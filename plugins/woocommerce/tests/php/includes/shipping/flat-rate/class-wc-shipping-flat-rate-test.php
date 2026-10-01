@@ -248,4 +248,243 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 			'alphanumeric'                  => array( '10abc', '.', ',' ),
 		);
 	}
+
+	/**
+	 * @testdox Should take the tax out of the entered cost only when costs are entered with tax.
+	 * @testWith [{"cost": "5.70", "prices_include_tax": "yes"}, 4.596774, 1.103226]
+	 *           [{"cost": "5.70", "prices_include_tax": "no"}, 5.70, 1.368]
+	 *           [{"cost": "5.70"}, 5.70, 1.368]
+	 *           [{"cost": "5.70", "prices_include_tax": "yes", "tax_status": "none"}, 5.70, 0]
+	 *
+	 * @param array $settings      Flat rate settings; no prices_include_tax is an instance saved before the setting existed.
+	 * @param float $expected_cost Expected net cost on the rate.
+	 * @param float $expected_tax  Expected tax on the rate.
+	 */
+	public function test_calculate_shipping_honours_prices_include_tax( array $settings, float $expected_cost, float $expected_tax ): void {
+		$this->enable_shipping_tax( array( '24.0000' ) );
+
+		$rates = $this->calculate_flat_rates( $settings );
+		$rate  = reset( $rates );
+
+		$this->assertEqualsWithDelta( $expected_cost, (float) $rate->get_cost(), 0.000001, 'The stored cost should be the net' );
+		$this->assertEqualsWithDelta( $expected_tax, array_sum( $rate->get_taxes() ), 0.000001, 'The tax should match the setting' );
+	}
+
+	/**
+	 * @testdox Should charge the cost entered with tax in the cart and keep it when the order taxes are recalculated.
+	 * @testWith ["10.00", ["24.0000"], "no"]
+	 *           ["10.00", ["24.0000"], "yes"]
+	 *           ["7.00", ["19.0000"], "yes"]
+	 *
+	 * @param string   $cost                       Cost entered with tax.
+	 * @param string[] $tax_rates                  Tax rates that apply to shipping, each at its own priority.
+	 * @param string   $product_prices_include_tax Value of the woocommerce_prices_include_tax option, which sets the tax rounding mode.
+	 */
+	public function test_cost_entered_with_tax_survives_order_recalculation( string $cost, array $tax_rates, string $product_prices_include_tax ): void {
+		update_option( 'woocommerce_prices_include_tax', $product_prices_include_tax );
+		$this->enable_shipping_tax( $tax_rates );
+
+		$zone = new WC_Shipping_Zone();
+		$zone->set_zone_name( 'US' );
+		$zone->add_location( 'US', 'country' );
+		$zone->save();
+		$instance_id = $zone->add_shipping_method( 'flat_rate' );
+		update_option(
+			'woocommerce_flat_rate_' . $instance_id . '_settings',
+			array(
+				'cost'               => $cost,
+				'prices_include_tax' => 'yes',
+			)
+		);
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
+
+		$shipping_was_enabled = WC()->shipping()->enabled;
+
+		try {
+			WC()->shipping()->enabled = true;
+			WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+			WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate:' . $instance_id ) );
+			WC()->cart->calculate_totals();
+			$cart_total = WC()->cart->get_total( 'edit' );
+
+			$order = new WC_Order();
+			WC()->checkout()->set_data_from_cart( $order );
+			$order->save();
+			$order->calculate_totals( true );
+		} finally {
+			WC()->shipping()->enabled = $shipping_was_enabled;
+		}
+
+		$this->assertSame( $cost, wc_format_decimal( (float) WC()->cart->get_shipping_total() + (float) WC()->cart->get_shipping_tax(), 2 ), 'The cart should charge the entered cost' );
+		$this->assertSame( $cost, wc_format_decimal( (float) $order->get_shipping_total() + (float) $order->get_shipping_tax(), 2 ), 'The recalculated order should charge the entered cost' );
+		$this->assertSame( wc_format_decimal( $cart_total, 2 ), wc_format_decimal( $order->get_total(), 2 ), 'The recalculated order total should match the cart total' );
+	}
+
+	/**
+	 * @testdox Should default new instances to costs entered with tax when the store enters prices with tax, and leave instances saved before the option existed alone.
+	 * @testWith ["yes", null, "yes"]
+	 *           ["yes", {"cost": "5.70"}, "no"]
+	 *           ["no", null, "no"]
+	 *
+	 * @param string     $store_prices_include_tax Value of the woocommerce_prices_include_tax option.
+	 * @param array|null $saved_settings           Settings saved for the instance, null for a new instance.
+	 * @param string     $expected                 Expected costs entered with tax setting.
+	 */
+	public function test_prices_include_tax_default_follows_store_setting_for_new_instances( string $store_prices_include_tax, ?array $saved_settings, string $expected ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', $store_prices_include_tax );
+		if ( null !== $saved_settings ) {
+			update_option( 'woocommerce_flat_rate_4242_settings', $saved_settings );
+		}
+
+		$flat_rate = new WC_Shipping_Flat_Rate( 4242 );
+
+		$this->assertSame( $expected, $flat_rate->get_option( 'prices_include_tax' ) );
+	}
+
+	/**
+	 * @testdox Should only offer the costs entered with tax setting while taxes are enabled.
+	 * @testWith ["yes", true]
+	 *           ["no", false]
+	 *
+	 * @param string $calc_taxes Value of the woocommerce_calc_taxes option.
+	 * @param bool   $expected   Whether the setting should be offered.
+	 */
+	public function test_prices_include_tax_field_needs_taxes_enabled( string $calc_taxes, bool $expected ): void {
+		update_option( 'woocommerce_calc_taxes', $calc_taxes );
+
+		$flat_rate = new WC_Shipping_Flat_Rate( 4242 );
+
+		$this->assertSame( $expected, array_key_exists( 'prices_include_tax', $flat_rate->get_instance_form_fields() ) );
+	}
+
+	/**
+	 * @testdox Should also take the tax out of rates that extensions add through the flat rate action.
+	 */
+	public function test_rate_added_through_action_is_entered_with_tax(): void {
+		$this->enable_shipping_tax( array( '24.0000' ) );
+		$add_express_rate = function ( $method ) {
+			$method->add_rate(
+				array(
+					'id'    => 'express',
+					'label' => 'Express',
+					'cost'  => '5.70',
+				)
+			);
+		};
+		add_action( 'woocommerce_flat_rate_shipping_add_rate', $add_express_rate );
+
+		try {
+			$rates = $this->calculate_flat_rates(
+				array(
+					'cost'               => '10.00',
+					'prices_include_tax' => 'yes',
+				)
+			);
+		} finally {
+			remove_action( 'woocommerce_flat_rate_shipping_add_rate', $add_express_rate );
+		}
+
+		$this->assertEqualsWithDelta( 4.596774, (float) $rates['express']->get_cost(), 0.000001 );
+	}
+
+	/**
+	 * @testdox Should let a woocommerce_shipping_prices_include_tax callback switch off costs entered with tax.
+	 */
+	public function test_shipping_prices_include_tax_filter_overrides_the_setting(): void {
+		$this->enable_shipping_tax( array( '24.0000' ) );
+		add_filter( 'woocommerce_shipping_prices_include_tax', '__return_false' );
+
+		try {
+			$rates = $this->calculate_flat_rates(
+				array(
+					'cost'               => '5.70',
+					'prices_include_tax' => 'yes',
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_shipping_prices_include_tax', '__return_false' );
+		}
+		$rate = reset( $rates );
+
+		$this->assertEqualsWithDelta( 5.70, (float) $rate->get_cost(), 0.000001, 'The cost should be treated as excluding tax' );
+		$this->assertEqualsWithDelta( 1.368, array_sum( $rate->get_taxes() ), 0.000001, 'The tax should be added on top of the cost' );
+	}
+
+	/**
+	 * @testdox Should leave costs alone for methods that have a prices_include_tax setting but do not support costs entered with tax.
+	 */
+	public function test_costs_entered_with_tax_need_method_support(): void {
+		$this->enable_shipping_tax( array( '24.0000' ) );
+
+		$sut = new class() extends WC_Shipping_Method {
+			/**
+			 * Set up a taxable method with its own prices_include_tax setting.
+			 */
+			public function __construct() {
+				$this->id         = 'own_prices_include_tax';
+				$this->tax_status = 'taxable';
+				$this->settings   = array( 'prices_include_tax' => 'yes' );
+			}
+
+			/**
+			 * Add a single rate.
+			 *
+			 * @param array $package Package.
+			 */
+			public function calculate_shipping( $package = array() ) {
+				$this->add_rate(
+					array(
+						'id'    => 'own',
+						'label' => 'Own',
+						'cost'  => '5.70',
+					)
+				);
+			}
+		};
+		$sut->calculate_shipping();
+		$rate = reset( $sut->rates );
+
+		$this->assertEqualsWithDelta( 5.70, (float) $rate->get_cost(), 0.000001, 'The cost should be left as entered' );
+		$this->assertEqualsWithDelta( 1.368, array_sum( $rate->get_taxes() ), 0.000001, 'The tax should be added on top' );
+	}
+
+	/**
+	 * Turn on taxes for shipping to the US customer, each rate at its own priority so they all apply.
+	 *
+	 * @param string[] $tax_rates Tax rate percentages.
+	 */
+	private function enable_shipping_tax( array $tax_rates ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_shipping_tax_class', '' );
+		foreach ( $tax_rates as $index => $tax_rate ) {
+			WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate'          => $tax_rate,
+					'tax_rate_priority' => $index + 1,
+				)
+			);
+		}
+		WC_Helper_Shipping::force_customer_us_address();
+	}
+
+	/**
+	 * Calculate the rates of a flat rate instance with the given settings.
+	 *
+	 * @param array $settings Flat rate settings.
+	 * @return WC_Shipping_Rate[]
+	 */
+	private function calculate_flat_rates( array $settings ): array {
+		update_option( 'woocommerce_flat_rate_4242_settings', $settings );
+
+		$flat_rate = new WC_Shipping_Flat_Rate( 4242 );
+		$flat_rate->calculate_shipping(
+			array(
+				'contents'      => array(),
+				'contents_cost' => 0,
+			)
+		);
+
+		return $flat_rate->rates;
+	}
 }

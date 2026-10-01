@@ -189,6 +189,17 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	public function calculate_shipping( $package = array() ) {}
 
 	/**
+	 * Whether the method's costs are entered with tax.
+	 *
+	 * Only methods that declare support for 'costs-entered-with-tax' get this, so other methods' own prices_include_tax settings are left alone.
+	 *
+	 * @return bool
+	 */
+	private function has_costs_entered_with_tax(): bool {
+		return $this->supports( 'costs-entered-with-tax' ) && wc_string_to_bool( $this->get_option( 'prices_include_tax', 'no' ) );
+	}
+
+	/**
 	 * Whether or not we need to calculate tax on top of the shipping rate.
 	 *
 	 * @return boolean
@@ -318,20 +329,23 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
 		// Taxes - if not an array and not set to false, calc tax based on cost and passed calc_tax variable. This saves shipping methods having to do complex tax calculations.
 		if ( ! is_array( $taxes ) && false !== $taxes && $total_cost > 0 && $this->is_taxable() ) {
+			$costs_include_tax = $this->has_costs_entered_with_tax();
+
 			if ( 'per_item' === $args['calc_tax'] ) {
 				$taxes = $this->get_taxes_per_item( $args['cost'] );
 			} else {
 				$shipping_tax_rates = WC_Tax::get_shipping_tax_rates();
-				$taxes              = WC_Tax::calc_shipping_tax( $total_cost, $shipping_tax_rates );
+				$taxes              = WC_Tax::calc_shipping_tax_maybe_inclusive( $total_cost, $shipping_tax_rates, $costs_include_tax );
 			}
 
 			/**
 			 * Filter whether shipping prices include tax.
 			 *
 			 * @since 10.6.0
-			 * @param bool $shipping_prices_include_tax Whether shipping cost includes tax. Default false.
+			 * @since 11.2.0 The default is the shipping method's "Costs entered with tax" setting.
+			 * @param bool $shipping_prices_include_tax Whether shipping cost includes tax.
 			 */
-			$shipping_prices_include_tax = wc_string_to_bool( apply_filters( 'woocommerce_shipping_prices_include_tax', false ) );
+			$shipping_prices_include_tax = wc_string_to_bool( apply_filters( 'woocommerce_shipping_prices_include_tax', $costs_include_tax ) );
 
 			// If prices include tax, convert gross to net.
 			if ( $shipping_prices_include_tax && ! empty( $taxes ) ) {
@@ -389,7 +403,8 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		// If we have an array of costs we can look up each items tax class and add tax accordingly.
 		if ( is_array( $costs ) ) {
 
-			$cart = WC()->cart->get_cart();
+			$cart              = WC()->cart->get_cart();
+			$costs_include_tax = $this->has_costs_entered_with_tax();
 
 			foreach ( $costs as $cost_key => $amount ) {
 				if ( ! isset( $cart[ $cost_key ] ) ) {
@@ -403,7 +418,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 					$tax_class = null;
 				}
 				$item_tax_rates = WC_Tax::get_shipping_tax_rates( $tax_class );
-				$item_taxes     = WC_Tax::calc_shipping_tax( $amount, $item_tax_rates );
+				$item_taxes     = WC_Tax::calc_shipping_tax_maybe_inclusive( $amount, $item_tax_rates, $costs_include_tax );
 
 				// Sum the item taxes.
 				foreach ( array_keys( $taxes + $item_taxes ) as $key ) {
@@ -414,7 +429,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			// Add any cost for the order - order costs are in the key 'order'.
 			if ( isset( $costs['order'] ) ) {
 				$order_tax_rates = WC_Tax::get_shipping_tax_rates();
-				$item_taxes      = WC_Tax::calc_shipping_tax( $costs['order'], $order_tax_rates );
+				$item_taxes      = WC_Tax::calc_shipping_tax_maybe_inclusive( $costs['order'], $order_tax_rates, $costs_include_tax );
 
 				// Sum the item taxes.
 				foreach ( array_keys( $taxes + $item_taxes ) as $key ) {

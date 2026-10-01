@@ -112,6 +112,11 @@ const GeneralSettings = () => {
 					onChange={ () => {
 						setShowCosts( ! showCosts );
 						setSettingField( 'cost' )( '' );
+						setSettingField( 'prices_include_tax' )(
+							readOnlySettings.storePricesIncludeTax
+								? 'yes'
+								: 'no'
+						);
 					} }
 					label={ __(
 						'Add a price for customers who choose local pickup',
@@ -124,22 +129,6 @@ const GeneralSettings = () => {
 				/>
 				{ showCosts ? (
 					<>
-						<TextControl
-							label={ __( 'Cost', 'woocommerce' ) }
-							name="local_pickup_cost"
-							help={ __(
-								'Optional cost to charge for local pickup.',
-								'woocommerce'
-							) }
-							placeholder={ __( 'Free', 'woocommerce' ) }
-							type="number"
-							pattern="[0-9]+\.?[0-9]*"
-							min={ 0 }
-							value={ settings.cost }
-							onChange={ setSettingField( 'cost' ) }
-							disabled={ false }
-							autoComplete="off"
-						/>
 						<SelectControl
 							label={ __( 'Taxes', 'woocommerce' ) }
 							name="local_pickup_tax_status"
@@ -160,6 +149,56 @@ const GeneralSettings = () => {
 							value={ settings.tax_status }
 							onChange={ setSettingField( 'tax_status' ) }
 							disabled={ false }
+						/>
+						{ readOnlySettings.taxesEnabled && (
+							<SelectControl
+								label={ __(
+									'Costs entered with tax',
+									'woocommerce'
+								) }
+								name="local_pickup_prices_include_tax"
+								help={ __(
+									'If you select "Yes", customers who pay tax pay exactly the cost you enter, and the tax is worked out from it. Only applies when the tax status is taxable.',
+									'woocommerce'
+								) }
+								options={ [
+									{
+										label: __(
+											'No, I will enter costs exclusive of tax',
+											'woocommerce'
+										),
+										value: 'no',
+									},
+									{
+										label: __(
+											'Yes, I will enter costs inclusive of tax',
+											'woocommerce'
+										),
+										value: 'yes',
+									},
+								] }
+								value={ settings.prices_include_tax }
+								onChange={ setSettingField(
+									'prices_include_tax'
+								) }
+								disabled={ settings.tax_status !== 'taxable' }
+							/>
+						) }
+						<TextControl
+							label={ __( 'Cost', 'woocommerce' ) }
+							name="local_pickup_cost"
+							help={ __(
+								'Optional cost to charge for local pickup.',
+								'woocommerce'
+							) }
+							placeholder={ __( 'Free', 'woocommerce' ) }
+							type="number"
+							pattern="[0-9]+\.?[0-9]*"
+							min={ 0 }
+							value={ settings.cost }
+							onChange={ setSettingField( 'cost' ) }
+							disabled={ false }
+							autoComplete="off"
 						/>
 					</>
 				) : null }

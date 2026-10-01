@@ -1008,4 +1008,27 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
 	}
+
+	/**
+	 * @testdox Should take the tax out of costs entered with tax and add it on top otherwise.
+	 * @testWith [true, 1.103226]
+	 *           [false, 1.368]
+	 *
+	 * @param bool  $prices_include_tax Value passed to calc_shipping_tax_maybe_inclusive().
+	 * @param float $expected_tax       Expected tax for a 5.70 cost at 24%.
+	 */
+	public function test_calc_shipping_tax_maybe_inclusive( bool $prices_include_tax, float $expected_tax ): void {
+		$rates = array(
+			1 => array(
+				'rate'     => 24.0,
+				'label'    => 'VAT',
+				'shipping' => 'yes',
+				'compound' => 'no',
+			),
+		);
+
+		$taxes = WC_Tax::calc_shipping_tax_maybe_inclusive( 5.70, $rates, $prices_include_tax );
+
+		$this->assertEqualsWithDelta( $expected_tax, $taxes[1], 0.000001 );
+	}
 }

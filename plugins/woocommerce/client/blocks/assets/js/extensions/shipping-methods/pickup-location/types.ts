@@ -27,6 +27,7 @@ export type ShippingMethodSettings = {
 	enabled: boolean;
 	title: string;
 	tax_status: string;
+	prices_include_tax: string;
 	cost: string;
 };
 
@@ -34,6 +35,8 @@ export type ReadOnlySettings = {
 	storeCountry: string;
 	storeState: string;
 	hasLegacyPickup: boolean;
+	taxesEnabled: boolean;
+	storePricesIncludeTax: boolean;
 };
 
 export type SettingsContextType = {
