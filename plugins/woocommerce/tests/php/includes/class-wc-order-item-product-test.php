@@ -115,6 +115,41 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_formatted_meta_data keeps a variation attribute whose value only appears in the parent product name.
+	 */
+	public function test_get_formatted_meta_data_keeps_attribute_that_matches_the_parent_name(): void {
+		// Three attributes keep the attribute list out of the variation title, so it is just "Vienna Huge".
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Vienna Huge',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '1',
+				'pa_colour' => 'black',
+			),
+			array(
+				'size'   => array( 'small', 'huge' ),
+				'number' => array( '0', '1' ),
+				'colour' => array( 'black', 'white' ),
+			)
+		);
+
+		try {
+			$item_id = $this->order->add_product( $variation, 1 );
+			$item    = $this->order->get_item( $item_id );
+
+			$this->assertSame( 'Vienna Huge', $item->get_name() );
+			$this->assertSame(
+				array( 'huge', '1', 'black' ),
+				array_values( wp_list_pluck( $item->get_formatted_meta_data(), 'value' ) ),
+				'Every selected attribute is listed when the item name shows none of them.'
+			);
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
 	 * @testdox 'doing it wrong' is thrown, if the Cost of Goods Sold feature is disabled.
 	 */
 	public function test_get_refund_html_with_cogs_disabled() {

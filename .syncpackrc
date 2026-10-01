@@ -68,6 +68,16 @@
 			"isIgnored": true
 		},
 		{
+			"label": "Packages already moved to Stylelint 16",
+			"dependencies": [
+				"stylelint"
+			],
+			"packages": [
+				"@woocommerce/admin-library"
+			],
+			"pinVersion": "^16.9.0"
+		},
+		{
 			"label": "internal-build generates version-constrained vendored types for these dependencies",
 			"dependencies": [
 				"@wordpress/core-data",
@@ -366,7 +376,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^1.61.1"
+			"pinVersion": "^1.63.0"
 		},
 		{
 			"dependencies": [
