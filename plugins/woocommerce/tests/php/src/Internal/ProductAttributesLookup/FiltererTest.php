@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Tests\Internal\ProductAttributesLookup;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Internal\AttributesHelper;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
@@ -355,7 +356,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$main_product_in_stock = ! empty(
 				array_filter(
 					$data['variations'],
-					function( $variation ) {
+					function ( $variation ) {
 						return $variation['in_stock'];
 					}
 				)
@@ -1362,6 +1363,134 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 1, $counts[ term_exists( 'Cotton', 'pa_material' )['term_id'] ] );
 		$this->assertSame( 1, $counts[ term_exists( 'Wool', 'pa_material' )['term_id'] ] );
 		$this->assert_counters( 'Material', array( 'Cotton', 'Wool' ), 'and' );
+	}
+
+	/**
+	 * @testdox Shared counts include only matching variations when lookup filtering is enabled.
+	 *
+	 * @testWith [true, "or", "", 2]
+	 *           [true, "and", "xs,s", 2]
+	 *           [true, "and", "s", 2]
+	 *           [false, "or", "", 4]
+	 *           [false, "and", "xs,s", 4]
+	 *
+	 * @param bool   $using_lookup_table Whether lookup filtering is enabled.
+	 * @param string $query_type Attribute query type.
+	 * @param string $selected Selected size terms, omitted by OR count callers.
+	 * @param int    $expected Expected XS product count.
+	 */
+	public function test_shared_attribute_counts_require_matching_variations( bool $using_lookup_table, string $query_type, string $selected, int $expected ): void {
+		$this->set_use_lookup_table( $using_lookup_table );
+		$this->create_product_attribute( 'Size', array( 'XS', 'S' ) );
+
+		foreach ( array( array( 'XS', 'XS', 'S' ), array( 'S' ), array( 'S' ) ) as $sizes ) {
+			$this->create_variable_product(
+				array(
+					'variation_attributes'     => array( 'Size' => array( 'XS', 'S' ) ),
+					'non_variation_attributes' => array(),
+					'variations'               => array_map(
+						static function ( $size ) {
+							return array(
+								'in_stock'            => true,
+								'defining_attributes' => array( 'Size' => $size ),
+							);
+						},
+						$sizes
+					),
+				)
+			);
+		}
+		$this->create_simple_product( array( 'Size' => array( 'XS', 'S' ) ), true );
+
+		$counts = wc_get_container()->get( FilterDataProvider::class )->with( wc_get_container()->get( QueryClauses::class ) )->get_attribute_counts(
+			array(
+				'post_type'       => 'product',
+				'post__in'        => $this->product_ids,
+				'filter_size'     => $selected,
+				'query_type_size' => $query_type,
+			),
+			'pa_size'
+		);
+		$this->assertSame( $expected, $counts[ term_exists( 'XS', 'pa_size' )['term_id'] ] );
+		if ( '' === $selected ) {
+			$this->set_use_lookup_table( ! $using_lookup_table );
+			$counts = wc_get_container()->get( FilterDataProvider::class )->with( wc_get_container()->get( QueryClauses::class ) )->get_attribute_counts(
+				array(
+					'post_type'       => 'product',
+					'post__in'        => $this->product_ids,
+					'filter_size'     => $selected,
+					'query_type_size' => $query_type,
+				),
+				'pa_size'
+			);
+			$this->assertSame( $using_lookup_table ? 4 : 2, $counts[ term_exists( 'XS', 'pa_size' )['term_id'] ], 'Changing lookup settings must not reuse stale counts.' );
+		}
+	}
+
+	/**
+	 * @testdox Shared counts honor variation stock and include Any and non-variation attributes.
+	 *
+	 * @testWith [false, 3]
+	 *           [true, 2]
+	 *
+	 * @param bool $hide_out_of_stock Whether out-of-stock items are hidden.
+	 * @param int  $expected Expected XS product count.
+	 */
+	public function test_shared_attribute_counts_use_lookup_stock( bool $hide_out_of_stock, int $expected ): void {
+		$this->set_use_lookup_table( true );
+		update_option( 'woocommerce_hide_out_of_stock_items', $hide_out_of_stock ? 'yes' : 'no' );
+		$this->create_product_attribute( 'Size', array( 'XS', 'S' ) );
+		foreach ( array( array( 'XS', false ), array( null, true ) ) as $variation ) {
+			$this->create_variable_product(
+				array(
+					'variation_attributes'     => array( 'Size' => array( 'XS', 'S' ) ),
+					'non_variation_attributes' => array(),
+					'variations'               => array(
+						array(
+							'in_stock'            => $variation[1],
+							'defining_attributes' => array( 'Size' => $variation[0] ),
+						),
+					),
+				)
+			);
+		}
+		$this->create_variable_product(
+			array(
+				'variation_attributes'     => array(),
+				'non_variation_attributes' => array( 'Size' => array( 'XS' ) ),
+				'variations'               => array(
+					array(
+						'in_stock'            => true,
+						'defining_attributes' => array(),
+					),
+				),
+			)
+		);
+
+		$disabled  = $this->create_variable_product(
+			array(
+				'variation_attributes'     => array( 'Size' => array( 'XS' ) ),
+				'non_variation_attributes' => array(),
+				'variations'               => array(
+					array(
+						'in_stock'            => true,
+						'defining_attributes' => array( 'Size' => 'XS' ),
+					),
+				),
+			)
+		);
+		$variation = wc_get_product( $disabled['variation_ids'][0] );
+		$variation->set_status( ProductStatus::PRIVATE );
+		$variation->save();
+		wc_get_container()->get( LookupDataStore::class )->create_data_for_product( wc_get_product( $disabled['id'] ) );
+		$counts = wc_get_container()->get( FilterDataProvider::class )->with( wc_get_container()->get( QueryClauses::class ) )->get_attribute_counts(
+			array(
+				'post_type' => 'product',
+				'post__in'  => $this->product_ids,
+			),
+			'pa_size'
+		);
+		$this->assertSame( $expected, $counts[ term_exists( 'XS', 'pa_size' )['term_id'] ] );
 	}
 
 	/**
