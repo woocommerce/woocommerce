@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities;
 
+use Automattic\WooCommerce\Abilities\InMemorySubject;
 use Automattic\WooCommerce\Abilities\InMemoryWrite;
 use Automattic\WooCommerce\Abilities\ObjectValidatorRegistry;
 
@@ -31,7 +32,7 @@ final class InMemoryWriteExecutor {
 	 */
 	public static function run( string $class_name, array $input ) {
 		$subject = $class_name::subject( $input );
-		if ( ! $subject instanceof \WC_Data ) {
+		if ( ! $subject instanceof \WC_Data && ! $subject instanceof InMemorySubject ) {
 			return new \WP_Error(
 				'woocommerce_in_memory_write_not_found',
 				__( 'The object to change was not found.', 'woocommerce' ),
@@ -42,11 +43,7 @@ final class InMemoryWriteExecutor {
 		try {
 			$valid = $class_name::validate( $subject, $input );
 			if ( is_wp_error( $valid ) ) {
-				$data = $valid->get_error_data();
-				if ( ! isset( $data['status'] ) ) {
-					$valid->add_data( array_merge( is_array( $data ) ? $data : array(), array( 'status' => 400 ) ) );
-				}
-				return $valid;
+				return self::with_status( $valid );
 			}
 
 			$class_name::apply( $subject, $input );
@@ -56,7 +53,7 @@ final class InMemoryWriteExecutor {
 				return new \WP_Error( 'woocommerce_in_memory_write_rejected', $rejection, array( 'status' => 400 ) );
 			}
 
-			$subject->save();
+			$saved = $subject->save();
 		} catch ( \WC_Data_Exception $exception ) {
 			return new \WP_Error( 'woocommerce_in_memory_write_save_failed', $exception->getMessage(), array( 'status' => 400 ) );
 		} catch ( \Exception $exception ) {
@@ -72,6 +69,23 @@ final class InMemoryWriteExecutor {
 			return new \WP_Error( 'woocommerce_in_memory_write_save_failed', __( 'The change could not be saved.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
+		if ( is_wp_error( $saved ) ) {
+			return self::with_status( $saved );
+		}
+
 		return $class_name::respond( $subject );
+	}
+
+	/**
+	 * Give an error a 400 status unless it carries one.
+	 *
+	 * @param \WP_Error $error Error.
+	 */
+	private static function with_status( \WP_Error $error ): \WP_Error {
+		$data = $error->get_error_data();
+		if ( ! isset( $data['status'] ) ) {
+			$error->add_data( array_merge( is_array( $data ) ? $data : array(), array( 'status' => 400 ) ) );
+		}
+		return $error;
 	}
 }
