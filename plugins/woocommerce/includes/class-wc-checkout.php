@@ -1182,6 +1182,7 @@ class WC_Checkout {
 
 		// Store Order ID in session, so it can be re-used after payment failure.
 		WC()->session->set( 'order_awaiting_payment', $order_id );
+		PaymentRecovery::remember_order_sent_to_gateway( (int) $order_id );
 
 		// We save the session early because if the payment gateway hangs
 		// the request will never finish, thus the session data will never be saved,

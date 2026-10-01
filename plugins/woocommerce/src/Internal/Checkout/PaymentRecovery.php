@@ -26,6 +26,56 @@ defined( 'ABSPATH' ) || exit;
 final class PaymentRecovery {
 
 	/**
+	 * Session key holding the order last handed to a gateway.
+	 *
+	 * Unlike order_awaiting_payment, which WC_Order::payment_complete() clears before the status
+	 * change, this survives a request that dies inside that change, so a repeat submit can still
+	 * find the order. Emptying the cart clears it.
+	 *
+	 * @var string
+	 */
+	public const ORDER_SENT_TO_GATEWAY = 'order_sent_to_gateway';
+
+	/**
+	 * Remembers the order a checkout is about to hand to the gateway.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param int $order_id Order ID.
+	 */
+	public static function remember_order_sent_to_gateway( int $order_id ): void {
+		if ( WC()->session ) {
+			WC()->session->set( self::ORDER_SENT_TO_GATEWAY, $order_id );
+		}
+	}
+
+	/**
+	 * The session's order, when it moved past payment and the cart still holds it.
+	 *
+	 * That combination means a submit repeats one the gateway already took: the gateway moved the
+	 * order on but the request died before the cart was emptied.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param int $fallback_order_id Order to use when nothing was remembered, as in a session written before the key existed.
+	 * @return WC_Order|null
+	 */
+	public static function get_session_order_moved_past_payment( int $fallback_order_id = 0 ): ?WC_Order {
+		if ( ! WC()->session || ! WC()->cart ) {
+			return null;
+		}
+
+		$order_id = absint( WC()->session->get( self::ORDER_SENT_TO_GATEWAY ) );
+		$order    = wc_get_order( $order_id ? $order_id : $fallback_order_id );
+
+		if ( ! $order instanceof WC_Order || ! $order->has_cart_hash( WC()->cart->get_cart_hash() ) ) {
+			return null;
+		}
+
+		return self::order_moved_past_payment( $order ) ? $order : null;
+	}
+
+	/**
 	 * Reads the order again, so a status the gateway set on its own instance is seen.
 	 *
 	 * @since 11.3.0

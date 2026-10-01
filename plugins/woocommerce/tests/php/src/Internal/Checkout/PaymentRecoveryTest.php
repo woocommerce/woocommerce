@@ -100,6 +100,78 @@ class PaymentRecoveryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should remember the order sent to the gateway under a key payment_complete() leaves alone.
+	 */
+	public function test_the_order_sent_to_gateway_outlives_payment_complete(): void {
+		$order = new WC_Order();
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		WC()->session->set( 'order_awaiting_payment', $order->get_id() );
+
+		PaymentRecovery::remember_order_sent_to_gateway( $order->get_id() );
+		$order->payment_complete( 'txn_1' );
+
+		$this->assertFalse( WC()->session->get( 'order_awaiting_payment' ), 'payment_complete() clears the older pointer, which is the gap this key closes.' );
+		$this->assertSame( $order->get_id(), WC()->session->get( 'order_sent_to_gateway' ), 'The order sent to the gateway is still known after payment_complete().' );
+	}
+
+	/**
+	 * @testdox Should forget the order sent to the gateway once the cart is emptied.
+	 */
+	public function test_emptying_the_cart_forgets_the_order_sent_to_gateway(): void {
+		$order = new WC_Order();
+		$order->save();
+		PaymentRecovery::remember_order_sent_to_gateway( $order->get_id() );
+
+		WC()->cart->empty_cart();
+
+		$this->assertEmpty( WC()->session->get( 'order_sent_to_gateway' ), 'An emptied cart has nothing left to place twice.' );
+	}
+
+	/**
+	 * @testdox Should find the order sent to the gateway only once it moved past payment.
+	 *
+	 * @testWith ["processing", true]
+	 *           ["on-hold", true]
+	 *           ["pending", false]
+	 *           ["failed", false]
+	 *
+	 * @param string $status   Status the order is left in.
+	 * @param bool   $is_found Whether the order should be found as moved past payment.
+	 */
+	public function test_session_order_moved_past_payment_decides_by_status( string $status, bool $is_found ): void {
+		$order = $this->order_for_the_current_cart( $status );
+		PaymentRecovery::remember_order_sent_to_gateway( $order->get_id() );
+
+		$found = PaymentRecovery::get_session_order_moved_past_payment();
+
+		$this->assertSame( $is_found ? $order->get_id() : null, $found ? $found->get_id() : null, sprintf( 'An order in %s should%s be found.', $status, $is_found ? '' : ' not' ) );
+	}
+
+	/**
+	 * @testdox Should not find the order sent to the gateway once the cart holds something else.
+	 */
+	public function test_session_order_moved_past_payment_ignores_a_different_cart(): void {
+		$order = $this->order_for_the_current_cart( OrderStatus::PROCESSING );
+		PaymentRecovery::remember_order_sent_to_gateway( $order->get_id() );
+
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+
+		$this->assertNull( PaymentRecovery::get_session_order_moved_past_payment(), 'A changed cart is a new purchase, not a repeat of the old one.' );
+	}
+
+	/**
+	 * @testdox Should fall back to the order the caller names when nothing was remembered.
+	 */
+	public function test_session_order_moved_past_payment_falls_back_to_the_given_order(): void {
+		$order = $this->order_for_the_current_cart( OrderStatus::PROCESSING );
+
+		$found = PaymentRecovery::get_session_order_moved_past_payment( $order->get_id() );
+
+		$this->assertSame( $order->get_id(), $found ? $found->get_id() : null, 'A session written before the key existed still points at the order.' );
+	}
+
+	/**
 	 * @testdox Should log the failure under the caller's source and note it on the order.
 	 */
 	public function test_record_failure_after_payment_logs_and_notes_the_failure(): void {
@@ -156,5 +228,22 @@ class PaymentRecoveryTest extends WC_Unit_Test_Case {
 		PaymentRecovery::record_failure_after_payment( $order, new \Error( 'boom' ), 'checkout' );
 
 		$this->assertFalse( WC()->cart->is_empty(), 'A cart holding another order is left as it is.' );
+	}
+
+	/**
+	 * Fills the cart with one product and saves an order in the given status that the cart produced.
+	 *
+	 * @param string $status Status to save the order in.
+	 * @return WC_Order
+	 */
+	private function order_for_the_current_cart( string $status ): WC_Order {
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+
+		$order = new WC_Order();
+		$order->set_status( $status );
+		$order->set_cart_hash( WC()->cart->get_cart_hash() );
+		$order->save();
+
+		return $order;
 	}
 }

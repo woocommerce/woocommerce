@@ -3264,6 +3264,29 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Store API checkout remembers the order it hands to the gateway before the gateway runs.
+	 */
+	public function test_post_remembers_the_order_sent_to_gateway(): void {
+		$remembered_during_payment = null;
+		$payment_handler           = function ( $context, $payment_result ) use ( &$remembered_during_payment ) {
+			unset( $context );
+			$remembered_during_payment = WC()->session->get( 'order_sent_to_gateway' );
+			$payment_result->set_status( 'success' );
+		};
+
+		add_action( 'woocommerce_rest_checkout_process_payment_with_context', $payment_handler, 1, 2 );
+
+		try {
+			$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+		} finally {
+			remove_action( 'woocommerce_rest_checkout_process_payment_with_context', $payment_handler, 1 );
+		}
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( (int) $response->get_data()['order_id'], $remembered_during_payment, 'The gateway should run with its order already remembered, so a request that dies inside it can be traced back.' );
+	}
+
+	/**
 	 * Build a valid checkout POST request body for use by the sample-extension tests.
 	 *
 	 * @return \WP_REST_Request

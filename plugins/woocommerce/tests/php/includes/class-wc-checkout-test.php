@@ -1050,6 +1050,30 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox process_checkout() remembers the order it hands to the gateway before the gateway runs.
+	 */
+	public function test_process_checkout_remembers_the_order_sent_to_gateway(): void {
+		$this->use_real_session();
+
+		$remembered_during_payment = null;
+		$this->make_gateway_available(
+			$this->create_gateway(
+				'recording',
+				function () use ( &$remembered_during_payment ) {
+					$remembered_during_payment = WC()->session->get( 'order_sent_to_gateway' );
+					throw new Exception( 'Stop after recording.' );
+				}
+			)
+		);
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) )->get_id() );
+		$this->post_checkout_form( 'recording' );
+
+		$this->submit_checkout_over_ajax();
+
+		$this->assertSame( $this->order_ids()[0] ?? null, $remembered_during_payment, 'The gateway should run with its order already remembered, so a request that dies inside it can be traced back.' );
+	}
+
+	/**
 	 * IDs of every order in the database, oldest first.
 	 *
 	 * @return int[]

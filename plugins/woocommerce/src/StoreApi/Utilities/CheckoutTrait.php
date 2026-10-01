@@ -94,6 +94,7 @@ trait CheckoutTrait {
 
 		$session = WC()->session;
 		$session->set( 'order_awaiting_payment', $order->get_id() );
+		PaymentRecovery::remember_order_sent_to_gateway( $order->get_id() );
 		// Persist before invoking gateways because redirects or stalled requests may prevent the session from being saved on shutdown.
 		if ( is_callable( array( $session, 'save_data' ) ) ) {
 			$session->save_data();
