@@ -110,7 +110,7 @@ final class MarketplaceTaskExperiment {
 	 * @return bool
 	 */
 	private function should_request_assignment( Task $task ): bool {
-		if ( wc_get_container()->get( LegacyProxy::class )->call_function( 'time' ) >= self::END_TIMESTAMP || 'yes' !== get_option( 'woocommerce_allow_tracking' ) || $task->is_dismissed() ) {
+		if ( $this->has_ended() || 'yes' !== get_option( 'woocommerce_allow_tracking' ) || $task->is_dismissed() ) {
 			return false;
 		}
 
@@ -125,6 +125,15 @@ final class MarketplaceTaskExperiment {
 
 		$task_list = TaskLists::get_list( $task->get_parent_id() );
 		return ! $task_list || $task_list->is_visible();
+	}
+
+	/**
+	 * Whether the end date has passed. Reads the time through LegacyProxy so tests can change it.
+	 *
+	 * @return bool
+	 */
+	private function has_ended(): bool {
+		return wc_get_container()->get( LegacyProxy::class )->call_function( 'time' ) >= self::END_TIMESTAMP;
 	}
 
 	/**
