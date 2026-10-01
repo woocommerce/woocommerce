@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Keep the pay-for-order form on the order context when wc-ajax is sent; fixes an unreleased change from #68976.
