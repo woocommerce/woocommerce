@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add an optional expiration argument to the reports `Cache::set()` method.

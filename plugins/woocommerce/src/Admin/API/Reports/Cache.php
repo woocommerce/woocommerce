@@ -59,18 +59,21 @@ class Cache {
 	/**
 	 * Update cached value.
 	 *
-	 * @param string $key   Cache key.
-	 * @param mixed  $value New value.
+	 * @since 11.3.0 Added the `$expiration` parameter.
+	 *
+	 * @param string $key        Cache key.
+	 * @param mixed  $value      New value.
+	 * @param int    $expiration Time until expiration in seconds. Default one week.
 	 * @return bool
 	 */
-	public static function set( $key, $value ) {
+	public static function set( $key, $value, $expiration = WEEK_IN_SECONDS ) {
 		$transient_version = self::get_version();
 		$transient_value   = array(
 			'version' => $transient_version,
 			'value'   => $value,
 		);
 
-		$result = set_transient( $key, $transient_value, WEEK_IN_SECONDS );
+		$result = set_transient( $key, $transient_value, $expiration );
 
 		return $result;
 	}
