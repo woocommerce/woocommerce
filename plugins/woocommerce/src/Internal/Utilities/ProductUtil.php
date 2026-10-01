@@ -35,7 +35,7 @@ class ProductUtil {
 		if ( is_numeric( $product ) ) {
 			return (int) $product;
 		} elseif ( $product instanceof \WC_Product ) {
-			return $product->get_id();
+			return (int) $product->get_id();
 		} elseif ( is_object( $product ) && ! empty( $product->ID ) ) {
 			return (int) $product->ID;
 		} else {
