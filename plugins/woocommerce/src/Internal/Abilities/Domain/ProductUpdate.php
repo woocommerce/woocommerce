@@ -111,6 +111,13 @@ class ProductUpdate extends AbstractDomainAbility implements AbilityDefinition {
 			);
 		}
 
+		if ( ! empty( $product_config['extensions_only'] ) ) {
+			$validation_error = self::validate_product_fields_for_config( $input, $product_config );
+			if ( is_wp_error( $validation_error ) ) {
+				return $validation_error;
+			}
+		}
+
 		if ( isset( $input['product_type_alias'] ) ) {
 			$product_config = self::get_product_config_for_alias( $input['product_type_alias'] );
 
@@ -137,6 +144,16 @@ class ProductUpdate extends AbstractDomainAbility implements AbilityDefinition {
 			$validation_error = self::set_product_props_from_input( $product, $input, $product_config );
 			if ( is_wp_error( $validation_error ) ) {
 				return $validation_error;
+			}
+
+			$rejection = self::apply_ability_contracts( $product, $input, 'woocommerce_product_update_rejected' );
+			if ( is_wp_error( $rejection ) ) {
+				return $rejection;
+			}
+
+			$rejection = isset( $product_config['validate'] ) ? call_user_func( $product_config['validate'], $product->get_type(), $product ) : null;
+			if ( is_wp_error( $rejection ) ) {
+				return new \WP_Error( 'woocommerce_product_update_rejected', $rejection->get_error_message(), array( 'status' => 400 ) );
 			}
 		} catch ( \WC_Data_Exception $exception ) {
 			return self::get_product_data_exception_error( $exception );

@@ -1,0 +1,1013 @@
+<?php
+/**
+ * ProductAbilityContractsTest class file.
+ */
+
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
+
+use Automattic\WooCommerce\Abilities\AbilityContracts;
+use Automattic\WooCommerce\Abilities\AbilityFieldRegistry;
+use Automattic\WooCommerce\Abilities\ObjectValidatorRegistry;
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
+
+/**
+ * Extension fields and object validators on the product create and update abilities.
+ */
+class ProductAbilityContractsTest extends \WC_Unit_Test_Case {
+
+	private const CANONICAL_ABILITY_IDS = array(
+		'woocommerce/products-query',
+		'woocommerce/product-create',
+		'woocommerce/product-update',
+		'woocommerce/product-delete',
+		'woocommerce/orders-query',
+		'woocommerce/order-update-status',
+		'woocommerce/order-add-note',
+	);
+
+	/**
+	 * Shared administrator used as the current user.
+	 *
+	 * @var int
+	 */
+	private static $administrator_id;
+
+	/**
+	 * Original action counts restored in tearDown.
+	 *
+	 * @var array<string, int|null>
+	 */
+	private $original_action_counts = array();
+
+	/**
+	 * Values passed to extension field apply callbacks.
+	 *
+	 * @var array<int, mixed>
+	 */
+	private $applied_values = array();
+
+	/**
+	 * Create immutable class fixtures.
+	 *
+	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$administrator_id = $factory->user->create( array( 'role' => 'administrator' ) );
+	}
+
+	/**
+	 * Set up test fixtures.
+	 */
+	public function setUp(): void {
+		global $wp_actions;
+
+		parent::setUp();
+
+		foreach ( array( 'init', 'wp_abilities_api_init', 'wp_abilities_api_categories_init' ) as $action ) {
+			$this->original_action_counts[ $action ] = $wp_actions[ $action ] ?? null;
+		}
+
+		if ( ! function_exists( 'wp_register_ability' ) ) {
+			require_once WC_ABSPATH . 'vendor/wordpress/abilities-api/includes/bootstrap.php';
+		}
+
+		$wp_actions['init'] = max( 1, (int) ( $wp_actions['init'] ?? 0 ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		wp_set_current_user( self::$administrator_id );
+
+		$this->reset_registries();
+		add_action( 'woocommerce_register_ability_fields', array( $this, 'register_test_fields' ) );
+		add_action( 'woocommerce_register_object_validators', array( $this, 'register_test_validators' ) );
+		add_filter( 'woocommerce_product_class', array( $this, 'contract_product_class' ), 10, 2 );
+
+		if ( ! wp_has_ability_category( 'woocommerce' ) ) {
+			$callback = static function () {
+				wp_register_ability_category(
+					'woocommerce',
+					array(
+						'label'       => 'WooCommerce',
+						'description' => 'Canonical store management abilities.',
+					)
+				);
+			};
+			add_action( 'wp_abilities_api_categories_init', $callback );
+			do_action( 'wp_abilities_api_categories_init' );
+			remove_action( 'wp_abilities_api_categories_init', $callback );
+		}
+
+		$this->set_feature( true );
+	}
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		global $wp_actions;
+
+		$this->unregister_abilities();
+		remove_action( 'woocommerce_register_ability_fields', array( $this, 'register_test_fields' ) );
+		remove_action( 'woocommerce_register_object_validators', array( $this, 'register_test_validators' ) );
+		remove_filter( 'woocommerce_product_class', array( $this, 'contract_product_class' ), 10 );
+		$this->reset_registries();
+		update_option( 'woocommerce_feature_' . AbilityContracts::FEATURE_ID . '_enabled', 'no' );
+
+		foreach ( $this->original_action_counts as $action => $original_count ) {
+			if ( null !== $original_count ) {
+				$wp_actions[ $action ] = $original_count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			} else {
+				unset( $wp_actions[ $action ] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			}
+		}
+
+		wp_set_current_user( 0 );
+
+		parent::tearDown();
+	}
+
+	/**
+	 * @testdox Should save extension field values on product create.
+	 */
+	public function test_product_create_saves_extension_fields(): void {
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'name'       => 'Contract product',
+				'extensions' => array( 'test_simple' => array( 'code' => 'abc' ) ),
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'abc', wc_get_product( $result['product']['id'] )->get_meta( '_test_simple_code' ) );
+		$this->assertSame( array( 'code' => 'abc' ), $result['product']['extensions']['test_simple'] );
+	}
+
+	/**
+	 * @testdox Should create no product when an extension field rejects its value.
+	 */
+	public function test_product_create_field_rejection_creates_nothing(): void {
+		$before = $this->count_products();
+
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'name'       => 'Rejected product',
+				'extensions' => array( 'test_simple' => array( 'code' => 'reject' ) ),
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'Code rejected.', $result->get_error_message() );
+		$this->assertSame( $before, $this->count_products() );
+	}
+
+	/**
+	 * @testdox Should create no product when an object validator rejects it.
+	 */
+	public function test_product_create_object_validator_rejection_creates_nothing(): void {
+		$before = $this->count_products();
+
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute( array( 'name' => 'Blocked' ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'Blocked by validator.', $result->get_error_message() );
+		$this->assertSame( $before, $this->count_products() );
+	}
+
+	/**
+	 * @testdox Should leave product create unchanged when the feature is off.
+	 */
+	public function test_product_create_without_feature_ignores_registries(): void {
+		$this->set_feature( false );
+
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute( array( 'name' => 'Blocked' ) );
+
+		$this->assertNotWPError( $result );
+		$this->assertArrayNotHasKey( 'extensions', $result['product'] );
+		$this->assertEmpty( $this->applied_values );
+
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'name'       => 'Contract product',
+				'extensions' => array( 'test_simple' => array( 'code' => 'abc' ) ),
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertEmpty( $this->applied_values );
+	}
+
+	/**
+	 * @testdox Should write a variation-scoped extension field to the variation, not its parent.
+	 */
+	public function test_product_update_writes_extension_field_on_variation(): void {
+		$parent       = \WC_Helper_Product::create_variation_product();
+		$variation_id = $parent->get_children()[0];
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'         => $variation_id,
+				'extensions' => array( 'test_variation' => array( 'code' => 'var-1' ) ),
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( $variation_id, $result['product']['id'] );
+		$this->assertSame( array( 'code' => 'var-1' ), $result['product']['extensions']['test_variation'] );
+		$this->assertSame( 'var-1', wc_get_product( $variation_id )->get_meta( '_test_variation_code' ) );
+		$this->assertSame( '', wc_get_product( $parent->get_id() )->get_meta( '_test_variation_code' ) );
+	}
+
+	/**
+	 * @testdox Should refuse a simple-scoped extension field on a variation.
+	 */
+	public function test_product_update_refuses_simple_scoped_field_on_variation(): void {
+		$parent       = \WC_Helper_Product::create_variation_product();
+		$variation_id = $parent->get_children()[0];
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'         => $variation_id,
+				'extensions' => array( 'test_simple' => array( 'code' => 'abc' ) ),
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_update_rejected', $result->get_error_code() );
+		$this->assertSame( "Product {$variation_id} is of type variation. It accepts extensions.test_variation.", $result->get_error_message() );
+		$this->assertSame( '', wc_get_product( $variation_id )->get_meta( '_test_simple_code' ) );
+	}
+
+	/**
+	 * @testdox Should keep Core fields locked on a variation when a namespace makes it reachable.
+	 */
+	public function test_product_update_refuses_core_fields_on_extension_only_type(): void {
+		$parent       = \WC_Helper_Product::create_variation_product();
+		$variation_id = $parent->get_children()[0];
+		$variation    = wc_get_product( $variation_id );
+		$sku          = $variation->get_sku();
+		$price        = $variation->get_regular_price();
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'  => $variation_id,
+				'sku' => 'changed-sku',
+			)
+		);
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_field_unsupported', $result->get_error_code() );
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'                 => $variation_id,
+				'product_type_alias' => 'physical',
+				'regular_price'      => '99',
+			)
+		);
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_field_unsupported', $result->get_error_code() );
+
+		$variation = wc_get_product( $variation_id );
+		$this->assertTrue( $variation->is_type( 'variation' ) );
+		$this->assertSame( $sku, $variation->get_sku() );
+		$this->assertSame( $price, $variation->get_regular_price() );
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'         => $variation_id,
+				'extensions' => array( 'test_variation' => array( 'code' => 'var-2' ) ),
+			)
+		);
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'var-2', wc_get_product( $variation_id )->get_meta( '_test_variation_code' ) );
+	}
+
+	/**
+	 * @testdox Should refuse variations when the feature is off.
+	 */
+	public function test_product_update_refuses_variation_without_feature(): void {
+		$this->set_feature( false );
+		$parent       = \WC_Helper_Product::create_variation_product();
+		$variation_id = $parent->get_children()[0];
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'  => $variation_id,
+				'sku' => 'changed-sku',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_type_unsupported', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should create a product of a registered extension type with its extension fields.
+	 */
+	public function test_product_create_registered_type_saves_extension_fields(): void {
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'product_type_alias' => 'contract',
+				'name'               => 'Contract plan',
+				'extensions'         => array( 'test_contract' => array( 'code' => 'c-1' ) ),
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$product = wc_get_product( $result['product']['id'] );
+		$this->assertSame( 'contract', $product->get_type() );
+		$this->assertSame( 'c-1', $product->get_meta( '_test_contract_code' ) );
+		$this->assertSame( 'contract', $result['product']['type'] );
+		$this->assertSame( array( 'code' => 'c-1' ), $result['product']['extensions']['test_contract'] );
+	}
+
+	/**
+	 * @testdox Should refuse to create a product of an unregistered type.
+	 */
+	public function test_product_create_refuses_unregistered_type(): void {
+		$before = $this->count_products();
+
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'product_type_alias' => 'unregistered',
+				'name'               => 'Unknown type',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( $before, $this->count_products() );
+	}
+
+	/**
+	 * @testdox Should refuse an extension field scoped to another type on a registered type.
+	 */
+	public function test_product_create_registered_type_refuses_field_scoped_to_other_type(): void {
+		$before = $this->count_products();
+
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'product_type_alias' => 'contract',
+				'name'               => 'Contract plan',
+				'extensions'         => array( 'test_simple' => array( 'code' => 'abc' ) ),
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( $before, $this->count_products() );
+	}
+
+	/**
+	 * @testdox Should say a product accepts no extension fields when no namespace applies to its type.
+	 */
+	public function test_product_update_names_no_applicable_extensions(): void {
+		$product = \WC_Helper_Product::create_external_product();
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'test_simple' => array( 'code' => 'abc' ) ),
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_update_rejected', $result->get_error_code() );
+		$this->assertSame( "Product {$product->get_id()} is of type external. It accepts no extension fields.", $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should keep Core type-specific fields locked on a registered type.
+	 */
+	public function test_product_create_registered_type_refuses_core_type_fields(): void {
+		$before = $this->count_products();
+
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'product_type_alias' => 'contract',
+				'name'               => 'Contract plan',
+				'regular_price'      => '10',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( $before, $this->count_products() );
+	}
+
+	/**
+	 * @testdox Should create nothing when the type owner rejects the product.
+	 */
+	public function test_product_create_registered_type_owner_rejection_creates_nothing(): void {
+		$before = $this->count_products();
+
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'product_type_alias' => 'contract',
+				'name'               => 'Rejected contract',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'Contract rejected.', $result->get_error_message() );
+		$this->assertSame( $before, $this->count_products() );
+	}
+
+	/**
+	 * @testdox Should create a product of a registered type with the Core fields of the alias it behaves like.
+	 */
+	public function test_product_create_behaves_like_type_accepts_core_fields(): void {
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'product_type_alias' => 'membership',
+				'name'               => 'Gold membership',
+				'regular_price'      => '10',
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$product = wc_get_product( $result['product']['id'] );
+		$this->assertSame( 'membership', $product->get_type() );
+		$this->assertSame( '10', $product->get_regular_price() );
+		$this->assertTrue( $product->get_virtual() );
+		$this->assertFalse( $product->get_downloadable() );
+	}
+
+	/**
+	 * @testdox Should change an existing product to a registered type that behaves like a Core alias.
+	 */
+	public function test_product_update_changes_product_to_behaves_like_type(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'                 => $product->get_id(),
+				'product_type_alias' => 'membership',
+				'regular_price'      => '12',
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$product = wc_get_product( $product->get_id() );
+		$this->assertSame( 'membership', $product->get_type() );
+		$this->assertSame( '12', $product->get_regular_price() );
+		$this->assertTrue( $product->get_virtual() );
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'                 => $product->get_id(),
+				'product_type_alias' => 'membership',
+				'sale_price'         => '8',
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( '8', wc_get_product( $product->get_id() )->get_sale_price() );
+	}
+
+	/**
+	 * @testdox Should keep the publish capability gate on a registered type that behaves like a Core alias.
+	 */
+	public function test_product_update_behaves_like_type_keeps_publish_gate(): void {
+		$author_id = self::factory()->user->create( array( 'role' => 'contributor' ) );
+		get_userdata( $author_id )->add_cap( 'edit_products' );
+		$product = wc_get_product_object( 'membership' );
+		$product->set_name( 'Draft membership' );
+		$product->set_status( 'draft' );
+		$product->save();
+		wp_update_post(
+			array(
+				'ID'          => $product->get_id(),
+				'post_author' => $author_id,
+			)
+		);
+		wp_set_current_user( $author_id );
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'                 => $product->get_id(),
+				'product_type_alias' => 'membership',
+				'status'             => 'publish',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_publish_forbidden', $result->get_error_code() );
+		$this->assertSame( 'draft', wc_get_product( $product->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox Should filter products-query by a registered type that behaves like a Core alias.
+	 */
+	public function test_products_query_filters_by_behaves_like_type(): void {
+		\WC_Helper_Product::create_simple_product();
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'product_type_alias' => 'membership',
+				'name'               => 'Silver membership',
+			)
+		);
+
+		$result = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'product_type_alias' => 'membership' ) );
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( array( $created['product']['id'] ), array_column( $result['products'], 'id' ) );
+	}
+
+	/**
+	 * @testdox Should save nothing when the type owner rejects an update to a product of its type.
+	 */
+	public function test_product_update_behaves_like_type_owner_rejection_saves_nothing(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Plain' ) );
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'                 => $product->get_id(),
+				'product_type_alias' => 'membership',
+				'name'               => 'Rejected membership',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'Membership rejected.', $result->get_error_message() );
+		$product = wc_get_product( $product->get_id() );
+		$this->assertSame( 'simple', $product->get_type() );
+		$this->assertSame( 'Plain', $product->get_name() );
+	}
+
+	/**
+	 * @testdox Should refuse to change a product to a registered type that does not behave like a Core alias.
+	 */
+	public function test_product_update_refuses_type_without_behaves_like(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'                 => $product->get_id(),
+				'product_type_alias' => 'contract',
+				'name'               => 'Contract plan',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'simple', wc_get_product( $product->get_id() )->get_type() );
+	}
+
+	/**
+	 * @testdox Should apply a namespace registered without product types to variable products and variations.
+	 */
+	public function test_unscoped_namespace_applies_to_variable_and_variation(): void {
+		$this->register_only_unscoped_namespace();
+		$parent       = \WC_Helper_Product::create_variation_product();
+		$variation_id = $parent->get_children()[0];
+
+		foreach ( array( $parent->get_id(), $variation_id ) as $product_id ) {
+			$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+				array(
+					'id'         => $product_id,
+					'extensions' => array( 'test_all' => array( 'code' => "all-{$product_id}" ) ),
+				)
+			);
+
+			$this->assertNotWPError( $result );
+			$this->assertSame( array( 'code' => "all-{$product_id}" ), $result['product']['extensions']['test_all'] );
+			$this->assertSame( "all-{$product_id}", wc_get_product( $product_id )->get_meta( '_test_all_code' ) );
+		}
+	}
+
+	/**
+	 * @testdox Should keep Core fields locked on variable products and variations reached by an unscoped namespace.
+	 */
+	public function test_unscoped_namespace_keeps_core_fields_locked(): void {
+		$this->register_only_unscoped_namespace();
+		$parent       = \WC_Helper_Product::create_variation_product();
+		$variation_id = $parent->get_children()[0];
+
+		foreach ( array( $parent->get_id(), $variation_id ) as $product_id ) {
+			$sku    = wc_get_product( $product_id )->get_sku();
+			$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+				array(
+					'id'  => $product_id,
+					'sku' => 'changed-sku',
+				)
+			);
+
+			$this->assertWPError( $result );
+			$this->assertSame( 'woocommerce_product_field_unsupported', $result->get_error_code() );
+			$this->assertSame( $sku, wc_get_product( $product_id )->get_sku() );
+		}
+	}
+
+	/**
+	 * @testdox Should pass a field's merchant-facing title through to the input and output schemas.
+	 */
+	public function test_field_title_reaches_input_and_output_schemas(): void {
+		$expected = array(
+			'type'        => 'string',
+			'title'       => 'Contract code',
+			'description' => 'Code the contract system uses.',
+		);
+		$create   = wp_get_ability( 'woocommerce/product-create' );
+		$update   = wp_get_ability( 'woocommerce/product-update' );
+		$query    = wp_get_ability( 'woocommerce/products-query' );
+
+		foreach ( array( $create->get_input_schema(), $update->get_input_schema() ) as $input_schema ) {
+			$branch = array_values(
+				array_filter(
+					$input_schema['oneOf'],
+					static function ( array $branch ): bool {
+						return isset( $branch['properties']['extensions']['properties']['test_contract'] );
+					}
+				)
+			)[0];
+			$this->assertSame( $expected, $branch['properties']['extensions']['properties']['test_contract']['properties']['code'] );
+		}
+
+		$this->assertSame( $expected, $create->get_output_schema()['properties']['product']['properties']['extensions']['properties']['test_contract']['properties']['code'] );
+		$this->assertSame( $expected, $update->get_output_schema()['properties']['product']['properties']['extensions']['properties']['test_contract']['properties']['code'] );
+		$this->assertSame( $expected, $query->get_output_schema()['properties']['products']['items']['properties']['extensions']['properties']['test_contract']['properties']['code'] );
+	}
+
+	/**
+	 * @testdox Should refuse an enum value registration made after collection.
+	 */
+	public function test_enum_value_registration_after_collection_is_refused(): void {
+		$this->setExpectedIncorrectUsage( AbilityFieldRegistry::class . '::register_enum_value' );
+
+		AbilityFieldRegistry::instance()->register_enum_value(
+			'product',
+			'product_type_alias',
+			'too_late',
+			array(
+				'namespace'   => 'test_too_late',
+				'description' => 'Too late.',
+			)
+		);
+
+		$this->assertArrayNotHasKey( 'too_late', AbilityFieldRegistry::instance()->enum_values( 'product', 'product_type_alias' ) );
+	}
+
+	/**
+	 * @testdox Should leave product create schema and behavior unchanged for registered types when the feature is off.
+	 */
+	public function test_product_create_registered_type_without_feature(): void {
+		$this->set_feature( false );
+		$with_registration = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
+		remove_action( 'woocommerce_register_ability_fields', array( $this, 'register_test_fields' ) );
+		$this->reset_registries();
+		$this->set_feature( false );
+
+		$this->assertSame( wp_get_ability( 'woocommerce/product-create' )->get_input_schema(), $with_registration );
+
+		$before = $this->count_products();
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'product_type_alias' => 'contract',
+				'name'               => 'Contract plan',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( $before, $this->count_products() );
+	}
+
+	/**
+	 * @testdox Should list on each product type branch only the extension namespaces that apply to that type.
+	 */
+	public function test_product_type_branches_list_only_applicable_extensions(): void {
+		$create = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
+		$update = wp_get_ability( 'woocommerce/product-update' )->get_input_schema();
+
+		$this->assertSame( array( 'test_simple' ), $this->extension_namespaces_of_branch( $create, 'physical' ) );
+		$this->assertSame( array( 'test_simple' ), $this->extension_namespaces_of_branch( $create, 'digital' ) );
+		$this->assertSame( array( 'test_contract' ), $this->extension_namespaces_of_branch( $create, 'contract' ) );
+		$this->assertNull( $this->extension_namespaces_of_branch( $create, 'affiliate' ) );
+
+		$this->assertSame( array( 'test_simple' ), $this->extension_namespaces_of_branch( $update, 'physical' ) );
+		$this->assertNull( $this->extension_namespaces_of_branch( $update, 'grouped' ) );
+	}
+
+	/**
+	 * @testdox Should collect field registrations on first use, without the Abilities API.
+	 */
+	public function test_field_registry_collects_on_first_use(): void {
+		$this->reset_registries();
+		$register = static function ( AbilityFieldRegistry $registry ) {
+			$registry->register(
+				'product',
+				'test_direct',
+				array(
+					'description' => 'Direct fields.',
+					'fields'      => array(),
+				)
+			);
+		};
+		add_action( 'woocommerce_register_ability_fields', $register );
+
+		$has = AbilityFieldRegistry::instance()->has( 'product', 'test_direct' );
+		remove_action( 'woocommerce_register_ability_fields', $register );
+
+		$this->assertTrue( $has );
+	}
+
+	/**
+	 * @testdox Should collect validator registrations on first use, without the Abilities API.
+	 */
+	public function test_validator_registry_collects_on_first_use(): void {
+		$this->reset_registries();
+		$register = static function ( ObjectValidatorRegistry $registry ) {
+			$registry->register(
+				'product',
+				'test_direct',
+				static function () {
+					return new \WP_Error( 'test_direct', 'Direct validator.' );
+				}
+			);
+		};
+		add_action( 'woocommerce_register_object_validators', $register );
+
+		$rejection = ObjectValidatorRegistry::instance()->validate( new \WC_Product_Simple() );
+		remove_action( 'woocommerce_register_object_validators', $register );
+
+		$this->assertSame( 'Direct validator.', $rejection );
+	}
+
+	/**
+	 * @testdox Should not collect before all plugins have loaded, and collect on a later use.
+	 */
+	public function test_registry_used_before_plugins_loaded_collects_later(): void {
+		global $wp_actions;
+		$this->reset_registries();
+		$this->setExpectedIncorrectUsage( AbilityFieldRegistry::class . '::instance' );
+		$register = static function ( AbilityFieldRegistry $registry ) {
+			$registry->register(
+				'product',
+				'test_early',
+				array(
+					'description' => 'Early fields.',
+					'fields'      => array(),
+				)
+			);
+		};
+		add_action( 'woocommerce_register_ability_fields', $register );
+
+		$plugins_loaded = $wp_actions['plugins_loaded'];
+		unset( $wp_actions['plugins_loaded'] );
+		$has_early                    = AbilityFieldRegistry::instance()->has( 'product', 'test_early' );
+		$wp_actions['plugins_loaded'] = $plugins_loaded; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$has_later                    = AbilityFieldRegistry::instance()->has( 'product', 'test_early' );
+		remove_action( 'woocommerce_register_ability_fields', $register );
+
+		$this->assertFalse( $has_early );
+		$this->assertTrue( $has_later );
+	}
+
+	/**
+	 * @testdox Should refuse a field registration made after collection.
+	 */
+	public function test_field_registration_after_collection_is_refused(): void {
+		$this->setExpectedIncorrectUsage( AbilityFieldRegistry::class . '::register' );
+
+		AbilityFieldRegistry::instance()->register(
+			'product',
+			'test_too_late',
+			array(
+				'description' => 'Too late.',
+				'fields'      => array(),
+			)
+		);
+
+		$this->assertFalse( AbilityFieldRegistry::instance()->has( 'product', 'test_too_late' ) );
+	}
+
+	/**
+	 * @testdox Should refuse a validator registration made after collection.
+	 */
+	public function test_validator_registration_after_collection_is_refused(): void {
+		$this->setExpectedIncorrectUsage( ObjectValidatorRegistry::class . '::register' );
+
+		ObjectValidatorRegistry::instance()->register(
+			'product',
+			'test_too_late',
+			static function () {
+				return new \WP_Error( 'test_too_late', 'Too late.' );
+			}
+		);
+
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute( array( 'name' => 'Accepted product' ) );
+		$this->assertNotWPError( $result );
+	}
+
+	/**
+	 * Register the test extension namespaces.
+	 *
+	 * @param AbilityFieldRegistry $registry Registry.
+	 */
+	public function register_test_fields( AbilityFieldRegistry $registry ): void {
+		foreach ( array( 'simple', 'variation', 'contract' ) as $product_type ) {
+			$meta_key = "_test_{$product_type}_code";
+			$registry->register(
+				'product',
+				"test_{$product_type}",
+				array(
+					'description'   => "Test fields for {$product_type} products.",
+					'product_types' => array( $product_type ),
+					'fields'        => array(
+						'code' => array(
+							'schema'   => 'contract' === $product_type ? array(
+								'type'        => 'string',
+								'title'       => 'Contract code',
+								'description' => 'Code the contract system uses.',
+							) : array( 'type' => 'string' ),
+							'validate' => static function ( $value ) {
+								return 'reject' === $value ? new \WP_Error( 'test_rejected', 'Code rejected.' ) : true;
+							},
+							'apply'    => function ( $value, \WC_Product $product ) use ( $meta_key ) {
+								$this->applied_values[] = $value;
+								$product->update_meta_data( $meta_key, $value );
+							},
+							'read'     => static function ( \WC_Product $product ) use ( $meta_key ) {
+								return $product->get_meta( $meta_key );
+							},
+						),
+					),
+				)
+			);
+		}
+
+		$registry->register_enum_value(
+			'product',
+			'product_type_alias',
+			'contract',
+			array(
+				'namespace'   => 'test_contract',
+				'description' => 'A contract product sold by the test extension.',
+				'validate'    => static function ( string $value, \WC_Product $product ) {
+					return 'Rejected contract' === $product->get_name() ? new \WP_Error( 'test_contract_rejected', 'Contract rejected.' ) : true;
+				},
+			)
+		);
+
+		$registry->register_enum_value(
+			'product',
+			'product_type_alias',
+			'membership',
+			array(
+				'namespace'    => 'test_membership',
+				'description'  => 'A membership sold by the test extension.',
+				'behaves_like' => 'virtual',
+				'validate'     => static function ( string $value, \WC_Product $product ) {
+					return 'Rejected membership' === $product->get_name() ? new \WP_Error( 'test_membership_rejected', 'Membership rejected.' ) : true;
+				},
+			)
+		);
+	}
+
+	/**
+	 * Classes for the test extension's `contract` and `membership` product types.
+	 *
+	 * @param string $class_name   Class name.
+	 * @param string $product_type Product type.
+	 * @return string
+	 */
+	public function contract_product_class( $class_name, $product_type ) {
+		if ( 'contract' === $product_type ) {
+			$product = new class() extends \WC_Product_Simple {
+				/**
+				 * Product type.
+				 *
+				 * @return string
+				 */
+				public function get_type() {
+					return 'contract';
+				}
+			};
+			return get_class( $product );
+		}
+		if ( 'membership' === $product_type ) {
+			$product = new class() extends \WC_Product_Simple {
+				/**
+				 * Product type.
+				 *
+				 * @return string
+				 */
+				public function get_type() {
+					return 'membership';
+				}
+			};
+			return get_class( $product );
+		}
+		return $class_name;
+	}
+
+	/**
+	 * Register a product validator that rejects one product name.
+	 *
+	 * @param ObjectValidatorRegistry $registry Registry.
+	 */
+	public function register_test_validators( ObjectValidatorRegistry $registry ): void {
+		$registry->register(
+			'product',
+			'test',
+			static function ( \WC_Product $product ) {
+				return 'Blocked' === $product->get_name() ? new \WP_Error( 'test_blocked', 'Blocked by validator.' ) : true;
+			}
+		);
+	}
+
+	/**
+	 * Replace the test namespaces with one namespace registered without product types.
+	 */
+	private function register_only_unscoped_namespace(): void {
+		remove_action( 'woocommerce_register_ability_fields', array( $this, 'register_test_fields' ) );
+		$this->reset_registries();
+		$register = static function ( AbilityFieldRegistry $registry ) {
+			$registry->register(
+				'product',
+				'test_all',
+				array(
+					'description' => 'Test fields for every product.',
+					'fields'      => array(
+						'code' => array(
+							'schema' => array( 'type' => 'string' ),
+							'apply'  => static function ( $value, \WC_Product $product ) {
+								$product->update_meta_data( '_test_all_code', $value );
+							},
+							'read'   => static function ( \WC_Product $product ) {
+								return $product->get_meta( '_test_all_code' );
+							},
+						),
+					),
+				)
+			);
+		};
+		add_action( 'woocommerce_register_ability_fields', $register );
+		$this->set_feature( true );
+		remove_action( 'woocommerce_register_ability_fields', $register );
+	}
+
+	/**
+	 * Toggle the feature and re-register the abilities so their schemas follow it.
+	 *
+	 * @param bool $enabled Whether the feature is enabled.
+	 */
+	private function set_feature( bool $enabled ): void {
+		update_option( 'woocommerce_feature_' . AbilityContracts::FEATURE_ID . '_enabled', $enabled ? 'yes' : 'no' );
+
+		$this->unregister_abilities();
+		$callback = array( AbilitiesLoader::class, 'register_abilities' );
+		add_action( 'wp_abilities_api_init', $callback );
+		do_action( 'wp_abilities_api_init' );
+		remove_action( 'wp_abilities_api_init', $callback );
+	}
+
+	/**
+	 * Unregister the canonical abilities.
+	 */
+	private function unregister_abilities(): void {
+		foreach ( self::CANONICAL_ABILITY_IDS as $ability_id ) {
+			if ( wp_has_ability( $ability_id ) ) {
+				wp_unregister_ability( $ability_id );
+			}
+		}
+	}
+
+	/**
+	 * Drop the shared registries so the next use collects registrations again.
+	 */
+	private function reset_registries(): void {
+		foreach ( array( AbilityFieldRegistry::class, ObjectValidatorRegistry::class ) as $class_name ) {
+			$reflection = new \ReflectionProperty( $class_name, 'instance' );
+			$reflection->setAccessible( true );
+			$reflection->setValue( null, null );
+		}
+	}
+
+	/**
+	 * Extension namespaces a product type branch lists, or null when it has no `extensions`.
+	 *
+	 * @param array  $schema             Input schema.
+	 * @param string $product_type_alias Branch alias.
+	 * @return string[]|null
+	 */
+	private function extension_namespaces_of_branch( array $schema, string $product_type_alias ): ?array {
+		foreach ( $schema['oneOf'] as $branch ) {
+			if ( array( $product_type_alias ) === ( $branch['properties']['product_type_alias']['enum'] ?? null ) ) {
+				return isset( $branch['properties']['extensions'] ) ? array_keys( $branch['properties']['extensions']['properties'] ) : null;
+			}
+		}
+		$this->fail( "No {$product_type_alias} branch." );
+	}
+
+	/**
+	 * Number of products in the store.
+	 */
+	private function count_products(): int {
+		return count(
+			get_posts(
+				array(
+					'post_type'   => 'product',
+					'post_status' => 'any',
+					'fields'      => 'ids',
+					'numberposts' => -1,
+				)
+			)
+		);
+	}
+}
