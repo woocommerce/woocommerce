@@ -1026,6 +1026,22 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should treat a per page of zero as one when the requested page is past the last one, as WP_Query does.
+	 */
+	public function test_get_tokens_for_roles_reports_totals_for_a_page_past_the_end_with_zero_per_page(): void {
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+
+		$this->create_push_token_for_user( $data_store, $admin_id );
+
+		$result = $data_store->get_tokens_for_roles( array( 'administrator' ), 2, 0 );
+
+		$this->assertSame( array(), $result['tokens'] );
+		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( 1, $result['total_pages'] );
+	}
+
+	/**
 	 * @testdox Should return only the given user's tokens when filtered by user ID.
 	 */
 	public function test_get_tokens_for_roles_filters_by_user_id(): void {
