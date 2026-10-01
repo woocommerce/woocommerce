@@ -12,19 +12,24 @@ use WC_Unit_Test_Case;
 class CacheTest extends WC_Unit_Test_Case {
 
 	/**
-	 * @testdox set() stores the value for one week by default, or for the given expiration.
+	 * @testdox set() stores the value for one week by default, or for the filtered expiration.
 	 *
 	 * @testWith [null, 604800]
 	 *           [60, 60]
 	 *
-	 * @param int|null $expiration Expiration passed to set(), or null to use the default.
+	 * @param int|null $expiration Filtered expiration, or null to leave the default.
 	 * @param int      $expected   Expected lifetime in seconds.
 	 */
 	public function test_set_uses_expiration( ?int $expiration, int $expected ): void {
+		$filter = fn() => $expiration;
+		if ( null !== $expiration ) {
+			add_filter( 'woocommerce_reports_cache_expiration', $filter );
+		}
 		$before = time();
 
-		null === $expiration ? Cache::set( 'wc_cache_test', 'value' ) : Cache::set( 'wc_cache_test', 'value', $expiration );
+		Cache::set( 'wc_cache_test', 'value' );
 
+		remove_filter( 'woocommerce_reports_cache_expiration', $filter );
 		$timeout = (int) get_option( '_transient_timeout_wc_cache_test' );
 		$this->assertGreaterThanOrEqual( $before + $expected, $timeout );
 		$this->assertLessThanOrEqual( time() + $expected, $timeout );

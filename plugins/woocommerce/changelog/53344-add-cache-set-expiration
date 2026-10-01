@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
 
-Add an optional expiration argument to the reports `Cache::set()` method.
+Add the woocommerce_reports_cache_expiration filter to change how long Analytics report data is cached.

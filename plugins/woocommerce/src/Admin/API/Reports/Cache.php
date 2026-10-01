@@ -59,19 +59,26 @@ class Cache {
 	/**
 	 * Update cached value.
 	 *
-	 * @since 11.3.0 Added the `$expiration` parameter.
-	 *
-	 * @param string $key        Cache key.
-	 * @param mixed  $value      New value.
-	 * @param int    $expiration Time until expiration in seconds. Default one week.
+	 * @param string $key   Cache key.
+	 * @param mixed  $value New value.
 	 * @return bool
 	 */
-	public static function set( $key, $value, $expiration = WEEK_IN_SECONDS ) {
+	public static function set( $key, $value ) {
 		$transient_version = self::get_version();
 		$transient_value   = array(
 			'version' => $transient_version,
 			'value'   => $value,
 		);
+
+		/**
+		 * Filters how long a reports cache value is kept, in seconds.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param int    $expiration Time until expiration in seconds. Default one week.
+		 * @param string $key        Cache key.
+		 */
+		$expiration = absint( apply_filters( 'woocommerce_reports_cache_expiration', WEEK_IN_SECONDS, $key ) );
 
 		$result = set_transient( $key, $transient_value, $expiration );
 
