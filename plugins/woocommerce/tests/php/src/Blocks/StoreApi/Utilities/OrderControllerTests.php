@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
+use WC_Helper_Customer;
 use WC_Helper_Order;
 use WC_Helper_Product;
 use Automattic\WooCommerce\Enums\OrderStatus;
@@ -47,6 +48,48 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 				parent::validate_address_fields( $order, $address_type, $errors );
 			}
 		};
+	}
+
+	/**
+	 * @testdox sync_customer_data_with_order() preserves session-only customer properties when persistent customer data changes.
+	 */
+	public function test_sync_customer_data_with_order_preserves_session_only_properties(): void {
+		$customer = WC_Helper_Customer::create_customer();
+		$order    = WC_Helper_Order::create_order( $customer->get_id() );
+
+		wp_set_current_user( $customer->get_id() );
+		update_user_meta( $customer->get_id(), 'last_update', time() - MINUTE_IN_SECONDS );
+		WC()->session->init();
+
+		$session_customer = new \WC_Customer( $customer->get_id(), true );
+		WC()->customer    = $session_customer;
+		$session_customer->set_is_vat_exempt( true );
+		$session_customer->set_calculated_shipping( true );
+		$session_customer->save();
+
+		$session_data = (array) WC()->session->get( 'customer' );
+
+		$this->sut->sync_customer_data_with_order( $order );
+
+		$persistent_customer = new \WC_Customer( $customer->get_id() );
+		$this->assertNotSame(
+			$session_data['date_modified'],
+			(string) $persistent_customer->get_date_modified( 'edit' ),
+			'The fixture must update the persistent customer after the session snapshot is saved.'
+		);
+
+		$reloaded_customer = new \WC_Customer( $customer->get_id(), true );
+		$this->assertSame(
+			array(
+				'is_vat_exempt'       => true,
+				'calculated_shipping' => true,
+			),
+			array(
+				'is_vat_exempt'       => $reloaded_customer->get_is_vat_exempt(),
+				'calculated_shipping' => $reloaded_customer->get_calculated_shipping(),
+			),
+			'Session-only customer properties should survive persistent customer updates during checkout.'
+		);
 	}
 
 	/**

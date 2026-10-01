@@ -93,7 +93,7 @@ class OrderController {
 	}
 
 	/**
-	 * Copies order data to customer object (not the session), so values persist for future checkouts.
+	 * Copies order data to the persistent customer and keeps the current customer session synchronized.
 	 *
 	 * @param \WC_Order $order Order object.
 	 */
@@ -128,6 +128,16 @@ class OrderController {
 			);
 			$this->additional_fields_controller->sync_customer_additional_fields_with_order( $order, $customer );
 			$customer->save();
+
+			$session_customer = WC()->customer;
+			if (
+				$session_customer &&
+				$session_customer->get_id() === $customer_id &&
+				(string) $session_customer->get_date_modified( 'edit' ) !== (string) $customer->get_date_modified( 'edit' )
+			) {
+				$session_customer->set_date_modified( (string) $customer->get_date_modified( 'edit' ) );
+				$session_customer->save();
+			}
 		}
 	}
 
