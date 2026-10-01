@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Button } from '@wordpress/components';
+import { Button, VisuallyHidden } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import {
 	createInterpolateElement,
@@ -170,8 +170,14 @@ export default function MySubscriptions(): React.JSX.Element {
 							target="_blank"
 							rel="noopener noreferrer"
 							variant="secondary"
+							icon={ external }
+							iconSize={ 16 }
+							iconPosition="right"
 						>
 							{ __( 'Learn more', 'woocommerce' ) }
+							<VisuallyHidden as="span">
+								{ __( '(opens in a new tab)', 'woocommerce' ) }
+							</VisuallyHidden>
 						</Button>
 					</div>
 				</div>
