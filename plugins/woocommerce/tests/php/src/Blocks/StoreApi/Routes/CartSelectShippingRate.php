@@ -97,19 +97,20 @@ class CartSelectShippingRate extends ControllerTestCase {
 	}
 
 	/**
-	 * Whether the given rate id is marked selected in the first package of a cart response.
+	 * Whether the given rate id is marked selected in a package of a cart response.
 	 *
-	 * @param array  $data    Cart response data.
-	 * @param string $rate_id Rate id to look up.
+	 * @param array  $data          Cart response data.
+	 * @param string $rate_id       Rate id to look up.
+	 * @param int    $package_index Package to read, defaulting to the first.
 	 * @return bool
 	 */
-	private function is_selected( array $data, string $rate_id ): bool {
-		foreach ( $data['shipping_rates'][0]['shipping_rates'] as $rate ) {
+	private function is_selected( array $data, string $rate_id, int $package_index = 0 ): bool {
+		foreach ( $data['shipping_rates'][ $package_index ]['shipping_rates'] as $rate ) {
 			if ( $rate['rate_id'] === $rate_id ) {
 				return (bool) $rate['selected'];
 			}
 		}
-		$this->fail( 'Rate ' . $rate_id . ' was not offered.' );
+		$this->fail( 'Rate ' . $rate_id . ' was not offered in package ' . $package_index . '.' );
 	}
 
 	/**
@@ -137,22 +138,39 @@ class CartSelectShippingRate extends ControllerTestCase {
 	}
 
 	/**
-	 * With no package id the route selects the rate for every package. With one package that is
-	 * the same outcome, reached through the other branch of the route.
+	 * With no package id the route selects the rate for every package. The cart is split into two
+	 * packages first, so the all-packages branch is exercised against more than one and a
+	 * regression that updated only the first package would be caught.
 	 *
 	 * @testdox Omitting the package id selects the rate for every package.
 	 */
 	public function test_omitting_the_package_id_selects_the_rate_for_every_package(): void {
 		$second = 'flat_rate:' . $this->instances[1];
 
-		$result = $this->select( array( 'rate_id' => $second ) );
+		// Split the single cart package into two identical ones so "every package" means more than one.
+		$split = static function ( $packages ) {
+			if ( 1 === count( $packages ) ) {
+				$packages[] = $packages[0];
+			}
+			return $packages;
+		};
+		add_filter( 'woocommerce_cart_shipping_packages', $split );
+		WC()->cart->calculate_shipping();
+
+		try {
+			$result = $this->select( array( 'rate_id' => $second ) );
+		} finally {
+			remove_filter( 'woocommerce_cart_shipping_packages', $split );
+		}
 
 		$this->assertSame( 200, $result['status'], 'A selection without a package id should succeed.' );
-		$this->assertTrue( $this->is_selected( $result['data'], $second ), 'The chosen rate should come back selected.' );
+		$this->assertCount( 2, $result['data']['shipping_rates'], 'The cart should have split into two packages.' );
+		$this->assertTrue( $this->is_selected( $result['data'], $second, 0 ), 'The first package should carry the chosen rate.' );
+		$this->assertTrue( $this->is_selected( $result['data'], $second, 1 ), 'The second package should carry the chosen rate too.' );
 		$this->assertSame(
-			array( $second ),
+			array( $second, $second ),
 			WC()->session->get( 'chosen_shipping_methods' ),
-			'The single package should carry the chosen rate.'
+			'Every package should be stored with the chosen rate, not only the first.'
 		);
 	}
 
