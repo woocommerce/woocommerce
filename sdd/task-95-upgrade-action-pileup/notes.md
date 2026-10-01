@@ -24,6 +24,9 @@ Blast radius: 13 production get_next call sites across 10 files; AnalyticsImport
 - [x] Validate and record results in `sdd/task-95-upgrade-action-pileup/notes.md`: replay the original two-process wp-env reproduction with the same unrelated backlog and held callback; verify pending count stays zero while running, existing pending copies do not increase, and one later event schedules a new copy after completion. Run focused engine and existing inbox/queue PHPUnit coverage inside wp-env, both required PHP lint commands, and PHPStan on changed PHP files. Acceptance: before/after evidence is recorded, all applicable checks pass without baseline additions, and reproduction fixtures are cleaned up. Dependencies: third task.
 - [x] Add `plugins/woocommerce/changelog/fix-upgrade-inbox-action-pileup` and finalize review evidence in `sdd/task-95-upgrade-action-pileup/notes.md`: record preserved external queue/date contracts, bounded query cost, unchanged check-then-insert race, original merchant reproduction limits, and remaining actual-upgrade/high-volume/multisite/custom-queue manual testing. Acceptance: SDD review clears findings and draft PR material includes the task quote, issue closure, historical guard explanation, measured reproduction, scoped change, and validation limits. Dependencies: fourth task.
 
+- [x] Prefer Action Scheduler's existence API in `plugins/woocommerce/src/Admin/RemoteInboxNotifications/RemoteInboxNotificationsEngine.php` when `as_has_scheduled_action()` is available and the queue is exactly the standard `WC_Action_Queue`. Retain the bounded scalar searches for unavailable functions and all custom queues, including subclasses. Extend `plugins/woocommerce/tests/php/src/Admin/RemoteInboxNotifications/RemoteInboxNotificationsEngineTest.php` to verify subclass overrides remain authoritative. Acceptance: existing scheduling regressions and custom queue cases pass without changing shared contracts. Dependencies: original tasks complete.
+- [x] Validate the helper follow-up through focused container PHPUnit, changed PHP and branch lint, production PHPStan and SDD review; record results in this file. Acceptance: all applicable validation passes, no port override changes, and reproduction fixtures are cleaned up. Validation is complete; the parent agent will commit and push to the existing draft PR, then verify a clean worktree. Dependencies: helper implementation.
+
 ## Implementation Notes
 
 ### Validation profile
@@ -40,6 +43,12 @@ Blast radius: 13 production get_next call sites across 10 files; AnalyticsImport
 
 - Used the provisioned wp-env site without changing its port overrides.
 - Real Action Scheduler store and runner used, no mocked statuses or queue results in the reproduction. The callback was deliberately held open to make the concurrency window deterministic.
+
+### Follow-up request: native existence API
+
+- The user requested `as_has_scheduled_action()` when available. The bundled API checks pending and running statuses together, matches explicit empty arguments and group, and returns a boolean without needing a scheduled date. It has existed since Action Scheduler 3.3.0.
+- This refines the original approach only for the exact standard queue class. Calling it for arbitrary queue implementations or subclasses could bypass their storage or overridden searches. Those queues retain the original fallback, as does a runtime lacking the helper. No interface or shared date-lookup changes are needed.
+- Trunk now has `ActionSchedulerUtil::has_scheduled_action()`, but its older-version fallback can miss running work. This bug's fallback must keep checking both states through the queue rather than accept that tradeoff.
 
 ### Iteration 1
 
@@ -71,7 +80,24 @@ Blast radius: 13 production get_next call sites across 10 files; AnalyticsImport
 - QA: PASS for the controlled two-process and async reproductions. After all tests, WooCommerce was reactivated and the site was verified at localhost:8796 with zero reproduction backlog and zero active target actions.
 - Reviewer: PASS. The full code review pipeline returned APPROVE with zero findings from six specialists; the independent decision critic returned STAND. Reviews covered code correctness, queue contracts, concurrency, performance, PHP tests, and WooCommerce regressions. The changelog was also checked. No implementation revision was required.
 
-### Final Summary
+### Iteration 2
+
+#### Implementation
+
+- The standard `WC_Action_Queue` now uses `as_has_scheduled_action()` when available, with the same hook, explicit empty arguments and group. Exact class matching preserves custom subclass overrides; missing helpers and custom queues retain the existing bounded pending/running searches.
+- Expanded replacement-queue tests to exercise both interface implementations and `WC_Action_Queue` subclasses in empty, pending and running states. The real Action Scheduler store deliberately disagrees with the replacement queue, so an accidental direct lookup or `instanceof` shortcut fails the scheduling expectations.
+- Existing real-store regressions exercise the native helper for running work, pending async work, inactive states and scope mismatches. No interface, shared date contract, scheduling payload or test-only production entry point changed.
+- Added a transactional setup reset for the target hook/group: the first run found a pending action created by wp-env's upgrade bootstrap before the test transactions. Clearing it after parent setup isolates the tests while rollback restores the baseline. The initial 201-test run had eight failures from this existing action; the rerun passed.
+
+#### Validation
+
+- Tests: PASS, 201 tests and 767 assertions under PHP 8.1.34 / PHPUnit 9.6.35 using `pnpm test:php:env -- --filter 'RemoteInboxNotificationsEngineTest|RemoteInboxNotificationsTest|WC_Tests_Queue|WC_Tests_Webhooks|RemoteSpecs|WC_Admin_Tests_RemoteInboxNotifications|WC_Tests_CRUD_Webhooks'`. Includes 17 engine cases, six of which exercise replacement queues and subclasses.
+- Lint: changed PHP and whole-branch PHP/JS checks pass; no changed-code errors or warnings. Production PHPStan passes with `--debug` to avoid the sandbox restriction on its parallel-process socket. Markdown lint passes using the installed CLI's direct path. No baseline changes.
+- QA: replayed the existing two-process fixture on the rebased 11.3.0-dev checkout with 1,000 unrelated overdue actions. Ten updates with a pending target left one copy. Ten updates with the real runner callback held open left zero pending copies and one running target throughout, despite `as_next=true` and `wc_next=null`. The callback completed normally; ten subsequent updates created exactly one fresh pending action.
+- Review: focused SDD review passes with no findings, including the fixture-isolation follow-up. The attempted full review pipeline excluded uncommitted changes and is not claimed as completed for this iteration. Remote Jev triage was not invoked under the external-write restriction.
+- Environment: refreshed locked Composer dependencies and generated autoload files to resolve a stale filemap after rebasing. No tracked dependency or wp-env override changes. The runtime without `as_has_scheduled_action()` was not separately exercised; the same scalar-search fallback is covered through custom queues. Original manual-validation limitations still apply.
+
+### Iteration 1 summary
 
 #### Key Decisions
 
@@ -97,3 +123,11 @@ Blast radius: 13 production get_next call sites across 10 files; AnalyticsImport
 #### Remaining manual validation
 
 - An actual historical upgrade with the reporter's repeated-update trigger, Action Scheduler High Volume with two threads, multisite, and real third-party replacement queues. The controlled reproduction establishes the mechanism, not the original merchant's complete loop. The entire WooCommerce suite was not run.
+
+### Final Summary
+
+- Completed all seven tasks across two implementation-loop iterations. Iteration 2 implementation and validation succeeded; commit and push delivery remain with the parent agent.
+- The standard queue uses `as_has_scheduled_action()` when available. Custom queues, including subclasses, retain their own bounded searches. `WC_Queue_Interface`, the shared date contract and scheduling payload remain unchanged.
+- Targeted container PHPUnit passed: 201 tests, 767 assertions. Changed PHP lint, branch lint, production PHPStan and focused SDD review passed. No full new review pipeline or runtime test without the helper is claimed.
+- Live replay with 1,000 unrelated overdue actions kept pending targets at zero while the target ran; subsequent updates created exactly one new target after completion. Reproduction fixtures were cleaned up, with zero pending and zero running target actions remaining.
+- Remaining manual validation is unchanged: the historical upgrade trigger, actual High Volume two-thread operation, multisite and real third-party queues. The entire WooCommerce suite was not run; the independent check-then-insert race and existing duplicate cleanup remain outside scope.

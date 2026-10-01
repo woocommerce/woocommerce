@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Admin\RemoteInboxNotifications;
 use ActionScheduler;
 use ActionScheduler_Store;
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsEngine;
+use WC_Action_Queue;
 use WC_Queue;
 use WC_Queue_Interface;
 use WC_Unit_Test_Case;
@@ -32,6 +33,18 @@ class RemoteInboxNotificationsEngineTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		// An upgrade during test bootstrap can leave work outside the test transaction.
+		$store      = ActionScheduler::store();
+		$action_ids = $store->query_actions(
+			array(
+				'hook'     => self::HOOK,
+				'group'    => self::GROUP,
+				'per_page' => -1,
+			)
+		);
+		foreach ( $action_ids as $action_id ) {
+			$store->delete_action( $action_id );
+		}
 		remove_all_actions( 'woocommerce_updated' );
 		RemoteInboxNotificationsEngine::init();
 	}
@@ -171,11 +184,17 @@ class RemoteInboxNotificationsEngineTest extends WC_Unit_Test_Case {
 	 * @testdox Replacement queues control scheduling through the existing queue interface.
 	 * @dataProvider replacement_queue_provider
 	 *
+	 * @param string      $queue_class   Queue interface or class to replace.
 	 * @param string|null $active_status Existing active work, or null for an empty queue.
 	 */
-	public function test_replacement_queue_controls_scheduling( ?string $active_status ): void {
-		$queue         = $this->createMock( WC_Queue_Interface::class );
+	public function test_replacement_queue_controls_scheduling( string $queue_class, ?string $active_status ): void {
+		$queue         = $this->createMock( $queue_class );
 		$should_create = null === $active_status;
+		if ( $should_create ) {
+			as_schedule_single_action( time() + 60, self::HOOK, array(), self::GROUP );
+		}
+		$this->assertSame( $should_create, as_has_scheduled_action( self::HOOK, array(), self::GROUP ), 'Action Scheduler must disagree with the replacement queue so bypassing its search would fail this test.' );
+
 		$queue->expects( $this->never() )->method( 'get_next' );
 		$queue->method( 'search' )->willReturnCallback(
 			function ( array $args, string $return_format ) use ( &$active_status ): array {
@@ -211,14 +230,16 @@ class RemoteInboxNotificationsEngineTest extends WC_Unit_Test_Case {
 	/**
 	 * Active states exposed by a replacement queue.
 	 *
-	 * @return array<string, array{string|null}>
+	 * @return array<string, array{string, string|null}>
 	 */
 	public function replacement_queue_provider(): array {
-		return array(
-			'empty'   => array( null ),
-			'pending' => array( ActionScheduler_Store::STATUS_PENDING ),
-			'running' => array( ActionScheduler_Store::STATUS_RUNNING ),
-		);
+		$cases = array();
+		foreach ( array( WC_Queue_Interface::class, WC_Action_Queue::class ) as $queue_class ) {
+			$cases[ $queue_class . ' empty' ]   = array( $queue_class, null );
+			$cases[ $queue_class . ' pending' ] = array( $queue_class, ActionScheduler_Store::STATUS_PENDING );
+			$cases[ $queue_class . ' running' ] = array( $queue_class, ActionScheduler_Store::STATUS_RUNNING );
+		}
+		return $cases;
 	}
 
 	/**
