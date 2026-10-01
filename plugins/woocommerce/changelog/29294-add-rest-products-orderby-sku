@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Allow sorting products by SKU in the REST API with `orderby=sku`.

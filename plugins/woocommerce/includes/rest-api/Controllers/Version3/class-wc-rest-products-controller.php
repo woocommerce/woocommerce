@@ -79,6 +79,13 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	private $exclude_status = array();
 
 	/**
+	 * Sort direction (ASC or DESC) when ordering by SKU, or an empty string otherwise.
+	 *
+	 * @var string
+	 */
+	private $orderby_sku_order = '';
+
+	/**
 	 * Stores attachment IDs processed during the current request for potential cleanup.
 	 *
 	 * @var array
@@ -474,6 +481,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		if ( $ordering_args['meta_key'] ) {
 			$args['meta_key'] = $ordering_args['meta_key']; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Core orderings bypass postmeta; this fallback supports extension-defined meta keys.
 		}
+		$this->orderby_sku_order = 'sku' === $request['orderby'] ? $ordering_args['order'] : '';
 
 		/*
 		 * When the suggested products ids is not empty,
@@ -512,7 +520,17 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			add_filter( 'posts_where', array( $this, 'exclude_product_statuses' ) );
 		}
 
+		if ( $this->orderby_sku_order ) {
+			add_filter( 'posts_clauses', array( $this, 'order_by_sku_post_clauses' ) );
+		}
+
 		$result = parent::get_objects( $query_args );
+
+		if ( $this->orderby_sku_order ) {
+			remove_filter( 'posts_clauses', array( $this, 'order_by_sku_post_clauses' ) );
+
+			$this->orderby_sku_order = '';
+		}
 
 		// Remove filters for search criteria in product postmeta via the lookup table.
 		if ( $add_search_criteria ) {
@@ -538,6 +556,21 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Order the products query by SKU, using the product lookup table.
+	 *
+	 * @internal
+	 *
+	 * @param array $args Query clauses.
+	 * @return array
+	 */
+	public function order_by_sku_post_clauses( $args ) {
+		$order           = 'DESC' === $this->orderby_sku_order ? 'DESC' : 'ASC';
+		$args['join']    = wc_get_container()->get( ProductUtil::class )->append_product_sorting_table_join( $args['join'] );
+		$args['orderby'] = " wc_product_meta_lookup.sku {$order}, wc_product_meta_lookup.product_id {$order} ";
+		return $args;
 	}
 
 	/**
@@ -1858,7 +1891,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 */
 	public function get_collection_params() {
 		$params                    = parent::get_collection_params();
-		$params['orderby']['enum'] = array_merge( $params['orderby']['enum'], array( 'price', 'popularity', 'rating' ) );
+		$params['orderby']['enum'] = array_merge( $params['orderby']['enum'], array( 'price', 'popularity', 'rating', 'sku' ) );
 
 		unset( $params['in_stock'] );
 		$params['stock_status'] = array(
