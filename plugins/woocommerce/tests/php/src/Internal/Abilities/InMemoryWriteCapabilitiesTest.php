@@ -257,6 +257,28 @@ class InMemoryWriteCapabilitiesTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should run a write that labels its changes like any other write.
+	 */
+	public function test_labels_changes_write_executes(): void {
+		$result = wp_get_ability( TestLabelledOptionWriteDefinition::ABILITY_ID )->execute(
+			array(
+				'name'  => self::OPTION,
+				'value' => 'changed',
+			)
+		);
+
+		$this->assertSame(
+			array(
+				'name'  => self::OPTION,
+				'value' => 'changed',
+			),
+			$result
+		);
+		$this->assertSame( 'changed', get_option( self::OPTION ) );
+		$this->assertSame( 'Option ' . self::OPTION, TestLabelledOptionWriteDefinition::subject_label( new TestOptionRecord( self::OPTION ) ) );
+	}
+
+	/**
 	 * Add the test definitions to the loader.
 	 *
 	 * @param array $classes Ability definition class names.
@@ -266,6 +288,7 @@ class InMemoryWriteCapabilitiesTest extends \WC_Unit_Test_Case {
 		$classes[] = TestOptionWriteDefinition::class;
 		$classes[] = TestCreateProductDefinition::class;
 		$classes[] = TestCommittingOptionWriteDefinition::class;
+		$classes[] = TestLabelledOptionWriteDefinition::class;
 		return $classes;
 	}
 
