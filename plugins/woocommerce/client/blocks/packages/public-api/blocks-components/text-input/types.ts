@@ -32,6 +32,7 @@ export interface ValidatedTextInputProps
 	customValidityMessage?: ( validity: ValidityState ) => string;
 	// Custom formatted to format values as they are typed.
 	customFormatter?: ( value: string ) => string;
+	mask?: string;
 	// Whether validation should run when mounted - only has an effect when focusOnMount is also true.
 	validateOnMount?: boolean;
 	// An icon to display in the input field.
