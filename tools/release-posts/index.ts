@@ -43,7 +43,7 @@ program
 
 		const tmpFile = join(
 			tmpdir(),
-			`contributors-${ currentRef.replace( '/', '-' ) }.html`
+			`contributors-${ currentRef.replaceAll( '/', '-' ) }.html`
 		);
 
 		await writeFile( tmpFile, html );
