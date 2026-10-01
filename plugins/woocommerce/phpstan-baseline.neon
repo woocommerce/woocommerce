@@ -5755,12 +5755,6 @@ parameters:
 			path: includes/admin/meta-boxes/views/html-order-fee.php
 
 		-
-			message: '#^Call to an undefined method object\:\:get_all_formatted_meta_data\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/admin/meta-boxes/views/html-order-item-meta.php
-
-		-
 			message: '#^Parameter \#1 \$text of function esc_attr expects string, int given\.$#'
 			identifier: argument.type
 			count: 2
