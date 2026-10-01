@@ -286,7 +286,6 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 			array(
 				'class' => $classes,
 				'style' => $styles,
-				'id'    => $attributes['anchor'] ?? '',
 			)
 		);
 
