@@ -122,6 +122,23 @@ class ShowLocalPickupDetailsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * An order placed before collection meta existed, or whose pickup location was later removed,
+	 * carries a pickup method with no meta to read. The details fall back to the line the store
+	 * already rendered rather than erroring or showing an empty "Collection from".
+	 *
+	 * @testdox A pickup order with no collection meta falls back to the original line.
+	 */
+	public function test_a_pickup_order_with_no_collection_meta_falls_back(): void {
+		$order = $this->order_shipped_by( 'pickup_location' );
+
+		$this->assertSame(
+			'Flat rate',
+			$this->controller->show_local_pickup_details( 'Flat rate', $order ),
+			'With no location, address or details to show, the original line should be kept.'
+		);
+	}
+
+	/**
 	 * The filter can run with something that is not an order, and leaves it untouched.
 	 *
 	 * @testdox Something that is not an order is left untouched.
