@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities;
 
+use Automattic\WooCommerce\Abilities\CommitsAfterSave;
 use Automattic\WooCommerce\Abilities\InMemorySubject;
 use Automattic\WooCommerce\Abilities\InMemoryWrite;
 use Automattic\WooCommerce\Abilities\ObjectValidatorRegistry;
@@ -71,6 +72,13 @@ final class InMemoryWriteExecutor {
 
 		if ( is_wp_error( $saved ) ) {
 			return self::with_status( $saved );
+		}
+
+		if ( is_a( $class_name, CommitsAfterSave::class, true ) ) {
+			$committed = $class_name::commit( $subject, $input );
+			if ( is_wp_error( $committed ) ) {
+				return self::with_status( $committed );
+			}
 		}
 
 		return $class_name::respond( $subject );

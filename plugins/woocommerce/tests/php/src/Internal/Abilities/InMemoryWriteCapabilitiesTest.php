@@ -87,6 +87,7 @@ class InMemoryWriteCapabilitiesTest extends \WC_Unit_Test_Case {
 		$this->reset_validator_registry();
 		update_option( 'woocommerce_feature_' . AbilityContracts::FEATURE_ID . '_enabled', 'no' );
 		delete_option( self::OPTION );
+		delete_option( TestCommittingOptionWriteDefinition::LOG_OPTION );
 
 		foreach ( $this->original_action_counts as $action => $original_count ) {
 			if ( null !== $original_count ) {
@@ -203,6 +204,59 @@ class InMemoryWriteCapabilitiesTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should run commit() after the save and before respond().
+	 */
+	public function test_commit_runs_after_save_before_respond(): void {
+		$result = wp_get_ability( TestCommittingOptionWriteDefinition::ABILITY_ID )->execute(
+			array(
+				'name'  => self::OPTION,
+				'value' => 'changed',
+			)
+		);
+
+		$this->assertSame(
+			array(
+				'name'  => self::OPTION,
+				'value' => 'changed',
+				'log'   => 'changed',
+			),
+			$result
+		);
+	}
+
+	/**
+	 * @testdox Should return the WP_Error commit() returns.
+	 */
+	public function test_commit_error_is_the_result(): void {
+		$result = wp_get_ability( TestCommittingOptionWriteDefinition::ABILITY_ID )->execute(
+			array(
+				'name'  => self::OPTION,
+				'value' => 'uncommittable',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'test_commit_failed', $result->get_error_code() );
+		$this->assertSame( 400, $result->get_error_data()['status'] );
+		$this->assertFalse( get_option( TestCommittingOptionWriteDefinition::LOG_OPTION ) );
+	}
+
+	/**
+	 * @testdox Should not commit when the save fails.
+	 */
+	public function test_commit_skipped_when_save_fails(): void {
+		$result = wp_get_ability( TestCommittingOptionWriteDefinition::ABILITY_ID )->execute(
+			array(
+				'name'  => self::OPTION,
+				'value' => 'unsavable',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertFalse( get_option( TestCommittingOptionWriteDefinition::LOG_OPTION ) );
+	}
+
+	/**
 	 * Add the test definitions to the loader.
 	 *
 	 * @param array $classes Ability definition class names.
@@ -211,6 +265,7 @@ class InMemoryWriteCapabilitiesTest extends \WC_Unit_Test_Case {
 	public function add_test_definitions( array $classes ): array {
 		$classes[] = TestOptionWriteDefinition::class;
 		$classes[] = TestCreateProductDefinition::class;
+		$classes[] = TestCommittingOptionWriteDefinition::class;
 		return $classes;
 	}
 
