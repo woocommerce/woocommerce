@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\Abilities\Domain\Traits;
 use Automattic\WooCommerce\Abilities\AbilityContracts;
 use Automattic\WooCommerce\Abilities\AbilityFieldRegistry;
 use Automattic\WooCommerce\Abilities\ObjectValidatorRegistry;
+use Automattic\WooCommerce\Abilities\SideEffectGuard;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
@@ -693,22 +694,33 @@ trait ProductAbilityTrait {
 	}
 
 	/**
-	 * Apply extension fields and run object validators before the save.
+	 * Apply extension fields, run object validators and the product type's
+	 * validator before the save, with side effects blocked.
 	 *
-	 * @param \WC_Product $product    Product object, changed in memory.
-	 * @param array       $input      Ability input.
-	 * @param string      $error_code Error code for a rejection.
+	 * @param \WC_Product $product        Product object, changed in memory.
+	 * @param array       $input          Ability input.
+	 * @param array       $product_config Product type configuration.
+	 * @param string      $product_type   Value passed to the product type's validator.
+	 * @param string      $error_code     Error code for a rejection.
 	 * @return null|\WP_Error
 	 */
-	protected static function apply_ability_contracts( \WC_Product $product, array $input, string $error_code ) {
+	protected static function apply_ability_contracts( \WC_Product $product, array $input, array $product_config, string $product_type, string $error_code ) {
 		if ( ! AbilityContracts::is_enabled() ) {
 			return null;
 		}
 
-		$rejection = isset( $input['extensions'] ) ? AbilityFieldRegistry::instance()->apply( 'product', $product, $input['extensions'] ) : null;
-		$rejection = $rejection ?? ObjectValidatorRegistry::instance()->validate( $product );
+		return SideEffectGuard::run(
+			static function () use ( $product, $input, $product_config, $product_type, $error_code ) {
+				$rejection = isset( $input['extensions'] ) ? AbilityFieldRegistry::instance()->apply( 'product', $product, $input['extensions'] ) : null;
+				$rejection = $rejection ?? ObjectValidatorRegistry::instance()->validate( $product );
+				if ( null === $rejection && isset( $product_config['validate'] ) ) {
+					$valid     = call_user_func( $product_config['validate'], $product_type, $product );
+					$rejection = is_wp_error( $valid ) ? $valid->get_error_message() : null;
+				}
 
-		return null === $rejection ? null : new \WP_Error( $error_code, $rejection, array( 'status' => 400 ) );
+				return null === $rejection ? null : new \WP_Error( $error_code, $rejection, array( 'status' => 400 ) );
+			}
+		);
 	}
 
 	/**
