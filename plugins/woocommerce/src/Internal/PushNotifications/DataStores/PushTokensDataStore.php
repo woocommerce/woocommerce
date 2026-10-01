@@ -556,7 +556,7 @@ class PushTokensDataStore {
 				);
 
 				$result['total']       = (int) $count_query->found_posts;
-				$result['total_pages'] = (int) ceil( $result['total'] / $per_page );
+				$result['total_pages'] = (int) ceil( $result['total'] / max( 1, $per_page ) );
 			}
 
 			$this->tokens_by_roles_cache[ $cache_key ] = $result;
