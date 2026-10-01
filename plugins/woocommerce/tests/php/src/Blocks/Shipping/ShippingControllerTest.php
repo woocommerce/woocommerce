@@ -341,7 +341,9 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Put the shopper on the block checkout, which is the only place these two filters apply.
+	 * Put the shopper on the block checkout. Only remove_shipping_if_no_address() asks which cart
+	 * it is; its sibling applies everywhere, so tests of that one say which cart they are on only
+	 * because the pair below varies exactly that.
 	 */
 	private function shopper_is_on_the_block_checkout(): void {
 		WC()->cart->cart_context = 'store-api';
@@ -781,6 +783,8 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 	 * @testdox Collection stays on offer while every package can be collected.
 	 */
 	public function test_collection_stays_while_every_package_can_be_collected(): void {
+		$this->shopper_is_on_the_block_checkout();
+
 		$packages = $this->shipping_controller->filter_shipping_packages(
 			array(
 				$this->package_offering( array( 'flat_rate:1', 'pickup_location:0' ) ),
@@ -796,6 +800,8 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 	 * @testdox When one package cannot be collected, collection disappears from the whole order.
 	 */
 	public function test_one_uncollectable_package_withdraws_collection_from_the_order(): void {
+		$this->shopper_is_on_the_block_checkout();
+
 		$packages = $this->shipping_controller->filter_shipping_packages(
 			array(
 				$this->package_offering( array( 'flat_rate:1', 'pickup_location:0' ) ),
@@ -814,6 +820,8 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 	 * @testdox A package offering nothing at all counts as one that cannot be collected.
 	 */
 	public function test_a_package_with_no_rates_counts_as_uncollectable(): void {
+		$this->shopper_is_on_the_block_checkout();
+
 		$packages = $this->shipping_controller->filter_shipping_packages(
 			array(
 				$this->package_offering( array( 'pickup_location:0' ) ),
@@ -845,5 +853,35 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( array(), array_keys( $packages[0]['rates'] ), 'Collection went because the order cannot be collected, and delivery went because there is no address.' );
 		$this->assertSame( array(), array_keys( $packages[1]['rates'] ), 'The same is true of the package that was never collectable.' );
+	}
+
+	/**
+	 * Unlike the sibling filter above it, this one asks no question about where the shopper is, so
+	 * the classic cart loses collection in the same way. The reason holds there too: the classic
+	 * cart also taxes a collected order at one place, the shop base. The collection method here is
+	 * `local_pickup` rather than `pickup_location`, because that is what a classic cart offers.
+	 *
+	 * @testdox On the classic cart too, one uncollectable package withdraws collection.
+	 */
+	public function test_the_classic_cart_also_loses_collection_for_the_whole_order(): void {
+		WC()->cart->cart_context = 'shortcode';
+
+		$packages = $this->shipping_controller->filter_shipping_packages(
+			array(
+				$this->package_offering( array( 'flat_rate:1', 'local_pickup:3' ) ),
+				$this->package_offering( array( 'flat_rate:2' ) ),
+			)
+		);
+
+		$this->assertSame(
+			array( 'flat_rate:1' ),
+			array_keys( $packages[0]['rates'] ),
+			'Collection should go from the classic cart as well, since this filter does not ask which cart it is.'
+		);
+		$this->assertSame(
+			array( 'flat_rate:2' ),
+			array_keys( $packages[1]['rates'] ),
+			'The package that was never collectable is left as it was.'
+		);
 	}
 }
