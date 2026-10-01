@@ -23,10 +23,19 @@ class WC_Cart_Needs_Shipping_Test extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		// The shipping methods are memoized on the WC_Shipping singleton, which the database
-		// rollback does not undo, so an earlier test's configured method would otherwise still be
-		// counted here. This file needs to start from none.
+		global $wpdb;
+
+		// Start from no shipping method at all. Two kinds of leftover state survive the database
+		// rollback between tests and would otherwise be counted here: a method from before shipping
+		// zones loads whenever its settings option is enabled, and a zone-method row written by a
+		// committed query from another test. unregister_shipping_methods() only clears the list
+		// memoized on the WC_Shipping singleton, so clear both of those too. All of this is undone
+		// with the current test's transaction.
 		WC()->shipping()->unregister_shipping_methods();
+		foreach ( array( 'flat_rate', 'free_shipping', 'international_delivery', 'local_delivery', 'local_pickup' ) as $legacy_method ) {
+			delete_option( 'woocommerce_' . $legacy_method . '_settings' );
+		}
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_shipping_zone_methods" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
 
 		$product = WC_Helper_Product::create_simple_product();
