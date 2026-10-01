@@ -107,7 +107,7 @@ class PushNotificationRestController {
 
 		if ( empty( $notifications ) || ! is_array( $notifications ) ) {
 			$step_logger->log_unattributed_failure(
-				'received',
+				'loopback_started',
 				'malformed_body',
 				'warning',
 				'Loopback endpoint received empty or missing notifications array.'
@@ -123,7 +123,7 @@ class PushNotificationRestController {
 				$notification = Notification::from_array( $data );
 			} catch ( Exception $e ) {
 				$step_logger->log_unattributed_failure(
-					'received',
+					'loopback_started',
 					'invalid_notification',
 					'error',
 					sprintf( 'Failed to process notification: %s', $e->getMessage() ),
@@ -135,7 +135,7 @@ class PushNotificationRestController {
 				continue;
 			}
 
-			$step_logger->log_notification_step( $notification, 'received', 'ok' );
+			$step_logger->log_notification_step( $notification, 'loopback_started', 'ok' );
 
 			try {
 				$processor->process( $notification );
@@ -251,7 +251,7 @@ class PushNotificationRestController {
 		WC_Rate_Limiter::set_rate_limit( self::AUTH_FAILURE_LOG_RATE_LIMIT_ID, self::AUTH_FAILURE_LOG_RATE_LIMIT_SECONDS );
 
 		wc_get_container()->get( NotificationStepLogger::class )->log_unattributed_failure(
-			'received',
+			'loopback_started',
 			'auth_failed',
 			'warning',
 			sprintf( 'Loopback request refused: %s', self::AUTH_FAILURE_MESSAGES[ $reason ] ),

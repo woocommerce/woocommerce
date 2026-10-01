@@ -133,15 +133,15 @@ class NotificationTest extends WC_Unit_Test_Case {
 		return array(
 			'null pref means opt-in by default'         => array( null, null ),
 			'array with enabled true'                   => array( array( 'enabled' => true ), null ),
-			'array with enabled false'                  => array( array( 'enabled' => false ), SuppressionReason::TYPE_DISABLED ),
+			'array with enabled false'                  => array( array( 'enabled' => false ), SuppressionReason::NOTIFICATIONS_OFF ),
 			'array missing enabled defaults to true'    => array( array( 'min_value' => 500 ), null ),
 			'empty array defaults to true'              => array( array(), null ),
 			'array with truthy enabled (1) is true'     => array( array( 'enabled' => 1 ), null ),
-			'array with falsy enabled (0) is false'     => array( array( 'enabled' => 0 ), SuppressionReason::TYPE_DISABLED ),
+			'array with falsy enabled (0) is false'     => array( array( 'enabled' => 0 ), SuppressionReason::NOTIFICATIONS_OFF ),
 			'scalar bool true (defensive fallback)'     => array( true, null ),
-			'scalar bool false (defensive fallback)'    => array( false, SuppressionReason::TYPE_DISABLED ),
+			'scalar bool false (defensive fallback)'    => array( false, SuppressionReason::NOTIFICATIONS_OFF ),
 			'scalar truthy string (defensive fallback)' => array( '1', null ),
-			'scalar empty string (defensive fallback)'  => array( '', SuppressionReason::TYPE_DISABLED ),
+			'scalar empty string (defensive fallback)'  => array( '', SuppressionReason::NOTIFICATIONS_OFF ),
 		);
 	}
 
@@ -170,7 +170,7 @@ class NotificationTest extends WC_Unit_Test_Case {
 			->onlyMethods( array( 'to_payload', 'has_meta', 'write_meta', 'delete_meta' ) )
 			->getMock();
 
-		$this->assertSame( SuppressionReason::TYPE_DISABLED, $notification->get_suppression_reason( array( 'enabled' => false ) ) );
+		$this->assertSame( SuppressionReason::NOTIFICATIONS_OFF, $notification->get_suppression_reason( array( 'enabled' => false ) ) );
 	}
 
 	/**

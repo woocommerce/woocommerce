@@ -351,7 +351,7 @@ class PushNotificationRestControllerTest extends WC_Unit_Test_Case {
 			'Loopback request refused: Missing credential',
 			array(
 				'source'        => PushNotifications::FEATURE_NAME,
-				'step'          => 'received',
+				'step'          => 'loopback_started',
 				'outcome'       => 'auth_failed',
 				'reason'        => AuthorizationFailureReason::CREDENTIAL_MISSING,
 				'notifications' => 1,
@@ -380,7 +380,7 @@ class PushNotificationRestControllerTest extends WC_Unit_Test_Case {
 			'empty or missing notifications array',
 			array(
 				'source'  => PushNotifications::FEATURE_NAME,
-				'step'    => 'received',
+				'step'    => 'loopback_started',
 				'outcome' => 'malformed_body',
 			)
 		);
@@ -401,7 +401,7 @@ class PushNotificationRestControllerTest extends WC_Unit_Test_Case {
 			'Failed to process notification:',
 			array(
 				'source'      => PushNotifications::FEATURE_NAME,
-				'step'        => 'received',
+				'step'        => 'loopback_started',
 				'outcome'     => 'invalid_notification',
 				'type'        => 'unknown_type',
 				'resource_id' => 7,

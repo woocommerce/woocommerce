@@ -176,7 +176,7 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should log the trigger as queued with its safety net, then as a duplicate on a repeat.
+	 * @testdox Should log the trigger as queued with its fallback, then as a duplicate on a repeat.
 	 */
 	public function test_add_logs_queued_then_duplicate(): void {
 		$dispatcher  = $this->createMock( InternalNotificationDispatcher::class );
@@ -184,7 +184,7 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 		$step_logger->expects( $this->exactly( 2 ) )
 			->method( 'log_notification_step' )
 			->withConsecutive(
-				array( $this->anything(), 'triggered', 'queued', array( 'safety_net' => 'scheduled' ) ),
+				array( $this->anything(), 'triggered', 'queued', array( 'fallback' => 'scheduled' ) ),
 				array( $this->anything(), 'triggered', 'duplicate_in_request' )
 			);
 		$store = new PendingNotificationStore();

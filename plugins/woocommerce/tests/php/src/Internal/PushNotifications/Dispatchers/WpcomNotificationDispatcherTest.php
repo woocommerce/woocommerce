@@ -279,7 +279,7 @@ class WpcomNotificationDispatcherTest extends WC_Unit_Test_Case {
 			->method( 'log_notification_step' )
 			->with(
 				$this->anything(),
-				'send',
+				'dispatched',
 				SendOutcome::ACCEPTED,
 				array(
 					'recipients'   => 1,
@@ -306,7 +306,7 @@ class WpcomNotificationDispatcherTest extends WC_Unit_Test_Case {
 			->method( 'log_notification_step' )
 			->with(
 				$this->anything(),
-				'send',
+				'dispatched',
 				SendOutcome::ACCEPTED,
 				$this->callback(
 					function ( array $context ) {
@@ -328,7 +328,7 @@ class WpcomNotificationDispatcherTest extends WC_Unit_Test_Case {
 
 		$this->step_logger->expects( $this->once() )
 			->method( 'log_notification_step' )
-			->with( $this->anything(), 'send', SendOutcome::DEDUPLICATED );
+			->with( $this->anything(), 'dispatched', SendOutcome::DEDUPLICATED );
 
 		$result = $this->sut->dispatch( $this->create_notification(), $this->create_tokens() );
 
@@ -350,7 +350,7 @@ class WpcomNotificationDispatcherTest extends WC_Unit_Test_Case {
 			->method( 'log_failure' )
 			->with(
 				$this->anything(),
-				'send',
+				'dispatched',
 				SendOutcome::REJECTED_INVALID_TOKEN,
 				'error',
 				'Push notification request returned HTTP 422.',
@@ -391,7 +391,7 @@ class WpcomNotificationDispatcherTest extends WC_Unit_Test_Case {
 			->method( 'log_failure' )
 			->with(
 				$this->anything(),
-				'send',
+				'dispatched',
 				SendOutcome::FAILED,
 				'error',
 				$this->anything(),
@@ -411,8 +411,8 @@ class WpcomNotificationDispatcherTest extends WC_Unit_Test_Case {
 		$this->step_logger->expects( $this->exactly( 2 ) )
 			->method( 'log_failure' )
 			->withConsecutive(
-				array( $this->anything(), 'send', SendOutcome::RESOURCE_MISSING, 'error' ),
-				array( $this->anything(), 'send', SendOutcome::REQUEST_FAILED, 'error' )
+				array( $this->anything(), 'dispatched', SendOutcome::RESOURCE_MISSING, 'error' ),
+				array( $this->anything(), 'dispatched', SendOutcome::REQUEST_FAILED, 'error' )
 			);
 
 		$result = $this->sut->dispatch( $this->create_notification( null ), $this->create_tokens() );

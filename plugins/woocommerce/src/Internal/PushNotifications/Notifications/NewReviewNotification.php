@@ -52,7 +52,7 @@ class NewReviewNotification extends Notification {
 
 		$comment = WC()->call_function( 'get_comment', $this->get_resource_id() );
 		if ( ! $comment instanceof WP_Comment ) {
-			return SuppressionReason::COMMENT_MISSING;
+			return SuppressionReason::REVIEW_MISSING;
 		}
 
 		$rating = WC()->call_function( 'get_comment_meta', $this->get_resource_id(), 'rating', true );

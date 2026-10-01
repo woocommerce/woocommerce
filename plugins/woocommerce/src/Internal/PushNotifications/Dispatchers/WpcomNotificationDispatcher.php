@@ -91,7 +91,7 @@ class WpcomNotificationDispatcher {
 		if ( empty( $site_id ) ) {
 			$this->step_logger->log_failure(
 				$notification,
-				'send',
+				'dispatched',
 				SendOutcome::SITE_ID_MISSING,
 				'error',
 				'Cannot send push notifications: Jetpack site ID unavailable.'
@@ -105,7 +105,7 @@ class WpcomNotificationDispatcher {
 		if ( null === $payload ) {
 			$this->step_logger->log_failure(
 				$notification,
-				'send',
+				'dispatched',
 				SendOutcome::RESOURCE_MISSING,
 				'error',
 				sprintf(
@@ -123,7 +123,7 @@ class WpcomNotificationDispatcher {
 		if ( is_wp_error( $response ) ) {
 			$this->step_logger->log_failure(
 				$notification,
-				'send',
+				'dispatched',
 				SendOutcome::REQUEST_FAILED,
 				'error',
 				sprintf( 'Push notification request failed: %s', $response->get_error_message() ),
@@ -148,7 +148,7 @@ class WpcomNotificationDispatcher {
 
 			$this->step_logger->log_notification_step(
 				$notification,
-				'send',
+				'dispatched',
 				$outcome,
 				array(
 					'recipients'   => count( $tokens ),
@@ -180,7 +180,7 @@ class WpcomNotificationDispatcher {
 
 		$this->step_logger->log_failure(
 			$notification,
-			'send',
+			'dispatched',
 			$outcome,
 			'error',
 			sprintf( 'Push notification request returned HTTP %d.', $status_code ),

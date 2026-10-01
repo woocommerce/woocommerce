@@ -394,13 +394,13 @@ class StockNotificationTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( SuppressionReason::TYPE_DISABLED, $reason );
+		$this->assertSame( SuppressionReason::NOTIFICATIONS_OFF, $reason );
 	}
 
 	/**
 	 * @testdox get_suppression_reason should name the event flag when only that is off.
 	 */
-	public function test_get_suppression_reason_event_type_disabled(): void {
+	public function test_get_suppression_reason_stock_alert_off(): void {
 		$notification = new StockNotification( 1, StockNotification::EVENT_LOW_STOCK );
 
 		$reason = $notification->get_suppression_reason(
@@ -410,7 +410,7 @@ class StockNotificationTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( SuppressionReason::EVENT_TYPE_DISABLED, $reason );
+		$this->assertSame( SuppressionReason::STOCK_ALERT_OFF, $reason );
 	}
 
 	/**

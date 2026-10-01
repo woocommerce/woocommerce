@@ -69,7 +69,7 @@ class NotificationProcessor {
 	 * counts on the notification line are written. A per-device line is a file
 	 * per token per day, and a store with thousands of recipients would
 	 * otherwise create that many files for every notification. Devices that were
-	 * held back share one store-wide source, so they are not capped.
+	 * excluded share one store-wide source, so they are not capped.
 	 *
 	 * Set to the number the Remote Push Notification Proxy delivers to, since it
 	 * drops everything after the first 100 tokens in a request. A lower cap
@@ -264,7 +264,7 @@ class NotificationProcessor {
 	 * @param PushToken[]  $tokens       The tokens to filter.
 	 * @param Notification $notification The notification being processed.
 	 *
-	 * @return array{0: PushToken[], 1: array<int, string>} The tokens whose owner wants the notification, and the reason each dropped token was held back, as token ID => reason.
+	 * @return array{0: PushToken[], 1: array<int, string>} The tokens whose owner wants the notification, and the reason each dropped token was excluded, as token ID => reason.
 	 *
 	 * @since 10.9.0
 	 */
@@ -277,7 +277,7 @@ class NotificationProcessor {
 		foreach ( $tokens as $token ) {
 			$user_id = $token->get_user_id();
 			if ( ! $user_id ) {
-				$suppression_reasons[ (int) $token->get_id() ] = SuppressionReason::NO_USER;
+				$suppression_reasons[ (int) $token->get_id() ] = SuppressionReason::NO_ACCOUNT;
 				continue;
 			}
 
@@ -303,7 +303,7 @@ class NotificationProcessor {
 	 * @param Notification       $notification      The notification being processed.
 	 * @param PushToken[]        $eligible_tokens   Tokens whose owner has a role that receives push notifications.
 	 * @param PushToken[]        $recipients        The tokens the notification will be sent to.
-	 * @param array<int, string> $suppression_reasons The reason each dropped token was held back, as token ID => reason.
+	 * @param array<int, string> $suppression_reasons The reason each dropped token was excluded, as token ID => reason.
 	 * @param bool               $write_token_lines Whether per-device recipient lines are written for this attempt.
 	 * @param array              $step_context      Fields shared by every line of this attempt.
 	 * @return void
@@ -335,14 +335,14 @@ class NotificationProcessor {
 		);
 
 		if ( empty( $eligible_tokens ) ) {
-			$this->step_logger->log_notification_step( $notification, 'no_recipients', 'no_tokens', $context );
+			$this->step_logger->log_notification_step( $notification, 'recipients', 'none', $context );
 		} elseif ( empty( $recipients ) ) {
-			$this->step_logger->log_notification_step( $notification, 'no_recipients', 'all_held_back', $context );
+			$this->step_logger->log_notification_step( $notification, 'recipients', 'all_excluded', $context );
 		} else {
 			if ( $write_token_lines ) {
 				$context['token_ids'] = $recipient_ids;
 			}
-			$this->step_logger->log_notification_step( $notification, 'cleared_to_send', 'ok', $context );
+			$this->step_logger->log_notification_step( $notification, 'recipients', 'resolved', $context );
 		}
 
 		$tokens_by_id = array();
@@ -355,7 +355,7 @@ class NotificationProcessor {
 				$notification,
 				$token_id,
 				(int) $tokens_by_id[ $token_id ]->get_user_id(),
-				'held_back',
+				'token_excluded',
 				$reason,
 				$step_context
 			);
@@ -370,7 +370,7 @@ class NotificationProcessor {
 				$notification,
 				(int) $token->get_id(),
 				(int) $token->get_user_id(),
-				'cleared_to_send',
+				'token_included',
 				'ok',
 				$step_context
 			);
@@ -407,7 +407,7 @@ class NotificationProcessor {
 				$notification,
 				(int) $token->get_id(),
 				(int) $token->get_user_id(),
-				'send',
+				'dispatched',
 				isset( $invalid_tokens[ $token->get_token() ] ) ? 'invalid_token' : $outcome,
 				$step_context
 			);
@@ -465,10 +465,10 @@ class NotificationProcessor {
 			$notification = Notification::from_array( $data );
 		} catch ( Exception $e ) {
 			$this->step_logger->log_unattributed_failure(
-				'safety_net',
+				'fallback',
 				'invalid_notification',
 				'error',
-				sprintf( 'Safety net failed: %s', $e->getMessage() ),
+				sprintf( 'Fallback failed: %s', $e->getMessage() ),
 				array(
 					'type'        => $type,
 					'resource_id' => $resource_id,
@@ -477,17 +477,17 @@ class NotificationProcessor {
 			return;
 		}
 
-		$this->step_logger->log_notification_step( $notification, 'safety_net', 'fired' );
+		$this->step_logger->log_notification_step( $notification, 'fallback', 'fired' );
 
 		try {
 			$this->process( $notification, true );
 		} catch ( Exception $e ) {
 			$this->step_logger->log_failure(
 				$notification,
-				'safety_net',
+				'fallback',
 				'exception',
 				'error',
-				sprintf( 'Safety net failed: %s', $e->getMessage() )
+				sprintf( 'Fallback failed: %s', $e->getMessage() )
 			);
 			$this->retry_handler->schedule( $notification, null, 0 );
 		}

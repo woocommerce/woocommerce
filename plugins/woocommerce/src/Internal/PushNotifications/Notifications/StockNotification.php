@@ -249,7 +249,7 @@ class StockNotification extends Notification {
 			return null;
 		}
 
-		return $pref_value[ $this->event_type ] ? null : SuppressionReason::EVENT_TYPE_DISABLED;
+		return $pref_value[ $this->event_type ] ? null : SuppressionReason::STOCK_ALERT_OFF;
 	}
 
 	/**

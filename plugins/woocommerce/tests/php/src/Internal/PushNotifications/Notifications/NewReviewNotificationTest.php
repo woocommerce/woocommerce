@@ -350,7 +350,7 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( SuppressionReason::TYPE_DISABLED, $reason );
+		$this->assertSame( SuppressionReason::NOTIFICATIONS_OFF, $reason );
 	}
 
 	/**
@@ -372,7 +372,7 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox get_suppression_reason should report a missing comment when it cannot be loaded.
 	 */
-	public function test_get_suppression_reason_comment_missing(): void {
+	public function test_get_suppression_reason_review_missing(): void {
 		$notification = new NewReviewNotification( 999999 );
 
 		$reason = $notification->get_suppression_reason(
@@ -382,7 +382,7 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( SuppressionReason::COMMENT_MISSING, $reason );
+		$this->assertSame( SuppressionReason::REVIEW_MISSING, $reason );
 	}
 
 	/**

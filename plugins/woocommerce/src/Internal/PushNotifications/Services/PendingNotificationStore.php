@@ -160,9 +160,9 @@ class PendingNotificationStore {
 		// $order->save() on an order whose line items have not been written yet.
 		$notification->set_triggered_at( time() );
 
-		$safety_net = $this->schedule_safety_net( $notification ) ? 'scheduled' : 'already_scheduled';
+		$fallback = $this->schedule_safety_net( $notification ) ? 'scheduled' : 'already_scheduled';
 
-		$this->step_logger->log_notification_step( $notification, 'triggered', 'queued', array( 'safety_net' => $safety_net ) );
+		$this->step_logger->log_notification_step( $notification, 'triggered', 'queued', array( 'fallback' => $fallback ) );
 
 		if ( ! $this->shutdown_registered ) {
 			add_action( 'shutdown', array( $this, 'dispatch_all' ) );
