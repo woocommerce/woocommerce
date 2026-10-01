@@ -53,6 +53,16 @@ class WC_Abstract_Shipping_Method_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * WC()->customer is a singleton the database rollback does not reset, so the VAT-exempt flag
+	 * test_a_vat_exempt_customer_pays_no_tax_on_shipping() sets would otherwise carry into a later
+	 * test and silently zero its tax. Put it back.
+	 */
+	public function tearDown(): void {
+		WC()->customer->set_is_vat_exempt( false );
+		parent::tearDown();
+	}
+
+	/**
 	 * Insert a 10% rate, saying whether it applies to shipping.
 	 *
 	 * @param string $applies_to_shipping '1' or '0', as the Shipping column on the tax rates screen.
