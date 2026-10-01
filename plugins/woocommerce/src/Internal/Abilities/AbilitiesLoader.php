@@ -82,6 +82,7 @@ class AbilitiesLoader {
 		add_action( 'wp_abilities_api_init', array( __CLASS__, 'register_abilities' ) );
 
 		AbilitiesRestBridge::init();
+		AbilitiesApiAdapter::init();
 
 		self::$initialized = true;
 	}
@@ -140,10 +141,15 @@ class AbilitiesLoader {
 
 			$args = $class_name::get_registration_args();
 			if ( AbilityContracts::is_enabled() && is_a( $class_name, InMemoryWrite::class, true ) ) {
-				// The write never saves by itself; direct callers get the same validators as any other caller.
-				$args['execute_callback'] = static function ( $input = null ) use ( $class_name ) {
-					return InMemoryWriteExecutor::run( $class_name, is_array( $input ) ? $input : array() );
-				};
+				$args['in_memory_write'] = array(
+					'object_type' => $class_name::subject_type(),
+					'subject'     => array( $class_name, 'subject' ),
+					'validate'    => array( $class_name, 'validate' ),
+					'apply'       => array( $class_name, 'apply' ),
+					'hints'       => array( $class_name, 'hints' ),
+					'inverse'     => array( $class_name, 'inverse' ),
+					'respond'     => array( $class_name, 'respond' ),
+				);
 			}
 
 			$registered_ability = wp_register_ability( $ability_name, $args );

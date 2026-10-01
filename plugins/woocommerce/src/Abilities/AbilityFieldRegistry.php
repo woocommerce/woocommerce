@@ -212,16 +212,7 @@ class AbilityFieldRegistry {
 			if ( null !== $product_type && isset( $definition['product_types'] ) && ! in_array( $product_type, (array) $definition['product_types'], true ) ) {
 				continue;
 			}
-			$fields = array();
-			foreach ( $definition['fields'] as $name => $field ) {
-				$fields[ $name ] = $field['schema'];
-			}
-			$namespaces[ $namespace ] = array(
-				'type'                 => 'object',
-				'description'          => $definition['description'],
-				'properties'           => $fields,
-				'additionalProperties' => false,
-			);
+			$namespaces[ $namespace ] = self::namespace_schema( $definition );
 		}
 
 		if ( empty( $namespaces ) ) {
@@ -234,6 +225,53 @@ class AbilityFieldRegistry {
 			'properties'           => $namespaces,
 			'additionalProperties' => false,
 		);
+	}
+
+	/**
+	 * JSON schema for one namespace's fields.
+	 *
+	 * @param array<string, mixed> $definition Namespace definition.
+	 * @return array<string, mixed>
+	 */
+	private static function namespace_schema( array $definition ): array {
+		$fields = array();
+		foreach ( $definition['fields'] as $name => $field ) {
+			$fields[ $name ] = $field['schema'];
+		}
+		return array(
+			'type'                 => 'object',
+			'description'          => $definition['description'],
+			'properties'           => $fields,
+			'additionalProperties' => false,
+		);
+	}
+
+	/**
+	 * Each namespace of a resource as an ability field, for wc_register_ability_field()'s registry.
+	 *
+	 * @param string $resource_type Resource.
+	 * @return array<string, array<string, mixed>>
+	 */
+	public function ability_fields( string $resource_type ): array {
+		$fields = array();
+		foreach ( $this->registrations[ $resource_type ] ?? array() as $namespace => $definition ) {
+			$fields[ $namespace ] = array(
+				'schema'            => self::namespace_schema( $definition ),
+				'product_types'     => $definition['product_types'] ?? null,
+				'get_callback'      => function ( WC_Data $subject ) use ( $resource_type, $namespace ) {
+					$values = $this->read_namespace( $resource_type, $namespace, $subject );
+					return empty( $values ) ? null : $values;
+				},
+				'update_callback'   => function ( $values, WC_Data $subject ) use ( $resource_type, $namespace ) {
+					$this->apply_namespace( $resource_type, $namespace, $subject, $values );
+				},
+				'validate_callback' => function ( $values, WC_Data $subject ) use ( $resource_type, $namespace ) {
+					$rejection = $this->validate_namespace( $resource_type, $namespace, $subject, $values );
+					return null === $rejection ? true : new \WP_Error( 'woocommerce_ability_field_invalid', $rejection );
+				},
+			);
+		}
+		return $fields;
 	}
 
 	/**
@@ -250,40 +288,92 @@ class AbilityFieldRegistry {
 			return __( 'extensions must be an object.', 'woocommerce' );
 		}
 
-		$writes = array();
 		foreach ( $extensions as $namespace => $values ) {
-			$definition = $this->registrations[ $resource_type ][ $namespace ] ?? null;
-			if ( null === $definition || ! is_array( $values ) ) {
-				/* translators: %s: extension namespace. */
-				return sprintf( __( 'Unknown extension "%s".', 'woocommerce' ), $namespace );
-			}
-			if ( $subject instanceof \WC_Product && isset( $definition['product_types'] ) && ! $subject->is_type( $definition['product_types'] ) ) {
-				return $this->applicable_namespaces_message( $subject );
-			}
-			foreach ( $values as $name => $value ) {
-				$field = $definition['fields'][ $name ] ?? null;
-				if ( null === $field ) {
-					/* translators: 1: extension namespace, 2: field name. */
-					return sprintf( __( 'Unknown field "%1$s.%2$s".', 'woocommerce' ), $namespace, $name );
-				}
-				$valid = rest_validate_value_from_schema( $value, $field['schema'], "extensions.$namespace.$name" );
-				if ( is_wp_error( $valid ) ) {
-					return $valid->get_error_message();
-				}
-				if ( isset( $field['validate'] ) ) {
-					$valid = call_user_func( $field['validate'], $value, $subject );
-					if ( is_wp_error( $valid ) ) {
-						return $valid->get_error_message();
-					}
-				}
-				$writes[] = array( $field['apply'], $value );
+			$rejection = $this->validate_namespace( $resource_type, (string) $namespace, $subject, $values );
+			if ( null !== $rejection ) {
+				return $rejection;
 			}
 		}
 
-		foreach ( $writes as $write ) {
-			call_user_func( $write[0], $write[1], $subject );
+		foreach ( $extensions as $namespace => $values ) {
+			$this->apply_namespace( $resource_type, (string) $namespace, $subject, $values );
 		}
 		return null;
+	}
+
+	/**
+	 * Check one namespace's values against the object.
+	 *
+	 * @param string  $resource_type       Resource.
+	 * @param string  $extension_namespace Namespace.
+	 * @param WC_Data $subject             Object to change.
+	 * @param mixed   $values              Values keyed by field.
+	 * @return string|null Error message, or null when every value is accepted.
+	 */
+	private function validate_namespace( string $resource_type, string $extension_namespace, WC_Data $subject, $values ): ?string {
+		$definition = $this->registrations[ $resource_type ][ $extension_namespace ] ?? null;
+		if ( null === $definition || ! is_array( $values ) ) {
+			/* translators: %s: extension namespace. */
+			return sprintf( __( 'Unknown extension "%s".', 'woocommerce' ), $extension_namespace );
+		}
+		if ( $subject instanceof \WC_Product && isset( $definition['product_types'] ) && ! $subject->is_type( $definition['product_types'] ) ) {
+			return $this->applicable_namespaces_message( $subject );
+		}
+		foreach ( $values as $name => $value ) {
+			$field = $definition['fields'][ $name ] ?? null;
+			if ( null === $field ) {
+				/* translators: 1: extension namespace, 2: field name. */
+				return sprintf( __( 'Unknown field "%1$s.%2$s".', 'woocommerce' ), $extension_namespace, $name );
+			}
+			$valid = rest_validate_value_from_schema( $value, $field['schema'], "extensions.$extension_namespace.$name" );
+			if ( is_wp_error( $valid ) ) {
+				return $valid->get_error_message();
+			}
+			if ( isset( $field['validate'] ) ) {
+				$valid = call_user_func( $field['validate'], $value, $subject );
+				if ( is_wp_error( $valid ) ) {
+					return $valid->get_error_message();
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Apply one namespace's validated values in memory.
+	 *
+	 * @param string  $resource_type       Resource.
+	 * @param string  $extension_namespace Namespace.
+	 * @param WC_Data $subject             Object to change.
+	 * @param array   $values              Values keyed by field.
+	 */
+	private function apply_namespace( string $resource_type, string $extension_namespace, WC_Data $subject, array $values ): void {
+		foreach ( $values as $name => $value ) {
+			call_user_func( $this->registrations[ $resource_type ][ $extension_namespace ]['fields'][ $name ]['apply'], $value, $subject );
+		}
+	}
+
+	/**
+	 * Values of one namespace that applies to this object, keyed by field.
+	 *
+	 * @param string              $resource_type       Resource.
+	 * @param string              $extension_namespace Namespace.
+	 * @param WC_Data             $subject             Object to read.
+	 * @param array<string,mixed> $only                Read only these fields, keyed by field.
+	 * @return array<string, mixed>
+	 */
+	private function read_namespace( string $resource_type, string $extension_namespace, WC_Data $subject, ?array $only = null ): array {
+		$definition = $this->registrations[ $resource_type ][ $extension_namespace ];
+		if ( $subject instanceof \WC_Product && isset( $definition['product_types'] ) && ! $subject->is_type( $definition['product_types'] ) ) {
+			return array();
+		}
+		$values = array();
+		foreach ( null === $only ? array_keys( $definition['fields'] ) : array_keys( $only ) as $name ) {
+			if ( isset( $definition['fields'][ $name ] ) ) {
+				$values[ $name ] = call_user_func( $definition['fields'][ $name ]['read'], $subject );
+			}
+		}
+		return $values;
 	}
 
 	/**
@@ -337,15 +427,10 @@ class AbilityFieldRegistry {
 	 */
 	public function read( string $resource_type, WC_Data $subject, ?array $only = null ): array {
 		$values = array();
-		foreach ( $this->registrations[ $resource_type ] ?? array() as $namespace => $definition ) {
-			if ( $subject instanceof \WC_Product && isset( $definition['product_types'] ) && ! $subject->is_type( $definition['product_types'] ) ) {
-				continue;
-			}
-			$names = null === $only ? array_keys( $definition['fields'] ) : array_keys( (array) ( $only[ $namespace ] ?? array() ) );
-			foreach ( $names as $name ) {
-				if ( isset( $definition['fields'][ $name ] ) ) {
-					$values[ $namespace ][ $name ] = call_user_func( $definition['fields'][ $name ]['read'], $subject );
-				}
+		foreach ( array_keys( $this->registrations[ $resource_type ] ?? array() ) as $namespace ) {
+			$namespace_values = $this->read_namespace( $resource_type, $namespace, $subject, null === $only ? null : (array) ( $only[ $namespace ] ?? array() ) );
+			if ( ! empty( $namespace_values ) ) {
+				$values[ $namespace ] = $namespace_values;
 			}
 		}
 		return $values;

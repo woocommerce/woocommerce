@@ -115,12 +115,12 @@ class ObjectValidatorRegistry {
 	/**
 	 * Run every validator for the object's kind.
 	 *
-	 * @param WC_Data     $subject Fully applied, unsaved object.
-	 * @param string|null $kind    Object kind, or null to derive it from the object.
+	 * @param object      $subject Fully applied, unsaved object.
+	 * @param string|null $kind    Object kind, or null to derive it from a WC_Data object.
 	 * @return string|null The first rejection, or null when every validator accepts.
 	 */
-	public function validate( WC_Data $subject, ?string $kind = null ): ?string {
-		$kind    = $kind ?? self::kind_of( $subject );
+	public function validate( $subject, ?string $kind = null ): ?string {
+		$kind    = $kind ?? ( $subject instanceof WC_Data ? self::kind_of( $subject ) : '' );
 		$changed = $subject instanceof \WC_Order ? self::changed_items( $subject ) : array();
 
 		foreach ( $this->validators[ $kind ] ?? array() as $validator ) {

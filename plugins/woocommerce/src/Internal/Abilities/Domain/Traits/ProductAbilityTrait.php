@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Internal\Abilities\Domain\Traits;
 
 use Automattic\WooCommerce\Abilities\AbilityContracts;
 use Automattic\WooCommerce\Abilities\AbilityFieldRegistry;
-use Automattic\WooCommerce\Abilities\ObjectValidatorRegistry;
+use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityFields;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
@@ -64,7 +64,7 @@ trait ProductAbilityTrait {
 				),
 			),
 			self::get_product_mutation_field_schemas_for_fields( self::get_registered_product_type_config( $product_type_alias )['fields'] ?? array() ),
-			array( 'extensions' => AbilityFieldRegistry::instance()->schema( 'product', $product_type_alias ) )
+			array( 'extensions' => self::get_extensions_input_schema( $product_type_alias ) )
 		);
 
 		return array(
@@ -169,7 +169,7 @@ trait ProductAbilityTrait {
 			$common_properties[ $field ] = $mutation_schemas[ $field ];
 		}
 
-		$extensions = AbilityContracts::is_enabled() ? AbilityFieldRegistry::instance()->schema( 'product' ) : null;
+		$extensions = AbilityContracts::is_enabled() ? AbilityFields::schema( AbilityFields::get( 'product' ) ) : null;
 		if ( null !== $extensions ) {
 			$common_properties['extensions'] = $extensions;
 		}
@@ -231,7 +231,7 @@ trait ProductAbilityTrait {
 				self::get_product_mutation_field_schemas_for_fields( $product_config['fields'] )
 			);
 
-			$extensions = AbilityContracts::is_enabled() ? AbilityFieldRegistry::instance()->schema( 'product', $product_config['wc_type'] ) : null;
+			$extensions = AbilityContracts::is_enabled() ? self::get_extensions_input_schema( $product_config['wc_type'] ) : null;
 			if ( null !== $extensions ) {
 				$properties['extensions'] = $extensions;
 			}
@@ -245,6 +245,23 @@ trait ProductAbilityTrait {
 		}
 
 		return $branches;
+	}
+
+	/**
+	 * The `extensions` input schema with the fields that apply to a product type.
+	 *
+	 * @param string $product_type Product type.
+	 * @return array|null
+	 */
+	private static function get_extensions_input_schema( string $product_type ): ?array {
+		return AbilityFields::schema(
+			array_filter(
+				AbilityFields::get( 'product' ),
+				static function ( array $field ) use ( $product_type ): bool {
+					return ! isset( $field['product_types'] ) || in_array( $product_type, (array) $field['product_types'], true );
+				}
+			)
+		);
 	}
 
 	/**
@@ -693,25 +710,6 @@ trait ProductAbilityTrait {
 	}
 
 	/**
-	 * Apply extension fields and run object validators before the save.
-	 *
-	 * @param \WC_Product $product    Product object, changed in memory.
-	 * @param array       $input      Ability input.
-	 * @param string      $error_code Error code for a rejection.
-	 * @return null|\WP_Error
-	 */
-	protected static function apply_ability_contracts( \WC_Product $product, array $input, string $error_code ) {
-		if ( ! AbilityContracts::is_enabled() ) {
-			return null;
-		}
-
-		$rejection = isset( $input['extensions'] ) ? AbilityFieldRegistry::instance()->apply( 'product', $product, $input['extensions'] ) : null;
-		$rejection = $rejection ?? ObjectValidatorRegistry::instance()->validate( $product );
-
-		return null === $rejection ? null : new \WP_Error( $error_code, $rejection, array( 'status' => 400 ) );
-	}
-
-	/**
 	 * Apply product type configuration to a product object.
 	 *
 	 * @param \WC_Product $product        Product object.
@@ -958,23 +956,6 @@ trait ProductAbilityTrait {
 	 * @return array
 	 */
 	protected static function format_product_for_response( \WC_Product $product ): array {
-		$response = self::format_core_product_for_response( $product );
-		if ( AbilityContracts::is_enabled() ) {
-			$extensions = AbilityFieldRegistry::instance()->read( 'product', $product );
-			if ( ! empty( $extensions ) ) {
-				$response['extensions'] = $extensions;
-			}
-		}
-		return $response;
-	}
-
-	/**
-	 * Core fields of a product response.
-	 *
-	 * @param \WC_Product $product Product.
-	 * @return array
-	 */
-	private static function format_core_product_for_response( \WC_Product $product ): array {
 		$stock_quantity = $product->get_stock_quantity();
 		$permalink      = $product->get_permalink();
 
@@ -1015,10 +996,8 @@ trait ProductAbilityTrait {
 	 * @return array
 	 */
 	protected static function get_product_output_schema(): array {
-		$schema     = self::get_core_product_output_schema();
-		$extensions = AbilityContracts::is_enabled() ? AbilityFieldRegistry::instance()->schema( 'product' ) : null;
-		if ( null !== $extensions ) {
-			$schema['properties']['extensions']   = $extensions;
+		$schema = self::get_core_product_output_schema();
+		if ( AbilityContracts::is_enabled() ) {
 			$schema['properties']['type']['enum'] = array_values(
 				array_unique(
 					array_merge(

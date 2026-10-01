@@ -50,6 +50,17 @@ class ProductUpdate extends AbstractDomainAbility implements AbilityDefinition {
 			'output_schema'       => self::get_entity_output_schema( 'product', self::get_product_output_schema() ),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_update_product' ),
+			'in_memory_write'     => array(
+				'object_type' => 'product',
+				'subject'     => array( __CLASS__, 'subject' ),
+				'validate'    => '__return_true',
+				'apply'       => array( __CLASS__, 'apply' ),
+				'respond'     => array( __CLASS__, 'respond' ),
+			),
+			'extension_fields'    => array(
+				'object_type' => 'product',
+				'output'      => 'product',
+			),
 			'meta'                => array(
 				'show_in_rest' => true,
 				'mcp'          => array(
@@ -74,6 +85,31 @@ class ProductUpdate extends AbstractDomainAbility implements AbilityDefinition {
 	 * @since 10.9.0
 	 */
 	public static function execute( array $input ) {
+		$product = self::subject( $input );
+		if ( is_wp_error( $product ) ) {
+			return $product;
+		}
+
+		$error = self::apply( $product, $input );
+		if ( is_wp_error( $error ) ) {
+			return $error;
+		}
+
+		$save_error = self::save_product( $product, 'woocommerce_product_update_failed' );
+		if ( is_wp_error( $save_error ) ) {
+			return $save_error;
+		}
+
+		return self::respond( $product );
+	}
+
+	/**
+	 * Load the product to update, as the product type the input asks for. Never saves.
+	 *
+	 * @param array $input Ability input.
+	 * @return \WC_Product|\WP_Error
+	 */
+	public static function subject( array $input ) {
 		$product = self::get_product_from_input( $input );
 
 		if ( is_wp_error( $product ) ) {
@@ -118,22 +154,41 @@ class ProductUpdate extends AbstractDomainAbility implements AbilityDefinition {
 			}
 		}
 
-		if ( isset( $input['product_type_alias'] ) ) {
-			$product_config = self::get_product_config_for_alias( $input['product_type_alias'] );
+		if ( ! isset( $input['product_type_alias'] ) ) {
+			return $product;
+		}
 
-			if ( is_wp_error( $product_config ) ) {
-				return $product_config;
-			}
+		$product_config = self::get_product_config_for_alias( $input['product_type_alias'] );
 
-			$product = wc_get_product_object( $product_config['wc_type'], $product->get_id() );
+		if ( is_wp_error( $product_config ) ) {
+			return $product_config;
+		}
 
-			if ( ! $product ) {
-				return new \WP_Error(
-					'woocommerce_invalid_product_type',
-					__( 'Invalid product type.', 'woocommerce' ),
-					array( 'status' => 400 )
-				);
-			}
+		$product = wc_get_product_object( $product_config['wc_type'], $product->get_id() );
+
+		if ( ! $product ) {
+			return new \WP_Error(
+				'woocommerce_invalid_product_type',
+				__( 'Invalid product type.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		return $product;
+	}
+
+	/**
+	 * Set the product type and fields from the input in memory. Never saves.
+	 *
+	 * @param \WC_Product $product Product.
+	 * @param array       $input   Ability input.
+	 * @return null|\WP_Error
+	 */
+	public static function apply( \WC_Product $product, array $input ) {
+		$product_config = isset( $input['product_type_alias'] ) ? self::get_product_config_for_alias( $input['product_type_alias'] ) : self::get_product_config_for_product( $product );
+
+		if ( is_wp_error( $product_config ) ) {
+			return $product_config;
 		}
 
 		try {
@@ -141,29 +196,19 @@ class ProductUpdate extends AbstractDomainAbility implements AbilityDefinition {
 				self::apply_product_type_config( $product, $product_config );
 			}
 
-			$validation_error = self::set_product_props_from_input( $product, $input, $product_config );
-			if ( is_wp_error( $validation_error ) ) {
-				return $validation_error;
-			}
-
-			$rejection = self::apply_ability_contracts( $product, $input, 'woocommerce_product_update_rejected' );
-			if ( is_wp_error( $rejection ) ) {
-				return $rejection;
-			}
-
-			$rejection = isset( $product_config['validate'] ) ? call_user_func( $product_config['validate'], $product->get_type(), $product ) : null;
-			if ( is_wp_error( $rejection ) ) {
-				return new \WP_Error( 'woocommerce_product_update_rejected', $rejection->get_error_message(), array( 'status' => 400 ) );
-			}
+			return self::set_product_props_from_input( $product, $input, $product_config );
 		} catch ( \WC_Data_Exception $exception ) {
 			return self::get_product_data_exception_error( $exception );
 		}
+	}
 
-		$save_error = self::save_product( $product, 'woocommerce_product_update_failed' );
-		if ( is_wp_error( $save_error ) ) {
-			return $save_error;
-		}
-
+	/**
+	 * The response for the saved product.
+	 *
+	 * @param \WC_Product $product Saved product.
+	 * @return array
+	 */
+	public static function respond( \WC_Product $product ): array {
 		return array(
 			'product' => self::format_product_for_response( $product ),
 		);
