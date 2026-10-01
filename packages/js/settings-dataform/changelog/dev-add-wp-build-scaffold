@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add a minimal WordPress build scaffold with build and watch integration for WooCommerce Core's Settings DataForm submenu.

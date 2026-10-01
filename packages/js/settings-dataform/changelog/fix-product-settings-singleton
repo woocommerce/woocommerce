@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Load, edit, discard, and save the flat product settings resource as one core-data entity while preserving setting value types and displaying request errors.

@@ -106,7 +106,7 @@ const wcAdminPackages = [
 	'tracks',
 	'onboarding',
 	'sanitize',
-	'settings-ui',
+	// 'settings-ui',
 	'remote-logging',
 	'email-editor',
 ];
