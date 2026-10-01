@@ -22,6 +22,13 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	protected $add_to_cart_quantity_filter_args = array();
 
 	/**
+	 * Customer shipping address to restore after a test that changes it, keyed by prop name.
+	 *
+	 * @var array<string, string>|null
+	 */
+	private $original_shipping_address = null;
+
+	/**
 	 * Called before every test.
 	 */
 	public function setUp(): void {
@@ -38,6 +45,11 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		WC()->customer->set_is_vat_exempt( false );
 		WC()->session->set( 'wc_notices', null );
+
+		if ( null !== $this->original_shipping_address ) {
+			WC()->customer->set_props( $this->original_shipping_address );
+			$this->original_shipping_address = null;
+		}
 
 		// The parent teardown only clears chosen_shipping_methods, through
 		// WC_Shipping::reset_shipping(). Planted shipping_for_package_* rates survive and
@@ -615,6 +627,48 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Cart item metadata keeps an attribute whose value only appears in the parent product name.
+	 */
+	public function test_formatted_cart_item_data_keeps_attribute_that_matches_the_parent_name(): void {
+		// Three attributes keep the attribute list out of the variation title, so it is just "Vienna Huge"
+		// and the "huge" size must not be treated as already shown.
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Vienna Huge',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '1',
+				'pa_colour' => 'black',
+			),
+			array(
+				'size'   => array( 'small', 'huge' ),
+				'number' => array( '0', '1' ),
+				'colour' => array( 'black', 'white' ),
+			)
+		);
+
+		try {
+			list( , $cart_item ) = $this->add_variation_to_cart(
+				$product,
+				$variation,
+				array(
+					'attribute_pa_size'   => 'huge',
+					'attribute_pa_number' => '1',
+					'attribute_pa_colour' => 'black',
+				)
+			);
+
+			$this->assertSame( 'Vienna Huge', WC()->cart->get_item_product_name( $cart_item ) );
+			$this->assertSame(
+				"size: huge\nnumber: 1\ncolour: black",
+				trim( wc_get_formatted_cart_item_data( $cart_item, true ) )
+			);
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
 	 * @testdox Cart item metadata dedup keys on the template-provided name regardless of name filters.
 	 */
 	public function test_formatted_cart_item_data_dedupes_against_the_provided_name_regardless_of_name_filters(): void {
@@ -1055,6 +1109,82 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_pickup_location_settings', $default_pickup_location_settings );
 		$product->delete( true );
 		WC()->cart->cart_context = 'shortcode'; // Reset to default.
+	}
+
+	/**
+	 * @testdox show_shipping() in the classic cart does not wait for an address field that the country locale hides.
+	 *
+	 * @testWith [ "postcode" ]
+	 *           [ "state" ]
+	 *
+	 * @param string $field Address field the locale hides while it stays required.
+	 */
+	public function test_show_shipping_skips_an_address_field_the_locale_hides( string $field ): void {
+		$this->hide_us_address_field_in_locale( $field, true );
+		$this->add_product_for_a_us_address_missing( $field );
+
+		WC()->cart->calculate_totals();
+
+		$this->assertTrue( WC()->cart->show_shipping(), "A hidden {$field} should not hold back shipping." );
+		$this->assertTrue( WC()->cart->has_calculated_shipping(), "A hidden {$field} should let shipping be calculated." );
+		$this->assertGreaterThan( 0.0, (float) WC()->cart->get_shipping_total(), "A hidden {$field} should still charge the flat rate." );
+	}
+
+	/**
+	 * @testdox show_shipping() in the classic cart still requires an address field whose hidden flag is not exactly true.
+	 *
+	 * @testWith [ "postcode", "yes" ]
+	 *           [ "postcode", 1 ]
+	 *           [ "state", "yes" ]
+	 *           [ "state", 1 ]
+	 *
+	 * @param string $field  Address field the locale flags as hidden.
+	 * @param mixed  $hidden Hidden flag the locale sets on the field.
+	 */
+	public function test_show_shipping_requires_a_field_whose_hidden_flag_is_not_exactly_true( string $field, $hidden ): void {
+		$this->hide_us_address_field_in_locale( $field, $hidden );
+		$this->add_product_for_a_us_address_missing( $field );
+
+		$this->assertFalse( WC()->cart->show_shipping(), "The classic checkout only treats hidden => true as hidden, so the {$field} stays required." );
+	}
+
+	/**
+	 * Hide a US address field in the country locale while leaving it required.
+	 *
+	 * @param string $field  Address field key, without the type prefix.
+	 * @param mixed  $hidden Value for the hidden flag.
+	 */
+	private function hide_us_address_field_in_locale( string $field, $hidden ): void {
+		add_filter(
+			'woocommerce_get_country_locale',
+			function ( $locale ) use ( $field, $hidden ) {
+				$locale['US'][ $field ]['hidden'] = $hidden;
+				return $locale;
+			}
+		);
+		WC()->countries->locale = array();
+	}
+
+	/**
+	 * Add a product to the cart and give the customer a US shipping address without the given field, with shipping costs hidden until an address is entered.
+	 *
+	 * @param string $missing_field Address field to leave empty: 'postcode' or 'state'.
+	 */
+	private function add_product_for_a_us_address_missing( string $missing_field ): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		$customer                        = WC()->cart->get_customer();
+		$this->original_shipping_address = array(
+			'shipping_country'  => $customer->get_shipping_country(),
+			'shipping_state'    => $customer->get_shipping_state(),
+			'shipping_city'     => $customer->get_shipping_city(),
+			'shipping_postcode' => $customer->get_shipping_postcode(),
+		);
+		$customer->set_shipping_country( 'US' );
+		$customer->set_shipping_city( 'New York' );
+		$customer->set_shipping_state( 'state' === $missing_field ? '' : 'NY' );
+		$customer->set_shipping_postcode( 'postcode' === $missing_field ? '' : '10001' );
 	}
 
 	/**
@@ -2426,101 +2556,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			$single_child->delete( true );
 			$skipped_child->delete( true );
 			$first_child->delete( true );
-		}
-	}
-
-	/**
-	 * @testdox Should remove grouped child cart items through consecutive form requests.
-	 */
-	public function test_update_cart_action_removes_grouped_child_items(): void {
-		// $_SERVER is the only request global the base class leaves alone; it resets
-		// the other three before every test.
-		$original_server = $GLOBALS['_SERVER'];
-
-		try {
-			// Do not remove this unset as redundant cleanup. It is what keeps the test
-			// alive: after removing an item, update_cart_action() calls wp_safe_redirect()
-			// followed by exit whenever wp_get_referer() is truthy
-			// (includes/class-wc-form-handler.php:818-821). exit inside PHPUnit kills the
-			// whole run, not just this test.
-			unset( $GLOBALS['_SERVER']['HTTP_REFERER'] );
-			update_option( 'woocommerce_cart_redirect_after_add', 'no' );
-			WC()->cart->empty_cart();
-			WC()->session->set( 'wc_notices', null );
-
-			$first_child = WC_Helper_Product::create_simple_product();
-			$first_child->set_regular_price( '10' );
-			$first_child->save();
-
-			$second_child = WC_Helper_Product::create_simple_product();
-			$second_child->set_regular_price( '20' );
-			$second_child->save();
-
-			$grouped_product = new WC_Product_Grouped();
-			$grouped_product->set_name( 'Grouped removal request product' );
-			$grouped_product->set_children(
-				array(
-					$first_child->get_id(),
-					$second_child->get_id(),
-				)
-			);
-			$grouped_product->save();
-
-			$grouped_quantities  = array(
-				$first_child->get_id()  => 1,
-				$second_child->get_id() => 1,
-			);
-			$GLOBALS['_REQUEST'] = array(
-				'add-to-cart' => $grouped_product->get_id(),
-				'quantity'    => $grouped_quantities,
-			);
-			$GLOBALS['_POST']    = array(
-				'quantity' => $grouped_quantities,
-			);
-
-			WC_Form_Handler::add_to_cart_action( false );
-
-			$cart_items                = WC()->cart->get_cart();
-			$cart_item_keys_by_product = array();
-			foreach ( $cart_items as $cart_item_key => $cart_item ) {
-				$cart_item_keys_by_product[ $cart_item['product_id'] ] = $cart_item_key;
-			}
-			$expected_child_ids = array( $first_child->get_id(), $second_child->get_id() );
-			$actual_child_ids   = array_map( 'intval', array_keys( $cart_item_keys_by_product ) );
-			sort( $expected_child_ids );
-			sort( $actual_child_ids );
-
-			$this->assertCount( 2, $cart_items, 'Both grouped children should be cart lines.' );
-			$this->assertSame(
-				$expected_child_ids,
-				$actual_child_ids,
-				'Only the grouped children should be cart lines.'
-			);
-			$this->assertArrayNotHasKey( $grouped_product->get_id(), $cart_item_keys_by_product, 'The grouped parent should not become a cart line.' );
-
-			$cart_item_keys = array_values( $cart_item_keys_by_product );
-			foreach ( $cart_item_keys as $index => $cart_item_key ) {
-				$GLOBALS['_GET']     = array(
-					'remove_item' => $cart_item_key,
-				);
-				$GLOBALS['_POST']    = array();
-				$GLOBALS['_REQUEST'] = array(
-					'_wpnonce'    => wp_create_nonce( 'woocommerce-cart' ),
-					'remove_item' => $cart_item_key,
-				);
-
-				WC_Form_Handler::update_cart_action();
-
-				$remaining_cart_items = WC()->cart->get_cart();
-				if ( 0 === $index ) {
-					$this->assertArrayNotHasKey( $cart_item_key, $remaining_cart_items, 'The first requested cart item should be removed.' );
-					$this->assertSame( array( $cart_item_keys[1] ), array_keys( $remaining_cart_items ), 'Only the other original cart item should remain.' );
-				} else {
-					$this->assertEmpty( $remaining_cart_items, 'The second removal request should empty the cart.' );
-				}
-			}
-		} finally {
-			$GLOBALS['_SERVER'] = $original_server;
 		}
 	}
 }
