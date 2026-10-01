@@ -98,14 +98,9 @@ class ProductCreate extends AbstractDomainAbility implements AbilityDefinition {
 				return $validation_error;
 			}
 
-			$rejection = self::apply_ability_contracts( $product, $input, 'woocommerce_product_create_rejected' );
+			$rejection = self::apply_ability_contracts( $product, $input, $product_config, $product_type_alias, 'woocommerce_product_create_rejected' );
 			if ( is_wp_error( $rejection ) ) {
 				return $rejection;
-			}
-
-			$rejection = isset( $product_config['validate'] ) ? call_user_func( $product_config['validate'], $product_type_alias, $product ) : null;
-			if ( is_wp_error( $rejection ) ) {
-				return new \WP_Error( 'woocommerce_product_create_rejected', $rejection->get_error_message(), array( 'status' => 400 ) );
 			}
 		} catch ( \WC_Data_Exception $exception ) {
 			return self::get_product_data_exception_error( $exception );

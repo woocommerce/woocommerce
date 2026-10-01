@@ -9,12 +9,14 @@ namespace Automattic\WooCommerce\Internal\Abilities;
 
 use Automattic\WooCommerce\Abilities\InMemoryWrite;
 use Automattic\WooCommerce\Abilities\ObjectValidatorRegistry;
+use Automattic\WooCommerce\Abilities\SideEffectGuard;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Runs an in-memory write for direct callers: subject, validate, apply,
- * object validators, one save. The write never saves by itself.
+ * object validators, one save. The write never saves by itself: validate,
+ * apply and the validators run inside SideEffectGuard.
  *
  * @since 11.3.0
  */
@@ -40,20 +42,25 @@ final class InMemoryWriteExecutor {
 		}
 
 		try {
-			$valid = $class_name::validate( $subject, $input );
-			if ( is_wp_error( $valid ) ) {
-				$data = $valid->get_error_data();
-				if ( ! isset( $data['status'] ) ) {
-					$valid->add_data( array_merge( is_array( $data ) ? $data : array(), array( 'status' => 400 ) ) );
+			$error = SideEffectGuard::run(
+				static function () use ( $class_name, $subject, $input ) {
+					$valid = $class_name::validate( $subject, $input );
+					if ( is_wp_error( $valid ) ) {
+						$data = $valid->get_error_data();
+						if ( ! isset( $data['status'] ) ) {
+							$valid->add_data( array_merge( is_array( $data ) ? $data : array(), array( 'status' => 400 ) ) );
+						}
+						return $valid;
+					}
+
+					$class_name::apply( $subject, $input );
+
+					$rejection = ObjectValidatorRegistry::instance()->validate( $subject, $class_name::subject_type() );
+					return null === $rejection ? null : new \WP_Error( 'woocommerce_in_memory_write_rejected', $rejection, array( 'status' => 400 ) );
 				}
-				return $valid;
-			}
-
-			$class_name::apply( $subject, $input );
-
-			$rejection = ObjectValidatorRegistry::instance()->validate( $subject, $class_name::subject_type() );
-			if ( null !== $rejection ) {
-				return new \WP_Error( 'woocommerce_in_memory_write_rejected', $rejection, array( 'status' => 400 ) );
+			);
+			if ( null !== $error ) {
+				return $error;
 			}
 
 			$subject->save();

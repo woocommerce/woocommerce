@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Refuse an in-memory write whose validate, apply or validator steps write to the database, send email or make an HTTP request, behind the ability contracts feature.
