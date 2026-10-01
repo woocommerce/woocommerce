@@ -23,22 +23,6 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	);
 
 	/**
-	 * Global style enabled for this block.
-	 *
-	 * @var array
-	 */
-	protected $global_style_wrapper = array(
-		'background_color',
-		'border_color',
-		'border_radius',
-		'border_width',
-		'font_size',
-		'padding',
-		'text_color',
-		'extra_classes',
-	);
-
-	/**
 	 * Initialize the block.
 	 */
 	protected function initialize() {
