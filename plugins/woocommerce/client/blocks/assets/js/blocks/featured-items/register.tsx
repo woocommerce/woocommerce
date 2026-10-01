@@ -18,11 +18,6 @@ export function register(
 	metadata: BlockConfiguration,
 	settings: Partial< BlockConfiguration >
 ): void {
-	const DEFAULT_SETTINGS = {
-		attributes: metadata.attributes,
-		supports: metadata.supports,
-	};
-
 	const DEFAULT_EXAMPLE = {
 		attributes: {
 			alt: '',
@@ -38,7 +33,6 @@ export function register(
 	};
 
 	registerBlockType( metadata, {
-		...DEFAULT_SETTINGS,
 		example: {
 			...DEFAULT_EXAMPLE,
 			...example,
