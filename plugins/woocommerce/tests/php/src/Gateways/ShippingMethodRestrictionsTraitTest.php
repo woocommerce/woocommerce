@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Gateways;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Shipping\PickupLocation;
 use WC_Cache_Helper;
 use WC_Gateway_BACS;
@@ -73,6 +74,7 @@ class ShippingMethodRestrictionsTraitTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		try {
 			$this->set_order_pay_query_var( null );
+			Constants::clear_single_constant( 'WC_DOING_AJAX' );
 			WC()->session->set( 'chosen_shipping_methods', null );
 			WC_Cache_Helper::get_transient_version( 'shipping', true );
 			WC()->shipping()->enabled = $this->shipping_was_enabled;
@@ -256,6 +258,31 @@ class ShippingMethodRestrictionsTraitTest extends WC_Unit_Test_Case {
 		// The cart would allow the gateway on its own, so a pass here proves the order context was used.
 		$this->fill_cart( 'flat_rate_a' );
 		$this->set_order_pay_query_var( (string) $this->create_order_with_shipping( $order_rate )->get_id() );
+
+		$this->assertSame( $expected, $gateway->is_available() );
+	}
+
+	/**
+	 * @testdox Should evaluate the cart's shipping method on wc-ajax requests, even when order-pay is an existing order.
+	 * @testWith ["flat_rate_a", true]
+	 *           ["flat_rate_b", false]
+	 *
+	 * @param string $chosen_rate Symbolic name of the shipping rate selected in the cart.
+	 * @param bool   $expected    Expected availability.
+	 */
+	public function test_is_available_uses_the_cart_on_wc_ajax_requests_with_an_existing_order( string $chosen_rate, bool $expected ): void {
+		$gateway = $this->create_gateway(
+			WC_Gateway_COD::class,
+			array(
+				'enabled'            => 'yes',
+				'enable_for_methods' => array( $this->rate_ids['flat_rate_a'] ),
+				'enable_for_virtual' => 'yes',
+			)
+		);
+		$this->fill_cart( $chosen_rate );
+		// An order without shipping would count as virtual and skip the restriction if its context were used.
+		$this->set_order_pay_query_var( (string) $this->create_order_with_shipping( null )->get_id() );
+		Constants::set_constant( 'WC_DOING_AJAX', true );
 
 		$this->assertSame( $expected, $gateway->is_available() );
 	}
