@@ -61929,7 +61929,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$args of function get_terms expects array\{taxonomy\?\: array\<string\>\|string, object_ids\?\: array\<int\>\|int, orderby\?\: string, order\?\: string, hide_empty\?\: bool\|int, include\?\: array\<int\>\|string, exclude\?\: array\<int\>\|string, exclude_tree\?\: array\<int\>\|string, \.\.\.\}, \(int\|string\) given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: src/Internal/ProductAttributesLookup/Filterer.php
 
 		-
@@ -62445,12 +62445,6 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$str of function explode expects string, array\|string given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Internal/ProductFilters/QueryClauses.php
-
-		-
-			message: '#^Variable \$chosen_attributes in empty\(\) always exists and is not falsy\.$#'
-			identifier: empty.variable
 			count: 1
 			path: src/Internal/ProductFilters/QueryClauses.php
 
