@@ -27,6 +27,7 @@ class ProductUtil {
 	 * Get a product ID from a product, post, or numeric value.
 	 *
 	 * @since 11.3.0
+	 *
 	 * @param mixed $product Product instance, post instance, or numeric ID.
 	 * @return int Product ID, or 0 when no ID is available.
 	 */
