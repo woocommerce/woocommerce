@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Abilities;
 
 use Automattic\WooCommerce\Abilities\AbilityContracts;
 use Automattic\WooCommerce\Abilities\ObjectValidatorRegistry;
+use Automattic\WooCommerce\Abilities\SubjectSnapshot;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 
 /**
@@ -150,6 +151,58 @@ class InMemoryWriteCapabilitiesTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should let a caller running the steps get an undo that uses the ID the save created.
+	 */
+	public function test_inverse_after_save_undoes_a_create(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$input   = array( 'name' => 'Created' );
+		$subject = TestCreateProductDefinition::subject( $input );
+		$before  = SubjectSnapshot::of( $subject );
+		TestCreateProductDefinition::apply( $subject, $input );
+		$subject->save();
+
+		$inverse = TestCreateProductDefinition::inverse_after_save( $before, $subject, $input );
+		$this->assertSame( 'Created', wc_get_product( $subject->get_id() )->get_name() );
+
+		$result = wp_get_ability( $inverse['ability'] )->execute( $inverse['input'] );
+
+		$this->assertNotWPError( $result );
+		$this->assertFalse( wc_get_product( $subject->get_id() ) );
+	}
+
+	/**
+	 * @testdox Should run a write that computes its undo after the save like any other write.
+	 */
+	public function test_inverse_after_save_write_executes(): void {
+		$result = wp_get_ability( TestCreateProductDefinition::ABILITY_ID )->execute( array( 'name' => 'Created' ) );
+
+		$this->assertSame( 'Created', wc_get_product( $result['product_id'] )->get_name() );
+	}
+
+	/**
+	 * @testdox Should snapshot a WC_Data subject with its meta as plain data, and an InMemorySubject with snapshot().
+	 */
+	public function test_subject_snapshot(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Snapped' ) );
+		$product->update_meta_data( '_test_key', 'test-value' );
+		$product->save();
+
+		$snapshot = SubjectSnapshot::of( wc_get_product( $product->get_id() ) );
+
+		$this->assertSame( $product->get_id(), $snapshot['id'] );
+		$this->assertSame( 'Snapped', $snapshot['name'] );
+		$this->assertSame( array( '_test_key' => 'test-value' ), array_column( $snapshot['meta_data'], 'value', 'key' ) );
+
+		$this->assertSame(
+			array(
+				'name'  => self::OPTION,
+				'value' => 'original',
+			),
+			SubjectSnapshot::of( new TestOptionRecord( self::OPTION ) )
+		);
+	}
+
+	/**
 	 * Add the test definitions to the loader.
 	 *
 	 * @param array $classes Ability definition class names.
@@ -157,6 +210,7 @@ class InMemoryWriteCapabilitiesTest extends \WC_Unit_Test_Case {
 	 */
 	public function add_test_definitions( array $classes ): array {
 		$classes[] = TestOptionWriteDefinition::class;
+		$classes[] = TestCreateProductDefinition::class;
 		return $classes;
 	}
 
