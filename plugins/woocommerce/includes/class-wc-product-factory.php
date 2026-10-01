@@ -128,6 +128,7 @@ class WC_Product_Factory {
 	 * Get the product ID from a product reference.
 	 *
 	 * @since 3.0.0
+	 *
 	 * @param mixed $product Product instance, post instance, numeric or false to use global $post.
 	 * @return int Product ID, or 0 when no ID is available.
 	 */
