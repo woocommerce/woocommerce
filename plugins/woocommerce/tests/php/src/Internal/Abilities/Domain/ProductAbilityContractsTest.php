@@ -795,6 +795,295 @@ class ProductAbilityContractsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep product ability schemas and outputs as recorded, with the feature on and off.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $enabled Whether the feature is enabled.
+	 */
+	public function test_product_abilities_match_recorded_outputs( bool $enabled ): void {
+		$this->set_feature( $enabled );
+		$ids     = array();
+		$results = array();
+		$track   = static function ( int $id ) use ( &$ids ): int {
+			if ( ! isset( $ids[ $id ] ) ) {
+				$ids[ $id ] = count( $ids ) + 1;
+			}
+			return $id;
+		};
+
+		foreach ( array( 'woocommerce/product-create', 'woocommerce/product-update', 'woocommerce/products-query' ) as $ability_id ) {
+			$results[ "$ability_id input schema" ]  = wp_get_ability( $ability_id )->get_input_schema();
+			$results[ "$ability_id output schema" ] = wp_get_ability( $ability_id )->get_output_schema();
+		}
+
+		$simple    = $track( \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Plain' ) )->get_id() );
+		$taken     = $track( \WC_Helper_Product::create_simple_product( true, array( 'sku' => 'taken-sku' ) )->get_id() );
+		$external  = $track( \WC_Helper_Product::create_external_product()->get_id() );
+		$parent    = \WC_Helper_Product::create_variation_product();
+		$variation = $track( $parent->get_children()[0] );
+		$track( $parent->get_id() );
+
+		$scenarios = array(
+			array(
+				'woocommerce/product-create',
+				array(
+					'name'          => 'Physical',
+					'sku'           => 'phys-1',
+					'regular_price' => '10',
+					'sale_price'    => '8',
+				),
+			),
+			array(
+				'woocommerce/product-create',
+				array(
+					'product_type_alias' => 'affiliate',
+					'name'               => 'Affiliate',
+					'external_url'       => 'https://example.com',
+					'button_text'        => 'Buy',
+				),
+			),
+			array(
+				'woocommerce/product-create',
+				array(
+					'product_type_alias' => 'grouped',
+					'name'               => 'Group',
+					'grouped_products'   => array( $simple ),
+				),
+			),
+			array(
+				'woocommerce/product-create',
+				array(
+					'product_type_alias' => 'grouped',
+					'name'               => 'Group',
+					'grouped_products'   => array( 0 ),
+				),
+			),
+			array(
+				'woocommerce/product-create',
+				array(
+					'product_type_alias' => 'grouped',
+					'name'               => 'Group',
+					'regular_price'      => '1',
+				),
+			),
+			array(
+				'woocommerce/product-create',
+				array(
+					'name' => 'Duplicate',
+					'sku'  => 'taken-sku',
+				),
+			),
+			array( 'woocommerce/product-create', array( 'name' => 'Blocked' ) ),
+			array(
+				'woocommerce/product-create',
+				array(
+					'name'       => 'Coded',
+					'extensions' => array( 'test_simple' => array( 'code' => 'abc' ) ),
+				),
+			),
+			array(
+				'woocommerce/product-create',
+				array(
+					'name'       => 'Coded',
+					'extensions' => array( 'test_simple' => array( 'code' => 'reject' ) ),
+				),
+			),
+			array(
+				'woocommerce/product-create',
+				array(
+					'product_type_alias' => 'contract',
+					'name'               => 'Contract',
+					'extensions'         => array( 'test_contract' => array( 'code' => 'c-1' ) ),
+				),
+			),
+			array(
+				'woocommerce/product-create',
+				array(
+					'product_type_alias' => 'contract',
+					'name'               => 'Rejected contract',
+				),
+			),
+			array(
+				'woocommerce/product-create',
+				array(
+					'product_type_alias' => 'membership',
+					'name'               => 'Membership',
+					'regular_price'      => '5',
+				),
+			),
+			array(
+				'woocommerce/product-update',
+				array(
+					'id'                 => $simple,
+					'product_type_alias' => 'physical',
+					'name'               => 'Renamed',
+					'regular_price'      => '20',
+				),
+			),
+			array( 'woocommerce/product-update', array( 'id' => $simple ) ),
+			array(
+				'woocommerce/product-update',
+				array(
+					'id'   => PHP_INT_MAX,
+					'name' => 'Missing',
+				),
+			),
+			array(
+				'woocommerce/product-update',
+				array(
+					'id'  => $simple,
+					'sku' => 'taken-sku',
+				),
+			),
+			array(
+				'woocommerce/product-update',
+				array(
+					'id'                 => $simple,
+					'product_type_alias' => 'virtual',
+					'name'               => 'Virtual',
+				),
+			),
+			array(
+				'woocommerce/product-update',
+				array(
+					'id'                 => $simple,
+					'product_type_alias' => 'unknown',
+				),
+			),
+			array(
+				'woocommerce/product-update',
+				array(
+					'id'   => $simple,
+					'name' => 'Blocked',
+				),
+			),
+			array(
+				'woocommerce/product-update',
+				array(
+					'id'         => $simple,
+					'extensions' => array( 'test_simple' => array( 'code' => 'upd' ) ),
+				),
+			),
+			array(
+				'woocommerce/product-update',
+				array(
+					'id'         => $external,
+					'extensions' => array( 'test_simple' => array( 'code' => 'abc' ) ),
+				),
+			),
+			array(
+				'woocommerce/product-update',
+				array(
+					'id'         => $variation,
+					'extensions' => array( 'test_variation' => array( 'code' => 'v-1' ) ),
+				),
+			),
+			array(
+				'woocommerce/product-update',
+				array(
+					'id'         => $variation,
+					'extensions' => array( 'test_simple' => array( 'code' => 'abc' ) ),
+				),
+			),
+			array(
+				'woocommerce/product-update',
+				array(
+					'id'  => $variation,
+					'sku' => 'var-sku',
+				),
+			),
+			array(
+				'woocommerce/product-update',
+				array(
+					'id'                 => $simple,
+					'product_type_alias' => 'membership',
+					'name'               => 'Rejected membership',
+				),
+			),
+			array( 'woocommerce/products-query', array( 'id' => $simple ) ),
+			array( 'woocommerce/products-query', array( 'id' => $variation ) ),
+			array( 'woocommerce/products-query', array( 'per_page' => 100 ) ),
+			array( 'woocommerce/products-query', array( 'product_type_alias' => 'membership' ) ),
+		);
+
+		foreach ( $scenarios as $index => $scenario ) {
+			$result = wp_get_ability( $scenario[0] )->execute( $scenario[1] );
+			if ( is_wp_error( $result ) ) {
+				$result = array(
+					'code'    => $result->get_error_code(),
+					'message' => $result->get_error_message(),
+					'data'    => $result->get_error_data(),
+				);
+			} else {
+				if ( isset( $result['products'] ) ) {
+					usort(
+						$result['products'],
+						static function ( array $a, array $b ): int {
+							return $a['id'] <=> $b['id'];
+						}
+					);
+				}
+				foreach ( $result['products'] ?? array( $result['product'] ) as $product ) {
+					$track( $product['id'] );
+				}
+			}
+			$results[ "$index {$scenario[0]}" ] = $result;
+		}
+
+		add_filter( 'wp_insert_post_empty_content', '__return_true' );
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute( array( 'name' => 'Unsaved' ) );
+		remove_filter( 'wp_insert_post_empty_content', '__return_true' );
+		$results['save failure'] = array( $result->get_error_code(), $result->get_error_message() );
+
+		$actual = $this->normalize_recorded( $results, $ids );
+		$file   = __DIR__ . '/product-abilities-' . ( $enabled ? 'on' : 'off' ) . '.json';
+		if ( ! file_exists( $file ) ) {
+			file_put_contents( $file, wp_json_encode( $actual, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) . "\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+			$this->markTestIncomplete( 'Recorded ' . basename( $file ) . '.' );
+		}
+
+		$this->assertSame( json_decode( (string) file_get_contents( $file ), true ), json_decode( (string) wp_json_encode( $actual ), true ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+	}
+
+	/**
+	 * Replace product IDs with their creation order and drop dates, so recorded outputs compare across runs.
+	 *
+	 * @param mixed           $value Value.
+	 * @param array<int, int> $ids   Product ID to creation order.
+	 * @param string|null     $key   Key of the value.
+	 * @return mixed
+	 */
+	private function normalize_recorded( $value, array $ids, ?string $key = null ) {
+		if ( is_array( $value ) ) {
+			$normalized = array();
+			foreach ( $value as $child_key => $child ) {
+				if ( 0 !== strpos( (string) $child_key, 'date_' ) ) {
+					$normalized[ $child_key ] = $this->normalize_recorded( $child, $ids, is_int( $child_key ) ? $key : (string) $child_key );
+				}
+			}
+			return $normalized;
+		}
+		if ( is_int( $value ) && in_array( $key, array( 'id', 'resource_id', 'grouped_products' ), true ) ) {
+			return isset( $ids[ $value ] ) ? "product-{$ids[ $value ]}" : $value;
+		}
+		if ( is_string( $value ) && 'sku' === $key ) {
+			return (string) preg_replace( '/^DUMMY (VARIABLE )?SKU.*/', 'DUMMY SKU', $value );
+		}
+		if ( is_string( $value ) && in_array( $key, array( 'permalink', 'message' ), true ) ) {
+			return preg_replace_callback(
+				'/\\d+/',
+				static function ( array $found ) use ( $ids ): string {
+					return isset( $ids[ (int) $found[0] ] ) ? "product-{$ids[ (int) $found[0] ]}" : $found[0];
+				},
+				$value
+			);
+		}
+		return $value;
+	}
+
+	/**
 	 * Register the test extension namespaces.
 	 *
 	 * @param AbilityFieldRegistry $registry Registry.

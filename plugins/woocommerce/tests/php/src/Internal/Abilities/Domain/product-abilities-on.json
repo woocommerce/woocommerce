@@ -1,0 +1,2731 @@
+{
+    "woocommerce/product-create input schema": {
+        "type": "object",
+        "oneOf": [
+            {
+                "type": "object",
+                "properties": {
+                    "product_type_alias": {
+                        "type": "string",
+                        "description": "Supported agent-facing product type alias. physical maps to a simple shippable, non-downloadable product; virtual maps to a simple non-shipping, non-downloadable product; digital maps to a simple virtual/downloadable product; affiliate maps to the external product type; grouped maps to grouped.",
+                        "enum": [
+                            "physical"
+                        ],
+                        "default": "physical"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "sku": {
+                        "type": "string"
+                    },
+                    "regular_price": {
+                        "type": "string",
+                        "description": "Decimal price as a string, without a currency symbol or thousand separators.",
+                        "pattern": "^(?:-?(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+)|)$"
+                    },
+                    "sale_price": {
+                        "type": "string",
+                        "description": "Decimal price as a string, without a currency symbol or thousand separators.",
+                        "pattern": "^(?:-?(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+)|)$"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Product description content. Safe HTML is allowed."
+                    },
+                    "short_description": {
+                        "type": "string",
+                        "description": "Short product description content. Safe HTML is allowed."
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "pending",
+                            "private",
+                            "publish",
+                            "future"
+                        ]
+                    },
+                    "manage_stock": {
+                        "type": "boolean"
+                    },
+                    "stock_quantity": {
+                        "type": "integer",
+                        "description": "Available stock quantity when product-level stock management is used."
+                    },
+                    "stock_status": {
+                        "type": "string",
+                        "enum": [
+                            "instock",
+                            "outofstock",
+                            "onbackorder"
+                        ]
+                    },
+                    "extensions": {
+                        "type": "object",
+                        "description": "Fields added by extensions, grouped by extension.",
+                        "properties": {
+                            "test_simple": {
+                                "type": "object",
+                                "description": "Test fields for simple products.",
+                                "properties": {
+                                    "code": {
+                                        "type": "string"
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                },
+                "required": [
+                    "name"
+                ],
+                "additionalProperties": false
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "product_type_alias": {
+                        "type": "string",
+                        "description": "Supported agent-facing product type alias. physical maps to a simple shippable, non-downloadable product; virtual maps to a simple non-shipping, non-downloadable product; digital maps to a simple virtual/downloadable product; affiliate maps to the external product type; grouped maps to grouped.",
+                        "enum": [
+                            "virtual"
+                        ]
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "sku": {
+                        "type": "string"
+                    },
+                    "regular_price": {
+                        "type": "string",
+                        "description": "Decimal price as a string, without a currency symbol or thousand separators.",
+                        "pattern": "^(?:-?(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+)|)$"
+                    },
+                    "sale_price": {
+                        "type": "string",
+                        "description": "Decimal price as a string, without a currency symbol or thousand separators.",
+                        "pattern": "^(?:-?(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+)|)$"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Product description content. Safe HTML is allowed."
+                    },
+                    "short_description": {
+                        "type": "string",
+                        "description": "Short product description content. Safe HTML is allowed."
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "pending",
+                            "private",
+                            "publish",
+                            "future"
+                        ]
+                    },
+                    "manage_stock": {
+                        "type": "boolean"
+                    },
+                    "stock_quantity": {
+                        "type": "integer",
+                        "description": "Available stock quantity when product-level stock management is used."
+                    },
+                    "stock_status": {
+                        "type": "string",
+                        "enum": [
+                            "instock",
+                            "outofstock",
+                            "onbackorder"
+                        ]
+                    },
+                    "extensions": {
+                        "type": "object",
+                        "description": "Fields added by extensions, grouped by extension.",
+                        "properties": {
+                            "test_simple": {
+                                "type": "object",
+                                "description": "Test fields for simple products.",
+                                "properties": {
+                                    "code": {
+                                        "type": "string"
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                },
+                "required": [
+                    "name",
+                    "product_type_alias"
+                ],
+                "additionalProperties": false
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "product_type_alias": {
+                        "type": "string",
+                        "description": "Supported agent-facing product type alias. physical maps to a simple shippable, non-downloadable product; virtual maps to a simple non-shipping, non-downloadable product; digital maps to a simple virtual/downloadable product; affiliate maps to the external product type; grouped maps to grouped.",
+                        "enum": [
+                            "digital"
+                        ]
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "sku": {
+                        "type": "string"
+                    },
+                    "regular_price": {
+                        "type": "string",
+                        "description": "Decimal price as a string, without a currency symbol or thousand separators.",
+                        "pattern": "^(?:-?(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+)|)$"
+                    },
+                    "sale_price": {
+                        "type": "string",
+                        "description": "Decimal price as a string, without a currency symbol or thousand separators.",
+                        "pattern": "^(?:-?(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+)|)$"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Product description content. Safe HTML is allowed."
+                    },
+                    "short_description": {
+                        "type": "string",
+                        "description": "Short product description content. Safe HTML is allowed."
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "pending",
+                            "private",
+                            "publish",
+                            "future"
+                        ]
+                    },
+                    "manage_stock": {
+                        "type": "boolean"
+                    },
+                    "stock_quantity": {
+                        "type": "integer",
+                        "description": "Available stock quantity when product-level stock management is used."
+                    },
+                    "stock_status": {
+                        "type": "string",
+                        "enum": [
+                            "instock",
+                            "outofstock",
+                            "onbackorder"
+                        ]
+                    },
+                    "extensions": {
+                        "type": "object",
+                        "description": "Fields added by extensions, grouped by extension.",
+                        "properties": {
+                            "test_simple": {
+                                "type": "object",
+                                "description": "Test fields for simple products.",
+                                "properties": {
+                                    "code": {
+                                        "type": "string"
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                },
+                "required": [
+                    "name",
+                    "product_type_alias"
+                ],
+                "additionalProperties": false
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "product_type_alias": {
+                        "type": "string",
+                        "description": "Supported agent-facing product type alias. physical maps to a simple shippable, non-downloadable product; virtual maps to a simple non-shipping, non-downloadable product; digital maps to a simple virtual/downloadable product; affiliate maps to the external product type; grouped maps to grouped.",
+                        "enum": [
+                            "affiliate"
+                        ]
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "sku": {
+                        "type": "string"
+                    },
+                    "regular_price": {
+                        "type": "string",
+                        "description": "Decimal price as a string, without a currency symbol or thousand separators.",
+                        "pattern": "^(?:-?(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+)|)$"
+                    },
+                    "sale_price": {
+                        "type": "string",
+                        "description": "Decimal price as a string, without a currency symbol or thousand separators.",
+                        "pattern": "^(?:-?(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+)|)$"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Product description content. Safe HTML is allowed."
+                    },
+                    "short_description": {
+                        "type": "string",
+                        "description": "Short product description content. Safe HTML is allowed."
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "pending",
+                            "private",
+                            "publish",
+                            "future"
+                        ]
+                    },
+                    "external_url": {
+                        "type": "string",
+                        "description": "External destination URL for affiliate products.",
+                        "format": "uri"
+                    },
+                    "button_text": {
+                        "type": "string",
+                        "description": "Button text for affiliate products."
+                    }
+                },
+                "required": [
+                    "name",
+                    "product_type_alias"
+                ],
+                "additionalProperties": false
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "product_type_alias": {
+                        "type": "string",
+                        "description": "Supported agent-facing product type alias. physical maps to a simple shippable, non-downloadable product; virtual maps to a simple non-shipping, non-downloadable product; digital maps to a simple virtual/downloadable product; affiliate maps to the external product type; grouped maps to grouped.",
+                        "enum": [
+                            "grouped"
+                        ]
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "sku": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Product description content. Safe HTML is allowed."
+                    },
+                    "short_description": {
+                        "type": "string",
+                        "description": "Short product description content. Safe HTML is allowed."
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "pending",
+                            "private",
+                            "publish",
+                            "future"
+                        ]
+                    },
+                    "grouped_products": {
+                        "type": "array",
+                        "description": "Product IDs to include as children of a grouped product.",
+                        "items": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    }
+                },
+                "required": [
+                    "name",
+                    "product_type_alias"
+                ],
+                "additionalProperties": false
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "product_type_alias": {
+                        "type": "string",
+                        "description": "A contract product sold by the test extension.",
+                        "enum": [
+                            "contract"
+                        ]
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "sku": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Product description content. Safe HTML is allowed."
+                    },
+                    "short_description": {
+                        "type": "string",
+                        "description": "Short product description content. Safe HTML is allowed."
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "pending",
+                            "private",
+                            "publish",
+                            "future"
+                        ]
+                    },
+                    "extensions": {
+                        "type": "object",
+                        "description": "Fields added by extensions, grouped by extension.",
+                        "properties": {
+                            "test_contract": {
+                                "type": "object",
+                                "description": "Test fields for contract products.",
+                                "properties": {
+                                    "code": {
+                                        "type": "string",
+                                        "title": "Contract code",
+                                        "description": "Code the contract system uses."
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                },
+                "required": [
+                    "name",
+                    "product_type_alias"
+                ],
+                "additionalProperties": false
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "product_type_alias": {
+                        "type": "string",
+                        "description": "A membership sold by the test extension.",
+                        "enum": [
+                            "membership"
+                        ]
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "sku": {
+                        "type": "string"
+                    },
+                    "regular_price": {
+                        "type": "string",
+                        "description": "Decimal price as a string, without a currency symbol or thousand separators.",
+                        "pattern": "^(?:-?(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+)|)$"
+                    },
+                    "sale_price": {
+                        "type": "string",
+                        "description": "Decimal price as a string, without a currency symbol or thousand separators.",
+                        "pattern": "^(?:-?(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+)|)$"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Product description content. Safe HTML is allowed."
+                    },
+                    "short_description": {
+                        "type": "string",
+                        "description": "Short product description content. Safe HTML is allowed."
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "pending",
+                            "private",
+                            "publish",
+                            "future"
+                        ]
+                    },
+                    "manage_stock": {
+                        "type": "boolean"
+                    },
+                    "stock_quantity": {
+                        "type": "integer",
+                        "description": "Available stock quantity when product-level stock management is used."
+                    },
+                    "stock_status": {
+                        "type": "string",
+                        "enum": [
+                            "instock",
+                            "outofstock",
+                            "onbackorder"
+                        ]
+                    }
+                },
+                "required": [
+                    "name",
+                    "product_type_alias"
+                ],
+                "additionalProperties": false
+            }
+        ]
+    },
+    "woocommerce/product-create output schema": {
+        "type": "object",
+        "properties": {
+            "product": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "slug": {
+                        "type": "string"
+                    },
+                    "permalink": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Product permalink, or null when no public permalink is available.",
+                        "format": "uri"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "Internal product type slug, such as simple, external, grouped, or variable.",
+                        "enum": [
+                            "simple",
+                            "grouped",
+                            "external",
+                            "variable",
+                            "variation",
+                            "contract",
+                            "membership"
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "pending",
+                            "private",
+                            "publish",
+                            "future",
+                            "auto-draft",
+                            "trash"
+                        ]
+                    },
+                    "sku": {
+                        "type": "string"
+                    },
+                    "currency": {
+                        "type": "string",
+                        "enum": [
+                            "AED",
+                            "AFN",
+                            "ALL",
+                            "AMD",
+                            "ANG",
+                            "AOA",
+                            "ARS",
+                            "AUD",
+                            "AWG",
+                            "AZN",
+                            "BAM",
+                            "BBD",
+                            "BDT",
+                            "BGN",
+                            "BHD",
+                            "BIF",
+                            "BMD",
+                            "BND",
+                            "BOB",
+                            "BRL",
+                            "BSD",
+                            "BTC",
+                            "BTN",
+                            "BWP",
+                            "BYR",
+                            "BYN",
+                            "BZD",
+                            "CAD",
+                            "CDF",
+                            "CHF",
+                            "CHW",
+                            "CLP",
+                            "CNY",
+                            "COP",
+                            "CRC",
+                            "CUC",
+                            "CUP",
+                            "CVE",
+                            "CZK",
+                            "DJF",
+                            "DKK",
+                            "DOP",
+                            "DZD",
+                            "EGP",
+                            "ERN",
+                            "ETB",
+                            "EUR",
+                            "FJD",
+                            "FKP",
+                            "GBP",
+                            "GEL",
+                            "GGP",
+                            "GHS",
+                            "GIP",
+                            "GMD",
+                            "GNF",
+                            "GTQ",
+                            "GYD",
+                            "HKD",
+                            "HNL",
+                            "HRK",
+                            "HTG",
+                            "HUF",
+                            "IDR",
+                            "ILS",
+                            "IMP",
+                            "INR",
+                            "IQD",
+                            "IRR",
+                            "IRT",
+                            "ISK",
+                            "JEP",
+                            "JMD",
+                            "JOD",
+                            "JPY",
+                            "KES",
+                            "KGS",
+                            "KHR",
+                            "KMF",
+                            "KPW",
+                            "KRW",
+                            "KWD",
+                            "KYD",
+                            "KZT",
+                            "LAK",
+                            "LBP",
+                            "LKR",
+                            "LRD",
+                            "LSL",
+                            "LYD",
+                            "MAD",
+                            "MDL",
+                            "MGA",
+                            "MKD",
+                            "MMK",
+                            "MNT",
+                            "MOP",
+                            "MRU",
+                            "MUR",
+                            "MVR",
+                            "MWK",
+                            "MXN",
+                            "MYR",
+                            "MZN",
+                            "NAD",
+                            "NGN",
+                            "NIO",
+                            "NOK",
+                            "NPR",
+                            "NZD",
+                            "OMR",
+                            "PAB",
+                            "PEN",
+                            "PGK",
+                            "PHP",
+                            "PKR",
+                            "PLN",
+                            "PRB",
+                            "PYG",
+                            "QAR",
+                            "RON",
+                            "RSD",
+                            "RUB",
+                            "RWF",
+                            "SAR",
+                            "SBD",
+                            "SCR",
+                            "SDG",
+                            "SEK",
+                            "SGD",
+                            "SHP",
+                            "SLL",
+                            "SOS",
+                            "SRD",
+                            "SSP",
+                            "STN",
+                            "SYP",
+                            "SZL",
+                            "THB",
+                            "TJS",
+                            "TMT",
+                            "TND",
+                            "TOP",
+                            "TRY",
+                            "TTD",
+                            "TWD",
+                            "TZS",
+                            "UAH",
+                            "UGX",
+                            "USD",
+                            "UYU",
+                            "UZS",
+                            "VEF",
+                            "VES",
+                            "VND",
+                            "VUV",
+                            "WST",
+                            "XAF",
+                            "XCD",
+                            "XOF",
+                            "XPF",
+                            "YER",
+                            "ZAR",
+                            "ZMW"
+                        ]
+                    },
+                    "currency_symbol": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "string",
+                        "description": "Decimal price as a string, without a currency symbol."
+                    },
+                    "regular_price": {
+                        "type": "string",
+                        "description": "Decimal price as a string, without a currency symbol."
+                    },
+                    "sale_price": {
+                        "type": "string",
+                        "description": "Decimal price as a string, without a currency symbol."
+                    },
+                    "stock_status": {
+                        "type": "string",
+                        "enum": [
+                            "instock",
+                            "outofstock",
+                            "onbackorder"
+                        ]
+                    },
+                    "stock_quantity": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Current stock quantity, or null when no stock quantity is set."
+                    },
+                    "manage_stock": {
+                        "type": "boolean"
+                    },
+                    "virtual": {
+                        "type": "boolean"
+                    },
+                    "downloadable": {
+                        "type": "boolean"
+                    },
+                    "external_url": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "External product URL for external products.",
+                        "format": "uri"
+                    },
+                    "button_text": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Button text for external products."
+                    },
+                    "grouped_products": {
+                        "type": "array",
+                        "description": "Product IDs included as children of a grouped product.",
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    "extensions": {
+                        "type": "object",
+                        "description": "Fields added by extensions, grouped by extension.",
+                        "properties": {
+                            "test_simple": {
+                                "type": "object",
+                                "description": "Test fields for simple products.",
+                                "properties": {
+                                    "code": {
+                                        "type": "string"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            "test_variation": {
+                                "type": "object",
+                                "description": "Test fields for variation products.",
+                                "properties": {
+                                    "code": {
+                                        "type": "string"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            "test_contract": {
+                                "type": "object",
+                                "description": "Test fields for contract products.",
+                                "properties": {
+                                    "code": {
+                                        "type": "string",
+                                        "title": "Contract code",
+                                        "description": "Code the contract system uses."
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "additionalProperties": false
+    },
+    "woocommerce/product-update input schema": {
+        "type": "object",
+        "oneOf": [
+            {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "sku": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Product description content. Safe HTML is allowed."
+                    },
+                    "short_description": {
+                        "type": "string",
+                        "description": "Short product description content. Safe HTML is allowed."
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "pending",
+                            "private",
+                            "publish",
+                            "future"
+                        ]
+                    },
+                    "extensions": {
+                        "type": "object",
+                        "description": "Fields added by extensions, grouped by extension.",
+                        "properties": {
+                            "test_simple": {
+                                "type": "object",
+                                "description": "Test fields for simple products.",
+                                "properties": {
+                                    "code": {
+                                        "type": "string"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            "test_variation": {
+                                "type": "object",
+                                "description": "Test fields for variation products.",
+                                "properties": {
+                                    "code": {
+                                        "type": "string"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            "test_contract": {
+                                "type": "object",
+                                "description": "Test fields for contract products.",
+                                "properties": {
+                                    "code": {
+                                        "type": "string",
+                                        "title": "Contract code",
+                                        "description": "Code the contract system uses."
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                },
+                "required": [
+                    "id"
+                ],
+                "additionalProperties": false
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "product_type_alias": {
+                        "type": "string",
+                        "description": "Supported agent-facing product type alias. physical maps to a simple shippable, non-downloadable product; virtual maps to a simple non-shipping, non-downloadable product; digital maps to a simple virtual/downloadable product; affiliate maps to the external product type; grouped maps to grouped.",
+                        "enum": [
+                            "physical"
+                        ]
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "sku": {
+                        "type": "string"
+                    },
+                    "regular_price": {
+                        "type": "string",
+                        "description": "Decimal price as a string, without a currency symbol or thousand separators.",
+                        "pattern": "^(?:-?(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+)|)$"
+                    },
+                    "sale_price": {
+                        "type": "string",
+                        "description": "Decimal price as a string, without a currency symbol or thousand separators.",
+                        "pattern": "^(?:-?(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+)|)$"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Product description content. Safe HTML is allowed."
+                    },
+                    "short_description": {
+                        "type": "string",
+                        "description": "Short product description content. Safe HTML is allowed."
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "pending",
+                            "private",
+                            "publish",
+                            "future"
+                        ]
+                    },
+                    "manage_stock": {
+                        "type": "boolean"
+                    },
+                    "stock_quantity": {
+                        "type": "integer",
+                        "description": "Available stock quantity when product-level stock management is used."
+                    },
+                    "stock_status": {
+                        "type": "string",
+                        "enum": [
+                            "instock",
+                            "outofstock",
+                            "onbackorder"
+                        ]
+                    },
+                    "extensions": {
+                        "type": "object",
+                        "description": "Fields added by extensions, grouped by extension.",
+                        "properties": {
+                            "test_simple": {
+                                "type": "object",
+                                "description": "Test fields for simple products.",
+                                "properties": {
+                                    "code": {
+                                        "type": "string"
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                },
+                "required": [
+                    "id",
+                    "product_type_alias"
+                ],
+                "additionalProperties": false
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "product_type_alias": {
+                        "type": "string",
+                        "description": "Supported agent-facing product type alias. physical maps to a simple shippable, non-downloadable product; virtual maps to a simple non-shipping, non-downloadable product; digital maps to a simple virtual/downloadable product; affiliate maps to the external product type; grouped maps to grouped.",
+                        "enum": [
+                            "virtual"
+                        ]
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "sku": {
+                        "type": "string"
+                    },
+                    "regular_price": {
+                        "type": "string",
+                        "description": "Decimal price as a string, without a currency symbol or thousand separators.",
+                        "pattern": "^(?:-?(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+)|)$"
+                    },
+                    "sale_price": {
+                        "type": "string",
+                        "description": "Decimal price as a string, without a currency symbol or thousand separators.",
+                        "pattern": "^(?:-?(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+)|)$"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Product description content. Safe HTML is allowed."
+                    },
+                    "short_description": {
+                        "type": "string",
+                        "description": "Short product description content. Safe HTML is allowed."
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "pending",
+                            "private",
+                            "publish",
+                            "future"
+                        ]
+                    },
+                    "manage_stock": {
+                        "type": "boolean"
+                    },
+                    "stock_quantity": {
+                        "type": "integer",
+                        "description": "Available stock quantity when product-level stock management is used."
+                    },
+                    "stock_status": {
+                        "type": "string",
+                        "enum": [
+                            "instock",
+                            "outofstock",
+                            "onbackorder"
+                        ]
+                    },
+                    "extensions": {
+                        "type": "object",
+                        "description": "Fields added by extensions, grouped by extension.",
+                        "properties": {
+                            "test_simple": {
+                                "type": "object",
+                                "description": "Test fields for simple products.",
+                                "properties": {
+                                    "code": {
+                                        "type": "string"
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                },
+                "required": [
+                    "id",
+                    "product_type_alias"
+                ],
+                "additionalProperties": false
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "product_type_alias": {
+                        "type": "string",
+                        "description": "Supported agent-facing product type alias. physical maps to a simple shippable, non-downloadable product; virtual maps to a simple non-shipping, non-downloadable product; digital maps to a simple virtual/downloadable product; affiliate maps to the external product type; grouped maps to grouped.",
+                        "enum": [
+                            "digital"
+                        ]
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "sku": {
+                        "type": "string"
+                    },
+                    "regular_price": {
+                        "type": "string",
+                        "description": "Decimal price as a string, without a currency symbol or thousand separators.",
+                        "pattern": "^(?:-?(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+)|)$"
+                    },
+                    "sale_price": {
+                        "type": "string",
+                        "description": "Decimal price as a string, without a currency symbol or thousand separators.",
+                        "pattern": "^(?:-?(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+)|)$"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Product description content. Safe HTML is allowed."
+                    },
+                    "short_description": {
+                        "type": "string",
+                        "description": "Short product description content. Safe HTML is allowed."
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "pending",
+                            "private",
+                            "publish",
+                            "future"
+                        ]
+                    },
+                    "manage_stock": {
+                        "type": "boolean"
+                    },
+                    "stock_quantity": {
+                        "type": "integer",
+                        "description": "Available stock quantity when product-level stock management is used."
+                    },
+                    "stock_status": {
+                        "type": "string",
+                        "enum": [
+                            "instock",
+                            "outofstock",
+                            "onbackorder"
+                        ]
+                    },
+                    "extensions": {
+                        "type": "object",
+                        "description": "Fields added by extensions, grouped by extension.",
+                        "properties": {
+                            "test_simple": {
+                                "type": "object",
+                                "description": "Test fields for simple products.",
+                                "properties": {
+                                    "code": {
+                                        "type": "string"
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                },
+                "required": [
+                    "id",
+                    "product_type_alias"
+                ],
+                "additionalProperties": false
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "product_type_alias": {
+                        "type": "string",
+                        "description": "Supported agent-facing product type alias. physical maps to a simple shippable, non-downloadable product; virtual maps to a simple non-shipping, non-downloadable product; digital maps to a simple virtual/downloadable product; affiliate maps to the external product type; grouped maps to grouped.",
+                        "enum": [
+                            "affiliate"
+                        ]
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "sku": {
+                        "type": "string"
+                    },
+                    "regular_price": {
+                        "type": "string",
+                        "description": "Decimal price as a string, without a currency symbol or thousand separators.",
+                        "pattern": "^(?:-?(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+)|)$"
+                    },
+                    "sale_price": {
+                        "type": "string",
+                        "description": "Decimal price as a string, without a currency symbol or thousand separators.",
+                        "pattern": "^(?:-?(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+)|)$"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Product description content. Safe HTML is allowed."
+                    },
+                    "short_description": {
+                        "type": "string",
+                        "description": "Short product description content. Safe HTML is allowed."
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "pending",
+                            "private",
+                            "publish",
+                            "future"
+                        ]
+                    },
+                    "external_url": {
+                        "type": "string",
+                        "description": "External destination URL for affiliate products.",
+                        "format": "uri"
+                    },
+                    "button_text": {
+                        "type": "string",
+                        "description": "Button text for affiliate products."
+                    }
+                },
+                "required": [
+                    "id",
+                    "product_type_alias"
+                ],
+                "additionalProperties": false
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "product_type_alias": {
+                        "type": "string",
+                        "description": "Supported agent-facing product type alias. physical maps to a simple shippable, non-downloadable product; virtual maps to a simple non-shipping, non-downloadable product; digital maps to a simple virtual/downloadable product; affiliate maps to the external product type; grouped maps to grouped.",
+                        "enum": [
+                            "grouped"
+                        ]
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "sku": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Product description content. Safe HTML is allowed."
+                    },
+                    "short_description": {
+                        "type": "string",
+                        "description": "Short product description content. Safe HTML is allowed."
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "pending",
+                            "private",
+                            "publish",
+                            "future"
+                        ]
+                    },
+                    "grouped_products": {
+                        "type": "array",
+                        "description": "Product IDs to include as children of a grouped product.",
+                        "items": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "product_type_alias"
+                ],
+                "additionalProperties": false
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "product_type_alias": {
+                        "type": "string",
+                        "description": "A membership sold by the test extension.",
+                        "enum": [
+                            "membership"
+                        ]
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "sku": {
+                        "type": "string"
+                    },
+                    "regular_price": {
+                        "type": "string",
+                        "description": "Decimal price as a string, without a currency symbol or thousand separators.",
+                        "pattern": "^(?:-?(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+)|)$"
+                    },
+                    "sale_price": {
+                        "type": "string",
+                        "description": "Decimal price as a string, without a currency symbol or thousand separators.",
+                        "pattern": "^(?:-?(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+)|)$"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Product description content. Safe HTML is allowed."
+                    },
+                    "short_description": {
+                        "type": "string",
+                        "description": "Short product description content. Safe HTML is allowed."
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "pending",
+                            "private",
+                            "publish",
+                            "future"
+                        ]
+                    },
+                    "manage_stock": {
+                        "type": "boolean"
+                    },
+                    "stock_quantity": {
+                        "type": "integer",
+                        "description": "Available stock quantity when product-level stock management is used."
+                    },
+                    "stock_status": {
+                        "type": "string",
+                        "enum": [
+                            "instock",
+                            "outofstock",
+                            "onbackorder"
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "product_type_alias"
+                ],
+                "additionalProperties": false
+            }
+        ]
+    },
+    "woocommerce/product-update output schema": {
+        "type": "object",
+        "properties": {
+            "product": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "slug": {
+                        "type": "string"
+                    },
+                    "permalink": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Product permalink, or null when no public permalink is available.",
+                        "format": "uri"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "Internal product type slug, such as simple, external, grouped, or variable.",
+                        "enum": [
+                            "simple",
+                            "grouped",
+                            "external",
+                            "variable",
+                            "variation",
+                            "contract",
+                            "membership"
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "pending",
+                            "private",
+                            "publish",
+                            "future",
+                            "auto-draft",
+                            "trash"
+                        ]
+                    },
+                    "sku": {
+                        "type": "string"
+                    },
+                    "currency": {
+                        "type": "string",
+                        "enum": [
+                            "AED",
+                            "AFN",
+                            "ALL",
+                            "AMD",
+                            "ANG",
+                            "AOA",
+                            "ARS",
+                            "AUD",
+                            "AWG",
+                            "AZN",
+                            "BAM",
+                            "BBD",
+                            "BDT",
+                            "BGN",
+                            "BHD",
+                            "BIF",
+                            "BMD",
+                            "BND",
+                            "BOB",
+                            "BRL",
+                            "BSD",
+                            "BTC",
+                            "BTN",
+                            "BWP",
+                            "BYR",
+                            "BYN",
+                            "BZD",
+                            "CAD",
+                            "CDF",
+                            "CHF",
+                            "CHW",
+                            "CLP",
+                            "CNY",
+                            "COP",
+                            "CRC",
+                            "CUC",
+                            "CUP",
+                            "CVE",
+                            "CZK",
+                            "DJF",
+                            "DKK",
+                            "DOP",
+                            "DZD",
+                            "EGP",
+                            "ERN",
+                            "ETB",
+                            "EUR",
+                            "FJD",
+                            "FKP",
+                            "GBP",
+                            "GEL",
+                            "GGP",
+                            "GHS",
+                            "GIP",
+                            "GMD",
+                            "GNF",
+                            "GTQ",
+                            "GYD",
+                            "HKD",
+                            "HNL",
+                            "HRK",
+                            "HTG",
+                            "HUF",
+                            "IDR",
+                            "ILS",
+                            "IMP",
+                            "INR",
+                            "IQD",
+                            "IRR",
+                            "IRT",
+                            "ISK",
+                            "JEP",
+                            "JMD",
+                            "JOD",
+                            "JPY",
+                            "KES",
+                            "KGS",
+                            "KHR",
+                            "KMF",
+                            "KPW",
+                            "KRW",
+                            "KWD",
+                            "KYD",
+                            "KZT",
+                            "LAK",
+                            "LBP",
+                            "LKR",
+                            "LRD",
+                            "LSL",
+                            "LYD",
+                            "MAD",
+                            "MDL",
+                            "MGA",
+                            "MKD",
+                            "MMK",
+                            "MNT",
+                            "MOP",
+                            "MRU",
+                            "MUR",
+                            "MVR",
+                            "MWK",
+                            "MXN",
+                            "MYR",
+                            "MZN",
+                            "NAD",
+                            "NGN",
+                            "NIO",
+                            "NOK",
+                            "NPR",
+                            "NZD",
+                            "OMR",
+                            "PAB",
+                            "PEN",
+                            "PGK",
+                            "PHP",
+                            "PKR",
+                            "PLN",
+                            "PRB",
+                            "PYG",
+                            "QAR",
+                            "RON",
+                            "RSD",
+                            "RUB",
+                            "RWF",
+                            "SAR",
+                            "SBD",
+                            "SCR",
+                            "SDG",
+                            "SEK",
+                            "SGD",
+                            "SHP",
+                            "SLL",
+                            "SOS",
+                            "SRD",
+                            "SSP",
+                            "STN",
+                            "SYP",
+                            "SZL",
+                            "THB",
+                            "TJS",
+                            "TMT",
+                            "TND",
+                            "TOP",
+                            "TRY",
+                            "TTD",
+                            "TWD",
+                            "TZS",
+                            "UAH",
+                            "UGX",
+                            "USD",
+                            "UYU",
+                            "UZS",
+                            "VEF",
+                            "VES",
+                            "VND",
+                            "VUV",
+                            "WST",
+                            "XAF",
+                            "XCD",
+                            "XOF",
+                            "XPF",
+                            "YER",
+                            "ZAR",
+                            "ZMW"
+                        ]
+                    },
+                    "currency_symbol": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "string",
+                        "description": "Decimal price as a string, without a currency symbol."
+                    },
+                    "regular_price": {
+                        "type": "string",
+                        "description": "Decimal price as a string, without a currency symbol."
+                    },
+                    "sale_price": {
+                        "type": "string",
+                        "description": "Decimal price as a string, without a currency symbol."
+                    },
+                    "stock_status": {
+                        "type": "string",
+                        "enum": [
+                            "instock",
+                            "outofstock",
+                            "onbackorder"
+                        ]
+                    },
+                    "stock_quantity": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Current stock quantity, or null when no stock quantity is set."
+                    },
+                    "manage_stock": {
+                        "type": "boolean"
+                    },
+                    "virtual": {
+                        "type": "boolean"
+                    },
+                    "downloadable": {
+                        "type": "boolean"
+                    },
+                    "external_url": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "External product URL for external products.",
+                        "format": "uri"
+                    },
+                    "button_text": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Button text for external products."
+                    },
+                    "grouped_products": {
+                        "type": "array",
+                        "description": "Product IDs included as children of a grouped product.",
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    "extensions": {
+                        "type": "object",
+                        "description": "Fields added by extensions, grouped by extension.",
+                        "properties": {
+                            "test_simple": {
+                                "type": "object",
+                                "description": "Test fields for simple products.",
+                                "properties": {
+                                    "code": {
+                                        "type": "string"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            "test_variation": {
+                                "type": "object",
+                                "description": "Test fields for variation products.",
+                                "properties": {
+                                    "code": {
+                                        "type": "string"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            "test_contract": {
+                                "type": "object",
+                                "description": "Test fields for contract products.",
+                                "properties": {
+                                    "code": {
+                                        "type": "string",
+                                        "title": "Contract code",
+                                        "description": "Code the contract system uses."
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "additionalProperties": false
+    },
+    "woocommerce/products-query input schema": {
+        "type": "object",
+        "properties": {
+            "id": {
+                "type": "integer",
+                "minimum": 1
+            },
+            "search": {
+                "type": "string"
+            },
+            "sku": {
+                "type": "string",
+                "description": "Limit results to products with SKUs that partially match this string. Use * to match products with any non-empty SKU."
+            },
+            "status": {
+                "type": "string",
+                "enum": [
+                    "future",
+                    "trash",
+                    "draft",
+                    "pending",
+                    "private",
+                    "publish"
+                ]
+            },
+            "product_type_alias": {
+                "type": "string",
+                "description": "Filter by supported agent-facing product type alias. physical maps to simple shippable, non-downloadable products; virtual maps to simple non-shipping, non-downloadable products; digital maps to simple virtual/downloadable products; affiliate maps to the external product type; grouped maps to grouped.",
+                "enum": [
+                    "physical",
+                    "virtual",
+                    "digital",
+                    "affiliate",
+                    "grouped",
+                    "membership"
+                ]
+            },
+            "stock_status": {
+                "type": "string",
+                "enum": [
+                    "instock",
+                    "outofstock",
+                    "onbackorder"
+                ]
+            },
+            "page": {
+                "type": "integer",
+                "default": 1,
+                "minimum": 1
+            },
+            "per_page": {
+                "type": "integer",
+                "default": 10,
+                "minimum": 1,
+                "maximum": 100
+            }
+        },
+        "additionalProperties": false,
+        "default": []
+    },
+    "woocommerce/products-query output schema": {
+        "type": "object",
+        "properties": {
+            "products": {
+                "type": "array",
+                "description": "Returned products for the current page.",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "integer"
+                        },
+                        "name": {
+                            "type": "string"
+                        },
+                        "slug": {
+                            "type": "string"
+                        },
+                        "permalink": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "description": "Product permalink, or null when no public permalink is available.",
+                            "format": "uri"
+                        },
+                        "type": {
+                            "type": "string",
+                            "description": "Internal product type slug, such as simple, external, grouped, or variable.",
+                            "enum": [
+                                "simple",
+                                "grouped",
+                                "external",
+                                "variable",
+                                "variation",
+                                "contract",
+                                "membership"
+                            ]
+                        },
+                        "status": {
+                            "type": "string",
+                            "enum": [
+                                "draft",
+                                "pending",
+                                "private",
+                                "publish",
+                                "future",
+                                "auto-draft",
+                                "trash"
+                            ]
+                        },
+                        "sku": {
+                            "type": "string"
+                        },
+                        "currency": {
+                            "type": "string",
+                            "enum": [
+                                "AED",
+                                "AFN",
+                                "ALL",
+                                "AMD",
+                                "ANG",
+                                "AOA",
+                                "ARS",
+                                "AUD",
+                                "AWG",
+                                "AZN",
+                                "BAM",
+                                "BBD",
+                                "BDT",
+                                "BGN",
+                                "BHD",
+                                "BIF",
+                                "BMD",
+                                "BND",
+                                "BOB",
+                                "BRL",
+                                "BSD",
+                                "BTC",
+                                "BTN",
+                                "BWP",
+                                "BYR",
+                                "BYN",
+                                "BZD",
+                                "CAD",
+                                "CDF",
+                                "CHF",
+                                "CHW",
+                                "CLP",
+                                "CNY",
+                                "COP",
+                                "CRC",
+                                "CUC",
+                                "CUP",
+                                "CVE",
+                                "CZK",
+                                "DJF",
+                                "DKK",
+                                "DOP",
+                                "DZD",
+                                "EGP",
+                                "ERN",
+                                "ETB",
+                                "EUR",
+                                "FJD",
+                                "FKP",
+                                "GBP",
+                                "GEL",
+                                "GGP",
+                                "GHS",
+                                "GIP",
+                                "GMD",
+                                "GNF",
+                                "GTQ",
+                                "GYD",
+                                "HKD",
+                                "HNL",
+                                "HRK",
+                                "HTG",
+                                "HUF",
+                                "IDR",
+                                "ILS",
+                                "IMP",
+                                "INR",
+                                "IQD",
+                                "IRR",
+                                "IRT",
+                                "ISK",
+                                "JEP",
+                                "JMD",
+                                "JOD",
+                                "JPY",
+                                "KES",
+                                "KGS",
+                                "KHR",
+                                "KMF",
+                                "KPW",
+                                "KRW",
+                                "KWD",
+                                "KYD",
+                                "KZT",
+                                "LAK",
+                                "LBP",
+                                "LKR",
+                                "LRD",
+                                "LSL",
+                                "LYD",
+                                "MAD",
+                                "MDL",
+                                "MGA",
+                                "MKD",
+                                "MMK",
+                                "MNT",
+                                "MOP",
+                                "MRU",
+                                "MUR",
+                                "MVR",
+                                "MWK",
+                                "MXN",
+                                "MYR",
+                                "MZN",
+                                "NAD",
+                                "NGN",
+                                "NIO",
+                                "NOK",
+                                "NPR",
+                                "NZD",
+                                "OMR",
+                                "PAB",
+                                "PEN",
+                                "PGK",
+                                "PHP",
+                                "PKR",
+                                "PLN",
+                                "PRB",
+                                "PYG",
+                                "QAR",
+                                "RON",
+                                "RSD",
+                                "RUB",
+                                "RWF",
+                                "SAR",
+                                "SBD",
+                                "SCR",
+                                "SDG",
+                                "SEK",
+                                "SGD",
+                                "SHP",
+                                "SLL",
+                                "SOS",
+                                "SRD",
+                                "SSP",
+                                "STN",
+                                "SYP",
+                                "SZL",
+                                "THB",
+                                "TJS",
+                                "TMT",
+                                "TND",
+                                "TOP",
+                                "TRY",
+                                "TTD",
+                                "TWD",
+                                "TZS",
+                                "UAH",
+                                "UGX",
+                                "USD",
+                                "UYU",
+                                "UZS",
+                                "VEF",
+                                "VES",
+                                "VND",
+                                "VUV",
+                                "WST",
+                                "XAF",
+                                "XCD",
+                                "XOF",
+                                "XPF",
+                                "YER",
+                                "ZAR",
+                                "ZMW"
+                            ]
+                        },
+                        "currency_symbol": {
+                            "type": "string"
+                        },
+                        "price": {
+                            "type": "string",
+                            "description": "Decimal price as a string, without a currency symbol."
+                        },
+                        "regular_price": {
+                            "type": "string",
+                            "description": "Decimal price as a string, without a currency symbol."
+                        },
+                        "sale_price": {
+                            "type": "string",
+                            "description": "Decimal price as a string, without a currency symbol."
+                        },
+                        "stock_status": {
+                            "type": "string",
+                            "enum": [
+                                "instock",
+                                "outofstock",
+                                "onbackorder"
+                            ]
+                        },
+                        "stock_quantity": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ],
+                            "description": "Current stock quantity, or null when no stock quantity is set."
+                        },
+                        "manage_stock": {
+                            "type": "boolean"
+                        },
+                        "virtual": {
+                            "type": "boolean"
+                        },
+                        "downloadable": {
+                            "type": "boolean"
+                        },
+                        "external_url": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "description": "External product URL for external products.",
+                            "format": "uri"
+                        },
+                        "button_text": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "description": "Button text for external products."
+                        },
+                        "grouped_products": {
+                            "type": "array",
+                            "description": "Product IDs included as children of a grouped product.",
+                            "items": {
+                                "type": "integer"
+                            }
+                        },
+                        "extensions": {
+                            "type": "object",
+                            "description": "Fields added by extensions, grouped by extension.",
+                            "properties": {
+                                "test_simple": {
+                                    "type": "object",
+                                    "description": "Test fields for simple products.",
+                                    "properties": {
+                                        "code": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "additionalProperties": false
+                                },
+                                "test_variation": {
+                                    "type": "object",
+                                    "description": "Test fields for variation products.",
+                                    "properties": {
+                                        "code": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "additionalProperties": false
+                                },
+                                "test_contract": {
+                                    "type": "object",
+                                    "description": "Test fields for contract products.",
+                                    "properties": {
+                                        "code": {
+                                            "type": "string",
+                                            "title": "Contract code",
+                                            "description": "Code the contract system uses."
+                                        }
+                                    },
+                                    "additionalProperties": false
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "total_pages": {
+                "type": "integer",
+                "description": "Total number of result pages available for the current query."
+            },
+            "page": {
+                "type": "integer",
+                "description": "Current result page."
+            },
+            "per_page": {
+                "type": "integer",
+                "description": "Maximum number of items requested per page."
+            }
+        },
+        "additionalProperties": false
+    },
+    "0 woocommerce/product-create": {
+        "product": {
+            "id": "product-6",
+            "name": "Physical",
+            "slug": "",
+            "permalink": "http://localhost:8186/?product=physical",
+            "type": "simple",
+            "status": "publish",
+            "sku": "phys-1",
+            "currency": "USD",
+            "currency_symbol": "$",
+            "price": "8",
+            "regular_price": "10",
+            "sale_price": "8",
+            "stock_status": "instock",
+            "stock_quantity": null,
+            "manage_stock": false,
+            "virtual": false,
+            "downloadable": false,
+            "external_url": null,
+            "button_text": null,
+            "grouped_products": [],
+            "extensions": {
+                "test_simple": {
+                    "code": ""
+                }
+            }
+        }
+    },
+    "1 woocommerce/product-create": {
+        "product": {
+            "id": "product-7",
+            "name": "Affiliate",
+            "slug": "",
+            "permalink": "http://localhost:8186/?product=affiliate",
+            "type": "external",
+            "status": "publish",
+            "sku": "",
+            "currency": "USD",
+            "currency_symbol": "$",
+            "price": "",
+            "regular_price": "",
+            "sale_price": "",
+            "stock_status": "instock",
+            "stock_quantity": null,
+            "manage_stock": false,
+            "virtual": false,
+            "downloadable": false,
+            "external_url": "https://example.com",
+            "button_text": "Buy",
+            "grouped_products": []
+        }
+    },
+    "2 woocommerce/product-create": {
+        "product": {
+            "id": "product-8",
+            "name": "Group",
+            "slug": "",
+            "permalink": "http://localhost:8186/?product=group",
+            "type": "grouped",
+            "status": "publish",
+            "sku": "",
+            "currency": "USD",
+            "currency_symbol": "$",
+            "price": "",
+            "regular_price": "",
+            "sale_price": "",
+            "stock_status": "instock",
+            "stock_quantity": null,
+            "manage_stock": false,
+            "virtual": false,
+            "downloadable": false,
+            "external_url": null,
+            "button_text": null,
+            "grouped_products": [
+                "product-1"
+            ]
+        }
+    },
+    "3 woocommerce/product-create": {
+        "code": "ability_invalid_input",
+        "message": "Ability \"woocommerce/product-create\" has invalid input. Reason: input does not match the expected format. Reason: input[grouped_products][0] must be greater than or equal to 1",
+        "data": null
+    },
+    "4 woocommerce/product-create": {
+        "code": "ability_invalid_input",
+        "message": "Ability \"woocommerce/product-create\" has invalid input. Reason: input does not match the expected format. Reason: input[product_type_alias] is not physical.",
+        "data": null
+    },
+    "5 woocommerce/product-create": {
+        "code": "product_invalid_sku",
+        "message": "Invalid or duplicated SKU.",
+        "data": {
+            "status": 400,
+            "resource_id": "product-2",
+            "unique_sku": "taken-sku-1"
+        }
+    },
+    "6 woocommerce/product-create": {
+        "code": "woocommerce_product_create_rejected",
+        "message": "Blocked by validator.",
+        "data": {
+            "status": 400
+        }
+    },
+    "7 woocommerce/product-create": {
+        "product": {
+            "id": "product-9",
+            "name": "Coded",
+            "slug": "",
+            "permalink": "http://localhost:8186/?product=coded",
+            "type": "simple",
+            "status": "publish",
+            "sku": "",
+            "currency": "USD",
+            "currency_symbol": "$",
+            "price": "",
+            "regular_price": "",
+            "sale_price": "",
+            "stock_status": "instock",
+            "stock_quantity": null,
+            "manage_stock": false,
+            "virtual": false,
+            "downloadable": false,
+            "external_url": null,
+            "button_text": null,
+            "grouped_products": [],
+            "extensions": {
+                "test_simple": {
+                    "code": "abc"
+                }
+            }
+        }
+    },
+    "8 woocommerce/product-create": {
+        "code": "woocommerce_product_create_rejected",
+        "message": "Code rejected.",
+        "data": {
+            "status": 400
+        }
+    },
+    "9 woocommerce/product-create": {
+        "product": {
+            "id": "product-10",
+            "name": "Contract",
+            "slug": "",
+            "permalink": "http://localhost:8186/?product=contract",
+            "type": "contract",
+            "status": "publish",
+            "sku": "",
+            "currency": "USD",
+            "currency_symbol": "$",
+            "price": "",
+            "regular_price": "",
+            "sale_price": "",
+            "stock_status": "instock",
+            "stock_quantity": null,
+            "manage_stock": false,
+            "virtual": false,
+            "downloadable": false,
+            "external_url": null,
+            "button_text": null,
+            "grouped_products": [],
+            "extensions": {
+                "test_contract": {
+                    "code": "c-1"
+                }
+            }
+        }
+    },
+    "10 woocommerce/product-create": {
+        "code": "woocommerce_product_create_rejected",
+        "message": "Contract rejected.",
+        "data": {
+            "status": 400
+        }
+    },
+    "11 woocommerce/product-create": {
+        "product": {
+            "id": "product-11",
+            "name": "Membership",
+            "slug": "",
+            "permalink": "http://localhost:8186/?product=membership",
+            "type": "membership",
+            "status": "publish",
+            "sku": "",
+            "currency": "USD",
+            "currency_symbol": "$",
+            "price": "5",
+            "regular_price": "5",
+            "sale_price": "",
+            "stock_status": "instock",
+            "stock_quantity": null,
+            "manage_stock": false,
+            "virtual": true,
+            "downloadable": false,
+            "external_url": null,
+            "button_text": null,
+            "grouped_products": []
+        }
+    },
+    "12 woocommerce/product-update": {
+        "product": {
+            "id": "product-1",
+            "name": "Renamed",
+            "slug": "plain",
+            "permalink": "http://localhost:8186/?product=plain",
+            "type": "simple",
+            "status": "publish",
+            "sku": "DUMMY SKU",
+            "currency": "USD",
+            "currency_symbol": "$",
+            "price": "20",
+            "regular_price": "20",
+            "sale_price": "",
+            "stock_status": "instock",
+            "stock_quantity": null,
+            "manage_stock": false,
+            "virtual": false,
+            "downloadable": false,
+            "external_url": null,
+            "button_text": null,
+            "grouped_products": [],
+            "extensions": {
+                "test_simple": {
+                    "code": ""
+                }
+            }
+        }
+    },
+    "13 woocommerce/product-update": {
+        "code": "woocommerce_product_update_no_fields",
+        "message": "At least one product field is required to update a product.",
+        "data": {
+            "status": 400
+        }
+    },
+    "14 woocommerce/product-update": {
+        "code": "ability_invalid_permissions",
+        "message": "Ability \"woocommerce/product-update\" does not have necessary permission.",
+        "data": null
+    },
+    "15 woocommerce/product-update": {
+        "code": "product_invalid_sku",
+        "message": "Invalid or duplicated SKU.",
+        "data": {
+            "status": 400,
+            "resource_id": "product-2",
+            "unique_sku": "taken-sku-1"
+        }
+    },
+    "16 woocommerce/product-update": {
+        "product": {
+            "id": "product-1",
+            "name": "Virtual",
+            "slug": "plain",
+            "permalink": "http://localhost:8186/?product=plain",
+            "type": "simple",
+            "status": "publish",
+            "sku": "DUMMY SKU",
+            "currency": "USD",
+            "currency_symbol": "$",
+            "price": "20",
+            "regular_price": "20",
+            "sale_price": "",
+            "stock_status": "instock",
+            "stock_quantity": null,
+            "manage_stock": false,
+            "virtual": true,
+            "downloadable": false,
+            "external_url": null,
+            "button_text": null,
+            "grouped_products": [],
+            "extensions": {
+                "test_simple": {
+                    "code": ""
+                }
+            }
+        }
+    },
+    "17 woocommerce/product-update": {
+        "code": "ability_invalid_input",
+        "message": "Ability \"woocommerce/product-update\" has invalid input. Reason: input does not match the expected format. Reason: input[product_type_alias] is not physical.",
+        "data": null
+    },
+    "18 woocommerce/product-update": {
+        "code": "woocommerce_product_update_rejected",
+        "message": "Blocked by validator.",
+        "data": {
+            "status": 400
+        }
+    },
+    "19 woocommerce/product-update": {
+        "product": {
+            "id": "product-1",
+            "name": "Virtual",
+            "slug": "plain",
+            "permalink": "http://localhost:8186/?product=plain",
+            "type": "simple",
+            "status": "publish",
+            "sku": "DUMMY SKU",
+            "currency": "USD",
+            "currency_symbol": "$",
+            "price": "20",
+            "regular_price": "20",
+            "sale_price": "",
+            "stock_status": "instock",
+            "stock_quantity": null,
+            "manage_stock": false,
+            "virtual": true,
+            "downloadable": false,
+            "external_url": null,
+            "button_text": null,
+            "grouped_products": [],
+            "extensions": {
+                "test_simple": {
+                    "code": "upd"
+                }
+            }
+        }
+    },
+    "20 woocommerce/product-update": {
+        "code": "woocommerce_product_update_rejected",
+        "message": "Product product-3 is of type external. It accepts no extension fields.",
+        "data": {
+            "status": 400
+        }
+    },
+    "21 woocommerce/product-update": {
+        "product": {
+            "id": "product-4",
+            "name": "Dummy Variable Product",
+            "slug": "dummy-variable-product-small",
+            "permalink": "http://localhost:8186/?product=dummy-variable-product&attribute_pa_size=small",
+            "type": "variation",
+            "status": "publish",
+            "sku": "DUMMY SKU",
+            "currency": "USD",
+            "currency_symbol": "$",
+            "price": "10",
+            "regular_price": "10",
+            "sale_price": "",
+            "stock_status": "instock",
+            "stock_quantity": null,
+            "manage_stock": false,
+            "virtual": false,
+            "downloadable": false,
+            "external_url": null,
+            "button_text": null,
+            "grouped_products": [],
+            "extensions": {
+                "test_variation": {
+                    "code": "v-1"
+                }
+            }
+        }
+    },
+    "22 woocommerce/product-update": {
+        "code": "woocommerce_product_update_rejected",
+        "message": "Product product-4 is of type variation. It accepts extensions.test_variation.",
+        "data": {
+            "status": 400
+        }
+    },
+    "23 woocommerce/product-update": {
+        "code": "woocommerce_product_field_unsupported",
+        "message": "These fields are not supported for the selected product type: sku.",
+        "data": {
+            "status": 400
+        }
+    },
+    "24 woocommerce/product-update": {
+        "code": "woocommerce_product_update_rejected",
+        "message": "Membership rejected.",
+        "data": {
+            "status": 400
+        }
+    },
+    "25 woocommerce/products-query": {
+        "products": [
+            {
+                "id": "product-1",
+                "name": "Virtual",
+                "slug": "plain",
+                "permalink": "http://localhost:8186/?product=plain",
+                "type": "simple",
+                "status": "publish",
+                "sku": "DUMMY SKU",
+                "currency": "USD",
+                "currency_symbol": "$",
+                "price": "20",
+                "regular_price": "20",
+                "sale_price": "",
+                "stock_status": "instock",
+                "stock_quantity": null,
+                "manage_stock": false,
+                "virtual": true,
+                "downloadable": false,
+                "external_url": null,
+                "button_text": null,
+                "grouped_products": [],
+                "extensions": {
+                    "test_simple": {
+                        "code": "upd"
+                    }
+                }
+            }
+        ],
+        "total_pages": 1,
+        "page": 1,
+        "per_page": 1
+    },
+    "26 woocommerce/products-query": {
+        "code": "woocommerce_product_type_unsupported",
+        "message": "Product type is not supported by this ability.",
+        "data": {
+            "status": 400
+        }
+    },
+    "27 woocommerce/products-query": {
+        "products": [
+            {
+                "id": "product-1",
+                "name": "Virtual",
+                "slug": "plain",
+                "permalink": "http://localhost:8186/?product=plain",
+                "type": "simple",
+                "status": "publish",
+                "sku": "DUMMY SKU",
+                "currency": "USD",
+                "currency_symbol": "$",
+                "price": "20",
+                "regular_price": "20",
+                "sale_price": "",
+                "stock_status": "instock",
+                "stock_quantity": null,
+                "manage_stock": false,
+                "virtual": true,
+                "downloadable": false,
+                "external_url": null,
+                "button_text": null,
+                "grouped_products": [],
+                "extensions": {
+                    "test_simple": {
+                        "code": "upd"
+                    }
+                }
+            },
+            {
+                "id": "product-2",
+                "name": "Dummy Product",
+                "slug": "dummy-product",
+                "permalink": "http://localhost:8186/?product=dummy-product",
+                "type": "simple",
+                "status": "publish",
+                "sku": "taken-sku",
+                "currency": "USD",
+                "currency_symbol": "$",
+                "price": "10",
+                "regular_price": "10",
+                "sale_price": "",
+                "stock_status": "instock",
+                "stock_quantity": null,
+                "manage_stock": false,
+                "virtual": false,
+                "downloadable": false,
+                "external_url": null,
+                "button_text": null,
+                "grouped_products": [],
+                "extensions": {
+                    "test_simple": {
+                        "code": ""
+                    }
+                }
+            },
+            {
+                "id": "product-3",
+                "name": "Dummy External Product",
+                "slug": "dummy-external-product",
+                "permalink": "http://localhost:8186/?product=dummy-external-product",
+                "type": "external",
+                "status": "publish",
+                "sku": "DUMMY EXTERNAL SKU",
+                "currency": "USD",
+                "currency_symbol": "$",
+                "price": "10",
+                "regular_price": "10",
+                "sale_price": "",
+                "stock_status": "instock",
+                "stock_quantity": null,
+                "manage_stock": false,
+                "virtual": false,
+                "downloadable": false,
+                "external_url": "https://woocommerce.com",
+                "button_text": "Buy external product",
+                "grouped_products": []
+            },
+            {
+                "id": "product-5",
+                "name": "Dummy Variable Product",
+                "slug": "dummy-variable-product",
+                "permalink": "http://localhost:8186/?product=dummy-variable-product",
+                "type": "variable",
+                "status": "publish",
+                "sku": "DUMMY SKU",
+                "currency": "USD",
+                "currency_symbol": "$",
+                "price": "",
+                "regular_price": "",
+                "sale_price": "",
+                "stock_status": "outofstock",
+                "stock_quantity": null,
+                "manage_stock": false,
+                "virtual": false,
+                "downloadable": false,
+                "external_url": null,
+                "button_text": null,
+                "grouped_products": []
+            },
+            {
+                "id": "product-6",
+                "name": "Physical",
+                "slug": "physical",
+                "permalink": "http://localhost:8186/?product=physical",
+                "type": "simple",
+                "status": "publish",
+                "sku": "phys-1",
+                "currency": "USD",
+                "currency_symbol": "$",
+                "price": "8",
+                "regular_price": "10",
+                "sale_price": "8",
+                "stock_status": "instock",
+                "stock_quantity": null,
+                "manage_stock": false,
+                "virtual": false,
+                "downloadable": false,
+                "external_url": null,
+                "button_text": null,
+                "grouped_products": [],
+                "extensions": {
+                    "test_simple": {
+                        "code": ""
+                    }
+                }
+            },
+            {
+                "id": "product-7",
+                "name": "Affiliate",
+                "slug": "affiliate",
+                "permalink": "http://localhost:8186/?product=affiliate",
+                "type": "external",
+                "status": "publish",
+                "sku": "",
+                "currency": "USD",
+                "currency_symbol": "$",
+                "price": "",
+                "regular_price": "",
+                "sale_price": "",
+                "stock_status": "instock",
+                "stock_quantity": null,
+                "manage_stock": false,
+                "virtual": false,
+                "downloadable": false,
+                "external_url": "https://example.com",
+                "button_text": "Buy",
+                "grouped_products": []
+            },
+            {
+                "id": "product-8",
+                "name": "Group",
+                "slug": "group",
+                "permalink": "http://localhost:8186/?product=group",
+                "type": "grouped",
+                "status": "publish",
+                "sku": "",
+                "currency": "USD",
+                "currency_symbol": "$",
+                "price": "10",
+                "regular_price": "",
+                "sale_price": "",
+                "stock_status": "instock",
+                "stock_quantity": null,
+                "manage_stock": false,
+                "virtual": false,
+                "downloadable": false,
+                "external_url": null,
+                "button_text": null,
+                "grouped_products": [
+                    "product-1"
+                ]
+            },
+            {
+                "id": "product-9",
+                "name": "Coded",
+                "slug": "coded",
+                "permalink": "http://localhost:8186/?product=coded",
+                "type": "simple",
+                "status": "publish",
+                "sku": "",
+                "currency": "USD",
+                "currency_symbol": "$",
+                "price": "",
+                "regular_price": "",
+                "sale_price": "",
+                "stock_status": "instock",
+                "stock_quantity": null,
+                "manage_stock": false,
+                "virtual": false,
+                "downloadable": false,
+                "external_url": null,
+                "button_text": null,
+                "grouped_products": [],
+                "extensions": {
+                    "test_simple": {
+                        "code": "abc"
+                    }
+                }
+            }
+        ],
+        "total_pages": 1,
+        "page": 1,
+        "per_page": 100
+    },
+    "28 woocommerce/products-query": {
+        "products": [
+            {
+                "id": "product-11",
+                "name": "Membership",
+                "slug": "membership",
+                "permalink": "http://localhost:8186/?product=membership",
+                "type": "membership",
+                "status": "publish",
+                "sku": "",
+                "currency": "USD",
+                "currency_symbol": "$",
+                "price": "5",
+                "regular_price": "5",
+                "sale_price": "",
+                "stock_status": "instock",
+                "stock_quantity": null,
+                "manage_stock": false,
+                "virtual": true,
+                "downloadable": false,
+                "external_url": null,
+                "button_text": null,
+                "grouped_products": []
+            }
+        ],
+        "total_pages": 1,
+        "page": 1,
+        "per_page": 10
+    },
+    "save failure": [
+        "woocommerce_product_create_failed",
+        "Failed to save product."
+    ]
+}
