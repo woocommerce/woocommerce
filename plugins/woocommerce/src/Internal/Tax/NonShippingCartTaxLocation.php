@@ -37,8 +37,8 @@ class NonShippingCartTaxLocation {
 	 */
 	final public function init( CartPricingContext $cart_pricing_context ): void {
 		$this->cart_pricing_context = $cart_pricing_context;
-		// Should run after the Blocks local pickup filter, which can apply a pickup choice left in the session after the last shippable item is removed.
-		add_filter( 'woocommerce_customer_taxable_address', array( $this, 'use_billing_address_for_cart_without_shipping' ), 11, 2 );
+		// Runs early so it only replaces the default address, and callbacks from other plugins at the default priority see and can override the result.
+		add_filter( 'woocommerce_customer_taxable_address', array( $this, 'use_billing_address_for_cart_without_shipping' ), 1, 2 );
 	}
 
 	/**
@@ -51,54 +51,55 @@ class NonShippingCartTaxLocation {
 	 * @return mixed The taxable address.
 	 */
 	public function use_billing_address_for_cart_without_shipping( $taxable_address, $customer = null ) {
-		if ( null === $customer ) {
-			return $taxable_address;
-		}
-
-		if ( TaxBasedOn::SHIPPING !== get_option( 'woocommerce_tax_based_on' ) ) {
-			return $taxable_address;
-		}
-
-		if ( ! $customer instanceof \WC_Customer ) {
-			return $taxable_address;
-		}
-
-		$billing_country = $customer->get_billing_country();
-		if ( empty( $billing_country ) ) {
-			return $taxable_address;
-		}
-
-		if ( ! $this->cart_pricing_context->is_active() ) {
-			return $taxable_address;
-		}
-
-		$cart = WC()->cart;
-		if ( ! $cart instanceof \WC_Cart || $cart->get_customer() !== $customer ) {
-			return $taxable_address;
-		}
-
-		// needs_shipping filter callbacks may resolve the taxable address again (e.g. to price with tax).
-		if ( $this->is_checking_shipping ) {
-			return $taxable_address;
-		}
-
-		$this->is_checking_shipping = true;
-		try {
-			$has_only_non_shipping_products = $this->has_only_non_shipping_products( $cart );
-		} finally {
-			$this->is_checking_shipping = false;
-		}
-
-		if ( ! $has_only_non_shipping_products ) {
+		if ( ! $customer instanceof \WC_Customer || ! $this->should_use_billing_address( $customer ) ) {
 			return $taxable_address;
 		}
 
 		return array(
-			$billing_country,
+			$customer->get_billing_country(),
 			$customer->get_billing_state(),
 			$customer->get_billing_postcode(),
 			$customer->get_billing_city(),
 		);
+	}
+
+	/**
+	 * Determine whether the customer's billing address should be used for tax because tax is based on shipping and no product in their cart needs shipping.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param \WC_Customer $customer The customer whose taxable address is being determined.
+	 * @return bool True when the billing address should be used.
+	 */
+	public function should_use_billing_address( \WC_Customer $customer ): bool {
+		if ( TaxBasedOn::SHIPPING !== get_option( 'woocommerce_tax_based_on' ) ) {
+			return false;
+		}
+
+		if ( empty( $customer->get_billing_country() ) ) {
+			return false;
+		}
+
+		if ( ! $this->cart_pricing_context->is_active() ) {
+			return false;
+		}
+
+		$cart = WC()->cart;
+		if ( ! $cart instanceof \WC_Cart || $cart->get_customer() !== $customer ) {
+			return false;
+		}
+
+		// needs_shipping filter callbacks may resolve the taxable address again (e.g. to price with tax).
+		if ( $this->is_checking_shipping ) {
+			return false;
+		}
+
+		$this->is_checking_shipping = true;
+		try {
+			return $this->has_only_non_shipping_products( $cart );
+		} finally {
+			$this->is_checking_shipping = false;
+		}
 	}
 
 	/**

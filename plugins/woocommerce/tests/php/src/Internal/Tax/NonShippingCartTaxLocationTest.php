@@ -115,7 +115,7 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 
 		// The instance hooked at boot differs from the SUT in tests, so keep only the SUT hooked.
 		remove_all_filters( 'woocommerce_customer_taxable_address' );
-		add_filter( 'woocommerce_customer_taxable_address', array( $this->sut, 'use_billing_address_for_cart_without_shipping' ), 11, 2 );
+		add_filter( 'woocommerce_customer_taxable_address', array( $this->sut, 'use_billing_address_for_cart_without_shipping' ), 1, 2 );
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Simulates a third-party call without the customer argument.
 		$result = apply_filters( 'woocommerce_customer_taxable_address', $taxable_address );
@@ -315,7 +315,7 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 
 		// The instance hooked at boot differs from the SUT in tests, so keep only the SUT hooked.
 		remove_all_filters( 'woocommerce_customer_taxable_address' );
-		add_filter( 'woocommerce_customer_taxable_address', array( $this->sut, 'use_billing_address_for_cart_without_shipping' ), 11, 2 );
+		add_filter( 'woocommerce_customer_taxable_address', array( $this->sut, 'use_billing_address_for_cart_without_shipping' ), 1, 2 );
 
 		// WC_Cart::needs_shipping() only checks products when a shipping method exists, so count nesting rather than calls.
 		$depth          = 0;
@@ -370,6 +370,32 @@ class NonShippingCartTaxLocationTest extends \WC_Unit_Test_Case {
 		} finally {
 			$zone->delete( true );
 		}
+	}
+
+	/**
+	 * @testdox Lets a later woocommerce_customer_taxable_address callback see and override the billing address.
+	 *
+	 * Plugins such as One Stop Shop for WooCommerce replace the address at the default priority, for example with the shop base address for VAT-exempt customers.
+	 */
+	public function test_later_taxable_address_callback_sees_and_overrides_billing_address(): void {
+		$this->add_product_to_cart( true );
+		$this->set_checkout_context();
+		$received_address = null;
+		$base_address     = array( 'DE', 'BE', '10115', 'Berlin' );
+		$callback         = function ( $address ) use ( &$received_address, $base_address ) {
+			$received_address = $address;
+			return $base_address;
+		};
+		add_filter( 'woocommerce_customer_taxable_address', $callback );
+
+		try {
+			$result = $this->customer->get_taxable_address();
+		} finally {
+			remove_filter( 'woocommerce_customer_taxable_address', $callback );
+		}
+
+		$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $received_address, 'A callback at the default priority should receive the billing address.' );
+		$this->assertSame( $base_address, $result, 'The address returned by a callback at the default priority should be used.' );
 	}
 
 	/**
