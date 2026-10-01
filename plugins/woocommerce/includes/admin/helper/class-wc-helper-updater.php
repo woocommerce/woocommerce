@@ -1168,6 +1168,11 @@ class WC_Helper_Updater {
 					WC_Helper_API_Backoff::record( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK, 15 * MINUTE_IN_SECONDS );
 				}
 
+				// Renew the old cache so it can't expire during the backoff; its hash still sends the next check out.
+				if ( is_array( $cached_data ) ) {
+					set_transient( $cache_key, $cached_data, 12 * HOUR_IN_SECONDS );
+				}
+
 				return self::get_cached_products( $cached_data, $hash );
 			}
 		} else {

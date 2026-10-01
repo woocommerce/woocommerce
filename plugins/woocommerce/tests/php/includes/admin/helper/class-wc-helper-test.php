@@ -1268,8 +1268,8 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		try {
 			WC_Helper::update_auth_option( 'token', 'secret', 123, home_url() );
 		} finally {
-			remove_filter( 'pre_http_request', $http_mock );
 			WC_Helper_Options::update( 'auth', $previous_auth );
+			remove_filter( 'pre_http_request', $http_mock );
 		}
 
 		$this->assertFalse(

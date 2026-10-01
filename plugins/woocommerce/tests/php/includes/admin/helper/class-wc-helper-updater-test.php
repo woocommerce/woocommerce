@@ -348,7 +348,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 			),
 			'errors'   => array(),
 		);
-		set_transient( '_woocommerce_helper_updates', $cached_data, HOUR_IN_SECONDS );
+		set_transient( '_woocommerce_helper_updates', $cached_data, MINUTE_IN_SECONDS );
 
 		$requests  = 0;
 		$http_mock = static function () use ( $status, &$requests ) {
@@ -401,6 +401,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 1, $requests, 'A check inside the backoff window should not call the API, even after the installed version changed' );
 		$this->assertGreaterThan( time(), $backoff_until, 'A failed check should record a backoff window' );
 		$this->assertLessThanOrEqual( time() + 15 * MINUTE_IN_SECONDS, $backoff_until, 'The backoff after a failed check should be short' );
+		$this->assertGreaterThan( $backoff_until, (int) get_option( '_transient_timeout__woocommerce_helper_updates' ), 'The cached data should be renewed so it outlasts the backoff' );
 	}
 
 	/**
