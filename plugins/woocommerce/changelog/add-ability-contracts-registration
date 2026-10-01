@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Let abilities opt in to in-memory writes and extension fields with the in_memory_write and extension_fields registration arguments, behind the ability contracts feature.

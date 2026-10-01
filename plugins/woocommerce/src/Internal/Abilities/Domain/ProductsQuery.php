@@ -50,6 +50,11 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'output_schema'       => self::get_collection_output_schema( 'products', self::get_product_output_schema() ),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_query_products' ),
+			'extension_fields'    => array(
+				'object_type' => 'product',
+				'output'      => 'products',
+				'load'        => 'wc_get_product',
+			),
 			'meta'                => array(
 				'show_in_rest' => true,
 				'mcp'          => array(

@@ -232,7 +232,7 @@ class ProductAbilityContractsTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_product_update_rejected', $result->get_error_code() );
+		$this->assertSame( 'woocommerce_in_memory_write_rejected', $result->get_error_code() );
 		$this->assertSame( "Product {$variation_id} is of type variation. It accepts extensions.test_variation.", $result->get_error_message() );
 		$this->assertSame( '', wc_get_product( $variation_id )->get_meta( '_test_simple_code' ) );
 	}
@@ -369,7 +369,7 @@ class ProductAbilityContractsTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_product_update_rejected', $result->get_error_code() );
+		$this->assertSame( 'woocommerce_in_memory_write_rejected', $result->get_error_code() );
 		$this->assertSame( "Product {$product->get_id()} is of type external. It accepts no extension fields.", $result->get_error_message() );
 	}
 

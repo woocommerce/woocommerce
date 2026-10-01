@@ -2170,7 +2170,7 @@
         }
     },
     "6 woocommerce/product-create": {
-        "code": "woocommerce_product_create_rejected",
+        "code": "woocommerce_in_memory_write_rejected",
         "message": "Blocked by validator.",
         "data": {
             "status": 400
@@ -2206,7 +2206,7 @@
         }
     },
     "8 woocommerce/product-create": {
-        "code": "woocommerce_product_create_rejected",
+        "code": "woocommerce_in_memory_write_rejected",
         "message": "Code rejected.",
         "data": {
             "status": 400
@@ -2242,7 +2242,7 @@
         }
     },
     "10 woocommerce/product-create": {
-        "code": "woocommerce_product_create_rejected",
+        "code": "woocommerce_in_memory_write_rejected",
         "message": "Contract rejected.",
         "data": {
             "status": 400
@@ -2357,7 +2357,7 @@
         "data": null
     },
     "18 woocommerce/product-update": {
-        "code": "woocommerce_product_update_rejected",
+        "code": "woocommerce_in_memory_write_rejected",
         "message": "Blocked by validator.",
         "data": {
             "status": 400
@@ -2393,7 +2393,7 @@
         }
     },
     "20 woocommerce/product-update": {
-        "code": "woocommerce_product_update_rejected",
+        "code": "woocommerce_in_memory_write_rejected",
         "message": "Product product-3 is of type external. It accepts no extension fields.",
         "data": {
             "status": 400
@@ -2429,7 +2429,7 @@
         }
     },
     "22 woocommerce/product-update": {
-        "code": "woocommerce_product_update_rejected",
+        "code": "woocommerce_in_memory_write_rejected",
         "message": "Product product-4 is of type variation. It accepts extensions.test_variation.",
         "data": {
             "status": 400
@@ -2443,7 +2443,7 @@
         }
     },
     "24 woocommerce/product-update": {
-        "code": "woocommerce_product_update_rejected",
+        "code": "woocommerce_in_memory_write_rejected",
         "message": "Membership rejected.",
         "data": {
             "status": 400
@@ -2725,7 +2725,7 @@
         "per_page": 10
     },
     "save failure": [
-        "woocommerce_product_create_failed",
-        "Failed to save product."
+        "woocommerce_in_memory_write_save_failed",
+        "The change could not be saved."
     ]
 }
