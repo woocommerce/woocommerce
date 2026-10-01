@@ -94,7 +94,7 @@ packages:
     - 'tools/eslint-config'
     - 'tools/package-release'
     - 'tools/cherry-pick'
-    - 'tools/release-contributors'
+    - 'tools/release-posts'
     - 'tools/storybook'
     - 'tools/monorepo-utils'
 

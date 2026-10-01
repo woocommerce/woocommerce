@@ -155,20 +155,20 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install prerequisites
-        working-directory: tools/release-contributors
+        working-directory: tools/release-posts
         run: |
           pnpm install
 
       - name: Generate contributors list
         id: generate-contributors-list
-        working-directory: tools/release-contributors
+        working-directory: tools/release-posts
         env:
           GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           CURRENT_BRANCH="release/${{ needs.extract-versions.outputs.current_version }}"
           PREVIOUS_BRANCH="release/${{ needs.extract-versions.outputs.previous_version }}"
 
-          OUTPUT=$(pnpm run release-contributors ${CURRENT_BRANCH} ${PREVIOUS_BRANCH})
+          OUTPUT=$(pnpm run release-post contributors ${CURRENT_BRANCH} ${PREVIOUS_BRANCH})
           echo "$OUTPUT"
 
           HTML_FILE_PATH=$(echo "$OUTPUT" | grep "Contributors HTML generated at" | sed 's/.*Contributors HTML generated at //')

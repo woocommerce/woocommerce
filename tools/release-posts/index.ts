@@ -17,7 +17,11 @@ import { renderTemplate } from './lib/render-template';
 dotenv.config();
 
 const program = new Command()
-	.name( 'release-contributors' )
+	.name( 'release-post' )
+	.description( 'Utilities for WooCommerce release posts.' );
+
+program
+	.command( 'contributors' )
 	.description(
 		'Generate an HTML contributors list for a WooCommerce release.'
 	)

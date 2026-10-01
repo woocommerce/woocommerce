@@ -4141,7 +4141,7 @@ importers:
         specifier: 5.7.x
         version: 5.7.3
 
-  tools/release-contributors:
+  tools/release-posts:
     dependencies:
       '@commander-js/extra-typings':
         specifier: ^0.1.0

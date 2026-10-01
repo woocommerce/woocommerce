@@ -1,10 +1,10 @@
 {
-	"name": "release-contributors",
+	"name": "release-posts",
 	"version": "0.0.1",
-	"description": "Generate a WooCommerce release contributors list",
+	"description": "Utilities for WooCommerce release posts",
 	"scripts": {
 		"lint": "tsc --noEmit",
-		"release-contributors": "node -r ts-node/register ./index.ts"
+		"release-post": "node -r ts-node/register ./index.ts"
 	},
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
