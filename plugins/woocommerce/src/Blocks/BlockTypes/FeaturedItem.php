@@ -484,7 +484,7 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	public function get_styles( $attributes ) {
 		$style = sprintf( '--wc-featured-item-min-height:%dpx;', wc_get_theme_support( 'featured_block::default_height', 500 ) );
 
-		if ( isset( $attributes['minHeight'] ) ) {
+		if ( isset( $attributes['minHeight'] ) && ! isset( $attributes['style']['dimensions']['minHeight'] ) ) {
 			$style .= sprintf( 'min-height:%dpx;', intval( $attributes['minHeight'] ) );
 		}
 
