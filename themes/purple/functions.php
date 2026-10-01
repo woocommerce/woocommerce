@@ -146,15 +146,12 @@ if ( ! function_exists( 'purple_styles' ) ) :
 
 		// Register theme stylesheet. Use the template (parent) directory and
 		// version so the file still resolves when a child theme is active.
-		wp_register_style(
+		wp_enqueue_style(
 			'purple-style',
 			get_template_directory_uri() . '/style.css',
 			array(),
 			$theme_version
 		);
-
-		// Enqueue theme stylesheet.
-		wp_enqueue_style( 'purple-style' );
 
 		foreach ( purple_get_woocommerce_stylesheets() as $version => $relative_path ) {
 			wp_enqueue_style(
