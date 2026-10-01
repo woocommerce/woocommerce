@@ -2,8 +2,6 @@
 namespace Automattic\WooCommerce\Blocks\Utils;
 
 use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
-use Automattic\WooCommerce\Internal\ProductVariations\VariationsLoopOptimizationService;
-use Automattic\WooCommerce\Internal\VariationGallery\LegacyVariationGalleryCompatibility;
 
 /**
  * Utility methods used for the Product Gallery block.
@@ -424,23 +422,10 @@ class ProductGalleryUtils {
 		$parent_gallery_ids    = array_filter( $parent_gallery_ids, 'wp_attachment_is_image' );
 		$parent_gallery_extras = array_values( array_diff( $parent_gallery_ids, array( $parent_featured_id ) ) );
 
-		$loop_optimizer           = wc_get_container()->get( VariationsLoopOptimizationService::class );
-		$read_image_ids_from_meta = null;
+		// Performance note: meta-based optimization (populating images from metas) was evaluated and dismissed due to impact to complexity ratio.
 		foreach ( $variations as $variation_id ) {
 			$variation_id = (int) $variation_id;
-			$variation    = null;
-			if ( null === $read_image_ids_from_meta ) {
-				$variation                = wc_get_product( $variation_id );
-				$read_image_ids_from_meta = $loop_optimizer->applicable_to_image_metas( $variation );
-			}
-
-			// Performance note: alternate between supplying id vs object to define using faster meta-values vs object getters.
-			if ( $read_image_ids_from_meta ) {
-				$entry = self::build_variation_gallery_entry( $variation_id, $parent_featured_id, $parent_gallery_extras );
-			} else {
-				$variation = $variation ?? wc_get_product( $variation_id );
-				$entry     = self::build_variation_gallery_entry( $variation, $parent_featured_id, $parent_gallery_extras );
-			}
+			$entry        = self::build_variation_gallery_entry( $variation_id, $parent_featured_id, $parent_gallery_extras );
 
 			if ( null !== $entry ) {
 				$variation_gallery_data[ $variation_id ] = $entry;
@@ -460,31 +445,24 @@ class ProductGalleryUtils {
 	 * - own featured + gallery → variation images only
 	 * - gallery only, no own featured (potential AVI shape) → parent featured + variation gallery
 	 *
-	 * @param mixed $variation             Variation ID or object.
+	 * @param int   $variation_id          Variation post ID.
 	 * @param int   $parent_featured_id    Parent product's featured image ID (0 if missing/invalid).
 	 * @param int[] $parent_gallery_extras Parent gallery image IDs, with the featured filtered out.
 	 * @return array<string, mixed>|null
 	 */
-	private static function build_variation_gallery_entry( $variation, int $parent_featured_id, array $parent_gallery_extras ): ?array {
-		if ( ! is_int( $variation ) && ! $variation instanceof \WC_Product_Variation ) {
+	private static function build_variation_gallery_entry( int $variation_id, int $parent_featured_id, array $parent_gallery_extras ): ?array {
+		$variation = wc_get_product( $variation_id );
+
+		if ( ! $variation instanceof \WC_Product_Variation ) {
 			return null;
 		}
 
-		// Performance note: alternate between object-getters and meta reads (variation data is primed at this point).
-		if ( $variation instanceof \WC_Product_Variation ) {
-			$featured_id = (int) $variation->get_image_id();
-			$gallery_ids = $variation->get_gallery_image_ids();
-		} else {
-			$featured_id = (int) get_post_meta( $variation, '_thumbnail_id', true );
-			$gallery     = (string) get_post_meta( $variation, '_product_image_gallery', true );
-			if ( '' === $gallery && ! LegacyVariationGalleryCompatibility::is_variation_id_core_managed( $variation ) ) {
-				$gallery = (string) get_post_meta( $variation, '_wc_additional_variation_images', true );
-			}
-			$gallery_ids = array_filter( explode( ',', $gallery ) );
-		}
+		$featured_id    = (int) $variation->get_image_id();
+		$featured_valid = $featured_id && wp_attachment_is_image( $featured_id );
 
-		$variation_gallery_ids = array_values( array_filter( array_map( 'intval', $gallery_ids ), 'wp_attachment_is_image' ) );
-		$featured_valid        = $featured_id && wp_attachment_is_image( $featured_id );
+		$variation_gallery_ids = array_map( 'intval', $variation->get_gallery_image_ids() );
+		$variation_gallery_ids = array_filter( $variation_gallery_ids, 'wp_attachment_is_image' );
+		$variation_gallery_ids = array_values( $variation_gallery_ids );
 
 		// No images from variation - full parent fallback.
 		if ( ! $featured_valid && empty( $variation_gallery_ids ) ) {

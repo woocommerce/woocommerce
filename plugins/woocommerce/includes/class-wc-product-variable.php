@@ -10,7 +10,6 @@
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
-use Automattic\WooCommerce\Internal\ProductVariations\VariationsLoopOptimizationService;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -343,48 +342,38 @@ class WC_Product_Variable extends WC_Product {
 	 * @phpstan-return ($return is 'array' ? array[] : WC_Product_Variation[])
 	 */
 	public function get_available_variations( $return = 'array' ) {
-		$variations    = array();
-		$variation_ids = $this->get_children();
+		$variations              = array();
+		$variation_ids           = $this->get_children();
+		$hide_out_of_stock_items = ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) );
 
 		if ( ! empty( $variation_ids ) ) {
 			// Prime caches to reduce future queries.
 			_prime_post_caches( $variation_ids );
+		}
 
-			$product_id              = $this->get_id();
-			$hide_out_of_stock_items = ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) );
+		// Performance note: meta-based optimization (skipping aout-of-stock variations) was evaluated and dismissed due to impact to complexity ratio.
+		foreach ( $variation_ids as $variation_id ) {
+			$variation = wc_get_product( $variation_id );
 
-			$loop_optimizer            = wc_get_container()->get( VariationsLoopOptimizationService::class );
-			$skip_out_of_stock_by_meta = null;
-			foreach ( $variation_ids as $variation_id ) { //
-				// Performance note: inactive optimization for the majority of stores; leverage lightweight primed data read before constructing product object.
-				// Verified taxonomy terms approach ('product_visibility' -> ProductStockStatus::OUT_OF_STOCK): some importers/migrators are blocking this path.
-				if ( $skip_out_of_stock_by_meta && ProductStockStatus::OUT_OF_STOCK === get_post_meta( $variation_id, '_stock_status', true ) ) {
-					continue;
-				}
-
-				$variation                 = wc_get_product( $variation_id );
-				$skip_out_of_stock_by_meta = $skip_out_of_stock_by_meta ?? ( $hide_out_of_stock_items && $loop_optimizer->applicable_to_stock_status_meta( $variation ) );
-
-				// Hide out of stock variations if 'Hide out of stock items from the catalog' is checked.
-				if ( ! $variation || ! $variation->exists() || ( $hide_out_of_stock_items && ! $variation->is_in_stock() ) ) {
-					continue;
-				}
-
-				/**
-				 * Filter 'woocommerce_hide_invisible_variations' to optionally hide invisible variations (disabled variations and variations with empty price).
-				 *
-				 * @since 2.6.8
-				 *
-				 * @param  bool                  $hide        Whether to hide invisible variations. Default true.
-				 * @param  int                   $product_id  The ID of the variation.
-				 * @param  WC_Product_Variation  $variation   The variation object.
-				 */
-				if ( apply_filters( 'woocommerce_hide_invisible_variations', true, $product_id, $variation ) && ! $variation->variation_is_visible() ) {
-					continue;
-				}
-
-				$variations[] = $variation;
+			// Hide out of stock variations if 'Hide out of stock items from the catalog' is checked.
+			if ( ! $variation || ! $variation->exists() || ( $hide_out_of_stock_items && ! $variation->is_in_stock() ) ) {
+				continue;
 			}
+
+			/**
+			 * Filter 'woocommerce_hide_invisible_variations' to optionally hide invisible variations (disabled variations and variations with empty price).
+			 *
+			 * @since 2.6.8
+			 *
+			 * @param  bool                  $hide        Whether to hide invisible variations. Default true.
+			 * @param  int                   $product_id  The ID of the variation.
+			 * @param  WC_Product_Variation  $variation   The variation object.
+			 */
+			if ( apply_filters( 'woocommerce_hide_invisible_variations', true, $this->get_id(), $variation ) && ! $variation->variation_is_visible() ) {
+				continue;
+			}
+
+			$variations[] = $variation;
 		}
 
 		if ( 'array' === $return && ! empty( $variations ) ) {
@@ -414,6 +403,8 @@ class WC_Product_Variable extends WC_Product {
 		 * - The transient improves the 95th percentile (P95) load time of the product page by approximately 10%, but does not affect the median.
 		 * - The transient breaks backward compatibility. The woocommerce_is_purchasable filter from \WC_Product::is_purchasable is used by
 		 *   extensions to control product purchasability based on user role, membership, geolocation, or login status.
+		 *
+		 * Meta-based optimization (skipping aout-of-stock variations) was evaluated and dismissed due to impact to complexity ratio.
 		 */
 		$has_purchasable_variations = false;
 		$variation_ids              = $this->get_children();
@@ -421,18 +412,8 @@ class WC_Product_Variable extends WC_Product {
 			// Prime caches to reduce future queries.
 			_prime_post_caches( $variation_ids );
 
-			$loop_optimizer            = wc_get_container()->get( VariationsLoopOptimizationService::class );
-			$skip_out_of_stock_by_meta = null;
-			foreach ( $variation_ids as $variation_id ) { //
-				// Performance note: applicable to estimated 90% of stores; leverage lightweight primed data read before constructing product object.
-				// Verified taxonomy terms approach ('product_visibility' -> ProductStockStatus::OUT_OF_STOCK): some importers/migrators are blocking this path.
-				if ( $skip_out_of_stock_by_meta && ProductStockStatus::OUT_OF_STOCK === get_post_meta( $variation_id, '_stock_status', true ) ) {
-					continue;
-				}
-
-				$variation                 = wc_get_product( $variation_id );
-				$skip_out_of_stock_by_meta = $skip_out_of_stock_by_meta ?? $loop_optimizer->applicable_to_stock_status_meta( $variation );
-
+			foreach ( $variation_ids as $variation_id ) {
+				$variation = wc_get_product( $variation_id );
 				if ( $variation && $variation->is_purchasable() && $variation->is_in_stock() ) {
 					$has_purchasable_variations = true;
 					break;

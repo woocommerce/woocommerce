@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Tests\Blocks\Utils;
 
 use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
 use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
-use Automattic\WooCommerce\Internal\ProductVariations\VariationsLoopOptimizationService;
 use WP_UnitTestCase;
 
 /**
@@ -284,46 +283,6 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 			array( $shared_id, $parent_gallery_extra ),
 			$entry['image_ids']
 		);
-	}
-
-	/**
-	 * @testdox 'get_product_variation_gallery_data' produces identical results via the optimized meta path and the object getter path.
-	 */
-	public function test_get_product_variation_gallery_data_meta_and_object_paths_produce_same_result(): void {
-		$parent_featured_id    = $this->create_image_attachment( 'Parent Featured', 'parent-featured.jpg' );
-		$variation_featured_id = $this->create_image_attachment( 'Variation Featured', 'variation-featured.jpg' );
-
-		$product = \WC_Helper_Product::create_variation_product();
-		$product->set_image_id( $parent_featured_id );
-		$product->save();
-
-		$variation = wc_get_product( $product->get_children()[0] );
-		$variation->set_image_id( $variation_featured_id );
-		$variation->save();
-
-		$optimizer = wc_get_container()->get( VariationsLoopOptimizationService::class );
-
-		// Optimized path: no image filters active, meta reads used. This specific test doesn't allow to capture instantioations count.
-		$this->assertTrue( $optimizer->applicable_to_image_metas( $variation ), 'Meta path should be applicable when no image filter is active.' );
-		$result_via_meta = ProductGalleryUtils::get_product_variation_gallery_data( $product );
-
-		$this->assertCount( count( $product->get_children() ), $result_via_meta, 'All variations should have gallery data via the optimized path.' );
-		$this->assertSame( $variation_featured_id, $result_via_meta[ $variation->get_id() ]['image_id'], 'Variation featured image must match via the optimized path.' );
-
-		// Non-optimized path: add a pass-through filter to force object getters.
-		add_filter( 'woocommerce_product_variation_get_image_id', 'intval' );
-
-		$this->assertFalse( $optimizer->applicable_to_image_metas( $variation ), 'Meta path should not be applicable when an image filter is active.' );
-		$result_via_object = ProductGalleryUtils::get_product_variation_gallery_data( $product );
-
-		remove_filter( 'woocommerce_product_variation_get_image_id', 'intval' );
-
-		// Both paths must produce the same result.
-		$this->assertSame( $result_via_meta, $result_via_object, 'Optimized meta path and object getter path must produce identical gallery data.' );
-
-		$product->delete( true );
-		wp_delete_attachment( $parent_featured_id, true );
-		wp_delete_attachment( $variation_featured_id, true );
 	}
 
 	/**
