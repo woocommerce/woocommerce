@@ -134,15 +134,19 @@ class WC_Shipping_Calculator_Template_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Multiple countries should retain the existing country-filter behavior.
+	 * @testdox Multiple countries should retain the existing country-filter behavior without a hidden fallback.
 	 */
-	public function test_multiple_shipping_countries_can_still_hide_country_field() {
+	public function test_multiple_shipping_countries_can_still_hide_country_field(): void {
 		$this->set_shipping_countries( array( 'GR', 'CY' ) );
 		add_filter( 'woocommerce_shipping_calculator_enable_country', '__return_false' );
 
 		$output = wc_get_template_html( 'cart/shipping-calculator.php' );
 
 		$this->assertStringNotContainsString( 'id="calc_shipping_country_field"', $output );
+		$inputs = new WP_HTML_Tag_Processor( $output );
+		while ( $inputs->next_tag( array( 'tag_name' => 'input' ) ) ) {
+			$this->assertFalse( 'hidden' === $inputs->get_attribute( 'type' ) && 'calc_shipping_country' === $inputs->get_attribute( 'name' ) );
+		}
 	}
 
 	/**
