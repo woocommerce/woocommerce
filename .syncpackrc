@@ -73,6 +73,7 @@
 				"stylelint"
 			],
 			"packages": [
+				"@woocommerce/admin-library",
 				"@woocommerce/classic-assets"
 			],
 			"pinVersion": "^16.9.0"
