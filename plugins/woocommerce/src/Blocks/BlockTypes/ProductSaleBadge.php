@@ -67,7 +67,8 @@ class ProductSaleBadge extends AbstractBlock {
 
 		$align = isset( $attributes['align'] ) ? $attributes['align'] : '';
 
-		$sale_text     = $attributes['saleText'] ?? __( 'Sale', 'woocommerce' );
+		$sale_text     = $attributes['saleText'] ?? '';
+		$sale_text     = '' === $sale_text ? __( 'Sale', 'woocommerce' ) : $sale_text;
 		$badge_content = $attributes['badgeContent'] ?? 'text';
 
 		if ( in_array( $badge_content, array( 'amount', 'percentage' ), true ) ) {
@@ -98,6 +99,9 @@ class ProductSaleBadge extends AbstractBlock {
 			}
 
 			if ( $amount > 0 ) {
+				if ( 'percentage' === $badge_content && round( $percentage * 100 ) < 1 ) {
+					return '';
+				}
 				$value = 'percentage' === $badge_content
 					? round( $percentage * 100 ) . '%'
 					: html_entity_decode( wp_strip_all_tags( wc_price( $amount ) ), ENT_QUOTES, get_bloginfo( 'charset' ) );

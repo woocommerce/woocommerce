@@ -2,14 +2,7 @@
  * External dependencies
  */
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
-import {
-	PanelBody,
-	TextControl,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalToggleGroupControl as ToggleGroupControl,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
-} from '@wordpress/components';
+import { PanelBody, SelectControl, TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import type { BlockEditProps } from '@wordpress/blocks';
 import type { ReactElement } from 'react';
@@ -43,7 +36,7 @@ const Edit = ( {
 		<>
 			<InspectorControls>
 				<PanelBody title={ __( 'Badge content', 'woocommerce' ) }>
-					<ToggleGroupControl
+					<SelectControl
 						__next40pxDefaultSize
 						__nextHasNoMarginBottom
 						label={ __( 'Show', 'woocommerce' ) }
@@ -57,21 +50,21 @@ const Edit = ( {
 								setAttributes( { badgeContent } );
 							}
 						} }
-						isBlock
-					>
-						<ToggleGroupControlOption
-							label={ __( 'Text', 'woocommerce' ) }
-							value="text"
-						/>
-						<ToggleGroupControlOption
-							label={ __( 'Amount', 'woocommerce' ) }
-							value="amount"
-						/>
-						<ToggleGroupControlOption
-							label={ __( 'Percentage', 'woocommerce' ) }
-							value="percentage"
-						/>
-					</ToggleGroupControl>
+						options={ [
+							{
+								label: __( 'Text', 'woocommerce' ),
+								value: 'text',
+							},
+							{
+								label: __( 'Amount', 'woocommerce' ),
+								value: 'amount',
+							},
+							{
+								label: __( 'Percentage', 'woocommerce' ),
+								value: 'percentage',
+							},
+						] }
+					/>
 					{ ! attributes.badgeContent ||
 					attributes.badgeContent === 'text' ? (
 						<TextControl
