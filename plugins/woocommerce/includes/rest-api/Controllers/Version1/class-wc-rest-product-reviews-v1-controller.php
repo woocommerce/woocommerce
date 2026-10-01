@@ -320,7 +320,7 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		}
 
 		update_comment_meta( $product_review_id, 'rating', ! empty( $request['rating'] ) ? $request['rating'] : '0' );
-		WC_Comments::add_comment_purchase_verification( $product_review_id );
+		wc_review_is_from_verified_owner( $product_review_id );
 
 		$product_review = get_comment( $product_review_id );
 

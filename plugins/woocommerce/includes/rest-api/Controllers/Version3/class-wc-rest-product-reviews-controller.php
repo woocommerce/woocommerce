@@ -474,7 +474,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		if ( isset( $request['verified'] ) && ! empty( $request['verified'] ) ) {
 			update_comment_meta( $review_id, 'verified', $request['verified'] );
 		} else {
-			WC_Comments::add_comment_purchase_verification( $review_id );
+			wc_review_is_from_verified_owner( $review_id );
 		}
 
 		$review = get_comment( $review_id );
