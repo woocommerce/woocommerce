@@ -97,7 +97,7 @@ final class PaymentRecovery {
 		 */
 		wc_get_logger()->error(
 			sprintf(
-				'Checkout for order #%1$d failed after payment was taken: %2$s: %3$s in %4$s:%5$d',
+				'Checkout for order #%1$d failed after it moved past the payment step: %2$s: %3$s in %4$s:%5$d',
 				$order->get_id(),
 				get_class( $error ),
 				$error->getMessage(),
@@ -109,8 +109,8 @@ final class PaymentRecovery {
 
 		$order->add_order_note(
 			sprintf(
-				/* translators: %s: the error that was raised after payment was taken. */
-				__( 'Checkout could not be completed after payment was taken: %s', 'woocommerce' ),
+				/* translators: %s: the error that was raised after the order moved past the payment step. */
+				__( 'Checkout could not be completed after the order moved past the payment step. The order keeps the status the gateway set: %s', 'woocommerce' ),
 				wp_strip_all_tags( $error->getMessage() )
 			)
 		);

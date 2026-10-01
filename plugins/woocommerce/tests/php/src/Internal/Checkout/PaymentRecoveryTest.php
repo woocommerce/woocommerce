@@ -111,16 +111,16 @@ class PaymentRecoveryTest extends WC_Unit_Test_Case {
 
 		PaymentRecovery::record_failure_after_payment( $order, $error, 'checkout' );
 
-		$this->assertLogged( 'error', sprintf( 'Checkout for order #%d failed after payment was taken', $order->get_id() ) );
+		$this->assertLogged( 'error', sprintf( 'Checkout for order #%d failed after it moved past the payment step', $order->get_id() ) );
 		$this->assertLogged( 'error', 'push_order() on null' );
 		$this->assertLogged( 'error', __FILE__ );
 
 		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
 
 		$this->assertStringContainsString(
-			'Checkout could not be completed after payment was taken: Call to a member function push_order() on null',
+			'Checkout could not be completed after the order moved past the payment step. The order keeps the status the gateway set: Call to a member function push_order() on null',
 			$notes[0]->content,
-			'The merchant is told what failed after the payment step.'
+			'The merchant is told what failed and why the order kept its status.'
 		);
 	}
 
