@@ -31,6 +31,11 @@ class WC_Helper_Updater {
 	private const CAMPAIGN_PLUGIN_ROW = 'pu_plugin_row';
 
 	/**
+	 * Transient holding the last successful update check, kept longer than the main cache so a failed check has something to fall back on.
+	 */
+	private const LAST_GOOD_CACHE_KEY = '_woocommerce_helper_updates_last_good';
+
+	/**
 	 * Loads the class, runs on init.
 	 */
 	public static function load() {
@@ -1040,6 +1045,21 @@ class WC_Helper_Updater {
 	}
 
 	/**
+	 * The update data to serve when a check is skipped or fails: the main cache while it holds
+	 * products, otherwise the longer-lived copy of the last successful check.
+	 *
+	 * @param mixed $data The data retrieved from the main transient, of any shape.
+	 * @return mixed
+	 */
+	private static function get_fallback_update_data( $data ) {
+		if ( is_array( $data ) && isset( $data['products'] ) && is_array( $data['products'] ) ) {
+			return $data;
+		}
+
+		return get_transient( self::LAST_GOOD_CACHE_KEY );
+	}
+
+	/**
 	 * Extract the products from a cached update-check payload.
 	 *
 	 * Used while backing off and when the update check fails. The server-side `autoupdate`
@@ -1118,7 +1138,7 @@ class WC_Helper_Updater {
 		 * button clears it. Return the last cached products, if any.
 		 */
 		if ( WC_Helper_API_Backoff::is_rate_limited( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK ) ) {
-			return self::get_cached_products( $data, $hash );
+			return self::get_cached_products( self::get_fallback_update_data( $data ), $hash );
 		}
 
 		$cached_data = $data;
@@ -1168,15 +1188,14 @@ class WC_Helper_Updater {
 					WC_Helper_API_Backoff::record( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK, 15 * MINUTE_IN_SECONDS );
 				}
 
-				// Renew the old cache so it can't expire during the backoff; its hash still sends the next check out.
-				if ( is_array( $cached_data ) ) {
-					set_transient( $cache_key, $cached_data, 12 * HOUR_IN_SECONDS );
-				}
-
-				return self::get_cached_products( $cached_data, $hash );
+				return self::get_cached_products( self::get_fallback_update_data( $cached_data ), $hash );
 			}
+
+			// The server refused the site, so its old updates must not come back as a fallback later.
+			delete_transient( self::LAST_GOOD_CACHE_KEY );
 		} else {
 			$data['products'] = $products;
+			set_transient( self::LAST_GOOD_CACHE_KEY, $data, WEEK_IN_SECONDS );
 		}
 
 		set_transient( $cache_key, $data, 12 * HOUR_IN_SECONDS );
@@ -1321,6 +1340,7 @@ class WC_Helper_Updater {
 	 */
 	public static function flush_updates_cache() {
 		delete_transient( '_woocommerce_helper_updates' );
+		delete_transient( self::LAST_GOOD_CACHE_KEY );
 		self::expire_updates_cache();
 	}
 
