@@ -110,7 +110,7 @@ final class MarketplaceTaskExperiment {
 	 * @return bool
 	 */
 	private function should_request_assignment( Task $task ): bool {
-		if ( $this->has_ended() || 'yes' !== get_option( 'woocommerce_allow_tracking' ) || $task->is_dismissed() ) {
+		if ( $this->has_ended() || ! \WC_Site_Tracking::is_tracking_enabled() || $task->is_dismissed() ) {
 			return false;
 		}
 

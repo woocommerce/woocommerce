@@ -227,12 +227,13 @@ class MarketplaceTaskExperimentTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not request an assignment when the task is dismissed, complete, its list is hidden, there is no tk_ai cookie, or the experiment has ended.
+	 * @testdox Should not request an assignment when the task is dismissed, complete, its list is hidden, there is no tk_ai cookie, tracking is filtered off, or the experiment has ended.
 	 *
 	 * @testWith ["dismissed"]
 	 *           ["visited"]
 	 *           ["hidden_list"]
 	 *           ["no_anon_id"]
+	 *           ["tracking_filtered_off"]
 	 *           ["ended"]
 	 *
 	 * @param string $state Task state that should skip the request.
@@ -248,6 +249,8 @@ class MarketplaceTaskExperimentTest extends WC_Unit_Test_Case {
 			update_option( TaskList::HIDDEN_OPTION, array( 'extended' ) );
 		} elseif ( 'no_anon_id' === $state ) {
 			unset( $_COOKIE['tk_ai'] );
+		} elseif ( 'tracking_filtered_off' === $state ) {
+			add_filter( 'woocommerce_apply_user_tracking', '__return_false' );
 		} else {
 			$this->register_legacy_proxy_function_mocks( array( 'time' => fn() => 1803859200 ) );
 		}
