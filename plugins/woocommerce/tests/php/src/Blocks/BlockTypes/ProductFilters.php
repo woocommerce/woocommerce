@@ -116,7 +116,7 @@ class ProductFilters extends \WP_UnitTestCase {
 			$block->context['productCollectionLocation'] = array( 'type' => 'archive' );
 		}
 
-		$html = $this->product_filters->render_callback( array(), '', $block );
+		$html = $block->render();
 		$tags = new \WP_HTML_Tag_Processor( $html );
 
 		$this->assertTrue( $tags->next_tag( array( 'class_name' => 'wc-block-product-filters' ) ) );
