@@ -40,7 +40,7 @@ $settings = array(
 			'no'  => __( 'No, I will enter costs exclusive of tax', 'woocommerce' ),
 			'yes' => __( 'Yes, I will enter costs inclusive of tax', 'woocommerce' ),
 		),
-		'description' => __( 'If you select "Yes", customers who pay tax pay exactly the cost you enter, and the tax is worked out from it. Only applies when the tax status is taxable. Formulas are evaluated first and the result is treated as including tax.', 'woocommerce' ),
+		'description' => __( 'Select "Yes" if the cost you enter already includes tax. Customers pay that cost, and any tax is worked out from it. Only applies when the tax status is taxable. Formulas are evaluated first and the result is treated as including tax.', 'woocommerce' ),
 		'desc_tip'    => true,
 	),
 	'cost'               => array(

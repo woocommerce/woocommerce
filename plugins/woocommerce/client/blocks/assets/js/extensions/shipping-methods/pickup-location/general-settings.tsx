@@ -158,7 +158,7 @@ const GeneralSettings = () => {
 								) }
 								name="local_pickup_prices_include_tax"
 								help={ __(
-									'If you select "Yes", customers who pay tax pay exactly the cost you enter, and the tax is worked out from it. Only applies when the tax status is taxable.',
+									'Select "Yes" if the cost you enter already includes tax. Customers pay that cost, and any tax is worked out from it. Only applies when the tax status is taxable.',
 									'woocommerce'
 								) }
 								options={ [
