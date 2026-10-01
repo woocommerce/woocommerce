@@ -997,7 +997,7 @@ trait ProductAbilityTrait {
 	 */
 	protected static function get_product_output_schema(): array {
 		$schema = self::get_core_product_output_schema();
-		if ( AbilityContracts::is_enabled() && null !== AbilityFieldRegistry::instance()->schema( 'product' ) ) {
+		if ( AbilityContracts::is_enabled() ) {
 			$schema['properties']['type']['enum'] = array_values(
 				array_unique(
 					array_merge(

@@ -43,7 +43,11 @@ final class WCDataSubject implements InMemorySubject {
 		$snapshot              = $this->data->get_data();
 		$snapshot['meta_data'] = array_map(
 			static function ( $meta ) {
-				return $meta->get_data();
+				return array(
+					'id'    => $meta->id,
+					'key'   => $meta->key,
+					'value' => $meta->value,
+				);
 			},
 			$this->data->get_meta_data()
 		);

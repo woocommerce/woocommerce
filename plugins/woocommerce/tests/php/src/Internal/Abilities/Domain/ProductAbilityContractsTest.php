@@ -795,6 +795,39 @@ class ProductAbilityContractsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should list a product type registered without extension fields in the output type enum.
+	 */
+	public function test_type_registered_without_fields_is_a_valid_output_type(): void {
+		remove_action( 'woocommerce_register_ability_fields', array( $this, 'register_test_fields' ) );
+		$this->reset_registries();
+		$register = static function ( AbilityFieldRegistry $registry ) {
+			$registry->register_enum_value(
+				'product',
+				'product_type_alias',
+				'contract',
+				array(
+					'namespace'   => 'test_contract',
+					'description' => 'A contract product sold by the test extension.',
+				)
+			);
+		};
+		add_action( 'woocommerce_register_ability_fields', $register );
+		$this->set_feature( true );
+		remove_action( 'woocommerce_register_ability_fields', $register );
+
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'product_type_alias' => 'contract',
+				'name'               => 'Contract plan',
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'contract', $result['product']['type'] );
+		$this->assertContains( 'contract', wp_get_ability( 'woocommerce/products-query' )->get_output_schema()['properties']['products']['items']['properties']['type']['enum'] );
+	}
+
+	/**
 	 * @testdox Should keep product ability schemas and outputs as recorded, with the feature on and off.
 	 *
 	 * @testWith [true]
