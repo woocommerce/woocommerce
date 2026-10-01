@@ -19,4 +19,8 @@ A screen is experimental: every part of this can change in any release. See `plu
 
 The screen opens at `admin.php?page=wc-payment-settings-wp-admin&p=/settings/{id}`.
 
-Add `classic_section` with the gateway's classic settings section (its `section` query argument) to redirect that page to the screen. Only GET requests redirect, other query arguments are passed to the route, and adding `wc_classic_settings=1` keeps the classic page. The screen then shows a "Use classic settings" link.
+To open a group as its own page, give it a `panel` layout with `openAs: { type: 'page' }` in View Config. WooCommerce shows a button where the group sits, and the group opens at `/settings/{id}/{group}` with breadcrumbs back. A sub-page can contain other sub-pages, each adding a segment to the path. To link to a sub-page from the extension's own control instead, use `openAs: { type: 'page', button: false }` and link to `admin.php?page=wc-payment-settings-wp-admin&p=/settings/{id}/{group}`. Links to the screen's own pages open in place.
+
+Each page is its own form. Save and Discard cover the fields on the current page, and leaving a page with unsaved changes asks before discarding them.
+
+Add `classic_section` with the gateway's classic settings section (its `section` query argument) to redirect that page to the screen. Only GET requests redirect, other query arguments are passed to the route, and adding `wc_classic_settings=1` keeps the classic page. The screen then shows a "Use classic settings" link. To open an old link at a sub-page, turn its query arguments into a path with the `woocommerce_experimental_payment_settings_classic_location` filter.

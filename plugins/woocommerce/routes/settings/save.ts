@@ -8,6 +8,7 @@ import { useState } from 'react';
 /**
  * Internal dependencies
  */
+import { pickEdits } from './page-edits';
 import { saveAndReload } from './save-and-reload';
 import type { SaveNotice } from './save-and-reload';
 import { NO_KEY } from './screen';
@@ -25,12 +26,17 @@ interface ResolutionActions {
 }
 
 /**
- * Edit, save and discard the settings entity of a screen.
+ * Edit, save and discard the settings entity of a screen, one page at a time.
+ *
+ * Save and Discard only cover the fields on the current page, so each page works as its own form.
  */
-export function useSettingsEntity( screen: PaymentSettingsScreen ) {
+export function useSettingsEntity(
+	screen: PaymentSettingsScreen,
+	fieldIds: string[]
+) {
 	const { kind, name } = screen.entity;
 	const [ notice, setNotice ] = useState< SaveNotice >();
-	const { record, data, isDirty, isSaving, loadError } = useSelect(
+	const { record, data, edits, isSaving, loadError } = useSelect(
 		( select ) => {
 			const core = select( coreStore );
 			return {
@@ -38,11 +44,16 @@ export function useSettingsEntity( screen: PaymentSettingsScreen ) {
 				data: core.getEditedEntityRecord( kind, name, NO_KEY ) as
 					| SettingsRecord
 					| undefined,
-				isDirty: core.hasEditsForEntityRecord( kind, name, NO_KEY ),
-				isSaving: core.isSavingEntityRecord( kind, name, NO_KEY ),
-				loadError: (
-					core as unknown as ResolutionSelectors
-				 ).getResolutionError( 'getEntityRecord', [
+				data: core.getEditedEntityRecord( kind, name, undefined ) as
+					| SettingsRecord
+					| undefined,
+				edits: core.getEntityRecordNonTransientEdits(
+					kind,
+					name,
+					undefined
+				) as SettingsRecord | undefined,
+				isSaving: core.isSavingEntityRecord( kind, name, undefined ),
+				loadError: core.getResolutionError( 'getEntityRecord', [
 					kind,
 					name,
 					NO_KEY,
@@ -51,18 +62,17 @@ export function useSettingsEntity( screen: PaymentSettingsScreen ) {
 		},
 		[ kind, name ]
 	);
-	const { editEntityRecord, saveEditedEntityRecord } =
+	const { editEntityRecord, saveEntityRecord, invalidateResolution } =
 		useDispatch( coreStore );
-	const { invalidateResolution } = useDispatch(
-		coreStore
-	) as unknown as ResolutionActions;
+	const pageEdits = pickEdits( edits ?? {}, fieldIds );
+	const isDirty = Object.keys( pageEdits ).length > 0;
 
-	const edit = ( edits: SettingsRecord ) => {
+	const edit = ( changes: SettingsRecord ) => {
 		if ( isSaving ) {
 			return;
 		}
 		setNotice( undefined );
-		void editEntityRecord( kind, name, NO_KEY, edits );
+		void editEntityRecord( kind, name, undefined, changes );
 	};
 
 	const save = async () => {
@@ -73,7 +83,7 @@ export function useSettingsEntity( screen: PaymentSettingsScreen ) {
 		setNotice(
 			await saveAndReload( {
 				save: () =>
-					saveEditedEntityRecord( kind, name, NO_KEY, {
+					saveEntityRecord( kind, name, pageEdits, {
 						throwOnError: true,
 					} ),
 				reload: async () => {
@@ -90,8 +100,13 @@ export function useSettingsEntity( screen: PaymentSettingsScreen ) {
 
 	const discard = () => {
 		setNotice( undefined );
-		if ( record ) {
-			void editEntityRecord( kind, name, NO_KEY, record );
+		if ( record && isDirty ) {
+			void editEntityRecord(
+				kind,
+				name,
+				undefined,
+				pickEdits( record, Object.keys( pageEdits ) )
+			);
 		}
 	};
 
