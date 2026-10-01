@@ -43,9 +43,19 @@ These commands also run as part of Core's full build and watch commands. They li
 
 The page is implemented in `routes/settings/stage.tsx`, using `Page` from `@wordpress/admin-ui` for its title, subtitle, and content spacing. It edits product settings and provides Discard changes and Save changes actions. Runtime dependencies are declared in `routes/settings/package.json`.
 
+## Settings navigation
+
+The shared route is `/settings/$page`. For example, `/settings/products` selects the registered products page. The `/` entry route redirects there to preserve the existing entry point.
+
+`route.tsx` registers the `woo_settings/page` collection and loads `GET /wc/v4/settings/pages`. It then registers a settings entity for every returned page, with a v4 URL derived from that page's ID. The endpoint returns page IDs, labels, and classic admin URLs directly from `WC_Admin_Settings::get_settings_pages()`, including extension pages. It does not evaluate tab visibility or load sections. The v4 REST API feature must be enabled, as for the existing product settings endpoint.
+
+The route validates the selected page before loading the stage. Unknown pages produce a not-found result; discovery failures produce a route error. The stage uses the same core-data collection to render page navigation. Classic `wc-settings` links continue to use their existing PHP entry point.
+
+Only the products page currently registers fields and loads a form. Other registered pages render a placeholder without requesting product settings or a guessed settings endpoint. The loader returns the selected `page`; `hasSettingsForm` and the stage's rendering branch are the integration points for a future compatibility layer. Extensions that register only during an admin page request will require that later integration.
+
 ## Data and form configuration
 
-The router registers the core-data singleton entity `woo_settings/product` with `baseURL: '/wc/v4/settings/products'` and `key: false`. Its loader preloads the settings record; the stage loads the layout through `useViewConfig`. All entity selectors and actions omit the record ID, using the constants exported by the settings UI package.
+The products page retains the existing `woo_settings/product` entity name and uses `baseURL: '/wc/v4/settings/products'` with `key: false`. Its loader preloads the settings record; the stage loads the layout through `useViewConfig`. The selected page determines the entity used by field registration, record selectors, edits, saves, and View Config. These calls omit the record ID. Other registered entities are available for the future compatibility layer, but their records are not requested until a form exists for that page.
 
 The endpoint returns a flat object keyed by setting ID:
 
@@ -75,9 +85,9 @@ Run `pnpm lint:types` and `pnpm build:core` from this package. In the Settings D
 
 ## WordPress menu
 
-Use WordPress 7.0 or later with WooCommerce active and build the Core assets. Open **WooCommerce → Settings DataForm**. No separate plugin activation is needed.
+Use WordPress 7.0 or later with WooCommerce active and build the Core assets. Open a WooCommerce settings page entry such as **WooCommerce → Products (DataForm)**. Each registered settings page gets a menu link to its `/settings/$page` route. No separate plugin activation is needed.
 
-The `wpPlugin.pages` configuration generates the admin page, and `routes/settings/stage.tsx` provides its content. Core's `SettingsDataForm` class loads `assets/client/settings-dataform/build.php` and registers the submenu with the `manage_woocommerce` capability. WordPress supplies the `@wordpress/boot` module used by the generated page.
+The `wpPlugin.pages` configuration generates the admin page, and `routes/settings/stage.tsx` provides its content. Core's `SettingsDataForm` class loads `assets/client/settings-dataform/build.php` and registers the page with the `manage_woocommerce` capability. It keeps the original submenu entry for WordPress's access check while hiding the duplicate link in JavaScript-enabled admin pages. WordPress supplies the `@wordpress/boot` module used by the generated page.
 
 The admin page integration skips older WordPress versions, missing builds, front-end requests, AJAX, and network admin. The PHP View Config loads independently of the admin page so REST requests can resolve the form. On multisite, the menu belongs to each site's admin; the form configuration does not read or write site or network options.
 

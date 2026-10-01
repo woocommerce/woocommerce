@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Expose option-backed classic settings pages as a DataForm view configuration and accept partial legacy settings writes through the flagged v4 settings URL.

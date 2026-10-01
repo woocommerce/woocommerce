@@ -1,3 +1,16 @@
 #woocommerce-embedded-root {
 	display: none;
 }
+
+.wc-settings-dataform__content {
+	box-sizing: border-box;
+	margin-inline: auto;
+	max-width: 680px;
+	padding: 24px;
+	width: 100%;
+}
+
+.wc-settings-dataform__unsupported-list {
+	list-style: disc;
+	padding-inline-start: 20px;
+}
