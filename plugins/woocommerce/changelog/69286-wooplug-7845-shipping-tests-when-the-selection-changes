@@ -1,5 +1,5 @@
 Significance: patch
 Type: dev
-Comment: Add tests for the cart select-shipping-rate route; no production change.
+Comment: Add tests for the cart select-shipping-rate route and stale-selection refusal; no production change.
 
 
