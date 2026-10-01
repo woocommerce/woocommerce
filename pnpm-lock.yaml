@@ -4141,7 +4141,7 @@ importers:
         specifier: 5.7.x
         version: 5.7.3
 
-  tools/release-posts:
+  tools/release-contributors:
     dependencies:
       '@commander-js/extra-typings':
         specifier: ^0.1.0
@@ -4152,9 +4152,6 @@ importers:
       '@woocommerce/monorepo-utils':
         specifier: workspace:*
         version: link:../monorepo-utils
-      code-analyzer:
-        specifier: workspace:*
-        version: link:../code-analyzer
       commander:
         specifier: 9.4.0
         version: 9.4.0
@@ -4164,24 +4161,9 @@ importers:
       ejs:
         specifier: ^3.1.9
         version: 3.1.10
-      enquirer:
-        specifier: ^2.4.1
-        version: 2.4.1
-      express:
-        specifier: ^4.18.2
-        version: 4.22.1
-      form-data:
-        specifier: ^4.0.6
-        version: 4.0.6
       lodash.shuffle:
         specifier: ^4.2.0
         version: 4.2.0
-      node-fetch:
-        specifier: ^2.7.0
-        version: 2.7.0(encoding@0.1.13)
-      open:
-        specifier: ^8.4.2
-        version: 8.4.2
       semver:
         specifier: ^7.5.4
         version: 7.7.4
@@ -4195,18 +4177,12 @@ importers:
       '@types/ejs':
         specifier: ^3.1.5
         version: 3.1.5
-      '@types/express':
-        specifier: ^4.17.21
-        version: 4.17.25
       '@types/lodash.shuffle':
         specifier: ^4.2.9
         version: 4.2.9
       '@types/node':
         specifier: ^24.1.0
         version: 24.12.2
-      '@types/node-fetch':
-        specifier: ^2.6.9
-        version: 2.6.13
       '@types/semver':
         specifier: ^7.5.6
         version: 7.7.1

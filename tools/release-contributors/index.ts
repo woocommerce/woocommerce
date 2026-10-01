@@ -3,6 +3,7 @@
  */
 import { Command } from '@commander-js/extra-typings';
 import { Logger } from '@woocommerce/monorepo-utils/src/core/logger';
+import dotenv from 'dotenv';
 import { writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
@@ -10,27 +11,24 @@ import { join } from 'path';
 /**
  * Internal dependencies
  */
-import { generateContributors } from '../../lib/contributors';
-import { renderTemplate } from '../../lib/render-template';
+import { generateContributors } from './lib/contributors';
+import { renderTemplate } from './lib/render-template';
 
-// Define the contributors command
+dotenv.config();
+
 const program = new Command()
-	.command( 'contributors' )
-	.description( 'CLI to automate generation of a release post.' )
-	.argument(
-		'<currentVersion>',
-		'The version of the plugin to generate a post for, please use the tag version from Github.'
+	.name( 'release-contributors' )
+	.description(
+		'Generate an HTML contributors list for a WooCommerce release.'
 	)
-	.argument(
-		'--previousVersion <previousVersion>',
-		'If you would like to compare against a version other than last minor you can provide a tag version from Github.'
-	)
-	.action( async ( currentVersion, previousVersion ) => {
+	.argument( '<currentRef>', 'The Git ref for the current release.' )
+	.argument( '<previousRef>', 'The Git ref for the previous release.' )
+	.action( async ( currentRef, previousRef ) => {
 		Logger.startTask( 'Generating contributors list...' );
 
 		const contributors = await generateContributors(
-			currentVersion,
-			previousVersion.toString()
+			currentRef,
+			previousRef
 		);
 
 		Logger.endTask();
@@ -41,7 +39,7 @@ const program = new Command()
 
 		const tmpFile = join(
 			tmpdir(),
-			`contributors-${ currentVersion.replace( '/', '-' ) }.html`
+			`contributors-${ currentRef.replace( '/', '-' ) }.html`
 		);
 
 		await writeFile( tmpFile, html );
