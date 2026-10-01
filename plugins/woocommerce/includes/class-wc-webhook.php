@@ -195,7 +195,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 				$return = $this->is_valid_user_action( $arg );
 				break;
 			case 'before_delete_post':
-				$return = $this->is_valid_variation_delete_action( $arg );
+				$return = $this->is_valid_permanent_delete_action( $arg );
 				break;
 		}
 
@@ -233,16 +233,16 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	}
 
 	/**
-	 * Validates permanent deletions for product webhooks: only variations, skipping those already reported.
+	 * Validates permanent deletions for product webhooks: only products and variations, skipping those already reported.
 	 *
 	 * Trashing through wp_trash_post() fires `product.deleted` and records `_wp_trash_meta_status`,
-	 * so a variation trashed that way is not reported again when it is permanently deleted.
+	 * so a product trashed that way is not reported again when it is permanently deleted.
 	 *
 	 * @since  11.3.0
 	 * @param  mixed $arg First hook argument.
 	 * @return bool       True if validation passes.
 	 */
-	private function is_valid_variation_delete_action( $arg ) {
+	private function is_valid_permanent_delete_action( $arg ) {
 		if ( 'product' !== $this->get_resource() ) {
 			return true;
 		}
@@ -251,13 +251,9 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			return false;
 		}
 
-		$variation_id = absint( $arg );
+		$post_id = absint( $arg );
 
-		if ( 'product_variation' !== get_post_type( $variation_id ) ) {
-			return false;
-		}
-
-		return ProductStatus::TRASH !== get_post_status( $variation_id ) || ! metadata_exists( 'post', $variation_id, '_wp_trash_meta_status' );
+		return ProductStatus::TRASH !== get_post_status( $post_id ) || ! metadata_exists( 'post', $post_id, '_wp_trash_meta_status' );
 	}
 
 	/**
