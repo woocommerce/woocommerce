@@ -2682,8 +2682,8 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Products can be ordered by SKU in both directions.
 	 *
-	 * @testWith ['asc', ['sku-a', 'sku-b', 'sku-c']]
-	 *           ['desc', ['sku-c', 'sku-b', 'sku-a']]
+	 * @testWith ["asc", ["sku-a", "sku-b", "sku-c"]]
+	 *           ["desc", ["sku-c", "sku-b", "sku-a"]]
 	 *
 	 * @param string $order         Sort direction.
 	 * @param array  $expected_skus Expected SKUs in response order.
