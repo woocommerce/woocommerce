@@ -122,11 +122,11 @@ if ( ! function_exists( 'purple_styles' ) ) :
 		// WooCommerce may not be installed. Skip versioned sheets entirely then.
 		if ( defined( 'WC_VERSION' ) ) {
 			$woocommerce_version_stylesheets = array(
-				'11.2' => 'assets/css/woocommerce-11.2.css',
-				'11.1' => 'assets/css/woocommerce-11.1.css',
+				'11.2.0' => 'assets/css/woocommerce-11.1.css',
+				'11.3.0' => 'assets/css/woocommerce-11.2.css',
 			);
 			foreach ( $woocommerce_version_stylesheets as $version => $relative_path ) {
-				if ( version_compare( WC_VERSION, $version, '<=' ) ) {
+				if ( version_compare( WC_VERSION, $version, '<' ) ) {
 					wp_enqueue_style(
 						'purple-woocommerce-' . str_replace( '.', '-', $version ),
 						get_template_directory_uri() . '/' . $relative_path,
