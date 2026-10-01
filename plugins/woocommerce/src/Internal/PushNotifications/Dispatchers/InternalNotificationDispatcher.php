@@ -124,24 +124,37 @@ class InternalNotificationDispatcher {
 			)
 		);
 
-		foreach ( $notifications as $notification ) {
-			if ( is_wp_error( $response ) ) {
-				$this->step_logger->log_failure(
-					$notification,
-					'loopback_requested',
-					'request_failed',
-					'warning',
-					sprintf( 'Loopback request failed: %s', $response->get_error_message() ),
-					array( 'batch_size' => count( $notifications ) )
-				);
-			} else {
-				$this->step_logger->log_notification_step(
-					$notification,
-					'loopback_requested',
-					'ok',
-					array( 'batch_size' => count( $notifications ) )
-				);
-			}
+		/*
+		 * One line for the batch, not one per notification: a single request
+		 * carries all of them, so a line each would describe the same request
+		 * thousands of times on a bulk stock update. Naming each notification by
+		 * type and resource ID lets a per-notification read find the batch its
+		 * own notification was part of; the identifier string cannot be used,
+		 * since a subclass is free to build it from more than those two.
+		 */
+		$context = array(
+			'batch_size'    => count( $notifications ),
+			'notifications' => array_map(
+				fn( Notification $notification ) => array(
+					'type'        => $notification->get_type(),
+					'resource_id' => $notification->get_resource_id(),
+				),
+				$notifications
+			),
+		);
+
+		if ( is_wp_error( $response ) ) {
+			$this->step_logger->log_unattributed_failure(
+				'loopback_requested',
+				'request_failed',
+				'warning',
+				sprintf( 'Loopback request failed: %s', $response->get_error_message() ),
+				$context
+			);
+
+			return;
 		}
+
+		$this->step_logger->log_batch_step( 'loopback_requested', 'ok', $context );
 	}
 }

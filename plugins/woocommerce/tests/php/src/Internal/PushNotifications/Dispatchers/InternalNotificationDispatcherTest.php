@@ -206,26 +206,48 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should log each notification as dispatched with the batch size.
+	 * @testdox Should log one line for the batch, naming every notification it carried.
 	 */
-	public function test_dispatch_logs_each_notification_as_dispatched(): void {
-		$this->step_logger->expects( $this->exactly( 2 ) )
-			->method( 'log_notification_step' )
-			->with( $this->anything(), 'loopback_requested', 'ok', array( 'batch_size' => 2 ) );
+	public function test_dispatch_logs_one_line_for_the_batch(): void {
+		$this->step_logger->expects( $this->once() )
+			->method( 'log_batch_step' )
+			->with(
+				'loopback_requested',
+				'ok',
+				$this->callback(
+					fn( array $context ) => 2 === $context['batch_size']
+						&& array(
+							array(
+								'type'        => 'store_order',
+								'resource_id' => 1,
+							),
+							array(
+								'type'        => 'store_order',
+								'resource_id' => 2,
+							),
+						) === $context['notifications']
+				)
+			);
 
 		$this->sut->dispatch( array( $this->create_order_mock( 1 ), $this->create_order_mock( 2 ) ) );
 	}
 
 	/**
-	 * @testdox Should log a request failure for each notification when the loopback request cannot be made.
+	 * @testdox Should log one failure for the batch when the loopback request cannot be made.
 	 */
 	public function test_dispatch_logs_request_failure(): void {
 		remove_filter( 'pre_http_request', array( $this, 'intercept_http_request' ), 10 );
 		add_filter( 'pre_http_request', fn() => new \WP_Error( 'http_request_failed', 'cURL error 7' ) );
 
 		$this->step_logger->expects( $this->once() )
-			->method( 'log_failure' )
-			->with( $this->anything(), 'loopback_requested', 'request_failed', 'warning', 'Loopback request failed: cURL error 7', array( 'batch_size' => 1 ) );
+			->method( 'log_unattributed_failure' )
+			->with(
+				'loopback_requested',
+				'request_failed',
+				'warning',
+				'Loopback request failed: cURL error 7',
+				$this->callback( fn( array $context ) => 1 === $context['batch_size'] )
+			);
 
 		$this->sut->dispatch( array( $this->create_order_mock( 1 ) ) );
 	}

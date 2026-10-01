@@ -69,17 +69,21 @@ class NotificationStepLoggerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should write a token step to that token's source with the token and user IDs.
+	 * @testdox Should write an excluded-token step to the store-wide suppressed source.
 	 */
-	public function test_log_token_step_writes_to_the_token_source(): void {
-		$this->sut->log_token_step( $this->create_order_mock( 42 ), 4412, 7, 'token_excluded', 'notifications_off' );
+	public function test_log_suppressed_step_writes_to_the_suppressed_source(): void {
+		$this->sut->log_suppressed_step(
+			$this->create_order_mock( 42 ),
+			'token_excluded',
+			'notifications_off',
+			array( 'excluded_tokens' => array( 'notifications_off' => array( 4412 ) ) )
+		);
 
 		$this->assertCount( 1, $this->logger->info_calls );
 
 		$context = $this->logger->info_calls[0]['context'];
-		$this->assertSame( 'push-token-4412', $context['source'] );
-		$this->assertSame( 4412, $context['token_id'] );
-		$this->assertSame( 7, $context['user_id'] );
+		$this->assertSame( NotificationStepLogger::SUPPRESSED_SOURCE, $context['source'] );
+		$this->assertSame( array( 'notifications_off' => array( 4412 ) ), $context['excluded_tokens'] );
 		$this->assertSame( get_current_blog_id() . '_store_order_42', $context['identifier'] );
 		$this->assertSame( 'token_excluded', $context['step'] );
 		$this->assertSame( 'notifications_off', $context['outcome'] );

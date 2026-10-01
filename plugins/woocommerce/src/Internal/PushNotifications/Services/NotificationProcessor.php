@@ -65,17 +65,14 @@ class NotificationProcessor {
 	const SENT_META_KEY = '_wc_push_notification_sent';
 
 	/**
-	 * Above this many recipients, per-device log lines are skipped and only the
-	 * counts on the notification line are written. A per-device line is a file
-	 * per token per day, and a store with thousands of recipients would
-	 * otherwise create that many files for every notification. Devices that were
-	 * excluded share one store-wide source, so they are not capped.
+	 * The most recipient token IDs recorded on a `recipients` line.
 	 *
-	 * Set to the number the Remote Push Notification Proxy delivers to, since it
-	 * drops everything after the first 100 tokens in a request. A lower cap
-	 * would hide devices WordPress.com did send to.
+	 * Set to the number the Remote Push Notification Proxy delivers to, since
+	 * it drops everything after the first 100 tokens in a request, so IDs past
+	 * that one could not have received the notification. The full count is
+	 * recorded beside the list either way.
 	 */
-	const TOKEN_LINE_CAP = 100;
+	const RECIPIENT_ID_CAP = 100;
 
 	/**
 	 * The WPCOM dispatcher.
@@ -207,9 +204,7 @@ class NotificationProcessor {
 		 */
 		list( $tokens, $suppression_reasons ) = $this->filter_tokens_by_preferences( $eligible_tokens, $notification );
 
-		$write_token_lines = count( $tokens ) <= self::TOKEN_LINE_CAP;
-
-		$this->log_recipients( $notification, $eligible_tokens, $tokens, $suppression_reasons, $write_token_lines, $step_context );
+		$this->log_recipients( $notification, $eligible_tokens, $tokens, $suppression_reasons, $step_context );
 
 		/**
 		 * There are no recipients to send to (either no tokens at all, or
@@ -226,7 +221,7 @@ class NotificationProcessor {
 
 		$result = $this->dispatcher->dispatch( $notification, $tokens );
 
-		$this->log_send_outcome( $notification, $tokens, $result, $write_token_lines, $step_context );
+		$this->log_send_outcome( $notification, $tokens, $result, $step_context );
 
 		if ( ! empty( $result['success'] ) ) {
 			// Success only, for the reason {@see PushToken::get_last_sent_at_gmt()} gives.
@@ -297,15 +292,19 @@ class NotificationProcessor {
 	}
 
 	/**
-	 * Writes the recipient decision to the step log: one notification line
-	 * with the counts, and one line per device while under the cap.
+	 * Writes the recipient decision to the step log: one line naming the
+	 * recipients, and one line naming the tokens that were excluded.
 	 *
-	 * @param Notification       $notification      The notification being processed.
-	 * @param PushToken[]        $eligible_tokens   Tokens whose owner has a role that receives push notifications.
-	 * @param PushToken[]        $recipients        The tokens the notification will be sent to.
+	 * Both lines carry token IDs in arrays rather than a line per token. A
+	 * store holding thousands of tokens would otherwise write megabytes for a
+	 * single notification, against a per-source daily ceiling that silently
+	 * overwrites whatever came first.
+	 *
+	 * @param Notification       $notification        The notification being processed.
+	 * @param PushToken[]        $eligible_tokens     Tokens whose owner has a role that receives push notifications.
+	 * @param PushToken[]        $recipients          The tokens the notification will be sent to.
 	 * @param array<int, string> $suppression_reasons The reason each dropped token was excluded, as token ID => reason.
-	 * @param bool               $write_token_lines Whether per-device recipient lines are written for this attempt.
-	 * @param array              $step_context      Fields shared by every line of this attempt.
+	 * @param array              $step_context        Fields shared by every line of this attempt.
 	 * @return void
 	 */
 	private function log_recipients(
@@ -313,7 +312,6 @@ class NotificationProcessor {
 		array $eligible_tokens,
 		array $recipients,
 		array $suppression_reasons,
-		bool $write_token_lines,
 		array $step_context
 	): void {
 		if ( ! $this->step_logger->is_active() ) {
@@ -330,7 +328,6 @@ class NotificationProcessor {
 				'recipients'        => count( $recipients ),
 				'held_back'         => count( $suppression_reasons ),
 				'held_back_reasons' => array_count_values( $suppression_reasons ),
-				'token_lines'       => $write_token_lines ? 'written' : 'skipped_over_cap',
 			)
 		);
 
@@ -339,79 +336,84 @@ class NotificationProcessor {
 		} elseif ( empty( $recipients ) ) {
 			$this->step_logger->log_notification_step( $notification, 'recipients', 'all_excluded', $context );
 		} else {
-			if ( $write_token_lines ) {
-				$context['token_ids'] = $recipient_ids;
-			}
+			$context['token_ids'] = array_slice( $recipient_ids, 0, self::RECIPIENT_ID_CAP );
 			$this->step_logger->log_notification_step( $notification, 'recipients', 'resolved', $context );
 		}
 
-		$tokens_by_id = array();
-		foreach ( $eligible_tokens as $token ) {
-			$tokens_by_id[ (int) $token->get_id() ] = $token;
-		}
-
-		foreach ( $suppression_reasons as $token_id => $reason ) {
-			$this->step_logger->log_suppressed_token_step(
-				$notification,
-				$token_id,
-				(int) $tokens_by_id[ $token_id ]->get_user_id(),
-				'token_excluded',
-				$reason,
-				$step_context
-			);
-		}
-
-		if ( ! $write_token_lines ) {
-			return;
-		}
-
-		foreach ( $recipients as $token ) {
-			$this->step_logger->log_token_step(
-				$notification,
-				(int) $token->get_id(),
-				(int) $token->get_user_id(),
-				'token_included',
-				'ok',
-				$step_context
-			);
-		}
+		$this->log_excluded_tokens( $notification, $suppression_reasons, $step_context );
 	}
 
 	/**
-	 * Writes one per-device line with the send outcome WPCOM reported. A token
-	 * WPCOM refused is marked as invalid; the rest carry the batch outcome.
+	 * Writes one line naming every token the notification was not sent to,
+	 * grouped by the reason each was excluded.
 	 *
-	 * @param Notification $notification      The notification being processed.
-	 * @param PushToken[]  $recipients        The tokens the notification was sent to.
-	 * @param array        $result            The dispatcher's return value.
-	 * @param bool         $write_token_lines Whether per-device recipient lines are written for this attempt.
-	 * @param array        $step_context      Fields shared by every line of this attempt.
+	 * Grouping by reason rather than naming a reason per token keeps the line
+	 * small on a store where most tokens are excluded.
+	 *
+	 * @param Notification       $notification        The notification being processed.
+	 * @param array<int, string> $suppression_reasons The reason each dropped token was excluded, as token ID => reason.
+	 * @param array              $step_context        Fields shared by every line of this attempt.
 	 * @return void
 	 */
-	private function log_send_outcome(
-		Notification $notification,
-		array $recipients,
-		array $result,
-		bool $write_token_lines,
-		array $step_context
-	): void {
-		if ( ! $write_token_lines || ! $this->step_logger->is_active() ) {
+	private function log_excluded_tokens( Notification $notification, array $suppression_reasons, array $step_context ): void {
+		if ( empty( $suppression_reasons ) ) {
 			return;
 		}
 
-		$outcome        = (string) ( $result['outcome'] ?? ( empty( $result['success'] ) ? 'failed' : 'accepted' ) );
+		$by_reason = array();
+		foreach ( $suppression_reasons as $token_id => $reason ) {
+			$by_reason[ $reason ][] = (int) $token_id;
+		}
+
+		$outcome = 'various';
+		if ( 1 === count( $by_reason ) ) {
+			$outcome = (string) array_key_first( $by_reason );
+		}
+
+		$this->step_logger->log_suppressed_step(
+			$notification,
+			'token_excluded',
+			$outcome,
+			array_merge( $step_context, array( 'excluded_tokens' => $by_reason ) )
+		);
+	}
+
+	/**
+	 * Writes the send outcome WPCOM reported, naming the tokens it refused.
+	 *
+	 * Every recipient carries the notification's own outcome except the ones
+	 * WPCOM named as invalid, so the refused IDs are the whole difference.
+	 *
+	 * @param Notification $notification The notification being processed.
+	 * @param PushToken[]  $recipients   The tokens the notification was sent to.
+	 * @param array        $result       The dispatcher's return value.
+	 * @param array        $step_context Fields shared by every line of this attempt.
+	 * @return void
+	 */
+	private function log_send_outcome( Notification $notification, array $recipients, array $result, array $step_context ): void {
+		if ( ! $this->step_logger->is_active() ) {
+			return;
+		}
+
 		$invalid_tokens = array_flip( $result['invalid_tokens'] ?? array() );
 
-		foreach ( $recipients as $token ) {
-			$this->step_logger->log_token_step(
-				$notification,
-				(int) $token->get_id(),
-				(int) $token->get_user_id(),
-				'dispatched',
-				isset( $invalid_tokens[ $token->get_token() ] ) ? 'invalid_token' : $outcome,
-				$step_context
-			);
+		if ( empty( $invalid_tokens ) ) {
+			return;
 		}
+
+		$invalid_ids = array();
+		foreach ( $recipients as $token ) {
+			if ( isset( $invalid_tokens[ $token->get_token() ] ) ) {
+				$invalid_ids[] = (int) $token->get_id();
+			}
+		}
+
+		$this->step_logger->log_notification_step(
+			$notification,
+			'dispatched',
+			'invalid_token',
+			array_merge( $step_context, array( 'invalid_token_ids' => $invalid_ids ) )
+		);
 	}
 
 	/**

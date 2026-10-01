@@ -31,11 +31,6 @@ class NotificationStepLogger {
 	const NOTIFICATION_SOURCE_PREFIX = 'push-notifications-';
 
 	/**
-	 * Source prefix for per-device lines; the token post ID follows.
-	 */
-	const TOKEN_SOURCE_PREFIX = 'push-token-';
-
-	/**
 	 * Source for devices a notification was not sent to.
 	 *
 	 * One source for the whole store rather than one per device, because the
@@ -64,51 +59,26 @@ class NotificationStepLogger {
 	 * @since 11.3.0
 	 */
 	public function log_notification_step( Notification $notification, string $step, string $outcome, array $context = array() ): void {
-		$this->write( $notification, null, $step, $outcome, $context );
+		$this->write( $notification, $step, $outcome, $context );
 	}
 
 	/**
-	 * Records a per-device step for one token.
+	 * Records a step for the tokens a notification was not sent to.
 	 *
-	 * @param Notification $notification The notification the step belongs to.
-	 * @param int          $token_id     The push token post ID.
-	 * @param int          $user_id      The user who owns the token.
-	 * @param string       $step         Machine-readable step name, e.g. `token_included`.
-	 * @param string       $outcome      Machine-readable outcome, e.g. `type_disabled`.
-	 * @param array        $context      Extra scalar fields to store with the line.
-	 * @return void
-	 *
-	 * @since 11.3.0
-	 */
-	public function log_token_step( Notification $notification, int $token_id, int $user_id, string $step, string $outcome, array $context = array() ): void {
-		$context['token_id'] = $token_id;
-		$context['user_id']  = $user_id;
-
-		$this->write( $notification, $token_id, $step, $outcome, $context );
-	}
-
-	/**
-	 * Records a step for a device the notification was not sent to.
-	 *
-	 * These go to one store-wide source rather than the device's own, so the
+	 * Goes to one store-wide source rather than a source per token, so the
 	 * file count follows the notification types rather than every token the
-	 * store holds.
+	 * store holds. The tokens themselves are named in the context.
 	 *
 	 * @param Notification $notification The notification the step belongs to.
-	 * @param int          $token_id     The push token post ID.
-	 * @param int          $user_id      The user who owns the token.
 	 * @param string       $step         Machine-readable step name, e.g. `token_excluded`.
-	 * @param string       $outcome      Machine-readable outcome, e.g. `type_disabled`.
-	 * @param array        $context      Extra scalar fields to store with the line.
+	 * @param string       $outcome      Machine-readable outcome, e.g. `notifications_off`.
+	 * @param array        $context      Extra fields to store with the line.
 	 * @return void
 	 *
 	 * @since 11.3.0
 	 */
-	public function log_suppressed_token_step( Notification $notification, int $token_id, int $user_id, string $step, string $outcome, array $context = array() ): void {
-		$context['token_id'] = $token_id;
-		$context['user_id']  = $user_id;
-
-		$this->write( $notification, $token_id, $step, $outcome, $context, true );
+	public function log_suppressed_step( Notification $notification, string $step, string $outcome, array $context = array() ): void {
+		$this->write( $notification, $step, $outcome, $context, true );
 	}
 
 	/**
@@ -144,6 +114,38 @@ class NotificationStepLogger {
 	}
 
 	/**
+	 * Records a step that covers several notifications at once, such as the
+	 * single loopback request a batch is sent in.
+	 *
+	 * Written under the module's own source, since a batch can span
+	 * notification types and so belongs to no one type's source. The
+	 * notifications it covers are named by identifier in the context.
+	 *
+	 * @param string $step    Machine-readable step name, e.g. `loopback_requested`.
+	 * @param string $outcome Machine-readable outcome, e.g. `ok`.
+	 * @param array  $context Extra fields to store with the line.
+	 * @return void
+	 *
+	 * @since 11.3.0
+	 */
+	public function log_batch_step( string $step, string $outcome, array $context = array() ): void {
+		try {
+			if ( ! $this->is_active() ) {
+				return;
+			}
+
+			$context['step']           = $step;
+			$context['outcome']        = $outcome;
+			$context['source']         = PushNotifications::FEATURE_NAME;
+			$context['remote-logging'] = false;
+
+			wc_get_logger()->info( self::format_message( $step, $outcome ), $context );
+		} catch ( Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			// Deliberately ignored: a logging failure must not affect the send.
+		}
+	}
+
+	/**
 	 * Records a failure that happened before a notification could be
 	 * identified, such as a loopback request that failed authorization.
 	 *
@@ -175,19 +177,19 @@ class NotificationStepLogger {
 	 * @since 11.3.0
 	 */
 	public static function get_notification_source( Notification $notification ): string {
-		return sanitize_title( self::NOTIFICATION_SOURCE_PREFIX . str_replace( '_', '-', $notification->get_type() ) );
+		return self::get_notification_source_for_type( $notification->get_type() );
 	}
 
 	/**
-	 * Builds the log source for a push token.
+	 * Builds the log source for a notification type name.
 	 *
-	 * @param int $token_id The push token post ID.
+	 * @param string $type The notification type, e.g. `store_order`.
 	 * @return string
 	 *
 	 * @since 11.3.0
 	 */
-	public static function get_token_source( int $token_id ): string {
-		return self::TOKEN_SOURCE_PREFIX . $token_id;
+	public static function get_notification_source_for_type( string $type ): string {
+		return sanitize_title( self::NOTIFICATION_SOURCE_PREFIX . str_replace( '_', '-', $type ) );
 	}
 
 	/**
@@ -237,14 +239,13 @@ class NotificationStepLogger {
 	 * get_notification_source() runs sanitize_title() and its public filter.
 	 *
 	 * @param Notification $notification The notification the step belongs to.
-	 * @param int|null     $token_id     The push token post ID for a per-device line, or null for a notification-level line.
 	 * @param string       $step         Machine-readable step name.
 	 * @param string       $outcome      Machine-readable outcome.
 	 * @param array        $context      Extra fields to store with the line.
-	 * @param bool         $suppressed   True to write to the store-wide suppressed source instead of the device's own.
+	 * @param bool         $suppressed   True to write to the store-wide suppressed source instead of the notification type's.
 	 * @return void
 	 */
-	private function write( Notification $notification, ?int $token_id, string $step, string $outcome, array $context, bool $suppressed = false ): void {
+	private function write( Notification $notification, string $step, string $outcome, array $context, bool $suppressed = false ): void {
 		try {
 			if ( ! $this->is_active() ) {
 				return;
@@ -252,13 +253,9 @@ class NotificationStepLogger {
 
 			$context = self::identify( $notification, $step, $outcome, $context );
 
-			if ( $suppressed ) {
-				$context['source'] = self::SUPPRESSED_SOURCE;
-			} elseif ( null === $token_id ) {
-				$context['source'] = self::get_notification_source( $notification );
-			} else {
-				$context['source'] = self::get_token_source( $token_id );
-			}
+			$context['source'] = $suppressed
+				? self::SUPPRESSED_SOURCE
+				: self::get_notification_source( $notification );
 
 			wc_get_logger()->info( self::format_message( $step, $outcome ), $context );
 		} catch ( Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch

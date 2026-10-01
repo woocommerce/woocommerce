@@ -807,13 +807,12 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 							&& 0 === $context['tokens_eligible']
 							&& 0 === $context['recipients']
 							&& 0 === $context['held_back']
-							&& 'written' === $context['token_lines']
 							&& 0 === $context['attempt']
 							&& false === $context['is_retry'];
 					}
 				)
 			);
-		$logger->expects( $this->never() )->method( 'log_token_step' );
+		$logger->expects( $this->never() )->method( 'log_suppressed_step' );
 
 		$sut = new NotificationProcessor();
 		$sut->init( $this->dispatcher, $data_store, $this->preferences_service, $this->retry_handler, $logger );
@@ -822,7 +821,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should log the exclusion reason per token and an all_excluded outcome when nobody wants it.
+	 * @testdox Should name the excluded tokens grouped by reason and log an all_excluded outcome when nobody wants it.
 	 */
 	public function test_process_logs_excluded_tokens_with_reasons(): void {
 		$data_store = $this->createMock( PushTokensDataStore::class );
@@ -855,13 +854,15 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 					}
 				)
 			);
-		$logger->expects( $this->never() )->method( 'log_token_step' );
-		$logger->expects( $this->exactly( 3 ) )
-			->method( 'log_suppressed_token_step' )
-			->withConsecutive(
-				array( $this->anything(), 11, 1, 'token_excluded', 'notifications_off' ),
-				array( $this->anything(), 12, 1, 'token_excluded', 'notifications_off' ),
-				array( $this->anything(), 13, 2, 'token_excluded', 'notifications_off' )
+		$logger->expects( $this->once() )
+			->method( 'log_suppressed_step' )
+			->with(
+				$this->anything(),
+				'token_excluded',
+				'notifications_off',
+				$this->callback(
+					fn( array $context ) => array( 'notifications_off' => array( 11, 12, 13 ) ) === $context['excluded_tokens']
+				)
 			);
 
 		$sut = new NotificationProcessor();
@@ -871,7 +872,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should log recipients resolved with the recipient token IDs and one line per recipient.
+	 * @testdox Should log recipients resolved with the recipient token IDs and no line per recipient.
 	 */
 	public function test_process_logs_recipients_resolved(): void {
 		$data_store = $this->createMock( PushTokensDataStore::class );
@@ -891,18 +892,9 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 				$this->callback(
 					function ( array $context ) {
 						return 2 === $context['recipients']
-							&& array( 11, 12 ) === $context['token_ids']
-							&& 'written' === $context['token_lines'];
+							&& array( 11, 12 ) === $context['token_ids'];
 					}
 				)
-			);
-		$logger->expects( $this->exactly( 4 ) )
-			->method( 'log_token_step' )
-			->withConsecutive(
-				array( $this->anything(), 11, 1, 'token_included', 'ok' ),
-				array( $this->anything(), 12, 2, 'token_included', 'ok' ),
-				array( $this->anything(), 11, 1, 'dispatched', 'accepted' ),
-				array( $this->anything(), 12, 2, 'dispatched', 'accepted' )
 			);
 
 		$sut = new NotificationProcessor();
@@ -912,9 +904,9 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should mark the token WPCOM refused as invalid and the rest with the batch outcome.
+	 * @testdox Should name the tokens WPCOM refused on one dispatched line.
 	 */
-	public function test_process_logs_send_outcome_per_device(): void {
+	public function test_process_names_the_refused_tokens(): void {
 		$data_store = $this->createMock( PushTokensDataStore::class );
 		$data_store->method( 'get_tokens_for_roles' )->willReturn(
 			array( $this->create_token( 11, 1 ), $this->create_token( 12, 2 ) )
@@ -930,13 +922,18 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		);
 
 		$logger = $this->create_active_step_logger();
-		$logger->expects( $this->exactly( 4 ) )
-			->method( 'log_token_step' )
-			->withConsecutive(
-				array( $this->anything(), 11, 1, 'token_included', 'ok' ),
-				array( $this->anything(), 12, 2, 'token_included', 'ok' ),
-				array( $this->anything(), 11, 1, 'dispatched', SendOutcome::REJECTED_INVALID_TOKEN ),
-				array( $this->anything(), 12, 2, 'dispatched', 'invalid_token' )
+		$logger->expects( $this->atLeastOnce() )
+			->method( 'log_notification_step' )
+			->with(
+				$this->anything(),
+				$this->anything(),
+				$this->anything(),
+				$this->callback(
+					function ( array $context ) {
+						return ! array_key_exists( 'invalid_token_ids', $context )
+							|| array( 12 ) === $context['invalid_token_ids'];
+					}
+				)
 			);
 
 		$sut = new NotificationProcessor();
@@ -963,11 +960,11 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should write counts only and no per-device lines when eligible tokens exceed the cap.
+	 * @testdox Should record the full recipient count but cap the token IDs it names.
 	 */
-	public function test_process_skips_token_lines_over_the_cap(): void {
+	public function test_process_caps_the_recipient_ids_it_names(): void {
 		$tokens = array();
-		for ( $i = 1; $i <= NotificationProcessor::TOKEN_LINE_CAP + 1; $i++ ) {
+		for ( $i = 1; $i <= NotificationProcessor::RECIPIENT_ID_CAP + 5; $i++ ) {
 			$tokens[] = $this->create_token( 100 + $i, 1 );
 		}
 
@@ -985,12 +982,11 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 				'resolved',
 				$this->callback(
 					function ( array $context ) {
-						return 'skipped_over_cap' === $context['token_lines']
-							&& ! array_key_exists( 'token_ids', $context );
+						return count( $context['token_ids'] ) === NotificationProcessor::RECIPIENT_ID_CAP
+							&& NotificationProcessor::RECIPIENT_ID_CAP + 5 === $context['recipients'];
 					}
 				)
 			);
-		$logger->expects( $this->never() )->method( 'log_token_step' );
 
 		$sut = new NotificationProcessor();
 		$sut->init( $this->dispatcher, $data_store, $this->preferences_service, $this->retry_handler, $logger );
@@ -1010,8 +1006,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$logger = $this->createMock( NotificationStepLogger::class );
 		$logger->method( 'is_active' )->willReturn( false );
 		$logger->expects( $this->never() )->method( 'log_notification_step' );
-		$logger->expects( $this->never() )->method( 'log_token_step' );
-		$logger->expects( $this->never() )->method( 'log_suppressed_token_step' );
+		$logger->expects( $this->never() )->method( 'log_suppressed_step' );
 
 		$sut = new NotificationProcessor();
 		$sut->init( $this->dispatcher, $data_store, $this->preferences_service, $this->retry_handler, $logger );
@@ -1020,7 +1015,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should write excluded tokens to the store-wide suppressed source rather than each token's own.
+	 * @testdox Should write excluded tokens to the store-wide suppressed source, naming them on one line.
 	 */
 	public function test_process_writes_excluded_tokens_to_the_suppressed_source(): void {
 		$data_store = $this->createMock( PushTokensDataStore::class );
@@ -1041,9 +1036,8 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 			'info',
 			'Token excluded: notifications off',
 			array(
-				'source'   => NotificationStepLogger::SUPPRESSED_SOURCE,
-				'token_id' => 11,
-				'user_id'  => 1,
+				'source'          => NotificationStepLogger::SUPPRESSED_SOURCE,
+				'excluded_tokens' => array( 'notifications_off' => array( 11 ) ),
 			)
 		);
 	}
