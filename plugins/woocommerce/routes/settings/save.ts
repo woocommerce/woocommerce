@@ -28,7 +28,8 @@ interface ResolutionActions {
 /**
  * Edit, save and discard the settings entity of a screen, one page at a time.
  *
- * Save and Discard only cover the fields on the current page, so each page works as its own form.
+ * Save and Discard only cover the current page: its fields, and any other values its edits changed,
+ * such as a field whose `setValue` writes to another key. Each page works as its own form.
  */
 export function useSettingsEntity(
 	screen: PaymentSettingsScreen,
@@ -36,6 +37,7 @@ export function useSettingsEntity(
 ) {
 	const { kind, name } = screen.entity;
 	const [ notice, setNotice ] = useState< SaveNotice >();
+	const [ editedKeys, setEditedKeys ] = useState< string[] >( [] );
 	const { record, data, edits, isSaving, loadError } = useSelect(
 		( select ) => {
 			const core = select( coreStore );
@@ -64,7 +66,7 @@ export function useSettingsEntity(
 	);
 	const { editEntityRecord, saveEntityRecord, invalidateResolution } =
 		useDispatch( coreStore );
-	const pageEdits = pickEdits( edits ?? {}, fieldIds );
+	const pageEdits = pickEdits( edits ?? {}, [ ...fieldIds, ...editedKeys ] );
 	const isDirty = Object.keys( pageEdits ).length > 0;
 
 	const edit = ( changes: SettingsRecord ) => {
@@ -72,6 +74,9 @@ export function useSettingsEntity(
 			return;
 		}
 		setNotice( undefined );
+		setEditedKeys( ( keys ) => [
+			...new Set( [ ...keys, ...Object.keys( changes ) ] ),
+		] );
 		void editEntityRecord( kind, name, undefined, changes );
 	};
 

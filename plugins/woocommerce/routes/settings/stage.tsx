@@ -300,7 +300,9 @@ function ScreenContent( {
 	}
 
 	return (
+		// Each page is its own form, so it starts with its own record of what it edited.
 		<SettingsForm
+			key={ path ?? '' }
 			screen={ screen }
 			definition={ definition }
 			path={ path }
