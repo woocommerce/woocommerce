@@ -296,7 +296,7 @@ class WC_Shipping_Zone_Matching_Test extends WC_Unit_Test_Case {
 	 * @testdox The zone listed first wins, so a broad zone above a narrow one shadows it.
 	 */
 	public function test_a_broad_zone_above_a_narrow_one_shadows_it(): void {
-		$broad  = $this->zone_with( 'All of the US', 'US', 'country', 1 );
+		$broad = $this->zone_with( 'All of the US', 'US', 'country', 1 );
 		$this->zone_with( 'Beverly Hills only', '90210', 'postcode', 2 );
 
 		$destination = array(
@@ -320,5 +320,38 @@ class WC_Shipping_Zone_Matching_Test extends WC_Unit_Test_Case {
 			$this->matched_zone_name( $destination ),
 			'With the narrow zone now listed first, it wins, so order decides rather than specificity.'
 		);
+	}
+
+	/**
+	 * The admin warns that a zone "will not be matched because another covers the same region earlier
+	 * in the list." That warning is true of the matcher, not only of the helper that prints it: a
+	 * broad zone above a narrower one it fully covers makes the narrower zone unreachable, so no
+	 * address the narrower zone describes ever lands in it.
+	 *
+	 * @testdox A zone the warning flags as shadowed is never returned by the matcher.
+	 */
+	public function test_a_shadowed_zone_is_never_matched(): void {
+		$this->zone_with( 'All of the US', 'US', 'country', 1 );
+		$this->zone_with( 'California only', 'US:CA', 'state', 2 );
+
+		$warned = array();
+		foreach ( WC_Shipping_Zones::get_zones_with_order_conflict_warnings() as $zone ) {
+			if ( ! empty( $zone['zone_order_conflict_warning'] ) ) {
+				$warned[] = $zone['zone_name'];
+			}
+		}
+		$this->assertContains( 'California only', $warned, 'The narrower zone should be flagged as shadowed.' );
+
+		// The matcher agrees: a Californian address lands in the broad zone, never the flagged one.
+		$matched = WC_Shipping_Zones::get_zone_matching_package(
+			array(
+				'destination' => array(
+					'country'  => 'US',
+					'state'    => 'CA',
+					'postcode' => '90210',
+				),
+			)
+		);
+		$this->assertSame( 'All of the US', $matched->get_zone_name(), 'The broad zone that shadows it wins instead, never the flagged one.' );
 	}
 }
