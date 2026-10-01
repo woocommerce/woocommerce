@@ -1623,4 +1623,42 @@ class Cart extends ControllerTestCase {
 
 		$this->assertSame( 500, $response->get_status(), 'A cart session failure should return a Store API error response.' );
 	}
+
+	/**
+	 * The merchant turns tax on and the shopper collects a shipping tax on the shipping line, which
+	 * is the figure the Cart and Checkout blocks read. `test_get_item` pins the tax-off case, where
+	 * `total_shipping_tax` is always '0'; this pins the chain through to a non-zero figure, so the
+	 * two together bracket the behaviour.
+	 */
+	public function test_shipping_tax_reaches_the_cart_totals() {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		\WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'Tax @ 10%',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		wc()->cart->calculate_totals();
+
+		$this->assertAPIResponse(
+			'/wc/store/v1/cart',
+			200,
+			array(
+				'totals' => array(
+					// Shipping still costs the same 10.00 test_get_item pins, so the tax below is tax on a known base.
+					'total_shipping'     => '1000',
+					// 10% of 1000. test_get_item pins this at '0' with tax off; this is the non-zero counterpart.
+					'total_shipping_tax' => '100',
+				),
+			)
+		);
+	}
 }
