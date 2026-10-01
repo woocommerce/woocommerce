@@ -267,10 +267,11 @@ class FilterData {
 			return $pre_filter_counts;
 		}
 
-		$product_ids         = $this->get_cached_product_ids( $query_vars );
-		$attribute_count_sql = null;
-		if ( $product_ids && $this->query_clauses instanceof AttributeCountQueryGenerator ) {
-			$attribute_count_sql = $this->query_clauses->get_attribute_count_query( $query_vars, $attribute_to_count, $product_ids );
+		// Build the cache key before fetching product IDs so cached counts skip the product query.
+		$product_ids_placeholder = '__WC_FILTER_PRODUCT_IDS__';
+		$attribute_count_sql     = null;
+		if ( $this->query_clauses instanceof AttributeCountQueryGenerator ) {
+			$attribute_count_sql = $this->query_clauses->get_attribute_count_query( $query_vars, $attribute_to_count, $product_ids_placeholder );
 		}
 
 		$transient_key = $this->get_transient_key(
@@ -287,7 +288,8 @@ class FilterData {
 			return $cached_data;
 		}
 
-		$results = array();
+		$results     = array();
+		$product_ids = $this->get_cached_product_ids( $query_vars );
 
 		if ( $product_ids ) {
 			global $wpdb;
@@ -304,6 +306,8 @@ class FilterData {
 					GROUP BY terms.term_id
 				";
 			}
+
+			$attribute_count_sql = str_replace( $product_ids_placeholder, $product_ids, $attribute_count_sql );
 
 			/**
 			 * We can't use $wpdb->prepare() here because using %s with

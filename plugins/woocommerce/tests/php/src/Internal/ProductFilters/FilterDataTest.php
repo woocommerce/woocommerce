@@ -64,9 +64,9 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	public function test_custom_attribute_count_query_and_cache_separation(): void {
 		global $wpdb;
 		$generator = $this->createMock( AttributeCountQueryGenerator::class );
-		$generator->method( 'add_query_clauses' )->willReturnArgument( 0 );
+		$generator->expects( $this->once() )->method( 'add_query_clauses' )->willReturnArgument( 0 );
 		$limit = '';
-		$generator->expects( $this->exactly( 2 ) )->method( 'get_attribute_count_query' )->willReturnCallback(
+		$generator->expects( $this->exactly( 3 ) )->method( 'get_attribute_count_query' )->willReturnCallback(
 			function ( $query_vars, $taxonomy, $product_ids ) use ( $wpdb, &$limit ) {
 				$this->assertSame( 'pa_color', $taxonomy );
 				$this->assertSame( array( 'post_type' => 'product' ), $query_vars );
@@ -90,6 +90,8 @@ class FilterDataTest extends AbstractProductFiltersTest {
 		$this->assertSame( array( 123 => count( $this->products ) ), $sut->get_attribute_counts( array( 'post_type' => 'product' ), 'pa_color' ) );
 		$limit = 'AND ID = ' . $this->products[0]->get_id();
 		$this->assertSame( array( 123 => 1 ), $sut->get_attribute_counts( array( 'post_type' => 'product' ), 'pa_color' ) );
+		wp_cache_flush();
+		$this->assertSame( array( 123 => 1 ), $sut->get_attribute_counts( array( 'post_type' => 'product' ), 'pa_color' ), 'Cached counts must not rerun the eligible-product query after the object cache is cleared.' );
 		$this->assertCount( 2, array_unique( $cache_keys ), 'Different count SQL must not overwrite the same cached count.' );
 	}
 
@@ -122,12 +124,11 @@ class FilterDataTest extends AbstractProductFiltersTest {
 		);
 		$custom->expects( $this->once() )->method( 'get_attribute_count_query' )->willReturnCallback(
 			function ( $query_vars, $taxonomy, $product_ids ) use ( $wpdb ) {
-				$this->assertSame( (string) $this->products[1]->get_id(), $product_ids, 'Eligible IDs must belong to the current generator.' );
-				return "SELECT COUNT(ID) AS term_count, 123 AS term_count_id FROM {$wpdb->posts} WHERE ID IN ({$product_ids})";
+				return "SELECT COUNT(ID) AS term_count, ID AS term_count_id FROM {$wpdb->posts} WHERE ID IN ({$product_ids}) GROUP BY ID";
 			}
 		);
 		$custom_sut = new FilterData( $custom, $this->taxonomy_hierarchy_data, $container->get( Params::class ) );
-		$this->assertSame( array( 123 => 1 ), $custom_sut->get_attribute_counts( array( 'post_type' => 'product' ), 'pa_color' ) );
+		$this->assertSame( array( $this->products[1]->get_id() => 1 ), $custom_sut->get_attribute_counts( array( 'post_type' => 'product' ), 'pa_color' ) );
 	}
 
 	/**
