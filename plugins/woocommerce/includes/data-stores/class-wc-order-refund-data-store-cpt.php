@@ -5,6 +5,8 @@
  * @package WooCommerce\DataStores
  */
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrderModifiedDateUpdater;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -61,12 +63,26 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 		/**
 		 * Fires when a refund is deleted.
 		 *
+		 * @param int $id The refund ID.
 		 * @since 3.0.0
-		 * @since 11.3.0 Added the parent order ID parameter.
-		 * @param int $id              The refund ID.
-		 * @param int $parent_order_id The parent order ID.
 		 */
-		do_action( 'woocommerce_delete_order_refund', $id, $parent_order_id );
+		do_action( 'woocommerce_delete_order_refund', $id );
+
+		if ( ! $parent_order_id ) {
+			return;
+		}
+
+		wc_get_container()->get( OrderModifiedDateUpdater::class )->update_modified_date( $parent_order_id );
+
+		/**
+		 * Fires after a refund is deleted from an order, unless the order itself is being deleted.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param int $order_id  The ID of the order the refund belonged to.
+		 * @param int $refund_id The ID of the deleted refund.
+		 */
+		do_action( 'woocommerce_order_refund_deleted', $parent_order_id, $id );
 	}
 
 	/**
