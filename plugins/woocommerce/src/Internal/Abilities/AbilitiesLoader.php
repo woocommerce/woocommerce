@@ -7,7 +7,9 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities;
 
+use Automattic\WooCommerce\Abilities\AbilityContracts;
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\InMemoryWrite;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
@@ -136,7 +138,15 @@ class AbilitiesLoader {
 				self::log_replaced_reserved_ability( $ability_name, $class_name );
 			}
 
-			$registered_ability = wp_register_ability( $ability_name, $class_name::get_registration_args() );
+			$args = $class_name::get_registration_args();
+			if ( AbilityContracts::is_enabled() && is_a( $class_name, InMemoryWrite::class, true ) ) {
+				// The write never saves by itself; direct callers get the same validators as any other caller.
+				$args['execute_callback'] = static function ( $input = null ) use ( $class_name ) {
+					return InMemoryWriteExecutor::run( $class_name, is_array( $input ) ? $input : array() );
+				};
+			}
+
+			$registered_ability = wp_register_ability( $ability_name, $args );
 
 			if ( $is_core_ability && null !== $registered_ability ) {
 				self::$registered_core_abilities[ $ability_name ] = $registered_ability;
