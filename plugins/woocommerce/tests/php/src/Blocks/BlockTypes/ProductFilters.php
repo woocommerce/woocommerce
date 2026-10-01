@@ -104,6 +104,26 @@ class ProductFilters extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Emits a router region for standalone and nested Product Filters.
+	 *
+	 * @param bool $nested Whether the filters are inside a Product Collection.
+	 * @testWith [false]
+	 *           [true]
+	 */
+	public function test_render_emits_router_region( bool $nested ): void {
+		$block = new \WP_Block( parse_blocks( '<!-- wp:woocommerce/product-filters /-->' )[0] );
+		if ( $nested ) {
+			$block->context['productCollectionLocation'] = array( 'type' => 'archive' );
+		}
+
+		$html = $this->product_filters->render_callback( array(), '', $block );
+		$tags = new \WP_HTML_Tag_Processor( $html );
+
+		$this->assertTrue( $tags->next_tag( array( 'class_name' => 'wc-block-product-filters' ) ) );
+		$this->assertMatchesRegularExpression( '/^wc-product-filters-[a-f0-9]{32}$/', (string) $tags->get_attribute( 'data-wp-router-region' ) );
+	}
+
+	/**
 	 * Ensures get_pagenum_link filters receive the expected argument types.
 	 *
 	 * @param mixed $link    Base URL from WordPress.
