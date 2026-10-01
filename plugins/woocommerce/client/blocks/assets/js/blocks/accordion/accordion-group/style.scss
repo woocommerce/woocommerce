@@ -56,7 +56,6 @@
 
 .wp-block-woocommerce-accordion-header.icon-position-left
 	.accordion-item__toggle {
-	/* stylelint-disable-next-line declaration-property-value-allowed-list -- This should be refactored to not use the row-reverse value. */
 	flex-direction: row-reverse;
 }
 
