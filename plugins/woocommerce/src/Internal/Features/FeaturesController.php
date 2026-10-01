@@ -339,8 +339,8 @@ class FeaturesController {
 			\Automattic\WooCommerce\Abilities\AbilityContracts::FEATURE_ID => array(
 				'name'                         => __( 'Ability contracts', 'woocommerce' ),
 				'description'                  => __( 'Let extensions add fields and validators to WooCommerce abilities, and run write abilities in memory before saving.', 'woocommerce' ),
-				'is_experimental'              => true,
-				'enabled_by_default'           => false,
+				'is_experimental'              => false,
+				'enabled_by_default'           => true,
 				'disable_ui'                   => false,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
