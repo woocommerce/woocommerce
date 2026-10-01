@@ -61,4 +61,25 @@ class WC_Tests_Order_Item_Functions extends WC_Unit_Test_Case {
 		$this->assertEmpty( wc_get_order_item_meta( $item_id, '_test_key' ) );
 	}
 
+	/**
+	 * @testdox wc_update_order_item() fires woocommerce_update_order_item with the item and order ID, like the data store.
+	 */
+	public function test_wc_update_order_item_hook_arguments() {
+		$order   = WC_Helper_Order::create_order();
+		$item_id = current( $order->get_items() )->get_id();
+		$args    = array( 'order_item_name' => 'Renamed' );
+
+		$received = array();
+		$callback = function () use ( &$received ) {
+			$received = func_get_args();
+		};
+		add_action( 'woocommerce_update_order_item', $callback, 10, 4 );
+		wc_update_order_item( $item_id, $args );
+		remove_action( 'woocommerce_update_order_item', $callback, 10 );
+
+		$this->assertSame( $item_id, $received[0] );
+		$this->assertInstanceOf( WC_Order_Item_Product::class, $received[1] );
+		$this->assertSame( $order->get_id(), $received[2] );
+		$this->assertSame( $args, $received[3] );
+	}
 }
