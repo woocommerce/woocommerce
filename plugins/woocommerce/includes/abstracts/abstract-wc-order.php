@@ -2427,6 +2427,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$tax_rate_id = $tax->get_rate_id();
 			// Remove taxes which no longer exist for cart/shipping.
 			if ( ( ! array_key_exists( $tax_rate_id, $cart_taxes ) && ! array_key_exists( $tax_rate_id, $shipping_taxes ) ) || in_array( $tax_rate_id, $saved_rate_ids, true ) ) {
+				// Filters may change array keys without changing the local collection.
+				if ( ( $this->items['tax_lines'][ $tax_item_id ] ?? null ) !== $tax ) {
+					$tax_item_key = array_search( $tax, $this->items['tax_lines'] ?? array(), true );
+					$tax_item_id  = false === $tax_item_key ? $tax->get_id() : $tax_item_key;
+				}
+
 				$this->remove_item( $tax_item_id );
 				continue;
 			}

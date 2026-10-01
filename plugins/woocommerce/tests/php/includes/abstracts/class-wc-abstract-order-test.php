@@ -1055,9 +1055,70 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox update_taxes removes an unsaved duplicate while preserving the persisted tax item.
+	 * @testdox update_taxes removes the correct tax item when a filter changes its collection key.
+	 * @testWith [true, "reindex"]
+	 *           [false, "reindex"]
+	 *           [true, "collision"]
+	 *           [false, "collision"]
+	 *           [true, "clone"]
+	 *
+	 * @param bool   $persist_tax Whether to persist the tax before removing it.
+	 * @param string $filter_mode How to transform the filtered tax collection.
 	 */
-	public function test_update_taxes_removes_unsaved_duplicate_tax_item(): void {
+	public function test_update_taxes_removes_obsolete_tax_item_from_filtered_collection( bool $persist_tax, string $filter_mode ): void {
+		$order = new WC_Order();
+		$fee   = new WC_Order_Item_Fee();
+		$fee->set_name( 'Retained fee' );
+		$order->add_item( $fee );
+		$order->save();
+		$fee_id = $fee->get_id();
+
+		$tax_item = new WC_Order_Item_Tax();
+		$tax_item->set_rate_id( 1234 );
+		$order->add_item( $tax_item );
+		if ( $persist_tax ) {
+			$order->save();
+		}
+
+		$filter_tax_items = static function ( $items, $filtered_order, $types ) use ( $order, $fee_id, $filter_mode ) {
+			if ( $filtered_order !== $order || array( 'tax' ) !== $types || empty( $items ) ) {
+				return $items;
+			}
+
+			if ( 'clone' === $filter_mode ) {
+				return array_map(
+					static function ( $item ) {
+						return clone $item;
+					},
+					$items
+				);
+			}
+
+			return 'collision' === $filter_mode ? array( $fee_id => reset( $items ) ) : array_values( $items );
+		};
+		add_filter( 'woocommerce_order_get_items', $filter_tax_items, 10, 3 );
+
+		try {
+			$order->update_taxes();
+		} finally {
+			remove_filter( 'woocommerce_order_get_items', $filter_tax_items, 10 );
+		}
+
+		$this->assertSame( array( $fee_id ), array_keys( $order->get_fees() ), 'Tax cleanup should preserve the unrelated fee in memory.' );
+		$this->assertEmpty( $order->get_taxes(), 'The obsolete tax should be removed from the local collection despite the filter.' );
+		$reloaded_order = wc_get_order( $order->get_id() );
+		$this->assertSame( array( $fee_id ), array_keys( $reloaded_order->get_fees() ), 'Tax cleanup should preserve the persisted fee.' );
+		$this->assertEmpty( $reloaded_order->get_taxes(), 'The obsolete tax should not remain persisted after cleanup.' );
+	}
+
+	/**
+	 * @testdox update_taxes removes an unsaved duplicate while preserving the persisted tax item.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $reindex_taxes Whether to reindex the filtered tax collection.
+	 */
+	public function test_update_taxes_removes_unsaved_duplicate_tax_item( bool $reindex_taxes ): void {
 		$tax_rate_id = WC_Tax::_insert_tax_rate(
 			array(
 				'tax_rate'      => '10.0000',
@@ -1083,7 +1144,16 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$order->add_item( $duplicate );
 		$this->assertSame( 0, $duplicate->get_id(), 'The duplicate tax should still use a temporary collection key.' );
 
-		$order->update_taxes();
+		$filter_tax_items = static function ( $items, $filtered_order, $types ) use ( $order, $reindex_taxes ) {
+			return $reindex_taxes && $order === $filtered_order && array( 'tax' ) === $types ? array_values( $items ) : $items;
+		};
+		add_filter( 'woocommerce_order_get_items', $filter_tax_items, 10, 3 );
+
+		try {
+			$order->update_taxes();
+		} finally {
+			remove_filter( 'woocommerce_order_get_items', $filter_tax_items, 10 );
+		}
 
 		$this->assertSame( array( $tax_item_id ), array_keys( $order->get_taxes() ), 'Only the original persisted tax should remain in memory.' );
 		$this->assertSame( 1.0, (float) $order->get_cart_tax(), 'Removing the duplicate should preserve the fee tax total.' );
