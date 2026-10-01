@@ -580,7 +580,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$notification->expects( $this->once() )
 			->method( 'get_suppression_reason' )
 			->with( $this->equalTo( $pref_value ) )
-			->willReturn( SuppressionReason::TYPE_DISABLED );
+			->willReturn( SuppressionReason::NOTIFICATIONS_OFF );
 
 		$this->dispatcher->expects( $this->never() )->method( 'dispatch' );
 
@@ -799,8 +799,8 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 			->method( 'log_notification_step' )
 			->with(
 				$this->anything(),
-				'no_recipients',
-				'no_tokens',
+				'recipients',
+				'none',
 				$this->callback(
 					function ( array $context ) {
 						return 2 === $context['tokens_total']
@@ -822,9 +822,9 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should log the held-back reason per device and an all_held_back outcome when nobody wants it.
+	 * @testdox Should log the exclusion reason per token and an all_excluded outcome when nobody wants it.
 	 */
-	public function test_process_logs_held_back_devices_with_reasons(): void {
+	public function test_process_logs_excluded_tokens_with_reasons(): void {
 		$data_store = $this->createMock( PushTokensDataStore::class );
 		$data_store->method( 'get_tokens_for_roles' )->willReturn(
 			array(
@@ -845,13 +845,13 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 			->method( 'log_notification_step' )
 			->with(
 				$this->anything(),
-				'no_recipients',
-				'all_held_back',
+				'recipients',
+				'all_excluded',
 				$this->callback(
 					function ( array $context ) {
 						return 3 === $context['held_back']
 							&& 0 === $context['recipients']
-							&& array( 'type_disabled' => 3 ) === $context['held_back_reasons'];
+							&& array( 'notifications_off' => 3 ) === $context['held_back_reasons'];
 					}
 				)
 			);
@@ -859,9 +859,9 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$logger->expects( $this->exactly( 3 ) )
 			->method( 'log_suppressed_token_step' )
 			->withConsecutive(
-				array( $this->anything(), 11, 1, 'held_back', 'type_disabled' ),
-				array( $this->anything(), 12, 1, 'held_back', 'type_disabled' ),
-				array( $this->anything(), 13, 2, 'held_back', 'type_disabled' )
+				array( $this->anything(), 11, 1, 'token_excluded', 'notifications_off' ),
+				array( $this->anything(), 12, 1, 'token_excluded', 'notifications_off' ),
+				array( $this->anything(), 13, 2, 'token_excluded', 'notifications_off' )
 			);
 
 		$sut = new NotificationProcessor();
@@ -871,9 +871,9 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should log cleared_to_send with the recipient token IDs and one line per recipient.
+	 * @testdox Should log recipients resolved with the recipient token IDs and one line per recipient.
 	 */
-	public function test_process_logs_cleared_to_send(): void {
+	public function test_process_logs_recipients_resolved(): void {
 		$data_store = $this->createMock( PushTokensDataStore::class );
 		$data_store->method( 'get_tokens_for_roles' )->willReturn(
 			array( $this->create_token( 11, 1 ), $this->create_token( 12, 2 ) )
@@ -886,8 +886,8 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 			->method( 'log_notification_step' )
 			->with(
 				$this->anything(),
-				'cleared_to_send',
-				'ok',
+				'recipients',
+				'resolved',
 				$this->callback(
 					function ( array $context ) {
 						return 2 === $context['recipients']
@@ -899,10 +899,10 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$logger->expects( $this->exactly( 4 ) )
 			->method( 'log_token_step' )
 			->withConsecutive(
-				array( $this->anything(), 11, 1, 'cleared_to_send', 'ok' ),
-				array( $this->anything(), 12, 2, 'cleared_to_send', 'ok' ),
-				array( $this->anything(), 11, 1, 'send', 'accepted' ),
-				array( $this->anything(), 12, 2, 'send', 'accepted' )
+				array( $this->anything(), 11, 1, 'token_included', 'ok' ),
+				array( $this->anything(), 12, 2, 'token_included', 'ok' ),
+				array( $this->anything(), 11, 1, 'dispatched', 'accepted' ),
+				array( $this->anything(), 12, 2, 'dispatched', 'accepted' )
 			);
 
 		$sut = new NotificationProcessor();
@@ -933,10 +933,10 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$logger->expects( $this->exactly( 4 ) )
 			->method( 'log_token_step' )
 			->withConsecutive(
-				array( $this->anything(), 11, 1, 'cleared_to_send', 'ok' ),
-				array( $this->anything(), 12, 2, 'cleared_to_send', 'ok' ),
-				array( $this->anything(), 11, 1, 'send', SendOutcome::REJECTED_INVALID_TOKEN ),
-				array( $this->anything(), 12, 2, 'send', 'invalid_token' )
+				array( $this->anything(), 11, 1, 'token_included', 'ok' ),
+				array( $this->anything(), 12, 2, 'token_included', 'ok' ),
+				array( $this->anything(), 11, 1, 'dispatched', SendOutcome::REJECTED_INVALID_TOKEN ),
+				array( $this->anything(), 12, 2, 'dispatched', 'invalid_token' )
 			);
 
 		$sut = new NotificationProcessor();
@@ -946,7 +946,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should log the safety net firing before processing.
+	 * @testdox Should log the fallback firing before processing.
 	 */
 	public function test_handle_safety_net_logs_that_it_fired(): void {
 		$this->data_store->method( 'get_tokens_for_roles' )->willReturn( array() );
@@ -954,7 +954,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$logger = $this->create_active_step_logger();
 		$logger->expects( $this->atLeastOnce() )
 			->method( 'log_notification_step' )
-			->withConsecutive( array( $this->anything(), 'safety_net', 'fired' ) );
+			->withConsecutive( array( $this->anything(), 'fallback', 'fired' ) );
 
 		$sut = new NotificationProcessor();
 		$sut->init( $this->dispatcher, $this->data_store, $this->preferences_service, $this->retry_handler, $logger );
@@ -981,8 +981,8 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 			->method( 'log_notification_step' )
 			->with(
 				$this->anything(),
-				'cleared_to_send',
-				'ok',
+				'recipients',
+				'resolved',
 				$this->callback(
 					function ( array $context ) {
 						return 'skipped_over_cap' === $context['token_lines']
@@ -1020,9 +1020,9 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should write held back devices to the store-wide suppressed source rather than each device's own.
+	 * @testdox Should write excluded tokens to the store-wide suppressed source rather than each token's own.
 	 */
-	public function test_process_writes_held_back_devices_to_the_suppressed_source(): void {
+	public function test_process_writes_excluded_tokens_to_the_suppressed_source(): void {
 		$data_store = $this->createMock( PushTokensDataStore::class );
 		$data_store->method( 'get_tokens_for_roles' )->willReturn( array( $this->create_token( 11, 1 ) ) );
 		$data_store->method( 'count_tokens' )->willReturn( 1 );
@@ -1039,7 +1039,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 
 		$this->assertLogged(
 			'info',
-			'Held back: type disabled',
+			'Token excluded: notifications off',
 			array(
 				'source'   => NotificationStepLogger::SUPPRESSED_SOURCE,
 				'token_id' => 11,
@@ -1175,10 +1175,10 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 
 		$this->assertLogged(
 			'error',
-			'Safety net failed:',
+			'Fallback failed:',
 			array(
 				'source'  => PushNotifications::FEATURE_NAME,
-				'step'    => 'safety_net',
+				'step'    => 'fallback',
 				'outcome' => 'invalid_notification',
 				'type'    => 'unknown_type',
 			)

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Internal\PushNotifications\Enums;
 
 /**
- * Reasons a notification was not sent to a device.
+ * Reasons a notification was not sent to a token.
  */
 final class SuppressionReason {
 
@@ -14,14 +14,14 @@ final class SuppressionReason {
 	 *
 	 * @var string
 	 */
-	public const TYPE_DISABLED = 'type_disabled';
+	public const NOTIFICATIONS_OFF = 'notifications_off';
 
 	/**
 	 * The user turned off this stock event type.
 	 *
 	 * @var string
 	 */
-	public const EVENT_TYPE_DISABLED = 'event_type_disabled';
+	public const STOCK_ALERT_OFF = 'stock_alert_off';
 
 	/**
 	 * The order could not be loaded.
@@ -42,7 +42,7 @@ final class SuppressionReason {
 	 *
 	 * @var string
 	 */
-	public const COMMENT_MISSING = 'comment_missing';
+	public const REVIEW_MISSING = 'review_missing';
 
 	/**
 	 * The review's rating is above the maximum the user asked to be told about.
@@ -56,5 +56,5 @@ final class SuppressionReason {
 	 *
 	 * @var string
 	 */
-	public const NO_USER = 'no_user';
+	public const NO_ACCOUNT = 'no_account';
 }

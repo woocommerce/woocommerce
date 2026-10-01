@@ -83,7 +83,7 @@ class InternalNotificationDispatcher {
 			foreach ( $notifications as $notification ) {
 				$this->step_logger->log_failure(
 					$notification,
-					'dispatched',
+					'loopback_requested',
 					'encode_failed',
 					'error',
 					'Failed to JSON-encode push notification payload.',
@@ -128,7 +128,7 @@ class InternalNotificationDispatcher {
 			if ( is_wp_error( $response ) ) {
 				$this->step_logger->log_failure(
 					$notification,
-					'dispatched',
+					'loopback_requested',
 					'request_failed',
 					'warning',
 					sprintf( 'Loopback request failed: %s', $response->get_error_message() ),
@@ -137,7 +137,7 @@ class InternalNotificationDispatcher {
 			} else {
 				$this->step_logger->log_notification_step(
 					$notification,
-					'dispatched',
+					'loopback_requested',
 					'ok',
 					array( 'batch_size' => count( $notifications ) )
 				);

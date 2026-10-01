@@ -56,7 +56,7 @@ class NotificationStepLogger {
 	 * Records a notification-level step.
 	 *
 	 * @param Notification $notification The notification the step belongs to.
-	 * @param string       $step         Machine-readable step name, e.g. `cleared_to_send`.
+	 * @param string       $step         Machine-readable step name, e.g. `recipients`.
 	 * @param string       $outcome      Machine-readable outcome, e.g. `ok` or `no_tokens`.
 	 * @param array        $context      Extra scalar fields to store with the line.
 	 * @return void
@@ -73,7 +73,7 @@ class NotificationStepLogger {
 	 * @param Notification $notification The notification the step belongs to.
 	 * @param int          $token_id     The push token post ID.
 	 * @param int          $user_id      The user who owns the token.
-	 * @param string       $step         Machine-readable step name, e.g. `held_back`.
+	 * @param string       $step         Machine-readable step name, e.g. `token_included`.
 	 * @param string       $outcome      Machine-readable outcome, e.g. `type_disabled`.
 	 * @param array        $context      Extra scalar fields to store with the line.
 	 * @return void
@@ -97,7 +97,7 @@ class NotificationStepLogger {
 	 * @param Notification $notification The notification the step belongs to.
 	 * @param int          $token_id     The push token post ID.
 	 * @param int          $user_id      The user who owns the token.
-	 * @param string       $step         Machine-readable step name, e.g. `held_back`.
+	 * @param string       $step         Machine-readable step name, e.g. `token_excluded`.
 	 * @param string       $outcome      Machine-readable outcome, e.g. `type_disabled`.
 	 * @param array        $context      Extra scalar fields to store with the line.
 	 * @return void

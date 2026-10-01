@@ -372,12 +372,12 @@ abstract class Notification {
 		}
 
 		if ( is_array( $pref_value ) ) {
-			return ( $pref_value['enabled'] ?? true ) ? null : SuppressionReason::TYPE_DISABLED;
+			return ( $pref_value['enabled'] ?? true ) ? null : SuppressionReason::NOTIFICATIONS_OFF;
 		}
 
 		// Defensive fallback for unexpected scalar values; the service
 		// always normalises stored prefs to the array shape above.
-		return $pref_value ? null : SuppressionReason::TYPE_DISABLED;
+		return $pref_value ? null : SuppressionReason::NOTIFICATIONS_OFF;
 	}
 
 	/**

@@ -52,7 +52,7 @@ class NotificationStepLoggerTest extends WC_Unit_Test_Case {
 	 * @testdox Should write a notification step at info level to the type source with the identifying context.
 	 */
 	public function test_log_notification_step_writes_to_the_type_source(): void {
-		$this->sut->log_notification_step( $this->create_order_mock( 42 ), 'cleared_to_send', 'ok', array( 'recipients' => 3 ) );
+		$this->sut->log_notification_step( $this->create_order_mock( 42 ), 'recipients', 'resolved', array( 'recipients' => 3 ) );
 
 		$this->assertCount( 1, $this->logger->info_calls );
 
@@ -61,18 +61,18 @@ class NotificationStepLoggerTest extends WC_Unit_Test_Case {
 		$this->assertSame( get_current_blog_id() . '_store_order_42', $context['identifier'] );
 		$this->assertSame( 'store_order', $context['type'] );
 		$this->assertSame( 42, $context['resource_id'] );
-		$this->assertSame( 'cleared_to_send', $context['step'] );
-		$this->assertSame( 'ok', $context['outcome'] );
+		$this->assertSame( 'recipients', $context['step'] );
+		$this->assertSame( 'resolved', $context['outcome'] );
 		$this->assertSame( 3, $context['recipients'] );
 		$this->assertFalse( $context['remote-logging'] );
-		$this->assertSame( 'Cleared to send: ok', $this->logger->info_calls[0]['message'] );
+		$this->assertSame( 'Recipients: resolved', $this->logger->info_calls[0]['message'] );
 	}
 
 	/**
 	 * @testdox Should write a token step to that token's source with the token and user IDs.
 	 */
 	public function test_log_token_step_writes_to_the_token_source(): void {
-		$this->sut->log_token_step( $this->create_order_mock( 42 ), 4412, 7, 'held_back', 'type_disabled' );
+		$this->sut->log_token_step( $this->create_order_mock( 42 ), 4412, 7, 'token_excluded', 'notifications_off' );
 
 		$this->assertCount( 1, $this->logger->info_calls );
 
@@ -81,8 +81,8 @@ class NotificationStepLoggerTest extends WC_Unit_Test_Case {
 		$this->assertSame( 4412, $context['token_id'] );
 		$this->assertSame( 7, $context['user_id'] );
 		$this->assertSame( get_current_blog_id() . '_store_order_42', $context['identifier'] );
-		$this->assertSame( 'held_back', $context['step'] );
-		$this->assertSame( 'type_disabled', $context['outcome'] );
+		$this->assertSame( 'token_excluded', $context['step'] );
+		$this->assertSame( 'notifications_off', $context['outcome'] );
 	}
 
 	/**
@@ -224,7 +224,7 @@ class NotificationStepLoggerTest extends WC_Unit_Test_Case {
 	public function test_log_failure_writes_an_error_line_and_a_step_line(): void {
 		$this->sut->log_failure(
 			$this->create_order_mock( 42 ),
-			'send',
+			'dispatched',
 			'request_failed',
 			'error',
 			'Push notification request failed.',
@@ -241,13 +241,13 @@ class NotificationStepLoggerTest extends WC_Unit_Test_Case {
 		$this->assertSame( get_current_blog_id() . '_store_order_42', $error['context']['identifier'] );
 		$this->assertSame( 'store_order', $error['context']['type'] );
 		$this->assertSame( 42, $error['context']['resource_id'] );
-		$this->assertSame( 'send', $error['context']['step'] );
+		$this->assertSame( 'dispatched', $error['context']['step'] );
 		$this->assertSame( 'request_failed', $error['context']['outcome'] );
 		$this->assertSame( 500, $error['context']['http_status'] );
 		$this->assertFalse( $error['context']['remote-logging'] );
 
 		$step = $this->logger->info_calls[0];
-		$this->assertSame( 'Send: request failed', $step['message'] );
+		$this->assertSame( 'Dispatched: request failed', $step['message'] );
 		$this->assertSame( 'push-notifications-store-order', $step['context']['source'] );
 		$this->assertSame( 500, $step['context']['http_status'] );
 	}
@@ -256,7 +256,7 @@ class NotificationStepLoggerTest extends WC_Unit_Test_Case {
 	 * @testdox Should write the failure's error line at the level the caller asked for.
 	 */
 	public function test_log_failure_uses_the_given_level(): void {
-		$this->sut->log_failure( $this->create_order_mock( 42 ), 'dispatched', 'request_failed', 'warning', 'Loopback request failed.' );
+		$this->sut->log_failure( $this->create_order_mock( 42 ), 'loopback_requested', 'request_failed', 'warning', 'Loopback request failed.' );
 
 		$this->assertSame( 'warning', $this->logger->log_calls[0]['level'] );
 	}
@@ -271,7 +271,7 @@ class NotificationStepLoggerTest extends WC_Unit_Test_Case {
 			->getMock();
 		$notification->method( 'get_identifier' )->willThrowException( new \RuntimeException( 'getter exploded' ) );
 
-		$this->sut->log_failure( $notification, 'send', 'request_failed', 'error', 'Push notification request failed.' );
+		$this->sut->log_failure( $notification, 'dispatched', 'request_failed', 'error', 'Push notification request failed.' );
 
 		$this->assertCount( 0, $this->logger->info_calls );
 		$this->assertCount( 1, $this->logger->log_calls );
@@ -287,7 +287,7 @@ class NotificationStepLoggerTest extends WC_Unit_Test_Case {
 	 * @testdox Should record an unattributed failure under the module source only, with no step line.
 	 */
 	public function test_log_unattributed_failure_writes_no_step_line(): void {
-		$this->sut->log_unattributed_failure( 'received', 'auth_failed', 'warning', 'Loopback request refused.', array( 'reason' => 'token_invalid' ) );
+		$this->sut->log_unattributed_failure( 'loopback_started', 'auth_failed', 'warning', 'Loopback request refused.', array( 'reason' => 'token_invalid' ) );
 
 		$this->assertCount( 0, $this->logger->info_calls );
 		$this->assertCount( 1, $this->logger->log_calls );
@@ -295,7 +295,7 @@ class NotificationStepLoggerTest extends WC_Unit_Test_Case {
 		$error = $this->logger->log_calls[0];
 		$this->assertSame( 'warning', $error['level'] );
 		$this->assertSame( 'push_notifications', $error['context']['source'] );
-		$this->assertSame( 'received', $error['context']['step'] );
+		$this->assertSame( 'loopback_started', $error['context']['step'] );
 		$this->assertSame( 'auth_failed', $error['context']['outcome'] );
 		$this->assertSame( 'token_invalid', $error['context']['reason'] );
 		$this->assertArrayNotHasKey( 'identifier', $error['context'] );
@@ -307,8 +307,8 @@ class NotificationStepLoggerTest extends WC_Unit_Test_Case {
 	public function test_the_filter_does_not_suppress_failure_lines(): void {
 		add_filter( 'woocommerce_push_notification_step_logging_enabled', '__return_false' );
 
-		$this->sut->log_failure( $this->create_order_mock( 42 ), 'send', 'request_failed', 'error', 'Push notification request failed.' );
-		$this->sut->log_unattributed_failure( 'received', 'auth_failed', 'warning', 'Loopback request refused.' );
+		$this->sut->log_failure( $this->create_order_mock( 42 ), 'dispatched', 'request_failed', 'error', 'Push notification request failed.' );
+		$this->sut->log_unattributed_failure( 'loopback_started', 'auth_failed', 'warning', 'Loopback request refused.' );
 
 		$this->assertCount( 0, $this->logger->info_calls );
 		$this->assertCount( 2, $this->logger->log_calls );
@@ -343,7 +343,7 @@ class NotificationStepLoggerTest extends WC_Unit_Test_Case {
 			20
 		);
 
-		$this->sut->log_unattributed_failure( 'received', 'auth_failed', 'warning', 'Loopback request refused.' );
+		$this->sut->log_unattributed_failure( 'loopback_started', 'auth_failed', 'warning', 'Loopback request refused.' );
 
 		$this->assertTrue( true, 'No exception reached the caller.' );
 	}

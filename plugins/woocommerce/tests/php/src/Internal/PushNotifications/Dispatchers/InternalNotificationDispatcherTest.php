@@ -211,7 +211,7 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 	public function test_dispatch_logs_each_notification_as_dispatched(): void {
 		$this->step_logger->expects( $this->exactly( 2 ) )
 			->method( 'log_notification_step' )
-			->with( $this->anything(), 'dispatched', 'ok', array( 'batch_size' => 2 ) );
+			->with( $this->anything(), 'loopback_requested', 'ok', array( 'batch_size' => 2 ) );
 
 		$this->sut->dispatch( array( $this->create_order_mock( 1 ), $this->create_order_mock( 2 ) ) );
 	}
@@ -225,7 +225,7 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 
 		$this->step_logger->expects( $this->once() )
 			->method( 'log_failure' )
-			->with( $this->anything(), 'dispatched', 'request_failed', 'warning', 'Loopback request failed: cURL error 7', array( 'batch_size' => 1 ) );
+			->with( $this->anything(), 'loopback_requested', 'request_failed', 'warning', 'Loopback request failed: cURL error 7', array( 'batch_size' => 1 ) );
 
 		$this->sut->dispatch( array( $this->create_order_mock( 1 ) ) );
 	}

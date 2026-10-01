@@ -247,7 +247,7 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( SuppressionReason::TYPE_DISABLED, $reason );
+		$this->assertSame( SuppressionReason::NOTIFICATIONS_OFF, $reason );
 	}
 
 	/**
