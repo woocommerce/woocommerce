@@ -393,6 +393,24 @@ class PickupLocationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The method answers for itself rather than for any one branch, so nothing about the branches
+	 * can hold it back. A store that has not added one yet, and one whose only branch is closed,
+	 * are both still stores where local pickup is switched on. The sibling test covers the switch
+	 * being off, which needs no locations to say anything.
+	 *
+	 * @testdox Being offered follows the switch, and no branch can hold it back.
+	 */
+	public function test_the_switch_decides_on_its_own_whatever_locations_exist(): void {
+		$package = array( 'destination' => array( 'country' => 'US' ) );
+
+		$this->pickup_configured_with( array(), array( 'enabled' => 'yes' ) );
+		$this->assertTrue( $this->sut->is_available( $package ), 'With nowhere to collect from yet, the method is still the one that was switched on.' );
+
+		$this->pickup_configured_with( array( $this->location( 'Downtown', false ) ), array( 'enabled' => 'yes' ) );
+		$this->assertTrue( $this->sut->is_available( $package ), 'A branch being closed is not the method being switched off.' );
+	}
+
+	/**
 	 * The settings screen keeps limited HTML in the pickup details, so a merchant can save markup
 	 * there. What the shopper is handed on the rate is plain text either way: `add_meta_data()`
 	 * cleans every value it stores. The wording survives, the markup does not.
