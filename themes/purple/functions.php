@@ -74,6 +74,10 @@ if ( ! function_exists( 'purple_setup' ) ) :
 
 		// Enqueue editor styles.
 		add_editor_style( 'style.css' );
+
+		foreach ( purple_get_woocommerce_stylesheets() as $relative_path ) {
+			add_editor_style( $relative_path );
+		}
 	}
 
 endif;
@@ -95,6 +99,39 @@ if ( ! function_exists( 'purple_register_pattern_categories' ) ) :
 endif;
 
 add_action( 'init', 'purple_register_pattern_categories' );
+
+if ( ! function_exists( 'purple_get_woocommerce_stylesheets' ) ) :
+	/**
+	 * WooCommerce compatibility stylesheets that apply to the installed version.
+	 *
+	 * Keys are the releases that contain the upstream fix. A sheet is included
+	 * only while the installed version is older than that.
+	 *
+	 * @since purple 1.0
+	 *
+	 * @return array<string, string> Map of fixed-in version to stylesheet path.
+	 */
+	function purple_get_woocommerce_stylesheets(): array {
+		if ( ! defined( 'WC_VERSION' ) ) {
+			return array();
+		}
+
+		$stylesheets = array(
+			'11.2.0' => 'assets/css/woocommerce-11.1.css',
+			'11.3.0' => 'assets/css/woocommerce-11.2.css',
+		);
+
+		$applicable = array();
+		foreach ( $stylesheets as $version => $relative_path ) {
+			if ( version_compare( WC_VERSION, $version, '<' ) ) {
+				$applicable[ $version ] = $relative_path;
+			}
+		}
+
+		return $applicable;
+	}
+
+endif;
 
 if ( ! function_exists( 'purple_styles' ) ) :
 	/**
@@ -119,22 +156,13 @@ if ( ! function_exists( 'purple_styles' ) ) :
 		// Enqueue theme stylesheet.
 		wp_enqueue_style( 'purple-style' );
 
-		// WooCommerce may not be installed. Skip versioned sheets entirely then.
-		if ( defined( 'WC_VERSION' ) ) {
-			$woocommerce_version_stylesheets = array(
-				'11.2.0' => 'assets/css/woocommerce-11.1.css',
-				'11.3.0' => 'assets/css/woocommerce-11.2.css',
+		foreach ( purple_get_woocommerce_stylesheets() as $version => $relative_path ) {
+			wp_enqueue_style(
+				'purple-woocommerce-' . str_replace( '.', '-', $version ),
+				get_template_directory_uri() . '/' . $relative_path,
+				array(),
+				$theme_version
 			);
-			foreach ( $woocommerce_version_stylesheets as $version => $relative_path ) {
-				if ( version_compare( WC_VERSION, $version, '<' ) ) {
-					wp_enqueue_style(
-						'purple-woocommerce-' . str_replace( '.', '-', $version ),
-						get_template_directory_uri() . '/' . $relative_path,
-						array(),
-						$theme_version
-					);
-				}
-			}
 		}
 	}
 
