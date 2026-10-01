@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { dispatch as wpDispatch } from '@wordpress/data';
+import type { Cart } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -27,13 +28,16 @@ const mockWpDispatch = jest.mocked( wpDispatch );
 describe( 'Window load event handler', () => {
 	let mockFinishResolution: jest.Mock;
 	let originalAddEventListener: typeof window.addEventListener;
-	let loadHandler: EventListener;
+	let loadHandler: ( event: Event ) => void;
 
 	beforeAll( () => {
 		// Capture the addEventListener calls to extract the load handler
 		originalAddEventListener = window.addEventListener;
 		window.addEventListener = jest.fn(
-			( event: string, handler: EventListenerOrEventListenerObject ) => {
+			(
+				event: string,
+				handler: Parameters< typeof window.addEventListener >[ 1 ]
+			) => {
 				if ( event === 'load' && typeof handler === 'function' ) {
 					loadHandler = handler;
 				}
@@ -42,7 +46,7 @@ describe( 'Window load event handler', () => {
 		);
 
 		// Now import the module to register the event listener
-		require( '../index' );
+		jest.requireActual( '../index' );
 	} );
 
 	beforeEach( () => {
@@ -69,7 +73,9 @@ describe( 'Window load event handler', () => {
 	it( 'should skip API request when cached cart has items and not adding to cart with /?add-to-cart=', () => {
 		mockHasCartSession.mockReturnValue( true );
 		mockIsAddingToCart.mockReturnValue( false );
-		mockPersistenceLayerGet.mockReturnValue( { itemsCount: 2 } );
+		mockPersistenceLayerGet.mockReturnValue( {
+			itemsCount: 2,
+		} as unknown as Cart );
 
 		loadHandler( new Event( 'load' ) );
 
@@ -79,7 +85,9 @@ describe( 'Window load event handler', () => {
 	it( 'should make API request when has cart session but cached cart is empty', () => {
 		mockHasCartSession.mockReturnValue( true );
 		mockIsAddingToCart.mockReturnValue( false );
-		mockPersistenceLayerGet.mockReturnValue( { itemsCount: 0 } );
+		mockPersistenceLayerGet.mockReturnValue( {
+			itemsCount: 0,
+		} as unknown as Cart );
 
 		loadHandler( new Event( 'load' ) );
 
@@ -109,7 +117,9 @@ describe( 'Window load event handler', () => {
 	it( 'should make API request when has cart session, cached cart has items, but adding to cart with /?add-to-cart=', () => {
 		mockHasCartSession.mockReturnValue( true );
 		mockIsAddingToCart.mockReturnValue( true );
-		mockPersistenceLayerGet.mockReturnValue( { itemsCount: 2 } );
+		mockPersistenceLayerGet.mockReturnValue( {
+			itemsCount: 2,
+		} as unknown as Cart );
 
 		loadHandler( new Event( 'load' ) );
 

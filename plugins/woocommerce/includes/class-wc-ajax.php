@@ -397,7 +397,22 @@ class WC_AJAX {
 	 * @return void
 	 */
 	public static function update_order_review() {
-		check_ajax_referer( 'update-order-review', 'security' );
+		// A rejected nonce usually means the browser restored a checkout rendered for an earlier session,
+		// e.g. going back after logging in. Reload it once; if the fresh page is rejected too, show the expired notice.
+		// Without a session cookie the reload flag can't persist, so skip the reload to avoid an endless loop.
+		if ( ! check_ajax_referer( 'update-order-review', 'security', false ) ) {
+			$can_remember_reload = ! ( WC()->session instanceof WC_Session_Handler ) || WC()->session->has_session();
+
+			if ( ! $can_remember_reload || WC()->session->get( 'reload_checkout_for_nonce' ) ) {
+				unset( WC()->session->reload_checkout_for_nonce );
+				self::update_order_review_expired();
+			}
+
+			WC()->session->set( 'reload_checkout_for_nonce', true );
+			wp_send_json( array( 'reload' => true ) );
+		}
+
+		unset( WC()->session->reload_checkout_for_nonce );
 
 		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
 
@@ -483,10 +498,19 @@ class WC_AJAX {
 		if ( ! $reload_checkout ) {
 			// Capture the error count before printing, because wc_print_notices() clears the queue.
 			// A filter on `woocommerce_notice_types` can keep queued errors off the page, so the
-			// flag only reports errors that were rendered.
+			// flag only reports errors that were rendered. Record the types that filter settles on
+			// rather than applying it a second time; a non-array iterable can't be inspected after
+			// wc_print_notices() consumes it, so it falls back to trusting the rendered output.
 			$error_notice_count = wc_notice_count( 'error' );
-			$messages           = wc_print_notices( true );
-			$has_error_notices  = 0 < $error_notice_count && '' !== $messages;
+			$rendered_types     = array();
+			$record_types       = static function ( $types ) use ( &$rendered_types ) {
+				$rendered_types = $types;
+				return $types;
+			};
+			add_filter( 'woocommerce_notice_types', $record_types, PHP_INT_MAX );
+			$messages = wc_print_notices( true );
+			remove_filter( 'woocommerce_notice_types', $record_types, PHP_INT_MAX );
+			$has_error_notices = 0 < $error_notice_count && ( ! is_array( $rendered_types ) || in_array( 'error', $rendered_types, true ) ) && '' !== $messages;
 		} else {
 			$has_error_notices = false;
 			$messages          = '';
