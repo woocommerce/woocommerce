@@ -252,3 +252,77 @@ test( 'description is not shown if rate is not selected', async () => {
 	expect( screen.queryByText( 'Store 1 details.' ) ).not.toBeInTheDocument();
 	expect( screen.getByText( 'Store 2 details.' ) ).toBeInTheDocument();
 } );
+
+test( "labels a location by its own name and address, not the shipping method's", async () => {
+	const packageData = generateShippingPackage( {
+		packageId: 0,
+		shippingRates: [
+			generateShippingRate( {
+				rateId: 'pickup_location:1',
+				name: 'Local pickup',
+				methodID: 'pickup_nyc',
+				price: '0',
+				instanceID: 0,
+				meta_data: [
+					{ key: 'pickup_location', value: 'Downtown Store' },
+					{
+						key: 'pickup_address',
+						value: '12 High Street, London',
+					},
+				],
+			} ),
+		],
+	} );
+	( useShippingData as jest.Mock ).mockImplementation( () => {
+		return {
+			selectShippingRate: jest.fn(),
+			isSelectingRate: false,
+			shippingRates: [ packageData ],
+		};
+	} );
+
+	render( <CheckoutPickupOptionsBlock /> );
+
+	// Named by the branch, which is how two branches are told apart, rather than by the
+	// method all of them share.
+	expect(
+		await screen.findByRole( 'radio', { name: /Downtown Store/ } )
+	).toBeInTheDocument();
+	expect(
+		screen.queryByRole( 'radio', { name: /Local pickup/ } )
+	).not.toBeInTheDocument();
+	expect( screen.getByText( '12 High Street, London' ) ).toBeInTheDocument();
+} );
+
+test( 'shows the pickup cost instead of free once the merchant sets one', async () => {
+	const packageData = generateShippingPackage( {
+		packageId: 0,
+		shippingRates: [
+			generateShippingRate( {
+				rateId: 'pickup_location:1',
+				name: 'Pickup New York City',
+				methodID: 'pickup_nyc',
+				price: '500',
+				instanceID: 0,
+				meta_data: [
+					{ key: 'pickup_location', value: 'New York City' },
+				],
+			} ),
+		],
+	} );
+	( useShippingData as jest.Mock ).mockImplementation( () => {
+		return {
+			selectShippingRate: jest.fn(),
+			isSelectingRate: false,
+			shippingRates: [ packageData ],
+		};
+	} );
+
+	render( <CheckoutPickupOptionsBlock /> );
+
+	// The amount is rendered in parts ($ then 5.00), so read it off the option's accessible name.
+	expect(
+		await screen.findByRole( 'radio', { name: /New York City.*\$\s*5\.00/ } )
+	).toBeInTheDocument();
+	expect( screen.queryByText( 'free' ) ).not.toBeInTheDocument();
+} );
