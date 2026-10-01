@@ -1274,8 +1274,13 @@ class FiltererTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Multiple AND attributes match across variation and non-variation lookup rows.
+	 *
+	 * @testWith [["Red", "Blue"]]
+	 *           [["Red"]]
+	 *
+	 * @param string[] $color_terms Selected color terms.
 	 */
-	public function test_and_filters_match_variation_and_non_variation_attributes(): void {
+	public function test_and_filters_match_variation_and_non_variation_attributes( array $color_terms ): void {
 		$this->set_use_lookup_table( true );
 		$this->create_product_attribute( 'Color', array( 'Red', 'Blue' ) );
 		$this->create_product_attribute( 'Material', array( 'Cotton', 'Wool' ) );
@@ -1304,7 +1309,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$expected,
 			$this->do_product_request(
 				array(
-					'Color'    => array( 'Red', 'Blue' ),
+					'Color'    => $color_terms,
 					'Material' => array( 'Cotton', 'Wool' ),
 				),
 				array(
@@ -1317,7 +1322,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 
 		$chosen_attributes = array(
 			'pa_color'    => array(
-				'terms'      => array( 'red', 'blue' ),
+				'terms'      => array_map( 'wc_sanitize_taxonomy_name', $color_terms ),
 				'query_type' => 'and',
 			),
 			'pa_material' => array(
@@ -1347,7 +1352,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			array(
 				'post_type'           => 'product',
 				'post__in'            => $this->product_ids,
-				'filter_color'        => 'red,blue',
+				'filter_color'        => implode( ',', array_map( 'wc_sanitize_taxonomy_name', $color_terms ) ),
 				'query_type_color'    => 'and',
 				'filter_material'     => 'cotton,wool',
 				'query_type_material' => 'and',
@@ -1356,6 +1361,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		);
 		$this->assertSame( 1, $counts[ term_exists( 'Cotton', 'pa_material' )['term_id'] ] );
 		$this->assertSame( 1, $counts[ term_exists( 'Wool', 'pa_material' )['term_id'] ] );
+		$this->assert_counters( 'Material', array( 'Cotton', 'Wool' ), 'and' );
 	}
 
 	/**

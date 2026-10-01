@@ -297,19 +297,22 @@ class Filterer {
 			$attributes_to_filter_by = \WC_Query::get_layered_nav_chosen_attributes();
 
 			if ( ! empty( $attributes_to_filter_by ) ) {
-				$and_term_ids = array();
-
 				foreach ( $attributes_to_filter_by as $taxonomy => $data ) {
 					if ( 'and' !== $data['query_type'] ) {
 						continue;
 					}
-					$all_terms             = get_terms( $taxonomy, array( 'hide_empty' => false ) );
-					$term_ids_by_slug      = wp_list_pluck( $all_terms, 'term_id', 'slug' );
-					$term_ids_to_filter_by = array_values( array_intersect_key( $term_ids_by_slug, array_flip( $data['terms'] ) ) );
-					$and_term_ids          = array_merge( $and_term_ids, $term_ids_to_filter_by );
-				}
+					$all_terms        = get_terms(
+						array(
+							'taxonomy'   => $taxonomy,
+							'hide_empty' => false,
+						)
+					);
+					$term_ids_by_slug = wp_list_pluck( $all_terms, 'term_id', 'slug' );
+					$and_term_ids     = array_values( array_intersect_key( $term_ids_by_slug, array_flip( $data['terms'] ) ) );
 
-				if ( ! empty( $and_term_ids ) ) {
+					if ( empty( $and_term_ids ) ) {
+						continue;
+					}
 					$terms_count   = count( $and_term_ids );
 					$term_ids_list = '(' . join( ',', $and_term_ids ) . ')';
 					// The extra derived table ("SELECT product_or_parent_id FROM") is needed for performance
