@@ -29,7 +29,7 @@ interface InMemoryWrite extends AbilityDefinition {
 	 * Load the object to change. Never saves.
 	 *
 	 * @param array $input Ability input.
-	 * @return \WC_Data|null
+	 * @return \WC_Data|InMemorySubject|null
 	 *
 	 * @since 11.3.0
 	 */
