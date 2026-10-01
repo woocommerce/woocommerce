@@ -23,4 +23,6 @@ To open a group as its own page, give it a `panel` layout with `openAs: { type: 
 
 Each page is its own form. Save and Discard cover the fields on the current page, and leaving a page with unsaved changes asks before discarding them.
 
+A card's description can only be text. To include a link, register a read-only field, set its `render` in the screen's script module, and place it first in the card with `labelPosition: 'none'`. See the example plugin's Customer support card.
+
 Add `classic_section` with the gateway's classic settings section (its `section` query argument) to redirect that page to the screen. Only GET requests redirect, other query arguments are passed to the route, and adding `wc_classic_settings=1` keeps the classic page. The screen then shows a "Use classic settings" link. To open an old link at a sub-page, turn its query arguments into a path with the `woocommerce_experimental_payment_settings_classic_location` filter.

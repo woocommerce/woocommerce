@@ -102,7 +102,7 @@ add_action(
 	}
 );
 
-// A script module that adds to the `title` field's definition.
+// A script module that adds to the `title` field's definition and renders the support card's description.
 add_action(
 	'init',
 	static function () {
@@ -149,6 +149,13 @@ add_action(
 					'id'    => 'email',
 					'type'  => 'email',
 					'label' => 'Support email',
+				),
+				// Not a setting: shows the support card's description, with a link, from `fields.js`.
+				array(
+					'id'       => 'support_description',
+					'type'     => 'text',
+					'label'    => 'Customer support description',
+					'readOnly' => true,
 				),
 				array(
 					'id'    => 'descriptor',
@@ -200,7 +207,20 @@ add_filter(
 					),
 					'fields' => array(
 						$card( 'general', 'General', array( 'enabled', 'title', 'mode' ) ),
-						$card( 'support', 'Customer support', array( 'email' ) ),
+						$card(
+							'support',
+							'Customer support',
+							array(
+								array(
+									'id'     => 'support_description',
+									'layout' => array(
+										'type'          => 'regular',
+										'labelPosition' => 'none',
+									),
+								),
+								'email',
+							)
+						),
 						// `rules` is a sub-page inside the `advanced` sub-page.
 						$card(
 							'statement',
