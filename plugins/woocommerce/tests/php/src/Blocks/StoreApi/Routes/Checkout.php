@@ -3587,6 +3587,59 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Retrying after the request died between payment_complete() and the cart being emptied does not place a second paid order.
+	 */
+	public function test_retry_after_the_request_died_post_payment_does_not_duplicate_the_order() {
+		// PHPUnit cannot survive a real exit, so arrange the state one leaves behind: the first
+		// POST stops before payment, as an exit inside the transition would stop before the
+		// catch, and the gateway's payment_complete() is then run on the order directly.
+		$stop_before_payment = function () {
+			throw new \Automattic\WooCommerce\StoreApi\Exceptions\RouteException(
+				'woocommerce_rest_checkout_payment_failed',
+				'Stands in for the request dying after payment_complete()',
+				400
+			);
+		};
+		add_action( 'woocommerce_store_api_checkout_order_processed', $stop_before_payment, 999 );
+
+		try {
+			rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		} finally {
+			remove_action( 'woocommerce_store_api_checkout_order_processed', $stop_before_payment, 999 );
+		}
+
+		$paid_order_id = (int) WC()->session->get( 'store_api_draft_order' );
+		$this->assertGreaterThan( 0, $paid_order_id, 'The session should point at the order the first attempt created.' );
+
+		$paid_order = wc_get_order( $paid_order_id );
+		$paid_order->payment_complete( 'txn_died_after_payment' );
+
+		$this->assertFalse( wc_get_order( $paid_order_id )->needs_payment(), 'The gateway took payment before the request died.' );
+		$this->assertFalse( WC()->cart->is_empty(), 'The request died before anything emptied the cart.' );
+		$this->assertSame( $paid_order_id, (int) WC()->session->get( 'store_api_draft_order' ), 'payment_complete() leaves the Store API pointer in place.' );
+
+		$this->simulate_fresh_request();
+		$retry = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$order_ids_after_retry = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => 'any',
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame(
+			array( $paid_order_id ),
+			$order_ids_after_retry,
+			'Retrying after the request died post-payment must not create a second paid order. Retry answered: ' . print_r( $retry->get_data(), true )
+		);
+		$this->assertSame( $paid_order_id, $retry->get_data()['order_id'], 'The retry should answer with the order that was already paid.' );
+		$this->assertSame( 'success', $retry->get_data()['payment_result']['payment_status'] );
+		$this->assertSame( wc_get_order( $paid_order_id )->get_checkout_order_received_url(), $retry->get_data()['payment_result']['redirect_url'], 'The shopper should be sent to the order received page of the paid order.' );
+	}
+
+	/**
 	 * @testdox A recovered checkout empties the cart the gateway never got to.
 	 */
 	public function test_recovered_checkout_empties_the_cart() {

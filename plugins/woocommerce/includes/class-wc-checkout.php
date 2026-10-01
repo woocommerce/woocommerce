@@ -1265,7 +1265,7 @@ class WC_Checkout {
 	 * @param WC_Order $order The order the session was awaiting payment for.
 	 */
 	protected function send_repeat_submit_response( WC_Order $order ): void {
-		$order->add_order_note( __( 'The checkout form was submitted again for this order after the payment step. No second order was created; the customer was sent to the order received page.', 'woocommerce' ) );
+		PaymentRecovery::record_repeat_submit( $order );
 
 		wc_log_order_step(
 			'[Shortcode #6C] Repeat submit for an order that moved past payment, sending to the order received page',

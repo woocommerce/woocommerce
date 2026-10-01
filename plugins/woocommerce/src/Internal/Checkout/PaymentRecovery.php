@@ -76,6 +76,17 @@ final class PaymentRecovery {
 	}
 
 	/**
+	 * Notes on the order that a repeat submit was answered with its order received page.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param WC_Order $order The order the gateway already moved past payment.
+	 */
+	public static function record_repeat_submit( WC_Order $order ): void {
+		$order->add_order_note( __( 'The checkout form was submitted again for this order after the payment step. No second order was created; the customer was sent to the order received page.', 'woocommerce' ) );
+	}
+
+	/**
 	 * Reads the order again, so a status the gateway set on its own instance is seen.
 	 *
 	 * @since 11.3.0

@@ -172,6 +172,20 @@ class PaymentRecoveryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should note on the order that a repeat submit was answered without a second order.
+	 */
+	public function test_record_repeat_submit_notes_the_order(): void {
+		$order = new WC_Order();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		PaymentRecovery::record_repeat_submit( $order );
+
+		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$this->assertStringContainsString( 'No second order was created', $notes[0]->content, 'The merchant should see that the shopper submitted again and was not charged twice.' );
+	}
+
+	/**
 	 * @testdox Should log the failure under the caller's source and note it on the order.
 	 */
 	public function test_record_failure_after_payment_logs_and_notes_the_failure(): void {
