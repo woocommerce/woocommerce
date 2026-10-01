@@ -431,7 +431,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A failed update check after the main cache expired should fall back to the last successful check.
+	 * @testdox A failed update check after the main cache expired should fall back to the last successful check, without its forced auto-updates.
 	 */
 	public function test_update_check_falls_back_to_last_successful_check_when_cache_expired(): void {
 		$payload  = array(
@@ -440,7 +440,12 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 				'file_id'    => 'abc123',
 			),
 		);
-		$products = array( 123 => array( 'version' => '1.2.3' ) );
+		$products = array(
+			123 => array(
+				'version'    => '1.2.3',
+				'autoupdate' => true,
+			),
+		);
 		$fail     = false;
 
 		$http_mock = static function () use ( &$fail, $products ) {
@@ -458,6 +463,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 
 		try {
 			$this->call_update_check( $payload );
+			$last_good = get_transient( '_woocommerce_helper_updates_last_good' );
 			delete_transient( '_woocommerce_helper_updates' );
 			$fail           = true;
 			$after_failure  = $this->call_update_check( $payload );
@@ -466,8 +472,10 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 			remove_filter( 'pre_http_request', $http_mock );
 		}
 
-		$this->assertSame( $products, $after_failure, 'A failed check should serve the last successful check once the main cache is gone' );
-		$this->assertSame( $products, $inside_backoff, 'A check inside the backoff should serve the last successful check too' );
+		$expected = array( 123 => array( 'version' => '1.2.3' ) );
+		$this->assertSame( $products, $last_good['products'], 'A successful check should keep a copy of its products' );
+		$this->assertSame( $expected, $after_failure, 'A failed check should serve the last successful check once the main cache is gone, without forcing auto-updates' );
+		$this->assertSame( $expected, $inside_backoff, 'A check inside the backoff should serve the last successful check too' );
 		$this->assertFalse( get_transient( '_woocommerce_helper_updates' ), 'A failed check should not write the main cache' );
 	}
 
@@ -555,6 +563,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 				'autoupdate' => true,
 			),
 		);
+		set_transient( '_woocommerce_helper_updates_last_good', array( 'products' => $products ), HOUR_IN_SECONDS );
 		set_transient(
 			'_woocommerce_helper_updates',
 			array(
@@ -585,6 +594,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 1, $update_checks, 'A refresh should force a fresh update check' );
 		$this->assertSame( $products, $result, 'A failed check after a refresh should serve the cached products, keeping the forced auto-update made for this payload' );
 		$this->assertSame( $hash, get_transient( '_woocommerce_helper_updates' )['hash'], 'A refresh should keep the hash of the cached payload' );
+		$this->assertNotFalse( get_transient( '_woocommerce_helper_updates_last_good' ), 'A refresh should keep the copy of the last successful check' );
 	}
 
 	/**

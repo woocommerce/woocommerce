@@ -1046,7 +1046,8 @@ class WC_Helper_Updater {
 
 	/**
 	 * The update data to serve when a check is skipped or fails: the main cache while it holds
-	 * products, otherwise the longer-lived copy of the last successful check.
+	 * products, otherwise the longer-lived copy of the last successful check. The copy loses its
+	 * hash, so its forced auto-updates are dropped and only ever come from the 12-hour main cache.
 	 *
 	 * @param mixed $data The data retrieved from the main transient, of any shape.
 	 * @return mixed
@@ -1056,7 +1057,12 @@ class WC_Helper_Updater {
 			return $data;
 		}
 
-		return get_transient( self::LAST_GOOD_CACHE_KEY );
+		$last_good = get_transient( self::LAST_GOOD_CACHE_KEY );
+		if ( is_array( $last_good ) ) {
+			unset( $last_good['hash'] );
+		}
+
+		return $last_good;
 	}
 
 	/**
