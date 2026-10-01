@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\DataUtils;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundPreviewSchema;
 use Automattic\WooCommerce\Utilities\MetaDataUtil;
+use Automattic\WooCommerce\Utilities\NumberUtil;
 
 /**
  * REST API Order Refunds controller class.
@@ -405,12 +406,17 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 
 		$order = wc_get_order( (int) $request['order_id'] );
 
-		if ( ! $order ) {
+		if ( ! $order instanceof WC_Order ) {
 			return new WP_Error( 'woocommerce_rest_invalid_order_id', __( 'Invalid order ID.', 'woocommerce' ), 404 );
 		}
 
 		if ( 0 > $request['amount'] ) {
 			return new WP_Error( 'woocommerce_rest_invalid_order_refund', __( 'Refund amount must be greater than zero.', 'woocommerce' ), 400 );
+		}
+
+		$validation_error = $this->validate_explicit_refund_amounts( $order, $request['line_items'], $request['amount'] );
+		if ( is_wp_error( $validation_error ) ) {
+			return $validation_error;
 		}
 
 		// Create the refund.
@@ -449,6 +455,62 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 		 * @param bool            $creating If is creating a new object.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $refund, $request, $creating );
+	}
+
+	/**
+	 * Validate explicit refund amounts without changing quantity-only requests.
+	 *
+	 * This runs when compute_totals is false; the computed path uses
+	 * create_refund_with_computed_totals(). Compare refund_total with each line's
+	 * refundable balance and with the requested order-level amount.
+	 *
+	 * @param WC_Order $order      Order being refunded.
+	 * @param array    $line_items Line items in the internal format.
+	 * @param mixed    $amount     Requested order-level refund amount.
+	 * @return true|WP_Error Validation result.
+	 */
+	private function validate_explicit_refund_amounts( $order, $line_items, $amount ) {
+		if ( ! is_array( $line_items ) || ! $line_items ) {
+			return true;
+		}
+
+		$line_total     = 0.0;
+		$price_decimals = wc_get_price_decimals();
+		$refund_data    = null;
+		foreach ( $line_items as $item_id => $line ) {
+			if ( ! is_array( $line ) || ! isset( $line['refund_total'] ) ) {
+				continue;
+			}
+
+			if ( ! is_numeric( $line['refund_total'] ) ) {
+				return new WP_Error( 'woocommerce_rest_invalid_refund_total', __( 'refund_total must be a number.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+
+			$refund_total = (float) $line['refund_total'];
+			$line_total  += $refund_total;
+			if ( 0.0 === $refund_total ) {
+				continue;
+			}
+
+			$item = $order->get_item( $item_id );
+			if ( ! $item instanceof WC_Order_Item_Product && ! $item instanceof WC_Order_Item_Fee && ! $item instanceof WC_Order_Item_Shipping ) {
+				return new WP_Error( 'woocommerce_rest_line_item_not_found', __( 'Line item not found.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+
+			if ( null === $refund_data ) {
+				$refund_data = $this->get_data_utils()->compute_refunded_quantities_and_totals( $order );
+			}
+			$validation_error = $this->get_data_utils()->validate_refund_line_total( $item, $refund_total, (float) ( $refund_data['totals'][ $item_id ] ?? 0 ) );
+			if ( is_wp_error( $validation_error ) ) {
+				return $this->prefix_error_code( $validation_error );
+			}
+		}
+
+		if ( NumberUtil::round( $line_total, $price_decimals ) > NumberUtil::round( (float) $amount, $price_decimals ) ) {
+			return new WP_Error( 'woocommerce_rest_invalid_refund_amount', __( 'Refund amount cannot be less than the total of line items.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		return true;
 	}
 
 	/**
