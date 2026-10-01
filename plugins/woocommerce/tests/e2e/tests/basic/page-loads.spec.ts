@@ -39,12 +39,6 @@ const wcPages = [
 				text: 'All Customers',
 			},
 			{
-				name: 'Reports',
-				heading: 'Reports',
-				element: '.nav-tab-wrapper > .nav-tab-active',
-				text: 'Orders',
-			},
-			{
 				name: 'Settings',
 				heading: 'Settings',
 				element: '#store_address-description',
@@ -290,3 +284,24 @@ for ( const currentPage of wcPages ) {
 		}
 	} );
 }
+
+test( 'hides the legacy Reports menu item on a new store but keeps the page reachable', async ( {
+	page,
+} ) => {
+	await page.goto( 'wp-admin/admin.php?page=wc-settings' );
+
+	await expect(
+		page
+			.locator( 'li.wp-menu-open > ul.wp-submenu' )
+			.getByRole( 'link', { name: 'Reports', exact: true } )
+	).toBeHidden();
+
+	await page.goto( 'wp-admin/admin.php?page=wc-reports' );
+
+	await expect(
+		page.getByRole( 'heading', { name: 'Reports' } ).first()
+	).toBeVisible();
+	await expect(
+		page.locator( '.nav-tab-wrapper > .nav-tab-active' )
+	).toContainText( 'Orders' );
+} );
