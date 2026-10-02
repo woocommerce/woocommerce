@@ -62,7 +62,6 @@
 		"moment": "^2.29.4",
 		"node-stream-zip": "^1.15.0",
 		"postcss-loader": "4.3.x",
-		"prettier": "npm:wp-prettier@3.0.3",
 		"regenerator-runtime": "^0.13.11",
 		"rimraf": "5.0.5",
 		"sass": "^1.69.5",
