@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Stop the block-library Jest run from also running classic-assets tests; no production change.

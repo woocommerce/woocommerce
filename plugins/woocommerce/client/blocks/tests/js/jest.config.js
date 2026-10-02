@@ -133,7 +133,7 @@ module.exports = {
 		'<rootDir>/vendor/',
 		'<rootDir>/tests/',
 	],
-	roots: [ '<rootDir>' ],
+	roots: [ '<rootDir>', '<rootDir>/../legacy/js' ],
 	resolver: '<rootDir>/tests/js/scripts/resolver.js',
 	transform: {
 		'^.+\\.(js|ts|tsx)$': '<rootDir>/tests/js/scripts/babel-transformer.js',

@@ -39,7 +39,6 @@
 		"grunt-sass": "3.1.0",
 		"grunt-stylelint": "0.16.0",
 		"jest-fixed-jsdom": "^0.0.10",
-		"jquery": "3.7.1",
 		"sass": "^1.69.5",
 		"stylelint": "^14.16.1"
 	},
