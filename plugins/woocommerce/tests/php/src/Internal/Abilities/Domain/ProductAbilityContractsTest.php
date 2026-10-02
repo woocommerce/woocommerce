@@ -197,6 +197,46 @@ class ProductAbilityContractsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should summarize a product update with an extension field in a dry run, and save nothing.
+	 */
+	public function test_product_update_dry_run(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Original' ) );
+
+		$summary = wp_get_ability( 'woocommerce/product-update' )->dry_run(
+			array(
+				'id'         => $product->get_id(),
+				'name'       => 'Renamed',
+				'extensions' => array( 'test_simple' => array( 'code' => 'abc' ) ),
+			)
+		);
+
+		$this->assertNotWPError( $summary );
+		$this->assertSame( $product->get_id(), $summary['object_id'] );
+		$changes = array_column( $summary['changes'], null, 'field' );
+		$this->assertSame(
+			array(
+				'field'  => 'name',
+				'label'  => 'name',
+				'before' => 'Original',
+				'after'  => 'Renamed',
+			),
+			$changes['name']
+		);
+		$this->assertSame(
+			array(
+				'field'  => 'extensions.test_simple.code',
+				'label'  => 'test_simple',
+				'before' => '',
+				'after'  => 'abc',
+			),
+			$changes['extensions.test_simple.code']
+		);
+		$stored = wc_get_product( $product->get_id() );
+		$this->assertSame( 'Original', $stored->get_name() );
+		$this->assertSame( '', $stored->get_meta( '_test_simple_code' ) );
+	}
+
+	/**
 	 * @testdox Should save extension field values on product create.
 	 */
 	public function test_product_create_saves_extension_fields(): void {

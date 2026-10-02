@@ -148,39 +148,95 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 		$this->assertSame( $field, $write->get_output_schema()['properties']['record']['properties']['extensions']['properties']['test_notes'] );
 		$this->assertSame( $field, $read->get_output_schema()['properties']['records']['items']['properties']['extensions']['properties']['test_notes'] );
 		$this->assertArrayNotHasKey( 'extensions', $read->get_input_schema()['properties'] );
-		$this->assertSame( $field, wc_get_ability_fields_schema( 'test_record' )['properties']['test_notes'] );
 	}
 
 	/**
-	 * @testdox Should let a client preview a change with the ability and the field functions, without saving.
+	 * @testdox Should summarize a change with a dry run, save nothing, and match what execute then saves.
 	 */
-	public function test_client_preview_saves_nothing(): void {
+	public function test_dry_run_summarizes_and_saves_nothing(): void {
 		$this->register( true );
 		$ability = wp_get_ability( self::WRITE );
 		$input   = array(
-			'id'    => 7,
-			'title' => 'Renamed',
+			'id'         => 7,
+			'title'      => 'Renamed',
+			'extensions' => array( 'test_notes' => 'second' ),
 		);
 
-		$record = $ability->load( $input );
-		$before = wc_get_ability_field_values( $record, 'test_record' );
-		$ability->change( $record, $input );
-		$this->assertNull( wc_update_ability_fields( $record, 'test_record', array( 'test_notes' => 'second' ) ) );
-		$this->assertNull( wc_validate_ability_object( $record, 'test_record' ) );
-		$after = wc_get_ability_field_values( $record, 'test_record' );
+		$summary = $ability->dry_run( $input );
 
-		$this->assertSame( array( 'test_notes' => 'first' ), $before );
-		$this->assertSame( array( 'test_notes' => 'second' ), $after );
-		$this->assertSame( 'Renamed', $record->title );
-
-		$blocked = $ability->load( $input );
-		$ability->change( $blocked, array_merge( $input, array( 'title' => 'Blocked' ) ) );
-		$this->assertSame( 'Blocked by validator.', wc_validate_ability_object( $blocked, 'test_record' )->get_error_message() );
-		$this->assertSame( 'Note rejected.', wc_update_ability_fields( $blocked, 'test_record', array( 'test_notes' => 'reject' ) )->get_error_message() );
-
+		$this->assertSame(
+			array(
+				'ability'      => self::WRITE,
+				'object_type'  => 'test_record',
+				'object_id'    => 7,
+				'changes'      => array(
+					array(
+						'field'  => 'title',
+						'label'  => 'title',
+						'before' => 'Original',
+						'after'  => 'Renamed',
+					),
+					array(
+						'field'  => 'note',
+						'label'  => 'note',
+						'before' => 'first',
+						'after'  => 'second',
+					),
+					array(
+						'field'  => 'extensions.test_notes',
+						'label'  => 'Notes',
+						'before' => 'first',
+						'after'  => 'second',
+					),
+				),
+				'side_effects' => array( 'Renames the record.' ),
+				'undo'         => array(
+					'ability' => self::WRITE,
+					'input'   => array(
+						'id'    => 7,
+						'title' => 'Original',
+					),
+				),
+			),
+			$summary
+		);
 		$this->assertSame( 0, TestRecord::$saves );
 		$this->assertSame( 'Original', TestRecord::load( 7 )->title );
 		$this->assertSame( 'first', TestRecord::load( 7 )->note );
+
+		$this->assertNotWPError( $ability->execute( $input ) );
+		$this->assertSame( 1, TestRecord::$saves );
+		$this->assertSame( $summary['changes'][0]['after'], TestRecord::load( 7 )->title );
+		$this->assertSame( $summary['changes'][2]['after'], TestRecord::load( 7 )->note );
+	}
+
+	/**
+	 * @testdox Should return the same error from a dry run as from execute when a step rejects, and save nothing.
+	 *
+	 * @testWith ["Blocked", "first"]
+	 *           ["Renamed", "reject"]
+	 *           ["", "first"]
+	 *
+	 * @param string $title Title input.
+	 * @param string $note  Note input.
+	 */
+	public function test_dry_run_rejection_matches_execute( string $title, string $note ): void {
+		$this->register( true );
+		$ability = wp_get_ability( self::WRITE );
+		$input   = array(
+			'id'         => 7,
+			'title'      => $title,
+			'extensions' => array( 'test_notes' => $note ),
+		);
+
+		$dry_run = $ability->dry_run( $input );
+		$execute = $ability->execute( $input );
+
+		$this->assertWPError( $dry_run );
+		$this->assertSame( $execute->get_error_code(), $dry_run->get_error_code() );
+		$this->assertSame( $execute->get_error_message(), $dry_run->get_error_message() );
+		$this->assertSame( 0, TestRecord::$saves );
+		$this->assertSame( 'Original', TestRecord::load( 7 )->title );
 	}
 
 	/**

@@ -35,12 +35,12 @@ final class WCDataSubject implements InMemorySubject {
 	}
 
 	/**
-	 * The object's data with each meta entry as `id`, `key` and `value`.
+	 * The object's data, with changes not saved yet, and each meta entry as `id`, `key` and `value`.
 	 *
 	 * @return array
 	 */
 	public function snapshot(): array {
-		$snapshot              = $this->data->get_data();
+		$snapshot              = array_replace_recursive( $this->data->get_data(), $this->data->get_changes() );
 		$snapshot['meta_data'] = array_map(
 			static function ( $meta ) {
 				return array(
