@@ -38,9 +38,11 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 	private const GATEWAY_APPROVING = 'engine_dispatch_gateway_approve';
 
 	/**
-	 * The consumer slug registered to open the processing gate in charging tests.
+	 * The consumer slug registered in charging tests. It is the owner the test plan (and
+	 * therefore every contract signed up from it) carries, so registering it puts those
+	 * contracts in the owner-scoped due scan.
 	 */
-	private const CONSUMER = 'engine-tests-consumer';
+	private const CONSUMER = 'engine-tests';
 
 	public function set_up(): void {
 		parent::set_up();

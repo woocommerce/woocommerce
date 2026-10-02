@@ -17,6 +17,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ConsumerRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\DuplicateCycleException;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\RenewalCandidate;
@@ -34,12 +35,20 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 */
 	private $sut;
 
+	/**
+	 * The owner the due-scan fixtures carry, registered as a consumer in setUp().
+	 */
+	private const OWNER = 'engine-tests';
+
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut = new ContractRepository();
+		ConsumerRegistry::reset();
+		ConsumerRegistry::register( self::OWNER );
 	}
 
 	public function tearDown(): void {
+		ConsumerRegistry::reset();
 		StatusRegistry::reset();
 		parent::tearDown();
 	}
@@ -1087,9 +1096,9 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox find_due returns only active contracts whose next_payment has arrived, oldest first.
+	 * @testdox find_due returns every contract whose next_payment has arrived, oldest first, regardless of status.
 	 */
-	public function test_find_due_returns_only_due_active_contracts_oldest_first(): void {
+	public function test_find_due_returns_due_contracts_oldest_first_regardless_of_status(): void {
 		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
 
 		$due_old    = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
@@ -1099,10 +1108,67 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 
 		$ids = $this->due_ids( $now, 50 );
 
-		// Only the two due+active contracts, oldest-due first; the future and the non-active excluded.
-		$this->assertSame( array( $due_old, $due_recent ), $ids );
+		// Status is opaque to the scan: the past-due on-hold row is selected in due order
+		// (flows disarm the due moment instead); only the future row is excluded.
+		$this->assertSame( array( $on_hold, $due_old, $due_recent ), $ids );
 		$this->assertNotContains( $not_yet, $ids );
-		$this->assertNotContains( $on_hold, $ids );
+	}
+
+	/**
+	 * @testdox find_due selects a due contract whose stored status is not registered.
+	 */
+	public function test_find_due_selects_a_contract_with_an_unregistered_stored_status(): void {
+		global $wpdb;
+
+		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+		$id  = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ), array( 'status' => 'legacy-paused' ), array( 'id' => $id ) );
+
+		$this->assertSame( array( $id ), $this->due_ids( $now, 50 ) );
+	}
+
+	/**
+	 * @testdox find_due skips a due contract with no owner.
+	 */
+	public function test_find_due_skips_a_contract_with_no_owner(): void {
+		$now      = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+		$owned    = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+		$no_owner = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_PRIMITIVE, CycleStatus::BILLED, null, null, null );
+
+		$ids = $this->due_ids( $now, 50 );
+
+		$this->assertContains( $owned, $ids );
+		$this->assertNotContains( $no_owner, $ids );
+	}
+
+	/**
+	 * @testdox find_due skips a contract whose owner is not registered, and selects it untouched once it registers.
+	 */
+	public function test_find_due_skips_an_unregistered_owner_until_it_registers(): void {
+		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+		$id  = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_PRIMITIVE, CycleStatus::BILLED, null, null, 'other-ext' );
+
+		$this->assertNotContains( $id, $this->due_ids( $now, 50 ) );
+
+		ConsumerRegistry::register( 'other-ext' );
+
+		$this->assertContains( $id, $this->due_ids( $now, 50 ) );
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$this->assertSame( '2026-06-15 00:00:00', $contract->get_next_payment_gmt(), 'The waiting contract keeps its due moment.' );
+	}
+
+	/**
+	 * @testdox find_due returns nothing when no consumer is registered.
+	 */
+	public function test_find_due_returns_nothing_when_no_consumer_is_registered(): void {
+		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+		$this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+
+		ConsumerRegistry::reset();
+
+		$this->assertSame( array(), $this->sut->find_due( $now, 50 ) );
 	}
 
 	/**
@@ -1384,6 +1450,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @param string      $head_status      The head cycle status (a CycleStatus value).
 	 * @param string|null $claimed_until    The head cycle lease expiry, or null for none.
 	 * @param string|null $head_ends_at     The head period end; defaults to `$next_payment_gmt`.
+	 * @param string|null $owner            The owning extension slug; defaults to the registered test owner.
 	 */
 	private function insert_contract_due_at(
 		?string $next_payment_gmt,
@@ -1391,7 +1458,8 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		string $schedule_source = Contract::SCHEDULE_SOURCE_PRIMITIVE,
 		string $head_status = CycleStatus::BILLED,
 		?string $claimed_until = null,
-		?string $head_ends_at = null
+		?string $head_ends_at = null,
+		?string $owner = self::OWNER
 	): int {
 		$contract = Contract::create(
 			array(
@@ -1403,6 +1471,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 				'next_payment_gmt' => $next_payment_gmt,
 				'status'           => $status,
 				'schedule_source'  => $schedule_source,
+				'extension_slug'   => $owner,
 			)
 		);
 		$id       = $this->sut->insert( $contract );
