@@ -15,6 +15,7 @@ const {
 	QUEUE_AGE_THRESHOLD_MIN = '5',
 	HYSTERESIS_MIN = '20',
 	GITHUB_STEP_SUMMARY,
+	GITHUB_ENV,
 } = process.env;
 
 const VARIABLE_NAME = 'CI_QUEUE_OVERFLOW';
@@ -35,6 +36,11 @@ const MAX_IN_PROGRESS_RUNS_TO_PROBE = 30;
 const MAX_ESCALATION_RUNS_TO_PROBE = 60;
 const MAX_RUN_LIST_PAGES = 3;
 const MAX_FETCH_RETRIES = 2;
+// Each unreadable run costs ~45s of retry sleep; 60 would burn the job timeout.
+const MAX_PROBE_FAILURES = 3;
+// Observed overflow windows run 26-42 min; the longest ever recorded is 102.
+// Past this with nothing to explain the ON state, the switch is stuck, not busy.
+const MAX_ON_MINUTES = 120;
 
 const sleep = ( seconds ) => new Promise( ( resolve ) => setTimeout( resolve, seconds * 1000 ) );
 
@@ -150,8 +156,24 @@ const isHostedPoolJob = ( job ) =>
 const collectQueuedJobs = async ( runList ) => {
 	const queued = [];
 	let ignoredPools = 0;
+	let failed = 0;
+	let attempted = 0;
 	for ( const run of runList ) {
-		const jobs = await fetchJobsForRun( run.id );
+		let jobs;
+		attempted++;
+		try {
+			jobs = await fetchJobsForRun( run.id );
+		} catch ( error ) {
+			// Missing one run's jobs can only understate the queue, so record it
+			// and let the incomplete probe suppress switch-off instead of aborting.
+			failed++;
+			console.log( `Probe skipped run ${ run.id }: ${ error.message }` );
+			if ( failed >= MAX_PROBE_FAILURES ) {
+				console.log( 'Probe abandoned: too many unreadable runs' );
+				break;
+			}
+			continue;
+		}
 		for ( const job of jobs ) {
 			if ( job.status !== 'queued' ) {
 				continue;
@@ -163,7 +185,7 @@ const collectQueuedJobs = async ( runList ) => {
 			}
 		}
 	}
-	return { queued, ignoredPools };
+	return { queued, ignoredPools, failed, attempted };
 };
 
 const fetchQueuedJobs = async ( runs ) => {
@@ -179,8 +201,15 @@ const fetchQueuedJobs = async ( runs ) => {
 		...allQueued.slice( MAX_QUEUED_RUNS_TO_PROBE ),
 		...allInProgress.slice( MAX_IN_PROGRESS_RUNS_TO_PROBE ),
 	];
-	const { queued, ignoredPools } = await collectQueuedJobs( probeList );
-	return { queued, complete: remainder.length === 0, ignoredPools, remainder };
+	const { queued, ignoredPools, failed, attempted } = await collectQueuedJobs( probeList );
+	return {
+		queued,
+		complete: remainder.length === 0 && failed === 0,
+		ignoredPools,
+		remainder,
+		failed,
+		attempted,
+	};
 };
 
 const fetchVariable = async () => {
@@ -256,7 +285,7 @@ const main = async () => {
 	// Forced modes skip the probe: a manual override must succeed even when
 	// the queue API is failing, and needs no queue data to decide.
 	const forced = MODE === 'on' || MODE === 'off';
-	let runs = [], queuedJobs = [], dropped = 0, ignoredPools = 0, remainder = [];
+	let runs = [], queuedJobs = [], dropped = 0, ignoredPools = 0, remainder = [], failedProbes = 0, probeAttempts = 0;
 	let runsListComplete = true, probeComplete = true;
 	if ( ! forced ) {
 		const runsResult = await fetchActiveRuns();
@@ -268,6 +297,8 @@ const main = async () => {
 		dropped = runsResult.dropped;
 		ignoredPools = jobsResult.ignoredPools;
 		remainder = jobsResult.remainder;
+		failedProbes = jobsResult.failed;
+		probeAttempts = jobsResult.attempted;
 	}
 	// Measure ages after the probe; retries can stretch it by minutes.
 	let nowMs = Date.now();
@@ -289,10 +320,12 @@ const main = async () => {
 	// is ON and the probed hosted queue looks healthy, that suppression may
 	// rest only on unprobed runs — probe them so the off decision is proven
 	// rather than dependent on the run count fitting the caps. Runs only in
-	// that narrow state, so normal ticks pay nothing extra.
+	// that narrow state, so normal ticks pay nothing extra. Skipped once a probe
+	// has failed: probeComplete can no longer become true, so it would change
+	// nothing, and the failure allowance stays global to the tick.
 	let escalated = 0;
 	if (
-		! forced && ! probeComplete && current === '1' &&
+		! forced && ! probeComplete && failedProbes === 0 && current === '1' &&
 		! ( oldestAgeMin !== null && oldestAgeMin > thresholdMin ) &&
 		nowMs - updatedAtMs >= hysteresisMin * 60 * 1000 &&
 		remainder.length > 0 && remainder.length <= MAX_ESCALATION_RUNS_TO_PROBE
@@ -300,12 +333,20 @@ const main = async () => {
 		const extra = await collectQueuedJobs( remainder );
 		queuedJobs = [ ...queuedJobs, ...extra.queued ];
 		ignoredPools += extra.ignoredPools;
-		escalated = remainder.length;
+		failedProbes += extra.failed;
+		probeAttempts += extra.attempted;
+		escalated = extra.attempted;
 		nowMs = Date.now();
 		oldestAgeMin = oldestAge( queuedJobs, nowMs );
-		// Every listed run is now probed; only run-list page truncation can
-		// still leave the probe incomplete.
-		probeComplete = runsListComplete;
+		probeComplete = runsListComplete && failedProbes === 0;
+	}
+
+	// Not an alert: this self-heals next tick and costs nothing while the switch
+	// is off. Blindness that is actually costing money is caught at the end.
+	if ( failedProbes > 0 ) {
+		console.log(
+			`::warning::Queue probe could not read ${ failedProbes } of ${ probeAttempts } active runs; switch-off is suppressed this tick.`
+		);
 	}
 
 	const value = decide( {
@@ -323,22 +364,39 @@ const main = async () => {
 		await writeVariable( value, !! variable );
 	}
 
-	const probed = escalated +
-		Math.min( runs.filter( ( run ) => run.status === 'queued' ).length, MAX_QUEUED_RUNS_TO_PROBE ) +
-		Math.min( runs.filter( ( run ) => run.status !== 'queued' ).length, MAX_IN_PROGRESS_RUNS_TO_PROBE );
 	summarize( [
 		'### CI Queue Sentinel',
 		`- Mode: \`${ MODE }\``,
 		...( forced ? [ '- Probe skipped (forced mode)' ] : [
-			`- Active runs probed: ${ probed } of ${ runs.length }${ dropped ? ` (${ dropped } dropped by age window)` : '' }${ escalated ? ` (escalated: +${ escalated } runs to verify switch-off)` : '' }${ probeComplete ? '' : ' (probe truncated — switch-off suppressed)' }`,
+			`- Active runs attempted: ${ probeAttempts } of ${ runs.length }${ dropped ? ` (${ dropped } dropped by age window)` : '' }${ escalated ? ` (escalated: +${ escalated } runs to verify switch-off)` : '' }${ failedProbes ? ` (${ failedProbes } unreadable — API errors)` : '' }${ probeComplete ? '' : ' (probe incomplete — switch-off suppressed)' }`,
 			`- Queued jobs found: ${ queuedJobs.length } (hosted pool${ ignoredPools ? `; ${ ignoredPools } in runner groups ignored` : '' })`,
-			`- Oldest queued job age: ${ oldestAgeMin === null ? 'n/a (queue clear)' : `${ oldestAgeMin.toFixed( 1 ) } min` } (threshold ${ QUEUE_AGE_THRESHOLD_MIN } min)`,
+			// An unread run can hold an older job, so an incomplete probe gives a
+			// lower bound, never a clear queue.
+			`- Oldest queued job age: ${ oldestAgeMin === null ? ( probeComplete ? 'n/a (queue clear)' : 'unknown (probe incomplete)' ) : `${ probeComplete ? '' : '≥ ' }${ oldestAgeMin.toFixed( 1 ) } min${ probeComplete ? '' : ' (probe incomplete)' }` } (threshold ${ QUEUE_AGE_THRESHOLD_MIN } min)`,
 		] ),
 		`- ${ VARIABLE_NAME }: \`${ rawValue }\` -> \`${ value }\`${ value === rawValue ? ' (no change)' : '' }`,
 	] );
+
+	// Checked after the decision is recorded, so ringing the alarm cannot strand
+	// the switch. Fires only when the probe explains nothing: congestion itself
+	// overruns the run caps and leaves the probe incomplete, so without the
+	// provenCongested clause a long real backlog would page.
+	const onForMin = ( nowMs - updatedAtMs ) / 60000;
+	const provenCongested = oldestAgeMin !== null && oldestAgeMin > thresholdMin;
+	if ( value === '1' && rawValue === '1' && ! probeComplete && ! provenCongested && onForMin > MAX_ON_MINUTES ) {
+		throw new Error(
+			`${ VARIABLE_NAME } has been ON for ${ Math.round( onForMin ) } min; the probe is incomplete and found no queued work over the threshold, so the switch cannot be proven safe to turn off`
+		);
+	}
 };
 
 main().catch( ( error ) => {
 	summarize( [ '### CI Queue Sentinel', `- FAILED: ${ error.message }` ] );
+	// Hand the reason to the Slack step, which otherwise reports every cause
+	// identically. Stripped of characters the shell would act on inside quotes.
+	if ( GITHUB_ENV ) {
+		const reason = error.message.replace( /[\r\n]+/g, ' ' ).replace( /[`$\\"]/g, '' );
+		fs.appendFileSync( GITHUB_ENV, `SENTINEL_FAILURE=${ reason }\n` );
+	}
 	process.exit( 1 );
 } );
