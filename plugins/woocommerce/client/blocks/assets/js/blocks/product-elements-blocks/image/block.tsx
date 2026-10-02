@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Fragment } from '@wordpress/element';
+import { Fragment, cloneElement, isValidElement } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { PLACEHOLDER_IMG_SRC, getSetting } from '@woocommerce/settings';
@@ -12,7 +12,7 @@ import {
 import { useStyleProps } from '@woocommerce/base-hooks';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
 import { useStoreEvents } from '@woocommerce/base-context/hooks';
-import type { HTMLAttributes } from 'react';
+import type { CSSProperties, HTMLAttributes } from 'react';
 import { decodeEntities } from '@wordpress/html-entities';
 import { isEmpty, ProductResponseItem } from '@woocommerce/types';
 import { ProductEntityResponse } from '@woocommerce/entities';
@@ -170,6 +170,26 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	} = props;
 
 	const styleProps = useStyleProps( props );
+	const {
+		padding,
+		paddingTop,
+		paddingRight,
+		paddingBottom,
+		paddingLeft,
+		...imageStyle
+	} = styleProps.style;
+	const innerBlocks = isValidElement< { style?: CSSProperties } >( children )
+		? cloneElement( children, {
+				style: {
+					...children.props.style,
+					padding,
+					paddingTop,
+					paddingRight,
+					paddingBottom,
+					paddingLeft,
+				},
+		  } )
+		: children;
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product, isLoading } = useProductDataContext( {
 		isAdmin,
@@ -213,11 +233,11 @@ export const Block = ( props: Props ): JSX.Element | null => {
 						},
 						styleProps.className
 					) }
-					style={ styleProps.style }
+					style={ imageStyle }
 				>
 					<ImagePlaceholder style={ imageStyles } />
 				</div>
-				{ children }
+				{ innerBlocks }
 			</>
 		);
 	}
@@ -258,7 +278,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 					},
 					styleProps.className
 				) }
-				style={ styleProps.style }
+				style={ imageStyle }
 			>
 				{ /* For backwards compatibility in All Products blocks. */ }
 				{ displayLegacySaleBadge( props ) && (
@@ -281,7 +301,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 					/>
 				</ParentComponent>
 			</div>
-			{ children }
+			{ innerBlocks }
 		</>
 	);
 };

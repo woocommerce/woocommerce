@@ -26,15 +26,17 @@
 		}
 	}
 
-	.wc-block-components-product-sale-badge {
-		&--align-left {
+	// Legacy badge added by the Product Image block. This selectors don't
+	// target the Product Badge when used as an inner block.
+	:where(.wc-block-components-product-sale-badge:not( .wc-block-components-product-image__inner-container * )) {
+		&.wc-block-components-product-sale-badge--align-left {
 			position: absolute;
 			left: $gap-smaller * 0.5;
 			top: $gap-smaller * 0.5;
 			right: auto;
 			margin: 0;
 		}
-		&--align-center {
+		&.wc-block-components-product-sale-badge--align-center {
 			position: absolute;
 			top: $gap-smaller * 0.5;
 			left: 50%;
@@ -42,7 +44,7 @@
 			transform: translateX(-50%);
 			margin: 0;
 		}
-		&--align-right {
+		&.wc-block-components-product-sale-badge--align-right {
 			position: absolute;
 			right: $gap-smaller * 0.5;
 			top: $gap-smaller * 0.5;
@@ -65,7 +67,7 @@
 	&__inner-container {
 		display: flex;
 		flex-direction: column;
-		padding: $gap-small;
+		padding: $gap-smaller * 0.5;
 		position: absolute;
 		bottom: 0;
 		left: 0;
