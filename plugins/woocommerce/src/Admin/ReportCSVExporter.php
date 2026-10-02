@@ -355,6 +355,19 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	}
 
 	/**
+	 * Write the headers row file, which is what marks an export complete and downloadable.
+	 *
+	 * @internal
+	 * @since 11.3.0
+	 * @return void
+	 */
+	public function write_headers_row_file() {
+		$header = chr( 239 ) . chr( 187 ) . chr( 191 ) . $this->export_column_headers();
+
+		@file_put_contents( $this->get_headers_row_file_path(), $header ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+	}
+
+	/**
 	 * Get total number of rows in export.
 	 *
 	 * @return int Number of rows to export.

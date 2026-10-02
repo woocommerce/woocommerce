@@ -189,16 +189,11 @@ class ReportExporter {
 		$batch_size  = $exporter->get_limit();
 		$num_batches = (int) ceil( $total_rows / $batch_size );
 
-		// Create batches, like initial import.
-		$report_batch_args = array( $export_id, $report_type, $report_args );
-
 		if ( 0 < $num_batches ) {
-			self::queue_batches( 1, $num_batches, 'export_report', $report_batch_args );
+			$email_user_id = $send_email ? get_current_user_id() : 0;
 
-			if ( $send_email ) {
-				$email_action_args = array( get_current_user_id(), $export_id, $report_type, $report_args );
-				self::schedule_action( 'email_report_download_link', $email_action_args );
-			}
+			// Only the first page is queued. Each page queues the next one, so the pages run one at a time and in order.
+			self::schedule_action( 'export_report', array( 1, $export_id, $report_type, $report_args, $email_user_id, $num_batches ) );
 		}
 
 		return $total_rows;
@@ -211,16 +206,76 @@ class ReportExporter {
 	 * @param string $export_id Unique ID for report (timestamp expected).
 	 * @param string $report_type Report type. E.g. 'customers'.
 	 * @param array  $report_args Report parameters, passed to data query.
+	 * @param int    $email_user_id Optional. User to email the download link to once the last page is written, or 0 for none.
+	 * @param int    $num_batches Optional. Number of pages in the export. Exports queued before 11.3.0 run without it.
 	 * @return void
 	 */
-	public static function export_report( $page_number, $export_id, $report_type, $report_args ) {
-		$report_args['page'] = $page_number;
+	public static function export_report( $page_number, $export_id, $report_type, $report_args, $email_user_id = 0, $num_batches = 0 ) {
+		$exporter = self::write_export_page( $page_number, $export_id, $report_type, $report_args );
 
-		$exporter = new ReportCSVExporter( $report_type, $report_args );
+		// An export queued before 11.3.0 queued all its pages at once, and its email with them.
+		if ( ! $num_batches ) {
+			self::update_export_percentage_complete( $report_type, $export_id, $exporter->get_percent_complete() );
+			return;
+		}
+
+		// Without Action Scheduler the other pages run here, in a loop rather than one nested call per page.
+		/**
+		 * This filter is documented in includes/wc-update-functions.php
+		 *
+		 * @since 4.0.0
+		 */
+		if ( ! get_option( 'schema-ActionScheduler_StoreSchema' ) || apply_filters( 'woocommerce_analytics_disable_action_scheduling', false ) ) {
+			while ( $page_number < $num_batches ) {
+				++$page_number;
+				$exporter = self::write_export_page( $page_number, $export_id, $report_type, $report_args );
+			}
+		}
+
+		if ( $page_number < $num_batches ) {
+			self::update_export_percentage_complete( $report_type, $export_id, (int) floor( $page_number / $num_batches * 100 ) );
+			self::queue_next_page( array( $page_number + 1, $export_id, $report_type, $report_args, $email_user_id, $num_batches ) );
+			return;
+		}
+
+		// The parent only writes the headers row file when the rows it counted on this page add up to 100%,
+		// which they do not when rows are added to the report during the export.
+		$exporter->write_headers_row_file();
+		self::update_export_percentage_complete( $report_type, $export_id, 100 );
+
+		if ( $email_user_id > 0 ) {
+			self::schedule_action( 'email_report_download_link', array( (int) $email_user_id, $export_id, $report_type, $report_args ) );
+		}
+	}
+
+	/**
+	 * Write one page of an export to the export file.
+	 *
+	 * @param int    $page_number Page number.
+	 * @param string $export_id Unique ID for report (timestamp expected).
+	 * @param string $report_type Report type. E.g. 'customers'.
+	 * @param array  $report_args Report parameters, passed to data query.
+	 * @return ReportCSVExporter The exporter that wrote the page.
+	 */
+	private static function write_export_page( $page_number, $export_id, $report_type, $report_args ) {
+		$exporter = new ReportCSVExporter( $report_type, array_merge( $report_args, array( 'page' => $page_number ) ) );
 		$exporter->set_filename( self::get_export_filename( $report_type, $export_id ) );
 		$exporter->generate_file();
 
-		self::update_export_percentage_complete( $report_type, $export_id, $exporter->get_percent_complete() );
+		return $exporter;
+	}
+
+	/**
+	 * Queue the next page of an export.
+	 *
+	 * @param array $args Arguments for export_report().
+	 * @return void
+	 */
+	private static function queue_next_page( $args ) {
+		// SchedulerTraits types the queue without a leading backslash, so PHPStan cannot resolve it.
+		/** @var \WC_Queue_Interface $queue */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+		$queue = self::queue();
+		$queue->add( (string) self::get_action( 'export_report' ), $args, (string) self::$group );
 	}
 
 	/**
@@ -487,15 +542,20 @@ class ReportExporter {
 	 * @return void
 	 */
 	public static function email_report_download_link( $user_id, $export_id, $report_type, $report_args = array() ) {
-		$percent_complete = self::get_export_percentage_complete( $report_type, $export_id );
+		if ( 100 !== self::get_export_percentage_complete( $report_type, $export_id ) ) {
+			wc_get_logger()->warning(
+				sprintf( 'Not emailing the %1$s report export %2$s: it never reported itself complete.', $report_type, $export_id ),
+				array( 'source' => 'report-csv-exporter' )
+			);
 
-		if ( 100 === $percent_complete ) {
-			$download_url = self::get_download_url( $report_type, $export_id, $report_args );
-
-			\WC_Emails::instance();
-			$email = new ReportCSVEmail();
-			$email->set_report_date_range( self::get_export_date_range_label( $report_args ) );
-			$email->trigger( $user_id, $report_type, $download_url );
+			return;
 		}
+
+		$download_url = self::get_download_url( $report_type, $export_id, $report_args );
+
+		\WC_Emails::instance();
+		$email = new ReportCSVEmail();
+		$email->set_report_date_range( self::get_export_date_range_label( $report_args ) );
+		$email->trigger( $user_id, $report_type, $download_url );
 	}
 }
