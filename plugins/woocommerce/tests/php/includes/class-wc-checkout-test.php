@@ -936,4 +936,35 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertNotFalse( $cart_item_key, 'The variation should be added to the cart.' );
 		WC()->cart->calculate_totals();
 	}
+
+	/**
+	 * @testdox Coupon lines created at checkout store the coupon's maximum discount only when it has one.
+	 *
+	 * @testWith ["30", "30"]
+	 *           ["", ""]
+	 *
+	 * @param string $maximum_discount Coupon maximum discount.
+	 * @param string $expected_meta    Expected maximum_discount meta on the coupon line item.
+	 */
+	public function test_create_order_coupon_lines_stores_maximum_discount( string $maximum_discount, string $expected_meta ): void {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 500 ) );
+		$coupon  = new WC_Coupon();
+		$coupon->set_props(
+			array(
+				'code'             => 'checkout-capped',
+				'discount_type'    => 'percent',
+				'amount'           => '10',
+				'maximum_discount' => $maximum_discount,
+			)
+		);
+		$coupon->save();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->apply_coupon( 'checkout-capped' );
+		WC()->cart->calculate_totals();
+
+		$order = new WC_Order();
+		$this->sut->create_order_coupon_lines( $order, WC()->cart );
+
+		$this->assertSame( $expected_meta, current( $order->get_items( 'coupon' ) )->get_meta( 'maximum_discount' ) );
+	}
 }

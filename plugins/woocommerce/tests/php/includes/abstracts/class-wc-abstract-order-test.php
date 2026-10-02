@@ -2241,4 +2241,66 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( $status, wc_get_order( $order->get_id() )->get_status() );
 	}
+
+	/**
+	 * @testdox Recalculating coupons keeps a percentage coupon's maximum discount after the coupon is deleted.
+	 */
+	public function test_recalculate_coupons_keeps_maximum_discount_after_coupon_deleted(): void {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 500 ) );
+		$coupon  = new WC_Coupon();
+		$coupon->set_props(
+			array(
+				'code'             => 'ten-up-to-thirty',
+				'discount_type'    => 'percent',
+				'amount'           => '10',
+				'maximum_discount' => '30',
+			)
+		);
+		$coupon->save();
+
+		$order = new WC_Order();
+		$order->add_product( $product, 1 );
+		$order->calculate_totals();
+		$order->apply_coupon( 'ten-up-to-thirty' );
+		$order->save();
+
+		$this->assertEquals( 30, $order->get_discount_total(), 'The capped coupon should give $30.' );
+		$this->assertSame( '30', current( $order->get_items( 'coupon' ) )->get_meta( 'maximum_discount' ), 'The cap should be stored on the coupon line item.' );
+
+		$coupon->delete( true );
+		$order = wc_get_order( $order->get_id() );
+		$order->recalculate_coupons();
+
+		$this->assertEquals( 30, $order->get_discount_total(), 'The cap should still apply once the coupon is deleted.' );
+	}
+
+	/**
+	 * @testdox Recalculating coupons keeps the capped discount of a virtual percentage coupon that was never saved.
+	 */
+	public function test_recalculate_coupons_keeps_capped_discount_of_unsaved_virtual_coupon(): void {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 500 ) );
+		$coupon  = new WC_Coupon();
+		$coupon->set_props(
+			array(
+				'code'             => 'virtual-ten-up-to-thirty',
+				'discount_type'    => 'percent',
+				'amount'           => '10',
+				'maximum_discount' => '30',
+				'virtual'          => true,
+			)
+		);
+
+		$order = new WC_Order();
+		$order->add_product( $product, 1 );
+		$order->calculate_totals();
+		$order->apply_coupon( $coupon );
+		$order->save();
+
+		$this->assertEquals( 30, $order->get_discount_total(), 'The capped virtual coupon should give $30.' );
+
+		$order = wc_get_order( $order->get_id() );
+		$order->recalculate_coupons();
+
+		$this->assertEquals( 30, $order->get_discount_total(), 'Recalculation should not remove the cap from a virtual coupon.' );
+	}
 }

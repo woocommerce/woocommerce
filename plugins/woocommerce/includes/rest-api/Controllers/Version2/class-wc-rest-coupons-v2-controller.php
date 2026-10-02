@@ -155,7 +155,7 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 	protected function get_formatted_item_data( $object ) {
 		$data = $object->get_data();
 
-		$format_decimal = array( 'amount', 'minimum_amount', 'maximum_amount' );
+		$format_decimal = array( 'amount', 'minimum_amount', 'maximum_amount', 'maximum_discount' );
 		$format_date    = array( 'date_created', 'date_modified', 'date_expires' );
 		$format_null    = array( 'usage_limit', 'usage_limit_per_user', 'limit_usage_to_x_items' );
 
@@ -202,6 +202,7 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 			'exclude_sale_items'          => $data['exclude_sale_items'],
 			'minimum_amount'              => $data['minimum_amount'],
 			'maximum_amount'              => $data['maximum_amount'],
+			'maximum_discount'            => $data['maximum_discount'],
 			'email_restrictions'          => $data['email_restrictions'],
 			'used_by'                     => $data['used_by'],
 			'meta_data'                   => $data['meta_data'],
@@ -519,6 +520,11 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 				),
 				'maximum_amount'              => array(
 					'description' => __( 'Maximum order amount allowed when using the coupon.', 'woocommerce' ),
+					'type'        => array( 'number', 'string' ),
+					'context'     => array( 'view', 'edit' ),
+				),
+				'maximum_discount'            => array(
+					'description' => __( 'Maximum discount a percentage coupon can give. 0 means no maximum.', 'woocommerce' ),
 					'type'        => array( 'number', 'string' ),
 					'context'     => array( 'view', 'edit' ),
 				),

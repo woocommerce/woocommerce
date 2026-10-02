@@ -109,6 +109,7 @@ class WC_Meta_Box_Coupon_Data_Test extends WC_Unit_Test_Case {
 				'exclude_sale_items'         => 'yes',
 				'minimum_amount'             => '50',
 				'maximum_amount'             => '500',
+				'maximum_discount'           => '30',
 				'usage_limit'                => '7',
 				'usage_limit_per_user'       => '2',
 				'limit_usage_to_x_items'     => '3',
@@ -134,6 +135,7 @@ class WC_Meta_Box_Coupon_Data_Test extends WC_Unit_Test_Case {
 		$this->assertTrue( $coupon->get_exclude_sale_items(), 'Expected the posted exclude sale items flag to persist.' );
 		$this->assertSame( '50', $coupon->get_minimum_amount(), 'Expected the posted minimum amount to persist.' );
 		$this->assertSame( '500', $coupon->get_maximum_amount(), 'Expected the posted maximum amount to persist.' );
+		$this->assertSame( '30', $coupon->get_maximum_discount(), 'Expected the posted maximum discount to persist.' );
 		$this->assertSame( 7, $coupon->get_usage_limit(), 'Expected the posted usage limit to persist.' );
 		$this->assertSame( 2, $coupon->get_usage_limit_per_user(), 'Expected the posted per-user usage limit to persist.' );
 		$this->assertSame( 3, $coupon->get_limit_usage_to_x_items(), 'Expected the posted item usage limit to persist.' );
