@@ -386,7 +386,7 @@ function wc_body_class( $classes ) {
 
 	$classes[] = 'woocommerce-no-js';
 
-	add_action( 'wp_footer', 'wc_no_js' );
+	add_action( 'wp_enqueue_scripts', 'wc_no_js' );
 
 	return array_unique( $classes );
 }
@@ -398,16 +398,13 @@ function wc_body_class( $classes ) {
  * @return void
  */
 function wc_no_js() {
-	$type_attr = current_theme_supports( 'html5', 'script' ) ? '' : " type='text/javascript'";
-	?>
-	<script<?php echo $type_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-		(function () {
-			var c = document.body.className;
-			c = c.replace(/woocommerce-no-js/, 'woocommerce-js');
-			document.body.className = c;
-		})();
-	</script>
-	<?php
+	$script  = "(function () {\n";
+	$script .= "\tvar c = document.body.className;\n";
+	$script .= "\tc = c.replace(/woocommerce-no-js/, 'woocommerce-js');\n";
+	$script .= "\tdocument.body.className = c;\n";
+	$script .= "})();";
+
+	wp_add_inline_script( 'woocommerce', $script, 'after' );
 }
 
 /**
