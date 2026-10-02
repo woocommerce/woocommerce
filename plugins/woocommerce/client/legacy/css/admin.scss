@@ -7153,6 +7153,23 @@ img.help_tip {
 	}
 }
 
+.wc-product-customs {
+
+	.woocommerce_options_panel & > h4 {
+		padding-inline: 12px;
+	}
+
+	// Leave room for the error tip under the description, the last field in the Shipping panel, which the panel wrapper would otherwise clip.
+	#shipping_product_data & {
+		padding-block-end: 4em;
+	}
+
+	.woocommerce_variation & {
+		border-top: 1px solid #eee;
+		margin-top: 12px;
+	}
+}
+
 .woocommerce_variable_attributes {
 	background-color: #fdfdfd;
 	border-top: 1px solid #eee;
