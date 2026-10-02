@@ -70,7 +70,7 @@ class AbilitiesApiAdapter {
 	}
 
 	/**
-	 * Load a product by ID.
+	 * Load a product or an order by ID.
 	 *
 	 * @internal
 	 *
@@ -80,11 +80,18 @@ class AbilitiesApiAdapter {
 	 * @return mixed
 	 */
 	public static function load_object( $subject, $object_type, $id ) {
-		if ( null !== $subject || 'product' !== $object_type ) {
+		if ( null !== $subject ) {
 			return $subject;
 		}
-		$product = wc_get_product( $id );
-		return $product ? $product : null;
+		if ( 'product' === $object_type ) {
+			$product = wc_get_product( $id );
+			return $product ? $product : null;
+		}
+		if ( 'order' === $object_type ) {
+			$order = wc_get_order( $id );
+			return $order ? $order : null;
+		}
+		return null;
 	}
 
 	/**

@@ -366,6 +366,61 @@ class ProductAbilityContractsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return an order extension field from the order abilities, with its title in the output schemas.
+	 */
+	public function test_order_extension_field_in_order_abilities(): void {
+		add_filter(
+			'woocommerce_ability_fields',
+			static function ( array $fields, string $object_type ): array {
+				if ( 'order' === $object_type ) {
+					$fields['test_gift_message'] = array(
+						'schema'       => array(
+							'type'  => 'string',
+							'title' => 'Gift message',
+						),
+						'get_callback' => static function ( \WC_Order $order ) {
+							return (string) $order->get_meta( '_test_gift_message' );
+						},
+					);
+				}
+				return $fields;
+			},
+			10,
+			2
+		);
+		$this->set_feature( true );
+		$order = \WC_Helper_Order::create_order();
+		$order->update_meta_data( '_test_gift_message', 'Happy birthday' );
+		$order->save();
+
+		$query  = wp_get_ability( 'woocommerce/orders-query' );
+		$result = $query->execute( array( 'id' => $order->get_id() ) );
+		$this->assertNotWPError( $result );
+		$this->assertSame( array( 'test_gift_message' => 'Happy birthday' ), $result['orders'][0]['extensions'] );
+		$this->assertSame( 'Gift message', $query->get_output_schema()['properties']['orders']['items']['properties']['extensions']['properties']['test_gift_message']['title'] );
+
+		$update = wp_get_ability( 'woocommerce/order-update-status' );
+		$result = $update->execute(
+			array(
+				'id'     => $order->get_id(),
+				'status' => 'completed',
+			)
+		);
+		$this->assertNotWPError( $result );
+		$this->assertSame( array( 'test_gift_message' => 'Happy birthday' ), $result['order']['extensions'] );
+		$this->assertSame( 'Gift message', $update->get_output_schema()['properties']['order']['properties']['extensions']['properties']['test_gift_message']['title'] );
+
+		$result = wp_get_ability( 'woocommerce/order-add-note' )->execute(
+			array(
+				'id'   => $order->get_id(),
+				'note' => 'Wrapped.',
+			)
+		);
+		$this->assertNotWPError( $result );
+		$this->assertSame( array( 'test_gift_message' => 'Happy birthday' ), $result['order']['extensions'] );
+	}
+
+	/**
 	 * @testdox Should save extension field values on product create.
 	 */
 	public function test_product_create_saves_extension_fields(): void {
