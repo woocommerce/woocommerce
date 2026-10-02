@@ -161,7 +161,8 @@ final class RenewalEngine {
 	 * settled head is force-advanced to the next cycle (whose period continues from the previous
 	 * end, so the schedule is preserved, not reset), while a failed or stalled head is re-attempted
 	 * at its own count. Unlike the scheduled path it never parks the contract - a manual action
-	 * should not clear the schedule when it cannot proceed.
+	 * should not clear the schedule when it cannot proceed (a non-active contract, for one,
+	 * simply returns null).
 	 *
 	 * @param int                    $contract_id The contract to renew.
 	 * @param DateTimeImmutable|null $now         The processing moment; defaults to now (UTC).
@@ -210,17 +211,21 @@ final class RenewalEngine {
 	 *
 	 * The structural invariants it does enforce keep the money-path safe whatever the caller:
 	 * it skips (logging, never throwing - a scheduled action would retry a permanent condition
-	 * forever) when the contract is gone, gateway-scheduled, or inactive, and refuses a cycle
-	 * that is neither the head nor its immediate successor (no billing a gap). The claim is the
+	 * forever) when the contract is gone or gateway-scheduled, and refuses a cycle that is
+	 * neither the head nor its immediate successor (no billing a gap). A contract that is not
+	 * active is never charged: the status-blind due scan can still select one (a stale due
+	 * moment), so it is reported as a pre-flight impossibility below and parked by the
+	 * scheduled caller. The claim is the
 	 * concurrency gate: appending the successor collides on `UNIQUE(contract_id, kind, count)`
 	 * and the head is reclaimed only through the lease compare-and-set, so a cycle is charged at
 	 * most once even under overlapping runs. Order reconciliation follows the claim, so the
 	 * cycle chain - not the mutable order - is the idempotency authority.
 	 *
-	 * Throws {@see RenewalNotProcessable} for a pre-flight impossibility (no chain, an
-	 * unresolvable plan, a non-adjacent count, a gateway that cannot charge renewals) so the
-	 * caller can park; returns null for an idempotent no-op (a live claim, an already-settled
-	 * cycle, an unbuildable order).
+	 * Throws {@see RenewalNotProcessable} for a pre-flight impossibility (a non-active
+	 * contract, no chain, an unresolvable plan, a non-adjacent count, a gateway that cannot
+	 * charge renewals) so the scheduled caller can park and a manual caller can return null;
+	 * returns null for an idempotent no-op (a live claim, an already-settled cycle, an
+	 * unbuildable order).
 	 *
 	 * @param RenewalIntent     $intent The contract and cycle count to bill.
 	 * @param DateTimeImmutable $now    The processing moment (the lease clock for a claim).
@@ -254,16 +259,11 @@ final class RenewalEngine {
 			return null;
 		}
 
+		// The due scan is status-blind, so a non-active contract that still carries a due
+		// moment can be selected. Charging it is impossible, so it is a pre-flight failure:
+		// the scheduled caller parks it out of the due set; a manual caller gets null.
 		if ( ContractStatus::ACTIVE !== $contract->get_status() ) {
-			wc_get_logger()->info(
-				sprintf( 'RenewalEngine::process(): contract %d is %s, not active - skipping renewal. No order created.', $contract_id, $contract->get_status() ),
-				array(
-					'source'      => self::LOG_SOURCE,
-					'contract_id' => $contract_id,
-					'status'      => $contract->get_status(),
-				)
-			);
-			return null;
+			throw new RenewalNotProcessable( esc_html( sprintf( 'the contract is %s, not active', $contract->get_status() ) ) );
 		}
 
 		// Pre-flight capability gate, ahead of the claim so an unchargeable renewal never
