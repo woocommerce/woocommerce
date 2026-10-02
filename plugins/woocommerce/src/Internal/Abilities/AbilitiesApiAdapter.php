@@ -15,16 +15,16 @@ use Automattic\WooCommerce\Internal\AbilitiesApi\RegistrationArgs;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Connects WooCommerce to the generic ability registration keys: WC_Data
- * subjects, the extension field registry, the object validator registry and
- * WooCommerce's data exceptions.
+ * Connects WooCommerce to the generic ability layer: the ability hooks behind
+ * the feature, WC_Data subjects, product loading, the extension field
+ * registry, the object validator registry and WooCommerce's data exceptions.
  *
  * @since 11.3.0
  */
 class AbilitiesApiAdapter {
 
 	/**
-	 * Hook the adapters, unless WordPress handles the registration keys itself.
+	 * Hook the adapters, unless WordPress handles ability fields itself.
 	 *
 	 * @internal
 	 */
@@ -33,7 +33,9 @@ class AbilitiesApiAdapter {
 			return;
 		}
 
-		add_filter( 'wp_register_ability_args', array( __CLASS__, 'registration_args' ), 10, 2 );
+		add_filter( 'wp_register_ability_args', array( __CLASS__, 'registration_args' ) );
+		add_filter( 'wp_ability_execute_result', array( __CLASS__, 'execute_result' ), 10, 4 );
+		add_filter( 'woocommerce_ability_object', array( __CLASS__, 'load_object' ), 10, 3 );
 		add_filter( 'woocommerce_ability_in_memory_subject', array( __CLASS__, 'subject' ), 10, 2 );
 		add_filter( 'woocommerce_ability_fields', array( __CLASS__, 'fields' ), 10, 2 );
 		add_filter( 'woocommerce_ability_object_validators', array( __CLASS__, 'validators' ), 10, 2 );
@@ -41,19 +43,48 @@ class AbilitiesApiAdapter {
 	}
 
 	/**
-	 * Apply the registration keys when ability contracts are on, and drop them otherwise.
+	 * Build the ability from its `meta.woocommerce` when ability contracts are on.
 	 *
 	 * @internal
 	 *
-	 * @param mixed  $args         Registration arguments.
-	 * @param string $ability_name Ability name.
+	 * @param mixed $args Registration arguments.
 	 * @return mixed
 	 */
-	public static function registration_args( $args, $ability_name ) {
-		if ( ! is_array( $args ) ) {
-			return $args;
+	public static function registration_args( $args ) {
+		return is_array( $args ) && AbilityContracts::is_enabled() ? RegistrationArgs::apply( $args ) : $args;
+	}
+
+	/**
+	 * Add extension field values to the output when ability contracts are on.
+	 *
+	 * @internal
+	 *
+	 * @param mixed  $result       Execute result.
+	 * @param string $ability_name Ability name.
+	 * @param mixed  $input        Input.
+	 * @param mixed  $ability      Ability.
+	 * @return mixed
+	 */
+	public static function execute_result( $result, $ability_name, $input, $ability ) {
+		return $ability instanceof \WP_Ability && AbilityContracts::is_enabled() ? RegistrationArgs::fill_result( $result, $ability ) : $result;
+	}
+
+	/**
+	 * Load a product by ID.
+	 *
+	 * @internal
+	 *
+	 * @param mixed  $subject     Object.
+	 * @param string $object_type Object type.
+	 * @param mixed  $id          Object ID.
+	 * @return mixed
+	 */
+	public static function load_object( $subject, $object_type, $id ) {
+		if ( null !== $subject || 'product' !== $object_type ) {
+			return $subject;
 		}
-		return AbilityContracts::is_enabled() ? RegistrationArgs::apply( $args, (string) $ability_name ) : RegistrationArgs::strip( $args );
+		$product = wc_get_product( $id );
+		return $product ? $product : null;
 	}
 
 	/**

@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Fields other plugins add to an object type's abilities, the ability
  * counterpart of register_rest_field(). An ability that declares
- * `extension_fields` accepts and returns them under `extensions`.
+ * `meta.woocommerce.extension_fields` returns them under `extensions`.
  *
  * @since 11.3.0
  */
@@ -132,39 +132,47 @@ final class AbilityFields {
 	}
 
 	/**
-	 * Add `extensions` to the object, or each object of a list, at the output key.
+	 * Add `extensions` to the object, or each object of a list, at the output
+	 * key. Each object is loaded by the `id` its output carries.
 	 *
 	 * @param mixed                $output      Ability output.
-	 * @param array<string, mixed> $declaration The ability's `extension_fields`.
-	 * @param object|null          $subject     The object at the output key, when known.
+	 * @param array<string, mixed> $declaration `object_type` and `output` key.
 	 * @return mixed
 	 */
-	public static function fill_output( $output, array $declaration, $subject = null ) {
-		$key = $declaration['output'] ?? null;
+	public static function fill_output( $output, array $declaration ) {
+		$key         = $declaration['output'] ?? null;
+		$object_type = (string) ( $declaration['object_type'] ?? '' );
 		if ( ! is_string( $key ) || ! is_array( $output ) || ! isset( $output[ $key ] ) || ! is_array( $output[ $key ] ) ) {
 			return $output;
 		}
 
-		$fields = self::get( $declaration['object_type'] );
-		$load   = $declaration['load'] ?? null;
-		$fill   = static function ( array $item, $item_subject ) use ( $fields, $load ): array {
-			if ( null === $item_subject && is_callable( $load ) && isset( $item['id'] ) ) {
-				$item_subject = call_user_func( $load, $item['id'] );
+		$fields = self::get( $object_type );
+		if ( empty( $fields ) ) {
+			return $output;
+		}
+
+		$fill = static function ( $item ) use ( $fields, $object_type ) {
+			if ( ! is_array( $item ) || ! isset( $item['id'] ) ) {
+				return $item;
 			}
-			$values = is_object( $item_subject ) ? self::read( $fields, $item_subject ) : array();
+			/**
+			 * Filters the object of a type an ability output names by ID, so its extension fields can be read.
+			 *
+			 * @since 11.3.0
+			 *
+			 * @param object|null $subject     Object, or null when none is found.
+			 * @param string      $object_type Object type.
+			 * @param mixed       $id          Object ID.
+			 */
+			$subject = apply_filters( 'woocommerce_ability_object', null, $object_type, $item['id'] );
+			$values  = is_object( $subject ) ? self::read( $fields, $subject ) : array();
 			if ( ! empty( $values ) ) {
 				$item['extensions'] = $values;
 			}
 			return $item;
 		};
 
-		if ( wp_is_numeric_array( $output[ $key ] ) ) {
-			foreach ( $output[ $key ] as $index => $item ) {
-				$output[ $key ][ $index ] = is_array( $item ) ? $fill( $item, null ) : $item;
-			}
-		} else {
-			$output[ $key ] = $fill( $output[ $key ], $subject );
-		}
+		$output[ $key ] = wp_is_numeric_array( $output[ $key ] ) ? array_map( $fill, $output[ $key ] ) : $fill( $output[ $key ] );
 		return $output;
 	}
 

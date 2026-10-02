@@ -16,7 +16,10 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductWriteAbility;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
+use Automattic\WooCommerce\Internal\AbilitiesApi\InMemoryWriteRunner;
+use Automattic\WooCommerce\Internal\AbilitiesApi\RegistrationArgs;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -140,16 +143,8 @@ class AbilitiesLoader {
 			}
 
 			$args = $class_name::get_registration_args();
-			if ( AbilityContracts::is_enabled() && is_a( $class_name, InMemoryWrite::class, true ) ) {
-				$args['in_memory_write'] = array(
-					'object_type' => $class_name::subject_type(),
-					'subject'     => array( $class_name, 'subject' ),
-					'validate'    => array( $class_name, 'validate' ),
-					'apply'       => array( $class_name, 'apply' ),
-					'hints'       => array( $class_name, 'hints' ),
-					'inverse'     => array( $class_name, 'inverse' ),
-					'respond'     => array( $class_name, 'respond' ),
-				);
+			if ( AbilityContracts::is_enabled() ) {
+				$args = self::with_ability_contracts( $args, $ability_name, $class_name );
 			}
 
 			$registered_ability = wp_register_ability( $ability_name, $args );
@@ -158,6 +153,45 @@ class AbilitiesLoader {
 				self::$registered_core_abilities[ $ability_name ] = $registered_ability;
 			}
 		}
+	}
+
+	/**
+	 * Declare the extension fields of the products query, run Core's product
+	 * writes as in-memory writes, and run InMemoryWrite definitions through
+	 * the same runner.
+	 *
+	 * @param array        $args         Registration arguments.
+	 * @param string       $ability_name Ability name.
+	 * @param class-string $class_name   Ability definition class name.
+	 * @return array
+	 */
+	private static function with_ability_contracts( array $args, string $ability_name, string $class_name ): array {
+		if ( ProductsQuery::class === $class_name ) {
+			$args['meta'][ RegistrationArgs::META ]['extension_fields'] = array(
+				'object_type' => 'product',
+				'output'      => 'products',
+			);
+		}
+
+		if ( ( ProductWriteAbility::DEFINITIONS[ $ability_name ] ?? null ) === $class_name ) {
+			$args['ability_class'] = ProductWriteAbility::class;
+		} elseif ( is_a( $class_name, InMemoryWrite::class, true ) ) {
+			$steps = array(
+				'object_type' => $class_name::subject_type(),
+				'subject'     => array( $class_name, 'subject' ),
+				'validate'    => array( $class_name, 'validate' ),
+				'apply'       => array( $class_name, 'apply' ),
+				'respond'     => array( $class_name, 'respond' ),
+			);
+
+			$args['meta'][ RegistrationArgs::META ]['in_memory_write'] = array( 'object_type' => $steps['object_type'] );
+
+			$args['execute_callback'] = static function ( $input = null ) use ( $ability_name, $steps ) {
+				return InMemoryWriteRunner::run( $ability_name, $steps, is_array( $input ) ? $input : array() );
+			};
+		}
+
+		return $args;
 	}
 
 	/**

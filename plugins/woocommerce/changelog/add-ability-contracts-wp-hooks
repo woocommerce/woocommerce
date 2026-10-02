@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Declare ability extension fields in namespaced meta and in-memory writes with an ability subclass, on the WordPress ability hooks, behind the ability contracts feature.
