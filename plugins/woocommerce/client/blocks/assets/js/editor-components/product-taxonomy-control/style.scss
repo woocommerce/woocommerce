@@ -1,3 +1,7 @@
+.woocommerce-product-taxonomy-control__operator,
+.woocommerce-product-attributes__operator,
+.woocommerce-product-brands__operator,
+.woocommerce-product-categories__operator,
 .woocommerce-product-tags__operator {
 	.components-base-control__help {
 		@include visually-hidden;
