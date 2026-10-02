@@ -45,9 +45,10 @@ final class StatusRegistry {
 	private const MAX_LENGTH = 20;
 
 	/**
-	 * Slug format: lowercase alphanumeric words joined by single hyphens.
+	 * Slug format: lowercase alphanumeric words joined by single hyphens. Anchored with `\z`
+	 * (not `$`, which also matches before a trailing newline).
 	 */
-	private const SLUG_PATTERN = '/^[a-z0-9]+(?:-[a-z0-9]+)*$/';
+	private const SLUG_PATTERN = '/^[a-z0-9]+(?:-[a-z0-9]+)*\z/';
 
 	/**
 	 * Extension registrations, keyed by kind => list of slugs in registration

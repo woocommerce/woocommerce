@@ -107,6 +107,8 @@ class StatusRegistryTest extends TestCase {
 			'space'           => array( 'with space' ),
 			'markup'          => array( '<b>' ),
 			'over 20 chars'   => array( str_repeat( 'a', 21 ) ),
+			'trailing LF'     => array( "paused\n" ),
+			'trailing CRLF'   => array( "paused\r\n" ),
 		);
 	}
 
