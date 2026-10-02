@@ -832,10 +832,22 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 	 * @testdox Should register a POST /reset route alongside the existing default-content route.
 	 */
 	public function test_register_routes_registers_reset_endpoint(): void {
-		$rest_server = rest_get_server();
-		$this->email_api_controller->register_routes();
+		global $wp_rest_server;
 
-		$routes = $rest_server->get_routes();
+		$previous_rest_server = $wp_rest_server;
+		$wp_rest_server       = new \WP_REST_Server();
+
+		try {
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This test invokes the production route-registration action.
+			do_action( 'rest_api_init', $wp_rest_server );
+			$this->email_api_controller->register_routes();
+
+			$routes = $wp_rest_server->get_routes();
+		} finally {
+			// tear_down() does not touch $wp_rest_server.
+			$wp_rest_server = $previous_rest_server;
+		}
+
 		$this->assertArrayHasKey( '/woocommerce-email-editor/v1/emails/(?P<id>\d+)/reset', $routes );
 
 		$reset_route_handlers = $routes['/woocommerce-email-editor/v1/emails/(?P<id>\d+)/reset'];
@@ -852,16 +864,22 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 	 * @testdox Should register a GET /change-summary route alongside the existing default-content route.
 	 */
 	public function test_register_routes_registers_change_summary_endpoint(): void {
-		// `register_rest_route()` warns when called outside `rest_api_init`. The
-		// reset sibling test only avoids the warning because it's the first
-		// caller of `rest_get_server()` in the suite, which lazily fires the
-		// action; this test runs after that, so we opt into the warning.
-		$this->setExpectedIncorrectUsage( 'register_rest_route' );
+		global $wp_rest_server;
 
-		$rest_server = rest_get_server();
-		$this->email_api_controller->register_routes();
+		$previous_rest_server = $wp_rest_server;
+		$wp_rest_server       = new \WP_REST_Server();
 
-		$routes = $rest_server->get_routes();
+		try {
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This test invokes the production route-registration action.
+			do_action( 'rest_api_init', $wp_rest_server );
+			$this->email_api_controller->register_routes();
+
+			$routes = $wp_rest_server->get_routes();
+		} finally {
+			// tear_down() does not touch $wp_rest_server.
+			$wp_rest_server = $previous_rest_server;
+		}
+
 		$this->assertArrayHasKey( '/woocommerce-email-editor/v1/emails/(?P<id>\d+)/change-summary', $routes );
 
 		$change_summary_route_handlers = $routes['/woocommerce-email-editor/v1/emails/(?P<id>\d+)/change-summary'];

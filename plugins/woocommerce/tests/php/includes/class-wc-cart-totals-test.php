@@ -14,6 +14,20 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 	private $shipping_was_enabled;
 
 	/**
+	 * Customer billing country before the test.
+	 *
+	 * @var string
+	 */
+	private $previous_billing_country;
+
+	/**
+	 * Customer shipping country before the test.
+	 *
+	 * @var string
+	 */
+	private $previous_shipping_country;
+
+	/**
 	 * Set up non-shipping cart total tests.
 	 */
 	public function setUp(): void {
@@ -21,12 +35,24 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 
 		$this->shipping_was_enabled = WC()->shipping()->enabled;
 		WC()->shipping()->enabled   = false;
+
+		// The tax rates these tests insert have no country of their own, and
+		// WC_Tax::find_rates() finds nothing for a customer whose taxable address has no
+		// country. WC()->customer outlives a test, so set a country here instead of reading
+		// whatever the test before left on it.
+		$this->previous_billing_country  = WC()->customer->get_billing_country();
+		$this->previous_shipping_country = WC()->customer->get_shipping_country();
+		WC()->customer->set_billing_country( 'US' );
+		WC()->customer->set_shipping_country( 'US' );
 	}
 
 	/**
 	 * tearDown.
 	 */
 	public function tearDown(): void {
+		WC()->customer->set_billing_country( $this->previous_billing_country );
+		WC()->customer->set_shipping_country( $this->previous_shipping_country );
+
 		parent::tearDown();
 		WC()->shipping()->enabled = $this->shipping_was_enabled;
 	}

@@ -159,6 +159,11 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 */
 	public function tearDown(): void {
 		try {
+			// Function and static-method mocks are process-wide. Reset them here so the test
+			// that installs one is the last to see it, including when the next test extends a
+			// WordPress base class that never runs setUp() on this hierarchy.
+			CodeHacker::reset_hacks();
+
 			$this->clear_wc_singleton_state();
 		} finally {
 			// The parent teardown must always run: it rolls back the database
