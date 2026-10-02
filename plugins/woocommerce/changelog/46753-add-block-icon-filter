@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a PHP filter for replacing the decorative Mini-Cart, Cart Link, and Customer Account block icons with custom SVGs.

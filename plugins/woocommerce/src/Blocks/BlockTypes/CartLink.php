@@ -3,7 +3,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
-use Automattic\WooCommerce\Blocks\Utils\MiniCartUtils;
+use Automattic\WooCommerce\Blocks\Utils\BlockIconUtils;
 
 /**
  * CartLink class.
@@ -27,7 +27,7 @@ class CartLink extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
-		$icon               = MiniCartUtils::get_svg_icon( $attributes['cartIcon'] ?? '' );
+		$icon               = BlockIconUtils::get_cart_icon( $attributes['cartIcon'] ?? '', 'currentColor', $this->get_full_block_name(), $attributes );
 		$text               = array_key_exists( 'content', $attributes ) ? esc_html( $attributes['content'] ) : esc_html__( 'Cart', 'woocommerce' );
 		$aria_label         = empty( $text ) ? sprintf( ' aria-label="%s"', esc_attr__( 'Cart', 'woocommerce' ) ) : '';
 
