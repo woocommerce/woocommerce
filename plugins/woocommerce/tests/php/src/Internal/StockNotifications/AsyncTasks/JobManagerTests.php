@@ -17,7 +17,7 @@ class JobManagerTests extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * @before
+	 * Set up the test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
@@ -25,7 +25,7 @@ class JobManagerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @after
+	 * Tear down the test.
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
