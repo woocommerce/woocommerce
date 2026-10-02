@@ -129,8 +129,9 @@ class InternalNotificationDispatcher {
 		 * carries all of them, so a line each would describe the same request
 		 * thousands of times on a bulk stock update. Naming each notification by
 		 * type and resource ID lets a per-notification read find the batch its
-		 * own notification was part of; the identifier string cannot be used,
-		 * since a subclass is free to build it from more than those two.
+		 * own notification was part of. The identifier is carried too, because a
+		 * subclass may build it from more than those two: two stock events for
+		 * one product share a type and a resource ID and differ only there.
 		 */
 		$context = array(
 			'batch_size'    => count( $notifications ),
@@ -138,6 +139,7 @@ class InternalNotificationDispatcher {
 				fn( Notification $notification ) => array(
 					'type'        => $notification->get_type(),
 					'resource_id' => $notification->get_resource_id(),
+					'identifier'  => $notification->get_identifier(),
 				),
 				$notifications
 			),

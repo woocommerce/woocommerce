@@ -15,10 +15,14 @@ use Throwable;
  * WooCommerce log lines that Mission Control can read back per notification
  * and per device.
  *
- * Notification-level steps go to one rolling source per notification type and
- * per-device steps to one rolling source per token, with the notification
- * identifier on every line linking the two. That identifier names the
- * notification's subject rather than one delivery, so a resource firing the
+ * Every line goes to one rolling source per notification type, except the
+ * tokens a notification was not sent to, which share one store-wide source. No
+ * source is per token, so the file count follows the notification types rather
+ * than the devices a store holds; a line names its devices in its context
+ * instead, and the read side turns those back into a row per device.
+ *
+ * The notification identifier on every line links them. That identifier names
+ * the notification's subject rather than one delivery, so a resource firing the
  * same type twice in a day repeats it, and a run is read from its trigger step
  * to its terminal outcome.
  *
@@ -39,6 +43,25 @@ class NotificationStepLogger {
 	 * than a delivery history to read.
 	 */
 	const SUPPRESSED_SOURCE = 'push-suppressed';
+
+	/**
+	 * The most characters a line's message may carry.
+	 *
+	 * Exception messages reach the log and an exception can name a value the
+	 * caller sent, so nothing written here is assumed to be short.
+	 */
+	const MAX_MESSAGE_LENGTH = 1000;
+
+	/**
+	 * The most characters any one context value may carry.
+	 */
+	const MAX_VALUE_LENGTH = 200;
+
+	/**
+	 * The most entries any one context array may name. What is left out is
+	 * counted in a sibling field rather than dropped silently.
+	 */
+	const MAX_ARRAY_ITEMS = 100;
 
 	/**
 	 * Whether step logging is active for this request, or null until checked.
@@ -139,7 +162,7 @@ class NotificationStepLogger {
 			$context['source']         = PushNotifications::FEATURE_NAME;
 			$context['remote-logging'] = false;
 
-			wc_get_logger()->info( self::format_message( $step, $outcome ), $context );
+			wc_get_logger()->info( self::format_message( $step, $outcome ), self::bound( $context ) );
 		} catch ( Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 			// Deliberately ignored: a logging failure must not affect the send.
 		}
@@ -251,7 +274,7 @@ class NotificationStepLogger {
 				return;
 			}
 
-			$context = self::identify( $notification, $step, $outcome, $context );
+			$context = self::bound( self::identify( $notification, $step, $outcome, $context ) );
 
 			$context['source'] = $suppressed
 				? self::SUPPRESSED_SOURCE
@@ -276,10 +299,88 @@ class NotificationStepLogger {
 			$context['source']         = PushNotifications::FEATURE_NAME;
 			$context['remote-logging'] = false;
 
-			wc_get_logger()->log( $level, $message, $context );
+			wc_get_logger()->log( $level, self::clean( $message, self::MAX_MESSAGE_LENGTH ), self::bound( $context ) );
 		} catch ( Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 			// Deliberately ignored: a logging failure must not affect the send.
 		}
+	}
+
+	/**
+	 * Strips control characters from a string and caps its length.
+	 *
+	 * A newline in a message would split the entry, since the handler writes
+	 * the message into the line unencoded, so a caller able to reach a logged
+	 * exception could otherwise forge a line the readers parse as genuine.
+	 *
+	 * @param string $value The value.
+	 * @param int    $limit The most characters to keep.
+	 * @return string
+	 */
+	private static function clean( string $value, int $limit ): string {
+		$value = (string) preg_replace( '/[\x00-\x1F\x7F]+/u', ' ', $value );
+
+		if ( mb_strlen( $value ) <= $limit ) {
+			return $value;
+		}
+
+		return mb_substr( $value, 0, $limit ) . '... (truncated)';
+	}
+
+	/**
+	 * Caps every value in a context, naming what was left out.
+	 *
+	 * Arrays are cut to {@see self::MAX_ARRAY_ITEMS} and gain a sibling
+	 * counting the entries omitted, so a reader can tell a short list from a
+	 * truncated one. A map of lists, such as the excluded tokens grouped by
+	 * reason, is cut per list and counted per key.
+	 *
+	 * @param array $context The context.
+	 * @return array
+	 */
+	private static function bound( array $context ): array {
+		$bounded = array();
+
+		foreach ( $context as $key => $value ) {
+			if ( is_string( $value ) ) {
+				$bounded[ $key ] = self::clean( $value, self::MAX_VALUE_LENGTH );
+				continue;
+			}
+
+			if ( ! is_array( $value ) ) {
+				$bounded[ $key ] = $value;
+				continue;
+			}
+
+			$omitted = array();
+
+			foreach ( $value as $inner_key => $inner ) {
+				if ( ! is_array( $inner ) ) {
+					continue;
+				}
+
+				$left = count( $inner ) - self::MAX_ARRAY_ITEMS;
+
+				if ( $left > 0 ) {
+					$value[ $inner_key ]   = array_slice( $inner, 0, self::MAX_ARRAY_ITEMS );
+					$omitted[ $inner_key ] = $left;
+				}
+			}
+
+			$left = count( $value ) - self::MAX_ARRAY_ITEMS;
+
+			if ( empty( $omitted ) && $left > 0 ) {
+				$value   = array_slice( $value, 0, self::MAX_ARRAY_ITEMS );
+				$omitted = $left;
+			}
+
+			$bounded[ $key ] = $value;
+
+			if ( ! empty( $omitted ) ) {
+				$bounded[ $key . '_omitted' ] = $omitted;
+			}
+		}
+
+		return $bounded;
 	}
 
 	/**

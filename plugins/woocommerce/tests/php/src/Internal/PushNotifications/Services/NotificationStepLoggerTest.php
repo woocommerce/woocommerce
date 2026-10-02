@@ -69,6 +69,83 @@ class NotificationStepLoggerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A caller can reach a logged exception message, and the handler writes the
+	 * message into the line unencoded, so a newline would let it forge a line.
+	 *
+	 * @testdox Should strip control characters from a logged message so it cannot add a line.
+	 */
+	public function test_log_failure_strips_control_characters_from_the_message(): void {
+		$this->sut->log_failure(
+			$this->create_order_mock( 42 ),
+			'processing',
+			'exception',
+			'error',
+			"Unknown notification type: evil\n2026-10-02T00:00:00+00:00 INFO Dispatched: accepted"
+		);
+
+		$this->assertStringNotContainsString( "\n", $this->logger->log_calls[0]['message'] );
+	}
+
+	/**
+	 * @testdox Should cap a logged message rather than write whatever an exception carried.
+	 */
+	public function test_log_failure_caps_the_message_length(): void {
+		$this->sut->log_failure( $this->create_order_mock( 42 ), 'processing', 'exception', 'error', str_repeat( 'a', 5000 ) );
+
+		$this->assertStringEndsWith( '... (truncated)', $this->logger->log_calls[0]['message'] );
+		$this->assertLessThan( 5000, strlen( $this->logger->log_calls[0]['message'] ) );
+	}
+
+	/**
+	 * @testdox Should cap a context string so a caller-supplied value cannot fill the line.
+	 */
+	public function test_context_strings_are_capped(): void {
+		$this->sut->log_notification_step( $this->create_order_mock( 42 ), 'recipients', 'resolved', array( 'note' => str_repeat( 'b', 1000 ) ) );
+
+		$this->assertStringEndsWith( '... (truncated)', $this->logger->info_calls[0]['context']['note'] );
+	}
+
+	/**
+	 * @testdox Should cap a context array and say how many entries it left out.
+	 */
+	public function test_context_arrays_are_capped_and_count_what_was_omitted(): void {
+		$this->sut->log_notification_step(
+			$this->create_order_mock( 42 ),
+			'recipients',
+			'resolved',
+			array( 'token_ids' => range( 1, 450 ) )
+		);
+
+		$context = $this->logger->info_calls[0]['context'];
+
+		$this->assertCount( NotificationStepLogger::MAX_ARRAY_ITEMS, $context['token_ids'] );
+		$this->assertSame( 350, $context['token_ids_omitted'] );
+	}
+
+	/**
+	 * @testdox Should cap each list of a grouped map and count what each one left out.
+	 */
+	public function test_grouped_context_arrays_are_capped_per_group(): void {
+		$this->sut->log_suppressed_step(
+			$this->create_order_mock( 42 ),
+			'token_excluded',
+			'various',
+			array(
+				'excluded_tokens' => array(
+					'notifications_off' => range( 1, 250 ),
+					'no_account'        => range( 1, 5 ),
+				),
+			)
+		);
+
+		$context = $this->logger->info_calls[0]['context'];
+
+		$this->assertCount( NotificationStepLogger::MAX_ARRAY_ITEMS, $context['excluded_tokens']['notifications_off'] );
+		$this->assertCount( 5, $context['excluded_tokens']['no_account'] );
+		$this->assertSame( array( 'notifications_off' => 150 ), $context['excluded_tokens_omitted'] );
+	}
+
+	/**
 	 * @testdox Should write an excluded-token step to the store-wide suppressed source.
 	 */
 	public function test_log_suppressed_step_writes_to_the_suppressed_source(): void {

@@ -216,16 +216,9 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 				'ok',
 				$this->callback(
 					fn( array $context ) => 2 === $context['batch_size']
-						&& array(
-							array(
-								'type'        => 'store_order',
-								'resource_id' => 1,
-							),
-							array(
-								'type'        => 'store_order',
-								'resource_id' => 2,
-							),
-						) === $context['notifications']
+						&& array( 'store_order', 'store_order' ) === array_column( $context['notifications'], 'type' )
+						&& array( 1, 2 ) === array_column( $context['notifications'], 'resource_id' )
+						&& 2 === count( array_filter( array_column( $context['notifications'], 'identifier' ) ) )
 				)
 			);
 

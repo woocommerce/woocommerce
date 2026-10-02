@@ -35,6 +35,15 @@ class PushTokensDataStore {
 	private array $tokens_by_roles_cache = array();
 
 	/**
+	 * Memoized count_tokens() result for this request. The step log puts it on
+	 * every notification's recipients line, so a bulk stock update would
+	 * otherwise run one COUNT(*) over every token row per notification.
+	 *
+	 * @var int|null
+	 */
+	private ?int $token_count = null;
+
+	/**
 	 * Memoized has_tokens() result. Null until the first lookup, and reset by create() so a stale false cannot drop a notification.
 	 *
 	 * @var bool|null
@@ -121,7 +130,8 @@ class PushTokensDataStore {
 
 		$push_token->set_id( $id );
 
-		$this->has_tokens = null;
+		$this->has_tokens  = null;
+		$this->token_count = null;
 
 		return $push_token;
 	}
@@ -286,6 +296,7 @@ class PushTokensDataStore {
 
 		// Anything read earlier in this request now includes deleted tokens.
 		$this->tokens_by_roles_cache = array();
+		$this->token_count           = null;
 
 		return $deleted;
 	}
@@ -444,14 +455,20 @@ class PushTokensDataStore {
 	 * @return int
 	 */
 	public function count_tokens(): int {
+		if ( null !== $this->token_count ) {
+			return $this->token_count;
+		}
+
 		global $wpdb;
 
-		return (int) $wpdb->get_var(
+		$this->token_count = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'private'",
 				PushToken::POST_TYPE
 			)
 		);
+
+		return $this->token_count;
 	}
 
 	/**
