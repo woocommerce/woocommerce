@@ -127,6 +127,43 @@ class ProductAbilityContractsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should declare the product abilities' contracts in meta with the feature on, and nothing with it off.
+	 */
+	public function test_product_abilities_declare_contracts_in_meta(): void {
+		$expected = array(
+			'woocommerce/products-query' => array(
+				'extension_fields' => array(
+					'object_type' => 'product',
+					'output'      => 'products',
+				),
+			),
+			'woocommerce/product-create' => array(
+				'extension_fields' => array(
+					'object_type' => 'product',
+					'output'      => 'product',
+				),
+				'in_memory_write'  => array( 'object_type' => 'product' ),
+			),
+			'woocommerce/product-update' => array(
+				'extension_fields' => array(
+					'object_type' => 'product',
+					'output'      => 'product',
+				),
+				'in_memory_write'  => array( 'object_type' => 'product' ),
+			),
+		);
+		foreach ( $expected as $ability_id => $meta ) {
+			$this->assertSame( $meta, wp_get_ability( $ability_id )->get_meta()['woocommerce'] );
+		}
+
+		$this->set_feature( false );
+		foreach ( array_keys( $expected ) as $ability_id ) {
+			$this->assertArrayNotHasKey( 'woocommerce', wp_get_ability( $ability_id )->get_meta() );
+			$this->assertSame( \WP_Ability::class, get_class( wp_get_ability( $ability_id ) ) );
+		}
+	}
+
+	/**
 	 * @testdox Should save extension field values on product create.
 	 */
 	public function test_product_create_saves_extension_fields(): void {

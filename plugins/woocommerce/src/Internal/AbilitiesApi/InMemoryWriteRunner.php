@@ -10,8 +10,8 @@ namespace Automattic\WooCommerce\Internal\AbilitiesApi;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Runs an ability's `in_memory_write` steps: subject, validate, apply, the
- * extension fields, the object validators, one save, respond. No step saves.
+ * Runs a write's steps: subject, validate, apply, the extension fields, the
+ * object validators, one save, respond. No step saves.
  *
  * @since 11.3.0
  */
@@ -20,13 +20,12 @@ final class InMemoryWriteRunner {
 	/**
 	 * Run the write.
 	 *
-	 * @param string                    $ability_name Ability name.
-	 * @param array<string, mixed>      $steps        The ability's `in_memory_write`.
-	 * @param array<string, mixed>|null $fields       The ability's `extension_fields`, if any.
-	 * @param array                     $input        Ability input.
+	 * @param string               $ability_name Ability name.
+	 * @param array<string, mixed> $steps        `object_type` and the `subject`, `validate`, `apply` and optional `respond` callables.
+	 * @param array                $input        Ability input.
 	 * @return mixed The respond step's output, or a WP_Error when nothing was saved.
 	 */
-	public static function run( string $ability_name, array $steps, ?array $fields, array $input ) {
+	public static function run( string $ability_name, array $steps, array $input ) {
 		$target = call_user_func( $steps['subject'], $input );
 		if ( is_wp_error( $target ) ) {
 			return self::with_status( $target );
@@ -67,8 +66,9 @@ final class InMemoryWriteRunner {
 				return self::with_status( $applied );
 			}
 
-			$rejection = null !== $fields && isset( $input['extensions'] ) ? AbilityFields::update( AbilityFields::get( $fields['object_type'] ), $target, $input['extensions'] ) : null;
-			$rejection = $rejection ?? AbilityObjectValidators::validate( $target, (string) ( $steps['object_type'] ?? '' ) );
+			$object_type = (string) ( $steps['object_type'] ?? '' );
+			$rejection   = isset( $input['extensions'] ) ? AbilityFields::update( AbilityFields::get( $object_type ), $target, $input['extensions'] ) : null;
+			$rejection   = $rejection ?? AbilityObjectValidators::validate( $target, $object_type );
 			if ( null !== $rejection ) {
 				return new \WP_Error( 'woocommerce_in_memory_write_rejected', $rejection->get_error_message(), array( 'status' => 400 ) );
 			}
@@ -95,8 +95,8 @@ final class InMemoryWriteRunner {
 			);
 		}
 
-		$response = isset( $steps['respond'] ) ? call_user_func( $steps['respond'], $target ) : $subject->snapshot();
-		return null === $fields ? $response : AbilityFields::fill_output( $response, $fields, $target );
+		$response = isset( $steps['respond'] ) ? call_user_func( $steps['respond'], $target ) : null;
+		return $response ?? $subject->snapshot();
 	}
 
 	/**

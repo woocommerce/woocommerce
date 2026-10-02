@@ -10,10 +10,11 @@ namespace Automattic\WooCommerce\Tests\Internal\Abilities;
 use Automattic\WooCommerce\Abilities\AbilityContracts;
 use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityFields;
 use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityObjectValidators;
+use Automattic\WooCommerce\Internal\AbilitiesApi\PolyfilledAbility;
 
 /**
- * A plugin ability opts in to in-memory writes and extension fields with
- * plain wp_register_ability() arguments.
+ * A plugin ability opts in to extension fields with `meta.woocommerce` and to
+ * in-memory writes with an InMemoryWriteAbility `ability_class`.
  */
 class RegistrationContractsTest extends \WC_Unit_Test_Case {
 
@@ -96,6 +97,8 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 			}
 		);
 
+		add_filter( 'woocommerce_ability_object', array( $this, 'load_record' ), 10, 3 );
+
 		TestRecord::$saves = 0;
 		( new TestRecord( 7, 'Original', 'first' ) )->save();
 		( new TestRecord( 8, 'Second' ) )->save();
@@ -110,6 +113,7 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 
 		$this->unregister_abilities();
 		$this->reset_registries();
+		remove_filter( 'woocommerce_ability_object', array( $this, 'load_record' ), 10 );
 		update_option( 'woocommerce_feature_' . AbilityContracts::FEATURE_ID . '_enabled', 'no' );
 
 		foreach ( $this->original_action_counts as $action => $original_count ) {
@@ -269,26 +273,99 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should ignore the registration keys when the feature is off.
+	 * @testdox Should derive the write meta as plain data, with no callables.
 	 */
-	public function test_feature_off_ignores_keys(): void {
+	public function test_meta_is_plain_data(): void {
+		$this->register( true );
+
+		$write = wp_get_ability( self::WRITE )->get_meta();
+		$read  = wp_get_ability( self::READ )->get_meta();
+
+		$this->assertSame(
+			array(
+				'extension_fields' => array(
+					'object_type' => 'test_record',
+					'output'      => 'record',
+				),
+				'in_memory_write'  => array( 'object_type' => 'test_record' ),
+			),
+			$write['woocommerce']
+		);
+		$this->assertArrayNotHasKey( 'in_memory_write', $read['woocommerce'] );
+		array_walk_recursive(
+			$write,
+			function ( $value ) {
+				$this->assertTrue( null === $value || is_scalar( $value ) );
+			}
+		);
+	}
+
+	/**
+	 * @testdox Should fire each WordPress 7.1 ability hook once, in order, for a plain ability and a write ability.
+	 */
+	public function test_ability_hooks_fire_once_in_order(): void {
+		$this->register( true );
+
+		$hooks = array(
+			'wp_ability_invoked',
+			'wp_pre_execute_ability',
+			'wp_ability_normalize_input',
+			'wp_ability_validate_input',
+			'wp_ability_permission_result',
+			'wp_before_execute_ability',
+			'wp_ability_execute_result',
+			'wp_ability_validate_output',
+			'wp_after_execute_ability',
+		);
+		$fired = array();
+		foreach ( $hooks as $hook ) {
+			add_filter(
+				$hook,
+				static function ( $value ) use ( $hook, &$fired ) {
+					$fired[] = $hook;
+					return $value;
+				}
+			);
+		}
+
+		wp_get_ability( self::READ )->execute( array() );
+		$this->assertSame( $hooks, $fired );
+
+		$fired  = array();
+		$result = wp_get_ability( self::WRITE )->execute(
+			array(
+				'id'    => 7,
+				'title' => 'Renamed',
+			)
+		);
+		$this->assertNotWPError( $result );
+		$this->assertSame( $hooks, $fired );
+	}
+
+	/**
+	 * @testdox Should swap in the polyfilled class only before WordPress 7.1, and keep an ability's own class.
+	 */
+	public function test_polyfill_class_swap(): void {
+		$this->register( true );
+
+		$this->assertSame( PolyfilledAbility::is_active() ? PolyfilledAbility::class : \WP_Ability::class, get_class( wp_get_ability( self::READ ) ) );
+		$this->assertInstanceOf( TestRecordWriteAbility::class, wp_get_ability( self::WRITE ) );
+	}
+
+	/**
+	 * @testdox Should add no meta, schemas, extension values or class swap when the feature is off.
+	 */
+	public function test_feature_off_ignores_meta(): void {
 		$this->register( false );
 
 		$write = wp_get_ability( self::WRITE );
 		$read  = wp_get_ability( self::READ );
 
+		$this->assertArrayNotHasKey( 'in_memory_write', $write->get_meta()['woocommerce'] );
+		$this->assertSame( \WP_Ability::class, get_class( $read ) );
 		$this->assertArrayNotHasKey( 'extensions', $write->get_input_schema()['properties'] );
 		$this->assertArrayNotHasKey( 'extensions', $write->get_output_schema()['properties']['record']['properties'] );
 		$this->assertArrayNotHasKey( 'extensions', $read->get_output_schema()['properties']['records']['items']['properties'] );
-		$this->assertSame(
-			array( 'own_execute' => true ),
-			$write->execute(
-				array(
-					'id'    => 7,
-					'title' => 'Renamed',
-				)
-			)
-		);
 		$this->assertSame(
 			array(
 				array(
@@ -302,7 +379,18 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 			),
 			$read->execute( array() )['records']
 		);
-		$this->assertSame( 0, TestRecord::$saves );
+	}
+
+	/**
+	 * Load a test record for its extension fields.
+	 *
+	 * @param mixed  $subject     Object.
+	 * @param string $object_type Object type.
+	 * @param mixed  $id          Record ID.
+	 * @return mixed
+	 */
+	public function load_record( $subject, $object_type, $id ) {
+		return 'test_record' === $object_type ? TestRecord::load( $id ) : $subject;
 	}
 
 	/**
@@ -341,36 +429,15 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 						'type'       => 'object',
 						'properties' => array( 'record' => $record_schema ),
 					),
-					'execute_callback'    => static function (): array {
-						return array( 'own_execute' => true );
-					},
+					'ability_class'       => TestRecordWriteAbility::class,
 					'permission_callback' => '__return_true',
-					'in_memory_write'     => array(
-						'object_type' => 'test_record',
-						'subject'     => static function ( array $input ) {
-							return TestRecord::load( $input['id'] );
-						},
-						'validate'    => static function ( TestRecord $record, array $input ) {
-							return '' === $input['title'] ? new \WP_Error( 'test_empty_title', 'Title is empty.' ) : true;
-						},
-						'apply'       => static function ( TestRecord $record, array $input ) {
-							if ( 'throw' === $input['title'] ) {
-								throw new \RuntimeException( 'Apply failed.' );
-							}
-							$record->title = $input['title'];
-						},
-						'respond'     => static function ( TestRecord $record ): array {
-							return array(
-								'record' => array(
-									'id'    => $record->id,
-									'title' => $record->title,
-								),
-							);
-						},
-					),
-					'extension_fields'    => array(
-						'object_type' => 'test_record',
-						'output'      => 'record',
+					'meta'                => array(
+						'woocommerce' => array(
+							'extension_fields' => array(
+								'object_type' => 'test_record',
+								'output'      => 'record',
+							),
+						),
 					),
 				)
 			);
@@ -407,11 +474,14 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 						return array( 'records' => $records );
 					},
 					'permission_callback' => '__return_true',
-					'meta'                => array( 'annotations' => array( 'readonly' => true ) ),
-					'extension_fields'    => array(
-						'object_type' => 'test_record',
-						'output'      => 'records',
-						'load'        => array( TestRecord::class, 'load' ),
+					'meta'                => array(
+						'annotations' => array( 'readonly' => true ),
+						'woocommerce' => array(
+							'extension_fields' => array(
+								'object_type' => 'test_record',
+								'output'      => 'records',
+							),
+						),
 					),
 				)
 			);

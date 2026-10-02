@@ -49,17 +49,6 @@ class ProductCreate extends AbstractDomainAbility implements AbilityDefinition {
 			'output_schema'       => self::get_entity_output_schema( 'product', self::get_product_output_schema() ),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_create_product' ),
-			'in_memory_write'     => array(
-				'object_type' => 'product',
-				'subject'     => array( __CLASS__, 'subject' ),
-				'validate'    => '__return_true',
-				'apply'       => array( __CLASS__, 'apply' ),
-				'respond'     => array( __CLASS__, 'respond' ),
-			),
-			'extension_fields'    => array(
-				'object_type' => 'product',
-				'output'      => 'product',
-			),
 			'meta'                => array(
 				'show_in_rest' => true,
 				'mcp'          => array(
