@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Enums\AuthorizationFailure
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
+use WC_Rate_Limiter;
 use WC_Unit_Test_Case;
 use WP_REST_Request;
 use WP_REST_Server;
@@ -357,11 +358,22 @@ class PushNotificationRestControllerTest extends WC_Unit_Test_Case {
 				'notifications' => 1,
 			)
 		);
+	}
 
+	/**
+	 * The rate limit would also stop the line, so this puts the next allowed
+	 * time in the past first. Without that the test passes whether or not the
+	 * body is checked at all, since the limiter returns early either way.
+	 *
+	 * @testdox Should not log a refused request whose body is not ours, even when nothing is rate limited.
+	 */
+	public function test_authorize_does_not_log_a_refusal_without_our_body(): void {
+		WC_Rate_Limiter::set_rate_limit( PushNotificationRestController::AUTH_FAILURE_LOG_RATE_LIMIT_ID, -60 );
 		$this->captured_logs = array();
-		$scan                = new WP_REST_Request( 'POST', '/wc-push-notifications/send' );
-		$scan->set_body( '{"anything":"else"}' );
-		$this->sut->authorize( $scan );
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/send' );
+		$request->set_body( '{"anything":"else"}' );
+		$this->sut->authorize( $request );
 
 		$this->assertSame( array(), $this->captured_logs, 'A refused request without our body must not be logged.' );
 	}

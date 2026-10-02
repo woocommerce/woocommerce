@@ -176,6 +176,30 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Action Scheduler returns 0 rather than throwing when it cannot store the
+	 * job, so a notification with no fallback would otherwise be logged as
+	 * though one had been scheduled.
+	 *
+	 * @testdox Should log schedule_failed when Action Scheduler refuses the fallback job.
+	 */
+	public function test_add_logs_a_failed_fallback_schedule(): void {
+		add_filter( 'pre_as_schedule_single_action', '__return_zero' );
+
+		$dispatcher  = $this->createMock( InternalNotificationDispatcher::class );
+		$step_logger = $this->createMock( NotificationStepLogger::class );
+		$step_logger->expects( $this->once() )
+			->method( 'log_notification_step' )
+			->with( $this->anything(), 'triggered', 'queued', array( 'fallback' => 'schedule_failed' ) );
+		$store = new PendingNotificationStore();
+		$store->init( $dispatcher, $this->create_data_store_with_tokens( true ), $step_logger );
+		$store->register();
+
+		$store->add( $this->create_order_mock( 42 ) );
+
+		remove_filter( 'pre_as_schedule_single_action', '__return_zero' );
+	}
+
+	/**
 	 * @testdox Should log the trigger as queued with its fallback, then as a duplicate on a repeat.
 	 */
 	public function test_add_logs_queued_then_duplicate(): void {

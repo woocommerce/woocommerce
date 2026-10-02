@@ -921,25 +921,27 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 			)
 		);
 
+		$logged = array();
 		$logger = $this->create_active_step_logger();
-		$logger->expects( $this->atLeastOnce() )
-			->method( 'log_notification_step' )
-			->with(
-				$this->anything(),
-				$this->anything(),
-				$this->anything(),
-				$this->callback(
-					function ( array $context ) {
-						return ! array_key_exists( 'invalid_token_ids', $context )
-							|| array( 12 ) === $context['invalid_token_ids'];
-					}
-				)
+		$logger->method( 'log_notification_step' )
+			->willReturnCallback(
+				function ( $notification, string $step, string $outcome, array $context = array() ) use ( &$logged ) {
+					$logged[] = array( $step, $outcome, $context );
+				}
 			);
 
 		$sut = new NotificationProcessor();
 		$sut->init( $this->dispatcher, $data_store, $this->preferences_service, $this->retry_handler, $logger );
 
 		$this->assertFalse( $sut->process( new NewOrderNotification( $this->order_id ) ) );
+
+		$dispatched = array_values(
+			array_filter( $logged, fn( array $line ) => 'dispatched' === $line[0] )
+		);
+
+		$this->assertCount( 1, $dispatched, 'Exactly one dispatched line should name the refused tokens.' );
+		$this->assertSame( 'invalid_token', $dispatched[0][1] );
+		$this->assertSame( array( 12 ), $dispatched[0][2]['invalid_token_ids'] );
 	}
 
 	/**

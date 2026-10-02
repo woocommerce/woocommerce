@@ -160,7 +160,7 @@ class PendingNotificationStore {
 		// $order->save() on an order whose line items have not been written yet.
 		$notification->set_triggered_at( time() );
 
-		$fallback = $this->schedule_safety_net( $notification ) ? 'scheduled' : 'already_scheduled';
+		$fallback = $this->schedule_safety_net( $notification );
 
 		$this->step_logger->log_notification_step( $notification, 'triggered', 'queued', array( 'fallback' => $fallback ) );
 
@@ -177,21 +177,24 @@ class PendingNotificationStore {
 	 * guarantees the notification is still processed.
 	 *
 	 * @param Notification $notification The notification to schedule.
-	 * @return bool True if a job was scheduled, false if one was already pending.
+	 * @return string `scheduled`, `already_scheduled`, or `schedule_failed` when Action Scheduler refused the job.
 	 *
 	 * @since 10.7.0
 	 */
-	private function schedule_safety_net( Notification $notification ): bool {
+	private function schedule_safety_net( Notification $notification ): string {
 		// Canonical, identity-keyed args shared with NotificationProcessor::cancel_safety_net().
 		// Action Scheduler matches stored args by exact equality, so both sides must derive
 		// them from the same place; see Notification::get_safety_net_args().
 		$args = $notification->get_safety_net_args();
 
 		if ( ActionSchedulerUtil::has_scheduled_action( NotificationProcessor::SAFETY_NET_HOOK, $args, NotificationProcessor::ACTION_SCHEDULER_GROUP ) ) {
-			return false;
+			return 'already_scheduled';
 		}
 
-		as_schedule_single_action(
+		// Action Scheduler returns 0 rather than throwing when it cannot store
+		// the job, and a notification whose fallback was never scheduled has
+		// nothing to catch it if the loopback does not arrive.
+		$action_id = as_schedule_single_action(
 			time() + NotificationProcessor::SAFETY_NET_DELAY,
 			NotificationProcessor::SAFETY_NET_HOOK,
 			$args,
@@ -199,7 +202,7 @@ class PendingNotificationStore {
 			true
 		);
 
-		return true;
+		return $action_id > 0 ? 'scheduled' : 'schedule_failed';
 	}
 
 	/**

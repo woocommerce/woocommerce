@@ -94,7 +94,7 @@ class NewOrderNotification extends Notification {
 	 * @param mixed $pref_value The user's stored preference value, or null.
 	 * @return string|null One of the SuppressionReason constants, or null to send.
 	 *
-	 * @since 10.9.0
+	 * @since 11.3.0
 	 */
 	public function get_suppression_reason( $pref_value ): ?string {
 		$reason = parent::get_suppression_reason( $pref_value );
