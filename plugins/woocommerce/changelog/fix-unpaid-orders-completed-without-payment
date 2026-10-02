@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent checkout from marking unpaid orders as paid when their status says they do not require payment.
