@@ -19,6 +19,7 @@ use DomainException;
 use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\InstrumentRef;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 
@@ -26,6 +27,11 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract
  */
 class ContractTest extends TestCase {
+
+	protected function tearDown(): void {
+		StatusRegistry::reset();
+		parent::tearDown();
+	}
 
 	/**
 	 * A complete, valid contract row.
@@ -400,5 +406,113 @@ class ContractTest extends TestCase {
 		$contract->set_plan_snapshot( PlanSnapshot::from_array( array( 'selling_plan_id' => 2 ) ) );
 
 		$this->assertArrayNotHasKey( 'plan_snapshot', $contract->to_storage(), 'plan_snapshot is a hydrated read-only field, not a stored column.' );
+	}
+
+	/**
+	 * Hydrate a stored contract row with the given status.
+	 *
+	 * @param string $status Stored status.
+	 */
+	private function stored_contract( string $status ): Contract {
+		$row           = $this->valid_row();
+		$row['status'] = $status;
+
+		return Contract::from_storage( $row );
+	}
+
+	/**
+	 * @testdox set_status() moves between any two registered statuses (no transition table).
+	 */
+	public function test_set_status_moves_between_any_registered_statuses(): void {
+		$cancelled = $this->stored_contract( ContractStatus::CANCELLED );
+		$cancelled->set_status( ContractStatus::ACTIVE );
+		$this->assertSame( ContractStatus::ACTIVE, $cancelled->get_status() );
+
+		$pending_cancellation = $this->stored_contract( ContractStatus::PENDING_CANCELLATION );
+		$pending_cancellation->set_status( ContractStatus::ON_HOLD );
+		$this->assertSame( ContractStatus::ON_HOLD, $pending_cancellation->get_status() );
+	}
+
+	/**
+	 * @testdox set_status() with the current status is a no-op.
+	 */
+	public function test_set_status_to_the_same_status_is_a_no_op(): void {
+		$contract = $this->make_contract();
+
+		$contract->set_status( ContractStatus::ACTIVE );
+
+		$this->assertSame( ContractStatus::ACTIVE, $contract->get_status() );
+	}
+
+	/**
+	 * @testdox set_status() rejects an unregistered status and leaves the status unchanged.
+	 */
+	public function test_set_status_rejects_an_unregistered_status(): void {
+		$contract = $this->make_contract();
+
+		try {
+			$contract->set_status( 'never-registered' );
+			$this->fail( 'Expected a DomainException for an unregistered status.' );
+		} catch ( DomainException $e ) {
+			$this->assertSame( ContractStatus::ACTIVE, $contract->get_status() );
+		}
+	}
+
+	/**
+	 * @testdox An extension-registered status is accepted by create() and set_status().
+	 */
+	public function test_an_extension_registered_status_is_writable(): void {
+		StatusRegistry::register( StatusRegistry::KIND_CONTRACT, 'paused-by-merchant' );
+
+		$created = Contract::create(
+			array(
+				'customer_id'     => 1,
+				'currency'        => 'USD',
+				'selling_plan_id' => 2,
+				'start_gmt'       => '2026-01-01 00:00:00',
+				'status'          => 'paused-by-merchant',
+			)
+		);
+		$this->assertSame( 'paused-by-merchant', $created->get_status() );
+
+		$contract = $this->make_contract();
+		$contract->set_status( 'paused-by-merchant' );
+		$this->assertSame( 'paused-by-merchant', $contract->get_status() );
+	}
+
+	/**
+	 * @testdox from_storage() hydrates an unregistered stored status and to_storage() returns it verbatim.
+	 */
+	public function test_an_unregistered_stored_status_round_trips(): void {
+		$contract = $this->stored_contract( 'legacy-paused' );
+
+		$this->assertSame( 'legacy-paused', $contract->get_status() );
+		$this->assertSame( 'legacy-paused', $contract->to_storage()['status'] );
+
+		$contract->set_next_payment_gmt( '2026-03-01 00:00:00' );
+
+		$this->assertSame( 'legacy-paused', $contract->to_storage()['status'] );
+	}
+
+	/**
+	 * @testdox set_meta() adds, overwrites, and (with null) removes a key.
+	 */
+	public function test_set_meta_adds_overwrites_and_removes_a_key(): void {
+		$contract = Contract::from_storage( $this->valid_row(), null, array(), array(), array( 'keep' => 'me' ) );
+
+		$contract->set_meta( 'k', 'v' );
+		$this->assertSame(
+			array(
+				'keep' => 'me',
+				'k'    => 'v',
+			),
+			$contract->get_meta()
+		);
+
+		$contract->set_meta( 'k', 'w' );
+		$this->assertSame( 'w', $contract->get_meta()['k'] );
+
+		$contract->set_meta( 'k', null );
+		$this->assertSame( array( 'keep' => 'me' ), $contract->get_meta() );
 	}
 }
