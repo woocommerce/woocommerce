@@ -3,8 +3,11 @@
  * RenewalDispatcher - the autonomous batch renewal scanner.
  *
  * One recurring Action Scheduler job drives every scheduled renewal: each tick runs
- * {@see self::run_batch()} over the cycle-aware due-index. The class owns the recurring
- * action's registration, scheduling, and hook callback.
+ * {@see self::run_batch()} over the cycle-aware due-index. Due-ness is owner-scoped and
+ * status-blind: a contract is due when its next-due moment has passed and its owner is a
+ * registered consumer, so an empty consumer registry selects nothing. A selected contract
+ * that is not active is parked rather than charged. The class owns the recurring action's
+ * registration, scheduling, and hook callback.
  *
  * The create-as-claim ({@see RenewalEngine}) plus the cycle crash-recovery lease keep
  * overlap correct, so the scan needs no claim of its own: a contract picked up twice
@@ -127,9 +130,10 @@ final class RenewalDispatcher {
 	 * Enqueue the recurring scan action when one is not already scheduled.
 	 *
 	 * Call once Action Scheduler is available (Bootstrap runs it on `action_scheduler_init`,
-	 * the moment AS declares its `as_*` functions ready). Gated on the consumer registry: a store with no consumer extension runs no
-	 * renewals, so it carries no recurring scan action either - one already scheduled is
-	 * removed on the first gated boot after the last consumer deactivates. To avoid an Action Scheduler
+	 * the moment AS declares its `as_*` functions ready). Skipped while the consumer registry
+	 * is empty: the due scan is scoped to registered owners, so a store with no consumer
+	 * extension has nothing due and carries no recurring scan action either (an optimization -
+	 * one already scheduled is removed on the first boot after the last consumer deactivates). To avoid an Action Scheduler
 	 * store query on every request, a positive result is cached in an autoloaded option and
 	 * re-verified only once per re-check window - bounded staleness that self-heals if the
 	 * action is ever cleared. Within a re-verify it still guards with the `is_scheduled()`
@@ -200,14 +204,16 @@ final class RenewalDispatcher {
 	}
 
 	/**
-	 * Run one scan tick over up to `$limit` due contracts: gate, then drive every due renewal.
+	 * Run one scan tick over up to `$limit` due contracts.
 	 *
-	 * The processing gate comes first - with no registered consumer the engine charges
-	 * nothing and the run returns immediately. Otherwise the cycle-aware scan returns the
-	 * actionable contracts due at `$now`; each is run through read-only selection and, when a
-	 * cycle is due, billed via {@see RenewalEngine::process()}. A pre-flight impossibility
-	 * ({@see RenewalNotProcessable}) parks the contract; any other throw is logged - so one bad
-	 * contract cannot stall the batch. A backlog larger than `$limit` drains over successive ticks.
+	 * The scan is owner-scoped ({@see ContractRepository::find_due()}): only contracts owned by
+	 * a registered consumer are selected, so with no consumer registered nothing is charged (the
+	 * empty-registry check up front just skips the query). The scan returns the actionable
+	 * contracts due at `$now`; each is run through read-only selection and, when a cycle is due,
+	 * billed via {@see RenewalEngine::process()}. A pre-flight impossibility
+	 * ({@see RenewalNotProcessable}, including a selected contract that is not active) parks the
+	 * contract; any other throw is logged - so one bad contract cannot stall the batch. A backlog
+	 * larger than `$limit` drains over successive ticks.
 	 *
 	 * @param DateTimeImmutable|null $now   The scan moment; defaults to now (UTC). Injectable for tests.
 	 * @param int                    $limit Maximum due contracts to process this tick; defaults to

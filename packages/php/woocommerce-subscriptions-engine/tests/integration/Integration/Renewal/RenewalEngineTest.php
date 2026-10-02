@@ -27,6 +27,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalEngine
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalIntent;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalEngine
@@ -785,22 +786,76 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox the scheduled scan skips a non-active contract and creates no renewal order.
+	 * @testdox the scheduled scan parks a selected non-active contract and creates no renewal order.
+	 *
+	 * The due scan is status-blind, so a non-active contract that still carries a past-due
+	 * next-due moment (a shape no flow produces any more) is selected; the engine refuses to
+	 * charge it and the dispatcher parks it, clearing the stale moment.
 	 */
-	public function test_scheduled_renewal_skips_non_active_contract(): void {
-		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
+	public function test_scheduled_renewal_parks_a_selected_non_active_contract(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
 
-		$plan_id     = $this->make_plan();
-		$order       = $this->make_origin_order();
-		$contract    = $this->make_contract( $plan_id, $order->get_id() );
-		$contract_id = $contract->get_id();
-		$this->assertNotNull( $contract_id );
-		$contract->set_status( ContractStatus::ON_HOLD );
-		( new ContractRepository() )->update( $contract );
+		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
+		$contract_id = (int) $contract->get_id();
+		$this->force_status( $contract_id, ContractStatus::ON_HOLD );
+
+		$repo   = new ContractRepository();
+		$before = $repo->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $before );
+		$this->assertNotNull( $this->reload_contract( $contract_id )->get_next_payment_gmt(), 'Seeded with a stale due moment.' );
 
 		$this->assertNull( $this->run_scheduled_renewal( $contract_id ) );
 
-		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 1 ) );
+		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
+		$after = $repo->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $after );
+		$this->assertSame( $before->get_id(), $after->get_id(), 'No successor cycle was claimed.' );
+		$parked = $this->reload_contract( $contract_id );
+		$this->assertSame( ContractStatus::ON_HOLD, $parked->get_status() );
+		$this->assertNull( $parked->get_next_payment_gmt(), 'The selected non-active contract is parked.' );
+	}
+
+	/**
+	 * @testdox renew_now returns null for a non-active contract and does not park it.
+	 */
+	public function test_renew_now_returns_null_for_a_non_active_contract_without_parking(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+
+		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
+		$contract_id = (int) $contract->get_id();
+		$this->force_status( $contract_id, ContractStatus::ON_HOLD );
+		$next_payment = $this->reload_contract( $contract_id )->get_next_payment_gmt();
+
+		$this->assertNull( ( new RenewalEngine() )->renew_now( $contract_id ) );
+
+		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
+		$this->assertSame( $next_payment, $this->reload_contract( $contract_id )->get_next_payment_gmt(), 'A manual renew never parks.' );
+	}
+
+	/**
+	 * Overwrite a contract's stored status directly, keeping every other column (a shape no
+	 * flow produces, e.g. an on-hold contract that still has a next-due moment).
+	 *
+	 * @param int    $contract_id Contract id.
+	 * @param string $status      Status to store.
+	 */
+	private function force_status( int $contract_id, string $status ): void {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ), array( 'status' => $status ), array( 'id' => $contract_id ) );
+	}
+
+	/**
+	 * Reload a contract, asserting it still exists.
+	 *
+	 * @param int $contract_id Contract id.
+	 */
+	private function reload_contract( int $contract_id ): Contract {
+		$contract = ( new ContractRepository() )->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $contract );
+
+		return $contract;
 	}
 
 	/**
@@ -838,10 +893,10 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox cancel transitions the contract to cancelled.
+	 * @testdox cancel transitions the contract to cancelled and disarms its next-due moment.
 	 *
-	 * The due scan only selects active contracts, so cancellation needs no schedule
-	 * cleanup - the status transition alone removes the contract from renewal.
+	 * The due scan is status-blind, so cancellation clears `next_payment_gmt` itself - that
+	 * is what removes the contract from renewal.
 	 */
 	public function test_cancel_transitions_the_contract(): void {
 		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
@@ -857,6 +912,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$reloaded = ( new ContractRepository() )->find( $contract_id );
 		$this->assertInstanceOf( Contract::class, $reloaded );
 		$this->assertSame( ContractStatus::CANCELLED, $reloaded->get_status() );
+		$this->assertNull( $reloaded->get_next_payment_gmt() );
 	}
 
 	/**
