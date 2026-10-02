@@ -7,9 +7,12 @@
  * next-due moment, and announce it. The batch due scan keys on `next_payment_gmt` and a
  * registered owner (its active-status predicate is a renewal-flow condition, see
  * {@see ContractRepository::find_due()}), so the flow disarms its own due moment rather
- * than relying on status to stop billing; the cleared moment is kept in contract meta ({@see self::ANCHOR_META_KEY})
- * so {@see Reactivation} can recompute the schedule forward from it. Interim engine
- * flow: its preconditions are its own, not a rule of the status primitive.
+ * than relying on status to stop billing. The cleared moment is kept in contract meta
+ * ({@see self::ANCHOR_META_KEY}) so {@see Reactivation} can recompute the schedule
+ * forward from it. Its preconditions are its own, not a rule of the status primitive.
+ *
+ * Interim: moves out of the engine with the lifecycle flows (hold / reactivate /
+ * cancel and their routes).
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts
  */
@@ -37,8 +40,10 @@ final class Hold {
 
 	/**
 	 * Contract meta key holding the next-due moment cleared by a hold - the moment
-	 * {@see Reactivation} recomputes forward from. Interim: moves with the hold flow
-	 * when the flow leaves the engine.
+	 * {@see Reactivation} recomputes forward from.
+	 *
+	 * Interim: moves out of the engine with the lifecycle flows (hold / reactivate /
+	 * cancel and their routes).
 	 */
 	public const ANCHOR_META_KEY = '_hold_next_payment_gmt';
 

@@ -6,8 +6,12 @@
  * mirroring {@see Cancellation}: move the contract ON_HOLD -> ACTIVE, re-arm its
  * next-due moment forward from the hold anchor, and announce it. Writing the forward
  * next-payment date is the re-arm (the batch due scan, keyed on `next_payment_gmt` and a
- * registered owner, picks the contract up at that date), not the status change alone. Lives under `Integration\Contracts` so
- * contract lifecycle stays separate from the renewal money-path.
+ * registered owner, picks the contract up at that date), not the status change alone.
+ * Lives under `Integration\Contracts` so contract lifecycle stays separate from the
+ * renewal money-path. Its preconditions are its own, not a rule of the status primitive.
+ *
+ * Interim: moves out of the engine with the lifecycle flows (hold / reactivate /
+ * cancel and their routes).
  *
  * `$now` is read at this integration boundary (or injected for tests) and the cadence
  * math is delegated to the clock-free {@see RenewalCalculator}, so the engine keeps a

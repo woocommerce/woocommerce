@@ -3,13 +3,11 @@
  * CycleStatus - a cycle status as an immutable value object, plus read helpers
  * over the {@see StatusRegistry}. Mirrors {@see ContractStatus}.
  *
- * Cycle status is opaque engine data with no enforced transitions. The
- * constants name the engine defaults, whose intended lifecycle is: a cycle is
- * born `pending`; a charge submitted to a gateway that has not yet returned an
- * outcome is `processing`; it settles to `billed` or `failed`; a `failed` cycle
- * may be retried back to `pending`, and an unsettled cycle may be `cancelled`.
- * That lifecycle is driven by the flows, not enforced here. The state is shared
- * with the shipping chain, so `processing` avoids payment-specific wording.
+ * Cycle status is opaque engine data. The constants name the engine defaults:
+ * the defaults are shared slugs and carry no engine meaning; the engine enforces
+ * no transitions. Extensions may register more through
+ * {@see StatusRegistry::register()}. The slugs are shared with the shipping chain,
+ * so `processing` avoids payment-specific wording.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Core\Entity
  */
@@ -135,7 +133,7 @@ final class CycleStatus {
 	}
 
 	/**
-	 * The engine's default cycle statuses in lifecycle order (the registry seed).
+	 * The engine's default cycle statuses (the registry seed).
 	 *
 	 * @return array<int, string>
 	 */
@@ -171,9 +169,9 @@ final class CycleStatus {
 	/**
 	 * Whether `$status` is `billed` or `cancelled`.
 	 *
-	 * Interim: only the repository's snapshot skip in `hydrate_cycle()` reads
-	 * this, and it goes away when the renewal flow leaves the engine. Unknown
-	 * and extension-registered statuses report false.
+	 * Interim: moves out of the engine with the renewal flow (only the repository's
+	 * snapshot skip in `hydrate_cycle()` reads this). Unknown and
+	 * extension-registered statuses report false.
 	 *
 	 * @param string $status Status to check.
 	 */
