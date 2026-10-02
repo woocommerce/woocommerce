@@ -53,6 +53,13 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	private static $sync_on_read_order_ids = array();
 
 	/**
+	 * Order IDs (as keys) whose trash metadata is being cleaned up after an untrash. The order was just saved, so meta changes must not trigger another save.
+	 *
+	 * @var array
+	 */
+	private static $untrashing_order_ids = array();
+
+	/**
 	 * Data stored in meta keys, but not considered "meta" for an order.
 	 *
 	 * @since 7.0.0
@@ -2959,7 +2966,13 @@ FROM $order_meta_table
 			$order->delete_meta_data( '_wp_trash_meta_status' );
 			$order->delete_meta_data( '_wp_trash_meta_time' );
 			$order->delete_meta_data( '_wp_trash_meta_comments_status' );
-			$order->save_meta_data();
+
+			self::$untrashing_order_ids[ $id ] = true;
+			try {
+				$order->save_meta_data();
+			} finally {
+				unset( self::$untrashing_order_ids[ $id ] );
+			}
 
 			return true;
 		}
@@ -3728,6 +3741,7 @@ CREATE TABLE $meta_table (
 		$should_save =
 			$order->get_id() > 0
 			&& ! isset( self::$sync_on_read_order_ids[ $order->get_id() ] )
+			&& ! isset( self::$untrashing_order_ids[ $order->get_id() ] )
 			&& $order->get_date_modified() < $current_date_time && empty( $order->get_changes() )
 			&& ( ! is_object( $meta ) || ! in_array( $meta->key, $this->ephemeral_meta_keys, true ) );
 

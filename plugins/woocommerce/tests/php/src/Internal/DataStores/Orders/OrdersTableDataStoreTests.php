@@ -644,6 +644,46 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testdox Untrash does not fire 'woocommerce_update_order' when the clock ticks over a second during the restore.
+	 */
+	public function test_cot_datastore_untrash_does_not_fire_update_hook_across_second_boundary() {
+		$this->toggle_cot_feature_and_usage( true );
+		$this->disable_cot_sync();
+
+		$order = $this->create_complex_cot_order();
+		$order->set_status( OrderStatus::ON_HOLD );
+		$order->save();
+
+		$this->sut->trash_order( $order );
+		$this->sut->read( $order );
+
+		// Make the post-save meta cleanup see a "later" time than the date_modified the save just wrote.
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'current_time' => function ( $type, $gmt = 0 ) {
+					unset( $type, $gmt );
+					return gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS );
+				},
+			)
+		);
+
+		$update_count = 0;
+		$callback     = function () use ( &$update_count ) {
+			++$update_count;
+		};
+		add_action( 'woocommerce_update_order', $callback );
+
+		$this->assertTrue( $this->sut->untrash_order( $order ) );
+		remove_action( 'woocommerce_update_order', $callback );
+
+		$this->assertSame( 0, $update_count );
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertSame( OrderStatus::ON_HOLD, $order->get_status() );
+		$this->assertEmpty( $order->get_meta( '_wp_trash_meta_status' ) );
+	}
+
+	/**
 	 * @testdox Notes are still restored on untrash even without a comment-status record.
 	 */
 	public function test_cot_datastore_untrash_restores_notes_with_no_trash_meta_record() {
