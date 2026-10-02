@@ -1,6 +1,6 @@
 <?php
 /**
- * Polyfilled ability class file.
+ * Dry run ability class file.
  */
 
 declare( strict_types=1 );
@@ -10,19 +10,79 @@ namespace Automattic\WooCommerce\Internal\AbilitiesApi;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * An ability that fires the hooks WP_Ability fires from WordPress 7.1, in the
- * same order and with the same arguments, on earlier versions. From 7.1 it
- * behaves exactly like WP_Ability.
+ * The base class for WooCommerce's ability contracts. Experimental: a
+ * subclass can implement do_dry_run() to say what execute would do without
+ * doing it. dry_run() checks the input and permissions first.
+ *
+ * Before WordPress 7.1, it also fires the hooks WP_Ability fires from 7.1, in
+ * the same order and with the same arguments. From 7.1 that part does
+ * nothing. Remove that part once WooCommerce requires WordPress 7.1; the class
+ * stays.
  *
  * @since 11.3.0
  */
-class PolyfilledAbility extends \WP_Ability {
+class DryRunAbility extends \WP_Ability {
 
 	/**
-	 * Whether WordPress is older than 7.1 and the hooks need a polyfill.
+	 * Whether WordPress is older than 7.1, so this class fires the 7.1 hooks itself.
 	 */
-	public static function is_active(): bool {
+	public static function polyfill_active(): bool {
 		return version_compare( get_bloginfo( 'version' ), '7.1-alpha', '<' );
+	}
+
+	/**
+	 * Whether a class implements its own dry run.
+	 *
+	 * @param string $class_name Ability class.
+	 */
+	public static function has_dry_run( string $class_name ): bool {
+		return is_a( $class_name, self::class, true ) && self::class !== ( new \ReflectionMethod( $class_name, 'do_dry_run' ) )->getDeclaringClass()->getName();
+	}
+
+	/**
+	 * What execute would do, without doing it: the ability, object_type,
+	 * object_id, object_label, changes, side_effects and undo. It checks the
+	 * input and permissions the same way execute does.
+	 *
+	 * @param array $input Ability input.
+	 * @return array|\WP_Error The summary, or the error execute would return.
+	 */
+	public function dry_run( array $input ) {
+		if ( ! self::has_dry_run( static::class ) ) {
+			return new \WP_Error(
+				'ability_dry_run_unsupported',
+				/* translators: %s ability name. */
+				sprintf( __( 'Ability "%s" does not support a dry run.', 'woocommerce' ), $this->get_name() )
+			);
+		}
+
+		$input = $this->normalize_input( $input );
+		if ( is_wp_error( $input ) ) {
+			return $input;
+		}
+		$valid = $this->validate_input( $input );
+		if ( is_wp_error( $valid ) ) {
+			return $valid;
+		}
+		if ( true !== $this->check_permissions( $input ) ) {
+			return new \WP_Error(
+				'ability_invalid_permissions',
+				/* translators: %s ability name. */
+				sprintf( __( 'Ability "%s" does not have necessary permission.', 'woocommerce' ), $this->get_name() )
+			);
+		}
+
+		return $this->do_dry_run( is_array( $input ) ? $input : array() );
+	}
+
+	/**
+	 * The dry run a subclass implements. Never saves, sends email or makes HTTP requests.
+	 *
+	 * @param array $input Valid input the caller may use.
+	 * @return array|\WP_Error
+	 */
+	protected function do_dry_run( array $input ) {
+		return new \WP_Error( 'ability_dry_run_unsupported', __( 'This ability does not support a dry run.', 'woocommerce' ) );
 	}
 
 	/**
@@ -33,7 +93,7 @@ class PolyfilledAbility extends \WP_Ability {
 	 */
 	public function normalize_input( $input = null ) {
 		$input = parent::normalize_input( $input );
-		if ( ! self::is_active() ) {
+		if ( ! self::polyfill_active() ) {
 			return $input;
 		}
 
@@ -49,7 +109,7 @@ class PolyfilledAbility extends \WP_Ability {
 	 */
 	public function validate_input( $input = null ) {
 		$is_valid = parent::validate_input( $input );
-		if ( ! self::is_active() || empty( $this->get_input_schema() ) ) {
+		if ( ! self::polyfill_active() || empty( $this->get_input_schema() ) ) {
 			return $is_valid;
 		}
 
@@ -72,7 +132,7 @@ class PolyfilledAbility extends \WP_Ability {
 	 */
 	public function check_permissions( $input = null ) {
 		$permission = parent::check_permissions( $input );
-		if ( ! self::is_active() ) {
+		if ( ! self::polyfill_active() ) {
 			return $permission;
 		}
 
@@ -89,7 +149,7 @@ class PolyfilledAbility extends \WP_Ability {
 	 */
 	protected function do_execute( $input = null ) {
 		$result = parent::do_execute( $input );
-		if ( ! self::is_active() ) {
+		if ( ! self::polyfill_active() ) {
 			return $result;
 		}
 
@@ -105,7 +165,7 @@ class PolyfilledAbility extends \WP_Ability {
 	 */
 	protected function validate_output( $output ) {
 		$is_valid = parent::validate_output( $output );
-		if ( ! self::is_active() ) {
+		if ( ! self::polyfill_active() ) {
 			return $is_valid;
 		}
 
@@ -127,7 +187,7 @@ class PolyfilledAbility extends \WP_Ability {
 	 * @return mixed|\WP_Error
 	 */
 	public function execute( $input = null ) {
-		if ( ! self::is_active() ) {
+		if ( ! self::polyfill_active() ) {
 			return parent::execute( $input );
 		}
 

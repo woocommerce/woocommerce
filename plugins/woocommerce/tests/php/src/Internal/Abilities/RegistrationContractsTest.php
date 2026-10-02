@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Abilities;
 use Automattic\WooCommerce\Abilities\AbilityContracts;
 use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityFields;
 use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityObjectValidators;
-use Automattic\WooCommerce\Internal\AbilitiesApi\PolyfilledAbility;
+use Automattic\WooCommerce\Internal\AbilitiesApi\DryRunAbility;
 
 /**
  * A plugin ability opts in to extension fields with `meta.woocommerce` and to
@@ -23,6 +23,12 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 	private const READ = 'test-plugin/records-query';
 
 	private const PLAIN = 'test-plugin/records-count';
+
+	private const ROOT_OBJECT = 'test-plugin/record-get';
+
+	private const ROOT_LIST = 'test-plugin/records-list';
+
+	private const NOTIFY = 'test-plugin/notify-merchant';
 
 	/**
 	 * Original action counts restored in tearDown.
@@ -148,13 +154,120 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 		$this->assertSame( $field, $write->get_output_schema()['properties']['record']['properties']['extensions']['properties']['test_notes'] );
 		$this->assertSame( $field, $read->get_output_schema()['properties']['records']['items']['properties']['extensions']['properties']['test_notes'] );
 		$this->assertArrayNotHasKey( 'extensions', $read->get_input_schema()['properties'] );
-		$this->assertSame( $field, wc_get_ability_fields_schema( 'test_record' )['properties']['test_notes'] );
 	}
 
 	/**
-	 * @testdox Should let a client preview a change with the ability and the field functions, without saving.
+	 * @testdox Should summarize a change with a dry run, save nothing, and match what execute then saves.
 	 */
-	public function test_client_preview_saves_nothing(): void {
+	public function test_dry_run_summarizes_and_saves_nothing(): void {
+		$this->register( true );
+		$ability = wp_get_ability( self::WRITE );
+		$input   = array(
+			'id'         => 7,
+			'title'      => 'Renamed',
+			'extensions' => array( 'test_notes' => 'second' ),
+		);
+
+		$summary = $ability->dry_run( $input );
+
+		$this->assertSame(
+			array(
+				'ability'      => self::WRITE,
+				'object_type'  => 'test_record',
+				'object_id'    => 7,
+				'object_label' => null,
+				'changes'      => array(
+					array(
+						'field'  => 'title',
+						'label'  => 'title',
+						'before' => 'Original',
+						'after'  => 'Renamed',
+					),
+					array(
+						'field'  => 'note',
+						'label'  => 'note',
+						'before' => 'first',
+						'after'  => 'second',
+					),
+					array(
+						'field'  => 'extensions.test_notes',
+						'label'  => 'Notes',
+						'before' => 'first',
+						'after'  => 'second',
+					),
+				),
+				'expected'     => array(
+					'title'                 => 'Original',
+					'note'                  => 'first',
+					'extensions.test_notes' => 'first',
+				),
+				'side_effects' => array( 'Renames the record.' ),
+				'undo'         => array(
+					'ability' => self::WRITE,
+					'input'   => array(
+						'id'       => 7,
+						'title'    => 'Original',
+						'expected' => array(
+							'title'                 => 'Renamed',
+							'note'                  => 'second',
+							'extensions.test_notes' => 'second',
+						),
+					),
+				),
+			),
+			$summary
+		);
+		$this->assertSame( 0, TestRecord::$saves );
+		$this->assertSame( 'Original', TestRecord::load( 7 )->title );
+		$this->assertSame( 'first', TestRecord::load( 7 )->note );
+
+		$this->assertNotWPError( $ability->execute( $input ) );
+		$this->assertSame( 1, TestRecord::$saves );
+		$this->assertSame( $summary['changes'][0]['after'], TestRecord::load( 7 )->title );
+		$this->assertSame( $summary['changes'][2]['after'], TestRecord::load( 7 )->note );
+	}
+
+	/**
+	 * @testdox Should save when the expected values match, and refuse a stale change with a 409 in a dry run and on execute.
+	 */
+	public function test_expected_values_guard_the_change(): void {
+		$this->register( true );
+		$ability = wp_get_ability( self::WRITE );
+		$stale   = array(
+			'id'       => 7,
+			'title'    => 'Renamed',
+			'expected' => array(
+				'title'                 => 'Original',
+				'extensions.test_notes' => 'edited elsewhere',
+			),
+		);
+
+		foreach ( array( $ability->dry_run( $stale ), $ability->execute( $stale ) ) as $result ) {
+			$this->assertWPError( $result );
+			$this->assertSame( 'woocommerce_in_memory_write_stale', $result->get_error_code() );
+			$this->assertSame( 409, $result->get_error_data()['status'] );
+			$this->assertStringContainsString( 'extensions.test_notes', $result->get_error_message() );
+		}
+		$this->assertSame( 0, TestRecord::$saves );
+
+		$fresh = array(
+			'id'       => 7,
+			'title'    => 'Renamed',
+			'expected' => $ability->dry_run(
+				array(
+					'id'    => 7,
+					'title' => 'Renamed',
+				)
+			)['expected'],
+		);
+		$this->assertNotWPError( $ability->execute( $fresh ) );
+		$this->assertSame( 'Renamed', TestRecord::load( 7 )->title );
+	}
+
+	/**
+	 * @testdox Should refuse the undo call after an intervening edit, and restore without one.
+	 */
+	public function test_undo_is_refused_after_an_intervening_edit(): void {
 		$this->register( true );
 		$ability = wp_get_ability( self::WRITE );
 		$input   = array(
@@ -162,25 +275,53 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 			'title' => 'Renamed',
 		);
 
-		$record = $ability->load( $input );
-		$before = wc_get_ability_field_values( $record, 'test_record' );
-		$ability->change( $record, $input );
-		$this->assertNull( wc_update_ability_fields( $record, 'test_record', array( 'test_notes' => 'second' ) ) );
-		$this->assertNull( wc_validate_ability_object( $record, 'test_record' ) );
-		$after = wc_get_ability_field_values( $record, 'test_record' );
+		$undo = $ability->dry_run( $input )['undo'];
+		$this->assertNotWPError( $ability->execute( $input ) );
+		$this->assertNotWPError(
+			$ability->execute(
+				array(
+					'id'    => 7,
+					'title' => 'Edited elsewhere',
+				)
+			)
+		);
+		$refused = wp_get_ability( $undo['ability'] )->execute( $undo['input'] );
+		$this->assertSame( 'woocommerce_in_memory_write_stale', $refused->get_error_code() );
+		$this->assertSame( 'Edited elsewhere', TestRecord::load( 7 )->title );
 
-		$this->assertSame( array( 'test_notes' => 'first' ), $before );
-		$this->assertSame( array( 'test_notes' => 'second' ), $after );
-		$this->assertSame( 'Renamed', $record->title );
+		$undo = $ability->dry_run( $input )['undo'];
+		$this->assertNotWPError( $ability->execute( $input ) );
+		$this->assertNotWPError( wp_get_ability( $undo['ability'] )->execute( $undo['input'] ) );
+		$this->assertSame( 'Edited elsewhere', TestRecord::load( 7 )->title );
+	}
 
-		$blocked = $ability->load( $input );
-		$ability->change( $blocked, array_merge( $input, array( 'title' => 'Blocked' ) ) );
-		$this->assertSame( 'Blocked by validator.', wc_validate_ability_object( $blocked, 'test_record' )->get_error_message() );
-		$this->assertSame( 'Note rejected.', wc_update_ability_fields( $blocked, 'test_record', array( 'test_notes' => 'reject' ) )->get_error_message() );
+	/**
+	 * @testdox Should return the same error from a dry run as from execute when a step rejects, and save nothing.
+	 *
+	 * @testWith ["Blocked", "first"]
+	 *           ["Renamed", "reject"]
+	 *           ["", "first"]
+	 *
+	 * @param string $title Title input.
+	 * @param string $note  Note input.
+	 */
+	public function test_dry_run_rejection_matches_execute( string $title, string $note ): void {
+		$this->register( true );
+		$ability = wp_get_ability( self::WRITE );
+		$input   = array(
+			'id'         => 7,
+			'title'      => $title,
+			'extensions' => array( 'test_notes' => $note ),
+		);
 
+		$dry_run = $ability->dry_run( $input );
+		$execute = $ability->execute( $input );
+
+		$this->assertWPError( $dry_run );
+		$this->assertSame( $execute->get_error_code(), $dry_run->get_error_code() );
+		$this->assertSame( $execute->get_error_message(), $dry_run->get_error_message() );
 		$this->assertSame( 0, TestRecord::$saves );
 		$this->assertSame( 'Original', TestRecord::load( 7 )->title );
-		$this->assertSame( 'first', TestRecord::load( 7 )->note );
 	}
 
 	/**
@@ -325,6 +466,7 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 					'output'      => 'record',
 				),
 				'in_memory_write'  => array( 'object_type' => 'test_record' ),
+				'dry_run'          => true,
 			),
 			$write['woocommerce']
 		);
@@ -335,6 +477,123 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 				$this->assertTrue( null === $value || is_scalar( $value ) );
 			}
 		);
+	}
+
+	/**
+	 * @testdox Should add extensions to an object or a list of objects that is the whole output.
+	 */
+	public function test_root_output_gains_extensions(): void {
+		$this->register( true );
+		$record_schema = array(
+			'type'       => 'object',
+			'properties' => array(
+				'id'    => array( 'type' => 'integer' ),
+				'title' => array( 'type' => 'string' ),
+			),
+		);
+		$callback      = static function () use ( $record_schema ) {
+			foreach ( array(
+				self::ROOT_OBJECT => $record_schema,
+				self::ROOT_LIST   => array(
+					'type'  => 'array',
+					'items' => $record_schema,
+				),
+			) as $name => $output_schema ) {
+				wp_register_ability(
+					$name,
+					array(
+						'label'               => 'Records',
+						'description'         => 'Records at the root of the output.',
+						'category'            => 'test-plugin',
+						'output_schema'       => $output_schema,
+						'execute_callback'    => static function () use ( $name ) {
+							$record = array(
+								'id'    => 7,
+								'title' => 'Original',
+							);
+							return self::ROOT_LIST === $name ? array( $record ) : $record;
+						},
+						'permission_callback' => '__return_true',
+						'meta'                => array(
+							'woocommerce' => array(
+								'extension_fields' => array(
+									'object_type' => 'test_record',
+									'output'      => '',
+								),
+							),
+						),
+					)
+				);
+			}
+		};
+		add_action( 'wp_abilities_api_init', $callback );
+		do_action( 'wp_abilities_api_init' );
+		remove_action( 'wp_abilities_api_init', $callback );
+
+		$expected = array(
+			'id'         => 7,
+			'title'      => 'Original',
+			'extensions' => array( 'test_notes' => 'first' ),
+		);
+		$this->assertSame( $expected, wp_get_ability( self::ROOT_OBJECT )->execute() );
+		$this->assertSame( array( $expected ), wp_get_ability( self::ROOT_LIST )->execute() );
+		$this->assertSame( 'Notes', wp_get_ability( self::ROOT_OBJECT )->get_output_schema()['properties']['extensions']['properties']['test_notes']['title'] );
+		$this->assertSame( 'Notes', wp_get_ability( self::ROOT_LIST )->get_output_schema()['items']['properties']['extensions']['properties']['test_notes']['title'] );
+	}
+
+	/**
+	 * @testdox Should run a hand-written dry run that sends nothing, mark it in meta, and check permissions first.
+	 */
+	public function test_hand_written_dry_run(): void {
+		$this->register( true );
+		$callback = static function () {
+			wp_register_ability(
+				self::NOTIFY,
+				array(
+					'label'               => 'Notify merchant',
+					'description'         => 'Email the merchant a message.',
+					'category'            => 'test-plugin',
+					'ability_class'       => TestNotifyAbility::class,
+					'input_schema'        => array(
+						'type'       => 'object',
+						'properties' => array( 'message' => array( 'type' => 'string' ) ),
+						'required'   => array( 'message' ),
+					),
+					'execute_callback'    => static function ( array $input ): bool {
+						return wp_mail( 'merchant@example.com', 'Note', $input['message'] );
+					},
+					'permission_callback' => static function (): bool {
+						return current_user_can( 'manage_options' );
+					},
+				)
+			);
+		};
+		add_action( 'wp_abilities_api_init', $callback );
+		do_action( 'wp_abilities_api_init' );
+		remove_action( 'wp_abilities_api_init', $callback );
+		$sent = 0;
+		add_filter(
+			'wp_mail',
+			static function ( $args ) use ( &$sent ) {
+				++$sent;
+				return $args;
+			}
+		);
+		$ability = wp_get_ability( self::NOTIFY );
+		$input   = array( 'message' => 'Stock is low.' );
+
+		$this->assertSame( 'ability_invalid_permissions', $ability->dry_run( $input )->get_error_code() );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$this->assertSame( array( 'Emails the merchant: Stock is low.' ), $ability->dry_run( $input )['side_effects'] );
+		$this->assertSame( array(), $ability->dry_run( $input )['changes'] );
+		$this->assertSame( 'ability_invalid_input', $ability->dry_run( array() )->get_error_code() );
+		$this->assertSame( 0, $sent );
+		$this->assertTrue( $ability->get_meta()['woocommerce']['dry_run'] );
+		$this->assertArrayNotHasKey( 'dry_run', wp_get_ability( self::READ )->get_meta()['woocommerce'] );
+
+		$ability->execute( $input );
+		$this->assertSame( 1, $sent );
 	}
 
 	/**
@@ -409,12 +668,12 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should swap in the polyfilled class only before WordPress 7.1 and only for an ability with WooCommerce meta, and keep an ability's own class.
+	 * @testdox Should swap in DryRunAbility only before WordPress 7.1 and only for an ability with WooCommerce meta, and keep an ability's own class.
 	 */
 	public function test_polyfill_class_swap(): void {
 		$this->register( true );
 
-		$this->assertSame( PolyfilledAbility::is_active() ? PolyfilledAbility::class : \WP_Ability::class, get_class( wp_get_ability( self::READ ) ) );
+		$this->assertSame( DryRunAbility::polyfill_active() ? DryRunAbility::class : \WP_Ability::class, get_class( wp_get_ability( self::READ ) ) );
 		$this->assertSame( \WP_Ability::class, get_class( wp_get_ability( self::PLAIN ) ) );
 		$this->assertInstanceOf( TestRecordWriteAbility::class, wp_get_ability( self::WRITE ) );
 	}
@@ -581,7 +840,7 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 	 * Unregister the plugin's abilities.
 	 */
 	private function unregister_abilities(): void {
-		foreach ( array( self::WRITE, self::READ, self::PLAIN ) as $ability_id ) {
+		foreach ( array( self::WRITE, self::READ, self::PLAIN, self::ROOT_OBJECT, self::ROOT_LIST, self::NOTIFY ) as $ability_id ) {
 			if ( wp_has_ability( $ability_id ) ) {
 				wp_unregister_ability( $ability_id );
 			}

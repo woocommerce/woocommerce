@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Abilities\AbilityContracts;
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatusAbility;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
@@ -154,8 +155,8 @@ class AbilitiesLoader {
 	}
 
 	/**
-	 * Declare the extension fields of the products query and run Core's
-	 * product writes as object changes.
+	 * Declare the extension fields of the read abilities, and run Core's
+	 * product writes and order status update as object changes.
 	 *
 	 * @param array        $args         Registration arguments.
 	 * @param string       $ability_name Ability name.
@@ -163,15 +164,23 @@ class AbilitiesLoader {
 	 * @return array
 	 */
 	private static function with_ability_contracts( array $args, string $ability_name, string $class_name ): array {
-		if ( ProductsQuery::class === $class_name ) {
+		$outputs = array(
+			ProductsQuery::class => array( 'product', 'products' ),
+			OrdersQuery::class   => array( 'order', 'orders' ),
+			OrderAddNote::class  => array( 'order', 'order' ),
+		);
+		if ( isset( $outputs[ $class_name ] ) ) {
 			$args['meta'][ RegistrationArgs::META ]['extension_fields'] = array(
-				'object_type' => 'product',
-				'output'      => 'products',
+				'object_type' => $outputs[ $class_name ][0],
+				'output'      => $outputs[ $class_name ][1],
 			);
 		}
 
 		if ( ( ProductWriteAbility::DEFINITIONS[ $ability_name ] ?? null ) === $class_name ) {
 			$args['ability_class'] = ProductWriteAbility::class;
+		}
+		if ( OrderUpdateStatus::class === $class_name ) {
+			$args['ability_class'] = OrderUpdateStatusAbility::class;
 		}
 
 		return $args;

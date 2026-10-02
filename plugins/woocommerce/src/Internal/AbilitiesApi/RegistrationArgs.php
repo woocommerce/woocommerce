@@ -14,7 +14,9 @@ defined( 'ABSPATH' ) || exit;
  * `meta.woocommerce`:
  *
  * - `extension_fields`: `object_type` and the `output` key where the object, or list of objects, sits.
+ *   An `output` of '' means the whole output is the object, or the list of objects.
  * - `in_memory_write`: `object_type`.
+ * - `dry_run`: true when the ability class implements a dry run.
  *
  * Both are derived from an ObjectChangeAbility `ability_class`, with the object type as the output key, unless the ability declares them.
  *
@@ -27,7 +29,7 @@ final class RegistrationArgs {
 	public const META = 'woocommerce';
 
 	/**
-	 * Derive the write meta, swap in the polyfilled ability class before
+	 * Derive the write meta, swap in DryRunAbility, which fires the 7.1 hooks before
 	 * WordPress 7.1 for an ability with this meta, and add `extensions` to the
 	 * schemas.
 	 *
@@ -42,9 +44,13 @@ final class RegistrationArgs {
 				'output'      => $class::object_type(),
 			);
 			$args['meta'][ self::META ]['in_memory_write']  = $args['meta'][ self::META ]['in_memory_write'] ?? array( 'object_type' => $class::object_type() );
+			$args['input_schema']                           = self::with_expected( $args['input_schema'] ?? array() );
 		}
-		if ( null === $class && isset( $args['meta'][ self::META ] ) && PolyfilledAbility::is_active() ) {
-			$args['ability_class'] = PolyfilledAbility::class;
+		if ( is_string( $class ) && DryRunAbility::has_dry_run( $class ) ) {
+			$args['meta'][ self::META ]['dry_run'] = true;
+		}
+		if ( null === $class && isset( $args['meta'][ self::META ] ) && DryRunAbility::polyfill_active() ) {
+			$args['ability_class'] = DryRunAbility::class;
 		}
 
 		$fields = $args['meta'][ self::META ]['extension_fields'] ?? null;
@@ -53,9 +59,6 @@ final class RegistrationArgs {
 		}
 
 		$extensions = AbilityFields::schema( AbilityFields::get( (string) ( $fields['object_type'] ?? '' ) ) );
-		if ( null === $extensions ) {
-			return $args;
-		}
 
 		if ( isset( $args['meta'][ self::META ]['in_memory_write'], $args['input_schema']['properties'] ) && ! isset( $args['input_schema']['properties']['extensions'] ) ) {
 			$args['input_schema']['properties']['extensions'] = $extensions;
@@ -64,6 +67,28 @@ final class RegistrationArgs {
 			$args['output_schema'] = AbilityFields::add_to_output_schema( $args['output_schema'], (string) $fields['output'], $extensions );
 		}
 		return $args;
+	}
+
+	/**
+	 * Accept the optional `expected` map in an input schema, and in each of its `oneOf` branches.
+	 *
+	 * @param array $schema Input schema.
+	 * @return array
+	 */
+	private static function with_expected( array $schema ): array {
+		$expected = array(
+			'type'        => 'object',
+			'description' => 'Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved.',
+		);
+		if ( isset( $schema['properties'] ) ) {
+			$schema['properties']['expected'] = $expected;
+		}
+		foreach ( $schema['oneOf'] ?? array() as $index => $branch ) {
+			if ( isset( $branch['properties'] ) ) {
+				$schema['oneOf'][ $index ]['properties']['expected'] = $expected;
+			}
+		}
+		return $schema;
 	}
 
 	/**

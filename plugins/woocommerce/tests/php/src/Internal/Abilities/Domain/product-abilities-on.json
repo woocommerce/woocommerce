@@ -76,8 +76,11 @@
                                 },
                                 "additionalProperties": false
                             }
-                        },
-                        "additionalProperties": false
+                        }
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -158,8 +161,11 @@
                                 },
                                 "additionalProperties": false
                             }
-                        },
-                        "additionalProperties": false
+                        }
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -241,8 +247,11 @@
                                 },
                                 "additionalProperties": false
                             }
-                        },
-                        "additionalProperties": false
+                        }
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -303,6 +312,14 @@
                     "button_text": {
                         "type": "string",
                         "description": "Button text for affiliate products."
+                    },
+                    "extensions": {
+                        "type": "object",
+                        "description": "Fields added by extensions, grouped by extension."
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -352,6 +369,14 @@
                             "type": "integer",
                             "minimum": 1
                         }
+                    },
+                    "extensions": {
+                        "type": "object",
+                        "description": "Fields added by extensions, grouped by extension."
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -410,8 +435,11 @@
                                 },
                                 "additionalProperties": false
                             }
-                        },
-                        "additionalProperties": false
+                        }
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -478,6 +506,14 @@
                             "outofstock",
                             "onbackorder"
                         ]
+                    },
+                    "extensions": {
+                        "type": "object",
+                        "description": "Fields added by extensions, grouped by extension."
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -805,8 +841,7 @@
                                 },
                                 "additionalProperties": false
                             }
-                        },
-                        "additionalProperties": false
+                        }
                     }
                 },
                 "additionalProperties": false
@@ -884,8 +919,11 @@
                                 },
                                 "additionalProperties": false
                             }
-                        },
-                        "additionalProperties": false
+                        }
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -970,8 +1008,11 @@
                                 },
                                 "additionalProperties": false
                             }
-                        },
-                        "additionalProperties": false
+                        }
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -1057,8 +1098,11 @@
                                 },
                                 "additionalProperties": false
                             }
-                        },
-                        "additionalProperties": false
+                        }
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -1144,8 +1188,11 @@
                                 },
                                 "additionalProperties": false
                             }
-                        },
-                        "additionalProperties": false
+                        }
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -1210,6 +1257,14 @@
                     "button_text": {
                         "type": "string",
                         "description": "Button text for affiliate products."
+                    },
+                    "extensions": {
+                        "type": "object",
+                        "description": "Fields added by extensions, grouped by extension."
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -1263,6 +1318,14 @@
                             "type": "integer",
                             "minimum": 1
                         }
+                    },
+                    "extensions": {
+                        "type": "object",
+                        "description": "Fields added by extensions, grouped by extension."
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -1333,6 +1396,14 @@
                             "outofstock",
                             "onbackorder"
                         ]
+                    },
+                    "extensions": {
+                        "type": "object",
+                        "description": "Fields added by extensions, grouped by extension."
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -1660,8 +1731,7 @@
                                 },
                                 "additionalProperties": false
                             }
-                        },
-                        "additionalProperties": false
+                        }
                     }
                 },
                 "additionalProperties": false
@@ -2049,8 +2119,7 @@
                                     },
                                     "additionalProperties": false
                                 }
-                            },
-                            "additionalProperties": false
+                            }
                         }
                     },
                     "additionalProperties": false
