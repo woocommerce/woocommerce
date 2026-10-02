@@ -332,9 +332,8 @@ class Renderer {
 			return $text;
 		}
 		// Placeholders are numbered, so PERSONALIZATION_TAG_PLACEHOLDER_1 is a prefix of _10, _11 and
-		// so on. Replacing them one at a time in ascending order rewrote every placeholder from the
-		// eleventh onward into tag #1 followed by a stray digit. strtr() matches the longest key at
-		// each position and never re-scans text it has already replaced.
+		// so on. strtr() matches the longest key at each position and never re-scans text it has
+		// already replaced, so a short placeholder cannot match inside a longer one.
 		return strtr( $text, $this->personalization_tag_placeholders );
 	}
 }

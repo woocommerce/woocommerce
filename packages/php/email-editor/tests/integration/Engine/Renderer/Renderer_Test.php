@@ -696,7 +696,9 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	 * fail for an unrelated reason.
 	 */
 	public function testItRestoresMoreThanTenPersonalizationTagsInTextVersion(): void {
-		$registry = $this->di_container->get( Personalization_Tags_Registry::class );
+		$registry = new Personalization_Tags_Registry(
+			$this->di_container->get( \Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger::class )
+		);
 
 		$paragraphs = array();
 		$expected   = array();
@@ -705,7 +707,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			$registry->register(
 				new Personalization_Tag(
 					'Renderer Test Tag ' . $i,
-					$token,
+					'[' . $token . ']',
 					'Renderer Test',
 					function () use ( $i ) {
 						return 'value-' . $i;
@@ -715,6 +717,14 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			$paragraphs[] = '<!-- wp:paragraph --><p>Field ' . $i . ': <!--[' . $token . ']--></p><!-- /wp:paragraph -->';
 			$expected[]   = '<!--[' . $token . ']-->';
 		}
+
+		// The renderer built in setUp() uses a registry mock with no tags, so it preserves nothing.
+		$this->renderer = $this->getServiceWithOverrides(
+			Renderer::class,
+			array(
+				'personalization_tags_registry' => $registry,
+			)
+		);
 
 		// @phpstan-ignore-next-line PHPStan is not aware of the register_block_template function's side effects.
 		register_block_template(
