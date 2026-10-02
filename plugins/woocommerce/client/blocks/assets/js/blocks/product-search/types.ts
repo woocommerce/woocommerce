@@ -15,6 +15,7 @@ export interface SearchBlockAttributes {
 	buttonUseIcon: boolean;
 	isSearchFieldHidden: boolean;
 	label?: string;
+	liveResults?: boolean;
 	namespace?: string;
 	placeholder?: string;
 	showLabel: boolean;
