@@ -23,4 +23,4 @@ fi
 # whose import/webpack resolver loads its webpack.config.js. That config only
 # exports an iterable when WP_EXPERIMENTAL_MODULES is set, matching its lint:js.
 # shellcheck disable=SC2086
-WP_EXPERIMENTAL_MODULES=true pnpm eslint $changedFiles
+WP_EXPERIMENTAL_MODULES=true pnpm exec wp-scripts lint-js $changedFiles

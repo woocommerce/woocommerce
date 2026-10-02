@@ -51,8 +51,8 @@
 		"format": "wp-scripts format '*.{js,jsx,mjs,cjs,json,ts,tsx,yml,yaml,css,scss}' '{src,configs,scripts,styles,type-overrides}/**/*.{js,jsx,mjs,cjs,json,ts,tsx,yml,yaml,css,scss}'",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
-		"lint:fix:lang:js": "eslint src --fix",
-		"lint:lang:js": "eslint src"
+		"lint:fix:lang:js": "wp-scripts lint-js src --fix",
+		"lint:lang:js": "wp-scripts lint-js src"
 	},
 	"dependencies": {
 		"@automattic/color-studio": "^4.0.0",
@@ -78,7 +78,6 @@
 		"@wordpress/editor": "14.33.11",
 		"@wordpress/notices": "5.33.1",
 		"@wordpress/scripts": "catalog:tooling",
-		"eslint": "^10.0.0",
 		"typescript": "5.7.x"
 	},
 	"config": {

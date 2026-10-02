@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { globalIgnores } from 'eslint/config';
+import { globalIgnores } from '@eslint/config-helpers';
 import globals from 'globals';
 import storybook from 'eslint-plugin-storybook';
 import youDontNeedLodashUnderscore from 'eslint-plugin-you-dont-need-lodash-underscore';
@@ -181,7 +181,7 @@ const TEST_FILES = [
 
 export default [
 	// node_modules is ignored by default.
-	globalIgnores( [
+	globalIgnores([
 		'build',
 		'build-module',
 		'coverage',
@@ -193,7 +193,7 @@ export default [
 		'assets/js/interactivity',
 		'tests/e2e-jest/specs/backend/__fixtures__',
 		'tests/e2e-jest/specs/backend/__snapshots__',
-	] ),
+	]),
 	/*
 	 * The shared config already registers the jest, @typescript-eslint and
 	 * fixupPluginRules-wrapped `import` plugins, and applies the TypeScript
@@ -204,7 +204,7 @@ export default [
 	 * "Cannot redefine plugin", so those rules are set on the inherited plugins.
 	 */
 	...woocommerce,
-	...storybook.configs[ 'flat/recommended' ],
+	...storybook.configs['flat/recommended'],
 	{
 		/*
 		 * This plugin ships only eslintrc-style configs, whose `plugins` is an
@@ -255,12 +255,12 @@ export default [
 			 * than v4 did.
 			 */
 			'react-hooks/exhaustive-deps': 'warn',
-			'react/jsx-fragments': [ 'error', 'syntax' ],
+			'react/jsx-fragments': ['error', 'syntax'],
 			'@wordpress/no-global-active-element': 'warn',
 			'@wordpress/i18n-text-domain': [
 				'error',
 				{
-					allowedTextDomain: [ 'woocommerce' ],
+					allowedTextDomain: ['woocommerce'],
 				},
 			],
 			'no-restricted-imports': [
@@ -293,13 +293,13 @@ export default [
 		},
 	},
 	{
-		files: [ '**/tests/e2e-jest/**' ],
+		files: ['**/tests/e2e-jest/**'],
 		rules: {
 			'jest/no-disabled-tests': 'off',
 		},
 	},
 	{
-		files: [ '**/bin/**.js', '**/storybook/**.js', '**/stories/**.js' ],
+		files: ['**/bin/**.js', '**/storybook/**.js', '**/stories/**.js'],
 		// These build/tooling scripts run in Node; eslint-env comments are gone in v9+.
 		languageOptions: {
 			globals: { ...globals.node },
@@ -318,12 +318,12 @@ export default [
 		},
 	},
 	{
-		files: [ '**/*.ts', '**/*.tsx' ],
+		files: ['**/*.ts', '**/*.tsx'],
 		// `excludedFiles` in eslintrc.
 		ignores: TEST_FILES,
 		settings: {
 			'import/parsers': {
-				'@typescript-eslint/parser': [ '.ts', '.tsx' ],
+				'@typescript-eslint/parser': ['.ts', '.tsx'],
 			},
 			'import/resolver': {
 				typescript: {}, // this loads <rootdir>/tsconfig.json to eslint
@@ -343,15 +343,15 @@ export default [
 			'@typescript-eslint/no-explicit-any': 'error',
 			'@typescript-eslint/no-non-null-assertion': 'error',
 			'no-use-before-define': 'off',
-			'@typescript-eslint/no-use-before-define': [ 'error' ],
+			'@typescript-eslint/no-use-before-define': ['error'],
 			'jsdoc/require-param': 'off',
 			'no-shadow': 'off',
 			camelcase: 'off',
 			'@typescript-eslint/naming-convention': [
 				'error',
 				{
-					selector: [ 'method', 'variableLike' ],
-					format: [ 'camelCase', 'PascalCase', 'UPPER_CASE' ],
+					selector: ['method', 'variableLike'],
+					format: ['camelCase', 'PascalCase', 'UPPER_CASE'],
 					leadingUnderscore: 'allowSingleOrDouble',
 					filter: {
 						regex: 'webpack_public_path__',
@@ -360,7 +360,7 @@ export default [
 				},
 				{
 					selector: 'typeProperty',
-					format: [ 'camelCase', 'snake_case' ],
+					format: ['camelCase', 'snake_case'],
 					filter: {
 						regex: 'API_FETCH_WITH_HEADERS|Block',
 						match: false,
@@ -393,13 +393,13 @@ export default [
 		},
 	},
 	{
-		files: [ '**/frontend.ts' ],
+		files: ['**/frontend.ts'],
 		rules: {
 			'@typescript-eslint/no-use-before-define': 'off',
 		},
 	},
 	{
-		files: [ 'assets/js/mapped-types.ts' ],
+		files: ['assets/js/mapped-types.ts'],
 		rules: {
 			'@typescript-eslint/no-explicit-any': 'off',
 			'@typescript-eslint/no-shadow': 'off',

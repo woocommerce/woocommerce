@@ -26,7 +26,7 @@
 		"lint:fix:lang:css": "stylelint '**/*.scss' --fix --ip 'storybook/wordpress'",
 		"lint:fix:lang:js": "pnpm lint:lang:js --fix",
 		"lint:lang:css": "stylelint '**/*.scss' --cache --cache-location=node_modules/.cache/stylelint",
-		"lint:lang:js": "eslint ./client --cache --cache-location=node_modules/.cache/eslint",
+		"lint:lang:js": "wp-scripts lint-js ./client --cache --cache-location=node_modules/.cache/eslint",
 		"lint:lang:types": "tsc --build --emitDeclarationOnly",
 		"postinstall": "node bin/xstate5-symlink.js",
 		"test:js": "jest --config client/jest.config.js",
@@ -132,6 +132,7 @@
 		"zod": "^3.22.4"
 	},
 	"devDependencies": {
+		"@eslint/config-helpers": "0.6.0",
 		"@automattic/color-studio": "^4.0.0",
 		"@babel/cli": "catalog:tooling",
 		"@babel/core": "catalog:tooling",
@@ -187,7 +188,6 @@
 		"config": "3.3.7",
 		"copy-webpack-plugin": "13.0.x",
 		"css-loader": "6.11.x",
-		"eslint": "^10.0.0",
 		"eslint-import-resolver-typescript": "^4.4.5",
 		"eslint-import-resolver-webpack": "^0.13.11",
 		"fs-extra": "11.1.1",

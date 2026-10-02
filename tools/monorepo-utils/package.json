@@ -19,7 +19,7 @@
 	"scripts": {
 		"build": "webpack --config webpack.config.js && replace '\r\n' '\n' fonts/Standard.flf",
 		"format": "wp-scripts format '*.{js,jsx,mjs,cjs,json,ts,tsx,yml,yaml,css,scss}' '{src,bin}/**/*.{js,jsx,mjs,cjs,json,ts,tsx,yml,yaml,css,scss}'",
-		"lint": "eslint .",
+		"lint": "wp-scripts lint-js .",
 		"start": "webpack --config webpack.config.js --watch",
 		"test": "pnpm test:js",
 		"test:js": "jest"
@@ -50,13 +50,13 @@
 		"simple-git": "^3.21.0"
 	},
 	"devDependencies": {
+		"@eslint/config-helpers": "0.6.0",
 		"@types/jest": "29.5.x",
 		"@types/node": "^24.1.0",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/scripts": "catalog:tooling",
 		"copy-webpack-plugin": "13.0.x",
-		"eslint": "^10.0.0",
 		"jest": "29.5.x",
 		"replace": "^1.2.2",
 		"ts-jest": "29.1.x",

@@ -35,7 +35,6 @@
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/scripts": "catalog:tooling",
-		"eslint": "^10.0.0",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
 		"rimraf": "5.0.5",
@@ -50,12 +49,12 @@
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
-		"lint:fix:lang:js": "eslint src --fix",
-		"lint:lang:js": "eslint --output-file eslint_report.json --format json src"
+		"lint:fix:lang:js": "wp-scripts lint-js src --fix",
+		"lint:lang:js": "wp-scripts lint-js --output-file eslint_report.json --format json src"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
-			"eslint --fix"
+			"wp-scripts lint-js --fix"
 		]
 	},
 	"config": {

@@ -64,7 +64,7 @@
 		"lint:css-fix": "stylelint '**/*.scss' --fix",
 		"lint:js": "WP_EXPERIMENTAL_MODULES=true wp-scripts lint-js --cache --cache-location=node_modules/.cache/eslint",
 		"lint:js:report": "pnpm run lint:js -- --output-file eslint_report.json --format json",
-		"lint:js-fix": "eslint assets/js --fix",
+		"lint:js-fix": "WP_EXPERIMENTAL_MODULES=true wp-scripts lint-js assets/js --fix",
 		"lint:md:docs": "wp-scripts lint-md-docs",
 		"pre-commit": "lint-staged",
 		"format": "wp-scripts format \"**/*.{js,jsx,ts,tsx,css,scss}\"",
@@ -90,6 +90,7 @@
 		"knip": "WP_EXPERIMENTAL_MODULES=true knip"
 	},
 	"devDependencies": {
+		"@eslint/config-helpers": "0.6.0",
 		"@automattic/color-studio": "4.0.0",
 		"@babel/cli": "catalog:tooling",
 		"@babel/core": "catalog:tooling",
@@ -171,7 +172,6 @@
 		"cssnano": "5.1.12",
 		"deep-freeze": "0.0.1",
 		"dotenv": "^16.3.1",
-		"eslint": "^10.0.0",
 		"eslint-import-resolver-typescript": "^4.4.5",
 		"eslint-import-resolver-webpack": "^0.13.11",
 		"eslint-plugin-playwright": "^2.10.5",

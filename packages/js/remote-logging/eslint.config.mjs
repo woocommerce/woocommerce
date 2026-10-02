@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { globalIgnores } from 'eslint/config';
+import { globalIgnores } from '@eslint/config-helpers';
 
 /**
  * Internal dependencies

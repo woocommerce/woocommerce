@@ -56,7 +56,7 @@
 		"lint:fix:lang:php": "composer run-script phpcbf",
 		"lint:changes:branch:js": "bash ./bin/eslint-branch.sh",
 		"lint:changes:branch:php": "XDEBUG_MODE=off pnpm lint:php:changes:branch",
-		"lint:lang:js": "eslint .",
+		"lint:lang:js": "wp-scripts lint-js .",
 		"lint:lang:php": "composer run-script phpcs",
 		"lint:php": "composer run-script phpcs",
 		"lint:php:changes": "composer run-script lint",
@@ -127,7 +127,7 @@
 			"composer run-script lint-staged"
 		],
 		"!(*min).js": [
-			"eslint --fix"
+			"wp-scripts lint-js --fix"
 		]
 	},
 	"config": {
@@ -1320,6 +1320,7 @@
 		}
 	},
 	"devDependencies": {
+		"@eslint/config-helpers": "0.6.0",
 		"@babel/cli": "catalog:tooling",
 		"@babel/core": "catalog:tooling",
 		"@babel/preset-env": "catalog:tooling",
@@ -1341,7 +1342,6 @@
 		"axios": "^0.33.0",
 		"config": "3.3.7",
 		"dotenv": "^10.0.0",
-		"eslint": "^10.0.0",
 		"eslint-plugin-jest": "^29.15.4",
 		"eslint-plugin-playwright": "^2.10.5",
 		"fs-extra": "11.1.1",
