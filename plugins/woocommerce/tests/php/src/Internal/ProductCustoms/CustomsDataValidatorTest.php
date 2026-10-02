@@ -18,15 +18,13 @@ class CustomsDataValidatorTest extends WC_Unit_Test_Case {
 	 *           ["commodity_code", "00123456789012", "00123456789012"]
 	 *           ["commodity_code", "01/02\t03", "010203"]
 	 *           ["country_of_origin", " us ", "US"]
-	 *           ["description", " <b>Cotton</b> shirt\n ", "Cotton shirt"]
+	 *           ["description", " Cotton\t shirt\n ", "Cotton shirt"]
 	 *           ["description", "Chemise été", "Chemise été"]
 	 *           ["description", "100%acrylic yarn", "100%acrylic yarn"]
 	 *           ["description", "Salt & pepper", "Salt & pepper"]
 	 *           ["description", "Men's T-shirt (cotton), 2/pk.", "Men's T-shirt (cotton), 2/pk."]
 	 *           ["description", "Café Kaffee 咖啡", "Café Kaffee 咖啡"]
 	 *           ["description", "Price $5 + tax, size = M", "Price $5 + tax, size = M"]
-	 *           ["description", "<<b>b>Coffee", "Coffee"]
-	 *           ["description", "<<<i>i>script>alert(1)", "alert(1)"]
 	 * @param string      $field Field suffix.
 	 * @param string|null $value Input value.
 	 * @param string|null $expected Normalized value.
@@ -65,6 +63,9 @@ class CustomsDataValidatorTest extends WC_Unit_Test_Case {
 	 *           ["description", "Mug™"]
 	 *           ["description", "Size 1️⃣"]
 	 *           ["description", "Price €5"]
+	 *           ["description", "Size<M shirt"]
+	 *           ["description", "<b>Cotton</b>"]
+	 *           ["description", "Size > M"]
 	 * @param string $field Field suffix.
 	 * @param mixed  $value Invalid value.
 	 */
@@ -89,12 +90,12 @@ class CustomsDataValidatorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should allow thirty-five Unicode code points after removing markup.
+	 * @testdox Should allow thirty-five Unicode code points.
 	 */
 	public function test_description_limit_counts_unicode_code_points(): void {
 		$value = str_repeat( 'é', 35 );
 
-		$this->assertSame( $value, CustomsDataValidator::normalize_description( '<b>' . $value . '</b>' ), 'Multibyte characters should count once.' );
+		$this->assertSame( $value, CustomsDataValidator::normalize_description( ' ' . $value . ' ' ), 'Multibyte characters should count once.' );
 		$this->expectException( WC_Data_Exception::class );
 		CustomsDataValidator::normalize_description( $value . 'é' );
 	}

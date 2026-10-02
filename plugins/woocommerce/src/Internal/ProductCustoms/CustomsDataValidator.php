@@ -101,6 +101,7 @@ final class CustomsDataValidator {
 	/**
 	 * Normalizes a plain text customs description of up to thirty-five Unicode code points.
 	 * Only letters, digits, spaces, punctuation and printable ASCII symbols are allowed, so emoji (including keycap and variation-selector sequences) and symbols such as ™ are rejected.
+	 * Angle brackets are rejected rather than stripped as markup, so text such as "Size<M shirt" isn't silently cut.
 	 *
 	 * @since 11.3.0
 	 *
@@ -114,11 +115,11 @@ final class CustomsDataValidator {
 		}
 
 		if ( is_string( $value ) && '' !== wp_check_invalid_utf8( $value ) ) {
-			$text = wp_strip_all_tags( $value, true );
+			$text = trim( (string) preg_replace( '/[\r\n\t ]+/', ' ', $value ) );
 			if ( '' === $text ) {
 				return null;
 			}
-			if ( mb_strlen( $text ) <= 35 && ! preg_match( '/[^\x20-\x7E\p{L}\p{Mn}\p{Mc}\p{N}\p{P}\s]|[\x{FE00}-\x{FE0F}\x{E0100}-\x{E01EF}]/u', $text ) ) {
+			if ( mb_strlen( $text ) <= 35 && ! preg_match( '/[<>]|[^\x20-\x7E\p{L}\p{Mn}\p{Mc}\p{N}\p{P}\s]|[\x{FE00}-\x{FE0F}\x{E0100}-\x{E01EF}]/u', $text ) ) {
 				return $text;
 			}
 		}

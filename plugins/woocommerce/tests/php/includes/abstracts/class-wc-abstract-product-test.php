@@ -594,7 +594,7 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	 * @testdox Should persist normalized customs values as internal product data and remove cleared metadata.
 	 * @testWith ["customs_commodity_code", "01.02-03", "010203"]
 	 *           ["customs_country_of_origin", " ro ", "RO"]
-	 *           ["customs_description", " <b>Cotton</b> shirt ", "Cotton shirt"]
+	 *           ["customs_description", " Cotton  shirt ", "Cotton shirt"]
 	 * @param string $field Property name.
 	 * @param string $input Input value.
 	 * @param string $expected Stored value.
@@ -621,6 +621,7 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should preserve a product value when a customs setter receives invalid data.
 	 * @testWith ["customs_country_of_origin", "RO", "ZZ"]
+	 *           ["customs_description", "Cotton shirt", "Size<M shirt"]
 	 * @param string $field Property name.
 	 * @param string $valid Original value.
 	 * @param string $invalid Invalid value.
