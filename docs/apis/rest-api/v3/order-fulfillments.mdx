@@ -913,6 +913,13 @@ woocommerce.delete("orders/723/fulfillments/2/metadata", meta_key: "_shipment_pr
 ```json
 [
 	{
+		"id": 3,
+		"key": "_items",
+		"value": [
+			{ "item_id": 456, "qty": 2 }
+		]
+	},
+	{
 		"id": 4,
 		"key": "_tracking_number",
 		"value": "1Z999AA9876543210"
@@ -1033,7 +1040,10 @@ When the tracking number is longer than 50 characters, the response returns the 
 | ------------------ | ------- | --------------------------------- |
 | `tracking_number`  | string  | Required. The tracking number to look up. |
 
-An empty or missing `tracking_number` returns a `400` error with the code `woocommerce_rest_tracking_number_missing`.
+The two error cases are different and return different codes:
+
+-   Missing `tracking_number`: WordPress rejects the request before the endpoint runs, because the parameter is registered as required. The response is a `400` with the code `rest_missing_callback_param`.
+-   Empty `tracking_number` (for example `?tracking_number=`): the request reaches the endpoint and returns a `400` with the code `woocommerce_rest_tracking_number_missing`.
 
 ## Error responses
 
@@ -1053,5 +1063,6 @@ Common error codes for the fulfillments endpoints:
 
 -   `woocommerce_rest_order_invalid_id` - The order ID does not exist.
 -   `woocommerce_rest_order_id_missing` - The order ID is required but was not supplied.
--   `woocommerce_rest_tracking_number_missing` - The `tracking_number` parameter is required but was not supplied.
+-   `rest_missing_callback_param` - A required parameter was omitted, for example a missing `tracking_number`.
+-   `woocommerce_rest_tracking_number_missing` - The `tracking_number` parameter was supplied but is empty.
 -   Standard authentication/authorization errors when the current user lacks `manage_woocommerce` and isn't the order's owner.
