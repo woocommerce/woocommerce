@@ -47,6 +47,30 @@
 			]
 		},
 		{
+			"label": "Shared tooling dependencies use the tooling catalog",
+			"dependencyTypes": [
+				"prod",
+				"dev"
+			],
+			"dependencies": [
+				"@babel/cli",
+				"@babel/core",
+				"@babel/plugin-syntax-jsx",
+				"@babel/preset-env",
+				"@babel/preset-react",
+				"@babel/preset-typescript",
+				"@babel/runtime",
+				"@wordpress/prettier-config",
+				"@wordpress/scripts",
+				"postcss",
+				"webpack"
+			],
+			"packages": [
+				"**"
+			],
+			"policy": "catalog"
+		},
+		{
 			"label": "block-library pins these differently from the wp-min catalog",
 			"dependencies": [
 				"@automattic/color-studio",
@@ -54,9 +78,7 @@
 				"@testing-library/*",
 				"@typescript-eslint/*",
 				"@wordpress/autop",
-				"@wordpress/prettier-config",
 				"@wordpress/private-apis",
-				"@wordpress/scripts",
 				"@wordpress/style-engine",
 				"@wordpress/stylelint-config",
 				"eslint*",
@@ -119,26 +141,6 @@
 			"packages": [
 				"**"
 			]
-		},
-		{
-			"label": "Direct Babel build tooling shared across workspace packages",
-			"dependencyTypes": [
-				"prod",
-				"dev"
-			],
-			"dependencies": [
-				"@babel/core",
-				"@babel/cli",
-				"@babel/plugin-syntax-jsx",
-				"@babel/preset-env",
-				"@babel/preset-react",
-				"@babel/preset-typescript",
-				"@babel/runtime"
-			],
-			"packages": [
-				"**"
-			],
-			"policy": "catalog"
 		},
 		{
 			"label": "Babel dependencies: babel-plugin-transform-react-remove-prop-types - reduce build artifacts size",
@@ -221,19 +223,6 @@
 				"**"
 			],
 			"pinVersion": "^10.0.0"
-		},
-		{
-			"dependencyTypes": [
-				"prod",
-				"dev"
-			],
-			"dependencies": [
-				"webpack"
-			],
-			"packages": [
-				"**"
-			],
-			"policy": "catalog"
 		},
 		{
 			"dependencies": [
@@ -391,7 +380,6 @@
 		{
 			"dependencies": [
 				"@wordpress/stylelint-config",
-				"@wordpress/scripts",
 				"@wordpress/jest-console",
 				"@wordpress/e2e-test-utils"
 			],
@@ -419,15 +407,6 @@
 				"@woocommerce/experimental"
 			],
 			"isIgnored": true
-		},
-		{
-			"dependencies": [
-				"@wordpress/prettier-config"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "4.49.0"
 		},
 		{
 			"dependencies": [
@@ -561,19 +540,6 @@
 				"**"
 			],
 			"pinVersion": "4.3.x"
-		},
-		{
-			"dependencyTypes": [
-				"prod",
-				"dev"
-			],
-			"dependencies": [
-				"postcss"
-			],
-			"packages": [
-				"**"
-			],
-			"policy": "catalog"
 		},
 		{
 			"dependencies": [
