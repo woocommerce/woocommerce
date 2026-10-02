@@ -28,81 +28,81 @@ type Props = {
 	isExpanded: boolean;
 };
 
-const getFormattedAddress = ( address: Props[ 'address' ] ) => {
-	const countryData = getSetting< Record< string, CountryData > >(
+const getFormattedAddress = (address: Props['address']) => {
+	const countryData = getSetting<Record<string, CountryData>>(
 		'countryData',
 		{}
 	);
 
-	let formatToUse = getSetting< string >(
+	let formatToUse = getSetting<string>(
 		'defaultAddressFormat',
 		'{name}\n{company}\n{address_1}\n{address_2}\n{city}\n{state}\n{postcode}\n{country}'
 	);
 
 	if (
-		objectHasProp( countryData, address?.country ) &&
-		objectHasProp( countryData[ address.country ], 'format' ) &&
-		isString( countryData[ address.country ].format )
+		objectHasProp(countryData, address?.country) &&
+		objectHasProp(countryData[address.country], 'format') &&
+		isString(countryData[address.country].format)
 	) {
 		// `as string` is fine here because we check if it's a string above.
-		formatToUse = countryData[ address.country ].format as string;
+		formatToUse = countryData[address.country].format as string;
 	}
 
-	return formatAddress( address, formatToUse );
+	return formatAddress(address, formatToUse);
 };
 
-const AddressCard = ( { address, onEdit, target, isExpanded }: Props ) => {
+const AddressCard = ({ address, onEdit, target, isExpanded }: Props) => {
 	const { name: formattedName, address: formattedAddress } =
-		getFormattedAddress( address );
+		getFormattedAddress(address);
 
 	const label =
 		target === 'shipping'
-			? __( 'Edit shipping address', 'woocommerce' )
-			: __( 'Edit billing address', 'woocommerce' );
+			? __('Edit shipping address', 'woocommerce')
+			: __('Edit billing address', 'woocommerce');
 
-	const fullAddress = useMemo( () => {
-		return [ ...formattedAddress, address.phone ]
-			.filter( ( field ) => !! field )
-			.map( ( field ) => decodeEntities( field ) )
-			.join( ', ' );
-	}, [ formattedAddress, address.phone ] );
+	const fullAddress = useMemo(() => {
+		return [...formattedAddress, address.phone]
+			.filter((field) => !!field)
+			.map((field) => decodeEntities(field))
+			.join(', ');
+	}, [formattedAddress, address.phone]);
 
 	return (
 		<div className="wc-block-components-address-card">
 			<address>
 				<span
-					className={ clsx(
+					className={clsx(
 						'wc-block-components-address-card__address-section',
 						'wc-block-components-address-card__address-section--primary'
-					) }
+					)}
 				>
-					{ decodeEntities( formattedName ) }
+					{decodeEntities(formattedName)}
 				</span>
 				<span
-					className={ clsx(
+					className={clsx(
 						'wc-block-components-address-card__address-section',
 						'wc-block-components-address-card__address-section--secondary'
-					) }
+					)}
 				>
-					{ fullAddress }
+					{fullAddress}
 				</span>
 			</address>
-			{ onEdit && (
+			{onEdit && (
 				<Button
-					render={ <span /> }
+					render={<span />}
 					className="wc-block-components-address-card__edit"
-					aria-controls={ target }
-					aria-expanded={ isExpanded }
-					aria-label={ label }
-					onClick={ ( e ) => {
+					aria-controls={target}
+					aria-expanded={isExpanded}
+					aria-label={label}
+					onClick={(e) => {
 						e.preventDefault();
 						onEdit();
-					} }
+					}}
 					type="button"
 				>
-					{ __( 'Edit', 'woocommerce' ) }
+					{__('Edit', 'woocommerce')}
 				</Button>
-			) }
+			)}
 		</div>
 	);
 };

@@ -3,7 +3,7 @@
  */
 import { getActionsList, WhatsNextProps } from '../WhatsNext';
 
-describe( 'getActionsList', () => {
+describe('getActionsList', () => {
 	const defaultProps: WhatsNextProps = {
 		allTasklists: [
 			{
@@ -80,90 +80,90 @@ describe( 'getActionsList', () => {
 		activePlugins: [],
 	};
 
-	it( 'should return 3 actions', () => {
-		const actions = getActionsList( defaultProps );
-		expect( actions ).toHaveLength( 3 );
-	} );
+	it('should return 3 actions', () => {
+		const actions = getActionsList(defaultProps);
+		expect(actions).toHaveLength(3);
+	});
 
-	it( 'should include marketing, payment and extensions actions', () => {
-		const actions = getActionsList( defaultProps );
-		expect( actions ).toContainEqual(
-			expect.objectContaining( { title: 'Promote your products' } )
+	it('should include marketing, payment and extensions actions', () => {
+		const actions = getActionsList(defaultProps);
+		expect(actions).toContainEqual(
+			expect.objectContaining({ title: 'Promote your products' })
 		);
-		expect( actions ).toContainEqual(
-			expect.objectContaining( { title: 'Provide more ways to pay' } )
+		expect(actions).toContainEqual(
+			expect.objectContaining({ title: 'Provide more ways to pay' })
 		);
-		expect( actions ).toContainEqual(
-			expect.objectContaining( { title: 'Power up your store' } )
+		expect(actions).toContainEqual(
+			expect.objectContaining({ title: 'Power up your store' })
 		);
-	} );
+	});
 
-	it( 'should not include marketing action when marketing task is completed', () => {
+	it('should not include marketing action when marketing task is completed', () => {
 		const props = {
 			...defaultProps,
 			allTasklists: [
 				{
 					id: 'setup',
-					tasks: [ { id: 'payments', isComplete: false } ],
+					tasks: [{ id: 'payments', isComplete: false }],
 				},
 				{
 					id: 'extended',
-					tasks: [ { id: 'marketing', isComplete: true } ],
+					tasks: [{ id: 'marketing', isComplete: true }],
 				},
 			],
 		};
-		const actions = getActionsList( props as WhatsNextProps );
+		const actions = getActionsList(props as WhatsNextProps);
 		const marketingAction = actions.find(
-			( action ) => action.title === 'Promote your products'
+			(action) => action.title === 'Promote your products'
 		);
-		expect( marketingAction ).toBeUndefined();
-	} );
+		expect(marketingAction).toBeUndefined();
+	});
 
-	it( 'should not include payments action when payments task is completed', () => {
+	it('should not include payments action when payments task is completed', () => {
 		const props = {
 			...defaultProps,
 			allTasklists: [
 				{
 					id: 'setup',
-					tasks: [ { id: 'payments', isComplete: true } ],
+					tasks: [{ id: 'payments', isComplete: true }],
 				},
 				{
 					id: 'extended',
-					tasks: [ { id: 'marketing', isComplete: false } ],
+					tasks: [{ id: 'marketing', isComplete: false }],
 				},
 			],
 		};
-		const actions = getActionsList( props as WhatsNextProps );
+		const actions = getActionsList(props as WhatsNextProps);
 		const paymentsAction = actions.find(
-			( action ) => action.title === 'Provide more ways to pay'
+			(action) => action.title === 'Provide more ways to pay'
 		);
-		expect( paymentsAction ).toBeUndefined();
-	} );
+		expect(paymentsAction).toBeUndefined();
+	});
 
-	it( 'should include mobileApp, mailchimp actions when first three actions are completed', () => {
+	it('should include mobileApp, mailchimp actions when first three actions are completed', () => {
 		const props = {
 			...defaultProps,
 			allTasklists: [
 				{
 					id: 'setup',
-					tasks: [ { id: 'payments', isComplete: true } ],
+					tasks: [{ id: 'payments', isComplete: true }],
 				},
 				{
 					id: 'extended',
-					tasks: [ { id: 'marketing', isComplete: true } ],
+					tasks: [{ id: 'marketing', isComplete: true }],
 				},
 			],
 		};
-		const actions = getActionsList( props as WhatsNextProps );
-		expect( actions ).toContainEqual(
-			expect.objectContaining( { linkText: 'Get the app' } )
+		const actions = getActionsList(props as WhatsNextProps);
+		expect(actions).toContainEqual(
+			expect.objectContaining({ linkText: 'Get the app' })
 		);
-		expect( actions ).toContainEqual(
-			expect.objectContaining( { title: 'Build customer relationships' } )
+		expect(actions).toContainEqual(
+			expect.objectContaining({ title: 'Build customer relationships' })
 		);
-	} );
+	});
 
-	it( 'should not include Mailchimp action when Mailchimp is activated', () => {
+	it('should not include Mailchimp action when Mailchimp is activated', () => {
 		const props = {
 			...defaultProps,
 			allTasklists: [
@@ -175,22 +175,22 @@ describe( 'getActionsList', () => {
 					],
 				},
 			],
-			activePlugins: [ 'mailchimp-for-woocommerce' ],
+			activePlugins: ['mailchimp-for-woocommerce'],
 		};
-		const actions = getActionsList( props as WhatsNextProps );
+		const actions = getActionsList(props as WhatsNextProps);
 		const mailchimpAction = actions.find(
-			( action ) => action.title === 'Build customer relationships'
+			(action) => action.title === 'Build customer relationships'
 		);
-		expect( mailchimpAction ).toBeUndefined();
-	} );
+		expect(mailchimpAction).toBeUndefined();
+	});
 
-	it( 'should include payments, extensions and externalDocumentation actions', () => {
+	it('should include payments, extensions and externalDocumentation actions', () => {
 		const props = {
 			...defaultProps,
 			allTasklists: [
 				{
 					id: 'setup',
-					tasks: [ { id: 'payments', isComplete: true } ],
+					tasks: [{ id: 'payments', isComplete: true }],
 				},
 				{
 					id: 'extended',
@@ -200,17 +200,17 @@ describe( 'getActionsList', () => {
 					],
 				},
 			],
-			activePlugins: [ 'mailchimp-for-woocommerce' ],
+			activePlugins: ['mailchimp-for-woocommerce'],
 		};
-		const actions = getActionsList( props as WhatsNextProps );
-		expect( actions ).toContainEqual(
-			expect.objectContaining( { title: 'Provide more ways to pay' } )
+		const actions = getActionsList(props as WhatsNextProps);
+		expect(actions).toContainEqual(
+			expect.objectContaining({ title: 'Provide more ways to pay' })
 		);
-		expect( actions ).toContainEqual(
-			expect.objectContaining( { title: 'Power up your store' } )
+		expect(actions).toContainEqual(
+			expect.objectContaining({ title: 'Power up your store' })
 		);
-		expect( actions ).toContainEqual(
-			expect.objectContaining( { linkText: 'Explore support resources' } )
+		expect(actions).toContainEqual(
+			expect.objectContaining({ linkText: 'Explore support resources' })
 		);
-	} );
-} );
+	});
+});

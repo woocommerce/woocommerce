@@ -8,10 +8,7 @@ import { getSetting } from '@woocommerce/settings';
  */
 import type { ProductTypeProps } from '../shared/stores/product-type-template-state';
 
-const productTypes = getSetting< Record< string, string > >(
-	'productTypes',
-	{}
-);
+const productTypes = getSetting<Record<string, string>>('productTypes', {});
 
 /**
  * Build product types collection for product types.
@@ -19,8 +16,8 @@ const productTypes = getSetting< Record< string, string > >(
  * @return {ProductTypeProps[]} Product types collection.
  */
 export function getProductTypeOptions(): ProductTypeProps[] {
-	return Object.keys( productTypes ).map( ( key ) => ( {
+	return Object.keys(productTypes).map((key) => ({
 		slug: key,
-		label: productTypes[ key ],
-	} ) );
+		label: productTypes[key],
+	}));
 }

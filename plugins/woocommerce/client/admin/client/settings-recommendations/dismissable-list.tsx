@@ -21,28 +21,28 @@ import './dismissable-list.scss';
  * state and supplies `onDismiss` (typically from a dismiss hook such as
  * `useOptionDismiss` or `useEndpointDismiss`).
  */
-export const DismissableListHeading = ( {
+export const DismissableListHeading = ({
 	onDismiss = () => null,
 	children,
 }: {
 	children: React.ReactNode;
 	onDismiss?: () => void;
-} ) => {
+}) => {
 	return (
 		<CardHeader>
 			<div className="woocommerce-dismissable-list__header">
-				{ children }
+				{children}
 			</div>
 			<div>
 				<EllipsisMenu
-					label={ __( 'Task List Options', 'woocommerce' ) }
-					renderContent={ () => (
+					label={__('Task List Options', 'woocommerce')}
+					renderContent={() => (
 						<div className="woocommerce-dismissable-list__controls">
-							<Button onClick={ onDismiss }>
-								{ __( 'Hide this', 'woocommerce' ) }
+							<Button onClick={onDismiss}>
+								{__('Hide this', 'woocommerce')}
 							</Button>
 						</div>
-					) }
+					)}
 				/>
 			</div>
 		</CardHeader>
@@ -63,7 +63,7 @@ export const DismissableListHeading = ( {
  * surrounding wrapper stays mounted as a focus target: on dismissal we move
  * focus to it and announce the change with `speak()`.
  */
-export const DismissableList = ( {
+export const DismissableList = ({
 	children,
 	className,
 	isDismissed,
@@ -74,40 +74,37 @@ export const DismissableList = ( {
 	 * Whether the card has been dismissed. When true the card is hidden.
 	 */
 	isDismissed?: boolean;
-} ) => {
-	const wrapperRef = useRef< HTMLDivElement >( null );
+}) => {
+	const wrapperRef = useRef<HTMLDivElement>(null);
 	// Seed with the initial value so an already-dismissed card on first render
 	// is treated as steady state, not a fresh dismissal.
-	const wasDismissed = useRef( isDismissed );
+	const wasDismissed = useRef(isDismissed);
 
-	useEffect( () => {
-		if ( isDismissed && ! wasDismissed.current ) {
-			speak( __( 'Recommendation hidden.', 'woocommerce' ), 'assertive' );
+	useEffect(() => {
+		if (isDismissed && !wasDismissed.current) {
+			speak(__('Recommendation hidden.', 'woocommerce'), 'assertive');
 			wrapperRef.current?.focus();
 		}
 
 		wasDismissed.current = isDismissed;
-	}, [ isDismissed ] );
+	}, [isDismissed]);
 
 	return (
 		<div
-			ref={ wrapperRef }
+			ref={wrapperRef}
 			// Programmatically focusable (not in the tab order) so focus can
 			// land here once the card unmounts on dismissal.
-			tabIndex={ -1 }
+			tabIndex={-1}
 			className="woocommerce-dismissable-list__wrapper"
 		>
-			{ ! isDismissed && (
+			{!isDismissed && (
 				<Card
 					size="medium"
-					className={ clsx(
-						'woocommerce-dismissable-list',
-						className
-					) }
+					className={clsx('woocommerce-dismissable-list', className)}
 				>
-					{ children }
+					{children}
 				</Card>
-			) }
+			)}
 		</div>
 	);
 };

@@ -19,68 +19,68 @@ export type SnackbarListProps = {
 	// List of notices to be rendered.
 	notices: NoticeType[];
 	// Callback to be called when a notice is dismissed.
-	onRemove: ( id: string ) => void;
+	onRemove: (id: string) => void;
 };
 
 /**
  * A temporary informational UI displayed at the bottom of store pages.
  */
-const SnackbarList = ( {
+const SnackbarList = ({
 	notices,
 	className,
 	onRemove = () => void 0,
-}: SnackbarListProps ): JSX.Element => {
-	const listRef = useRef< HTMLDivElement | null >( null );
+}: SnackbarListProps): JSX.Element => {
+	const listRef = useRef<HTMLDivElement | null>(null);
 	const isReducedMotion = useReducedMotion();
 
-	const removeNotice = ( notice: NoticeType ) => () =>
-		onRemove( notice?.id || '' );
+	const removeNotice = (notice: NoticeType) => () =>
+		onRemove(notice?.id || '');
 
 	return (
 		<div
-			className={ clsx(
+			className={clsx(
 				className,
 				'wc-block-components-notice-snackbar-list'
-			) }
-			tabIndex={ -1 }
-			ref={ listRef }
+			)}
+			tabIndex={-1}
+			ref={listRef}
 		>
-			{ isReducedMotion ? (
-				notices.map( ( notice ) => {
+			{isReducedMotion ? (
+				notices.map((notice) => {
 					const { content, ...restNotice } = notice;
 					return (
 						<Snackbar
-							{ ...restNotice }
-							onRemove={ removeNotice( notice ) }
-							listRef={ listRef }
-							key={ notice.id }
+							{...restNotice}
+							onRemove={removeNotice(notice)}
+							listRef={listRef}
+							key={notice.id}
 						>
-							{ notice.content }
+							{notice.content}
 						</Snackbar>
 					);
-				} )
+				})
 			) : (
 				<TransitionGroup>
-					{ notices.map( ( notice ) => {
+					{notices.map((notice) => {
 						const { content, ...restNotice } = notice;
 						return (
 							<CSSTransition
-								key={ 'snackbar-' + notice.id }
-								timeout={ 500 }
+								key={'snackbar-' + notice.id}
+								timeout={500}
 								classNames="notice-transition"
 							>
 								<Snackbar
-									{ ...restNotice }
-									onRemove={ removeNotice( notice ) }
-									listRef={ listRef }
+									{...restNotice}
+									onRemove={removeNotice(notice)}
+									listRef={listRef}
 								>
-									{ content }
+									{content}
 								</Snackbar>
 							</CSSTransition>
 						);
-					} ) }
+					})}
 				</TransitionGroup>
-			) }
+			)}
 		</div>
 	);
 };

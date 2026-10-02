@@ -29,75 +29,75 @@ const MAX_THUMBNAILS = 10;
 const prepareProductImages = (
 	productImages: ProductResponseImageItem[]
 ): { src: string | undefined; alt: string | undefined }[] => {
-	return productImages.slice( 0, MAX_THUMBNAILS ).map( ( image ) => {
+	return productImages.slice(0, MAX_THUMBNAILS).map((image) => {
 		return {
 			src: image?.src,
 			alt: image?.alt,
 		};
-	} );
+	});
 };
-export const Edit = ( {
+export const Edit = ({
 	attributes,
 	setAttributes,
 	context,
-}: BlockEditProps< ProductGalleryThumbnailsBlockAttributes > & {
+}: BlockEditProps<ProductGalleryThumbnailsBlockAttributes> & {
 	context: {
 		postId?: string;
 	};
-} ) => {
+}) => {
 	const { thumbnailSize, aspectRatio, activeThumbnailStyle } = attributes;
 
-	const { product } = useProduct( context.postId );
+	const { product } = useProduct(context.postId);
 	const productImages = product?.images || [];
 	const hasOneOrNoImages = productImages.length <= 1;
-	const noProductContext = ! Boolean( context.postId && product?.id );
+	const noProductContext = !Boolean(context.postId && product?.id);
 
 	const productThumbnails =
 		productImages.length > 0
-			? prepareProductImages( productImages )
-			: Array( MAX_THUMBNAILS ).fill( {
+			? prepareProductImages(productImages)
+			: Array(MAX_THUMBNAILS).fill({
 					src: PLACEHOLDER_IMG_SRC,
 					alt: '',
-			  } );
-	const renderThumbnails = noProductContext || ! hasOneOrNoImages;
+				});
+	const renderThumbnails = noProductContext || !hasOneOrNoImages;
 
-	const scrollableRef = useRef< HTMLDivElement >( null );
-	const [ overflowState, setOverflowState ] = useState( {
+	const scrollableRef = useRef<HTMLDivElement>(null);
+	const [overflowState, setOverflowState] = useState({
 		bottom: false,
 		right: false,
-	} );
+	});
 
-	useEffect( () => {
-		if ( ! renderThumbnails ) {
+	useEffect(() => {
+		if (!renderThumbnails) {
 			return;
 		}
 
 		const scrollableElement = scrollableRef.current;
-		if ( ! scrollableElement ) {
+		if (!scrollableElement) {
 			return;
 		}
 
 		// Create a ResizeObserver to watch for layout changes
-		const resizeObserver = new ResizeObserver( () => {
-			const overflow = checkOverflow( scrollableElement );
-			setOverflowState( overflow );
-		} );
+		const resizeObserver = new ResizeObserver(() => {
+			const overflow = checkOverflow(scrollableElement);
+			setOverflowState(overflow);
+		});
 
 		// Observe both the scrollable element and its parent for size changes
-		resizeObserver.observe( scrollableElement );
-		if ( scrollableElement.parentElement ) {
-			resizeObserver.observe( scrollableElement.parentElement );
+		resizeObserver.observe(scrollableElement);
+		if (scrollableElement.parentElement) {
+			resizeObserver.observe(scrollableElement.parentElement);
 		}
 
 		return () => {
 			resizeObserver.disconnect();
 		};
-	}, [ renderThumbnails, thumbnailSize ] );
+	}, [renderThumbnails, thumbnailSize]);
 
-	const thumbnailSizeValue = Number( thumbnailSize.replace( '%', '' ) );
+	const thumbnailSizeValue = Number(thumbnailSize.replace('%', ''));
 	const className = clsx(
 		'wc-block-product-gallery-thumbnails',
-		`wc-block-product-gallery-thumbnails--active-${ activeThumbnailStyle }`,
+		`wc-block-product-gallery-thumbnails--active-${activeThumbnailStyle}`,
 		{
 			'wc-block-product-gallery-thumbnails--overflow-right':
 				overflowState.right,
@@ -105,13 +105,13 @@ export const Edit = ( {
 				overflowState.bottom,
 		}
 	);
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className,
 		style: {
 			'--wc-block-product-gallery-thumbnails-size': thumbnailSizeValue,
 		},
-	} );
-	const imageStyles: Record< string, string | undefined > = {
+	});
+	const imageStyles: Record<string, string | undefined> = {
 		aspectRatio,
 	};
 
@@ -119,17 +119,17 @@ export const Edit = ( {
 		<>
 			<InspectorControls>
 				<ProductGalleryThumbnailsBlockSettings
-					attributes={ attributes }
-					setAttributes={ setAttributes }
+					attributes={attributes}
+					setAttributes={setAttributes}
 				/>
 			</InspectorControls>
-			{ renderThumbnails && (
-				<div { ...blockProps }>
+			{renderThumbnails && (
+				<div {...blockProps}>
 					<div
-						ref={ scrollableRef }
+						ref={scrollableRef}
 						className="wc-block-product-gallery-thumbnails__scrollable"
 					>
-						{ productThumbnails.map( ( { src, alt }, index ) => {
+						{productThumbnails.map(({ src, alt }, index) => {
 							const imageClassName = clsx(
 								'wc-block-product-gallery-thumbnails__thumbnail__image',
 								{
@@ -140,21 +140,21 @@ export const Edit = ( {
 							return (
 								<div
 									className="wc-block-product-gallery-thumbnails__thumbnail"
-									key={ index }
+									key={index}
 								>
 									<img
-										className={ imageClassName }
-										src={ src }
-										alt={ alt }
+										className={imageClassName}
+										src={src}
+										alt={alt}
 										loading="lazy"
-										style={ imageStyles }
+										style={imageStyles}
 									/>
 								</div>
 							);
-						} ) }
+						})}
 					</div>
 				</div>
-			) }
+			)}
 		</>
 	);
 };

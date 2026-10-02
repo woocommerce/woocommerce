@@ -8,16 +8,16 @@ import { select, dispatch } from '@wordpress/data';
  */
 import { hasNoticesOfType, removeNoticesByStatus } from '../notices';
 
-jest.mock( '@wordpress/data' );
+jest.mock('@wordpress/data');
 
-describe( 'Notice utils', () => {
-	beforeEach( () => {
+describe('Notice utils', () => {
+	beforeEach(() => {
 		jest.resetAllMocks();
-	} );
-	describe( 'hasNoticesOfType', () => {
-		it( 'Correctly returns if there are notices of a given type in the core data store', () => {
-			select.mockReturnValue( {
-				getNotices: jest.fn().mockReturnValue( [
+	});
+	describe('hasNoticesOfType', () => {
+		it('Correctly returns if there are notices of a given type in the core data store', () => {
+			select.mockReturnValue({
+				getNotices: jest.fn().mockReturnValue([
 					{
 						id: 'coupon-form',
 						status: 'error',
@@ -31,29 +31,26 @@ describe( 'Notice utils', () => {
 						icon: null,
 						explicitDismiss: false,
 					},
-				] ),
-			} );
-			const hasSnackbarNotices = hasNoticesOfType(
-				'snackbar',
-				'wc/cart'
-			);
-			const hasDefaultNotices = hasNoticesOfType( 'default', 'wc/cart' );
-			expect( hasDefaultNotices ).toBe( true );
-			expect( hasSnackbarNotices ).toBe( false );
-		} );
+				]),
+			});
+			const hasSnackbarNotices = hasNoticesOfType('snackbar', 'wc/cart');
+			const hasDefaultNotices = hasNoticesOfType('default', 'wc/cart');
+			expect(hasDefaultNotices).toBe(true);
+			expect(hasSnackbarNotices).toBe(false);
+		});
 
-		it( 'Handles notices being empty', () => {
-			select.mockReturnValue( {
-				getNotices: jest.fn().mockReturnValue( [] ),
-			} );
-			const hasDefaultNotices = hasNoticesOfType( 'default', 'wc/cart' );
-			expect( hasDefaultNotices ).toBe( false );
-		} );
-	} );
-	describe( 'removeNoticesByStatus', () => {
-		it( 'Correctly removes notices of a given status', () => {
-			select.mockReturnValue( {
-				getNotices: jest.fn().mockReturnValue( [
+		it('Handles notices being empty', () => {
+			select.mockReturnValue({
+				getNotices: jest.fn().mockReturnValue([]),
+			});
+			const hasDefaultNotices = hasNoticesOfType('default', 'wc/cart');
+			expect(hasDefaultNotices).toBe(false);
+		});
+	});
+	describe('removeNoticesByStatus', () => {
+		it('Correctly removes notices of a given status', () => {
+			select.mockReturnValue({
+				getNotices: jest.fn().mockReturnValue([
 					{
 						id: 'coupon-form',
 						status: 'error',
@@ -89,34 +86,34 @@ describe( 'Notice utils', () => {
 						icon: null,
 						explicitDismiss: false,
 					},
-				] ),
-			} );
-			dispatch.mockReturnValue( {
+				]),
+			});
+			dispatch.mockReturnValue({
 				removeNotice: jest.fn(),
-			} );
-			removeNoticesByStatus( 'error' );
-			expect( dispatch().removeNotice ).toHaveBeenNthCalledWith(
+			});
+			removeNoticesByStatus('error');
+			expect(dispatch().removeNotice).toHaveBeenNthCalledWith(
 				1,
 				'coupon-form',
 				undefined
 			);
-			expect( dispatch().removeNotice ).toHaveBeenNthCalledWith(
+			expect(dispatch().removeNotice).toHaveBeenNthCalledWith(
 				2,
 				'address-form',
 				undefined
 			);
-		} );
+		});
 
-		it( 'Handles notices being empty', () => {
-			select.mockReturnValue( {
-				getNotices: jest.fn().mockReturnValue( [] ),
-			} );
+		it('Handles notices being empty', () => {
+			select.mockReturnValue({
+				getNotices: jest.fn().mockReturnValue([]),
+			});
 
-			dispatch.mockReturnValue( {
+			dispatch.mockReturnValue({
 				removeNotice: jest.fn(),
-			} );
-			removeNoticesByStatus( 'empty' );
-			expect( dispatch().removeNotice ).not.toHaveBeenCalled();
-		} );
-	} );
-} );
+			});
+			removeNoticesByStatus('empty');
+			expect(dispatch().removeNotice).not.toHaveBeenCalled();
+		});
+	});
+});

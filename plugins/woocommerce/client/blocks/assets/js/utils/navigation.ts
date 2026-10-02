@@ -8,6 +8,6 @@
  *
  * @param {string} url The URL to navigate to.
  */
-export function reload( url: string ) {
-	window.location.assign( url );
+export function reload(url: string) {
+	window.location.assign(url);
 }

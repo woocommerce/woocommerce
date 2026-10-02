@@ -17,7 +17,7 @@ import Block from './block';
 import { useIsDescendentOfSingleProductTemplate } from '../shared/use-is-descendent-of-single-product-template';
 
 type UnsupportedAlignments = 'wide' | 'full';
-type AllowedAlignments = Exclude< BlockAlignment, UnsupportedAlignments >;
+type AllowedAlignments = Exclude<BlockAlignment, UnsupportedAlignments>;
 
 interface BlockAttributes {
 	textAlign?: AllowedAlignments;
@@ -36,69 +36,69 @@ interface Context {
 interface Props {
 	attributes: Attributes;
 	setAttributes: (
-		attributes: Partial< BlockAttributes > & Record< string, unknown >
+		attributes: Partial<BlockAttributes> & Record<string, unknown>
 	) => void;
 	context: Context;
 }
 
-const PriceEdit = ( {
+const PriceEdit = ({
 	attributes,
 	setAttributes,
 	context,
-}: Props ): JSX.Element => {
+}: Props): JSX.Element => {
 	const blockProps = useBlockProps();
 	const blockAttrs = {
 		...attributes,
 		...context,
 	};
-	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
+	const isDescendentOfQueryLoop = Number.isFinite(context.queryId);
 
 	let { isDescendentOfSingleProductTemplate } =
 		useIsDescendentOfSingleProductTemplate();
 
-	if ( isDescendentOfQueryLoop ) {
+	if (isDescendentOfQueryLoop) {
 		isDescendentOfSingleProductTemplate = false;
 	}
 
 	const isExperimentalWcRestApiEnabled = isExperimentalWcRestApiV4Enabled();
 
-	const { product } = useProduct( context.postId );
+	const { product } = useProduct(context.postId);
 
 	return (
 		<>
 			<BlockControls>
 				<AlignmentToolbar
-					value={ attributes.textAlign }
-					onChange={ ( textAlign: AllowedAlignments ) => {
-						setAttributes( { textAlign } );
-					} }
+					value={attributes.textAlign}
+					onChange={(textAlign: AllowedAlignments) => {
+						setAttributes({ textAlign });
+					}}
 				/>
 			</BlockControls>
-			<div { ...blockProps }>
+			<div {...blockProps}>
 				{
 					// If experimental WC API is not available we must fallback to "old" way of fetching product data.
 					// Once it's available everywhere we can remove this fallback.
 					isExperimentalWcRestApiEnabled ? (
 						<Block
-							{ ...blockAttrs }
+							{...blockAttrs}
 							isDescendentOfSingleProductTemplate={
 								isDescendentOfSingleProductTemplate
 							}
-							isAdmin={ true }
-							product={ product }
+							isAdmin={true}
+							product={product}
 							isExperimentalWcRestApiV4Enabled={
 								isExperimentalWcRestApiEnabled
 							}
 						/>
 					) : (
 						<Block
-							{ ...blockAttrs }
+							{...blockAttrs}
 							isDescendentOfSingleProductTemplate={
 								isDescendentOfSingleProductTemplate
 							}
-							product={ undefined }
-							isAdmin={ false }
-							isExperimentalWcRestApiV4Enabled={ false }
+							product={undefined}
+							isAdmin={false}
+							isExperimentalWcRestApiV4Enabled={false}
 						/>
 					)
 				}

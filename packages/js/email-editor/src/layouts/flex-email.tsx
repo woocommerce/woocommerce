@@ -33,46 +33,46 @@ import { addFilterForEmail, updateBlockSettings } from '../config-tools';
 
 const layoutBlockSupportKey = '__experimentalEmailFlexLayout';
 
-function hasLayoutBlockSupport( blockName: string ) {
+function hasLayoutBlockSupport(blockName: string) {
 	// @ts-expect-error No types for this exist yet.
-	return hasBlockSupport( blockName, layoutBlockSupportKey );
+	return hasBlockSupport(blockName, layoutBlockSupportKey);
 }
 
-function JustificationControls( {
+function JustificationControls({
 	justificationValue,
 	onChange,
 	isToolbar = false,
-} ) {
+}) {
 	const justificationOptions = [
 		{
 			value: 'left',
 			icon: justifyLeft,
-			label: __( 'Justify items left', __i18n_text_domain__ ),
+			label: __('Justify items left', __i18n_text_domain__),
 		},
 		{
 			value: 'center',
 			icon: justifyCenter,
-			label: __( 'Justify items center', __i18n_text_domain__ ),
+			label: __('Justify items center', __i18n_text_domain__),
 		},
 		{
 			value: 'right',
 			icon: justifyRight,
-			label: __( 'Justify items right', __i18n_text_domain__ ),
+			label: __('Justify items right', __i18n_text_domain__),
 		},
 	];
 
-	if ( isToolbar ) {
+	if (isToolbar) {
 		const allowedValues = justificationOptions.map(
-			( option ) => option.value
+			(option) => option.value
 		);
 		return (
 			<JustifyContentControl
-				value={ justificationValue }
-				onChange={ onChange }
-				allowedControls={ allowedValues }
-				popoverProps={ {
+				value={justificationValue}
+				onChange={onChange}
+				allowedControls={allowedValues}
+				popoverProps={{
 					placement: 'bottom-start',
-				} }
+				}}
 			/>
 		);
 	}
@@ -80,24 +80,24 @@ function JustificationControls( {
 	return (
 		<ToggleGroupControl
 			__nextHasNoMarginBottom
-			label={ __( 'Justification', __i18n_text_domain__ ) }
-			value={ justificationValue }
-			onChange={ onChange }
+			label={__('Justification', __i18n_text_domain__)}
+			value={justificationValue}
+			onChange={onChange}
 			className="block-editor-hooks__flex-layout-justification-controls"
 		>
-			{ justificationOptions.map( ( { value, icon, label } ) => (
+			{justificationOptions.map(({ value, icon, label }) => (
 				<ToggleGroupControlOptionIcon
-					key={ value }
-					value={ value }
-					icon={ icon }
-					label={ label }
+					key={value}
+					value={value}
+					icon={icon}
+					label={label}
 				/>
-			) ) }
+			))}
 		</ToggleGroupControl>
 	);
 }
 
-function LayoutControls( { setAttributes, attributes, name: blockName } ) {
+function LayoutControls({ setAttributes, attributes, name: blockName }) {
 	const layoutBlockSupport = getBlockSupport(
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		blockName,
@@ -106,60 +106,60 @@ function LayoutControls( { setAttributes, attributes, name: blockName } ) {
 		{}
 	);
 
-	if ( ! layoutBlockSupport ) {
+	if (!layoutBlockSupport) {
 		return null;
 	}
 
 	const { justifyContent = 'left' } = attributes.layout || {};
 
-	const onJustificationChange = ( value ) => {
-		setAttributes( {
+	const onJustificationChange = (value) => {
+		setAttributes({
 			layout: {
 				...attributes.layout,
 				justifyContent: value,
 			},
-		} );
+		});
 	};
 
 	const resetAll = () => {
 		const { justifyContent: _discarded, ...restLayout } =
 			attributes.layout || {};
-		setAttributes( {
+		setAttributes({
 			layout: restLayout,
-		} );
+		});
 	};
 
 	return (
 		<>
 			<InspectorControls>
 				<ToolsPanel
-					label={ __( 'Layout', __i18n_text_domain__ ) }
-					resetAll={ resetAll }
+					label={__('Layout', __i18n_text_domain__)}
+					resetAll={resetAll}
 				>
 					<ToolsPanelItem
 						isShownByDefault
-						onDeselect={ resetAll } // This attribute is usually used to reset the panel item value.
-						hasValue={ () =>
+						onDeselect={resetAll} // This attribute is usually used to reset the panel item value.
+						hasValue={() =>
 							attributes.layout?.justifyContent || false
 						}
-						label={ __( 'Justification', __i18n_text_domain__ ) }
+						label={__('Justification', __i18n_text_domain__)}
 					>
 						<Flex>
 							<FlexItem>
 								<JustificationControls
-									justificationValue={ justifyContent }
-									onChange={ onJustificationChange }
+									justificationValue={justifyContent}
+									onChange={onJustificationChange}
 								/>
 							</FlexItem>
 						</Flex>
 					</ToolsPanelItem>
 				</ToolsPanel>
 			</InspectorControls>
-			{ /* @ts-expect-error No types for this exist yet. */ }
+			{/* @ts-expect-error No types for this exist yet. */}
 			<BlockControls group="block" __experimentalShareWithChildBlocks>
 				<JustificationControls
-					justificationValue={ justifyContent }
-					onChange={ onJustificationChange }
+					justificationValue={justifyContent}
+					onChange={onJustificationChange}
 					isToolbar
 				/>
 			</BlockControls>
@@ -171,9 +171,9 @@ function LayoutControls( { setAttributes, attributes, name: blockName } ) {
  * Filters registered block settings, extending attributes to include `layout`.
  */
 export function addAttribute() {
-	getBlockTypes().forEach( ( blockType: Block ) => {
-		if ( hasLayoutBlockSupport( blockType.name ) ) {
-			updateBlockSettings( blockType.name, ( current ) => ( {
+	getBlockTypes().forEach((blockType: Block) => {
+		if (hasLayoutBlockSupport(blockType.name)) {
+			updateBlockSettings(blockType.name, (current) => ({
 				...current,
 				attributes: {
 					...current.attributes,
@@ -181,9 +181,9 @@ export function addAttribute() {
 						type: 'object',
 					},
 				},
-			} ) );
+			}));
 		}
-	} );
+	});
 }
 
 /**
@@ -194,28 +194,28 @@ export function addAttribute() {
  * @return {Function} Wrapped component.
  */
 export const withLayoutControls = createHigherOrderComponent(
-	( BlockEdit ) => ( props ) => {
+	(BlockEdit) => (props) => {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-		const supportLayout = hasLayoutBlockSupport( props.name );
+		const supportLayout = hasLayoutBlockSupport(props.name);
 
 		return [
-			supportLayout && <LayoutControls key="layout" { ...props } />,
-			<BlockEdit key="edit" { ...props } />,
+			supportLayout && <LayoutControls key="layout" {...props} />,
+			<BlockEdit key="edit" {...props} />,
 		];
 	},
 	'withLayoutControls'
 );
 
-function BlockWithLayoutStyles( { block: BlockListBlock, props } ) {
+function BlockWithLayoutStyles({ block: BlockListBlock, props }) {
 	const { attributes } = props;
 	const { layout } = attributes;
 
 	const layoutClasses = 'is-layout-email-flex is-layout-flex';
-	const justify = ( layout?.justifyContent as string ) || 'left';
-	const justificationClass = `is-content-justification-${ justify }`;
+	const justify = (layout?.justifyContent as string) || 'left';
+	const justificationClass = `is-content-justification-${justify}`;
 
-	const layoutClassNames = clsx( justificationClass, layoutClasses );
-	return <BlockListBlock { ...props } className={ layoutClassNames } />;
+	const layoutClassNames = clsx(justificationClass, layoutClasses);
+	return <BlockListBlock {...props} className={layoutClassNames} />;
 }
 
 /**
@@ -226,20 +226,17 @@ function BlockWithLayoutStyles( { block: BlockListBlock, props } ) {
  * @return {Function} Wrapped component.
  */
 export const withLayoutStyles = createHigherOrderComponent(
-	( BlockListBlock ) =>
-		function maybeWrapWithLayoutStyles( props ) {
+	(BlockListBlock) =>
+		function maybeWrapWithLayoutStyles(props) {
 			const blockSupportsLayout = hasLayoutBlockSupport(
 				props.name as string
 			);
-			if ( ! blockSupportsLayout ) {
-				return <BlockListBlock { ...props } />;
+			if (!blockSupportsLayout) {
+				return <BlockListBlock {...props} />;
 			}
 
 			return (
-				<BlockWithLayoutStyles
-					block={ BlockListBlock }
-					props={ props }
-				/>
+				<BlockWithLayoutStyles block={BlockListBlock} props={props} />
 			);
 		},
 	'withLayoutStyles'

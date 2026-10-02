@@ -24,13 +24,13 @@ const SHARED_RULES = postcodeValidationData.rules as Record<
 
 const normalizePostcode = (
 	postcode: string,
-	normalization?: PostcodeValidationRule[ 'normalization' ]
+	normalization?: PostcodeValidationRule['normalization']
 ): string => {
-	if ( normalization === 'removeSpaces' ) {
-		return postcode.replace( / /g, '' );
+	if (normalization === 'removeSpaces') {
+		return postcode.replace(/ /g, '');
 	}
-	if ( normalization === 'removeSpacesAndHyphens' ) {
-		return postcode.trim().replace( /[\s-]/g, '' );
+	if (normalization === 'removeSpacesAndHyphens') {
+		return postcode.trim().replace(/[\s-]/g, '');
 	}
 	return postcode;
 };
@@ -40,31 +40,31 @@ export interface IsPostcodeProps {
 	country: string;
 }
 
-const isPostcode = ( { postcode, country }: IsPostcodeProps ): boolean => {
-	if ( typeof postcode !== 'string' || typeof country !== 'string' ) {
+const isPostcode = ({ postcode, country }: IsPostcodeProps): boolean => {
+	if (typeof postcode !== 'string' || typeof country !== 'string') {
 		return false;
 	}
 
 	// Mirror WC_Validation::is_postcode(): only ASCII whitespace, letters,
 	// digits, and hyphens may reach country-specific validation.
-	if ( /[^ \t\n\r\f\vA-Za-z0-9-]/.test( postcode ) ) {
+	if (/[^ \t\n\r\f\vA-Za-z0-9-]/.test(postcode)) {
 		return false;
 	}
 
-	if ( Object.hasOwn( SHARED_RULES, country ) ) {
-		const sharedRule = SHARED_RULES[ country ];
+	if (Object.hasOwn(SHARED_RULES, country)) {
+		const sharedRule = SHARED_RULES[country];
 		const regex = new RegExp(
-			`^(?:${ sharedRule.pattern })$`,
+			`^(?:${sharedRule.pattern})$`,
 			sharedRule.flags || ''
 		);
 		return regex.test(
-			normalizePostcode( postcode, sharedRule.normalization )
+			normalizePostcode(postcode, sharedRule.normalization)
 		);
 	}
 	// If the country is not in the upstream list, trying to validate it would throw, so we skip and assume
 	// that it is valid.
-	if ( postcodeValidatorExistsForCountry( country ) ) {
-		return postcodeValidator( postcode, country );
+	if (postcodeValidatorExistsForCountry(country)) {
+		return postcodeValidator(postcode, country);
 	}
 	return true;
 };

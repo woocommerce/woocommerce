@@ -14,70 +14,70 @@ import { API_NAMESPACE } from './constants';
  *
  * @param {Array} options
  */
-export function setOptions( options ) {
+export function setOptions(options) {
 	return {
 		type: TYPES.SET_OPTIONS,
 		options,
 	};
 }
 
-export function setLoadingState( isLoading ) {
+export function setLoadingState(isLoading) {
 	return {
 		type: TYPES.SET_IS_LOADING,
 		isLoading,
 	};
 }
 
-export function setOptionForEditing( editingOption ) {
+export function setOptionForEditing(editingOption) {
 	return {
 		type: TYPES.SET_OPTION_FOR_EDITING,
 		editingOption,
 	};
 }
 
-export function setNotice( notice ) {
+export function setNotice(notice) {
 	return {
 		type: TYPES.SET_NOTICE,
 		notice,
 	};
 }
 
-export function* deleteOption( optionName ) {
-	yield apiFetch( {
+export function* deleteOption(optionName) {
+	yield apiFetch({
 		method: 'DELETE',
-		path: `${ API_NAMESPACE }/options/${ optionName }`,
-	} );
+		path: `${API_NAMESPACE}/options/${optionName}`,
+	});
 	yield {
 		type: TYPES.DELETE_OPTION,
 		optionName,
 	};
 }
 
-export function* saveOption( optionName, newOptionValue ) {
+export function* saveOption(optionName, newOptionValue) {
 	try {
 		const payload = {};
 		try {
 			// If the option value is a JSON string, parse it.
-			payload[ optionName ] = JSON.parse( newOptionValue );
-		} catch ( error ) {
+			payload[optionName] = JSON.parse(newOptionValue);
+		} catch (error) {
 			// If it's not a JSON string, just use the value as is.
-			payload[ optionName ] = newOptionValue;
+			payload[optionName] = newOptionValue;
 		}
-		yield apiFetch( {
+		yield apiFetch({
 			method: 'POST',
 			path: '/wc-admin/options',
 			headers: { 'content-type': 'application/json' },
-			body: JSON.stringify( payload ),
-		} );
-		yield setNotice( {
+			body: JSON.stringify(payload),
+		});
+		yield setNotice({
 			status: 'success',
 			message: optionName + ' has been saved.',
-		} );
-	} catch ( error ) {
-		yield setNotice( {
+		});
+	} catch (error) {
+		yield setNotice({
 			status: 'error',
 			message: 'Unable to save ' + optionName,
-		} );
+		});
 		throw error;
 	}
 }

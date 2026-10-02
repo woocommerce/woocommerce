@@ -26,28 +26,28 @@ export const dispatchEvent = (
 		detail = {},
 	}: DispatchedEventProperties
 ): void => {
-	if ( ! CustomEvent ) {
+	if (!CustomEvent) {
 		return;
 	}
-	if ( ! element ) {
+	if (!element) {
 		element = document.body;
 	}
-	const event = new CustomEvent( name, {
+	const event = new CustomEvent(name, {
 		bubbles,
 		cancelable,
 		detail,
-	} );
-	element.dispatchEvent( event );
+	});
+	element.dispatchEvent(event);
 };
 
-export const triggerAddedToCartEvent = ( {
+export const triggerAddedToCartEvent = ({
 	preserveCartData = false,
-}: AddToCartEventDetail ): void => {
-	dispatchEvent( 'wc-blocks_added_to_cart', {
+}: AddToCartEventDetail): void => {
+	dispatchEvent('wc-blocks_added_to_cart', {
 		bubbles: true,
 		cancelable: true,
 		detail: { preserveCartData },
-	} );
+	});
 };
 
 export const translateJQueryEventToNative = (
@@ -57,11 +57,11 @@ export const translateJQueryEventToNative = (
 	nativeEventName: string,
 	// Whether the event bubbles.
 	bubbles = false
-): ( () => void ) => {
+): (() => void) => {
 	const eventDispatcher = () => {
-		dispatchEvent( nativeEventName, { bubbles } );
+		dispatchEvent(nativeEventName, { bubbles });
 	};
 
-	jQuery( document ).on( jQueryEventName, eventDispatcher );
-	return () => jQuery( document ).off( jQueryEventName, eventDispatcher );
+	jQuery(document).on(jQueryEventName, eventDispatcher);
+	return () => jQuery(document).off(jQueryEventName, eventDispatcher);
 };

@@ -21,7 +21,7 @@ export type ShippingPartnerTrackingProps = {
 	plugins: string;
 };
 
-const WooCommerceShippingItem = ( {
+const WooCommerceShippingItem = ({
 	isPluginInstalled,
 	isPluginActive,
 	onInstallClick,
@@ -31,51 +31,51 @@ const WooCommerceShippingItem = ( {
 }: {
 	isPluginInstalled: boolean;
 	isPluginActive: boolean;
-	pluginsBeingSetup: Array< string >;
-	onInstallClick: ( slugs: string[] ) => PromiseLike< void >;
-	onActivateClick: ( slugs: string[] ) => PromiseLike< void >;
+	pluginsBeingSetup: Array<string>;
+	onInstallClick: (slugs: string[]) => PromiseLike<void>;
+	onActivateClick: (slugs: string[]) => PromiseLike<void>;
 	tracking?: ShippingPartnerTrackingProps;
-} ) => {
-	const { createSuccessNotice } = useDispatch( 'core/notices' );
+}) => {
+	const { createSuccessNotice } = useDispatch('core/notices');
 
 	const handleClick = () => {
 		const trackingBase = {
-			...( tracking ?? {} ),
+			...(tracking ?? {}),
 			selected_plugin: WOOCOMMERCE_SHIPPING_PLUGIN_SLUG,
 		};
 
-		recordEvent( 'shipping_partner_click', trackingBase );
-		recordEvent( 'settings_shipping_recommendation_setup_click', {
+		recordEvent('shipping_partner_click', trackingBase);
+		recordEvent('settings_shipping_recommendation_setup_click', {
 			plugin: WOOCOMMERCE_SHIPPING_PLUGIN_SLUG,
 			action: isPluginInstalled ? 'activate' : 'install',
-		} );
+		});
 
 		const action = isPluginInstalled ? onActivateClick : onInstallClick;
 		const eventName = isPluginInstalled
 			? 'shipping_partner_activate'
 			: 'shipping_partner_install';
 
-		action( [ WOOCOMMERCE_SHIPPING_PLUGIN_SLUG ] ).then(
+		action([WOOCOMMERCE_SHIPPING_PLUGIN_SLUG]).then(
 			() => {
-				recordEvent( eventName, {
+				recordEvent(eventName, {
 					...trackingBase,
 					success: true,
-				} );
+				});
 				createSuccessNotice(
 					isPluginInstalled
-						? __( 'WooCommerce Shipping activated!', 'woocommerce' )
+						? __('WooCommerce Shipping activated!', 'woocommerce')
 						: __(
 								'WooCommerce Shipping is installed!',
 								'woocommerce'
-						  ),
+							),
 					{}
 				);
 			},
 			() => {
-				recordEvent( eventName, {
+				recordEvent(eventName, {
 					...trackingBase,
 					success: false,
-				} );
+				});
 			}
 		);
 	};
@@ -85,52 +85,52 @@ const WooCommerceShippingItem = ( {
 			<div className="woocommerce-list__item-before">
 				<img
 					className="woocommerce-shipping-plugin-item__logo"
-					src={ WooIcon }
+					src={WooIcon}
 					alt="WooCommerce Shipping Logo"
 				/>
 			</div>
 			<div className="woocommerce-list__item-text">
 				<span className="woocommerce-list__item-title">
-					{ __( 'WooCommerce Shipping', 'woocommerce' ) }
-					<Pill>{ __( 'Recommended', 'woocommerce' ) }</Pill>
+					{__('WooCommerce Shipping', 'woocommerce')}
+					<Pill>{__('Recommended', 'woocommerce')}</Pill>
 				</span>
 				<span className="woocommerce-list__item-content">
-					{ __(
+					{__(
 						'Print USPS, UPS, and DHL Express labels straight from your WooCommerce dashboard and save on shipping.',
 						'woocommerce'
-					) }
+					)}
 					<br />
 					<ExternalLink href="https://woocommerce.com/woocommerce-shipping/">
-						{ __( 'Learn more', 'woocommerce' ) }
+						{__('Learn more', 'woocommerce')}
 					</ExternalLink>
 				</span>
 			</div>
 			<div className="woocommerce-list__item-after">
-				{ isPluginActive ? (
+				{isPluginActive ? (
 					<Button
 						variant="secondary"
 						aria-disabled="true"
-						aria-label={ __(
+						aria-label={__(
 							'WooCommerce Shipping is already active',
 							'woocommerce'
-						) }
+						)}
 					>
-						{ __( 'Active', 'woocommerce' ) }
+						{__('Active', 'woocommerce')}
 					</Button>
 				) : (
 					<Button
-						variant={ isPluginInstalled ? 'primary' : 'secondary' }
-						onClick={ handleClick }
-						isBusy={ pluginsBeingSetup.includes(
+						variant={isPluginInstalled ? 'primary' : 'secondary'}
+						onClick={handleClick}
+						isBusy={pluginsBeingSetup.includes(
 							WOOCOMMERCE_SHIPPING_PLUGIN_SLUG
-						) }
-						disabled={ pluginsBeingSetup.length > 0 }
+						)}
+						disabled={pluginsBeingSetup.length > 0}
 					>
-						{ isPluginInstalled
-							? __( 'Activate', 'woocommerce' )
-							: __( 'Install', 'woocommerce' ) }
+						{isPluginInstalled
+							? __('Activate', 'woocommerce')
+							: __('Install', 'woocommerce')}
 					</Button>
-				) }
+				)}
 			</div>
 		</div>
 	);

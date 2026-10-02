@@ -37,7 +37,7 @@ interface RetryFailedResponse {
  * (`{ code, message }`), which is a plain object — not an `Error` instance —
  * so narrow on the `message` property instead of the constructor.
  */
-function getErrorMessage( err: unknown, fallback: string ): string {
+function getErrorMessage(err: unknown, fallback: string): string {
 	if (
 		typeof err === 'object' &&
 		err !== null &&
@@ -58,98 +58,95 @@ function getErrorMessage( err: unknown, fallback: string ): string {
  * request fails (the notice is an auxiliary affordance).
  */
 function FailedOrdersNotice() {
-	const [ status, setStatus ] = useState< FailedImportsStatus | null >(
-		null
-	);
-	const [ isRetrying, setIsRetrying ] = useState( false );
-	const { createNotice } = useDispatch( 'core/notices' );
+	const [status, setStatus] = useState<FailedImportsStatus | null>(null);
+	const [isRetrying, setIsRetrying] = useState(false);
+	const { createNotice } = useDispatch('core/notices');
 
-	const fetchStatus = useCallback( async () => {
+	const fetchStatus = useCallback(async () => {
 		try {
-			const data = await apiFetch< FailedImportsStatus >( {
+			const data = await apiFetch<FailedImportsStatus>({
 				path: '/wc-analytics/imports/status',
-			} );
-			setStatus( data );
-		} catch ( err ) {
+			});
+			setStatus(data);
+		} catch (err) {
 			// Fail silently — the notice is an auxiliary affordance.
 		}
-	}, [] );
+	}, []);
 
-	useEffect( () => {
+	useEffect(() => {
 		void fetchStatus();
-	}, [ fetchStatus ] );
+	}, [fetchStatus]);
 
 	const failedCount = status?.failed_count ?? 0;
 	const overflowCount = status?.failed_overflow_count ?? 0;
 
-	if ( failedCount === 0 ) {
+	if (failedCount === 0) {
 		return null;
 	}
 
 	const handleRetry = async () => {
-		setIsRetrying( true );
+		setIsRetrying(true);
 		try {
-			const response = await apiFetch< RetryFailedResponse >( {
+			const response = await apiFetch<RetryFailedResponse>({
 				path: '/wc-analytics/imports/retry-failed',
 				method: 'POST',
-			} );
-			createNotice( 'success', response.message );
+			});
+			createNotice('success', response.message);
 			await fetchStatus();
-		} catch ( err ) {
+		} catch (err) {
 			createNotice(
 				'error',
 				getErrorMessage(
 					err,
-					__( 'Failed to retry order imports.', 'woocommerce' )
+					__('Failed to retry order imports.', 'woocommerce')
 				)
 			);
 		} finally {
-			setIsRetrying( false );
+			setIsRetrying(false);
 		}
 	};
 
 	const logLink = (
 		<a
-			href={ getAdminLink( LOG_URL_PATH ) }
-			aria-label={ __( 'View the order import log', 'woocommerce' ) }
+			href={getAdminLink(LOG_URL_PATH)}
+			aria-label={__('View the order import log', 'woocommerce')}
 		/>
 	);
 
 	const template =
 		overflowCount > 0
 			? /* translators: %d: number of failed orders currently stored (additional failures were dropped past the storage limit). <link> is a link to the order import log. */
-			  __(
+				__(
 					'More than %d orders failed to import. To recover all missed orders, run the import above with "Skip previously imported customers and orders" checked. <link>View the log</link> for details.',
 					'woocommerce'
-			  )
+				)
 			: /* translators: %d: number of failed orders. <link> is a link to the order import log. */
-			  _n(
+				_n(
 					'%d order failed to import. <link>View the log</link> for details.',
 					'%d orders failed to import. <link>View the log</link> for details.',
 					failedCount,
 					'woocommerce'
-			  );
+				);
 
-	const message = createInterpolateElement(
-		sprintf( template, failedCount ),
-		{ link: logLink }
-	);
+	const message = createInterpolateElement(sprintf(template, failedCount), {
+		link: logLink,
+	});
 
 	return (
 		<Notice
 			className="woocommerce-settings-historical-data__failed-orders"
 			status="warning"
-			isDismissible={ false }
+			isDismissible={false}
 		>
-			<p>{ message }</p>
+			<p>{message}</p>
 			<Button
 				variant="secondary"
-				isBusy={ isRetrying }
-				disabled={ isRetrying }
-				aria-disabled={ isRetrying }
-				onClick={ handleRetry }
+				isBusy={isRetrying}
+				disabled={isRetrying}
+				aria-disabled={isRetrying}
+				onClick={handleRetry}
 			>
-				{ __( 'Retry failed imports', 'woocommerce' ) }
+				{__('Retry failed imports', 'woocommerce')}
 			</Button>
 		</Notice>
 	);

@@ -6,6 +6,6 @@ import { __ } from '@wordpress/i18n';
 export default {
 	heading: {
 		type: 'string',
-		default: __( 'Order details', 'woocommerce' ),
+		default: __('Order details', 'woocommerce'),
 	},
 };

@@ -25,46 +25,46 @@ import { MarketplaceContextType } from '../../contexts/types';
  * Info button next to the filter label; opens the shared badge explanation
  * popover.
  */
-function QualityBadgeInfo( props: {
+function QualityBadgeInfo(props: {
 	label: string;
 	tooltip: string;
 	docsUrl?: string;
-} ) {
-	const [ isOpen, setIsOpen ] = useState( false );
-	const [ anchor, setAnchor ] = useState< HTMLButtonElement | null >( null );
+}) {
+	const [isOpen, setIsOpen] = useState(false);
+	const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
 
 	return (
 		<>
 			<button
-				ref={ setAnchor }
+				ref={setAnchor}
 				type="button"
 				className="woocommerce-marketplace__quality-badge-filter__info"
-				aria-expanded={ isOpen }
-				aria-label={ sprintf(
+				aria-expanded={isOpen}
+				aria-label={sprintf(
 					// translators: %s: name of the quality badge, supplied by the WooCommerce.com API (e.g. "Excellence Verified").
-					__( 'About %s', 'woocommerce' ),
+					__('About %s', 'woocommerce'),
 					props.label
-				) }
-				onClick={ () => setIsOpen( ! isOpen ) }
-				onKeyDown={ ( event ) => {
+				)}
+				onClick={() => setIsOpen(!isOpen)}
+				onKeyDown={(event) => {
 					// Focus stays on the trigger when the popover has no link.
-					if ( event.key === 'Escape' && isOpen ) {
-						setIsOpen( false );
+					if (event.key === 'Escape' && isOpen) {
+						setIsOpen(false);
 					}
-				} }
+				}}
 			>
-				<Icon icon={ info } size={ 16 } />
+				<Icon icon={info} size={16} />
 			</button>
-			{ isOpen && (
+			{isOpen && (
 				<QualityBadgePopover
-					label={ props.label }
-					tooltip={ props.tooltip }
-					docsUrl={ props.docsUrl }
-					anchor={ anchor }
+					label={props.label}
+					tooltip={props.tooltip}
+					docsUrl={props.docsUrl}
+					anchor={anchor}
 					source="filter"
-					onClose={ () => setIsOpen( false ) }
+					onClose={() => setIsOpen(false)}
 				/>
-			) }
+			)}
 		</>
 	);
 }
@@ -78,12 +78,12 @@ function QualityBadgeInfo( props: {
  */
 export function isQualityBadgeFilterActive(
 	query: { quality_badge?: string },
-	iamSettings: MarketplaceContextType[ 'iamSettings' ] | undefined
+	iamSettings: MarketplaceContextType['iamSettings'] | undefined
 ): boolean {
 	const badge = iamSettings?.quality_badge;
 
 	return (
-		query.quality_badge === '1' && Boolean( badge?.enabled && badge.label )
+		query.quality_badge === '1' && Boolean(badge?.enabled && badge.label)
 	);
 }
 
@@ -94,7 +94,7 @@ export function isQualityBadgeFilterActive(
  * search API.
  */
 export default function QualityBadgeFilter() {
-	const { iamSettings } = useContext( MarketplaceContext );
+	const { iamSettings } = useContext(MarketplaceContext);
 	const query = useQuery();
 	const toggleId = useInstanceId(
 		QualityBadgeFilter,
@@ -102,26 +102,26 @@ export default function QualityBadgeFilter() {
 	) as string;
 
 	const badge = iamSettings?.quality_badge;
-	if ( ! badge?.enabled || ! badge.label ) {
+	if (!badge?.enabled || !badge.label) {
 		return null;
 	}
 
 	const isActive = query.quality_badge === '1';
 
 	const onChange = () => {
-		recordEvent( 'marketplace_quality_badge_filter_toggled', {
+		recordEvent('marketplace_quality_badge_filter_toggled', {
 			state: isActive ? 'off' : 'on',
-		} );
-		navigateTo( {
-			url: getNewPath( { quality_badge: isActive ? undefined : '1' } ),
-		} );
+		});
+		navigateTo({
+			url: getNewPath({ quality_badge: isActive ? undefined : '1' }),
+		});
 	};
 
 	return (
 		<div className="woocommerce-marketplace__quality-badge-filter">
-			<QualityBadgeIcon size={ 18 } />
-			<label htmlFor={ toggleId }>
-				{ createInterpolateElement(
+			<QualityBadgeIcon size={18} />
+			<label htmlFor={toggleId}>
+				{createInterpolateElement(
 					sprintf(
 						// translators: %s: name of the quality badge, supplied by the WooCommerce.com API (e.g. "Excellence Verified").
 						__(
@@ -135,20 +135,16 @@ export default function QualityBadgeFilter() {
 							<span className="woocommerce-marketplace__quality-badge-filter__name" />
 						),
 					}
-				) }
+				)}
 			</label>
-			{ badge.tooltip && (
+			{badge.tooltip && (
 				<QualityBadgeInfo
-					label={ badge.label }
-					tooltip={ badge.tooltip }
-					docsUrl={ badge.docs_url }
+					label={badge.label}
+					tooltip={badge.tooltip}
+					docsUrl={badge.docs_url}
 				/>
-			) }
-			<FormToggle
-				id={ toggleId }
-				checked={ isActive }
-				onChange={ onChange }
-			/>
+			)}
+			<FormToggle id={toggleId} checked={isActive} onChange={onChange} />
 		</div>
 	);
 }

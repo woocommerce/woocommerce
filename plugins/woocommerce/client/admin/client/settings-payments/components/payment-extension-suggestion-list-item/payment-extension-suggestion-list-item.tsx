@@ -56,7 +56,7 @@ type PaymentExtensionSuggestionListItemProps = {
 	/**
 	 * Callback function to handle accepting an incentive. Receives the incentive ID as a parameter.
 	 */
-	acceptIncentive: ( id: string ) => void;
+	acceptIncentive: (id: string) => void;
 	/**
 	 * Indicates whether the incentive should be highlighted.
 	 */
@@ -68,7 +68,7 @@ type PaymentExtensionSuggestionListItemProps = {
  * Displays extension details including title, description, and an action button
  * for installation or enabling the plugin. The component highlights incentive if available.
  */
-export const PaymentExtensionSuggestionListItem = ( {
+export const PaymentExtensionSuggestionListItem = ({
 	suggestion,
 	installingPlugin,
 	setUpPlugin,
@@ -76,75 +76,75 @@ export const PaymentExtensionSuggestionListItem = ( {
 	acceptIncentive,
 	shouldHighlightIncentive = false,
 	...props
-}: PaymentExtensionSuggestionListItemProps ) => {
-	const incentive = hasIncentive( suggestion ) ? suggestion._incentive : null;
+}: PaymentExtensionSuggestionListItemProps) => {
+	const incentive = hasIncentive(suggestion) ? suggestion._incentive : null;
 
 	// Determine the CTA button label based on the extension state.
-	let ctaButtonLabel = __< string >( 'Install', 'woocommerce' );
-	if ( pluginInstalled ) {
-		ctaButtonLabel = __( 'Enable', 'woocommerce' );
-	} else if ( installingPlugin === suggestion.id ) {
-		ctaButtonLabel = __( 'Installing', 'woocommerce' );
+	let ctaButtonLabel = __<string>('Install', 'woocommerce');
+	if (pluginInstalled) {
+		ctaButtonLabel = __('Enable', 'woocommerce');
+	} else if (installingPlugin === suggestion.id) {
+		ctaButtonLabel = __('Installing', 'woocommerce');
 	}
 
 	return (
 		<div
-			id={ suggestion.id }
-			className={ `transitions-disabled woocommerce-list__item woocommerce-list__item-enter-done ${
-				hasIncentive( suggestion ) && shouldHighlightIncentive
+			id={suggestion.id}
+			className={`transitions-disabled woocommerce-list__item woocommerce-list__item-enter-done ${
+				hasIncentive(suggestion) && shouldHighlightIncentive
 					? `has-incentive`
 					: ''
-			}` }
-			{ ...props }
+			}`}
+			{...props}
 		>
 			<div className="woocommerce-list__item-inner">
 				<div className="woocommerce-list__item-before">
 					<DefaultDragHandle />
-					{ suggestion.icon && (
+					{suggestion.icon && (
 						<img
-							className={ 'woocommerce-list__item-image' }
-							src={ suggestion.icon }
-							alt={ suggestion.title + ' logo' }
+							className={'woocommerce-list__item-image'}
+							src={suggestion.icon}
+							alt={suggestion.title + ' logo'}
 						/>
-					) }
+					)}
 				</div>
 				<div className="woocommerce-list__item-text">
 					<span className="woocommerce-list__item-title">
-						{ suggestion.title }{ ' ' }
-						{ ! hasIncentive( suggestion ) &&
-							isWooPayments( suggestion.id ) && (
+						{suggestion.title}{' '}
+						{!hasIncentive(suggestion) &&
+							isWooPayments(suggestion.id) && (
 								<StatusBadge status="recommended" />
-							) }
-						{ incentive && (
-							<IncentiveStatusBadge incentive={ incentive } />
-						) }
-						{ /* All payment extension suggestions are official. */ }
+							)}
+						{incentive && (
+							<IncentiveStatusBadge incentive={incentive} />
+						)}
+						{/* All payment extension suggestions are official. */}
 						<OfficialBadge
 							variant="expanded"
-							suggestionId={ suggestion.id }
+							suggestionId={suggestion.id}
 						/>
 					</span>
 					<span
 						className="woocommerce-list__item-content"
-						dangerouslySetInnerHTML={ sanitizeHTML(
-							decodeEntities( suggestion.description )
-						) }
+						dangerouslySetInnerHTML={sanitizeHTML(
+							decodeEntities(suggestion.description)
+						)}
 					/>
-					{ isWooPayments( suggestion.id ) && (
+					{isWooPayments(suggestion.id) && (
 						<WooPaymentsMethodsLogos
-							maxElements={ 10 }
-							tabletWidthBreakpoint={ 1080 } // Reduce the number of logos earlier.
-							mobileWidthBreakpoint={ 768 } // Reduce the number of logos earlier.
-							isWooPayEligible={ isWooPayEligible( suggestion ) }
+							maxElements={10}
+							tabletWidthBreakpoint={1080} // Reduce the number of logos earlier.
+							mobileWidthBreakpoint={768} // Reduce the number of logos earlier.
+							isWooPayEligible={isWooPayEligible(suggestion)}
 						/>
-					) }
+					)}
 				</div>
 				<div className="woocommerce-list__item-buttons">
 					<div className="woocommerce-list__item-buttons__actions">
 						<Button
 							variant="primary"
-							onClick={ () => {
-								if ( pluginInstalled ) {
+							onClick={() => {
+								if (pluginInstalled) {
 									// Record the event when user clicks on a suggestion's enable button.
 									recordPaymentsProviderEvent(
 										'enable_click',
@@ -157,8 +157,8 @@ export const PaymentExtensionSuggestionListItem = ( {
 									);
 								}
 
-								if ( incentive ) {
-									acceptIncentive( incentive.promo_id );
+								if (incentive) {
+									acceptIncentive(incentive.promo_id);
 								}
 
 								setUpPlugin(
@@ -167,26 +167,26 @@ export const PaymentExtensionSuggestionListItem = ( {
 										?.href ?? null,
 									pluginInstalled
 										? null
-										: suggestion._links?.attach?.href ??
-												null,
+										: (suggestion._links?.attach?.href ??
+												null),
 									'wc_settings_payments__main_suggestion'
 								);
-							} }
-							isBusy={ installingPlugin === suggestion.id }
-							disabled={ !! installingPlugin }
+							}}
+							isBusy={installingPlugin === suggestion.id}
+							disabled={!!installingPlugin}
 						>
-							{ ctaButtonLabel }
+							{ctaButtonLabel}
 						</Button>
 					</div>
 				</div>
 				<div className="woocommerce-list__item-after">
 					<div className="woocommerce-list__item-after__actions">
 						<EllipsisMenu
-							label={ __(
+							label={__(
 								'Payment provider actions',
 								'woocommerce'
-							) }
-							provider={ suggestion }
+							)}
+							provider={suggestion}
 						/>
 					</div>
 				</div>

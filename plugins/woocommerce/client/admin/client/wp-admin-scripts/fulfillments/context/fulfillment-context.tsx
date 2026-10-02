@@ -23,13 +23,13 @@ import {
 interface FulfillmentContextProps {
 	order: Order | null;
 	fulfillment: Fulfillment | null;
-	setFulfillment: ( fulfillment: Fulfillment | null ) => void;
+	setFulfillment: (fulfillment: Fulfillment | null) => void;
 	selectedItems: ItemSelection[];
-	setSelectedItems: ( items: ItemSelection[] ) => void;
+	setSelectedItems: (items: ItemSelection[]) => void;
 	notifyCustomer: boolean;
-	setNotifyCustomer: ( notifyCustomer: boolean ) => void;
+	setNotifyCustomer: (notifyCustomer: boolean) => void;
 	customerNote: string;
-	setCustomerNote: ( customerNote: string ) => void;
+	setCustomerNote: (customerNote: string) => void;
 }
 
 const defaultContextProps: FulfillmentContextProps = {
@@ -45,11 +45,11 @@ const defaultContextProps: FulfillmentContextProps = {
 };
 
 const FulfillmentContextValue =
-	createContext< FulfillmentContextProps >( defaultContextProps );
+	createContext<FulfillmentContextProps>(defaultContextProps);
 
 export const useFulfillmentContext = () => {
-	const context = React.useContext( FulfillmentContextValue );
-	if ( ! context ) {
+	const context = React.useContext(FulfillmentContextValue);
+	if (!context) {
 		throw new Error(
 			'useFulfillmentContext must be used within a FulfillmentProvider'
 		);
@@ -57,7 +57,7 @@ export const useFulfillmentContext = () => {
 	return context;
 };
 
-export const FulfillmentProvider = ( {
+export const FulfillmentProvider = ({
 	order,
 	fulfillment,
 	items,
@@ -67,11 +67,12 @@ export const FulfillmentProvider = ( {
 	fulfillment?: Fulfillment | null;
 	items?: ItemSelection[];
 	children: React.ReactNode;
-} ) => {
-	const [ _fulfillment, _setFulfillment ] =
-		React.useState< Fulfillment | null >( fulfillment ?? null );
-	const [ notifyCustomer, setNotifyCustomer ] = React.useState( true );
-	const [ customerNote, setCustomerNote ] = React.useState( '' );
+}) => {
+	const [_fulfillment, _setFulfillment] = React.useState<Fulfillment | null>(
+		fulfillment ?? null
+	);
+	const [notifyCustomer, setNotifyCustomer] = React.useState(true);
+	const [customerNote, setCustomerNote] = React.useState('');
 
 	const {
 		selectedOption,
@@ -81,24 +82,24 @@ export const FulfillmentProvider = ( {
 		providerName,
 	} = useShipmentFormContext();
 
-	const [ selectedItems, setSelectedItems ] = useState< ItemSelection[] >(
+	const [selectedItems, setSelectedItems] = useState<ItemSelection[]>(
 		items ?? []
 	);
 
 	// Refresh the selected items when the items prop changes.
-	useEffect( () => {
-		setSelectedItems( items ?? [] );
-	}, [ items ] );
+	useEffect(() => {
+		setSelectedItems(items ?? []);
+	}, [items]);
 
 	// Set the fulfillment object based on the order and selected items.
-	useEffect( () => {
-		if ( ! order?.id ) {
-			_setFulfillment( null );
+	useEffect(() => {
+		if (!order?.id) {
+			_setFulfillment(null);
 			return;
 		}
-		_setFulfillment( {
+		_setFulfillment({
 			id: fulfillment?.id ?? undefined,
-			entity_id: String( order.id ),
+			entity_id: String(order.id),
 			entity_type: WC_ORDER_CLASS,
 			is_fulfilled: fulfillment?.is_fulfilled ?? false,
 			status: fulfillment?.status ?? 'unfulfilled',
@@ -144,18 +145,18 @@ export const FulfillmentProvider = ( {
 					id: 0,
 					key: ITEMS_META_KEY,
 					value: selectedItems
-						.map( ( item ) => {
+						.map((item) => {
 							return {
 								item_id: item.item_id,
 								qty: item.selection.filter(
-									( selection ) => selection.checked
+									(selection) => selection.checked
 								).length,
 							};
-						} )
-						.filter( ( item ) => item.qty > 0 ),
+						})
+						.filter((item) => item.qty > 0),
 				},
 			],
-		} as Fulfillment );
+		} as Fulfillment);
 	}, [
 		order,
 		trackingNumber,
@@ -165,10 +166,10 @@ export const FulfillmentProvider = ( {
 		selectedOption,
 		fulfillment,
 		selectedItems,
-	] );
+	]);
 
 	const contextValues = useMemo(
-		() => ( {
+		() => ({
 			order,
 			fulfillment: _fulfillment,
 			setFulfillment: _setFulfillment,
@@ -178,7 +179,7 @@ export const FulfillmentProvider = ( {
 			setNotifyCustomer,
 			customerNote,
 			setCustomerNote,
-		} ),
+		}),
 		[
 			order,
 			_fulfillment,
@@ -193,8 +194,8 @@ export const FulfillmentProvider = ( {
 	);
 
 	return (
-		<FulfillmentContextValue.Provider value={ contextValues }>
-			{ children }
+		<FulfillmentContextValue.Provider value={contextValues}>
+			{children}
 		</FulfillmentContextValue.Provider>
 	);
 };

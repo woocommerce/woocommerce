@@ -12,7 +12,8 @@
 	border-bottom: 1px solid $gutenberg-gray-300;
 	display: grid;
 	gap: $medium-gap;
-	grid-template: "mktpl-title mktpl-search mktpl-meta" 60px
+	grid-template:
+		"mktpl-title mktpl-search mktpl-meta" 60px
 		"mktpl-tabs mktpl-tabs mktpl-tabs" auto / 1fr 320px auto;
 	padding: 0 $content-spacing-large;
 	width: 100%;
@@ -20,7 +21,8 @@
 	// On narrow screens, "stack" header items and hide the bottom border
 	@media screen and (max-width: $breakpoint-large) {
 		border-bottom: 0;
-		grid-template: "mktpl-title mktpl-meta" 60px
+		grid-template:
+			"mktpl-title mktpl-meta" 60px
 			"mktpl-tabs mktpl-tabs" 48px
 			"mktpl-search mktpl-search" auto / auto 48px;
 		padding: 0;

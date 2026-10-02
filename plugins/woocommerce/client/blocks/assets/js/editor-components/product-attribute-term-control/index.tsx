@@ -25,8 +25,10 @@ import type { AttributeObject, AttributeTerm } from '@woocommerce/types';
  */
 import './style.scss';
 
-interface Props
-	extends Omit< SearchListControlProps, 'isSingle' | 'list' | 'selected' > {
+interface Props extends Omit<
+	SearchListControlProps,
+	'isSingle' | 'list' | 'selected'
+> {
 	instanceId?: string;
 	/**
 	 * Callback to update the category operator. If not passed in, setting is not used.
@@ -48,21 +50,21 @@ interface Props
  */
 const toAttributeListItem = (
 	attribute: AttributeObject
-): SearchListItemProps => ( {
-	...convertAttributeObjectToSearchItem( attribute ),
+): SearchListItemProps => ({
+	...convertAttributeObjectToSearchItem(attribute),
 	id: -attribute.id,
 	parent: 0,
-} );
+});
 
 const toTermListItem = (
 	term: AttributeTerm,
 	attributeId: number
-): SearchListItemProps => ( {
-	...convertAttributeObjectToSearchItem( term ),
+): SearchListItemProps => ({
+	...convertAttributeObjectToSearchItem(term),
 	parent: -attributeId,
-} );
+});
 
-const ProductAttributeTermControl = ( {
+const ProductAttributeTermControl = ({
 	onChange,
 	onOperatorChange,
 	instanceId,
@@ -71,11 +73,11 @@ const ProductAttributeTermControl = ( {
 	operator = 'any',
 	selected,
 	type = 'text',
-}: Props ) => {
+}: Props) => {
 	const { errorLoadingAttributes, isLoadingAttributes, productsAttributes } =
-		useProductAttributes( true );
+		useProductAttributes(true);
 
-	const renderItem = ( args: RenderItemArgs ) => {
+	const renderItem = (args: RenderItemArgs) => {
 		const { item, search, depth = 0 } = args;
 		const count = item.count || 0;
 		const classes = [
@@ -87,22 +89,22 @@ const ProductAttributeTermControl = ( {
 			},
 		];
 
-		if ( ! item.breadcrumbs.length ) {
+		if (!item.breadcrumbs.length) {
 			return (
 				<ExpandableSearchListItem
-					{ ...args }
-					className={ clsx( classes ) }
-					item={ item }
-					isLoading={ isLoadingAttributes }
-					isSelectable={ false }
-					disabled={ item.count === 0 }
-					name={ `attributes-${ instanceId }` }
-					countLabel={ sprintf(
+					{...args}
+					className={clsx(classes)}
+					item={item}
+					isLoading={isLoadingAttributes}
+					isSelectable={false}
+					disabled={item.count === 0}
+					name={`attributes-${instanceId}`}
+					countLabel={sprintf(
 						/* translators: %d is the count of terms. */
-						_n( '%d term', '%d terms', count, 'woocommerce' ),
+						_n('%d term', '%d terms', count, 'woocommerce'),
 						count
-					) }
-					aria-label={ sprintf(
+					)}
+					aria-label={sprintf(
 						/* translators: %1$s is the item name, %2$d is the count of terms for the item. */
 						_n(
 							'%1$s, has %2$d term',
@@ -112,24 +114,24 @@ const ProductAttributeTermControl = ( {
 						),
 						item.name,
 						count
-					) }
+					)}
 				/>
 			);
 		}
 
-		const itemName = `${ item.breadcrumbs[ 0 ] }: ${ item.name }`;
+		const itemName = `${item.breadcrumbs[0]}: ${item.name}`;
 
 		return (
 			<SearchListItem
-				{ ...args }
-				name={ `terms-${ instanceId }` }
-				className={ clsx( ...classes, 'has-count' ) }
-				countLabel={ sprintf(
+				{...args}
+				name={`terms-${instanceId}`}
+				className={clsx(...classes, 'has-count')}
+				countLabel={sprintf(
 					/* translators: %d is the count of products. */
-					_n( '%d product', '%d products', count, 'woocommerce' ),
+					_n('%d product', '%d products', count, 'woocommerce'),
 					count
-				) }
-				aria-label={ sprintf(
+				)}
+				aria-label={sprintf(
 					/* translators: %1$s is the attribute name, %2$d is the count of products for that attribute. */
 					_n(
 						'%1$s, has %2$d product',
@@ -139,29 +141,29 @@ const ProductAttributeTermControl = ( {
 					),
 					itemName,
 					count
-				) }
+				)}
 			/>
 		);
 	};
 
-	const list = productsAttributes.reduce( ( acc, curr ) => {
+	const list = productsAttributes.reduce((acc, curr) => {
 		const { terms, ...attribute } = curr;
 
 		return [
 			...acc,
-			toAttributeListItem( attribute ),
-			...terms.map( ( term ) => toTermListItem( term, attribute.id ) ),
+			toAttributeListItem(attribute),
+			...terms.map((term) => toTermListItem(term, attribute.id)),
 		];
-	}, [] as SearchListItemProps[] );
+	}, [] as SearchListItemProps[]);
 
 	messages = {
-		clear: __( 'Clear all product attributes', 'woocommerce' ),
+		clear: __('Clear all product attributes', 'woocommerce'),
 		noItems: __(
 			"Your store doesn't have any product attributes.",
 			'woocommerce'
 		),
-		search: __( 'Search for product attributes', 'woocommerce' ),
-		selected: ( n: number ) =>
+		search: __('Search for product attributes', 'woocommerce'),
+		selected: (n: number) =>
 			sprintf(
 				/* translators: %d is the count of attributes selected. */
 				_n(
@@ -172,53 +174,45 @@ const ProductAttributeTermControl = ( {
 				),
 				n
 			),
-		updated: __(
-			'Product attribute search results updated.',
-			'woocommerce'
-		),
+		updated: __('Product attribute search results updated.', 'woocommerce'),
 		...messages,
 	};
 
-	if ( errorLoadingAttributes ) {
-		return <ErrorMessage error={ errorLoadingAttributes } />;
+	if (errorLoadingAttributes) {
+		return <ErrorMessage error={errorLoadingAttributes} />;
 	}
 
 	return (
 		<>
 			<SearchListControl
 				className="woocommerce-product-attributes"
-				isCompact={ isCompact }
+				isCompact={isCompact}
 				isHierarchical
-				isLoading={ isLoadingAttributes }
-				isSingle={ false }
-				list={ list }
-				messages={ messages }
-				onChange={ onChange }
-				renderItem={ renderItem }
+				isLoading={isLoadingAttributes}
+				isSingle={false}
+				list={list}
+				messages={messages}
+				onChange={onChange}
+				renderItem={renderItem}
 				selected={
 					selected
-						.map( ( { id } ) =>
-							list.find( ( term ) => term.id === id )
-						)
-						.filter( Boolean ) as SearchListItemProps[]
+						.map(({ id }) => list.find((term) => term.id === id))
+						.filter(Boolean) as SearchListItemProps[]
 				}
-				type={ type }
+				type={type}
 			/>
-			{ !! onOperatorChange && (
-				<div hidden={ selected.length < 2 }>
+			{!!onOperatorChange && (
+				<div hidden={selected.length < 2}>
 					<SelectControl
 						className="woocommerce-product-attributes__operator"
-						label={ __(
-							'Display products matching',
-							'woocommerce'
-						) }
-						help={ __(
+						label={__('Display products matching', 'woocommerce')}
+						help={__(
 							'Pick at least two attributes to use this setting.',
 							'woocommerce'
-						) }
-						value={ operator }
-						onChange={ onOperatorChange }
-						options={ [
+						)}
+						value={operator}
+						onChange={onOperatorChange}
+						options={[
 							{
 								label: __(
 									'Any selected attributes',
@@ -233,12 +227,12 @@ const ProductAttributeTermControl = ( {
 								),
 								value: 'all',
 							},
-						] }
+						]}
 					/>
 				</div>
-			) }
+			)}
 		</>
 	);
 };
 
-export default withInstanceId( ProductAttributeTermControl );
+export default withInstanceId(ProductAttributeTermControl);

@@ -21,11 +21,11 @@ import { VIEWED_FROM_EMAIL_LIST } from '../wp-admin-scripts/email-editor-integra
 // Shown in place of the list when its chunk fails to load. Without it the
 // failure would unmount the whole slot, description and button included.
 const ListViewLoadError: typeof ListViewComponent = () => (
-	<Notice status="error" isDismissible={ false }>
-		{ __(
+	<Notice status="error" isDismissible={false}>
+		{__(
 			'The email list could not be loaded. Reload the page to try again.',
 			'woocommerce'
-		) }
+		)}
 	</Notice>
 );
 
@@ -34,25 +34,25 @@ const ListViewLoadError: typeof ListViewComponent = () => (
 // editor enabled. Its stylesheet is a separate chunk picked by text direction,
 // because the chunk runtime bypasses the RTL swap WordPress applies to
 // registered styles. Both are awaited, so the list never renders unstyled.
-const ListView = lazy( () =>
-	Promise.all( [
+const ListView = lazy(() =>
+	Promise.all([
 		import(
 			/* webpackChunkName: "settings-email-listing" */ './settings-email-listing-listview'
 		),
 		isRTL()
 			? import(
 					/* webpackChunkName: "settings-email-listing-styles-rtl" */ './settings-email-listing-rtl.scss'
-			  )
+				)
 			: import(
 					/* webpackChunkName: "settings-email-listing-styles" */ './settings-email-listing.scss'
-			  ),
-	] )
-		.then( ( [ module ] ) => ( { default: module.ListView } ) )
-		.catch( ( error ) => {
+				),
+	])
+		.then(([module]) => ({ default: module.ListView }))
+		.catch((error) => {
 			// eslint-disable-next-line no-console
-			console.error( error );
+			console.error(error);
 			return { default: ListViewLoadError };
-		} )
+		})
 );
 
 export type Recipients = {
@@ -71,9 +71,7 @@ export type EmailStatus = 'enabled' | 'disabled' | 'manual';
  * Public REST API contract — see RSM-140 spec § 4.3.
  */
 export type TemplateStatus =
-	| 'in_sync'
-	| 'core_updated_uncustomized'
-	| 'core_updated_customized';
+	'in_sync' | 'core_updated_uncustomized' | 'core_updated_customized';
 
 export type EmailType = {
 	title: string;
@@ -119,7 +117,7 @@ export type EmailType = {
 	wasBackfilled: boolean;
 };
 
-const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
+const { Fill } = createSlotFill(SETTINGS_SLOT_FILL_CONSTANT);
 
 /**
  * Session-storage key for the list-page `_list_viewed` Tracks dedup. Fires once
@@ -136,7 +134,7 @@ const LIST_VIEWED_DEDUP_SESSION_KEY = 'wc_email_update_list_viewed';
  * otherwise a post is created on click for `templateSessionEmailTypeId` —
  * any email type works as the session host, the listing passes its first row.
  */
-const EditTemplateButton = ( {
+const EditTemplateButton = ({
 	editTemplateUrl,
 	emailTemplateId,
 	templateSessionEmailTypeId,
@@ -144,41 +142,41 @@ const EditTemplateButton = ( {
 	editTemplateUrl: string | null;
 	emailTemplateId: string | null;
 	templateSessionEmailTypeId: string | null;
-} ) => {
-	const [ isCreatingPost, setIsCreatingPost ] = useState( false );
+}) => {
+	const [isCreatingPost, setIsCreatingPost] = useState(false);
 
-	if ( editTemplateUrl ) {
+	if (editTemplateUrl) {
 		return (
 			<Button
 				variant="primary"
-				href={ editTemplateUrl }
+				href={editTemplateUrl}
 				className="woocommerce-email-listing-edit-template-button"
 			>
-				{ __( 'Edit template', 'woocommerce' ) }
+				{__('Edit template', 'woocommerce')}
 			</Button>
 		);
 	}
 
-	if ( ! emailTemplateId || ! templateSessionEmailTypeId ) {
+	if (!emailTemplateId || !templateSessionEmailTypeId) {
 		return null;
 	}
 
 	const handleClick = async () => {
-		setIsCreatingPost( true );
+		setIsCreatingPost(true);
 		const response = await recreateEmailPostRequest(
 			templateSessionEmailTypeId
 		);
-		const postId = parseInt( response?.post_id ?? '', 10 );
-		if ( Number.isInteger( postId ) && postId > 0 ) {
+		const postId = parseInt(response?.post_id ?? '', 10);
+		if (Number.isInteger(postId) && postId > 0) {
 			window.location.href = getAdminLink(
-				`post.php?post=${ postId }&action=edit&template=${ encodeURIComponent(
+				`post.php?post=${postId}&action=edit&template=${encodeURIComponent(
 					emailTemplateId
-				) }`
+				)}`
 			);
 			return;
 		}
-		setIsCreatingPost( false );
-		void dispatch( 'core/notices' ).createErrorNotice(
+		setIsCreatingPost(false);
+		void dispatch('core/notices').createErrorNotice(
 			__(
 				'Could not prepare the email template for editing. Please try again.',
 				'woocommerce'
@@ -189,12 +187,12 @@ const EditTemplateButton = ( {
 	return (
 		<Button
 			variant="primary"
-			isBusy={ isCreatingPost }
-			disabled={ isCreatingPost }
-			onClick={ handleClick }
+			isBusy={isCreatingPost}
+			disabled={isCreatingPost}
+			onClick={handleClick}
 			className="woocommerce-email-listing-edit-template-button"
 		>
-			{ __( 'Edit template', 'woocommerce' ) }
+			{__('Edit template', 'woocommerce')}
 		</Button>
 	);
 };
@@ -203,49 +201,47 @@ const EditTemplateButton = ( {
 // fill mounts, so the switch to React is not visible.
 const ListViewPlaceholder = () => (
 	<div className="woocommerce-email-listing-placeholder" role="status">
-		<p>{ __( 'Loading…', 'woocommerce' ) }</p>
+		<p>{__('Loading…', 'woocommerce')}</p>
 	</div>
 );
 
-export const EmailListingFill: React.FC< {
+export const EmailListingFill: React.FC<{
 	emailTypes: EmailType[];
 	editTemplateUrl: string | null;
 	emailTemplateId: string | null;
-} > = ( { emailTypes, editTemplateUrl, emailTemplateId } ) => {
+}> = ({ emailTypes, editTemplateUrl, emailTemplateId }) => {
 	// Fire one aggregate `_list_viewed` per session covering the entire list.
 	// Tracking per-row creates one event per visible cell (~20+ on a default
 	// install) per page load with limited analytical lift over a single
 	// page-level signal — the editor-banner `_viewed` covers per-post drilldown
 	// already. sessionStorage persists for the tab's lifetime, so refreshes
 	// dedup; a new tab fires once.
-	useEffect( () => {
+	useEffect(() => {
 		try {
-			if (
-				window.sessionStorage.getItem( LIST_VIEWED_DEDUP_SESSION_KEY )
-			) {
+			if (window.sessionStorage.getItem(LIST_VIEWED_DEDUP_SESSION_KEY)) {
 				return;
 			}
-			window.sessionStorage.setItem( LIST_VIEWED_DEDUP_SESSION_KEY, '1' );
+			window.sessionStorage.setItem(LIST_VIEWED_DEDUP_SESSION_KEY, '1');
 		} catch {
 			// sessionStorage unavailable (privacy mode / quota). Fall through
 			// and fire the event anyway — duplicate counts are preferable to
 			// silent dropouts when storage is blocked.
 		}
 
-		const eligibleCount = emailTypes.filter( ( post ) =>
-			shouldShowReviewUpdate( post )
+		const eligibleCount = emailTypes.filter((post) =>
+			shouldShowReviewUpdate(post)
 		).length;
 
-		recordEvent( 'block_email_list_viewed', {
+		recordEvent('block_email_list_viewed', {
 			viewed_from: VIEWED_FROM_EMAIL_LIST,
 			eligible_count: eligibleCount,
 			total_count: emailTypes.length,
-		} );
+		});
 		// `emailTypes` is sourced once from the server-rendered slot payload
 		// and does not change during the page's lifetime, so this effect runs
 		// exactly once per mount.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [] );
+	}, []);
 
 	return (
 		<Fill>
@@ -254,19 +250,19 @@ export const EmailListingFill: React.FC< {
 				className="woocommerce-email-listing-description"
 			>
 				<p>
-					{ __(
+					{__(
 						"Manage email notifications sent from WooCommerce below or click on 'Edit template' to customize your email template design.",
 						'woocommerce'
-					) }
+					)}
 				</p>
 				<EditTemplateButton
-					editTemplateUrl={ editTemplateUrl }
-					emailTemplateId={ emailTemplateId }
-					templateSessionEmailTypeId={ emailTypes[ 0 ]?.id ?? null }
+					editTemplateUrl={editTemplateUrl}
+					emailTemplateId={emailTemplateId}
+					templateSessionEmailTypeId={emailTypes[0]?.id ?? null}
 				/>
 			</div>
-			<Suspense fallback={ <ListViewPlaceholder /> }>
-				<ListView emailTypes={ emailTypes } />
+			<Suspense fallback={<ListViewPlaceholder />}>
+				<ListView emailTypes={emailTypes} />
 			</Suspense>
 		</Fill>
 	);
@@ -283,28 +279,28 @@ export const EmailListingFill: React.FC< {
  * Exported for unit testing.
  */
 export const normalizeEmailTypePayload = (
-	raw: Record< string, unknown >
+	raw: Record<string, unknown>
 ): EmailType => {
 	const templateStatus =
 		typeof raw.template_status === 'string' &&
 		raw.template_status.length > 0
-			? ( raw.template_status as EmailType[ 'templateStatus' ] )
+			? (raw.template_status as EmailType['templateStatus'])
 			: null;
 	const templateVersion =
 		typeof raw.template_version === 'string' &&
 		raw.template_version.length > 0
-			? ( raw.template_version as string )
+			? (raw.template_version as string)
 			: null;
 	const currentVersion =
 		typeof raw.current_version === 'string' &&
 		raw.current_version.length > 0
-			? ( raw.current_version as string )
+			? (raw.current_version as string)
 			: null;
 	const wasBackfilled =
 		raw.was_backfilled === true || raw.was_backfilled === 1;
 
 	return {
-		...( raw as unknown as EmailType ),
+		...(raw as unknown as EmailType),
 		templateStatus,
 		templateVersion,
 		currentVersion,
@@ -314,35 +310,31 @@ export const normalizeEmailTypePayload = (
 
 export const registerSettingsEmailListingFill = () => {
 	const slotElementId = 'wc_settings_email_listing_slotfill';
-	const slotElement = document.getElementById( slotElementId );
-	if ( ! slotElement ) {
+	const slotElement = document.getElementById(slotElementId);
+	if (!slotElement) {
 		return null;
 	}
-	const emailTypesData = slotElement.getAttribute( 'data-email-types' );
-	const editTemplateUrl = slotElement.getAttribute(
-		'data-edit-template-url'
-	);
-	const emailTemplateId = slotElement.getAttribute(
-		'data-email-template-id'
-	);
+	const emailTypesData = slotElement.getAttribute('data-email-types');
+	const editTemplateUrl = slotElement.getAttribute('data-edit-template-url');
+	const emailTemplateId = slotElement.getAttribute('data-email-template-id');
 	let emailTypes: EmailType[] = [];
 	try {
-		const parsed = JSON.parse( emailTypesData || '' );
-		emailTypes = Array.isArray( parsed )
-			? parsed.map( ( item: Record< string, unknown > ) =>
-					normalizeEmailTypePayload( item )
-			  )
+		const parsed = JSON.parse(emailTypesData || '');
+		emailTypes = Array.isArray(parsed)
+			? parsed.map((item: Record<string, unknown>) =>
+					normalizeEmailTypePayload(item)
+				)
 			: [];
-	} catch ( e ) {}
+	} catch (e) {}
 
-	registerPlugin( 'woocommerce-admin-settings-email-listing', {
+	registerPlugin('woocommerce-admin-settings-email-listing', {
 		scope: 'woocommerce-email-listing',
 		render: () => (
 			<EmailListingFill
-				emailTypes={ emailTypes }
-				editTemplateUrl={ editTemplateUrl }
-				emailTemplateId={ emailTemplateId }
+				emailTypes={emailTypes}
+				editTemplateUrl={editTemplateUrl}
+				emailTemplateId={emailTemplateId}
 			/>
 		),
-	} );
+	});
 };

@@ -31,10 +31,10 @@ function trackConnectErrorActionClicked(
 	action: 'manage_subscriptions' | 'contact_support' | 'try_again',
 	errorCode: string
 ) {
-	recordEvent( 'marketplace_product_connect_error_action_clicked', {
+	recordEvent('marketplace_product_connect_error_action_clicked', {
 		action,
 		error_code: errorCode,
-	} );
+	});
 }
 
 function getConnectionErrorMessage(
@@ -43,16 +43,16 @@ function getConnectionErrorMessage(
 ): string {
 	const code = error?.data?.code || '';
 
-	if ( code === 'maxed_out' ) {
+	if (code === 'maxed_out') {
 		const sites = error?.data?.data?.sites_list || [];
 		const domainCount = Number(
 			error?.data?.data?.total_domains ?? sites.length
 		);
 
-		if ( domainCount >= 2 ) {
-			const first = sites[ 0 ] || '';
-			const second = sites[ 1 ] || '';
-			if ( domainCount === 2 ) {
+		if (domainCount >= 2) {
+			const first = sites[0] || '';
+			const second = sites[1] || '';
+			if (domainCount === 2) {
 				return (
 					baseMessage +
 					' ' +
@@ -88,7 +88,7 @@ function getConnectionErrorMessage(
 		}
 	}
 
-	if ( code === 'invalid_product_key' ) {
+	if (code === 'invalid_product_key') {
 		return (
 			baseMessage +
 			' ' +
@@ -99,7 +99,7 @@ function getConnectionErrorMessage(
 		);
 	}
 
-	if ( code === 'invalid_product' ) {
+	if (code === 'invalid_product') {
 		return (
 			baseMessage +
 			' ' +
@@ -112,7 +112,7 @@ function getConnectionErrorMessage(
 
 	if (
 		ERROR_CODES_WITH_MESSAGES.includes(
-			code as ( typeof ERROR_CODES_WITH_MESSAGES )[ number ]
+			code as (typeof ERROR_CODES_WITH_MESSAGES)[number]
 		)
 	) {
 		const serverMessage = error?.data?.message || '';
@@ -122,24 +122,24 @@ function getConnectionErrorMessage(
 	return baseMessage;
 }
 
-function getConnectionErrorAction( error: ConnectError ): StoreAction | null {
+function getConnectionErrorAction(error: ConnectError): StoreAction | null {
 	const code = error?.data?.code || '';
-	if ( code === 'maxed_out' ) {
+	if (code === 'maxed_out') {
 		return {
-			label: __( 'Manage subscriptions', 'woocommerce' ),
+			label: __('Manage subscriptions', 'woocommerce'),
 			onClick: () => {
-				trackConnectErrorActionClicked( 'manage_subscriptions', code );
-				window.location.assign( MARKETPLACE_RENEW_SUBSCRIPTION_PATH );
+				trackConnectErrorActionClicked('manage_subscriptions', code);
+				window.location.assign(MARKETPLACE_RENEW_SUBSCRIPTION_PATH);
 			},
 		};
 	}
 
-	if ( code === 'invalid_product_key' ) {
+	if (code === 'invalid_product_key') {
 		return {
-			label: __( 'Contact support', 'woocommerce' ),
+			label: __('Contact support', 'woocommerce'),
 			onClick: () => {
-				trackConnectErrorActionClicked( 'contact_support', code );
-				window.location.assign( MARKETPLACE_SUPPORT_PATH );
+				trackConnectErrorActionClicked('contact_support', code);
+				window.location.assign(MARKETPLACE_SUPPORT_PATH);
 			},
 		};
 	}

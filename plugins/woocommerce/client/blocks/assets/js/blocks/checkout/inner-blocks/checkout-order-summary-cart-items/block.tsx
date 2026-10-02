@@ -10,17 +10,17 @@ import { TotalsWrapper } from '@woocommerce/blocks-components';
  */
 import { BlockAttributes } from './edit';
 
-const Block = ( {
+const Block = ({
 	className = '',
 	disableProductDescriptions = false,
-}: BlockAttributes ): JSX.Element => {
+}: BlockAttributes): JSX.Element => {
 	const { cartItems } = useStoreCart();
 
 	return (
-		<TotalsWrapper className={ className }>
+		<TotalsWrapper className={className}>
 			<OrderSummary
-				cartItems={ cartItems }
-				disableProductDescriptions={ disableProductDescriptions }
+				cartItems={cartItems}
+				disableProductDescriptions={disableProductDescriptions}
 			/>
 		</TotalsWrapper>
 	);

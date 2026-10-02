@@ -14,7 +14,7 @@ export interface ChangeSummaryBlockEntry {
 	/** Humanized label for display, e.g. `Heading`. */
 	label: string;
 	/** Index path through the parsed block tree on the relevant side. */
-	path: Array< number | string >;
+	path: Array<number | string>;
 }
 
 /**
@@ -32,7 +32,7 @@ export interface ChangeSummaryCopyChange {
 	/** Total matched blocks of this type on the core side. */
 	total: number;
 	/** Post-side index path of the conflicting block. */
-	path: Array< number | string >;
+	path: Array<number | string>;
 	/**
 	 * Three-way path only. `true` = merchant unchanged, core changed
 	 * (drawer can apply silently). `false` = both changed (true conflict).
@@ -50,7 +50,7 @@ export interface ChangeSummaryStructuralChange {
 	/** Pre-localized one-line description. */
 	description: string;
 	/** Index path of the affected block; absent for `kind: 'reorder'`. */
-	path?: Array< number | string >;
+	path?: Array<number | string>;
 }
 
 /**
@@ -90,56 +90,56 @@ export function useChangeSummary(
 	postId: number | null,
 	enabled: boolean
 ): UseChangeSummaryResult {
-	const [ summary, setSummary ] = useState< ChangeSummary | null >( null );
-	const [ isLoading, setIsLoading ] = useState< boolean >( false );
-	const [ error, setError ] = useState< Error | null >( null );
-	const [ refreshKey, setRefreshKey ] = useState< number >( 0 );
+	const [summary, setSummary] = useState<ChangeSummary | null>(null);
+	const [isLoading, setIsLoading] = useState<boolean>(false);
+	const [error, setError] = useState<Error | null>(null);
+	const [refreshKey, setRefreshKey] = useState<number>(0);
 
-	const refetch = useCallback( () => {
-		setRefreshKey( ( k ) => k + 1 );
-	}, [] );
+	const refetch = useCallback(() => {
+		setRefreshKey((k) => k + 1);
+	}, []);
 
-	useEffect( () => {
-		if ( ! enabled || ! postId ) {
+	useEffect(() => {
+		if (!enabled || !postId) {
 			// Reset state so the drawer never renders a previous template's
 			// summary (or keeps Apply enabled) after the post-id changes or
 			// the drawer is re-disabled.
-			setSummary( null );
-			setError( null );
-			setIsLoading( false );
+			setSummary(null);
+			setError(null);
+			setIsLoading(false);
 			return;
 		}
 
 		let cancelled = false;
-		setSummary( null );
-		setIsLoading( true );
-		setError( null );
+		setSummary(null);
+		setIsLoading(true);
+		setError(null);
 
-		apiFetch< ChangeSummary >( {
-			path: `/woocommerce-email-editor/v1/emails/${ postId }/change-summary`,
-		} )
-			.then( ( res ) => {
-				if ( ! cancelled ) {
-					setSummary( res );
+		apiFetch<ChangeSummary>({
+			path: `/woocommerce-email-editor/v1/emails/${postId}/change-summary`,
+		})
+			.then((res) => {
+				if (!cancelled) {
+					setSummary(res);
 				}
-			} )
-			.catch( ( err: unknown ) => {
-				if ( ! cancelled ) {
+			})
+			.catch((err: unknown) => {
+				if (!cancelled) {
 					setError(
-						err instanceof Error ? err : new Error( String( err ) )
+						err instanceof Error ? err : new Error(String(err))
 					);
 				}
-			} )
-			.finally( () => {
-				if ( ! cancelled ) {
-					setIsLoading( false );
+			})
+			.finally(() => {
+				if (!cancelled) {
+					setIsLoading(false);
 				}
-			} );
+			});
 
 		return () => {
 			cancelled = true;
 		};
-	}, [ postId, enabled, refreshKey ] );
+	}, [postId, enabled, refreshKey]);
 
 	return { summary, isLoading, error, refetch };
 }

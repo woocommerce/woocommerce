@@ -17,7 +17,7 @@ import { ButtonPositionProps, ProductSearchBlockProps } from './types';
  *
  * @param {ProductSearchBlockProps} block - A WooCommerce block.
  */
-export function isWooSearchBlockVariation( block: ProductSearchBlockProps ) {
+export function isWooSearchBlockVariation(block: ProductSearchBlockProps) {
 	return (
 		block.name === SEARCH_BLOCK_NAME &&
 		block.attributes?.namespace === SEARCH_VARIATION_NAME
@@ -32,7 +32,7 @@ export function isWooSearchBlockVariation( block: ProductSearchBlockProps ) {
  *
  * @param {string} buttonPosition - The position of the button to check.
  */
-export function isInputAndButtonOption( buttonPosition: string ): boolean {
+export function isInputAndButtonOption(buttonPosition: string): boolean {
 	return (
 		buttonPosition === 'button-outside' ||
 		buttonPosition === 'button-inside'
@@ -48,10 +48,8 @@ export function isInputAndButtonOption( buttonPosition: string ): boolean {
  *
  * @param {string} buttonPosition - The position of the button to evaluate.
  */
-export function getSelectedRadioControlOption(
-	buttonPosition: string
-): string {
-	if ( isInputAndButtonOption( buttonPosition ) ) {
+export function getSelectedRadioControlOption(buttonPosition: string): string {
+	if (isInputAndButtonOption(buttonPosition)) {
 		return PositionOptions.INPUT_AND_BUTTON;
 	}
 	return buttonPosition;
@@ -66,8 +64,8 @@ export function getSelectedRadioControlOption(
  *
  * @param {ButtonPositionProps} value - The position of the button to evaluate.
  */
-export function getInputAndButtonOption( value: ButtonPositionProps ) {
-	if ( isInputAndButtonOption( value ) ) {
+export function getInputAndButtonOption(value: ButtonPositionProps) {
+	if (isInputAndButtonOption(value)) {
 		return value;
 	}
 	// The default value is 'inside' for input and button.

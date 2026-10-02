@@ -20,7 +20,7 @@ import {
 	registerOrderAttributionSlotFill,
 } from '../order-attribution-install-banner/order-editor/slot';
 
-const debug = debugFactory( 'wc-admin:client' );
+const debug = debugFactory('wc-admin:client');
 
 /**
  * Renders the hydrated layout. This will render the header.
@@ -37,17 +37,15 @@ const renderHydratedLayout = (
 	let HydratedEmbedLayout = withSettingsHydration(
 		settingsGroup,
 		window.wcSettings?.admin
-	)( EmbedLayout as React.ComponentType< Record< string, unknown > > );
+	)(EmbedLayout as React.ComponentType<Record<string, unknown>>);
 
-	if ( hydrateUser ) {
-		HydratedEmbedLayout = withCurrentUserHydration( hydrateUser )(
-			HydratedEmbedLayout as React.ComponentType<
-				Record< string, unknown >
-			>
+	if (hydrateUser) {
+		HydratedEmbedLayout = withCurrentUserHydration(hydrateUser)(
+			HydratedEmbedLayout as React.ComponentType<Record<string, unknown>>
 		);
 	}
 
-	createRoot( embeddedRoot ).render( <HydratedEmbedLayout /> );
+	createRoot(embeddedRoot).render(<HydratedEmbedLayout />);
 };
 
 /**
@@ -56,14 +54,14 @@ const renderHydratedLayout = (
  * @param {HTMLElement} wpBody - The WP body element.
  * @return {Element | null} The wrap element or null if not found.
  */
-const findWrapElement = ( wpBody: HTMLElement ) => {
+const findWrapElement = (wpBody: HTMLElement) => {
 	const wrap =
-		wpBody.querySelector( '.wrap.woocommerce' ) ||
-		document.querySelector( '#wpbody-content > .woocommerce' ) ||
-		wpBody.querySelector( '.wrap' );
+		wpBody.querySelector('.wrap.woocommerce') ||
+		document.querySelector('#wpbody-content > .woocommerce') ||
+		wpBody.querySelector('.wrap');
 
-	if ( ! wrap ) {
-		debug( 'Wrap element not found' );
+	if (!wrap) {
+		debug('Wrap element not found');
 		return null;
 	}
 	return wrap;
@@ -75,11 +73,11 @@ const findWrapElement = ( wpBody: HTMLElement ) => {
  * @param {HTMLElement} wpBody - The WP body element.
  * @param {Element}     wrap   - The wrap element.
  */
-const renderNotices = ( wpBody: HTMLElement, wrap: Element ) => {
-	const noticeContainer = document.createElement( 'div' );
+const renderNotices = (wpBody: HTMLElement, wrap: Element) => {
+	const noticeContainer = document.createElement('div');
 	// Preserve the wrap's initial top spacing when this container breaks its adjacent-sibling selector.
 	noticeContainer.className = 'woocommerce-layout';
-	createRoot( wpBody.insertBefore( noticeContainer, wrap ) ).render(
+	createRoot(wpBody.insertBefore(noticeContainer, wrap)).render(
 		<NoticeArea />
 	);
 };
@@ -90,11 +88,11 @@ const renderNotices = ( wpBody: HTMLElement, wrap: Element ) => {
  * @param {HTMLElement} wpBody - The WP body element.
  * @param {Element}     wrap   - The wrap element.
  */
-const renderEmbeddedBody = ( wpBody: HTMLElement, wrap: Element ) => {
-	const embeddedBodyContainer = document.createElement( 'div' );
+const renderEmbeddedBody = (wpBody: HTMLElement, wrap: Element) => {
+	const embeddedBodyContainer = document.createElement('div');
 	createRoot(
-		wpBody.insertBefore( embeddedBodyContainer, wrap.nextSibling )
-	).render( <EmbeddedBodyLayout /> );
+		wpBody.insertBefore(embeddedBodyContainer, wrap.nextSibling)
+	).render(<EmbeddedBodyLayout />);
 };
 
 /**
@@ -119,32 +117,32 @@ export const renderEmbeddedLayout = (
 ) => {
 	try {
 		// Render the header
-		renderHydratedLayout( embeddedRoot, hydrateUser, settingsGroup );
+		renderHydratedLayout(embeddedRoot, hydrateUser, settingsGroup);
 
 		// Remove the loading class
-		embeddedRoot.classList.remove( 'is-embed-loading' );
+		embeddedRoot.classList.remove('is-embed-loading');
 
 		// Get and verify wpBody exists
-		const wpBody = document.getElementById( 'wpbody-content' );
-		if ( ! wpBody ) {
-			debug( 'WP Body content element not found' );
+		const wpBody = document.getElementById('wpbody-content');
+		if (!wpBody) {
+			debug('WP Body content element not found');
 			return false;
 		}
 
 		// Find and verify wrap element
-		const wrap = findWrapElement( wpBody );
-		if ( ! wrap ) {
+		const wrap = findWrapElement(wpBody);
+		if (!wrap) {
 			return false;
 		}
 
 		// Render components
-		renderNotices( wpBody, wrap );
-		renderEmbeddedBody( wpBody, wrap );
+		renderNotices(wpBody, wrap);
+		renderEmbeddedBody(wpBody, wrap);
 		registerSlotFills();
 
 		return true;
-	} catch ( error ) {
+	} catch (error) {
 		// eslint-disable-next-line no-console
-		console.error( 'Failed to initialize embedded layout:', error );
+		console.error('Failed to initialize embedded layout:', error);
 	}
 };

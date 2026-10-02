@@ -4,20 +4,15 @@
 import { useEmailStyles } from '../../../hooks';
 import { getElementStyles } from '../utils';
 
-export default function TypographyPreview( {
+export default function TypographyPreview({
 	element,
 	headingLevel,
 }: {
 	element: string;
 	headingLevel: string;
-} ) {
+}) {
 	const { styles } = useEmailStyles();
-	const elementStyles = getElementStyles(
-		styles,
-		element,
-		headingLevel,
-		true
-	);
+	const elementStyles = getElementStyles(styles, element, headingLevel, true);
 
 	const {
 		fontFamily,
@@ -37,13 +32,13 @@ export default function TypographyPreview( {
 		element === 'link'
 			? {
 					textDecoration: textDecoration ?? 'underline',
-			  }
+				}
 			: {};
 
 	return (
 		<div
 			className="edit-site-typography-preview"
-			style={ {
+			style={{
 				fontFamily: fontFamily ?? 'serif',
 				background,
 				color: textColor,
@@ -55,7 +50,7 @@ export default function TypographyPreview( {
 				textDecoration,
 				textTransform,
 				...extraStyles,
-			} }
+			}}
 		>
 			Aa
 		</div>

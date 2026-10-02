@@ -20,7 +20,7 @@ interface StoreAddToCart {
 	cartQuantity: number;
 	addingToCart: boolean;
 	cartIsLoading: boolean;
-	addToCart: ( quantity?: number ) => Promise< boolean >;
+	addToCart: (quantity?: number) => Promise<boolean>;
 }
 /**
  * Get the quantity of a product in the cart.
@@ -30,10 +30,10 @@ interface StoreAddToCart {
  * @return {number} Quantity in the cart.
  */
 const getQuantityFromCartItems = (
-	cartItems: Array< CartItem >,
+	cartItems: Array<CartItem>,
 	productId: number
 ): number => {
-	const productItem = cartItems.find( ( { id } ) => id === productId );
+	const productItem = cartItems.find(({ id }) => id === productId);
 
 	return productItem ? productItem.quantity : 0;
 };
@@ -48,44 +48,44 @@ const getQuantityFromCartItems = (
  * @return {StoreCartItemAddToCart} An object exposing data and actions relating
  *                                  to add to cart functionality.
  */
-export const useStoreAddToCart = ( productId: number ): StoreAddToCart => {
-	const { addItemToCart } = useDispatch( cartStore );
+export const useStoreAddToCart = (productId: number): StoreAddToCart => {
+	const { addItemToCart } = useDispatch(cartStore);
 	const { cartItems, cartIsLoading } = useStoreCart();
-	const { createErrorNotice, removeNotice } = useDispatch( 'core/notices' );
+	const { createErrorNotice, removeNotice } = useDispatch('core/notices');
 
-	const [ addingToCart, setAddingToCart ] = useState( false );
+	const [addingToCart, setAddingToCart] = useState(false);
 	const currentCartItemQuantity = useRef(
-		getQuantityFromCartItems( cartItems, productId )
+		getQuantityFromCartItems(cartItems, productId)
 	);
 
-	const addToCart = ( quantity = 1 ) => {
-		setAddingToCart( true );
-		return addItemToCart( productId, quantity )
-			.then( () => {
-				removeNotice( 'add-to-cart' );
-			} )
-			.catch( ( error ) => {
-				createErrorNotice( decodeEntities( error.message ), {
+	const addToCart = (quantity = 1) => {
+		setAddingToCart(true);
+		return addItemToCart(productId, quantity)
+			.then(() => {
+				removeNotice('add-to-cart');
+			})
+			.catch((error) => {
+				createErrorNotice(decodeEntities(error.message), {
 					id: 'add-to-cart',
 					context: 'wc/all-products',
 					isDismissible: true,
-				} );
-			} )
-			.finally( () => {
-				setAddingToCart( false );
-			} );
+				});
+			})
+			.finally(() => {
+				setAddingToCart(false);
+			});
 	};
 
-	useEffect( () => {
-		const quantity = getQuantityFromCartItems( cartItems, productId );
+	useEffect(() => {
+		const quantity = getQuantityFromCartItems(cartItems, productId);
 
-		if ( quantity !== currentCartItemQuantity.current ) {
+		if (quantity !== currentCartItemQuantity.current) {
 			currentCartItemQuantity.current = quantity;
 		}
-	}, [ cartItems, productId ] );
+	}, [cartItems, productId]);
 
 	return {
-		cartQuantity: Number.isFinite( currentCartItemQuantity.current )
+		cartQuantity: Number.isFinite(currentCartItemQuantity.current)
 			? currentCartItemQuantity.current
 			: 0,
 		addingToCart,

@@ -21,102 +21,98 @@ interface CartLineItemsTableProps {
 	className?: string;
 }
 
-const setRefs = ( lineItems: CartResponseItem[] ) => {
-	const refs = {} as Record< string, RefObject< HTMLTableRowElement > >;
-	lineItems.forEach( ( { key } ) => {
-		refs[ key ] = createRef();
-	} );
+const setRefs = (lineItems: CartResponseItem[]) => {
+	const refs = {} as Record<string, RefObject<HTMLTableRowElement>>;
+	lineItems.forEach(({ key }) => {
+		refs[key] = createRef();
+	});
 	return refs;
 };
 
-const CartLineItemsTable = ( {
+const CartLineItemsTable = ({
 	lineItems = [],
 	isLoading = false,
 	className,
-}: CartLineItemsTableProps ): JSX.Element => {
-	const tableRef = useRef< HTMLTableElement | null >( null );
-	const rowRefs = useRef( setRefs( lineItems ) );
-	useEffect( () => {
-		rowRefs.current = setRefs( lineItems );
-	}, [ lineItems ] );
+}: CartLineItemsTableProps): JSX.Element => {
+	const tableRef = useRef<HTMLTableElement | null>(null);
+	const rowRefs = useRef(setRefs(lineItems));
+	useEffect(() => {
+		rowRefs.current = setRefs(lineItems);
+	}, [lineItems]);
 
-	const onRemoveRow = ( nextItemKey: string | null ) => () => {
-		requestAnimationFrame( () => {
+	const onRemoveRow = (nextItemKey: string | null) => () => {
+		requestAnimationFrame(() => {
 			if (
 				rowRefs?.current &&
 				nextItemKey &&
-				rowRefs.current[ nextItemKey ].current instanceof HTMLElement
+				rowRefs.current[nextItemKey].current instanceof HTMLElement
 			) {
-				(
-					rowRefs.current[ nextItemKey ].current as HTMLElement
-				 ).focus();
-			} else if ( tableRef.current instanceof HTMLElement ) {
+				(rowRefs.current[nextItemKey].current as HTMLElement).focus();
+			} else if (tableRef.current instanceof HTMLElement) {
 				tableRef.current.focus();
 			}
-		} );
+		});
 	};
 
 	const products = (
 		<DelayedContentWithSkeleton
-			isLoading={ isLoading }
-			skeleton={ <CartLineItemsCartSkeleton /> }
+			isLoading={isLoading}
+			skeleton={<CartLineItemsCartSkeleton />}
 		>
 			<>
-				{ lineItems.map( ( lineItem, i ) => {
+				{lineItems.map((lineItem, i) => {
 					const nextItemKey =
-						lineItems.length > i + 1
-							? lineItems[ i + 1 ].key
-							: null;
+						lineItems.length > i + 1 ? lineItems[i + 1].key : null;
 					return (
 						<CartLineItemRow
-							key={ lineItem.key }
-							lineItem={ lineItem }
-							onRemove={ onRemoveRow( nextItemKey ) }
-							ref={ rowRefs.current[ lineItem.key ] }
-							tabIndex={ -1 }
+							key={lineItem.key}
+							lineItem={lineItem}
+							onRemove={onRemoveRow(nextItemKey)}
+							ref={rowRefs.current[lineItem.key]}
+							tabIndex={-1}
 						/>
 					);
-				} ) }
+				})}
 			</>
 		</DelayedContentWithSkeleton>
 	);
 
 	return (
 		<table
-			className={ clsx( 'wc-block-cart-items', className ) }
-			ref={ tableRef }
-			tabIndex={ -1 }
+			className={clsx('wc-block-cart-items', className)}
+			ref={tableRef}
+			tabIndex={-1}
 		>
 			<caption className="screen-reader-text">
-				<h2>{ __( 'Products in cart', 'woocommerce' ) }</h2>
+				<h2>{__('Products in cart', 'woocommerce')}</h2>
 			</caption>
 			<thead>
 				<tr className="wc-block-cart-items__header">
-					{ /* Decorative image column, hidden from screen readers (see cart-line-item-row.tsx). */ }
+					{/* Decorative image column, hidden from screen readers (see cart-line-item-row.tsx). */}
 					<th
 						scope="col"
 						aria-hidden="true"
 						className="wc-block-cart-items__header-image"
 					>
-						<span>{ __( 'Product', 'woocommerce' ) }</span>
+						<span>{__('Product', 'woocommerce')}</span>
 					</th>
 					<th
 						scope="col"
 						className="wc-block-cart-items__header-product"
 					>
 						<span className="screen-reader-text">
-							{ __( 'Details', 'woocommerce' ) }
+							{__('Details', 'woocommerce')}
 						</span>
 					</th>
 					<th
 						scope="col"
 						className="wc-block-cart-items__header-total"
 					>
-						<span>{ __( 'Total', 'woocommerce' ) }</span>
+						<span>{__('Total', 'woocommerce')}</span>
 					</th>
 				</tr>
 			</thead>
-			<tbody>{ products }</tbody>
+			<tbody>{products}</tbody>
 		</table>
 	);
 };

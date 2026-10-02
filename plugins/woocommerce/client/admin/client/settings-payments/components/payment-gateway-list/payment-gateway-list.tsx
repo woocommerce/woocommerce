@@ -56,7 +56,7 @@ interface PaymentGatewayListProps {
 	/**
 	 * Callback to handle accepting an incentive. Receives the incentive ID as a parameter.
 	 */
-	acceptIncentive: ( id: string ) => void;
+	acceptIncentive: (id: string) => void;
 	/**
 	 * Indicates whether the incentive should be highlighted.
 	 */
@@ -64,11 +64,11 @@ interface PaymentGatewayListProps {
 	/**
 	 * Callback to update the ordering of payments providers after sorting.
 	 */
-	updateOrdering: ( providers: PaymentsProvider[] ) => void;
+	updateOrdering: (providers: PaymentsProvider[]) => void;
 	/**
 	 * Callback to open or close the onboarding modal.
 	 */
-	setIsOnboardingModalOpen: ( isOpen: boolean ) => void;
+	setIsOnboardingModalOpen: (isOpen: boolean) => void;
 }
 
 /**
@@ -79,7 +79,7 @@ interface PaymentGatewayListProps {
  * The list supports drag-and-drop reordering and dynamic actions like installing plugins, enabling gateways,
  * and handling incentives.
  */
-export const PaymentGatewayList = ( {
+export const PaymentGatewayList = ({
 	providers,
 	installedPluginSlugs,
 	installingPlugin,
@@ -88,17 +88,17 @@ export const PaymentGatewayList = ( {
 	shouldHighlightIncentive,
 	updateOrdering,
 	setIsOnboardingModalOpen,
-}: PaymentGatewayListProps ) => {
+}: PaymentGatewayListProps) => {
 	const navigate = useNavigate();
 
 	return (
-		<SortableContainer< PaymentsProvider >
-			items={ providers }
-			className={ 'settings-payment-gateways__list' }
-			setItems={ updateOrdering }
+		<SortableContainer<PaymentsProvider>
+			items={providers}
+			className={'settings-payment-gateways__list'}
+			setItems={updateOrdering}
 		>
-			{ providers.map( ( provider: PaymentsProvider ) => {
-				switch ( provider._type ) {
+			{providers.map((provider: PaymentsProvider) => {
+				switch (provider._type) {
 					// Return different components wrapped into SortableItem depending on the provider type.
 					case PaymentsProviderType.Suggestion:
 						const suggestion =
@@ -108,33 +108,30 @@ export const PaymentGatewayList = ( {
 						);
 						return (
 							<SortableItem
-								key={ suggestion.id }
-								id={ suggestion.id }
+								key={suggestion.id}
+								id={suggestion.id}
 							>
-								{ PaymentExtensionSuggestionListItem( {
+								{PaymentExtensionSuggestionListItem({
 									suggestion,
 									installingPlugin,
 									setUpPlugin,
 									pluginInstalled,
 									acceptIncentive,
 									shouldHighlightIncentive,
-								} ) }
+								})}
 							</SortableItem>
 						);
 					case PaymentsProviderType.Gateway:
 						const gateway = provider as PaymentGatewayProvider;
 						return (
-							<SortableItem
-								key={ provider.id }
-								id={ provider.id }
-							>
-								{ PaymentGatewayListItem( {
+							<SortableItem key={provider.id} id={provider.id}>
+								{PaymentGatewayListItem({
 									gateway,
 									installingPlugin,
 									acceptIncentive,
 									shouldHighlightIncentive,
 									setIsOnboardingModalOpen,
-								} ) }
+								})}
 							</SortableItem>
 						);
 					case PaymentsProviderType.OfflinePmsGroup:
@@ -143,27 +140,27 @@ export const PaymentGatewayList = ( {
 							provider as OfflinePmsGroupProvider;
 						return (
 							<SortableItem
-								key={ offlinePmsGroup.id }
-								id={ offlinePmsGroup.id }
+								key={offlinePmsGroup.id}
+								id={offlinePmsGroup.id}
 							>
-								{ /* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */ }
+								{/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
 								<div
-									id={ offlinePmsGroup.id }
+									id={offlinePmsGroup.id}
 									className="transitions-disabled woocommerce-list__item clickable-list-item enter-done"
-									onClick={ () => {
+									onClick={() => {
 										navigate(
 											removeOriginFromURL(
 												offlinePmsGroup.management
 													._links.settings.href
 											)
 										);
-									} }
+									}}
 								>
 									<div className="woocommerce-list__item-inner">
 										<div className="woocommerce-list__item-before">
 											<DefaultDragHandle />
 											<img
-												src={ offlinePmsGroup.icon }
+												src={offlinePmsGroup.icon}
 												alt={
 													offlinePmsGroup.title +
 													' logo'
@@ -172,14 +169,14 @@ export const PaymentGatewayList = ( {
 										</div>
 										<div className="woocommerce-list__item-text">
 											<span className="woocommerce-list__item-title">
-												{ offlinePmsGroup.title }
+												{offlinePmsGroup.title}
 											</span>
 											<span
 												className="woocommerce-list__item-content"
 												// eslint-disable-next-line react/no-danger -- This string is sanitized by the PaymentGateway class.
-												dangerouslySetInnerHTML={ {
+												dangerouslySetInnerHTML={{
 													__html: offlinePmsGroup.description,
-												} }
+												}}
 											/>
 										</div>
 										<div className="woocommerce-list__item-after centered no-buttons">
@@ -212,7 +209,7 @@ export const PaymentGatewayList = ( {
 					default:
 						return null;
 				}
-			} ) }
+			})}
 		</SortableContainer>
 	);
 };

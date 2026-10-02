@@ -67,11 +67,11 @@ declare global {
 		pagenow: string;
 		adminpage: string;
 		wcSettings: {
-			preloadOptions: Record< string, unknown >;
+			preloadOptions: Record<string, unknown>;
 			adminUrl: string;
 			currentUserId: number;
 			currentThemeIsFSETheme: boolean;
-			countries: Record< string, string >;
+			countries: Record<string, string>;
 			siteTitle: string;
 			homeUrl: string;
 			admin: {
@@ -108,7 +108,7 @@ declare global {
 						industry?: number[];
 					};
 				};
-				siteVisibilitySettings: Record< string, string >;
+				siteVisibilitySettings: Record<string, string>;
 			};
 		};
 		wcAdminFeatures: DeprecatedWcAdminFeatureFlags & {
@@ -141,19 +141,19 @@ declare global {
 				frames?: {
 					img_select?: wp.media.frame;
 				};
-				( options: wp.media.frameOptions ): wp.media.frame;
-				attachment: ( id: number ) => wp.media.attachment;
+				(options: wp.media.frameOptions): wp.media.frame;
+				attachment: (id: number) => wp.media.attachment;
 			};
 		};
 		tinymce?: {
-			get: ( name: string ) => {
+			get: (name: string) => {
 				isHidden: () => boolean;
 				isDirty: () => boolean;
 			};
 		};
-		getUserSetting?: ( name: string ) => string | undefined;
-		setUserSetting?: ( name: string, value: string ) => void;
-		deleteUserSetting?: ( name: string ) => void;
+		getUserSetting?: (name: string) => string | undefined;
+		setUserSetting?: (name: string, value: string) => void;
+		deleteUserSetting?: (name: string) => void;
 		woocommerce_admin: {
 			ajax_url: string;
 			nonces: {
@@ -164,9 +164,9 @@ declare global {
 	namespace wp.media {
 		interface frame {
 			open(): void;
-			on( event: string, callback: Function ): void;
+			on(event: string, callback: Function): void;
 			state(): {
-				get( state: string ): any;
+				get(state: string): any;
 			};
 		}
 
@@ -182,8 +182,8 @@ declare global {
 		}
 
 		interface attachment {
-			fetch(): Promise< void >;
-			get( key: string ): unknown;
+			fetch(): Promise<void>;
+			get(key: string): unknown;
 		}
 	}
 }

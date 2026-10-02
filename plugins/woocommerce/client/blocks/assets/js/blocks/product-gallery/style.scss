@@ -34,7 +34,11 @@ $dialog-padding: 20px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		aspect-ratio: var(--wc-block-product-gallery-large-image-ratio-width, 1) / var(--wc-block-product-gallery-large-image-ratio-height, 1);
+		aspect-ratio: var(
+				--wc-block-product-gallery-large-image-ratio-width,
+				1
+			) /
+			var(--wc-block-product-gallery-large-image-ratio-height, 1);
 	}
 
 	.wc-block-product-gallery-large-image__wrapper[hidden] {
@@ -69,11 +73,17 @@ $dialog-padding: 20px;
 		transition: all 0.1s linear;
 		z-index: 1;
 
-		&:where(:not(.wc-block-woocommerce-product-gallery-large-image__image--full-screen-on-click)) {
+		&:where(
+			:not(
+				.wc-block-woocommerce-product-gallery-large-image__image--full-screen-on-click
+			)
+		) {
 			cursor: default;
 		}
 
-		&:where(.wc-block-woocommerce-product-gallery-large-image__image--hoverZoom) {
+		&:where(
+			.wc-block-woocommerce-product-gallery-large-image__image--hoverZoom
+		) {
 			cursor: zoom-in;
 		}
 	}
@@ -147,44 +157,83 @@ $dialog-padding: 20px;
 		&:has(.wc-block-components-product-image--aspect-ratio-auto),
 		&:has(.wc-block-components-product-image--aspect-ratio-1) {
 			:where(.wc-block-product-gallery-thumbnails) {
-				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
-				aspect-ratio: 1 / calc(100 / var(--wc-block-product-gallery-thumbnails-size));
+				flex-basis: calc(
+					var(--wc-block-product-gallery-thumbnails-size) * 1%
+				);
+				aspect-ratio: 1 /
+					calc(100 / var(--wc-block-product-gallery-thumbnails-size));
 			}
 		}
 		&:has(.wc-block-components-product-image--aspect-ratio-4-3) {
 			:where(.wc-block-product-gallery-thumbnails) {
-				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
-				aspect-ratio: 4 / calc(100 / var(--wc-block-product-gallery-thumbnails-size) * 3);
+				flex-basis: calc(
+					var(--wc-block-product-gallery-thumbnails-size) * 1%
+				);
+				aspect-ratio: 4 /
+					calc(
+						100 / var(--wc-block-product-gallery-thumbnails-size) *
+							3
+					);
 			}
 		}
 		&:has(.wc-block-components-product-image--aspect-ratio-3-4) {
 			:where(.wc-block-product-gallery-thumbnails) {
-				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
-				aspect-ratio: 3 / calc(100 / var(--wc-block-product-gallery-thumbnails-size) * 4);
+				flex-basis: calc(
+					var(--wc-block-product-gallery-thumbnails-size) * 1%
+				);
+				aspect-ratio: 3 /
+					calc(
+						100 / var(--wc-block-product-gallery-thumbnails-size) *
+							4
+					);
 			}
 		}
 		&:has(.wc-block-components-product-image--aspect-ratio-3-2) {
 			:where(.wc-block-product-gallery-thumbnails) {
-				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
-				aspect-ratio: 3 / calc(100 / var(--wc-block-product-gallery-thumbnails-size) * 2);
+				flex-basis: calc(
+					var(--wc-block-product-gallery-thumbnails-size) * 1%
+				);
+				aspect-ratio: 3 /
+					calc(
+						100 / var(--wc-block-product-gallery-thumbnails-size) *
+							2
+					);
 			}
 		}
 		&:has(.wc-block-components-product-image--aspect-ratio-2-3) {
 			:where(.wc-block-product-gallery-thumbnails) {
-				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
-				aspect-ratio: 2 / calc(100 / var(--wc-block-product-gallery-thumbnails-size) * 3);
+				flex-basis: calc(
+					var(--wc-block-product-gallery-thumbnails-size) * 1%
+				);
+				aspect-ratio: 2 /
+					calc(
+						100 / var(--wc-block-product-gallery-thumbnails-size) *
+							3
+					);
 			}
 		}
 		&:has(.wc-block-components-product-image--aspect-ratio-16-9) {
 			:where(.wc-block-product-gallery-thumbnails) {
-				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
-				aspect-ratio: 16 / calc(100 / var(--wc-block-product-gallery-thumbnails-size) * 9);
+				flex-basis: calc(
+					var(--wc-block-product-gallery-thumbnails-size) * 1%
+				);
+				aspect-ratio: 16 /
+					calc(
+						100 / var(--wc-block-product-gallery-thumbnails-size) *
+							9
+					);
 			}
 		}
 		&:has(.wc-block-components-product-image--aspect-ratio-9-16) {
 			:where(.wc-block-product-gallery-thumbnails) {
-				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
-				aspect-ratio: 9 / calc(100 / var(--wc-block-product-gallery-thumbnails-size) * 16);
+				flex-basis: calc(
+					var(--wc-block-product-gallery-thumbnails-size) * 1%
+				);
+				aspect-ratio: 9 /
+					calc(
+						100 / var(--wc-block-product-gallery-thumbnails-size) *
+							16
+					);
 			}
 		}
 	}
@@ -216,10 +265,14 @@ $dialog-padding: 20px;
 	$gradient-mid-step-size: 6%;
 	$gradient-mid-step: rgba(0, 0, 0, 0.3);
 
-	$gradient: transparent 0, $gradient-mid-step $gradient-mid-step-size,
+	$gradient:
+		transparent 0,
+		$gradient-mid-step $gradient-mid-step-size,
 		rgb(0, 0, 0) $gradient-size;
-	$gradient-end: rgb(0, 0, 0) calc(100% - $gradient-size),
-		$gradient-mid-step calc(100% - $gradient-mid-step-size), transparent;
+	$gradient-end:
+		rgb(0, 0, 0) calc(100% - $gradient-size),
+		$gradient-mid-step calc(100% - $gradient-mid-step-size),
+		transparent;
 
 	&.wc-block-product-gallery-thumbnails--overflow-top {
 		mask-image: linear-gradient(to bottom, $gradient);
@@ -286,7 +339,9 @@ $dialog-padding: 20px;
 	outline-offset: -2px;
 }
 
-:where(.wc-block-product-gallery-thumbnails__thumbnail__image):focus:not(:focus-visible) {
+:where(.wc-block-product-gallery-thumbnails__thumbnail__image):focus:not(
+		:focus-visible
+	) {
 	outline: none;
 }
 
@@ -296,12 +351,18 @@ $dialog-padding: 20px;
 }
 
 // Overlay style: darkens the active thumbnail
-:where(.wc-block-product-gallery-thumbnails--active-overlay .wc-block-product-gallery-thumbnails__thumbnail__image--is-active) {
+:where(
+	.wc-block-product-gallery-thumbnails--active-overlay
+		.wc-block-product-gallery-thumbnails__thumbnail__image--is-active
+) {
 	filter: brightness(0.8);
 }
 
 // Outline style: adds a border around the active thumbnail
-:where(.wc-block-product-gallery-thumbnails--active-outline .wc-block-product-gallery-thumbnails__thumbnail__image--is-active) {
+:where(
+	.wc-block-product-gallery-thumbnails--active-outline
+		.wc-block-product-gallery-thumbnails__thumbnail__image--is-active
+) {
 	border: 1px solid currentColor;
 	padding: 2px;
 	box-sizing: border-box;
@@ -314,7 +375,10 @@ $dialog-padding: 20px;
 	&:where(.wc-block-product-gallery-thumbnails) {
 		width: 100%;
 		height: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
-		aspect-ratio: calc(100 / var(--wc-block-product-gallery-thumbnails-size)) / 1;
+		aspect-ratio: calc(
+				100 / var(--wc-block-product-gallery-thumbnails-size)
+			) /
+			1;
 	}
 }
 

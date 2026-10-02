@@ -18,7 +18,7 @@ import { dispatch, select } from '@wordpress/data';
 import ProductTemplateEdit from '../edit';
 import { LocationType } from '../utils';
 
-type EntityQuery = Record< string, unknown >;
+type EntityQuery = Record<string, unknown>;
 const noProducts: never[] = [];
 const noTaxonomies: never[] = [];
 const resolvedTaxonomyRecords = {
@@ -31,28 +31,28 @@ const requiredBlockTypes = [
 ];
 const registeredBlockTypes: string[] = [];
 
-beforeAll( () => {
-	requiredBlockTypes.forEach( ( name ) => {
-		if ( getBlockType( name ) ) {
+beforeAll(() => {
+	requiredBlockTypes.forEach((name) => {
+		if (getBlockType(name)) {
 			return;
 		}
 
-		registerBlockType( name, {
+		registerBlockType(name, {
 			apiVersion: 3,
 			title: name,
 			category: 'widgets',
 			edit: () => null,
 			save: () => null,
-		} );
-		registeredBlockTypes.push( name );
-	} );
-} );
+		});
+		registeredBlockTypes.push(name);
+	});
+});
 
-afterAll( () => {
-	registeredBlockTypes.forEach( ( name ) => unregisterBlockType( name ) );
-} );
+afterAll(() => {
+	registeredBlockTypes.forEach((name) => unregisterBlockType(name));
+});
 
-const createProps = ( {
+const createProps = ({
 	clientId = 'product-template-client-id',
 	inherit = false,
 	postId,
@@ -62,7 +62,7 @@ const createProps = ( {
 	inherit?: boolean;
 	postId?: number;
 	templateSlug?: string;
-} = {} ) => ( {
+} = {}) => ({
 	attributes: {},
 	clientId,
 	context: {
@@ -83,7 +83,7 @@ const createProps = ( {
 			search: '',
 			taxQuery: {},
 		},
-		queryContext: [ { page: 1 } ],
+		queryContext: [{ page: 1 }],
 		queryContextIncludes: [],
 		postId,
 		templateSlug,
@@ -94,122 +94,122 @@ const createProps = ( {
 	onReplace: jest.fn(),
 	setAttributes: jest.fn(),
 	__unstableLayoutClassNames: '',
-} );
+});
 
-const getProductQuery = ( getEntityRecords: jest.SpyInstance ) => {
-	const call = [ ...getEntityRecords.mock.calls ]
+const getProductQuery = (getEntityRecords: jest.SpyInstance) => {
+	const call = [...getEntityRecords.mock.calls]
 		.reverse()
 		.find(
-			( [ kind, name, query ] ) =>
+			([kind, name, query]) =>
 				kind === 'postType' &&
 				name === 'product' &&
-				! ( query as EntityQuery ).slug
+				!(query as EntityQuery).slug
 		);
 
-	expect( call ).toBeDefined();
-	return call?.[ 2 ] as EntityQuery;
+	expect(call).toBeDefined();
+	return call?.[2] as EntityQuery;
 };
 
-describe( 'ProductTemplateEdit request context', () => {
+describe('ProductTemplateEdit request context', () => {
 	let getEntityRecords: jest.SpyInstance;
 	let getTaxonomies: jest.SpyInstance;
 	let getEditedEntityRecord: jest.SpyInstance;
 
-	beforeEach( () => {
-		act( () => {
-			dispatch( blockEditorStore ).resetBlocks( [] );
-		} );
+	beforeEach(() => {
+		act(() => {
+			dispatch(blockEditorStore).resetBlocks([]);
+		});
 
-		const coreSelectors = select( coreStore );
+		const coreSelectors = select(coreStore);
 		const selectEntityRecords =
-			coreSelectors.getEntityRecords.bind( coreSelectors );
+			coreSelectors.getEntityRecords.bind(coreSelectors);
 
 		getEntityRecords = jest
-			.spyOn( coreSelectors, 'getEntityRecords' )
-			.mockImplementation( ( kind, name, query ) => {
-				if ( kind === 'taxonomy' ) {
+			.spyOn(coreSelectors, 'getEntityRecords')
+			.mockImplementation((kind, name, query) => {
+				if (kind === 'taxonomy') {
 					const record =
 						resolvedTaxonomyRecords[
 							name as keyof typeof resolvedTaxonomyRecords
 						];
-					if ( record?.slug === ( query as EntityQuery ).slug ) {
-						return [ record ];
+					if (record?.slug === (query as EntityQuery).slug) {
+						return [record];
 					}
 				}
 
 				if (
 					kind === 'postType' &&
 					name === 'product' &&
-					! ( query as EntityQuery ).slug
+					!(query as EntityQuery).slug
 				) {
 					return noProducts;
 				}
 
-				return selectEntityRecords( kind, name, query );
-			} );
+				return selectEntityRecords(kind, name, query);
+			});
 		getTaxonomies = jest
-			.spyOn( coreSelectors, 'getTaxonomies' )
-			.mockReturnValue( noTaxonomies );
+			.spyOn(coreSelectors, 'getTaxonomies')
+			.mockReturnValue(noTaxonomies);
 		getEditedEntityRecord = jest
-			.spyOn( coreSelectors, 'getEditedEntityRecord' )
-			.mockReturnValue( {
+			.spyOn(coreSelectors, 'getEditedEntityRecord')
+			.mockReturnValue({
 				woocommerce_default_catalog_orderby: 'price-desc',
-			} );
-	} );
+			});
+	});
 
-	afterEach( () => {
+	afterEach(() => {
 		getEntityRecords.mockRestore();
 		getTaxonomies.mockRestore();
 		getEditedEntityRecord.mockRestore();
-		act( () => {
-			dispatch( blockEditorStore ).resetBlocks( [] );
-		} );
-	} );
+		act(() => {
+			dispatch(blockEditorStore).resetBlocks([]);
+		});
+	});
 
-	it( 'adds only the product ID for a product location', () => {
-		const productTemplate = createBlock( 'woocommerce/product-template' );
-		const singleProduct = createBlock( 'woocommerce/single-product', {}, [
+	it('adds only the product ID for a product location', () => {
+		const productTemplate = createBlock('woocommerce/product-template');
+		const singleProduct = createBlock('woocommerce/single-product', {}, [
 			productTemplate,
-		] );
-		act( () => {
-			dispatch( blockEditorStore ).resetBlocks( [ singleProduct ] );
-		} );
+		]);
+		act(() => {
+			dispatch(blockEditorStore).resetBlocks([singleProduct]);
+		});
 
 		render(
 			<ProductTemplateEdit
-				{ ...createProps( {
+				{...createProps({
 					clientId: productTemplate.clientId,
 					postId: 101,
 					templateSlug: 'taxonomy-product_cat',
-				} ) }
+				})}
 			/>
 		);
 
-		expect( getProductQuery( getEntityRecords ) ).toMatchObject( {
+		expect(getProductQuery(getEntityRecords)).toMatchObject({
 			productCollectionLocation: {
 				sourceData: { productId: 101 },
 				type: LocationType.Product,
 			},
-		} );
+		});
 		const sourceData = (
-			getProductQuery( getEntityRecords ).productCollectionLocation as {
+			getProductQuery(getEntityRecords).productCollectionLocation as {
 				sourceData: EntityQuery;
 			}
-		 ).sourceData;
-		expect( sourceData ).not.toHaveProperty( 'taxonomy' );
-		expect( sourceData ).not.toHaveProperty( 'termId' );
-	} );
+		).sourceData;
+		expect(sourceData).not.toHaveProperty('taxonomy');
+		expect(sourceData).not.toHaveProperty('termId');
+	});
 
-	it( 'adds only taxonomy fields for an archive location', () => {
+	it('adds only taxonomy fields for an archive location', () => {
 		render(
 			<ProductTemplateEdit
-				{ ...createProps( {
+				{...createProps({
 					templateSlug: 'taxonomy-product_cat',
-				} ) }
+				})}
 			/>
 		);
 
-		expect( getProductQuery( getEntityRecords ) ).toMatchObject( {
+		expect(getProductQuery(getEntityRecords)).toMatchObject({
 			productCollectionLocation: {
 				sourceData: {
 					taxonomy: 'product_cat',
@@ -217,16 +217,16 @@ describe( 'ProductTemplateEdit request context', () => {
 				},
 				type: LocationType.Archive,
 			},
-		} );
+		});
 		const sourceData = (
-			getProductQuery( getEntityRecords ).productCollectionLocation as {
+			getProductQuery(getEntityRecords).productCollectionLocation as {
 				sourceData: EntityQuery;
 			}
-		 ).sourceData;
-		expect( sourceData ).not.toHaveProperty( 'productId' );
-	} );
+		).sourceData;
+		expect(sourceData).not.toHaveProperty('productId');
+	});
 
-	it.each( [
+	it.each([
 		{
 			taxonomy: 'product_cat',
 			termId: 81,
@@ -239,56 +239,56 @@ describe( 'ProductTemplateEdit request context', () => {
 			templateSlug: 'taxonomy-product_tag-recommended',
 			wrongTaxonomy: 'product_cat',
 		},
-	] )(
+	])(
 		'adds the resolved $taxonomy ID to an inherited product request',
-		( { taxonomy, termId, templateSlug, wrongTaxonomy } ) => {
+		({ taxonomy, termId, templateSlug, wrongTaxonomy }) => {
 			render(
 				<ProductTemplateEdit
-					{ ...createProps( {
+					{...createProps({
 						inherit: true,
 						templateSlug,
-					} ) }
+					})}
 				/>
 			);
 
-			const request = getProductQuery( getEntityRecords );
-			expect( request[ taxonomy ] ).toBe( termId );
-			expect( request ).not.toHaveProperty( wrongTaxonomy );
+			const request = getProductQuery(getEntityRecords);
+			expect(request[taxonomy]).toBe(termId);
+			expect(request).not.toHaveProperty(wrongTaxonomy);
 		}
 	);
 
-	it( 'does not add source fields for a site location', () => {
-		render( <ProductTemplateEdit { ...createProps() } /> );
+	it('does not add source fields for a site location', () => {
+		render(<ProductTemplateEdit {...createProps()} />);
 
-		const location = getProductQuery( getEntityRecords )
+		const location = getProductQuery(getEntityRecords)
 			.productCollectionLocation as {
 			sourceData: EntityQuery;
 			type: LocationType;
 		};
 
-		expect( location ).toEqual( {
+		expect(location).toEqual({
 			sourceData: {},
 			type: LocationType.Site,
-		} );
-		expect( location.sourceData ).toEqual( {} );
-		expect( location.sourceData ).not.toHaveProperty( 'productId' );
-		expect( location.sourceData ).not.toHaveProperty( 'taxonomy' );
-		expect( location.sourceData ).not.toHaveProperty( 'termId' );
-	} );
+		});
+		expect(location.sourceData).toEqual({});
+		expect(location.sourceData).not.toHaveProperty('productId');
+		expect(location.sourceData).not.toHaveProperty('taxonomy');
+		expect(location.sourceData).not.toHaveProperty('termId');
+	});
 
-	it( 'uses the site default catalog order for inherited requests', () => {
+	it('uses the site default catalog order for inherited requests', () => {
 		render(
 			<ProductTemplateEdit
-				{ ...createProps( {
+				{...createProps({
 					inherit: true,
 					templateSlug: 'archive-product',
-				} ) }
+				})}
 			/>
 		);
 
-		expect( getProductQuery( getEntityRecords ) ).toMatchObject( {
+		expect(getProductQuery(getEntityRecords)).toMatchObject({
 			order: 'desc',
 			orderby: 'price',
-		} );
-	} );
-} );
+		});
+	});
+});

@@ -18,48 +18,48 @@ class TaxesReportTable extends Component {
 	constructor() {
 		super();
 
-		this.getHeadersContent = this.getHeadersContent.bind( this );
-		this.getRowsContent = this.getRowsContent.bind( this );
-		this.getSummary = this.getSummary.bind( this );
+		this.getHeadersContent = this.getHeadersContent.bind(this);
+		this.getRowsContent = this.getRowsContent.bind(this);
+		this.getSummary = this.getSummary.bind(this);
 	}
 
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Tax code', 'woocommerce' ),
+				label: __('Tax code', 'woocommerce'),
 				key: 'tax_code',
 				required: true,
 				isLeftAligned: true,
 				isSortable: true,
 			},
 			{
-				label: __( 'Rate', 'woocommerce' ),
+				label: __('Rate', 'woocommerce'),
 				key: 'rate',
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Total tax', 'woocommerce' ),
+				label: __('Total tax', 'woocommerce'),
 				key: 'total_tax',
 				isSortable: true,
 			},
 			{
-				label: __( 'Order tax', 'woocommerce' ),
+				label: __('Order tax', 'woocommerce'),
 				key: 'order_tax',
 				isSortable: true,
 			},
 			{
-				label: __( 'Shipping tax', 'woocommerce' ),
+				label: __('Shipping tax', 'woocommerce'),
 				key: 'shipping_tax',
 				isSortable: true,
 			},
 			{
-				label: __( 'Taxable amount', 'woocommerce' ),
+				label: __('Taxable amount', 'woocommerce'),
 				key: 'taxable_amount',
 				isSortable: true,
 			},
 			{
-				label: __( 'Orders', 'woocommerce' ),
+				label: __('Orders', 'woocommerce'),
 				key: 'orders_count',
 				required: true,
 				defaultSort: true,
@@ -69,14 +69,14 @@ class TaxesReportTable extends Component {
 		];
 	}
 
-	getRowsContent( taxes ) {
+	getRowsContent(taxes) {
 		const {
 			render: renderCurrency,
 			formatDecimal: getCurrencyFormatDecimal,
 			getCurrencyConfig,
 		} = this.context;
 
-		return map( taxes, ( tax ) => {
+		return map(taxes, (tax) => {
 			const { query } = this.props;
 			const {
 				order_tax: orderTax,
@@ -91,10 +91,10 @@ class TaxesReportTable extends Component {
 			// taxable amount existed (or a manual tax line) - unknown, not zero.
 			const hasTaxableAmount =
 				taxableAmount !== undefined &&
-				! ( taxableAmount === 0 && totalTax !== 0 );
-			const taxCode = getTaxCode( tax );
+				!(taxableAmount === 0 && totalTax !== 0);
+			const taxCode = getTaxCode(tax);
 
-			const persistedQuery = getPersistedQuery( query );
+			const persistedQuery = getPersistedQuery(query);
 			const ordersTaxLink = getNewPath(
 				persistedQuery,
 				'/analytics/orders',
@@ -104,8 +104,8 @@ class TaxesReportTable extends Component {
 				}
 			);
 			const taxLink = (
-				<Link href={ ordersTaxLink } type="wc-admin">
-					{ taxCode }
+				<Link href={ordersTaxLink} type="wc-admin">
+					{taxCode}
 				</Link>
 			);
 
@@ -115,27 +115,27 @@ class TaxesReportTable extends Component {
 					value: taxCode,
 				},
 				{
-					display: taxRate.toFixed( 2 ) + '%',
+					display: taxRate.toFixed(2) + '%',
 					value: taxRate,
 				},
 				{
-					display: renderCurrency( totalTax ),
-					value: getCurrencyFormatDecimal( totalTax ),
+					display: renderCurrency(totalTax),
+					value: getCurrencyFormatDecimal(totalTax),
 				},
 				{
-					display: renderCurrency( orderTax ),
-					value: getCurrencyFormatDecimal( orderTax ),
+					display: renderCurrency(orderTax),
+					value: getCurrencyFormatDecimal(orderTax),
 				},
 				{
-					display: renderCurrency( shippingTax ),
-					value: getCurrencyFormatDecimal( shippingTax ),
+					display: renderCurrency(shippingTax),
+					value: getCurrencyFormatDecimal(shippingTax),
 				},
 				{
 					display: hasTaxableAmount
-						? renderCurrency( taxableAmount )
-						: __( 'N/A', 'woocommerce' ),
+						? renderCurrency(taxableAmount)
+						: __('N/A', 'woocommerce'),
 					value: hasTaxableAmount
-						? getCurrencyFormatDecimal( taxableAmount )
+						? getCurrencyFormatDecimal(taxableAmount)
 						: '',
 				},
 				{
@@ -147,10 +147,10 @@ class TaxesReportTable extends Component {
 					value: ordersCount,
 				},
 			];
-		} );
+		});
 	}
 
-	getSummary( totals, totalResults = 0 ) {
+	getSummary(totals, totalResults = 0) {
 		const {
 			tax_codes: taxesCodes = 0,
 			total_tax: totalTax = 0,
@@ -162,8 +162,8 @@ class TaxesReportTable extends Component {
 		const currency = getCurrencyConfig();
 		return [
 			{
-				label: _n( 'tax', 'taxes', totalResults, 'woocommerce' ),
-				value: formatValue( currency, 'number', totalResults ),
+				label: _n('tax', 'taxes', totalResults, 'woocommerce'),
+				value: formatValue(currency, 'number', totalResults),
 			},
 			{
 				label: _n(
@@ -172,23 +172,23 @@ class TaxesReportTable extends Component {
 					taxesCodes,
 					'woocommerce'
 				),
-				value: formatValue( currency, 'number', taxesCodes ),
+				value: formatValue(currency, 'number', taxesCodes),
 			},
 			{
-				label: __( 'total tax', 'woocommerce' ),
-				value: formatAmount( totalTax ),
+				label: __('total tax', 'woocommerce'),
+				value: formatAmount(totalTax),
 			},
 			{
-				label: __( 'order tax', 'woocommerce' ),
-				value: formatAmount( orderTax ),
+				label: __('order tax', 'woocommerce'),
+				value: formatAmount(orderTax),
 			},
 			{
-				label: __( 'shipping tax', 'woocommerce' ),
-				value: formatAmount( shippingTax ),
+				label: __('shipping tax', 'woocommerce'),
+				value: formatAmount(shippingTax),
 			},
 			{
-				label: _n( 'order', 'orders', ordersCount, 'woocommerce' ),
-				value: formatValue( currency, 'number', ordersCount ),
+				label: _n('order', 'orders', ordersCount, 'woocommerce'),
+				value: formatValue(currency, 'number', ordersCount),
 			},
 		];
 	}
@@ -200,27 +200,27 @@ class TaxesReportTable extends Component {
 			<ReportTable
 				compareBy="taxes"
 				endpoint="taxes"
-				getHeadersContent={ this.getHeadersContent }
-				getRowsContent={ this.getRowsContent }
-				getSummary={ this.getSummary }
-				summaryFields={ [
+				getHeadersContent={this.getHeadersContent}
+				getRowsContent={this.getRowsContent}
+				getSummary={this.getSummary}
+				summaryFields={[
 					'tax_codes',
 					'total_tax',
 					'order_tax',
 					'shipping_tax',
 					'orders_count',
-				] }
-				isRequesting={ isRequesting }
+				]}
+				isRequesting={isRequesting}
 				itemIdField="tax_rate_id"
-				query={ query }
+				query={query}
 				searchBy="taxes"
-				tableQuery={ {
+				tableQuery={{
 					orderby: query.orderby || 'tax_rate_id',
-				} }
-				title={ __( 'Taxes', 'woocommerce' ) }
+				}}
+				title={__('Taxes', 'woocommerce')}
 				columnPrefsKey="taxes_report_columns"
-				filters={ filters }
-				advancedFilters={ advancedFilters }
+				filters={filters}
+				advancedFilters={advancedFilters}
 			/>
 		);
 	}

@@ -12,50 +12,50 @@ import type { BlockConfiguration } from '@wordpress/blocks';
 // Note: Store a shallow copy; callers should avoid mutating nested properties in-place.
 const originalBlockSettings = new Map<
 	string,
-	BlockConfiguration< Record< string, unknown > >
+	BlockConfiguration<Record<string, unknown>>
 >();
 
 export function updateBlockSettings<
-	TAttributes extends Record< string, unknown > = Record< string, unknown >,
+	TAttributes extends Record<string, unknown> = Record<string, unknown>,
 >(
 	name: string,
 	updater: (
-		settings: BlockConfiguration< TAttributes >
+		settings: BlockConfiguration<TAttributes>
 	) =>
-		| Partial< BlockConfiguration< TAttributes > >
-		| BlockConfiguration< TAttributes >
+		| Partial<BlockConfiguration<TAttributes>>
+		| BlockConfiguration<TAttributes>
 ): boolean {
-	const type = getBlockType< TAttributes >( name );
-	if ( ! type ) return false;
+	const type = getBlockType<TAttributes>(name);
+	if (!type) return false;
 
 	const { name: blockName, ...currentSettings } = type as unknown as {
 		name: string;
-	} & BlockConfiguration< TAttributes >;
+	} & BlockConfiguration<TAttributes>;
 
 	try {
 		// Backup original settings the first time this block is updated.
-		if ( ! originalBlockSettings.has( blockName ) ) {
-			originalBlockSettings.set( blockName, {
-				...( currentSettings as BlockConfiguration<
-					Record< string, unknown >
-				> ),
-			} );
+		if (!originalBlockSettings.has(blockName)) {
+			originalBlockSettings.set(blockName, {
+				...(currentSettings as BlockConfiguration<
+					Record<string, unknown>
+				>),
+			});
 		}
 
 		const patch = updater(
-			currentSettings as BlockConfiguration< TAttributes >
+			currentSettings as BlockConfiguration<TAttributes>
 		);
 		const nextSettings = {
-			...( currentSettings as BlockConfiguration< TAttributes > ),
-			...( patch as Partial< BlockConfiguration< TAttributes > > ),
-		} as BlockConfiguration< TAttributes >;
+			...(currentSettings as BlockConfiguration<TAttributes>),
+			...(patch as Partial<BlockConfiguration<TAttributes>>),
+		} as BlockConfiguration<TAttributes>;
 
-		unregisterBlockType( blockName );
-		registerBlockType< TAttributes >( blockName, nextSettings );
+		unregisterBlockType(blockName);
+		registerBlockType<TAttributes>(blockName, nextSettings);
 		return true;
-	} catch ( e ) {
+	} catch (e) {
 		// eslint-disable-next-line no-console
-		console.error( 'Failed to update block settings for', name, e );
+		console.error('Failed to update block settings for', name, e);
 		return false;
 	}
 }
@@ -66,20 +66,16 @@ export function updateBlockSettings<
  */
 export function restoreAllModifiedBlockSettings(): string[] {
 	const restored: string[] = [];
-	for ( const [ blockName, original ] of originalBlockSettings.entries() ) {
+	for (const [blockName, original] of originalBlockSettings.entries()) {
 		try {
-			unregisterBlockType( blockName );
+			unregisterBlockType(blockName);
 			// original is a BlockConfiguration; re-register as-is
-			registerBlockType( blockName, original );
-			restored.push( blockName );
-			originalBlockSettings.delete( blockName );
-		} catch ( e ) {
+			registerBlockType(blockName, original);
+			restored.push(blockName);
+			originalBlockSettings.delete(blockName);
+		} catch (e) {
 			// eslint-disable-next-line no-console
-			console.error(
-				'Failed to restore block settings for',
-				blockName,
-				e
-			);
+			console.error('Failed to restore block settings for', blockName, e);
 		}
 	}
 	return restored;

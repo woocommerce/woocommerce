@@ -27,9 +27,9 @@ const ProductCollectionPlaceholder = (
 
 	// @ts-expect-error Type definitions for this function are missing
 	// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/actions.d.ts
-	const { replaceBlock } = useDispatch( blockEditorStore );
+	const { replaceBlock } = useDispatch(blockEditorStore);
 
-	const onCollectionClick = ( collectionName: CollectionName ) => {
+	const onCollectionClick = (collectionName: CollectionName) => {
 		recordEvent(
 			'blocks_product_collection_collection_chosen_from_placeholder',
 			{
@@ -37,19 +37,19 @@ const ProductCollectionPlaceholder = (
 				location: tracksLocation,
 			}
 		);
-		applyCollection( collectionName, clientId, replaceBlock );
+		applyCollection(collectionName, clientId, replaceBlock);
 	};
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<Placeholder
 				className="wc-blocks-product-collection__placeholder"
-				instructions={ __(
+				instructions={__(
 					'What products do you want to show?',
 					'woocommerce'
-				) }
+				)}
 			>
-				<CollectionChooser onCollectionClick={ onCollectionClick } />
+				<CollectionChooser onCollectionClick={onCollectionClick} />
 			</Placeholder>
 		</div>
 	);

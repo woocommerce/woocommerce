@@ -46,7 +46,10 @@ $gutenberg-blueberry-focus: #1d35b4;
 				z-index: 10;
 
 				&-button {
-					color: var(--wp-components-color-accent, $gutenberg-blueberry);
+					color: var(
+						--wp-components-color-accent,
+						$gutenberg-blueberry
+					);
 					cursor: pointer;
 					background-color: transparent;
 					border: none;
@@ -56,7 +59,10 @@ $gutenberg-blueberry-focus: #1d35b4;
 					font-size: 14px;
 
 					.gridicons-chevron-left {
-						fill: var(--wp-components-color-accent, $gutenberg-blueberry);
+						fill: var(
+							--wp-components-color-accent,
+							$gutenberg-blueberry
+						);
 						margin-right: 2px;
 					}
 
@@ -84,7 +90,7 @@ $gutenberg-blueberry-focus: #1d35b4;
 				flex-direction: column;
 				align-items: center;
 
-				@media screen and ( max-width: $break-xlarge ) {
+				@media screen and (max-width: $break-xlarge) {
 					width: 100%;
 					padding: 0 $gap;
 					margin: $gap auto;
@@ -99,7 +105,7 @@ $gutenberg-blueberry-focus: #1d35b4;
 				color: $gray-900;
 				text-align: center;
 
-				@media screen and ( max-width: $break-mobile ) {
+				@media screen and (max-width: $break-mobile) {
 					text-align: left;
 					text-wrap: auto;
 				}
@@ -114,7 +120,7 @@ $gutenberg-blueberry-focus: #1d35b4;
 				color: $gray-700;
 				margin: $gap-small 0 $gap-largest;
 
-				@media screen and ( max-width: $break-mobile ) {
+				@media screen and (max-width: $break-mobile) {
 					text-align: left;
 				}
 			}
@@ -181,13 +187,17 @@ $gutenberg-blueberry-focus: #1d35b4;
 			margin-bottom: $gap-large;
 		}
 
-		.components-custom-select-control button.components-custom-select-control__button,
-		.components-grouped-select-control button.components-grouped-select-control__button {
+		.components-custom-select-control
+			button.components-custom-select-control__button,
+		.components-grouped-select-control
+			button.components-grouped-select-control__button {
 			margin: 0;
 		}
 
-		.components-custom-select-control .components-custom-select-control__menu,
-		.components-grouped-select-control .components-grouped-select-control__list {
+		.components-custom-select-control
+			.components-custom-select-control__menu,
+		.components-grouped-select-control
+			.components-grouped-select-control__list {
 			margin-left: 0;
 			margin-right: 0;
 
@@ -204,7 +214,7 @@ $gutenberg-blueberry-focus: #1d35b4;
 				pointer-events: none;
 				z-index: 0;
 
-				@media screen and ( max-width: $break-xlarge ) {
+				@media screen and (max-width: $break-xlarge) {
 					margin-top: $gap; // Align the bottom gap with the side padding.
 				}
 			}

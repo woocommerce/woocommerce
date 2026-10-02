@@ -11,22 +11,22 @@ import { selectImage } from './settings-email-image-url-handlers';
 
 type NewImageProps = {
 	inputId: string;
-	setImageUrl: ( imageUrl: string ) => void;
+	setImageUrl: (imageUrl: string) => void;
 };
 
-export const NewImage = ( { inputId, setImageUrl }: NewImageProps ) => {
+export const NewImage = ({ inputId, setImageUrl }: NewImageProps) => {
 	return (
 		<div>
 			<button
-				onClick={ () => selectImage( inputId, setImageUrl ) }
+				onClick={() => selectImage(inputId, setImageUrl)}
 				className="wc-settings-email-select-image"
 				type="button"
 			>
 				<img
-					src={ imageUploadIcon }
+					src={imageUploadIcon}
 					width="24"
 					height="24"
-					alt={ __( 'Image upload icon', 'woocommerce' ) }
+					alt={__('Image upload icon', 'woocommerce')}
 					className="wc-settings-email-select-image-icon"
 				/>
 			</button>

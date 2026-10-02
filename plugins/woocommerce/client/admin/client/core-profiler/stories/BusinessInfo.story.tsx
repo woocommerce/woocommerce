@@ -8,9 +8,9 @@ import { WithSetupWizardLayout } from './WithSetupWizardLayout';
 
 export const Basic = () => (
 	<BusinessInfo
-		sendEvent={ () => {} }
-		navigationProgress={ 60 }
-		context={ {
+		sendEvent={() => {}}
+		navigationProgress={60}
+		context={{
 			geolocatedLocation: {
 				latitude: '-37.83961',
 				longitude: '144.94228',
@@ -29,15 +29,15 @@ export const Basic = () => (
 			],
 			onboardingProfile: {
 				is_store_country_set: false,
-				industry: [ 'clothing_and_accessories' ],
+				industry: ['clothing_and_accessories'],
 				business_choice: 'im_just_starting_my_business',
 			},
-		} }
+		}}
 	/>
 );
 
 export default {
 	title: 'WooCommerce Admin/Core Profiler/Business Info',
 	component: BusinessInfo,
-	decorators: [ WithSetupWizardLayout ],
+	decorators: [WithSetupWizardLayout],
 };

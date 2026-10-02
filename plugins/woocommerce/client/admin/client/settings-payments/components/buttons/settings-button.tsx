@@ -45,27 +45,27 @@ interface SettingsButtonProps {
  * A simple button component that navigates to the provided settings URL when clicked.
  * Used for managing settings for a payment gateway.
  */
-export const SettingsButton = ( {
+export const SettingsButton = ({
 	gatewayProvider,
 	settingsHref,
 	isInstallingPlugin,
-	buttonText = __( 'Manage', 'woocommerce' ),
-}: SettingsButtonProps ) => {
+	buttonText = __('Manage', 'woocommerce'),
+}: SettingsButtonProps) => {
 	// Determine if the settingsHref is for a Reactified page.
 	// A Reactified page will have a 'path' query parameter.
-	const isReactifiedPage = !! getQueryArg( settingsHref, 'path' );
+	const isReactifiedPage = !!getQueryArg(settingsHref, 'path');
 	const navigate = useNavigate();
 	const { invalidateResolutionForStoreSelector } =
-		useDispatch( paymentGatewaysStore );
+		useDispatch(paymentGatewaysStore);
 	const recordButtonClickEvent = () => {
-		recordPaymentsProviderEvent( 'provider_manage_click', gatewayProvider );
+		recordPaymentsProviderEvent('provider_manage_click', gatewayProvider);
 	};
 
 	return (
 		<Button
-			variant={ 'secondary' }
-			disabled={ isInstallingPlugin }
-			onClick={ ( event: MouseEvent ) => {
+			variant={'secondary'}
+			disabled={isInstallingPlugin}
+			onClick={(event: MouseEvent) => {
 				recordButtonClickEvent();
 
 				// Allow modified clicks (new tab/window, etc.) to proceed with default behavior.
@@ -77,8 +77,8 @@ export const SettingsButton = ( {
 					event.button === 1;
 
 				// If it's a modified click, open in new tab/window.
-				if ( isModifiedClick ) {
-					window.open( settingsHref, '_blank' );
+				if (isModifiedClick) {
+					window.open(settingsHref, '_blank');
 					return;
 				}
 
@@ -87,17 +87,17 @@ export const SettingsButton = ( {
 				// Then we navigate to the settings URL.
 				// This is necessary to ensure that the page updates correctly with the latest data.
 				// If it's not a Reactified page, we just navigate to the settingsHref directly.
-				if ( isReactifiedPage ) {
+				if (isReactifiedPage) {
 					void invalidateResolutionForStoreSelector(
 						'getPaymentGateway'
 					);
-					navigate( removeOriginFromURL( settingsHref ) );
+					navigate(removeOriginFromURL(settingsHref));
 				} else {
 					window.location.href = settingsHref;
 				}
-			} }
+			}}
 		>
-			{ buttonText }
+			{buttonText}
 		</Button>
 	);
 };

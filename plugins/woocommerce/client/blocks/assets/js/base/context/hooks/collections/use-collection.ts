@@ -45,12 +45,12 @@ export interface useCollectionOptions {
 	namespace: string;
 	resourceName: string;
 	resourceValues?: number[];
-	query?: Record< string, unknown >;
+	query?: Record<string, unknown>;
 	shouldSelect?: boolean;
 	isEditor?: boolean;
 }
 
-export const useCollection = < T >(
+export const useCollection = <T>(
 	options: useCollectionOptions
 ): {
 	results: T[];
@@ -63,38 +63,38 @@ export const useCollection = < T >(
 		query = {},
 		shouldSelect = true,
 	} = options;
-	if ( ! namespace || ! resourceName ) {
+	if (!namespace || !resourceName) {
 		throw new Error(
 			'The options object must have valid values for the namespace and ' +
 				'the resource properties.'
 		);
 	}
-	const currentResults = useRef< { results: T[]; isLoading: boolean } >( {
+	const currentResults = useRef<{ results: T[]; isLoading: boolean }>({
 		results: [],
 		isLoading: true,
-	} );
+	});
 	// ensure we feed the previous reference if it's equivalent
-	const currentQuery = useShallowEqual( query );
-	const currentResourceValues = useShallowEqual( resourceValues );
+	const currentQuery = useShallowEqual(query);
+	const currentResourceValues = useShallowEqual(resourceValues);
 	const throwError = useThrowError();
 	const results = useSelect(
-		( select ) => {
-			if ( ! shouldSelect ) {
+		(select) => {
+			if (!shouldSelect) {
 				return null;
 			}
 
-			const store = select( storeKey );
+			const store = select(storeKey);
 			const args = [
 				namespace,
 				resourceName,
 				currentQuery,
 				currentResourceValues,
 			];
-			const error = store.getCollectionError( ...args );
+			const error = store.getCollectionError(...args);
 
-			if ( error ) {
-				if ( isError( error ) ) {
-					throwError( error );
+			if (error) {
+				if (isError(error)) {
+					throwError(error);
 				} else {
 					// Store errors (e.g. from the Store API) normally carry a
 					// message, but guard against non-Error values that don't so
@@ -102,23 +102,20 @@ export const useCollection = < T >(
 					const message =
 						typeof error === 'object' &&
 						error !== null &&
-						typeof ( error as { message?: unknown } ).message ===
+						typeof (error as { message?: unknown }).message ===
 							'string'
-							? ( error as { message: string } ).message
+							? (error as { message: string }).message
 							: __(
 									'Something went wrong while loading data.',
 									'woocommerce'
-							  );
-					throwError( new Error( message ) );
+								);
+					throwError(new Error(message));
 				}
 			}
 
 			return {
-				results: store.getCollection< T[] >( ...args ),
-				isLoading: ! store.hasFinishedResolution(
-					'getCollection',
-					args
-				),
+				results: store.getCollection<T[]>(...args),
+				isLoading: !store.hasFinishedResolution('getCollection', args),
 			};
 		},
 		[
@@ -132,7 +129,7 @@ export const useCollection = < T >(
 	);
 	// if selector was not bailed, then update current results. Otherwise return
 	// previous results
-	if ( results !== null ) {
+	if (results !== null) {
 		currentResults.current = results;
 	}
 	return currentResults.current;

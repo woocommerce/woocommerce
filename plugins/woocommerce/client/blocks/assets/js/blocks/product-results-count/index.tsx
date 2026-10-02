@@ -12,11 +12,11 @@ import metadata from './block.json';
 import edit from './edit';
 import './style.scss';
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	icon: {
 		src: (
 			<Icon
-				icon={ totals }
+				icon={totals}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -25,4 +25,4 @@ registerBlockType( metadata, {
 	save() {
 		return null;
 	},
-} );
+});

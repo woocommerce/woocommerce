@@ -16,8 +16,7 @@ export interface CartResponseCouponItem {
 	totals: CartResponseTotalsItem;
 }
 
-export interface CartResponseCouponItemWithLabel
-	extends CartResponseCouponItem {
+export interface CartResponseCouponItemWithLabel extends CartResponseCouponItem {
 	label: string;
 }
 
@@ -48,12 +47,9 @@ export interface MetaKeyValue {
 	value: string;
 }
 
-export type ExtensionsData =
-	| Record< string, unknown >
-	| Record< string, never >;
+export type ExtensionsData = Record<string, unknown> | Record<string, never>;
 
-export interface CartResponseShippingPackageShippingRate
-	extends CurrencyResponse {
+export interface CartResponseShippingPackageShippingRate extends CurrencyResponse {
 	rate_id: string;
 	name: string;
 	description: string;
@@ -62,21 +58,19 @@ export interface CartResponseShippingPackageShippingRate
 	taxes: string;
 	instance_id: number;
 	method_id: string;
-	meta_data: Array< MetaKeyValue >;
+	meta_data: Array<MetaKeyValue>;
 	selected: boolean;
 }
 
 export type CartResponseShippingRate = CartShippingRate;
 
 export interface CartResponseShippingAddress
-	extends ResponseBaseAddress,
-		ResponseFirstNameLastName {
+	extends ResponseBaseAddress, ResponseFirstNameLastName {
 	company: string;
 	phone: string;
 }
 
-export interface CartResponseBillingAddress
-	extends CartResponseShippingAddress {
+export interface CartResponseBillingAddress extends CartResponseShippingAddress {
 	email: string;
 }
 
@@ -146,7 +140,7 @@ export interface CartResponseTotals extends CurrencyResponse {
 	total_shipping_tax: string;
 	total_price: string;
 	total_tax: string;
-	tax_lines: Array< CartResponseTotalsTaxLineItem >;
+	tax_lines: Array<CartResponseTotalsTaxLineItem>;
 }
 
 export interface CartResponseErrorItem {
@@ -155,24 +149,24 @@ export interface CartResponseErrorItem {
 }
 
 export interface CartResponseExtensionItem {
-	[ key: string ]: unknown;
+	[key: string]: unknown;
 }
 
 export interface CartResponse {
-	coupons: Array< CartResponseCouponItem >;
-	shipping_rates: Array< CartResponseShippingRate >;
+	coupons: Array<CartResponseCouponItem>;
+	shipping_rates: Array<CartResponseShippingRate>;
 	shipping_address: CartResponseShippingAddress;
 	billing_address: CartResponseBillingAddress;
-	items: Array< CartResponseItem >;
+	items: Array<CartResponseItem>;
 	items_count: number;
 	items_weight: number;
-	cross_sells: Array< ProductResponseItem >;
+	cross_sells: Array<ProductResponseItem>;
 	needs_payment: boolean;
 	needs_shipping: boolean;
 	has_calculated_shipping: boolean;
-	fees: Array< CartResponseFeeItem >;
+	fees: Array<CartResponseFeeItem>;
 	totals: CartResponseTotals;
-	errors: Array< CartResponseErrorItem >;
+	errors: Array<CartResponseErrorItem>;
 	payment_methods: string[];
 	payment_requirements: string[];
 	extensions: ExtensionsData;

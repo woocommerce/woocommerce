@@ -1,40 +1,37 @@
 /**
  * External dependencies
  */
-const path = require( 'path' );
-const { omit } = require( 'lodash' );
-const cssnano = require( 'cssnano' );
-const postcss = require( 'postcss' );
-const ProgressBarPlugin = require( 'progress-bar-webpack-plugin' );
-const webpack = require( 'webpack' );
+const path = require('path');
+const { omit } = require('lodash');
+const cssnano = require('cssnano');
+const postcss = require('postcss');
+const ProgressBarPlugin = require('progress-bar-webpack-plugin');
+const webpack = require('webpack');
 
 /**
  * Internal dependencies
  */
-const { getEntryConfig } = require( './webpack-entries' );
+const { getEntryConfig } = require('./webpack-entries');
 const {
 	editorStyleEntries,
 	styleEntries,
-} = require( './webpack-interactivity-entries' );
+} = require('./webpack-interactivity-entries');
 const {
 	NODE_ENV,
 	getProgressBarPluginConfig,
 	getResolve,
 	requestToExternal,
 	requestToHandle,
-} = require( './webpack-helpers' );
-const { getSharedPlugins, getStylingConfig } = require( './webpack-configs' );
-const { sharedOptimizationConfig } = require( './webpack-shared-config' );
+} = require('./webpack-helpers');
+const { getSharedPlugins, getStylingConfig } = require('./webpack-configs');
+const { sharedOptimizationConfig } = require('./webpack-shared-config');
 
-const ROOT_DIR = path.resolve( __dirname, '../../../../../' );
+const ROOT_DIR = path.resolve(__dirname, '../../../../../');
 // Blocks' webpack writes directly to the WooCommerce plugin's
 // `assets/client/blocks/` so PHP can enqueue files from their final location
 // without an intermediate rsync step.
-const BUILD_DIR = path.resolve( __dirname, '../../../assets/client/blocks' );
-const BABEL_CACHE_DIR = path.join(
-	ROOT_DIR,
-	'node_modules/.cache/babel-loader'
-);
+const BUILD_DIR = path.resolve(__dirname, '../../../assets/client/blocks');
+const BABEL_CACHE_DIR = path.join(ROOT_DIR, 'node_modules/.cache/babel-loader');
 const isProduction = NODE_ENV === 'production';
 const UNIFIED_EDITOR_STYLE_HANDLE = 'wc-block-library-style';
 const UNIFIED_EDITOR_STYLE_PATTERN = /^wc-block-library-style(?:-rtl)?\.css$/;
@@ -57,27 +54,27 @@ const editorExternalPackages = [
 	'@woocommerce/types',
 ];
 
-const shouldBundleWooPackage = ( request ) =>
-	request.startsWith( '@woocommerce/' ) &&
-	! editorExternalPackages.includes( request );
+const shouldBundleWooPackage = (request) =>
+	request.startsWith('@woocommerce/') &&
+	!editorExternalPackages.includes(request);
 
-const requestToUnifiedEditorExternal = ( request ) => {
-	if ( shouldBundleWooPackage( request ) ) {
+const requestToUnifiedEditorExternal = (request) => {
+	if (shouldBundleWooPackage(request)) {
 		return false;
 	}
 
-	return requestToExternal( request );
+	return requestToExternal(request);
 };
 
-const requestToUnifiedEditorHandle = ( request ) => {
-	if ( shouldBundleWooPackage( request ) ) {
+const requestToUnifiedEditorHandle = (request) => {
+	if (shouldBundleWooPackage(request)) {
 		return false;
 	}
 
-	return requestToHandle( request );
+	return requestToHandle(request);
 };
 
-const getUnifiedEditorPackageAliases = () => ( {
+const getUnifiedEditorPackageAliases = () => ({
 	'@woocommerce/block-data': path.resolve(
 		__dirname,
 		`../packages/public-api/block-data`
@@ -122,7 +119,7 @@ const getUnifiedEditorPackageAliases = () => ( {
 		__dirname,
 		`../packages/public-api/shared-hocs/`
 	),
-} );
+});
 
 /**
  * Optimize the combined editor styles after CSS extraction and RTL generation.
@@ -148,31 +145,29 @@ class OptimizeUnifiedEditorStylesPlugin {
 	 *
 	 * @param {webpack.Compiler} compiler Webpack compiler.
 	 */
-	apply( compiler ) {
+	apply(compiler) {
 		compiler.hooks.thisCompilation.tap(
 			OPTIMIZE_UNIFIED_EDITOR_STYLES_PLUGIN,
-			( compilation ) => {
+			(compilation) => {
 				compilation.hooks.processAssets.tapPromise(
 					{
 						name: OPTIMIZE_UNIFIED_EDITOR_STYLES_PLUGIN,
 						stage: webpack.Compilation
 							.PROCESS_ASSETS_STAGE_OPTIMIZE_SIZE,
 					},
-					async ( assets ) => {
+					async (assets) => {
 						await Promise.all(
-							Object.entries( assets )
-								.filter( ( [ assetName ] ) =>
-									UNIFIED_EDITOR_STYLE_PATTERN.test(
-										assetName
-									)
+							Object.entries(assets)
+								.filter(([assetName]) =>
+									UNIFIED_EDITOR_STYLE_PATTERN.test(assetName)
 								)
-								.map( async ( [ assetName, asset ] ) => {
-									const result = await postcss( [
+								.map(async ([assetName, asset]) => {
+									const result = await postcss([
 										cssnano,
-									] ).process( asset.source().toString(), {
+									]).process(asset.source().toString(), {
 										from: undefined,
 										map: false,
-									} );
+									});
 
 									compilation.updateAsset(
 										assetName,
@@ -180,7 +175,7 @@ class OptimizeUnifiedEditorStylesPlugin {
 											result.css
 										)
 									);
-								} )
+								})
 						);
 					}
 				);
@@ -196,15 +191,15 @@ class OptimizeUnifiedEditorStylesPlugin {
  * @param {string[]} exclude Entry names to exclude.
  * @return {Object} Unified styling entries.
  */
-const getUnifiedEditorStyleEntries = ( exclude = [] ) =>
+const getUnifiedEditorStyleEntries = (exclude = []) =>
 	omit(
 		{
 			'wc-block-library-style-source': [
-				...Object.values( getEntryConfig( 'styling', exclude ) ).flat(),
+				...Object.values(getEntryConfig('styling', exclude)).flat(),
 				// Interactivity styles are emitted by a separate frontend build,
 				// so they are excluded from the standard styling entry graph.
-				...Object.values( styleEntries ).flat(),
-				...Object.values( editorStyleEntries ).flat(),
+				...Object.values(styleEntries).flat(),
+				...Object.values(editorStyleEntries).flat(),
 			],
 		},
 		exclude
@@ -215,21 +210,21 @@ const getUnifiedEditorStyleEntries = ( exclude = [] ) =>
  *
  * @param {Object} options Build options.
  */
-const getUnifiedMainConfig = ( options = {} ) => {
+const getUnifiedMainConfig = (options = {}) => {
 	const { alias, resolvePlugins = [] } = options;
-	const resolve = getResolve( {
+	const resolve = getResolve({
 		alias: {
 			...getUnifiedEditorPackageAliases(),
 			...alias,
 		},
 		resolvePlugins,
-	} );
+	});
 
 	return {
 		entry: omit(
 			{
 				'wc-block-library': Object.values(
-					getEntryConfig( 'main' )
+					getEntryConfig('main')
 				).flat(),
 			},
 			options.exclude || []
@@ -247,18 +242,16 @@ const getUnifiedMainConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
+					exclude: [/[\/\\](node_modules|build|docs|vendor)[\/\\]/],
 					use: {
 						loader: 'babel-loader',
 						options: {
-							presets: [ '@wordpress/babel-preset-default' ],
+							presets: ['@wordpress/babel-preset-default'],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve('babel-plugin-transform-react-remove-prop-types')
 									: false,
-							].filter( Boolean ),
+							].filter(Boolean),
 							cacheDirectory: BABEL_CACHE_DIR,
 							cacheCompression: false,
 						},
@@ -277,21 +270,19 @@ const getUnifiedMainConfig = ( options = {} ) => {
 			splitChunks: false,
 		},
 		plugins: [
-			...getSharedPlugins( {
+			...getSharedPlugins({
 				bundleAnalyzerReportTitle: 'Unified editor',
 				dependencyRequestToExternal: requestToUnifiedEditorExternal,
 				dependencyRequestToHandle: requestToUnifiedEditorHandle,
-			} ),
-			new ProgressBarPlugin(
-				getProgressBarPluginConfig( 'Unified editor' )
-			),
-			new webpack.optimize.LimitChunkCountPlugin( {
+			}),
+			new ProgressBarPlugin(getProgressBarPluginConfig('Unified editor')),
+			new webpack.optimize.LimitChunkCountPlugin({
 				maxChunks: 1,
-			} ),
+			}),
 		],
 		resolve: {
 			...resolve,
-			extensions: [ '.js', '.jsx', '.ts', '.tsx' ],
+			extensions: ['.js', '.jsx', '.ts', '.tsx'],
 		},
 	};
 };
@@ -301,12 +292,12 @@ const getUnifiedMainConfig = ( options = {} ) => {
  *
  * @param {Object} options Build options.
  */
-const getUnifiedStylingConfig = ( options = {} ) => {
-	const stylingConfig = getStylingConfig( options );
+const getUnifiedStylingConfig = (options = {}) => {
+	const stylingConfig = getStylingConfig(options);
 
 	return {
 		...stylingConfig,
-		entry: getUnifiedEditorStyleEntries( options.exclude || [] ),
+		entry: getUnifiedEditorStyleEntries(options.exclude || []),
 		output: {
 			...stylingConfig.output,
 			uniqueName: 'webpackWcBlocksUnifiedStylingJsonp',
@@ -321,8 +312,8 @@ const getUnifiedStylingConfig = ( options = {} ) => {
 					default: false,
 					defaultVendors: false,
 					editorStyle: {
-						test: ( module = {} ) => {
-							return module.type.includes( 'css' );
+						test: (module = {}) => {
+							return module.type.includes('css');
 						},
 						name: UNIFIED_EDITOR_STYLE_HANDLE,
 						chunks: 'all',
@@ -335,7 +326,7 @@ const getUnifiedStylingConfig = ( options = {} ) => {
 		plugins: [
 			...stylingConfig.plugins,
 			isProduction && new OptimizeUnifiedEditorStylesPlugin(),
-		].filter( Boolean ),
+		].filter(Boolean),
 	};
 };
 

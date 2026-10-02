@@ -14,15 +14,15 @@ import { recordEvent } from '../../events';
 
 export function SentEmailNotice() {
 	const { isEmailSent } = useSelect(
-		( select ) => ( {
-			isEmailSent: select( storeName ).isEmailSent(),
-		} ),
+		(select) => ({
+			isEmailSent: select(storeName).isEmailSent(),
+		}),
 		[]
 	);
 
-	useEffect( () => {
-		if ( isEmailSent ) {
-			void dispatch( noticesStore ).createNotice(
+	useEffect(() => {
+		if (isEmailSent) {
+			void dispatch(noticesStore).createNotice(
 				'warning',
 				__(
 					'This email has already been sent. It can be edited, but not sent again. Duplicate this email if you want to send it again.',
@@ -34,9 +34,9 @@ export function SentEmailNotice() {
 					context: 'email-editor',
 				}
 			);
-			recordEvent( 'editor_showed_email_sent_notice' );
+			recordEvent('editor_showed_email_sent_notice');
 		}
-	}, [ isEmailSent ] );
+	}, [isEmailSent]);
 
 	return null;
 }

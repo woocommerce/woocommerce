@@ -25,35 +25,33 @@ export class ErrorBoundary extends Component<
 	ErrorBoundaryProps,
 	ErrorBoundaryState
 > {
-	constructor( props: ErrorBoundaryProps ) {
-		super( props );
+	constructor(props: ErrorBoundaryProps) {
+		super(props);
 		this.state = { hasError: false, error: null, errorInfo: null };
 	}
 
-	static getDerivedStateFromError(
-		error: Error
-	): Partial< ErrorBoundaryState > {
+	static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
 		return { hasError: true, error };
 	}
 
-	componentDidCatch( error: Error, errorInfo: ErrorInfo ) {
-		this.setState( { errorInfo } );
+	componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+		this.setState({ errorInfo });
 
-		bumpStat( 'error', 'unhandled-js-error-during-render' );
+		bumpStat('error', 'unhandled-js-error-during-render');
 
 		// Limit the component stack to 10 calls so we don't send too much data.
 		const componentStack = errorInfo.componentStack
 			?.trim()
-			.split( '\n' )
-			.slice( 0, 10 )
-			.map( ( line ) => line.trim() );
+			.split('\n')
+			.slice(0, 10)
+			.map((line) => line.trim());
 
-		void captureException( error, {
+		void captureException(error, {
 			severity: 'critical',
 			extra: {
 				componentStack,
 			},
-		} );
+		});
 	}
 
 	handleRefresh = () => {
@@ -68,44 +66,41 @@ export class ErrorBoundary extends Component<
 	};
 
 	render() {
-		if ( this.state.hasError ) {
+		if (this.state.hasError) {
 			return (
 				<div className="woocommerce-global-error-boundary">
 					<h1 className="woocommerce-global-error-boundary__heading">
-						{ __( 'Oops, something went wrong', 'woocommerce' ) }
+						{__('Oops, something went wrong', 'woocommerce')}
 					</h1>
 					<p className="woocommerce-global-error-boundary__subheading">
-						{ __(
+						{__(
 							'We’re sorry for the inconvenience. Please try reloading the page, or you can get support from the community forums.',
 							'woocommerce'
-						) }
+						)}
 					</p>
 					<div className="woocommerce-global-error-boundary__actions">
 						<Button
 							variant="secondary"
-							onClick={ this.handleOpenSupport }
+							onClick={this.handleOpenSupport}
 						>
-							{ __( 'Get Support', 'woocommerce' ) }
+							{__('Get Support', 'woocommerce')}
 						</Button>
-						<Button
-							variant="primary"
-							onClick={ this.handleRefresh }
-						>
-							{ __( 'Reload Page', 'woocommerce' ) }
+						<Button variant="primary" onClick={this.handleRefresh}>
+							{__('Reload Page', 'woocommerce')}
 						</Button>
 					</div>
 					<details className="woocommerce-global-error-boundary__details">
 						<summary>
-							{ __( 'Click for error details', 'woocommerce' ) }
+							{__('Click for error details', 'woocommerce')}
 						</summary>
 						<div className="woocommerce-global-error-boundary__details-content">
 							<strong className="woocommerce-global-error-boundary__error">
-								{ this.state.error &&
-									this.state.error.toString() }
+								{this.state.error &&
+									this.state.error.toString()}
 							</strong>
 							<p>
-								{ this.state.errorInfo &&
-									this.state.errorInfo.componentStack }
+								{this.state.errorInfo &&
+									this.state.errorInfo.componentStack}
 							</p>
 						</div>
 					</details>

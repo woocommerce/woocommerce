@@ -27,7 +27,7 @@ export interface SortSelectProps {
 	/**
 	 * Function to call on the change event.
 	 */
-	onChange: ChangeEventHandler< HTMLSelectElement >;
+	onChange: ChangeEventHandler<HTMLSelectElement>;
 	/**
 	 * Option values for the select.
 	 */
@@ -54,7 +54,7 @@ export interface SortSelectProps {
  * Component used for 'Order by' selectors, which renders a label
  * and a <select> with the options provided in the props.
  */
-export const SortSelect = ( {
+export const SortSelect = ({
 	className,
 	instanceId,
 	label = '',
@@ -63,43 +63,43 @@ export const SortSelect = ( {
 	screenReaderLabel,
 	value = '',
 	readOnly = false,
-}: SortSelectProps ): JSX.Element => {
-	const selectId = `wc-block-components-sort-select__select-${ instanceId }`;
+}: SortSelectProps): JSX.Element => {
+	const selectId = `wc-block-components-sort-select__select-${instanceId}`;
 
 	return (
 		<div
-			className={ clsx(
+			className={clsx(
 				'wc-block-sort-select',
 				'wc-block-components-sort-select',
 				className
-			) }
+			)}
 		>
 			<Label
-				label={ label }
-				screenReaderLabel={ screenReaderLabel }
+				label={label}
+				screenReaderLabel={screenReaderLabel}
 				wrapperElement="label"
-				wrapperProps={ {
+				wrapperProps={{
 					className:
 						'wc-block-sort-select__label wc-block-components-sort-select__label',
 					htmlFor: selectId,
-				} }
+				}}
 			/>
 			<select
-				disabled={ !! readOnly }
-				id={ selectId }
+				disabled={!!readOnly}
+				id={selectId}
 				className="wc-block-sort-select__select wc-block-components-sort-select__select"
-				onChange={ onChange }
-				value={ value }
+				onChange={onChange}
+				value={value}
 			>
-				{ options &&
-					options.map( ( option ) => (
-						<option key={ option.key } value={ option.key }>
-							{ option.label }
+				{options &&
+					options.map((option) => (
+						<option key={option.key} value={option.key}>
+							{option.label}
 						</option>
-					) ) }
+					))}
 			</select>
 		</div>
 	);
 };
 
-export default withInstanceId( SortSelect );
+export default withInstanceId(SortSelect);

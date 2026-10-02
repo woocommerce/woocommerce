@@ -18,37 +18,37 @@ import { BlockAttributes } from './types';
 import './editor.scss';
 
 const Edit = (
-	props: BlockEditProps< BlockAttributes > & { context: Context }
+	props: BlockEditProps<BlockAttributes> & { context: Context }
 ): JSX.Element => {
 	const { attributes, setAttributes, context } = props;
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className: 'wp-block-woocommerce-product-rating',
-	} );
+	});
 	const blockAttrs = {
 		...attributes,
 		...context,
 		shouldDisplayMockedReviewsWhenProductHasNoReviews: true,
 	};
-	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
+	const isDescendentOfQueryLoop = Number.isFinite(context.queryId);
 
-	const { product } = useProduct( context.postId );
+	const { product } = useProduct(context.postId);
 
 	return (
 		<>
 			<BlockControls>
 				<AlignmentToolbar
-					value={ attributes.textAlign }
-					onChange={ ( newAlign ) => {
-						setAttributes( { textAlign: newAlign || '' } );
-					} }
+					value={attributes.textAlign}
+					onChange={(newAlign) => {
+						setAttributes({ textAlign: newAlign || '' });
+					}}
 				/>
 			</BlockControls>
-			<div { ...blockProps }>
+			<div {...blockProps}>
 				<Block
-					isAdmin={ true }
-					{ ...blockAttrs }
-					isDescendentOfQueryLoop={ isDescendentOfQueryLoop }
-					product={ product }
+					isAdmin={true}
+					{...blockAttrs}
+					isDescendentOfQueryLoop={isDescendentOfQueryLoop}
+					product={product}
 				/>
 			</div>
 		</>

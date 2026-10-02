@@ -11,7 +11,7 @@ import { DisplayStyleSwitcher, resetDisplayStyleBlock } from '../index';
 type MockBlock = {
 	clientId: string;
 	name: string;
-	attributes?: Record< string, unknown >;
+	attributes?: Record<string, unknown>;
 	innerBlocks: MockBlock[];
 };
 
@@ -20,114 +20,114 @@ type MockBlockType = {
 	title: string;
 	ancestor?: string[];
 	usesContext?: string[];
-	supports?: Record< string, unknown >;
+	supports?: Record<string, unknown>;
 };
 
 let mockBlockTypes: MockBlockType[] = [];
 let mockParentBlock: MockBlock | null = null;
 
 const mockCreateBlock = jest.fn(
-	( name: string, attributes: Record< string, unknown > = {} ) => ( {
+	(name: string, attributes: Record<string, unknown> = {}) => ({
 		name,
 		attributes,
-	} )
+	})
 );
 const mockInsertBlock = jest.fn();
 const mockReplaceBlock = jest.fn();
 
-jest.mock( '@wordpress/blocks', () => ( {
-	createBlock: ( name: string, attributes?: Record< string, unknown > ) =>
-		mockCreateBlock( name, attributes ),
+jest.mock('@wordpress/blocks', () => ({
+	createBlock: (name: string, attributes?: Record<string, unknown>) =>
+		mockCreateBlock(name, attributes),
 	getBlockTypes: () => mockBlockTypes,
-} ) );
+}));
 
-jest.mock( '@wordpress/data', () => ( {
-	select: () => ( {
+jest.mock('@wordpress/data', () => ({
+	select: () => ({
 		getBlock: () => mockParentBlock,
-	} ),
-	useDispatch: () => ( {
+	}),
+	useDispatch: () => ({
 		insertBlock: mockInsertBlock,
 		replaceBlock: mockReplaceBlock,
-	} ),
-	dispatch: () => ( {
+	}),
+	dispatch: () => ({
 		insertBlock: mockInsertBlock,
 		replaceBlock: mockReplaceBlock,
-	} ),
-} ) );
+	}),
+}));
 
-jest.mock( '@woocommerce/utils', () => ( {
-	getInnerBlockByName: ( block: MockBlock | null, name: string ) => {
-		if ( ! block ) {
+jest.mock('@woocommerce/utils', () => ({
+	getInnerBlockByName: (block: MockBlock | null, name: string) => {
+		if (!block) {
 			return null;
 		}
 
-		for ( const innerBlock of block.innerBlocks ) {
-			if ( innerBlock.name === name ) {
+		for (const innerBlock of block.innerBlocks) {
+			if (innerBlock.name === name) {
 				return innerBlock;
 			}
 
 			const nestedBlock = jest
-				.requireMock( '@woocommerce/utils' )
-				.getInnerBlockByName( innerBlock, name );
+				.requireMock('@woocommerce/utils')
+				.getInnerBlockByName(innerBlock, name);
 
-			if ( nestedBlock ) {
+			if (nestedBlock) {
 				return nestedBlock;
 			}
 		}
 
 		return null;
 	},
-} ) );
+}));
 
-jest.mock( '@wordpress/components', () => {
-	const element = jest.requireActual( '@wordpress/element' );
+jest.mock('@wordpress/components', () => {
+	const element = jest.requireActual('@wordpress/element');
 	return {
-		__experimentalToggleGroupControl: ( {
+		__experimentalToggleGroupControl: ({
 			children,
 			onChange,
 		}: {
 			children: JSX.Element[];
-			onChange: ( value: string ) => void;
-		} ) =>
+			onChange: (value: string) => void;
+		}) =>
 			element.createElement(
 				'div',
 				{},
-				element.Children.map( children, ( child: JSX.Element ) =>
-					element.cloneElement( child, { onSelect: onChange } )
+				element.Children.map(children, (child: JSX.Element) =>
+					element.cloneElement(child, { onSelect: onChange })
 				)
 			),
-		__experimentalToggleGroupControlOption: ( {
+		__experimentalToggleGroupControlOption: ({
 			label,
 			value,
 			onSelect,
 		}: {
 			label: string;
 			value: string;
-			onSelect: ( value: string ) => void;
-		} ) =>
+			onSelect: (value: string) => void;
+		}) =>
 			element.createElement(
 				'button',
-				{ type: 'button', onClick: () => onSelect( value ) },
+				{ type: 'button', onClick: () => onSelect(value) },
 				label
 			),
 	};
-} );
+});
 
-const makeBlockType = ( overrides: Partial< MockBlockType > ) => ( {
+const makeBlockType = (overrides: Partial<MockBlockType>) => ({
 	name: 'woocommerce/product-filter-chips',
 	title: 'Chips',
-	ancestor: [ 'woocommerce/product-filter-attribute' ],
-	usesContext: [ 'woocommerce/selectableItems' ],
+	ancestor: ['woocommerce/product-filter-attribute'],
+	usesContext: ['woocommerce/selectableItems'],
 	supports: {
 		woocommerce: {
 			innerBlockDisplayStyle: true,
 		},
 	},
 	...overrides,
-} );
+});
 
-describe( 'DisplayStyleSwitcher', () => {
-	beforeEach( () => {
+describe('DisplayStyleSwitcher', () => {
+	beforeEach(() => {
 		mockBlockTypes = [];
 		mockParentBlock = {
 			clientId: 'parent-client-id',
@@ -137,61 +137,61 @@ describe( 'DisplayStyleSwitcher', () => {
 		mockCreateBlock.mockClear();
 		mockInsertBlock.mockClear();
 		mockReplaceBlock.mockClear();
-	} );
+	});
 
-	it( 'includes only blocks with display style support, matching ancestor, and matching context', () => {
+	it('includes only blocks with display style support, matching ancestor, and matching context', () => {
 		mockBlockTypes = [
-			makeBlockType( {
+			makeBlockType({
 				name: 'woocommerce/product-filter-chips',
 				title: 'Chips',
-			} ),
-			makeBlockType( {
+			}),
+			makeBlockType({
 				name: 'woocommerce/no-support',
 				title: 'No support',
 				supports: {},
-			} ),
-			makeBlockType( {
+			}),
+			makeBlockType({
 				name: 'woocommerce/wrong-ancestor',
 				title: 'Wrong ancestor',
-				ancestor: [ 'woocommerce/other-parent' ],
-			} ),
-			makeBlockType( {
+				ancestor: ['woocommerce/other-parent'],
+			}),
+			makeBlockType({
 				name: 'woocommerce/wrong-context',
 				title: 'Wrong context',
-				usesContext: [ 'woocommerce/removableItems' ],
-			} ),
+				usesContext: ['woocommerce/removableItems'],
+			}),
 		];
 
 		render(
 			<DisplayStyleSwitcher
 				clientId="parent-client-id"
 				currentStyle="woocommerce/product-filter-chips"
-				onChange={ jest.fn() }
+				onChange={jest.fn()}
 			/>
 		);
 
-		expect( screen.getByRole( 'button', { name: 'Chips' } ) ).toBeVisible();
+		expect(screen.getByRole('button', { name: 'Chips' })).toBeVisible();
 		expect(
-			screen.queryByRole( 'button', { name: 'No support' } )
+			screen.queryByRole('button', { name: 'No support' })
 		).not.toBeInTheDocument();
 		expect(
-			screen.queryByRole( 'button', { name: 'Wrong ancestor' } )
+			screen.queryByRole('button', { name: 'Wrong ancestor' })
 		).not.toBeInTheDocument();
 		expect(
-			screen.queryByRole( 'button', { name: 'Wrong context' } )
+			screen.queryByRole('button', { name: 'Wrong context' })
 		).not.toBeInTheDocument();
-	} );
+	});
 
-	it( 'replaces the actual display style block when the attribute is stale', () => {
+	it('replaces the actual display style block when the attribute is stale', () => {
 		mockBlockTypes = [
-			makeBlockType( {
+			makeBlockType({
 				name: 'woocommerce/product-filter-chips',
 				title: 'Chips',
-			} ),
-			makeBlockType( {
+			}),
+			makeBlockType({
 				name: 'woocommerce/product-filter-checkbox-list',
 				title: 'List',
-			} ),
+			}),
 		];
 		mockParentBlock = {
 			clientId: 'parent-client-id',
@@ -210,29 +210,29 @@ describe( 'DisplayStyleSwitcher', () => {
 			<DisplayStyleSwitcher
 				clientId="parent-client-id"
 				currentStyle="woocommerce/missing-style"
-				onChange={ jest.fn() }
+				onChange={jest.fn()}
 			/>
 		);
 
-		fireEvent.click( screen.getByRole( 'button', { name: 'List' } ) );
+		fireEvent.click(screen.getByRole('button', { name: 'List' }));
 
-		expect( mockReplaceBlock ).toHaveBeenCalledWith( 'chips-client-id', {
+		expect(mockReplaceBlock).toHaveBeenCalledWith('chips-client-id', {
 			name: 'woocommerce/product-filter-checkbox-list',
 			attributes: {},
-		} );
-		expect( mockInsertBlock ).not.toHaveBeenCalled();
-	} );
+		});
+		expect(mockInsertBlock).not.toHaveBeenCalled();
+	});
 
-	it( 'restores attributes using the actual display style block name', () => {
+	it('restores attributes using the actual display style block name', () => {
 		mockBlockTypes = [
-			makeBlockType( {
+			makeBlockType({
 				name: 'woocommerce/product-filter-chips',
 				title: 'Chips',
-			} ),
-			makeBlockType( {
+			}),
+			makeBlockType({
 				name: 'woocommerce/product-filter-checkbox-list',
 				title: 'List',
-			} ),
+			}),
 		];
 		mockParentBlock = {
 			clientId: 'parent-client-id',
@@ -251,11 +251,11 @@ describe( 'DisplayStyleSwitcher', () => {
 			<DisplayStyleSwitcher
 				clientId="parent-client-id"
 				currentStyle="woocommerce/missing-style"
-				onChange={ jest.fn() }
+				onChange={jest.fn()}
 			/>
 		);
 
-		fireEvent.click( screen.getByRole( 'button', { name: 'List' } ) );
+		fireEvent.click(screen.getByRole('button', { name: 'List' }));
 
 		mockParentBlock = {
 			clientId: 'parent-client-id',
@@ -276,27 +276,27 @@ describe( 'DisplayStyleSwitcher', () => {
 			<DisplayStyleSwitcher
 				clientId="parent-client-id"
 				currentStyle="woocommerce/product-filter-checkbox-list"
-				onChange={ jest.fn() }
+				onChange={jest.fn()}
 			/>
 		);
 
-		fireEvent.click( screen.getByRole( 'button', { name: 'Chips' } ) );
+		fireEvent.click(screen.getByRole('button', { name: 'Chips' }));
 
-		expect( mockCreateBlock ).toHaveBeenCalledWith(
+		expect(mockCreateBlock).toHaveBeenCalledWith(
 			'woocommerce/product-filter-chips',
 			{ chipText: 'blue' }
 		);
-	} );
+	});
 
-	it( 'uses fallback placement when no display style block exists', () => {
+	it('uses fallback placement when no display style block exists', () => {
 		mockBlockTypes = [
-			makeBlockType( {
+			makeBlockType({
 				name: 'woocommerce/product-filter-chips',
 				title: 'Chips',
 				ancestor: [
 					'woocommerce/add-to-cart-with-options-variation-selector-attribute',
 				],
-			} ),
+			}),
 		];
 		mockParentBlock = {
 			clientId: 'parent-client-id',
@@ -314,17 +314,17 @@ describe( 'DisplayStyleSwitcher', () => {
 			<DisplayStyleSwitcher
 				clientId="parent-client-id"
 				currentStyle="woocommerce/product-filter-chips"
-				getFallbackDisplayStyleInsertionPoint={ () => ( {
+				getFallbackDisplayStyleInsertionPoint={() => ({
 					rootClientId: 'group-client-id',
 					index: 0,
-				} ) }
-				onChange={ jest.fn() }
+				})}
+				onChange={jest.fn()}
 			/>
 		);
 
-		fireEvent.click( screen.getByRole( 'button', { name: 'Chips' } ) );
+		fireEvent.click(screen.getByRole('button', { name: 'Chips' }));
 
-		expect( mockInsertBlock ).toHaveBeenCalledWith(
+		expect(mockInsertBlock).toHaveBeenCalledWith(
 			{
 				name: 'woocommerce/product-filter-chips',
 				attributes: {},
@@ -333,17 +333,17 @@ describe( 'DisplayStyleSwitcher', () => {
 			'group-client-id',
 			false
 		);
-	} );
+	});
 
-	it( 'uses fallback placement when resetting without a display style block', () => {
+	it('uses fallback placement when resetting without a display style block', () => {
 		mockBlockTypes = [
-			makeBlockType( {
+			makeBlockType({
 				name: 'woocommerce/product-filter-chips',
 				title: 'Chips',
 				ancestor: [
 					'woocommerce/add-to-cart-with-options-variation-selector-attribute',
 				],
-			} ),
+			}),
 		];
 		mockParentBlock = {
 			clientId: 'parent-client-id',
@@ -354,13 +354,13 @@ describe( 'DisplayStyleSwitcher', () => {
 		resetDisplayStyleBlock(
 			'parent-client-id',
 			'woocommerce/product-filter-chips',
-			() => ( {
+			() => ({
 				rootClientId: 'group-client-id',
 				index: 0,
-			} )
+			})
 		);
 
-		expect( mockInsertBlock ).toHaveBeenCalledWith(
+		expect(mockInsertBlock).toHaveBeenCalledWith(
 			{
 				name: 'woocommerce/product-filter-chips',
 				attributes: {},
@@ -369,5 +369,5 @@ describe( 'DisplayStyleSwitcher', () => {
 			'group-client-id',
 			false
 		);
-	} );
-} );
+	});
+});

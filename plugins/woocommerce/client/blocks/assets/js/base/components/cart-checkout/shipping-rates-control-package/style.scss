@@ -61,12 +61,12 @@
 
 .wc-block-components-shipping-rates-control__package-container {
 	display: flex;
-    width: 100%;
-    justify-content: space-between;
+	width: 100%;
+	justify-content: space-between;
 
 	.wc-block-components-shipping-rates-control__package-thumbnails {
 		display: flex;
-        gap: $gap-smallest;
+		gap: $gap-smallest;
 		align-items: center;
 
 		> img {
@@ -79,7 +79,7 @@
 			margin-left: $gap-smallest;
 		}
 
-		@media screen and ( max-width: 480px ) {
+		@media screen and (max-width: 480px) {
 			img:nth-child(3) {
 				display: none;
 			}

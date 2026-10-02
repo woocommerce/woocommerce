@@ -13,7 +13,7 @@ export const Edit = (): JSX.Element => {
 	const blockProps = useBlockProps();
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<Noninteractive>
 				<Block className="is-mobile" />
 			</Noninteractive>
@@ -22,5 +22,5 @@ export const Edit = (): JSX.Element => {
 };
 
 export const Save = (): JSX.Element => {
-	return <div { ...useBlockProps.save() }></div>;
+	return <div {...useBlockProps.save()}></div>;
 };

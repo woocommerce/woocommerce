@@ -12,28 +12,28 @@ import { PlainPaymentMethods } from '../../../types';
 import '../../checkout';
 import { store as paymentStore } from '..';
 
-const originalSelect = jest.requireActual( '@wordpress/data' ).select;
-const originalDispatch = jest.requireActual( '@wordpress/data' ).dispatch;
+const originalSelect = jest.requireActual('@wordpress/data').select;
+const originalDispatch = jest.requireActual('@wordpress/data').dispatch;
 
-jest.mock( '@wordpress/data', () => {
+jest.mock('@wordpress/data', () => {
 	return {
-		...jest.requireActual( '@wordpress/data' ),
+		...jest.requireActual('@wordpress/data'),
 		select: jest.fn(),
 		dispatch: jest.fn(),
 	};
-} );
+});
 
-jest.mock( '@woocommerce/utils', () => {
+jest.mock('@woocommerce/utils', () => {
 	return {
-		isSiteEditorPage: jest.fn().mockReturnValue( true ),
+		isSiteEditorPage: jest.fn().mockReturnValue(true),
 	};
-} );
+});
 
-describe( 'setDefaultPaymentMethod', () => {
-	afterEach( () => {
+describe('setDefaultPaymentMethod', () => {
+	afterEach(() => {
 		jest.resetAllMocks();
 		jest.resetModules();
-	} );
+	});
 
 	const paymentMethods: PlainPaymentMethods = {
 		'wc-payment-gateway-1': {
@@ -44,26 +44,26 @@ describe( 'setDefaultPaymentMethod', () => {
 		},
 	};
 
-	it( 'correctly sets the first payment method in the list of available payment methods', async () => {
+	it('correctly sets the first payment method in the list of available payment methods', async () => {
 		const setActivePaymentMethodMock = jest.fn();
-		( select as jest.Mock ).mockImplementation( ( storeName ) => {
-			const originalStore = originalSelect( storeName );
-			if ( storeName === paymentStore ) {
+		(select as jest.Mock).mockImplementation((storeName) => {
+			const originalStore = originalSelect(storeName);
+			if (storeName === paymentStore) {
 				return {
 					...originalStore,
-					getAvailableExpressPaymentMethods: () => ( {
+					getAvailableExpressPaymentMethods: () => ({
 						express_payment_1: {
 							name: 'express_payment_1',
 						},
-					} ),
-					getSavedPaymentMethods: () => ( {} ),
+					}),
+					getSavedPaymentMethods: () => ({}),
 				};
 			}
 			return originalStore;
-		} );
-		( dispatch as jest.Mock ).mockImplementation( ( storeName ) => {
-			const originalStore = originalDispatch( storeName );
-			if ( storeName === paymentStore ) {
+		});
+		(dispatch as jest.Mock).mockImplementation((storeName) => {
+			const originalStore = originalDispatch(storeName);
+			if (storeName === paymentStore) {
 				return {
 					...originalStore,
 					__internalSetActivePaymentMethod:
@@ -71,17 +71,17 @@ describe( 'setDefaultPaymentMethod', () => {
 				};
 			}
 			return originalStore;
-		} );
+		});
 
-		await setDefaultPaymentMethod( paymentMethods );
-		expect( setActivePaymentMethodMock ).toHaveBeenCalledWith(
+		await setDefaultPaymentMethod(paymentMethods);
+		expect(setActivePaymentMethodMock).toHaveBeenCalledWith(
 			'wc-payment-gateway-1'
 		);
-	} );
-	it( 'correctly sets the saved payment method if one is available', async () => {
-		( select as jest.Mock ).mockImplementation( ( storeName ) => {
-			const originalStore = originalSelect( storeName );
-			if ( storeName === paymentStore ) {
+	});
+	it('correctly sets the saved payment method if one is available', async () => {
+		(select as jest.Mock).mockImplementation((storeName) => {
+			const originalStore = originalSelect(storeName);
+			if (storeName === paymentStore) {
 				return {
 					...originalStore,
 					getAvailableExpressPaymentMethods: () => {
@@ -116,12 +116,12 @@ describe( 'setDefaultPaymentMethod', () => {
 				};
 			}
 			return originalStore;
-		} );
+		});
 
 		const setActivePaymentMethodMock = jest.fn();
-		( dispatch as jest.Mock ).mockImplementation( ( storeName ) => {
-			const originalStore = originalDispatch( storeName );
-			if ( storeName === paymentStore ) {
+		(dispatch as jest.Mock).mockImplementation((storeName) => {
+			const originalStore = originalDispatch(storeName);
+			if (storeName === paymentStore) {
 				return {
 					...originalStore,
 					__internalSetActivePaymentMethod:
@@ -134,9 +134,9 @@ describe( 'setDefaultPaymentMethod', () => {
 				};
 			}
 			return originalStore;
-		} );
-		await setDefaultPaymentMethod( paymentMethods );
-		expect( setActivePaymentMethodMock ).toHaveBeenCalledWith(
+		});
+		await setDefaultPaymentMethod(paymentMethods);
+		expect(setActivePaymentMethodMock).toHaveBeenCalledWith(
 			'saved-method',
 			{
 				isSavedToken: true,
@@ -145,5 +145,5 @@ describe( 'setDefaultPaymentMethod', () => {
 				'wc-saved-method-payment-token': '2',
 			}
 		);
-	} );
-} );
+	});
+});

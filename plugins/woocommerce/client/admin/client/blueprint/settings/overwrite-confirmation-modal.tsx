@@ -14,90 +14,86 @@ type OverwriteConfirmationModalProps = {
 	additionalActions?: string[];
 };
 
-export const OverwriteConfirmationModal = ( {
+export const OverwriteConfirmationModal = ({
 	isOpen,
 	isImporting,
 	onClose,
 	onConfirm,
 	overwrittenItems,
 	additionalActions = [],
-}: OverwriteConfirmationModalProps ) => {
-	if ( ! isOpen ) {
+}: OverwriteConfirmationModalProps) => {
+	if (!isOpen) {
 		return null;
 	}
 	return (
 		<Modal
-			title={ __( 'Review what this Blueprint will do', 'woocommerce' ) }
-			onRequestClose={ onClose }
+			title={__('Review what this Blueprint will do', 'woocommerce')}
+			onRequestClose={onClose}
 			className="woocommerce-blueprint-overwrite-modal"
-			isDismissible={ ! isImporting }
+			isDismissible={!isImporting}
 		>
 			<p className="woocommerce-blueprint-overwrite-modal__description">
-				{ overwrittenItems.length
+				{overwrittenItems.length
 					? __(
 							'Importing the file will overwrite the current configuration for the following items in WooCommerce Settings:',
 							'woocommerce'
-					  )
+						)
 					: __(
 							'Importing the file will overwrite the current configuration in WooCommerce Settings.',
 							'woocommerce'
-					  ) }
+						)}
 			</p>
 
 			<ul className="woocommerce-blueprint-overwrite-modal__list">
-				{ overwrittenItems.map( ( item ) => (
-					<li key={ item }>{ item }</li>
-				) ) }
+				{overwrittenItems.map((item) => (
+					<li key={item}>{item}</li>
+				))}
 			</ul>
 
-			{ !! additionalActions.length && (
+			{!!additionalActions.length && (
 				<>
 					<p className="woocommerce-blueprint-overwrite-modal__description woocommerce-blueprint-overwrite-modal__description--actions">
-						{ __( 'It will also:', 'woocommerce' ) }
+						{__('It will also:', 'woocommerce')}
 					</p>
 					<ul className="woocommerce-blueprint-overwrite-modal__list">
-						{ additionalActions.map( ( action ) => (
-							<li key={ action }>{ action }</li>
-						) ) }
+						{additionalActions.map((action) => (
+							<li key={action}>{action}</li>
+						))}
 					</ul>
 				</>
-			) }
+			)}
 
 			<Notice
 				status="warning"
-				isDismissible={ false }
+				isDismissible={false}
 				className="woocommerce-blueprint-overwrite-modal__trust-notice"
 			>
-				{ __(
+				{__(
 					'A Blueprint runs with your administrator access, so it can change anything on your site — including data that is not listed above. Only import files from a source you trust.',
 					'woocommerce'
-				) }
+				)}
 			</Notice>
 
 			<div className="woocommerce-blueprint-overwrite-modal__actions">
 				<Button
 					className="woocommerce-blueprint-overwrite-modal__actions-cancel"
 					variant="tertiary"
-					onClick={ onClose }
-					disabled={ isImporting }
+					onClick={onClose}
+					disabled={isImporting}
 				>
-					{ __( 'Cancel', 'woocommerce' ) }
+					{__('Cancel', 'woocommerce')}
 				</Button>
 				<Button
-					className={ clsx(
+					className={clsx(
 						'woocommerce-blueprint-overwrite-modal__actions-import',
 						{
 							'is-importing': isImporting,
 						}
-					) }
+					)}
 					variant="primary"
-					onClick={ onConfirm }
+					onClick={onConfirm}
 				>
-					{ isImporting ? (
-						<Spinner />
-					) : (
-						__( 'Import', 'woocommerce' )
-					) }
+					{isImporting ? <Spinner /> : __('Import', 'woocommerce')}
 				</Button>
 			</div>
 		</Modal>

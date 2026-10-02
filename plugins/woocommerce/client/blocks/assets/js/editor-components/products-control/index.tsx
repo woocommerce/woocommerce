@@ -18,14 +18,14 @@ import type { ComponentType } from 'react';
 interface ProductsControlProps {
 	error: ErrorObject | null;
 	isLoading?: boolean;
-	onSearch?: ( search: string ) => void;
+	onSearch?: (search: string) => void;
 	products?: ProductResponseItem[];
 	selected?: number[];
-	onChange: ( value: SearchListItem< ProductResponseItem >[] ) => void;
+	onChange: (value: SearchListItem<ProductResponseItem>[]) => void;
 	isCompact?: boolean;
 }
 
-const ProductsControl = ( {
+const ProductsControl = ({
 	error,
 	onChange,
 	onSearch,
@@ -33,12 +33,12 @@ const ProductsControl = ( {
 	products = [],
 	isLoading = true,
 	isCompact = false,
-}: ProductsControlProps ): JSX.Element => {
-	const messages: Partial< SearchListMessages > = {
-		clear: __( 'Clear all products', 'woocommerce' ),
-		noItems: __( "Your store doesn't have any products.", 'woocommerce' ),
-		search: __( 'Search for products to display', 'woocommerce' ),
-		selected: ( n: number ) =>
+}: ProductsControlProps): JSX.Element => {
+	const messages: Partial<SearchListMessages> = {
+		clear: __('Clear all products', 'woocommerce'),
+		noItems: __("Your store doesn't have any products.", 'woocommerce'),
+		search: __('Search for products to display', 'woocommerce'),
+		selected: (n: number) =>
 			sprintf(
 				/* translators: %d is the number of selected products. */
 				_n(
@@ -49,51 +49,49 @@ const ProductsControl = ( {
 				),
 				n
 			),
-		updated: __( 'Product search results updated.', 'woocommerce' ),
+		updated: __('Product search results updated.', 'woocommerce'),
 	};
 
-	if ( error ) {
-		return <ErrorMessage error={ error } />;
+	if (error) {
+		return <ErrorMessage error={error} />;
 	}
 
-	const productList = products.map( convertProductResponseItemToSearchItem );
+	const productList = products.map(convertProductResponseItemToSearchItem);
 
 	return (
 		<SearchListControl
 			className="woocommerce-products"
-			list={ productList.map( ( product ) => {
+			list={productList.map((product) => {
 				const formattedSku = product.details?.sku
 					? ' (' + product.details.sku + ')'
 					: '';
 				return {
 					...product,
-					name: `${ decodeEntities(
-						product.name
-					) }${ formattedSku }`,
+					name: `${decodeEntities(product.name)}${formattedSku}`,
 				};
-			} ) }
-			isCompact={ isCompact }
-			isLoading={ isLoading }
-			isSingle={ false }
-			selected={ productList.filter( ( { details } ) => {
-				if ( ! details || ! Number.isSafeInteger( details.id ) ) {
+			})}
+			isCompact={isCompact}
+			isLoading={isLoading}
+			isSingle={false}
+			selected={productList.filter(({ details }) => {
+				if (!details || !Number.isSafeInteger(details.id)) {
 					return false;
 				}
-				return selected.includes( details.id );
-			} ) }
-			onSearch={ onSearch }
-			onChange={ onChange }
-			messages={ messages }
+				return selected.includes(details.id);
+			})}
+			onSearch={onSearch}
+			onChange={onChange}
+			messages={messages}
 		/>
 	);
 };
 
-const WrappedProductsControl: ComponentType< {
-	onChange: ( value: SearchListItem< ProductResponseItem >[] ) => void;
+const WrappedProductsControl: ComponentType<{
+	onChange: (value: SearchListItem<ProductResponseItem>[]) => void;
 	selected: number[];
 	isCompact?: boolean;
-} > =
+}> =
 	// @ts-expect-error HOC typing for injected products is narrower than this control's search list item shape.
-	withSearchedProducts( ProductsControl );
+	withSearchedProducts(ProductsControl);
 
 export default WrappedProductsControl;

@@ -12,7 +12,7 @@ import {
 } from './types';
 
 export const receiveRegisteredChannelsSuccess = (
-	channels: Array< RegisteredChannel >
+	channels: Array<RegisteredChannel>
 ) => {
 	return {
 		type: TYPES.RECEIVE_REGISTERED_CHANNELS_SUCCESS,
@@ -20,7 +20,7 @@ export const receiveRegisteredChannelsSuccess = (
 	};
 };
 
-export const receiveRegisteredChannelsError = ( error: ApiFetchError ) => {
+export const receiveRegisteredChannelsError = (error: ApiFetchError) => {
 	return {
 		type: TYPES.RECEIVE_REGISTERED_CHANNELS_ERROR,
 		payload: error,
@@ -29,7 +29,7 @@ export const receiveRegisteredChannelsError = ( error: ApiFetchError ) => {
 };
 
 export const receiveRecommendedChannelsSuccess = (
-	channels: Array< RecommendedChannel >
+	channels: Array<RecommendedChannel>
 ) => {
 	return {
 		type: TYPES.RECEIVE_RECOMMENDED_CHANNELS_SUCCESS,
@@ -37,7 +37,7 @@ export const receiveRecommendedChannelsSuccess = (
 	};
 };
 
-export const receiveRecommendedChannelsError = ( error: ApiFetchError ) => {
+export const receiveRecommendedChannelsError = (error: ApiFetchError) => {
 	return {
 		type: TYPES.RECEIVE_RECOMMENDED_CHANNELS_ERROR,
 		payload: error,
@@ -46,7 +46,7 @@ export const receiveRecommendedChannelsError = ( error: ApiFetchError ) => {
 };
 
 type CampaignsSuccessResponse = {
-	payload: Array< Campaign >;
+	payload: Array<Campaign>;
 	error: false;
 	meta: {
 		page: number;
@@ -70,7 +70,7 @@ type CampaignsResponse = CampaignsSuccessResponse | CampaignsFailResponse;
 /**
  * Create a "RECEIVE_CAMPAIGNS" action object.
  */
-export const receiveCampaigns = ( response: CampaignsResponse ) => {
+export const receiveCampaigns = (response: CampaignsResponse) => {
 	return {
 		type: TYPES.RECEIVE_CAMPAIGNS,
 		...response,
@@ -78,9 +78,9 @@ export const receiveCampaigns = ( response: CampaignsResponse ) => {
 };
 
 export const receiveCampaignTypes = (
-	data: Array< CampaignType > | ApiFetchError
+	data: Array<CampaignType> | ApiFetchError
 ) => {
-	if ( isApiFetchError( data ) ) {
+	if (isApiFetchError(data)) {
 		return {
 			type: TYPES.RECEIVE_CAMPAIGN_TYPES,
 			payload: data,

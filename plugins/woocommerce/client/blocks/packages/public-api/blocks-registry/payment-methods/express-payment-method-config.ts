@@ -15,9 +15,7 @@ import type {
 import { getCanMakePayment } from './payment-method-config-helper';
 import { assertConfigHasProperties, assertValidElement } from './assertions';
 
-export default class ExpressPaymentMethodConfig
-	implements ExpressPaymentMethodConfigInstance
-{
+export default class ExpressPaymentMethodConfig implements ExpressPaymentMethodConfigInstance {
 	public name: string;
 	public title: string;
 	public description: string;
@@ -28,20 +26,20 @@ export default class ExpressPaymentMethodConfig
 	public supports: Supports;
 	public canMakePaymentFromConfig: CanMakePaymentCallback;
 
-	constructor( config: ExpressPaymentMethodConfiguration ) {
+	constructor(config: ExpressPaymentMethodConfiguration) {
 		// validate config
 
 		const readableName =
 			typeof config.name === 'string'
-				? config.name.replace( /[_-]/g, ' ' )
+				? config.name.replace(/[_-]/g, ' ')
 				: config.name;
 		const trimmedDescription =
 			typeof config?.description === 'string' &&
 			config.description.length > 130
-				? config.description.slice( 0, 130 ) + '...'
+				? config.description.slice(0, 130) + '...'
 				: config.description;
 
-		ExpressPaymentMethodConfig.assertValidConfig( config );
+		ExpressPaymentMethodConfig.assertValidConfig(config);
 		this.name = config.name;
 		this.title = config.title || readableName;
 		this.description = trimmedDescription || '';
@@ -50,7 +48,7 @@ export default class ExpressPaymentMethodConfig
 		this.edit = config.edit;
 		this.paymentMethodId = config.paymentMethodId || this.name;
 		this.supports = {
-			features: config?.supports?.features || [ 'products' ],
+			features: config?.supports?.features || ['products'],
 			style: config?.supports?.style || [],
 		};
 		this.canMakePaymentFromConfig = config.canMakePayment;
@@ -68,8 +66,8 @@ export default class ExpressPaymentMethodConfig
 	static assertValidConfig = (
 		config: ExpressPaymentMethodConfiguration
 	): void => {
-		assertConfigHasProperties( config, [ 'name', 'content', 'edit' ] );
-		if ( typeof config.name !== 'string' ) {
+		assertConfigHasProperties(config, ['name', 'content', 'edit']);
+		if (typeof config.name !== 'string') {
 			throw new TypeError(
 				'The name property for the express payment method must be a string'
 			);
@@ -84,15 +82,15 @@ export default class ExpressPaymentMethodConfig
 		}
 		if (
 			typeof config.supports?.features !== 'undefined' &&
-			! Array.isArray( config.supports?.features )
+			!Array.isArray(config.supports?.features)
 		) {
 			throw new Error(
 				'The features property for the payment method must be an array or undefined.'
 			);
 		}
-		assertValidElement( config.content, 'content' );
-		assertValidElement( config.edit, 'edit' );
-		if ( typeof config.canMakePayment !== 'function' ) {
+		assertValidElement(config.content, 'content');
+		assertValidElement(config.edit, 'edit');
+		if (typeof config.canMakePayment !== 'function') {
 			throw new TypeError(
 				'The canMakePayment property for the express payment method must be a function.'
 			);

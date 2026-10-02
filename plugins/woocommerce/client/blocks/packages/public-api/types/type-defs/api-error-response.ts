@@ -12,15 +12,15 @@ export type ApiErrorResponse = {
 
 export type CouponApiErrorResponse = ApiErrorResponse & {
 	data: ApiErrorResponseData & {
-		details: Record< 'cart' | 'checkout', string >;
+		details: Record<'cart' | 'checkout', string>;
 	};
 };
 
 // API errors contain data with the status, and more in-depth error details. This may be null.
 export type ApiErrorResponseData = {
 	status: number;
-	params: Record< string, string >;
-	details: Record< string, ApiErrorResponseDataDetails >;
+	params: Record<string, string>;
+	details: Record<string, ApiErrorResponseDataDetails>;
 	context?: string;
 	// Some endpoints return cart data to update the client.
 	cart?: CartResponse | undefined;

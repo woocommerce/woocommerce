@@ -18,8 +18,8 @@ import {
 /**
  * Creates an array that is the symmetric difference of the given arrays
  */
-export function ArrayXOR< T extends Array< unknown > >( a: T, b: T ) {
-	return a.filter( ( el ) => ! b.includes( el ) );
+export function ArrayXOR<T extends Array<unknown>>(a: T, b: T) {
+	return a.filter((el) => !b.includes(el));
 }
 
 /**
@@ -29,10 +29,10 @@ export function ArrayXOR< T extends Array< unknown > >( a: T, b: T ) {
  * also adding extra namespaced attributes. If those namespaced attributes
  * are present, we can be fairly sure it is our own registered variation.
  */
-export function isWooQueryBlockVariation( block: ProductQueryBlock ) {
+export function isWooQueryBlockVariation(block: ProductQueryBlock) {
 	return (
 		block.name === QUERY_LOOP_ID &&
-		Object.values( QueryVariation ).includes(
+		Object.values(QueryVariation).includes(
 			block.attributes.namespace as QueryVariation
 		)
 	);
@@ -41,7 +41,7 @@ export function isWooQueryBlockVariation( block: ProductQueryBlock ) {
 /**
  * Identifies if a block is a Related Products variation.
  */
-export function isRelatedProducts( block: ProductQueryBlock ) {
+export function isRelatedProducts(block: ProductQueryBlock) {
 	return (
 		block.name === QUERY_LOOP_ID &&
 		block.attributes.namespace === QueryVariation.RELATED_PRODUCTS
@@ -55,16 +55,16 @@ export function isRelatedProducts( block: ProductQueryBlock ) {
  */
 export function setQueryAttribute(
 	block: ProductQueryBlock,
-	queryParams: Partial< ProductQueryBlockQuery >
+	queryParams: Partial<ProductQueryBlockQuery>
 ) {
 	const { query } = block.attributes;
 
-	block.setAttributes( {
+	block.setAttributes({
 		query: {
 			...query,
 			...queryParams,
 		},
-	} );
+	});
 }
 
 // This is a feature flag to enable the custom inherit Global Query implementation.
@@ -73,7 +73,7 @@ export function setQueryAttribute(
 export const isCustomInheritGlobalQueryImplementationEnabled = false;
 
 export function isWooInheritQueryEnabled(
-	attributes: ProductQueryBlock[ 'attributes' ]
+	attributes: ProductQueryBlock['attributes']
 ) {
 	return isCustomInheritGlobalQueryImplementationEnabled
 		? attributes.query.__woocommerceInherit
@@ -88,26 +88,26 @@ export function isWooInheritQueryEnabled(
  * @return {string[]} An array of the controls keys.
  */
 export function useAllowedControls(
-	attributes: ProductQueryBlock[ 'attributes' ]
+	attributes: ProductQueryBlock['attributes']
 ) {
 	const controls = useSelect(
-		( select ) =>
-			select( WP_BLOCKS_STORE ).getActiveBlockVariation(
+		(select) =>
+			select(WP_BLOCKS_STORE).getActiveBlockVariation(
 				QUERY_LOOP_ID,
 				attributes
 			)?.allowedControls,
-		[ attributes ]
+		[attributes]
 	);
 
-	if ( ! Array.isArray( controls ) ) {
+	if (!Array.isArray(controls)) {
 		return [];
 	}
 
-	if ( ! isSiteEditorPage() ) {
-		return controls.filter( ( control ) => control !== 'wooInherit' );
+	if (!isSiteEditorPage()) {
+		return controls.filter((control) => control !== 'wooInherit');
 	}
 
-	return isWooInheritQueryEnabled( attributes )
-		? controls.filter( ( control ) => control === 'wooInherit' )
+	return isWooInheritQueryEnabled(attributes)
+		? controls.filter((control) => control === 'wooInherit')
 		: controls;
 }

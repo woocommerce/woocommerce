@@ -47,20 +47,14 @@ export const handPickedIcon = (
 
 const collection = {
 	name: CoreCollectionNames.HAND_PICKED,
-	title: __( 'Hand-Picked Products', 'woocommerce' ),
-	icon: <Icon icon={ handPickedIcon } />,
+	title: __('Hand-Picked Products', 'woocommerce'),
+	icon: <Icon icon={handPickedIcon} />,
 	description: __(
 		'Select specific products to recommend to customers.',
 		'woocommerce'
 	),
-	keywords: [
-		'specific',
-		'choose',
-		'recommend',
-		'handpicked',
-		'hand picked',
-	],
-	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
+	keywords: ['specific', 'choose', 'recommend', 'handpicked', 'hand picked'],
+	scope: ['inserter', 'block'] as BlockVariationScope[],
 };
 
 const attributes = {
@@ -84,7 +78,7 @@ const heading: InnerBlockTemplate = [
 	{
 		textAlign: 'center',
 		level: 2,
-		content: __( 'Recommended products', 'woocommerce' ),
+		content: __('Recommended products', 'woocommerce'),
 		style: { spacing: { margin: { bottom: '1rem' } } },
 	},
 ];

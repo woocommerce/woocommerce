@@ -5,8 +5,8 @@
 import { __ } from '@wordpress/i18n';
 
 interface DescriptionKeyMap {
-	[ key: string ]: {
-		[ key: string ]: string;
+	[key: string]: {
+		[key: string]: string;
 	};
 }
 

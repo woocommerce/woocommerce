@@ -19,9 +19,9 @@ export const assertType = (
 	expectedType: unknown
 ): void => {
 	const actualType = typeof option;
-	if ( actualType !== expectedType ) {
+	if (actualType !== expectedType) {
 		throw new Error(
-			`Incorrect value for the ${ optionName } argument when registering a checkout block. It was a ${ actualType }, but must be a ${ expectedType }.`
+			`Incorrect value for the ${optionName} argument when registering a checkout block. It was a ${actualType}, but must be a ${expectedType}.`
 		);
 	}
 };
@@ -31,13 +31,11 @@ export const assertType = (
  *
  * @throws Will throw an error if the block name is invalid.
  */
-export const assertBlockName = ( blockName: string ): void => {
-	assertType( 'blockName', blockName, 'string' );
+export const assertBlockName = (blockName: string): void => {
+	assertType('blockName', blockName, 'string');
 
-	if ( ! blockName ) {
-		throw new Error(
-			`Value for the blockName argument must not be empty.`
-		);
+	if (!blockName) {
+		throw new Error(`Value for the blockName argument must not be empty.`);
 	}
 };
 
@@ -46,22 +44,22 @@ export const assertBlockName = ( blockName: string ): void => {
  *
  * @throws Will throw an error if the block name is invalid.
  */
-export const assertBlockParent = ( blockParent: string | string[] ): void => {
-	if ( typeof blockParent !== 'string' && ! Array.isArray( blockParent ) ) {
+export const assertBlockParent = (blockParent: string | string[]): void => {
+	if (typeof blockParent !== 'string' && !Array.isArray(blockParent)) {
 		throw new Error(
-			`Incorrect value for the parent argument when registering a checkout block. It was a ${ typeof blockParent }, but must be a string or array of strings.`
+			`Incorrect value for the parent argument when registering a checkout block. It was a ${typeof blockParent}, but must be a string or array of strings.`
 		);
 	}
 
-	if ( typeof blockParent === 'string' && ! hasInnerBlocks( blockParent ) ) {
+	if (typeof blockParent === 'string' && !hasInnerBlocks(blockParent)) {
 		throw new Error(
 			`When registering a checkout block, the parent must be a valid inner block area.`
 		);
 	}
 
 	if (
-		Array.isArray( blockParent ) &&
-		! blockParent.some( ( parent ) => hasInnerBlocks( parent ) )
+		Array.isArray(blockParent) &&
+		!blockParent.some((parent) => hasInnerBlocks(parent))
 	) {
 		throw new Error(
 			`When registering a checkout block, the parent must be a valid inner block area.`
@@ -82,13 +80,13 @@ export const assertOption = (
 	optionName: string,
 	expectedType: string
 ): void => {
-	if ( ! isObject( options ) ) {
+	if (!isObject(options)) {
 		return;
 	}
-	const actualType = typeof options[ optionName ];
-	if ( actualType !== expectedType ) {
+	const actualType = typeof options[optionName];
+	if (actualType !== expectedType) {
 		throw new Error(
-			`Incorrect value for the ${ optionName } argument when registering a block component. It was a ${ actualType }, but must be a ${ expectedType }.`
+			`Incorrect value for the ${optionName} argument when registering a block component. It was a ${actualType}, but must be a ${expectedType}.`
 		);
 	}
 };
@@ -99,24 +97,24 @@ export const assertOption = (
  * @throws Will throw an error if the type of the option doesn't match the expected type.
  */
 export const assertBlockComponent = (
-	options: Record< string, unknown >,
+	options: Record<string, unknown>,
 	optionName: string
 ): void => {
-	const optionValue = options[ optionName ];
+	const optionValue = options[optionName];
 
-	if ( optionValue ) {
-		if ( typeof optionValue === 'function' ) {
+	if (optionValue) {
+		if (typeof optionValue === 'function') {
 			return;
 		}
 		if (
-			isObject( optionValue ) &&
+			isObject(optionValue) &&
 			optionValue.$$typeof &&
-			optionValue.$$typeof === Symbol.for( 'react.lazy' )
+			optionValue.$$typeof === Symbol.for('react.lazy')
 		) {
 			return;
 		}
 	}
 	throw new Error(
-		`Incorrect value for the ${ optionName } argument when registering a block component. Component must be a valid React Element or Lazy callback.`
+		`Incorrect value for the ${optionName} argument when registering a block component. Component must be a valid React Element or Lazy callback.`
 	);
 };

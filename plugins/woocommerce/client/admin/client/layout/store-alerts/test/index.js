@@ -32,186 +32,182 @@ const alerts = [
 	},
 ];
 
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
+jest.mock('@wordpress/data', () => ({
+	...jest.requireActual('@wordpress/data'),
 	useDispatch: jest.fn(),
 	useSelect: jest.fn(),
-} ) );
+}));
 
-jest.mock( '@woocommerce/data', () => ( {
+jest.mock('@woocommerce/data', () => ({
 	notesStore: 'wc/admin/notes',
 	optionsStore: 'wc/admin/options',
 	QUERY_DEFAULTS: {
 		pageSize: 25,
 	},
-	useUserPreferences: jest.fn().mockReturnValue( {} ),
-} ) );
+	useUserPreferences: jest.fn().mockReturnValue({}),
+}));
 
-describe( 'StoreAlerts', () => {
-	beforeEach( () => {
-		useDispatch.mockReturnValue( {
+describe('StoreAlerts', () => {
+	beforeEach(() => {
+		useDispatch.mockReturnValue({
 			createNotice: jest.fn(),
 			removeNote: jest.fn(),
 			triggerNoteAction: jest.fn(),
 			updateNote: jest.fn(),
-		} );
-	} );
+		});
+	});
 
-	it( 'should return null when no alerts exist', () => {
-		useSelect.mockImplementation( () => {
+	it('should return null when no alerts exist', () => {
+		useSelect.mockImplementation(() => {
 			return {
 				alerts: [],
 				isLoading: false,
 			};
-		} );
-		const { container } = render( <StoreAlerts /> );
+		});
+		const { container } = render(<StoreAlerts />);
 
-		expect( container.firstChild ).toBeNull();
-	} );
+		expect(container.firstChild).toBeNull();
+	});
 
-	it( 'should show the placeholder when loading and preloaded alerts exist', () => {
-		setAdminSetting( 'alertCount', 2 );
-		useSelect.mockImplementation( () => {
+	it('should show the placeholder when loading and preloaded alerts exist', () => {
+		setAdminSetting('alertCount', 2);
+		useSelect.mockImplementation(() => {
 			return {
 				alerts,
 				isLoading: true,
 			};
-		} );
-		const { container } = render( <StoreAlerts /> );
+		});
+		const { container } = render(<StoreAlerts />);
 
-		expect(
-			container.querySelector( '.is-placeholder' )
-		).toBeInTheDocument();
-	} );
+		expect(container.querySelector('.is-placeholder')).toBeInTheDocument();
+	});
 
-	it( 'should show the alert title and content', () => {
-		useSelect.mockImplementation( () => {
+	it('should show the alert title and content', () => {
+		useSelect.mockImplementation(() => {
 			return {
 				alerts,
 				isLoading: false,
 			};
-		} );
-		const { container } = render( <StoreAlerts /> );
+		});
+		const { container } = render(<StoreAlerts />);
 
 		expect(
-			container.querySelector( '.woocommerce-store-alerts__title' )
+			container.querySelector('.woocommerce-store-alerts__title')
 				.textContent
-		).toBe( 'Alert title 1' );
+		).toBe('Alert title 1');
 		expect(
-			container.querySelector( '.woocommerce-store-alerts__message' )
+			container.querySelector('.woocommerce-store-alerts__message')
 				.textContent
-		).toBe( 'Alert content 1' );
-	} );
+		).toBe('Alert content 1');
+	});
 
-	it( 'should not show the pagination for a single alert', () => {
-		useSelect.mockImplementation( () => {
+	it('should not show the pagination for a single alert', () => {
+		useSelect.mockImplementation(() => {
 			return {
-				alerts: [ alerts[ 0 ] ],
+				alerts: [alerts[0]],
 				isLoading: false,
 			};
-		} );
-		const { container } = render( <StoreAlerts /> );
+		});
+		const { container } = render(<StoreAlerts />);
 
 		expect(
-			container.querySelector( '.woocommerce-store-alerts__pagination' )
+			container.querySelector('.woocommerce-store-alerts__pagination')
 		).toBeNull();
-	} );
+	});
 
-	it( 'should show the pagination for multiple alerts', () => {
-		useSelect.mockImplementation( () => {
+	it('should show the pagination for multiple alerts', () => {
+		useSelect.mockImplementation(() => {
 			return {
 				alerts,
 				isLoading: false,
 			};
-		} );
-		const { container } = render( <StoreAlerts /> );
+		});
+		const { container } = render(<StoreAlerts />);
 
 		expect(
-			container.querySelector( '.woocommerce-store-alerts__pagination' )
+			container.querySelector('.woocommerce-store-alerts__pagination')
 		).toBeInTheDocument();
-	} );
+	});
 
-	it( 'should show the actions for an alert that contains actions', () => {
-		useSelect.mockImplementation( () => {
+	it('should show the actions for an alert that contains actions', () => {
+		useSelect.mockImplementation(() => {
 			return {
-				alerts: [ alerts[ 1 ] ],
+				alerts: [alerts[1]],
 				isLoading: false,
 			};
-		} );
-		const { container } = render( <StoreAlerts /> );
+		});
+		const { container } = render(<StoreAlerts />);
 
 		expect(
 			container.querySelector(
 				'.components-button:not(.woocommerce-store-alerts__close)'
 			).textContent
-		).toBe( 'Click me!' );
+		).toBe('Click me!');
 		expect(
 			container
 				.querySelector(
 					'.components-button:not(.woocommerce-store-alerts__close)'
 				)
-				.getAttribute( 'href' )
-		).toBe( '#' );
+				.getAttribute('href')
+		).toBe('#');
 		expect(
-			container.querySelector( '.woocommerce-store-alerts__snooze' )
+			container.querySelector('.woocommerce-store-alerts__snooze')
 		).not.toBeInTheDocument();
-	} );
+	});
 
-	it( 'should show the actions and snooze actions for snoozable alerts', () => {
-		useSelect.mockImplementation( () => {
+	it('should show the actions and snooze actions for snoozable alerts', () => {
+		useSelect.mockImplementation(() => {
 			return {
-				alerts: [ { ...alerts[ 1 ], is_snoozable: true } ],
+				alerts: [{ ...alerts[1], is_snoozable: true }],
 				isLoading: false,
 			};
-		} );
-		const { container } = render( <StoreAlerts /> );
+		});
+		const { container } = render(<StoreAlerts />);
 
 		expect(
 			container.querySelector(
 				'.components-button:not(.woocommerce-store-alerts__close)'
 			).textContent
-		).toBe( 'Click me!' );
+		).toBe('Click me!');
 		expect(
 			container
 				.querySelector(
 					'.components-button:not(.woocommerce-store-alerts__close)'
 				)
-				.getAttribute( 'href' )
-		).toBe( '#' );
+				.getAttribute('href')
+		).toBe('#');
 		expect(
-			container.querySelector( '.woocommerce-store-alerts__snooze' )
+			container.querySelector('.woocommerce-store-alerts__snooze')
 		).toBeInTheDocument();
-	} );
+	});
 
-	it( 'should show different alerts when clicking the pagination buttons', () => {
-		useSelect.mockImplementation( () => {
+	it('should show different alerts when clicking the pagination buttons', () => {
+		useSelect.mockImplementation(() => {
 			return { alerts, isLoading: false };
-		} );
-		const { container, getByLabelText, rerender } = render(
-			<StoreAlerts />
-		);
+		});
+		const { container, getByLabelText, rerender } = render(<StoreAlerts />);
 
 		expect(
-			container.querySelector( '.woocommerce-store-alerts__title' )
+			container.querySelector('.woocommerce-store-alerts__title')
 				.textContent
-		).toBe( 'Alert title 1' );
+		).toBe('Alert title 1');
 
-		fireEvent.click( getByLabelText( 'Next Alert' ) );
+		fireEvent.click(getByLabelText('Next Alert'));
 
-		rerender( <StoreAlerts /> );
+		rerender(<StoreAlerts />);
 
 		expect(
-			container.querySelector( '.woocommerce-store-alerts__title' )
+			container.querySelector('.woocommerce-store-alerts__title')
 				.textContent
-		).toBe( 'Alert title 2' );
+		).toBe('Alert title 2');
 
-		fireEvent.click( getByLabelText( 'Previous Alert' ) );
+		fireEvent.click(getByLabelText('Previous Alert'));
 
-		rerender( <StoreAlerts /> );
+		rerender(<StoreAlerts />);
 
 		expect(
-			container.querySelector( '.woocommerce-store-alerts__title' )
+			container.querySelector('.woocommerce-store-alerts__title')
 				.textContent
-		).toBe( 'Alert title 1' );
-	} );
-} );
+		).toBe('Alert title 1');
+	});
+});

@@ -13,12 +13,12 @@ import {
  */
 import { PaymentExtensionSuggestionListItem } from '..';
 
-jest.mock( '@woocommerce/tracks', () => ( {
+jest.mock('@woocommerce/tracks', () => ({
 	recordEvent: jest.fn(),
-} ) );
+}));
 
-describe( 'PaymentExtensionSuggestionListItem', () => {
-	it( 'should record settings_payments_provider_enable_click event on click of the Enable button', () => {
+describe('PaymentExtensionSuggestionListItem', () => {
+	it('should record settings_payments_provider_enable_click event on click of the Enable button', () => {
 		const { getByRole } = render(
 			<PaymentExtensionSuggestionListItem
 				suggestion={
@@ -40,21 +40,21 @@ describe( 'PaymentExtensionSuggestionListItem', () => {
 						_suggestion_id: 'test-suggestion',
 					} as unknown as PaymentsExtensionSuggestionProvider
 				}
-				installingPlugin={ null }
-				setUpPlugin={ () => {} }
-				pluginInstalled={ true }
-				acceptIncentive={ () => {} }
-				shouldHighlightIncentive={ false }
+				installingPlugin={null}
+				setUpPlugin={() => {}}
+				pluginInstalled={true}
+				acceptIncentive={() => {}}
+				shouldHighlightIncentive={false}
 			/>
 		);
 
-		fireEvent.click( getByRole( 'button', { name: 'Enable' } ) );
-		expect( recordEvent ).toHaveBeenCalledWith(
+		fireEvent.click(getByRole('button', { name: 'Enable' }));
+		expect(recordEvent).toHaveBeenCalledWith(
 			'settings_payments_provider_enable_click',
-			expect.objectContaining( {
+			expect.objectContaining({
 				provider_id: '_wc_pes_test-suggestion',
 				suggestion_id: 'test-suggestion',
-			} )
+			})
 		);
-	} );
-} );
+	});
+});

@@ -14,7 +14,7 @@ import { CART_PAGE_ID } from '@woocommerce/block-settings';
  */
 import { defaultButtonLabel } from './constants';
 
-export const Edit = ( {
+export const Edit = ({
 	attributes,
 	setAttributes,
 }: {
@@ -23,35 +23,35 @@ export const Edit = ( {
 		className: string;
 		buttonLabel: string;
 	};
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ): JSX.Element => {
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}): JSX.Element => {
 	const blockProps = useBlockProps();
 	const { checkoutPageId = 0, buttonLabel } = attributes;
-	const { current: savedCheckoutPageId } = useRef( checkoutPageId );
+	const { current: savedCheckoutPageId } = useRef(checkoutPageId);
 
 	const currentPostId = useSelect(
-		( select ) => {
-			if ( ! savedCheckoutPageId ) {
-				const store = select( 'core/editor' );
+		(select) => {
+			if (!savedCheckoutPageId) {
+				const store = select('core/editor');
 				return store.getCurrentPostId();
 			}
 			return savedCheckoutPageId;
 		},
-		[ savedCheckoutPageId ]
+		[savedCheckoutPageId]
 	);
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<InspectorControls>
-				{ ! (
+				{!(
 					currentPostId === CART_PAGE_ID && savedCheckoutPageId === 0
 				) && (
 					<PageSelector
-						pageId={ checkoutPageId }
-						setPageId={ ( id: number ) =>
-							setAttributes( { checkoutPageId: id } )
+						pageId={checkoutPageId}
+						setPageId={(id: number) =>
+							setAttributes({ checkoutPageId: id })
 						}
-						labels={ {
+						labels={{
 							title: __(
 								'Proceed to Checkout button',
 								'woocommerce'
@@ -60,24 +60,24 @@ export const Edit = ( {
 								'WooCommerce Checkout Page',
 								'woocommerce'
 							),
-						} }
+						}}
 					/>
-				) }
+				)}
 			</InspectorControls>
 			<EditableButton
 				className="wc-block-cart__submit-button"
-				value={ buttonLabel }
-				placeholder={ defaultButtonLabel }
-				onChange={ ( content ) => {
-					setAttributes( {
+				value={buttonLabel}
+				placeholder={defaultButtonLabel}
+				onChange={(content) => {
+					setAttributes({
 						buttonLabel: content,
-					} );
-				} }
+					});
+				}}
 			/>
 		</div>
 	);
 };
 
 export const Save = (): JSX.Element => {
-	return <div { ...useBlockProps.save() } />;
+	return <div {...useBlockProps.save()} />;
 };

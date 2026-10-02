@@ -21,43 +21,43 @@ export interface ShippingMethodRestrictionSettings {
  * @return A `canMakePayment` callback for `registerPaymentMethod`.
  */
 export const canMakePaymentForShippingMethods =
-	( settings: ShippingMethodRestrictionSettings ) =>
-	( {
+	(settings: ShippingMethodRestrictionSettings) =>
+	({
 		cartNeedsShipping,
 		selectedShippingMethods,
 	}: Pick<
 		CanMakePaymentArgument,
 		'cartNeedsShipping' | 'selectedShippingMethods'
-	> ): boolean => {
+	>): boolean => {
 		const enableForShippingMethods =
 			settings.enableForShippingMethods ?? [];
 
-		if ( settings.enableForVirtual && ! cartNeedsShipping ) {
+		if (settings.enableForVirtual && !cartNeedsShipping) {
 			// Store allows the payment method for virtual orders.
 			return true;
 		}
 
-		if ( ! enableForShippingMethods.length ) {
+		if (!enableForShippingMethods.length) {
 			// Store does not limit the payment method to specific shipping methods.
 			return true;
 		}
 
 		// Look for a supported shipping method in the user's selected
 		// shipping methods. If one is found, then the payment method is allowed.
-		const selectedMethods = Object.values( selectedShippingMethods );
+		const selectedMethods = Object.values(selectedShippingMethods);
 
 		// Enable until proven unavailable.
-		if ( selectedMethods.length === 0 ) {
+		if (selectedMethods.length === 0) {
 			return true;
 		}
 
 		// Supported shipping methods might be global (eg. "Any flat rate"), hence
 		// this is doing a `String.prototype.includes` match vs a `Array.prototype.includes` match.
-		return enableForShippingMethods.some( ( shippingMethodId ) =>
+		return enableForShippingMethods.some((shippingMethodId) =>
 			selectedMethods.some(
-				( selectedMethod ) =>
+				(selectedMethod) =>
 					typeof selectedMethod === 'string' &&
-					selectedMethod.includes( shippingMethodId )
+					selectedMethod.includes(shippingMethodId)
 			)
 		);
 	};

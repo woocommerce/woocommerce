@@ -102,7 +102,7 @@ const program = new Command()
 					? ( await getMostRecentBeta() ).tag_name
 					: `${ semverVersion.major }.${ semverVersion.minor }.${
 							semverVersion.patch
-					  }-rc.${ prereleaseVersion - 1 }`;
+						}-rc.${ prereleaseVersion - 1 }`;
 
 			const semverPreviousVersion = semver.parse( previousVersion );
 
@@ -184,9 +184,9 @@ const program = new Command()
 					}.${ semverPreviousVersion.patch }${
 						semverPreviousVersion.prerelease.length
 							? ' ' +
-							  semverPreviousVersion.prerelease[ 0 ] +
-							  ' ' +
-							  semverPreviousVersion.prerelease[ 1 ]
+								semverPreviousVersion.prerelease[ 0 ] +
+								' ' +
+								semverPreviousVersion.prerelease[ 1 ]
 							: ''
 					}`,
 					finalReleaseDate,

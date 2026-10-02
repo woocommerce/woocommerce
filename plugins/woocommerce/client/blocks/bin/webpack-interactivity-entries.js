@@ -1,38 +1,38 @@
-const path = require( 'path' );
-const fs = require( 'fs' );
-const glob = require( 'glob' );
+const path = require('path');
+const fs = require('fs');
+const glob = require('glob');
 
-function blockSupportsInteractivity( blockJson ) {
-	if ( typeof blockJson?.supports?.interactivity === 'object' ) {
+function blockSupportsInteractivity(blockJson) {
+	if (typeof blockJson?.supports?.interactivity === 'object') {
 		return blockJson.supports.interactivity?.interactive === true;
 	}
 
 	return blockJson?.supports?.interactivity === true;
 }
 
-function findInteractivityBlockAssets( dir = [] ) {
+function findInteractivityBlockAssets(dir = []) {
 	const additionalPatterns = [
 		'{frontend.ts,frontend.js}',
 		'style.scss',
 		'editor.scss',
 	];
 	let results = [];
-	const ents = fs.readdirSync( dir, { withFileTypes: true } );
+	const ents = fs.readdirSync(dir, { withFileTypes: true });
 
-	for ( const entry of ents ) {
-		const fullPath = path.join( dir, entry.name );
-		if ( entry.isDirectory() ) {
+	for (const entry of ents) {
+		const fullPath = path.join(dir, entry.name);
+		if (entry.isDirectory()) {
 			results = results.concat(
-				findInteractivityBlockAssets( fullPath, additionalPatterns )
+				findInteractivityBlockAssets(fullPath, additionalPatterns)
 			);
-		} else if ( entry.isFile() && entry.name === 'block.json' ) {
+		} else if (entry.isFile() && entry.name === 'block.json') {
 			// parse the json file and determine if its a block that supports interactivity.
-			const blockJson = JSON.parse( fs.readFileSync( fullPath, 'utf8' ) );
+			const blockJson = JSON.parse(fs.readFileSync(fullPath, 'utf8'));
 
-			if ( blockSupportsInteractivity( blockJson ) ) {
-				const blockDir = path.dirname( fullPath );
-				const assets = additionalPatterns.flatMap( ( pattern ) =>
-					glob.sync( pattern, { cwd: blockDir, absolute: true } )
+			if (blockSupportsInteractivity(blockJson)) {
+				const blockDir = path.dirname(fullPath);
+				const assets = additionalPatterns.flatMap((pattern) =>
+					glob.sync(pattern, { cwd: blockDir, absolute: true })
 				);
 
 				// For block.json's viewScriptModule, style, editorStyle, check if the file exists and warn
@@ -45,11 +45,11 @@ function findInteractivityBlockAssets( dir = [] ) {
 				if (
 					blockJson.viewScriptModule &&
 					blockJson.viewScriptModule === blockJson.name &&
-					! fs.existsSync( path.join( blockDir, 'frontend.ts' ) )
+					!fs.existsSync(path.join(blockDir, 'frontend.ts'))
 				) {
 					// eslint-disable-next-line no-console
 					console.warn(
-						`viewScriptModule was declared in ${ blockJson.name } block.json but no frontend.ts file exists.`
+						`viewScriptModule was declared in ${blockJson.name} block.json but no frontend.ts file exists.`
 					);
 				}
 
@@ -57,38 +57,34 @@ function findInteractivityBlockAssets( dir = [] ) {
 				// compiled from a shared base component), so only warn when a
 				// local style.scss source is expected but missing. `style` may
 				// be a single reference or an array of them.
-				const styleRefs = Array.isArray( blockJson.style )
+				const styleRefs = Array.isArray(blockJson.style)
 					? blockJson.style
-					: [ blockJson.style ];
+					: [blockJson.style];
 				if (
 					blockJson.style &&
-					! styleRefs.some( ( ref ) =>
-						String( ref ).startsWith( 'file:' )
-					) &&
-					! fs.existsSync( path.join( blockDir, 'style.scss' ) )
+					!styleRefs.some((ref) => String(ref).startsWith('file:')) &&
+					!fs.existsSync(path.join(blockDir, 'style.scss'))
 				) {
 					// eslint-disable-next-line no-console
 					console.warn(
-						`style was declared in ${ blockJson.name } block.json but no style.scss file exists.`
+						`style was declared in ${blockJson.name} block.json but no style.scss file exists.`
 					);
 				}
 
-				if ( blockJson.editorStyle ) {
-					if (
-						! fs.existsSync( path.join( blockDir, 'editor.scss' ) )
-					) {
+				if (blockJson.editorStyle) {
+					if (!fs.existsSync(path.join(blockDir, 'editor.scss'))) {
 						// eslint-disable-next-line no-console
 						console.warn(
-							`editorStyle was declared in ${ blockJson.name } block.json but no editor.scss file exists.`
+							`editorStyle was declared in ${blockJson.name} block.json but no editor.scss file exists.`
 						);
 					}
 				}
 
-				results.push( {
+				results.push({
 					blockName: blockJson.name,
 					blockJson: fullPath,
 					assets,
-				} );
+				});
 			}
 		}
 	}
@@ -97,38 +93,38 @@ function findInteractivityBlockAssets( dir = [] ) {
 }
 
 const interactivityBlocks = findInteractivityBlockAssets(
-	path.resolve( __dirname, '../assets/js' )
+	path.resolve(__dirname, '../assets/js')
 );
 
-const scriptModuleEntries = interactivityBlocks.reduce( ( acc, block ) => {
-	const frontendFile = block.assets.find( ( f ) =>
-		[ 'frontend.ts', 'frontend.js' ].includes( path.basename( f ) )
+const scriptModuleEntries = interactivityBlocks.reduce((acc, block) => {
+	const frontendFile = block.assets.find((f) =>
+		['frontend.ts', 'frontend.js'].includes(path.basename(f))
 	);
-	if ( frontendFile ) {
-		acc[ block.blockName ] = frontendFile;
+	if (frontendFile) {
+		acc[block.blockName] = frontendFile;
 	}
 	return acc;
-}, {} );
+}, {});
 
-const styleEntries = interactivityBlocks.reduce( ( acc, block ) => {
+const styleEntries = interactivityBlocks.reduce((acc, block) => {
 	const styleFile = block.assets.find(
-		( f ) => path.basename( f ) === 'style.scss'
+		(f) => path.basename(f) === 'style.scss'
 	);
-	if ( styleFile ) {
-		acc[ `${ block.blockName }-style` ] = styleFile;
+	if (styleFile) {
+		acc[`${block.blockName}-style`] = styleFile;
 	}
 	return acc;
-}, {} );
+}, {});
 
-const editorStyleEntries = interactivityBlocks.reduce( ( acc, block ) => {
+const editorStyleEntries = interactivityBlocks.reduce((acc, block) => {
 	const editorFile = block.assets.find(
-		( f ) => path.basename( f ) === 'editor.scss'
+		(f) => path.basename(f) === 'editor.scss'
 	);
-	if ( editorFile ) {
-		acc[ `${ block.blockName }-editor` ] = editorFile;
+	if (editorFile) {
+		acc[`${block.blockName}-editor`] = editorFile;
 	}
 	return acc;
-}, {} );
+}, {});
 
 module.exports = {
 	scriptModuleEntries,

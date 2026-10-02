@@ -11,22 +11,22 @@ import type { DataFormControlProps } from '@wordpress/dataviews';
 /**
  * The shape of the form values used by the offline payment method settings forms.
  */
-export type OfflineFormValues = Record< string, string | boolean | string[] >;
+export type OfflineFormValues = Record<string, string | boolean | string[]>;
 
 /**
  * A DataForm edit control that renders a `CheckboxControl`, preserving the
  * markup of the previous hand-rolled offline payment method forms.
  */
-export const CheckboxEdit = ( {
+export const CheckboxEdit = ({
 	data,
 	field,
 	onChange,
-}: DataFormControlProps< OfflineFormValues > ) => (
+}: DataFormControlProps<OfflineFormValues>) => (
 	<CheckboxControl
-		label={ field.label }
-		help={ field.description }
-		checked={ Boolean( field.getValue( { item: data } ) ) }
-		onChange={ ( checked ) => onChange( { [ field.id ]: checked } ) }
+		label={field.label}
+		help={field.description}
+		checked={Boolean(field.getValue({ item: data }))}
+		onChange={(checked) => onChange({ [field.id]: checked })}
 	/>
 );
 
@@ -34,17 +34,17 @@ export const CheckboxEdit = ( {
  * A DataForm edit control that renders a `TextControl`, preserving the
  * markup of the previous hand-rolled offline payment method forms.
  */
-export const TextEdit = ( {
+export const TextEdit = ({
 	data,
 	field,
 	onChange,
-}: DataFormControlProps< OfflineFormValues > ) => (
+}: DataFormControlProps<OfflineFormValues>) => (
 	<TextControl
-		label={ field.label }
-		help={ field.description }
-		placeholder={ field.placeholder }
-		value={ String( field.getValue( { item: data } ) ?? '' ) }
-		onChange={ ( value ) => onChange( { [ field.id ]: value } ) }
+		label={field.label}
+		help={field.description}
+		placeholder={field.placeholder}
+		value={String(field.getValue({ item: data }) ?? '')}
+		onChange={(value) => onChange({ [field.id]: value })}
 	/>
 );
 
@@ -52,15 +52,15 @@ export const TextEdit = ( {
  * A DataForm edit control that renders a `TextareaControl`, preserving the
  * markup of the previous hand-rolled offline payment method forms.
  */
-export const TextareaEdit = ( {
+export const TextareaEdit = ({
 	data,
 	field,
 	onChange,
-}: DataFormControlProps< OfflineFormValues > ) => (
+}: DataFormControlProps<OfflineFormValues>) => (
 	<TextareaControl
-		label={ field.label }
-		help={ field.description }
-		value={ String( field.getValue( { item: data } ) ?? '' ) }
-		onChange={ ( value ) => onChange( { [ field.id ]: value } ) }
+		label={field.label}
+		help={field.description}
+		value={String(field.getValue({ item: data }) ?? '')}
+		onChange={(value) => onChange({ [field.id]: value })}
 	/>
 );

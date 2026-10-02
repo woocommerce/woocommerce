@@ -18,7 +18,7 @@ interface Props {
 	attributes: {
 		textAlign?: string;
 	};
-	setAttributes: ( attrs: Partial< Props[ 'attributes' ] > ) => void;
+	setAttributes: (attrs: Partial<Props['attributes']>) => void;
 	context: {
 		termId?: number;
 		termTaxonomy?: string;
@@ -26,47 +26,47 @@ interface Props {
 	};
 }
 
-export default function Edit( { attributes, setAttributes, context }: Props ) {
+export default function Edit({ attributes, setAttributes, context }: Props) {
 	const { textAlign } = attributes;
 	const { termId, termTaxonomy, taxonomy } = context;
 	const effectiveTaxonomy = termTaxonomy || taxonomy || 'product_cat';
 
 	const userCanEdit = useSelect(
-		( select ) => {
-			if ( ! termId ) {
+		(select) => {
+			if (!termId) {
 				return false;
 			}
 			// This use actually reflects the use seen in `core/post-title` block.
-			return select( coreStore ).canUser( 'update', {
+			return select(coreStore).canUser('update', {
 				kind: 'taxonomy',
 				name: effectiveTaxonomy,
 				id: termId,
-			} );
+			});
 		},
-		[ termId, effectiveTaxonomy ]
+		[termId, effectiveTaxonomy]
 	);
 
-	const [ rawDescription = '', setDescription, fullDescription ] =
+	const [rawDescription = '', setDescription, fullDescription] =
 		useEntityProp(
 			'taxonomy',
 			effectiveTaxonomy,
 			'description',
-			termId ? String( termId ) : undefined
+			termId ? String(termId) : undefined
 		);
 
-	const isPreviewMode = usePreviewMode() && ! termId;
+	const isPreviewMode = usePreviewMode() && !termId;
 
 	let displayRawDescription = '';
-	if ( isPreviewMode ) {
-		displayRawDescription = previewCategories[ 0 ].description;
-	} else if ( typeof rawDescription === 'string' ) {
+	if (isPreviewMode) {
+		displayRawDescription = previewCategories[0].description;
+	} else if (typeof rawDescription === 'string') {
 		displayRawDescription = rawDescription;
 	}
 
 	let displayFullDescription = '';
-	if ( isPreviewMode ) {
-		displayFullDescription = previewCategories[ 0 ].description;
-	} else if ( typeof fullDescription === 'string' ) {
+	if (isPreviewMode) {
+		displayFullDescription = previewCategories[0].description;
+	} else if (typeof fullDescription === 'string') {
 		displayFullDescription = fullDescription;
 	} else if (
 		typeof fullDescription === 'object' &&
@@ -77,32 +77,32 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		displayFullDescription = fullDescription.rendered;
 	}
 
-	const blockProps = useBlockProps( {
-		className: clsx( { [ `has-text-align-${ textAlign }` ]: textAlign } ),
-	} );
+	const blockProps = useBlockProps({
+		className: clsx({ [`has-text-align-${textAlign}`]: textAlign }),
+	});
 
 	let descriptionElement = (
-		<p { ...blockProps }>{ __( 'Category description', 'woocommerce' ) }</p>
+		<p {...blockProps}>{__('Category description', 'woocommerce')}</p>
 	);
 
-	if ( termId || isPreviewMode ) {
+	if (termId || isPreviewMode) {
 		descriptionElement = userCanEdit ? (
 			<PlainText
 				tagName="p"
-				placeholder={ __( 'No description', 'woocommerce' ) as string }
-				value={ displayRawDescription }
-				onChange={ ( v: string ) =>
-					( setDescription as ( v: string ) => void )( v )
+				placeholder={__('No description', 'woocommerce') as string}
+				value={displayRawDescription}
+				onChange={(v: string) =>
+					(setDescription as (v: string) => void)(v)
 				}
-				__experimentalVersion={ 2 }
-				{ ...blockProps }
+				__experimentalVersion={2}
+				{...blockProps}
 			/>
 		) : (
 			<p
-				{ ...blockProps }
-				dangerouslySetInnerHTML={ {
+				{...blockProps}
+				dangerouslySetInnerHTML={{
 					__html: displayFullDescription,
-				} }
+				}}
 			/>
 		);
 	}
@@ -111,13 +111,13 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		<>
 			<BlockControls group="block">
 				<AlignmentControl
-					value={ textAlign }
-					onChange={ ( nextAlign: string ) =>
-						setAttributes( { textAlign: nextAlign || '' } )
+					value={textAlign}
+					onChange={(nextAlign: string) =>
+						setAttributes({ textAlign: nextAlign || '' })
 					}
 				/>
 			</BlockControls>
-			{ descriptionElement }
+			{descriptionElement}
 		</>
 	);
 }

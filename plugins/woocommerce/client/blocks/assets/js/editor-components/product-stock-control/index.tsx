@@ -7,23 +7,23 @@ import { useCallback, useState, useEffect } from '@wordpress/element';
 import { ToggleControl } from '@wordpress/components';
 
 export interface ProductStockControlProps {
-	value: Array< string >;
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
+	value: Array<string>;
+	setAttributes: (attributes: Record<string, unknown>) => void;
 }
 
 // Look up whether or not out of stock items should be hidden globally.
-const hideOutOfStockItems = getSetting( 'hideOutOfStockItems', false );
+const hideOutOfStockItems = getSetting('hideOutOfStockItems', false);
 
 // Get the stock status options.
-const allStockStatusOptions = getSetting( 'stockStatusOptions', {} );
+const allStockStatusOptions = getSetting('stockStatusOptions', {});
 
 /**
  * A pre-configured SelectControl for product stock settings.
  */
-const ProductStockControl = ( {
+const ProductStockControl = ({
 	value,
 	setAttributes,
-}: ProductStockControlProps ): JSX.Element => {
+}: ProductStockControlProps): JSX.Element => {
 	// Determine whether or not to use the out of stock status.
 	const { outofstock, ...otherStockStatusOptions } = allStockStatusOptions;
 	const stockStatusOptions = hideOutOfStockItems
@@ -35,15 +35,15 @@ const ProductStockControl = ( {
 	 * stockStatusOptions are returned as [ 'mystatus' : 'My label' ].
 	 * Formatting is corrected here.
 	 */
-	const displayOptions = Object.entries( stockStatusOptions )
-		.map( ( [ slug, name ] ) => ( { value: slug, label: name } ) )
-		.filter( ( status ) => !! status.label );
-	const defaultCheckedOptions = Object.keys( stockStatusOptions ).filter(
-		( key: string ) => !! key
+	const displayOptions = Object.entries(stockStatusOptions)
+		.map(([slug, name]) => ({ value: slug, label: name }))
+		.filter((status) => !!status.label);
+	const defaultCheckedOptions = Object.keys(stockStatusOptions).filter(
+		(key: string) => !!key
 	);
 
 	// Set the initial state to the default or saved value.
-	const [ checkedOptions, setChecked ] = useState(
+	const [checkedOptions, setChecked] = useState(
 		value || defaultCheckedOptions
 	);
 
@@ -51,55 +51,55 @@ const ProductStockControl = ( {
 	 * Set attributes when checked items change.
 	 * Note: The blank stock status prevents all results returning when all options are unchecked.
 	 */
-	useEffect( () => {
-		setAttributes( {
-			stockStatus: [ '', ...checkedOptions ],
-		} );
-	}, [ checkedOptions, setAttributes ] );
+	useEffect(() => {
+		setAttributes({
+			stockStatus: ['', ...checkedOptions],
+		});
+	}, [checkedOptions, setAttributes]);
 
 	/**
 	 * When a checkbox in the list changes, update state.
 	 */
 	const onChange = useCallback(
-		( checkedValue: string ) => {
-			const previouslyChecked = checkedOptions.includes( checkedValue );
+		(checkedValue: string) => {
+			const previouslyChecked = checkedOptions.includes(checkedValue);
 
 			const newChecked = checkedOptions.filter(
-				( filteredValue ) => filteredValue !== checkedValue
+				(filteredValue) => filteredValue !== checkedValue
 			);
 
-			if ( ! previouslyChecked ) {
-				newChecked.push( checkedValue );
+			if (!previouslyChecked) {
+				newChecked.push(checkedValue);
 				newChecked.sort();
 			}
 
-			setChecked( newChecked );
+			setChecked(newChecked);
 		},
-		[ checkedOptions ]
+		[checkedOptions]
 	);
 
 	return (
 		<>
-			{ displayOptions.map( ( option ) => {
-				const helpText = checkedOptions.includes( option.value )
+			{displayOptions.map((option) => {
+				const helpText = checkedOptions.includes(option.value)
 					? /* translators: %s stock status. */ __(
 							'Stock status "%s" visible.',
 							'woocommerce'
-					  )
+						)
 					: /* translators: %s stock status. */ __(
 							'Stock status "%s" hidden.',
 							'woocommerce'
-					  );
+						);
 				return (
 					<ToggleControl
-						label={ option.label }
-						key={ option.value }
-						help={ sprintf( helpText, option.label ) }
-						checked={ checkedOptions.includes( option.value ) }
-						onChange={ () => onChange( option.value ) }
+						label={option.label}
+						key={option.value}
+						help={sprintf(helpText, option.label)}
+						checked={checkedOptions.includes(option.value)}
+						onChange={() => onChange(option.value)}
 					/>
 				);
-			} ) }
+			})}
 		</>
 	);
 };

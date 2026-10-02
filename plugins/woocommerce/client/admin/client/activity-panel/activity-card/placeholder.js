@@ -16,31 +16,31 @@ class ActivityCardPlaceholder extends Component {
 		);
 
 		return (
-			<div className={ cardClassName } aria-hidden>
+			<div className={cardClassName} aria-hidden>
 				<span className="woocommerce-activity-card__icon">
 					<span className="is-placeholder" />
 				</span>
 				<div className="woocommerce-activity-card__header">
 					<div className="woocommerce-activity-card__title is-placeholder" />
-					{ hasSubtitle && (
+					{hasSubtitle && (
 						<div className="woocommerce-activity-card__subtitle is-placeholder" />
-					) }
-					{ hasDate && (
+					)}
+					{hasDate && (
 						<div className="woocommerce-activity-card__date">
 							<span className="is-placeholder" />
 						</div>
-					) }
+					)}
 				</div>
 				<div className="woocommerce-activity-card__body">
-					{ range( lines ).map( ( i ) => (
-						<span className="is-placeholder" key={ i } />
-					) ) }
+					{range(lines).map((i) => (
+						<span className="is-placeholder" key={i} />
+					))}
 				</div>
-				{ hasAction && (
+				{hasAction && (
 					<div className="woocommerce-activity-card__actions">
 						<span className="is-placeholder" />
 					</div>
-				) }
+				)}
 			</div>
 		);
 	}

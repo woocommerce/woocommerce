@@ -31,4 +31,4 @@ export const initialGlobals = {
 		manual: true,
 	},
 };
-export const tags = [ 'autodocs' ];
+export const tags = ['autodocs'];

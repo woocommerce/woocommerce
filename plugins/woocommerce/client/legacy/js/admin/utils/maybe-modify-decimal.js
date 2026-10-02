@@ -13,18 +13,22 @@
 function maybeModifyDecimal( value, config ) {
 	// Check if value is a string and config is provided
 	if (
-		! value
-		|| typeof value !== 'string'
-		|| ! config
-		|| typeof config !== 'object'
-		|| ! config.decimalSeparator
+		! value ||
+		typeof value !== 'string' ||
+		! config ||
+		typeof config !== 'object' ||
+		! config.decimalSeparator
 	) {
 		return value;
 	}
 
 	// Formula detection regex matches: brackets [], parentheses (), operators */+-, quotes "', and letters a-z and A-Z.
 	const formulaRegex = /[\[\]()\*\+\-\/\"'a-zA-Z]/;
-	if ( ! formulaRegex.test( value ) && '.' !== config.decimalSeparator && value.includes( '.' ) ) {
+	if (
+		! formulaRegex.test( value ) &&
+		'.' !== config.decimalSeparator &&
+		value.includes( '.' )
+	) {
 		return value.replace( '.', config.decimalSeparator );
 	}
 	return value;

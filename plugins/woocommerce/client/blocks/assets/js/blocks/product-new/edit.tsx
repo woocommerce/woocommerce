@@ -9,14 +9,12 @@ import { useBlockProps } from '@wordpress/block-editor';
 import { ProductNewestBlock } from './block';
 import { ProductNewestBlockProps } from './types';
 
-export const Edit = (
-	props: unknown & ProductNewestBlockProps
-): JSX.Element => {
+export const Edit = (props: unknown & ProductNewestBlockProps): JSX.Element => {
 	const blockProps = useBlockProps();
 
 	return (
-		<div { ...blockProps }>
-			<ProductNewestBlock { ...props } />
+		<div {...blockProps}>
+			<ProductNewestBlock {...props} />
 		</div>
 	);
 };

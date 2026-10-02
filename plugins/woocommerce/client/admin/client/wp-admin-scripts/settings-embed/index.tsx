@@ -63,14 +63,14 @@ const renderPaymentsSettings = () => {
 	];
 
 	// Render each payment component.
-	pages.forEach( ( { id, component } ) => {
-		const root = document.getElementById( id );
-		if ( root ) {
-			const newDiv = document.createElement( 'div' );
+	pages.forEach(({ id, component }) => {
+		const root = document.getElementById(id);
+		if (root) {
+			const newDiv = document.createElement('div');
 			newDiv.className = 'wc-settings-prevent-change-event';
-			createRoot( root.insertBefore( newDiv, null ) ).render( component );
+			createRoot(root.insertBefore(newDiv, null)).render(component);
 		}
-	} );
+	});
 };
 
 const registerSlotFills = () => {
@@ -82,15 +82,15 @@ const registerSlotFills = () => {
 
 	registerSiteVisibilitySlotFill();
 
-	if ( isFeatureEnabled( 'blueprint' ) ) {
+	if (isFeatureEnabled('blueprint')) {
 		registerBlueprintSlotfill();
 	}
 
-	if ( isFeatureEnabled( 'block_email_editor' ) ) {
+	if (isFeatureEnabled('block_email_editor')) {
 		registerSettingsEmailListingFill();
 	}
 
-	if ( features?.[ 'settings-ui' ] === true ) {
+	if (features?.['settings-ui'] === true) {
 		registerSettingsUIScreens();
 	}
 

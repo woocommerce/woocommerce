@@ -12,7 +12,7 @@ import './style.scss';
  * Wrapper for address fields which handles the edit/preview transition. Form fields are always rendered so that
  * validation can occur.
  */
-export const AddressWrapper = ( {
+export const AddressWrapper = ({
 	isEditing = false,
 	addressCard,
 	addressForm,
@@ -22,22 +22,19 @@ export const AddressWrapper = ( {
 	addressCard: JSX.Element;
 	addressForm: JSX.Element;
 	shouldAnimate?: boolean;
-} ): JSX.Element => {
-	const wrapperClasses = clsx(
-		'wc-block-components-address-address-wrapper',
-		{
-			'is-editing': isEditing,
-			'is-animated': shouldAnimate,
-		}
-	);
+}): JSX.Element => {
+	const wrapperClasses = clsx('wc-block-components-address-address-wrapper', {
+		'is-editing': isEditing,
+		'is-animated': shouldAnimate,
+	});
 
 	return (
-		<div className={ wrapperClasses }>
+		<div className={wrapperClasses}>
 			<div className="wc-block-components-address-card-wrapper">
-				{ addressCard }
+				{addressCard}
 			</div>
 			<div className="wc-block-components-address-form-wrapper">
-				{ addressForm }
+				{addressForm}
 			</div>
 		</div>
 	);

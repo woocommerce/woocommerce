@@ -14,57 +14,53 @@ import { useUser } from '@woocommerce/data';
 import { Product } from '../product-list/types';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 
-function ProductCardFooter( props: { product: Product } ) {
+function ProductCardFooter(props: { product: Product }) {
 	const { product } = props;
 	const { user, currentUserCan } = useUser();
-	const { selectedTab, isProductInstalled } =
-		useContext( MarketplaceContext );
+	const { selectedTab, isProductInstalled } = useContext(MarketplaceContext);
 
 	function openInstallModal() {
-		recordEvent( 'marketplace_add_to_store_clicked', {
+		recordEvent('marketplace_add_to_store_clicked', {
 			product_id: product.id,
-		} );
+		});
 
-		navigateTo( {
-			url: getNewPath( {
+		navigateTo({
+			url: getNewPath({
 				installProduct: product.id,
-			} ),
-		} );
+			}),
+		});
 	}
 
-	function shouldShowAddToStore( productToCheck: Product ) {
-		if ( ! user || ! productToCheck ) {
+	function shouldShowAddToStore(productToCheck: Product) {
+		if (!user || !productToCheck) {
 			return false;
 		}
 
-		if ( ! currentUserCan( 'install_plugins' ) ) {
+		if (!currentUserCan('install_plugins')) {
 			return false;
 		}
 
 		// This value is sent from the WooCommerce.com API.
-		if ( ! productToCheck.isInstallable ) {
+		if (!productToCheck.isInstallable) {
 			return false;
 		}
 
-		if ( productToCheck.type === 'theme' ) {
+		if (productToCheck.type === 'theme') {
 			return false;
 		}
 
-		if ( selectedTab === 'discover' ) {
+		if (selectedTab === 'discover') {
 			return false;
 		}
 
-		if (
-			productToCheck.slug &&
-			isProductInstalled( productToCheck.slug )
-		) {
+		if (productToCheck.slug && isProductInstalled(productToCheck.slug)) {
 			return false;
 		}
 
 		return true;
 	}
 
-	const currencyFormats: { [ key: string ]: string } = {
+	const currencyFormats: { [key: string]: string } = {
 		USD: '$%s',
 		AUD: 'A$%s',
 		CAD: 'C$%s',
@@ -72,21 +68,21 @@ function ProductCardFooter( props: { product: Product } ) {
 		GBP: '£%s',
 	};
 
-	const getCurrencyFormat = ( currencyCode: string ) => {
-		return currencyFormats[ currencyCode ] || '%s';
+	const getCurrencyFormat = (currencyCode: string) => {
+		return currencyFormats[currencyCode] || '%s';
 	};
 
 	function getPriceLabel(): string {
-		if ( product.price === 0 ) {
-			return __( 'Free download', 'woocommerce' );
+		if (product.price === 0) {
+			return __('Free download', 'woocommerce');
 		}
 
-		if ( product.freemium_type === 'primary' ) {
-			return __( 'Free plan available', 'woocommerce' );
+		if (product.freemium_type === 'primary') {
+			return __('Free plan available', 'woocommerce');
 		}
 
 		// @ts-expect-error The type isn't correct. We need to update @wordpress/i18n to a newer version to fix it.
-		return sprintf( getCurrencyFormat( product.currency ), product.price );
+		return sprintf(getCurrencyFormat(product.currency), product.price);
 	}
 
 	function getPriceSuffix(): string {
@@ -95,50 +91,50 @@ function ProductCardFooter( props: { product: Product } ) {
 			product.billingPeriodInterval === 1 ||
 			product.billingPeriod === ''
 		) {
-			switch ( product.billingPeriod ) {
+			switch (product.billingPeriod) {
 				case 'day':
-					return __( 'daily', 'woocommerce' );
+					return __('daily', 'woocommerce');
 				case 'week':
-					return __( 'weekly', 'woocommerce' );
+					return __('weekly', 'woocommerce');
 				case 'month':
-					return __( 'monthly', 'woocommerce' );
+					return __('monthly', 'woocommerce');
 				case 'year':
 				case '':
-					return __( 'annually', 'woocommerce' );
+					return __('annually', 'woocommerce');
 				default:
 					return '';
 			}
 		}
 
 		let period;
-		switch ( product.billingPeriod ) {
+		switch (product.billingPeriod) {
 			case 'day':
-				period = __( 'days', 'woocommerce' );
+				period = __('days', 'woocommerce');
 				break;
 			case 'week':
-				period = __( 'weeks', 'woocommerce' );
+				period = __('weeks', 'woocommerce');
 				break;
 			case 'month':
-				period = __( 'months', 'woocommerce' );
+				period = __('months', 'woocommerce');
 				break;
 			default:
-				period = __( 'years', 'woocommerce' );
+				period = __('years', 'woocommerce');
 		}
 
 		return sprintf(
 			// translators: %1$d: billing period interval, %2$s: billing period (e.g. days, weeks, months, years)
-			__( 'every %1$d %2$s', 'woocommerce' ),
+			__('every %1$d %2$s', 'woocommerce'),
 			product.billingPeriodInterval ?? 0,
 			period
 		);
 	}
 
 	function getBillingText(): string {
-		if ( product.freemium_type === 'primary' ) {
+		if (product.freemium_type === 'primary') {
 			return '';
 		}
 
-		if ( product.price !== 0 ) {
+		if (product.price !== 0) {
 			return getPriceSuffix();
 		}
 
@@ -146,7 +142,7 @@ function ProductCardFooter( props: { product: Product } ) {
 	}
 
 	const getReaderPriceLabel = () => {
-		if ( product.isOnSale ) {
+		if (product.isOnSale) {
 			return sprintf(
 				//translators: %1$s is the sale price of the product, %2$s is the regular price of the product, %3$s is the billing period
 				__(
@@ -155,7 +151,7 @@ function ProductCardFooter( props: { product: Product } ) {
 				),
 				getPriceLabel(),
 				sprintf(
-					getCurrencyFormat( product.currency ),
+					getCurrencyFormat(product.currency),
 					// @ts-expect-error The type isn't correct. We need to update @wordpress/i18n to a newer version to fix it.
 					product.regularPrice
 				),
@@ -163,10 +159,10 @@ function ProductCardFooter( props: { product: Product } ) {
 			);
 		}
 
-		if ( product.price !== 0 && product.freemium_type !== 'primary' ) {
+		if (product.price !== 0 && product.freemium_type !== 'primary') {
 			return sprintf(
 				//translators: %1$s is the price of the product, %2$s is the billing period
-				__( ' %1$s, %2$s ', 'woocommerce' ),
+				__(' %1$s, %2$s ', 'woocommerce'),
 				getPriceLabel(),
 				getBillingText()
 			);
@@ -176,23 +172,23 @@ function ProductCardFooter( props: { product: Product } ) {
 	};
 
 	const isInstalled = () => {
-		return product.slug && isProductInstalled( product.slug );
+		return product.slug && isProductInstalled(product.slug);
 	};
 
-	if ( isInstalled() ) {
+	if (isInstalled()) {
 		return (
 			<span className="woocommerce-marketplace__product-card__installed-label">
-				{ __( 'Installed', 'woocommerce' ) }
+				{__('Installed', 'woocommerce')}
 			</span>
 		);
 	}
 
-	if ( shouldShowAddToStore( product ) ) {
+	if (shouldShowAddToStore(product)) {
 		return (
 			<>
 				<span className="woocommerce-marketplace__product-card__add-to-store">
-					<Button variant="secondary" onClick={ openInstallModal }>
-						{ __( 'Add to Store', 'woocommerce' ) }
+					<Button variant="secondary" onClick={openInstallModal}>
+						{__('Add to Store', 'woocommerce')}
 					</Button>
 				</span>
 			</>
@@ -207,59 +203,59 @@ function ProductCardFooter( props: { product: Product } ) {
 			<div className="woocommerce-marketplace__product-card__price">
 				<span className="woocommerce-marketplace__product-card__price-label">
 					<span className="screen-reader-text">
-						{ getReaderPriceLabel() }
+						{getReaderPriceLabel()}
 					</span>
-					<span aria-hidden>{ getPriceLabel() }</span>
+					<span aria-hidden>{getPriceLabel()}</span>
 				</span>
 
-				{ product.isOnSale && (
+				{product.isOnSale && (
 					<span
 						className="woocommerce-marketplace__product-card__on-sale"
 						aria-hidden
 					>
-						{ sprintf(
-							getCurrencyFormat( product.currency ),
+						{sprintf(
+							getCurrencyFormat(product.currency),
 							// @ts-expect-error The type isn't correct. We need to update @wordpress/i18n to a newer version to fix it.
 							product.regularPrice
-						) }
+						)}
 					</span>
-				) }
+				)}
 
 				<span
 					className="woocommerce-marketplace__product-card__price-billing"
 					aria-hidden
 				>
-					{ getBillingText() }
+					{getBillingText()}
 				</span>
 			</div>
 			<div className="woocommerce-marketplace__product-card__rating">
-				{ Number.isFinite( averageRating ) && averageRating > 0 && (
+				{Number.isFinite(averageRating) && averageRating > 0 && (
 					<>
 						<span className="woocommerce-marketplace__product-card__rating-icon">
-							<Icon icon={ 'star-filled' } size={ 16 } />
+							<Icon icon={'star-filled'} size={16} />
 						</span>
 						<span className="woocommerce-marketplace__product-card__rating-average">
-							<span aria-hidden>{ averageRating }</span>
+							<span aria-hidden>{averageRating}</span>
 							<span className="screen-reader-text">
-								{ sprintf(
+								{sprintf(
 									// translators: %.1f: average rating
-									__( '%.1f stars', 'woocommerce' ),
+									__('%.1f stars', 'woocommerce'),
 									averageRating
-								) }
+								)}
 							</span>
 						</span>
 						<span className="woocommerce-marketplace__product-card__rating-count">
-							<span aria-hidden>({ product.reviewsCount })</span>
+							<span aria-hidden>({product.reviewsCount})</span>
 							<span className="screen-reader-text">
-								{ sprintf(
+								{sprintf(
 									// translators: %d: rating count
-									__( 'from %d reviews', 'woocommerce' ),
+									__('from %d reviews', 'woocommerce'),
 									product.reviewsCount ?? 0
-								) }
+								)}
 							</span>
 						</span>
 					</>
-				) }
+				)}
 			</div>
 		</>
 	);

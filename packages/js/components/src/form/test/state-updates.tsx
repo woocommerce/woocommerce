@@ -569,7 +569,9 @@ describe( 'Form state updates', () => {
 			)
 		);
 
-		userEvent.click( screen.getByRole( 'button', { name: 'Apply patch' } ) );
+		userEvent.click(
+			screen.getByRole( 'button', { name: 'Apply patch' } )
+		);
 
 		const nextValues = { ...initialNameValues(), firstName: 'Updated' };
 		expect( renderedValues() ).toBe( JSON.stringify( nextValues ) );
@@ -590,7 +592,9 @@ describe( 'Form state updates', () => {
 			initialValues,
 			( { setValues } ) => (
 				<button
-					onClick={ () => setValues( patch as unknown as NameValues ) }
+					onClick={ () =>
+						setValues( patch as unknown as NameValues )
+					}
 				>
 					Apply nullish patch
 				</button>
@@ -603,7 +607,9 @@ describe( 'Form state updates', () => {
 
 		expect( renderedValues() ).toBe( JSON.stringify( initialValues ) );
 		expect( onChange ).not.toHaveBeenCalled();
-		expect( onChanges.mock.calls ).toEqual( [ [ [], initialValues, true ] ] );
+		expect( onChanges.mock.calls ).toEqual( [
+			[ [], initialValues, true ],
+		] );
 	} );
 
 	// setWith() writes each of these names as one literal key, since none is a

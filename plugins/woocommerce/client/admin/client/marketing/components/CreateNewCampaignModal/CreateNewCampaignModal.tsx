@@ -26,8 +26,7 @@ import {
 import { SmartPluginCardBody } from '~/marketing/components';
 import './CreateNewCampaignModal.scss';
 
-const isExternalURL = ( url: string ) =>
-	new URL( url ).origin !== location.origin;
+const isExternalURL = (url: string) => new URL(url).origin !== location.origin;
 
 /**
  * Props for CreateNewCampaignModal, which is based on Modal.
@@ -36,13 +35,13 @@ const isExternalURL = ( url: string ) =>
  * and not needed to be specified by the consumer.
  */
 type CreateCampaignModalProps = Omit<
-	React.ComponentProps< typeof Modal >,
+	React.ComponentProps<typeof Modal>,
 	'title' | 'children'
 >;
 
-export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
+export const CreateNewCampaignModal = (props: CreateCampaignModalProps) => {
 	const { className, ...restProps } = props;
-	const [ collapsed, setCollapsed ] = useState( true );
+	const [collapsed, setCollapsed] = useState(true);
 	const { data: campaignTypes, refetch: refetchCampaignTypes } =
 		useCampaignTypes();
 	const { refetch: refetchRegisteredChannels } = useRegisteredChannels();
@@ -50,119 +49,116 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 	const { loadInstalledPluginsAfterActivation } =
 		useInstalledPluginsWithoutChannels();
 
-	const hasCampaignTypes = !! campaignTypes?.length;
-	const hasRecommendedChannels = !! recommendedChannels?.length;
+	const hasCampaignTypes = !!campaignTypes?.length;
+	const hasRecommendedChannels = !!recommendedChannels?.length;
 
-	const onInstalledAndActivated = ( pluginSlug: string ) => {
+	const onInstalledAndActivated = (pluginSlug: string) => {
 		refetchCampaignTypes();
 		refetchRegisteredChannels();
-		loadInstalledPluginsAfterActivation( pluginSlug );
+		loadInstalledPluginsAfterActivation(pluginSlug);
 	};
 
 	return (
 		<Modal
-			{ ...restProps }
-			className={ clsx(
+			{...restProps}
+			className={clsx(
 				className,
 				'woocommerce-marketing-create-campaign-modal'
-			) }
-			title={ __( 'Create a new campaign', 'woocommerce' ) }
+			)}
+			title={__('Create a new campaign', 'woocommerce')}
 		>
 			<div className="woocommerce-marketing-new-campaigns">
 				<div className="woocommerce-marketing-new-campaigns__question-label">
-					{ hasCampaignTypes
+					{hasCampaignTypes
 						? __(
 								'Where would you like to promote your products?',
 								'woocommerce'
-						  )
-						: __( 'No campaign types found.', 'woocommerce' ) }
+							)
+						: __('No campaign types found.', 'woocommerce')}
 				</div>
-				{ campaignTypes?.map( ( el ) => (
+				{campaignTypes?.map((el) => (
 					<Flex
-						key={ el.id }
+						key={el.id}
 						className="woocommerce-marketing-new-campaign-type"
-						gap={ 4 }
+						gap={4}
 					>
 						<FlexItem>
 							<img
-								src={ el.icon }
-								alt={ el.name }
+								src={el.icon}
+								alt={el.name}
 								width="32"
 								height="32"
 							/>
 						</FlexItem>
 						<FlexBlock>
-							<Flex direction="column" gap={ 1 }>
+							<Flex direction="column" gap={1}>
 								<FlexItem className="woocommerce-marketing-new-campaign-type__name">
-									{ el.name }
+									{el.name}
 								</FlexItem>
 								<FlexItem className="woocommerce-marketing-new-campaign-type__description">
-									{ el.description }
+									{el.description}
 								</FlexItem>
 							</Flex>
 						</FlexBlock>
 						<FlexItem>
 							<Button
 								variant="secondary"
-								href={ el.createUrl }
+								href={el.createUrl}
 								target={
-									isExternalURL( el.createUrl )
+									isExternalURL(el.createUrl)
 										? '_blank'
 										: '_self'
 								}
 							>
-								<Flex gap={ 1 }>
+								<Flex gap={1}>
 									<FlexItem>
-										{ __( 'Create', 'woocommerce' ) }
+										{__('Create', 'woocommerce')}
 									</FlexItem>
-									{ isExternalURL( el.createUrl ) && (
+									{isExternalURL(el.createUrl) && (
 										<FlexItem>
-											<Icon
-												icon={ external }
-												size={ 16 }
-											/>
+											<Icon icon={external} size={16} />
 										</FlexItem>
-									) }
+									)}
 								</Flex>
 							</Button>
 						</FlexItem>
 					</Flex>
-				) ) }
+				))}
 			</div>
-			{ hasRecommendedChannels && (
+			{hasRecommendedChannels && (
 				<div className="woocommerce-marketing-add-channels">
 					<Flex direction="column">
 						<FlexItem>
 							<Button
 								variant="link"
-								onClick={ () => setCollapsed( ! collapsed ) }
+								onClick={() => setCollapsed(!collapsed)}
 							>
-								{ __(
+								{__(
 									'Add channels for other campaign types',
 									'woocommerce'
-								) }
+								)}
 								<Icon
-									icon={ collapsed ? chevronDown : chevronUp }
-									size={ 24 }
+									icon={collapsed ? chevronDown : chevronUp}
+									size={24}
 								/>
 							</Button>
 						</FlexItem>
-						{ ! collapsed && (
+						{!collapsed && (
 							<FlexItem>
-								{ recommendedChannels.map( ( el ) => (
+								{recommendedChannels.map((el) => (
 									<SmartPluginCardBody
-										key={ el.plugin }
-										plugin={ el }
+										key={el.plugin}
+										plugin={el}
 										onInstalledAndActivated={
 											onInstalledAndActivated
 										}
 									/>
-								) ) }
+								))}
 							</FlexItem>
-						) }
+						)}
 					</Flex>
 				</div>
-			) }
+			)}
 		</Modal>
 	);
 };

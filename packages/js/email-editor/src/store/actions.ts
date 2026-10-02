@@ -20,33 +20,33 @@ import {
 } from './types';
 import { recordEvent } from '../events';
 
-export function togglePreviewModal( isOpen: boolean ) {
+export function togglePreviewModal(isOpen: boolean) {
 	return {
 		type: 'CHANGE_PREVIEW_STATE',
-		state: { isModalOpened: isOpen } as Partial< State[ 'preview' ] >,
+		state: { isModalOpened: isOpen } as Partial<State['preview']>,
 	} as const;
 }
 
-export function updateSendPreviewEmail( toEmail: string ) {
+export function updateSendPreviewEmail(toEmail: string) {
 	return {
 		type: 'CHANGE_PREVIEW_STATE',
-		state: { toEmail } as Partial< State[ 'preview' ] >,
+		state: { toEmail } as Partial<State['preview']>,
 	} as const;
 }
 
 export const setEmailPost =
-	( postId: number | string, postType: string ) =>
-	async ( { dispatch } ) => {
-		if ( ! postId || ! postType ) {
+	(postId: number | string, postType: string) =>
+	async ({ dispatch }) => {
+		if (!postId || !postType) {
 			throw new Error(
 				'setEmailPost requires valid postId and postType parameters'
 			);
 		}
 
-		dispatch( {
+		dispatch({
 			type: 'SET_EMAIL_POST',
-			state: { postId, postType } as Partial< State >,
-		} );
+			state: { postId, postType } as Partial<State>,
+		});
 	};
 
 /**
@@ -55,44 +55,42 @@ export const setEmailPost =
  */
 export const invalidatePersonalizationTagsCache =
 	() =>
-	async ( { registry } ) => {
+	async ({ registry }) => {
 		// `invalidateResolution` matches resolver arguments structurally, so this
 		// has to be the same query the selector fetched with — hence the shared
 		// builder rather than a second literal.
-		const postId = registry.select( storeName ).getEmailPostId();
+		const postId = registry.select(storeName).getEmailPostId();
 
 		registry
-			.dispatch( coreDataStore )
-			.invalidateResolution( 'getEntityRecords', [
+			.dispatch(coreDataStore)
+			.invalidateResolution('getEntityRecords', [
 				PERSONALIZATION_TAG_ENTITY.kind,
 				PERSONALIZATION_TAG_ENTITY.name,
-				getPersonalizationTagsQuery( postId ),
-			] );
+				getPersonalizationTagsQuery(postId),
+			]);
 	};
 
-export function setEmailPostType( postType: string ) {
-	if ( ! postType ) {
-		throw new Error(
-			'setEmailPostType requires a valid postType parameter'
-		);
+export function setEmailPostType(postType: string) {
+	if (!postType) {
+		throw new Error('setEmailPostType requires a valid postType parameter');
 	}
 
 	return {
 		type: 'SET_EMAIL_POST',
-		state: { postType } as Partial< State >,
+		state: { postType } as Partial<State>,
 	} as const;
 }
 
 export const setTemplateToPost =
-	( templateSlug ) =>
-	async ( { registry } ) => {
-		const postId = registry.select( storeName ).getEmailPostId();
-		const postType = registry.select( storeName ).getEmailPostType();
+	(templateSlug) =>
+	async ({ registry }) => {
+		const postId = registry.select(storeName).getEmailPostId();
+		const postType = registry.select(storeName).getEmailPostType();
 		registry
-			.dispatch( coreDataStore )
-			.editEntityRecord( 'postType', postType, postId, {
+			.dispatch(coreDataStore)
+			.editEntityRecord('postType', postType, postId, {
 				template: templateSlug,
-			} );
+			});
 	};
 
 export function setTemplateSelected() {
@@ -101,10 +99,10 @@ export function setTemplateSelected() {
 	} as const;
 }
 
-export function* requestSendingNewsletterPreview( email: string ) {
+export function* requestSendingNewsletterPreview(email: string) {
 	// If preview is already sending do nothing
-	const previewState = select( storeName ).getPreviewState();
-	if ( previewState.isSendingPreviewEmail ) {
+	const previewState = select(storeName).getPreviewState();
+	if (previewState.isSendingPreviewEmail) {
 		return;
 	}
 	// Initiate sending
@@ -113,19 +111,19 @@ export function* requestSendingNewsletterPreview( email: string ) {
 		state: {
 			sendingPreviewStatus: null,
 			isSendingPreviewEmail: true,
-		} as Partial< State[ 'preview' ] >,
+		} as Partial<State['preview']>,
 	} as const;
 	try {
-		const postId = select( storeName ).getEmailPostId();
+		const postId = select(storeName).getEmailPostId();
 
-		yield apiFetch( {
+		yield apiFetch({
 			path: '/woocommerce-email-editor/v1/send_preview_email',
 			method: 'POST',
 			data: {
 				email,
 				postId,
 			},
-		} );
+		});
 
 		yield {
 			type: 'CHANGE_PREVIEW_STATE',
@@ -134,9 +132,9 @@ export function* requestSendingNewsletterPreview( email: string ) {
 				isSendingPreviewEmail: false,
 			},
 		};
-		recordEvent( 'sent_preview_email', { postId, email } );
-	} catch ( errorResponse ) {
-		recordEvent( 'sent_preview_email_error', { email } );
+		recordEvent('sent_preview_email', { postId, email });
+	} catch (errorResponse) {
+		recordEvent('sent_preview_email_error', { email });
 		yield {
 			type: 'CHANGE_PREVIEW_STATE',
 			state: {
@@ -144,7 +142,7 @@ export function* requestSendingNewsletterPreview( email: string ) {
 				isSendingPreviewEmail: false,
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore
-				errorMessage: JSON.stringify( errorResponse?.error ),
+				errorMessage: JSON.stringify(errorResponse?.error),
 			},
 		};
 	}
@@ -159,34 +157,34 @@ export function setContentValidation(
 	} as const;
 }
 
-export function setEditorSettings( editorSettings: EmailEditorSettings ) {
+export function setEditorSettings(editorSettings: EmailEditorSettings) {
 	return {
 		type: 'SET_EDITOR_SETTINGS',
 		editorSettings,
 	} as const;
 }
 
-export function setEditorTheme( theme: EmailTheme ) {
+export function setEditorTheme(theme: EmailTheme) {
 	return {
 		type: 'SET_EDITOR_THEME',
 		theme,
 	} as const;
 }
 
-export function setEditorUrls( urls: EmailEditorUrls ) {
+export function setEditorUrls(urls: EmailEditorUrls) {
 	return {
 		type: 'SET_EDITOR_URLS',
 		urls,
 	} as const;
 }
 
-export function setEditorConfig( config: {
+export function setEditorConfig(config: {
 	editorSettings: EmailEditorSettings;
 	theme: EmailTheme;
 	urls: EmailEditorUrls;
 	userEmail: string;
 	globalStylesPostId?: number | null;
-} ) {
+}) {
 	return {
 		type: 'SET_EDITOR_CONFIG',
 		config,

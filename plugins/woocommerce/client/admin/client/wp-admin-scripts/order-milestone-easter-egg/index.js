@@ -1,5 +1,5 @@
 /* global wcOrderMilestoneEgg, Path2D, requestAnimationFrame, cancelAnimationFrame, navigator, history */
-( function () {
+(function () {
 	'use strict';
 
 	/* eslint-disable no-var */
@@ -11,9 +11,9 @@
 	var LABELS = _cfg.labels || {};
 	var DISMISS = _cfg.dismiss || null;
 	var shown = {};
-	var reducedMotion = !! (
+	var reducedMotion = !!(
 		window.matchMedia &&
-		window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches
+		window.matchMedia('(prefers-reduced-motion: reduce)').matches
 	);
 
 	/* -- Variant definitions ------------------------------------------------ */
@@ -140,8 +140,8 @@
 
 	/* -- Layout helpers ----------------------------------------------------- */
 	function pinataPxWidth() {
-		var w = Math.min( window.innerWidth * 0.21, 266 );
-		return Math.max( 154, w ) * ( active.scale || 1.0 ) * 0.9;
+		var w = Math.min(window.innerWidth * 0.21, 266);
+		return Math.max(154, w) * (active.scale || 1.0) * 0.9;
 	}
 
 	function applyLayout() {
@@ -153,34 +153,34 @@
 				: _contentBB.centerX;
 
 		_shiftX = active.shiftX || 0;
-		var cont = document.getElementById( 'egg-pinata-container' );
+		var cont = document.getElementById('egg-pinata-container');
 		cont.style.width = w + 'px';
-		cont.style.height = ( w * active.vbH ) / active.vbW + 'px';
+		cont.style.height = (w * active.vbH) / active.vbW + 'px';
 		cont.style.transform =
-			'translateX(' + ( w / 2 - attachX * sc + _shiftX ) + 'px)';
+			'translateX(' + (w / 2 - attachX * sc + _shiftX) + 'px)';
 
 		var topOfContainer =
 			window.innerHeight / 2 - 60 - _contentBB.centerY * sc;
-		_pinataCenterX = ( _contentBB.centerX - attachX ) * sc + _shiftX;
+		_pinataCenterX = (_contentBB.centerX - attachX) * sc + _shiftX;
 		_pinataCenterY = window.innerHeight / 2 - 60;
 		_pinataR = w * 0.42;
 
-		document.getElementById( 'egg-rope' ).style.height =
-			Math.max( 0, topOfContainer ) + 'px';
-		var copy = overlayEl.querySelector( '.egg-copy' );
-		copy.style.top = Math.round( window.innerHeight * 0.7 ) + 'px';
+		document.getElementById('egg-rope').style.height =
+			Math.max(0, topOfContainer) + 'px';
+		var copy = overlayEl.querySelector('.egg-copy');
+		copy.style.top = Math.round(window.innerHeight * 0.7) + 'px';
 	}
 
 	function pinataCentre() {
-		var sa = Math.sin( mainAngle ),
-			ca = Math.cos( mainAngle );
+		var sa = Math.sin(mainAngle),
+			ca = Math.cos(mainAngle);
 		return {
 			x:
 				window.innerWidth / 2 +
 				_pinataCenterX * ca -
 				_pinataCenterY * sa,
 			y:
-				( dropped ? 0 : -window.innerHeight * 1.2 ) +
+				(dropped ? 0 : -window.innerHeight * 1.2) +
 				_pinataCenterX * sa +
 				_pinataCenterY * ca,
 			r: _pinataR,
@@ -188,30 +188,30 @@
 	}
 
 	/* -- Load pinata -------------------------------------------------------- */
-	async function loadPinata( variantKey ) {
-		if ( ! VARIANTS[ variantKey ] ) return;
+	async function loadPinata(variantKey) {
+		if (!VARIANTS[variantKey]) return;
 
-		var svgText = SVG_DATA[ variantKey ];
-		if ( ! svgText ) return;
+		var svgText = SVG_DATA[variantKey];
+		if (!svgText) return;
 
-		active = VARIANTS[ variantKey ];
+		active = VARIANTS[variantKey];
 		var v = active;
-		var cont = document.getElementById( 'egg-pinata-container' );
+		var cont = document.getElementById('egg-pinata-container');
 		HEAD_TOP_LAYER.els = [];
 		HEAD_TOP_LAYER.val = 0;
 		HEAD_TOP_LAYER.vel = 0;
 
 		cont.innerHTML = svgText;
 
-		var svg = cont.querySelector( 'svg' );
+		var svg = cont.querySelector('svg');
 		pinataEl = svg;
 		var firstEl =
 			svg &&
-			svg.querySelector( 'path,circle,ellipse,polygon,rect,polyline' );
-		if ( firstEl ) protectedEls.add( firstEl );
-		svg.removeAttribute( 'width' );
-		svg.removeAttribute( 'height' );
-		svg.setAttribute( 'preserveAspectRatio', 'xMidYMid meet' );
+			svg.querySelector('path,circle,ellipse,polygon,rect,polyline');
+		if (firstEl) protectedEls.add(firstEl);
+		svg.removeAttribute('width');
+		svg.removeAttribute('height');
+		svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
 		_contentBB = { topY: 0, centerY: v.vbH / 2, centerX: v.vbW / 2 };
 		applyLayout();
@@ -225,25 +225,25 @@
 			{ stiff: 0.034, damp: 0.8, velMult: 0.18 },
 			{ stiff: 0.026, damp: 0.83, velMult: 0.28 },
 		];
-		COLOR_LAYERS = v.classes.map( function ( sel, i ) {
-			var p = SPRING_PRESETS[ i % SPRING_PRESETS.length ];
+		COLOR_LAYERS = v.classes.map(function (sel, i) {
+			var p = SPRING_PRESETS[i % SPRING_PRESETS.length];
 			return {
 				sel,
 				stiff: p.stiff,
 				damp: p.damp,
 				velMult: p.velMult,
-				els: [].slice.call( svg.querySelectorAll( sel ) ),
+				els: [].slice.call(svg.querySelectorAll(sel)),
 				val: 0,
 				vel: 0,
 			};
-		} );
+		});
 
-		await new Promise( function ( r ) {
-			requestAnimationFrame( r );
-		} );
-		await new Promise( function ( r ) {
-			requestAnimationFrame( r );
-		} );
+		await new Promise(function (r) {
+			requestAnimationFrame(r);
+		});
+		await new Promise(function (r) {
+			requestAnimationFrame(r);
+		});
 
 		var minX = Infinity,
 			minY = Infinity,
@@ -255,193 +255,187 @@
 					'path,circle,ellipse,polygon,rect,polyline'
 				)
 			)
-			.forEach( function ( el ) {
+			.forEach(function (el) {
 				var bb;
 				try {
 					bb = el.getBBox();
-				} catch ( _ ) {
+				} catch (_) {
 					return;
 				}
-				if ( bb.width === 0 && bb.height === 0 ) return;
-				if ( bb.x < minX ) minX = bb.x;
-				if ( bb.y < minY ) minY = bb.y;
-				if ( bb.x + bb.width > maxX ) maxX = bb.x + bb.width;
-				if ( bb.y + bb.height > maxY ) maxY = bb.y + bb.height;
-			} );
-		if ( isFinite( minY ) ) {
+				if (bb.width === 0 && bb.height === 0) return;
+				if (bb.x < minX) minX = bb.x;
+				if (bb.y < minY) minY = bb.y;
+				if (bb.x + bb.width > maxX) maxX = bb.x + bb.width;
+				if (bb.y + bb.height > maxY) maxY = bb.y + bb.height;
+			});
+		if (isFinite(minY)) {
 			_contentBB = {
 				topY: minY,
-				centerY: ( minY + maxY ) / 2,
-				centerX: ( minX + maxX ) / 2,
+				centerY: (minY + maxY) / 2,
+				centerX: (minX + maxX) / 2,
 			};
 		}
 		applyLayout();
 
-		var headThreshold = _contentBB.topY + ( maxY - minY ) * v.headTopFrac;
+		var headThreshold = _contentBB.topY + (maxY - minY) * v.headTopFrac;
 		HEAD_TOP_LAYER.els = [];
-		COLOR_LAYERS.forEach( function ( layer ) {
-			layer.els = layer.els.filter( function ( el ) {
+		COLOR_LAYERS.forEach(function (layer) {
+			layer.els = layer.els.filter(function (el) {
 				var bb;
 				try {
 					bb = el.getBBox();
-				} catch ( _ ) {
+				} catch (_) {
 					return true;
 				}
-				if ( bb.y + bb.height / 2 < headThreshold ) {
-					HEAD_TOP_LAYER.els.push( el );
+				if (bb.y + bb.height / 2 < headThreshold) {
+					HEAD_TOP_LAYER.els.push(el);
 					return false;
 				}
 				return true;
-			} );
-		} );
+			});
+		});
 
 		// -- Detect eye circles (all groups of concentric circles in head area) --
 		eyeEls = [];
 		eyeElsSet = null;
 		eyeGroups = [];
 		var headCircles = [].slice
-			.call( svg.querySelectorAll( 'circle' ) )
-			.filter( function ( c ) {
+			.call(svg.querySelectorAll('circle'))
+			.filter(function (c) {
 				var bb;
 				try {
 					bb = c.getBBox();
-				} catch ( _ ) {
+				} catch (_) {
 					return false;
 				}
 				return bb.y + bb.height / 2 < headThreshold;
-			} );
+			});
 		var posMap = {};
-		headCircles.forEach( function ( c ) {
+		headCircles.forEach(function (c) {
 			var key =
-				Math.round( parseFloat( c.getAttribute( 'cx' ) ) / 15 ) +
+				Math.round(parseFloat(c.getAttribute('cx')) / 15) +
 				',' +
-				Math.round( parseFloat( c.getAttribute( 'cy' ) ) / 15 );
-			if ( ! posMap[ key ] ) posMap[ key ] = [];
-			posMap[ key ].push( c );
-		} );
-		Object.keys( posMap ).forEach( function ( k ) {
-			var group = posMap[ k ];
-			if ( group.length < 2 ) return;
+				Math.round(parseFloat(c.getAttribute('cy')) / 15);
+			if (!posMap[key]) posMap[key] = [];
+			posMap[key].push(c);
+		});
+		Object.keys(posMap).forEach(function (k) {
+			var group = posMap[k];
+			if (group.length < 2) return;
 			var sumCx = 0,
 				sumCy = 0;
-			group.forEach( function ( c ) {
-				sumCx += parseFloat( c.getAttribute( 'cx' ) );
-				sumCy += parseFloat( c.getAttribute( 'cy' ) );
-			} );
+			group.forEach(function (c) {
+				sumCx += parseFloat(c.getAttribute('cx'));
+				sumCy += parseFloat(c.getAttribute('cy'));
+			});
 			var gCx = sumCx / group.length,
 				gCy = sumCy / group.length;
-			var pupil = group.reduce( function ( min, el ) {
-				return parseFloat( el.getAttribute( 'r' ) || '999' ) <
-					parseFloat( min.getAttribute( 'r' ) || '999' )
+			var pupil = group.reduce(function (min, el) {
+				return parseFloat(el.getAttribute('r') || '999') <
+					parseFloat(min.getAttribute('r') || '999')
 					? el
 					: min;
-			}, group[ 0 ] );
-			group.forEach( function ( el ) {
-				eyeEls.push( el );
-				protectedEls.add( el );
-			} );
-			eyeGroups.push( {
+			}, group[0]);
+			group.forEach(function (el) {
+				eyeEls.push(el);
+				protectedEls.add(el);
+			});
+			eyeGroups.push({
 				pupilEl: pupil,
-				pupilCx: parseFloat( pupil.getAttribute( 'cx' ) ),
-				pupilCy: parseFloat( pupil.getAttribute( 'cy' ) ),
+				pupilCx: parseFloat(pupil.getAttribute('cx')),
+				pupilCy: parseFloat(pupil.getAttribute('cy')),
 				eyeCx: gCx,
 				eyeCy: gCy,
-			} );
-		} );
-		if ( eyeGroups.length ) {
-			eyeElsSet = new Set( eyeEls );
+			});
+		});
+		if (eyeGroups.length) {
+			eyeElsSet = new Set(eyeEls);
 
-			[].slice
-				.call( svg.querySelectorAll( 'circle' ) )
-				.forEach( function ( c ) {
-					if ( eyeElsSet.has( c ) ) return;
-					var cx = parseFloat( c.getAttribute( 'cx' ) ),
-						cy = parseFloat( c.getAttribute( 'cy' ) );
-					var near = eyeGroups.some( function ( g ) {
-						return (
-							Math.sqrt(
-								( cx - g.eyeCx ) * ( cx - g.eyeCx ) +
-									( cy - g.eyeCy ) * ( cy - g.eyeCy )
-							) < 100
-						);
-					} );
-					if ( ! near ) return;
-					protectedEls.add( c );
-					eyeEls.push( c );
-					eyeElsSet.add( c );
-					HEAD_TOP_LAYER.els = HEAD_TOP_LAYER.els.filter(
-						function ( el ) {
-							return el !== c;
-						}
+			[].slice.call(svg.querySelectorAll('circle')).forEach(function (c) {
+				if (eyeElsSet.has(c)) return;
+				var cx = parseFloat(c.getAttribute('cx')),
+					cy = parseFloat(c.getAttribute('cy'));
+				var near = eyeGroups.some(function (g) {
+					return (
+						Math.sqrt(
+							(cx - g.eyeCx) * (cx - g.eyeCx) +
+								(cy - g.eyeCy) * (cy - g.eyeCy)
+						) < 100
 					);
-					COLOR_LAYERS.forEach( function ( layer ) {
-						layer.els = layer.els.filter( function ( el ) {
-							return el !== c;
-						} );
-					} );
-				} );
+				});
+				if (!near) return;
+				protectedEls.add(c);
+				eyeEls.push(c);
+				eyeElsSet.add(c);
+				HEAD_TOP_LAYER.els = HEAD_TOP_LAYER.els.filter(function (el) {
+					return el !== c;
+				});
+				COLOR_LAYERS.forEach(function (layer) {
+					layer.els = layer.els.filter(function (el) {
+						return el !== c;
+					});
+				});
+			});
 
-			HEAD_TOP_LAYER.els = HEAD_TOP_LAYER.els.filter( function ( el ) {
-				return ! eyeElsSet.has( el );
-			} );
-			COLOR_LAYERS.forEach( function ( layer ) {
-				layer.els = layer.els.filter( function ( el ) {
-					return ! eyeElsSet.has( el );
-				} );
-			} );
+			HEAD_TOP_LAYER.els = HEAD_TOP_LAYER.els.filter(function (el) {
+				return !eyeElsSet.has(el);
+			});
+			COLOR_LAYERS.forEach(function (layer) {
+				layer.els = layer.els.filter(function (el) {
+					return !eyeElsSet.has(el);
+				});
+			});
 
 			highlightEls = [];
-			[].slice
-				.call( svg.querySelectorAll( 'path' ) )
-				.forEach( function ( p ) {
-					var bb;
-					try {
-						bb = p.getBBox();
-					} catch ( _ ) {
-						return;
-					}
-					var cx = bb.x + bb.width / 2,
-						cy = bb.y + bb.height / 2;
-					var nearAnyEye = eyeGroups.some( function ( g ) {
-						return (
-							Math.sqrt(
-								( cx - g.eyeCx ) * ( cx - g.eyeCx ) +
-									( cy - g.eyeCy ) * ( cy - g.eyeCy )
-							) < 40 &&
-							bb.width < 35 &&
-							bb.height < 35
-						);
-					} );
-					if ( nearAnyEye ) {
-						highlightEls.push( p );
-						protectedEls.add( p );
-						HEAD_TOP_LAYER.els = HEAD_TOP_LAYER.els.filter(
-							function ( el ) {
-								return el !== p;
-							}
-						);
-						COLOR_LAYERS.forEach( function ( layer ) {
-							layer.els = layer.els.filter( function ( el ) {
-								return el !== p;
-							} );
-						} );
-					}
-				} );
+			[].slice.call(svg.querySelectorAll('path')).forEach(function (p) {
+				var bb;
+				try {
+					bb = p.getBBox();
+				} catch (_) {
+					return;
+				}
+				var cx = bb.x + bb.width / 2,
+					cy = bb.y + bb.height / 2;
+				var nearAnyEye = eyeGroups.some(function (g) {
+					return (
+						Math.sqrt(
+							(cx - g.eyeCx) * (cx - g.eyeCx) +
+								(cy - g.eyeCy) * (cy - g.eyeCy)
+						) < 40 &&
+						bb.width < 35 &&
+						bb.height < 35
+					);
+				});
+				if (nearAnyEye) {
+					highlightEls.push(p);
+					protectedEls.add(p);
+					HEAD_TOP_LAYER.els = HEAD_TOP_LAYER.els.filter(
+						function (el) {
+							return el !== p;
+						}
+					);
+					COLOR_LAYERS.forEach(function (layer) {
+						layer.els = layer.els.filter(function (el) {
+							return el !== p;
+						});
+					});
+				}
+			});
 		}
 
-		var existingBoom = svg.querySelector( '#egg-boom-text' );
-		if ( existingBoom ) existingBoom.remove();
+		var existingBoom = svg.querySelector('#egg-boom-text');
+		if (existingBoom) existingBoom.remove();
 		var allClassEls = [];
-		v.classes.forEach( function ( sel ) {
+		v.classes.forEach(function (sel) {
 			allClassEls = allClassEls.concat(
-				[].slice.call( svg.querySelectorAll( sel ) )
+				[].slice.call(svg.querySelectorAll(sel))
 			);
-		} );
-		var svgAll = [].slice.call( svg.querySelectorAll( '*' ) );
+		});
+		var svgAll = [].slice.call(svg.querySelectorAll('*'));
 		var firstClassEl = null;
-		for ( var i = 0; i < svgAll.length; i++ ) {
-			if ( allClassEls.indexOf( svgAll[ i ] ) >= 0 ) {
-				firstClassEl = svgAll[ i ];
+		for (var i = 0; i < svgAll.length; i++) {
+			if (allClassEls.indexOf(svgAll[i]) >= 0) {
+				firstClassEl = svgAll[i];
 				break;
 			}
 		}
@@ -455,20 +449,20 @@
 		var boomOffY = active.boomOffsetY !== null ? active.boomOffsetY : 40;
 		boomText.setAttribute(
 			'x',
-			( _contentBB.centerX + boomOffX / boomSc ).toFixed( 1 )
+			(_contentBB.centerX + boomOffX / boomSc).toFixed(1)
 		);
 		boomText.setAttribute(
 			'y',
-			( _contentBB.centerY + boomOffY / boomSc ).toFixed( 1 )
+			(_contentBB.centerY + boomOffY / boomSc).toFixed(1)
 		);
-		boomText.setAttribute( 'text-anchor', 'middle' );
-		boomText.setAttribute( 'dominant-baseline', 'middle' );
-		boomText.setAttribute( 'fill', '#ffffff' );
+		boomText.setAttribute('text-anchor', 'middle');
+		boomText.setAttribute('dominant-baseline', 'middle');
+		boomText.setAttribute('fill', '#ffffff');
 		boomText.setAttribute(
 			'font-size',
-			( ( active.vbW * 0.08 ) / ( active.scale || 1.0 ) ).toFixed( 1 )
+			((active.vbW * 0.08) / (active.scale || 1.0)).toFixed(1)
 		);
-		boomText.setAttribute( 'font-weight', '500' );
+		boomText.setAttribute('font-weight', '500');
 		boomText.setAttribute(
 			'font-family',
 			'system-ui,-apple-system,"Segoe UI",Roboto,sans-serif'
@@ -476,13 +470,13 @@
 		boomText.textContent = settings.boomText || 'One down';
 		boomText.style.opacity = '0';
 		boomText.style.transition = 'opacity 0.6s ease';
-		if ( firstClassEl && firstClassEl.parentNode ) {
+		if (firstClassEl && firstClassEl.parentNode) {
 			firstClassEl.parentNode.insertBefore(
 				boomText,
 				firstClassEl.nextSibling
 			);
 		} else {
-			svg.appendChild( boomText );
+			svg.appendChild(boomText);
 		}
 
 		mainAngle = 0;
@@ -492,51 +486,50 @@
 	/* -- Init --------------------------------------------------------------- */
 	/* -- Blink -------------------------------------------------------------- */
 	function startBlink() {
-		if ( ! eyeGroups.length ) return;
+		if (!eyeGroups.length) return;
 		blinkScaleY = 1;
-		function animTo( from, to, dur, done ) {
+		function animTo(from, to, dur, done) {
 			var t0 = Date.now();
-			( function tick() {
-				var p = Math.min( 1, ( Date.now() - t0 ) / dur );
-				blinkScaleY = from + ( to - from ) * p;
-				if ( p < 1 ) requestAnimationFrame( tick );
-				else if ( done ) done();
-			} )();
+			(function tick() {
+				var p = Math.min(1, (Date.now() - t0) / dur);
+				blinkScaleY = from + (to - from) * p;
+				if (p < 1) requestAnimationFrame(tick);
+				else if (done) done();
+			})();
 		}
 		function doBlink() {
-			animTo( 1, 0.05, 80, function () {
-				animTo( 0.05, 1, 150, function () {
+			animTo(1, 0.05, 80, function () {
+				animTo(0.05, 1, 150, function () {
 					blinkTimer = setTimeout(
 						doBlink,
 						1500 + Math.random() * 2500
 					);
-				} );
-			} );
+				});
+			});
 		}
-		blinkTimer = setTimeout( doBlink, 1000 + Math.random() * 1500 );
+		blinkTimer = setTimeout(doBlink, 1000 + Math.random() * 1500);
 	}
 
 	function updatePupil() {
-		if ( ! eyeGroups.length || ! overlayEl || ! overlayEl.parentNode )
-			return;
+		if (!eyeGroups.length || !overlayEl || !overlayEl.parentNode) return;
 		var lastOx = 0,
 			lastOy = 0;
-		eyeGroups.forEach( function ( group ) {
+		eyeGroups.forEach(function (group) {
 			var ctm;
 			try {
 				ctm = group.pupilEl.getScreenCTM();
-			} catch ( _ ) {
+			} catch (_) {
 				return;
 			}
-			if ( ! ctm ) return;
-			var scale = Math.sqrt( ctm.a * ctm.a + ctm.b * ctm.b );
+			if (!ctm) return;
+			var scale = Math.sqrt(ctm.a * ctm.a + ctm.b * ctm.b);
 			var esx = ctm.a * group.pupilCx + ctm.c * group.pupilCy + ctm.e;
 			var esy = ctm.b * group.pupilCx + ctm.d * group.pupilCy + ctm.f;
 			var dx = mx - esx,
 				dy = my - esy;
 			var maxPx = 13 * scale;
-			var dist = Math.sqrt( dx * dx + dy * dy );
-			if ( dist > maxPx ) {
+			var dist = Math.sqrt(dx * dx + dy * dy);
+			if (dist > maxPx) {
 				var ratio = maxPx / dist;
 				dx *= ratio;
 				dy *= ratio;
@@ -547,116 +540,109 @@
 			lastOy = oy;
 			var t =
 				'translate(' +
-				( group.pupilCx + ox ) +
+				(group.pupilCx + ox) +
 				',' +
-				( group.pupilCy + oy ) +
+				(group.pupilCy + oy) +
 				') scale(1,' +
-				blinkScaleY.toFixed( 4 ) +
+				blinkScaleY.toFixed(4) +
 				') translate(' +
 				-group.pupilCx +
 				',' +
 				-group.pupilCy +
 				')';
-			group.pupilEl.setAttribute( 'transform', t );
-		} );
-		highlightEls.forEach( function ( el ) {
+			group.pupilEl.setAttribute('transform', t);
+		});
+		highlightEls.forEach(function (el) {
 			el.setAttribute(
 				'transform',
 				'translate(' + lastOx + ',' + lastOy + ')'
 			);
-		} );
+		});
 	}
 
 	/* -- Physics ------------------------------------------------------------ */
 	function update() {
-		if ( ! dropped ) return;
+		if (!dropped) return;
 
 		var proxTorque = 0;
-		if ( mActive ) {
+		if (mActive) {
 			var c = pinataCentre(),
 				dx = mx - c.x,
-				d = Math.hypot( dx, my - c.y ),
+				d = Math.hypot(dx, my - c.y),
 				R = c.r * 2.69;
-			if ( d < R && d > 1 )
-				proxTorque = -( dx / d ) * Math.pow( 1 - d / R, 2 ) * 0.0006;
+			if (d < R && d > 1)
+				proxTorque = -(dx / d) * Math.pow(1 - d / R, 2) * 0.0006;
 		}
 
 		mainOmega =
-			( mainOmega +
-				( -settings.gravity * Math.sin( mainAngle ) + proxTorque ) ) *
+			(mainOmega +
+				(-settings.gravity * Math.sin(mainAngle) + proxTorque)) *
 			settings.damp;
-		if ( mainOmega > 0.06 ) mainOmega = 0.06;
-		if ( mainOmega < -0.06 ) mainOmega = -0.06;
+		if (mainOmega > 0.06) mainOmega = 0.06;
+		if (mainOmega < -0.06) mainOmega = -0.06;
 		mainAngle += mainOmega;
 		var _maxSwing =
 			active && active.maxSwing !== null ? active.maxSwing : 0.9;
-		if ( mainAngle > _maxSwing ) {
+		if (mainAngle > _maxSwing) {
 			mainAngle = _maxSwing;
 			mainOmega *= -0.4;
 		}
-		if ( mainAngle < -_maxSwing ) {
+		if (mainAngle < -_maxSwing) {
 			mainAngle = -_maxSwing;
 			mainOmega *= -0.4;
 		}
 
 		var pcx = _contentBB.centerX,
 			pcy = _contentBB.centerY;
-		COLOR_LAYERS.forEach( function ( layer ) {
-			if ( ! layer.els.length ) return;
+		COLOR_LAYERS.forEach(function (layer) {
+			if (!layer.els.length) return;
 			var target =
 				-mainOmega *
 				layer.velMult *
 				settings.sway *
-				( 180 / Math.PI ) *
+				(180 / Math.PI) *
 				14;
 			layer.vel =
-				( layer.vel + ( target - layer.val ) * layer.stiff ) *
-				layer.damp;
+				(layer.vel + (target - layer.val) * layer.stiff) * layer.damp;
 			layer.val += layer.vel;
 			var t =
-				'rotate(' +
-				layer.val.toFixed( 3 ) +
-				' ' +
-				pcx +
-				' ' +
-				pcy +
-				')';
-			layer.els.forEach( function ( el ) {
-				el.setAttribute( 'transform', t );
-			} );
-		} );
+				'rotate(' + layer.val.toFixed(3) + ' ' + pcx + ' ' + pcy + ')';
+			layer.els.forEach(function (el) {
+				el.setAttribute('transform', t);
+			});
+		});
 
-		if ( HEAD_TOP_LAYER.els.length ) {
+		if (HEAD_TOP_LAYER.els.length) {
 			var ht =
 				-mainOmega *
 				HEAD_TOP_LAYER.velMult *
 				settings.sway *
-				( 180 / Math.PI ) *
+				(180 / Math.PI) *
 				14;
 			HEAD_TOP_LAYER.vel =
-				( HEAD_TOP_LAYER.vel +
-					( ht - HEAD_TOP_LAYER.val ) * HEAD_TOP_LAYER.stiff ) *
+				(HEAD_TOP_LAYER.vel +
+					(ht - HEAD_TOP_LAYER.val) * HEAD_TOP_LAYER.stiff) *
 				HEAD_TOP_LAYER.damp;
 			HEAD_TOP_LAYER.val += HEAD_TOP_LAYER.vel;
 			var htT =
 				'rotate(' +
-				HEAD_TOP_LAYER.val.toFixed( 3 ) +
+				HEAD_TOP_LAYER.val.toFixed(3) +
 				' ' +
 				pcx +
 				' ' +
 				pcy +
 				')';
-			HEAD_TOP_LAYER.els.forEach( function ( el ) {
-				el.setAttribute( 'transform', htT );
-			} );
+			HEAD_TOP_LAYER.els.forEach(function (el) {
+				el.setAttribute('transform', htT);
+			});
 		}
 
-		squishVel = ( squishVel - squishAmp * 0.22 ) * 0.72;
+		squishVel = (squishVel - squishAmp * 0.22) * 0.72;
 		squishAmp += squishVel;
-		if ( pinataEl ) {
-			var sdeg = ( ( squishAngle * 180 ) / Math.PI ).toFixed( 2 );
-			var sAlong = ( 1 - squishAmp * 0.042 ).toFixed( 4 );
-			var sPerp = ( 1 + squishAmp * 0.063 ).toFixed( 4 );
+		if (pinataEl) {
+			var sdeg = ((squishAngle * 180) / Math.PI).toFixed(2);
+			var sAlong = (1 - squishAmp * 0.042).toFixed(4);
+			var sPerp = (1 + squishAmp * 0.063).toFixed(4);
 			pinataEl.style.transform =
 				'rotate(' +
 				sdeg +
@@ -665,24 +651,24 @@
 				') scaleY(' +
 				sPerp +
 				') rotate(' +
-				( ( -squishAngle * 180 ) / Math.PI ).toFixed( 2 ) +
+				((-squishAngle * 180) / Math.PI).toFixed(2) +
 				'deg)';
 		}
 	}
 
 	function applyRotation() {
-		document.getElementById( 'egg-pendulum' ).style.transform =
+		document.getElementById('egg-pendulum').style.transform =
 			'rotate(' + mainAngle + 'rad)';
 	}
 
 	/* -- Canvases ----------------------------------------------------------- */
-	function sizeCanvasHiDPI( canvas ) {
+	function sizeCanvasHiDPI(canvas) {
 		var dpr = window.devicePixelRatio || 1,
 			w = window.innerWidth,
 			h = window.innerHeight;
-		var tw = Math.round( w * dpr ),
-			th = Math.round( h * dpr );
-		if ( canvas.width !== tw || canvas.height !== th ) {
+		var tw = Math.round(w * dpr),
+			th = Math.round(h * dpr);
+		if (canvas.width !== tw || canvas.height !== th) {
 			canvas.width = tw;
 			canvas.height = th;
 		}
@@ -690,230 +676,224 @@
 	}
 
 	function sizeConfetti() {
-		sizeCanvasHiDPI( cfCV );
+		sizeCanvasHiDPI(cfCV);
 	}
 
 	/* -- Confetti ----------------------------------------------------------- */
 	async function loadConfettiShapes() {
 		var text = SVG_DATA.confetti;
-		if ( ! text ) return;
-		var tmp = document.createElement( 'div' );
+		if (!text) return;
+		var tmp = document.createElement('div');
 		tmp.style.cssText =
 			'position:absolute;left:-9999px;top:-9999px;visibility:hidden';
 		tmp.innerHTML = text;
-		document.body.appendChild( tmp );
-		[].slice
-			.call( tmp.querySelectorAll( 'path' ) )
-			.forEach( function ( p ) {
-				var bb;
-				try {
-					bb = p.getBBox();
-				} catch ( _ ) {
-					return;
-				}
-				var d = p.getAttribute( 'd' ),
-					fill = p.getAttribute( 'fill' ) || '#7c5cf0';
-				if ( ! d || bb.width <= 0 || bb.height <= 0 ) return;
-				var aspect =
-					Math.max( bb.width, bb.height ) /
-					Math.max( 0.0001, Math.min( bb.width, bb.height ) );
-				var kind = 'misc';
-				if ( aspect < 1.15 ) {
-					kind = 'circle';
-				} else if ( aspect > 1.7 ) {
-					kind = 'line';
-				}
-				ALL_SHAPES.push( {
-					path2d: new Path2D( d ),
-					cx: bb.x + bb.width / 2,
-					cy: bb.y + bb.height / 2,
-					r: Math.max( bb.width, bb.height ) / 2,
-					color: fill,
-					kind,
-				} );
-			} );
-		document.body.removeChild( tmp );
+		document.body.appendChild(tmp);
+		[].slice.call(tmp.querySelectorAll('path')).forEach(function (p) {
+			var bb;
+			try {
+				bb = p.getBBox();
+			} catch (_) {
+				return;
+			}
+			var d = p.getAttribute('d'),
+				fill = p.getAttribute('fill') || '#7c5cf0';
+			if (!d || bb.width <= 0 || bb.height <= 0) return;
+			var aspect =
+				Math.max(bb.width, bb.height) /
+				Math.max(0.0001, Math.min(bb.width, bb.height));
+			var kind = 'misc';
+			if (aspect < 1.15) {
+				kind = 'circle';
+			} else if (aspect > 1.7) {
+				kind = 'line';
+			}
+			ALL_SHAPES.push({
+				path2d: new Path2D(d),
+				cx: bb.x + bb.width / 2,
+				cy: bb.y + bb.height / 2,
+				r: Math.max(bb.width, bb.height) / 2,
+				color: fill,
+				kind,
+			});
+		});
+		document.body.removeChild(tmp);
 	}
 
 	function filterShapes() {
 		var k = settings.cfShape;
-		if ( k === 'circles' ) {
-			activeShapes = ALL_SHAPES.filter( function ( s ) {
+		if (k === 'circles') {
+			activeShapes = ALL_SHAPES.filter(function (s) {
 				return s.kind === 'circle';
-			} );
-		} else if ( k === 'lines' ) {
-			activeShapes = ALL_SHAPES.filter( function ( s ) {
+			});
+		} else if (k === 'lines') {
+			activeShapes = ALL_SHAPES.filter(function (s) {
 				return s.kind === 'line';
-			} );
+			});
 		} else {
 			activeShapes = ALL_SHAPES.slice();
 		}
-		if ( ! activeShapes.length ) activeShapes = ALL_SHAPES.slice();
+		if (!activeShapes.length) activeShapes = ALL_SHAPES.slice();
 	}
 
 	function rebuildColumns() {
-		columns = new Array(
-			Math.ceil( window.innerWidth / COLUMN_W ) + 4
-		).fill( window.innerHeight );
-	}
-
-	function colOf( x ) {
-		return Math.max(
-			0,
-			Math.min( columns.length - 1, Math.floor( x / COLUMN_W ) )
+		columns = new Array(Math.ceil(window.innerWidth / COLUMN_W) + 4).fill(
+			window.innerHeight
 		);
 	}
 
-	function spawnBurst( x, y, count, opts ) {
-		if ( ! settings.cfOn || ! activeShapes.length ) return;
+	function colOf(x) {
+		return Math.max(
+			0,
+			Math.min(columns.length - 1, Math.floor(x / COLUMN_W))
+		);
+	}
+
+	function spawnBurst(x, y, count, opts) {
+		if (!settings.cfOn || !activeShapes.length) return;
 		count = count || settings.cfCount;
-		var upBias = ( opts && opts.upBias ) || 2.5;
-		for ( var i = 0; i < count; i++ ) {
+		var upBias = (opts && opts.upBias) || 2.5;
+		for (var i = 0; i < count; i++) {
 			var ang = Math.random() * Math.PI * 2,
 				speed = 5 + Math.random() * 8;
 			var tpl =
-				activeShapes[
-					Math.floor( Math.random() * activeShapes.length )
-				];
+				activeShapes[Math.floor(Math.random() * activeShapes.length)];
 			var scale =
-				( 6 / Math.max( 0.5, tpl.r ) ) *
-				( 0.85 + Math.random() * 0.3 ) *
+				(6 / Math.max(0.5, tpl.r)) *
+				(0.85 + Math.random() * 0.3) *
 				settings.cfSize;
-			live.push( {
-				x: x + ( Math.random() - 0.5 ) * 10,
-				y: y + ( Math.random() - 0.5 ) * 10,
-				vx: Math.cos( ang ) * speed,
-				vy: Math.sin( ang ) * speed - upBias,
+			live.push({
+				x: x + (Math.random() - 0.5) * 10,
+				y: y + (Math.random() - 0.5) * 10,
+				vx: Math.cos(ang) * speed,
+				vy: Math.sin(ang) * speed - upBias,
 				rot: Math.random() * Math.PI * 2,
-				rotVel: ( Math.random() - 0.5 ) * 0.18,
+				rotVel: (Math.random() - 0.5) * 0.18,
 				scale,
 				tpl,
 				r: tpl.r * scale,
-			} );
+			});
 		}
 	}
 
 	function updateConfetti() {
 		var H = window.innerHeight;
-		for ( var i = live.length - 1; i >= 0; i-- ) {
-			var p = live[ i ];
+		for (var i = live.length - 1; i >= 0; i--) {
+			var p = live[i];
 			p.vy += 0.36;
 			p.vx *= 0.992;
 			p.rotVel *= 0.992;
 			p.x += p.vx;
 			p.y += p.vy;
 			p.rot += p.rotVel;
-			if ( p.x < -p.r ) {
+			if (p.x < -p.r) {
 				p.x = -p.r;
 				p.vx = -p.vx * 0.4;
 			}
-			if ( p.x > window.innerWidth + p.r ) {
+			if (p.x > window.innerWidth + p.r) {
 				p.x = window.innerWidth + p.r;
 				p.vx = -p.vx * 0.4;
 			}
 
-			if ( ! settings.cfPile ) {
-				if ( p.y - p.r > H + 50 ) live.splice( i, 1 );
+			if (!settings.cfPile) {
+				if (p.y - p.r > H + 50) live.splice(i, 1);
 				continue;
 			}
 
 			var r = p.r,
 				r2 = r * 2,
-				cc = colOf( p.x ),
-				hc = Math.ceil( r / COLUMN_W ),
+				cc = colOf(p.x),
+				hc = Math.ceil(r / COLUMN_W),
 				ftop = H;
-			for ( var dc = -hc; dc <= hc; dc++ ) {
+			for (var dc = -hc; dc <= hc; dc++) {
 				var nc = cc + dc;
-				if ( nc >= 0 && nc < columns.length && columns[ nc ] < ftop )
-					ftop = columns[ nc ];
+				if (nc >= 0 && nc < columns.length && columns[nc] < ftop)
+					ftop = columns[nc];
 			}
 
-			if ( p.y + r >= ftop ) {
+			if (p.y + r >= ftop) {
 				var fc = cc,
-					fy = columns[ cc ],
-					rr = Math.max( 2, hc + 1 );
-				for ( var dc2 = -rr; dc2 <= rr; dc2++ ) {
-					if ( ! dc2 ) continue;
+					fy = columns[cc],
+					rr = Math.max(2, hc + 1);
+				for (var dc2 = -rr; dc2 <= rr; dc2++) {
+					if (!dc2) continue;
 					var nc2 = cc + dc2;
 					if (
 						nc2 >= 0 &&
 						nc2 < columns.length &&
-						columns[ nc2 ] > fy + 1
+						columns[nc2] > fy + 1
 					) {
 						fc = nc2;
-						fy = columns[ nc2 ];
+						fy = columns[nc2];
 					}
 				}
-				if ( fc !== cc )
+				if (fc !== cc)
 					p.x =
-						( fc + 0.5 ) * COLUMN_W +
-						( Math.random() - 0.5 ) * COLUMN_W;
+						(fc + 0.5) * COLUMN_W +
+						(Math.random() - 0.5) * COLUMN_W;
 				p.y = fy - r;
 				p.rotVel = 0;
 				var sp = hc + 2;
-				for ( var dc3 = -sp; dc3 <= sp; dc3++ ) {
+				for (var dc3 = -sp; dc3 <= sp; dc3++) {
 					var nc3 = fc + dc3;
-					if ( nc3 < 0 || nc3 >= columns.length ) continue;
+					if (nc3 < 0 || nc3 >= columns.length) continue;
 					var dx3 = dc3 * COLUMN_W;
-					if ( Math.abs( dx3 ) > r2 ) continue;
+					if (Math.abs(dx3) > r2) continue;
 					var nt =
-						p.y +
-						r -
-						Math.sqrt( Math.max( 0, r2 * r2 - dx3 * dx3 ) );
-					if ( nt < columns[ nc3 ] ) columns[ nc3 ] = nt;
+						p.y + r - Math.sqrt(Math.max(0, r2 * r2 - dx3 * dx3));
+					if (nt < columns[nc3]) columns[nc3] = nt;
 				}
-				settled.push( p );
-				live.splice( i, 1 );
-				if ( settled.length > SETTLED_CAP ) settled.splice( 0, 60 );
-			} else if ( p.y - p.r > H + 50 ) {
-				live.splice( i, 1 );
+				settled.push(p);
+				live.splice(i, 1);
+				if (settled.length > SETTLED_CAP) settled.splice(0, 60);
+			} else if (p.y - p.r > H + 50) {
+				live.splice(i, 1);
 			}
 		}
 	}
 
-	function drawShapeList( arr ) {
-		for ( var i = 0; i < arr.length; i++ ) {
-			var p = arr[ i ],
+	function drawShapeList(arr) {
+		for (var i = 0; i < arr.length; i++) {
+			var p = arr[i],
 				tpl = p.tpl;
 			cfCtx.save();
-			cfCtx.translate( p.x, p.y );
-			cfCtx.rotate( p.rot );
-			cfCtx.scale( p.scale, p.scale );
-			cfCtx.translate( -tpl.cx, -tpl.cy );
+			cfCtx.translate(p.x, p.y);
+			cfCtx.rotate(p.rot);
+			cfCtx.scale(p.scale, p.scale);
+			cfCtx.translate(-tpl.cx, -tpl.cy);
 			cfCtx.fillStyle = tpl.color;
-			cfCtx.fill( tpl.path2d );
+			cfCtx.fill(tpl.path2d);
 			cfCtx.restore();
 		}
 	}
 
 	function drawFallingPieces() {
-		for ( var i = 0; i < fallingPieces.length; i++ ) {
-			var p = fallingPieces[ i ];
+		for (var i = 0; i < fallingPieces.length; i++) {
+			var p = fallingPieces[i];
 			cfCtx.save();
-			cfCtx.translate( p.x, p.y );
-			cfCtx.rotate( p.rot );
-			cfCtx.scale( p.scale, p.scale );
-			cfCtx.translate( -p.svgCx, -p.svgCy );
+			cfCtx.translate(p.x, p.y);
+			cfCtx.rotate(p.rot);
+			cfCtx.scale(p.scale, p.scale);
+			cfCtx.translate(-p.svgCx, -p.svgCy);
 			cfCtx.fillStyle = p.fill;
-			cfCtx.fill( p.path2d );
+			cfCtx.fill(p.path2d);
 			cfCtx.restore();
 		}
 	}
 
 	function drawConfetti() {
-		var dpr = sizeCanvasHiDPI( cfCV );
-		cfCtx.setTransform( dpr, 0, 0, dpr, 0, 0 );
-		cfCtx.clearRect( 0, 0, window.innerWidth, window.innerHeight );
-		drawShapeList( settled );
-		drawShapeList( live );
+		var dpr = sizeCanvasHiDPI(cfCV);
+		cfCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+		cfCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+		drawShapeList(settled);
+		drawShapeList(live);
 		drawFallingPieces();
 	}
 
 	function drawBg() {
-		var dpr = sizeCanvasHiDPI( bgCV );
-		bgCtx.setTransform( dpr, 0, 0, dpr, 0, 0 );
-		bgCtx.clearRect( 0, 0, window.innerWidth, window.innerHeight );
-		if ( ! dropped ) return;
+		var dpr = sizeCanvasHiDPI(bgCV);
+		bgCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+		bgCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+		if (!dropped) return;
 		var c = pinataCentre();
 		var strOff =
 			active && active.stringOffsetX !== null ? active.stringOffsetX : 10;
@@ -922,13 +902,13 @@
 		var botX = c.x + strOff,
 			botY = c.y;
 		var trail = mainOmega * 1200;
-		var cp1x = topX + ( botX - topX ) * 0.25 - trail * 0.2;
-		var cp1y = topY + ( botY - topY ) * 0.25;
-		var cp2x = topX + ( botX - topX ) * 0.75 - trail * 0.8;
-		var cp2y = topY + ( botY - topY ) * 0.75;
+		var cp1x = topX + (botX - topX) * 0.25 - trail * 0.2;
+		var cp1y = topY + (botY - topY) * 0.25;
+		var cp2x = topX + (botX - topX) * 0.75 - trail * 0.8;
+		var cp2y = topY + (botY - topY) * 0.75;
 		bgCtx.beginPath();
-		bgCtx.moveTo( topX, topY );
-		bgCtx.bezierCurveTo( cp1x, cp1y, cp2x, cp2y, botX, botY );
+		bgCtx.moveTo(topX, topY);
+		bgCtx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, botX, botY);
 		bgCtx.strokeStyle = '#330862';
 		bgCtx.lineWidth = 4;
 		bgCtx.lineCap = 'round';
@@ -937,104 +917,103 @@
 
 	/* -- Falling pinata pieces ---------------------------------------------- */
 	function detachPiece() {
-		var allLayers = COLOR_LAYERS.filter( function ( l ) {
+		var allLayers = COLOR_LAYERS.filter(function (l) {
 			return l.els.length > 0;
-		} );
-		if ( HEAD_TOP_LAYER && HEAD_TOP_LAYER.els.length > 0 )
-			allLayers.push( HEAD_TOP_LAYER );
+		});
+		if (HEAD_TOP_LAYER && HEAD_TOP_LAYER.els.length > 0)
+			allLayers.push(HEAD_TOP_LAYER);
 
 		var eligible = [];
-		allLayers.forEach( function ( layer ) {
-			layer.els.forEach( function ( el ) {
-				if ( ! protectedEls.has( el ) ) eligible.push( { layer, el } );
-			} );
-		} );
-		if ( ! eligible.length ) return;
+		allLayers.forEach(function (layer) {
+			layer.els.forEach(function (el) {
+				if (!protectedEls.has(el)) eligible.push({ layer, el });
+			});
+		});
+		if (!eligible.length) return;
 
-		var pick = eligible[ Math.floor( Math.random() * eligible.length ) ];
+		var pick = eligible[Math.floor(Math.random() * eligible.length)];
 		var layer = pick.layer;
 		var el = pick.el;
-		var idx = layer.els.indexOf( el );
+		var idx = layer.els.indexOf(el);
 
-		var d = el.getAttribute( 'd' );
+		var d = el.getAttribute('d');
 		var fill =
-			window.getComputedStyle( el ).fill ||
-			el.getAttribute( 'fill' ) ||
+			window.getComputedStyle(el).fill ||
+			el.getAttribute('fill') ||
 			'#c084fc';
 		var bb, ctm;
 		try {
 			bb = el.getBBox();
-		} catch ( _ ) {
+		} catch (_) {
 			bb = null;
 		}
 		try {
 			ctm = el.getScreenCTM();
-		} catch ( _ ) {
+		} catch (_) {
 			ctm = null;
 		}
 
-		layer.els.splice( idx, 1 );
-		if ( el.parentNode ) el.parentNode.removeChild( el );
+		layer.els.splice(idx, 1);
+		if (el.parentNode) el.parentNode.removeChild(el);
 
-		if ( ! d || ! bb || ! ctm || bb.width === 0 ) return;
+		if (!d || !bb || !ctm || bb.width === 0) return;
 
 		var svgCx = bb.x + bb.width / 2;
 		var svgCy = bb.y + bb.height / 2;
 		var sx = ctm.a * svgCx + ctm.c * svgCy + ctm.e;
 		var sy = ctm.b * svgCx + ctm.d * svgCy + ctm.f;
-		var scale = Math.sqrt( ctm.a * ctm.a + ctm.b * ctm.b );
+		var scale = Math.sqrt(ctm.a * ctm.a + ctm.b * ctm.b);
 
-		fallingPieces.push( {
-			path2d: new Path2D( d ),
+		fallingPieces.push({
+			path2d: new Path2D(d),
 			fill,
 			svgCx,
 			svgCy,
 			x: sx,
 			y: sy,
-			vx: ( Math.random() - 0.5 ) * 9,
+			vx: (Math.random() - 0.5) * 9,
 			vy: -5 - Math.random() * 5,
-			rot: Math.atan2( ctm.b, ctm.a ),
-			rotVel: ( Math.random() - 0.5 ) * 0.14,
+			rot: Math.atan2(ctm.b, ctm.a),
+			rotVel: (Math.random() - 0.5) * 0.14,
 			scale,
-		} );
+		});
 	}
 
 	function updateFallingPieces() {
-		for ( var i = fallingPieces.length - 1; i >= 0; i-- ) {
-			var p = fallingPieces[ i ];
+		for (var i = fallingPieces.length - 1; i >= 0; i--) {
+			var p = fallingPieces[i];
 			p.vy += 0.5;
 			p.vx *= 0.992;
 			p.x += p.vx;
 			p.y += p.vy;
 			p.rot += p.rotVel;
-			if ( p.y > window.innerHeight + 300 ) fallingPieces.splice( i, 1 );
+			if (p.y > window.innerHeight + 300) fallingPieces.splice(i, 1);
 		}
 	}
 
 	/* -- Cursor ------------------------------------------------------------- */
 	function updateCursor() {
-		if ( ! mActive ) return;
+		if (!mActive) return;
 		var rawVx = mx - lastMx;
 		mouseVx = mouseVx * 0.7 + rawVx * 0.3;
 		lastMx = mx;
-		var vel = Math.max( -35, Math.min( 35, mouseVx * 0.45 ) );
-		stickAngleVel =
-			( stickAngleVel + ( 25 + vel - stickAngle ) * 0.1 ) * 0.82;
+		var vel = Math.max(-35, Math.min(35, mouseVx * 0.45));
+		stickAngleVel = (stickAngleVel + (25 + vel - stickAngle) * 0.1) * 0.82;
 		stickAngle += stickAngleVel;
 		stick.style.transform =
 			'translate(' +
-			( mx - 65 ) +
+			(mx - 65) +
 			'px,' +
-			( my - 73 ) +
+			(my - 73) +
 			'px) rotate(' +
-			stickAngle.toFixed( 2 ) +
+			stickAngle.toFixed(2) +
 			'deg)';
 		var near =
 			dropped &&
-			Math.hypot( mx - pinataCentre().x, my - pinataCentre().y ) <
+			Math.hypot(mx - pinataCentre().x, my - pinataCentre().y) <
 				pinataCentre().r * 1.68;
 		stick.style.opacity = near ? 1 : 0;
-		overlayEl.classList.toggle( 'near-pinata', near );
+		overlayEl.classList.toggle('near-pinata', near);
 	}
 
 	function swingStick() {
@@ -1042,24 +1021,23 @@
 	}
 
 	/* -- Hits --------------------------------------------------------------- */
-	function tryHit( cx, cy ) {
-		if ( ! dropped ) return;
+	function tryHit(cx, cy) {
+		if (!dropped) return;
 		var c = pinataCentre();
-		if ( Math.hypot( cx - c.x, cy - c.y ) > c.r * 1.68 ) return;
+		if (Math.hypot(cx - c.x, cy - c.y) > c.r * 1.68) return;
 		mainOmega +=
-			( c.x - cx ) * settings.hit +
-			( Math.random() - 0.5 ) * settings.hit * 5;
-		COLOR_LAYERS.forEach( function ( l ) {
-			l.vel += ( Math.random() - 0.5 ) * 4.5;
-		} );
-		spawnBurst( cx, cy );
+			(c.x - cx) * settings.hit +
+			(Math.random() - 0.5) * settings.hit * 5;
+		COLOR_LAYERS.forEach(function (l) {
+			l.vel += (Math.random() - 0.5) * 4.5;
+		});
+		spawnBurst(cx, cy);
 		swingStick();
 		detachPiece();
-		squishAngle = Math.atan2( c.y - cy, c.x - cx );
+		squishAngle = Math.atan2(c.y - cy, c.x - cx);
 		squishVel += 0.9;
-		var boomEl = document.getElementById( 'egg-boom-text' );
-		if ( boomEl && boomEl.style.opacity === '0' )
-			boomEl.style.opacity = '1';
+		var boomEl = document.getElementById('egg-boom-text');
+		if (boomEl && boomEl.style.opacity === '0') boomEl.style.opacity = '1';
 	}
 
 	/* -- Main loop ---------------------------------------------------------- */
@@ -1072,18 +1050,18 @@
 		drawConfetti();
 		updateCursor();
 		updatePupil();
-		rafId = requestAnimationFrame( loop );
+		rafId = requestAnimationFrame(loop);
 	}
 
 	async function init() {
 		stick.innerHTML = SVG_DATA.stick || '';
 		ALL_SHAPES = [];
-		if ( ! reducedMotion ) await loadConfettiShapes();
+		if (!reducedMotion) await loadConfettiShapes();
 		filterShapes();
-		await loadPinata( settings.variant );
-		if ( ! reducedMotion ) startBlink();
+		await loadPinata(settings.variant);
+		if (!reducedMotion) startBlink();
 		dropped = true;
-		if ( reducedMotion ) {
+		if (reducedMotion) {
 			applyRotation();
 			drawBg();
 		} else {
@@ -1093,7 +1071,7 @@
 	}
 
 	/* -- Named event handlers (for cleanup) --------------------------------- */
-	function onMouseMove( e ) {
+	function onMouseMove(e) {
 		mx = e.clientX;
 		my = e.clientY;
 		mActive = true;
@@ -1111,91 +1089,91 @@
 		settled.length = 0;
 	}
 
-	function onKeyDown( e ) {
-		if ( e.key === 'Escape' ) {
+	function onKeyDown(e) {
+		if (e.key === 'Escape') {
 			closeOverlay();
 			return;
 		}
-		if ( e.key === 'Tab' && overlayEl ) {
+		if (e.key === 'Tab' && overlayEl) {
 			var focusable = [].slice.call(
 				overlayEl.querySelectorAll(
 					'button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])'
 				)
 			);
-			if ( ! focusable.length ) return;
-			var first = focusable[ 0 ],
-				last = focusable[ focusable.length - 1 ];
+			if (!focusable.length) return;
+			var first = focusable[0],
+				last = focusable[focusable.length - 1];
 			var activeElement = overlayEl.ownerDocument.activeElement;
-			if ( e.shiftKey ) {
-				if ( activeElement === first ) {
+			if (e.shiftKey) {
+				if (activeElement === first) {
 					e.preventDefault();
 					last.focus();
 				}
-			} else if ( activeElement === last ) {
+			} else if (activeElement === last) {
 				e.preventDefault();
 				first.focus();
 			}
 		}
 	}
 
-	function onDocClick( e ) {
+	function onDocClick(e) {
 		var t = e.target;
-		if ( ! t || ! t.closest ) {
-			tryHit( e.clientX, e.clientY );
+		if (!t || !t.closest) {
+			tryHit(e.clientX, e.clientY);
 			return;
 		}
-		if ( t.closest( '#egg-close-btn' ) ) return;
-		if ( t.closest( '.egg-celebrate-btn' ) ) return;
-		if ( t.closest( '.egg-opt-out-btn' ) ) return;
-		tryHit( e.clientX, e.clientY );
+		if (t.closest('#egg-close-btn')) return;
+		if (t.closest('.egg-celebrate-btn')) return;
+		if (t.closest('.egg-opt-out-btn')) return;
+		tryHit(e.clientX, e.clientY);
 	}
 
 	/* -- Close -------------------------------------------------------------- */
 	closeOverlay = function () {
-		if ( currentMilestone && currentMilestone._orderId && DISMISS ) {
+		if (currentMilestone && currentMilestone._orderId && DISMISS) {
 			var fd = new FormData();
-			fd.append( 'action', 'wc_egg_dismiss' );
-			fd.append( 'nonce', DISMISS.nonce );
-			fd.append( 'order_id', currentMilestone._orderId );
-			if ( navigator.sendBeacon ) {
-				navigator.sendBeacon( DISMISS.url, fd );
+			fd.append('action', 'wc_egg_dismiss');
+			fd.append('nonce', DISMISS.nonce);
+			fd.append('order_id', currentMilestone._orderId);
+			if (navigator.sendBeacon) {
+				navigator.sendBeacon(DISMISS.url, fd);
 			} else {
-				fetch( DISMISS.url, { method: 'POST', body: fd } );
+				fetch(DISMISS.url, { method: 'POST', body: fd });
 			}
 		}
-		if ( blinkTimer ) {
-			clearTimeout( blinkTimer );
+		if (blinkTimer) {
+			clearTimeout(blinkTimer);
 			blinkTimer = null;
 		}
-		if ( rafId ) {
-			cancelAnimationFrame( rafId );
+		if (rafId) {
+			cancelAnimationFrame(rafId);
 			rafId = null;
 		}
-		document.removeEventListener( 'mousemove', onMouseMove );
-		document.removeEventListener( 'mouseleave', onMouseLeave );
-		document.removeEventListener( 'mouseenter', onMouseEnter );
-		document.removeEventListener( 'click', onDocClick );
-		document.removeEventListener( 'keydown', onKeyDown );
-		window.removeEventListener( 'resize', onResize );
-		if ( svgDefsEl && svgDefsEl.parentNode ) svgDefsEl.remove();
-		if ( overlayEl && overlayEl.parentNode ) overlayEl.remove();
-		var st = document.getElementById( 'woo-egg-style' );
-		if ( st ) st.remove();
-		if ( _previousFocus && typeof _previousFocus.focus === 'function' ) {
+		document.removeEventListener('mousemove', onMouseMove);
+		document.removeEventListener('mouseleave', onMouseLeave);
+		document.removeEventListener('mouseenter', onMouseEnter);
+		document.removeEventListener('click', onDocClick);
+		document.removeEventListener('keydown', onKeyDown);
+		window.removeEventListener('resize', onResize);
+		if (svgDefsEl && svgDefsEl.parentNode) svgDefsEl.remove();
+		if (overlayEl && overlayEl.parentNode) overlayEl.remove();
+		var st = document.getElementById('woo-egg-style');
+		if (st) st.remove();
+		if (_previousFocus && typeof _previousFocus.focus === 'function') {
 			_previousFocus.focus();
 		}
 	};
 
 	/* -- Build overlay DOM -------------------------------------------------- */
-	function escHtml( s ) {
-		return String( s )
-			.replace( /&/g, '&amp;' )
-			.replace( /</g, '&lt;' )
-			.replace( />/g, '&gt;' )
-			.replace( /"/g, '&quot;' );
+	function escHtml(s) {
+		return String(s)
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;');
 	}
 
-	function buildOverlay( milestoneData ) {
+	function buildOverlay(milestoneData) {
 		var W = window.innerWidth,
 			H = window.innerHeight;
 
@@ -1208,7 +1186,7 @@
 			'style',
 			'position:fixed;width:0;height:0;overflow:hidden;'
 		);
-		svgDefsEl.setAttribute( 'aria-hidden', 'true' );
+		svgDefsEl.setAttribute('aria-hidden', 'true');
 		svgDefsEl.innerHTML =
 			'<defs><clipPath id="' +
 			clipId +
@@ -1220,10 +1198,10 @@
 			H / 2 +
 			') scale(0) translate(-391 -381)"/>' +
 			'</clipPath></defs>';
-		document.body.appendChild( svgDefsEl );
-		var wooblePath = svgDefsEl.querySelector( 'path' );
+		document.body.appendChild(svgDefsEl);
+		var wooblePath = svgDefsEl.querySelector('path');
 
-		var style = document.createElement( 'style' );
+		var style = document.createElement('style');
 		style.id = 'woo-egg-style';
 		style.textContent =
 			'#woo-egg-overlay,#woo-egg-overlay *{box-sizing:border-box;margin:0;padding:0}' +
@@ -1257,9 +1235,9 @@
 			'#woo-egg-overlay .egg-actions{display:flex;flex-direction:column;align-items:center;gap:8px}' +
 			'#woo-egg-overlay .egg-opt-out-btn.components-button{padding:6px 12px}' +
 			'@media (prefers-reduced-motion: reduce){#egg-sprinkle-bg *{animation:none!important}#egg-pinata-container svg{transition:none!important}}';
-		document.head.appendChild( style );
+		document.head.appendChild(style);
 
-		var el = document.createElement( 'div' );
+		var el = document.createElement('div');
 		el.id = 'woo-egg-overlay';
 		el.innerHTML =
 			'<div id="egg-scene">' +
@@ -1273,73 +1251,73 @@
 			'<canvas id="egg-confetti"></canvas>' +
 			'<div class="egg-copy">' +
 			'<h1 id="egg-headline" class="egg-headline">' +
-			escHtml( milestoneData.title ) +
+			escHtml(milestoneData.title) +
 			'</h1>' +
 			'<p class="egg-body">' +
-			escHtml( milestoneData.subtitle ) +
+			escHtml(milestoneData.subtitle) +
 			'</p>' +
 			'<div class="egg-actions">' +
 			'<button class="egg-celebrate-btn components-button is-primary">' +
-			escHtml( LABELS.cta ) +
+			escHtml(LABELS.cta) +
 			'</button>' +
 			'<button class="egg-opt-out-btn components-button is-tertiary">' +
-			escHtml( LABELS.optOut ) +
+			escHtml(LABELS.optOut) +
 			'</button>' +
 			'</div>' +
 			'</div>' +
 			'<div id="egg-cursor-stick"></div>' +
 			'</div>' +
 			'<button id="egg-close-btn" aria-label="' +
-			escHtml( LABELS.closeLabel ) +
+			escHtml(LABELS.closeLabel) +
 			'" title="' +
-			escHtml( LABELS.closeTitle ) +
+			escHtml(LABELS.closeTitle) +
 			'"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 13.06l3.712 3.713 1.061-1.06L13.061 12l3.712-3.712-1.06-1.06L12 10.938 8.288 7.227l-1.061 1.06L10.939 12l-3.712 3.712 1.06 1.061L12 13.061z"/></svg></button>';
 
-		if ( SVG_DATA.sprinkle ) {
-			var sp = document.createElement( 'div' );
+		if (SVG_DATA.sprinkle) {
+			var sp = document.createElement('div');
 			sp.id = 'egg-sprinkle-bg';
 			sp.innerHTML = SVG_DATA.sprinkle;
-			var spSvg = sp.querySelector( 'svg' );
-			if ( spSvg ) {
-				spSvg.setAttribute( 'preserveAspectRatio', 'xMidYMid slice' );
-				var particles = spSvg.querySelectorAll( 'path,circle,rect' );
-				particles.forEach( function ( p ) {
-					var dur = ( 3 + Math.random() * 5 ).toFixed( 2 );
-					var delay = -( Math.random() * 8 ).toFixed( 2 );
+			var spSvg = sp.querySelector('svg');
+			if (spSvg) {
+				spSvg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+				var particles = spSvg.querySelectorAll('path,circle,rect');
+				particles.forEach(function (p) {
+					var dur = (3 + Math.random() * 5).toFixed(2);
+					var delay = -(Math.random() * 8).toFixed(2);
 					p.style.animation =
 						'egg-particle-pulse ' +
 						dur +
 						's ease-in-out ' +
 						delay +
 						's infinite';
-				} );
+				});
 			}
-			var scene = el.querySelector( '#egg-scene' );
-			scene.insertBefore( sp, scene.firstChild );
+			var scene = el.querySelector('#egg-scene');
+			scene.insertBefore(sp, scene.firstChild);
 		}
 
-		el.setAttribute( 'role', 'dialog' );
-		el.setAttribute( 'aria-modal', 'true' );
-		el.setAttribute( 'aria-labelledby', 'egg-headline' );
-		document.body.appendChild( el );
+		el.setAttribute('role', 'dialog');
+		el.setAttribute('aria-modal', 'true');
+		el.setAttribute('aria-labelledby', 'egg-headline');
+		document.body.appendChild(el);
 		overlayEl = el;
 
 		var firstFocusable = el.querySelector(
 			'.egg-celebrate-btn, #egg-close-btn'
 		);
-		if ( firstFocusable ) firstFocusable.focus();
+		if (firstFocusable) firstFocusable.focus();
 
-		bgCV = document.getElementById( 'egg-bg' );
-		bgCtx = bgCV.getContext( '2d' );
-		cfCV = document.getElementById( 'egg-confetti' );
-		cfCtx = cfCV.getContext( '2d' );
-		stick = document.getElementById( 'egg-cursor-stick' );
+		bgCV = document.getElementById('egg-bg');
+		bgCtx = bgCV.getContext('2d');
+		cfCV = document.getElementById('egg-confetti');
+		cfCtx = cfCV.getContext('2d');
+		stick = document.getElementById('egg-cursor-stick');
 		sizeConfetti();
 		rebuildColumns();
 
-		el.querySelector( '.egg-celebrate-btn' ).addEventListener(
+		el.querySelector('.egg-celebrate-btn').addEventListener(
 			'click',
-			function ( e ) {
+			function (e) {
 				var r = e.currentTarget.getBoundingClientRect();
 				spawnBurst(
 					r.left + r.width / 2,
@@ -1353,39 +1331,38 @@
 		);
 
 		document
-			.getElementById( 'egg-close-btn' )
-			.addEventListener( 'click', closeOverlay );
+			.getElementById('egg-close-btn')
+			.addEventListener('click', closeOverlay);
 
-		el.querySelector( '.egg-opt-out-btn' ).addEventListener(
+		el.querySelector('.egg-opt-out-btn').addEventListener(
 			'click',
 			function () {
-				if ( DISMISS ) {
+				if (DISMISS) {
 					var fd = new FormData();
-					fd.append( 'action', 'wc_egg_opt_out' );
-					fd.append( 'nonce', DISMISS.nonce );
-					if ( navigator.sendBeacon ) {
-						navigator.sendBeacon( DISMISS.url, fd );
+					fd.append('action', 'wc_egg_opt_out');
+					fd.append('nonce', DISMISS.nonce);
+					if (navigator.sendBeacon) {
+						navigator.sendBeacon(DISMISS.url, fd);
 					} else {
-						fetch( DISMISS.url, { method: 'POST', body: fd } );
+						fetch(DISMISS.url, { method: 'POST', body: fd });
 					}
 				}
 				closeOverlay();
 			}
 		);
 
-		document.addEventListener( 'mousemove', onMouseMove );
-		document.addEventListener( 'mouseleave', onMouseLeave );
-		document.addEventListener( 'mouseenter', onMouseEnter );
-		document.addEventListener( 'click', onDocClick );
-		document.addEventListener( 'keydown', onKeyDown );
-		window.addEventListener( 'resize', onResize );
+		document.addEventListener('mousemove', onMouseMove);
+		document.addEventListener('mouseleave', onMouseLeave);
+		document.addEventListener('mouseenter', onMouseEnter);
+		document.addEventListener('click', onDocClick);
+		document.addEventListener('keydown', onKeyDown);
+		window.addEventListener('resize', onResize);
 
-		var maxScale = Math.sqrt( W * W + H * H ) / 220;
+		var maxScale = Math.sqrt(W * W + H * H) / 220;
 		var revealStart = Date.now();
-		( function animReveal() {
-			var t = Math.min( ( Date.now() - revealStart ) / 1000, 1 );
-			var e2 =
-				t < 0.5 ? 4 * t * t * t : 1 - Math.pow( -2 * t + 2, 3 ) / 2;
+		(function animReveal() {
+			var t = Math.min((Date.now() - revealStart) / 1000, 1);
+			var e2 = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 			wooblePath.setAttribute(
 				'transform',
 				'translate(' +
@@ -1396,13 +1373,13 @@
 					e2 * maxScale +
 					') translate(-391 -381)'
 			);
-			if ( t < 1 ) requestAnimationFrame( animReveal );
+			if (t < 1) requestAnimationFrame(animReveal);
 			else overlayEl.style.clipPath = 'none';
-		} )();
+		})();
 	}
 
 	/* -- showOverlay -------------------------------------------------------- */
-	function showOverlay( milestoneData ) {
+	function showOverlay(milestoneData) {
 		mainAngle = 0;
 		mainOmega = 0;
 		dropped = false;
@@ -1423,8 +1400,8 @@
 		squishAmp = 0;
 		squishVel = 0;
 		squishAngle = 0;
-		if ( blinkTimer ) {
-			clearTimeout( blinkTimer );
+		if (blinkTimer) {
+			clearTimeout(blinkTimer);
 			blinkTimer = null;
 		}
 		ALL_SHAPES = [];
@@ -1444,53 +1421,53 @@
 		lastMx = mx;
 
 		currentMilestone = milestoneData;
-		settings = Object.assign( {}, DEFAULTS, {
+		settings = Object.assign({}, DEFAULTS, {
 			headline: milestoneData.title,
 			body: milestoneData.subtitle,
 			variant: milestoneData.variant || 'llama',
 			boomText: milestoneData.boomText || 'One down',
-		} );
+		});
 
 		_previousFocus = document.body.ownerDocument.activeElement;
-		buildOverlay( milestoneData );
+		buildOverlay(milestoneData);
 		init();
 	}
 
 	/* -- Milestone URL detection -------------------------------------------- */
 	function checkUrl() {
-		var params = new URLSearchParams( window.location.search );
-		var testKey = params.get( 'woo_egg' );
-		if ( testKey && ALL_MILESTONES[ testKey ] ) {
-			if ( ! shown[ '__test__' + testKey ] ) {
-				shown[ '__test__' + testKey ] = true;
-				showOverlay( ALL_MILESTONES[ testKey ] );
+		var params = new URLSearchParams(window.location.search);
+		var testKey = params.get('woo_egg');
+		if (testKey && ALL_MILESTONES[testKey]) {
+			if (!shown['__test__' + testKey]) {
+				shown['__test__' + testKey] = true;
+				showOverlay(ALL_MILESTONES[testKey]);
 			}
 			return;
 		}
 		if (
-			params.get( 'page' ) !== 'wc-orders' ||
-			params.get( 'action' ) !== 'edit'
+			params.get('page') !== 'wc-orders' ||
+			params.get('action') !== 'edit'
 		)
 			return;
-		var orderId = parseInt( params.get( 'id' ), 10 );
-		if ( ! orderId || shown[ orderId ] || ! milestones[ orderId ] ) return;
-		shown[ orderId ] = true;
+		var orderId = parseInt(params.get('id'), 10);
+		if (!orderId || shown[orderId] || !milestones[orderId]) return;
+		shown[orderId] = true;
 		showOverlay(
-			Object.assign( {}, milestones[ orderId ], { _orderId: orderId } )
+			Object.assign({}, milestones[orderId], { _orderId: orderId })
 		);
 	}
 
-	window.addEventListener( 'load', checkUrl );
+	window.addEventListener('load', checkUrl);
 	var _push = history.pushState;
 	history.pushState = function () {
-		_push.apply( this, arguments );
-		setTimeout( checkUrl, 200 );
+		_push.apply(this, arguments);
+		setTimeout(checkUrl, 200);
 	};
 	var _replace = history.replaceState;
 	history.replaceState = function () {
-		_replace.apply( this, arguments );
-		setTimeout( checkUrl, 200 );
+		_replace.apply(this, arguments);
+		setTimeout(checkUrl, 200);
 	};
-	window.addEventListener( 'popstate', checkUrl );
+	window.addEventListener('popstate', checkUrl);
 	/* eslint-enable no-var */
-} )();
+})();

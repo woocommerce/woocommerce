@@ -32,7 +32,7 @@
 			padding: $gap-large 0;
 			align-items: flex-start;
 
-			@media screen and ( max-width: 782px ) {
+			@media screen and (max-width: 782px) {
 				display: grid;
 				// Configuring the grid layout to two columns, resulting in the buttons shifting to a new row.
 				grid-template-columns: 30px minmax(200px, 1fr);
@@ -48,7 +48,7 @@
 			height: 40px;
 			border-radius: 4px;
 
-			@media screen and ( max-width: 782px ) {
+			@media screen and (max-width: 782px) {
 				display: none;
 			}
 		}
@@ -62,7 +62,7 @@
 			gap: 10px;
 			align-items: center;
 
-			@media screen and ( max-width: 782px ) {
+			@media screen and (max-width: 782px) {
 				font-size: 15px;
 				line-height: 20px;
 				font-weight: 500;
@@ -91,11 +91,11 @@
 			}
 		}
 
-		@media screen and ( max-width: 1024px ) {
+		@media screen and (max-width: 1024px) {
 			padding: 0 $gap-large;
 		}
 
-		@media screen and ( max-width: 782px ) {
+		@media screen and (max-width: 782px) {
 			padding: 0 $gap;
 
 			&-before {

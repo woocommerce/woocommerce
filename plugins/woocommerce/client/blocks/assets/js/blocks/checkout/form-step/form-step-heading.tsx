@@ -6,25 +6,25 @@ import { Title } from '@woocommerce/blocks-components';
 /**
  * Step Heading Component
  */
-const FormStepHeading = ( {
+const FormStepHeading = ({
 	children,
 	stepHeadingContent,
 }: {
 	children: JSX.Element;
 	stepHeadingContent?: JSX.Element;
-} ): JSX.Element => (
+}): JSX.Element => (
 	<div className="wc-block-components-checkout-step__heading">
 		<Title
 			className="wc-block-components-checkout-step__title"
 			headingLevel="2"
 		>
-			{ children }
+			{children}
 		</Title>
-		{ !! stepHeadingContent && (
+		{!!stepHeadingContent && (
 			<span className="wc-block-components-checkout-step__heading-content">
-				{ stepHeadingContent }
+				{stepHeadingContent}
 			</span>
-		) }
+		)}
 	</div>
 );
 

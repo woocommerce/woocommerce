@@ -19,24 +19,24 @@ import CategoryBreacrumbs from './breadcrumbs';
 import ReportTable from '../../components/report-table';
 
 class CategoriesReportTable extends Component {
-	constructor( props ) {
-		super( props );
+	constructor(props) {
+		super(props);
 
-		this.getRowsContent = this.getRowsContent.bind( this );
-		this.getSummary = this.getSummary.bind( this );
+		this.getRowsContent = this.getRowsContent.bind(this);
+		this.getSummary = this.getSummary.bind(this);
 	}
 
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Category', 'woocommerce' ),
+				label: __('Category', 'woocommerce'),
 				key: 'category',
 				required: true,
 				isSortable: true,
 				isLeftAligned: true,
 			},
 			{
-				label: __( 'Items sold', 'woocommerce' ),
+				label: __('Items sold', 'woocommerce'),
 				key: 'items_sold',
 				required: true,
 				defaultSort: true,
@@ -44,19 +44,19 @@ class CategoriesReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'Net sales', 'woocommerce' ),
+				label: __('Net sales', 'woocommerce'),
 				key: 'net_revenue',
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Products', 'woocommerce' ),
+				label: __('Products', 'woocommerce'),
 				key: 'products_count',
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Orders', 'woocommerce' ),
+				label: __('Orders', 'woocommerce'),
 				key: 'orders_count',
 				isSortable: true,
 				isNumeric: true,
@@ -64,19 +64,19 @@ class CategoriesReportTable extends Component {
 		];
 	}
 
-	getRowsContent( categoryStats ) {
+	getRowsContent(categoryStats) {
 		const {
 			render: renderCurrency,
 			formatDecimal: getCurrencyFormatDecimal,
 			getCurrencyConfig,
 		} = this.context;
 		const { categories, query } = this.props;
-		if ( ! categories ) {
+		if (!categories) {
 			return [];
 		}
 		const currency = getCurrencyConfig();
 
-		return map( categoryStats, ( categoryStat ) => {
+		return map(categoryStats, (categoryStat) => {
 			const {
 				category_id: categoryId,
 				items_sold: itemsSold,
@@ -84,55 +84,55 @@ class CategoriesReportTable extends Component {
 				products_count: productsCount,
 				orders_count: ordersCount,
 			} = categoryStat;
-			const category = categories.get( categoryId );
-			const persistedQuery = getPersistedQuery( query );
+			const category = categories.get(categoryId);
+			const persistedQuery = getPersistedQuery(query);
 
 			return [
 				{
 					display: (
 						<CategoryBreacrumbs
-							query={ query }
-							category={ category }
-							categories={ categories }
+							query={query}
+							category={category}
+							categories={categories}
 						/>
 					),
 					value: category && category.name,
 				},
 				{
-					display: formatValue( currency, 'number', itemsSold ),
+					display: formatValue(currency, 'number', itemsSold),
 					value: itemsSold,
 				},
 				{
-					display: renderCurrency( netRevenue ),
-					value: getCurrencyFormatDecimal( netRevenue ),
+					display: renderCurrency(netRevenue),
+					value: getCurrencyFormatDecimal(netRevenue),
 				},
 				{
 					display: category && (
 						<Link
-							href={ getNewPath(
+							href={getNewPath(
 								persistedQuery,
 								'/analytics/categories',
 								{
 									filter: 'single_category',
 									categories: category.id,
 								}
-							) }
+							)}
 							type="wc-admin"
 						>
-							{ formatValue( currency, 'number', productsCount ) }
+							{formatValue(currency, 'number', productsCount)}
 						</Link>
 					),
 					value: productsCount,
 				},
 				{
-					display: formatValue( currency, 'number', ordersCount ),
+					display: formatValue(currency, 'number', ordersCount),
 					value: ordersCount,
 				},
 			];
-		} );
+		});
 	}
 
-	getSummary( totals, totalResults = 0 ) {
+	getSummary(totals, totalResults = 0) {
 		const {
 			items_sold: itemsSold = 0,
 			net_revenue: netRevenue = 0,
@@ -148,24 +148,19 @@ class CategoriesReportTable extends Component {
 					totalResults,
 					'woocommerce'
 				),
-				value: formatValue( currency, 'number', totalResults ),
+				value: formatValue(currency, 'number', totalResults),
 			},
 			{
-				label: _n(
-					'Item sold',
-					'Items sold',
-					itemsSold,
-					'woocommerce'
-				),
-				value: formatValue( currency, 'number', itemsSold ),
+				label: _n('Item sold', 'Items sold', itemsSold, 'woocommerce'),
+				value: formatValue(currency, 'number', itemsSold),
 			},
 			{
-				label: __( 'Net sales', 'woocommerce' ),
-				value: formatAmount( netRevenue ),
+				label: __('Net sales', 'woocommerce'),
+				value: formatAmount(netRevenue),
 			},
 			{
-				label: _n( 'Order', 'Orders', ordersCount, 'woocommerce' ),
-				value: formatValue( currency, 'number', ordersCount ),
+				label: _n('Order', 'Orders', ordersCount, 'woocommerce'),
+				value: formatValue(currency, 'number', ordersCount),
 			},
 		];
 	}
@@ -178,35 +173,31 @@ class CategoriesReportTable extends Component {
 				'Check at least two categories below to compare',
 				'woocommerce'
 			),
-			placeholder: __( 'Search by category name', 'woocommerce' ),
+			placeholder: __('Search by category name', 'woocommerce'),
 		};
 
 		return (
 			<ReportTable
 				compareBy="categories"
 				endpoint="categories"
-				getHeadersContent={ this.getHeadersContent }
-				getRowsContent={ this.getRowsContent }
-				getSummary={ this.getSummary }
-				summaryFields={ [
-					'items_sold',
-					'net_revenue',
-					'orders_count',
-				] }
-				isRequesting={ isRequesting }
+				getHeadersContent={this.getHeadersContent}
+				getRowsContent={this.getRowsContent}
+				getSummary={this.getSummary}
+				summaryFields={['items_sold', 'net_revenue', 'orders_count']}
+				isRequesting={isRequesting}
 				itemIdField="category_id"
-				query={ query }
+				query={query}
 				searchBy="categories"
-				labels={ labels }
-				tableQuery={ {
+				labels={labels}
+				tableQuery={{
 					orderby: query.orderby || 'items_sold',
 					order: query.order || 'desc',
 					extended_info: true,
-				} }
-				title={ __( 'Categories', 'woocommerce' ) }
+				}}
+				title={__('Categories', 'woocommerce')}
 				columnPrefsKey="categories_report_columns"
-				filters={ filters }
-				advancedFilters={ advancedFilters }
+				filters={filters}
+				advancedFilters={advancedFilters}
 			/>
 		);
 	}
@@ -215,34 +206,33 @@ class CategoriesReportTable extends Component {
 CategoriesReportTable.contextType = CurrencyContext;
 
 export default compose(
-	withSelect( ( select, props ) => {
+	withSelect((select, props) => {
 		const { isRequesting, query } = props;
 		if (
 			isRequesting ||
-			( query.search &&
-				! ( query.categories && query.categories.length ) )
+			(query.search && !(query.categories && query.categories.length))
 		) {
 			return {};
 		}
 
-		const { getItems, getItemsError, isResolving } = select( itemsStore );
+		const { getItems, getItemsError, isResolving } = select(itemsStore);
 		const tableQuery = {
 			per_page: -1,
 		};
 
-		const categories = getItems( 'categories', tableQuery );
+		const categories = getItems('categories', tableQuery);
 		const isCategoriesError = Boolean(
-			getItemsError( 'categories', tableQuery )
+			getItemsError('categories', tableQuery)
 		);
-		const isCategoriesRequesting = isResolving( 'getItems', [
+		const isCategoriesRequesting = isResolving('getItems', [
 			'categories',
 			tableQuery,
-		] );
+		]);
 
 		return {
 			categories,
 			isError: isCategoriesError,
 			isRequesting: isCategoriesRequesting,
 		};
-	} )
-)( CategoriesReportTable );
+	})
+)(CategoriesReportTable);

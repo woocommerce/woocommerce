@@ -19,35 +19,32 @@ const NOTICE_ROW_SELECTOR = 'tr[data-plugin-row-type]';
  * @param {string} selector    CSS selector matching the links.
  * @param {string} eventPrefix Event name without the `_shown` / `_clicked` suffix.
  */
-export function trackPluginNoticeLinks(
-	selector: string,
-	eventPrefix: string
-) {
+export function trackPluginNoticeLinks(selector: string, eventPrefix: string) {
 	const links = Array.from(
-		document.querySelectorAll< HTMLAnchorElement >( selector )
+		document.querySelectorAll<HTMLAnchorElement>(selector)
 	);
 	const updateRowLinks = links.filter(
-		( link ) => ! link.closest( NOTICE_ROW_SELECTOR )
+		(link) => !link.closest(NOTICE_ROW_SELECTOR)
 	);
-	const noticeRowLinks = links.filter( ( link ) =>
-		link.closest( NOTICE_ROW_SELECTOR )
+	const noticeRowLinks = links.filter((link) =>
+		link.closest(NOTICE_ROW_SELECTOR)
 	);
 
-	if ( updateRowLinks.length > 0 ) {
-		recordEvent( `${ eventPrefix }_shown` );
-		updateRowLinks.forEach( ( link ) => {
-			link.addEventListener( 'click', () => {
-				recordEvent( `${ eventPrefix }_clicked` );
-			} );
-		} );
+	if (updateRowLinks.length > 0) {
+		recordEvent(`${eventPrefix}_shown`);
+		updateRowLinks.forEach((link) => {
+			link.addEventListener('click', () => {
+				recordEvent(`${eventPrefix}_clicked`);
+			});
+		});
 	}
 
-	if ( noticeRowLinks.length > 0 ) {
-		recordEvent( `${ eventPrefix }_shown`, { no_update: true } );
-		noticeRowLinks.forEach( ( link ) => {
-			link.addEventListener( 'click', () => {
-				recordEvent( `${ eventPrefix }_clicked`, { no_update: true } );
-			} );
-		} );
+	if (noticeRowLinks.length > 0) {
+		recordEvent(`${eventPrefix}_shown`, { no_update: true });
+		noticeRowLinks.forEach((link) => {
+			link.addEventListener('click', () => {
+				recordEvent(`${eventPrefix}_clicked`, { no_update: true });
+			});
+		});
 	}
 }

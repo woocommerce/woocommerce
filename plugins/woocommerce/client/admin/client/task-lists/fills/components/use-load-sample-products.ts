@@ -18,41 +18,41 @@ type UseLoadSampleProductsProps = {
 	redirectUrlAfterSuccess: string;
 };
 
-const useLoadSampleProducts = ( {
+const useLoadSampleProducts = ({
 	redirectUrlAfterSuccess,
-}: UseLoadSampleProductsProps ) => {
-	const [ isRequesting, setIsRequesting ] = useState< boolean >( false );
-	const { createNotice } = useDispatch( 'core/notices' );
-	const { recordCompletionTime } = useRecordCompletionTime( 'products' );
+}: UseLoadSampleProductsProps) => {
+	const [isRequesting, setIsRequesting] = useState<boolean>(false);
+	const { createNotice } = useDispatch('core/notices');
+	const { recordCompletionTime } = useRecordCompletionTime('products');
 
 	const loadSampleProduct = async () => {
-		recordEvent( 'tasklist_add_product', {
+		recordEvent('tasklist_add_product', {
 			method: 'sample_product',
-		} );
+		});
 		recordCompletionTime();
-		setIsRequesting( true );
+		setIsRequesting(true);
 		try {
-			await apiFetch( {
-				path: `${ WC_ADMIN_NAMESPACE }/onboarding/tasks/import_sample_products`,
+			await apiFetch({
+				path: `${WC_ADMIN_NAMESPACE}/onboarding/tasks/import_sample_products`,
 				method: 'POST',
-			} );
+			});
 
-			if ( redirectUrlAfterSuccess ) {
+			if (redirectUrlAfterSuccess) {
 				window.location.href = redirectUrlAfterSuccess;
 				return;
 			}
-		} catch ( error: unknown ) {
+		} catch (error: unknown) {
 			const message =
 				error instanceof Error && error.message
 					? error.message
 					: __(
 							'There was an error importing the sample products',
 							'woocommerce'
-					  );
+						);
 
-			createNotice( 'error', message );
+			createNotice('error', message);
 		}
-		setIsRequesting( false );
+		setIsRequesting(false);
 	};
 
 	return {

@@ -137,8 +137,6 @@
 				}
 			}
 		}
-
-
 	}
 
 	.woocommerce-blueprint-import-button {
@@ -190,7 +188,9 @@
 			margin: 0;
 			color: $gray-900;
 			line-height: 24px; /* 184.615% */
-			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+			font-family:
+				-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+				Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 			text-wrap: auto;
 		}
 	}

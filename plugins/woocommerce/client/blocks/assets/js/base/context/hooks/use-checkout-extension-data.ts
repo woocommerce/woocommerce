@@ -9,19 +9,19 @@ import { checkoutStore } from '@woocommerce/block-data';
  * Custom hook for setting custom checkout data which is passed to the wc/store/checkout endpoint when processing orders.
  */
 export const useCheckoutExtensionData = () => {
-	const { setExtensionData } = useDispatch( checkoutStore );
-	const extensionData = useSelect( ( select ) =>
-		select( checkoutStore ).getExtensionData()
+	const { setExtensionData } = useDispatch(checkoutStore);
+	const extensionData = useSelect((select) =>
+		select(checkoutStore).getExtensionData()
 	);
-	const extensionDataRef = useRef( extensionData );
+	const extensionDataRef = useRef(extensionData);
 
 	const setExtensionDataCallback = useCallback(
-		( namespace: string, key: string, value: unknown ) => {
-			setExtensionData( namespace, {
-				[ key ]: value,
-			} );
+		(namespace: string, key: string, value: unknown) => {
+			setExtensionData(namespace, {
+				[key]: value,
+			});
 		},
-		[ setExtensionData ]
+		[setExtensionData]
 	);
 
 	return {

@@ -12,12 +12,12 @@ type Props = {
 	children: React.ReactNode;
 };
 
-const Block = ( { children }: Props ) => {
-	const wrapper = useRef( null );
+const Block = ({ children }: Props) => {
+	const wrapper = useRef(null);
 	return (
-		<div className="wc-blocks-filter-wrapper" ref={ wrapper }>
-			<FilterBlockContext.Provider value={ { wrapper } }>
-				{ children }
+		<div className="wc-blocks-filter-wrapper" ref={wrapper}>
+			<FilterBlockContext.Provider value={{ wrapper }}>
+				{children}
 			</FilterBlockContext.Provider>
 		</div>
 	);

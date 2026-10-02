@@ -11,12 +11,12 @@ import type { FilterOptionItem } from '../types';
  * @param item - Filter option item
  * @return Sortable text string
  */
-function getSortableText( item: FilterOptionItem ): string {
-	if ( typeof item.label === 'string' ) {
+function getSortableText(item: FilterOptionItem): string {
+	if (typeof item.label === 'string') {
 		return item.label;
 	}
 	// When label is ReactNode, ariaLabel is guaranteed to exist by our type definition
-	return ( item as { ariaLabel: string } ).ariaLabel;
+	return (item as { ariaLabel: string }).ariaLabel;
 }
 
 /**
@@ -30,43 +30,33 @@ export function sortFilterOptions(
 	options: FilterOptionItem[],
 	sortOrder: string
 ): FilterOptionItem[] {
-	return options.sort( ( a, b ) => {
-		switch ( sortOrder ) {
+	return options.sort((a, b) => {
+		switch (sortOrder) {
 			case 'menu_order-asc': {
 				// Sort by menu order, with secondary sort by name when equal.
 				const orderA = a.menuOrder ?? 0;
 				const orderB = b.menuOrder ?? 0;
-				if ( orderA !== orderB ) {
+				if (orderA !== orderB) {
 					return orderA - orderB;
 				}
-				return getSortableText( a ).localeCompare(
-					getSortableText( b )
-				);
+				return getSortableText(a).localeCompare(getSortableText(b));
 			}
 			case 'name-asc':
-				return getSortableText( a ).localeCompare(
-					getSortableText( b )
-				);
+				return getSortableText(a).localeCompare(getSortableText(b));
 			case 'name-desc':
-				return getSortableText( b ).localeCompare(
-					getSortableText( a )
-				);
+				return getSortableText(b).localeCompare(getSortableText(a));
 			case 'count-asc':
 				// Fallback to name sort when count is not available
-				if ( a.count === undefined || b.count === undefined ) {
-					return getSortableText( a ).localeCompare(
-						getSortableText( b )
-					);
+				if (a.count === undefined || b.count === undefined) {
+					return getSortableText(a).localeCompare(getSortableText(b));
 				}
 				return a.count - b.count;
 			default: // count-desc
 				// Fallback to name sort when count is not available
-				if ( a.count === undefined || b.count === undefined ) {
-					return getSortableText( a ).localeCompare(
-						getSortableText( b )
-					);
+				if (a.count === undefined || b.count === undefined) {
+					return getSortableText(a).localeCompare(getSortableText(b));
 				}
 				return b.count - a.count;
 		}
-	} );
+	});
 }

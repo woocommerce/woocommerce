@@ -23,40 +23,40 @@ export default class RevenueReport extends Component {
 		return (
 			<Fragment>
 				<ReportHeader
-					query={ query }
-					path={ path }
+					query={query}
+					path={path}
 					report="revenue"
-					filters={ filters }
-					advancedFilters={ advancedFilters }
+					filters={filters}
+					advancedFilters={advancedFilters}
 				/>
 				<ReportSummary
-					charts={ charts }
+					charts={charts}
 					endpoint="revenue"
-					query={ query }
-					selectedChart={ getSelectedChart( query.chart, charts ) }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
+					query={query}
+					selectedChart={getSelectedChart(query.chart, charts)}
+					filters={filters}
+					advancedFilters={advancedFilters}
 				/>
 				<ReportChart
-					charts={ charts }
+					charts={charts}
 					endpoint="revenue"
-					path={ path }
-					query={ query }
-					selectedChart={ getSelectedChart( query.chart, charts ) }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
+					path={path}
+					query={query}
+					selectedChart={getSelectedChart(query.chart, charts)}
+					filters={filters}
+					advancedFilters={advancedFilters}
 				/>
 				<RevenueReportTable
-					query={ query }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
+					query={query}
+					filters={filters}
+					advancedFilters={advancedFilters}
 				/>
 				<ReportDateTour
 					optionName="woocommerce_revenue_report_date_tour_shown"
-					headingText={ __(
+					headingText={__(
 						'Revenue is now reported from paid orders ✅',
 						'woocommerce'
-					) }
+					)}
 				/>
 			</Fragment>
 		);

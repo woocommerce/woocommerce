@@ -21,11 +21,11 @@ type PaymentMethodListItemProps = {
 	/**
 	 * Current state of payment methods, mapping method IDs to their enabled status.
 	 */
-	paymentMethodsState: Record< string, boolean >;
+	paymentMethodsState: Record<string, boolean>;
 	/**
 	 * Callback to update the state of payment methods. Receives a new state object as a parameter.
 	 */
-	setPaymentMethodsState: ( state: Record< string, boolean > ) => void;
+	setPaymentMethodsState: (state: Record<string, boolean>) => void;
 	/**
 	 * Indicates whether the payment methods list is currently expanded.
 	 */
@@ -45,7 +45,7 @@ type PaymentMethodListItemProps = {
  * A component that renders a recommended payment method as a list item.
  * Displays the payment method's icon, title, description, and a toggle control to enable or disable it.
  */
-export const PaymentMethodListItem = ( {
+export const PaymentMethodListItem = ({
 	method,
 	paymentMethodsState,
 	setPaymentMethodsState,
@@ -53,21 +53,21 @@ export const PaymentMethodListItem = ( {
 	initialVisibilityStatus,
 	isLoading = false,
 	...props
-}: PaymentMethodListItemProps ) => {
+}: PaymentMethodListItemProps) => {
 	// Internal ref for fallback mechanism when prop is not provided
-	const shouldRenderInMainListRef = useRef< boolean | null >( null );
+	const shouldRenderInMainListRef = useRef<boolean | null>(null);
 
 	// Fallback: Calculate initial visibility internally if prop is not provided
-	if ( initialVisibilityStatus === undefined ) {
+	if (initialVisibilityStatus === undefined) {
 		// Only initialize the ref once the state for this method is available.
 		if (
 			shouldRenderInMainListRef.current === null &&
-			paymentMethodsState[ method.id ] !== undefined
+			paymentMethodsState[method.id] !== undefined
 		) {
 			shouldRenderInMainListRef.current =
 				shouldRenderPaymentMethodInMainList(
 					method,
-					paymentMethodsState[ method.id ]
+					paymentMethodsState[method.id]
 				);
 		}
 	}
@@ -76,156 +76,148 @@ export const PaymentMethodListItem = ( {
 	// Prioritize the prop if provided, otherwise use the internal ref state.
 	const baseVisibility =
 		initialVisibilityStatus !== undefined
-			? initialVisibilityStatus ?? false
-			: shouldRenderInMainListRef.current ?? false;
+			? (initialVisibilityStatus ?? false)
+			: (shouldRenderInMainListRef.current ?? false);
 
 	const shouldRender = isExpanded || baseVisibility;
 
-	if ( ! shouldRender ) {
+	if (!shouldRender) {
 		return null;
 	}
 
 	return (
 		<div
-			id={ method.id }
+			id={method.id}
 			className="woocommerce-list__item woocommerce-list__item-enter-done"
-			{ ...props }
+			{...props}
 		>
 			<div className="woocommerce-list__item-inner">
-				{ /* Default layout for regular payment methods */ }
-				{ method.id !== 'apple_google' && (
+				{/* Default layout for regular payment methods */}
+				{method.id !== 'apple_google' && (
 					<>
 						<div className="woocommerce-list__item-before">
 							<img
-								src={ method.icon }
-								alt={ method.title + ' logo' }
+								src={method.icon}
+								alt={method.title + ' logo'}
 							/>
 						</div>
 						<div className="woocommerce-list__item-text">
 							<span className="woocommerce-list__item-title">
-								{ method.title }
-								{ method.notice?.badge && (
+								{method.title}
+								{method.notice?.badge && (
 									<span
 										className="woocommerce-list__item-notice-badge"
 										data-testid="payment-method-notice-badge"
 									>
-										{ method.notice.badge }
+										{method.notice.badge}
 									</span>
-								) }
+								)}
 							</span>
 							<span
 								className="woocommerce-list__item-content"
 								// eslint-disable-next-line react/no-danger -- This string is sanitized by the PaymentGateway class.
-								dangerouslySetInnerHTML={ sanitizeHTML(
-									decodeEntities( method.description )
-								) }
+								dangerouslySetInnerHTML={sanitizeHTML(
+									decodeEntities(method.description)
+								)}
 							/>
 						</div>
 					</>
-				) }
-				{ /* Special layout for "apple_google" payment methods */ }
-				{ method.id === 'apple_google' && (
+				)}
+				{/* Special layout for "apple_google" payment methods */}
+				{method.id === 'apple_google' && (
 					<div className="woocommerce-list__item-multi">
 						<div className="woocommerce-list__item-multi-row multi-row-space">
 							<div className="woocommerce-list__item-before">
 								<img
-									src={ method.icon }
-									alt={ method.title + ' logo' }
+									src={method.icon}
+									alt={method.title + ' logo'}
 								/>
 							</div>
 							<div className="woocommerce-list__item-text">
 								<span className="woocommerce-list__item-title">
-									{ method.title }
-									{ method.notice?.badge && (
+									{method.title}
+									{method.notice?.badge && (
 										<span
 											className="woocommerce-list__item-notice-badge"
 											data-testid="payment-method-notice-badge"
 										>
-											{ method.notice.badge }
+											{method.notice.badge}
 										</span>
-									) }
+									)}
 								</span>
 								<span
 									className="woocommerce-list__item-content"
 									// eslint-disable-next-line react/no-danger -- This string is sanitized by the PaymentGateway class.
-									dangerouslySetInnerHTML={ sanitizeHTML(
-										decodeEntities( method.description )
-									) }
+									dangerouslySetInnerHTML={sanitizeHTML(
+										decodeEntities(method.description)
+									)}
 								/>
 							</div>
 						</div>
 						<div className="woocommerce-list__item-multi-row">
 							<div className="woocommerce-list__item-before">
 								<img
-									src={ method.extraIcon }
-									alt={ method.extraTitle + ' logo' }
+									src={method.extraIcon}
+									alt={method.extraTitle + ' logo'}
 								/>
 							</div>
 							<div className="woocommerce-list__item-text">
 								<span className="woocommerce-list__item-title">
-									{ method.extraTitle }
+									{method.extraTitle}
 								</span>
 								<span
 									className="woocommerce-list__item-content"
 									// eslint-disable-next-line react/no-danger -- This string is sanitized by the PaymentGateway class.
-									dangerouslySetInnerHTML={ sanitizeHTML(
+									dangerouslySetInnerHTML={sanitizeHTML(
 										decodeEntities(
 											method.extraDescription ?? ''
 										)
-									) }
+									)}
 								/>
 							</div>
 						</div>
 					</div>
-				) }
+				)}
 				<div className="woocommerce-list__item-after">
 					<div className="woocommerce-list__item-after__actions wc-settings-prevent-change-event">
 						<ToggleControl
-							checked={
-								paymentMethodsState[ method.id ] ?? false
-							}
-							onChange={ ( isChecked: boolean ) => {
-								setPaymentMethodsState( {
+							checked={paymentMethodsState[method.id] ?? false}
+							onChange={(isChecked: boolean) => {
+								setPaymentMethodsState({
 									...paymentMethodsState,
-									[ method.id ]: isChecked,
-								} );
-							} }
-							disabled={
-								( method.required ?? false ) || isLoading
-							}
+									[method.id]: isChecked,
+								});
+							}}
+							disabled={(method.required ?? false) || isLoading}
 							label=""
 						/>
 					</div>
 				</div>
 			</div>
-			{ method.notice?.message &&
-				( paymentMethodsState[ method.id ] ?? false ) && (
+			{method.notice?.message &&
+				(paymentMethodsState[method.id] ?? false) && (
 					<Notice.Root
 						className="woocommerce-list__item-notice-info"
 						data-testid="payment-method-notice-info"
 						intent="info"
-						spokenMessage={ decodeEntities(
-							method.notice.message
-						) }
+						spokenMessage={decodeEntities(method.notice.message)}
 					>
 						<Notice.Description>
-							{ decodeEntities( method.notice.message ) }
+							{decodeEntities(method.notice.message)}
 						</Notice.Description>
-						{ method.notice.link_url && method.notice.link_text && (
+						{method.notice.link_url && method.notice.link_text && (
 							<Notice.Actions>
 								<Notice.ActionLink
-									href={ method.notice.link_url }
+									href={method.notice.link_url}
 									openInNewTab
 									rel="noopener noreferrer"
 								>
-									{ decodeEntities(
-										method.notice.link_text
-									) }
+									{decodeEntities(method.notice.link_text)}
 								</Notice.ActionLink>
 							</Notice.Actions>
-						) }
+						)}
 					</Notice.Root>
-				) }
+				)}
 		</div>
 	);
 };

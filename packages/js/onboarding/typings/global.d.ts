@@ -2,7 +2,7 @@ import wpData from '@wordpress/data';
 
 declare global {
 	const wp: {
-		data: typeof wpData
+		data: typeof wpData;
 	};
 }
 

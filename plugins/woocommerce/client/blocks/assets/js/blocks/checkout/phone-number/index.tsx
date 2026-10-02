@@ -7,7 +7,7 @@ import { ValidatedTextInput } from '@woocommerce/blocks-components';
 /**
  * Renders a phone number input.
  */
-const PhoneNumber = ( {
+const PhoneNumber = ({
 	id = 'phone',
 	errorId = 'phone',
 	isRequired = false,
@@ -18,22 +18,22 @@ const PhoneNumber = ( {
 	errorId?: string;
 	isRequired: boolean;
 	value: string;
-	onChange: ( value: string ) => void;
-} ): JSX.Element => {
+	onChange: (value: string) => void;
+}): JSX.Element => {
 	return (
 		<ValidatedTextInput
-			id={ id }
-			errorId={ errorId }
+			id={id}
+			errorId={errorId}
 			type="tel"
 			autoComplete="tel"
-			required={ isRequired }
+			required={isRequired}
 			label={
 				isRequired
-					? __( 'Phone', 'woocommerce' )
-					: __( 'Phone (optional)', 'woocommerce' )
+					? __('Phone', 'woocommerce')
+					: __('Phone (optional)', 'woocommerce')
 			}
-			value={ value }
-			onChange={ onChange }
+			value={value}
+			onChange={onChange}
 		/>
 	);
 };

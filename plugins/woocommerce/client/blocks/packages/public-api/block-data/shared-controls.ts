@@ -17,10 +17,10 @@ const EMPTY_OBJECT = {};
  */
 const invalidJsonError = {
 	code: 'invalid_json',
-	message: __( 'The response is not a valid JSON response.', 'woocommerce' ),
+	message: __('The response is not a valid JSON response.', 'woocommerce'),
 };
 
-const processHeadersOnFetch = ( headers: Headers ): void => {
+const processHeadersOnFetch = (headers: Headers): void => {
 	if (
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore -- this does exist because it's monkey patched in
@@ -34,7 +34,7 @@ const processHeadersOnFetch = ( headers: Headers ): void => {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore -- this does exist because it's monkey patched in
 		// middleware/store-api-nonce.
-		triggerFetch.setNonce( headers );
+		triggerFetch.setNonce(headers);
 	} else {
 		// eslint-disable-next-line no-console
 		console.error(
@@ -54,7 +54,7 @@ const processHeadersOnFetch = ( headers: Headers ): void => {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore -- this does exist because it's monkey patched in
 		// middleware/store-api-cart-hash.
-		triggerFetch.setCartHash( headers );
+		triggerFetch.setCartHash(headers);
 	} else {
 		// eslint-disable-next-line no-console
 		console.error(
@@ -66,25 +66,24 @@ const processHeadersOnFetch = ( headers: Headers ): void => {
 /**
  * Trigger a fetch from the API using the batch endpoint.
  */
-const triggerBatchFetch = ( keys: readonly APIFetchOptions[] ) => {
-	return triggerFetch( {
+const triggerBatchFetch = (keys: readonly APIFetchOptions[]) => {
+	return triggerFetch({
 		path: `/wc/store/v1/batch`,
 		method: 'POST',
 		data: {
-			requests: keys.map( ( request: APIFetchOptions ) => {
+			requests: keys.map((request: APIFetchOptions) => {
 				return {
 					...request,
 					body: request?.data,
 				};
-			} ),
+			}),
 		},
-	} ).then( ( response: unknown ) => {
-		assertBatchResponseIsValid( response );
+	}).then((response: unknown) => {
+		assertBatchResponseIsValid(response);
 		return keys.map(
-			( key, index: number ) =>
-				response.responses[ index ] || EMPTY_OBJECT
+			(key, index: number) => response.responses[index] || EMPTY_OBJECT
 		);
-	} );
+	});
 };
 
 /**
@@ -97,20 +96,20 @@ const triggerBatchFetchDelay = 300;
 /**
  * DataLoader instance for triggerBatchFetch.
  */
-const triggerBatchFetchLoader = new DataLoader( triggerBatchFetch, {
-	batchScheduleFn: ( callback: () => void ) =>
-		setTimeout( callback, triggerBatchFetchDelay ),
+const triggerBatchFetchLoader = new DataLoader(triggerBatchFetch, {
+	batchScheduleFn: (callback: () => void) =>
+		setTimeout(callback, triggerBatchFetchDelay),
 	cache: false,
 	maxBatchSize: 25,
-} );
+});
 
 /**
  * Trigger a fetch from the API using the batch endpoint.
  *
  * @param {APIFetchOptions} request Request object containing API request.
  */
-const batchFetch = async ( request: APIFetchOptions ) => {
-	return await triggerBatchFetchLoader.load( request );
+const batchFetch = async (request: APIFetchOptions) => {
+	return await triggerBatchFetchLoader.load(request);
 };
 
 /**
@@ -119,11 +118,11 @@ const batchFetch = async ( request: APIFetchOptions ) => {
  *
  * @param {APIFetchOptions} options The options for the API request.
  */
-export const apiFetchWithHeadersControl = ( options: APIFetchOptions ) =>
-	( {
+export const apiFetchWithHeadersControl = (options: APIFetchOptions) =>
+	({
 		type: 'API_FETCH_WITH_HEADERS',
 		options,
-	} ) as const;
+	}) as const;
 
 // List of paths which should not be batched.
 const preventBatching = [
@@ -139,88 +138,88 @@ const preventBatching = [
  * The underlying function that actually does the fetch. This is used by both the generator (control) version of
  * apiFetchWithHeadersControl and the async function apiFetchWithHeaders.
  */
-const doApiFetchWithHeaders = ( options: APIFetchOptions ) =>
-	new Promise( ( resolve, reject ) => {
+const doApiFetchWithHeaders = (options: APIFetchOptions) =>
+	new Promise((resolve, reject) => {
 		// GET Requests cannot be batched.
 		if (
-			! options.method ||
+			!options.method ||
 			options.method === 'GET' ||
-			preventBatching.includes( options.path || '' )
+			preventBatching.includes(options.path || '')
 		) {
 			// Parse is disabled here to avoid returning just the body--we also need headers.
-			triggerFetch( {
+			triggerFetch({
 				...options,
 				parse: false,
-			} )
-				.then( ( fetchResponse: unknown ) => {
-					if ( fetchResponse instanceof Response ) {
+			})
+				.then((fetchResponse: unknown) => {
+					if (fetchResponse instanceof Response) {
 						fetchResponse
 							.json()
-							.then( ( response: unknown ) => {
-								resolve( {
+							.then((response: unknown) => {
+								resolve({
 									response,
 									headers: fetchResponse.headers,
-								} );
-								processHeadersOnFetch( fetchResponse.headers );
-							} )
-							.catch( () => {
-								reject( invalidJsonError );
-							} );
+								});
+								processHeadersOnFetch(fetchResponse.headers);
+							})
+							.catch(() => {
+								reject(invalidJsonError);
+							});
 					} else {
-						reject( invalidJsonError );
+						reject(invalidJsonError);
 					}
-				} )
-				.catch( ( errorResponse ) => {
+				})
+				.catch((errorResponse) => {
 					// Propagate AbortError directly so callers can detect cancelled requests.
-					if ( errorResponse.name === 'AbortError' ) {
-						reject( errorResponse );
+					if (errorResponse.name === 'AbortError') {
+						reject(errorResponse);
 						return;
 					}
-					if ( errorResponse.headers ) {
-						processHeadersOnFetch( errorResponse.headers );
+					if (errorResponse.headers) {
+						processHeadersOnFetch(errorResponse.headers);
 					}
-					if ( typeof errorResponse.json === 'function' ) {
+					if (typeof errorResponse.json === 'function') {
 						// Parse error response before rejecting it.
 						errorResponse
 							.json()
-							.then( ( error: unknown ) => {
-								reject( error );
-							} )
-							.catch( () => {
-								reject( invalidJsonError );
-							} );
+							.then((error: unknown) => {
+								reject(error);
+							})
+							.catch(() => {
+								reject(invalidJsonError);
+							});
 					} else {
-						reject( errorResponse.message );
+						reject(errorResponse.message);
 					}
-				} );
+				});
 		} else {
-			batchFetch( options )
-				.then( ( response: ApiResponse< unknown > ) => {
-					assertResponseIsValid( response );
+			batchFetch(options)
+				.then((response: ApiResponse<unknown>) => {
+					assertResponseIsValid(response);
 
-					if ( response.status >= 200 && response.status < 300 ) {
-						resolve( {
+					if (response.status >= 200 && response.status < 300) {
+						resolve({
 							response: response.body,
 							headers: response.headers,
-						} );
-						processHeadersOnFetch( response.headers );
+						});
+						processHeadersOnFetch(response.headers);
 					}
 
 					// Status code indicates error.
 					throw response;
-				} )
-				.catch( ( errorResponse: ApiResponse< unknown > ) => {
-					if ( errorResponse.headers ) {
-						processHeadersOnFetch( errorResponse.headers );
+				})
+				.catch((errorResponse: ApiResponse<unknown>) => {
+					if (errorResponse.headers) {
+						processHeadersOnFetch(errorResponse.headers);
 					}
-					if ( errorResponse.body ) {
-						reject( errorResponse.body );
+					if (errorResponse.body) {
+						reject(errorResponse.body);
 					} else {
-						reject( errorResponse );
+						reject(errorResponse);
 					}
-				} );
+				});
 		}
-	} );
+	});
 
 /**
  * Triggers an api fetch call with no parsing.
@@ -228,10 +227,10 @@ const doApiFetchWithHeaders = ( options: APIFetchOptions ) =>
  *
  * @param {APIFetchOptions} options The options for the API request.
  */
-export const apiFetchWithHeaders = < T = unknown >(
+export const apiFetchWithHeaders = <T = unknown>(
 	options: APIFetchOptions
-): Promise< T > => {
-	return doApiFetchWithHeaders( options ) as Promise< T >;
+): Promise<T> => {
+	return doApiFetchWithHeaders(options) as Promise<T>;
 };
 
 /**
@@ -241,11 +240,9 @@ export const apiFetchWithHeaders = < T = unknown >(
  *                  the controls property of the registration object.
  */
 export const controls = {
-	API_FETCH_WITH_HEADERS: ( {
+	API_FETCH_WITH_HEADERS: ({
 		options,
-	}: ReturnType<
-		typeof apiFetchWithHeadersControl
-	> ): Promise< unknown > => {
-		return doApiFetchWithHeaders( options );
+	}: ReturnType<typeof apiFetchWithHeadersControl>): Promise<unknown> => {
+		return doApiFetchWithHeaders(options);
 	},
 };

@@ -12,23 +12,23 @@ import { useState } from '@wordpress/element';
 import { STORE_KEY } from './data/constants';
 import './data';
 
-function RestAPIFilters( {
+function RestAPIFilters({
 	filters,
 	deleteFilter,
 	isLoading,
 	saveFilter,
 	toggleFilter,
-} ) {
-	const [ isNewModalOpen, setNewModalOpen ] = useState( false );
+}) {
+	const [isNewModalOpen, setNewModalOpen] = useState(false);
 
-	const submitAddForm = ( e ) => {
+	const submitAddForm = (e) => {
 		e.preventDefault();
 		saveFilter(
 			e.target.endpoint.value,
 			e.target.dotNotation.value,
 			e.target.replacement.value
 		);
-		setNewModalOpen( false );
+		setNewModalOpen(false);
 	};
 
 	const renderLoading = () => {
@@ -42,7 +42,7 @@ function RestAPIFilters( {
 	};
 
 	const renderTableData = () => {
-		if ( filters.length === 0 ) {
+		if (filters.length === 0) {
 			return (
 				<tr>
 					<td colSpan="7" align="center">
@@ -52,7 +52,7 @@ function RestAPIFilters( {
 			);
 		}
 
-		return filters.map( ( filter, index ) => {
+		return filters.map((filter, index) => {
 			// eslint-disable-next-line camelcase
 			const {
 				endpoint,
@@ -62,16 +62,16 @@ function RestAPIFilters( {
 			} = filter;
 
 			return (
-				<tr key={ index }>
-					<td>{ index + 1 }</td>
-					<td>{ endpoint }</td>
-					<td key={ 'optionValue' }>{ dotNotation }</td>
-					<td className="align-center">{ replacement + '' }</td>
-					<td className="align-center">{ enabled + '' }</td>
+				<tr key={index}>
+					<td>{index + 1}</td>
+					<td>{endpoint}</td>
+					<td key={'optionValue'}>{dotNotation}</td>
+					<td className="align-center">{replacement + ''}</td>
+					<td className="align-center">{enabled + ''}</td>
 					<td className="align-center">
 						<button
 							className="button btn-primary"
-							onClick={ () => toggleFilter( index ) }
+							onClick={() => toggleFilter(index)}
 						>
 							Toggle
 						</button>
@@ -79,28 +79,28 @@ function RestAPIFilters( {
 					<td className="align-center">
 						<button
 							className="button btn-danger"
-							onClick={ () => deleteFilter( index ) }
+							onClick={() => deleteFilter(index)}
 						>
 							Delete
 						</button>
 					</td>
 				</tr>
 			);
-		} );
+		});
 	};
 
 	return (
 		<>
-			{ isNewModalOpen && (
+			{isNewModalOpen && (
 				<Modal
-					title={ 'New Filter' }
-					onRequestClose={ () => {
-						setNewModalOpen( false );
-					} }
+					title={'New Filter'}
+					onRequestClose={() => {
+						setNewModalOpen(false);
+					}}
 				>
 					<form
 						className="rest-api-filter-new-form"
-						onSubmit={ submitAddForm }
+						onSubmit={submitAddForm}
 					>
 						<div className="grid">
 							<label htmlFor="endpoint">Endpoint</label>
@@ -117,13 +117,13 @@ function RestAPIFilters( {
 						/>
 					</form>
 				</Modal>
-			) }
+			)}
 			<div id="wc-admin-test-helper-rest-api-filters">
 				<input
 					type="button"
 					className="button btn-primary btn-new"
 					value="New Filter"
-					onClick={ () => setNewModalOpen( true ) }
+					onClick={() => setNewModalOpen(true)}
 				/>
 				<br />
 				<br />
@@ -150,7 +150,7 @@ function RestAPIFilters( {
 						</tr>
 					</thead>
 					<tbody>
-						{ isLoading ? renderLoading() : renderTableData() }
+						{isLoading ? renderLoading() : renderTableData()}
 					</tbody>
 				</table>
 			</div>
@@ -159,23 +159,22 @@ function RestAPIFilters( {
 }
 
 export default compose(
-	withSelect( ( select ) => {
-		const { getFilters, isLoading } = select( STORE_KEY );
+	withSelect((select) => {
+		const { getFilters, isLoading } = select(STORE_KEY);
 		const filters = getFilters();
 
 		return {
 			filters,
 			isLoading: isLoading(),
 		};
-	} ),
-	withDispatch( ( dispatch ) => {
-		const { saveFilter, deleteFilter, toggleFilter } =
-			dispatch( STORE_KEY );
+	}),
+	withDispatch((dispatch) => {
+		const { saveFilter, deleteFilter, toggleFilter } = dispatch(STORE_KEY);
 
 		return {
 			saveFilter,
 			deleteFilter,
 			toggleFilter,
 		};
-	} )
-)( RestAPIFilters );
+	})
+)(RestAPIFilters);

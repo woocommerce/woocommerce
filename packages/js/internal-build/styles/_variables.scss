@@ -1,13 +1,13 @@
-@import '@automattic/color-studio/dist/color-variables.scss';
+@import "@automattic/color-studio/dist/color-variables.scss";
 
 // Import Gutenberg variables
-@import '@wordpress/base-styles/colors.scss';
-@import '@wordpress/base-styles/variables.scss';
-@import '@wordpress/base-styles/mixins.scss';
-@import '@wordpress/base-styles/breakpoints.scss';
-@import '@wordpress/base-styles/animations.scss';
-@import '@wordpress/base-styles/z-index.scss';
-@import '@wordpress/base-styles/default-custom-properties.scss';
+@import "@wordpress/base-styles/colors.scss";
+@import "@wordpress/base-styles/variables.scss";
+@import "@wordpress/base-styles/mixins.scss";
+@import "@wordpress/base-styles/breakpoints.scss";
+@import "@wordpress/base-styles/animations.scss";
+@import "@wordpress/base-styles/z-index.scss";
+@import "@wordpress/base-styles/default-custom-properties.scss";
 
 $fallback-gutter: 24px;
 $fallback-gutter-large: 40px;
@@ -69,9 +69,15 @@ $wp-admin-border: #dcdcde; // wp-admin chrome border colour
 $wp-admin-sidebar: #24292d;
 
 // Muriel
-$muriel-box-shadow-1dp: 0 2px 1px -1px rgba(0, 0, 0, 0.2),
-	0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 1px 3px 0 rgba(0, 0, 0, 0.12);
-$muriel-box-shadow-6dp: 0 3px 5px rgba(0, 0, 0, 0.2),
-	0 1px 18px rgba(0, 0, 0, 0.12), 0 6px 10px rgba(0, 0, 0, 0.14);
-$muriel-box-shadow-8dp: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
-	0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+$muriel-box-shadow-1dp:
+	0 2px 1px -1px rgba(0, 0, 0, 0.2),
+	0 1px 1px 0 rgba(0, 0, 0, 0.14),
+	0 1px 3px 0 rgba(0, 0, 0, 0.12);
+$muriel-box-shadow-6dp:
+	0 3px 5px rgba(0, 0, 0, 0.2),
+	0 1px 18px rgba(0, 0, 0, 0.12),
+	0 6px 10px rgba(0, 0, 0, 0.14);
+$muriel-box-shadow-8dp:
+	0 5px 5px -3px rgba(0, 0, 0, 0.2),
+	0 8px 10px 1px rgba(0, 0, 0, 0.14),
+	0 3px 14px 2px rgba(0, 0, 0, 0.12);

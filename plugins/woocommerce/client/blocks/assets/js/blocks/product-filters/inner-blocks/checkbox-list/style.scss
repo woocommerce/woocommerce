@@ -74,8 +74,8 @@ input[type="checkbox"].wc-block-product-filter-checkbox-list__input:disabled {
 }
 
 .wc-block-product-filter-checkbox-list__label:has(
-		input.wc-block-product-filter-checkbox-list__input:disabled
-	) {
+	input.wc-block-product-filter-checkbox-list__input:disabled
+) {
 	opacity: 0.5;
 	cursor: not-allowed;
 }

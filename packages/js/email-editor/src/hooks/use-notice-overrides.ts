@@ -43,14 +43,14 @@ const EMAIL_DESIGN_UPDATED_MESSAGE = __(
 	__i18n_text_domain__
 );
 
-function getNoticeOverrides(): Record< string, NoticeOverride > {
+function getNoticeOverrides(): Record<string, NoticeOverride> {
 	return {
 		'site-editor-save-success': {
 			content: EMAIL_DESIGN_UPDATED_MESSAGE,
 			removeActions: true,
 		},
 		'editor-save': {
-			content: __( 'Email saved.', __i18n_text_domain__ ),
+			content: __('Email saved.', __i18n_text_domain__),
 			// Gutenberg attaches an action linking to the post permalink,
 			// labelled with the post type's `view_item` label, which reads
 			// as "View Post"/"View Email" for an email. Drop it: a preview
@@ -77,7 +77,7 @@ function getNoticeOverrides(): Record< string, NoticeOverride > {
 			// to revert a published post to draft once the "post-status"
 			// panel is removed above. So these labels can never match a real
 			// `editor-save` notice either.
-			labelKeys: [ 'item_updated', 'item_published' ],
+			labelKeys: ['item_updated', 'item_published'],
 		},
 	};
 }
@@ -87,19 +87,19 @@ interface Notice {
 	content: string;
 	spokenMessage: string;
 	actions: unknown[];
-	[ key: string ]: unknown;
+	[key: string]: unknown;
 }
 
-type PostTypeLabels = Record< string, string > | undefined;
+type PostTypeLabels = Record<string, string> | undefined;
 
 // Post types whose own save notices ("Template updated.", …) get their own
 // "Email design updated." wording instead of "Email saved." — that text is
 // reserved for actual email post types, since saving a template is a design
 // change, not a change to the email content itself.
-const TEMPLATE_POST_TYPES = [ 'wp_template', 'wp_template_part' ];
+const TEMPLATE_POST_TYPES = ['wp_template', 'wp_template_part'];
 
-function isTemplatePostType( postType: string | undefined ): boolean {
-	return !! postType && TEMPLATE_POST_TYPES.includes( postType );
+function isTemplatePostType(postType: string | undefined): boolean {
+	return !!postType && TEMPLATE_POST_TYPES.includes(postType);
 }
 
 // A notice's wording is decided by which post type's labels its content
@@ -122,10 +122,10 @@ function findMatchingCandidate(
 	labelKeys: string[],
 	content: string
 ): PostTypeCandidate | undefined {
-	return candidates.find( ( candidate ) =>
+	return candidates.find((candidate) =>
 		labelKeys.some(
-			( key ) =>
-				candidate.labels?.[ key ] && candidate.labels[ key ] === content
+			(key) =>
+				candidate.labels?.[key] && candidate.labels[key] === content
 		)
 	);
 }
@@ -137,30 +137,26 @@ function transformNotice(
 	const overrides = getNoticeOverrides();
 	// A plain lookup would resolve ids like `constructor` or `toString` to
 	// an inherited `Object.prototype` member instead of `undefined`.
-	if ( ! Object.prototype.hasOwnProperty.call( overrides, notice.id ) ) {
+	if (!Object.prototype.hasOwnProperty.call(overrides, notice.id)) {
 		return notice;
 	}
-	const override = overrides[ notice.id ];
+	const override = overrides[notice.id];
 
 	const matchedCandidate = override.labelKeys
-		? findMatchingCandidate(
-				candidates,
-				override.labelKeys,
-				notice.content
-		  )
+		? findMatchingCandidate(candidates, override.labelKeys, notice.content)
 		: undefined;
 
-	const rewriteText = ! override.labelKeys || !! matchedCandidate;
+	const rewriteText = !override.labelKeys || !!matchedCandidate;
 
 	const content =
 		notice.id === 'editor-save' &&
-		isTemplatePostType( matchedCandidate?.postType )
+		isTemplatePostType(matchedCandidate?.postType)
 			? EMAIL_DESIGN_UPDATED_MESSAGE
 			: override.content;
 
 	return {
 		...notice,
-		...( rewriteText ? { content, spokenMessage: content } : {} ),
+		...(rewriteText ? { content, spokenMessage: content } : {}),
 		actions: override.removeActions ? [] : notice.actions,
 	};
 }
@@ -169,10 +165,10 @@ function applyOverridesToNotices(
 	notices: Notice[],
 	candidates: PostTypeCandidate[]
 ): Notice[] {
-	return notices.map( ( notice ) => transformNotice( notice, candidates ) );
+	return notices.map((notice) => transformNotice(notice, candidates));
 }
 
-function getStoreName( namespace: string | { name: string } ): string {
+function getStoreName(namespace: string | { name: string }): string {
 	return typeof namespace === 'object' ? namespace.name : namespace;
 }
 
@@ -188,10 +184,10 @@ const getNoticesWithOverrides = createSelector(
 		const candidates: PostTypeCandidate[] = [
 			{ postType: currentPostType, labels: currentLabels },
 		];
-		if ( ! isSamePostType ) {
-			candidates.push( { postType: emailPostType, labels: emailLabels } );
+		if (!isSamePostType) {
+			candidates.push({ postType: emailPostType, labels: emailLabels });
 		}
-		return applyOverridesToNotices( notices, candidates );
+		return applyOverridesToNotices(notices, candidates);
 	},
 	(
 		notices: Notice[],
@@ -215,42 +211,42 @@ const getNoticesWithOverrides = createSelector(
  * the original select when it unmounts.
  */
 export function useNoticeOverrides(): void {
-	useEffect( () => {
-		let originalSelect: ( namespace: string | { name: string } ) => unknown;
+	useEffect(() => {
+		let originalSelect: (namespace: string | { name: string }) => unknown;
 
-		use( ( registry: { select: ( ...args: unknown[] ) => unknown } ) => {
+		use((registry: { select: (...args: unknown[]) => unknown }) => {
 			originalSelect = registry.select;
 
 			return {
-				select: ( namespace: string | { name: string } ) => {
-					if ( getStoreName( namespace ) !== noticesStore.name ) {
-						return originalSelect( namespace );
+				select: (namespace: string | { name: string }) => {
+					if (getStoreName(namespace) !== noticesStore.name) {
+						return originalSelect(namespace);
 					}
 
-					const selectors = originalSelect( namespace ) as {
-						getNotices?: ( context?: string ) => Notice[];
-						[ key: string ]: unknown;
+					const selectors = originalSelect(namespace) as {
+						getNotices?: (context?: string) => Notice[];
+						[key: string]: unknown;
 					};
 
 					const originalGetNotices = selectors.getNotices;
-					if ( ! originalGetNotices ) {
+					if (!originalGetNotices) {
 						return selectors;
 					}
 
 					return {
 						...selectors,
-						getNotices: ( context?: string ) => {
-							const notices = originalGetNotices( context );
+						getNotices: (context?: string) => {
+							const notices = originalGetNotices(context);
 							const overrides = getNoticeOverrides();
 							const hasOverridableNotice = notices.some(
-								( notice ) =>
+								(notice) =>
 									Object.prototype.hasOwnProperty.call(
 										overrides,
 										notice.id
 									)
 							);
 
-							if ( ! hasOverridableNotice ) {
+							if (!hasOverridableNotice) {
 								return getNoticesWithOverrides(
 									notices,
 									undefined,
@@ -266,7 +262,7 @@ export function useNoticeOverrides(): void {
 							): PostTypeLabels =>
 								postType
 									? (
-											originalSelect( coreStore ) as
+											originalSelect(coreStore) as
 												| {
 														getPostType: (
 															postType: string
@@ -275,7 +271,7 @@ export function useNoticeOverrides(): void {
 														};
 												  }
 												| undefined
-									   )?.getPostType( postType )?.labels
+										)?.getPostType(postType)?.labels
 									: undefined;
 
 							// The post type currently being edited: navigating
@@ -284,16 +280,14 @@ export function useNoticeOverrides(): void {
 							// touching the email editor store's own post
 							// type, so this can differ from the one below.
 							const currentPostType = (
-								originalSelect( CORE_EDITOR_STORE ) as
+								originalSelect(CORE_EDITOR_STORE) as
 									| {
 											getCurrentPostType?: () =>
-												| string
-												| undefined;
+												string | undefined;
 									  }
 									| undefined
-							 )?.getCurrentPostType?.();
-							const currentLabels =
-								getLabelsFor( currentPostType );
+							)?.getCurrentPostType?.();
+							const currentLabels = getLabelsFor(currentPostType);
 
 							// The post type the email editor was opened on. A
 							// notice's text is written when the save happens,
@@ -302,14 +296,13 @@ export function useNoticeOverrides(): void {
 							// wording correct regardless of which one is
 							// current by the time this selector re-runs.
 							const emailPostType = (
-								originalSelect( emailEditorStoreName ) as
+								originalSelect(emailEditorStoreName) as
 									| {
 											getEmailPostType?: () =>
-												| string
-												| undefined;
+												string | undefined;
 									  }
 									| undefined
-							 )?.getEmailPostType?.();
+							)?.getEmailPostType?.();
 							// Single source of truth for "are these the same
 							// post type": both the label lookup below and the
 							// candidate list built inside
@@ -319,7 +312,7 @@ export function useNoticeOverrides(): void {
 								emailPostType === currentPostType;
 							const emailLabels = isSamePostType
 								? currentLabels
-								: getLabelsFor( emailPostType );
+								: getLabelsFor(emailPostType);
 
 							return getNoticesWithOverrides(
 								notices,
@@ -333,10 +326,10 @@ export function useNoticeOverrides(): void {
 					};
 				},
 			};
-		} );
+		});
 
 		return () => {
-			use( () => ( { select: originalSelect } ) );
+			use(() => ({ select: originalSelect }));
 		};
-	}, [] );
+	}, []);
 }

@@ -16,14 +16,14 @@ import Content from './components/content/content';
 import Footer from './components/footer/footer';
 
 function MarketplaceComponents() {
-	const { selectedTab } = useContext( MarketplaceContext );
+	const { selectedTab } = useContext(MarketplaceContext);
 
 	const classNames =
 		'woocommerce-marketplace' +
-		( selectedTab ? ' woocommerce-marketplace--' + selectedTab : '' );
+		(selectedTab ? ' woocommerce-marketplace--' + selectedTab : '');
 
 	return (
-		<div className={ classNames }>
+		<div className={classNames}>
 			<Header />
 			<Content />
 			<Footer />

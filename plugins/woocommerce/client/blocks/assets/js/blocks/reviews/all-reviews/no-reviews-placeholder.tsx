@@ -10,17 +10,14 @@ const NoCategoryReviewsPlaceholder = (): JSX.Element => {
 		<Placeholder
 			className="wc-block-all-reviews"
 			icon={
-				<Icon
-					icon={ postComments }
-					className="block-editor-block-icon"
-				/>
+				<Icon icon={postComments} className="block-editor-block-icon" />
 			}
-			label={ __( 'All Reviews', 'woocommerce' ) }
+			label={__('All Reviews', 'woocommerce')}
 		>
-			{ __(
+			{__(
 				'This block shows a list of all product reviews. Your store does not have any reviews yet, but they will show up here when it does.',
 				'woocommerce'
-			) }
+			)}
 		</Placeholder>
 	);
 };

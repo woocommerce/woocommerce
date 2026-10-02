@@ -30,90 +30,85 @@ const defaultContext: SubscriptionsContextType = {
 };
 
 export const SubscriptionsContext =
-	createContext< SubscriptionsContextType >( defaultContext );
+	createContext<SubscriptionsContextType>(defaultContext);
 
-export function SubscriptionsContextProvider( props: {
+export function SubscriptionsContextProvider(props: {
 	children: React.JSX.Element;
-} ): React.JSX.Element {
-	const [ subscriptions, setSubscriptions ] = useState<
-		Array< Subscription >
-	>( [] );
-	const [ isLoading, setIsLoading ] = useState( true );
+}): React.JSX.Element {
+	const [subscriptions, setSubscriptions] = useState<Array<Subscription>>([]);
+	const [isLoading, setIsLoading] = useState(true);
 
-	const loadSubscriptions = ( toggleLoading?: boolean ) => {
-		if ( toggleLoading === true ) {
-			setIsLoading( true );
+	const loadSubscriptions = (toggleLoading?: boolean) => {
+		if (toggleLoading === true) {
+			setIsLoading(true);
 		}
 
 		return fetchSubscriptions()
-			.then( ( subscriptionResponse ) => {
-				setSubscriptions( subscriptionResponse );
-			} )
-			.finally( () => {
-				if ( toggleLoading ) {
-					setIsLoading( false );
+			.then((subscriptionResponse) => {
+				setSubscriptions(subscriptionResponse);
+			})
+			.finally(() => {
+				if (toggleLoading) {
+					setIsLoading(false);
 				}
-			} );
+			});
 	};
 
-	const refreshSubscriptions = ( toggleLoading?: boolean ) => {
-		if ( toggleLoading ) {
-			setIsLoading( true );
+	const refreshSubscriptions = (toggleLoading?: boolean) => {
+		if (toggleLoading) {
+			setIsLoading(true);
 		}
 
 		return fetchSubscriptionsFromWooCom()
-			.then( ( subscriptionResponse ) => {
-				setSubscriptions( subscriptionResponse );
-			} )
-			.catch( ( error ) => {
+			.then((subscriptionResponse) => {
+				setSubscriptions(subscriptionResponse);
+			})
+			.catch((error) => {
 				throw error;
-			} )
-			.finally( () => {
-				if ( toggleLoading ) {
-					setIsLoading( false );
+			})
+			.finally(() => {
+				if (toggleLoading) {
+					setIsLoading(false);
 				}
-			} );
+			});
 	};
 
-	useEffect( () => {
+	useEffect(() => {
 		/**
 		 * Check if we have &install=PRODUCT_KEY in the URL. This means we have just
 		 * installed a new product and nwe need to refresh the list.
 		 */
-		const urlParams = new URLSearchParams( window.location.search );
-		const installKey = urlParams.get( 'install' );
+		const urlParams = new URLSearchParams(window.location.search);
+		const installKey = urlParams.get('install');
 
-		if ( installKey ) {
-			refreshSubscriptions( true ).catch( ( error ) => {
+		if (installKey) {
+			refreshSubscriptions(true).catch((error) => {
 				addNotice(
 					REFRESH_SUBSCRIPTIONS_NOTICE_ID,
 					sprintf(
 						// translators: %s is the error message.
-						__(
-							'Error refreshing subscriptions: %s',
-							'woocommerce'
-						),
-						getRefreshErrorMessage( error )
+						__('Error refreshing subscriptions: %s', 'woocommerce'),
+						getRefreshErrorMessage(error)
 					),
 					NoticeStatus.Error
 				);
-			} );
+			});
 
 			return;
 		}
 
-		loadSubscriptions( true ).catch( ( error ) => {
+		loadSubscriptions(true).catch((error) => {
 			addNotice(
 				'woocommerce-marketplace-load-subscriptions',
 				sprintf(
 					// translators: %s is the error message.
-					__( 'Error loading subscriptions: %s', 'woocommerce' ),
+					__('Error loading subscriptions: %s', 'woocommerce'),
 					error.message
 				),
 				NoticeStatus.Error
 			);
-		} );
-	}, [] );
+		});
+	}, []);
 
 	const contextValue = {
 		subscriptions,
@@ -125,8 +120,8 @@ export function SubscriptionsContextProvider( props: {
 	};
 
 	return (
-		<SubscriptionsContext.Provider value={ contextValue }>
-			{ props.children }
+		<SubscriptionsContext.Provider value={contextValue}>
+			{props.children}
 		</SubscriptionsContext.Provider>
 	);
 }

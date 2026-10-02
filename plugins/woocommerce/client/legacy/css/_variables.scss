@@ -2,49 +2,58 @@
  * WooCommerce CSS Variables
  */
 
-$woocommerce:   	#720eec !default;
-$green:         	#007518 !default;
-$red:           	#a00 !default;
-$orange:        	#ffba00 !default;
-$blue:          	#2ea2cc !default;
+$woocommerce: #720eec !default;
+$green: #007518 !default;
+$red: #a00 !default;
+$orange: #ffba00 !default;
+$blue: #2ea2cc !default;
 
-$primary:           #720eec !default;                                  // Primary color for buttons (alt)
-$primarytext:       desaturate(lighten($primary, 50%), 18%) !default;    // Text on primary color background.
+$primary: #720eec !default; // Primary color for buttons (alt)
+$primarytext: desaturate(
+	lighten($primary, 50%),
+	18%
+) !default; // Text on primary color background.
 
 // In the past, the secondary color was derived from the WooCommerce purple (the primary color).
 // However, since it was used in many places in the frontend, we decided not to modify it
 // after the WooCommerce rebranding.
 // See: https://github.com/woocommerce/woocommerce/issues/55165.
-$secondary:         #e9e6ed !default;                                  // Secondary color for buttons, backgrounds, etc.
-$secondarytext:     #515151 !default;                                  // Text on secondary color background.
+$secondary: #e9e6ed !default; // Secondary color for buttons, backgrounds, etc.
+$secondarytext: #515151 !default; // Text on secondary color background.
 
-$highlight:         adjust-hue(darken($primary, 18%), 150deg) !default;  // Prices, In stock labels, sales flash
-$highlightext:      desaturate(lighten($highlight, 80%), 18%) !default;  // Text on highlight color background.
+$highlight: adjust-hue(
+	darken($primary, 18%),
+	150deg
+) !default; // Prices, In stock labels, sales flash
+$highlightext: desaturate(
+	lighten($highlight, 80%),
+	18%
+) !default; // Text on highlight color background.
 
-$contentbg:         #fff !default;                                     // Content BG - Tabs (active state)
-$subtext:           #767676 !default;                                  // small, breadcrumbs etc
+$contentbg: #fff !default; // Content BG - Tabs (active state)
+$subtext: #767676 !default; // small, breadcrumbs etc
 
 // Mirrors @wordpress/base-styles/colors.scss (WP 7.0 admin gray scale).
-$gray-900:            #1e1e1e !default;                                // Primary admin text
-$gray-700:            #757575 !default;                                // Placeholder / secondary admin text
-$wp-admin-hover-gray: #f0f0f0 !default;                                // WordPress dashboard hover background.
-$wp-admin-text-gray:  #50575e !default;                                // WordPress dashboard text color.
-$wp-admin-icon-gray:  #646970 !default;                                // WordPress dashboard icon color.
+$gray-900: #1e1e1e !default; // Primary admin text
+$gray-700: #757575 !default; // Placeholder / secondary admin text
+$wp-admin-hover-gray: #f0f0f0 !default; // WordPress dashboard hover background.
+$wp-admin-text-gray: #50575e !default; // WordPress dashboard text color.
+$wp-admin-icon-gray: #646970 !default; // WordPress dashboard icon color.
 
 // Mirrors @wordpress/base-styles/colors.scss alert colors.
-$wp-alert-red:      #cc1818 !default;
+$wp-alert-red: #cc1818 !default;
 
 // Border radius tokens — mirrors WP Design System naming.
-$radius-s:          2px !default;                                      // Small radius: inputs, buttons, selects.
+$radius-s: 2px !default; // Small radius: inputs, buttons, selects.
 
 // Grayscale tokens — mirror @wordpress/base-styles/_colors.scss for WP 7.0 alignment.
 // Adjacent work in #64280 adds $gray-700 and $gray-900 — coordinate on merge.
-$gray-100:          #f6f7f7 !default;                                  // Subtle backgrounds.
-$gray-200:          #dcdcde !default;                                  // Borders, dividers.
-$gray-400:          #ccc !default;                                     // Matches Core $gray-400.
+$gray-100: #f6f7f7 !default; // Subtle backgrounds.
+$gray-200: #dcdcde !default; // Borders, dividers.
+$gray-400: #ccc !default; // Matches Core $gray-400.
 
 // Spacing tokens — mirrors WP Design System naming.
-$grid-unit-60:      48px !default;                                     // Matches Core $grid-unit-60.
+$grid-unit-60: 48px !default; // Matches Core $grid-unit-60.
 
 // export vars as CSS vars
 :root {

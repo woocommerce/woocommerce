@@ -16,10 +16,10 @@ import { registerElementVariation } from './utils';
 export const CORE_NAME = 'core/post-title';
 export const VARIATION_NAME = 'woocommerce/product-query/product-title';
 
-registerElementVariation( CORE_NAME, {
+registerElementVariation(CORE_NAME, {
 	blockDescription: description,
-	blockIcon: <Icon icon={ heading } />,
+	blockIcon: <Icon icon={heading} />,
 	blockTitle: title,
 	variationName: VARIATION_NAME,
-	scope: [ 'block' ],
-} );
+	scope: ['block'],
+});

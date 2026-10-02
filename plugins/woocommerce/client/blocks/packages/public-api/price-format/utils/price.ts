@@ -21,18 +21,16 @@ import { formatPriceWithCurrency, normalizeCurrencyResponse } from './currency';
 export const getCurrencyFromPriceResponse = (
 	currencyData?:
 		| CurrencyResponse
-		| Record< string, never >
+		| Record<string, never>
 		| CartShippingPackageShippingRate
 ): Currency => {
-	return normalizeCurrencyResponse( currencyData, SITE_CURRENCY );
+	return normalizeCurrencyResponse(currencyData, SITE_CURRENCY);
 };
 
 /**
  * Gets currency information in normalized format, allowing overrides.
  */
-export const getCurrency = (
-	currencyData: Partial< Currency > = {}
-): Currency => {
+export const getCurrency = (currencyData: Partial<Currency> = {}): Currency => {
 	return {
 		...SITE_CURRENCY,
 		...currencyData,
@@ -47,6 +45,6 @@ export const formatPrice = (
 	price: number | string,
 	currencyData?: Currency
 ): string => {
-	const currency: Currency = getCurrency( currencyData );
-	return formatPriceWithCurrency( price, currency );
+	const currency: Currency = getCurrency(currencyData);
+	return formatPriceWithCurrency(price, currency);
 };

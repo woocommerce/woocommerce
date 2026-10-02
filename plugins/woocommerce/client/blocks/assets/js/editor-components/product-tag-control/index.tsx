@@ -20,107 +20,104 @@ import './style.scss';
 /**
  * Component to handle searching and selecting product tags.
  */
-const ProductTagControl = ( {
+const ProductTagControl = ({
 	isCompact = false,
 	onChange,
 	onOperatorChange,
 	operator = 'any',
 	selected,
-}: ProductTagControlProps ): JSX.Element => {
-	const [ list, setList ] = useState< SearchListItemProps[] >( [] );
-	const [ loading, setLoading ] = useState( true );
-	const [ isMounted, setIsMounted ] = useState( false );
-	const limitTags = getSetting( 'limitTags', false );
+}: ProductTagControlProps): JSX.Element => {
+	const [list, setList] = useState<SearchListItemProps[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [isMounted, setIsMounted] = useState(false);
+	const limitTags = getSetting('limitTags', false);
 
-	const selectedTags = useMemo< SearchListItemProps[] >( () => {
-		return list.filter( ( item ) => selected.includes( item.id ) );
-	}, [ list, selected ] );
+	const selectedTags = useMemo<SearchListItemProps[]>(() => {
+		return list.filter((item) => selected.includes(item.id));
+	}, [list, selected]);
 
 	const onSearch = useCallback(
-		( search: string ) => {
-			setLoading( true );
-			getProductTags( { selected, search } )
-				.then( ( newList ) => {
-					setList( newList );
-					setLoading( false );
-				} )
-				.catch( () => {
-					setLoading( false );
-				} );
+		(search: string) => {
+			setLoading(true);
+			getProductTags({ selected, search })
+				.then((newList) => {
+					setList(newList);
+					setLoading(false);
+				})
+				.catch(() => {
+					setLoading(false);
+				});
 		},
-		[ selected ]
+		[selected]
 	);
 
 	// Load on mount.
-	useEffect( () => {
-		if ( isMounted ) {
+	useEffect(() => {
+		if (isMounted) {
 			return;
 		}
-		onSearch( '' );
-		setIsMounted( true );
-	}, [ onSearch, isMounted ] );
+		onSearch('');
+		setIsMounted(true);
+	}, [onSearch, isMounted]);
 
-	const debouncedOnSearch = useDebouncedCallback( onSearch, 400 );
+	const debouncedOnSearch = useDebouncedCallback(onSearch, 400);
 
 	const messages = {
-		clear: __( 'Clear all product tags', 'woocommerce' ),
-		list: __( 'Product Tags', 'woocommerce' ),
+		clear: __('Clear all product tags', 'woocommerce'),
+		list: __('Product Tags', 'woocommerce'),
 		noItems: __(
 			'You have not set up any product tags on your store.',
 			'woocommerce'
 		),
-		search: __( 'Search for product tags', 'woocommerce' ),
-		selected: ( n: number ) =>
+		search: __('Search for product tags', 'woocommerce'),
+		selected: (n: number) =>
 			sprintf(
 				/* translators: %d is the count of selected tags. */
-				_n( '%d tag selected', '%d tags selected', n, 'woocommerce' ),
+				_n('%d tag selected', '%d tags selected', n, 'woocommerce'),
 				n
 			),
-		updated: __( 'Tag search results updated.', 'woocommerce' ),
+		updated: __('Tag search results updated.', 'woocommerce'),
 	};
 
 	return (
 		<>
 			<SearchListControl
 				className="woocommerce-product-tags"
-				list={ list }
-				isLoading={ loading }
-				selected={ selectedTags }
-				onChange={ onChange }
-				onSearch={ limitTags ? debouncedOnSearch : undefined }
-				renderItem={ ProductTagItem }
-				messages={ messages }
-				isCompact={ isCompact }
+				list={list}
+				isLoading={loading}
+				selected={selectedTags}
+				onChange={onChange}
+				onSearch={limitTags ? debouncedOnSearch : undefined}
+				renderItem={ProductTagItem}
+				messages={messages}
+				isCompact={isCompact}
 				isHierarchical
-				isSingle={ false }
+				isSingle={false}
 			/>
-			{ !! onOperatorChange && (
-				<div hidden={ selected.length < 2 }>
+			{!!onOperatorChange && (
+				<div hidden={selected.length < 2}>
 					<SelectControl
 						className="woocommerce-product-tags__operator"
-						label={ __(
-							'Display products matching',
-							'woocommerce'
-						) }
-						help={ __(
+						label={__('Display products matching', 'woocommerce')}
+						help={__(
 							'Pick at least two tags to use this setting.',
 							'woocommerce'
-						) }
-						value={ operator }
-						onChange={ onOperatorChange }
-						options={ [
+						)}
+						value={operator}
+						onChange={onOperatorChange}
+						options={[
 							{
-								label: __( 'Any selected tags', 'woocommerce' ),
+								label: __('Any selected tags', 'woocommerce'),
 								value: 'any',
 							},
 							{
-								label: __( 'All selected tags', 'woocommerce' ),
+								label: __('All selected tags', 'woocommerce'),
 								value: 'all',
 							},
-						] }
+						]}
 					/>
 				</div>
-			) }
+			)}
 		</>
 	);
 };

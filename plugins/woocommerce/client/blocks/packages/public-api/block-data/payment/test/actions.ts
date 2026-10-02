@@ -12,13 +12,13 @@ import { store as paymentStore } from '..';
 import { PlainPaymentMethods } from '../../../types';
 import { __internalSetRegisteredExpressPaymentMethods } from '../actions';
 
-const originalDispatch = jest.requireActual( '@wordpress/data' ).dispatch;
+const originalDispatch = jest.requireActual('@wordpress/data').dispatch;
 
-jest.mock( '../utils/set-default-payment-method', () => ( {
+jest.mock('../utils/set-default-payment-method', () => ({
 	setDefaultPaymentMethod: jest.fn(),
-} ) );
+}));
 
-describe( 'payment data store actions', () => {
+describe('payment data store actions', () => {
 	const paymentMethods: PlainPaymentMethods = {
 		'wc-payment-gateway-1': {
 			name: 'wc-payment-gateway-1',
@@ -42,7 +42,7 @@ describe( 'payment data store actions', () => {
 			title: 'Stripe Express',
 			description: 'Pay with Stripe express checkout',
 			gatewayId: 'stripe',
-			supportsStyle: [ 'height', 'borderRadius' ],
+			supportsStyle: ['height', 'borderRadius'],
 		},
 		'paypal-express': {
 			name: 'paypal-express',
@@ -53,49 +53,49 @@ describe( 'payment data store actions', () => {
 		},
 	};
 
-	describe( 'setAvailablePaymentMethods', () => {
-		it( 'Does not call setDefaultPaymentGateway if the current method is still available', () => {
-			const actions = originalDispatch( paymentStore );
+	describe('setAvailablePaymentMethods', () => {
+		it('Does not call setDefaultPaymentGateway if the current method is still available', () => {
+			const actions = originalDispatch(paymentStore);
 			actions.__internalSetActivePaymentMethod(
-				Object.keys( paymentMethods )[ 0 ]
+				Object.keys(paymentMethods)[0]
 			);
-			actions.__internalSetAvailablePaymentMethods( paymentMethods );
-			expect( setDefaultPaymentMethodOriginal ).not.toHaveBeenCalled();
-		} );
+			actions.__internalSetAvailablePaymentMethods(paymentMethods);
+			expect(setDefaultPaymentMethodOriginal).not.toHaveBeenCalled();
+		});
 
-		it( 'Resets the default gateway if the current method is no longer available', () => {
-			const actions = originalDispatch( paymentStore );
+		it('Resets the default gateway if the current method is no longer available', () => {
+			const actions = originalDispatch(paymentStore);
 			actions.__internalSetActivePaymentMethod(
-				Object.keys( paymentMethods )[ 0 ]
+				Object.keys(paymentMethods)[0]
 			);
-			actions.__internalSetAvailablePaymentMethods( [
-				paymentMethods[ Object.keys( paymentMethods )[ 0 ] ],
-			] );
-			expect( setDefaultPaymentMethodOriginal ).toHaveBeenCalled();
-		} );
-	} );
+			actions.__internalSetAvailablePaymentMethods([
+				paymentMethods[Object.keys(paymentMethods)[0]],
+			]);
+			expect(setDefaultPaymentMethodOriginal).toHaveBeenCalled();
+		});
+	});
 
-	describe( '__internalSetRegisteredExpressPaymentMethods', () => {
-		it( 'returns the correct action object', () => {
+	describe('__internalSetRegisteredExpressPaymentMethods', () => {
+		it('returns the correct action object', () => {
 			const action = __internalSetRegisteredExpressPaymentMethods(
 				expressPaymentMethods
 			);
 
-			expect( action ).toEqual( {
+			expect(action).toEqual({
 				type: 'SET_REGISTERED_EXPRESS_PAYMENT_METHODS',
 				paymentMethods: expressPaymentMethods,
-			} );
-		} );
+			});
+		});
 
-		it( 'handles empty payment methods object', () => {
+		it('handles empty payment methods object', () => {
 			const emptyMethods: PlainExpressPaymentMethods = {};
 			const action =
-				__internalSetRegisteredExpressPaymentMethods( emptyMethods );
+				__internalSetRegisteredExpressPaymentMethods(emptyMethods);
 
-			expect( action ).toEqual( {
+			expect(action).toEqual({
 				type: 'SET_REGISTERED_EXPRESS_PAYMENT_METHODS',
 				paymentMethods: {},
-			} );
-		} );
-	} );
-} );
+			});
+		});
+	});
+});

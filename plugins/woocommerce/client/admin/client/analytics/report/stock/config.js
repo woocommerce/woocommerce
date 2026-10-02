@@ -40,40 +40,40 @@ export const advancedFilters = applyFilters(
  * @filter woocommerce_admin_stock_report_filters
  * @param {Array.<filter>} filters Report filters.
  */
-export const filters = applyFilters( STOCK_REPORT_FILTERS_FILTER, [
+export const filters = applyFilters(STOCK_REPORT_FILTERS_FILTER, [
 	{
-		label: __( 'Show', 'woocommerce' ),
-		staticParams: [ 'paged', 'per_page' ],
+		label: __('Show', 'woocommerce'),
+		staticParams: ['paged', 'per_page'],
 		param: 'type',
 		showFilters: () => true,
 		filters: [
-			{ label: __( 'All products', 'woocommerce' ), value: 'all' },
+			{ label: __('All products', 'woocommerce'), value: 'all' },
 			{
-				label: __( 'Out of stock', 'woocommerce' ),
+				label: __('Out of stock', 'woocommerce'),
 				value: 'outofstock',
 			},
 			{
-				label: __( 'Low stock', 'woocommerce' ),
+				label: __('Low stock', 'woocommerce'),
 				value: 'lowstock',
 			},
-			{ label: __( 'In stock', 'woocommerce' ), value: 'instock' },
+			{ label: __('In stock', 'woocommerce'), value: 'instock' },
 			{
-				label: __( 'On backorder', 'woocommerce' ),
+				label: __('On backorder', 'woocommerce'),
 				value: 'onbackorder',
 			},
 		],
 	},
 	{
-		label: __( 'Filter by', 'woocommerce' ),
-		staticParams: [ 'paged', 'per_page' ],
+		label: __('Filter by', 'woocommerce'),
+		staticParams: ['paged', 'per_page'],
 		param: 'filter',
-		showFilters: () => Object.keys( advancedFilters.filters ).length,
+		showFilters: () => Object.keys(advancedFilters.filters).length,
 		filters: [
-			{ label: __( 'All Products', 'woocommerce' ), value: 'all' },
+			{ label: __('All Products', 'woocommerce'), value: 'all' },
 			{
-				label: __( 'Advanced Filters', 'woocommerce' ),
+				label: __('Advanced Filters', 'woocommerce'),
 				value: 'advanced',
 			},
 		],
 	},
-] );
+]);

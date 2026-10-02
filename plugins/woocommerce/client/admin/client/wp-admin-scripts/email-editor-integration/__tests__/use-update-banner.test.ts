@@ -14,35 +14,31 @@ import { useUpdateBanner } from '../hooks/use-update-banner';
 // tests — `had_customizations` is asserted with `expect.any(Boolean)` —
 // so a no-op mock that resolves to a fixed digest is sufficient.
 if (
-	typeof ( globalThis as { TextEncoder?: unknown } ).TextEncoder ===
-	'undefined'
+	typeof (globalThis as { TextEncoder?: unknown }).TextEncoder === 'undefined'
 ) {
 	// eslint-disable-next-line @typescript-eslint/no-var-requires
-	const { TextEncoder: NodeTextEncoder } = require( 'util' );
-	(
-		globalThis as unknown as { TextEncoder: typeof TextEncoder }
-	 ).TextEncoder = NodeTextEncoder;
+	const { TextEncoder: NodeTextEncoder } = require('util');
+	(globalThis as unknown as { TextEncoder: typeof TextEncoder }).TextEncoder =
+		NodeTextEncoder;
 }
-if ( ! ( globalThis as { crypto?: { subtle?: unknown } } ).crypto?.subtle ) {
-	Object.defineProperty( globalThis, 'crypto', {
+if (!(globalThis as { crypto?: { subtle?: unknown } }).crypto?.subtle) {
+	Object.defineProperty(globalThis, 'crypto', {
 		value: {
-			...( globalThis as { crypto?: object } ).crypto,
+			...(globalThis as { crypto?: object }).crypto,
 			subtle: {
-				digest: jest
-					.fn()
-					.mockResolvedValue( new Uint8Array( 20 ).buffer ),
+				digest: jest.fn().mockResolvedValue(new Uint8Array(20).buffer),
 			},
 		},
 		configurable: true,
 		writable: true,
-	} );
+	});
 }
 
 // ---- recordEvent mock (Tracks) -------------------------------------------
 const recordEventMock = jest.fn();
-jest.mock( '@woocommerce/tracks', () => ( {
-	recordEvent: ( ...args: unknown[] ) => recordEventMock( ...args ),
-} ) );
+jest.mock('@woocommerce/tracks', () => ({
+	recordEvent: (...args: unknown[]) => recordEventMock(...args),
+}));
 
 // ---- @wordpress/data mock ------------------------------------------------
 //
@@ -61,31 +57,31 @@ const dispatchMocks = {
 	openReviewDrawer: jest.fn(),
 };
 let wasViewedReturn = false;
-let useSelectReturn: Record< string, unknown > = {};
+let useSelectReturn: Record<string, unknown> = {};
 let useEntityRecordReturn: {
 	record: {
 		slug?: string;
-		meta?: Record< string, unknown >;
+		meta?: Record<string, unknown>;
 		content?: { raw?: string };
 	} | null;
 } = { record: null };
 
-jest.mock( '@wordpress/data', () => ( {
+jest.mock('@wordpress/data', () => ({
 	// `useSelect` is called by the hook with a lambda + deps; we ignore both
 	// and return the per-test flat shape directly.
 	useSelect: () => useSelectReturn,
 	useDispatch: () => dispatchMocks,
-	select: () => ( {
+	select: () => ({
 		wasUpdateBannerViewedFor: () => wasViewedReturn,
-	} ),
-} ) );
+	}),
+}));
 
 // Stubs for store-shaped imports the hook makes from `@wordpress/core-data`
 // and the project's own modules.
-jest.mock( '@wordpress/core-data', () => ( {
+jest.mock('@wordpress/core-data', () => ({
 	store: 'core',
 	useEntityRecord: () => useEntityRecordReturn,
-} ) );
+}));
 
 // Default summary mock: returns whatever `useChangeSummaryReturn` says.
 let useChangeSummaryReturn: {
@@ -99,25 +95,25 @@ let useChangeSummaryReturn: {
 	error: null,
 	refetch: jest.fn(),
 };
-jest.mock( '../hooks/use-change-summary', () => ( {
+jest.mock('../hooks/use-change-summary', () => ({
 	useChangeSummary: () => useChangeSummaryReturn,
-} ) );
+}));
 
 // useApplyUpdate mock; per-test override available via `applyMock`.
-let applyMock: jest.Mock = jest.fn().mockResolvedValue( {
+let applyMock: jest.Mock = jest.fn().mockResolvedValue({
 	merged_content: 'merged',
 	revision_id: 'rev-1',
 	version_to: '9.5',
 	status: 'applied',
 	structural_skipped: false,
 	aliases_migrated: [],
-} );
-jest.mock( '../hooks/use-apply-update', () => ( {
-	useApplyUpdate: () => ( {
-		apply: ( ...args: unknown[] ) => applyMock( ...args ),
+});
+jest.mock('../hooks/use-apply-update', () => ({
+	useApplyUpdate: () => ({
+		apply: (...args: unknown[]) => applyMock(...args),
 		isApplying: false,
-	} ),
-} ) );
+	}),
+}));
 
 // ---- Per-test setup helpers ---------------------------------------------
 
@@ -150,7 +146,7 @@ const defaultRecord = {
 	content: { raw: '<!-- wp:paragraph --><p>hi</p><!-- /wp:paragraph -->' },
 };
 
-function summaryFixture( overrides: Record< string, unknown > = {} ) {
+function summaryFixture(overrides: Record<string, unknown> = {}) {
 	return {
 		version_from: '9.4',
 		version_to: '9.5',
@@ -159,7 +155,7 @@ function summaryFixture( overrides: Record< string, unknown > = {} ) {
 		removed_blocks: [],
 		copy_changes: [],
 		structural_changes: [],
-		summary_lines: [ 'Header logo updated.', 'Footer text refreshed.' ],
+		summary_lines: ['Header logo updated.', 'Footer text refreshed.'],
 		is_fallback: false,
 		cache_hit: false,
 		...overrides,
@@ -168,9 +164,9 @@ function summaryFixture( overrides: Record< string, unknown > = {} ) {
 
 function setUpMocks(
 	overrides: {
-		selectShape?: Partial< SelectShape >;
-		record?: typeof defaultRecord | null | Partial< typeof defaultRecord >;
-		recordMeta?: Record< string, unknown >;
+		selectShape?: Partial<SelectShape>;
+		record?: typeof defaultRecord | null | Partial<typeof defaultRecord>;
+		recordMeta?: Record<string, unknown>;
 		summary?: unknown;
 		summaryLoading?: boolean;
 		summaryError?: Error | null;
@@ -180,17 +176,17 @@ function setUpMocks(
 ) {
 	useSelectReturn = {
 		...defaultSelectShape,
-		...( overrides.selectShape ?? {} ),
+		...(overrides.selectShape ?? {}),
 	};
 
-	if ( overrides.record === null ) {
+	if (overrides.record === null) {
 		useEntityRecordReturn = { record: null };
 	} else {
 		const baseRecord = {
 			...defaultRecord,
-			...( overrides.record ?? {} ),
+			...(overrides.record ?? {}),
 		};
-		if ( overrides.recordMeta ) {
+		if (overrides.recordMeta) {
 			baseRecord.meta = { ...baseRecord.meta, ...overrides.recordMeta };
 		}
 		useEntityRecordReturn = { record: baseRecord };
@@ -205,88 +201,85 @@ function setUpMocks(
 
 	wasViewedReturn = overrides.wasViewed ?? false;
 
-	if ( overrides.apply ) {
+	if (overrides.apply) {
 		applyMock = overrides.apply;
 	} else {
-		applyMock = jest.fn().mockResolvedValue( {
+		applyMock = jest.fn().mockResolvedValue({
 			merged_content: 'merged',
 			revision_id: 'rev-1',
 			version_to: '9.5',
 			status: 'applied',
 			structural_skipped: false,
 			aliases_migrated: [],
-		} );
+		});
 	}
 }
 
-beforeEach( () => {
+beforeEach(() => {
 	dispatchMocks.dismissUpdateBanner.mockClear();
 	dispatchMocks.clearDismissedForPost.mockClear();
 	dispatchMocks.markUpdateBannerViewed.mockClear();
 	dispatchMocks.openReviewDrawer.mockClear();
 	recordEventMock.mockClear();
 	setUpMocks();
-} );
+});
 
 // ==========================================================================
 // Sub-phase 6a — eligibility predicate
 // ==========================================================================
-describe( 'useUpdateBanner — eligibility (6a)', () => {
-	it.each( [
-		[ 'in_sync' ],
-		[ 'core_updated_uncustomized' ],
-		[ null ],
-		[ 'something_unexpected' ],
-	] )(
-		'shouldRender is false when status is %p',
-		( status: string | null ) => {
-			setUpMocks( {
-				recordMeta: { _wc_email_template_status: status },
-			} );
-			const { result } = renderHook( () => useUpdateBanner() );
-			expect( result.current.shouldRender ).toBe( false );
-		}
-	);
+describe('useUpdateBanner — eligibility (6a)', () => {
+	it.each([
+		['in_sync'],
+		['core_updated_uncustomized'],
+		[null],
+		['something_unexpected'],
+	])('shouldRender is false when status is %p', (status: string | null) => {
+		setUpMocks({
+			recordMeta: { _wc_email_template_status: status },
+		});
+		const { result } = renderHook(() => useUpdateBanner());
+		expect(result.current.shouldRender).toBe(false);
+	});
 
-	it( 'shouldRender is true when status is core_updated_customized and all gates pass', () => {
+	it('shouldRender is true when status is core_updated_customized and all gates pass', () => {
 		setUpMocks();
-		const { result } = renderHook( () => useUpdateBanner() );
-		expect( result.current.shouldRender ).toBe( true );
-	} );
+		const { result } = renderHook(() => useUpdateBanner());
+		expect(result.current.shouldRender).toBe(true);
+	});
 
-	it( 'shouldRender is false when postId is null', () => {
-		setUpMocks( { selectShape: { postId: null } } );
-		const { result } = renderHook( () => useUpdateBanner() );
-		expect( result.current.shouldRender ).toBe( false );
-	} );
+	it('shouldRender is false when postId is null', () => {
+		setUpMocks({ selectShape: { postId: null } });
+		const { result } = renderHook(() => useUpdateBanner());
+		expect(result.current.shouldRender).toBe(false);
+	});
 
-	it( 'shouldRender is false when postType is not woo_email', () => {
-		setUpMocks( { selectShape: { postType: 'post' } } );
-		const { result } = renderHook( () => useUpdateBanner() );
-		expect( result.current.shouldRender ).toBe( false );
-	} );
+	it('shouldRender is false when postType is not woo_email', () => {
+		setUpMocks({ selectShape: { postType: 'post' } });
+		const { result } = renderHook(() => useUpdateBanner());
+		expect(result.current.shouldRender).toBe(false);
+	});
 
-	it( 'shouldRender flips to false when isDismissed is true', () => {
-		setUpMocks( { selectShape: { isDismissed: true } } );
-		const { result } = renderHook( () => useUpdateBanner() );
-		expect( result.current.shouldRender ).toBe( false );
-	} );
-} );
+	it('shouldRender flips to false when isDismissed is true', () => {
+		setUpMocks({ selectShape: { isDismissed: true } });
+		const { result } = renderHook(() => useUpdateBanner());
+		expect(result.current.shouldRender).toBe(false);
+	});
+});
 
 // ==========================================================================
 // Sub-phase 6b — change-summary integration + conflict gate
 // ==========================================================================
-describe( 'useUpdateBanner — change summary + conflicts (6b)', () => {
-	it( 'exposes the summary returned by useChangeSummary', () => {
+describe('useUpdateBanner — change summary + conflicts (6b)', () => {
+	it('exposes the summary returned by useChangeSummary', () => {
 		const fixture = summaryFixture();
-		setUpMocks( { summary: fixture } );
-		const { result } = renderHook( () => useUpdateBanner() );
-		expect( result.current.summary ).toEqual( fixture );
-	} );
+		setUpMocks({ summary: fixture });
+		const { result } = renderHook(() => useUpdateBanner());
+		expect(result.current.summary).toEqual(fixture);
+	});
 
-	it( 'hasConflicts is true when copy_changes is non-empty', () => {
-		setUpMocks( {
-			summary: summaryFixture( {
+	it('hasConflicts is true when copy_changes is non-empty', () => {
+		setUpMocks({
+			summary: summaryFixture({
 				copy_changes: [
 					{
 						block: 'Paragraph',
@@ -294,63 +287,63 @@ describe( 'useUpdateBanner — change summary + conflicts (6b)', () => {
 						after: 'new',
 						occurrence: 1,
 						total: 1,
-						path: [ 0 ],
+						path: [0],
 					},
 				],
-			} ),
-		} );
-		const { result } = renderHook( () => useUpdateBanner() );
-		expect( result.current.hasConflicts ).toBe( true );
-	} );
+			}),
+		});
+		const { result } = renderHook(() => useUpdateBanner());
+		expect(result.current.hasConflicts).toBe(true);
+	});
 
-	it( 'hasConflicts stays false when only structural_changes are present', () => {
-		setUpMocks( {
-			summary: summaryFixture( {
+	it('hasConflicts stays false when only structural_changes are present', () => {
+		setUpMocks({
+			summary: summaryFixture({
 				structural_changes: [
 					{
 						kind: 'reorder',
 						description: 'Two top-level blocks reordered.',
 					},
 				],
-			} ),
-		} );
-		const { result } = renderHook( () => useUpdateBanner() );
-		expect( result.current.hasConflicts ).toBe( false );
-	} );
+			}),
+		});
+		const { result } = renderHook(() => useUpdateBanner());
+		expect(result.current.hasConflicts).toBe(false);
+	});
 
-	it( 'shouldRender flips to false when summary reports merchant reviewed this version (version_from >= version_to)', () => {
+	it('shouldRender flips to false when summary reports merchant reviewed this version (version_from >= version_to)', () => {
 		// Canonical detector check: when stored version >= current registry
 		// version the merchant has already reviewed this release — hide the
 		// indicator even if status is still customized (which happens after
 		// a drawer apply that kept any customizations).
-		setUpMocks( {
-			summary: summaryFixture( {
+		setUpMocks({
+			summary: summaryFixture({
 				version_from: '10.7.0',
 				version_to: '10.7.0',
-			} ),
-		} );
-		const { result } = renderHook( () => useUpdateBanner() );
-		expect( result.current.shouldRender ).toBe( false );
-	} );
+			}),
+		});
+		const { result } = renderHook(() => useUpdateBanner());
+		expect(result.current.shouldRender).toBe(false);
+	});
 
-	it( 'shouldRender stays true when merchant version is older than current (version_from < version_to)', () => {
-		setUpMocks( {
-			summary: summaryFixture( {
+	it('shouldRender stays true when merchant version is older than current (version_from < version_to)', () => {
+		setUpMocks({
+			summary: summaryFixture({
 				version_from: '10.6.0',
 				version_to: '10.7.0',
-			} ),
-		} );
-		const { result } = renderHook( () => useUpdateBanner() );
-		expect( result.current.shouldRender ).toBe( true );
-	} );
+			}),
+		});
+		const { result } = renderHook(() => useUpdateBanner());
+		expect(result.current.shouldRender).toBe(true);
+	});
 
-	it( 'shouldRender flips to false when summary reports no real diff (status stale despite older version)', () => {
+	it('shouldRender flips to false when summary reports no real diff (status stale despite older version)', () => {
 		// Defensive guard: even when version-compare says merchant hasn't
 		// reviewed yet, hide the banner if the summary has no real changes.
 		// Avoids surfacing a "Review update" → drawer with `Apply (0)` dead
 		// end (test fixtures or stale meta can produce this state).
-		setUpMocks( {
-			summary: summaryFixture( {
+		setUpMocks({
+			summary: summaryFixture({
 				version_from: '9.4.0-test',
 				version_to: '10.7.0',
 				summary_lines: [],
@@ -359,115 +352,115 @@ describe( 'useUpdateBanner — change summary + conflicts (6b)', () => {
 				copy_changes: [],
 				structural_changes: [],
 				is_fallback: false,
-			} ),
-		} );
-		const { result } = renderHook( () => useUpdateBanner() );
-		expect( result.current.shouldRender ).toBe( false );
-	} );
-} );
+			}),
+		});
+		const { result } = renderHook(() => useUpdateBanner());
+		expect(result.current.shouldRender).toBe(false);
+	});
+});
 
 // ==========================================================================
 // Sub-phase 6c — apply state machine + dirty/read-only gates + dispatchers
 // ==========================================================================
-describe( 'useUpdateBanner — apply / gates / dispatchers (6c)', () => {
-	it( 'apply transitions idle -> applying -> applied on success', async () => {
+describe('useUpdateBanner — apply / gates / dispatchers (6c)', () => {
+	it('apply transitions idle -> applying -> applied on success', async () => {
 		// `applyResolve` lets us hold the in-flight promise so we can
 		// observe the intermediate `applying` state.
-		let applyResolve: ( v: unknown ) => void = () => {};
+		let applyResolve: (v: unknown) => void = () => {};
 		const apply = jest.fn(
 			() =>
-				new Promise( ( resolve ) => {
+				new Promise((resolve) => {
 					applyResolve = resolve;
-				} )
+				})
 		);
-		setUpMocks( {
+		setUpMocks({
 			summary: summaryFixture(),
 			apply: apply as unknown as jest.Mock,
-		} );
+		});
 
-		const { result } = renderHook( () => useUpdateBanner() );
-		expect( result.current.applyState ).toBe( 'idle' );
+		const { result } = renderHook(() => useUpdateBanner());
+		expect(result.current.applyState).toBe('idle');
 
-		let applyPromise: Promise< void > = Promise.resolve();
+		let applyPromise: Promise<void> = Promise.resolve();
 		// `apply()` flips to `'applying'` synchronously before the sha1
 		// microtask, so a single microtask flush is enough.
-		await act( async () => {
+		await act(async () => {
 			applyPromise = result.current.apply();
 			await Promise.resolve();
-		} );
+		});
 		// In flight.
-		expect( result.current.applyState ).toBe( 'applying' );
+		expect(result.current.applyState).toBe('applying');
 
-		await act( async () => {
-			applyResolve( {
+		await act(async () => {
+			applyResolve({
 				merged_content: 'merged',
 				revision_id: 'rev-1',
 				version_to: '9.5',
 				status: 'applied',
 				structural_skipped: false,
 				aliases_migrated: [],
-			} );
+			});
 			await applyPromise;
-		} );
+		});
 
-		expect( result.current.applyState ).toBe( 'applied' );
-	} );
+		expect(result.current.applyState).toBe('applied');
+	});
 
-	it( 'apply transitions idle -> applying -> failed when doApply resolves with null (falsy result treated as failure)', async () => {
-		setUpMocks( {
+	it('apply transitions idle -> applying -> failed when doApply resolves with null (falsy result treated as failure)', async () => {
+		setUpMocks({
 			summary: summaryFixture(),
-			apply: jest.fn().mockResolvedValue( null ),
-		} );
+			apply: jest.fn().mockResolvedValue(null),
+		});
 
-		const { result } = renderHook( () => useUpdateBanner() );
+		const { result } = renderHook(() => useUpdateBanner());
 
-		await act( async () => {
+		await act(async () => {
 			await result.current.apply();
-		} );
+		});
 
-		expect( result.current.applyState ).toBe( 'failed' );
-	} );
+		expect(result.current.applyState).toBe('failed');
+	});
 
-	it( 'apply transitions to failed when doApply rejects (so banner can recover)', async () => {
-		setUpMocks( {
+	it('apply transitions to failed when doApply rejects (so banner can recover)', async () => {
+		setUpMocks({
 			summary: summaryFixture(),
-			apply: jest.fn().mockRejectedValue( new Error( 'network down' ) ),
-		} );
+			apply: jest.fn().mockRejectedValue(new Error('network down')),
+		});
 
-		const { result } = renderHook( () => useUpdateBanner() );
+		const { result } = renderHook(() => useUpdateBanner());
 
-		await act( async () => {
+		await act(async () => {
 			await result.current.apply();
-		} );
+		});
 
-		expect( result.current.applyState ).toBe( 'failed' );
-	} );
+		expect(result.current.applyState).toBe('failed');
+	});
 
-	it( 'canApply is false and disabledReason is "dirty" when post is dirty; canReview is true', () => {
-		setUpMocks( {
+	it('canApply is false and disabledReason is "dirty" when post is dirty; canReview is true', () => {
+		setUpMocks({
 			summary: summaryFixture(),
 			selectShape: { isDirty: true },
-		} );
-		const { result } = renderHook( () => useUpdateBanner() );
-		expect( result.current.canApply ).toBe( false );
-		expect( result.current.canReview ).toBe( true );
-		expect( result.current.disabledReason ).toBe( 'dirty' );
-	} );
+		});
+		const { result } = renderHook(() => useUpdateBanner());
+		expect(result.current.canApply).toBe(false);
+		expect(result.current.canReview).toBe(true);
+		expect(result.current.disabledReason).toBe('dirty');
+	});
 
-	it( 'canApply and canReview are both false when canUserUpdate is false; disabledReason is "read_only"', () => {
-		setUpMocks( {
+	it('canApply and canReview are both false when canUserUpdate is false; disabledReason is "read_only"', () => {
+		setUpMocks({
 			summary: summaryFixture(),
 			selectShape: { canUserUpdate: false },
-		} );
-		const { result } = renderHook( () => useUpdateBanner() );
-		expect( result.current.canApply ).toBe( false );
-		expect( result.current.canReview ).toBe( false );
-		expect( result.current.disabledReason ).toBe( 'read_only' );
-	} );
+		});
+		const { result } = renderHook(() => useUpdateBanner());
+		expect(result.current.canApply).toBe(false);
+		expect(result.current.canReview).toBe(false);
+		expect(result.current.disabledReason).toBe('read_only');
+	});
 
-	it( 'canApply is false and canReview is true when conflicts exist; disabledReason is "has_conflicts"', () => {
-		setUpMocks( {
-			summary: summaryFixture( {
+	it('canApply is false and canReview is true when conflicts exist; disabledReason is "has_conflicts"', () => {
+		setUpMocks({
+			summary: summaryFixture({
 				copy_changes: [
 					{
 						block: 'Paragraph',
@@ -475,36 +468,36 @@ describe( 'useUpdateBanner — apply / gates / dispatchers (6c)', () => {
 						after: 'new',
 						occurrence: 1,
 						total: 1,
-						path: [ 0 ],
+						path: [0],
 					},
 				],
-			} ),
-		} );
-		const { result } = renderHook( () => useUpdateBanner() );
-		expect( result.current.canApply ).toBe( false );
-		expect( result.current.canReview ).toBe( true );
-		expect( result.current.disabledReason ).toBe( 'has_conflicts' );
-	} );
+			}),
+		});
+		const { result } = renderHook(() => useUpdateBanner());
+		expect(result.current.canApply).toBe(false);
+		expect(result.current.canReview).toBe(true);
+		expect(result.current.disabledReason).toBe('has_conflicts');
+	});
 
-	it( 'dismiss() dispatches dismissUpdateBanner with the postId', () => {
-		setUpMocks( { summary: summaryFixture() } );
-		const { result } = renderHook( () => useUpdateBanner() );
-		act( () => result.current.dismiss() );
-		expect( dispatchMocks.dismissUpdateBanner ).toHaveBeenCalledWith( 42 );
-	} );
+	it('dismiss() dispatches dismissUpdateBanner with the postId', () => {
+		setUpMocks({ summary: summaryFixture() });
+		const { result } = renderHook(() => useUpdateBanner());
+		act(() => result.current.dismiss());
+		expect(dispatchMocks.dismissUpdateBanner).toHaveBeenCalledWith(42);
+	});
 
-	it( 'openReview() dispatches openReviewDrawer', () => {
-		setUpMocks( { summary: summaryFixture() } );
-		const { result } = renderHook( () => useUpdateBanner() );
-		act( () => result.current.openReview() );
-		expect( dispatchMocks.openReviewDrawer ).toHaveBeenCalledTimes( 1 );
-	} );
-} );
+	it('openReview() dispatches openReviewDrawer', () => {
+		setUpMocks({ summary: summaryFixture() });
+		const { result } = renderHook(() => useUpdateBanner());
+		act(() => result.current.openReview());
+		expect(dispatchMocks.openReviewDrawer).toHaveBeenCalledTimes(1);
+	});
+});
 
 // ==========================================================================
 // Sub-phase 6d — Tracks events
 // ==========================================================================
-describe( 'useUpdateBanner — Tracks (6d)', () => {
+describe('useUpdateBanner — Tracks (6d)', () => {
 	const sharedPayloadMatcher = {
 		email_id: 'customer_processing_order',
 		template_version_from: '9.4',
@@ -514,89 +507,89 @@ describe( 'useUpdateBanner — Tracks (6d)', () => {
 		was_backfilled: false,
 	};
 
-	beforeEach( () => {
+	beforeEach(() => {
 		recordEventMock.mockClear();
-	} );
+	});
 
-	it( '_viewed fires on first eligible render with the shared payload', () => {
-		setUpMocks( { summary: summaryFixture() } );
-		renderHook( () => useUpdateBanner() );
-		expect( recordEventMock ).toHaveBeenCalledWith(
+	it('_viewed fires on first eligible render with the shared payload', () => {
+		setUpMocks({ summary: summaryFixture() });
+		renderHook(() => useUpdateBanner());
+		expect(recordEventMock).toHaveBeenCalledWith(
 			'block_email_update_viewed',
-			expect.objectContaining( {
+			expect.objectContaining({
 				...sharedPayloadMatcher,
 				viewed_from: 'editor_banner',
-			} )
+			})
 		);
-	} );
+	});
 
-	it( '_viewed does NOT fire when the dedup selector reports the pair was already viewed', () => {
-		setUpMocks( { summary: summaryFixture(), wasViewed: true } );
-		renderHook( () => useUpdateBanner() );
-		expect( recordEventMock ).not.toHaveBeenCalledWith(
+	it('_viewed does NOT fire when the dedup selector reports the pair was already viewed', () => {
+		setUpMocks({ summary: summaryFixture(), wasViewed: true });
+		renderHook(() => useUpdateBanner());
+		expect(recordEventMock).not.toHaveBeenCalledWith(
 			'block_email_update_viewed',
 			expect.anything()
 		);
-	} );
+	});
 
-	it( '_dismissed fires when dismiss() is called, with the shared payload', () => {
-		setUpMocks( { summary: summaryFixture() } );
-		const { result } = renderHook( () => useUpdateBanner() );
+	it('_dismissed fires when dismiss() is called, with the shared payload', () => {
+		setUpMocks({ summary: summaryFixture() });
+		const { result } = renderHook(() => useUpdateBanner());
 		recordEventMock.mockClear();
-		act( () => result.current.dismiss() );
-		expect( recordEventMock ).toHaveBeenCalledWith(
+		act(() => result.current.dismiss());
+		expect(recordEventMock).toHaveBeenCalledWith(
 			'block_email_update_dismissed',
-			expect.objectContaining( sharedPayloadMatcher )
+			expect.objectContaining(sharedPayloadMatcher)
 		);
-	} );
+	});
 
-	it( 'autoDismiss() does NOT fire _dismissed but DOES dispatch dismissUpdateBanner', () => {
+	it('autoDismiss() does NOT fire _dismissed but DOES dispatch dismissUpdateBanner', () => {
 		// Spec §9.2: the success-morph auto-dismiss path must NOT fire the
 		// `_dismissed` Tracks event. The store dispatch still has to fire,
 		// otherwise the banner wouldn't unmount on success morph timeout.
-		setUpMocks( { summary: summaryFixture() } );
-		const { result } = renderHook( () => useUpdateBanner() );
+		setUpMocks({ summary: summaryFixture() });
+		const { result } = renderHook(() => useUpdateBanner());
 		recordEventMock.mockClear();
 		dispatchMocks.dismissUpdateBanner.mockClear();
-		act( () => result.current.autoDismiss() );
-		expect( recordEventMock ).not.toHaveBeenCalledWith(
+		act(() => result.current.autoDismiss());
+		expect(recordEventMock).not.toHaveBeenCalledWith(
 			'block_email_update_dismissed',
 			expect.anything()
 		);
-		expect( dispatchMocks.dismissUpdateBanner ).toHaveBeenCalledWith( 42 );
-	} );
+		expect(dispatchMocks.dismissUpdateBanner).toHaveBeenCalledWith(42);
+	});
 
-	it( '_applied fires on apply success with shared payload + applied_from + auto_resolved + had_customizations', async () => {
-		setUpMocks( { summary: summaryFixture() } );
-		const { result } = renderHook( () => useUpdateBanner() );
+	it('_applied fires on apply success with shared payload + applied_from + auto_resolved + had_customizations', async () => {
+		setUpMocks({ summary: summaryFixture() });
+		const { result } = renderHook(() => useUpdateBanner());
 		recordEventMock.mockClear();
-		await act( async () => {
+		await act(async () => {
 			await result.current.apply();
-		} );
-		expect( recordEventMock ).toHaveBeenCalledWith(
+		});
+		expect(recordEventMock).toHaveBeenCalledWith(
 			'block_email_update_applied',
-			expect.objectContaining( {
+			expect.objectContaining({
 				...sharedPayloadMatcher,
 				applied_from: 'editor_banner',
 				auto_resolved: true,
-				had_customizations: expect.any( Boolean ),
-			} )
+				had_customizations: expect.any(Boolean),
+			})
 		);
-	} );
+	});
 
-	it( '_applied does NOT fire on apply failure', async () => {
-		setUpMocks( {
+	it('_applied does NOT fire on apply failure', async () => {
+		setUpMocks({
 			summary: summaryFixture(),
-			apply: jest.fn().mockResolvedValue( null ),
-		} );
-		const { result } = renderHook( () => useUpdateBanner() );
+			apply: jest.fn().mockResolvedValue(null),
+		});
+		const { result } = renderHook(() => useUpdateBanner());
 		recordEventMock.mockClear();
-		await act( async () => {
+		await act(async () => {
 			await result.current.apply();
-		} );
-		expect( recordEventMock ).not.toHaveBeenCalledWith(
+		});
+		expect(recordEventMock).not.toHaveBeenCalledWith(
 			'block_email_update_applied',
 			expect.anything()
 		);
-	} );
-} );
+	});
+});

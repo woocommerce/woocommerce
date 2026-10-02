@@ -16,47 +16,45 @@ import { ProductOnSaleInspectorControls } from './inspector-controls';
 
 interface Props {
 	attributes: Attributes;
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
+	setAttributes: (attributes: Record<string, unknown>) => void;
 	name: string;
 }
 
 const EmptyPlaceholder = () => (
 	<Placeholder
-		icon={ <Icon icon={ percent } /> }
-		label={ __( 'On Sale Products', 'woocommerce' ) }
+		icon={<Icon icon={percent} />}
+		label={__('On Sale Products', 'woocommerce')}
 		className="wc-block-product-on-sale"
 	>
-		{ __(
+		{__(
 			'This block shows on-sale products. There are currently no discounted products in your store.',
 			'woocommerce'
-		) }
+		)}
 	</Placeholder>
 );
 
 /**
  * Component to handle edit mode of "On Sale Products".
  */
-const ProductOnSaleBlock: React.FunctionComponent< Props > = (
-	props: Props
-) => {
+const ProductOnSaleBlock: React.FunctionComponent<Props> = (props: Props) => {
 	const { attributes, setAttributes, name } = props;
 	const blockProps = useBlockProps();
 
-	if ( attributes.isPreview ) {
-		return <div { ...blockProps }>{ gridBlockPreview }</div>;
+	if (attributes.isPreview) {
+		return <div {...blockProps}>{gridBlockPreview}</div>;
 	}
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<ProductOnSaleInspectorControls
-				attributes={ attributes }
-				setAttributes={ setAttributes }
+				attributes={attributes}
+				setAttributes={setAttributes}
 			/>
 			<Disabled>
 				<ServerSideRender
-					block={ name }
-					attributes={ attributes }
-					EmptyResponsePlaceholder={ EmptyPlaceholder }
+					block={name}
+					attributes={attributes}
+					EmptyResponsePlaceholder={EmptyPlaceholder}
 				/>
 			</Disabled>
 		</div>

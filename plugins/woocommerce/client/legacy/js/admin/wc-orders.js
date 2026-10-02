@@ -1,6 +1,5 @@
 /* global wc_orders_params */
-jQuery( function( $ ) {
-
+jQuery( function ( $ ) {
 	if ( typeof wc_orders_params === 'undefined' ) {
 		return false;
 	}
@@ -8,30 +7,29 @@ jQuery( function( $ ) {
 	/**
 	 * WCOrdersTable class.
 	 */
-	var WCOrdersTable = function() {
-
+	var WCOrdersTable = function () {
 		const SELECTORS = [
 			// WordPress 7.1 renders primary order cells as th instead of td.
-			".post-type-shop_order .wp-list-table tbody td:not(.check-column)",
-			".post-type-shop_order .wp-list-table tbody th:not(.check-column)",
-			".woocommerce_page_wc-orders .wp-list-table.orders tbody td:not(.check-column)",
-			".woocommerce_page_wc-orders .wp-list-table.orders tbody th:not(.check-column)"
-		]
+			'.post-type-shop_order .wp-list-table tbody td:not(.check-column)',
+			'.post-type-shop_order .wp-list-table tbody th:not(.check-column)',
+			'.woocommerce_page_wc-orders .wp-list-table.orders tbody td:not(.check-column)',
+			'.woocommerce_page_wc-orders .wp-list-table.orders tbody th:not(.check-column)',
+		];
 
 		$( document )
-			.on(
-				'click',
-				SELECTORS.join( ', ' ),
-				this.onRowClick
-			)
+			.on( 'click', SELECTORS.join( ', ' ), this.onRowClick )
 			.on( 'click', '.order-preview:not(.disabled)', this.onPreview );
 	};
 
 	/**
 	 * Click a row.
 	 */
-	WCOrdersTable.prototype.onRowClick = function( e ) {
-		if ( $( e.target ).filter( 'a, a *, .no-link, .no-link *, button, button *' ).length ) {
+	WCOrdersTable.prototype.onRowClick = function ( e ) {
+		if (
+			$( e.target ).filter(
+				'a, a *, .no-link, .no-link *, button, button *'
+			).length
+		) {
 			return true;
 		}
 
@@ -56,42 +54,41 @@ jQuery( function( $ ) {
 	/**
 	 * Preview an order.
 	 */
-	WCOrdersTable.prototype.onPreview = function() {
-		var $previewButton    = $( this ),
-			$order_id         = $previewButton.data( 'orderId' );
+	WCOrdersTable.prototype.onPreview = function () {
+		var $previewButton = $( this ),
+			$order_id = $previewButton.data( 'orderId' );
 
 		if ( $previewButton.data( 'order-data' ) ) {
-			$( this ).WCBackboneModal({
+			$( this ).WCBackboneModal( {
 				template: 'wc-modal-view-order',
-				variable : $previewButton.data( 'orderData' )
-			});
+				variable: $previewButton.data( 'orderData' ),
+			} );
 		} else {
 			$previewButton.addClass( 'disabled' );
 
-			$.ajax({
-				url:     wc_orders_params.ajax_url,
-				data:    {
+			$.ajax( {
+				url: wc_orders_params.ajax_url,
+				data: {
 					order_id: $order_id,
-					action  : 'woocommerce_get_order_details',
-					security: wc_orders_params.preview_nonce
+					action: 'woocommerce_get_order_details',
+					security: wc_orders_params.preview_nonce,
 				},
-				type:    'GET',
-				success: function( response ) {
+				type: 'GET',
+				success: function ( response ) {
 					$( '.order-preview' ).removeClass( 'disabled' );
 
 					if ( response.success ) {
 						$previewButton.data( 'orderData', response.data );
 
-						$( this ).WCBackboneModal({
+						$( this ).WCBackboneModal( {
 							template: 'wc-modal-view-order',
-							variable : response.data
-						});
+							variable: response.data,
+						} );
 					}
-				}
-			});
+				},
+			} );
 		}
 		return false;
-
 	};
 
 	/**

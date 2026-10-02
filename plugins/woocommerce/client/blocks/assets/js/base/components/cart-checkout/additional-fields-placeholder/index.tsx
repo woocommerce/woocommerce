@@ -13,30 +13,30 @@ interface AdditionalFieldsPlaceholderProps {
 	additionalFields: CheckoutField[];
 }
 
-const AdditionalFieldsPlaceholder = ( {
+const AdditionalFieldsPlaceholder = ({
 	additionalFields = [],
-}: AdditionalFieldsPlaceholderProps ) => {
+}: AdditionalFieldsPlaceholderProps) => {
 	return (
 		<dl className="wc-block-components-additional-fields-list">
-			{ Object.entries( additionalFields ).map( ( [ , field ] ) => {
+			{Object.entries(additionalFields).map(([, field]) => {
 				const { label, type, options } = field;
-				let sampleValue = __( 'Placeholder', 'woocommerce' );
+				let sampleValue = __('Placeholder', 'woocommerce');
 
-				if ( type === 'checkbox' ) {
-					sampleValue = __( 'Yes', 'woocommerce' );
+				if (type === 'checkbox') {
+					sampleValue = __('Yes', 'woocommerce');
 				}
 
-				if ( type === 'select' ) {
-					sampleValue = options[ 0 ].label;
+				if (type === 'select') {
+					sampleValue = options[0].label;
 				}
 
 				return (
 					<>
-						<dt>{ label }</dt>
-						<dd>{ sampleValue }</dd>
+						<dt>{label}</dt>
+						<dd>{sampleValue}</dd>
 					</>
 				);
-			} ) }
+			})}
 		</dl>
 	);
 };

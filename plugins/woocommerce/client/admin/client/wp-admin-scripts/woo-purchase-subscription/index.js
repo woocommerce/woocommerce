@@ -8,9 +8,9 @@ import domReady from '@wordpress/dom-ready';
  */
 import { trackPluginNoticeLinks } from '~/utils/plugin-notice-tracking';
 
-domReady( () => {
+domReady(() => {
 	trackPluginNoticeLinks(
 		'.woocommerce-purchase-subscription',
 		'woo_purchase_subscription_in_plugins'
 	);
-} );
+});

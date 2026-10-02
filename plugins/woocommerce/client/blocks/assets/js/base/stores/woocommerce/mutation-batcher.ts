@@ -13,7 +13,7 @@
  * individual request's success or failure within the batch.
  */
 
-export type MutationRequest< TMeta = unknown > = {
+export type MutationRequest<TMeta = unknown> = {
 	path: string;
 	method: 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 	body?: unknown;
@@ -26,7 +26,7 @@ export type MutationRequest< TMeta = unknown > = {
 	meta?: TMeta;
 };
 
-export type MutationResult< TState = unknown > = {
+export type MutationResult<TState = unknown> = {
 	success: boolean;
 	data?: TState;
 	error?: Error;
@@ -36,7 +36,7 @@ export type MutationResult< TState = unknown > = {
  * A single request's outcome as reported to a queue's onCycleSettled
  * callback.
  */
-export type CycleSettledEntry< TMeta = unknown > = {
+export type CycleSettledEntry<TMeta = unknown> = {
 	/**
 	 * Whether this request succeeded within the cycle (the same definition
 	 * used for its own settled promise: no per-item error was recorded).
@@ -51,16 +51,16 @@ export type CycleSettledEntry< TMeta = unknown > = {
 type BatchItemResponse = {
 	status: number;
 	body: unknown;
-	headers?: Record< string, string >;
+	headers?: Record<string, string>;
 };
 
-export type MutationQueueConfig< TState = unknown, TMeta = unknown > = {
+export type MutationQueueConfig<TState = unknown, TMeta = unknown> = {
 	endpoint: string;
-	getHeaders: () => Record< string, string >;
+	getHeaders: () => Record<string, string>;
 	fetchHandler?: typeof fetch;
 	takeSnapshot: () => TState;
-	rollback: ( snapshot: TState ) => void;
-	commit: ( serverState: TState ) => void;
+	rollback: (snapshot: TState) => void;
+	commit: (serverState: TState) => void;
 	/**
 	 * Called synchronously once per reconciliation cycle, after the cycle's
 	 * commit/rollback and before isProcessing clears. Receives one entry per
@@ -69,20 +69,20 @@ export type MutationQueueConfig< TState = unknown, TMeta = unknown > = {
 	 * are caught and logged; they never interrupt reconciliation or affect
 	 * individual requests' own settlement.
 	 */
-	onCycleSettled?: ( settled: Array< CycleSettledEntry< TMeta > > ) => void;
+	onCycleSettled?: (settled: Array<CycleSettledEntry<TMeta>>) => void;
 };
 
-type TrackedRequest< TMeta = unknown > = {
+type TrackedRequest<TMeta = unknown> = {
 	id: string;
-	request: MutationRequest< TMeta >;
-	resolve: ( result: MutationResult ) => void;
-	reject: ( error: Error ) => void;
+	request: MutationRequest<TMeta>;
+	resolve: (result: MutationResult) => void;
+	reject: (error: Error) => void;
 };
 
 const KEEPALIVE_PAYLOAD_LIMIT = 64 * 1024;
 
-export function createMutationQueue< TState, TMeta = unknown >(
-	config: MutationQueueConfig< TState, TMeta >
+export function createMutationQueue<TState, TMeta = unknown>(
+	config: MutationQueueConfig<TState, TMeta>
 ) {
 	const {
 		endpoint,
@@ -97,7 +97,7 @@ export function createMutationQueue< TState, TMeta = unknown >(
 	let snapshot: TState | null = null;
 
 	// All tracked requests for the current cycle.
-	const trackedRequests: Map< string, TrackedRequest< TMeta > > = new Map();
+	const trackedRequests: Map<string, TrackedRequest<TMeta>> = new Map();
 
 	// Requests collected this tick, waiting to be sent.
 	let pendingIds: string[] = [];
@@ -109,39 +109,39 @@ export function createMutationQueue< TState, TMeta = unknown >(
 	let lastServerState: TState | null = null;
 
 	// Per-request errors accumulated across all batches in the cycle.
-	const errors: Map< string, Error > = new Map();
+	const errors: Map<string, Error> = new Map();
 
 	let microtaskScheduled = false;
 	let isProcessing = false;
-	let idleResolvers: Array< () => void > = [];
+	let idleResolvers: Array<() => void> = [];
 	let nextId = 0;
 
 	// reconcile - Commits server state (or rolls back on total failure), notifies callers, resets the cycle
 	function reconcile() {
-		if ( lastServerState !== null ) {
-			commit( lastServerState );
-		} else if ( snapshot !== null ) {
-			rollback( snapshot );
+		if (lastServerState !== null) {
+			commit(lastServerState);
+		} else if (snapshot !== null) {
+			rollback(snapshot);
 		}
 
 		// Build the per-cycle settled list, one entry per tracked request in
 		// submission order, and notify the single per-cycle hook — also
 		// while isProcessing is still true. Exceptions are contained here so
 		// a misbehaving hook can never break reconciliation.
-		const settled: Array< CycleSettledEntry< TMeta > > = [];
-		trackedRequests.forEach( ( tracked ) => {
-			settled.push( {
-				success: ! errors.get( tracked.id ),
-				...( tracked.request.meta !== undefined && {
+		const settled: Array<CycleSettledEntry<TMeta>> = [];
+		trackedRequests.forEach((tracked) => {
+			settled.push({
+				success: !errors.get(tracked.id),
+				...(tracked.request.meta !== undefined && {
 					meta: tracked.request.meta,
-				} ),
-			} );
-		} );
+				}),
+			});
+		});
 		try {
-			config.onCycleSettled?.( settled );
-		} catch ( error ) {
+			config.onCycleSettled?.(settled);
+		} catch (error) {
 			// eslint-disable-next-line no-console
-			console.error( error );
+			console.error(error);
 		}
 
 		isProcessing = false;
@@ -149,22 +149,22 @@ export function createMutationQueue< TState, TMeta = unknown >(
 		// Notify idle waiters.
 		const resolvers = idleResolvers;
 		idleResolvers = [];
-		resolvers.forEach( ( r ) => r() );
+		resolvers.forEach((r) => r());
 
 		// Resolve/reject individual promises.
-		trackedRequests.forEach( ( tracked ) => {
-			const error = errors.get( tracked.id );
-			if ( error ) {
-				tracked.reject( error );
+		trackedRequests.forEach((tracked) => {
+			const error = errors.get(tracked.id);
+			if (error) {
+				tracked.reject(error);
 			} else {
-				tracked.resolve( {
+				tracked.resolve({
 					success: true,
-					...( lastServerState !== null && {
+					...(lastServerState !== null && {
 						data: lastServerState,
-					} ),
-				} );
+					}),
+				});
 			}
-		} );
+		});
 
 		// Reset for next cycle.
 		snapshot = null;
@@ -178,7 +178,7 @@ export function createMutationQueue< TState, TMeta = unknown >(
 		inFlightIds = null;
 
 		// If new requests arrived while in-flight, send them.
-		if ( pendingIds.length > 0 ) {
+		if (pendingIds.length > 0) {
 			// eslint-disable-next-line @typescript-eslint/no-use-before-define
 			void processRequests();
 			return;
@@ -188,9 +188,9 @@ export function createMutationQueue< TState, TMeta = unknown >(
 	}
 
 	// handleBatchFailure - Marks all items in the batch as failed (network error or bad status).
-	function handleBatchFailure( requestIds: string[], error: Error ) {
-		for ( const id of requestIds ) {
-			errors.set( id, error );
+	function handleBatchFailure(requestIds: string[], error: Error) {
+		for (const id of requestIds) {
+			errors.set(id, error);
 		}
 		onBatchComplete();
 	}
@@ -200,14 +200,14 @@ export function createMutationQueue< TState, TMeta = unknown >(
 		requestIds: string[],
 		responses: BatchItemResponse[]
 	) {
-		responses.forEach( ( itemResponse, index ) => {
-			const requestId = requestIds[ index ];
-			if ( ! requestId ) return;
+		responses.forEach((itemResponse, index) => {
+			const requestId = requestIds[index];
+			if (!requestId) return;
 
 			const isSuccess =
 				itemResponse.status >= 200 && itemResponse.status < 300;
 
-			if ( isSuccess ) {
+			if (isSuccess) {
 				lastServerState = itemResponse.body as TState;
 			} else {
 				const errorBody = itemResponse.body as {
@@ -217,12 +217,12 @@ export function createMutationQueue< TState, TMeta = unknown >(
 				errors.set(
 					requestId,
 					Object.assign(
-						new Error( errorBody?.message || 'Request failed' ),
+						new Error(errorBody?.message || 'Request failed'),
 						{ code: errorBody?.code || 'unknown_error' }
 					)
 				);
 			}
-		} );
+		});
 
 		onBatchComplete();
 	}
@@ -231,12 +231,12 @@ export function createMutationQueue< TState, TMeta = unknown >(
 	async function processRequests() {
 		microtaskScheduled = false;
 
-		if ( pendingIds.length === 0 || inFlightIds !== null ) {
+		if (pendingIds.length === 0 || inFlightIds !== null) {
 			return;
 		}
 
 		// Move pending requests to in-flight.
-		inFlightIds = [ ...pendingIds ];
+		inFlightIds = [...pendingIds];
 		pendingIds = [];
 
 		const requestIds = inFlightIds;
@@ -244,9 +244,9 @@ export function createMutationQueue< TState, TMeta = unknown >(
 
 		try {
 			const requests = requestIds
-				.map( ( id ) => {
-					const tracked = trackedRequests.get( id );
-					if ( ! tracked ) return null;
+				.map((id) => {
+					const tracked = trackedRequests.get(id);
+					if (!tracked) return null;
 					return {
 						path: tracked.request.path,
 						method: tracked.request.method,
@@ -256,48 +256,48 @@ export function createMutationQueue< TState, TMeta = unknown >(
 						},
 						body: tracked.request.body,
 					};
-				} )
-				.filter( Boolean );
-			const body = JSON.stringify( { requests } );
+				})
+				.filter(Boolean);
+			const body = JSON.stringify({ requests });
 
-			const response = await fetchHandler( endpoint, {
+			const response = await fetchHandler(endpoint, {
 				method: 'POST',
 				keepalive:
-					new TextEncoder().encode( body ).byteLength <
+					new TextEncoder().encode(body).byteLength <
 					KEEPALIVE_PAYLOAD_LIMIT,
 				headers: {
 					'Content-Type': 'application/json',
 					...requestHeaders,
 				},
 				body,
-			} );
+			});
 
-			if ( ! response.ok ) {
+			if (!response.ok) {
 				handleBatchFailure(
 					requestIds,
-					new Error( `Request failed: ${ response.status }` )
+					new Error(`Request failed: ${response.status}`)
 				);
 			} else {
 				const json = await response.json();
-				handleBatchResponse( requestIds, json.responses || [] );
+				handleBatchResponse(requestIds, json.responses || []);
 			}
-		} catch ( error ) {
+		} catch (error) {
 			handleBatchFailure(
 				requestIds,
-				error instanceof Error ? error : new Error( String( error ) )
+				error instanceof Error ? error : new Error(String(error))
 			);
 		}
 	}
 
 	// submit - Queues a request. First call in a cycle takes a snapshot.
 	function submit(
-		request: MutationRequest< TMeta >
-	): Promise< MutationResult< TState > > {
-		return new Promise( ( resolve, reject ) => {
-			const id = String( nextId++ );
+		request: MutationRequest<TMeta>
+	): Promise<MutationResult<TState>> {
+		return new Promise((resolve, reject) => {
+			const id = String(nextId++);
 
 			// First request in a cycle: snapshot and start processing.
-			if ( ! isProcessing ) {
+			if (!isProcessing) {
 				snapshot = takeSnapshot();
 				isProcessing = true;
 			}
@@ -306,27 +306,27 @@ export function createMutationQueue< TState, TMeta = unknown >(
 			// updates from subsequent calls cannot alter the payload that
 			// will be sent to the server.
 			const clonedBody = request.body
-				? JSON.parse( JSON.stringify( request.body ) )
+				? JSON.parse(JSON.stringify(request.body))
 				: undefined;
 
-			if ( request.applyOptimistic ) {
+			if (request.applyOptimistic) {
 				request.applyOptimistic();
 			}
 
-			trackedRequests.set( id, {
+			trackedRequests.set(id, {
 				id,
 				request: { ...request, body: clonedBody },
-				resolve: resolve as ( result: MutationResult ) => void,
+				resolve: resolve as (result: MutationResult) => void,
 				reject,
-			} );
+			});
 
-			pendingIds.push( id );
+			pendingIds.push(id);
 
-			if ( ! microtaskScheduled && inFlightIds === null ) {
+			if (!microtaskScheduled && inFlightIds === null) {
 				microtaskScheduled = true;
-				queueMicrotask( () => processRequests() );
+				queueMicrotask(() => processRequests());
 			}
-		} );
+		});
 	}
 
 	function getStatus() {
@@ -337,18 +337,18 @@ export function createMutationQueue< TState, TMeta = unknown >(
 	}
 
 	// Returns a promise that resolves when the current cycle completes. Resolves immediately if idle.
-	function waitForIdle(): Promise< void > {
-		if ( ! isProcessing ) {
+	function waitForIdle(): Promise<void> {
+		if (!isProcessing) {
 			return Promise.resolve();
 		}
-		return new Promise( ( resolve ) => {
-			idleResolvers.push( resolve );
-		} );
+		return new Promise((resolve) => {
+			idleResolvers.push(resolve);
+		});
 	}
 
 	return { submit, getStatus, waitForIdle };
 }
 
-export type MutationQueue< TState = unknown, TMeta = unknown > = ReturnType<
-	typeof createMutationQueue< TState, TMeta >
+export type MutationQueue<TState = unknown, TMeta = unknown> = ReturnType<
+	typeof createMutationQueue<TState, TMeta>
 >;

@@ -22,7 +22,7 @@ export interface Attributes {
 		| 'rating'
 		| 'title'
 		| 'menu_order';
-	products: Array< number >;
+	products: Array<number>;
 	alignButtons: boolean;
 	isPreview: boolean;
 }
@@ -41,7 +41,7 @@ export interface Props {
 	/**
 	 * A callback to update attributes
 	 */
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
+	setAttributes: (attributes: Record<string, unknown>) => void;
 	// from withSpokenMessages
-	debouncedSpeak: ( message: string ) => void;
+	debouncedSpeak: (message: string) => void;
 }

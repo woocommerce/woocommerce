@@ -19,12 +19,12 @@ export const App = () => {
 
 	return (
 		<>
-			<Heading level={ 1 }>
+			<Heading level={1}>
 				Live Branches - Install and test WooCommerce PRs
 			</Heading>
-			{ isError && <p>Something Went Wrong!</p> }
-			{ isLoading && <Spinner /> }
-			{ ! isError && ! isLoading && <BranchList branches={ branches } /> }
+			{isError && <p>Something Went Wrong!</p>}
+			{isLoading && <Spinner />}
+			{!isError && !isLoading && <BranchList branches={branches} />}
 		</>
 	);
 };

@@ -18,7 +18,7 @@
 
 	// Match the filters' breakpoint so label/gap shrink in lockstep with
 	// .woocommerce-filters-filter — keeps Date Range and Data Status boxes aligned.
-	@media screen and ( max-width: $break-wide ) {
+	@media screen and (max-width: $break-wide) {
 		gap: 5px;
 
 		&__label {
@@ -46,12 +46,11 @@
 		gap: 32px;
 		flex: 1;
 
-
-		@media screen and ( max-width: $break-wide ) {
+		@media screen and (max-width: $break-wide) {
 			gap: $gap-large;
 		}
 
-		@media screen and ( max-width: $break-large ) {
+		@media screen and (max-width: $break-large) {
 			gap: $gap;
 		}
 	}
@@ -84,7 +83,7 @@
 	}
 
 	// At very narrow widths the row can't fit; let the trigger wrap below the values.
-	@media screen and ( max-width: $break-mobile ) {
+	@media screen and (max-width: $break-mobile) {
 		height: auto;
 		min-height: 50px;
 		padding: 8px 12px;

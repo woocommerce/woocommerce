@@ -10,27 +10,27 @@ import { Attributes } from '../types';
 
 interface SharedProductControlProps {
 	attributes: Attributes;
-	setAttributes: ( attributes: Attributes ) => void;
-	onChange?: ( () => void ) | undefined;
+	setAttributes: (attributes: Attributes) => void;
+	onChange?: (() => void) | undefined;
 }
 
-const SharedProductControl = ( {
+const SharedProductControl = ({
 	attributes,
 	setAttributes,
 	onChange,
-}: SharedProductControlProps ) => (
+}: SharedProductControlProps) => (
 	<ProductControl
-		selected={ attributes.productId || 0 }
+		selected={attributes.productId || 0}
 		showVariations
-		onChange={ ( value = [] ) => {
-			const id = value[ 0 ] ? value[ 0 ].id : 0;
-			setAttributes( {
+		onChange={(value = []) => {
+			const id = value[0] ? value[0].id : 0;
+			setAttributes({
 				productId: id,
-			} );
-			if ( onChange ) {
+			});
+			if (onChange) {
 				onChange();
 			}
-		} }
+		}}
 	/>
 );
 

@@ -11,12 +11,12 @@ import { ADDRESS_FORM_FIELDS } from '@woocommerce/block-settings';
 import './style.scss';
 
 const Edit = (): JSX.Element => {
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className: 'wc-block-order-confirmation-shipping-address',
-	} );
+	});
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<address>
 				Test address 1<br />
 				Test address 2<br />
@@ -24,7 +24,7 @@ const Edit = (): JSX.Element => {
 				<br />
 				United States
 				<AdditionalFieldsPlaceholder
-					additionalFields={ ADDRESS_FORM_FIELDS }
+					additionalFields={ADDRESS_FORM_FIELDS}
 				/>
 			</address>
 		</div>

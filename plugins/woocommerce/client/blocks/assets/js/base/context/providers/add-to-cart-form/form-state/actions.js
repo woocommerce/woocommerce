@@ -21,38 +21,38 @@ const {
  * All the actions that can be dispatched for the checkout.
  */
 export const actions = {
-	setPristine: () => ( {
+	setPristine: () => ({
 		type: SET_PRISTINE,
-	} ),
-	setIdle: () => ( {
+	}),
+	setIdle: () => ({
 		type: SET_IDLE,
-	} ),
-	setDisabled: () => ( {
+	}),
+	setDisabled: () => ({
 		type: SET_DISABLED,
-	} ),
-	setProcessing: () => ( {
+	}),
+	setProcessing: () => ({
 		type: SET_PROCESSING,
-	} ),
-	setBeforeProcessing: () => ( {
+	}),
+	setBeforeProcessing: () => ({
 		type: SET_BEFORE_PROCESSING,
-	} ),
-	setAfterProcessing: () => ( {
+	}),
+	setAfterProcessing: () => ({
 		type: SET_AFTER_PROCESSING,
-	} ),
-	setProcessingResponse: ( data ) => ( {
+	}),
+	setProcessingResponse: (data) => ({
 		type: SET_PROCESSING_RESPONSE,
 		data,
-	} ),
-	setHasError: ( hasError = true ) => {
+	}),
+	setHasError: (hasError = true) => {
 		const type = hasError ? SET_HAS_ERROR : SET_NO_ERROR;
 		return { type };
 	},
-	setQuantity: ( quantity ) => ( {
+	setQuantity: (quantity) => ({
 		type: SET_QUANTITY,
 		quantity,
-	} ),
-	setRequestParams: ( data ) => ( {
+	}),
+	setRequestParams: (data) => ({
 		type: SET_REQUEST_PARAMS,
 		data,
-	} ),
+	}),
 };

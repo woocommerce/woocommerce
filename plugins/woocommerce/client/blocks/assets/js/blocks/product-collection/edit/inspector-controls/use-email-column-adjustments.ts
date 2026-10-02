@@ -20,15 +20,13 @@ const MAX_EMAIL_COLUMNS = 2;
  */
 const useEmailColumnAdjustments = (
 	attributes: ProductCollectionAttributes,
-	setAttributes: (
-		attributes: Partial< ProductCollectionAttributes >
-	) => void
+	setAttributes: (attributes: Partial<ProductCollectionAttributes>) => void
 ) => {
 	const { displayLayout } = attributes;
 	const isEmail = useIsEmailEditor();
 
-	useEffect( () => {
-		if ( ! isEmail ) {
+	useEffect(() => {
+		if (!isEmail) {
 			return;
 		}
 
@@ -37,14 +35,14 @@ const useEmailColumnAdjustments = (
 			displayLayout.columns &&
 			displayLayout.columns > MAX_EMAIL_COLUMNS
 		) {
-			setAttributes( {
+			setAttributes({
 				displayLayout: {
 					...displayLayout,
 					columns: MAX_EMAIL_COLUMNS,
 				},
-			} );
+			});
 		}
-	}, [ isEmail, displayLayout, setAttributes ] );
+	}, [isEmail, displayLayout, setAttributes]);
 };
 
 export default useEmailColumnAdjustments;

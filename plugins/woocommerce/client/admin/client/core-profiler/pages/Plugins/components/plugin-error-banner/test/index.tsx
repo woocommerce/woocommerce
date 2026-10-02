@@ -8,17 +8,17 @@ import { render, screen } from '@testing-library/react';
  */
 import { PluginErrorBanner } from '../PluginErrorBanner';
 
-describe( 'PluginErrorBanner', () => {
-	it( 'should render permissions failure message when pluginsInstallationPermissionsFailure is true', () => {
+describe('PluginErrorBanner', () => {
+	it('should render permissions failure message when pluginsInstallationPermissionsFailure is true', () => {
 		render(
-			<PluginErrorBanner pluginsInstallationPermissionsFailure={ true } />
+			<PluginErrorBanner pluginsInstallationPermissionsFailure={true} />
 		);
 		expect(
-			screen.getByText( /You do not have permissions to manage plugins/i )
+			screen.getByText(/You do not have permissions to manage plugins/i)
 		).toBeInTheDocument();
-	} );
+	});
 
-	it( 'should render generic error message when pluginsInstallationErrors is provided', () => {
+	it('should render generic error message when pluginsInstallationErrors is provided', () => {
 		const errors = [
 			{
 				plugin: 'test-plugin',
@@ -30,21 +30,19 @@ describe( 'PluginErrorBanner', () => {
 		];
 		render(
 			<PluginErrorBanner
-				pluginsInstallationErrors={ errors }
-				pluginsSlugToName={ {
+				pluginsInstallationErrors={errors}
+				pluginsSlugToName={{
 					'test-plugin': 'Test Plugin',
-				} }
+				}}
 			/>
 		);
 		expect(
-			screen.getByText(
-				/Oops! We encountered a problem while installing/i
-			)
+			screen.getByText(/Oops! We encountered a problem while installing/i)
 		).toBeInTheDocument();
-		expect( screen.getByText( 'Test Plugin' ) ).toBeInTheDocument();
-	} );
+		expect(screen.getByText('Test Plugin')).toBeInTheDocument();
+	});
 
-	it( 'should render the correct strings if multiple plugins fail to install', () => {
+	it('should render the correct strings if multiple plugins fail to install', () => {
 		const errors = [
 			{
 				plugin: 'test-plugin-1',
@@ -63,23 +61,21 @@ describe( 'PluginErrorBanner', () => {
 		];
 		render(
 			<PluginErrorBanner
-				pluginsInstallationErrors={ errors }
-				pluginsSlugToName={ {
+				pluginsInstallationErrors={errors}
+				pluginsSlugToName={{
 					'test-plugin-1': 'Test Plugin 1',
 					'test-plugin-2': 'Test Plugin 2',
-				} }
+				}}
 			/>
 		);
 		expect(
-			screen.getByText(
-				/Oops! We encountered a problem while installing/i
-			)
+			screen.getByText(/Oops! We encountered a problem while installing/i)
 		).toBeInTheDocument();
-		expect( screen.getByText( 'Test Plugin 1' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'Test Plugin 2' ) ).toBeInTheDocument();
-	} );
+		expect(screen.getByText('Test Plugin 1')).toBeInTheDocument();
+		expect(screen.getByText('Test Plugin 2')).toBeInTheDocument();
+	});
 
-	it( 'should render permissions failure message when pluginsInstallationErrors contains a 403 error', () => {
+	it('should render permissions failure message when pluginsInstallationErrors contains a 403 error', () => {
 		const errors = [
 			{
 				plugin: 'test-plugin',
@@ -94,18 +90,18 @@ describe( 'PluginErrorBanner', () => {
 		];
 		render(
 			<PluginErrorBanner
-				pluginsSlugToName={ {
+				pluginsSlugToName={{
 					'test-plugin': 'Test Plugin',
-				} }
-				pluginsInstallationErrors={ errors }
+				}}
+				pluginsInstallationErrors={errors}
 			/>
 		);
 		expect(
-			screen.getByText( /You do not have permissions to manage plugins/i )
+			screen.getByText(/You do not have permissions to manage plugins/i)
 		).toBeInTheDocument();
-	} );
+	});
 
-	it( 'should call onClick when "Please try again" link is clicked', () => {
+	it('should call onClick when "Please try again" link is clicked', () => {
 		const mockOnClick = jest.fn();
 		const errors = [
 			{
@@ -118,14 +114,14 @@ describe( 'PluginErrorBanner', () => {
 		];
 		render(
 			<PluginErrorBanner
-				pluginsSlugToName={ {
+				pluginsSlugToName={{
 					'test-plugin': 'Test Plugin',
-				} }
-				pluginsInstallationErrors={ errors }
-				onClick={ mockOnClick }
+				}}
+				pluginsInstallationErrors={errors}
+				onClick={mockOnClick}
 			/>
 		);
-		screen.getByText( 'Please try again' ).click();
-		expect( mockOnClick ).toHaveBeenCalledTimes( 1 );
-	} );
-} );
+		screen.getByText('Please try again').click();
+		expect(mockOnClick).toHaveBeenCalledTimes(1);
+	});
+});

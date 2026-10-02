@@ -16,19 +16,19 @@ import {
 } from './actions';
 import { API_NAMESPACE } from './constants';
 
-export function* getRecommendedPlugins( category ) {
+export function* getRecommendedPlugins(category) {
 	try {
-		const categoryParam = yield category ? `&category=${ category }` : '';
-		const response = yield apiFetch( {
-			path: `${ API_NAMESPACE }/recommended?per_page=50${ categoryParam }`,
-		} );
+		const categoryParam = yield category ? `&category=${category}` : '';
+		const response = yield apiFetch({
+			path: `${API_NAMESPACE}/recommended?per_page=50${categoryParam}`,
+		});
 
-		if ( response ) {
-			yield receiveRecommendedPlugins( response, category );
+		if (response) {
+			yield receiveRecommendedPlugins(response, category);
 		} else {
 			throw new Error();
 		}
-	} catch ( error ) {
+	} catch (error) {
 		yield handleFetchError(
 			error,
 			__(
@@ -41,40 +41,37 @@ export function* getRecommendedPlugins( category ) {
 
 export function* getMiscRecommendations() {
 	try {
-		const response = yield apiFetch( {
-			path: `${ API_NAMESPACE }/misc-recommendations`,
-		} );
+		const response = yield apiFetch({
+			path: `${API_NAMESPACE}/misc-recommendations`,
+		});
 
-		if ( response ) {
-			yield receiveMiscRecommendations( response );
+		if (response) {
+			yield receiveMiscRecommendations(response);
 		} else {
 			throw new Error();
 		}
-	} catch ( error ) {
+	} catch (error) {
 		yield handleFetchError(
 			error,
-			__(
-				'There was an error loading misc recommendations',
-				'woocommerce'
-			)
+			__('There was an error loading misc recommendations', 'woocommerce')
 		);
 	}
 }
 
-export function* getBlogPosts( category ) {
+export function* getBlogPosts(category) {
 	try {
-		const categoryParam = yield category ? `?category=${ category }` : '';
-		const response = yield apiFetch( {
-			path: `${ API_NAMESPACE }/knowledge-base${ categoryParam }`,
+		const categoryParam = yield category ? `?category=${category}` : '';
+		const response = yield apiFetch({
+			path: `${API_NAMESPACE}/knowledge-base${categoryParam}`,
 			method: 'GET',
-		} );
+		});
 
-		if ( response ) {
-			yield receiveBlogPosts( response, category );
+		if (response) {
+			yield receiveBlogPosts(response, category);
 		} else {
 			throw new Error();
 		}
-	} catch ( error ) {
-		yield setError( category, error );
+	} catch (error) {
+		yield setError(category, error);
 	}
 }

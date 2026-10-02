@@ -25,25 +25,25 @@ export default function ToolbarProductTypeGroup() {
 	 * Do not render the component if the product is not set
 	 * or if there is only one product type.
 	 */
-	if ( product?.id || productTypes?.length < 2 ) {
+	if (product?.id || productTypes?.length < 2) {
 		return null;
 	}
 
 	return (
 		<ToolbarGroup>
 			<ToolbarDropdownMenu
-				icon={ <Icon icon={ eye } /> }
+				icon={<Icon icon={eye} />}
 				text={
 					currentProductType?.label ||
-					__( 'Switch product type', 'woocommerce' )
+					__('Switch product type', 'woocommerce')
 				}
-				label={ __( 'Switch product type', 'woocommerce' ) }
-				value={ currentProductType?.slug }
-				controls={ productTypes.map( ( productType ) => ( {
+				label={__('Switch product type', 'woocommerce')}
+				value={currentProductType?.slug}
+				controls={productTypes.map((productType) => ({
 					title: productType.label,
 					onClick: () => {
-						set( productType.slug );
-						if ( currentProductType?.slug !== productType.slug ) {
+						set(productType.slug);
+						if (currentProductType?.slug !== productType.slug) {
 							recordEvent(
 								'blocks_add_to_cart_with_options_product_type_switched',
 								{
@@ -54,7 +54,7 @@ export default function ToolbarProductTypeGroup() {
 							);
 						}
 					},
-				} ) ) }
+				}))}
 			/>
 		</ToolbarGroup>
 	);

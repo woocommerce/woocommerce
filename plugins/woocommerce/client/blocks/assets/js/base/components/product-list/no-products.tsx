@@ -8,20 +8,20 @@ import { Icon, cautionFilled } from '@wordpress/icons';
 const NoProducts = (): JSX.Element => {
 	const { parentClassName } = useInnerBlockLayoutContext();
 	return (
-		<div className={ `${ parentClassName }__no-products` }>
+		<div className={`${parentClassName}__no-products`}>
 			<Icon
-				className={ `${ parentClassName }__no-products-image` }
-				icon={ cautionFilled }
-				size={ 100 }
+				className={`${parentClassName}__no-products-image`}
+				icon={cautionFilled}
+				size={100}
 			/>
-			<strong className={ `${ parentClassName }__no-products-title` }>
-				{ __( 'No products', 'woocommerce' ) }
+			<strong className={`${parentClassName}__no-products-title`}>
+				{__('No products', 'woocommerce')}
 			</strong>
-			<p className={ `${ parentClassName }__no-products-description` }>
-				{ __(
+			<p className={`${parentClassName}__no-products-description`}>
+				{__(
 					'There are currently no products available to display.',
 					'woocommerce'
-				) }
+				)}
 			</p>
 		</div>
 	);

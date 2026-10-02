@@ -11,18 +11,18 @@ export * from './plugins';
  * @param {string} locationSearch - Querystring part of a URL, including the question mark (?).
  * @return {Object} - URL params.
  */
-export function getUrlParams( locationSearch ) {
-	if ( locationSearch ) {
+export function getUrlParams(locationSearch) {
+	if (locationSearch) {
 		return locationSearch
-			.substr( 1 )
-			.split( '&' )
-			.reduce( ( params, query ) => {
-				const chunks = query.split( '=' );
-				const key = chunks[ 0 ];
-				let value = decodeURIComponent( chunks[ 1 ] );
-				value = isNaN( Number( value ) ) ? value : Number( value );
-				return ( params[ key ] = value ), params;
-			}, {} );
+			.substr(1)
+			.split('&')
+			.reduce((params, query) => {
+				const chunks = query.split('=');
+				const key = chunks[0];
+				let value = decodeURIComponent(chunks[1]);
+				value = isNaN(Number(value)) ? value : Number(value);
+				return ((params[key] = value), params);
+			}, {});
 	}
 	return {};
 }
@@ -38,13 +38,11 @@ export function getScreenName() {
 		page,
 		path,
 		post_type: postType,
-	} = getUrlParams( window.location.search );
-	if ( page ) {
+	} = getUrlParams(window.location.search);
+	if (page) {
 		const currentPage = page === 'wc-admin' ? 'home_screen' : page;
-		screenName = path
-			? path.replace( /\//g, '_' ).substring( 1 )
-			: currentPage;
-	} else if ( postType ) {
+		screenName = path ? path.replace(/\//g, '_').substring(1) : currentPage;
+	} else if (postType) {
 		screenName = postType;
 	}
 	return screenName;
@@ -58,13 +56,13 @@ export function getScreenName() {
  *
  * @return {Array} - Array of two arrays, first including truthy values, and second including falsy.
  */
-export const sift = ( arr, partitioner ) =>
+export const sift = (arr, partitioner) =>
 	arr.reduce(
-		( all, curr ) => {
-			all[ !! partitioner( curr ) ? 0 : 1 ].push( curr );
+		(all, curr) => {
+			all[!!partitioner(curr) ? 0 : 1].push(curr);
 			return all;
 		},
-		[ [], [] ]
+		[[], []]
 	);
 
 const timeFrames = [
@@ -85,12 +83,12 @@ const timeFrames = [
  *
  * @return {string} - Time frame.
  */
-export const getTimeFrame = ( timeInMs ) => {
-	for ( const timeFrame of timeFrames ) {
-		if ( ! timeFrame.max ) {
+export const getTimeFrame = (timeInMs) => {
+	for (const timeFrame of timeFrames) {
+		if (!timeFrame.max) {
 			return timeFrame.name;
 		}
-		if ( timeInMs < timeFrame.max * 1000 ) {
+		if (timeInMs < timeFrame.max * 1000) {
 			return timeFrame.name;
 		}
 	}
@@ -101,26 +99,26 @@ export const getTimeFrame = ( timeInMs ) => {
  *
  * @param {string[]} classes - classes to add to document.body
  */
-export const useFullScreen = ( classes ) => {
-	useEffect( () => {
+export const useFullScreen = (classes) => {
+	useEffect(() => {
 		const hasToolbarClass =
-			document.documentElement.classList.contains( 'wp-toolbar' );
-		document.body.classList.remove( 'woocommerce-admin-is-loading' );
-		document.body.classList.add( classes );
-		document.body.classList.add( 'woocommerce-admin-full-screen' );
-		document.body.classList.add( 'is-wp-toolbar-disabled' );
-		if ( hasToolbarClass ) {
-			document.documentElement.classList.remove( 'wp-toolbar' );
+			document.documentElement.classList.contains('wp-toolbar');
+		document.body.classList.remove('woocommerce-admin-is-loading');
+		document.body.classList.add(classes);
+		document.body.classList.add('woocommerce-admin-full-screen');
+		document.body.classList.add('is-wp-toolbar-disabled');
+		if (hasToolbarClass) {
+			document.documentElement.classList.remove('wp-toolbar');
 		}
 		return () => {
-			document.body.classList.remove( classes );
-			document.body.classList.remove( 'woocommerce-admin-full-screen' );
-			document.body.classList.remove( 'is-wp-toolbar-disabled' );
-			if ( hasToolbarClass ) {
-				document.documentElement.classList.add( 'wp-toolbar' );
+			document.body.classList.remove(classes);
+			document.body.classList.remove('woocommerce-admin-full-screen');
+			document.body.classList.remove('is-wp-toolbar-disabled');
+			if (hasToolbarClass) {
+				document.documentElement.classList.add('wp-toolbar');
 			}
 		};
-	} );
+	});
 };
 
 /**
@@ -148,24 +146,20 @@ export const useFullScreen = ( classes ) => {
  * @param {string} [basePath=''] - Internal tracking for property paths.
  * @return {Proxy} A proxied object with deprecation warnings.
  */
-export function createDeprecatedPropertiesProxy(
-	obj,
-	messages,
-	basePath = ''
-) {
+export function createDeprecatedPropertiesProxy(obj, messages, basePath = '') {
 	// If not a plain object or array, return as is
-	if ( typeof obj !== 'object' || obj === null ) {
+	if (typeof obj !== 'object' || obj === null) {
 		return obj;
 	}
 
-	return new Proxy( obj, {
-		get( target, prop, receiver ) {
-			const value = Reflect.get( target, prop, receiver );
+	return new Proxy(obj, {
+		get(target, prop, receiver) {
+			const value = Reflect.get(target, prop, receiver);
 
 			// Handle array methods and properties
 			if (
-				Array.isArray( target ) &&
-				( prop === 'length' || prop === Symbol.iterator )
+				Array.isArray(target) &&
+				(prop === 'length' || prop === Symbol.iterator)
 			) {
 				return value;
 			}
@@ -179,27 +173,27 @@ export function createDeprecatedPropertiesProxy(
 				typeof prop === 'boolean'
 			) {
 				nextPath = basePath
-					? `${ basePath }.${ String( prop ) }`
-					: String( prop );
+					? `${basePath}.${String(prop)}`
+					: String(prop);
 
 				// Retrieve the deprecation message (if exists)
 				const deprecationMessage = nextPath
-					.split( '.' )
-					.reduce( ( acc, key ) => {
+					.split('.')
+					.reduce((acc, key) => {
 						return acc && typeof acc === 'object'
-							? acc[ key ]
+							? acc[key]
 							: undefined;
-					}, messages );
+					}, messages);
 
-				if ( typeof deprecationMessage === 'string' ) {
-					console.warn( deprecationMessage ); // eslint-disable-line no-console
+				if (typeof deprecationMessage === 'string') {
+					console.warn(deprecationMessage); // eslint-disable-line no-console
 				}
 			}
 
 			// Recursively wrap objects to maintain deprecation checks
 			return value && typeof value === 'object'
-				? createDeprecatedPropertiesProxy( value, messages, nextPath )
+				? createDeprecatedPropertiesProxy(value, messages, nextPath)
 				: value;
 		},
-	} );
+	});
 }

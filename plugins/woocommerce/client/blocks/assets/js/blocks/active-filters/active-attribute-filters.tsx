@@ -28,7 +28,7 @@ interface ActiveAttributeFiltersProps {
 	operator: 'and' | 'in';
 	slugs: string[];
 	attributeObject: AttributeObject;
-	isLoadingCallback: ( val: boolean ) => void;
+	isLoadingCallback: (val: boolean) => void;
 }
 
 /**
@@ -41,32 +41,32 @@ interface ActiveAttributeFiltersProps {
  * @param {string} props.displayStyle      The style used for displaying the filters.
  * @param {string} props.isLoadingCallback The callback to trigger the loading complete state.
  */
-const ActiveAttributeFilters = ( {
+const ActiveAttributeFilters = ({
 	attributeObject,
 	slugs = [],
 	operator = 'in',
 	displayStyle,
 	isLoadingCallback,
-}: ActiveAttributeFiltersProps ) => {
-	const { results, isLoading } = useCollection< AttributeTerm >( {
+}: ActiveAttributeFiltersProps) => {
+	const { results, isLoading } = useCollection<AttributeTerm>({
 		namespace: '/wc/store/v1',
 		resourceName: 'products/attributes/terms',
-		resourceValues: [ attributeObject.id ],
-	} );
+		resourceValues: [attributeObject.id],
+	});
 
-	const [ productAttributes, setProductAttributes ] = useQueryStateByKey(
+	const [productAttributes, setProductAttributes] = useQueryStateByKey(
 		'attributes',
 		[]
 	);
 
-	useEffect( () => {
-		isLoadingCallback( isLoading );
-	}, [ isLoading, isLoadingCallback ] );
+	useEffect(() => {
+		isLoadingCallback(isLoading);
+	}, [isLoading, isLoadingCallback]);
 
 	if (
-		! Array.isArray( results ) ||
-		! isAttributeTermCollection( results ) ||
-		! isAttributeQueryCollection( productAttributes )
+		!Array.isArray(results) ||
+		!isAttributeTermCollection(results) ||
+		!isAttributeQueryCollection(productAttributes)
 	) {
 		return null;
 	}
@@ -82,54 +82,53 @@ const ActiveAttributeFilters = ( {
 	return (
 		<li>
 			<span className="wc-block-active-filters__list-item-type">
-				{ attributeLabel }:
+				{attributeLabel}:
 			</span>
 			<ul>
-				{ slugs.map( ( slug, index ) => {
-					const termObject = results.find( ( term ) => {
+				{slugs.map((slug, index) => {
+					const termObject = results.find((term) => {
 						return term.slug === slug;
-					} );
+					});
 
-					if ( ! termObject ) {
+					if (!termObject) {
 						return null;
 					}
 
 					let prefix: string | JSX.Element = '';
 
-					if ( index > 0 && operator === 'and' ) {
+					if (index > 0 && operator === 'and') {
 						prefix = (
 							<span className="wc-block-active-filters__list-item-operator">
-								{ __( 'All', 'woocommerce' ) }
+								{__('All', 'woocommerce')}
 							</span>
 						);
 					}
 
-					return renderRemovableListItem( {
+					return renderRemovableListItem({
 						type: attributeLabel,
-						name: decodeEntities( termObject.name || slug ),
+						name: decodeEntities(termObject.name || slug),
 						prefix,
 						isLoading,
 						removeCallback: () => {
 							const currentAttribute = productAttributes.find(
-								( { attribute } ) =>
-									attribute === `pa_${ attributeObject.name }`
+								({ attribute }) =>
+									attribute === `pa_${attributeObject.name}`
 							);
 
 							// If only one attribute was selected, we remove both filter and query type from the URL.
-							if ( currentAttribute?.slug.length === 1 ) {
+							if (currentAttribute?.slug.length === 1) {
 								removeArgsFromFilterUrl(
-									`query_type_${ attributeObject.name }`,
-									`filter_${ attributeObject.name }`
+									`query_type_${attributeObject.name}`,
+									`filter_${attributeObject.name}`
 								);
 							} else {
 								// Remove only the slug from the URL.
-								removeArgsFromFilterUrl( {
-									[ `filter_${ attributeObject.name }` ]:
-										slug,
-								} );
+								removeArgsFromFilterUrl({
+									[`filter_${attributeObject.name}`]: slug,
+								});
 							}
 
-							if ( ! filteringForPhpTemplate ) {
+							if (!filteringForPhpTemplate) {
 								removeAttributeFilterBySlug(
 									productAttributes,
 									setProductAttributes,
@@ -140,8 +139,8 @@ const ActiveAttributeFilters = ( {
 						},
 						showLabel: false,
 						displayStyle,
-					} );
-				} ) }
+					});
+				})}
 			</ul>
 		</li>
 	);

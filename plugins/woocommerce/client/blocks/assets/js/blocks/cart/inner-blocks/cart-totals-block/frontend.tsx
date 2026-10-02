@@ -9,16 +9,16 @@ import { Sidebar } from '@woocommerce/base-components/sidebar-layout';
  */
 import './style.scss';
 
-const FrontendBlock = ( {
+const FrontendBlock = ({
 	children,
 	className = '',
 }: {
 	children: JSX.Element | JSX.Element[];
 	className?: string;
-} ): JSX.Element => {
+}): JSX.Element => {
 	return (
-		<Sidebar className={ clsx( 'wc-block-cart__sidebar', className ) }>
-			{ children }
+		<Sidebar className={clsx('wc-block-cart__sidebar', className)}>
+			{children}
 		</Sidebar>
 	);
 };

@@ -12,41 +12,41 @@ import {
  */
 import './style.scss';
 
-const Edit = ( {
+const Edit = ({
 	attributes,
 	setAttributes,
 }: {
 	attributes: {
 		heading: string;
 	};
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ) => {
-	const blockProps = useBlockProps( {
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}) => {
+	const blockProps = useBlockProps({
 		className: 'wc-block-order-confirmation-additional-fields-wrapper',
-	} );
+	});
 
 	const additionalFields = {
 		...ORDER_FORM_FIELDS,
 		...CONTACT_FORM_FIELDS,
 	};
 
-	if ( Object.entries( additionalFields ).length === 0 ) {
+	if (Object.entries(additionalFields).length === 0) {
 		return null;
 	}
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<InnerBlocks
-				allowedBlocks={ [ 'core/heading' ] }
-				template={ [
+				allowedBlocks={['core/heading']}
+				template={[
 					[
 						'core/heading',
 						{
 							level: 2,
 							style: { typography: { fontSize: '24px' } },
 							content: attributes.heading || '',
-							onChangeContent: ( value: string ) =>
-								setAttributes( { heading: value } ),
+							onChangeContent: (value: string) =>
+								setAttributes({ heading: value }),
 						},
 					],
 					[
@@ -57,7 +57,7 @@ const Edit = ( {
 							},
 						},
 					],
-				] }
+				]}
 			/>
 		</div>
 	);

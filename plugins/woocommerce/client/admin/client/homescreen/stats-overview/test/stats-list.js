@@ -9,7 +9,7 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { StatsList } from '../stats-list';
 
-jest.mock( '@woocommerce/tracks' );
+jest.mock('@woocommerce/tracks');
 
 const stats = [
 	{ stat: 'revenue/net_revenue', label: 'Net sales' },
@@ -30,7 +30,7 @@ const data = {
 						href: 'http://tangaroa.test/wp-json/wc-analytics/reports/revenue/stats',
 					},
 				],
-				report: [ { href: '/analytics/revenue' } ],
+				report: [{ href: '/analytics/revenue' }],
 			},
 		},
 		{
@@ -45,60 +45,58 @@ const data = {
 						href: 'http://tangaroa.test/wp-json/wc-analytics/reports/orders/stats',
 					},
 				],
-				report: [ { href: '/analytics/orders' } ],
+				report: [{ href: '/analytics/orders' }],
 			},
 		},
 	],
 };
 
-describe( 'StatsList', () => {
-	it( 'should render SummaryNumbers', () => {
+describe('StatsList', () => {
+	it('should render SummaryNumbers', () => {
 		render(
 			<StatsList
-				stats={ stats }
-				primaryData={ data }
-				secondaryData={ data }
-				query={ {
+				stats={stats}
+				primaryData={data}
+				secondaryData={data}
+				query={{
 					period: 'today',
 					compare: 'previous_period',
-				} }
+				}}
 			/>
 		);
 
 		// Check that there should be two.
-		expect( screen.getByText( 'Net sales' ) ).toBeDefined();
-		expect( screen.getByText( 'Orders' ) ).toBeDefined();
-	} );
+		expect(screen.getByText('Net sales')).toBeDefined();
+		expect(screen.getByText('Orders')).toBeDefined();
+	});
 
-	it( 'should render placeholders when data is fetching', () => {
-		render( <StatsList stats={ stats } primaryRequesting={ true } /> );
+	it('should render placeholders when data is fetching', () => {
+		render(<StatsList stats={stats} primaryRequesting={true} />);
 
 		// Check that there should be two.
-		expect( screen.getAllByTestId( 'summary-placeholder' ) ).toHaveLength(
-			2
-		);
-	} );
+		expect(screen.getAllByTestId('summary-placeholder')).toHaveLength(2);
+	});
 
-	it( 'should record an event on click of SummaryNumbers', () => {
+	it('should record an event on click of SummaryNumbers', () => {
 		render(
 			<StatsList
-				stats={ stats }
-				primaryData={ data }
-				secondaryData={ data }
-				query={ {
+				stats={stats}
+				primaryData={data}
+				secondaryData={data}
+				query={{
 					period: 'today',
 					compare: 'previous_period',
-				} }
+				}}
 			/>
 		);
 
-		fireEvent.click( screen.getByText( 'Net sales' ) );
+		fireEvent.click(screen.getByText('Net sales'));
 
-		expect( recordEvent ).toHaveBeenCalledWith(
+		expect(recordEvent).toHaveBeenCalledWith(
 			'statsoverview_indicators_click',
 			{
 				key: 'revenue/net_revenue',
 			}
 		);
-	} );
-} );
+	});
+});

@@ -11,31 +11,31 @@ import { store as coreStore } from '@wordpress/core-data';
 import { EmailTheme, storeName } from '../store';
 
 export function useUserTheme() {
-	const { globalStylePost } = useSelect( ( select ) => {
-		const post = select( storeName ).getGlobalEmailStylesPost() || null;
+	const { globalStylePost } = useSelect((select) => {
+		const post = select(storeName).getGlobalEmailStylesPost() || null;
 		return {
 			globalStylePost: post,
 		};
-	}, [] );
+	}, []);
 
 	// Consumers use this as a dependency for expensive work such as regenerating
 	// the global styles stylesheet, so the identity must only change when the
 	// styles or settings actually change. Editing styles goes through
 	// `editEntityRecord`, which replaces both values, so the memo still updates.
 	const userTheme = useMemo(
-		() => ( {
+		() => ({
 			settings: globalStylePost?.settings,
 			styles: globalStylePost?.styles,
-		} ),
-		[ globalStylePost?.settings, globalStylePost?.styles ]
+		}),
+		[globalStylePost?.settings, globalStylePost?.styles]
 	);
 
 	const updateGlobalStylesPost = useCallback(
-		( newTheme: EmailTheme ) => {
-			if ( ! globalStylePost ) {
+		(newTheme: EmailTheme) => {
+			if (!globalStylePost) {
 				return;
 			}
-			void dispatch( coreStore ).editEntityRecord(
+			void dispatch(coreStore).editEntityRecord(
 				'root',
 				'globalStyles',
 				globalStylePost.id,
@@ -45,7 +45,7 @@ export function useUserTheme() {
 				}
 			);
 		},
-		[ globalStylePost ]
+		[globalStylePost]
 	);
 
 	return {

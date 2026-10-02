@@ -10,18 +10,18 @@ import { findBlock } from '@woocommerce/utils';
  */
 import metadata from './block.json';
 
-export const upgradeToBlockifiedProductGallery = ( blockClientId: string ) => {
-	const blocks = select( 'core/block-editor' ).getBlocks();
-	const foundBlock = findBlock( {
+export const upgradeToBlockifiedProductGallery = (blockClientId: string) => {
+	const blocks = select('core/block-editor').getBlocks();
+	const foundBlock = findBlock({
 		blocks,
-		findCondition: ( block ) =>
+		findCondition: (block) =>
 			block.name === metadata.name && block.clientId === blockClientId,
-	} );
+	});
 
-	if ( foundBlock ) {
-		const newBlock = createBlock( 'woocommerce/product-gallery' );
+	if (foundBlock) {
+		const newBlock = createBlock('woocommerce/product-gallery');
 
-		dispatch( 'core/block-editor' ).replaceBlock( blockClientId, newBlock );
+		dispatch('core/block-editor').replaceBlock(blockClientId, newBlock);
 
 		return true;
 	}

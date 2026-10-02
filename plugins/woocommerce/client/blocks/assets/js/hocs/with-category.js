@@ -15,39 +15,38 @@ import { formatError } from '../base/utils/errors';
  *
  * @param {Function} OriginalComponent Component being wrapped.
  */
-const withCategory = createHigherOrderComponent( ( OriginalComponent ) => {
+const withCategory = createHigherOrderComponent((OriginalComponent) => {
 	return class WrappedComponent extends Component {
 		constructor() {
-			super( ...arguments );
+			super(...arguments);
 			const categoryId = this.getCategoryId();
 			this.state = {
 				error: null,
-				loading: !! categoryId && categoryId !== 'preview',
+				loading: !!categoryId && categoryId !== 'preview',
 				category:
 					this.props.attributes.categoryId === 'preview'
 						? this.props.attributes.previewCategory
 						: null,
 			};
-			this.getCategoryId = this.getCategoryId.bind( this );
-			this.loadCategory = this.loadCategory.bind( this );
+			this.getCategoryId = this.getCategoryId.bind(this);
+			this.loadCategory = this.loadCategory.bind(this);
 		}
 
 		componentDidMount() {
 			this.loadCategory();
 		}
 
-		componentDidUpdate( prevProps ) {
+		componentDidUpdate(prevProps) {
 			if (
-				this.getCategoryId( prevProps ) !==
-				this.getCategoryId( this.props )
+				this.getCategoryId(prevProps) !== this.getCategoryId(this.props)
 			) {
 				this.loadCategory();
 			}
 		}
 
-		getCategoryId( props = this.props ) {
+		getCategoryId(props = this.props) {
 			const { categoryId } = props.attributes;
-			if ( categoryId ) {
+			if (categoryId) {
 				return categoryId;
 			}
 
@@ -61,30 +60,30 @@ const withCategory = createHigherOrderComponent( ( OriginalComponent ) => {
 		loadCategory() {
 			const categoryId = this.getCategoryId();
 
-			if ( categoryId === 'preview' ) {
+			if (categoryId === 'preview') {
 				return;
 			}
 
-			if ( ! categoryId ) {
-				this.setState( {
+			if (!categoryId) {
+				this.setState({
 					category: null,
 					loading: false,
 					error: null,
-				} );
+				});
 				return;
 			}
 
-			this.setState( { loading: true } );
+			this.setState({ loading: true });
 
-			getCategory( categoryId )
-				.then( ( category ) => {
-					this.setState( { category, loading: false, error: null } );
-				} )
-				.catch( async ( e ) => {
-					const error = await formatError( e );
+			getCategory(categoryId)
+				.then((category) => {
+					this.setState({ category, loading: false, error: null });
+				})
+				.catch(async (e) => {
+					const error = await formatError(e);
 
-					this.setState( { category: null, loading: false, error } );
-				} );
+					this.setState({ category: null, loading: false, error });
+				});
 		}
 
 		render() {
@@ -92,16 +91,16 @@ const withCategory = createHigherOrderComponent( ( OriginalComponent ) => {
 
 			return (
 				<OriginalComponent
-					{ ...this.props }
-					error={ error }
-					getCategory={ this.loadCategory }
-					isLoading={ loading }
-					category={ category }
-					effectiveCategoryId={ this.getCategoryId() }
+					{...this.props}
+					error={error}
+					getCategory={this.loadCategory}
+					isLoading={loading}
+					category={category}
+					effectiveCategoryId={this.getCategoryId()}
 				/>
 			);
 		}
 	};
-}, 'withCategory' );
+}, 'withCategory');
 
 export default withCategory;

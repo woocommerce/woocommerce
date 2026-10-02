@@ -24,14 +24,14 @@ import WooPaymentsOnboardingModalSnackbar from './components/snackbar';
 
 const SnackbarWrapper = () => {
 	const { snackbar } = useOnboardingContext();
-	if ( ! snackbar.show ) return null;
+	if (!snackbar.show) return null;
 
 	return (
 		<WooPaymentsOnboardingModalSnackbar
-			className={ snackbar.className || '' }
-			duration={ snackbar.duration }
+			className={snackbar.className || ''}
+			duration={snackbar.duration}
 		>
-			{ snackbar.message }
+			{snackbar.message}
 		</WooPaymentsOnboardingModalSnackbar>
 	);
 };
@@ -39,33 +39,33 @@ const SnackbarWrapper = () => {
 /**
  * Modal component for WooPayments onboarding
  */
-export default function WooPaymentsModal( {
+export default function WooPaymentsModal({
 	isOpen,
 	setIsOpen,
 	providerData,
-}: WooPaymentsModalProps ): React.ReactNode {
+}: WooPaymentsModalProps): React.ReactNode {
 	const location = useLocation();
 	const history = getHistory();
 	const wooPaymentsOnboardingPath = '/woopayments/onboarding';
-	const { createErrorNotice } = dispatch( 'core/notices' );
+	const { createErrorNotice } = dispatch('core/notices');
 	const isJetpackReturn =
-		getQueryArg( window.location.href, 'wpcom_connection_return' ) || false;
+		getQueryArg(window.location.href, 'wpcom_connection_return') || false;
 	const hasWPComConnection =
 		providerData?.onboarding?.state?.wpcom_has_working_connection || false;
 	const { sessionEntryPoint } = useOnboardingContext();
 
 	// Handle modal and URL synchronization.
-	React.useEffect( () => {
+	React.useEffect(() => {
 		const query = getQuery() as { path?: string };
 		const isOnOnboardingPath =
-			query.path && query.path.includes( wooPaymentsOnboardingPath );
+			query.path && query.path.includes(wooPaymentsOnboardingPath);
 
 		// Open modal when on an onboarding route
 		if (
 			isOnOnboardingPath &&
-			! isOpen &&
+			!isOpen &&
 			// Prevent the onboarding modal from reopening if the WPCom connection remains unestablished and the user has returned from Jetpack.
-			! ( ! hasWPComConnection && isJetpackReturn )
+			!(!hasWPComConnection && isJetpackReturn)
 		) {
 			recordPaymentsOnboardingEvent(
 				'woopayments_onboarding_modal_opened',
@@ -74,11 +74,11 @@ export default function WooPaymentsModal( {
 				}
 			);
 
-			setIsOpen( true );
+			setIsOpen(true);
 		}
 
 		// If modal is open, but we're not on an onboarding route, navigate to onboarding.
-		if ( isOpen && ! isOnOnboardingPath ) {
+		if (isOpen && !isOnOnboardingPath) {
 			const newPath = getNewPath(
 				{ path: wooPaymentsOnboardingPath },
 				wooPaymentsOnboardingPath,
@@ -87,11 +87,11 @@ export default function WooPaymentsModal( {
 					tab: 'checkout',
 				}
 			);
-			history.push( newPath );
+			history.push(newPath);
 		}
 
 		// Trigger a snackbar error notification when the user aborts the WPCom connection process.
-		if ( ! hasWPComConnection && isJetpackReturn ) {
+		if (!hasWPComConnection && isJetpackReturn) {
 			recordPaymentsOnboardingEvent(
 				'woopayments_onboarding_wpcom_connection_cancelled',
 				{
@@ -99,10 +99,10 @@ export default function WooPaymentsModal( {
 				}
 			);
 
-			createErrorNotice( __( 'Setup was cancelled!', 'woocommerce' ), {
+			createErrorNotice(__('Setup was cancelled!', 'woocommerce'), {
 				type: 'snackbar',
 				explicitDismiss: false,
-			} );
+			});
 		}
 	}, [
 		location,
@@ -112,29 +112,29 @@ export default function WooPaymentsModal( {
 		hasWPComConnection,
 		createErrorNotice,
 		history,
-	] );
+	]);
 
 	// Handle modal close by navigating away from onboarding routes
 	const handleClose = () => {
-		recordPaymentsOnboardingEvent( 'woopayments_onboarding_modal_closed', {
+		recordPaymentsOnboardingEvent('woopayments_onboarding_modal_closed', {
 			source: sessionEntryPoint,
-		} );
+		});
 
-		const newPath = getNewPath( {}, '/wp-admin/admin.php', {
+		const newPath = getNewPath({}, '/wp-admin/admin.php', {
 			page: 'wc-settings',
 			tab: 'checkout',
-		} );
-		history.push( newPath );
-		setIsOpen( false );
+		});
+		history.push(newPath);
+		setIsOpen(false);
 	};
 
-	if ( ! isOpen ) return null;
+	if (!isOpen) return null;
 
 	return (
-		<Modal setIsOpen={ handleClose }>
+		<Modal setIsOpen={handleClose}>
 			<OnboardingProvider
-				closeModal={ handleClose }
-				onboardingSteps={ steps }
+				closeModal={handleClose}
+				onboardingSteps={steps}
 			>
 				<WooPaymentsOnboarding />
 				<SnackbarWrapper />

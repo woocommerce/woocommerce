@@ -17,35 +17,35 @@ const updateBlockAttributes = jest.fn();
 const useDispatchMock = dataModule.useDispatch as jest.Mock;
 const useSelectMock = dataModule.useSelect as jest.Mock;
 
-jest.mock( '@wordpress/components', () => ( {
-	Button: ( props: React.ComponentProps< 'button' > ) => (
-		<button onClick={ props.onClick }>{ props.children }</button>
+jest.mock('@wordpress/components', () => ({
+	Button: (props: React.ComponentProps<'button'>) => (
+		<button onClick={props.onClick}>{props.children}</button>
 	),
-} ) );
+}));
 
-jest.mock( '@wordpress/block-editor', () => ( {
+jest.mock('@wordpress/block-editor', () => ({
 	store: {},
-} ) );
+}));
 
 const setupUseSelectMock = (
 	selectedBlockId = '123',
 	selectedBlockName = 'core/paragraph'
 ) => {
 	useSelectMock
-		.mockImplementationOnce( ( selector ) =>
-			selector( () => ( {
+		.mockImplementationOnce((selector) =>
+			selector(() => ({
 				getSelectedBlockClientId: () => selectedBlockId,
-			} ) )
+			}))
 		)
-		.mockImplementationOnce( ( selector ) =>
-			selector( () => ( {
-				getBlock: () => ( { name: selectedBlockName } ),
-			} ) )
+		.mockImplementationOnce((selector) =>
+			selector(() => ({
+				getBlock: () => ({ name: selectedBlockName }),
+			}))
 		);
 };
 
-describe( 'CategorySection', () => {
-	const mockTags: Record< string, PersonalizationTag[] > = {
+describe('CategorySection', () => {
+	const mockTags: Record<string, PersonalizationTag[]> = {
 		General: [
 			{
 				name: 'Customer Name',
@@ -53,7 +53,7 @@ describe( 'CategorySection', () => {
 				valueToInsert: '[woocommerce/customer-name]',
 				category: 'Customer',
 				attributes: [],
-				postTypes: [ 'woo_mail' ],
+				postTypes: ['woo_mail'],
 			},
 			{
 				name: 'Customer Email',
@@ -61,7 +61,7 @@ describe( 'CategorySection', () => {
 				valueToInsert: '[woocommerce/customer-email]',
 				category: 'Customer',
 				attributes: [],
-				postTypes: [ 'woo_mail' ],
+				postTypes: ['woo_mail'],
 			},
 		],
 		Link: [
@@ -71,7 +71,7 @@ describe( 'CategorySection', () => {
 				valueToInsert: '[woocommerce/profile-url]',
 				category: 'Link',
 				attributes: [],
-				postTypes: [ 'woo_mail' ],
+				postTypes: ['woo_mail'],
 			},
 		],
 	};
@@ -80,88 +80,88 @@ describe( 'CategorySection', () => {
 	const closeCallback = jest.fn();
 	const openLinkModal = jest.fn();
 
-	beforeEach( () => {
+	beforeEach(() => {
 		jest.clearAllMocks();
-		useDispatchMock.mockReturnValue( { updateBlockAttributes } );
-	} );
+		useDispatchMock.mockReturnValue({ updateBlockAttributes });
+	});
 
-	it( 'should render tags for all categories', () => {
+	it('should render tags for all categories', () => {
 		setupUseSelectMock();
 
 		render(
 			<CategorySection
-				groupedTags={ mockTags }
-				activeCategory={ null }
-				onInsert={ onInsert }
-				canInsertLink={ true }
-				closeCallback={ closeCallback }
-				openLinkModal={ openLinkModal }
+				groupedTags={mockTags}
+				activeCategory={null}
+				onInsert={onInsert}
+				canInsertLink={true}
+				closeCallback={closeCallback}
+				openLinkModal={openLinkModal}
 			/>
 		);
 
-		expect( screen.getByText( 'Customer Name' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'Customer Email' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'Profile URL' ) ).toBeInTheDocument();
-	} );
+		expect(screen.getByText('Customer Name')).toBeInTheDocument();
+		expect(screen.getByText('Customer Email')).toBeInTheDocument();
+		expect(screen.getByText('Profile URL')).toBeInTheDocument();
+	});
 
-	it( 'should call onInsert when Insert is clicked', () => {
+	it('should call onInsert when Insert is clicked', () => {
 		setupUseSelectMock();
 
 		render(
 			<CategorySection
-				groupedTags={ mockTags }
-				activeCategory={ 'General' }
-				onInsert={ onInsert }
-				canInsertLink={ false }
-				closeCallback={ closeCallback }
-				openLinkModal={ openLinkModal }
+				groupedTags={mockTags}
+				activeCategory={'General'}
+				onInsert={onInsert}
+				canInsertLink={false}
+				closeCallback={closeCallback}
+				openLinkModal={openLinkModal}
 			/>
 		);
 
-		fireEvent.click( screen.getAllByText( 'Insert' )[ 0 ] );
-		expect( onInsert ).toHaveBeenCalledWith(
+		fireEvent.click(screen.getAllByText('Insert')[0]);
+		expect(onInsert).toHaveBeenCalledWith(
 			'[woocommerce/customer-name]',
 			false
 		);
-	} );
+	});
 
-	it( 'should call updateBlockAttributes and close modal when Set as URL is clicked', () => {
-		setupUseSelectMock( '123', 'core/button' );
+	it('should call updateBlockAttributes and close modal when Set as URL is clicked', () => {
+		setupUseSelectMock('123', 'core/button');
 
 		render(
 			<CategorySection
-				groupedTags={ mockTags }
-				activeCategory={ 'Link' }
-				onInsert={ onInsert }
-				canInsertLink={ false }
-				closeCallback={ closeCallback }
-				openLinkModal={ openLinkModal }
+				groupedTags={mockTags}
+				activeCategory={'Link'}
+				onInsert={onInsert}
+				canInsertLink={false}
+				closeCallback={closeCallback}
+				openLinkModal={openLinkModal}
 			/>
 		);
 
-		fireEvent.click( screen.getByText( 'Set as URL' ) );
-		expect( updateBlockAttributes ).toHaveBeenCalledWith( '123', {
+		fireEvent.click(screen.getByText('Set as URL'));
+		expect(updateBlockAttributes).toHaveBeenCalledWith('123', {
 			url: '[woocommerce/profile-url]',
-		} );
-		expect( closeCallback ).toHaveBeenCalled();
-	} );
+		});
+		expect(closeCallback).toHaveBeenCalled();
+	});
 
-	it( 'should call openLinkModal when Insert as link is clicked for Link category', () => {
+	it('should call openLinkModal when Insert as link is clicked for Link category', () => {
 		setupUseSelectMock();
 
 		render(
 			<CategorySection
-				groupedTags={ mockTags }
-				activeCategory={ 'Link' }
-				onInsert={ onInsert }
-				canInsertLink={ true }
-				closeCallback={ closeCallback }
-				openLinkModal={ openLinkModal }
+				groupedTags={mockTags}
+				activeCategory={'Link'}
+				onInsert={onInsert}
+				canInsertLink={true}
+				closeCallback={closeCallback}
+				openLinkModal={openLinkModal}
 			/>
 		);
 
-		fireEvent.click( screen.getByText( 'Insert as link' ) );
-		expect( closeCallback ).toHaveBeenCalled();
-		expect( openLinkModal ).toHaveBeenCalledWith( mockTags.Link[ 0 ] );
-	} );
-} );
+		fireEvent.click(screen.getByText('Insert as link'));
+		expect(closeCallback).toHaveBeenCalled();
+		expect(openLinkModal).toHaveBeenCalledWith(mockTags.Link[0]);
+	});
+});

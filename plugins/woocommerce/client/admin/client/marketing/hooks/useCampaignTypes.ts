@@ -16,12 +16,12 @@ import { CampaignType } from '~/marketing/types/CampaignType';
 
 type UseCampaignTypes = {
 	loading: boolean;
-	data?: Array< CampaignType >;
+	data?: Array<CampaignType>;
 	error?: ApiFetchError;
 	refetch: () => void;
 };
 
-const convert = ( campaignType: APICampaignType ): CampaignType => {
+const convert = (campaignType: APICampaignType): CampaignType => {
 	return {
 		id: campaignType.id,
 		icon: campaignType.icon_url,
@@ -34,25 +34,25 @@ const convert = ( campaignType: APICampaignType ): CampaignType => {
 };
 
 export const useCampaignTypes = (): UseCampaignTypes => {
-	const { invalidateResolution } = useDispatch( STORE_KEY );
+	const { invalidateResolution } = useDispatch(STORE_KEY);
 
-	const refetch = useCallback( () => {
-		void invalidateResolution( 'getCampaignTypes', [] );
-	}, [ invalidateResolution ] );
+	const refetch = useCallback(() => {
+		void invalidateResolution('getCampaignTypes', []);
+	}, [invalidateResolution]);
 
 	return useSelect(
-		( select ) => {
+		(select) => {
 			const { hasFinishedResolution, getCampaignTypes } =
-				select( STORE_KEY );
+				select(STORE_KEY);
 			const campaignTypesState = getCampaignTypes();
 
 			return {
-				loading: ! hasFinishedResolution( 'getCampaignTypes', [] ),
-				data: campaignTypesState.data?.map( convert ),
+				loading: !hasFinishedResolution('getCampaignTypes', []),
+				data: campaignTypesState.data?.map(convert),
 				error: campaignTypesState.error,
 				refetch,
 			};
 		},
-		[ refetch ]
+		[refetch]
 	);
 };

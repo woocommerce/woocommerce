@@ -15,14 +15,14 @@ import './style.scss';
 const OnlyExpressPayments = () => {
 	return (
 		<NoticeBanner
-			isDismissible={ false }
+			isDismissible={false}
 			className="wc-block-checkout__only-express-payments-notice"
 			status="info"
 		>
-			{ __(
+			{__(
 				'Only express payment methods are available for this order. Please select one to continue.',
 				'woocommerce'
-			) }
+			)}
 		</NoticeBanner>
 	);
 };

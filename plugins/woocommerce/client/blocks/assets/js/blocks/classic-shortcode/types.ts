@@ -10,7 +10,7 @@ type TemplateDetail = {
 	placeholder: string;
 };
 
-export type TemplateDetails = Record< string, TemplateDetail >;
+export type TemplateDetails = Record<string, TemplateDetail>;
 
 export type InheritedAttributes = {
 	align?: string;
@@ -18,14 +18,14 @@ export type InheritedAttributes = {
 
 export type OnClickCallbackParameter = {
 	clientId: string;
-	attributes: Record< string, unknown >;
+	attributes: Record<string, unknown>;
 	getBlocks: () => BlockInstance[];
-	replaceBlock: ( clientId: string, blocks: BlockInstance[] ) => void;
-	selectBlock: ( clientId: string ) => void;
+	replaceBlock: (clientId: string, blocks: BlockInstance[]) => void;
+	selectBlock: (clientId: string) => void;
 };
 
 type ConversionConfig = {
-	onClickCallback: ( params: OnClickCallbackParameter ) => void;
+	onClickCallback: (params: OnClickCallbackParameter) => void;
 	getButtonLabel: () => string;
 	getBlockifiedTemplate: (
 		inheritedAttributes: InheritedAttributes
@@ -34,11 +34,11 @@ type ConversionConfig = {
 
 export type BlockifiedTemplateConfig = {
 	// Description of the template, shown in the block placeholder.
-	getDescription: ( templateTitle: string ) => string;
+	getDescription: (templateTitle: string) => string;
 	// Returns the skeleton HTML for the template, or can be left blank to use the default fallback image.
-	getSkeleton?: ( () => JSX.Element ) | undefined;
+	getSkeleton?: (() => JSX.Element) | undefined;
 	// Returns the title for the placeholder, or can be left blank to use the default fallback text.
-	getTitle?: ( () => string ) | undefined;
+	getTitle?: (() => string) | undefined;
 	// If conversion is possible, returns the config for the template to be blockified.
 	blockifyConfig?: ConversionConfig | undefined;
 };

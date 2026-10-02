@@ -15,99 +15,97 @@ import RatingFilterEdit from '../../rating-filter/edit';
 import StockFilterEdit from '../../stock-filter/edit';
 import { textContentMatcher } from '../../../../../tests/utils/find-by-text';
 
-jest.mock( '@wordpress/block-editor', () => ( {
-	...jest.requireActual( '@wordpress/block-editor' ),
-	useBlockProps: jest.fn( ( props = {} ) => props ),
-	InspectorControls: jest.fn( ( { children } ) => <div>{ children }</div> ),
-	InnerBlocks: jest.fn( ( { template } ) => (
+jest.mock('@wordpress/block-editor', () => ({
+	...jest.requireActual('@wordpress/block-editor'),
+	useBlockProps: jest.fn((props = {}) => props),
+	InspectorControls: jest.fn(({ children }) => <div>{children}</div>),
+	InnerBlocks: jest.fn(({ template }) => (
 		<section>
-			<h3>{ template[ 0 ][ 1 ].content }</h3>
+			<h3>{template[0][1].content}</h3>
 			<div
 				data-testid="locked-filter-child"
-				data-block-name={ template[ 1 ][ 0 ] }
-				data-lock-remove={ String( template[ 1 ][ 1 ].lock.remove ) }
+				data-block-name={template[1][0]}
+				data-lock-remove={String(template[1][1].lock.remove)}
 			/>
 		</section>
-	) ),
-} ) );
+	)),
+}));
 
-jest.mock( '@wordpress/components', () => {
-	const element = jest.requireActual( '@wordpress/element' );
+jest.mock('@wordpress/components', () => {
+	const element = jest.requireActual('@wordpress/element');
 
 	return {
-		...jest.requireActual( '@wordpress/components' ),
-		Disabled: jest.fn( ( { children } ) => <div>{ children }</div> ),
-		Notice: jest.fn( ( { children } ) => <div>{ children }</div> ),
-		PanelBody: jest.fn( ( { children } ) => <div>{ children }</div> ),
-		ToggleControl: jest.fn( ( { label, checked, onChange } ) => (
+		...jest.requireActual('@wordpress/components'),
+		Disabled: jest.fn(({ children }) => <div>{children}</div>),
+		Notice: jest.fn(({ children }) => <div>{children}</div>),
+		PanelBody: jest.fn(({ children }) => <div>{children}</div>),
+		ToggleControl: jest.fn(({ label, checked, onChange }) => (
 			<span>
 				<input
 					type="checkbox"
-					aria-label={ label }
-					checked={ checked }
-					onChange={ ( event ) => onChange( event.target.checked ) }
+					aria-label={label}
+					checked={checked}
+					onChange={(event) => onChange(event.target.checked)}
 				/>
-				{ label }
+				{label}
 			</span>
-		) ),
-		withSpokenMessages: jest.fn( ( Component ) => Component ),
+		)),
+		withSpokenMessages: jest.fn((Component) => Component),
 		__experimentalToggleGroupControl: jest.fn(
-			( { children, label, onChange, value } ) => (
+			({ children, label, onChange, value }) => (
 				<fieldset>
-					<legend>{ label }</legend>
-					{ element.Children.map( children, ( child ) =>
-						element.cloneElement( child, {
+					<legend>{label}</legend>
+					{element.Children.map(children, (child) =>
+						element.cloneElement(child, {
 							onSelect: onChange,
 							selectedValue: value,
-						} )
-					) }
+						})
+					)}
 				</fieldset>
 			)
 		),
 		__experimentalToggleGroupControlOption: jest.fn(
-			( { label, onSelect, selectedValue, value } ) => (
+			({ label, onSelect, selectedValue, value }) => (
 				<span>
 					<input
 						type="radio"
-						aria-label={ label }
-						checked={ selectedValue === value }
-						onChange={ () => onSelect( value ) }
+						aria-label={label}
+						checked={selectedValue === value}
+						onChange={() => onSelect(value)}
 					/>
-					{ label }
+					{label}
 				</span>
 			)
 		),
-		__experimentalToolsPanel: jest.fn( ( { children } ) => (
-			<div>{ children }</div>
-		) ),
-		__experimentalToolsPanelItem: jest.fn( ( { children } ) => (
-			<div>{ children }</div>
-		) ),
+		__experimentalToolsPanel: jest.fn(({ children }) => (
+			<div>{children}</div>
+		)),
+		__experimentalToolsPanelItem: jest.fn(({ children }) => (
+			<div>{children}</div>
+		)),
 	};
-} );
+});
 
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useDispatch: jest.fn( () => ( {
+jest.mock('@wordpress/data', () => ({
+	...jest.requireActual('@wordpress/data'),
+	useDispatch: jest.fn(() => ({
 		removeBlock: jest.fn(),
 		replaceBlock: jest.fn(),
 		selectBlock: jest.fn(),
 		updateBlockAttributes: jest.fn(),
-	} ) ),
-} ) );
+	})),
+}));
 
-jest.mock( '@woocommerce/editor-components/upgrade-downgrade-notice', () => ( {
-	UpgradeDowngradeNotice: jest.fn( ( { children } ) => (
-		<div>{ children }</div>
-	) ),
-} ) );
+jest.mock('@woocommerce/editor-components/upgrade-downgrade-notice', () => ({
+	UpgradeDowngradeNotice: jest.fn(({ children }) => <div>{children}</div>),
+}));
 
-jest.mock( '@woocommerce/block-settings', () => ( {
-	...jest.requireActual( '@woocommerce/block-settings' ),
+jest.mock('@woocommerce/block-settings', () => ({
+	...jest.requireActual('@woocommerce/block-settings'),
 	blocksConfig: { productCount: 1 },
-} ) );
+}));
 
-jest.mock( '@woocommerce/base-context/hooks', () => {
+jest.mock('@woocommerce/base-context/hooks', () => {
 	const queryState = {};
 	const queryValues: string[] = [];
 	const setQueryState = jest.fn();
@@ -134,48 +132,48 @@ jest.mock( '@woocommerce/base-context/hooks', () => {
 	};
 
 	return {
-		...jest.requireActual( '@woocommerce/base-context/hooks' ),
-		useCollectionData: jest.fn( () => ( {
+		...jest.requireActual('@woocommerce/base-context/hooks'),
+		useCollectionData: jest.fn(() => ({
 			data: collectionData,
 			isLoading: false,
-		} ) ),
-		useQueryStateByContext: jest.fn( () => [ queryState ] ),
-		useQueryStateByKey: jest.fn( () => [ queryValues, setQueryState ] ),
+		})),
+		useQueryStateByContext: jest.fn(() => [queryState]),
+		useQueryStateByKey: jest.fn(() => [queryValues, setQueryState]),
 	};
-} );
+});
 
-jest.mock( '@woocommerce/settings', () => {
+jest.mock('@woocommerce/settings', () => {
 	const stockStatusOptions = {
 		instock: 'In stock',
 		outofstock: 'Out of stock',
 	};
 
 	return {
-		...jest.requireActual( '@woocommerce/settings' ),
-		getSetting: jest.fn( ( key, defaultValue ) => {
-			if ( key === 'stockStatusOptions' ) {
+		...jest.requireActual('@woocommerce/settings'),
+		getSetting: jest.fn((key, defaultValue) => {
+			if (key === 'stockStatusOptions') {
 				return stockStatusOptions;
 			}
 			return defaultValue;
-		} ),
-		getSettingWithCoercion: jest.fn( ( key, defaultValue ) =>
+		}),
+		getSettingWithCoercion: jest.fn((key, defaultValue) =>
 			key === 'hasFilterableProducts' ? true : defaultValue
 		),
 	};
-} );
+});
 
-jest.mock( '@wordpress/a11y', () => ( {
-	...jest.requireActual( '@wordpress/a11y' ),
+jest.mock('@wordpress/a11y', () => ({
+	...jest.requireActual('@wordpress/a11y'),
 	speak: jest.fn(),
-} ) );
+}));
 
-afterEach( () => {
+afterEach(() => {
 	jest.clearAllMocks();
 	jest.restoreAllMocks();
-} );
+});
 
-describe( 'legacy filter editor ownership', () => {
-	it.each( [
+describe('legacy filter editor ownership', () => {
+	it.each([
 		{
 			filterType: 'price-filter',
 			heading: 'Filter by price',
@@ -188,46 +186,46 @@ describe( 'legacy filter editor ownership', () => {
 			filterType: 'stock-filter',
 			heading: 'Filter by stock status',
 		},
-	] )( 'seeds the $filterType wrapper template', ( row ) => {
+	])('seeds the $filterType wrapper template', (row) => {
 		const WrapperEdit = FilterWrapperEdit as unknown as React.ComponentType<
-			Record< string, unknown >
+			Record<string, unknown>
 		>;
 
 		render(
 			<WrapperEdit
-				attributes={ {
+				attributes={{
 					filterType: row.filterType,
 					heading: row.heading,
-				} }
+				}}
 				clientId="wrapper-client-id"
 			/>
 		);
 
 		expect(
-			screen.getByRole( 'heading', { level: 3, name: row.heading } )
+			screen.getByRole('heading', { level: 3, name: row.heading })
 		).toBeInTheDocument();
-		expect( screen.getByTestId( 'locked-filter-child' ) ).toHaveAttribute(
+		expect(screen.getByTestId('locked-filter-child')).toHaveAttribute(
 			'data-block-name',
-			`woocommerce/${ row.filterType }`
+			`woocommerce/${row.filterType}`
 		);
-		expect( screen.getByTestId( 'locked-filter-child' ) ).toHaveAttribute(
+		expect(screen.getByTestId('locked-filter-child')).toHaveAttribute(
 			'data-lock-remove',
 			'true'
 		);
 
-		const innerBlocksProps = ( InnerBlocks as unknown as jest.Mock ).mock
-			.calls[ 0 ][ 0 ];
-		expect( innerBlocksProps.allowedBlocks ).toEqual( [ 'core/heading' ] );
-		expect( innerBlocksProps.template ).toEqual( [
-			[ 'core/heading', { content: row.heading, level: 3 } ],
+		const innerBlocksProps = (InnerBlocks as unknown as jest.Mock).mock
+			.calls[0][0];
+		expect(innerBlocksProps.allowedBlocks).toEqual(['core/heading']);
+		expect(innerBlocksProps.template).toEqual([
+			['core/heading', { content: row.heading, level: 3 }],
 			[
-				`woocommerce/${ row.filterType }`,
+				`woocommerce/${row.filterType}`,
 				{ heading: '', lock: { remove: true } },
 			],
-		] );
-	} );
+		]);
+	});
 
-	it( 'maps Price display and Apply controls to preview behavior', async () => {
+	it('maps Price display and Apply controls to preview behavior', async () => {
 		const user = userEvent.setup();
 		const setAttributes = jest.fn();
 		const attributes = {
@@ -238,76 +236,76 @@ describe( 'legacy filter editor ownership', () => {
 			showFilterButton: false,
 		};
 		const PriceEdit = PriceFilterEdit as unknown as React.ComponentType<
-			Record< string, unknown >
+			Record<string, unknown>
 		>;
-		const renderEdit = ( editAttributes: Record< string, unknown > ) => (
+		const renderEdit = (editAttributes: Record<string, unknown>) => (
 			<PriceEdit
-				attributes={ editAttributes }
+				attributes={editAttributes}
 				clientId="filter-client-id"
-				setAttributes={ setAttributes }
+				setAttributes={setAttributes}
 			/>
 		);
 
-		const { rerender } = render( renderEdit( attributes ) );
+		const { rerender } = render(renderEdit(attributes));
 
 		expect(
-			await screen.findByRole( 'textbox', {
+			await screen.findByRole('textbox', {
 				name: 'Filter products by minimum price',
-			} )
+			})
 		).toBeVisible();
 		expect(
-			screen.getByRole( 'textbox', {
+			screen.getByRole('textbox', {
 				name: 'Filter products by maximum price',
-			} )
+			})
 		).toBeVisible();
 		expect(
-			screen.queryByRole( 'button', { name: 'Apply price filter' } )
+			screen.queryByRole('button', { name: 'Apply price filter' })
 		).not.toBeInTheDocument();
 
-		await user.click( screen.getByRole( 'radio', { name: 'Text' } ) );
-		expect( setAttributes ).toHaveBeenCalledTimes( 1 );
-		expect( setAttributes ).toHaveBeenCalledWith( {
+		await user.click(screen.getByRole('radio', { name: 'Text' }));
+		expect(setAttributes).toHaveBeenCalledTimes(1);
+		expect(setAttributes).toHaveBeenCalledWith({
 			showInputFields: false,
-		} );
+		});
 
-		rerender( renderEdit( { ...attributes, showInputFields: false } ) );
+		rerender(renderEdit({ ...attributes, showInputFields: false }));
 		expect(
-			screen.queryByRole( 'textbox', {
+			screen.queryByRole('textbox', {
 				name: 'Filter products by minimum price',
-			} )
+			})
 		).not.toBeInTheDocument();
 		expect(
-			screen.queryByRole( 'textbox', {
+			screen.queryByRole('textbox', {
 				name: 'Filter products by maximum price',
-			} )
+			})
 		).not.toBeInTheDocument();
-		expect( screen.getByText( textContentMatcher( '$1' ) ) ).toBeVisible();
-		expect( screen.getByText( textContentMatcher( '$50' ) ) ).toBeVisible();
+		expect(screen.getByText(textContentMatcher('$1'))).toBeVisible();
+		expect(screen.getByText(textContentMatcher('$50'))).toBeVisible();
 
 		setAttributes.mockClear();
 		await user.click(
-			screen.getByRole( 'checkbox', {
+			screen.getByRole('checkbox', {
 				name: "Show 'Apply filters' button",
-			} )
+			})
 		);
-		expect( setAttributes ).toHaveBeenCalledTimes( 1 );
-		expect( setAttributes ).toHaveBeenCalledWith( {
+		expect(setAttributes).toHaveBeenCalledTimes(1);
+		expect(setAttributes).toHaveBeenCalledWith({
 			showFilterButton: true,
-		} );
+		});
 
 		rerender(
-			renderEdit( {
+			renderEdit({
 				...attributes,
 				showInputFields: false,
 				showFilterButton: true,
-			} )
+			})
 		);
 		expect(
-			await screen.findByRole( 'button', { name: 'Apply price filter' } )
+			await screen.findByRole('button', { name: 'Apply price filter' })
 		).toBeVisible();
-	} );
+	});
 
-	it.each( [
+	it.each([
 		{
 			Edit: RatingFilterEdit,
 			attributes: {
@@ -332,74 +330,72 @@ describe( 'legacy filter editor ownership', () => {
 			},
 			listOption: 'In stock',
 		},
-	] )(
+	])(
 		'maps $listOption display and Apply controls to preview behavior',
-		async ( row ) => {
+		async (row) => {
 			const user = userEvent.setup();
 			const setAttributes = jest.fn();
 			const Edit = row.Edit as unknown as React.ComponentType<
-				Record< string, unknown >
+				Record<string, unknown>
 			>;
-			const renderEdit = ( attributes: Record< string, unknown > ) => (
+			const renderEdit = (attributes: Record<string, unknown>) => (
 				<Edit
-					attributes={ attributes }
+					attributes={attributes}
 					clientId="filter-client-id"
-					setAttributes={ setAttributes }
+					setAttributes={setAttributes}
 				/>
 			);
 
-			const { rerender } = render( renderEdit( row.attributes ) );
+			const { rerender } = render(renderEdit(row.attributes));
 
 			expect(
-				await screen.findByRole( 'checkbox', {
+				await screen.findByRole('checkbox', {
 					name: row.listOption,
-				} )
+				})
 			).toBeVisible();
 			expect(
-				screen.queryByRole( 'button', {
+				screen.queryByRole('button', {
 					name: /^Apply (rating|stock) filter$/,
-				} )
+				})
 			).not.toBeInTheDocument();
 
-			await user.click(
-				screen.getByRole( 'radio', { name: 'Dropdown' } )
-			);
-			expect( setAttributes ).toHaveBeenCalledTimes( 1 );
-			expect( setAttributes ).toHaveBeenCalledWith( {
+			await user.click(screen.getByRole('radio', { name: 'Dropdown' }));
+			expect(setAttributes).toHaveBeenCalledTimes(1);
+			expect(setAttributes).toHaveBeenCalledWith({
 				displayStyle: 'dropdown',
-			} );
+			});
 
 			rerender(
-				renderEdit( { ...row.attributes, displayStyle: 'dropdown' } )
+				renderEdit({ ...row.attributes, displayStyle: 'dropdown' })
 			);
 			expect(
-				screen.queryByRole( 'checkbox', { name: row.listOption } )
+				screen.queryByRole('checkbox', { name: row.listOption })
 			).not.toBeInTheDocument();
-			expect( await screen.findByRole( 'combobox' ) ).toBeVisible();
+			expect(await screen.findByRole('combobox')).toBeVisible();
 
 			setAttributes.mockClear();
 			await user.click(
-				screen.getByRole( 'checkbox', {
+				screen.getByRole('checkbox', {
 					name: "Show 'Apply filters' button",
-				} )
+				})
 			);
-			expect( setAttributes ).toHaveBeenCalledTimes( 1 );
-			expect( setAttributes ).toHaveBeenCalledWith( {
+			expect(setAttributes).toHaveBeenCalledTimes(1);
+			expect(setAttributes).toHaveBeenCalledWith({
 				showFilterButton: true,
-			} );
+			});
 
 			rerender(
-				renderEdit( {
+				renderEdit({
 					...row.attributes,
 					displayStyle: 'dropdown',
 					showFilterButton: true,
-				} )
+				})
 			);
 			expect(
-				await screen.findByRole( 'button', {
+				await screen.findByRole('button', {
 					name: /^Apply (rating|stock) filter$/,
-				} )
+				})
 			).toBeVisible();
 		}
 	);
-} );
+});

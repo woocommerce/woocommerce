@@ -38,13 +38,10 @@ export interface SavedPaymentMethod {
 	actions: ObjectType;
 }
 export type SavedPaymentMethods =
-	| Record< string, SavedPaymentMethod[] >
-	| EmptyObjectType;
+	Record<string, SavedPaymentMethod[]> | EmptyObjectType;
 
 export interface PaymentMethodDispatchers {
-	setRegisteredPaymentMethods: (
-		paymentMethods: PlainPaymentMethods
-	) => void;
+	setRegisteredPaymentMethods: (paymentMethods: PlainPaymentMethods) => void;
 	setRegisteredExpressPaymentMethods: (
 		paymentMethods: PlainExpressPaymentMethods
 	) => void;
@@ -58,7 +55,7 @@ export interface PaymentStatusDispatchers {
 	pristine: () => void;
 	started: () => void;
 	processing: () => void;
-	error: ( error: string ) => void;
+	error: (error: string) => void;
 	failed: (
 		error?: string,
 		paymentMethodData?: ObjectType | EmptyObjectType,
@@ -80,16 +77,14 @@ export type PaymentMethodsDispatcherType = (
  */
 export type emitProcessingEventType = (
 	observers: EventObserversType,
-	setValidationErrors: (
-		errors: Record< string, FieldValidationStatus >
-	) => void
-) => ( {
+	setValidationErrors: (errors: Record<string, FieldValidationStatus>) => void
+) => ({
 	dispatch,
 	registry,
 }: {
-	dispatch: DispatchFromMap< typeof actions >;
+	dispatch: DispatchFromMap<typeof actions>;
 	registry: DataRegistry;
-} ) => void;
+}) => void;
 
 export interface PaymentStatus {
 	isPristine?: boolean;

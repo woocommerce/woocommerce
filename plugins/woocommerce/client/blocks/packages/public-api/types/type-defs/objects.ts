@@ -1,2 +1,2 @@
-export type ObjectType = Record< string, unknown >;
-export type EmptyObjectType = Record< string, never >;
+export type ObjectType = Record<string, unknown>;
+export type EmptyObjectType = Record<string, never>;

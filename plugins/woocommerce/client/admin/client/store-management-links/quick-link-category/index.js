@@ -8,13 +8,13 @@ import React from '@wordpress/element';
  */
 import './style.scss';
 
-export const QuickLinkCategory = ( { title, children } ) => {
+export const QuickLinkCategory = ({ title, children }) => {
 	return (
 		<div className="woocommerce-quick-links__category">
 			<h3 className="woocommerce-quick-links__category-header">
-				{ title }
+				{title}
 			</h3>
-			{ children }
+			{children}
 		</div>
 	);
 };

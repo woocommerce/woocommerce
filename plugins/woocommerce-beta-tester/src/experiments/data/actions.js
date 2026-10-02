@@ -13,13 +13,13 @@ import {
 	TRANSIENT_TIMEOUT_NAME_PREFIX,
 } from './constants';
 
-function toggleFrontendExperiment( experimentName, newVariation ) {
+function toggleFrontendExperiment(experimentName, newVariation) {
 	let storageItem = JSON.parse(
-		window.localStorage.getItem( EXPERIMENT_NAME_PREFIX + experimentName )
+		window.localStorage.getItem(EXPERIMENT_NAME_PREFIX + experimentName)
 	);
 
 	// If the experiment is not in localStorage, consider it as a new.
-	if ( storageItem === null ) {
+	if (storageItem === null) {
 		storageItem = {
 			experimentName,
 			retrievedTimestamp: Date.now(),
@@ -31,34 +31,34 @@ function toggleFrontendExperiment( experimentName, newVariation ) {
 
 	window.localStorage.setItem(
 		EXPERIMENT_NAME_PREFIX + experimentName,
-		JSON.stringify( storageItem )
+		JSON.stringify(storageItem)
 	);
 }
 
-function* toggleBackendExperiment( experimentName, newVariation ) {
+function* toggleBackendExperiment(experimentName, newVariation) {
 	try {
 		const payload = {};
-		payload[ TRANSIENT_NAME_PREFIX + experimentName ] = newVariation;
-		payload[ TRANSIENT_TIMEOUT_NAME_PREFIX + experimentName ] =
-			Math.round( Date.now() / 1000 ) + 3600;
+		payload[TRANSIENT_NAME_PREFIX + experimentName] = newVariation;
+		payload[TRANSIENT_TIMEOUT_NAME_PREFIX + experimentName] =
+			Math.round(Date.now() / 1000) + 3600;
 
-		yield apiFetch( {
+		yield apiFetch({
 			method: 'POST',
 			path: '/wc-admin/options',
 			headers: { 'content-type': 'application/json' },
-			body: JSON.stringify( payload ),
-		} );
-	} catch ( error ) {
+			body: JSON.stringify(payload),
+		});
+	} catch (error) {
 		throw new Error();
 	}
 }
 
-export function* toggleExperiment( experimentName, currentVariation ) {
+export function* toggleExperiment(experimentName, currentVariation) {
 	const newVariation =
 		currentVariation === 'control' ? 'treatment' : 'control';
 
-	toggleFrontendExperiment( experimentName, newVariation );
-	yield toggleBackendExperiment( experimentName, newVariation );
+	toggleFrontendExperiment(experimentName, newVariation);
+	yield toggleBackendExperiment(experimentName, newVariation);
 
 	return {
 		type: TYPES.TOGGLE_EXPERIMENT,
@@ -67,16 +67,16 @@ export function* toggleExperiment( experimentName, currentVariation ) {
 	};
 }
 
-export function setExperiments( experiments ) {
+export function setExperiments(experiments) {
 	return {
 		type: TYPES.SET_EXPERIMENTS,
 		experiments,
 	};
 }
 
-export function* addExperiment( experimentName, variation ) {
-	toggleFrontendExperiment( experimentName, variation );
-	yield toggleBackendExperiment( experimentName, variation );
+export function* addExperiment(experimentName, variation) {
+	toggleFrontendExperiment(experimentName, variation);
+	yield toggleBackendExperiment(experimentName, variation);
 
 	return {
 		type: TYPES.ADD_EXPERIMENT,
@@ -85,18 +85,18 @@ export function* addExperiment( experimentName, variation ) {
 	};
 }
 
-export function* deleteExperiment( experimentName ) {
-	window.localStorage.removeItem( EXPERIMENT_NAME_PREFIX + experimentName );
+export function* deleteExperiment(experimentName) {
+	window.localStorage.removeItem(EXPERIMENT_NAME_PREFIX + experimentName);
 
 	const optionNames = [
 		TRANSIENT_NAME_PREFIX + experimentName,
 		TRANSIENT_TIMEOUT_NAME_PREFIX + experimentName,
 	];
 
-	yield apiFetch( {
+	yield apiFetch({
 		method: 'DELETE',
-		path: '/wc-admin-test-helper/options/' + optionNames.join( ',' ),
-	} );
+		path: '/wc-admin-test-helper/options/' + optionNames.join(','),
+	});
 
 	return {
 		type: TYPES.DELETE_EXPERIMENT,

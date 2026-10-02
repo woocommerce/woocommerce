@@ -13,17 +13,17 @@ interface V1Attributes extends BlockAttributes {
 	isDescendentOfSingleProductBlock?: boolean;
 }
 
-const save = ( {
+const save = ({
 	attributes,
 	innerBlocks,
 }: {
 	attributes: V1Attributes;
 	innerBlocks?: unknown[];
-} ) => {
+}) => {
 	if (
 		attributes.isDescendentOfQueryLoop ||
 		attributes.isDescendentOfSingleProductBlock ||
-		! innerBlocks ||
+		!innerBlocks ||
 		innerBlocks?.length === 0
 	) {
 		return null;
@@ -31,12 +31,12 @@ const save = ( {
 
 	return (
 		<div
-			{ ...useBlockProps.save( {
-				className: clsx( 'is-loading', attributes.className, {
-					[ `has-custom-width wp-block-button__width-${ attributes.width }` ]:
+			{...useBlockProps.save({
+				className: clsx('is-loading', attributes.className, {
+					[`has-custom-width wp-block-button__width-${attributes.width}`]:
 						attributes.width,
-				} ),
-			} ) }
+				}),
+			})}
 		/>
 	);
 };
@@ -54,6 +54,6 @@ const v1 = {
 	apiVersion: 3,
 };
 
-const deprecated = [ v1 ];
+const deprecated = [v1];
 
 export default deprecated;

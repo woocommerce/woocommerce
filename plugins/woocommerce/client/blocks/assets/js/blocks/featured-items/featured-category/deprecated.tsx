@@ -11,7 +11,7 @@ import metadata from './block.json';
 
 interface BlockAttributes {
 	showDesc?: boolean;
-	[ key: string ]: unknown;
+	[key: string]: unknown;
 }
 
 // Version 1: Migration from legacy showDesc attribute to inner blocks
@@ -24,12 +24,12 @@ const v1 = {
 		},
 	},
 	save: () => <InnerBlocks.Content />,
-	isEligible: ( attributes: BlockAttributes ) => {
+	isEligible: (attributes: BlockAttributes) => {
 		// If the block has editMode attribute as boolean value, it's a legacy block
 		// and it should be migrated to use inner blocks instead.
 		return typeof attributes.editMode === 'boolean';
 	},
-	migrate: ( attributes: BlockAttributes, innerBlocks: BlockInstance[] ) => {
+	migrate: (attributes: BlockAttributes, innerBlocks: BlockInstance[]) => {
 		const { editMode, showDesc, ...otherAttributes } = attributes;
 
 		// This padding was applied via the styles in inner sections of the block.
@@ -37,22 +37,22 @@ const v1 = {
 		const V1_PADDING_BOTTOM = '16px';
 
 		// Conditionally add category description if showDesc was true
-		if ( showDesc ) {
+		if (showDesc) {
 			innerBlocks.unshift(
-				createBlock( 'woocommerce/category-description', {
+				createBlock('woocommerce/category-description', {
 					textAlign: 'center',
 					style: {
 						padding: {
 							bottom: V1_PADDING_BOTTOM,
 						},
 					},
-				} )
+				})
 			);
 		}
 
 		// Always add category title as first inner block
 		innerBlocks.unshift(
-			createBlock( 'woocommerce/category-title', {
+			createBlock('woocommerce/category-title', {
 				level: 2,
 				isLink: false,
 				textAlign: 'center',
@@ -61,11 +61,11 @@ const v1 = {
 						bottom: V1_PADDING_BOTTOM,
 					},
 				},
-			} )
+			})
 		);
 
-		return [ otherAttributes, innerBlocks ];
+		return [otherAttributes, innerBlocks];
 	},
 };
 
-export default [ v1 ];
+export default [v1];

@@ -29,31 +29,30 @@ interface APIErrorCategoryProps extends APIErrorRequiredProps {
 	getProduct: never;
 }
 
-type APIErrorProps< T extends Block > =
-	| ( T & APIErrorProductProps )
-	| ( T & APIErrorCategoryProps );
+type APIErrorProps<T extends Block> =
+	(T & APIErrorProductProps) | (T & APIErrorCategoryProps);
 
 export const withApiError =
-	< T extends Block >( Component: ComponentType< T > ) =>
-	( props: APIErrorProps< T > ) => {
+	<T extends Block>(Component: ComponentType<T>) =>
+	(props: APIErrorProps<T>) => {
 		const { error, isLoading, name } = props;
 
-		const className = getClassPrefixFromName( name );
+		const className = getClassPrefixFromName(name);
 		const onRetry =
 			name === BLOCK_NAMES.featuredCategory
 				? props.getCategory
 				: props.getProduct;
 
-		if ( error ) {
+		if (error) {
 			return (
 				<ErrorPlaceholder
-					className={ `${ className }-error` }
-					error={ error }
-					isLoading={ isLoading }
-					onRetry={ onRetry }
+					className={`${className}-error`}
+					error={error}
+					isLoading={isLoading}
+					onRetry={onRetry}
 				/>
 			);
 		}
 
-		return <Component { ...props } />;
+		return <Component {...props} />;
 	};

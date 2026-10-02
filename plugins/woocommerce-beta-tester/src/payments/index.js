@@ -9,8 +9,8 @@ import apiFetch from '@wordpress/api-fetch';
 const metaKey = '_wcpay_mode';
 
 const Payments = () => {
-	const { orders } = useSelect( ( select ) => {
-		const { getOrders } = select( ordersStore );
+	const { orders } = useSelect((select) => {
+		const { getOrders } = select(ordersStore);
 
 		const query = {
 			page: 1,
@@ -18,17 +18,17 @@ const Payments = () => {
 		};
 
 		return {
-			orders: getOrders( query, null ),
+			orders: getOrders(query, null),
 		};
-	} );
+	});
 
-	const { getOrderSuccess } = useDispatch( ordersStore );
+	const { getOrderSuccess } = useDispatch(ordersStore);
 
-	const isTestOrder = ( order ) =>
-		order.meta_data.find( ( metaItem ) => metaItem.key === metaKey )
-			?.value === 'test';
+	const isTestOrder = (order) =>
+		order.meta_data.find((metaItem) => metaItem.key === metaKey)?.value ===
+		'test';
 
-	const onToggle = async ( order, isChecked ) => {
+	const onToggle = async (order, isChecked) => {
 		const data = {
 			meta_data: [
 				{
@@ -39,62 +39,60 @@ const Payments = () => {
 		};
 
 		try {
-			const updatedOrder = await apiFetch( {
-				path: `/wc/v3/orders/${ order.id }`,
+			const updatedOrder = await apiFetch({
+				path: `/wc/v3/orders/${order.id}`,
 				method: 'PUT',
 				data,
 				headers: {
 					'Content-Type': 'application/json',
 				},
-			} );
-			getOrderSuccess( order.id, updatedOrder );
-		} catch ( error ) {
+			});
+			getOrderSuccess(order.id, updatedOrder);
+		} catch (error) {
 			throw error;
 		}
 	};
 
-	const renderOrders = ( orderList ) => {
-		return orderList.map( ( order ) => {
+	const renderOrders = (orderList) => {
+		return orderList.map((order) => {
 			return (
-				<tr key={ order.id }>
-					<td className="manage-column column-thumb" key={ 0 }>
-						{ `${ order?.billing?.first_name } ${ order?.billing?.last_name }` }
+				<tr key={order.id}>
+					<td className="manage-column column-thumb" key={0}>
+						{`${order?.billing?.first_name} ${order?.billing?.last_name}`}
 					</td>
-					<td className="manage-column column-thumb" key={ 1 }>
-						{ order.id }
+					<td className="manage-column column-thumb" key={1}>
+						{order.id}
 					</td>
 					<td
 						className="manage-column column-thumb"
-						key={ 'optionValue' }
+						key={'optionValue'}
 					>
-						{ order.date_created_gmt }
+						{order.date_created_gmt}
 					</td>
 					<td
 						className="manage-column column-thumb align-center"
-						key={ 2 }
+						key={2}
 					>
-						{ order.status }
+						{order.status}
 					</td>
 					<td
 						className="manage-column column-thumb align-center"
-						key={ 3 }
+						key={3}
 					>
-						{ order.total }
+						{order.total}
 					</td>
 					<td
 						className="manage-column column-thumb align-center"
-						key={ 4 }
+						key={4}
 					>
 						<ToggleControl
-							checked={ isTestOrder( order ) }
-							onChange={ ( isChecked ) =>
-								onToggle( order, isChecked )
-							}
+							checked={isTestOrder(order)}
+							onChange={(isChecked) => onToggle(order, isChecked)}
 						/>
 					</td>
 				</tr>
 			);
-		} );
+		});
 	};
 
 	return (
@@ -103,41 +101,41 @@ const Payments = () => {
 			<table className="wp-list-table striped table-view-list widefat">
 				<thead>
 					<tr>
-						<td className="manage-column column-thumb" key={ 0 }>
+						<td className="manage-column column-thumb" key={0}>
 							Order
 						</td>
-						<td className="manage-column column-thumb" key={ 1 }>
+						<td className="manage-column column-thumb" key={1}>
 							ID
 						</td>
 						<td
 							className="manage-column column-thumb"
-							key={ 'optionValue' }
+							key={'optionValue'}
 						>
 							Date
 						</td>
 						<td
 							className="manage-column column-thumb align-center"
-							key={ 2 }
+							key={2}
 						>
 							Status
 						</td>
 						<td
 							className="manage-column column-thumb align-center"
-							key={ 3 }
+							key={3}
 						>
 							Total
 						</td>
 						<td
 							className="manage-column column-thumb align-center"
-							key={ 4 }
+							key={4}
 						>
 							WCPay Test Order
 						</td>
 					</tr>
 				</thead>
-				<tbody>{ orders?.length > 0 && renderOrders( orders ) }</tbody>
+				<tbody>{orders?.length > 0 && renderOrders(orders)}</tbody>
 			</table>
-			{ orders?.length === 0 && <p>No orders found.</p> }
+			{orders?.length === 0 && <p>No orders found.</p>}
 		</>
 	);
 };

@@ -24,87 +24,84 @@ type ResetStylesControlProps = {
 	autoSyncInput: HTMLInputElement;
 };
 
-export const ResetStylesControl = ( {
+export const ResetStylesControl = ({
 	defaultColors,
 	hasThemeJson,
 	autoSync,
 	autoSyncInput,
-}: ResetStylesControlProps ) => {
-	const [ isResetShown, setIsResetShown ] = useState(
-		areColorsChanged( defaultColors )
+}: ResetStylesControlProps) => {
+	const [isResetShown, setIsResetShown] = useState(
+		areColorsChanged(defaultColors)
 	);
-	const [ changed, setChanged ] = useState( false );
-	const [ isAutoSyncEnabled, setIsAutoSyncEnabled ] = useState( autoSync );
+	const [changed, setChanged] = useState(false);
+	const [isAutoSyncEnabled, setIsAutoSyncEnabled] = useState(autoSync);
 
-	const [ initialValue ] = useState( getColors() );
+	const [initialValue] = useState(getColors());
 
-	const handleAutoSyncToggle = ( newValue: boolean ) => {
-		setIsAutoSyncEnabled( newValue );
+	const handleAutoSyncToggle = (newValue: boolean) => {
+		setIsAutoSyncEnabled(newValue);
 		autoSyncInput.value = newValue ? 'yes' : 'no';
 	};
 
 	const handleInputChange = () => {
-		const isOutOfSync = areColorsChanged( defaultColors );
-		setIsResetShown( isOutOfSync );
-		if ( isOutOfSync ) {
-			handleAutoSyncToggle( false );
+		const isOutOfSync = areColorsChanged(defaultColors);
+		setIsResetShown(isOutOfSync);
+		if (isOutOfSync) {
+			handleAutoSyncToggle(false);
 		}
-		setChanged( areColorsChanged( initialValue ) );
+		setChanged(areColorsChanged(initialValue));
 	};
 
 	const handleReset = () => {
-		setColors( defaultColors );
-		setIsResetShown( false );
-		setChanged( areColorsChanged( initialValue ) );
-		handleAutoSyncToggle( true );
+		setColors(defaultColors);
+		setIsResetShown(false);
+		setChanged(areColorsChanged(initialValue));
+		handleAutoSyncToggle(true);
 	};
 
 	const handleUndo = () => {
-		setColors( initialValue );
-		setIsResetShown( areColorsChanged( defaultColors ) );
-		setChanged( false );
-		handleAutoSyncToggle( autoSync );
+		setColors(initialValue);
+		setIsResetShown(areColorsChanged(defaultColors));
+		setChanged(false);
+		handleAutoSyncToggle(autoSync);
 	};
 
-	useEffect( () => {
-		addListeners( handleInputChange );
+	useEffect(() => {
+		addListeners(handleInputChange);
 		return () => {
-			removeListeners( handleInputChange );
+			removeListeners(handleInputChange);
 		};
-	} );
+	});
 
 	return (
 		<>
-			{ ! isResetShown && (
+			{!isResetShown && (
 				<span className="wc-settings-email-color-palette-message">
-					{ hasThemeJson
-						? __( 'Synced with theme.', 'woocommerce' )
-						: __( 'Using default values.', 'woocommerce' ) }
+					{hasThemeJson
+						? __('Synced with theme.', 'woocommerce')
+						: __('Using default values.', 'woocommerce')}
 				</span>
-			) }
-			{ hasThemeJson && ! isResetShown && (
+			)}
+			{hasThemeJson && !isResetShown && (
 				<ToggleControl
-					label={ __(
-						'Auto-sync with theme changes',
-						'woocommerce'
-					) }
-					checked={ isAutoSyncEnabled }
-					onChange={ handleAutoSyncToggle }
+					label={__('Auto-sync with theme changes', 'woocommerce')}
+					checked={isAutoSyncEnabled}
+					onChange={handleAutoSyncToggle}
 					className="wc-settings-email-color-palette-auto-sync"
 				/>
-			) }
-			{ isResetShown && (
-				<Button variant="secondary" onClick={ handleReset }>
-					{ hasThemeJson
-						? __( 'Sync with theme', 'woocommerce' )
-						: __( 'Reset', 'woocommerce' ) }
+			)}
+			{isResetShown && (
+				<Button variant="secondary" onClick={handleReset}>
+					{hasThemeJson
+						? __('Sync with theme', 'woocommerce')
+						: __('Reset', 'woocommerce')}
 				</Button>
-			) }
-			{ changed && (
-				<Button variant="tertiary" onClick={ handleUndo }>
-					{ __( 'Undo changes', 'woocommerce' ) }
+			)}
+			{changed && (
+				<Button variant="tertiary" onClick={handleUndo}>
+					{__('Undo changes', 'woocommerce')}
 				</Button>
-			) }
+			)}
 		</>
 	);
 };

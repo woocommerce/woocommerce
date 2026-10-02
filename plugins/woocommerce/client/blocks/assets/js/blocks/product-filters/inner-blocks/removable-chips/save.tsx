@@ -10,26 +10,26 @@ import clsx from 'clsx';
 import { BlockAttributes } from './types';
 import { getColorClasses, getColorVars } from './utils';
 
-const Save = ( {
+const Save = ({
 	attributes,
 	style,
 }: {
 	attributes: BlockAttributes;
-	style: Record< string, string >;
-} ) => {
-	const blockProps = useBlockProps.save( {
+	style: Record<string, string>;
+}) => {
+	const blockProps = useBlockProps.save({
 		className: clsx(
 			'wc-block-product-filter-removable-chips',
 			attributes.className,
-			getColorClasses( attributes )
+			getColorClasses(attributes)
 		),
 		style: {
 			...style,
-			...getColorVars( attributes ),
+			...getColorVars(attributes),
 		},
-	} );
+	});
 
-	return <div { ...blockProps } />;
+	return <div {...blockProps} />;
 };
 
 export default Save;

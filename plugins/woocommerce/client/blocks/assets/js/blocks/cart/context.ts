@@ -10,10 +10,10 @@ export type CartBlockContextProps = {
 	hasDarkControls: boolean;
 };
 
-export const CartBlockContext = createContext< CartBlockContextProps >( {
+export const CartBlockContext = createContext<CartBlockContextProps>({
 	hasDarkControls: false,
-} );
+});
 
 export const useCartBlockContext = (): CartBlockContextProps => {
-	return useContext( CartBlockContext );
+	return useContext(CartBlockContext);
 };

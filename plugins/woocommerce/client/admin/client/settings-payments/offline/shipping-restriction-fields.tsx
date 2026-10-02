@@ -20,14 +20,14 @@ import { CheckboxEdit, type OfflineFormValues } from './dataform-controls';
  */
 export const getShippingRestrictionValues = (
 	gateway: PaymentGateway
-): OfflineFormValues => ( {
+): OfflineFormValues => ({
 	enable_for_methods: Array.isArray(
 		gateway.settings.enable_for_methods?.value
 	)
 		? gateway.settings.enable_for_methods.value
 		: [],
 	enable_for_virtual: gateway.settings.enable_for_virtual?.value === 'yes',
-} );
+});
 
 /**
  * Serializes the shipping method restriction form values into the settings
@@ -37,12 +37,12 @@ export const getShippingRestrictionValues = (
  */
 export const getShippingRestrictionSettings = (
 	formValues: OfflineFormValues
-): Record< string, string | string[] > => ( {
-	enable_for_methods: Array.isArray( formValues.enable_for_methods )
+): Record<string, string | string[]> => ({
+	enable_for_methods: Array.isArray(formValues.enable_for_methods)
 		? formValues.enable_for_methods
 		: [],
 	enable_for_virtual: formValues.enable_for_virtual ? 'yes' : 'no',
-} );
+});
 
 /**
  * Builds the DataForm fields for the "Enable for shipping methods" and
@@ -54,45 +54,43 @@ export const getShippingRestrictionSettings = (
 export const getShippingRestrictionFields = (
 	gateway: PaymentGateway | undefined,
 	methodName: string
-): Field< OfflineFormValues >[] => {
+): Field<OfflineFormValues>[] => {
 	const shippingMethodsOptions = gateway?.settings.enable_for_methods?.options
-		? mapShippingMethodsOptions(
-				gateway.settings.enable_for_methods.options
-		  )
+		? mapShippingMethodsOptions(gateway.settings.enable_for_methods.options)
 		: [];
 
 	return [
 		{
 			id: 'enable_for_methods',
-			label: __( 'Enable for shipping methods', 'woocommerce' ),
+			label: __('Enable for shipping methods', 'woocommerce'),
 			description: __(
 				'Select shipping methods for which this payment method is enabled.',
 				'woocommerce'
 			),
 			// Renders the shipping methods multi-select using the options
 			// that ship with the gateway.
-			Edit: ( { data, field, onChange } ) => {
-				const value = field.getValue( { item: data } );
+			Edit: ({ data, field, onChange }) => {
+				const value = field.getValue({ item: data });
 				return (
 					<TreeSelectControl
-						label={ field.label }
-						help={ field.description }
-						options={ shippingMethodsOptions }
-						value={ Array.isArray( value ) ? value : [] }
-						onChange={ ( newValue: string[] ) =>
-							onChange( { [ field.id ]: newValue } )
+						label={field.label}
+						help={field.description}
+						options={shippingMethodsOptions}
+						value={Array.isArray(value) ? value : []}
+						onChange={(newValue: string[]) =>
+							onChange({ [field.id]: newValue })
 						}
-						selectAllLabel={ false }
+						selectAllLabel={false}
 					/>
 				);
 			},
 		},
 		{
 			id: 'enable_for_virtual',
-			label: __( 'Accept for virtual orders', 'woocommerce' ),
+			label: __('Accept for virtual orders', 'woocommerce'),
 			description: sprintf(
 				/* translators: %s: payment method name, e.g. "cash on delivery". */
-				__( 'Accept %s if the order is virtual', 'woocommerce' ),
+				__('Accept %s if the order is virtual', 'woocommerce'),
 				methodName
 			),
 			Edit: CheckboxEdit,

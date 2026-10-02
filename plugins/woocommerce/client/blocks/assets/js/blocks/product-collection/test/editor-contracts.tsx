@@ -46,23 +46,23 @@ import {
 } from '../types';
 import { LocationType } from '../../product-template/utils';
 
-jest.mock( '../edit/inspector-controls', () => () => null );
-jest.mock( '../edit/inspector-advanced-controls', () => () => null );
-jest.mock( '../edit/toolbar-controls', () => () => null );
+jest.mock('../edit/inspector-controls', () => () => null);
+jest.mock('../edit/inspector-advanced-controls', () => () => null);
+jest.mock('../edit/toolbar-controls', () => () => null);
 jest.mock(
 	'../edit/inspector-controls/order-by-control/order-by-control',
 	() => {
-		const React = jest.requireActual( 'react' );
+		const React = jest.requireActual('react');
 
-		return ( { label, onChange, orderOptions, selectedValue } ) =>
+		return ({ label, onChange, orderOptions, selectedValue }) =>
 			React.createElement(
 				'select',
 				{
 					'aria-label': label,
-					onChange: ( event ) => onChange( event.target.value ),
+					onChange: (event) => onChange(event.target.value),
 					value: selectedValue,
 				},
-				orderOptions.map( ( option ) =>
+				orderOptions.map((option) =>
 					React.createElement(
 						'option',
 						{ key: option.value, value: option.value },
@@ -74,45 +74,45 @@ jest.mock(
 );
 
 const registeredBlockTypes: string[] = [];
-let originalBlockCategories: ReturnType< typeof getCategories >;
+let originalBlockCategories: ReturnType<typeof getCategories>;
 
-beforeAll( () => {
+beforeAll(() => {
 	originalBlockCategories = getCategories();
 	if (
-		! originalBlockCategories.some(
-			( category ) => category.slug === 'woocommerce'
+		!originalBlockCategories.some(
+			(category) => category.slug === 'woocommerce'
 		)
 	) {
-		setCategories( [
+		setCategories([
 			...originalBlockCategories,
 			{ slug: 'woocommerce', title: 'WooCommerce' },
-		] );
+		]);
 	}
 
-	if ( ! getBlockType( productTemplateMetadata.name ) ) {
-		registerBlockType( productTemplateMetadata, {
+	if (!getBlockType(productTemplateMetadata.name)) {
+		registerBlockType(productTemplateMetadata, {
 			edit: () => null,
 			save: productTemplateSave,
-		} );
-		registeredBlockTypes.push( productTemplateMetadata.name );
+		});
+		registeredBlockTypes.push(productTemplateMetadata.name);
 	}
 
-	if ( ! getBlockType( metadata.name ) ) {
-		registerBlockType( metadata, {
+	if (!getBlockType(metadata.name)) {
+		registerBlockType(metadata, {
 			edit: () => null,
 			save,
-		} );
-		registeredBlockTypes.push( metadata.name );
+		});
+		registeredBlockTypes.push(metadata.name);
 	}
-} );
+});
 
-afterAll( () => {
-	registeredBlockTypes.forEach( ( name ) => unregisterBlockType( name ) );
-	setCategories( originalBlockCategories );
-} );
+afterAll(() => {
+	registeredBlockTypes.forEach((name) => unregisterBlockType(name));
+	setCategories(originalBlockCategories);
+});
 
-describe( 'Product Collection editor contracts', () => {
-	it.each( [
+describe('Product Collection editor contracts', () => {
+	it.each([
 		{
 			caseName: 'default collection in a post',
 			collection: undefined,
@@ -133,10 +133,10 @@ describe( 'Product Collection editor contracts', () => {
 			collection: CoreCollectionNames.ON_SALE,
 			inherit: true,
 		},
-	] )(
+	])(
 		'round-trips $caseName through real metadata',
-		( { collection, inherit } ) => {
-			const productTemplate = createBlock( productTemplateMetadata.name );
+		({ collection, inherit }) => {
+			const productTemplate = createBlock(productTemplateMetadata.name);
 			const block = createBlock(
 				PRODUCT_COLLECTION_BLOCK_NAME,
 				{
@@ -156,64 +156,64 @@ describe( 'Product Collection editor contracts', () => {
 						perPage: 8,
 					},
 				},
-				[ productTemplate ]
+				[productTemplate]
 			);
-			const serialized = serialize( block );
-			const [ parsed ] = parse( serialized );
+			const serialized = serialize(block);
+			const [parsed] = parse(serialized);
 
-			expect( parsed.attributes.collection ).toBe( collection );
-			expect( parsed.attributes.query ).toMatchObject( {
+			expect(parsed.attributes.collection).toBe(collection);
+			expect(parsed.attributes.query).toMatchObject({
 				inherit,
 				order: 'asc',
 				orderBy: 'title',
 				perPage: 8,
-			} );
-			expect( parsed.attributes.displayLayout ).toEqual( {
+			});
+			expect(parsed.attributes.displayLayout).toEqual({
 				columns: 4,
 				shrinkColumns: true,
 				type: LayoutOptions.GRID,
-			} );
-			expect( parsed.innerBlocks ).toHaveLength( 1 );
-			expect( parsed.innerBlocks[ 0 ].name ).toBe(
+			});
+			expect(parsed.innerBlocks).toHaveLength(1);
+			expect(parsed.innerBlocks[0].name).toBe(
 				productTemplateMetadata.name
 			);
-			expect( parsed.attributes ).not.toHaveProperty(
+			expect(parsed.attributes).not.toHaveProperty(
 				'__privatePreviewState'
 			);
-			expect( serialized ).not.toContain( '__privatePreviewState' );
+			expect(serialized).not.toContain('__privatePreviewState');
 		}
 	);
 
-	it( 'adds Product Collection to the real Pagination metadata filter', () => {
+	it('adds Product Collection to the real Pagination metadata filter', () => {
 		addProductCollectionToQueryPaginationParentOrAncestor();
 
 		try {
 			const settings = applyFilters(
 				'blocks.registerBlockType',
-				{ ancestor: [ 'core/query' ] },
+				{ ancestor: ['core/query'] },
 				'core/query-pagination'
 			) as { ancestor: string[] };
 
-			expect( settings.ancestor ).toEqual( [
+			expect(settings.ancestor).toEqual([
 				'core/query',
 				PRODUCT_COLLECTION_BLOCK_NAME,
-			] );
+			]);
 		} finally {
 			removeFilter(
 				'blocks.registerBlockType',
 				'woocommerce/add-product-collection-block-to-parent-array-of-pagination-block'
 			);
 		}
-	} );
-} );
+	});
+});
 
-describe( 'Product Collection page-context defaults', () => {
-	afterEach( () => {
-		dispatch( blockEditorStore ).resetBlocks( [] );
+describe('Product Collection page-context defaults', () => {
+	afterEach(() => {
+		dispatch(blockEditorStore).resetBlocks([]);
 		jest.restoreAllMocks();
-	} );
+	});
 
-	it.each( [
+	it.each([
 		{
 			caseName: 'Product Catalog archive inheritance',
 			getDefault: getDefaultValueOfInherit,
@@ -274,46 +274,43 @@ describe( 'Product Collection page-context defaults', () => {
 			property: 'filterable',
 			templateSlug: 'single-product',
 		},
-	] as const )(
+	] as const)(
 		'allows only the first collection to own $caseName',
-		( { getDefault, property, templateSlug } ) => {
+		({ getDefault, property, templateSlug }) => {
 			jest.spyOn(
-				select( CORE_EDITOR_STORE ) as unknown as {
+				select(CORE_EDITOR_STORE) as unknown as {
 					getEditedPostSlug: () => string;
 				},
 				'getEditedPostSlug'
-			).mockReturnValue( templateSlug );
+			).mockReturnValue(templateSlug);
 
-			dispatch( blockEditorStore ).resetBlocks( [] );
-			expect( getDefault() ).toBe( true );
+			dispatch(blockEditorStore).resetBlocks([]);
+			expect(getDefault()).toBe(true);
 
-			const firstCollection = createBlock(
-				PRODUCT_COLLECTION_BLOCK_NAME,
-				{
-					query: {
-						...DEFAULT_QUERY,
-						[ property ]: true,
-					},
-				}
-			);
-			dispatch( blockEditorStore ).resetBlocks( [ firstCollection ] );
-			expect( getDefault() ).toBe( false );
+			const firstCollection = createBlock(PRODUCT_COLLECTION_BLOCK_NAME, {
+				query: {
+					...DEFAULT_QUERY,
+					[property]: true,
+				},
+			});
+			dispatch(blockEditorStore).resetBlocks([firstCollection]);
+			expect(getDefault()).toBe(false);
 
-			dispatch( blockEditorStore ).updateBlockAttributes(
+			dispatch(blockEditorStore).updateBlockAttributes(
 				firstCollection.clientId,
 				{
 					query: {
 						...DEFAULT_QUERY,
-						[ property ]: false,
+						[property]: false,
 					},
 				}
 			);
-			expect( getDefault() ).toBe( true );
+			expect(getDefault()).toBe(true);
 		}
 	);
-} );
+});
 
-const createPreviewAttributes = (): ProductCollectionAttributes => ( {
+const createPreviewAttributes = (): ProductCollectionAttributes => ({
 	...DEFAULT_ATTRIBUTES,
 	convertedFromProducts: false,
 	filterable: false,
@@ -322,111 +319,111 @@ const createPreviewAttributes = (): ProductCollectionAttributes => ( {
 		...DEFAULT_QUERY,
 		inherit: true,
 	},
-	queryContext: [ { page: 1 } ],
+	queryContext: [{ page: 1 }],
 	queryId: 1,
 	templateSlug: '',
-} );
+});
 
-const GenericArchivePreview = ( {
+const GenericArchivePreview = ({
 	isSelected,
 	taxonomy,
 }: {
 	isSelected: boolean;
 	taxonomy: string | null;
-} ) => {
-	const [ attributes, setAttributes ] = useState( createPreviewAttributes() );
+}) => {
+	const [attributes, setAttributes] = useState(createPreviewAttributes());
 	const setBlockAttributes = useCallback(
-		( updates: Partial< ProductCollectionAttributes > ) => {
-			setAttributes( ( current ) => ( {
+		(updates: Partial<ProductCollectionAttributes>) => {
+			setAttributes((current) => ({
 				...current,
 				...updates,
-			} ) );
+			}));
 		},
 		[]
 	);
 
 	return (
 		<ProductCollectionContent
-			attributes={ attributes }
-			clientId={ `preview-${ taxonomy ?? 'attribute' }` }
-			context={ { templateSlug: '' } }
-			insertBlocksAfter={ () => undefined }
-			isSelected={ isSelected }
-			isUsingReferencePreviewMode={ false }
-			location={ {
+			attributes={attributes}
+			clientId={`preview-${taxonomy ?? 'attribute'}`}
+			context={{ templateSlug: '' }}
+			insertBlocksAfter={() => undefined}
+			isSelected={isSelected}
+			isUsingReferencePreviewMode={false}
+			location={{
 				sourceData: { taxonomy, termId: null },
 				type: LocationType.Archive,
-			} }
-			name={ PRODUCT_COLLECTION_BLOCK_NAME }
-			onReplace={ () => undefined }
-			openCollectionSelectionModal={ () => undefined }
-			setAttributes={ setBlockAttributes }
+			}}
+			name={PRODUCT_COLLECTION_BLOCK_NAME}
+			onReplace={() => undefined}
+			openCollectionSelectionModal={() => undefined}
+			setAttributes={setBlockAttributes}
 			tracksLocation="product-archive"
 		/>
 	);
 };
 
-describe( 'generic archive previews', () => {
-	it.each( [
-		[ 'tag', 'product_tag' ],
-		[ 'category', 'product_cat' ],
-		[ 'attribute', null ],
-	] )( 'shows the %s preview only while selected', async ( _, taxonomy ) => {
+describe('generic archive previews', () => {
+	it.each([
+		['tag', 'product_tag'],
+		['category', 'product_cat'],
+		['attribute', null],
+	])('shows the %s preview only while selected', async (_, taxonomy) => {
 		const { rerender } = render(
-			<GenericArchivePreview isSelected taxonomy={ taxonomy } />
+			<GenericArchivePreview isSelected taxonomy={taxonomy} />
 		);
 
 		expect(
-			await screen.findByTestId( 'product-collection-preview-button' )
+			await screen.findByTestId('product-collection-preview-button')
 		).toBeVisible();
 
 		rerender(
-			<GenericArchivePreview isSelected={ false } taxonomy={ taxonomy } />
+			<GenericArchivePreview isSelected={false} taxonomy={taxonomy} />
 		);
-		await waitFor( () =>
+		await waitFor(() =>
 			expect(
-				screen.queryByTestId( 'product-collection-preview-button' )
+				screen.queryByTestId('product-collection-preview-button')
 			).not.toBeInTheDocument()
 		);
 
-		rerender( <GenericArchivePreview isSelected taxonomy={ taxonomy } /> );
+		rerender(<GenericArchivePreview isSelected taxonomy={taxonomy} />);
 		expect(
-			await screen.findByTestId( 'product-collection-preview-button' )
+			await screen.findByTestId('product-collection-preview-button')
 		).toBeVisible();
-	} );
-} );
+	});
+});
 
-describe( 'default catalog order control', () => {
-	it( 'writes the selected default order to the site entity', async () => {
+describe('default catalog order control', () => {
+	it('writes the selected default order to the site entity', async () => {
 		const user = userEvent.setup();
-		const coreSelectors = select( coreStore );
-		const coreActions = dispatch( coreStore );
+		const coreSelectors = select(coreStore);
+		const coreActions = dispatch(coreStore);
 		const getEditedEntityRecord = jest
-			.spyOn( coreSelectors, 'getEditedEntityRecord' )
-			.mockReturnValue( {
+			.spyOn(coreSelectors, 'getEditedEntityRecord')
+			.mockReturnValue({
 				woocommerce_default_catalog_orderby: 'menu_order',
-			} );
+			});
 		const editEntityRecord = jest
-			.spyOn( coreActions, 'editEntityRecord' )
-			.mockReturnValue( undefined );
+			.spyOn(coreActions, 'editEntityRecord')
+			.mockReturnValue(undefined);
 		const trackInteraction = jest.fn();
 
 		try {
 			render(
 				<DefaultQueryOrderByControl
-					trackInteraction={ trackInteraction }
+					trackInteraction={trackInteraction}
 				/>
 			);
-			await act( async () => {
+			await act(async () => {
 				await user.selectOptions(
-					screen.getByRole( 'combobox', {
+					screen.getByRole('combobox', {
 						name: 'Default sort by',
-					} ),
+					}),
 					'price-desc'
 				);
-			} );
+			});
 
-			expect( editEntityRecord ).toHaveBeenCalledWith(
+			expect(editEntityRecord).toHaveBeenCalledWith(
 				'root',
 				'site',
 				undefined,
@@ -434,10 +431,10 @@ describe( 'default catalog order control', () => {
 					woocommerce_default_catalog_orderby: 'price-desc',
 				}
 			);
-			expect( trackInteraction ).toHaveBeenCalledWith( 'default-order' );
+			expect(trackInteraction).toHaveBeenCalledWith('default-order');
 		} finally {
 			getEditedEntityRecord.mockRestore();
 			editEntityRecord.mockRestore();
 		}
-	} );
-} );
+	});
+});

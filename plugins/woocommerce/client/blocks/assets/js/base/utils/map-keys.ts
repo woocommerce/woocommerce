@@ -1,11 +1,11 @@
 export const mapKeys = (
 	obj: object,
-	mapper: ( value: unknown, key: string ) => string
+	mapper: (value: unknown, key: string) => string
 ) =>
-	Object.entries( obj ).reduce(
-		( acc, [ key, value ] ) => ( {
+	Object.entries(obj).reduce(
+		(acc, [key, value]) => ({
 			...acc,
-			[ mapper( value, key ) ]: value,
-		} ),
+			[mapper(value, key)]: value,
+		}),
 		{}
 	);

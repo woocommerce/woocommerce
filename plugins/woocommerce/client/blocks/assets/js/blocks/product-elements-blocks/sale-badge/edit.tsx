@@ -12,10 +12,10 @@ import Block from './block';
 import type { BlockAttributes } from './types';
 import { useIsDescendentOfSingleProductTemplate } from '../shared/use-is-descendent-of-single-product-template';
 
-const Edit = ( {
+const Edit = ({
 	attributes,
 	context,
-}: BlockEditProps< BlockAttributes > & { context: Context } ): JSX.Element => {
+}: BlockEditProps<BlockAttributes> & { context: Context }): JSX.Element => {
 	const blockProps = useBlockProps();
 
 	// Remove the `style` prop from the block props to avoid passing it to the wrapper div.
@@ -29,9 +29,9 @@ const Edit = ( {
 	};
 
 	return (
-		<div { ...wrapperProps }>
+		<div {...wrapperProps}>
 			<Block
-				{ ...blockAttrs }
+				{...blockAttrs}
 				isDescendentOfSingleProductTemplate={
 					isDescendentOfSingleProductTemplate
 				}

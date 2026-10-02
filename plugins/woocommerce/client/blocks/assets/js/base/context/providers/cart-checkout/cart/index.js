@@ -14,10 +14,10 @@ import { CheckoutProvider } from '../checkout-provider';
  *                                     redirect to after successful
  *                                     submit.
  */
-export const CartProvider = ( { children, redirectUrl } ) => {
+export const CartProvider = ({ children, redirectUrl }) => {
 	return (
-		<CheckoutProvider redirectUrl={ redirectUrl }>
-			{ children }
+		<CheckoutProvider redirectUrl={redirectUrl}>
+			{children}
 		</CheckoutProvider>
 	);
 };

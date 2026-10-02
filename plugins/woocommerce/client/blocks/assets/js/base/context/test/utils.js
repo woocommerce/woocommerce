@@ -3,7 +3,7 @@
  */
 import { assertValidContextValue } from '../utils';
 
-describe( 'assertValidContextValue', () => {
+describe('assertValidContextValue', () => {
 	const contextName = 'testContext';
 	const validationMap = {
 		cheeseburger: {
@@ -17,37 +17,29 @@ describe( 'assertValidContextValue', () => {
 	};
 	it.each`
 		testValue
-		${ {} }
-		${ 10 }
-		${ { amountKetchup: '10' } }
+		${{}}
+		${10}
+		${{ amountKetchup: '10' }}
 	`(
 		'The value of $testValue is expected to trigger an Error',
-		( { testValue } ) => {
+		({ testValue }) => {
 			const invokeTest = () => {
-				assertValidContextValue(
-					contextName,
-					validationMap,
-					testValue
-				);
+				assertValidContextValue(contextName, validationMap, testValue);
 			};
-			expect( invokeTest ).toThrow();
+			expect(invokeTest).toThrow();
 		}
 	);
 	it.each`
 		testValue
-		${ { amountKetchup: 20 } }
-		${ { cheeseburger: 'fries', amountKetchup: 20 } }
+		${{ amountKetchup: 20 }}
+		${{ cheeseburger: 'fries', amountKetchup: 20 }}
 	`(
 		'The value of $testValue is not expected to trigger an Error',
-		( { testValue } ) => {
+		({ testValue }) => {
 			const invokeTest = () => {
-				assertValidContextValue(
-					contextName,
-					validationMap,
-					testValue
-				);
+				assertValidContextValue(contextName, validationMap, testValue);
 			};
-			expect( invokeTest ).not.toThrow();
+			expect(invokeTest).not.toThrow();
 		}
 	);
-} );
+});

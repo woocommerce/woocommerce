@@ -8,7 +8,7 @@ export const speakFoundShippingOptions = (
 	packageCount: number,
 	rateCount: number
 ) => {
-	if ( packageCount === 1 ) {
+	if (packageCount === 1) {
 		speak(
 			sprintf(
 				/* translators: %d number of shipping options found. */

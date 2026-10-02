@@ -15,23 +15,23 @@ export const MobileAppBanner = () => {
 	const isDismissed = userData.android_app_banner_dismissed === 'yes';
 
 	const onClick = () => {
-		updateUserPreferences( {
+		updateUserPreferences({
 			android_app_banner_dismissed: 'yes',
-		} );
+		});
 	};
 
-	if ( isDismissed ) {
+	if (isDismissed) {
 		return null;
 	}
 
 	return (
 		<WooHeaderItem>
-			<Banner onDismiss={ onClick } onInstall={ onClick } />
+			<Banner onDismiss={onClick} onInstall={onClick} />
 		</WooHeaderItem>
 	);
 };
 
-registerPlugin( 'mobile-banner-header-item', {
+registerPlugin('mobile-banner-header-item', {
 	render: MobileAppBanner,
 	scope: 'woocommerce-admin',
-} );
+});

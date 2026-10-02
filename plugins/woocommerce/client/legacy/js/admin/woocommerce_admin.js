@@ -8,14 +8,20 @@
 		// Toggle #wc-lost-connection-notice via WP core's heartbeat events (see WC_Admin_Assets::render_lost_connection_notice()).
 		if ( woocommerce_admin.show_lost_connection_notice ) {
 			$( document )
-				.on( 'heartbeat-connection-lost.wc-lost-connection-notice', function ( event, error, status ) {
-					if ( 'timeout' === error || 603 === status ) {
-						$( '#wc-lost-connection-notice' ).show();
+				.on(
+					'heartbeat-connection-lost.wc-lost-connection-notice',
+					function ( event, error, status ) {
+						if ( 'timeout' === error || 603 === status ) {
+							$( '#wc-lost-connection-notice' ).show();
+						}
 					}
-				} )
-				.on( 'heartbeat-connection-restored.wc-lost-connection-notice', function () {
-					$( '#wc-lost-connection-notice' ).hide();
-				} );
+				)
+				.on(
+					'heartbeat-connection-restored.wc-lost-connection-notice',
+					function () {
+						$( '#wc-lost-connection-notice' ).hide();
+					}
+				);
 		}
 
 		// Add buttons to product screen.
@@ -30,20 +36,22 @@
 					.attr( 'href', woocommerce_admin.urls.add_product );
 			}
 			if ( woocommerce_admin.urls.export_products ) {
-				const exportLink = document.createElement('a');
+				const exportLink = document.createElement( 'a' );
 				exportLink.href = woocommerce_admin.urls.export_products;
 				exportLink.className = 'page-title-action';
-				exportLink.textContent = woocommerce_admin.strings.export_products;
+				exportLink.textContent =
+					woocommerce_admin.strings.export_products;
 
-				$title_action.after(exportLink);
+				$title_action.after( exportLink );
 			}
 			if ( woocommerce_admin.urls.import_products ) {
-				const importLink = document.createElement('a');
+				const importLink = document.createElement( 'a' );
 				importLink.href = woocommerce_admin.urls.import_products;
 				importLink.className = 'page-title-action';
-				importLink.textContent = woocommerce_admin.strings.import_products;
+				importLink.textContent =
+					woocommerce_admin.strings.import_products;
 
-				$title_action.after(importLink);
+				$title_action.after( importLink );
 			}
 		} else {
 			$title_action.hide();
@@ -213,12 +221,10 @@
 							error,
 						] );
 					} else {
-						$(
-							document.body
-						).triggerHandler( 'wc_remove_error_tip', [
-							$( this ),
-							error,
-						] );
+						$( document.body ).triggerHandler(
+							'wc_remove_error_tip',
+							[ $( this ), error ]
+						);
 					}
 				}
 			)
@@ -718,38 +724,51 @@
 		}
 	} );
 
-	$( function() {
+	$( function () {
 		/**
 		 * Handles heartbeat integration of order locking when HPOS is enabled.
 		 */
 		var wc_order_lock = {
-			init: function() {
+			init: function () {
 				// Order screen.
 				this.$lock_dialog = $( '#post-lock-dialog.order-lock-dialog' );
-				if ( 0 !== this.$lock_dialog.length && 'undefined' !== typeof woocommerce_admin_meta_boxes ) {
+				if (
+					0 !== this.$lock_dialog.length &&
+					'undefined' !== typeof woocommerce_admin_meta_boxes
+				) {
 					// We do not want WP's lock to interfere.
 					$( document ).off( 'heartbeat-send.refresh-lock' );
 					$( document ).off( 'heartbeat-tick.refresh-lock' );
 
-					$( document ).on( 'heartbeat-send', this.refresh_order_lock );
+					$( document ).on(
+						'heartbeat-send',
+						this.refresh_order_lock
+					);
 					$( document ).on( 'heartbeat-tick', this.check_order_lock );
 				}
 
 				// Orders list table.
 				this.$list_table = $( 'table.wc-orders-list-table' );
 				if ( 0 !== this.$list_table.length ) {
-					$( document ).on( 'heartbeat-send', this.send_orders_in_list );
-					$( document ).on( 'heartbeat-tick', this.check_orders_in_list );
+					$( document ).on(
+						'heartbeat-send',
+						this.send_orders_in_list
+					);
+					$( document ).on(
+						'heartbeat-tick',
+						this.check_orders_in_list
+					);
 				}
 			},
 
-			refresh_order_lock: function( e, data ) {
-				delete data['wp-refresh-post-lock'];
-				data['wc-refresh-order-lock'] = woocommerce_admin_meta_boxes.post_id;
+			refresh_order_lock: function ( e, data ) {
+				delete data[ 'wp-refresh-post-lock' ];
+				data[ 'wc-refresh-order-lock' ] =
+					woocommerce_admin_meta_boxes.post_id;
 			},
 
-			check_order_lock: function( e, data ) {
-				var lock_data = data['wc-refresh-order-lock'];
+			check_order_lock: function ( e, data ) {
+				var lock_data = data[ 'wc-refresh-order-lock' ];
 
 				if ( ! lock_data || ! lock_data.error ) {
 					// No lock request in heartbeat or lock refreshed ok.
@@ -761,49 +780,65 @@
 				}
 
 				if ( lock_data.error.user_avatar_src ) {
-					wc_order_lock.$lock_dialog.find( '.post-locked-avatar' ).empty().append(
-						$(
-							'<img />',
-							{
-								'class': 'avatar avatar-64 photo',
+					wc_order_lock.$lock_dialog
+						.find( '.post-locked-avatar' )
+						.empty()
+						.append(
+							$( '<img />', {
+								class: 'avatar avatar-64 photo',
 								width: 64,
 								height: 64,
 								alt: '',
 								src: lock_data.error.user_avatar_src,
-								srcset: lock_data.error.user_avatar_src_2x ? lock_data.error.user_avatar_src_2x + ' 2x' : undefined
-							}
-						)
-					);
+								srcset: lock_data.error.user_avatar_src_2x
+									? lock_data.error.user_avatar_src_2x + ' 2x'
+									: undefined,
+							} )
+						);
 				}
 
-				wc_order_lock.$lock_dialog.find( '.currently-editing' ).text( lock_data.error.message );
+				wc_order_lock.$lock_dialog
+					.find( '.currently-editing' )
+					.text( lock_data.error.message );
 				wc_order_lock.$lock_dialog.show();
-				wc_order_lock.$lock_dialog.find( '.wp-tab-first' ).trigger( 'focus' );
+				wc_order_lock.$lock_dialog
+					.find( '.wp-tab-first' )
+					.trigger( 'focus' );
 			},
 
-			send_orders_in_list: function( e, data ) {
-				data['wc-check-locked-orders'] = wc_order_lock.$list_table.find( 'tr input[name="id[]"]' ).map(
-					function() { return this.value; }
-				).get();
+			send_orders_in_list: function ( e, data ) {
+				data[ 'wc-check-locked-orders' ] = wc_order_lock.$list_table
+					.find( 'tr input[name="id[]"]' )
+					.map( function () {
+						return this.value;
+					} )
+					.get();
 			},
 
-			check_orders_in_list: function( e, data ) {
-				var locked_orders = data['wc-check-locked-orders'] || {};
+			check_orders_in_list: function ( e, data ) {
+				var locked_orders = data[ 'wc-check-locked-orders' ] || {};
 
-				wc_order_lock.$list_table.find( 'tr' ).each( function( i, tr ) {
-					var $tr      = $( tr );
-					var order_id = $tr.find( 'input[name="id[]"]' ).val();
+				wc_order_lock.$list_table
+					.find( 'tr' )
+					.each( function ( i, tr ) {
+						var $tr = $( tr );
+						var order_id = $tr.find( 'input[name="id[]"]' ).val();
 
-					if ( locked_orders[ order_id ] ) {
-						if ( ! $tr.hasClass( 'wp-locked' ) ) {
-							$tr.find( '.check-column checkbox' ).prop( 'checked', false );
-							$tr.addClass( 'wp-locked' );
+						if ( locked_orders[ order_id ] ) {
+							if ( ! $tr.hasClass( 'wp-locked' ) ) {
+								$tr.find( '.check-column checkbox' ).prop(
+									'checked',
+									false
+								);
+								$tr.addClass( 'wp-locked' );
+							}
+						} else {
+							$tr.removeClass( 'wp-locked' )
+								.find( '.locked-info span' )
+								.empty();
 						}
-					} else {
-						$tr.removeClass( 'wp-locked' ).find( '.locked-info span' ).empty();
-					}
-				} );
-			}
+					} );
+			},
 		};
 
 		wc_order_lock.init();
@@ -811,9 +846,11 @@
 
 	// Function to handle selected product export
 	$( function () {
-		const $exportButton = $( 'a.page-title-action[href*="page=product_exporter"]');
+		const $exportButton = $(
+			'a.page-title-action[href*="page=product_exporter"]'
+		);
 		// bail out early.
-		if ( !$exportButton.length ) {
+		if ( ! $exportButton.length ) {
 			return;
 		}
 
@@ -839,19 +876,33 @@
 					if ( selectedProductIds.length > 0 ) {
 						// Construct the new href with product_ids and nonce.
 						const url = new URL( originalExportHref );
-						url.searchParams.set( 'product_ids', selectedProductIds.join(','));
-						url.searchParams.set( '_wpnonce', woocommerce_admin.nonces.export_selected_products_nonce);
+						url.searchParams.set(
+							'product_ids',
+							selectedProductIds.join( ',' )
+						);
+						url.searchParams.set(
+							'_wpnonce',
+							woocommerce_admin.nonces
+								.export_selected_products_nonce
+						);
 						const newHref = url.toString();
 						// Construct the text with the count of selected products.
-						const count      = selectedProductIds.length;
-						const buttonText = woocommerce_admin.strings.export_selected_products.replace( '%d', count );
-						$exportButton.text( buttonText ).attr( 'href', newHref );
+						const count = selectedProductIds.length;
+						const buttonText =
+							woocommerce_admin.strings.export_selected_products.replace(
+								'%d',
+								count
+							);
+						$exportButton
+							.text( buttonText )
+							.attr( 'href', newHref );
 					} else {
-						$exportButton.text( originalExportText ).attr( 'href', originalExportHref );
+						$exportButton
+							.text( originalExportText )
+							.attr( 'href', originalExportHref );
 					}
 				}, 0 );
 			}
 		);
 	} );
-
 } )( jQuery, woocommerce_admin );

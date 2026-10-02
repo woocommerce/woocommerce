@@ -12,35 +12,35 @@ import './editor.scss';
 interface BlockTitleProps {
 	className: string;
 	headingLevel: number;
-	onChange: ( value: string ) => void;
+	onChange: (value: string) => void;
 	heading: string;
 	instanceId: number;
 }
-const BlockTitle = ( {
+const BlockTitle = ({
 	className,
 	headingLevel,
 	onChange,
 	heading,
 	instanceId,
-}: BlockTitleProps ) => {
-	const TagName = `h${ headingLevel }` as keyof JSX.IntrinsicElements;
+}: BlockTitleProps) => {
+	const TagName = `h${headingLevel}` as keyof JSX.IntrinsicElements;
 	return (
-		<TagName className={ className }>
+		<TagName className={className}>
 			<label
 				className="screen-reader-text"
-				htmlFor={ `block-title-${ instanceId }` }
+				htmlFor={`block-title-${instanceId}`}
 			>
-				{ __( 'Block title', 'woocommerce' ) }
+				{__('Block title', 'woocommerce')}
 			</label>
 			<PlainText
-				id={ `block-title-${ instanceId }` }
+				id={`block-title-${instanceId}`}
 				className="wc-block-editor-components-title"
-				value={ heading }
-				onChange={ onChange }
-				style={ { backgroundColor: 'transparent' } }
+				value={heading}
+				onChange={onChange}
+				style={{ backgroundColor: 'transparent' }}
 			/>
 		</TagName>
 	);
 };
 
-export default withInstanceId( BlockTitle );
+export default withInstanceId(BlockTitle);

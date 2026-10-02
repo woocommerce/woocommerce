@@ -23,25 +23,25 @@ type User = {
 	name?: string;
 };
 
-export default function Edit( {
+export default function Edit({
 	attributes: { isLink, linkTarget, textAlign },
 	context: { commentId },
 	setAttributes,
-}: BlockEditProps< {
+}: BlockEditProps<{
 	isLink: boolean;
 	linkTarget: string;
 	textAlign: string;
-} > & {
+}> & {
 	context: { commentId: string };
-} ) {
-	const blockProps = useBlockProps( {
-		className: clsx( {
-			[ `has-text-align-${ textAlign }` ]: textAlign,
-		} ),
-	} );
+}) {
+	const blockProps = useBlockProps({
+		className: clsx({
+			[`has-text-align-${textAlign}`]: textAlign,
+		}),
+	});
 	let displayName = useSelect(
-		( select ) => {
-			const { getEntityRecord } = select( coreStore );
+		(select) => {
+			const { getEntityRecord } = select(coreStore);
 
 			const comment = getEntityRecord(
 				'root',
@@ -50,29 +50,29 @@ export default function Edit( {
 			) as Comment | null;
 			const authorName = comment?.author_name;
 
-			if ( comment && ! authorName ) {
+			if (comment && !authorName) {
 				const user = getEntityRecord(
 					'root',
 					'user',
 					comment.author
 				) as User | null;
-				return user?.name ?? __( 'Anonymous', 'woocommerce' );
+				return user?.name ?? __('Anonymous', 'woocommerce');
 			}
 			return authorName ?? '';
 		},
-		[ commentId ]
+		[commentId]
 	);
 
-	if ( ! commentId || ! displayName ) {
-		displayName = _x( 'Review Author', 'block title', 'woocommerce' );
+	if (!commentId || !displayName) {
+		displayName = _x('Review Author', 'block title', 'woocommerce');
 	}
 
 	const displayAuthor = isLink ? (
 		<a
 			href="#review-author-pseudo-link"
-			onClick={ ( event ) => event.preventDefault() }
+			onClick={(event) => event.preventDefault()}
 		>
-			{ displayName }
+			{displayName}
 		</a>
 	) : (
 		displayName
@@ -80,38 +80,38 @@ export default function Edit( {
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
+				<PanelBody title={__('Settings', 'woocommerce')}>
 					<ToggleControl
 						__nextHasNoMarginBottom
-						label={ __( 'Link to authors URL', 'woocommerce' ) }
-						onChange={ () => setAttributes( { isLink: ! isLink } ) }
-						checked={ isLink }
+						label={__('Link to authors URL', 'woocommerce')}
+						onChange={() => setAttributes({ isLink: !isLink })}
+						checked={isLink}
 					/>
-					{ isLink && (
+					{isLink && (
 						<ToggleControl
 							__nextHasNoMarginBottom
-							label={ __( 'Open in new tab', 'woocommerce' ) }
-							onChange={ ( value ) =>
-								setAttributes( {
+							label={__('Open in new tab', 'woocommerce')}
+							onChange={(value) =>
+								setAttributes({
 									linkTarget: value ? '_blank' : '_self',
-								} )
+								})
 							}
-							checked={ linkTarget === '_blank' }
+							checked={linkTarget === '_blank'}
 						/>
-					) }
+					)}
 				</PanelBody>
 			</InspectorControls>
 			<BlockControls>
 				<AlignmentControl
-					value={ textAlign }
-					onChange={ ( newAlign: string | undefined ) => {
-						if ( typeof newAlign === 'string' ) {
-							setAttributes( { textAlign: newAlign } );
+					value={textAlign}
+					onChange={(newAlign: string | undefined) => {
+						if (typeof newAlign === 'string') {
+							setAttributes({ textAlign: newAlign });
 						}
-					} }
+					}}
 				/>
 			</BlockControls>
-			<div { ...blockProps }>{ displayAuthor }</div>
+			<div {...blockProps}>{displayAuthor}</div>
 		</>
 	);
 }

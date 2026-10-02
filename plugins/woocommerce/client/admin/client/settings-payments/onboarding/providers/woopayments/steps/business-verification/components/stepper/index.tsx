@@ -10,59 +10,57 @@ import { useEffect } from '@wordpress/element';
 import { useOnboardingContext } from '../../../../data/onboarding-context';
 
 interface UseContextValueParams {
-	steps: Record< string, React.ReactElement >;
+	steps: Record<string, React.ReactElement>;
 	initialStep?: string;
-	onStepView?: ( step: string ) => void;
-	onStepChange?: ( step: string ) => void;
+	onStepView?: (step: string) => void;
+	onStepChange?: (step: string) => void;
 	onComplete?: () => void;
 	onExit?: () => void;
 }
 
-const useContextValue = ( {
+const useContextValue = ({
 	steps,
 	initialStep,
 	onStepChange,
 	onComplete,
 	onExit,
-}: UseContextValueParams ) => {
-	const keys = Object.keys( steps );
+}: UseContextValueParams) => {
+	const keys = Object.keys(steps);
 	const { currentStep: currentModalStep } = useOnboardingContext();
-	const [ currentStep, setCurrentStep ] = useState(
-		initialStep ?? keys[ 0 ]
-	);
+	const [currentStep, setCurrentStep] = useState(initialStep ?? keys[0]);
 
 	// If the current step is completed, move to the next step.
 	if (
-		currentModalStep?.context?.sub_steps[ currentStep ]?.status ===
+		currentModalStep?.context?.sub_steps[currentStep]?.status ===
 		'completed'
 	) {
-		const index = keys.indexOf( currentStep );
-		const next = keys[ index + 1 ];
-		setCurrentStep( next );
-		onStepChange?.( next );
+		const index = keys.indexOf(currentStep);
+		const next = keys[index + 1];
+		setCurrentStep(next);
+		onStepChange?.(next);
 	}
 
-	const progress = ( keys.indexOf( currentStep ) + 1 ) / keys.length;
+	const progress = (keys.indexOf(currentStep) + 1) / keys.length;
 
 	const nextStep = () => {
-		const index = keys.indexOf( currentStep );
-		const next = keys[ index + 1 ];
+		const index = keys.indexOf(currentStep);
+		const next = keys[index + 1];
 
-		if ( next ) {
-			setCurrentStep( next );
-			onStepChange?.( next );
+		if (next) {
+			setCurrentStep(next);
+			onStepChange?.(next);
 		} else {
 			onComplete?.();
 		}
 	};
 
 	const prevStep = () => {
-		const index = keys.indexOf( currentStep );
-		const prev = keys[ index - 1 ];
+		const index = keys.indexOf(currentStep);
+		const prev = keys[index - 1];
 
-		if ( prev ) {
-			setCurrentStep( prev );
-			onStepChange?.( prev );
+		if (prev) {
+			setCurrentStep(prev);
+			onStepChange?.(prev);
 		} else {
 			onExit?.();
 		}
@@ -79,24 +77,24 @@ const useContextValue = ( {
 	};
 };
 
-type ContextValue = ReturnType< typeof useContextValue >;
+type ContextValue = ReturnType<typeof useContextValue>;
 
-const StepperContext = createContext< ContextValue | null >( null );
+const StepperContext = createContext<ContextValue | null>(null);
 
 interface StepperProps {
 	children: React.ReactNode[];
 	initialStep?: string;
-	onStepView?: ( step: string ) => void;
-	onStepChange?: ( step: string ) => void;
+	onStepView?: (step: string) => void;
+	onStepChange?: (step: string) => void;
 	onComplete?: () => void;
 	onExit?: () => void;
 }
 
-const childrenToSteps = ( children: StepperProps[ 'children' ] ) => {
+const childrenToSteps = (children: StepperProps['children']) => {
 	return children.reduce(
-		( acc: Record< string, React.ReactElement >, child, index ) => {
-			if ( React.isValidElement( child ) ) {
-				acc[ child.props.name ?? index ] = child;
+		(acc: Record<string, React.ReactElement>, child, index) => {
+			if (React.isValidElement(child)) {
+				acc[child.props.name ?? index] = child;
 			}
 			return acc;
 		},
@@ -104,34 +102,34 @@ const childrenToSteps = ( children: StepperProps[ 'children' ] ) => {
 	);
 };
 
-export const Stepper: React.FC< StepperProps > = ( {
+export const Stepper: React.FC<StepperProps> = ({
 	children,
 	onStepView,
 	...rest
-} ) => {
-	const steps = childrenToSteps( children );
-	const value = useContextValue( {
+}) => {
+	const steps = childrenToSteps(children);
+	const value = useContextValue({
 		steps,
 		...rest,
-	} );
+	});
 
-	useEffect( () => {
-		onStepView?.( value.currentStep );
-	}, [ value.currentStep ] );
+	useEffect(() => {
+		onStepView?.(value.currentStep);
+	}, [value.currentStep]);
 
-	const CurrentStep = steps[ value.currentStep ];
+	const CurrentStep = steps[value.currentStep];
 
 	return (
-		<StepperContext.Provider value={ value }>
-			{ CurrentStep }
+		<StepperContext.Provider value={value}>
+			{CurrentStep}
 		</StepperContext.Provider>
 	);
 };
 
 export const useStepperContext = (): ContextValue => {
-	const context = useContext( StepperContext );
-	if ( ! context ) {
-		throw new Error( 'useStepperContext() must be used within <Stepper>' );
+	const context = useContext(StepperContext);
+	if (!context) {
+		throw new Error('useStepperContext() must be used within <Stepper>');
 	}
 	return context;
 };

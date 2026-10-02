@@ -44,32 +44,32 @@ export interface ErrorPlaceholderProps {
 	/**
 	 * Callback to retry an action.
 	 */
-	onRetry?: ( () => void ) | undefined;
+	onRetry?: (() => void) | undefined;
 }
 
-const ErrorPlaceholder = ( {
+const ErrorPlaceholder = ({
 	className = '',
 	error,
 	isLoading = false,
 	onRetry,
-}: ErrorPlaceholderProps ): JSX.Element => (
+}: ErrorPlaceholderProps): JSX.Element => (
 	<Placeholder
-		icon={ <Icon icon={ cautionFilled } /> }
-		label={ __( 'Sorry, an error occurred', 'woocommerce' ) }
-		className={ clsx( 'wc-block-api-error', className ) }
+		icon={<Icon icon={cautionFilled} />}
+		label={__('Sorry, an error occurred', 'woocommerce')}
+		className={clsx('wc-block-api-error', className)}
 	>
-		<ErrorMessage error={ error } />
-		{ onRetry && (
+		<ErrorMessage error={error} />
+		{onRetry && (
 			<>
-				{ isLoading ? (
+				{isLoading ? (
 					<Spinner />
 				) : (
-					<Button variant="secondary" onClick={ onRetry }>
-						{ __( 'Retry', 'woocommerce' ) }
+					<Button variant="secondary" onClick={onRetry}>
+						{__('Retry', 'woocommerce')}
 					</Button>
-				) }
+				)}
 			</>
-		) }
+		)}
 	</Placeholder>
 );
 

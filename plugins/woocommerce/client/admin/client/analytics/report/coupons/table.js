@@ -20,22 +20,22 @@ class CouponsReportTable extends Component {
 	constructor() {
 		super();
 
-		this.getHeadersContent = this.getHeadersContent.bind( this );
-		this.getRowsContent = this.getRowsContent.bind( this );
-		this.getSummary = this.getSummary.bind( this );
+		this.getHeadersContent = this.getHeadersContent.bind(this);
+		this.getRowsContent = this.getRowsContent.bind(this);
+		this.getSummary = this.getSummary.bind(this);
 	}
 
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Coupon code', 'woocommerce' ),
+				label: __('Coupon code', 'woocommerce'),
 				key: 'code',
 				required: true,
 				isLeftAligned: true,
 				isSortable: true,
 			},
 			{
-				label: __( 'Orders', 'woocommerce' ),
+				label: __('Orders', 'woocommerce'),
 				key: 'orders_count',
 				required: true,
 				defaultSort: true,
@@ -43,29 +43,29 @@ class CouponsReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'Amount discounted', 'woocommerce' ),
+				label: __('Amount discounted', 'woocommerce'),
 				key: 'amount',
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Created', 'woocommerce' ),
+				label: __('Created', 'woocommerce'),
 				key: 'created',
 			},
 			{
-				label: __( 'Expires', 'woocommerce' ),
+				label: __('Expires', 'woocommerce'),
 				key: 'expires',
 			},
 			{
-				label: __( 'Type', 'woocommerce' ),
+				label: __('Type', 'woocommerce'),
 				key: 'type',
 			},
 		];
 	}
 
-	getRowsContent( coupons ) {
+	getRowsContent(coupons) {
 		const { query } = this.props;
-		const persistedQuery = getPersistedQuery( query );
+		const persistedQuery = getPersistedQuery(query);
 		const dateFormat = getAdminSetting(
 			'dateFormat',
 			defaultTableDateFormat
@@ -76,7 +76,7 @@ class CouponsReportTable extends Component {
 			getCurrencyConfig,
 		} = this.context;
 
-		return map( coupons, ( coupon ) => {
+		return map(coupons, (coupon) => {
 			const {
 				amount,
 				coupon_id: couponId,
@@ -92,38 +92,38 @@ class CouponsReportTable extends Component {
 
 			const couponUrl =
 				couponId > 0
-					? getNewPath( persistedQuery, '/analytics/coupons', {
+					? getNewPath(persistedQuery, '/analytics/coupons', {
 							filter: 'single_coupon',
 							coupons: couponId,
-					  } )
+						})
 					: null;
 
 			const couponLink =
 				couponUrl === null ? (
 					code
 				) : (
-					<Link href={ couponUrl } type="wc-admin">
-						{ code }
+					<Link href={couponUrl} type="wc-admin">
+						{code}
 					</Link>
 				);
 
 			const ordersUrl =
 				couponId > 0
-					? getNewPath( persistedQuery, '/analytics/orders', {
+					? getNewPath(persistedQuery, '/analytics/orders', {
 							filter: 'advanced',
 							coupon_includes: couponId,
-					  } )
+						})
 					: null;
 			const ordersLink =
 				ordersUrl === null ? (
 					ordersCount
 				) : (
-					<Link href={ ordersUrl } type="wc-admin">
-						{ formatValue(
+					<Link href={ordersUrl} type="wc-admin">
+						{formatValue(
 							getCurrencyConfig(),
 							'number',
 							ordersCount
-						) }
+						)}
 					</Link>
 				);
 
@@ -137,40 +137,34 @@ class CouponsReportTable extends Component {
 					value: ordersCount,
 				},
 				{
-					display: formatAmount( amount ),
-					value: getCurrencyFormatDecimal( amount ),
+					display: formatAmount(amount),
+					value: getCurrencyFormatDecimal(amount),
 				},
 				{
 					display: dateCreated ? (
-						<Date
-							date={ dateCreated }
-							visibleFormat={ dateFormat }
-						/>
+						<Date date={dateCreated} visibleFormat={dateFormat} />
 					) : (
-						__( 'N/A', 'woocommerce' )
+						__('N/A', 'woocommerce')
 					),
 					value: dateCreated,
 				},
 				{
 					display: dateExpires ? (
-						<Date
-							date={ dateExpires }
-							visibleFormat={ dateFormat }
-						/>
+						<Date date={dateExpires} visibleFormat={dateFormat} />
 					) : (
-						__( 'N/A', 'woocommerce' )
+						__('N/A', 'woocommerce')
 					),
 					value: dateExpires,
 				},
 				{
-					display: this.getCouponType( discountType ),
+					display: this.getCouponType(discountType),
 					value: discountType,
 				},
 			];
-		} );
+		});
 	}
 
-	getSummary( totals ) {
+	getSummary(totals) {
 		const {
 			coupons_count: couponsCount = 0,
 			orders_count: ordersCount = 0,
@@ -180,29 +174,29 @@ class CouponsReportTable extends Component {
 		const currency = getCurrencyConfig();
 		return [
 			{
-				label: _n( 'Coupon', 'Coupons', couponsCount, 'woocommerce' ),
-				value: formatValue( currency, 'number', couponsCount ),
+				label: _n('Coupon', 'Coupons', couponsCount, 'woocommerce'),
+				value: formatValue(currency, 'number', couponsCount),
 			},
 			{
-				label: _n( 'Order', 'Orders', ordersCount, 'woocommerce' ),
-				value: formatValue( currency, 'number', ordersCount ),
+				label: _n('Order', 'Orders', ordersCount, 'woocommerce'),
+				value: formatValue(currency, 'number', ordersCount),
 			},
 			{
-				label: __( 'Amount discounted', 'woocommerce' ),
-				value: formatAmount( amount ),
+				label: __('Amount discounted', 'woocommerce'),
+				value: formatAmount(amount),
 			},
 		];
 	}
 
-	getCouponType( discountType ) {
+	getCouponType(discountType) {
 		// Extension types use their wc_get_coupon_types() label; core types keep the shorter labels below.
 		const couponTypes = {
-			...getAdminSetting( 'couponTypes', {} ),
-			percent: __( 'Percentage', 'woocommerce' ),
-			fixed_cart: __( 'Fixed cart', 'woocommerce' ),
-			fixed_product: __( 'Fixed product', 'woocommerce' ),
+			...getAdminSetting('couponTypes', {}),
+			percent: __('Percentage', 'woocommerce'),
+			fixed_cart: __('Fixed cart', 'woocommerce'),
+			fixed_product: __('Fixed product', 'woocommerce'),
 		};
-		return couponTypes[ discountType ] || __( 'N/A', 'woocommerce' );
+		return couponTypes[discountType] || __('N/A', 'woocommerce');
 	}
 
 	render() {
@@ -212,23 +206,23 @@ class CouponsReportTable extends Component {
 			<ReportTable
 				compareBy="coupons"
 				endpoint="coupons"
-				getHeadersContent={ this.getHeadersContent }
-				getRowsContent={ this.getRowsContent }
-				getSummary={ this.getSummary }
-				summaryFields={ [ 'coupons_count', 'orders_count', 'amount' ] }
-				isRequesting={ isRequesting }
+				getHeadersContent={this.getHeadersContent}
+				getRowsContent={this.getRowsContent}
+				getSummary={this.getSummary}
+				summaryFields={['coupons_count', 'orders_count', 'amount']}
+				isRequesting={isRequesting}
 				itemIdField="coupon_id"
-				query={ query }
+				query={query}
 				searchBy="coupons"
-				tableQuery={ {
+				tableQuery={{
 					orderby: query.orderby || 'orders_count',
 					order: query.order || 'desc',
 					extended_info: true,
-				} }
-				title={ __( 'Coupons', 'woocommerce' ) }
+				}}
+				title={__('Coupons', 'woocommerce')}
 				columnPrefsKey="coupons_report_columns"
-				filters={ filters }
-				advancedFilters={ advancedFilters }
+				filters={filters}
+				advancedFilters={advancedFilters}
 			/>
 		);
 	}

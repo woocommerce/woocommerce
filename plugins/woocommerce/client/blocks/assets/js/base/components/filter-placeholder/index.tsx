@@ -7,12 +7,10 @@ interface FilterTitlePlaceholderProps {
 	children?: React.ReactNode;
 }
 
-const FilterTitlePlaceholder = ( {
+const FilterTitlePlaceholder = ({
 	children,
-}: FilterTitlePlaceholderProps ): JSX.Element => {
-	return (
-		<div className="wc-block-filter-title-placeholder">{ children }</div>
-	);
+}: FilterTitlePlaceholderProps): JSX.Element => {
+	return <div className="wc-block-filter-title-placeholder">{children}</div>;
 };
 
 export default FilterTitlePlaceholder;

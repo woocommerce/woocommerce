@@ -3,8 +3,8 @@
  */
 import mustContain from './must-contain';
 
-export const productPriceValidation = ( value: string ) =>
-	mustContain( value, '<price/>' );
+export const productPriceValidation = (value: string) =>
+	mustContain(value, '<price/>');
 
 /**
  * Ensure that the screen reader price text contains required placeholders.
@@ -18,8 +18,8 @@ export const productPriceScreenReaderValidation = (
 	value: string
 ): true | never => {
 	return (
-		mustContain( value, '<quantity/>' ) &&
-		mustContain( value, '<productName/>' ) &&
-		mustContain( value, '<price/>' )
+		mustContain(value, '<quantity/>') &&
+		mustContain(value, '<productName/>') &&
+		mustContain(value, '<price/>')
 	);
 };

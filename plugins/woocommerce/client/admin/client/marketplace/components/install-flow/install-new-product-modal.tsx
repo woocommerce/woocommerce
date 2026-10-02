@@ -23,94 +23,94 @@ import { getAdminSetting } from '../../../utils/admin-settings';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 
 enum InstallFlowStatus {
-	'notConnected',
-	'notInstalled',
-	'installing',
-	'installedCanActivate',
-	'installedCannotActivate',
-	'installFailed',
-	'activating',
-	'activated',
-	'activationFailed',
+	notConnected,
+	notInstalled,
+	installing,
+	installedCanActivate,
+	installedCannotActivate,
+	installFailed,
+	activating,
+	activated,
+	activationFailed,
 }
 
-function InstallNewProductModal( props: { products: Product[] } ) {
-	const [ installStatus, setInstallStatus ] = useState< InstallFlowStatus >(
+function InstallNewProductModal(props: { products: Product[] }) {
+	const [installStatus, setInstallStatus] = useState<InstallFlowStatus>(
 		InstallFlowStatus.notInstalled
 	);
-	const [ product, setProduct ] = useState< Product >();
-	const [ installedProducts, setInstalledProducts ] = useState< string[] >();
-	const [ isStoreConnected, setIsStoreConnected ] = useState< boolean >();
-	const [ activateUrl, setActivateUrl ] = useState< string >();
-	const [ documentationUrl, setDocumentationUrl ] = useState< string >();
-	const [ showModal, setShowModal ] = useState< boolean >( false );
-	const [ notice, setNotice ] = useState< {
+	const [product, setProduct] = useState<Product>();
+	const [installedProducts, setInstalledProducts] = useState<string[]>();
+	const [isStoreConnected, setIsStoreConnected] = useState<boolean>();
+	const [activateUrl, setActivateUrl] = useState<string>();
+	const [documentationUrl, setDocumentationUrl] = useState<string>();
+	const [showModal, setShowModal] = useState<boolean>(false);
+	const [notice, setNotice] = useState<{
 		message: string;
 		status: NoticeStatus;
-	} >();
-	const { addInstalledProduct } = useContext( MarketplaceContext );
+	}>();
+	const { addInstalledProduct } = useContext(MarketplaceContext);
 
 	const query = useQuery();
 
 	// Check if the store is connected to WooCommerce.com. This is run once, when the component is mounted.
-	useEffect( () => {
-		const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+	useEffect(() => {
+		const wccomSettings = getAdminSetting('wccomHelper', {});
 
-		setInstalledProducts( wccomSettings?.installedProducts );
-		setIsStoreConnected( wccomSettings?.isConnected );
-	}, [] );
+		setInstalledProducts(wccomSettings?.installedProducts);
+		setIsStoreConnected(wccomSettings?.isConnected);
+	}, []);
 
 	/**
 	 * Listen for changes in the query, and show the modal if the installProduct query param is set.
 	 * If it's set, try to find the product in the products prop. We need it to be able to
 	 * display title, icon and send product ID to WooCommerce.com to create an order.
 	 */
-	useEffect( () => {
-		setShowModal( false );
-		if ( ! query.installProduct ) {
+	useEffect(() => {
+		setShowModal(false);
+		if (!query.installProduct) {
 			return;
 		}
 
-		const productId = parseInt( query.installProduct, 10 );
+		const productId = parseInt(query.installProduct, 10);
 
 		/**
 		 * Try to find the product in the search results. We need to product to be able to
 		 * show the title and the icon.
 		 */
 		const productToInstall = props.products.find(
-			( item ) => item.id === productId
+			(item) => item.id === productId
 		);
 
-		if ( ! productToInstall ) {
+		if (!productToInstall) {
 			return;
 		}
 
-		if ( installedProducts ) {
-			const isInstalled = !! installedProducts.find(
-				( item ) => item === productToInstall.slug
+		if (installedProducts) {
+			const isInstalled = !!installedProducts.find(
+				(item) => item === productToInstall.slug
 			);
 
-			if ( isInstalled ) {
+			if (isInstalled) {
 				return;
 			}
 		}
 
-		if ( ! isStoreConnected ) {
-			setInstallStatus( InstallFlowStatus.notConnected );
-			setNotice( {
+		if (!isStoreConnected) {
+			setInstallStatus(InstallFlowStatus.notConnected);
+			setNotice({
 				status: 'warning',
 				message: __(
 					'In order to install a product, you need to first connect your account.',
 					'woocommerce'
 				),
-			} );
+			});
 		} else {
-			setInstallStatus( InstallFlowStatus.notInstalled );
+			setInstallStatus(InstallFlowStatus.notInstalled);
 		}
 
-		setShowModal( true );
-		setProduct( productToInstall );
-	}, [ query, props.products, installedProducts, isStoreConnected ] );
+		setShowModal(true);
+		setProduct(productToInstall);
+	}, [query, props.products, installedProducts, isStoreConnected]);
 
 	/**
 	 * WordPress gives us a activateURL as a response to us installig the product.
@@ -118,70 +118,70 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 	 * and activate the plugin.
 	 */
 	function activateClick() {
-		if ( ! activateUrl ) {
+		if (!activateUrl) {
 			return;
 		}
 
-		setInstallStatus( InstallFlowStatus.activating );
+		setInstallStatus(InstallFlowStatus.activating);
 
-		recordEvent( 'marketplace_activate_new_product_clicked', {
+		recordEvent('marketplace_activate_new_product_clicked', {
 			product_id: product ? product.id : 0,
-		} );
+		});
 
-		fetch( activateUrl )
-			.then( () => {
-				setInstallStatus( InstallFlowStatus.activated );
-			} )
-			.catch( () => {
-				setInstallStatus( InstallFlowStatus.activationFailed );
-				setNotice( {
+		fetch(activateUrl)
+			.then(() => {
+				setInstallStatus(InstallFlowStatus.activated);
+			})
+			.catch(() => {
+				setInstallStatus(InstallFlowStatus.activationFailed);
+				setNotice({
 					status: 'error',
 					message: __(
 						'Activation failed. Please try again from the plugins page.',
 						'woocommerce'
 					),
-				} );
-			} );
+				});
+			});
 	}
 
 	function orderAndInstall() {
-		if ( ! product || ! product.id ) {
+		if (!product || !product.id) {
 			return;
 		}
 
-		recordEvent( 'marketplace_install_new_product_clicked', {
+		recordEvent('marketplace_install_new_product_clicked', {
 			product_id: product.id,
-		} );
+		});
 
-		setInstallStatus( InstallFlowStatus.installing );
+		setInstallStatus(InstallFlowStatus.installing);
 
-		createOrder( product.id )
-			.then( ( response ) => {
+		createOrder(product.id)
+			.then((response) => {
 				// This narrows the CreateOrderResponse type to CreateOrderSuccessResponse
-				if ( ! response.success ) {
+				if (!response.success) {
 					throw response;
 				}
 
-				void dispatch( installingStore ).startInstalling(
-					String( product.id ?? '' )
+				void dispatch(installingStore).startInstalling(
+					String(product.id ?? '')
 				);
-				setDocumentationUrl( response.data.documentation_url );
+				setDocumentationUrl(response.data.documentation_url);
 
-				if ( product.slug ) {
-					addInstalledProduct( product.slug ?? '' );
+				if (product.slug) {
+					addInstalledProduct(product.slug ?? '');
 				}
 
 				return downloadProduct(
 					response.data.product_type,
 					response.data.zip_slug
-				).then( ( downloadResponse ) => {
-					void dispatch( installingStore ).stopInstalling(
-						String( product.id ?? '' )
+				).then((downloadResponse) => {
+					void dispatch(installingStore).stopInstalling(
+						String(product.id ?? '')
 					);
 
 					// No activateUrl means we can't activate the plugin.
-					if ( downloadResponse.data.activateUrl ) {
-						setActivateUrl( downloadResponse.data.activateUrl );
+					if (downloadResponse.data.activateUrl) {
+						setActivateUrl(downloadResponse.data.activateUrl);
 
 						setInstallStatus(
 							InstallFlowStatus.installedCanActivate
@@ -191,29 +191,29 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 							InstallFlowStatus.installedCannotActivate
 						);
 					}
-				} );
-			} )
-			.catch( ( error ) => {
+				});
+			})
+			.catch((error) => {
 				/**
 				 * apiFetch doesn't return the HTTP error code in the error condition.
 				 * We'll rely on the data returned by the server.
 				 */
-				if ( error.data.redirect_location ) {
-					setNotice( {
+				if (error.data.redirect_location) {
+					setNotice({
 						status: 'warning',
 						message: __(
 							'We need your address to complete installing this product. We will redirect you to WooCommerce.com checkout. Afterwards, you will be able to install the product.',
 							'woocommerce'
 						),
-					} );
+					});
 
 					// Wait to allow users to read the notice.
-					setTimeout( () => {
+					setTimeout(() => {
 						window.location.href = error.data.redirect_location;
-					}, 5000 );
+					}, 5000);
 				} else {
-					setInstallStatus( InstallFlowStatus.installFailed );
-					setNotice( {
+					setInstallStatus(InstallFlowStatus.installFailed);
+					setNotice({
 						status: 'error',
 						message:
 							error.data.message ??
@@ -221,16 +221,16 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 								'An error occurred. Please try again later.',
 								'woocommerce'
 							),
-					} );
+					});
 				}
-			} );
+			});
 	}
 
 	function onClose() {
-		setInstallStatus( InstallFlowStatus.notInstalled );
-		setNotice( undefined );
+		setInstallStatus(InstallFlowStatus.notInstalled);
+		setNotice(undefined);
 
-		navigateTo( {
+		navigateTo({
 			url: getNewPath(
 				{
 					...query,
@@ -240,19 +240,19 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 				MARKETPLACE_PATH,
 				{}
 			),
-		} );
+		});
 	}
 
 	function getTitle(): string {
-		if ( installStatus === InstallFlowStatus.activated ) {
-			return __( 'You are ready to go!', 'woocommerce' );
+		if (installStatus === InstallFlowStatus.activated) {
+			return __('You are ready to go!', 'woocommerce');
 		}
 
-		return __( 'Add to Store', 'woocommerce' );
+		return __('Add to Store', 'woocommerce');
 	}
 
 	function getDescription(): string {
-		if ( installStatus === InstallFlowStatus.notConnected ) {
+		if (installStatus === InstallFlowStatus.notConnected) {
 			return '';
 		}
 
@@ -266,34 +266,34 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 			);
 		}
 
-		if ( installStatus === InstallFlowStatus.installedCannotActivate ) {
+		if (installStatus === InstallFlowStatus.installedCannotActivate) {
 			return __(
 				"Extension successfully installed but we can't activate it at the moment. Please visit the plugins page to see more.",
 				'woocommerce'
 			);
 		}
 
-		if ( installStatus === InstallFlowStatus.activated ) {
+		if (installStatus === InstallFlowStatus.activated) {
 			return __(
 				'Keep the momentum going and start setting up your extension.',
 				'woocommerce'
 			);
 		}
 
-		return __( 'Would you like to install this extension?', 'woocommerce' );
+		return __('Would you like to install this extension?', 'woocommerce');
 	}
 
 	function secondaryButton(): React.ReactElement {
-		if ( installStatus === InstallFlowStatus.activated ) {
-			if ( documentationUrl ) {
+		if (installStatus === InstallFlowStatus.activated) {
+			if (documentationUrl) {
 				return (
 					<Button
 						variant="tertiary"
-						href={ documentationUrl }
+						href={documentationUrl}
 						className="woocommerce-marketplace__header-account-modal-button"
-						key={ 'docs' }
+						key={'docs'}
 					>
-						{ __( 'View Docs', 'woocommerce' ) }
+						{__('View Docs', 'woocommerce')}
 					</Button>
 				);
 			}
@@ -304,18 +304,18 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 		return (
 			<Button
 				variant="tertiary"
-				onClick={ onClose }
+				onClick={onClose}
 				className="woocommerce-marketplace__header-account-modal-button"
-				key={ 'cancel' }
+				key={'cancel'}
 			>
-				{ __( 'Cancel', 'woocommerce' ) }
+				{__('Cancel', 'woocommerce')}
 			</Button>
 		);
 	}
 
 	function primaryButton(): React.ReactElement {
-		if ( installStatus === InstallFlowStatus.notConnected ) {
-			return <ConnectAccountButton variant="primary" key={ 'connect' } />;
+		if (installStatus === InstallFlowStatus.notConnected) {
+			return <ConnectAccountButton variant="primary" key={'connect'} />;
 		}
 
 		if (
@@ -325,12 +325,12 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 			return (
 				<Button
 					variant="primary"
-					onClick={ activateClick }
-					key={ 'activate' }
-					isBusy={ installStatus === InstallFlowStatus.activating }
-					disabled={ installStatus === InstallFlowStatus.activating }
+					onClick={activateClick}
+					key={'activate'}
+					isBusy={installStatus === InstallFlowStatus.activating}
+					disabled={installStatus === InstallFlowStatus.activating}
 				>
-					{ __( 'Activate', 'woocommerce' ) }
+					{__('Activate', 'woocommerce')}
 				</Button>
 			);
 		}
@@ -343,11 +343,11 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 			return (
 				<Button
 					variant="primary"
-					href={ WP_ADMIN_PLUGIN_LIST_URL }
+					href={WP_ADMIN_PLUGIN_LIST_URL}
 					className="woocommerce-marketplace__header-account-modal-button"
-					key={ 'plugin-list' }
+					key={'plugin-list'}
 				>
-					{ __( 'View in Plugins', 'woocommerce' ) }
+					{__('View in Plugins', 'woocommerce')}
 				</Button>
 			);
 		}
@@ -355,15 +355,15 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 		return (
 			<Button
 				variant="primary"
-				onClick={ orderAndInstall }
-				key={ 'install' }
-				isBusy={ installStatus === InstallFlowStatus.installing }
+				onClick={orderAndInstall}
+				key={'install'}
+				isBusy={installStatus === InstallFlowStatus.installing}
 				disabled={
 					installStatus === InstallFlowStatus.installing ||
 					installStatus === InstallFlowStatus.installFailed
 				}
 			>
-				{ __( 'Install', 'woocommerce' ) }
+				{__('Install', 'woocommerce')}
 			</Button>
 		);
 	}
@@ -373,41 +373,41 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 	 * for the product narrows the type from "Product | undefined"
 	 * to "Product".
 	 */
-	if ( ! product || ! showModal ) {
+	if (!product || !showModal) {
 		return <></>;
 	}
 
 	return (
 		<Modal
-			title={ getTitle() }
-			onRequestClose={ onClose }
-			focusOnMount={ true }
+			title={getTitle()}
+			onRequestClose={onClose}
+			focusOnMount={true}
 			className="woocommerce-marketplace__header-account-modal has-size-medium"
-			style={ { borderRadius: 4 } }
+			style={{ borderRadius: 4 }}
 			overlayClassName="woocommerce-marketplace__header-account-modal-overlay"
 		>
-			{ notice && (
-				<Notice status={ notice.status } isDismissible={ false }>
-					{ notice.message }
+			{notice && (
+				<Notice status={notice.status} isDismissible={false}>
+					{notice.message}
 				</Notice>
-			) }
+			)}
 			<p className="woocommerce-marketplace__header-account-modal-text">
-				{ getDescription() }
+				{getDescription()}
 			</p>
-			{ product && (
+			{product && (
 				<ProductCard
-					product={ product }
-					small={ true }
-					tracksData={ {
+					product={product}
+					small={true}
+					tracksData={{
 						position: 1,
 						group: 'install-flow',
 						label: 'install',
-					} }
+					}}
 				/>
-			) }
+			)}
 			<ButtonGroup className="woocommerce-marketplace__header-account-modal-button-group">
-				{ secondaryButton() }
-				{ primaryButton() }
+				{secondaryButton()}
+				{primaryButton()}
 			</ButtonGroup>
 		</Modal>
 	);

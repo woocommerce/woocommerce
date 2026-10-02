@@ -16,33 +16,33 @@ interface ReviewSortSelectProps {
 	value: 'most-recent' | 'highest-rating' | 'lowest-rating';
 }
 
-const ReviewSortSelect = ( {
+const ReviewSortSelect = ({
 	onChange,
 	readOnly,
 	value,
-}: ReviewSortSelectProps ): JSX.Element => {
+}: ReviewSortSelectProps): JSX.Element => {
 	return (
 		<SortSelect
 			className="wc-block-review-sort-select wc-block-components-review-sort-select"
-			label={ __( 'Order by', 'woocommerce' ) }
-			onChange={ onChange }
-			options={ [
+			label={__('Order by', 'woocommerce')}
+			onChange={onChange}
+			options={[
 				{
 					key: 'most-recent',
-					label: __( 'Most recent', 'woocommerce' ),
+					label: __('Most recent', 'woocommerce'),
 				},
 				{
 					key: 'highest-rating',
-					label: __( 'Highest rating', 'woocommerce' ),
+					label: __('Highest rating', 'woocommerce'),
 				},
 				{
 					key: 'lowest-rating',
-					label: __( 'Lowest rating', 'woocommerce' ),
+					label: __('Lowest rating', 'woocommerce'),
 				},
-			] }
-			readOnly={ readOnly }
-			screenReaderLabel={ __( 'Order reviews by', 'woocommerce' ) }
-			value={ value }
+			]}
+			readOnly={readOnly}
+			screenReaderLabel={__('Order reviews by', 'woocommerce')}
+			value={value}
 		/>
 	);
 };

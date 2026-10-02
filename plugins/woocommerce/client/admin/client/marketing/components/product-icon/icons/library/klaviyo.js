@@ -10,8 +10,8 @@ import { WC_ASSET_URL } from '~/utils/admin-settings';
 
 const klaviyo = (
 	<img
-		src={ `${ WC_ASSET_URL }images/marketing/klaviyo.png` }
-		alt={ __( 'Klaviyo', 'woocommerce' ) }
+		src={`${WC_ASSET_URL}images/marketing/klaviyo.png`}
+		alt={__('Klaviyo', 'woocommerce')}
 	/>
 );
 

@@ -15,17 +15,14 @@ interface ReviewListProps {
 	reviews: Review[];
 }
 
-const ReviewList = ( {
-	attributes,
-	reviews,
-}: ReviewListProps ): JSX.Element => {
-	const showAvatars = getSetting< boolean >( 'showAvatars', true );
-	const reviewRatingsEnabled = getSetting< boolean >(
+const ReviewList = ({ attributes, reviews }: ReviewListProps): JSX.Element => {
+	const showAvatars = getSetting<boolean>('showAvatars', true);
+	const reviewRatingsEnabled = getSetting<boolean>(
 		'reviewRatingsEnabled',
 		true
 	);
 	const showReviewImage =
-		( showAvatars || attributes.imageType === 'product' ) &&
+		(showAvatars || attributes.imageType === 'product') &&
 		attributes.showReviewImage;
 	const showReviewRating =
 		reviewRatingsEnabled && attributes.showReviewRating;
@@ -37,17 +34,17 @@ const ReviewList = ( {
 
 	return (
 		<ul className="wc-block-review-list wc-block-components-review-list">
-			{ reviews.length === 0 ? (
-				<ReviewListItem attributes={ attrs } />
+			{reviews.length === 0 ? (
+				<ReviewListItem attributes={attrs} />
 			) : (
-				reviews.map( ( review, index ) => (
+				reviews.map((review, index) => (
 					<ReviewListItem
-						key={ review.id ?? `review-placeholder-${ index }` }
-						attributes={ attrs }
-						review={ review }
+						key={review.id ?? `review-placeholder-${index}`}
+						attributes={attrs}
+						review={review}
 					/>
-				) )
-			) }
+				))
+			)}
 		</ul>
 	);
 };

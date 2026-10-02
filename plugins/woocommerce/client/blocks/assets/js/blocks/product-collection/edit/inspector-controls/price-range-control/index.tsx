@@ -18,61 +18,61 @@ import { CoreFilterNames, QueryControlProps } from '../../../types';
 import { DEFAULT_FILTERS } from '../../../constants';
 import PriceTextField from './PriceTextField';
 
-const PriceRangeControl = ( props: QueryControlProps ) => {
+const PriceRangeControl = (props: QueryControlProps) => {
 	const { query, trackInteraction, setQueryAttribute } = props;
 
 	const value = query.priceRange;
 
 	const deselectCallback = () => {
-		setQueryAttribute( { priceRange: DEFAULT_FILTERS.priceRange } );
-		trackInteraction( CoreFilterNames.PRICE_RANGE );
+		setQueryAttribute({ priceRange: DEFAULT_FILTERS.priceRange });
+		trackInteraction(CoreFilterNames.PRICE_RANGE);
 	};
 
 	return (
 		<ToolsPanelItem
-			label={ __( 'Price Range', 'woocommerce' ) }
-			hasValue={ () => {
+			label={__('Price Range', 'woocommerce')}
+			hasValue={() => {
 				return value?.min !== undefined || value?.max !== undefined;
-			} }
-			onDeselect={ deselectCallback }
-			resetAllFilter={ deselectCallback }
+			}}
+			onDeselect={deselectCallback}
+			resetAllFilter={deselectCallback}
 			className="wc-block-product-price-range-control"
 		>
 			<BaseControl.VisualLabel>
-				{ __( 'PRICE RANGE', 'woocommerce' ) }
+				{__('PRICE RANGE', 'woocommerce')}
 			</BaseControl.VisualLabel>
 
 			<HStack spacing="2">
 				<PriceTextField
-					label={ __( 'MIN', 'woocommerce' ) }
-					value={ value?.min as number }
-					onChange={ ( val?: number ) => {
+					label={__('MIN', 'woocommerce')}
+					value={value?.min as number}
+					onChange={(val?: number) => {
 						const min = val === 0 ? undefined : val;
 
-						setQueryAttribute( {
+						setQueryAttribute({
 							priceRange: {
 								min,
 								max: value?.max as number,
 							},
-						} );
-						trackInteraction( CoreFilterNames.PRICE_RANGE );
-					} }
+						});
+						trackInteraction(CoreFilterNames.PRICE_RANGE);
+					}}
 				/>
 
 				<PriceTextField
-					label={ __( 'MAX', 'woocommerce' ) }
-					value={ value?.max as number }
-					onChange={ ( val?: number ) => {
+					label={__('MAX', 'woocommerce')}
+					value={value?.max as number}
+					onChange={(val?: number) => {
 						const max = val === 0 ? undefined : val;
 
-						setQueryAttribute( {
+						setQueryAttribute({
 							priceRange: {
 								min: value?.min as number,
 								max,
 							},
-						} );
-						trackInteraction( CoreFilterNames.PRICE_RANGE );
-					} }
+						});
+						trackInteraction(CoreFilterNames.PRICE_RANGE);
+					}}
 				/>
 			</HStack>
 		</ToolsPanelItem>

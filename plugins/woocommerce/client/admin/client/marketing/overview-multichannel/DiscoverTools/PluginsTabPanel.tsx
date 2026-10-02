@@ -31,36 +31,34 @@ import './DiscoverTools.scss';
  * 1. Get an array of unique subcategories from the list of plugins.
  * 2. Map the subcategories schema into tabs schema.
  */
-const getTabs = ( plugins: RecommendedPlugin[] ) => {
+const getTabs = (plugins: RecommendedPlugin[]) => {
 	const pluginSubcategories = uniqBy(
-		flatMapDeep( plugins, ( p ) => p.subcategories ),
-		( subcategory ) => subcategory.slug
+		flatMapDeep(plugins, (p) => p.subcategories),
+		(subcategory) => subcategory.slug
 	);
 
-	return pluginSubcategories.map( ( subcategory ) => ( {
+	return pluginSubcategories.map((subcategory) => ({
 		name: subcategory.slug,
 		title: subcategory.name,
-	} ) );
+	}));
 };
 
 type PluginsTabPanelType = {
 	isLoading: boolean;
 	plugins: RecommendedPlugin[];
-	onInstallAndActivate: ( pluginSlug: string ) => void;
+	onInstallAndActivate: (pluginSlug: string) => void;
 };
 
 /**
  * A TabPanel where each tab is a plugin subcategory.
  */
-export const PluginsTabPanel = ( {
+export const PluginsTabPanel = ({
 	isLoading,
 	plugins,
 	onInstallAndActivate,
-}: PluginsTabPanelType ) => {
-	const [ currentPlugin, setCurrentPlugin ] = useState< string | null >(
-		null
-	);
-	const { installAndActivatePlugins } = useDispatch( pluginsStore );
+}: PluginsTabPanelType) => {
+	const [currentPlugin, setCurrentPlugin] = useState<string | null>(null);
+	const { installAndActivatePlugins } = useDispatch(pluginsStore);
 	const { loadInstalledPluginsAfterActivation } =
 		useInstalledPluginsWithoutChannels();
 
@@ -74,52 +72,50 @@ export const PluginsTabPanel = ( {
 	 *
 	 * @param plugin Plugin to be installed and activated.
 	 */
-	const installAndActivate = async ( plugin: RecommendedPlugin ) => {
-		setCurrentPlugin( plugin.product );
+	const installAndActivate = async (plugin: RecommendedPlugin) => {
+		setCurrentPlugin(plugin.product);
 
 		try {
-			recordEvent( 'marketing_recommended_extension', {
+			recordEvent('marketing_recommended_extension', {
 				name: plugin.title,
 				source: getRecommendationSource(),
-			} );
+			});
 
-			const response = await installAndActivatePlugins( [
-				plugin.product,
-			] );
+			const response = await installAndActivatePlugins([plugin.product]);
 
-			onInstallAndActivate( plugin.product );
-			loadInstalledPluginsAfterActivation( plugin.product );
-			createNoticesFromResponse( response );
-		} catch ( error ) {
-			createNoticesFromResponse( error );
+			onInstallAndActivate(plugin.product);
+			loadInstalledPluginsAfterActivation(plugin.product);
+			createNoticesFromResponse(response);
+		} catch (error) {
+			createNoticesFromResponse(error);
 		}
 
-		setCurrentPlugin( null );
+		setCurrentPlugin(null);
 	};
 
 	return (
-		<TabPanel tabs={ getTabs( plugins ) }>
-			{ ( tab ) => {
-				const subcategoryPlugins = plugins.filter( ( plugin ) =>
+		<TabPanel tabs={getTabs(plugins)}>
+			{(tab) => {
+				const subcategoryPlugins = plugins.filter((plugin) =>
 					plugin.subcategories.some(
-						( subcategory ) => subcategory.slug === tab.name
+						(subcategory) => subcategory.slug === tab.name
 					)
 				);
 
-				const renderButton = ( plugin: RecommendedPlugin ) => {
-					const buttonDisabled = !! currentPlugin || isLoading;
+				const renderButton = (plugin: RecommendedPlugin) => {
+					const buttonDisabled = !!currentPlugin || isLoading;
 
-					if ( plugin.direct_install ) {
+					if (plugin.direct_install) {
 						return (
 							<Button
 								variant="secondary"
-								isBusy={ currentPlugin === plugin.product }
-								disabled={ buttonDisabled }
-								onClick={ () => {
-									void installAndActivate( plugin );
-								} }
+								isBusy={currentPlugin === plugin.product}
+								disabled={buttonDisabled}
+								onClick={() => {
+									void installAndActivate(plugin);
+								}}
 							>
-								{ __( 'Install extension', 'woocommerce' ) }
+								{__('Install extension', 'woocommerce')}
 							</Button>
 						);
 					}
@@ -127,49 +123,44 @@ export const PluginsTabPanel = ( {
 					return (
 						<Button
 							variant="secondary"
-							href={ getInAppPurchaseUrl( plugin.url ) }
-							disabled={ buttonDisabled }
-							onClick={ () => {
-								recordEvent(
-									'marketing_recommended_extension',
-									{
-										name: plugin.title,
-										source: getRecommendationSource(),
-									}
-								);
-							} }
+							href={getInAppPurchaseUrl(plugin.url)}
+							disabled={buttonDisabled}
+							onClick={() => {
+								recordEvent('marketing_recommended_extension', {
+									name: plugin.title,
+									source: getRecommendationSource(),
+								});
+							}}
 						>
-							{ __( 'View details', 'woocommerce' ) }
+							{__('View details', 'woocommerce')}
 						</Button>
 					);
 				};
 
 				return (
 					<>
-						{ subcategoryPlugins.map( ( plugin ) => (
-							<Fragment key={ plugin.product }>
+						{subcategoryPlugins.map((plugin) => (
+							<Fragment key={plugin.product}>
 								<CardDivider />
 								<PluginCardBody
 									icon={
 										<img
-											src={ plugin.icon }
-											alt={ plugin.title }
+											src={plugin.icon}
+											alt={plugin.title}
 										/>
 									}
-									name={ plugin.title }
-									pills={ plugin.tags.map( ( tag ) => (
-										<Pill key={ tag.slug }>
-											{ tag.name }
-										</Pill>
-									) ) }
-									description={ plugin.description }
-									button={ renderButton( plugin ) }
+									name={plugin.title}
+									pills={plugin.tags.map((tag) => (
+										<Pill key={tag.slug}>{tag.name}</Pill>
+									))}
+									description={plugin.description}
+									button={renderButton(plugin)}
 								/>
 							</Fragment>
-						) ) }
+						))}
 					</>
 				);
-			} }
+			}}
 		</TabPanel>
 	);
 };

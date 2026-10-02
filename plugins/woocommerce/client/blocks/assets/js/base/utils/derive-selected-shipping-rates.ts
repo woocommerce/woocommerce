@@ -11,12 +11,12 @@ import { CartShippingRate } from '@woocommerce/types';
  */
 export const deriveSelectedShippingRates = (
 	shippingRates: CartShippingRate[]
-): Record< string, string > =>
+): Record<string, string> =>
 	Object.fromEntries(
 		shippingRates.map(
-			( { package_id: packageId, shipping_rates: packageRates } ) => [
+			({ package_id: packageId, shipping_rates: packageRates }) => [
 				packageId,
-				packageRates.find( ( rate ) => rate.selected )?.rate_id || '',
+				packageRates.find((rate) => rate.selected)?.rate_id || '',
 			]
 		)
 	);

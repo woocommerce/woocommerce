@@ -10,7 +10,7 @@ import { registerPlugin, getPlugin } from '@wordpress/plugins';
 import { PaymentsBannerWrapper } from './payment-settings-banner';
 import { SETTINGS_SLOT_FILL_CONSTANT } from '../settings/settings-slots';
 
-const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
+const { Fill } = createSlotFill(SETTINGS_SLOT_FILL_CONSTANT);
 const PLUGIN_ID = 'woocommerce-admin-paymentsgateways-settings-banner';
 
 const PaymentsBannerFill = () => {
@@ -22,12 +22,12 @@ const PaymentsBannerFill = () => {
 };
 
 export const registerPaymentsSettingsBannerFill = () => {
-	if ( getPlugin( PLUGIN_ID ) ) {
+	if (getPlugin(PLUGIN_ID)) {
 		return;
 	}
 
-	registerPlugin( PLUGIN_ID, {
+	registerPlugin(PLUGIN_ID, {
 		scope: 'woocommerce-payments-settings',
 		render: PaymentsBannerFill,
-	} );
+	});
 };

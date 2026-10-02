@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { ToggleControl } from '@wordpress/components';
 
 interface GridContentControlProps {
-	onChange: ( settings: GridContentSettings ) => void;
+	onChange: (settings: GridContentSettings) => void;
 	settings: GridContentSettings;
 }
 
@@ -23,10 +23,10 @@ interface GridContentSettings {
  * @param {function(any):any} props.onChange
  * @param {Object}            props.settings
  */
-const GridContentControl = ( {
+const GridContentControl = ({
 	onChange,
 	settings,
-}: GridContentControlProps ) => {
+}: GridContentControlProps) => {
 	const { image, button, price, rating, title } = settings;
 	// If `image` is undefined, that might be because it's a block that was
 	// created before the `image` attribute existed, so we default to true.
@@ -34,31 +34,31 @@ const GridContentControl = ( {
 	return (
 		<>
 			<ToggleControl
-				label={ __( 'Product image', 'woocommerce' ) }
-				checked={ imageIsVisible }
-				onChange={ () =>
-					onChange( { ...settings, image: ! imageIsVisible } )
+				label={__('Product image', 'woocommerce')}
+				checked={imageIsVisible}
+				onChange={() =>
+					onChange({ ...settings, image: !imageIsVisible })
 				}
 			/>
 			<ToggleControl
-				label={ __( 'Product title', 'woocommerce' ) }
-				checked={ title }
-				onChange={ () => onChange( { ...settings, title: ! title } ) }
+				label={__('Product title', 'woocommerce')}
+				checked={title}
+				onChange={() => onChange({ ...settings, title: !title })}
 			/>
 			<ToggleControl
-				label={ __( 'Product price', 'woocommerce' ) }
-				checked={ price }
-				onChange={ () => onChange( { ...settings, price: ! price } ) }
+				label={__('Product price', 'woocommerce')}
+				checked={price}
+				onChange={() => onChange({ ...settings, price: !price })}
 			/>
 			<ToggleControl
-				label={ __( 'Product rating', 'woocommerce' ) }
-				checked={ rating }
-				onChange={ () => onChange( { ...settings, rating: ! rating } ) }
+				label={__('Product rating', 'woocommerce')}
+				checked={rating}
+				onChange={() => onChange({ ...settings, rating: !rating })}
 			/>
 			<ToggleControl
-				label={ __( 'Add to Cart button', 'woocommerce' ) }
-				checked={ button }
-				onChange={ () => onChange( { ...settings, button: ! button } ) }
+				label={__('Add to Cart button', 'woocommerce')}
+				checked={button}
+				onChange={() => onChange({ ...settings, button: !button })}
 			/>
 		</>
 	);

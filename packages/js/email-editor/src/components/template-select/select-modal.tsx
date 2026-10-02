@@ -27,33 +27,33 @@ import { recordEvent, recordEventOnce } from '../../events';
 function getCategoriesFromTemplates(
 	templates: TemplatePreview[],
 	patternCategories: UserPatternCategory[]
-): Array< { name: TemplateCategory; label: string } > {
-	const categoryLabels = new Map< string, string >(
-		patternCategories.map( ( cat ) => [ cat.name, cat.label ] )
+): Array<{ name: TemplateCategory; label: string }> {
+	const categoryLabels = new Map<string, string>(
+		patternCategories.map((cat) => [cat.name, cat.label])
 	);
 	// Add localized label for 'recent' category (used by email posts)
-	categoryLabels.set( 'recent', __( 'Recent', __i18n_text_domain__ ) );
+	categoryLabels.set('recent', __('Recent', __i18n_text_domain__));
 
-	const uniqueCategories = new Set< string >();
-	for ( const template of templates ) {
-		if ( template.category ) {
-			uniqueCategories.add( template.category );
+	const uniqueCategories = new Set<string>();
+	for (const template of templates) {
+		if (template.category) {
+			uniqueCategories.add(template.category);
 		}
 	}
 
-	return [ ...uniqueCategories ].map( ( category ) => ( {
+	return [...uniqueCategories].map((category) => ({
 		name: category as TemplateCategory,
-		label: categoryLabels.get( category ) ?? category,
-	} ) );
+		label: categoryLabels.get(category) ?? category,
+	}));
 }
 
-function SelectTemplateBody( {
+function SelectTemplateBody({
 	templates,
 	handleTemplateSelection,
 	templateSelectMode,
-} ) {
+}) {
 	const patternCategories = useSelect(
-		( select ) =>
+		(select) =>
 			select(
 				coreStore
 			).getBlockPatternCategories() as UserPatternCategory[],
@@ -62,54 +62,54 @@ function SelectTemplateBody( {
 
 	const hideRecentCategory = templateSelectMode === 'swap';
 
-	const displayCategories = useMemo( () => {
+	const displayCategories = useMemo(() => {
 		const allCategories = getCategoriesFromTemplates(
 			templates,
 			patternCategories ?? []
 		);
 
-		if ( hideRecentCategory ) {
-			return allCategories.filter( ( cat ) => cat.name !== 'recent' );
+		if (hideRecentCategory) {
+			return allCategories.filter((cat) => cat.name !== 'recent');
 		}
 
 		// Put 'recent' category first
-		return allCategories.sort( ( a, b ) => {
-			if ( a.name === 'recent' ) return -1;
-			if ( b.name === 'recent' ) return 1;
+		return allCategories.sort((a, b) => {
+			if (a.name === 'recent') return -1;
+			if (b.name === 'recent') return 1;
 			return 0;
-		} );
-	}, [ templates, patternCategories, hideRecentCategory ] );
+		});
+	}, [templates, patternCategories, hideRecentCategory]);
 
-	const [ selectedCategory, setSelectedCategory ] =
-		useState< TemplateCategory | null >( null );
+	const [selectedCategory, setSelectedCategory] =
+		useState<TemplateCategory | null>(null);
 
-	const handleCategorySelection = ( category: TemplateCategory ) => {
-		recordEvent( 'template_select_modal_category_change', { category } );
-		setSelectedCategory( category );
+	const handleCategorySelection = (category: TemplateCategory) => {
+		recordEvent('template_select_modal_category_change', { category });
+		setSelectedCategory(category);
 	};
 
-	useEffect( () => {
-		if ( selectedCategory !== null || displayCategories.length === 0 ) {
+	useEffect(() => {
+		if (selectedCategory !== null || displayCategories.length === 0) {
 			return undefined;
 		}
 
-		const timeoutId = setTimeout( () => {
+		const timeoutId = setTimeout(() => {
 			const defaultCategory =
-				displayCategories.find( ( cat ) => cat.name !== 'recent' )
-					?.name ?? displayCategories[ 0 ]?.name;
-			setSelectedCategory( defaultCategory );
-		}, 1000 ); // using setTimeout to ensure the template styles are available before block preview
+				displayCategories.find((cat) => cat.name !== 'recent')?.name ??
+				displayCategories[0]?.name;
+			setSelectedCategory(defaultCategory);
+		}, 1000); // using setTimeout to ensure the template styles are available before block preview
 
-		return () => clearTimeout( timeoutId );
-	}, [ displayCategories, selectedCategory ] );
+		return () => clearTimeout(timeoutId);
+	}, [displayCategories, selectedCategory]);
 
-	if ( displayCategories.length === 0 ) {
+	if (displayCategories.length === 0) {
 		return (
 			<div className="email-editor-template-select">
 				<TemplateList
-					templates={ templates }
-					onTemplateSelection={ handleTemplateSelection }
-					selectedCategory={ selectedCategory }
+					templates={templates}
+					onTemplateSelection={handleTemplateSelection}
+					selectedCategory={selectedCategory}
 				/>
 			</div>
 		);
@@ -119,101 +119,99 @@ function SelectTemplateBody( {
 		<Tabs.Root
 			className="email-editor-template-select"
 			orientation="vertical"
-			value={ selectedCategory }
-			onValueChange={ handleCategorySelection }
+			value={selectedCategory}
+			onValueChange={handleCategorySelection}
 		>
 			<TemplateCategoriesListSidebar
-				templateCategories={ displayCategories }
+				templateCategories={displayCategories}
 			/>
-			{ displayCategories.map( ( { name } ) => (
+			{displayCategories.map(({ name }) => (
 				<Tabs.Panel
-					key={ name }
-					value={ name }
-					tabIndex={ -1 }
+					key={name}
+					value={name}
+					tabIndex={-1}
 					className="email-editor-template-select__panel"
 				>
 					<TemplateList
-						templates={ templates }
-						onTemplateSelection={ handleTemplateSelection }
-						selectedCategory={ name }
+						templates={templates}
+						onTemplateSelection={handleTemplateSelection}
+						selectedCategory={name}
 					/>
 				</Tabs.Panel>
-			) ) }
+			))}
 		</Tabs.Root>
 	);
 }
 
-const MemorizedSelectTemplateBody = memo( SelectTemplateBody );
+const MemorizedSelectTemplateBody = memo(SelectTemplateBody);
 
-export function SelectTemplateModal( {
+export function SelectTemplateModal({
 	onSelectCallback,
 	closeCallback = null,
 	previewContent = '',
 	postType,
-} ) {
+}) {
 	const templateSelectMode = previewContent ? 'swap' : 'new';
-	recordEventOnce( 'template_select_modal_opened', { templateSelectMode } );
+	recordEventOnce('template_select_modal_opened', { templateSelectMode });
 
-	const [ templates, emailPosts ] = usePreviewTemplates( previewContent );
+	const [templates, emailPosts] = usePreviewTemplates(previewContent);
 
 	const hasTemplates = templates?.length > 0;
 
-	const handleTemplateSelection = ( template: TemplatePreview ) => {
+	const handleTemplateSelection = (template: TemplatePreview) => {
 		const templateIsPostContent = template.type === postType;
 
 		const postContent = template.template as unknown as EmailEditorPostType;
 
-		recordEvent( 'template_select_modal_template_selected', {
+		recordEvent('template_select_modal_template_selected', {
 			templateSlug: template.slug,
 			templateSelectMode,
 			templateType: template.type,
-		} );
+		});
 
 		// When we provide previewContent, we don't want to reset the blocks
-		if ( ! previewContent ) {
-			void dispatch( editorStore ).resetEditorBlocks(
-				template.emailParsed
-			);
+		if (!previewContent) {
+			void dispatch(editorStore).resetEditorBlocks(template.emailParsed);
 		}
 
-		void dispatch( storeName ).setTemplateToPost(
+		void dispatch(storeName).setTemplateToPost(
 			templateIsPostContent ? postContent.template : template.slug
 		);
 		onSelectCallback();
 	};
 
 	const handleCloseWithoutSelection = () => {
-		const template = templates[ 0 ] ?? null;
-		if ( ! template ) {
+		const template = templates[0] ?? null;
+		if (!template) {
 			return;
 		} // Prevent closing when templates are not loaded
 		recordEvent(
 			'template_select_modal_handle_close_without_template_selected'
 		);
-		handleTemplateSelection( template );
+		handleTemplateSelection(template);
 	};
 
 	return (
 		<Modal
 			title={
 				templateSelectMode === 'new'
-					? __( 'Start with an email preset', __i18n_text_domain__ )
-					: __( 'Select a template', __i18n_text_domain__ )
+					? __('Start with an email preset', __i18n_text_domain__)
+					: __('Select a template', __i18n_text_domain__)
 			}
-			onRequestClose={ () => {
-				recordEvent( 'template_select_modal_closed', {
+			onRequestClose={() => {
+				recordEvent('template_select_modal_closed', {
 					templateSelectMode,
-				} );
+				});
 				return closeCallback
 					? closeCallback()
 					: handleCloseWithoutSelection();
-			} }
+			}}
 			isFullScreen
 		>
 			<MemorizedSelectTemplateBody
-				templates={ [ ...templates, ...emailPosts ] }
-				handleTemplateSelection={ handleTemplateSelection }
-				templateSelectMode={ templateSelectMode }
+				templates={[...templates, ...emailPosts]}
+				handleTemplateSelection={handleTemplateSelection}
+				templateSelectMode={templateSelectMode}
 			/>
 
 			<Flex className="email-editor-modal-footer" justify="flex-end">
@@ -221,15 +219,15 @@ export function SelectTemplateModal( {
 					<Button
 						variant="tertiary"
 						className="email-editor-start_from_scratch_button"
-						onClick={ () => {
+						onClick={() => {
 							recordEvent(
 								'template_select_modal_start_from_scratch_clicked'
 							);
 							return handleCloseWithoutSelection();
-						} }
-						isBusy={ ! hasTemplates }
+						}}
+						isBusy={!hasTemplates}
 					>
-						{ __( 'Start from scratch', __i18n_text_domain__ ) }
+						{__('Start from scratch', __i18n_text_domain__)}
 					</Button>
 				</FlexItem>
 			</Flex>

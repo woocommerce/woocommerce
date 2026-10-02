@@ -24,7 +24,7 @@ export type Review =
 				src: string;
 				srcset: string;
 			};
-			reviewer_avatar_urls: { [ size: string ]: string };
+			reviewer_avatar_urls: { [size: string]: string };
 			verified: boolean;
 			rating: number;
 	  }

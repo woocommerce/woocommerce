@@ -16,22 +16,19 @@ export interface WithMaybeSelectedOption {
  * HOC that transforms a single select to a multiple select.
  */
 const withTransformSingleSelectToMultipleSelect = <
-	T extends Record< string, unknown >,
+	T extends Record<string, unknown>,
 >(
-	OriginalComponent: FunctionComponent< T & WithMaybeSelectedOption >
+	OriginalComponent: FunctionComponent<T & WithMaybeSelectedOption>
 ) => {
-	return ( props: T & WithMaybeSelectedOption ): JSX.Element => {
+	return (props: T & WithMaybeSelectedOption): JSX.Element => {
 		let { selected } = props;
 		selected = selected === undefined ? null : selected;
 		const isNil = selected === null;
 
-		return Array.isArray( selected ) ? (
-			<OriginalComponent { ...props } />
+		return Array.isArray(selected) ? (
+			<OriginalComponent {...props} />
 		) : (
-			<OriginalComponent
-				{ ...props }
-				selected={ isNil ? [] : [ selected ] }
-			/>
+			<OriginalComponent {...props} selected={isNil ? [] : [selected]} />
 		);
 	};
 };

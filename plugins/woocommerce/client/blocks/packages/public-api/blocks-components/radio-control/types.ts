@@ -11,7 +11,7 @@ export interface RadioControlProps {
 	// The selected option. This is a controlled component.
 	selected: string;
 	// Fired when an option is changed.
-	onChange: ( value: string ) => void;
+	onChange: (value: string) => void;
 	// List of radio control options.
 	options: RadioControlOption[];
 	// Is the control disabled.
@@ -26,7 +26,7 @@ export interface RadioControlProps {
 export interface RadioControlOptionProps {
 	checked: boolean;
 	name?: string;
-	onChange: ( value: string ) => void;
+	onChange: (value: string) => void;
 	option: RadioControlOption;
 	disabled?: boolean;
 	// Should the selected option be highlighted with a border?
@@ -44,7 +44,7 @@ interface RadioControlOptionContent {
 
 export interface RadioControlOption extends RadioControlOptionContent {
 	value: string;
-	onChange?: ( value: string ) => void;
+	onChange?: (value: string) => void;
 }
 
 export interface RadioControlOptionLayout extends RadioControlOptionContent {

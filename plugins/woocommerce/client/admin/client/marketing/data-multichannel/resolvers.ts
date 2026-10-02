@@ -27,14 +27,14 @@ import { isApiFetchError } from './guards';
 
 export function* getRegisteredChannels() {
 	try {
-		const data: RegisteredChannel[] = yield apiFetch( {
-			path: `${ API_NAMESPACE }/channels`,
-		} );
+		const data: RegisteredChannel[] = yield apiFetch({
+			path: `${API_NAMESPACE}/channels`,
+		});
 
-		yield receiveRegisteredChannelsSuccess( data );
-	} catch ( error ) {
-		if ( isApiFetchError( error ) ) {
-			yield receiveRegisteredChannelsError( error );
+		yield receiveRegisteredChannelsSuccess(data);
+	} catch (error) {
+		if (isApiFetchError(error)) {
+			yield receiveRegisteredChannelsError(error);
 		}
 
 		throw error;
@@ -43,14 +43,14 @@ export function* getRegisteredChannels() {
 
 export function* getRecommendedChannels() {
 	try {
-		const data: RecommendedChannel[] = yield apiFetch( {
-			path: `${ API_NAMESPACE }/recommendations?category=channels`,
-		} );
+		const data: RecommendedChannel[] = yield apiFetch({
+			path: `${API_NAMESPACE}/recommendations?category=channels`,
+		});
 
-		yield receiveRecommendedChannelsSuccess( data );
-	} catch ( error ) {
-		if ( isApiFetchError( error ) ) {
-			yield receiveRecommendedChannelsError( error );
+		yield receiveRecommendedChannelsSuccess(data);
+	} catch (error) {
+		if (isApiFetchError(error)) {
+			yield receiveRecommendedChannelsError(error);
 		}
 
 		throw error;
@@ -62,14 +62,14 @@ export function* getRecommendedChannels() {
  *
  * If the header is not present, then the function will return `undefined`.
  */
-const getTotalFromResponse = ( response: Response ) => {
-	const total = response.headers.get( 'x-wp-total' );
+const getTotalFromResponse = (response: Response) => {
+	const total = response.headers.get('x-wp-total');
 
-	if ( total === null ) {
+	if (total === null) {
 		return undefined;
 	}
 
-	return parseInt( total, 10 );
+	return parseInt(total, 10);
 };
 
 /**
@@ -78,17 +78,17 @@ const getTotalFromResponse = ( response: Response ) => {
  * @param page    Page number. First page is `1`.
  * @param perPage Page size, i.e. number of records in one page.
  */
-export function* getCampaigns( page: number, perPage: number ) {
+export function* getCampaigns(page: number, perPage: number) {
 	try {
-		const response: Response = yield apiFetch( {
-			path: `${ API_NAMESPACE }/campaigns?page=${ page }&per_page=${ perPage }`,
+		const response: Response = yield apiFetch({
+			path: `${API_NAMESPACE}/campaigns?page=${page}&per_page=${perPage}`,
 			parse: false,
-		} );
+		});
 
-		const total = getTotalFromResponse( response );
-		const payload: Campaign[] = yield awaitResponseJson( response );
+		const total = getTotalFromResponse(response);
+		const payload: Campaign[] = yield awaitResponseJson(response);
 
-		yield receiveCampaigns( {
+		yield receiveCampaigns({
 			payload,
 			error: false,
 			meta: {
@@ -96,13 +96,13 @@ export function* getCampaigns( page: number, perPage: number ) {
 				perPage,
 				total,
 			},
-		} );
-	} catch ( error ) {
-		if ( error instanceof Response ) {
-			const total = getTotalFromResponse( error );
-			const payload: ApiFetchError = yield awaitResponseJson( error );
+		});
+	} catch (error) {
+		if (error instanceof Response) {
+			const total = getTotalFromResponse(error);
+			const payload: ApiFetchError = yield awaitResponseJson(error);
 
-			yield receiveCampaigns( {
+			yield receiveCampaigns({
 				payload,
 				error: true,
 				meta: {
@@ -110,7 +110,7 @@ export function* getCampaigns( page: number, perPage: number ) {
 					perPage,
 					total,
 				},
-			} );
+			});
 		}
 
 		throw error;
@@ -119,14 +119,14 @@ export function* getCampaigns( page: number, perPage: number ) {
 
 export function* getCampaignTypes() {
 	try {
-		const data: CampaignType[] = yield apiFetch( {
-			path: `${ API_NAMESPACE }/campaign-types`,
-		} );
+		const data: CampaignType[] = yield apiFetch({
+			path: `${API_NAMESPACE}/campaign-types`,
+		});
 
-		yield receiveCampaignTypes( data );
-	} catch ( error ) {
-		if ( isApiFetchError( error ) ) {
-			yield receiveCampaignTypes( error );
+		yield receiveCampaignTypes(data);
+	} catch (error) {
+		if (isApiFetchError(error)) {
+			yield receiveCampaignTypes(error);
 		}
 	}
 }

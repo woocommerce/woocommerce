@@ -18,19 +18,19 @@ export const blockAttributes = {
 		default: [
 			{
 				view: 'woocommerce/filled-cart-block',
-				label: __( 'Filled Cart', 'woocommerce' ),
-				icon: <Icon icon={ filledCart } />,
+				label: __('Filled Cart', 'woocommerce'),
+				icon: <Icon icon={filledCart} />,
 			},
 			{
 				view: 'woocommerce/empty-cart-block',
-				label: __( 'Empty Cart', 'woocommerce' ),
-				icon: <Icon icon={ removeCart } />,
+				label: __('Empty Cart', 'woocommerce'),
+				icon: <Icon icon={removeCart} />,
 			},
 		],
 	},
 	hasDarkControls: {
 		type: 'boolean',
-		default: getSetting( 'hasDarkEditorStyleSupport', false ),
+		default: getSetting('hasDarkEditorStyleSupport', false),
 	},
 	// Deprecated - here for v1 migration support
 	checkoutPageId: {

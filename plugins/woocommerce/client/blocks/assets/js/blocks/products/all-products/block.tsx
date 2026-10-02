@@ -18,11 +18,11 @@ interface BlockProps {
 /**
  * The All Products Block.
  */
-class Block extends Component< BlockProps > {
+class Block extends Component<BlockProps> {
 	render() {
 		const { attributes, urlParameterSuffix } = this.props;
 
-		if ( attributes.isPreview ) {
+		if (attributes.isPreview) {
 			return gridBlockPreview;
 		}
 
@@ -37,10 +37,10 @@ class Block extends Component< BlockProps > {
 				parentName="woocommerce/all-products"
 				parentClassName="wc-block-grid"
 			>
-				<StoreNoticesContainer context={ 'wc/all-products' } />
+				<StoreNoticesContainer context={'wc/all-products'} />
 				<ProductListContainer
-					attributes={ attributes }
-					urlParameterSuffix={ urlParameterSuffix }
+					attributes={attributes}
+					urlParameterSuffix={urlParameterSuffix}
 				/>
 			</InnerBlockLayoutContextProvider>
 		);

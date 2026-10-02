@@ -7,28 +7,26 @@ interface Attributes {
 	attributes: {
 		label: string;
 	};
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
+	setAttributes: (attributes: Record<string, unknown>) => void;
 }
 
-export const Edit = ( {
+export const Edit = ({
 	attributes: { label },
 	setAttributes,
-}: Attributes ): JSX.Element => {
+}: Attributes): JSX.Element => {
 	const blockProps = useBlockProps();
 
 	return (
-		<span { ...blockProps }>
+		<span {...blockProps}>
 			<RichText
-				allowedFormats={ [] }
-				value={ label }
-				onChange={ ( newLabel ) =>
-					setAttributes( { label: newLabel } )
-				}
+				allowedFormats={[]}
+				value={label}
+				onChange={(newLabel) => setAttributes({ label: newLabel })}
 			/>
 		</span>
 	);
 };
 
 export const Save = (): JSX.Element => {
-	return <div { ...useBlockProps.save() }></div>;
+	return <div {...useBlockProps.save()}></div>;
 };

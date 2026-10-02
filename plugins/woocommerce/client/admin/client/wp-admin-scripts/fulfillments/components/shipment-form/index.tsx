@@ -22,16 +22,16 @@ import { useShipmentFormContext } from '../../context/shipment-form-context';
 export default function ShipmentForm() {
 	const { selectedOption, setSelectedOption } = useShipmentFormContext();
 	const randomRadioGroupName =
-		'radio-group-' + String( Math.floor( Math.random() * 1000000 ) );
+		'radio-group-' + String(Math.floor(Math.random() * 1000000));
 
 	return (
 		<FulfillmentCard
-			isCollapsible={ false }
+			isCollapsible={false}
 			initialState="expanded"
 			header={
 				<>
 					<TruckIcon />
-					<h3>{ __( 'Shipment Information', 'woocommerce' ) }</h3>
+					<h3>{__('Shipment Information', 'woocommerce')}</h3>
 				</>
 			}
 		>
@@ -39,52 +39,51 @@ export default function ShipmentForm() {
 				<div className="woocommerce-fulfillment-shipment-information-option-tracking-number">
 					<CheckboxControl
 						type="radio"
-						name={ randomRadioGroupName }
-						value={ SHIPMENT_OPTION_TRACKING_NUMBER }
+						name={randomRadioGroupName}
+						value={SHIPMENT_OPTION_TRACKING_NUMBER}
 						checked={
 							selectedOption === SHIPMENT_OPTION_TRACKING_NUMBER
 						}
-						onChange={ ( value ) =>
+						onChange={(value) =>
 							value &&
-							setSelectedOption( SHIPMENT_OPTION_TRACKING_NUMBER )
+							setSelectedOption(SHIPMENT_OPTION_TRACKING_NUMBER)
 						}
-						label={ __( 'Tracking Number', 'woocommerce' ) }
+						label={__('Tracking Number', 'woocommerce')}
 						__nextHasNoMarginBottom
 					/>
-					{ selectedOption === SHIPMENT_OPTION_TRACKING_NUMBER && (
+					{selectedOption === SHIPMENT_OPTION_TRACKING_NUMBER && (
 						<ShipmentTrackingNumberForm />
-					) }
+					)}
 				</div>
 				<div className="woocommerce-fulfillment-shipment-information-option-manual-entry">
 					<CheckboxControl
 						type="radio"
-						name={ randomRadioGroupName }
-						value={ SHIPMENT_OPTION_MANUAL_ENTRY }
+						name={randomRadioGroupName}
+						value={SHIPMENT_OPTION_MANUAL_ENTRY}
 						checked={
 							selectedOption === SHIPMENT_OPTION_MANUAL_ENTRY
 						}
-						onChange={ ( value ) =>
+						onChange={(value) =>
 							value &&
-							setSelectedOption( SHIPMENT_OPTION_MANUAL_ENTRY )
+							setSelectedOption(SHIPMENT_OPTION_MANUAL_ENTRY)
 						}
-						label={ __( 'Enter manually', 'woocommerce' ) }
+						label={__('Enter manually', 'woocommerce')}
 						__nextHasNoMarginBottom
 					/>
-					{ selectedOption === SHIPMENT_OPTION_MANUAL_ENTRY && (
+					{selectedOption === SHIPMENT_OPTION_MANUAL_ENTRY && (
 						<ShipmentManualEntryForm />
-					) }
+					)}
 				</div>
 				<div className="woocommerce-fulfillment-shipment-information-option-no-info">
 					<CheckboxControl
 						type="radio"
-						name={ randomRadioGroupName }
-						value={ SHIPMENT_OPTION_NO_INFO }
-						checked={ selectedOption === SHIPMENT_OPTION_NO_INFO }
-						onChange={ ( value ) =>
-							value &&
-							setSelectedOption( SHIPMENT_OPTION_NO_INFO )
+						name={randomRadioGroupName}
+						value={SHIPMENT_OPTION_NO_INFO}
+						checked={selectedOption === SHIPMENT_OPTION_NO_INFO}
+						onChange={(value) =>
+							value && setSelectedOption(SHIPMENT_OPTION_NO_INFO)
 						}
-						label={ __( 'No shipment information', 'woocommerce' ) }
+						label={__('No shipment information', 'woocommerce')}
 						__nextHasNoMarginBottom
 					/>
 				</div>

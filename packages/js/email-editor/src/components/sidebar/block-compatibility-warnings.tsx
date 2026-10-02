@@ -6,11 +6,11 @@ import { Fill, Notice } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
-export const hasBackgroundImageSupport = ( nameOrType: string ) => {
+export const hasBackgroundImageSupport = (nameOrType: string) => {
 	const backgroundSupport = getBlockSupport(
 		nameOrType, // @ts-expect-error not yet supported in the types
 		'background'
-	) as Record< string, boolean >;
+	) as Record<string, boolean>;
 
 	return backgroundSupport && backgroundSupport?.backgroundImage !== false;
 };
@@ -18,7 +18,7 @@ export const hasBackgroundImageSupport = ( nameOrType: string ) => {
 export function BlockCompatibilityWarnings(): JSX.Element {
 	// Select the currently selected block
 	const selectedBlock = useSelect(
-		( sel ) => sel( 'core/block-editor' ).getSelectedBlock(),
+		(sel) => sel('core/block-editor').getSelectedBlock(),
 		[]
 	);
 
@@ -40,39 +40,39 @@ export function BlockCompatibilityWarnings(): JSX.Element {
 
 	return (
 		<>
-			{ hasBorderSupport && (
+			{hasBorderSupport && (
 				<Fill name="InspectorControlsBorder">
 					<Notice
 						className="woocommerce-grid-full-width"
 						status="warning"
-						isDismissible={ false }
+						isDismissible={false}
 					>
-						{ __(
+						{__(
 							'Border display may vary or be unsupported in some email clients.',
 							__i18n_text_domain__
-						) }
+						)}
 						<br />
-						{ __(
+						{__(
 							'Units other than pixels (px) lack support in old email clients.',
 							__i18n_text_domain__
-						) }
+						)}
 					</Notice>
 				</Fill>
-			) }
-			{ hasBackgroundImageSupport( selectedBlock?.name ) && (
+			)}
+			{hasBackgroundImageSupport(selectedBlock?.name) && (
 				<Fill name="InspectorControlsBackground">
 					<Notice
 						className="woocommerce-grid-full-width"
 						status="warning"
-						isDismissible={ false }
+						isDismissible={false}
 					>
-						{ __(
+						{__(
 							'Select a background color for email clients that do not support background images.',
 							__i18n_text_domain__
-						) }
+						)}
 					</Notice>
 				</Fill>
-			) }
+			)}
 		</>
 	);
 }

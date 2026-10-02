@@ -19,17 +19,17 @@ const REVENUE_REPORT_ADVANCED_FILTERS_FILTER =
  * @typedef {import('../index.js').chart} chart
  */
 
-const usesNewFullRefundData = getAdminSetting( 'usesNewFullRefundData', true );
+const usesNewFullRefundData = getAdminSetting('usesNewFullRefundData', true);
 /**
  * Revenue Report charts filter.
  *
  * @filter woocommerce_admin_revenue_report_charts
  * @param {Array.<chart>} charts Report charts.
  */
-export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
+export const charts = applyFilters(REVENUE_REPORT_CHARTS_FILTER, [
 	{
 		key: 'gross_sales',
-		label: __( 'Gross sales', 'woocommerce' ),
+		label: __('Gross sales', 'woocommerce'),
 		order: 'desc',
 		orderby: 'gross_sales',
 		type: 'currency',
@@ -37,7 +37,7 @@ export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 	},
 	{
 		key: 'refunds',
-		label: __( 'Returns', 'woocommerce' ),
+		label: __('Returns', 'woocommerce'),
 		order: 'desc',
 		orderby: 'refunds',
 		type: 'currency',
@@ -46,12 +46,12 @@ export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 			? __(
 					'Returns include returned shipping and tax amounts.',
 					'woocommerce'
-			  )
+				)
 			: null,
 	},
 	{
 		key: 'coupons',
-		label: __( 'Coupons', 'woocommerce' ),
+		label: __('Coupons', 'woocommerce'),
 		order: 'desc',
 		orderby: 'coupons',
 		type: 'currency',
@@ -59,7 +59,7 @@ export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 	},
 	{
 		key: 'net_revenue',
-		label: __( 'Net sales', 'woocommerce' ),
+		label: __('Net sales', 'woocommerce'),
 		orderby: 'net_revenue',
 		type: 'currency',
 		isReverseTrend: false,
@@ -68,11 +68,11 @@ export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 			: __(
 					'Full refunds are not deducted from tax or net sales totals',
 					'woocommerce'
-			  ),
+				),
 	},
 	{
 		key: 'taxes',
-		label: __( 'Taxes', 'woocommerce' ),
+		label: __('Taxes', 'woocommerce'),
 		order: 'desc',
 		orderby: 'taxes',
 		type: 'currency',
@@ -82,24 +82,24 @@ export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 			: __(
 					'Full refunds are not deducted from tax or net sales totals',
 					'woocommerce'
-			  ),
+				),
 	},
 	{
 		key: 'shipping',
-		label: __( 'Shipping', 'woocommerce' ),
+		label: __('Shipping', 'woocommerce'),
 		orderby: 'shipping',
 		type: 'currency',
 		isReverseTrend: false,
 	},
 	{
 		key: 'total_sales',
-		label: __( 'Total sales', 'woocommerce' ),
+		label: __('Total sales', 'woocommerce'),
 		order: 'desc',
 		orderby: 'total_sales',
 		type: 'currency',
 		isReverseTrend: false,
 	},
-] );
+]);
 
 /**
  * Revenue Report Advanced Filters.
@@ -123,15 +123,15 @@ export const advancedFilters = applyFilters(
 
 const filterValues = [];
 
-if ( Object.keys( advancedFilters.filters ).length ) {
-	filterValues.push( {
-		label: __( 'All Revenue', 'woocommerce' ),
+if (Object.keys(advancedFilters.filters).length) {
+	filterValues.push({
+		label: __('All Revenue', 'woocommerce'),
 		value: 'all',
-	} );
-	filterValues.push( {
-		label: __( 'Advanced Filters', 'woocommerce' ),
+	});
+	filterValues.push({
+		label: __('Advanced Filters', 'woocommerce'),
 		value: 'advanced',
-	} );
+	});
 }
 
 /**
@@ -144,12 +144,12 @@ if ( Object.keys( advancedFilters.filters ).length ) {
  * @filter woocommerce_admin_revenue_report_filters
  * @param {Array.<filter>} filters Report filters.
  */
-export const filters = applyFilters( REVENUE_REPORT_FILTERS_FILTER, [
+export const filters = applyFilters(REVENUE_REPORT_FILTERS_FILTER, [
 	{
-		label: __( 'Show', 'woocommerce' ),
-		staticParams: [ 'chartType', 'paged', 'per_page' ],
+		label: __('Show', 'woocommerce'),
+		staticParams: ['chartType', 'paged', 'per_page'],
 		param: 'filter',
 		showFilters: () => filterValues.length > 0,
 		filters: filterValues,
 	},
-] );
+]);

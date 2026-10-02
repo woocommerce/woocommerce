@@ -12,17 +12,17 @@ import { Edit, Save } from './edit';
 import './style.scss';
 import metadata from './block.json';
 
-registerBlockType( 'woocommerce/empty-cart-block', {
+registerBlockType('woocommerce/empty-cart-block', {
 	apiVersion: metadata.apiVersion,
 	title: metadata.title,
 	icon: {
 		src: (
 			<Icon
-				icon={ removeCart }
+				icon={removeCart}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
 	},
 	edit: Edit,
 	save: Save,
-} );
+});

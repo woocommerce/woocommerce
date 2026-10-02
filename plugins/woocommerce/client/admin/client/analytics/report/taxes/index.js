@@ -21,7 +21,7 @@ class TaxesReport extends Component {
 		const isCompareTaxView = query.filter === 'compare-taxes';
 		const mode = isCompareTaxView ? 'item-comparison' : 'time-comparison';
 		/* translators: %d: number of taxes */
-		const itemsLabel = __( '%d taxes', 'woocommerce' );
+		const itemsLabel = __('%d taxes', 'woocommerce');
 
 		return {
 			itemsLabel,
@@ -37,43 +37,43 @@ class TaxesReport extends Component {
 			...query,
 		};
 
-		if ( mode === 'item-comparison' ) {
+		if (mode === 'item-comparison') {
 			chartQuery.segmentby = 'tax_rate_id';
 		}
 		return (
 			<Fragment>
 				<ReportHeader
-					query={ query }
-					path={ path }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
+					query={query}
+					path={path}
+					filters={filters}
+					advancedFilters={advancedFilters}
 					report="taxes"
 				/>
 				<ReportSummary
-					charts={ charts }
+					charts={charts}
 					endpoint="taxes"
-					query={ chartQuery }
-					selectedChart={ getSelectedChart( query.chart, charts ) }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
+					query={chartQuery}
+					selectedChart={getSelectedChart(query.chart, charts)}
+					filters={filters}
+					advancedFilters={advancedFilters}
 				/>
 				<ReportChart
-					charts={ charts }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
-					mode={ mode }
+					charts={charts}
+					filters={filters}
+					advancedFilters={advancedFilters}
+					mode={mode}
 					endpoint="taxes"
-					query={ chartQuery }
-					path={ path }
-					isRequesting={ isRequesting }
-					itemsLabel={ itemsLabel }
-					selectedChart={ getSelectedChart( query.chart, charts ) }
+					query={chartQuery}
+					path={path}
+					isRequesting={isRequesting}
+					itemsLabel={itemsLabel}
+					selectedChart={getSelectedChart(query.chart, charts)}
 				/>
 				<TaxesReportTable
-					isRequesting={ isRequesting }
-					query={ query }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
+					isRequesting={isRequesting}
+					query={query}
+					filters={filters}
+					advancedFilters={advancedFilters}
 				/>
 			</Fragment>
 		);

@@ -18,8 +18,8 @@ const BLOG_POST_CATEGORY = 'marketing';
 const PER_PAGE = 2;
 
 export const LearnMarketing = () => {
-	const [ page, setPage ] = useState( 1 );
-	const { isLoading, error, posts } = useBlogPosts( BLOG_POST_CATEGORY );
+	const [page, setPage] = useState(1);
+	const { isLoading, error, posts } = useBlogPosts(BLOG_POST_CATEGORY);
 
 	/**
 	 * Renders card footer.
@@ -29,7 +29,7 @@ export const LearnMarketing = () => {
 	 * - Returns a pagination component in the card footer for paging through the posts.
 	 */
 	const renderFooter = () => {
-		if ( isLoading ) {
+		if (isLoading) {
 			return (
 				<div
 					role="progressbar"
@@ -38,20 +38,20 @@ export const LearnMarketing = () => {
 			);
 		}
 
-		if ( error || ! posts || posts.length === 0 ) {
+		if (error || !posts || posts.length === 0) {
 			return null;
 		}
 
 		return (
 			<Pagination
-				showPagePicker={ false }
-				showPerPagePicker={ false }
-				page={ page }
-				perPage={ PER_PAGE }
-				total={ posts.length }
-				onPageChange={ ( newPage: number ) => {
-					setPage( newPage );
-				} }
+				showPagePicker={false}
+				showPerPagePicker={false}
+				page={page}
+				perPage={PER_PAGE}
+				total={posts.length}
+				onPageChange={(newPage: number) => {
+					setPage(newPage);
+				}}
 			/>
 		);
 	};
@@ -65,31 +65,31 @@ export const LearnMarketing = () => {
 	 * - Else, it returns two post tiles.
 	 */
 	const renderBody = () => {
-		if ( isLoading ) {
-			return [ ...Array( PER_PAGE ).keys() ].map( ( key ) => {
-				return <PlaceholderPostTile key={ key } />;
-			} );
+		if (isLoading) {
+			return [...Array(PER_PAGE).keys()].map((key) => {
+				return <PlaceholderPostTile key={key} />;
+			});
 		}
 
-		if ( error ) {
+		if (error) {
 			return (
 				<EmptyContent
-					title={ __(
+					title={__(
 						"Oops, our posts aren't loading right now",
 						'woocommerce'
-					) }
-					message={ <ReadBlogMessage /> }
+					)}
+					message={<ReadBlogMessage />}
 					illustration=""
 					actionLabel=""
 				/>
 			);
 		}
 
-		if ( posts.length === 0 ) {
+		if (posts.length === 0) {
 			return (
 				<EmptyContent
-					title={ __( 'No posts yet', 'woocommerce' ) }
-					message={ <ReadBlogMessage /> }
+					title={__('No posts yet', 'woocommerce')}
+					message={<ReadBlogMessage />}
 					illustration=""
 					actionLabel=""
 				/>
@@ -97,21 +97,21 @@ export const LearnMarketing = () => {
 		}
 
 		return posts
-			.slice( ( page - 1 ) * PER_PAGE, page * PER_PAGE )
-			.map( ( post, index ) => {
-				return <PostTile key={ index } post={ post } />;
-			} );
+			.slice((page - 1) * PER_PAGE, page * PER_PAGE)
+			.map((post, index) => {
+				return <PostTile key={index} post={post} />;
+			});
 	};
 
 	return (
 		<CollapsibleCard
 			initialCollapsed
 			className="woocommerce-marketing-learn-marketing-card"
-			header={ __( 'Learn about marketing a store', 'woocommerce' ) }
-			footer={ renderFooter() }
+			header={__('Learn about marketing a store', 'woocommerce')}
+			footer={renderFooter()}
 		>
 			<div className="woocommerce-marketing-learn-marketing-card__body">
-				{ renderBody() }
+				{renderBody()}
 			</div>
 		</CollapsibleCard>
 	);

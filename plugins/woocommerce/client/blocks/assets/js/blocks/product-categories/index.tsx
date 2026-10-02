@@ -13,11 +13,11 @@ import type { ProductCategoriesIndexProps } from './types';
 import './editor.scss';
 import './style.scss';
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	icon: {
 		src: (
 			<Icon
-				icon={ listView }
+				icon={listView}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -26,21 +26,18 @@ registerBlockType( metadata, {
 		from: [
 			{
 				type: 'block',
-				blocks: [ 'core/legacy-widget' ],
+				blocks: ['core/legacy-widget'],
 				// We can't transform if raw instance isn't shown in the REST API.
-				isMatch: ( {
-					idBase,
-					instance,
-				}: ProductCategoriesIndexProps ) =>
+				isMatch: ({ idBase, instance }: ProductCategoriesIndexProps) =>
 					idBase === 'woocommerce_product_categories' &&
-					!! instance?.raw,
-				transform: ( { instance } ) =>
-					createBlock( 'woocommerce/product-categories', {
-						hasCount: !! instance.raw.count,
-						hasEmpty: ! instance.raw.hide_empty,
-						isDropdown: !! instance.raw.dropdown,
-						isHierarchical: !! instance.raw.hierarchical,
-					} ),
+					!!instance?.raw,
+				transform: ({ instance }) =>
+					createBlock('woocommerce/product-categories', {
+						hasCount: !!instance.raw.count,
+						hasEmpty: !instance.raw.hide_empty,
+						isDropdown: !!instance.raw.dropdown,
+						isHierarchical: !!instance.raw.hierarchical,
+					}),
 			},
 		],
 	},
@@ -78,28 +75,28 @@ registerBlockType( metadata, {
 					attribute: 'data-is-hierarchical',
 				},
 			},
-			migrate( attributes ) {
+			migrate(attributes) {
 				return attributes;
 			},
-			save( props: ProductCategoriesIndexProps ) {
+			save(props: ProductCategoriesIndexProps) {
 				const { hasCount, hasEmpty, isDropdown, isHierarchical } =
 					props;
-				const data: { [ key: string ]: boolean } = {};
-				if ( hasCount ) {
-					data[ 'data-has-count' ] = true;
+				const data: { [key: string]: boolean } = {};
+				if (hasCount) {
+					data['data-has-count'] = true;
 				}
-				if ( hasEmpty ) {
-					data[ 'data-has-empty' ] = true;
+				if (hasEmpty) {
+					data['data-has-empty'] = true;
 				}
-				if ( isDropdown ) {
-					data[ 'data-is-dropdown' ] = true;
+				if (isDropdown) {
+					data['data-is-dropdown'] = true;
 				}
-				if ( isHierarchical ) {
-					data[ 'data-is-hierarchical' ] = true;
+				if (isHierarchical) {
+					data['data-is-hierarchical'] = true;
 				}
 				return (
-					<div className="is-loading" { ...data }>
-						{ isDropdown ? (
+					<div className="is-loading" {...data}>
+						{isDropdown ? (
 							<span
 								aria-hidden
 								className="wc-block-product-categories__placeholder"
@@ -116,7 +113,7 @@ registerBlockType( metadata, {
 									<span className="wc-block-product-categories__placeholder" />
 								</li>
 							</ul>
-						) }
+						)}
 					</div>
 				);
 			},
@@ -131,4 +128,4 @@ registerBlockType( metadata, {
 	save() {
 		return null;
 	},
-} );
+});

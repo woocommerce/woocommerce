@@ -20,43 +20,43 @@ import { css } from '@emotion/react';
  */
 import { Branch, useLiveBranchInstall } from '../hooks/live-branches';
 
-const cardStyle = css( {
+const cardStyle = css({
 	marginTop: '32px',
-} );
+});
 
-const BranchListItem = ( {
+const BranchListItem = ({
 	branch,
 	onBranchActive,
 }: {
 	branch: Branch;
-	onBranchActive: ( branch: Branch ) => void;
-} ) => {
+	onBranchActive: (branch: Branch) => void;
+}) => {
 	const { isError, isInProgress, installAndActivate, activate, status } =
 		useLiveBranchInstall(
 			branch.download_url,
-			`https://github.com/woocommerce/woocommerce/pull/${ branch.pr }`,
+			`https://github.com/woocommerce/woocommerce/pull/${branch.pr}`,
 			branch.version,
 			branch.install_status
 		);
 
 	const activateBranch = async () => {
 		await activate();
-		onBranchActive( branch );
+		onBranchActive(branch);
 	};
 
 	const installAndActivateBranch = async () => {
 		await installAndActivate();
-		onBranchActive( branch );
+		onBranchActive(branch);
 	};
 
 	const ActionButton = {
 		'not-installed': () => (
-			<Button variant="primary" onClick={ installAndActivateBranch }>
+			<Button variant="primary" onClick={installAndActivateBranch}>
 				Install and Activate
 			</Button>
 		),
 		installed: () => (
-			<Button variant="primary" onClick={ activateBranch }>
+			<Button variant="primary" onClick={activateBranch}>
 				Activate
 			</Button>
 		),
@@ -65,42 +65,42 @@ const BranchListItem = ( {
 				Activated
 			</Button>
 		),
-	}[ status ];
+	}[status];
 
 	return (
 		<Item>
 			<p>
-				Download URL:{ ' ' }
-				<a href={ branch.download_url }>{ branch.download_url }</a>
+				Download URL:{' '}
+				<a href={branch.download_url}>{branch.download_url}</a>
 			</p>
 			<p>
-				Pull Request:{ ' ' }
+				Pull Request:{' '}
 				<a
-					href={ `https://github.com/woocommerce/woocommerce/pull/${ branch.pr }` }
+					href={`https://github.com/woocommerce/woocommerce/pull/${branch.pr}`}
 				>
-					{ branch.branch }
+					{branch.branch}
 				</a>
 			</p>
-			{ isError && <p>Something Went Wrong!</p> }
-			{ isInProgress && <Spinner /> }
-			{ ! isError && ! isInProgress && <ActionButton /> }
+			{isError && <p>Something Went Wrong!</p>}
+			{isInProgress && <Spinner />}
+			{!isError && !isInProgress && <ActionButton />}
 		</Item>
 	);
 };
 
-const BranchInfo = ( { branch }: { branch: Branch } ) => {
+const BranchInfo = ({ branch }: { branch: Branch }) => {
 	return (
 		<p>
-			<strong>Pull Request Branch:</strong>{ ' ' }
+			<strong>Pull Request Branch:</strong>{' '}
 			<a
-				href={ `https://github.com/woocommerce/woocommerce/pull/${ branch.pr }` }
+				href={`https://github.com/woocommerce/woocommerce/pull/${branch.pr}`}
 			>
-				{ branch.branch }
+				{branch.branch}
 			</a>
-			{ ' | ' }
-			<strong>Version:</strong> { branch.version } |{ ' ' }
-			<strong>Download URL:</strong>{ ' ' }
-			<a href={ branch.download_url }>{ branch.download_url }</a>
+			{' | '}
+			<strong>Version:</strong> {branch.version} |{' '}
+			<strong>Download URL:</strong>{' '}
+			<a href={branch.download_url}>{branch.download_url}</a>
 		</p>
 	);
 };
@@ -109,108 +109,105 @@ const WooCommerceVersionInfo = () => {
 	const version = window?.wc?.wcSettings?.WC_VERSION || 'unknown';
 
 	return (
-		<p>
-			Live branch not installed. Running WooCommerce version: { version }
-		</p>
+		<p>Live branch not installed. Running WooCommerce version: {version}</p>
 	);
 };
 
-export const BranchList = ( { branches }: { branches: Branch[] } ) => {
-	const [ activeBranch, setActiveBranch ] = useState< Branch | null >(
-		branches.find( ( branch ) => branch.install_status === 'active' ) ||
-			null
+export const BranchList = ({ branches }: { branches: Branch[] }) => {
+	const [activeBranch, setActiveBranch] = useState<Branch | null>(
+		branches.find((branch) => branch.install_status === 'active') || null
 	);
 
 	const installedBranches = branches.filter(
-		( branch ) => branch.install_status === 'installed'
+		(branch) => branch.install_status === 'installed'
 	);
 
 	const uninstalledBranches = branches.filter(
-		( branch ) => branch.install_status === 'not-installed'
+		(branch) => branch.install_status === 'not-installed'
 	);
 
-	const [ selectedBranch, setSelectedBranch ] = useState(
-		uninstalledBranches[ 0 ]
+	const [selectedBranch, setSelectedBranch] = useState(
+		uninstalledBranches[0]
 	);
 
-	const installedBranchesExist = !! installedBranches.length;
+	const installedBranchesExist = !!installedBranches.length;
 
 	return (
 		<>
-			<Card elevation={ 3 } css={ cardStyle }>
+			<Card elevation={3} css={cardStyle}>
 				<CardHeader>
 					<h2>Currently Running</h2>
 				</CardHeader>
 				<CardBody>
-					{ activeBranch && (
+					{activeBranch && (
 						<BranchInfo
-							branch={ activeBranch }
-							key={ activeBranch.version }
+							branch={activeBranch}
+							key={activeBranch.version}
 						/>
-					) }
-					{ ! activeBranch && <WooCommerceVersionInfo /> }
+					)}
+					{!activeBranch && <WooCommerceVersionInfo />}
 				</CardBody>
 				<CardFooter>
 					<Fragment />
 				</CardFooter>
 			</Card>
-			<Card elevation={ 3 } css={ cardStyle }>
+			<Card elevation={3} css={cardStyle}>
 				<CardHeader>
 					<h2>Install and Activate Live Branches</h2>
 				</CardHeader>
 				<CardBody>
 					<ComboboxControl
-						onChange={ ( branchVersion ) => {
-							if ( branchVersion ) {
+						onChange={(branchVersion) => {
+							if (branchVersion) {
 								const branch = branches.find(
-									( _branch ) =>
+									(_branch) =>
 										_branch.version === branchVersion
 								);
 
-								if ( branch ) {
-									setSelectedBranch( branch );
+								if (branch) {
+									setSelectedBranch(branch);
 								}
 							}
-						} }
-						value={ selectedBranch.version }
-						options={ uninstalledBranches.map( ( branch ) => {
+						}}
+						value={selectedBranch.version}
+						options={uninstalledBranches.map((branch) => {
 							return {
 								value: branch.version,
 								label: branch.branch,
 							};
-						} ) }
+						})}
 					/>
 					<BranchListItem
-						branch={ selectedBranch }
-						onBranchActive={ setActiveBranch }
-						key={ selectedBranch.version }
+						branch={selectedBranch}
+						onBranchActive={setActiveBranch}
+						key={selectedBranch.version}
 					/>
 				</CardBody>
 				<CardFooter>
 					<Fragment />
 				</CardFooter>
 			</Card>
-			{ installedBranchesExist && (
-				<Card elevation={ 3 } css={ cardStyle }>
+			{installedBranchesExist && (
+				<Card elevation={3} css={cardStyle}>
 					<CardHeader>
 						<h2>Other Installed Branches</h2>
 					</CardHeader>
 					<CardBody>
 						<ItemGroup>
-							{ installedBranches.map( ( branch ) => (
+							{installedBranches.map((branch) => (
 								<BranchListItem
-									branch={ branch }
-									onBranchActive={ setActiveBranch }
-									key={ branch.version }
+									branch={branch}
+									onBranchActive={setActiveBranch}
+									key={branch.version}
 								/>
-							) ) }
+							))}
 						</ItemGroup>
 					</CardBody>
 					<CardFooter>
 						<Fragment />
 					</CardFooter>
 				</Card>
-			) }
+			)}
 		</>
 	);
 };

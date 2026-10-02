@@ -18,48 +18,48 @@ import { useEffect } from '@wordpress/element';
 import metadata from './block.json';
 import './editor.scss';
 
-const Edit = ( {
+const Edit = ({
 	attributes,
 	setAttributes,
 }: {
 	attributes: BlockAttributes;
-	setAttributes: ( attrs: BlockAttributes ) => void;
-} ) => {
+	setAttributes: (attrs: BlockAttributes) => void;
+}) => {
 	const TEMPLATE: InnerBlockTemplate[] = [
-		[ 'core/post-title', { align: 'wide', level: 1 } ],
-		[ 'core/post-content', { align: 'wide' } ],
+		['core/post-title', { align: 'wide', level: 1 }],
+		['core/post-content', { align: 'wide' }],
 	];
 
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className: 'wp-block-woocommerce-page-content-wrapper',
-	} );
+	});
 
-	useEffect( () => {
-		if ( ! attributes.postId && attributes.page ) {
+	useEffect(() => {
+		if (!attributes.postId && attributes.page) {
 			let postId = 0;
 
-			if ( attributes.page === 'checkout' ) {
+			if (attributes.page === 'checkout') {
 				postId = CHECKOUT_PAGE_ID;
 			}
 
-			if ( attributes.page === 'cart' ) {
+			if (attributes.page === 'cart') {
 				postId = CART_PAGE_ID;
 			}
 
-			if ( postId ) {
-				setAttributes( { postId, postType: 'page' } );
+			if (postId) {
+				setAttributes({ postId, postType: 'page' });
 			}
 		}
-	}, [ attributes, setAttributes ] );
+	}, [attributes, setAttributes]);
 
 	return (
-		<div { ...blockProps }>
-			<InnerBlocks template={ TEMPLATE } />
+		<div {...blockProps}>
+			<InnerBlocks template={TEMPLATE} />
 		</div>
 	);
 };
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	icon: {
 		src: page,
 	},
@@ -68,21 +68,21 @@ registerBlockType( metadata, {
 	variations: [
 		{
 			name: 'checkout-page',
-			title: __( 'Checkout Page', 'woocommerce' ),
+			title: __('Checkout Page', 'woocommerce'),
 			attributes: {
 				page: 'checkout',
 			},
-			isActive: ( blockAttributes, variationAttributes ) =>
+			isActive: (blockAttributes, variationAttributes) =>
 				blockAttributes.page === variationAttributes.page,
 		},
 		{
 			name: 'cart-page',
-			title: __( 'Cart Page', 'woocommerce' ),
+			title: __('Cart Page', 'woocommerce'),
 			attributes: {
 				page: 'cart',
 			},
-			isActive: ( blockAttributes, variationAttributes ) =>
+			isActive: (blockAttributes, variationAttributes) =>
 				blockAttributes.page === variationAttributes.page,
 		},
 	],
-} );
+});

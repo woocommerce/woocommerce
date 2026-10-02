@@ -83,17 +83,16 @@
 				throw new Error( 'Server providers configuration is invalid' );
 			}
 
-
-			var isRegistered = serverProviders.some( function (
-				serverProvider
-			) {
-				return (
-					serverProvider &&
-					typeof serverProvider === 'object' &&
-					typeof serverProvider.id === 'string' &&
-					serverProvider.id === provider.id
-				);
-			} );
+			var isRegistered = serverProviders.some(
+				function ( serverProvider ) {
+					return (
+						serverProvider &&
+						typeof serverProvider === 'object' &&
+						typeof serverProvider.id === 'string' &&
+						serverProvider.id === provider.id
+					);
+				}
+			);
 			if ( ! isRegistered ) {
 				throw new Error(
 					'Provider ' + provider.id + ' not registered on server'

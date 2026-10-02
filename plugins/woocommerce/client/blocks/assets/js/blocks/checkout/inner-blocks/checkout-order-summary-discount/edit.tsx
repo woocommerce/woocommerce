@@ -8,23 +8,23 @@ import { useBlockProps } from '@wordpress/block-editor';
  */
 import Block from './block';
 
-export const Edit = ( {
+export const Edit = ({
 	attributes,
 }: {
 	attributes: {
 		className: string;
 	};
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ): JSX.Element => {
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}): JSX.Element => {
 	const { className } = attributes;
 	const blockProps = useBlockProps();
 	return (
-		<div { ...blockProps }>
-			<Block className={ className } />
+		<div {...blockProps}>
+			<Block className={className} />
 		</div>
 	);
 };
 
 export const Save = (): JSX.Element => {
-	return <div { ...useBlockProps.save() } />;
+	return <div {...useBlockProps.save()} />;
 };

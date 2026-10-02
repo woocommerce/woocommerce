@@ -26,39 +26,39 @@ import { getAdminSetting } from '~/utils/admin-settings';
 import { deriveWpAdminBackgroundColours } from './utils/derive-wp-admin-background-colours';
 import { ErrorBoundary } from './error-boundary';
 
-const appRoot = document.getElementById( 'root' );
+const appRoot = document.getElementById('root');
 
 deriveWpAdminBackgroundColours();
 
-if ( appRoot ) {
+if (appRoot) {
 	// Hydrate the page layout with the settings and current user so that the layout is ready to render immediately.
 	const settingsGroup = 'wc_admin';
 	let HydratedPageLayout = withSettingsHydration(
 		settingsGroup,
 		window.wcSettings.admin
-	)( Layout );
+	)(Layout);
 
 	const preloadGeneralSettings =
 		window.wcSettings.admin?.preloadSettings?.general || false;
-	if ( preloadGeneralSettings ) {
-		HydratedPageLayout = withSettingsHydration( 'general', {
+	if (preloadGeneralSettings) {
+		HydratedPageLayout = withSettingsHydration('general', {
 			general: preloadGeneralSettings,
-		} )( HydratedPageLayout );
+		})(HydratedPageLayout);
 	}
 
-	const hydrateUser = getAdminSetting( 'currentUserData' );
-	if ( hydrateUser ) {
+	const hydrateUser = getAdminSetting('currentUserData');
+	if (hydrateUser) {
 		HydratedPageLayout =
-			withCurrentUserHydration( hydrateUser )( HydratedPageLayout );
+			withCurrentUserHydration(hydrateUser)(HydratedPageLayout);
 	}
 
 	// Render the App.
-	createRoot( appRoot ).render(
+	createRoot(appRoot).render(
 		<ErrorBoundary>
 			<HydratedPageLayout />
 		</ErrorBoundary>
 	);
 
 	// Render the Customer Effort Score Tracks.
-	renderCustomerEffortScoreTracks( appRoot );
+	renderCustomerEffortScoreTracks(appRoot);
 }

@@ -24,12 +24,12 @@ const returnToShopTemplate = SHOP_URL
 				[
 					'core/button',
 					{
-						text: __( 'Return to shop', 'woocommerce' ),
+						text: __('Return to shop', 'woocommerce'),
 						url: SHOP_URL,
 					},
 				],
 			],
-	  ]
+		]
 	: null;
 
 // Recent WordPress versions center headings through the typography support and no longer
@@ -45,7 +45,7 @@ const defaultTemplate = [
 		'core/heading',
 		{
 			...centeredHeading,
-			content: __( 'Your cart is empty', 'woocommerce' ),
+			content: __('Your cart is empty', 'woocommerce'),
 			level: 2,
 			className: 'wc-block-cart__empty-cart__title',
 		},
@@ -61,7 +61,7 @@ const defaultTemplate = [
 		'core/heading',
 		{
 			...centeredHeading,
-			content: __( 'New in store', 'woocommerce' ),
+			content: __('New in store', 'woocommerce'),
 			level: 2,
 		},
 	],
@@ -72,28 +72,28 @@ const defaultTemplate = [
 			rows: 1,
 		},
 	],
-].filter( Boolean ) as unknown as TemplateArray;
+].filter(Boolean) as unknown as TemplateArray;
 
-export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
+export const Edit = ({ clientId }: { clientId: string }): JSX.Element => {
 	const blockProps = useBlockProps();
 	const { currentView } = useEditorContext();
-	const allowedBlocks = getAllowedBlocks( innerBlockAreas.EMPTY_CART );
+	const allowedBlocks = getAllowedBlocks(innerBlockAreas.EMPTY_CART);
 
-	useForcedLayout( {
+	useForcedLayout({
 		clientId,
 		registeredBlocks: allowedBlocks,
 		defaultTemplate,
-	} );
+	});
 
 	return (
 		<div
-			{ ...blockProps }
-			hidden={ currentView !== 'woocommerce/empty-cart-block' }
+			{...blockProps}
+			hidden={currentView !== 'woocommerce/empty-cart-block'}
 		>
 			<InnerBlocks
-				template={ defaultTemplate }
-				templateLock={ false }
-				renderAppender={ InnerBlocks.ButtonBlockAppender }
+				template={defaultTemplate}
+				templateLock={false}
+				renderAppender={InnerBlocks.ButtonBlockAppender}
 			/>
 		</div>
 	);
@@ -101,7 +101,7 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 
 export const Save = (): JSX.Element => {
 	return (
-		<div { ...useBlockProps.save() }>
+		<div {...useBlockProps.save()}>
 			<InnerBlocks.Content />
 		</div>
 	);

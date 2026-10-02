@@ -32,22 +32,22 @@ export type BlockAttributes = {
 	customSelectedChipBorder?: string;
 };
 
-export type EditProps = BlockEditProps< BlockAttributes > & {
-	style: Record< string, string >;
-	context: SelectableItemsBlockContext< {
+export type EditProps = BlockEditProps<BlockAttributes> & {
+	style: Record<string, string>;
+	context: SelectableItemsBlockContext<{
 		count?: number;
 		visual?: VisualAttributeTerm;
-	} >;
+	}>;
 	chipText: Color;
-	setChipText: ( value: string ) => void;
+	setChipText: (value: string) => void;
 	chipBackground: Color;
-	setChipBackground: ( value: string ) => void;
+	setChipBackground: (value: string) => void;
 	chipBorder: Color;
-	setChipBorder: ( value: string ) => void;
+	setChipBorder: (value: string) => void;
 	selectedChipText: Color;
-	setSelectedChipText: ( value: string ) => void;
+	setSelectedChipText: (value: string) => void;
 	selectedChipBackground: Color;
-	setSelectedChipBackground: ( value: string ) => void;
+	setSelectedChipBackground: (value: string) => void;
 	selectedChipBorder: Color;
-	setSelectedChipBorder: ( value: string ) => void;
+	setSelectedChipBorder: (value: string) => void;
 };

@@ -11,11 +11,11 @@
 		gap: $gap-large;
 		overflow: hidden;
 
-		@media screen and ( max-width: $break-wide ) {
+		@media screen and (max-width: $break-wide) {
 			padding: 0 calc(24px);
 		}
 
-		@media screen and ( max-width: $break-medium ) {
+		@media screen and (max-width: $break-medium) {
 			padding: 0;
 		}
 	}
@@ -30,7 +30,7 @@
 			top: -20%;
 		}
 
-		@media screen and ( max-width: $break-wide ) {
+		@media screen and (max-width: $break-wide) {
 			width: 30%;
 
 			img {
@@ -40,7 +40,7 @@
 			}
 		}
 
-		@media screen and ( max-width: 1140px ) {
+		@media screen and (max-width: 1140px) {
 			width: 30%;
 
 			img {
@@ -50,7 +50,7 @@
 			}
 		}
 
-		@media screen and ( max-width: $break-xlarge ) {
+		@media screen and (max-width: $break-xlarge) {
 			width: 28%;
 
 			img {
@@ -60,7 +60,7 @@
 			}
 		}
 
-		@media screen and ( max-width: $break-large ) {
+		@media screen and (max-width: $break-large) {
 			width: 28%;
 
 			img {
@@ -70,7 +70,7 @@
 			}
 		}
 
-		@media screen and ( max-width: $break-small ) {
+		@media screen and (max-width: $break-small) {
 			display: none;
 		}
 	}
@@ -85,19 +85,19 @@
 		gap: $gap-smaller;
 		align-items: start;
 
-		@media screen and ( max-width: $break-xlarge ) {
+		@media screen and (max-width: $break-xlarge) {
 			max-width: calc(420px + 48px);
 		}
 
-		@media screen and ( max-width: $break-large ) {
+		@media screen and (max-width: $break-large) {
 			padding: $gap-large $gap-large;
 		}
 
-		@media screen and ( max-width: $break-medium ) {
+		@media screen and (max-width: $break-medium) {
 			padding: $gap-large $gap;
 		}
 
-		@media screen and ( max-width: $break-small ) {
+		@media screen and (max-width: $break-small) {
 			max-width: 100%;
 		}
 	}
@@ -140,11 +140,11 @@
 		}
 	}
 
-	@media screen and ( max-width: $break-xlarge ) {
+	@media screen and (max-width: $break-xlarge) {
 		margin: 24px 0;
 	}
 
-	@media screen and ( max-width: $break-medium ) {
+	@media screen and (max-width: $break-medium) {
 		margin: 24px -20px;
 		border-radius: 0;
 	}

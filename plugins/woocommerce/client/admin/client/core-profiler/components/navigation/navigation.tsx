@@ -22,51 +22,51 @@ type NavigationProps = {
 	progressBarColor?: string;
 };
 
-export const Navigation = ( {
+export const Navigation = ({
 	percentage = 0,
 	onSkip,
-	skipText = __( 'Skip this step', 'woocommerce' ),
+	skipText = __('Skip this step', 'woocommerce'),
 	showProgress = true,
 	showLogo = true,
 	classNames = {},
 	progressBarColor = 'var(--wp-admin-theme-color)',
-}: NavigationProps ) => {
+}: NavigationProps) => {
 	return (
 		<div
-			className={ clsx(
+			className={clsx(
 				'woocommerce-profiler-navigation-container',
 				classNames
-			) }
+			)}
 		>
-			{ showProgress && (
+			{showProgress && (
 				<ProgressBar
-					className={ 'progress-bar' }
-					percent={ percentage }
-					color={ progressBarColor }
-					bgcolor={ 'transparent' }
+					className={'progress-bar'}
+					percent={percentage}
+					color={progressBarColor}
+					bgcolor={'transparent'}
 				/>
-			) }
+			)}
 			<div className="woocommerce-profiler-navigation">
 				<div className="woocommerce-profiler-navigation-col-left">
-					{ showLogo && (
+					{showLogo && (
 						<span className="woologo">
 							<WooLogo />
 						</span>
-					) }
+					)}
 				</div>
 				<div className="woocommerce-profiler-navigation-col-right">
-					{ typeof onSkip === 'function' && (
+					{typeof onSkip === 'function' && (
 						<Button
-							onClick={ onSkip }
-							className={ clsx(
+							onClick={onSkip}
+							className={clsx(
 								'woocommerce-profiler-navigation-skip-link',
 								classNames.mobile ? 'mobile' : ''
-							) }
+							)}
 							isLink
 						>
-							{ skipText }
+							{skipText}
 						</Button>
-					) }
+					)}
 				</div>
 			</div>
 		</div>

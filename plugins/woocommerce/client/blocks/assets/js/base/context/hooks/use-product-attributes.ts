@@ -10,57 +10,55 @@ import {
 } from '@woocommerce/types';
 import { formatError } from '@woocommerce/base-utils';
 
-export default function useProductAttributes( shouldLoadAttributes: boolean ) {
-	const [ errorLoadingAttributes, setErrorLoadingAttributes ] =
-		useState< Awaited< ReturnType< typeof formatError > > | null >( null );
-	const [ isLoadingAttributes, setIsLoadingAttributes ] = useState( false );
-	const [ productsAttributes, setProductsAttributes ] = useState<
+export default function useProductAttributes(shouldLoadAttributes: boolean) {
+	const [errorLoadingAttributes, setErrorLoadingAttributes] =
+		useState<Awaited<ReturnType<typeof formatError>> | null>(null);
+	const [isLoadingAttributes, setIsLoadingAttributes] = useState(false);
+	const [productsAttributes, setProductsAttributes] = useState<
 		AttributeWithTerms[]
-	>( [] );
-	const hasLoadedAttributes = useRef( false );
+	>([]);
+	const hasLoadedAttributes = useRef(false);
 
-	useEffect( () => {
+	useEffect(() => {
 		if (
-			! shouldLoadAttributes ||
+			!shouldLoadAttributes ||
 			isLoadingAttributes ||
 			hasLoadedAttributes.current
 		)
 			return;
 
 		async function fetchAttributesWithTerms() {
-			setIsLoadingAttributes( true );
+			setIsLoadingAttributes(true);
 
 			try {
 				const attributes: AttributeObject[] = await getAttributes();
 				const attributesWithTerms: AttributeWithTerms[] = [];
 
-				for ( const attribute of attributes ) {
-					const terms: AttributeTerm[] = await getTerms(
-						attribute.id
-					);
+				for (const attribute of attributes) {
+					const terms: AttributeTerm[] = await getTerms(attribute.id);
 
-					attributesWithTerms.push( {
+					attributesWithTerms.push({
 						...attribute,
 						// Manually adding the parent id because of a Rest API bug
 						// returning always `0` as parent.
 						// see https://github.com/woocommerce/woocommerce-blocks/issues/8501
 						parent: 0,
-						terms: terms.map( ( term ) => ( {
+						terms: terms.map((term) => ({
 							...term,
 							attr_slug: attribute.taxonomy,
 							parent: attribute.id,
-						} ) ),
-					} );
+						})),
+					});
 				}
 
-				setProductsAttributes( attributesWithTerms );
+				setProductsAttributes(attributesWithTerms);
 				hasLoadedAttributes.current = true;
-			} catch ( e ) {
-				if ( e instanceof Error ) {
-					setErrorLoadingAttributes( await formatError( e ) );
+			} catch (e) {
+				if (e instanceof Error) {
+					setErrorLoadingAttributes(await formatError(e));
 				}
 			} finally {
-				setIsLoadingAttributes( false );
+				setIsLoadingAttributes(false);
 			}
 		}
 
@@ -69,7 +67,7 @@ export default function useProductAttributes( shouldLoadAttributes: boolean ) {
 		return () => {
 			hasLoadedAttributes.current = true;
 		};
-	}, [ isLoadingAttributes, shouldLoadAttributes ] );
+	}, [isLoadingAttributes, shouldLoadAttributes]);
 
 	return {
 		errorLoadingAttributes,

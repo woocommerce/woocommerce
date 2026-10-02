@@ -48,14 +48,14 @@ export interface Attributes {
 
 interface Props {
 	attributes: Attributes;
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
+	setAttributes: (attributes: Record<string, unknown>) => void;
 	clientId: number;
-	setPriceColor: ( colorValue: string | undefined ) => void;
-	setIconColor: ( colorValue: string | undefined ) => void;
-	setProductCountColor: ( colorValue: string | undefined ) => void;
+	setPriceColor: (colorValue: string | undefined) => void;
+	setIconColor: (colorValue: string | undefined) => void;
+	setProductCountColor: (colorValue: string | undefined) => void;
 }
 
-const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
+const Edit = ({ attributes, setAttributes }: Props): ReactElement => {
 	const {
 		cartAndCheckoutRenderStyle,
 		addToCartBehaviour,
@@ -66,43 +66,40 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 		productCountColor = defaultColorItem,
 		miniCartIcon,
 		productCountVisibility,
-	} = migrateAttributesToColorPanel( attributes );
-	const miniCartButtonRef = useRef< HTMLButtonElement >( null );
+	} = migrateAttributesToColorPanel(attributes);
+	const miniCartButtonRef = useRef<HTMLButtonElement>(null);
 
 	const miniCartColorAttributes = {
 		priceColor: {
-			label: __( 'Price', 'woocommerce' ),
+			label: __('Price', 'woocommerce'),
 			context: 'price-color',
 		},
 		iconColor: {
-			label: __( 'Icon', 'woocommerce' ),
+			label: __('Icon', 'woocommerce'),
 			context: 'icon-color',
 		},
 		productCountColor: {
-			label: __( 'Product Count', 'woocommerce' ),
+			label: __('Product Count', 'woocommerce'),
 			context: 'product-count-color',
 		},
 	};
 
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className: 'wc-block-mini-cart',
-	} );
+	});
 
 	const isSiteEditor = isSiteEditorPage();
 
-	const templatePartEditUri = getSetting(
-		'templatePartEditUri',
-		''
-	) as string;
+	const templatePartEditUri = getSetting('templatePartEditUri', '') as string;
 
 	// Apply Mini Cart quantity badge styles based on Site Editor's background and text colors.
 	// We need to set `span` in the selector so it has more specificity than the CSS.
 	useThemeColors(
 		'mini-cart-badge',
-		( { editorBackgroundColor, editorColor } ) => `
+		({ editorBackgroundColor, editorColor }) => `
 			span:where(.wc-block-mini-cart__badge) {
-				color: ${ editorBackgroundColor };
-				background-color: ${ editorColor };
+				color: ${editorBackgroundColor};
+				background-color: ${editorColor};
 			}
 		`
 	);
@@ -115,65 +112,65 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 
 	const productTotal = 0;
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<InspectorControls>
-				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
+				<PanelBody title={__('Settings', 'woocommerce')}>
 					<ToggleGroupControl
 						__nextHasNoMarginBottom
 						__next40pxDefaultSize
 						className="wc-block-editor-mini-cart__cart-icon-toggle"
 						isBlock
-						label={ __( 'Cart Icon', 'woocommerce' ) }
-						value={ miniCartIcon }
-						onChange={ ( value: 'cart' | 'bag' | 'bag-alt' ) => {
-							setAttributes( {
+						label={__('Cart Icon', 'woocommerce')}
+						value={miniCartIcon}
+						onChange={(value: 'cart' | 'bag' | 'bag-alt') => {
+							setAttributes({
 								miniCartIcon: value,
-							} );
-						} }
+							});
+						}}
 					>
 						<ToggleGroupControlOption
-							value={ 'cart' }
-							label={ <Icon size={ 32 } icon={ cartOutline } /> }
+							value={'cart'}
+							label={<Icon size={32} icon={cartOutline} />}
 						/>
 						<ToggleGroupControlOption
-							value={ 'bag' }
-							label={ <Icon size={ 32 } icon={ bag } /> }
+							value={'bag'}
+							label={<Icon size={32} icon={bag} />}
 						/>
 						<ToggleGroupControlOption
-							value={ 'bag-alt' }
-							label={ <Icon size={ 32 } icon={ bagAlt } /> }
+							value={'bag-alt'}
+							label={<Icon size={32} icon={bagAlt} />}
 						/>
 					</ToggleGroupControl>
 					<BaseControl
 						__nextHasNoMarginBottom
 						id="wc-block-mini-cart__display-toggle"
-						label={ __( 'Display', 'woocommerce' ) }
+						label={__('Display', 'woocommerce')}
 					>
 						<ToggleControl
 							__nextHasNoMarginBottom
 							__next40pxDefaultSize
-							label={ __( 'Display total price', 'woocommerce' ) }
-							help={ __(
+							label={__('Display total price', 'woocommerce')}
+							help={__(
 								'Toggle to display the total price of products in the shopping cart. If no products have been added, the price will not display.',
 								'woocommerce'
-							) }
-							checked={ ! hasHiddenPrice }
-							onChange={ () =>
-								setAttributes( {
-									hasHiddenPrice: ! hasHiddenPrice,
-								} )
+							)}
+							checked={!hasHiddenPrice}
+							onChange={() =>
+								setAttributes({
+									hasHiddenPrice: !hasHiddenPrice,
+								})
 							}
 						/>
 					</BaseControl>
 					<BaseControl
 						__nextHasNoMarginBottom
 						id="wc-block-mini-cart__product-count-basecontrol"
-						label={ __( 'Show Cart Item Count:', 'woocommerce' ) }
+						label={__('Show Cart Item Count:', 'woocommerce')}
 					>
 						<RadioControl
 							className="wc-block-mini-cart__product-count-radiocontrol"
-							selected={ productCountVisibility }
-							options={ [
+							selected={productCountVisibility}
+							options={[
 								{
 									label: __(
 										'Always (even if empty)',
@@ -189,122 +186,119 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 									value: 'greater_than_zero',
 								},
 								{
-									label: __( 'Never', 'woocommerce' ),
+									label: __('Never', 'woocommerce'),
 									value: 'never',
 								},
-							] }
-							help={ __(
+							]}
+							help={__(
 								'The editor does not display the real count value, but a placeholder to indicate how it will look on the front-end.',
 								'woocommerce'
-							) }
-							onChange={ ( value ) =>
-								setAttributes( {
+							)}
+							onChange={(value) =>
+								setAttributes({
 									productCountVisibility: value,
-								} )
+								})
 							}
 						/>
 					</BaseControl>
-					{ isSiteEditor && (
+					{isSiteEditor && (
 						<ToggleGroupControl
 							__nextHasNoMarginBottom
 							__next40pxDefaultSize
 							className="wc-block-editor-mini-cart__render-in-cart-and-checkout-toggle"
-							label={ __(
+							label={__(
 								'Mini-Cart in cart and checkout pages',
 								'woocommerce'
-							) }
+							)}
 							isBlock
-							value={ cartAndCheckoutRenderStyle }
-							onChange={ ( value: boolean ) => {
-								setAttributes( {
+							value={cartAndCheckoutRenderStyle}
+							onChange={(value: boolean) => {
+								setAttributes({
 									cartAndCheckoutRenderStyle: value,
-								} );
-							} }
-							help={ __(
+								});
+							}}
+							help={__(
 								'Select how the Mini-Cart behaves in the Cart and Checkout pages. This might affect the header layout.',
 								'woocommerce'
-							) }
+							)}
 						>
 							<ToggleGroupControlOption
-								value={ 'hidden' }
-								label={ __( 'Hide', 'woocommerce' ) }
+								value={'hidden'}
+								label={__('Hide', 'woocommerce')}
 							/>
 							<ToggleGroupControlOption
-								value={ 'removed' }
-								label={ __( 'Remove', 'woocommerce' ) }
+								value={'removed'}
+								label={__('Remove', 'woocommerce')}
 							/>
 						</ToggleGroupControl>
-					) }
+					)}
 				</PanelBody>
-				<PanelBody title={ __( 'Cart Drawer', 'woocommerce' ) }>
-					{ templatePartEditUri && (
+				<PanelBody title={__('Cart Drawer', 'woocommerce')}>
+					{templatePartEditUri && (
 						<>
 							<img
 								className="wc-block-editor-mini-cart__drawer-image"
 								src={
 									isRTL()
-										? `${ WC_BLOCKS_IMAGE_URL }blocks/mini-cart/cart-drawer-rtl.svg`
-										: `${ WC_BLOCKS_IMAGE_URL }blocks/mini-cart/cart-drawer.svg`
+										? `${WC_BLOCKS_IMAGE_URL}blocks/mini-cart/cart-drawer-rtl.svg`
+										: `${WC_BLOCKS_IMAGE_URL}blocks/mini-cart/cart-drawer.svg`
 								}
 								alt=""
 							/>
 							<p>
-								{ __(
+								{__(
 									'When opened, the Mini-Cart drawer gives shoppers quick access to view their selected products and checkout.',
 									'woocommerce'
-								) }
+								)}
 							</p>
 							<p className="wc-block-editor-mini-cart__drawer-link">
-								<ExternalLink href={ templatePartEditUri }>
-									{ __(
+								<ExternalLink href={templatePartEditUri}>
+									{__(
 										'Edit Mini-Cart Drawer template',
 										'woocommerce'
-									) }
+									)}
 								</ExternalLink>
 							</p>
 						</>
-					) }
+					)}
 					<BaseControl
 						__nextHasNoMarginBottom
 						id="wc-block-mini-cart__add-to-cart-behaviour-toggle"
-						label={ __( 'Behavior', 'woocommerce' ) }
+						label={__('Behavior', 'woocommerce')}
 					>
 						<ToggleControl
 							__nextHasNoMarginBottom
-							label={ __(
-								'Open drawer when adding',
-								'woocommerce'
-							) }
-							onChange={ ( value ) => {
-								setAttributes( {
+							label={__('Open drawer when adding', 'woocommerce')}
+							onChange={(value) => {
+								setAttributes({
 									addToCartBehaviour: value
 										? 'open_drawer'
 										: 'none',
-								} );
-							} }
-							help={ __(
+								});
+							}}
+							help={__(
 								'Toggle to open the Mini-Cart drawer when a shopper adds a product to their cart.',
 								'woocommerce'
-							) }
-							checked={ addToCartBehaviour === 'open_drawer' }
+							)}
+							checked={addToCartBehaviour === 'open_drawer'}
 						/>
 						<ToggleControl
 							__nextHasNoMarginBottom
-							label={ __(
+							label={__(
 								'Navigate to checkout when clicking the Mini-Cart, instead of opening the drawer.',
 								'woocommerce'
-							) }
-							onChange={ ( value ) => {
-								setAttributes( {
+							)}
+							onChange={(value) => {
+								setAttributes({
 									onCartClickBehaviour: value
 										? 'navigate_to_checkout'
 										: 'open_drawer',
-								} );
-							} }
-							help={ __(
+								});
+							}}
+							help={__(
 								'Toggle to disable opening the Mini-Cart drawer when clicking the cart icon, and instead navigate to the checkout page.',
 								'woocommerce'
-							) }
+							)}
 							checked={
 								onCartClickBehaviour === 'navigate_to_checkout'
 							}
@@ -313,29 +307,29 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 				</PanelBody>
 			</InspectorControls>
 			<ColorPanel
-				colorTypes={ miniCartColorAttributes }
-				miniCartButtonRef={ miniCartButtonRef }
+				colorTypes={miniCartColorAttributes}
+				miniCartButtonRef={miniCartButtonRef}
 			/>
 			<Noninteractive>
 				<button
-					ref={ miniCartButtonRef }
+					ref={miniCartButtonRef}
 					className="wc-block-mini-cart__button"
 				>
 					<QuantityBadge
-						count={ productCount }
-						iconColor={ iconColor }
-						productCountColor={ productCountColor }
-						icon={ miniCartIcon }
-						productCountVisibility={ productCountVisibility }
+						count={productCount}
+						iconColor={iconColor}
+						productCountColor={productCountColor}
+						icon={miniCartIcon}
+						productCountVisibility={productCountVisibility}
 					/>
-					{ ! hasHiddenPrice && (
+					{!hasHiddenPrice && (
 						<span
 							className="wc-block-mini-cart__amount"
-							style={ { color: priceColor.color } }
+							style={{ color: priceColor.color }}
 						>
-							{ formatPrice( productTotal ) }
+							{formatPrice(productTotal)}
 						</span>
-					) }
+					)}
 				</button>
 			</Noninteractive>
 		</div>

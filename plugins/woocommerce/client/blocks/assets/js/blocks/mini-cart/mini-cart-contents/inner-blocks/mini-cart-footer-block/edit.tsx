@@ -24,7 +24,7 @@ const PaymentMethodIconsElement = (): JSX.Element => {
 	const { paymentMethods } = usePaymentMethods();
 	return (
 		<PaymentMethodIcons
-			icons={ getIconsFromPaymentMethods( paymentMethods ) }
+			icons={getIconsFromPaymentMethods(paymentMethods)}
 		/>
 	);
 };
@@ -32,28 +32,28 @@ const PaymentMethodIconsElement = (): JSX.Element => {
 export const Edit = (): JSX.Element => {
 	const blockProps = useBlockProps();
 	const { cartTotals } = useStoreCart();
-	const subTotal = getSetting( 'displayCartPricesIncludingTax', false )
-		? parseInt( cartTotals.total_items, 10 ) +
-		  parseInt( cartTotals.total_items_tax, 10 )
-		: parseInt( cartTotals.total_items, 10 );
+	const subTotal = getSetting('displayCartPricesIncludingTax', false)
+		? parseInt(cartTotals.total_items, 10) +
+			parseInt(cartTotals.total_items_tax, 10)
+		: parseInt(cartTotals.total_items, 10);
 
 	const TEMPLATE = [
-		[ 'woocommerce/mini-cart-cart-button-block', {} ],
-		[ 'woocommerce/mini-cart-checkout-button-block', {} ],
+		['woocommerce/mini-cart-cart-button-block', {}],
+		['woocommerce/mini-cart-checkout-button-block', {}],
 	];
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<div className="wc-block-mini-cart__footer">
 				<TotalsItem
 					className="wc-block-mini-cart__footer-subtotal"
-					currency={ getCurrencyFromPriceResponse( cartTotals ) }
-					label={ __( 'Subtotal', 'woocommerce' ) }
-					value={ subTotal }
-					description={ getTotalsItemDescription() }
+					currency={getCurrencyFromPriceResponse(cartTotals)}
+					label={__('Subtotal', 'woocommerce')}
+					value={subTotal}
+					description={getTotalsItemDescription()}
 				/>
 				<div className="wc-block-mini-cart__footer-actions">
-					<InnerBlocks template={ TEMPLATE } />
+					<InnerBlocks template={TEMPLATE} />
 				</div>
 				<PaymentEventsProvider>
 					<PaymentMethodIconsElement />
@@ -65,7 +65,7 @@ export const Edit = (): JSX.Element => {
 
 export const Save = (): JSX.Element => {
 	return (
-		<div { ...useBlockProps.save() }>
+		<div {...useBlockProps.save()}>
 			<InnerBlocks.Content />
 		</div>
 	);

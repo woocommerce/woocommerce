@@ -9,14 +9,14 @@ import clsx from 'clsx';
  */
 import { ForwardRefProps } from './types';
 
-const Main = forwardRef< HTMLInputElement, ForwardRefProps >(
-	( { children, className = '' }, ref ): JSX.Element => {
+const Main = forwardRef<HTMLInputElement, ForwardRefProps>(
+	({ children, className = '' }, ref): JSX.Element => {
 		return (
 			<div
-				ref={ ref }
-				className={ clsx( 'wc-block-components-main', className ) }
+				ref={ref}
+				className={clsx('wc-block-components-main', className)}
 			>
-				{ children }
+				{children}
 			</div>
 		);
 	}

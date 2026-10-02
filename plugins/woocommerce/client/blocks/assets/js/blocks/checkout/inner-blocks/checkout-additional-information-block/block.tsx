@@ -12,17 +12,17 @@ import Noninteractive from '@woocommerce/base-components/noninteractive';
 import type { OrderFormValues } from '@woocommerce/settings';
 
 const Block = () => {
-	const { additionalFields } = useSelect( ( select ) => {
-		const store = select( checkoutStore );
+	const { additionalFields } = useSelect((select) => {
+		const store = select(checkoutStore);
 		return {
 			additionalFields: store.getAdditionalFields(),
 		};
-	}, [] );
+	}, []);
 	const { isEditor } = useEditorContext();
-	const { setAdditionalFields } = useDispatch( checkoutStore );
+	const { setAdditionalFields } = useDispatch(checkoutStore);
 
-	const onChangeForm = ( additionalValues: OrderFormValues ) => {
-		void setAdditionalFields( additionalValues );
+	const onChangeForm = (additionalValues: OrderFormValues) => {
+		void setAdditionalFields(additionalValues);
 	};
 
 	const additionalFieldValues = {
@@ -33,16 +33,14 @@ const Block = () => {
 
 	return (
 		<>
-			<StoreNoticesContainer
-				context={ noticeContexts.ORDER_INFORMATION }
-			/>
+			<StoreNoticesContainer context={noticeContexts.ORDER_INFORMATION} />
 			<WrapperComponent>
 				<Form
 					id="order"
 					addressType="order"
-					onChange={ onChangeForm }
-					fields={ ORDER_FORM_KEYS }
-					values={ additionalFieldValues }
+					onChange={onChangeForm}
+					fields={ORDER_FORM_KEYS}
+					values={additionalFieldValues}
 				/>
 			</WrapperComponent>
 		</>

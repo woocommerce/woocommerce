@@ -16,14 +16,14 @@ import { CoreCollectionNames, CoreFilterNames } from '../types';
 
 const collection = {
 	name: CoreCollectionNames.ON_SALE,
-	title: __( 'On Sale Products', 'woocommerce' ),
-	icon: <Icon icon={ percent } />,
+	title: __('On Sale Products', 'woocommerce'),
+	icon: <Icon icon={percent} />,
 	description: __(
 		'Highlight products that are currently on sale.',
 		'woocommerce'
 	),
-	keywords: [ 'discount', 'promotion', 'onsale' ],
-	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
+	keywords: ['discount', 'promotion', 'onsale'],
+	scope: ['inserter', 'block'] as BlockVariationScope[],
 };
 
 const attributes = {
@@ -37,7 +37,7 @@ const attributes = {
 		perPage: 5,
 		pages: 1,
 	},
-	hideControls: [ CoreFilterNames.ON_SALE, CoreFilterNames.FILTERABLE ],
+	hideControls: [CoreFilterNames.ON_SALE, CoreFilterNames.FILTERABLE],
 };
 
 const heading: InnerBlockTemplate = [
@@ -45,7 +45,7 @@ const heading: InnerBlockTemplate = [
 	{
 		textAlign: 'center',
 		level: 2,
-		content: __( 'On sale products', 'woocommerce' ),
+		content: __('On sale products', 'woocommerce'),
 		style: { spacing: { margin: { bottom: '1rem' } } },
 	},
 ];

@@ -18,60 +18,55 @@ import {
 } from '~/task-lists/fills/steps/location';
 import { FormValues } from '~/dashboard/components/settings/general/store-address';
 
-const validateLocationForm = ( values: FormValues ) => {
-	const errors = defaultValidate( values );
+const validateLocationForm = (values: FormValues) => {
+	const errors = defaultValidate(values);
 
 	if (
-		document.getElementById( 'woocommerce-store-address-form-address_1' ) &&
-		! values.addressLine1.trim().length
+		document.getElementById('woocommerce-store-address-form-address_1') &&
+		!values.addressLine1.trim().length
 	) {
-		errors.addressLine1 = __( 'Please enter an address', 'woocommerce' );
+		errors.addressLine1 = __('Please enter an address', 'woocommerce');
 	}
 
 	if (
-		document.getElementById( 'woocommerce-store-address-form-postcode' ) &&
-		! values.postCode.trim().length
+		document.getElementById('woocommerce-store-address-form-postcode') &&
+		!values.postCode.trim().length
 	) {
-		errors.postCode = __( 'Please enter a post code', 'woocommerce' );
+		errors.postCode = __('Please enter a post code', 'woocommerce');
 	}
 
 	if (
-		document.getElementById( 'woocommerce-store-address-form-city' ) &&
-		! values.city.trim().length
+		document.getElementById('woocommerce-store-address-form-city') &&
+		!values.city.trim().length
 	) {
-		errors.city = __( 'Please enter a city', 'woocommerce' );
+		errors.city = __('Please enter a city', 'woocommerce');
 	}
 
 	return errors;
 };
 
-export const StoreLocation = ( { nextStep }: { nextStep: () => void } ) => {
-	const { createNotice } = useDispatch( 'core/notices' );
-	const { updateAndPersistSettingsForGroup } = useDispatch( settingsStore );
-	const { generalSettings, isResolving, isUpdating } = useSelect(
-		( select ) => {
-			const {
-				getSettings,
-				hasFinishedResolution,
-				isUpdateSettingsRequesting,
-			} = select( settingsStore );
+export const StoreLocation = ({ nextStep }: { nextStep: () => void }) => {
+	const { createNotice } = useDispatch('core/notices');
+	const { updateAndPersistSettingsForGroup } = useDispatch(settingsStore);
+	const { generalSettings, isResolving, isUpdating } = useSelect((select) => {
+		const {
+			getSettings,
+			hasFinishedResolution,
+			isUpdateSettingsRequesting,
+		} = select(settingsStore);
 
-			return {
-				generalSettings: getSettings( 'general' )?.general,
-				isResolving: ! hasFinishedResolution( 'getSettings', [
-					'general',
-				] ),
-				isUpdating: isUpdateSettingsRequesting( 'general' ),
-			};
-		},
-		[]
-	);
+		return {
+			generalSettings: getSettings('general')?.general,
+			isResolving: !hasFinishedResolution('getSettings', ['general']),
+			isUpdating: isUpdateSettingsRequesting('general'),
+		};
+	}, []);
 
-	useEffect( () => {
+	useEffect(() => {
 		if (
 			isResolving ||
 			isUpdating ||
-			! hasCompleteAddress(
+			!hasCompleteAddress(
 				generalSettings || {},
 				Boolean(
 					document.getElementById(
@@ -83,27 +78,25 @@ export const StoreLocation = ( { nextStep }: { nextStep: () => void } ) => {
 			return;
 		}
 		nextStep();
-	}, [ isResolving, generalSettings, isUpdating ] );
+	}, [isResolving, generalSettings, isUpdating]);
 
-	if ( isResolving ) {
+	if (isResolving) {
 		return null;
 	}
 
 	return (
 		<StoreLocationForm
-			validate={ validateLocationForm }
-			onComplete={ ( values: { [ key: string ]: string } ) => {
-				const country = getCountryCode( values.countryState );
-				recordEvent( 'tasklist_tax_set_location', {
+			validate={validateLocationForm}
+			onComplete={(values: { [key: string]: string }) => {
+				const country = getCountryCode(values.countryState);
+				recordEvent('tasklist_tax_set_location', {
 					country,
-				} );
-			} }
-			isSettingsRequesting={ false }
-			settings={ generalSettings }
-			updateAndPersistSettingsForGroup={
-				updateAndPersistSettingsForGroup
-			}
-			createNotice={ createNotice }
+				});
+			}}
+			isSettingsRequesting={false}
+			settings={generalSettings}
+			updateAndPersistSettingsForGroup={updateAndPersistSettingsForGroup}
+			createNotice={createNotice}
 		/>
 	);
 };

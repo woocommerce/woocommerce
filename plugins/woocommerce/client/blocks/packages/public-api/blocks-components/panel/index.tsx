@@ -20,10 +20,10 @@ export interface PanelProps {
 	headingLevel?: 2 | 3 | 4 | 5 | 6;
 	title: ReactNode;
 	titleTag?: keyof JSX.IntrinsicElements;
-	state?: [ boolean, React.Dispatch< React.SetStateAction< boolean > > ];
+	state?: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
 }
 
-const Panel = ( {
+const Panel = ({
 	children,
 	className,
 	initialOpen = false,
@@ -36,45 +36,45 @@ const Panel = ( {
 	 */
 	titleTag,
 	state,
-}: PanelProps ): ReactElement => {
-	let [ isOpen, setIsOpen ] = useState< boolean >( initialOpen );
+}: PanelProps): ReactElement => {
+	let [isOpen, setIsOpen] = useState<boolean>(initialOpen);
 	// If state is managed externally, we override the internal state.
-	if ( Array.isArray( state ) && state.length === 2 ) {
-		[ isOpen, setIsOpen ] = state;
+	if (Array.isArray(state) && state.length === 2) {
+		[isOpen, setIsOpen] = state;
 	}
 
-	if ( titleTag ) {
-		deprecated( "Panel component's titleTag prop", {
+	if (titleTag) {
+		deprecated("Panel component's titleTag prop", {
 			since: '9.4.0',
-		} );
+		});
 	}
 
 	return (
 		<div
-			role={ headingLevel ? 'heading' : undefined }
-			aria-level={ headingLevel ? headingLevel : undefined }
-			className={ clsx( className, 'wc-block-components-panel', {
+			role={headingLevel ? 'heading' : undefined}
+			aria-level={headingLevel ? headingLevel : undefined}
+			className={clsx(className, 'wc-block-components-panel', {
 				'has-border': hasBorder,
-			} ) }
+			})}
 		>
 			<Button
-				render={ <div /> }
-				aria-expanded={ isOpen }
+				render={<div />}
+				aria-expanded={isOpen}
 				className="wc-block-components-panel__button"
-				onClick={ () => setIsOpen( ! isOpen ) }
+				onClick={() => setIsOpen(!isOpen)}
 			>
 				<Icon
 					aria-hidden="true"
 					className="wc-block-components-panel__button-icon"
-					icon={ isOpen ? chevronUp : chevronDown }
+					icon={isOpen ? chevronUp : chevronDown}
 				/>
-				{ title }
+				{title}
 			</Button>
-			{ isOpen && (
+			{isOpen && (
 				<div className="wc-block-components-panel__content">
-					{ children }
+					{children}
 				</div>
-			) }
+			)}
 		</div>
 	);
 };

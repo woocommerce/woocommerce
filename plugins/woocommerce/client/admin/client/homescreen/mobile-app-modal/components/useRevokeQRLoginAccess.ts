@@ -18,40 +18,40 @@ import apiFetch from '@wordpress/api-fetch';
  * threading state up from the unmounted QR.
  */
 export const useRevokeQRLoginAccess = () => {
-	const [ isRevoking, setIsRevoking ] = useState< boolean >( false );
-	const [ isRevoked, setIsRevoked ] = useState< boolean >( false );
-	const [ errorMessage, setErrorMessage ] = useState< string | null >( null );
-	const isMountedRef = useRef( true );
+	const [isRevoking, setIsRevoking] = useState<boolean>(false);
+	const [isRevoked, setIsRevoked] = useState<boolean>(false);
+	const [errorMessage, setErrorMessage] = useState<string | null>(null);
+	const isMountedRef = useRef(true);
 
-	useEffect( () => {
+	useEffect(() => {
 		isMountedRef.current = true;
 		return () => {
 			isMountedRef.current = false;
 		};
-	}, [] );
+	}, []);
 
-	const revoke = useCallback( async ( apUuid: string ) => {
-		if ( ! apUuid ) {
+	const revoke = useCallback(async (apUuid: string) => {
+		if (!apUuid) {
 			return;
 		}
 
-		setIsRevoking( true );
-		setErrorMessage( null );
+		setIsRevoking(true);
+		setErrorMessage(null);
 
 		try {
-			await apiFetch( {
-				path: `${ WC_ADMIN_NAMESPACE }/mobile-app/qr-login-revoke`,
+			await apiFetch({
+				path: `${WC_ADMIN_NAMESPACE}/mobile-app/qr-login-revoke`,
 				method: 'DELETE',
 				data: { uuid: apUuid },
-			} );
+			});
 
-			if ( ! isMountedRef.current ) {
+			if (!isMountedRef.current) {
 				return;
 			}
 
-			setIsRevoked( true );
-		} catch ( error: unknown ) {
-			if ( ! isMountedRef.current ) {
+			setIsRevoked(true);
+		} catch (error: unknown) {
+			if (!isMountedRef.current) {
 				return;
 			}
 
@@ -71,7 +71,7 @@ export const useRevokeQRLoginAccess = () => {
 				err.code === 'invalid_json' ||
 				httpStatus === 429;
 
-			if ( isRateLimited ) {
+			if (isRateLimited) {
 				setErrorMessage(
 					__(
 						"You're sending requests too quickly. Please wait a moment and try again.",
@@ -89,11 +89,11 @@ export const useRevokeQRLoginAccess = () => {
 					)
 			);
 		} finally {
-			if ( isMountedRef.current ) {
-				setIsRevoking( false );
+			if (isMountedRef.current) {
+				setIsRevoking(false);
 			}
 		}
-	}, [] );
+	}, []);
 
 	return {
 		revoke,

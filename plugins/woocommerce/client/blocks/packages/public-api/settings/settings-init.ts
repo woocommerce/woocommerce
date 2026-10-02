@@ -5,7 +5,7 @@ import { SymbolPosition, CurrencyCode } from '@woocommerce/types';
 
 declare global {
 	interface Window {
-		wcSettings: Record< string, unknown >;
+		wcSettings: Record<string, unknown>;
 	}
 }
 
@@ -37,13 +37,13 @@ export interface WooCommerceSiteLocale {
 
 export interface WooCommerceSharedSettings {
 	adminUrl: string;
-	countries: Record< string, string > | never[];
+	countries: Record<string, string> | never[];
 	countryData: Record<
 		string,
 		{
 			allowBilling: boolean;
 			allowShipping: boolean;
-			states: Record< string, string >;
+			states: Record<string, string>;
 			locale: Record<
 				string,
 				{
@@ -63,7 +63,7 @@ export interface WooCommerceSharedSettings {
 	homeUrl: string;
 	isMultisite: boolean;
 	locale: WooCommerceSiteLocale;
-	orderStatuses: Record< string, string > | never[];
+	orderStatuses: Record<string, string> | never[];
 	placeholderImgSrc: string;
 	siteTitle: string;
 	storePages:
@@ -105,7 +105,7 @@ const defaults: WooCommerceSharedSettings = {
 	locale: {
 		siteLocale: 'en_US',
 		userLocale: 'en_US',
-		weekdaysShort: [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ],
+		weekdaysShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
 	},
 	orderStatuses: [],
 	placeholderImgSrc: '',
@@ -121,8 +121,7 @@ const globalSharedSettings =
 	typeof window.wcSettings === 'object' ? window.wcSettings : {};
 
 interface AllSettings
-	extends WooCommerceSharedSettings,
-		Record< string, unknown > {
+	extends WooCommerceSharedSettings, Record<string, unknown> {
 	currency: WooCommerceSiteCurrency;
 }
 
@@ -134,7 +133,7 @@ const allSettings: AllSettings = {
 
 allSettings.currency = {
 	...defaults.currency,
-	...( allSettings.currency as WooCommerceSiteCurrency ),
+	...(allSettings.currency as WooCommerceSiteCurrency),
 };
 
 allSettings.locale = {

@@ -13,11 +13,11 @@ import sharedAttributes, {
 } from '../../utils/shared-attributes';
 import metadata from './block.json';
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	icon: {
 		src: (
 			<Icon
-				icon={ percent }
+				icon={percent}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -31,10 +31,10 @@ registerBlockType( metadata, {
 			{
 				type: 'block',
 				blocks: sharedAttributeBlockTypes.filter(
-					( value ) => value !== 'woocommerce/product-on-sale'
+					(value) => value !== 'woocommerce/product-on-sale'
 				),
-				transform: ( attributes ) =>
-					createBlock( 'woocommerce/product-on-sale', attributes ),
+				transform: (attributes) =>
+					createBlock('woocommerce/product-on-sale', attributes),
 			},
 		],
 	},
@@ -44,11 +44,11 @@ registerBlockType( metadata, {
 	 *
 	 * @param {Object} props Props to pass to block.
 	 */
-	edit( props ) {
-		return <Block { ...props } />;
+	edit(props) {
+		return <Block {...props} />;
 	},
 
 	save() {
 		return null;
 	},
-} );
+});

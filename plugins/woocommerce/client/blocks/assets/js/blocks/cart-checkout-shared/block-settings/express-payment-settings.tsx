@@ -15,18 +15,18 @@ import { select } from '@wordpress/data';
 import { paymentStore } from '@woocommerce/block-data';
 import { ADMIN_URL } from '@woocommerce/settings';
 
-const allStyleControls = [ 'height', 'borderRadius' ];
+const allStyleControls = ['height', 'borderRadius'];
 
-const atLeastOnePaymentMethodSupportsOneOf = ( styleControl: string[] ) => {
+const atLeastOnePaymentMethodSupportsOneOf = (styleControl: string[]) => {
 	const availableExpressMethods =
-		select( paymentStore ).getAvailableExpressPaymentMethods();
+		select(paymentStore).getAvailableExpressPaymentMethods();
 
-	return Object.values( availableExpressMethods ).reduce(
-		( acc, currentValue ) => {
+	return Object.values(availableExpressMethods).reduce(
+		(acc, currentValue) => {
 			return (
 				acc ||
-				currentValue?.supportsStyle.some( ( el ) =>
-					styleControl.includes( el )
+				currentValue?.supportsStyle.some((el) =>
+					styleControl.includes(el)
 				)
 			);
 		},
@@ -34,70 +34,70 @@ const atLeastOnePaymentMethodSupportsOneOf = ( styleControl: string[] ) => {
 	);
 };
 
-const ExpressPaymentButtonStyleControls = ( {
+const ExpressPaymentButtonStyleControls = ({
 	attributes,
 	setAttributes,
 }: {
 	attributes: BlockAttributes;
-	setAttributes: ( attrs: BlockAttributes ) => void;
-} ) => {
+	setAttributes: (attrs: BlockAttributes) => void;
+}) => {
 	const { buttonHeight, buttonBorderRadius } = attributes;
 
 	return (
 		<>
-			{ atLeastOnePaymentMethodSupportsOneOf( [ 'height' ] ) && (
+			{atLeastOnePaymentMethodSupportsOneOf(['height']) && (
 				<RadioControl
-					label={ __( 'Button height', 'woocommerce' ) }
-					selected={ buttonHeight }
-					options={ [
+					label={__('Button height', 'woocommerce')}
+					selected={buttonHeight}
+					options={[
 						{
-							label: __( 'Small (40px)', 'woocommerce' ),
+							label: __('Small (40px)', 'woocommerce'),
 							value: '40',
 						},
 						{
-							label: __( 'Medium (48px)', 'woocommerce' ),
+							label: __('Medium (48px)', 'woocommerce'),
 							value: '48',
 						},
 						{
-							label: __( 'Large (55px)', 'woocommerce' ),
+							label: __('Large (55px)', 'woocommerce'),
 							value: '55',
 						},
-					] }
-					onChange={ ( newValue: string ) =>
-						setAttributes( { buttonHeight: newValue } )
+					]}
+					onChange={(newValue: string) =>
+						setAttributes({ buttonHeight: newValue })
 					}
 				/>
-			) }
-			{ atLeastOnePaymentMethodSupportsOneOf( [ 'borderRadius' ] ) && (
+			)}
+			{atLeastOnePaymentMethodSupportsOneOf(['borderRadius']) && (
 				<div className="border-radius-control-container">
 					<HeightControl
-						label={ __( 'Button border radius', 'woocommerce' ) }
-						value={ buttonBorderRadius }
-						onChange={ ( newValue: string ) => {
-							const valueOnly = newValue.replace( 'px', '' );
-							setAttributes( {
+						label={__('Button border radius', 'woocommerce')}
+						value={buttonBorderRadius}
+						onChange={(newValue: string) => {
+							const valueOnly = newValue.replace('px', '');
+							setAttributes({
 								buttonBorderRadius: valueOnly,
-							} );
-						} }
+							});
+						}}
 					/>
 				</div>
-			) }
+			)}
 		</>
 	);
 };
 
-const ExpressPaymentToggle = ( {
+const ExpressPaymentToggle = ({
 	attributes,
 	setAttributes,
 }: {
 	attributes: BlockAttributes;
-	setAttributes: ( attrs: BlockAttributes ) => void;
-} ) => {
-	if ( attributes.showButtonStyles ) {
+	setAttributes: (attrs: BlockAttributes) => void;
+}) => {
+	if (attributes.showButtonStyles) {
 		return (
 			<ExpressPaymentButtonStyleControls
-				attributes={ attributes }
-				setAttributes={ setAttributes }
+				attributes={attributes}
+				setAttributes={setAttributes}
 			/>
 		);
 	}
@@ -106,15 +106,15 @@ const ExpressPaymentToggle = ( {
 
 const ExpressPaymentMethods = () => {
 	const availableExpressMethods =
-		select( paymentStore ).getAvailableExpressPaymentMethods();
+		select(paymentStore).getAvailableExpressPaymentMethods();
 
-	if ( Object.entries( availableExpressMethods ).length < 1 ) {
+	if (Object.entries(availableExpressMethods).length < 1) {
 		return (
 			<p className="wc-block-checkout__controls-text">
-				{ __(
+				{__(
 					'You currently have no express payment integrations active.',
 					'woocommerce'
-				) }
+				)}
 			</p>
 		);
 	}
@@ -122,80 +122,80 @@ const ExpressPaymentMethods = () => {
 	return (
 		<>
 			<p className="wc-block-checkout__controls-text">
-				{ __(
+				{__(
 					'You currently have the following express payment integrations active.',
 					'woocommerce'
-				) }
+				)}
 			</p>
-			{ Object.values( availableExpressMethods ).map( ( values ) => {
+			{Object.values(availableExpressMethods).map((values) => {
 				return (
 					<ExternalLinkCard
-						key={ values.name }
-						href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=checkout&section=${ encodeURIComponent(
+						key={values.name}
+						href={`${ADMIN_URL}admin.php?page=wc-settings&tab=checkout&section=${encodeURIComponent(
 							values.gatewayId
-						) }` }
-						title={ values.title }
-						description={ values.description }
+						)}`}
+						title={values.title}
+						description={values.description}
 					/>
 				);
-			} ) }
+			})}
 		</>
 	);
 };
 
 const toggleLabel = (
 	<>
-		{ __( 'Apply uniform styles', 'woocommerce' ) }{ ' ' }
+		{__('Apply uniform styles', 'woocommerce')}{' '}
 		<span className="express-payment-styles-beta-badge">Beta</span>
 	</>
 );
 
-export const ExpressPaymentControls = ( {
+export const ExpressPaymentControls = ({
 	attributes,
 	setAttributes,
 }: {
 	attributes: BlockAttributes;
-	setAttributes: ( attrs: BlockAttributes ) => void;
-} ) => {
+	setAttributes: (attrs: BlockAttributes) => void;
+}) => {
 	return (
 		<InspectorControls>
-			{ atLeastOnePaymentMethodSupportsOneOf( allStyleControls ) && (
+			{atLeastOnePaymentMethodSupportsOneOf(allStyleControls) && (
 				<PanelBody
-					title={ __( 'Button Settings', 'woocommerce' ) }
+					title={__('Button Settings', 'woocommerce')}
 					className="express-payment-button-settings"
 				>
 					<ToggleControl
 						__nextHasNoMarginBottom
-						label={ toggleLabel }
-						checked={ attributes.showButtonStyles }
-						onChange={ () =>
-							setAttributes( {
-								showButtonStyles: ! attributes.showButtonStyles,
-							} )
+						label={toggleLabel}
+						checked={attributes.showButtonStyles}
+						onChange={() =>
+							setAttributes({
+								showButtonStyles: !attributes.showButtonStyles,
+							})
 						}
-						help={ __(
+						help={__(
 							'Sets a consistent style for express payment buttons.',
 							'woocommerce'
-						) }
+						)}
 					/>
 					<Notice
 						status="warning"
-						isDismissible={ false }
+						isDismissible={false}
 						className="wc-block-checkout__notice express-payment-styles-notice"
 					>
-						<strong>{ __( 'Note', 'woocommerce' ) }:</strong>{ ' ' }
-						{ __(
+						<strong>{__('Note', 'woocommerce')}:</strong>{' '}
+						{__(
 							'Some payment methods might not yet support all style controls',
 							'woocommerce'
-						) }
+						)}
 					</Notice>
 					<ExpressPaymentToggle
-						attributes={ attributes }
-						setAttributes={ setAttributes }
+						attributes={attributes}
+						setAttributes={setAttributes}
 					/>
 				</PanelBody>
-			) }
-			<PanelBody title={ __( 'Express Payment Methods', 'woocommerce' ) }>
+			)}
+			<PanelBody title={__('Express Payment Methods', 'woocommerce')}>
 				<ExpressPaymentMethods />
 			</PanelBody>
 		</InspectorControls>

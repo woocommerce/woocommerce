@@ -15,106 +15,106 @@ import { LinkModal } from './link-modal';
 import { recordEvent, recordEventOnce } from '../../events';
 import { PersonalizationTag, storeName } from '../../store';
 
-const PersonalizationTagsModal = ( {
+const PersonalizationTagsModal = ({
 	onInsert,
 	isOpened,
 	closeCallback,
 	canInsertLink = false,
 	openedBy = '',
-} ) => {
-	const [ activeCategory, setActiveCategory ] = useState( null );
-	const [ searchQuery, setSearchQuery ] = useState( '' );
-	const [ selectedTag, setSelectedTag ] = useState( null );
-	const [ isLinkModalOpened, setIsLinkModalOpened ] = useState( false );
+}) => {
+	const [activeCategory, setActiveCategory] = useState(null);
+	const [searchQuery, setSearchQuery] = useState('');
+	const [selectedTag, setSelectedTag] = useState(null);
+	const [isLinkModalOpened, setIsLinkModalOpened] = useState(false);
 
 	const list = useSelect(
-		( select ) => select( storeName ).getPersonalizationTagsList(),
+		(select) => select(storeName).getPersonalizationTagsList(),
 		[]
 	);
 
-	if ( isLinkModalOpened ) {
+	if (isLinkModalOpened) {
 		return (
 			<LinkModal
-				onInsert={ ( tag, linkText ) => {
-					onInsert( tag, linkText );
-					setIsLinkModalOpened( false );
-				} }
-				isOpened={ isLinkModalOpened }
-				closeCallback={ () => setIsLinkModalOpened( false ) }
-				tag={ selectedTag }
+				onInsert={(tag, linkText) => {
+					onInsert(tag, linkText);
+					setIsLinkModalOpened(false);
+				}}
+				isOpened={isLinkModalOpened}
+				closeCallback={() => setIsLinkModalOpened(false)}
+				tag={selectedTag}
 			/>
 		);
 	}
 
-	if ( ! isOpened ) {
+	if (!isOpened) {
 		return null;
 	}
 
-	recordEventOnce( 'personalization_tags_modal_opened', { openedBy } );
+	recordEventOnce('personalization_tags_modal_opened', { openedBy });
 
-	const groupedTags: Record< string, PersonalizationTag[] > = list.reduce(
-		( groups, item ) => {
+	const groupedTags: Record<string, PersonalizationTag[]> = list.reduce(
+		(groups, item) => {
 			const { category, name, token } = item;
 
 			if (
-				! searchQuery ||
-				name.toLowerCase().includes( searchQuery.toLowerCase() ) ||
-				token.toLowerCase().includes( searchQuery.toLowerCase() )
+				!searchQuery ||
+				name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				token.toLowerCase().includes(searchQuery.toLowerCase())
 			) {
-				if ( ! groups[ category ] ) {
-					groups[ category ] = [];
+				if (!groups[category]) {
+					groups[category] = [];
 				}
-				groups[ category ].push( item );
+				groups[category].push(item);
 			}
 			return groups;
 		},
-		{} as Record< string, PersonalizationTag[] >
+		{} as Record<string, PersonalizationTag[]>
 	);
 
 	return (
 		<Modal
 			size="medium"
-			title={ __( 'Personalization Tags', __i18n_text_domain__ ) }
-			onRequestClose={ () => {
+			title={__('Personalization Tags', __i18n_text_domain__)}
+			onRequestClose={() => {
 				closeCallback();
-				recordEvent( 'personalization_tags_modal_closed', {
+				recordEvent('personalization_tags_modal_closed', {
 					openedBy,
-				} );
-			} }
+				});
+			}}
 			className="woocommerce-personalization-tags-modal"
 		>
 			<p>
-				{ __(
+				{__(
 					'Insert personalization tags to dynamically fill in information and personalize your emails.',
 					__i18n_text_domain__
-				) }{ ' ' }
+				)}{' '}
 				<ExternalLink
 					href="https://kb.mailpoet.com/article/435-a-guide-to-personalisation-tags-for-tailored-newsletters#list"
-					onClick={ () =>
+					onClick={() =>
 						recordEvent(
 							'personalization_tags_modal_learn_more_link_clicked',
 							{ openedBy }
 						)
 					}
 				>
-					{ __( 'Learn more', __i18n_text_domain__ ) }
+					{__('Learn more', __i18n_text_domain__)}
 				</ExternalLink>
 			</p>
 			<SearchControl
-				onChange={ ( theSearchQuery ) => {
-					setSearchQuery( theSearchQuery );
+				onChange={(theSearchQuery) => {
+					setSearchQuery(theSearchQuery);
 					recordEventOnce(
 						'personalization_tags_modal_search_control_input_updated',
 						{ openedBy }
 					);
-				} }
-				value={ searchQuery }
+				}}
+				value={searchQuery}
 			/>
 			<CategoryMenu
-				groupedTags={ groupedTags }
-				activeCategory={ activeCategory }
-				onCategorySelect={ ( category ) => {
-					setActiveCategory( category );
+				groupedTags={groupedTags}
+				activeCategory={activeCategory}
+				onCategorySelect={(category) => {
+					setActiveCategory(category);
 					recordEvent(
 						'personalization_tags_modal_category_menu_clicked',
 						{
@@ -122,13 +122,13 @@ const PersonalizationTagsModal = ( {
 							openedBy,
 						}
 					);
-				} }
+				}}
 			/>
 			<CategorySection
-				groupedTags={ groupedTags }
-				activeCategory={ activeCategory }
-				onInsert={ ( insertedTag ) => {
-					onInsert( insertedTag );
+				groupedTags={groupedTags}
+				activeCategory={activeCategory}
+				onInsert={(insertedTag) => {
+					onInsert(insertedTag);
 					recordEvent(
 						'personalization_tags_modal_tag_insert_button_clicked',
 						{
@@ -137,13 +137,13 @@ const PersonalizationTagsModal = ( {
 							openedBy,
 						}
 					);
-				} }
-				closeCallback={ closeCallback }
-				canInsertLink={ canInsertLink }
-				openLinkModal={ ( tag ) => {
-					setSelectedTag( tag );
-					setIsLinkModalOpened( true );
-				} }
+				}}
+				closeCallback={closeCallback}
+				canInsertLink={canInsertLink}
+				openLinkModal={(tag) => {
+					setSelectedTag(tag);
+					setIsLinkModalOpened(true);
+				}}
 			/>
 		</Modal>
 	);

@@ -43,51 +43,52 @@ type InspectorControlRequiredKeys =
 	| 'overlayColor'
 	| 'overlayGradient';
 
-interface InspectorControlsRequiredAttributes
-	extends LooselyMustHave<
-		FeaturedItemRequiredAttributes,
-		InspectorControlRequiredKeys
-	> {
+interface InspectorControlsRequiredAttributes extends LooselyMustHave<
+	FeaturedItemRequiredAttributes,
+	InspectorControlRequiredKeys
+> {
 	alt: string;
 	backgroundImageSrc: string;
 }
 
 interface InspectorControlsProps extends InspectorControlsRequiredAttributes {
 	setAttributes: (
-		attrs: Partial< InspectorControlsRequiredAttributes >
+		attrs: Partial<InspectorControlsRequiredAttributes>
 	) => void;
 	// Gutenberg doesn't provide some types, so we have to hard-code them here
 	clientId: string;
-	setGradient: ( newGradientValue: string ) => void;
+	setGradient: (newGradientValue: string) => void;
 }
 
-interface WithInspectorControlsRequiredProps< T > {
+interface WithInspectorControlsRequiredProps<T> {
 	attributes: InspectorControlsRequiredAttributes &
-		EditorBlock< T >[ 'attributes' ];
-	setAttributes: InspectorControlsProps[ 'setAttributes' ];
+		EditorBlock<T>['attributes'];
+	setAttributes: InspectorControlsProps['setAttributes'];
 	backgroundColorVisibilityStatus: {
 		isBackgroundVisible: boolean;
 		message: string | null;
 	};
 }
 
-interface WithInspectorControlsCategoryProps< T >
-	extends WithInspectorControlsRequiredProps< T > {
+interface WithInspectorControlsCategoryProps<
+	T,
+> extends WithInspectorControlsRequiredProps<T> {
 	category: WP_REST_API_Category;
 	product: never;
 }
 
-interface WithInspectorControlsProductProps< T >
-	extends WithInspectorControlsRequiredProps< T > {
+interface WithInspectorControlsProductProps<
+	T,
+> extends WithInspectorControlsRequiredProps<T> {
 	category: never;
 	product: ProductResponseItem;
 }
 
-type WithInspectorControlsProps< T extends EditorBlock< T > > =
-	| ( T & WithInspectorControlsCategoryProps< T > )
-	| ( T & WithInspectorControlsProductProps< T > );
+type WithInspectorControlsProps<T extends EditorBlock<T>> =
+	| (T & WithInspectorControlsCategoryProps<T>)
+	| (T & WithInspectorControlsProductProps<T>);
 
-export const InspectorControls = ( {
+export const InspectorControls = ({
 	alt,
 	backgroundColor,
 	backgroundColorVisibilityStatus,
@@ -102,227 +103,212 @@ export const InspectorControls = ( {
 	overlayGradient,
 	setAttributes,
 	setGradient,
-}: InspectorControlsProps ) => {
+}: InspectorControlsProps) => {
 	// FocalPointPicker was introduced in Gutenberg 5.0 (WordPress 5.2),
 	// so we need to check if it exists before using it.
 	const focalPointPickerExists = typeof FocalPointPicker === 'function';
 
-	const isImgElement = ! isRepeated && ! hasParallax;
+	const isImgElement = !isRepeated && !hasParallax;
 
 	const colorGradientSettings = useMultipleOriginColorsAndGradients();
 
 	return (
 		<>
 			<GutenbergInspectorControls key="inspector">
-				{ !! backgroundImageSrc && (
+				{!!backgroundImageSrc && (
 					<>
-						{ focalPointPickerExists && (
+						{focalPointPickerExists && (
 							<PanelBody
-								title={ __( 'Media settings', 'woocommerce' ) }
+								title={__('Media settings', 'woocommerce')}
 							>
 								<ToggleControl
-									label={ __(
+									label={__(
 										'Fixed background',
 										'woocommerce'
-									) }
-									checked={ hasParallax }
-									onChange={ () => {
-										setAttributes( {
-											hasParallax: ! hasParallax,
-										} );
-									} }
+									)}
+									checked={hasParallax}
+									onChange={() => {
+										setAttributes({
+											hasParallax: !hasParallax,
+										});
+									}}
 								/>
 								<ToggleControl
-									label={ __(
+									label={__(
 										'Repeated background',
 										'woocommerce'
-									) }
-									checked={ isRepeated }
-									onChange={ () => {
-										setAttributes( {
-											isRepeated: ! isRepeated,
-										} );
-									} }
+									)}
+									checked={isRepeated}
+									onChange={() => {
+										setAttributes({
+											isRepeated: !isRepeated,
+										});
+									}}
 								/>
-								{ ! isRepeated && (
+								{!isRepeated && (
 									<ToggleGroupControl
 										help={
 											<>
 												<span
-													style={ {
+													style={{
 														display: 'block',
 														marginBottom: '1em',
-													} }
+													}}
 												>
-													{ __(
+													{__(
 														'Select “Cover” to have the image automatically fit its container.',
 														'woocommerce'
-													) }
+													)}
 												</span>
 												<span>
-													{ __(
+													{__(
 														'This may affect your ability to freely move the focal point of the image.',
 														'woocommerce'
-													) }
+													)}
 												</span>
 											</>
 										}
-										label={ __(
-											'Image fit',
-											'woocommerce'
-										) }
+										label={__('Image fit', 'woocommerce')}
 										isBlock
-										value={ imageFit }
-										onChange={ ( value: ImageFit ) =>
-											setAttributes( {
+										value={imageFit}
+										onChange={(value: ImageFit) =>
+											setAttributes({
 												imageFit: value,
-											} )
+											})
 										}
 									>
 										<ToggleGroupControlOption
-											label={ __(
-												'None',
-												'woocommerce'
-											) }
+											label={__('None', 'woocommerce')}
 											value="none"
 										/>
 										<ToggleGroupControlOption
 											/* translators: "Cover" is a verb that indicates an image covering the entire container. */
-											label={ __(
-												'Cover',
-												'woocommerce'
-											) }
+											label={__('Cover', 'woocommerce')}
 											value="cover"
 										/>
 									</ToggleGroupControl>
-								) }
+								)}
 								<FocalPointPicker
-									label={ __(
+									label={__(
 										'Focal Point Picker',
 										'woocommerce'
-									) }
-									url={ backgroundImageSrc }
-									value={ focalPoint }
-									onChange={ ( value ) =>
-										setAttributes( {
+									)}
+									url={backgroundImageSrc}
+									value={focalPoint}
+									onChange={(value) =>
+										setAttributes({
 											focalPoint: value,
-										} )
+										})
 									}
 								/>
-								{ isImgElement && (
+								{isImgElement && (
 									<TextareaControl
-										label={ __(
+										label={__(
 											'Alt text (alternative text)',
 											'woocommerce'
-										) }
-										value={ alt }
-										onChange={ ( value: string ) => {
-											setAttributes( { alt: value } );
-										} }
+										)}
+										value={alt}
+										onChange={(value: string) => {
+											setAttributes({ alt: value });
+										}}
 										help={
 											<>
 												<ExternalLink href="https://www.w3.org/WAI/tutorials/images/decision-tree">
-													{ __(
+													{__(
 														'Describe the purpose of the image',
 														'woocommerce'
-													) }
+													)}
 												</ExternalLink>
 											</>
 										}
 									/>
-								) }
+								)}
 							</PanelBody>
-						) }
+						)}
 					</>
-				) }
+				)}
 			</GutenbergInspectorControls>
-			{ colorGradientSettings.hasColorsOrGradients && (
+			{colorGradientSettings.hasColorsOrGradients && (
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore - group prop is valid but not in TS definitions yet
 				<GutenbergInspectorControls group="color">
-					{ !! backgroundImageSrc && (
+					{!!backgroundImageSrc && (
 						<>
 							<ColorGradientSettingsDropdown
 								__experimentalIsRenderedInSidebar
-								settings={ [
+								settings={[
 									{
 										clearable: true,
 										colorValue: overlayColor,
 										gradientValue: overlayGradient,
-										label: __( 'Overlay', 'woocommerce' ),
-										onColorChange: ( value: string ) =>
-											setAttributes( {
+										label: __('Overlay', 'woocommerce'),
+										onColorChange: (value: string) =>
+											setAttributes({
 												overlayColor: value,
-											} ),
-										onGradientChange: ( value: string ) => {
-											setGradient( value );
-											setAttributes( {
+											}),
+										onGradientChange: (value: string) => {
+											setGradient(value);
+											setAttributes({
 												overlayGradient: value,
-											} );
+											});
 										},
 										isShownByDefault: true,
-										resetAllFilter: () => ( {
+										resetAllFilter: () => ({
 											overlayColor: undefined,
 											overlayGradient: undefined,
-										} ),
+										}),
 									},
-								] }
-								panelId={ clientId }
-								{ ...colorGradientSettings }
+								]}
+								panelId={clientId}
+								{...colorGradientSettings}
 							/>
 							<ToolsPanelItem
 								isShownByDefault
-								hasValue={ () => dimRatio !== 50 }
-								label={ __( 'Overlay opacity', 'woocommerce' ) }
-								onDeselect={ () =>
-									setAttributes( { dimRatio: 50 } )
+								hasValue={() => dimRatio !== 50}
+								label={__('Overlay opacity', 'woocommerce')}
+								onDeselect={() =>
+									setAttributes({ dimRatio: 50 })
 								}
-								panelId={ clientId }
-								resetAllFilter={ () => ( {
+								panelId={clientId}
+								resetAllFilter={() => ({
 									dimRatio: 50,
-								} ) }
+								})}
 							>
 								<RangeControl
 									required
-									label={ __(
-										'Overlay opacity',
-										'woocommerce'
-									) }
-									max={ 100 }
-									min={ 0 }
-									onChange={ ( value ) =>
-										setAttributes( {
+									label={__('Overlay opacity', 'woocommerce')}
+									max={100}
+									min={0}
+									onChange={(value) =>
+										setAttributes({
 											dimRatio: value as number,
-										} )
+										})
 									}
-									step={ 10 }
-									value={ dimRatio }
+									step={10}
+									value={dimRatio}
 								/>
 							</ToolsPanelItem>
 						</>
-					) }
-					{ backgroundColorVisibilityStatus?.isBackgroundVisible ===
+					)}
+					{backgroundColorVisibilityStatus?.isBackgroundVisible ===
 						false &&
 						backgroundColorVisibilityStatus?.message &&
 						backgroundColor && (
 							<div className="image-bg-color-warning">
-								<Notice
-									status="warning"
-									isDismissible={ false }
-								>
-									{ backgroundColorVisibilityStatus.message }
+								<Notice status="warning" isDismissible={false}>
+									{backgroundColorVisibilityStatus.message}
 								</Notice>
 							</div>
-						) }
+						)}
 				</GutenbergInspectorControls>
-			) }
+			)}
 		</>
 	);
 };
 
 export const withInspectorControls =
-	< T extends EditorBlock< T > >( Component: ComponentType< T > ) =>
-	( props: WithInspectorControlsProps< T > ) => {
+	<T extends EditorBlock<T>>(Component: ComponentType<T>) =>
+	(props: WithInspectorControlsProps<T>) => {
 		const {
 			attributes,
 			backgroundColorVisibilityStatus,
@@ -350,41 +336,41 @@ export const withInspectorControls =
 				? props.product
 				: props.category;
 
-		const { setGradient } = useGradient( {
+		const { setGradient } = useGradient({
 			gradientAttribute: 'overlayGradient',
 			customGradientAttribute: 'overlayGradient',
-		} );
+		});
 
-		const { backgroundImageSrc } = useBackgroundImage( {
+		const { backgroundImageSrc } = useBackgroundImage({
 			item,
 			mediaId,
 			mediaSrc,
 			blockName: name,
-		} );
+		});
 
 		return (
 			<>
 				<InspectorControls
-					alt={ alt }
-					backgroundImageSrc={ backgroundImageSrc }
-					dimRatio={ dimRatio }
-					focalPoint={ focalPoint }
-					hasParallax={ hasParallax }
-					isRepeated={ isRepeated }
-					imageFit={ imageFit }
-					overlayColor={ overlayColor }
-					overlayGradient={ overlayGradient }
-					setAttributes={ setAttributes }
-					setGradient={ setGradient }
+					alt={alt}
+					backgroundImageSrc={backgroundImageSrc}
+					dimRatio={dimRatio}
+					focalPoint={focalPoint}
+					hasParallax={hasParallax}
+					isRepeated={isRepeated}
+					imageFit={imageFit}
+					overlayColor={overlayColor}
+					overlayGradient={overlayGradient}
+					setAttributes={setAttributes}
+					setGradient={setGradient}
 					backgroundColorVisibilityStatus={
 						backgroundColorVisibilityStatus
 					}
 					backgroundColor={
 						backgroundColor || style?.color?.background
 					}
-					clientId={ clientId }
+					clientId={clientId}
 				/>
-				<Component { ...props } />
+				<Component {...props} />
 			</>
 		);
 	};

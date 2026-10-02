@@ -123,7 +123,7 @@ export function toggleNode(
 										: node.parent.data.isExpanded,
 							},
 						},
-				  }
+					}
 				: {} ),
 		};
 	} );

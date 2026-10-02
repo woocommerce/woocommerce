@@ -18,15 +18,15 @@ export type TaskListItemProps = {
 	trackClick: () => void;
 };
 
-export const TaskListItem = ( {
+export const TaskListItem = ({
 	task,
 	activeTaskId,
 	taskIndex,
 	goToTask,
 	trackClick,
-}: TaskListItemProps ) => {
-	const { createNotice } = useDispatch( 'core/notices' );
-	const { dismissTask, undoDismissTask } = useDispatch( onboardingStore );
+}: TaskListItemProps) => {
+	const { createNotice } = useDispatch('core/notices');
+	const { dismissTask, undoDismissTask } = useDispatch(onboardingStore);
 
 	const {
 		id: taskId,
@@ -42,27 +42,27 @@ export const TaskListItem = ( {
 		isDismissable,
 	} = task;
 
-	const slot = useSlot( `woocommerce_onboarding_task_list_item_${ taskId }` );
-	const hasFills = Boolean( slot?.fills?.length );
+	const slot = useSlot(`woocommerce_onboarding_task_list_item_${taskId}`);
+	const hasFills = Boolean(slot?.fills?.length);
 
-	const onDismissTask = ( onDismiss?: () => void ) => {
-		void dismissTask( taskId );
-		createNotice( 'success', __( 'Task dismissed', 'woocommerce' ), {
+	const onDismissTask = (onDismiss?: () => void) => {
+		void dismissTask(taskId);
+		createNotice('success', __('Task dismissed', 'woocommerce'), {
 			actions: [
 				{
-					label: __( 'Undo', 'woocommerce' ),
-					onClick: () => undoDismissTask( taskId ),
+					label: __('Undo', 'woocommerce'),
+					onClick: () => undoDismissTask(taskId),
 				},
 			],
-		} );
+		});
 
-		if ( onDismiss ) {
+		if (onDismiss) {
 			onDismiss();
 		}
 	};
 
 	const DefaultTaskItem = useCallback(
-		( props: { onClick?: () => void; isClickable?: boolean } ) => {
+		(props: { onClick?: () => void; isClickable?: boolean }) => {
 			const className = clsx(
 				'woocommerce-task-list__item index-' + taskIndex,
 				{
@@ -72,11 +72,11 @@ export const TaskListItem = ( {
 				}
 			);
 
-			const onClick = ( e: React.MouseEvent< HTMLButtonElement > ) => {
-				if ( ( e.target as HTMLElement ).tagName === 'A' ) {
+			const onClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+				if ((e.target as HTMLElement).tagName === 'A') {
 					return;
 				}
-				if ( props.onClick ) {
+				if (props.onClick) {
 					trackClick();
 					return props.onClick();
 				}
@@ -85,23 +85,21 @@ export const TaskListItem = ( {
 
 			return (
 				<TaskItem
-					key={ taskId }
-					className={ className }
-					title={ title }
-					badge={ badge }
-					inProgress={ isInProgress }
-					inProgressLabel={ inProgressLabel }
-					completed={ isComplete }
-					additionalInfo={ additionalInfo }
-					content={ content }
-					onClick={
-						props.isClickable === false ? undefined : onClick
-					}
+					key={taskId}
+					className={className}
+					title={title}
+					badge={badge}
+					inProgress={isInProgress}
+					inProgressLabel={inProgressLabel}
+					completed={isComplete}
+					additionalInfo={additionalInfo}
+					content={content}
+					onClick={props.isClickable === false ? undefined : onClick}
 					onDismiss={
 						isDismissable ? () => onDismissTask() : undefined
 					}
-					action={ () => {} }
-					actionLabel={ actionLabel }
+					action={() => {}}
+					actionLabel={actionLabel}
 				/>
 			);
 		},
@@ -119,11 +117,11 @@ export const TaskListItem = ( {
 
 	return hasFills ? (
 		<WooOnboardingTaskListItem.Slot
-			id={ taskId }
-			fillProps={ {
+			id={taskId}
+			fillProps={{
 				defaultTaskItem: DefaultTaskItem,
 				isComplete,
-			} }
+			}}
 		/>
 	) : (
 		<DefaultTaskItem />

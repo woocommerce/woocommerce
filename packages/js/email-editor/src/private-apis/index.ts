@@ -33,17 +33,17 @@ const {
 	BackgroundPanel,
 	useHasColorPanel,
 	useHasBackgroundPanel,
-} = unlock( blockEditorPrivateApis );
+} = unlock(blockEditorPrivateApis);
 
-const StylesBackgroundPanel = BackgroundPanel ?? ( () => null );
-const useHasStylesColorPanel = useHasColorPanel ?? ( () => true );
-const useHasStylesBackgroundPanel = useHasBackgroundPanel ?? ( () => false );
+const StylesBackgroundPanel = BackgroundPanel ?? (() => null);
+const useHasStylesColorPanel = useHasColorPanel ?? (() => true);
+const useHasStylesBackgroundPanel = useHasBackgroundPanel ?? (() => false);
 
 /**
  * The Editor is the main component for the email editor.
  */
 const { Editor, FullscreenMode, ViewMoreMenuGroup, BackButton } =
-	unlock( editorPrivateApis );
+	unlock(editorPrivateApis);
 
 /**
  * The registerEntityAction and unregisterEntityAction are used to register and unregister entity actions.
@@ -51,7 +51,7 @@ const { Editor, FullscreenMode, ViewMoreMenuGroup, BackButton } =
  * Providing us with the ability to remove the default move to trash action and add a custom trash email post action.
  */
 const { registerEntityAction, unregisterEntityAction } = unlock(
-	dispatch( editorStore )
+	dispatch(editorStore)
 );
 
 export {

@@ -3,10 +3,10 @@
  */
 import { AspectRatioStyle, ImageSizing } from './types';
 
-export const isTryingToDisplayLegacySaleBadge = ( showSaleBadge?: boolean ) => {
+export const isTryingToDisplayLegacySaleBadge = (showSaleBadge?: boolean) => {
 	// If the block is pristine, it doesn't have a showSaleBadge attribute
 	// but it is supposed to be `true` by default.
-	if ( showSaleBadge === undefined ) {
+	if (showSaleBadge === undefined) {
 		return true;
 	}
 
@@ -35,14 +35,14 @@ export const resolveAspectRatio = (
 		return style.dimensions.aspectRatio;
 	}
 
-	if ( aspectRatio && typeof aspectRatio === 'string' ) {
+	if (aspectRatio && typeof aspectRatio === 'string') {
 		return aspectRatio;
 	}
 
 	if (
 		imageSizing &&
-		( imageSizing === ImageSizing.THUMBNAIL ||
-			imageSizing === ImageSizing.CROPPED )
+		(imageSizing === ImageSizing.THUMBNAIL ||
+			imageSizing === ImageSizing.CROPPED)
 	) {
 		return storeAspectRatio ?? undefined;
 	}

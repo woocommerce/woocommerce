@@ -18,48 +18,48 @@ export default {
 	args: {
 		initialOpen: true,
 	},
-} as Meta< TotalsCouponProps >;
+} as Meta<TotalsCouponProps>;
 
 const INVALID_COUPON_ERROR = {
 	hidden: false,
 	message: 'Invalid coupon code',
 };
 
-const Template: StoryFn< TotalsCouponProps > = ( args ) => {
-	const [ {}, setArgs ] = useArgs();
+const Template: StoryFn<TotalsCouponProps> = (args) => {
+	const [{}, setArgs] = useArgs();
 
-	const onSubmit = ( code: string ) => {
-		args.onSubmit?.( code );
-		setArgs( { isLoading: true } );
-		return new Promise( ( resolve ) => {
-			setTimeout( () => {
-				setArgs( { isLoading: false } );
-				resolve( true );
-			}, INTERACTION_TIMEOUT );
-		} );
+	const onSubmit = (code: string) => {
+		args.onSubmit?.(code);
+		setArgs({ isLoading: true });
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				setArgs({ isLoading: false });
+				resolve(true);
+			}, INTERACTION_TIMEOUT);
+		});
 	};
 
-	return <TotalsCoupon { ...args } onSubmit={ onSubmit } />;
+	return <TotalsCoupon {...args} onSubmit={onSubmit} />;
 };
 
-export const Default = Template.bind( {} );
+export const Default = Template.bind({});
 Default.args = {};
 
-export const LoadingState = Template.bind( {} );
+export const LoadingState = Template.bind({});
 LoadingState.args = {
 	isLoading: true,
 };
 
-export const ErrorState: StoryFn< TotalsCouponProps > = ( args ) => {
-	const { setValidationErrors } = useDispatch( validationStore );
+export const ErrorState: StoryFn<TotalsCouponProps> = (args) => {
+	const { setValidationErrors } = useDispatch(validationStore);
 
-	setValidationErrors( { coupon: INVALID_COUPON_ERROR } );
+	setValidationErrors({ coupon: INVALID_COUPON_ERROR });
 
-	return <TotalsCoupon { ...args } />;
+	return <TotalsCoupon {...args} />;
 };
 
 ErrorState.decorators = [
-	( StoryComponent ) => {
+	(StoryComponent) => {
 		return <StoryComponent />;
 	},
 ];

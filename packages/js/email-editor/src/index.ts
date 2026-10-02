@@ -13,7 +13,7 @@
  * `false`, so the assignment is dead-code-eliminated by the consumer's
  * minifier and has zero runtime cost.
  */
-if ( typeof __i18n_text_domain__ === 'undefined' ) {
+if (typeof __i18n_text_domain__ === 'undefined') {
 	window.__i18n_text_domain__ = 'woocommerce';
 }
 
@@ -143,17 +143,17 @@ export {
  *
  * @param htmlId - The ID of the HTML element to initialize the editor in.
  */
-export function initializeEditor( htmlId: string ) {
-	if ( document.readyState === 'loading' ) {
+export function initializeEditor(htmlId: string) {
+	if (document.readyState === 'loading') {
 		window.addEventListener(
 			'DOMContentLoaded',
 			() => {
-				initialize( htmlId );
+				initialize(htmlId);
 			},
 			{ once: true }
 		);
 	} else {
-		initialize( htmlId );
+		initialize(htmlId);
 	}
 }
 

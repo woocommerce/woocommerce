@@ -9,7 +9,7 @@ import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
 import type { CartShippingPackageShippingRate } from '@woocommerce/type-defs/cart';
 
-export const RatePrice = ( {
+export const RatePrice = ({
 	minRate,
 	maxRate,
 	multiple = false,
@@ -17,38 +17,38 @@ export const RatePrice = ( {
 	minRate: CartShippingPackageShippingRate | undefined;
 	maxRate: CartShippingPackageShippingRate | undefined;
 	multiple?: boolean;
-} ) => {
-	if ( minRate === undefined || maxRate === undefined ) {
+}) => {
+	if (minRate === undefined || maxRate === undefined) {
 		return null;
 	}
-	const minRatePrice = getSetting( 'displayCartPricesIncludingTax', false )
-		? parseInt( minRate.price, 10 ) + parseInt( minRate.taxes, 10 )
-		: parseInt( minRate.price, 10 );
-	const maxRatePrice = getSetting( 'displayCartPricesIncludingTax', false )
-		? parseInt( maxRate.price, 10 ) + parseInt( maxRate.taxes, 10 )
-		: parseInt( maxRate.price, 10 );
+	const minRatePrice = getSetting('displayCartPricesIncludingTax', false)
+		? parseInt(minRate.price, 10) + parseInt(minRate.taxes, 10)
+		: parseInt(minRate.price, 10);
+	const maxRatePrice = getSetting('displayCartPricesIncludingTax', false)
+		? parseInt(maxRate.price, 10) + parseInt(maxRate.taxes, 10)
+		: parseInt(maxRate.price, 10);
 	const priceElement =
 		minRatePrice === 0 && maxRatePrice === 0 ? (
-			<em>{ __( 'free', 'woocommerce' ) }</em>
+			<em>{__('free', 'woocommerce')}</em>
 		) : (
 			<FormattedMonetaryAmount
-				currency={ getCurrencyFromPriceResponse( minRate ) }
-				value={ minRatePrice }
+				currency={getCurrencyFromPriceResponse(minRate)}
+				value={minRatePrice}
 			/>
 		);
 
 	return (
 		<span className="wc-block-checkout__shipping-method-option-price">
-			{ minRatePrice === maxRatePrice && ! multiple
+			{minRatePrice === maxRatePrice && !multiple
 				? priceElement
 				: createInterpolateElement(
 						minRatePrice === 0 && maxRatePrice === 0
 							? '<price />'
-							: __( 'from <price />', 'woocommerce' ),
+							: __('from <price />', 'woocommerce'),
 						{
 							price: priceElement,
 						}
-				  ) }
+					)}
 		</span>
 	);
 };

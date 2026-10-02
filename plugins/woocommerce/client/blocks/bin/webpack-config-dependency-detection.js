@@ -4,25 +4,22 @@
  * This builds a standalone JS File that PHP inlines into the page.
  */
 
-const path = require( 'path' );
-const ProgressBarPlugin = require( 'progress-bar-webpack-plugin' );
-const TerserPlugin = require( 'terser-webpack-plugin' );
+const path = require('path');
+const ProgressBarPlugin = require('progress-bar-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 /**
  * Internal dependencies
  */
-const FilesystemCacheWarningsPlugin = require( './filesystem-cache-warnings-webpack-plugin.js' );
-const { getProgressBarPluginConfig } = require( './webpack-helpers' );
+const FilesystemCacheWarningsPlugin = require('./filesystem-cache-warnings-webpack-plugin.js');
+const { getProgressBarPluginConfig } = require('./webpack-helpers');
 
-const ROOT_DIR = path.resolve( __dirname, '../../../../../' );
+const ROOT_DIR = path.resolve(__dirname, '../../../../../');
 // Blocks' webpack writes directly to the WooCommerce plugin's
 // `assets/client/blocks/` so PHP can enqueue files from their final location
 // without an intermediate rsync step.
-const BUILD_DIR = path.resolve( __dirname, '../../../assets/client/blocks' );
-const BABEL_CACHE_DIR = path.join(
-	ROOT_DIR,
-	'node_modules/.cache/babel-loader'
-);
+const BUILD_DIR = path.resolve(__dirname, '../../../assets/client/blocks');
+const BABEL_CACHE_DIR = path.join(ROOT_DIR, 'node_modules/.cache/babel-loader');
 
 module.exports = {
 	entry: {
@@ -65,7 +62,7 @@ module.exports = {
 	},
 	plugins: [
 		new ProgressBarPlugin(
-			getProgressBarPluginConfig( 'Dependency Detection' )
+			getProgressBarPluginConfig('Dependency Detection')
 		),
 		// Suppress file system cache warnings (unsupported serialization related).
 		new FilesystemCacheWarningsPlugin(),
@@ -74,7 +71,7 @@ module.exports = {
 		// Always minimize - this is an inline script embedded in page HTML.
 		minimize: true,
 		minimizer: [
-			new TerserPlugin( {
+			new TerserPlugin({
 				// Don't extract license comments to a separate file.
 				extractComments: false,
 				terserOptions: {
@@ -92,10 +89,10 @@ module.exports = {
 						// Don't mangle top-level names.
 						toplevel: false,
 						// Preserve variable names for readability and PHP placeholder replacement.
-						reserved: [ 'WC_GLOBAL_EXPORTS', 'WC_PLUGIN_URL' ],
+						reserved: ['WC_GLOBAL_EXPORTS', 'WC_PLUGIN_URL'],
 					},
 				},
-			} ),
+			}),
 		],
 	},
 	// No source maps for inline script.
@@ -103,6 +100,6 @@ module.exports = {
 	// No externals - this is a standalone script.
 	externals: {},
 	resolve: {
-		extensions: [ '.ts', '.js' ],
+		extensions: ['.ts', '.js'],
 	},
 };

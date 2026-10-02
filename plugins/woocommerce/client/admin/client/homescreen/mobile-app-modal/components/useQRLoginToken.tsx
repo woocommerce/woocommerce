@@ -43,7 +43,7 @@ export const QRLoginTokenStates = {
 } as const;
 
 export type QRLoginTokenState =
-	( typeof QRLoginTokenStates )[ keyof typeof QRLoginTokenStates ];
+	(typeof QRLoginTokenStates)[keyof typeof QRLoginTokenStates];
 
 /**
  * Whitelisted device-info shape returned by the status endpoint after a
@@ -71,7 +71,7 @@ type QRLoginStatusResponse =
 	| { status: 'pending'; expires_at: number }
 	| {
 			status: 'scanned';
-			numbers: [ string, string, string ];
+			numbers: [string, string, string];
 			device: QRLoginDeviceInfo;
 			expires_at: number;
 	  }
@@ -95,102 +95,97 @@ const STATUS_POLL_INTERVAL_MS = 2500;
 
 type UseQRLoginTokenOptions = {
 	onReady?: () => void;
-	onError?: ( errorCode: string ) => void;
+	onError?: (errorCode: string) => void;
 };
 
-export const useQRLoginToken = ( {
+export const useQRLoginToken = ({
 	onReady,
 	onError,
-}: UseQRLoginTokenOptions = {} ) => {
-	const [ state, setState ] = useState< QRLoginTokenState >(
+}: UseQRLoginTokenOptions = {}) => {
+	const [state, setState] = useState<QRLoginTokenState>(
 		QRLoginTokenStates.IDLE
 	);
-	const [ qrUrl, setQrUrl ] = useState< string | null >( null );
-	const [ secondsRemaining, setSecondsRemaining ] = useState< number >( 0 );
+	const [qrUrl, setQrUrl] = useState<string | null>(null);
+	const [secondsRemaining, setSecondsRemaining] = useState<number>(0);
 	// `errorMessage` is rendered directly by `<QRDirectLoginCode />`. It is a
 	// `ReactNode` (not just `string`) so individual cases can inject inline
 	// links, for example the `application_passwords_unavailable` branch wraps a
 	// "Learn more" link in the message itself.
-	const [ errorMessage, setErrorMessage ] = useState< ReactNode | null >(
-		null
-	);
+	const [errorMessage, setErrorMessage] = useState<ReactNode | null>(null);
 	// `errorCode` mirrors the REST error code that triggered the message,
 	// exposed alongside `errorMessage` so callers (e.g. analytics) can
 	// reliably reference the failure mode regardless of how the message was
 	// rendered.
-	const [ errorCode, setErrorCode ] = useState< string | null >( null );
-	const [ deviceInfo, setDeviceInfo ] = useState< QRLoginDeviceInfo | null >(
+	const [errorCode, setErrorCode] = useState<string | null>(null);
+	const [deviceInfo, setDeviceInfo] = useState<QRLoginDeviceInfo | null>(
 		null
 	);
-	const [ apUuid, setApUuid ] = useState< string | null >( null );
+	const [apUuid, setApUuid] = useState<string | null>(null);
 	// Task 7 — shuffled candidate numbers surfaced to the merchant during
 	// the SCANNED state. The wc-admin client never sees which one is real;
 	// the server compares the merchant's choice against its own stored value.
-	const [ candidateNumbers, setCandidateNumbers ] = useState<
-		[ string, string, string ] | null
-	>( null );
-	const [ challengeExpiresAt, setChallengeExpiresAt ] =
-		useState< number >( 0 );
-	const timerRef = useRef< ReturnType< typeof setInterval > | null >( null );
+	const [candidateNumbers, setCandidateNumbers] = useState<
+		[string, string, string] | null
+	>(null);
+	const [challengeExpiresAt, setChallengeExpiresAt] = useState<number>(0);
+	const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 	// Plaintext token kept in a ref (not state) so it never causes re-renders
 	// and never leaves the hook closure. The status-polling and revoke calls
 	// need it server-side; the consumer only ever sees state transitions.
-	const tokenRef = useRef< string | null >( null );
-	const pollTimerRef = useRef< ReturnType< typeof setInterval > | null >(
-		null
-	);
-	const expiresAtRef = useRef< number >( 0 );
-	const onReadyRef = useRef( onReady );
-	const onErrorRef = useRef( onError );
-	const isMountedRef = useRef( true );
-	const requestIdRef = useRef( 0 );
+	const tokenRef = useRef<string | null>(null);
+	const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+	const expiresAtRef = useRef<number>(0);
+	const onReadyRef = useRef(onReady);
+	const onErrorRef = useRef(onError);
+	const isMountedRef = useRef(true);
+	const requestIdRef = useRef(0);
 
 	onReadyRef.current = onReady;
 	onErrorRef.current = onError;
 
-	const clearTimer = useCallback( () => {
-		if ( timerRef.current ) {
-			clearInterval( timerRef.current );
+	const clearTimer = useCallback(() => {
+		if (timerRef.current) {
+			clearInterval(timerRef.current);
 			timerRef.current = null;
 		}
-	}, [] );
+	}, []);
 
-	const clearPollTimer = useCallback( () => {
-		if ( pollTimerRef.current ) {
-			clearInterval( pollTimerRef.current );
+	const clearPollTimer = useCallback(() => {
+		if (pollTimerRef.current) {
+			clearInterval(pollTimerRef.current);
 			pollTimerRef.current = null;
 		}
-	}, [] );
+	}, []);
 
 	const startCountdown = useCallback(
-		( expiresAt: number ) => {
+		(expiresAt: number) => {
 			clearTimer();
 			expiresAtRef.current = expiresAt;
 
 			const updateRemaining = () => {
-				if ( ! isMountedRef.current ) {
+				if (!isMountedRef.current) {
 					return;
 				}
 
 				const remaining = Math.max(
 					0,
-					Math.floor( expiresAtRef.current - Date.now() / 1000 )
+					Math.floor(expiresAtRef.current - Date.now() / 1000)
 				);
-				setSecondsRemaining( remaining );
+				setSecondsRemaining(remaining);
 
-				if ( remaining <= 0 ) {
+				if (remaining <= 0) {
 					clearTimer();
 					clearPollTimer();
-					setState( QRLoginTokenStates.EXPIRED );
-					setQrUrl( null );
+					setState(QRLoginTokenStates.EXPIRED);
+					setQrUrl(null);
 					tokenRef.current = null;
 				}
 			};
 
 			updateRemaining();
-			timerRef.current = setInterval( updateRemaining, 1000 );
+			timerRef.current = setInterval(updateRemaining, 1000);
 		},
-		[ clearTimer, clearPollTimer ]
+		[clearTimer, clearPollTimer]
 	);
 
 	/**
@@ -198,13 +193,13 @@ export const useQRLoginToken = ( {
 	 * `qr-login-token`. Robust against future query-string ordering changes.
 	 * Returns `null` if the URL doesn't carry a token (defensive).
 	 */
-	const extractTokenFromQrUrl = ( deepLink: string ): string | null => {
-		const queryStart = deepLink.indexOf( '?' );
-		if ( queryStart === -1 ) {
+	const extractTokenFromQrUrl = (deepLink: string): string | null => {
+		const queryStart = deepLink.indexOf('?');
+		if (queryStart === -1) {
 			return null;
 		}
-		const params = new URLSearchParams( deepLink.slice( queryStart + 1 ) );
-		const token = params.get( 'token' );
+		const params = new URLSearchParams(deepLink.slice(queryStart + 1));
+		const token = params.get('token');
 		return token ? token : null;
 	};
 
@@ -215,40 +210,40 @@ export const useQRLoginToken = ( {
 	 * panel within a couple of seconds of the user scanning. Called from the
 	 * effect below when state flips to READY and a plaintext token is in scope.
 	 */
-	const pollStatus = useCallback( async () => {
+	const pollStatus = useCallback(async () => {
 		const token = tokenRef.current;
-		if ( ! token || ! isMountedRef.current ) {
+		if (!token || !isMountedRef.current) {
 			return;
 		}
 		const requestId = requestIdRef.current;
 
 		try {
-			const response = await apiFetch< QRLoginStatusResponse >( {
-				path: `${ WC_ADMIN_NAMESPACE }/mobile-app/qr-login-status`,
+			const response = await apiFetch<QRLoginStatusResponse>({
+				path: `${WC_ADMIN_NAMESPACE}/mobile-app/qr-login-status`,
 				method: 'POST',
 				data: { token },
-			} );
+			});
 
 			if (
-				! isMountedRef.current ||
+				!isMountedRef.current ||
 				token !== tokenRef.current ||
 				requestId !== requestIdRef.current
 			) {
 				return;
 			}
 
-			if ( response.status === 'consumed' ) {
+			if (response.status === 'consumed') {
 				clearTimer();
 				clearPollTimer();
-				setQrUrl( null );
-				setApUuid( response.ap_uuid );
-				setDeviceInfo( response.device || null );
-				setState( QRLoginTokenStates.CONSUMED );
+				setQrUrl(null);
+				setApUuid(response.ap_uuid);
+				setDeviceInfo(response.device || null);
+				setState(QRLoginTokenStates.CONSUMED);
 				tokenRef.current = null;
 				return;
 			}
 
-			if ( response.status === 'scanned' ) {
+			if (response.status === 'scanned') {
 				// Mobile app scanned the QR. Surface the shuffled candidate
 				// triple so the merchant can confirm by tapping the matching
 				// number. The countdown timer is replaced by the
@@ -261,104 +256,98 @@ export const useQRLoginToken = ( {
 				// `tokenRef`, and clearing the visible state limits what an
 				// XSS or malicious browser extension can scrape from the JS
 				// heap for the rest of the flow.
-				setQrUrl( null );
-				setCandidateNumbers( response.numbers );
-				setChallengeExpiresAt( response.expires_at );
-				setDeviceInfo( response.device || null );
-				setState( QRLoginTokenStates.SCANNED );
-				startCountdown( response.expires_at );
+				setQrUrl(null);
+				setCandidateNumbers(response.numbers);
+				setChallengeExpiresAt(response.expires_at);
+				setDeviceInfo(response.device || null);
+				setState(QRLoginTokenStates.SCANNED);
+				startCountdown(response.expires_at);
 				return;
 			}
 
-			if ( response.status === 'approved' ) {
+			if (response.status === 'approved') {
 				// Merchant tapped correctly on this tab or another tab. Show
 				// "Signing in…" until the mobile app finishes the exchange and
 				// the next poll flips us to CONSUMED.
 				requestIdRef.current += 1;
 				clearTimer();
-				setCandidateNumbers( null );
-				setChallengeExpiresAt( 0 );
-				setState( QRLoginTokenStates.APPROVED );
+				setCandidateNumbers(null);
+				setChallengeExpiresAt(0);
+				setState(QRLoginTokenStates.APPROVED);
 				return;
 			}
 
-			if ( response.status === 'rejected' ) {
+			if (response.status === 'rejected') {
 				clearTimer();
 				clearPollTimer();
-				setQrUrl( null );
-				setCandidateNumbers( null );
-				setState( QRLoginTokenStates.REJECTED );
+				setQrUrl(null);
+				setCandidateNumbers(null);
+				setState(QRLoginTokenStates.REJECTED);
 				tokenRef.current = null;
 				return;
 			}
 
-			if ( response.status === 'expired' ) {
+			if (response.status === 'expired') {
 				clearTimer();
 				clearPollTimer();
-				setQrUrl( null );
-				setCandidateNumbers( null );
-				setChallengeExpiresAt( 0 );
-				setState( QRLoginTokenStates.EXPIRED );
+				setQrUrl(null);
+				setCandidateNumbers(null);
+				setChallengeExpiresAt(0);
+				setState(QRLoginTokenStates.EXPIRED);
 				tokenRef.current = null;
 			}
 			// `pending` is a no-op here — the countdown timer drives the
 			// normal READY expiry transition; we just keep polling.
-		} catch ( error ) {
+		} catch (error) {
 			// Swallow polling errors. A transient 500/429 should not break the
 			// QR flow — the next tick will retry, and the countdown will
 			// eventually push us to EXPIRED.
 			// eslint-disable-next-line no-console
-			console.warn( 'QR login status polling failed.', error );
+			console.warn('QR login status polling failed.', error);
 		}
-	}, [ clearTimer, clearPollTimer, startCountdown ] );
+	}, [clearTimer, clearPollTimer, startCountdown]);
 
-	const startStatusPolling = useCallback( () => {
+	const startStatusPolling = useCallback(() => {
 		clearPollTimer();
 		// First tick fires immediately so a fast-scanning merchant gets the
 		// confirmation panel without waiting a full interval.
 		void pollStatus();
-		pollTimerRef.current = setInterval(
-			pollStatus,
-			STATUS_POLL_INTERVAL_MS
-		);
-	}, [ clearPollTimer, pollStatus ] );
+		pollTimerRef.current = setInterval(pollStatus, STATUS_POLL_INTERVAL_MS);
+	}, [clearPollTimer, pollStatus]);
 
-	const fetchToken = useCallback( async () => {
+	const fetchToken = useCallback(async () => {
 		const requestId = requestIdRef.current + 1;
 		requestIdRef.current = requestId;
 
 		clearTimer();
 		clearPollTimer();
 		tokenRef.current = null;
-		setApUuid( null );
-		setDeviceInfo( null );
-		setCandidateNumbers( null );
-		setChallengeExpiresAt( 0 );
+		setApUuid(null);
+		setDeviceInfo(null);
+		setCandidateNumbers(null);
+		setChallengeExpiresAt(0);
 		expiresAtRef.current = 0;
-		setQrUrl( null );
-		setSecondsRemaining( 0 );
-		setState( QRLoginTokenStates.LOADING );
-		setErrorMessage( null );
-		setErrorCode( null );
+		setQrUrl(null);
+		setSecondsRemaining(0);
+		setState(QRLoginTokenStates.LOADING);
+		setErrorMessage(null);
+		setErrorCode(null);
 
 		try {
-			const response = await apiFetch< QRLoginTokenResponse >( {
-				path: `${ WC_ADMIN_NAMESPACE }/mobile-app/qr-login-token`,
+			const response = await apiFetch<QRLoginTokenResponse>({
+				path: `${WC_ADMIN_NAMESPACE}/mobile-app/qr-login-token`,
 				method: 'POST',
-			} );
+			});
 
-			if (
-				! isMountedRef.current ||
-				requestId !== requestIdRef.current
-			) {
+			if (!isMountedRef.current || requestId !== requestIdRef.current) {
 				return;
 			}
 
 			if (
-				! response ||
+				!response ||
 				typeof response.qr_url !== 'string' ||
 				response.qr_url.length === 0 ||
-				! Number.isFinite( response.expires_at ) ||
+				!Number.isFinite(response.expires_at) ||
 				response.expires_at <= Date.now() / 1000
 			) {
 				throw new Error(
@@ -369,23 +358,20 @@ export const useQRLoginToken = ( {
 				);
 			}
 
-			tokenRef.current = extractTokenFromQrUrl( response.qr_url );
-			setQrUrl( response.qr_url );
-			setState( QRLoginTokenStates.READY );
-			startCountdown( response.expires_at );
+			tokenRef.current = extractTokenFromQrUrl(response.qr_url);
+			setQrUrl(response.qr_url);
+			setState(QRLoginTokenStates.READY);
+			startCountdown(response.expires_at);
 			onReadyRef.current?.();
 			// Kick off the poll loop only once we actually have a token to
 			// poll for. If the URL was malformed and we couldn't extract one,
 			// the QR still renders, we just won't transition to CONSUMED
 			// until the next refresh.
-			if ( tokenRef.current ) {
+			if (tokenRef.current) {
 				startStatusPolling();
 			}
-		} catch ( error: unknown ) {
-			if (
-				! isMountedRef.current ||
-				requestId !== requestIdRef.current
-			) {
+		} catch (error: unknown) {
+			if (!isMountedRef.current || requestId !== requestIdRef.current) {
 				return;
 			}
 
@@ -393,8 +379,8 @@ export const useQRLoginToken = ( {
 			clearPollTimer();
 			tokenRef.current = null;
 			expiresAtRef.current = 0;
-			setQrUrl( null );
-			setSecondsRemaining( 0 );
+			setQrUrl(null);
+			setSecondsRemaining(0);
 
 			const err = error as {
 				code?: string;
@@ -414,13 +400,13 @@ export const useQRLoginToken = ( {
 				nextErrorCode === 'invalid_json' ||
 				httpStatus === 429;
 
-			if ( isRateLimited ) {
+			if (isRateLimited) {
 				nextErrorMessage = __(
 					"You've requested QR login codes too quickly. Please wait a moment and try again.",
 					'woocommerce'
 				);
 			} else {
-				switch ( nextErrorCode ) {
+				switch (nextErrorCode) {
 					case 'woocommerce_rest_cannot_view':
 						// The endpoint requires the `manage_woocommerce`
 						// capability; surface a clear, actionable message
@@ -445,7 +431,7 @@ export const useQRLoginToken = ( {
 							{
 								link: (
 									<Link
-										href={ APPLICATION_PASSWORDS_DOCS_URL }
+										href={APPLICATION_PASSWORDS_DOCS_URL}
 										target="_blank"
 										type="external"
 									/>
@@ -463,12 +449,12 @@ export const useQRLoginToken = ( {
 				}
 			}
 
-			setErrorCode( nextErrorCode );
-			setErrorMessage( nextErrorMessage );
-			setState( QRLoginTokenStates.ERROR );
-			onErrorRef.current?.( nextErrorCode ?? 'unknown_error' );
+			setErrorCode(nextErrorCode);
+			setErrorMessage(nextErrorMessage);
+			setState(QRLoginTokenStates.ERROR);
+			onErrorRef.current?.(nextErrorCode ?? 'unknown_error');
 		}
-	}, [ clearTimer, clearPollTimer, startCountdown, startStatusPolling ] );
+	}, [clearTimer, clearPollTimer, startCountdown, startStatusPolling]);
 
 	/**
 	 * Task 7 — Submit the merchant's number-match choice to /qr-login-approve.
@@ -484,44 +470,44 @@ export const useQRLoginToken = ( {
 	 *               for an explicit user-initiated rejection.
 	 */
 	const chooseNumber = useCallback(
-		async ( choice: string ) => {
+		async (choice: string) => {
 			const token = tokenRef.current;
-			if ( ! token ) {
+			if (!token) {
 				return;
 			}
 
-			setErrorMessage( null );
-			setErrorCode( null );
+			setErrorMessage(null);
+			setErrorCode(null);
 
 			try {
-				const response = await apiFetch< {
+				const response = await apiFetch<{
 					state: 'approved' | 'rejected';
-				} >( {
-					path: `${ WC_ADMIN_NAMESPACE }/mobile-app/qr-login-approve`,
+				}>({
+					path: `${WC_ADMIN_NAMESPACE}/mobile-app/qr-login-approve`,
 					method: 'POST',
 					data: { token, choice },
-				} );
+				});
 
-				if ( ! isMountedRef.current ) {
+				if (!isMountedRef.current) {
 					return;
 				}
 
-				if ( response.state === 'approved' ) {
+				if (response.state === 'approved') {
 					requestIdRef.current += 1;
 					clearTimer();
-					setCandidateNumbers( null );
-					setChallengeExpiresAt( 0 );
-					setState( QRLoginTokenStates.APPROVED );
+					setCandidateNumbers(null);
+					setChallengeExpiresAt(0);
+					setState(QRLoginTokenStates.APPROVED);
 				} else {
 					clearTimer();
 					clearPollTimer();
-					setCandidateNumbers( null );
-					setChallengeExpiresAt( 0 );
+					setCandidateNumbers(null);
+					setChallengeExpiresAt(0);
 					tokenRef.current = null;
-					setState( QRLoginTokenStates.REJECTED );
+					setState(QRLoginTokenStates.REJECTED);
 				}
-			} catch ( error: unknown ) {
-				if ( ! isMountedRef.current ) {
+			} catch (error: unknown) {
+				if (!isMountedRef.current) {
 					return;
 				}
 
@@ -540,9 +526,9 @@ export const useQRLoginToken = ( {
 				) {
 					clearTimer();
 					clearPollTimer();
-					setCandidateNumbers( null );
+					setCandidateNumbers(null);
 					tokenRef.current = null;
-					setState( QRLoginTokenStates.REJECTED );
+					setState(QRLoginTokenStates.REJECTED);
 					return;
 				}
 
@@ -553,10 +539,10 @@ export const useQRLoginToken = ( {
 							'woocommerce'
 						)
 				);
-				setErrorCode( err.code ?? null );
+				setErrorCode(err.code ?? null);
 			}
 		},
-		[ clearTimer, clearPollTimer ]
+		[clearTimer, clearPollTimer]
 	);
 
 	/**
@@ -565,25 +551,25 @@ export const useQRLoginToken = ( {
 	 * have no AP yet, REVOKED is a no-op, and EXPIRED means the consumed
 	 * record may already be gone from the server.
 	 */
-	const revoke = useCallback( async () => {
-		if ( ! apUuid ) {
+	const revoke = useCallback(async () => {
+		if (!apUuid) {
 			return;
 		}
 
 		try {
-			await apiFetch( {
-				path: `${ WC_ADMIN_NAMESPACE }/mobile-app/qr-login-revoke`,
+			await apiFetch({
+				path: `${WC_ADMIN_NAMESPACE}/mobile-app/qr-login-revoke`,
 				method: 'DELETE',
 				data: { uuid: apUuid },
-			} );
+			});
 
-			if ( ! isMountedRef.current ) {
+			if (!isMountedRef.current) {
 				return;
 			}
 
-			setState( QRLoginTokenStates.REVOKED );
-		} catch ( error: unknown ) {
-			if ( ! isMountedRef.current ) {
+			setState(QRLoginTokenStates.REVOKED);
+		} catch (error: unknown) {
+			if (!isMountedRef.current) {
 				return;
 			}
 
@@ -596,10 +582,10 @@ export const useQRLoginToken = ( {
 					)
 			);
 		}
-	}, [ apUuid ] );
+	}, [apUuid]);
 
 	// Cleanup timers + polling on unmount.
-	useEffect( () => {
+	useEffect(() => {
 		isMountedRef.current = true;
 
 		return () => {
@@ -609,7 +595,7 @@ export const useQRLoginToken = ( {
 			clearTimer();
 			clearPollTimer();
 		};
-	}, [ clearTimer, clearPollTimer ] );
+	}, [clearTimer, clearPollTimer]);
 
 	return {
 		state,

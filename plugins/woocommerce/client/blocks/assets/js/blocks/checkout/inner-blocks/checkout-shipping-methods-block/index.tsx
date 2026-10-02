@@ -12,13 +12,13 @@ import attributes from './attributes';
 import metadata from './block.json';
 import './style.scss';
 
-registerBlockType( 'woocommerce/checkout-shipping-methods-block', {
+registerBlockType('woocommerce/checkout-shipping-methods-block', {
 	apiVersion: metadata.apiVersion,
 	title: metadata.title,
 	icon: {
 		src: (
 			<Icon
-				icon={ shipping }
+				icon={shipping}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -26,4 +26,4 @@ registerBlockType( 'woocommerce/checkout-shipping-methods-block', {
 	attributes,
 	edit: Edit,
 	save: Save,
-} );
+});

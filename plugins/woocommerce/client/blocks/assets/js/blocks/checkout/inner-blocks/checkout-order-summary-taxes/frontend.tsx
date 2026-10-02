@@ -9,4 +9,4 @@ import { withFilteredAttributes } from '@woocommerce/shared-hocs';
 import Block from './block';
 import attributes from './attributes';
 
-export default withFilteredAttributes( attributes )( Block );
+export default withFilteredAttributes(attributes)(Block);

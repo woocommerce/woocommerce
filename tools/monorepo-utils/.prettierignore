@@ -1,0 +1,6 @@
+build
+vendor
+
+# Fixtures used to test invalid and empty JSON input.
+src/slack-test-report/lib/__tests__/invalid.json
+src/slack-test-report/lib/__tests__/empty.json

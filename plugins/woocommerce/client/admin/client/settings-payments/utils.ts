@@ -24,8 +24,8 @@ import {
 /**
  * Checks whether a payment provider has an incentive.
  */
-export const hasIncentive = ( extension: PaymentsProvider ) => {
-	return !! extension._incentive;
+export const hasIncentive = (extension: PaymentsProvider) => {
+	return !!extension._incentive;
 };
 
 /**
@@ -34,11 +34,11 @@ export const hasIncentive = ( extension: PaymentsProvider ) => {
 export const isActionIncentive = (
 	incentive: PaymentsProviderIncentive | undefined
 ) => {
-	if ( ! incentive ) {
+	if (!incentive) {
 		return false;
 	}
 
-	return incentive.promo_id.includes( '-action-' );
+	return incentive.promo_id.includes('-action-');
 };
 
 /**
@@ -47,11 +47,11 @@ export const isActionIncentive = (
 export const isSwitchIncentive = (
 	incentive: PaymentsProviderIncentive | undefined
 ) => {
-	if ( ! incentive ) {
+	if (!incentive) {
 		return false;
 	}
 
-	return incentive.promo_id.includes( '-switch-' );
+	return incentive.promo_id.includes('-switch-');
 };
 
 /**
@@ -61,12 +61,12 @@ export const isIncentiveDismissedInContext = (
 	incentive: PaymentsProviderIncentive | undefined,
 	context: string
 ) => {
-	if ( ! incentive || ! Array.isArray( incentive._dismissals ) ) {
+	if (!incentive || !Array.isArray(incentive._dismissals)) {
 		return false;
 	}
 
 	return incentive._dismissals.some(
-		( dismissal ) =>
+		(dismissal) =>
 			dismissal.context === 'all' || dismissal.context === context
 	);
 };
@@ -79,57 +79,57 @@ export const isIncentiveDismissedEarlierThanTimestamp = (
 	context: string,
 	referenceTimestampMs: number // UNIX timestamp in milliseconds.
 ): boolean => {
-	if ( ! incentive || ! Array.isArray( incentive._dismissals ) ) {
+	if (!incentive || !Array.isArray(incentive._dismissals)) {
 		return false;
 	}
 
 	// Check if the dismissal happened before the provided reference timestamp.
-	return incentive._dismissals.some( ( dismissal ) => {
+	return incentive._dismissals.some((dismissal) => {
 		const dismissalTimestampMs = dismissal.timestamp * 1000; // Convert to milliseconds if stored in seconds
 		return (
-			( dismissal.context === 'all' || dismissal.context === context ) &&
+			(dismissal.context === 'all' || dismissal.context === context) &&
 			dismissalTimestampMs < referenceTimestampMs
 		);
-	} );
+	});
 };
 
 /**
  * Handles enabling WooPayments and redirection based on Jetpack connection status.
  */
-export const parseScriptTag = ( elementId: string ) => {
-	const scriptTag = document.getElementById( elementId );
-	return scriptTag ? JSON.parse( scriptTag.textContent || '' ) : [];
+export const parseScriptTag = (elementId: string) => {
+	const scriptTag = document.getElementById(elementId);
+	return scriptTag ? JSON.parse(scriptTag.textContent || '') : [];
 };
 
-export const isWooPayments = ( id: string ) => {
+export const isWooPayments = (id: string) => {
 	return [
 		wooPaymentsProviderSuggestionId,
 		wooPaymentsProviderId,
 		wooPaymentsSuggestionId,
-	].includes( id );
+	].includes(id);
 };
 
 /**
  * Checks whether a provider is WooPayments and that it is eligible for WooPay.
  */
-export const isWooPayEligible = ( provider: PaymentsProvider ) => {
+export const isWooPayEligible = (provider: PaymentsProvider) => {
 	return (
-		isWooPayments( provider.id ) &&
-		( provider.tags?.includes( 'woopay_eligible' ) || false )
+		isWooPayments(provider.id) &&
+		(provider.tags?.includes('woopay_eligible') || false)
 	);
 };
 
 export const getWooPaymentsSetupLiveAccountLink = () => {
 	return getAdminLink(
 		'admin.php?wcpay-connect=1&_wpnonce=' +
-			getAdminSetting( 'wcpay_welcome_page_connect_nonce' ) +
+			getAdminSetting('wcpay_welcome_page_connect_nonce') +
 			'&wcpay-disable-onboarding-test-mode=true&redirect_to_settings_page=true&source=wcpay-setup-live-payments'
 	);
 };
 
 export const getPaymentMethodById =
-	( id: string ) => ( providers: RecommendedPaymentMethod[] ) => {
-		return providers.find( ( provider ) => provider.id === id ) || null;
+	(id: string) => (providers: RecommendedPaymentMethod[]) => {
+		return providers.find((provider) => provider.id === id) || null;
 	};
 
 /**
@@ -140,10 +140,8 @@ export const getPaymentMethodById =
 export const providersContainWooPaymentsInTestMode = (
 	providers: PaymentsProvider[]
 ): boolean => {
-	const wooPayments = providers.find( ( obj ) => isWooPayments( obj.id ) );
-	return (
-		!! wooPayments?.state?.test_mode && ! wooPayments?.state?.needs_setup
-	);
+	const wooPayments = providers.find((obj) => isWooPayments(obj.id));
+	return !!wooPayments?.state?.test_mode && !wooPayments?.state?.needs_setup;
 };
 
 /**
@@ -154,7 +152,7 @@ export const providersContainWooPaymentsInTestMode = (
 export const providersContainWooPaymentsNeedsSetup = (
 	providers: PaymentsProvider[]
 ): boolean => {
-	const wooPayments = providers.find( ( obj ) => isWooPayments( obj.id ) );
+	const wooPayments = providers.find((obj) => isWooPayments(obj.id));
 	return wooPayments?.state?.needs_setup || false;
 };
 
@@ -166,7 +164,7 @@ export const providersContainWooPaymentsNeedsSetup = (
 export const getWooPaymentsFromProviders = (
 	providers: PaymentsProvider[]
 ): PaymentsProvider | null => {
-	return providers.find( ( obj ) => isWooPayments( obj.id ) ) ?? null;
+	return providers.find((obj) => isWooPayments(obj.id)) ?? null;
 };
 
 /**
@@ -179,12 +177,12 @@ export const getRecommendedPaymentMethods = (
 	providers: PaymentsProvider[]
 ): RecommendedPaymentMethod[] => {
 	const updatedWooPaymentsProvider = providers.find(
-		( provider: PaymentsProvider ) => isWooPayments( provider.id )
+		(provider: PaymentsProvider) => isWooPayments(provider.id)
 	);
 
 	return (
 		updatedWooPaymentsProvider?.onboarding?.recommended_payment_methods ??
-		( [] as RecommendedPaymentMethod[] )
+		([] as RecommendedPaymentMethod[])
 	);
 };
 
@@ -196,8 +194,8 @@ export const getRecommendedPaymentMethods = (
 export const providersContainWooPaymentsInDevMode = (
 	providers: PaymentsProvider[]
 ): boolean => {
-	const wooPayments = providers.find( ( obj ) => isWooPayments( obj.id ) );
-	return !! wooPayments?.state?.dev_mode;
+	const wooPayments = providers.find((obj) => isWooPayments(obj.id));
+	return !!wooPayments?.state?.dev_mode;
 };
 
 /**
@@ -210,16 +208,16 @@ export const providersContainWooPaymentsInDevMode = (
 export const combineRequestMethods = (
 	paymentMethods: RecommendedPaymentMethod[]
 ) => {
-	const applePay = getPaymentMethodById( 'apple_pay' )( paymentMethods );
-	const googlePay = getPaymentMethodById( 'google_pay' )( paymentMethods );
+	const applePay = getPaymentMethodById('apple_pay')(paymentMethods);
+	const googlePay = getPaymentMethodById('google_pay')(paymentMethods);
 
-	if ( ! applePay || ! googlePay ) {
+	if (!applePay || !googlePay) {
 		return paymentMethods; // If either Apple Pay or Google Pay is not found, return the original paymentMethods
 	}
 
 	return paymentMethods
-		.map( ( method ) => {
-			if ( method.id === 'apple_pay' ) {
+		.map((method) => {
+			if (method.id === 'apple_pay') {
 				// Combine apple_pay and google_pay data into a new payment method
 				return {
 					...method,
@@ -231,14 +229,14 @@ export const combineRequestMethods = (
 			}
 
 			// Exclude GooglePay from the list
-			if ( method.id === 'google_pay' ) {
+			if (method.id === 'google_pay') {
 				return null;
 			}
 
 			return method; // Keep the rest of the payment methods
-		} )
+		})
 		.filter(
-			( method ): method is RecommendedPaymentMethod => method !== null
+			(method): method is RecommendedPaymentMethod => method !== null
 		); // Filter null values
 };
 
@@ -250,18 +248,18 @@ export const combineRequestMethods = (
  * state is returned.
  */
 export const combinePaymentMethodsState = (
-	paymentMethodsState: Record< string, boolean >
+	paymentMethodsState: Record<string, boolean>
 ) => {
-	return Object.keys( paymentMethodsState ).reduce(
-		( acc, key ) => {
-			if ( key === 'apple_pay' || key === 'google_pay' ) {
-				acc.apple_google = paymentMethodsState[ key ];
+	return Object.keys(paymentMethodsState).reduce(
+		(acc, key) => {
+			if (key === 'apple_pay' || key === 'google_pay') {
+				acc.apple_google = paymentMethodsState[key];
 			} else {
-				acc[ key ] = paymentMethodsState[ key ];
+				acc[key] = paymentMethodsState[key];
 			}
 			return acc;
 		},
-		{} as Record< string, boolean >
+		{} as Record<string, boolean>
 	);
 };
 
@@ -273,12 +271,12 @@ export const shouldRenderPaymentMethodInMainList = (
 	method_enabled: boolean
 ) => {
 	// Starting from WooPayments 9.2, the method has a category which we use to determine if it should be rendered.
-	if ( method.category === 'primary' ) {
+	if (method.category === 'primary') {
 		return true;
 	}
 
 	// However, in WooPayments < 9.2, we use the `enabled` property (returned from the server) to determine if the method should be rendered.
-	if ( method.enabled ) {
+	if (method.enabled) {
 		return true;
 	}
 
@@ -298,21 +296,21 @@ export const shouldRenderPaymentMethodInMainList = (
  */
 export const recordPaymentsEvent = (
 	eventName: string,
-	data: Record< string, string | boolean | number > = {}
+	data: Record<string, string | boolean | number> = {}
 ) => {
 	// Ensure the event name starts with 'settings_payments_'.
-	if ( ! eventName.startsWith( 'settings_payments_' ) ) {
-		eventName = `settings_payments_${ eventName }`;
+	if (!eventName.startsWith('settings_payments_')) {
+		eventName = `settings_payments_${eventName}`;
 	}
 
 	// Capture the business registration country code from the WooCommerce settings if not provided.
-	if ( ! data.business_country ) {
+	if (!data.business_country) {
 		data.business_country =
 			window.wcSettings?.admin?.woocommerce_payments_nox_profile
 				?.business_country_code ?? 'unknown';
 	}
 
-	recordEvent( eventName, data );
+	recordEvent(eventName, data);
 };
 
 /**
@@ -330,15 +328,15 @@ export const recordPaymentsEvent = (
 export const recordPaymentsProviderEvent = (
 	eventName: string,
 	provider: PaymentsProvider,
-	data: Record< string, string | boolean | number > = {}
+	data: Record<string, string | boolean | number> = {}
 ) => {
 	// Ensure the event name starts with 'provider_'.
 	// The rest of the prefixing is handled by `recordPaymentsEvent`.
-	if ( ! eventName.startsWith( 'provider_' ) ) {
-		eventName = `provider_${ eventName }`;
+	if (!eventName.startsWith('provider_')) {
+		eventName = `provider_${eventName}`;
 	}
 
-	const enrichedData: Record< string, string | boolean | number > = {
+	const enrichedData: Record<string, string | boolean | number> = {
 		...data,
 		provider_id: provider.id,
 		provider_type: provider._type ?? 'unknown',
@@ -362,14 +360,14 @@ export const recordPaymentsProviderEvent = (
 	// The provider extension data.
 	enrichedData.provider_extension_slug = provider.plugin.slug ?? 'unknown';
 	// WooPayments-specific data.
-	if ( isWooPayments( provider.id ) ) {
+	if (isWooPayments(provider.id)) {
 		enrichedData.provider_has_test_drive_account =
 			provider.onboarding?.state?.test_drive_account ?? false;
 		enrichedData.provider_has_working_wpcom_connection =
 			provider.onboarding?.state?.wpcom_has_working_connection ?? false;
 	}
 
-	recordPaymentsEvent( eventName, enrichedData );
+	recordPaymentsEvent(eventName, enrichedData);
 };
 
 /**
@@ -387,30 +385,30 @@ export const recordPaymentsProviderEvent = (
  */
 export const recordPaymentsOnboardingEvent = (
 	eventName: string,
-	data: Record< string, string | boolean | number > = {}
+	data: Record<string, string | boolean | number> = {}
 ) => {
 	// Ensure the event name starts with 'settings_payments_'.
-	if ( ! eventName.startsWith( 'settings_payments_' ) ) {
-		eventName = `settings_payments_${ eventName }`;
+	if (!eventName.startsWith('settings_payments_')) {
+		eventName = `settings_payments_${eventName}`;
 	}
 
 	// Capture the business registration country code from the WooCommerce settings if not provided.
-	if ( ! data.business_country ) {
+	if (!data.business_country) {
 		data.business_country =
 			window.wcSettings?.admin?.woocommerce_payments_nox_profile
 				?.business_country_code ?? 'unknown';
 	}
 
 	// Capture the onboarding flow `source` from the URL parameters, if not provided.
-	const urlParams = new URLSearchParams( window.location.search );
-	if ( ! data.source ) {
+	const urlParams = new URLSearchParams(window.location.search);
+	if (!data.source) {
 		data.source =
-			urlParams.get( 'source' )?.replace( /[^\w-]+/g, '' ) || 'unknown';
+			urlParams.get('source')?.replace(/[^\w-]+/g, '') || 'unknown';
 	}
 	// We should not carry over the `from` parameter from the URL,
 	// as it meant to indicate the immediate source of the action that triggered the event.
 
-	recordEvent( eventName, data );
+	recordEvent(eventName, data);
 };
 
 /**
@@ -425,9 +423,9 @@ export const recordPaymentsOnboardingEvent = (
  * @param url The URL to strip the origin from.
  * @return The URL with the origin stripped.
  */
-export const removeOriginFromURL = ( url: string ) => {
-	const parsedUrl = parseAdminUrl( url );
-	return parsedUrl.href?.replace( parsedUrl.origin, '' ) ?? url;
+export const removeOriginFromURL = (url: string) => {
+	const parsedUrl = parseAdminUrl(url);
+	return parsedUrl.href?.replace(parsedUrl.origin, '') ?? url;
 };
 
 /**
@@ -447,7 +445,7 @@ export const getFailedPluginAction = (
 ): 'install' | 'activate' => {
 	const reportedAction =
 		typeof error === 'object' && error !== null && 'actionType' in error
-			? ( error as { actionType: unknown } ).actionType
+			? (error as { actionType: unknown }).actionType
 			: undefined;
 
 	return reportedAction === 'install' || reportedAction === 'activate'
@@ -476,22 +474,22 @@ export const getPluginActionErrorMessage = (
 		actionType === 'install'
 			? sprintf(
 					/* translators: %s: payment provider name (e.g. Visa Acceptance Solutions) */
-					__( 'Could not install %s.', 'woocommerce' ),
+					__('Could not install %s.', 'woocommerce'),
 					title
-			  )
+				)
 			: sprintf(
 					/* translators: %s: payment provider name (e.g. Visa Acceptance Solutions) */
-					__( 'Could not activate %s.', 'woocommerce' ),
+					__('Could not activate %s.', 'woocommerce'),
 					title
-			  );
+				);
 
 	const rejection =
 		typeof error === 'object' && error !== null
-			? ( error as { reason?: unknown; message?: unknown } )
+			? (error as { reason?: unknown; message?: unknown })
 			: undefined;
 
-	if ( typeof rejection?.reason === 'string' && rejection.reason ) {
-		return `${ frame } ${ rejection.reason }`;
+	if (typeof rejection?.reason === 'string' && rejection.reason) {
+		return `${frame} ${rejection.reason}`;
 	}
 
 	const message =

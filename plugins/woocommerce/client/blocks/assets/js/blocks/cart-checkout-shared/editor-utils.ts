@@ -7,21 +7,21 @@ import { cartStore } from '@woocommerce/block-data';
 import { select } from '@wordpress/data';
 
 // List of core block types to allow in inner block areas.
-const coreBlockTypes = [ 'core/paragraph', 'core/image', 'core/separator' ];
+const coreBlockTypes = ['core/paragraph', 'core/image', 'core/separator'];
 
 /**
  * Gets a list of allowed blocks types under a specific parent block type.
  */
-export const getAllowedBlocks = ( block: string ): string[] => {
-	const additionalCartCheckoutInnerBlockTypes = applyCheckoutFilter( {
+export const getAllowedBlocks = (block: string): string[] => {
+	const additionalCartCheckoutInnerBlockTypes = applyCheckoutFilter({
 		filterName: 'additionalCartCheckoutInnerBlockTypes',
 		defaultValue: [],
-		extensions: select( cartStore ).getCartData().extensions,
+		extensions: select(cartStore).getCartData().extensions,
 		arg: { block },
-		validation: ( value ) => {
+		validation: (value) => {
 			if (
-				Array.isArray( value ) &&
-				value.every( ( item ) => typeof item === 'string' )
+				Array.isArray(value) &&
+				value.every((item) => typeof item === 'string')
 			) {
 				return true;
 			}
@@ -29,18 +29,18 @@ export const getAllowedBlocks = ( block: string ): string[] => {
 				'allowedBlockTypes filters must return an array of strings.'
 			);
 		},
-	} );
+	});
 
 	// Convert to set here so that we remove duplicated block types.
 	return Array.from(
-		new Set( [
+		new Set([
 			...getBlockTypes()
-				.filter( ( blockType ) =>
-					( blockType?.parent || [] ).includes( block )
+				.filter((blockType) =>
+					(blockType?.parent || []).includes(block)
 				)
-				.map( ( { name } ) => name ),
+				.map(({ name }) => name),
 			...coreBlockTypes,
 			...additionalCartCheckoutInnerBlockTypes,
-		] )
+		])
 	);
 };

@@ -25,7 +25,7 @@ function registerProductQueryElementsNamespace(
 	props: Block,
 	blockName: string
 ) {
-	if ( EXTENDED_CORE_ELEMENTS.includes( blockName ) ) {
+	if (EXTENDED_CORE_ELEMENTS.includes(blockName)) {
 		// Gracefully handle if settings.attributes is undefined.
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore -- We need this because `attributes` is marked as `readonly`

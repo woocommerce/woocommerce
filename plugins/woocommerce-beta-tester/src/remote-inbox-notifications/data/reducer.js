@@ -12,8 +12,8 @@ const DEFAULT_STATE = {
 	},
 };
 
-const reducer = ( state = DEFAULT_STATE, action ) => {
-	switch ( action.type ) {
+const reducer = (state = DEFAULT_STATE, action) => {
+	switch (action.type) {
 		case TYPES.SET_IS_LOADING:
 			return {
 				...state,
@@ -37,7 +37,7 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 			return {
 				...state,
 				notifications: state.notifications.filter(
-					( item ) => item.note_id !== action.id
+					(item) => item.note_id !== action.id
 				),
 			};
 		default:

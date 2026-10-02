@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 
-export default function LockLabel( { message }: { message: string } ) {
+export default function LockLabel({ message }: { message: string }) {
 	return (
 		<div className="woocommerce-fulfillment-lock-label">
 			<span className="woocommerce-fulfillment-lock-label__icon">
@@ -19,11 +19,11 @@ export default function LockLabel( { message }: { message: string } ) {
 				</svg>
 			</span>
 			<span className="woocommerce-fulfillment-lock-label__text">
-				{ message ||
+				{message ||
 					__(
 						'This item is locked and cannot be edited.',
 						'woocommerce'
-					) }
+					)}
 			</span>
 		</div>
 	);

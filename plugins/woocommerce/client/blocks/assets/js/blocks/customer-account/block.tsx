@@ -22,7 +22,7 @@ const icons = {
 	line: customerAccountStyleLine,
 };
 
-const AccountIcon = ( {
+const AccountIcon = ({
 	iconStyle,
 	displayStyle,
 	iconClass,
@@ -30,72 +30,68 @@ const AccountIcon = ( {
 	iconStyle: IconStyle;
 	displayStyle: DisplayStyle;
 	iconClass: string;
-} ) => {
+}) => {
 	return displayStyle !== DisplayStyle.TEXT_ONLY ? (
 		<div className="wc-block-customer-account__visual">
-			<Icon
-				className={ iconClass }
-				icon={ icons[ iconStyle ] }
-				size={ 18 }
-			/>
+			<Icon className={iconClass} icon={icons[iconStyle]} size={18} />
 		</div>
 	) : null;
 };
 
-const Label = ( { displayStyle }: { displayStyle: DisplayStyle } ) => {
-	if ( displayStyle === DisplayStyle.ICON_ONLY ) {
+const Label = ({ displayStyle }: { displayStyle: DisplayStyle }) => {
+	if (displayStyle === DisplayStyle.ICON_ONLY) {
 		return null;
 	}
 
-	const currentUserId = getSetting( 'currentUserId', null );
+	const currentUserId = getSetting('currentUserId', null);
 
 	return (
 		<span className="label">
-			{ currentUserId
-				? __( 'My Account', 'woocommerce' )
-				: __( 'Log in', 'woocommerce' ) }
+			{currentUserId
+				? __('My Account', 'woocommerce')
+				: __('Log in', 'woocommerce')}
 		</span>
 	);
 };
 
-export const CustomerAccountBlock = ( {
+export const CustomerAccountBlock = ({
 	attributes,
 }: {
 	attributes: Attributes;
-} ): JSX.Element => {
+}): JSX.Element => {
 	const { displayStyle, hasDropdownNavigation, iconStyle, iconClass } =
 		attributes;
 
 	const ariaAttributes =
 		displayStyle === DisplayStyle.ICON_ONLY
 			? {
-					'aria-label': __( 'My Account', 'woocommerce' ),
-			  }
+					'aria-label': __('My Account', 'woocommerce'),
+				}
 			: {};
 
 	const content = (
 		<>
 			<AccountIcon
-				iconStyle={ iconStyle }
-				displayStyle={ displayStyle }
-				iconClass={ iconClass }
+				iconStyle={iconStyle}
+				displayStyle={displayStyle}
+				iconClass={iconClass}
 			/>
-			<Label displayStyle={ displayStyle } />
+			<Label displayStyle={displayStyle} />
 		</>
 	);
 
-	if ( hasDropdownNavigation ) {
+	if (hasDropdownNavigation) {
 		return (
 			<button
 				type="button"
 				className="wc-block-customer-account__toggle"
-				{ ...ariaAttributes }
+				{...ariaAttributes}
 			>
-				{ content }
+				{content}
 				<Icon
 					className="wc-block-customer-account__caret"
-					icon={ caret }
-					size={ 10 }
+					icon={caret}
+					size={10}
 				/>
 			</button>
 		);
@@ -104,13 +100,13 @@ export const CustomerAccountBlock = ( {
 	return (
 		<a
 			className="wc-block-customer-account__link"
-			href={ getSetting(
+			href={getSetting(
 				'dashboardUrl',
-				getSetting( 'wpLoginUrl', '/wp-login.php' )
-			) }
-			{ ...ariaAttributes }
+				getSetting('wpLoginUrl', '/wp-login.php')
+			)}
+			{...ariaAttributes}
 		>
-			{ content }
+			{content}
 		</a>
 	);
 };

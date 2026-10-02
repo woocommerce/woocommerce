@@ -14,7 +14,7 @@ import { getSettingWithCoercion } from './utils';
 
 // A list of attributes that can be added to a custom field when registering it.
 type CustomFieldAttributes = Pick<
-	AllHTMLAttributes< HTMLInputElement >,
+	AllHTMLAttributes<HTMLInputElement>,
 	| 'maxLength'
 	| 'readOnly'
 	| 'pattern'
@@ -37,11 +37,11 @@ export interface Field {
 	// How this field value is capitalized.
 	autocapitalize?: string;
 	// Set to true if the field is required or a JSON schema object.
-	required: boolean | JSONSchemaType< DocumentObject< 'global' > > | [];
+	required: boolean | JSONSchemaType<DocumentObject<'global'>> | [];
 	// Set to true if the field should not be rendered or a JSON schema object.
-	hidden: boolean | JSONSchemaType< DocumentObject< 'global' > > | [];
+	hidden: boolean | JSONSchemaType<DocumentObject<'global'>> | [];
 	// A JSON schema object for validation.
-	validation: JSONSchemaType< DocumentObject< 'global' > > | [];
+	validation: JSONSchemaType<DocumentObject<'global'>> | [];
 	// Fields will be sorted and render in this order, lowest to highest.
 	index: number;
 	// The type of input to render. Defaults to text.
@@ -55,13 +55,13 @@ export interface Field {
 	// The latest date a date field accepts, as YYYY-MM-DD or an ISO 8601-2 duration such as `-P18Y`.
 	max?: string;
 	// Additional attributes added when registering a field. String in key is required for data attributes.
-	attributes?: Record< keyof CustomFieldAttributes, string >;
+	attributes?: Record<keyof CustomFieldAttributes, string>;
 }
 
 /**
  * Countries can override fields props depending on the country, a fieldLocaleOverrides contains those overrides.
  */
-export type FieldLocaleOverrides = Partial< Field >;
+export type FieldLocaleOverrides = Partial<Field>;
 
 /**
  * Shipping and billing address form fields.
@@ -77,7 +77,7 @@ export interface AddressForm {
 	state: Field;
 	postcode: Field;
 	phone: Field;
-	[ x: `${ string }/${ string }` ]: Field; // Additional fields are named like: namespace/field_name
+	[x: `${string}/${string}`]: Field; // Additional fields are named like: namespace/field_name
 }
 
 /**
@@ -85,14 +85,14 @@ export interface AddressForm {
  */
 export interface ContactForm {
 	email: Field;
-	[ x: `${ string }/${ string }` ]: Field;
+	[x: `${string}/${string}`]: Field;
 }
 
 /**
  * Order form fields.
  */
 export interface OrderForm {
-	[ x: `${ string }/${ string }` ]: Field;
+	[x: `${string}/${string}`]: Field;
 }
 
 /**
@@ -104,7 +104,7 @@ export type FormFields = AddressForm & ContactForm & OrderForm;
  * KeyedFormFields is the array shape of FormFields object with the key added to each field.
  */
 export type KeyedFormFields = Array<
-	FormFields[ keyof FormFields ] & {
+	FormFields[keyof FormFields] & {
 		key: keyof FormFields;
 		errorMessage?: string;
 	}
@@ -114,7 +114,7 @@ export type KeyedFormFields = Array<
  * KeyedParsedFormFields is the array shape of FormFields object with the key added to each field.
  */
 export type KeyedParsedFormFields = Array<
-	FormFields[ keyof FormFields ] & {
+	FormFields[keyof FormFields] & {
 		key: keyof FormFields;
 		errorMessage?: string;
 		hidden: boolean;
@@ -124,13 +124,13 @@ export type KeyedParsedFormFields = Array<
 /**
  * All possible values for a form.
  */
-export type FormValues = Record< keyof FormFields, string > & {
-	[ x: `${ string }/${ string }` ]: string | boolean;
+export type FormValues = Record<keyof FormFields, string> & {
+	[x: `${string}/${string}`]: string | boolean;
 };
 
-export type AddressFormValues = Pick< FormValues, keyof AddressForm >;
-export type ContactFormValues = Pick< FormValues, keyof ContactForm >;
-export type OrderFormValues = Pick< FormValues, keyof OrderForm >;
+export type AddressFormValues = Pick<FormValues, keyof AddressForm>;
+export type ContactFormValues = Pick<FormValues, keyof ContactForm>;
+export type OrderFormValues = Pick<FormValues, keyof OrderForm>;
 
 export type AddressFormType = 'billing' | 'shipping';
 export type FormType = AddressFormType | 'contact' | 'order';
@@ -140,7 +140,7 @@ export interface BillingAddress extends AddressFormValues {
 	email: string;
 }
 
-export type CountryAddressFields = Record< string, FormFields >;
+export type CountryAddressFields = Record<string, FormFields>;
 
 /**
  * Fallback FormFields object matching the server-side structure exactly.
@@ -263,7 +263,7 @@ const fallbackFormFields: FormFields = {
 /**
  * Default field properties.
  */
-export const defaultFields: FormFields = getSettingWithCoercion< FormFields >(
+export const defaultFields: FormFields = getSettingWithCoercion<FormFields>(
 	'defaultFields',
 	fallbackFormFields,
 	isFormFields

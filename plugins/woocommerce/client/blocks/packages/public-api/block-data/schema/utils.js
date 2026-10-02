@@ -11,9 +11,9 @@
  *
  * @return {string} The resource name extracted from the route.
  */
-export const extractResourceNameFromRoute = ( namespace, route ) => {
-	route = route.replace( `${ namespace }/`, '' );
-	return route.replace( /\/\(\?P\<[a-z_]*\>\[\\*[a-z]\]\+\)/g, '' );
+export const extractResourceNameFromRoute = (namespace, route) => {
+	route = route.replace(`${namespace}/`, '');
+	return route.replace(/\/\(\?P\<[a-z_]*\>\[\\*[a-z]\]\+\)/g, '');
 };
 
 /**
@@ -30,12 +30,12 @@ export const extractResourceNameFromRoute = ( namespace, route ) => {
  *
  * @return {Array}  An array of named route identifier names.
  */
-export const getRouteIds = ( route ) => {
-	const matches = route.match( /\<[a-z_]*\>/g );
-	if ( ! Array.isArray( matches ) || matches.length === 0 ) {
+export const getRouteIds = (route) => {
+	const matches = route.match(/\<[a-z_]*\>/g);
+	if (!Array.isArray(matches) || matches.length === 0) {
 		return [];
 	}
-	return matches.map( ( match ) => match.replace( /<|>/g, '' ) );
+	return matches.map((match) => match.replace(/<|>/g, ''));
 };
 
 /**
@@ -53,13 +53,13 @@ export const getRouteIds = ( route ) => {
  *
  * @return {string} The route with new id placeholders
  */
-export const simplifyRouteWithId = ( route, matchIds ) => {
-	if ( ! Array.isArray( matchIds ) || matchIds.length === 0 ) {
+export const simplifyRouteWithId = (route, matchIds) => {
+	if (!Array.isArray(matchIds) || matchIds.length === 0) {
 		return route;
 	}
-	matchIds.forEach( ( matchId ) => {
-		const expression = `\\(\\?P<${ matchId }>.*?\\)`;
-		route = route.replace( new RegExp( expression ), `{${ matchId }}` );
-	} );
+	matchIds.forEach((matchId) => {
+		const expression = `\\(\\?P<${matchId}>.*?\\)`;
+		route = route.replace(new RegExp(expression), `{${matchId}}`);
+	});
 	return route;
 };

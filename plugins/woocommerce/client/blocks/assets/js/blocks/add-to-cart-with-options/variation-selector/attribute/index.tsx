@@ -13,16 +13,16 @@ import AttributeItemTemplateSave from './save';
 import deprecated from './deprecated';
 import './style.scss';
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	edit: AttributeItemTemplateEdit,
 	icon: {
 		src: (
 			<Icon
-				icon={ button }
+				icon={button}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
 	},
 	save: AttributeItemTemplateSave,
 	deprecated,
-} );
+});

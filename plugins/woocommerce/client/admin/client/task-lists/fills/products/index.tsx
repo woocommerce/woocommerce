@@ -35,46 +35,45 @@ import {
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
 
 const getOnboardingProductType = (): string[] => {
-	const onboardingData = getAdminSetting( 'onboarding' );
+	const onboardingData = getAdminSetting('onboarding');
 	return (
-		( onboardingData?.profile &&
-			onboardingData?.profile.product_types ) || [ 'physical' ]
+		(onboardingData?.profile && onboardingData?.profile.product_types) || [
+			'physical',
+		]
 	);
 };
 
-const ViewControlButton = ( {
+const ViewControlButton = ({
 	isExpanded,
 	onClick,
 }: {
 	isExpanded: boolean;
 	onClick: () => void;
-} ) => (
+}) => (
 	<Button
 		className="woocommerce-task-products__button-view-less-product-types"
-		onClick={ onClick }
+		onClick={onClick}
 	>
-		{ isExpanded
-			? __( `View less product types`, 'woocommerce' )
-			: __( `View more product types`, 'woocommerce' ) }
-		<Icon icon={ isExpanded ? chevronUp : chevronDown } />
+		{isExpanded
+			? __(`View less product types`, 'woocommerce')
+			: __(`View more product types`, 'woocommerce')}
+		<Icon icon={isExpanded ? chevronUp : chevronDown} />
 	</Button>
 );
 
 export const Products = () => {
-	const [ isExpanded, setIsExpanded ] = useState< boolean >( false );
-	const [
-		isConfirmingLoadSampleProducts,
-		setIsConfirmingLoadSampleProducts,
-	] = useState( false );
+	const [isExpanded, setIsExpanded] = useState<boolean>(false);
+	const [isConfirmingLoadSampleProducts, setIsConfirmingLoadSampleProducts] =
+		useState(false);
 
-	const { installedPlugins, isRequestingPlugins } = useSelect( ( select ) => {
+	const { installedPlugins, isRequestingPlugins } = useSelect((select) => {
 		const { getInstalledPlugins, isPluginsRequesting } =
-			select( pluginsStore );
+			select(pluginsStore);
 		return {
-			isRequestingPlugins: isPluginsRequesting( 'installPlugins' ),
+			isRequestingPlugins: isPluginsRequesting('installPlugins'),
 			installedPlugins: getInstalledPlugins(),
 		};
-	}, [] );
+	}, []);
 
 	const surfacedProductTypeKeys = getSurfacedProductTypeKeys(
 		getOnboardingProductType()
@@ -84,38 +83,37 @@ export const Products = () => {
 		getProductTypes(),
 		surfacedProductTypeKeys
 	);
-	const { recordCompletionTime } = useRecordCompletionTime( 'products' );
+	const { recordCompletionTime } = useRecordCompletionTime('products');
 
 	const productTypesWithTimeRecord = useMemo(
 		() =>
-			productTypes.map( ( productType ) => ( {
+			productTypes.map((productType) => ({
 				...productType,
 				onClick: (): void => {
 					productType.onClick();
 					recordCompletionTime();
 				},
-			} ) ),
-		[ recordCompletionTime, productTypes ]
+			})),
+		[recordCompletionTime, productTypes]
 	);
 
 	const { loadSampleProduct, isLoadingSampleProducts } =
-		useLoadSampleProducts( {
+		useLoadSampleProducts({
 			redirectUrlAfterSuccess: getAdminLink(
 				'edit.php?post_type=product&wc_onboarding_active_task=products'
 			),
-		} );
+		});
 
-	const visibleProductTypes = useMemo( () => {
+	const visibleProductTypes = useMemo(() => {
 		const surfacedProductTypes = productTypesWithTimeRecord.filter(
-			( productType ) =>
-				surfacedProductTypeKeys.includes( productType.key )
+			(productType) => surfacedProductTypeKeys.includes(productType.key)
 		);
-		if ( isExpanded ) {
+		if (isExpanded) {
 			// To show product types in same order, we need to push the other product types to the end.
 			productTypesWithTimeRecord.forEach(
-				( productType ) =>
-					! surfacedProductTypes.includes( productType ) &&
-					surfacedProductTypes.push( productType )
+				(productType) =>
+					!surfacedProductTypes.includes(productType) &&
+					surfacedProductTypes.push(productType)
 			);
 		}
 		/**
@@ -129,9 +127,9 @@ export const Products = () => {
 			surfacedProductTypes
 		) as typeof surfacedProductTypes;
 		return surfacedProductTypesAndAppendedProducts;
-	}, [ surfacedProductTypeKeys, isExpanded, productTypesWithTimeRecord ] );
+	}, [surfacedProductTypeKeys, isExpanded, productTypesWithTimeRecord]);
 
-	const footerStack = useMemo( () => {
+	const footerStack = useMemo(() => {
 		const importCSVItemWithTimeRecord = {
 			...ImportCSVItem,
 			onClick: () => {
@@ -145,13 +143,13 @@ export const Products = () => {
 		];
 
 		if (
-			! isRequestingPlugins &&
-			! installedPlugins.includes( 'printful-shipping-for-woocommerce' )
+			!isRequestingPlugins &&
+			!installedPlugins.includes('printful-shipping-for-woocommerce')
 		) {
-			options.push( PrintfulAdvertProductPlacement );
+			options.push(PrintfulAdvertProductPlacement);
 		}
 		return options;
-	}, [ recordCompletionTime, isRequestingPlugins, installedPlugins ] );
+	}, [recordCompletionTime, isRequestingPlugins, installedPlugins]);
 
 	return (
 		<div className="woocommerce-task-products">
@@ -160,68 +158,68 @@ export const Products = () => {
 				as="h2"
 				className="woocommerce-task-products__title"
 			>
-				{ __( 'What product do you want to add?', 'woocommerce' ) }
+				{__('What product do you want to add?', 'woocommerce')}
 			</Text>
 
 			<div className="woocommerce-product-content">
 				<Stack
-					items={ visibleProductTypes }
-					onClickLoadSampleProduct={ () =>
-						setIsConfirmingLoadSampleProducts( true )
+					items={visibleProductTypes}
+					onClickLoadSampleProduct={() =>
+						setIsConfirmingLoadSampleProducts(true)
 					}
-					showOtherOptions={ isExpanded }
-					isTaskListItemClicked={ isRequesting }
+					showOtherOptions={isExpanded}
+					isTaskListItemClicked={isRequesting}
 				/>
 				<ViewControlButton
-					isExpanded={ isExpanded }
-					onClick={ () => {
-						if ( ! isExpanded ) {
+					isExpanded={isExpanded}
+					onClick={() => {
+						if (!isExpanded) {
 							recordEvent(
 								'tasklist_view_more_product_types_click'
 							);
 						}
-						setIsExpanded( ! isExpanded );
-					} }
+						setIsExpanded(!isExpanded);
+					}}
 				/>
 				<Stack
-					items={ footerStack }
-					showOtherOptions={ false }
-					isTaskListItemClicked={ isRequesting }
+					items={footerStack}
+					showOtherOptions={false}
+					isTaskListItemClicked={isRequesting}
 				/>
 				<TrackedLink
-					textProps={ {
+					textProps={{
 						className: 'woocommerce-products-marketplace-link',
-					} }
-					message={ __(
+					}}
+					message={__(
 						// translators: {{Link}} is a placeholder for a html element.
 						'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to enhance your store with additional options such as Subscriptions, Gift Cards, and more.',
 						'woocommerce'
-					) }
+					)}
 					eventName="tasklist_add_product_visit_marketplace_click"
-					targetUrl={ getAdminLink(
+					targetUrl={getAdminLink(
 						'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=merchandising'
-					) }
+					)}
 					linkType="wc-admin"
 				/>
 			</div>
-			{ isLoadingSampleProducts ? (
+			{isLoadingSampleProducts ? (
 				<LoadSampleProductModal />
 			) : (
 				isConfirmingLoadSampleProducts && (
 					<LoadSampleProductConfirmModal
-						onCancel={ () => {
-							setIsConfirmingLoadSampleProducts( false );
+						onCancel={() => {
+							setIsConfirmingLoadSampleProducts(false);
 							recordEvent(
 								'tasklist_cancel_load_sample_products_click'
 							);
-						} }
-						onImport={ () => {
-							setIsConfirmingLoadSampleProducts( false );
+						}}
+						onImport={() => {
+							setIsConfirmingLoadSampleProducts(false);
 							void loadSampleProduct();
-						} }
+						}}
 					/>
 				)
-			) }
+			)}
 		</div>
 	);
 };
@@ -234,7 +232,7 @@ const ProductsFill = () => {
 	);
 };
 
-registerPlugin( 'wc-admin-onboarding-task-products', {
+registerPlugin('wc-admin-onboarding-task-products', {
 	scope: 'woocommerce-tasks',
 	render: () => <ProductsFill />,
-} );
+});

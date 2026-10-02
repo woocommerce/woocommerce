@@ -40,39 +40,39 @@ export type InstallationCompletedResult = {
 export type PluginInstallError = {
 	plugin: string;
 	error: string;
-	errorDetails: Pick< InstallAndActivateErrorResponse, 'data' >;
+	errorDetails: Pick<InstallAndActivateErrorResponse, 'data'>;
 };
 
 const createInstallationCompletedWithErrorsEvent = (
 	errors: PluginInstallError[]
-): PluginsInstallationCompletedWithErrorsEvent => ( {
+): PluginsInstallationCompletedWithErrorsEvent => ({
 	type: 'PLUGINS_INSTALLATION_COMPLETED_WITH_ERRORS',
 	payload: {
 		errors,
 	},
-} );
+});
 
 const createInstallationCompletedEvent = (
 	installationCompletedResult: InstallationCompletedResult
-): PluginsInstallationCompletedEvent => ( {
+): PluginsInstallationCompletedEvent => ({
 	type: 'PLUGINS_INSTALLATION_COMPLETED',
 	payload: {
 		installationCompletedResult,
 	},
-} );
+});
 
 const createPluginInstalledAndActivatedEvent = (
 	progressPercentage: number
-): PluginInstalledAndActivatedEvent => ( {
+): PluginInstalledAndActivatedEvent => ({
 	type: 'PLUGIN_INSTALLED_AND_ACTIVATED',
 	payload: {
 		progressPercentage,
 	},
-} );
+});
 
 export type PluginInstallerMachineContext = {
 	selectedPlugins: PluginNames[];
-	pluginsAvailable: ExtensionList[ 'plugins' ] | [];
+	pluginsAvailable: ExtensionList['plugins'] | [];
 	pluginsInstallationQueue: PluginNames[];
 	installedPlugins: InstalledPlugin[];
 	startTime: number;
@@ -94,8 +94,8 @@ export type InstallAndActivateErrorResponse = {
 type InstallAndActivateSuccessResponse = {
 	data: {
 		installed: PluginNames[];
-		results: Record< PluginNames, boolean >;
-		install_time: Record< PluginNames, number >;
+		results: Record<PluginNames, boolean>;
+		install_time: Record<PluginNames, number>;
 	};
 };
 
@@ -108,19 +108,19 @@ export const pluginInstallerMachine = createMachine(
 		types: {} as {
 			context: PluginInstallerMachineContext;
 		},
-		context: ( {
+		context: ({
 			input,
 		}: {
 			input: Pick<
 				PluginInstallerMachineContext,
 				'selectedPlugins' | 'pluginsAvailable'
 			>;
-		} ) => {
+		}) => {
 			return {
 				selectedPlugins: input?.selectedPlugins || [],
 				pluginsAvailable:
 					input?.pluginsAvailable ||
-					( [] as ExtensionList[ 'plugins' ] | [] ),
+					([] as ExtensionList['plugins'] | []),
 				pluginsInstallationQueue: [],
 				installedPlugins: [],
 				startTime: 0,
@@ -131,7 +131,7 @@ export const pluginInstallerMachine = createMachine(
 		states: {
 			installing: {
 				initial: 'installer',
-				entry: [ 'assignPluginsInstallationQueue', 'assignStartTime' ],
+				entry: ['assignPluginsInstallationQueue', 'assignStartTime'],
 				after: {
 					INSTALLATION_TIMEOUT: 'timedOut',
 				},
@@ -143,7 +143,7 @@ export const pluginInstallerMachine = createMachine(
 								invoke: {
 									systemId: 'installPlugin',
 									src: 'installPlugin',
-									input: ( { context } ) => context,
+									input: ({ context }) => context,
 									onDone: {
 										actions: [
 											'assignInstallationSuccessDetails',
@@ -176,21 +176,21 @@ export const pluginInstallerMachine = createMachine(
 			},
 			finished: {
 				id: 'installation-finished',
-				entry: [ 'assignInstallationDuration' ],
+				entry: ['assignInstallationDuration'],
 				always: [
 					{ target: 'reportErrors', guard: 'hasErrors' },
 					{ target: 'reportSuccess' },
 				],
 			},
 			timedOut: {
-				entry: [ 'assignInstallationDuration' ],
+				entry: ['assignInstallationDuration'],
 				invoke: {
 					systemId: 'queueRemainingPluginsAsync',
 					src: 'queueRemainingPluginsAsync',
-					input: ( { context } ) => ( {
+					input: ({ context }) => ({
 						pluginsInstallationQueue:
 							context.pluginsInstallationQueue,
-					} ),
+					}),
 					onDone: {
 						target: 'reportSuccess',
 					},
@@ -209,81 +209,81 @@ export const pluginInstallerMachine = createMachine(
 			INSTALLATION_TIMEOUT,
 		},
 		actions: {
-			assignPluginsInstallationQueue: assign( {
-				pluginsInstallationQueue: ( { context } ) => {
+			assignPluginsInstallationQueue: assign({
+				pluginsInstallationQueue: ({ context }) => {
 					// Sort the plugins by install_priority so that the smaller plugins are installed first
 					// install_priority is set by plugin's size
 					// Lower install_priority means the plugin is smaller
-					return context.selectedPlugins.slice().sort( ( a, b ) => {
+					return context.selectedPlugins.slice().sort((a, b) => {
 						const aIndex = context.pluginsAvailable.find(
-							( plugin ) => plugin.key === a
+							(plugin) => plugin.key === a
 						);
 						const bIndex = context.pluginsAvailable.find(
-							( plugin ) => plugin.key === b
+							(plugin) => plugin.key === b
 						);
 						return (
-							( aIndex?.install_priority ?? 99 ) -
-							( bIndex?.install_priority ?? 99 )
+							(aIndex?.install_priority ?? 99) -
+							(bIndex?.install_priority ?? 99)
 						);
-					} );
+					});
 				},
-			} ),
-			assignStartTime: assign( {
+			}),
+			assignStartTime: assign({
 				startTime: () => window.performance.now(),
-			} ),
-			assignInstallationDuration: assign( {
-				installationDuration: ( { context } ) =>
+			}),
+			assignInstallationDuration: assign({
+				installationDuration: ({ context }) =>
 					window.performance.now() - context.startTime,
-			} ),
-			assignInstallationSuccessDetails: assign( {
-				installedPlugins: ( { context, event } ) => {
-					const plugin = context.pluginsInstallationQueue[ 0 ];
+			}),
+			assignInstallationSuccessDetails: assign({
+				installedPlugins: ({ context, event }) => {
+					const plugin = context.pluginsInstallationQueue[0];
 					return [
 						...context.installedPlugins,
 						{
 							plugin,
 							installTime:
 								(
-									event as DoneActorEvent< InstallAndActivateSuccessResponse >
-								 ).output.data.install_time[ plugin ] || 0,
+									event as DoneActorEvent<InstallAndActivateSuccessResponse>
+								).output.data.install_time[plugin] || 0,
 						},
 					];
 				},
-			} ),
-			assignInstallationErrorDetails: assign( {
-				errors: ( { context, event } ) => {
+			}),
+			assignInstallationErrorDetails: assign({
+				errors: ({ context, event }) => {
 					return [
 						...context.errors,
 						{
-							plugin: context.pluginsInstallationQueue[ 0 ],
+							plugin: context.pluginsInstallationQueue[0],
 							error: (
-								event as ErrorActorEvent< InstallAndActivateErrorResponse >
-							 ).error.message,
+								event as ErrorActorEvent<InstallAndActivateErrorResponse>
+							).error.message,
 							errorDetails: (
-								event as ErrorActorEvent< InstallAndActivateErrorResponse >
-							 ).error,
+								event as ErrorActorEvent<InstallAndActivateErrorResponse>
+							).error,
 						},
 					];
 				},
-			} ),
-			removePluginFromQueue: assign( {
-				pluginsInstallationQueue: ( { context } ) => {
-					return context.pluginsInstallationQueue.slice( 1 );
+			}),
+			removePluginFromQueue: assign({
+				pluginsInstallationQueue: ({ context }) => {
+					return context.pluginsInstallationQueue.slice(1);
 				},
-			} ),
-			updateParentWithPluginProgress: sendParent( ( { context } ) => {
+			}),
+			updateParentWithPluginProgress: sendParent(({ context }) => {
 				const installedCount =
 					context.selectedPlugins.length -
 					context.pluginsInstallationQueue.length;
 				const pluginsToInstallCount = context.selectedPlugins.length;
 
 				const percentageOfPluginsInstalled = Math.round(
-					( installedCount / pluginsToInstallCount ) * 100
+					(installedCount / pluginsToInstallCount) * 100
 				);
 
 				const elapsed = window.performance.now() - context.startTime;
 				const percentageOfTimePassed = Math.round(
-					( elapsed / INSTALLATION_TIMEOUT ) * 100
+					(elapsed / INSTALLATION_TIMEOUT) * 100
 				);
 
 				return createPluginInstalledAndActivatedEvent(
@@ -292,41 +292,41 @@ export const pluginInstallerMachine = createMachine(
 						percentageOfTimePassed
 					)
 				);
-			} ),
-			updateParentWithInstallationErrors: sendParent( ( { context } ) =>
-				createInstallationCompletedWithErrorsEvent( context.errors )
+			}),
+			updateParentWithInstallationErrors: sendParent(({ context }) =>
+				createInstallationCompletedWithErrorsEvent(context.errors)
 			),
-			updateParentWithInstallationSuccess: sendParent( ( { context } ) =>
-				createInstallationCompletedEvent( {
+			updateParentWithInstallationSuccess: sendParent(({ context }) =>
+				createInstallationCompletedEvent({
 					installedPlugins: context.installedPlugins,
 					totalTime: context.installationDuration,
-				} )
+				})
 			),
 		},
 		guards: {
-			hasErrors: ( { context } ) => context.errors.length > 0,
-			hasPluginsToInstall: ( { context } ) =>
+			hasErrors: ({ context }) => context.errors.length > 0,
+			hasPluginsToInstall: ({ context }) =>
 				context.pluginsInstallationQueue.length > 0,
 		},
 		actors: {
 			installPlugin: fromPromise(
-				async ( {
+				async ({
 					input: { pluginsInstallationQueue },
 				}: {
 					input: { pluginsInstallationQueue: PluginNames[] };
-				} ) => {
-					return dispatch( pluginsStore ).installAndActivatePlugins(
-						[ getPluginSlug( pluginsInstallationQueue[ 0 ] ) ],
+				}) => {
+					return dispatch(pluginsStore).installAndActivatePlugins(
+						[getPluginSlug(pluginsInstallationQueue[0])],
 						'core-profiler'
 					);
 				}
 			),
 			queueRemainingPluginsAsync: fromPromise(
-				async ( {
+				async ({
 					input: { pluginsInstallationQueue },
 				}: {
 					input: { pluginsInstallationQueue: PluginNames[] };
-				} ) => {
+				}) => {
 					return dispatch(
 						onboardingStore
 					).installAndActivatePluginsAsync(

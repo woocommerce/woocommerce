@@ -9,15 +9,15 @@ import clsx from 'clsx';
  */
 import { CartExpressPayment } from '../../../cart-checkout-shared/payment-methods';
 
-const Block = ( { className }: { className: string } ): JSX.Element | null => {
+const Block = ({ className }: { className: string }): JSX.Element | null => {
 	const { cartNeedsPayment } = useStoreCart();
 
-	if ( ! cartNeedsPayment ) {
+	if (!cartNeedsPayment) {
 		return null;
 	}
 
 	return (
-		<div className={ clsx( 'wc-block-cart__payment-options', className ) }>
+		<div className={clsx('wc-block-cart__payment-options', className)}>
 			<CartExpressPayment />
 		</div>
 	);

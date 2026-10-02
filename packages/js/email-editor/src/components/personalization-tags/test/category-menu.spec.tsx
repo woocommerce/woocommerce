@@ -11,16 +11,16 @@ import '@testing-library/jest-dom';
  */
 import { CategoryMenu } from '../category-menu';
 
-jest.mock( '@wordpress/components', () => ( {
-	MenuGroup: ( props: React.HTMLAttributes< HTMLDivElement > ) => (
-		<div data-testid="menu-group" { ...props } />
+jest.mock('@wordpress/components', () => ({
+	MenuGroup: (props: React.HTMLAttributes<HTMLDivElement>) => (
+		<div data-testid="menu-group" {...props} />
 	),
-	MenuItem: ( props: React.ButtonHTMLAttributes< HTMLButtonElement > ) => (
-		<button role="menuitem" { ...props } />
+	MenuItem: (props: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
+		<button role="menuitem" {...props} />
 	),
-} ) );
+}));
 
-describe( 'CategoryMenu', () => {
+describe('CategoryMenu', () => {
 	const groupedTags = {
 		Marketing: [],
 		Promotions: [],
@@ -28,72 +28,72 @@ describe( 'CategoryMenu', () => {
 	};
 	const onCategorySelect = jest.fn();
 
-	beforeEach( () => {
+	beforeEach(() => {
 		onCategorySelect.mockClear();
-	} );
+	});
 
-	it( 'should render the "All" menu item and all categories', () => {
+	it('should render the "All" menu item and all categories', () => {
 		render(
 			<CategoryMenu
-				groupedTags={ groupedTags }
-				activeCategory={ null }
-				onCategorySelect={ onCategorySelect }
+				groupedTags={groupedTags}
+				activeCategory={null}
+				onCategorySelect={onCategorySelect}
 			/>
 		);
 
-		expect( screen.getByText( 'All' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'Marketing' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'Promotions' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'Customer Data' ) ).toBeInTheDocument();
-	} );
+		expect(screen.getByText('All')).toBeInTheDocument();
+		expect(screen.getByText('Marketing')).toBeInTheDocument();
+		expect(screen.getByText('Promotions')).toBeInTheDocument();
+		expect(screen.getByText('Customer Data')).toBeInTheDocument();
+	});
 
-	it( 'should call onCategorySelect when "All" is clicked', () => {
+	it('should call onCategorySelect when "All" is clicked', () => {
 		render(
 			<CategoryMenu
-				groupedTags={ groupedTags }
-				activeCategory={ 'Marketing' }
-				onCategorySelect={ onCategorySelect }
+				groupedTags={groupedTags}
+				activeCategory={'Marketing'}
+				onCategorySelect={onCategorySelect}
 			/>
 		);
 
-		fireEvent.click( screen.getByText( 'All' ) );
-		expect( onCategorySelect ).toHaveBeenCalledWith( null );
-	} );
+		fireEvent.click(screen.getByText('All'));
+		expect(onCategorySelect).toHaveBeenCalledWith(null);
+	});
 
-	it( 'should call onCategorySelect with correct category', () => {
+	it('should call onCategorySelect with correct category', () => {
 		render(
 			<CategoryMenu
-				groupedTags={ groupedTags }
-				activeCategory={ null }
-				onCategorySelect={ onCategorySelect }
+				groupedTags={groupedTags}
+				activeCategory={null}
+				onCategorySelect={onCategorySelect}
 			/>
 		);
 
-		fireEvent.click( screen.getByText( 'Promotions' ) );
-		expect( onCategorySelect ).toHaveBeenCalledWith( 'Promotions' );
-	} );
+		fireEvent.click(screen.getByText('Promotions'));
+		expect(onCategorySelect).toHaveBeenCalledWith('Promotions');
+	});
 
-	it( 'should apply active class to active category', () => {
+	it('should apply active class to active category', () => {
 		render(
 			<CategoryMenu
-				groupedTags={ groupedTags }
-				activeCategory={ 'Customer Data' }
-				onCategorySelect={ onCategorySelect }
+				groupedTags={groupedTags}
+				activeCategory={'Customer Data'}
+				onCategorySelect={onCategorySelect}
 			/>
 		);
 
-		const activeItem = screen.getByText( 'Customer Data' );
-		expect( activeItem ).toHaveClass(
+		const activeItem = screen.getByText('Customer Data');
+		expect(activeItem).toHaveClass(
 			'woocommerce-personalization-tags-modal-menu-item-active'
 		);
-	} );
+	});
 
-	it( 'should render separators between categories', () => {
+	it('should render separators between categories', () => {
 		render(
 			<CategoryMenu
-				groupedTags={ groupedTags }
-				activeCategory={ null }
-				onCategorySelect={ onCategorySelect }
+				groupedTags={groupedTags}
+				activeCategory={null}
+				onCategorySelect={onCategorySelect}
 			/>
 		);
 
@@ -101,6 +101,6 @@ describe( 'CategoryMenu', () => {
 			'woocommerce-personalization-tags-modal-menu-separator'
 		);
 		// 1 after "All" + 2 between 3 categories
-		expect( separators ).toHaveLength( 3 );
-	} );
-} );
+		expect(separators).toHaveLength(3);
+	});
+});

@@ -16,20 +16,20 @@ const SETTINGS_FILTER = 'woocommerce_admin_analytics_settings';
 // Defaults resolved by the server for the wc_admin settings group, including the
 // `woocommerce_analytics_settings_default_*_order_statuses` filters. Missing when the
 // page did not preload them, so every consumer keeps a built-in fallback.
-const settingsDefaults = getAdminSetting( 'wcAdminSettingsDefaults', {} ) || {};
+const settingsDefaults = getAdminSetting('wcAdminSettingsDefaults', {}) || {};
 
-const getDefaultStatuses = ( setting, fallback ) => {
-	const statuses = settingsDefaults[ setting ];
-	return Array.isArray( statuses ) ? [ ...statuses ] : fallback;
+const getDefaultStatuses = (setting, fallback) => {
+	const statuses = settingsDefaults[setting];
+	return Array.isArray(statuses) ? [...statuses] : fallback;
 };
 
 export const DEFAULT_EXCLUDED_STATUSES = getDefaultStatuses(
 	'woocommerce_excluded_report_order_statuses',
-	[ 'pending', 'cancelled', 'failed' ]
+	['pending', 'cancelled', 'failed']
 );
 export const DEFAULT_ACTIONABLE_STATUSES = getDefaultStatuses(
 	'woocommerce_actionable_order_statuses',
-	[ 'processing', 'on-hold' ]
+	['processing', 'on-hold']
 );
 export const DEFAULT_ORDER_STATUSES = [
 	'completed',
@@ -45,19 +45,19 @@ export const DEFAULT_DATE_TYPE = 'date_paid';
 export const SCHEDULED_IMPORT_SETTING_NAME =
 	'woocommerce_analytics_scheduled_import';
 
-const filteredOrderStatuses = Object.keys( ORDER_STATUSES )
-	.filter( ( status ) => status !== 'refunded' )
-	.map( ( key ) => {
+const filteredOrderStatuses = Object.keys(ORDER_STATUSES)
+	.filter((status) => status !== 'refunded')
+	.map((key) => {
 		return {
 			value: key,
-			label: ORDER_STATUSES[ key ],
+			label: ORDER_STATUSES[key],
 			description: sprintf(
 				/* translators: %s: non-refunded order statuses to exclude */
-				__( 'Exclude the %s status from reports', 'woocommerce' ),
-				ORDER_STATUSES[ key ]
+				__('Exclude the %s status from reports', 'woocommerce'),
+				ORDER_STATUSES[key]
 			),
 		};
-	} );
+	});
 
 const unregisteredOrderStatuses = getAdminSetting(
 	'unregisteredOrderStatuses',
@@ -67,31 +67,31 @@ const unregisteredOrderStatuses = getAdminSetting(
 const orderStatusOptions = [
 	{
 		key: 'defaultStatuses',
-		options: filteredOrderStatuses.filter( ( status ) =>
-			DEFAULT_ORDER_STATUSES.includes( status.value )
+		options: filteredOrderStatuses.filter((status) =>
+			DEFAULT_ORDER_STATUSES.includes(status.value)
 		),
 	},
 	{
 		key: 'customStatuses',
-		label: __( 'Custom Statuses', 'woocommerce' ),
+		label: __('Custom Statuses', 'woocommerce'),
 		options: filteredOrderStatuses.filter(
-			( status ) => ! DEFAULT_ORDER_STATUSES.includes( status.value )
+			(status) => !DEFAULT_ORDER_STATUSES.includes(status.value)
 		),
 	},
 	{
 		key: 'unregisteredStatuses',
-		label: __( 'Unregistered Statuses', 'woocommerce' ),
-		options: Object.keys( unregisteredOrderStatuses ).map( ( key ) => {
+		label: __('Unregistered Statuses', 'woocommerce'),
+		options: Object.keys(unregisteredOrderStatuses).map((key) => {
 			return {
 				value: key,
 				label: key,
 				description: sprintf(
 					/* translators: %s: unregistered order statuses to exclude */
-					__( 'Exclude the %s status from reports', 'woocommerce' ),
+					__('Exclude the %s status from reports', 'woocommerce'),
 					key
 				),
 			};
-		} ),
+		}),
 	},
 ];
 
@@ -103,10 +103,10 @@ const orderStatusOptions = [
  */
 const baseConfig = {
 	woocommerce_excluded_report_order_statuses: {
-		label: __( 'Excluded statuses:', 'woocommerce' ),
+		label: __('Excluded statuses:', 'woocommerce'),
 		inputType: 'checkboxGroup',
 		options: orderStatusOptions,
-		helpText: interpolateComponents( {
+		helpText: interpolateComponents({
 			mixedString: __(
 				'Orders with these statuses are excluded from the totals in your reports. ' +
 					'The {{strong}}Refunded{{/strong}} status can not be excluded.',
@@ -115,11 +115,11 @@ const baseConfig = {
 			components: {
 				strong: <strong />,
 			},
-		} ),
+		}),
 		defaultValue: DEFAULT_EXCLUDED_STATUSES,
 	},
 	woocommerce_actionable_order_statuses: {
-		label: __( 'Actionable statuses:', 'woocommerce' ),
+		label: __('Actionable statuses:', 'woocommerce'),
 		inputType: 'checkboxGroup',
 		options: orderStatusOptions,
 		helpText: __(
@@ -131,7 +131,7 @@ const baseConfig = {
 	},
 	woocommerce_default_date_range: {
 		name: 'woocommerce_default_date_range',
-		label: __( 'Default date range:', 'woocommerce' ),
+		label: __('Default date range:', 'woocommerce'),
 		inputType: 'component',
 		component: DefaultDate,
 		helpText: __(
@@ -143,26 +143,26 @@ const baseConfig = {
 	},
 	woocommerce_date_type: {
 		name: 'woocommerce_date_type',
-		label: __( 'Date type:', 'woocommerce' ),
+		label: __('Date type:', 'woocommerce'),
 		inputType: 'select',
 		options: [
 			{
-				label: __( 'Select a date type', 'woocommerce' ),
+				label: __('Select a date type', 'woocommerce'),
 				value: '',
 				disabled: true,
 			},
 			{
-				label: __( 'Date created', 'woocommerce' ),
+				label: __('Date created', 'woocommerce'),
 				value: 'date_created',
 				key: 'date_created',
 			},
 			{
-				label: __( 'Date paid', 'woocommerce' ),
+				label: __('Date paid', 'woocommerce'),
 				value: 'date_paid',
 				key: 'date_paid',
 			},
 			{
-				label: __( 'Date completed', 'woocommerce' ),
+				label: __('Date completed', 'woocommerce'),
 				value: 'date_completed',
 				key: 'date_completed',
 			},
@@ -177,16 +177,16 @@ const baseConfig = {
 
 const importInterval = getAdminSetting(
 	'woocommerce_analytics_import_interval',
-	__( '12 hours', 'woocommerce' ) // Default value for the import interval.
+	__('12 hours', 'woocommerce') // Default value for the import interval.
 );
 
-baseConfig[ SCHEDULED_IMPORT_SETTING_NAME ] = {
+baseConfig[SCHEDULED_IMPORT_SETTING_NAME] = {
 	name: SCHEDULED_IMPORT_SETTING_NAME,
-	label: __( 'Updates:', 'woocommerce' ),
+	label: __('Updates:', 'woocommerce'),
 	inputType: 'radio',
 	options: [
 		{
-			label: __( 'Scheduled (recommended)', 'woocommerce' ),
+			label: __('Scheduled (recommended)', 'woocommerce'),
 			value: 'yes',
 			description: sprintf(
 				/* translators: %s: import interval, e.g. "12 hours" */
@@ -198,7 +198,7 @@ baseConfig[ SCHEDULED_IMPORT_SETTING_NAME ] = {
 			),
 		},
 		{
-			label: __( 'Immediately', 'woocommerce' ),
+			label: __('Immediately', 'woocommerce'),
 			value: 'no',
 			description: __(
 				'Updates as soon as new data is available. May slow busy stores.',
@@ -213,4 +213,4 @@ baseConfig[ SCHEDULED_IMPORT_SETTING_NAME ] = {
 	defaultValue: 'yes',
 };
 
-export const config = applyFilters( SETTINGS_FILTER, baseConfig );
+export const config = applyFilters(SETTINGS_FILTER, baseConfig);

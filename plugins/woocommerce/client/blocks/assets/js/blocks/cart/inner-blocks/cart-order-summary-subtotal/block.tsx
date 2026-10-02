@@ -8,27 +8,27 @@ import {
 	useOrderSummaryLoadingState,
 } from '@woocommerce/base-context/hooks';
 
-const Block = ( { className = '' }: { className?: string } ) => {
+const Block = ({ className = '' }: { className?: string }) => {
 	const { cartTotals } = useStoreCart();
 	const { isLoading } = useOrderSummaryLoadingState();
 
 	// Hide if there are no other totals to show.
 	if (
-		! parseFloat( cartTotals.total_fees ) &&
-		! parseFloat( cartTotals.total_discount ) &&
-		! parseFloat( cartTotals.total_shipping )
+		!parseFloat(cartTotals.total_fees) &&
+		!parseFloat(cartTotals.total_discount) &&
+		!parseFloat(cartTotals.total_shipping)
 	) {
 		return null;
 	}
 
-	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
+	const totalsCurrency = getCurrencyFromPriceResponse(cartTotals);
 
 	return (
-		<TotalsWrapper className={ className }>
+		<TotalsWrapper className={className}>
 			<Subtotal
-				currency={ totalsCurrency }
-				values={ cartTotals }
-				showSkeleton={ isLoading }
+				currency={totalsCurrency}
+				values={cartTotals}
+				showSkeleton={isLoading}
 			/>
 		</TotalsWrapper>
 	);

@@ -21,23 +21,21 @@ export default {
 			total_items_tax: '200',
 		},
 	},
-} as Meta< SubtotalProps >;
+} as Meta<SubtotalProps>;
 
 type StorybookSubtotalProps = SubtotalProps & { total_items: string };
 
-const Template: StoryFn< StorybookSubtotalProps > = ( args ) => {
+const Template: StoryFn<StorybookSubtotalProps> = (args) => {
 	const totalItems = args.total_items;
 	const values = {
 		total_items: totalItems,
 		total_items_tax: args.values.total_items_tax,
 	};
 
-	return (
-		<Subtotal { ...args } currency={ args.currency } values={ values } />
-	);
+	return <Subtotal {...args} currency={args.currency} values={values} />;
 };
 
-export const Default: StoryFn< StorybookSubtotalProps > = Template.bind( {} );
+export const Default: StoryFn<StorybookSubtotalProps> = Template.bind({});
 Default.args = {
 	currency: currencies.USD,
 	total_items: '1000',

@@ -10,11 +10,11 @@
  * manipulate the style using block attributes and inject the CSS
  * via `wp_add_inline_style()` function.
  */
-export const MiniCartInnerBlocksStyle = ( {
+export const MiniCartInnerBlocksStyle = ({
 	style,
 }: {
-	style: Record< string, unknown >;
-} ): JSX.Element => {
+	style: Record<string, unknown>;
+}): JSX.Element => {
 	const innerStyles = [
 		{
 			selector:
@@ -35,21 +35,21 @@ export const MiniCartInnerBlocksStyle = ( {
 			],
 		},
 	]
-		.map( ( { selector, properties } ) => {
+		.map(({ selector, properties }) => {
 			const rules = properties
-				.filter( ( { value } ) => value )
-				.map( ( { property, value } ) => `${ property }: ${ value };` )
-				.join( '' );
+				.filter(({ value }) => value)
+				.map(({ property, value }) => `${property}: ${value};`)
+				.join('');
 
-			if ( rules ) return `${ selector } { ${ rules } }`;
+			if (rules) return `${selector} { ${rules} }`;
 			return '';
-		} )
-		.join( '' )
+		})
+		.join('')
 		.trim();
 
-	if ( ! innerStyles ) {
+	if (!innerStyles) {
 		return <></>;
 	}
 
-	return <style>{ innerStyles } </style>;
+	return <style>{innerStyles} </style>;
 };

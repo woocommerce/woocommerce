@@ -12,27 +12,26 @@ export type TaskListMenuProps = {
 	hideTaskListText?: string;
 };
 
-export const TaskListMenu = ( { id, hideTaskListText }: TaskListMenuProps ) => {
-	const { hideTaskList } = useDispatch( onboardingStore );
-	const label = __( 'Task list options', 'woocommerce' );
+export const TaskListMenu = ({ id, hideTaskListText }: TaskListMenuProps) => {
+	const { hideTaskList } = useDispatch(onboardingStore);
+	const label = __('Task list options', 'woocommerce');
 
 	return (
 		<div className="woocommerce-card__menu woocommerce-card__header-item">
 			<DropdownMenu
-				controls={ [
+				controls={[
 					{
 						title:
-							hideTaskListText ||
-							__( 'Hide this', 'woocommerce' ),
-						onClick: () => hideTaskList( id ),
+							hideTaskListText || __('Hide this', 'woocommerce'),
+						onClick: () => hideTaskList(id),
 					},
-				] }
-				icon={ moreVertical }
-				label={ label }
-				popoverProps={ { placement: 'bottom-end' } }
-				toggleProps={ {
+				]}
+				icon={moreVertical}
+				label={label}
+				popoverProps={{ placement: 'bottom-end' }}
+				toggleProps={{
 					className: 'woocommerce-ellipsis-menu__toggle',
-				} }
+				}}
 			/>
 		</div>
 	);

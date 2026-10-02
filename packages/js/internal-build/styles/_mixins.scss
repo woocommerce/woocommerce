@@ -1,14 +1,14 @@
 // Rem output with px fallback
-@mixin font-size( $sizeValue: 16, $lineHeight: false ) {
+@mixin font-size($sizeValue: 16, $lineHeight: false) {
 	font-size: $sizeValue + px;
-	font-size: math.div( $sizeValue, 16 ) + rem;
-	@if ( $lineHeight ) {
+	font-size: math.div($sizeValue, 16) + rem;
+	@if ($lineHeight) {
 		line-height: $lineHeight;
 	}
 }
 
-@function url-friendly-colour( $color ) {
-	@return '%23' + str-slice( '#{ $color }', 2, -1 );
+@function url-friendly-colour($color) {
+	@return "%23" + str-slice("#{ $color }", 2, -1);
 }
 
 @mixin hover-state {
@@ -20,25 +20,25 @@
 }
 
 // Adds animation to placeholder section
-@mixin placeholder( $lighten-percentage: 30% ) {
+@mixin placeholder($lighten-percentage: 30%) {
 	animation: loading-fade 1.6s ease-in-out infinite;
 	background-color: $gray-100;
 	color: transparent;
 
 	&::after {
-		content: '\00a0';
+		content: "\00a0";
 	}
 
-	@media screen and ( prefers-reduced-motion: reduce ) {
+	@media screen and (prefers-reduced-motion: reduce) {
 		animation: none;
 	}
 }
 
 // Adds animation to transforms
-@mixin animate-transform( $duration: 0.2s ) {
+@mixin animate-transform($duration: 0.2s) {
 	transition: transform ease $duration;
 
-	@media screen and ( prefers-reduced-motion: reduce ) {
+	@media screen and (prefers-reduced-motion: reduce) {
 		transition: none;
 	}
 }
@@ -105,7 +105,9 @@
 @mixin button-style__focus-active() {
 	background-color: $studio-white;
 	color: $gray-900;
-	box-shadow: inset 0 0 0 1px $gray-700, inset 0 0 0 2px $studio-white;
+	box-shadow:
+		inset 0 0 0 1px $gray-700,
+		inset 0 0 0 2px $studio-white;
 
 	// Windows High Contrast mode will show this outline, but not the box-shadow.
 	outline: 2px solid transparent;
@@ -113,17 +115,17 @@
 }
 
 /* stylelint-disable block-closing-brace-newline-after */
-@mixin reduce-motion( $property: '' ) {
-	@if $property == 'transition' {
-		@media ( prefers-reduced-motion: reduce ) {
+@mixin reduce-motion($property: "") {
+	@if $property == "transition" {
+		@media (prefers-reduced-motion: reduce) {
 			transition-duration: 0s;
 		}
-	} @else if $property == 'animation' {
-		@media ( prefers-reduced-motion: reduce ) {
+	} @else if $property == "animation" {
+		@media (prefers-reduced-motion: reduce) {
 			animation-duration: 1ms;
 		}
 	} @else {
-		@media ( prefers-reduced-motion: reduce ) {
+		@media (prefers-reduced-motion: reduce) {
 			transition-duration: 0s;
 			animation-duration: 1ms;
 		}
@@ -133,7 +135,9 @@
 
 // Gutenberg Switch.
 @mixin switch-style__focus-active() {
-	box-shadow: 0 0 0 2px $studio-white, 0 0 0 3px $gray-700;
+	box-shadow:
+		0 0 0 2px $studio-white,
+		0 0 0 3px $gray-700;
 
 	// Windows High Contrast mode will show this outline, but not the box-shadow.
 	outline: 2px solid transparent;
@@ -141,13 +145,13 @@
 }
 
 // Sets positions for children of grid elements
-@mixin set-grid-item-position( $wrap-after, $number-of-items ) {
+@mixin set-grid-item-position($wrap-after, $number-of-items) {
 	@for $i from 1 through $number-of-items {
-		&:nth-child( #{$i} ) {
-			grid-column-start: #{( $i - 1 ) % $wrap-after + 1};
-			grid-column-end: #{( $i - 1 ) % $wrap-after + 2};
-			grid-row-start: #{floor( math.div( $i - 1, $wrap-after ) ) + 1};
-			grid-row-end: #{floor( math.div( $i - 1, $wrap-after ) ) + 2};
+		&:nth-child(#{$i}) {
+			grid-column-start: #{($i - 1) % $wrap-after + 1};
+			grid-column-end: #{($i - 1) % $wrap-after + 2};
+			grid-row-start: #{floor(math.div($i - 1, $wrap-after)) + 1};
+			grid-row-end: #{floor(math.div($i - 1, $wrap-after)) + 2};
 		}
 	}
 }
@@ -155,8 +159,8 @@
 // Hide an element from sighted users, but available to screen reader users.
 // @deprecated in favor of screen-reader-only
 @mixin visually-hidden() {
-	clip: rect( 1px, 1px, 1px, 1px );
-	clip-path: inset( 50% );
+	clip: rect(1px, 1px, 1px, 1px);
+	clip-path: inset(50%);
 	height: 1px;
 	width: 1px;
 	margin: -1px;
@@ -173,7 +177,7 @@
 	padding: 0;
 	margin: -1px;
 	overflow: hidden;
-	clip: rect( 0, 0, 0, 0 );
+	clip: rect(0, 0, 0, 0);
 	white-space: nowrap;
 	border-width: 0;
 }
@@ -201,11 +205,11 @@
 }
 
 // Create a string-repeat function
-@function str-repeat( $character, $n ) {
+@function str-repeat($character, $n) {
 	@if $n == 0 {
-		@return '';
+		@return "";
 	}
-	$c: '';
+	$c: "";
 	@for $i from 1 through $n {
 		$c: $c + $character;
 	}

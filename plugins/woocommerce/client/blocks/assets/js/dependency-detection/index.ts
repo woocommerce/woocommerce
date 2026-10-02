@@ -37,13 +37,13 @@ interface PendingCheck {
 	requiredDependencyHandle: WcDependencyHandle;
 }
 
-( function () {
+(function () {
 	// Set up a placeholder that will be replaced with the real proxy later.
 	// This ensures we capture window.wc before any WC scripts set it.
-	let originalWc: Record< string, unknown > = window.wc || {};
+	let originalWc: Record<string, unknown> = window.wc || {};
 	let scriptRegistry: ScriptRegistry = {};
 	let registryLoaded = false;
-	const warnedScripts: Record< string, boolean > = {};
+	const warnedScripts: Record<string, boolean> = {};
 	let pendingChecks: PendingCheck[] = []; // Queue checks until registry is loaded
 
 	// Maps window.wc.* property names to their required script handles.
@@ -61,17 +61,14 @@ interface PendingCheck {
 	 * @return The caller script URL or null.
 	 */
 	function getCallerScriptUrl(): string | null {
-		const src = ( document.currentScript as HTMLScriptElement | null )?.src;
-		if ( src && typeof src === 'string' ) {
-			return src.replace( /\?.*$/, '' );
+		const src = (document.currentScript as HTMLScriptElement | null)?.src;
+		if (src && typeof src === 'string') {
+			return src.replace(/\?.*$/, '');
 		}
 
 		// Fallback for scenarios when currentScript isn't available
 		const stack = new Error().stack;
-		return parseStackForCallerUrl(
-			stack ?? null,
-			window.location.pathname
-		);
+		return parseStackForCallerUrl(stack ?? null, window.location.pathname);
 	}
 
 	/**
@@ -86,10 +83,10 @@ interface PendingCheck {
 		wcGlobalKey: WcGlobalKey,
 		requiredDependencyHandle: WcDependencyHandle
 	): void {
-		const warningKey = ( callerUrl || 'inline' ) + ':' + wcGlobalKey;
+		const warningKey = (callerUrl || 'inline') + ':' + wcGlobalKey;
 
 		// Don't warn twice for the same script + property combination.
-		if ( warnedScripts[ warningKey ] ) {
+		if (warnedScripts[warningKey]) {
 			return;
 		}
 
@@ -101,10 +98,10 @@ interface PendingCheck {
 			getFilename
 		);
 
-		if ( warning ) {
+		if (warning) {
 			// eslint-disable-next-line no-console
-			console.warn( warning.message );
-			warnedScripts[ warningKey ] = true;
+			console.warn(warning.message);
+			warnedScripts[warningKey] = true;
 		}
 	}
 
@@ -122,7 +119,7 @@ interface PendingCheck {
 	): void {
 		// For null/unknown callerUrl, warn immediately - no registry needed.
 		// We already know it's an inline or unknown script.
-		if ( ! callerUrl ) {
+		if (!callerUrl) {
 			warnIfMissingDependency(
 				callerUrl,
 				wcGlobalKey,
@@ -132,17 +129,17 @@ interface PendingCheck {
 		}
 
 		// Skip WooCommerce's own scripts - they manage their own dependencies.
-		if ( isWooCommerceScript( callerUrl, WC_PLUGIN_URL ) ) {
+		if (isWooCommerceScript(callerUrl, WC_PLUGIN_URL)) {
 			return;
 		}
 
 		// If registry not loaded yet, queue the check for later.
-		if ( ! registryLoaded ) {
-			pendingChecks.push( {
+		if (!registryLoaded) {
+			pendingChecks.push({
 				callerUrl,
 				wcGlobalKey,
 				requiredDependencyHandle,
-			} );
+			});
 			return;
 		}
 
@@ -162,11 +159,11 @@ interface PendingCheck {
 	);
 
 	// Define window.wc as a getter/setter to maintain the proxy.
-	Object.defineProperty( window, 'wc', {
+	Object.defineProperty(window, 'wc', {
 		get() {
 			return wcProxy;
 		},
-		set( newValue: Record< string, unknown > ) {
+		set(newValue: Record<string, unknown>) {
 			// When WC scripts set window.wc, wrap the new value.
 			// Handle null/undefined to prevent Proxy TypeError.
 			originalWc = newValue || {};
@@ -179,7 +176,7 @@ interface PendingCheck {
 		},
 		configurable: true,
 		enumerable: true,
-	} );
+	});
 
 	/**
 	 * Update the script registry. Called by WooCommerce PHP to provide
@@ -190,14 +187,14 @@ interface PendingCheck {
 	 *
 	 * @internal
 	 */
-	( window.wc as Record< string, unknown > ).wcUpdateDependencyRegistry =
-		function ( registry: ScriptRegistry ): void {
+	(window.wc as Record<string, unknown>).wcUpdateDependencyRegistry =
+		function (registry: ScriptRegistry): void {
 			scriptRegistry = registry || {};
 			registryLoaded = true;
 
 			// Process any pending checks now that we have the registry.
-			for ( let i = 0; i < pendingChecks.length; i++ ) {
-				const check = pendingChecks[ i ];
+			for (let i = 0; i < pendingChecks.length; i++) {
+				const check = pendingChecks[i];
 				warnIfMissingDependency(
 					check.callerUrl,
 					check.wcGlobalKey,
@@ -211,4 +208,4 @@ interface PendingCheck {
 	console.info(
 		'[WooCommerce] Dependency detection enabled. Warnings will be shown for scripts that access wc.* globals without proper dependencies.'
 	);
-} )();
+})();

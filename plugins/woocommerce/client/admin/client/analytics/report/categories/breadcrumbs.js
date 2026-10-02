@@ -9,66 +9,62 @@ import { Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 
 export default class CategoryBreadcrumbs extends Component {
-	getCategoryAncestorIds( category, categories ) {
+	getCategoryAncestorIds(category, categories) {
 		const ancestors = [];
 		let parent = category?.parent;
 
-		while ( parent ) {
-			const parentCategory = categories.get( parent );
-			if ( ! parentCategory ) break;
-			ancestors.unshift( parent );
+		while (parent) {
+			const parentCategory = categories.get(parent);
+			if (!parentCategory) break;
+			ancestors.unshift(parent);
 			parent = parentCategory.parent;
 		}
 
 		return ancestors;
 	}
 
-	getCategoryAncestors( category, categories ) {
-		const ancestorIds = this.getCategoryAncestorIds( category, categories );
+	getCategoryAncestors(category, categories) {
+		const ancestorIds = this.getCategoryAncestorIds(category, categories);
 
-		if ( ! ancestorIds.length ) {
+		if (!ancestorIds.length) {
 			return;
 		}
-		if ( ancestorIds.length === 1 ) {
-			return categories.get( first( ancestorIds ) ).name + ' › ';
+		if (ancestorIds.length === 1) {
+			return categories.get(first(ancestorIds)).name + ' › ';
 		}
-		if ( ancestorIds.length === 2 ) {
+		if (ancestorIds.length === 2) {
 			return (
-				categories.get( first( ancestorIds ) ).name +
+				categories.get(first(ancestorIds)).name +
 				' › ' +
-				categories.get( last( ancestorIds ) ).name +
+				categories.get(last(ancestorIds)).name +
 				' › '
 			);
 		}
 		return (
-			categories.get( first( ancestorIds ) ).name +
+			categories.get(first(ancestorIds)).name +
 			' … ' +
-			categories.get( last( ancestorIds ) ).name +
+			categories.get(last(ancestorIds)).name +
 			' › '
 		);
 	}
 
 	render() {
 		const { categories, category, query } = this.props;
-		const persistedQuery = getPersistedQuery( query );
+		const persistedQuery = getPersistedQuery(query);
 
 		return category ? (
 			<div className="woocommerce-table__breadcrumbs">
-				{ decodeEntities(
-					this.getCategoryAncestors( category, categories )
-				) }
+				{decodeEntities(
+					this.getCategoryAncestors(category, categories)
+				)}
 				<Link
-					href={ getNewPath(
-						persistedQuery,
-						'/analytics/categories',
-						{
-							filter: 'single_category',
-							categories: category.id,
-						}
-					) }
+					href={getNewPath(persistedQuery, '/analytics/categories', {
+						filter: 'single_category',
+						categories: category.id,
+					})}
 					type="wc-admin"
 				>
-					{ decodeEntities( category.name ) }
+					{decodeEntities(category.name)}
 				</Link>
 			</div>
 		) : (

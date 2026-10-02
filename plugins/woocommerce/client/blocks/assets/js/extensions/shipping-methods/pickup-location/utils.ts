@@ -17,17 +17,17 @@ import type {
 export const indexLocationsById = (
 	locations: PickupLocation[]
 ): SortablePickupLocation[] => {
-	return locations.map( ( value, index ) => {
+	return locations.map((value, index) => {
 		return {
 			...value,
-			id: cleanForSlug( value.name ) + '-' + index,
+			id: cleanForSlug(value.name) + '-' + index,
 		};
-	} );
+	});
 };
 
 export const defaultSettings = {
 	enabled: false,
-	title: __( 'Pickup', 'woocommerce' ),
+	title: __('Pickup', 'woocommerce'),
 	tax_status: 'taxable',
 	cost: '',
 };
@@ -65,62 +65,59 @@ export const getInitialSettings = (): ShippingMethodSettings => {
 };
 
 export const getInitialPickupLocations = (): SortablePickupLocation[] =>
-	indexLocationsById( hydratedScreenSettings.pickupLocations || [] );
+	indexLocationsById(hydratedScreenSettings.pickupLocations || []);
 
 export const readOnlySettings =
 	hydratedScreenSettings.readonlySettings || defaultReadyOnlySettings;
 
-export const countries = getSetting< Record< string, string > >(
-	'countries',
-	[]
-);
-export const states = getSetting< Record< string, Record< string, string > > >(
+export const countries = getSetting<Record<string, string>>('countries', []);
+export const states = getSetting<Record<string, Record<string, string>>>(
 	'countryStates',
 	[]
 );
-export const getUserFriendlyAddress = ( address: unknown ) => {
-	const updatedAddress = isObject( address ) && {
+export const getUserFriendlyAddress = (address: unknown) => {
+	const updatedAddress = isObject(address) && {
 		...address,
 		country:
-			typeof address.country === 'string' && countries[ address.country ],
+			typeof address.country === 'string' && countries[address.country],
 		state:
 			typeof address.country === 'string' &&
 			typeof address.state === 'string' &&
-			states[ address.country ]?.[ address.state ]
-				? states[ address.country ][ address.state ]
+			states[address.country]?.[address.state]
+				? states[address.country][address.state]
 				: address.state,
 	};
 
-	return Object.values( updatedAddress )
-		.filter( ( value ) => value !== '' )
-		.join( ', ' );
+	return Object.values(updatedAddress)
+		.filter((value) => value !== '')
+		.join(', ');
 };
 
 // Outputs the list of countries and states in a single dropdown select.
 const countryStateDropdownOptions = () => {
-	const countryStateOptions = Object.keys( countries ).map( ( country ) => {
-		const countryStates = states[ country ] || {};
+	const countryStateOptions = Object.keys(countries).map((country) => {
+		const countryStates = states[country] || {};
 
-		if ( Object.keys( countryStates ).length === 0 ) {
+		if (Object.keys(countryStates).length === 0) {
 			return {
 				options: [
 					{
 						value: country,
-						label: countries[ country ],
+						label: countries[country],
 					},
 				],
 			};
 		}
 
-		const stateOptions = Object.keys( countryStates ).map( ( state ) => ( {
-			value: `${ country }:${ state }`,
-			label: `${ countries[ country ] } — ${ countryStates[ state ] }`,
-		} ) );
+		const stateOptions = Object.keys(countryStates).map((state) => ({
+			value: `${country}:${state}`,
+			label: `${countries[country]} — ${countryStates[state]}`,
+		}));
 		return {
-			label: countries[ country ],
-			options: [ ...stateOptions ],
+			label: countries[country],
+			options: [...stateOptions],
 		};
-	} );
+	});
 	return {
 		options: countryStateOptions,
 	};

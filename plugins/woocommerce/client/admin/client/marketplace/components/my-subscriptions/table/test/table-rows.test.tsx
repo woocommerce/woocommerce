@@ -4,14 +4,14 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-jest.mock( '@woocommerce/tracks', () => ( {
+jest.mock('@woocommerce/tracks', () => ({
 	recordEvent: jest.fn(),
 	queueRecordEvent: jest.fn(),
-} ) );
+}));
 
-jest.mock( '../../../../../utils/admin-settings', () => ( {
-	getAdminSetting: jest.fn( () => ( { wooUpdateManagerActive: true } ) ),
-} ) );
+jest.mock('../../../../../utils/admin-settings', () => ({
+	getAdminSetting: jest.fn(() => ({ wooUpdateManagerActive: true })),
+}));
 
 /**
  * Internal dependencies
@@ -51,42 +51,42 @@ const subscription = {
 	},
 } as unknown as Subscription;
 
-describe( 'subscriptionRow', () => {
-	it( 'gives installed rows one cell per header, including automatic updates', () => {
+describe('subscriptionRow', () => {
+	it('gives installed rows one cell per header, including automatic updates', () => {
 		render(
 			<InstalledSubscriptionsTable
-				rows={ [ subscriptionRow( subscription, 'installed' ) ] }
-				isLoading={ false }
+				rows={[subscriptionRow(subscription, 'installed')]}
+				isLoading={false}
 			/>
 		);
 
-		expect( screen.getAllByRole( 'cell' ) ).toHaveLength(
-			screen.getAllByRole( 'columnheader' ).length
+		expect(screen.getAllByRole('cell')).toHaveLength(
+			screen.getAllByRole('columnheader').length
 		);
 		expect(
-			screen.getByRole( 'columnheader', { name: 'Automatic updates' } )
+			screen.getByRole('columnheader', { name: 'Automatic updates' })
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole( 'button', { name: 'Enable auto-updates' } )
+			screen.getByRole('button', { name: 'Enable auto-updates' })
 		).toBeInTheDocument();
-	} );
+	});
 
-	it( 'gives available rows one cell per header, without automatic updates', () => {
+	it('gives available rows one cell per header, without automatic updates', () => {
 		render(
 			<AvailableSubscriptionsTable
-				rows={ [ subscriptionRow( subscription, 'available' ) ] }
-				isLoading={ false }
+				rows={[subscriptionRow(subscription, 'available')]}
+				isLoading={false}
 			/>
 		);
 
-		expect( screen.getAllByRole( 'cell' ) ).toHaveLength(
-			screen.getAllByRole( 'columnheader' ).length
+		expect(screen.getAllByRole('cell')).toHaveLength(
+			screen.getAllByRole('columnheader').length
 		);
 		expect(
-			screen.queryByRole( 'columnheader', { name: 'Automatic updates' } )
+			screen.queryByRole('columnheader', { name: 'Automatic updates' })
 		).not.toBeInTheDocument();
 		expect(
-			screen.queryByRole( 'button', { name: 'Enable auto-updates' } )
+			screen.queryByRole('button', { name: 'Enable auto-updates' })
 		).not.toBeInTheDocument();
-	} );
-} );
+	});
+});

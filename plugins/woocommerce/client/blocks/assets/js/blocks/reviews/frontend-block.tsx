@@ -20,49 +20,46 @@ import { ReviewBlockAttributes } from './attributes';
 interface FrontendBlockProps {
 	attributes: ReviewBlockAttributes;
 	onAppendReviews: MouseEventHandler;
-	onChangeOrderby: ChangeEventHandler< HTMLSelectElement >;
+	onChangeOrderby: ChangeEventHandler<HTMLSelectElement>;
 	sortSelectValue: 'most-recent' | 'highest-rating' | 'lowest-rating';
 	reviews: Review[];
 	totalReviews: number;
 }
 
-const FrontendBlock = ( {
+const FrontendBlock = ({
 	attributes,
 	onAppendReviews,
 	onChangeOrderby,
 	reviews,
 	sortSelectValue,
 	totalReviews,
-}: FrontendBlockProps ) => {
-	if ( reviews.length === 0 ) {
+}: FrontendBlockProps) => {
+	if (reviews.length === 0) {
 		return null;
 	}
 
-	const reviewRatingsEnabled = getSetting< boolean >(
+	const reviewRatingsEnabled = getSetting<boolean>(
 		'reviewRatingsEnabled',
 		true
 	);
 
 	return (
 		<>
-			{ attributes.showOrderby && reviewRatingsEnabled && (
+			{attributes.showOrderby && reviewRatingsEnabled && (
 				<ReviewSortSelect
-					value={ sortSelectValue }
-					onChange={ onChangeOrderby }
+					value={sortSelectValue}
+					onChange={onChangeOrderby}
 				/>
-			) }
-			<ReviewList attributes={ attributes } reviews={ reviews } />
-			{ attributes.showLoadMore && totalReviews > reviews.length && (
+			)}
+			<ReviewList attributes={attributes} reviews={reviews} />
+			{attributes.showLoadMore && totalReviews > reviews.length && (
 				<LoadMoreButton
-					onClick={ onAppendReviews }
-					screenReaderLabel={ __(
-						'Load more reviews',
-						'woocommerce'
-					) }
+					onClick={onAppendReviews}
+					screenReaderLabel={__('Load more reviews', 'woocommerce')}
 				/>
-			) }
+			)}
 		</>
 	);
 };
 
-export default withReviews( FrontendBlock );
+export default withReviews(FrontendBlock);

@@ -9,14 +9,14 @@ import { getBlockTypes, Block } from '@wordpress/blocks';
 export function getAllowedBlockNames(): string[] {
 	try {
 		return getBlockTypes()
-			.filter( ( block: Block ) => {
+			.filter((block: Block) => {
 				// @ts-expect-error: 'email' is a custom property
 				return block.supports?.email === true;
-			} )
-			.map( ( block ) => block.name );
-	} catch ( error ) {
+			})
+			.map((block) => block.name);
+	} catch (error) {
 		// eslint-disable-next-line no-console
-		console.error( 'Failed to get allowed block names:', error );
+		console.error('Failed to get allowed block names:', error);
 		return [];
 	}
 }

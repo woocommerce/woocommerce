@@ -17,15 +17,15 @@ interface Props {
 	productCountVisibility?: productCountVisibilityType;
 }
 
-const QuantityBadge = ( {
+const QuantityBadge = ({
 	count = 0,
 	icon,
 	iconColor,
 	productCountColor,
 	productCountVisibility,
-}: Props ): JSX.Element => {
-	function getIcon( iconName?: 'cart' | 'bag' | 'bag-alt' ) {
-		switch ( iconName ) {
+}: Props): JSX.Element => {
+	function getIcon(iconName?: 'cart' | 'bag' | 'bag-alt') {
+		switch (iconName) {
 			case 'cart':
 				return cartOutline;
 			case 'bag':
@@ -39,7 +39,7 @@ const QuantityBadge = ( {
 
 	const shouldDisplayCount =
 		productCountVisibility === 'always' ||
-		( productCountVisibility === 'greater_than_zero' && count > 0 );
+		(productCountVisibility === 'greater_than_zero' && count > 0);
 
 	const displayCount = shouldDisplayCount ? count : '';
 
@@ -47,18 +47,18 @@ const QuantityBadge = ( {
 		<span className="wc-block-mini-cart__quantity-badge">
 			<Icon
 				className="wc-block-mini-cart__icon"
-				color={ iconColor?.color }
-				size={ 20 }
-				icon={ getIcon( icon ) }
+				color={iconColor?.color}
+				size={20}
+				icon={getIcon(icon)}
 			/>
-			{ shouldDisplayCount && (
+			{shouldDisplayCount && (
 				<span
 					className="wc-block-mini-cart__badge"
-					style={ { background: productCountColor?.color } }
+					style={{ background: productCountColor?.color }}
 				>
-					{ displayCount }
+					{displayCount}
 				</span>
-			) }
+			)}
 		</span>
 	);
 };

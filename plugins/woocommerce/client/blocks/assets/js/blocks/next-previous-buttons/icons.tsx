@@ -15,13 +15,13 @@ export const Icon = () => (
 	</svg>
 );
 
-export const PrevIcon = ( { className }: { className: string } ) => (
+export const PrevIcon = ({ className }: { className: string }) => (
 	<svg
 		xmlns="http://www.w3.org/2000/svg"
 		width="8"
 		height="12"
 		fill="none"
-		className={ className }
+		className={className}
 	>
 		<path
 			fill="currentColor"
@@ -32,13 +32,13 @@ export const PrevIcon = ( { className }: { className: string } ) => (
 	</svg>
 );
 
-export const NextIcon = ( { className }: { className: string } ) => (
+export const NextIcon = ({ className }: { className: string }) => (
 	<svg
 		xmlns="http://www.w3.org/2000/svg"
 		width="8"
 		height="12"
 		fill="none"
-		className={ className }
+		className={className}
 	>
 		<path
 			fill="currentColor"

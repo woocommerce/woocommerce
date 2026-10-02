@@ -18,6 +18,6 @@ const blockConfig = {
 	save: Save,
 };
 
-registerProductBlockType( blockConfig, {
+registerProductBlockType(blockConfig, {
 	isAvailableOnPostEditor: true,
-} );
+});

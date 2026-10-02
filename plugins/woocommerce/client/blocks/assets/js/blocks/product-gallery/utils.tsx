@@ -9,7 +9,7 @@ export const checkOverflow = (
 	// This is a threshold to allow for little remaining space when scrolling.
 	// Browsers may return fractions of a pixel, so we need to account for that.
 	const overflowThreshold = 3;
-	if ( ! scrollableElement ) {
+	if (!scrollableElement) {
 		return {
 			top: false,
 			bottom: false,

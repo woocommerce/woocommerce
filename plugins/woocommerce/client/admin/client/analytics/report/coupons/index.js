@@ -21,11 +21,11 @@ class CouponsReport extends Component {
 		const isCompareView =
 			query.filter === 'compare-coupons' &&
 			query.coupons &&
-			query.coupons.split( ',' ).length > 1;
+			query.coupons.split(',').length > 1;
 
 		const mode = isCompareView ? 'item-comparison' : 'time-comparison';
 		/* translators: %d: number of coupons */
-		const itemsLabel = __( '%d coupons', 'woocommerce' );
+		const itemsLabel = __('%d coupons', 'woocommerce');
 
 		return {
 			itemsLabel,
@@ -41,44 +41,44 @@ class CouponsReport extends Component {
 			...query,
 		};
 
-		if ( mode === 'item-comparison' ) {
+		if (mode === 'item-comparison') {
 			chartQuery.segmentby = 'coupon';
 		}
 
 		return (
 			<Fragment>
 				<ReportHeader
-					query={ query }
-					path={ path }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
+					query={query}
+					path={path}
+					filters={filters}
+					advancedFilters={advancedFilters}
 					report="coupons"
 				/>
 				<ReportSummary
-					charts={ charts }
+					charts={charts}
 					endpoint="coupons"
-					query={ chartQuery }
-					selectedChart={ getSelectedChart( query.chart, charts ) }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
+					query={chartQuery}
+					selectedChart={getSelectedChart(query.chart, charts)}
+					filters={filters}
+					advancedFilters={advancedFilters}
 				/>
 				<ReportChart
-					charts={ charts }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
-					mode={ mode }
+					charts={charts}
+					filters={filters}
+					advancedFilters={advancedFilters}
+					mode={mode}
 					endpoint="coupons"
-					path={ path }
-					query={ chartQuery }
-					isRequesting={ isRequesting }
-					itemsLabel={ itemsLabel }
-					selectedChart={ getSelectedChart( query.chart, charts ) }
+					path={path}
+					query={chartQuery}
+					isRequesting={isRequesting}
+					itemsLabel={itemsLabel}
+					selectedChart={getSelectedChart(query.chart, charts)}
 				/>
 				<CouponsReportTable
-					isRequesting={ isRequesting }
-					query={ query }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
+					isRequesting={isRequesting}
+					query={query}
+					filters={filters}
+					advancedFilters={advancedFilters}
 				/>
 			</Fragment>
 		);

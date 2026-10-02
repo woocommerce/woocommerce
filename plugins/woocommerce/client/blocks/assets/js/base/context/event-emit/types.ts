@@ -3,7 +3,7 @@ export enum ACTION {
 	REMOVE_EVENT_CALLBACK = 'remove_event_callback',
 }
 
-export type ActionCallbackType = ( ...args: unknown[] ) => unknown;
+export type ActionCallbackType = (...args: unknown[]) => unknown;
 
 export type ActionType = {
 	type: ACTION;
@@ -14,5 +14,5 @@ export type ActionType = {
 };
 
 export type ObserverType = { priority: number; callback: ActionCallbackType };
-export type ObserversType = Map< string, ObserverType >;
-export type EventObserversType = Record< string, ObserversType >;
+export type ObserversType = Map<string, ObserverType>;
+export type EventObserversType = Record<string, ObserversType>;

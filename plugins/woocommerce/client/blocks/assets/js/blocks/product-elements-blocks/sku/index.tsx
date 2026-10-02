@@ -10,10 +10,10 @@ import { barcode } from '@woocommerce/icons';
  */
 import metadata from './block.json';
 import edit from './edit';
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	icon: (
 		<Icon
-			icon={ barcode }
+			icon={barcode}
 			className="wc-block-editor-components-block-icon"
 		/>
 	),
@@ -21,4 +21,4 @@ registerBlockType( metadata, {
 	save() {
 		return null;
 	},
-} );
+});

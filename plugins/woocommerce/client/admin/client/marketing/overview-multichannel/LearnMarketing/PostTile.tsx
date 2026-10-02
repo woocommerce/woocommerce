@@ -13,36 +13,36 @@ type PostTileProps = {
 	post: Post;
 };
 
-export const PostTile = ( { post }: PostTileProps ) => {
+export const PostTile = ({ post }: PostTileProps) => {
 	return (
 		<a
 			className="woocommerce-marketing-learn-marketing-card__post"
-			href={ post.link }
+			href={post.link}
 			target="_blank"
 			rel="noopener noreferrer"
-			onClick={ () => {
-				recordEvent( 'marketing_knowledge_article', {
+			onClick={() => {
+				recordEvent('marketing_knowledge_article', {
 					title: post.title,
-				} );
-			} }
+				});
+			}}
 		>
 			<div className="woocommerce-marketing-learn-marketing-card__post-img">
-				{ !! post.image && <img src={ post.image } alt="" /> }
+				{!!post.image && <img src={post.image} alt="" />}
 			</div>
 			<div className="woocommerce-marketing-learn-marketing-card__post-title">
-				{ post.title }
+				{post.title}
 			</div>
 			<div className="woocommerce-marketing-learn-marketing-card__post-description">
 				{
 					// translators: %s: author's name.
-					sprintf( __( 'By %s', 'woocommerce' ), post.author_name )
+					sprintf(__('By %s', 'woocommerce'), post.author_name)
 				}
-				{ !! post.author_avatar && (
+				{!!post.author_avatar && (
 					<img
-						src={ post.author_avatar.replace( 's=96', 's=32' ) }
+						src={post.author_avatar.replace('s=96', 's=32')}
 						alt=""
 					/>
-				) }
+				)}
 			</div>
 		</a>
 	);

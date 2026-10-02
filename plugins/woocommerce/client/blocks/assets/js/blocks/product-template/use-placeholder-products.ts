@@ -21,8 +21,8 @@ const PLACEHOLDER_PRICE = '9.99';
 const getPlaceholderPriceMinorUnits = () =>
 	String(
 		Math.round(
-			parseFloat( PLACEHOLDER_PRICE ) *
-				Math.pow( 10, SITE_CURRENCY.minorUnit )
+			parseFloat(PLACEHOLDER_PRICE) *
+				Math.pow(10, SITE_CURRENCY.minorUnit)
 		)
 	);
 
@@ -31,8 +31,8 @@ const getPlaceholderPriceMinorUnits = () =>
  * Used by ProductDataContextProvider so child blocks (price, image, button)
  * can render previews without fetching from the Store API.
  */
-const createPlaceholderResponseItem = ( id: number ): ProductResponseItem => {
-	const placeholderName = __( 'Product name', 'woocommerce' );
+const createPlaceholderResponseItem = (id: number): ProductResponseItem => {
+	const placeholderName = __('Product name', 'woocommerce');
 	const priceInMinorUnits = getPlaceholderPriceMinorUnits();
 
 	return {
@@ -43,7 +43,7 @@ const createPlaceholderResponseItem = ( id: number ): ProductResponseItem => {
 		variation: '',
 		permalink: '',
 		sku: '',
-		slug: `placeholder-product-${ id }`,
+		slug: `placeholder-product-${id}`,
 		short_description: '',
 		description: '',
 		on_sale: false,
@@ -83,13 +83,13 @@ const createPlaceholderResponseItem = ( id: number ): ProductResponseItem => {
 		regular_price: PLACEHOLDER_PRICE,
 		sale_price: '',
 		add_to_cart: {
-			text: __( 'Add to cart', 'woocommerce' ),
-			description: __( 'Add to cart', 'woocommerce' ),
+			text: __('Add to cart', 'woocommerce'),
+			description: __('Add to cart', 'woocommerce'),
 			url: '',
 			minimum: 1,
 			maximum: 99,
 			multiple_of: 1,
-			single_text: __( 'Add to cart', 'woocommerce' ),
+			single_text: __('Add to cart', 'woocommerce'),
 		},
 		grouped_products: [],
 	};
@@ -105,37 +105,37 @@ const createPlaceholderResponseItem = ( id: number ): ProductResponseItem => {
  * - ('postType', 'product') for core post-title block (uses useEntityProp)
  * - ('root', 'product') for WooCommerce child blocks (uses useProduct hook)
  */
-export const usePlaceholderProducts = ( {
+export const usePlaceholderProducts = ({
 	isPreviewWithNoProducts,
 	count,
 }: {
 	isPreviewWithNoProducts: boolean;
 	count: number;
-} ) => {
-	const [ entitiesReady, setEntitiesReady ] = useState( false );
+}) => {
+	const [entitiesReady, setEntitiesReady] = useState(false);
 
-	const placeholderIds = useMemo( () => {
-		if ( ! isPreviewWithNoProducts ) {
+	const placeholderIds = useMemo(() => {
+		if (!isPreviewWithNoProducts) {
 			return [];
 		}
-		const safeCount = Math.max( 1, Math.min( count, 10 ) );
+		const safeCount = Math.max(1, Math.min(count, 10));
 		return Array.from(
 			{ length: safeCount },
-			( _, i ) => PLACEHOLDER_ID_BASE - i
+			(_, i) => PLACEHOLDER_ID_BASE - i
 		);
-	}, [ isPreviewWithNoProducts, count ] );
+	}, [isPreviewWithNoProducts, count]);
 
-	useEffect( () => {
-		if ( ! isPreviewWithNoProducts || placeholderIds.length === 0 ) {
-			setEntitiesReady( false );
+	useEffect(() => {
+		if (!isPreviewWithNoProducts || placeholderIds.length === 0) {
+			setEntitiesReady(false);
 			return;
 		}
 
-		const placeholderName = __( 'Product name', 'woocommerce' );
-		const storeActions = dispatch( coreStore );
+		const placeholderName = __('Product name', 'woocommerce');
+		const storeActions = dispatch(coreStore);
 
 		// WP REST API format — used by core post-title block via useEntityProp.
-		const wpEntities = placeholderIds.map( ( id ) => ( {
+		const wpEntities = placeholderIds.map((id) => ({
 			id,
 			type: 'product',
 			status: 'publish',
@@ -143,17 +143,17 @@ export const usePlaceholderProducts = ( {
 				rendered: placeholderName,
 				raw: placeholderName,
 			},
-		} ) );
+		}));
 
 		const priceInMinorUnits = getPlaceholderPriceMinorUnits();
 
 		// WC REST API format — used by WooCommerce child blocks via useProduct hook.
 		// Includes both REST API fields (price, regular_price) and Store API fields
 		// (prices object) to support both experimental and non-experimental code paths.
-		const wcEntities = placeholderIds.map( ( id ) => ( {
+		const wcEntities = placeholderIds.map((id) => ({
 			id,
 			name: placeholderName,
-			slug: `placeholder-product-${ id }`,
+			slug: `placeholder-product-${id}`,
 			type: 'simple' as const,
 			status: 'publish' as const,
 			permalink: '',
@@ -182,7 +182,7 @@ export const usePlaceholderProducts = ( {
 				sale_price: priceInMinorUnits,
 				price_range: null,
 			},
-		} ) );
+		}));
 
 		// Inject into both entity stores.
 		// Args: kind, name, records, query, invalidateCache, edits, meta.
@@ -209,57 +209,54 @@ export const usePlaceholderProducts = ( {
 		// for these placeholder IDs. Both getEntityRecord (the actual
 		// resolver) and getEditedEntityRecord (checked by useProduct
 		// hook's hasFinishedResolution) need to be finished.
-		for ( const id of placeholderIds ) {
-			void storeActions.finishResolution( 'getEntityRecord', [
+		for (const id of placeholderIds) {
+			void storeActions.finishResolution('getEntityRecord', [
 				'root',
 				'product',
 				id,
-			] );
-			void storeActions.finishResolution( 'getEntityRecord', [
+			]);
+			void storeActions.finishResolution('getEntityRecord', [
 				'postType',
 				'product',
 				id,
-			] );
-			void storeActions.finishResolution( 'getEditedEntityRecord', [
+			]);
+			void storeActions.finishResolution('getEditedEntityRecord', [
 				'root',
 				'product',
 				id,
-			] );
-			void storeActions.finishResolution( 'getEditedEntityRecord', [
+			]);
+			void storeActions.finishResolution('getEditedEntityRecord', [
 				'postType',
 				'product',
 				id,
-			] );
+			]);
 		}
 
-		setEntitiesReady( true );
-	}, [ isPreviewWithNoProducts, placeholderIds ] );
+		setEntitiesReady(true);
+	}, [isPreviewWithNoProducts, placeholderIds]);
 
-	const blockContexts = useMemo( () => {
-		if ( ! entitiesReady ) {
+	const blockContexts = useMemo(() => {
+		if (!entitiesReady) {
 			return null;
 		}
-		return placeholderIds.map( ( id ) => ( {
+		return placeholderIds.map((id) => ({
 			postType: 'product',
 			postId: id,
-		} ) );
-	}, [ entitiesReady, placeholderIds ] );
+		}));
+	}, [entitiesReady, placeholderIds]);
 
 	// Store API format products for ProductDataContextProvider.
 	// This ensures child blocks (price, image, button) that use
 	// withProductDataContext HOC can access product data without
 	// fetching from the Store API.
-	const placeholderProductMap = useMemo( () => {
-		if ( ! entitiesReady ) {
-			return new Map< number, ProductResponseItem >();
+	const placeholderProductMap = useMemo(() => {
+		if (!entitiesReady) {
+			return new Map<number, ProductResponseItem>();
 		}
 		return new Map(
-			placeholderIds.map( ( id ) => [
-				id,
-				createPlaceholderResponseItem( id ),
-			] )
+			placeholderIds.map((id) => [id, createPlaceholderResponseItem(id)])
 		);
-	}, [ entitiesReady, placeholderIds ] );
+	}, [entitiesReady, placeholderIds]);
 
 	return { blockContexts, placeholderProductMap, isReady: entitiesReady };
 };

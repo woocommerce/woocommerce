@@ -14,25 +14,25 @@ import { PanelBody } from '@wordpress/components';
 import { EditProps } from './types';
 import { UpgradeNotice } from './upgrade';
 
-const Edit = ( { attributes, clientId }: EditProps ) => {
+const Edit = ({ attributes, clientId }: EditProps) => {
 	const blockProps = useBlockProps();
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<InspectorControls>
 				<PanelBody>
-					<UpgradeNotice clientId={ clientId } />
+					<UpgradeNotice clientId={clientId} />
 				</PanelBody>
 			</InspectorControls>
 			<InnerBlocks
-				allowedBlocks={ [ 'core/heading' ] }
-				template={ [
+				allowedBlocks={['core/heading']}
+				template={[
 					[
 						'core/heading',
 						{ level: 3, content: attributes.heading || '' },
 					],
 					[
-						`woocommerce/${ attributes.filterType }`,
+						`woocommerce/${attributes.filterType}`,
 						{
 							heading: '',
 							lock: {
@@ -40,7 +40,7 @@ const Edit = ( { attributes, clientId }: EditProps ) => {
 							},
 						},
 					],
-				] }
+				]}
 			/>
 		</div>
 	);

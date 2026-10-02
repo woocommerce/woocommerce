@@ -6,25 +6,25 @@ import { useStoreCartCoupons } from '@woocommerce/base-context/hooks';
 import { getSetting } from '@woocommerce/settings';
 import { TotalsWrapper } from '@woocommerce/blocks-components';
 
-const Block = ( {
+const Block = ({
 	className = '',
 }: {
 	className?: string;
-} ): JSX.Element | null => {
-	const couponsEnabled = getSetting( 'couponsEnabled', true );
+}): JSX.Element | null => {
+	const couponsEnabled = getSetting('couponsEnabled', true);
 
 	const { applyCoupon, isApplyingCoupon } =
-		useStoreCartCoupons( 'wc/checkout' );
+		useStoreCartCoupons('wc/checkout');
 
-	if ( ! couponsEnabled ) {
+	if (!couponsEnabled) {
 		return null;
 	}
 
 	return (
-		<TotalsWrapper className={ className }>
+		<TotalsWrapper className={className}>
 			<TotalsCoupon
-				onSubmit={ applyCoupon }
-				isLoading={ isApplyingCoupon }
+				onSubmit={applyCoupon}
+				isLoading={isApplyingCoupon}
 				instanceId="coupon"
 			/>
 		</TotalsWrapper>

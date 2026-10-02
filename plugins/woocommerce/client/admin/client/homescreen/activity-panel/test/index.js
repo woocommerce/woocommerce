@@ -11,22 +11,22 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { ActivityPanel } from '../';
 
-jest.mock( '@wordpress/data', () => {
-	const originalModule = jest.requireActual( '@wordpress/data' );
+jest.mock('@wordpress/data', () => {
+	const originalModule = jest.requireActual('@wordpress/data');
 
 	return {
 		__esModule: true,
 		...originalModule,
-		useSelect: jest.fn().mockReturnValue( {
+		useSelect: jest.fn().mockReturnValue({
 			isTaskListHidden: false,
-		} ),
+		}),
 	};
-} );
+});
 
 // Mock the panels.
-jest.mock( '../panels', () => {
+jest.mock('../panels', () => {
 	return {
-		getAllPanels: jest.fn().mockImplementation( () => [
+		getAllPanels: jest.fn().mockImplementation(() => [
 			{
 				id: 'custom-panel-1',
 				title: 'custom-panel-1',
@@ -43,56 +43,54 @@ jest.mock( '../panels', () => {
 				panel: <span>Custom panel 2</span>,
 				collapsible: true,
 			},
-		] ),
+		]),
 	};
-} );
+});
 
 // Mock the order statuses.
-jest.mock( '../orders/utils', () => {
+jest.mock('../orders/utils', () => {
 	return {
-		getOrderStatuses: jest.fn().mockImplementation( () => [ 'status' ] ),
+		getOrderStatuses: jest.fn().mockImplementation(() => ['status']),
 	};
-} );
+});
 
-describe( 'ActivityPanel', () => {
-	it( 'should render a panel with two rows', () => {
-		render( <ActivityPanel /> );
-		expect( screen.getByText( 'custom-panel-1' ) ).not.toBeNull();
-		expect( screen.getByText( 'custom-panel-2' ) ).not.toBeNull();
-	} );
+describe('ActivityPanel', () => {
+	it('should render a panel with two rows', () => {
+		render(<ActivityPanel />);
+		expect(screen.getByText('custom-panel-1')).not.toBeNull();
+		expect(screen.getByText('custom-panel-2')).not.toBeNull();
+	});
 
-	it( 'should render one visible panel and one hidden panel', () => {
-		render( <ActivityPanel /> );
-		expect( screen.queryByText( 'Custom panel 1' ) ).toBeInTheDocument();
-		expect(
-			screen.queryByText( 'Custom panel 2' )
-		).not.toBeInTheDocument();
-	} );
+	it('should render one visible panel and one hidden panel', () => {
+		render(<ActivityPanel />);
+		expect(screen.queryByText('Custom panel 1')).toBeInTheDocument();
+		expect(screen.queryByText('Custom panel 2')).not.toBeInTheDocument();
+	});
 
-	it( 'should render the count of unread items', () => {
-		render( <ActivityPanel /> );
-		expect( screen.queryByText( '10000' ) ).toBeInTheDocument();
-		expect( screen.queryByText( '20000' ) ).toBeInTheDocument();
-	} );
+	it('should render the count of unread items', () => {
+		render(<ActivityPanel />);
+		expect(screen.queryByText('10000')).toBeInTheDocument();
+		expect(screen.queryByText('20000')).toBeInTheDocument();
+	});
 
-	it( 'should not render panels when loadingOrderAndProductCount is true', () => {
-		useSelect.mockReturnValue( {
+	it('should not render panels when loadingOrderAndProductCount is true', () => {
+		useSelect.mockReturnValue({
 			isTaskListHidden: false,
 			loadingOrderAndProductCount: true,
-		} );
-		render( <ActivityPanel /> );
-		expect( screen.queryByText( 'custom-panel-1' ) ).toBeNull();
-		expect( screen.queryByText( 'custom-panel-2' ) ).toBeNull();
-	} );
+		});
+		render(<ActivityPanel />);
+		expect(screen.queryByText('custom-panel-1')).toBeNull();
+		expect(screen.queryByText('custom-panel-2')).toBeNull();
+	});
 
-	it( 'should record activity_panel_open Tracks event when panel is opened', () => {
-		useSelect.mockReturnValue( {
+	it('should record activity_panel_open Tracks event when panel is opened', () => {
+		useSelect.mockReturnValue({
 			isTaskListHidden: false,
-		} );
-		const { getByText } = render( <ActivityPanel /> );
-		userEvent.click( getByText( 'custom-panel-2' ) );
-		expect( recordEvent ).toHaveBeenCalledWith( 'activity_panel_open', {
+		});
+		const { getByText } = render(<ActivityPanel />);
+		userEvent.click(getByText('custom-panel-2'));
+		expect(recordEvent).toHaveBeenCalledWith('activity_panel_open', {
 			tab: 'custom-panel-2',
-		} );
-	} );
-} );
+		});
+	});
+});

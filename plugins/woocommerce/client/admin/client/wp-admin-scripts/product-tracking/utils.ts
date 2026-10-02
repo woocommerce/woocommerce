@@ -8,30 +8,30 @@
  */
 export function attachEventListenerToParentForChildren(
 	parentQuery: string,
-	children: Array< {
+	children: Array<{
 		eventName: 'click' | 'change';
 		childQuery: string;
-		callback: ( clickedElement: Element ) => void;
-	} >
+		callback: (clickedElement: Element) => void;
+	}>
 ) {
-	const parent = document.querySelector( parentQuery );
+	const parent = document.querySelector(parentQuery);
 
-	if ( ! parent ) return;
+	if (!parent) return;
 
-	const eventListener = ( event: Event ) => {
-		children.forEach( ( { eventName, childQuery, callback } ) => {
+	const eventListener = (event: Event) => {
+		children.forEach(({ eventName, childQuery, callback }) => {
 			if (
 				event.type === eventName &&
-				( event.target as Element ).matches( childQuery )
+				(event.target as Element).matches(childQuery)
 			) {
-				callback( event.target as Element );
+				callback(event.target as Element);
 			}
-		} );
+		});
 	};
 
-	children.forEach( ( { eventName } ) => {
-		parent.addEventListener( eventName, eventListener );
-	} );
+	children.forEach(({ eventName }) => {
+		parent.addEventListener(eventName, eventListener);
+	});
 }
 
 /**
@@ -46,15 +46,15 @@ export function waitUntilElementIsPresent(
 	func: () => void,
 	tries = 0
 ) {
-	if ( tries > 6 ) {
+	if (tries > 6) {
 		return;
 	}
-	setTimeout( () => {
-		const element = document.querySelector( query );
-		if ( element ) {
+	setTimeout(() => {
+		const element = document.querySelector(query);
+		if (element) {
 			func();
 		} else {
-			waitUntilElementIsPresent( query, func, ++tries );
+			waitUntilElementIsPresent(query, func, ++tries);
 		}
-	}, 500 );
+	}, 500);
 }

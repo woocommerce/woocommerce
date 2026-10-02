@@ -67,9 +67,9 @@ interface ReadMoreState {
 export const defaultProps = {
 	className: 'read-more-content',
 	ellipsis: '&hellip;',
-	lessText: __( 'Read less', 'woocommerce' ),
+	lessText: __('Read less', 'woocommerce'),
 	maxLines: 3,
-	moreText: __( 'Read more', 'woocommerce' ),
+	moreText: __('Read more', 'woocommerce'),
 };
 
 /**
@@ -77,14 +77,14 @@ export const defaultProps = {
  *
  * Based on https://github.com/zoltantothcom/react-clamp-lines.
  */
-class ReadMore extends Component< ReadMoreProps, ReadMoreState > {
+class ReadMore extends Component<ReadMoreProps, ReadMoreState> {
 	static defaultProps = defaultProps;
 
-	private reviewSummary: RefObject< HTMLDivElement >;
-	private reviewContent: RefObject< HTMLDivElement >;
+	private reviewSummary: RefObject<HTMLDivElement>;
+	private reviewContent: RefObject<HTMLDivElement>;
 
-	constructor( props: ReadMoreProps ) {
-		super( props );
+	constructor(props: ReadMoreProps) {
+		super(props);
 
 		this.state = {
 			/**
@@ -105,17 +105,17 @@ class ReadMore extends Component< ReadMoreProps, ReadMoreState > {
 			summary: '.',
 		};
 
-		this.reviewContent = createRef< HTMLDivElement >();
-		this.reviewSummary = createRef< HTMLDivElement >();
-		this.getButton = this.getButton.bind( this );
-		this.onClick = this.onClick.bind( this );
+		this.reviewContent = createRef<HTMLDivElement>();
+		this.reviewSummary = createRef<HTMLDivElement>();
+		this.getButton = this.getButton.bind(this);
+		this.onClick = this.onClick.bind(this);
 	}
 
 	componentDidMount(): void {
 		this.setSummary();
 	}
 
-	componentDidUpdate( prevProps: ReadMoreProps ): void {
+	componentDidUpdate(prevProps: ReadMoreProps): void {
 		if (
 			prevProps.maxLines !== this.props.maxLines ||
 			prevProps.children !== this.props.children
@@ -135,13 +135,10 @@ class ReadMore extends Component< ReadMoreProps, ReadMoreState > {
 	}
 
 	setSummary(): void {
-		if ( this.props.children ) {
+		if (this.props.children) {
 			const { maxLines, ellipsis } = this.props;
 
-			if (
-				! this.reviewSummary.current ||
-				! this.reviewContent.current
-			) {
+			if (!this.reviewSummary.current || !this.reviewContent.current) {
 				return;
 			}
 
@@ -150,19 +147,19 @@ class ReadMore extends Component< ReadMoreProps, ReadMoreState > {
 			const maxHeight = lineHeight * maxLines + 1;
 			const clampEnabled = reviewHeight > maxHeight;
 
-			this.setState( {
+			this.setState({
 				clampEnabled,
-			} );
+			});
 
-			if ( clampEnabled ) {
-				this.setState( {
+			if (clampEnabled) {
+				this.setState({
 					summary: clampLines(
 						this.reviewContent.current.innerHTML,
 						this.reviewSummary.current,
 						maxHeight,
 						ellipsis
 					),
-				} );
+				});
 			}
 		}
 	}
@@ -173,19 +170,19 @@ class ReadMore extends Component< ReadMoreProps, ReadMoreState > {
 
 		const buttonText = isExpanded ? lessText : moreText;
 
-		if ( ! buttonText ) {
+		if (!buttonText) {
 			return;
 		}
 
 		return (
 			<a
 				href="#more"
-				className={ className + '__read_more' }
-				onClick={ this.onClick }
-				aria-expanded={ ! isExpanded }
+				className={className + '__read_more'}
+				onClick={this.onClick}
+				aria-expanded={!isExpanded}
 				role="button"
 			>
-				{ buttonText }
+				{buttonText}
 			</a>
 		);
 	}
@@ -193,52 +190,49 @@ class ReadMore extends Component< ReadMoreProps, ReadMoreState > {
 	/**
 	 * Handles the click event for the read more/less button.
 	 */
-	onClick( e: MouseEvent< HTMLAnchorElement, MouseEvent > ): void {
+	onClick(e: MouseEvent<HTMLAnchorElement, MouseEvent>): void {
 		e.preventDefault();
 
 		const { isExpanded } = this.state;
 
-		this.setState( {
-			isExpanded: ! isExpanded,
-		} );
+		this.setState({
+			isExpanded: !isExpanded,
+		});
 	}
 
 	render(): JSX.Element | null {
 		const { className } = this.props;
 		const { content, summary, clampEnabled, isExpanded } = this.state;
 
-		if ( ! content ) {
+		if (!content) {
 			return null;
 		}
 
-		if ( clampEnabled === false ) {
+		if (clampEnabled === false) {
 			return (
-				<div className={ className }>
-					<div ref={ this.reviewContent }>{ content }</div>
+				<div className={className}>
+					<div ref={this.reviewContent}>{content}</div>
 				</div>
 			);
 		}
 
 		return (
-			<div className={ className }>
-				{ ( ! isExpanded || clampEnabled === null ) && (
+			<div className={className}>
+				{(!isExpanded || clampEnabled === null) && (
 					<div
-						ref={ this.reviewSummary }
-						aria-hidden={ isExpanded }
-						dangerouslySetInnerHTML={ {
+						ref={this.reviewSummary}
+						aria-hidden={isExpanded}
+						dangerouslySetInnerHTML={{
 							__html: summary,
-						} }
+						}}
 					/>
-				) }
-				{ ( isExpanded || clampEnabled === null ) && (
-					<div
-						ref={ this.reviewContent }
-						aria-hidden={ ! isExpanded }
-					>
-						{ content }
+				)}
+				{(isExpanded || clampEnabled === null) && (
+					<div ref={this.reviewContent} aria-hidden={!isExpanded}>
+						{content}
 					</div>
-				) }
-				{ this.getButton() }
+				)}
+				{this.getButton()}
 			</div>
 		);
 	}

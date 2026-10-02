@@ -14,15 +14,15 @@ const DEFAULT_STATE: NoticeState = {
 	notices: {},
 };
 
-const store = createReduxStore( NOTICE_STORE_NAME, {
-	reducer( state: NoticeState | undefined = DEFAULT_STATE, action ) {
-		switch ( action.type ) {
+const store = createReduxStore(NOTICE_STORE_NAME, {
+	reducer(state: NoticeState | undefined = DEFAULT_STATE, action) {
+		switch (action.type) {
 			case 'ADD_NOTICE':
 				return {
 					...state,
 					notices: {
 						...state.notices,
-						[ action.productKey ]: {
+						[action.productKey]: {
 							productKey: action.productKey,
 							message: action.message,
 							status: action.status,
@@ -32,8 +32,8 @@ const store = createReduxStore( NOTICE_STORE_NAME, {
 				};
 			case 'REMOVE_NOTICE':
 				const notices = { ...state.notices };
-				if ( notices[ action.productKey ] ) {
-					delete notices[ action.productKey ];
+				if (notices[action.productKey]) {
+					delete notices[action.productKey];
 				}
 				return {
 					...state,
@@ -48,7 +48,7 @@ const store = createReduxStore( NOTICE_STORE_NAME, {
 			productKey: string,
 			message: string,
 			status: NoticeStatus,
-			options?: Partial< NoticeOptions >
+			options?: Partial<NoticeOptions>
 		) {
 			return {
 				type: 'ADD_NOTICE',
@@ -58,7 +58,7 @@ const store = createReduxStore( NOTICE_STORE_NAME, {
 				options,
 			};
 		},
-		removeNotice( productKey: string ) {
+		removeNotice(productKey: string) {
 			return {
 				type: 'REMOVE_NOTICE',
 				productKey,
@@ -66,24 +66,24 @@ const store = createReduxStore( NOTICE_STORE_NAME, {
 		},
 	},
 	selectors: {
-		notices( state: NoticeState | undefined ): Notice[] {
-			if ( ! state ) {
+		notices(state: NoticeState | undefined): Notice[] {
+			if (!state) {
 				return [];
 			}
-			return Object.values( state.notices );
+			return Object.values(state.notices);
 		},
 		getNotice(
 			state: NoticeState | undefined,
 			productKey: string
 		): Notice | undefined {
-			if ( ! state ) {
+			if (!state) {
 				return;
 			}
-			return state.notices[ productKey ];
+			return state.notices[productKey];
 		},
 	},
-} );
+});
 
-register( store );
+register(store);
 
 export { store as noticeStore, NOTICE_STORE_NAME };

@@ -13,51 +13,48 @@ import { setQueryAttribute } from '../utils';
 const PRESETS = [
 	{
 		key: 'title/asc',
-		name: __( 'Sorted by title', 'woocommerce' ),
+		name: __('Sorted by title', 'woocommerce'),
 	},
-	{ key: 'date/desc', name: __( 'Newest', 'woocommerce' ) },
+	{ key: 'date/desc', name: __('Newest', 'woocommerce') },
 	{
 		key: 'popularity/desc',
-		name: __( 'Best Selling', 'woocommerce' ),
+		name: __('Best Selling', 'woocommerce'),
 	},
 	{
 		key: 'rating/desc',
-		name: __( 'Top Rated', 'woocommerce' ),
+		name: __('Top Rated', 'woocommerce'),
 	},
 ];
 
-export function PopularPresets( props: ProductQueryBlock ) {
+export function PopularPresets(props: ProductQueryBlock) {
 	const { query } = props.attributes;
 
 	return (
 		<PanelBody
 			className="woocommerce-product-query-panel__sort"
-			title={ __( 'Popular Filters', 'woocommerce' ) }
-			initialOpen={ true }
+			title={__('Popular Filters', 'woocommerce')}
+			initialOpen={true}
 		>
-			<p>
-				{ __( 'Arrange products by popular pre-sets.', 'woocommerce' ) }
-			</p>
+			<p>{__('Arrange products by popular pre-sets.', 'woocommerce')}</p>
 			<CustomSelectControl
-				hideLabelFromVision={ true }
-				label={ __( 'Choose among these pre-sets', 'woocommerce' ) }
-				onChange={ ( option ) => {
-					if ( ! option.selectedItem?.key ) return;
+				hideLabelFromVision={true}
+				label={__('Choose among these pre-sets', 'woocommerce')}
+				onChange={(option) => {
+					if (!option.selectedItem?.key) return;
 
-					const [ orderBy, order ] = option.selectedItem?.key?.split(
+					const [orderBy, order] = option.selectedItem?.key?.split(
 						'/'
 					) as [
-						ProductQueryBlockQuery[ 'orderBy' ],
-						ProductQueryBlockQuery[ 'order' ],
+						ProductQueryBlockQuery['orderBy'],
+						ProductQueryBlockQuery['order'],
 					];
 
-					setQueryAttribute( props, { order, orderBy } );
-				} }
-				options={ PRESETS }
-				value={ PRESETS.find(
-					( option ) =>
-						option.key === `${ query.orderBy }/${ query.order }`
-				) }
+					setQueryAttribute(props, { order, orderBy });
+				}}
+				options={PRESETS}
+				value={PRESETS.find(
+					(option) => option.key === `${query.orderBy}/${query.order}`
+				)}
 			/>
 		</PanelBody>
 	);

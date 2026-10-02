@@ -15,27 +15,27 @@ import { Heading } from '../components/heading/heading';
 import { Navigation } from '../components/navigation/navigation';
 import { CoreProfilerStateMachineContext } from '..';
 
-export const IntroOptIn = ( {
+export const IntroOptIn = ({
 	sendEvent,
 	navigationProgress,
 	context,
 }: {
-	sendEvent: ( event: IntroOptInEvent ) => void;
+	sendEvent: (event: IntroOptInEvent) => void;
 	navigationProgress: number;
 	context: Pick<
 		CoreProfilerStateMachineContext,
 		'optInDataSharing' | 'userProfile' | 'coreProfilerCompletedSteps'
 	>;
-} ) => {
+}) => {
 	const hasCompletedIntroOptInPreviously =
 		context.userProfile?.completed ||
 		context.userProfile?.skipped ||
-		context.coreProfilerCompletedSteps?.[ 'intro-opt-in' ];
+		context.coreProfilerCompletedSteps?.['intro-opt-in'];
 	const optInCheckboxInitialStatus =
-		( hasCompletedIntroOptInPreviously && context.optInDataSharing ) ||
-		! hasCompletedIntroOptInPreviously;
+		(hasCompletedIntroOptInPreviously && context.optInDataSharing) ||
+		!hasCompletedIntroOptInPreviously;
 
-	const [ iOptInDataSharing, setIsOptInDataSharing ] = useState< boolean >(
+	const [iOptInDataSharing, setIsOptInDataSharing] = useState<boolean>(
 		optInCheckboxInitialStatus
 	);
 
@@ -54,12 +54,12 @@ export const IntroOptIn = ( {
 			className="woocommerce-profiler-intro-opt-in"
 			data-testid="core-profiler-intro-opt-in-screen"
 		>
-			<Navigation percentage={ navigationProgress } />
+			<Navigation percentage={navigationProgress} />
 			<div className="woocommerce-profiler-page__content woocommerce-profiler-intro-opt-in__content">
 				<div className="woocommerce-profiler-welcome-image" />
 				<Heading
-					title={ __( 'Welcome to Woo!', 'woocommerce' ) }
-					subTitle={ interpolateComponents( {
+					title={__('Welcome to Woo!', 'woocommerce')}
+					subTitle={interpolateComponents({
 						mixedString: __(
 							'It’s great to have you here with us! We’ll be guiding you through the setup process – first, answer a few questions to tailor your experience.',
 							'woocommerce'
@@ -67,38 +67,38 @@ export const IntroOptIn = ( {
 						components: {
 							br: <br />,
 						},
-					} ) }
+					})}
 				/>
 				<Button
 					className="woocommerce-profiler-setup-store__button"
 					variant="primary"
-					onClick={ () =>
-						sendEvent( {
+					onClick={() =>
+						sendEvent({
 							type: 'INTRO_COMPLETED',
 							payload: { optInDataSharing: iOptInDataSharing },
-						} )
+						})
 					}
 				>
-					{ __( 'Set up my store', 'woocommerce' ) }
+					{__('Set up my store', 'woocommerce')}
 				</Button>
 				<Button
 					className="woocommerce-profiler-setup-store__button"
 					variant="tertiary"
-					onClick={ () =>
-						sendEvent( {
+					onClick={() =>
+						sendEvent({
 							type: 'INTRO_SKIPPED',
 							payload: { optInDataSharing: iOptInDataSharing },
-						} )
+						})
 					}
 				>
-					{ __( 'Skip guided setup', 'woocommerce' ) }
+					{__('Skip guided setup', 'woocommerce')}
 				</Button>
 				<div className="woocommerce-profiler-intro-opt-in__footer">
 					<CheckboxControl
 						__nextHasNoMarginBottom
 						className="core-profiler__checkbox"
 						// @ts-expect-error - Type definition is not correct. Label can be a string or JSX.Element.
-						label={ interpolateComponents( {
+						label={interpolateComponents({
 							mixedString: __(
 								'I agree to share my data to tailor my store setup experience, get more relevant content, and help make WooCommerce better for everyone. You can opt out at any time in WooCommerce settings. {{link}}Learn more about usage tracking.{{/link}}',
 								'woocommerce'
@@ -112,9 +112,9 @@ export const IntroOptIn = ( {
 									/>
 								),
 							},
-						} ) }
-						checked={ iOptInDataSharing }
-						onChange={ setIsOptInDataSharing }
+						})}
+						checked={iOptInDataSharing}
+						onChange={setIsOptInDataSharing}
 					/>
 				</div>
 			</div>

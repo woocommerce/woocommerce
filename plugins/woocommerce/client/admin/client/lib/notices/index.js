@@ -15,16 +15,16 @@ import { __ } from '@wordpress/i18n';
  * @param {unknown} response The rejection value from apiFetch.
  * @return {boolean} Whether this looks like a silent network failure.
  */
-function isSilentNetworkFailure( response ) {
-	if ( ! response ) {
+function isSilentNetworkFailure(response) {
+	if (!response) {
 		return false;
 	}
 
-	if ( response instanceof TypeError ) {
+	if (response instanceof TypeError) {
 		return true;
 	}
 
-	if ( typeof response !== 'object' ) {
+	if (typeof response !== 'object') {
 		return false;
 	}
 
@@ -32,28 +32,28 @@ function isSilentNetworkFailure( response ) {
 	// fall through to the existing handling below so the merchant sees the
 	// real message rather than a generic offline copy.
 	const hasStructuredPayload =
-		( 'message' in response && response.message ) ||
-		( 'errors' in response &&
+		('message' in response && response.message) ||
+		('errors' in response &&
 			response.errors &&
-			Object.keys( response.errors ).length ) ||
+			Object.keys(response.errors).length) ||
 		'code' in response ||
 		'error_data' in response;
 
 	return (
-		! hasStructuredPayload &&
+		!hasStructuredPayload &&
 		typeof window !== 'undefined' &&
 		window.navigator?.onLine === false
 	);
 }
 
-export function createNoticesFromResponse( response ) {
-	const { createNotice } = dispatch( 'core/notices' );
+export function createNoticesFromResponse(response) {
+	const { createNotice } = dispatch('core/notices');
 
-	if ( isSilentNetworkFailure( response ) ) {
+	if (isSilentNetworkFailure(response)) {
 		// String matches Gutenberg's existing offline copy — reuses their translations.
 		createNotice(
 			'error',
-			__( 'Updating failed. You are probably offline.', 'woocommerce' )
+			__('Updating failed. You are probably offline.', 'woocommerce')
 		);
 		return;
 	}
@@ -61,20 +61,20 @@ export function createNoticesFromResponse( response ) {
 	if (
 		response.error_data &&
 		response.errors &&
-		Object.keys( response.errors ).length
+		Object.keys(response.errors).length
 	) {
 		// Loop over multi-error responses.
-		Object.keys( response.errors ).forEach( ( errorKey ) => {
-			createNotice( 'error', response.errors[ errorKey ].join( ' ' ) );
-		} );
-	} else if ( response instanceof Error ) {
+		Object.keys(response.errors).forEach((errorKey) => {
+			createNotice('error', response.errors[errorKey].join(' '));
+		});
+	} else if (response instanceof Error) {
 		// A thrown Error (e.g. the PluginError rejected by @woocommerce/data's
 		// plugin actions) is always a failure, even though it carries no code.
-		if ( response.message ) {
-			createNotice( 'error', response.message );
+		if (response.message) {
+			createNotice('error', response.message);
 		}
-	} else if ( response.message ) {
+	} else if (response.message) {
 		// Handle generic messages.
-		createNotice( response.code ? 'error' : 'success', response.message );
+		createNotice(response.code ? 'error' : 'success', response.message);
 	}
 }

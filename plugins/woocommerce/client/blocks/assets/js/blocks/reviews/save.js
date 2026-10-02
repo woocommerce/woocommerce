@@ -9,13 +9,13 @@ import { useBlockProps } from '@wordpress/block-editor';
 import './editor.scss';
 import { getBlockClassName, getDataAttrs } from './utils.js';
 
-export default ( { attributes } ) => {
+export default ({ attributes }) => {
 	return (
 		<div
-			{ ...useBlockProps.save( {
-				className: getBlockClassName( attributes ),
-			} ) }
-			{ ...getDataAttrs( attributes ) }
+			{...useBlockProps.save({
+				className: getBlockClassName(attributes),
+			})}
+			{...getDataAttrs(attributes)}
 		/>
 	);
 };

@@ -56,7 +56,7 @@ export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 		'core/heading',
 		{
 			level: 2,
-			content: __( 'Related products', 'woocommerce' ),
+			content: __('Related products', 'woocommerce'),
 			style: { spacing: { margin: { top: '1rem', bottom: '1rem' } } },
 		},
 	],
@@ -64,9 +64,9 @@ export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 		'core/post-template',
 		{
 			__woocommerceNamespace: PRODUCT_TEMPLATE_ID,
-			...( postTemplateHasSupportForGridView && {
+			...(postTemplateHasSupportForGridView && {
 				layout: { type: 'grid', columnCount: 5 },
-			} ),
+			}),
 		},
 		[
 			[
@@ -123,13 +123,13 @@ export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 
 const blockConfig = {
 	name: QUERY_LOOP_ID,
-	description: __( 'Display related products.', 'woocommerce' ),
-	title: __( 'Related Products Controls', 'woocommerce' ),
-	isActive: ( blockAttributes: BlockAttributes ) =>
+	description: __('Display related products.', 'woocommerce'),
+	title: __('Related Products Controls', 'woocommerce'),
+	isActive: (blockAttributes: BlockAttributes) =>
 		blockAttributes.namespace === VARIATION_NAME,
 	icon: (
 		<Icon
-			icon={ stacks }
+			icon={stacks}
 			className="wc-block-editor-components-block-icon wc-block-editor-components-block-icon--stacks"
 		/>
 	),
@@ -140,11 +140,11 @@ const blockConfig = {
 	// @ts-ignore
 	allowedControls: [],
 	innerBlocks: INNER_BLOCKS_TEMPLATE,
-	scope: [ 'block' ],
+	scope: ['block'],
 };
 
-registerProductBlockType( blockConfig, {
+registerProductBlockType(blockConfig, {
 	isVariationBlock: true,
 	variationName: VARIATION_NAME,
 	isAvailableOnPostEditor: false,
-} );
+});

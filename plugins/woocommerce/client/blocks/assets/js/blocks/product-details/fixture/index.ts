@@ -86,7 +86,7 @@ export const productWithoutSpecifications = {
 	menu_order: 0,
 	price_html:
 		'<span class="woocommerce-Price-amount amount"><bdi>90,00&nbsp;<span class="woocommerce-Price-currencySymbol">&euro;</span></bdi></span>',
-	related_ids: [ 34, 19, 18 ],
+	related_ids: [34, 19, 18],
 	meta_data: [
 		{
 			id: 514,
@@ -105,7 +105,7 @@ export const productWithoutSpecifications = {
 			{
 				href: 'http://locale.local/wp-json/wc/v3/products/20',
 				targetHints: {
-					allow: [ 'GET', 'POST', 'PUT', 'PATCH', 'DELETE' ],
+					allow: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
 				},
 			},
 		],
@@ -134,7 +134,7 @@ export const productWithSpecifications = {
 			position: 0,
 			visible: true,
 			variation: false,
-			options: [ 'Black', 'Brown', 'Tortoise' ],
+			options: ['Black', 'Brown', 'Tortoise'],
 		},
 		{
 			id: 2,
@@ -142,7 +142,7 @@ export const productWithSpecifications = {
 			position: 1,
 			visible: true,
 			variation: false,
-			options: [ 'Medium', 'Large' ],
+			options: ['Medium', 'Large'],
 		},
 		{
 			id: 3,
@@ -150,7 +150,7 @@ export const productWithSpecifications = {
 			position: 2,
 			visible: true,
 			variation: false,
-			options: [ 'Acetate', 'Metal' ],
+			options: ['Acetate', 'Metal'],
 		},
 	],
 };

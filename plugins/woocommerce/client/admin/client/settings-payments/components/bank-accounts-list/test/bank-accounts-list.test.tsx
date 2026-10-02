@@ -21,51 +21,49 @@ const mockAccounts: BankAccount[] = [
 	},
 ];
 
-describe( 'BankAccountsList', () => {
-	it( 'renders existing accounts', () => {
+describe('BankAccountsList', () => {
+	it('renders existing accounts', () => {
 		render(
 			<BankAccountsList
-				accounts={ mockAccounts }
-				onChange={ jest.fn() }
+				accounts={mockAccounts}
+				onChange={jest.fn()}
 				defaultCountry="US"
 			/>
 		);
-		expect( screen.getByText( 'Example Bank' ) ).toBeInTheDocument();
-		expect( screen.getByText( '123456' ) ).toBeInTheDocument();
-	} );
+		expect(screen.getByText('Example Bank')).toBeInTheDocument();
+		expect(screen.getByText('123456')).toBeInTheDocument();
+	});
 
-	it( 'opens modal to add new account', async () => {
+	it('opens modal to add new account', async () => {
 		render(
 			<BankAccountsList
-				accounts={ [] }
-				onChange={ jest.fn() }
+				accounts={[]}
+				onChange={jest.fn()}
 				defaultCountry="US"
 			/>
 		);
-		await userEvent.click( screen.getByText( '+ Add account' ) );
+		await userEvent.click(screen.getByText('+ Add account'));
 		expect(
-			screen.getByRole( 'dialog', { name: /add/i } )
+			screen.getByRole('dialog', { name: /add/i })
 		).toBeInTheDocument();
-	} );
+	});
 
-	it( 'calls onChange when an account is deleted', async () => {
+	it('calls onChange when an account is deleted', async () => {
 		const onChange = jest.fn();
 		render(
 			<BankAccountsList
-				accounts={ mockAccounts }
-				onChange={ onChange }
+				accounts={mockAccounts}
+				onChange={onChange}
 				defaultCountry="US"
 			/>
 		);
 
 		// Open menu and click delete.
-		await userEvent.click(
-			screen.getByRole( 'button', { name: 'Options' } )
-		);
-		await userEvent.click( screen.getByText( 'Delete' ) );
+		await userEvent.click(screen.getByRole('button', { name: 'Options' }));
+		await userEvent.click(screen.getByText('Delete'));
 
 		// Confirm deletion
-		await userEvent.click( screen.getByText( 'Delete' ) );
-		expect( onChange ).toHaveBeenCalledWith( [] );
-	} );
-} );
+		await userEvent.click(screen.getByText('Delete'));
+		expect(onChange).toHaveBeenCalledWith([]);
+	});
+});

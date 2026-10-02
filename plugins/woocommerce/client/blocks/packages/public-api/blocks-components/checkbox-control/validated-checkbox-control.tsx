@@ -23,14 +23,16 @@ import './style.scss';
 import { ValidationInputError } from '../validation-input-error';
 import { getValidityMessageForInput } from '../../blocks-checkout/utils';
 
-export interface ValidatedCheckboxControlProps
-	extends Omit< InputHTMLAttributes< HTMLInputElement >, 'onChange' > {
+export interface ValidatedCheckboxControlProps extends Omit<
+	InputHTMLAttributes<HTMLInputElement>,
+	'onChange'
+> {
 	// Unique instance ID. id will be used instead if provided.
 	instanceId?: string;
 	// id to use for the error message. If not provided, an id will be generated.
 	errorId?: string;
 	// Callback to run on change which is passed the updated value.
-	onChange: ( newValue: boolean ) => void;
+	onChange: (newValue: boolean) => void;
 	// Optional label for the field.
 	label?: string;
 	// If true, validation errors will be shown.
@@ -38,11 +40,9 @@ export interface ValidatedCheckboxControlProps
 	// Error message to display alongside the field regardless of validation.
 	errorMessage?: string;
 	// Custom validation function that is run on change. Use setCustomValidity to set an error message.
-	customValidation?:
-		| ( ( inputObject: HTMLInputElement ) => boolean )
-		| undefined;
+	customValidation?: ((inputObject: HTMLInputElement) => boolean) | undefined;
 	// Custom validation message to display when validity is false. Given the input element. Expected to use inputObject.validity.
-	customValidityMessage?: ( validity: ValidityState ) => string;
+	customValidityMessage?: (validity: ValidityState) => string;
 	// Whether validation should run on mount.
 	validateOnMount?: boolean;
 }
@@ -80,54 +80,54 @@ const ValidatedCheckboxControl = forwardRef<
 		forwardedRef
 	) => {
 		// Ref for the input element.
-		const inputRef = useRef< HTMLInputElement >( null );
+		const inputRef = useRef<HTMLInputElement>(null);
 
 		const genId = useId();
 		const instanceId = preferredInstanceId || genId;
-		const textInputId = id || `textinput-${ instanceId }`;
+		const textInputId = id || `textinput-${instanceId}`;
 		const errorIdString = errorId || textInputId;
 
 		const { setValidationErrors, clearValidationError } =
-			useDispatch( validationStore );
+			useDispatch(validationStore);
 
 		// Ref for validation callback.
-		const customValidationRef = useRef( customValidation );
+		const customValidationRef = useRef(customValidation);
 
 		// Update ref when validation callback changes.
-		useEffect( () => {
+		useEffect(() => {
 			customValidationRef.current = customValidation;
-		}, [ customValidation ] );
+		}, [customValidation]);
 
 		const { validationError, validationErrorId } = useSelect(
-			( select ) => {
-				const store = select( validationStore );
+			(select) => {
+				const store = select(validationStore);
 				return {
-					validationError: store.getValidationError( errorIdString ),
+					validationError: store.getValidationError(errorIdString),
 					validationErrorId:
-						store.getValidationErrorId( errorIdString ),
+						store.getValidationErrorId(errorIdString),
 				};
 			},
-			[ errorIdString ]
+			[errorIdString]
 		);
 
 		const validateInput = useCallback(
-			( errorsHidden = true ) => {
+			(errorsHidden = true) => {
 				const inputObject = inputRef.current || null;
 
-				if ( inputObject === null ) {
+				if (inputObject === null) {
 					return;
 				}
 
 				if (
 					inputObject.checkValidity() &&
-					customValidationRef.current( inputObject )
+					customValidationRef.current(inputObject)
 				) {
-					void clearValidationError( errorIdString );
+					void clearValidationError(errorIdString);
 					return;
 				}
 
-				void setValidationErrors( {
-					[ errorIdString ]: {
+				void setValidationErrors({
+					[errorIdString]: {
 						message: getValidityMessageForInput(
 							label,
 							inputObject,
@@ -135,7 +135,7 @@ const ValidatedCheckboxControl = forwardRef<
 						),
 						hidden: errorsHidden,
 					},
-				} );
+				});
 			},
 			[
 				clearValidationError,
@@ -155,46 +155,46 @@ const ValidatedCheckboxControl = forwardRef<
 						inputRef.current?.focus();
 					},
 					revalidate() {
-						validateInput( false );
+						validateInput(false);
 					},
 				};
 			},
-			[ validateInput ]
+			[validateInput]
 		);
 
 		/**
 		 * Validation on mount.
 		 */
-		useEffect( () => {
-			if ( validateOnMount ) {
-				validateInput( true );
+		useEffect(() => {
+			if (validateOnMount) {
+				validateInput(true);
 			}
-		}, [ validateOnMount, validateInput ] );
+		}, [validateOnMount, validateInput]);
 
 		// Remove validation errors when unmounted.
-		useEffect( () => {
+		useEffect(() => {
 			return () => {
-				void clearValidationError( errorIdString );
+				void clearValidationError(errorIdString);
 			};
-		}, [ clearValidationError, errorIdString ] );
+		}, [clearValidationError, errorIdString]);
 
-		if ( passedErrorMessage !== '' && isObject( validationError ) ) {
+		if (passedErrorMessage !== '' && isObject(validationError)) {
 			validationError.message = passedErrorMessage;
 		}
 
-		const hasError = validationError?.message && ! validationError?.hidden;
+		const hasError = validationError?.message && !validationError?.hidden;
 
 		return (
 			<CheckboxControl
-				className={ clsx(
+				className={clsx(
 					'wc-block-components-validated-checkbox-control',
 					className,
 					{
 						'has-error': hasError,
 					}
-				) }
-				aria-invalid={ hasError === true }
-				id={ textInputId }
+				)}
+				aria-invalid={hasError === true}
+				id={textInputId}
 				aria-errormessage={
 					// we're using the internal `aria-errormessage` attribute, calculated from the data store.
 					// If a consumer wants to overwrite the attribute, they can pass a prop.
@@ -202,23 +202,23 @@ const ValidatedCheckboxControl = forwardRef<
 						? validationErrorId
 						: undefined
 				}
-				ref={ inputRef }
-				onChange={ useCallback(
-					( newValue ) => {
-						validateInput( false );
+				ref={inputRef}
+				onChange={useCallback(
+					(newValue) => {
+						validateInput(false);
 						// Push the changes up to the parent component.
-						onChange( newValue );
+						onChange(newValue);
 					},
-					[ onChange, validateInput ]
-				) }
-				aria-describedby={ ariaDescribedBy }
-				checked={ checked }
+					[onChange, validateInput]
+				)}
+				aria-describedby={ariaDescribedBy}
+				checked={checked}
 				title="" // This prevents the same error being shown on hover.
-				label={ label }
-				disabled={ disabled }
-				{ ...rest }
+				label={label}
+				disabled={disabled}
+				{...rest}
 			>
-				<ValidationInputError propertyName={ errorIdString } />
+				<ValidationInputError propertyName={errorIdString} />
 			</CheckboxControl>
 		);
 	}

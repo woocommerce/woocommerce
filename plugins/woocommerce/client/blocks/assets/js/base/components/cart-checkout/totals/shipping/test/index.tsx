@@ -13,31 +13,31 @@ import * as baseContextHooks from '@woocommerce/base-context/hooks';
  */
 import { TotalsShipping } from '../index';
 
-jest.mock( '@wordpress/data', () => ( {
+jest.mock('@wordpress/data', () => ({
 	__esModule: true,
-	...jest.requireActual( '@wordpress/data' ),
+	...jest.requireActual('@wordpress/data'),
 	useSelect: jest.fn(),
-} ) );
+}));
 
 // Mock use select so we can override it when wc/store/checkout is accessed, but return the original select function if any other store is accessed.
 (
-	wpData.useSelect as jest.MockedFunction< typeof wpData.useSelect >
- ).mockImplementation(
-	jest.fn().mockImplementation( ( passedMapSelect ) => {
-		const mockedSelect = jest.fn().mockImplementation( ( storeName ) => {
-			if ( storeName === 'wc/store/checkout' ) {
+	wpData.useSelect as jest.MockedFunction<typeof wpData.useSelect>
+).mockImplementation(
+	jest.fn().mockImplementation((passedMapSelect) => {
+		const mockedSelect = jest.fn().mockImplementation((storeName) => {
+			if (storeName === 'wc/store/checkout') {
 				return {
 					prefersCollection() {
 						return false;
 					},
 				};
 			}
-			return jest.requireActual( '@wordpress/data' ).select( storeName );
-		} );
-		passedMapSelect( mockedSelect, {
-			dispatch: jest.requireActual( '@wordpress/data' ).dispatch,
-		} );
-	} )
+			return jest.requireActual('@wordpress/data').select(storeName);
+		});
+		passedMapSelect(mockedSelect, {
+			dispatch: jest.requireActual('@wordpress/data').dispatch,
+		});
+	})
 );
 
 const shippingAddress = {
@@ -102,31 +102,31 @@ const shippingRates = [
 	},
 ] as CartShippingRate[];
 
-jest.mock( '@woocommerce/base-context/hooks', () => {
+jest.mock('@woocommerce/base-context/hooks', () => {
 	return {
 		__esModule: true,
-		...jest.requireActual( '@woocommerce/base-context/hooks' ),
+		...jest.requireActual('@woocommerce/base-context/hooks'),
 		useShippingData: jest.fn(),
 		useStoreCart: jest.fn(),
 		useOrderSummaryLoadingState: jest.fn(),
 	};
-} );
+});
 
 (
 	baseContextHooks.useShippingData as jest.MockedFunction<
 		typeof baseContextHooks.useShippingData
 	>
- ).mockReturnValue( {
+).mockReturnValue({
 	needsShipping: true,
 	selectShippingRate: jest.fn(),
 	shippingRates,
-} );
+});
 
 (
 	baseContextHooks.useStoreCart as jest.MockedFunction<
 		typeof baseContextHooks.useStoreCart
 	>
- ).mockReturnValue( {
+).mockReturnValue({
 	cartItems: mockPreviewCart.items,
 	cartTotals: mockPreviewCart.totals,
 	cartCoupons: mockPreviewCart.coupons,
@@ -137,61 +137,61 @@ jest.mock( '@woocommerce/base-context/hooks', () => {
 	billingAddress: mockPreviewCart.billing_address,
 	cartHasCalculatedShipping: mockPreviewCart.has_calculated_shipping,
 	isLoadingRates: false,
-} );
+});
 
 (
 	baseContextHooks.useOrderSummaryLoadingState as jest.MockedFunction<
 		typeof baseContextHooks.useOrderSummaryLoadingState
 	>
- ).mockReturnValue( {
+).mockReturnValue({
 	isLoading: false,
-} );
+});
 
-describe( 'TotalsShipping', () => {
-	it( 'shows skeleton when loading', () => {
+describe('TotalsShipping', () => {
+	it('shows skeleton when loading', () => {
 		// Set loading state to true
 		(
 			baseContextHooks.useOrderSummaryLoadingState as jest.MockedFunction<
 				typeof baseContextHooks.useOrderSummaryLoadingState
 			>
-		 ).mockReturnValue( {
+		).mockReturnValue({
 			isLoading: true,
-		} );
+		});
 
 		render(
 			<SlotFillProvider>
 				<TotalsShipping />
 			</SlotFillProvider>
 		);
-		expect( screen.getByText( 'Shipping' ) ).toBeInTheDocument();
-		expect( screen.getByLabelText( 'Loading price…' ) ).toBeInTheDocument();
-	} );
+		expect(screen.getByText('Shipping')).toBeInTheDocument();
+		expect(screen.getByLabelText('Loading price…')).toBeInTheDocument();
+	});
 
-	it( 'shows FREE if shipping cost is 0', () => {
+	it('shows FREE if shipping cost is 0', () => {
 		// Set loading state to false
 		(
 			baseContextHooks.useOrderSummaryLoadingState as jest.MockedFunction<
 				typeof baseContextHooks.useOrderSummaryLoadingState
 			>
-		 ).mockReturnValue( {
+		).mockReturnValue({
 			isLoading: false,
-		} );
+		});
 		(
 			baseContextHooks.useStoreCart as jest.MockedFunction<
 				typeof baseContextHooks.useStoreCart
 			>
-		 ).mockReturnValue( {
+		).mockReturnValue({
 			...baseContextHooks.useStoreCart(),
 			shippingRates: [
 				...shippingRates,
-				{ ...shippingRates[ 0 ], price: '0' },
+				{ ...shippingRates[0], price: '0' },
 			],
 			cartTotals: {
 				...mockPreviewCart.totals,
 				total_shipping: '0',
 				total_shipping_tax: '0',
 			},
-		} );
+		});
 
 		const { rerender } = render(
 			<SlotFillProvider>
@@ -199,20 +199,18 @@ describe( 'TotalsShipping', () => {
 			</SlotFillProvider>
 		);
 
-		expect(
-			screen.getByText( 'Free', { exact: true } )
-		).toBeInTheDocument();
-		expect( screen.queryByText( '0.00' ) ).not.toBeInTheDocument();
+		expect(screen.getByText('Free', { exact: true })).toBeInTheDocument();
+		expect(screen.queryByText('0.00')).not.toBeInTheDocument();
 
 		(
 			baseContextHooks.useStoreCart as jest.MockedFunction<
 				typeof baseContextHooks.useStoreCart
 			>
-		 ).mockReturnValue( {
+		).mockReturnValue({
 			...baseContextHooks.useStoreCart(),
 			shippingRates: [
 				...shippingRates,
-				{ ...shippingRates[ 0 ], price: '5678' },
+				{ ...shippingRates[0], price: '5678' },
 			],
 			cartTotals: {
 				...mockPreviewCart.totals,
@@ -226,7 +224,7 @@ describe( 'TotalsShipping', () => {
 				currency_suffix: '',
 				currency_thousand_separator: ', ',
 			},
-		} );
+		});
 
 		rerender(
 			<SlotFillProvider>
@@ -234,7 +232,7 @@ describe( 'TotalsShipping', () => {
 			</SlotFillProvider>
 		);
 
-		expect( screen.queryByText( 'Free' ) ).not.toBeInTheDocument();
-		expect( screen.getByText( '56.78' ) ).toBeInTheDocument();
-	} );
-} );
+		expect(screen.queryByText('Free')).not.toBeInTheDocument();
+		expect(screen.getByText('56.78')).toBeInTheDocument();
+	});
+});

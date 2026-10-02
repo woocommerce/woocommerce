@@ -64,13 +64,19 @@ jQuery( function ( $ ) {
 					// On a "normal" shortcode checkout page, the page validates this server-side only (not via validate_field).
 					// We do client-side validation here for a better UX with custom place order buttons.
 					// Clearing any stale invalid state before re-validating, to ensure a clean slate.
-					var $termsCheckbox = $form.find( 'input[name="terms"]:visible' );
+					var $termsCheckbox = $form.find(
+						'input[name="terms"]:visible'
+					);
 					if ( $termsCheckbox.length ) {
-						$termsCheckbox.closest( '.form-row' ).removeClass( 'woocommerce-invalid' );
+						$termsCheckbox
+							.closest( '.form-row' )
+							.removeClass( 'woocommerce-invalid' );
 					}
 
 					// Trigger field-level validation (which adds `.woocommerce-invalid` to invalid fields)
-					$form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' );
+					$form
+						.find( '.input-text, select, input:checkbox' )
+						.trigger( 'validate' );
 
 					// Check for validation errors (from validate_field handler).
 					// Only consider visible fields: `validate_field` flags any empty
@@ -79,46 +85,64 @@ jQuery( function ( $ ) {
 					// would otherwise block submission even when the visible form is
 					// valid. The `.woocommerce-invalid` class lives on the `.form-row`,
 					// which is hidden when its section is collapsed.
-					if ( $form.find( '.woocommerce-invalid:visible' ).length > 0 ) {
+					if (
+						$form.find( '.woocommerce-invalid:visible' ).length > 0
+					) {
 						hasError = true;
 					}
 
 					// Check required fields (adds .woocommerce-invalid if not already set)
-					$form.find( '.validate-required:visible' ).each( function () {
-						var $field = $( this );
-						var $input = $field.find( 'input.input-text, select, input:checkbox' );
+					$form
+						.find( '.validate-required:visible' )
+						.each( function () {
+							var $field = $( this );
+							var $input = $field.find(
+								'input.input-text, select, input:checkbox'
+							);
 
-						if ( $input.length === 0 ) {
-							return;
-						}
+							if ( $input.length === 0 ) {
+								return;
+							}
 
-						var isEmpty;
-						if ( $input.is( ':checkbox' ) ) {
-							isEmpty = ! $input.is( ':checked' );
-						} else {
-							isEmpty = $input.val() === '' || $input.val() === null;
-						}
+							var isEmpty;
+							if ( $input.is( ':checkbox' ) ) {
+								isEmpty = ! $input.is( ':checked' );
+							} else {
+								isEmpty =
+									$input.val() === '' ||
+									$input.val() === null;
+							}
 
-						if ( isEmpty ) {
-							hasError = true;
-							$field.addClass( 'woocommerce-invalid woocommerce-invalid-required-field' );
-						}
-					} );
+							if ( isEmpty ) {
+								hasError = true;
+								$field.addClass(
+									'woocommerce-invalid woocommerce-invalid-required-field'
+								);
+							}
+						} );
 
 					// Check terms checkbox - this is our client-side validation for better UX
 					// (WC Core only validates terms server-side)
-					if ( $termsCheckbox.length && ! $termsCheckbox.is( ':checked' ) ) {
+					if (
+						$termsCheckbox.length &&
+						! $termsCheckbox.is( ':checked' )
+					) {
 						hasError = true;
-						$termsCheckbox.closest( '.form-row' ).addClass( 'woocommerce-invalid' );
+						$termsCheckbox
+							.closest( '.form-row' )
+							.addClass( 'woocommerce-invalid' );
 					}
 
 					// Scroll to the first invalid field in DOM order
 					if ( hasError ) {
-						var $firstInvalidField = $form.find( '.woocommerce-invalid:visible' ).first();
+						var $firstInvalidField = $form
+							.find( '.woocommerce-invalid:visible' )
+							.first();
 						if ( $firstInvalidField.length ) {
 							$( 'html, body' ).animate(
 								{
-									scrollTop: $firstInvalidField.offset().top - 100,
+									scrollTop:
+										$firstInvalidField.offset().top - 100,
 								},
 								500
 							);
@@ -147,9 +171,15 @@ jQuery( function ( $ ) {
 	} );
 
 	// When a gateway registers after a page load, render its button if it's selected.
-	$( document.body ).on( 'wc_custom_place_order_button_registered', function ( e, gatewayId ) {
-		window.wc.customPlaceOrderButton.__maybeShow( gatewayId, createCheckoutPlaceOrderApi() );
-	} );
+	$( document.body ).on(
+		'wc_custom_place_order_button_registered',
+		function ( e, gatewayId ) {
+			window.wc.customPlaceOrderButton.__maybeShow(
+				gatewayId,
+				createCheckoutPlaceOrderApi()
+			);
+		}
+	);
 
 	var wc_checkout_form = {
 		updateTimer: false,
@@ -179,9 +209,13 @@ jQuery( function ( $ ) {
 				this.$order_review.attr( 'novalidate', 'novalidate' );
 
 				// Initialize the custom place order button for the "order-pay" page
-				var $orderPayMethod = this.$order_review.find( 'input[name="payment_method"]:checked' );
+				var $orderPayMethod = this.$order_review.find(
+					'input[name="payment_method"]:checked'
+				);
 				if ( $orderPayMethod.length ) {
-					window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit( $orderPayMethod.val() );
+					window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit(
+						$orderPayMethod.val()
+					);
 					$orderPayMethod.trigger( 'click' );
 				}
 			}
@@ -295,7 +329,9 @@ jQuery( function ( $ ) {
 			// This hides the default button immediately to prevent flash while the gateway JS loads
 			var $selectedMethod = $payment_methods.filter( ':checked' ).eq( 0 );
 			if ( $selectedMethod.length ) {
-				window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit( $selectedMethod.val() );
+				window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit(
+					$selectedMethod.val()
+				);
 			}
 
 			// Trigger click event for selected method
@@ -346,7 +382,10 @@ jQuery( function ( $ ) {
 
 			// Handle custom place order button
 			var gatewayId = $( this ).val();
-			window.wc.customPlaceOrderButton.__maybeShow( gatewayId, createCheckoutPlaceOrderApi() );
+			window.wc.customPlaceOrderButton.__maybeShow(
+				gatewayId,
+				createCheckoutPlaceOrderApi()
+			);
 
 			wc_checkout_form.selectedPaymentMethod = selectedPaymentMethod;
 		},
@@ -664,7 +703,7 @@ jQuery( function ( $ ) {
 					? args
 					: {
 							update_shipping_method: true,
-					  };
+						};
 
 			var country = $( '#billing_country' ).val(),
 				state = $( '#billing_state' ).val(),

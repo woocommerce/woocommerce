@@ -13,15 +13,15 @@ import { STORE_KEY } from './data/constants';
 import { OptionModal } from './option-modal';
 import './data';
 
-function shorten( input ) {
-	if ( input.length > 20 ) {
-		return input.substring( 0, 20 ) + '...';
+function shorten(input) {
+	if (input.length > 20) {
+		return input.substring(0, 20) + '...';
 	}
 
 	return input;
 }
 
-function Options( {
+function Options({
 	options,
 	getOptions,
 	deleteOption,
@@ -32,28 +32,26 @@ function Options( {
 	saveOption,
 	notice,
 	setNotice,
-} ) {
-	const [ isEditModalOpen, setEditModalOpen ] = useState( false );
+}) {
+	const [isEditModalOpen, setEditModalOpen] = useState(false);
 
-	const deleteOptionByName = ( optionName ) => {
+	const deleteOptionByName = (optionName) => {
 		// eslint-disable-next-line no-alert
-		if ( confirm( 'Are you sure you want to delete this option?' ) ) {
-			deleteOption( optionName );
+		if (confirm('Are you sure you want to delete this option?')) {
+			deleteOption(optionName);
 		}
 	};
 
-	const openEditModal = ( optionName ) => {
-		invalidateResolution( STORE_KEY, 'getOptionForEditing', [
-			optionName,
-		] );
+	const openEditModal = (optionName) => {
+		invalidateResolution(STORE_KEY, 'getOptionForEditing', [optionName]);
 
-		getOptionForEditing( optionName );
-		setEditModalOpen( true );
+		getOptionForEditing(optionName);
+		setEditModalOpen(true);
 	};
 
-	const handleSaveOption = ( optionName, newValue ) => {
-		saveOption( optionName, newValue );
-		setEditModalOpen( false );
+	const handleSaveOption = (optionName, newValue) => {
+		saveOption(optionName, newValue);
+		setEditModalOpen(false);
 	};
 
 	const renderLoading = () => {
@@ -67,7 +65,7 @@ function Options( {
 	};
 
 	const renderTableData = () => {
-		if ( options.length === 0 ) {
+		if (options.length === 0) {
 			return (
 				<tr>
 					<td colSpan="6" align="center">
@@ -77,7 +75,7 @@ function Options( {
 			);
 		}
 
-		return options.map( ( option ) => {
+		return options.map((option) => {
 			// eslint-disable-next-line camelcase
 			const { option_id, option_name, option_value, autoload } = option;
 
@@ -86,71 +84,71 @@ function Options( {
 			// eslint-disable-next-line camelcase
 			const optionName = option_name;
 			// eslint-disable-next-line camelcase
-			const optionValue = shorten( option_value );
+			const optionValue = shorten(option_value);
 
 			return (
-				<tr key={ optionId }>
-					<td key={ 0 }>{ optionId }</td>
-					<td key={ 1 }>{ optionName }</td>
-					<td key={ 'optionValue' }>{ optionValue }</td>
-					<td className="align-center" key={ 2 }>
-						{ autoload }
+				<tr key={optionId}>
+					<td key={0}>{optionId}</td>
+					<td key={1}>{optionName}</td>
+					<td key={'optionValue'}>{optionValue}</td>
+					<td className="align-center" key={2}>
+						{autoload}
 					</td>
-					<td className="align-center" key={ 3 }>
+					<td className="align-center" key={3}>
 						<button
 							className="button btn-danger"
-							onClick={ () => deleteOptionByName( optionName ) }
+							onClick={() => deleteOptionByName(optionName)}
 						>
 							Delete
 						</button>
 					</td>
-					<td className="align-center" key={ 4 }>
+					<td className="align-center" key={4}>
 						<button
 							className="button btn-primary"
-							onClick={ () => openEditModal( optionName ) }
+							onClick={() => openEditModal(optionName)}
 						>
 							Edit
 						</button>
 					</td>
 				</tr>
 			);
-		} );
+		});
 	};
 
-	const searchOption = ( event ) => {
+	const searchOption = (event) => {
 		event.preventDefault();
 		const keyword = event.target.search.value;
 
 		// Invalidate resolution of the same selector + arg
 		// so that entering the same keyword always works
-		invalidateResolution( STORE_KEY, 'getOptions', [ keyword ] );
+		invalidateResolution(STORE_KEY, 'getOptions', [keyword]);
 
-		getOptions( keyword );
+		getOptions(keyword);
 	};
 
 	return (
 		<>
-			{ isEditModalOpen && (
+			{isEditModalOpen && (
 				<OptionModal
-					onRequestClose={ () => {
-						setEditModalOpen( false );
-					} }
-					option={ editingOption }
-					onSave={ handleSaveOption }
+					onRequestClose={() => {
+						setEditModalOpen(false);
+					}}
+					option={editingOption}
+					onSave={handleSaveOption}
 				/>
-			) }
+			)}
 			<div id="wc-admin-test-helper-options">
-				{ notice.message.length > 0 && (
+				{notice.message.length > 0 && (
 					<Notice
-						status={ notice.status }
-						onRemove={ () => {
-							setNotice( { message: '' } );
-						} }
+						status={notice.status}
+						onRemove={() => {
+							setNotice({ message: '' });
+						}}
 					>
-						{ notice.message }
+						{notice.message}
 					</Notice>
-				) }
-				<form onSubmit={ searchOption }>
+				)}
+				<form onSubmit={searchOption}>
 					<div className="search-box">
 						<label
 							className="screen-reader-text"
@@ -171,46 +169,40 @@ function Options( {
 				<table className="wp-list-table striped table-view-list widefat">
 					<thead>
 						<tr>
-							<td
-								className="manage-column column-thumb"
-								key={ 0 }
-							>
+							<td className="manage-column column-thumb" key={0}>
 								I.D
 							</td>
-							<td
-								className="manage-column column-thumb"
-								key={ 1 }
-							>
+							<td className="manage-column column-thumb" key={1}>
 								Name
 							</td>
 							<td
 								className="manage-column column-thumb"
-								key={ 'optionValue' }
+								key={'optionValue'}
 							>
 								Value
 							</td>
 							<td
 								className="manage-column column-thumb align-center"
-								key={ 2 }
+								key={2}
 							>
 								Autoload
 							</td>
 							<td
 								className="manage-column column-thumb align-center"
-								key={ 3 }
+								key={3}
 							>
 								Delete
 							</td>
 							<td
 								className="manage-column column-thumb align-center"
-								key={ 4 }
+								key={4}
 							>
 								Edit
 							</td>
 						</tr>
 					</thead>
 					<tbody>
-						{ isLoading ? renderLoading() : renderTableData() }
+						{isLoading ? renderLoading() : renderTableData()}
 					</tbody>
 				</table>
 			</div>
@@ -219,9 +211,9 @@ function Options( {
 }
 
 export default compose(
-	withSelect( ( select ) => {
+	withSelect((select) => {
 		const { getOptions, getOptionForEditing, getNotice, isLoading } =
-			select( STORE_KEY );
+			select(STORE_KEY);
 		const options = getOptions();
 		const editingOption = getOptionForEditing();
 		const notice = getNotice();
@@ -234,10 +226,10 @@ export default compose(
 			getOptionForEditing,
 			notice,
 		};
-	} ),
-	withDispatch( ( dispatch ) => {
-		const { deleteOption, saveOption, setNotice } = dispatch( STORE_KEY );
-		const { invalidateResolution } = dispatch( 'core/data' );
+	}),
+	withDispatch((dispatch) => {
+		const { deleteOption, saveOption, setNotice } = dispatch(STORE_KEY);
+		const { invalidateResolution } = dispatch('core/data');
 
 		return {
 			deleteOption,
@@ -245,5 +237,5 @@ export default compose(
 			saveOption,
 			setNotice,
 		};
-	} )
-)( Options );
+	})
+)(Options);

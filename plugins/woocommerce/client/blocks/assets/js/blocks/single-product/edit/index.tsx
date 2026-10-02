@@ -43,7 +43,7 @@ interface EditorProps {
 	attributes: {
 		productId: number;
 	};
-	setAttributes: ( attributes: Attributes ) => void;
+	setAttributes: (attributes: Attributes) => void;
 	error: string | ErrorObject;
 	getProduct: () => void;
 	product: ProductResponseItem;
@@ -51,7 +51,7 @@ interface EditorProps {
 	clientId: string;
 }
 
-const Editor = ( {
+const Editor = ({
 	attributes,
 	setAttributes,
 	error,
@@ -59,60 +59,58 @@ const Editor = ( {
 	product,
 	isLoading,
 	clientId,
-}: EditorProps ) => {
+}: EditorProps) => {
 	const { productId } = attributes;
 	const isPreviewMode = usePreviewMode();
-	const [ isEditing, setIsEditing ] = useState( ! productId );
+	const [isEditing, setIsEditing] = useState(!productId);
 	const blockProps = useBlockProps();
 
 	const block = useSelect(
-		( select ) => select( 'core/blocks' ).getBlockType( metadata.name ),
+		(select) => select('core/blocks').getBlockType(metadata.name),
 		[]
 	);
 
-	const productPreview = useSelect( ( select ) => {
-		if ( ! isPreviewMode ) {
+	const productPreview = useSelect((select) => {
+		if (!isPreviewMode) {
 			return null;
 		}
-		return select( PRODUCTS_STORE_NAME ).getProducts< Array< Product > >( {
+		return select(PRODUCTS_STORE_NAME).getProducts<Array<Product>>({
 			per_page: 1,
-		} );
-	} );
+		});
+	});
 
 	const isInvalidProductId =
 		typeof error === 'object' &&
 		error?.code === 'woocommerce_rest_product_invalid_id';
 
-	useEffect( () => {
-		const productPreviewId = productPreview
-			? productPreview[ 0 ]?.id
-			: null;
+	useEffect(() => {
+		const productPreviewId = productPreview ? productPreview[0]?.id : null;
 
 		// If the product is set, do not override it with the preview.
-		if ( ! productPreviewId || productId ) {
+		if (!productPreviewId || productId) {
 			return;
 		}
 
-		setAttributes( {
+		setAttributes({
 			...attributes,
 			productId: productPreviewId,
-		} );
-		setIsEditing( false );
-	}, [ attributes, productId, productPreview, setAttributes ] );
+		});
+		setIsEditing(false);
+	}, [attributes, productId, productPreview, setAttributes]);
 
-	useEffect( () => {
-		if ( isInvalidProductId ) {
-			setIsEditing( true );
+	useEffect(() => {
+		if (isInvalidProductId) {
+			setIsEditing(true);
 		}
-	}, [ isInvalidProductId ] );
+	}, [isInvalidProductId]);
 
-	if ( error && ! isInvalidProductId ) {
+	if (error && !isInvalidProductId) {
 		return (
 			<ErrorPlaceholder
 				className="wc-block-editor-single-product-error"
-				error={ error as ErrorObject }
-				isLoading={ isLoading }
-				onRetry={ getProduct }
+				error={error as ErrorObject}
+				isLoading={isLoading}
+				onRetry={getProduct}
 			/>
 		);
 	}
@@ -120,85 +118,83 @@ const Editor = ( {
 	const infoTitle = isInvalidProductId ? (
 		<>
 			<Icon
-				icon={ info }
+				icon={info}
 				className="wc-block-editor-single-product__info-icon"
 			/>
 			<Text>
-				{ __(
+				{__(
 					'Previously selected product is no longer available.',
 					'woocommerce'
-				) }
+				)}
 			</Text>
 		</>
 	) : (
-		<Text>{ block.description }</Text>
+		<Text>{block.description}</Text>
 	);
 
-	const onChange = isInvalidProductId
-		? () => setIsEditing( false )
-		: undefined;
+	const onChange = isInvalidProductId ? () => setIsEditing(false) : undefined;
 
 	return (
-		<div { ...blockProps }>
-			{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
-			{ /* @ts-ignore */ }
+		<div {...blockProps}>
+			{/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+			{/* @ts-ignore */}
 			<BlockErrorBoundary
-				header={ __( 'Single Product Block Error', 'woocommerce' ) }
+				header={__('Single Product Block Error', 'woocommerce')}
 			>
 				<EditorBlockControls
-					setIsEditing={ setIsEditing }
-					isEditing={ isEditing }
+					setIsEditing={setIsEditing}
+					isEditing={isEditing}
 				/>
-				{ isEditing ? (
+				{isEditing ? (
 					<Placeholder
-						icon={ BLOCK_ICON }
-						label={ block.title }
+						icon={BLOCK_ICON}
+						label={block.title}
 						className="wc-block-editor-single-product"
 					>
-						<HStack alignment="center"> { infoTitle } </HStack>
+						<HStack alignment="center"> {infoTitle} </HStack>
 						<div className="wc-block-editor-single-product__selection">
 							<SharedProductControl
-								attributes={ attributes }
-								setAttributes={ setAttributes }
-								onChange={ onChange }
+								attributes={attributes}
+								setAttributes={setAttributes}
+								onChange={onChange}
 							/>
-							{ ! isInvalidProductId && (
+							{!isInvalidProductId && (
 								<Button
 									variant="secondary"
-									onClick={ () => {
-										setIsEditing( false );
-									} }
+									onClick={() => {
+										setIsEditing(false);
+									}}
 								>
-									{ __( 'Done', 'woocommerce' ) }
+									{__('Done', 'woocommerce')}
 								</Button>
-							) }
+							)}
 						</div>
 					</Placeholder>
 				) : (
 					<div>
 						<InspectorControls>
 							<PanelBody
-								title={ __( 'Product', 'woocommerce' ) }
-								initialOpen={ false }
+								title={__('Product', 'woocommerce')}
+								initialOpen={false}
 							>
 								<SharedProductControl
-									attributes={ attributes }
-									setAttributes={ setAttributes }
+									attributes={attributes}
+									setAttributes={setAttributes}
 								/>
 							</PanelBody>
 						</InspectorControls>
 
-						<EditProductLink productId={ productId } />
+						<EditProductLink productId={productId} />
 						<LayoutEditor
-							clientId={ clientId }
-							product={ product }
-							isLoading={ isLoading }
+							clientId={clientId}
+							product={product}
+							isLoading={isLoading}
 						/>
 					</div>
-				) }
+				)}
 			</BlockErrorBoundary>
 		</div>
 	);
 };
 
-export default withProduct( Editor );
+export default withProduct(Editor);

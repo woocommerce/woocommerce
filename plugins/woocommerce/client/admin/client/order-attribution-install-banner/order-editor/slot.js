@@ -17,20 +17,20 @@ import {
 	BANNER_TYPE_SMALL,
 } from '../constants';
 
-const { Slot, Fill } = createSlotFill( ORDER_ATTRIBUTION_SLOT_FILL_CONSTANT );
+const { Slot, Fill } = createSlotFill(ORDER_ATTRIBUTION_SLOT_FILL_CONSTANT);
 
 export const possiblyRenderOrderAttributionSlot = () => {
 	const slotDomElement = document.getElementById(
 		ORDER_ATTRIBUTION_INSTALL_BANNER_DOM_ID
 	);
 
-	if ( slotDomElement ) {
-		createRoot( slotDomElement ).render(
+	if (slotDomElement) {
+		createRoot(slotDomElement).render(
 			<>
 				<SlotFillProvider>
 					<Slot />
 					<PluginArea
-						scope={ ORDER_ATTRIBUTION_INSTALL_BANNER_SLOT_SCOPE }
+						scope={ORDER_ATTRIBUTION_INSTALL_BANNER_SLOT_SCOPE}
 					/>
 				</SlotFillProvider>
 			</>
@@ -43,12 +43,12 @@ const OrderAttributionInstallBannerSlotFill = () => {
 		<Fill>
 			<OrderAttributionInstallBanner
 				eventContext="order-editor-order-attribution-metabox"
-				bannerType={ BANNER_TYPE_SMALL }
-				description={ __(
+				bannerType={BANNER_TYPE_SMALL}
+				description={__(
 					'View all of your orders in our new Order Attribution extension.',
 					'woocommerce'
-				) }
-				buttonText={ __( 'Install the extension', 'woocommerce' ) }
+				)}
+				buttonText={__('Install the extension', 'woocommerce')}
 			/>
 		</Fill>
 	);

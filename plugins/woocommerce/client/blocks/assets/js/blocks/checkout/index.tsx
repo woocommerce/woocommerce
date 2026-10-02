@@ -19,7 +19,7 @@ const settings = {
 	icon: {
 		src: (
 			<Icon
-				icon={ fields }
+				icon={fields}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -35,8 +35,8 @@ const settings = {
 		to: [
 			{
 				type: 'block',
-				blocks: [ 'woocommerce/classic-shortcode' ],
-				transform: ( attributes ) => {
+				blocks: ['woocommerce/classic-shortcode'],
+				transform: (attributes) => {
 					return createBlock(
 						'woocommerce/classic-shortcode',
 						{
@@ -57,19 +57,17 @@ const settings = {
 				...blockAttributes,
 				...deprecatedAttributes,
 			},
-			save( { attributes }: { attributes: { className: string } } ) {
+			save({ attributes }: { attributes: { className: string } }) {
 				return (
-					<div
-						className={ clsx( 'is-loading', attributes.className ) }
-					/>
+					<div className={clsx('is-loading', attributes.className)} />
 				);
 			},
-			migrate: ( attributes: {
+			migrate: (attributes: {
 				showOrderNotes: boolean;
 				showPolicyLinks: boolean;
 				showReturnToCart: boolean;
 				cartPageId: number;
-			} ) => {
+			}) => {
 				const {
 					showOrderNotes,
 					showPolicyLinks,
@@ -123,14 +121,14 @@ const settings = {
 											'woocommerce/checkout-order-note-block',
 											{},
 											[]
-									  )
+										)
 									: false,
 								showPolicyLinks
 									? createBlock(
 											'woocommerce/checkout-terms-block',
 											{},
 											[]
-									  )
+										)
 									: false,
 								createBlock(
 									'woocommerce/checkout-actions-block',
@@ -140,80 +138,78 @@ const settings = {
 									},
 									[]
 								),
-							].filter( Boolean ) as BlockInstance[]
+							].filter(Boolean) as BlockInstance[]
 						),
-						createBlock( 'woocommerce/checkout-totals-block', {} ),
+						createBlock('woocommerce/checkout-totals-block', {}),
 					],
 				];
 			},
 			isEligible: (
-				attributes: Record< string, unknown >,
+				attributes: Record<string, unknown>,
 				innerBlocks: BlockInstance[]
 			) => {
-				return ! innerBlocks.some(
-					( block: { name: string } ) =>
+				return !innerBlocks.some(
+					(block: { name: string }) =>
 						block.name === 'woocommerce/checkout-fields-block'
 				);
 			},
 		},
 		// Adds the additional information block.
 		{
-			save( { attributes }: { attributes: { className: string } } ) {
+			save({ attributes }: { attributes: { className: string } }) {
 				return (
-					<div
-						className={ clsx( 'is-loading', attributes.className ) }
-					/>
+					<div className={clsx('is-loading', attributes.className)} />
 				);
 			},
 			isEligible: (
-				_attributes: Record< string, unknown >,
+				_attributes: Record<string, unknown>,
 				innerBlocks: BlockInstance[]
 			) => {
 				const checkoutFieldsBlock = innerBlocks.find(
-					( block: { name: string } ) =>
+					(block: { name: string }) =>
 						block.name === 'woocommerce/checkout-fields-block'
 				);
 
-				if ( ! checkoutFieldsBlock ) {
+				if (!checkoutFieldsBlock) {
 					return false;
 				}
 
 				// Top level block is the fields block, we then need to search within that for the additional information block.
-				return ! checkoutFieldsBlock.innerBlocks.some(
-					( block: { name: string } ) =>
+				return !checkoutFieldsBlock.innerBlocks.some(
+					(block: { name: string }) =>
 						block.name ===
 						'woocommerce/checkout-additional-information-block'
 				);
 			},
 			migrate: (
-				attributes: Record< string, unknown >,
+				attributes: Record<string, unknown>,
 				innerBlocks: BlockInstance[]
 			) => {
 				const checkoutFieldsBlockIndex = innerBlocks.findIndex(
-					( block: { name: string } ) =>
+					(block: { name: string }) =>
 						block.name === 'woocommerce/checkout-fields-block'
 				);
 
-				if ( checkoutFieldsBlockIndex === -1 ) {
+				if (checkoutFieldsBlockIndex === -1) {
 					return false;
 				}
 
 				const checkoutFieldsBlock =
-					innerBlocks[ checkoutFieldsBlockIndex ];
+					innerBlocks[checkoutFieldsBlockIndex];
 
 				const insertIndex = checkoutFieldsBlock.innerBlocks.findIndex(
-					( block: { name: string } ) =>
+					(block: { name: string }) =>
 						block.name ===
 						'wp-block-woocommerce-checkout-payment-block'
 				);
 
-				if ( insertIndex === -1 ) {
+				if (insertIndex === -1) {
 					return false;
 				}
 
-				innerBlocks[ checkoutFieldsBlockIndex ] =
+				innerBlocks[checkoutFieldsBlockIndex] =
 					checkoutFieldsBlock.innerBlocks
-						.slice( 0, insertIndex )
+						.slice(0, insertIndex)
 						.concat(
 							createBlock(
 								'woocommerce/checkout-additional-information-block',
@@ -228,10 +224,10 @@ const settings = {
 							)
 						);
 
-				return [ attributes, innerBlocks ];
+				return [attributes, innerBlocks];
 			},
 		},
 	],
 };
 
-registerBlockType( metadata, settings );
+registerBlockType(metadata, settings);

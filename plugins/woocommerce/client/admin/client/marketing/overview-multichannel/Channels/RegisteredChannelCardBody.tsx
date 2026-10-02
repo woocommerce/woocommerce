@@ -17,9 +17,9 @@ type RegisteredChannelCardBodyProps = {
 	registeredChannel: RegisteredChannel;
 };
 
-export const RegisteredChannelCardBody = ( {
+export const RegisteredChannelCardBody = ({
 	registeredChannel,
-}: RegisteredChannelCardBodyProps ) => {
+}: RegisteredChannelCardBodyProps) => {
 	/**
 	 * The description section in the channel card.
 	 *
@@ -27,17 +27,17 @@ export const RegisteredChannelCardBody = ( {
 	 *
 	 * If setup is completed, this would be an element with sync status and issue status.
 	 */
-	const description = ! registeredChannel.isSetupCompleted ? (
+	const description = !registeredChannel.isSetupCompleted ? (
 		registeredChannel.description
 	) : (
 		<div className="woocommerce-marketing-registered-channel-description">
-			{ !! registeredChannel.syncStatus && (
+			{!!registeredChannel.syncStatus && (
 				<>
-					<SyncStatus status={ registeredChannel.syncStatus } />
+					<SyncStatus status={registeredChannel.syncStatus} />
 					<div className="woocommerce-marketing-registered-channel-description__separator" />
 				</>
-			) }
-			<IssueStatus registeredChannel={ registeredChannel } />
+			)}
+			<IssueStatus registeredChannel={registeredChannel} />
 		</div>
 	);
 
@@ -48,13 +48,13 @@ export const RegisteredChannelCardBody = ( {
 	 *
 	 * If setup is completed, this would be a "Manage" secondary button.
 	 */
-	const button = ! registeredChannel.isSetupCompleted ? (
-		<Button variant="primary" href={ registeredChannel.setupUrl }>
-			{ __( 'Finish setup', 'woocommerce' ) }
+	const button = !registeredChannel.isSetupCompleted ? (
+		<Button variant="primary" href={registeredChannel.setupUrl}>
+			{__('Finish setup', 'woocommerce')}
 		</Button>
 	) : (
-		<Button variant="secondary" href={ registeredChannel.manageUrl }>
-			{ __( 'Manage', 'woocommerce' ) }
+		<Button variant="secondary" href={registeredChannel.manageUrl}>
+			{__('Manage', 'woocommerce')}
 		</Button>
 	);
 
@@ -63,13 +63,13 @@ export const RegisteredChannelCardBody = ( {
 			className="woocommerce-marketing-registered-channel-card-body"
 			icon={
 				<img
-					src={ registeredChannel.icon }
-					alt={ registeredChannel.title }
+					src={registeredChannel.icon}
+					alt={registeredChannel.title}
 				/>
 			}
-			name={ registeredChannel.title }
-			description={ description }
-			button={ button }
+			name={registeredChannel.title}
+			description={description}
+			button={button}
 		/>
 	);
 };

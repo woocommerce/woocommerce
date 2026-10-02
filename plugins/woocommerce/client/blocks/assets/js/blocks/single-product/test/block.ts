@@ -56,21 +56,21 @@ const mockProduct = {
 
 // Setup MSW.
 const handlers = [
-	http.get( '/wp/v2/types', () => {
-		return HttpResponse.json( {} );
-	} ),
+	http.get('/wp/v2/types', () => {
+		return HttpResponse.json({});
+	}),
 
-	http.get( '/wc/store/v1/products/:id', () => {
-		return HttpResponse.json( mockProduct );
-	} ),
+	http.get('/wc/store/v1/products/:id', () => {
+		return HttpResponse.json(mockProduct);
+	}),
 ];
 
-const server = setupServer( ...handlers );
+const server = setupServer(...handlers);
 
 // Start MSW.
-beforeAll( () => server.listen() );
-afterEach( () => server.resetHandlers() );
-afterAll( () => server.close() );
+beforeAll(() => server.listen());
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
 
 async function setup() {
 	const singleProductBlock = [
@@ -81,58 +81,58 @@ async function setup() {
 			},
 		},
 	];
-	return initializeEditor( singleProductBlock );
+	return initializeEditor(singleProductBlock);
 }
 
-describe( 'Product block', () => {
-	it( 'should render inner blocks for users without edit permissions', async () => {
+describe('Product block', () => {
+	it('should render inner blocks for users without edit permissions', async () => {
 		// The V4 of this endpoint will return product data to authors,
 		// see https://github.com/woocommerce/woocommerce/pull/61718.
 		// However, V3 didn't, that's why we need this test.
 		server.use(
-			http.get( '/wc/v3/products/:id', () => {
-				return HttpResponse.json( '', { status: 403 } );
-			} )
+			http.get('/wc/v3/products/:id', () => {
+				return HttpResponse.json('', { status: 403 });
+			})
 		);
 
 		await setup();
 
-		const block = await screen.findAllByLabelText( `Block: Product` );
-		expect( block.length ).toBeGreaterThan( 0 );
+		const block = await screen.findAllByLabelText(`Block: Product`);
+		expect(block.length).toBeGreaterThan(0);
 
 		const productDescription = await screen.findByText(
 			'This is a short description'
 		);
-		expect( productDescription ).toBeInTheDocument();
+		expect(productDescription).toBeInTheDocument();
 
 		expect(
-			await screen.findByText( textContentMatcher( '20,00 €' ) )
+			await screen.findByText(textContentMatcher('20,00 €'))
 		).toBeInTheDocument();
 
 		// wp-6.8: MSW warns about unhandled OPTIONS preflight requests from
 		// @wordpress/core-data in jsdom where there's no real network layer.
-		expect( console ).toHaveWarned();
-	} );
+		expect(console).toHaveWarned();
+	});
 
-	it( 'should render inner blocks for admins', async () => {
+	it('should render inner blocks for admins', async () => {
 		server.use(
-			http.get( '/wc/v3/products/:id', () => {
-				return HttpResponse.json( mockProduct );
-			} )
+			http.get('/wc/v3/products/:id', () => {
+				return HttpResponse.json(mockProduct);
+			})
 		);
 
 		await setup();
 
-		const block = await screen.findAllByLabelText( `Block: Product` );
-		expect( block.length ).toBeGreaterThan( 0 );
+		const block = await screen.findAllByLabelText(`Block: Product`);
+		expect(block.length).toBeGreaterThan(0);
 
 		const productDescription = await screen.findByText(
 			'This is a short description'
 		);
-		expect( productDescription ).toBeInTheDocument();
+		expect(productDescription).toBeInTheDocument();
 
 		expect(
-			await screen.findByText( textContentMatcher( '20,00 €' ) )
+			await screen.findByText(textContentMatcher('20,00 €'))
 		).toBeInTheDocument();
-	} );
-} );
+	});
+});

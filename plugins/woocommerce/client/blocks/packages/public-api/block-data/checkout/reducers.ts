@@ -12,16 +12,16 @@ import { CheckoutState, defaultState } from './default-state';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore-next-line
-const reducer: Reducer< CheckoutState > = ( state = defaultState, action ) => {
+const reducer: Reducer<CheckoutState> = (state = defaultState, action) => {
 	let newState = state;
-	switch ( action.type ) {
+	switch (action.type) {
 		case types.SET_IDLE:
 			newState =
 				state.status !== STATUS.IDLE
 					? {
 							...state,
 							status: STATUS.IDLE,
-					  }
+						}
 					: state;
 			break;
 
@@ -32,7 +32,7 @@ const reducer: Reducer< CheckoutState > = ( state = defaultState, action ) => {
 					? {
 							...state,
 							redirectUrl: action.redirectUrl,
-					  }
+						}
 					: state;
 			break;
 
@@ -91,12 +91,12 @@ const reducer: Reducer< CheckoutState > = ( state = defaultState, action ) => {
 		case types.DECREMENT_CALCULATING:
 			newState = {
 				...state,
-				calculatingCount: Math.max( 0, state.calculatingCount - 1 ),
+				calculatingCount: Math.max(0, state.calculatingCount - 1),
 			};
 			break;
 
 		case types.SET_CUSTOMER_ID:
-			if ( action.customerId !== undefined ) {
+			if (action.customerId !== undefined) {
 				newState = {
 					...state,
 					customerId: action.customerId,
@@ -105,7 +105,7 @@ const reducer: Reducer< CheckoutState > = ( state = defaultState, action ) => {
 			break;
 
 		case types.SET_CUSTOMER_PASSWORD:
-			if ( typeof action.customerPassword !== 'undefined' ) {
+			if (typeof action.customerPassword !== 'undefined') {
 				newState = {
 					...state,
 					customerPassword: action.customerPassword,
@@ -114,7 +114,7 @@ const reducer: Reducer< CheckoutState > = ( state = defaultState, action ) => {
 			break;
 
 		case types.SET_ADDITIONAL_FIELDS:
-			if ( action.additionalFields !== undefined ) {
+			if (action.additionalFields !== undefined) {
 				newState = {
 					...state,
 					additionalFields: {
@@ -195,12 +195,12 @@ const reducer: Reducer< CheckoutState > = ( state = defaultState, action ) => {
 					...state,
 					extensionData: {
 						...state.extensionData,
-						[ action.namespace ]: action.replace
+						[action.namespace]: action.replace
 							? action.extensionData
 							: {
-									...state.extensionData[ action.namespace ],
+									...state.extensionData[action.namespace],
 									...action.extensionData,
-							  },
+								},
 					},
 				};
 			}
@@ -208,14 +208,12 @@ const reducer: Reducer< CheckoutState > = ( state = defaultState, action ) => {
 		case types.ADD_ADDRESS_AUTOCOMPLETE_PROVIDER:
 			if (
 				typeof action.providerId === 'string' &&
-				! state.addressAutocompleteProviders?.includes(
-					action.providerId
-				)
+				!state.addressAutocompleteProviders?.includes(action.providerId)
 			) {
 				newState = {
 					...state,
 					addressAutocompleteProviders: [
-						...( state.addressAutocompleteProviders || [] ),
+						...(state.addressAutocompleteProviders || []),
 						action.providerId,
 					],
 				};
@@ -225,8 +223,8 @@ const reducer: Reducer< CheckoutState > = ( state = defaultState, action ) => {
 		case types.SET_ACTIVE_ADDRESS_AUTOCOMPLETE_PROVIDER:
 			if (
 				typeof action.providerId === 'string' &&
-				( action.addressType === 'billing' ||
-					action.addressType === 'shipping' ) &&
+				(action.addressType === 'billing' ||
+					action.addressType === 'shipping') &&
 				action.providerId !==
 					state.activeAddressAutocompleteProvider?.[
 						action.addressType as 'shipping' | 'billing'
@@ -236,7 +234,7 @@ const reducer: Reducer< CheckoutState > = ( state = defaultState, action ) => {
 					...state,
 					activeAddressAutocompleteProvider: {
 						...state.activeAddressAutocompleteProvider,
-						[ action.addressType ]: action.providerId,
+						[action.addressType]: action.providerId,
 					},
 				};
 			}

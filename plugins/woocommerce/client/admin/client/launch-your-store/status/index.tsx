@@ -15,14 +15,14 @@ export const LaunchYourStoreStatus = () => {
 
 	return (
 		<div className="woocommerce-lys-status">
-			{ shouldTourBeShown && showTour && (
+			{shouldTourBeShown && showTour && (
 				<SiteVisibilityTour
-					onClose={ () => {
+					onClose={() => {
 						onClose();
-						setShowTour( false );
-					} }
+						setShowTour(false);
+					}}
 				/>
-			) }
+			)}
 		</div>
 	);
 };

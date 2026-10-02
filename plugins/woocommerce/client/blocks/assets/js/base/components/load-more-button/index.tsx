@@ -16,18 +16,15 @@ interface LoadMoreButtonProps {
 	screenReaderLabel?: string;
 }
 
-export const LoadMoreButton = ( {
+export const LoadMoreButton = ({
 	onClick,
-	label = __( 'Load more', 'woocommerce' ),
-	screenReaderLabel = __( 'Load more', 'woocommerce' ),
-}: LoadMoreButtonProps ): JSX.Element => {
+	label = __('Load more', 'woocommerce'),
+	screenReaderLabel = __('Load more', 'woocommerce'),
+}: LoadMoreButtonProps): JSX.Element => {
 	return (
 		<div className="wp-block-button wc-block-load-more wc-block-components-load-more">
-			<button className="wp-block-button__link" onClick={ onClick }>
-				<Label
-					label={ label }
-					screenReaderLabel={ screenReaderLabel }
-				/>
+			<button className="wp-block-button__link" onClick={onClick}>
+				<Label label={label} screenReaderLabel={screenReaderLabel} />
 			</button>
 		</div>
 	);

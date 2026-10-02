@@ -16,43 +16,43 @@ type ItemSelectorProps = {
 	editMode: boolean;
 };
 
-export default function ItemSelector( { editMode }: ItemSelectorProps ) {
+export default function ItemSelector({ editMode }: ItemSelectorProps) {
 	const { order, selectedItems, setSelectedItems } = useFulfillmentContext();
 
 	const itemsCount = selectedItems.reduce(
-		( acc, item ) => acc + item.selection.length,
+		(acc, item) => acc + item.selection.length,
 		0
 	);
 
 	const selectedItemsCount = selectedItems.reduce(
-		( acc, item ) =>
+		(acc, item) =>
 			acc +
-			item.selection.filter( ( selection ) => selection.checked ).length,
+			item.selection.filter((selection) => selection.checked).length,
 		0
 	);
 
 	const clearSelectedItems = () => {
 		setSelectedItems(
-			selectedItems.map( ( item ) => ( {
+			selectedItems.map((item) => ({
 				...item,
-				selection: item.selection.map( ( selection ) => ( {
+				selection: item.selection.map((selection) => ({
 					...selection,
 					checked: false,
-				} ) ),
-			} ) )
+				})),
+			}))
 		);
-		speak( __( 'All items deselected.', 'woocommerce' ), 'polite' );
+		speak(__('All items deselected.', 'woocommerce'), 'polite');
 	};
 
 	const selectAllItems = () => {
 		setSelectedItems(
-			selectedItems.map( ( item ) => ( {
+			selectedItems.map((item) => ({
 				...item,
-				selection: item.selection.map( ( selection ) => ( {
+				selection: item.selection.map((selection) => ({
 					...selection,
 					checked: true,
-				} ) ),
-			} ) )
+				})),
+			}))
 		);
 		speak(
 			sprintf(
@@ -69,88 +69,82 @@ export default function ItemSelector( { editMode }: ItemSelectorProps ) {
 		);
 	};
 
-	const handleToggleItem = (
-		id: number,
-		index: number,
-		checked: boolean
-	) => {
-		if ( index < 0 ) {
+	const handleToggleItem = (id: number, index: number, checked: boolean) => {
+		if (index < 0) {
 			// If the index is negative, it means we are trying to toggle the whole item.
 			// We will toggle all selections for this item.
-			setSelectedItems( [
-				...selectedItems.map( ( item ) => {
-					if ( item.item_id === id ) {
+			setSelectedItems([
+				...selectedItems.map((item) => {
+					if (item.item_id === id) {
 						return {
 							...item,
-							selection: item.selection.map( ( selection ) => ( {
+							selection: item.selection.map((selection) => ({
 								...selection,
 								checked,
-							} ) ),
+							})),
 						};
 					}
 					return item;
-				} ),
-			] );
+				}),
+			]);
 			return;
 		}
-		setSelectedItems( [
-			...selectedItems.map( ( item ) => {
-				if ( item.item_id === id ) {
-					item.selection.map( ( selection ) => {
-						if ( selection.index === index ) {
+		setSelectedItems([
+			...selectedItems.map((item) => {
+				if (item.item_id === id) {
+					item.selection.map((selection) => {
+						if (selection.index === index) {
 							selection.checked = checked;
 						}
 						return selection;
-					} );
+					});
 				}
 				return item;
-			} ),
-		] );
+			}),
+		]);
 
-		const currentItem = selectedItems.find(
-			( item ) => item.item_id === id
-		);
-		if ( currentItem ) {
+		const currentItem = selectedItems.find((item) => item.item_id === id);
+		if (currentItem) {
 			speak(
 				sprintf(
 					/* translators: %1$s is the item name, %2$s is selected/deselected status */
-					__( '%1$s %2$s.', 'woocommerce' ),
+					__('%1$s %2$s.', 'woocommerce'),
 					currentItem.item.name,
 					checked
-						? __( 'selected', 'woocommerce' )
-						: __( 'deselected', 'woocommerce' )
+						? __('selected', 'woocommerce')
+						: __('deselected', 'woocommerce')
 				),
 				'polite'
 			);
 		}
 	};
 
-	const isChecked = ( id: number, index: number ) => {
-		if ( index < 0 ) {
+	const isChecked = (id: number, index: number) => {
+		if (index < 0) {
 			// If the index is negative, it means we are trying to determine if the whole item is checked.
 			return selectedItems.some(
-				( item ) =>
+				(item) =>
 					item.item_id === id &&
-					item.selection.every( ( selection ) => selection.checked )
+					item.selection.every((selection) => selection.checked)
 			);
 		}
-		const _item = selectedItems.find( ( item ) => item.item_id === id );
-		if ( ! _item ) {
+		const _item = selectedItems.find((item) => item.item_id === id);
+		if (!_item) {
 			return false;
 		}
 		const _selection = _item.selection.find(
-			( selection ) => selection.index === index
+			(selection) => selection.index === index
 		);
 		return _selection ? _selection.checked : false;
 	};
 
-	const isIndeterminate = ( id: number ) => {
-		const _item = selectedItems.find( ( item ) => item.item_id === id );
-		if ( ! _item ) {
+	const isIndeterminate = (id: number) => {
+		const _item = selectedItems.find((item) => item.item_id === id);
+		if (!_item) {
 			return false;
 		}
 		const checkedCount = _item.selection.filter(
-			( selection ) => selection.checked
+			(selection) => selection.checked
 		).length;
 		return checkedCount > 0 && checkedCount < _item.selection.length;
 	};
@@ -158,34 +152,34 @@ export default function ItemSelector( { editMode }: ItemSelectorProps ) {
 	return (
 		<ul
 			className="woocommerce-fulfillment-item-list"
-			aria-label={ __( 'Select items for fulfillment', 'woocommerce' ) }
+			aria-label={__('Select items for fulfillment', 'woocommerce')}
 		>
 			<li>
 				<div className="woocommerce-fulfillment-item-bulk-select">
-					{ editMode && (
+					{editMode && (
 						<CheckboxControl
-							onChange={ () => {
-								if ( selectedItemsCount === itemsCount ) {
+							onChange={() => {
+								if (selectedItemsCount === itemsCount) {
 									clearSelectedItems();
 								} else {
 									selectAllItems();
 								}
-							} }
-							checked={ selectedItemsCount === itemsCount }
+							}}
+							checked={selectedItemsCount === itemsCount}
 							indeterminate={
 								selectedItemsCount > 0 &&
 								selectedItemsCount < itemsCount
 							}
 							aria-label={
 								selectedItemsCount === itemsCount
-									? __( 'Deselect all items', 'woocommerce' )
-									: __( 'Select all items', 'woocommerce' )
+									? __('Deselect all items', 'woocommerce')
+									: __('Select all items', 'woocommerce')
 							}
 							__nextHasNoMarginBottom
 						/>
-					) }
+					)}
 					<div className="woocommerce-fulfillment-item-bulk-select__label">
-						{ sprintf(
+						{sprintf(
 							/* translators: %s: number of selected items */
 							_n(
 								'%s selected',
@@ -194,23 +188,23 @@ export default function ItemSelector( { editMode }: ItemSelectorProps ) {
 								'woocommerce'
 							),
 							selectedItemsCount.toString()
-						) }
+						)}
 					</div>
 				</div>
 			</li>
-			{ selectedItems.map( ( item: ItemSelection ) => (
-				<li key={ item.item_id }>
+			{selectedItems.map((item: ItemSelection) => (
+				<li key={item.item_id}>
 					<FulfillmentLineItem
-						item={ item.item }
-						quantity={ item.selection.length }
-						editMode={ editMode }
-						currency={ order?.currency ?? '' }
-						toggleItem={ handleToggleItem }
-						isChecked={ isChecked }
-						isIndeterminate={ isIndeterminate }
+						item={item.item}
+						quantity={item.selection.length}
+						editMode={editMode}
+						currency={order?.currency ?? ''}
+						toggleItem={handleToggleItem}
+						isChecked={isChecked}
+						isIndeterminate={isIndeterminate}
 					/>
 				</li>
-			) ) }
+			))}
 		</ul>
 	);
 }

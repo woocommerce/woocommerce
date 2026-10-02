@@ -34,8 +34,8 @@ import {
 } from './types';
 import './style.scss';
 
-const getSortArgs: GetSortArgs = ( orderName ) => {
-	switch ( orderName ) {
+const getSortArgs: GetSortArgs = (orderName) => {
+	switch (orderName) {
 		case 'menu_order':
 		case 'popularity':
 		case 'rating':
@@ -57,15 +57,15 @@ const getSortArgs: GetSortArgs = ( orderName ) => {
 	}
 };
 
-const generateQuery: GenerateQuery = ( {
+const generateQuery: GenerateQuery = ({
 	sortValue,
 	currentPage,
 	attributes,
-} ) => {
+}) => {
 	const { columns, rows } = attributes;
 
 	return {
-		...getSortArgs( sortValue ),
+		...getSortArgs(sortValue),
 		catalog_visibility: 'catalog',
 		per_page: columns * rows,
 		page: currentPage,
@@ -81,19 +81,19 @@ const generateQuery: GenerateQuery = ( {
  * @return {Object} Same query without pagination and sorting attributes.
  */
 
-const extractPaginationAndSortAttributes = ( query: Query ): TotalQuery => {
+const extractPaginationAndSortAttributes = (query: Query): TotalQuery => {
 	/* eslint-disable-next-line no-unused-vars */
 	const { order, orderby, page, per_page: perPage, ...totalQuery } = query;
 	return totalQuery || {};
 };
 
-const announceLoadingCompletion = ( totalProducts: number ): void => {
-	if ( ! Number.isFinite( totalProducts ) ) {
+const announceLoadingCompletion = (totalProducts: number): void => {
+	if (!Number.isFinite(totalProducts)) {
 		return;
 	}
 
-	if ( totalProducts === 0 ) {
-		speak( __( 'No products found', 'woocommerce' ) );
+	if (totalProducts === 0) {
+		speak(__('No products found', 'woocommerce'));
 	} else {
 		speak(
 			sprintf(
@@ -113,46 +113,41 @@ const announceLoadingCompletion = ( totalProducts: number ): void => {
 const areQueryTotalsDifferent: AreQueryTotalsDifferent = (
 	{ totalQuery: nextQuery, totalProducts: nextProducts },
 	{ totalQuery: currentQuery } = {}
-) =>
-	! fastDeepEqual( nextQuery, currentQuery ) &&
-	Number.isFinite( nextProducts );
+) => !fastDeepEqual(nextQuery, currentQuery) && Number.isFinite(nextProducts);
 
-const ProductList = ( {
+const ProductList = ({
 	attributes,
 	currentPage,
 	onPageChange,
 	onSortChange,
 	sortValue,
 	scrollToTop,
-}: ProductListProps ): JSX.Element => {
+}: ProductListProps): JSX.Element => {
 	// These are possible filters.
-	const [ productAttributes, setProductAttributes ] = useQueryStateByKey(
+	const [productAttributes, setProductAttributes] = useQueryStateByKey(
 		'attributes',
 		[]
 	);
-	const [ productStockStatus, setProductStockStatus ] = useQueryStateByKey(
+	const [productStockStatus, setProductStockStatus] = useQueryStateByKey(
 		'stock_status',
 		[]
 	);
-	const [ productRating, setProductRating ] = useQueryStateByKey(
-		'rating',
-		[]
-	);
+	const [productRating, setProductRating] = useQueryStateByKey('rating', []);
 
-	const [ minPrice, setMinPrice ] = useQueryStateByKey( 'min_price' );
-	const [ maxPrice, setMaxPrice ] = useQueryStateByKey( 'max_price' );
+	const [minPrice, setMinPrice] = useQueryStateByKey('min_price');
+	const [maxPrice, setMaxPrice] = useQueryStateByKey('max_price');
 
-	const [ queryState ] = useSynchronizedQueryState(
-		generateQuery( {
+	const [queryState] = useSynchronizedQueryState(
+		generateQuery({
 			attributes,
 			sortValue,
 			currentPage,
-		} )
+		})
 	);
 	const { products, totalProducts, productsLoading } =
-		useStoreProducts( queryState );
+		useStoreProducts(queryState);
 	const { parentClassName, parentName } = useInnerBlockLayoutContext();
-	const totalQuery = extractPaginationAndSortAttributes( queryState );
+	const totalQuery = extractPaginationAndSortAttributes(queryState);
 	const { dispatchStoreEvent } = useStoreEvents();
 
 	// Only update previous query totals if the query is different and the total number of products is a finite number.
@@ -162,34 +157,34 @@ const ProductList = ( {
 	);
 
 	// If the product list changes, trigger an event.
-	useEffect( () => {
-		dispatchStoreEvent( 'product-list-render', {
+	useEffect(() => {
+		dispatchStoreEvent('product-list-render', {
 			products,
 			listName: parentName,
-		} );
-	}, [ products, parentName, dispatchStoreEvent ] );
+		});
+	}, [products, parentName, dispatchStoreEvent]);
 
 	// If query state (excluding pagination/sorting attributes) changed, reset pagination to the first page.
-	useEffect( () => {
-		if ( fastDeepEqual( totalQuery, previousQueryTotals?.totalQuery ) ) {
+	useEffect(() => {
+		if (fastDeepEqual(totalQuery, previousQueryTotals?.totalQuery)) {
 			return;
 		}
-		onPageChange( 1 );
+		onPageChange(1);
 
 		// Make sure there was a previous query, so we don't announce it on page load.
-		if ( previousQueryTotals?.totalQuery ) {
-			announceLoadingCompletion( totalProducts );
+		if (previousQueryTotals?.totalQuery) {
+			announceLoadingCompletion(totalProducts);
 		}
 	}, [
 		previousQueryTotals?.totalQuery,
 		totalProducts,
 		onPageChange,
 		totalQuery,
-	] );
+	]);
 
-	const onPaginationChange = ( newPage: number ) => {
-		scrollToTop( { focusableSelector: 'a, button' } );
-		onPageChange( newPage );
+	const onPaginationChange = (newPage: number) => {
+		scrollToTop({ focusableSelector: 'a, button' });
+		onPageChange(newPage);
 	};
 
 	const getClassnames = () => {
@@ -210,66 +205,63 @@ const ProductList = ( {
 	const { contentVisibility } = attributes;
 	const perPage = attributes.columns * attributes.rows;
 	const totalPages =
-		! Number.isFinite( totalProducts ) &&
-		Number.isFinite( previousQueryTotals?.totalProducts ) &&
-		fastDeepEqual( totalQuery, previousQueryTotals?.totalQuery )
-			? Math.ceil( ( previousQueryTotals?.totalProducts || 0 ) / perPage )
-			: Math.ceil( totalProducts / perPage );
+		!Number.isFinite(totalProducts) &&
+		Number.isFinite(previousQueryTotals?.totalProducts) &&
+		fastDeepEqual(totalQuery, previousQueryTotals?.totalQuery)
+			? Math.ceil((previousQueryTotals?.totalProducts || 0) / perPage)
+			: Math.ceil(totalProducts / perPage);
 	const listProducts = products.length
 		? products
-		: Array.from( { length: perPage } );
+		: Array.from({ length: perPage });
 	const hasProducts = products.length !== 0 || productsLoading;
 	const hasFilters =
 		productAttributes.length > 0 ||
 		productStockStatus.length > 0 ||
 		productRating.length > 0 ||
-		Number.isFinite( minPrice ) ||
-		Number.isFinite( maxPrice );
+		Number.isFinite(minPrice) ||
+		Number.isFinite(maxPrice);
 
 	return (
-		<div className={ getClassnames() }>
-			{ contentVisibility?.orderBy && hasProducts && (
-				<ProductSortSelect
-					onChange={ onSortChange }
-					value={ sortValue }
-				/>
-			) }
-			{ ! hasProducts && hasFilters && (
+		<div className={getClassnames()}>
+			{contentVisibility?.orderBy && hasProducts && (
+				<ProductSortSelect onChange={onSortChange} value={sortValue} />
+			)}
+			{!hasProducts && hasFilters && (
 				<NoMatchingProducts
-					resetCallback={ () => {
-						setProductAttributes( [] );
-						setProductStockStatus( [] );
-						setProductRating( [] );
-						setMinPrice( null );
-						setMaxPrice( null );
-					} }
+					resetCallback={() => {
+						setProductAttributes([]);
+						setProductStockStatus([]);
+						setProductRating([]);
+						setMinPrice(null);
+						setMaxPrice(null);
+					}}
 				/>
-			) }
-			{ ! hasProducts && ! hasFilters && <NoProducts /> }
-			{ hasProducts && (
+			)}
+			{!hasProducts && !hasFilters && <NoProducts />}
+			{hasProducts && (
 				<ul
-					className={ clsx( `${ parentClassName }__products`, {
+					className={clsx(`${parentClassName}__products`, {
 						'is-loading-products': productsLoading,
-					} ) }
+					})}
 				>
-					{ listProducts.map( ( product = {}, i: number ) => (
+					{listProducts.map((product = {}, i: number) => (
 						<ProductListItem
-							key={ product.id || i }
-							attributes={ attributes }
-							product={ product }
+							key={product.id || i}
+							attributes={attributes}
+							product={product}
 						/>
-					) ) }
+					))}
 				</ul>
-			) }
-			{ totalPages > 1 && (
+			)}
+			{totalPages > 1 && (
 				<Pagination
-					currentPage={ currentPage }
-					onPageChange={ onPaginationChange }
-					totalPages={ totalPages }
+					currentPage={currentPage}
+					onPageChange={onPaginationChange}
+					totalPages={totalPages}
 				/>
-			) }
+			)}
 		</div>
 	);
 };
 
-export default withScrollToTop( ProductList );
+export default withScrollToTop(ProductList);

@@ -28,7 +28,7 @@ interface ActivatePaymentsButtonProps {
 	 *
 	 * @param id Incentive ID.
 	 */
-	acceptIncentive: ( id: string ) => void;
+	acceptIncentive: (id: string) => void;
 	/**
 	 * The text of the button.
 	 */
@@ -44,7 +44,7 @@ interface ActivatePaymentsButtonProps {
 	/**
 	 * Function to set the onboarding modal open.
 	 */
-	setOnboardingModalOpen: ( isOnboardingModalOpen: boolean ) => void;
+	setOnboardingModalOpen: (isOnboardingModalOpen: boolean) => void;
 	/**
 	 * The onboarding type for the gateway.
 	 */
@@ -60,36 +60,36 @@ interface ActivatePaymentsButtonProps {
  * If incentive data is provided, it will trigger the `acceptIncentive` callback with the incentive ID before
  * moving to the live account setup.
  */
-export const ActivatePaymentsButton = ( {
+export const ActivatePaymentsButton = ({
 	acceptIncentive,
 	installingPlugin,
-	buttonText = __( 'Activate payments', 'woocommerce' ),
+	buttonText = __('Activate payments', 'woocommerce'),
 	incentive = null,
 	setOnboardingModalOpen,
 	onboardingType,
 	disableTestAccountUrl,
-}: ActivatePaymentsButtonProps ) => {
-	const [ isUpdating, setIsUpdating ] = useState( false );
+}: ActivatePaymentsButtonProps) => {
+	const [isUpdating, setIsUpdating] = useState(false);
 
 	const activatePayments = () => {
-		setIsUpdating( true );
+		setIsUpdating(true);
 
-		recordPaymentsEvent( 'activate_payments_button_click', {
+		recordPaymentsEvent('activate_payments_button_click', {
 			provider_id: wooPaymentsProviderId,
 			suggestion_id: wooPaymentsSuggestionId,
 			incentive_id: incentive ? incentive.promo_id : 'none',
 			onboarding_type: onboardingType || 'unknown',
 			provider_extension_slug: wooPaymentsExtensionSlug,
-		} );
+		});
 
 		// If no URL to disable the test account is provided, we just point the user to the live account setup.
-		if ( ! disableTestAccountUrl ) {
-			if ( incentive ) {
-				acceptIncentive( incentive.promo_id );
+		if (!disableTestAccountUrl) {
+			if (incentive) {
+				acceptIncentive(incentive.promo_id);
 			}
 
-			setIsUpdating( false );
-			if ( onboardingType === 'native_in_context' ) {
+			setIsUpdating(false);
+			if (onboardingType === 'native_in_context') {
 				// Open the onboarding modal.
 				recordPaymentsOnboardingEvent(
 					'woopayments_onboarding_modal_opened',
@@ -98,7 +98,7 @@ export const ActivatePaymentsButton = ( {
 						source: wooPaymentsOnboardingSessionEntrySettings,
 					}
 				);
-				setOnboardingModalOpen( true );
+				setOnboardingModalOpen(true);
 			} else {
 				window.location.href = getWooPaymentsSetupLiveAccountLink();
 			}
@@ -107,18 +107,18 @@ export const ActivatePaymentsButton = ( {
 		}
 
 		// Disable test account and redirect to the live account setup link.
-		apiFetch( {
+		apiFetch({
 			url: disableTestAccountUrl,
 			method: 'POST',
-		} )
-			.then( () => {
-				if ( incentive ) {
-					acceptIncentive( incentive.promo_id );
+		})
+			.then(() => {
+				if (incentive) {
+					acceptIncentive(incentive.promo_id);
 				}
 
-				setIsUpdating( false );
+				setIsUpdating(false);
 
-				if ( onboardingType === 'native_in_context' ) {
+				if (onboardingType === 'native_in_context') {
 					// Open the onboarding modal.
 					recordPaymentsOnboardingEvent(
 						'woopayments_onboarding_modal_opened',
@@ -127,26 +127,26 @@ export const ActivatePaymentsButton = ( {
 							source: wooPaymentsOnboardingSessionEntrySettings,
 						}
 					);
-					setOnboardingModalOpen( true );
+					setOnboardingModalOpen(true);
 				} else {
 					window.location.href = getWooPaymentsSetupLiveAccountLink();
 				}
-			} )
-			.catch( () => {
+			})
+			.catch(() => {
 				// Handle any errors that occur during the process.
-				setIsUpdating( false );
+				setIsUpdating(false);
 				// Error tracking is handled on the backend, so we don't need to do anything here.
-			} );
+			});
 	};
 
 	return (
 		<Button
-			variant={ 'primary' }
-			isBusy={ isUpdating }
-			disabled={ isUpdating || !! installingPlugin }
-			onClick={ activatePayments }
+			variant={'primary'}
+			isBusy={isUpdating}
+			disabled={isUpdating || !!installingPlugin}
+			onClick={activatePayments}
 		>
-			{ buttonText }
+			{buttonText}
 		</Button>
 	);
 };

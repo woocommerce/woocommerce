@@ -20,7 +20,7 @@ export const useOrderSummaryLoadingState = () => {
 	const { isApplyingCoupon, isRemovingCoupon } = useStoreCartCoupons();
 
 	const isCalculating = useSelect(
-		( select ) => select( checkoutStore ).isCalculating(),
+		(select) => select(checkoutStore).isCalculating(),
 		[]
 	);
 

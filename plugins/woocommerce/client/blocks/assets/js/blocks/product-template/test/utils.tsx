@@ -29,13 +29,13 @@ const requiredBlockTypes = [
 ];
 const registeredBlockTypes: string[] = [];
 
-beforeAll( () => {
-	requiredBlockTypes.forEach( ( name ) => {
-		if ( getBlockType( name ) ) {
+beforeAll(() => {
+	requiredBlockTypes.forEach((name) => {
+		if (getBlockType(name)) {
 			return;
 		}
 
-		registerBlockType( name, {
+		registerBlockType(name, {
 			apiVersion: 3,
 			title: name,
 			category: 'widgets',
@@ -47,18 +47,18 @@ beforeAll( () => {
 								type: 'boolean',
 								default: false,
 							},
-					  }
+						}
 					: {},
 			edit: () => null,
 			save: () => null,
-		} );
-		registeredBlockTypes.push( name );
-	} );
-} );
+		});
+		registeredBlockTypes.push(name);
+	});
+});
 
-afterAll( () => {
-	registeredBlockTypes.forEach( ( name ) => unregisterBlockType( name ) );
-} );
+afterAll(() => {
+	registeredBlockTypes.forEach((name) => unregisterBlockType(name));
+});
 
 const primeEntityResolution = (
 	kind: 'postType' | 'taxonomy',
@@ -67,104 +67,104 @@ const primeEntityResolution = (
 	records: { id: number; slug: string }[]
 ) => {
 	const query = {
-		_fields: [ 'id' ],
+		_fields: ['id'],
 		slug,
 	};
-	const actions = dispatch( coreStore );
+	const actions = dispatch(coreStore);
 
-	actions.addEntities( [
+	actions.addEntities([
 		{
-			baseURL: `/wp/v2/${ name }`,
+			baseURL: `/wp/v2/${name}`,
 			kind,
 			name,
 		},
-	] );
-	actions.receiveEntityRecords( kind, name, records, query );
-	actions.finishResolution( 'getEntityRecords', [ kind, name, query ] );
+	]);
+	actions.receiveEntityRecords(kind, name, records, query);
+	actions.finishResolution('getEntityRecords', [kind, name, query]);
 };
 
-describe( 'useGetLocation', () => {
-	beforeEach( () => {
-		act( () => {
-			dispatch( blockEditorStore ).resetBlocks( [] );
-		} );
-	} );
+describe('useGetLocation', () => {
+	beforeEach(() => {
+		act(() => {
+			dispatch(blockEditorStore).resetBlocks([]);
+		});
+	});
 
-	afterEach( () => {
-		act( () => {
-			dispatch( blockEditorStore ).resetBlocks( [] );
-		} );
-	} );
+	afterEach(() => {
+		act(() => {
+			dispatch(blockEditorStore).resetBlocks([]);
+		});
+	});
 
-	it( 'resolves a product template slug into a numeric product location', async () => {
-		primeEntityResolution( 'postType', 'product', 'cap', [
+	it('resolves a product template slug into a numeric product location', async () => {
+		primeEntityResolution('postType', 'product', 'cap', [
 			{ id: 71, slug: 'cap' },
-		] );
+		]);
 
-		const { result } = renderHook( () =>
+		const { result } = renderHook(() =>
 			useGetLocation(
 				{ templateSlug: 'single-product-cap' },
 				'standalone-product-template'
 			)
 		);
 
-		expect( result.current ).toEqual( {
+		expect(result.current).toEqual({
 			type: LocationType.Product,
 			sourceData: { productId: null },
-		} );
-		await waitFor( () =>
-			expect( result.current ).toEqual( {
+		});
+		await waitFor(() =>
+			expect(result.current).toEqual({
 				type: LocationType.Product,
 				sourceData: { productId: 71 },
-			} )
+			})
 		);
-	} );
+	});
 
-	it( 'resolves category location into taxonomy request', async () => {
-		primeEntityResolution( 'taxonomy', 'product_cat', 'hoodies', [
+	it('resolves category location into taxonomy request', async () => {
+		primeEntityResolution('taxonomy', 'product_cat', 'hoodies', [
 			{ id: 81, slug: 'hoodies' },
-		] );
+		]);
 
-		const { result } = renderHook( () =>
+		const { result } = renderHook(() =>
 			useGetLocation(
 				{ templateSlug: 'taxonomy-product_cat-hoodies' },
 				'category-product-template'
 			)
 		);
 
-		expect( result.current ).toEqual( {
+		expect(result.current).toEqual({
 			type: LocationType.Archive,
 			sourceData: { taxonomy: 'product_cat', termId: null },
-		} );
-		await waitFor( () =>
-			expect( result.current ).toEqual( {
+		});
+		await waitFor(() =>
+			expect(result.current).toEqual({
 				type: LocationType.Archive,
 				sourceData: { taxonomy: 'product_cat', termId: 81 },
-			} )
+			})
 		);
-	} );
+	});
 
-	it( 'resolves a tag template slug into a numeric taxonomy location', async () => {
-		primeEntityResolution( 'taxonomy', 'product_tag', 'recommended', [
+	it('resolves a tag template slug into a numeric taxonomy location', async () => {
+		primeEntityResolution('taxonomy', 'product_tag', 'recommended', [
 			{ id: 91, slug: 'recommended' },
-		] );
+		]);
 
-		const { result } = renderHook( () =>
+		const { result } = renderHook(() =>
 			useGetLocation(
 				{ templateSlug: 'taxonomy-product_tag-recommended' },
 				'tag-product-template'
 			)
 		);
 
-		await waitFor( () =>
-			expect( result.current ).toEqual( {
+		await waitFor(() =>
+			expect(result.current).toEqual({
 				type: LocationType.Archive,
 				sourceData: { taxonomy: 'product_tag', termId: 91 },
-			} )
+			})
 		);
-	} );
+	});
 
-	it.each( [
+	it.each([
 		{
 			caseName: 'a generic category template',
 			context: { templateSlug: 'taxonomy-product_cat' },
@@ -194,24 +194,24 @@ describe( 'useGetLocation', () => {
 			context: { templateSlug: 'single' },
 			expected: { type: LocationType.Site, sourceData: {} },
 		},
-	] )( 'returns the context for $caseName', ( { context, expected } ) => {
-		const { result } = renderHook( () =>
-			useGetLocation( context, 'generic-product-template' )
+	])('returns the context for $caseName', ({ context, expected }) => {
+		const { result } = renderHook(() =>
+			useGetLocation(context, 'generic-product-template')
 		);
 
-		expect( result.current ).toEqual( expected );
-	} );
+		expect(result.current).toEqual(expected);
+	});
 
-	it( 'gives Single Product block context precedence over the template', () => {
-		const productTemplate = createBlock( 'woocommerce/product-template' );
-		const singleProduct = createBlock( 'woocommerce/single-product', {}, [
+	it('gives Single Product block context precedence over the template', () => {
+		const productTemplate = createBlock('woocommerce/product-template');
+		const singleProduct = createBlock('woocommerce/single-product', {}, [
 			productTemplate,
-		] );
-		act( () => {
-			dispatch( blockEditorStore ).resetBlocks( [ singleProduct ] );
-		} );
+		]);
+		act(() => {
+			dispatch(blockEditorStore).resetBlocks([singleProduct]);
+		});
 
-		const { result } = renderHook( () =>
+		const { result } = renderHook(() =>
 			useGetLocation(
 				{
 					postId: 101,
@@ -221,71 +221,71 @@ describe( 'useGetLocation', () => {
 			)
 		);
 
-		expect( result.current ).toEqual( {
+		expect(result.current).toEqual({
 			type: LocationType.Product,
 			sourceData: { productId: 101 },
-		} );
-	} );
-} );
+		});
+	});
+});
 
-describe( 'useProductCollectionQueryContext', () => {
-	afterEach( () => {
-		act( () => {
-			dispatch( blockEditorStore ).resetBlocks( [] );
-		} );
-	} );
+describe('useProductCollectionQueryContext', () => {
+	afterEach(() => {
+		act(() => {
+			dispatch(blockEditorStore).resetBlocks([]);
+		});
+	});
 
-	it( 'includes only requested truthy Product Collection attributes', () => {
-		const productTemplate = createBlock( 'woocommerce/product-template' );
+	it('includes only requested truthy Product Collection attributes', () => {
+		const productTemplate = createBlock('woocommerce/product-template');
 		const productCollection = createBlock(
 			'woocommerce/product-collection',
 			{
 				collection: 'woocommerce/product-collection/on-sale',
 				forcePageReload: false,
 			},
-			[ productTemplate ]
+			[productTemplate]
 		);
-		act( () => {
-			dispatch( blockEditorStore ).resetBlocks( [ productCollection ] );
-		} );
+		act(() => {
+			dispatch(blockEditorStore).resetBlocks([productCollection]);
+		});
 
 		const { result, rerender } = renderHook(
-			( { includes } ) =>
-				useProductCollectionQueryContext( {
+			({ includes }) =>
+				useProductCollectionQueryContext({
 					clientId: productTemplate.clientId,
 					queryContextIncludes: includes,
-				} ),
+				}),
 			{
 				initialProps: {
-					includes: [ 'collection' ],
+					includes: ['collection'],
 				},
 			}
 		);
 
-		expect( result.current ).toEqual( {
+		expect(result.current).toEqual({
 			collection: 'woocommerce/product-collection/on-sale',
-		} );
+		});
 
-		rerender( { includes: [ 'forcePageReload' ] } );
-		expect( result.current ).toEqual( {} );
+		rerender({ includes: ['forcePageReload'] });
+		expect(result.current).toEqual({});
 
-		rerender( { includes: [] } );
-		expect( result.current ).toEqual( {} );
-	} );
+		rerender({ includes: [] });
+		expect(result.current).toEqual({});
+	});
 
-	it( 'returns null outside Product Collection', () => {
-		const paragraph = createBlock( 'core/paragraph' );
-		act( () => {
-			dispatch( blockEditorStore ).resetBlocks( [ paragraph ] );
-		} );
+	it('returns null outside Product Collection', () => {
+		const paragraph = createBlock('core/paragraph');
+		act(() => {
+			dispatch(blockEditorStore).resetBlocks([paragraph]);
+		});
 
-		const { result } = renderHook( () =>
-			useProductCollectionQueryContext( {
+		const { result } = renderHook(() =>
+			useProductCollectionQueryContext({
 				clientId: paragraph.clientId,
-				queryContextIncludes: [ 'collection' ],
-			} )
+				queryContextIncludes: ['collection'],
+			})
 		);
 
-		expect( result.current ).toBeNull();
-	} );
-} );
+		expect(result.current).toBeNull();
+	});
+});

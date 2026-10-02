@@ -24,54 +24,54 @@ export type TaskPromoProps = {
 	onButtonClick?: () => void;
 };
 
-export const TaskPromo = ( {
+export const TaskPromo = ({
 	title = '',
-	iconSrc = `${ WC_ASSET_URL }images/woo-app-icon.svg`,
-	iconAlt = __( 'Woo icon', 'woocommerce' ),
-	name = __( 'WooCommerce Marketplace', 'woocommerce' ),
+	iconSrc = `${WC_ASSET_URL}images/woo-app-icon.svg`,
+	iconAlt = __('Woo icon', 'woocommerce'),
+	name = __('WooCommerce Marketplace', 'woocommerce'),
 	text = '',
 	buttonHref = '',
 	buttonText = '',
 	onButtonClick,
-}: TaskPromoProps ) => {
-	useEffect( () => {
-		recordEvent( 'task_marketing_marketplace_promo_shown', {
+}: TaskPromoProps) => {
+	useEffect(() => {
+		recordEvent('task_marketing_marketplace_promo_shown', {
 			task: 'marketing',
-		} );
-	}, [] );
+		});
+	}, []);
 
 	return (
 		<Card className="woocommerce-task-card woocommerce-task-promo">
-			{ title && (
+			{title && (
 				<CardHeader>
 					<Text
 						variant="title.small"
 						as="h2"
 						className="woocommerce-task-card__title"
 					>
-						{ title }
+						{title}
 					</Text>
 				</CardHeader>
-			) }
+			)}
 			<CardBody>
-				{ iconSrc && iconAlt && (
+				{iconSrc && iconAlt && (
 					<div className="woocommerce-plugin-list__plugin-logo">
-						<img src={ iconSrc } alt={ iconAlt } />
+						<img src={iconSrc} alt={iconAlt} />
 					</div>
-				) }
+				)}
 				<div className="woocommerce-plugin-list__plugin-text">
 					<Text variant="subtitle.small" as="h4">
-						{ name }
+						{name}
 					</Text>
-					<Text variant="subtitle.small">{ text }</Text>
+					<Text variant="subtitle.small">{text}</Text>
 				</div>
 				<div className="woocommerce-plugin-list__plugin-action">
 					<Button
 						isSecondary
-						href={ buttonHref }
-						onClick={ onButtonClick }
+						href={buttonHref}
+						onClick={onButtonClick}
 					>
-						{ buttonText }
+						{buttonText}
 					</Button>
 				</div>
 			</CardBody>

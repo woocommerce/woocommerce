@@ -14,59 +14,58 @@ import { optionsStore } from '@woocommerce/data';
 import '../style.scss';
 
 export class DismissModal extends Component {
-	setDismissed = ( timestamp ) => {
-		this.props.updateOptions( {
+	setDismissed = (timestamp) => {
+		this.props.updateOptions({
 			woocommerce_shipping_dismissed_timestamp: timestamp,
-		} );
+		});
 	};
 
 	hideBanner = () => {
-		document.getElementById(
-			'woocommerce-admin-print-label'
-		).style.display = 'none';
+		document.getElementById('woocommerce-admin-print-label').style.display =
+			'none';
 	};
 
 	remindMeLaterClicked = () => {
 		const { onCloseAll, trackElementClicked } = this.props;
-		this.setDismissed( Date.now() );
+		this.setDismissed(Date.now());
 		onCloseAll();
 		this.hideBanner();
-		trackElementClicked( 'shipping_banner_dismiss_modal_remind_me_later' );
+		trackElementClicked('shipping_banner_dismiss_modal_remind_me_later');
 	};
 
 	closeForeverClicked = () => {
 		const { onCloseAll, trackElementClicked } = this.props;
-		this.setDismissed( -1 );
+		this.setDismissed(-1);
 		onCloseAll();
 		this.hideBanner();
-		trackElementClicked( 'shipping_banner_dismiss_modal_close_forever' );
+		trackElementClicked('shipping_banner_dismiss_modal_close_forever');
 	};
 
 	render() {
 		const { onClose, visible } = this.props;
 
-		if ( ! visible ) {
+		if (!visible) {
 			return null;
 		}
 
 		return (
 			<Modal
-				title={ __( 'Are you sure?', 'woocommerce' ) }
-				onRequestClose={ onClose }
+				title={__('Are you sure?', 'woocommerce')}
+				onRequestClose={onClose}
 				className="wc-admin-shipping-banner__dismiss-modal"
 			>
 				<p className="wc-admin-shipping-banner__dismiss-modal-help-text">
-					{ __(
+					{__(
 						'With WooCommerce Shipping you can Print shipping labels from your WooCommerce dashboard at the lowest USPS rates.',
 						'woocommerce'
-					) }
+					)}
 				</p>
 				<div className="wc-admin-shipping-banner__dismiss-modal-actions">
-					<Button isSecondary onClick={ this.remindMeLaterClicked }>
-						{ __( 'Remind me later', 'woocommerce' ) }
+					<Button isSecondary onClick={this.remindMeLaterClicked}>
+						{__('Remind me later', 'woocommerce')}
 					</Button>
-					<Button isPrimary onClick={ this.closeForeverClicked }>
-						{ __( "I don't need this", 'woocommerce' ) }
+					<Button isPrimary onClick={this.closeForeverClicked}>
+						{__("I don't need this", 'woocommerce')}
 					</Button>
 				</div>
 			</Modal>
@@ -75,8 +74,8 @@ export class DismissModal extends Component {
 }
 
 export default compose(
-	withDispatch( ( dispatch ) => {
-		const { updateOptions } = dispatch( optionsStore );
+	withDispatch((dispatch) => {
+		const { updateOptions } = dispatch(optionsStore);
 		return { updateOptions };
-	} )
-)( DismissModal );
+	})
+)(DismissModal);

@@ -11,15 +11,15 @@ import ScreenHeader from './screen-header';
 import { recordEventOnce } from '../../../events';
 
 export function ScreenTypography(): JSX.Element {
-	recordEventOnce( 'styles_sidebar_screen_typography_opened' );
+	recordEventOnce('styles_sidebar_screen_typography_opened');
 	return (
 		<>
 			<ScreenHeader
-				title={ __( 'Typography', __i18n_text_domain__ ) }
-				description={ __(
+				title={__('Typography', __i18n_text_domain__)}
+				description={__(
 					'Manage the typography settings for different elements.',
 					__i18n_text_domain__
-				) }
+				)}
 			/>
 			<TypographyPanel />
 		</>

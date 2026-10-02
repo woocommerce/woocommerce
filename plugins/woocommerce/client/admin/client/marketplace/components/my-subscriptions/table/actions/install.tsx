@@ -22,47 +22,47 @@ import { Subscription } from '../../types';
 import { installingStore } from '../../../../contexts/install-store';
 import { NoticeStatus } from '../../../../contexts/types';
 
-type ButtonProps = ComponentProps< typeof Button >;
+type ButtonProps = ComponentProps<typeof Button>;
 
 interface InstallProps {
 	subscription: Subscription;
-	variant?: ButtonProps[ 'variant' ];
+	variant?: ButtonProps['variant'];
 	onSuccess?: () => void;
 	onError?: () => void;
 }
 
-export default function Install( props: InstallProps ) {
-	const { loadSubscriptions } = useContext( SubscriptionsContext );
+export default function Install(props: InstallProps) {
+	const { loadSubscriptions } = useContext(SubscriptionsContext);
 
 	const loading: boolean = useSelect(
-		( select ) => {
-			return select( installingStore ).isInstalling(
+		(select) => {
+			return select(installingStore).isInstalling(
 				props.subscription.product_key
 			);
 		},
-		[ props.subscription.product_key ]
+		[props.subscription.product_key]
 	);
 
 	const startInstall = () => {
-		void dispatch( installingStore ).startInstalling(
+		void dispatch(installingStore).startInstalling(
 			props.subscription.product_key
 		);
 	};
 	const stopInstall = () => {
-		void dispatch( installingStore ).stopInstalling(
+		void dispatch(installingStore).stopInstalling(
 			props.subscription.product_key
 		);
 	};
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const handleInstallError = ( error: any ) => {
-		void loadSubscriptions( false ).then( () => {
+	const handleInstallError = (error: any) => {
+		void loadSubscriptions(false).then(() => {
 			let errorMessage = sprintf(
 				// translators: %s is the product name.
-				__( '%s couldn’t be installed.', 'woocommerce' ),
+				__('%s couldn’t be installed.', 'woocommerce'),
 				props.subscription.product_name
 			);
-			if ( error?.success === false && error?.data.message ) {
+			if (error?.success === false && error?.data.message) {
 				errorMessage += ' ' + error.data.message;
 			}
 			addNotice(
@@ -84,89 +84,86 @@ export default function Install( props: InstallProps ) {
 			);
 			stopInstall();
 
-			if ( props.onError ) {
+			if (props.onError) {
 				props.onError();
 			}
-		} );
+		});
 
-		recordEvent( 'marketplace_product_install_failed', {
+		recordEvent('marketplace_product_install_failed', {
 			product_zip_slug: props.subscription.zip_slug,
 			product_id: props.subscription.product_id,
 			product_current_version: props.subscription.version,
 			error_message: error?.data?.message,
-		} );
+		});
 	};
 
 	const install = () => {
-		recordEvent( 'marketplace_product_install_button_clicked', {
+		recordEvent('marketplace_product_install_button_clicked', {
 			product_zip_slug: props.subscription.zip_slug,
 			product_id: props.subscription.product_id,
 			product_current_version: props.subscription.version,
-		} );
+		});
 
 		startInstall();
-		removeNotice( props.subscription.product_key );
+		removeNotice(props.subscription.product_key);
 
-		if ( props.subscription.is_installable ) {
-			installProduct( props.subscription )
-				.then( () => {
-					void loadSubscriptions( false ).then( () => {
+		if (props.subscription.is_installable) {
+			installProduct(props.subscription)
+				.then(() => {
+					void loadSubscriptions(false).then(() => {
 						addNotice(
 							props.subscription.product_key,
 							sprintf(
 								// translators: %s is the product name.
-								__(
-									'%s successfully installed.',
-									'woocommerce'
-								),
+								__('%s successfully installed.', 'woocommerce'),
 								props.subscription.product_name
 							),
 							NoticeStatus.Success
 						);
 						stopInstall();
-					} );
+					});
 
-					recordEvent( 'marketplace_product_installed', {
+					recordEvent('marketplace_product_installed', {
 						product_zip_slug: props.subscription.zip_slug,
 						product_id: props.subscription.product_id,
 						product_current_version: props.subscription.version,
-					} );
+					});
 
-					if ( props.onSuccess ) {
+					if (props.onSuccess) {
 						props.onSuccess();
 					}
-				} )
-				.catch( handleInstallError );
+				})
+				.catch(handleInstallError);
 		} else {
-			getInstallUrl( props.subscription )
-				.then( ( url: string ) => {
-					recordEvent( 'marketplace_product_install_url', {
+			getInstallUrl(props.subscription)
+				.then((url: string) => {
+					recordEvent('marketplace_product_install_url', {
 						product_zip_slug: props.subscription.zip_slug,
 						product_id: props.subscription.product_id,
 						product_current_version: props.subscription.version,
 						product_install_url: url,
-					} );
+					});
 
 					stopInstall();
 
-					if ( url ) {
-						window.open( url, '_self' );
+					if (url) {
+						window.open(url, '_self');
 					} else {
 						throw new Error();
 					}
-				} )
-				.catch( handleInstallError );
+				})
+				.catch(handleInstallError);
 		}
 	};
 
 	return (
 		<Button
-			variant={ props.variant ?? 'link' }
-			isBusy={ loading }
-			disabled={ loading }
-			onClick={ install }
+			variant={props.variant ?? 'link'}
+			isBusy={loading}
+			disabled={loading}
+			onClick={install}
 		>
-			{ __( 'Install', 'woocommerce' ) }
+			{__('Install', 'woocommerce')}
 		</Button>
 	);
 }

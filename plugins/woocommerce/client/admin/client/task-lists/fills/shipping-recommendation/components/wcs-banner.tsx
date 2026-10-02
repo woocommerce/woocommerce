@@ -15,7 +15,7 @@ import { PluginBanner } from './plugin-banner';
 const features = [
 	{
 		icon: PrinterImage,
-		title: __( 'Buy postage when you need it', 'woocommerce' ),
+		title: __('Buy postage when you need it', 'woocommerce'),
 		description: __(
 			'No need to wonder where that stampbook went.',
 			'woocommerce'
@@ -23,7 +23,7 @@ const features = [
 	},
 	{
 		icon: PaperImage,
-		title: __( 'Print at home', 'woocommerce' ),
+		title: __('Print at home', 'woocommerce'),
 		description: __(
 			'Pick up an order, then just pay, print, package and post.',
 			'woocommerce'
@@ -31,7 +31,7 @@ const features = [
 	},
 	{
 		icon: DiscountImage,
-		title: __( 'Discounted rates', 'woocommerce' ),
+		title: __('Discounted rates', 'woocommerce'),
 		description: __(
 			'Access discounted shipping rates with USPS, UPS, and DHL.',
 			'woocommerce'
@@ -40,5 +40,5 @@ const features = [
 ];
 
 export const WCSBanner = () => {
-	return <PluginBanner logo={ { image: WCSImage } } features={ features } />;
+	return <PluginBanner logo={{ image: WCSImage }} features={features} />;
 };

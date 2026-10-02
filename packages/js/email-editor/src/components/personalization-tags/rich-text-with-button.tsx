@@ -28,13 +28,10 @@ type Props = {
 	placeholder: string;
 	attributeName: string;
 	attributeValue?: string;
-	updateProperty: (
-		theAttributeName: string,
-		theUpdatedValue: string
-	) => void;
+	updateProperty: (theAttributeName: string, theUpdatedValue: string) => void;
 };
 
-export function RichTextWithButton( {
+export function RichTextWithButton({
 	label,
 	labelSuffix,
 	help,
@@ -42,48 +39,48 @@ export function RichTextWithButton( {
 	attributeName,
 	attributeValue,
 	updateProperty = () => {},
-}: Props ) {
-	const [ selectionRange, setSelectionRange ] = useState( null );
-	const [ isModalOpened, setIsModalOpened ] = useState( false );
+}: Props) {
+	const [selectionRange, setSelectionRange] = useState(null);
+	const [isModalOpened, setIsModalOpened] = useState(false);
 	const list = useSelect(
-		( select ) => select( storeName ).getPersonalizationTagsList(),
+		(select) => select(storeName).getPersonalizationTagsList(),
 		[]
 	);
 
-	const richTextRef = useRef( null );
+	const richTextRef = useRef(null);
 
 	const handleInsertPersonalizationTag = useCallback(
-		( tagName, currentValue, currentSelectionRange ) => {
+		(tagName, currentValue, currentSelectionRange) => {
 			// Ensure selection range is within bounds
 			const start = currentSelectionRange?.start ?? currentValue.length;
 			const end = currentSelectionRange?.end ?? currentValue.length;
 
-			let richTextValue = create( { html: currentValue } );
+			let richTextValue = create({ html: currentValue });
 			richTextValue = insert(
 				richTextValue,
-				create( { html: `<!--${ tagName }-->` } ),
+				create({ html: `<!--${tagName}-->` }),
 				start,
 				end
 			);
-			const updatedValue = toHTMLString( { value: richTextValue } );
+			const updatedValue = toHTMLString({ value: richTextValue });
 
 			// Update the corresponding property
-			updateProperty( attributeName, updatedValue );
+			updateProperty(attributeName, updatedValue);
 
-			setSelectionRange( null );
+			setSelectionRange(null);
 		},
-		[ attributeName, updateProperty ]
+		[attributeName, updateProperty]
 	);
 
 	const finalLabel = (
 		<>
-			<span>{ label }</span>
+			<span>{label}</span>
 			<Button
 				className="woocommerce-settings-panel-personalization-tags-button"
 				icon="shortcode"
-				title={ __( 'Personalization Tags', __i18n_text_domain__ ) }
-				onClick={ () => {
-					setIsModalOpened( true );
+				title={__('Personalization Tags', __i18n_text_domain__)}
+				onClick={() => {
+					setIsModalOpened(true);
 					recordEvent(
 						'rich_text_with_button_personalization_tags_shortcode_icon_clicked',
 						{
@@ -91,33 +88,33 @@ export function RichTextWithButton( {
 							label,
 						}
 					);
-				} }
+				}}
 			/>
-			{ labelSuffix }
+			{labelSuffix}
 		</>
 	);
 
-	if ( ! attributeName ) {
+	if (!attributeName) {
 		return null;
 	}
 
 	return (
 		<BaseControl
 			id="" // See https://github.com/mailpoet/mailpoet/pull/6089#discussion_r1952126850 to understand why the ID is empty
-			label={ finalLabel }
-			className={ `woocommerce-settings-panel-${ attributeName }-text` }
-			help={ help }
+			label={finalLabel}
+			className={`woocommerce-settings-panel-${attributeName}-text`}
+			help={help}
 			__nextHasNoMarginBottom // To avoid warning about deprecation in console
 		>
 			<PersonalizationTagsModal
-				isOpened={ isModalOpened }
-				onInsert={ ( value ) => {
+				isOpened={isModalOpened}
+				onInsert={(value) => {
 					handleInsertPersonalizationTag(
 						value,
 						attributeValue ?? '',
 						selectionRange
 					);
-					setIsModalOpened( false );
+					setIsModalOpened(false);
 					recordEvent(
 						'rich_text_with_button_personalization_tags_inserted',
 						{
@@ -125,56 +122,56 @@ export function RichTextWithButton( {
 							value,
 						}
 					);
-				} }
-				closeCallback={ () => setIsModalOpened( false ) }
+				}}
+				closeCallback={() => setIsModalOpened(false)}
 				openedBy="RichTextWithButton-BaseControl"
 			/>
 			<PersonalizationTagsPopover
-				contentRef={ richTextRef }
-				onUpdate={ ( originalTag, updatedTag ) => {
+				contentRef={richTextRef}
+				onUpdate={(originalTag, updatedTag) => {
 					const currentValue = attributeValue ?? '';
 					// When we update the tag, we need to add brackets to the tag, because the popover removes them
 					const updatedContent = currentValue.replace(
-						`<!--[${ originalTag }]-->`,
-						`<!--[${ updatedTag }]-->`
+						`<!--[${originalTag}]-->`,
+						`<!--[${updatedTag}]-->`
 					);
-					updateProperty( attributeName, updatedContent );
-				} }
+					updateProperty(attributeName, updatedContent);
+				}}
 			/>
 			<RichText
-				ref={ richTextRef }
+				ref={richTextRef}
 				className="woocommerce-settings-panel-richtext"
-				placeholder={ placeholder }
-				onFocus={ () => {
+				placeholder={placeholder}
+				onFocus={() => {
 					setSelectionRange(
-						getCursorPosition( richTextRef, attributeValue ?? '' )
+						getCursorPosition(richTextRef, attributeValue ?? '')
 					);
-				} }
-				onKeyUp={ () => {
+				}}
+				onKeyUp={() => {
 					setSelectionRange(
-						getCursorPosition( richTextRef, attributeValue ?? '' )
+						getCursorPosition(richTextRef, attributeValue ?? '')
 					);
-				} }
-				onClick={ () => {
+				}}
+				onClick={() => {
 					setSelectionRange(
-						getCursorPosition( richTextRef, attributeValue ?? '' )
+						getCursorPosition(richTextRef, attributeValue ?? '')
 					);
-				} }
-				onChange={ ( value ) => {
+				}}
+				onChange={(value) => {
 					value = replacePersonalizationTagsWithHTMLComments(
 						value ?? '',
 						list
 					);
-					updateProperty( attributeName, value );
+					updateProperty(attributeName, value);
 					recordEventOnce(
 						'rich_text_with_button_input_field_updated',
 						{
 							attributeName,
 						}
 					);
-				} }
-				value={ attributeValue ?? '' }
-				data-automation-id={ `email_${ attributeName }` }
+				}}
+				value={attributeValue ?? ''}
+				data-automation-id={`email_${attributeName}`}
 			/>
 		</BaseControl>
 	);

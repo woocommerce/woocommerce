@@ -25,31 +25,29 @@ import LoadSampleProductConfirmModal from '../components/load-sample-product-con
 import useRecordCompletionTime from '../use-record-completion-time';
 
 export const Products = () => {
-	const [ showStacks, setStackVisibility ] = useState< boolean >( false );
-	const { recordCompletionTime } = useRecordCompletionTime( 'products' );
-	const [
-		isConfirmingLoadSampleProducts,
-		setIsConfirmingLoadSampleProducts,
-	] = useState( false );
+	const [showStacks, setStackVisibility] = useState<boolean>(false);
+	const { recordCompletionTime } = useRecordCompletionTime('products');
+	const [isConfirmingLoadSampleProducts, setIsConfirmingLoadSampleProducts] =
+		useState(false);
 
 	const importTypesWithTimeRecord = useMemo(
 		() =>
-			importTypes.map( ( importType ) => ( {
+			importTypes.map((importType) => ({
 				...importType,
 				onClick: () => {
 					importType.onClick();
 					recordCompletionTime();
 				},
-			} ) ),
-		[ recordCompletionTime ]
+			})),
+		[recordCompletionTime]
 	);
 
 	const { loadSampleProduct, isLoadingSampleProducts } =
-		useLoadSampleProducts( {
+		useLoadSampleProducts({
 			redirectUrlAfterSuccess: getAdminLink(
 				'edit.php?post_type=product&wc_onboarding_active_task=products'
 			),
-		} );
+		});
 
 	const { productTypes: productTypeListItems } = useProductTypeListItems(
 		getProductTypes(),
@@ -61,58 +59,56 @@ export const Products = () => {
 
 	const StacksComponent = (
 		<Stacks
-			items={ productTypeListItems }
-			onClickLoadSampleProduct={ () =>
-				setIsConfirmingLoadSampleProducts( true )
+			items={productTypeListItems}
+			onClickLoadSampleProduct={() =>
+				setIsConfirmingLoadSampleProducts(true)
 			}
 		/>
 	);
 
 	return (
 		<div className="woocommerce-task-import-products">
-			<h1>{ __( 'Import your products', 'woocommerce' ) }</h1>
-			<CardList items={ importTypesWithTimeRecord } />
+			<h1>{__('Import your products', 'woocommerce')}</h1>
+			<CardList items={importTypesWithTimeRecord} />
 			<div className="woocommerce-task-import-products-stacks">
 				<Button
-					onClick={ () => {
-						recordEvent(
-							'tasklist_add_product_from_scratch_click'
-						);
-						setStackVisibility( ! showStacks );
-					} }
+					onClick={() => {
+						recordEvent('tasklist_add_product_from_scratch_click');
+						setStackVisibility(!showStacks);
+					}}
 				>
-					{ __( 'Or add your products from scratch', 'woocommerce' ) }
-					<Icon icon={ showStacks ? chevronUp : chevronDown } />
+					{__('Or add your products from scratch', 'woocommerce')}
+					<Icon icon={showStacks ? chevronUp : chevronDown} />
 				</Button>
-				{ showStacks && StacksComponent }
+				{showStacks && StacksComponent}
 			</div>
-			{ isLoadingSampleProducts ? (
+			{isLoadingSampleProducts ? (
 				<LoadSampleProductModal />
 			) : (
 				isConfirmingLoadSampleProducts && (
 					<LoadSampleProductConfirmModal
-						onCancel={ () => {
-							setIsConfirmingLoadSampleProducts( false );
+						onCancel={() => {
+							setIsConfirmingLoadSampleProducts(false);
 							recordEvent(
 								'tasklist_cancel_load_sample_products_click'
 							);
-						} }
-						onImport={ () => {
-							setIsConfirmingLoadSampleProducts( false );
+						}}
+						onImport={() => {
+							setIsConfirmingLoadSampleProducts(false);
 							void loadSampleProduct();
-						} }
+						}}
 					/>
 				)
-			) }
+			)}
 		</div>
 	);
 };
 
-registerPlugin( 'wc-admin-onboarding-task-products', {
+registerPlugin('wc-admin-onboarding-task-products', {
 	scope: 'woocommerce-tasks',
 	render: () => (
 		<WooOnboardingTask id="products">
 			<Products />
 		</WooOnboardingTask>
 	),
-} );
+});

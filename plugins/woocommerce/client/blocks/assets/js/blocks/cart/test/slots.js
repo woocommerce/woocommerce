@@ -17,10 +17,10 @@ import { defaultCartState } from '@woocommerce/block-data/cart/default-state';
 import Cart from '../block';
 import OrderSummaryBlock from '../inner-blocks/cart-order-summary-block/frontend';
 
-const SlotFillConsumer = ( { cart } ) => {
+const SlotFillConsumer = ({ cart }) => {
 	const { billingData } = cart;
 
-	return <p>My address: { billingData.address_1 }</p>;
+	return <p>My address: {billingData.address_1}</p>;
 };
 
 const CartBlock = () => {
@@ -31,38 +31,38 @@ const CartBlock = () => {
 	);
 };
 
-describe( 'Testing Slotfills', () => {
-	beforeAll( () => {
-		registerPlugin( 'slot-fills-test', {
+describe('Testing Slotfills', () => {
+	beforeAll(() => {
+		registerPlugin('slot-fills-test', {
 			render: () => (
 				<ExperimentalOrderMeta>
 					<SlotFillConsumer />
 				</ExperimentalOrderMeta>
 			),
 			scope: 'woocommerce-checkout',
-		} );
-	} );
-	beforeEach( () => {
+		});
+	});
+	beforeEach(() => {
 		server.use(
-			http.get( '/wc/store/v1/cart/', () => {
-				return HttpResponse.json( previewCart );
-			} )
+			http.get('/wc/store/v1/cart/', () => {
+				return HttpResponse.json(previewCart);
+			})
 		);
 
-		act( () => {
+		act(() => {
 			// need to clear the store resolution state between tests.
-			dispatch( storeKey ).invalidateResolutionForStore();
-			dispatch( storeKey ).receiveCart( defaultCartState.cartData );
-		} );
-	} );
+			dispatch(storeKey).invalidateResolutionForStore();
+			dispatch(storeKey).receiveCart(defaultCartState.cartData);
+		});
+	});
 
-	afterEach( () => {
+	afterEach(() => {
 		server.resetHandlers();
-	} );
+	});
 
-	it( 'still expects billingData', async () => {
+	it('still expects billingData', async () => {
 		server.use(
-			http.get( '/wc/store/v1/cart', () => {
+			http.get('/wc/store/v1/cart', () => {
 				const cart = {
 					...previewCart,
 					billing_address: {
@@ -71,15 +71,15 @@ describe( 'Testing Slotfills', () => {
 					},
 				};
 
-				return HttpResponse.json( cart );
-			} )
+				return HttpResponse.json(cart);
+			})
 		);
-		render( <CartBlock /> );
+		render(<CartBlock />);
 
-		await waitFor( () => {
+		await waitFor(() => {
 			expect(
-				screen.getByText( /My address: Street address/i )
+				screen.getByText(/My address: Street address/i)
 			).toBeVisible();
-		} );
-	} );
-} );
+		});
+	});
+});

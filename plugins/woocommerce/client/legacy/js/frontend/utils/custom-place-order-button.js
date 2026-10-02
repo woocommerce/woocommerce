@@ -23,7 +23,8 @@
 		}
 		var style = document.createElement( 'style' );
 		style.id = styleId;
-		style.textContent = 'form.has-custom-place-order-button #place_order { display: none !important; }';
+		style.textContent =
+			'form.has-custom-place-order-button #place_order { display: none !important; }';
 		document.head.appendChild( style );
 	} )();
 
@@ -68,10 +69,16 @@
 	 */
 	function getGatewaysWithCustomButton() {
 		// Try multiple param sources for compatibility across pages
-		if ( typeof wc_checkout_params !== 'undefined' && wc_checkout_params.gateways_with_custom_place_order_button ) {
+		if (
+			typeof wc_checkout_params !== 'undefined' &&
+			wc_checkout_params.gateways_with_custom_place_order_button
+		) {
 			return wc_checkout_params.gateways_with_custom_place_order_button;
 		}
-		if ( typeof wc_add_payment_method_params !== 'undefined' && wc_add_payment_method_params.gateways_with_custom_place_order_button ) {
+		if (
+			typeof wc_add_payment_method_params !== 'undefined' &&
+			wc_add_payment_method_params.gateways_with_custom_place_order_button
+		) {
 			return wc_add_payment_method_params.gateways_with_custom_place_order_button;
 		}
 		return [];
@@ -96,7 +103,11 @@
 	 * @return {jQuery} The container element
 	 */
 	function getOrCreateCustomButtonContainer() {
-		if ( $customButtonContainer && $customButtonContainer.length && $.contains( document, $customButtonContainer[ 0 ] ) ) {
+		if (
+			$customButtonContainer &&
+			$customButtonContainer.length &&
+			$.contains( document, $customButtonContainer[ 0 ] )
+		) {
 			return $customButtonContainer;
 		}
 
@@ -105,7 +116,9 @@
 			return $( [] );
 		}
 
-		$customButtonContainer = $( '<div class="wc-custom-place-order-button"></div>' );
+		$customButtonContainer = $(
+			'<div class="wc-custom-place-order-button"></div>'
+		);
 		$placeOrderButton.after( $customButtonContainer );
 
 		return $customButtonContainer;
@@ -125,13 +138,19 @@
 	 * Clean up the current custom button if any.
 	 */
 	function cleanupCurrentCustomButton() {
-		if ( activeCustomButtonGateway && customPlaceOrderButtons[ activeCustomButtonGateway ] ) {
+		if (
+			activeCustomButtonGateway &&
+			customPlaceOrderButtons[ activeCustomButtonGateway ]
+		) {
 			try {
 				customPlaceOrderButtons[ activeCustomButtonGateway ].cleanup();
 			} catch ( e ) {
 				// Log errors to help gateway developers debug their cleanup implementation.
 				// eslint-disable-next-line no-console
-				console.error( 'Error in custom place order button cleanup:', e );
+				console.error(
+					'Error in custom place order button cleanup:',
+					e
+				);
 			}
 		}
 		removeCustomButtonContainer();
@@ -150,17 +169,25 @@
 		var $form = getForm();
 
 		// Clean up any displayed custom button, if any
-		if ( activeCustomButtonGateway && customPlaceOrderButtons[ activeCustomButtonGateway ] ) {
+		if (
+			activeCustomButtonGateway &&
+			customPlaceOrderButtons[ activeCustomButtonGateway ]
+		) {
 			try {
 				customPlaceOrderButtons[ activeCustomButtonGateway ].cleanup();
 			} catch ( e ) {
 				// Log errors to help gateway developers debug their cleanup implementation.
 				// eslint-disable-next-line no-console
-				console.error( 'Error in custom place order button cleanup:', e );
+				console.error(
+					'Error in custom place order button cleanup:',
+					e
+				);
 			}
 		}
 
-		var isCustomButtonRegistered = Boolean( customPlaceOrderButtons[ gatewayId ] );
+		var isCustomButtonRegistered = Boolean(
+			customPlaceOrderButtons[ gatewayId ]
+		);
 		if ( isCustomButtonRegistered ) {
 			// Hide the default button and show the custom one, instead.
 			$form.addClass( 'has-custom-place-order-button' );
@@ -170,11 +197,17 @@
 			$container.empty();
 
 			try {
-				customPlaceOrderButtons[ gatewayId ].render( $container.get( 0 ), api );
+				customPlaceOrderButtons[ gatewayId ].render(
+					$container.get( 0 ),
+					api
+				);
 			} catch ( e ) {
 				// Log errors to help gateway developers debug their render implementation.
 				// eslint-disable-next-line no-console
-				console.error( 'Error rendering custom place order button:', e );
+				console.error(
+					'Error rendering custom place order button:',
+					e
+				);
 			}
 		} else {
 			// Only show default button if gateway doesn't have a custom button pending registration.
@@ -218,35 +251,49 @@
 		if ( typeof gatewayId !== 'string' || ! gatewayId ) {
 			// Log validation errors to help gateway developers fix incorrect API usage.
 			// eslint-disable-next-line no-console
-			console.error( 'wc.customPlaceOrderButton.register: gatewayId must be a non-empty string' );
+			console.error(
+				'wc.customPlaceOrderButton.register: gatewayId must be a non-empty string'
+			);
 			return;
 		}
 		if ( typeof config !== 'object' || config === null ) {
 			// Log validation errors to help gateway developers fix incorrect API usage.
 			// eslint-disable-next-line no-console
-			console.error( 'wc.customPlaceOrderButton.register: config must be an object' );
+			console.error(
+				'wc.customPlaceOrderButton.register: config must be an object'
+			);
 			return;
 		}
 		if ( typeof config.render !== 'function' ) {
 			// Log validation errors to help gateway developers fix incorrect API usage.
 			// eslint-disable-next-line no-console
-			console.error( 'wc.customPlaceOrderButton.register: render must be a function' );
+			console.error(
+				'wc.customPlaceOrderButton.register: render must be a function'
+			);
 			return;
 		}
 		if ( typeof config.cleanup !== 'function' ) {
 			// Log validation errors to help gateway developers fix incorrect API usage.
 			// eslint-disable-next-line no-console
-			console.error( 'wc.customPlaceOrderButton.register: cleanup must be a function' );
+			console.error(
+				'wc.customPlaceOrderButton.register: cleanup must be a function'
+			);
 			return;
 		}
 
 		customPlaceOrderButtons[ gatewayId ] = config;
 
 		// If this gateway is already selected, notify that registration is complete
-		if ( getForm().find( 'input[name="payment_method"]:checked' ).val() === gatewayId ) {
+		if (
+			getForm().find( 'input[name="payment_method"]:checked' ).val() ===
+			gatewayId
+		) {
 			// since this API needs to be used on checkout/pay for order/my account pages,
 			// we need to trigger a global event to ensure it's picked up by the WC Core JS used in those pages.
-			$( document.body ).trigger( 'wc_custom_place_order_button_registered', [ gatewayId ] );
+			$( document.body ).trigger(
+				'wc_custom_place_order_button_registered',
+				[ gatewayId ]
+			);
 		}
 	}
 
@@ -255,9 +302,10 @@
 	window.wc.customPlaceOrderButton.register = registerCustomPlaceOrderButton;
 
 	// Internal API (used by WooCommerce core, not for external use)
-	window.wc.customPlaceOrderButton.__maybeShow = maybeShowCustomPlaceOrderButton;
-	window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit = maybeHideDefaultButtonOnInit;
+	window.wc.customPlaceOrderButton.__maybeShow =
+		maybeShowCustomPlaceOrderButton;
+	window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit =
+		maybeHideDefaultButtonOnInit;
 	window.wc.customPlaceOrderButton.__cleanup = cleanupCurrentCustomButton;
 	window.wc.customPlaceOrderButton.__getForm = getForm;
-
 } )( jQuery );

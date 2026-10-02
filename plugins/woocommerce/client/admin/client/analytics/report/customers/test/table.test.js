@@ -11,48 +11,48 @@ import CustomersReportTable from '../table';
 
 const captured = { getRowsContent: null, getHeadersContent: null };
 
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
+jest.mock('@wordpress/data', () => ({
+	...jest.requireActual('@wordpress/data'),
 	useSelect: jest.fn(),
-} ) );
+}));
 
-const mockCountriesStore = ( countries ) => {
-	useSelect.mockReturnValue( {
+const mockCountriesStore = (countries) => {
+	useSelect.mockReturnValue({
 		countries,
 		loadingCountries: false,
-	} );
+	});
 };
 
-jest.mock( '@woocommerce/data', () => ( {
-	...jest.requireActual( '@woocommerce/data' ),
+jest.mock('@woocommerce/data', () => ({
+	...jest.requireActual('@woocommerce/data'),
 	COUNTRIES_STORE_NAME: 'wc/admin/countries',
-} ) );
+}));
 
-jest.mock( '@woocommerce/currency', () => {
-	const React = require( 'react' );
+jest.mock('@woocommerce/currency', () => {
+	const React = require('react');
 	const config = {
-		formatAmount: ( v ) => String( v ),
-		formatDecimal: ( v ) => v,
-		getCurrencyConfig: () => ( {} ),
+		formatAmount: (v) => String(v),
+		formatDecimal: (v) => v,
+		getCurrencyConfig: () => ({}),
 	};
 	return {
-		CurrencyContext: React.createContext( config ),
+		CurrencyContext: React.createContext(config),
 		CurrencyFactory: () => config,
 	};
-} );
+});
 
-jest.mock( '~/utils/admin-settings', () => ( {
-	getAdminSetting: ( _key, fallback ) => fallback,
-} ) );
+jest.mock('~/utils/admin-settings', () => ({
+	getAdminSetting: (_key, fallback) => fallback,
+}));
 
-jest.mock( '../../../components/report-table', () => ( {
+jest.mock('../../../components/report-table', () => ({
 	__esModule: true,
-	default: ( props ) => {
+	default: (props) => {
 		captured.getRowsContent = props.getRowsContent;
 		captured.getHeadersContent = props.getHeadersContent;
 		return null;
 	},
-} ) );
+}));
 
 const baseCustomer = {
 	id: 1,
@@ -92,118 +92,118 @@ const HEADER_KEYS = [
 	'role',
 ];
 
-const col = ( key ) => HEADER_KEYS.indexOf( key );
+const col = (key) => HEADER_KEYS.indexOf(key);
 
-const COUNTRY_COL = col( 'country' );
+const COUNTRY_COL = col('country');
 
-function getCountryCell( customer ) {
+function getCountryCell(customer) {
 	captured.getRowsContent = null;
-	render( <CustomersReportTable query={ {} } /> );
-	const rows = captured.getRowsContent( [ customer ] );
-	return rows[ 0 ][ COUNTRY_COL ];
+	render(<CustomersReportTable query={{}} />);
+	const rows = captured.getRowsContent([customer]);
+	return rows[0][COUNTRY_COL];
 }
 
-function renderCellDisplay( display ) {
+function renderCellDisplay(display) {
 	return render(
 		<table>
 			<tbody>
 				<tr>
-					<td>{ display }</td>
+					<td>{display}</td>
 				</tr>
 			</tbody>
 		</table>
 	);
 }
 
-describe( 'CustomersReportTable country cell', () => {
-	beforeEach( () => {
+describe('CustomersReportTable country cell', () => {
+	beforeEach(() => {
 		jest.clearAllMocks();
-	} );
+	});
 
-	it( 'renders the decoded country name for a known country code', () => {
-		mockCountriesStore( [
+	it('renders the decoded country name for a known country code', () => {
+		mockCountriesStore([
 			{ code: 'FR', name: 'France', states: [] },
 			{ code: 'IT', name: 'Italy', states: [] },
-		] );
-		const cell = getCountryCell( { ...baseCustomer, country: 'FR' } );
+		]);
+		const cell = getCountryCell({ ...baseCustomer, country: 'FR' });
 
-		expect( cell.value ).toBe( 'FR' );
+		expect(cell.value).toBe('FR');
 
-		const { getByText, getAllByText } = renderCellDisplay( cell.display );
+		const { getByText, getAllByText } = renderCellDisplay(cell.display);
 		// The aria-hidden span shows the ISO code.
-		expect( getByText( 'FR' ) ).toBeInTheDocument();
+		expect(getByText('FR')).toBeInTheDocument();
 		// The screen-reader span shows the human-readable name.
-		expect( getAllByText( 'France' ).length ).toBeGreaterThan( 0 );
-	} );
+		expect(getAllByText('France').length).toBeGreaterThan(0);
+	});
 
-	it( 'decodes HTML entities in country names', () => {
-		mockCountriesStore( [
+	it('decodes HTML entities in country names', () => {
+		mockCountriesStore([
 			{ code: 'CI', name: 'C&ocirc;te d&#039;Ivoire', states: [] },
-		] );
-		const cell = getCountryCell( { ...baseCustomer, country: 'CI' } );
+		]);
+		const cell = getCountryCell({ ...baseCustomer, country: 'CI' });
 
-		const { getAllByText } = renderCellDisplay( cell.display );
-		expect( getAllByText( "Côte d'Ivoire" ).length ).toBeGreaterThan( 0 );
-	} );
+		const { getAllByText } = renderCellDisplay(cell.display);
+		expect(getAllByText("Côte d'Ivoire").length).toBeGreaterThan(0);
+	});
 
-	it( 'renders without crashing when the country code is unknown', () => {
-		mockCountriesStore( [ { code: 'FR', name: 'France', states: [] } ] );
-		const cell = getCountryCell( { ...baseCustomer, country: 'XX' } );
+	it('renders without crashing when the country code is unknown', () => {
+		mockCountriesStore([{ code: 'FR', name: 'France', states: [] }]);
+		const cell = getCountryCell({ ...baseCustomer, country: 'XX' });
 
-		expect( () => renderCellDisplay( cell.display ) ).not.toThrow();
-	} );
+		expect(() => renderCellDisplay(cell.display)).not.toThrow();
+	});
 
 	// Regression for woocommerce/woocommerce#64555. Before the fix, getCountryName
 	// did `countries[ code ]`, which on an Array treats the key as an index.
 	// A customer record with country = "0" therefore resolved to the first
 	// country object, which React then refused to render as a child.
-	it( 'does not return a country object when the country code coerces to an array index (#64555)', () => {
-		mockCountriesStore( [
+	it('does not return a country object when the country code coerces to an array index (#64555)', () => {
+		mockCountriesStore([
 			{
 				code: 'FR',
 				name: 'France',
 				states: [],
-				_links: { self: [ { href: '' } ] },
+				_links: { self: [{ href: '' }] },
 			},
-		] );
-		const cell = getCountryCell( { ...baseCustomer, country: '0' } );
+		]);
+		const cell = getCountryCell({ ...baseCustomer, country: '0' });
 
-		expect( () => renderCellDisplay( cell.display ) ).not.toThrow();
-	} );
+		expect(() => renderCellDisplay(cell.display)).not.toThrow();
+	});
 
-	it( 'does not return an Array prototype value when the country code is a method name (#64555)', () => {
-		mockCountriesStore( [ { code: 'FR', name: 'France', states: [] } ] );
-		const cell = getCountryCell( {
+	it('does not return an Array prototype value when the country code is a method name (#64555)', () => {
+		mockCountriesStore([{ code: 'FR', name: 'France', states: [] }]);
+		const cell = getCountryCell({
 			...baseCustomer,
 			country: 'find',
-		} );
+		});
 
-		expect( () => renderCellDisplay( cell.display ) ).not.toThrow();
-	} );
-} );
+		expect(() => renderCellDisplay(cell.display)).not.toThrow();
+	});
+});
 
-describe( 'CustomersReportTable column order', () => {
-	beforeEach( () => {
+describe('CustomersReportTable column order', () => {
+	beforeEach(() => {
 		jest.clearAllMocks();
-	} );
+	});
 
 	// The same Download button exports the table client-side for single-page
 	// reports and server-side for larger ones, so drift between the two orders
 	// makes identical reports produce differently ordered CSVs.
-	it( 'keeps the header order in sync with the server-side CSV export', () => {
-		mockCountriesStore( [] );
+	it('keeps the header order in sync with the server-side CSV export', () => {
+		mockCountriesStore([]);
 		captured.getHeadersContent = null;
-		render( <CustomersReportTable query={ {} } /> );
+		render(<CustomersReportTable query={{}} />);
 
 		expect(
-			captured.getHeadersContent().map( ( header ) => header.key )
-		).toEqual( HEADER_KEYS );
-	} );
+			captured.getHeadersContent().map((header) => header.key)
+		).toEqual(HEADER_KEYS);
+	});
 
-	it( 'emits every cell under its own header', () => {
-		mockCountriesStore( [] );
+	it('emits every cell under its own header', () => {
+		mockCountriesStore([]);
 		captured.getRowsContent = null;
-		render( <CustomersReportTable query={ {} } /> );
+		render(<CustomersReportTable query={{}} />);
 
 		// One distinct value per field, so a cell landing under the wrong
 		// header surfaces as a mismatch instead of passing by coincidence.
@@ -225,48 +225,48 @@ describe( 'CustomersReportTable column order', () => {
 			role: 'Customer',
 		};
 
-		const row = captured.getRowsContent( [ customer ] )[ 0 ];
+		const row = captured.getRowsContent([customer])[0];
 
-		expect( row ).toHaveLength( HEADER_KEYS.length );
+		expect(row).toHaveLength(HEADER_KEYS.length);
 		expect(
 			Object.fromEntries(
-				HEADER_KEYS.map( ( key, index ) => [ key, row[ index ].value ] )
+				HEADER_KEYS.map((key, index) => [key, row[index].value])
 			)
-		).toEqual( customer );
-	} );
-} );
+		).toEqual(customer);
+	});
+});
 
-describe( 'CustomersReportTable phone cells', () => {
-	const BILLING_PHONE_COL = col( 'billing_phone' );
-	const SHIPPING_PHONE_COL = col( 'shipping_phone' );
+describe('CustomersReportTable phone cells', () => {
+	const BILLING_PHONE_COL = col('billing_phone');
+	const SHIPPING_PHONE_COL = col('shipping_phone');
 
-	beforeEach( () => {
+	beforeEach(() => {
 		jest.clearAllMocks();
-	} );
+	});
 
-	it( 'maps billing and shipping phone into their cells', () => {
-		mockCountriesStore( [] );
+	it('maps billing and shipping phone into their cells', () => {
+		mockCountriesStore([]);
 		captured.getRowsContent = null;
-		render( <CustomersReportTable query={ {} } /> );
-		const rows = captured.getRowsContent( [
+		render(<CustomersReportTable query={{}} />);
+		const rows = captured.getRowsContent([
 			{
 				...baseCustomer,
 				billing_phone: '555-32123',
 				shipping_phone: '555-99887',
 			},
-		] );
+		]);
 
-		expect( rows[ 0 ][ BILLING_PHONE_COL ].value ).toBe( '555-32123' );
-		expect( rows[ 0 ][ SHIPPING_PHONE_COL ].value ).toBe( '555-99887' );
-	} );
+		expect(rows[0][BILLING_PHONE_COL].value).toBe('555-32123');
+		expect(rows[0][SHIPPING_PHONE_COL].value).toBe('555-99887');
+	});
 
-	it( 'keeps the phone headers aligned with the phone cells', () => {
-		mockCountriesStore( [] );
+	it('keeps the phone headers aligned with the phone cells', () => {
+		mockCountriesStore([]);
 		captured.getHeadersContent = null;
-		render( <CustomersReportTable query={ {} } /> );
+		render(<CustomersReportTable query={{}} />);
 		const headers = captured.getHeadersContent();
 
-		expect( headers[ BILLING_PHONE_COL ].key ).toBe( 'billing_phone' );
-		expect( headers[ SHIPPING_PHONE_COL ].key ).toBe( 'shipping_phone' );
-	} );
-} );
+		expect(headers[BILLING_PHONE_COL].key).toBe('billing_phone');
+		expect(headers[SHIPPING_PHONE_COL].key).toBe('shipping_phone');
+	});
+});

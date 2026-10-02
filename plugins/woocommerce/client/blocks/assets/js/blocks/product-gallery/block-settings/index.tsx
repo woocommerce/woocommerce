@@ -16,64 +16,61 @@ import {
  */
 import type { ProductGallerySettingsProps } from '../types';
 
-export const ProductGalleryBlockSettings = ( {
+export const ProductGalleryBlockSettings = ({
 	attributes,
 	setAttributes,
-}: ProductGallerySettingsProps ) => {
+}: ProductGallerySettingsProps) => {
 	const { hoverZoom, fullScreenOnClick } = attributes;
 	return (
 		<InspectorControls>
 			<ToolsPanel
-				label={ __( 'Media Settings', 'woocommerce' ) }
-				resetAll={ () => {
-					setAttributes( {
+				label={__('Media Settings', 'woocommerce')}
+				resetAll={() => {
+					setAttributes({
 						hoverZoom: true,
 						fullScreenOnClick: true,
-					} );
-				} }
+					});
+				}}
 			>
 				<ToolsPanelItem
-					hasValue={ () => hoverZoom !== true }
-					label={ __( 'Zoom while hovering', 'woocommerce' ) }
-					onDeselect={ () => setAttributes( { hoverZoom: true } ) }
+					hasValue={() => hoverZoom !== true}
+					label={__('Zoom while hovering', 'woocommerce')}
+					onDeselect={() => setAttributes({ hoverZoom: true })}
 					isShownByDefault
 				>
 					<ToggleControl
-						label={ __( 'Zoom while hovering', 'woocommerce' ) }
-						help={ __(
+						label={__('Zoom while hovering', 'woocommerce')}
+						help={__(
 							'While hovering the image in the viewer will zoom in by 30%.',
 							'woocommerce'
-						) }
-						checked={ hoverZoom }
-						onChange={ () =>
-							setAttributes( {
-								hoverZoom: ! hoverZoom,
-							} )
+						)}
+						checked={hoverZoom}
+						onChange={() =>
+							setAttributes({
+								hoverZoom: !hoverZoom,
+							})
 						}
 					/>
 				</ToolsPanelItem>
 				<ToolsPanelItem
-					hasValue={ () => fullScreenOnClick !== true }
-					label={ __( 'Open pop-up when clicked', 'woocommerce' ) }
-					onDeselect={ () =>
-						setAttributes( { fullScreenOnClick: true } )
+					hasValue={() => fullScreenOnClick !== true}
+					label={__('Open pop-up when clicked', 'woocommerce')}
+					onDeselect={() =>
+						setAttributes({ fullScreenOnClick: true })
 					}
 					isShownByDefault
 				>
 					<ToggleControl
-						label={ __(
-							'Open pop-up when clicked',
-							'woocommerce'
-						) }
-						help={ __(
+						label={__('Open pop-up when clicked', 'woocommerce')}
+						help={__(
 							'Clicking on the image in the viewer will open a full-screen gallery experience.',
 							'woocommerce'
-						) }
-						checked={ fullScreenOnClick }
-						onChange={ () =>
-							setAttributes( {
-								fullScreenOnClick: ! fullScreenOnClick,
-							} )
+						)}
+						checked={fullScreenOnClick}
+						onChange={() =>
+							setAttributes({
+								fullScreenOnClick: !fullScreenOnClick,
+							})
 						}
 					/>
 				</ToolsPanelItem>

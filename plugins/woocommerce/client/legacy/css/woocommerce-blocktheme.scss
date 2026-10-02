@@ -11,7 +11,6 @@
 .woocommerce-cart,
 .woocommerce-account,
 .woocommerce-checkout {
-
 	.wp-block-post-title,
 	main .woocommerce {
 		// Allow Cart/Checkout/Account pages more space to breathe.
@@ -27,10 +26,8 @@
 * General
 */
 .woocommerce {
-
 	button.button,
 	a.button {
-
 		&.disabled,
 		&:disabled,
 		&:disabled[disabled],
@@ -44,7 +41,6 @@
 	#respond input#submit,
 	input.button,
 	a.button.alt {
-
 		&:hover {
 			opacity: 0.9;
 		}
@@ -64,7 +60,6 @@
 * Products
 */
 .woocommerce {
-
 	/**
 	* Shop products list
 	*/
@@ -91,21 +86,20 @@
 		}
 
 		.woocommerce-tabs {
-
 			ul.tabs li.active {
-
 				&::before {
-					box-shadow: 2px 2px 0 var(--wp--preset--color--background, $contentbg);
+					box-shadow: 2px 2px 0
+						var(--wp--preset--color--background, $contentbg);
 				}
 
 				&::after {
-					box-shadow: -2px 2px 0 var(--wp--preset--color--background, $contentbg);
+					box-shadow: -2px 2px 0
+						var(--wp--preset--color--background, $contentbg);
 				}
 			}
 		}
 
 		form.cart {
-
 			div.quantity {
 				float: none; // Remove float set by WC core.
 				vertical-align: middle;
@@ -127,7 +121,6 @@
 			}
 
 			.variations {
-
 				td,
 				th {
 					word-break: normal;
@@ -142,7 +135,6 @@
 	}
 
 	.woocommerce-Reviews {
-
 		#comments {
 			// Add spacing between the review comments and the review form.
 			margin-bottom: var(--wp--style--block-gap);
@@ -163,7 +155,6 @@
 	.price,
 	.woocommerce-grouped-product-list-item__price,
 	.wc-block-components-product-price {
-
 		ins,
 		bdi {
 			// Ensure discounted prices aren't underlined.
@@ -185,7 +176,6 @@
 		display: block;
 
 		tr {
-
 			th,
 			td {
 				padding-bottom: var(--wp--style--block-gap);
@@ -248,9 +238,7 @@ a.added_to_cart {
 }
 
 .woocommerce {
-
 	form {
-
 		.form-row {
 			margin-bottom: 1em;
 		}
@@ -266,7 +254,6 @@ a.added_to_cart {
 * Cart / Checkout
 */
 .woocommerce-page {
-
 	/**
 	* Tables
 	*/
@@ -275,7 +262,7 @@ a.added_to_cart {
 		width: 70%;
 		border-collapse: collapse;
 
-		@media only screen and ( max-width: 768px ) {
+		@media only screen and (max-width: 768px) {
 			width: 100%;
 		}
 
@@ -295,7 +282,6 @@ a.added_to_cart {
 	* Cart specific
 	*/
 	.woocommerce-cart-form {
-
 		.product-remove {
 			// Decrease width of the product remove column.
 			width: 1em;
@@ -325,8 +311,7 @@ a.added_to_cart {
 			padding: 0 1.1em;
 		}
 
-		@media only screen and ( max-width: 768px ) {
-
+		@media only screen and (max-width: 768px) {
 			.product-remove {
 				width: auto;
 			}
@@ -367,7 +352,7 @@ a.added_to_cart {
 		padding-left: 0;
 		font-size: var(--wp--preset--font-size--small);
 
-		@media only screen and ( max-width: 768px ) {
+		@media only screen and (max-width: 768px) {
 			flex-direction: column;
 		}
 
@@ -399,9 +384,7 @@ a.added_to_cart {
 * My account
 */
 .woocommerce-account {
-
 	.woocommerce-MyAccount-navigation {
-
 		ul {
 			// Ensure top left alignment of the navigation.
 			margin: 0 0 2em;
@@ -413,7 +396,7 @@ a.added_to_cart {
 			list-style: none;
 			padding: 1em 0;
 
-			@media only screen and ( max-width: 768px ) {
+			@media only screen and (max-width: 768px) {
 				padding: 0.35em 0;
 			}
 
@@ -422,7 +405,6 @@ a.added_to_cart {
 			}
 
 			&.is-active {
-
 				a {
 					text-decoration: underline;
 				}
@@ -439,7 +421,6 @@ a.added_to_cart {
 	}
 
 	.woocommerce-MyAccount-content {
-
 		> p:first-of-type,
 		p.form-row-first,
 		p.form-row-last {
@@ -466,7 +447,6 @@ a.added_to_cart {
 	}
 
 	.woocommerce-orders-table__cell.woocommerce-orders-table__cell-order-actions {
-
 		&::before {
 			display: none;
 		}
@@ -485,7 +465,6 @@ a.added_to_cart {
 .woocommerce-page {
 	// For block themes we increase the padding of the input fields across classic checkout and my account pages.
 	form .form-row {
-
 		select,
 		textarea.input-text,
 		input.input-text {
@@ -504,7 +483,6 @@ a.added_to_cart {
 
 		// Ensure dropdowns are visually consistent with other form fields.
 		.select2-container {
-
 			.select2-selection--single .select2-selection__rendered {
 				padding: 0.9rem 1.1rem;
 			}
@@ -516,7 +494,6 @@ a.added_to_cart {
 	}
 
 	.select2-container {
-
 		.select2-search--dropdown {
 			padding: 0 1.1rem 0.5rem;
 		}

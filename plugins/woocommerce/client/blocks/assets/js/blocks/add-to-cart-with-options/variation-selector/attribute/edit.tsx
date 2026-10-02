@@ -47,14 +47,12 @@ import type { VisualAttributeTerm } from '../../../../base/utils/visual-attribut
 
 const INNER_CHIPS = 'woocommerce/product-filter-chips';
 
-const getFallbackDisplayStyleInsertionPoint = (
-	parentBlock: BlockInstance
-) => {
+const getFallbackDisplayStyleInsertionPoint = (parentBlock: BlockInstance) => {
 	const groupBlock = parentBlock.innerBlocks.find(
-		( block ) => block.name === 'core/group'
+		(block) => block.name === 'core/group'
 	);
 
-	if ( groupBlock ) {
+	if (groupBlock) {
 		return {
 			rootClientId: groupBlock.clientId,
 			index: groupBlock.innerBlocks.length,
@@ -80,70 +78,70 @@ type AttributeItemProps = {
 	onSelect(): void;
 };
 
-function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
+function AttributeItem({ blocks, isSelected, onSelect }: AttributeItemProps) {
 	const { data: attribute } =
-		useCustomDataContext< ProductResponseAttributeItem >( 'attribute' );
-	const termIds = useMemo( () => {
+		useCustomDataContext<ProductResponseAttributeItem>('attribute');
+	const termIds = useMemo(() => {
 		return attribute?.terms
 			? attribute.terms
-					.map( ( term ) => term.id )
-					.filter( ( termId ) => termId > 0 )
+					.map((term) => term.id)
+					.filter((termId) => termId > 0)
 			: [];
-	}, [ attribute ] );
-	const { results: attributeTerms } = useCollection< AttributeTerm >( {
+	}, [attribute]);
+	const { results: attributeTerms } = useCollection<AttributeTerm>({
 		namespace: '/wc/store/v1',
 		resourceName: 'products/attributes/terms',
-		resourceValues: [ attribute?.id || 0 ],
-		shouldSelect: !! attribute?.id && termIds.length > 0,
+		resourceValues: [attribute?.id || 0],
+		shouldSelect: !!attribute?.id && termIds.length > 0,
 		query: {
 			include: termIds,
 			hide_empty: false,
 			__experimental_visual: true,
 		},
-	} );
+	});
 	const visualAttributesEnabled = getSetting(
 		'experimentalVisualAttributes',
 		false
 	);
-	const visualByTermId = useMemo( () => {
-		return attributeTerms.reduce< Record< number, VisualAttributeTerm > >(
-			( accumulator, term ) => {
-				if ( term.__experimentalVisual ) {
-					accumulator[ term.id ] = term.__experimentalVisual;
+	const visualByTermId = useMemo(() => {
+		return attributeTerms.reduce<Record<number, VisualAttributeTerm>>(
+			(accumulator, term) => {
+				if (term.__experimentalVisual) {
+					accumulator[term.id] = term.__experimentalVisual;
 				}
 
 				return accumulator;
 			},
 			{}
 		);
-	}, [ attributeTerms ] );
+	}, [attributeTerms]);
 
-	const selectableContext = useMemo( () => {
-		let items: SelectableItem< {
+	const selectableContext = useMemo(() => {
+		let items: SelectableItem<{
 			label: string;
 			ariaLabel: string;
 			visual?: VisualAttributeTerm;
-		} >[] = [];
+		}>[] = [];
 		if (
 			attribute &&
-			Array.isArray( attribute?.terms ) &&
+			Array.isArray(attribute?.terms) &&
 			attribute.terms.length > 0
 		) {
-			items = attribute.terms.map( ( term ) => {
+			items = attribute.terms.map((term) => {
 				const visual =
-					visualByTermId[ term.id ] ||
-					( visualAttributesEnabled
-						? EMPTY_TERM_VISUALS[ term.id ]
-						: undefined );
+					visualByTermId[term.id] ||
+					(visualAttributesEnabled
+						? EMPTY_TERM_VISUALS[term.id]
+						: undefined);
 
 				return {
-					id: `${ attribute.taxonomy }-${ term.slug }`,
+					id: `${attribute.taxonomy}-${term.slug}`,
 					label: term.name,
 					value: term.slug,
 					ariaLabel: term.name,
-					...( visual ? { visual } : {} ),
+					...(visual ? { visual } : {}),
 				};
-			} );
+			});
 		}
 
 		return {
@@ -151,216 +149,210 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 			selectionMode: 'single' as const,
 			storeNamespace: 'woocommerce/add-to-cart-with-options',
 			groupLabel: '',
-		} satisfies SelectableItemsContext< {
+		} satisfies SelectableItemsContext<{
 			label: string;
 			ariaLabel: string;
 			visual?: VisualAttributeTerm;
-		} >;
-	}, [ attribute, visualAttributesEnabled, visualByTermId ] );
+		}>;
+	}, [attribute, visualAttributesEnabled, visualByTermId]);
 
-	const blockPreviewProps = useBlockPreview( {
+	const blockPreviewProps = useBlockPreview({
 		blocks,
-	} );
+	});
 	const innerBlocksProps = useInnerBlocksProps();
 
-	if ( ! attribute ) {
+	if (!attribute) {
 		return null;
 	}
 
 	return (
 		<BlockContextProvider
-			value={ {
+			value={{
 				'woocommerce/selectableItems': selectableContext,
-			} }
+			}}
 		>
-			{ isSelected ? (
-				<div { ...innerBlocksProps } />
+			{isSelected ? (
+				<div {...innerBlocksProps} />
 			) : (
 				// We don't need these elements to be interactive with the
 				// keyboard because the first attribute blocks are always
 				// editable. We allow clicking on the blocks of other attributes
 				// but it's not critical, so we disable the keyboard events.
 				// eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-				<div { ...blockPreviewProps } onClick={ onSelect } />
-			) }
+				<div {...blockPreviewProps} onClick={onSelect} />
+			)}
 		</BlockContextProvider>
 	);
 }
 
 export default function AttributeItemTemplateEdit(
-	props: BlockEditProps< Attributes >
+	props: BlockEditProps<Attributes>
 ) {
 	const { attributes, setAttributes, clientId } = props;
 	const { className, displayStyle, autoselect, disabledAttributesAction } =
 		attributes;
 
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className,
-	} );
+	});
 
 	const { product } = useProductDataContext();
 
 	const productAttributes =
-		isProductResponseItem( product ) && product.type === 'variable'
+		isProductResponseItem(product) && product.type === 'variable'
 			? product.attributes
 			: DEFAULT_ATTRIBUTES;
 
 	const { blocks } = useSelect(
-		( select ) => {
-			const { getBlocks } = select( blockEditorStore );
+		(select) => {
+			const { getBlocks } = select(blockEditorStore);
 			return {
-				blocks: getBlocks( clientId ),
+				blocks: getBlocks(clientId),
 			};
 		},
-		[ clientId ]
+		[clientId]
 	);
 
-	const [ selectedAttributeItem, setSelectedAttributeItem ] =
-		useState< number >();
+	const [selectedAttributeItem, setSelectedAttributeItem] =
+		useState<number>();
 
 	return (
 		<>
 			<InspectorControls>
 				<ToolsPanel
-					label={ __( 'Style', 'woocommerce' ) }
-					resetAll={ () => {
-						setAttributes( { displayStyle: INNER_CHIPS } );
+					label={__('Style', 'woocommerce')}
+					resetAll={() => {
+						setAttributes({ displayStyle: INNER_CHIPS });
 						resetDisplayStyleBlock(
 							clientId,
 							INNER_CHIPS,
 							getFallbackDisplayStyleInsertionPoint
 						);
-					} }
+					}}
 				>
 					<ToolsPanelItem
-						hasValue={ () => displayStyle !== INNER_CHIPS }
-						label={ __( 'Style', 'woocommerce' ) }
-						onDeselect={ () => {
-							setAttributes( { displayStyle: INNER_CHIPS } );
+						hasValue={() => displayStyle !== INNER_CHIPS}
+						label={__('Style', 'woocommerce')}
+						onDeselect={() => {
+							setAttributes({ displayStyle: INNER_CHIPS });
 							resetDisplayStyleBlock(
 								clientId,
 								INNER_CHIPS,
 								getFallbackDisplayStyleInsertionPoint
 							);
-						} }
+						}}
 						isShownByDefault
 					>
 						<div>
 							<span className="screen-reader-text">
-								{ __( 'Style', 'woocommerce' ) }
+								{__('Style', 'woocommerce')}
 							</span>
 							<DisplayStyleSwitcher
-								clientId={ clientId }
-								currentStyle={ displayStyle }
+								clientId={clientId}
+								currentStyle={displayStyle}
 								getFallbackDisplayStyleInsertionPoint={
 									getFallbackDisplayStyleInsertionPoint
 								}
-								onChange={ ( value ) => {
-									setAttributes( {
+								onChange={(value) => {
+									setAttributes({
 										displayStyle: value,
-									} );
-								} }
+									});
+								}}
 							/>
 						</div>
 					</ToolsPanelItem>
 				</ToolsPanel>
 				<ToolsPanel
-					label={ __( 'Auto-select', 'woocommerce' ) }
-					resetAll={ () =>
-						setAttributes( {
+					label={__('Auto-select', 'woocommerce')}
+					resetAll={() =>
+						setAttributes({
 							autoselect: false,
 							disabledAttributesAction: 'disable',
-						} )
+						})
 					}
 				>
 					<ToolsPanelItem
-						label={ __(
+						label={__(
 							'Auto-select when only one option is available',
 							'woocommerce'
-						) }
-						hasValue={ () => autoselect }
-						onDeselect={ () =>
-							setAttributes( { autoselect: false } )
-						}
+						)}
+						hasValue={() => autoselect}
+						onDeselect={() => setAttributes({ autoselect: false })}
 						isShownByDefault
 					>
 						<ToggleControl
-							label={ __(
+							label={__(
 								'Auto-select when only one option is available',
 								'woocommerce'
-							) }
-							help={ __(
+							)}
+							help={__(
 								'Automatically select options on page load or after the shopper changes attributes, when only one valid choice is available.',
 								'woocommerce'
-							) }
-							checked={ autoselect }
-							onChange={ () =>
-								setAttributes( { autoselect: ! autoselect } )
+							)}
+							checked={autoselect}
+							onChange={() =>
+								setAttributes({ autoselect: !autoselect })
 							}
 							__nextHasNoMarginBottom
 						/>
 					</ToolsPanelItem>
 					<ToolsPanelItem
-						label={ __( 'Invalid options', 'woocommerce' ) }
-						hasValue={ () =>
-							disabledAttributesAction !== 'disable'
-						}
-						onDeselect={ () =>
-							setAttributes( {
+						label={__('Invalid options', 'woocommerce')}
+						hasValue={() => disabledAttributesAction !== 'disable'}
+						onDeselect={() =>
+							setAttributes({
 								disabledAttributesAction: 'disable',
-							} )
+							})
 						}
 						isShownByDefault
 					>
 						<ToggleGroupControl
-							label={ __( 'Invalid options', 'woocommerce' ) }
-							help={ __(
+							label={__('Invalid options', 'woocommerce')}
+							help={__(
 								'Control the display of invalid options.',
 								'woocommerce'
-							) }
-							value={ disabledAttributesAction }
-							onChange={ ( value ) => {
-								if ( value === 'hide' || value === 'disable' ) {
-									setAttributes( {
+							)}
+							value={disabledAttributesAction}
+							onChange={(value) => {
+								if (value === 'hide' || value === 'disable') {
+									setAttributes({
 										disabledAttributesAction: value,
-									} );
+									});
 								}
-							} }
+							}}
 							isBlock
 							size="__unstable-large"
 						>
 							<ToggleGroupControlOption
 								value="disable"
-								label={ __( 'Grayed-out', 'woocommerce' ) }
+								label={__('Grayed-out', 'woocommerce')}
 							/>
 							<ToggleGroupControlOption
 								value="hide"
-								label={ __( 'Hidden', 'woocommerce' ) }
+								label={__('Hidden', 'woocommerce')}
 							/>
 						</ToggleGroupControl>
 					</ToolsPanelItem>
 				</ToolsPanel>
 			</InspectorControls>
 
-			<div { ...blockProps }>
-				{ productAttributes.map( ( attribute, index ) => (
+			<div {...blockProps}>
+				{productAttributes.map((attribute, index) => (
 					// Identify rows by position, not by `attribute.id`: the
 					// Store API reports 0 for every non-taxonomy attribute, so
 					// custom attributes would all share the same identity.
 					<CustomDataProvider
-						key={ index }
+						key={index}
 						id="attribute"
-						data={ attribute }
+						data={attribute}
 					>
 						<AttributeItem
-							blocks={ blocks }
-							isSelected={
-								( selectedAttributeItem ?? 0 ) === index
-							}
-							onSelect={ () => setSelectedAttributeItem( index ) }
+							blocks={blocks}
+							isSelected={(selectedAttributeItem ?? 0) === index}
+							onSelect={() => setSelectedAttributeItem(index)}
 						/>
 					</CustomDataProvider>
-				) ) }
+				))}
 			</div>
 		</>
 	);

@@ -26,21 +26,21 @@ import './editor.scss';
 import { UpgradeNotice } from '../filter-wrapper/upgrade';
 
 const noRatingsNotice = (
-	<Notice status="warning" isDismissible={ false }>
+	<Notice status="warning" isDismissible={false}>
 		<p>
-			{ __(
+			{__(
 				"Your store doesn't have any products with ratings yet. This filter option will display when a product receives a review.",
 				'woocommerce'
-			) }
+			)}
 		</p>
 	</Notice>
 );
 
-const Edit = ( {
+const Edit = ({
 	attributes,
 	setAttributes,
 	clientId,
-}: BlockEditProps< Attributes > ) => {
+}: BlockEditProps<Attributes>) => {
 	const {
 		className,
 		displayStyle,
@@ -49,91 +49,88 @@ const Edit = ( {
 		selectType,
 	} = attributes;
 
-	const blockProps = useBlockProps( {
-		className: clsx( 'wc-block-rating-filter', className ),
-	} );
+	const blockProps = useBlockProps({
+		className: clsx('wc-block-rating-filter', className),
+	});
 
 	const getInspectorControls = () => {
 		return (
 			<InspectorControls key="inspector">
 				<PanelBody>
-					<UpgradeNotice clientId={ clientId } />
+					<UpgradeNotice clientId={clientId} />
 				</PanelBody>
-				<PanelBody title={ __( 'Display Settings', 'woocommerce' ) }>
+				<PanelBody title={__('Display Settings', 'woocommerce')}>
 					<ToggleControl
-						label={ __( 'Display product count', 'woocommerce' ) }
-						checked={ showCounts }
-						onChange={ () =>
-							setAttributes( {
-								showCounts: ! showCounts,
-							} )
+						label={__('Display product count', 'woocommerce')}
+						checked={showCounts}
+						onChange={() =>
+							setAttributes({
+								showCounts: !showCounts,
+							})
 						}
 					/>
 					<ToggleGroupControl
-						label={ __(
+						label={__(
 							'Allow selecting multiple options?',
 							'woocommerce'
-						) }
+						)}
 						isBlock
-						value={ selectType || 'multiple' }
-						onChange={ ( value: string ) =>
-							setAttributes( {
+						value={selectType || 'multiple'}
+						onChange={(value: string) =>
+							setAttributes({
 								selectType: value,
-							} )
+							})
 						}
 						className="wc-block-attribute-filter__multiple-toggle"
 					>
 						<ToggleGroupControlOption
 							value="multiple"
-							label={ _x(
+							label={_x(
 								'Multiple',
 								'Number of filters',
 								'woocommerce'
-							) }
+							)}
 						/>
 						<ToggleGroupControlOption
 							value="single"
-							label={ _x(
+							label={_x(
 								'Single',
 								'Number of filters',
 								'woocommerce'
-							) }
+							)}
 						/>
 					</ToggleGroupControl>
 					<ToggleGroupControl
-						label={ __( 'Display Style', 'woocommerce' ) }
+						label={__('Display Style', 'woocommerce')}
 						isBlock
-						value={ displayStyle }
-						onChange={ ( value: string ) =>
-							setAttributes( {
+						value={displayStyle}
+						onChange={(value: string) =>
+							setAttributes({
 								displayStyle: value,
-							} )
+							})
 						}
 						className="wc-block-attribute-filter__display-toggle"
 					>
 						<ToggleGroupControlOption
 							value="list"
-							label={ __( 'List', 'woocommerce' ) }
+							label={__('List', 'woocommerce')}
 						/>
 						<ToggleGroupControlOption
 							value="dropdown"
-							label={ __( 'Dropdown', 'woocommerce' ) }
+							label={__('Dropdown', 'woocommerce')}
 						/>
 					</ToggleGroupControl>
 					<ToggleControl
-						label={ __(
-							"Show 'Apply filters' button",
-							'woocommerce'
-						) }
-						help={ __(
+						label={__("Show 'Apply filters' button", 'woocommerce')}
+						help={__(
 							'Products will update when the button is clicked.',
 							'woocommerce'
-						) }
-						checked={ showFilterButton }
-						onChange={ ( value ) =>
-							setAttributes( {
+						)}
+						checked={showFilterButton}
+						onChange={(value) =>
+							setAttributes({
 								showFilterButton: value,
-							} )
+							})
 						}
 					/>
 				</PanelBody>
@@ -143,14 +140,14 @@ const Edit = ( {
 
 	return (
 		<>
-			{ getInspectorControls() }
+			{getInspectorControls()}
 			{
-				<div { ...blockProps }>
+				<div {...blockProps}>
 					<Disabled>
 						<Block
-							attributes={ attributes }
-							isEditor={ true }
-							noRatingsNotice={ noRatingsNotice }
+							attributes={attributes}
+							isEditor={true}
+							noRatingsNotice={noRatingsNotice}
 						/>
 					</Disabled>
 				</div>
@@ -159,4 +156,4 @@ const Edit = ( {
 	);
 };
 
-export default withSpokenMessages( Edit );
+export default withSpokenMessages(Edit);

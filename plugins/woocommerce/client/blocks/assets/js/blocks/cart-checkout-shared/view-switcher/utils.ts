@@ -8,11 +8,8 @@ import { select, dispatch } from '@wordpress/data';
  */
 import type { View } from './types';
 
-export const getView = (
-	viewName: string,
-	views: View[]
-): View | undefined => {
-	return views.find( ( view ) => view.view === viewName );
+export const getView = (viewName: string, views: View[]): View | undefined => {
+	return views.find((view) => view.view === viewName);
 };
 
 export const selectView = (
@@ -21,16 +18,16 @@ export const selectView = (
 	selectParent = true
 ) => {
 	const { updateBlockAttributes, selectBlock } =
-		dispatch( 'core/block-editor' );
-	updateBlockAttributes( clientId, {
+		dispatch('core/block-editor');
+	updateBlockAttributes(clientId, {
 		currentView: viewName,
-	} );
-	if ( selectParent ) {
+	});
+	if (selectParent) {
 		selectBlock(
-			select( 'core/block-editor' )
-				.getBlock( clientId )
+			select('core/block-editor')
+				.getBlock(clientId)
 				?.innerBlocks.find(
-					( block: { name: string } ) => block.name === viewName
+					(block: { name: string }) => block.name === viewName
 				)?.clientId || clientId
 		);
 	}
@@ -53,33 +50,33 @@ export const findParentBlockEditorViews = (
 } => {
 	const depth = currentDepth + 1;
 
-	if ( depth > maxDepth ) {
+	if (depth > maxDepth) {
 		return defaultView;
 	}
 
 	const { getBlockAttributes, getBlockRootClientId } =
-		select( 'core/block-editor' );
-	const rootId = getBlockRootClientId( clientId );
+		select('core/block-editor');
+	const rootId = getBlockRootClientId(clientId);
 
-	if ( rootId === null || rootId === '' ) {
+	if (rootId === null || rootId === '') {
 		return defaultView;
 	}
 
-	const rootAttributes = getBlockAttributes( rootId );
+	const rootAttributes = getBlockAttributes(rootId);
 
-	if ( ! rootAttributes ) {
+	if (!rootAttributes) {
 		return defaultView;
 	}
 
-	if ( rootAttributes.editorViews !== undefined ) {
+	if (rootAttributes.editorViews !== undefined) {
 		return {
 			views: rootAttributes.editorViews,
 			currentView:
 				rootAttributes.currentView ||
-				rootAttributes.editorViews[ 0 ].view,
+				rootAttributes.editorViews[0].view,
 			viewClientId: rootId,
 		};
 	}
 
-	return findParentBlockEditorViews( rootId, maxDepth, depth );
+	return findParentBlockEditorViews(rootId, maxDepth, depth);
 };

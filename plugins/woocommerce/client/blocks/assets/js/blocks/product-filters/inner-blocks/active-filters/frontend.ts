@@ -21,22 +21,22 @@ type RemovableItemContext = {
 const activeFiltersStore = {
 	state: {
 		get removableItems(): RemovableItem[] {
-			return state.activeFilters.map( ( f ) => ( {
+			return state.activeFilters.map((f) => ({
 				id: f.type + '_' + f.value,
 				type: f.type,
 				value: f.value,
 				label: f.activeLabel,
-			} ) );
+			}));
 		},
 		get removeItemLabel() {
-			const { item } = getContext< RemovableItemContext >();
+			const { item } = getContext<RemovableItemContext>();
 			const { removeLabelTemplate } = getConfig();
 			const template =
 				typeof removeLabelTemplate === 'string'
 					? removeLabelTemplate
 					: '{{label}}';
 			const label = typeof item?.label === 'string' ? item.label : '';
-			return template.replace( '{{label}}', label );
+			return template.replace('{{label}}', label);
 		},
 		get hasActiveFilters(): boolean {
 			return state.activeFilters.length > 0;
@@ -44,14 +44,14 @@ const activeFiltersStore = {
 	},
 	actions: {
 		removeAll: () => {
-			const context = getContext< ProductFiltersContext >();
+			const context = getContext<ProductFiltersContext>();
 			context.activeFilters = [];
 			void actions.navigate();
 		},
 		remove: () => {
-			const { item } = getContext< RemovableItemContext >();
+			const { item } = getContext<RemovableItemContext>();
 			actions.removeActiveFiltersBy(
-				( filter ) =>
+				(filter) =>
 					filter.value === item.value && filter.type === item.type
 			);
 			void actions.navigate();
@@ -65,4 +65,4 @@ activeFiltersStore satisfies RemovableItemsParentStore;
 
 const { state, actions } = store<
 	ProductFiltersStore & typeof activeFiltersStore
->( PRODUCT_FILTERS_STORE_NAME, activeFiltersStore );
+>(PRODUCT_FILTERS_STORE_NAME, activeFiltersStore);

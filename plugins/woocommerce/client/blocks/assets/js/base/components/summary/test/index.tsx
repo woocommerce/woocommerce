@@ -26,26 +26,26 @@ const disallowedSource =
 	'<script>alert("Hello");</script>' +
 	'</p>';
 
-const getProps = ( source: string ) =>
-	( {
+const getProps = (source: string) =>
+	({
 		source,
 		maxLength: 1000,
 		countType: 'words',
 		className: 'test-class',
-	} ) as SummaryProps;
+	}) as SummaryProps;
 
-describe( 'Summary component', () => {
-	it( 'renders rich HTML with the allowed tags and attributes', () => {
-		const props = getProps( allowedSource );
-		const { container } = render( <Summary { ...props } /> );
+describe('Summary component', () => {
+	it('renders rich HTML with the allowed tags and attributes', () => {
+		const props = getProps(allowedSource);
+		const { container } = render(<Summary {...props} />);
 
-		expect( container ).toMatchSnapshot( allowedSource );
-	} );
+		expect(container).toMatchSnapshot(allowedSource);
+	});
 
-	it( 'omits disallowed tags and attributes', () => {
-		const props = getProps( disallowedSource );
-		const { container } = render( <Summary { ...props } /> );
+	it('omits disallowed tags and attributes', () => {
+		const props = getProps(disallowedSource);
+		const { container } = render(<Summary {...props} />);
 
-		expect( container ).toMatchSnapshot( allowedSource );
-	} );
-} );
+		expect(container).toMatchSnapshot(allowedSource);
+	});
+});

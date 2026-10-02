@@ -1,6 +1,6 @@
-const path = require( 'path' );
+const path = require('path');
 
-const rootDir = path.resolve( __dirname, '../../' );
+const rootDir = path.resolve(__dirname, '../../');
 
 /**
  * WordPress packages that must resolve to a single instance across the test
@@ -26,14 +26,14 @@ const singletonWpModules = [
 	'@wordpress/notices',
 ];
 
-const wpSingletonMapper = singletonWpModules.reduce( ( acc, mod ) => {
+const wpSingletonMapper = singletonWpModules.reduce((acc, mod) => {
 	try {
-		acc[ `^${ mod }$` ] = require.resolve( mod );
-	} catch ( e ) {
+		acc[`^${mod}$`] = require.resolve(mod);
+	} catch (e) {
 		// Not a direct dep — skip.
 	}
 	return acc;
-}, {} );
+}, {});
 
 module.exports = {
 	rootDir,
@@ -43,7 +43,7 @@ module.exports = {
 		'!**/vendor/**',
 		'!**/test/**',
 	],
-	moduleDirectories: [ 'node_modules' ],
+	moduleDirectories: ['node_modules'],
 	moduleNameMapper: {
 		'\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2)$':
 			'<rootDir>/tests/js/config/file-mock.js',
@@ -120,7 +120,7 @@ module.exports = {
 		'^(.+)/build-module/(.*)$': '$1/build/$2',
 	},
 	preset: '@wordpress/jest-preset-default',
-	setupFiles: [ '<rootDir>/tests/js/config/global-mocks.js' ],
+	setupFiles: ['<rootDir>/tests/js/config/global-mocks.js'],
 	setupFilesAfterEnv: [
 		'<rootDir>/tests/js/config/testing-library.js',
 		'<rootDir>/tests/js/config/msw-setup.js',

@@ -11,7 +11,7 @@ import { useState } from '@wordpress/element';
 import { STORE_KEY } from './data/constants';
 import './data';
 
-function RemoteSpecValidator( { validate, message, setMessage } ) {
+function RemoteSpecValidator({ validate, message, setMessage }) {
 	const exampleText = JSON.stringify(
 		[
 			{
@@ -24,32 +24,32 @@ function RemoteSpecValidator( { validate, message, setMessage } ) {
 		null,
 		4
 	);
-	const [ spec, setSpec ] = useState( exampleText );
+	const [spec, setSpec] = useState(exampleText);
 	return (
 		<>
 			<p>Paste your Remote Spec rule and click Validate button.</p>
 			<div id="wc-admin-test-helper-remote-spec-validator">
 				<textarea
-					value={ spec }
-					onChange={ ( e ) => setSpec( e.target.value ) }
+					value={spec}
+					onChange={(e) => setSpec(e.target.value)}
 				/>
-				{ message && message.text && (
-					<div className={ message.type }>{ message.text }</div>
-				) }
+				{message && message.text && (
+					<div className={message.type}>{message.text}</div>
+				)}
 				<input
 					type="button"
 					className="button btn-primary btn-validate"
 					value="Validate"
-					onClick={ () => {
+					onClick={() => {
 						try {
-							if ( JSON.parse( spec ) ) {
-								setMessage( null, null );
+							if (JSON.parse(spec)) {
+								setMessage(null, null);
 							}
-							validate( spec );
-						} catch ( e ) {
-							setMessage( 'error', 'Invalid JSON' );
+							validate(spec);
+						} catch (e) {
+							setMessage('error', 'Invalid JSON');
 						}
-					} }
+					}}
 				/>
 			</div>
 		</>
@@ -57,18 +57,18 @@ function RemoteSpecValidator( { validate, message, setMessage } ) {
 }
 
 export default compose(
-	withSelect( ( select ) => {
-		const { getMessage } = select( STORE_KEY );
+	withSelect((select) => {
+		const { getMessage } = select(STORE_KEY);
 		return {
 			message: getMessage(),
 		};
-	} ),
-	withDispatch( ( dispatch ) => {
-		const { validate, setMessage } = dispatch( STORE_KEY );
+	}),
+	withDispatch((dispatch) => {
+		const { validate, setMessage } = dispatch(STORE_KEY);
 
 		return {
 			validate,
 			setMessage,
 		};
-	} )
-)( RemoteSpecValidator );
+	})
+)(RemoteSpecValidator);

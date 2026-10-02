@@ -15,18 +15,18 @@ import Hearticon from '../assets/images/loader-hearticon.svg';
 import { Stages } from '../components/loader/Loader';
 
 const LightbulbStage = {
-	title: __( 'Turning on the lights', 'woocommerce' ),
-	image: <img src={ LightBulbImage } alt="loader-lightbulb" />,
+	title: __('Turning on the lights', 'woocommerce'),
+	image: <img src={LightBulbImage} alt="loader-lightbulb" />,
 	paragraphs: [
 		{
-			label: __( '#FunWooFact: ', 'woocommerce' ),
+			label: __('#FunWooFact: ', 'woocommerce'),
 			text: __(
 				'Explore powerful extensions and themes at WooCommerce.com to enhance your store.',
 				'woocommerce'
 			),
 		},
 		{
-			label: __( '#FunWooFact: ', 'woocommerce' ),
+			label: __('#FunWooFact: ', 'woocommerce'),
 			text: __(
 				'The Woo team is made up of over 350 talented individuals, distributed across 30+ countries.',
 				'woocommerce'
@@ -35,11 +35,11 @@ const LightbulbStage = {
 	],
 };
 const LayoutStage = {
-	title: __( 'Extending your store’s capabilities', 'woocommerce' ),
-	image: <img src={ LayoutImage } alt="loader-lightbulb" />,
+	title: __('Extending your store’s capabilities', 'woocommerce'),
+	image: <img src={LayoutImage} alt="loader-lightbulb" />,
 	paragraphs: [
 		{
-			label: __( '#FunWooFact: ', 'woocommerce' ),
+			label: __('#FunWooFact: ', 'woocommerce'),
 			text: __(
 				'Did you know that Woo powers almost 4 million stores worldwide? You’re in good company.',
 				'woocommerce'
@@ -49,11 +49,11 @@ const LayoutStage = {
 };
 
 const DevelopingStage = {
-	title: __( 'Woo! Let’s get your features ready', 'woocommerce' ),
-	image: <img src={ DevelopingImage } alt="loader-developng" />,
+	title: __('Woo! Let’s get your features ready', 'woocommerce'),
+	image: <img src={DevelopingImage} alt="loader-developng" />,
 	paragraphs: [
 		{
-			label: __( '#FunWooFact: ', 'woocommerce' ),
+			label: __('#FunWooFact: ', 'woocommerce'),
 			text: __(
 				'Did you know that Woo was founded by two South Africans and a Norwegian? Here are three alternative ways to say “store” in those countries – Winkel, ivenkile, and butikk.',
 				'woocommerce'
@@ -63,15 +63,15 @@ const DevelopingStage = {
 };
 
 const OpeningTheDoorsStage = {
-	title: __( 'Opening the doors', 'woocommerce' ),
-	image: <img src={ OpeningTheDoorsImage } alt="loader-opening-the-doors" />,
+	title: __('Opening the doors', 'woocommerce'),
+	image: <img src={OpeningTheDoorsImage} alt="loader-opening-the-doors" />,
 	paragraphs: [
 		{
-			label: __( '#FunWooFact: ', 'woocommerce' ),
-			text: __( 'Our favorite color is purple ', 'woocommerce' ),
+			label: __('#FunWooFact: ', 'woocommerce'),
+			text: __('Our favorite color is purple ', 'woocommerce'),
 			element: (
 				<img
-					src={ Hearticon }
+					src={Hearticon}
 					alt="loader-hearticon"
 					className="loader-hearticon"
 				/>
@@ -80,14 +80,14 @@ const OpeningTheDoorsStage = {
 	],
 };
 
-export const getLoaderStageMeta = ( key: string ): Stages => {
-	switch ( key ) {
+export const getLoaderStageMeta = (key: string): Stages => {
+	switch (key) {
 		case 'plugins':
-			return [ DevelopingStage, LayoutStage, LightbulbStage ];
+			return [DevelopingStage, LayoutStage, LightbulbStage];
 		case 'skippedGuidedSetup':
-			return [ LightbulbStage, OpeningTheDoorsStage ];
+			return [LightbulbStage, OpeningTheDoorsStage];
 		case 'default':
 		default:
-			return [ LightbulbStage ];
+			return [LightbulbStage];
 	}
 };

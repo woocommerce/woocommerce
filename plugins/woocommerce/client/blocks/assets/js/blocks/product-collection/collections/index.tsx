@@ -43,34 +43,30 @@ const collections: BlockVariation[] = [
 ];
 
 // Email-only collections
-const emailCollections: BlockVariation[] = [ cartContents ];
+const emailCollections: BlockVariation[] = [cartContents];
 
 export const registerCollections = () => {
-	collections.forEach( ( collection ) =>
-		registerProductCollection( collection )
-	);
+	collections.forEach((collection) => registerProductCollection(collection));
 };
 
 export const registerEmailCollections = () => {
-	emailCollections.forEach( ( collection ) =>
-		registerProductCollection( collection )
+	emailCollections.forEach((collection) =>
+		registerProductCollection(collection)
 	);
 };
 
-export const getCollectionByName = ( collectionName?: CollectionName ) => {
-	if ( ! collectionName ) {
+export const getCollectionByName = (collectionName?: CollectionName) => {
+	if (!collectionName) {
 		return null;
 	}
 
 	// @ts-expect-error Type definitions are missing
 	// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/selectors.d.ts
-	const variations = select( blocksStore ).getBlockVariations(
-		blockJson.name
-	);
+	const variations = select(blocksStore).getBlockVariations(blockJson.name);
 
 	// @ts-expect-error Type definitions are missing
 	// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/selectors.d.ts
-	return variations.find( ( { name } ) => name === collectionName );
+	return variations.find(({ name }) => name === collectionName);
 };
 
 export default registerCollections;

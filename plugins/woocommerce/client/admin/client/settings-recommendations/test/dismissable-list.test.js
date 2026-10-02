@@ -10,55 +10,51 @@ import { speak } from '@wordpress/a11y';
  */
 import { DismissableList, DismissableListHeading } from '../dismissable-list';
 
-jest.mock( '@wordpress/a11y', () => ( {
+jest.mock('@wordpress/a11y', () => ({
 	speak: jest.fn(),
-} ) );
+}));
 
-describe( 'DismissableList', () => {
-	it( 'renders its children when isDismissed is false', () => {
+describe('DismissableList', () => {
+	it('renders its children when isDismissed is false', () => {
 		render(
-			<DismissableList isDismissed={ false }>
+			<DismissableList isDismissed={false}>
 				<span>dismissible children</span>
 			</DismissableList>
 		);
 
-		expect(
-			screen.queryByText( 'dismissible children' )
-		).toBeInTheDocument();
-	} );
+		expect(screen.queryByText('dismissible children')).toBeInTheDocument();
+	});
 
-	it( 'renders its children when isDismissed is omitted', () => {
+	it('renders its children when isDismissed is omitted', () => {
 		render(
 			<DismissableList>
 				<span>dismissible children</span>
 			</DismissableList>
 		);
 
-		expect(
-			screen.queryByText( 'dismissible children' )
-		).toBeInTheDocument();
-	} );
+		expect(screen.queryByText('dismissible children')).toBeInTheDocument();
+	});
 
-	it( 'renders nothing when isDismissed is true', () => {
+	it('renders nothing when isDismissed is true', () => {
 		render(
-			<DismissableList isDismissed={ true }>
+			<DismissableList isDismissed={true}>
 				<span>dismissible children</span>
 			</DismissableList>
 		);
 
 		expect(
-			screen.queryByText( 'dismissible children' )
+			screen.queryByText('dismissible children')
 		).not.toBeInTheDocument();
-	} );
+	});
 
-	describe( 'dismissal accessibility', () => {
-		beforeEach( () => {
+	describe('dismissal accessibility', () => {
+		beforeEach(() => {
 			speak.mockClear();
-		} );
+		});
 
-		it( 'announces and moves focus to a stable element when dismissed', () => {
+		it('announces and moves focus to a stable element when dismissed', () => {
 			const { container, rerender } = render(
-				<DismissableList isDismissed={ false }>
+				<DismissableList isDismissed={false}>
 					<span>dismissible children</span>
 				</DismissableList>
 			);
@@ -68,67 +64,67 @@ describe( 'DismissableList', () => {
 			);
 
 			rerender(
-				<DismissableList isDismissed={ true }>
+				<DismissableList isDismissed={true}>
 					<span>dismissible children</span>
 				</DismissableList>
 			);
 
-			expect( speak ).toHaveBeenCalledWith(
+			expect(speak).toHaveBeenCalledWith(
 				'Recommendation hidden.',
 				'assertive'
 			);
 			// The wrapper stays mounted so focus has somewhere to land.
-			expect( wrapper ).toBeInTheDocument();
-			expect( wrapper ).toHaveFocus();
-		} );
+			expect(wrapper).toBeInTheDocument();
+			expect(wrapper).toHaveFocus();
+		});
 
-		it( 'does not announce or steal focus when dismissed on first render', () => {
+		it('does not announce or steal focus when dismissed on first render', () => {
 			render(
-				<DismissableList isDismissed={ true }>
+				<DismissableList isDismissed={true}>
 					<span>dismissible children</span>
 				</DismissableList>
 			);
 
-			expect( speak ).not.toHaveBeenCalled();
-			expect( document.body ).toHaveFocus();
-		} );
-	} );
-} );
+			expect(speak).not.toHaveBeenCalled();
+			expect(document.body).toHaveFocus();
+		});
+	});
+});
 
-describe( 'DismissableListHeading', () => {
-	it( 'renders its children', () => {
+describe('DismissableListHeading', () => {
+	it('renders its children', () => {
 		render(
 			<DismissableListHeading>
 				<span>heading content</span>
 			</DismissableListHeading>
 		);
 
-		expect( screen.queryByText( 'heading content' ) ).toBeInTheDocument();
-	} );
+		expect(screen.queryByText('heading content')).toBeInTheDocument();
+	});
 
-	it( 'calls onDismiss when "Hide this" is clicked', () => {
+	it('calls onDismiss when "Hide this" is clicked', () => {
 		const onDismiss = jest.fn();
 		render(
-			<DismissableListHeading onDismiss={ onDismiss }>
+			<DismissableListHeading onDismiss={onDismiss}>
 				heading content
 			</DismissableListHeading>
 		);
 
-		userEvent.click( screen.getByTitle( 'Task List Options' ) );
-		userEvent.click( screen.getByText( 'Hide this' ) );
+		userEvent.click(screen.getByTitle('Task List Options'));
+		userEvent.click(screen.getByText('Hide this'));
 
-		expect( onDismiss ).toHaveBeenCalledTimes( 1 );
-	} );
+		expect(onDismiss).toHaveBeenCalledTimes(1);
+	});
 
-	it( 'does not throw when "Hide this" is clicked without an onDismiss prop', () => {
+	it('does not throw when "Hide this" is clicked without an onDismiss prop', () => {
 		render(
 			<DismissableListHeading>heading content</DismissableListHeading>
 		);
 
-		userEvent.click( screen.getByTitle( 'Task List Options' ) );
+		userEvent.click(screen.getByTitle('Task List Options'));
 
-		expect( () =>
-			userEvent.click( screen.getByText( 'Hide this' ) )
+		expect(() =>
+			userEvent.click(screen.getByText('Hide this'))
 		).not.toThrow();
-	} );
-} );
+	});
+});

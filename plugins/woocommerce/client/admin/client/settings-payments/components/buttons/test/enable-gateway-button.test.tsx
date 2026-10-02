@@ -16,30 +16,30 @@ const mockCreateErrorNotice = jest.fn();
 const mockTogglePaymentGateway = jest.fn();
 const mockInvalidateResolutionForStoreSelector = jest.fn();
 
-jest.mock( '@woocommerce/data', () => ( {
+jest.mock('@woocommerce/data', () => ({
 	paymentSettingsStore: {},
-} ) );
+}));
 
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	dispatch: jest.fn( () => ( {
+jest.mock('@wordpress/data', () => ({
+	...jest.requireActual('@wordpress/data'),
+	dispatch: jest.fn(() => ({
 		createErrorNotice: mockCreateErrorNotice,
-	} ) ),
-	useDispatch: jest.fn( () => ( {
+	})),
+	useDispatch: jest.fn(() => ({
 		togglePaymentGateway: mockTogglePaymentGateway,
 		invalidateResolutionForStoreSelector:
 			mockInvalidateResolutionForStoreSelector,
-	} ) ),
-} ) );
+	})),
+}));
 
-jest.mock( '~/settings-payments/utils', () => ( {
+jest.mock('~/settings-payments/utils', () => ({
 	recordPaymentsOnboardingEvent: jest.fn(),
 	recordPaymentsProviderEvent: jest.fn(),
-} ) );
+}));
 
-jest.mock( '~/settings-payments/constants', () => ( {
+jest.mock('~/settings-payments/constants', () => ({
 	wooPaymentsOnboardingSessionEntrySettings: 'settings',
-} ) );
+}));
 
 const gatewayProvider = {
 	id: 'test-gateway',
@@ -55,13 +55,13 @@ const gatewayProvider = {
 	_type: 'gateway',
 } as PaymentGatewayProvider;
 
-describe( 'EnableGatewayButton', () => {
-	beforeEach( () => {
-		mockTogglePaymentGateway.mockResolvedValue( {
+describe('EnableGatewayButton', () => {
+	beforeEach(() => {
+		mockTogglePaymentGateway.mockResolvedValue({
 			data: 'needs_setup',
-		} );
+		});
 
-		Object.defineProperty( window, 'woocommerce_admin', {
+		Object.defineProperty(window, 'woocommerce_admin', {
 			value: {
 				ajax_url: '/wp-admin/admin-ajax.php',
 				nonces: {
@@ -69,50 +69,50 @@ describe( 'EnableGatewayButton', () => {
 				},
 			},
 			writable: true,
-		} );
-	} );
+		});
+	});
 
-	afterEach( () => {
+	afterEach(() => {
 		jest.clearAllMocks();
-	} );
+	});
 
-	it( 'shows an actionable setup message when a connected gateway still needs setup', async () => {
+	it('shows an actionable setup message when a connected gateway still needs setup', async () => {
 		const { getByRole } = render(
 			<EnableGatewayButton
-				gatewayProvider={ gatewayProvider }
+				gatewayProvider={gatewayProvider}
 				settingsHref="/settings/test-gateway"
 				onboardingHref="/onboard/test-gateway"
-				isOffline={ false }
-				gatewayHasRecommendedPaymentMethods={ false }
-				installingPlugin={ null }
+				isOffline={false}
+				gatewayHasRecommendedPaymentMethods={false}
+				installingPlugin={null}
 			/>
 		);
 
-		fireEvent.click( getByRole( 'link', { name: 'Enable' } ) );
+		fireEvent.click(getByRole('link', { name: 'Enable' }));
 
-		await waitFor( () => {
-			expect( mockCreateErrorNotice ).toHaveBeenCalledWith(
-				expect.stringContaining( 'Test Gateway' ),
-				expect.objectContaining( {
+		await waitFor(() => {
+			expect(mockCreateErrorNotice).toHaveBeenCalledWith(
+				expect.stringContaining('Test Gateway'),
+				expect.objectContaining({
 					type: 'snackbar',
 					explicitDismiss: true,
-					actions: expect.arrayContaining( [
-						expect.objectContaining( {
+					actions: expect.arrayContaining([
+						expect.objectContaining({
 							label: 'Manage',
 							url: '/settings/test-gateway',
-						} ),
-					] ),
-				} )
+						}),
+					]),
+				})
 			);
-		} );
-	} );
+		});
+	});
 
-	it.each( [
-		[ 'empty', '' ],
-		[ 'null', null ],
-	] )(
+	it.each([
+		['empty', ''],
+		['null', null],
+	])(
 		'falls back to a generic setup message when the gateway title is %s',
-		async ( _case, title ) => {
+		async (_case, title) => {
 			const gatewayProviderWithoutTitle = {
 				...gatewayProvider,
 				title,
@@ -120,32 +120,32 @@ describe( 'EnableGatewayButton', () => {
 
 			const { getByRole } = render(
 				<EnableGatewayButton
-					gatewayProvider={ gatewayProviderWithoutTitle }
+					gatewayProvider={gatewayProviderWithoutTitle}
 					settingsHref="/settings/test-gateway"
 					onboardingHref="/onboard/test-gateway"
-					isOffline={ false }
-					gatewayHasRecommendedPaymentMethods={ false }
-					installingPlugin={ null }
+					isOffline={false}
+					gatewayHasRecommendedPaymentMethods={false}
+					installingPlugin={null}
 				/>
 			);
 
-			fireEvent.click( getByRole( 'link', { name: 'Enable' } ) );
+			fireEvent.click(getByRole('link', { name: 'Enable' }));
 
-			await waitFor( () => {
-				expect( mockCreateErrorNotice ).toHaveBeenCalledWith(
-					expect.stringContaining( 'this payment method' ),
-					expect.objectContaining( {
+			await waitFor(() => {
+				expect(mockCreateErrorNotice).toHaveBeenCalledWith(
+					expect.stringContaining('this payment method'),
+					expect.objectContaining({
 						type: 'snackbar',
 						explicitDismiss: true,
-						actions: expect.arrayContaining( [
-							expect.objectContaining( {
+						actions: expect.arrayContaining([
+							expect.objectContaining({
 								label: 'Manage',
 								url: '/settings/test-gateway',
-							} ),
-						] ),
-					} )
+							}),
+						]),
+					})
 				);
-			} );
+			});
 		}
 	);
-} );
+});

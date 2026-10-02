@@ -15,37 +15,37 @@ import {
 	getAllowedBlocks,
 } from '../../../../cart-checkout-shared';
 
-export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
+export const Edit = ({ clientId }: { clientId: string }): JSX.Element => {
 	const blockProps = useBlockProps();
-	const allowedBlocks = getAllowedBlocks( innerBlockAreas.FILLED_MINI_CART );
+	const allowedBlocks = getAllowedBlocks(innerBlockAreas.FILLED_MINI_CART);
 	const { currentView } = useEditorContext();
 
 	const defaultTemplate = [
-		[ 'woocommerce/mini-cart-title-block', {} ],
-		[ 'woocommerce/mini-cart-items-block', {} ],
-		[ 'woocommerce/mini-cart-footer-block', {} ],
-	].filter( Boolean ) as unknown as TemplateArray;
+		['woocommerce/mini-cart-title-block', {}],
+		['woocommerce/mini-cart-items-block', {}],
+		['woocommerce/mini-cart-footer-block', {}],
+	].filter(Boolean) as unknown as TemplateArray;
 
-	useForcedLayout( {
+	useForcedLayout({
 		clientId,
 		registeredBlocks: allowedBlocks,
 		defaultTemplate,
-	} );
+	});
 
 	return (
 		<div
-			{ ...blockProps }
+			{...blockProps}
 			hidden={
 				currentView !== 'woocommerce/filled-mini-cart-contents-block'
 			}
 		>
 			<EditorProvider
-				currentView={ currentView }
-				previewData={ { previewCart } }
+				currentView={currentView}
+				previewData={{ previewCart }}
 			>
 				<InnerBlocks
-					template={ defaultTemplate }
-					allowedBlocks={ allowedBlocks }
+					template={defaultTemplate}
+					allowedBlocks={allowedBlocks}
 					templateLock="insert"
 				/>
 			</EditorProvider>
@@ -55,7 +55,7 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 
 export const Save = (): JSX.Element => {
 	return (
-		<div { ...useBlockProps.save() }>
+		<div {...useBlockProps.save()}>
 			<InnerBlocks.Content />
 		</div>
 	);

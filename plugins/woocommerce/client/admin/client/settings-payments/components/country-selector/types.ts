@@ -5,7 +5,7 @@ export interface Item {
 	style?: React.CSSProperties;
 }
 
-export interface ControlProps< ItemType > {
+export interface ControlProps<ItemType> {
 	name?: string;
 	className?: string;
 	label: string;
@@ -13,6 +13,6 @@ export interface ControlProps< ItemType > {
 	options: ItemType[];
 	value: ItemType;
 	placeholder?: string;
-	onChange: ( value: string ) => void;
-	children?: ( item: ItemType ) => JSX.Element;
+	onChange: (value: string) => void;
+	children?: (item: ItemType) => JSX.Element;
 }

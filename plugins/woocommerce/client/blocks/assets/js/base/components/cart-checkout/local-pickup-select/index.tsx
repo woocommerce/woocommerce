@@ -37,12 +37,12 @@ interface LocalPickupSelectProps {
 		clientSelectedOption?: string
 	) => RadioControlOptionType;
 	packageCount: number;
-	onChange: ( value: string ) => void;
+	onChange: (value: string) => void;
 }
 /**
  * Local pickup select component, used to render a package title and local pickup options.
  */
-export const LocalPickupSelect = ( {
+export const LocalPickupSelect = ({
 	title,
 	packageData = undefined,
 	showItems,
@@ -51,7 +51,7 @@ export const LocalPickupSelect = ( {
 	renderPickupLocation,
 	packageCount,
 	onChange,
-}: LocalPickupSelectProps ) => {
+}: LocalPickupSelectProps) => {
 	const { shippingRates } = useShippingData();
 	const { cartItems } = useStoreCart();
 	const internalPackageCount = shippingRates?.length || 1;
@@ -67,40 +67,36 @@ export const LocalPickupSelect = ( {
 	// We sometimes don't want to show items even if we have multiple packages.
 	const shouldShowItems = showItems ?? multiplePackages;
 
-	let header = multiplePackages && title && <div>{ title }</div>;
+	let header = multiplePackages && title && <div>{title}</div>;
 
 	// packageData was added in version 10.4
-	if ( ( multiplePackages || shouldShowItems ) && packageData ) {
+	if ((multiplePackages || shouldShowItems) && packageData) {
 		header = (
 			<div className="wc-block-components-shipping-rates-control__package-header">
 				<div
 					className="wc-block-components-shipping-rates-control__package-title"
-					dangerouslySetInnerHTML={ {
-						__html: sanitizeHTML(
-							String( packageData.name ?? '' )
-						),
-					} }
+					dangerouslySetInnerHTML={{
+						__html: sanitizeHTML(String(packageData.name ?? '')),
+					}}
 				/>
-				{ shouldShowItems && (
-					<PackageItems packageData={ packageData } />
-				) }
+				{shouldShowItems && <PackageItems packageData={packageData} />}
 			</div>
 		);
 
-		if ( multiplePackages ) {
+		if (multiplePackages) {
 			const packageItems = packageData.items || [];
 
 			header = (
 				<div className="wc-block-components-shipping-rates-control__package-container">
-					{ header }
+					{header}
 					<div className="wc-block-components-shipping-rates-control__package-thumbnails">
-						{ packageItems.slice( 0, 3 ).map( ( item ) => (
+						{packageItems.slice(0, 3).map((item) => (
 							<ShippingPackageItemIcon
-								key={ item.key }
-								packageItem={ item }
-								cartItems={ cartItems }
+								key={item.key}
+								packageItem={item}
+								cartItems={cartItems}
 							/>
-						) ) }
+						))}
 					</div>
 				</div>
 			);
@@ -109,24 +105,20 @@ export const LocalPickupSelect = ( {
 
 	return (
 		<div
-			className={ clsx(
+			className={clsx(
 				'wc-block-components-local-pickup-select',
 				multiplePackages &&
 					'wc-block-components-local-pickup-select--multiple'
-			) }
+			)}
 		>
-			{ header }
+			{header}
 			<RadioControl
-				onChange={ onChange }
-				highlightChecked={ true }
-				selected={ selectedOption }
-				options={ pickupLocations.map( ( location ) =>
-					renderPickupLocation(
-						location,
-						packageCount,
-						selectedOption
-					)
-				) }
+				onChange={onChange}
+				highlightChecked={true}
+				selected={selectedOption}
+				options={pickupLocations.map((location) =>
+					renderPickupLocation(location, packageCount, selectedOption)
+				)}
 			/>
 		</div>
 	);

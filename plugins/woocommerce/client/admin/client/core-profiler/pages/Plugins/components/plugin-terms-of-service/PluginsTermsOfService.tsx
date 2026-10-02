@@ -10,28 +10,28 @@ import { ExtensionList } from '@woocommerce/data';
  */
 import { joinWithAnd, composeListFormatParts } from '../../Plugins';
 
-export const PluginsTermsOfService = ( {
+export const PluginsTermsOfService = ({
 	selectedPlugins,
 }: {
-	selectedPlugins: ExtensionList[ 'plugins' ];
-} ) => {
-	const pluginsWithTOS = selectedPlugins.filter( ( plugin ) =>
+	selectedPlugins: ExtensionList['plugins'];
+}) => {
+	const pluginsWithTOS = selectedPlugins.filter((plugin) =>
 		[
 			'jetpack',
 			'woocommerce-services:tax',
 			'woocommerce-shipping',
 			'woocommerce-tax',
 			'woocommerce-payments',
-		].includes( plugin.key )
+		].includes(plugin.key)
 	);
 
-	if ( ! pluginsWithTOS.length ) {
+	if (!pluginsWithTOS.length) {
 		return null;
 	}
 
 	return (
 		<p className="woocommerce-profiler-plugins-jetpack-agreement">
-			{ interpolateComponents( {
+			{interpolateComponents({
 				mixedString: sprintf(
 					/* translators: %s: a list of plugins, e.g. Jetpack */
 					_n(
@@ -40,11 +40,9 @@ export const PluginsTermsOfService = ( {
 						pluginsWithTOS.length,
 						'woocommerce'
 					),
-					joinWithAnd(
-						pluginsWithTOS.map( ( plugin ) => plugin.name )
-					)
-						.map( composeListFormatParts )
-						.join( '' )
+					joinWithAnd(pluginsWithTOS.map((plugin) => plugin.name))
+						.map(composeListFormatParts)
+						.join('')
 				),
 				components: {
 					span: <span />,
@@ -56,7 +54,7 @@ export const PluginsTermsOfService = ( {
 						/>
 					),
 				},
-			} ) }
+			})}
 		</p>
 	);
 };

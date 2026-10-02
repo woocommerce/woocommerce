@@ -11,37 +11,37 @@ import clsx from 'clsx';
 import { defaultCheckoutButtonLabel } from './constants';
 import { getVariant } from '../utils';
 
-export const Edit = ( {
+export const Edit = ({
 	attributes,
 	setAttributes,
 }: {
 	attributes: {
 		checkoutButtonLabel: string;
 	};
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ): JSX.Element => {
-	const blockProps = useBlockProps( {
-		className: clsx( 'wc-block-mini-cart__footer-checkout' ),
-	} );
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}): JSX.Element => {
+	const blockProps = useBlockProps({
+		className: clsx('wc-block-mini-cart__footer-checkout'),
+	});
 	const { checkoutButtonLabel } = attributes;
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<EditableButton
-				variant={ getVariant( blockProps.className, 'contained' ) }
-				value={ checkoutButtonLabel }
-				placeholder={ defaultCheckoutButtonLabel }
-				onChange={ ( content ) => {
-					setAttributes( {
+				variant={getVariant(blockProps.className, 'contained')}
+				value={checkoutButtonLabel}
+				placeholder={defaultCheckoutButtonLabel}
+				onChange={(content) => {
+					setAttributes({
 						checkoutButtonLabel: content,
-					} );
-				} }
-				style={ blockProps.style }
+					});
+				}}
+				style={blockProps.style}
 			/>
 		</div>
 	);
 };
 
 export const Save = (): JSX.Element => {
-	return <div { ...useBlockProps.save() }></div>;
+	return <div {...useBlockProps.save()}></div>;
 };

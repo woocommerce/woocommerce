@@ -32,97 +32,97 @@ import CartOrderSummaryTaxesFrontend from './cart-order-summary-taxes/frontend';
 // eslint-disable-next-line no-undef,camelcase
 __webpack_public_path__ = WC_BLOCKS_BUILD_URL;
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.FILLED_CART,
 	component: FilledCartFrontend,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.EMPTY_CART,
 	component: EmptyCartFrontend,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CART_ITEMS,
 	component: CartItemsFrontend,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CART_LINE_ITEMS,
 	component: CartLineItemsBlock,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CART_CROSS_SELLS,
 	component: CartCrossSellsFrontend,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CART_CROSS_SELLS_PRODUCTS,
 	component: CartCrossSellsProductsFrontend,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CART_TOTALS,
 	component: CartTotalsFrontend,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CART_EXPRESS_PAYMENT,
 	component: CartExpressPaymentFrontend,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.PROCEED_TO_CHECKOUT,
 	component: ProceedToCheckoutFrontend,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CART_ACCEPTED_PAYMENT_METHODS,
 	component: CartAcceptedPaymentMethodsFrontend,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CART_ORDER_SUMMARY,
 	component: CartOrderSummaryFrontend,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CART_ORDER_SUMMARY_HEADING,
 	component: CartOrderSummaryHeadingFrontend,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CART_ORDER_SUMMARY_SUBTOTAL,
 	component: CartOrderSummarySubtotalFrontend,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CART_ORDER_SUMMARY_FEE,
 	component: CartOrderSummaryFeeFrontend,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CART_ORDER_SUMMARY_DISCOUNT,
 	component: CartOrderSummaryDiscountFrontend,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CART_ORDER_SUMMARY_COUPON_FORM,
 	component: CartOrderSummaryCouponFormFrontend,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CART_ORDER_SUMMARY_SHIPPING,
 	component: CartOrderSummaryShippingFrontend,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CART_ORDER_SUMMARY_TOTALS,
 	component: CartOrderSummaryTotalsFrontend,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CART_ORDER_SUMMARY_TAXES,
 	component: CartOrderSummaryTaxesFrontend,
-} );
+});

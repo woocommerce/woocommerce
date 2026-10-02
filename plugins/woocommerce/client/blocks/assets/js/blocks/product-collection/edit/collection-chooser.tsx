@@ -34,17 +34,17 @@ type CollectionOptionsProps = {
 	chosenCollection?: CollectionName | undefined;
 	catalogVariation: BlockVariation;
 	collectionVariations: BlockVariation[];
-	onCollectionClick: ( name: string ) => void;
+	onCollectionClick: (name: string) => void;
 };
 
 export const applyCollection = (
 	collectionName: CollectionName,
 	clientId: string,
-	replaceBlock: ( clientId: string, block: BlockInstance ) => void
+	replaceBlock: (clientId: string, block: BlockInstance) => void
 ) => {
-	const collection = getCollectionByName( collectionName );
+	const collection = getCollectionByName(collectionName);
 
-	if ( ! collection ) {
+	if (!collection) {
 		return;
 	}
 
@@ -54,81 +54,79 @@ export const applyCollection = (
 			: createBlock(
 					blockJson.name,
 					collection.attributes,
-					createBlocksFromInnerBlocksTemplate(
-						collection.innerBlocks
-					)
-			  );
+					createBlocksFromInnerBlocksTemplate(collection.innerBlocks)
+				);
 
-	replaceBlock( clientId, newBlock );
+	replaceBlock(clientId, newBlock);
 };
 
-const CollectionButton = ( {
+const CollectionButton = ({
 	title,
 	icon,
 	description,
 	onClick,
-}: CollectionButtonProps ) => {
+}: CollectionButtonProps) => {
 	return (
-		<Tooltip text={ description } placement="top">
+		<Tooltip text={description} placement="top">
 			<Button
 				className="wc-blocks-product-collection__collection-button"
-				onClick={ onClick }
+				onClick={onClick}
 			>
 				<div className="wc-blocks-product-collection__collection-button-icon">
-					<Icon icon={ icon as Icon.IconType< BlockIcon > } />
+					<Icon icon={icon as Icon.IconType<BlockIcon>} />
 				</div>
 				<p className="wc-blocks-product-collection__collection-button-title">
-					{ title }
+					{title}
 				</p>
 			</Button>
 		</Tooltip>
 	);
 };
 
-const CreateCollectionButton = ( props: CollectionButtonProps ) => {
+const CreateCollectionButton = (props: CollectionButtonProps) => {
 	const { description, onClick } = props;
 
 	return (
 		<div className="wc-blocks-product-collection__collections-create">
-			<span>{ __( 'or', 'woocommerce' ) }</span>
-			<Tooltip text={ description } placement="top">
-				<Button onClick={ onClick }>
-					{ __( 'create your own', 'woocommerce' ) }
+			<span>{__('or', 'woocommerce')}</span>
+			<Tooltip text={description} placement="top">
+				<Button onClick={onClick}>
+					{__('create your own', 'woocommerce')}
 				</Button>
 			</Tooltip>
 		</div>
 	);
 };
 
-const GridCollectionOptions = ( props: CollectionOptionsProps ) => {
+const GridCollectionOptions = (props: CollectionOptionsProps) => {
 	const { onCollectionClick, catalogVariation, collectionVariations } = props;
 
 	return (
 		<div className="wc-blocks-product-collection__collections-grid">
 			<div className="wc-blocks-product-collection__collections-section">
-				{ collectionVariations.map(
-					( { name, title, icon, description } ) => (
+				{collectionVariations.map(
+					({ name, title, icon, description }) => (
 						<CollectionButton
-							key={ name }
-							title={ title }
-							description={ description }
-							icon={ icon }
-							onClick={ () => onCollectionClick( name ) }
+							key={name}
+							title={title}
+							description={description}
+							icon={icon}
+							onClick={() => onCollectionClick(name)}
 						/>
 					)
-				) }
+				)}
 			</div>
 			<CreateCollectionButton
-				title={ catalogVariation.title }
-				description={ catalogVariation.description }
-				icon={ catalogVariation.icon }
-				onClick={ () => onCollectionClick( catalogVariation.name ) }
+				title={catalogVariation.title}
+				description={catalogVariation.description}
+				icon={catalogVariation.icon}
+				onClick={() => onCollectionClick(catalogVariation.name)}
 			/>
 		</div>
 	);
 };
 
-const DropdownCollectionOptions = ( props: CollectionOptionsProps ) => {
+const DropdownCollectionOptions = (props: CollectionOptionsProps) => {
 	const { onCollectionClick, catalogVariation, collectionVariations } = props;
 
 	return (
@@ -136,36 +134,36 @@ const DropdownCollectionOptions = ( props: CollectionOptionsProps ) => {
 			<Dropdown
 				className="wc-blocks-product-collection__collections-dropdown-toggle"
 				contentClassName="wc-blocks-product-collection__collections-dropdown-content"
-				renderToggle={ ( { isOpen, onToggle } ) => (
+				renderToggle={({ isOpen, onToggle }) => (
 					<Button
 						variant="secondary"
-						onClick={ onToggle }
-						aria-expanded={ isOpen }
+						onClick={onToggle}
+						aria-expanded={isOpen}
 					>
-						{ __( 'Choose collection', 'woocommerce' ) }
+						{__('Choose collection', 'woocommerce')}
 					</Button>
-				) }
-				renderContent={ () => (
+				)}
+				renderContent={() => (
 					<>
-						{ collectionVariations.map(
-							( { name, title, icon, description } ) => (
+						{collectionVariations.map(
+							({ name, title, icon, description }) => (
 								<CollectionButton
-									key={ name }
-									title={ title }
-									description={ description }
-									icon={ icon }
-									onClick={ () => onCollectionClick( name ) }
+									key={name}
+									title={title}
+									description={description}
+									icon={icon}
+									onClick={() => onCollectionClick(name)}
 								/>
 							)
-						) }
+						)}
 					</>
-				) }
+				)}
 			></Dropdown>
 			<CreateCollectionButton
-				title={ catalogVariation.title }
-				description={ catalogVariation.description }
-				icon={ catalogVariation.icon }
-				onClick={ () => onCollectionClick( catalogVariation.name ) }
+				title={catalogVariation.title}
+				description={catalogVariation.description}
+				icon={catalogVariation.icon}
+				onClick={() => onCollectionClick(catalogVariation.name)}
 			/>
 		</div>
 	);
@@ -178,39 +176,39 @@ const CollectionChooser = (
 	>
 ) => {
 	// Get Collections
-	const blockCollections = useSelect( ( select ) => {
+	const blockCollections = useSelect((select) => {
 		// @ts-expect-error Type definitions are missing
 		// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/selectors.d.ts
-		const { getBlockVariations } = select( blocksStore );
-		return getBlockVariations( blockJson.name );
-	}, [] ) as BlockVariation[];
+		const { getBlockVariations } = select(blocksStore);
+		return getBlockVariations(blockJson.name);
+	}, []) as BlockVariation[];
 
 	const productCatalog = useMemo(
 		() =>
 			blockCollections.find(
-				( { name } ) => name === CoreCollectionNames.PRODUCT_CATALOG
+				({ name }) => name === CoreCollectionNames.PRODUCT_CATALOG
 			) as BlockVariation,
-		[ blockCollections ]
+		[blockCollections]
 	);
 
 	const collectionVariations = useMemo(
 		() =>
-			blockCollections.filter( ( { name, scope } ) => {
+			blockCollections.filter(({ name, scope }) => {
 				return (
 					name !== CoreCollectionNames.PRODUCT_CATALOG &&
 					// Display collections in the Collection Chooser if:
 					// 1. They have an explicit "block" scope
 					// 2. The scope is undefined (scope defaults to both block and inserter)
-					( scope === undefined || scope?.includes( 'block' ) )
+					(scope === undefined || scope?.includes('block'))
 				);
-			} ) as BlockVariation[],
-		[ blockCollections ]
+			}) as BlockVariation[],
+		[blockCollections]
 	);
 
-	const [ resizeListener, { width } ] = useResizeObserver();
+	const [resizeListener, { width }] = useResizeObserver();
 
 	let OptionsComponent;
-	if ( width !== null && width >= 600 ) {
+	if (width !== null && width >= 600) {
 		OptionsComponent = GridCollectionOptions;
 	} else {
 		OptionsComponent = DropdownCollectionOptions;
@@ -218,14 +216,14 @@ const CollectionChooser = (
 
 	return (
 		<>
-			{ resizeListener }
-			{ !! width && (
+			{resizeListener}
+			{!!width && (
 				<OptionsComponent
-					{ ...props }
-					catalogVariation={ productCatalog }
-					collectionVariations={ collectionVariations }
+					{...props}
+					catalogVariation={productCatalog}
+					collectionVariations={collectionVariations}
 				/>
-			) }
+			)}
 		</>
 	);
 };

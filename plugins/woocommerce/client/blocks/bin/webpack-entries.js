@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
-const { omit } = require( 'lodash' );
-const glob = require( 'glob' );
-const { scriptModuleEntries } = require( './webpack-interactivity-entries' );
+const { omit } = require('lodash');
+const glob = require('glob');
+const { scriptModuleEntries } = require('./webpack-interactivity-entries');
 
 // List of blocks that should be used as webpack entry points. They are expected
 // to be in `/assets/js/blocks/[BLOCK_NAME]`. If they are not, their relative
@@ -269,49 +269,49 @@ const cartAndCheckoutBlocks = {
 // Returns the entries for each block given a relative path (ie: `index.js`,
 // `**/*.scss`...).
 // It also filters out elements with undefined props and experimental blocks.
-const getBlockEntries = ( relativePath, blockEntries = blocks ) => {
+const getBlockEntries = (relativePath, blockEntries = blocks) => {
 	return Object.fromEntries(
-		Object.entries( blockEntries )
-			.map( ( [ blockCode, config ] ) => {
+		Object.entries(blockEntries)
+			.map(([blockCode, config]) => {
 				const filePaths = glob.sync(
-					`./assets/js/blocks/${ config.customDir || blockCode }/` +
+					`./assets/js/blocks/${config.customDir || blockCode}/` +
 						relativePath,
 					{ dotRelative: true, posix: true }
 				);
-				if ( filePaths.length > 0 ) {
-					return [ blockCode, filePaths ];
+				if (filePaths.length > 0) {
+					return [blockCode, filePaths];
 				}
 				return null;
-			} )
-			.filter( Boolean )
+			})
+			.filter(Boolean)
 	);
 };
 
 // Script module blocks scripts and styles are handled in
 // webpack-config-interactivity-blocks-frontend.js.
-const frontendScriptModuleBlocksToSkip = Object.keys( scriptModuleEntries );
+const frontendScriptModuleBlocksToSkip = Object.keys(scriptModuleEntries);
 
-const frontendEntries = getBlockEntries( 'frontend.{t,j}s{,x}', {
+const frontendEntries = getBlockEntries('frontend.{t,j}s{,x}', {
 	...Object.fromEntries(
-		Object.entries( { ...blocks, ...genericBlocks } ).filter(
-			( [ blockName ] ) => {
-				return ! frontendScriptModuleBlocksToSkip.includes(
-					`woocommerce/${ blockName }`
+		Object.entries({ ...blocks, ...genericBlocks }).filter(
+			([blockName]) => {
+				return !frontendScriptModuleBlocksToSkip.includes(
+					`woocommerce/${blockName}`
 				);
 			}
 		)
 	),
-} );
+});
 
-const cartAndCheckoutFrontendEntries = getBlockEntries( 'frontend.{t,j}s{,x}', {
+const cartAndCheckoutFrontendEntries = getBlockEntries('frontend.{t,j}s{,x}', {
 	...Object.fromEntries(
-		Object.entries( cartAndCheckoutBlocks ).filter( ( [ blockName ] ) => {
-			return ! frontendScriptModuleBlocksToSkip.includes(
-				`woocommerce/${ blockName }`
+		Object.entries(cartAndCheckoutBlocks).filter(([blockName]) => {
+			return !frontendScriptModuleBlocksToSkip.includes(
+				`woocommerce/${blockName}`
 			);
-		} )
+		})
 	),
-} );
+});
 
 // Remove styles from style build,
 // that are already included in interactivity
@@ -320,18 +320,18 @@ const blockStylingEntries = getBlockEntries(
 	'{index,block,frontend}.{t,j}s{,x}',
 	{
 		...Object.fromEntries(
-			Object.entries( {
+			Object.entries({
 				...blocks,
 				...genericBlocks,
 				...cartAndCheckoutBlocks,
-			} ).filter( ( [ blockName, config ] ) => {
-				if ( config.skipStyling ) {
+			}).filter(([blockName, config]) => {
+				if (config.skipStyling) {
 					return false;
 				}
-				return ! frontendScriptModuleBlocksToSkip.includes(
-					`woocommerce/${ blockName }`
+				return !frontendScriptModuleBlocksToSkip.includes(
+					`woocommerce/${blockName}`
 				);
-			} )
+			})
 		),
 	}
 );
@@ -375,11 +375,11 @@ const entries = {
 		'wc-blocks': './assets/js/index.js',
 
 		// Blocks
-		...getBlockEntries( 'index.{t,j}s{,x}', {
+		...getBlockEntries('index.{t,j}s{,x}', {
 			...blocks,
 			...genericBlocks,
 			...cartAndCheckoutBlocks,
-		} ),
+		}),
 	},
 	frontend: {
 		reviews: './assets/js/blocks/reviews/frontend.ts',
@@ -408,8 +408,8 @@ const entries = {
 	},
 };
 
-const getEntryConfig = ( type = 'main', exclude = [] ) => {
-	return omit( entries[ type ], exclude );
+const getEntryConfig = (type = 'main', exclude = []) => {
+	return omit(entries[type], exclude);
 };
 
 module.exports = {

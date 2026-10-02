@@ -22,30 +22,31 @@ import { EditorBlock, GenericBlockUIConfig } from './types';
 
 type Media = { id: number; url: string };
 
-interface WithBlockControlsRequiredProps< T > {
-	attributes: BlockControlRequiredAttributes &
-		EditorBlock< T >[ 'attributes' ];
-	setAttributes: ( attrs: Partial< BlockControlRequiredAttributes > ) => void;
-	useEditingImage: [ boolean, Dispatch< SetStateAction< boolean > > ];
-	useEditMode: [ boolean, Dispatch< SetStateAction< boolean > > ];
+interface WithBlockControlsRequiredProps<T> {
+	attributes: BlockControlRequiredAttributes & EditorBlock<T>['attributes'];
+	setAttributes: (attrs: Partial<BlockControlRequiredAttributes>) => void;
+	useEditingImage: [boolean, Dispatch<SetStateAction<boolean>>];
+	useEditMode: [boolean, Dispatch<SetStateAction<boolean>>];
 	canEditItem: boolean;
 }
 
-interface WithBlockControlsCategoryProps< T >
-	extends WithBlockControlsRequiredProps< T > {
+interface WithBlockControlsCategoryProps<
+	T,
+> extends WithBlockControlsRequiredProps<T> {
 	category: WP_REST_API_Category;
 	product: never;
 }
 
-interface WithBlockControlsProductProps< T >
-	extends WithBlockControlsRequiredProps< T > {
+interface WithBlockControlsProductProps<
+	T,
+> extends WithBlockControlsRequiredProps<T> {
 	category: never;
 	product: ProductResponseItem;
 }
 
-type WithBlockControlsProps< T extends EditorBlock< T > > =
-	| ( T & WithBlockControlsCategoryProps< T > )
-	| ( T & WithBlockControlsProductProps< T > );
+type WithBlockControlsProps<T extends EditorBlock<T>> =
+	| (T & WithBlockControlsCategoryProps<T>)
+	| (T & WithBlockControlsProductProps<T>);
 
 type BlockControlRequiredAttributes = {
 	contentAlign: BlockAlignment;
@@ -63,9 +64,9 @@ interface BlockControlsProps {
 	editMode: boolean;
 	isEditingImage: boolean;
 	mediaSrc: string;
-	setAttributes: ( attrs: Partial< BlockControlRequiredAttributes > ) => void;
-	setIsEditingImage: ( value: boolean ) => void;
-	setEditMode: ( editMode: boolean ) => void;
+	setAttributes: (attrs: Partial<BlockControlRequiredAttributes>) => void;
+	setIsEditingImage: (value: boolean) => void;
+	setEditMode: (editMode: boolean) => void;
 }
 
 interface BlockControlsConfiguration extends GenericBlockUIConfig {
@@ -73,7 +74,7 @@ interface BlockControlsConfiguration extends GenericBlockUIConfig {
 	editLabel: string;
 }
 
-export const BlockControls = ( {
+export const BlockControls = ({
 	canEditItem = true,
 	backgroundImageId,
 	backgroundImageSrc,
@@ -86,95 +87,95 @@ export const BlockControls = ( {
 	setAttributes,
 	setIsEditingImage,
 	setEditMode,
-}: BlockControlsProps ) => {
+}: BlockControlsProps) => {
 	return (
 		<BlockControlsWrapper>
 			<AlignmentToolbar
-				value={ contentAlign }
-				onChange={ ( nextAlign: BlockAlignment ) => {
-					setAttributes( { contentAlign: nextAlign } );
-				} }
+				value={contentAlign}
+				onChange={(nextAlign: BlockAlignment) => {
+					setAttributes({ contentAlign: nextAlign });
+				}}
 			/>
 			<ToolbarGroup>
-				{ backgroundImageSrc && ! isEditingImage && (
+				{backgroundImageSrc && !isEditingImage && (
 					<ToolbarButton
-						onClick={ () => setIsEditingImage( true ) }
-						icon={ crop }
-						label={ cropLabel }
+						onClick={() => setIsEditingImage(true)}
+						icon={crop}
+						label={cropLabel}
 					/>
-				) }
+				)}
 				<MediaReplaceFlow
-					mediaId={ backgroundImageId }
-					mediaURL={ mediaSrc }
+					mediaId={backgroundImageId}
+					mediaURL={mediaSrc}
 					accept="image/*"
-					onSelect={ ( media: Media ) => {
-						setAttributes( {
+					onSelect={(media: Media) => {
+						setAttributes({
 							mediaId: media.id,
 							mediaSrc: media.url,
-						} );
-					} }
-					allowedTypes={ [ 'image' ] }
+						});
+					}}
+					allowedTypes={['image']}
 				/>
-				{ backgroundImageId && mediaSrc ? (
+				{backgroundImageId && mediaSrc ? (
 					<ToolbarButton
-						onClick={ () =>
-							setAttributes( { mediaId: 0, mediaSrc: '' } )
+						onClick={() =>
+							setAttributes({ mediaId: 0, mediaSrc: '' })
 						}
 					>
-						{ __( 'Reset', 'woocommerce' ) }
+						{__('Reset', 'woocommerce')}
 					</ToolbarButton>
-				) : null }
+				) : null}
 			</ToolbarGroup>
-			{ canEditItem && (
+			{canEditItem && (
 				<ToolbarGroup
-					controls={ [
+					controls={[
 						{
 							icon: 'edit',
 							title: editLabel,
-							onClick: () => setEditMode( ! editMode ),
+							onClick: () => setEditMode(!editMode),
 							isActive: editMode,
 						},
-					] }
+					]}
 				/>
-			) }
+			)}
 		</BlockControlsWrapper>
 	);
 };
 
 export const withBlockControls =
-	( { cropLabel, editLabel }: BlockControlsConfiguration ) =>
-	< T extends EditorBlock< T > >( Component: ComponentType< T > ) =>
-	( props: WithBlockControlsProps< T > ) => {
-		const [ isEditingImage, setIsEditingImage ] = props.useEditingImage;
-		const [ editMode, setEditMode ] = props.useEditMode;
+	({ cropLabel, editLabel }: BlockControlsConfiguration) =>
+	<T extends EditorBlock<T>>(Component: ComponentType<T>) =>
+	(props: WithBlockControlsProps<T>) => {
+		const [isEditingImage, setIsEditingImage] = props.useEditingImage;
+		const [editMode, setEditMode] = props.useEditMode;
 		const { attributes, category, name, product, setAttributes } = props;
 		const { contentAlign, mediaId, mediaSrc } = attributes;
 		const item = category || product;
 
-		const { backgroundImageId, backgroundImageSrc } = useBackgroundImage( {
+		const { backgroundImageId, backgroundImageSrc } = useBackgroundImage({
 			item,
 			mediaId,
 			mediaSrc,
 			blockName: name,
-		} );
+		});
 
 		return (
 			<>
 				<BlockControls
-					canEditItem={ props.canEditItem }
-					backgroundImageId={ backgroundImageId }
-					backgroundImageSrc={ backgroundImageSrc }
-					contentAlign={ contentAlign }
-					cropLabel={ cropLabel }
-					editLabel={ editLabel }
-					editMode={ editMode }
-					isEditingImage={ isEditingImage }
-					mediaSrc={ mediaSrc }
-					setAttributes={ setAttributes }
-					setIsEditingImage={ setIsEditingImage }
-					setEditMode={ setEditMode }
+					canEditItem={props.canEditItem}
+					backgroundImageId={backgroundImageId}
+					backgroundImageSrc={backgroundImageSrc}
+					contentAlign={contentAlign}
+					cropLabel={cropLabel}
+					editLabel={editLabel}
+					editMode={editMode}
+					isEditingImage={isEditingImage}
+					mediaSrc={mediaSrc}
+					setAttributes={setAttributes}
+					setIsEditingImage={setIsEditingImage}
+					setEditMode={setEditMode}
 				/>
-				<Component { ...props } />
+				<Component {...props} />
 			</>
 		);
 	};

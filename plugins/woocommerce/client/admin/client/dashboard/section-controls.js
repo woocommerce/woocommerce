@@ -10,22 +10,22 @@ import { Component, Fragment } from '@wordpress/element';
 import { MenuItem } from '@woocommerce/components';
 
 class SectionControls extends Component {
-	constructor( props ) {
-		super( props );
-		this.onMoveUp = this.onMoveUp.bind( this );
-		this.onMoveDown = this.onMoveDown.bind( this );
+	constructor(props) {
+		super(props);
+		this.onMoveUp = this.onMoveUp.bind(this);
+		this.onMoveDown = this.onMoveDown.bind(this);
 	}
 
 	onMoveUp() {
 		const { onMove, onToggle } = this.props;
-		onMove( -1 );
+		onMove(-1);
 		// Close the dropdown
 		onToggle();
 	}
 
 	onMoveDown() {
 		const { onMove, onToggle } = this.props;
-		onMove( 1 );
+		onMove(1);
 		// Close the dropdown
 		onToggle();
 	}
@@ -44,44 +44,44 @@ class SectionControls extends Component {
 			<Fragment>
 				<div className="woocommerce-ellipsis-menu__item">
 					<TextControl
-						label={ __( 'Section title', 'woocommerce' ) }
-						onBlur={ onTitleBlur }
-						onChange={ onTitleChange }
+						label={__('Section title', 'woocommerce')}
+						onBlur={onTitleBlur}
+						onChange={onTitleChange}
 						required
-						value={ titleInput }
+						value={titleInput}
 					/>
 				</div>
 				<div className="woocommerce-dashboard-section-controls">
-					{ ! isFirst && (
-						<MenuItem isClickable onInvoke={ this.onMoveUp }>
+					{!isFirst && (
+						<MenuItem isClickable onInvoke={this.onMoveUp}>
 							<Icon
-								icon={ <ChevronUpIcon /> }
-								label={ __( 'Move up', 'woocommerce' ) }
-								size={ 20 }
+								icon={<ChevronUpIcon />}
+								label={__('Move up', 'woocommerce')}
+								size={20}
 								className="icon-control"
 							/>
-							{ __( 'Move up', 'woocommerce' ) }
+							{__('Move up', 'woocommerce')}
 						</MenuItem>
-					) }
-					{ ! isLast && (
-						<MenuItem isClickable onInvoke={ this.onMoveDown }>
+					)}
+					{!isLast && (
+						<MenuItem isClickable onInvoke={this.onMoveDown}>
 							<Icon
-								icon={ <ChevronDownIcon /> }
-								size={ 20 }
-								label={ __( 'Move down', 'woocommerce' ) }
+								icon={<ChevronDownIcon />}
+								size={20}
+								label={__('Move down', 'woocommerce')}
 								className="icon-control"
 							/>
-							{ __( 'Move down', 'woocommerce' ) }
+							{__('Move down', 'woocommerce')}
 						</MenuItem>
-					) }
-					<MenuItem isClickable onInvoke={ onRemove }>
+					)}
+					<MenuItem isClickable onInvoke={onRemove}>
 						<Icon
-							icon={ trash }
-							size={ 20 }
-							label={ __( 'Remove block', 'woocommerce' ) }
+							icon={trash}
+							size={20}
+							label={__('Remove block', 'woocommerce')}
 							className="icon-control"
 						/>
-						{ __( 'Remove section', 'woocommerce' ) }
+						{__('Remove section', 'woocommerce')}
 					</MenuItem>
 				</div>
 			</Fragment>

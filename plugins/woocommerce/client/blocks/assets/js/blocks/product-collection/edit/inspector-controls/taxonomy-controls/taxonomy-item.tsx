@@ -17,7 +17,7 @@ type Term = {
 interface TaxonomyItemProps {
 	taxonomy: Taxonomy;
 	termIds: number[];
-	onChange: ( termIds: number[] ) => void;
+	onChange: (termIds: number[]) => void;
 }
 
 /**
@@ -39,10 +39,10 @@ const DEFAULT_QUERY_ARGS = {
  * @param {Term} term The term to build a token for.
  * @return {string} The token for the term.
  */
-const getTokenForTerm = ( term: Term ): string => {
+const getTokenForTerm = (term: Term): string => {
 	// Make sure that the ID is AFTER the name so that the matching
 	// in FormTokenField works and the suggestions are rendered.
-	return `${ term.name } (#${ term.id })`;
+	return `${term.name} (#${term.id})`;
 };
 
 /**
@@ -51,146 +51,144 @@ const getTokenForTerm = ( term: Term ): string => {
  * @param {string} token The token to parse.
  * @return {Term|false} The term if one could be parsed and false if not.
  */
-const getTermFromToken = ( token: string ): Term | false => {
-	const matches = token.match( /^(?:(.+) )?\(#(\d+)\)$/ );
-	if ( ! matches ) {
+const getTermFromToken = (token: string): Term | false => {
+	const matches = token.match(/^(?:(.+) )?\(#(\d+)\)$/);
+	if (!matches) {
 		return false;
 	}
 
 	return {
-		name: matches[ 1 ] ?? '',
-		id: parseInt( matches[ 2 ], 10 ),
+		name: matches[1] ?? '',
+		id: parseInt(matches[2], 10),
 	};
 };
 
-const TaxonomyItem = ( { taxonomy, termIds, onChange }: TaxonomyItemProps ) => {
+const TaxonomyItem = ({ taxonomy, termIds, onChange }: TaxonomyItemProps) => {
 	// We need to get the existing terms so that we can store the term object
 	// in the map that we used to render the term name in the FormTokenField.
 	const { existingTerms, isLoadingExistingTerms } = useSelect(
-		( select ) => {
+		(select) => {
 			// There's no need to load any existing terms when there are no terms set.
-			if ( ! termIds || ! termIds.length ) {
+			if (!termIds || !termIds.length) {
 				return { existingTerms: [], isLoadingExistingTerms: false };
 			}
 
-			const { getEntityRecords, hasFinishedResolution } =
-				select( 'core' );
+			const { getEntityRecords, hasFinishedResolution } = select('core');
 
-			const selectorArgs: [ string, string, Record< string, unknown > ] =
-				[
-					'taxonomy',
-					taxonomy.slug,
-					{
-						...DEFAULT_QUERY_ARGS,
-						include: termIds,
-					},
-				];
+			const selectorArgs: [string, string, Record<string, unknown>] = [
+				'taxonomy',
+				taxonomy.slug,
+				{
+					...DEFAULT_QUERY_ARGS,
+					include: termIds,
+				},
+			];
 
 			return {
-				existingTerms: getEntityRecords( ...selectorArgs ) as Term[],
-				isLoadingExistingTerms: ! hasFinishedResolution(
+				existingTerms: getEntityRecords(...selectorArgs) as Term[],
+				isLoadingExistingTerms: !hasFinishedResolution(
 					'getEntityRecords',
 					selectorArgs
 				),
 			};
 		},
-		[ taxonomy, termIds ]
+		[taxonomy, termIds]
 	);
 
 	// A search query will enable us to populate the FormTokenField's suggestion
 	// list based on the user supplied search string.
-	const [ searchQuery, setSearchQuery ] = useState( '' );
+	const [searchQuery, setSearchQuery] = useState('');
 	const { searchTerms } = useSelect(
-		( select ) => {
+		(select) => {
 			// The FormTokenField requires at least two characters to start showing
 			// the suggestions. Let's not waste a web request since it won't do
 			// anything useful.
-			if ( searchQuery.length <= 1 ) {
+			if (searchQuery.length <= 1) {
 				return { searchTerms: [] };
 			}
 
-			const { getEntityRecords } = select( 'core' );
+			const { getEntityRecords } = select('core');
 			return {
-				searchTerms: getEntityRecords( 'taxonomy', taxonomy.slug, {
+				searchTerms: getEntityRecords('taxonomy', taxonomy.slug, {
 					...DEFAULT_QUERY_ARGS,
 					exclude: termIds,
 					search: searchQuery,
-				} ) as Term[],
+				}) as Term[],
 			};
 		},
-		[ taxonomy, termIds, searchQuery ]
+		[taxonomy, termIds, searchQuery]
 	);
-	const handleSearch = useDebounce( setSearchQuery, 250 );
+	const handleSearch = useDebounce(setSearchQuery, 250);
 
 	// Transform the terms for the FormTokenField control and
 	// keep track of any duplicate term names for later.
-	const allTermNames = new Set< string >();
-	const duplicateNames = new Set< string >();
-	const createTokenForTerm = ( term: Term ) => {
-		if ( allTermNames.has( term.name ) ) {
-			duplicateNames.add( term.name );
+	const allTermNames = new Set<string>();
+	const duplicateNames = new Set<string>();
+	const createTokenForTerm = (term: Term) => {
+		if (allTermNames.has(term.name)) {
+			duplicateNames.add(term.name);
 		}
-		allTermNames.add( term.name );
+		allTermNames.add(term.name);
 
-		return getTokenForTerm( term );
+		return getTokenForTerm(term);
 	};
 
 	const existingTokens = existingTerms
-		? existingTerms.map( createTokenForTerm )
+		? existingTerms.map(createTokenForTerm)
 		: [];
 	const suggestionTokens = searchTerms
-		? searchTerms.map( createTokenForTerm )
+		? searchTerms.map(createTokenForTerm)
 		: [];
 
 	// Since the FormTokenField has the term ID encoded in the token
 	// we need to pull out the ID in order to update the term IDs.
-	const handleChangeTermIDs = ( tokens: string[] ) => {
+	const handleChangeTermIDs = (tokens: string[]) => {
 		const newTermIds: number[] = [];
-		tokens.forEach( ( token ) => {
-			const term = getTermFromToken( token );
-			if ( ! term ) {
+		tokens.forEach((token) => {
+			const term = getTermFromToken(token);
+			if (!term) {
 				return;
 			}
 
-			newTermIds.push( term.id );
-		} );
+			newTermIds.push(term.id);
+		});
 
-		onChange( newTermIds );
+		onChange(newTermIds);
 	};
 
 	// It's possible that a term may have been deleted but still
 	// be present in the termIds array. In that case we will
 	// display the ID and an indication it was deleted.
-	if ( existingTerms && termIds.length !== existingTerms.length ) {
+	if (existingTerms && termIds.length !== existingTerms.length) {
 		// Use a map to make checking for the terms faster.
 		const termMap = existingTerms.reduce(
-			( acc: Record< string, Term >, term: Term ) => {
-				acc[ term.id ] = term;
+			(acc: Record<string, Term>, term: Term) => {
+				acc[term.id] = term;
 				return acc;
 			},
 			{}
 		);
 
 		// Deleted terms will be displayed as just the ID with no name.
-		termIds.forEach( ( termId ) => {
-			if ( ! termMap[ termId ] ) {
-				existingTokens.push( `(#${ termId })` );
+		termIds.forEach((termId) => {
+			if (!termMap[termId]) {
+				existingTokens.push(`(#${termId})`);
 			}
-		} );
+		});
 	}
 
 	// Since our tokens include some encoding we need to perform some transformations
 	// before they can be displayed in the input and in the suggestion list.
-	const displayTermName = ( display: string ) => {
-		const term = getTermFromToken( display );
-		if ( term ) {
+	const displayTermName = (display: string) => {
+		const term = getTermFromToken(display);
+		if (term) {
 			// Terms that are missing will be identified as such.
-			if ( ! term.name ) {
-				display = `(#${ term.id } ${ __( 'Missing', 'woocommerce' ) })`;
+			if (!term.name) {
+				display = `(#${term.id} ${__('Missing', 'woocommerce')})`;
 			}
 			// Terms with names that are non-unique will have the ID appended.
-			else if ( duplicateNames.has( term.name ) ) {
-				display = `${ term.name } (#${ term.id })`;
+			else if (duplicateNames.has(term.name)) {
+				display = `${term.name} (#${term.id})`;
 			}
 			// Terms that fit neither criteria just display the name.
 			else {
@@ -201,7 +199,7 @@ const TaxonomyItem = ( { taxonomy, termIds, onChange }: TaxonomyItemProps ) => {
 		// Both the API and React will encode any HTML entities in the term name.
 		// We need to decode them before they are rendered to undo the
 		// API's encoding so that React can display them properly.
-		return decodeEntities( display ) || '';
+		return decodeEntities(display) || '';
 	};
 
 	return (
@@ -209,15 +207,15 @@ const TaxonomyItem = ( { taxonomy, termIds, onChange }: TaxonomyItemProps ) => {
 			<FormTokenField
 				__next40pxDefaultSize
 				__nextHasNoMarginBottom
-				label={ taxonomy.name }
-				value={ existingTokens }
-				onInputChange={ handleSearch }
-				onChange={ handleChangeTermIDs }
-				suggestions={ suggestionTokens }
-				disabled={ isLoadingExistingTerms }
-				displayTransform={ displayTermName }
+				label={taxonomy.name}
+				value={existingTokens}
+				onInputChange={handleSearch}
+				onChange={handleChangeTermIDs}
+				suggestions={suggestionTokens}
+				disabled={isLoadingExistingTerms}
+				displayTransform={displayTermName}
 				// @ts-expect-error Using experimental features
-				__experimentalShowHowTo={ false }
+				__experimentalShowHowTo={false}
 			/>
 		</div>
 	);

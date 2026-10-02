@@ -16,81 +16,80 @@ import { Button, TextareaControl, Icon } from '@wordpress/components';
 import { SurveyData } from '.';
 import { isWooExpress } from '~/utils/is-woo-express';
 
-export const LysSurvey = ( {
+export const LysSurvey = ({
 	hasCompleteSurvey,
 	onSubmit,
 }: {
 	hasCompleteSurvey: boolean;
-	onSubmit: ( surveyData: SurveyData ) => void;
-} ) => {
-	const [ score, setScore ] = useState< number | null >( null );
-	const [ feedbackText, setFeedbackText ] = useState< string >( '' );
-	const [ isShowThanks, setIsShowThanks ] = useState< boolean >( false );
-	const [ isShowSurvey, setIsShowSurvey ] = useState< boolean >(
-		! hasCompleteSurvey
-	);
-	const shouldShowComment = isInteger( score );
+	onSubmit: (surveyData: SurveyData) => void;
+}) => {
+	const [score, setScore] = useState<number | null>(null);
+	const [feedbackText, setFeedbackText] = useState<string>('');
+	const [isShowThanks, setIsShowThanks] = useState<boolean>(false);
+	const [isShowSurvey, setIsShowSurvey] =
+		useState<boolean>(!hasCompleteSurvey);
+	const shouldShowComment = isInteger(score);
 
 	const sendData = () => {
-		onSubmit( {
+		onSubmit({
 			action: 'lys_experience',
 			score,
 			comments: feedbackText,
-		} );
+		});
 
-		setIsShowThanks( true );
+		setIsShowThanks(true);
 	};
 
 	return (
 		<>
-			{ isShowSurvey && <hr className="separator" /> }
+			{isShowSurvey && <hr className="separator" />}
 
-			{ isShowSurvey && (
+			{isShowSurvey && (
 				<div className="woocommerce-launch-store__congrats-survey">
-					{ isShowThanks ? (
+					{isShowThanks ? (
 						<div className="woocommerce-launch-store__congrats-thanks">
 							<p className="thanks-copy">
-								🙌{ ' ' }
-								{ __(
+								🙌{' '}
+								{__(
 									'We appreciate your feedback!',
 									'woocommerce'
-								) }
+								)}
 							</p>
 							<Button
 								className="close-button"
-								label={ __( 'Close', 'woocommerce' ) }
+								label={__('Close', 'woocommerce')}
 								icon={
 									<Icon
-										icon={ closeSmall }
+										icon={closeSmall}
 										viewBox="6 4 12 14"
 									/>
 								}
-								iconSize={ 14 }
-								onClick={ () => {
-									setIsShowThanks( false );
-									setIsShowSurvey( false );
-								} }
+								iconSize={14}
+								onClick={() => {
+									setIsShowThanks(false);
+									setIsShowSurvey(false);
+								}}
 							></Button>
 						</div>
 					) : (
 						<div className="woocommerce-launch-store__congrats-section_1">
 							<div className="woocommerce-launch-store__congrats-survey__selection">
 								<CustomerFeedbackSimple
-									label={ __(
+									label={__(
 										'How was the experience of launching your store?',
 										'woocommerce'
-									) }
-									onSelect={ setScore }
-									selectedValue={ score }
+									)}
+									onSelect={setScore}
+									selectedValue={score}
 								/>
 							</div>
-							{ shouldShowComment && (
+							{shouldShowComment && (
 								<div className="woocommerce-launch-store__congrats-survey__comment">
 									<label
 										className="comment-label"
 										htmlFor="launch-your-store-comment"
 									>
-										{ createInterpolateElement(
+										{createInterpolateElement(
 											__(
 												'Why do you feel that way? <smallText>(optional)</smallText>',
 												'woocommerce'
@@ -100,19 +99,19 @@ export const LysSurvey = ( {
 													<span className="small-text" />
 												),
 											}
-										) }
+										)}
 									</label>
 									<TextareaControl
 										__nextHasNoMarginBottom
 										id="launch-your-store-comment"
 										data-testid="launch-your-store-comment"
-										value={ feedbackText }
-										onChange={ ( value ) => {
-											setFeedbackText( value );
-										} }
+										value={feedbackText}
+										onChange={(value) => {
+											setFeedbackText(value);
+										}}
 									/>
 									<span className="privacy-text">
-										{ createInterpolateElement(
+										{createInterpolateElement(
 											__(
 												'Your feedback will be only be shared with WooCommerce and treated in accordance with our <privacyLink>privacy policy</privacyLink>.',
 												'woocommerce'
@@ -128,43 +127,43 @@ export const LysSurvey = ( {
 													</Link>
 												),
 											}
-										) }
+										)}
 									</span>
 								</div>
-							) }
+							)}
 						</div>
-					) }
-					{ shouldShowComment && ! isShowThanks && (
+					)}
+					{shouldShowComment && !isShowThanks && (
 						<div className="woocommerce-launch-store__congrats-section_2">
 							<div className="woocommerce-launch-store__congrats-buttons">
 								<Button
 									className=""
 									variant="tertiary"
-									onClick={ () => {
-										setScore( null );
-									} }
+									onClick={() => {
+										setScore(null);
+									}}
 								>
-									{ __( 'Cancel', 'woocommerce' ) }
+									{__('Cancel', 'woocommerce')}
 								</Button>
 								<Button
 									className=""
 									variant="primary"
-									onClick={ () => {
+									onClick={() => {
 										recordEvent(
 											isWooExpress()
 												? 'launch_your_store_congrats_survey_click'
 												: 'launch_your_store_on_core_congrats_survey_click'
 										);
 										sendData();
-									} }
+									}}
 								>
-									{ __( 'Send', 'woocommerce' ) }
+									{__('Send', 'woocommerce')}
 								</Button>
 							</div>
 						</div>
-					) }
+					)}
 				</div>
-			) }
+			)}
 		</>
 	);
 };

@@ -8,8 +8,8 @@ import { render } from '@testing-library/react';
  */
 import { staticFormDataToObject } from '../static-form-helper';
 
-describe( 'staticFormDataToObject', () => {
-	it( 'should create object of all nested input, select, textarea fields within form element', () => {
+describe('staticFormDataToObject', () => {
+	it('should create object of all nested input, select, textarea fields within form element', () => {
 		render(
 			<form id="testform">
 				<div>
@@ -28,20 +28,20 @@ describe( 'staticFormDataToObject', () => {
 		);
 		type FormElements = {
 			testform?: HTMLFormElement;
-		} & HTMLCollectionOf< HTMLFormElement >;
+		} & HTMLCollectionOf<HTMLFormElement>;
 		const forms: FormElements = document.forms;
 		let formObject;
-		if ( forms.testform ) {
-			formObject = staticFormDataToObject( forms.testform );
+		if (forms.testform) {
+			formObject = staticFormDataToObject(forms.testform);
 		}
-		expect( formObject ).toEqual( {
+		expect(formObject).toEqual({
 			Name: 'John',
 			Car: 'audi',
 			Description: 'Tall',
-		} );
-	} );
+		});
+	});
 
-	it( 'should add array of items for select multiple', () => {
+	it('should add array of items for select multiple', () => {
 		render(
 			<form id="testform">
 				<div>
@@ -60,18 +60,18 @@ describe( 'staticFormDataToObject', () => {
 		);
 		type FormElements = {
 			testform?: HTMLFormElement;
-		} & HTMLCollectionOf< HTMLFormElement >;
+		} & HTMLCollectionOf<HTMLFormElement>;
 		const forms: FormElements = document.forms;
 		let formObject;
-		if ( forms.testform ) {
-			formObject = staticFormDataToObject( forms.testform );
+		if (forms.testform) {
+			formObject = staticFormDataToObject(forms.testform);
 		}
-		expect( formObject ).toEqual( {
-			Car: [ 'volvo', 'audi' ],
-		} );
-	} );
+		expect(formObject).toEqual({
+			Car: ['volvo', 'audi'],
+		});
+	});
 
-	it( 'should skip input types of type button, image, and submit', () => {
+	it('should skip input types of type button, image, and submit', () => {
 		render(
 			<form id="testform">
 				<div>
@@ -84,14 +84,14 @@ describe( 'staticFormDataToObject', () => {
 		);
 		type FormElements = {
 			testform?: HTMLFormElement;
-		} & HTMLCollectionOf< HTMLFormElement >;
+		} & HTMLCollectionOf<HTMLFormElement>;
 		const forms: FormElements = document.forms;
 		let formObject;
-		if ( forms.testform ) {
-			formObject = staticFormDataToObject( forms.testform );
+		if (forms.testform) {
+			formObject = staticFormDataToObject(forms.testform);
 		}
-		expect( formObject ).toEqual( {
+		expect(formObject).toEqual({
 			Name: 'John',
-		} );
-	} );
-} );
+		});
+	});
+});

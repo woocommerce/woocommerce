@@ -15,14 +15,14 @@ import './style.scss';
  * filter blocks notice. We want users to utilize the sidebar for attribute
  * settings, so we are keeping the new notice minimal."
  */
-export const Notice = ( { children }: { children: React.ReactNode } ) => (
+export const Notice = ({ children }: { children: React.ReactNode }) => (
 	<div className="wc-block-product-filter-components-notice">
 		<Icon
 			className="wc-block-product-filter-components-notice__icon"
-			icon={ info }
+			icon={info}
 		/>
 		<div className="wc-block-product-filter-components-notice__content">
-			{ children }
+			{children}
 		</div>
 	</div>
 );

@@ -24,35 +24,35 @@ import type { WCStoreV1ProductsCollectionProps } from '@woocommerce/types';
 import RatingFilterBlock from '../block';
 import { Attributes } from '../types';
 
-jest.mock( '@woocommerce/base-context/hooks', () => ( {
+jest.mock('@woocommerce/base-context/hooks', () => ({
 	__esModule: true,
-	...jest.requireActual( '@woocommerce/base-context/hooks' ),
-} ) );
+	...jest.requireActual('@woocommerce/base-context/hooks'),
+}));
 
-const setWindowUrl = ( { url }: { url: string } ) => {
+const setWindowUrl = ({ url }: { url: string }) => {
 	/*
 	 * jsdom (>= 21) makes `window.location` non-configurable, so navigate via
 	 * the History API instead of replacing the object. Same-origin only (see
 	 * the `@jest-environment-options` url above).
 	 */
-	window.history.replaceState( {}, '', url );
+	window.history.replaceState({}, '', url);
 };
 
 // Captured before any test navigates, so each test starts from the env URL.
 const initialUrl = window.location.href;
 
-afterEach( () => {
-	window.history.replaceState( {}, '', initialUrl );
-} );
+afterEach(() => {
+	window.history.replaceState({}, '', initialUrl);
+});
 
 const acceptErrorWithDuplicatedKeys = () => {
 	// React throws an error about the duplicated `key` in the render tree.
 	// This is due to `FormTokenField` is forcefully used with incorrect children type,
 	// hence the error is acknowledged and consciously accepted.
-	expect( console ).toHaveErrored();
+	expect(console).toHaveErrored();
 };
 
-const stubCollectionData = (): WCStoreV1ProductsCollectionProps => ( {
+const stubCollectionData = (): WCStoreV1ProductsCollectionProps => ({
 	price_range: null,
 	attribute_counts: null,
 	rating_counts: [
@@ -61,7 +61,7 @@ const stubCollectionData = (): WCStoreV1ProductsCollectionProps => ( {
 		{ rating: 5, count: 1 },
 	],
 	stock_status_counts: null,
-} );
+});
 
 type DisplayStyle = 'list' | 'dropdown';
 type SelectType = 'single' | 'multiple';
@@ -77,12 +77,12 @@ const selectors = {
 	chipsContainer: '.components-form-token-field__token',
 };
 
-const setup = ( params: SetupParams ) => {
+const setup = (params: SetupParams) => {
 	cleanup();
 	const url = `http://woo.local/${
 		params.filterRating ? '?rating_filter=' + params.filterRating : ''
 	}`;
-	setWindowUrl( { url } );
+	setWindowUrl({ url });
 
 	const attributes: Attributes = {
 		displayStyle: params.displayStyle || 'list',
@@ -92,73 +92,71 @@ const setup = ( params: SetupParams ) => {
 		isPreview: false,
 	};
 
-	jest.spyOn( hooks, 'useCollectionData' ).mockReturnValue( {
+	jest.spyOn(hooks, 'useCollectionData').mockReturnValue({
 		data: stubCollectionData(),
 		isLoading: false,
-	} );
+	});
 
 	const { container, ...utils } = render(
-		<RatingFilterBlock attributes={ attributes } />
+		<RatingFilterBlock attributes={attributes} />
 	);
 
-	const getList = () => container.querySelector( selectors.list );
-	const getDropdown = () => screen.queryByRole( 'combobox' );
+	const getList = () => container.querySelector(selectors.list);
+	const getDropdown = () => screen.queryByRole('combobox');
 
 	const getChipsContainers = () =>
-		container.querySelectorAll( selectors.chipsContainer );
+		container.querySelectorAll(selectors.chipsContainer);
 	const getSuggestionsContainer = () =>
-		container.querySelector( selectors.suggestionsContainer );
+		container.querySelector(selectors.suggestionsContainer);
 
-	const getChips = ( value: string ) => {
+	const getChips = (value: string) => {
 		const chipsContainers = getChipsContainers();
-		const chips = Array.from( chipsContainers ).find( ( chipsContainer ) =>
+		const chips = Array.from(chipsContainers).find((chipsContainer) =>
 			chipsContainer
-				? within( chipsContainer ).queryByLabelText(
-						`Rated ${ value } out of 5`
-				  )
+				? within(chipsContainer).queryByLabelText(
+						`Rated ${value} out of 5`
+					)
 				: false
 		);
 
 		return chips || null;
 	};
-	const getSuggestion = ( value: string ) => {
+	const getSuggestion = (value: string) => {
 		const suggestionsContainer = getSuggestionsContainer();
-		if ( suggestionsContainer ) {
-			return within( suggestionsContainer ).queryByLabelText(
-				`Rated ${ value } out of 5`
+		if (suggestionsContainer) {
+			return within(suggestionsContainer).queryByLabelText(
+				`Rated ${value} out of 5`
 			);
 		}
 		return null;
 	};
-	const getCheckbox = ( value: string ) => {
+	const getCheckbox = (value: string) => {
 		const checkboxesContainer = getList();
 		const checkboxes = checkboxesContainer
-			? checkboxesContainer.querySelectorAll( 'input' )
+			? checkboxesContainer.querySelectorAll('input')
 			: [];
 
-		const checkbox = Array.from( checkboxes ).find(
-			( input ) => input.value === value
+		const checkbox = Array.from(checkboxes).find(
+			(input) => input.value === value
 		);
 
 		return checkbox;
 	};
 
-	const getRemoveButtonFromChips = ( chips: HTMLElement | null ) =>
-		chips
-			? within( chips ).getByLabelText( 'Remove rating filter.' )
-			: null;
+	const getRemoveButtonFromChips = (chips: HTMLElement | null) =>
+		chips ? within(chips).getByLabelText('Remove rating filter.') : null;
 
-	const getRating2Chips = () => getChips( '2' );
-	const getRating4Chips = () => getChips( '4' );
-	const getRating5Chips = () => getChips( '5' );
+	const getRating2Chips = () => getChips('2');
+	const getRating4Chips = () => getChips('4');
+	const getRating5Chips = () => getChips('5');
 
-	const getRating2Suggestion = () => getSuggestion( '2' );
-	const getRating4Suggestion = () => getSuggestion( '4' );
-	const getRating5Suggestion = () => getSuggestion( '5' );
+	const getRating2Suggestion = () => getSuggestion('2');
+	const getRating4Suggestion = () => getSuggestion('4');
+	const getRating5Suggestion = () => getSuggestion('5');
 
-	const getRating2Checkbox = () => getCheckbox( '2' );
-	const getRating4Checkbox = () => getCheckbox( '4' );
-	const getRating5Checkbox = () => getCheckbox( '5' );
+	const getRating2Checkbox = () => getCheckbox('2');
+	const getRating4Checkbox = () => getCheckbox('4');
+	const getRating5Checkbox = () => getCheckbox('5');
 
 	return {
 		...utils,
@@ -184,137 +182,136 @@ interface SetupParams {
 	selectType: SelectType;
 }
 
-const setupSingleChoiceList = ( filterRating = '5' ) =>
-	setup( {
+const setupSingleChoiceList = (filterRating = '5') =>
+	setup({
 		filterRating,
 		displayStyle: 'list',
 		selectType: 'single',
-	} );
+	});
 
-const setupMultipleChoiceList = ( filterRating = '5' ) =>
-	setup( {
+const setupMultipleChoiceList = (filterRating = '5') =>
+	setup({
 		filterRating,
 		displayStyle: 'list',
 		selectType: 'multiple',
-	} );
+	});
 
-const setupSingleChoiceDropdown = ( filterRating = '5' ) =>
-	setup( {
+const setupSingleChoiceDropdown = (filterRating = '5') =>
+	setup({
 		filterRating,
 		displayStyle: 'dropdown',
 		selectType: 'single',
-	} );
+	});
 
-const setupMultipleChoiceDropdown = ( filterRating = '5' ) =>
-	setup( {
+const setupMultipleChoiceDropdown = (filterRating = '5') =>
+	setup({
 		filterRating,
 		displayStyle: 'dropdown',
 		selectType: 'multiple',
-	} );
+	});
 
-describe( 'Filter by Rating block', () => {
-	describe( 'Single choice Dropdown', () => {
-		test( 'renders dropdown', () => {
+describe('Filter by Rating block', () => {
+	describe('Single choice Dropdown', () => {
+		test('renders dropdown', () => {
 			const { getDropdown, getList } = setupSingleChoiceDropdown();
 
-			expect( getDropdown() ).toBeInTheDocument();
-			expect( getList() ).toBeNull();
-		} );
+			expect(getDropdown()).toBeInTheDocument();
+			expect(getList()).toBeNull();
+		});
 
-		test( 'renders chips based on URL params', async () => {
-			await waitFor( async () => {
+		test('renders chips based on URL params', async () => {
+			await waitFor(async () => {
 				const ratingParam = '2';
 				const { getRating2Chips, getRating4Chips, getRating5Chips } =
-					setupSingleChoiceDropdown( ratingParam );
+					setupSingleChoiceDropdown(ratingParam);
 
-				expect( getRating2Chips() ).toBeInTheDocument();
-				expect( getRating4Chips() ).toBeNull();
-				expect( getRating5Chips() ).toBeNull();
-			} );
-		} );
+				expect(getRating2Chips()).toBeInTheDocument();
+				expect(getRating4Chips()).toBeNull();
+				expect(getRating5Chips()).toBeNull();
+			});
+		});
 
-		test( 'replaces chosen option when another one is clicked', async () => {
-			await waitFor( async () => {
+		test('replaces chosen option when another one is clicked', async () => {
+			await waitFor(async () => {
 				const ratingParam = '2';
 				const {
 					getDropdown,
 					getRating2Chips,
 					getRating4Chips,
 					getRating4Suggestion,
-				} = setupSingleChoiceDropdown( ratingParam );
+				} = setupSingleChoiceDropdown(ratingParam);
 
-				expect( getRating2Chips() ).toBeInTheDocument();
-				expect( getRating4Chips() ).toBeNull();
+				expect(getRating2Chips()).toBeInTheDocument();
+				expect(getRating4Chips()).toBeNull();
 
 				const dropdown = getDropdown();
 
-				if ( dropdown ) {
-					await userEvent.click( dropdown );
+				if (dropdown) {
+					await userEvent.click(dropdown);
 					acceptErrorWithDuplicatedKeys();
 				}
 
 				const rating4Suggestion = getRating4Suggestion();
 
-				if ( rating4Suggestion ) {
-					await userEvent.click( rating4Suggestion );
+				if (rating4Suggestion) {
+					await userEvent.click(rating4Suggestion);
 				}
 
-				expect( getRating2Chips() ).toBeNull();
-				expect( getRating4Chips() ).toBeInTheDocument();
-			} );
-		} );
+				expect(getRating2Chips()).toBeNull();
+				expect(getRating4Chips()).toBeInTheDocument();
+			});
+		});
 
-		test( 'removes the option when the X button is clicked', async () => {
-			await waitFor( async () => {
+		test('removes the option when the X button is clicked', async () => {
+			await waitFor(async () => {
 				const ratingParam = '4';
 				const {
 					getRating2Chips,
 					getRating4Chips,
 					getRating5Chips,
 					getRemoveButtonFromChips,
-				} = setupMultipleChoiceDropdown( ratingParam );
+				} = setupMultipleChoiceDropdown(ratingParam);
 
-				expect( getRating2Chips() ).toBeNull();
-				expect( getRating4Chips() ).toBeInTheDocument();
-				expect( getRating5Chips() ).toBeNull();
+				expect(getRating2Chips()).toBeNull();
+				expect(getRating4Chips()).toBeInTheDocument();
+				expect(getRating5Chips()).toBeNull();
 
-				const removeRating4Button = getRemoveButtonFromChips(
-					getRating4Chips()
-				);
+				const removeRating4Button =
+					getRemoveButtonFromChips(getRating4Chips());
 
-				if ( removeRating4Button ) {
-					await userEvent.click( removeRating4Button );
+				if (removeRating4Button) {
+					await userEvent.click(removeRating4Button);
 					acceptErrorWithDuplicatedKeys();
 				}
 
-				expect( getRating2Chips() ).toBeNull();
-				expect( getRating4Chips() ).toBeNull();
-				expect( getRating5Chips() ).toBeNull();
-			} );
-		} );
-	} );
+				expect(getRating2Chips()).toBeNull();
+				expect(getRating4Chips()).toBeNull();
+				expect(getRating5Chips()).toBeNull();
+			});
+		});
+	});
 
-	describe( 'Multiple choice Dropdown', () => {
-		test( 'renders dropdown', () => {
+	describe('Multiple choice Dropdown', () => {
+		test('renders dropdown', () => {
 			const { getDropdown, getList } = setupMultipleChoiceDropdown();
-			expect( getDropdown() ).toBeDefined();
-			expect( getList() ).toBeNull();
-		} );
+			expect(getDropdown()).toBeDefined();
+			expect(getList()).toBeNull();
+		});
 
-		test( 'renders chips based on URL params', async () => {
-			await waitFor( async () => {
+		test('renders chips based on URL params', async () => {
+			await waitFor(async () => {
 				const ratingParam = '2,4';
 				const { getRating2Chips, getRating4Chips, getRating5Chips } =
-					setupMultipleChoiceDropdown( ratingParam );
+					setupMultipleChoiceDropdown(ratingParam);
 
-				expect( getRating2Chips() ).toBeInTheDocument();
-				expect( getRating4Chips() ).toBeInTheDocument();
-				expect( getRating5Chips() ).toBeNull();
-			} );
-		} );
+				expect(getRating2Chips()).toBeInTheDocument();
+				expect(getRating4Chips()).toBeInTheDocument();
+				expect(getRating5Chips()).toBeNull();
+			});
+		});
 
-		test( 'adds chosen option to another one that is clicked', async () => {
-			await waitFor( async () => {
+		test('adds chosen option to another one that is clicked', async () => {
+			await waitFor(async () => {
 				const ratingParam = '2';
 				const {
 					getDropdown,
@@ -323,215 +320,214 @@ describe( 'Filter by Rating block', () => {
 					getRating5Chips,
 					getRating4Suggestion,
 					getRating5Suggestion,
-				} = setupMultipleChoiceDropdown( ratingParam );
+				} = setupMultipleChoiceDropdown(ratingParam);
 
-				expect( getRating2Chips() ).toBeInTheDocument();
-				expect( getRating4Chips() ).toBeNull();
-				expect( getRating5Chips() ).toBeNull();
+				expect(getRating2Chips()).toBeInTheDocument();
+				expect(getRating4Chips()).toBeNull();
+				expect(getRating5Chips()).toBeNull();
 
 				const dropdown = getDropdown();
 
-				if ( dropdown ) {
-					await userEvent.click( dropdown );
+				if (dropdown) {
+					await userEvent.click(dropdown);
 					acceptErrorWithDuplicatedKeys();
 				}
 
 				const rating4Suggestion = getRating4Suggestion();
 
-				if ( rating4Suggestion ) {
-					await userEvent.click( rating4Suggestion );
+				if (rating4Suggestion) {
+					await userEvent.click(rating4Suggestion);
 				}
 
-				expect( getRating2Chips() ).toBeInTheDocument();
-				expect( getRating4Chips() ).toBeInTheDocument();
-				expect( getRating5Chips() ).toBeNull();
+				expect(getRating2Chips()).toBeInTheDocument();
+				expect(getRating4Chips()).toBeInTheDocument();
+				expect(getRating5Chips()).toBeNull();
 
 				const rating5Suggestion = getRating5Suggestion();
 
-				if ( rating5Suggestion ) {
-					await userEvent.click( rating5Suggestion );
+				if (rating5Suggestion) {
+					await userEvent.click(rating5Suggestion);
 				}
 
-				expect( getRating2Chips() ).toBeInTheDocument();
-				expect( getRating4Chips() ).toBeInTheDocument();
-				expect( getRating5Chips() ).toBeInTheDocument();
-			} );
-		} );
+				expect(getRating2Chips()).toBeInTheDocument();
+				expect(getRating4Chips()).toBeInTheDocument();
+				expect(getRating5Chips()).toBeInTheDocument();
+			});
+		});
 
-		test( 'removes the option when the X button is clicked', async () => {
-			await waitFor( async () => {
+		test('removes the option when the X button is clicked', async () => {
+			await waitFor(async () => {
 				const ratingParam = '2,4,5';
 				const {
 					getRating2Chips,
 					getRating4Chips,
 					getRating5Chips,
 					getRemoveButtonFromChips,
-				} = setupMultipleChoiceDropdown( ratingParam );
+				} = setupMultipleChoiceDropdown(ratingParam);
 
-				expect( getRating2Chips() ).toBeInTheDocument();
-				expect( getRating4Chips() ).toBeInTheDocument();
-				expect( getRating5Chips() ).toBeInTheDocument();
+				expect(getRating2Chips()).toBeInTheDocument();
+				expect(getRating4Chips()).toBeInTheDocument();
+				expect(getRating5Chips()).toBeInTheDocument();
 
-				const removeRating4Button = getRemoveButtonFromChips(
-					getRating4Chips()
-				);
+				const removeRating4Button =
+					getRemoveButtonFromChips(getRating4Chips());
 
-				if ( removeRating4Button ) {
-					await userEvent.click( removeRating4Button );
+				if (removeRating4Button) {
+					await userEvent.click(removeRating4Button);
 				}
 
-				expect( getRating2Chips() ).toBeInTheDocument();
-				expect( getRating4Chips() ).toBeNull();
-				expect( getRating5Chips() ).toBeInTheDocument();
-			} );
-		} );
-	} );
+				expect(getRating2Chips()).toBeInTheDocument();
+				expect(getRating4Chips()).toBeNull();
+				expect(getRating5Chips()).toBeInTheDocument();
+			});
+		});
+	});
 
-	describe( 'Single choice List', () => {
-		test( 'renders list', () => {
+	describe('Single choice List', () => {
+		test('renders list', () => {
 			const { getDropdown, getList } = setupSingleChoiceList();
-			expect( getDropdown() ).toBeNull();
-			expect( getList() ).toBeInTheDocument();
-		} );
+			expect(getDropdown()).toBeNull();
+			expect(getList()).toBeInTheDocument();
+		});
 
-		test( 'renders checked options based on URL params', async () => {
-			await waitFor( async () => {
+		test('renders checked options based on URL params', async () => {
+			await waitFor(async () => {
 				const ratingParam = '4';
 				const {
 					getRating2Checkbox,
 					getRating4Checkbox,
 					getRating5Checkbox,
-				} = setupSingleChoiceList( ratingParam );
+				} = setupSingleChoiceList(ratingParam);
 
-				expect( getRating2Checkbox()?.checked ).toBeFalsy();
-				expect( getRating4Checkbox()?.checked ).toBeTruthy();
-				expect( getRating5Checkbox()?.checked ).toBeFalsy();
-			} );
-		} );
+				expect(getRating2Checkbox()?.checked).toBeFalsy();
+				expect(getRating4Checkbox()?.checked).toBeTruthy();
+				expect(getRating5Checkbox()?.checked).toBeFalsy();
+			});
+		});
 
-		test( 'replaces chosen option when another one is clicked', async () => {
-			await waitFor( async () => {
+		test('replaces chosen option when another one is clicked', async () => {
+			await waitFor(async () => {
 				const ratingParam = '2';
 				const {
 					getRating2Checkbox,
 					getRating4Checkbox,
 					getRating5Checkbox,
-				} = setupSingleChoiceList( ratingParam );
+				} = setupSingleChoiceList(ratingParam);
 
-				expect( getRating2Checkbox()?.checked ).toBeTruthy();
-				expect( getRating4Checkbox()?.checked ).toBeFalsy();
-				expect( getRating5Checkbox()?.checked ).toBeFalsy();
+				expect(getRating2Checkbox()?.checked).toBeTruthy();
+				expect(getRating4Checkbox()?.checked).toBeFalsy();
+				expect(getRating5Checkbox()?.checked).toBeFalsy();
 
 				const rating4checkbox = getRating4Checkbox();
 
-				if ( rating4checkbox ) {
-					await act( async () => {
-						await userEvent.click( rating4checkbox );
-					} );
+				if (rating4checkbox) {
+					await act(async () => {
+						await userEvent.click(rating4checkbox);
+					});
 				}
 
-				expect( getRating2Checkbox()?.checked ).toBeFalsy();
-				expect( getRating4Checkbox()?.checked ).toBeTruthy();
-				expect( getRating5Checkbox()?.checked ).toBeFalsy();
-			} );
-		} );
+				expect(getRating2Checkbox()?.checked).toBeFalsy();
+				expect(getRating4Checkbox()?.checked).toBeTruthy();
+				expect(getRating5Checkbox()?.checked).toBeFalsy();
+			});
+		});
 
-		test( 'removes the option when it is clicked again', async () => {
-			await waitFor( async () => {
+		test('removes the option when it is clicked again', async () => {
+			await waitFor(async () => {
 				const ratingParam = '4';
 				const {
 					getRating2Checkbox,
 					getRating4Checkbox,
 					getRating5Checkbox,
-				} = setupMultipleChoiceList( ratingParam );
+				} = setupMultipleChoiceList(ratingParam);
 
-				expect( getRating2Checkbox()?.checked ).toBeFalsy();
-				expect( getRating4Checkbox()?.checked ).toBeTruthy();
-				expect( getRating5Checkbox()?.checked ).toBeFalsy();
+				expect(getRating2Checkbox()?.checked).toBeFalsy();
+				expect(getRating4Checkbox()?.checked).toBeTruthy();
+				expect(getRating5Checkbox()?.checked).toBeFalsy();
 
 				const rating4checkbox = getRating4Checkbox();
 
-				if ( rating4checkbox ) {
-					await userEvent.click( rating4checkbox );
+				if (rating4checkbox) {
+					await userEvent.click(rating4checkbox);
 				}
 
-				expect( getRating2Checkbox()?.checked ).toBeFalsy();
-				expect( getRating4Checkbox()?.checked ).toBeFalsy();
-				expect( getRating5Checkbox()?.checked ).toBeFalsy();
-			} );
-		} );
-	} );
+				expect(getRating2Checkbox()?.checked).toBeFalsy();
+				expect(getRating4Checkbox()?.checked).toBeFalsy();
+				expect(getRating5Checkbox()?.checked).toBeFalsy();
+			});
+		});
+	});
 
-	describe( 'Multiple choice List', () => {
-		test( 'renders list', () => {
+	describe('Multiple choice List', () => {
+		test('renders list', () => {
 			const { getDropdown, getList } = setupMultipleChoiceList();
-			expect( getDropdown() ).toBeNull();
-			expect( getList() ).toBeInTheDocument();
-		} );
+			expect(getDropdown()).toBeNull();
+			expect(getList()).toBeInTheDocument();
+		});
 
-		test( 'renders chips based on URL params', async () => {
-			await waitFor( async () => {
+		test('renders chips based on URL params', async () => {
+			await waitFor(async () => {
 				const ratingParam = '4,5';
 				const {
 					getRating2Checkbox,
 					getRating4Checkbox,
 					getRating5Checkbox,
-				} = setupMultipleChoiceList( ratingParam );
+				} = setupMultipleChoiceList(ratingParam);
 
-				expect( getRating2Checkbox()?.checked ).toBeFalsy();
-				expect( getRating4Checkbox()?.checked ).toBeTruthy();
-				expect( getRating5Checkbox()?.checked ).toBeTruthy();
-			} );
-		} );
+				expect(getRating2Checkbox()?.checked).toBeFalsy();
+				expect(getRating4Checkbox()?.checked).toBeTruthy();
+				expect(getRating5Checkbox()?.checked).toBeTruthy();
+			});
+		});
 
-		test( 'adds chosen option to another one that is clicked', async () => {
-			await waitFor( async () => {
+		test('adds chosen option to another one that is clicked', async () => {
+			await waitFor(async () => {
 				const ratingParam = '2,4';
 				const {
 					getRating2Checkbox,
 					getRating4Checkbox,
 					getRating5Checkbox,
-				} = setupMultipleChoiceList( ratingParam );
+				} = setupMultipleChoiceList(ratingParam);
 
-				expect( getRating2Checkbox()?.checked ).toBeTruthy();
-				expect( getRating4Checkbox()?.checked ).toBeTruthy();
-				expect( getRating5Checkbox()?.checked ).toBeFalsy();
+				expect(getRating2Checkbox()?.checked).toBeTruthy();
+				expect(getRating4Checkbox()?.checked).toBeTruthy();
+				expect(getRating5Checkbox()?.checked).toBeFalsy();
 
 				const rating5checkbox = getRating5Checkbox();
 
-				if ( rating5checkbox ) {
-					await userEvent.click( rating5checkbox );
+				if (rating5checkbox) {
+					await userEvent.click(rating5checkbox);
 				}
 
-				expect( getRating2Checkbox()?.checked ).toBeTruthy();
-				expect( getRating4Checkbox()?.checked ).toBeTruthy();
-				expect( getRating5Checkbox()?.checked ).toBeTruthy();
-			} );
-		} );
+				expect(getRating2Checkbox()?.checked).toBeTruthy();
+				expect(getRating4Checkbox()?.checked).toBeTruthy();
+				expect(getRating5Checkbox()?.checked).toBeTruthy();
+			});
+		});
 
-		test( 'removes the option when it is clicked again', async () => {
-			await waitFor( async () => {
+		test('removes the option when it is clicked again', async () => {
+			await waitFor(async () => {
 				const ratingParam = '2,4';
 				const {
 					getRating2Checkbox,
 					getRating4Checkbox,
 					getRating5Checkbox,
-				} = setupMultipleChoiceList( ratingParam );
+				} = setupMultipleChoiceList(ratingParam);
 
-				expect( getRating2Checkbox()?.checked ).toBeTruthy();
-				expect( getRating4Checkbox()?.checked ).toBeTruthy();
-				expect( getRating5Checkbox()?.checked ).toBeFalsy();
+				expect(getRating2Checkbox()?.checked).toBeTruthy();
+				expect(getRating4Checkbox()?.checked).toBeTruthy();
+				expect(getRating5Checkbox()?.checked).toBeFalsy();
 
 				const rating2checkbox = getRating2Checkbox();
 
-				if ( rating2checkbox ) {
-					await userEvent.click( rating2checkbox );
+				if (rating2checkbox) {
+					await userEvent.click(rating2checkbox);
 				}
 
-				expect( getRating2Checkbox()?.checked ).toBeFalsy();
-				expect( getRating4Checkbox()?.checked ).toBeTruthy();
-				expect( getRating5Checkbox()?.checked ).toBeFalsy();
-			} );
-		} );
-	} );
-} );
+				expect(getRating2Checkbox()?.checked).toBeFalsy();
+				expect(getRating4Checkbox()?.checked).toBeTruthy();
+				expect(getRating5Checkbox()?.checked).toBeFalsy();
+			});
+		});
+	});
+});

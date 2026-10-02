@@ -30,16 +30,16 @@ export const getHeadingElementStyles = (
 	merge = false
 ): EmailStyles =>
 	merge
-		? ( deepmerge.all( [
+		? (deepmerge.all([
 				defaultStyleObject,
 				styles.elements?.heading || {},
-				styles.elements?.[ headingLevel ] || {},
-		  ] ) as EmailStyles )
-		: ( {
+				styles.elements?.[headingLevel] || {},
+			]) as EmailStyles)
+		: ({
 				...defaultStyleObject,
-				...( styles.elements?.heading || {} ),
-				...( styles.elements?.[ headingLevel ] || {} ),
-		  } as EmailStyles );
+				...(styles.elements?.heading || {}),
+				...(styles.elements?.[headingLevel] || {}),
+			} as EmailStyles);
 
 export const getElementStyles = (
 	styles: EmailStyles,
@@ -48,7 +48,7 @@ export const getElementStyles = (
 	merge = false
 ): EmailStyles => {
 	let elementStyles: EmailStyles;
-	switch ( element ) {
+	switch (element) {
 		case 'text':
 			elementStyles = {
 				typography: styles.typography,
@@ -63,8 +63,8 @@ export const getElementStyles = (
 			);
 			break;
 		default:
-			elementStyles = ( styles.elements?.[ element ] ||
-				defaultStyleObject ) as EmailStyles;
+			elementStyles = (styles.elements?.[element] ||
+				defaultStyleObject) as EmailStyles;
 	}
 
 	// Ensure the `typography` and `color` objects are always available to

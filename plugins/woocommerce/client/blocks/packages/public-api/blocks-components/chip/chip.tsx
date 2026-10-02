@@ -9,7 +9,7 @@ import type { ElementType, HTMLAttributes } from 'react';
  */
 import './style.scss';
 
-export interface ChipProps extends HTMLAttributes< HTMLElement > {
+export interface ChipProps extends HTMLAttributes<HTMLElement> {
 	/**
 	 * Text for chip content.
 	 */
@@ -42,7 +42,7 @@ export interface ChipProps extends HTMLAttributes< HTMLElement > {
  * Each chip defaults to a list element but this can be customized by providing
  * a wrapperElement.
  */
-const Chip: React.FC< ChipProps > = ( {
+const Chip: React.FC<ChipProps> = ({
 	text,
 	screenReaderText = '',
 	element = 'li',
@@ -50,7 +50,7 @@ const Chip: React.FC< ChipProps > = ( {
 	radius = 'small',
 	children = null,
 	...props
-} ) => {
+}) => {
 	const Wrapper = element;
 	const wrapperClassName = clsx(
 		className,
@@ -63,17 +63,17 @@ const Chip: React.FC< ChipProps > = ( {
 	);
 
 	return (
-		<Wrapper className={ wrapperClassName } { ...props }>
+		<Wrapper className={wrapperClassName} {...props}>
 			<span
-				aria-hidden={ showScreenReaderText }
+				aria-hidden={showScreenReaderText}
 				className="wc-block-components-chip__text"
 			>
-				{ text }
+				{text}
 			</span>
-			{ showScreenReaderText && (
-				<span className="screen-reader-text">{ screenReaderText }</span>
-			) }
-			{ children }
+			{showScreenReaderText && (
+				<span className="screen-reader-text">{screenReaderText}</span>
+			)}
+			{children}
 		</Wrapper>
 	);
 };

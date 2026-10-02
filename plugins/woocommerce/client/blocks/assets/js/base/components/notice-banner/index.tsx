@@ -29,19 +29,19 @@ export interface NoticeBannerProps {
  *
  * An informational UI displayed near the top of the store pages.
  */
-const NoticeBanner = ( {
+const NoticeBanner = ({
 	className,
 	status = 'default',
 	children,
 	spokenMessage = children,
 	onRemove = () => void 0,
 	isDismissible = true,
-	politeness = getDefaultPoliteness( status ),
+	politeness = getDefaultPoliteness(status),
 	summary,
-}: NoticeBannerProps ) => {
-	useSpokenMessage( spokenMessage, politeness );
+}: NoticeBannerProps) => {
+	useSpokenMessage(spokenMessage, politeness);
 
-	const dismiss = ( event: React.SyntheticEvent ) => {
+	const dismiss = (event: React.SyntheticEvent) => {
 		if (
 			typeof event?.preventDefault === 'function' &&
 			event.preventDefault
@@ -60,34 +60,34 @@ const NoticeBanner = ( {
 					? 'alert'
 					: 'status'
 			}
-			className={ clsx(
+			className={clsx(
 				className,
 				'wc-block-components-notice-banner',
 				'is-' + status,
 				{
 					'is-dismissible': isDismissible,
 				}
-			) }
+			)}
 		>
-			<Icon icon={ getStatusIcon( status ) } />
+			<Icon icon={getStatusIcon(status)} />
 			<div className="wc-block-components-notice-banner__content">
-				{ summary && (
+				{summary && (
 					<p className="wc-block-components-notice-banner__summary">
-						{ summary }
+						{summary}
 					</p>
-				) }
-				{ children }
+				)}
+				{children}
 			</div>
-			{ !! isDismissible && (
+			{!!isDismissible && (
 				<Button
 					className="wc-block-components-notice-banner__dismiss"
-					aria-label={ __( 'Dismiss this notice', 'woocommerce' ) }
-					onClick={ dismiss }
+					aria-label={__('Dismiss this notice', 'woocommerce')}
+					onClick={dismiss}
 					removeTextWrap
 				>
-					<Icon icon={ close } />
+					<Icon icon={close} />
 				</Button>
-			) }
+			)}
 		</div>
 	);
 };

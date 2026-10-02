@@ -34,7 +34,7 @@ import type {
 } from './types';
 import { useProductTypeSelector } from '../../../shared/stores/product-type-template-state';
 
-const getButtonText = ( {
+const getButtonText = ({
 	cartQuantity,
 	productCartDetails,
 	isDescendantOfAddToCartWithOptions,
@@ -42,31 +42,28 @@ const getButtonText = ( {
 	cartQuantity: number;
 	productCartDetails: AddToCartProductDetails;
 	isDescendantOfAddToCartWithOptions: boolean | undefined;
-} ) => {
-	const addedToCart = Number.isFinite( cartQuantity ) && cartQuantity > 0;
+}) => {
+	const addedToCart = Number.isFinite(cartQuantity) && cartQuantity > 0;
 
-	if ( addedToCart ) {
+	if (addedToCart) {
 		return sprintf(
 			/* translators: %s number of products in cart. */
-			_n( '%d in cart', '%d in cart', cartQuantity, 'woocommerce' ),
+			_n('%d in cart', '%d in cart', cartQuantity, 'woocommerce'),
 			cartQuantity
 		);
 	}
 
-	if (
-		isDescendantOfAddToCartWithOptions &&
-		productCartDetails?.single_text
-	) {
+	if (isDescendantOfAddToCartWithOptions && productCartDetails?.single_text) {
 		return productCartDetails?.single_text;
 	}
 
-	return productCartDetails?.text || __( 'Add to cart', 'woocommerce' );
+	return productCartDetails?.text || __('Add to cart', 'woocommerce');
 };
 
 /**
  * This is used to render the button for the admin side.
  */
-const AddToCartButtonAdminSide = ( {
+const AddToCartButtonAdminSide = ({
 	product,
 	isDescendantOfAddToCartWithOptions,
 	collection,
@@ -74,7 +71,7 @@ const AddToCartButtonAdminSide = ( {
 	product: ProductEntityResponse;
 	isDescendantOfAddToCartWithOptions: boolean | undefined;
 	collection?: string;
-} ): JSX.Element => {
+}): JSX.Element => {
 	const isCartContents =
 		collection === 'woocommerce/product-collection/cart-contents';
 
@@ -85,8 +82,8 @@ const AddToCartButtonAdminSide = ( {
 		: product.add_to_cart?.single_text;
 
 	let buttonText: string | undefined;
-	if ( isCartContents ) {
-		buttonText = __( 'Finish checkout', 'woocommerce' );
+	if (isCartContents) {
+		buttonText = __('Finish checkout', 'woocommerce');
 	} else {
 		buttonText = isDescendantOfAddToCartWithOptions
 			? singleTextToRender
@@ -95,30 +92,30 @@ const AddToCartButtonAdminSide = ( {
 
 	return (
 		<button
-			disabled={ false }
-			className={ clsx(
+			disabled={false}
+			className={clsx(
 				'wp-block-button__link',
 				'wp-element-button',
 				'add_to_cart_button',
 				'wc-block-components-product-button__button'
-			) }
-			style={ {} }
+			)}
+			style={{}}
 		>
-			{ /* We need to use the button_text for external products*/ }
-			{ isExternal
+			{/* We need to use the button_text for external products*/}
+			{isExternal
 				? product.button_text
-				: buttonText || __( 'Add to cart', 'woocommerce' ) }
+				: buttonText || __('Add to cart', 'woocommerce')}
 		</button>
 	);
 };
 
-export const AddToCartButton = ( {
+export const AddToCartButton = ({
 	product,
 	isDescendantOfAddToCartWithOptions,
 	className,
 	style,
 	collection,
-}: AddToCartButtonAttributes ): JSX.Element => {
+}: AddToCartButtonAttributes): JSX.Element => {
 	const {
 		id,
 		permalink,
@@ -128,55 +125,55 @@ export const AddToCartButton = ( {
 		is_in_stock: isInStock,
 	} = product;
 	const { dispatchStoreEvent } = useStoreEvents();
-	const { cartQuantity, addingToCart, addToCart } = useStoreAddToCart( id );
-	const addedToCart = Number.isFinite( cartQuantity ) && cartQuantity > 0;
+	const { cartQuantity, addingToCart, addToCart } = useStoreAddToCart(id);
+	const addedToCart = Number.isFinite(cartQuantity) && cartQuantity > 0;
 
 	// Check if this is a cart-contents collection
 	const isCartContents =
 		collection === 'woocommerce/product-collection/cart-contents';
 
-	const allowAddToCart = ! hasOptions && isPurchasable && isInStock;
+	const allowAddToCart = !hasOptions && isPurchasable && isInStock;
 	const buttonAriaLabel = decodeEntities(
 		productCartDetails?.description || ''
 	);
 	const buttonText = isCartContents
-		? __( 'Finish checkout', 'woocommerce' )
-		: getButtonText( {
+		? __('Finish checkout', 'woocommerce')
+		: getButtonText({
 				cartQuantity,
 				productCartDetails,
 				isDescendantOfAddToCartWithOptions,
-		  } );
+			});
 
-	const ButtonTag = allowAddToCart && ! isCartContents ? 'button' : 'a';
+	const ButtonTag = allowAddToCart && !isCartContents ? 'button' : 'a';
 	const buttonProps = {} as HTMLAnchorElement & { onClick: () => void };
 
-	if ( isCartContents ) {
+	if (isCartContents) {
 		// For cart contents, always link to cart page
 		buttonProps.href = CART_URL;
 		buttonProps.rel = 'nofollow';
 		buttonProps.onClick = () => {
-			dispatchStoreEvent( 'cart-view-link', {
+			dispatchStoreEvent('cart-view-link', {
 				product,
-			} );
+			});
 		};
-	} else if ( ! allowAddToCart ) {
+	} else if (!allowAddToCart) {
 		buttonProps.href = permalink;
 		buttonProps.onClick = () => {
-			dispatchStoreEvent( 'product-view-link', {
+			dispatchStoreEvent('product-view-link', {
 				product,
-			} );
+			});
 		};
 	} else {
 		buttonProps.onClick = async () => {
 			await addToCart();
-			dispatchStoreEvent( 'cart-add-item', {
+			dispatchStoreEvent('cart-add-item', {
 				product,
-			} );
+			});
 			// redirect to cart if the setting to redirect to the cart page
 			// on cart add item is enabled
 			const { cartRedirectAfterAdd }: { cartRedirectAfterAdd: boolean } =
-				getSetting( 'productsSettings' );
-			if ( cartRedirectAfterAdd ) {
+				getSetting('productsSettings');
+			if (cartRedirectAfterAdd) {
 				window.location.href = CART_URL;
 			}
 		};
@@ -184,10 +181,10 @@ export const AddToCartButton = ( {
 
 	return (
 		<ButtonTag
-			{ ...buttonProps }
-			aria-label={ buttonAriaLabel }
-			disabled={ addingToCart }
-			className={ clsx(
+			{...buttonProps}
+			aria-label={buttonAriaLabel}
+			disabled={addingToCart}
+			className={clsx(
 				className,
 				'wp-block-button__link',
 				'wp-element-button',
@@ -197,163 +194,163 @@ export const AddToCartButton = ( {
 					loading: addingToCart,
 					added: addedToCart,
 				}
-			) }
-			style={ style }
+			)}
+			style={style}
 		>
-			{ buttonText }
+			{buttonText}
 		</ButtonTag>
 	);
 };
 
-const LoadingAddToCartButton = ( {
+const LoadingAddToCartButton = ({
 	className,
 	style,
 }: {
 	className: string;
 	style: React.CSSProperties;
-} ): JSX.Element => {
+}): JSX.Element => {
 	return (
 		<button
-			className={ clsx(
+			className={clsx(
 				'wp-block-button__link',
 				'wp-element-button',
 				'add_to_cart_button',
 				'wc-block-components-product-button__button',
 				'wc-block-components-product-button__button--placeholder',
 				className
-			) }
-			style={ style }
-			disabled={ true }
+			)}
+			style={style}
+			disabled={true}
 		>
-			{ __( 'Add to cart', 'woocommerce' ) }
+			{__('Add to cart', 'woocommerce')}
 		</button>
 	);
 };
 
-const AddToCartButtonPlaceholder = ( {
+const AddToCartButtonPlaceholder = ({
 	className,
 	style,
 	blockClientId,
 	collection,
 }: AddToCartButtonPlaceholderAttributes & {
 	collection?: string;
-} ): JSX.Element => {
+}): JSX.Element => {
 	const {
 		current: currentProductType,
 		registerListener,
 		unregisterListener,
 	} = useProductTypeSelector();
 
-	useEffect( () => {
-		if ( blockClientId ) {
-			registerListener( blockClientId );
+	useEffect(() => {
+		if (blockClientId) {
+			registerListener(blockClientId);
 			return () => {
-				unregisterListener( blockClientId );
+				unregisterListener(blockClientId);
 			};
 		}
-	}, [ blockClientId, registerListener, unregisterListener ] );
+	}, [blockClientId, registerListener, unregisterListener]);
 
 	const isCartContents =
 		collection === 'woocommerce/product-collection/cart-contents';
 
 	let buttonText: string;
-	if ( isCartContents ) {
-		buttonText = __( 'Finish checkout', 'woocommerce' );
+	if (isCartContents) {
+		buttonText = __('Finish checkout', 'woocommerce');
 	} else {
 		buttonText =
 			currentProductType?.slug === 'external'
-				? __( 'Buy product', 'woocommerce' )
-				: __( 'Add to cart', 'woocommerce' );
+				? __('Buy product', 'woocommerce')
+				: __('Add to cart', 'woocommerce');
 	}
 
 	return (
 		<button
-			className={ clsx(
+			className={clsx(
 				'wp-block-button__link',
 				'wp-element-button',
 				'add_to_cart_button',
 				'wc-block-components-product-button__button',
 				className
-			) }
-			style={ style }
-			disabled={ true }
+			)}
+			style={style}
+			disabled={true}
 		>
-			{ buttonText }
+			{buttonText}
 		</button>
 	);
 };
 
-export const Block = ( props: BlockAttributes ): JSX.Element => {
+export const Block = (props: BlockAttributes): JSX.Element => {
 	const { className, textAlign, blockClientId, collection } = props;
-	const styleProps = useStyleProps( props );
+	const styleProps = useStyleProps(props);
 	const { parentClassName } = useInnerBlockLayoutContext();
-	const { product, isLoading } = useProductDataContext( {
+	const { product, isLoading } = useProductDataContext({
 		product: props.product,
 		isAdmin: props.isAdmin,
-	} );
+	});
 
 	const showNewAddToCartButton =
 		product?.id && props.isAdmin && isExperimentalWcRestApiV4Enabled();
 
 	return (
 		<div
-			className={ clsx(
+			className={clsx(
 				className,
 				'wp-block-button',
 				'wc-block-components-product-button',
 				{
-					[ `${ parentClassName }__product-add-to-cart` ]:
+					[`${parentClassName}__product-add-to-cart`]:
 						parentClassName,
-					[ `align-${ textAlign }` ]: textAlign,
+					[`align-${textAlign}`]: textAlign,
 				}
-			) }
+			)}
 		>
-			{ isLoading ? (
+			{isLoading ? (
 				<LoadingAddToCartButton
-					className={ styleProps.className }
-					style={ styleProps.style }
+					className={styleProps.className}
+					style={styleProps.style}
 				/>
 			) : (
 				<>
-					{ showNewAddToCartButton && (
+					{showNewAddToCartButton && (
 						<AddToCartButtonAdminSide
-							product={ product as ProductEntityResponse }
+							product={product as ProductEntityResponse}
 							isDescendantOfAddToCartWithOptions={
 								props[
 									'woocommerce/isDescendantOfAddToCartWithOptions'
 								]
 							}
-							collection={ collection }
+							collection={collection}
 						/>
-					) }
-					{ ! showNewAddToCartButton &&
-						( product && product?.id ? (
+					)}
+					{!showNewAddToCartButton &&
+						(product && product?.id ? (
 							<AddToCartButton
-								product={ product }
-								style={ styleProps.style }
-								className={ styleProps.className }
-								isAdmin={ props.isAdmin }
+								product={product}
+								style={styleProps.style}
+								className={styleProps.className}
+								isAdmin={props.isAdmin}
 								isDescendantOfAddToCartWithOptions={
 									props[
 										'woocommerce/isDescendantOfAddToCartWithOptions'
 									]
 								}
-								productEntity={ props.product }
-								collection={ collection }
+								productEntity={props.product}
+								collection={collection}
 							/>
 						) : (
 							<AddToCartButtonPlaceholder
-								style={ styleProps.style }
-								className={ styleProps.className }
-								isLoading={ isLoading ?? false }
-								blockClientId={ blockClientId }
-								collection={ collection }
+								style={styleProps.style}
+								className={styleProps.className}
+								isLoading={isLoading ?? false}
+								blockClientId={blockClientId}
+								collection={collection}
 							/>
-						) ) }
+						))}
 				</>
-			) }
+			)}
 		</div>
 	);
 };
 
-export default withProductDataContext( Block );
+export default withProductDataContext(Block);

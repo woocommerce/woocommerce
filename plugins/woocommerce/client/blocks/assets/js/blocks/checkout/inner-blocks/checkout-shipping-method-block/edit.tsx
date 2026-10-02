@@ -34,7 +34,7 @@ import type { minMaxPrices } from './shared';
 import './style.scss';
 import { defaultShippingText, defaultLocalPickupText } from './constants';
 
-const LocalPickupSelector = ( {
+const LocalPickupSelector = ({
 	checked,
 	rate,
 	showPrice,
@@ -49,43 +49,41 @@ const LocalPickupSelector = ( {
 	showIcon: boolean;
 	toggleText: string;
 	onClick: () => void;
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ) => {
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}) => {
 	return (
 		<Button
-			render={ <div /> }
-			className={ clsx( 'wc-block-checkout__shipping-method-option', {
+			render={<div />}
+			className={clsx('wc-block-checkout__shipping-method-option', {
 				'wc-block-checkout__shipping-method-option--selected':
 					checked === 'pickup',
-			} ) }
-			onClick={ onClick }
+			})}
+			onClick={onClick}
 		>
-			{ showIcon === true && (
+			{showIcon === true && (
 				<Icon
-					icon={ store }
-					size={ 28 }
+					icon={store}
+					size={28}
 					className="wc-block-checkout__shipping-method-option-icon"
 				/>
-			) }
+			)}
 			<RichText
-				value={ toggleText }
-				placeholder={ defaultLocalPickupText }
+				value={toggleText}
+				placeholder={defaultLocalPickupText}
 				tagName="span"
 				className="wc-block-checkout__shipping-method-option-title"
-				onChange={ ( value ) =>
-					setAttributes( { localPickupText: value } )
-				}
+				onChange={(value) => setAttributes({ localPickupText: value })}
 				__unstableDisableFormats
 				preserveWhiteSpace
 			/>
-			{ showPrice === true && (
-				<RatePrice minRate={ rate.min } maxRate={ rate.max } />
-			) }
+			{showPrice === true && (
+				<RatePrice minRate={rate.min} maxRate={rate.max} />
+			)}
 		</Button>
 	);
 };
 
-const ShippingSelector = ( {
+const ShippingSelector = ({
 	checked,
 	rate,
 	showPrice,
@@ -99,51 +97,49 @@ const ShippingSelector = ( {
 	showPrice: boolean;
 	showIcon: boolean;
 	toggleText: string;
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
+	setAttributes: (attributes: Record<string, unknown>) => void;
 	onClick: () => void;
-} ) => {
+}) => {
 	const Price =
 		rate.min === undefined ? (
 			<span className="wc-block-checkout__shipping-method-option-price">
-				{ __( 'calculated with an address', 'woocommerce' ) }
+				{__('calculated with an address', 'woocommerce')}
 			</span>
 		) : (
-			<RatePrice minRate={ rate.min } maxRate={ rate.max } />
+			<RatePrice minRate={rate.min} maxRate={rate.max} />
 		);
 
 	return (
 		<Button
-			render={ <div /> }
-			className={ clsx( 'wc-block-checkout__shipping-method-option', {
+			render={<div />}
+			className={clsx('wc-block-checkout__shipping-method-option', {
 				'wc-block-checkout__shipping-method-option--selected':
 					checked === 'shipping',
-			} ) }
-			onClick={ onClick }
+			})}
+			onClick={onClick}
 		>
-			{ showIcon === true && (
+			{showIcon === true && (
 				<Icon
-					icon={ shipping }
-					size={ 28 }
+					icon={shipping}
+					size={28}
 					className="wc-block-checkout__shipping-method-option-icon"
 				/>
-			) }
+			)}
 			<RichText
-				value={ toggleText }
-				placeholder={ defaultShippingText }
+				value={toggleText}
+				placeholder={defaultShippingText}
 				tagName="span"
 				className="wc-block-checkout__shipping-method-option-title"
-				onChange={ ( value ) =>
-					setAttributes( { shippingText: value } )
-				}
+				onChange={(value) => setAttributes({ shippingText: value })}
 				__unstableDisableFormats
 				preserveWhiteSpace
 			/>
-			{ showPrice === true && Price }
+			{showPrice === true && Price}
 		</Button>
 	);
 };
 
-export const Edit = ( {
+export const Edit = ({
 	attributes,
 	setAttributes,
 }: {
@@ -158,25 +154,25 @@ export const Edit = ( {
 		showIcon: boolean;
 		className: string;
 	};
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ): JSX.Element | null => {
-	useEffect( () => {
-		const localPickupTitle = getSetting< string >(
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}): JSX.Element | null => {
+	useEffect(() => {
+		const localPickupTitle = getSetting<string>(
 			'localPickupText',
 			attributes.localPickupText
 		);
-		setAttributes( { localPickupText: localPickupTitle } );
+		setAttributes({ localPickupText: localPickupTitle });
 		// Disable the exhaustive deps rule because we only want to run this on first mount to set the attribute, not
 		// each time the attribute changes.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ setAttributes ] );
-	const { setPrefersCollection } = useDispatch( checkoutStoreDescriptor );
-	const { prefersCollection } = useSelect( ( select ) => {
-		const checkoutStore = select( checkoutStoreDescriptor );
+	}, [setAttributes]);
+	const { setPrefersCollection } = useDispatch(checkoutStoreDescriptor);
+	const { prefersCollection } = useSelect((select) => {
+		const checkoutStore = select(checkoutStoreDescriptor);
 		return {
 			prefersCollection: checkoutStore.prefersCollection(),
 		};
-	} );
+	});
 	const { showPrice, showIcon, className, localPickupText, shippingText } =
 		attributes;
 	const {
@@ -187,85 +183,82 @@ export const Edit = ( {
 	} = useShippingData();
 
 	if (
-		! needsShipping ||
-		! hasCalculatedShipping ||
-		! shippingRates ||
-		! isCollectable ||
-		! LOCAL_PICKUP_ENABLED
+		!needsShipping ||
+		!hasCalculatedShipping ||
+		!shippingRates ||
+		!isCollectable ||
+		!LOCAL_PICKUP_ENABLED
 	) {
 		return null;
 	}
 
-	const changeView = ( method: string ) => {
-		if ( method === 'pickup' ) {
-			void setPrefersCollection( true );
+	const changeView = (method: string) => {
+		if (method === 'pickup') {
+			void setPrefersCollection(true);
 		} else {
-			void setPrefersCollection( false );
+			void setPrefersCollection(false);
 		}
 	};
 
 	return (
 		<FormStepBlock
-			attributes={ attributes }
-			setAttributes={ setAttributes }
-			className={ clsx(
-				'wc-block-checkout__shipping-method',
-				className
-			) }
+			attributes={attributes}
+			setAttributes={setAttributes}
+			className={clsx('wc-block-checkout__shipping-method', className)}
 		>
 			<InspectorControls>
-				<PanelBody title={ __( 'Appearance', 'woocommerce' ) }>
+				<PanelBody title={__('Appearance', 'woocommerce')}>
 					<p className="wc-block-checkout__controls-text">
-						{ __(
+						{__(
 							'Choose how this block is displayed to your customers.',
 							'woocommerce'
-						) }
+						)}
 					</p>
 					<ToggleControl
 						__nextHasNoMarginBottom
-						label={ __( 'Show icon', 'woocommerce' ) }
-						checked={ showIcon }
-						onChange={ () =>
-							setAttributes( {
-								showIcon: ! showIcon,
-							} )
+						label={__('Show icon', 'woocommerce')}
+						checked={showIcon}
+						onChange={() =>
+							setAttributes({
+								showIcon: !showIcon,
+							})
 						}
 					/>
 					<ToggleControl
 						__nextHasNoMarginBottom
-						label={ __( 'Show costs', 'woocommerce' ) }
-						checked={ showPrice }
-						onChange={ () =>
-							setAttributes( {
-								showPrice: ! showPrice,
-							} )
+						label={__('Show costs', 'woocommerce')}
+						checked={showPrice}
+						onChange={() =>
+							setAttributes({
+								showPrice: !showPrice,
+							})
 						}
 					/>
 				</PanelBody>
-				<PanelBody title={ __( 'Shipping Methods', 'woocommerce' ) }>
+				<PanelBody title={__('Shipping Methods', 'woocommerce')}>
 					<p className="wc-block-checkout__controls-text">
-						{ __(
+						{__(
 							'Methods can be made managed in your store settings.',
 							'woocommerce'
-						) }
+						)}
 					</p>
 					<ExternalLinkCard
-						key={ 'shipping_methods' }
-						href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping` }
-						title={ __( 'Shipping', 'woocommerce' ) }
-						description={ __(
+						key={'shipping_methods'}
+						href={`${ADMIN_URL}admin.php?page=wc-settings&tab=shipping`}
+						title={__('Shipping', 'woocommerce')}
+						description={__(
 							'Manage your shipping zones, methods, and rates.',
 							'woocommerce'
-						) }
+						)}
 					/>
 					<ExternalLinkCard
-						key={ 'pickup_location' }
-						href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping&section=pickup_location` }
-						title={ __( 'Pickup', 'woocommerce' ) }
-						description={ __(
+						key={'pickup_location'}
+						href={`${ADMIN_URL}admin.php?page=wc-settings&tab=shipping&section=pickup_location`}
+						title={__('Pickup', 'woocommerce')}
+						description={__(
 							'Allow customers to choose a local pickup location during checkout.',
 							'woocommerce'
-						) }
+						)}
 					/>
 				</PanelBody>
 			</InspectorControls>
@@ -275,40 +268,38 @@ export const Edit = ( {
 				role="radiogroup"
 			>
 				<ShippingSelector
-					checked={ prefersCollection ? 'pickup' : 'shipping' }
-					rate={ getShippingPrices(
-						shippingRates[ 0 ]?.shipping_rates
-					) }
-					onClick={ () => {
-						changeView( 'shipping' );
-					} }
-					showPrice={ showPrice }
-					showIcon={ showIcon }
-					setAttributes={ setAttributes }
-					toggleText={ shippingText }
+					checked={prefersCollection ? 'pickup' : 'shipping'}
+					rate={getShippingPrices(shippingRates[0]?.shipping_rates)}
+					onClick={() => {
+						changeView('shipping');
+					}}
+					showPrice={showPrice}
+					showIcon={showIcon}
+					setAttributes={setAttributes}
+					toggleText={shippingText}
 				/>
 				<LocalPickupSelector
-					checked={ prefersCollection ? 'pickup' : 'shipping' }
-					rate={ getLocalPickupPrices(
-						shippingRates[ 0 ]?.shipping_rates
-					) }
-					showPrice={ showPrice }
-					onClick={ () => {
-						changeView( 'pickup' );
-					} }
-					showIcon={ showIcon }
-					setAttributes={ setAttributes }
-					toggleText={ localPickupText }
+					checked={prefersCollection ? 'pickup' : 'shipping'}
+					rate={getLocalPickupPrices(
+						shippingRates[0]?.shipping_rates
+					)}
+					showPrice={showPrice}
+					onClick={() => {
+						changeView('pickup');
+					}}
+					showIcon={showIcon}
+					setAttributes={setAttributes}
+					toggleText={localPickupText}
 				/>
 			</div>
-			<AdditionalFields block={ innerBlockAreas.SHIPPING_METHOD } />
+			<AdditionalFields block={innerBlockAreas.SHIPPING_METHOD} />
 		</FormStepBlock>
 	);
 };
 
 export const Save = (): JSX.Element => {
 	return (
-		<div { ...useBlockProps.save() }>
+		<div {...useBlockProps.save()}>
 			<AdditionalFieldsContent />
 		</div>
 	);

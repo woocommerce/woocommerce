@@ -15,7 +15,7 @@ export default {
 	argTypes: {
 		children: { control: { disable: true } },
 	},
-} as Meta< ReadMoreProps >;
+} as Meta<ReadMoreProps>;
 
 const LongText = (
 	<>
@@ -32,9 +32,9 @@ const LongText = (
 		<p>
 			You mean it controls your actions?
 			<strong>
-				{ ' ' }
+				{' '}
 				She must have hidden the plans in the escape pod.
-			</strong>{ ' ' }
+			</strong>{' '}
 			<em>
 				Send a detachment down to retrieve them, and see to it
 				personally, Commander.
@@ -61,9 +61,9 @@ const LongText = (
 	</>
 );
 
-const Template: StoryFn< ReadMoreProps > = ( args ) => <ReadMore { ...args } />;
+const Template: StoryFn<ReadMoreProps> = (args) => <ReadMore {...args} />;
 
-export const Default = Template.bind( {} );
+export const Default = Template.bind({});
 Default.args = {
 	children: LongText,
 	maxLines: 6,

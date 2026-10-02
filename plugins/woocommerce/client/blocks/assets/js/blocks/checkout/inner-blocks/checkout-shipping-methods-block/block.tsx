@@ -37,32 +37,32 @@ import ReadMore from '@woocommerce/base-components/read-more';
 const renderShippingRatesControlOption = (
 	option: CartShippingPackageShippingRate
 ): PackageRateOption => {
-	const priceWithTaxes = getSetting( 'displayCartPricesIncludingTax', false )
-		? parseInt( option.price, 10 ) + parseInt( option.taxes, 10 )
-		: parseInt( option.price, 10 );
+	const priceWithTaxes = getSetting('displayCartPricesIncludingTax', false)
+		? parseInt(option.price, 10) + parseInt(option.taxes, 10)
+		: parseInt(option.price, 10);
 	const isSelected = option?.selected;
 
 	const secondaryLabel =
 		priceWithTaxes === 0 ? (
 			<span className="wc-block-checkout__shipping-option--free">
-				{ __( 'Free', 'woocommerce' ) }
+				{__('Free', 'woocommerce')}
 			</span>
 		) : (
 			<FormattedMonetaryAmount
-				currency={ getCurrencyFromPriceResponse( option ) }
-				value={ priceWithTaxes }
+				currency={getCurrencyFromPriceResponse(option)}
+				value={priceWithTaxes}
 			/>
 		);
 
 	return {
-		label: decodeEntities( option.name ),
+		label: decodeEntities(option.name),
 		value: option.rate_id,
-		description: decodeEntities( option.delivery_time ),
+		description: decodeEntities(option.delivery_time),
 		secondaryLabel,
 		secondaryDescription:
 			isSelected && option.description ? (
-				<ReadMore maxLines={ 2 }>
-					{ decodeEntities( option.description ) }
+				<ReadMore maxLines={2}>
+					{decodeEntities(option.description)}
 				</ReadMore>
 			) : undefined,
 	};
@@ -75,19 +75,19 @@ const NoShippingAddressMessage = () => {
 			aria-live="polite"
 			className="wc-block-components-shipping-rates-control__no-shipping-address-message"
 		>
-			{ __(
+			{__(
 				'Enter a shipping address to view shipping options.',
 				'woocommerce'
-			) }
+			)}
 		</p>
 	);
 };
 
-const Block = ( {
+const Block = ({
 	noShippingPlaceholder = null,
 }: {
 	noShippingPlaceholder?: ReactElement | null;
-} ) => {
+}) => {
 	const { isEditor } = useEditorContext();
 
 	const {
@@ -100,69 +100,67 @@ const Block = ( {
 
 	const { shippingAddress } = useCustomerData();
 
-	const filteredShippingRates = useMemo( () => {
+	const filteredShippingRates = useMemo(() => {
 		return isCollectable
-			? shippingRates.map( ( shippingRatesPackage ) => {
+			? shippingRates.map((shippingRatesPackage) => {
 					return {
 						...shippingRatesPackage,
 						shipping_rates:
 							shippingRatesPackage.shipping_rates.filter(
-								( shippingRatesPackageRate ) =>
-									! hasCollectableRate(
+								(shippingRatesPackageRate) =>
+									!hasCollectableRate(
 										shippingRatesPackageRate.method_id
 									)
 							),
 					};
-			  } )
+				})
 			: shippingRates;
-	}, [ shippingRates, isCollectable ] );
+	}, [shippingRates, isCollectable]);
 
-	if ( ! needsShipping ) {
+	if (!needsShipping) {
 		return null;
 	}
 
 	const shippingRatesPackageCount =
-		getShippingRatesPackageCount( shippingRates );
+		getShippingRatesPackageCount(shippingRates);
 
-	if ( ! hasCalculatedShipping && ! shippingRatesPackageCount ) {
+	if (!hasCalculatedShipping && !shippingRatesPackageCount) {
 		return <NoShippingAddressMessage />;
 	}
-	const addressComplete = hasAllFieldsForShippingRates( shippingAddress );
+	const addressComplete = hasAllFieldsForShippingRates(shippingAddress);
 
 	return (
 		<>
-			<StoreNoticesContainer
-				context={ noticeContexts.SHIPPING_METHODS }
-			/>
-			{ isEditor && ! shippingRatesPackageCount ? (
+			<StoreNoticesContainer context={noticeContexts.SHIPPING_METHODS} />
+			{isEditor && !shippingRatesPackageCount ? (
 				noShippingPlaceholder
 			) : (
 				<ShippingRatesControl
 					noResultsMessage={
 						<>
-							{ addressComplete ? (
+							{addressComplete ? (
 								<NoticeBanner
-									isDismissible={ false }
+									isDismissible={false}
 									className="wc-block-components-shipping-rates-control__no-results-notice"
 									status="warning"
 								>
-									{ __(
+									{__(
 										'No shipping options are available for this address. Please verify the address is correct or try a different address.',
 										'woocommerce'
-									) }
+									)}
 								</NoticeBanner>
 							) : (
 								<NoShippingAddressMessage />
-							) }
+							)}
 						</>
 					}
-					renderOption={ renderShippingRatesControlOption }
-					collapsible={ false }
-					shippingRates={ filteredShippingRates }
-					isLoadingRates={ isLoadingRates }
+					renderOption={renderShippingRatesControlOption}
+					collapsible={false}
+					shippingRates={filteredShippingRates}
+					isLoadingRates={isLoadingRates}
 					context="woocommerce/checkout"
 				/>
-			) }
+			)}
 		</>
 	);
 };

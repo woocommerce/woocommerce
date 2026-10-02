@@ -18,14 +18,14 @@ import { MarketplaceContextType } from '../../contexts/types';
 /**
  * Seal-with-checkmark icon, kept identical to the badge icon on WooCommerce.com.
  */
-export function QualityBadgeIcon( { size = 12 }: { size?: number } ) {
+export function QualityBadgeIcon({ size = 12 }: { size?: number }) {
 	return (
 		<svg
 			className="woocommerce-marketplace__quality-badge-icon"
 			fill="none"
-			height={ size }
+			height={size}
 			viewBox="0 0 16 16"
-			width={ size }
+			width={size}
 			xmlns="http://www.w3.org/2000/svg"
 			aria-hidden="true"
 		>
@@ -46,9 +46,9 @@ export function QualityBadgeIcon( { size = 12 }: { size?: number } ) {
  * server-side; accept only absolute https URLs anyway before rendering it
  * as a link target.
  */
-function getSafeDocsUrl( value?: string ): string | undefined {
+function getSafeDocsUrl(value?: string): string | undefined {
 	try {
-		const url = new URL( value ?? '' );
+		const url = new URL(value ?? '');
 		return url.protocol === 'https:' ? url.href : undefined;
 	} catch {
 		return undefined;
@@ -61,89 +61,89 @@ function getSafeDocsUrl( value?: string ): string | undefined {
  * filter's info button; a popover (not a tooltip) so the link stays reachable
  * by pointer and keyboard.
  */
-export function QualityBadgePopover( props: {
+export function QualityBadgePopover(props: {
 	label: string;
 	tooltip: string;
 	docsUrl?: string;
 	anchor: Element | null;
 	source: 'product_card' | 'filter';
 	onClose: () => void;
-} ) {
-	const docsUrl = getSafeDocsUrl( props.docsUrl );
+}) {
+	const docsUrl = getSafeDocsUrl(props.docsUrl);
 	const { tooltip, anchor, onClose } = props;
 
 	// Screen readers do not announce the popover content on their own.
-	useEffect( () => {
-		speak( tooltip );
-	}, [ tooltip ] );
+	useEffect(() => {
+		speak(tooltip);
+	}, [tooltip]);
 
 	// Close when focus lands outside the popover and its trigger, without
 	// pulling focus back, so tabbing away flows naturally. The Popover's own
 	// focus-outside detection does not cover this: without a link, focus
 	// never enters the popover at all.
-	useEffect( () => {
-		const onFocusin = ( event: FocusEvent ) => {
+	useEffect(() => {
+		const onFocusin = (event: FocusEvent) => {
 			const target = event.target as Element | null;
 			if (
-				! target ||
+				!target ||
 				target.closest(
 					'.woocommerce-marketplace__quality-badge-popover'
 				) ||
-				anchor?.contains( target )
+				anchor?.contains(target)
 			) {
 				return;
 			}
 			onClose();
 		};
 
-		document.addEventListener( 'focusin', onFocusin );
-		return () => document.removeEventListener( 'focusin', onFocusin );
-	}, [ anchor, onClose ] );
+		document.addEventListener('focusin', onFocusin);
+		return () => document.removeEventListener('focusin', onFocusin);
+	}, [anchor, onClose]);
 
 	return (
 		<Popover
 			className="woocommerce-marketplace__quality-badge-popover"
-			anchor={ props.anchor }
+			anchor={props.anchor}
 			placement="bottom"
 			// Focus the link when there is one; without it, focus stays on the
 			// trigger and the content is announced via speak() above.
-			focusOnMount={ docsUrl ? 'firstElement' : false }
+			focusOnMount={docsUrl ? 'firstElement' : false}
 			// Keep the popover in the page tab order; tabbing out closes it
 			// via the focusin listener above.
-			constrainTabbing={ false }
-			onClose={ onClose }
+			constrainTabbing={false}
+			onClose={onClose}
 		>
-			<p>{ props.tooltip }</p>
-			{ docsUrl && (
+			<p>{props.tooltip}</p>
+			{docsUrl && (
 				<a
-					href={ docsUrl }
+					href={docsUrl}
 					target="_blank"
 					rel="noreferrer"
-					aria-label={ sprintf(
+					aria-label={sprintf(
 						// translators: %s: name of the quality badge, supplied by the WooCommerce.com API (e.g. "Excellence Verified").
-						__( 'Learn more about the %s badge', 'woocommerce' ),
+						__('Learn more about the %s badge', 'woocommerce'),
 						props.label
-					) }
-					onClick={ () =>
+					)}
+					onClick={() =>
 						recordEvent(
 							'marketplace_quality_badge_learn_more_clicked',
 							{ source: props.source }
 						)
 					}
-					onKeyDown={ ( event ) => {
+					onKeyDown={(event) => {
 						// Escape returns focus to the trigger. Tab would leave
 						// through the portal to the end of the document, so
 						// hand focus back to the trigger and let the browser
 						// continue the tab order from there.
-						if ( event.key === 'Escape' || event.key === 'Tab' ) {
+						if (event.key === 'Escape' || event.key === 'Tab') {
 							onClose();
-							( anchor as HTMLElement | null )?.focus();
+							(anchor as HTMLElement | null)?.focus();
 						}
-					} }
+					}}
 				>
-					{ __( 'Learn more', 'woocommerce' ) }
+					{__('Learn more', 'woocommerce')}
 				</a>
-			) }
+			)}
 		</Popover>
 	);
 }
@@ -155,11 +155,11 @@ export function QualityBadgePopover( props: {
  */
 export function getVisibleQualityBadge(
 	product: Product | undefined,
-	iamSettings: MarketplaceContextType[ 'iamSettings' ] | undefined
+	iamSettings: MarketplaceContextType['iamSettings'] | undefined
 ) {
 	const badge = iamSettings?.quality_badge;
 
-	if ( ! badge?.enabled || ! badge.label || ! product?.hasQualityBadge ) {
+	if (!badge?.enabled || !badge.label || !product?.hasQualityBadge) {
 		return null;
 	}
 
@@ -172,30 +172,30 @@ export function getVisibleQualityBadge(
  * with the product data, the label/tooltip/docs URL from the IAM settings
  * endpoint. Clicking the chip opens the explanation popover.
  */
-export default function QualityBadge( props: { product: Product } ) {
-	const { iamSettings } = useContext( MarketplaceContext );
-	const [ isOpen, setIsOpen ] = useState( false );
-	const [ anchor, setAnchor ] = useState< HTMLButtonElement | null >( null );
+export default function QualityBadge(props: { product: Product }) {
+	const { iamSettings } = useContext(MarketplaceContext);
+	const [isOpen, setIsOpen] = useState(false);
+	const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
 
-	const badge = getVisibleQualityBadge( props.product, iamSettings );
+	const badge = getVisibleQualityBadge(props.product, iamSettings);
 
-	if ( ! badge ) {
+	if (!badge) {
 		return null;
 	}
 
 	const chipContent = (
 		<>
 			<QualityBadgeIcon />
-			{ badge.label }
+			{badge.label}
 		</>
 	);
 
 	// Without explanation copy the chip is a plain, inert label.
-	if ( ! badge.tooltip ) {
+	if (!badge.tooltip) {
 		return (
 			<div className="woocommerce-marketplace__quality-badge">
 				<span className="woocommerce-marketplace__quality-badge__chip">
-					{ chipContent }
+					{chipContent}
 				</span>
 			</div>
 		);
@@ -204,30 +204,30 @@ export default function QualityBadge( props: { product: Product } ) {
 	return (
 		<div className="woocommerce-marketplace__quality-badge">
 			<button
-				ref={ setAnchor }
+				ref={setAnchor}
 				type="button"
 				className="woocommerce-marketplace__quality-badge__chip"
-				aria-expanded={ isOpen }
-				onClick={ () => setIsOpen( ! isOpen ) }
-				onKeyDown={ ( event ) => {
+				aria-expanded={isOpen}
+				onClick={() => setIsOpen(!isOpen)}
+				onKeyDown={(event) => {
 					// Focus stays on the trigger when the popover has no link.
-					if ( event.key === 'Escape' && isOpen ) {
-						setIsOpen( false );
+					if (event.key === 'Escape' && isOpen) {
+						setIsOpen(false);
 					}
-				} }
+				}}
 			>
-				{ chipContent }
+				{chipContent}
 			</button>
-			{ isOpen && (
+			{isOpen && (
 				<QualityBadgePopover
-					label={ badge.label }
-					tooltip={ badge.tooltip }
-					docsUrl={ badge.docs_url }
-					anchor={ anchor }
+					label={badge.label}
+					tooltip={badge.tooltip}
+					docsUrl={badge.docs_url}
+					anchor={anchor}
 					source="product_card"
-					onClose={ () => setIsOpen( false ) }
+					onClose={() => setIsOpen(false)}
 				/>
-			) }
+			)}
 		</div>
 	);
 }

@@ -22,8 +22,8 @@ import '../../product-elements-blocks/sale-badge';
 
 // Setup MSW
 const handlers = [
-	http.get( '/wp/v2/product/:id', () => {
-		return HttpResponse.json( {
+	http.get('/wp/v2/product/:id', () => {
+		return HttpResponse.json({
 			id: 123,
 			title: { rendered: 'Test Product' },
 			images: [
@@ -34,10 +34,10 @@ const handlers = [
 					alt: 'Test 1',
 				},
 			],
-		} );
-	} ),
-	http.get( '/wc/v3/products/:id', () => {
-		return HttpResponse.json( {
+		});
+	}),
+	http.get('/wc/v3/products/:id', () => {
+		return HttpResponse.json({
 			id: 123,
 			name: 'Test Product',
 			images: [
@@ -60,19 +60,19 @@ const handlers = [
 					alt: 'Test 3',
 				},
 			],
-		} );
-	} ),
+		});
+	}),
 
-	http.get( '/wc/store/v1', () => {
-		return HttpResponse.json( {} );
-	} ),
+	http.get('/wc/store/v1', () => {
+		return HttpResponse.json({});
+	}),
 
-	http.get( '/wp/v2/types', () => {
-		return HttpResponse.json( {} );
-	} ),
+	http.get('/wp/v2/types', () => {
+		return HttpResponse.json({});
+	}),
 
-	http.get( '/wc/store/v1/products/:id', () => {
-		return HttpResponse.json( {
+	http.get('/wc/store/v1/products/:id', () => {
+		return HttpResponse.json({
 			id: 123,
 			name: 'Test Product',
 			images: [
@@ -95,31 +95,31 @@ const handlers = [
 					alt: 'Test 3',
 				},
 			],
-		} );
-	} ),
+		});
+	}),
 ];
 
-const server = setupServer( ...handlers );
+const server = setupServer(...handlers);
 
 // Start MSW
-beforeAll( () => server.listen() );
-afterEach( () => server.resetHandlers() );
-afterAll( () => server.close() );
+beforeAll(() => server.listen());
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
 
-async function setup( attributes = {} ) {
-	const productImageBlock = createBlock( 'woocommerce/product-image', {
+async function setup(attributes = {}) {
+	const productImageBlock = createBlock('woocommerce/product-image', {
 		showProductLink: false,
 		showSaleBadge: false,
 		aspectRatio: '16/9',
 		...attributes,
-	} );
+	});
 
 	const viewerBlock = createBlock(
 		'woocommerce/product-gallery-large-image',
 		{},
 		[
 			productImageBlock,
-			createBlock( 'woocommerce/product-sale-badge', { align: 'right' } ),
+			createBlock('woocommerce/product-sale-badge', { align: 'right' }),
 			createBlock(
 				'woocommerce/product-gallery-large-image-next-previous'
 			),
@@ -136,7 +136,7 @@ async function setup( attributes = {} ) {
 			hoverZoom: true,
 			fullScreenOnClick: true,
 		},
-		[ thumbnailsBlock, viewerBlock ]
+		[thumbnailsBlock, viewerBlock]
 	);
 
 	const singleProductBlock = [
@@ -145,114 +145,112 @@ async function setup( attributes = {} ) {
 			attributes: {
 				productId: '123',
 			},
-			innerBlocks: [ productGalleryBlock ],
+			innerBlocks: [productGalleryBlock],
 		},
 	];
-	return initializeEditor( singleProductBlock );
+	return initializeEditor(singleProductBlock);
 }
 
-describe( 'Product Gallery Block', () => {
-	it( 'uses the registered default gallery settings', () => {
-		const productGalleryBlock = createBlock( blockJson.name );
+describe('Product Gallery Block', () => {
+	it('uses the registered default gallery settings', () => {
+		const productGalleryBlock = createBlock(blockJson.name);
 
-		expect( productGalleryBlock.attributes ).toMatchObject( {
+		expect(productGalleryBlock.attributes).toMatchObject({
 			hoverZoom: true,
 			fullScreenOnClick: true,
-		} );
-	} );
+		});
+	});
 
-	it( 'restricts registration to Single Product descendants', () => {
-		expect( getBlockType( blockJson.name )?.ancestor ).toEqual( [
+	it('restricts registration to Single Product descendants', () => {
+		expect(getBlockType(blockJson.name)?.ancestor).toEqual([
 			'woocommerce/single-product',
-		] );
-	} );
+		]);
+	});
 
-	it( 'should render the block in the editor with correct structure', async () => {
+	it('should render the block in the editor with correct structure', async () => {
 		await setup();
 
 		// Get the main block wrapper
-		const block = screen.getByRole( 'document', {
+		const block = screen.getByRole('document', {
 			name: /Block: Product Gallery/i,
-		} );
-		expect( block ).toBeInTheDocument();
+		});
+		expect(block).toBeInTheDocument();
 
 		// Check inner blocks container
-		const innerBlocks = block.querySelector( '.block-editor-inner-blocks' );
-		expect( innerBlocks ).toBeInTheDocument();
+		const innerBlocks = block.querySelector('.block-editor-inner-blocks');
+		expect(innerBlocks).toBeInTheDocument();
 
 		// Check layout container.
-		const layout = block.querySelector(
-			'.block-editor-block-list__layout'
-		);
-		expect( layout ).toBeInTheDocument();
+		const layout = block.querySelector('.block-editor-block-list__layout');
+		expect(layout).toBeInTheDocument();
 
 		// Check for viewer block and its inner blocks
-		const viewerBlock = screen.getByRole( 'document', {
+		const viewerBlock = screen.getByRole('document', {
 			name: /Block: Viewer/i,
-		} );
-		expect( viewerBlock ).toBeInTheDocument();
+		});
+		expect(viewerBlock).toBeInTheDocument();
 
 		// Check inner blocks of viewer
 		expect(
-			screen.getByRole( 'document', { name: /Block: Product Image/i } )
+			screen.getByRole('document', { name: /Block: Product Image/i })
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole( 'document', { name: /Block: On-Sale Badge/i } )
+			screen.getByRole('document', { name: /Block: On-Sale Badge/i })
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole( 'document', {
+			screen.getByRole('document', {
 				name: /Block: Next\/Previous Buttons/i,
-			} )
+			})
 		).toBeInTheDocument();
 
-		await waitFor( () => {
+		await waitFor(() => {
 			expect(
-				screen.getAllByRole( 'img', { hidden: true } ).at( 0 )
-			).not.toHaveAttribute( 'src', 'placeholder.jpg' );
-		} );
+				screen.getAllByRole('img', { hidden: true }).at(0)
+			).not.toHaveAttribute('src', 'placeholder.jpg');
+		});
 
 		// Check that the product image is rendered
-		const productImage = screen.getByTestId( 'product-image' );
-		expect( productImage ).toBeInTheDocument();
-		expect( productImage ).toHaveAttribute( 'src', 'test-image-1.jpg' );
-		expect( productImage ).toHaveAttribute( 'alt', 'Test 1' );
-	} );
+		const productImage = screen.getByTestId('product-image');
+		expect(productImage).toBeInTheDocument();
+		expect(productImage).toHaveAttribute('src', 'test-image-1.jpg');
+		expect(productImage).toHaveAttribute('alt', 'Test 1');
+	});
 
-	it( 'should expose custom product image ratios as large image CSS variables', async () => {
-		await setup( {
+	it('should expose custom product image ratios as large image CSS variables', async () => {
+		await setup({
 			style: {
 				dimensions: {
 					aspectRatio: '3/5',
 				},
 			},
-		} );
+		});
 
 		// Get the viewer
-		const productImage = screen.getByTestId( 'product-image' );
-		expect( productImage ).toBeInTheDocument();
+		const productImage = screen.getByTestId('product-image');
+		expect(productImage).toBeInTheDocument();
 
 		// Verify aspect ratio class is applied
 		const imageContainer = productImage.closest(
 			'.wc-block-components-product-image'
 		);
-		expect( imageContainer ).toHaveClass(
+		expect(imageContainer).toHaveClass(
 			'wc-block-components-product-image--aspect-ratio-3-5'
 		);
-		const productGalleryBlock = screen.getByRole( 'document', {
+		const productGalleryBlock = screen.getByRole('document', {
 			name: /Block: Product Gallery/i,
-		} );
-		expect( productGalleryBlock ).toHaveStyle( {
+		});
+		expect(productGalleryBlock).toHaveStyle({
 			'--wc-block-product-gallery-large-image-ratio-width': '3',
 			'--wc-block-product-gallery-large-image-ratio-height': '5',
-		} );
+		});
 
-		const thumbnailsBlock = screen.getByRole( 'document', {
+		const thumbnailsBlock = screen.getByRole('document', {
 			name: /Block: Thumbnails/i,
-		} );
-		expect( thumbnailsBlock ).toBeInTheDocument();
+		});
+		expect(thumbnailsBlock).toBeInTheDocument();
 
 		// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
 		// opt out of without changing the visual output.
-		expect( console ).toHaveWarned();
-	} );
-} );
+		expect(console).toHaveWarned();
+	});
+});

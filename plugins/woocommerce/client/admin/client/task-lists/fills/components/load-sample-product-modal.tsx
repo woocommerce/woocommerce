@@ -16,17 +16,17 @@ const LoadSampleProductModal = () => {
 			className="woocommerce-products-load-sample-product-modal"
 			overlayClassName="woocommerce-products-load-sample-product-modal-overlay"
 			title=""
-			onRequestClose={ () => {} }
+			onRequestClose={() => {}}
 		>
-			<Spinner color="#007cba" style={ { width: 48, height: 48 } } />
+			<Spinner color="#007cba" style={{ width: 48, height: 48 }} />
 			<Text className="woocommerce-load-sample-product-modal__title">
-				{ __( 'Loading sample products', 'woocommerce' ) }
+				{__('Loading sample products', 'woocommerce')}
 			</Text>
 			<Text className="woocommerce-load-sample-product-modal__description">
-				{ __(
+				{__(
 					'We are loading 9 sample products into your store',
 					'woocommerce'
-				) }
+				)}
 			</Text>
 		</Modal>
 	);

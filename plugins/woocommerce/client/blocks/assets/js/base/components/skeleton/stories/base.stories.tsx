@@ -18,7 +18,7 @@ export default {
 		className: { control: 'text' },
 		tag: {
 			control: { type: 'select' },
-			options: [ 'div' ],
+			options: ['div'],
 		},
 	},
 	parameters: {
@@ -29,11 +29,11 @@ export default {
 			},
 		},
 	},
-} as Meta< SkeletonProps >;
+} as Meta<SkeletonProps>;
 
-const Template = ( args: SkeletonProps ) => <Skeleton { ...args } />;
+const Template = (args: SkeletonProps) => <Skeleton {...args} />;
 
-export const Default: StoryObj< SkeletonProps > = {
+export const Default: StoryObj<SkeletonProps> = {
 	render: Template,
 	args: {},
 	parameters: {
@@ -45,7 +45,7 @@ export const Default: StoryObj< SkeletonProps > = {
 	},
 };
 
-export const TallerSkeleton: StoryObj< SkeletonProps > = {
+export const TallerSkeleton: StoryObj<SkeletonProps> = {
 	render: Template,
 	args: {
 		height: '48px',
@@ -60,7 +60,7 @@ export const TallerSkeleton: StoryObj< SkeletonProps > = {
 	},
 };
 
-export const NarrowerSkeleton: StoryObj< SkeletonProps > = {
+export const NarrowerSkeleton: StoryObj<SkeletonProps> = {
 	render: Template,
 	args: {
 		width: '177px',
@@ -75,7 +75,7 @@ export const NarrowerSkeleton: StoryObj< SkeletonProps > = {
 	},
 };
 
-export const Circular: StoryObj< SkeletonProps > = {
+export const Circular: StoryObj<SkeletonProps> = {
 	render: Template,
 	args: {
 		borderRadius: '100%',

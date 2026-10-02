@@ -68,11 +68,11 @@ export function getEntryFieldRaw(
 	entry: ItemData | undefined,
 	field: 'name' | 'value'
 ): string {
-	if ( ! entry ) {
+	if (!entry) {
 		return '';
 	}
 
-	if ( field === 'name' ) {
+	if (field === 'name') {
 		return entry.key || entry.attribute || entry.name || '';
 	}
 
@@ -87,7 +87,7 @@ export function getEntryFieldRaw(
  * @return {boolean} True when `hidden` is truthy under any of `true`,
  *                    `'true'`, `'1'`, or `1`.
  */
-export function isEntryHiddenFlag( entry: ItemData | undefined ): boolean {
+export function isEntryHiddenFlag(entry: ItemData | undefined): boolean {
 	const hiddenValue = entry?.hidden;
 
 	return (
@@ -108,11 +108,11 @@ export function isEntryHiddenFlag( entry: ItemData | undefined ): boolean {
  * @return {boolean} True when the entry has a usable name or value and is
  *                    not hidden-flagged.
  */
-export function isItemDataEntryVisible( entry: ItemData | undefined ): boolean {
-	const hasUsableName = !! getEntryFieldRaw( entry, 'name' );
-	const hasUsableValue = !! getEntryFieldRaw( entry, 'value' );
+export function isItemDataEntryVisible(entry: ItemData | undefined): boolean {
+	const hasUsableName = !!getEntryFieldRaw(entry, 'name');
+	const hasUsableValue = !!getEntryFieldRaw(entry, 'value');
 
-	return ( hasUsableName || hasUsableValue ) && ! isEntryHiddenFlag( entry );
+	return (hasUsableName || hasUsableValue) && !isEntryHiddenFlag(entry);
 }
 
 /**
@@ -133,17 +133,17 @@ export function isLastVisibleEntry(
 	items: ItemData[] | undefined,
 	entry: ItemData | undefined
 ): boolean {
-	if ( ! items || items.length === 0 ) {
+	if (!items || items.length === 0) {
 		return true;
 	}
 
-	const visibleItems = items.filter( isItemDataEntryVisible );
+	const visibleItems = items.filter(isItemDataEntryVisible);
 
-	if ( visibleItems.length === 0 ) {
+	if (visibleItems.length === 0) {
 		return true;
 	}
 
-	return entry === visibleItems[ visibleItems.length - 1 ];
+	return entry === visibleItems[visibleItems.length - 1];
 }
 
 /**
@@ -159,19 +159,19 @@ export function isLastVisibleEntry(
 export function buildCartItemDataAttr(
 	entry: ItemData | undefined
 ): CartItemDataAttr {
-	const nameTxt = document.createElement( 'textarea' );
-	nameTxt.innerHTML = getEntryFieldRaw( entry, 'name' );
+	const nameTxt = document.createElement('textarea');
+	nameTxt.innerHTML = getEntryFieldRaw(entry, 'name');
 
-	const valueTxt = document.createElement( 'textarea' );
-	valueTxt.innerHTML = getEntryFieldRaw( entry, 'value' );
+	const valueTxt = document.createElement('textarea');
+	valueTxt.innerHTML = getEntryFieldRaw(entry, 'value');
 
 	return {
 		name: nameTxt.value ? nameTxt.value + ':' : '',
 		value: valueTxt.value,
-		className: `wc-block-components-product-details__${ nameTxt.value
-			.replace( /([a-z])([A-Z])/g, '$1-$2' )
-			.replace( /<[^>]*>/g, '' )
-			.replace( /[\s_&]+/g, '-' )
-			.toLowerCase() }`,
+		className: `wc-block-components-product-details__${nameTxt.value
+			.replace(/([a-z])([A-Z])/g, '$1-$2')
+			.replace(/<[^>]*>/g, '')
+			.replace(/[\s_&]+/g, '-')
+			.toLowerCase()}`,
 	};
 }

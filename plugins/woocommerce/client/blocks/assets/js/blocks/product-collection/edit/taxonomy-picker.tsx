@@ -27,7 +27,7 @@ interface TaxonomyPickerProps extends ProductCollectionEditComponentProps {
 export const getTaxonomySlugForCollection = (
 	collection: string | undefined
 ): string | null => {
-	switch ( collection ) {
+	switch (collection) {
 		case CoreCollectionNames.BY_CATEGORY:
 			return 'product_cat';
 		case CoreCollectionNames.BY_TAG:
@@ -45,7 +45,7 @@ export const getTaxonomySlugForCollection = (
 const getDescriptionForCollection = (
 	collection: string | undefined
 ): string => {
-	switch ( collection ) {
+	switch (collection) {
 		case CoreCollectionNames.BY_CATEGORY:
 			return __(
 				'Display a grid of products from your selected categories.',
@@ -72,8 +72,8 @@ const getDescriptionForCollection = (
 /**
  * Get the icon for a given collection.
  */
-const getIconForCollection = ( collection: string | undefined ) => {
-	switch ( collection ) {
+const getIconForCollection = (collection: string | undefined) => {
+	switch (collection) {
 		case CoreCollectionNames.BY_CATEGORY:
 			return category;
 		case CoreCollectionNames.BY_TAG:
@@ -85,69 +85,68 @@ const getIconForCollection = ( collection: string | undefined ) => {
 	}
 };
 
-const TaxonomyPicker = ( props: TaxonomyPickerProps ) => {
+const TaxonomyPicker = (props: TaxonomyPickerProps) => {
 	const { attributes, onDone } = props;
 	const blockProps = useBlockProps();
 
-	const collectionData = getCollectionByName( attributes.collection );
-	const taxonomySlug = getTaxonomySlugForCollection( attributes.collection );
+	const collectionData = getCollectionByName(attributes.collection);
+	const taxonomySlug = getTaxonomySlugForCollection(attributes.collection);
 
 	// Get selected term IDs for the relevant taxonomy
 	const selectedTermIds: number[] = taxonomySlug
-		? attributes.query?.taxQuery?.[ taxonomySlug ] || []
+		? attributes.query?.taxQuery?.[taxonomySlug] || []
 		: [];
 
 	const hasSelectedTerms = selectedTermIds.length > 0;
 
-	if ( ! collectionData || ! taxonomySlug ) {
+	if (!collectionData || !taxonomySlug) {
 		return null;
 	}
 
-	const handleTermChange = ( termIds: number[] ) => {
-		setQueryAttribute( props, {
+	const handleTermChange = (termIds: number[]) => {
+		setQueryAttribute(props, {
 			taxQuery: {
-				[ taxonomySlug ]: termIds,
+				[taxonomySlug]: termIds,
 			},
-		} );
+		});
 	};
 
 	const renderTaxonomyControl = () => {
-		switch ( attributes.collection ) {
+		switch (attributes.collection) {
 			case CoreCollectionNames.BY_CATEGORY:
 				return (
 					<ProductCategoryControl
-						selected={ selectedTermIds }
-						onChange={ ( value = [] ) => {
+						selected={selectedTermIds}
+						onChange={(value = []) => {
 							const ids = value.map(
-								( { id }: { id: number } ) => id
+								({ id }: { id: number }) => id
 							);
-							handleTermChange( ids );
-						} }
+							handleTermChange(ids);
+						}}
 					/>
 				);
 			case CoreCollectionNames.BY_TAG:
 				return (
 					<ProductTagControl
-						selected={ selectedTermIds }
-						onChange={ ( value = [] ) => {
+						selected={selectedTermIds}
+						onChange={(value = []) => {
 							const ids = value.map(
-								( { id }: { id: number | string } ) =>
-									Number( id )
+								({ id }: { id: number | string }) => Number(id)
 							);
-							handleTermChange( ids );
-						} }
+							handleTermChange(ids);
+						}}
 					/>
 				);
 			case CoreCollectionNames.BY_BRAND:
 				return (
 					<ProductBrandControl
-						selected={ selectedTermIds }
-						onChange={ ( value = [] ) => {
+						selected={selectedTermIds}
+						onChange={(value = []) => {
 							const ids = value.map(
-								( { id }: { id: number } ) => id
+								({ id }: { id: number }) => id
 							);
-							handleTermChange( ids );
-						} }
+							handleTermChange(ids);
+						}}
 					/>
 				);
 			default:
@@ -156,25 +155,25 @@ const TaxonomyPicker = ( props: TaxonomyPickerProps ) => {
 	};
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<Placeholder
 				icon={
 					<Icon
-						icon={ getIconForCollection( attributes.collection ) }
+						icon={getIconForCollection(attributes.collection)}
 						className="block-editor-block-icon"
 					/>
 				}
-				label={ collectionData.title }
+				label={collectionData.title}
 			>
-				{ getDescriptionForCollection( attributes.collection ) }
+				{getDescriptionForCollection(attributes.collection)}
 				<div className="wc-block-editor-product-collection__taxonomy-picker-selection">
-					{ renderTaxonomyControl() }
+					{renderTaxonomyControl()}
 					<Button
 						variant="primary"
-						onClick={ onDone }
-						disabled={ ! hasSelectedTerms }
+						onClick={onDone}
+						disabled={!hasSelectedTerms}
 					>
-						{ __( 'Done', 'woocommerce' ) }
+						{__('Done', 'woocommerce')}
 					</Button>
 				</div>
 			</Placeholder>

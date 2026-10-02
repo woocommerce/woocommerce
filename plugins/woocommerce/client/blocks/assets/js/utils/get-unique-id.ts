@@ -4,5 +4,5 @@
  * @return {number} The generated unique ID as a number.
  */
 export function generateUniqueId(): number {
-	return Math.floor( Math.random() * Date.now() );
+	return Math.floor(Math.random() * Date.now());
 }

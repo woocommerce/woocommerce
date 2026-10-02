@@ -17,20 +17,20 @@ interface ProductLowStockBadgeProps {
  * @param {Object} props                   Incoming props for the component.
  * @param {number} props.lowStockRemaining Whether or not there is low stock remaining.
  */
-const ProductLowStockBadge = ( {
+const ProductLowStockBadge = ({
 	lowStockRemaining,
-}: ProductLowStockBadgeProps ): JSX.Element | null => {
-	if ( ! lowStockRemaining ) {
+}: ProductLowStockBadgeProps): JSX.Element | null => {
+	if (!lowStockRemaining) {
 		return null;
 	}
 
 	return (
 		<ProductBadge className="wc-block-components-product-low-stock-badge">
-			{ sprintf(
+			{sprintf(
 				/* translators: %d stock amount (number of items in stock for product) */
-				__( '%d left in stock', 'woocommerce' ),
+				__('%d left in stock', 'woocommerce'),
 				lowStockRemaining
-			) }
+			)}
 		</ProductBadge>
 	);
 };

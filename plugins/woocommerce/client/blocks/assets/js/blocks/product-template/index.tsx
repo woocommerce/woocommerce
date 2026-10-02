@@ -11,8 +11,8 @@ import edit from './edit';
 import save from './save';
 import icon from './icon';
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	icon,
 	edit,
 	save,
-} );
+});

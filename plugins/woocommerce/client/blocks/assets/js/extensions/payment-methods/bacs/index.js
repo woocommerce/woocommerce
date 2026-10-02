@@ -14,15 +14,15 @@ import { RawHTML } from '@wordpress/element';
 import { PAYMENT_METHOD_NAME } from './constants';
 import { canMakePaymentForShippingMethods } from '../utils/shipping-method-restrictions';
 
-const settings = getPaymentMethodData( 'bacs', {} );
-const defaultLabel = __( 'Direct bank transfer', 'woocommerce' );
-const label = decodeEntities( settings?.title || '' ) || defaultLabel;
+const settings = getPaymentMethodData('bacs', {});
+const defaultLabel = __('Direct bank transfer', 'woocommerce');
+const label = decodeEntities(settings?.title || '') || defaultLabel;
 
 /**
  * Content component
  */
 const Content = () => {
-	return <RawHTML>{ sanitizeHTML( settings.description || '' ) }</RawHTML>;
+	return <RawHTML>{sanitizeHTML(settings.description || '')}</RawHTML>;
 };
 
 /**
@@ -30,9 +30,9 @@ const Content = () => {
  *
  * @param {*} props Props from payment API.
  */
-const Label = ( props ) => {
+const Label = (props) => {
 	const { PaymentMethodLabel } = props.components;
-	return <PaymentMethodLabel text={ label } />;
+	return <PaymentMethodLabel text={label} />;
 };
 
 /**
@@ -43,11 +43,11 @@ const bankTransferPaymentMethod = {
 	label: <Label />,
 	content: <Content />,
 	edit: <Content />,
-	canMakePayment: canMakePaymentForShippingMethods( settings ),
+	canMakePayment: canMakePaymentForShippingMethods(settings),
 	ariaLabel: label,
 	supports: {
 		features: settings?.supports ?? [],
 	},
 };
 
-registerPaymentMethod( bankTransferPaymentMethod );
+registerPaymentMethod(bankTransferPaymentMethod);

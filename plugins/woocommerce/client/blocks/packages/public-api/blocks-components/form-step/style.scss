@@ -106,8 +106,8 @@
 			@include reset-box();
 			background: transparent;
 			counter-increment: checkout-step;
-			content: "\00a0"counter(checkout-step) ".";
-			content: "\00a0"counter(checkout-step) "." / "";
+			content: "\00a0" counter(checkout-step) ".";
+			content: "\00a0" counter(checkout-step) "." / "";
 			position: absolute;
 			left: -$gap-large;
 			top: 0;

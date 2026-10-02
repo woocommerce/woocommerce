@@ -38,7 +38,7 @@ type GetFallbackDisplayStyleInsertionPoint = (
 	parentBlock: BlockInstance
 ) => DisplayStyleInsertionPoint;
 
-type DisplayStyleBlockType = ReturnType< typeof getBlockTypes >[ number ] & {
+type DisplayStyleBlockType = ReturnType<typeof getBlockTypes>[number] & {
 	ancestor?: readonly string[] | string;
 	usesContext?: readonly string[] | string;
 	supports?: DisplayStyleBlockSupport;
@@ -47,24 +47,22 @@ type DisplayStyleBlockType = ReturnType< typeof getBlockTypes >[ number ] & {
 type DisplayStyleSwitcherProps = {
 	clientId: string;
 	currentStyle: string;
-	onChange: ( value: string ) => void;
+	onChange: (value: string) => void;
 	contextKey?: string;
 	getFallbackDisplayStyleInsertionPoint?: GetFallbackDisplayStyleInsertionPoint;
 };
 
-function isBlockInstance(
-	block: BlockInstance | null
-): block is BlockInstance {
-	return Boolean( block );
+function isBlockInstance(block: BlockInstance | null): block is BlockInstance {
+	return Boolean(block);
 }
 
 function getBlockTypeList(
 	value: readonly string[] | string | undefined
 ): readonly string[] {
-	if ( ! value ) {
+	if (!value) {
 		return [];
 	}
-	return Array.isArray( value ) ? value : [ value ];
+	return Array.isArray(value) ? value : [value];
 }
 
 function hasInnerBlockDisplayStyleSupport(
@@ -78,17 +76,17 @@ function isDisplayStyleCandidate(
 	parentBlockName: string | undefined,
 	contextKey: string
 ): boolean {
-	if ( ! parentBlockName ) {
+	if (!parentBlockName) {
 		return false;
 	}
 
-	if ( ! hasInnerBlockDisplayStyleSupport( blockType ) ) {
+	if (!hasInnerBlockDisplayStyleSupport(blockType)) {
 		return false;
 	}
 
 	return (
-		getBlockTypeList( blockType.ancestor ).includes( parentBlockName ) &&
-		getBlockTypeList( blockType.usesContext ).includes( contextKey )
+		getBlockTypeList(blockType.ancestor).includes(parentBlockName) &&
+		getBlockTypeList(blockType.usesContext).includes(contextKey)
 	);
 }
 
@@ -96,9 +94,8 @@ function getDisplayStyleOptions(
 	parentBlockName: string | undefined,
 	contextKey: string
 ): DisplayStyleBlockType[] {
-	return ( getBlockTypes() as DisplayStyleBlockType[] ).filter(
-		( blockType ) =>
-			isDisplayStyleCandidate( blockType, parentBlockName, contextKey )
+	return (getBlockTypes() as DisplayStyleBlockType[]).filter((blockType) =>
+		isDisplayStyleCandidate(blockType, parentBlockName, contextKey)
 	);
 }
 
@@ -108,10 +105,10 @@ function getCurrentDisplayStyleBlock(
 ): BlockInstance | null {
 	return (
 		displayStyleOptions
-			.map( ( blockType ) =>
-				getInnerBlockByName( parentBlock, blockType.name )
+			.map((blockType) =>
+				getInnerBlockByName(parentBlock, blockType.name)
 			)
-			.find( isBlockInstance ) ?? null
+			.find(isBlockInstance) ?? null
 	);
 }
 
@@ -120,52 +117,52 @@ function getDisplayStyleInsertionPoint(
 	getFallbackDisplayStyleInsertionPoint?: GetFallbackDisplayStyleInsertionPoint
 ): DisplayStyleInsertionPoint {
 	return (
-		getFallbackDisplayStyleInsertionPoint?.( parentBlock ) ?? {
+		getFallbackDisplayStyleInsertionPoint?.(parentBlock) ?? {
 			rootClientId: parentBlock.clientId,
 			index: parentBlock.innerBlocks.length,
 		}
 	);
 }
 
-export const DisplayStyleSwitcher = ( {
+export const DisplayStyleSwitcher = ({
 	clientId,
 	currentStyle,
 	onChange,
 	contextKey = SELECTABLE_ITEMS_CONTEXT,
 	getFallbackDisplayStyleInsertionPoint,
-}: DisplayStyleSwitcherProps ) => {
-	const parentBlock = select( 'core/block-editor' ).getBlock( clientId );
+}: DisplayStyleSwitcherProps) => {
+	const parentBlock = select('core/block-editor').getBlock(clientId);
 	const parentBlockName = parentBlock?.name;
 	const displayStyleOptions = getDisplayStyleOptions(
 		parentBlockName,
 		contextKey
 	);
 
-	const { insertBlock, replaceBlock } = useDispatch( 'core/block-editor' );
+	const { insertBlock, replaceBlock } = useDispatch('core/block-editor');
 
-	const [ displayStyleBlocksAttributes, setDisplayStyleBlocksAttributes ] =
-		useState< Record< string, Record< string, unknown > > >( {} );
+	const [displayStyleBlocksAttributes, setDisplayStyleBlocksAttributes] =
+		useState<Record<string, Record<string, unknown>>>({});
 
-	if ( displayStyleOptions.length === 0 ) return null;
+	if (displayStyleOptions.length === 0) return null;
 
 	return (
 		<ToggleGroupControl
-			value={ currentStyle }
+			value={currentStyle}
 			isBlock
 			__nextHasNoMarginBottom
 			__next40pxDefaultSize
 			label=""
 			hideLabelFromVision
-			onChange={ ( value: string | number | undefined ) => {
-				if ( ! value || typeof value !== 'string' ) {
+			onChange={(value: string | number | undefined) => {
+				if (!value || typeof value !== 'string') {
 					return;
 				}
-				if ( ! parentBlock ) {
+				if (!parentBlock) {
 					return;
 				}
 				if (
-					! displayStyleOptions.some(
-						( blockType ) => blockType.name === value
+					!displayStyleOptions.some(
+						(blockType) => blockType.name === value
 					)
 				) {
 					return;
@@ -175,11 +172,10 @@ export const DisplayStyleSwitcher = ( {
 					displayStyleOptions
 				);
 
-				if ( currentStyleBlock ) {
+				if (currentStyleBlock) {
 					const nextDisplayStyleBlocksAttributes = {
 						...displayStyleBlocksAttributes,
-						[ currentStyleBlock.name ]:
-							currentStyleBlock.attributes,
+						[currentStyleBlock.name]: currentStyleBlock.attributes,
 					};
 
 					setDisplayStyleBlocksAttributes(
@@ -189,7 +185,7 @@ export const DisplayStyleSwitcher = ( {
 						currentStyleBlock.clientId,
 						createBlock(
 							value,
-							nextDisplayStyleBlocksAttributes[ value ] || {}
+							nextDisplayStyleBlocksAttributes[value] || {}
 						)
 					);
 				} else {
@@ -199,23 +195,23 @@ export const DisplayStyleSwitcher = ( {
 					);
 
 					void insertBlock(
-						createBlock( value ),
+						createBlock(value),
 						insertionPoint.index,
 						insertionPoint.rootClientId,
 						false
 					);
 				}
-				onChange( value );
-			} }
-			style={ { width: '100%' } }
+				onChange(value);
+			}}
+			style={{ width: '100%' }}
 		>
-			{ displayStyleOptions.map( ( blockType ) => (
+			{displayStyleOptions.map((blockType) => (
 				<ToggleGroupControlOption
-					key={ blockType.name }
-					label={ blockType.title }
-					value={ blockType.name }
+					key={blockType.name}
+					label={blockType.title}
+					value={blockType.name}
 				/>
-			) ) }
+			))}
 		</ToggleGroupControl>
 	);
 };
@@ -226,8 +222,8 @@ export function resetDisplayStyleBlock(
 	getFallbackDisplayStyleInsertionPoint?: GetFallbackDisplayStyleInsertionPoint,
 	contextKey = SELECTABLE_ITEMS_CONTEXT
 ) {
-	const parentBlock = select( 'core/block-editor' ).getBlock( clientId );
-	if ( ! parentBlock ) return;
+	const parentBlock = select('core/block-editor').getBlock(clientId);
+	if (!parentBlock) return;
 
 	const displayStyleOptions = getDisplayStyleOptions(
 		parentBlock.name,
@@ -235,8 +231,8 @@ export function resetDisplayStyleBlock(
 	);
 
 	if (
-		! displayStyleOptions.some(
-			( blockType ) => blockType.name === defaultStyle
+		!displayStyleOptions.some(
+			(blockType) => blockType.name === defaultStyle
 		)
 	) {
 		return;
@@ -247,9 +243,9 @@ export function resetDisplayStyleBlock(
 		displayStyleOptions
 	);
 
-	const { insertBlock, replaceBlock } = dispatch( 'core/block-editor' );
-	if ( currentStyleBlock ) {
-		replaceBlock( currentStyleBlock.clientId, createBlock( defaultStyle ) );
+	const { insertBlock, replaceBlock } = dispatch('core/block-editor');
+	if (currentStyleBlock) {
+		replaceBlock(currentStyleBlock.clientId, createBlock(defaultStyle));
 	} else {
 		const insertionPoint = getDisplayStyleInsertionPoint(
 			parentBlock,
@@ -257,7 +253,7 @@ export function resetDisplayStyleBlock(
 		);
 
 		insertBlock(
-			createBlock( defaultStyle ),
+			createBlock(defaultStyle),
 			insertionPoint.index,
 			insertionPoint.rootClientId,
 			false

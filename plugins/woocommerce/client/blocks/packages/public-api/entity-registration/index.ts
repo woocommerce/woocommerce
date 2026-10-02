@@ -15,6 +15,6 @@ export {
 
 registerProductEntity();
 
-if ( isExperimentalWcRestApiV4Enabled() ) {
+if (isExperimentalWcRestApiV4Enabled()) {
 	registerSettingsEntity();
 }

@@ -10,11 +10,11 @@ import { Icon, info } from '@wordpress/icons';
 import metadata from './block.json';
 import edit from './edit';
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	icon: {
 		src: (
 			<Icon
-				icon={ info }
+				icon={info}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -26,4 +26,4 @@ registerBlockType( metadata, {
 	save() {
 		return null;
 	},
-} );
+});

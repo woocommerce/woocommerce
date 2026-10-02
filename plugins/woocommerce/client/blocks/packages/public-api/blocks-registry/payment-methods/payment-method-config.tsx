@@ -26,9 +26,7 @@ const NullComponent = () => {
 	return null;
 };
 
-export default class PaymentMethodConfig
-	implements PaymentMethodConfigInstance
-{
+export default class PaymentMethodConfig implements PaymentMethodConfigInstance {
 	public name: string;
 	public content: ReactNode;
 	public edit: ReactNode;
@@ -42,9 +40,9 @@ export default class PaymentMethodConfig
 	public savedTokenComponent?: ReactNode | null;
 	public canMakePaymentFromConfig: CanMakePaymentCallback;
 
-	constructor( config: PaymentMethodConfiguration ) {
+	constructor(config: PaymentMethodConfiguration) {
 		// validate config
-		PaymentMethodConfig.assertValidConfig( config );
+		PaymentMethodConfig.assertValidConfig(config);
 		this.name = config.name;
 		this.label = config.label;
 		this.placeOrderButtonLabel = config.placeOrderButtonLabel;
@@ -61,7 +59,7 @@ export default class PaymentMethodConfig
 				config?.supports?.savePaymentInfo || // Kept for backward compatibility if methods still pass this when registering.
 				false,
 			showSaveOption: config?.supports?.showSaveOption || false,
-			features: config?.supports?.features || [ 'products' ],
+			features: config?.supports?.features || ['products'],
 		};
 		this.canMakePaymentFromConfig = config.canMakePayment;
 	}
@@ -75,27 +73,27 @@ export default class PaymentMethodConfig
 		);
 	}
 
-	static assertValidConfig = ( config: PaymentMethodConfiguration ): void => {
+	static assertValidConfig = (config: PaymentMethodConfiguration): void => {
 		// set default for optional
 		config.savedTokenComponent = config.savedTokenComponent || (
 			<NullComponent />
 		);
-		assertConfigHasProperties( config, [
+		assertConfigHasProperties(config, [
 			'name',
 			'label',
 			'ariaLabel',
 			'content',
 			'edit',
 			'canMakePayment',
-		] );
-		if ( typeof config.name !== 'string' ) {
+		]);
+		if (typeof config.name !== 'string') {
 			throw new Error(
 				'The name property for the payment method must be a string'
 			);
 		}
 		if (
 			typeof config.icons !== 'undefined' &&
-			! Array.isArray( config.icons ) &&
+			!Array.isArray(config.icons) &&
 			config.icons !== null
 		) {
 			throw new Error(
@@ -126,22 +124,22 @@ export default class PaymentMethodConfig
 				'The placeOrderButton property for the payment method must be a React component (function)'
 			);
 		}
-		if ( config.placeOrderButton && config.placeOrderButtonLabel ) {
+		if (config.placeOrderButton && config.placeOrderButtonLabel) {
 			// eslint-disable-next-line no-console
 			console.warn(
-				`Payment method "${ config.name }" provided both placeOrderButton and placeOrderButtonLabel. Using placeOrderButton.`
+				`Payment method "${config.name}" provided both placeOrderButton and placeOrderButtonLabel. Using placeOrderButton.`
 			);
 		}
-		assertValidElementOrString( config.label, 'label' );
-		assertValidElement( config.content, 'content' );
-		assertValidElement( config.edit, 'edit' );
-		assertValidElement( config.savedTokenComponent, 'savedTokenComponent' );
-		if ( typeof config.ariaLabel !== 'string' ) {
+		assertValidElementOrString(config.label, 'label');
+		assertValidElement(config.content, 'content');
+		assertValidElement(config.edit, 'edit');
+		assertValidElement(config.savedTokenComponent, 'savedTokenComponent');
+		if (typeof config.ariaLabel !== 'string') {
 			throw new TypeError(
 				'The ariaLabel property for the payment method must be a string'
 			);
 		}
-		if ( typeof config.canMakePayment !== 'function' ) {
+		if (typeof config.canMakePayment !== 'function') {
 			throw new TypeError(
 				'The canMakePayment property for the payment method must be a function.'
 			);
@@ -154,7 +152,7 @@ export default class PaymentMethodConfig
 				'If the payment method includes the `supports.showSavedCards` property, it must be a boolean'
 			);
 		}
-		if ( typeof config.supports?.savePaymentInfo !== 'undefined' ) {
+		if (typeof config.supports?.savePaymentInfo !== 'undefined') {
 			deprecated(
 				'Passing savePaymentInfo when registering a payment method.',
 				{
@@ -165,7 +163,7 @@ export default class PaymentMethodConfig
 		}
 		if (
 			typeof config.supports?.features !== 'undefined' &&
-			! Array.isArray( config.supports?.features )
+			!Array.isArray(config.supports?.features)
 		) {
 			throw new Error(
 				'The features property for the payment method must be an array or undefined.'

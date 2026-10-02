@@ -15,4 +15,8 @@ $cart-checkout-sidebar-width: 360px;
 
 // Standard border radius for forms.
 $universal-border-radius: 4px;
-$universal-translucent-border-color: color-mix(in srgb, currentColor 30%, transparent);
+$universal-translucent-border-color: color-mix(
+	in srgb,
+	currentColor 30%,
+	transparent
+);

@@ -9,7 +9,7 @@ const Link = () => {
 		>
 			<mask
 				id="mask0_1133_132681"
-				style={ { maskType: 'alpha' } }
+				style={{ maskType: 'alpha' }}
 				maskUnits="userSpaceOnUse"
 				x="2"
 				y="7"

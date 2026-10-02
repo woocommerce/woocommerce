@@ -9,7 +9,7 @@ import { screen } from '@testing-library/react';
 import ExperimentalOrderShippingPackages from '..';
 import { renderSlotFill, getFillProps } from '../../../slot/test-utils';
 
-describe( 'ExperimentalOrderShippingPackages', () => {
+describe('ExperimentalOrderShippingPackages', () => {
 	const defaultSlotProps = {
 		extensions: {},
 		cart: {},
@@ -21,28 +21,28 @@ describe( 'ExperimentalOrderShippingPackages', () => {
 		showItems: false,
 	};
 
-	it( 'renders fill content inside the slot with expected classes', () => {
+	it('renders fill content inside the slot with expected classes', () => {
 		const { container } = renderSlotFill(
 			ExperimentalOrderShippingPackages,
 			{ ...defaultSlotProps, className: 'custom-shipping' }
 		);
 
-		expect( screen.getByTestId( 'fill-content' ) ).toBeInTheDocument();
+		expect(screen.getByTestId('fill-content')).toBeInTheDocument();
 
 		const slot = container.querySelector(
 			'.wc-block-components-shipping-rates-control'
 		);
-		expect( slot ).toBeInTheDocument();
-		expect( slot ).toHaveClass( 'custom-shipping' );
-	} );
+		expect(slot).toBeInTheDocument();
+		expect(slot).toHaveClass('custom-shipping');
+	});
 
-	it( 'passes all expected fillProps', () => {
+	it('passes all expected fillProps', () => {
 		const extensions = { 'shipping-ext': { zones: [] } };
-		const cart = { shippingRates: [ { rate: '5.00' } ] };
+		const cart = { shippingRates: [{ rate: '5.00' }] };
 		const components = { ShippingRate: () => null };
 		const renderOption = jest.fn();
 
-		const fillProps = getFillProps( ExperimentalOrderShippingPackages, {
+		const fillProps = getFillProps(ExperimentalOrderShippingPackages, {
 			extensions,
 			cart,
 			components,
@@ -51,10 +51,10 @@ describe( 'ExperimentalOrderShippingPackages', () => {
 			renderOption,
 			collapsible: true,
 			showItems: true,
-		} );
+		});
 
-		expect( fillProps ).toEqual(
-			expect.objectContaining( {
+		expect(fillProps).toEqual(
+			expect.objectContaining({
 				extensions,
 				cart,
 				components,
@@ -64,7 +64,7 @@ describe( 'ExperimentalOrderShippingPackages', () => {
 				collapsible: true,
 				collapse: true,
 				showItems: true,
-			} )
+			})
 		);
-	} );
-} );
+	});
+});

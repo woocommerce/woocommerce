@@ -33,190 +33,188 @@ const hierarchicalList = [
 	{ id: 6, name: 'Mulberry', parent: 0 },
 ];
 
-describe( 'SearchListControl', () => {
-	test( 'should render a search box and list of options', () => {
+describe('SearchListControl', () => {
+	test('should render a search box and list of options', () => {
 		const component = render(
 			<SearchListControl
-				instanceId={ 1 }
-				list={ list }
-				selected={ [] }
-				onChange={ noop }
+				instanceId={1}
+				list={list}
+				selected={[]}
+				onChange={noop}
 			/>
 		);
-		expect( component ).toMatchSnapshot();
-	} );
+		expect(component).toMatchSnapshot();
+	});
 
-	test( 'should render a search box and list of options with a custom className', () => {
+	test('should render a search box and list of options with a custom className', () => {
 		const component = render(
 			<SearchListControl
-				instanceId={ 1 }
+				instanceId={1}
 				className="test-search"
-				list={ list }
-				selected={ [] }
-				onChange={ noop }
+				list={list}
+				selected={[]}
+				onChange={noop}
 			/>
 		);
-		expect( component ).toMatchSnapshot();
-	} );
+		expect(component).toMatchSnapshot();
+	});
 
-	test( 'should render a search box, a list of options, and 1 selected item', () => {
+	test('should render a search box, a list of options, and 1 selected item', () => {
 		const component = render(
 			<SearchListControl
-				instanceId={ 1 }
-				list={ list }
-				selected={ [ list[ 1 ] ] }
-				onChange={ noop }
+				instanceId={1}
+				list={list}
+				selected={[list[1]]}
+				onChange={noop}
 			/>
 		);
-		expect( component ).toMatchSnapshot();
-	} );
+		expect(component).toMatchSnapshot();
+	});
 
-	test( 'should render a search box, a list of options, and 2 selected item', () => {
+	test('should render a search box, a list of options, and 2 selected item', () => {
 		const component = render(
 			<SearchListControl
-				instanceId={ 1 }
-				list={ list }
-				selected={ [ list[ 1 ], list[ 3 ] ] }
-				onChange={ noop }
+				instanceId={1}
+				list={list}
+				selected={[list[1], list[3]]}
+				onChange={noop}
 			/>
 		);
-		expect( component ).toMatchSnapshot();
-	} );
+		expect(component).toMatchSnapshot();
+	});
 
-	test( 'should render a search box and no options', () => {
+	test('should render a search box and no options', () => {
 		const component = render(
 			<SearchListControl
-				instanceId={ 1 }
-				list={ [] }
-				selected={ [] }
-				onChange={ noop }
+				instanceId={1}
+				list={[]}
+				selected={[]}
+				onChange={noop}
 			/>
 		);
-		expect( component ).toMatchSnapshot();
-	} );
+		expect(component).toMatchSnapshot();
+	});
 
-	test( 'should render a search box with a search term, and only matching options', () => {
+	test('should render a search box with a search term, and only matching options', () => {
 		const component = render(
 			<SearchListControl
-				instanceId={ 1 }
-				list={ list }
+				instanceId={1}
+				list={list}
 				search="berry"
-				selected={ [] }
-				onChange={ noop }
-				debouncedSpeak={ noop }
+				selected={[]}
+				onChange={noop}
+				debouncedSpeak={noop}
 			/>
 		);
-		expect( component ).toMatchSnapshot();
-	} );
+		expect(component).toMatchSnapshot();
+	});
 
-	test( 'should render a search box with a search term, and only matching options, regardless of case sensitivity', () => {
+	test('should render a search box with a search term, and only matching options, regardless of case sensitivity', () => {
 		const component = render(
 			<SearchListControl
-				instanceId={ 1 }
-				list={ list }
-				selected={ [] }
-				onChange={ noop }
-				debouncedSpeak={ noop }
+				instanceId={1}
+				list={list}
+				selected={[]}
+				onChange={noop}
+				debouncedSpeak={noop}
 			/>
 		);
 
 		fireEvent.change(
-			component.container.querySelector( SELECTORS.searchInput ),
+			component.container.querySelector(SELECTORS.searchInput),
 			{ target: { value: 'BeRrY' } }
 		);
 
-		expect( component ).toMatchSnapshot();
+		expect(component).toMatchSnapshot();
 
 		const $listItems = component.container.querySelectorAll(
 			SELECTORS.listItems
 		);
 
-		expect( $listItems ).toHaveLength( 2 );
-	} );
+		expect($listItems).toHaveLength(2);
+	});
 
 	// @see https://github.com/woocommerce/woocommerce-blocks/issues/6524
-	test( "should render search results in their original case regardless of user's input case", () => {
-		const EXPECTED = [ 'Elderberry', 'Mulberry' ];
+	test("should render search results in their original case regardless of user's input case", () => {
+		const EXPECTED = ['Elderberry', 'Mulberry'];
 
 		const component = render(
 			<SearchListControl
-				instanceId={ 1 }
-				list={ list }
-				selected={ [] }
-				onChange={ noop }
-				debouncedSpeak={ noop }
+				instanceId={1}
+				list={list}
+				selected={[]}
+				onChange={noop}
+				debouncedSpeak={noop}
 			/>
 		);
 
 		fireEvent.change(
-			component.container.querySelector( SELECTORS.searchInput ),
+			component.container.querySelector(SELECTORS.searchInput),
 			{ target: { value: 'BeRrY' } }
 		);
 
 		const listItems = Array.from(
-			component.container.querySelectorAll( SELECTORS.listItems )
-		).map( ( $el ) => $el.textContent );
+			component.container.querySelectorAll(SELECTORS.listItems)
+		).map(($el) => $el.textContent);
 
-		expect( listItems ).toEqual( expect.arrayContaining( EXPECTED ) );
-	} );
+		expect(listItems).toEqual(expect.arrayContaining(EXPECTED));
+	});
 
-	test( 'should render a search box with a search term, and no matching options', () => {
+	test('should render a search box with a search term, and no matching options', () => {
 		const component = render(
 			<SearchListControl
-				instanceId={ 1 }
-				list={ list }
+				instanceId={1}
+				list={list}
 				search="no matches"
-				selected={ [] }
-				onChange={ noop }
-				debouncedSpeak={ noop }
+				selected={[]}
+				onChange={noop}
+				debouncedSpeak={noop}
 			/>
 		);
-		expect( component ).toMatchSnapshot();
-	} );
+		expect(component).toMatchSnapshot();
+	});
 
-	test( 'should render a search box and list of options, with a custom search input message', () => {
+	test('should render a search box and list of options, with a custom search input message', () => {
 		const messages = { search: 'Testing search label' };
 		const component = render(
 			<SearchListControl
-				instanceId={ 1 }
-				list={ list }
-				selected={ [] }
-				onChange={ noop }
-				messages={ messages }
+				instanceId={1}
+				list={list}
+				selected={[]}
+				onChange={noop}
+				messages={messages}
 			/>
 		);
-		expect( component ).toMatchSnapshot();
-	} );
+		expect(component).toMatchSnapshot();
+	});
 
-	test( 'should render a search box and list of options, with a custom render callback for each item', () => {
-		const renderItem = ( { item } ) => (
-			<div key={ item.id }>{ item.name }!</div>
-		); // eslint-disable-line
+	test('should render a search box and list of options, with a custom render callback for each item', () => {
+		const renderItem = ({ item }) => <div key={item.id}>{item.name}!</div>; // eslint-disable-line
 		const component = render(
 			<SearchListControl
-				instanceId={ 1 }
-				list={ list }
-				selected={ [] }
-				onChange={ noop }
-				renderItem={ renderItem }
+				instanceId={1}
+				list={list}
+				selected={[]}
+				onChange={noop}
+				renderItem={renderItem}
 			/>
 		);
-		expect( component ).toMatchSnapshot();
-	} );
+		expect(component).toMatchSnapshot();
+	});
 
-	test( 'should render a search box and list of hierarchical options', () => {
+	test('should render a search box and list of hierarchical options', () => {
 		const component = render(
 			<SearchListControl
 				isCompact
 				isHierarchical
-				instanceId={ 1 }
-				isSingle={ false }
-				list={ hierarchicalList }
-				onChange={ noop }
-				selected={ [] }
-				type={ 'text' }
+				instanceId={1}
+				isSingle={false}
+				list={hierarchicalList}
+				onChange={noop}
+				selected={[]}
+				type={'text'}
 			/>
 		);
-		expect( component ).toMatchSnapshot();
-	} );
-} );
+		expect(component).toMatchSnapshot();
+	});
+});

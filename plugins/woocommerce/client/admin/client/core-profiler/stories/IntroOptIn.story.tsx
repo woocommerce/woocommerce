@@ -9,8 +9,8 @@ import { WithSetupWizardLayout } from './WithSetupWizardLayout';
 
 export const Basic = () => (
 	<IntroOptIn
-		sendEvent={ () => {} }
-		navigationProgress={ 20 }
+		sendEvent={() => {}}
+		navigationProgress={20}
 		context={
 			{
 				optInDataSharing: true,
@@ -23,5 +23,5 @@ export const Basic = () => (
 export default {
 	title: 'WooCommerce Admin/Core Profiler/IntroOptIn',
 	component: IntroOptIn,
-	decorators: [ WithSetupWizardLayout ],
+	decorators: [WithSetupWizardLayout],
 };

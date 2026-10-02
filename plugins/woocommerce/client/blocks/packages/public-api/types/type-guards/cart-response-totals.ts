@@ -8,12 +8,12 @@ import { isObject } from './object';
 // This is useful because we want to check that the keys object ALWAYS contains all the object's keys.
 // https://stackoverflow.com/questions/52028791/make-a-generic-type-arraykeyof-t-require-all-keys-of-t
 
-type CartResponseTotalsKeys = Record< keyof CartResponseTotals, 0 >;
+type CartResponseTotalsKeys = Record<keyof CartResponseTotals, 0>;
 
 export const isCartResponseTotals = (
 	value: unknown
 ): value is CartResponseTotals => {
-	if ( ! isObject( value ) ) {
+	if (!isObject(value)) {
 		return false;
 	}
 
@@ -38,5 +38,5 @@ export const isCartResponseTotals = (
 		currency_suffix: 0,
 	};
 
-	return Object.keys( keys ).every( ( key ) => key in value );
+	return Object.keys(keys).every((key) => key in value);
 };

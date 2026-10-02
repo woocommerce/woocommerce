@@ -6,17 +6,17 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { createInterpolateElement } from '@wordpress/element';
 
 export default {
-	noThanks: __( 'No thanks', 'woocommerce' ),
-	heading: ( firstName?: string ) =>
+	noThanks: __('No thanks', 'woocommerce'),
+	heading: (firstName?: string) =>
 		sprintf(
 			/* translators: %s: first name of the merchant, if it exists. */
 			__(
 				'Hi%s, run your business and manage your payments all in one place, with no setup costs or monthly fees.',
 				'woocommerce'
 			),
-			firstName ? ` ${ firstName }` : ''
+			firstName ? ` ${firstName}` : ''
 		),
-	limitedTimeOffer: __( 'Limited time offer', 'woocommerce' ),
+	limitedTimeOffer: __('Limited time offer', 'woocommerce'),
 	TosAndPp: createInterpolateElement(
 		sprintf(
 			/* translators: 1: Payment provider name (e.g., WooPayments) */
@@ -81,16 +81,13 @@ export default {
 			),
 		}
 	),
-	termsAndConditions: ( url: string ) =>
+	termsAndConditions: (url: string) =>
 		createInterpolateElement(
-			__(
-				'*See <a>Terms and Conditions</a> for details.',
-				'woocommerce'
-			),
+			__('*See <a>Terms and Conditions</a> for details.', 'woocommerce'),
 			{
 				a: (
 					// eslint-disable-next-line jsx-a11y/anchor-has-content
-					<a href={ url } target="_blank" rel="noopener noreferrer" />
+					<a href={url} target="_blank" rel="noopener noreferrer" />
 				),
 			}
 		),
@@ -102,12 +99,12 @@ export default {
 		),
 		'WooPayments'
 	),
-	andMore: __( '& more', 'woocommerce' ),
-	learnMore: __( 'Learn more', 'woocommerce' ),
+	andMore: __('& more', 'woocommerce'),
+	learnMore: __('Learn more', 'woocommerce'),
 	survey: {
 		title: sprintf(
 			/* translators: %s: Payment provider name (e.g., WooPayments) */
-			__( 'No thanks, I don’t want %s', 'woocommerce' ),
+			__('No thanks, I don’t want %s', 'woocommerce'),
 			'WooPayments'
 		),
 		intro: sprintf(
@@ -132,7 +129,7 @@ export default {
 		),
 		moreInfoLabel: sprintf(
 			/* translators: %s: Payment provider name (e.g., WooPayments) */
-			__( 'I need more information about %s', 'woocommerce' ),
+			__('I need more information about %s', 'woocommerce'),
 			'WooPayments'
 		),
 		anotherTimeLabel: __(
@@ -143,26 +140,23 @@ export default {
 			'It’s something else (Please share below)',
 			'woocommerce'
 		),
-		commentsLabel: __( 'Comments (Optional)', 'woocommerce' ),
+		commentsLabel: __('Comments (Optional)', 'woocommerce'),
 		cancelButton: sprintf(
 			/* translators: %s: Payment provider name (e.g., WooPayments) */
-			__( 'Just dismiss %s', 'woocommerce' ),
+			__('Just dismiss %s', 'woocommerce'),
 			'WooPayments'
 		),
-		submitButton: __( 'Dismiss and send feedback', 'woocommerce' ),
+		submitButton: __('Dismiss and send feedback', 'woocommerce'),
 	},
 	faq: {
-		haveQuestions: __( 'Have questions?', 'woocommerce' ),
-		getInTouch: __( 'Get in touch', 'woocommerce' ),
+		haveQuestions: __('Have questions?', 'woocommerce'),
+		getInTouch: __('Get in touch', 'woocommerce'),
 	},
 	apms: {
-		addMoreWaysToPay: __(
-			'Add more ways for buyers to pay',
-			'woocommerce'
-		),
-		seeMore: __( 'See more', 'woocommerce' ),
+		addMoreWaysToPay: __('Add more ways for buyers to pay', 'woocommerce'),
+		seeMore: __('See more', 'woocommerce'),
 		paypal: {
-			title: __( 'PayPal Payments', 'woocommerce' ),
+			title: __('PayPal Payments', 'woocommerce'),
 			description: sprintf(
 				/* translators: %s: Payment provider name (e.g., WooPayments) */
 				__(
@@ -173,7 +167,7 @@ export default {
 			),
 		},
 		amazonpay: {
-			title: __( 'Amazon Pay', 'woocommerce' ),
+			title: __('Amazon Pay', 'woocommerce'),
 			description: sprintf(
 				/* translators: %s: Payment provider name (e.g., WooPayments) */
 				__(
@@ -184,7 +178,7 @@ export default {
 			),
 		},
 		klarna: {
-			title: __( 'Klarna', 'woocommerce' ),
+			title: __('Klarna', 'woocommerce'),
 			description: sprintf(
 				/* translators: %s: Payment provider name (e.g., WooPayments) */
 				__(
@@ -195,7 +189,7 @@ export default {
 			),
 		},
 		affirm: {
-			title: __( 'Affirm', 'woocommerce' ),
+			title: __('Affirm', 'woocommerce'),
 			description: sprintf(
 				/* translators: %s: Payment provider name (e.g., WooPayments) */
 				__(
@@ -205,8 +199,8 @@ export default {
 				'WooPayments'
 			),
 		},
-		installText: ( extensionsString: string ) => {
-			const extensionsNumber = extensionsString.split( ', ' ).length;
+		installText: (extensionsString: string) => {
+			const extensionsNumber = extensionsString.split(', ').length;
 			return createInterpolateElement(
 				sprintf(
 					/* translators: 1: Payment provider name (e.g., WooPayments), 2: names of the installed extensions */
@@ -224,6 +218,6 @@ export default {
 				}
 			);
 		},
-		installTextPost: __( 'extension in your store.', 'woocommerce' ),
+		installTextPost: __('extension in your store.', 'woocommerce'),
 	},
 };

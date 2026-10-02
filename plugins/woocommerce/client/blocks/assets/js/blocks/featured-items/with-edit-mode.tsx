@@ -42,24 +42,23 @@ type EditModeRequiredAttributes = {
 	productId?: number;
 };
 
-interface EditModeRequiredProps< T > {
-	attributes: EditModeRequiredAttributes & EditorBlock< T >[ 'attributes' ];
+interface EditModeRequiredProps<T> {
+	attributes: EditModeRequiredAttributes & EditorBlock<T>['attributes'];
 	clientId: string;
 	effectiveCategoryId?: number;
-	debouncedSpeak: ( label: string ) => void;
-	setAttributes: ( attrs: Partial< EditModeRequiredAttributes > ) => void;
+	debouncedSpeak: (label: string) => void;
+	setAttributes: (attrs: Partial<EditModeRequiredAttributes>) => void;
 	triggerUrlUpdate: () => void;
 	isLoading: boolean;
 	error?: ErrorObject | null;
 }
 
-type EditModeProps< T extends EditorBlock< T > > = T &
-	EditModeRequiredProps< T >;
+type EditModeProps<T extends EditorBlock<T>> = T & EditModeRequiredProps<T>;
 
 export const withEditMode =
-	( { description, editLabel, icon, label }: EditModeConfiguration ) =>
-	< T extends EditorBlock< T > >( Component: ComponentType< T > ) =>
-	( props: EditModeProps< T > ) => {
+	({ description, editLabel, icon, label }: EditModeConfiguration) =>
+	<T extends EditorBlock<T>>(Component: ComponentType<T>) =>
+	(props: EditModeProps<T>) => {
 		const {
 			attributes,
 			effectiveCategoryId,
@@ -71,34 +70,32 @@ export const withEditMode =
 			isLoading: isItemLoading,
 		} = props;
 
-		const className = getClassPrefixFromName( name );
-		const [ selectedOptions, setSelectedOptions ] = useState< {
+		const className = getClassPrefixFromName(name);
+		const [selectedOptions, setSelectedOptions] = useState<{
 			productId?: number;
 			categoryId?: number;
 			mediaId: number;
 			mediaSrc: string;
-		} >();
+		}>();
 
 		const hasFeaturedItemId =
-			( name === BLOCK_NAMES.featuredProduct && attributes.productId ) ||
-			( name === BLOCK_NAMES.featuredCategory &&
-				( attributes.categoryId || effectiveCategoryId ) );
-		const canEditItem = ! (
+			(name === BLOCK_NAMES.featuredProduct && attributes.productId) ||
+			(name === BLOCK_NAMES.featuredCategory &&
+				(attributes.categoryId || effectiveCategoryId));
+		const canEditItem = !(
 			name === BLOCK_NAMES.featuredCategory &&
-			! attributes.categoryId &&
+			!attributes.categoryId &&
 			effectiveCategoryId
 		);
 
 		// Only show edit mode for newly inserted blocks without existing selection
-		const [ editMode, setEditMode ] = useState< boolean >(
-			! hasFeaturedItemId
-		);
+		const [editMode, setEditMode] = useState<boolean>(!hasFeaturedItemId);
 
 		const onDone = () => {
-			if ( selectedOptions ) {
-				setAttributes( selectedOptions );
-				setEditMode( false );
-				debouncedSpeak( editLabel );
+			if (selectedOptions) {
+				setAttributes(selectedOptions);
+				setEditMode(false);
+				debouncedSpeak(editLabel);
 			}
 		};
 
@@ -111,98 +108,98 @@ export const withEditMode =
 			status,
 			isDeleted,
 			isLoading: isStatusLoading,
-		} = useFeaturedItemStatus( {
+		} = useFeaturedItemStatus({
 			itemId,
 			itemType: name,
-		} );
+		});
 		const isLoading = isItemLoading || isStatusLoading;
 
 		const isPreviewMode = usePreviewMode();
 
-		useEffect( () => {
-			if ( isPreviewMode || ! canEditItem ) {
+		useEffect(() => {
+			if (isPreviewMode || !canEditItem) {
 				return;
 			}
 
-			if ( ! isLoading ) {
+			if (!isLoading) {
 				const currEditModeValue =
-					( name === BLOCK_NAMES.featuredProduct &&
-						status !== 'publish' ) ||
+					(name === BLOCK_NAMES.featuredProduct &&
+						status !== 'publish') ||
 					isDeleted;
 
-				if ( currEditModeValue ) {
-					setEditMode( currEditModeValue );
+				if (currEditModeValue) {
+					setEditMode(currEditModeValue);
 				}
 			}
-		}, [ status, isDeleted, name, isLoading, isPreviewMode, canEditItem ] );
+		}, [status, isDeleted, name, isLoading, isPreviewMode, canEditItem]);
 
-		if ( editMode && canEditItem ) {
+		if (editMode && canEditItem) {
 			return (
 				<Placeholder
-					icon={ <Icon icon={ icon } /> }
-					label={ label }
-					className={ className }
+					icon={<Icon icon={icon} />}
+					label={label}
+					className={className}
 				>
 					<HStack alignment="center">
-						{ isDeleted ? (
+						{isDeleted ? (
 							<Icon
-								icon={ info }
+								icon={info}
 								className="wc-blocks-featured-items__orange-info-icon"
 							/>
 						) : (
-							<Icon icon={ info } />
-						) }
+							<Icon icon={info} />
+						)}
 						<Text>
-							{ isDeleted
-								? getInvalidItemDescription( name )
-								: description }
+							{isDeleted
+								? getInvalidItemDescription(name)
+								: description}
 						</Text>
 					</HStack>
-					<div className={ `${ className }__selection` }>
-						{ name === BLOCK_NAMES.featuredCategory && (
+					<div className={`${className}__selection`}>
+						{name === BLOCK_NAMES.featuredCategory && (
 							<ProductCategoryControl
 								selected={
 									selectedOptions?.categoryId
-										? [ selectedOptions.categoryId ]
+										? [selectedOptions.categoryId]
 										: []
 								}
-								onChange={ (
+								onChange={(
 									value: ProductCategoryResponseItem[] = []
 								) => {
-									const id = value[ 0 ] ? value[ 0 ].id : 0;
-									setSelectedOptions( {
+									const id = value[0] ? value[0].id : 0;
+									setSelectedOptions({
 										categoryId: id,
 										mediaId: 0,
 										mediaSrc: '',
-									} );
+									});
 									triggerUrlUpdate();
-								} }
+								}}
 								isSingle
 							/>
-						) }
-						{ name === BLOCK_NAMES.featuredProduct && (
+						)}
+						{name === BLOCK_NAMES.featuredProduct && (
 							<ProductControl
 								selected={
 									selectedOptions?.productId
-										? [ selectedOptions.productId ]
+										? [selectedOptions.productId]
 										: []
 								}
 								showVariations
-								onChange={ (
+								onChange={(
 									value: ProductResponseItem[] = []
 								) => {
-									const id = value[ 0 ] ? value[ 0 ].id : 0;
-									setSelectedOptions( {
+									const id = value[0] ? value[0].id : 0;
+									setSelectedOptions({
 										productId: id,
 										mediaId: 0,
 										mediaSrc: '',
-									} );
+									});
 									triggerUrlUpdate();
-								} }
+								}}
 							/>
-						) }
-						<Button variant="primary" onClick={ onDone }>
-							{ __( 'Done', 'woocommerce' ) }
+						)}
+						<Button variant="primary" onClick={onDone}>
+							{__('Done', 'woocommerce')}
 						</Button>
 					</div>
 				</Placeholder>
@@ -211,11 +208,11 @@ export const withEditMode =
 
 		return (
 			<Component
-				{ ...props }
-				canEditItem={ canEditItem }
-				isLoading={ isLoading }
-				error={ isLoading ? null : error }
-				useEditMode={ [ editMode, setEditMode ] }
+				{...props}
+				canEditItem={canEditItem}
+				isLoading={isLoading}
+				error={isLoading ? null : error}
+				useEditMode={[editMode, setEditMode]}
 			/>
 		);
 	};

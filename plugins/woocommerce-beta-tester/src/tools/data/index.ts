@@ -14,12 +14,12 @@ import * as selectors from './selectors';
 import reducer from './reducer';
 import { STORE_KEY } from './constants';
 
-export const store = createReduxStore( STORE_KEY, {
+export const store = createReduxStore(STORE_KEY, {
 	reducer,
 	actions,
 	controls,
 	selectors,
 	resolvers,
-} );
+});
 
-register( store );
+register(store);

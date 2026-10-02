@@ -12,7 +12,7 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { SetupStepProps } from './setup';
 
-export const AutomatedTaxes = ( {
+export const AutomatedTaxes = ({
 	isPending,
 	onAutomate,
 	onManual,
@@ -20,7 +20,7 @@ export const AutomatedTaxes = ( {
 }: Pick<
 	SetupStepProps,
 	'isPending' | 'onAutomate' | 'onManual' | 'onDisable'
-> ) => {
+>) => {
 	return (
 		<div className="woocommerce-task-tax__success">
 			<span
@@ -31,10 +31,10 @@ export const AutomatedTaxes = ( {
 				🎊
 			</span>
 			<H id="woocommerce-task-tax__success-message">
-				{ __( 'Good news!', 'woocommerce' ) }
+				{__('Good news!', 'woocommerce')}
 			</H>
 			<p>
-				{ interpolateComponents( {
+				{interpolateComponents({
 					mixedString: __(
 						'{{strong}}WooCommerce Tax{{/strong}} can automate your sales tax calculations for you.',
 						'woocommerce'
@@ -42,34 +42,34 @@ export const AutomatedTaxes = ( {
 					components: {
 						strong: <strong />,
 					},
-				} ) }
+				})}
 			</p>
 			<Button
 				isPrimary
-				isBusy={ isPending }
-				onClick={ () => {
-					recordEvent( 'tasklist_tax_setup_automated_proceed', {
+				isBusy={isPending}
+				onClick={() => {
+					recordEvent('tasklist_tax_setup_automated_proceed', {
 						setup_automatically: true,
-					} );
+					});
 					onAutomate();
-				} }
+				}}
 			>
-				{ __( 'Yes please', 'woocommerce' ) }
+				{__('Yes please', 'woocommerce')}
 			</Button>
 			<Button
-				disabled={ isPending }
+				disabled={isPending}
 				isTertiary
-				onClick={ () => {
-					recordEvent( 'tasklist_tax_setup_automated_proceed', {
+				onClick={() => {
+					recordEvent('tasklist_tax_setup_automated_proceed', {
 						setup_automatically: false,
-					} );
+					});
 					onManual();
-				} }
+				}}
 			>
-				{ __( "No thanks, I'll set up manually", 'woocommerce' ) }
+				{__("No thanks, I'll set up manually", 'woocommerce')}
 			</Button>
-			<Button disabled={ isPending } isTertiary onClick={ onDisable }>
-				{ __( "I don't charge sales tax", 'woocommerce' ) }
+			<Button disabled={isPending} isTertiary onClick={onDisable}>
+				{__("I don't charge sales tax", 'woocommerce')}
 			</Button>
 		</div>
 	);

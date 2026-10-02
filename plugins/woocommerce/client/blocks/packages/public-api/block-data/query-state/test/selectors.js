@@ -8,21 +8,21 @@ import deepFreeze from 'deep-freeze';
  */
 import { getValueForQueryKey, getValueForQueryContext } from '../selectors';
 
-const testState = deepFreeze( {
-	contexta: JSON.stringify( {
+const testState = deepFreeze({
+	contexta: JSON.stringify({
 		foo: 'bar',
 		cheese: 'pizza',
-	} ),
-} );
+	}),
+});
 
-describe( 'getValueForQueryKey', () => {
+describe('getValueForQueryKey', () => {
 	it(
 		'returns provided default value when there is no state for the ' +
 			'given context',
 		() => {
-			expect(
-				getValueForQueryKey( testState, 'invalid', 'foo', 42 )
-			).toBe( 42 );
+			expect(getValueForQueryKey(testState, 'invalid', 'foo', 42)).toBe(
+				42
+			);
 		}
 	);
 	it(
@@ -30,34 +30,32 @@ describe( 'getValueForQueryKey', () => {
 			'given context and queryKey',
 		() => {
 			expect(
-				getValueForQueryKey( testState, 'contexta', 'pizza', 42 )
-			).toBe( 42 );
+				getValueForQueryKey(testState, 'contexta', 'pizza', 42)
+			).toBe(42);
 		}
 	);
-	it( 'returns expected value when context and queryKey exist', () => {
-		expect( getValueForQueryKey( testState, 'contexta', 'foo', 42 ) ).toBe(
+	it('returns expected value when context and queryKey exist', () => {
+		expect(getValueForQueryKey(testState, 'contexta', 'foo', 42)).toBe(
 			'bar'
 		);
-	} );
-} );
+	});
+});
 
-describe( 'getValueForQueryContext', () => {
+describe('getValueForQueryContext', () => {
 	it(
 		'returns provided default value when there is no state for the ' +
 			'given context',
 		() => {
-			expect( getValueForQueryContext( testState, 'invalid', 42 ) ).toBe(
-				42
-			);
+			expect(getValueForQueryContext(testState, 'invalid', 42)).toBe(42);
 		}
 	);
 	it(
 		'returns expected value when selecting a context that exists in ' +
 			'state',
 		() => {
-			expect(
-				getValueForQueryContext( testState, 'contexta', 42 )
-			).toEqual( JSON.parse( testState.contexta ) );
+			expect(getValueForQueryContext(testState, 'contexta', 42)).toEqual(
+				JSON.parse(testState.contexta)
+			);
 		}
 	);
-} );
+});

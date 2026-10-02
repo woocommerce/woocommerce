@@ -11,8 +11,8 @@ import metadata from './block.json';
 import Edit from './edit';
 import Save from './save';
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	edit: Edit,
 	icon: productFilterOptions,
 	save: Save,
-} );
+});

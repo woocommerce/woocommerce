@@ -34,21 +34,21 @@ export const emitEvent = async (
 	observers: EventObserversType,
 	eventType: string,
 	data: unknown
-): Promise< unknown > => {
-	const observersByType = getObserversByPriority( observers, eventType );
+): Promise<unknown> => {
+	const observersByType = getObserversByPriority(observers, eventType);
 	const observerResponses = [];
-	for ( const observer of observersByType ) {
+	for (const observer of observersByType) {
 		try {
 			const observerResponse = await Promise.resolve(
-				observer.callback( data )
+				observer.callback(data)
 			);
-			if ( typeof observerResponse === 'object' ) {
-				observerResponses.push( observerResponse );
+			if (typeof observerResponse === 'object') {
+				observerResponses.push(observerResponse);
 			}
-		} catch ( e ) {
+		} catch (e) {
 			// we don't care about errors blocking execution, but will console.error for troubleshooting.
 			// eslint-disable-next-line no-console
-			console.error( e );
+			console.error(e);
 		}
 	}
 	return observerResponses.length ? observerResponses : true;
@@ -72,33 +72,33 @@ export const emitEventWithAbort = async (
 	observers: EventObserversType,
 	eventType: string,
 	data: unknown
-): Promise< ObserverResponse[] > => {
+): Promise<ObserverResponse[]> => {
 	const observerResponses: ObserverResponse[] = [];
-	const observersByType = getObserversByPriority( observers, eventType );
-	for ( const observer of observersByType ) {
+	const observersByType = getObserversByPriority(observers, eventType);
+	for (const observer of observersByType) {
 		try {
-			const response = await Promise.resolve( observer.callback( data ) );
-			if ( ! isObserverResponse( response ) ) {
+			const response = await Promise.resolve(observer.callback(data));
+			if (!isObserverResponse(response)) {
 				continue;
 			}
-			if ( ! response.hasOwnProperty( 'type' ) ) {
+			if (!response.hasOwnProperty('type')) {
 				throw new Error(
 					'Returned objects from event emitter observers must return an object with a type property'
 				);
 			}
-			if ( isErrorResponse( response ) || isFailResponse( response ) ) {
-				observerResponses.push( response );
+			if (isErrorResponse(response) || isFailResponse(response)) {
+				observerResponses.push(response);
 				// early abort.
 				return observerResponses;
 			}
 			// all potential abort conditions have been considered push the
 			// response to the array.
-			observerResponses.push( response );
-		} catch ( e ) {
+			observerResponses.push(response);
+		} catch (e) {
 			// We don't handle thrown errors but just console.log for troubleshooting.
 			// eslint-disable-next-line no-console
-			console.error( e );
-			observerResponses.push( { type: responseTypes.ERROR } );
+			console.error(e);
+			observerResponses.push({ type: responseTypes.ERROR });
 			return observerResponses;
 		}
 	}

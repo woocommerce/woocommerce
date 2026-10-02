@@ -13,7 +13,7 @@ $task-alert-yellow: #f0b849;
 	}
 
 	&::before {
-		content: '';
+		content: "";
 		position: absolute;
 		top: 0;
 		left: 0;
@@ -133,7 +133,8 @@ $task-alert-yellow: #f0b849;
 		background-color: var(--Alias-bg-bg-surface-warning, #fff2d7);
 		border-radius: 4px;
 		color: var(--Alias-text-text-warning, #4d3716);
-		padding: var(--grid-unit-05, $gap-smallest) var(--grid-unit-10, $gap-smaller);
+		padding: var(--grid-unit-05, $gap-smallest)
+			var(--grid-unit-10, $gap-smaller);
 		font-size: 12px;
 		font-style: normal;
 		font-weight: 400;

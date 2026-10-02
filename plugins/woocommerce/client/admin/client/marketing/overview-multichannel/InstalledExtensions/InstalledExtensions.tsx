@@ -22,78 +22,78 @@ export const InstalledExtensions = () => {
 	const { data, activatingPlugins, activateInstalledPlugin } =
 		useInstalledPluginsWithoutChannels();
 
-	if ( data.length === 0 ) {
+	if (data.length === 0) {
 		return null;
 	}
 
-	const getButton = ( plugin: InstalledPlugin ) => {
-		if ( plugin.status === 'installed' ) {
+	const getButton = (plugin: InstalledPlugin) => {
+		if (plugin.status === 'installed') {
 			return (
 				<Button
 					variant="secondary"
-					isBusy={ activatingPlugins.includes( plugin.slug ) }
-					disabled={ activatingPlugins.includes( plugin.slug ) }
-					onClick={ () => {
-						recordEvent( 'marketing_installed_activate', {
+					isBusy={activatingPlugins.includes(plugin.slug)}
+					disabled={activatingPlugins.includes(plugin.slug)}
+					onClick={() => {
+						recordEvent('marketing_installed_activate', {
 							name: plugin.name,
-						} );
-						activateInstalledPlugin( plugin.slug );
-					} }
+						});
+						activateInstalledPlugin(plugin.slug);
+					}}
 				>
-					{ __( 'Activate', 'woocommerce' ) }
+					{__('Activate', 'woocommerce')}
 				</Button>
 			);
 		}
 
-		if ( plugin.status === 'activated' ) {
+		if (plugin.status === 'activated') {
 			return (
 				<Button
 					variant="primary"
-					href={ plugin.settingsUrl }
-					onClick={ () => {
-						recordEvent( 'marketing_installed_finish_setup', {
+					href={plugin.settingsUrl}
+					onClick={() => {
+						recordEvent('marketing_installed_finish_setup', {
 							name: plugin.name,
-						} );
-					} }
+						});
+					}}
 				>
-					{ __( 'Finish setup', 'woocommerce' ) }
+					{__('Finish setup', 'woocommerce')}
 				</Button>
 			);
 		}
 
-		if ( plugin.status === 'configured' ) {
+		if (plugin.status === 'configured') {
 			return (
 				<Button
 					variant="secondary"
-					href={ plugin.dashboardUrl || plugin.settingsUrl }
-					onClick={ () => {
-						recordEvent( 'marketing_installed_options', {
+					href={plugin.dashboardUrl || plugin.settingsUrl}
+					onClick={() => {
+						recordEvent('marketing_installed_options', {
 							name: plugin.name,
 							link: 'manage',
-						} );
-					} }
+						});
+					}}
 				>
-					{ __( 'Manage', 'woocommerce' ) }
+					{__('Manage', 'woocommerce')}
 				</Button>
 			);
 		}
 	};
 
 	return (
-		<CollapsibleCard header={ __( 'Installed extensions', 'woocommerce' ) }>
-			{ data.map( ( el, idx ) => {
+		<CollapsibleCard header={__('Installed extensions', 'woocommerce')}>
+			{data.map((el, idx) => {
 				return (
-					<Fragment key={ el.slug }>
+					<Fragment key={el.slug}>
 						<PluginCardBody
-							icon={ <ProductIcon product={ el.slug } /> }
-							name={ el.name }
-							description={ el.description }
-							button={ getButton( el ) }
+							icon={<ProductIcon product={el.slug} />}
+							name={el.name}
+							description={el.description}
+							button={getButton(el)}
 						/>
-						{ idx !== data.length - 1 && <CardDivider /> }
+						{idx !== data.length - 1 && <CardDivider />}
 					</Fragment>
 				);
-			} ) }
+			})}
 		</CollapsibleCard>
 	);
 };

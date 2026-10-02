@@ -9,11 +9,11 @@ import { CheckboxControl, PanelBody } from '@wordpress/components';
  */
 import { QueryControlProps, RelatedBy, CoreFilterNames } from '../../types';
 
-const RelatedByControl = ( {
+const RelatedByControl = ({
 	query,
 	setQueryAttribute,
 	trackInteraction,
-}: QueryControlProps ) => {
+}: QueryControlProps) => {
 	const relatedBy = query?.relatedBy as RelatedBy;
 
 	const handleRelatedByChange = (
@@ -22,35 +22,35 @@ const RelatedByControl = ( {
 	) => {
 		const newRelatedBy = {
 			...relatedBy,
-			[ type ]: value,
+			[type]: value,
 		};
 
-		setQueryAttribute( {
+		setQueryAttribute({
 			relatedBy: newRelatedBy,
-		} );
+		});
 
-		trackInteraction( CoreFilterNames.RELATED_BY );
+		trackInteraction(CoreFilterNames.RELATED_BY);
 	};
 
 	return (
-		<PanelBody title={ __( 'Related by', 'woocommerce' ) }>
+		<PanelBody title={__('Related by', 'woocommerce')}>
 			<div className="wc-block-editor-product-collection-inspector-controls__relate-by">
 				<CheckboxControl
 					__nextHasNoMarginBottom
-					label={ __( 'Categories', 'woocommerce' ) }
-					checked={ relatedBy?.categories }
-					onChange={ ( value ) => {
-						handleRelatedByChange( value, 'categories' );
-					} }
+					label={__('Categories', 'woocommerce')}
+					checked={relatedBy?.categories}
+					onChange={(value) => {
+						handleRelatedByChange(value, 'categories');
+					}}
 				/>
 
 				<CheckboxControl
 					__nextHasNoMarginBottom
-					label={ __( 'Tags', 'woocommerce' ) }
-					checked={ relatedBy?.tags }
-					onChange={ ( value ) => {
-						handleRelatedByChange( value, 'tags' );
-					} }
+					label={__('Tags', 'woocommerce')}
+					checked={relatedBy?.tags}
+					onChange={(value) => {
+						handleRelatedByChange(value, 'tags');
+					}}
 				/>
 			</div>
 		</PanelBody>

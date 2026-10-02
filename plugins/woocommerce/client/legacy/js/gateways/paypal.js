@@ -1,4 +1,4 @@
-jQuery(function ($) {
+jQuery( function ( $ ) {
 	const containerSelector = 'paypal-standard-container';
 	let orderReceivedUrl = '';
 	let orderId = '';
@@ -25,10 +25,16 @@ jQuery(function ($) {
 		 */
 		const manageCartForProductPageOrder = async () => {
 			// Get product ID from the value of the "add-to-cart" button.
-			const addToCartBtn = document.querySelector('[name="add-to-cart"]');
+			const addToCartBtn = document.querySelector(
+				'[name="add-to-cart"]'
+			);
 			let productId = addToCartBtn ? addToCartBtn.value : null;
-			const variationIdField = document.querySelector( '[name="variation_id"]' );
-			const variationId = variationIdField ? variationIdField.value : null;
+			const variationIdField = document.querySelector(
+				'[name="variation_id"]'
+			);
+			const variationId = variationIdField
+				? variationIdField.value
+				: null;
 
 			if ( variationId ) {
 				productId = variationId;
@@ -48,7 +54,11 @@ jQuery(function ($) {
 			// Clearing the cart and re-adding the item causes the current WooCommerce draft order to be lost.
 			// If the user is re-opening the payment modal and has not changed anything, do nothing;
 			// we want to resume the existing draft order if the cart has not changed.
-			if ( orderId && productPageCartData.id === productId && productPageCartData.quantity === quantity ) {
+			if (
+				orderId &&
+				productPageCartData.id === productId &&
+				productPageCartData.quantity === quantity
+			) {
 				return true;
 			}
 
@@ -89,7 +99,7 @@ jQuery(function ($) {
 			};
 
 			return true;
-		}
+		};
 
 		const buttons = paypal.Buttons( {
 			appSwitchWhenAvailable: true,
@@ -116,7 +126,10 @@ jQuery(function ($) {
 
 					if ( ! responseData.order_id || ! responseData.order_key ) {
 						// eslint-disable-next-line no-console
-						console.error( 'Failed to create WooCommerce order', responseData );
+						console.error(
+							'Failed to create WooCommerce order',
+							responseData
+						);
 						return null;
 					}
 
@@ -131,7 +144,8 @@ jQuery(function ($) {
 							order_id: responseData.order_id,
 							order_key: responseData.order_key,
 							payment_source: data.paymentSource || '',
-							app_switch_request_origin: paypal_standard.app_switch_request_origin,
+							app_switch_request_origin:
+								paypal_standard.app_switch_request_origin,
 						},
 					} );
 
@@ -157,7 +171,9 @@ jQuery(function ($) {
 				if ( ! orderId ) {
 					// When coming back from App Switch, the order ID may not be available in the
 					// client-side data. Check the URL for the order ID.
-					orderId = new URLSearchParams( window.location.search ).get( 'order_id' );
+					orderId = new URLSearchParams( window.location.search ).get(
+						'order_id'
+					);
 				}
 
 				if ( ! orderId ) {
@@ -185,13 +201,19 @@ jQuery(function ($) {
 			},
 
 			onError: function ( error ) {
-				const sanitizedErrorMessage = $( '<div>' ).text( error.message || paypal_standard.generic_error_message ).html();
+				const sanitizedErrorMessage = $( '<div>' )
+					.text(
+						error.message || paypal_standard.generic_error_message
+					)
+					.html();
 				const messageWrapper =
 					'<ul class="woocommerce-error" role="alert"><li>' +
-						sanitizedErrorMessage +
+					sanitizedErrorMessage +
 					'</li></ul>';
 
-				const $noticeContainer = $( '.woocommerce-notices-wrapper' ).first();
+				const $noticeContainer = $(
+					'.woocommerce-notices-wrapper'
+				).first();
 
 				if ( ! $noticeContainer.length ) {
 					return;
@@ -202,8 +224,7 @@ jQuery(function ($) {
 				).remove();
 				$noticeContainer.prepend( messageWrapper );
 			},
-
-		});
+		} );
 
 		if ( buttons.hasReturned() ) {
 			// App Switch resume flow.
@@ -213,8 +234,7 @@ jQuery(function ($) {
 		buttons.render( container ).catch( function ( err ) {
 			// eslint-disable-next-line no-console
 			console.error( 'Failed to render PayPal buttons', err );
-		});
-
+		} );
 	}
 
 	// Align the PayPal buttons to the center of the container on classic checkout page.
@@ -232,10 +252,13 @@ jQuery(function ($) {
 	$( document.body ).on( 'updated_cart_totals', function () {
 		// If the container was replaced, re-render PayPal buttons
 		const buttonsContainer = document.getElementById( containerSelector );
-		if ( buttonsContainer && ! buttonsContainer.querySelector( 'iframe' ) ) {
+		if (
+			buttonsContainer &&
+			! buttonsContainer.querySelector( 'iframe' )
+		) {
 			renderButtons();
 		}
 	} );
 
 	renderButtons();
-});
+} );

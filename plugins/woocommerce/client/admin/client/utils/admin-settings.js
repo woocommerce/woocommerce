@@ -10,12 +10,12 @@ import { getSetting } from '@woocommerce/settings';
 import { createDeprecatedPropertiesProxy } from './index';
 
 // Remove mutable data from settings object to prevent access. Data stores should be used instead.
-const mutableSources = [ 'wcAdminSettings', 'preloadSettings' ];
-const adminSettings = getSetting( 'admin', {} );
-const ADMIN_SETTINGS_SOURCE = Object.keys( adminSettings ).reduce(
-	( source, key ) => {
-		if ( ! mutableSources.includes( key ) ) {
-			source[ key ] = adminSettings[ key ];
+const mutableSources = ['wcAdminSettings', 'preloadSettings'];
+const adminSettings = getSetting('admin', {});
+const ADMIN_SETTINGS_SOURCE = Object.keys(adminSettings).reduce(
+	(source, key) => {
+		if (!mutableSources.includes(key)) {
+			source[key] = adminSettings[key];
 		}
 		return source;
 	},
@@ -54,10 +54,10 @@ export const deprecatedAdminProperties = {
 export function getAdminSetting(
 	name,
 	fallback = false,
-	filter = ( val ) => val,
+	filter = (val) => val,
 	deprecatedProperties = deprecatedAdminProperties
 ) {
-	if ( mutableSources.includes( name ) ) {
+	if (mutableSources.includes(name)) {
 		throw new Error(
 			__(
 				'Mutable settings should be accessed via data store.',
@@ -66,28 +66,25 @@ export function getAdminSetting(
 		);
 	}
 
-	const value = ADMIN_SETTINGS_SOURCE.hasOwnProperty( name )
-		? ADMIN_SETTINGS_SOURCE[ name ]
+	const value = ADMIN_SETTINGS_SOURCE.hasOwnProperty(name)
+		? ADMIN_SETTINGS_SOURCE[name]
 		: fallback;
-	const filtered = filter( value, fallback );
+	const filtered = filter(value, fallback);
 
 	// Return proxied object if the requested object has deprecated properties.
-	return deprecatedProperties?.[ name ] &&
+	return deprecatedProperties?.[name] &&
 		process.env.NODE_ENV === 'development'
-		? createDeprecatedPropertiesProxy(
-				filtered,
-				deprecatedProperties[ name ]
-		  )
+		? createDeprecatedPropertiesProxy(filtered, deprecatedProperties[name])
 		: filtered;
 }
 
-export const ADMIN_URL = getSetting( 'adminUrl' );
-export const COUNTRIES = getSetting( 'countries' );
-export const CURRENCY = getSetting( 'currency' );
-export const LOCALE = getSetting( 'locale' );
-export const SITE_TITLE = getSetting( 'siteTitle' );
-export const WC_ASSET_URL = getSetting( 'wcAssetUrl' );
-export const ORDER_STATUSES = getAdminSetting( 'orderStatuses' );
+export const ADMIN_URL = getSetting('adminUrl');
+export const COUNTRIES = getSetting('countries');
+export const CURRENCY = getSetting('currency');
+export const LOCALE = getSetting('locale');
+export const SITE_TITLE = getSetting('siteTitle');
+export const WC_ASSET_URL = getSetting('wcAssetUrl');
+export const ORDER_STATUSES = getAdminSetting('orderStatuses');
 
 /**
  * Sets a value to a property on the settings state.
@@ -104,8 +101,8 @@ export const ORDER_STATUSES = getAdminSetting( 'orderStatuses' );
  *                                           to sanitize the setting (eg.
  *                                           ensure it's a number)
  */
-export function setAdminSetting( name, value, filter = ( val ) => val ) {
-	if ( mutableSources.includes( name ) ) {
+export function setAdminSetting(name, value, filter = (val) => val) {
+	if (mutableSources.includes(name)) {
 		throw new Error(
 			__(
 				'Mutable settings should be mutated via data store.',
@@ -113,5 +110,5 @@ export function setAdminSetting( name, value, filter = ( val ) => val ) {
 			)
 		);
 	}
-	ADMIN_SETTINGS_SOURCE[ name ] = filter( value );
+	ADMIN_SETTINGS_SOURCE[name] = filter(value);
 }

@@ -13,16 +13,16 @@ import Block from './block';
  *
  * @param {*} props
  */
-const AllProductsFrontend = ( props ) => {
-	return <Block { ...props } />;
+const AllProductsFrontend = (props) => {
+	return <Block {...props} />;
 };
 
-const getProps = ( el ) => ( {
-	attributes: JSON.parse( el.dataset.attributes ),
-} );
+const getProps = (el) => ({
+	attributes: JSON.parse(el.dataset.attributes),
+});
 
-renderFrontend( {
+renderFrontend({
 	selector: '.wp-block-woocommerce-all-products',
 	Block: AllProductsFrontend,
 	getProps,
-} );
+});

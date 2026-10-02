@@ -15,19 +15,19 @@ import CartModal from '../../dashboard/components/cart-modal';
 import { getCategorizedOnboardingProducts } from '../../dashboard/utils';
 
 type PurchaseTaskItemProps = {
-	defaultTaskItem: React.ComponentType< {
+	defaultTaskItem: React.ComponentType<{
 		onClick: () => void;
-	} >;
+	}>;
 };
 
-const PurchaseTaskItem = ( { defaultTaskItem }: PurchaseTaskItemProps ) => {
-	const [ cartModalOpen, setCartModalOpen ] = useState( false );
+const PurchaseTaskItem = ({ defaultTaskItem }: PurchaseTaskItemProps) => {
+	const [cartModalOpen, setCartModalOpen] = useState(false);
 
 	const { installedPlugins, productTypes, profileItems } = useSelect(
-		( select ) => {
+		(select) => {
 			const { getProductTypes, getProfileItems } =
-				select( onboardingStore );
-			const { getInstalledPlugins } = select( pluginsStore );
+				select(onboardingStore);
+			const { getInstalledPlugins } = select(pluginsStore);
 
 			return {
 				installedPlugins: getInstalledPlugins(),
@@ -38,13 +38,13 @@ const PurchaseTaskItem = ( { defaultTaskItem }: PurchaseTaskItemProps ) => {
 		[]
 	);
 
-	const toggleCartModal = useCallback( () => {
-		if ( ! cartModalOpen ) {
-			recordEvent( 'tasklist_purchase_extensions' );
+	const toggleCartModal = useCallback(() => {
+		if (!cartModalOpen) {
+			recordEvent('tasklist_purchase_extensions');
 		}
 
-		setCartModalOpen( ! cartModalOpen );
-	}, [ cartModalOpen ] );
+		setCartModalOpen(!cartModalOpen);
+	}, [cartModalOpen]);
 
 	const groupedProducts = getCategorizedOnboardingProducts(
 		productTypes,
@@ -57,19 +57,19 @@ const PurchaseTaskItem = ( { defaultTaskItem }: PurchaseTaskItemProps ) => {
 	return (
 		<>
 			<DefaultTaskItem
-				onClick={ () => {
-					if ( remainingProducts.length ) {
+				onClick={() => {
+					if (remainingProducts.length) {
 						toggleCartModal();
 					}
-				} }
+				}}
 			/>
-			{ cartModalOpen && (
+			{cartModalOpen && (
 				// @ts-expect-error Todo: convert CartModal to TS
 				<CartModal
-					onClose={ () => toggleCartModal() }
-					onClickPurchaseLater={ () => toggleCartModal() }
+					onClose={() => toggleCartModal()}
+					onClickPurchaseLater={() => toggleCartModal()}
 				/>
-			) }
+			)}
 		</>
 	);
 };
@@ -77,14 +77,14 @@ const PurchaseTaskItem = ( { defaultTaskItem }: PurchaseTaskItemProps ) => {
 const PurchaseTaskItemFill = () => {
 	return (
 		<WooOnboardingTaskListItem id="purchase">
-			{ ( { defaultTaskItem } ) => (
-				<PurchaseTaskItem defaultTaskItem={ defaultTaskItem } />
-			) }
+			{({ defaultTaskItem }) => (
+				<PurchaseTaskItem defaultTaskItem={defaultTaskItem} />
+			)}
 		</WooOnboardingTaskListItem>
 	);
 };
 
-registerPlugin( 'woocommerce-admin-task-purchase', {
+registerPlugin('woocommerce-admin-task-purchase', {
 	scope: 'woocommerce-tasks',
 	render: PurchaseTaskItemFill,
-} );
+});

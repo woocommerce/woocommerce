@@ -45,7 +45,7 @@ type BlockContext = {
 	listItem?: RawShopperListItem;
 	htmlField?: 'price_html' | 'image_html';
 	// Item keys currently mid-mutation, used to disable per-row buttons.
-	pendingKeys: Record< string, true >;
+	pendingKeys: Record<string, true>;
 };
 
 type BlockStore = {
@@ -61,8 +61,8 @@ type BlockStore = {
 		currentItemVariationLabel: string;
 	};
 	actions: {
-		onClickRemove: () => Generator< unknown, void >;
-		onClickMoveToCart: () => Generator< unknown, void >;
+		onClickRemove: () => Generator<unknown, void>;
+		onClickMoveToCart: () => Generator<unknown, void>;
 	};
 	callbacks: {
 		updateInnerHtml: () => void;
@@ -71,77 +71,74 @@ type BlockStore = {
 };
 
 const { state: shopperListsState, actions: shopperListsActions } =
-	store< ShopperListsStore >(
+	store<ShopperListsStore>(
 		'woocommerce/shopper-lists',
 		{},
 		{ lock: universalLock }
 	);
 
-const { actions: cartActions } = store< WooCommerce >(
+const { actions: cartActions } = store<WooCommerce>(
 	'woocommerce',
 	{},
 	{ lock: universalLock }
 );
 
-const decodeEntities = ( encoded: string ): string => {
-	const txt = document.createElement( 'textarea' );
+const decodeEntities = (encoded: string): string => {
+	const txt = document.createElement('textarea');
 	txt.innerHTML = encoded;
 	return txt.value;
 };
 
-const formatVariationLabel = ( item: RawShopperListItem ): string => {
-	if ( ! item.variation || item.variation.length === 0 ) {
+const formatVariationLabel = (item: RawShopperListItem): string => {
+	if (!item.variation || item.variation.length === 0) {
 		return '';
 	}
 	return item.variation
 		.map(
-			( v ) =>
-				`${ decodeEntities( v.attribute ) }: ${ decodeEntities(
-					v.value
-				) }`
+			(v) => `${decodeEntities(v.attribute)}: ${decodeEntities(v.value)}`
 		)
-		.join( ', ' );
+		.join(', ');
 };
 
-const getList = ( slug: string ) => shopperListsState.lists[ slug ] ?? null;
+const getList = (slug: string) => shopperListsState.lists[slug] ?? null;
 
-store< BlockStore >(
+store<BlockStore>(
 	'woocommerce/saved-for-later',
 	{
 		state: {
 			get currentItems(): RawShopperListItem[] {
-				return getList( LIST_SLUG )?.items ?? [];
+				return getList(LIST_SLUG)?.items ?? [];
 			},
 
 			get isCurrentItemPending(): boolean {
-				const { listItem, pendingKeys } = getContext< BlockContext >();
-				return !! listItem && !! pendingKeys[ listItem.key ];
+				const { listItem, pendingKeys } = getContext<BlockContext>();
+				return !!listItem && !!pendingKeys[listItem.key];
 			},
 
 			get isEmpty(): boolean {
-				const list = getList( LIST_SLUG );
-				if ( ! list ) {
+				const list = getList(LIST_SLUG);
+				if (!list) {
 					return false;
 				}
-				const ctx = getContext< BlockContext >();
+				const ctx = getContext<BlockContext>();
 				return (
 					ctx.hasShownItems &&
-					! list.isLoading &&
+					!list.isLoading &&
 					list.items.length === 0
 				);
 			},
 
 			get isPriceHidden(): boolean {
-				const { listItem } = getContext< BlockContext >();
-				return ! listItem?.price_html;
+				const { listItem } = getContext<BlockContext>();
+				return !listItem?.price_html;
 			},
 
 			get isMoveToCartHidden(): boolean {
-				const { listItem } = getContext< BlockContext >();
-				if ( ! listItem ) {
+				const { listItem } = getContext<BlockContext>();
+				if (!listItem) {
 					return true;
 				}
-				return ! listItem.is_purchasable;
+				return !listItem.is_purchasable;
 			},
 
 			// `data-wp-text` writes its argument as text-content without
@@ -151,13 +148,13 @@ store< BlockStore >(
 			// raw context field so what the browser shows matches what
 			// PHP wrote on first paint.
 			get currentItemDisplayName(): string {
-				const { listItem } = getContext< BlockContext >();
-				return listItem ? decodeEntities( listItem.name ) : '';
+				const { listItem } = getContext<BlockContext>();
+				return listItem ? decodeEntities(listItem.name) : '';
 			},
 
 			get currentItemQuantityLabel(): string {
-				const { listItem } = getContext< BlockContext >();
-				if ( ! listItem ) {
+				const { listItem } = getContext<BlockContext>();
+				if (!listItem) {
 					return '';
 				}
 				const { quantityLabelTemplate } = getConfig(
@@ -165,13 +162,13 @@ store< BlockStore >(
 				) as SavedForLaterConfig;
 				return quantityLabelTemplate.replace(
 					'%d',
-					String( listItem.quantity )
+					String(listItem.quantity)
 				);
 			},
 
 			get currentItemRemoveLabel(): string {
-				const { listItem } = getContext< BlockContext >();
-				if ( ! listItem ) {
+				const { listItem } = getContext<BlockContext>();
+				if (!listItem) {
 					return '';
 				}
 				const { removeLabelTemplate } = getConfig(
@@ -179,39 +176,39 @@ store< BlockStore >(
 				) as SavedForLaterConfig;
 				return removeLabelTemplate.replace(
 					'%s',
-					decodeEntities( listItem.name )
+					decodeEntities(listItem.name)
 				);
 			},
 
 			get currentItemVariationLabel(): string {
-				const { listItem } = getContext< BlockContext >();
-				return listItem ? formatVariationLabel( listItem ) : '';
+				const { listItem } = getContext<BlockContext>();
+				return listItem ? formatVariationLabel(listItem) : '';
 			},
 		},
 
 		actions: {
-			*onClickRemove(): AsyncAction< void > {
-				const { listItem, pendingKeys } = getContext< BlockContext >();
-				if ( ! listItem || pendingKeys[ listItem.key ] ) {
+			*onClickRemove(): AsyncAction<void> {
+				const { listItem, pendingKeys } = getContext<BlockContext>();
+				if (!listItem || pendingKeys[listItem.key]) {
 					return;
 				}
-				pendingKeys[ listItem.key ] = true;
+				pendingKeys[listItem.key] = true;
 				try {
 					yield shopperListsActions.removeItem(
 						LIST_SLUG,
 						listItem.key
 					);
 				} finally {
-					delete pendingKeys[ listItem.key ];
+					delete pendingKeys[listItem.key];
 				}
 			},
 
-			*onClickMoveToCart(): AsyncAction< void > {
-				const { listItem, pendingKeys } = getContext< BlockContext >();
+			*onClickMoveToCart(): AsyncAction<void> {
+				const { listItem, pendingKeys } = getContext<BlockContext>();
 				if (
-					! listItem ||
-					! listItem.is_purchasable ||
-					pendingKeys[ listItem.key ]
+					!listItem ||
+					!listItem.is_purchasable ||
+					pendingKeys[listItem.key]
 				) {
 					return;
 				}
@@ -225,28 +222,28 @@ store< BlockStore >(
 				// Same swap mini-cart's `changeQuantity` does. Empty for
 				// simple products.
 				const variation = listItem.variation.map(
-					( { raw_attribute: rawAttribute, value, attribute } ) => ( {
+					({ raw_attribute: rawAttribute, value, attribute }) => ({
 						attribute: rawAttribute || attribute,
 						value,
-					} )
+					})
 				);
 				const isVariation = listItem.variation_id > 0;
 
-				pendingKeys[ listItem.key ] = true;
+				pendingKeys[listItem.key] = true;
 				try {
 					// `addCartItem` resolves an `AddCartItemOutcome` captured
 					// at the moment its own request settles (accepted or
 					// rejected), so `outcome.success` tells us directly
 					// whether to drop the source entry — no need to read or
 					// sum the cart ourselves.
-					const outcome = ( yield cartActions.addCartItem( {
+					const outcome = (yield cartActions.addCartItem({
 						id: listItem.id,
 						quantityToAdd: listItem.quantity,
 						type: isVariation ? 'variation' : 'simple',
-						...( isVariation && { variation } ),
-					} ) ) as AddCartItemOutcome;
+						...(isVariation && { variation }),
+					})) as AddCartItemOutcome;
 
-					if ( ! outcome.success ) {
+					if (!outcome.success) {
 						return;
 					}
 
@@ -255,7 +252,7 @@ store< BlockStore >(
 						listItem.key
 					);
 				} finally {
-					delete pendingKeys[ listItem.key ];
+					delete pendingKeys[listItem.key];
 				}
 			},
 		},
@@ -271,9 +268,9 @@ store< BlockStore >(
 			// back to `false`, which is what gives the "had-items → now-empty"
 			// transition we want during the session.
 			trackShownItems: () => {
-				const ctx = getContext< BlockContext >();
-				const list = getList( LIST_SLUG );
-				if ( list && list.items.length > 0 && ! ctx.hasShownItems ) {
+				const ctx = getContext<BlockContext>();
+				const list = getList(LIST_SLUG);
+				if (list && list.items.length > 0 && !ctx.hasShownItems) {
 					ctx.hasShownItems = true;
 				}
 			},
@@ -289,13 +286,13 @@ store< BlockStore >(
 			// and a clean swap when it has (e.g. after Remove shifts the
 			// next item into this slot).
 			updateInnerHtml: () => {
-				const { listItem, htmlField } = getContext< BlockContext >();
-				if ( ! listItem || ! htmlField ) {
+				const { listItem, htmlField } = getContext<BlockContext>();
+				if (!listItem || !htmlField) {
 					return;
 				}
 				swapPreformattedHtml(
 					getElement().ref,
-					listItem[ htmlField ],
+					listItem[htmlField],
 					LIST_ITEM_HTML_CONFIG
 				);
 			},

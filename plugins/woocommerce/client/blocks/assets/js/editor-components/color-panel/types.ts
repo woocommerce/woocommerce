@@ -1,18 +1,18 @@
 export interface ColorSetting {
 	colorValue: string | undefined;
-	onColorChange: ( value: string ) => void;
+	onColorChange: (value: string) => void;
 	label: string;
 	resetAllFilter: () => void;
 }
 
 export interface ColorAttributes {
-	[ key: string ]: {
-		[ key: string ]: string;
+	[key: string]: {
+		[key: string]: string;
 	};
 }
 
 export interface CustomColorsMap {
-	[ key: string ]: {
+	[key: string]: {
 		label: string;
 		context: string;
 	};
@@ -41,6 +41,6 @@ interface ColorGradientOptionsGradientItem {
 }
 
 export interface ColorGradientOptionsItems {
-	colors: [ ColorGradientOptionsColorItem ];
-	gradients: [ ColorGradientOptionsGradientItem ];
+	colors: [ColorGradientOptionsColorItem];
+	gradients: [ColorGradientOptionsGradientItem];
 }

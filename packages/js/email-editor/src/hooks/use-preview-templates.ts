@@ -31,15 +31,15 @@ function setPostContentInnerBlocks(
 	templateBlocks: BlockInstance[],
 	innerBlocks: BlockInstance[]
 ): BlockInstance[] {
-	return templateBlocks.map( ( block: BlockInstance ) => {
-		if ( block.name === 'core/post-content' ) {
+	return templateBlocks.map((block: BlockInstance) => {
+		if (block.name === 'core/post-content') {
 			return {
 				...block,
 				name: 'core/group', // Change the name to group to render the innerBlocks
 				innerBlocks,
 			};
 		}
-		if ( block.innerBlocks?.length ) {
+		if (block.innerBlocks?.length) {
 			return {
 				...block,
 				innerBlocks: setPostContentInnerBlocks(
@@ -49,7 +49,7 @@ function setPostContentInnerBlocks(
 			};
 		}
 		return block;
-	} );
+	});
 }
 
 const InternalTemplateCache = {};
@@ -71,19 +71,19 @@ function generateTemplateContent(
 		postTemplateContent: null,
 	};
 
-	if ( ! contentTemplate ) {
+	if (!contentTemplate) {
 		return defaultReturnObject;
 	}
 
-	if ( InternalTemplateCache[ contentTemplate ] ) {
-		return InternalTemplateCache[ contentTemplate ];
+	if (InternalTemplateCache[contentTemplate]) {
+		return InternalTemplateCache[contentTemplate];
 	}
 
 	const postTemplate = allTemplates.find(
-		( template ) => template.slug === contentTemplate
+		(template) => template.slug === contentTemplate
 	);
 
-	if ( ! postTemplate ) {
+	if (!postTemplate) {
 		return defaultReturnObject;
 	}
 
@@ -91,7 +91,7 @@ function generateTemplateContent(
 		postTemplateContent: postTemplate?.template,
 	};
 
-	InternalTemplateCache[ contentTemplate ] = templateContent;
+	InternalTemplateCache[contentTemplate] = templateContent;
 
 	return templateContent;
 }
@@ -99,39 +99,38 @@ function generateTemplateContent(
 export function usePreviewTemplates(
 	customEmailContent = '',
 	includeRecentPosts = true
-): [ TemplatePreview[], TemplatePreview[], boolean ] {
+): [TemplatePreview[], TemplatePreview[], boolean] {
 	const { templates, patterns, emailPosts, hasEmailPosts } = useSelect(
-		( select ) => {
+		(select) => {
 			const rawEmailPosts =
 				includeRecentPosts && customEmailContent !== 'swap'
-					? select( storeName ).getSentEmailEditorPosts()
+					? select(storeName).getSentEmailEditorPosts()
 					: undefined;
 
 			return {
-				templates: select( storeName ).getEmailTemplates(),
-				patterns:
-					select( storeName ).getBlockPatternsForEmailTemplate(),
+				templates: select(storeName).getEmailTemplates(),
+				patterns: select(storeName).getBlockPatternsForEmailTemplate(),
 				emailPosts: rawEmailPosts,
-				hasEmailPosts: !! ( rawEmailPosts && rawEmailPosts?.length ),
+				hasEmailPosts: !!(rawEmailPosts && rawEmailPosts?.length),
 			};
 		},
-		[ customEmailContent, includeRecentPosts ]
+		[customEmailContent, includeRecentPosts]
 	);
 
-	const allTemplates = useMemo( () => {
+	const allTemplates = useMemo(() => {
 		let contentPatterns = [];
 		const parsedCustomEmailContent =
-			customEmailContent && parse( customEmailContent );
+			customEmailContent && parse(customEmailContent);
 
 		// If there is a custom email content passed from outside we use it as email content for preview
 		// otherwise generate one preview per template and pattern
-		if ( parsedCustomEmailContent ) {
-			contentPatterns = [ { blocks: parsedCustomEmailContent } ];
+		if (parsedCustomEmailContent) {
+			contentPatterns = [{ blocks: parsedCustomEmailContent }];
 		} else {
 			contentPatterns = patterns;
 		}
 
-		if ( ! contentPatterns || ! templates ) {
+		if (!contentPatterns || !templates) {
 			return EMPTY_ARRAY;
 		}
 
@@ -139,17 +138,17 @@ export function usePreviewTemplates(
 		// We don't want to show the blank template in the list
 		templates
 			?.filter(
-				( template: EmailTemplatePreview ) =>
+				(template: EmailTemplatePreview) =>
 					template.slug !== 'email-general'
 			)
-			?.forEach( ( template: EmailTemplatePreview ) => {
-				contentPatterns?.forEach( ( contentPattern ) => {
-					let parsedTemplate = parse( template.content?.raw );
+			?.forEach((template: EmailTemplatePreview) => {
+				contentPatterns?.forEach((contentPattern) => {
+					let parsedTemplate = parse(template.content?.raw);
 					parsedTemplate = setPostContentInnerBlocks(
 						parsedTemplate,
 						contentPattern.blocks
 					);
-					templateToPreview.push( {
+					templateToPreview.push({
 						id: template.id,
 						slug: template.slug,
 						// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -157,19 +156,19 @@ export function usePreviewTemplates(
 						emailParsed:
 							contentPattern.emailBlocks ?? contentPattern.blocks,
 						template,
-						category: contentPattern.categories?.[ 0 ],
+						category: contentPattern.categories?.[0],
 						type: template.type,
 						displayName: contentPattern.title
-							? `${ template.title.rendered } - ${ contentPattern.title }`
+							? `${template.title.rendered} - ${contentPattern.title}`
 							: template.title.rendered,
-					} );
-				} );
-			} );
+					});
+				});
+			});
 		return templateToPreview;
-	}, [ templates, patterns, customEmailContent ] );
+	}, [templates, patterns, customEmailContent]);
 
-	const allEmailPosts = useMemo( () => {
-		return emailPosts?.map( ( post: EmailEditorPostType ) => {
+	const allEmailPosts = useMemo(() => {
+		return emailPosts?.map((post: EmailEditorPostType) => {
 			const preferredTitle = applyFilters(
 				'woocommerce_email_editor_preferred_template_title',
 				'',
@@ -179,13 +178,13 @@ export function usePreviewTemplates(
 				post,
 				allTemplates
 			);
-			const parsedPostContent = parse( post.content?.raw );
+			const parsedPostContent = parse(post.content?.raw);
 
 			let parsedPostContentWithTemplate = parsedPostContent;
 
-			if ( postTemplateContent?.content?.raw ) {
+			if (postTemplateContent?.content?.raw) {
 				parsedPostContentWithTemplate = setPostContentInnerBlocks(
-					parse( postTemplateContent?.content?.raw ),
+					parse(postTemplateContent?.content?.raw),
 					parsedPostContent
 				);
 			}
@@ -206,8 +205,8 @@ export function usePreviewTemplates(
 				displayName: template.title.rendered,
 				template,
 			};
-		} ) as unknown as TemplatePreview[];
-	}, [ emailPosts, allTemplates ] );
+		}) as unknown as TemplatePreview[];
+	}, [emailPosts, allTemplates]);
 
 	return [
 		allTemplates || EMPTY_ARRAY,

@@ -23,56 +23,56 @@ import Snackbar from './';
  * @param {Object}   $0.children  Array of children to be rendered inside the notice list.
  * @return {Object}                The rendered notices list.
  */
-function SnackbarList( {
+function SnackbarList({
 	notices,
 	className,
 	children,
 	onRemove = noop,
 	onRemove2 = noop,
-} ) {
+}) {
 	const isReducedMotion = useReducedMotion();
-	const [ refMap ] = useState( () => new WeakMap() );
-	const transitions = useTransition( notices, {
-		keys: ( notice ) => notice.id,
+	const [refMap] = useState(() => new WeakMap());
+	const transitions = useTransition(notices, {
+		keys: (notice) => notice.id,
 		from: { opacity: 0, height: 0 },
-		enter: ( item ) => async ( next ) =>
-			await next( {
+		enter: (item) => async (next) =>
+			await next({
 				opacity: 1,
-				height: refMap.get( item ).offsetHeight,
-			} ),
-		leave: () => async ( next ) => {
-			await next( { opacity: 0 } );
-			await next( { height: 0 } );
+				height: refMap.get(item).offsetHeight,
+			}),
+		leave: () => async (next) => {
+			await next({ opacity: 0 });
+			await next({ height: 0 });
 		},
 		immediate: isReducedMotion,
-	} );
+	});
 
-	className = clsx( 'components-snackbar-list', className );
-	const removeNotice = ( notice ) => () => {
-		onRemove( notice.id );
+	className = clsx('components-snackbar-list', className);
+	const removeNotice = (notice) => () => {
+		onRemove(notice.id);
 		// To be removed when we're no longer using core/notices2.
-		onRemove2( notice.id );
+		onRemove2(notice.id);
 	};
 
 	return (
-		<div className={ className }>
-			{ children }
+		<div className={className}>
+			{children}
 			<>
-				{ transitions( ( style, notice ) => (
-					<animated.div style={ style }>
+				{transitions((style, notice) => (
+					<animated.div style={style}>
 						<div
 							className="components-snackbar-list__notice-container"
-							ref={ ( ref ) => ref && refMap.set( notice, ref ) }
+							ref={(ref) => ref && refMap.set(notice, ref)}
 						>
 							<Snackbar
-								{ ...omit( notice, [ 'content' ] ) }
-								onRemove={ removeNotice( notice ) }
+								{...omit(notice, ['content'])}
+								onRemove={removeNotice(notice)}
 							>
-								{ notice.content }
+								{notice.content}
 							</Snackbar>
 						</div>
 					</animated.div>
-				) ) }
+				))}
 			</>
 		</div>
 	);

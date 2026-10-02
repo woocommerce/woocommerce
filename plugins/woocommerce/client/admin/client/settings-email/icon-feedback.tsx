@@ -3,10 +3,10 @@
  */
 import { SVG } from '@wordpress/primitives';
 
-const FeedbackIcon = ( { size = 12 }: { size?: number } ) => (
+const FeedbackIcon = ({ size = 12 }: { size?: number }) => (
 	<SVG
-		width={ size }
-		height={ size + 1 }
+		width={size}
+		height={size + 1}
 		viewBox="0 -1 12 12"
 		fill="none"
 		xmlns="http://www.w3.org/2000/svg"

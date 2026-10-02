@@ -8,17 +8,17 @@ interface Props {
 	className?: string;
 }
 
-const FrontendBlock = ( {
+const FrontendBlock = ({
 	children,
 	className = '',
-}: Props ): JSX.Element | null => {
+}: Props): JSX.Element | null => {
 	const { crossSellsProducts, cartIsLoading } = useStoreCart();
 
-	if ( cartIsLoading || crossSellsProducts.length < 1 ) {
+	if (cartIsLoading || crossSellsProducts.length < 1) {
 		return null;
 	}
 
-	return <div className={ className }>{ children }</div>;
+	return <div className={className}>{children}</div>;
 };
 
 export default FrontendBlock;

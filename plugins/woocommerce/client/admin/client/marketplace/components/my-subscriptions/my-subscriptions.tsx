@@ -46,16 +46,16 @@ import MySubscriptionsAccount from './my-subscriptions-account';
 let pageLoadErrorReported = false;
 
 export default function MySubscriptions(): React.JSX.Element {
-	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
-	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
-	const installedHeadingRef = useRef< HTMLHeadingElement >( null );
+	const { subscriptions, isLoading } = useContext(SubscriptionsContext);
+	const wccomSettings = getAdminSetting('wccomHelper', {});
+	const installedHeadingRef = useRef<HTMLHeadingElement>(null);
 
 	// Report the failure captured at page load as the notice a failed refresh
 	// would report, under the same id. The Refresh button reruns the very
 	// request this describes, so sharing the id means the later result replaces
 	// the earlier one and a single problem yields a single dismissible notice.
-	useEffect( () => {
-		if ( pageLoadErrorReported || ! wccomSettings?.api_error_notice ) {
+	useEffect(() => {
+		if (pageLoadErrorReported || !wccomSettings?.api_error_notice) {
 			return;
 		}
 
@@ -66,7 +66,7 @@ export default function MySubscriptions(): React.JSX.Element {
 			wccomSettings.api_error_notice,
 			NoticeStatus.Error
 		);
-	}, [ wccomSettings?.api_error_notice ] );
+	}, [wccomSettings?.api_error_notice]);
 
 	const installedTableDescription = createInterpolateElement(
 		__(
@@ -83,20 +83,20 @@ export default function MySubscriptions(): React.JSX.Element {
 					your account
 				</a>
 			),
-			custom_icon: <Icon icon={ external } size={ 12 } />,
+			custom_icon: <Icon icon={external} size={12} />,
 		}
 	);
 
-	const subscriptionsInstalled: Array< Subscription > = subscriptions.filter(
-		( subscription: Subscription ) => subscription.subscription_installed
+	const subscriptionsInstalled: Array<Subscription> = subscriptions.filter(
+		(subscription: Subscription) => subscription.subscription_installed
 	);
 
-	const subscriptionsAvailable: Array< Subscription > = subscriptions.filter(
-		( subscription: Subscription ) =>
-			! subscription.subscription_installed &&
+	const subscriptionsAvailable: Array<Subscription> = subscriptions.filter(
+		(subscription: Subscription) =>
+			!subscription.subscription_installed &&
 			wccomSettings?.wooUpdateManagerPluginSlug !==
 				subscription.product_slug &&
-			! subscription.maxed // no more connections allowed for the subscription so it's no longer "available to use"
+			!subscription.maxed // no more connections allowed for the subscription so it's no longer "available to use"
 	);
 
 	const handleConnectNoticeClose = () => {
@@ -104,18 +104,18 @@ export default function MySubscriptions(): React.JSX.Element {
 			notice_id: 'woo-connect-notice',
 			dismiss_notice_nonce: wccomSettings?.dismissNoticeNonce || '',
 		};
-		void apiFetch( {
+		void apiFetch({
 			path: `/wc-admin/notice/dismiss`,
 			method: 'POST',
 			data,
-		} );
+		});
 		localStorage.setItem(
 			'wc-marketplaceNoticeClosed-woo-connect-notice',
 			'false'
 		);
 	};
 
-	if ( ! wccomSettings?.isConnected ) {
+	if (!wccomSettings?.isConnected) {
 		const connectMessage = __(
 			'Connect your WooCommerce.com account to get product updates, manage your subscriptions from your store admin, and get streamlined support.',
 			'woocommerce'
@@ -126,11 +126,11 @@ export default function MySubscriptions(): React.JSX.Element {
 				notice_id: 'woo-disconnect-notice',
 				dismiss_notice_nonce: wccomSettings?.dismissNoticeNonce || '',
 			};
-			void apiFetch( {
+			void apiFetch({
 				path: `/wc-admin/notice/dismiss`,
 				method: 'POST',
 				data,
-			} );
+			});
 			localStorage.setItem(
 				'wc-marketplaceNoticeClosed-woo-disconnect-notice',
 				'false'
@@ -139,29 +139,29 @@ export default function MySubscriptions(): React.JSX.Element {
 
 		return (
 			<>
-				{ wccomSettings?.disconnected_notice && (
+				{wccomSettings?.disconnected_notice && (
 					<Notice
-						id={ 'woo-disconnect-notice' }
-						description={ wccomSettings?.disconnected_notice }
-						isDismissible={ true }
+						id={'woo-disconnect-notice'}
+						description={wccomSettings?.disconnected_notice}
+						isDismissible={true}
 						variant="info"
-						onClose={ handleDisconnectNoticeClose }
+						onClose={handleDisconnectNoticeClose}
 					/>
-				) }
+				)}
 				<div className="woocommerce-marketplace__my-subscriptions--connect">
 					<InstallModal />
 					<div className="woocommerce-marketplace__my-subscriptions__icon" />
 					<h2 className="woocommerce-marketplace__my-subscriptions__header">
-						{ __(
+						{__(
 							'Connect your WooCommerce.com account',
 							'woocommerce'
-						) }
+						)}
 					</h2>
 					<p className="woocommerce-marketplace__my-subscriptions__description">
-						{ connectMessage }
+						{connectMessage}
 					</p>
-					<Button href={ connectUrl() } variant="primary">
-						{ __( 'Connect', 'woocommerce' ) }
+					<Button href={connectUrl()} variant="primary">
+						{__('Connect', 'woocommerce')}
 					</Button>
 				</div>
 			</>
@@ -170,41 +170,41 @@ export default function MySubscriptions(): React.JSX.Element {
 
 	return (
 		<>
-			{ wccomSettings?.connected_notice && (
+			{wccomSettings?.connected_notice && (
 				<Notice
-					id={ 'woo-connect-notice' }
-					description={ wccomSettings?.connected_notice }
-					isDismissible={ true }
+					id={'woo-connect-notice'}
+					description={wccomSettings?.connected_notice}
+					isDismissible={true}
 					variant="success"
-					onClose={ handleConnectNoticeClose }
+					onClose={handleConnectNoticeClose}
 				/>
-			) }
+			)}
 
-			{ ! wccomSettings?.has_host_plan_orders &&
+			{!wccomSettings?.has_host_plan_orders &&
 				wccomSettings?.connection_url_notice && (
 					<Notice
-						id={ 'woo-connection-url-notice' }
-						description={ wccomSettings?.connection_url_notice }
-						isDismissible={ false }
+						id={'woo-connection-url-notice'}
+						description={wccomSettings?.connection_url_notice}
+						isDismissible={false}
 						variant="error"
 					>
 						<Button
-							href={ connectUrl( 'wc-admin', true ) }
+							href={connectUrl('wc-admin', true)}
 							variant="secondary"
 						>
-							{ __( 'Reconnect', 'woocommerce' ) }
+							{__('Reconnect', 'woocommerce')}
 						</Button>
 					</Notice>
-				) }
+				)}
 
-			{ wccomSettings?.maybe_deleted_connection && (
+			{wccomSettings?.maybe_deleted_connection && (
 				<Notice
-					id={ 'woo-deleted-connection-notice' }
-					description={ wccomSettings?.maybe_deleted_connection }
-					isDismissible={ false }
+					id={'woo-deleted-connection-notice'}
+					description={wccomSettings?.maybe_deleted_connection}
+					isDismissible={false}
 					variant="error"
 				/>
-			) }
+			)}
 
 			<div className="woocommerce-marketplace__my-subscriptions">
 				<InstallModal />
@@ -212,23 +212,20 @@ export default function MySubscriptions(): React.JSX.Element {
 					<Notices />
 				</section>
 				<MySubscriptionsAccount
-					onDismiss={ () => installedHeadingRef.current?.focus() }
+					onDismiss={() => installedHeadingRef.current?.focus()}
 				/>
 				<section className="woocommerce-marketplace__my-subscriptions-section woocommerce-marketplace__my-subscriptions__installed">
 					<header className="woocommerce-marketplace__my-subscriptions__header">
 						<div className="woocommerce-marketplace__my-subscriptions__header-content">
 							<h2
 								className="woocommerce-marketplace__my-subscriptions__heading"
-								ref={ installedHeadingRef }
-								tabIndex={ -1 }
+								ref={installedHeadingRef}
+								tabIndex={-1}
 							>
-								{ __(
-									'Installed on this store',
-									'woocommerce'
-								) }
+								{__('Installed on this store', 'woocommerce')}
 							</h2>
 							<p className="woocommerce-marketplace__my-subscriptions__table-description">
-								{ installedTableDescription }
+								{installedTableDescription}
 							</p>
 						</div>
 						<div className="woocommerce-marketplace__my-subscriptions__header-refresh">
@@ -237,34 +234,34 @@ export default function MySubscriptions(): React.JSX.Element {
 					</header>
 					<div className="woocommerce-marketplace__my-subscriptions__table-wrapper">
 						<InstalledSubscriptionsTable
-							isLoading={ isLoading }
-							rows={ subscriptionsInstalled.map( ( item ) => {
-								return subscriptionRow( item, 'installed' );
-							} ) }
+							isLoading={isLoading}
+							rows={subscriptionsInstalled.map((item) => {
+								return subscriptionRow(item, 'installed');
+							})}
 						/>
 					</div>
 				</section>
-				{ subscriptionsAvailable.length > 0 && (
+				{subscriptionsAvailable.length > 0 && (
 					<section className="woocommerce-marketplace__my-subscriptions-section woocommerce-marketplace__my-subscriptions__available">
 						<h2 className="woocommerce-marketplace__my-subscriptions__heading">
-							{ __( 'Available to use', 'woocommerce' ) }
+							{__('Available to use', 'woocommerce')}
 						</h2>
 						<p className="woocommerce-marketplace__my-subscriptions__table-description">
-							{ __(
+							{__(
 								"WooCommerce.com subscriptions you haven't used yet.",
 								'woocommerce'
-							) }
+							)}
 						</p>
 						<div className="woocommerce-marketplace__my-subscriptions__table-wrapper">
 							<AvailableSubscriptionsTable
-								isLoading={ isLoading }
-								rows={ subscriptionsAvailable.map( ( item ) => {
-									return subscriptionRow( item, 'available' );
-								} ) }
+								isLoading={isLoading}
+								rows={subscriptionsAvailable.map((item) => {
+									return subscriptionRow(item, 'available');
+								})}
 							/>
 						</div>
 					</section>
-				) }
+				)}
 			</div>
 		</>
 	);

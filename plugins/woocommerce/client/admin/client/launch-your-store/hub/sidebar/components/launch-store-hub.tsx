@@ -32,7 +32,7 @@ import { SidebarContainer } from './sidebar-container';
 import { taskCompleteIcon } from './icons';
 import { SiteHub } from '~/customize-store/site-hub';
 import { CompletedTaskItem, IncompleteTaskItem } from '../tasklist';
-export const LaunchYourStoreHubSidebar = ( props: SidebarComponentProps ) => {
+export const LaunchYourStoreHubSidebar = (props: SidebarComponentProps) => {
 	const {
 		context: {
 			tasklist,
@@ -44,13 +44,13 @@ export const LaunchYourStoreHubSidebar = ( props: SidebarComponentProps ) => {
 
 	const sidebarTitle = (
 		<Button
-			onClick={ () => {
-				props.sendEventToSidebar( {
+			onClick={() => {
+				props.sendEventToSidebar({
 					type: 'POP_BROWSER_STACK', // go back to previous URL
-				} );
-			} }
+				});
+			}}
 		>
-			{ __( 'Launch Your Store', 'woocommerce' ) }
+			{__('Launch Your Store', 'woocommerce')}
 		</Button>
 	);
 
@@ -60,131 +60,122 @@ export const LaunchYourStoreHubSidebar = ( props: SidebarComponentProps ) => {
 	);
 
 	const hasIncompleteTasks =
-		tasklist && ! tasklist.tasks.every( ( task ) => task.isComplete );
+		tasklist && !tasklist.tasks.every((task) => task.isComplete);
 
-	const [ removeTestOrders, setRemoveTestOrder ] = useState(
+	const [removeTestOrders, setRemoveTestOrder] = useState(
 		removeTestOrdersContext ?? true
 	);
 
-	const [ errorNoticeDismissed, setErrorNoticeDismissed ] = useState( false );
-	const [ hasSubmitted, setHasSubmitted ] = useState( false );
+	const [errorNoticeDismissed, setErrorNoticeDismissed] = useState(false);
+	const [hasSubmitted, setHasSubmitted] = useState(false);
 
 	const launchStoreAction = () => {
-		setHasSubmitted( true );
-		props.sendEventToSidebar( {
+		setHasSubmitted(true);
+		props.sendEventToSidebar({
 			type: 'LAUNCH_STORE',
 			removeTestOrders,
-		} );
+		});
 	};
 
-	useEffect( () => {
-		if ( launchStoreError?.message ) {
-			setHasSubmitted( false );
+	useEffect(() => {
+		if (launchStoreError?.message) {
+			setHasSubmitted(false);
 		}
-	}, [ launchStoreError?.message ] );
+	}, [launchStoreError?.message]);
 
 	return (
 		<div
-			className={ clsx(
-				'launch-store-sidebar__container',
-				props.className
-			) }
+			className={clsx('launch-store-sidebar__container', props.className)}
 		>
 			<motion.div
 				className="woocommerce-edit-site-layout__header-container"
-				animate={ 'view' }
+				animate={'view'}
 			>
 				<SiteHub
-					variants={ {
+					variants={{
 						view: { x: 0 },
-					} }
-					isTransparent={ false }
+					}}
+					isTransparent={false}
 					className="woocommerce-edit-site-layout__hub"
 				/>
 			</motion.div>
 			<SidebarContainer
-				title={ sidebarTitle }
-				description={ sidebarDescription }
-				onMobileClose={ props.onMobileClose }
+				title={sidebarTitle}
+				description={sidebarDescription}
+				onMobileClose={props.onMobileClose}
 			>
 				<div className="woocommerce-edit-site-sidebar-navigation-screen-essential-tasks__group-header">
-					<Heading level={ 2 }>
-						{ __( 'Essential Tasks', 'woocommerce' ) }
+					<Heading level={2}>
+						{__('Essential Tasks', 'woocommerce')}
 					</Heading>
 				</div>
 				<ItemGroup className="woocommerce-edit-site-sidebar-navigation-screen-essential-tasks__group">
-					{ tasklist &&
+					{tasklist &&
 						hasIncompleteTasks &&
-						tasklist.tasks.map( ( task ) =>
+						tasklist.tasks.map((task) =>
 							task.isComplete ? (
-								<CompletedTaskItem
-									task={ task }
-									key={ task.id }
-								/>
+								<CompletedTaskItem task={task} key={task.id} />
 							) : (
 								<IncompleteTaskItem
-									task={ task }
-									key={ task.id }
-									onClick={ () => {
-										props.sendEventToSidebar( {
+									task={task}
+									key={task.id}
+									onClick={() => {
+										props.sendEventToSidebar({
 											type: 'TASK_CLICKED',
 											task,
-										} );
-									} }
+										});
+									}}
 								/>
 							)
-						) }
-					{ tasklist && ! hasIncompleteTasks && (
+						)}
+					{tasklist && !hasIncompleteTasks && (
 						<SidebarNavigationItem
 							className="all-tasks-complete"
-							icon={ taskCompleteIcon }
+							icon={taskCompleteIcon}
 						>
-							{ __(
+							{__(
 								'Fantastic job! Your store is ready to go — no pending tasks to complete.',
 								'woocommerce'
-							) }
+							)}
 						</SidebarNavigationItem>
-					) }
+					)}
 				</ItemGroup>
-				{ testOrderCount > 0 && (
+				{testOrderCount > 0 && (
 					<>
 						<div className="woocommerce-edit-site-sidebar-navigation-screen-test-data__group-header">
-							<Heading level={ 2 }>
-								{ __( 'Test data', 'woocommerce' ) }
+							<Heading level={2}>
+								{__('Test data', 'woocommerce')}
 							</Heading>
 						</div>
 						<ItemGroup className="woocommerce-edit-site-sidebar-navigation-screen-remove-test-data__group">
 							<ToggleControl
 								__nextHasNoMarginBottom
-								label={ sprintf(
+								label={sprintf(
 									// translators: %d is the number of test orders
-									__(
-										'Remove %d test orders',
-										'woocommerce'
-									),
+									__('Remove %d test orders', 'woocommerce'),
 									testOrderCount
-								) }
-								checked={ removeTestOrders }
-								onChange={ setRemoveTestOrder }
+								)}
+								checked={removeTestOrders}
+								onChange={setRemoveTestOrder}
 							/>
 							<p>
-								{ __(
+								{__(
 									'Remove test orders and associated data, including analytics and transactions, once your store goes live. ',
 									'woocommerce'
-								) }
+								)}
 							</p>
 						</ItemGroup>
 					</>
-				) }
+				)}
 				<ItemGroup className="woocommerce-edit-site-sidebar-navigation-screen-launch-store-button__group">
-					{ launchStoreError?.message && ! errorNoticeDismissed && (
+					{launchStoreError?.message && !errorNoticeDismissed && (
 						<Notice
 							className="launch-store-error-notice"
-							isDismissible={ true }
-							onRemove={ () => setErrorNoticeDismissed( true ) }
+							isDismissible={true}
+							onRemove={() => setErrorNoticeDismissed(true)}
 							status="error"
 						>
-							{ createInterpolateElement(
+							{createInterpolateElement(
 								__(
 									'Oops! We encountered a problem while launching your store. <retryButton/>',
 									'woocommerce'
@@ -192,25 +183,25 @@ export const LaunchYourStoreHubSidebar = ( props: SidebarComponentProps ) => {
 								{
 									retryButton: (
 										<Button
-											onClick={ launchStoreAction }
+											onClick={launchStoreAction}
 											variant="tertiary"
 										>
-											{ __(
+											{__(
 												'Please try again',
 												'woocommerce'
-											) }
+											)}
 										</Button>
 									),
 								}
-							) }
+							)}
 						</Notice>
-					) }
-					<Button variant="primary" onClick={ launchStoreAction }>
-						{ hasSubmitted ? (
+					)}
+					<Button variant="primary" onClick={launchStoreAction}>
+						{hasSubmitted ? (
 							<Spinner />
 						) : (
-							__( 'Launch your store', 'woocommerce' )
-						) }
+							__('Launch your store', 'woocommerce')
+						)}
 					</Button>
 				</ItemGroup>
 			</SidebarContainer>

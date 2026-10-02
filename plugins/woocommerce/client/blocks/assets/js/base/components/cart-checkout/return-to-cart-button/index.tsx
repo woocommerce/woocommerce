@@ -15,23 +15,23 @@ interface ReturnToCartButtonProps {
 	element?: React.ElementType;
 }
 
-const ReturnToCartButton = ( {
+const ReturnToCartButton = ({
 	href,
 	children,
 	element = 'a',
-}: ReturnToCartButtonProps ): JSX.Element | null => {
+}: ReturnToCartButtonProps): JSX.Element | null => {
 	const cartLink = href || CART_URL;
-	if ( ! cartLink ) {
+	if (!cartLink) {
 		return null;
 	}
 	const Element = element;
 	return (
 		<Element
-			{ ...( element === 'a' ? { href: cartLink } : {} ) }
+			{...(element === 'a' ? { href: cartLink } : {})}
 			className="wc-block-components-checkout-return-to-cart-button"
 		>
-			<Icon icon={ arrowLeft } />
-			{ children }
+			<Icon icon={arrowLeft} />
+			{children}
 		</Element>
 	);
 };

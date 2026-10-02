@@ -10,13 +10,13 @@ import { getRegisteredBlockComponents } from '@woocommerce/blocks-registry';
 import './register-components';
 import Block from './block';
 
-renderParentBlock( {
+renderParentBlock({
 	blockName: 'woocommerce/filter-wrapper',
 	selector: '.wp-block-woocommerce-filter-wrapper',
 	Block,
-	blockMap: getRegisteredBlockComponents( 'woocommerce/filter-wrapper' ),
+	blockMap: getRegisteredBlockComponents('woocommerce/filter-wrapper'),
 	options: {
 		multiple: true,
 	},
-	getProps: () => ( {} ),
-} );
+	getProps: () => ({}),
+});

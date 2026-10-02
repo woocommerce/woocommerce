@@ -9,15 +9,15 @@ import { apiFetch } from '@wordpress/data-controls';
 import { setLoadingState, setNotifications } from './actions';
 
 export function* getNotifications() {
-	yield setLoadingState( true );
+	yield setLoadingState(true);
 
 	try {
-		const response = yield apiFetch( {
+		const response = yield apiFetch({
 			path: 'wc-admin-test-helper/remote-inbox-notifications',
-		} );
+		});
 
-		yield setNotifications( response );
-	} catch ( error ) {
+		yield setNotifications(response);
+	} catch (error) {
 		throw new Error();
 	}
 }

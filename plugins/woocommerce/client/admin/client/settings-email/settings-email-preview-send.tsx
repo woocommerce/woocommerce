@@ -25,8 +25,8 @@ type EmailPreviewSendProps = {
 	type: string;
 };
 
-export const EmailPreviewSend = ( { type }: EmailPreviewSendProps ) => {
-	const [ isModalOpen, setIsModalOpen ] = useState( false );
+export const EmailPreviewSend = ({ type }: EmailPreviewSendProps) => {
+	const [isModalOpen, setIsModalOpen] = useState(false);
 	const {
 		email,
 		setEmail,
@@ -41,36 +41,33 @@ export const EmailPreviewSend = ( { type }: EmailPreviewSendProps ) => {
 	);
 
 	const closeModal = () => {
-		setIsModalOpen( false );
-		setIsSending( false );
+		setIsModalOpen(false);
+		setIsSending(false);
 	};
 
 	return (
 		<div className="wc-settings-email-preview-send">
-			<Button
-				variant="secondary"
-				onClick={ () => setIsModalOpen( true ) }
-			>
-				{ __( 'Send a test email', 'woocommerce' ) }
+			<Button variant="secondary" onClick={() => setIsModalOpen(true)}>
+				{__('Send a test email', 'woocommerce')}
 			</Button>
 
-			{ isModalOpen && (
+			{isModalOpen && (
 				<Modal
-					title={ __( 'Send a test email', 'woocommerce' ) }
-					onRequestClose={ closeModal }
+					title={__('Send a test email', 'woocommerce')}
+					onRequestClose={closeModal}
 					className="wc-settings-email-preview-send-modal"
 				>
 					<SendTestEmailForm
-						email={ email }
-						onEmailChange={ setEmail }
-						isSending={ isSending }
-						notice={ notice }
-						noticeType={ noticeType }
-						onSend={ sendEmail }
-						onCancel={ closeModal }
+						email={email}
+						onEmailChange={setEmail}
+						isSending={isSending}
+						notice={notice}
+						noticeType={noticeType}
+						onSend={sendEmail}
+						onCancel={closeModal}
 					/>
 				</Modal>
-			) }
+			)}
 		</div>
 	);
 };

@@ -21,16 +21,16 @@ interface UseFeaturedItemReturnType {
 	isLoading: boolean;
 }
 
-export const useFeaturedItemStatus = ( {
+export const useFeaturedItemStatus = ({
 	itemId,
 	itemType,
-}: UseFeaturedItemProps ): UseFeaturedItemReturnType => {
+}: UseFeaturedItemProps): UseFeaturedItemReturnType => {
 	const { product, isResolutionFinished } = useProduct(
 		itemType === BLOCK_NAMES.featuredProduct ? itemId : undefined
 	);
 	return useSelect(
-		( selectFunc ) => {
-			if ( ! itemId ) {
+		(selectFunc) => {
+			if (!itemId) {
 				return {
 					status: null,
 					isDeleted: false,
@@ -38,13 +38,13 @@ export const useFeaturedItemStatus = ( {
 				};
 			}
 
-			if ( itemType === BLOCK_NAMES.featuredProduct ) {
-				const isLoading = ! isResolutionFinished;
+			if (itemType === BLOCK_NAMES.featuredProduct) {
+				const isLoading = !isResolutionFinished;
 
 				// An item is considered deleted if its status is 'trash' or if the
 				// API request has finished and returned no product.
 				const isDeleted =
-					product?.status === 'trash' || ( ! isLoading && ! product );
+					product?.status === 'trash' || (!isLoading && !product);
 
 				return {
 					status: product?.status ?? null,
@@ -53,22 +53,25 @@ export const useFeaturedItemStatus = ( {
 				};
 			}
 
-			if ( itemType === BLOCK_NAMES.featuredCategory ) {
+			if (itemType === BLOCK_NAMES.featuredCategory) {
 				const { getEntityRecords, hasFinishedResolution } =
-					selectFunc( coreDataStore );
-				const categoryArgs: [ string, string, { include: number[] } ] =
-					[ 'taxonomy', 'product_cat', { include: [ itemId ] } ];
-				const categories = getEntityRecords( ...categoryArgs );
+					selectFunc(coreDataStore);
+				const categoryArgs: [string, string, { include: number[] }] = [
+					'taxonomy',
+					'product_cat',
+					{ include: [itemId] },
+				];
+				const categories = getEntityRecords(...categoryArgs);
 				const isResolved = hasFinishedResolution(
 					'getEntityRecords',
 					categoryArgs
 				);
-				const isDeleted = ! categories?.length;
+				const isDeleted = !categories?.length;
 
 				return {
 					status: isDeleted ? 'deleted' : null,
 					isDeleted,
-					isLoading: ! isResolved,
+					isLoading: !isResolved,
 				};
 			}
 
@@ -79,6 +82,6 @@ export const useFeaturedItemStatus = ( {
 				isLoading: false,
 			};
 		},
-		[ itemId, itemType, product, isResolutionFinished ]
+		[itemId, itemType, product, isResolutionFinished]
 	);
 };

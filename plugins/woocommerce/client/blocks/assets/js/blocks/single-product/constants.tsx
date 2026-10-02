@@ -14,7 +14,7 @@ import { VARIATION_NAME as PRODUCT_TITLE_VARIATION_NAME } from '../product-query
 
 export const BLOCK_ICON = (
 	<Icon
-		icon={ mediaAndText }
+		icon={mediaAndText}
 		className="wc-block-editor-components-block-icon"
 	/>
 );
@@ -24,7 +24,7 @@ export const DEFAULT_INNER_BLOCKS: InnerBlockTemplate[] = [
 		'core/columns',
 		{},
 		[
-			[ 'core/column', {}, [ [ 'woocommerce/product-gallery' ] ] ],
+			['core/column', {}, [['woocommerce/product-gallery']]],
 			[
 				'core/column',
 				{},
@@ -38,15 +38,15 @@ export const DEFAULT_INNER_BLOCKS: InnerBlockTemplate[] = [
 								PRODUCT_TITLE_VARIATION_NAME,
 						},
 					],
-					[ 'woocommerce/product-rating' ],
-					[ 'woocommerce/product-price' ],
-					[ 'woocommerce/product-summary' ],
+					['woocommerce/product-rating'],
+					['woocommerce/product-price'],
+					['woocommerce/product-summary'],
 					[
-						getSetting( 'isBlockTheme', false )
+						getSetting('isBlockTheme', false)
 							? 'woocommerce/add-to-cart-with-options'
 							: 'woocommerce/add-to-cart-form',
 					],
-					[ 'woocommerce/product-meta' ],
+					['woocommerce/product-meta'],
 				],
 			],
 		],
@@ -64,5 +64,5 @@ export const ALLOWED_INNER_BLOCKS = [
 	'woocommerce/product-gallery',
 	'woocommerce/product-reviews',
 	'woocommerce/product-details',
-	...Object.keys( getBlockMap( metadata.name ) ),
+	...Object.keys(getBlockMap(metadata.name)),
 ];

@@ -27,10 +27,10 @@ import type {
 } from './types';
 
 /** Normalize an integer ID from the variation event payload. */
-const normalizeId = ( id: unknown ): number | undefined => {
-	const normalizedId = Number( id );
+const normalizeId = (id: unknown): number | undefined => {
+	const normalizedId = Number(id);
 
-	return Number.isInteger( normalizedId ) ? normalizedId : undefined;
+	return Number.isInteger(normalizedId) ? normalizedId : undefined;
 };
 
 /**
@@ -41,21 +41,21 @@ const normalizeId = ( id: unknown ): number | undefined => {
 export const subscribeLegacyJQueryFormVariations = (
 	formElement: HTMLElement,
 	handlers: LegacyJQueryFormHandlers
-): null | ( () => void ) => {
-	const legacyJQuery = ( window as LegacyJQueryWindow ).jQuery;
-	if ( ! legacyJQuery ) {
+): null | (() => void) => {
+	const legacyJQuery = (window as LegacyJQueryWindow).jQuery;
+	if (!legacyJQuery) {
 		return null;
 	}
 
-	const $form = legacyJQuery( formElement );
+	const $form = legacyJQuery(formElement);
 
 	const handleFound = withScope(
-		( _event?: unknown, variation?: LegacyVariationPayload ) => {
-			const variationId = normalizeId( variation?.variation_id );
-			const featuredImageId = normalizeId( variation?.image_id );
+		(_event?: unknown, variation?: LegacyVariationPayload) => {
+			const variationId = normalizeId(variation?.variation_id);
+			const featuredImageId = normalizeId(variation?.image_id);
 
-			if ( variationId !== undefined && featuredImageId !== undefined ) {
-				handlers.onVariationFound( variationId, featuredImageId );
+			if (variationId !== undefined && featuredImageId !== undefined) {
+				handlers.onVariationFound(variationId, featuredImageId);
 				return;
 			}
 
@@ -63,13 +63,13 @@ export const subscribeLegacyJQueryFormVariations = (
 		}
 	);
 
-	const handleReset = withScope( () => handlers.onVariationReset() );
+	const handleReset = withScope(() => handlers.onVariationReset());
 
 	$form
-		.on( LEGACY_FORM_JQUERY_EVENTS.foundVariation, handleFound )
-		.on( LEGACY_FORM_JQUERY_EVENTS.hideOrResetVariation, handleReset );
+		.on(LEGACY_FORM_JQUERY_EVENTS.foundVariation, handleFound)
+		.on(LEGACY_FORM_JQUERY_EVENTS.hideOrResetVariation, handleReset);
 
 	return () => {
-		$form.off( LEGACY_FORM_JQUERY_EVENTS.namespace );
+		$form.off(LEGACY_FORM_JQUERY_EVENTS.namespace);
 	};
 };

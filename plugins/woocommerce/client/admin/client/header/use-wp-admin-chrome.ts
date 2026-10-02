@@ -11,7 +11,7 @@ type WpAdminChrome = {
 	hasContextualHelp: boolean;
 	activeMetaIcon: ActiveMetaIcon;
 	triggerMetaIcon: (
-		which: Exclude< ActiveMetaIcon, null >,
+		which: Exclude<ActiveMetaIcon, null>,
 		triggerId: string
 	) => void;
 };
@@ -42,97 +42,91 @@ type WpAdminChrome = {
  * a duplicate-title frame before the first effect commits.
  */
 export const useWpAdminChrome = (
-	query: Record< string, string >
+	query: Record<string, string>
 ): WpAdminChrome => {
-	const detectWpAdminChrome = () => ( {
-		hasH1: !! document.querySelector( '.wrap > h1.wp-heading-inline' ),
-		hasScreenOptions: !! document.querySelector(
-			'#screen-options-link-wrap'
-		),
-		hasContextualHelp: !! document.querySelector(
+	const detectWpAdminChrome = () => ({
+		hasH1: !!document.querySelector('.wrap > h1.wp-heading-inline'),
+		hasScreenOptions: !!document.querySelector('#screen-options-link-wrap'),
+		hasContextualHelp: !!document.querySelector(
 			'#contextual-help-link-wrap'
 		),
-	} );
-	const [ chrome, setChrome ] = useState( detectWpAdminChrome );
-	useEffect( () => {
-		setChrome( detectWpAdminChrome() );
-	}, [ query ] );
+	});
+	const [chrome, setChrome] = useState(detectWpAdminChrome);
+	useEffect(() => {
+		setChrome(detectWpAdminChrome());
+	}, [query]);
 	const { hasH1, hasScreenOptions, hasContextualHelp } = chrome;
 
-	const [ activeMetaIcon, setActiveMetaIcon ] =
-		useState< ActiveMetaIcon >( null );
+	const [activeMetaIcon, setActiveMetaIcon] = useState<ActiveMetaIcon>(null);
 
 	// Reverse-direction sync: when an activity-panel tab is clicked AND a
 	// wp-admin dropdown is currently open, close the dropdown. We don't update
 	// React state from this handler (state syncs reactively via the
 	// MutationObserver below), so no setTimeout deferral is needed.
-	useEffect( () => {
-		const handler = ( e: Event ) => {
+	useEffect(() => {
+		const handler = (e: Event) => {
 			const target = e.target as HTMLElement | null;
-			if (
-				! target?.closest( '.woocommerce-layout__activity-panel-tab' )
-			) {
+			if (!target?.closest('.woocommerce-layout__activity-panel-tab')) {
 				return;
 			}
 			document
-				.querySelector< HTMLButtonElement >(
+				.querySelector<HTMLButtonElement>(
 					'#show-settings-link[aria-expanded="true"]'
 				)
 				?.click();
 			document
-				.querySelector< HTMLButtonElement >(
+				.querySelector<HTMLButtonElement>(
 					'#contextual-help-link[aria-expanded="true"]'
 				)
 				?.click();
 		};
-		document.addEventListener( 'click', handler, true );
-		return () => document.removeEventListener( 'click', handler, true );
-	}, [] );
+		document.addEventListener('click', handler, true);
+		return () => document.removeEventListener('click', handler, true);
+	}, []);
 
 	// Keep activeMetaIcon in sync with the actual wp-admin dropdown state by
 	// observing aria-expanded changes on the trigger buttons.
-	useEffect( () => {
-		if ( ! hasScreenOptions && ! hasContextualHelp ) {
-			setActiveMetaIcon( null );
+	useEffect(() => {
+		if (!hasScreenOptions && !hasContextualHelp) {
+			setActiveMetaIcon(null);
 			return;
 		}
-		const screenOptBtn = document.querySelector< HTMLButtonElement >(
+		const screenOptBtn = document.querySelector<HTMLButtonElement>(
 			'#show-settings-link'
 		);
-		const helpBtn = document.querySelector< HTMLButtonElement >(
+		const helpBtn = document.querySelector<HTMLButtonElement>(
 			'#contextual-help-link'
 		);
 		const sync = () => {
 			const screenOpen =
-				screenOptBtn?.getAttribute( 'aria-expanded' ) === 'true';
-			const helpOpen =
-				helpBtn?.getAttribute( 'aria-expanded' ) === 'true';
+				screenOptBtn?.getAttribute('aria-expanded') === 'true';
+			const helpOpen = helpBtn?.getAttribute('aria-expanded') === 'true';
 			let next: ActiveMetaIcon = null;
-			if ( screenOpen ) {
+			if (screenOpen) {
 				next = 'screen-options';
-			} else if ( helpOpen ) {
+			} else if (helpOpen) {
 				next = 'help';
 			}
-			setActiveMetaIcon( next );
+			setActiveMetaIcon(next);
 		};
 		sync();
-		const observer = new MutationObserver( sync );
+		const observer = new MutationObserver(sync);
 		const opts = {
 			attributes: true,
-			attributeFilter: [ 'aria-expanded' ],
+			attributeFilter: ['aria-expanded'],
 		};
-		if ( screenOptBtn ) observer.observe( screenOptBtn, opts );
-		if ( helpBtn ) observer.observe( helpBtn, opts );
+		if (screenOptBtn) observer.observe(screenOptBtn, opts);
+		if (helpBtn) observer.observe(helpBtn, opts);
 		return () => observer.disconnect();
-	}, [ hasScreenOptions, hasContextualHelp ] );
+	}, [hasScreenOptions, hasContextualHelp]);
 
 	const triggerMetaIcon = (
-		which: Exclude< ActiveMetaIcon, null >,
+		which: Exclude<ActiveMetaIcon, null>,
 		triggerId: string
 	) => {
 		// Close any open activity-panel tab so the five icons act as one group.
 		document
-			.querySelector< HTMLButtonElement >(
+			.querySelector<HTMLButtonElement>(
 				'.woocommerce-layout__activity-panel-tab.is-active'
 			)
 			?.click();
@@ -147,22 +141,22 @@ export const useWpAdminChrome = (
 			which === 'screen-options'
 				? '#contextual-help-link'
 				: '#show-settings-link';
-		const otherOpen = document.querySelector< HTMLButtonElement >(
-			`${ otherTriggerId }[aria-expanded="true"]`
+		const otherOpen = document.querySelector<HTMLButtonElement>(
+			`${otherTriggerId}[aria-expanded="true"]`
 		);
 		const openTarget = () =>
-			document.querySelector< HTMLButtonElement >( triggerId )?.click();
-		if ( otherOpen ) {
-			const chain = new MutationObserver( () => {
-				if ( otherOpen.getAttribute( 'aria-expanded' ) !== 'true' ) {
+			document.querySelector<HTMLButtonElement>(triggerId)?.click();
+		if (otherOpen) {
+			const chain = new MutationObserver(() => {
+				if (otherOpen.getAttribute('aria-expanded') !== 'true') {
 					chain.disconnect();
 					openTarget();
 				}
-			} );
-			chain.observe( otherOpen, {
+			});
+			chain.observe(otherOpen, {
 				attributes: true,
-				attributeFilter: [ 'aria-expanded' ],
-			} );
+				attributeFilter: ['aria-expanded'],
+			});
 			otherOpen.click();
 		} else {
 			openTarget();

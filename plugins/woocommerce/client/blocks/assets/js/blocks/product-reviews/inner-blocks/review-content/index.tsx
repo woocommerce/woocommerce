@@ -12,7 +12,7 @@ import edit from './edit';
 import './style.scss';
 
 // @ts-expect-error metadata is not typed.
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	icon,
 	edit,
-} );
+});

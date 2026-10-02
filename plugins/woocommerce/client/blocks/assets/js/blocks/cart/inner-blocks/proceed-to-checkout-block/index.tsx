@@ -12,13 +12,13 @@ import { Edit, Save } from './edit';
 import './style.scss';
 import metadata from './block.json';
 
-registerBlockType( 'woocommerce/proceed-to-checkout-block', {
+registerBlockType('woocommerce/proceed-to-checkout-block', {
 	apiVersion: metadata.apiVersion,
 	title: metadata.title,
 	icon: {
 		src: (
 			<Icon
-				icon={ button }
+				icon={button}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -26,4 +26,4 @@ registerBlockType( 'woocommerce/proceed-to-checkout-block', {
 	attributes,
 	edit: Edit,
 	save: Save,
-} );
+});

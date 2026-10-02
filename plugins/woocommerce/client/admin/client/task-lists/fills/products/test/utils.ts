@@ -13,20 +13,20 @@ import {
 	SETUP_TASKLIST_PRODUCT_TYPES_FILTER,
 } from '../constants';
 
-describe( 'getProductTypes', () => {
-	it( 'should return the product types', () => {
-		expect( getProductTypes() ).toEqual( productTypes );
-	} );
+describe('getProductTypes', () => {
+	it('should return the product types', () => {
+		expect(getProductTypes()).toEqual(productTypes);
+	});
 
-	it( 'should return the product types without excluded items', () => {
+	it('should return the product types without excluded items', () => {
 		expect(
-			getProductTypes( { exclude: [ 'external', 'digital' ] } ).map(
-				( p ) => p.key
+			getProductTypes({ exclude: ['external', 'digital'] }).map(
+				(p) => p.key
 			)
-		).toEqual( [ 'physical', 'variable', 'grouped' ] );
-	} );
+		).toEqual(['physical', 'variable', 'grouped']);
+	});
 
-	it( 'should return the product types with extras from filter and excluded items', () => {
+	it('should return the product types with extras from filter and excluded items', () => {
 		const customProduct = {
 			key: 'custom-product',
 			title: 'Custom product',
@@ -38,43 +38,41 @@ describe( 'getProductTypes', () => {
 		addFilter(
 			SETUP_TASKLIST_PRODUCT_TYPES_FILTER,
 			'wc/admin/tests',
-			( filteredProductTypes ) => {
-				return [ ...filteredProductTypes, customProduct ];
+			(filteredProductTypes) => {
+				return [...filteredProductTypes, customProduct];
 			}
 		);
 
 		expect(
-			getProductTypes( { exclude: [ 'external', 'digital' ] } ).map(
-				( p ) => p.key
+			getProductTypes({ exclude: ['external', 'digital'] }).map(
+				(p) => p.key
 			)
-		).toEqual( [ 'physical', 'variable', 'grouped', 'custom-product' ] );
-	} );
-} );
+		).toEqual(['physical', 'variable', 'grouped', 'custom-product']);
+	});
+});
 
-describe( 'getSurfacedProductTypeKeys', () => {
-	test.each( [
+describe('getSurfacedProductTypeKeys', () => {
+	test.each([
 		{
-			selectedTypes: [ 'physical' ],
+			selectedTypes: ['physical'],
 			expected: onboardingProductTypesToSurfaced.physical,
 		},
 		{
-			selectedTypes: [ 'physical', 'downloads' ],
-			expected: onboardingProductTypesToSurfaced[ 'downloads,physical' ],
+			selectedTypes: ['physical', 'downloads'],
+			expected: onboardingProductTypesToSurfaced['downloads,physical'],
 		},
 		{
-			selectedTypes: [ 'physical', 'downloads', 'membership', 'booking' ],
-			expected: onboardingProductTypesToSurfaced[ 'downloads,physical' ],
+			selectedTypes: ['physical', 'downloads', 'membership', 'booking'],
+			expected: onboardingProductTypesToSurfaced['downloads,physical'],
 		},
 		{
 			selectedTypes: [],
 			expected: onboardingProductTypesToSurfaced.physical,
 		},
-	] )(
+	])(
 		'should return expected surfaced product keys when onboarding product type contains $selected',
-		( { selectedTypes, expected } ) => {
-			expect( getSurfacedProductTypeKeys( selectedTypes ) ).toEqual(
-				expected
-			);
+		({ selectedTypes, expected }) => {
+			expect(getSurfacedProductTypeKeys(selectedTypes)).toEqual(expected);
 		}
 	);
-} );
+});

@@ -17,47 +17,47 @@ import { onboardingStore } from '@woocommerce/data';
  * returning the URL.
  */
 export class Connect extends Component {
-	constructor( props ) {
-		super( props );
+	constructor(props) {
+		super(props);
 		this.state = {
 			isAwaitingRedirect: false,
 			isRedirecting: false,
 		};
 
-		this.connectJetpack = this.connectJetpack.bind( this );
-		props.setIsPending( false );
+		this.connectJetpack = this.connectJetpack.bind(this);
+		props.setIsPending(false);
 	}
 
-	componentDidUpdate( prevProps ) {
+	componentDidUpdate(prevProps) {
 		const { createNotice, error, onError, isRequesting } = this.props;
 
-		if ( error && error !== prevProps.error ) {
-			if ( onError ) {
+		if (error && error !== prevProps.error) {
+			if (onError) {
 				onError();
 			}
-			createNotice( 'error', error );
+			createNotice('error', error);
 		}
 
 		if (
 			this.state.isAwaitingRedirect &&
-			! this.state.isRedirecting &&
-			! isRequesting &&
-			! error
+			!this.state.isRedirecting &&
+			!isRequesting &&
+			!error
 		) {
-			this.setState( { isRedirecting: true }, () => {
+			this.setState({ isRedirecting: true }, () => {
 				window.location = this.props.jetpackAuthUrl;
-			} );
+			});
 		}
 	}
 
 	connectJetpack() {
 		const { onConnect } = this.props;
 
-		if ( onConnect ) {
+		if (onConnect) {
 			onConnect();
 		}
 
-		this.setState( { isAwaitingRedirect: true } );
+		this.setState({ isAwaitingRedirect: true });
 	}
 
 	render() {
@@ -65,32 +65,29 @@ export class Connect extends Component {
 
 		return (
 			<Fragment>
-				{ error ? (
-					<Button
-						isPrimary
-						onClick={ () => window.location.reload() }
-					>
-						{ __( 'Retry', 'woocommerce' ) }
+				{error ? (
+					<Button isPrimary onClick={() => window.location.reload()}>
+						{__('Retry', 'woocommerce')}
 					</Button>
 				) : (
 					<Button
-						isBusy={ this.state.isAwaitingRedirect }
+						isBusy={this.state.isAwaitingRedirect}
 						isPrimary
-						onClick={ this.connectJetpack }
+						onClick={this.connectJetpack}
 					>
-						{ __( 'Connect', 'woocommerce' ) }
+						{__('Connect', 'woocommerce')}
 					</Button>
-				) }
-				{ onSkip && (
-					<Button onClick={ onSkip }>
-						{ skipText || __( 'No thanks', 'woocommerce' ) }
+				)}
+				{onSkip && (
+					<Button onClick={onSkip}>
+						{skipText || __('No thanks', 'woocommerce')}
 					</Button>
-				) }
-				{ onAbort && (
-					<Button onClick={ onAbort }>
-						{ abortText || __( 'Abort', 'woocommerce' ) }
+				)}
+				{onAbort && (
+					<Button onClick={onAbort}>
+						{abortText || __('Abort', 'woocommerce')}
 					</Button>
-				) }
+				)}
 			</Fragment>
 		);
 	}
@@ -159,25 +156,25 @@ Connect.defaultProps = {
 };
 
 export default compose(
-	withSelect( ( select, props ) => {
-		const { getJetpackAuthUrl, isResolving } = select( onboardingStore );
+	withSelect((select, props) => {
+		const { getJetpackAuthUrl, isResolving } = select(onboardingStore);
 
 		const queryArgs = {
 			redirectUrl: props.redirectUrl || window.location.href,
 			from: props.from,
 		};
 
-		const jetpackAuthUrlResponse = getJetpackAuthUrl( queryArgs );
-		const isRequesting = isResolving( 'getJetpackAuthUrl', [ queryArgs ] );
+		const jetpackAuthUrlResponse = getJetpackAuthUrl(queryArgs);
+		const isRequesting = isResolving('getJetpackAuthUrl', [queryArgs]);
 
 		let error;
 
-		if ( ! isResolving && ! jetpackAuthUrlResponse ) {
-			error = __( 'Error requesting connection URL.', 'woocommerce' );
+		if (!isResolving && !jetpackAuthUrlResponse) {
+			error = __('Error requesting connection URL.', 'woocommerce');
 		}
 
-		if ( jetpackAuthUrlResponse?.errors?.length ) {
-			error = jetpackAuthUrlResponse?.errors[ 0 ];
+		if (jetpackAuthUrlResponse?.errors?.length) {
+			error = jetpackAuthUrlResponse?.errors[0];
 		}
 
 		return {
@@ -185,12 +182,12 @@ export default compose(
 			isRequesting,
 			jetpackAuthUrl: jetpackAuthUrlResponse.url,
 		};
-	} ),
-	withDispatch( ( dispatch ) => {
-		const { createNotice } = dispatch( 'core/notices' );
+	}),
+	withDispatch((dispatch) => {
+		const { createNotice } = dispatch('core/notices');
 
 		return {
 			createNotice,
 		};
-	} )
-)( Connect );
+	})
+)(Connect);

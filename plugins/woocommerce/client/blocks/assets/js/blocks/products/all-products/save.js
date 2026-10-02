@@ -8,19 +8,19 @@ import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
  */
 import { getBlockClassName } from '../utils.js';
 
-export default function save( { attributes } ) {
+export default function save({ attributes }) {
 	const dataAttributes = {};
-	Object.keys( attributes )
+	Object.keys(attributes)
 		.sort()
-		.forEach( ( key ) => {
-			dataAttributes[ key ] = attributes[ key ];
-		} );
-	const blockProps = useBlockProps.save( {
-		className: getBlockClassName( 'wc-block-all-products', attributes ),
-		'data-attributes': JSON.stringify( dataAttributes ),
-	} );
+		.forEach((key) => {
+			dataAttributes[key] = attributes[key];
+		});
+	const blockProps = useBlockProps.save({
+		className: getBlockClassName('wc-block-all-products', attributes),
+		'data-attributes': JSON.stringify(dataAttributes),
+	});
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<InnerBlocks.Content />
 		</div>
 	);

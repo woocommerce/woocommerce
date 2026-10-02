@@ -30,7 +30,7 @@ type shippingAdminLink = {
 	description: string;
 };
 
-export const Edit = ( {
+export const Edit = ({
 	attributes,
 	setAttributes,
 }: {
@@ -40,8 +40,8 @@ export const Edit = ( {
 		showStepNumber: boolean;
 		className: string;
 	};
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ): JSX.Element | null => {
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}): JSX.Element | null => {
 	const globalShippingMethods = getSetting(
 		'globalShippingMethods'
 	) as shippingAdminLink[];
@@ -51,108 +51,106 @@ export const Edit = ( {
 
 	const { showShippingMethods } = useCheckoutAddress();
 
-	if ( ! showShippingMethods ) {
+	if (!showShippingMethods) {
 		return null;
 	}
 
 	return (
 		<FormStepBlock
-			attributes={ attributes }
-			setAttributes={ setAttributes }
-			className={ clsx(
+			attributes={attributes}
+			setAttributes={setAttributes}
+			className={clsx(
 				'wc-block-checkout__shipping-option',
 				attributes?.className
-			) }
+			)}
 		>
 			<InspectorControls>
-				<PanelBody
-					title={ __( 'Shipping Calculations', 'woocommerce' ) }
-				>
+				<PanelBody title={__('Shipping Calculations', 'woocommerce')}>
 					<p className="wc-block-checkout__controls-text">
-						{ __(
+						{__(
 							'Options that control shipping can be managed in your store settings.',
 							'woocommerce'
-						) }
+						)}
 					</p>
 					<ExternalLink
-						href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping&section=options` }
+						href={`${ADMIN_URL}admin.php?page=wc-settings&tab=shipping&section=options`}
 					>
-						{ __( 'Manage shipping options', 'woocommerce' ) }
-					</ExternalLink>{ ' ' }
+						{__('Manage shipping options', 'woocommerce')}
+					</ExternalLink>{' '}
 				</PanelBody>
-				{ globalShippingMethods.length > 0 && (
-					<PanelBody title={ __( 'Methods', 'woocommerce' ) }>
+				{globalShippingMethods.length > 0 && (
+					<PanelBody title={__('Methods', 'woocommerce')}>
 						<p className="wc-block-checkout__controls-text">
-							{ __(
+							{__(
 								'The following shipping integrations are active on your store.',
 								'woocommerce'
-							) }
+							)}
 						</p>
-						{ globalShippingMethods.map( ( method ) => {
+						{globalShippingMethods.map((method) => {
 							return (
 								<ExternalLinkCard
-									key={ method.id }
-									href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping&section=${ method.id }` }
-									title={ method.title }
-									description={ method.description }
+									key={method.id}
+									href={`${ADMIN_URL}admin.php?page=wc-settings&tab=shipping&section=${method.id}`}
+									title={method.title}
+									description={method.description}
 								/>
 							);
-						} ) }
+						})}
 						<ExternalLink
-							href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping` }
+							href={`${ADMIN_URL}admin.php?page=wc-settings&tab=shipping`}
 						>
-							{ __( 'Manage shipping methods', 'woocommerce' ) }
+							{__('Manage shipping methods', 'woocommerce')}
 						</ExternalLink>
 					</PanelBody>
-				) }
-				{ activeShippingZones.length && (
-					<PanelBody title={ __( 'Shipping Zones', 'woocommerce' ) }>
+				)}
+				{activeShippingZones.length && (
+					<PanelBody title={__('Shipping Zones', 'woocommerce')}>
 						<p className="wc-block-checkout__controls-text">
-							{ __(
+							{__(
 								'Shipping Zones can be made managed in your store settings.',
 								'woocommerce'
-							) }
+							)}
 						</p>
-						{ activeShippingZones.map( ( zone ) => {
+						{activeShippingZones.map((zone) => {
 							return (
 								<ExternalLinkCard
-									key={ zone.id }
-									href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping&zone_id=${ zone.id }` }
-									title={ zone.title }
-									description={ zone.description }
+									key={zone.id}
+									href={`${ADMIN_URL}admin.php?page=wc-settings&tab=shipping&zone_id=${zone.id}`}
+									title={zone.title}
+									description={zone.description}
 								/>
 							);
-						} ) }
+						})}
 					</PanelBody>
-				) }
+				)}
 			</InspectorControls>
 			<Noninteractive>
 				<Block
 					noShippingPlaceholder={
 						<ConfigurePlaceholder
-							icon={ shipping }
-							label={ __( 'Shipping options', 'woocommerce' ) }
-							description={ __(
+							icon={shipping}
+							label={__('Shipping options', 'woocommerce')}
+							description={__(
 								'Your store does not have any Shipping Options configured. Once you have added your Shipping Options they will appear here.',
 								'woocommerce'
-							) }
-							buttonLabel={ __(
+							)}
+							buttonLabel={__(
 								'Configure Shipping Options',
 								'woocommerce'
-							) }
-							buttonHref={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping` }
+							)}
+							buttonHref={`${ADMIN_URL}admin.php?page=wc-settings&tab=shipping`}
 						/>
 					}
 				/>
 			</Noninteractive>
-			<AdditionalFields block={ innerBlockAreas.SHIPPING_METHODS } />
+			<AdditionalFields block={innerBlockAreas.SHIPPING_METHODS} />
 		</FormStepBlock>
 	);
 };
 
 export const Save = (): JSX.Element => {
 	return (
-		<div { ...useBlockProps.save() }>
+		<div {...useBlockProps.save()}>
 			<AdditionalFieldsContent />
 		</div>
 	);

@@ -15,20 +15,20 @@ const deprecated = [
 		attributes: metadata.attributes,
 		save: () => {
 			return (
-				<div { ...useBlockProps.save() }>
+				<div {...useBlockProps.save()}>
 					<InnerBlocks.Content />
 				</div>
 			);
 		},
 		supports: metadata.supports,
-		migrate: ( { attributes } ) => {
+		migrate: ({ attributes }) => {
 			return [
 				attributes,
 				[
 					createBlock(
 						'woocommerce/cart-order-summary-heading-block',
 						{
-							content: __( 'Cart totals', 'woocommerce' ),
+							content: __('Cart totals', 'woocommerce'),
 						},
 						[]
 					),
@@ -71,9 +71,9 @@ const deprecated = [
 				],
 			];
 		},
-		isEligible: ( attributes, innerBlocks ) => {
-			return ! innerBlocks.some(
-				( block ) =>
+		isEligible: (attributes, innerBlocks) => {
+			return !innerBlocks.some(
+				(block) =>
 					block.name === 'woocommerce/cart-order-summary-totals-block'
 			);
 		},

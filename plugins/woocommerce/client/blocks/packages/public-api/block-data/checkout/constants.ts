@@ -28,7 +28,7 @@ export enum STATUS {
 const preloadedCheckoutData = getSetting(
 	'checkoutData',
 	{}
-) as Partial< CheckoutResponseSuccess >;
+) as Partial<CheckoutResponseSuccess>;
 
 export const checkoutData = {
 	order_id: 0,
@@ -36,5 +36,5 @@ export const checkoutData = {
 	billing_address: {} as BillingAddress,
 	shipping_address: {} as ShippingAddress,
 	additional_fields: {} as OrderFormValues,
-	...( preloadedCheckoutData || {} ),
+	...(preloadedCheckoutData || {}),
 };

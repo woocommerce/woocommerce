@@ -17,25 +17,25 @@ interface ProductMetadataProps {
 	variation?: CartVariationItem[];
 }
 
-const ProductMetadata = ( {
+const ProductMetadata = ({
 	shortDescription = '',
 	fullDescription = '',
 	itemData = [],
 	variation = [],
-}: ProductMetadataProps ): JSX.Element => {
+}: ProductMetadataProps): JSX.Element => {
 	return (
 		<div className="wc-block-components-product-metadata">
 			<ProductSummary
 				className="wc-block-components-product-metadata__description"
-				shortDescription={ shortDescription }
-				fullDescription={ fullDescription }
+				shortDescription={shortDescription}
+				fullDescription={fullDescription}
 			/>
-			<ProductDetails details={ itemData } />
+			<ProductDetails details={itemData} />
 			<ProductDetails
-				details={ variation.map( ( { attribute = '', value } ) => ( {
+				details={variation.map(({ attribute = '', value }) => ({
 					key: attribute,
 					value,
-				} ) ) }
+				}))}
 			/>
 		</div>
 	);

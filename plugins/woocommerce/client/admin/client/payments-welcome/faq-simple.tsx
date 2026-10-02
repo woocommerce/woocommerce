@@ -12,14 +12,14 @@ import strings from './strings';
 const FrequentlyAskedQuestionsSimple = () => {
 	return (
 		<Card className="woopayments-welcome-page__faq">
-			<Icon icon={ help } />
-			<span>{ strings.faq.haveQuestions } </span>
+			<Icon icon={help} />
+			<span>{strings.faq.haveQuestions} </span>
 			<a
 				href="https://woocommerce.com/my-account/tickets/"
 				target="_blank"
 				rel="noreferrer"
 			>
-				{ strings.faq.getInTouch }
+				{strings.faq.getInTouch}
 			</a>
 		</Card>
 	);

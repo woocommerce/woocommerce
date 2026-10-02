@@ -18,57 +18,57 @@ interface MultiProductPickerProps extends ProductCollectionEditComponentProps {
 	onDone: () => void;
 }
 
-const MultiProductPicker = ( props: MultiProductPickerProps ) => {
+const MultiProductPicker = (props: MultiProductPickerProps) => {
 	const { attributes, onDone } = props;
 	const blockProps = useBlockProps();
 
-	const collection = getCollectionByName( attributes.collection );
+	const collection = getCollectionByName(attributes.collection);
 
 	// Convert string IDs to numbers for ProductsControl.
 	const selectedProductIds = (
 		attributes.query?.woocommerceHandPickedProducts || []
-	).map( Number );
+	).map(Number);
 
 	const hasSelectedProducts = selectedProductIds.length > 0;
 
-	if ( ! collection ) {
+	if (!collection) {
 		return null;
 	}
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<Placeholder className="wc-block-editor-product-collection__product-picker">
 				<div className="wc-block-editor-product-collection__product-picker-info">
 					<Icon
-						icon={ info }
+						icon={info}
 						className="wc-block-editor-product-collection__info-icon"
 					/>
 					<span>
-						{ __(
+						{__(
 							'Select products to display in this collection.',
 							'woocommerce'
-						) }
+						)}
 					</span>
 				</div>
 				<div className="wc-block-editor-product-collection__product-picker-selection">
-					{ /* @ts-expect-error Props provided by withSearchedProducts HOC */ }
+					{/* @ts-expect-error Props provided by withSearchedProducts HOC */}
 					<ProductsControl
-						selected={ selectedProductIds }
-						onChange={ ( value = [] ) => {
-							const ids = value.map( ( { id }: { id: number } ) =>
-								String( id )
+						selected={selectedProductIds}
+						onChange={(value = []) => {
+							const ids = value.map(({ id }: { id: number }) =>
+								String(id)
 							);
-							setQueryAttribute( props, {
+							setQueryAttribute(props, {
 								woocommerceHandPickedProducts: ids,
-							} );
-						} }
+							});
+						}}
 					/>
 					<Button
 						variant="primary"
-						onClick={ onDone }
-						disabled={ ! hasSelectedProducts }
+						onClick={onDone}
+						disabled={!hasSelectedProducts}
 					>
-						{ __( 'Done', 'woocommerce' ) }
+						{__('Done', 'woocommerce')}
 					</Button>
 				</div>
 			</Placeholder>

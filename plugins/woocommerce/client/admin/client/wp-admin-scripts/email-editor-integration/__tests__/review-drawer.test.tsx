@@ -13,13 +13,13 @@ import type { ChangeSummary } from '../hooks/use-change-summary';
 const mockUseChangeSummary = jest.fn();
 const mockUseApplyUpdate = jest.fn();
 
-jest.mock( '../hooks/use-change-summary', () => ( {
+jest.mock('../hooks/use-change-summary', () => ({
 	useChangeSummary: () => mockUseChangeSummary(),
-} ) );
+}));
 
-jest.mock( '../hooks/use-apply-update', () => ( {
+jest.mock('../hooks/use-apply-update', () => ({
 	useApplyUpdate: () => mockUseApplyUpdate(),
-} ) );
+}));
 
 const summary: ChangeSummary = {
 	version_from: '1.0.0',
@@ -34,7 +34,7 @@ const summary: ChangeSummary = {
 			after: 'Core text one',
 			occurrence: 1,
 			total: 2,
-			path: [ 0 ],
+			path: [0],
 			auto_resolvable: false,
 		},
 		{
@@ -43,7 +43,7 @@ const summary: ChangeSummary = {
 			after: 'Core text two',
 			occurrence: 2,
 			total: 2,
-			path: [ 1 ],
+			path: [1],
 			auto_resolvable: false,
 		},
 	],
@@ -53,120 +53,118 @@ const summary: ChangeSummary = {
 	cache_hit: false,
 };
 
-describe( 'ReviewDrawer', () => {
-	afterEach( () => {
+describe('ReviewDrawer', () => {
+	afterEach(() => {
 		jest.clearAllMocks();
-	} );
+	});
 
-	it( 'applies only an explicitly selected core conflict and closes after success', async () => {
-		const apply = jest.fn().mockResolvedValue( { status: 'applied' } );
+	it('applies only an explicitly selected core conflict and closes after success', async () => {
+		const apply = jest.fn().mockResolvedValue({ status: 'applied' });
 		const onOpenChange = jest.fn();
-		mockUseChangeSummary.mockReturnValue( {
+		mockUseChangeSummary.mockReturnValue({
 			summary,
 			isLoading: false,
 			error: null,
 			refetch: jest.fn(),
-		} );
-		mockUseApplyUpdate.mockReturnValue( { apply, isApplying: false } );
+		});
+		mockUseApplyUpdate.mockReturnValue({ apply, isApplying: false });
 
 		render(
 			<ReviewDrawer
-				postId={ 123 }
+				postId={123}
 				emailTitle="New order"
 				isOpen
-				onOpenChange={ onOpenChange }
+				onOpenChange={onOpenChange}
 			/>
 		);
 
-		const conflictGroups = screen.getAllByRole( 'radiogroup', {
+		const conflictGroups = screen.getAllByRole('radiogroup', {
 			name: 'Choose which version to apply',
-		} );
-		expect( conflictGroups ).toHaveLength( 2 );
-		for ( const conflictGroup of conflictGroups ) {
+		});
+		expect(conflictGroups).toHaveLength(2);
+		for (const conflictGroup of conflictGroups) {
 			expect(
-				within( conflictGroup ).getByRole( 'radio', {
+				within(conflictGroup).getByRole('radio', {
 					name: /keep yours/i,
-				} )
-			).toHaveAttribute( 'aria-checked', 'true' );
+				})
+			).toHaveAttribute('aria-checked', 'true');
 			expect(
-				within( conflictGroup ).getByRole( 'radio', {
+				within(conflictGroup).getByRole('radio', {
 					name: /use core/i,
-				} )
-			).toHaveAttribute( 'aria-checked', 'false' );
+				})
+			).toHaveAttribute('aria-checked', 'false');
 		}
 
 		await userEvent.click(
-			within( conflictGroups[ 0 ] ).getByRole( 'radio', {
+			within(conflictGroups[0]).getByRole('radio', {
 				name: /use core/i,
-			} )
+			})
 		);
 
 		expect(
-			within( conflictGroups[ 0 ] ).getByRole( 'radio', {
+			within(conflictGroups[0]).getByRole('radio', {
 				name: /use core/i,
-			} )
-		).toHaveAttribute( 'aria-checked', 'true' );
+			})
+		).toHaveAttribute('aria-checked', 'true');
 		expect(
-			within( conflictGroups[ 0 ] ).getByRole( 'radio', {
+			within(conflictGroups[0]).getByRole('radio', {
 				name: /keep yours/i,
-			} )
-		).toHaveAttribute( 'aria-checked', 'false' );
+			})
+		).toHaveAttribute('aria-checked', 'false');
 		expect(
-			within( conflictGroups[ 1 ] ).getByRole( 'radio', {
+			within(conflictGroups[1]).getByRole('radio', {
 				name: /keep yours/i,
-			} )
-		).toHaveAttribute( 'aria-checked', 'true' );
+			})
+		).toHaveAttribute('aria-checked', 'true');
 		expect(
-			within( conflictGroups[ 1 ] ).getByRole( 'radio', {
+			within(conflictGroups[1]).getByRole('radio', {
 				name: /use core/i,
-			} )
-		).toHaveAttribute( 'aria-checked', 'false' );
+			})
+		).toHaveAttribute('aria-checked', 'false');
 
 		await userEvent.click(
-			screen.getByRole( 'button', { name: 'Apply (2)' } )
+			screen.getByRole('button', { name: 'Apply (2)' })
 		);
 
-		await waitFor( () =>
-			expect( apply ).toHaveBeenCalledWith( [
-				{ path: [ 0 ], decision: 'use_core' },
-			] )
+		await waitFor(() =>
+			expect(apply).toHaveBeenCalledWith([
+				{ path: [0], decision: 'use_core' },
+			])
 		);
-		expect( apply ).toHaveBeenCalledTimes( 1 );
-		await waitFor( () =>
-			expect( onOpenChange ).toHaveBeenCalledWith( false )
-		);
-		expect( onOpenChange ).toHaveBeenCalledTimes( 1 );
-	} );
+		expect(apply).toHaveBeenCalledTimes(1);
+		await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
+		expect(onOpenChange).toHaveBeenCalledTimes(1);
+	});
 
-	it( 'stays open when the apply does not succeed', async () => {
+	it('stays open when the apply does not succeed', async () => {
 		// useApplyUpdate resolves null when the request fails, and the drawer must
 		// keep the merchant's choices on screen rather than close on them.
-		const apply = jest.fn().mockResolvedValue( null );
+		const apply = jest.fn().mockResolvedValue(null);
 		const onOpenChange = jest.fn();
-		mockUseChangeSummary.mockReturnValue( {
+		mockUseChangeSummary.mockReturnValue({
 			summary,
 			isLoading: false,
 			error: null,
 			refetch: jest.fn(),
-		} );
-		mockUseApplyUpdate.mockReturnValue( { apply, isApplying: false } );
+		});
+		mockUseApplyUpdate.mockReturnValue({ apply, isApplying: false });
 
 		render(
 			<ReviewDrawer
-				postId={ 123 }
+				postId={123}
 				emailTitle="New order"
 				isOpen
-				onOpenChange={ onOpenChange }
+				onOpenChange={onOpenChange}
 			/>
 		);
 
 		await userEvent.click(
-			screen.getByRole( 'button', { name: 'Apply (2)' } )
+			screen.getByRole('button', { name: 'Apply (2)' })
 		);
 
-		await waitFor( () => expect( apply ).toHaveBeenCalledTimes( 1 ) );
+		await waitFor(() => expect(apply).toHaveBeenCalledTimes(1));
 		// Let the rejected-result branch settle before asserting it closed nothing.
-		await apply.mock.results[ 0 ].value;
-		expect( onOpenChange ).not.toHaveBeenCalled();
-	} );
-} );
+		await apply.mock.results[0].value;
+		expect(onOpenChange).not.toHaveBeenCalled();
+	});
+});

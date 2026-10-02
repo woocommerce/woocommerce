@@ -11,24 +11,24 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { createNoticesFromResponse } from '~/lib/notices';
 
-export function connectWcpay( createNotice, onCatch ) {
+export function connectWcpay(createNotice, onCatch) {
 	const errorMessage = __(
 		'There was an error connecting to WooPayments. Please try again or connect later in store settings.',
 		'woocommerce'
 	);
-	apiFetch( {
+	apiFetch({
 		path: WC_ADMIN_NAMESPACE + '/plugins/connect-wcpay',
 		method: 'POST',
-	} )
-		.then( ( response ) => {
+	})
+		.then((response) => {
 			window.location = response.connectUrl;
-		} )
-		.catch( () => {
-			createNotice( 'error', errorMessage );
-			if ( typeof onCatch === 'function' ) {
+		})
+		.catch(() => {
+			createNotice('error', errorMessage);
+			if (typeof onCatch === 'function') {
 				onCatch();
 			}
-		} );
+		});
 }
 
 export function installActivateAndConnectWcpay(
@@ -36,23 +36,23 @@ export function installActivateAndConnectWcpay(
 	createNotice,
 	installAndActivatePlugins
 ) {
-	installAndActivatePlugins( [ 'woocommerce-payments' ] )
-		.then( () => {
-			recordEvent( 'woocommerce_payments_install', {
+	installAndActivatePlugins(['woocommerce-payments'])
+		.then(() => {
+			recordEvent('woocommerce_payments_install', {
 				context: 'tasklist',
-			} );
+			});
 
-			connectWcpay( createNotice, () => {
+			connectWcpay(createNotice, () => {
 				reject();
-			} );
-		} )
-		.catch( ( error ) => {
-			createNoticesFromResponse( error );
+			});
+		})
+		.catch((error) => {
+			createNoticesFromResponse(error);
 			reject();
-		} );
+		});
 }
 
-export function isWCPaySupported( countryCode ) {
+export function isWCPaySupported(countryCode) {
 	const supportedCountries = [
 		'US',
 		'PR',
@@ -95,5 +95,5 @@ export function isWCPaySupported( countryCode ) {
 		'AE',
 	];
 
-	return supportedCountries.includes( countryCode );
+	return supportedCountries.includes(countryCode);
 }

@@ -20,36 +20,36 @@ export type DismissState = {
  * @param optionName The option name used to persist the dismissal.
  * @return The current dismissal state and a callback to dismiss.
  */
-export const useOptionDismiss = ( optionName: string ): DismissState => {
+export const useOptionDismiss = (optionName: string): DismissState => {
 	const { isDismissed, hasResolved } = useSelect(
-		( select ) => {
-			const { getOption, hasFinishedResolution } = select( optionsStore );
+		(select) => {
+			const { getOption, hasFinishedResolution } = select(optionsStore);
 
 			// Read the option first so the resolver is always triggered. Calling
 			// `getOption` is what kicks off the fetch; gating it behind the
 			// resolution check (e.g. via `||` short-circuit) would mean it is
 			// never called while unresolved, so resolution would never start and
 			// the card would stay hidden forever.
-			const value = getOption( optionName );
+			const value = getOption(optionName);
 
-			const optionHasResolved = hasFinishedResolution( 'getOption', [
+			const optionHasResolved = hasFinishedResolution('getOption', [
 				optionName,
-			] );
+			]);
 
 			// Treat "not yet resolved" as dismissed so the card does not flash
 			// before the option value is known.
 			return {
-				isDismissed: ! optionHasResolved || value === 'yes',
+				isDismissed: !optionHasResolved || value === 'yes',
 				hasResolved: optionHasResolved,
 			};
 		},
-		[ optionName ]
+		[optionName]
 	);
 
-	const { updateOptions } = useDispatch( optionsStore );
+	const { updateOptions } = useDispatch(optionsStore);
 
 	const onDismiss = () => {
-		void updateOptions( { [ optionName ]: 'yes' } );
+		void updateOptions({ [optionName]: 'yes' });
 	};
 
 	return { isDismissed, hasResolved, onDismiss };

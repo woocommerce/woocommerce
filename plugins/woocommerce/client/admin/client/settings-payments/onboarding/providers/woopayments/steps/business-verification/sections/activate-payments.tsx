@@ -17,68 +17,68 @@ const ActivatePayments: React.FC = () => {
 	const { currentStep, sessionEntryPoint, refreshStoreData } =
 		useOnboardingContext();
 	const { nextStep } = useStepperContext();
-	const [ isContinueButtonLoading, setIsContinueButtonLoading ] =
-		useState( false );
+	const [isContinueButtonLoading, setIsContinueButtonLoading] =
+		useState(false);
 
 	const handleContinue = () => {
-		recordPaymentsOnboardingEvent( 'woopayments_onboarding_modal_click', {
+		recordPaymentsOnboardingEvent('woopayments_onboarding_modal_click', {
 			step: currentStep?.id || 'unknown',
 			sub_step_id: 'activate',
 			action: 'activate_payments',
 			source: sessionEntryPoint,
-		} );
+		});
 
-		if ( ! currentStep?.actions?.test_account_disable?.href ) {
+		if (!currentStep?.actions?.test_account_disable?.href) {
 			// If there is no test account disable URL, we can proceed to the next step directly.
 			return nextStep();
 		}
 
-		setIsContinueButtonLoading( true );
+		setIsContinueButtonLoading(true);
 
 		// Disable test account and proceed with business verification.
-		apiFetch( {
+		apiFetch({
 			url: currentStep?.actions?.test_account_disable?.href,
 			method: 'POST',
 			data: {
-				from: 'step_' + ( currentStep?.id || 'unknown' ),
+				from: 'step_' + (currentStep?.id || 'unknown'),
 				source: sessionEntryPoint,
 			},
-		} )
-			.then( async () => {
+		})
+			.then(async () => {
 				// Refresh the entire onboarding store data after disabling the test account.
 				// This ensures that the latest data is available for the next sub-steps.
-				await ( typeof refreshStoreData === 'function'
+				await (typeof refreshStoreData === 'function'
 					? refreshStoreData()
-					: Promise.resolve() );
+					: Promise.resolve());
 				// Stop loading before navigating to avoid setState-after-unmount.
-				setIsContinueButtonLoading( false );
+				setIsContinueButtonLoading(false);
 				// Navigate to the business sub-step.
 				return nextStep();
-			} )
-			.catch( () => {
+			})
+			.catch(() => {
 				// Handle any errors that occur during the process.
-				setIsContinueButtonLoading( false );
+				setIsContinueButtonLoading(false);
 				// Error tracking is handled on the backend, so we don't need to do anything here.
-			} );
+			});
 	};
 
 	return (
 		<>
 			<h1 className="stepper__heading">
-				{ strings.steps.activate.heading }
+				{strings.steps.activate.heading}
 			</h1>
 			<p className="stepper__subheading">
-				{ strings.steps.activate.subheading }
+				{strings.steps.activate.subheading}
 			</p>
 			<div className="stepper__content">
 				<Button
 					variant="primary"
 					className="stepper__cta"
-					onClick={ handleContinue }
-					isBusy={ isContinueButtonLoading }
-					disabled={ isContinueButtonLoading }
+					onClick={handleContinue}
+					isBusy={isContinueButtonLoading}
+					disabled={isContinueButtonLoading}
 				>
-					{ strings.steps.activate.cta }
+					{strings.steps.activate.cta}
 				</Button>
 			</div>
 		</>

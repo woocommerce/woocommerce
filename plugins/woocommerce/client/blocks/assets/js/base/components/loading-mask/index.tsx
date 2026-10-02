@@ -18,33 +18,33 @@ export interface LoadingMaskProps {
 	isLoading?: boolean;
 }
 // @todo Find a way to block buttons/form components when LoadingMask isLoading
-const LoadingMask = ( {
+const LoadingMask = ({
 	children,
 	className,
 	screenReaderLabel,
 	showSpinner = false,
 	isLoading = true,
-}: LoadingMaskProps ): JSX.Element => {
+}: LoadingMaskProps): JSX.Element => {
 	return (
 		<div
-			className={ clsx( className, {
+			className={clsx(className, {
 				'wc-block-components-loading-mask': isLoading,
-			} ) }
+			})}
 		>
-			{ isLoading && showSpinner && <Spinner /> }
+			{isLoading && showSpinner && <Spinner />}
 			<div
-				className={ clsx( {
+				className={clsx({
 					'wc-block-components-loading-mask__children': isLoading,
-				} ) }
-				aria-hidden={ isLoading }
+				})}
+				aria-hidden={isLoading}
 			>
-				{ children }
+				{children}
 			</div>
-			{ isLoading && (
+			{isLoading && (
 				<span className="screen-reader-text">
-					{ screenReaderLabel || __( 'Loading…', 'woocommerce' ) }
+					{screenReaderLabel || __('Loading…', 'woocommerce')}
 				</span>
-			) }
+			)}
 		</div>
 	);
 };

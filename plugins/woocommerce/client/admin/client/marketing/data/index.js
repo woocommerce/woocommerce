@@ -13,12 +13,12 @@ import * as selectors from './selectors';
 import * as resolvers from './resolvers';
 import reducer from './reducer';
 
-export const store = createReduxStore( STORE_KEY, {
+export const store = createReduxStore(STORE_KEY, {
 	actions,
 	selectors,
 	resolvers,
 	controls,
 	reducer,
-} );
+});
 
-register( store );
+register(store);

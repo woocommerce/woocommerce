@@ -14,50 +14,50 @@ import { renderMenu } from './render-menu';
 import './multiple-selector.scss';
 
 type Props = {
-	options: Array< { label: string; value: string } >;
+	options: Array<{ label: string; value: string }>;
 	onSelect: (
-		selectedOptions: Array< { label: string; value: string } >
+		selectedOptions: Array<{ label: string; value: string }>
 	) => void;
-	selectedOptions?: Array< { label: string; value: string } >;
+	selectedOptions?: Array<{ label: string; value: string }>;
 	placeholder?: string;
-	onOpenClose?: ( isOpen: boolean ) => void;
+	onOpenClose?: (isOpen: boolean) => void;
 };
 
-export const MultipleSelector = ( {
+export const MultipleSelector = ({
 	options,
 	onSelect,
 	selectedOptions = [],
-	placeholder = __( 'Select platforms', 'woocommerce' ),
+	placeholder = __('Select platforms', 'woocommerce'),
 	onOpenClose = () => {},
-}: Props ) => {
+}: Props) => {
 	return (
 		<SelectControl
 			className="woocommerce-profiler-platform-selector"
 			label=""
 			multiple
 			__experimentalOpenMenuOnFocus
-			readOnlyWhenClosed={ false }
-			items={ options }
-			getFilteredItems={ ( allItems ) => allItems }
-			selected={ selectedOptions }
-			inputProps={ {
+			readOnlyWhenClosed={false}
+			items={options}
+			getFilteredItems={(allItems) => allItems}
+			selected={selectedOptions}
+			inputProps={{
 				readOnly: true,
 				'aria-readonly': true,
 				'aria-label': __(
 					'Use up and down arrow keys to navigate',
 					'woocommerce'
 				),
-			} }
-			onKeyDown={ ( e ) => {
-				if ( e.key.length <= 1 ) {
+			}}
+			onKeyDown={(e) => {
+				if (e.key.length <= 1) {
 					e.preventDefault();
 					return false;
 				}
-			} }
-			placeholder={ selectedOptions.length ? '' : placeholder }
-			stateReducer={ ( state, actionAndChanges ) => {
+			}}
+			placeholder={selectedOptions.length ? '' : placeholder}
+			stateReducer={(state, actionAndChanges) => {
 				const { changes, type } = actionAndChanges;
-				switch ( type ) {
+				switch (type) {
 					case selectControlStateChangeTypes.ControlledPropUpdatedSelectedItem:
 						return {
 							...changes,
@@ -71,7 +71,7 @@ export const MultipleSelector = ( {
 							highlightedIndex: state.highlightedIndex,
 						};
 					case selectControlStateChangeTypes.InputBlur:
-						if ( state.isOpen && actionAndChanges.selectItem ) {
+						if (state.isOpen && actionAndChanges.selectItem) {
 							// Prevent the menu from closing when clicking on a selected item.
 							return {
 								...changes,
@@ -82,27 +82,26 @@ export const MultipleSelector = ( {
 					default:
 						return changes;
 				}
-			} }
-			onSelect={ ( item ) => {
-				if ( ! item ) {
+			}}
+			onSelect={(item) => {
+				if (!item) {
 					return;
 				}
 				const exist = selectedOptions.find(
-					( existingItem ) => existingItem.value === item.value
+					(existingItem) => existingItem.value === item.value
 				);
 				const updatedPlatforms = exist
 					? selectedOptions.filter(
-							( existingItem ) =>
-								existingItem.value !== item.value
-					  )
-					: [ ...selectedOptions, item ];
-				onSelect( updatedPlatforms );
-			} }
-			onRemove={ ( item ) =>
-				onSelect( selectedOptions.filter( ( i ) => i !== item ) )
+							(existingItem) => existingItem.value !== item.value
+						)
+					: [...selectedOptions, item];
+				onSelect(updatedPlatforms);
+			}}
+			onRemove={(item) =>
+				onSelect(selectedOptions.filter((i) => i !== item))
 			}
 		>
-			{ renderMenu( { selectedOptions, onOpenClose } ) }
+			{renderMenu({ selectedOptions, onOpenClose })}
 		</SelectControl>
 	);
 };

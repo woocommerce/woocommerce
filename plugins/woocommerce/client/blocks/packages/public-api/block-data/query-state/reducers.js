@@ -10,32 +10,32 @@ import { getStateForContext } from './utils';
  * @param {Object} state  Current state in store.
  * @param {Object} action Action being processed.
  */
-const queryStateReducer = ( state = {}, action ) => {
+const queryStateReducer = (state = {}, action) => {
 	const { type, context, queryKey, value } = action;
-	const prevState = getStateForContext( state, context );
+	const prevState = getStateForContext(state, context);
 	let newState;
-	switch ( type ) {
+	switch (type) {
 		case types.SET_QUERY_KEY_VALUE:
 			const prevStateObject =
-				prevState !== null ? JSON.parse( prevState ) : {};
+				prevState !== null ? JSON.parse(prevState) : {};
 
 			// mutate it and JSON.stringify to compare
-			prevStateObject[ queryKey ] = value;
-			newState = JSON.stringify( prevStateObject );
+			prevStateObject[queryKey] = value;
+			newState = JSON.stringify(prevStateObject);
 
-			if ( prevState !== newState ) {
+			if (prevState !== newState) {
 				state = {
 					...state,
-					[ context ]: newState,
+					[context]: newState,
 				};
 			}
 			break;
 		case types.SET_QUERY_CONTEXT_VALUE:
-			newState = JSON.stringify( value );
-			if ( prevState !== newState ) {
+			newState = JSON.stringify(value);
+			if (prevState !== newState) {
 				state = {
 					...state,
-					[ context ]: newState,
+					[context]: newState,
 				};
 			}
 			break;

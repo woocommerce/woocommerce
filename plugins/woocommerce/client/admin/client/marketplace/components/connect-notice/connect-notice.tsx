@@ -14,40 +14,40 @@ import { getAdminSetting } from '~/utils/admin-settings';
 
 export default function ConnectNotice(): React.JSX.Element | null {
 	const localStorageKey = 'woo-connect-notice-marketplace-dismissed';
-	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+	const wccomSettings = getAdminSetting('wccomHelper', {});
 	const noticeType: 'none' | 'short' | 'long' =
 		wccomSettings?.woocomConnectNoticeType || 'none';
 
-	const defaultStoreName = __( 'Your store', 'woocommerce' );
+	const defaultStoreName = __('Your store', 'woocommerce');
 	const storeName: string = wccomSettings?.storeName || defaultStoreName;
 
 	const formattedStoreName =
 		storeName !== defaultStoreName
-			? `<strong>${ storeName }</strong>`
+			? `<strong>${storeName}</strong>`
 			: storeName;
 
 	// The "outdated plugins / store at risk" (long) state is now surfaced in
 	// Site Health instead of here, so only the short connect nudge renders.
-	if ( noticeType === 'none' || noticeType === 'long' ) {
+	if (noticeType === 'none' || noticeType === 'long') {
 		return null;
 	}
 
-	const lastDismissed = localStorage.getItem( localStorageKey );
-	const parsedDismissedDate = new Date( lastDismissed || '' );
+	const lastDismissed = localStorage.getItem(localStorageKey);
+	const parsedDismissedDate = new Date(lastDismissed || '');
 	const aMonthAgo = new Date();
-	aMonthAgo.setMonth( aMonthAgo.getMonth() - 1 );
+	aMonthAgo.setMonth(aMonthAgo.getMonth() - 1);
 
 	// try to re-show the notice if it was dismissed more than a month ago.
 	// removing these 2 local storage items will make the notice reappear.
 	if (
 		lastDismissed === null ||
-		isNaN( parsedDismissedDate.valueOf() ) ||
+		isNaN(parsedDismissedDate.valueOf()) ||
 		aMonthAgo.valueOf() > parsedDismissedDate.valueOf()
 	) {
 		localStorage.removeItem(
 			'wc-marketplaceNoticeClosed-woo-connect-notice'
 		);
-		localStorage.removeItem( localStorageKey );
+		localStorage.removeItem(localStorageKey);
 	}
 
 	const noticeText = {
@@ -61,56 +61,56 @@ export default function ConnectNotice(): React.JSX.Element | null {
 		),
 	};
 
-	const description = noticeText[ noticeType ];
+	const description = noticeText[noticeType];
 
 	const handleClick = () => {
-		recordEvent( 'woo_connect_notice_in_marketplace_clicked' );
+		recordEvent('woo_connect_notice_in_marketplace_clicked');
 		return true;
 	};
 
 	const handleLearnMoreClick = () => {
-		recordEvent( 'woo_connect_notice_learn_more_clicked' );
+		recordEvent('woo_connect_notice_learn_more_clicked');
 		return true;
 	};
 
 	const handleClose = () => {
-		localStorage.setItem( localStorageKey, new Date().toString() );
-		recordEvent( 'woo_connect_notice_in_marketplace_dismissed' );
+		localStorage.setItem(localStorageKey, new Date().toString());
+		recordEvent('woo_connect_notice_in_marketplace_dismissed');
 	};
 
 	const handleLoad = () => {
-		recordEvent( 'woo_connect_notice_in_marketplace_shown' );
+		recordEvent('woo_connect_notice_in_marketplace_shown');
 	};
 
-	const connectUrlWithUTM = appendURLParams( connectUrl(), [
-		[ 'utm_source', 'pu' ],
-		[ 'utm_campaign', 'pu_in_apps_screen_connect' ],
-	] );
+	const connectUrlWithUTM = appendURLParams(connectUrl(), [
+		['utm_source', 'pu'],
+		['utm_campaign', 'pu_in_apps_screen_connect'],
+	]);
 
 	return (
 		<Notice
 			id="woo-connect-notice"
-			description={ description }
-			isDismissible={ true }
+			description={description}
+			isDismissible={true}
 			variant="warning"
 			className="woocommerce-marketplace__connect-notice"
-			onClose={ handleClose }
-			onLoad={ handleLoad }
+			onClose={handleClose}
+			onLoad={handleLoad}
 		>
 			<Button
-				href={ connectUrlWithUTM }
+				href={connectUrlWithUTM}
 				variant="primary"
-				onClick={ handleClick }
+				onClick={handleClick}
 			>
-				{ __( 'Connect your store', 'woocommerce' ) }
+				{__('Connect your store', 'woocommerce')}
 			</Button>
 			<Button
 				href="https://woocommerce.com/document/managing-woocommerce-com-subscriptions/#connect-your-site-woocommercecom-account"
 				target="_blank"
 				variant="tertiary"
-				onClick={ handleLearnMoreClick }
+				onClick={handleLearnMoreClick}
 			>
-				{ __( 'Learn more', 'woocommerce' ) }
+				{__('Learn more', 'woocommerce')}
 			</Button>
 		</Notice>
 	);

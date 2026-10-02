@@ -22,15 +22,15 @@ const blockConfig = {
 		to: [
 			{
 				type: 'block',
-				blocks: [ galleryBlock ],
+				blocks: [galleryBlock],
 				transform: () => {
-					return createBlock( galleryBlock );
+					return createBlock(galleryBlock);
 				},
 			},
 		],
 	},
 };
 
-registerProductBlockType( blockConfig, {
+registerProductBlockType(blockConfig, {
 	isAvailableOnPostEditor: false,
-} );
+});

@@ -43,9 +43,9 @@
 
 :where(.wp-block-woocommerce-customer-account .wc-block-customer-account__link),
 :where(
-		.wp-block-woocommerce-customer-account.wc-block-customer-account--has-dropdown
-			.wc-block-customer-account__toggle
-	) {
+	.wp-block-woocommerce-customer-account.wc-block-customer-account--has-dropdown
+		.wc-block-customer-account__toggle
+) {
 	align-items: center;
 	color: inherit;
 	display: flex;
@@ -99,7 +99,8 @@
 			font: inherit;
 		}
 
-		&.wc-block-customer-account--is-dropdown-open .wc-block-customer-account__caret {
+		&.wc-block-customer-account--is-dropdown-open
+			.wc-block-customer-account__caret {
 			transform: rotate(180deg);
 		}
 

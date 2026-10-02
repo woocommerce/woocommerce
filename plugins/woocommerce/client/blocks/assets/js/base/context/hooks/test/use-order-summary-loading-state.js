@@ -1,21 +1,21 @@
 // Mock all dependencies first, before any imports
-jest.mock( '../cart/use-store-cart', () => ( {
+jest.mock('../cart/use-store-cart', () => ({
 	useStoreCart: jest.fn(),
-} ) );
+}));
 
-jest.mock( '../cart/use-store-cart-coupons', () => ( {
+jest.mock('../cart/use-store-cart-coupons', () => ({
 	useStoreCartCoupons: jest.fn(),
-} ) );
+}));
 
-jest.mock( '@wordpress/data', () => ( {
+jest.mock('@wordpress/data', () => ({
 	useSelect: jest.fn(),
-} ) );
+}));
 
-jest.mock( '@woocommerce/block-data', () => ( {
+jest.mock('@woocommerce/block-data', () => ({
 	checkoutStore: {
 		name: 'wc/store/checkout',
 	},
-} ) );
+}));
 
 /**
  * External dependencies
@@ -30,127 +30,127 @@ import { useOrderSummaryLoadingState } from '../use-order-summary-loading-state'
 import { useStoreCart } from '../cart/use-store-cart';
 import { useStoreCartCoupons } from '../cart/use-store-cart-coupons';
 
-describe( 'useOrderSummaryLoadingState', () => {
-	beforeEach( () => {
+describe('useOrderSummaryLoadingState', () => {
+	beforeEach(() => {
 		// Reset and set up default mocks
-		useStoreCart.mockReturnValue( {
+		useStoreCart.mockReturnValue({
 			cartIsLoading: false,
 			isLoadingRates: false,
 			hasPendingItemsOperations: false,
-		} );
+		});
 
-		useStoreCartCoupons.mockReturnValue( {
+		useStoreCartCoupons.mockReturnValue({
 			isApplyingCoupon: false,
 			isRemovingCoupon: false,
-		} );
+		});
 
-		useSelect.mockReturnValue( false );
-	} );
+		useSelect.mockReturnValue(false);
+	});
 
-	afterEach( () => {
+	afterEach(() => {
 		jest.clearAllMocks();
-	} );
+	});
 
-	it( 'should return isLoading: false when no loading states are active', () => {
-		const { result } = renderHook( () => useOrderSummaryLoadingState() );
-		expect( result.current.isLoading ).toBe( false );
-	} );
+	it('should return isLoading: false when no loading states are active', () => {
+		const { result } = renderHook(() => useOrderSummaryLoadingState());
+		expect(result.current.isLoading).toBe(false);
+	});
 
-	it( 'should return isLoading: true when cartIsLoading is true', () => {
-		useStoreCart.mockReturnValue( {
+	it('should return isLoading: true when cartIsLoading is true', () => {
+		useStoreCart.mockReturnValue({
 			cartIsLoading: true,
 			isLoadingRates: false,
 			hasPendingItemsOperations: false,
-		} );
+		});
 
-		const { result } = renderHook( () => useOrderSummaryLoadingState() );
-		expect( result.current.isLoading ).toBe( true );
-	} );
+		const { result } = renderHook(() => useOrderSummaryLoadingState());
+		expect(result.current.isLoading).toBe(true);
+	});
 
-	it( 'should return isLoading: true when isLoadingRates is true', () => {
-		useStoreCart.mockReturnValue( {
+	it('should return isLoading: true when isLoadingRates is true', () => {
+		useStoreCart.mockReturnValue({
 			cartIsLoading: false,
 			isLoadingRates: true,
 			hasPendingItemsOperations: false,
-		} );
+		});
 
-		const { result } = renderHook( () => useOrderSummaryLoadingState() );
-		expect( result.current.isLoading ).toBe( true );
-	} );
+		const { result } = renderHook(() => useOrderSummaryLoadingState());
+		expect(result.current.isLoading).toBe(true);
+	});
 
-	it( 'should return isLoading: true when hasPendingItemsOperations is true', () => {
-		useStoreCart.mockReturnValue( {
+	it('should return isLoading: true when hasPendingItemsOperations is true', () => {
+		useStoreCart.mockReturnValue({
 			cartIsLoading: false,
 			isLoadingRates: false,
 			hasPendingItemsOperations: true,
-		} );
+		});
 
-		const { result } = renderHook( () => useOrderSummaryLoadingState() );
-		expect( result.current.isLoading ).toBe( true );
-	} );
+		const { result } = renderHook(() => useOrderSummaryLoadingState());
+		expect(result.current.isLoading).toBe(true);
+	});
 
-	it( 'should return isLoading: true when isApplyingCoupon is true', () => {
-		useStoreCartCoupons.mockReturnValue( {
+	it('should return isLoading: true when isApplyingCoupon is true', () => {
+		useStoreCartCoupons.mockReturnValue({
 			isApplyingCoupon: true,
 			isRemovingCoupon: false,
-		} );
+		});
 
-		const { result } = renderHook( () => useOrderSummaryLoadingState() );
-		expect( result.current.isLoading ).toBe( true );
-	} );
+		const { result } = renderHook(() => useOrderSummaryLoadingState());
+		expect(result.current.isLoading).toBe(true);
+	});
 
-	it( 'should return isLoading: true when isRemovingCoupon is true', () => {
-		useStoreCartCoupons.mockReturnValue( {
+	it('should return isLoading: true when isRemovingCoupon is true', () => {
+		useStoreCartCoupons.mockReturnValue({
 			isApplyingCoupon: false,
 			isRemovingCoupon: true,
-		} );
+		});
 
-		const { result } = renderHook( () => useOrderSummaryLoadingState() );
-		expect( result.current.isLoading ).toBe( true );
-	} );
+		const { result } = renderHook(() => useOrderSummaryLoadingState());
+		expect(result.current.isLoading).toBe(true);
+	});
 
-	it( 'should return isLoading: true when isCalculating is true', () => {
-		useSelect.mockReturnValue( true );
+	it('should return isLoading: true when isCalculating is true', () => {
+		useSelect.mockReturnValue(true);
 
-		const { result } = renderHook( () => useOrderSummaryLoadingState() );
-		expect( result.current.isLoading ).toBe( true );
-	} );
+		const { result } = renderHook(() => useOrderSummaryLoadingState());
+		expect(result.current.isLoading).toBe(true);
+	});
 
-	it( 'should return isLoading: true when multiple loading states are active', () => {
-		useStoreCart.mockReturnValue( {
+	it('should return isLoading: true when multiple loading states are active', () => {
+		useStoreCart.mockReturnValue({
 			cartIsLoading: true,
 			isLoadingRates: true,
 			hasPendingItemsOperations: false,
-		} );
+		});
 
-		useStoreCartCoupons.mockReturnValue( {
+		useStoreCartCoupons.mockReturnValue({
 			isApplyingCoupon: true,
 			isRemovingCoupon: false,
-		} );
+		});
 
-		useSelect.mockReturnValue( true );
+		useSelect.mockReturnValue(true);
 
-		const { result } = renderHook( () => useOrderSummaryLoadingState() );
-		expect( result.current.isLoading ).toBe( true );
-	} );
+		const { result } = renderHook(() => useOrderSummaryLoadingState());
+		expect(result.current.isLoading).toBe(true);
+	});
 
-	it( 'should call useSelect with correct selector function and empty dependency array', () => {
-		renderHook( () => useOrderSummaryLoadingState() );
+	it('should call useSelect with correct selector function and empty dependency array', () => {
+		renderHook(() => useOrderSummaryLoadingState());
 
-		expect( useSelect ).toHaveBeenCalledWith( expect.any( Function ), [] );
+		expect(useSelect).toHaveBeenCalledWith(expect.any(Function), []);
 
 		// Test that the selector function calls the correct store method
-		const selectorFunction = useSelect.mock.calls[ 0 ][ 0 ];
-		const mockSelect = jest.fn().mockReturnValue( {
-			isCalculating: jest.fn().mockReturnValue( false ),
-		} );
+		const selectorFunction = useSelect.mock.calls[0][0];
+		const mockSelect = jest.fn().mockReturnValue({
+			isCalculating: jest.fn().mockReturnValue(false),
+		});
 
-		selectorFunction( mockSelect );
+		selectorFunction(mockSelect);
 
-		expect( mockSelect ).toHaveBeenCalledWith(
-			expect.objectContaining( {
+		expect(mockSelect).toHaveBeenCalledWith(
+			expect.objectContaining({
 				name: 'wc/store/checkout',
-			} )
+			})
 		);
-	} );
-} );
+	});
+});

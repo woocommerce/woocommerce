@@ -24,15 +24,15 @@ import { useCallback, useEffect, useRef } from '@wordpress/element';
  */
 
 export function useIsMounted() {
-	const isMounted = useRef( false );
+	const isMounted = useRef(false);
 
-	useEffect( () => {
+	useEffect(() => {
 		isMounted.current = true;
 
 		return () => {
 			isMounted.current = false;
 		};
-	}, [] );
+	}, []);
 
-	return useCallback( () => isMounted.current, [] );
+	return useCallback(() => isMounted.current, []);
 }

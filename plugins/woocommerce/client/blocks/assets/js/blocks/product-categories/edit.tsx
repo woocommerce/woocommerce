@@ -16,8 +16,8 @@ export default function ProductCategoriesEdit(
 	const blockProps = useBlockProps();
 
 	return (
-		<div { ...blockProps }>
-			<Block { ...props } />
+		<div {...blockProps}>
+			<Block {...props} />
 		</div>
 	);
 }

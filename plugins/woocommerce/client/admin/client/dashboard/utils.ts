@@ -15,12 +15,12 @@ import {
  * @return {string} Country string.
  */
 
-export function getCountryCode( countryState = '' ) {
-	if ( ! countryState ) {
+export function getCountryCode(countryState = '') {
+	if (!countryState) {
 		return null;
 	}
 
-	return countryState.split( ':' )[ 0 ];
+	return countryState.split(':')[0];
 }
 
 /**
@@ -29,8 +29,8 @@ export function getCountryCode( countryState = '' ) {
  * @param {string} string Price string.
  * @return {number} Number value.
  */
-export function getPriceValue( string: string ) {
-	return Number( decodeEntities( string ).replace( /[^0-9.-]+/g, '' ) );
+export function getPriceValue(string: string) {
+	return Number(decodeEntities(string).replace(/[^0-9.-]+/g, ''));
 }
 
 /**
@@ -50,24 +50,24 @@ export function getProductList(
 ) {
 	const productList: OnboardingProductType[] = [];
 
-	if ( ! productTypes ) {
+	if (!productTypes) {
 		return productList;
 	}
 
 	const profileItemsProductTypes = profileItems.product_types || [];
 
-	profileItemsProductTypes.forEach( ( productType ) => {
+	profileItemsProductTypes.forEach((productType) => {
 		if (
-			productTypes[ productType ] &&
-			productTypes[ productType ].product &&
-			( includeInstalledItems ||
-				! installedPlugins.includes(
-					productTypes[ productType ].slug as string
-				) )
+			productTypes[productType] &&
+			productTypes[productType].product &&
+			(includeInstalledItems ||
+				!installedPlugins.includes(
+					productTypes[productType].slug as string
+				))
 		) {
-			productList.push( productTypes[ productType ] );
+			productList.push(productTypes[productType]);
 		}
-	} );
+	});
 
 	return productList;
 }
@@ -94,7 +94,7 @@ export function getProductIdsForCart(
 		productTypes
 	);
 	const productIds = productList.map(
-		( product ) => product.id || product.product
+		(product) => product.id || product.product
 	);
 	return productIds;
 }
@@ -125,16 +125,16 @@ export function getCategorizedOnboardingProducts(
 		productTypes
 	);
 
-	const productSets = [ ...new Set( [ ...products, ...remainingProducts ] ) ];
-	const uniqueItemsList = productSets.map( ( product ) => {
+	const productSets = [...new Set([...products, ...remainingProducts])];
+	const uniqueItemsList = productSets.map((product) => {
 		let cleanedProduct;
-		if ( product.label ) {
+		if (product.label) {
 			cleanedProduct = { type: 'extension', name: product.label };
 		} else {
 			cleanedProduct = { type: 'theme', name: product.title };
 		}
 		return cleanedProduct;
-	} );
+	});
 
 	return {
 		products,

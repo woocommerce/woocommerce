@@ -9,14 +9,14 @@ export interface Attributes {
 }
 
 const Edit = () => {
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className: 'woocommerce wc-block-product-results-count',
-	} );
+	});
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<p className="woocommerce-result-count">
-				{ __( 'Showing 1-X of X results', 'woocommerce' ) }
+				{__('Showing 1-X of X results', 'woocommerce')}
 			</p>
 		</div>
 	);

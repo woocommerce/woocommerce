@@ -19,8 +19,8 @@ interface EmailStylesData {
 	styles: EmailStyles;
 	userStyles: EmailStyles;
 	defaultStyles: EmailStyles;
-	updateStyleProp: ( path, newValue ) => void;
-	updateStyles: ( newStyles: EmailStyles ) => void;
+	updateStyleProp: (path, newValue) => void;
+	updateStyles: (newStyles: EmailStyles) => void;
 }
 
 /**
@@ -29,11 +29,11 @@ interface EmailStylesData {
  * @param {Object} obj The object to check.
  * @return {boolean} True if the nested object is empty, false otherwise.
  */
-function isNestedEmpty( obj ) {
-	const isNotEmpty = Object.keys( obj ).some(
-		( key ) => Object.keys( obj[ key ] ).length > 0
+function isNestedEmpty(obj) {
+	const isNotEmpty = Object.keys(obj).some(
+		(key) => Object.keys(obj[key]).length > 0
 	);
-	return ! isNotEmpty;
+	return !isNotEmpty;
 }
 
 /**
@@ -46,27 +46,25 @@ function isNestedEmpty( obj ) {
  * @param {*}                   value     New value to set.
  * @return {Object} Cloned object with the new value set.
  */
-export function setImmutably( setObject, setPath, value ): typeof setObject {
+export function setImmutably(setObject, setPath, value): typeof setObject {
 	// Normalize path
-	const path = Array.isArray( setPath ) ? [ ...setPath ] : [ setPath ];
+	const path = Array.isArray(setPath) ? [...setPath] : [setPath];
 
 	// Shallowly clone the base of the object
-	const object = Array.isArray( setObject )
-		? [ ...setObject ]
-		: { ...setObject };
+	const object = Array.isArray(setObject) ? [...setObject] : { ...setObject };
 
 	const leaf = path.pop();
 
 	// Traverse object from root to leaf, shallowly cloning at each level
 	let prev = object;
 
-	path.forEach( ( key ) => {
-		const lvl = prev[ key ];
-		prev[ key ] = Array.isArray( lvl ) ? [ ...lvl ] : { ...lvl };
-		prev = prev[ key ];
-	} );
+	path.forEach((key) => {
+		const lvl = prev[key];
+		prev[key] = Array.isArray(lvl) ? [...lvl] : { ...lvl };
+		prev = prev[key];
+	});
 
-	prev[ leaf ] = value;
+	prev[leaf] = value;
 
 	return object;
 }
@@ -78,33 +76,33 @@ export function setImmutably( setObject, setPath, value ): typeof setObject {
  * @param {Object} obj The object to shorten the variable names in.
  * @return {Object} The object with the shortened variable names.
  */
-function shortenWpPresetVariables( obj ) {
+function shortenWpPresetVariables(obj) {
 	// Helper function to replace the variable string
-	const replaceVariable = ( value ) => {
+	const replaceVariable = (value) => {
 		return value.replace(
 			/var\(--([a-z]+)--([a-z]+(?:--[a-z0-9]+(?:-[a-z0-9]+)*)*)--([a-z0-9-]+)\)/g,
-			( _match, _prefix, group1, group2 ) => {
-				const groups = group1.split( '--' ).concat( group2 );
-				return `var:${ groups.join( '|' ) }`;
+			(_match, _prefix, group1, group2) => {
+				const groups = group1.split('--').concat(group2);
+				return `var:${groups.join('|')}`;
 			}
 		);
 	};
 
 	// Recursive function to traverse the object
-	const traverse = ( current ) => {
-		if ( typeof current === 'object' && current !== null ) {
-			for ( const key in current ) {
-				if ( current.hasOwnProperty( key ) ) {
-					current[ key ] = traverse( current[ key ] );
+	const traverse = (current) => {
+		if (typeof current === 'object' && current !== null) {
+			for (const key in current) {
+				if (current.hasOwnProperty(key)) {
+					current[key] = traverse(current[key]);
 				}
 			}
-		} else if ( typeof current === 'string' ) {
-			return replaceVariable( current );
+		} else if (typeof current === 'string') {
+			return replaceVariable(current);
 		}
 		return current;
 	};
 
-	return traverse( obj );
+	return traverse(obj);
 }
 
 /**
@@ -114,26 +112,26 @@ function shortenWpPresetVariables( obj ) {
  * @param {Object} obj The object to clean.
  * @return {Object} The cleaned object.
  */
-function cleanupUserStyles( obj ) {
-	const cleanObject = ( current ) => {
+function cleanupUserStyles(obj) {
+	const cleanObject = (current) => {
 		if (
-			( typeof current === 'object' && current !== null ) ||
+			(typeof current === 'object' && current !== null) ||
 			current === undefined
 		) {
-			if ( Array.isArray( current ) && current.length === 0 ) {
+			if (Array.isArray(current) && current.length === 0) {
 				return undefined; // Remove empty arrays
 			}
 
-			for ( const key in current ) {
-				if ( Object.prototype.hasOwnProperty.call( current, key ) ) {
-					const cleanedValue = cleanObject( current[ key ] );
+			for (const key in current) {
+				if (Object.prototype.hasOwnProperty.call(current, key)) {
+					const cleanedValue = cleanObject(current[key]);
 					if (
 						cleanedValue === undefined ||
-						isNestedEmpty( cleanedValue )
+						isNestedEmpty(cleanedValue)
 					) {
-						delete current[ key ]; // Remove keys with undefined values
+						delete current[key]; // Remove keys with undefined values
 					} else {
-						current[ key ] = cleanedValue;
+						current[key] = cleanedValue;
 					}
 				}
 			}
@@ -141,7 +139,7 @@ function cleanupUserStyles( obj ) {
 		return current;
 	};
 
-	return cleanObject( obj );
+	return cleanObject(obj);
 }
 
 export const useEmailStyles = (): EmailStylesData => {
@@ -149,51 +147,51 @@ export const useEmailStyles = (): EmailStylesData => {
 	const { userTheme, updateUserTheme } = useUserTheme();
 
 	// This is email level styling stored in post meta.
-	const styles = useMemo( () => {
+	const styles = useMemo(() => {
 		return userTheme
-			? cleanupUserStyles( shortenWpPresetVariables( userTheme?.styles ) )
+			? cleanupUserStyles(shortenWpPresetVariables(userTheme?.styles))
 			: EMPTY_OBJECT;
-	}, [ userTheme ] );
+	}, [userTheme]);
 
 	// Default styles from theme.json.
-	const { styles: defaultStyles } = useSelect( ( select ) => ( {
-		styles: select( storeName ).getStyles(),
-	} ) );
+	const { styles: defaultStyles } = useSelect((select) => ({
+		styles: select(storeName).getStyles(),
+	}));
 
 	// Update email styles.
 	const updateStyles = useCallback(
-		( newStyles ) => {
+		(newStyles) => {
 			const newTheme = {
 				...userTheme,
-				styles: cleanupUserStyles( newStyles ) as EmailStyles,
+				styles: cleanupUserStyles(newStyles) as EmailStyles,
 			};
-			updateUserTheme( newTheme );
+			updateUserTheme(newTheme);
 		},
-		[ updateUserTheme, userTheme ]
+		[updateUserTheme, userTheme]
 	);
 
 	// Update an email style prop.
 	const updateStyleProp = useCallback(
-		( path, newValue ) => {
+		(path, newValue) => {
 			const newTheme = setImmutably(
 				userTheme,
-				[ 'styles', ...path ],
+				['styles', ...path],
 				newValue
 			);
-			updateUserTheme( newTheme );
+			updateUserTheme(newTheme);
 		},
-		[ updateUserTheme, userTheme ]
+		[updateUserTheme, userTheme]
 	);
 
-	const mergedStyles = useMemo( () => {
-		if ( ! defaultStyles ) {
+	const mergedStyles = useMemo(() => {
+		if (!defaultStyles) {
 			return EMPTY_OBJECT;
 		}
-		if ( ! styles ) {
+		if (!styles) {
 			return defaultStyles;
 		}
-		return deepmerge.all( [ defaultStyles, styles ] );
-	}, [ defaultStyles, styles ] );
+		return deepmerge.all([defaultStyles, styles]);
+	}, [defaultStyles, styles]);
 
 	return {
 		styles: mergedStyles,

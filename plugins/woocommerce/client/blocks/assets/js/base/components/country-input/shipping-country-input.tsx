@@ -9,8 +9,8 @@ import { COUNTRIES } from '@woocommerce/block-settings';
 import CountryInput from './country-input';
 import { CountryInputProps } from './CountryInputProps';
 
-const ShippingCountryInput = ( props: CountryInputProps ): JSX.Element => {
-	return <CountryInput countries={ COUNTRIES } { ...props } />;
+const ShippingCountryInput = (props: CountryInputProps): JSX.Element => {
+	return <CountryInput countries={COUNTRIES} {...props} />;
 };
 
 export default ShippingCountryInput;

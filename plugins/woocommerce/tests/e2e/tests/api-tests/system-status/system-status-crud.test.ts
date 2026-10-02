@@ -43,7 +43,7 @@ const expect = baseExpect.extend( {
 					( matcherResult
 						? `Received: ${ this.utils.printReceived(
 								matcherResult.actual
-						  ) }`
+							) }`
 						: '' )
 			: () =>
 					this.utils.matcherHint(
@@ -60,7 +60,7 @@ const expect = baseExpect.extend( {
 					( matcherResult
 						? `Received: ${ this.utils.printReceived(
 								matcherResult.actual
-						  ) }`
+							) }`
 						: '' );
 
 		return {

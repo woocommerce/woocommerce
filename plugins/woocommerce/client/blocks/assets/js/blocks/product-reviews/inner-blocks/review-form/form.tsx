@@ -14,7 +14,7 @@ import { store as coreStore } from '@wordpress/core-data';
 import { productsStore } from '@woocommerce/data';
 
 const CommentsFormPlaceholder = () => {
-	const instanceId = useInstanceId( CommentsFormPlaceholder );
+	const instanceId = useInstanceId(CommentsFormPlaceholder);
 
 	return (
 		<div>
@@ -22,28 +22,28 @@ const CommentsFormPlaceholder = () => {
 				id="reply-title"
 				className="comment-reply-title"
 				role="heading"
-				aria-level={ 3 }
+				aria-level={3}
 			>
-				{ __( 'Add a review', 'woocommerce' ) }
+				{__('Add a review', 'woocommerce')}
 			</span>
 			<form
 				noValidate
 				className="review-form"
-				onSubmit={ ( event ) => event.preventDefault() }
+				onSubmit={(event) => event.preventDefault()}
 			>
 				<div className="comment-form-rating">
-					<span>{ __( 'Your rating *', 'woocommerce' ) }</span>
+					<span>{__('Your rating *', 'woocommerce')}</span>
 					<p className="wp-block-woocommerce-product-reviews__editor__stars"></p>
 				</div>
 				<p>
-					<label htmlFor={ `review-${ instanceId }` }>
-						{ __( 'Your review *', 'woocommerce' ) }
+					<label htmlFor={`review-${instanceId}`}>
+						{__('Your review *', 'woocommerce')}
 					</label>
 					<textarea
-						id={ `review-${ instanceId }` }
+						id={`review-${instanceId}`}
 						name="review"
-						cols={ 45 }
-						rows={ 8 }
+						cols={45}
+						rows={8}
 						readOnly
 					/>
 				</p>
@@ -51,11 +51,11 @@ const CommentsFormPlaceholder = () => {
 					<input
 						name="submit"
 						type="submit"
-						className={ clsx(
+						className={clsx(
 							'wp-block-button__link',
-							__experimentalGetElementClassName( 'button' )
-						) }
-						value={ __( 'Submit', 'woocommerce' ) }
+							__experimentalGetElementClassName('button')
+						)}
+						value={__('Submit', 'woocommerce')}
 						aria-disabled="true"
 					/>
 				</p>
@@ -64,72 +64,71 @@ const CommentsFormPlaceholder = () => {
 	);
 };
 
-const CommentsForm = ( {
+const CommentsForm = ({
 	postId,
 	postType,
 }: {
 	postId: string;
 	postType: string;
-} ) => {
-	const { updateProduct } = useDispatch( productsStore );
+}) => {
+	const { updateProduct } = useDispatch(productsStore);
 	const product = useSelect(
-		( select ) => {
-			if ( ! postId ) {
+		(select) => {
+			if (!postId) {
 				return null;
 			}
-			return select( productsStore ).getProduct( Number( postId ) );
+			return select(productsStore).getProduct(Number(postId));
 		},
-		[ postId ]
+		[postId]
 	);
 
-	const setReviewsAllowed = ( allowed: boolean ) => {
-		if ( ! postId ) return;
-		void updateProduct( Number( postId ), {
+	const setReviewsAllowed = (allowed: boolean) => {
+		if (!postId) return;
+		void updateProduct(Number(postId), {
 			reviews_allowed: allowed,
-		} );
+		});
 	};
 
 	const isSiteEditor = postType === undefined || postId === undefined;
 
 	const postTypeSupportsComments = useSelect(
-		( select ) =>
+		(select) =>
 			postType
-				? !! select( coreStore ).getPostType( postType )?.supports
-						.comments
+				? !!select(coreStore).getPostType(postType)?.supports.comments
 				: false,
-		[ postType ]
+		[postType]
 	);
 
-	if ( ! isSiteEditor && product && ! product?.reviews_allowed ) {
+	if (!isSiteEditor && product && !product?.reviews_allowed) {
 		const actions = [
 			<Button
 				__next40pxDefaultSize
 				key="enableReviews"
-				onClick={ () => setReviewsAllowed( true ) }
+				onClick={() => setReviewsAllowed(true)}
 				variant="primary"
 			>
-				{ _x(
+				{_x(
 					'Enable reviews',
 					'action that affects the current product',
 					'woocommerce'
-				) }
+				)}
 			</Button>,
 		];
 		return (
-			<Warning actions={ actions }>
-				{ __(
+			<Warning actions={actions}>
+				{__(
 					'Product Reviews Form block: Reviews are not enabled for this product.',
 					'woocommerce'
-				) }
+				)}
 			</Warning>
 		);
-	} else if ( ! postTypeSupportsComments ) {
+	} else if (!postTypeSupportsComments) {
 		return (
 			<Warning>
-				{ __(
+				{__(
 					'Product Reviews Form block: Reviews are not enabled.',
 					'woocommerce'
-				) }
+				)}
 			</Warning>
 		);
 	}

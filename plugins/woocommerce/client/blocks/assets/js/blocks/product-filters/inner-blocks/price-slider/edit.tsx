@@ -31,7 +31,7 @@ import { colorNames } from './constants';
 import { getHasColorClasses, getStyleColorVars } from '../../utils/colors';
 import type { EditProps } from './types';
 
-const PriceSliderEdit = ( {
+const PriceSliderEdit = ({
 	clientId,
 	context,
 
@@ -45,7 +45,7 @@ const PriceSliderEdit = ( {
 	setSliderHandleBorder,
 	slider,
 	setSlider,
-}: EditProps ): JSX.Element | null => {
+}: EditProps): JSX.Element | null => {
 	const {
 		showInputFields,
 		inlineInput,
@@ -55,131 +55,128 @@ const PriceSliderEdit = ( {
 		customSlider,
 	} = attributes;
 
-	const rangeInput = context[ 'woocommerce/rangeInput' ];
+	const rangeInput = context['woocommerce/rangeInput'];
 	const { isLoading } = rangeInput ?? {};
 
-	const blockProps = useBlockProps( {
-		className: clsx( 'wc-block-product-filter-price-slider', {
+	const blockProps = useBlockProps({
+		className: clsx('wc-block-product-filter-price-slider', {
 			'is-loading': isLoading,
-			...getHasColorClasses( attributes, colorNames ),
-		} ),
+			...getHasColorClasses(attributes, colorNames),
+		}),
 		style: getStyleColorVars(
 			'wc-product-filter-price',
 			attributes,
 			colorNames
 		),
-	} );
+	});
 
 	const colorGradientSettings = useMultipleOriginColorsAndGradients();
 
-	if ( isLoading || ! rangeInput ) {
-		return <>{ __( 'Loading…', 'woocommerce' ) }</>;
+	if (isLoading || !rangeInput) {
+		return <>{__('Loading…', 'woocommerce')}</>;
 	}
 
 	const { min, max, currentMin, currentMax } = rangeInput;
 	const formattedMinPrice = formatPrice(
 		currentMin,
-		getCurrency( { minorUnit: 0 } )
+		getCurrency({ minorUnit: 0 })
 	);
 
 	const formattedMaxPrice = formatPrice(
 		currentMax,
-		getCurrency( { minorUnit: 0 } )
+		getCurrency({ minorUnit: 0 })
 	);
 
 	const priceMin = showInputFields ? (
-		<input className="min" type="text" defaultValue={ formattedMinPrice } />
+		<input className="min" type="text" defaultValue={formattedMinPrice} />
 	) : (
-		<span>{ formattedMinPrice }</span>
+		<span>{formattedMinPrice}</span>
 	);
 
 	const priceMax = showInputFields ? (
-		<input className="max" type="text" defaultValue={ formattedMaxPrice } />
+		<input className="max" type="text" defaultValue={formattedMaxPrice} />
 	) : (
-		<span>{ formattedMaxPrice }</span>
+		<span>{formattedMaxPrice}</span>
 	);
 
 	return (
 		<>
 			<InspectorControls>
 				<ToolsPanel
-					label={ __( 'Settings', 'woocommerce' ) }
-					resetAll={ () => {
-						setAttributes( {
+					label={__('Settings', 'woocommerce')}
+					resetAll={() => {
+						setAttributes({
 							showInputFields: true,
 							inlineInput: false,
-						} );
-					} }
+						});
+					}}
 				>
 					<ToolsPanelItem
-						hasValue={ () => showInputFields !== true }
-						label={ __( 'Show input fields', 'woocommerce' ) }
-						onDeselect={ () =>
-							setAttributes( { showInputFields: true } )
+						hasValue={() => showInputFields !== true}
+						label={__('Show input fields', 'woocommerce')}
+						onDeselect={() =>
+							setAttributes({ showInputFields: true })
 						}
 						isShownByDefault
 					>
 						<ToggleControl
-							label={ __( 'Show input fields', 'woocommerce' ) }
-							checked={ showInputFields }
-							onChange={ () =>
-								setAttributes( {
-									showInputFields: ! showInputFields,
-								} )
+							label={__('Show input fields', 'woocommerce')}
+							checked={showInputFields}
+							onChange={() =>
+								setAttributes({
+									showInputFields: !showInputFields,
+								})
 							}
 							__nextHasNoMarginBottom
 						/>
 					</ToolsPanelItem>
 
-					{ showInputFields && (
+					{showInputFields && (
 						<ToolsPanelItem
-							hasValue={ () => inlineInput === true }
-							label={ __( 'Inline input fields', 'woocommerce' ) }
-							onDeselect={ () =>
-								setAttributes( { inlineInput: false } )
+							hasValue={() => inlineInput === true}
+							label={__('Inline input fields', 'woocommerce')}
+							onDeselect={() =>
+								setAttributes({ inlineInput: false })
 							}
 							isShownByDefault
 						>
 							<ToggleControl
-								label={ __(
-									'Inline input fields',
-									'woocommerce'
-								) }
-								checked={ inlineInput }
-								onChange={ () =>
-									setAttributes( {
-										inlineInput: ! inlineInput,
-									} )
+								label={__('Inline input fields', 'woocommerce')}
+								checked={inlineInput}
+								onChange={() =>
+									setAttributes({
+										inlineInput: !inlineInput,
+									})
 								}
 								__nextHasNoMarginBottom
 							/>
 						</ToolsPanelItem>
-					) }
+					)}
 				</ToolsPanel>
 			</InspectorControls>
 
 			<InspectorControls group="color">
-				{ colorGradientSettings.hasColorsOrGradients && (
+				{colorGradientSettings.hasColorsOrGradients && (
 					<ColorGradientSettingsDropdown
 						__experimentalIsRenderedInSidebar
-						settings={ [
+						settings={[
 							{
-								label: __( 'Slider Handle', 'woocommerce' ),
+								label: __('Slider Handle', 'woocommerce'),
 								colorValue:
 									sliderHandle.color || customSliderHandle,
 								isShownByDefault: true,
 								enableAlpha: true,
-								onColorChange: ( colorValue: string ) => {
-									setSliderHandle( colorValue );
-									setAttributes( {
+								onColorChange: (colorValue: string) => {
+									setSliderHandle(colorValue);
+									setAttributes({
 										customSliderHandle: colorValue,
-									} );
+									});
 								},
 								resetAllFilter: () => {
-									setSliderHandle( '' );
-									setAttributes( {
+									setSliderHandle('');
+									setAttributes({
 										customSliderHandle: '',
-									} );
+									});
 								},
 							},
 							{
@@ -192,77 +189,77 @@ const PriceSliderEdit = ( {
 									customSliderHandleBorder,
 								isShownByDefault: true,
 								enableAlpha: true,
-								onColorChange: ( colorValue: string ) => {
-									setSliderHandleBorder( colorValue );
-									setAttributes( {
+								onColorChange: (colorValue: string) => {
+									setSliderHandleBorder(colorValue);
+									setAttributes({
 										customSliderHandleBorder: colorValue,
-									} );
+									});
 								},
 								resetAllFilter: () => {
-									setSliderHandleBorder( '' );
-									setAttributes( {
+									setSliderHandleBorder('');
+									setAttributes({
 										customSliderHandleBorder: '',
-									} );
+									});
 								},
 							},
 							{
-								label: __( 'Slider', 'woocommerce' ),
+								label: __('Slider', 'woocommerce'),
 								colorValue: slider.color || customSlider,
 								isShownByDefault: true,
 								enableAlpha: true,
-								onColorChange: ( colorValue: string ) => {
-									setSlider( colorValue );
-									setAttributes( {
+								onColorChange: (colorValue: string) => {
+									setSlider(colorValue);
+									setAttributes({
 										customSlider: colorValue,
-									} );
+									});
 								},
 								resetAllFilter: () => {
-									setSlider( '' );
-									setAttributes( {
+									setSlider('');
+									setAttributes({
 										customSlider: '',
-									} );
+									});
 								},
 							},
-						] }
-						panelId={ clientId }
-						{ ...colorGradientSettings }
+						]}
+						panelId={clientId}
+						{...colorGradientSettings}
 					/>
-				) }
+				)}
 			</InspectorControls>
 
-			<div { ...blockProps }>
+			<div {...blockProps}>
 				<Disabled>
 					<div
-						className={ clsx(
+						className={clsx(
 							'wc-block-product-filter-price-slider__content',
 							{
 								'wc-block-product-filter-price-slider__content--inline':
 									inlineInput && showInputFields,
 							}
-						) }
+						)}
 					>
 						<div className="wc-block-product-filter-price-slider__left text">
-							{ priceMin }
+							{priceMin}
 						</div>
 						<div className="wc-block-product-filter-price-slider__range">
 							<div className="range-bar"></div>
 							<input
 								type="range"
 								className="min"
-								min={ min }
-								max={ max }
-								defaultValue={ currentMin }
+								min={min}
+								max={max}
+								defaultValue={currentMin}
 							/>
 							<input
 								type="range"
 								className="max"
-								min={ min }
-								max={ max }
-								defaultValue={ currentMax }
+								min={min}
+								max={max}
+								defaultValue={currentMax}
 							/>
 						</div>
 						<div className="wc-block-product-filter-price-slider__right text">
-							{ priceMax }
+							{priceMax}
 						</div>
 					</div>
 				</Disabled>
@@ -271,4 +268,4 @@ const PriceSliderEdit = ( {
 	);
 };
 
-export default withColors( ...colorNames )( PriceSliderEdit );
+export default withColors(...colorNames)(PriceSliderEdit);

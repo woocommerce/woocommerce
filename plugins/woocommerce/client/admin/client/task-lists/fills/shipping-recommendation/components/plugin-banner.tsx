@@ -21,58 +21,55 @@ type PluginBannerProps = {
 	};
 	description?: string;
 	layout?: 'single' | 'dual';
-	features: Array< Feature >;
+	features: Array<Feature>;
 	children?: React.ReactNode;
 };
 
-export const PluginBanner = ( {
+export const PluginBanner = ({
 	logo,
 	description,
 	layout = 'single',
 	features,
 	children,
-}: PluginBannerProps ) => {
+}: PluginBannerProps) => {
 	return (
 		<div
-			className={ clsx(
+			className={clsx(
 				'woocommerce-task-shipping-recommendation__plugins-install',
 				layout
-			) }
+			)}
 		>
-			{ logo && (
+			{logo && (
 				<div className="plugins-install__plugin-banner-image">
 					<img
-						src={ logo.image }
-						alt={ logo.alt ?? logo.label ?? '' }
-						className={ clsx( { 'with-label': logo.label } ) }
+						src={logo.image}
+						alt={logo.alt ?? logo.label ?? ''}
+						className={clsx({ 'with-label': logo.label })}
 					/>
-					{ logo.label && <div>{ logo.label }</div> }
+					{logo.label && <div>{logo.label}</div>}
 				</div>
-			) }
-			{ description && <p>{ description }</p> }
+			)}
+			{description && <p>{description}</p>}
 			<div className="plugins-install__list">
-				{ features.map( ( feature: Feature, index ) => {
+				{features.map((feature: Feature, index) => {
 					return (
-						<div
-							className="plugins-install__list-item"
-							key={ index }
-						>
+						<div className="plugins-install__list-item" key={index}>
 							<div className="plugins-install__list-icon">
-								<img src={ feature.icon } alt="" />
+								<img src={feature.icon} alt="" />
 							</div>
 							<div>
-								{ feature.title && (
+								{feature.title && (
 									<div>
-										<strong>{ feature.title }</strong>
+										<strong>{feature.title}</strong>
 									</div>
-								) }
-								<div>{ feature.description }</div>
+								)}
+								<div>{feature.description}</div>
 							</div>
 						</div>
 					);
-				} ) }
+				})}
 			</div>
-			{ children }
+			{children}
 		</div>
 	);
 };

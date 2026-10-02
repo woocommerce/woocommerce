@@ -15,14 +15,14 @@ type TasksPlaceholderProps = {
 	};
 };
 
-export const TaskListPlaceholder = ( props: TasksPlaceholderProps ) => {
+export const TaskListPlaceholder = (props: TasksPlaceholderProps) => {
 	const { numTasks = 5 } = props;
 
 	return (
 		<div
-			className={ clsx(
+			className={clsx(
 				'woocommerce-task-dashboard__container setup-task-list'
-			) }
+			)}
 		>
 			<div className="components-card is-size-large woocommerce-task-card woocommerce-homescreen-card is-loading">
 				<div className="components-card__header is-size-medium">
@@ -31,10 +31,10 @@ export const TaskListPlaceholder = ( props: TasksPlaceholderProps ) => {
 					</div>
 				</div>
 				<ul className="woocommerce-experimental-list">
-					{ Array.from( new Array( numTasks ) ).map( ( v, i ) => (
+					{Array.from(new Array(numTasks)).map((v, i) => (
 						<li
-							tabIndex={ i }
-							key={ i }
+							tabIndex={i}
+							key={i}
 							className="woocommerce-experimental-list__item woocommerce-task-list__item"
 						>
 							<div className="woocommerce-task-list__item-before">
@@ -44,7 +44,7 @@ export const TaskListPlaceholder = ( props: TasksPlaceholderProps ) => {
 								<div className="components-truncate components-text is-placeholder"></div>
 							</div>
 						</li>
-					) ) }
+					))}
 				</ul>
 			</div>
 		</div>

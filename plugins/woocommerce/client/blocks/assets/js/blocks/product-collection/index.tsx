@@ -15,11 +15,11 @@ import registerProductTitleVariation from './variations/elements/product-title';
 import registerCollections from './collections';
 import { addProductCollectionToQueryPaginationParentOrAncestor } from './utils';
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	icon,
 	edit,
 	save,
-} );
+});
 registerProductSummaryVariation();
 registerProductTitleVariation();
 registerCollections();

@@ -25,66 +25,66 @@ import {
  */
 import { DimensionsControlProps, WidthOptions } from '../../types';
 
-const getHelpText = ( type: WidthOptions ) => {
-	if ( type === WidthOptions.FILL ) {
-		return __( 'Stretch to fill available space.', 'woocommerce' );
+const getHelpText = (type: WidthOptions) => {
+	if (type === WidthOptions.FILL) {
+		return __('Stretch to fill available space.', 'woocommerce');
 	}
 
-	return __( 'Specify a fixed width.', 'woocommerce' );
+	return __('Specify a fixed width.', 'woocommerce');
 };
 
-const WidthOptionsControl = ( {
+const WidthOptionsControl = ({
 	dimensions,
 	setAttributes,
-}: DimensionsControlProps ) => {
+}: DimensionsControlProps) => {
 	const { widthType, fixedWidth = '' } = dimensions;
-	const setDimensions = ( type: WidthOptions ) => {
-		setAttributes( {
+	const setDimensions = (type: WidthOptions) => {
+		setAttributes({
 			dimensions: {
 				...dimensions,
 				widthType: type,
 			},
-		} );
+		});
 	};
 
 	return (
 		<ToolsPanelItem
-			label={ __( 'Width', 'woocommerce' ) }
-			hasValue={ () => widthType !== WidthOptions.FILL }
+			label={__('Width', 'woocommerce')}
+			hasValue={() => widthType !== WidthOptions.FILL}
 			isShownByDefault
 		>
 			<ToggleGroupControl
 				__next40pxDefaultSize
 				__nextHasNoMarginBottom
-				label={ __( 'Width', 'woocommerce' ) }
-				value={ widthType }
-				help={ getHelpText( widthType ) }
-				onChange={ ( value: WidthOptions ) => setDimensions( value ) }
+				label={__('Width', 'woocommerce')}
+				value={widthType}
+				help={getHelpText(widthType)}
+				onChange={(value: WidthOptions) => setDimensions(value)}
 				isBlock
 			>
 				<ToggleGroupControlOption
-					value={ WidthOptions.FILL }
-					label={ __( 'Fill', 'woocommerce' ) }
+					value={WidthOptions.FILL}
+					label={__('Fill', 'woocommerce')}
 				/>
 				<ToggleGroupControlOption
-					value={ WidthOptions.FIXED }
-					label={ __( 'Fixed', 'woocommerce' ) }
+					value={WidthOptions.FIXED}
+					label={__('Fixed', 'woocommerce')}
 				/>
 			</ToggleGroupControl>
-			{ widthType === WidthOptions.FIXED && (
+			{widthType === WidthOptions.FIXED && (
 				<UnitControl
 					__next40pxDefaultSize
-					onChange={ ( value: string ) => {
-						setAttributes( {
+					onChange={(value: string) => {
+						setAttributes({
 							dimensions: {
 								...dimensions,
 								fixedWidth: value,
 							},
-						} );
-					} }
-					value={ fixedWidth }
+						});
+					}}
+					value={fixedWidth}
 				/>
-			) }
+			)}
 		</ToolsPanelItem>
 	);
 };

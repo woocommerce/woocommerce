@@ -17,75 +17,71 @@ import {
 import { storeName } from '../../store';
 
 type PersonalizationTagsLinkPopoverProps = {
-	contentRef: React.RefObject< HTMLElement >;
+	contentRef: React.RefObject<HTMLElement>;
 	onUpdate: (
 		htmlElement: HTMLElement,
 		newTag: string,
 		newText: string
 	) => void;
 };
-const PersonalizationTagsLinkPopover = ( {
+const PersonalizationTagsLinkPopover = ({
 	contentRef,
 	onUpdate,
-}: PersonalizationTagsLinkPopoverProps ) => {
-	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
-	const [ linkElement, setLinkElement ] = useState< HTMLElement | null >(
-		null
-	);
-	const [ linkText, setLinkText ] = useState( '' );
-	const [ linkHref, setLinkHref ] = useState( '' );
+}: PersonalizationTagsLinkPopoverProps) => {
+	const [isPopoverVisible, setIsPopoverVisible] = useState(false);
+	const [linkElement, setLinkElement] = useState<HTMLElement | null>(null);
+	const [linkText, setLinkText] = useState('');
+	const [linkHref, setLinkHref] = useState('');
 
 	const list = useSelect(
-		( select ) => select( storeName ).getPersonalizationTagsList(),
+		(select) => select(storeName).getPersonalizationTagsList(),
 		[]
 	);
 
-	useEffect( () => {
-		if ( ! contentRef || ! contentRef.current ) {
+	useEffect(() => {
+		if (!contentRef || !contentRef.current) {
 			return undefined;
 		}
 
 		const container = contentRef.current;
 
 		// Handle clicks within the referenced container
-		const handleContainerClick = ( event: Event ) => {
+		const handleContainerClick = (event: Event) => {
 			const target = event.target as HTMLElement;
-			const element = target.closest(
-				'a[data-link-href]'
-			) as HTMLElement;
+			const element = target.closest('a[data-link-href]') as HTMLElement;
 
-			if ( element ) {
+			if (element) {
 				// Remove brackets from the text content for better user experience
-				setLinkElement( element );
-				setLinkHref( element.getAttribute( 'data-link-href' ) || '' );
-				setLinkText( element.textContent || '' );
-				setIsPopoverVisible( true );
+				setLinkElement(element);
+				setLinkHref(element.getAttribute('data-link-href') || '');
+				setLinkText(element.textContent || '');
+				setIsPopoverVisible(true);
 			}
 		};
 
 		// Add the event listener to the container
-		container.addEventListener( 'click', handleContainerClick );
+		container.addEventListener('click', handleContainerClick);
 
 		// Cleanup function to remove the event listener on unmount
 		return () => {
-			container.removeEventListener( 'click', handleContainerClick );
+			container.removeEventListener('click', handleContainerClick);
 		};
-	}, [ contentRef ] );
+	}, [contentRef]);
 
 	return (
 		<>
-			{ isPopoverVisible && linkElement && (
+			{isPopoverVisible && linkElement && (
 				<Popover
 					position="bottom left"
-					onClose={ () => setIsPopoverVisible( false ) }
-					anchor={ linkElement } // Directly use commentSpan as the anchor
+					onClose={() => setIsPopoverVisible(false)}
+					anchor={linkElement} // Directly use commentSpan as the anchor
 					className="woocommerce-personalization-tag-popover"
 				>
 					<div className="woocommerce-personalization-tag-popover-content">
 						<TextControl
-							label={ __( 'Link Text', __i18n_text_domain__ ) }
-							value={ linkText }
-							onChange={ ( value ) => setLinkText( value ) }
+							label={__('Link Text', __i18n_text_domain__)}
+							value={linkText}
+							onChange={(value) => setLinkText(value)}
 							__nextHasNoMarginBottom // To avoid warning about deprecation in console
 							__next40pxDefaultSize
 							autoComplete="off"
@@ -93,47 +89,47 @@ const PersonalizationTagsLinkPopover = ( {
 						<SelectControl
 							__next40pxDefaultSize
 							__nextHasNoMarginBottom
-							label={ __( 'Link tag', __i18n_text_domain__ ) }
-							value={ linkHref }
-							onChange={ ( value ) => {
-								setLinkHref( value );
-							} }
-							options={ list
-								.filter( ( tag ) => {
+							label={__('Link tag', __i18n_text_domain__)}
+							value={linkHref}
+							onChange={(value) => {
+								setLinkHref(value);
+							}}
+							options={list
+								.filter((tag) => {
 									return (
 										tag.category ===
-										__( 'Link', __i18n_text_domain__ )
+										__('Link', __i18n_text_domain__)
 									);
-								} )
-								.map( ( tag ) => {
+								})
+								.map((tag) => {
 									return {
 										label: tag.name,
 										value: tag.token,
 									};
-								} ) }
+								})}
 						/>
 						<div className="woocommerce-personalization-tag-popover-content-buttons">
 							<Button
 								isTertiary
-								onClick={ () => {
-									setIsPopoverVisible( false );
-								} }
+								onClick={() => {
+									setIsPopoverVisible(false);
+								}}
 							>
-								{ __( 'Cancel', __i18n_text_domain__ ) }
+								{__('Cancel', __i18n_text_domain__)}
 							</Button>
 							<Button
 								isPrimary
-								onClick={ () => {
-									setIsPopoverVisible( false );
-									onUpdate( linkElement, linkHref, linkText );
-								} }
+								onClick={() => {
+									setIsPopoverVisible(false);
+									onUpdate(linkElement, linkHref, linkText);
+								}}
 							>
-								{ __( 'Update link', __i18n_text_domain__ ) }
+								{__('Update link', __i18n_text_domain__)}
 							</Button>
 						</div>
 					</div>
 				</Popover>
-			) }
+			)}
 		</>
 	);
 };

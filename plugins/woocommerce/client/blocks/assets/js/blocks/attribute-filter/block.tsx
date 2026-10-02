@@ -64,7 +64,7 @@ import { useSetWrapperVisibility } from '../filter-wrapper/context';
  * @param {boolean} props.isEditor   Whether the component is being rendered in the editor.
  * @param {boolean} props.getNotice  Get notice content if in editor.
  */
-const AttributeFilterBlock = ( {
+const AttributeFilterBlock = ({
 	attributes: blockAttributes,
 	isEditor = false,
 	getNotice = () => null,
@@ -72,7 +72,7 @@ const AttributeFilterBlock = ( {
 	attributes: BlockAttributes;
 	isEditor?: boolean;
 	getNotice?: GetNotice;
-} ) => {
+}) => {
 	const hasFilterableProducts = getSettingWithCoercion(
 		'hasFilterableProducts',
 		false,
@@ -91,48 +91,46 @@ const AttributeFilterBlock = ( {
 		isString
 	);
 
-	const [ hasSetFilterDefaultsFromUrl, setHasSetFilterDefaultsFromUrl ] =
-		useState( false );
+	const [hasSetFilterDefaultsFromUrl, setHasSetFilterDefaultsFromUrl] =
+		useState(false);
 
 	const attributeObject =
-		blockAttributes.isPreview && ! blockAttributes.attributeId
+		blockAttributes.isPreview && !blockAttributes.attributeId
 			? previewAttributeObject
-			: getAttributeFromID( blockAttributes.attributeId );
+			: getAttributeFromID(blockAttributes.attributeId);
 
 	const initialFilters = useMemo(
-		() => getActiveFilters( attributeObject ),
-		[ attributeObject ]
+		() => getActiveFilters(attributeObject),
+		[attributeObject]
 	);
 
-	const [ checked, setChecked ] = useState( initialFilters );
+	const [checked, setChecked] = useState(initialFilters);
 
 	/*
 		FormTokenField forces the dropdown to reopen on reset, so we create a unique ID to use as the components key.
 		This will force the component to remount on reset when we change this value.
 		More info: https://github.com/woocommerce/woocommerce-blocks/pull/6920#issuecomment-1222402482
 	 */
-	const [ remountKey, setRemountKey ] = useState( generateUniqueId() );
+	const [remountKey, setRemountKey] = useState(generateUniqueId());
 
-	const [ displayedOptions, setDisplayedOptions ] = useState<
-		DisplayOption[]
-	>(
-		blockAttributes.isPreview && ! blockAttributes.attributeId
+	const [displayedOptions, setDisplayedOptions] = useState<DisplayOption[]>(
+		blockAttributes.isPreview && !blockAttributes.attributeId
 			? previewOptions
 			: []
 	);
 
-	const [ queryState ] = useQueryStateByContext();
-	const [ productAttributesQuery, setProductAttributesQuery ] =
-		useQueryStateByKey( 'attributes', [] );
+	const [queryState] = useQueryStateByContext();
+	const [productAttributesQuery, setProductAttributesQuery] =
+		useQueryStateByKey('attributes', []);
 
 	const { results: attributeTerms, isLoading: attributeTermsLoading } =
-		useCollection< AttributeTerm >( {
+		useCollection<AttributeTerm>({
 			namespace: '/wc/store/v1',
 			resourceName: 'products/attributes/terms',
-			resourceValues: [ attributeObject?.id || 0 ],
+			resourceValues: [attributeObject?.id || 0],
 			shouldSelect: blockAttributes.attributeId > 0,
 			query: { orderby: attributeObject?.orderby || 'menu_order' },
-		} );
+		});
 
 	const backendQueryState = getSettingWithCoercion(
 		'queryState',
@@ -140,7 +138,7 @@ const AttributeFilterBlock = ( {
 		isObject
 	);
 	const { data: filteredCounts, isLoading: filteredCountsLoading } =
-		useCollectionData( {
+		useCollectionData({
 			queryAttribute: {
 				taxonomy: attributeObject?.taxonomy || '',
 				queryType: blockAttributes.queryType,
@@ -150,63 +148,63 @@ const AttributeFilterBlock = ( {
 				...queryState,
 			},
 			isEditor,
-		} );
+		});
 
 	/**
 	 * Get count data about a given term by ID.
 	 */
 	const getFilteredTerm = useCallback(
-		( id ) => {
+		(id) => {
 			if (
-				! objectHasProp( filteredCounts, 'attribute_counts' ) ||
-				! Array.isArray( filteredCounts.attribute_counts )
+				!objectHasProp(filteredCounts, 'attribute_counts') ||
+				!Array.isArray(filteredCounts.attribute_counts)
 			) {
 				return null;
 			}
 			return filteredCounts.attribute_counts.find(
-				( { term } ) => term === id
+				({ term }) => term === id
 			);
 		},
-		[ filteredCounts ]
+		[filteredCounts]
 	);
 
 	/**
 	 * Compare intersection of all terms and filtered counts to get a list of options to display.
 	 */
-	useEffect( () => {
+	useEffect(() => {
 		/**
 		 * Checks if a term slug is in the query state.
 		 *
 		 * @param {string} termSlug The term of the slug to check.
 		 */
-		const isTermInQueryState = ( termSlug: string ) => {
-			if ( ! queryState?.attributes ) {
+		const isTermInQueryState = (termSlug: string) => {
+			if (!queryState?.attributes) {
 				return false;
 			}
 			return queryState.attributes.some(
-				( { attribute, slug = [] }: AttributeQuery ) =>
+				({ attribute, slug = [] }: AttributeQuery) =>
 					attribute === attributeObject?.taxonomy &&
-					slug.includes( termSlug )
+					slug.includes(termSlug)
 			);
 		};
 
-		if ( attributeTermsLoading || filteredCountsLoading ) {
+		if (attributeTermsLoading || filteredCountsLoading) {
 			return;
 		}
 
-		if ( ! Array.isArray( attributeTerms ) ) {
+		if (!Array.isArray(attributeTerms)) {
 			return;
 		}
 
 		const newOptions = attributeTerms
-			.map( ( term ) => {
-				const filteredTerm = getFilteredTerm( term.id );
+			.map((term) => {
+				const filteredTerm = getFilteredTerm(term.id);
 
 				// If there is no match this term doesn't match the current product collection - only render if checked.
 				if (
-					! filteredTerm &&
-					! checked.includes( term.slug ) &&
-					! isTermInQueryState( term.slug )
+					!filteredTerm &&
+					!checked.includes(term.slug) &&
+					!isTermInQueryState(term.slug)
 				) {
 					return null;
 				}
@@ -214,24 +212,24 @@ const AttributeFilterBlock = ( {
 				const count = filteredTerm ? filteredTerm.count : 0;
 
 				return {
-					formattedValue: formatSlug( term.slug ),
+					formattedValue: formatSlug(term.slug),
 					value: term.slug,
-					name: decodeEntities( term.name ),
+					name: decodeEntities(term.name),
 					label: (
 						<Label
-							name={ decodeEntities( term.name ) }
-							count={ blockAttributes.showCounts ? count : null }
+							name={decodeEntities(term.name)}
+							count={blockAttributes.showCounts ? count : null}
 						/>
 					),
 					textLabel: blockAttributes.showCounts
-						? `${ decodeEntities( term.name ) } (${ count })`
-						: decodeEntities( term.name ),
+						? `${decodeEntities(term.name)} (${count})`
+						: decodeEntities(term.name),
 				};
-			} )
-			.filter( ( option ): option is DisplayOption => !! option );
+			})
+			.filter((option): option is DisplayOption => !!option);
 
-		setDisplayedOptions( newOptions );
-		setRemountKey( generateUniqueId() );
+		setDisplayedOptions(newOptions);
+		setRemountKey(generateUniqueId());
 	}, [
 		attributeObject?.taxonomy,
 		attributeTerms,
@@ -241,24 +239,24 @@ const AttributeFilterBlock = ( {
 		getFilteredTerm,
 		checked,
 		queryState.attributes,
-	] );
+	]);
 
 	/**
 	 * Returns an array of term objects that have been chosen via the checkboxes.
 	 */
 	const getSelectedTerms = useCallback(
-		( newChecked ) => {
-			if ( ! Array.isArray( attributeTerms ) ) {
+		(newChecked) => {
+			if (!Array.isArray(attributeTerms)) {
 				return [];
 			}
-			return attributeTerms.reduce( ( acc, term ) => {
-				if ( newChecked.includes( term.slug ) ) {
-					acc.push( term );
+			return attributeTerms.reduce((acc, term) => {
+				if (newChecked.includes(term.slug)) {
+					acc.push(term);
 				}
 				return acc;
-			}, [] );
+			}, []);
 		},
-		[ attributeTerms ]
+		[attributeTerms]
 	);
 
 	/**
@@ -268,20 +266,18 @@ const AttributeFilterBlock = ( {
 	 * @param {boolean} allFiltersRemoved If there are active filters or not.
 	 */
 	const updateFilterUrl = useCallback(
-		( query, allFiltersRemoved = false ) => {
-			query = query.map( ( item: AttributeQuery ) => ( {
+		(query, allFiltersRemoved = false) => {
+			query = query.map((item: AttributeQuery) => ({
 				...item,
-				slug: item.slug.map( ( slug: string ) =>
-					decodeURIComponent( slug )
-				),
-			} ) );
+				slug: item.slug.map((slug: string) => decodeURIComponent(slug)),
+			}));
 
-			if ( allFiltersRemoved ) {
-				if ( ! attributeObject?.taxonomy ) {
+			if (allFiltersRemoved) {
+				if (!attributeObject?.taxonomy) {
 					return;
 				}
 				const currentQueryArgKeys = Object.keys(
-					getQueryArgs( window.location.href )
+					getQueryArgs(window.location.href)
 				);
 
 				const parsedTaxonomy = parseTaxonomyToGenerateURL(
@@ -289,58 +285,58 @@ const AttributeFilterBlock = ( {
 				);
 
 				const url = currentQueryArgKeys.reduce(
-					( currentUrl, queryArg ) =>
+					(currentUrl, queryArg) =>
 						queryArg.includes(
 							PREFIX_QUERY_ARG_QUERY_TYPE + parsedTaxonomy
 						) ||
 						queryArg.includes(
 							PREFIX_QUERY_ARG_FILTER_TYPE + parsedTaxonomy
 						)
-							? removeQueryArgs( currentUrl, queryArg )
+							? removeQueryArgs(currentUrl, queryArg)
 							: currentUrl,
 					window.location.href
 				);
 
-				const newUrl = formatParams( url, query );
-				changeUrl( newUrl );
+				const newUrl = formatParams(url, query);
+				changeUrl(newUrl);
 			} else {
-				const newUrl = formatParams( pageUrl, query );
-				const currentQueryArgs = getQueryArgs( window.location.href );
-				const newUrlQueryArgs = getQueryArgs( newUrl );
+				const newUrl = formatParams(pageUrl, query);
+				const currentQueryArgs = getQueryArgs(window.location.href);
+				const newUrlQueryArgs = getQueryArgs(newUrl);
 
-				if ( ! isQueryArgsEqual( currentQueryArgs, newUrlQueryArgs ) ) {
-					changeUrl( newUrl );
+				if (!isQueryArgsEqual(currentQueryArgs, newUrlQueryArgs)) {
+					changeUrl(newUrl);
 				}
 			}
 		},
-		[ pageUrl, attributeObject?.taxonomy ]
+		[pageUrl, attributeObject?.taxonomy]
 	);
 
-	const onSubmit = ( checkedFilters: string[] ) => {
+	const onSubmit = (checkedFilters: string[]) => {
 		const query = updateAttributeFilter(
 			productAttributesQuery,
 			setProductAttributesQuery,
 			attributeObject,
-			getSelectedTerms( checkedFilters ),
+			getSelectedTerms(checkedFilters),
 			blockAttributes.queryType === 'or' ? 'in' : 'and'
 		);
 
-		updateFilterUrl( query, checkedFilters.length === 0 );
+		updateFilterUrl(query, checkedFilters.length === 0);
 	};
 
 	const updateCheckedFilters = useCallback(
-		( checkedFilters: string[], force = false ) => {
-			if ( isEditor ) {
+		(checkedFilters: string[], force = false) => {
+			if (isEditor) {
 				return;
 			}
 
-			setChecked( checkedFilters );
-			if ( force || ! blockAttributes.showFilterButton ) {
+			setChecked(checkedFilters);
+			if (force || !blockAttributes.showFilterButton) {
 				updateAttributeFilter(
 					productAttributesQuery,
 					setProductAttributesQuery,
 					attributeObject,
-					getSelectedTerms( checkedFilters ),
+					getSelectedTerms(checkedFilters),
 					blockAttributes.queryType === 'or' ? 'in' : 'and'
 				);
 			}
@@ -357,35 +353,33 @@ const AttributeFilterBlock = ( {
 		]
 	);
 
-	const checkedQuery = useMemo( () => {
-		if ( ! isAttributeQueryCollection( productAttributesQuery ) ) {
+	const checkedQuery = useMemo(() => {
+		if (!isAttributeQueryCollection(productAttributesQuery)) {
 			return [];
 		}
 
 		return productAttributesQuery
-			.filter(
-				( { attribute } ) => attribute === attributeObject?.taxonomy
-			)
-			.flatMap( ( { slug } ) => slug );
-	}, [ productAttributesQuery, attributeObject?.taxonomy ] );
+			.filter(({ attribute }) => attribute === attributeObject?.taxonomy)
+			.flatMap(({ slug }) => slug);
+	}, [productAttributesQuery, attributeObject?.taxonomy]);
 
-	const currentCheckedQuery = useShallowEqual( checkedQuery );
-	const previousCheckedQuery = usePrevious( currentCheckedQuery );
+	const currentCheckedQuery = useShallowEqual(checkedQuery);
+	const previousCheckedQuery = usePrevious(currentCheckedQuery);
 	// Track ATTRIBUTES QUERY changes so the block reflects current filters.
-	useEffect( () => {
+	useEffect(() => {
 		if (
 			previousCheckedQuery &&
-			! isShallowEqual( previousCheckedQuery, currentCheckedQuery ) && // checked query changed
-			! isShallowEqual( checked, currentCheckedQuery ) // checked query doesn't match the UI
+			!isShallowEqual(previousCheckedQuery, currentCheckedQuery) && // checked query changed
+			!isShallowEqual(checked, currentCheckedQuery) // checked query doesn't match the UI
 		) {
-			updateCheckedFilters( currentCheckedQuery );
+			updateCheckedFilters(currentCheckedQuery);
 		}
 	}, [
 		checked,
 		currentCheckedQuery,
 		previousCheckedQuery,
 		updateCheckedFilters,
-	] );
+	]);
 
 	const multiple = blockAttributes.selectType !== 'single';
 
@@ -393,45 +387,43 @@ const AttributeFilterBlock = ( {
 	 * When a checkbox in the list changes, update state.
 	 */
 	const onChange = useCallback(
-		( checkedValue ) => {
-			const previouslyChecked = checked.includes( checkedValue );
+		(checkedValue) => {
+			const previouslyChecked = checked.includes(checkedValue);
 			let newChecked;
 
-			if ( ! multiple ) {
-				newChecked = previouslyChecked ? [] : [ checkedValue ];
+			if (!multiple) {
+				newChecked = previouslyChecked ? [] : [checkedValue];
 			} else {
-				newChecked = checked.filter(
-					( value ) => value !== checkedValue
-				);
+				newChecked = checked.filter((value) => value !== checkedValue);
 
-				if ( ! previouslyChecked ) {
-					newChecked.push( checkedValue );
+				if (!previouslyChecked) {
+					newChecked.push(checkedValue);
 					newChecked.sort();
 				}
 			}
 
-			updateCheckedFilters( newChecked );
+			updateCheckedFilters(newChecked);
 		},
-		[ checked, multiple, updateCheckedFilters ]
+		[checked, multiple, updateCheckedFilters]
 	);
 
 	/**
 	 * Update the filter URL on state change.
 	 */
-	useEffect( () => {
-		if ( ! attributeObject || blockAttributes.showFilterButton ) {
+	useEffect(() => {
+		if (!attributeObject || blockAttributes.showFilterButton) {
 			return;
 		}
 
 		if (
-			areAllFiltersRemoved( {
+			areAllFiltersRemoved({
 				currentCheckedFilters: checked,
 				hasSetFilterDefaultsFromUrl,
-			} )
+			})
 		) {
-			updateFilterUrl( productAttributesQuery, true );
+			updateFilterUrl(productAttributesQuery, true);
 		} else {
-			updateFilterUrl( productAttributesQuery, false );
+			updateFilterUrl(productAttributesQuery, false);
 		}
 	}, [
 		hasSetFilterDefaultsFromUrl,
@@ -440,24 +432,24 @@ const AttributeFilterBlock = ( {
 		attributeObject,
 		checked,
 		blockAttributes.showFilterButton,
-	] );
+	]);
 
 	/**
 	 * Try to get the current attribute filter from the URl.
 	 */
-	useEffect( () => {
-		if ( hasSetFilterDefaultsFromUrl || attributeTermsLoading ) {
+	useEffect(() => {
+		if (hasSetFilterDefaultsFromUrl || attributeTermsLoading) {
 			return;
 		}
 
-		if ( initialFilters.length > 0 ) {
-			setHasSetFilterDefaultsFromUrl( true );
-			updateCheckedFilters( initialFilters, true );
+		if (initialFilters.length > 0) {
+			setHasSetFilterDefaultsFromUrl(true);
+			updateCheckedFilters(initialFilters, true);
 			return;
 		}
 
-		if ( ! filteringForPhpTemplate ) {
-			setHasSetFilterDefaultsFromUrl( true );
+		if (!filteringForPhpTemplate) {
+			setHasSetFilterDefaultsFromUrl(true);
 		}
 	}, [
 		attributeObject,
@@ -466,71 +458,69 @@ const AttributeFilterBlock = ( {
 		updateCheckedFilters,
 		initialFilters,
 		filteringForPhpTemplate,
-	] );
+	]);
 
 	const setWrapperVisibility = useSetWrapperVisibility();
 
-	if ( ! hasFilterableProducts ) {
-		setWrapperVisibility( false );
+	if (!hasFilterableProducts) {
+		setWrapperVisibility(false);
 		return null;
 	}
 
 	// Short-circuit if no attribute is selected.
-	if ( ! attributeObject ) {
-		if ( isEditor ) {
-			return getNotice( 'noAttributes' );
+	if (!attributeObject) {
+		if (isEditor) {
+			return getNotice('noAttributes');
 		}
-		setWrapperVisibility( false );
+		setWrapperVisibility(false);
 		return null;
 	}
 
-	if ( displayedOptions.length === 0 && ! attributeTermsLoading ) {
-		if ( isEditor ) {
-			return getNotice( 'noProducts' );
+	if (displayedOptions.length === 0 && !attributeTermsLoading) {
+		if (isEditor) {
+			return getNotice('noProducts');
 		}
 	}
 
 	const TagName =
-		`h${ blockAttributes.headingLevel }` as keyof JSX.IntrinsicElements;
-	const termsLoading = ! blockAttributes.isPreview && attributeTermsLoading;
-	const countsLoading = ! blockAttributes.isPreview && filteredCountsLoading;
+		`h${blockAttributes.headingLevel}` as keyof JSX.IntrinsicElements;
+	const termsLoading = !blockAttributes.isPreview && attributeTermsLoading;
+	const countsLoading = !blockAttributes.isPreview && filteredCountsLoading;
 
 	const isLoading =
-		( termsLoading || countsLoading ) && displayedOptions.length === 0;
+		(termsLoading || countsLoading) && displayedOptions.length === 0;
 
-	if ( ! isLoading && displayedOptions.length === 0 ) {
-		setWrapperVisibility( false );
+	if (!isLoading && displayedOptions.length === 0) {
+		setWrapperVisibility(false);
 		return null;
 	}
 
 	const showChevron = multiple
-		? ! isLoading && checked.length < displayedOptions.length
-		: ! isLoading && checked.length === 0;
+		? !isLoading && checked.length < displayedOptions.length
+		: !isLoading && checked.length === 0;
 
 	const heading = (
 		<TagName className="wc-block-attribute-filter__title">
-			{ blockAttributes.heading }
+			{blockAttributes.heading}
 		</TagName>
 	);
 
 	const filterHeading = isLoading ? (
-		<FilterTitlePlaceholder>{ heading }</FilterTitlePlaceholder>
+		<FilterTitlePlaceholder>{heading}</FilterTitlePlaceholder>
 	) : (
 		heading
 	);
 
-	setWrapperVisibility( true );
+	setWrapperVisibility(true);
 
 	const getIsApplyButtonDisabled = () => {
-		if ( termsLoading || countsLoading ) {
+		if (termsLoading || countsLoading) {
 			return true;
 		}
 
-		const activeFilters = getActiveFilters( attributeObject );
-		if ( activeFilters.length === checked.length ) {
-			return checked.every( ( value ) =>
-				activeFilters.includes( value )
-			);
+		const activeFilters = getActiveFilters(attributeObject);
+		if (activeFilters.length === checked.length) {
+			return checked.every((value) => activeFilters.includes(value));
 		}
 
 		return false;
@@ -538,146 +528,140 @@ const AttributeFilterBlock = ( {
 
 	return (
 		<>
-			{ ! isEditor && blockAttributes.heading && filterHeading }
+			{!isEditor && blockAttributes.heading && filterHeading}
 			<div
-				className={ clsx(
+				className={clsx(
 					'wc-block-attribute-filter',
-					`style-${ blockAttributes.displayStyle }`
-				) }
+					`style-${blockAttributes.displayStyle}`
+				)}
 			>
-				{ blockAttributes.displayStyle === 'dropdown' ? (
+				{blockAttributes.displayStyle === 'dropdown' ? (
 					<>
 						<FormTokenField
-							key={ remountKey }
-							label={ attributeObject.label }
-							className={ clsx( {
-								'single-selection': ! multiple,
+							key={remountKey}
+							label={attributeObject.label}
+							className={clsx({
+								'single-selection': !multiple,
 								'is-loading': isLoading,
-							} ) }
-							suggestions={ displayedOptions
+							})}
+							suggestions={displayedOptions
 								.filter(
-									( option ) =>
-										! checked.includes( option.value )
+									(option) => !checked.includes(option.value)
 								)
-								.map( ( option ) => option.formattedValue ) }
-							disabled={ isLoading }
-							placeholder={ sprintf(
+								.map((option) => option.formattedValue)}
+							disabled={isLoading}
+							placeholder={sprintf(
 								/* translators: %s attribute name. */
-								__( 'Select %s', 'woocommerce' ),
+								__('Select %s', 'woocommerce'),
 								attributeObject.label
-							) }
-							onChange={ ( tokens: string[] ) => {
-								if ( ! multiple && tokens.length > 1 ) {
-									tokens = [ tokens[ tokens.length - 1 ] ];
+							)}
+							onChange={(tokens: string[]) => {
+								if (!multiple && tokens.length > 1) {
+									tokens = [tokens[tokens.length - 1]];
 								}
 
-								tokens = tokens.map( ( token ) => {
+								tokens = tokens.map((token) => {
 									const displayOption = displayedOptions.find(
-										( option ) =>
+										(option) =>
 											option.formattedValue === token
 									);
 
 									return displayOption
 										? displayOption.value
 										: token;
-								} );
+								});
 
-								const added = [ tokens, checked ].reduce(
-									( a, b ) =>
-										a.filter( ( c ) => ! b.includes( c ) )
+								const added = [tokens, checked].reduce((a, b) =>
+									a.filter((c) => !b.includes(c))
 								);
 
-								if ( added.length === 1 ) {
-									return onChange( added[ 0 ] );
+								if (added.length === 1) {
+									return onChange(added[0]);
 								}
 
-								const removed = [ checked, tokens ].reduce(
-									( a, b ) =>
-										a.filter( ( c ) => ! b.includes( c ) )
+								const removed = [checked, tokens].reduce(
+									(a, b) => a.filter((c) => !b.includes(c))
 								);
-								if ( removed.length === 1 ) {
-									onChange( removed[ 0 ] );
+								if (removed.length === 1) {
+									onChange(removed[0]);
 								}
-							} }
-							value={ checked }
-							displayTransform={ ( value: string ) => {
-								const result = displayedOptions.find(
-									( option ) =>
-										[
-											option.value,
-											option.formattedValue,
-										].includes( value )
+							}}
+							value={checked}
+							displayTransform={(value: string) => {
+								const result = displayedOptions.find((option) =>
+									[
+										option.value,
+										option.formattedValue,
+									].includes(value)
 								);
 								return result ? result.textLabel : value;
-							} }
-							saveTransform={ formatSlug }
-							messages={ {
+							}}
+							saveTransform={formatSlug}
+							messages={{
 								added: sprintf(
 									/* translators: %s is the attribute label. */
-									__( '%s filter added.', 'woocommerce' ),
+									__('%s filter added.', 'woocommerce'),
 									attributeObject.label
 								),
 								removed: sprintf(
 									/* translators: %s is the attribute label. */
-									__( '%s filter removed.', 'woocommerce' ),
+									__('%s filter removed.', 'woocommerce'),
 									attributeObject.label
 								),
 								remove: sprintf(
 									/* translators: %s is the attribute label. */
-									__( 'Remove %s filter.', 'woocommerce' ),
+									__('Remove %s filter.', 'woocommerce'),
 									attributeObject.label.toLocaleLowerCase()
 								),
 								__experimentalInvalid: sprintf(
 									/* translators: %s is the attribute label. */
-									__( 'Invalid %s filter.', 'woocommerce' ),
+									__('Invalid %s filter.', 'woocommerce'),
 									attributeObject.label.toLocaleLowerCase()
 								),
-							} }
+							}}
 						/>
-						{ showChevron && (
-							<Icon icon={ chevronDown } size={ 30 } />
-						) }
+						{showChevron && <Icon icon={chevronDown} size={30} />}
 					</>
 				) : (
 					<CheckboxFilter
-						options={ displayedOptions }
-						checked={ checked }
-						onChange={ onChange }
-						isLoading={ isLoading }
-						isDisabled={ isLoading }
+						options={displayedOptions}
+						checked={checked}
+						onChange={onChange}
+						isLoading={isLoading}
+						isDisabled={isLoading}
 					/>
-				) }
+				)}
 			</div>
 
 			<div className="wc-block-attribute-filter__actions">
-				{ ( checked.length > 0 || isEditor ) && ! isLoading && (
+				{(checked.length > 0 || isEditor) && !isLoading && (
 					<FilterResetButton
-						onClick={ () => {
-							setChecked( [] );
-							setRemountKey( generateUniqueId() );
-							if ( hasSetFilterDefaultsFromUrl ) {
-								onSubmit( [] );
+						onClick={() => {
+							setChecked([]);
+							setRemountKey(generateUniqueId());
+							if (hasSetFilterDefaultsFromUrl) {
+								onSubmit([]);
 							}
-						} }
-						screenReaderLabel={ __(
+						}}
+						screenReaderLabel={__(
 							'Reset attribute filter',
 							'woocommerce'
-						) }
+						)}
 					/>
-				) }
-				{ blockAttributes.showFilterButton && (
+				)}
+				{blockAttributes.showFilterButton && (
 					<FilterSubmitButton
 						className="wc-block-attribute-filter__button"
-						isLoading={ isLoading }
-						disabled={ getIsApplyButtonDisabled() }
-						onClick={ () => onSubmit( checked ) }
-						screenReaderLabel={ sprintf(
+						isLoading={isLoading}
+						disabled={getIsApplyButtonDisabled()}
+						onClick={() => onSubmit(checked)}
+						screenReaderLabel={sprintf(
 							/* translators: %s is the attribute label */
-							__( 'Apply attribute filter: %s', 'woocommerce' ),
+							__('Apply attribute filter: %s', 'woocommerce'),
 							attributeObject.label
-						) }
+						)}
 					/>
-				) }
+				)}
 			</div>
 		</>
 	);

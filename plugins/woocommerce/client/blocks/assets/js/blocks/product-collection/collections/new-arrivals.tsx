@@ -21,11 +21,11 @@ import { setEmailEditorPreviewState } from '../utils';
 
 const collection = {
 	name: CoreCollectionNames.NEW_ARRIVALS,
-	title: __( 'New Arrivals', 'woocommerce' ),
-	icon: <Icon icon={ calendar } />,
-	description: __( 'Recommend your newest products.', 'woocommerce' ),
-	keywords: [ 'newest' ],
-	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
+	title: __('New Arrivals', 'woocommerce'),
+	icon: <Icon icon={calendar} />,
+	description: __('Recommend your newest products.', 'woocommerce'),
+	keywords: ['newest'],
+	scope: ['inserter', 'block'] as BlockVariationScope[],
 };
 
 const attributes = {
@@ -44,7 +44,7 @@ const attributes = {
 			value: '-7 days',
 		},
 	},
-	hideControls: [ CoreFilterNames.ORDER, CoreFilterNames.FILTERABLE ],
+	hideControls: [CoreFilterNames.ORDER, CoreFilterNames.FILTERABLE],
 };
 
 const heading: InnerBlockTemplate = [
@@ -52,7 +52,7 @@ const heading: InnerBlockTemplate = [
 	{
 		textAlign: 'center',
 		level: 2,
-		content: __( 'New arrivals', 'woocommerce' ),
+		content: __('New arrivals', 'woocommerce'),
 		style: { spacing: { margin: { bottom: '1rem' } } },
 	},
 ];

@@ -26,60 +26,57 @@ export interface TotalsItemProps {
 	skeleton?: ReactElement;
 }
 
-const TotalsItemValue = ( {
+const TotalsItemValue = ({
 	value,
 	currency,
-}: Partial< TotalsItemProps > ): ReactElement | null => {
-	if ( isValidElement( value ) ) {
+}: Partial<TotalsItemProps>): ReactElement | null => {
+	if (isValidElement(value)) {
 		return (
 			<div className="wc-block-components-totals-item__value">
-				{ value }
+				{value}
 			</div>
 		);
 	}
 
-	return Number.isFinite( value ) ? (
+	return Number.isFinite(value) ? (
 		<FormattedMonetaryAmount
 			className="wc-block-components-totals-item__value"
-			currency={ currency || undefined }
-			value={ value as number }
+			currency={currency || undefined}
+			value={value as number}
 		/>
 	) : null;
 };
 
-const TotalsItem = ( {
+const TotalsItem = ({
 	className,
 	currency,
 	label,
 	value,
 	description,
 	showSkeleton = false,
-}: TotalsItemProps ): ReactElement => {
+}: TotalsItemProps): ReactElement => {
 	return (
-		<div className={ clsx( 'wc-block-components-totals-item', className ) }>
+		<div className={clsx('wc-block-components-totals-item', className)}>
 			<span className="wc-block-components-totals-item__label">
-				{ label }
+				{label}
 			</span>
 			<DelayedContentWithSkeleton
-				isLoading={ showSkeleton }
+				isLoading={showSkeleton}
 				skeleton={
 					<>
 						<Skeleton
 							width="45px"
 							height="1em"
-							ariaMessage={ __(
-								'Loading price… ',
-								'woocommerce'
-							) }
+							ariaMessage={__('Loading price… ', 'woocommerce')}
 						/>
 					</>
 				}
 			>
-				<TotalsItemValue value={ value } currency={ currency } />
+				<TotalsItemValue value={value} currency={currency} />
 			</DelayedContentWithSkeleton>
 
 			<div className="wc-block-components-totals-item__description">
-				{ description }
+				{description}
 			</div>
 		</div>
 	);

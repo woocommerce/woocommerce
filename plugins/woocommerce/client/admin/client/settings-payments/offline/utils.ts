@@ -7,8 +7,8 @@
  *
  * @param text
  */
-export function decodeHtmlEntities( text: string ) {
-	const textArea = document.createElement( 'textarea' );
+export function decodeHtmlEntities(text: string) {
+	const textArea = document.createElement('textarea');
 	textArea.innerHTML = text;
 	return textArea.value;
 }
@@ -19,20 +19,18 @@ export function decodeHtmlEntities( text: string ) {
  * @param options
  */
 export function mapShippingMethodsOptions(
-	options: Record< string, Record< string, string > >
+	options: Record<string, Record<string, string>>
 ) {
-	return Object.entries( options ).map( ( [ groupLabel, methods ] ) => {
-		const decodedGroupLabel = decodeHtmlEntities( groupLabel );
-		const children = Object.entries( methods ).map(
-			( [ value, label ] ) => ( {
-				value,
-				label: decodeHtmlEntities( label ),
-			} )
-		);
+	return Object.entries(options).map(([groupLabel, methods]) => {
+		const decodedGroupLabel = decodeHtmlEntities(groupLabel);
+		const children = Object.entries(methods).map(([value, label]) => ({
+			value,
+			label: decodeHtmlEntities(label),
+		}));
 		return {
 			label: decodedGroupLabel,
 			value: groupLabel,
 			children,
 		};
-	} );
+	});
 }

@@ -13,32 +13,28 @@ import ErrorPlaceholder, { ErrorPlaceholderProps } from '..';
 export default {
 	title: 'Editor Components/Errors/Error Placeholder',
 	component: ErrorPlaceholder,
-} as Meta< ErrorPlaceholderProps >;
+} as Meta<ErrorPlaceholderProps>;
 
-const Template: StoryFn< ErrorPlaceholderProps > = ( args ) => {
-	const [ { isLoading }, setArgs ] = useArgs();
+const Template: StoryFn<ErrorPlaceholderProps> = (args) => {
+	const [{ isLoading }, setArgs] = useArgs();
 
 	const onRetry = args.onRetry
 		? () => {
-				setArgs( { isLoading: true } );
+				setArgs({ isLoading: true });
 
 				setTimeout(
-					() => setArgs( { isLoading: false } ),
+					() => setArgs({ isLoading: false }),
 					INTERACTION_TIMEOUT
 				);
-		  }
+			}
 		: undefined;
 
 	return (
-		<ErrorPlaceholder
-			{ ...args }
-			onRetry={ onRetry }
-			isLoading={ isLoading }
-		/>
+		<ErrorPlaceholder {...args} onRetry={onRetry} isLoading={isLoading} />
 	);
 };
 
-export const Default = Template.bind( {} );
+export const Default = Template.bind({});
 Default.args = {
 	error: {
 		message:
@@ -47,7 +43,7 @@ Default.args = {
 	},
 };
 
-export const APIError = Template.bind( {} );
+export const APIError = Template.bind({});
 APIError.args = {
 	error: {
 		message: 'Server refuses to comply. It is a teapot.',
@@ -55,7 +51,7 @@ APIError.args = {
 	},
 };
 
-export const UnknownError = Template.bind( {} );
+export const UnknownError = Template.bind({});
 UnknownError.args = {
 	error: {
 		message: '',
@@ -63,8 +59,8 @@ UnknownError.args = {
 	},
 };
 
-export const NoRetry: StoryFn< ErrorPlaceholderProps > = ( args ) => {
-	return <ErrorPlaceholder { ...args } onRetry={ undefined } />;
+export const NoRetry: StoryFn<ErrorPlaceholderProps> = (args) => {
+	return <ErrorPlaceholder {...args} onRetry={undefined} />;
 };
 NoRetry.args = {
 	error: {

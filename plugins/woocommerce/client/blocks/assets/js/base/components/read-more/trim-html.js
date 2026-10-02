@@ -1,21 +1,21 @@
 // count symbols like one char
-function getCharArr( rowCut ) {
+function getCharArr(rowCut) {
 	// eslint-disable-next-line prefer-const
 	let charArr = [],
 		subRow,
 		match,
 		char;
 
-	for ( let i = 0; i < rowCut.length; i++ ) {
-		subRow = rowCut.substring( i );
-		match = subRow.match( /^&[a-z0-9#]+;/ );
+	for (let i = 0; i < rowCut.length; i++) {
+		subRow = rowCut.substring(i);
+		match = subRow.match(/^&[a-z0-9#]+;/);
 
-		if ( match ) {
-			char = match[ 0 ];
-			charArr.push( char );
+		if (match) {
+			char = match[0];
+			charArr.push(char);
 			i += char.length - 1;
 		} else {
-			charArr.push( rowCut[ i ] );
+			charArr.push(rowCut[i]);
 		}
 	}
 
@@ -24,7 +24,7 @@ function getCharArr( rowCut ) {
 
 // Copy-pasted from https://github.com/brankosekulic/trimHtml/blob/master/index.js
 // the published npm version of this code contains a bug that causes it throw exceptions.
-export function trimHtml( html, options ) {
+export function trimHtml(html, options) {
 	options = options || {};
 
 	const limit = options.limit || 100,
@@ -42,12 +42,12 @@ export function trimHtml( html, options ) {
 		preserveWhiteSpace = options.preserveWhiteSpace || false;
 
 	const arr = html
-		.replace( /</g, '\n<' )
-		.replace( />/g, '>\n' )
-		.replace( /\n\n/g, '\n' )
-		.replace( /^\n/g, '' )
-		.replace( /\n$/g, '' )
-		.split( '\n' );
+		.replace(/</g, '\n<')
+		.replace(/>/g, '>\n')
+		.replace(/\n\n/g, '\n')
+		.replace(/^\n/g, '')
+		.replace(/\n$/g, '')
+		.split('\n');
 
 	let sum = 0,
 		row,
@@ -60,41 +60,41 @@ export function trimHtml( html, options ) {
 		tagStack = [],
 		more = false;
 
-	for ( let i = 0; i < arr.length; i++ ) {
-		row = arr[ i ];
+	for (let i = 0; i < arr.length; i++) {
+		row = arr[i];
 
 		// count multiple spaces as one character
-		if ( ! preserveWhiteSpace ) {
-			rowCut = row.replace( /[ ]+/g, ' ' );
+		if (!preserveWhiteSpace) {
+			rowCut = row.replace(/[ ]+/g, ' ');
 		} else {
 			rowCut = row;
 		}
 
-		if ( ! row.length ) {
+		if (!row.length) {
 			continue;
 		}
 
-		const charArr = getCharArr( rowCut );
+		const charArr = getCharArr(rowCut);
 
-		if ( row[ 0 ] !== '<' ) {
-			if ( sum >= limit ) {
+		if (row[0] !== '<') {
+			if (sum >= limit) {
 				row = '';
-			} else if ( sum + charArr.length >= limit ) {
+			} else if (sum + charArr.length >= limit) {
 				cut = limit - sum;
 
-				if ( charArr[ cut - 1 ] === ' ' ) {
-					while ( cut ) {
+				if (charArr[cut - 1] === ' ') {
+					while (cut) {
 						cut -= 1;
-						if ( charArr[ cut - 1 ] !== ' ' ) {
+						if (charArr[cut - 1] !== ' ') {
 							break;
 						}
 					}
 				} else {
-					add = charArr.slice( cut ).indexOf( ' ' );
+					add = charArr.slice(cut).indexOf(' ');
 
 					// break on halh of word
-					if ( ! wordBreak ) {
-						if ( add !== -1 ) {
+					if (!wordBreak) {
+						if (add !== -1) {
 							cut += add;
 						} else {
 							cut = row.length;
@@ -102,10 +102,10 @@ export function trimHtml( html, options ) {
 					}
 				}
 
-				row = charArr.slice( 0, cut ).join( '' ) + suffix;
+				row = charArr.slice(0, cut).join('') + suffix;
 
-				if ( moreLink ) {
-					const link = document.createElement( 'a' );
+				if (moreLink) {
+					const link = document.createElement('a');
 					link.href = moreLink;
 					link.style.display = 'inline';
 					link.textContent = moreText;
@@ -118,25 +118,25 @@ export function trimHtml( html, options ) {
 			} else {
 				sum += charArr.length;
 			}
-		} else if ( ! preserveTags ) {
+		} else if (!preserveTags) {
 			row = '';
-		} else if ( sum >= limit ) {
-			tagMatch = row.match( /[a-zA-Z]+/ );
-			tagName = tagMatch ? tagMatch[ 0 ] : '';
+		} else if (sum >= limit) {
+			tagMatch = row.match(/[a-zA-Z]+/);
+			tagName = tagMatch ? tagMatch[0] : '';
 
-			if ( tagName ) {
-				if ( row.substring( 0, 2 ) !== '</' ) {
-					tagStack.push( tagName );
+			if (tagName) {
+				if (row.substring(0, 2) !== '</') {
+					tagStack.push(tagName);
 					row = '';
 				} else {
 					while (
-						tagStack[ tagStack.length - 1 ] !== tagName &&
+						tagStack[tagStack.length - 1] !== tagName &&
 						tagStack.length
 					) {
 						tagStack.pop();
 					}
 
-					if ( tagStack.length ) {
+					if (tagStack.length) {
 						row = '';
 					}
 
@@ -147,11 +147,11 @@ export function trimHtml( html, options ) {
 			}
 		}
 
-		arr[ i ] = row;
+		arr[i] = row;
 	}
 
 	return {
-		html: arr.join( '\n' ).replace( /\n/g, '' ),
+		html: arr.join('\n').replace(/\n/g, ''),
 		more,
 	};
 }

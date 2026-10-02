@@ -23,18 +23,18 @@ const serverProviders = getSettingWithCoercion<
 >(
 	'addressAutocompleteProviders',
 	[],
-	( type: unknown ): type is ServerAddressAutocompleteProvider[] => {
-		if ( ! Array.isArray( type ) ) {
+	(type: unknown): type is ServerAddressAutocompleteProvider[] => {
+		if (!Array.isArray(type)) {
 			return false;
 		}
 
-		return type.every( ( item ) => {
+		return type.every((item) => {
 			return (
 				typeof item.name === 'string' &&
 				typeof item.id === 'string' &&
 				typeof item.branding_html === 'string'
 			);
-		} );
+		});
 	}
 );
 
@@ -49,7 +49,7 @@ export function useUpdatePreferredAutocompleteProvider(
 	addressType: 'shipping' | 'billing'
 ) {
 	const { country, registeredProviders } = useSelect(
-		( select ) => {
+		(select) => {
 			const addressTypeKey =
 				addressType === 'shipping'
 					? 'shippingAddress'
@@ -59,63 +59,61 @@ export function useUpdatePreferredAutocompleteProvider(
 				country: (
 					select(
 						'wc/store/cart'
-					) as CurriedSelectorsOf< CartStoreDescriptor >
-				 ).getCartData()?.[ addressTypeKey ]?.country,
+					) as CurriedSelectorsOf<CartStoreDescriptor>
+				).getCartData()?.[addressTypeKey]?.country,
 				registeredProviders: (
 					select(
 						'wc/store/checkout'
-					) as CurriedSelectorsOf< CheckoutStoreDescriptor >
-				 ).getRegisteredAutocompleteProviders(),
+					) as CurriedSelectorsOf<CheckoutStoreDescriptor>
+				).getRegisteredAutocompleteProviders(),
 			};
 		},
-		[ addressType ]
+		[addressType]
 	);
 
 	const { setActiveAddressAutocompleteProvider } = useDispatch(
 		'wc/store/checkout'
-	) as ActionCreatorsOf< ConfigOf< CheckoutStoreDescriptor > >;
+	) as ActionCreatorsOf<ConfigOf<CheckoutStoreDescriptor>>;
 
-	useEffect( () => {
+	useEffect(() => {
 		// Check if window.wc.addressAutocomplete.providers exists
-		if ( ! window?.wc?.addressAutocomplete?.providers ) {
-			void setActiveAddressAutocompleteProvider( '', addressType );
-			if ( window?.wc?.addressAutocomplete?.activeProvider ) {
-				window.wc.addressAutocomplete.activeProvider[ addressType ] =
+		if (!window?.wc?.addressAutocomplete?.providers) {
+			void setActiveAddressAutocompleteProvider('', addressType);
+			if (window?.wc?.addressAutocomplete?.activeProvider) {
+				window.wc.addressAutocomplete.activeProvider[addressType] =
 					null;
 			}
 			return;
 		}
 
 		// Check providers in preference order (server handles preferred provider ordering)
-		for ( const serverProvider of serverProviders ) {
+		for (const serverProvider of serverProviders) {
 			const provider =
-				window?.wc?.addressAutocomplete?.providers?.[
-					serverProvider.id
-				];
+				window?.wc?.addressAutocomplete?.providers?.[serverProvider.id];
 
-			if ( provider && provider.canSearch( country ) ) {
+			if (provider && provider.canSearch(country)) {
 				void setActiveAddressAutocompleteProvider(
 					provider.id,
 					addressType
 				);
 
 				// Set globally as this is going to be the source of truth where the actual provider objects are stored.
-				window.wc.addressAutocomplete.activeProvider[ addressType ] =
+				window.wc.addressAutocomplete.activeProvider[addressType] =
 					provider;
 				return;
 			}
 		}
 
 		// No provider supports this country, clear the active provider
-		void setActiveAddressAutocompleteProvider( '', addressType );
+		void setActiveAddressAutocompleteProvider('', addressType);
 		// Set globally as this is going to be the source of truth where the actual provider objects are stored.
-		if ( window?.wc?.addressAutocomplete?.activeProvider ) {
-			window.wc.addressAutocomplete.activeProvider[ addressType ] = null;
+		if (window?.wc?.addressAutocomplete?.activeProvider) {
+			window.wc.addressAutocomplete.activeProvider[addressType] = null;
 		}
 	}, [
 		addressType,
 		country,
 		setActiveAddressAutocompleteProvider,
 		registeredProviders,
-	] );
+	]);
 }

@@ -5,32 +5,32 @@
  * @param {Array}  rawAttributes   Dataset from DOM.
  * @return {Array} Array of parsed attributes.
  */
-export const getValidBlockAttributes = ( blockAttributes, rawAttributes ) => {
+export const getValidBlockAttributes = (blockAttributes, rawAttributes) => {
 	const attributes = [];
 
-	Object.keys( blockAttributes ).forEach( ( key ) => {
-		if ( typeof rawAttributes[ key ] !== 'undefined' ) {
-			switch ( blockAttributes[ key ].type ) {
+	Object.keys(blockAttributes).forEach((key) => {
+		if (typeof rawAttributes[key] !== 'undefined') {
+			switch (blockAttributes[key].type) {
 				case 'boolean':
-					attributes[ key ] =
-						rawAttributes[ key ] !== 'false' &&
-						rawAttributes[ key ] !== false;
+					attributes[key] =
+						rawAttributes[key] !== 'false' &&
+						rawAttributes[key] !== false;
 					break;
 				case 'number':
-					attributes[ key ] = parseInt( rawAttributes[ key ], 10 );
+					attributes[key] = parseInt(rawAttributes[key], 10);
 					break;
 				case 'array':
 				case 'object':
-					attributes[ key ] = JSON.parse( rawAttributes[ key ] );
+					attributes[key] = JSON.parse(rawAttributes[key]);
 					break;
 				default:
-					attributes[ key ] = rawAttributes[ key ];
+					attributes[key] = rawAttributes[key];
 					break;
 			}
 		} else {
-			attributes[ key ] = blockAttributes[ key ].default;
+			attributes[key] = blockAttributes[key].default;
 		}
-	} );
+	});
 
 	return attributes;
 };

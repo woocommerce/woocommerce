@@ -12,20 +12,20 @@ import './style.scss';
 /**
  * Component that renders a block title.
  */
-const Title = ( {
+const Title = ({
 	children,
 	className = '',
 	headingLevel,
 	...props
-}: TitleProps ): JSX.Element => {
-	const TagName = `h${ headingLevel }` as const;
+}: TitleProps): JSX.Element => {
+	const TagName = `h${headingLevel}` as const;
 
 	return (
 		<TagName
-			className={ clsx( 'wc-block-components-title', className ) }
-			{ ...props }
+			className={clsx('wc-block-components-title', className)}
+			{...props}
 		>
-			{ children }
+			{children}
 		</TagName>
 	);
 };

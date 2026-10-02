@@ -20,7 +20,7 @@ import { hasSchemaRules } from './utils';
 /**
  * Combines address fields, including fields from the locale, and sorts them by index.
  */
-export const useFormFields = < T extends keyof FormFields >(
+export const useFormFields = <T extends keyof FormFields>(
 	// List of field keys to include in the form.
 	fieldKeys: T[],
 	// Default fields from settings.
@@ -30,8 +30,8 @@ export const useFormFields = < T extends keyof FormFields >(
 	// Address country.
 	addressCountry = ''
 ): KeyedParsedFormFields => {
-	const currentResults = useRef< KeyedParsedFormFields >( [] );
-	const { parser, data } = useSchemaParser( formType );
+	const currentResults = useRef<KeyedParsedFormFields>([]);
+	const { parser, data } = useSchemaParser(formType);
 
 	const formFields = prepareFormFields(
 		fieldKeys,
@@ -39,15 +39,15 @@ export const useFormFields = < T extends keyof FormFields >(
 		addressCountry
 	);
 
-	const updatedFields = formFields.map( ( field ) => {
-		const defaultConfig = defaultFields[ field.key ] || {};
+	const updatedFields = formFields.map((field) => {
+		const defaultConfig = defaultFields[field.key] || {};
 
-		if ( parser ) {
-			if ( hasSchemaRules( defaultConfig, 'required' ) ) {
+		if (parser) {
+			if (hasSchemaRules(defaultConfig, 'required')) {
 				let schema = {};
 				if (
-					Object.keys( defaultConfig.required ).some(
-						( key ) =>
+					Object.keys(defaultConfig.required).some(
+						(key) =>
 							key === 'cart' ||
 							key === 'checkout' ||
 							key === 'customer'
@@ -62,20 +62,20 @@ export const useFormFields = < T extends keyof FormFields >(
 				}
 
 				try {
-					const result = parser.validate( schema, data );
+					const result = parser.validate(schema, data);
 					field.required = result;
-				} catch ( error ) {
-					if ( CURRENT_USER_IS_ADMIN ) {
+				} catch (error) {
+					if (CURRENT_USER_IS_ADMIN) {
 						// eslint-disable-next-line no-console
-						console.error( error );
+						console.error(error);
 					}
 				}
 			}
-			if ( hasSchemaRules( defaultConfig, 'hidden' ) ) {
+			if (hasSchemaRules(defaultConfig, 'hidden')) {
 				let schema = {};
 				if (
-					Object.keys( defaultConfig.hidden ).some(
-						( key ) =>
+					Object.keys(defaultConfig.hidden).some(
+						(key) =>
 							key === 'cart' ||
 							key === 'checkout' ||
 							key === 'customer'
@@ -90,30 +90,30 @@ export const useFormFields = < T extends keyof FormFields >(
 				}
 
 				try {
-					const result = parser.validate( schema, data );
+					const result = parser.validate(schema, data);
 					field.hidden = result;
-				} catch ( error ) {
-					if ( CURRENT_USER_IS_ADMIN ) {
+				} catch (error) {
+					if (CURRENT_USER_IS_ADMIN) {
 						// eslint-disable-next-line no-console
-						console.error( error );
+						console.error(error);
 					}
 				}
 			}
 		}
 		return field;
-	} );
+	});
 
 	if (
-		! currentResults.current ||
-		! fastDeepEqual( currentResults.current, updatedFields )
+		!currentResults.current ||
+		!fastDeepEqual(currentResults.current, updatedFields)
 	) {
 		// Default required and hidden to their boolean values if they exist
-		const sanitizedFields = updatedFields.map( ( field ) => ( {
+		const sanitizedFields = updatedFields.map((field) => ({
 			...field,
 			hidden: typeof field.hidden === 'boolean' ? field.hidden : false,
 			required:
 				typeof field.required === 'boolean' ? field.required : false,
-		} ) );
+		}));
 
 		currentResults.current = sanitizedFields;
 	}

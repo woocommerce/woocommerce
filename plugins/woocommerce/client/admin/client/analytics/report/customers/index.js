@@ -23,18 +23,18 @@ export default class CustomersReport extends Component {
 		return (
 			<Fragment>
 				<ReportHeader
-					query={ query }
-					path={ path }
-					filters={ filters }
-					showDatePicker={ false }
-					advancedFilters={ advancedFilters }
+					query={query}
+					path={path}
+					filters={filters}
+					showDatePicker={false}
+					advancedFilters={advancedFilters}
 					report="customers"
 				/>
 				<CustomersReportTable
-					isRequesting={ isRequesting }
-					query={ tableQuery }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
+					isRequesting={isRequesting}
+					query={tableQuery}
+					filters={filters}
+					advancedFilters={advancedFilters}
 				/>
 			</Fragment>
 		);

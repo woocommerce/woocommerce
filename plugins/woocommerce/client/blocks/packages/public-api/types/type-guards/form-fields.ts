@@ -10,12 +10,12 @@ import type { FormFields, Field } from '@woocommerce/settings';
  * @param value - The value to check.
  * @return Whether the value is a valid Field object.
  */
-const isField = ( value: unknown ): value is Field => {
-	if ( typeof value !== 'object' || value === null ) {
+const isField = (value: unknown): value is Field => {
+	if (typeof value !== 'object' || value === null) {
 		return false;
 	}
 
-	const field = value as Record< string, unknown >;
+	const field = value as Record<string, unknown>;
 
 	// Required properties that must always be present
 	if (
@@ -39,16 +39,12 @@ const isField = ( value: unknown ): value is Field => {
  * @param value - The value to check.
  * @return Whether the value is a valid FormFields object.
  */
-export const isFormFields = ( value: unknown ): value is FormFields => {
-	if (
-		typeof value !== 'object' ||
-		value === null ||
-		Array.isArray( value )
-	) {
+export const isFormFields = (value: unknown): value is FormFields => {
+	if (typeof value !== 'object' || value === null || Array.isArray(value)) {
 		return false;
 	}
 
-	const fields = value as Record< string, unknown >;
+	const fields = value as Record<string, unknown>;
 
 	// Check if it has all core fields from CheckoutFields::get_core_fields()
 	// These are the fields that should always be present
@@ -66,17 +62,17 @@ export const isFormFields = ( value: unknown ): value is FormFields => {
 		'phone',
 	];
 
-	if ( ! coreFields.every( ( field ) => field in fields ) ) {
+	if (!coreFields.every((field) => field in fields)) {
 		return false;
 	}
 
 	// Validate each field has the proper Field structure
-	for ( const [ fieldId, fieldValue ] of Object.entries( fields ) ) {
+	for (const [fieldId, fieldValue] of Object.entries(fields)) {
 		// If not included in core fields, it's an additional field we don't need to consider.
-		if ( ! coreFields.includes( fieldId ) ) {
+		if (!coreFields.includes(fieldId)) {
 			continue;
 		}
-		if ( ! isField( fieldValue ) ) {
+		if (!isField(fieldValue)) {
 			return false;
 		}
 	}

@@ -18,34 +18,34 @@ import {
 import './editor.scss';
 import { useCartBlockContext } from '../../context';
 
-export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
+export const Edit = ({ clientId }: { clientId: string }): JSX.Element => {
 	const blockProps = useBlockProps();
 	const { currentView } = useEditorContext();
 	const { hasDarkControls } = useCartBlockContext();
-	const allowedBlocks = getAllowedBlocks( innerBlockAreas.FILLED_CART );
+	const allowedBlocks = getAllowedBlocks(innerBlockAreas.FILLED_CART);
 	const defaultTemplate = [
-		[ 'woocommerce/cart-items-block', {}, [] ],
-		[ 'woocommerce/cart-totals-block', {}, [] ],
+		['woocommerce/cart-items-block', {}, []],
+		['woocommerce/cart-totals-block', {}, []],
 	] as TemplateArray;
 
-	useForcedLayout( {
+	useForcedLayout({
 		clientId,
 		registeredBlocks: allowedBlocks,
 		defaultTemplate,
-	} );
+	});
 	return (
 		<div
-			{ ...blockProps }
-			hidden={ currentView !== 'woocommerce/filled-cart-block' }
+			{...blockProps}
+			hidden={currentView !== 'woocommerce/filled-cart-block'}
 		>
 			<SidebarLayout
-				className={ clsx( 'wc-block-cart', {
+				className={clsx('wc-block-cart', {
 					'has-dark-controls': hasDarkControls,
-				} ) }
+				})}
 			>
 				<InnerBlocks
-					allowedBlocks={ allowedBlocks }
-					template={ defaultTemplate }
+					allowedBlocks={allowedBlocks}
+					template={defaultTemplate}
 					templateLock="insert"
 				/>
 			</SidebarLayout>
@@ -55,7 +55,7 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 
 export const Save = (): JSX.Element => {
 	return (
-		<div { ...useBlockProps.save() }>
+		<div {...useBlockProps.save()}>
 			<InnerBlocks.Content />
 		</div>
 	);

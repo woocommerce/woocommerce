@@ -15,12 +15,12 @@ import {
 const initTracks = () => {
 	const productData = getProductData();
 
-	recordEvent( 'product_edit_view', { product_id: productData?.product_id } );
+	recordEvent('product_edit_view', { product_id: productData?.product_id });
 	initProductScreenTracks();
 };
 
-if ( productScreen && productScreen.name === 'edit' ) {
+if (productScreen && productScreen.name === 'edit') {
 	initTracks();
 
-	addExitPageListener( 'product_edit_view' );
+	addExitPageListener('product_edit_view');
 }

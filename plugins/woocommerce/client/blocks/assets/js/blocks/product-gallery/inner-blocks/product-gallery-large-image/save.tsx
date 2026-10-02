@@ -4,9 +4,9 @@
 import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
 
 export const Save = () => {
-	const blockProps = useBlockProps.save( {
+	const blockProps = useBlockProps.save({
 		className: 'wc-block-product-gallery-large-image__inner-blocks',
-	} );
-	const innerBlocksProps = useInnerBlocksProps.save( blockProps );
-	return <div { ...innerBlocksProps } />;
+	});
+	const innerBlocksProps = useInnerBlocksProps.save(blockProps);
+	return <div {...innerBlocksProps} />;
 };

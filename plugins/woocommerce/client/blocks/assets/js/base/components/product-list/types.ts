@@ -10,7 +10,7 @@ interface GenerateQueryProps {
 	attributes: Attributes;
 }
 
-export type LayoutConfig = [ string, { children?: LayoutConfig } ][];
+export type LayoutConfig = [string, { children?: LayoutConfig }][];
 
 export type Attributes = {
 	columns: number;
@@ -33,11 +33,11 @@ export type Query = {
 	order?: string;
 };
 
-export type TotalQuery = Pick< Query, 'catalog_visibility' >;
+export type TotalQuery = Pick<Query, 'catalog_visibility'>;
 
-export type GenerateQuery = ( props: GenerateQueryProps ) => Query;
+export type GenerateQuery = (props: GenerateQueryProps) => Query;
 
-export type GetSortArgs = ( orderName: string ) =>
+export type GetSortArgs = (orderName: string) =>
 	| {
 			orderby: string;
 			order: string;
@@ -57,7 +57,7 @@ export type AreQueryTotalsDifferent = (
 export interface ProductListProps {
 	attributes: Attributes;
 	currentPage: number;
-	onPageChange: ( page: number ) => void;
+	onPageChange: (page: number) => void;
 	onSortChange: ChangeEventHandler;
 	sortValue:
 		| 'menu_order'
@@ -66,12 +66,12 @@ export interface ProductListProps {
 		| 'date'
 		| 'price'
 		| 'price-desc';
-	scrollToTop: ( opts: { focusableSelector: string } ) => void;
+	scrollToTop: (opts: { focusableSelector: string }) => void;
 }
 
 export interface ProductSortSelectProps {
 	onChange: ChangeEventHandler;
-	value: ProductListProps[ 'sortValue' ];
+	value: ProductListProps['sortValue'];
 }
 
 export interface ProductListContainerProps {
@@ -84,14 +84,14 @@ export interface NoMatchingProductsProps {
 }
 
 export interface ProductListItemProps {
-	product?: Partial< ProductResponseItem >;
+	product?: Partial<ProductResponseItem>;
 	attributes: Attributes;
 	instanceId: number;
 }
 
 export interface RenderProductLayoutProps {
 	blockName: string;
-	product: Partial< ProductResponseItem >;
+	product: Partial<ProductResponseItem>;
 	layoutConfig: LayoutConfig;
 	componentId: number;
 }

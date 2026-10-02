@@ -5,11 +5,11 @@ import { Card, CardBody } from '@wordpress/components';
 import styled from '@emotion/styled';
 import type { ReactNode } from 'react';
 
-const StyledCard = styled( Card )`
+const StyledCard = styled(Card)`
 	border-radius: 3px;
 `;
 
-const StyledCardBody = styled( CardBody )`
+const StyledCardBody = styled(CardBody)`
 	padding: 24px;
 
 	// increasing the specificity of the styles to override the Gutenberg ones
@@ -51,14 +51,14 @@ const StyledCardBody = styled( CardBody )`
 	}
 `;
 
-const SettingsCard = ( {
+const SettingsCard = ({
 	children,
 	...props
 }: {
 	children: ReactNode;
-} ): JSX.Element => (
+}): JSX.Element => (
 	<StyledCard>
-		<StyledCardBody { ...props }>{ children }</StyledCardBody>
+		<StyledCardBody {...props}>{children}</StyledCardBody>
 	</StyledCard>
 );
 

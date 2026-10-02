@@ -19,20 +19,20 @@ export interface minMaxPrices {
 export function getShippingPrices(
 	shippingRates: CartShippingPackageShippingRate[]
 ): minMaxPrices {
-	if ( shippingRates ) {
+	if (shippingRates) {
 		return {
 			min: shippingRates.reduce(
 				(
 					lowestRate: CartShippingPackageShippingRate | undefined,
 					currentRate: CartShippingPackageShippingRate
 				) => {
-					if ( hasCollectableRate( currentRate.method_id ) ) {
+					if (hasCollectableRate(currentRate.method_id)) {
 						return lowestRate;
 					}
 					if (
 						lowestRate === undefined ||
-						parseInt( currentRate.price, 10 ) <
-							parseInt( lowestRate.price, 10 )
+						parseInt(currentRate.price, 10) <
+							parseInt(lowestRate.price, 10)
 					) {
 						return currentRate;
 					}
@@ -45,13 +45,13 @@ export function getShippingPrices(
 					highestRate: CartShippingPackageShippingRate | undefined,
 					currentRate: CartShippingPackageShippingRate
 				) => {
-					if ( hasCollectableRate( currentRate.method_id ) ) {
+					if (hasCollectableRate(currentRate.method_id)) {
 						return highestRate;
 					}
 					if (
 						highestRate === undefined ||
-						parseInt( currentRate.price, 10 ) >
-							parseInt( highestRate.price, 10 )
+						parseInt(currentRate.price, 10) >
+							parseInt(highestRate.price, 10)
 					) {
 						return currentRate;
 					}
@@ -77,14 +77,14 @@ export function getShippingPrices(
 export function getLocalPickupPrices(
 	shippingRates: CartShippingPackageShippingRate[]
 ): minMaxPrices {
-	if ( shippingRates ) {
+	if (shippingRates) {
 		return {
 			min: shippingRates.reduce(
 				(
 					lowestRate: CartShippingPackageShippingRate | undefined,
 					currentRate: CartShippingPackageShippingRate
 				) => {
-					if ( ! hasCollectableRate( currentRate.method_id ) ) {
+					if (!hasCollectableRate(currentRate.method_id)) {
 						return lowestRate;
 					}
 					if (
@@ -102,7 +102,7 @@ export function getLocalPickupPrices(
 					highestRate: CartShippingPackageShippingRate | undefined,
 					currentRate: CartShippingPackageShippingRate
 				) => {
-					if ( ! hasCollectableRate( currentRate.method_id ) ) {
+					if (!hasCollectableRate(currentRate.method_id)) {
 						return highestRate;
 					}
 					if (

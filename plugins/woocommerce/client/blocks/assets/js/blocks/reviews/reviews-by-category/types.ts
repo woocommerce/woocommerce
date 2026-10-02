@@ -5,11 +5,11 @@ export interface ReviewsByCategoryEditorProps {
 		offset: number;
 		showProductName: boolean;
 	};
-	setAttributes: ( attributes: {
+	setAttributes: (attributes: {
 		editMode?: boolean;
 		categoryIds?: number[];
 		offset?: number;
 		showProductName?: boolean;
-	} ) => void;
-	debouncedSpeak: ( message: string ) => void;
+	}) => void;
+	debouncedSpeak: (message: string) => void;
 }

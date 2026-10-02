@@ -7,7 +7,7 @@ import { Post } from '@wordpress/core-data/build-types/entity-types/post';
 import type { WpTemplate } from '@wordpress/core-data';
 import type { GlobalStylesConfig } from '@wordpress/global-styles-engine';
 
-export interface EmailTemplate extends Omit< WpTemplate, 'title' > {
+export interface EmailTemplate extends Omit<WpTemplate, 'title'> {
 	post_types: string[];
 	title: string;
 }
@@ -43,7 +43,7 @@ export type EmailEditorSettings = EditorSettings &
 		styles?: EmailBuiltStyles[];
 	};
 
-export type EmailTheme = Omit< GlobalStylesConfig, 'styles' > & {
+export type EmailTheme = Omit<GlobalStylesConfig, 'styles'> & {
 	styles: EmailStyles;
 };
 
@@ -83,7 +83,7 @@ export type EmailStyles = {
 		text: string;
 	};
 	typography?: TypographyProperties;
-	elements?: Record< string, ElementStyleProperties >;
+	elements?: Record<string, ElementStyleProperties>;
 };
 
 interface ElementStyleProperties {
@@ -143,10 +143,7 @@ export type State = {
 	templateSelected: boolean;
 };
 
-export type EmailTemplatePreview = Omit<
-	EmailTemplate,
-	'content' | 'title'
-> & {
+export type EmailTemplatePreview = Omit<EmailTemplate, 'content' | 'title'> & {
 	content: {
 		block_version: number;
 		raw: string;
@@ -180,17 +177,14 @@ export type RecentEmailsQuery = {
 	status?: string;
 	orderby?: string;
 	order?: string;
-	exclude?: Array< number | string >;
-	[ key: string ]: unknown;
+	exclude?: Array<number | string>;
+	[key: string]: unknown;
 };
 
 export type Feature =
-	| 'fullscreenMode'
-	| 'showIconLabels'
-	| 'fixedToolbar'
-	| 'focusMode';
+	'fullscreenMode' | 'showIconLabels' | 'fixedToolbar' | 'focusMode';
 
-export type EmailEditorPostType = Omit< Post, 'type' > & {
+export type EmailEditorPostType = Omit<Post, 'type'> & {
 	type: string;
 };
 
@@ -201,7 +195,7 @@ export type EmailContentValidationAction = {
 
 export type EmailContentValidationRule = {
 	id: string;
-	testContent: ( emailContent: string ) => boolean;
+	testContent: (emailContent: string) => boolean;
 	message: string;
 	actions: EmailContentValidationAction[];
 };

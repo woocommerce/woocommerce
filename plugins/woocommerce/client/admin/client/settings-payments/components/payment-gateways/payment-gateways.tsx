@@ -46,13 +46,13 @@ interface PaymentGatewaysProps {
 		attachUrl: string | null,
 		context?: string
 	) => void;
-	acceptIncentive: ( id: string ) => void;
+	acceptIncentive: (id: string) => void;
 	shouldHighlightIncentive: boolean;
-	updateOrdering: ( providers: PaymentsProvider[] ) => void;
+	updateOrdering: (providers: PaymentsProvider[]) => void;
 	isFetching: boolean;
 	businessRegistrationCountry: string | null;
-	setBusinessRegistrationCountry: ( country: string ) => void;
-	setIsOnboardingModalOpen: ( isOpen: boolean ) => void;
+	setBusinessRegistrationCountry: (country: string) => void;
+	setIsOnboardingModalOpen: (isOpen: boolean) => void;
 }
 
 /**
@@ -60,7 +60,7 @@ interface PaymentGatewaysProps {
  * to filter providers based on the business location and supports real-time updates when the country or
  * provider order changes.
  */
-export const PaymentGateways = ( {
+export const PaymentGateways = ({
 	providers,
 	installedPluginSlugs,
 	installingPlugin,
@@ -72,30 +72,30 @@ export const PaymentGateways = ( {
 	businessRegistrationCountry,
 	setBusinessRegistrationCountry,
 	setIsOnboardingModalOpen,
-}: PaymentGatewaysProps ) => {
+}: PaymentGatewaysProps) => {
 	const { invalidateResolution: invalidateMainStore } =
-		useDispatch( paymentSettingsStore );
+		useDispatch(paymentSettingsStore);
 	const { invalidateResolution: invalidateWooPaymentsOnboardingStore } =
-		useDispatch( woopaymentsOnboardingStore );
-	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
-	const buttonRef = useRef< HTMLDivElement >( null );
+		useDispatch(woopaymentsOnboardingStore);
+	const [isPopoverVisible, setIsPopoverVisible] = useState(false);
+	const buttonRef = useRef<HTMLDivElement>(null);
 	const storeCountryCode = (
 		window.wcSettings?.admin?.preloadSettings?.general
 			?.woocommerce_default_country || 'US'
-	).split( ':' )[ 0 ]; // Retrieve the default store country code, by removing the state code if present.
+	).split(':')[0]; // Retrieve the default store country code, by removing the state code if present.
 
 	/**
 	 * Generates a list of country options from the WooCommerce settings.
 	 */
-	const countryOptions = useMemo( () => {
-		return Object.entries( window.wcSettings.countries || [] )
-			.map( ( [ key, name ] ) => ( {
+	const countryOptions = useMemo(() => {
+		return Object.entries(window.wcSettings.countries || [])
+			.map(([key, name]) => ({
 				key,
-				name: decodeEntities( name ),
+				name: decodeEntities(name),
 				types: [],
-			} ) )
-			.sort( ( a, b ) => a.name.localeCompare( b.name ) );
-	}, [] );
+			}))
+			.sort((a, b) => a.name.localeCompare(b.name));
+	}, []);
 
 	const isBaseCountryDifferent =
 		storeCountryCode !== businessRegistrationCountry;
@@ -114,86 +114,86 @@ export const PaymentGateways = ( {
 			'.settings-payment-gateways__header-select-container--indicator'
 		);
 
-		if ( buttonRef.current && parentDiv !== buttonRef.current ) {
+		if (buttonRef.current && parentDiv !== buttonRef.current) {
 			return;
 		}
 
 		// Record the event when user clicks on the business location indicator.
-		recordPaymentsEvent( 'business_location_indicator_click', {
+		recordPaymentsEvent('business_location_indicator_click', {
 			store_country: storeCountryCode,
 			business_country: businessRegistrationCountry || 'unknown',
-		} );
+		});
 
-		setIsPopoverVisible( ( prev ) => ! prev );
+		setIsPopoverVisible((prev) => !prev);
 	};
 
 	const handleFocusOutside = () => {
-		setIsPopoverVisible( false );
+		setIsPopoverVisible(false);
 	};
 
-	const handleIndicatorKeyDown = ( event: React.KeyboardEvent ) => {
-		if ( event.key === 'Escape' && isPopoverVisible ) {
+	const handleIndicatorKeyDown = (event: React.KeyboardEvent) => {
+		if (event.key === 'Escape' && isPopoverVisible) {
 			event.stopPropagation();
-			setIsPopoverVisible( false );
+			setIsPopoverVisible(false);
 			buttonRef.current?.focus();
-		} else if ( event.key === 'Enter' || event.key === ' ' ) {
+		} else if (event.key === 'Enter' || event.key === ' ') {
 			// Only handle Enter/Space when the indicator button itself is focused,
 			// allowing links inside the popover to work normally.
-			if ( event.target !== buttonRef.current ) {
+			if (event.target !== buttonRef.current) {
 				return;
 			}
 			event.preventDefault();
-			handleBusinessLocationIndicatorClick( event );
+			handleBusinessLocationIndicatorClick(event);
 		}
 	};
 
 	// Handle Escape key globally when popover is open (for portal focus)
-	useEffect( () => {
-		if ( ! isPopoverVisible ) {
+	useEffect(() => {
+		if (!isPopoverVisible) {
 			return;
 		}
 
-		const handleGlobalKeyDown = ( event: KeyboardEvent ) => {
-			if ( event.key === 'Escape' ) {
+		const handleGlobalKeyDown = (event: KeyboardEvent) => {
+			if (event.key === 'Escape') {
 				event.stopPropagation();
-				setIsPopoverVisible( false );
+				setIsPopoverVisible(false);
 				buttonRef.current?.focus();
 			}
 		};
 
-		document.addEventListener( 'keydown', handleGlobalKeyDown );
+		document.addEventListener('keydown', handleGlobalKeyDown);
 		return () => {
-			document.removeEventListener( 'keydown', handleGlobalKeyDown );
+			document.removeEventListener('keydown', handleGlobalKeyDown);
 		};
-	}, [ isPopoverVisible ] );
+	}, [isPopoverVisible]);
 
 	return (
 		<div className="settings-payment-gateways">
 			<div className="settings-payment-gateways__header">
 				<div className="settings-payment-gateways__header-title">
-					{ __( 'Payment providers', 'woocommerce' ) }
+					{__('Payment providers', 'woocommerce')}
 				</div>
-				<div className={ selectContainerClass }>
+				<div className={selectContainerClass}>
 					<CountrySelector
 						className="woocommerce-select-control__country"
-						label={ __( 'Business location:', 'woocommerce' ) }
-						placeholder={ '' }
+						label={__('Business location:', 'woocommerce')}
+						placeholder={''}
 						value={
 							countryOptions.find(
-								( country ) =>
+								(country) =>
 									country.key === businessRegistrationCountry
 							) ?? { key: 'US', name: 'United States (US)' }
 						}
-						options={ countryOptions }
-						onChange={ ( currentSelectedCountry: string ) => {
+						options={countryOptions}
+						onChange={(currentSelectedCountry: string) => {
 							// Save selected country and refresh the store by invalidating getPaymentProviders.
-							void apiFetch( {
+							void apiFetch({
 								path:
 									WC_ADMIN_NAMESPACE +
 									'/settings/payments/country',
 								method: 'POST',
 								data: { location: currentSelectedCountry },
-							} ).then( () => {
+							}).then(() => {
 								// Update UI.
 								setBusinessRegistrationCountry(
 									currentSelectedCountry
@@ -208,42 +208,42 @@ export const PaymentGateways = ( {
 								}
 								void invalidateMainStore(
 									'getPaymentProviders',
-									[ currentSelectedCountry ]
+									[currentSelectedCountry]
 								);
 								void invalidateWooPaymentsOnboardingStore(
 									'getOnboardingData',
 									[]
 								);
-							} );
-						} }
+							});
+						}}
 					/>
-					{ isBaseCountryDifferent && (
+					{isBaseCountryDifferent && (
 						<div
 							className="settings-payment-gateways__header-select-container--indicator"
-							tabIndex={ 0 }
+							tabIndex={0}
 							role="button"
-							ref={ buttonRef }
-							onClick={ handleBusinessLocationIndicatorClick }
-							onKeyDown={ handleIndicatorKeyDown }
+							ref={buttonRef}
+							onClick={handleBusinessLocationIndicatorClick}
+							onKeyDown={handleIndicatorKeyDown}
 						>
 							<div className="settings-payment-gateways__header-select-container--indicator-icon">
 								<InfoOutline />
 							</div>
 
-							{ isPopoverVisible && (
+							{isPopoverVisible && (
 								<Popover
 									className="settings-payment-gateways__header-select-container--indicator-popover"
 									placement="top-end"
-									offset={ 4 }
+									offset={4}
 									variant="unstyled"
-									focusOnMount={ true }
-									noArrow={ true }
-									shift={ true }
-									onFocusOutside={ handleFocusOutside }
+									focusOnMount={true}
+									noArrow={true}
+									shift={true}
+									onFocusOutside={handleFocusOutside}
 								>
 									<div className="components-popover__content-container">
 										<p>
-											{ interpolateComponents( {
+											{interpolateComponents({
 												mixedString: __(
 													'Your business location does not match your store location. {{link}}Edit store location.{{/link}}',
 													'woocommerce'
@@ -251,12 +251,12 @@ export const PaymentGateways = ( {
 												components: {
 													link: (
 														<Link
-															href={ getAdminLink(
+															href={getAdminLink(
 																'admin.php?page=wc-settings&tab=general'
-															) }
+															)}
 															target="_blank"
 															type="external"
-															onClick={ () => {
+															onClick={() => {
 																// Record the event when user clicks on the edit store location link.
 																recordPaymentsEvent(
 																	'business_location_popover_edit_store_location_click',
@@ -268,33 +268,33 @@ export const PaymentGateways = ( {
 																			'unknown',
 																	}
 																);
-															} }
+															}}
 														/>
 													),
 												},
-											} ) }
+											})}
 										</p>
 									</div>
 								</Popover>
-							) }
+							)}
 						</div>
-					) }
+					)}
 				</div>
 			</div>
-			{ isFetching ? (
-				<ListPlaceholder rows={ 5 } />
+			{isFetching ? (
+				<ListPlaceholder rows={5} />
 			) : (
 				<PaymentGatewayList
-					providers={ providers }
-					installedPluginSlugs={ installedPluginSlugs }
-					installingPlugin={ installingPlugin }
-					setUpPlugin={ setUpPlugin }
-					acceptIncentive={ acceptIncentive }
-					shouldHighlightIncentive={ shouldHighlightIncentive }
-					updateOrdering={ updateOrdering }
-					setIsOnboardingModalOpen={ setIsOnboardingModalOpen }
+					providers={providers}
+					installedPluginSlugs={installedPluginSlugs}
+					installingPlugin={installingPlugin}
+					setUpPlugin={setUpPlugin}
+					acceptIncentive={acceptIncentive}
+					shouldHighlightIncentive={shouldHighlightIncentive}
+					updateOrdering={updateOrdering}
+					setIsOnboardingModalOpen={setIsOnboardingModalOpen}
 				/>
-			) }
+			)}
 		</div>
 	);
 };

@@ -8,18 +8,18 @@ import { useEffect, useState, createPortal } from '@wordpress/element';
  *
  * Currently there is no API to add notices with custom context to the content area.
  */
-export function NoticesSlot( { children } ) {
-	const [ portalEl ] = useState( document.createElement( 'div' ) );
+export function NoticesSlot({ children }) {
+	const [portalEl] = useState(document.createElement('div'));
 
 	// Place element for portal as first child of visual editor
-	useEffect( () => {
+	useEffect(() => {
 		const visualEditor = document.getElementsByClassName(
 			'editor-visual-editor '
-		)[ 0 ];
-		if ( visualEditor ) {
-			visualEditor.parentNode?.insertBefore( portalEl, visualEditor );
+		)[0];
+		if (visualEditor) {
+			visualEditor.parentNode?.insertBefore(portalEl, visualEditor);
 		}
-	}, [ portalEl ] );
+	}, [portalEl]);
 
-	return createPortal( <>{ children }</>, portalEl );
+	return createPortal(<>{children}</>, portalEl);
 }

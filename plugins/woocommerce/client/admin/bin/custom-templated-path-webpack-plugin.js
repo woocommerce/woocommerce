@@ -6,7 +6,7 @@
 /**
  * External dependencies
  */
-const { escapeRegExp } = require( 'lodash' );
+const { escapeRegExp } = require('lodash');
 
 /**
  * Webpack plugin for handling specific template tags in Webpack configuration
@@ -24,12 +24,12 @@ class CustomTemplatedPathPlugin {
 	 *                                            with function value returning
 	 *                                            replacement string.
 	 */
-	constructor( handlers ) {
+	constructor(handlers) {
 		this.handlers = [];
 
-		for ( const [ key, handler ] of Object.entries( handlers ) ) {
-			const regexp = new RegExp( `\\[${ escapeRegExp( key ) }\\]`, 'gi' );
-			this.handlers.push( [ regexp, handler ] );
+		for (const [key, handler] of Object.entries(handlers)) {
+			const regexp = new RegExp(`\\[${escapeRegExp(key)}\\]`, 'gi');
+			this.handlers.push([regexp, handler]);
 		}
 	}
 
@@ -38,19 +38,19 @@ class CustomTemplatedPathPlugin {
 	 *
 	 * @param {Object} compiler Webpack compiler
 	 */
-	apply( compiler ) {
+	apply(compiler) {
 		compiler.hooks.compilation.tap(
 			'CustomTemplatedPathPlugin',
-			( compilation ) => {
+			(compilation) => {
 				compilation.hooks.assetPath.tap(
 					'CustomTemplatedPathPlugin',
-					( path, data ) => {
-						for ( let i = 0; i < this.handlers.length; i++ ) {
-							const [ regexp, handler ] = this.handlers[ i ];
-							if ( regexp.test( path ) ) {
+					(path, data) => {
+						for (let i = 0; i < this.handlers.length; i++) {
+							const [regexp, handler] = this.handlers[i];
+							if (regexp.test(path)) {
 								path = path.replace(
 									regexp,
-									handler( path, data )
+									handler(path, data)
 								);
 							}
 						}

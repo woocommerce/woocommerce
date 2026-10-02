@@ -13,22 +13,22 @@ import {
 import { AddToCartButton } from '../block';
 import type { AddToCartButtonAttributes } from '../types';
 
-jest.mock( '@woocommerce/base-context/hooks', () => ( {
+jest.mock('@woocommerce/base-context/hooks', () => ({
 	useStoreAddToCart: jest.fn(),
 	useStoreEvents: jest.fn(),
-} ) );
+}));
 
-jest.mock( '@woocommerce/base-hooks', () => ( {} ) );
+jest.mock('@woocommerce/base-hooks', () => ({}));
 
-jest.mock( '@woocommerce/block-settings', () => ( {
+jest.mock('@woocommerce/block-settings', () => ({
 	CART_URL: '/cart/',
-} ) );
+}));
 
-jest.mock( '@woocommerce/shared-hocs', () => ( {
-	withProductDataContext: ( component ) => component,
-} ) );
+jest.mock('@woocommerce/shared-hocs', () => ({
+	withProductDataContext: (component) => component,
+}));
 
-const product: AddToCartButtonAttributes[ 'product' ] = {
+const product: AddToCartButtonAttributes['product'] = {
 	id: 1,
 	type: 'variable',
 	permalink: '/product/example-product/',
@@ -44,44 +44,44 @@ const product: AddToCartButtonAttributes[ 'product' ] = {
 	button_text: 'Select options',
 };
 
-const renderButton = ( overrides: Partial< AddToCartButtonAttributes > = {} ) =>
+const renderButton = (overrides: Partial<AddToCartButtonAttributes> = {}) =>
 	render(
 		<AddToCartButton
 			className=""
-			style={ {} }
-			isDescendantOfAddToCartWithOptions={ false }
-			product={ product }
-			{ ...overrides }
+			style={{}}
+			isDescendantOfAddToCartWithOptions={false}
+			product={product}
+			{...overrides}
 		/>
 	);
 
-describe( 'AddToCartButton', () => {
-	beforeEach( () => {
-		( useStoreAddToCart as jest.Mock ).mockReturnValue( {
+describe('AddToCartButton', () => {
+	beforeEach(() => {
+		(useStoreAddToCart as jest.Mock).mockReturnValue({
 			cartQuantity: 0,
 			addingToCart: false,
 			addToCart: jest.fn(),
-		} );
-		( useStoreEvents as jest.Mock ).mockReturnValue( {
+		});
+		(useStoreEvents as jest.Mock).mockReturnValue({
 			dispatchStoreEvent: jest.fn(),
-		} );
-	} );
+		});
+	});
 
-	it( 'does not add nofollow to product permalink links', () => {
+	it('does not add nofollow to product permalink links', () => {
 		renderButton();
 
-		const link = screen.getByRole( 'link' );
-		expect( link ).toHaveAttribute( 'href', product.permalink );
-		expect( link ).not.toHaveAttribute( 'rel' );
-	} );
+		const link = screen.getByRole('link');
+		expect(link).toHaveAttribute('href', product.permalink);
+		expect(link).not.toHaveAttribute('rel');
+	});
 
-	it( 'keeps nofollow on cart action links', () => {
-		renderButton( {
+	it('keeps nofollow on cart action links', () => {
+		renderButton({
 			collection: 'woocommerce/product-collection/cart-contents',
-		} );
+		});
 
-		const link = screen.getByRole( 'link' );
-		expect( link ).toHaveAttribute( 'href', '/cart/' );
-		expect( link ).toHaveAttribute( 'rel', 'nofollow' );
-	} );
-} );
+		const link = screen.getByRole('link');
+		expect(link).toHaveAttribute('href', '/cart/');
+		expect(link).toHaveAttribute('rel', 'nofollow');
+	});
+});

@@ -12,18 +12,18 @@ import { setLoadingState, setFilters } from './actions';
 export function* getFilters() {
 	const path = '/wc-admin/options?options=' + FILTERS_OPTION_NAME;
 
-	yield setLoadingState( true );
+	yield setLoadingState(true);
 
 	try {
-		const response = yield apiFetch( {
+		const response = yield apiFetch({
 			path,
-		} );
-		if ( response[ FILTERS_OPTION_NAME ] === false ) {
-			yield setFilters( [] );
+		});
+		if (response[FILTERS_OPTION_NAME] === false) {
+			yield setFilters([]);
 		} else {
-			yield setFilters( response[ FILTERS_OPTION_NAME ] );
+			yield setFilters(response[FILTERS_OPTION_NAME]);
 		}
-	} catch ( error ) {
+	} catch (error) {
 		throw new Error();
 	}
 }

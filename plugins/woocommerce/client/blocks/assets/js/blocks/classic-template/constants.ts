@@ -27,22 +27,19 @@ export const PLACEHOLDERS = {
 export const TEMPLATES: TemplateDetails = {
 	'single-product': {
 		type: TYPES.singleProduct,
-		title: __( 'Product (Classic)', 'woocommerce' ),
-		description: __( 'Displays the PHP product page.', 'woocommerce' ),
+		title: __('Product (Classic)', 'woocommerce'),
+		description: __('Displays the PHP product page.', 'woocommerce'),
 		placeholder: PLACEHOLDERS.singleProduct,
 	},
 	'archive-product': {
 		type: TYPES.productCatalog,
-		title: __( 'Product Grid (Classic)', 'woocommerce' ),
-		description: __(
-			'Displays the PHP product grid page. ',
-			'woocommerce'
-		),
+		title: __('Product Grid (Classic)', 'woocommerce'),
+		description: __('Displays the PHP product grid page. ', 'woocommerce'),
 		placeholder: PLACEHOLDERS.archiveProduct,
 	},
 	'taxonomy-product_cat': {
 		type: TYPES.productTaxonomy,
-		title: __( 'Product Category (Classic)', 'woocommerce' ),
+		title: __('Product Category (Classic)', 'woocommerce'),
 		description: __(
 			'Displays the PHP product category page.',
 			'woocommerce'
@@ -51,13 +48,13 @@ export const TEMPLATES: TemplateDetails = {
 	},
 	'taxonomy-product_tag': {
 		type: TYPES.productTaxonomy,
-		title: __( 'Product Tag (Classic)', 'woocommerce' ),
-		description: __( 'Displays the PHP product tag page.', 'woocommerce' ),
+		title: __('Product Tag (Classic)', 'woocommerce'),
+		description: __('Displays the PHP product tag page.', 'woocommerce'),
 		placeholder: PLACEHOLDERS.archiveProduct,
 	},
 	'taxonomy-product_attribute': {
 		type: TYPES.productTaxonomy,
-		title: __( 'Product Attribute (Classic)', 'woocommerce' ),
+		title: __('Product Attribute (Classic)', 'woocommerce'),
 		description: __(
 			'Displays the PHP product attribute page.',
 			'woocommerce'
@@ -67,7 +64,7 @@ export const TEMPLATES: TemplateDetails = {
 	// Since that it is a fallback value, it has to be the last one.
 	'taxonomy-product': {
 		type: TYPES.productTaxonomy,
-		title: __( "Product's Custom Taxonomy (Classic)", 'woocommerce' ),
+		title: __("Product's Custom Taxonomy (Classic)", 'woocommerce'),
 		description: __(
 			"Displays the PHP product's custom taxonomy page.",
 			'woocommerce'
@@ -76,7 +73,7 @@ export const TEMPLATES: TemplateDetails = {
 	},
 	'product-search-results': {
 		type: TYPES.productSearchResults,
-		title: __( 'Product Search Results (Classic)', 'woocommerce' ),
+		title: __('Product Search Results (Classic)', 'woocommerce'),
 		description: __(
 			'Displays the PHP product search results.',
 			'woocommerce'
@@ -85,12 +82,12 @@ export const TEMPLATES: TemplateDetails = {
 	},
 	'checkout-header': {
 		type: TYPES.checkoutHeader,
-		title: __( 'Checkout Header', 'woocommerce' ),
+		title: __('Checkout Header', 'woocommerce'),
 		placeholder: 'checkout-header',
 	},
 	'order-confirmation': {
 		type: TYPES.orderConfirmation,
-		title: __( 'Order Confirmation Block', 'woocommerce' ),
+		title: __('Order Confirmation Block', 'woocommerce'),
 		placeholder: PLACEHOLDERS.orderConfirmation,
 	},
 };

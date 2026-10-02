@@ -1,15 +1,15 @@
 /**
  * External dependencies
  */
-const fs = require( 'fs' );
-const path = require( 'path' );
+const fs = require('fs');
+const path = require('path');
 
-const example = ( hookDoc ) => {
+const example = (hookDoc) => {
 	const tags = hookDoc.tags || [];
 	const exampleDoc =
-		tags.filter( ( { name: tagName } ) => tagName === 'example' )[ 0 ] ||
+		tags.filter(({ name: tagName }) => tagName === 'example')[0] ||
 		undefined;
-	if ( ! exampleDoc || ! exampleDoc.content ) {
+	if (!exampleDoc || !exampleDoc.content) {
 		return null;
 	}
 
@@ -20,30 +20,30 @@ const example = ( hookDoc ) => {
 	// prebuild:docs.
 	let exampleContent;
 	try {
-		const examplesRoot = fs.realpathSync( 'docs/examples' ) + path.sep;
-		const resolvedSource = fs.realpathSync( exampleDoc.content );
-		if ( ! resolvedSource.startsWith( examplesRoot ) ) {
-			throw new Error( 'path is outside docs/examples' );
+		const examplesRoot = fs.realpathSync('docs/examples') + path.sep;
+		const resolvedSource = fs.realpathSync(exampleDoc.content);
+		if (!resolvedSource.startsWith(examplesRoot)) {
+			throw new Error('path is outside docs/examples');
 		}
-		exampleContent = fs.readFileSync( resolvedSource, 'utf8' );
+		exampleContent = fs.readFileSync(resolvedSource, 'utf8');
 	} catch {
 		// eslint-disable-next-line no-console
 		console.warn(
-			`Skipping @example "${ exampleDoc.content }": not a readable file under docs/examples.`
+			`Skipping @example "${exampleDoc.content}": not a readable file under docs/examples.`
 		);
 		return null;
 	}
 
 	// Demote the example doc's title so it nests under the "Example" section
 	// instead of showing up as a sibling of the per-hook headings.
-	if ( exampleContent.startsWith( '# ' ) ) {
-		exampleContent = `#### ${ exampleContent.slice( 2 ) }`;
+	if (exampleContent.startsWith('# ')) {
+		exampleContent = `#### ${exampleContent.slice(2)}`;
 	}
 
 	return exampleContent
 		? {
 				html: exampleContent,
-		  }
+			}
 		: null;
 };
 

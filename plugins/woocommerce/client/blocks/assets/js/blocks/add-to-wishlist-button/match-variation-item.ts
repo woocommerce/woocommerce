@@ -5,10 +5,10 @@
  */
 type MatchableItem = {
 	id: number;
-	variation?: Array< {
+	variation?: Array<{
 		attribute: string;
 		value: string;
-	} > | null;
+	}> | null;
 };
 
 /**
@@ -44,16 +44,16 @@ export function matchVariationItem(
 	id: number,
 	selected: SelectedPair[]
 ): boolean {
-	if ( item.id !== id ) {
+	if (item.id !== id) {
 		return false;
 	}
 	const stored = item.variation ?? [];
-	if ( stored.length !== selected.length ) {
+	if (stored.length !== selected.length) {
 		return false;
 	}
-	return selected.every( ( sel ) =>
+	return selected.every((sel) =>
 		stored.some(
-			( v ) =>
+			(v) =>
 				v.attribute === sel.attribute &&
 				v.value.toLowerCase() === sel.value.toLowerCase()
 		)

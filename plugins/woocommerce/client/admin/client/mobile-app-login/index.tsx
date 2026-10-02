@@ -38,9 +38,9 @@ const FAQ_URL =
  * structural rewrite.
  */
 export const MobileAppLoginPage = () => {
-	useEffect( () => {
-		recordEvent( 'mobile_app_qr_login_page_viewed' );
-	}, [] );
+	useEffect(() => {
+		recordEvent('mobile_app_qr_login_page_viewed');
+	}, []);
 
 	return (
 		<div className="woocommerce-mobile-app-login">
@@ -53,10 +53,10 @@ export const MobileAppLoginPage = () => {
 						<WooLogo />
 					</div>
 					<h1 className="woocommerce-mobile-app-login__heading">
-						{ __( 'Sign in to the Woo mobile app', 'woocommerce' ) }
+						{__('Sign in to the Woo mobile app', 'woocommerce')}
 					</h1>
 					<p className="woocommerce-mobile-app-login__intro">
-						{ interpolateComponents( {
+						{interpolateComponents({
 							mixedString: __(
 								'Open the Woo mobile app on your phone, tap {{strong}}Scan QR code{{/strong}}, then point your camera at the code below.',
 								'woocommerce'
@@ -64,22 +64,22 @@ export const MobileAppLoginPage = () => {
 							components: {
 								strong: <strong />,
 							},
-						} ) }
+						})}
 					</p>
 
 					<div className="woocommerce-mobile-app-login__qr">
 						<QRDirectLoginCode />
 					</div>
 
-					{ /*
+					{/*
 					 * Leave room below the actions for a future "Log in with
 					 * WordPress.com for multi-store access" secondary CTA
 					 * (see WOOMOB-2767 plan). Do not add the UI here — a
 					 * separate task owns that flow.
-					 */ }
+					 */}
 
 					<p className="woocommerce-mobile-app-login__faq">
-						{ interpolateComponents( {
+						{interpolateComponents({
 							mixedString: __(
 								'Any troubles signing in? Check out the {{link}}FAQ{{/link}}.',
 								'woocommerce'
@@ -87,18 +87,18 @@ export const MobileAppLoginPage = () => {
 							components: {
 								link: (
 									<Link
-										href={ FAQ_URL }
+										href={FAQ_URL}
 										target="_blank"
 										type="external"
-										onClick={ () => {
+										onClick={() => {
 											recordEvent(
 												'mobile_app_qr_login_page_faq_click'
 											);
-										} }
+										}}
 									/>
 								),
 							},
-						} ) }
+						})}
 					</p>
 				</CardBody>
 			</Card>

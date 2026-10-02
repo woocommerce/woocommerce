@@ -41,15 +41,15 @@ export interface CartState {
 	errors: ApiErrorResponse[];
 }
 
-const shippingAddress: Partial< AddressFormValues > = {};
-ADDRESS_FORM_KEYS.forEach( ( key ) => {
-	shippingAddress[ key ] = '';
-} );
+const shippingAddress: Partial<AddressFormValues> = {};
+ADDRESS_FORM_KEYS.forEach((key) => {
+	shippingAddress[key] = '';
+});
 
-const billingAddress: Partial< AddressFormValues & { email: string } > = {};
-ADDRESS_FORM_KEYS.forEach( ( key ) => {
-	billingAddress[ key ] = '';
-} );
+const billingAddress: Partial<AddressFormValues & { email: string }> = {};
+ADDRESS_FORM_KEYS.forEach((key) => {
+	billingAddress[key] = '';
+});
 billingAddress.email = '';
 
 export const defaultCartState: CartState = {

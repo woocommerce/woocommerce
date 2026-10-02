@@ -14,7 +14,7 @@ export const CheckoutShippingSkeleton = () => {
 		<div
 			className="wc-block-components-skeleton wc-block-components-skeleton--checkout-shipping"
 			aria-live="polite"
-			aria-label={ __( 'Loading shipping options…', 'woocommerce' ) }
+			aria-label={__('Loading shipping options…', 'woocommerce')}
 		>
 			<Skeleton height="20px" width="20px" borderRadius="100%" />
 			<Skeleton height="20px" maxWidth="148px" />

@@ -22,38 +22,35 @@ interface CrossSellsProductProps {
 	isLoading: boolean;
 }
 
-const CartCrossSellsProduct = ( {
+const CartCrossSellsProduct = ({
 	product,
-}: CrossSellsProductProps ): JSX.Element => {
+}: CrossSellsProductProps): JSX.Element => {
 	return (
 		<div className="cross-sells-product">
 			<InnerBlockLayoutContextProvider
-				parentName={ 'woocommerce/cart-cross-sells-block' }
-				parentClassName={ 'wp-block-cart-cross-sells-product' }
+				parentName={'woocommerce/cart-cross-sells-block'}
+				parentClassName={'wp-block-cart-cross-sells-product'}
 			>
-				<ProductDataContextProvider
-					isLoading={ false }
-					product={ product }
-				>
+				<ProductDataContextProvider isLoading={false} product={product}>
 					<div>
 						<ProductImage
-							className={ '' }
-							showSaleBadge={ true }
-							productId={ product.id }
-							showProductLink={ true }
-							saleBadgeAlign={ 'left' }
-							imageSizing={ ImageSizing.SINGLE }
-							scale={ 'cover' }
-							aspectRatio={ '1:1' }
+							className={''}
+							showSaleBadge={true}
+							productId={product.id}
+							showProductLink={true}
+							saleBadgeAlign={'left'}
+							imageSizing={ImageSizing.SINGLE}
+							scale={'cover'}
+							aspectRatio={'1:1'}
 						/>
 						<ProductName
-							align={ '' }
-							headingLevel={ 3 }
-							showProductLink={ true }
+							align={''}
+							headingLevel={3}
+							showProductLink={true}
 						/>
 						<ProductRating
-							productId={ product.id }
-							postId={ 0 }
+							productId={product.id}
+							postId={0}
 							shouldDisplayMockedReviewsWhenProductHasNoReviews={
 								false
 							}

@@ -27,7 +27,7 @@ export const DEFAULT_ERROR_MESSAGE = __(
  * Contexts are defined in enum format, but this returns an array of strings instead.
  */
 export const getNoticeContexts = () => {
-	return Object.values( noticeContexts );
+	return Object.values(noticeContexts);
 };
 
 /**
@@ -36,23 +36,23 @@ export const getNoticeContexts = () => {
 export const createNotice = (
 	status: 'error' | 'warning' | 'info' | 'success',
 	message: string,
-	options: Partial< NoticeOptions >
+	options: Partial<NoticeOptions>
 ) => {
 	const noticeContext = options?.context;
 	const selectors = select(
 		'wc/store/payment'
-	) as CurriedSelectorsOf< PaymentStoreDescriptor >;
+	) as CurriedSelectorsOf<PaymentStoreDescriptor>;
 	const suppressNotices = selectors.isExpressPaymentMethodActive();
 
-	if ( suppressNotices || noticeContext === undefined ) {
+	if (suppressNotices || noticeContext === undefined) {
 		return;
 	}
 
-	void dispatch( noticesStore ).createNotice( status, message, {
+	void dispatch(noticesStore).createNotice(status, message, {
 		isDismissible: true,
 		...options,
 		context: noticeContext,
-	} );
+	});
 };
 
 /**
@@ -64,25 +64,25 @@ export const createNotice = (
 export const removeAllNotices = () => {
 	const selectors = select(
 		'wc/store/store-notices'
-	) as CurriedSelectorsOf< StoreNoticesStoreDescriptor >;
+	) as CurriedSelectorsOf<StoreNoticesStoreDescriptor>;
 	const containers = selectors.getRegisteredContainers();
-	const { removeNotice } = dispatch( noticesStore );
-	const { getNotices } = select( noticesStore );
+	const { removeNotice } = dispatch(noticesStore);
+	const { getNotices } = select(noticesStore);
 
-	containers.forEach( ( container ) => {
-		getNotices( container ).forEach( ( notice ) => {
-			void removeNotice( notice.id, container );
-		} );
-	} );
+	containers.forEach((container) => {
+		getNotices(container).forEach((notice) => {
+			void removeNotice(notice.id, container);
+		});
+	});
 };
 
-export const removeNoticesWithContext = ( context: string ) => {
-	const { removeNotice } = dispatch( noticesStore );
-	const { getNotices } = select( noticesStore );
+export const removeNoticesWithContext = (context: string) => {
+	const { removeNotice } = dispatch(noticesStore);
+	const { getNotices } = select(noticesStore);
 
-	getNotices( context ).forEach( ( notice ) => {
-		void removeNotice( notice.id, context );
-	} );
+	getNotices(context).forEach((notice) => {
+		void removeNotice(notice.id, context);
+	});
 };
 
 /**
@@ -91,26 +91,26 @@ export const removeNoticesWithContext = ( context: string ) => {
  * @param {string} id        - The string to match notice IDs against.
  * @param {string} [context] - The context of the notice to remove. If not provided, will check all contexts.
  */
-export const removeNoticesForField = ( id: string, context?: string ) => {
-	const { removeNotice } = dispatch( noticesStore );
+export const removeNoticesForField = (id: string, context?: string) => {
+	const { removeNotice } = dispatch(noticesStore);
 
-	if ( context ) {
-		void removeNotice( id, context );
+	if (context) {
+		void removeNotice(id, context);
 		return;
 	}
 
 	const selectors = select(
 		'wc/store/store-notices'
-	) as CurriedSelectorsOf< StoreNoticesStoreDescriptor >;
+	) as CurriedSelectorsOf<StoreNoticesStoreDescriptor>;
 	const containers = selectors.getRegisteredContainers();
-	const { getNotices } = select( noticesStore );
+	const { getNotices } = select(noticesStore);
 
 	// At this point we are removing the notice from all WC contexts since we don't know which one it is.
-	containers.forEach( ( container ) => {
-		getNotices( container ).forEach( ( notice ) => {
-			if ( notice.id.startsWith( id ) ) {
-				void removeNotice( notice.id, container );
+	containers.forEach((container) => {
+		getNotices(container).forEach((notice) => {
+			if (notice.id.startsWith(id)) {
+				void removeNotice(notice.id, container);
 			}
-		} );
-	} );
+		});
+	});
 };

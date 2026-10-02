@@ -15,7 +15,7 @@ type QRLoginRevokedPanelProps = {
  * next request will fail with 401 and the device will be effectively signed
  * out the moment it tries to do anything.
  */
-export const QRLoginRevokedPanel = ( { onDone }: QRLoginRevokedPanelProps ) => {
+export const QRLoginRevokedPanel = ({ onDone }: QRLoginRevokedPanelProps) => {
 	return (
 		<div
 			className="woocommerce-qr-direct-login woocommerce-qr-direct-login--revoked"
@@ -23,20 +23,20 @@ export const QRLoginRevokedPanel = ( { onDone }: QRLoginRevokedPanelProps ) => {
 			aria-live="polite"
 		>
 			<p className="woocommerce-qr-direct-login__revoked-headline">
-				{ __( 'Access revoked', 'woocommerce' ) }
+				{__('Access revoked', 'woocommerce')}
 			</p>
 			<p className="woocommerce-qr-direct-login__revoked-subline">
-				{ __(
+				{__(
 					'The mobile app will be signed out the next time it makes a request.',
 					'woocommerce'
-				) }
+				)}
 			</p>
 
-			{ onDone && (
-				<Button variant="primary" onClick={ onDone }>
-					{ __( 'Done', 'woocommerce' ) }
+			{onDone && (
+				<Button variant="primary" onClick={onDone}>
+					{__('Done', 'woocommerce')}
 				</Button>
-			) }
+			)}
 		</div>
 	);
 };

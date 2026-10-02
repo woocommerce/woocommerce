@@ -39,7 +39,7 @@ const DASHBOARD_FILTERS_FILTER = 'woocommerce_admin_dashboard_filters';
  * @filter woocommerce_admin_dashboard_filters
  * @param {Array.<filter>} filters Report filters.
  */
-const filters = applyFilters( DASHBOARD_FILTERS_FILTER, [] );
+const filters = applyFilters(DASHBOARD_FILTERS_FILTER, []);
 
 /**
  * A section is only usable when it carries the `key` that ties it back to a
@@ -51,10 +51,10 @@ const filters = applyFilters( DASHBOARD_FILTERS_FILTER, [] );
  * @param {*} section Entry of the stored `dashboard_sections` preference.
  * @return {boolean} Whether the entry can be merged with a default section.
  */
-const isValidSection = ( section ) =>
-	!! section &&
+const isValidSection = (section) =>
+	!!section &&
 	typeof section === 'object' &&
-	( typeof section.key === 'string' || Number.isFinite( section.key ) );
+	(typeof section.key === 'string' || Number.isFinite(section.key));
 
 /**
  * Stored fields that take the dashboard down, or make a section unreachable,
@@ -70,8 +70,8 @@ const isValidSection = ( section ) =>
  */
 const FIELD_CHECKS = {
 	hiddenBlocks: Array.isArray,
-	isVisible: ( value ) => typeof value === 'boolean',
-	title: ( value ) => typeof value === 'string',
+	isVisible: (value) => typeof value === 'boolean',
+	title: (value) => typeof value === 'string',
 };
 
 /**
@@ -87,8 +87,8 @@ const FIELD_CHECKS = {
  */
 const FIELD_FALLBACKS = {
 	hiddenBlocks: () => [],
-	isVisible: ( value ) => !! value,
-	title: ( value ) => ( typeof value === 'number' ? String( value ) : '' ),
+	isVisible: (value) => !!value,
+	title: (value) => (typeof value === 'number' ? String(value) : ''),
 };
 
 /**
@@ -99,10 +99,10 @@ const FIELD_FALLBACKS = {
  * @param {Object} section Well formed entry of the stored preference.
  * @return {boolean} Whether every field the dashboard reads can be used as is.
  */
-const hasUsableFields = ( section ) =>
-	Object.entries( FIELD_CHECKS ).every(
-		( [ field, isUsable ] ) =>
-			undefined === section[ field ] || isUsable( section[ field ] )
+const hasUsableFields = (section) =>
+	Object.entries(FIELD_CHECKS).every(
+		([field, isUsable]) =>
+			undefined === section[field] || isUsable(section[field])
 	);
 
 /**
@@ -112,8 +112,8 @@ const hasUsableFields = ( section ) =>
  * @param {*} section Entry of the stored `dashboard_sections` preference.
  * @return {boolean} Whether the entry can be used as is.
  */
-const isUsableSection = ( section ) =>
-	isValidSection( section ) && hasUsableFields( section );
+const isUsableSection = (section) =>
+	isValidSection(section) && hasUsableFields(section);
 
 /**
  * Whether the stored `dashboard_sections` preference is well formed.
@@ -121,10 +121,10 @@ const isUsableSection = ( section ) =>
  * @param {*} prefSections Stored `dashboard_sections` preference.
  * @return {boolean} Whether the preference can be used as is.
  */
-const isValidSectionsPreference = ( prefSections ) =>
-	Array.isArray( prefSections ) &&
+const isValidSectionsPreference = (prefSections) =>
+	Array.isArray(prefSections) &&
 	prefSections.length > 0 &&
-	prefSections.every( isUsableSection );
+	prefSections.every(isUsableSection);
 
 /**
  * Whether the dashboard was never customized. An unset preference and an empty
@@ -133,9 +133,8 @@ const isValidSectionsPreference = ( prefSections ) =>
  * @param {*} prefSections Stored `dashboard_sections` preference.
  * @return {boolean} Whether the preference holds nothing.
  */
-const isEmptySectionsPreference = ( prefSections ) =>
-	! prefSections ||
-	( Array.isArray( prefSections ) && prefSections.length === 0 );
+const isEmptySectionsPreference = (prefSections) =>
+	!prefSections || (Array.isArray(prefSections) && prefSections.length === 0);
 
 /**
  * `icon` and `component` are React nodes, they must never be persisted.
@@ -143,7 +142,7 @@ const isEmptySectionsPreference = ( prefSections ) =>
  * @param {section} section Section to persist.
  * @return {Object} Section without its React nodes.
  */
-const toStorableSection = ( { icon, component, ...section } ) => section;
+const toStorableSection = ({ icon, component, ...section }) => section;
 
 /**
  * Drops the fields the dashboard cannot read back, in place.
@@ -151,12 +150,12 @@ const toStorableSection = ( { icon, component, ...section } ) => section;
  * @param {Object} section Section to strip.
  * @return {Object} The same section, holding only usable values.
  */
-const deleteUnusableFields = ( section ) => {
-	Object.entries( FIELD_CHECKS ).forEach( ( [ field, isUsable ] ) => {
-		if ( ! isUsable( section[ field ] ) ) {
-			delete section[ field ];
+const deleteUnusableFields = (section) => {
+	Object.entries(FIELD_CHECKS).forEach(([field, isUsable]) => {
+		if (!isUsable(section[field])) {
+			delete section[field];
 		}
-	} );
+	});
 
 	return section;
 };
@@ -170,8 +169,8 @@ const deleteUnusableFields = ( section ) => {
  * @param {section} section Section to persist.
  * @return {Object} Section holding only values the dashboard can read back.
  */
-const toUsableSection = ( section ) =>
-	deleteUnusableFields( toStorableSection( section ) );
+const toUsableSection = (section) =>
+	deleteUnusableFields(toStorableSection(section));
 
 /**
  * A default section is the last fallback, so it has to stand on its own. An
@@ -182,8 +181,8 @@ const toUsableSection = ( section ) =>
  * @param {*} section Entry returned by the default sections filter.
  * @return {boolean} Whether a section can be built from the entry.
  */
-const isUsableDefaultSection = ( section ) =>
-	isValidSection( section ) && !! section.component;
+const isUsableDefaultSection = (section) =>
+	isValidSection(section) && !!section.component;
 
 /**
  * A default section holding a value the dashboard can read for every field it
@@ -194,14 +193,14 @@ const isUsableDefaultSection = ( section ) =>
  * @param {section} section Entry returned by the default sections filter.
  * @return {section} Copy of the section, holding only usable values.
  */
-const toUsableDefaultSection = ( section ) => {
+const toUsableDefaultSection = (section) => {
 	const usable = { ...section };
 
-	Object.entries( FIELD_CHECKS ).forEach( ( [ field, isUsable ] ) => {
-		if ( ! isUsable( usable[ field ] ) ) {
-			usable[ field ] = FIELD_FALLBACKS[ field ]( usable[ field ] );
+	Object.entries(FIELD_CHECKS).forEach(([field, isUsable]) => {
+		if (!isUsable(usable[field])) {
+			usable[field] = FIELD_FALLBACKS[field](usable[field]);
 		}
-	} );
+	});
 
 	return usable;
 };
@@ -218,61 +217,59 @@ const toUsableDefaultSection = ( section ) => {
  * @return {Array.<section>} Default sections.
  */
 const getDefaultSections = () => {
-	if ( ! Array.isArray( defaultSections ) ) {
+	if (!Array.isArray(defaultSections)) {
 		throw new Error(
-			`The \`defaultSections\` is not an array, please make sure \`${ DEFAULT_SECTIONS_FILTER }\` filter is used correctly.`
+			`The \`defaultSections\` is not an array, please make sure \`${DEFAULT_SECTIONS_FILTER}\` filter is used correctly.`
 		);
 	}
 
 	return defaultSections
-		.filter( isUsableDefaultSection )
-		.map( toUsableDefaultSection );
+		.filter(isUsableDefaultSection)
+		.map(toUsableDefaultSection);
 };
 
-export const mergeSectionsWithDefaults = ( prefSections ) => {
+export const mergeSectionsWithDefaults = (prefSections) => {
 	const defaults = getDefaultSections();
 	// Malformed entries are dropped instead of failing the whole dashboard.
-	const validPrefSections = Array.isArray( prefSections )
-		? prefSections.filter( isValidSection )
+	const validPrefSections = Array.isArray(prefSections)
+		? prefSections.filter(isValidSection)
 		: [];
 
-	if ( validPrefSections.length === 0 ) {
+	if (validPrefSections.length === 0) {
 		return defaults;
 	}
 
-	const defaultKeys = defaults.map( ( section ) => section.key );
-	const prefKeys = validPrefSections.map( ( section ) => section.key );
-	const keys = new Set( [ ...prefKeys, ...defaultKeys ] );
+	const defaultKeys = defaults.map((section) => section.key);
+	const prefKeys = validPrefSections.map((section) => section.key);
+	const keys = new Set([...prefKeys, ...defaultKeys]);
 	const sections = [];
 
-	keys.forEach( ( key ) => {
-		const defaultSection = defaults.find(
-			( section ) => section.key === key
-		);
-		if ( ! defaultSection ) {
+	keys.forEach((key) => {
+		const defaultSection = defaults.find((section) => section.key === key);
+		if (!defaultSection) {
 			return;
 		}
 		const prefSection = validPrefSections.find(
-			( section ) => section.key === key
+			(section) => section.key === key
 		);
 
 		const section = {
 			...defaultSection,
 			// A stored `icon` is a stale React node, the default one wins.
-			...( prefSection ? toStorableSection( prefSection ) : {} ),
+			...(prefSection ? toStorableSection(prefSection) : {}),
 		};
 
 		// The same goes for any field the dashboard cannot use, so a single
 		// corrupted field costs the merchant that field and not their whole
 		// section.
-		Object.entries( FIELD_CHECKS ).forEach( ( [ field, isUsable ] ) => {
-			if ( ! isUsable( section[ field ] ) ) {
-				section[ field ] = defaultSection[ field ];
+		Object.entries(FIELD_CHECKS).forEach(([field, isUsable]) => {
+			if (!isUsable(section[field])) {
+				section[field] = defaultSection[field];
 			}
-		} );
+		});
 
-		sections.push( section );
-	} );
+		sections.push(section);
+	});
 
 	return sections;
 };
@@ -288,68 +285,67 @@ export const mergeSectionsWithDefaults = ( prefSections ) => {
  * @param {*}               prefSections Stored `dashboard_sections` preference.
  * @return {Array.<Object>} Sections to store.
  */
-const toRepairedPreference = ( sections, prefSections ) => {
-	const knownKeys = sections.map( ( section ) => section.key );
+const toRepairedPreference = (sections, prefSections) => {
+	const knownKeys = sections.map((section) => section.key);
 	const unknownSections = (
-		Array.isArray( prefSections ) ? prefSections : []
+		Array.isArray(prefSections) ? prefSections : []
 	).filter(
-		( section ) =>
-			isValidSection( section ) && ! knownKeys.includes( section.key )
+		(section) => isValidSection(section) && !knownKeys.includes(section.key)
 	);
 
-	return [ ...sections, ...unknownSections ].map( toUsableSection );
+	return [...sections, ...unknownSections].map(toUsableSection);
 };
 
-const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
+const CustomizableDashboard = ({ defaultDateRange, path, query }) => {
 	const { updateUserPreferences, ...userPrefs } = useUserPreferences();
 
 	const sections = useMemo(
-		() => mergeSectionsWithDefaults( userPrefs.dashboard_sections ),
-		[ userPrefs.dashboard_sections ]
+		() => mergeSectionsWithDefaults(userPrefs.dashboard_sections),
+		[userPrefs.dashboard_sections]
 	);
 
 	// The update callbacks are handed to the section components, so a third
 	// party one can supply a value the dashboard cannot read back. Sanitizing
 	// here keeps a preference the dashboard wrote from needing a repair.
-	const updateSections = ( newSections ) => {
-		updateUserPreferences( {
-			dashboard_sections: newSections.map( toUsableSection ),
-		} );
+	const updateSections = (newSections) => {
+		updateUserPreferences({
+			dashboard_sections: newSections.map(toUsableSection),
+		});
 	};
 
 	// Repair a corrupted `dashboard_sections` preference by storing the sections
 	// the dashboard fell back to. Without this the merchant keeps loading the
 	// broken value on every visit until they happen to customize a section.
-	const hasAttemptedRepair = useRef( false );
-	useEffect( () => {
+	const hasAttemptedRepair = useRef(false);
+	useEffect(() => {
 		const prefSections = userPrefs.dashboard_sections;
 
 		if (
 			hasAttemptedRepair.current ||
-			isEmptySectionsPreference( prefSections ) ||
-			isValidSectionsPreference( prefSections )
+			isEmptySectionsPreference(prefSections) ||
+			isValidSectionsPreference(prefSections)
 		) {
 			return;
 		}
 
 		hasAttemptedRepair.current = true;
 
-		const repaired = toRepairedPreference( sections, prefSections );
+		const repaired = toRepairedPreference(sections, prefSections);
 
 		// Nothing to fall back to, for example when the default sections filter
 		// emptied the list. Storing this would only be repaired again on the
 		// next visit, one write per page load and no gain.
-		if ( ! isValidSectionsPreference( repaired ) ) {
+		if (!isValidSectionsPreference(repaired)) {
 			return;
 		}
 
-		updateUserPreferences( { dashboard_sections: repaired } );
+		updateUserPreferences({ dashboard_sections: repaired });
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ userPrefs.dashboard_sections ] );
+	}, [userPrefs.dashboard_sections]);
 
-	const updateSection = ( updatedKey, newSettings ) => {
-		const newSections = sections.map( ( section ) => {
-			if ( section.key === updatedKey ) {
+	const updateSection = (updatedKey, newSettings) => {
+		const newSections = sections.map((section) => {
+			if (section.key === updatedKey) {
 				return {
 					...section,
 					...newSettings,
@@ -357,210 +353,205 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 			}
 
 			return section;
-		} );
-		updateSections( newSections );
+		});
+		updateSections(newSections);
 	};
 
-	const onChangeHiddenBlocks = ( updatedKey ) => {
-		return ( updatedHiddenBlocks ) => {
-			updateSection( updatedKey, {
+	const onChangeHiddenBlocks = (updatedKey) => {
+		return (updatedHiddenBlocks) => {
+			updateSection(updatedKey, {
 				hiddenBlocks: updatedHiddenBlocks,
-			} );
+			});
 		};
 	};
 
-	const onSectionTitleUpdate = ( updatedKey ) => {
-		return ( updatedTitle ) => {
-			recordEvent( 'dash_section_rename', { key: updatedKey } );
-			updateSection( updatedKey, { title: updatedTitle } );
+	const onSectionTitleUpdate = (updatedKey) => {
+		return (updatedTitle) => {
+			recordEvent('dash_section_rename', { key: updatedKey });
+			updateSection(updatedKey, { title: updatedTitle });
 		};
 	};
 
-	const toggleVisibility = ( key, onToggle ) => {
+	const toggleVisibility = (key, onToggle) => {
 		return () => {
-			if ( onToggle ) {
+			if (onToggle) {
 				// Close the dropdown before setting state so an action is not performed on an unmounted component.
 				onToggle();
 			}
 			// When toggling visibility, place section at the end of the array.
-			const index = sections.findIndex( ( s ) => key === s.key );
-			const toggledSection = sections.splice( index, 1 ).shift();
-			toggledSection.isVisible = ! toggledSection.isVisible;
-			sections.push( toggledSection );
+			const index = sections.findIndex((s) => key === s.key);
+			const toggledSection = sections.splice(index, 1).shift();
+			toggledSection.isVisible = !toggledSection.isVisible;
+			sections.push(toggledSection);
 
-			if ( toggledSection.isVisible ) {
-				recordEvent( 'dash_section_add', { key: toggledSection.key } );
+			if (toggledSection.isVisible) {
+				recordEvent('dash_section_add', { key: toggledSection.key });
 			} else {
-				recordEvent( 'dash_section_remove', {
+				recordEvent('dash_section_remove', {
 					key: toggledSection.key,
-				} );
+				});
 			}
 
-			updateSections( sections );
+			updateSections(sections);
 		};
 	};
 
-	const onMove = ( index, change ) => {
-		const movedSection = sections.splice( index, 1 ).shift();
+	const onMove = (index, change) => {
+		const movedSection = sections.splice(index, 1).shift();
 		const newIndex = index + change;
 
 		// Figure out the index of the skipped section.
 		const nextJumpedSectionIndex = change < 0 ? newIndex : newIndex - 1;
 
 		if (
-			sections[ nextJumpedSectionIndex ].isVisible || // Is the skipped section visible?
+			sections[nextJumpedSectionIndex].isVisible || // Is the skipped section visible?
 			index === 0 || // Will this be the first element?
 			index === sections.length - 1 // Will this be the last element?
 		) {
 			// Yes, lets insert.
-			sections.splice( newIndex, 0, movedSection );
-			updateSections( sections );
+			sections.splice(newIndex, 0, movedSection);
+			updateSections(sections);
 
 			const eventProps = {
 				key: movedSection.key,
 				direction: change > 0 ? 'down' : 'up',
 			};
-			recordEvent( 'dash_section_order_change', eventProps );
+			recordEvent('dash_section_order_change', eventProps);
 		} else {
 			// No, lets try the next one.
-			onMove( index, change + change );
+			onMove(index, change + change);
 		}
 	};
 
 	const renderAddMore = () => {
 		const hiddenSections = sections.filter(
-			( section ) => section.isVisible === false
+			(section) => section.isVisible === false
 		);
 
-		if ( hiddenSections.length === 0 ) {
+		if (hiddenSections.length === 0) {
 			return null;
 		}
 
 		return (
 			<Dropdown
 				className="woocommerce-dashboard-section__add-more"
-				renderToggle={ ( { onToggle, isOpen } ) => (
+				renderToggle={({ onToggle, isOpen }) => (
 					<Button
-						onClick={ onToggle }
-						title={ __( 'Add more sections', 'woocommerce' ) }
-						aria-expanded={ isOpen }
+						onClick={onToggle}
+						title={__('Add more sections', 'woocommerce')}
+						aria-expanded={isOpen}
 					>
-						<Icon icon={ plusCircleFilled } />
+						<Icon icon={plusCircleFilled} />
 					</Button>
-				) }
-				renderContent={ ( { onToggle } ) => (
+				)}
+				renderContent={({ onToggle }) => (
 					<>
-						<H>{ __( 'Dashboard Sections', 'woocommerce' ) }</H>
+						<H>{__('Dashboard Sections', 'woocommerce')}</H>
 						<div className="woocommerce-dashboard-section__add-more-choices">
-							{ hiddenSections.map( ( section ) => {
+							{hiddenSections.map((section) => {
 								return (
 									<Button
-										key={ section.key }
-										onClick={ toggleVisibility(
+										key={section.key}
+										onClick={toggleVisibility(
 											section.key,
 											onToggle
-										) }
+										)}
 										className="woocommerce-dashboard-section__add-more-btn"
-										title={ sprintf(
+										title={sprintf(
 											/* translators: %s: dashboard section titles which are hidden, this button allows unhiding them */
-											__(
-												'Add %s section',
-												'woocommerce'
-											),
+											__('Add %s section', 'woocommerce'),
 											section.title
-										) }
+										)}
 									>
-										{ isValidElement( section.icon ) && (
+										{isValidElement(section.icon) && (
 											<Icon
 												className={
 													section.key + '__icon'
 												}
-												icon={ section.icon }
-												size={ 30 }
+												icon={section.icon}
+												size={30}
 											/>
-										) }
+										)}
 										<span className="woocommerce-dashboard-section__add-more-btn-title">
-											{ section.title }
+											{section.title}
 										</span>
 									</Button>
 								);
-							} ) }
+							})}
 						</div>
 					</>
-				) }
+				)}
 			/>
 		);
 	};
 
 	const renderDashboardReports = () => {
 		const visibleSectionKeys = sections
-			.filter( ( section ) => section.isVisible )
-			.map( ( section ) => section.key );
+			.filter((section) => section.isVisible)
+			.map((section) => section.key);
 
 		return (
 			<>
 				<ReportHeader
 					report="dashboard"
-					query={ query }
-					path={ path }
-					filters={ filters }
+					query={query}
+					path={path}
+					filters={filters}
 				/>
-				{ sections.map( ( section, index ) => {
-					if ( section.isVisible ) {
+				{sections.map((section, index) => {
+					if (section.isVisible) {
 						return (
 							<Section
-								component={ section.component }
-								hiddenBlocks={ section.hiddenBlocks }
-								key={ section.key }
-								onChangeHiddenBlocks={ onChangeHiddenBlocks(
+								component={section.component}
+								hiddenBlocks={section.hiddenBlocks}
+								key={section.key}
+								onChangeHiddenBlocks={onChangeHiddenBlocks(
 									section.key
-								) }
-								onTitleUpdate={ onSectionTitleUpdate(
+								)}
+								onTitleUpdate={onSectionTitleUpdate(
 									section.key
-								) }
-								path={ path }
-								defaultDateRange={ defaultDateRange }
-								query={ query }
-								title={ section.title }
-								onMove={ partial( onMove, index ) }
-								onRemove={ toggleVisibility( section.key ) }
-								isFirst={
-									section.key === visibleSectionKeys[ 0 ]
-								}
+								)}
+								path={path}
+								defaultDateRange={defaultDateRange}
+								query={query}
+								title={section.title}
+								onMove={partial(onMove, index)}
+								onRemove={toggleVisibility(section.key)}
+								isFirst={section.key === visibleSectionKeys[0]}
 								isLast={
 									section.key ===
 									visibleSectionKeys[
 										visibleSectionKeys.length - 1
 									]
 								}
-								filters={ filters }
+								filters={filters}
 							/>
 						);
 					}
 					return null;
-				} ) }
-				{ renderAddMore() }
+				})}
+				{renderAddMore()}
 			</>
 		);
 	};
 
 	return (
 		<CurrencyContext.Provider
-			value={ getFilteredCurrencyInstance( getQuery() ) }
+			value={getFilteredCurrencyInstance(getQuery())}
 		>
-			{ renderDashboardReports() }
+			{renderDashboardReports()}
 		</CurrencyContext.Provider>
 	);
 };
 
 export default compose(
-	withSelect( ( select ) => {
+	withSelect((select) => {
 		const { woocommerce_default_date_range: defaultDateRange } = select(
 			settingsStore
-		).getSetting( 'wc_admin', 'wcAdminSettings' );
+		).getSetting('wc_admin', 'wcAdminSettings');
 
 		return {
 			defaultDateRange,
 		};
-	} )
-)( CustomizableDashboard );
+	})
+)(CustomizableDashboard);

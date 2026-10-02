@@ -25,82 +25,82 @@ export type SidebarContainerProps = {
 	children: React.ReactNode;
 	onMobileClose?: () => void;
 };
-export const SidebarContainer = ( {
+export const SidebarContainer = ({
 	title,
 	description,
 	footer,
 	children,
 	onMobileClose,
-}: SidebarContainerProps ) => {
+}: SidebarContainerProps) => {
 	const chevronIcon = isRTL() ? chevronRight : chevronLeft;
 
 	const hasOnClick = (
 		el: React.ReactNode
-	): el is React.ReactElement< { onClick: () => void } > =>
-		React.isValidElement( el ) && typeof el.props.onClick === 'function';
+	): el is React.ReactElement<{ onClick: () => void }> =>
+		React.isValidElement(el) && typeof el.props.onClick === 'function';
 
 	return (
 		<>
 			<VStack
-				className={ clsx(
+				className={clsx(
 					'woocommerce-edit-site-sidebar-navigation-screen__main',
 					{
-						'has-footer': !! footer,
+						'has-footer': !!footer,
 					}
-				) }
-				spacing={ 0 }
+				)}
+				spacing={0}
 				justify="flex-start"
 			>
 				<HStack
-					spacing={ 4 }
+					spacing={4}
 					alignment="flex-start"
 					className="woocommerce-edit-site-sidebar-navigation-screen__title-icon"
 				>
 					<SidebarButton
 						onClick={
-							hasOnClick( title ) // inherit onClick from title, if it exists
+							hasOnClick(title) // inherit onClick from title, if it exists
 								? title.props.onClick
 								: undefined
 						}
-						icon={ chevronIcon }
-						label={ __( 'Back', 'woocommerce' ) }
-						showTooltip={ false }
+						icon={chevronIcon}
+						label={__('Back', 'woocommerce')}
+						showTooltip={false}
 					/>
 
 					<Heading
 						className="woocommerce-edit-site-sidebar-navigation-screen__title"
-						level={ 1 }
+						level={1}
 						as="h1"
 					>
-						{ title }
+						{title}
 					</Heading>
 				</HStack>
 
-				{ onMobileClose && (
+				{onMobileClose && (
 					<div className="woocommerce-lys-mobile-sidebar-close">
 						<Button
 							className="mobile-sidebar-close"
-							onClick={ onMobileClose }
-							icon={ <Icon icon={ close } size={ 24 } /> }
-							aria-label={ __( 'Close sidebar', 'woocommerce' ) }
+							onClick={onMobileClose}
+							icon={<Icon icon={close} size={24} />}
+							aria-label={__('Close sidebar', 'woocommerce')}
 						/>
 					</div>
-				) }
+				)}
 
 				<div className="woocommerce-edit-site-sidebar-navigation-screen__content">
-					{ description && (
+					{description && (
 						<p className="woocommerce-edit-site-sidebar-navigation-screen__description">
-							{ description }
+							{description}
 						</p>
-					) }
-					{ children }
+					)}
+					{children}
 				</div>
 			</VStack>
-			{ footer && (
+			{footer && (
 				<footer className="woocommerce-edit-site-sidebar-navigation-screen__footer">
-					{ footer }
+					{footer}
 				</footer>
-			) }
+			)}
 		</>
 	);
 };

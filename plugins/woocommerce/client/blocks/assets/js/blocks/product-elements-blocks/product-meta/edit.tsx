@@ -16,18 +16,18 @@ const Edit = () => {
 			'core/group',
 			{ layout: { type: 'flex', flexWrap: 'nowrap' } },
 			[
-				[ 'woocommerce/product-sku' ],
+				['woocommerce/product-sku'],
 				[
 					'core/post-terms',
 					{
-						prefix: __( 'Category: ', 'woocommerce' ),
+						prefix: __('Category: ', 'woocommerce'),
 						term: 'product_cat',
 					},
 				],
 				[
 					'core/post-terms',
 					{
-						prefix: __( 'Tags: ', 'woocommerce' ),
+						prefix: __('Tags: ', 'woocommerce'),
 						term: 'product_tag',
 					},
 				],
@@ -37,8 +37,8 @@ const Edit = () => {
 	const blockProps = useBlockProps();
 
 	return (
-		<div { ...blockProps }>
-			<InnerBlocks template={ TEMPLATE } />
+		<div {...blockProps}>
+			<InnerBlocks template={TEMPLATE} />
 		</div>
 	);
 };

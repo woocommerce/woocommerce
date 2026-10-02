@@ -5,8 +5,8 @@
  *
  * @return The result of the function call.
  */
-export async function withFakeTimers< T >( fn: () => T ) {
-	const usingFakeTimers = jest.isMockFunction( setTimeout );
+export async function withFakeTimers<T>(fn: () => T) {
+	const usingFakeTimers = jest.isMockFunction(setTimeout);
 
 	// Portions of the React Native Animation API rely upon these APIs. However,
 	// Jest's 'legacy' fake timers mutate these globals, which breaks the Animated
@@ -14,16 +14,16 @@ export async function withFakeTimers< T >( fn: () => T ) {
 	const requestAnimationFrameCopy = global.requestAnimationFrame;
 	const cancelAnimationFrameCopy = global.cancelAnimationFrame;
 
-	if ( ! usingFakeTimers ) {
-		jest.useFakeTimers( {
+	if (!usingFakeTimers) {
+		jest.useFakeTimers({
 			now: new Date(),
-			doNotFake: [ 'setTimeout' ],
-		} );
+			doNotFake: ['setTimeout'],
+		});
 	}
 
 	const result = await fn();
 
-	if ( ! usingFakeTimers ) {
+	if (!usingFakeTimers) {
 		jest.useRealTimers();
 
 		global.requestAnimationFrame = requestAnimationFrameCopy;

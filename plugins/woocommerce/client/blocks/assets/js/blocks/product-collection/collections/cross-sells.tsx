@@ -20,15 +20,15 @@ import { CoreCollectionNames, CoreFilterNames } from '../types';
 
 const collection = {
 	name: CoreCollectionNames.CROSS_SELLS,
-	title: __( 'Cross-Sells', 'woocommerce' ),
-	icon: <Icon icon={ reusableBlock } />,
+	title: __('Cross-Sells', 'woocommerce'),
+	icon: <Icon icon={reusableBlock} />,
 	description: __(
 		'By suggesting complementary products in the cart using cross-sells, you can significantly increase the average order value.',
 		'woocommerce'
 	),
-	keywords: [ 'boost', 'promotion' ],
-	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
-	usesReference: [ 'product', 'cart', 'order' ],
+	keywords: ['boost', 'promotion'],
+	scope: ['inserter', 'block'] as BlockVariationScope[],
+	usesReference: ['product', 'cart', 'order'],
 };
 
 export const attributes = {
@@ -43,7 +43,7 @@ export const attributes = {
 		perPage: 8,
 		pages: 1,
 	},
-	hideControls: [ CoreFilterNames.FILTERABLE ],
+	hideControls: [CoreFilterNames.FILTERABLE],
 };
 
 const heading: InnerBlockTemplate = [
@@ -51,7 +51,7 @@ const heading: InnerBlockTemplate = [
 	{
 		textAlign: 'left',
 		level: 2,
-		content: __( 'You may be interested in…', 'woocommerce' ),
+		content: __('You may be interested in…', 'woocommerce'),
 		style: { spacing: { margin: { bottom: '1rem' } } },
 	},
 ];

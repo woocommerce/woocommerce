@@ -29,40 +29,40 @@ export interface TotalsFeesProps {
 	className?: string;
 }
 
-const TotalsFees = ( {
+const TotalsFees = ({
 	currency,
 	cartFees,
 	className,
-}: TotalsFeesProps ): ReactElement | null => {
+}: TotalsFeesProps): ReactElement | null => {
 	return (
 		<>
-			{ cartFees.map( ( { id, key, name, totals }, index ) => {
-				const feesValue = parseInt( totals.total, 10 );
+			{cartFees.map(({ id, key, name, totals }, index) => {
+				const feesValue = parseInt(totals.total, 10);
 
-				if ( ! feesValue ) {
+				if (!feesValue) {
 					return null;
 				}
 
-				const feesTaxValue = parseInt( totals.total_tax, 10 );
+				const feesTaxValue = parseInt(totals.total_tax, 10);
 
 				return (
 					<TotalsItem
-						key={ id || `${ index }-${ name }` }
-						className={ clsx(
+						key={id || `${index}-${name}`}
+						className={clsx(
 							'wc-block-components-totals-fees',
 							'wc-block-components-totals-fees__' + key,
 							className
-						) }
-						currency={ currency }
-						label={ name || __( 'Fee', 'woocommerce' ) }
+						)}
+						currency={currency}
+						label={name || __('Fee', 'woocommerce')}
 						value={
-							getSetting( 'displayCartPricesIncludingTax', false )
+							getSetting('displayCartPricesIncludingTax', false)
 								? feesValue + feesTaxValue
 								: feesValue
 						}
 					/>
 				);
-			} ) }
+			})}
 		</>
 	);
 };

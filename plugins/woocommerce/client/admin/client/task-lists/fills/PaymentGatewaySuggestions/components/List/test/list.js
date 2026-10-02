@@ -8,9 +8,9 @@ import { render } from '@testing-library/react';
  */
 import { List } from '../List';
 
-jest.mock( '@woocommerce/tracks', () => ( {
+jest.mock('@woocommerce/tracks', () => ({
 	recordEvent: jest.fn(),
-} ) );
+}));
 
 const mockGateway = {
 	id: 'mock-gateway',
@@ -27,46 +27,46 @@ const defaultProps = {
 	heading: 'Test heading',
 	markConfigured: jest.fn(),
 	recommendation: 'testId',
-	paymentGateways: [ mockGateway ],
+	paymentGateways: [mockGateway],
 };
 
-describe( 'PaymentGatewaySuggestions > List', () => {
-	it( 'should display correct heading', () => {
-		const { queryByText } = render( <List { ...defaultProps } /> );
+describe('PaymentGatewaySuggestions > List', () => {
+	it('should display correct heading', () => {
+		const { queryByText } = render(<List {...defaultProps} />);
 
-		expect( queryByText( defaultProps.heading ) ).toBeInTheDocument();
-	} );
+		expect(queryByText(defaultProps.heading)).toBeInTheDocument();
+	});
 
-	it( 'should display gateway title', () => {
-		const { queryByText } = render( <List { ...defaultProps } /> );
+	it('should display gateway title', () => {
+		const { queryByText } = render(<List {...defaultProps} />);
 
-		expect( queryByText( mockGateway.title ) ).toBeInTheDocument();
-	} );
+		expect(queryByText(mockGateway.title)).toBeInTheDocument();
+	});
 
-	it( 'should display the "Enable" button when setup is NOT required', () => {
-		const { queryByRole } = render( <List { ...defaultProps } /> );
+	it('should display the "Enable" button when setup is NOT required', () => {
+		const { queryByRole } = render(<List {...defaultProps} />);
 
-		expect( queryByRole( 'button' ) ).toHaveTextContent( 'Enable' );
-	} );
+		expect(queryByRole('button')).toHaveTextContent('Enable');
+	});
 
-	it( 'should display the "Get started" button when setup is required', () => {
+	it('should display the "Get started" button when setup is required', () => {
 		const props = {
 			...defaultProps,
 			paymentGateways: [
 				{
 					...mockGateway,
 					needsSetup: true,
-					plugins: [ 'test-plugins' ],
+					plugins: ['test-plugins'],
 				},
 			],
 		};
 
-		const { queryByRole } = render( <List { ...props } /> );
+		const { queryByRole } = render(<List {...props} />);
 
-		expect( queryByRole( 'button' ) ).toHaveTextContent( 'Get started' );
-	} );
+		expect(queryByRole('button')).toHaveTextContent('Get started');
+	});
 
-	it( 'should display the SetupRequired component when appropriate', () => {
+	it('should display the SetupRequired component when appropriate', () => {
 		const props = {
 			...defaultProps,
 			paymentGateways: [
@@ -74,17 +74,17 @@ describe( 'PaymentGatewaySuggestions > List', () => {
 					...mockGateway,
 					needsSetup: true,
 					installed: true,
-					plugins: [ 'test-plugin' ],
+					plugins: ['test-plugin'],
 				},
 			],
 		};
 
-		const { queryByText } = render( <List { ...props } /> );
+		const { queryByText } = render(<List {...props} />);
 
-		expect( queryByText( 'Setup required' ) ).toBeInTheDocument();
-	} );
+		expect(queryByText('Setup required')).toBeInTheDocument();
+	});
 
-	it( 'should not display the SetupRequired component when not appropriate', () => {
+	it('should not display the SetupRequired component when not appropriate', () => {
 		const props = {
 			...defaultProps,
 			paymentGateways: [
@@ -92,17 +92,17 @@ describe( 'PaymentGatewaySuggestions > List', () => {
 					...mockGateway,
 					needsSetup: true,
 					installed: false,
-					plugins: [ 'test-plugin' ],
+					plugins: ['test-plugin'],
 				},
 			],
 		};
 
-		const { queryByText } = render( <List { ...props } /> );
+		const { queryByText } = render(<List {...props} />);
 
-		expect( queryByText( 'Setup required' ) ).not.toBeInTheDocument();
-	} );
+		expect(queryByText('Setup required')).not.toBeInTheDocument();
+	});
 
-	it( 'should display the Recommended ribbon when appropriate', () => {
+	it('should display the Recommended ribbon when appropriate', () => {
 		const props = {
 			...defaultProps,
 			recommendation: 'mock-gateway',
@@ -115,12 +115,12 @@ describe( 'PaymentGatewaySuggestions > List', () => {
 			],
 		};
 
-		const { queryByText } = render( <List { ...props } /> );
+		const { queryByText } = render(<List {...props} />);
 
-		expect( queryByText( 'Recommended' ) ).toBeInTheDocument();
-	} );
+		expect(queryByText('Recommended')).toBeInTheDocument();
+	});
 
-	it( 'should not display the Recommended ribbon when gateway id does not match', () => {
+	it('should not display the Recommended ribbon when gateway id does not match', () => {
 		const props = {
 			...defaultProps,
 			recommendation: 'mock-gateway',
@@ -133,12 +133,12 @@ describe( 'PaymentGatewaySuggestions > List', () => {
 			],
 		};
 
-		const { queryByText } = render( <List { ...props } /> );
+		const { queryByText } = render(<List {...props} />);
 
-		expect( queryByText( 'Recommended' ) ).not.toBeInTheDocument();
-	} );
+		expect(queryByText('Recommended')).not.toBeInTheDocument();
+	});
 
-	it( 'should display Manage button if enabled and does have setup', () => {
+	it('should display Manage button if enabled and does have setup', () => {
 		const props = {
 			...defaultProps,
 			paymentGateways: [
@@ -149,62 +149,62 @@ describe( 'PaymentGatewaySuggestions > List', () => {
 			],
 		};
 
-		const { queryByRole } = render( <List { ...props } /> );
+		const { queryByRole } = render(<List {...props} />);
 
-		expect( queryByRole( 'button' ) ).toHaveTextContent( 'Manage' );
-	} );
+		expect(queryByRole('button')).toHaveTextContent('Manage');
+	});
 
-	it( 'should display Manage button for core plugins that are enabled', () => {
+	it('should display Manage button for core plugins that are enabled', () => {
 		const props = {
 			...defaultProps,
 			paymentGateways: [
 				{
 					...mockGateway,
-					requiredSettings: [ 'just', 'kidding' ],
+					requiredSettings: ['just', 'kidding'],
 					enabled: true,
 					plugins: [],
 				},
 			],
 		};
 
-		const { queryByRole } = render( <List { ...props } /> );
+		const { queryByRole } = render(<List {...props} />);
 
-		expect( queryByRole( 'button' ) ).toHaveTextContent( 'Manage' );
-	} );
+		expect(queryByRole('button')).toHaveTextContent('Manage');
+	});
 
-	it( 'should display Manage button if it does have plugins and does not need setup', () => {
+	it('should display Manage button if it does have plugins and does not need setup', () => {
 		const props = {
 			...defaultProps,
 			paymentGateways: [
 				{
 					...mockGateway,
-					plugins: [ 'nope' ],
+					plugins: ['nope'],
 					needsSetup: false,
 					enabled: true,
 				},
 			],
 		};
 
-		const { queryByRole } = render( <List { ...props } /> );
+		const { queryByRole } = render(<List {...props} />);
 
-		expect( queryByRole( 'button' ) ).toHaveTextContent( 'Manage' );
-	} );
+		expect(queryByRole('button')).toHaveTextContent('Manage');
+	});
 
-	it( 'should display Finish Setup button when installed but not setup', () => {
+	it('should display Finish Setup button when installed but not setup', () => {
 		const props = {
 			...defaultProps,
 			paymentGateways: [
 				{
 					...mockGateway,
-					plugins: [ 'nope' ],
+					plugins: ['nope'],
 					needsSetup: true,
 					installed: true,
 				},
 			],
 		};
 
-		const { queryByRole } = render( <List { ...props } /> );
+		const { queryByRole } = render(<List {...props} />);
 
-		expect( queryByRole( 'button' ) ).toHaveTextContent( 'Finish setup' );
-	} );
-} );
+		expect(queryByRole('button')).toHaveTextContent('Finish setup');
+	});
+});

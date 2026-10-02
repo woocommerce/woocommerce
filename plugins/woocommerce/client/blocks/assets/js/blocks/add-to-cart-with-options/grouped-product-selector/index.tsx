@@ -11,15 +11,15 @@ import metadata from './block.json';
 import AddToCartWithOptionsGroupedProductSelectorEdit from './edit';
 import AddToCartWithOptionsGroupedProductSelectorSave from './save';
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	edit: AddToCartWithOptionsGroupedProductSelectorEdit,
 	icon: {
 		src: (
 			<Icon
-				icon={ button }
+				icon={button}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
 	},
 	save: AddToCartWithOptionsGroupedProductSelectorSave,
-} );
+});

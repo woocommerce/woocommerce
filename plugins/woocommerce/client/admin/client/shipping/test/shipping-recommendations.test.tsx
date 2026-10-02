@@ -12,121 +12,116 @@ import { recordEvent } from '@woocommerce/tracks';
 import ShippingRecommendations from '../shipping-recommendations';
 import { SHIPPING_RECOMMENDATIONS_DISMISS_OPTION } from '../shipping-recommendations-utils';
 
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
+jest.mock('@wordpress/data', () => ({
+	...jest.requireActual('@wordpress/data'),
 	useSelect: jest.fn(),
 	useDispatch: jest.fn(),
-} ) );
-jest.mock( '~/components/tracked-link/tracked-link', () => ( {
-	TrackedLink: ( { textProps }: { textProps?: { className?: string } } ) => (
-		<span className={ textProps?.className }>
+}));
+jest.mock('~/components/tracked-link/tracked-link', () => ({
+	TrackedLink: ({ textProps }: { textProps?: { className?: string } }) => (
+		<span className={textProps?.className}>
 			the WooCommerce Marketplace
 		</span>
 	),
-} ) );
-jest.mock( '../../settings-recommendations/dismissable-list', () => {
+}));
+jest.mock('../../settings-recommendations/dismissable-list', () => {
 	const { DismissableList } = jest.requireActual(
 		'../../settings-recommendations/dismissable-list'
 	);
 
 	return {
-		DismissableList: ( {
+		DismissableList: ({
 			children,
 			isDismissed,
 		}: {
 			children: React.ReactNode;
 			isDismissed?: boolean;
-		} ) => (
+		}) => (
 			<div
-				data-dismissed={ String( Boolean( isDismissed ) ) }
+				data-dismissed={String(Boolean(isDismissed))}
 				data-testid="dismissable-list"
 			>
-				<DismissableList isDismissed={ isDismissed }>
-					{ children }
+				<DismissableList isDismissed={isDismissed}>
+					{children}
 				</DismissableList>
 			</div>
 		),
-		DismissableListHeading: ( {
+		DismissableListHeading: ({ children }: { children: React.ReactNode }) =>
 			children,
-		}: {
-			children: React.ReactNode;
-		} ) => children,
 	};
-} );
-jest.mock( '~/guided-tours/shipping-tour', () => ( {
-	ShippingTour: ( {
+});
+jest.mock('~/guided-tours/shipping-tour', () => ({
+	ShippingTour: ({
 		showShippingRecommendationsStep,
 	}: {
 		showShippingRecommendationsStep: boolean;
-	} ) => (
+	}) => (
 		<div
-			data-show-recommendations-step={ String(
+			data-show-recommendations-step={String(
 				showShippingRecommendationsStep
-			) }
+			)}
 			data-testid="shipping-tour"
 		/>
 	),
-} ) );
-jest.mock( '../woocommerce-shipping-item', () => () => (
+}));
+jest.mock('../woocommerce-shipping-item', () => () => (
 	<div>WooCommerce Shipping</div>
-) );
-jest.mock( '../shipstation-item', () => () => <div>ShipStation</div> );
-jest.mock( '../packlink-item', () => () => <div>Packlink PRO</div> );
-jest.mock( '../../lib/notices', () => ( {
+));
+jest.mock('../shipstation-item', () => () => <div>ShipStation</div>);
+jest.mock('../packlink-item', () => () => <div>Packlink PRO</div>);
+jest.mock('../../lib/notices', () => ({
 	createNoticesFromResponse: () => null,
-} ) );
-jest.mock( '@woocommerce/tracks', () => ( {
+}));
+jest.mock('@woocommerce/tracks', () => ({
 	recordEvent: jest.fn(),
-} ) );
-jest.mock( '@wordpress/a11y', () => ( {
+}));
+jest.mock('@wordpress/a11y', () => ({
 	speak: jest.fn(),
-} ) );
+}));
 
 const defaultSelectReturn = {
 	getActivePlugins: () => [],
 	getInstalledPlugins: () => [],
-	getSettings: () => ( {
+	getSettings: () => ({
 		general: {
 			woocommerce_default_country: 'US',
 		},
-	} ),
-	getProfileItems: () => ( {} ),
-	getOption: jest.fn().mockReturnValue( 'no' ),
-	hasFinishedResolution: jest.fn().mockReturnValue( true ),
+	}),
+	getProfileItems: () => ({}),
+	getOption: jest.fn().mockReturnValue('no'),
+	hasFinishedResolution: jest.fn().mockReturnValue(true),
 };
 
-const mockSelect = ( overrides: Record< string, unknown > = {} ) => {
-	( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
-		fn( () => ( {
+const mockSelect = (overrides: Record<string, unknown> = {}) => {
+	(useSelect as jest.Mock).mockImplementation((fn) =>
+		fn(() => ({
 			...defaultSelectReturn,
 			...overrides,
-		} ) )
+		}))
 	);
 };
 
-describe( 'ShippingRecommendations', () => {
-	beforeEach( () => {
+describe('ShippingRecommendations', () => {
+	beforeEach(() => {
 		mockSelect();
-		( useDispatch as jest.Mock ).mockReturnValue( {
+		(useDispatch as jest.Mock).mockReturnValue({
 			installPlugins: () => Promise.resolve(),
 			activatePlugins: () => Promise.resolve(),
-		} );
-		( recordEvent as jest.Mock ).mockClear();
-		( speak as jest.Mock ).mockClear();
-	} );
+		});
+		(recordEvent as jest.Mock).mockClear();
+		(speak as jest.Mock).mockClear();
+	});
 
-	it( 'renders recommendations and the shipping tour recommendations step', () => {
-		render( <ShippingRecommendations /> );
+	it('renders recommendations and the shipping tour recommendations step', () => {
+		render(<ShippingRecommendations />);
 
-		expect(
-			screen.queryByText( 'WooCommerce Shipping' )
-		).toBeInTheDocument();
-		expect( screen.queryByText( 'ShipStation' ) ).toBeInTheDocument();
-		expect( screen.getByTestId( 'shipping-tour' ) ).toHaveAttribute(
+		expect(screen.queryByText('WooCommerce Shipping')).toBeInTheDocument();
+		expect(screen.queryByText('ShipStation')).toBeInTheDocument();
+		expect(screen.getByTestId('shipping-tour')).toHaveAttribute(
 			'data-show-recommendations-step',
 			'true'
 		);
-		expect( recordEvent ).toHaveBeenCalledWith(
+		expect(recordEvent).toHaveBeenCalledWith(
 			'shipping_partner_impression',
 			{
 				context: 'settings',
@@ -135,42 +130,40 @@ describe( 'ShippingRecommendations', () => {
 					'woocommerce-shipping,woocommerce-shipstation-integration',
 			}
 		);
-	} );
+	});
 
-	it( 'waits for the dismissal option without remounting the shipping tour', () => {
+	it('waits for the dismissal option without remounting the shipping tour', () => {
 		let hasDismissResolved = false;
-		mockSelect( {
-			hasFinishedResolution: ( selector: string ) =>
+		mockSelect({
+			hasFinishedResolution: (selector: string) =>
 				selector === 'getOption' ? hasDismissResolved : true,
-		} );
+		});
 
-		const { rerender } = render( <ShippingRecommendations /> );
-		const initialShippingTour = screen.getByTestId( 'shipping-tour' );
+		const { rerender } = render(<ShippingRecommendations />);
+		const initialShippingTour = screen.getByTestId('shipping-tour');
 
 		expect(
-			screen.queryByText( 'the WooCommerce Marketplace' )
+			screen.queryByText('the WooCommerce Marketplace')
 		).not.toBeInTheDocument();
 		expect(
-			screen.queryByTestId( 'dismissable-list' )
+			screen.queryByTestId('dismissable-list')
 		).not.toBeInTheDocument();
-		expect( screen.getByTestId( 'shipping-tour' ) ).toHaveAttribute(
+		expect(screen.getByTestId('shipping-tour')).toHaveAttribute(
 			'data-show-recommendations-step',
 			'false'
 		);
-		expect( recordEvent ).not.toHaveBeenCalledWith(
+		expect(recordEvent).not.toHaveBeenCalledWith(
 			'shipping_partner_impression',
 			expect.anything()
 		);
 
 		hasDismissResolved = true;
-		rerender( <ShippingRecommendations /> );
+		rerender(<ShippingRecommendations />);
 
-		expect( screen.getByTestId( 'shipping-tour' ) ).toBe(
-			initialShippingTour
-		);
-		expect( screen.getByTestId( 'dismissable-list' ) ).toBeInTheDocument();
-		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
-		expect( recordEvent ).toHaveBeenCalledWith(
+		expect(screen.getByTestId('shipping-tour')).toBe(initialShippingTour);
+		expect(screen.getByTestId('dismissable-list')).toBeInTheDocument();
+		expect(recordEvent).toHaveBeenCalledTimes(1);
+		expect(recordEvent).toHaveBeenCalledWith(
 			'shipping_partner_impression',
 			{
 				context: 'settings',
@@ -179,174 +172,174 @@ describe( 'ShippingRecommendations', () => {
 					'woocommerce-shipping,woocommerce-shipstation-integration',
 			}
 		);
-	} );
+	});
 
-	it( 'does not render recommendations before the country settings resolve', () => {
-		mockSelect( {
-			getSettings: () => ( { general: {} } ),
-			hasFinishedResolution: ( selector: string ) =>
+	it('does not render recommendations before the country settings resolve', () => {
+		mockSelect({
+			getSettings: () => ({ general: {} }),
+			hasFinishedResolution: (selector: string) =>
 				selector !== 'getSettings',
-		} );
+		});
 
-		render( <ShippingRecommendations /> );
+		render(<ShippingRecommendations />);
 
 		expect(
-			screen.queryByText( 'the WooCommerce Marketplace' )
+			screen.queryByText('the WooCommerce Marketplace')
 		).not.toBeInTheDocument();
 		expect(
-			screen.queryByTestId( 'dismissable-list' )
+			screen.queryByTestId('dismissable-list')
 		).not.toBeInTheDocument();
-		expect( screen.getByTestId( 'shipping-tour' ) ).toHaveAttribute(
+		expect(screen.getByTestId('shipping-tour')).toHaveAttribute(
 			'data-show-recommendations-step',
 			'false'
 		);
-		expect( recordEvent ).not.toHaveBeenCalledWith(
+		expect(recordEvent).not.toHaveBeenCalledWith(
 			'shipping_partner_impression',
 			expect.anything()
 		);
-	} );
+	});
 
-	it( 'keeps the dismissal wrapper mounted to restore focus and announce the change', () => {
+	it('keeps the dismissal wrapper mounted to restore focus and announce the change', () => {
 		let dismissOption = 'no';
-		mockSelect( {
-			getOption: ( option: string ) =>
+		mockSelect({
+			getOption: (option: string) =>
 				option === SHIPPING_RECOMMENDATIONS_DISMISS_OPTION
 					? dismissOption
 					: undefined,
-		} );
+		});
 
-		const { rerender } = render( <ShippingRecommendations /> );
+		const { rerender } = render(<ShippingRecommendations />);
 		const dismissalWrapper = document.querySelector(
 			'.woocommerce-dismissable-list__wrapper'
 		);
 
-		expect( dismissalWrapper ).toBeInTheDocument();
-		expect( screen.getByTestId( 'dismissable-list' ) ).toHaveAttribute(
+		expect(dismissalWrapper).toBeInTheDocument();
+		expect(screen.getByTestId('dismissable-list')).toHaveAttribute(
 			'data-dismissed',
 			'false'
 		);
 
 		dismissOption = 'yes';
-		rerender( <ShippingRecommendations /> );
+		rerender(<ShippingRecommendations />);
 
 		expect(
-			document.querySelector( '.woocommerce-dismissable-list__wrapper' )
-		).toBe( dismissalWrapper );
-		expect( screen.getByTestId( 'dismissable-list' ) ).toHaveAttribute(
+			document.querySelector('.woocommerce-dismissable-list__wrapper')
+		).toBe(dismissalWrapper);
+		expect(screen.getByTestId('dismissable-list')).toHaveAttribute(
 			'data-dismissed',
 			'true'
 		);
-		expect( speak ).toHaveBeenCalledWith(
+		expect(speak).toHaveBeenCalledWith(
 			'Recommendation hidden.',
 			'assertive'
 		);
-		expect( dismissalWrapper ).toHaveFocus();
+		expect(dismissalWrapper).toHaveFocus();
 		expect(
-			screen.getByText( 'the WooCommerce Marketplace' )
+			screen.getByText('the WooCommerce Marketplace')
 		).toBeInTheDocument();
-	} );
+	});
 
-	it( 'does not render recommendations before the product profile resolves', () => {
-		mockSelect( {
-			hasFinishedResolution: ( selector: string ) =>
+	it('does not render recommendations before the product profile resolves', () => {
+		mockSelect({
+			hasFinishedResolution: (selector: string) =>
 				selector !== 'getProfileItems',
-		} );
+		});
 
-		render( <ShippingRecommendations /> );
+		render(<ShippingRecommendations />);
 
 		expect(
-			screen.queryByText( 'the WooCommerce Marketplace' )
+			screen.queryByText('the WooCommerce Marketplace')
 		).not.toBeInTheDocument();
 		expect(
-			screen.queryByTestId( 'dismissable-list' )
+			screen.queryByTestId('dismissable-list')
 		).not.toBeInTheDocument();
-		expect( screen.getByTestId( 'shipping-tour' ) ).toHaveAttribute(
+		expect(screen.getByTestId('shipping-tour')).toHaveAttribute(
 			'data-show-recommendations-step',
 			'false'
 		);
-		expect( recordEvent ).not.toHaveBeenCalledWith(
+		expect(recordEvent).not.toHaveBeenCalledWith(
 			'shipping_partner_impression',
 			expect.anything()
 		);
-	} );
+	});
 
-	it( 'renders the marketplace fallback when recommendations are dismissed', () => {
-		mockSelect( {
-			getOption: ( option: string ) =>
+	it('renders the marketplace fallback when recommendations are dismissed', () => {
+		mockSelect({
+			getOption: (option: string) =>
 				option === SHIPPING_RECOMMENDATIONS_DISMISS_OPTION
 					? 'yes'
 					: undefined,
-		} );
+		});
 
-		render( <ShippingRecommendations /> );
+		render(<ShippingRecommendations />);
 
 		expect(
-			screen.queryByText( 'WooCommerce Shipping' )
+			screen.queryByText('WooCommerce Shipping')
 		).not.toBeInTheDocument();
-		expect( screen.queryByText( 'ShipStation' ) ).not.toBeInTheDocument();
+		expect(screen.queryByText('ShipStation')).not.toBeInTheDocument();
 		expect(
-			screen.queryByText( 'the WooCommerce Marketplace' )
+			screen.queryByText('the WooCommerce Marketplace')
 		).toBeInTheDocument();
-		expect( screen.getByTestId( 'dismissable-list' ) ).toHaveAttribute(
+		expect(screen.getByTestId('dismissable-list')).toHaveAttribute(
 			'data-dismissed',
 			'true'
 		);
-		expect( speak ).not.toHaveBeenCalled();
-		expect( screen.getByTestId( 'shipping-tour' ) ).toHaveAttribute(
+		expect(speak).not.toHaveBeenCalled();
+		expect(screen.getByTestId('shipping-tour')).toHaveAttribute(
 			'data-show-recommendations-step',
 			'false'
 		);
-		expect( recordEvent ).not.toHaveBeenCalledWith(
+		expect(recordEvent).not.toHaveBeenCalledWith(
 			'shipping_partner_impression',
 			expect.anything()
 		);
-	} );
+	});
 
-	it( 'renders the marketplace fallback when there are no country recommendations', () => {
-		mockSelect( {
-			getSettings: () => ( {
+	it('renders the marketplace fallback when there are no country recommendations', () => {
+		mockSelect({
+			getSettings: () => ({
 				general: {
 					woocommerce_default_country: 'JP',
 				},
-			} ),
-		} );
+			}),
+		});
 
-		render( <ShippingRecommendations /> );
+		render(<ShippingRecommendations />);
 
 		expect(
-			screen.queryByText( 'WooCommerce Shipping' )
+			screen.queryByText('WooCommerce Shipping')
 		).not.toBeInTheDocument();
 		expect(
-			screen.queryByText( 'the WooCommerce Marketplace' )
+			screen.queryByText('the WooCommerce Marketplace')
 		).toBeInTheDocument();
-		expect( screen.getByTestId( 'shipping-tour' ) ).toHaveAttribute(
+		expect(screen.getByTestId('shipping-tour')).toHaveAttribute(
 			'data-show-recommendations-step',
 			'false'
 		);
-	} );
+	});
 
-	it( 'renders the marketplace fallback for stores selling digital products only', () => {
-		mockSelect( {
-			getProfileItems: () => ( {
-				product_types: [ 'downloads' ],
-			} ),
-		} );
+	it('renders the marketplace fallback for stores selling digital products only', () => {
+		mockSelect({
+			getProfileItems: () => ({
+				product_types: ['downloads'],
+			}),
+		});
 
-		render( <ShippingRecommendations /> );
+		render(<ShippingRecommendations />);
 
 		expect(
-			screen.queryByText( 'WooCommerce Shipping' )
+			screen.queryByText('WooCommerce Shipping')
 		).not.toBeInTheDocument();
 		expect(
-			screen.queryByText( 'the WooCommerce Marketplace' )
+			screen.queryByText('the WooCommerce Marketplace')
 		).toBeInTheDocument();
-		expect( screen.getByTestId( 'shipping-tour' ) ).toHaveAttribute(
+		expect(screen.getByTestId('shipping-tour')).toHaveAttribute(
 			'data-show-recommendations-step',
 			'false'
 		);
-		expect( recordEvent ).not.toHaveBeenCalledWith(
+		expect(recordEvent).not.toHaveBeenCalledWith(
 			'shipping_partner_impression',
 			expect.anything()
 		);
-	} );
-} );
+	});
+});

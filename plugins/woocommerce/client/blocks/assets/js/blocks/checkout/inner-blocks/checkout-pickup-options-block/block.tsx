@@ -32,36 +32,30 @@ import ReadMore from '@woocommerce/base-components/read-more';
  */
 import ShippingRatesControlPackage from '../../../../base/components/cart-checkout/shipping-rates-control-package';
 
-const getPickupLocation = (
-	option: CartShippingPackageShippingRate
-): string => {
-	if ( option?.meta_data ) {
+const getPickupLocation = (option: CartShippingPackageShippingRate): string => {
+	if (option?.meta_data) {
 		const match = option.meta_data.find(
-			( meta ) => meta.key === 'pickup_location'
+			(meta) => meta.key === 'pickup_location'
 		);
 		return match ? match.value : '';
 	}
 	return '';
 };
 
-const getPickupAddress = (
-	option: CartShippingPackageShippingRate
-): string => {
-	if ( option?.meta_data ) {
+const getPickupAddress = (option: CartShippingPackageShippingRate): string => {
+	if (option?.meta_data) {
 		const match = option.meta_data.find(
-			( meta ) => meta.key === 'pickup_address'
+			(meta) => meta.key === 'pickup_address'
 		);
 		return match ? match.value : '';
 	}
 	return '';
 };
 
-const getPickupDetails = (
-	option: CartShippingPackageShippingRate
-): string => {
-	if ( option?.meta_data ) {
+const getPickupDetails = (option: CartShippingPackageShippingRate): string => {
+	if (option?.meta_data) {
 		const match = option.meta_data.find(
-			( meta ) => meta.key === 'pickup_details'
+			(meta) => meta.key === 'pickup_details'
 		);
 		return match ? match.value : '';
 	}
@@ -73,24 +67,24 @@ const renderPickupLocation = (
 	packageCount: number,
 	clientSelectedOption = ''
 ): RadioControlOptionType => {
-	const priceWithTaxes = getSetting( 'displayCartPricesIncludingTax', false )
-		? parseInt( option.price, 10 ) + parseInt( option.taxes, 10 )
-		: parseInt( option.price, 10 );
-	const location = getPickupLocation( option );
-	const address = getPickupAddress( option );
-	const details = getPickupDetails( option );
+	const priceWithTaxes = getSetting('displayCartPricesIncludingTax', false)
+		? parseInt(option.price, 10) + parseInt(option.taxes, 10)
+		: parseInt(option.price, 10);
+	const location = getPickupLocation(option);
+	const address = getPickupAddress(option);
+	const details = getPickupDetails(option);
 
 	// Default to showing "free" as the secondary label. Price checks below will update it if needed.
-	let secondaryLabel = <em>{ __( 'free', 'woocommerce' ) }</em>;
+	let secondaryLabel = <em>{__('free', 'woocommerce')}</em>;
 
 	// If there is a cost for local pickup, show the cost per package.
-	if ( priceWithTaxes > 0 ) {
+	if (priceWithTaxes > 0) {
 		// If only one package, show the price and not the package count.
-		if ( packageCount === 1 ) {
+		if (packageCount === 1) {
 			secondaryLabel = (
 				<FormattedMonetaryAmount
-					currency={ getCurrencyFromPriceResponse( option ) }
-					value={ priceWithTaxes }
+					currency={getCurrencyFromPriceResponse(option)}
+					value={priceWithTaxes}
 				/>
 			);
 		} else {
@@ -105,11 +99,11 @@ const renderPickupLocation = (
 				{
 					price: (
 						<FormattedMonetaryAmount
-							currency={ getCurrencyFromPriceResponse( option ) }
-							value={ priceWithTaxes }
+							currency={getCurrencyFromPriceResponse(option)}
+							value={priceWithTaxes}
 						/>
 					),
-					packageCount: <>{ packageCount }</>,
+					packageCount: <>{packageCount}</>,
 				}
 			);
 		}
@@ -118,25 +112,23 @@ const renderPickupLocation = (
 	return {
 		value: option.rate_id,
 		label: location
-			? decodeEntities( location )
-			: decodeEntities( option.name ),
+			? decodeEntities(location)
+			: decodeEntities(option.name),
 		secondaryLabel,
 		description: address ? (
 			<>
 				<Icon
-					icon={ mapMarker }
+					icon={mapMarker}
 					className="wc-block-editor-components-block-icon"
-					width={ 16 }
-					height={ 16 }
+					width={16}
+					height={16}
 				/>
-				{ decodeEntities( address ) }
+				{decodeEntities(address)}
 			</>
 		) : undefined,
 		secondaryDescription:
 			clientSelectedOption === option?.rate_id && details ? (
-				<ReadMore maxLines={ 2 }>
-					{ decodeEntities( details ) }
-				</ReadMore>
+				<ReadMore maxLines={2}>{decodeEntities(details)}</ReadMore>
 			) : undefined,
 	};
 };
@@ -145,26 +137,24 @@ const Block = () => {
 	const { shippingRates, selectShippingRate } = useShippingData();
 
 	// Memoize pickup locations to prevent re-rendering when the shipping rates change.
-	const pickupLocations: CartShippingPackageShippingRate[] = useMemo( () => {
-		return ( shippingRates[ 0 ]?.shipping_rates || [] ).filter(
+	const pickupLocations: CartShippingPackageShippingRate[] = useMemo(() => {
+		return (shippingRates[0]?.shipping_rates || []).filter(
 			isPackageRateCollectable
 		);
-	}, [ shippingRates ] );
+	}, [shippingRates]);
 
-	const [ selectedOption, setSelectedOption ] = useState<
-		string | undefined
-	>(
+	const [selectedOption, setSelectedOption] = useState<string | undefined>(
 		() =>
-			pickupLocations.find( ( rate ) => rate.selected )?.rate_id ??
-			pickupLocations[ 0 ]?.rate_id
+			pickupLocations.find((rate) => rate.selected)?.rate_id ??
+			pickupLocations[0]?.rate_id
 	);
 
 	const handleShippingRateChange = useCallback(
-		( rateId: string ) => {
-			setSelectedOption( rateId );
-			selectShippingRate( rateId );
+		(rateId: string) => {
+			setSelectedOption(rateId);
+			selectShippingRate(rateId);
 		},
-		[ setSelectedOption, selectShippingRate ]
+		[setSelectedOption, selectShippingRate]
 	);
 
 	// Update on mount, we do it every time to:
@@ -172,27 +162,27 @@ const Block = () => {
 	// - or reset pending request to change shipping rate that might be coming
 	//   from other components (e.g. shipping options), selectShippingRate thunk
 	//   in the cart store properly handles aborting the previous request if needed
-	useEffect( () => {
-		if ( selectedOption ) {
-			selectShippingRate( selectedOption );
+	useEffect(() => {
+		if (selectedOption) {
+			selectShippingRate(selectedOption);
 		}
 		// We want this to run on mount only, beware of updating it as it may cause
 		// shipping rate selection to end up in infinite loop
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [] );
+	}, []);
 
 	// Update the selected option if cart state changes in the data store.
-	useEffect( () => {
-		const selectedRate = pickupLocations.find( ( rate ) => rate.selected );
+	useEffect(() => {
+		const selectedRate = pickupLocations.find((rate) => rate.selected);
 		const selectedRateId = selectedRate?.rate_id;
 
-		if ( selectedRateId && selectedRateId !== selectedOption ) {
-			setSelectedOption( selectedRateId );
+		if (selectedRateId && selectedRateId !== selectedOption) {
+			setSelectedOption(selectedRateId);
 		}
 		// We want to explicitly react to changes in the data store only here, local state is managed
 		// through different code path.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ pickupLocations ] );
+	}, [pickupLocations]);
 
 	// Prepare props to pass to the ExperimentalOrderLocalPickupPackages slot fill.
 	// We need to pluck out receiveCart.
@@ -208,22 +198,20 @@ const Block = () => {
 		renderPickupLocation,
 	};
 
-	const packageData = shippingRates[ 0 ] || null;
+	const packageData = shippingRates[0] || null;
 
 	return (
 		<>
-			<ExperimentalOrderLocalPickupPackages.Slot { ...slotFillProps } />
+			<ExperimentalOrderLocalPickupPackages.Slot {...slotFillProps} />
 			<ExperimentalOrderLocalPickupPackages>
 				<LocalPickupSelect
-					title={ packageData?.name }
-					packageData={ packageData }
-					selectedOption={ selectedOption ?? '' }
-					renderPickupLocation={ renderPickupLocation }
-					pickupLocations={ pickupLocations }
-					packageCount={ getShippingRatesPackageCount(
-						shippingRates
-					) }
-					onChange={ ( value ) => handleShippingRateChange( value ) }
+					title={packageData?.name}
+					packageData={packageData}
+					selectedOption={selectedOption ?? ''}
+					renderPickupLocation={renderPickupLocation}
+					pickupLocations={pickupLocations}
+					packageCount={getShippingRatesPackageCount(shippingRates)}
+					onChange={(value) => handleShippingRateChange(value)}
 				/>
 			</ExperimentalOrderLocalPickupPackages>
 		</>

@@ -43,12 +43,12 @@ function getStatusBadge(
 	subscription: Subscription,
 	table: MySubscriptionsTable
 ): StatusBadge | false {
-	if ( subscription.product_key === '' ) {
+	if (subscription.product_key === '') {
 		/**
 		 * If there is no subscription, we don't need to check for the expiry.
 		 */
 		return {
-			text: __( 'No subscription', 'woocommerce' ),
+			text: __('No subscription', 'woocommerce'),
 			level: StatusLevel.Error,
 			explanation: createInterpolateElement(
 				__(
@@ -58,7 +58,7 @@ function getStatusBadge(
 				{
 					purchase: (
 						<a
-							href={ subscribeUrl( subscription ) }
+							href={subscribeUrl(subscription)}
 							rel="nofollow noopener noreferrer"
 						>
 							renew
@@ -66,7 +66,7 @@ function getStatusBadge(
 					),
 					sharing: (
 						<a
-							href={ MARKETPLACE_SHARING_PATH }
+							href={MARKETPLACE_SHARING_PATH}
 							rel="nofollow noopener noreferrer"
 						>
 							sharing
@@ -74,7 +74,7 @@ function getStatusBadge(
 					),
 					transferring: (
 						<a
-							href={ MARKETPLACE_COLLABORATION_PATH }
+							href={MARKETPLACE_COLLABORATION_PATH}
 							rel="nofollow noopener noreferrer"
 						>
 							sharing
@@ -85,9 +85,9 @@ function getStatusBadge(
 		};
 	}
 
-	if ( subscription.expired ) {
+	if (subscription.expired) {
 		return {
-			text: __( 'Expired', 'woocommerce' ),
+			text: __('Expired', 'woocommerce'),
 			level: StatusLevel.Error,
 			explanation: createInterpolateElement(
 				__(
@@ -97,7 +97,7 @@ function getStatusBadge(
 				{
 					renew: (
 						<a
-							href={ renewUrl( subscription ) }
+							href={renewUrl(subscription)}
 							rel="nofollow noopener noreferrer"
 						>
 							renew
@@ -105,7 +105,7 @@ function getStatusBadge(
 					),
 					sharing: (
 						<a
-							href={ MARKETPLACE_SHARING_PATH }
+							href={MARKETPLACE_SHARING_PATH}
 							rel="nofollow noopener noreferrer"
 						>
 							sharing
@@ -113,7 +113,7 @@ function getStatusBadge(
 					),
 					transferring: (
 						<a
-							href={ MARKETPLACE_COLLABORATION_PATH }
+							href={MARKETPLACE_COLLABORATION_PATH}
 							rel="nofollow noopener noreferrer"
 						>
 							sharing
@@ -124,9 +124,9 @@ function getStatusBadge(
 		};
 	}
 
-	if ( subscription.expiring && ! subscription.autorenew ) {
+	if (subscription.expiring && !subscription.autorenew) {
 		return {
-			text: __( 'Expires soon', 'woocommerce' ),
+			text: __('Expires soon', 'woocommerce'),
 			level: StatusLevel.Error,
 			explanation: createInterpolateElement(
 				__(
@@ -136,7 +136,7 @@ function getStatusBadge(
 				{
 					renew: (
 						<a
-							href={ enableAutorenewalUrl( subscription ) }
+							href={enableAutorenewalUrl(subscription)}
 							rel="nofollow noopener noreferrer"
 						>
 							renew
@@ -144,7 +144,7 @@ function getStatusBadge(
 					),
 					sharing: (
 						<a
-							href={ MARKETPLACE_SHARING_PATH }
+							href={MARKETPLACE_SHARING_PATH}
 							rel="nofollow noopener noreferrer"
 						>
 							sharing
@@ -152,7 +152,7 @@ function getStatusBadge(
 					),
 					transferring: (
 						<a
-							href={ MARKETPLACE_COLLABORATION_PATH }
+							href={MARKETPLACE_COLLABORATION_PATH}
 							rel="nofollow noopener noreferrer"
 						>
 							sharing
@@ -166,10 +166,10 @@ function getStatusBadge(
 	if (
 		table === 'installed' &&
 		subscription.local.installed &&
-		! subscription.active
+		!subscription.active
 	) {
 		return {
-			text: __( 'Not connected', 'woocommerce' ),
+			text: __('Not connected', 'woocommerce'),
 			level: StatusLevel.Warning,
 			explanation: __(
 				'To receive updates and support, please connect your subscription to this store.',
@@ -179,12 +179,12 @@ function getStatusBadge(
 	}
 
 	if (
-		! subscription.autorenew &&
-		! subscription.lifetime &&
-		! subscription.expired
+		!subscription.autorenew &&
+		!subscription.lifetime &&
+		!subscription.expired
 	) {
 		return {
-			text: __( 'Auto-renew: off', 'woocommerce' ),
+			text: __('Auto-renew: off', 'woocommerce'),
 			level: StatusLevel.Warning,
 			explanation: createInterpolateElement(
 				__(
@@ -194,7 +194,7 @@ function getStatusBadge(
 				{
 					enable: (
 						<a
-							href={ enableAutorenewalUrl( subscription ) }
+							href={enableAutorenewalUrl(subscription)}
 							rel="nofollow noopener noreferrer"
 						>
 							enable
@@ -212,10 +212,10 @@ function getVersion(
 	subscription: Subscription,
 	table: MySubscriptionsTable
 ): string | React.JSX.Element {
-	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+	const wccomSettings = getAdminSetting('wccomHelper', {});
 
-	if ( subscription.local.version === subscription.version ) {
-		return <Version span={ subscription.local.version } />;
+	if (subscription.local.version === subscription.version) {
+		return <Version span={subscription.local.version} />;
 	}
 
 	if (
@@ -225,46 +225,46 @@ function getVersion(
 	) {
 		return (
 			<Update
-				subscription={ subscription }
-				wooUpdateManagerActive={ wccomSettings?.wooUpdateManagerActive }
+				subscription={subscription}
+				wooUpdateManagerActive={wccomSettings?.wooUpdateManagerActive}
 			/>
 		);
 	}
 
-	if ( subscription.version ) {
-		return <Version span={ subscription.version } />;
+	if (subscription.version) {
+		return <Version span={subscription.version} />;
 	}
 
-	if ( subscription.local.version ) {
-		return <Version span={ subscription.local.version } />;
+	if (subscription.local.version) {
+		return <Version span={subscription.local.version} />;
 	}
 
 	return '';
 }
 
-function appendUTMParams( url: string ) {
-	return appendURLParams( url, [
-		[ 'utm_source', 'subscriptionsscreen' ],
-		[ 'utm_medium', 'product' ],
-		[ 'utm_campaign', 'wcaddons' ],
-		[ 'utm_content', 'product-name' ],
-	] );
+function appendUTMParams(url: string) {
+	return appendURLParams(url, [
+		['utm_source', 'subscriptionsscreen'],
+		['utm_medium', 'product'],
+		['utm_campaign', 'wcaddons'],
+		['utm_content', 'product-name'],
+	]);
 }
 
-export function nameAndStatus( subscription: Subscription ): TableRow {
+export function nameAndStatus(subscription: Subscription): TableRow {
 	// This is the fallback icon element with products without
-	let iconElement = <Icon icon={ plugins } size={ 40 } />;
+	let iconElement = <Icon icon={plugins} size={40} />;
 
 	// If the product has an icon, use that instead.
-	if ( subscription.product_icon ) {
+	if (subscription.product_icon) {
 		iconElement = (
 			<img
-				src={ subscription.product_icon }
-				alt={ sprintf(
+				src={subscription.product_icon}
+				alt={sprintf(
 					/* translators: %s is the product name. */
-					__( '%s icon', 'woocommerce' ),
+					__('%s icon', 'woocommerce'),
 					subscription.product_name
-				) }
+				)}
 			/>
 		);
 	}
@@ -272,28 +272,28 @@ export function nameAndStatus( subscription: Subscription ): TableRow {
 	const displayElement = (
 		<div className="woocommerce-marketplace__my-subscriptions__product">
 			<a
-				href={ appendUTMParams( subscription.product_url ) }
+				href={appendUTMParams(subscription.product_url)}
 				target="_blank"
 				rel="noreferrer"
 			>
 				<span className="woocommerce-marketplace__my-subscriptions__product-icon">
-					{ iconElement }
+					{iconElement}
 				</span>
 			</a>
 			<a
-				href={ appendUTMParams( subscription.product_url ) }
+				href={appendUTMParams(subscription.product_url)}
 				className="woocommerce-marketplace__my-subscriptions__product-name"
 				target="_blank"
 				rel="noreferrer"
 			>
-				{ subscription.product_name }
+				{subscription.product_name}
 			</a>
 			<span className="woocommerce-marketplace__my-subscriptions__product-statuses">
-				{ subscription.is_shared && (
+				{subscription.is_shared && (
 					<StatusPopover
-						text={ __( 'Shared with you', 'woocommerce' ) }
-						level={ StatusLevel.Info }
-						explanation={ createInterpolateElement(
+						text={__('Shared with you', 'woocommerce')}
+						level={StatusLevel.Info}
+						explanation={createInterpolateElement(
 							sprintf(
 								/* translators: %s is the email address of the user who shared the subscription. */
 								__(
@@ -305,23 +305,23 @@ export function nameAndStatus( subscription: Subscription ): TableRow {
 							{
 								email: (
 									<strong
-										style={ { overflowWrap: 'anywhere' } }
+										style={{ overflowWrap: 'anywhere' }}
 									>
 										email
 									</strong>
 								),
 								link: (
 									<a
-										href={ MARKETPLACE_SHARING_PATH }
+										href={MARKETPLACE_SHARING_PATH}
 										rel="nofollow noopener noreferrer"
 									>
 										Learn more
 									</a>
 								),
 							}
-						) }
+						)}
 					/>
-				) }
+				)}
 			</span>
 		</div>
 	);
@@ -332,7 +332,7 @@ export function nameAndStatus( subscription: Subscription ): TableRow {
 	};
 }
 
-export function expiry( subscription: Subscription ): TableRow {
+export function expiry(subscription: Subscription): TableRow {
 	if (
 		subscription.local.installed === true &&
 		subscription.product_key === ''
@@ -343,16 +343,16 @@ export function expiry( subscription: Subscription ): TableRow {
 		};
 	}
 
-	if ( subscription.is_agency || subscription.included_in_host_plan ) {
+	if (subscription.is_agency || subscription.included_in_host_plan) {
 		const isAgency = subscription.is_agency;
 		const text = isAgency
-			? __( 'Managed by agency', 'woocommerce' )
-			: __( 'Managed by host', 'woocommerce' );
+			? __('Managed by agency', 'woocommerce')
+			: __('Managed by host', 'woocommerce');
 		return {
 			display: (
 				<StatusPopover
-					text={ text }
-					level={ StatusLevel.Info }
+					text={text}
+					level={StatusLevel.Info}
 					explanation=""
 				/>
 			),
@@ -360,19 +360,19 @@ export function expiry( subscription: Subscription ): TableRow {
 		};
 	}
 
-	let expiryDateElement = __< string >( 'Never expires', 'woocommerce' );
+	let expiryDateElement = __<string>('Never expires', 'woocommerce');
 
 	const expiryDate = subscription.expires;
-	if ( expiryDate ) {
+	if (expiryDate) {
 		expiryDateElement = gmdateI18n(
 			'j M, Y',
-			new Date( expiryDate * 1000 )
-		) as TranslatableText< string >;
+			new Date(expiryDate * 1000)
+		) as TranslatableText<string>;
 	}
 
 	const displayElement = (
 		<span className="woocommerce-marketplace__my-subscriptions__expiry-date">
-			{ expiryDateElement }
+			{expiryDateElement}
 		</span>
 	);
 
@@ -387,25 +387,25 @@ export function subscriptionStatus(
 	table: MySubscriptionsTable
 ): TableRow {
 	function getStatus() {
-		const statusBadge = getStatusBadge( subscription, table );
-		if ( statusBadge ) {
+		const statusBadge = getStatusBadge(subscription, table);
+		if (statusBadge) {
 			return (
 				<StatusPopover
-					text={ statusBadge.text }
-					level={ statusBadge.level }
-					explanation={ statusBadge.explanation ?? '' }
+					text={statusBadge.text}
+					level={statusBadge.level}
+					explanation={statusBadge.explanation ?? ''}
 					explanationOnHover
 				/>
 			);
 		}
 
 		let status;
-		if ( subscription.lifetime ) {
-			status = __( 'Lifetime', 'woocommerce' );
-		} else if ( subscription.autorenew ) {
-			status = __( 'Active', 'woocommerce' );
+		if (subscription.lifetime) {
+			status = __('Lifetime', 'woocommerce');
+		} else if (subscription.autorenew) {
+			status = __('Active', 'woocommerce');
 		} else {
-			status = __( 'Cancelled', 'woocommerce' );
+			status = __('Cancelled', 'woocommerce');
 		}
 
 		return status;
@@ -420,50 +420,50 @@ export function version(
 	table: MySubscriptionsTable
 ): TableRow {
 	return {
-		display: getVersion( subscription, table ),
+		display: getVersion(subscription, table),
 	};
 }
 
-export function autoUpdates( subscription: Subscription ): TableRow {
+export function autoUpdates(subscription: Subscription): TableRow {
 	return {
 		display: (
 			<div className="woocommerce-marketplace__my-subscriptions__auto-updates">
-				<AutoUpdateStatus subscription={ subscription } />
+				<AutoUpdateStatus subscription={subscription} />
 			</div>
 		),
 	};
 }
 
-export function actions( subscription: Subscription ): TableRow {
+export function actions(subscription: Subscription): TableRow {
 	let actionButton = null;
-	if ( subscription.product_key === '' ) {
-		actionButton = <SubscribeButton subscription={ subscription } />;
-	} else if ( subscription.expired && ! subscription.lifetime ) {
-		actionButton = <RenewButton subscription={ subscription } />;
+	if (subscription.product_key === '') {
+		actionButton = <SubscribeButton subscription={subscription} />;
+	} else if (subscription.expired && !subscription.lifetime) {
+		actionButton = <RenewButton subscription={subscription} />;
 	} else if (
 		subscription.local.installed === false &&
 		subscription.subscription_installed === false &&
 		subscription.has_changelog === true
 	) {
-		actionButton = <Install subscription={ subscription } />;
+		actionButton = <Install subscription={subscription} />;
 	} else if (
 		subscription.active === false &&
 		subscription.subscription_available === true &&
 		subscription.has_changelog === true
 	) {
 		actionButton = (
-			<ConnectButton subscription={ subscription } variant="link" />
+			<ConnectButton subscription={subscription} variant="link" />
 		);
-	} else if ( ! subscription.autorenew && ! subscription.lifetime ) {
-		actionButton = <AutoRenewButton subscription={ subscription } />;
+	} else if (!subscription.autorenew && !subscription.lifetime) {
+		actionButton = <AutoRenewButton subscription={subscription} />;
 	}
 
 	return {
 		display: (
 			<div className="woocommerce-marketplace__my-subscriptions__actions">
-				{ actionButton }
+				{actionButton}
 
-				<ActionsDropdownMenu subscription={ subscription } />
+				<ActionsDropdownMenu subscription={subscription} />
 			</div>
 		),
 	};

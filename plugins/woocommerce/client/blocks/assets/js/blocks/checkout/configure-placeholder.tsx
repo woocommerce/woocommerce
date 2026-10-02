@@ -8,7 +8,7 @@ import PALETTE from '@automattic/color-studio';
 /**
  * Placeholder component that links to a settings page to configure something.
  */
-const ConfigurePlaceholder = ( {
+const ConfigurePlaceholder = ({
 	label,
 	description,
 	buttonLabel,
@@ -20,28 +20,28 @@ const ConfigurePlaceholder = ( {
 	buttonLabel: string;
 	buttonHref: string;
 	icon?: Icon;
-} ) => {
+}) => {
 	return (
 		<Placeholder
-			icon={ <Icon icon={ icon } /> }
-			label={ label }
+			icon={<Icon icon={icon} />}
+			label={label}
 			className="wc-block-checkout__configure-placeholder"
 		>
 			<span className="wc-block-checkout__configure-placeholder-description">
-				{ description }
+				{description}
 			</span>
 			<Button
 				variant="primary"
-				href={ buttonHref }
+				href={buttonHref}
 				target="_blank"
 				rel="noopener noreferrer"
-				style={ {
-					backgroundColor: PALETTE.colors[ 'Gray 100' ],
+				style={{
+					backgroundColor: PALETTE.colors['Gray 100'],
 					color: PALETTE.colors.White,
 					pointerEvents: 'all',
-				} }
+				}}
 			>
-				{ buttonLabel }
+				{buttonLabel}
 			</Button>
 		</Placeholder>
 	);

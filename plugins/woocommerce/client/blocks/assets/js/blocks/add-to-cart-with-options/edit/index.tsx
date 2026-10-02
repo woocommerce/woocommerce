@@ -23,16 +23,16 @@ import { Skeleton } from './skeleton';
 import type { Attributes } from '../types';
 
 const AddToCartOptionsEdit = (
-	props: BlockEditProps< Attributes > & { context?: { postId?: number } }
+	props: BlockEditProps<Attributes> & { context?: { postId?: number } }
 ) => {
-	const isWishlistFeatureEnabled = getSetting< boolean >(
+	const isWishlistFeatureEnabled = getSetting<boolean>(
 		'wishlistFeatureEnabled',
 		false
 	);
-	const { product } = useProduct( props.context?.postId );
-	const blockProps = useBlockProps( {
+	const { product } = useProduct(props.context?.postId);
+	const blockProps = useBlockProps({
 		className: 'wc-block-add-to-cart-with-options',
-	} );
+	});
 	const blockClientId = blockProps?.id;
 
 	const {
@@ -41,42 +41,42 @@ const AddToCartOptionsEdit = (
 		unregisterListener,
 	} = useProductTypeSelector();
 
-	useEffect( () => {
-		registerListener( blockClientId );
+	useEffect(() => {
+		registerListener(blockClientId);
 		return () => {
-			unregisterListener( blockClientId );
+			unregisterListener(blockClientId);
 		};
-	}, [ blockClientId, registerListener, unregisterListener ] );
+	}, [blockClientId, registerListener, unregisterListener]);
 
 	const productType =
 		product?.id === undefined ? currentProductType?.slug : product?.type;
 	const isCoreProductType =
 		productType &&
-		[ 'simple', 'variable', 'external', 'grouped' ].includes( productType );
+		['simple', 'variable', 'external', 'grouped'].includes(productType);
 
 	return (
 		<>
 			<InspectorControls>
 				<UpgradeProductImageGallery />
-				<DowngradeNotice blockClientId={ props?.clientId } />
+				<DowngradeNotice blockClientId={props?.clientId} />
 			</InspectorControls>
 			<BlockControls>
 				<ToolbarProductTypeGroup />
 			</BlockControls>
-			{ isCoreProductType ? (
+			{isCoreProductType ? (
 				<AddToCartWithOptionsEditTemplatePart
-					productType={ productType }
-					showAddToWishlist={ isWishlistFeatureEnabled }
+					productType={productType}
+					showAddToWishlist={isWishlistFeatureEnabled}
 				/>
 			) : (
-				<div { ...blockProps }>
+				<div {...blockProps}>
 					<Skeleton
-						buttonText={ product?.add_to_cart?.single_text }
-						productType={ productType }
-						isLoading={ false }
+						buttonText={product?.add_to_cart?.single_text}
+						productType={productType}
+						isLoading={false}
 					/>
 				</div>
-			) }
+			)}
 		</>
 	);
 };

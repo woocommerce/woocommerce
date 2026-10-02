@@ -14,40 +14,40 @@ import metadata from './block.json';
 import Edit from './edit';
 import Save from './save';
 
-const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
-const defaultAttribute = getSetting< AttributeSetting >(
+const ATTRIBUTES = getSetting<AttributeSetting[]>('attributes', []);
+const defaultAttribute = getSetting<AttributeSetting>(
 	'defaultProductFilterAttribute'
 );
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	edit: Edit,
 	icon: productFilterAttribute,
 	attributes: {
 		...metadata.attributes,
 		attributeId: {
 			...metadata.attributes.attributeId,
-			default: parseInt( defaultAttribute.attribute_id, 10 ),
+			default: parseInt(defaultAttribute.attribute_id, 10),
 		},
 	},
 	save: Save,
-	variations: ATTRIBUTES.map( ( attribute, index ) => {
+	variations: ATTRIBUTES.map((attribute, index) => {
 		return {
-			name: `product-filter-attribute-${ attribute.attribute_name }`,
+			name: `product-filter-attribute-${attribute.attribute_name}`,
 			title: sprintf(
 				// translators: %s is the attribute label.
-				__( '%s Filter', 'woocommerce' ),
+				__('%s Filter', 'woocommerce'),
 				attribute.attribute_label
 			),
 			description: sprintf(
 				// translators: %s is the attribute label.
-				__( 'Let shoppers filter products by %s.', 'woocommerce' ),
+				__('Let shoppers filter products by %s.', 'woocommerce'),
 				attribute.attribute_label.toLocaleLowerCase()
 			),
 			attributes: {
-				attributeId: parseInt( attribute.attribute_id, 10 ),
+				attributeId: parseInt(attribute.attribute_id, 10),
 			},
-			isActive: [ 'attributeId' ],
+			isActive: ['attributeId'],
 			isDefault: index === 0,
 		};
-	} ),
-} );
+	}),
+});

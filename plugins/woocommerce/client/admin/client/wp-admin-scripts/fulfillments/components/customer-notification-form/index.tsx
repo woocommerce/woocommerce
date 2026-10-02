@@ -16,24 +16,24 @@ import { useFulfillmentContext } from '../../context/fulfillment-context';
  * Internal dependencies
  */
 
-export default function CustomerNotificationBox( {
+export default function CustomerNotificationBox({
 	type = 'fulfill',
 }: {
 	type: 'fulfill' | 'update' | 'remove';
-} ) {
+}) {
 	const { notifyCustomer, setNotifyCustomer, customerNote, setCustomerNote } =
 		useFulfillmentContext();
-	const toggleRef = useRef< HTMLInputElement >( null );
+	const toggleRef = useRef<HTMLInputElement>(null);
 
-	const headerStrings = useMemo( () => {
+	const headerStrings = useMemo(() => {
 		return {
-			fulfill: __( 'Fulfillment notification', 'woocommerce' ),
-			remove: __( 'Removal update', 'woocommerce' ),
-			update: __( 'Update notification', 'woocommerce' ),
+			fulfill: __('Fulfillment notification', 'woocommerce'),
+			remove: __('Removal update', 'woocommerce'),
+			update: __('Update notification', 'woocommerce'),
 		};
-	}, [] );
+	}, []);
 
-	const contentStrings = useMemo( () => {
+	const contentStrings = useMemo(() => {
 		return {
 			fulfill: __(
 				'Automatically send an email to the customer when the selected items are fulfilled.',
@@ -48,65 +48,65 @@ export default function CustomerNotificationBox( {
 				'woocommerce'
 			),
 		};
-	}, [] );
+	}, []);
 
 	const descriptionId = 'notification-description';
 
-	useEffect( () => {
-		if ( toggleRef.current ) {
+	useEffect(() => {
+		if (toggleRef.current) {
 			toggleRef.current.ariaLabel =
-				headerStrings[ type ] || headerStrings.fulfill;
-			toggleRef.current.setAttribute( 'aria-describedby', descriptionId );
+				headerStrings[type] || headerStrings.fulfill;
+			toggleRef.current.setAttribute('aria-describedby', descriptionId);
 		}
-	}, [ type, headerStrings ] );
+	}, [type, headerStrings]);
 
 	return (
 		<FulfillmentCard
 			size="small"
-			isCollapsible={ false }
+			isCollapsible={false}
 			initialState="expanded"
 			header={
 				<>
 					<EnvelopeIcon />
-					<h3>{ headerStrings[ type ] || headerStrings.fulfill }</h3>
+					<h3>{headerStrings[type] || headerStrings.fulfill}</h3>
 					<ToggleControl
 						__nextHasNoMarginBottom
-						checked={ notifyCustomer }
-						label={ '' }
-						ref={ toggleRef }
-						onChange={ ( checked ) => {
-							setNotifyCustomer( checked );
-						} }
+						checked={notifyCustomer}
+						label={''}
+						ref={toggleRef}
+						onChange={(checked) => {
+							setNotifyCustomer(checked);
+						}}
 					/>
 				</>
 			}
 		>
 			<div className="woocommerce-fulfillment-notification-content">
 				<p
-					id={ descriptionId }
+					id={descriptionId}
 					className="woocommerce-fulfillment-description"
 				>
-					{ contentStrings[ type ] || contentStrings.fulfill }
+					{contentStrings[type] || contentStrings.fulfill}
 				</p>
-				{ type === 'update' && notifyCustomer && (
+				{type === 'update' && notifyCustomer && (
 					<div className="woocommerce-fulfillment-customer-note">
 						<TextareaControl
 							__nextHasNoMarginBottom
-							label={ __( 'Customer note', 'woocommerce' ) }
-							placeholder={ __(
+							label={__('Customer note', 'woocommerce')}
+							placeholder={__(
 								'Add a note for the customer (optional)',
 								'woocommerce'
-							) }
-							help={ __(
+							)}
+							help={__(
 								'This note will be included in the update notification email sent to the customer.',
 								'woocommerce'
-							) }
-							value={ customerNote }
-							onChange={ ( value ) => setCustomerNote( value ) }
-							rows={ 3 }
+							)}
+							value={customerNote}
+							onChange={(value) => setCustomerNote(value)}
+							rows={3}
 						/>
 					</div>
-				) }
+				)}
 			</div>
 		</FulfillmentCard>
 	);

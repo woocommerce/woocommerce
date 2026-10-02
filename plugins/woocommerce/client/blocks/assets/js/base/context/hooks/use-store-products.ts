@@ -36,17 +36,17 @@ export const useStoreProducts = (
 		resourceName: 'products',
 	};
 	const { results: products, isLoading: productsLoading } =
-		useCollection< ProductResponseItem >( {
+		useCollection<ProductResponseItem>({
 			...collectionOptions,
 			query,
-		} );
-	const { value: totalProducts } = useCollectionHeader( 'x-wp-total', {
+		});
+	const { value: totalProducts } = useCollectionHeader('x-wp-total', {
 		...collectionOptions,
 		query,
-	} );
+	});
 	return {
 		products,
-		totalProducts: parseInt( totalProducts as string, 10 ),
+		totalProducts: parseInt(totalProducts as string, 10),
 		productsLoading,
 	};
 };

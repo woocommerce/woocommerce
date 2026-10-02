@@ -17,7 +17,7 @@ type PluginCardBodyProps = {
 	/**
 	 * WooCommerce's Pill component to be rendered beside the name.
 	 */
-	pills?: Array< JSX.Element >;
+	pills?: Array<JSX.Element>;
 
 	description: React.ReactNode;
 	button?: JSX.Element;
@@ -26,34 +26,34 @@ type PluginCardBodyProps = {
 /**
  * Renders a CardBody layout component to display plugin info and button.
  */
-export const PluginCardBody = ( {
+export const PluginCardBody = ({
 	className,
 	icon,
 	name,
 	pills,
 	description,
 	button,
-}: PluginCardBodyProps ) => {
+}: PluginCardBodyProps) => {
 	return (
 		<CardBody
-			className={ clsx(
+			className={clsx(
 				'woocommerce_marketing_plugin_card_body',
 				className
-			) }
+			)}
 		>
 			<div className="woocommerce_marketing_plugin_card_body__icon">
-				{ icon }
+				{icon}
 			</div>
 			<div className="woocommerce_marketing_plugin_card_body__details">
 				<div className="woocommerce_marketing_plugin_card_body__details-name">
-					{ name }
-					{ pills }
+					{name}
+					{pills}
 				</div>
 				<div className="woocommerce_marketing_plugin_card_body__details-description">
-					{ description }
+					{description}
 				</div>
 			</div>
-			{ button }
+			{button}
 		</CardBody>
 	);
 };

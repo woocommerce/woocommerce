@@ -23,13 +23,13 @@ export const finalizeEmbeddedKycSession = async (
 	apiUrl: string,
 	source?: string
 ) => {
-	return await apiFetch< FinalizeEmbeddedKycSessionResponse >( {
+	return await apiFetch<FinalizeEmbeddedKycSessionResponse>({
 		url: apiUrl,
 		method: 'POST',
 		data: {
 			source,
 		},
-	} );
+	});
 };
 
 /**
@@ -48,21 +48,21 @@ export const completeSubStep = (
 			status: string;
 		}
 	>
-): Promise< void > => {
+): Promise<void> => {
 	// Store the sub-step completed status on the backend.
-	if ( apiUrl ) {
-		return apiFetch( {
+	if (apiUrl) {
+		return apiFetch({
 			url: apiUrl,
 			method: 'POST',
 			data: {
 				sub_steps: {
 					...data,
-					[ stepName ]: {
+					[stepName]: {
 						status: 'completed',
 					},
 				},
 			},
-		} );
+		});
 	}
 
 	// If no API URL is provided, just return a resolved promise.
@@ -80,23 +80,23 @@ export const createEmbeddedKycSession = async (
 	data: OnboardingFields,
 	apiUrl: string,
 	source?: string
-): Promise< EmbeddedKycSessionCreateResult > => {
-	const selfAssessmentData = fromDotNotation( data );
-	const requestData: Record< string, unknown > = {};
+): Promise<EmbeddedKycSessionCreateResult> => {
+	const selfAssessmentData = fromDotNotation(data);
+	const requestData: Record<string, unknown> = {};
 
 	// Only pass the self assessment data if at least one field is set.
-	if ( Object.keys( selfAssessmentData ).length > 0 ) {
+	if (Object.keys(selfAssessmentData).length > 0) {
 		requestData.self_assessment = selfAssessmentData;
 	}
 
 	// If a source is provided, include it in the request data.
-	if ( source ) {
+	if (source) {
 		requestData.source = source;
 	}
 
-	return await apiFetch< EmbeddedKycSessionCreateResult >( {
+	return await apiFetch<EmbeddedKycSessionCreateResult>({
 		url: apiUrl,
 		method: 'POST',
 		data: requestData,
-	} );
+	});
 };

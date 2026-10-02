@@ -55,6 +55,6 @@ interface TrimResult {
 declare module 'trim-html' {
 	export default function trimHtml(
 		html: string,
-		options: Partial< Opts >
+		options: Partial<Opts>
 	): TrimResult;
 }

@@ -32,7 +32,9 @@
 		gap: 8px;
 		opacity: 0;
 		visibility: hidden;
-		transition: opacity 0.5s ease, visibility 0.5s ease;
+		transition:
+			opacity 0.5s ease,
+			visibility 0.5s ease;
 		pointer-events: none;
 
 		&:focus-visible {

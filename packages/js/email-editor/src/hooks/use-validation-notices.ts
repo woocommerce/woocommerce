@@ -16,23 +16,23 @@ import type { WPNoticeAction } from '@wordpress/notices/build-types/store/action
 // `<NoticeList>` renders, which lines up with the narrowed projection of the
 // notices store's return.
 export type { NoticeAction };
-export type Notice = NoticeListProps[ 'notices' ][ number ];
+export type Notice = NoticeListProps['notices'][number];
 
 export type ValidationNoticesData = {
 	notices: Notice[];
-	hasValidationNotice: ( noticeId?: string ) => boolean;
+	hasValidationNotice: (noticeId?: string) => boolean;
 	addValidationNotice: (
 		noticeId: string,
 		message: string,
 		actions?: NoticeAction[]
 	) => void;
-	removeValidationNotice: ( noticeId: string ) => void;
+	removeValidationNotice: (noticeId: string) => void;
 };
 
 export const useValidationNotices = (): ValidationNoticesData => {
 	const context = 'email-validation';
 	const storeNotices = useSelect(
-		( mapSelect ) => mapSelect( noticesStore ).getNotices( context ),
+		(mapSelect) => mapSelect(noticesStore).getNotices(context),
 		[]
 	);
 	// `WPNotice.status: string` and `WPNoticeAction.onClick: Function` are
@@ -44,17 +44,17 @@ export const useValidationNotices = (): ValidationNoticesData => {
 	return {
 		notices,
 		hasValidationNotice: useCallback(
-			( noticeId?: string ): boolean => {
-				if ( ! noticeId ) {
+			(noticeId?: string): boolean => {
+				if (!noticeId) {
 					return notices?.length > 0;
 				}
 
 				return (
-					notices.find( ( notice ) => notice.id === noticeId ) !==
+					notices.find((notice) => notice.id === noticeId) !==
 					undefined
 				);
 			},
-			[ notices ]
+			[notices]
 		),
 		addValidationNotice: useCallback(
 			(
@@ -68,20 +68,20 @@ export const useValidationNotices = (): ValidationNoticesData => {
 				// `null`). Cast at the boundary so the store sees its expected
 				// shape.
 				const storeActions = actions as unknown as WPNoticeAction[];
-				void dispatch( noticesStore ).createNotice( 'error', message, {
+				void dispatch(noticesStore).createNotice('error', message, {
 					id: noticeId,
 					isDismissible: false,
 					actions: storeActions,
 					context,
-				} );
+				});
 			},
-			[ context ]
+			[context]
 		),
 		removeValidationNotice: useCallback(
-			( noticeId: string ): void => {
-				void dispatch( noticesStore ).removeNotice( noticeId, context );
+			(noticeId: string): void => {
+				void dispatch(noticesStore).removeNotice(noticeId, context);
 			},
-			[ context ]
+			[context]
 		),
 	};
 };

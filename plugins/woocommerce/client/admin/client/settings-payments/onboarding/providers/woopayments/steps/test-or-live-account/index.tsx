@@ -30,45 +30,46 @@ const TestOrLiveAccountStep = () => {
 		refreshStoreData,
 		getStepByKey,
 	} = useOnboardingContext();
-	const [ isContinueButtonLoading, setIsContinueButtonLoading ] =
-		useState( false );
+	const [isContinueButtonLoading, setIsContinueButtonLoading] =
+		useState(false);
 
-	const testAccountStepActions = getStepByKey( TESTING_ACCOUNT_STEP_ID )
-		?.actions;
+	const testAccountStepActions = getStepByKey(
+		TESTING_ACCOUNT_STEP_ID
+	)?.actions;
 	const canCreateTestAccount = testAccountStepActions?.finish?.href;
 
 	return (
 		<>
-			<WooPaymentsStepHeader onClose={ closeModal } />
+			<WooPaymentsStepHeader onClose={closeModal} />
 			<div className="settings-payments-onboarding-modal__step--content">
 				<div className="woocommerce-payments-test-or-live-account-step__success_content_container">
 					<div className="woocommerce-woopayments-modal__content woocommerce-payments-test-or-live-account-step__success_content">
 						<h1 className="woocommerce-payments-test-or-live-account-step__success_content_title">
-							{ __(
+							{__(
 								"You're almost there — time to activate payments!",
 								'woocommerce'
-							) }
+							)}
 						</h1>
-						{ currentStep?.errors &&
+						{currentStep?.errors &&
 							currentStep.errors.length > 0 && (
 								<Notice
 									status="error"
-									isDismissible={ false }
+									isDismissible={false}
 									className="woocommerce-payments-test-or-live-account-step__error"
 									// Adding role="alert" for explicit screen reader announcement.
 									// While @wordpress/components Notice uses speak() internally,
 									// role="alert" provides better backwards compatibility with older AT.
-									{ ...{ role: 'alert' } }
+									{...{ role: 'alert' }}
 								>
 									<p>
-										{ currentStep.errors[ 0 ]?.message ||
+										{currentStep.errors[0]?.message ||
 											__(
 												'Something went wrong. Please try again.',
 												'woocommerce'
-											) }
+											)}
 									</p>
 								</Notice>
-							) }
+							)}
 						<div className="woocommerce-payments-test-or-live-account-step__success-whats-next">
 							<div className="woocommerce-woopayments-modal__content__item-flex">
 								<img
@@ -80,23 +81,23 @@ const TestOrLiveAccountStep = () => {
 								/>
 								<div className="woocommerce-woopayments-modal__content__item-flex__description">
 									<h3>
-										{ __(
+										{__(
 											'Activate payments in two easy steps',
 											'woocommerce'
-										) }
+										)}
 									</h3>
 									<div>
-										{ __(
+										{__(
 											'Answer a few questions and verify your business details with our payments partner, including owner, address, and bank information.',
 											'woocommerce'
-										) }
+										)}
 									</div>
 								</div>
 							</div>
 							<Button
 								variant="primary"
-								onClick={ () => {
-									setIsContinueButtonLoading( true );
+								onClick={() => {
+									setIsContinueButtonLoading(true);
 
 									recordPaymentsOnboardingEvent(
 										'woopayments_onboarding_modal_click',
@@ -107,67 +108,65 @@ const TestOrLiveAccountStep = () => {
 										}
 									);
 
-									if ( canCreateTestAccount ) {
+									if (canCreateTestAccount) {
 										// Mark the test account as finished.
 										const actionUrl =
 											testAccountStepActions?.finish
 												?.href;
 
-										if ( actionUrl ) {
-											apiFetch( {
+										if (actionUrl) {
+											apiFetch({
 												url: actionUrl,
 												method: 'POST',
-											} )
-												.then( () => {
+											})
+												.then(() => {
 													setIsContinueButtonLoading(
 														false
 													);
 
 													refreshStoreData();
-												} )
-												.catch( () => {
+												})
+												.catch(() => {
 													// Handle any errors that occur during the process.
 													setIsContinueButtonLoading(
 														false
 													);
-												} );
+												});
 										}
 									} else {
 										// If no test step is present, start the live account creation process directly.
 										const liveAccountStep =
-											getStepByKey(
-												LIVE_ACCOUNT_STEP_ID
-											);
+											getStepByKey(LIVE_ACCOUNT_STEP_ID);
 
 										const liveAccountActionURL =
 											liveAccountStep?.actions?.start
 												?.href;
 
-										if ( liveAccountActionURL ) {
-											apiFetch( {
+										if (liveAccountActionURL) {
+											apiFetch({
 												url: liveAccountActionURL,
 												method: 'POST',
-											} )
-												.then( () => {
+											})
+												.then(() => {
 													setIsContinueButtonLoading(
 														false
 													);
 
 													refreshStoreData();
-												} )
-												.catch( () => {
+												})
+												.catch(() => {
 													// Handle any errors that occur during the process.
 													setIsContinueButtonLoading(
 														false
 													);
-												} );
+												});
 										}
 									}
-								} }
-								isBusy={ isContinueButtonLoading }
-								disabled={ isContinueButtonLoading }
+								}}
+								isBusy={isContinueButtonLoading}
+								disabled={isContinueButtonLoading}
 							>
-								{ __( 'Activate payments', 'woocommerce' ) }
+								{__('Activate payments', 'woocommerce')}
 							</Button>
 							<Link
 								className="woocommerce-payments-test-or-live-account-step__learn-more"
@@ -175,16 +174,16 @@ const TestOrLiveAccountStep = () => {
 								target="_blank"
 								rel="noreferrer"
 								type="external"
-								aria-label={ __(
+								aria-label={__(
 									'Learn more about the WooPayments sign-up process (opens in a new tab)',
 									'woocommerce'
-								) }
+								)}
 							>
-								{ __( 'Learn more', 'woocommerce' ) }
+								{__('Learn more', 'woocommerce')}
 							</Link>
 						</div>
 
-						{ canCreateTestAccount && (
+						{canCreateTestAccount && (
 							<div className="woocommerce-payments-test-or-live-account-step__success-whats-next">
 								<div className="woocommerce-woopayments-modal__content__item-flex">
 									<img
@@ -197,14 +196,14 @@ const TestOrLiveAccountStep = () => {
 									/>
 									<div className="woocommerce-woopayments-modal__content__item-flex__description">
 										<h3>
-											{ __(
+											{__(
 												'Test payments first, activate later',
 												'woocommerce'
-											) }
+											)}
 										</h3>
 										<div>
 											<p>
-												{ interpolateComponents( {
+												{interpolateComponents({
 													mixedString: __(
 														"A test account will be created for you to {{link}}test payments on your store{{/link}}. You'll still need to activate payments later to process real transactions.",
 														'woocommerce'
@@ -219,22 +218,22 @@ const TestOrLiveAccountStep = () => {
 															/>
 														),
 													},
-												} ) }
+												})}
 											</p>
 										</div>
 									</div>
 								</div>
 								<Button
 									variant="secondary"
-									disabled={ isContinueButtonLoading }
-									onClick={ () => {
+									disabled={isContinueButtonLoading}
+									onClick={() => {
 										navigateToNextStep();
-									} }
+									}}
 								>
-									{ __( 'Test payments', 'woocommerce' ) }
+									{__('Test payments', 'woocommerce')}
 								</Button>
 							</div>
-						) }
+						)}
 					</div>
 				</div>
 			</div>

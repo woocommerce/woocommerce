@@ -4,13 +4,13 @@
 export const getNavigationType = () => {
 	if (
 		window.performance &&
-		window.performance.getEntriesByType( 'navigation' ).length
+		window.performance.getEntriesByType('navigation').length
 	) {
 		return (
 			window.performance.getEntriesByType(
 				'navigation'
-			)[ 0 ] as PerformanceNavigationTiming
-		 ).type;
+			)[0] as PerformanceNavigationTiming
+		).type;
 	}
 	return '';
 };

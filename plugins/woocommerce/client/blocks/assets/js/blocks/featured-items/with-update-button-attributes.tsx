@@ -12,82 +12,84 @@ import { ProductResponseItem } from '@woocommerce/types';
  * Internal dependencies
  */
 import { EditorBlock } from './types';
-interface WithUpdateButtonAttributes< T > {
-	attributes: EditorBlock< T >[ 'attributes' ];
+interface WithUpdateButtonAttributes<T> {
+	attributes: EditorBlock<T>['attributes'];
 	editMode?: boolean;
 }
 
-interface WithUpdateButtonCategoryProps< T >
-	extends WithUpdateButtonAttributes< T > {
+interface WithUpdateButtonCategoryProps<
+	T,
+> extends WithUpdateButtonAttributes<T> {
 	category: WP_REST_API_Category;
 	product: never;
 }
 
-interface WithUpdateButtonProductProps< T >
-	extends WithUpdateButtonAttributes< T > {
+interface WithUpdateButtonProductProps<
+	T,
+> extends WithUpdateButtonAttributes<T> {
 	category: never;
 	product: ProductResponseItem;
 }
 
-type WithUpdateButtonProps< T extends EditorBlock< T > > =
-	| ( T & WithUpdateButtonCategoryProps< T > )
-	| ( T & WithUpdateButtonProductProps< T > );
+type WithUpdateButtonProps<T extends EditorBlock<T>> =
+	| (T & WithUpdateButtonCategoryProps<T>)
+	| (T & WithUpdateButtonProductProps<T>);
 
 export const withUpdateButtonAttributes =
-	< T extends EditorBlock< T > >( Component: ComponentType< T > ) =>
-	( props: WithUpdateButtonProps< T > ) => {
-		const [ doUrlUpdate, setDoUrlUpdate ] = useState( false );
+	<T extends EditorBlock<T>>(Component: ComponentType<T>) =>
+	(props: WithUpdateButtonProps<T>) => {
+		const [doUrlUpdate, setDoUrlUpdate] = useState(false);
 		const { category, clientId, editMode, product } = props;
 		const item = category || product;
 		const permalink =
-			( item as WP_REST_API_Category )?.link ||
-			( item as ProductResponseItem )?.permalink;
+			(item as WP_REST_API_Category)?.link ||
+			(item as ProductResponseItem)?.permalink;
 
 		const block: BlockInstance = useSelect(
-			( select ) => {
-				return select( 'core/block-editor' ).getBlock( clientId );
+			(select) => {
+				return select('core/block-editor').getBlock(clientId);
 			},
-			[ clientId ]
+			[clientId]
 		);
 		const findFirstButton = (
 			node?: BlockInstance
 		): BlockInstance | undefined => {
-			if ( ! node ) return undefined;
-			if ( node.name === 'core/button' ) {
+			if (!node) return undefined;
+			if (node.name === 'core/button') {
 				return node;
 			}
 			const children: BlockInstance[] = node.innerBlocks || [];
-			for ( const child of children ) {
-				const found = findFirstButton( child );
-				if ( found ) return found;
+			for (const child of children) {
+				const found = findFirstButton(child);
+				if (found) return found;
 			}
 			return undefined;
 		};
 
-		const innerRoot = block?.innerBlocks?.[ 0 ];
-		const innerButton = findFirstButton( innerRoot );
+		const innerRoot = block?.innerBlocks?.[0];
+		const innerButton = findFirstButton(innerRoot);
 		const buttonBlockId = innerButton?.clientId || '';
 		const currentButtonAttributes = useMemo(
 			() => innerButton?.attributes || {},
-			[ innerButton ]
+			[innerButton]
 		);
 		const { url } = currentButtonAttributes;
 
-		const { updateBlockAttributes } = useDispatch( 'core/block-editor' );
+		const { updateBlockAttributes } = useDispatch('core/block-editor');
 
-		useEffect( () => {
+		useEffect(() => {
 			if (
 				doUrlUpdate &&
 				buttonBlockId &&
-				! editMode &&
+				!editMode &&
 				permalink &&
 				url &&
 				permalink !== url
 			) {
-				void updateBlockAttributes( buttonBlockId, {
+				void updateBlockAttributes(buttonBlockId, {
 					url: permalink,
-				} );
-				setDoUrlUpdate( false );
+				});
+				setDoUrlUpdate(false);
 			}
 		}, [
 			buttonBlockId,
@@ -96,9 +98,9 @@ export const withUpdateButtonAttributes =
 			permalink,
 			updateBlockAttributes,
 			url,
-		] );
+		]);
 
-		const triggerUrlUpdate = () => setDoUrlUpdate( true );
+		const triggerUrlUpdate = () => setDoUrlUpdate(true);
 
-		return <Component { ...props } triggerUrlUpdate={ triggerUrlUpdate } />;
+		return <Component {...props} triggerUrlUpdate={triggerUrlUpdate} />;
 	};

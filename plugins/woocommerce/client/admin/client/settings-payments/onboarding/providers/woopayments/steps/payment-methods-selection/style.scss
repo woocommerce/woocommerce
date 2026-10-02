@@ -1,4 +1,5 @@
-#payment_methods.settings-payments-onboarding-modal__step .settings-payments-onboarding-modal__step--content {
+#payment_methods.settings-payments-onboarding-modal__step
+	.settings-payments-onboarding-modal__step--content {
 	padding: 0;
 }
 
@@ -48,7 +49,12 @@
 			}
 
 			&__item.clickable-list-item:hover {
-				background-color: rgba(0, 0, 0, 0.02); /* Light overlay effect */
+				background-color: rgba(
+					0,
+					0,
+					0,
+					0.02
+				); /* Light overlay effect */
 			}
 
 			&__item-inner {

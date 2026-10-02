@@ -14,23 +14,23 @@ import Modal from '~/task-lists/components/usage-modal';
 
 export const UsageModal = () => {
 	const query = getQuery();
-	const shouldDisplayModal = query[ 'wcpay-connection-success' ] === '1';
-	const [ isOpen, setIsOpen ] = useState( shouldDisplayModal );
+	const shouldDisplayModal = query['wcpay-connection-success'] === '1';
+	const [isOpen, setIsOpen] = useState(shouldDisplayModal);
 
-	if ( ! isOpen ) {
+	if (!isOpen) {
 		return null;
 	}
 
 	const closeModal = () => {
-		setIsOpen( false );
-		updateQueryString( { 'wcpay-connection-success': undefined } );
+		setIsOpen(false);
+		updateQueryString({ 'wcpay-connection-success': undefined });
 	};
 
 	const title = __(
 		'Help us build a better WooPayments experience',
 		'woocommerce'
 	);
-	const trackingMessage = interpolateComponents( {
+	const trackingMessage = interpolateComponents({
 		mixedString: __(
 			'By agreeing to share non-sensitive {{link}}usage data{{/link}}, you’ll help us improve features and optimize the WooPayments experience. You can opt out at any time.',
 			'woocommerce'
@@ -44,17 +44,17 @@ export const UsageModal = () => {
 				/>
 			),
 		},
-	} );
+	});
 
 	return (
 		<Modal
-			isDismissible={ false }
-			title={ title }
-			message={ trackingMessage }
-			acceptActionText={ __( 'I agree', 'woocommerce' ) }
-			dismissActionText={ __( 'No thanks', 'woocommerce' ) }
-			onContinue={ closeModal }
-			onClose={ closeModal }
+			isDismissible={false}
+			title={title}
+			message={trackingMessage}
+			acceptActionText={__('I agree', 'woocommerce')}
+			dismissActionText={__('No thanks', 'woocommerce')}
+			onContinue={closeModal}
+			onClose={closeModal}
 		/>
 	);
 };

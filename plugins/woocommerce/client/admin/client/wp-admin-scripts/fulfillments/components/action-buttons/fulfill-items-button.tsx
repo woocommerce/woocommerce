@@ -18,67 +18,67 @@ import {
 } from '../../utils/fulfillment-utils';
 import { useFulfillmentDrawerContext } from '../../context/drawer-context';
 
-export default function FulfillItemsButton( {
+export default function FulfillItemsButton({
 	setError,
 }: {
-	setError: ( message: string | null ) => void;
-} ) {
+	setError: (message: string | null) => void;
+}) {
 	const { setIsEditing } = useFulfillmentDrawerContext();
 	const { order, fulfillment, notifyCustomer } = useFulfillmentContext();
-	const [ isExecuting, setIsExecuting ] = useState( false );
-	const { saveFulfillment } = useDispatch( FulfillmentStore );
+	const [isExecuting, setIsExecuting] = useState(false);
+	const { saveFulfillment } = useDispatch(FulfillmentStore);
 	const descriptionId = useInstanceId(
 		FulfillItemsButton,
 		'fulfill-items-description'
 	) as string;
 
 	const handleFulfillItems = async () => {
-		setError( null );
-		if ( ! fulfillment || ! order ) {
+		setError(null);
+		if (!fulfillment || !order) {
 			return;
 		}
-		if ( getFulfillmentItems( fulfillment ).length === 0 ) {
-			setError( __( 'Select items to be fulfilled.', 'woocommerce' ) );
+		if (getFulfillmentItems(fulfillment).length === 0) {
+			setError(__('Select items to be fulfilled.', 'woocommerce'));
 			return;
 		}
 
-		setIsExecuting( true );
+		setIsExecuting(true);
 
 		// Mark fulfillment as fulfilled.
 		fulfillment.is_fulfilled = true;
 		fulfillment.status = 'fulfilled';
-		await saveFulfillment( order.id, fulfillment, notifyCustomer );
+		await saveFulfillment(order.id, fulfillment, notifyCustomer);
 
-		const error = select( FulfillmentStore ).getError( order.id );
-		if ( error ) {
-			setError( error );
+		const error = select(FulfillmentStore).getError(order.id);
+		if (error) {
+			setError(error);
 		} else {
-			void refreshOrderFulfillmentStatus( order.id );
-			setIsEditing( false );
+			void refreshOrderFulfillmentStatus(order.id);
+			setIsEditing(false);
 		}
 
-		setIsExecuting( false );
+		setIsExecuting(false);
 	};
 
 	return (
 		<>
 			<Button
 				variant="primary"
-				onClick={ handleFulfillItems }
+				onClick={handleFulfillItems}
 				__next40pxDefaultSize
-				isBusy={ isExecuting }
-				disabled={ isExecuting }
-				aria-describedby={ descriptionId }
+				isBusy={isExecuting}
+				disabled={isExecuting}
+				aria-describedby={descriptionId}
 			>
-				{ isExecuting
-					? __( 'Fulfilling…', 'woocommerce' )
-					: __( 'Fulfill items', 'woocommerce' ) }
+				{isExecuting
+					? __('Fulfilling…', 'woocommerce')
+					: __('Fulfill items', 'woocommerce')}
 			</Button>
-			<span id={ descriptionId } className="screen-reader-text">
-				{ __(
+			<span id={descriptionId} className="screen-reader-text">
+				{__(
 					'Marks the selected items as fulfilled and updates their status',
 					'woocommerce'
-				) }
+				)}
 			</span>
 		</>
 	);

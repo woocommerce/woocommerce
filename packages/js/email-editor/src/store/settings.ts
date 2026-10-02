@@ -20,7 +20,7 @@ function getUrls(): EmailEditorUrls {
  * This function is used by the initializeEditor function to maintain backward compatibility.
  */
 export function getEditorConfigFromWindow() {
-	if ( ! window.WooCommerceEmailEditor ) {
+	if (!window.WooCommerceEmailEditor) {
 		throw new Error(
 			'WooCommerceEmailEditor global object is not available. This is required for the email editor to work.'
 		);
@@ -33,18 +33,18 @@ export function getEditorConfigFromWindow() {
 		window.WooCommerceEmailEditor.current_wp_user_email;
 	const userThemePostId = window.WooCommerceEmailEditor.user_theme_post_id;
 
-	if ( ! editorSettings ) {
+	if (!editorSettings) {
 		throw new Error(
 			'window.WooCommerceEmailEditor.editor_settings is required.'
 		);
 	}
-	if ( ! editorTheme ) {
+	if (!editorTheme) {
 		throw new Error(
 			'window.WooCommerceEmailEditor.editor_theme is required.'
 		);
 	}
 	if (
-		! urls ||
+		!urls ||
 		typeof urls.back !== 'string' ||
 		typeof urls.listings !== 'string'
 	) {
@@ -58,6 +58,6 @@ export function getEditorConfigFromWindow() {
 		theme: editorTheme,
 		urls,
 		userEmail: currentWpUserEmail as string,
-		globalStylesPostId: ( userThemePostId as number | null ) ?? null,
+		globalStylesPostId: (userThemePostId as number | null) ?? null,
 	};
 }

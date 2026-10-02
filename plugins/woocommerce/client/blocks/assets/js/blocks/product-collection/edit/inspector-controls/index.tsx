@@ -55,8 +55,8 @@ import OffsetControl from './offset-control';
 import MaxPagesToShowControl from './max-pages-to-show-control';
 
 const prepareShouldShowFilter =
-	( hideControls: FilterName[] ) => ( filter: FilterName ) => {
-		return ! hideControls.includes( filter );
+	(hideControls: FilterName[]) => (filter: FilterName) => {
+		return !hideControls.includes(filter);
 	};
 
 const ProductCollectionInspectorControls = (
@@ -66,17 +66,17 @@ const ProductCollectionInspectorControls = (
 	const { query, hideControls, dimensions, displayLayout, collection } =
 		attributes;
 
-	const tracksLocation = useTracksLocation( context.templateSlug );
-	const trackInteraction = ( filter: FilterName ) =>
-		recordEvent( 'blocks_product_collection_inspector_control_clicked', {
+	const tracksLocation = useTracksLocation(context.templateSlug);
+	const trackInteraction = (filter: FilterName) =>
+		recordEvent('blocks_product_collection_inspector_control_clicked', {
 			collection: attributes.collection,
 			location: tracksLocation,
 			filter,
-		} );
+		});
 
 	const inherit = query?.inherit || false;
 
-	const shouldShowFilter = prepareShouldShowFilter( hideControls );
+	const shouldShowFilter = prepareShouldShowFilter(hideControls);
 
 	const isArchiveTemplate =
 		tracksLocation === 'product-catalog' ||
@@ -85,50 +85,46 @@ const ProductCollectionInspectorControls = (
 	// Carousel layout influences the visibility and behavior of some controls.
 	const isCarouselLayout = displayLayout?.type === LayoutOptions.CAROUSEL;
 	const isEmailEditor = useIsEmailEditor();
-	useCarouselLayoutAdjustments( clientId, attributes );
-	useEmailPaginationAdjustments( clientId, attributes );
-	useEmailColumnAdjustments( attributes, setAttributes );
-	useEmailHeadingAdjustments( clientId );
+	useCarouselLayoutAdjustments(clientId, attributes);
+	useEmailPaginationAdjustments(clientId, attributes);
+	useEmailColumnAdjustments(attributes, setAttributes);
+	useEmailHeadingAdjustments(clientId);
 
 	const showCustomQueryControls = inherit === false;
 	const showInheritQueryControl =
-		isArchiveTemplate && shouldShowFilter( CoreFilterNames.INHERIT );
+		isArchiveTemplate && shouldShowFilter(CoreFilterNames.INHERIT);
 	const showFilterableControl =
-		! isArchiveTemplate && shouldShowFilter( CoreFilterNames.FILTERABLE );
+		!isArchiveTemplate && shouldShowFilter(CoreFilterNames.FILTERABLE);
 	const showCustomOrderControl =
-		showCustomQueryControls && shouldShowFilter( CoreFilterNames.ORDER );
-	const showDefaultOrderControl = ! showCustomQueryControls;
+		showCustomQueryControls && shouldShowFilter(CoreFilterNames.ORDER);
+	const showDefaultOrderControl = !showCustomQueryControls;
 	const showOffsetControl =
-		showCustomQueryControls && shouldShowFilter( CoreFilterNames.OFFSET );
-	const showColumnsControl = ! isCarouselLayout;
+		showCustomQueryControls && shouldShowFilter(CoreFilterNames.OFFSET);
+	const showColumnsControl = !isCarouselLayout;
 	const showMaxPagesToShowControl =
 		showCustomQueryControls &&
-		! isCarouselLayout &&
-		shouldShowFilter( CoreFilterNames.MAX_PAGES_TO_SHOW );
+		!isCarouselLayout &&
+		shouldShowFilter(CoreFilterNames.MAX_PAGES_TO_SHOW);
 	const showProductsPerPageControl =
 		showCustomQueryControls &&
-		shouldShowFilter( CoreFilterNames.PRODUCTS_PER_PAGE );
-	const showOnSaleControl = shouldShowFilter( CoreFilterNames.ON_SALE );
+		shouldShowFilter(CoreFilterNames.PRODUCTS_PER_PAGE);
+	const showOnSaleControl = shouldShowFilter(CoreFilterNames.ON_SALE);
 	const showStockStatusControl = shouldShowFilter(
 		CoreFilterNames.STOCK_STATUS
 	);
 	const showHandPickedProductsControl = shouldShowFilter(
 		CoreFilterNames.HAND_PICKED
 	);
-	const showKeywordControl = shouldShowFilter( CoreFilterNames.KEYWORD );
-	const showAttributesControl = shouldShowFilter(
-		CoreFilterNames.ATTRIBUTES
-	);
-	const showTaxonomyControls = shouldShowFilter( CoreFilterNames.TAXONOMY );
-	const showFeaturedControl = shouldShowFilter( CoreFilterNames.FEATURED );
-	const showCreatedControl = shouldShowFilter( CoreFilterNames.CREATED );
-	const showPriceRangeControl = shouldShowFilter(
-		CoreFilterNames.PRICE_RANGE
-	);
+	const showKeywordControl = shouldShowFilter(CoreFilterNames.KEYWORD);
+	const showAttributesControl = shouldShowFilter(CoreFilterNames.ATTRIBUTES);
+	const showTaxonomyControls = shouldShowFilter(CoreFilterNames.TAXONOMY);
+	const showFeaturedControl = shouldShowFilter(CoreFilterNames.FEATURED);
+	const showCreatedControl = shouldShowFilter(CoreFilterNames.CREATED);
+	const showPriceRangeControl = shouldShowFilter(CoreFilterNames.PRICE_RANGE);
 
 	const setQueryAttributeBind = useMemo(
-		() => setQueryAttribute.bind( null, props ),
-		[ props ]
+		() => setQueryAttribute.bind(null, props),
+		[props]
 	);
 
 	const displayControlProps = {
@@ -152,12 +148,12 @@ const ProductCollectionInspectorControls = (
 	 * These controls are placed at the top for easy access when editing.
 	 */
 	const renderCollectionSpecificControl = () => {
-		switch ( collection ) {
+		switch (collection) {
 			case CoreCollectionNames.HAND_PICKED:
 				return (
 					<PanelBody>
 						<HandPickedProductsControlField
-							{ ...queryControlProps }
+							{...queryControlProps}
 						/>
 					</PanelBody>
 				);
@@ -167,14 +163,14 @@ const ProductCollectionInspectorControls = (
 				return (
 					<PanelBody>
 						<TaxonomyControls
-							{ ...queryControlProps }
-							collection={ collection }
+							{...queryControlProps}
+							collection={collection}
 							renderMode="standalone"
 						/>
 					</PanelBody>
 				);
 			case CoreCollectionNames.RELATED:
-				return <RelatedByControl { ...queryControlProps } />;
+				return <RelatedByControl {...queryControlProps} />;
 			default:
 				return null;
 		}
@@ -183,110 +179,110 @@ const ProductCollectionInspectorControls = (
 	return (
 		<InspectorControls>
 			<LinkedProductControl
-				query={ props.attributes.query }
-				setAttributes={ props.setAttributes }
-				usesReference={ props.usesReference }
-				location={ props.location }
+				query={props.attributes.query}
+				setAttributes={props.setAttributes}
+				usesReference={props.usesReference}
+				location={props.location}
 			/>
 
-			{ renderCollectionSpecificControl() }
+			{renderCollectionSpecificControl()}
 
 			<ToolsPanel
-				label={ __( 'Settings', 'woocommerce' ) }
-				resetAll={ () => {
+				label={__('Settings', 'woocommerce')}
+				resetAll={() => {
 					const defaultSettings = getDefaultSettings(
 						props.attributes
 					);
-					props.setAttributes( defaultSettings );
-				} }
+					props.setAttributes(defaultSettings);
+				}}
 				className="wc-block-editor-product-collection__settings_panel"
 			>
-				{ showInheritQueryControl && (
-					<InheritQueryControl { ...queryControlProps } />
-				) }
-				{ showFilterableControl && (
-					<FilterableControl { ...queryControlProps } />
-				) }
-				{ showCustomOrderControl && (
-					<CustomQueryOrderByControl { ...queryControlProps } />
-				) }
-				{ showDefaultOrderControl && (
+				{showInheritQueryControl && (
+					<InheritQueryControl {...queryControlProps} />
+				)}
+				{showFilterableControl && (
+					<FilterableControl {...queryControlProps} />
+				)}
+				{showCustomOrderControl && (
+					<CustomQueryOrderByControl {...queryControlProps} />
+				)}
+				{showDefaultOrderControl && (
 					<DefaultQueryOrderByControl
-						trackInteraction={ trackInteraction }
+						trackInteraction={trackInteraction}
 					/>
-				) }
-				{ ! isEmailEditor && (
-					<LayoutOptionsControl { ...displayControlProps } />
-				) }
-				{ ! isEmailEditor && (
-					<WidthOptionsControl { ...dimensionsControlProps } />
-				) }
-				{ showProductsPerPageControl && (
+				)}
+				{!isEmailEditor && (
+					<LayoutOptionsControl {...displayControlProps} />
+				)}
+				{!isEmailEditor && (
+					<WidthOptionsControl {...dimensionsControlProps} />
+				)}
+				{showProductsPerPageControl && (
 					<ProductsPerPageControl
-						{ ...queryControlProps }
-						carouselVariant={ isCarouselLayout }
+						{...queryControlProps}
+						carouselVariant={isCarouselLayout}
 					/>
-				) }
-				{ showColumnsControl && (
+				)}
+				{showColumnsControl && (
 					<ColumnsControl
-						{ ...displayControlProps }
-						{ ...( isEmailEditor && {
+						{...displayControlProps}
+						{...(isEmailEditor && {
 							maxColumns: 2,
 							hideResponsiveToggle: true,
-						} ) }
+						})}
 					/>
-				) }
-				{ ! isEmailEditor && showOffsetControl && (
-					<OffsetControl { ...queryControlProps } />
-				) }
-				{ showMaxPagesToShowControl && ! isEmailEditor && (
-					<MaxPagesToShowControl { ...queryControlProps } />
-				) }
+				)}
+				{!isEmailEditor && showOffsetControl && (
+					<OffsetControl {...queryControlProps} />
+				)}
+				{showMaxPagesToShowControl && !isEmailEditor && (
+					<MaxPagesToShowControl {...queryControlProps} />
+				)}
 			</ToolsPanel>
 
-			{ showCustomQueryControls ? (
+			{showCustomQueryControls ? (
 				<ToolsPanel
-					label={ __( 'Filters', 'woocommerce' ) }
-					resetAll={ ( resetAllFilters = [] ) => {
-						resetAllFilters.forEach( ( resetFilter ) => {
+					label={__('Filters', 'woocommerce')}
+					resetAll={(resetAllFilters = []) => {
+						resetAllFilters.forEach((resetFilter) => {
 							resetFilter();
-						} );
-					} }
+						});
+					}}
 					className="wc-block-editor-product-collection-inspector-toolspanel__filters"
 				>
-					{ showOnSaleControl && (
-						<OnSaleControl { ...queryControlProps } />
-					) }
-					{ showStockStatusControl && (
-						<StockStatusControl { ...queryControlProps } />
-					) }
-					{ showHandPickedProductsControl && (
-						<HandPickedProductsControl { ...queryControlProps } />
-					) }
-					{ showKeywordControl && (
-						<KeywordControl { ...queryControlProps } />
-					) }
-					{ showAttributesControl && (
-						<AttributesControl { ...queryControlProps } />
-					) }
-					{ showTaxonomyControls && (
+					{showOnSaleControl && (
+						<OnSaleControl {...queryControlProps} />
+					)}
+					{showStockStatusControl && (
+						<StockStatusControl {...queryControlProps} />
+					)}
+					{showHandPickedProductsControl && (
+						<HandPickedProductsControl {...queryControlProps} />
+					)}
+					{showKeywordControl && (
+						<KeywordControl {...queryControlProps} />
+					)}
+					{showAttributesControl && (
+						<AttributesControl {...queryControlProps} />
+					)}
+					{showTaxonomyControls && (
 						<TaxonomyControls
-							{ ...queryControlProps }
-							collection={ collection }
+							{...queryControlProps}
+							collection={collection}
 							renderMode="panel"
 						/>
-					) }
-					{ showFeaturedControl && (
-						<FeaturedProductsControl { ...queryControlProps } />
-					) }
-					{ showCreatedControl && (
-						<CreatedControl { ...queryControlProps } />
-					) }
-					{ showPriceRangeControl && (
-						<PriceRangeControl { ...queryControlProps } />
-					) }
+					)}
+					{showFeaturedControl && (
+						<FeaturedProductsControl {...queryControlProps} />
+					)}
+					{showCreatedControl && (
+						<CreatedControl {...queryControlProps} />
+					)}
+					{showPriceRangeControl && (
+						<PriceRangeControl {...queryControlProps} />
+					)}
 				</ToolsPanel>
-			) : null }
+			) : null}
 		</InspectorControls>
 	);
 };

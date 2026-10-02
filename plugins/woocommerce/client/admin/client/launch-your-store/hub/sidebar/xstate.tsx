@@ -53,7 +53,7 @@ export type LYSAugmentedTaskListType = TaskListType & {
 
 export type SidebarMachineContext = {
 	externalUrl: string | null;
-	mainContentMachineRef: ActorRefFrom< typeof mainContentMachine >;
+	mainContentMachineRef: ActorRefFrom<typeof mainContentMachine>;
 	tasklist?: LYSAugmentedTaskListType;
 	hasWooPayments?: boolean;
 	testOrderCount: number;
@@ -82,56 +82,54 @@ export type SidebarMachineEvents =
 	| { type: 'RETURN_FROM_PAYMENTS' }
 	| { type: 'REFRESH_TASKLIST' };
 
-const sidebarQueryParamListener = fromCallback( ( { sendBack } ) => {
-	return createQueryParamsListener( 'sidebar', sendBack );
-} );
+const sidebarQueryParamListener = fromCallback(({ sendBack }) => {
+	return createQueryParamsListener('sidebar', sendBack);
+});
 
 const launchStoreAction = async () => {
-	const results = await dispatch( optionsStore ).updateOptions( {
+	const results = await dispatch(optionsStore).updateOptions({
 		woocommerce_coming_soon: 'no',
-	} );
-	if ( results.success ) {
+	});
+	if (results.success) {
 		return results;
 	}
-	throw new Error( JSON.stringify( results ) );
+	throw new Error(JSON.stringify(results));
 };
 
 const getTestOrderCount = async () => {
-	const result = ( await apiFetch( {
+	const result = (await apiFetch({
 		path: '/wc-admin/launch-your-store/woopayments/test-orders/count',
 		method: 'GET',
-	} ) ) as { count: number };
+	})) as { count: number };
 
 	return result.count;
 };
 
-export const pageHasComingSoonMetaTag = async ( {
+export const pageHasComingSoonMetaTag = async ({
 	url,
 }: {
 	url: string;
-} ): Promise< boolean > => {
+}): Promise<boolean> => {
 	try {
-		const response = await fetch( url, {
+		const response = await fetch(url, {
 			method: 'GET',
 			credentials: 'omit',
 			cache: 'no-store',
-		} );
-		if ( ! response.ok ) {
-			throw new Error( `Failed to fetch ${ url }` );
+		});
+		if (!response.ok) {
+			throw new Error(`Failed to fetch ${url}`);
 		}
 		const html = await response.text();
 		const parser = new DOMParser();
-		const doc = parser.parseFromString( html, 'text/html' );
-		const metaTag = doc.querySelector(
-			'meta[name="woo-coming-soon-page"]'
-		);
+		const doc = parser.parseFromString(html, 'text/html');
+		const metaTag = doc.querySelector('meta[name="woo-coming-soon-page"]');
 
-		if ( metaTag ) {
+		if (metaTag) {
 			return true;
 		}
 		return false;
-	} catch ( error ) {
-		throw new Error( `Error fetching ${ url }: ${ error }` );
+	} catch (error) {
+		throw new Error(`Error fetching ${url}: ${error}`);
 	}
 };
 
@@ -147,81 +145,80 @@ export const getWooPaymentsStatus = async () => {
 
 	// Check the gateway is installed
 	const paymentGateways: PaymentGateway[] =
-		await resolveSelect( paymentGatewaysStore ).getPaymentGateways();
+		await resolveSelect(paymentGatewaysStore).getPaymentGateways();
 	const enabledPaymentGateways = paymentGateways.filter(
-		( gateway ) => gateway.enabled
+		(gateway) => gateway.enabled
 	);
 	// Return true when WooPayments is the only enabled gateway.
 	return (
 		enabledPaymentGateways.length === 1 &&
-		isWooPayments( enabledPaymentGateways[ 0 ].id )
+		isWooPayments(enabledPaymentGateways[0].id)
 	);
 };
 
 export const getSiteCachedStatus = async () => {
-	const settings =
-		await resolveSelect( settingsStore ).getSettings( 'wc_admin' );
+	const settings = await resolveSelect(settingsStore).getSettings('wc_admin');
 
 	// if store URL exists, check both storeUrl and siteUrl otherwise only check siteUrl
 	// we want to check both because there's a chance that caching is especially disabled for woocommerce pages, e.g WPEngine
-	const requests = [] as Promise< boolean >[];
-	if ( settings?.shopUrl ) {
+	const requests = [] as Promise<boolean>[];
+	if (settings?.shopUrl) {
 		requests.push(
-			pageHasComingSoonMetaTag( {
+			pageHasComingSoonMetaTag({
 				url: settings.shopUrl,
-			} )
+			})
 		);
 	}
 
-	if ( settings?.siteUrl ) {
+	if (settings?.siteUrl) {
 		requests.push(
-			pageHasComingSoonMetaTag( {
+			pageHasComingSoonMetaTag({
 				url: settings.siteUrl,
-			} )
+			})
 		);
 	}
 
-	const results = await Promise.all( requests );
-	return results.some( ( result ) => result );
+	const results = await Promise.all(requests);
+	return results.some((result) => result);
 };
 
-const deleteTestOrders = async ( {
+const deleteTestOrders = async ({
 	input,
 }: {
 	input: {
 		removeTestOrders: boolean;
 	};
-} ) => {
-	if ( ! input.removeTestOrders ) {
+}) => {
+	if (!input.removeTestOrders) {
 		return null;
 	}
-	return await apiFetch( {
+	return await apiFetch({
 		path: '/wc-admin/launch-your-store/woopayments/test-orders',
 		method: 'DELETE',
-	} );
+	});
 };
 
-const recordStoreLaunchAttempt = ( {
+const recordStoreLaunchAttempt = ({
 	context,
 }: {
 	context: SidebarMachineContext;
-} ) => {
+}) => {
 	const total_count = context.tasklist?.fullLysTaskList.length || 0;
 	const incomplete_tasks =
 		context.tasklist?.tasks
-			.filter( ( task ) => ! task.isComplete )
-			.map( ( task ) => task.id ) || [];
+			.filter((task) => !task.isComplete)
+			.map((task) => task.id) || [];
 
 	const completed =
 		context.tasklist?.fullLysTaskList
-			.filter( ( task ) => task.isComplete )
-			.map( ( task ) => task.id ) || [];
+			.filter((task) => task.isComplete)
+			.map((task) => task.id) || [];
 
-	const tasks_completed_in_lys = completed.filter(
-		( task ) => context.tasklist?.recentlyActionedTasks.includes( task )
+	const tasks_completed_in_lys = completed.filter((task) =>
+		context.tasklist?.recentlyActionedTasks.includes(task)
 	); // recently actioned tasks can include incomplete tasks
 
-	recordEvent( 'launch_your_store_hub_store_launch_attempted', {
+	recordEvent('launch_your_store_hub_store_launch_attempted', {
 		tasks_total_count: total_count, // all lys eligible tasks
 		tasks_completed: completed, // all lys eligible tasks that are completed
 		tasks_completed_count: completed.length,
@@ -230,72 +227,68 @@ const recordStoreLaunchAttempt = ( {
 		incomplete_tasks,
 		incomplete_tasks_count: incomplete_tasks.length,
 		delete_test_orders: context.removeTestOrders || false,
-	} );
+	});
 	return performance.now();
 };
 
-const recordStoreLaunchResults = ( timestamp: number, success: boolean ) => {
-	recordEvent( 'launch_your_store_hub_store_launch_results', {
+const recordStoreLaunchResults = (timestamp: number, success: boolean) => {
+	recordEvent('launch_your_store_hub_store_launch_results', {
 		success,
-		duration: getTimeFrame( performance.now() - timestamp ),
-	} );
+		duration: getTimeFrame(performance.now() - timestamp),
+	});
 };
-export const sidebarMachine = setup( {
+export const sidebarMachine = setup({
 	types: {} as {
 		context: SidebarMachineContext;
 		events: SidebarMachineEvents;
 		input: {
-			mainContentMachineRef: ActorRefFrom< typeof mainContentMachine >;
+			mainContentMachineRef: ActorRefFrom<typeof mainContentMachine>;
 		};
 	},
 	actions: {
 		showLaunchStoreSuccessPage: sendTo(
-			( { context } ) => context.mainContentMachineRef,
+			({ context }) => context.mainContentMachineRef,
 			{ type: 'SHOW_LAUNCH_STORE_SUCCESS' }
 		),
 		showLaunchStorePendingCache: sendTo(
-			( { context } ) => context.mainContentMachineRef,
+			({ context }) => context.mainContentMachineRef,
 			{ type: 'SHOW_LAUNCH_STORE_PENDING_CACHE' }
 		),
 		showLoadingPage: sendTo(
-			( { context } ) => context.mainContentMachineRef,
+			({ context }) => context.mainContentMachineRef,
 			{ type: 'SHOW_LOADING' }
 		),
 		showSitePreview: sendTo(
-			( { context } ) => context.mainContentMachineRef,
+			({ context }) => context.mainContentMachineRef,
 			{ type: 'EXTERNAL_URL_UPDATE' }
 		),
-		updateQueryParams: ( _, params: LaunchYourStoreQueryParams ) => {
-			updateQueryParams< LaunchYourStoreQueryParams >( params );
+		updateQueryParams: (_, params: LaunchYourStoreQueryParams) => {
+			updateQueryParams<LaunchYourStoreQueryParams>(params);
 		},
-		taskClicked: ( { event, self } ) => {
-			if ( event.type === 'TASK_CLICKED' ) {
-				const result = taskClickedAction( event );
+		taskClicked: ({ event, self }) => {
+			if (event.type === 'TASK_CLICKED') {
+				const result = taskClickedAction(event);
 
 				// If taskClickedAction returns an event object, handle it
-				if (
-					result &&
-					typeof result === 'object' &&
-					'type' in result
-				) {
+				if (result && typeof result === 'object' && 'type' in result) {
 					// If SHOW_PAYMENTS is returned, transition to the payments sub-steps
-					if ( result.type === 'SHOW_PAYMENTS' ) {
-						self.send( { type: 'SHOW_PAYMENTS' } );
+					if (result.type === 'SHOW_PAYMENTS') {
+						self.send({ type: 'SHOW_PAYMENTS' });
 					}
 				}
 			}
 		},
-		openWcAdminUrl: ( { event } ) => {
-			if ( event.type === 'OPEN_WC_ADMIN_URL' ) {
-				navigateTo( { url: event.url } );
+		openWcAdminUrl: ({ event }) => {
+			if (event.type === 'OPEN_WC_ADMIN_URL') {
+				navigateTo({ url: event.url });
 			}
 		},
 		windowHistoryBack: () => {
 			window.history.back();
 		},
-		recordStoreLaunchAttempt: assign( {
+		recordStoreLaunchAttempt: assign({
 			launchStoreAttemptTimestamp: recordStoreLaunchAttempt,
-		} ),
+		}),
 		recordStoreLaunchResults: (
 			{ context },
 			{ success }: { success: boolean }
@@ -311,12 +304,12 @@ export const sidebarMachine = setup( {
 			);
 		},
 		showPaymentsContent: sendTo(
-			( { context } ) => context.mainContentMachineRef,
+			({ context }) => context.mainContentMachineRef,
 			{ type: 'SHOW_PAYMENTS' }
 		),
-		triggerTasklistRefresh: ( { self } ) => {
+		triggerTasklistRefresh: ({ self }) => {
 			// Send refresh event to self to trigger background data refresh
-			self.send( { type: 'REFRESH_TASKLIST' } );
+			self.send({ type: 'REFRESH_TASKLIST' });
 		},
 		navigateToWcAdmin: () => {
 			// Navigate directly to WC Admin home
@@ -330,7 +323,7 @@ export const sidebarMachine = setup( {
 			{ sidebar: sidebarLocation }: LaunchYourStoreQueryParams
 		) => {
 			const { sidebar } = getQuery() as LaunchYourStoreQueryParams;
-			return !! sidebar && sidebar === sidebarLocation;
+			return !!sidebar && sidebar === sidebarLocation;
 		},
 		hasPaymentsContent: () => {
 			const { content } = getQuery() as LaunchYourStoreQueryParams;
@@ -341,35 +334,34 @@ export const sidebarMachine = setup( {
 				path?: string;
 			};
 			return (
-				!! query.path &&
-				query.path.includes( '/woopayments/onboarding' )
+				!!query.path && query.path.includes('/woopayments/onboarding')
 			);
 		},
-		hasWooPayments: ( { context } ) => {
-			return !! context.hasWooPayments;
+		hasWooPayments: ({ context }) => {
+			return !!context.hasWooPayments;
 		},
-		siteIsShowingCachedContent: ( { context } ) => {
-			return !! context.siteIsShowingCachedContent;
+		siteIsShowingCachedContent: ({ context }) => {
+			return !!context.siteIsShowingCachedContent;
 		},
 	},
 	actors: {
 		sidebarQueryParamListener,
-		getTasklist: fromPromise( getLysTasklist ),
-		getTestOrderCount: fromPromise( getTestOrderCount ),
-		getSiteCachedStatus: fromPromise( getSiteCachedStatus ),
-		updateLaunchStoreOptions: fromPromise( launchStoreAction ),
-		deleteTestOrders: fromPromise( deleteTestOrders ),
+		getTasklist: fromPromise(getLysTasklist),
+		getTestOrderCount: fromPromise(getTestOrderCount),
+		getSiteCachedStatus: fromPromise(getSiteCachedStatus),
+		updateLaunchStoreOptions: fromPromise(launchStoreAction),
+		deleteTestOrders: fromPromise(deleteTestOrders),
 		fetchCongratsData,
-		getWooPaymentsStatus: fromPromise( getWooPaymentsStatus ),
+		getWooPaymentsStatus: fromPromise(getWooPaymentsStatus),
 	},
-} ).createMachine( {
+}).createMachine({
 	id: 'sidebar',
 	initial: 'navigate',
-	context: ( { input } ) => ( {
+	context: ({ input }) => ({
 		externalUrl: null,
 		testOrderCount: 0,
 		mainContentMachineRef: input.mainContentMachineRef,
-	} ),
+	}),
 	invoke: {
 		id: 'sidebarQueryParamListener',
 		src: 'sidebarQueryParamListener',
@@ -409,16 +401,16 @@ export const sidebarMachine = setup( {
 			states: {
 				preLaunchYourStoreHub: {
 					entry: [
-						spawnChild( 'fetchCongratsData', {
+						spawnChild('fetchCongratsData', {
 							id: 'prefetch-congrats-data ',
-						} ),
+						}),
 					],
 					invoke: {
 						src: 'getTasklist',
 						onDone: {
-							actions: assign( {
-								tasklist: ( { event } ) => event.output,
-							} ),
+							actions: assign({
+								tasklist: ({ event }) => event.output,
+							}),
 							target: 'checkWooPayments',
 						},
 					},
@@ -427,9 +419,9 @@ export const sidebarMachine = setup( {
 					invoke: {
 						src: 'getWooPaymentsStatus',
 						onDone: {
-							actions: assign( {
-								hasWooPayments: ( { event } ) => event.output,
-							} ),
+							actions: assign({
+								hasWooPayments: ({ event }) => event.output,
+							}),
 							target: 'maybeCountTestOrders',
 						},
 						onError: {
@@ -452,9 +444,9 @@ export const sidebarMachine = setup( {
 					invoke: {
 						src: 'getTestOrderCount',
 						onDone: {
-							actions: assign( {
-								testOrderCount: ( { event } ) => event.output,
-							} ),
+							actions: assign({
+								testOrderCount: ({ event }) => event.output,
+							}),
 							target: 'launchYourStoreHub',
 						},
 						onError: {
@@ -474,7 +466,7 @@ export const sidebarMachine = setup( {
 							target: '#storeLaunching',
 						},
 						POP_BROWSER_STACK: {
-							actions: [ 'navigateToWcAdmin' ],
+							actions: ['navigateToWcAdmin'],
 						},
 						REFRESH_TASKLIST: {
 							// Stay in current state but trigger background refresh
@@ -493,9 +485,9 @@ export const sidebarMachine = setup( {
 						{
 							src: 'getTasklist',
 							onDone: {
-								actions: assign( {
-									tasklist: ( { event } ) => event.output,
-								} ),
+								actions: assign({
+									tasklist: ({ event }) => event.output,
+								}),
 								target: 'backgroundCheckWooPayments',
 							},
 							onError: {
@@ -509,7 +501,7 @@ export const sidebarMachine = setup( {
 							target: '#storeLaunching',
 						},
 						POP_BROWSER_STACK: {
-							actions: [ 'navigateToWcAdmin' ],
+							actions: ['navigateToWcAdmin'],
 						},
 					},
 				},
@@ -522,9 +514,9 @@ export const sidebarMachine = setup( {
 					invoke: {
 						src: 'getWooPaymentsStatus',
 						onDone: {
-							actions: assign( {
-								hasWooPayments: ( { event } ) => event.output,
-							} ),
+							actions: assign({
+								hasWooPayments: ({ event }) => event.output,
+							}),
 							target: 'backgroundMaybeCountTestOrders',
 						},
 						onError: {
@@ -536,7 +528,7 @@ export const sidebarMachine = setup( {
 							target: '#storeLaunching',
 						},
 						POP_BROWSER_STACK: {
-							actions: [ 'navigateToWcAdmin' ],
+							actions: ['navigateToWcAdmin'],
 						},
 					},
 				},
@@ -565,9 +557,9 @@ export const sidebarMachine = setup( {
 					invoke: {
 						src: 'getTestOrderCount',
 						onDone: {
-							actions: assign( {
-								testOrderCount: ( { event } ) => event.output,
-							} ),
+							actions: assign({
+								testOrderCount: ({ event }) => event.output,
+							}),
 							target: 'launchYourStoreHub',
 						},
 						onError: {
@@ -579,7 +571,7 @@ export const sidebarMachine = setup( {
 							target: '#storeLaunching',
 						},
 						POP_BROWSER_STACK: {
-							actions: [ 'navigateToWcAdmin' ],
+							actions: ['navigateToWcAdmin'],
 						},
 					},
 				},
@@ -591,7 +583,7 @@ export const sidebarMachine = setup( {
 			states: {
 				launching: {
 					entry: [
-						assign( { launchStoreError: undefined } ), // clear the errors if any from previously
+						assign({ launchStoreError: undefined }), // clear the errors if any from previously
 						'recordStoreLaunchAttempt',
 					],
 					invoke: [
@@ -608,15 +600,15 @@ export const sidebarMachine = setup( {
 							},
 							onError: {
 								actions: [
-									assign( {
-										launchStoreError: ( { event } ) => {
+									assign({
+										launchStoreError: ({ event }) => {
 											return {
 												message: JSON.stringify(
 													event.error
 												), // for some reason event.error is an empty object, worth investigating if we decide to use the error message somewhere
 											};
 										},
-									} ),
+									}),
 									{
 										type: 'recordStoreLaunchResults',
 										params: {
@@ -629,13 +621,13 @@ export const sidebarMachine = setup( {
 						},
 						{
 							src: 'deleteTestOrders',
-							input: ( { event } ) => {
+							input: ({ event }) => {
 								return {
 									removeTestOrders: (
 										event as {
 											removeTestOrders: boolean;
 										}
-									 ).removeTestOrders,
+									).removeTestOrders,
 								};
 							},
 						},
@@ -647,10 +639,10 @@ export const sidebarMachine = setup( {
 							src: 'getSiteCachedStatus',
 							onDone: {
 								target: '#storeLaunchSuccessful',
-								actions: assign( {
-									siteIsShowingCachedContent: ( { event } ) =>
+								actions: assign({
+									siteIsShowingCachedContent: ({ event }) =>
 										event.output,
-								} ),
+								}),
 							},
 							onError: {
 								target: '#storeLaunchSuccessful',
@@ -671,18 +663,18 @@ export const sidebarMachine = setup( {
 						content: 'launch-store-success',
 					},
 				},
-				enqueueActions( ( { check, enqueue } ) => {
-					if ( check( 'siteIsShowingCachedContent' ) ) {
-						enqueue( {
+				enqueueActions(({ check, enqueue }) => {
+					if (check('siteIsShowingCachedContent')) {
+						enqueue({
 							type: 'showLaunchStorePendingCache',
-						} );
-						enqueue( {
+						});
+						enqueue({
 							type: 'recordStoreLaunchCachedContentDetected',
-						} );
+						});
 						return;
 					}
-					enqueue( { type: 'showLaunchStoreSuccessPage' } );
-				} ),
+					enqueue({ type: 'showLaunchStoreSuccessPage' });
+				}),
 			],
 		},
 		payments: {
@@ -714,10 +706,9 @@ export const sidebarMachine = setup( {
 							params: { sidebar: 'hub', content: 'site-preview' },
 						},
 						// Force the main content to reset completely
-						sendTo(
-							( { context } ) => context.mainContentMachineRef,
-							{ type: 'RETURN_FROM_PAYMENTS' }
-						),
+						sendTo(({ context }) => context.mainContentMachineRef, {
+							type: 'RETURN_FROM_PAYMENTS',
+						}),
 						// Trigger background refresh of tasklist data
 						'triggerTasklistRefresh',
 					],
@@ -740,19 +731,17 @@ export const sidebarMachine = setup( {
 			target: '.payments',
 		},
 	},
-} );
-export const SidebarContainer = ( {
+});
+export const SidebarContainer = ({
 	children,
 	className,
 }: {
 	children: React.ReactNode;
 	className?: string;
-} ) => {
+}) => {
 	return (
-		<div
-			className={ clsx( 'launch-your-store-layout__sidebar', className ) }
-		>
-			{ children }
+		<div className={clsx('launch-your-store-layout__sidebar', className)}>
+			{children}
 		</div>
 	);
 };

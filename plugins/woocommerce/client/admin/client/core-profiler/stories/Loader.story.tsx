@@ -8,18 +8,18 @@ import '../style.scss';
 
 export const Short = () => (
 	<CoreProfilerLoader
-		context={ { loader: { progress: 10, useStages: 'skipGuidedSetup' } } }
+		context={{ loader: { progress: 10, useStages: 'skipGuidedSetup' } }}
 	/>
 );
 
 export const Plugins = () => (
 	<CoreProfilerLoader
-		context={ { loader: { progress: 10, useStages: 'plugins' } } }
+		context={{ loader: { progress: 10, useStages: 'plugins' } }}
 	/>
 );
 
 export default {
 	title: 'WooCommerce Admin/Core Profiler/Loader',
 	component: CoreProfilerLoader,
-	decorators: [ WithSetupWizardLayout ],
+	decorators: [WithSetupWizardLayout],
 };

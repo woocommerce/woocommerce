@@ -10,14 +10,14 @@ import { createContext, useContext } from '@wordpress/element';
  *
  * @member {Object} InnerBlockLayoutContext A react context object
  */
-const InnerBlockLayoutContext = createContext( {
+const InnerBlockLayoutContext = createContext({
 	parentName: '',
 	parentClassName: '',
 	isLoading: false,
-} );
+});
 
 export const useInnerBlockLayoutContext = () =>
-	useContext( InnerBlockLayoutContext );
+	useContext(InnerBlockLayoutContext);
 
 interface InnerBlockLayoutContextProviderProps {
 	parentName?: string;
@@ -26,20 +26,20 @@ interface InnerBlockLayoutContextProviderProps {
 	children: React.ReactNode;
 }
 
-export const InnerBlockLayoutContextProvider = ( {
+export const InnerBlockLayoutContextProvider = ({
 	parentName = '',
 	parentClassName = '',
 	isLoading = false,
 	children,
-}: InnerBlockLayoutContextProviderProps ) => {
+}: InnerBlockLayoutContextProviderProps) => {
 	const contextValue = {
 		parentName,
 		parentClassName,
 		isLoading,
 	};
 	return (
-		<InnerBlockLayoutContext.Provider value={ contextValue }>
-			{ children }
+		<InnerBlockLayoutContext.Provider value={contextValue}>
+			{children}
 		</InnerBlockLayoutContext.Provider>
 	);
 };

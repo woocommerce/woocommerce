@@ -15,27 +15,26 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import sanitizeHTML from '~/lib/sanitize-html';
 
-export const validateFields = ( values, fields ) => {
+export const validateFields = (values, fields) => {
 	const errors = {};
-	const getField = ( fieldId ) =>
-		fields.find( ( field ) => field.id === fieldId );
+	const getField = (fieldId) => fields.find((field) => field.id === fieldId);
 
-	for ( const [ fieldKey, value ] of Object.entries( values ) ) {
-		const field = getField( fieldKey );
+	for (const [fieldKey, value] of Object.entries(values)) {
+		const field = getField(fieldKey);
 		// Matches any word that is capitalized aside from abrevitions like ID.
-		const label = field.label.replace( /([A-Z][a-z]+)/g, ( val ) =>
+		const label = field.label.replace(/([A-Z][a-z]+)/g, (val) =>
 			val.toLowerCase()
 		);
 
-		if ( ! ( value || field.type === 'checkbox' ) ) {
-			errors[ fieldKey ] = `Please enter your ${ label }`;
+		if (!(value || field.type === 'checkbox')) {
+			errors[fieldKey] = `Please enter your ${label}`;
 		}
 	}
 
 	return errors;
 };
 
-export const Configure = ( { markConfigured, paymentGateway } ) => {
+export const Configure = ({ markConfigured, paymentGateway }) => {
 	const {
 		id,
 		connectionUrl,
@@ -45,12 +44,12 @@ export const Configure = ( { markConfigured, paymentGateway } ) => {
 		requiredSettings: fields,
 	} = paymentGateway;
 
-	const { createNotice } = useDispatch( 'core/notices' );
-	const { updatePaymentGateway } = useDispatch( PAYMENT_GATEWAYS_STORE_NAME );
-	const slot = useSlot( `woocommerce_payment_gateway_configure_${ id }` );
-	const hasFills = Boolean( slot?.fills?.length );
+	const { createNotice } = useDispatch('core/notices');
+	const { updatePaymentGateway } = useDispatch(PAYMENT_GATEWAYS_STORE_NAME);
+	const slot = useSlot(`woocommerce_payment_gateway_configure_${id}`);
+	const hasFills = Boolean(slot?.fills?.length);
 
-	const { isUpdating } = useSelect( ( select ) => {
+	const { isUpdating } = useSelect((select) => {
 		const { isPaymentGatewayUpdating } = select(
 			PAYMENT_GATEWAYS_STORE_NAME
 		);
@@ -58,27 +57,27 @@ export const Configure = ( { markConfigured, paymentGateway } ) => {
 		return {
 			isUpdating: isPaymentGatewayUpdating(),
 		};
-	} );
+	});
 
-	const handleSubmit = ( values ) => {
-		updatePaymentGateway( id, {
+	const handleSubmit = (values) => {
+		updatePaymentGateway(id, {
 			enabled: true,
 			settings: values,
-		} )
-			.then( ( result ) => {
-				if ( result && result.id === id ) {
-					markConfigured( id );
+		})
+			.then((result) => {
+				if (result && result.id === id) {
+					markConfigured(id);
 					createNotice(
 						'success',
 						sprintf(
 							/* translators: %s = title of the payment gateway */
-							__( '%s configured successfully', 'woocommerce' ),
+							__('%s configured successfully', 'woocommerce'),
 							title
 						)
 					);
 				}
-			} )
-			.catch( () => {
+			})
+			.catch(() => {
 				createNotice(
 					'error',
 					__(
@@ -86,77 +85,77 @@ export const Configure = ( { markConfigured, paymentGateway } ) => {
 						'woocommerce'
 					)
 				);
-			} );
+			});
 	};
 
 	const helpText = setupHelpText && (
-		<p dangerouslySetInnerHTML={ sanitizeHTML( setupHelpText ) } />
+		<p dangerouslySetInnerHTML={sanitizeHTML(setupHelpText)} />
 	);
 	const defaultForm = (
 		<DynamicForm
-			fields={ fields }
-			isBusy={ isUpdating }
-			onSubmit={ handleSubmit }
-			submitLabel={ __( 'Continue', 'woocommerce' ) }
-			validate={ ( values ) => validateFields( values, fields ) }
+			fields={fields}
+			isBusy={isUpdating}
+			onSubmit={handleSubmit}
+			submitLabel={__('Continue', 'woocommerce')}
+			validate={(values) => validateFields(values, fields)}
 		/>
 	);
 
-	if ( hasFills ) {
+	if (hasFills) {
 		return (
 			<WooPaymentGatewayConfigure.Slot
-				fillProps={ {
+				fillProps={{
 					defaultForm,
 					defaultSubmit: handleSubmit,
 					defaultFields: fields,
-					markConfigured: () => markConfigured( id ),
+					markConfigured: () => markConfigured(id),
 					paymentGateway,
-				} }
-				id={ id }
+				}}
+				id={id}
 			/>
 		);
 	}
 
-	if ( connectionUrl ) {
+	if (connectionUrl) {
 		return (
 			<>
-				{ helpText }
+				{helpText}
 				<Button
 					isPrimary
-					onClick={ () =>
-						recordEvent( 'tasklist_payment_connect_start', {
+					onClick={() =>
+						recordEvent('tasklist_payment_connect_start', {
 							payment_method: id,
-						} )
+						})
 					}
-					href={ connectionUrl }
+					href={connectionUrl}
 				>
-					{ __( 'Connect', 'woocommerce' ) }
+					{__('Connect', 'woocommerce')}
 				</Button>
 			</>
 		);
 	}
 
-	if ( fields.length ) {
+	if (fields.length) {
 		return (
 			<>
-				{ helpText }
-				{ defaultForm }
+				{helpText}
+				{defaultForm}
 			</>
 		);
 	}
 
 	return (
 		<>
-			{ helpText || (
+			{helpText || (
 				<p>
-					{ __(
+					{__(
 						'You can manage this payment gateway’s settings by clicking the button below',
 						'woocommerce'
-					) }
+					)}
 				</p>
-			) }
-			<Button isPrimary href={ settingsUrl }>
-				{ __( 'Get started', 'woocommerce' ) }
+			)}
+			<Button isPrimary href={settingsUrl}>
+				{__('Get started', 'woocommerce')}
 			</Button>
 		</>
 	);

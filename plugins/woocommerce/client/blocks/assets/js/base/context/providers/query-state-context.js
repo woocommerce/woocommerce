@@ -13,7 +13,7 @@ import { createContext, useContext } from '@wordpress/element';
  *
  * @member  {Object}  QueryStateContext A react context object
  */
-const QueryStateContext = createContext( 'page' );
+const QueryStateContext = createContext('page');
 
-export const useQueryStateContext = () => useContext( QueryStateContext );
+export const useQueryStateContext = () => useContext(QueryStateContext);
 export const QueryStateContextProvider = QueryStateContext.Provider;

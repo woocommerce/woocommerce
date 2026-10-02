@@ -8,15 +8,15 @@ import { addFilter } from '@wordpress/hooks';
  */
 import { App } from './App';
 
-addFilter( 'woocommerce_admin_pages_list', 'live-branches', ( pages ) => {
-	pages.push( {
+addFilter('woocommerce_admin_pages_list', 'live-branches', (pages) => {
+	pages.push({
 		container: App,
 		path: '/live-branches',
 		wpOpenMenu: 'toplevel_page_woocommerce',
 		capability: 'read',
-		breadcrumbs: [ 'Live Branches' ],
+		breadcrumbs: ['Live Branches'],
 		navArgs: { id: 'woocommerce-beta-tester-live-branches' },
-	} );
+	});
 
 	return pages;
-} );
+});

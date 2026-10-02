@@ -45,32 +45,28 @@ interface PaymentMethodLabelProps {
  *                            icon, or an SVG element.
  * @param {string} props.text Text shown next to icon.
  */
-export const PaymentMethodLabel = ( {
+export const PaymentMethodLabel = ({
 	icon = '',
 	text = '',
-}: PaymentMethodLabelProps ): JSX.Element => {
-	const hasIcon = !! icon;
+}: PaymentMethodLabelProps): JSX.Element => {
+	const hasIcon = !!icon;
 	const hasNamedIcon = useCallback(
 		(
 			iconToCheck: '' | keyof NamedIcons | SVGElement
 		): iconToCheck is keyof NamedIcons =>
 			hasIcon &&
-			isString( iconToCheck ) &&
-			objectHasProp( namedIcons, iconToCheck ),
-		[ hasIcon ]
+			isString(iconToCheck) &&
+			objectHasProp(namedIcons, iconToCheck),
+		[hasIcon]
 	);
-	const className = clsx( 'wc-block-components-payment-method-label', {
+	const className = clsx('wc-block-components-payment-method-label', {
 		'wc-block-components-payment-method-label--with-icon': hasIcon,
-	} );
+	});
 
 	return (
-		<span className={ className }>
-			{ hasNamedIcon( icon ) ? (
-				<Icon icon={ namedIcons[ icon ] } />
-			) : (
-				icon
-			) }
-			{ text }
+		<span className={className}>
+			{hasNamedIcon(icon) ? <Icon icon={namedIcons[icon]} /> : icon}
+			{text}
 		</span>
 	);
 };

@@ -25,9 +25,9 @@ export interface FormProps<
 	// aria-describedby attribute to add to the input.
 	ariaDescribedBy?: string;
 	// Array of fields in form.
-	fields: ( keyof FormFields )[];
+	fields: (keyof FormFields)[];
 	// Called with the new address data when the address form changes. This is only called when all required fields are filled and there are no validation errors.
-	onChange: ( newValue: T ) => void;
+	onChange: (newValue: T) => void;
 	// Values for fields.
 	values: T;
 	// support inserting children at end of form
@@ -36,45 +36,44 @@ export interface FormProps<
 	isEditing?: boolean;
 }
 
-export interface AddressLineFieldsProps
-	extends Omit<
-		FormProps< AddressFormValues >,
-		'fields' | 'values' | 'onChange'
-	> {
+export interface AddressLineFieldsProps extends Omit<
+	FormProps<AddressFormValues>,
+	'fields' | 'values' | 'onChange'
+> {
 	// Overwriting the id for the fields.
 	formId: string;
 	// Address 1 fields and value.
 	address1: {
-		field: AddressForm[ 'address_1' ] & {
+		field: AddressForm['address_1'] & {
 			key: 'address_1';
 			errorMessage?: string;
 		};
-		value: AddressFormValues[ 'address_1' ];
+		value: AddressFormValues['address_1'];
 	};
 	// Address 2 fields and value.
 	address2: {
-		field: AddressForm[ 'address_2' ] & {
+		field: AddressForm['address_2'] & {
 			key: 'address_2';
 			errorMessage?: string;
 		};
-		value: AddressFormValues[ 'address_2' ];
+		value: AddressFormValues['address_2'];
 	};
 	// Overwriting the address type for the fields.
 	addressType: FormType;
 	// Called with the new address data when the address form changes. This is only called when all required fields are filled and there are no validation errors.
-	onChange: ( key: 'address_1' | 'address_2', value: string ) => void;
+	onChange: (key: 'address_1' | 'address_2', value: string) => void;
 }
 
 export interface AddressLineFieldProps {
 	// Form fields.
-	field: AddressForm[ 'address_2' ] & {
+	field: AddressForm['address_2'] & {
 		key: 'address_2';
 		errorMessage?: string;
 	};
 	// Props for the form field.
 	props?: FieldProps | undefined;
 	// Called with the new address data when the address form changes. This is only called when all required fields are filled and there are no validation errors.
-	onChange: ( value: string ) => void;
+	onChange: (value: string) => void;
 	// Value for field.
 	value?: string | undefined;
 }

@@ -22,19 +22,17 @@ interface ShippingPackageItemIconProps {
  * @return {JSX.Element} React node.
  */
 
-const ShippingPackageItemIcon = ( {
+const ShippingPackageItemIcon = ({
 	packageItem,
 	cartItems = [],
-}: ShippingPackageItemIconProps ): JSX.Element => {
-	const cartItem = cartItems?.find(
-		( item ) => item.key === packageItem.key
-	);
+}: ShippingPackageItemIconProps): JSX.Element => {
+	const cartItem = cartItems?.find((item) => item.key === packageItem.key);
 	const images = cartItem?.images || [];
 
 	return (
 		<ProductImage
-			image={ images.length ? images[ 0 ] : {} }
-			fallbackAlt={ cartItem?.name || '' }
+			image={images.length ? images[0] : {}}
+			fallbackAlt={cartItem?.name || ''}
 		/>
 	);
 };

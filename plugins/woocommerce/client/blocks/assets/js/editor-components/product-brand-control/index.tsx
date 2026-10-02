@@ -27,7 +27,7 @@ interface ProductBrandControlProps {
 	/**
 	 * Callback to update the selected product brands.
 	 */
-	onChange: ( selected: SearchListItemProps[] ) => void;
+	onChange: (selected: SearchListItemProps[]) => void;
 	/**
 	 * Whether or not the search control should be displayed in a compact way, so it occupies less space.
 	 */
@@ -39,7 +39,7 @@ interface ProductBrandControlProps {
 	/**
 	 * Callback to update the brand operator. If not passed in, setting is not used.
 	 */
-	onOperatorChange?: ( operator: string ) => void;
+	onOperatorChange?: (operator: string) => void;
 	/**
 	 * Setting for whether products should match all or any selected brands.
 	 */
@@ -50,7 +50,7 @@ interface ProductBrandControlProps {
 	showReviewCount?: boolean;
 }
 
-const ProductBrandControl = ( {
+const ProductBrandControl = ({
 	brands = [],
 	error = null,
 	isLoading = false,
@@ -61,13 +61,13 @@ const ProductBrandControl = ( {
 	isCompact = false,
 	isSingle = false,
 	showReviewCount,
-}: ProductBrandControlProps & WithInjectedSearchedBrands ) => {
-	const renderItem = ( args: RenderItemArgs< ProductBrandResponseItem > ) => {
+}: ProductBrandControlProps & WithInjectedSearchedBrands) => {
+	const renderItem = (args: RenderItemArgs<ProductBrandResponseItem>) => {
 		const { item, search, depth = 0 } = args;
 
-		const accessibleName = ! item.breadcrumbs.length
+		const accessibleName = !item.breadcrumbs.length
 			? item.name
-			: `${ item.breadcrumbs.join( ', ' ) }, ${ item.name }`;
+			: `${item.breadcrumbs.join(', ')}, ${item.name}`;
 
 		const listItemAriaLabel = showReviewCount
 			? sprintf(
@@ -80,7 +80,7 @@ const ProductBrandControl = ( {
 					),
 					accessibleName,
 					item.details?.review_count || 0
-			  )
+				)
 			: sprintf(
 					/* translators: %1$s is the item name, %2$d is the count of products for the item. */
 					_n(
@@ -91,7 +91,7 @@ const ProductBrandControl = ( {
 					),
 					accessibleName,
 					item.details?.count || 0
-			  );
+				);
 
 		const listItemCountLabel = showReviewCount
 			? sprintf(
@@ -103,7 +103,7 @@ const ProductBrandControl = ( {
 						'woocommerce'
 					),
 					item.details?.review_count || 0
-			  )
+				)
 			: sprintf(
 					/* translators: %d is the count of products. */
 					_n(
@@ -113,106 +113,90 @@ const ProductBrandControl = ( {
 						'woocommerce'
 					),
 					item.details?.count || 0
-			  );
+				);
 
 		return (
 			<SearchListItem
-				className={ clsx(
+				className={clsx(
 					'woocommerce-product-brands__item',
 					'has-count',
 					{
 						'is-searching': search.length > 0,
 						'is-skip-level': depth === 0 && item.parent !== 0,
 					}
-				) }
-				{ ...args }
-				countLabel={ listItemCountLabel }
-				aria-label={ listItemAriaLabel }
+				)}
+				{...args}
+				countLabel={listItemCountLabel}
+				aria-label={listItemAriaLabel}
 			/>
 		);
 	};
 
 	const messages = {
-		clear: __( 'Clear all product brands', 'woocommerce' ),
-		list: __( 'Product Brands', 'woocommerce' ),
+		clear: __('Clear all product brands', 'woocommerce'),
+		list: __('Product Brands', 'woocommerce'),
 		noItems: __(
 			"Your store doesn't have any product brands.",
 			'woocommerce'
 		),
-		search: __( 'Search for product brands', 'woocommerce' ),
-		selected: ( n: number ) =>
+		search: __('Search for product brands', 'woocommerce'),
+		selected: (n: number) =>
 			sprintf(
 				/* translators: %d is the count of selected brands. */
-				_n(
-					'%d brand selected',
-					'%d brands selected',
-					n,
-					'woocommerce'
-				),
+				_n('%d brand selected', '%d brands selected', n, 'woocommerce'),
 				n
 			),
-		updated: __( 'Brand search results updated.', 'woocommerce' ),
+		updated: __('Brand search results updated.', 'woocommerce'),
 	};
 
-	if ( error ) {
-		return <ErrorMessage error={ error } />;
+	if (error) {
+		return <ErrorMessage error={error} />;
 	}
 
-	const currentList = brands.map(
-		convertProductBrandResponseItemToSearchItem
-	);
+	const currentList = brands.map(convertProductBrandResponseItemToSearchItem);
 
 	return (
 		<>
 			<SearchListControl
 				className="woocommerce-product-brands"
-				list={ currentList }
-				isLoading={ isLoading }
-				selected={ currentList.filter( ( { id } ) =>
-					selected.includes( Number( id ) )
-				) }
-				onChange={ onChange }
-				renderItem={ renderItem }
-				messages={ messages }
-				isCompact={ isCompact }
+				list={currentList}
+				isLoading={isLoading}
+				selected={currentList.filter(({ id }) =>
+					selected.includes(Number(id))
+				)}
+				onChange={onChange}
+				renderItem={renderItem}
+				messages={messages}
+				isCompact={isCompact}
 				isHierarchical
-				isSingle={ isSingle }
+				isSingle={isSingle}
 			/>
-			{ !! onOperatorChange && (
-				<div hidden={ selected.length < 2 }>
+			{!!onOperatorChange && (
+				<div hidden={selected.length < 2}>
 					<SelectControl
 						className="woocommerce-product-brands__operator"
-						label={ __(
-							'Display products matching',
-							'woocommerce'
-						) }
-						help={ __(
+						label={__('Display products matching', 'woocommerce')}
+						help={__(
 							'Pick at least two brands to use this setting.',
 							'woocommerce'
-						) }
-						value={ operator }
-						onChange={ onOperatorChange }
-						options={ [
+						)}
+						value={operator}
+						onChange={onOperatorChange}
+						options={[
 							{
-								label: __(
-									'Any selected brands',
-									'woocommerce'
-								),
+								label: __('Any selected brands', 'woocommerce'),
 								value: 'any',
 							},
 							{
-								label: __(
-									'All selected brands',
-									'woocommerce'
-								),
+								label: __('All selected brands', 'woocommerce'),
 								value: 'all',
 							},
-						] }
+						]}
 					/>
 				</div>
-			) }
+			)}
 		</>
 	);
 };
 
-export default withSearchedBrands( ProductBrandControl );
+export default withSearchedBrands(ProductBrandControl);

@@ -41,66 +41,66 @@ const ALLOWED_BLOCKS = [
 	'woocommerce/empty-cart-block',
 ];
 
-export const Edit = ( { clientId, className, attributes, setAttributes } ) => {
+export const Edit = ({ clientId, className, attributes, setAttributes }) => {
 	const { hasDarkControls, currentView } = attributes;
 	const isPreviewMode = usePreviewMode();
 	const defaultTemplate = [
-		[ 'woocommerce/filled-cart-block', {}, [] ],
-		[ 'woocommerce/empty-cart-block', {}, [] ],
+		['woocommerce/filled-cart-block', {}, []],
+		['woocommerce/empty-cart-block', {}, []],
 	];
-	const blockProps = useBlockPropsWithLocking( {
-		className: clsx( className, 'wp-block-woocommerce-cart', {
+	const blockProps = useBlockPropsWithLocking({
+		className: clsx(className, 'wp-block-woocommerce-cart', {
 			'is-editor-preview': isPreviewMode,
-		} ),
-	} );
+		}),
+	});
 
 	// This focuses on the block when a certain query param is found. This is used on the link from the task list.
-	const focus = useRef( getQueryArg( window.location.href, 'focus' ) );
+	const focus = useRef(getQueryArg(window.location.href, 'focus'));
 
-	useEffect( () => {
+	useEffect(() => {
 		if (
 			focus.current === 'cart' &&
-			! select( 'core/block-editor' ).hasSelectedBlock()
+			!select('core/block-editor').hasSelectedBlock()
 		) {
-			dispatch( 'core/block-editor' ).selectBlock( clientId );
-			dispatch( 'core/interface' ).enableComplementaryArea(
+			dispatch('core/block-editor').selectBlock(clientId);
+			dispatch('core/interface').enableComplementaryArea(
 				'core/edit-site',
 				'edit-site/block-inspector'
 			);
 		}
-	}, [ clientId ] );
+	}, [clientId]);
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<InspectorControls>
 				<BlockSettings
-					attributes={ attributes }
-					setAttributes={ setAttributes }
+					attributes={attributes}
+					setAttributes={setAttributes}
 				/>
 			</InspectorControls>
 			<BlockErrorBoundary
-				header={ __( 'Cart Block Error', 'woocommerce' ) }
-				text={ __(
+				header={__('Cart Block Error', 'woocommerce')}
+				text={__(
 					'There was an error whilst rendering the cart block. If this problem continues, try re-creating the block.',
 					'woocommerce'
-				) }
-				showErrorMessage={ true }
-				errorMessagePrefix={ __( 'Error message:', 'woocommerce' ) }
+				)}
+				showErrorMessage={true}
+				errorMessagePrefix={__('Error message:', 'woocommerce')}
 			>
 				<EditorProvider
-					previewData={ { previewCart } }
-					currentView={ currentView }
+					previewData={{ previewCart }}
+					currentView={currentView}
 				>
 					<CartBlockContext.Provider
-						value={ {
+						value={{
 							hasDarkControls,
-						} }
+						}}
 					>
 						<SlotFillProvider>
 							<CartProvider>
 								<InnerBlocks
-									allowedBlocks={ ALLOWED_BLOCKS }
-									template={ defaultTemplate }
+									allowedBlocks={ALLOWED_BLOCKS}
+									template={defaultTemplate}
 									templateLock="insert"
 								/>
 							</CartProvider>
@@ -115,9 +115,9 @@ export const Edit = ( { clientId, className, attributes, setAttributes } ) => {
 export const Save = () => {
 	return (
 		<div
-			{ ...useBlockProps.save( {
+			{...useBlockProps.save({
 				className: 'is-loading',
-			} ) }
+			})}
 		>
 			<InnerBlocks.Content />
 		</div>

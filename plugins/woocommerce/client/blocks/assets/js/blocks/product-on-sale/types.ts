@@ -9,10 +9,10 @@ export interface Attributes {
 		rating: boolean;
 		button: boolean;
 	};
-	categories: Array< number >;
+	categories: Array<number>;
 	catOperator: string;
 	isPreview: boolean;
-	stockStatus: Array< string >;
+	stockStatus: Array<string>;
 	editMode: boolean;
 	orderby:
 		| 'date'

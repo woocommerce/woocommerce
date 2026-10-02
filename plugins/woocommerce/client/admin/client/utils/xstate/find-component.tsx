@@ -3,29 +3,26 @@
  *
  * @template T - The type of the component meta object
  */
-export function findComponentMeta< T >(
-	obj: Record< string, unknown >,
-	visited = new Set< Record< string, unknown > >()
+export function findComponentMeta<T>(
+	obj: Record<string, unknown>,
+	visited = new Set<Record<string, unknown>>()
 ): T | undefined {
-	if ( visited.has( obj ) ) {
+	if (visited.has(obj)) {
 		return undefined;
 	}
 
-	visited.add( obj );
+	visited.add(obj);
 
-	for ( const key in obj ) {
-		if ( obj.hasOwnProperty( key ) ) {
-			if ( key === 'component' ) {
+	for (const key in obj) {
+		if (obj.hasOwnProperty(key)) {
+			if (key === 'component') {
 				return obj as T;
-			} else if (
-				typeof obj[ key ] === 'object' &&
-				obj[ key ] !== null
-			) {
-				const found = findComponentMeta< T >(
-					obj[ key ] as Record< string, unknown >,
+			} else if (typeof obj[key] === 'object' && obj[key] !== null) {
+				const found = findComponentMeta<T>(
+					obj[key] as Record<string, unknown>,
 					visited
 				);
-				if ( found !== undefined ) {
+				if (found !== undefined) {
 					return found;
 				}
 			}

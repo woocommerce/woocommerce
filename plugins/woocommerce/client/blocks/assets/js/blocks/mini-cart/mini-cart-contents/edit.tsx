@@ -35,38 +35,34 @@ const MIN_WIDTH = 300;
 
 interface Props {
 	clientId: string;
-	attributes: Record< string, unknown >;
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
+	attributes: Record<string, unknown>;
+	setAttributes: (attributes: Record<string, unknown>) => void;
 }
 
-const Edit = ( {
-	clientId,
-	attributes,
-	setAttributes,
-}: Props ): ReactElement => {
+const Edit = ({ clientId, attributes, setAttributes }: Props): ReactElement => {
 	const { currentView, width } = attributes;
 
 	const blockProps = useBlockProps();
 
 	const defaultTemplate = [
-		[ 'woocommerce/filled-mini-cart-contents-block', {}, [] ],
-		[ 'woocommerce/empty-mini-cart-contents-block', {}, [] ],
+		['woocommerce/filled-mini-cart-contents-block', {}, []],
+		['woocommerce/empty-mini-cart-contents-block', {}, []],
 	] as TemplateArray;
 
-	useForcedLayout( {
+	useForcedLayout({
 		clientId,
 		registeredBlocks: ALLOWED_BLOCKS,
 		defaultTemplate,
-	} );
+	});
 
 	// Apply the Mini-Cart Contents block base styles based on Site Editor's background and text colors.
 	// We need to set `div` in the selector so it has more specificity than the CSS.
 	useThemeColors(
 		'mini-cart-contents',
-		( { editorBackgroundColor, editorColor } ) => `
+		({ editorBackgroundColor, editorColor }) => `
 				div:where(.wp-block-woocommerce-mini-cart-contents) {
-					background-color: ${ editorBackgroundColor };
-					color: ${ editorColor };
+					background-color: ${editorBackgroundColor};
+					color: ${editorColor};
 				}
 			`
 	);
@@ -74,34 +70,31 @@ const Edit = ( {
 	return (
 		<>
 			<InspectorControls key="inspector">
-				<PanelBody
-					title={ __( 'Dimensions', 'woocommerce' ) }
-					initialOpen
-				>
+				<PanelBody title={__('Dimensions', 'woocommerce')} initialOpen>
 					<UnitControl
 						__next40pxDefaultSize
-						onChange={ ( value ) => {
-							setAttributes( { width: value } );
-						} }
-						onBlur={ ( e: FocusEvent< HTMLInputElement > ) => {
-							if ( e.target.value === '' ) {
-								setAttributes( {
+						onChange={(value) => {
+							setAttributes({ width: value });
+						}}
+						onBlur={(e: FocusEvent<HTMLInputElement>) => {
+							if (e.target.value === '') {
+								setAttributes({
 									width: defaultAttributes.width.default,
-								} );
-							} else if ( Number( e.target.value ) < MIN_WIDTH ) {
-								setAttributes( {
+								});
+							} else if (Number(e.target.value) < MIN_WIDTH) {
+								setAttributes({
 									width: MIN_WIDTH + 'px',
-								} );
+								});
 							}
-						} }
-						value={ width }
-						units={ [
+						}}
+						value={width}
+						units={[
 							{
 								value: 'px',
 								label: 'px',
 								default: defaultAttributes.width.default,
 							},
-						] }
+						]}
 					/>
 				</PanelBody>
 			</InspectorControls>
@@ -111,15 +104,15 @@ const Edit = ( {
 				aria-hidden="true"
 			></div>
 			<div className="wc-block-editor-mini-cart-contents__wrapper">
-				<div { ...blockProps }>
-					<EditorProvider currentView={ currentView }>
+				<div {...blockProps}>
+					<EditorProvider currentView={currentView}>
 						<InnerBlocks
-							allowedBlocks={ ALLOWED_BLOCKS }
-							template={ defaultTemplate }
-							templateLock={ false }
+							allowedBlocks={ALLOWED_BLOCKS}
+							template={defaultTemplate}
+							templateLock={false}
 						/>
 					</EditorProvider>
-					<MiniCartInnerBlocksStyle style={ blockProps.style } />
+					<MiniCartInnerBlocksStyle style={blockProps.style} />
 				</div>
 			</div>
 		</>
@@ -130,7 +123,7 @@ export default Edit;
 
 export const Save = (): JSX.Element => {
 	return (
-		<div { ...useBlockProps.save() }>
+		<div {...useBlockProps.save()}>
 			<InnerBlocks.Content />
 		</div>
 	);

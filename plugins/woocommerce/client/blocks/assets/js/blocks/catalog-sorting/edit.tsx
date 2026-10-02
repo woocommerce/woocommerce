@@ -18,75 +18,71 @@ import {
  */
 import type { BlockAttributes } from './types';
 
-const CatalogSorting = ( {
-	useLabel,
-}: Pick< BlockAttributes, 'useLabel' > ) => {
+const CatalogSorting = ({ useLabel }: Pick<BlockAttributes, 'useLabel'>) => {
 	return (
 		<>
-			{ useLabel ? (
+			{useLabel ? (
 				<>
 					<label htmlFor="woocommerce-orderby">
-						{ __( 'Sort by', 'woocommerce' ) }
+						{__('Sort by', 'woocommerce')}
 					</label>
 					<select className="orderby" id="woocommerce-orderby">
-						<option>{ __( 'Default', 'woocommerce' ) }</option>
+						<option>{__('Default', 'woocommerce')}</option>
 					</select>
 				</>
 			) : (
 				<select className="orderby">
-					<option>{ __( 'Default sorting', 'woocommerce' ) }</option>
+					<option>{__('Default sorting', 'woocommerce')}</option>
 				</select>
-			) }
+			)}
 		</>
 	);
 };
 
-const Edit = ( {
+const Edit = ({
 	attributes,
 	setAttributes,
-}: BlockEditProps< BlockAttributes > ) => {
+}: BlockEditProps<BlockAttributes>) => {
 	const { useLabel } = attributes;
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className: 'woocommerce wc-block-catalog-sorting',
-	} );
+	});
 
 	return (
 		<>
 			<InspectorControls>
 				<ToolsPanel
-					label={ __( 'Accessibility', 'woocommerce' ) }
-					resetAll={ () => {
-						setAttributes( { useLabel: false } );
-					} }
+					label={__('Accessibility', 'woocommerce')}
+					resetAll={() => {
+						setAttributes({ useLabel: false });
+					}}
 				>
 					<ToolsPanelItem
-						hasValue={ () => useLabel !== false }
-						label={ __( 'Show visual label', 'woocommerce' ) }
-						onDeselect={ () =>
-							setAttributes( { useLabel: false } )
-						}
+						hasValue={() => useLabel !== false}
+						label={__('Show visual label', 'woocommerce')}
+						onDeselect={() => setAttributes({ useLabel: false })}
 						isShownByDefault
 					>
 						<ToggleControl
 							__nextHasNoMarginBottom
-							label={ __( 'Show visual label', 'woocommerce' ) }
-							help={ __(
+							label={__('Show visual label', 'woocommerce')}
+							help={__(
 								'Displays "Sort by" text before the dropdown menu to improve clarity and accessibility.',
 								'woocommerce'
-							) }
-							checked={ useLabel }
-							onChange={ ( isChecked ) =>
-								setAttributes( {
+							)}
+							checked={useLabel}
+							onChange={(isChecked) =>
+								setAttributes({
 									useLabel: isChecked,
-								} )
+								})
 							}
 						/>
 					</ToolsPanelItem>
 				</ToolsPanel>
 			</InspectorControls>
-			<div { ...blockProps }>
+			<div {...blockProps}>
 				<Disabled>
-					<CatalogSorting useLabel={ useLabel } />
+					<CatalogSorting useLabel={useLabel} />
 				</Disabled>
 			</div>
 		</>

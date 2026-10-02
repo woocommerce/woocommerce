@@ -16,7 +16,7 @@ const MyFill = () => (
 
 if (
 	window.wcAdminFeatures &&
-	window.wcAdminFeatures[ 'beta-tester-slotfill-examples' ]
+	window.wcAdminFeatures['beta-tester-slotfill-examples']
 ) {
 	registerPlugin(
 		'beta-tester-woocommerce-experiments-placeholder-slotfill-example',

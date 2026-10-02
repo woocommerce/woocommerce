@@ -22,26 +22,26 @@ import {
 import { Navigator } from './navigator';
 
 export function RawStylesSidebar(): JSX.Element {
-	const { userCanEditGlobalStyles } = useSelect( ( select ) => {
-		const { canEdit } = select( storeName ).canUserEditGlobalEmailStyles();
+	const { userCanEditGlobalStyles } = useSelect((select) => {
+		const { canEdit } = select(storeName).canUserEditGlobalEmailStyles();
 		return {
 			userCanEditGlobalStyles: canEdit,
 		};
-	}, [] );
+	}, []);
 
 	return (
 		userCanEditGlobalStyles && (
 			<>
 				<PluginSidebarMoreMenuItem
 					target="email-styles-sidebar"
-					icon={ styles }
+					icon={styles}
 				>
-					{ __( 'Email styles', __i18n_text_domain__ ) }
+					{__('Email styles', __i18n_text_domain__)}
 				</PluginSidebarMoreMenuItem>
 				<PluginSidebar
 					name="email-styles-sidebar"
-					icon={ styles }
-					title={ __( 'Styles', __i18n_text_domain__ ) }
+					icon={styles}
+					title={__('Styles', __i18n_text_domain__)}
 					className="woocommerce-email-editor-styles-panel"
 				>
 					<Navigator initialPath="/">
@@ -87,4 +87,4 @@ export function RawStylesSidebar(): JSX.Element {
 	);
 }
 
-export const StylesSidebar = memo( RawStylesSidebar );
+export const StylesSidebar = memo(RawStylesSidebar);

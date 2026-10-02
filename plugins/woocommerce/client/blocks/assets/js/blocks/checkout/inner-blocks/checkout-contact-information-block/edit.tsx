@@ -19,7 +19,7 @@ import {
 } from '../../form-step';
 import Block from './block';
 
-export const Edit = ( {
+export const Edit = ({
 	attributes,
 	setAttributes,
 }: {
@@ -29,48 +29,48 @@ export const Edit = ( {
 		showStepNumber: boolean;
 		className: string;
 	};
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ): JSX.Element => {
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}): JSX.Element => {
 	return (
 		<FormStepBlock
-			attributes={ attributes }
-			setAttributes={ setAttributes }
-			className={ clsx(
+			attributes={attributes}
+			setAttributes={setAttributes}
+			className={clsx(
 				'wc-block-checkout__contact-fields',
 				attributes?.className
-			) }
+			)}
 		>
 			<InspectorControls>
 				<PanelBody
-					title={ __(
+					title={__(
 						'Account creation and guest checkout',
 						'woocommerce'
-					) }
+					)}
 				>
 					<p className="wc-block-checkout__controls-text">
-						{ __(
+						{__(
 							'Account creation and guest checkout settings can be managed in your store settings.',
 							'woocommerce'
-						) }
+						)}
 					</p>
 					<ExternalLink
-						href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=account` }
+						href={`${ADMIN_URL}admin.php?page=wc-settings&tab=account`}
 					>
-						{ __( 'Manage account settings', 'woocommerce' ) }
+						{__('Manage account settings', 'woocommerce')}
 					</ExternalLink>
 				</PanelBody>
 			</InspectorControls>
 			<Noninteractive>
 				<Block />
 			</Noninteractive>
-			<AdditionalFields block={ innerBlockAreas.CONTACT_INFORMATION } />
+			<AdditionalFields block={innerBlockAreas.CONTACT_INFORMATION} />
 		</FormStepBlock>
 	);
 };
 
 export const Save = (): JSX.Element => {
 	return (
-		<div { ...useBlockProps.save() }>
+		<div {...useBlockProps.save()}>
 			<AdditionalFieldsContent />
 		</div>
 	);

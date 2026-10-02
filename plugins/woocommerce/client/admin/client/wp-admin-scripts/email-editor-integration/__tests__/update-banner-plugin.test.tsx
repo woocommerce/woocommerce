@@ -16,9 +16,9 @@ import { UpdateBannerPlugin } from '../update-banner-plugin';
 // render and again after the rAF in the impl, so changing it
 // per-test is sufficient.
 const useUpdateBannerMock = jest.fn();
-jest.mock( '../hooks/use-update-banner', () => ( {
+jest.mock('../hooks/use-update-banner', () => ({
 	useUpdateBanner: () => useUpdateBannerMock(),
-} ) );
+}));
 
 const baseHookReturn = {
 	shouldRender: false,
@@ -38,49 +38,47 @@ const baseHookReturn = {
 	autoDismiss: jest.fn(),
 };
 
-describe( 'UpdateBannerPlugin', () => {
-	beforeEach( () => {
+describe('UpdateBannerPlugin', () => {
+	beforeEach(() => {
 		// Reset the DOM between tests so the canvas selector / body
 		// fallback assertions stay isolated.
 		document.body.innerHTML = '';
 		useUpdateBannerMock.mockReset();
-	} );
+	});
 
-	it( 'returns null when shouldRender is false', () => {
-		useUpdateBannerMock.mockReturnValue( {
+	it('returns null when shouldRender is false', () => {
+		useUpdateBannerMock.mockReturnValue({
 			...baseHookReturn,
 			shouldRender: false,
-		} );
+		});
 
-		const { container } = render( <UpdateBannerPlugin /> );
-		expect( container.firstChild ).toBeNull();
-	} );
+		const { container } = render(<UpdateBannerPlugin />);
+		expect(container.firstChild).toBeNull();
+	});
 
-	it( 'portals the banner into the editor canvas target when present', () => {
-		const target = document.createElement( 'div' );
+	it('portals the banner into the editor canvas target when present', () => {
+		const target = document.createElement('div');
 		target.className = 'edit-post-visual-editor';
-		document.body.appendChild( target );
+		document.body.appendChild(target);
 
-		useUpdateBannerMock.mockReturnValue( {
+		useUpdateBannerMock.mockReturnValue({
 			...baseHookReturn,
 			shouldRender: true,
-		} );
+		});
 
-		render( <UpdateBannerPlugin /> );
+		render(<UpdateBannerPlugin />);
 
-		expect( target.querySelector( '.wc-update-banner' ) ).not.toBeNull();
-	} );
+		expect(target.querySelector('.wc-update-banner')).not.toBeNull();
+	});
 
-	it( 'falls back to document.body when no canvas target is present', () => {
-		useUpdateBannerMock.mockReturnValue( {
+	it('falls back to document.body when no canvas target is present', () => {
+		useUpdateBannerMock.mockReturnValue({
 			...baseHookReturn,
 			shouldRender: true,
-		} );
+		});
 
-		render( <UpdateBannerPlugin /> );
+		render(<UpdateBannerPlugin />);
 
-		expect(
-			document.body.querySelector( '.wc-update-banner' )
-		).not.toBeNull();
-	} );
-} );
+		expect(document.body.querySelector('.wc-update-banner')).not.toBeNull();
+	});
+});

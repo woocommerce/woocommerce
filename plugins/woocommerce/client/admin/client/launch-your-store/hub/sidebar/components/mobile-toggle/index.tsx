@@ -15,15 +15,15 @@ interface MobileSidebarToggleProps {
 	onToggle: () => void;
 }
 
-const MobileSidebarToggle: React.FC< MobileSidebarToggleProps > = ( {
+const MobileSidebarToggle: React.FC<MobileSidebarToggleProps> = ({
 	onToggle,
-} ) => {
+}) => {
 	return (
 		<Button
 			className="mobile-sidebar-toggle"
-			onClick={ onToggle }
-			aria-label={ __( 'Toggle sidebar', 'woocommerce' ) }
-			icon={ <Icon icon={ menu } size={ 24 } /> }
+			onClick={onToggle}
+			aria-label={__('Toggle sidebar', 'woocommerce')}
+			icon={<Icon icon={menu} size={24} />}
 		/>
 	);
 };

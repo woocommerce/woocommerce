@@ -14,105 +14,105 @@ import { PaymentState } from './default-state';
 import { filterActiveSavedPaymentMethods } from './utils/filter-active-saved-payment-methods';
 import { STATUS as PAYMENT_STATUS } from './constants';
 
-const globalPaymentMethods: Record< string, string > = {};
+const globalPaymentMethods: Record<string, string> = {};
 
-if ( getSetting( 'globalPaymentMethods' ) ) {
-	getSetting< GlobalPaymentMethod[] >( 'globalPaymentMethods' ).forEach(
-		( method ) => {
-			globalPaymentMethods[ method.id ] = method.title;
+if (getSetting('globalPaymentMethods')) {
+	getSetting<GlobalPaymentMethod[]>('globalPaymentMethods').forEach(
+		(method) => {
+			globalPaymentMethods[method.id] = method.title;
 		}
 	);
 }
 
-export const isPaymentPristine = ( state: PaymentState ) => {
-	deprecated( 'isPaymentPristine', {
+export const isPaymentPristine = (state: PaymentState) => {
+	deprecated('isPaymentPristine', {
 		since: '7.5.0',
 		alternative: 'isPaymentIdle',
 		link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
-	} );
+	});
 
 	return state.status === PAYMENT_STATUS.IDLE;
 };
 
-export const isPaymentIdle = ( state: PaymentState ) =>
+export const isPaymentIdle = (state: PaymentState) =>
 	state.status === PAYMENT_STATUS.IDLE;
 
-export const isPaymentStarted = ( state: PaymentState ) => {
-	deprecated( 'isPaymentStarted', {
+export const isPaymentStarted = (state: PaymentState) => {
+	deprecated('isPaymentStarted', {
 		since: '7.5.0',
 		alternative: 'isExpressPaymentStarted',
 		link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
-	} );
+	});
 	return state.status === PAYMENT_STATUS.EXPRESS_STARTED;
 };
 
-export const isExpressPaymentStarted = ( state: PaymentState ) => {
+export const isExpressPaymentStarted = (state: PaymentState) => {
 	return state.status === PAYMENT_STATUS.EXPRESS_STARTED;
 };
 
-export const isPaymentProcessing = ( state: PaymentState ) =>
+export const isPaymentProcessing = (state: PaymentState) =>
 	state.status === PAYMENT_STATUS.PROCESSING;
 
-export const isPaymentReady = ( state: PaymentState ) =>
+export const isPaymentReady = (state: PaymentState) =>
 	state.status === PAYMENT_STATUS.READY;
 
-export const isPaymentSuccess = ( state: PaymentState ) => {
-	deprecated( 'isPaymentSuccess', {
+export const isPaymentSuccess = (state: PaymentState) => {
+	deprecated('isPaymentSuccess', {
 		since: '7.5.0',
 		alternative: 'isPaymentReady',
 		link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
-	} );
+	});
 
 	return state.status === PAYMENT_STATUS.READY;
 };
 
-export const hasPaymentError = ( state: PaymentState ) =>
+export const hasPaymentError = (state: PaymentState) =>
 	state.status === PAYMENT_STATUS.ERROR;
 
-export const isPaymentFailed = ( state: PaymentState ) => {
-	deprecated( 'isPaymentFailed', {
+export const isPaymentFailed = (state: PaymentState) => {
+	deprecated('isPaymentFailed', {
 		since: '7.5.0',
 		link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
-	} );
+	});
 
 	return state.status === PAYMENT_STATUS.ERROR;
 };
 
-export const isExpressPaymentMethodActive = ( state: PaymentState ) => {
-	return Object.keys( state.availableExpressPaymentMethods ).includes(
+export const isExpressPaymentMethodActive = (state: PaymentState) => {
+	return Object.keys(state.availableExpressPaymentMethods).includes(
 		state.activePaymentMethod
 	);
 };
 
-export const getActiveSavedToken = ( state: PaymentState ) => {
+export const getActiveSavedToken = (state: PaymentState) => {
 	return typeof state.paymentMethodData === 'object' &&
-		objectHasProp( state.paymentMethodData, 'token' )
+		objectHasProp(state.paymentMethodData, 'token')
 		? state.paymentMethodData.token + ''
 		: '';
 };
 
-export const getActivePaymentMethod = ( state: PaymentState ) => {
+export const getActivePaymentMethod = (state: PaymentState) => {
 	return state.activePaymentMethod;
 };
 
-export const getAvailablePaymentMethods = ( state: PaymentState ) => {
+export const getAvailablePaymentMethods = (state: PaymentState) => {
 	return state.availablePaymentMethods;
 };
 
-export const getAvailableExpressPaymentMethods = ( state: PaymentState ) => {
+export const getAvailableExpressPaymentMethods = (state: PaymentState) => {
 	return state.availableExpressPaymentMethods;
 };
 
-export const getRegisteredExpressPaymentMethods = ( state: PaymentState ) => {
+export const getRegisteredExpressPaymentMethods = (state: PaymentState) => {
 	return state.registeredExpressPaymentMethods;
 };
 
-export const getPaymentMethodData = ( state: PaymentState ) => {
+export const getPaymentMethodData = (state: PaymentState) => {
 	return state.paymentMethodData;
 };
 
 export const getIncompatiblePaymentMethods = createSelector(
-	( state: PaymentState ) => {
+	(state: PaymentState) => {
 		const {
 			availablePaymentMethods,
 			availableExpressPaymentMethods,
@@ -120,10 +120,7 @@ export const getIncompatiblePaymentMethods = createSelector(
 			expressPaymentMethodsInitialized,
 		} = state;
 
-		if (
-			! paymentMethodsInitialized ||
-			! expressPaymentMethodsInitialized
-		) {
+		if (!paymentMethodsInitialized || !expressPaymentMethodsInitialized) {
 			return {};
 		}
 
@@ -131,18 +128,18 @@ export const getIncompatiblePaymentMethods = createSelector(
 		// than their store key, so a distinct client-side `name` isn't flagged.
 		const availableExpressPaymentMethodIds = Object.values(
 			availableExpressPaymentMethods
-		).map( ( method ) => method.paymentMethodId ?? method.name );
+		).map((method) => method.paymentMethodId ?? method.name);
 
 		return Object.fromEntries(
-			Object.entries( globalPaymentMethods ).filter( ( [ id ] ) => {
-				return ! (
+			Object.entries(globalPaymentMethods).filter(([id]) => {
+				return !(
 					id in availablePaymentMethods ||
-					availableExpressPaymentMethodIds.includes( id )
+					availableExpressPaymentMethodIds.includes(id)
 				);
-			} )
+			})
 		);
 	},
-	( state: PaymentState ) => [
+	(state: PaymentState) => [
 		state.availablePaymentMethods,
 		state.availableExpressPaymentMethods,
 		state.paymentMethodsInitialized,
@@ -150,7 +147,7 @@ export const getIncompatiblePaymentMethods = createSelector(
 	]
 );
 
-export const getSavedPaymentMethods = ( state: PaymentState ) => {
+export const getSavedPaymentMethods = (state: PaymentState) => {
 	return state.savedPaymentMethods;
 };
 
@@ -158,7 +155,7 @@ export const getSavedPaymentMethods = ( state: PaymentState ) => {
  * Filters the list of saved payment methods and returns only the ones which
  * are active and supported by the payment gateway
  */
-export const getActiveSavedPaymentMethods = ( state: PaymentState ) => {
+export const getActiveSavedPaymentMethods = (state: PaymentState) => {
 	const availablePaymentMethodKeys = Object.keys(
 		state.availablePaymentMethods
 	);
@@ -169,11 +166,11 @@ export const getActiveSavedPaymentMethods = ( state: PaymentState ) => {
 	);
 };
 
-export const paymentMethodsInitialized = ( state: PaymentState ) => {
+export const paymentMethodsInitialized = (state: PaymentState) => {
 	return state.paymentMethodsInitialized;
 };
 
-export const expressPaymentMethodsInitialized = ( state: PaymentState ) => {
+export const expressPaymentMethodsInitialized = (state: PaymentState) => {
 	return state.expressPaymentMethodsInitialized;
 };
 
@@ -181,61 +178,61 @@ export const expressPaymentMethodsInitialized = ( state: PaymentState ) => {
  * @deprecated - Use these selectors instead: isPaymentIdle, isPaymentProcessing,
  * hasPaymentError
  */
-export const getCurrentStatus = ( state: PaymentState ) => {
-	deprecated( 'getCurrentStatus', {
+export const getCurrentStatus = (state: PaymentState) => {
+	deprecated('getCurrentStatus', {
 		since: '7.2.0',
 		alternative: 'isPaymentIdle, isPaymentProcessing, hasPaymentError',
 		link: 'https://github.com/woocommerce/woocommerce-blocks/pull/7666',
-	} );
+	});
 
 	return {
 		get isPristine() {
-			deprecated( 'isPristine', {
+			deprecated('isPristine', {
 				since: '7.5.0',
 				alternative: 'isIdle',
-			} );
-			return isPaymentIdle( state );
+			});
+			return isPaymentIdle(state);
 		}, // isPristine is the same as isIdle.
-		isIdle: isPaymentIdle( state ),
-		isStarted: isExpressPaymentStarted( state ),
-		isProcessing: isPaymentProcessing( state ),
+		isIdle: isPaymentIdle(state),
+		isStarted: isExpressPaymentStarted(state),
+		isProcessing: isPaymentProcessing(state),
 		get isFinished() {
-			deprecated( 'isFinished', {
+			deprecated('isFinished', {
 				since: '7.5.0',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
-			} );
-			return hasPaymentError( state ) || isPaymentReady( state );
+			});
+			return hasPaymentError(state) || isPaymentReady(state);
 		},
-		hasError: hasPaymentError( state ),
+		hasError: hasPaymentError(state),
 		get hasFailed() {
-			deprecated( 'hasFailed', {
+			deprecated('hasFailed', {
 				since: '7.5.0',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
-			} );
-			return hasPaymentError( state );
+			});
+			return hasPaymentError(state);
 		},
 		get isSuccessful() {
-			deprecated( 'isSuccessful', {
+			deprecated('isSuccessful', {
 				since: '7.5.0',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
-			} );
-			return isPaymentReady( state );
+			});
+			return isPaymentReady(state);
 		},
-		isDoingExpressPayment: isExpressPaymentMethodActive( state ),
+		isDoingExpressPayment: isExpressPaymentMethodActive(state),
 	};
 };
 
-export const getShouldSavePaymentMethod = ( state: PaymentState ) => {
+export const getShouldSavePaymentMethod = (state: PaymentState) => {
 	return state.shouldSavePaymentMethod;
 };
 
-export const getPaymentResult = ( state: PaymentState ) => {
+export const getPaymentResult = (state: PaymentState) => {
 	return state.paymentResult;
 };
 
 // We should avoid using this selector and instead use the focused selectors
 // We're keeping it because it's used in our unit test: assets/js/blocks/cart-checkout-shared/payment-methods/test/payment-methods.js
 // to mock the selectors.
-export const getState = ( state: PaymentState ) => {
+export const getState = (state: PaymentState) => {
 	return state;
 };

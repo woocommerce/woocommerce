@@ -19,13 +19,13 @@ import { __ } from '@wordpress/i18n';
 import './style.scss';
 import type { Attributes } from './types';
 
-type Props = BlockEditProps< Attributes > &
-	HTMLAttributes< HTMLDivElement > & {
+type Props = BlockEditProps<Attributes> &
+	HTMLAttributes<HTMLDivElement> & {
 		isDescendantOfAllProducts: boolean;
 		isDescendentOfSingleProductTemplate: boolean;
 	};
 
-const Preview = ( {
+const Preview = ({
 	setAttributes,
 	parentClassName,
 	sku,
@@ -34,73 +34,73 @@ const Preview = ( {
 	prefix,
 	suffix,
 }: {
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
+	setAttributes: (attributes: Record<string, unknown>) => void;
 	parentClassName: string;
 	sku: string;
 	className?: string | undefined;
 	style?: React.CSSProperties | undefined;
 	prefix?: string;
 	suffix?: string;
-} ) => (
+}) => (
 	<div
-		className={ clsx( className, 'wp-block-post-terms', {
-			[ `${ parentClassName }__product-sku` ]: parentClassName,
-		} ) }
-		style={ style }
+		className={clsx(className, 'wp-block-post-terms', {
+			[`${parentClassName}__product-sku`]: parentClassName,
+		})}
+		style={style}
 	>
 		<RichText
 			className="wc-block-components-product-sku__prefix"
 			tagName="span"
-			placeholder={ __( 'Prefix', 'woocommerce' ) }
-			value={ prefix }
-			onChange={ ( value ) => setAttributes( { prefix: value } ) }
+			placeholder={__('Prefix', 'woocommerce')}
+			value={prefix}
+			onChange={(value) => setAttributes({ prefix: value })}
 		/>
-		<span> { sku }</span>
+		<span> {sku}</span>
 		<RichText
-			className={ clsx( 'wc-block-components-product-sku__suffix', {
-				'has-content': !! suffix,
-			} ) }
+			className={clsx('wc-block-components-product-sku__suffix', {
+				'has-content': !!suffix,
+			})}
 			tagName="span"
-			placeholder={ ' ' + __( 'Suffix', 'woocommerce' ) }
-			value={ suffix }
-			onChange={ ( value ) => setAttributes( { suffix: value } ) }
+			placeholder={' ' + __('Suffix', 'woocommerce')}
+			value={suffix}
+			onChange={(value) => setAttributes({ suffix: value })}
 		/>
 	</div>
 );
 
-const Block = ( props: Props ): JSX.Element | null => {
+const Block = (props: Props): JSX.Element | null => {
 	const { className } = props;
-	const styleProps = useStyleProps( props );
+	const styleProps = useStyleProps(props);
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
 	const sku = product.sku;
 
-	if ( props.isDescendentOfSingleProductTemplate ) {
+	if (props.isDescendentOfSingleProductTemplate) {
 		return (
 			<Preview
-				setAttributes={ props.setAttributes }
-				parentClassName={ parentClassName }
-				className={ className }
-				sku={ __( 'Product SKU', 'woocommerce' ) }
-				prefix={ props.prefix }
-				suffix={ props.suffix }
+				setAttributes={props.setAttributes}
+				parentClassName={parentClassName}
+				className={className}
+				sku={__('Product SKU', 'woocommerce')}
+				prefix={props.prefix}
+				suffix={props.suffix}
 			/>
 		);
 	}
 
-	if ( ! sku ) {
+	if (!sku) {
 		return null;
 	}
 
 	return (
 		<Preview
-			setAttributes={ props.setAttributes }
-			className={ className }
-			parentClassName={ parentClassName }
-			sku={ sku }
-			prefix={ props.prefix }
-			suffix={ props.suffix }
-			{ ...( props.isDescendantOfAllProducts && {
+			setAttributes={props.setAttributes}
+			className={className}
+			parentClassName={parentClassName}
+			sku={sku}
+			prefix={props.prefix}
+			suffix={props.suffix}
+			{...(props.isDescendantOfAllProducts && {
 				className: clsx(
 					className,
 					'wc-block-components-product-sku wp-block-woocommerce-product-sku',
@@ -109,9 +109,9 @@ const Block = ( props: Props ): JSX.Element | null => {
 				style: {
 					...styleProps.style,
 				},
-			} ) }
+			})}
 		/>
 	);
 };
 
-export default withProductDataContext( Block );
+export default withProductDataContext(Block);

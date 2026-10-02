@@ -32,23 +32,20 @@ const CustomerAddress = () => {
 	const { isInitialized } = useCustomerData();
 
 	const { validationErrors } = useSelect(
-		( select ) => {
+		(select) => {
 			return {
-				validationErrors:
-					select( validationStore ).getValidationErrors(),
+				validationErrors: select(validationStore).getValidationErrors(),
 			};
 		},
-		[ billingAddress ]
+		[billingAddress]
 	);
 
-	useEffect( () => {
+	useEffect(() => {
 		// Check if any billing field has validation errors
-		const hasValidationErrors = Object.keys( billingAddress ).some(
-			( key ) => {
-				// Check if 'billing_' + key exists in validationErrors
-				return validationErrors[ `billing_${ key }` ] !== undefined;
-			}
-		);
+		const hasValidationErrors = Object.keys(billingAddress).some((key) => {
+			// Check if 'billing_' + key exists in validationErrors
+			return validationErrors[`billing_${key}`] !== undefined;
+		});
 
 		// Forces editing state if store has errors,
 		// but not on initial render when all fields are empty.
@@ -57,7 +54,7 @@ const CustomerAddress = () => {
 			hasValidationErrors &&
 			editingBillingAddress === false
 		) {
-			setEditingBillingAddress( true );
+			setEditingBillingAddress(true);
 		}
 	}, [
 		editingBillingAddress,
@@ -65,16 +62,16 @@ const CustomerAddress = () => {
 		isInitialized,
 		setEditingBillingAddress,
 		validationErrors,
-	] );
+	]);
 
 	const onChangeAddress = useCallback(
-		( values: AddressFormValues ) => {
-			setBillingAddress( values );
-			if ( useBillingAsShipping ) {
-				setShippingAddress( values );
-				dispatchCheckoutEvent( 'set-shipping-address' );
+		(values: AddressFormValues) => {
+			setBillingAddress(values);
+			if (useBillingAsShipping) {
+				setShippingAddress(values);
+				dispatchCheckoutEvent('set-shipping-address');
 			}
-			dispatchCheckoutEvent( 'set-billing-address' );
+			dispatchCheckoutEvent('set-billing-address');
 		},
 		[
 			dispatchCheckoutEvent,
@@ -86,25 +83,25 @@ const CustomerAddress = () => {
 
 	return (
 		<AddressWrapper
-			isEditing={ editingBillingAddress }
+			isEditing={editingBillingAddress}
 			addressCard={
 				<AddressCard
-					address={ billingAddress }
+					address={billingAddress}
 					target="billing"
-					onEdit={ () => {
-						setEditingBillingAddress( true );
-					} }
-					isExpanded={ editingBillingAddress }
+					onEdit={() => {
+						setEditingBillingAddress(true);
+					}}
+					isExpanded={editingBillingAddress}
 				/>
 			}
 			addressForm={
 				<Form
 					id="billing"
 					addressType="billing"
-					onChange={ onChangeAddress }
-					values={ billingAddress }
-					fields={ ADDRESS_FORM_KEYS }
-					isEditing={ editingBillingAddress }
+					onChange={onChangeAddress}
+					values={billingAddress}
+					fields={ADDRESS_FORM_KEYS}
+					isEditing={editingBillingAddress}
 				/>
 			}
 		/>

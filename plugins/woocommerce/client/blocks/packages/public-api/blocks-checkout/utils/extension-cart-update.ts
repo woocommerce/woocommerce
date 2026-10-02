@@ -18,12 +18,12 @@ import { STORE_KEY } from '../../block-data/cart/constants';
  */
 export const extensionCartUpdate = (
 	args: ExtensionCartUpdateArgs
-): Promise< CartResponse > => {
-	const { applyExtensionCartUpdate } = dispatch( STORE_KEY );
-	return applyExtensionCartUpdate( args ).catch( ( error ) => {
-		if ( error?.code === 'woocommerce_rest_cart_extensions_error' ) {
-			processErrorResponse( error );
+): Promise<CartResponse> => {
+	const { applyExtensionCartUpdate } = dispatch(STORE_KEY);
+	return applyExtensionCartUpdate(args).catch((error) => {
+		if (error?.code === 'woocommerce_rest_cart_extensions_error') {
+			processErrorResponse(error);
 		}
-		return Promise.reject( error );
-	} );
+		return Promise.reject(error);
+	});
 };

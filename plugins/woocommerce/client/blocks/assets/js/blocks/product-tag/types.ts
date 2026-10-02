@@ -1,6 +1,6 @@
 export interface ProductsByTagBlockProps {
 	attributes: {
-		tags: ( number | string )[];
+		tags: (number | string)[];
 		tagOperator: string;
 		columns: number;
 		rows: number;
@@ -21,7 +21,7 @@ export interface ProductsByTagBlockProps {
 	};
 	name: string;
 	setAttributes: (
-		attributes: Partial< ProductsByTagBlockProps[ 'attributes' ] >
+		attributes: Partial<ProductsByTagBlockProps['attributes']>
 	) => void;
-	debouncedSpeak: ( message: string ) => void;
+	debouncedSpeak: (message: string) => void;
 }

@@ -38,11 +38,11 @@ export default {
 			description: 'The props to be passed to the wrapper element.',
 		},
 	},
-} as Meta< LabelProps >;
+} as Meta<LabelProps>;
 
-const Template: StoryFn = ( args ) => <Label { ...args } />;
+const Template: StoryFn = (args) => <Label {...args} />;
 
-export const Default: StoryFn< LabelProps > = Template.bind( {} );
+export const Default: StoryFn<LabelProps> = Template.bind({});
 Default.args = {
 	label: 'I am a label',
 	screenReaderLabel: 'I am a screen reader label',

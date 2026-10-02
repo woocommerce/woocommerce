@@ -14,29 +14,29 @@ import { recordEvent, recordEventOnce } from '../../../events';
 import { StylesColorPanel } from '../../../private-apis';
 
 export function ScreenColors(): JSX.Element {
-	recordEventOnce( 'styles_sidebar_screen_colors_opened' );
+	recordEventOnce('styles_sidebar_screen_colors_opened');
 	const { userStyles, styles, updateStyles } = useEmailStyles();
-	const theme = useSelect( ( select ) => select( storeName ).getTheme(), [] );
+	const theme = useSelect((select) => select(storeName).getTheme(), []);
 
-	const handleOnChange = ( newStyles ) => {
-		updateStyles( newStyles );
-		recordEvent( 'styles_sidebar_screen_colors_styles_updated' ); // We can't log the updated color here because the onChange function returns the complete object.
+	const handleOnChange = (newStyles) => {
+		updateStyles(newStyles);
+		recordEvent('styles_sidebar_screen_colors_styles_updated'); // We can't log the updated color here because the onChange function returns the complete object.
 	};
 
 	return (
 		<>
 			<ScreenHeader
-				title={ __( 'Colors', __i18n_text_domain__ ) }
-				description={ __(
+				title={__('Colors', __i18n_text_domain__)}
+				description={__(
 					'Manage palettes and the default color of different global elements.',
 					__i18n_text_domain__
-				) }
+				)}
 			/>
 			<StylesColorPanel
-				value={ userStyles }
-				inheritedValue={ styles }
-				onChange={ handleOnChange }
-				settings={ theme?.settings }
+				value={userStyles}
+				inheritedValue={styles}
+				onChange={handleOnChange}
+				settings={theme?.settings}
 				panelId="colors"
 			/>
 		</>

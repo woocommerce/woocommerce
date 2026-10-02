@@ -45,13 +45,13 @@ type CheckoutEventsContextType = {
 	// Submits the checkout and begins processing.
 	onSubmit: () => void;
 	// Deprecated in favour of onCheckoutSuccess.
-	onCheckoutAfterProcessingWithSuccess: ReturnType< typeof emitterCallback >;
+	onCheckoutAfterProcessingWithSuccess: ReturnType<typeof emitterCallback>;
 	// Deprecated in favour of onCheckoutFail.
-	onCheckoutAfterProcessingWithError: ReturnType< typeof emitterCallback >;
+	onCheckoutAfterProcessingWithError: ReturnType<typeof emitterCallback>;
 	// Deprecated in favour of onCheckoutValidationBeforeProcessing.
-	onCheckoutBeforeProcessing: ReturnType< typeof emitterCallback >;
+	onCheckoutBeforeProcessing: ReturnType<typeof emitterCallback>;
 	// Deprecated in favour of onCheckoutValidation.
-	onCheckoutValidationBeforeProcessing: ReturnType< typeof emitterCallback >;
+	onCheckoutValidationBeforeProcessing: ReturnType<typeof emitterCallback>;
 	// Used to register a callback that will fire if the api call to /checkout is successful
 	onCheckoutSuccess: EventListenerRegistrationFunction;
 	// Used to register a callback that will fire if the api call to /checkout fails
@@ -60,7 +60,7 @@ type CheckoutEventsContextType = {
 	onCheckoutValidation: EventListenerRegistrationFunction;
 };
 
-const CheckoutEventsContext = createContext< CheckoutEventsContextType >( {
+const CheckoutEventsContext = createContext<CheckoutEventsContextType>({
 	onSubmit: () => void null,
 	onCheckoutAfterProcessingWithSuccess: () => () => void null, // deprecated for onCheckoutSuccess
 	onCheckoutAfterProcessingWithError: () => () => void null, // deprecated for onCheckoutFail
@@ -69,10 +69,10 @@ const CheckoutEventsContext = createContext< CheckoutEventsContextType >( {
 	onCheckoutSuccess: () => () => void null,
 	onCheckoutFail: () => () => void null,
 	onCheckoutValidation: () => () => void null,
-} );
+});
 
 export const useCheckoutEventsContext = () => {
-	return useContext( CheckoutEventsContext );
+	return useContext(CheckoutEventsContext);
 };
 
 /**
@@ -83,13 +83,13 @@ export const useCheckoutEventsContext = () => {
  * @param {Object} props.children    The children being wrapped.
  * @param {string} props.redirectUrl Initialize what the checkout will redirect to after successful submit.
  */
-export const CheckoutEventsProvider = ( {
+export const CheckoutEventsProvider = ({
 	children,
 	redirectUrl,
 }: {
 	children: React.ReactNode;
 	redirectUrl: string;
-} ): JSX.Element => {
+}): JSX.Element => {
 	const paymentMethods = getPaymentMethods();
 	const expressPaymentMethods = getExpressPaymentMethods();
 	/**
@@ -104,16 +104,16 @@ export const CheckoutEventsProvider = ( {
 	): PlainExpressPaymentMethods => {
 		const plainRegisteredMethods: PlainExpressPaymentMethods = {};
 
-		Object.keys( registeredMethods ).forEach( ( methodName ) => {
-			const method = registeredMethods[ methodName ];
-			plainRegisteredMethods[ methodName ] = {
+		Object.keys(registeredMethods).forEach((methodName) => {
+			const method = registeredMethods[methodName];
+			plainRegisteredMethods[methodName] = {
 				name: method.name,
 				title: method.title,
 				description: method.description,
 				gatewayId: method.gatewayId,
 				supportsStyle: method.supports?.style || [],
 			};
-		} );
+		});
 
 		return plainRegisteredMethods;
 	};
@@ -126,23 +126,23 @@ export const CheckoutEventsProvider = ( {
 	const {
 		__internalUpdateAvailablePaymentMethods,
 		__internalSetRegisteredExpressPaymentMethods,
-	} = useDispatch( paymentStore );
+	} = useDispatch(paymentStore);
 
 	// Set the registered express payment methods
-	useEffect( () => {
+	useEffect(() => {
 		void __internalSetRegisteredExpressPaymentMethods(
-			convertToPlainExpressPaymentMethods( registeredMethods )
+			convertToPlainExpressPaymentMethods(registeredMethods)
 		);
-	}, [ __internalSetRegisteredExpressPaymentMethods, registeredMethods ] );
+	}, [__internalSetRegisteredExpressPaymentMethods, registeredMethods]);
 
 	// Update the payment method store when paymentMethods or expressPaymentMethods changes.
 	// Ensure this happens in the editor even if paymentMethods is empty. This won't happen instantly when the objects
 	// are updated, but on the next re-render.
-	useEffect( () => {
+	useEffect(() => {
 		if (
-			! isEditor &&
-			Object.keys( paymentMethods ).length === 0 &&
-			Object.keys( expressPaymentMethods ).length === 0
+			!isEditor &&
+			Object.keys(paymentMethods).length === 0 &&
+			Object.keys(expressPaymentMethods).length === 0
 		) {
 			return;
 		}
@@ -152,14 +152,14 @@ export const CheckoutEventsProvider = ( {
 		paymentMethods,
 		expressPaymentMethods,
 		__internalUpdateAvailablePaymentMethods,
-	] );
+	]);
 
 	const {
 		__internalSetRedirectUrl,
 		__internalEmitValidateEvent,
 		__internalEmitAfterProcessingEvents,
 		__internalSetBeforeProcessing,
-	} = useDispatch( checkoutStore );
+	} = useDispatch(checkoutStore);
 
 	const {
 		checkoutRedirectUrl,
@@ -170,8 +170,8 @@ export const CheckoutEventsProvider = ( {
 		checkoutOrderId,
 		checkoutOrderNotes,
 		checkoutCustomerId,
-	} = useSelect( ( select ) => {
-		const store = select( checkoutStore );
+	} = useSelect((select) => {
+		const store = select(checkoutStore);
 		return {
 			checkoutRedirectUrl: store.getRedirectUrl(),
 			checkoutStatus: store.getCheckoutStatus(),
@@ -182,50 +182,48 @@ export const CheckoutEventsProvider = ( {
 			checkoutOrderNotes: store.getOrderNotes(),
 			checkoutCustomerId: store.getCustomerId(),
 		};
-	} );
+	});
 
-	if ( redirectUrl && redirectUrl !== checkoutRedirectUrl ) {
-		void __internalSetRedirectUrl( redirectUrl );
+	if (redirectUrl && redirectUrl !== checkoutRedirectUrl) {
+		void __internalSetRedirectUrl(redirectUrl);
 	}
 
-	const { setValidationErrors } = useDispatch( validationStore );
+	const { setValidationErrors } = useDispatch(validationStore);
 	const { dispatchCheckoutEvent } = useStoreEvents();
 
-	const checkoutContexts = Object.values( noticeContexts ).filter(
-		( context ) =>
+	const checkoutContexts = Object.values(noticeContexts).filter(
+		(context) =>
 			context !== noticeContexts.PAYMENTS &&
 			context !== noticeContexts.EXPRESS_PAYMENTS
 	);
 
 	const checkoutNotices = useSelect(
-		( select ) => {
-			const { getNotices } = select( noticesStore );
-			return checkoutContexts.reduce( ( acc, context ) => {
-				return [ ...acc, ...getNotices( context ) ];
-			}, [] as WPNotice[] );
+		(select) => {
+			const { getNotices } = select(noticesStore);
+			return checkoutContexts.reduce((acc, context) => {
+				return [...acc, ...getNotices(context)];
+			}, [] as WPNotice[]);
 		},
-		[ checkoutContexts ]
+		[checkoutContexts]
 	);
 
-	const { paymentNotices, expressPaymentNotices } = useSelect( ( select ) => {
-		const { getNotices } = select( noticesStore );
+	const { paymentNotices, expressPaymentNotices } = useSelect((select) => {
+		const { getNotices } = select(noticesStore);
 		return {
-			paymentNotices: getNotices( noticeContexts.PAYMENTS ),
-			expressPaymentNotices: getNotices(
-				noticeContexts.EXPRESS_PAYMENTS
-			),
+			paymentNotices: getNotices(noticeContexts.PAYMENTS),
+			expressPaymentNotices: getNotices(noticeContexts.EXPRESS_PAYMENTS),
 		};
-	}, [] );
+	}, []);
 
-	const [ observers ] = useReducer( emitReducer, {} );
-	const currentObservers = useRef( observers );
+	const [observers] = useReducer(emitReducer, {});
+	const currentObservers = useRef(observers);
 	const { onCheckoutValidation, onCheckoutSuccess, onCheckoutFail } =
 		checkoutEvents;
 
 	// set observers on ref so it's always current.
-	useEffect( () => {
+	useEffect(() => {
 		currentObservers.current = observers;
-	}, [ observers ] );
+	}, [observers]);
 
 	/**
 	 * @deprecated use onCheckoutValidation instead
@@ -236,77 +234,77 @@ export const CheckoutEventsProvider = ( {
 	 * (useMemo calls the passed function at render time)
 	 * See: https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4039/commits/a502d1be8828848270993264c64220731b0ae181
 	 */
-	const onCheckoutBeforeProcessing = useMemo( () => {
-		return function ( ...args: Parameters< typeof onCheckoutValidation > ) {
-			deprecated( 'onCheckoutBeforeProcessing', {
+	const onCheckoutBeforeProcessing = useMemo(() => {
+		return function (...args: Parameters<typeof onCheckoutValidation>) {
+			deprecated('onCheckoutBeforeProcessing', {
 				alternative: 'onCheckoutValidation',
-			} );
-			return onCheckoutValidation( ...args );
+			});
+			return onCheckoutValidation(...args);
 		};
-	}, [ onCheckoutValidation ] );
+	}, [onCheckoutValidation]);
 
 	/**
 	 * @deprecated use onCheckoutValidation instead
 	 */
-	const onCheckoutValidationBeforeProcessing = useMemo( () => {
-		return function ( ...args: Parameters< typeof onCheckoutValidation > ) {
-			deprecated( 'onCheckoutValidationBeforeProcessing', {
+	const onCheckoutValidationBeforeProcessing = useMemo(() => {
+		return function (...args: Parameters<typeof onCheckoutValidation>) {
+			deprecated('onCheckoutValidationBeforeProcessing', {
 				since: '7.6.0',
 				alternative: 'onCheckoutValidation',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8381',
-			} );
-			return onCheckoutValidation( ...args );
+			});
+			return onCheckoutValidation(...args);
 		};
-	}, [ onCheckoutValidation ] );
+	}, [onCheckoutValidation]);
 
 	/**
 	 * @deprecated use onCheckoutSuccess instead
 	 */
-	const onCheckoutAfterProcessingWithSuccess = useMemo( () => {
-		return function ( ...args: Parameters< typeof onCheckoutSuccess > ) {
-			deprecated( 'onCheckoutAfterProcessingWithSuccess', {
+	const onCheckoutAfterProcessingWithSuccess = useMemo(() => {
+		return function (...args: Parameters<typeof onCheckoutSuccess>) {
+			deprecated('onCheckoutAfterProcessingWithSuccess', {
 				since: '7.6.0',
 				alternative: 'onCheckoutSuccess',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8381',
-			} );
-			return onCheckoutSuccess( ...args );
+			});
+			return onCheckoutSuccess(...args);
 		};
-	}, [ onCheckoutSuccess ] );
+	}, [onCheckoutSuccess]);
 
 	/**
 	 * @deprecated use onCheckoutFail instead
 	 */
-	const onCheckoutAfterProcessingWithError = useMemo( () => {
-		return function ( ...args: Parameters< typeof onCheckoutFail > ) {
-			deprecated( 'onCheckoutAfterProcessingWithError', {
+	const onCheckoutAfterProcessingWithError = useMemo(() => {
+		return function (...args: Parameters<typeof onCheckoutFail>) {
+			deprecated('onCheckoutAfterProcessingWithError', {
 				since: '7.6.0',
 				alternative: 'onCheckoutFail',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8381',
-			} );
-			return onCheckoutFail( ...args );
+			});
+			return onCheckoutFail(...args);
 		};
-	}, [ onCheckoutFail ] );
+	}, [onCheckoutFail]);
 
 	// Emit CHECKOUT_VALIDATE event and set the error state based on the response of
 	// the registered callbacks
-	useEffect( () => {
-		if ( isCheckoutBeforeProcessing ) {
-			void __internalEmitValidateEvent( {
+	useEffect(() => {
+		if (isCheckoutBeforeProcessing) {
+			void __internalEmitValidateEvent({
 				setValidationErrors,
-			} );
+			});
 		}
 	}, [
 		isCheckoutBeforeProcessing,
 		setValidationErrors,
 		__internalEmitValidateEvent,
-	] );
+	]);
 
-	const previousStatus = usePrevious( checkoutStatus );
-	const previousHasError = usePrevious( checkoutHasError );
+	const previousStatus = usePrevious(checkoutStatus);
+	const previousHasError = usePrevious(checkoutHasError);
 
 	// Emit CHECKOUT_SUCCESS and CHECKOUT_FAIL events
 	// and set checkout errors according to the callback responses
-	useEffect( () => {
+	useEffect(() => {
 		if (
 			checkoutStatus === previousStatus &&
 			checkoutHasError === previousHasError
@@ -314,14 +312,14 @@ export const CheckoutEventsProvider = ( {
 			return;
 		}
 
-		if ( isCheckoutAfterProcessing ) {
-			void __internalEmitAfterProcessingEvents( {
+		if (isCheckoutAfterProcessing) {
+			void __internalEmitAfterProcessingEvents({
 				notices: {
 					checkoutNotices,
 					paymentNotices,
 					expressPaymentNotices,
 				},
-			} );
+			});
 		}
 	}, [
 		checkoutStatus,
@@ -339,12 +337,12 @@ export const CheckoutEventsProvider = ( {
 		paymentNotices,
 		__internalEmitValidateEvent,
 		__internalEmitAfterProcessingEvents,
-	] );
+	]);
 
-	const onSubmit = useCallback( () => {
-		dispatchCheckoutEvent( 'submit' );
+	const onSubmit = useCallback(() => {
+		dispatchCheckoutEvent('submit');
 		void __internalSetBeforeProcessing();
-	}, [ dispatchCheckoutEvent, __internalSetBeforeProcessing ] );
+	}, [dispatchCheckoutEvent, __internalSetBeforeProcessing]);
 
 	const checkoutEventHandlers = {
 		onSubmit,
@@ -357,8 +355,8 @@ export const CheckoutEventsProvider = ( {
 		onCheckoutValidation,
 	};
 	return (
-		<CheckoutEventsContext.Provider value={ checkoutEventHandlers }>
-			{ children }
+		<CheckoutEventsContext.Provider value={checkoutEventHandlers}>
+			{children}
 		</CheckoutEventsContext.Provider>
 	);
 };

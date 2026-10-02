@@ -17,10 +17,10 @@ interface WithReviewsProps {
 	orderby: string;
 	reviewsToDisplay: number;
 	categoryIds?: string | string[];
-	delayFunction?: ( f: () => void ) => DelayedFunction;
+	delayFunction?: (f: () => void) => DelayedFunction;
 	offset?: number;
 	onReviewsAppended?: () => void;
-	onReviewsLoadError?: ( error: ErrorObject ) => void;
+	onReviewsLoadError?: (error: ErrorObject) => void;
 	onReviewsReplaced?: () => void;
 	productId?: string | number;
 	attributes: {
@@ -36,23 +36,23 @@ interface WithReviewsState {
 	totalReviews: number;
 }
 
-type DelayedFunction = ( () => void ) & { cancel?: () => void };
+type DelayedFunction = (() => void) & { cancel?: () => void };
 
 /**
  * HOC that queries reviews for a component.
  */
 const withReviews = (
-	OriginalComponent: React.FunctionComponent< Record< string, unknown > >
+	OriginalComponent: React.FunctionComponent<Record<string, unknown>>
 ) => {
 	class WrappedComponent extends Component<
 		WithReviewsProps,
 		WithReviewsState
 	> {
-		isPreview = !! this.props.attributes.previewReviews;
+		isPreview = !!this.props.attributes.previewReviews;
 
 		delayedAppendReviews = (
-			this.props.delayFunction ?? ( ( f: () => void ) => f )
-		)( this.appendReviews );
+			this.props.delayFunction ?? ((f: () => void) => f)
+		)(this.appendReviews);
 
 		isMounted = false;
 
@@ -75,8 +75,8 @@ const withReviews = (
 			this.replaceReviews();
 		}
 
-		componentDidUpdate( prevProps: WithReviewsProps ) {
-			if ( this.shouldReplaceReviews( prevProps, this.props ) ) {
+		componentDidUpdate(prevProps: WithReviewsProps) {
+			if (this.shouldReplaceReviews(prevProps, this.props)) {
 				this.replaceReviews();
 			} else if (
 				prevProps.reviewsToDisplay < this.props.reviewsToDisplay
@@ -95,9 +95,9 @@ const withReviews = (
 			return (
 				prevProps.orderby !== nextProps.orderby ||
 				prevProps.order !== nextProps.order ||
-				this.getOffset( prevProps ) !== this.getOffset( nextProps ) ||
+				this.getOffset(prevProps) !== this.getOffset(nextProps) ||
 				prevProps.productId !== nextProps.productId ||
-				! isShallowEqual(
+				!isShallowEqual(
 					prevProps.categoryIds as string[],
 					nextProps.categoryIds as string[]
 				)
@@ -114,35 +114,35 @@ const withReviews = (
 			}
 		}
 
-		getOffset( props = this.props ) {
-			const parsedOffset = Number( props.offset ?? 0 );
+		getOffset(props = this.props) {
+			const parsedOffset = Number(props.offset ?? 0);
 
-			return Number.isInteger( parsedOffset ) && parsedOffset >= 0
+			return Number.isInteger(parsedOffset) && parsedOffset >= 0
 				? parsedOffset
 				: 0;
 		}
 
-		getArgs( reviewsToSkip: number ) {
+		getArgs(reviewsToSkip: number) {
 			const { categoryIds, order, orderby, productId, reviewsToDisplay } =
 				this.props;
-			const args: Record< string, string | number > = {
+			const args: Record<string, string | number> = {
 				order,
 				orderby,
 				per_page: reviewsToDisplay - reviewsToSkip,
 				offset: this.getOffset() + reviewsToSkip,
 			};
 
-			if ( categoryIds ) {
-				const categories = Array.isArray( categoryIds )
+			if (categoryIds) {
+				const categories = Array.isArray(categoryIds)
 					? categoryIds
-					: JSON.parse( categoryIds );
+					: JSON.parse(categoryIds);
 
-				args.category_id = Array.isArray( categories )
-					? categories.join( ',' )
+				args.category_id = Array.isArray(categories)
+					? categories.join(',')
 					: categories;
 			}
 
-			if ( productId ) {
+			if (productId) {
 				args.product_id = productId;
 			}
 
@@ -150,92 +150,91 @@ const withReviews = (
 		}
 
 		replaceReviews() {
-			if ( this.isPreview ) {
+			if (this.isPreview) {
 				return;
 			}
 
 			const onReviewsReplaced =
-				this.props.onReviewsReplaced ?? ( () => undefined );
-			void this.updateListOfReviews().then( onReviewsReplaced );
+				this.props.onReviewsReplaced ?? (() => undefined);
+			void this.updateListOfReviews().then(onReviewsReplaced);
 		}
 
 		appendReviews() {
-			if ( this.isPreview ) {
+			if (this.isPreview) {
 				return;
 			}
 
 			const onReviewsAppended =
-				this.props.onReviewsAppended ?? ( () => undefined );
+				this.props.onReviewsAppended ?? (() => undefined);
 			const { reviewsToDisplay } = this.props;
 			const { reviews } = this.state;
 
 			// Given that this function is delayed, props might have been updated since
 			// it was called so we need to check again if fetching new reviews is necessary.
-			if ( reviewsToDisplay <= reviews.length ) {
+			if (reviewsToDisplay <= reviews.length) {
 				return;
 			}
 
-			void this.updateListOfReviews( reviews ).then( onReviewsAppended );
+			void this.updateListOfReviews(reviews).then(onReviewsAppended);
 		}
 
-		updateListOfReviews( oldReviews: Review[] = [] ) {
+		updateListOfReviews(oldReviews: Review[] = []) {
 			const { reviewsToDisplay } = this.props;
 			const { totalReviews } = this.state;
 			const configuredOffset = this.getOffset();
 			const reviewsToLoad =
-				Math.min( totalReviews, reviewsToDisplay ) - oldReviews.length;
+				Math.min(totalReviews, reviewsToDisplay) - oldReviews.length;
 
-			this.setState( {
+			this.setState({
 				loading: true,
-				reviews: oldReviews.concat( Array( reviewsToLoad ).fill( {} ) ),
-			} );
+				reviews: oldReviews.concat(Array(reviewsToLoad).fill({})),
+			});
 
-			return getReviews( this.getArgs( oldReviews.length ) )
+			return getReviews(this.getArgs(oldReviews.length))
 				.then(
-					( {
+					({
 						reviews: newReviews,
 						totalReviews: newTotalReviews,
-					} ) => {
+					}) => {
 						const availableReviews = Math.max(
 							newTotalReviews - configuredOffset,
 							0
 						);
 
-						if ( this.isMounted ) {
-							this.setState( {
+						if (this.isMounted) {
+							this.setState({
 								hasReviewsHiddenByOffset:
 									configuredOffset > 0 &&
 									newTotalReviews > 0 &&
 									availableReviews === 0,
 								reviews: oldReviews
 									.filter(
-										( review ) =>
-											Object.keys( review ).length
+										(review) => Object.keys(review).length
 									)
-									.concat( newReviews ),
+									.concat(newReviews),
 								totalReviews: availableReviews,
 								loading: false,
 								error: null,
-							} );
+							});
 						}
 						return { newReviews };
 					}
 				)
-				.catch( this.setError );
+				.catch(this.setError);
 		}
 
-		setError = async ( e: Error ) => {
-			if ( ! this.isMounted ) {
+		setError = async (e: Error) => {
+			if (!this.isMounted) {
 				return;
 			}
 
 			const onReviewsLoadError =
-				this.props.onReviewsLoadError ?? ( () => undefined );
-			const error = await formatError( e );
+				this.props.onReviewsLoadError ?? (() => undefined);
+			const error = await formatError(e);
 
-			this.setState( { reviews: [], loading: false, error } );
+			this.setState({ reviews: [], loading: false, error });
 
-			onReviewsLoadError( error );
+			onReviewsLoadError(error);
 		};
 
 		render() {
@@ -250,12 +249,12 @@ const withReviews = (
 
 			return (
 				<OriginalComponent
-					{ ...this.props }
-					error={ error }
-					hasReviewsHiddenByOffset={ hasReviewsHiddenByOffset }
-					isLoading={ loading }
-					reviews={ reviews.slice( 0, reviewsToDisplay ) }
-					totalReviews={ totalReviews }
+					{...this.props}
+					error={error}
+					hasReviewsHiddenByOffset={hasReviewsHiddenByOffset}
+					isLoading={loading}
+					reviews={reviews.slice(0, reviewsToDisplay)}
+					totalReviews={totalReviews}
 				/>
 			);
 		}
@@ -263,9 +262,8 @@ const withReviews = (
 
 	const { displayName = OriginalComponent.name || 'Component' } =
 		OriginalComponent;
-	(
-		WrappedComponent as React.ComponentType< WithReviewsProps >
-	 ).displayName = `WithReviews(${ displayName })`;
+	(WrappedComponent as React.ComponentType<WithReviewsProps>).displayName =
+		`WithReviews(${displayName})`;
 	return WrappedComponent;
 };
 

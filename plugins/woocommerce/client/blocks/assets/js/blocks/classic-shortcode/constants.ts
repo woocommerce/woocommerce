@@ -21,14 +21,14 @@ export const TEMPLATES: TemplateDetails = {
 	cart: {
 		type: TYPES.cart,
 		// Title shows up in the list view in the site editor.
-		title: __( 'Cart Shortcode', 'woocommerce' ),
+		title: __('Cart Shortcode', 'woocommerce'),
 		// Description in the site editor.
-		description: __( 'Renders the classic cart shortcode.', 'woocommerce' ),
+		description: __('Renders the classic cart shortcode.', 'woocommerce'),
 		placeholder: PLACEHOLDERS.cart,
 	},
 	checkout: {
 		type: TYPES.checkout,
-		title: __( 'Checkout Cart', 'woocommerce' ),
+		title: __('Checkout Cart', 'woocommerce'),
 		description: __(
 			'Renders the classic checkout shortcode.',
 			'woocommerce'

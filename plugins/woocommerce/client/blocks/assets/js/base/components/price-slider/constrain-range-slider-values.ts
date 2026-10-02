@@ -7,7 +7,7 @@ export const constrainRangeSliderValues = (
 	/**
 	 * Tuple containing min and max values.
 	 */
-	values: [ number, number ],
+	values: [number, number],
 	/**
 	 * Min allowed value for the sliders.
 	 */
@@ -24,43 +24,42 @@ export const constrainRangeSliderValues = (
 	 * Whether we're currently interacting with the min range slider or not, so we update the correct values.
 	 */
 	isMin = false
-): [ number, number ] => {
-	let [ minValue, maxValue ] = values;
+): [number, number] => {
+	let [minValue, maxValue] = values;
 
-	const isFinite = ( n: number | undefined ): n is number =>
-		Number.isFinite( n );
+	const isFinite = (n: number | undefined): n is number => Number.isFinite(n);
 
-	if ( ! isFinite( minValue ) ) {
+	if (!isFinite(minValue)) {
 		minValue = min || 0;
 	}
 
-	if ( ! isFinite( maxValue ) ) {
+	if (!isFinite(maxValue)) {
 		maxValue = max || step;
 	}
 
-	if ( isFinite( min ) && min > minValue ) {
+	if (isFinite(min) && min > minValue) {
 		minValue = min;
 	}
 
-	if ( isFinite( max ) && max <= minValue ) {
+	if (isFinite(max) && max <= minValue) {
 		minValue = max - step;
 	}
 
-	if ( isFinite( min ) && min >= maxValue ) {
+	if (isFinite(min) && min >= maxValue) {
 		maxValue = min + step;
 	}
 
-	if ( isFinite( max ) && max < maxValue ) {
+	if (isFinite(max) && max < maxValue) {
 		maxValue = max;
 	}
 
-	if ( ! isMin && minValue >= maxValue ) {
+	if (!isMin && minValue >= maxValue) {
 		minValue = maxValue - step;
 	}
 
-	if ( isMin && maxValue <= minValue ) {
+	if (isMin && maxValue <= minValue) {
 		maxValue = minValue + step;
 	}
 
-	return [ minValue, maxValue ];
+	return [minValue, maxValue];
 };

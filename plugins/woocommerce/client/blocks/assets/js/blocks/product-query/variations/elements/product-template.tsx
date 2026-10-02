@@ -13,13 +13,13 @@ import { registerElementVariation } from './utils';
 export const CORE_NAME = 'core/post-template';
 export const VARIATION_NAME = 'woocommerce/product-query/product-template';
 
-registerElementVariation( CORE_NAME, {
+registerElementVariation(CORE_NAME, {
 	blockDescription: __(
 		'Contains the block elements used to render a product, like its name, featured image, rating, and more.',
 		'woocommerce'
 	),
-	blockIcon: <Icon icon={ layout } />,
-	blockTitle: __( 'Product template', 'woocommerce' ),
+	blockIcon: <Icon icon={layout} />,
+	blockTitle: __('Product template', 'woocommerce'),
 	variationName: VARIATION_NAME,
-	scope: [ 'block', 'inserter' ],
-} );
+	scope: ['block', 'inserter'],
+});

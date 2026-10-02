@@ -18,38 +18,37 @@ import { CurriedSelectorsOf } from '@wordpress/data/build-types/types';
 import type { ValidationStoreDescriptor } from '../validation';
 import { STORE_KEY as VALIDATION_STORE_KEY } from '../validation/constants';
 
-export const mapCartResponseToCart = ( responseCart: CartResponse ): Cart => {
-	return camelCaseKeys( responseCart ) as unknown as Cart;
+export const mapCartResponseToCart = (responseCart: CartResponse): Cart => {
+	return camelCaseKeys(responseCart) as unknown as Cart;
 };
 
 export const shippingAddressHasValidationErrors = () => {
 	const validationStore = select(
 		VALIDATION_STORE_KEY
-	) as CurriedSelectorsOf< ValidationStoreDescriptor >;
+	) as CurriedSelectorsOf<ValidationStoreDescriptor>;
 	// Check if the shipping address form has validation errors - if not then we know the full required
 	// address has been pushed to the server.
 	const stateValidationErrors =
-		validationStore.getValidationError( 'shipping_state' );
+		validationStore.getValidationError('shipping_state');
 	const address1ValidationErrors =
-		validationStore.getValidationError( 'shipping_address_1' );
+		validationStore.getValidationError('shipping_address_1');
 	const countryValidationErrors =
-		validationStore.getValidationError( 'shipping_country' );
+		validationStore.getValidationError('shipping_country');
 	const postcodeValidationErrors =
-		validationStore.getValidationError( 'shipping_postcode' );
+		validationStore.getValidationError('shipping_postcode');
 	const cityValidationErrors =
-		validationStore.getValidationError( 'shipping_city' );
+		validationStore.getValidationError('shipping_city');
 	return [
 		cityValidationErrors,
 		stateValidationErrors,
 		address1ValidationErrors,
 		countryValidationErrors,
 		postcodeValidationErrors,
-	].some( ( entry ) => typeof entry !== 'undefined' );
+	].some((entry) => typeof entry !== 'undefined');
 };
 
 export type BaseAddressKey =
-	| keyof CartBillingAddress
-	| keyof CartShippingAddress;
+	keyof CartBillingAddress | keyof CartShippingAddress;
 
 /**
  * Normalizes address values before push.
@@ -59,14 +58,14 @@ export const normalizeAddressProp = (
 	value?: string | undefined
 ) => {
 	// Skip normalizing for any non string field
-	if ( typeof value !== 'string' ) {
+	if (typeof value !== 'string') {
 		return value;
 	}
-	if ( key === 'email' ) {
-		return isEmail( value ) ? value.trim() : '';
+	if (key === 'email') {
+		return isEmail(value) ? value.trim() : '';
 	}
-	if ( key === 'postcode' ) {
-		return value.replace( ' ', '' ).toUpperCase();
+	if (key === 'postcode') {
+		return value.replace(' ', '').toUpperCase();
 	}
 	return value.trim();
 };
@@ -78,47 +77,47 @@ export const getDirtyKeys = <
 	T extends CartBillingAddress & CartShippingAddress,
 >(
 	// An object containing all previous address information
-	previousAddress: Partial< T >,
+	previousAddress: Partial<T>,
 	// An object containing all address information.
-	address: Partial< T >
+	address: Partial<T>
 ): BaseAddressKey[] => {
 	const previousAddressKeys = Object.keys(
 		previousAddress
 	) as BaseAddressKey[];
 
-	return previousAddressKeys.filter( ( key: BaseAddressKey ) => {
+	return previousAddressKeys.filter((key: BaseAddressKey) => {
 		return (
-			normalizeAddressProp( key, previousAddress[ key ] ) !==
-			normalizeAddressProp( key, address[ key ] )
+			normalizeAddressProp(key, previousAddress[key]) !==
+			normalizeAddressProp(key, address[key])
 		);
-	} );
+	});
 };
 
 /**
  * Validates dirty props before push.
  */
-export const validateDirtyProps = ( dirtyProps: {
+export const validateDirtyProps = (dirtyProps: {
 	billingAddress: BaseAddressKey[];
 	shippingAddress: BaseAddressKey[];
-} ): boolean => {
+}): boolean => {
 	const validationStore = select(
 		VALIDATION_STORE_KEY
-	) as CurriedSelectorsOf< ValidationStoreDescriptor >;
+	) as CurriedSelectorsOf<ValidationStoreDescriptor>;
 
 	const invalidProps = [
-		...dirtyProps.billingAddress.filter( ( key ) => {
+		...dirtyProps.billingAddress.filter((key) => {
 			return (
-				validationStore.getValidationError( 'billing_' + key ) !==
+				validationStore.getValidationError('billing_' + key) !==
 				undefined
 			);
-		} ),
-		...dirtyProps.shippingAddress.filter( ( key ) => {
+		}),
+		...dirtyProps.shippingAddress.filter((key) => {
 			return (
-				validationStore.getValidationError( 'shipping_' + key ) !==
+				validationStore.getValidationError('shipping_' + key) !==
 				undefined
 			);
-		} ),
-	].filter( Boolean );
+		}),
+	].filter(Boolean);
 
 	return invalidProps.length === 0;
 };
@@ -138,7 +137,7 @@ export const getIsCustomerDataDirty = () => {
  * Sets a flag in localStorage to indicate whether the customer data has been modified.
  */
 export const setIsCustomerDataDirty = debounce(
-	( isCustomerDataDirty: boolean ) => {
+	(isCustomerDataDirty: boolean) => {
 		window.localStorage.setItem(
 			'WOOCOMMERCE_CHECKOUT_IS_CUSTOMER_DATA_DIRTY',
 			isCustomerDataDirty ? 'true' : 'false'
@@ -153,7 +152,7 @@ export const setIsCustomerDataDirty = debounce(
  * event and causing an infinite loop.
  */
 let triggerStoreSyncEvent = true;
-export const setTriggerStoreSyncEvent = ( value: boolean ) => {
+export const setTriggerStoreSyncEvent = (value: boolean) => {
 	triggerStoreSyncEvent = value;
 };
 export const getTriggerStoreSyncEvent = () => triggerStoreSyncEvent;

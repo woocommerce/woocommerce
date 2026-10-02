@@ -26,35 +26,35 @@ export default {
 		maxPrice: { control: { disable: true } },
 		minPrice: { control: { disable: true } },
 	},
-} as Meta< PriceSliderProps >;
+} as Meta<PriceSliderProps>;
 
-const Template: StoryFn< PriceSliderProps > = ( args ) => {
+const Template: StoryFn<PriceSliderProps> = (args) => {
 	const { maxPrice, minPrice, ...props } = args;
 	// PriceSlider expects client to update min & max price, i.e. is a controlled component
-	const [ min, setMin ] = useState( minPrice );
-	const [ max, setMax ] = useState( maxPrice );
+	const [min, setMin] = useState(minPrice);
+	const [max, setMax] = useState(maxPrice);
 
 	return (
 		<PriceSlider
-			{ ...props }
-			maxPrice={ max }
-			minPrice={ min }
-			onChange={ ( [ newMin, newMax ] ) => {
-				setMin( newMin );
-				setMax( newMax );
-			} }
+			{...props}
+			maxPrice={max}
+			minPrice={min}
+			onChange={([newMin, newMax]) => {
+				setMin(newMin);
+				setMax(newMax);
+			}}
 		/>
 	);
 };
 
-export const Default = Template.bind( {} );
+export const Default = Template.bind({});
 
-export const WithoutInputs = Template.bind( {} );
+export const WithoutInputs = Template.bind({});
 WithoutInputs.args = {
 	showInputFields: false,
 };
 
-export const WithButton = Template.bind( {} );
+export const WithButton = Template.bind({});
 WithButton.args = {
 	showFilterButton: true,
 };

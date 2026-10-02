@@ -11,7 +11,7 @@ import { Save, DeprecatedSave } from './save';
 import metadata from './block.json';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-registerBlockType( metadata as any, {
+registerBlockType(metadata as any, {
 	edit: Edit,
 	save: Save,
 	deprecated: [
@@ -23,7 +23,7 @@ registerBlockType( metadata as any, {
 				},
 			},
 			save: DeprecatedSave,
-			migrate( attributes: Record< string, unknown > ) {
+			migrate(attributes: Record<string, unknown>) {
 				return {
 					...attributes,
 					source: 'existing' as const,
@@ -31,4 +31,4 @@ registerBlockType( metadata as any, {
 			},
 		},
 	],
-} );
+});

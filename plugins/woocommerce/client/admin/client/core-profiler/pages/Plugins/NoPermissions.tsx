@@ -20,7 +20,7 @@ import { PluginCard } from './components/plugin-card/plugin-card';
 import { PluginErrorBanner } from './components/plugin-error-banner/PluginErrorBanner';
 
 /** Page to be shown when the user does not have permissions to install plugins */
-export const NoPermissionsError = ( {
+export const NoPermissionsError = ({
 	context,
 	navigationProgress,
 	sendEvent,
@@ -36,16 +36,14 @@ export const NoPermissionsError = ( {
 			| PluginsLearnMoreLinkClickedEvent
 	) => void;
 	navigationProgress: number;
-} ) => {
+}) => {
 	const skipPluginsPage = () => {
-		return sendEvent( {
+		return sendEvent({
 			type: 'PLUGINS_PAGE_SKIPPED',
-		} );
+		});
 	};
 
-	const pluginsCardRowCount = Math.ceil(
-		context.pluginsAvailable.length / 2
-	);
+	const pluginsCardRowCount = Math.ceil(context.pluginsAvailable.length / 2);
 
 	return (
 		<div
@@ -53,74 +51,74 @@ export const NoPermissionsError = ( {
 			data-testid="core-profiler-plugins"
 		>
 			<Navigation
-				percentage={ navigationProgress }
-				onSkip={ skipPluginsPage }
+				percentage={navigationProgress}
+				onSkip={skipPluginsPage}
 			/>
 			<div className="woocommerce-profiler-page__content woocommerce-profiler-plugins__content">
 				<Heading
 					className="woocommerce-profiler__stepper-heading"
-					title={ __(
+					title={__(
 						'Get a boost with our free features',
 						'woocommerce'
-					) }
-					subTitle={ __(
+					)}
+					subTitle={__(
 						'No commitment required – you can remove them at any time.',
 						'woocommerce'
-					) }
+					)}
 				/>
 
 				<PluginErrorBanner
-					pluginsInstallationPermissionsFailure={ true }
+					pluginsInstallationPermissionsFailure={true}
 				/>
 
 				<div
-					className={ clsx(
+					className={clsx(
 						'woocommerce-profiler-plugins__list',
-						`rows-${ pluginsCardRowCount }`
-					) }
+						`rows-${pluginsCardRowCount}`
+					)}
 				>
-					{ context.pluginsAvailable.map( ( plugin ) => {
+					{context.pluginsAvailable.map((plugin) => {
 						const {
 							key: pluginSlug,
 							learn_more_link: learnMoreLink,
 						} = plugin;
 						return (
 							<PluginCard
-								key={ pluginSlug }
-								plugin={ plugin }
-								checked={ false }
-								disabled={ true }
+								key={pluginSlug}
+								plugin={plugin}
+								checked={false}
+								disabled={true}
 							>
-								{ learnMoreLink && (
+								{learnMoreLink && (
 									<PluginCard.LearnMoreLink
-										onClick={ () => {
-											sendEvent( {
+										onClick={() => {
+											sendEvent({
 												type: 'PLUGINS_LEARN_MORE_LINK_CLICKED',
 												payload: {
 													plugin: pluginSlug,
 													learnMoreLink,
 												},
-											} );
-										} }
+											});
+										}}
 									/>
-								) }
+								)}
 							</PluginCard>
 						);
-					} ) }
+					})}
 				</div>
 				<div
-					className={ clsx(
+					className={clsx(
 						'woocommerce-profiler-plugins__footer',
-						`rows-${ pluginsCardRowCount }`
-					) }
+						`rows-${pluginsCardRowCount}`
+					)}
 				>
 					<div className="woocommerce-profiler-plugins-continue-button-container">
 						<Button
 							className="woocommerce-profiler-plugins-continue-button"
 							variant="primary"
-							onClick={ skipPluginsPage }
+							onClick={skipPluginsPage}
 						>
-							{ __( 'Continue', 'woocommerce' ) }
+							{__('Continue', 'woocommerce')}
 						</Button>
 					</div>
 				</div>

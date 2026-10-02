@@ -27,7 +27,7 @@ import {
 import Block from './block';
 import ConfigurePlaceholder from '../../configure-placeholder';
 
-export const Edit = ( {
+export const Edit = ({
 	attributes,
 	setAttributes,
 }: {
@@ -37,13 +37,13 @@ export const Edit = ( {
 		showStepNumber: boolean;
 		className: string;
 	};
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ): JSX.Element => {
-	const globalPaymentMethods = getSetting< GlobalPaymentMethod[] >(
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}): JSX.Element => {
+	const globalPaymentMethods = getSetting<GlobalPaymentMethod[]>(
 		'globalPaymentMethods'
 	);
 	const incompatiblePaymentMethods =
-		select( paymentStore ).getIncompatiblePaymentMethods();
+		select(paymentStore).getIncompatiblePaymentMethods();
 
 	const incompatiblePaymentMethodMessage = __(
 		'Incompatible with block-based checkout',
@@ -53,29 +53,29 @@ export const Edit = ( {
 
 	return (
 		<FormStepBlock
-			attributes={ attributes }
-			setAttributes={ setAttributes }
-			className={ clsx(
+			attributes={attributes}
+			setAttributes={setAttributes}
+			className={clsx(
 				'wc-block-checkout__payment-method',
 				attributes?.className
-			) }
+			)}
 		>
 			<InspectorControls>
-				{ globalPaymentMethods.length > 0 && (
-					<PanelBody title={ __( 'Methods', 'woocommerce' ) }>
+				{globalPaymentMethods.length > 0 && (
+					<PanelBody title={__('Methods', 'woocommerce')}>
 						<p className="wc-block-checkout__controls-text">
-							{ __(
+							{__(
 								'You currently have the following payment integrations active.',
 								'woocommerce'
-							) }
+							)}
 						</p>
-						{ globalPaymentMethods.map( ( method ) => {
+						{globalPaymentMethods.map((method) => {
 							const isIncompatible =
-								!! incompatiblePaymentMethods[ method.id ];
+								!!incompatiblePaymentMethods[method.id];
 
 							let trimmedDescription;
 
-							if ( wordCountType === 'words' ) {
+							if (wordCountType === 'words') {
 								trimmedDescription = trimWords(
 									method.description,
 									30,
@@ -95,54 +95,54 @@ export const Edit = ( {
 
 							return (
 								<ExternalLinkCard
-									key={ method.id }
-									href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=checkout&section=${ method.id }` }
-									title={ method.title }
-									description={ trimmedDescription }
-									{ ...( isIncompatible
+									key={method.id}
+									href={`${ADMIN_URL}admin.php?page=wc-settings&tab=checkout&section=${method.id}`}
+									title={method.title}
+									description={trimmedDescription}
+									{...(isIncompatible
 										? {
 												warning:
 													incompatiblePaymentMethodMessage,
-										  }
-										: {} ) }
+											}
+										: {})}
 								/>
 							);
-						} ) }
+						})}
 						<ExternalLink
-							href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=checkout` }
+							href={`${ADMIN_URL}admin.php?page=wc-settings&tab=checkout`}
 						>
-							{ __( 'Manage payment methods', 'woocommerce' ) }
+							{__('Manage payment methods', 'woocommerce')}
 						</ExternalLink>
 					</PanelBody>
-				) }
+				)}
 			</InspectorControls>
 			<Noninteractive>
 				<Block
 					noPaymentMethods={
 						<ConfigurePlaceholder
-							icon={ payment }
-							label={ __( 'Payment options', 'woocommerce' ) }
-							description={ __(
+							icon={payment}
+							label={__('Payment options', 'woocommerce')}
+							description={__(
 								'Your store does not have any payment methods that support the Checkout block. Once you have configured a compatible payment method it will be displayed here.',
 								'woocommerce'
-							) }
-							buttonLabel={ __(
+							)}
+							buttonLabel={__(
 								'Configure Payment Options',
 								'woocommerce'
-							) }
-							buttonHref={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=checkout` }
+							)}
+							buttonHref={`${ADMIN_URL}admin.php?page=wc-settings&tab=checkout`}
 						/>
 					}
 				/>
 			</Noninteractive>
-			<AdditionalFields block={ innerBlockAreas.PAYMENT_METHODS } />
+			<AdditionalFields block={innerBlockAreas.PAYMENT_METHODS} />
 		</FormStepBlock>
 	);
 };
 
 export const Save = (): JSX.Element => {
 	return (
-		<div { ...useBlockProps.save() }>
+		<div {...useBlockProps.save()}>
 			<AdditionalFieldsContent />
 		</div>
 	);

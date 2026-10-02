@@ -21,13 +21,13 @@ const getBlockEditorContext = (): BlockEditorContext => {
 	};
 	const adminPage = wordpressWindow.adminpage;
 
-	if ( [ 'post-php', 'post-new-php' ].includes( adminPage ?? '' ) ) {
+	if (['post-php', 'post-new-php'].includes(adminPage ?? '')) {
 		return 'post';
 	}
 
 	// Customizer controls do not load the admin header, so adminpage is absent.
 	if (
-		[ 'widgets-php', 'customize-php' ].includes( adminPage ?? '' ) ||
+		['widgets-php', 'customize-php'].includes(adminPage ?? '') ||
 		wordpressWindow.pagenow === 'customize'
 	) {
 		return 'widgets';
@@ -37,28 +37,28 @@ const getBlockEditorContext = (): BlockEditorContext => {
 };
 
 const getBlockTypesToUnregister = (): string[] => {
-	const registeredBlockTypes = getBlockTypes().map( ( { name } ) => name );
+	const registeredBlockTypes = getBlockTypes().map(({ name }) => name);
 	const blockEditorContext = getBlockEditorContext();
 
-	if ( blockEditorContext === 'post' ) {
-		return POST_EDITOR_BLOCK_TYPES_TO_UNREGISTER.filter( ( blockType ) =>
-			registeredBlockTypes.includes( blockType )
+	if (blockEditorContext === 'post') {
+		return POST_EDITOR_BLOCK_TYPES_TO_UNREGISTER.filter((blockType) =>
+			registeredBlockTypes.includes(blockType)
 		);
 	}
 
-	if ( blockEditorContext === 'widgets' ) {
+	if (blockEditorContext === 'widgets') {
 		return registeredBlockTypes.filter(
-			( blockType ) =>
-				blockType.startsWith( 'woocommerce/' ) &&
-				! WIDGET_EDITOR_ALLOWED_BLOCK_TYPES.includes( blockType )
+			(blockType) =>
+				blockType.startsWith('woocommerce/') &&
+				!WIDGET_EDITOR_ALLOWED_BLOCK_TYPES.includes(blockType)
 		);
 	}
 
 	return [];
 };
 
-domReady( () => {
-	getBlockTypesToUnregister().forEach( ( blockType ) => {
-		unregisterBlockType( blockType );
-	} );
-} );
+domReady(() => {
+	getBlockTypesToUnregister().forEach((blockType) => {
+		unregisterBlockType(blockType);
+	});
+});

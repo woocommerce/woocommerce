@@ -13,23 +13,20 @@ const MyAbbreviatedNotification = () => {
 		<NotificationFill name="AbbreviatedNotification">
 			<AbbreviatedCard
 				className="woocommerce-abbreviated-notification"
-				icon={ page }
-				href={ '#' }
+				icon={page}
+				href={'#'}
 			>
 				<Text as="h3">
-					{ __(
-						'Abbreviated Notification Example',
-						'plugin-domain'
-					) }
+					{__('Abbreviated Notification Example', 'plugin-domain')}
 				</Text>
 				<Text>
-					{ __( 'This is an unread notifications', 'plugin-domain' ) }
+					{__('This is an unread notifications', 'plugin-domain')}
 				</Text>
 			</AbbreviatedCard>
 		</NotificationFill>
 	);
 };
 
-registerPlugin( 'my-abbreviated-notification', {
+registerPlugin('my-abbreviated-notification', {
 	render: MyAbbreviatedNotification,
-} );
+});

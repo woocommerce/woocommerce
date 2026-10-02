@@ -17,7 +17,7 @@ import { MarketplaceContextType } from '../../contexts/types';
 import { getAdminSetting } from '../../../utils/admin-settings';
 
 export interface TabsProps {
-	additionalClassNames?: Array< string > | undefined;
+	additionalClassNames?: Array<string> | undefined;
 }
 
 interface Tab {
@@ -29,75 +29,75 @@ interface Tab {
 }
 
 interface Tabs {
-	[ key: string ]: Tab;
+	[key: string]: Tab;
 }
 
-const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+const wccomSettings = getAdminSetting('wccomHelper', {});
 const wooUpdateCount = wccomSettings?.wooUpdateCount ?? 0;
 
-const setUrlTabParam = ( tabKey: string, query: Record< string, string > ) => {
+const setUrlTabParam = (tabKey: string, query: Record<string, string>) => {
 	const term = query.term ? { term: query.term.trim() } : {};
-	navigateTo( {
+	navigateTo({
 		url: getNewPath(
 			{ tab: tabKey === DEFAULT_TAB_KEY ? undefined : tabKey },
 			MARKETPLACE_PATH,
 			term
 		),
-	} );
+	});
 };
 
 const renderTabs = (
 	marketplaceContextValue: MarketplaceContextType,
 	tabs: Tabs,
-	query: Record< string, string >
+	query: Record<string, string>
 ) => {
 	const { selectedTab, setSelectedTab } = marketplaceContextValue;
 
-	const onTabClick = ( tabKey: string ) => {
-		if ( tabKey === selectedTab ) {
+	const onTabClick = (tabKey: string) => {
+		if (tabKey === selectedTab) {
 			return;
 		}
-		setSelectedTab( tabKey );
-		setUrlTabParam( tabKey, query );
+		setSelectedTab(tabKey);
+		setUrlTabParam(tabKey, query);
 	};
 
 	const tabContent = [];
-	for ( const tabKey in tabs ) {
+	for (const tabKey in tabs) {
 		tabContent.push(
-			tabs[ tabKey ]?.href ? (
+			tabs[tabKey]?.href ? (
 				<a
-					className={ clsx(
+					className={clsx(
 						'woocommerce-marketplace__tab-button',
 						'components-button',
-						`woocommerce-marketplace__tab-${ tabKey }`
-					) }
-					href={ tabs[ tabKey ]?.href }
-					key={ tabKey }
+						`woocommerce-marketplace__tab-${tabKey}`
+					)}
+					href={tabs[tabKey]?.href}
+					key={tabKey}
 				>
-					{ tabs[ tabKey ]?.title }
+					{tabs[tabKey]?.title}
 				</a>
 			) : (
 				<Button
-					className={ clsx(
+					className={clsx(
 						'woocommerce-marketplace__tab-button',
-						`woocommerce-marketplace__tab-${ tabKey }`,
+						`woocommerce-marketplace__tab-${tabKey}`,
 						{
 							'is-active': tabKey === selectedTab,
 						}
-					) }
-					onClick={ () => onTabClick( tabKey ) }
-					key={ tabKey }
+					)}
+					onClick={() => onTabClick(tabKey)}
+					key={tabKey}
 				>
-					{ tabs[ tabKey ]?.title }
-					{ tabs[ tabKey ]?.showUpdateCount && (
+					{tabs[tabKey]?.title}
+					{tabs[tabKey]?.showUpdateCount && (
 						<span
-							className={ clsx(
+							className={clsx(
 								'woocommerce-marketplace__update-count',
-								`woocommerce-marketplace__update-count-${ tabKey }`,
+								`woocommerce-marketplace__update-count-${tabKey}`,
 								{
 									'is-active': tabKey === selectedTab,
 								}
-							) }
+							)}
 							title={
 								tabKey === 'my-subscriptions'
 									? sprintf(
@@ -105,21 +105,21 @@ const renderTabs = (
 											_n(
 												'%d update available for your subscriptions',
 												'%d updates available for your subscriptions',
-												tabs[ tabKey ]?.updateCount,
+												tabs[tabKey]?.updateCount,
 												'woocommerce'
 											),
-											tabs[ tabKey ]?.updateCount
-									  )
+											tabs[tabKey]?.updateCount
+										)
 									: sprintf(
 											/* translators: %d: number of matching items */
 											_n(
 												'%d matching item in this category',
 												'%d matching items in this category',
-												tabs[ tabKey ]?.updateCount,
+												tabs[tabKey]?.updateCount,
 												'woocommerce'
 											),
-											tabs[ tabKey ]?.updateCount
-									  )
+											tabs[tabKey]?.updateCount
+										)
 							}
 							aria-label={
 								tabKey === 'my-subscriptions'
@@ -128,26 +128,26 @@ const renderTabs = (
 											_n(
 												'%d update available for your subscriptions',
 												'%d updates available for your subscriptions',
-												tabs[ tabKey ]?.updateCount,
+												tabs[tabKey]?.updateCount,
 												'woocommerce'
 											),
-											tabs[ tabKey ]?.updateCount
-									  )
+											tabs[tabKey]?.updateCount
+										)
 									: sprintf(
 											/* translators: %d: number of matching items */
 											_n(
 												'%d matching item in this category',
 												'%d matching items in this category',
-												tabs[ tabKey ]?.updateCount,
+												tabs[tabKey]?.updateCount,
 												'woocommerce'
 											),
-											tabs[ tabKey ]?.updateCount
-									  )
+											tabs[tabKey]?.updateCount
+										)
 							}
 						>
-							<span> { tabs[ tabKey ]?.updateCount } </span>
+							<span> {tabs[tabKey]?.updateCount} </span>
 						</span>
-					) }
+					)}
 				</Button>
 			)
 		);
@@ -155,66 +155,66 @@ const renderTabs = (
 	return tabContent;
 };
 
-const Tabs = ( props: TabsProps ): React.JSX.Element => {
+const Tabs = (props: TabsProps): React.JSX.Element => {
 	const { additionalClassNames } = props;
-	const marketplaceContextValue = useContext( MarketplaceContext );
+	const marketplaceContextValue = useContext(MarketplaceContext);
 	const { isLoading, setSelectedTab } = marketplaceContextValue;
 	const { searchResultsCount } = marketplaceContextValue;
 
-	const query: Record< string, string > = useQuery();
+	const query: Record<string, string> = useQuery();
 
 	const tabs: Tabs = useMemo(
-		() => ( {
+		() => ({
 			discover: {
 				name: 'discover',
-				title: __( 'Discover', 'woocommerce' ),
+				title: __('Discover', 'woocommerce'),
 				showUpdateCount: false,
 				updateCount: 0,
 			},
 			extensions: {
 				name: 'extensions',
-				title: __( 'Extensions', 'woocommerce' ),
-				showUpdateCount: !! query.term && ! isLoading,
+				title: __('Extensions', 'woocommerce'),
+				showUpdateCount: !!query.term && !isLoading,
 				updateCount: searchResultsCount.extensions,
 			},
 			themes: {
 				name: 'themes',
-				title: __( 'Themes', 'woocommerce' ),
-				showUpdateCount: !! query.term && ! isLoading,
+				title: __('Themes', 'woocommerce'),
+				showUpdateCount: !!query.term && !isLoading,
 				updateCount: searchResultsCount.themes,
 			},
 			'business-services': {
 				name: 'business-services',
-				title: __( 'Business services', 'woocommerce' ),
-				showUpdateCount: !! query.term && ! isLoading,
-				updateCount: searchResultsCount[ 'business-services' ],
+				title: __('Business services', 'woocommerce'),
+				showUpdateCount: !!query.term && !isLoading,
+				updateCount: searchResultsCount['business-services'],
 			},
 			'my-subscriptions': {
 				name: 'my-subscriptions',
-				title: __( 'My subscriptions', 'woocommerce' ),
+				title: __('My subscriptions', 'woocommerce'),
 				showUpdateCount: wooUpdateCount > 0,
 				updateCount: wooUpdateCount,
 			},
-		} ),
-		[ query, isLoading, searchResultsCount ]
+		}),
+		[query, isLoading, searchResultsCount]
 	);
 
-	useEffect( () => {
-		if ( query?.tab && tabs[ query.tab ] ) {
-			setSelectedTab( query.tab );
-		} else if ( Object.keys( query ).length > 0 ) {
-			setSelectedTab( DEFAULT_TAB_KEY );
+	useEffect(() => {
+		if (query?.tab && tabs[query.tab]) {
+			setSelectedTab(query.tab);
+		} else if (Object.keys(query).length > 0) {
+			setSelectedTab(DEFAULT_TAB_KEY);
 		}
-	}, [ query, setSelectedTab, tabs ] );
+	}, [query, setSelectedTab, tabs]);
 
 	return (
 		<nav
-			className={ clsx(
+			className={clsx(
 				'woocommerce-marketplace__tabs',
 				additionalClassNames || []
-			) }
+			)}
 		>
-			{ renderTabs( marketplaceContextValue, tabs, query ) }
+			{renderTabs(marketplaceContextValue, tabs, query)}
 		</nav>
 	);
 };

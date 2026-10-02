@@ -37,10 +37,10 @@ import { RegisteredBlockComponent } from '@woocommerce/types';
  */
 const getBlockComponentFromMap = (
 	block: string,
-	blockMap: Record< string, RegisteredBlockComponent >
+	blockMap: Record<string, RegisteredBlockComponent>
 ): React.ElementType | null => {
-	return block && blockMap[ block ]
-		? ( blockMap[ block ] as React.ElementType )
+	return block && blockMap[block]
+		? (blockMap[block] as React.ElementType)
 		: null;
 };
 
@@ -55,29 +55,29 @@ const getBlockComponentFromMap = (
  */
 const renderForcedBlocks = (
 	block: string,
-	blockMap: Record< string, RegisteredBlockComponent >,
+	blockMap: Record<string, RegisteredBlockComponent>,
 	// Current children from the parent (siblings of the forced block)
-	blockChildren: NodeListOf< ChildNode > | null,
+	blockChildren: NodeListOf<ChildNode> | null,
 	// Wrapper for inner components.
 	blockWrapper?: React.ElementType
 ) => {
-	if ( ! hasInnerBlocks( block ) ) {
+	if (!hasInnerBlocks(block)) {
 		return null;
 	}
 
 	const currentBlocks = blockChildren
-		? ( Array.from( blockChildren )
-				.map( ( node: Node ) =>
+		? (Array.from(blockChildren)
+				.map((node: Node) =>
 					node instanceof HTMLElement
 						? node?.dataset.blockName || null
 						: null
 				)
-				.filter( Boolean ) as string[] )
+				.filter(Boolean) as string[])
 		: [];
 
-	const forcedBlocks = getRegisteredBlocks( block ).filter(
-		( { blockName, force } ) =>
-			force === true && ! currentBlocks.includes( blockName )
+	const forcedBlocks = getRegisteredBlocks(block).filter(
+		({ blockName, force }) =>
+			force === true && !currentBlocks.includes(blockName)
 	);
 
 	// This will wrap inner blocks with the provided wrapper. If no wrapper is provided, we default to Fragment.
@@ -85,29 +85,29 @@ const renderForcedBlocks = (
 
 	return (
 		<>
-			{ forcedBlocks.map(
+			{forcedBlocks.map(
 				(
 					{ blockName, component },
 					index: number
 				): JSX.Element | null => {
 					const ForcedComponent = component
 						? component
-						: getBlockComponentFromMap( blockName, blockMap );
+						: getBlockComponentFromMap(blockName, blockMap);
 					return ForcedComponent ? (
 						<BlockErrorBoundary
-							key={ `${ blockName }_blockerror` }
-							text={ `Unexpected error in: ${ blockName }` }
-							showErrorBlock={ CURRENT_USER_IS_ADMIN as boolean }
+							key={`${blockName}_blockerror`}
+							text={`Unexpected error in: ${blockName}`}
+							showErrorBlock={CURRENT_USER_IS_ADMIN as boolean}
 						>
 							<InnerBlockComponentWrapper>
 								<ForcedComponent
-									key={ `${ blockName }_forced_${ index }` }
+									key={`${blockName}_forced_${index}`}
 								/>
 							</InnerBlockComponentWrapper>
 						</BlockErrorBoundary>
 					) : null;
 				}
-			) }
+			)}
 		</>
 	);
 };
@@ -116,7 +116,7 @@ interface RenderInnerBlocksProps {
 	// Block (parent) being rendered. Used for inner block component mapping.
 	block: string;
 	// Map of block names to block components for children.
-	blockMap: Record< string, RegisteredBlockComponent >;
+	blockMap: Record<string, RegisteredBlockComponent>;
 	// Wrapper for inner components.
 	blockWrapper?: React.ElementType | undefined;
 	// Elements from the DOM being converted to components.
@@ -128,7 +128,7 @@ interface RenderInnerBlocksProps {
 /**
  * Recursively replace block markup in the DOM with React Components.
  */
-const renderInnerBlocks = ( {
+const renderInnerBlocks = ({
 	// This is the parent block we're working within (see renderParentBlock)
 	block,
 	// This is the map of blockNames->components
@@ -139,20 +139,20 @@ const renderInnerBlocks = ( {
 	children,
 	// Current depth of the children. Used to ensure keys are unique.
 	depth = 1,
-}: RenderInnerBlocksProps ): ( string | JSX.Element | null )[] | null => {
-	if ( ! children || children.length === 0 ) {
+}: RenderInnerBlocksProps): (string | JSX.Element | null)[] | null => {
+	if (!children || children.length === 0) {
 		return null;
 	}
-	return Array.from( children ).map( ( node: Node, index: number ) => {
+	return Array.from(children).map((node: Node, index: number) => {
 		/**
 		 * This will grab the blockName from the data- attributes stored in block markup. Without a blockName, we cannot
 		 * convert the HTMLElement to a React component.
 		 */
 		const { blockName = '', ...componentProps } = {
-			...( node instanceof HTMLElement ? node.dataset : {} ),
+			...(node instanceof HTMLElement ? node.dataset : {}),
 			className: node instanceof Element ? node?.className : '',
 		};
-		const componentKey = `${ block }_${ depth }_${ index }`;
+		const componentKey = `${block}_${depth}_${index}`;
 		const InnerBlockComponent = getBlockComponentFromMap(
 			blockName,
 			blockMap
@@ -164,36 +164,36 @@ const renderInnerBlocks = ( {
 		 *
 		 * Note we use childNodes rather than children so that text nodes are also rendered.
 		 */
-		if ( ! InnerBlockComponent ) {
+		if (!InnerBlockComponent) {
 			const parsedElement = parse(
-				( node instanceof Element && node?.outerHTML ) ||
+				(node instanceof Element && node?.outerHTML) ||
 					node?.textContent ||
 					''
 			);
 
 			// Returns text nodes without manipulation.
-			if ( typeof parsedElement === 'string' && !! parsedElement ) {
+			if (typeof parsedElement === 'string' && !!parsedElement) {
 				return parsedElement;
 			}
 
 			// Do not render invalid elements.
-			if ( ! isValidElement( parsedElement ) ) {
+			if (!isValidElement(parsedElement)) {
 				return null;
 			}
 
 			// Return scripts without manipulation.
-			if ( parsedElement?.type === 'script' ) {
+			if (parsedElement?.type === 'script') {
 				return parsedElement;
 			}
 
 			const renderedChildren = node.childNodes.length
-				? renderInnerBlocks( {
+				? renderInnerBlocks({
 						block,
 						blockMap,
 						children: node.childNodes,
 						depth: depth + 1,
 						blockWrapper,
-				  } )
+					})
 				: undefined;
 
 			// We pass props here rather than componentProps to avoid the data attributes being renamed.
@@ -202,14 +202,14 @@ const renderInnerBlocks = ( {
 						parsedElement,
 						{
 							key: componentKey,
-							...( parsedElement?.props || {} ),
+							...(parsedElement?.props || {}),
 						},
 						renderedChildren
-				  )
-				: cloneElement( parsedElement, {
+					)
+				: cloneElement(parsedElement, {
 						key: componentKey,
-						...( parsedElement?.props || {} ),
-				  } );
+						...(parsedElement?.props || {}),
+					});
 		}
 
 		// This will wrap inner blocks with the provided wrapper. If no wrapper is provided, we default to Fragment.
@@ -222,28 +222,25 @@ const renderInnerBlocks = ( {
 
 		const blockContent = (
 			<BlockErrorBoundary
-				key={ `${ block }_${ depth }_${ index }_blockerror` }
-				text={ `Unexpected error in: ${ blockName }` }
-				showErrorBlock={ CURRENT_USER_IS_ADMIN as boolean }
+				key={`${block}_${depth}_${index}_blockerror`}
+				text={`Unexpected error in: ${blockName}`}
+				showErrorBlock={CURRENT_USER_IS_ADMIN as boolean}
 			>
 				<InnerBlockComponentWrapper>
-					<InnerBlockComponent
-						key={ componentKey }
-						{ ...componentProps }
-					>
+					<InnerBlockComponent key={componentKey} {...componentProps}>
 						{
 							/**
 							 * Within this Inner Block Component we also need to recursively render its children. This
 							 * is done here with a depth+1. The same block map and parent is used, but we pass new
 							 * children from this element.
 							 */
-							renderInnerBlocks( {
+							renderInnerBlocks({
 								block,
 								blockMap,
 								children: node.childNodes,
 								depth: depth + 1,
 								blockWrapper,
-							} )
+							})
 						}
 						{
 							/**
@@ -270,13 +267,13 @@ const renderInnerBlocks = ( {
 			blockContent
 		) : (
 			<Suspense
-				fallback={ null }
-				key={ `${ block }_${ depth }_${ index }_suspense` }
+				fallback={null}
+				key={`${block}_${depth}_${index}_suspense`}
 			>
-				{ blockContent }
+				{blockContent}
 			</Suspense>
 		);
-	} );
+	});
 };
 
 /**
@@ -291,11 +288,11 @@ const renderInnerBlocks = ( {
  * @see renderInnerBlocks
  * @see renderFrontend
  */
-export const renderParentBlock = ( {
+export const renderParentBlock = ({
 	Block,
 	selector,
 	blockName,
-	getProps = () => ( {} ),
+	getProps = () => ({}),
 	blockMap,
 	blockWrapper,
 	options,
@@ -303,7 +300,7 @@ export const renderParentBlock = ( {
 	// Parent Block Name. Used for inner block component mapping.
 	blockName: string;
 	// Map of block names to block components for children.
-	blockMap: Record< string, RegisteredBlockComponent >;
+	blockMap: Record<string, RegisteredBlockComponent>;
 	// Wrapper for inner components.
 	blockWrapper?: React.ElementType;
 	// React component to use as a replacement.
@@ -311,35 +308,33 @@ export const renderParentBlock = ( {
 	// props for this component having any here fixes some of the issues and allows more important
 	// errors to be surfaced (like missing other required parameters: selector, options, etc.)
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	Block: React.FunctionComponent< any >;
+	Block: React.FunctionComponent<any>;
 	// CSS selector to match the elements to replace.
 	selector: string;
 	// Function to generate the props object for the block.
-	getProps: ( el: Element, i: number ) => Record< string, unknown >;
+	getProps: (el: Element, i: number) => Record<string, unknown>;
 	// Options to control rendering behavior
-	options: NonNullable<
-		Parameters< typeof renderFrontend >[ 0 ][ 'options' ]
-	>;
-} ): ReactRootWithContainer[] => {
+	options: NonNullable<Parameters<typeof renderFrontend>[0]['options']>;
+}): ReactRootWithContainer[] => {
 	/**
 	 * In addition to getProps, we need to render and return the children. This adds children to props.
 	 */
-	const getPropsWithChildren = ( element: Element, i: number ) => {
-		const children = renderInnerBlocks( {
+	const getPropsWithChildren = (element: Element, i: number) => {
+		const children = renderInnerBlocks({
 			block: blockName,
 			blockMap,
 			children: element.children || [],
 			blockWrapper,
-		} );
-		return { ...getProps( element, i ), children };
+		});
+		return { ...getProps(element, i), children };
 	};
 	/**
 	 * The only difference between using renderParentBlock and renderFrontend is that here we provide children.
 	 */
-	return renderFrontend( {
+	return renderFrontend({
 		Block,
 		selector,
 		getProps: getPropsWithChildren,
 		options,
-	} );
+	});
 };

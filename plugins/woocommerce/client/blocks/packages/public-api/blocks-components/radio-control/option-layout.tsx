@@ -8,62 +8,62 @@ import clsx from 'clsx';
  */
 import type { RadioControlOptionLayout } from './types';
 
-const OptionLayout = ( {
+const OptionLayout = ({
 	label,
 	secondaryLabel,
 	description,
 	secondaryDescription,
 	id,
 	descriptionStackingDirection = 'row',
-}: RadioControlOptionLayout ): JSX.Element => {
+}: RadioControlOptionLayout): JSX.Element => {
 	return (
 		<div className="wc-block-components-radio-control__option-layout">
 			<div className="wc-block-components-radio-control__label-group">
-				{ label && (
+				{label && (
 					<span
-						id={ id && `${ id }__label` }
+						id={id && `${id}__label`}
 						className="wc-block-components-radio-control__label"
 					>
-						{ label }
+						{label}
 					</span>
-				) }
-				{ secondaryLabel && (
+				)}
+				{secondaryLabel && (
 					<span
-						id={ id && `${ id }__secondary-label` }
+						id={id && `${id}__secondary-label`}
 						className="wc-block-components-radio-control__secondary-label"
 					>
-						{ secondaryLabel }
+						{secondaryLabel}
 					</span>
-				) }
+				)}
 			</div>
-			{ ( description || secondaryDescription ) && (
+			{(description || secondaryDescription) && (
 				<div
-					className={ clsx(
+					className={clsx(
 						'wc-block-components-radio-control__description-group',
 						{
 							'wc-block-components-radio-control__description-group--column':
 								descriptionStackingDirection === 'column',
 						}
-					) }
+					)}
 				>
-					{ description && (
+					{description && (
 						<span
-							id={ id && `${ id }__description` }
+							id={id && `${id}__description`}
 							className="wc-block-components-radio-control__description"
 						>
-							{ description }
+							{description}
 						</span>
-					) }
-					{ secondaryDescription && (
+					)}
+					{secondaryDescription && (
 						<span
-							id={ id && `${ id }__secondary-description` }
+							id={id && `${id}__secondary-description`}
 							className="wc-block-components-radio-control__secondary-description"
 						>
-							{ secondaryDescription }
+							{secondaryDescription}
 						</span>
-					) }
+					)}
 				</div>
-			) }
+			)}
 		</div>
 	);
 };

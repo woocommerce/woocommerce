@@ -31,48 +31,48 @@ import './style.scss';
 import { SITE_VISIBILITY_DOC_LINK } from '../constants';
 import { ConfirmationModal } from './components/confirmation-modal';
 
-const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
+const { Fill } = createSlotFill(SETTINGS_SLOT_FILL_CONSTANT);
 const PLUGIN_ID = 'woocommerce-admin-site-visibility-settings-slotfill';
 
 const SiteVisibility = () => {
 	const setting = window?.wcSettings?.admin?.siteVisibilitySettings || {};
 	const shareKey = setting?.woocommerce_share_key;
 
-	const [ comingSoon, setComingSoon ] = useState(
+	const [comingSoon, setComingSoon] = useState(
 		setting?.woocommerce_coming_soon || 'no'
 	);
-	const [ storePagesOnly, setStorePagesOnly ] = useState(
+	const [storePagesOnly, setStorePagesOnly] = useState(
 		setting?.woocommerce_store_pages_only || 'no'
 	);
-	const [ privateLink, setPrivateLink ] = useState(
+	const [privateLink, setPrivateLink] = useState(
 		setting?.woocommerce_private_link || 'no'
 	);
-	const [ siteVisibilityBadge, setSiteVisibilityBadge ] = useState(
+	const [siteVisibilityBadge, setSiteVisibilityBadge] = useState(
 		setting?.woocommerce_feature_site_visibility_badge_enabled || 'yes'
 	);
-	const formRef = useRef( null );
-	const saveButtonRef = useRef( null );
+	const formRef = useRef(null);
+	const saveButtonRef = useRef(null);
 
-	const comingSoonTemplateId = useSelect( ( select ) => {
-		return select( coreStore ).getDefaultTemplateId( {
+	const comingSoonTemplateId = useSelect((select) => {
+		return select(coreStore).getDefaultTemplateId({
 			slug: 'coming-soon',
-		} );
-	}, [] );
+		});
+	}, []);
 
-	useEffect( () => {
+	useEffect(() => {
 		const saveButton = document.getElementsByClassName(
 			'woocommerce-save-button'
-		)[ 0 ];
-		if ( saveButton ) {
+		)[0];
+		if (saveButton) {
 			saveButtonRef.current = saveButton;
 		}
-		const form = document.querySelector( '#mainform' );
-		if ( form ) {
+		const form = document.querySelector('#mainform');
+		if (form) {
 			formRef.current = form;
 		}
-	}, [] );
+	}, []);
 
-	useEffect( () => {
+	useEffect(() => {
 		const initValues = {
 			comingSoon: setting.woocommerce_coming_soon,
 			storePagesOnly: setting.woocommerce_store_pages_only,
@@ -90,8 +90,8 @@ const SiteVisibility = () => {
 		};
 		const saveButton = document.getElementsByClassName(
 			'woocommerce-save-button'
-		)[ 0 ];
-		if ( saveButton ) {
+		)[0];
+		if (saveButton) {
 			saveButton.disabled =
 				initValues.comingSoon === currentValues.comingSoon &&
 				initValues.storePagesOnly === currentValues.storePagesOnly &&
@@ -99,142 +99,139 @@ const SiteVisibility = () => {
 				initValues.siteVisibilityBadge ===
 					currentValues.siteVisibilityBadge;
 		}
-	}, [ comingSoon, storePagesOnly, privateLink, siteVisibilityBadge ] );
+	}, [comingSoon, storePagesOnly, privateLink, siteVisibilityBadge]);
 
-	const copyLink = __( 'Copy link', 'woocommerce' );
-	const copied = __( 'Copied!', 'woocommerce' );
-	const [ copyLinkText, setCopyLinkText ] = useState( copyLink );
+	const copyLink = __('Copy link', 'woocommerce');
+	const copied = __('Copied!', 'woocommerce');
+	const [copyLinkText, setCopyLinkText] = useState(copyLink);
 
 	const getPrivateLink = () => {
 		const settings = window?.wcSettings;
 		const homeUrl = settings?.homeUrl;
-		const urlObject = new URL( homeUrl );
+		const urlObject = new URL(homeUrl);
 
-		if ( storePagesOnly === 'yes' ) {
+		if (storePagesOnly === 'yes') {
 			const shopPermalink =
 				settings?.admin?.siteVisibilitySettings?.shop_permalink;
-			if ( shopPermalink ) {
+			if (shopPermalink) {
 				urlObject.href = shopPermalink;
 			}
 		}
 
-		const params = new URLSearchParams( urlObject.search );
-		params.set( 'woo-share', shareKey );
+		const params = new URLSearchParams(urlObject.search);
+		params.set('woo-share', shareKey);
 		urlObject.search = params.toString();
 
 		return urlObject.toString();
 	};
 
-	const copyClipboardRef = useCopyToClipboard( getPrivateLink, () => {
-		setCopyLinkText( copied );
-		setTimeout( () => {
-			setCopyLinkText( copyLink );
-		}, 2000 );
-	} );
+	const copyClipboardRef = useCopyToClipboard(getPrivateLink, () => {
+		setCopyLinkText(copied);
+		setTimeout(() => {
+			setCopyLinkText(copyLink);
+		}, 2000);
+	});
 
 	return (
 		<div className="site-visibility-settings-slotfill">
 			<input
 				type="hidden"
-				value={ comingSoon }
+				value={comingSoon}
 				name="woocommerce_coming_soon"
 			/>
 			<input
 				type="hidden"
-				value={ storePagesOnly }
+				value={storePagesOnly}
 				name="woocommerce_store_pages_only"
 			/>
 			<input
 				type="hidden"
-				value={ privateLink }
+				value={privateLink}
 				name="woocommerce_private_link"
 			/>
 			<input
 				type="hidden"
-				value={ siteVisibilityBadge }
+				value={siteVisibilityBadge}
 				name="woocommerce_feature_site_visibility_badge_enabled"
 			/>
-			<h2>{ __( 'Site visibility', 'woocommerce' ) }</h2>
+			<h2>{__('Site visibility', 'woocommerce')}</h2>
 			<p className="site-visibility-settings-slotfill-description">
-				{ createInterpolateElement(
+				{createInterpolateElement(
 					__(
 						'Manage how your site appears to visitors. <a>Learn more</a>',
 						'woocommerce'
 					),
 					{
-						a: createElement( 'a', {
+						a: createElement('a', {
 							target: '_blank',
 							rel: 'noreferrer',
 							href: SITE_VISIBILITY_DOC_LINK,
-						} ),
+						}),
 					}
-				) }
+				)}
 			</p>
 			<div className="site-visibility-settings-slotfill-section">
 				<RadioControl
-					onChange={ () => {
-						setComingSoon( 'yes' );
-						recordEvent( 'site_visibility_toggle', {
+					onChange={() => {
+						setComingSoon('yes');
+						recordEvent('site_visibility_toggle', {
 							status: 'coming_soon',
-						} );
-					} }
-					options={ [
+						});
+					}}
+					options={[
 						{
-							label: __( 'Coming soon', 'woocommerce' ),
+							label: __('Coming soon', 'woocommerce'),
 							value: 'yes',
 						},
-					] }
-					selected={ comingSoon }
+					]}
+					selected={comingSoon}
 				/>
 				<p className="site-visibility-settings-slotfill-section-description">
-					{ getSetting( 'currentThemeIsFSETheme' )
+					{getSetting('currentThemeIsFSETheme')
 						? createInterpolateElement(
 								__(
 									'Your site is hidden from visitors behind a “Coming soon” landing page until it’s ready for viewing. You can customize your “Coming soon” landing page via the <a>Editor</a>.',
 									'woocommerce'
 								),
 								{
-									a: createElement( 'a', {
+									a: createElement('a', {
 										target: '_blank',
 										href: comingSoonTemplateId
 											? getAdminLink(
-													`site-editor.php?postType=wp_template&postId=${ comingSoonTemplateId }&canvas=edit`
-											  )
-											: getAdminLink( 'site-editor.php' ),
-									} ),
+													`site-editor.php?postType=wp_template&postId=${comingSoonTemplateId}&canvas=edit`
+												)
+											: getAdminLink('site-editor.php'),
+									}),
 								}
-						  )
+							)
 						: __(
 								'Your site is hidden from visitors behind a “Coming soon” landing page until it’s ready for viewing.',
 								'woocommerce'
-						  ) }
+							)}
 				</p>
 				<div
-					className={ clsx(
+					className={clsx(
 						'site-visibility-settings-slotfill-section-content',
 						{
 							'is-hidden': comingSoon !== 'yes',
 						}
-					) }
+					)}
 				>
 					<ToggleControl
 						__nextHasNoMarginBottom
 						label={
 							<>
-								{ __(
-									'Apply to store pages only',
-									'woocommerce'
-								) }
+								{__('Apply to store pages only', 'woocommerce')}
 								<p>
-									{ __(
+									{__(
 										'Display a "coming soon" message on your store pages — the rest of your site will remain visible.',
 										'woocommerce'
-									) }
+									)}
 								</p>
 							</>
 						}
-						checked={ storePagesOnly === 'yes' }
-						onChange={ ( enabled ) => {
+						checked={storePagesOnly === 'yes'}
+						onChange={(enabled) => {
 							setStorePagesOnly(
 								storePagesOnly === 'yes' ? 'no' : 'yes'
 							);
@@ -244,26 +241,26 @@ const SiteVisibility = () => {
 									enabled,
 								}
 							);
-						} }
+						}}
 					/>
 					<ToggleControl
 						__nextHasNoMarginBottom
 						label={
 							<>
-								{ __(
+								{__(
 									'Share your site with a private link',
 									'woocommerce'
-								) }
+								)}
 								<p>
-									{ __(
+									{__(
 										'Share your site with anyone using a private link.',
 										'woocommerce'
-									) }
+									)}
 								</p>
 							</>
 						}
-						checked={ privateLink === 'yes' }
-						onChange={ ( enabled ) => {
+						checked={privateLink === 'yes'}
+						onChange={(enabled) => {
 							setPrivateLink(
 								privateLink === 'yes' ? 'no' : 'yes'
 							);
@@ -273,47 +270,47 @@ const SiteVisibility = () => {
 									enabled,
 								}
 							);
-						} }
+						}}
 					/>
 				</div>
-				{ comingSoon === 'yes' && privateLink === 'yes' && (
+				{comingSoon === 'yes' && privateLink === 'yes' && (
 					<div className="site-visibility-settings-slotfill-private-link">
-						<input value={ getPrivateLink() } readOnly />
+						<input value={getPrivateLink()} readOnly />
 						<Button
-							ref={ copyClipboardRef }
+							ref={copyClipboardRef}
 							variant="link"
-							onClick={ () => {
+							onClick={() => {
 								recordEvent(
 									'site_visibility_private_link_copy'
 								);
-							} }
+							}}
 						>
-							{ copyLinkText }
+							{copyLinkText}
 						</Button>
 					</div>
-				) }
+				)}
 			</div>
 			<div className="site-visibility-settings-slotfill-section">
 				<RadioControl
-					onChange={ () => {
-						setComingSoon( 'no' );
-						recordEvent( 'site_visibility_toggle', {
+					onChange={() => {
+						setComingSoon('no');
+						recordEvent('site_visibility_toggle', {
 							status: 'live',
-						} );
-					} }
-					options={ [
+						});
+					}}
+					options={[
 						{
-							label: __( 'Live', 'woocommerce' ),
+							label: __('Live', 'woocommerce'),
 							value: 'no',
 						},
-					] }
-					selected={ comingSoon }
+					]}
+					selected={comingSoon}
 				/>
 				<p className="site-visibility-settings-slotfill-section-description">
-					{ __(
+					{__(
 						'Your entire site is visible to everyone.',
 						'woocommerce'
-					) }
+					)}
 				</p>
 			</div>
 			<div className="site-visibility-settings-slotfill-section">
@@ -322,35 +319,35 @@ const SiteVisibility = () => {
 						__nextHasNoMarginBottom
 						label={
 							<>
-								{ __(
+								{__(
 									'Display site visibility badge in admin bar',
 									'woocommerce'
-								) }
+								)}
 								<p>
-									{ __(
+									{__(
 										'Show the site visibility status badge in the WordPress admin bar.',
 										'woocommerce'
-									) }
+									)}
 								</p>
 							</>
 						}
-						checked={ siteVisibilityBadge === 'yes' }
-						onChange={ ( enabled ) => {
-							setSiteVisibilityBadge( enabled ? 'yes' : 'no' );
-							recordEvent( 'site_visibility_badge_toggle', {
+						checked={siteVisibilityBadge === 'yes'}
+						onChange={(enabled) => {
+							setSiteVisibilityBadge(enabled ? 'yes' : 'no');
+							recordEvent('site_visibility_badge_toggle', {
 								enabled,
-							} );
-						} }
+							});
+						}}
 					/>
 				</div>
 			</div>
-			{ formRef.current && saveButtonRef.current ? (
+			{formRef.current && saveButtonRef.current ? (
 				<ConfirmationModal
-					saveButtonRef={ saveButtonRef }
-					formRef={ formRef }
-					currentSetting={ setting }
+					saveButtonRef={saveButtonRef}
+					formRef={formRef}
+					currentSetting={setting}
 				/>
-			) : null }
+			) : null}
 		</div>
 	);
 };
@@ -364,12 +361,12 @@ const SiteVisibilitySlotFill = () => {
 };
 
 export const registerSiteVisibilitySlotFill = () => {
-	if ( getPlugin( PLUGIN_ID ) ) {
+	if (getPlugin(PLUGIN_ID)) {
 		return;
 	}
 
-	registerPlugin( PLUGIN_ID, {
+	registerPlugin(PLUGIN_ID, {
 		scope: 'woocommerce-site-visibility-settings',
 		render: SiteVisibilitySlotFill,
-	} );
+	});
 };

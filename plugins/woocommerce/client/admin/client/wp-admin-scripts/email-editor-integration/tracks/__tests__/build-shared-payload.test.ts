@@ -36,88 +36,88 @@ const baseSummary: ChangeSummary = {
 	cache_hit: false,
 };
 
-describe( 'buildSharedTracksPayload', () => {
-	it( 'returns the six base keys exactly when both record and summary are present', () => {
-		const result = buildSharedTracksPayload( {
+describe('buildSharedTracksPayload', () => {
+	it('returns the six base keys exactly when both record and summary are present', () => {
+		const result = buildSharedTracksPayload({
 			record: baseRecord,
 			summary: baseSummary,
-		} );
+		});
 
-		expect( result ).toEqual( {
+		expect(result).toEqual({
 			email_id: 'customer_processing_order',
 			template_version_from: '10.6.0',
 			template_version_to: '10.7.0',
 			source_hash_to: 'cafebabe0011223344556677889900aabbccddee',
 			classification: 'core_updated_customized',
 			was_backfilled: true,
-		} );
-	} );
+		});
+	});
 
-	it( 'does not include source_hash_from in the wire payload (RSM-145 §15.4)', () => {
-		const result = buildSharedTracksPayload( {
+	it('does not include source_hash_from in the wire payload (RSM-145 §15.4)', () => {
+		const result = buildSharedTracksPayload({
 			record: baseRecord,
 			summary: baseSummary,
-		} );
+		});
 
-		expect( result ).not.toBeNull();
-		expect( result ).not.toHaveProperty( 'source_hash_from' );
-	} );
+		expect(result).not.toBeNull();
+		expect(result).not.toHaveProperty('source_hash_from');
+	});
 
-	it( 'returns null when the record has no meta', () => {
+	it('returns null when the record has no meta', () => {
 		expect(
-			buildSharedTracksPayload( {
+			buildSharedTracksPayload({
 				record: { slug: 'customer_processing_order' },
 				summary: baseSummary,
-			} )
+			})
 		).toBeNull();
-	} );
+	});
 
-	it( 'returns null when the record is null', () => {
+	it('returns null when the record is null', () => {
 		expect(
-			buildSharedTracksPayload( {
+			buildSharedTracksPayload({
 				record: null,
 				summary: baseSummary,
-			} )
+			})
 		).toBeNull();
-	} );
+	});
 
-	it( 'treats missing summary as null template_version_to and source_hash_to', () => {
-		const result = buildSharedTracksPayload( {
+	it('treats missing summary as null template_version_to and source_hash_to', () => {
+		const result = buildSharedTracksPayload({
 			record: baseRecord,
 			summary: null,
-		} );
+		});
 
-		expect( result ).toMatchObject( {
+		expect(result).toMatchObject({
 			template_version_to: null,
 			source_hash_to: null,
-		} );
-	} );
+		});
+	});
 
-	it( 'coerces was_backfilled from string "1" and number 1', () => {
+	it('coerces was_backfilled from string "1" and number 1', () => {
 		const stringRecord = {
 			...baseRecord,
 			meta: { ...baseRecord.meta, _wc_email_backfilled: '1' },
 		};
 		expect(
-			buildSharedTracksPayload( {
+			buildSharedTracksPayload({
 				record: stringRecord,
 				summary: baseSummary,
-			} )?.was_backfilled
-		).toBe( true );
+			})?.was_backfilled
+		).toBe(true);
 
 		const numberRecord = {
 			...baseRecord,
 			meta: { ...baseRecord.meta, _wc_email_backfilled: 1 },
 		};
 		expect(
-			buildSharedTracksPayload( {
+			buildSharedTracksPayload({
 				record: numberRecord,
 				summary: baseSummary,
-			} )?.was_backfilled
-		).toBe( true );
-	} );
+			})?.was_backfilled
+		).toBe(true);
+	});
 
-	it( 'treats missing _wc_email_backfilled as false', () => {
+	it('treats missing _wc_email_backfilled as false', () => {
 		const noBackfillRecord = {
 			...baseRecord,
 			meta: {
@@ -126,26 +126,26 @@ describe( 'buildSharedTracksPayload', () => {
 			},
 		};
 		expect(
-			buildSharedTracksPayload( {
+			buildSharedTracksPayload({
 				record: noBackfillRecord,
 				summary: baseSummary,
-			} )?.was_backfilled
-		).toBe( false );
-	} );
+			})?.was_backfilled
+		).toBe(false);
+	});
 
-	it( 'falls back to empty strings for missing meta fields', () => {
+	it('falls back to empty strings for missing meta fields', () => {
 		const sparseRecord = {
 			slug: 'customer_processing_order',
 			meta: {},
 		};
 		expect(
-			buildSharedTracksPayload( {
+			buildSharedTracksPayload({
 				record: sparseRecord,
 				summary: baseSummary,
-			} )
-		).toMatchObject( {
+			})
+		).toMatchObject({
 			template_version_from: '',
 			classification: '',
-		} );
-	} );
-} );
+		});
+	});
+});

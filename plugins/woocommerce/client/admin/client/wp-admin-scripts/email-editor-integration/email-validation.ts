@@ -14,7 +14,7 @@ import { NAME_SPACE } from './constants';
 // When the type was imported from the email-editor package, the build failed due to more than 50 type errors.
 type EmailContentValidationRule = {
 	id: string;
-	testContent: ( emailContent: string ) => boolean;
+	testContent: (emailContent: string) => boolean;
 	message: string;
 	actions: [];
 };
@@ -24,11 +24,11 @@ type EmailContentValidationRule = {
  *
  * @return The WooCommerce data for the current post.
  */
-type WooCommerceEmailEditorData = Partial< EmailWooCommerceData > &
-	Partial< TemplateWooCommerceData >;
+type WooCommerceEmailEditorData = Partial<EmailWooCommerceData> &
+	Partial<TemplateWooCommerceData>;
 
 function getWooCommerceData(): WooCommerceEmailEditorData | undefined {
-	const editedPost = select( 'core' ).getEditedEntityRecord(
+	const editedPost = select('core').getEditedEntityRecord(
 		'postType',
 		window.WooCommerceEmailEditor.current_post_type,
 		window.WooCommerceEmailEditor.current_post_id
@@ -43,8 +43,8 @@ function getWooCommerceData(): WooCommerceEmailEditorData | undefined {
  * @param email The email to check.
  * @return True if the email is valid, false otherwise.
  */
-function isValidEmail( email: string ): boolean {
-	const emailField = document.createElement( 'input' );
+function isValidEmail(email: string): boolean {
+	const emailField = document.createElement('input');
 	emailField.type = 'email';
 	emailField.value = email;
 
@@ -57,12 +57,11 @@ function isValidEmail( email: string ): boolean {
  * @param commaSeparatedEmails - The comma-separated string of email addresses.
  * @return The invalid email addresses.
  */
-function getInvalidCommaSeparatedEmails( commaSeparatedEmails: string ) {
+function getInvalidCommaSeparatedEmails(commaSeparatedEmails: string) {
 	return commaSeparatedEmails
-		.split( ',' )
+		.split(',')
 		.filter(
-			( email: string ) =>
-				!! email.trim() && ! isValidEmail( email.trim() )
+			(email: string) => !!email.trim() && !isValidEmail(email.trim())
 		);
 }
 
@@ -78,27 +77,27 @@ function createValidationRuleForCommaSeparatedEmailsField(
 	message: string
 ): EmailContentValidationRule {
 	return {
-		id: `${ fieldName }-email-validation`,
+		id: `${fieldName}-email-validation`,
 		testContent: () => {
 			const wooCommerceData = getWooCommerceData();
 
-			if ( ! wooCommerceData?.[ fieldName ] ) {
+			if (!wooCommerceData?.[fieldName]) {
 				return false;
 			}
 
 			const invalidEmails = getInvalidCommaSeparatedEmails(
-				wooCommerceData[ fieldName ] ?? ''
+				wooCommerceData[fieldName] ?? ''
 			);
 
 			return invalidEmails.length > 0;
 		},
 		get message() {
 			const invalidEmails = getInvalidCommaSeparatedEmails(
-				getWooCommerceData()?.[ fieldName ] ?? ''
+				getWooCommerceData()?.[fieldName] ?? ''
 			);
 
 			// @ts-expect-error - The type isn't correct. We need to update @wordpress/i18n to a newer version to fix it.
-			return sprintf( message, invalidEmails.join( ',' ) );
+			return sprintf(message, invalidEmails.join(','));
 		},
 		actions: [],
 	};
@@ -110,9 +109,9 @@ const emailValidationRule: EmailContentValidationRule = {
 		const wooCommerceData = getWooCommerceData();
 		const email = wooCommerceData?.sender_settings?.from_address ?? '';
 
-		if ( ! email.trim() ) return false;
+		if (!email.trim()) return false;
 
-		return ! isValidEmail( email.trim() );
+		return !isValidEmail(email.trim());
 	},
 	message: __(
 		'The "from" email address is invalid. Please enter a valid email address that will appear as the sender in outgoing WooCommerce emails.',
@@ -154,9 +153,9 @@ export function registerEmailValidationRules() {
 	addFilter(
 		'woocommerce_email_editor_content_validation_rules',
 		NAME_SPACE,
-		( rules: EmailContentValidationRule[] ) => {
+		(rules: EmailContentValidationRule[]) => {
 			return [
-				...( rules || [] ),
+				...(rules || []),
 				emailValidationRule,
 				recipientValidationRule,
 				ccValidationRule,

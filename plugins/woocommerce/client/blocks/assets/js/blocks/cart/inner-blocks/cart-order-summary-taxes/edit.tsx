@@ -11,7 +11,7 @@ import { getSetting } from '@woocommerce/settings';
  */
 import Block from './block';
 
-export const Edit = ( {
+export const Edit = ({
 	attributes,
 	setAttributes,
 }: {
@@ -19,11 +19,11 @@ export const Edit = ( {
 		className: string;
 		showRateAfterTaxName: boolean;
 	};
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ): JSX.Element => {
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}): JSX.Element => {
 	const { className, showRateAfterTaxName } = attributes;
 	const blockProps = useBlockProps();
-	const taxesEnabled = getSetting( 'taxesEnabled' ) as boolean;
+	const taxesEnabled = getSetting('taxesEnabled') as boolean;
 	const displayItemizedTaxes = getSetting(
 		'displayItemizedTaxes',
 		false
@@ -33,41 +33,41 @@ export const Edit = ( {
 		false
 	) as boolean;
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<InspectorControls>
-				{ taxesEnabled &&
+				{taxesEnabled &&
 					displayItemizedTaxes &&
-					! displayCartPricesIncludingTax && (
-						<PanelBody title={ __( 'Taxes', 'woocommerce' ) }>
+					!displayCartPricesIncludingTax && (
+						<PanelBody title={__('Taxes', 'woocommerce')}>
 							<ToggleControl
 								__nextHasNoMarginBottom
-								label={ __(
+								label={__(
 									'Show rate after tax name',
 									'woocommerce'
-								) }
-								help={ __(
+								)}
+								help={__(
 									'Show the percentage rate alongside each tax line in the summary.',
 									'woocommerce'
-								) }
-								checked={ showRateAfterTaxName }
-								onChange={ () =>
-									setAttributes( {
+								)}
+								checked={showRateAfterTaxName}
+								onChange={() =>
+									setAttributes({
 										showRateAfterTaxName:
-											! showRateAfterTaxName,
-									} )
+											!showRateAfterTaxName,
+									})
 								}
 							/>
 						</PanelBody>
-					) }
+					)}
 			</InspectorControls>
 			<Block
-				className={ className }
-				showRateAfterTaxName={ showRateAfterTaxName }
+				className={className}
+				showRateAfterTaxName={showRateAfterTaxName}
 			/>
 		</div>
 	);
 };
 
 export const Save = (): JSX.Element => {
-	return <div { ...useBlockProps.save() } />;
+	return <div {...useBlockProps.save()} />;
 };

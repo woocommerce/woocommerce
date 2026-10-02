@@ -8,11 +8,11 @@ import type { WPDataSelector, WPDataSelectors } from '@woocommerce/data';
  */
 import { State } from './types';
 
-export const getRegisteredChannels = ( state: State ) => {
+export const getRegisteredChannels = (state: State) => {
 	return state.registeredChannels;
 };
 
-export const getRecommendedChannels = ( state: State ) => {
+export const getRecommendedChannels = (state: State) => {
 	return state.recommendedChannels;
 };
 
@@ -23,22 +23,22 @@ export const getRecommendedChannels = ( state: State ) => {
  * @param page    Page number. First page is `1`.
  * @param perPage Page size, i.e. number of records in one page.
  */
-export const getCampaigns = ( state: State, page: number, perPage: number ) => {
-	const key = `${ page }-${ perPage }`;
+export const getCampaigns = (state: State, page: number, perPage: number) => {
+	const key = `${page}-${perPage}`;
 	return {
-		campaignsPage: state.campaigns.pages[ key ] || null,
+		campaignsPage: state.campaigns.pages[key] || null,
 		meta: state.campaigns.meta,
 	};
 };
 
-export const getCampaignTypes = ( state: State ) => {
+export const getCampaignTypes = (state: State) => {
 	return state.campaignTypes;
 };
 
 // Types
 export type Selectors = {
-	getRegisteredChannels: WPDataSelector< typeof getRegisteredChannels >;
-	getRecommendedChannels: WPDataSelector< typeof getRecommendedChannels >;
-	getCampaigns: WPDataSelector< typeof getCampaigns >;
-	getCampaignTypes: WPDataSelector< typeof getCampaignTypes >;
+	getRegisteredChannels: WPDataSelector<typeof getRegisteredChannels>;
+	getRecommendedChannels: WPDataSelector<typeof getRecommendedChannels>;
+	getCampaigns: WPDataSelector<typeof getCampaigns>;
+	getCampaignTypes: WPDataSelector<typeof getCampaignTypes>;
 } & WPDataSelectors;

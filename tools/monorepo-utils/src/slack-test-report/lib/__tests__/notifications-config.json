@@ -3,21 +3,15 @@
 	"routes": [
 		{
 			"checkType": "release-checks",
-			"channels": [
-				"CHANNEL_ID_1"
-			]
+			"channels": [ "CHANNEL_ID_1" ]
 		},
 		{
 			"checkType": "daily-checks",
-			"channels": [
-				"CHANNEL_ID_2"
-			]
+			"channels": [ "CHANNEL_ID_2" ]
 		},
 		{
 			"refName": "release/**",
-			"channels": [
-				"CHANNEL_ID_1"
-			],
+			"channels": [ "CHANNEL_ID_1" ],
 			"excludeDefaultChannel": true
 		}
 	]

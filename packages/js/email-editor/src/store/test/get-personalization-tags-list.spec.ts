@@ -12,24 +12,24 @@ import { PersonalizationTag } from '../types';
 
 // Importing the selectors module pulls in the whole block editor, which Jest
 // cannot transform. Only the store descriptors are needed to route `select`.
-jest.mock( '@wordpress/core-data', () => ( { store: { name: 'core' } } ) );
-jest.mock( '@wordpress/editor', () => ( { store: { name: 'core/editor' } } ) );
-jest.mock( '@wordpress/preferences', () => ( {
+jest.mock('@wordpress/core-data', () => ({ store: { name: 'core' } }));
+jest.mock('@wordpress/editor', () => ({ store: { name: 'core/editor' } }));
+jest.mock('@wordpress/preferences', () => ({
 	store: { name: 'core/preferences' },
-} ) );
-jest.mock( '@wordpress/blocks', () => ( {
+}));
+jest.mock('@wordpress/blocks', () => ({
 	serialize: jest.fn(),
 	parse: jest.fn(),
-} ) );
+}));
 
-const makeTag = ( name: string, postTypes: string[] ): PersonalizationTag => ( {
+const makeTag = (name: string, postTypes: string[]): PersonalizationTag => ({
 	name,
-	token: `[woocommerce/${ name }]`,
+	token: `[woocommerce/${name}]`,
 	category: 'Test',
 	attributes: [],
-	valueToInsert: `[woocommerce/${ name }]`,
+	valueToInsert: `[woocommerce/${name}]`,
 	postTypes,
-} );
+});
 
 type Registry = { select: jest.Mock };
 
@@ -42,124 +42,119 @@ type Registry = { select: jest.Mock };
  * @param options.postType Post type currently being edited.
  * @param options.template Result of `getCurrentTemplate()`.
  */
-function buildRegistry( options: {
+function buildRegistry(options: {
 	tags: PersonalizationTag[] | null;
 	postType: string | undefined;
 	template?: { post_types: string[] } | null;
-} ) {
+}) {
 	const { tags, postType, template = null } = options;
-	const getEntityRecords = jest.fn().mockReturnValue( tags );
+	const getEntityRecords = jest.fn().mockReturnValue(tags);
 
 	const registry: Registry = {
-		select: jest.fn( ( store ) => {
-			if ( store === storeName ) {
+		select: jest.fn((store) => {
+			if (store === storeName) {
 				return {
 					getEmailPostId: () => 23,
 					getEmailPostType: () => postType,
 					getCurrentTemplate: () => template,
 				};
 			}
-			if ( store === coreDataStore ) {
+			if (store === coreDataStore) {
 				return { getEntityRecords };
 			}
-			throw new Error( `Unexpected store: ${ String( store ) }` );
-		} ),
+			throw new Error(`Unexpected store: ${String(store)}`);
+		}),
 	};
 
-	(
-		getPersonalizationTagsList as unknown as { registry: Registry }
-	 ).registry = registry;
+	(getPersonalizationTagsList as unknown as { registry: Registry }).registry =
+		registry;
 
 	return { getEntityRecords };
 }
 
-const names = () => getPersonalizationTagsList().map( ( tag ) => tag.name );
+const names = () => getPersonalizationTagsList().map((tag) => tag.name);
 
-describe( 'getPersonalizationTagsList', () => {
+describe('getPersonalizationTagsList', () => {
 	// Without this, a test that forgot `buildRegistry` would silently reuse the
 	// previous registry along with its warm caches.
-	afterEach( () => {
+	afterEach(() => {
 		delete (
 			getPersonalizationTagsList as unknown as { registry?: Registry }
-		 ).registry;
-	} );
+		).registry;
+	});
 
-	it( 'filters tags by the edited post type', () => {
-		buildRegistry( {
+	it('filters tags by the edited post type', () => {
+		buildRegistry({
 			tags: [
-				makeTag( 'a', [ 'woo_email' ] ),
-				makeTag( 'b', [ 'other_type' ] ),
-				makeTag( 'c', [] ),
+				makeTag('a', ['woo_email']),
+				makeTag('b', ['other_type']),
+				makeTag('c', []),
 			],
 			postType: 'woo_email',
-		} );
+		});
 
-		expect( names() ).toEqual( [ 'a', 'c' ] );
-	} );
+		expect(names()).toEqual(['a', 'c']);
+	});
 
-	it( 'filters tags by the template post types when editing a template', () => {
-		buildRegistry( {
+	it('filters tags by the template post types when editing a template', () => {
+		buildRegistry({
 			tags: [
-				makeTag( 'a', [ 'woo_email' ] ),
-				makeTag( 'b', [ 'other_type' ] ),
-				makeTag( 'c', [] ),
+				makeTag('a', ['woo_email']),
+				makeTag('b', ['other_type']),
+				makeTag('c', []),
 			],
 			postType: 'wp_template',
-			template: { post_types: [ 'other_type' ] },
-		} );
+			template: { post_types: ['other_type'] },
+		});
 
-		expect( names() ).toEqual( [ 'b', 'c' ] );
-	} );
+		expect(names()).toEqual(['b', 'c']);
+	});
 
 	// `getEditedPostTemplate` returns null while a template is unresolved, which
 	// the previous unguarded `postTemplate.post_types` threw a TypeError on.
-	it( 'keeps only untyped tags when the template is unresolved', () => {
-		buildRegistry( {
-			tags: [ makeTag( 'a', [ 'woo_email' ] ), makeTag( 'c', [] ) ],
+	it('keeps only untyped tags when the template is unresolved', () => {
+		buildRegistry({
+			tags: [makeTag('a', ['woo_email']), makeTag('c', [])],
 			postType: 'wp_template',
 			template: null,
-		} );
+		});
 
-		expect( names() ).toEqual( [ 'c' ] );
-	} );
+		expect(names()).toEqual(['c']);
+	});
 
-	it( 'returns a referentially stable list across repeated calls', () => {
-		buildRegistry( {
-			tags: [ makeTag( 'a', [ 'woo_email' ] ) ],
+	it('returns a referentially stable list across repeated calls', () => {
+		buildRegistry({
+			tags: [makeTag('a', ['woo_email'])],
 			postType: 'woo_email',
-		} );
+		});
 
-		expect( getPersonalizationTagsList() ).toBe(
-			getPersonalizationTagsList()
-		);
-	} );
+		expect(getPersonalizationTagsList()).toBe(getPersonalizationTagsList());
+	});
 
 	// The counterpart to the test above: stable is only correct while the
 	// records are unchanged.
-	it( 'recomputes when the records returned by core-data change', () => {
-		const { getEntityRecords } = buildRegistry( {
-			tags: [ makeTag( 'a', [ 'woo_email' ] ) ],
+	it('recomputes when the records returned by core-data change', () => {
+		const { getEntityRecords } = buildRegistry({
+			tags: [makeTag('a', ['woo_email'])],
 			postType: 'woo_email',
-		} );
+		});
 		const before = getPersonalizationTagsList();
 
-		getEntityRecords.mockReturnValue( [
-			makeTag( 'a', [ 'woo_email' ] ),
-			makeTag( 'b', [ 'woo_email' ] ),
-		] );
+		getEntityRecords.mockReturnValue([
+			makeTag('a', ['woo_email']),
+			makeTag('b', ['woo_email']),
+		]);
 
-		expect( getPersonalizationTagsList() ).not.toBe( before );
-		expect( names() ).toEqual( [ 'a', 'b' ] );
-	} );
+		expect(getPersonalizationTagsList()).not.toBe(before);
+		expect(names()).toEqual(['a', 'b']);
+	});
 
 	// Records are null until the request resolves, which is every call during
 	// initial load — a fresh array each time would defeat the memoization.
-	it( 'returns a stable empty list while the records are unresolved', () => {
-		buildRegistry( { tags: null, postType: 'woo_email' } );
+	it('returns a stable empty list while the records are unresolved', () => {
+		buildRegistry({ tags: null, postType: 'woo_email' });
 
-		expect( getPersonalizationTagsList() ).toStrictEqual( [] );
-		expect( getPersonalizationTagsList() ).toBe(
-			getPersonalizationTagsList()
-		);
-	} );
-} );
+		expect(getPersonalizationTagsList()).toStrictEqual([]);
+		expect(getPersonalizationTagsList()).toBe(getPersonalizationTagsList());
+	});
+});

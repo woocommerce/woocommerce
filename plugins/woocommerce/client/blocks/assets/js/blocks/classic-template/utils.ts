@@ -17,17 +17,17 @@ export function getTemplateDetailsBySlug(
 	parsedTemplate: string | null,
 	templates: TemplateDetails
 ) {
-	if ( ! parsedTemplate ) {
+	if (!parsedTemplate) {
 		return null;
 	}
 
-	const templateKeys = Object.keys( templates );
+	const templateKeys = Object.keys(templates);
 	let templateDetails = null;
 
-	for ( let i = 0; templateKeys.length > i; i++ ) {
-		const keyToMatch = parsedTemplate.substr( 0, templateKeys[ i ].length );
-		const maybeTemplate = templates[ keyToMatch ];
-		if ( maybeTemplate ) {
+	for (let i = 0; templateKeys.length > i; i++) {
+		const keyToMatch = parsedTemplate.substr(0, templateKeys[i].length);
+		const maybeTemplate = templates[keyToMatch];
+		if (maybeTemplate) {
 			templateDetails = maybeTemplate;
 			break;
 		}
@@ -42,12 +42,12 @@ export const createArchiveTitleBlock = (
 ) => {
 	const queryTitleBlockName = 'core/query-title';
 	const queryTitleBlockVariations =
-		getBlockType( queryTitleBlockName )?.variations || [];
+		getBlockType(queryTitleBlockName)?.variations || [];
 	const archiveTitleVariation = queryTitleBlockVariations.find(
-		( { name }: { name: string } ) => name === variationName
+		({ name }: { name: string }) => name === variationName
 	);
 
-	if ( ! archiveTitleVariation ) {
+	if (!archiveTitleVariation) {
 		return null;
 	}
 
@@ -58,22 +58,21 @@ export const createArchiveTitleBlock = (
 		showPrefix: false,
 	};
 
-	return createBlock( queryTitleBlockName, extendedAttributes );
+	return createBlock(queryTitleBlockName, extendedAttributes);
 };
 
 export const createRowBlock = (
-	innerBlocks: Array< BlockInstance >,
+	innerBlocks: Array<BlockInstance>,
 	inheritedAttributes: InheritedAttributes
 ) => {
 	const groupBlockName = 'core/group';
 	const rowVariationName = `group-row`;
-	const groupBlockVariations =
-		getBlockType( groupBlockName )?.variations || [];
+	const groupBlockVariations = getBlockType(groupBlockName)?.variations || [];
 	const rowVariation = groupBlockVariations.find(
-		( { name }: { name: string } ) => name === rowVariationName
+		({ name }: { name: string }) => name === rowVariationName
 	);
 
-	if ( ! rowVariation ) {
+	if (!rowVariation) {
 		return null;
 	}
 
@@ -87,5 +86,5 @@ export const createRowBlock = (
 		},
 	};
 
-	return createBlock( groupBlockName, extendedAttributes, innerBlocks );
+	return createBlock(groupBlockName, extendedAttributes, innerBlocks);
 };

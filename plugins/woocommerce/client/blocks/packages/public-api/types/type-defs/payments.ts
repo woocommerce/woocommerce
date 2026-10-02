@@ -47,38 +47,37 @@ export interface CanMakePaymentArgument {
 	billingData: CartResponseBillingAddress; // This needs to stay as billingData as third parties already use this key
 	shippingAddress: CartResponseShippingAddress;
 	billingAddress: CartResponseBillingAddress;
-	selectedShippingMethods: Record< string, unknown >;
+	selectedShippingMethods: Record<string, unknown>;
 	paymentRequirements: string[];
 	paymentMethods: string[];
 }
 
 export interface CanMakePaymentArgumentCart {
-	billingAddress: CartResponse[ 'billing_address' ];
-	billingData: CartResponse[ 'billing_address' ];
-	cartCoupons: CartResponse[ 'coupons' ];
+	billingAddress: CartResponse['billing_address'];
+	billingData: CartResponse['billing_address'];
+	cartCoupons: CartResponse['coupons'];
 	cartErrors: ApiErrorResponse[];
-	cartFees: CartResponse[ 'fees' ];
-	cartHasCalculatedShipping: CartResponse[ 'has_calculated_shipping' ];
+	cartFees: CartResponse['fees'];
+	cartHasCalculatedShipping: CartResponse['has_calculated_shipping'];
 	cartIsLoading: boolean;
-	cartItemErrors: CartResponse[ 'errors' ];
-	cartItems: CartResponse[ 'items' ];
-	cartItemsCount: CartResponse[ 'items_count' ];
-	cartItemsWeight: CartResponse[ 'items_weight' ];
-	cartNeedsPayment: CartResponse[ 'needs_payment' ];
-	cartNeedsShipping: CartResponse[ 'needs_shipping' ];
-	cartTotals: CartResponse[ 'totals' ];
-	extensions: CartResponse[ 'extensions' ];
-	crossSellsProducts: CartResponse[ 'cross_sells' ];
+	cartItemErrors: CartResponse['errors'];
+	cartItems: CartResponse['items'];
+	cartItemsCount: CartResponse['items_count'];
+	cartItemsWeight: CartResponse['items_weight'];
+	cartNeedsPayment: CartResponse['needs_payment'];
+	cartNeedsShipping: CartResponse['needs_shipping'];
+	cartTotals: CartResponse['totals'];
+	extensions: CartResponse['extensions'];
+	crossSellsProducts: CartResponse['cross_sells'];
 	isLoadingRates: boolean;
-	paymentRequirements: CartResponse[ 'payment_requirements' ];
-	receiveCart: ( response: CartResponse ) => void;
-	shippingAddress: CartResponse[ 'shipping_address' ];
-	shippingRates: CartResponse[ 'shipping_rates' ];
+	paymentRequirements: CartResponse['payment_requirements'];
+	receiveCart: (response: CartResponse) => void;
+	shippingAddress: CartResponse['shipping_address'];
+	shippingRates: CartResponse['shipping_rates'];
 }
 
 export type CanMakePaymentReturnType =
-	| boolean
-	| Promise< boolean | { error: { message: string } } >;
+	boolean | Promise<boolean | { error: { message: string } }>;
 
 export type CanMakePaymentCallback = (
 	cartData: CanMakePaymentArgument
@@ -94,7 +93,7 @@ export interface PaymentMethodIcon {
 	alt: string;
 }
 
-export type PaymentMethodIcons = ( PaymentMethodIcon | string )[];
+export type PaymentMethodIcons = (PaymentMethodIcon | string)[];
 
 export interface PaymentMethodConfiguration {
 	// A unique string to identify the payment method client side.
@@ -148,8 +147,7 @@ export interface ExpressPaymentMethodConfiguration {
 }
 
 export type PaymentMethods =
-	| Record< string, PaymentMethodConfigInstance >
-	| EmptyObjectType;
+	Record<string, PaymentMethodConfigInstance> | EmptyObjectType;
 
 /**
  * Used to represent payment methods in a context where storing objects is not allowed, i.e. in data stores.
@@ -171,14 +169,13 @@ export type PlainPaymentMethods = Record<
  */
 export type PlainExpressPaymentMethods = Record<
 	string,
-	PlainPaymentMethods[ string ] & {
+	PlainPaymentMethods[string] & {
 		paymentMethodId?: string;
 	}
 >;
 
 export type ExpressPaymentMethods =
-	| Record< string, ExpressPaymentMethodConfigInstance >
-	| EmptyObjectType;
+	Record<string, ExpressPaymentMethodConfigInstance> | EmptyObjectType;
 
 export interface PaymentMethodConfigInstance {
 	name: string;
@@ -214,8 +211,7 @@ export interface ExpressPaymentMethodConfigInstance {
 export interface PaymentResult {
 	message: string;
 	paymentStatus:
-		| CheckoutResponseSuccess[ 'payment_result' ][ 'payment_status' ]
-		| 'not set';
-	paymentDetails: Record< string, string > | Record< string, never >;
+		CheckoutResponseSuccess['payment_result']['payment_status'] | 'not set';
+	paymentDetails: Record<string, string> | Record<string, never>;
 	redirectUrl: string;
 }

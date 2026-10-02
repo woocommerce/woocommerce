@@ -38,65 +38,65 @@ interface HeaderProps {
 }
 
 const HEADER_PLUGIN_NAME = 'settings-payments-offline-header';
-const ITEMS_TO_REMOVE = [ 'activity-panel-header-item' ];
+const ITEMS_TO_REMOVE = ['activity-panel-header-item'];
 let hasRegisteredPlugins = false;
 
 /**
  * Registers the header component as a plugin to customize the header of the settings payments page.
  */
-export const Header = ( {
+export const Header = ({
 	title,
 	description,
 	hasButton,
 	buttonLabel,
 	onButtonClick,
-}: HeaderProps ) => {
-	if ( ! hasRegisteredPlugins ) {
+}: HeaderProps) => {
+	if (!hasRegisteredPlugins) {
 		/**
 		 * Unregister existing header plugins since we don't want to show the default items such as activity panel.
 		 */
 		const unRegisterHeaderItems = () => {
-			const plugins = getPlugins( 'woocommerce-admin' );
-			plugins.forEach( ( plugin ) => {
-				if ( ITEMS_TO_REMOVE.includes( plugin.name ) ) {
-					unregisterPlugin( plugin.name );
+			const plugins = getPlugins('woocommerce-admin');
+			plugins.forEach((plugin) => {
+				if (ITEMS_TO_REMOVE.includes(plugin.name)) {
+					unregisterPlugin(plugin.name);
 				}
-			} );
+			});
 		};
 
 		unRegisterHeaderItems();
 
-		registerPlugin( HEADER_PLUGIN_NAME, {
+		registerPlugin(HEADER_PLUGIN_NAME, {
 			render: () => (
 				<>
 					<WooHeaderPageTitle>
 						<span className="woocommerce-settings-payments-header__title">
-							{ title }
+							{title}
 						</span>
 					</WooHeaderPageTitle>
-					{ hasButton && (
+					{hasButton && (
 						<WooHeaderItem>
 							<Button
 								variant="primary"
-								onClick={ onButtonClick }
-								isBusy={ false }
-								disabled={ false }
+								onClick={onButtonClick}
+								isBusy={false}
+								disabled={false}
 							>
-								{ buttonLabel }
+								{buttonLabel}
 							</Button>
 						</WooHeaderItem>
-					) }
-					{ description && (
+					)}
+					{description && (
 						<WooHeaderItem>
 							<div className="woocommerce-settings-payments-header__description">
-								{ description }
+								{description}
 							</div>
 						</WooHeaderItem>
-					) }
+					)}
 				</>
 			),
 			scope: 'woocommerce-admin',
-		} );
+		});
 
 		hasRegisteredPlugins = true;
 	}

@@ -17,7 +17,7 @@
 	align-items: center;
 	flex-direction: column;
 	background-color: white;
-	@include breakpoint( '<782px' ) {
+	@include breakpoint("<782px") {
 		padding: 0 20px;
 	}
 
@@ -26,7 +26,7 @@
 		margin: 58px 0 0 0;
 		font-size: 28px;
 		font-weight: 500;
-		@include breakpoint( '<782px' ) {
+		@include breakpoint("<782px") {
 			font-size: 20px;
 		}
 	}
@@ -40,7 +40,7 @@
 	.woocommerce-onboarding-progress-bar {
 		width: 520px;
 		margin: $gap-large 0 $gap 0;
-		@include breakpoint( '<782px' ) {
+		@include breakpoint("<782px") {
 			width: 100%;
 		}
 	}
@@ -54,7 +54,7 @@
 		color: #2f2f2f;
 		opacity: 0.8;
 		text-align: center;
-		@include breakpoint( '<782px' ) {
+		@include breakpoint("<782px") {
 			font-size: 14px;
 			line-height: 20px;
 		}

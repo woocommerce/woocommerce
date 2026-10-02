@@ -9,19 +9,19 @@ import * as navigation from '@woocommerce/navigation';
 import { getPages, updateLinkHref } from '../controller';
 import { isFeatureEnabled } from '~/utils/features';
 
-jest.mock( '@woocommerce/navigation', () => {
-	const actual = jest.requireActual( '@woocommerce/navigation' );
+jest.mock('@woocommerce/navigation', () => {
+	const actual = jest.requireActual('@woocommerce/navigation');
 	return {
 		...actual,
-		getHistory: jest.fn( actual.getHistory ),
+		getHistory: jest.fn(actual.getHistory),
 	};
-} );
+});
 
-jest.mock( '~/utils/features', () => ( {
-	isFeatureEnabled: jest.fn().mockReturnValue( true ),
-} ) );
+jest.mock('~/utils/features', () => ({
+	isFeatureEnabled: jest.fn().mockReturnValue(true),
+}));
 
-describe( 'getPages', () => {
+describe('getPages', () => {
 	const analyticsPaths = [
 		'/analytics/overview',
 		'/analytics/settings',
@@ -29,31 +29,31 @@ describe( 'getPages', () => {
 		'/analytics/:report',
 	];
 
-	beforeEach( () => {
-		isFeatureEnabled.mockReturnValue( true );
-	} );
+	beforeEach(() => {
+		isFeatureEnabled.mockReturnValue(true);
+	});
 
-	it( 'registers analytics pages when analytics is enabled', () => {
-		const paths = getPages().map( ( page ) => page.path );
+	it('registers analytics pages when analytics is enabled', () => {
+		const paths = getPages().map((page) => page.path);
 
-		analyticsPaths.forEach( ( path ) => {
-			expect( paths ).toContain( path );
-		} );
-	} );
+		analyticsPaths.forEach((path) => {
+			expect(paths).toContain(path);
+		});
+	});
 
-	it( 'does not register analytics pages when analytics is disabled', () => {
-		isFeatureEnabled.mockReturnValue( false );
+	it('does not register analytics pages when analytics is disabled', () => {
+		isFeatureEnabled.mockReturnValue(false);
 
-		const paths = getPages().map( ( page ) => page.path );
+		const paths = getPages().map((page) => page.path);
 
-		analyticsPaths.forEach( ( path ) => {
-			expect( paths ).not.toContain( path );
-		} );
-	} );
-} );
+		analyticsPaths.forEach((path) => {
+			expect(paths).not.toContain(path);
+		});
+	});
+});
 
-describe( 'updateLinkHref', () => {
-	const timeExcludedScreens = [ 'stock', 'settings', 'customers' ];
+describe('updateLinkHref', () => {
+	const timeExcludedScreens = ['stock', 'settings', 'customers'];
 
 	const REPORT_URL =
 		'http://example.com/wp-admin/admin.php?page=wc-admin&path=/analytics/orders';
@@ -69,69 +69,67 @@ describe( 'updateLinkHref', () => {
 		dish: 'cobbler',
 	};
 
-	beforeEach( () => {
+	beforeEach(() => {
 		jest.restoreAllMocks();
 		navigation.getHistory.mockClear();
-	} );
+	});
 
-	it( 'should update report urls', () => {
+	it('should update report urls', () => {
 		const item = { href: REPORT_URL };
-		updateLinkHref( item, nextQuery, timeExcludedScreens );
-		const encodedPath = encodeURIComponent( '/analytics/orders' );
+		updateLinkHref(item, nextQuery, timeExcludedScreens);
+		const encodedPath = encodeURIComponent('/analytics/orders');
 
-		expect( item.href ).toBe(
-			`admin.php?page=wc-admin&path=${ encodedPath }&fruit=apple&dish=cobbler`
+		expect(item.href).toBe(
+			`admin.php?page=wc-admin&path=${encodedPath}&fruit=apple&dish=cobbler`
 		);
-	} );
+	});
 
-	it( 'should update dashboard urls', () => {
+	it('should update dashboard urls', () => {
 		const item = { href: DASHBOARD_URL };
-		updateLinkHref( item, nextQuery, timeExcludedScreens );
+		updateLinkHref(item, nextQuery, timeExcludedScreens);
 
-		expect( item.href ).toBe(
+		expect(item.href).toBe(
 			'admin.php?page=wc-admin&fruit=apple&dish=cobbler'
 		);
-	} );
+	});
 
-	it( 'should not add the nextQuery to a time excluded screen', () => {
+	it('should not add the nextQuery to a time excluded screen', () => {
 		const item = { href: REPORT_URL_TIME_EXCLUDED };
-		updateLinkHref( item, nextQuery, timeExcludedScreens );
-		const encodedPath = encodeURIComponent( '/analytics/settings' );
+		updateLinkHref(item, nextQuery, timeExcludedScreens);
+		const encodedPath = encodeURIComponent('/analytics/settings');
 
-		expect( item.href ).toBe(
-			`admin.php?page=wc-admin&path=${ encodedPath }`
-		);
-	} );
+		expect(item.href).toBe(`admin.php?page=wc-admin&path=${encodedPath}`);
+	});
 
-	it( 'should not update WooCommerce urls', () => {
+	it('should not update WooCommerce urls', () => {
 		const item = { href: WOO_URL };
-		updateLinkHref( item, nextQuery, timeExcludedScreens );
+		updateLinkHref(item, nextQuery, timeExcludedScreens);
 
-		expect( item.href ).toBe( WOO_URL );
-	} );
+		expect(item.href).toBe(WOO_URL);
+	});
 
-	it( 'should not update wp-admin urls', () => {
+	it('should not update wp-admin urls', () => {
 		const item = { href: WP_ADMIN_URL };
-		updateLinkHref( item, nextQuery, timeExcludedScreens );
+		updateLinkHref(item, nextQuery, timeExcludedScreens);
 
-		expect( item.href ).toBe( WP_ADMIN_URL );
-	} );
+		expect(item.href).toBe(WP_ADMIN_URL);
+	});
 
-	it( 'should filter out undefined query values', () => {
+	it('should filter out undefined query values', () => {
 		const item = { href: REPORT_URL };
 		updateLinkHref(
 			item,
 			{ ...nextQuery, test: undefined, anotherParam: undefined },
 			timeExcludedScreens
 		);
-		const encodedPath = encodeURIComponent( '/analytics/orders' );
+		const encodedPath = encodeURIComponent('/analytics/orders');
 
-		expect( item.href ).toBe(
-			`admin.php?page=wc-admin&path=${ encodedPath }&fruit=apple&dish=cobbler`
+		expect(item.href).toBe(
+			`admin.php?page=wc-admin&path=${encodedPath}&fruit=apple&dish=cobbler`
 		);
-	} );
+	});
 
-	it( 'should not prevent default when Command key is pressed', () => {
+	it('should not prevent default when Command key is pressed', () => {
 		const item = { href: REPORT_URL };
 		const event = {
 			ctrlKey: false,
@@ -139,14 +137,14 @@ describe( 'updateLinkHref', () => {
 			preventDefault: jest.fn(),
 		};
 
-		updateLinkHref( item, nextQuery, timeExcludedScreens );
+		updateLinkHref(item, nextQuery, timeExcludedScreens);
 
-		item.onclick( event );
-		expect( navigation.getHistory ).not.toHaveBeenCalled();
-		expect( event.preventDefault ).not.toHaveBeenCalled();
-	} );
+		item.onclick(event);
+		expect(navigation.getHistory).not.toHaveBeenCalled();
+		expect(event.preventDefault).not.toHaveBeenCalled();
+	});
 
-	it( 'should not prevent default when Control key is pressed', () => {
+	it('should not prevent default when Control key is pressed', () => {
 		const item = { href: REPORT_URL };
 		const event = {
 			ctrlKey: true,
@@ -154,14 +152,14 @@ describe( 'updateLinkHref', () => {
 			preventDefault: jest.fn(),
 		};
 
-		updateLinkHref( item, nextQuery, timeExcludedScreens );
+		updateLinkHref(item, nextQuery, timeExcludedScreens);
 
-		item.onclick( event );
-		expect( navigation.getHistory ).not.toHaveBeenCalled();
-		expect( event.preventDefault ).not.toHaveBeenCalled();
-	} );
+		item.onclick(event);
+		expect(navigation.getHistory).not.toHaveBeenCalled();
+		expect(event.preventDefault).not.toHaveBeenCalled();
+	});
 
-	it( 'should prevent default on normal clicks', () => {
+	it('should prevent default on normal clicks', () => {
 		const item = { href: REPORT_URL };
 		const event = {
 			ctrlKey: false,
@@ -169,10 +167,10 @@ describe( 'updateLinkHref', () => {
 			preventDefault: jest.fn(),
 		};
 
-		updateLinkHref( item, nextQuery, timeExcludedScreens );
+		updateLinkHref(item, nextQuery, timeExcludedScreens);
 
-		item.onclick( event );
-		expect( navigation.getHistory ).toHaveBeenCalledTimes( 1 );
-		expect( event.preventDefault ).toHaveBeenCalledTimes( 1 );
-	} );
-} );
+		item.onclick(event);
+		expect(navigation.getHistory).toHaveBeenCalledTimes(1);
+		expect(event.preventDefault).toHaveBeenCalledTimes(1);
+	});
+});

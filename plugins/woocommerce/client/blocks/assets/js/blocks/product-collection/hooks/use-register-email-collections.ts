@@ -17,9 +17,9 @@ import { registerEmailCollections } from '../collections';
 export const useRegisterEmailCollections = () => {
 	const isEmailEditor = useIsEmailEditor();
 
-	useEffect( () => {
-		if ( isEmailEditor ) {
+	useEffect(() => {
+		if (isEmailEditor) {
 			registerEmailCollections();
 		}
-	}, [ isEmailEditor ] );
+	}, [isEmailEditor]);
 };

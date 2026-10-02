@@ -27,29 +27,29 @@ const useProductTypeListItems = (
 
 	const productTypes = useMemo(
 		() =>
-			_productTypes.map( ( productType: ProductTypeWithOnclick ) => ( {
+			_productTypes.map((productType: ProductTypeWithOnclick) => ({
 				...productType,
 				onClick: () => {
-					if ( typeof productType?.onClick === 'function' ) {
+					if (typeof productType?.onClick === 'function') {
 						productType.onClick();
 					} else {
-						void createProductByType( productType.key );
+						void createProductByType(productType.key);
 					}
-					recordEvent( 'tasklist_add_product', {
+					recordEvent('tasklist_add_product', {
 						method: 'product_template',
-					} );
-					recordEvent( 'tasklist_product_template_selection', {
+					});
+					recordEvent('tasklist_product_template_selection', {
 						product_type: productType.key,
 						is_suggested: suggestedProductTypes.includes(
 							productType.key
 						),
-					} );
-					if ( typeof onClick === 'function' ) {
+					});
+					if (typeof onClick === 'function') {
 						onClick();
 					}
 				},
-			} ) ),
-		[ _productTypes, createProductByType, onClick, suggestedProductTypes ]
+			})),
+		[_productTypes, createProductByType, onClick, suggestedProductTypes]
 	);
 
 	return { productTypes, isRequesting };

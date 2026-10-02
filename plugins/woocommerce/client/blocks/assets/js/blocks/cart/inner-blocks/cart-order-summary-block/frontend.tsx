@@ -10,24 +10,24 @@ import { useStoreCart } from '@woocommerce/base-context/hooks';
  */
 import { OrderMetaSlotFill } from './slotfills';
 
-const FrontendBlock = ( {
+const FrontendBlock = ({
 	children,
 	className = '',
 }: {
 	children?: JSX.Element | JSX.Element[];
 	className?: string;
-} ) => {
+}) => {
 	const { cartTotals } = useStoreCart();
-	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
+	const totalsCurrency = getCurrencyFromPriceResponse(cartTotals);
 
 	return (
-		<div className={ className }>
-			{ children }
+		<div className={className}>
+			{children}
 			<div className="wc-block-components-totals-wrapper">
 				<TotalsFooterItem
-					currency={ totalsCurrency }
-					values={ cartTotals }
-					isEstimate={ true }
+					currency={totalsCurrency}
+					values={cartTotals}
+					isEstimate={true}
 				/>
 			</div>
 			<OrderMetaSlotFill />

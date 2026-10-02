@@ -10,21 +10,21 @@ import type { TemplateArray } from '@wordpress/blocks';
 import { getMiniCartAllowedBlocks } from '../allowed-blocks';
 
 export const Edit = (): JSX.Element => {
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className: 'wc-block-mini-cart__items',
-	} );
+	});
 
 	const defaultTemplate = [
-		[ 'woocommerce/mini-cart-products-table-block', {} ],
-	].filter( Boolean ) as unknown as TemplateArray;
+		['woocommerce/mini-cart-products-table-block', {}],
+	].filter(Boolean) as unknown as TemplateArray;
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<InnerBlocks
-				template={ defaultTemplate }
-				renderAppender={ InnerBlocks.ButtonBlockAppender }
-				templateLock={ false }
-				allowedBlocks={ getMiniCartAllowedBlocks() }
+				template={defaultTemplate}
+				renderAppender={InnerBlocks.ButtonBlockAppender}
+				templateLock={false}
+				allowedBlocks={getMiniCartAllowedBlocks()}
 			/>
 		</div>
 	);
@@ -32,7 +32,7 @@ export const Edit = (): JSX.Element => {
 
 export const Save = (): JSX.Element => {
 	return (
-		<div { ...useBlockProps.save() }>
+		<div {...useBlockProps.save()}>
 			<InnerBlocks.Content />
 		</div>
 	);

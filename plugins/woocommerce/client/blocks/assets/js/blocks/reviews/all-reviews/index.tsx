@@ -19,11 +19,11 @@ import metadata from './block.json';
  * Register and run the "All Reviews" block.
  * This block lists all product reviews.
  */
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	icon: {
 		src: (
 			<Icon
-				icon={ postComments }
+				icon={postComments}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -50,23 +50,23 @@ registerBlockType( metadata, {
 		from: [
 			{
 				type: 'block',
-				blocks: [ 'core/legacy-widget' ],
+				blocks: ['core/legacy-widget'],
 				// We can't transform if raw instance isn't shown in the REST API.
-				isMatch: ( { idBase, instance }: AllReviewsEditorProps ) =>
-					idBase === 'woocommerce_recent_reviews' && !! instance?.raw,
-				transform: ( { instance } ) =>
-					createBlock( 'woocommerce/all-reviews', {
+				isMatch: ({ idBase, instance }: AllReviewsEditorProps) =>
+					idBase === 'woocommerce_recent_reviews' && !!instance?.raw,
+				transform: ({ instance }) =>
+					createBlock('woocommerce/all-reviews', {
 						reviewsOnPageLoad: instance.raw.number,
 						imageType: 'product',
 						showLoadMore: false,
 						showOrderby: false,
 						showReviewDate: false,
 						showReviewContent: false,
-					} ),
+					}),
 			},
 		],
 	},
 
 	edit: Edit,
 	save,
-} );
+});

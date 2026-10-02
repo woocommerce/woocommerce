@@ -37,9 +37,9 @@ type ProductBlockSettings = {
  * @property {Partial<BlockConfiguration>} settings             - Block settings configuration
  * @property {ProductBlockSettings}        productBlockSettings - Product block settings
  */
-type ProductBlockConfig< T extends BlockAttributes > = ProductBlockSettings & {
+type ProductBlockConfig<T extends BlockAttributes> = ProductBlockSettings & {
 	blockName: string;
-	settings: Partial< BlockConfiguration< T > >;
+	settings: Partial<BlockConfiguration<T>>;
 };
 
 /**
@@ -52,8 +52,8 @@ type ProductBlockConfig< T extends BlockAttributes > = ProductBlockSettings & {
  * @property {string}                      [variationName]         - The name of the variation if applicable
  * @property {boolean}                     isAvailableOnPostEditor - Whether the block should be available in post editor
  */
-type ProductBlockRegistrationConfig< T extends BlockAttributes > = Partial<
-	BlockConfiguration< T >
+type ProductBlockRegistrationConfig<T extends BlockAttributes> = Partial<
+	BlockConfiguration<T>
 > &
 	ProductBlockSettings;
 
@@ -65,14 +65,14 @@ export class BlockRegistrationManager {
 	/** Singleton instance of the manager */
 	private static instance: BlockRegistrationManager;
 	/** Map storing block configurations keyed by block name or variation name */
-	private blocks: Map< string, ProductBlockConfig< BlockAttributes > > =
+	private blocks: Map<string, ProductBlockConfig<BlockAttributes>> =
 		new Map();
 	/** Current template ID being edited */
 	private currentTemplateId: string | undefined;
 	/** Flag indicating if the manager has been initialized */
 	private initialized = false;
 	/** Set to track block registration attempts to prevent duplicate registration attempts */
-	private attemptedRegisteredBlocks: Set< string > = new Set();
+	private attemptedRegisteredBlocks: Set<string> = new Set();
 
 	/**
 	 * Private constructor to enforce singleton pattern.
@@ -89,7 +89,7 @@ export class BlockRegistrationManager {
 	 * @return {BlockRegistrationManager} The singleton instance
 	 */
 	public static getInstance(): BlockRegistrationManager {
-		if ( ! BlockRegistrationManager.instance ) {
+		if (!BlockRegistrationManager.instance) {
 			BlockRegistrationManager.instance = new BlockRegistrationManager();
 		}
 		return BlockRegistrationManager.instance;
@@ -100,40 +100,40 @@ export class BlockRegistrationManager {
 	 * Sets up listeners for both the site editor and post editor contexts.
 	 */
 	private initializeSubscriptions(): void {
-		if ( this.initialized ) {
+		if (this.initialized) {
 			return;
 		}
 
 		// Main store subscription to detect which editor we're in
-		const unsubscribe = subscribe( () => {
-			const editorSelectors = select( CORE_EDITOR_STORE );
+		const unsubscribe = subscribe(() => {
+			const editorSelectors = select(CORE_EDITOR_STORE);
 
 			// Return if editor store is not available yet
-			if ( ! editorSelectors ) {
+			if (!editorSelectors) {
 				return;
 			}
 
 			const postType = editorSelectors.getCurrentPostType();
 
 			// Return if post type is not available yet
-			if ( ! postType ) {
+			if (!postType) {
 				return;
 			}
 
 			// Post Editor Context (Posts, Pages)
-			if ( postType === 'post' || postType === 'page' ) {
+			if (postType === 'post' || postType === 'page') {
 				// Unsubscribe from the main subscription since we've detected our context
 				unsubscribe();
 
 				// Register only blocks available in post editor
-				this.blocks.forEach( ( config ) => {
-					if ( config.isAvailableOnPostEditor ) {
+				this.blocks.forEach((config) => {
+					if (config.isAvailableOnPostEditor) {
 						const key = config.variationName || config.blockName;
-						if ( ! this.hasAttemptedRegistration( key ) ) {
-							this.registerBlock( config );
+						if (!this.hasAttemptedRegistration(key)) {
+							this.registerBlock(config);
 						}
 					}
-				} );
+				});
 
 				this.initialized = true;
 				// Site Editor Context (Templates, Patterns, etc.)
@@ -142,29 +142,29 @@ export class BlockRegistrationManager {
 				unsubscribe();
 
 				// getEditedPostSlug may return string or number so we cast it to string.
-				const postSlug = String( editorSelectors.getEditedPostSlug() );
+				const postSlug = String(editorSelectors.getEditedPostSlug());
 
 				// Set initial template ID
 				this.currentTemplateId = postSlug;
 
 				// Handle the initial template change
-				this.handleTemplateChange( undefined );
+				this.handleTemplateChange(undefined);
 
 				// Set up the template change listener
-				subscribe( () => {
+				subscribe(() => {
 					const previousTemplateId = this.currentTemplateId;
 					this.currentTemplateId =
 						// getEditedPostSlug may return string or number so we cast it to string.
-						String( editorSelectors.getEditedPostSlug() );
+						String(editorSelectors.getEditedPostSlug());
 
-					if ( previousTemplateId !== this.currentTemplateId ) {
-						this.handleTemplateChange( previousTemplateId );
+					if (previousTemplateId !== this.currentTemplateId) {
+						this.handleTemplateChange(previousTemplateId);
 					}
-				}, CORE_EDITOR_STORE );
+				}, CORE_EDITOR_STORE);
 
 				this.initialized = true;
 			}
-		} );
+		});
 	}
 
 	/**
@@ -177,23 +177,21 @@ export class BlockRegistrationManager {
 	 *
 	 * @param {string | undefined} previousTemplateId - The previous template ID
 	 */
-	private handleTemplateChange(
-		previousTemplateId: string | undefined
-	): void {
+	private handleTemplateChange(previousTemplateId: string | undefined): void {
 		const isTransitioningToOrFromSingleProduct =
-			this.currentTemplateId?.includes( 'single-product' ) ||
-			previousTemplateId?.includes( 'single-product' );
+			this.currentTemplateId?.includes('single-product') ||
+			previousTemplateId?.includes('single-product');
 
-		if ( ! isTransitioningToOrFromSingleProduct ) {
+		if (!isTransitioningToOrFromSingleProduct) {
 			return;
 		}
 
-		this.blocks.forEach( ( config ) => {
+		this.blocks.forEach((config) => {
 			// When the template changes, we need to unregister and register all blocks that are available on the new template
 			// Unregistering the block will remove it from the `hasAttemptedRegistration` set, so we can register it again
-			this.unregisterBlock( config );
-			this.registerBlock( config );
-		} );
+			this.unregisterBlock(config);
+			this.registerBlock(config);
+		});
 	}
 
 	/**
@@ -202,8 +200,8 @@ export class BlockRegistrationManager {
 	 * @param {string} blockKey - The key of the block to check
 	 * @return {boolean} Whether the block has already been attempted to be registered
 	 */
-	private hasAttemptedRegistration( blockKey: string ): boolean {
-		return this.attemptedRegisteredBlocks.has( blockKey );
+	private hasAttemptedRegistration(blockKey: string): boolean {
+		return this.attemptedRegisteredBlocks.has(blockKey);
 	}
 
 	/**
@@ -213,25 +211,22 @@ export class BlockRegistrationManager {
 	 * @template T The type of block attributes
 	 * @param {ProductBlockConfig<T>} config - Configuration of the block to unregister
 	 */
-	private unregisterBlock< T extends BlockAttributes >(
-		config: ProductBlockConfig< T >
+	private unregisterBlock<T extends BlockAttributes>(
+		config: ProductBlockConfig<T>
 	): void {
 		const { blockName, isVariationBlock, variationName } = config;
 
 		try {
-			if ( isVariationBlock && variationName ) {
-				unregisterBlockVariation( blockName, variationName );
-				this.attemptedRegisteredBlocks.delete( variationName );
+			if (isVariationBlock && variationName) {
+				unregisterBlockVariation(blockName, variationName);
+				this.attemptedRegisteredBlocks.delete(variationName);
 			} else {
-				unregisterBlockType( blockName );
-				this.attemptedRegisteredBlocks.delete( blockName );
+				unregisterBlockType(blockName);
+				this.attemptedRegisteredBlocks.delete(blockName);
 			}
-		} catch ( error ) {
+		} catch (error) {
 			// eslint-disable-next-line no-console
-			console.debug(
-				`Failed to unregister block ${ blockName }:`,
-				error
-			);
+			console.debug(`Failed to unregister block ${blockName}:`, error);
 		}
 	}
 
@@ -243,8 +238,8 @@ export class BlockRegistrationManager {
 	 * @template T The type of block attributes
 	 * @param {ProductBlockConfig<T>} config - Configuration of the block to register
 	 */
-	private registerBlock< T extends BlockAttributes >(
-		config: ProductBlockConfig< T >
+	private registerBlock<T extends BlockAttributes>(
+		config: ProductBlockConfig<T>
 	): void {
 		const {
 			blockName,
@@ -257,43 +252,43 @@ export class BlockRegistrationManager {
 		try {
 			// Check if block is already registered
 			const key = variationName || blockName;
-			if ( this.hasAttemptedRegistration( key ) ) {
+			if (this.hasAttemptedRegistration(key)) {
 				return;
 			}
 
-			const editSiteStore = select( 'core/edit-site' );
+			const editSiteStore = select('core/edit-site');
 
 			// Don't register if we're in post editor context and block isn't available there
-			if ( ! editSiteStore && ! isAvailableOnPostEditor ) {
+			if (!editSiteStore && !isAvailableOnPostEditor) {
 				return;
 			}
 
-			if ( isVariationBlock ) {
+			if (isVariationBlock) {
 				registerBlockVariation(
 					blockName,
-					settings as BlockVariation< BlockAttributes >
+					settings as BlockVariation<BlockAttributes>
 				);
 			} else {
-				const ancestor = isEmpty( settings?.ancestor )
-					? [ 'woocommerce/single-product' ]
+				const ancestor = isEmpty(settings?.ancestor)
+					? ['woocommerce/single-product']
 					: settings?.ancestor;
 
 				// Only remove ancestor if we're in site editor AND in single-product template
 				const shouldRemoveAncestor =
 					editSiteStore &&
-					this.currentTemplateId?.includes( 'single-product' );
+					this.currentTemplateId?.includes('single-product');
 
 				// @ts-expect-error - blockName can be either string or object
-				registerBlockType( blockName, {
+				registerBlockType(blockName, {
 					...settings,
 					ancestor: shouldRemoveAncestor ? undefined : ancestor,
-				} );
+				});
 			}
 
-			this.attemptedRegisteredBlocks.add( key );
-		} catch ( error ) {
+			this.attemptedRegisteredBlocks.add(key);
+		} catch (error) {
 			// eslint-disable-next-line no-console
-			console.error( `Failed to register block ${ blockName }:`, error );
+			console.error(`Failed to register block ${blockName}:`, error);
 		}
 	}
 
@@ -304,12 +299,12 @@ export class BlockRegistrationManager {
 	 * @template T The type of block attributes
 	 * @param {ProductBlockConfig<T>} config - Configuration of the block to register
 	 */
-	public registerBlockConfig< T extends BlockAttributes >(
-		config: ProductBlockConfig< T >
+	public registerBlockConfig<T extends BlockAttributes>(
+		config: ProductBlockConfig<T>
 	): void {
 		const key = config.variationName || config.blockName;
-		this.blocks.set( key, config as ProductBlockConfig< BlockAttributes > );
-		this.registerBlock( config );
+		this.blocks.set(key, config as ProductBlockConfig<BlockAttributes>);
+		this.registerBlock(config);
 	}
 }
 
@@ -352,16 +347,16 @@ export class BlockRegistrationManager {
  * });
  * ```
  */
-export const registerProductBlockType = < T extends BlockAttributes >(
-	blockNameOrMetadata: string | Partial< BlockConfiguration< T > >,
-	settings?: ProductBlockRegistrationConfig< BlockConfiguration< T > >
+export const registerProductBlockType = <T extends BlockAttributes>(
+	blockNameOrMetadata: string | Partial<BlockConfiguration<T>>,
+	settings?: ProductBlockRegistrationConfig<BlockConfiguration<T>>
 ): void => {
 	const blockName =
 		typeof blockNameOrMetadata === 'string'
 			? blockNameOrMetadata
 			: blockNameOrMetadata.name;
 
-	if ( ! blockName ) {
+	if (!blockName) {
 		// eslint-disable-next-line no-console
 		console.error(
 			'registerProductBlockType: Block name is required for registration'
@@ -374,7 +369,7 @@ export const registerProductBlockType = < T extends BlockAttributes >(
 		typeof blockNameOrMetadata === 'string'
 			? {}
 			: // eslint-disable-next-line @typescript-eslint/no-unused-vars
-			  ( ( { name, ...metadata } ) => metadata )( blockNameOrMetadata );
+				(({ name, ...metadata }) => metadata)(blockNameOrMetadata);
 
 	// Extract settings without custom properties
 	const {
@@ -384,20 +379,18 @@ export const registerProductBlockType = < T extends BlockAttributes >(
 		...settingsWithoutCustomProperties
 	} = {
 		...metaDataWithoutName,
-		...( settings || {} ),
+		...(settings || {}),
 	};
 
-	const internalConfig: ProductBlockConfig< T > = {
+	const internalConfig: ProductBlockConfig<T> = {
 		blockName,
 		settings: {
 			...settingsWithoutCustomProperties,
-		} as BlockConfiguration< T >,
+		} as BlockConfiguration<T>,
 		isVariationBlock: isVariationBlock ?? false,
 		variationName: variationName ?? undefined,
 		isAvailableOnPostEditor: isAvailableOnPostEditor ?? false,
 	};
 
-	BlockRegistrationManager.getInstance().registerBlockConfig(
-		internalConfig
-	);
+	BlockRegistrationManager.getInstance().registerBlockConfig(internalConfig);
 };

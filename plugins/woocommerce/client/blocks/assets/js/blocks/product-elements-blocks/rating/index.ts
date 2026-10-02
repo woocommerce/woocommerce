@@ -21,6 +21,6 @@ const blockConfig: BlockConfiguration = {
 	deprecated,
 };
 
-registerProductBlockType( blockConfig, {
+registerProductBlockType(blockConfig, {
 	isAvailableOnPostEditor: true,
-} );
+});

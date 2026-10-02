@@ -25,7 +25,7 @@ export const JetpackPluginStates = {
 } as const;
 
 export type JetpackPluginStates =
-	( typeof JetpackPluginStates )[ keyof typeof JetpackPluginStates ];
+	(typeof JetpackPluginStates)[keyof typeof JetpackPluginStates];
 
 /**
  * Utility hook to determine and manipulate the state of the Jetpack plugin on the WordPress installation
@@ -37,62 +37,60 @@ export const useJetpackPluginState = () => {
 		jetpackInstallState,
 		jetpackConnectionData,
 	} = useSelect(
-		( select ) => {
+		(select) => {
 			const { getPluginInstallState, getJetpackConnectionData } =
-				select( pluginsStore );
-			const installState = getPluginInstallState( 'jetpack' );
+				select(pluginsStore);
+			const installState = getPluginInstallState('jetpack');
 
 			return {
 				jetpackConnectionData: getJetpackConnectionData(),
 				jetpackInstallState: installState,
-				canUserInstallPlugins: currentUserCan( 'install_plugins' ),
+				canUserInstallPlugins: currentUserCan('install_plugins'),
 			};
 		},
-		[ currentUserCan ]
+		[currentUserCan]
 	);
 
-	const { installJetpackAndConnect } = useDispatch( pluginsStore );
-	const { createErrorNotice } = useDispatch( 'core/notices' );
+	const { installJetpackAndConnect } = useDispatch(pluginsStore);
+	const { createErrorNotice } = useDispatch('core/notices');
 
-	const [ pluginState, setPluginState ] = useState< JetpackPluginStates >(
+	const [pluginState, setPluginState] = useState<JetpackPluginStates>(
 		JetpackPluginStates.INITIALIZING
 	);
 
 	/**
 	 * Installs, Activates, and Connects Jetpack - starting wherever hasn't been completed
 	 */
-	const onClickInstall = useCallback( () => {
+	const onClickInstall = useCallback(() => {
 		const thisUrl = window.location.href;
 		void installJetpackAndConnect(
 			createErrorNotice,
 			() => thisUrl + '&jetpackState=returning'
 		);
-		setPluginState( JetpackPluginStates.INSTALLING );
-	}, [ installJetpackAndConnect, createErrorNotice ] );
+		setPluginState(JetpackPluginStates.INSTALLING);
+	}, [installJetpackAndConnect, createErrorNotice]);
 
-	useEffect( () => {
-		if ( ! canUserInstallPlugins ) {
-			setPluginState( JetpackPluginStates.USER_CANNOT_INSTALL );
+	useEffect(() => {
+		if (!canUserInstallPlugins) {
+			setPluginState(JetpackPluginStates.USER_CANNOT_INSTALL);
 		} else {
-			switch ( jetpackInstallState ) {
+			switch (jetpackInstallState) {
 				case 'installed':
-					setPluginState( JetpackPluginStates.NOT_ACTIVATED );
+					setPluginState(JetpackPluginStates.NOT_ACTIVATED);
 					break;
 				case 'unavailable':
-					setPluginState( JetpackPluginStates.NOT_INSTALLED );
+					setPluginState(JetpackPluginStates.NOT_INSTALLED);
 					break;
 				case 'activated':
 					if (
 						// Jetpack can be installed and activated but not connected to a WordPress.com user account, this handles that
 						jetpackConnectionData &&
-						! jetpackConnectionData?.connectionOwner
+						!jetpackConnectionData?.connectionOwner
 					) {
-						setPluginState(
-							JetpackPluginStates.USERLESS_CONNECTION
-						);
+						setPluginState(JetpackPluginStates.USERLESS_CONNECTION);
 					} else if (
 						jetpackConnectionData &&
-						! jetpackConnectionData?.currentUser?.isMaster
+						!jetpackConnectionData?.currentUser?.isMaster
 					) {
 						setPluginState(
 							JetpackPluginStates.NOT_OWNER_OF_CONNECTION
@@ -102,12 +100,12 @@ export const useJetpackPluginState = () => {
 						jetpackConnectionData?.currentUser?.isConnected &&
 						jetpackConnectionData?.currentUser?.isMaster
 					) {
-						setPluginState( JetpackPluginStates.FULL_CONNECTION );
+						setPluginState(JetpackPluginStates.FULL_CONNECTION);
 					}
 					break;
 			}
 		}
-	}, [ canUserInstallPlugins, jetpackInstallState, jetpackConnectionData ] );
+	}, [canUserInstallPlugins, jetpackInstallState, jetpackConnectionData]);
 
 	return {
 		state: pluginState,

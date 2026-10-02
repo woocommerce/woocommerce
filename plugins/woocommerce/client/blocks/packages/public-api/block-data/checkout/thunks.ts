@@ -41,8 +41,8 @@ import { CheckoutPutAbortController } from '../utils/clear-put-requests';
 import { CART_STORE_KEY } from '../cart';
 
 export interface CheckoutThunkArgs {
-	select: CurriedSelectorsOf< CheckoutStoreDescriptor >;
-	dispatch: ActionCreatorsOf< ConfigOf< CheckoutStoreDescriptor > >;
+	select: CurriedSelectorsOf<CheckoutStoreDescriptor>;
+	dispatch: ActionCreatorsOf<ConfigOf<CheckoutStoreDescriptor>>;
 	registry: { dispatch: DispatchFunction; select: SelectFunction };
 }
 
@@ -54,16 +54,14 @@ export interface CheckoutThunkArgs {
 export const __internalProcessCheckoutResponse = (
 	response: CheckoutResponse
 ) => {
-	return ( { dispatch }: CheckoutThunkArgs ) => {
-		const paymentResult = getPaymentResultFromCheckoutResponse( response );
+	return ({ dispatch }: CheckoutThunkArgs) => {
+		const paymentResult = getPaymentResultFromCheckoutResponse(response);
 		void dispatch.__internalSetRedirectUrl(
 			paymentResult?.redirectUrl || ''
 		);
 		// The local `dispatch` here is bound  to the actions of the data store. We need to use the global dispatch here
 		// to dispatch an action on a different store.
-		void wpDispatch( paymentStore ).__internalSetPaymentResult(
-			paymentResult
-		);
+		void wpDispatch(paymentStore).__internalSetPaymentResult(paymentResult);
 		void dispatch.__internalSetAfterProcessing();
 	};
 };
@@ -72,21 +70,21 @@ export const __internalProcessCheckoutResponse = (
  * Emit the CHECKOUT_VALIDATION event and process all
  * registered observers
  */
-export const __internalEmitValidateEvent: emitValidateEventType = ( {
+export const __internalEmitValidateEvent: emitValidateEventType = ({
 	setValidationErrors,
-} ) => {
-	return ( { dispatch, registry }: CheckoutThunkArgs ) => {
-		const { createErrorNotice } = registry.dispatch( noticesStore );
-		removeNoticesByStatus( 'error' );
+}) => {
+	return ({ dispatch, registry }: CheckoutThunkArgs) => {
+		const { createErrorNotice } = registry.dispatch(noticesStore);
+		removeNoticesByStatus('error');
 		void checkoutEventsEmitter
-			.emit( CHECKOUT_EVENTS.CHECKOUT_VALIDATION )
-			.then( ( responses ) => {
+			.emit(CHECKOUT_EVENTS.CHECKOUT_VALIDATION)
+			.then((responses) => {
 				// If responses length is 0, then no observer returned a response that wasn't `true` or void, therefore,
 				// we can assume all observers passed and continue to processing. We also need to check if all responses
 				// are of type `success`, so we can skip adding any errors too.
 				if (
 					responses.length === 0 ||
-					responses.every( isSuccessResponse )
+					responses.every(isSuccessResponse)
 				) {
 					void dispatch.__internalSetProcessing();
 					return;
@@ -94,11 +92,11 @@ export const __internalEmitValidateEvent: emitValidateEventType = ( {
 				// If any observer returned a response, by this point we know that it's either failure or error due to
 				// the checks above.
 				responses.forEach(
-					( {
+					({
 						errorMessage,
 						validationErrors,
 						context = 'wc/checkout',
-					} ) => {
+					}) => {
 						if (
 							// TODO: for a more consistent experience across observing events we should normalize the
 							// return values. For example this one expects `errorMessage` whereas `onCheckoutFail`
@@ -107,18 +105,16 @@ export const __internalEmitValidateEvent: emitValidateEventType = ( {
 							typeof errorMessage === 'string' &&
 							errorMessage
 						) {
-							void createErrorNotice( errorMessage, { context } );
+							void createErrorNotice(errorMessage, { context });
 						}
-						if (
-							isValidValidationErrorsObject( validationErrors )
-						) {
-							setValidationErrors( validationErrors );
+						if (isValidValidationErrorsObject(validationErrors)) {
+							setValidationErrors(validationErrors);
 						}
 					}
 				);
 				void dispatch.__internalSetIdle();
 				void dispatch.__internalSetHasError();
-			} );
+			});
 	};
 };
 
@@ -128,66 +124,66 @@ export const __internalEmitValidateEvent: emitValidateEventType = ( {
  * to the observer responses
  */
 export const __internalEmitAfterProcessingEvents: emitAfterProcessingEventsType =
-	( { notices } ) => {
-		return ( { select, dispatch, registry } ) => {
-			const { createErrorNotice } = registry.dispatch( noticesStore );
+	({ notices }) => {
+		return ({ select, dispatch, registry }) => {
+			const { createErrorNotice } = registry.dispatch(noticesStore);
 			const data = {
 				redirectUrl: select.getRedirectUrl(),
 				orderId: select.getOrderId(),
 				customerId: select.getCustomerId(),
 				orderNotes: select.getOrderNotes(),
-				processingResponse: wpSelect( paymentStore ).getPaymentResult(),
+				processingResponse: wpSelect(paymentStore).getPaymentResult(),
 			};
-			if ( select.hasError() ) {
+			if (select.hasError()) {
 				// allow payment methods or other things to customize the error
 				// with a fallback if nothing customizes it.
 				void checkoutEventsEmitter
-					.emitWithAbort( CHECKOUT_EVENTS.CHECKOUT_FAIL, data )
-					.then( ( observerResponses ) => {
-						runCheckoutFailObservers( {
+					.emitWithAbort(CHECKOUT_EVENTS.CHECKOUT_FAIL, data)
+					.then((observerResponses) => {
+						runCheckoutFailObservers({
 							observerResponses,
 							notices,
 							dispatch,
 							createErrorNotice,
 							data,
-						} );
-					} );
+						});
+					});
 			} else {
 				void checkoutEventsEmitter
-					.emitWithAbort( CHECKOUT_EVENTS.CHECKOUT_SUCCESS, data )
-					.then( ( observerResponses ) => {
-						runCheckoutSuccessObservers( {
+					.emitWithAbort(CHECKOUT_EVENTS.CHECKOUT_SUCCESS, data)
+					.then((observerResponses) => {
+						runCheckoutSuccessObservers({
 							observerResponses,
 							dispatch,
 							createErrorNotice,
-						} );
-					} );
+						});
+					});
 			}
 		};
 	};
 
-export const updateDraftOrder = ( data: CheckoutPutData ) => {
-	return async ( { registry } ) => {
-		const { receiveCartContents } = registry.dispatch( CART_STORE_KEY );
+export const updateDraftOrder = (data: CheckoutPutData) => {
+	return async ({ registry }) => {
+		const { receiveCartContents } = registry.dispatch(CART_STORE_KEY);
 		try {
-			const response = await apiFetchWithHeaders( {
+			const response = await apiFetchWithHeaders({
 				path: '/wc/store/v1/checkout?__experimental_calc_totals=true',
 				method: 'PUT',
 				data,
 				signal: CheckoutPutAbortController.signal,
-			} );
-			if ( response?.response?.__experimentalCart ) {
-				receiveCartContents( response.response.__experimentalCart );
+			});
+			if (response?.response?.__experimentalCart) {
+				receiveCartContents(response.response.__experimentalCart);
 			}
 			return response;
-		} catch ( error ) {
-			return Promise.reject( error );
+		} catch (error) {
+			return Promise.reject(error);
 		}
 	};
 };
 
-export const disableCheckoutFor = ( asyncFunc: () => Promise< unknown > ) => {
-	return async ( { dispatch }: CheckoutThunkArgs ) => {
+export const disableCheckoutFor = (asyncFunc: () => Promise<unknown>) => {
+	return async ({ dispatch }: CheckoutThunkArgs) => {
 		void dispatch.__internalStartCalculation();
 		try {
 			return await asyncFunc();

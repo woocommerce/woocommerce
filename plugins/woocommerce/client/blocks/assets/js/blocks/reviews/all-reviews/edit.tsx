@@ -9,12 +9,12 @@ import { useBlockProps } from '@wordpress/block-editor';
 import Block from './block';
 import type { AllReviewsEditorProps } from './types';
 
-export const Edit = ( props: unknown & AllReviewsEditorProps ): JSX.Element => {
+export const Edit = (props: unknown & AllReviewsEditorProps): JSX.Element => {
 	const blockProps = useBlockProps();
 
 	return (
-		<div { ...blockProps }>
-			<Block { ...props } />
+		<div {...blockProps}>
+			<Block {...props} />
 		</div>
 	);
 };

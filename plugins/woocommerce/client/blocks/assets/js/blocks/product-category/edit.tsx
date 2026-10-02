@@ -18,56 +18,54 @@ import { Attributes, Props } from './types';
 import { ProductsByCategoryInspectorControls } from './inspector-controls';
 import { ProductsByCategoryEditMode } from './edit-mode';
 
-const EditBlock = ( props: Props ): JSX.Element => {
+const EditBlock = (props: Props): JSX.Element => {
 	const blockProps = useBlockProps();
 
 	const { attributes } = props;
 
-	const [ isEditing, setIsEditing ] = useState(
-		! attributes.categories.length
-	);
+	const [isEditing, setIsEditing] = useState(!attributes.categories.length);
 
-	const [ changedAttributes, setChangedAttributes ] = useState<
-		Partial< Attributes >
-	>( {} );
+	const [changedAttributes, setChangedAttributes] = useState<
+		Partial<Attributes>
+	>({});
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<BlockControls>
 				<ToolbarGroup
-					controls={ [
+					controls={[
 						{
 							icon: 'edit',
 							title: __(
 								'Edit selected categories',
 								'woocommerce'
 							),
-							onClick: () => setIsEditing( ! isEditing ),
+							onClick: () => setIsEditing(!isEditing),
 							isActive: isEditing,
 						},
-					] }
+					]}
 				/>
 			</BlockControls>
 			<ProductsByCategoryInspectorControls
-				isEditing={ isEditing }
-				setChangedAttributes={ setChangedAttributes }
-				{ ...props }
+				isEditing={isEditing}
+				setChangedAttributes={setChangedAttributes}
+				{...props}
 			/>
-			{ isEditing ? (
+			{isEditing ? (
 				<ProductsByCategoryEditMode
-					isEditing={ isEditing }
-					setIsEditing={ setIsEditing }
-					changedAttributes={ changedAttributes }
-					setChangedAttributes={ setChangedAttributes }
-					{ ...props }
+					isEditing={isEditing}
+					setIsEditing={setIsEditing}
+					changedAttributes={changedAttributes}
+					setChangedAttributes={setChangedAttributes}
+					{...props}
 				/>
 			) : (
 				<Disabled>
-					<ProductByCategoryBlock { ...props } />
+					<ProductByCategoryBlock {...props} />
 				</Disabled>
-			) }
+			)}
 		</div>
 	);
 };
 
-export const Edit = withSpokenMessages( EditBlock );
+export const Edit = withSpokenMessages(EditBlock);

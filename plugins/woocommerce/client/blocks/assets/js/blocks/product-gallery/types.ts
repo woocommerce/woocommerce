@@ -10,9 +10,7 @@ export interface ProductGalleryBlockAttributes {
 
 export interface ProductGallerySettingsProps {
 	attributes: ProductGalleryBlockAttributes;
-	setAttributes: (
-		attributes: Partial< ProductGalleryBlockAttributes >
-	) => void;
+	setAttributes: (attributes: Partial<ProductGalleryBlockAttributes>) => void;
 }
 
 export type VariationImageSet = {
@@ -21,11 +19,11 @@ export type VariationImageSet = {
 };
 
 export type ProductImageSet = VariationImageSet & {
-	variations?: Record< number, VariationImageSet >;
+	variations?: Record<number, VariationImageSet>;
 };
 
 export type ProductGalleryConfig = WooCommerceConfig & {
-	products?: Record< string, ProductImageSet >;
+	products?: Record<string, ProductImageSet>;
 };
 
 export type LegacyVariationPayload = {
@@ -36,20 +34,17 @@ export type LegacyVariationPayload = {
 export type LegacyJQueryInstance = {
 	on: (
 		eventName: string,
-		handler: ( event?: unknown, variation?: LegacyVariationPayload ) => void
+		handler: (event?: unknown, variation?: LegacyVariationPayload) => void
 	) => LegacyJQueryInstance;
-	off: ( namespace: string ) => LegacyJQueryInstance;
+	off: (namespace: string) => LegacyJQueryInstance;
 };
 
 export type LegacyJQueryWindow = Window & {
-	jQuery?: ( target: Element | string ) => LegacyJQueryInstance;
+	jQuery?: (target: Element | string) => LegacyJQueryInstance;
 };
 
 export type LegacyJQueryFormHandlers = {
-	onVariationFound: (
-		variationId?: number,
-		featuredImageId?: number
-	) => void;
+	onVariationFound: (variationId?: number, featuredImageId?: number) => void;
 	onVariationReset: () => void;
 };
 

@@ -18,7 +18,7 @@ import { attributeNamesMatch } from './attribute-matching';
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: productsState } = store< ProductsStore >(
+const { state: productsState } = store<ProductsStore>(
 	'woocommerce/products',
 	{},
 	{ lock: universalLock }
@@ -29,34 +29,33 @@ export const doesCartItemMatchAttributes = (
 	selectedAttributes: SelectedAttributes[]
 ) => {
 	if (
-		! Array.isArray( cartItem.variation ) ||
-		! Array.isArray( selectedAttributes )
+		!Array.isArray(cartItem.variation) ||
+		!Array.isArray(selectedAttributes)
 	) {
 		return false;
 	}
 
-	if ( cartItem.variation.length !== selectedAttributes.length ) {
+	if (cartItem.variation.length !== selectedAttributes.length) {
 		return false;
 	}
 
 	const parentProductId =
-		productsState.productVariations[ cartItem.id ]?.parent;
+		productsState.productVariations[cartItem.id]?.parent;
 	const productAttributes =
-		productsState.products[ parentProductId ]?.attributes ?? [];
+		productsState.products[parentProductId]?.attributes ?? [];
 
-	return cartItem.variation.every( ( { attribute, value: termName } ) =>
-		selectedAttributes.some( ( selectedAttr: SelectedAttributes ) => {
+	return cartItem.variation.every(({ attribute, value: termName }) =>
+		selectedAttributes.some((selectedAttr: SelectedAttributes) => {
 			// Find the term matching the cart item's value label.
-			const terms = productAttributes.find( ( attr ) =>
-				attributeNamesMatch( attribute, attr.name )
+			const terms = productAttributes.find((attr) =>
+				attributeNamesMatch(attribute, attr.name)
 			)?.terms;
 			const termSlug =
-				terms?.find( ( term ) => term.name === termName )?.slug ||
-				termName; // Fallback to termName if no matching term is found.
+				terms?.find((term) => term.name === termName)?.slug || termName; // Fallback to termName if no matching term is found.
 			return (
-				attributeNamesMatch( selectedAttr.attribute, attribute ) &&
+				attributeNamesMatch(selectedAttr.attribute, attribute) &&
 				selectedAttr.value.toLowerCase() === termSlug?.toLowerCase()
 			);
-		} )
+		})
 	);
 };

@@ -6,7 +6,7 @@ import { createInterpolateElement } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 import { UpgradeDowngradeNotice } from '@woocommerce/editor-components/upgrade-downgrade-notice';
 
-export const UpgradeNotice = ( props: { upgradeBlock: () => void } ) => {
+export const UpgradeNotice = (props: { upgradeBlock: () => void }) => {
 	const notice = createInterpolateElement(
 		__(
 			'Upgrade all Products blocks on this page to <strongText /> for more features!',
@@ -14,12 +14,12 @@ export const UpgradeNotice = ( props: { upgradeBlock: () => void } ) => {
 		),
 		{
 			strongText: (
-				<strong>{ __( `Product Collection`, 'woocommerce' ) }</strong>
+				<strong>{__(`Product Collection`, 'woocommerce')}</strong>
 			),
 		}
 	);
 
-	const buttonLabel = __( 'Upgrade to Product Collection', 'woocommerce' );
+	const buttonLabel = __('Upgrade to Product Collection', 'woocommerce');
 
 	const handleClick = () => {
 		props.upgradeBlock();
@@ -33,11 +33,11 @@ export const UpgradeNotice = ( props: { upgradeBlock: () => void } ) => {
 
 	return (
 		<UpgradeDowngradeNotice
-			isDismissible={ false }
-			actionLabel={ buttonLabel }
-			onActionClick={ handleClick }
+			isDismissible={false}
+			actionLabel={buttonLabel}
+			onActionClick={handleClick}
 		>
-			{ notice }
+			{notice}
 		</UpgradeDowngradeNotice>
 	);
 };

@@ -29,125 +29,119 @@ import StoreNotice from '../store-notice';
  * this gives themes and scripts the same per-notice hook the shortcode
  * checkout has.
  */
-const StoreNoticeList = ( {
+const StoreNoticeList = ({
 	notices,
 }: {
-	notices: ( Pick< NoticeType, 'id' | 'content' > &
-		Partial< Pick< NoticeType, 'context' > > )[];
-} ): JSX.Element => (
+	notices: (Pick<NoticeType, 'id' | 'content'> &
+		Partial<Pick<NoticeType, 'context'>>)[];
+}): JSX.Element => (
 	// The role is not redundant here, see above.
 	// eslint-disable-next-line jsx-a11y/no-redundant-roles
 	<ul className="wc-block-components-notice-banner__list" role="list">
-		{ notices.map( ( notice ) => (
-			<li key={ notice.id + '-' + notice.context } data-id={ notice.id }>
-				<RawHTML>{ notice.content }</RawHTML>
+		{notices.map((notice) => (
+			<li key={notice.id + '-' + notice.context} data-id={notice.id}>
+				<RawHTML>{notice.content}</RawHTML>
 			</li>
-		) ) }
+		))}
 	</ul>
 );
 
-const StoreNotices = ( {
+const StoreNotices = ({
 	className,
 	notices,
 }: {
 	className: string;
 	notices: NoticeType[];
-} ): JSX.Element => {
-	const ref = useRef< HTMLDivElement >( null );
-	const { removeNotice } = useDispatch( 'core/notices' );
+}): JSX.Element => {
+	const ref = useRef<HTMLDivElement>(null);
+	const { removeNotice } = useDispatch('core/notices');
 	// Only scroll to the container when an error notice is added, not info notices.
 	const errorIds = notices
-		.map( ( notice ) => {
-			if ( notice.status === 'error' || notice.status === 'warning' ) {
+		.map((notice) => {
+			if (notice.status === 'error' || notice.status === 'warning') {
 				return notice.id;
 			}
 			return null;
-		} )
-		.filter( Boolean );
-	const previousErrorIds = usePrevious( errorIds );
+		})
+		.filter(Boolean);
+	const previousErrorIds = usePrevious(errorIds);
 
-	useEffect( () => {
+	useEffect(() => {
 		// Scroll to container when an error is added here.
 		const containerRef = ref.current;
 
-		if ( ! containerRef ) {
+		if (!containerRef) {
 			return;
 		}
 
 		// Do not scroll if input has focus.
 		const activeElement = containerRef.ownerDocument.activeElement;
-		const inputs = [ 'input', 'select', 'button', 'textarea' ];
+		const inputs = ['input', 'select', 'button', 'textarea'];
 
 		if (
 			activeElement &&
-			inputs.indexOf( activeElement.tagName.toLowerCase() ) !== -1 &&
-			activeElement.getAttribute( 'type' ) !== 'radio'
+			inputs.indexOf(activeElement.tagName.toLowerCase()) !== -1 &&
+			activeElement.getAttribute('type') !== 'radio'
 		) {
 			return;
 		}
 
 		const newErrorIds = errorIds.filter(
-			( value ) =>
-				! previousErrorIds || ! previousErrorIds.includes( value )
+			(value) => !previousErrorIds || !previousErrorIds.includes(value)
 		);
 
-		if ( newErrorIds.length && containerRef?.scrollIntoView ) {
-			containerRef.scrollIntoView( {
+		if (newErrorIds.length && containerRef?.scrollIntoView) {
+			containerRef.scrollIntoView({
 				behavior: 'smooth',
-			} );
+			});
 		}
-	}, [ errorIds, previousErrorIds, ref ] );
+	}, [errorIds, previousErrorIds, ref]);
 
 	// Group notices by whether or not they are dismissible. Dismissible notices can be grouped.
 	const dismissibleNotices = notices.filter(
-		( { isDismissible } ) => !! isDismissible
+		({ isDismissible }) => !!isDismissible
 	);
 	const nonDismissibleNotices = notices.filter(
-		( { isDismissible } ) => ! isDismissible
+		({ isDismissible }) => !isDismissible
 	);
 
 	// Group dismissibleNotices by status. They will be combined into a single notice.
 	const dismissibleNoticeGroups = {
-		error: dismissibleNotices.filter(
-			( { status } ) => status === 'error'
-		),
+		error: dismissibleNotices.filter(({ status }) => status === 'error'),
 		success: dismissibleNotices.filter(
-			( { status } ) => status === 'success'
+			({ status }) => status === 'success'
 		),
 		warning: dismissibleNotices.filter(
-			( { status } ) => status === 'warning'
+			({ status }) => status === 'warning'
 		),
-		info: dismissibleNotices.filter( ( { status } ) => status === 'info' ),
+		info: dismissibleNotices.filter(({ status }) => status === 'info'),
 		default: dismissibleNotices.filter(
-			( { status } ) => status === 'default'
+			({ status }) => status === 'default'
 		),
 	};
 
 	return (
 		<div
-			ref={ ref }
-			className={ clsx( className, 'wc-block-components-notices' ) }
+			ref={ref}
+			className={clsx(className, 'wc-block-components-notices')}
 		>
-			{ nonDismissibleNotices.map( ( notice ) => (
-				<StoreNotice
-					key={ notice.id + '-' + notice.context }
-					{ ...notice }
-				>
+			{nonDismissibleNotices.map((notice) => (
+				<StoreNotice key={notice.id + '-' + notice.context} {...notice}>
 					<StoreNoticeList
-						notices={ [
+						notices={[
 							{
 								...notice,
 								content: sanitizeHTML(
-									decodeEntities( notice.content )
+									decodeEntities(notice.content)
 								),
 							},
-						] }
+						]}
 					/>
 				</StoreNotice>
-			) ) }
-			{ Object.entries( dismissibleNoticeGroups ).map(
-				( [ status, noticeGroup ] ) => {
-					if ( ! noticeGroup.length ) {
+			))}
+			{Object.entries(dismissibleNoticeGroups).map(
+				([status, noticeGroup]) => {
+					if (!noticeGroup.length) {
 						return null;
 					}
 					const uniqueNotices = noticeGroup
@@ -158,28 +152,28 @@ const StoreNotices = ( {
 								noticesArray: NoticeType[]
 							) =>
 								noticesArray.findIndex(
-									( _notice: NoticeType ) =>
+									(_notice: NoticeType) =>
 										_notice.content === notice.content
 								) === noticeIndex
 						)
-						.map( ( notice ) => ( {
+						.map((notice) => ({
 							...notice,
 							content: sanitizeHTML(
-								decodeEntities( notice.content )
+								decodeEntities(notice.content)
 							),
-						} ) );
-					const noticeProps: Omit< NoticeBannerProps, 'children' > = {
+						}));
+					const noticeProps: Omit<NoticeBannerProps, 'children'> = {
 						status: status as NoticeStatus,
 						onRemove: () => {
-							noticeGroup.forEach( ( notice ) => {
-								removeNotice( notice.id, notice.context );
-							} );
+							noticeGroup.forEach((notice) => {
+								removeNotice(notice.id, notice.context);
+							});
 						},
 					};
 					return (
 						<StoreNotice
-							key={ 'store-notice-' + status }
-							{ ...noticeProps }
+							key={'store-notice-' + status}
+							{...noticeProps}
 							summary={
 								status === 'error'
 									? _n(
@@ -187,15 +181,15 @@ const StoreNotices = ( {
 											'Please fix the following errors before continuing',
 											uniqueNotices.length,
 											'woocommerce'
-									  )
+										)
 									: ''
 							}
 						>
-							<StoreNoticeList notices={ uniqueNotices } />
+							<StoreNoticeList notices={uniqueNotices} />
 						</StoreNotice>
 					);
 				}
-			) }
+			)}
 		</div>
 	);
 };

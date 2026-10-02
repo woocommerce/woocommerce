@@ -94,41 +94,45 @@ jQuery( function ( $ ) {
 					woocommerce_admin_meta_boxes.add_attributes_and_variations,
 			};
 
-			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function (
-				response
-			) {
-				if ( response.error ) {
-					// Error.
-					window.alert( response.error );
-					$( '#variable_product_options' ).unblock();
-				} else if ( response ) {
-					// Reload variations and attributes panel.
-					var this_page_url = window.location.toString();
-					this_page_url = this_page_url.replace(
-						'post-new.php?',
-						'post.php?post=' +
-							woocommerce_admin_meta_boxes.post_id +
-							'&action=edit&'
-					);
-
-					$.get( this_page_url, function ( page_html ) {
+			$.post(
+				woocommerce_admin_meta_boxes.ajax_url,
+				data,
+				function ( response ) {
+					if ( response.error ) {
+						// Error.
+						window.alert( response.error );
 						$( '#variable_product_options' ).unblock();
-						$( '#variable_product_options_inner' ).replaceWith(
-							$( page_html ).find(
-								'#variable_product_options_inner'
-							)
+					} else if ( response ) {
+						// Reload variations and attributes panel.
+						var this_page_url = window.location.toString();
+						this_page_url = this_page_url.replace(
+							'post-new.php?',
+							'post.php?post=' +
+								woocommerce_admin_meta_boxes.post_id +
+								'&action=edit&'
 						);
-						$( '#variable_product_options' ).trigger( 'reload' );
-						$(
-							'#product_attributes > .product_attributes'
-						).replaceWith(
-							$( page_html ).find(
+
+						$.get( this_page_url, function ( page_html ) {
+							$( '#variable_product_options' ).unblock();
+							$( '#variable_product_options_inner' ).replaceWith(
+								$( page_html ).find(
+									'#variable_product_options_inner'
+								)
+							);
+							$( '#variable_product_options' ).trigger(
+								'reload'
+							);
+							$(
 								'#product_attributes > .product_attributes'
-							)
-						);
-					} );
+							).replaceWith(
+								$( page_html ).find(
+									'#product_attributes > .product_attributes'
+								)
+							);
+						} );
+					}
 				}
-			} );
+			);
 		},
 
 		/**
@@ -200,10 +204,9 @@ jQuery( function ( $ ) {
 		 */
 		show_or_hide_cost_description: function ( e ) {
 			const target = $( e.currentTarget );
-			if( target.find( 'input' ).val() === '' ) {
+			if ( target.find( 'input' ).val() === '' ) {
 				target.find( '.description' ).show();
-			}
-			else {
+			} else {
 				target.find( '.description' ).hide();
 			}
 		},
@@ -276,18 +279,20 @@ jQuery( function ( $ ) {
 				).trigger( 'change' );
 
 				// Open sale schedule fields when have some sale price date
-				$( '.woocommerce_variation', wrapper ).each( function (
-					index,
-					el
-				) {
-					var $el = $( el ),
-						date_from = $( '.sale_price_dates_from', $el ).val(),
-						date_to = $( '.sale_price_dates_to', $el ).val();
+				$( '.woocommerce_variation', wrapper ).each(
+					function ( index, el ) {
+						var $el = $( el ),
+							date_from = $(
+								'.sale_price_dates_from',
+								$el
+							).val(),
+							date_to = $( '.sale_price_dates_to', $el ).val();
 
-					if ( '' !== date_from || '' !== date_to ) {
-						$( 'a.sale_schedule', $el ).trigger( 'click' );
+						if ( '' !== date_from || '' !== date_to ) {
+							$( 'a.sale_schedule', $el ).trigger( 'click' );
+						}
 					}
-				} );
+				);
 
 				// Remove variation-needs-update classes
 				$(
@@ -520,8 +525,10 @@ jQuery( function ( $ ) {
 				post_id = $button.attr( 'rel' ),
 				$parent = $button.closest( '.upload_image' );
 
-			wc_meta_boxes_product_variations_media.setting_variation_image = $parent;
-			wc_meta_boxes_product_variations_media.setting_variation_image_id = post_id;
+			wc_meta_boxes_product_variations_media.setting_variation_image =
+				$parent;
+			wc_meta_boxes_product_variations_media.setting_variation_image_id =
+				post_id;
 
 			event.preventDefault();
 
@@ -559,34 +566,31 @@ jQuery( function ( $ ) {
 				}
 
 				// Create the media frame.
-				wc_meta_boxes_product_variations_media.variable_image_frame = wp.media.frames.variable_image = wp.media(
-					{
+				wc_meta_boxes_product_variations_media.variable_image_frame =
+					wp.media.frames.variable_image = wp.media( {
 						// Set the title of the modal.
-						title:
-							woocommerce_admin_meta_boxes_variations.i18n_choose_image,
+						title: woocommerce_admin_meta_boxes_variations.i18n_choose_image,
 						button: {
-							text:
-								woocommerce_admin_meta_boxes_variations.i18n_set_image,
+							text: woocommerce_admin_meta_boxes_variations.i18n_set_image,
 						},
 						states: [
 							new wp.media.controller.Library( {
-								title:
-									woocommerce_admin_meta_boxes_variations.i18n_choose_image,
+								title: woocommerce_admin_meta_boxes_variations.i18n_choose_image,
 								filterable: 'all',
 							} ),
 						],
-					}
-				);
+					} );
 
 				// When an image is selected, run a callback.
 				wc_meta_boxes_product_variations_media.variable_image_frame.on(
 					'select',
 					function () {
-						var attachment = wc_meta_boxes_product_variations_media.variable_image_frame
-								.state()
-								.get( 'selection' )
-								.first()
-								.toJSON(),
+						var attachment =
+								wc_meta_boxes_product_variations_media.variable_image_frame
+									.state()
+									.get( 'selection' )
+									.first()
+									.toJSON(),
 							url =
 								attachment.sizes && attachment.sizes.thumbnail
 									? attachment.sizes.thumbnail.url
@@ -825,13 +829,12 @@ jQuery( function ( $ ) {
 		get_variations_fields: function ( fields ) {
 			var data = $( ':input', fields ).serializeJSON();
 
-			$( '.variations-defaults select' ).each( function (
-				index,
-				element
-			) {
-				var select = $( element );
-				data[ select.attr( 'name' ) ] = select.val();
-			} );
+			$( '.variations-defaults select' ).each(
+				function ( index, element ) {
+					var select = $( element );
+					data[ select.attr( 'name' ) ] = select.val();
+				}
+			);
 
 			return data;
 		},
@@ -854,9 +857,10 @@ jQuery( function ( $ ) {
 			if ( 0 < need_update.length ) {
 				wc_meta_boxes_product_variations_ajax.block();
 
-				data = wc_meta_boxes_product_variations_ajax.get_variations_fields(
-					need_update
-				);
+				data =
+					wc_meta_boxes_product_variations_ajax.get_variations_fields(
+						need_update
+					);
 				data.action = 'woocommerce_save_variations';
 				data.security =
 					woocommerce_admin_meta_boxes_variations.save_variations_nonce;
@@ -905,28 +909,30 @@ jQuery( function ( $ ) {
 				'woocommerce_variations_save_variations_button'
 			);
 
-			wc_meta_boxes_product_variations_ajax.save_changes( function (
-				error
-			) {
-				var wrapper = $( '#variable_product_options' ).find(
-						'.woocommerce_variations'
-					),
-					current = wrapper.attr( 'data-page' );
+			wc_meta_boxes_product_variations_ajax.save_changes(
+				function ( error ) {
+					var wrapper = $( '#variable_product_options' ).find(
+							'.woocommerce_variations'
+						),
+						current = wrapper.attr( 'data-page' );
 
-				$( '#variable_product_options' )
-					.find( '#woocommerce_errors' )
-					.remove();
+					$( '#variable_product_options' )
+						.find( '#woocommerce_errors' )
+						.remove();
 
-				if ( error ) {
-					wrapper.before( error );
+					if ( error ) {
+						wrapper.before( error );
+					}
+
+					$( '.variations-defaults select' ).each( function () {
+						$( this ).attr( 'data-current', $( this ).val() );
+					} );
+
+					wc_meta_boxes_product_variations_pagenav.go_to_page(
+						current
+					);
 				}
-
-				$( '.variations-defaults select' ).each( function () {
-					$( this ).attr( 'data-current', $( this ).val() );
-				} );
-
-				wc_meta_boxes_product_variations_pagenav.go_to_page( current );
-			} );
+			);
 
 			return false;
 		},
@@ -1036,7 +1042,10 @@ jQuery( function ( $ ) {
 
 					wc_meta_boxes_product_variations_ajax.show_hide_variation_empty_state();
 
-					$( '#variable_product_options' ).trigger( 'woocommerce_variations_added', 1 );
+					$( '#variable_product_options' ).trigger(
+						'woocommerce_variations_added',
+						1
+					);
 
 					wc_meta_boxes_product_variations_ajax.unblock();
 				}
@@ -1168,12 +1177,11 @@ jQuery( function ( $ ) {
 								: woocommerce_admin_meta_boxes_variations.i18n_variations_added.replace(
 										'%qty%',
 										count
-								  );
+									);
 
-						window.wp.data.dispatch( 'core/notices' ).createSuccessNotice(
-							message,
-							{ icon: '🎉' }
-						);
+						window.wp.data
+							.dispatch( 'core/notices' )
+							.createSuccessNotice( message, { icon: '🎉' } );
 
 						wc_meta_boxes_product_variations_ajax.show_hide_variation_empty_state();
 
@@ -1308,10 +1316,12 @@ jQuery( function ( $ ) {
 							'variable_sale_price_from_regular_price'
 						) {
 							// Preserve invalid input for server-side validation instead of coercing it to zero.
-							data.value = value.trim().replace(
-								woocommerce_admin.mon_decimal_point,
-								'.'
-							);
+							data.value = value
+								.trim()
+								.replace(
+									woocommerce_admin.mon_decimal_point,
+									'.'
+								);
 						} else if ( value.indexOf( '%' ) >= 0 ) {
 							data.value =
 								accounting.unformat(
@@ -1350,9 +1360,9 @@ jQuery( function ( $ ) {
 					break;
 				case 'variable_unset_cogs_value':
 					if (
-						! window.confirm (
+						! window.confirm(
 							woocommerce_admin_meta_boxes_variations.i18n_variation_cost_remove_warning
-							)
+						)
 					) {
 						cancel = true;
 					}
@@ -1413,8 +1423,9 @@ jQuery( function ( $ ) {
 					data: {
 						action: 'woocommerce_bulk_edit_variations',
 						security:
-						woocommerce_admin_meta_boxes_variations.bulk_edit_variations_nonce,
-						product_id: woocommerce_admin_meta_boxes_variations.post_id,
+							woocommerce_admin_meta_boxes_variations.bulk_edit_variations_nonce,
+						product_id:
+							woocommerce_admin_meta_boxes_variations.post_id,
 						product_type: $( '#product-type' ).val(),
 						bulk_action: do_variation_action,
 						data: data,
@@ -1428,8 +1439,8 @@ jQuery( function ( $ ) {
 					},
 					complete: function () {
 						$( '#field_to_edit' ).val( 'bulk_actions' );
-					}
-				});
+					},
+				} );
 			};
 
 			if ( cancel ) {
@@ -1543,7 +1554,7 @@ jQuery( function ( $ ) {
 					: woocommerce_admin_meta_boxes_variations.i18n_variation_count_plural.replace(
 							'%qty%',
 							total
-					  );
+						);
 
 			displaying_num.text( message );
 
@@ -1578,9 +1589,10 @@ jQuery( function ( $ ) {
 			var wrapper = $( '#variable_product_options' ).find(
 					'.woocommerce_variations'
 				),
-				new_qty = wc_meta_boxes_product_variations_pagenav.update_variations_count(
-					qty
-				),
+				new_qty =
+					wc_meta_boxes_product_variations_pagenav.update_variations_count(
+						qty
+					),
 				toolbar = $( '#variable_product_options' ).find( '.toolbar' ),
 				variation_action = $( '.variation_actions' ),
 				page_nav = $( '.variations-pagenav' ),

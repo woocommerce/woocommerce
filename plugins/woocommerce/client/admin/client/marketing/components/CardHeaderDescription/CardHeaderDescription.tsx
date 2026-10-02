@@ -3,12 +3,12 @@
  */
 import './CardHeaderDescription.scss';
 
-export const CardHeaderDescription = ( {
+export const CardHeaderDescription = ({
 	children,
-}: React.PropsWithChildren ) => {
+}: React.PropsWithChildren) => {
 	return (
 		<div className="woocommerce-marketing-card-header-description">
-			{ children }
+			{children}
 		</div>
 	);
 };

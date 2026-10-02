@@ -9,13 +9,13 @@ type ExpressPaymentContextProps = {
 	buttonBorderRadius: string;
 };
 
-export const ExpressPaymentContext: React.Context< ExpressPaymentContextProps > =
-	createContext< ExpressPaymentContextProps >( {
+export const ExpressPaymentContext: React.Context<ExpressPaymentContextProps> =
+	createContext<ExpressPaymentContextProps>({
 		showButtonStyles: false,
 		buttonHeight: '48',
 		buttonBorderRadius: '4',
-	} );
+	});
 
 export const useExpressPaymentContext = () => {
-	return useContext( ExpressPaymentContext );
+	return useContext(ExpressPaymentContext);
 };

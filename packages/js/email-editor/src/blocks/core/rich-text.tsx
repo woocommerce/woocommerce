@@ -46,13 +46,13 @@ function disableCertainRichTextFormats() {
 	];
 
 	// Unregister each format type and preserve its definition
-	formatTypesToDisable.forEach( ( formatName ) => {
-		unregisterFormatForEmail( formatName );
-	} );
+	formatTypesToDisable.forEach((formatName) => {
+		unregisterFormatForEmail(formatName);
+	});
 }
 
 type Props = {
-	contentRef: React.RefObject< HTMLElement >;
+	contentRef: React.RefObject<HTMLElement>;
 };
 
 /**
@@ -61,42 +61,42 @@ type Props = {
  * @param root0
  * @param root0.contentRef
  */
-function PersonalizationTagsButton( { contentRef }: Props ) {
-	const [ isModalOpened, setIsModalOpened ] = useState( false );
-	const selectedBlockId = useSelect( ( select ) =>
-		select( 'core/block-editor' ).getSelectedBlockClientId()
+function PersonalizationTagsButton({ contentRef }: Props) {
+	const [isModalOpened, setIsModalOpened] = useState(false);
+	const selectedBlockId = useSelect((select) =>
+		select('core/block-editor').getSelectedBlockClientId()
 	);
 
-	const { updateBlockAttributes } = useDispatch( 'core/block-editor' );
+	const { updateBlockAttributes } = useDispatch('core/block-editor');
 
 	// Get the current block attributes
-	const blockAttributes: object = useSelect( ( select ) => {
+	const blockAttributes: object = useSelect((select) => {
 		const attributes =
-			select( 'core/block-editor' ).getBlockAttributes( selectedBlockId );
+			select('core/block-editor').getBlockAttributes(selectedBlockId);
 
 		return attributes;
-	} );
+	});
 
 	// Some blocks, such as the Button block, store the content in `text` attribute.
 	const blockContentKey = 'text' in blockAttributes ? 'text' : 'content';
 
 	// After first saving the content does not have property originalHTML, so we need to check for content as well
 	const blockContent =
-		blockAttributes?.[ blockContentKey ]?.originalHTML ||
-		blockAttributes?.[ blockContentKey ] ||
+		blockAttributes?.[blockContentKey]?.originalHTML ||
+		blockAttributes?.[blockContentKey] ||
 		'';
 
 	const handleInsert = useCallback(
-		( tag: string, linkText: string | null ) => {
-			let { start, end } = getCursorPosition( contentRef, blockContent );
+		(tag: string, linkText: string | null) => {
+			let { start, end } = getCursorPosition(contentRef, blockContent);
 
 			let updatedContent = '';
 			// When we pass linkText, we want to insert the tag as a link
-			if ( linkText ) {
-				let richTextValue = create( { html: blockContent } );
+			if (linkText) {
+				let richTextValue = create({ html: blockContent });
 
 				// Insert the new text into the current selection or at the cursor
-				richTextValue = insert( richTextValue, linkText, start, end );
+				richTextValue = insert(richTextValue, linkText, start, end);
 
 				end = start + linkText.length;
 				// The link is inserted via registered format type to avoid breaking the content
@@ -114,21 +114,21 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 					start,
 					end
 				);
-				updatedContent = toHTMLString( { value: richTextValue } );
+				updatedContent = toHTMLString({ value: richTextValue });
 			} else {
-				let richTextValue = create( { html: blockContent } );
+				let richTextValue = create({ html: blockContent });
 				richTextValue = insert(
 					richTextValue,
-					create( { html: `<!--${ tag }-->&nbsp;` } ), // Add a non-breaking space to avoid an issue when WP renderer removes blog containing only a comment
+					create({ html: `<!--${tag}-->&nbsp;` }), // Add a non-breaking space to avoid an issue when WP renderer removes blog containing only a comment
 					start,
 					end
 				);
-				updatedContent = toHTMLString( { value: richTextValue } );
+				updatedContent = toHTMLString({ value: richTextValue });
 			}
 
-			void updateBlockAttributes( selectedBlockId, {
-				[ blockContentKey ]: updatedContent,
-			} );
+			void updateBlockAttributes(selectedBlockId, {
+				[blockContentKey]: updatedContent,
+			});
 		},
 		[
 			blockContent,
@@ -144,58 +144,58 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 			<ToolbarGroup>
 				<ToolbarButton
 					icon="shortcode"
-					title={ __( 'Personalization Tags', __i18n_text_domain__ ) }
-					onClick={ () => {
-						setIsModalOpened( true );
+					title={__('Personalization Tags', __i18n_text_domain__)}
+					onClick={() => {
+						setIsModalOpened(true);
 						recordEvent(
 							'block_controls_personalization_tags_button_clicked'
 						);
-					} }
+					}}
 				/>
 				<PersonalizationTagsPopover
-					contentRef={ contentRef }
-					onUpdate={ ( originalTag, updatedTag ) => {
+					contentRef={contentRef}
+					onUpdate={(originalTag, updatedTag) => {
 						// When we update the tag, we need to add brackets to the tag, because the popover removes them
 						const updatedContent = blockContent.replace(
-							`<!--[${ originalTag }]-->`,
-							`<!--[${ updatedTag }]-->`
+							`<!--[${originalTag}]-->`,
+							`<!--[${updatedTag}]-->`
 						);
-						void updateBlockAttributes( selectedBlockId, {
-							[ blockContentKey ]: updatedContent,
-						} );
-					} }
+						void updateBlockAttributes(selectedBlockId, {
+							[blockContentKey]: updatedContent,
+						});
+					}}
 				/>
 				<PersonalizationTagsLinkPopover
-					contentRef={ contentRef }
-					onUpdate={ ( htmlElement, newTag, newText ) => {
+					contentRef={contentRef}
+					onUpdate={(htmlElement, newTag, newText) => {
 						const oldTag = htmlElement
-							.getAttribute( 'data-link-href' )
-							.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
+							.getAttribute('data-link-href')
+							.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 						const regex = new RegExp(
-							`<a([^>]*?)data-link-href="${ oldTag }"([^>]*?)>${ htmlElement.textContent }</a>`,
+							`<a([^>]*?)data-link-href="${oldTag}"([^>]*?)>${htmlElement.textContent}</a>`,
 							'gi'
 						);
 
 						// Replace the matched link with the new link
 						const updatedContent = blockContent.replace(
 							regex,
-							( _, beforeAttrs, afterAttrs ) => {
+							(_, beforeAttrs, afterAttrs) => {
 								// Construct the new <a> tag
-								return `<a${ beforeAttrs }data-link-href="${ newTag }"${ afterAttrs }>${ newText }</a>`;
+								return `<a${beforeAttrs}data-link-href="${newTag}"${afterAttrs}>${newText}</a>`;
 							}
 						);
-						void updateBlockAttributes( selectedBlockId, {
+						void updateBlockAttributes(selectedBlockId, {
 							content: updatedContent,
-						} );
-					} }
+						});
+					}}
 				/>
 				<PersonalizationTagsModal
-					isOpened={ isModalOpened }
-					onInsert={ ( value, linkText ) => {
-						handleInsert( value, linkText );
-						setIsModalOpened( false );
-					} }
-					closeCallback={ () => setIsModalOpened( false ) }
+					isOpened={isModalOpened}
+					onInsert={(value, linkText) => {
+						handleInsert(value, linkText);
+						setIsModalOpened(false);
+					}}
+					closeCallback={() => setIsModalOpened(false)}
 					canInsertLink
 					openedBy="block-controls"
 				/>
@@ -208,9 +208,9 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
  * Extend the rich text formats with a button for personalization tags.
  */
 function extendRichTextFormats() {
-	registerFormatForEmail( 'woocommerce-email-editor/shortcode', {
+	registerFormatForEmail('woocommerce-email-editor/shortcode', {
 		name: 'woocommerce-email-editor/shortcode',
-		title: __( 'Personalization Tags', __i18n_text_domain__ ),
+		title: __('Personalization Tags', __i18n_text_domain__),
 		className: 'woocommerce-email-editor-personalization-tags',
 		tagName: 'span',
 		attributes: {},
@@ -219,12 +219,12 @@ function extendRichTextFormats() {
 		// hide the Personalization Tags toolbar button there.
 		interactive: false,
 		edit: PersonalizationTagsButton,
-	} );
+	});
 
 	// Register format type for using personalization tags as link attributes
-	registerFormatForEmail( 'woocommerce-email-editor/link-shortcode', {
+	registerFormatForEmail('woocommerce-email-editor/link-shortcode', {
 		name: 'woocommerce-email-editor/link-shortcode',
-		title: __( 'Personalization Tags Link', __i18n_text_domain__ ),
+		title: __('Personalization Tags Link', __i18n_text_domain__),
 		className: 'woocommerce-email-editor-personalization-tags-link',
 		tagName: 'a',
 		attributes: {
@@ -234,46 +234,46 @@ function extendRichTextFormats() {
 		},
 		interactive: true,
 		edit: null,
-	} );
+	});
 }
 
 const personalizationTagsLiveContentUpdate = createHigherOrderComponent(
-	( BlockEdit ) => ( props ) => {
+	(BlockEdit) => (props) => {
 		const { attributes, setAttributes, name } = props;
 		const { content } = attributes;
 
 		// Fetch the personalization tags list
 		const list = useSelect(
-			( select ) => select( storeName ).getPersonalizationTagsList(),
+			(select) => select(storeName).getPersonalizationTagsList(),
 			[]
 		);
 
 		// Memoized function to replace content tags
-		const updateContent = useCallback( () => {
-			if ( ! content ) {
+		const updateContent = useCallback(() => {
+			if (!content) {
 				return '';
 			}
-			return replacePersonalizationTagsWithHTMLComments( content, list );
-		}, [ content, list ] );
+			return replacePersonalizationTagsWithHTMLComments(content, list);
+		}, [content, list]);
 
 		// Handle content updates
 		const handleSetAttributes = useCallback(
-			( newAttributes ) => {
-				if ( newAttributes.content !== undefined ) {
+			(newAttributes) => {
+				if (newAttributes.content !== undefined) {
 					const replacedContent =
 						replacePersonalizationTagsWithHTMLComments(
 							newAttributes.content,
 							list
 						);
-					setAttributes( {
+					setAttributes({
 						...newAttributes,
 						content: replacedContent,
-					} );
+					});
 				} else {
-					setAttributes( newAttributes );
+					setAttributes(newAttributes);
 				}
 			},
-			[ list, setAttributes ]
+			[list, setAttributes]
 		);
 
 		// Only process supported blocks
@@ -284,18 +284,18 @@ const personalizationTagsLiveContentUpdate = createHigherOrderComponent(
 		) {
 			return (
 				<BlockEdit
-					{ ...props }
-					attributes={ {
+					{...props}
+					attributes={{
 						...attributes,
 						content: updateContent(),
-					} }
-					setAttributes={ handleSetAttributes }
+					}}
+					setAttributes={handleSetAttributes}
 				/>
 			);
 		}
 
 		// Return default for unsupported blocks
-		return <BlockEdit { ...props } />;
+		return <BlockEdit {...props} />;
 	},
 	'personalizationTagsLiveContentUpdate'
 );

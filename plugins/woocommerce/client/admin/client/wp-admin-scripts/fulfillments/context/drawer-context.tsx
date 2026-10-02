@@ -14,15 +14,15 @@ import { getItemsNotInAnyFulfillment } from '../utils/order-utils';
 
 interface FulfillmentDrawerContextProps {
 	fulfillments: Fulfillment[];
-	setFulfillments: ( fulfillments: Fulfillment[] ) => void;
+	setFulfillments: (fulfillments: Fulfillment[]) => void;
 	order: Order | null;
-	setOrder: ( order: Order | null ) => void;
+	setOrder: (order: Order | null) => void;
 	refunds: Refund[];
-	setRefunds: ( refunds: Refund[] ) => void;
+	setRefunds: (refunds: Refund[]) => void;
 	openSection: string;
-	setOpenSection: ( section: string ) => void;
+	setOpenSection: (section: string) => void;
 	isEditing: boolean;
-	setIsEditing: ( isEditing: boolean ) => void;
+	setIsEditing: (isEditing: boolean) => void;
 }
 
 const defaultContextProps: FulfillmentDrawerContextProps = {
@@ -39,11 +39,11 @@ const defaultContextProps: FulfillmentDrawerContextProps = {
 };
 
 const FulfillmentDrawerContextValue =
-	createContext< FulfillmentDrawerContextProps >( defaultContextProps );
+	createContext<FulfillmentDrawerContextProps>(defaultContextProps);
 
 export const useFulfillmentDrawerContext = () => {
-	const context = React.useContext( FulfillmentDrawerContextValue );
-	if ( ! context ) {
+	const context = React.useContext(FulfillmentDrawerContextValue);
+	if (!context) {
 		throw new Error(
 			'useFulfillmentDrawerContext must be used within a FulfillmentDrawerProvider'
 		);
@@ -51,78 +51,78 @@ export const useFulfillmentDrawerContext = () => {
 	return context;
 };
 
-export const FulfillmentDrawerProvider = ( {
+export const FulfillmentDrawerProvider = ({
 	orderId,
 	children,
 }: {
 	orderId: number | null;
 	children: React.ReactNode;
-} ) => {
-	const [ openSection, setOpenSection ] = useState( 'order' );
-	const [ isEditing, setIsEditing ] = useState( false );
-	const [ fulfillments, setFulfillments ] = useState< Fulfillment[] >();
-	const [ refunds, setRefunds ] = useState< Refund[] >();
-	const [ order, setOrder ] = useState< Order | null >();
+}) => {
+	const [openSection, setOpenSection] = useState('order');
+	const [isEditing, setIsEditing] = useState(false);
+	const [fulfillments, setFulfillments] = useState<Fulfillment[]>();
+	const [refunds, setRefunds] = useState<Refund[]>();
+	const [order, setOrder] = useState<Order | null>();
 
 	useSelect(
-		( select ) => {
-			if ( ! orderId ) {
+		(select) => {
+			if (!orderId) {
 				return;
 			}
-			const store = select( FulfillmentsStore );
-			const orderData = store.getOrder( orderId );
-			const fulfillmentsData = store.readFulfillments( orderId );
-			const refundsData = store.getRefunds( orderId );
-			if ( ! isEqual( orderData, order ) ) {
-				setOrder( orderData );
-				setIsEditing( false );
+			const store = select(FulfillmentsStore);
+			const orderData = store.getOrder(orderId);
+			const fulfillmentsData = store.readFulfillments(orderId);
+			const refundsData = store.getRefunds(orderId);
+			if (!isEqual(orderData, order)) {
+				setOrder(orderData);
+				setIsEditing(false);
 			}
-			if ( ! isEqual( refundsData, refunds ) ) {
-				setRefunds( refundsData ?? [] );
-				setIsEditing( false );
+			if (!isEqual(refundsData, refunds)) {
+				setRefunds(refundsData ?? []);
+				setIsEditing(false);
 			}
-			if ( ! isEqual( fulfillmentsData, fulfillments ) ) {
-				setFulfillments( fulfillmentsData ?? [] );
-				setIsEditing( false );
+			if (!isEqual(fulfillmentsData, fulfillments)) {
+				setFulfillments(fulfillmentsData ?? []);
+				setIsEditing(false);
 			}
 		},
-		[ orderId, fulfillments, order, refunds ]
+		[orderId, fulfillments, order, refunds]
 	);
 
-	useLayoutEffect( () => {
+	useLayoutEffect(() => {
 		const hasPendingItemsInOrder =
 			order &&
 			fulfillments &&
-			getItemsNotInAnyFulfillment( fulfillments, order, refunds ).length >
+			getItemsNotInAnyFulfillment(fulfillments, order, refunds).length >
 				0;
 
-		if ( hasPendingItemsInOrder ) {
+		if (hasPendingItemsInOrder) {
 			// If there are pending items in the order and multiple fulfillments,
 			// open the order section to allow adding a new fulfillment.
-			setOpenSection( 'order' );
-		} else if ( fulfillments && fulfillments.length === 1 ) {
+			setOpenSection('order');
+		} else if (fulfillments && fulfillments.length === 1) {
 			// If all the items are in a single fulfillment,
 			// open that fulfillment section directly.
-			setOpenSection( 'fulfillment-' + fulfillments[ 0 ].id );
-		} else if ( fulfillments && fulfillments.length > 0 ) {
+			setOpenSection('fulfillment-' + fulfillments[0].id);
+		} else if (fulfillments && fulfillments.length > 0) {
 			// If there are no pending items and multiple fulfillments,
 			// open the latest fulfillment.
 			setOpenSection(
-				'fulfillment-' + fulfillments[ fulfillments.length - 1 ].id
+				'fulfillment-' + fulfillments[fulfillments.length - 1].id
 			);
 		} else {
 			// No fulfillments data yet or empty, collapse all.
-			setOpenSection( '' );
+			setOpenSection('');
 		}
-	}, [ orderId, fulfillments, order, refunds ] );
+	}, [orderId, fulfillments, order, refunds]);
 
-	if ( orderId === null ) {
+	if (orderId === null) {
 		return null;
 	}
 
 	return (
 		<FulfillmentDrawerContextValue.Provider
-			value={ {
+			value={{
 				fulfillments: fulfillments ?? [],
 				setFulfillments,
 				order: order ?? null,
@@ -133,9 +133,9 @@ export const FulfillmentDrawerProvider = ( {
 				setOpenSection,
 				isEditing,
 				setIsEditing,
-			} }
+			}}
 		>
-			{ children }
+			{children}
 		</FulfillmentDrawerContextValue.Provider>
 	);
 };

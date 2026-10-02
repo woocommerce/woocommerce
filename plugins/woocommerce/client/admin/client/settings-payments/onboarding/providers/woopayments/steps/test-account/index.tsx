@@ -30,31 +30,31 @@ interface StepCheckResponse {
 	success: boolean;
 }
 
-const TestDriveLoader: React.FunctionComponent< {
+const TestDriveLoader: React.FunctionComponent<{
 	progress: number;
 	title?: string;
 	message?: string;
-} > = ( { progress, title, message } ) => (
+}> = ({ progress, title, message }) => (
 	<Loader className="woocommerce-payments-test-account-step__preloader">
 		<Loader.Layout className="woocommerce-payments-test-account-step__preloader-layout">
 			<Loader.Illustration>
 				<img
-					src={ `${ WC_ASSET_URL }images/onboarding/test-account-setup.svg` }
-					alt={ __( 'Setup', 'woocommerce' ) }
-					style={ { maxWidth: '223px' } }
+					src={`${WC_ASSET_URL}images/onboarding/test-account-setup.svg`}
+					alt={__('Setup', 'woocommerce')}
+					style={{ maxWidth: '223px' }}
 				/>
 			</Loader.Illustration>
 
 			<Loader.Title>
-				{ title || __( 'Finishing payments setup', 'woocommerce' ) }
+				{title || __('Finishing payments setup', 'woocommerce')}
 			</Loader.Title>
-			<Loader.ProgressBar progress={ progress ?? 0 } />
-			<Loader.Sequence interval={ 0 }>
-				{ message ||
+			<Loader.ProgressBar progress={progress ?? 0} />
+			<Loader.Sequence interval={0}>
+				{message ||
 					__(
 						"In just a few moments, you'll be ready to test payments on your store.",
 						'woocommerce'
-					) }
+					)}
 			</Loader.Sequence>
 		</Loader.Layout>
 	</Loader>
@@ -85,9 +85,9 @@ type Status =
 	| 'failed';
 
 const PHASE_MESSAGES = [
-	__( 'Setting up your test account', 'woocommerce' ),
-	__( 'Finishing payments setup', 'woocommerce' ),
-	__( 'Almost there!', 'woocommerce' ),
+	__('Setting up your test account', 'woocommerce'),
+	__('Finishing payments setup', 'woocommerce'),
+	__('Almost there!', 'woocommerce'),
 ];
 
 const TestAccountStep = () => {
@@ -101,27 +101,27 @@ const TestAccountStep = () => {
 	} = useOnboardingContext();
 
 	// Component State.
-	const [ status, setStatus ] = useState< Status >( 'idle' );
-	const [ progress, setProgress ] = useState( 20 );
-	const [ errorMessage, setErrorMessage ] = useState< string | undefined >();
-	const [ pollingPhase, setPollingPhase ] = useState( 0 ); // 0: initial, 1: extended 1, 2: extended 2
-	const [ retryCounter, setRetryCounter ] = useState( 0 );
-	const [ loaderTitle, setLoaderTitle ] = useState< string | undefined >(
-		PHASE_MESSAGES[ 0 ]
+	const [status, setStatus] = useState<Status>('idle');
+	const [progress, setProgress] = useState(20);
+	const [errorMessage, setErrorMessage] = useState<string | undefined>();
+	const [pollingPhase, setPollingPhase] = useState(0); // 0: initial, 1: extended 1, 2: extended 2
+	const [retryCounter, setRetryCounter] = useState(0);
+	const [loaderTitle, setLoaderTitle] = useState<string | undefined>(
+		PHASE_MESSAGES[0]
 	);
 
-	const [ isResetAccountModalOpen, setIsResetAccountModalOpen ] =
-		useState( false );
-	const [ errorCode, setErrorCode ] = useState< string | undefined >();
+	const [isResetAccountModalOpen, setIsResetAccountModalOpen] =
+		useState(false);
+	const [errorCode, setErrorCode] = useState<string | undefined>();
 
 	// Refs for timers and phase tracking.
-	const pollingTimeoutRef = useRef< number | null >( null );
-	const phase1StartTimeRef = useRef< number | null >( null );
-	const initializingTimeoutRef = useRef< number | null >( null );
-	const titlePhaseRef = useRef< number >( 0 );
+	const pollingTimeoutRef = useRef<number | null>(null);
+	const phase1StartTimeRef = useRef<number | null>(null);
+	const initializingTimeoutRef = useRef<number | null>(null);
+	const titlePhaseRef = useRef<number>(0);
 	// Update loader title based on time intervals
-	useEffect( () => {
-		if ( status === 'success' ) {
+	useEffect(() => {
+		if (status === 'success') {
 			// This is a pseudo-sub-step so we need to record the event manually.
 			recordPaymentsOnboardingEvent(
 				'woopayments_onboarding_modal_step_view',
@@ -133,71 +133,71 @@ const TestAccountStep = () => {
 			);
 		}
 
-		if ( status !== 'polling' && status !== 'initializing' ) {
+		if (status !== 'polling' && status !== 'initializing') {
 			titlePhaseRef.current = 0;
 			return;
 		}
 
 		// Start with first title
-		if ( titlePhaseRef.current === 0 ) {
-			setLoaderTitle( PHASE_MESSAGES[ 0 ] );
+		if (titlePhaseRef.current === 0) {
+			setLoaderTitle(PHASE_MESSAGES[0]);
 		}
 
 		// Increment title phase every TITLE_CHANGE_INTERVAL
-		const timer = setTimeout( () => {
+		const timer = setTimeout(() => {
 			titlePhaseRef.current += 1;
-			if ( titlePhaseRef.current < PHASE_MESSAGES.length ) {
-				setLoaderTitle( PHASE_MESSAGES[ titlePhaseRef.current ] );
+			if (titlePhaseRef.current < PHASE_MESSAGES.length) {
+				setLoaderTitle(PHASE_MESSAGES[titlePhaseRef.current]);
 			}
-		}, TITLE_CHANGE_INTERVAL );
+		}, TITLE_CHANGE_INTERVAL);
 
 		return () => {
-			clearTimeout( timer );
+			clearTimeout(timer);
 		};
-	}, [ status ] );
+	}, [status]);
 
 	// Helper to clear timers.
 	const clearTimers = () => {
-		if ( pollingTimeoutRef.current !== null ) {
-			clearTimeout( pollingTimeoutRef.current );
+		if (pollingTimeoutRef.current !== null) {
+			clearTimeout(pollingTimeoutRef.current);
 			pollingTimeoutRef.current = null;
 		}
-		if ( initializingTimeoutRef.current !== null ) {
-			clearTimeout( initializingTimeoutRef.current );
+		if (initializingTimeoutRef.current !== null) {
+			clearTimeout(initializingTimeoutRef.current);
 			initializingTimeoutRef.current = null;
 		}
 	};
 
-	const resetState = useCallback( () => {
-		setStatus( 'idle' );
-		setProgress( 0 );
-		setErrorMessage( undefined );
-		setPollingPhase( 0 );
+	const resetState = useCallback(() => {
+		setStatus('idle');
+		setProgress(0);
+		setErrorMessage(undefined);
+		setPollingPhase(0);
 		phase1StartTimeRef.current = null;
 		clearTimers();
-	}, [ setStatus, setProgress, setErrorMessage, setPollingPhase ] );
+	}, [setStatus, setProgress, setErrorMessage, setPollingPhase]);
 
 	// Main effect for handling initialization and polling loop.
-	useEffect( () => {
+	useEffect(() => {
 		// -- Initialization Phase --
-		if ( status === 'idle' ) {
-			if ( currentStep?.status === 'completed' ) {
-				setStatus( 'success' );
-				setJustCompletedStepId( currentStep.id );
+		if (status === 'idle') {
+			if (currentStep?.status === 'completed') {
+				setStatus('success');
+				setJustCompletedStepId(currentStep.id);
 
-				setProgress( 100 ); // Show success state immediately.
+				setProgress(100); // Show success state immediately.
 				return;
 			}
 
-			if ( currentStep?.status === 'blocked' ) {
+			if (currentStep?.status === 'blocked') {
 				setErrorMessage(
-					currentStep?.errors?.[ 0 ]?.message ||
+					currentStep?.errors?.[0]?.message ||
 						__(
 							'There are environment or store setup issues which are blocking progress. Please resolve them to proceed.',
 							'woocommerce'
 						)
 				);
-				setStatus( 'blocked' );
+				setStatus('blocked');
 				return;
 			}
 
@@ -206,46 +206,46 @@ const TestAccountStep = () => {
 				currentStep?.status === 'not_started' ||
 				currentStep?.status === 'failed'
 			) {
-				setStatus( 'initializing' );
-				setProgress( INIT_PROGRESS_START );
+				setStatus('initializing');
+				setProgress(INIT_PROGRESS_START);
 
 				const cleanStepIfNeeded = async () => {
 					// We only need to clean the step if it has been retried or failed.
 					if (
 						currentStep?.actions?.clean?.href &&
-						( retryCounter > 0 || currentStep?.status === 'failed' )
+						(retryCounter > 0 || currentStep?.status === 'failed')
 					) {
-						await apiFetch< {
+						await apiFetch<{
 							success: boolean;
 							message?: string;
-						} >( {
+						}>({
 							url: currentStep?.actions?.clean?.href,
 							method: 'POST',
-						} );
+						});
 					}
 				};
 
 				// First clean the step if needed, then initialize.
 				cleanStepIfNeeded()
-					.then( () => {
-						return apiFetch< {
+					.then(() => {
+						return apiFetch<{
 							success: boolean;
 							message?: string;
 							code?: string;
-						} >( {
+						}>({
 							url: currentStep?.actions?.init?.href,
 							method: 'POST',
 							data: {
 								source: sessionEntryPoint,
 							},
-						} );
-					} )
-					.then( ( response ) => {
-						if ( response?.success ) {
+						});
+					})
+					.then((response) => {
+						if (response?.success) {
 							// Start polling immediately after successful init.
-							setStatus( 'polling' );
+							setStatus('polling');
 						} else {
-							setErrorCode( response?.code || '' );
+							setErrorCode(response?.code || '');
 							setErrorMessage(
 								response?.message ||
 									__(
@@ -253,10 +253,10 @@ const TestAccountStep = () => {
 										'woocommerce'
 									)
 							);
-							setStatus( 'error' );
+							setStatus('error');
 						}
-					} )
-					.catch( ( error ) => {
+					})
+					.catch((error) => {
 						if (
 							error?.code ===
 							TEST_ACCOUNT_ERROR_CODES.NON_RECOVERABLE_ERROR
@@ -264,44 +264,44 @@ const TestAccountStep = () => {
 							// The test account could not be created and retrying can't fix it.
 							// The backend already marked the step completed, so notify the
 							// merchant and move them forward to the next step.
-							setSnackbar( {
+							setSnackbar({
 								show: true,
 								message: __(
 									"We couldn't create a test account, so we're taking you to the next step.",
 									'woocommerce'
 								),
-							} );
+							});
 							navigateToNextStep();
 							return;
 						}
 
-						setErrorCode( error?.code || '' );
-						setErrorMessage( error.message );
-						setStatus( 'error' );
-					} );
+						setErrorCode(error?.code || '');
+						setErrorMessage(error.message);
+						setStatus('error');
+					});
 			} else {
 				// If status is neither 'not_started' nor 'completed', assume we can start polling.
-				setStatus( 'polling' );
+				setStatus('polling');
 			}
 		}
 
 		// -- Polling Phase --
-		if ( status === 'polling' ) {
+		if (status === 'polling') {
 			const poll = () => {
 				// Clear any existing timeout before starting a new one.
 				clearTimers();
 
-				apiFetch< StepCheckResponse >( {
+				apiFetch<StepCheckResponse>({
 					url: currentStep?.actions?.check?.href,
 					method: 'POST',
-				} )
-					.then( ( response ) => {
-						if ( response?.status === 'completed' ) {
+				})
+					.then((response) => {
+						if (response?.status === 'completed') {
 							// Use timeout for smoother transition to success UI.
 							pollingTimeoutRef.current = window.setTimeout(
 								() => {
-									setStatus( 'success' );
-									setProgress( 100 ); // Visually complete.
+									setStatus('success');
+									setProgress(100); // Visually complete.
 									setJustCompletedStepId(
 										currentStep?.id || ''
 									);
@@ -317,15 +317,15 @@ const TestAccountStep = () => {
 						let newProgress = 0;
 
 						// Use functional update to ensure we always increment from the latest progress.
-						setProgress( ( currentProgress ) => {
+						setProgress((currentProgress) => {
 							// Apply different increment logic based on phase.
-							if ( pollingPhase === 0 ) {
+							if (pollingPhase === 0) {
 								// Phase 0: increment by INITIAL_PHASE_INCREMENT until MAX_INITIAL_PROGRESS.
 								newProgress = Math.min(
 									currentProgress + INITIAL_PHASE_INCREMENT,
 									MAX_INITIAL_PROGRESS
 								);
-							} else if ( pollingPhase === 1 ) {
+							} else if (pollingPhase === 1) {
 								// Phase 1: increment by EXTENDED_PHASE_1_INCREMENT until 96%.
 								newProgress = Math.min(
 									currentProgress +
@@ -337,7 +337,7 @@ const TestAccountStep = () => {
 								newProgress = currentProgress;
 							}
 							return newProgress;
-						} );
+						});
 
 						// Update next phase and interval based on current phase and progress.
 						if (
@@ -348,7 +348,7 @@ const TestAccountStep = () => {
 							nextPhase = 1;
 							nextInterval = POLLING_INTERVAL_EXTENDED_1;
 							phase1StartTimeRef.current = Date.now();
-						} else if ( pollingPhase === 1 ) {
+						} else if (pollingPhase === 1) {
 							// Already in phase 1, check if duration exceeded.
 							if (
 								phase1StartTimeRef.current &&
@@ -363,7 +363,7 @@ const TestAccountStep = () => {
 								nextPhase = 1;
 								nextInterval = POLLING_INTERVAL_EXTENDED_1;
 							}
-						} else if ( pollingPhase === 2 ) {
+						} else if (pollingPhase === 2) {
 							// Stay in phase 2.
 							nextPhase = 2;
 							nextInterval = POLLING_INTERVAL_EXTENDED_2;
@@ -373,19 +373,19 @@ const TestAccountStep = () => {
 							nextInterval = POLLING_INTERVAL_INITIAL;
 						}
 
-						setPollingPhase( nextPhase ); // Update phase state.
+						setPollingPhase(nextPhase); // Update phase state.
 
 						// Schedule the next poll.
 						pollingTimeoutRef.current = window.setTimeout(
 							poll,
 							nextInterval
 						);
-					} )
-					.catch( ( error ) => {
-						setErrorMessage( error.message );
-						setStatus( 'error' );
+					})
+					.catch((error) => {
+						setErrorMessage(error.message);
+						setStatus('error');
 						clearTimers();
-					} );
+					});
 			};
 
 			// Start the first poll.
@@ -393,20 +393,20 @@ const TestAccountStep = () => {
 		}
 
 		// -- Progress animation during Initializing Phase --
-		if ( status === 'initializing' ) {
+		if (status === 'initializing') {
 			// Start progress animation from 10% to 30%, increment by 2% every second.
-			if ( initializingTimeoutRef.current === null ) {
-				initializingTimeoutRef.current = window.setInterval( () => {
-					setProgress( ( current ) => {
-						if ( current < INIT_PROGRESS_MAX ) {
+			if (initializingTimeoutRef.current === null) {
+				initializingTimeoutRef.current = window.setInterval(() => {
+					setProgress((current) => {
+						if (current < INIT_PROGRESS_MAX) {
 							return Math.min(
 								current + INIT_PROGRESS_INCREMENT,
 								INIT_PROGRESS_MAX
 							);
 						}
 						return current;
-					} );
-				}, 1000 );
+					});
+				}, 1000);
 			}
 		}
 		// Clear the initializing timer if not in initializing phase.
@@ -414,7 +414,7 @@ const TestAccountStep = () => {
 			status !== 'initializing' &&
 			initializingTimeoutRef.current !== null
 		) {
-			clearTimeout( initializingTimeoutRef.current );
+			clearTimeout(initializingTimeoutRef.current);
 			initializingTimeoutRef.current = null;
 		}
 
@@ -430,16 +430,16 @@ const TestAccountStep = () => {
 		setJustCompletedStepId,
 		setSnackbar,
 		navigateToNextStep,
-	] );
+	]);
 
-	const getPhaseMessage = ( phase: number ) => {
-		if ( phase === 1 ) {
+	const getPhaseMessage = (phase: number) => {
+		if (phase === 1) {
 			return __(
 				"The test account creation is taking a bit longer than expected, but don't worry — we're on it! Please bear with us for a few seconds more as we set everything up for your store.",
 				'woocommerce'
 			);
 		}
-		if ( phase === 2 ) {
+		if (phase === 2) {
 			return __(
 				"Thank you for your patience! Unfortunately, the test account creation is taking a bit longer than we anticipated. But don't worry — we won't give up! Feel free to close this modal and check back later. We appreciate your understanding!",
 				'woocommerce'
@@ -448,15 +448,15 @@ const TestAccountStep = () => {
 		return undefined;
 	};
 
-	useEffect( () => {
-		if ( status === 'success' ) {
-			navigateTo( {
-				url: getNewPath( { nox: 'test_account_created' }, '', {
+	useEffect(() => {
+		if (status === 'success') {
+			navigateTo({
+				url: getNewPath({ nox: 'test_account_created' }, '', {
 					page: 'wc-admin',
-				} ),
-			} );
+				}),
+			});
 		}
-	}, [ status ] );
+	}, [status]);
 
 	const isAccountAlreadyExistsError =
 		errorCode === TEST_ACCOUNT_ERROR_CODES.ACCOUNT_ALREADY_EXISTS;
@@ -464,16 +464,16 @@ const TestAccountStep = () => {
 	const actions = isAccountAlreadyExistsError
 		? [
 				{
-					label: __( 'Reset Account', 'woocommerce' ),
+					label: __('Reset Account', 'woocommerce'),
 					variant: 'secondary' as const,
 					onClick: () => {
-						setIsResetAccountModalOpen( true );
+						setIsResetAccountModalOpen(true);
 					},
 				},
-		  ]
+			]
 		: [
 				{
-					label: __( 'Try Again', 'woocommerce' ),
+					label: __('Try Again', 'woocommerce'),
 					variant: 'primary' as const,
 					onClick: () => {
 						recordPaymentsOnboardingEvent(
@@ -487,11 +487,11 @@ const TestAccountStep = () => {
 						);
 
 						resetState();
-						setRetryCounter( ( c ) => c + 1 );
+						setRetryCounter((c) => c + 1);
 					},
 				},
 				{
-					label: __( 'Cancel', 'woocommerce' ),
+					label: __('Cancel', 'woocommerce'),
 					variant: 'secondary' as const,
 					className:
 						'woocommerce-payments-test-account-step__error-cancel-button',
@@ -509,18 +509,18 @@ const TestAccountStep = () => {
 						closeModal();
 					},
 				},
-		  ];
+			];
 
 	// Render loading/error state.
 	return (
 		<div className="woocommerce-payments-test-account-step">
-			<WooPaymentsStepHeader onClose={ closeModal } />
+			<WooPaymentsStepHeader onClose={closeModal} />
 
-			{ /* Error Notice */ }
-			{ ( status === 'error' || status === 'blocked' ) && (
+			{/* Error Notice */}
+			{(status === 'error' || status === 'blocked') && (
 				<Notice
-					status={ status === 'blocked' ? 'error' : 'warning' }
-					isDismissible={ false }
+					status={status === 'blocked' ? 'error' : 'warning'}
+					isDismissible={false}
 					actions={
 						// Only show actions if the step is not blocked.
 						status !== 'blocked' ? actions : []
@@ -528,41 +528,41 @@ const TestAccountStep = () => {
 					className="woocommerce-payments-test-account-step__error"
 				>
 					<p className="woocommerce-payments-test-account-step__error-message">
-						{ errorMessage ||
+						{errorMessage ||
 							__(
 								'An error occurred while creating your test account. Please try again.',
 								'woocommerce'
-							) }
+							)}
 					</p>
 				</Notice>
-			) }
+			)}
 
-			{ /* Loader - shown during initializing and polling */ }
-			{ /* The success state is added just to keep the current loader state while we redirect to the admin page */ }
-			{ ( status === 'initializing' ||
+			{/* Loader - shown during initializing and polling */}
+			{/* The success state is added just to keep the current loader state while we redirect to the admin page */}
+			{(status === 'initializing' ||
 				status === 'polling' ||
-				status === 'success' ) && (
+				status === 'success') && (
 				<TestDriveLoader
-					progress={ progress }
-					title={ loaderTitle }
-					message={ getPhaseMessage( pollingPhase ) }
+					progress={progress}
+					title={loaderTitle}
+					message={getPhaseMessage(pollingPhase)}
 				/>
-			) }
+			)}
 
 			<WooPaymentsResetAccountModal
-				isOpen={ isResetAccountModalOpen }
-				onClose={ () => {
-					setIsResetAccountModalOpen( false );
-					setSnackbar( {
+				isOpen={isResetAccountModalOpen}
+				onClose={() => {
+					setIsResetAccountModalOpen(false);
+					setSnackbar({
 						show: true,
 						message: __(
 							'Your test account was successfully reset.',
 							'woocommerce'
 						),
-					} );
-				} }
+					});
+				}}
 				isEmbeddedResetFlow
-				resetUrl={ currentStep?.actions?.reset?.href }
+				resetUrl={currentStep?.actions?.reset?.href}
 			/>
 		</div>
 	);

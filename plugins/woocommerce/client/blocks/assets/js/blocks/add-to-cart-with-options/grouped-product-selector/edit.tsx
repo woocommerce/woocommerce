@@ -14,16 +14,16 @@ interface Attributes {
 }
 
 export default function AddToCartWithOptionsGroupedProductSelectorEdit(
-	props: BlockEditProps< Attributes >
+	props: BlockEditProps<Attributes>
 ) {
 	const { className } = props.attributes;
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className,
-	} );
-	const innerBlocksProps = useInnerBlocksProps( blockProps, {
+	});
+	const innerBlocksProps = useInnerBlocksProps(blockProps, {
 		template: GROUPED_PRODUCT_ITEM_TEMPLATE,
 		templateLock: 'all',
-	} );
+	});
 
-	return <div { ...innerBlocksProps } />;
+	return <div {...innerBlocksProps} />;
 }

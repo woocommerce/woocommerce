@@ -151,7 +151,6 @@
 		"@wordpress/patterns": "catalog:wp-min",
 		"@wordpress/postcss-plugins-preset": "next",
 		"@wordpress/postcss-themes": "next",
-		"@wordpress/prettier-config": "1.4.0",
 		"@wordpress/private-apis": "catalog:wp-min",
 		"@wordpress/rich-text": "catalog:wp-min",
 		"@wordpress/scripts": "catalog:tooling",

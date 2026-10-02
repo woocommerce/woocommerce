@@ -28,27 +28,27 @@ import { hasEmptySearchResults } from '../utils';
  * Component to render summary numbers in reports.
  */
 export class ReportSummary extends Component {
-	formatVal( val, type ) {
+	formatVal(val, type) {
 		const { formatAmount, getCurrencyConfig } = this.context;
 		return type === 'currency'
-			? formatAmount( val )
-			: formatValue( getCurrencyConfig(), type, val );
+			? formatAmount(val)
+			: formatValue(getCurrencyConfig(), type, val);
 	}
 
-	getValues( key, type ) {
+	getValues(key, type) {
 		const { emptySearchResults, summaryData } = this.props;
 		const { totals } = summaryData;
 
-		const primaryTotal = totals.primary ? totals.primary[ key ] : 0;
-		const secondaryTotal = totals.secondary ? totals.secondary[ key ] : 0;
+		const primaryTotal = totals.primary ? totals.primary[key] : 0;
+		const secondaryTotal = totals.secondary ? totals.secondary[key] : 0;
 
 		const primaryValue = emptySearchResults ? 0 : primaryTotal;
 		const secondaryValue = emptySearchResults ? 0 : secondaryTotal;
 
 		return {
-			delta: calculateDelta( primaryValue, secondaryValue ),
-			prevValue: this.formatVal( secondaryValue, type ),
-			value: this.formatVal( primaryValue, type ),
+			delta: calculateDelta(primaryValue, secondaryValue),
+			prevValue: this.formatVal(secondaryValue, type),
+			value: this.formatVal(primaryValue, type),
 		};
 	}
 
@@ -64,18 +64,18 @@ export class ReportSummary extends Component {
 		} = this.props;
 		const { isError, isRequesting } = summaryData;
 
-		if ( isError ) {
+		if (isError) {
 			return <AnalyticsError />;
 		}
 
-		if ( isRequesting ) {
-			return <SummaryListPlaceholder numberOfItems={ charts.length } />;
+		if (isRequesting) {
+			return <SummaryListPlaceholder numberOfItems={charts.length} />;
 		}
 
-		const { compare } = getDateParamsFromQuery( query, defaultDateRange );
+		const { compare } = getDateParamsFromQuery(query, defaultDateRange);
 
-		const renderSummaryNumbers = ( { onToggle } ) =>
-			charts.map( ( chart ) => {
+		const renderSummaryNumbers = ({ onToggle }) =>
+			charts.map((chart) => {
 				const {
 					key,
 					order,
@@ -86,47 +86,47 @@ export class ReportSummary extends Component {
 					labelTooltipText,
 				} = chart;
 				const newPath = { chart: key };
-				if ( orderby ) {
+				if (orderby) {
 					newPath.orderby = orderby;
 				}
-				if ( order ) {
+				if (order) {
 					newPath.order = order;
 				}
-				const href = getNewPath( newPath );
+				const href = getNewPath(newPath);
 				const isSelected = selectedChart.key === key;
-				const { delta, prevValue, value } = this.getValues( key, type );
+				const { delta, prevValue, value } = this.getValues(key, type);
 
 				return (
 					<SummaryNumber
-						key={ key }
-						delta={ delta }
-						href={ href }
-						label={ label }
-						reverseTrend={ isReverseTrend }
+						key={key}
+						delta={delta}
+						href={href}
+						label={label}
+						reverseTrend={isReverseTrend}
 						prevLabel={
 							compare === 'previous_period'
-								? __( 'Previous period:', 'woocommerce' )
-								: __( 'Previous year:', 'woocommerce' )
+								? __('Previous period:', 'woocommerce')
+								: __('Previous year:', 'woocommerce')
 						}
-						prevValue={ prevValue }
-						selected={ isSelected }
-						value={ value }
-						labelTooltipText={ labelTooltipText }
-						onLinkClickCallback={ () => {
+						prevValue={prevValue}
+						selected={isSelected}
+						value={value}
+						labelTooltipText={labelTooltipText}
+						onLinkClickCallback={() => {
 							// Wider than a certain breakpoint, there is no dropdown so avoid calling onToggle.
-							if ( onToggle ) {
+							if (onToggle) {
 								onToggle();
 							}
-							recordEvent( 'analytics_chart_tab_click', {
+							recordEvent('analytics_chart_tab_click', {
 								report: report || endpoint,
 								key,
-							} );
-						} }
+							});
+						}}
 					/>
 				);
-			} );
+			});
 
-		return <SummaryList>{ renderSummaryNumbers }</SummaryList>;
+		return <SummaryList>{renderSummaryNumbers}</SummaryList>;
 	}
 }
 
@@ -154,7 +154,7 @@ ReportSummary.propTypes = {
 	/**
 	 * Properties of the selected chart.
 	 */
-	selectedChart: PropTypes.shape( {
+	selectedChart: PropTypes.shape({
 		/**
 		 * Key of the selected chart.
 		 */
@@ -166,7 +166,7 @@ ReportSummary.propTypes = {
 		/**
 		 * Order query argument.
 		 */
-		order: PropTypes.oneOf( [ 'asc', 'desc' ] ),
+		order: PropTypes.oneOf(['asc', 'desc']),
 		/**
 		 * Order by query argument.
 		 */
@@ -174,8 +174,8 @@ ReportSummary.propTypes = {
 		/**
 		 * Number type for formatting.
 		 */
-		type: PropTypes.oneOf( [ 'average', 'number', 'currency' ] ).isRequired,
-	} ).isRequired,
+		type: PropTypes.oneOf(['average', 'number', 'currency']).isRequired,
+	}).isRequired,
 	/**
 	 * Data to display in the SummaryNumbers.
 	 */
@@ -199,7 +199,7 @@ ReportSummary.defaultProps = {
 ReportSummary.contextType = CurrencyContext;
 
 export default compose(
-	withSelect( ( select, props ) => {
+	withSelect((select, props) => {
 		const {
 			charts,
 			endpoint,
@@ -208,21 +208,21 @@ export default compose(
 			filters,
 			advancedFilters,
 		} = props;
-		const limitBy = limitProperties || [ endpoint ];
+		const limitBy = limitProperties || [endpoint];
 
-		if ( hasEmptySearchResults( query, limitBy ) ) {
+		if (hasEmptySearchResults(query, limitBy)) {
 			return {
 				emptySearchResults: true,
 			};
 		}
 
-		const fields = charts && charts.map( ( chart ) => chart.key );
+		const fields = charts && charts.map((chart) => chart.key);
 
 		const { woocommerce_default_date_range: defaultDateRange } = select(
 			settingsStore
-		).getSetting( 'wc_admin', 'wcAdminSettings' );
+		).getSetting('wc_admin', 'wcAdminSettings');
 
-		const summaryData = getSummaryNumbers( {
+		const summaryData = getSummaryNumbers({
 			endpoint,
 			query,
 			select,
@@ -231,11 +231,11 @@ export default compose(
 			advancedFilters,
 			defaultDateRange,
 			fields,
-		} );
+		});
 
 		return {
 			summaryData,
 			defaultDateRange,
 		};
-	} )
-)( ReportSummary );
+	})
+)(ReportSummary);

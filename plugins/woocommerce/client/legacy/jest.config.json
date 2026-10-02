@@ -1,9 +1,6 @@
 {
 	"rootDir": "./js",
-	"collectCoverageFrom": [
-		"js/**/*.js",
-		"!**/node_modules/**"
-	],
+	"collectCoverageFrom": [ "js/**/*.js", "!**/node_modules/**" ],
 	"moduleDirectories": [ "node_modules" ],
 	"preset": "@wordpress/jest-preset-default",
 	"testPathIgnorePatterns": [

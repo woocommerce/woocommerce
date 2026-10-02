@@ -14,37 +14,37 @@ import { Props } from './types';
 
 const EmptyPlaceholder = () => (
 	<Placeholder
-		icon={ <Icon icon={ file } /> }
-		label={ __( 'Products by Category', 'woocommerce' ) }
+		icon={<Icon icon={file} />}
+		label={__('Products by Category', 'woocommerce')}
 		className="wc-block-products-grid wc-block-products-category"
 	>
-		{ __(
+		{__(
 			'No products were found that matched your selection.',
 			'woocommerce'
-		) }
+		)}
 	</Placeholder>
 );
 
-export const ProductByCategoryBlock = ( props: Props ): JSX.Element => {
+export const ProductByCategoryBlock = (props: Props): JSX.Element => {
 	const { name, attributes } = props;
 	const hasCategories = attributes.categories.length;
 
-	if ( attributes.isPreview ) {
+	if (attributes.isPreview) {
 		return gridBlockPreview;
 	}
 
 	return hasCategories ? (
 		<ServerSideRender
-			block={ name }
-			attributes={ attributes }
-			EmptyResponsePlaceholder={ EmptyPlaceholder }
+			block={name}
+			attributes={attributes}
+			EmptyResponsePlaceholder={EmptyPlaceholder}
 		/>
 	) : (
 		<>
-			{ __(
+			{__(
 				'Select at least one category to display its products.',
 				'woocommerce'
-			) }
+			)}
 		</>
 	);
 };

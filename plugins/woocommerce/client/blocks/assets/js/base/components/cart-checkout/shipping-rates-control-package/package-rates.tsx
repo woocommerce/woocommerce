@@ -13,7 +13,7 @@ import { renderPackageRateOption } from './render-package-rate-option';
 import type { PackageRateRenderOption } from '../shipping-rates-control-package/types';
 
 interface PackageRates {
-	onSelectRate: ( selectedRateId: string ) => void;
+	onSelectRate: (selectedRateId: string) => void;
 	rates: CartShippingPackageShippingRate[];
 	renderOption?: PackageRateRenderOption | undefined;
 	className?: string;
@@ -29,7 +29,7 @@ interface PackageRates {
 	manageSelectionLocally?: boolean;
 }
 
-const PackageRates = ( {
+const PackageRates = ({
 	className = '',
 	noResultsMessage,
 	onSelectRate,
@@ -39,41 +39,41 @@ const PackageRates = ( {
 	disabled = false,
 	highlightChecked = false,
 	manageSelectionLocally = true,
-}: PackageRates ): JSX.Element => {
+}: PackageRates): JSX.Element => {
 	const selectedRateId = selectedRate?.rate_id;
 
 	// Store selected rate ID in local state so shipping rates changes are shown in the UI instantly.
-	const [ selectedOption, setSelectedOption ] = useState<
-		string | undefined
-	>( () => getSelectedOrFirstRateId( rates ) );
+	const [selectedOption, setSelectedOption] = useState<string | undefined>(
+		() => getSelectedOrFirstRateId(rates)
+	);
 
 	// Standalone controls synchronize on mount and replace pending selections.
 	// Core disables this effect outside the editor and coordinates initial
 	// selections in the parent.
-	useEffect( () => {
-		if ( manageSelectionLocally && selectedOption ) {
-			onSelectRate( selectedOption );
+	useEffect(() => {
+		if (manageSelectionLocally && selectedOption) {
+			onSelectRate(selectedOption);
 		}
 		// We want this to run on mount only, beware of updating it as it may cause
 		// shipping rate selection to end up in infinite loop
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [] );
+	}, []);
 
 	// Update the selected option if cart state changes in the data store.
-	useEffect( () => {
+	useEffect(() => {
 		if (
 			manageSelectionLocally &&
 			selectedRateId &&
 			selectedRateId !== selectedOption
 		) {
-			setSelectedOption( selectedRateId );
+			setSelectedOption(selectedRateId);
 		}
 		// We want to explicitly react to changes in the data store only here, local state is managed
 		// through different code path.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ selectedRateId, manageSelectionLocally ] );
+	}, [selectedRateId, manageSelectionLocally]);
 
-	if ( rates.length === 0 ) {
+	if (rates.length === 0) {
 		return noResultsMessage;
 	}
 
@@ -85,17 +85,17 @@ const PackageRates = ( {
 
 	return (
 		<RadioControl
-			className={ className }
-			onChange={ ( value: string ) => {
-				if ( manageSelectionLocally ) {
-					setSelectedOption( value );
+			className={className}
+			onChange={(value: string) => {
+				if (manageSelectionLocally) {
+					setSelectedOption(value);
 				}
-				onSelectRate( value );
-			} }
-			highlightChecked={ highlightChecked }
-			disabled={ disabled }
-			selected={ checkedRateId ?? '' }
-			options={ rates.map( renderOption ) }
+				onSelectRate(value);
+			}}
+			highlightChecked={highlightChecked}
+			disabled={disabled}
+			selected={checkedRateId ?? ''}
+			options={rates.map(renderOption)}
 			descriptionStackingDirection="column"
 		/>
 	);

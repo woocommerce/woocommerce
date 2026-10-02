@@ -27,7 +27,7 @@ import { resolveAspectRatio } from '../product-elements-blocks/image/utils';
 import type { BlockAttributes as ProductImageBlockAttributes } from '../product-elements-blocks/image/types';
 
 const TEMPLATE: InnerBlockTemplate[] = [
-	[ 'woocommerce/product-gallery-thumbnails' ],
+	['woocommerce/product-gallery-thumbnails'],
 	[
 		'woocommerce/product-gallery-large-image',
 		{},
@@ -45,7 +45,7 @@ const TEMPLATE: InnerBlockTemplate[] = [
 					align: 'right',
 				},
 			],
-			[ 'woocommerce/product-gallery-large-image-next-previous' ],
+			['woocommerce/product-gallery-large-image-next-previous'],
 		],
 	],
 ];
@@ -59,9 +59,7 @@ type ParsedAspectRatio = {
 
 const DEFAULT_ASPECT_RATIO: ParsedAspectRatio = { width: '1', height: '1' };
 
-type ProductImageBlock = BlockInstance<
-	Partial< ProductImageBlockAttributes >
->;
+type ProductImageBlock = BlockInstance<Partial<ProductImageBlockAttributes>>;
 
 const isProductImageBlock = (
 	block: BlockInstance
@@ -70,15 +68,13 @@ const isProductImageBlock = (
 const findProductImageBlock = (
 	blocks: BlockInstance[]
 ): ProductImageBlock | undefined => {
-	for ( const block of blocks ) {
-		if ( isProductImageBlock( block ) ) {
+	for (const block of blocks) {
+		if (isProductImageBlock(block)) {
 			return block;
 		}
 
-		const innerProductImageBlock = findProductImageBlock(
-			block.innerBlocks
-		);
-		if ( innerProductImageBlock ) {
+		const innerProductImageBlock = findProductImageBlock(block.innerBlocks);
+		if (innerProductImageBlock) {
 			return innerProductImageBlock;
 		}
 	}
@@ -87,7 +83,7 @@ const findProductImageBlock = (
 };
 
 const resolveProductImageAspectRatio = (
-	attributes: Partial< ProductImageBlockAttributes > | undefined,
+	attributes: Partial<ProductImageBlockAttributes> | undefined,
 	storeAspectRatio: string | null
 ): string | undefined => {
 	const { style, aspectRatio, imageSizing } = attributes ?? {};
@@ -103,56 +99,56 @@ const resolveProductImageAspectRatio = (
 const parseAspectRatio = (
 	aspectRatio: string | undefined
 ): ParsedAspectRatio => {
-	if ( ! aspectRatio ) {
+	if (!aspectRatio) {
 		return DEFAULT_ASPECT_RATIO;
 	}
 
 	const ratioParts = aspectRatio
-		.split( '/' )
-		.map( ( part ) => part.trim() )
-		.filter( Boolean );
+		.split('/')
+		.map((part) => part.trim())
+		.filter(Boolean);
 
-	if ( ratioParts.length === 0 || ratioParts.length > 2 ) {
+	if (ratioParts.length === 0 || ratioParts.length > 2) {
 		return DEFAULT_ASPECT_RATIO;
 	}
 
-	const width = Number( ratioParts[ 0 ] );
-	const height = Number( ratioParts[ 1 ] ?? ratioParts[ 0 ] );
+	const width = Number(ratioParts[0]);
+	const height = Number(ratioParts[1] ?? ratioParts[0]);
 
-	if ( ! Number.isFinite( width ) || ! Number.isFinite( height ) ) {
+	if (!Number.isFinite(width) || !Number.isFinite(height)) {
 		return DEFAULT_ASPECT_RATIO;
 	}
 
 	return {
-		width: String( width ),
-		height: String( height ),
+		width: String(width),
+		height: String(height),
 	};
 };
 
 export const Edit = withProductDataContext(
-	( {
+	({
 		clientId,
 		attributes,
 		setAttributes,
 		context,
-	}: BlockEditProps< ProductGalleryBlockAttributes > & {
+	}: BlockEditProps<ProductGalleryBlockAttributes> & {
 		context?: {
 			postId?: number | string;
 		};
-	} ) => {
+	}) => {
 		const { product, isLoading } = useProductDataContext();
 		const productImages = product?.images || [];
-		const hasProductContext = Boolean( context?.postId && product?.id );
+		const hasProductContext = Boolean(context?.postId && product?.id);
 		const hasOneOrNoImages =
-			hasProductContext && ! isLoading && productImages.length <= 1;
-		const storeAspectRatio = getSetting< string | null >(
+			hasProductContext && !isLoading && productImages.length <= 1;
+		const storeAspectRatio = getSetting<string | null>(
 			'thumbnailAspectRatio',
 			null
 		);
 		const productImageAspectRatio = useSelect(
-			( select ) => {
+			(select) => {
 				const productImageBlock = findProductImageBlock(
-					select( blockEditorStore ).getBlocks( clientId )
+					select(blockEditorStore).getBlocks(clientId)
 				);
 
 				return resolveProductImageAspectRatio(
@@ -160,38 +156,38 @@ export const Edit = withProductDataContext(
 					storeAspectRatio
 				);
 			},
-			[ clientId, storeAspectRatio ]
+			[clientId, storeAspectRatio]
 		);
 		const productGalleryAspectRatio = parseAspectRatio(
 			productImageAspectRatio
 		);
-		const blockProps = useBlockProps( {
-			className: clsx( 'wc-block-product-gallery', {
+		const blockProps = useBlockProps({
+			className: clsx('wc-block-product-gallery', {
 				'wc-block-product-gallery--has-one-or-no-images':
 					hasOneOrNoImages,
-			} ),
+			}),
 			style: {
 				'--wc-block-product-gallery-large-image-ratio-width':
 					productGalleryAspectRatio.width,
 				'--wc-block-product-gallery-large-image-ratio-height':
 					productGalleryAspectRatio.height,
 			},
-		} );
+		});
 
 		return (
-			<div { ...blockProps }>
+			<div {...blockProps}>
 				<InspectorControls>
 					<ProductGalleryBlockSettings
-						attributes={ attributes }
-						setAttributes={ setAttributes }
+						attributes={attributes}
+						setAttributes={setAttributes}
 					/>
 				</InspectorControls>
 				<InnerBlocks
-					allowedBlocks={ [
+					allowedBlocks={[
 						'woocommerce/product-gallery-large-image',
 						'woocommerce/product-gallery-thumbnails',
-					] }
-					template={ TEMPLATE }
+					]}
+					template={TEMPLATE}
 				/>
 			</div>
 		);

@@ -77,7 +77,7 @@ export function receiveCollectionError(
 	};
 }
 
-export function receiveLastModified( timestamp ) {
+export function receiveLastModified(timestamp) {
 	return {
 		type: types.RECEIVE_LAST_MODIFIED,
 		timestamp,

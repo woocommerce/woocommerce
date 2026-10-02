@@ -23,18 +23,18 @@ import {
 
 const recordEventMock = jest.fn();
 
-jest.mock( '@woocommerce/tracks', () => ( {
-	recordEvent: ( name: string, payload: Record< string, unknown > ) =>
-		recordEventMock( name, payload ),
-} ) );
+jest.mock('@woocommerce/tracks', () => ({
+	recordEvent: (name: string, payload: Record<string, unknown>) =>
+		recordEventMock(name, payload),
+}));
 
-jest.mock( '@wordpress/components', () => ( {
-	createSlotFill: () => ( {
-		Fill: ( { children }: { children: React.ReactNode } ) => (
-			<div>{ children }</div>
+jest.mock('@wordpress/components', () => ({
+	createSlotFill: () => ({
+		Fill: ({ children }: { children: React.ReactNode }) => (
+			<div>{children}</div>
 		),
-	} ),
-	Button: ( {
+	}),
+	Button: ({
 		children,
 		onClick,
 		disabled,
@@ -44,38 +44,38 @@ jest.mock( '@wordpress/components', () => ( {
 		onClick?: () => void;
 		disabled?: boolean;
 		href?: string;
-	} ) =>
+	}) =>
 		href ? (
-			<a href={ href }>{ children }</a>
+			<a href={href}>{children}</a>
 		) : (
-			<button onClick={ onClick } disabled={ disabled }>
-				{ children }
+			<button onClick={onClick} disabled={disabled}>
+				{children}
 			</button>
 		),
-} ) );
+}));
 
-jest.mock( '../settings-email-listing-listview', () => ( {
+jest.mock('../settings-email-listing-listview', () => ({
 	ListView: () => <div data-testid="listview" />,
-} ) );
+}));
 
 // The slotfill imports `recreateEmailPostRequest` from the data module, which
 // transitively pulls in `@wordpress/core-data`; mock it out — these tests only
 // exercise the Tracks instrumentation, payload normalization, and the
 // "Edit template" lazy-creation flow.
-jest.mock( '../settings-email-listing-data', () => ( {
+jest.mock('../settings-email-listing-data', () => ({
 	recreateEmailPostRequest: jest.fn(),
-} ) );
+}));
 
 const createErrorNoticeMock = jest.fn();
 
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	dispatch: () => ( { createErrorNotice: createErrorNoticeMock } ),
-} ) );
+jest.mock('@wordpress/data', () => ({
+	...jest.requireActual('@wordpress/data'),
+	dispatch: () => ({ createErrorNotice: createErrorNoticeMock }),
+}));
 
-jest.mock( '@woocommerce/settings', () => ( {
-	getAdminLink: ( path: string ) => `https://example.com/wp-admin/${ path }`,
-} ) );
+jest.mock('@woocommerce/settings', () => ({
+	getAdminLink: (path: string) => `https://example.com/wp-admin/${path}`,
+}));
 
 const baseEmail: EmailType = {
 	id: 'new-order',
@@ -104,94 +104,94 @@ const eligibleEmail: EmailType = {
 	currentVersion: '10.7.0',
 };
 
-describe( 'EmailListingFill — list-page Tracks instrumentation', () => {
-	beforeEach( () => {
+describe('EmailListingFill — list-page Tracks instrumentation', () => {
+	beforeEach(() => {
 		recordEventMock.mockClear();
 		window.sessionStorage.clear();
-	} );
+	});
 
-	it( 'fires one block_email_list_viewed on mount with eligible_count and total_count', async () => {
+	it('fires one block_email_list_viewed on mount with eligible_count and total_count', async () => {
 		render(
 			<EmailListingFill
-				emailTypes={ [ baseEmail, eligibleEmail ] }
-				editTemplateUrl={ null }
-				emailTemplateId={ null }
+				emailTypes={[baseEmail, eligibleEmail]}
+				editTemplateUrl={null}
+				emailTemplateId={null}
 			/>
 		);
-		await screen.findByTestId( 'listview' );
+		await screen.findByTestId('listview');
 
-		expect( recordEventMock ).toHaveBeenCalledTimes( 1 );
-		expect( recordEventMock ).toHaveBeenCalledWith(
+		expect(recordEventMock).toHaveBeenCalledTimes(1);
+		expect(recordEventMock).toHaveBeenCalledWith(
 			'block_email_list_viewed',
-			expect.objectContaining( {
+			expect.objectContaining({
 				viewed_from: 'email_list',
 				eligible_count: 1,
 				total_count: 2,
-			} )
+			})
 		);
-	} );
+	});
 
-	it( 'dedups within a session: a second mount in the same tab does not refire', async () => {
+	it('dedups within a session: a second mount in the same tab does not refire', async () => {
 		const { unmount } = render(
 			<EmailListingFill
-				emailTypes={ [ eligibleEmail ] }
-				editTemplateUrl={ null }
-				emailTemplateId={ null }
+				emailTypes={[eligibleEmail]}
+				editTemplateUrl={null}
+				emailTemplateId={null}
 			/>
 		);
-		await screen.findByTestId( 'listview' );
+		await screen.findByTestId('listview');
 		unmount();
 		render(
 			<EmailListingFill
-				emailTypes={ [ eligibleEmail ] }
-				editTemplateUrl={ null }
-				emailTemplateId={ null }
+				emailTypes={[eligibleEmail]}
+				editTemplateUrl={null}
+				emailTemplateId={null}
 			/>
 		);
-		await screen.findByTestId( 'listview' );
+		await screen.findByTestId('listview');
 
-		expect( recordEventMock ).toHaveBeenCalledTimes( 1 );
-	} );
+		expect(recordEventMock).toHaveBeenCalledTimes(1);
+	});
 
-	it( 'still fires when sessionStorage is unavailable (privacy-mode fallback)', async () => {
+	it('still fires when sessionStorage is unavailable (privacy-mode fallback)', async () => {
 		const setItemSpy = jest
-			.spyOn( window.sessionStorage.__proto__, 'setItem' )
-			.mockImplementation( () => {
-				throw new Error( 'quota / privacy mode' );
-			} );
+			.spyOn(window.sessionStorage.__proto__, 'setItem')
+			.mockImplementation(() => {
+				throw new Error('quota / privacy mode');
+			});
 
 		try {
 			render(
 				<EmailListingFill
-					emailTypes={ [ eligibleEmail ] }
-					editTemplateUrl={ null }
-					emailTemplateId={ null }
+					emailTypes={[eligibleEmail]}
+					editTemplateUrl={null}
+					emailTemplateId={null}
 				/>
 			);
-			await screen.findByTestId( 'listview' );
+			await screen.findByTestId('listview');
 
-			expect( recordEventMock ).toHaveBeenCalledTimes( 1 );
+			expect(recordEventMock).toHaveBeenCalledTimes(1);
 		} finally {
 			setItemSpy.mockRestore();
 		}
-	} );
+	});
 
-	it( 'reports eligible_count=0 when no rows are eligible', async () => {
+	it('reports eligible_count=0 when no rows are eligible', async () => {
 		render(
 			<EmailListingFill
-				emailTypes={ [ baseEmail, baseEmail ] }
-				editTemplateUrl={ null }
-				emailTemplateId={ null }
+				emailTypes={[baseEmail, baseEmail]}
+				editTemplateUrl={null}
+				emailTemplateId={null}
 			/>
 		);
-		await screen.findByTestId( 'listview' );
+		await screen.findByTestId('listview');
 
-		expect( recordEventMock ).toHaveBeenCalledWith(
+		expect(recordEventMock).toHaveBeenCalledWith(
 			'block_email_list_viewed',
-			expect.objectContaining( { eligible_count: 0, total_count: 2 } )
+			expect.objectContaining({ eligible_count: 0, total_count: 2 })
 		);
-	} );
-} );
+	});
+});
 
 /**
  * Regression-witness tests for the snake_case→camelCase projection done by
@@ -214,7 +214,7 @@ describe( 'EmailListingFill — list-page Tracks instrumentation', () => {
  *      `normalizeEmailTypePayload` first yields `eligible_count: 1`. This is
  *      what `registerSettingsEmailListingFill` now does at JSON-parse time.
  */
-describe( 'normalizeEmailTypePayload — regression for eligible_count=0', () => {
+describe('normalizeEmailTypePayload — regression for eligible_count=0', () => {
 	const rawDivergentRow = {
 		// Exact shape PHP serializes into `data-email-types` (snake_case keys
 		// for the template-sync meta fields; other fields match the TS type
@@ -235,85 +235,85 @@ describe( 'normalizeEmailTypePayload — regression for eligible_count=0', () =>
 		was_backfilled: false,
 	};
 
-	beforeEach( () => {
+	beforeEach(() => {
 		recordEventMock.mockClear();
 		window.sessionStorage.clear();
-	} );
+	});
 
-	it( 'witness: rendering raw snake_case payload directly yields eligible_count=0 (the regression we observed in browser)', () => {
+	it('witness: rendering raw snake_case payload directly yields eligible_count=0 (the regression we observed in browser)', () => {
 		// Casting to EmailType bypasses the type system to reproduce the
 		// runtime shape that reached EmailListingFill before the fix.
 		const rawAsEmailType = rawDivergentRow as unknown as EmailType;
 
 		render(
 			<EmailListingFill
-				emailTypes={ [ rawAsEmailType ] }
-				editTemplateUrl={ null }
-				emailTemplateId={ null }
+				emailTypes={[rawAsEmailType]}
+				editTemplateUrl={null}
+				emailTemplateId={null}
 			/>
 		);
 
-		expect( recordEventMock ).toHaveBeenCalledWith(
+		expect(recordEventMock).toHaveBeenCalledWith(
 			'block_email_list_viewed',
-			expect.objectContaining( {
+			expect.objectContaining({
 				eligible_count: 0,
 				total_count: 1,
-			} )
+			})
 		);
-	} );
+	});
 
-	it( 'fix: normalizeEmailTypePayload projects snake_case meta so eligible_count=1', () => {
-		const normalized = normalizeEmailTypePayload( rawDivergentRow );
+	it('fix: normalizeEmailTypePayload projects snake_case meta so eligible_count=1', () => {
+		const normalized = normalizeEmailTypePayload(rawDivergentRow);
 
 		// Projection writes the camelCase fields shouldShowReviewUpdate reads.
-		expect( normalized.templateStatus ).toBe( 'core_updated_customized' );
-		expect( normalized.templateVersion ).toBe( '9.4.0-test' );
-		expect( normalized.currentVersion ).toBe( '10.7.0' );
-		expect( normalized.wasBackfilled ).toBe( false );
-		expect( normalized.email_class_name ).toBe(
+		expect(normalized.templateStatus).toBe('core_updated_customized');
+		expect(normalized.templateVersion).toBe('9.4.0-test');
+		expect(normalized.currentVersion).toBe('10.7.0');
+		expect(normalized.wasBackfilled).toBe(false);
+		expect(normalized.email_class_name).toBe(
 			'WC_Email_Customer_Processing_Order'
 		);
 
 		render(
 			<EmailListingFill
-				emailTypes={ [ normalized ] }
-				editTemplateUrl={ null }
-				emailTemplateId={ null }
+				emailTypes={[normalized]}
+				editTemplateUrl={null}
+				emailTemplateId={null}
 			/>
 		);
 
-		expect( recordEventMock ).toHaveBeenCalledWith(
+		expect(recordEventMock).toHaveBeenCalledWith(
 			'block_email_list_viewed',
-			expect.objectContaining( {
+			expect.objectContaining({
 				eligible_count: 1,
 				total_count: 1,
-			} )
+			})
 		);
-	} );
+	});
 
-	it( 'projects was_backfilled=1 (number) and true (bool) consistently', () => {
-		const numericTrue = normalizeEmailTypePayload( {
+	it('projects was_backfilled=1 (number) and true (bool) consistently', () => {
+		const numericTrue = normalizeEmailTypePayload({
 			...rawDivergentRow,
 			was_backfilled: 1,
-		} );
-		const boolTrue = normalizeEmailTypePayload( {
+		});
+		const boolTrue = normalizeEmailTypePayload({
 			...rawDivergentRow,
 			was_backfilled: true,
-		} );
+		});
 
-		expect( numericTrue.wasBackfilled ).toBe( true );
-		expect( boolTrue.wasBackfilled ).toBe( true );
-	} );
+		expect(numericTrue.wasBackfilled).toBe(true);
+		expect(boolTrue.wasBackfilled).toBe(true);
+	});
 
-	it( 'treats missing template_status as null (not undefined)', () => {
+	it('treats missing template_status as null (not undefined)', () => {
 		const { template_status: _omit, ...withoutStatus } = rawDivergentRow;
-		const normalized = normalizeEmailTypePayload( withoutStatus );
+		const normalized = normalizeEmailTypePayload(withoutStatus);
 
-		expect( normalized.templateStatus ).toBeNull();
-	} );
-} );
+		expect(normalized.templateStatus).toBeNull();
+	});
+});
 
-describe( 'EditTemplateButton — lazy post creation', () => {
+describe('EditTemplateButton — lazy post creation', () => {
 	const TEMPLATE_ID = 'my-theme//wooemailtemplate';
 
 	const { recreateEmailPostRequest } = jest.requireMock(
@@ -322,107 +322,103 @@ describe( 'EditTemplateButton — lazy post creation', () => {
 
 	const originalLocation = window.location;
 
-	beforeAll( () => {
+	beforeAll(() => {
 		// jsdom throws on real navigation; replace location with a writable stub.
-		Object.defineProperty( window, 'location', {
+		Object.defineProperty(window, 'location', {
 			writable: true,
 			value: { ...originalLocation, href: '' },
-		} );
-	} );
+		});
+	});
 
-	afterAll( () => {
-		Object.defineProperty( window, 'location', {
+	afterAll(() => {
+		Object.defineProperty(window, 'location', {
 			writable: true,
 			value: originalLocation,
-		} );
-	} );
+		});
+	});
 
-	beforeEach( () => {
+	beforeEach(() => {
 		recordEventMock.mockClear();
 		recreateEmailPostRequest.mockReset();
 		createErrorNoticeMock.mockClear();
 		window.sessionStorage.clear();
 		window.location.href = '';
-	} );
+	});
 
-	it( 'links directly to the template editor when editTemplateUrl is provided', () => {
+	it('links directly to the template editor when editTemplateUrl is provided', () => {
 		render(
 			<EmailListingFill
-				emailTypes={ [ baseEmail ] }
+				emailTypes={[baseEmail]}
 				editTemplateUrl="https://example.com/wp-admin/site-editor.php"
-				emailTemplateId={ TEMPLATE_ID }
+				emailTemplateId={TEMPLATE_ID}
 			/>
 		);
 
 		expect(
-			screen.getByRole( 'link', { name: 'Edit template' } )
+			screen.getByRole('link', { name: 'Edit template' })
 		).toHaveAttribute(
 			'href',
 			'https://example.com/wp-admin/site-editor.php'
 		);
-	} );
+	});
 
-	it( 'renders no button when there is no URL and no template id', () => {
+	it('renders no button when there is no URL and no template id', () => {
 		render(
 			<EmailListingFill
-				emailTypes={ [ baseEmail ] }
-				editTemplateUrl={ null }
-				emailTemplateId={ null }
+				emailTypes={[baseEmail]}
+				editTemplateUrl={null}
+				emailTemplateId={null}
 			/>
 		);
 
-		expect( screen.queryByText( 'Edit template' ) ).not.toBeInTheDocument();
-	} );
+		expect(screen.queryByText('Edit template')).not.toBeInTheDocument();
+	});
 
-	it( 'lazily creates the post and navigates to the editor with the template param', async () => {
-		recreateEmailPostRequest.mockResolvedValue( {
+	it('lazily creates the post and navigates to the editor with the template param', async () => {
+		recreateEmailPostRequest.mockResolvedValue({
 			message: 'ok',
 			post_id: '42',
-		} );
+		});
 
 		render(
 			<EmailListingFill
-				emailTypes={ [ baseEmail ] }
-				editTemplateUrl={ null }
-				emailTemplateId={ TEMPLATE_ID }
+				emailTypes={[baseEmail]}
+				editTemplateUrl={null}
+				emailTemplateId={TEMPLATE_ID}
 			/>
 		);
 
-		fireEvent.click(
-			screen.getByRole( 'button', { name: 'Edit template' } )
-		);
+		fireEvent.click(screen.getByRole('button', { name: 'Edit template' }));
 
-		await waitFor( () => {
-			expect( window.location.href ).toBe(
-				`https://example.com/wp-admin/post.php?post=42&action=edit&template=${ encodeURIComponent(
+		await waitFor(() => {
+			expect(window.location.href).toBe(
+				`https://example.com/wp-admin/post.php?post=42&action=edit&template=${encodeURIComponent(
 					TEMPLATE_ID
-				) }`
+				)}`
 			);
-		} );
-		expect( recreateEmailPostRequest ).toHaveBeenCalledWith( baseEmail.id );
-	} );
+		});
+		expect(recreateEmailPostRequest).toHaveBeenCalledWith(baseEmail.id);
+	});
 
-	it( 'shows an error notice and re-enables the button when post creation fails', async () => {
-		recreateEmailPostRequest.mockResolvedValue( null );
+	it('shows an error notice and re-enables the button when post creation fails', async () => {
+		recreateEmailPostRequest.mockResolvedValue(null);
 
 		render(
 			<EmailListingFill
-				emailTypes={ [ baseEmail ] }
-				editTemplateUrl={ null }
-				emailTemplateId={ TEMPLATE_ID }
+				emailTypes={[baseEmail]}
+				editTemplateUrl={null}
+				emailTemplateId={TEMPLATE_ID}
 			/>
 		);
 
-		fireEvent.click(
-			screen.getByRole( 'button', { name: 'Edit template' } )
-		);
+		fireEvent.click(screen.getByRole('button', { name: 'Edit template' }));
 
-		await waitFor( () => {
-			expect( createErrorNoticeMock ).toHaveBeenCalled();
-		} );
-		expect( window.location.href ).toBe( '' );
+		await waitFor(() => {
+			expect(createErrorNoticeMock).toHaveBeenCalled();
+		});
+		expect(window.location.href).toBe('');
 		expect(
-			screen.getByRole( 'button', { name: 'Edit template' } )
+			screen.getByRole('button', { name: 'Edit template' })
 		).toBeEnabled();
-	} );
-} );
+	});
+});

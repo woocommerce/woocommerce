@@ -12,7 +12,7 @@ import { useValidationNotices } from '../../hooks';
 export function ValidationNotices() {
 	const { notices } = useValidationNotices();
 
-	if ( notices.length === 0 ) {
+	if (notices.length === 0) {
 		return null;
 	}
 
@@ -20,29 +20,29 @@ export function ValidationNotices() {
 		<Notice
 			status="error"
 			className="woocommerce-email-editor-validation-errors components-editor-notices__pinned"
-			isDismissible={ false }
+			isDismissible={false}
 		>
 			<>
 				<strong>
-					{ __( 'Fix errors to continue:', __i18n_text_domain__ ) }
+					{__('Fix errors to continue:', __i18n_text_domain__)}
 				</strong>
 				<ul>
-					{ notices.map( ( { id, content, actions } ) => (
-						<li key={ id }>
-							{ content }
-							{ actions.length > 0
-								? actions.map( ( { label, onClick } ) => (
+					{notices.map(({ id, content, actions }) => (
+						<li key={id}>
+							{content}
+							{actions.length > 0
+								? actions.map(({ label, onClick }) => (
 										<Button
-											key={ label }
-											onClick={ onClick }
+											key={label}
+											onClick={onClick}
 											variant="link"
 										>
-											{ label }
+											{label}
 										</Button>
-								  ) )
-								: null }
+									))
+								: null}
 						</li>
-					) ) }
+					))}
 				</ul>
 			</>
 		</Notice>

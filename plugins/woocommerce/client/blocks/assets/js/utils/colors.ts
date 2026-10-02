@@ -1,6 +1,6 @@
-export function getElementBackgroundColor( element: HTMLElement ): string {
-	while ( element ) {
-		const bgColor = window.getComputedStyle( element ).backgroundColor;
+export function getElementBackgroundColor(element: HTMLElement): string {
+	while (element) {
+		const bgColor = window.getComputedStyle(element).backgroundColor;
 
 		if (
 			bgColor &&

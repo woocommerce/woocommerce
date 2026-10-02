@@ -24,59 +24,59 @@ import { getPickupLocation } from './utils';
 
 export const ShippingAddress = (): JSX.Element => {
 	const { shippingRates, shippingAddress } = useStoreCart();
-	const prefersCollection = useSelect( ( select ) =>
-		select( checkoutStore ).prefersCollection()
+	const prefersCollection = useSelect((select) =>
+		select(checkoutStore).prefersCollection()
 	);
 
-	const hasRates = hasShippingRate( shippingRates );
+	const hasRates = hasShippingRate(shippingRates);
 
-	const { showCalculator } = useContext( ShippingCalculatorContext );
+	const { showCalculator } = useContext(ShippingCalculatorContext);
 
 	const formattedAddress = prefersCollection
-		? getPickupLocation( shippingRates )
-		: formatShippingAddress( shippingAddress );
+		? getPickupLocation(shippingRates)
+		: formatShippingAddress(shippingAddress);
 
 	const deliversToLabel = hasRates
 		? // Translators: <address/> is the formatted shipping address.
-		  __( 'Delivers to <address/>', 'woocommerce' )
+			__('Delivers to <address/>', 'woocommerce')
 		: // Translators: <address/> is the formatted shipping address.
-		  __( 'No delivery options available for <address/>', 'woocommerce' );
+			__('No delivery options available for <address/>', 'woocommerce');
 
-	const addressComplete = hasAllFieldsForShippingRates( shippingAddress );
+	const addressComplete = hasAllFieldsForShippingRates(shippingAddress);
 
-	const shippingCostRequiresAddress = getSetting< boolean >(
+	const shippingCostRequiresAddress = getSetting<boolean>(
 		'shippingCostRequiresAddress',
 		false
 	);
 
 	const showEnterAddressMessage =
-		shippingCostRequiresAddress && ! addressComplete;
+		shippingCostRequiresAddress && !addressComplete;
 
 	const addressLabel = prefersCollection
 		? // Translators: <address/> is the pickup location.
-		  __( 'Collection from <address/>', 'woocommerce' )
+			__('Collection from <address/>', 'woocommerce')
 		: deliversToLabel;
 
 	const title = (
 		<p className="wc-block-components-totals-shipping-address-summary">
-			{ !! formattedAddress && ! showEnterAddressMessage ? (
-				createInterpolateElement( addressLabel, {
-					address: <strong>{ formattedAddress }</strong>,
-				} )
+			{!!formattedAddress && !showEnterAddressMessage ? (
+				createInterpolateElement(addressLabel, {
+					address: <strong>{formattedAddress}</strong>,
+				})
 			) : (
 				<>
-					{ __(
+					{__(
 						'Enter address to check delivery options',
 						'woocommerce'
-					) }
+					)}
 				</>
-			) }
+			)}
 		</p>
 	);
 
 	return (
 		<div className="wc-block-components-shipping-address">
-			{ showCalculator && <ShippingCalculatorPanel title={ title } /> }
+			{showCalculator && <ShippingCalculatorPanel title={title} />}
 		</div>
 	);
 };

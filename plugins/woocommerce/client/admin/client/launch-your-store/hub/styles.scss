@@ -21,7 +21,8 @@
 }
 
 .stripe-spinner {
-	animation: SpinnerAnimationShow 250ms ease,
+	animation:
+		SpinnerAnimationShow 250ms ease,
 		SpinnerAnimationRotation 0.7s linear infinite; // The timings are exactly like Stripe Spinner component.
 	transition-timing-function: ease;
 	transition-property: opacity, transform;

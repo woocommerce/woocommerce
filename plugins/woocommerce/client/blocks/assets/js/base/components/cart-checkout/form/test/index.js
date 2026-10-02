@@ -12,20 +12,20 @@ import { ADDRESS_FORM_KEYS } from '@woocommerce/block-settings';
  */
 import Form from '../form';
 
-jest.mock( '@wordpress/element', () => {
+jest.mock('@wordpress/element', () => {
 	return {
-		...jest.requireActual( '@wordpress/element' ),
+		...jest.requireActual('@wordpress/element'),
 		useId: () => {
 			return 'mock-id';
 		},
 	};
-} );
+});
 
-const renderInCheckoutProvider = ( ui ) => {
-	const Wrapper = ( { children } ) => {
-		return <CheckoutProvider>{ children }</CheckoutProvider>;
+const renderInCheckoutProvider = (ui) => {
+	const Wrapper = ({ children }) => {
+		return <CheckoutProvider>{children}</CheckoutProvider>;
 	};
-	const result = render( ui, { wrapper: Wrapper } );
+	const result = render(ui, { wrapper: Wrapper });
 	return result;
 };
 
@@ -62,52 +62,52 @@ const cityRegExp = /city/i;
 const stateRegExp = /county|province|state/i;
 const postalCodeRegExp = /postal code|postcode|zip/i;
 
-const inputAddress = async ( {
+const inputAddress = async ({
 	countryKey = null,
 	city = null,
 	state = null,
 	postcode = null,
-} ) => {
-	if ( countryKey ) {
-		const countryInput = screen.getByLabelText( 'Country/Region' );
+}) => {
+	if (countryKey) {
+		const countryInput = screen.getByLabelText('Country/Region');
 
-		if ( countryInput ) {
-			await userEvent.selectOptions( countryInput, countryKey );
+		if (countryInput) {
+			await userEvent.selectOptions(countryInput, countryKey);
 		}
 	}
-	if ( city ) {
-		const cityInput = screen.getByLabelText( cityRegExp );
-		await userEvent.type( cityInput, city );
+	if (city) {
+		const cityInput = screen.getByLabelText(cityRegExp);
+		await userEvent.type(cityInput, city);
 	}
 
-	if ( state ) {
-		const stateButton = screen.queryByLabelText( stateRegExp, {
+	if (state) {
+		const stateButton = screen.queryByLabelText(stateRegExp, {
 			selector: 'select',
-		} );
+		});
 		// State input might be a select or a text input.
-		if ( stateButton ) {
-			await userEvent.selectOptions( stateButton, state );
+		if (stateButton) {
+			await userEvent.selectOptions(stateButton, state);
 		} else {
-			const stateInput = screen.getByLabelText( stateRegExp );
-			await userEvent.type( stateInput, state );
+			const stateInput = screen.getByLabelText(stateRegExp);
+			await userEvent.type(stateInput, state);
 		}
 	}
-	if ( postcode ) {
-		const postcodeInput = screen.getByLabelText( postalCodeRegExp );
-		await userEvent.type( postcodeInput, postcode );
+	if (postcode) {
+		const postcodeInput = screen.getByLabelText(postalCodeRegExp);
+		await userEvent.type(postcodeInput, postcode);
 	}
 };
 
-describe( 'Form Component', () => {
-	const WrappedAddressForm = ( { type } ) => {
+describe('Form Component', () => {
+	const WrappedAddressForm = ({ type }) => {
 		const { setShippingAddress, shippingAddress } = useCheckoutAddress();
 
 		return (
 			<Form
-				type={ type }
-				onChange={ setShippingAddress }
-				values={ shippingAddress }
-				fields={ ADDRESS_FORM_KEYS }
+				type={type}
+				onChange={setShippingAddress}
+				values={shippingAddress}
+				fields={ADDRESS_FORM_KEYS}
 			/>
 		);
 	};
@@ -116,14 +116,14 @@ describe( 'Form Component', () => {
 
 		return (
 			<ul>
-				{ Object.keys( shippingAddress ).map( ( key ) => (
-					<li key={ key }>{ key + ': ' + shippingAddress[ key ] }</li>
-				) ) }
+				{Object.keys(shippingAddress).map((key) => (
+					<li key={key}>{key + ': ' + shippingAddress[key]}</li>
+				))}
 			</ul>
 		);
 	};
 
-	test( 'updates context value when interacting with form elements', async () => {
+	test('updates context value when interacting with form elements', async () => {
 		renderInCheckoutProvider(
 			<>
 				<WrappedAddressForm type="shipping" />
@@ -131,64 +131,64 @@ describe( 'Form Component', () => {
 			</>
 		);
 
-		await act( async () => {
-			await inputAddress( primaryAddress );
-		} );
+		await act(async () => {
+			await inputAddress(primaryAddress);
+		});
 
-		expect( screen.getByText( /country:/ ) ).toHaveTextContent(
-			`country: ${ primaryAddress.countryKey }`
+		expect(screen.getByText(/country:/)).toHaveTextContent(
+			`country: ${primaryAddress.countryKey}`
 		);
-		expect( screen.getByText( /city/ ) ).toHaveTextContent(
-			`city: ${ primaryAddress.city }`
+		expect(screen.getByText(/city/)).toHaveTextContent(
+			`city: ${primaryAddress.city}`
 		);
-		expect( screen.getByText( /state/ ) ).toHaveTextContent(
-			`state: ${ primaryAddress.state }`
+		expect(screen.getByText(/state/)).toHaveTextContent(
+			`state: ${primaryAddress.state}`
 		);
-		expect( screen.getByText( /postcode/ ) ).toHaveTextContent(
-			`postcode: ${ primaryAddress.postcode }`
+		expect(screen.getByText(/postcode/)).toHaveTextContent(
+			`postcode: ${primaryAddress.postcode}`
 		);
-	} );
+	});
 
-	test( 'input fields update when changing the country', async () => {
-		renderInCheckoutProvider( <WrappedAddressForm type="shipping" /> );
+	test('input fields update when changing the country', async () => {
+		renderInCheckoutProvider(<WrappedAddressForm type="shipping" />);
 
-		await act( async () => {
-			await inputAddress( primaryAddress );
-		} );
+		await act(async () => {
+			await inputAddress(primaryAddress);
+		});
 
 		// Verify correct labels are used.
-		expect( screen.getByLabelText( /City/ ) ).toBeInTheDocument();
-		expect( screen.getByLabelText( /County/ ) ).toBeInTheDocument();
-		expect( screen.getByLabelText( /Postcode/ ) ).toBeInTheDocument();
+		expect(screen.getByLabelText(/City/)).toBeInTheDocument();
+		expect(screen.getByLabelText(/County/)).toBeInTheDocument();
+		expect(screen.getByLabelText(/Postcode/)).toBeInTheDocument();
 
-		await act( async () => {
-			await inputAddress( secondaryAddress );
-		} );
+		await act(async () => {
+			await inputAddress(secondaryAddress);
+		});
 
 		// Verify state input has been removed.
-		expect( screen.queryByText( stateRegExp ) ).not.toBeInTheDocument();
+		expect(screen.queryByText(stateRegExp)).not.toBeInTheDocument();
 
-		await act( async () => {
-			await inputAddress( tertiaryAddress );
-		} );
+		await act(async () => {
+			await inputAddress(tertiaryAddress);
+		});
 
 		// Verify postal code input label changed.
-		expect( screen.getByLabelText( /Postal code/ ) ).toBeInTheDocument();
-	} );
+		expect(screen.getByLabelText(/Postal code/)).toBeInTheDocument();
+	});
 
-	test( 'input values are reset after changing the country', async () => {
-		renderInCheckoutProvider( <WrappedAddressForm type="shipping" /> );
+	test('input values are reset after changing the country', async () => {
+		renderInCheckoutProvider(<WrappedAddressForm type="shipping" />);
 
 		// First enter an address with no state, but fill the city.
-		await act( async () => {
-			await inputAddress( secondaryAddress );
-		} );
+		await act(async () => {
+			await inputAddress(secondaryAddress);
+		});
 
 		// Update country to another country without state.
-		await act( async () => {
-			await inputAddress( { countryKey: quaternaryAddress.countryKey } );
-		} );
+		await act(async () => {
+			await inputAddress({ countryKey: quaternaryAddress.countryKey });
+		});
 
-		expect( screen.getByLabelText( postalCodeRegExp ).value ).toBe( '' );
-	} );
-} );
+		expect(screen.getByLabelText(postalCodeRegExp).value).toBe('');
+	});
+});

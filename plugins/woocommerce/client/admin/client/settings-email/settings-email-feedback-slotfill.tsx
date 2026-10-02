@@ -12,7 +12,7 @@ import './style.scss';
 import { SETTINGS_SLOT_FILL_CONSTANT } from '~/settings/settings-slots';
 import { EmailCesFeedback } from './settings-email-ces-feedback';
 
-const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
+const { Fill } = createSlotFill(SETTINGS_SLOT_FILL_CONSTANT);
 
 const EmailFeedbackFill = () => {
 	const description = __(
@@ -28,9 +28,9 @@ const EmailFeedbackFill = () => {
 		<Fill>
 			<EmailCesFeedback
 				action="email_improvements_disabled_feedback"
-				description={ description }
-				question={ question }
-				showOnLoad={ true }
+				description={description}
+				question={question}
+				showOnLoad={true}
 			/>
 		</Fill>
 	);
@@ -38,12 +38,12 @@ const EmailFeedbackFill = () => {
 
 export const registerSettingsEmailFeedbackFill = () => {
 	const slotElementId = 'wc_settings_features_email_feedback_slotfill';
-	const slotElement = document.getElementById( slotElementId );
-	if ( ! slotElement ) {
+	const slotElement = document.getElementById(slotElementId);
+	if (!slotElement) {
 		return null;
 	}
-	registerPlugin( 'woocommerce-admin-settings-email-feedback', {
+	registerPlugin('woocommerce-admin-settings-email-feedback', {
 		scope: 'woocommerce-email-feedback-settings',
 		render: () => <EmailFeedbackFill />,
-	} );
+	});
 };

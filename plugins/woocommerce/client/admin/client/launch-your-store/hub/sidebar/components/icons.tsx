@@ -16,7 +16,7 @@ import CompletedStep from './payments-icons/completed-step';
 import ActiveStep from './payments-icons/active-step';
 export const taskCompleteIcon = check;
 
-export const taskIcons: Record< string, JSX.Element > = {
+export const taskIcons: Record<string, JSX.Element> = {
 	tax: percent,
 	shipping,
 	'customize-store': brush,

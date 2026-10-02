@@ -7,27 +7,27 @@ import { useDispatch } from '@wordpress/data';
 import { Button, Modal } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
-const DismissAllModal = ( { onClose } ) => {
-	const { createNotice } = useDispatch( 'core/notices' );
+const DismissAllModal = ({ onClose }) => {
+	const { createNotice } = useDispatch('core/notices');
 
-	const { batchUpdateNotes, removeAllNotes } = useDispatch( notesStore );
+	const { batchUpdateNotes, removeAllNotes } = useDispatch(notesStore);
 
 	const dismissAllNotes = async () => {
-		recordEvent( 'wcadmin_inbox_action_dismissall', {} );
+		recordEvent('wcadmin_inbox_action_dismissall', {});
 		try {
-			const notesRemoved = await removeAllNotes( {
+			const notesRemoved = await removeAllNotes({
 				status: 'unactioned',
-			} );
+			});
 			createNotice(
 				'success',
-				__( 'All messages dismissed', 'woocommerce' ),
+				__('All messages dismissed', 'woocommerce'),
 				{
 					actions: [
 						{
-							label: __( 'Undo', 'woocommerce' ),
+							label: __('Undo', 'woocommerce'),
 							onClick: () => {
 								batchUpdateNotes(
-									notesRemoved.map( ( note ) => note.id ),
+									notesRemoved.map((note) => note.id),
 									{
 										is_deleted: 0,
 									}
@@ -37,10 +37,10 @@ const DismissAllModal = ( { onClose } ) => {
 					],
 				}
 			);
-		} catch ( e ) {
+		} catch (e) {
 			createNotice(
 				'error',
-				__( 'Messages could not be dismissed', 'woocommerce' )
+				__('Messages could not be dismissed', 'woocommerce')
 			);
 			onClose();
 		}
@@ -48,29 +48,29 @@ const DismissAllModal = ( { onClose } ) => {
 	return (
 		<>
 			<Modal
-				title={ __( 'Dismiss all messages', 'woocommerce' ) }
+				title={__('Dismiss all messages', 'woocommerce')}
 				className="woocommerce-inbox-dismiss-all-modal"
-				onRequestClose={ onClose }
+				onRequestClose={onClose}
 			>
 				<div className="woocommerce-inbox-dismiss-all-modal__wrapper">
 					<div className="woocommerce-usage-modal__message">
-						{ __(
+						{__(
 							'Are you sure? Inbox messages will be dismissed forever.',
 							'woocommerce'
-						) }
+						)}
 					</div>
 					<div className="woocommerce-usage-modal__actions">
-						<Button onClick={ onClose }>
-							{ __( 'Cancel', 'woocommerce' ) }
+						<Button onClick={onClose}>
+							{__('Cancel', 'woocommerce')}
 						</Button>
 						<Button
 							isPrimary
-							onClick={ () => {
+							onClick={() => {
 								dismissAllNotes();
 								onClose();
-							} }
+							}}
 						>
-							{ __( 'Yes, dismiss all', 'woocommerce' ) }
+							{__('Yes, dismiss all', 'woocommerce')}
 						</Button>
 					</div>
 				</div>

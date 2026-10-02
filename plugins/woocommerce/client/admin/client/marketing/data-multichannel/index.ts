@@ -15,18 +15,18 @@ import * as actions from './actions';
 import * as selectors from './selectors';
 import * as resolvers from './resolvers';
 
-export const store = createReduxStore( STORE_KEY, {
-	reducer: reducer as Reducer< State, AnyAction >,
+export const store = createReduxStore(STORE_KEY, {
+	reducer: reducer as Reducer<State, AnyAction>,
 	actions,
 	selectors,
 	resolvers,
 	controls,
-} );
+});
 
-register( store );
+register(store);
 
 declare module '@wordpress/data' {
 	interface StoreRegistry {
-		[ STORE_KEY ]: typeof store;
+		[STORE_KEY]: typeof store;
 	}
 }

@@ -34,41 +34,41 @@ const mockParentStore = {
 
 jest.mock(
 	'@wordpress/interactivity',
-	() => ( {
+	() => ({
 		getContext: mockGetContext,
-		store: jest.fn( ( _name, definition ) => {
-			if ( definition ) {
+		store: jest.fn((_name, definition) => {
+			if (definition) {
 				mockRegisteredStore = definition;
 				return mockRegisteredStore;
 			}
 			return mockParentStore;
-		} ),
-	} ),
+		}),
+	}),
 	{ virtual: true }
 );
 
-describe( 'product filter checkbox list interactivity store', () => {
-	beforeEach( () => {
+describe('product filter checkbox list interactivity store', () => {
+	beforeEach(() => {
 		jest.resetModules();
 		mockGetContext.mockReset();
 		mockParentToggle.mockReset();
 		mockRegisteredStore = null;
 
-		jest.isolateModules( () => {
-			require( '../frontend' );
-		} );
-	} );
+		jest.isolateModules(() => {
+			require('../frontend');
+		});
+	});
 
-	it( 'mirrors parent selectable items with child-owned index metadata', () => {
-		if ( ! mockRegisteredStore ) {
-			throw new Error( 'Checkbox list store was not registered.' );
+	it('mirrors parent selectable items with child-owned index metadata', () => {
+		if (!mockRegisteredStore) {
+			throw new Error('Checkbox list store was not registered.');
 		}
 
-		mockGetContext.mockReturnValue( {
+		mockGetContext.mockReturnValue({
 			storeNamespace: 'woocommerce/product-filters',
-		} );
+		});
 
-		expect( mockRegisteredStore.state.items ).toEqual( [
+		expect(mockRegisteredStore.state.items).toEqual([
 			{
 				id: 'attribute-blue',
 				label: 'Blue',
@@ -87,26 +87,26 @@ describe( 'product filter checkbox list interactivity store', () => {
 				index: 1,
 				hidden: false,
 			},
-		] );
-	} );
+		]);
+	});
 
-	it( 'uses the default display limit when context limit is invalid', () => {
-		if ( ! mockRegisteredStore ) {
-			throw new Error( 'Checkbox list store was not registered.' );
+	it('uses the default display limit when context limit is invalid', () => {
+		if (!mockRegisteredStore) {
+			throw new Error('Checkbox list store was not registered.');
 		}
 
-		mockGetContext.mockReturnValue( {
+		mockGetContext.mockReturnValue({
 			storeNamespace: 'woocommerce/product-filters',
 			displayLimit: -1,
 			isExpanded: false,
-		} );
+		});
 
-		expect( mockRegisteredStore.state.items[ 0 ].hidden ).toBe( false );
-	} );
+		expect(mockRegisteredStore.state.items[0].hidden).toBe(false);
+	});
 
-	it( 'forwards toggle to parent store with current item', () => {
-		if ( ! mockRegisteredStore ) {
-			throw new Error( 'Checkbox list store was not registered.' );
+	it('forwards toggle to parent store with current item', () => {
+		if (!mockRegisteredStore) {
+			throw new Error('Checkbox list store was not registered.');
 		}
 
 		const item = {
@@ -117,37 +117,37 @@ describe( 'product filter checkbox list interactivity store', () => {
 			index: 0,
 		};
 
-		mockGetContext.mockReturnValue( {
+		mockGetContext.mockReturnValue({
 			storeNamespace: 'woocommerce/product-filters',
 			item,
-		} );
+		});
 
 		mockRegisteredStore.actions.toggle();
 
-		expect( mockParentToggle ).toHaveBeenCalledWith( item );
-	} );
+		expect(mockParentToggle).toHaveBeenCalledWith(item);
+	});
 
-	it( 'returns empty items when parent store data is missing', () => {
-		if ( ! mockRegisteredStore ) {
-			throw new Error( 'Checkbox list store was not registered.' );
+	it('returns empty items when parent store data is missing', () => {
+		if (!mockRegisteredStore) {
+			throw new Error('Checkbox list store was not registered.');
 		}
 
-		mockGetContext.mockReturnValue( {} );
+		mockGetContext.mockReturnValue({});
 
-		expect( mockRegisteredStore.state.items ).toEqual( [] );
-	} );
+		expect(mockRegisteredStore.state.items).toEqual([]);
+	});
 
-	it( 'does not forward toggle without current item', () => {
-		if ( ! mockRegisteredStore ) {
-			throw new Error( 'Checkbox list store was not registered.' );
+	it('does not forward toggle without current item', () => {
+		if (!mockRegisteredStore) {
+			throw new Error('Checkbox list store was not registered.');
 		}
 
-		mockGetContext.mockReturnValue( {
+		mockGetContext.mockReturnValue({
 			storeNamespace: 'woocommerce/product-filters',
-		} );
+		});
 
 		mockRegisteredStore.actions.toggle();
 
-		expect( mockParentToggle ).not.toHaveBeenCalled();
-	} );
-} );
+		expect(mockParentToggle).not.toHaveBeenCalled();
+	});
+});

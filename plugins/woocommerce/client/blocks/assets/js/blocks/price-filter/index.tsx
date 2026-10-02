@@ -14,11 +14,11 @@ import metadata from './block.json';
 import { blockAttributes } from './attributes';
 import deprecated from './deprecated';
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	icon: {
 		src: (
 			<Icon
-				icon={ currencyDollar }
+				icon={currencyDollar}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -28,13 +28,13 @@ registerBlockType( metadata, {
 		...blockAttributes,
 	},
 	edit,
-	save( { attributes } ) {
+	save({ attributes }) {
 		const { className } = attributes;
 		return (
 			<div
-				{ ...useBlockProps.save( {
-					className: clsx( 'is-loading', className ),
-				} ) }
+				{...useBlockProps.save({
+					className: clsx('is-loading', className),
+				})}
 			>
 				<span
 					aria-hidden
@@ -44,4 +44,4 @@ registerBlockType( metadata, {
 		);
 	},
 	deprecated,
-} );
+});

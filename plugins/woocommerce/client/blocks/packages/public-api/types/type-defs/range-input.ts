@@ -29,7 +29,7 @@ export type RangeInputBlockContext = {
  */
 export interface RangeInputParentStore {
 	actions: {
-		setMin: ( event: HTMLElementEvent< HTMLInputElement > ) => void;
-		setMax: ( event: HTMLElementEvent< HTMLInputElement > ) => void;
+		setMin: (event: HTMLElementEvent<HTMLInputElement>) => void;
+		setMax: (event: HTMLElementEvent<HTMLInputElement>) => void;
 	};
 }

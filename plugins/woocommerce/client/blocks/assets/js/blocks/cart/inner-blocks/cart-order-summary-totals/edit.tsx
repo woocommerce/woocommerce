@@ -13,30 +13,30 @@ import {
 	getAllowedBlocks,
 } from '../../../cart-checkout-shared';
 
-export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
+export const Edit = ({ clientId }: { clientId: string }): JSX.Element => {
 	const blockProps = useBlockProps();
 	const allowedBlocks = getAllowedBlocks(
 		innerBlockAreas.CART_ORDER_SUMMARY_TOTALS
 	);
 	const defaultTemplate = [
-		[ 'woocommerce/cart-order-summary-subtotal-block', {}, [] ],
-		[ 'woocommerce/cart-order-summary-fee-block', {}, [] ],
-		[ 'woocommerce/cart-order-summary-discount-block', {}, [] ],
-		[ 'woocommerce/cart-order-summary-shipping-block', {}, [] ],
-		[ 'woocommerce/cart-order-summary-taxes-block', {}, [] ],
+		['woocommerce/cart-order-summary-subtotal-block', {}, []],
+		['woocommerce/cart-order-summary-fee-block', {}, []],
+		['woocommerce/cart-order-summary-discount-block', {}, []],
+		['woocommerce/cart-order-summary-shipping-block', {}, []],
+		['woocommerce/cart-order-summary-taxes-block', {}, []],
 	] as TemplateArray;
 
-	useForcedLayout( {
+	useForcedLayout({
 		clientId,
 		registeredBlocks: allowedBlocks,
 		defaultTemplate,
-	} );
+	});
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<InnerBlocks
-				allowedBlocks={ allowedBlocks }
-				template={ defaultTemplate }
+				allowedBlocks={allowedBlocks}
+				template={defaultTemplate}
 			/>
 		</div>
 	);
@@ -44,7 +44,7 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 
 export const Save = (): JSX.Element => {
 	return (
-		<div { ...useBlockProps.save() }>
+		<div {...useBlockProps.save()}>
 			<InnerBlocks.Content />
 		</div>
 	);

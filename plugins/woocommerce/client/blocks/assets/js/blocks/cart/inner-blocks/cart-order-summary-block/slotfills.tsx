@@ -14,5 +14,5 @@ export const OrderMetaSlotFill = (): JSX.Element => {
 		context: 'woocommerce/cart',
 	};
 
-	return <ExperimentalOrderMeta.Slot { ...slotFillProps } />;
+	return <ExperimentalOrderMeta.Slot {...slotFillProps} />;
 };

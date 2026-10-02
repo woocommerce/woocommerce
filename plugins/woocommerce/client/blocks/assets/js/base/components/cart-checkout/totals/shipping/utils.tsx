@@ -13,10 +13,10 @@ import {
 	CartResponseTotals,
 } from '@woocommerce/types';
 
-export const renderShippingTotalValue = ( values: CartResponseTotals ) => {
-	const totalShippingValue = getTotalShippingValue( values );
-	if ( totalShippingValue === 0 ) {
-		return <strong>{ __( 'Free', 'woocommerce' ) }</strong>;
+export const renderShippingTotalValue = (values: CartResponseTotals) => {
+	const totalShippingValue = getTotalShippingValue(values);
+	if (totalShippingValue === 0) {
+		return <strong>{__('Free', 'woocommerce')}</strong>;
 	}
 	return totalShippingValue;
 };
@@ -24,25 +24,25 @@ export const renderShippingTotalValue = ( values: CartResponseTotals ) => {
 export const getPickupLocation = (
 	shippingRates: CartShippingRate[]
 ): string => {
-	const flattenedRates = ( shippingRates || [] ).flatMap(
-		( shippingRate ) => shippingRate.shipping_rates
+	const flattenedRates = (shippingRates || []).flatMap(
+		(shippingRate) => shippingRate.shipping_rates
 	);
 
 	const selectedCollectableRate = flattenedRates.find(
-		( rate ) => rate.selected && isPackageRateCollectable( rate )
+		(rate) => rate.selected && isPackageRateCollectable(rate)
 	);
 
 	// If the rate has an address specified in its metadata.
 	if (
-		isObject( selectedCollectableRate ) &&
-		objectHasProp( selectedCollectableRate, 'meta_data' )
+		isObject(selectedCollectableRate) &&
+		objectHasProp(selectedCollectableRate, 'meta_data')
 	) {
 		const selectedRateMetaData = selectedCollectableRate.meta_data.find(
-			( meta ) => meta.key === 'pickup_address'
+			(meta) => meta.key === 'pickup_address'
 		);
 		if (
-			isObject( selectedRateMetaData ) &&
-			objectHasProp( selectedRateMetaData, 'value' ) &&
+			isObject(selectedRateMetaData) &&
+			objectHasProp(selectedRateMetaData, 'value') &&
 			selectedRateMetaData.value
 		) {
 			return selectedRateMetaData.value;

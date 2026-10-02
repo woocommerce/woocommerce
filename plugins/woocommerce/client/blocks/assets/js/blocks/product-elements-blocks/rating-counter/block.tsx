@@ -12,15 +12,15 @@ import { withProductDataContext } from '@woocommerce/shared-hocs';
 import { isNumber, ProductResponseItem } from '@woocommerce/types';
 import { Disabled } from '@wordpress/components';
 
-const getRatingCount = ( product: ProductResponseItem ) => {
-	const count = isNumber( product.review_count )
+const getRatingCount = (product: ProductResponseItem) => {
+	const count = isNumber(product.review_count)
 		? product.review_count
-		: parseInt( product.review_count, 10 );
+		: parseInt(product.review_count, 10);
 
-	return Number.isFinite( count ) && count > 0 ? count : 0;
+	return Number.isFinite(count) && count > 0 ? count : 0;
 };
 
-const ReviewsCount = ( props: { reviews: number } ): JSX.Element => {
+const ReviewsCount = (props: { reviews: number }): JSX.Element => {
 	const { reviews } = props;
 
 	const reviewsCount = reviews
@@ -33,13 +33,13 @@ const ReviewsCount = ( props: { reviews: number } ): JSX.Element => {
 					'woocommerce'
 				),
 				reviews
-		  )
-		: __( '(X customer reviews)', 'woocommerce' );
+			)
+		: __('(X customer reviews)', 'woocommerce');
 
 	return (
 		<span className="wc-block-components-product-rating-counter__reviews_count">
 			<Disabled>
-				<a href="/">{ reviewsCount }</a>
+				<a href="/">{reviewsCount}</a>
 			</Disabled>
 		</span>
 	);
@@ -58,29 +58,29 @@ export const Block = (
 ): JSX.Element | undefined => {
 	const { textAlign, shouldDisplayMockedReviewsWhenProductHasNoReviews } =
 		props;
-	const styleProps = useStyleProps( props );
+	const styleProps = useStyleProps(props);
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
-	const reviews = getRatingCount( product );
+	const reviews = getRatingCount(product);
 
 	const className = clsx(
 		styleProps.className,
 		'wc-block-components-product-rating-counter',
 		{
-			[ `${ parentClassName }__product-rating` ]: parentClassName,
-			[ `has-text-align-${ textAlign }` ]: textAlign,
+			[`${parentClassName}__product-rating`]: parentClassName,
+			[`has-text-align-${textAlign}`]: textAlign,
 		}
 	);
 
-	if ( reviews || shouldDisplayMockedReviewsWhenProductHasNoReviews ) {
+	if (reviews || shouldDisplayMockedReviewsWhenProductHasNoReviews) {
 		return (
-			<div className={ className } style={ styleProps.style }>
+			<div className={className} style={styleProps.style}>
 				<div className="wc-block-components-product-rating-counter__container">
-					<ReviewsCount reviews={ reviews } />
+					<ReviewsCount reviews={reviews} />
 				</div>
 			</div>
 		);
 	}
 };
 
-export default withProductDataContext( Block );
+export default withProductDataContext(Block);

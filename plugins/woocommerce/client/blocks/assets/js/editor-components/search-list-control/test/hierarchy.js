@@ -13,18 +13,18 @@ const list = [
 	{ id: 7, name: 'Tamarind', parent: 5 },
 ];
 
-describe( 'buildTermsTree', () => {
-	test( 'should return an empty array on empty input', () => {
-		const tree = buildTermsTree( [] );
-		expect( tree ).toEqual( [] );
-	} );
+describe('buildTermsTree', () => {
+	test('should return an empty array on empty input', () => {
+		const tree = buildTermsTree([]);
+		expect(tree).toEqual([]);
+	});
 
-	test( 'should return a flat array when there are no parent relationships', () => {
-		const tree = buildTermsTree( [
+	test('should return a flat array when there are no parent relationships', () => {
+		const tree = buildTermsTree([
 			{ id: 1, name: 'Apricots', parent: 0 },
 			{ id: 2, name: 'Clementine', parent: 0 },
-		] );
-		expect( tree ).toEqual( [
+		]);
+		expect(tree).toEqual([
 			{
 				id: 1,
 				name: 'Apricots',
@@ -39,12 +39,12 @@ describe( 'buildTermsTree', () => {
 				breadcrumbs: [],
 				children: [],
 			},
-		] );
-	} );
+		]);
+	});
 
-	test( 'should return a tree of items', () => {
-		const tree = buildTermsTree( list );
-		expect( tree ).toEqual( [
+	test('should return a tree of items', () => {
+		const tree = buildTermsTree(list);
+		expect(tree).toEqual([
 			{
 				id: 1,
 				name: 'Apricots',
@@ -62,13 +62,13 @@ describe( 'buildTermsTree', () => {
 						id: 3,
 						name: 'Elderberry',
 						parent: 2,
-						breadcrumbs: [ 'Clementine' ],
+						breadcrumbs: ['Clementine'],
 						children: [
 							{
 								id: 5,
 								name: 'Lychee',
 								parent: 3,
-								breadcrumbs: [ 'Clementine', 'Elderberry' ],
+								breadcrumbs: ['Clementine', 'Elderberry'],
 								children: [
 									{
 										id: 7,
@@ -89,7 +89,7 @@ describe( 'buildTermsTree', () => {
 						id: 4,
 						name: 'Guava',
 						parent: 2,
-						breadcrumbs: [ 'Clementine' ],
+						breadcrumbs: ['Clementine'],
 						children: [],
 					},
 				],
@@ -101,10 +101,10 @@ describe( 'buildTermsTree', () => {
 				breadcrumbs: [],
 				children: [],
 			},
-		] );
-	} );
+		]);
+	});
 
-	test( 'should return a tree of items, with orphan categories appended to the end', () => {
+	test('should return a tree of items, with orphan categories appended to the end', () => {
 		const filteredList = [
 			{ id: 1, name: 'Apricots', parent: 0 },
 			{ id: 2, name: 'Clementine', parent: 0 },
@@ -112,8 +112,8 @@ describe( 'buildTermsTree', () => {
 			{ id: 5, name: 'Lychee', parent: 3 },
 			{ id: 6, name: 'Mulberry', parent: 0 },
 		];
-		const tree = buildTermsTree( filteredList, list );
-		expect( tree ).toEqual( [
+		const tree = buildTermsTree(filteredList, list);
+		expect(tree).toEqual([
 			{
 				id: 1,
 				name: 'Apricots',
@@ -131,7 +131,7 @@ describe( 'buildTermsTree', () => {
 						id: 4,
 						name: 'Guava',
 						parent: 2,
-						breadcrumbs: [ 'Clementine' ],
+						breadcrumbs: ['Clementine'],
 						children: [],
 					},
 				],
@@ -147,13 +147,13 @@ describe( 'buildTermsTree', () => {
 				id: 5,
 				name: 'Lychee',
 				parent: 3,
-				breadcrumbs: [ 'Clementine', 'Elderberry' ],
+				breadcrumbs: ['Clementine', 'Elderberry'],
 				children: [],
 			},
-		] );
-	} );
+		]);
+	});
 
-	test( 'should return a tree of items, with orphan categories appended to the end, with children of their own', () => {
+	test('should return a tree of items, with orphan categories appended to the end, with children of their own', () => {
 		const filteredList = [
 			{ id: 1, name: 'Apricots', parent: 0 },
 			{ id: 3, name: 'Elderberry', parent: 2 },
@@ -161,8 +161,8 @@ describe( 'buildTermsTree', () => {
 			{ id: 5, name: 'Lychee', parent: 3 },
 			{ id: 6, name: 'Mulberry', parent: 0 },
 		];
-		const tree = buildTermsTree( filteredList, list );
-		expect( tree ).toEqual( [
+		const tree = buildTermsTree(filteredList, list);
+		expect(tree).toEqual([
 			{
 				id: 1,
 				name: 'Apricots',
@@ -181,13 +181,13 @@ describe( 'buildTermsTree', () => {
 				id: 3,
 				name: 'Elderberry',
 				parent: 2,
-				breadcrumbs: [ 'Clementine' ],
+				breadcrumbs: ['Clementine'],
 				children: [
 					{
 						id: 5,
 						name: 'Lychee',
 						parent: 3,
-						breadcrumbs: [ 'Clementine', 'Elderberry' ],
+						breadcrumbs: ['Clementine', 'Elderberry'],
 						children: [],
 					},
 				],
@@ -196,9 +196,9 @@ describe( 'buildTermsTree', () => {
 				id: 4,
 				name: 'Guava',
 				parent: 2,
-				breadcrumbs: [ 'Clementine' ],
+				breadcrumbs: ['Clementine'],
 				children: [],
 			},
-		] );
-	} );
-} );
+		]);
+	});
+});

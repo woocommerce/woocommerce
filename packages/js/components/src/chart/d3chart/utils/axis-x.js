@@ -210,7 +210,7 @@ const removeDuplicateDates = ( d, i, ticks, formatter ) => {
 		? formatter( monthDate )
 		: compareStrings( formatter( prevMonth ), formatter( monthDate ) ).join(
 				' '
-		  );
+			);
 };
 
 export const drawXAxis = ( node, params, scales, formats ) => {
@@ -236,7 +236,7 @@ export const drawXAxis = ( node, params, scales, formats ) => {
 					params.interval === 'hour'
 						? formats.xFormat(
 								d instanceof Date ? d : moment( d ).toDate()
-						  )
+							)
 						: removeDuplicateDates( d, i, ticks, formats.xFormat )
 				)
 		);

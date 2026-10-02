@@ -6,7 +6,7 @@ import { Component } from '@wordpress/element';
 class CheckoutSlotErrorBoundary extends Component {
 	state = { errorMessage: '', hasError: false };
 
-	static getDerivedStateFromError( error ) {
+	static getDerivedStateFromError(error) {
 		if (
 			typeof error.statusText !== 'undefined' &&
 			typeof error.status !== 'undefined'
@@ -14,8 +14,8 @@ class CheckoutSlotErrorBoundary extends Component {
 			return {
 				errorMessage: (
 					<>
-						<strong>{ error.status }</strong>
-						{ ': ' + error.statusText }
+						<strong>{error.status}</strong>
+						{': ' + error.statusText}
 					</>
 				),
 				hasError: true,
@@ -29,11 +29,11 @@ class CheckoutSlotErrorBoundary extends Component {
 		const { renderError } = this.props;
 		const { errorMessage, hasError } = this.state;
 
-		if ( hasError ) {
-			if ( typeof renderError === 'function' ) {
-				return renderError( errorMessage );
+		if (hasError) {
+			if (typeof renderError === 'function') {
+				return renderError(errorMessage);
 			}
-			return <p>{ errorMessage }</p>;
+			return <p>{errorMessage}</p>;
 		}
 
 		return this.props.children;

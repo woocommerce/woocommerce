@@ -40,22 +40,22 @@ export default {
 			description: 'Whether the radio control is disabled or not.',
 		},
 	},
-} as Meta< RadioControlProps >;
+} as Meta<RadioControlProps>;
 
-const Template: StoryFn< RadioControlProps > = ( args ) => {
-	const [ { selected }, updateArgs ] = useArgs();
+const Template: StoryFn<RadioControlProps> = (args) => {
+	const [{ selected }, updateArgs] = useArgs();
 	return (
 		<RadioControl
-			{ ...args }
-			selected={ selected }
-			onChange={ ( value ) => {
-				updateArgs( { selected: value } );
-			} }
+			{...args}
+			selected={selected}
+			onChange={(value) => {
+				updateArgs({ selected: value });
+			}}
 		/>
 	);
 };
 
-export const Default: StoryFn< RadioControlProps > = Template.bind( {} );
+export const Default: StoryFn<RadioControlProps> = Template.bind({});
 Default.args = {
 	options: [
 		{

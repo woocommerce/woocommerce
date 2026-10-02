@@ -32,32 +32,32 @@ const productsQuery = {
 	],
 };
 export class StockPanel extends Component {
-	constructor( props ) {
-		super( props );
+	constructor(props) {
+		super(props);
 
-		this.updateStock = this.updateStock.bind( this );
+		this.updateStock = this.updateStock.bind(this);
 	}
 
-	async updateStock( product, quantity ) {
+	async updateStock(product, quantity) {
 		const {
 			invalidateResolution,
 			invalidateActivityPanel,
 			updateProductStock,
 		} = this.props;
-		const success = await updateProductStock( product, quantity );
+		const success = await updateProductStock(product, quantity);
 
-		if ( success ) {
+		if (success) {
 			// Request more low stock products.
-			invalidateResolution( 'getItems', [
+			invalidateResolution('getItems', [
 				'products/low-in-stock',
 				productsQuery,
-			] );
-			invalidateResolution( 'getItemsTotalCount', [
+			]);
+			invalidateResolution('getItemsTotalCount', [
 				'products/count-low-in-stock',
 				getLowStockCountQuery,
 				null,
-			] );
-			invalidateActivityPanel( 'getActivityPanelCounts', [] );
+			]);
+			invalidateActivityPanel('getActivityPanelCounts', []);
 		}
 
 		return success;
@@ -66,44 +66,44 @@ export class StockPanel extends Component {
 	renderProducts() {
 		const { products, createNotice } = this.props;
 
-		return products.map( ( product ) => (
+		return products.map((product) => (
 			<ProductStockCard
-				key={ product.id }
-				product={ product }
-				updateProductStock={ this.updateStock }
-				createNotice={ createNotice }
+				key={product.id}
+				product={product}
+				updateProductStock={this.updateStock}
+				createNotice={createNotice}
 			/>
-		) );
+		));
 	}
 
 	render() {
 		const { lowStockProductsCount, isError, isRequesting, products } =
 			this.props;
 
-		if ( isError ) {
+		if (isError) {
 			throw new Error(
 				'Failed to load low stock products, Raise error to trigger ErrorBoundary'
 			);
 		}
 
 		// Show placeholders only for the first products fetch.
-		if ( isRequesting || ! products.length ) {
-			const numPlaceholders = Math.min( 5, lowStockProductsCount ?? 1 );
-			const placeholders = Array.from( new Array( numPlaceholders ) ).map(
-				( v, idx ) => (
+		if (isRequesting || !products.length) {
+			const numPlaceholders = Math.min(5, lowStockProductsCount ?? 1);
+			const placeholders = Array.from(new Array(numPlaceholders)).map(
+				(v, idx) => (
 					<ActivityCardPlaceholder
-						key={ idx }
+						key={idx}
 						className="woocommerce-stock-activity-card"
 						hasAction
-						lines={ 1 }
+						lines={1}
 					/>
 				)
 			);
 
-			return <Section>{ placeholders }</Section>;
+			return <Section>{placeholders}</Section>;
 		}
 
-		return <Section>{ this.renderProducts() }</Section>;
+		return <Section>{this.renderProducts()}</Section>;
 	}
 }
 
@@ -121,28 +121,28 @@ StockPanel.defaultProps = {
 };
 
 export default compose(
-	withSelect( ( select ) => {
-		const { getItems, getItemsError, isResolving } = select( itemsStore );
+	withSelect((select) => {
+		const { getItems, getItemsError, isResolving } = select(itemsStore);
 
 		const products = Array.from(
-			getItems( 'products/low-in-stock', productsQuery ).values()
+			getItems('products/low-in-stock', productsQuery).values()
 		);
 		const isError = Boolean(
-			getItemsError( 'products/low-in-stock', productsQuery )
+			getItemsError('products/low-in-stock', productsQuery)
 		);
-		const isRequesting = isResolving( 'getItems', [
+		const isRequesting = isResolving('getItems', [
 			'products/low-in-stock',
 			productsQuery,
-		] );
+		]);
 
 		return { products, isError, isRequesting };
-	} ),
-	withDispatch( ( dispatch ) => {
+	}),
+	withDispatch((dispatch) => {
 		const { invalidateResolution, updateProductStock } =
-			dispatch( itemsStore );
+			dispatch(itemsStore);
 		const { invalidateResolution: invalidateActivityPanel } =
-			dispatch( activityPanelStore );
-		const { createNotice } = dispatch( 'core/notices' );
+			dispatch(activityPanelStore);
+		const { createNotice } = dispatch('core/notices');
 
 		return {
 			createNotice,
@@ -150,5 +150,5 @@ export default compose(
 			invalidateActivityPanel,
 			updateProductStock,
 		};
-	} )
-)( StockPanel );
+	})
+)(StockPanel);

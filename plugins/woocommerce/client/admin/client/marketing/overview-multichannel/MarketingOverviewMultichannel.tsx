@@ -50,66 +50,65 @@ export const MarketingOverviewMultichannel = () => {
 	const { loadInstalledPluginsAfterActivation } =
 		useInstalledPluginsWithoutChannels();
 	const { currentUserCan } = useUser();
-	const channelsRef = useRef< ChannelsRef >( null );
+	const channelsRef = useRef<ChannelsRef>(null);
 
 	if (
 		loadingIntroductionBanner ||
-		( loadingCampaigns && metaCampaigns?.total === undefined ) ||
-		( loadingCampaignTypes && ! dataCampaignTypes ) ||
-		( loadingRegistered && ! dataRegistered ) ||
-		( loadingRecommended && ! dataRecommended )
+		(loadingCampaigns && metaCampaigns?.total === undefined) ||
+		(loadingCampaignTypes && !dataCampaignTypes) ||
+		(loadingRegistered && !dataRegistered) ||
+		(loadingRecommended && !dataRecommended)
 	) {
 		return <CenteredSpinner />;
 	}
 
-	const showCampaigns = !! (
+	const showCampaigns = !!(
 		dataRegistered?.length &&
-		( isIntroductionBannerDismissed || metaCampaigns?.total )
+		(isIntroductionBannerDismissed || metaCampaigns?.total)
 	);
 
-	const showChannels = !! (
+	const showChannels = !!(
 		dataRegistered &&
 		dataRecommended &&
-		( dataRegistered.length || dataRecommended.length )
+		(dataRegistered.length || dataRecommended.length)
 	);
 
-	const showSuggestions = !! getAdminSetting(
+	const showSuggestions = !!getAdminSetting(
 		'allowMarketplaceSuggestions',
 		false
 	);
 
-	const showExtensions =
-		showSuggestions && currentUserCan( 'install_plugins' );
+	const showExtensions = showSuggestions && currentUserCan('install_plugins');
 
-	const onInstalledAndActivated = ( pluginSlug: string ) => {
+	const onInstalledAndActivated = (pluginSlug: string) => {
 		refetchCampaignTypes();
 		refetchRegisteredChannels();
-		loadInstalledPluginsAfterActivation( pluginSlug );
+		loadInstalledPluginsAfterActivation(pluginSlug);
 	};
 
 	return (
 		<div className="woocommerce-marketing-overview-multichannel">
 			<Promotions format="promo-card" />
-			{ ! isIntroductionBannerDismissed && (
+			{!isIntroductionBannerDismissed && (
 				<IntroductionBanner
-					onDismissClick={ dismissIntroductionBanner }
-					onAddChannelsClick={ () => {
+					onDismissClick={dismissIntroductionBanner}
+					onAddChannelsClick={() => {
 						channelsRef.current?.scrollIntoAddChannels();
-					} }
+					}}
 				/>
-			) }
-			{ showCampaigns && <Campaigns /> }
-			{ showChannels && (
+			)}
+			{showCampaigns && <Campaigns />}
+			{showChannels && (
 				<Channels
-					ref={ channelsRef }
-					registeredChannels={ dataRegistered }
-					recommendedChannels={ dataRecommended }
-					onInstalledAndActivated={ onInstalledAndActivated }
+					ref={channelsRef}
+					registeredChannels={dataRegistered}
+					recommendedChannels={dataRecommended}
+					onInstalledAndActivated={onInstalledAndActivated}
 				/>
-			) }
+			)}
 			<InstalledExtensions />
-			{ showExtensions && <DiscoverTools /> }
-			{ showSuggestions && <LearnMarketing /> }
+			{showExtensions && <DiscoverTools />}
+			{showSuggestions && <LearnMarketing />}
 		</div>
 	);
 };

@@ -77,7 +77,6 @@
 	padding: 0 20px;
 	--color-error: #cc1818; // used by some @automattic/components
 
-
 	.woocommerce-profiler-button-container {
 		width: 100%;
 		max-width: 404px;
@@ -242,7 +241,6 @@
 			max-width: 514px;
 			margin-left: 10px;
 		}
-
 	}
 }
 // Business location page
@@ -306,14 +304,14 @@
 		}
 
 		.woocommerce-select-control.is-searchable
-		.woocommerce-select-control__control-input {
+			.woocommerce-select-control__control-input {
 			margin: 0;
 			padding: 0;
 			padding-left: 1px;
 		}
 
 		.woocommerce-select-control.is-searchable
-		.components-base-control__label {
+			.components-base-control__label {
 			left: 13px;
 		}
 
@@ -345,10 +343,10 @@
 	}
 
 	.woocommerce-experimental-select-control
-	.components-popover
-	.components-popover__content
-	ul
-	li:hover {
+		.components-popover
+		.components-popover__content
+		ul
+		li:hover {
 		background-color: #f6f7f7 !important; // Gray-0
 		color: $gray-900;
 	}
@@ -474,20 +472,24 @@
 		align-items: center;
 
 		@mixin plugins-sticky-footer {
-			background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #fff 44.69%);
+			background: linear-gradient(
+				180deg,
+				rgba(255, 255, 255, 0) 0%,
+				#fff 44.69%
+			);
 			height: $sticky-footer-height;
 			position: fixed;
 			bottom: 0;
 		}
 
-		@include breakpoint(">782px") { // sticky footer shouldn't apply to mobile layout
+		@include breakpoint(">782px") {
+			// sticky footer shouldn't apply to mobile layout
 			// since the height of each card is more or less fixed (actually its variable but we limit text to 2 lines),
 			// we can estimate the visual breakpoints that are required to "unstick" the footer from the bottom of the page.
 			&.sticky-footer {
 				@include plugins-sticky-footer;
 			}
 		}
-
 	}
 
 	.woocommerce-profiler-plugins-continue-button-container {
@@ -534,9 +536,9 @@
 
 		.woocommerce-profiler-question-label,
 		.woocommerce-profiler-business-info-email-address
-		.components-base-control__label,
+			.components-base-control__label,
 		.woocommerce-profiler-business-info-store-name
-		.components-base-control__label {
+			.components-base-control__label {
 			text-transform: uppercase;
 			color: $gray-900;
 			font-weight: 500;
@@ -546,9 +548,9 @@
 		}
 
 		.woocommerce-profiler-question-label
-		.woocommerce-profiler-question-required,
+			.woocommerce-profiler-question-required,
 		.woocommerce-profiler-business-info-email-address
-		.woocommerce-profiler-question-required {
+			.woocommerce-profiler-question-required {
 			color: #cc1818;
 			padding-left: 3px;
 		}
@@ -581,7 +583,8 @@
 			width: 20px;
 		}
 
-		.woocommerce-profiler-select-control__country-spacer + .woocommerce-profiler-business-info-email-address {
+		.woocommerce-profiler-select-control__country-spacer
+			+ .woocommerce-profiler-business-info-email-address {
 			margin-top: 8px;
 		}
 
@@ -680,14 +683,13 @@
 	}
 
 	.woocommerce-select-control.is-searchable
-	.woocommerce-select-control__control-input {
+		.woocommerce-select-control__control-input {
 		margin: 0;
 		padding: 0;
 		padding-left: 1px;
 	}
 
-	.woocommerce-select-control.is-searchable
-	.components-base-control__label {
+	.woocommerce-select-control.is-searchable .components-base-control__label {
 		left: 13px;
 	}
 

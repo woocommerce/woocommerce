@@ -15,17 +15,17 @@ import { useCheckoutBlockContext } from './context';
 export const AddressFieldControls = (): JSX.Element => {
 	const { defaultFields } = useCheckoutBlockContext();
 
-	const setFieldEntity = ( field: string, value: string ) => {
+	const setFieldEntity = (field: string, value: string) => {
 		if (
-			[ 'phone', 'company', 'address_2' ].includes( field ) &&
-			[ 'optional', 'required', 'hidden' ].includes( value )
+			['phone', 'company', 'address_2'].includes(field) &&
+			['optional', 'required', 'hidden'].includes(value)
 		) {
-			dispatch( coreStore as unknown as string ).editEntityRecord(
+			dispatch(coreStore as unknown as string).editEntityRecord(
 				'root',
 				'site',
 				undefined,
 				{
-					[ `woocommerce_checkout_${ field }_field` ]: value,
+					[`woocommerce_checkout_${field}_field`]: value,
 				}
 			);
 		}
@@ -33,105 +33,105 @@ export const AddressFieldControls = (): JSX.Element => {
 
 	const requiredOptions = [
 		{
-			label: __( 'Optional', 'woocommerce' ),
+			label: __('Optional', 'woocommerce'),
 			value: 'false',
 		},
 		{
-			label: __( 'Required', 'woocommerce' ),
+			label: __('Required', 'woocommerce'),
 			value: 'true',
 		},
 	];
 
 	return (
 		<InspectorControls>
-			<PanelBody title={ __( 'Address Fields', 'woocommerce' ) }>
+			<PanelBody title={__('Address Fields', 'woocommerce')}>
 				<p className="wc-block-checkout__controls-text">
-					{ __(
+					{__(
 						'Show or hide fields in the checkout address forms.',
 						'woocommerce'
-					) }
+					)}
 				</p>
 				<ToggleControl
 					__nextHasNoMarginBottom
-					label={ __( 'Company', 'woocommerce' ) }
-					checked={ ! defaultFields.company.hidden }
-					onChange={ () => {
-						if ( defaultFields.company.hidden ) {
-							setFieldEntity( 'company', 'optional' );
+					label={__('Company', 'woocommerce')}
+					checked={!defaultFields.company.hidden}
+					onChange={() => {
+						if (defaultFields.company.hidden) {
+							setFieldEntity('company', 'optional');
 						} else {
-							setFieldEntity( 'company', 'hidden' );
+							setFieldEntity('company', 'hidden');
 						}
-					} }
+					}}
 				/>
-				{ ! defaultFields.company.hidden && (
+				{!defaultFields.company.hidden && (
 					<RadioControl
 						selected={
 							defaultFields.company.required ? 'true' : 'false'
 						}
-						options={ requiredOptions }
-						onChange={ ( value: string ) => {
+						options={requiredOptions}
+						onChange={(value: string) => {
 							setFieldEntity(
 								'company',
 								value === 'true' ? 'required' : 'optional'
 							);
-						} }
+						}}
 						className="components-base-control--nested wc-block-components-require-company-field"
 					/>
-				) }
+				)}
 				<ToggleControl
 					__nextHasNoMarginBottom
-					label={ __( 'Address line 2', 'woocommerce' ) }
-					checked={ ! defaultFields.address_2.hidden }
-					onChange={ () => {
-						if ( defaultFields.address_2.hidden ) {
-							setFieldEntity( 'address_2', 'optional' );
+					label={__('Address line 2', 'woocommerce')}
+					checked={!defaultFields.address_2.hidden}
+					onChange={() => {
+						if (defaultFields.address_2.hidden) {
+							setFieldEntity('address_2', 'optional');
 						} else {
-							setFieldEntity( 'address_2', 'hidden' );
+							setFieldEntity('address_2', 'hidden');
 						}
-					} }
+					}}
 				/>
-				{ ! defaultFields.address_2.hidden && (
+				{!defaultFields.address_2.hidden && (
 					<RadioControl
 						selected={
 							defaultFields.address_2.required ? 'true' : 'false'
 						}
-						options={ requiredOptions }
-						onChange={ ( value: string ) => {
+						options={requiredOptions}
+						onChange={(value: string) => {
 							setFieldEntity(
 								'address_2',
 								value === 'true' ? 'required' : 'optional'
 							);
-						} }
+						}}
 						className="components-base-control--nested wc-block-components-require-address_2-field"
 					/>
-				) }
+				)}
 				<ToggleControl
 					__nextHasNoMarginBottom
-					label={ __( 'Phone', 'woocommerce' ) }
-					checked={ ! defaultFields.phone.hidden }
-					onChange={ () => {
-						if ( defaultFields.phone.hidden ) {
-							setFieldEntity( 'phone', 'optional' );
+					label={__('Phone', 'woocommerce')}
+					checked={!defaultFields.phone.hidden}
+					onChange={() => {
+						if (defaultFields.phone.hidden) {
+							setFieldEntity('phone', 'optional');
 						} else {
-							setFieldEntity( 'phone', 'hidden' );
+							setFieldEntity('phone', 'hidden');
 						}
-					} }
+					}}
 				/>
-				{ ! defaultFields.phone.hidden && (
+				{!defaultFields.phone.hidden && (
 					<RadioControl
 						selected={
 							defaultFields.phone.required ? 'true' : 'false'
 						}
-						options={ requiredOptions }
-						onChange={ ( value: string ) => {
+						options={requiredOptions}
+						onChange={(value: string) => {
 							setFieldEntity(
 								'phone',
 								value === 'true' ? 'required' : 'optional'
 							);
-						} }
+						}}
 						className="components-base-control--nested wc-block-components-require-phone-field"
 					/>
-				) }
+				)}
 			</PanelBody>
 		</InspectorControls>
 	);

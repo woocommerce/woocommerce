@@ -15,22 +15,22 @@ import { PluginBanner } from '../../shipping-recommendation/components/plugin-ba
  * @param {Object} props.shippingMethod Shipping method object
  * @return {JSX.Element} React node
  */
-export const ShippingLayoutColumn = ( {
+export const ShippingLayoutColumn = ({
 	shippingMethod,
 }: {
 	shippingMethod: ShippingMethod;
-} ) => {
+}) => {
 	return (
 		<PluginBanner
 			description={
 				shippingMethod.layout_column?.description ||
 				shippingMethod.description
 			}
-			features={ shippingMethod.layout_column?.features || [] }
-			logo={ {
+			features={shippingMethod.layout_column?.features || []}
+			logo={{
 				image: shippingMethod.layout_column?.image || '',
 				label: shippingMethod.layout_column?.image_label,
-			} }
+			}}
 		/>
 	);
 };
@@ -43,27 +43,27 @@ export const ShippingLayoutColumn = ( {
  * @param {Array}  props.children       Children to render inside the layout
  * @return {JSX.Element} React node
  */
-export const ShippingLayoutRow = ( {
+export const ShippingLayoutRow = ({
 	shippingMethod,
 	children,
 }: {
 	shippingMethod: ShippingMethod;
 	children: React.ReactNode;
-} ) => {
+}) => {
 	return (
 		<PluginBanner
 			layout="dual"
-			features={ shippingMethod.layout_row?.features || [] }
-			logo={ {
+			features={shippingMethod.layout_row?.features || []}
+			logo={{
 				image: shippingMethod.layout_row?.image || '',
 				label: shippingMethod.layout_row?.image_label,
-			} }
+			}}
 			description={
 				shippingMethod.layout_row?.description ||
 				shippingMethod.description
 			}
 		>
-			{ children }
+			{children}
 		</PluginBanner>
 	);
 };

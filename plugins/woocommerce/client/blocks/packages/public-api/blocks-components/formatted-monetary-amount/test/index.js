@@ -14,8 +14,8 @@ import FormattedMonetaryAmount from '../index';
 const symbolSelector =
 	'.wc-block-components-formatted-money-amount__currency-symbol';
 
-jest.mock( '@woocommerce/settings', () => ( {
-	...jest.requireActual( '@woocommerce/settings' ),
+jest.mock('@woocommerce/settings', () => ({
+	...jest.requireActual('@woocommerce/settings'),
 	SITE_CURRENCY: {
 		code: 'EUR',
 		symbol: 'TEST',
@@ -25,23 +25,23 @@ jest.mock( '@woocommerce/settings', () => ( {
 		prefix: '',
 		suffix: ' TEST',
 	},
-} ) );
+}));
 
-describe( 'FormattedMonetaryAmount', () => {
-	describe( 'separators', () => {
-		test( 'should default to store currency configuration', () => {
+describe('FormattedMonetaryAmount', () => {
+	describe('separators', () => {
+		test('should default to store currency configuration', () => {
 			const { container } = render(
 				<FormattedMonetaryAmount value="156345" />
 			);
 
-			expect( container ).toHaveTextContent( '1.563,45 TEST' );
-		} );
+			expect(container).toHaveTextContent('1.563,45 TEST');
+		});
 
-		test( 'should add the thousand separator', () => {
+		test('should add the thousand separator', () => {
 			const { container } = render(
 				<FormattedMonetaryAmount
 					value="156345"
-					currency={ {
+					currency={{
 						code: 'EUR',
 						symbol: '€',
 						thousandSeparator: '.',
@@ -49,18 +49,18 @@ describe( 'FormattedMonetaryAmount', () => {
 						minorUnit: 2,
 						prefix: '',
 						suffix: ' €',
-					} }
+					}}
 				/>
 			);
 
-			expect( container ).toHaveTextContent( '1.563,45 €' );
-		} );
+			expect(container).toHaveTextContent('1.563,45 €');
+		});
 
-		test( 'should not add thousand separator', () => {
+		test('should not add thousand separator', () => {
 			const { container } = render(
 				<FormattedMonetaryAmount
 					value="156345"
-					currency={ {
+					currency={{
 						code: 'EUR',
 						symbol: '€',
 						decimalSeparator: ',',
@@ -68,17 +68,17 @@ describe( 'FormattedMonetaryAmount', () => {
 						minorUnit: 2,
 						prefix: '',
 						suffix: ' €',
-					} }
+					}}
 				/>
 			);
-			expect( container ).toHaveTextContent( '1563,45 €' );
-		} );
+			expect(container).toHaveTextContent('1563,45 €');
+		});
 
-		test( 'should remove the thousand separator when identical to the decimal one', () => {
+		test('should remove the thousand separator when identical to the decimal one', () => {
 			const { container } = render(
 				<FormattedMonetaryAmount
 					value="156345"
-					currency={ {
+					currency={{
 						code: 'EUR',
 						symbol: '€',
 						thousandSeparator: ',',
@@ -86,18 +86,18 @@ describe( 'FormattedMonetaryAmount', () => {
 						minorUnit: 2,
 						prefix: '',
 						suffix: ' €',
-					} }
+					}}
 				/>
 			);
-			expect( console ).toHaveWarned();
-			expect( container ).toHaveTextContent( '1563,45 €' );
-		} );
+			expect(console).toHaveWarned();
+			expect(container).toHaveTextContent('1563,45 €');
+		});
 
-		test( 'should fall back to a period for an empty decimal separator', () => {
+		test('should fall back to a period for an empty decimal separator', () => {
 			const { container } = render(
 				<FormattedMonetaryAmount
 					value="156345"
-					currency={ {
+					currency={{
 						code: 'EUR',
 						symbol: '€',
 						thousandSeparator: '.',
@@ -105,18 +105,18 @@ describe( 'FormattedMonetaryAmount', () => {
 						minorUnit: 2,
 						prefix: '',
 						suffix: ' €',
-					} }
+					}}
 				/>
 			);
-			expect( console ).toHaveWarned();
-			expect( container ).toHaveTextContent( '1563.45 €' );
-		} );
+			expect(console).toHaveWarned();
+			expect(container).toHaveTextContent('1563.45 €');
+		});
 
-		test( 'should render when both separators are empty', () => {
+		test('should render when both separators are empty', () => {
 			const { container } = render(
 				<FormattedMonetaryAmount
 					value="156345"
-					currency={ {
+					currency={{
 						code: 'EUR',
 						symbol: '€',
 						thousandSeparator: '',
@@ -124,18 +124,18 @@ describe( 'FormattedMonetaryAmount', () => {
 						minorUnit: 2,
 						prefix: '',
 						suffix: ' €',
-					} }
+					}}
 				/>
 			);
-			expect( container ).toHaveTextContent( '1563.45 €' );
-		} );
-	} );
-	describe( 'suffix/prefix', () => {
-		test( 'should add the currency suffix', () => {
+			expect(container).toHaveTextContent('1563.45 €');
+		});
+	});
+	describe('suffix/prefix', () => {
+		test('should add the currency suffix', () => {
 			const { container } = render(
 				<FormattedMonetaryAmount
 					value="15"
-					currency={ {
+					currency={{
 						code: 'EUR',
 						symbol: '€',
 						thousandSeparator: '.',
@@ -143,17 +143,17 @@ describe( 'FormattedMonetaryAmount', () => {
 						minorUnit: 2,
 						prefix: '',
 						suffix: ' €',
-					} }
+					}}
 				/>
 			);
-			expect( container ).toHaveTextContent( '0,15 €' );
-		} );
+			expect(container).toHaveTextContent('0,15 €');
+		});
 
-		test( 'should add the currency prefix', () => {
+		test('should add the currency prefix', () => {
 			const { container } = render(
 				<FormattedMonetaryAmount
 					value="15"
-					currency={ {
+					currency={{
 						code: 'EUR',
 						symbol: '€',
 						thousandSeparator: '.',
@@ -161,14 +161,14 @@ describe( 'FormattedMonetaryAmount', () => {
 						minorUnit: 2,
 						prefix: '€ ',
 						suffix: '',
-					} }
+					}}
 				/>
 			);
-			expect( container ).toHaveTextContent( '€ 0,15' );
-		} );
-	} );
+			expect(container).toHaveTextContent('€ 0,15');
+		});
+	});
 
-	describe( 'onValueChange', () => {
+	describe('onValueChange', () => {
 		/** @type {import('@woocommerce/types').Currency} */
 		const eurCurrency = {
 			code: 'EUR',
@@ -180,35 +180,35 @@ describe( 'FormattedMonetaryAmount', () => {
 			suffix: '',
 		};
 
-		test( 'fires for user input, converted to subunits', () => {
+		test('fires for user input, converted to subunits', () => {
 			const onValueChange = jest.fn();
 			render(
 				<FormattedMonetaryAmount
 					value="156345"
-					currency={ eurCurrency }
+					currency={eurCurrency}
 					displayType="input"
-					onValueChange={ onValueChange }
+					onValueChange={onValueChange}
 				/>
 			);
 
 			// Not on mount.
-			expect( onValueChange ).not.toHaveBeenCalled();
+			expect(onValueChange).not.toHaveBeenCalled();
 
-			fireEvent.change( screen.getByRole( 'textbox' ), {
+			fireEvent.change(screen.getByRole('textbox'), {
 				target: { value: '€ 12,00' },
-			} );
-			expect( onValueChange ).toHaveBeenCalledTimes( 1 );
-			expect( onValueChange ).toHaveBeenCalledWith( 1200 );
-		} );
+			});
+			expect(onValueChange).toHaveBeenCalledTimes(1);
+			expect(onValueChange).toHaveBeenCalledWith(1200);
+		});
 
-		test( 'also fires for value prop changes, matching v4', () => {
+		test('also fires for value prop changes, matching v4', () => {
 			const onValueChange = jest.fn();
 			const { rerender } = render(
 				<FormattedMonetaryAmount
 					value="156345"
-					currency={ eurCurrency }
+					currency={eurCurrency}
 					displayType="input"
-					onValueChange={ onValueChange }
+					onValueChange={onValueChange}
 				/>
 			);
 
@@ -218,21 +218,21 @@ describe( 'FormattedMonetaryAmount', () => {
 			rerender(
 				<FormattedMonetaryAmount
 					value="179900"
-					currency={ eurCurrency }
+					currency={eurCurrency}
 					displayType="input"
-					onValueChange={ onValueChange }
+					onValueChange={onValueChange}
 				/>
 			);
-			expect( onValueChange ).toHaveBeenCalledWith( 179900 );
-		} );
-	} );
+			expect(onValueChange).toHaveBeenCalledWith(179900);
+		});
+	});
 
-	describe( 'supports different value types', () => {
-		test( 'should support numbers', () => {
+	describe('supports different value types', () => {
+		test('should support numbers', () => {
 			const { container } = render(
 				<FormattedMonetaryAmount
-					value={ 15.0 }
-					currency={ {
+					value={15.0}
+					currency={{
 						code: 'EUR',
 						symbol: '€',
 						thousandSeparator: '.',
@@ -240,17 +240,17 @@ describe( 'FormattedMonetaryAmount', () => {
 						minorUnit: 0,
 						prefix: '',
 						suffix: ' €',
-					} }
+					}}
 				/>
 			);
-			expect( container ).toHaveTextContent( '15 €' );
-		} );
+			expect(container).toHaveTextContent('15 €');
+		});
 
-		test( 'should support strings', () => {
+		test('should support strings', () => {
 			const { container } = render(
 				<FormattedMonetaryAmount
 					value="15.0"
-					currency={ {
+					currency={{
 						code: 'EUR',
 						symbol: '€',
 						thousandSeparator: '.',
@@ -258,14 +258,14 @@ describe( 'FormattedMonetaryAmount', () => {
 						minorUnit: 0,
 						prefix: '€ ',
 						suffix: '',
-					} }
+					}}
 				/>
 			);
-			expect( container ).toHaveTextContent( '€ 15' );
-		} );
-	} );
+			expect(container).toHaveTextContent('€ 15');
+		});
+	});
 
-	describe( 'markup', () => {
+	describe('markup', () => {
 		/** @type {import('@woocommerce/types').Currency} */
 		const eurCurrency = {
 			code: 'EUR',
@@ -285,33 +285,33 @@ describe( 'FormattedMonetaryAmount', () => {
 			thousandSeparator: ',',
 			decimalSeparator: '.',
 			minorUnit: 2,
-			prefix: `${ lbpSymbol } `,
+			prefix: `${lbpSymbol} `,
 			suffix: '',
 		};
 
 		const lrm = '‎';
 
-		test( 'renders the price in a bdi with the symbol in its own isolating element, matching wc_price()', () => {
+		test('renders the price in a bdi with the symbol in its own isolating element, matching wc_price()', () => {
 			const { container } = render(
 				<FormattedMonetaryAmount
 					value="156345"
-					currency={ eurCurrency }
+					currency={eurCurrency}
 				/>
 			);
 
-			expect( container.querySelector( 'bdi' ) ).toHaveTextContent(
+			expect(container.querySelector('bdi')).toHaveTextContent(
 				'€ 1.563,45'
 			);
 
-			const symbol = container.querySelector( symbolSelector );
+			const symbol = container.querySelector(symbolSelector);
 			// The space stays outside the isolate; inside it, it would be drawn
 			// on the wrong side of the symbol.
-			expect( symbol?.textContent ).toBe( '€' );
-			expect( symbol ).toHaveAttribute( 'dir', 'auto' );
-		} );
+			expect(symbol?.textContent).toBe('€');
+			expect(symbol).toHaveAttribute('dir', 'auto');
+		});
 
-		test.each( [
-			[ 'a prefix symbol', eurCurrency, '€', '€ 1.563,45' ],
+		test.each([
+			['a prefix symbol', eurCurrency, '€', '€ 1.563,45'],
 			[
 				'a suffix symbol',
 				{ ...eurCurrency, prefix: '', suffix: ' €' },
@@ -328,111 +328,109 @@ describe( 'FormattedMonetaryAmount', () => {
 				'an RTL-script prefix symbol',
 				lbpCurrency,
 				lbpSymbol,
-				`${ lbpSymbol } 1,563.45`,
+				`${lbpSymbol} 1,563.45`,
 			],
 			[
 				'a filtered symbol carrying a directional mark',
-				{ ...lbpCurrency, prefix: `${ lrm }${ lbpSymbol } ` },
-				`${ lrm }${ lbpSymbol }`,
-				`${ lrm }${ lbpSymbol } 1,563.45`,
+				{ ...lbpCurrency, prefix: `${lrm}${lbpSymbol} ` },
+				`${lrm}${lbpSymbol}`,
+				`${lrm}${lbpSymbol} 1,563.45`,
 			],
-		] )(
+		])(
 			'isolates %s and keeps its spacing outside the isolate',
-			( _case, currency, symbol, text ) => {
+			(_case, currency, symbol, text) => {
 				const { container } = render(
 					<FormattedMonetaryAmount
 						value="156345"
-						currency={ currency }
+						currency={currency}
 					/>
 				);
 
 				expect(
-					container.querySelector( symbolSelector )?.textContent
-				).toBe( symbol );
-				expect( container.querySelector( 'bdi' ) ).toHaveTextContent(
-					text
-				);
+					container.querySelector(symbolSelector)?.textContent
+				).toBe(symbol);
+				expect(container.querySelector('bdi')).toHaveTextContent(text);
 			}
 		);
 
-		test( 'keeps the negative sign inside the bdi, ahead of the symbol', () => {
+		test('keeps the negative sign inside the bdi, ahead of the symbol', () => {
 			const { container } = render(
 				<FormattedMonetaryAmount
 					value="-156345"
-					currency={ eurCurrency }
+					currency={eurCurrency}
 				/>
 			);
 
-			expect( container.querySelector( 'bdi' ) ).toHaveTextContent(
+			expect(container.querySelector('bdi')).toHaveTextContent(
 				'-€ 1.563,45'
 			);
-		} );
+		});
 
-		test( 'keeps the symbol in the value when rendering an input', () => {
+		test('keeps the symbol in the value when rendering an input', () => {
 			const { container } = render(
 				<FormattedMonetaryAmount
 					value="156345"
-					currency={ eurCurrency }
+					currency={eurCurrency}
 					displayType="input"
 				/>
 			);
 
-			expect( container.querySelector( 'bdi' ) ).toBeNull();
-			expect( screen.getByRole( 'textbox' ) ).toHaveValue( '€ 1.563,45' );
-		} );
+			expect(container.querySelector('bdi')).toBeNull();
+			expect(screen.getByRole('textbox')).toHaveValue('€ 1.563,45');
+		});
 
-		test( 'keeps the wrapper span classes, style and translate attribute', () => {
+		test('keeps the wrapper span classes, style and translate attribute', () => {
 			const { container } = render(
 				<FormattedMonetaryAmount
 					value="156345"
-					currency={ eurCurrency }
+					currency={eurCurrency}
 					className="custom-class"
-					style={ { color: 'red' } }
+					style={{ color: 'red' }}
 				/>
 			);
 
 			// The span props come through the renderText callback now, so pin
 			// down that nothing is lost on the way.
 			const wrapper = container.firstChild;
-			expect( wrapper ).toHaveClass(
+			expect(wrapper).toHaveClass(
 				'wc-block-formatted-money-amount',
 				'wc-block-components-formatted-money-amount',
 				'custom-class'
 			);
-			expect( wrapper ).toHaveStyle( { color: 'rgb(255, 0, 0)' } );
-			expect( wrapper ).toHaveAttribute( 'translate', 'no' );
-		} );
+			expect(wrapper).toHaveStyle({ color: 'rgb(255, 0, 0)' });
+			expect(wrapper).toHaveAttribute('translate', 'no');
+		});
 
-		test( 'forwards getInputRef to the wrapper span in text mode', () => {
+		test('forwards getInputRef to the wrapper span in text mode', () => {
 			const getInputRef = jest.fn();
 			const { container } = render(
 				<FormattedMonetaryAmount
 					value="156345"
-					currency={ eurCurrency }
-					getInputRef={ getInputRef }
+					currency={eurCurrency}
+					getInputRef={getInputRef}
 				/>
 			);
 
 			// NumericFormat does not apply getInputRef when renderText is set,
 			// so the component wires it to the span itself.
-			expect( getInputRef ).toHaveBeenCalledWith( container.firstChild );
-		} );
+			expect(getInputRef).toHaveBeenCalledWith(container.firstChild);
+		});
 
-		test( 'leaves a consumer-supplied renderText in control of the output', () => {
+		test('leaves a consumer-supplied renderText in control of the output', () => {
 			const { container } = render(
 				<FormattedMonetaryAmount
 					value="156345"
-					currency={ eurCurrency }
-					renderText={ ( formattedValue ) => (
-						<strong>{ formattedValue }</strong>
-					) }
+					currency={eurCurrency}
+					renderText={(formattedValue) => (
+						<strong>{formattedValue}</strong>
+					)}
 				/>
 			);
 
-			expect( container.querySelector( 'bdi' ) ).toBeNull();
-			expect( container.querySelector( 'strong' ) ).toHaveTextContent(
+			expect(container.querySelector('bdi')).toBeNull();
+			expect(container.querySelector('strong')).toHaveTextContent(
 				'€ 1.563,45'
 			);
-		} );
-	} );
-} );
+		});
+	});
+});

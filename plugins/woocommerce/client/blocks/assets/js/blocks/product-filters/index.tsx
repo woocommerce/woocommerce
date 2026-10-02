@@ -13,9 +13,9 @@ import deprecated from './deprecated';
 import { Edit } from './edit';
 import { Save } from './save';
 
-registerBlockType( metadata, {
-	icon: <Icon icon={ filterThreeLines } />,
+registerBlockType(metadata, {
+	icon: <Icon icon={filterThreeLines} />,
 	edit: Edit,
 	save: Save,
 	deprecated,
-} );
+});

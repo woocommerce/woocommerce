@@ -36,32 +36,32 @@ import './payment-gateway-suggestions.scss';
 import { getPluginSlug } from '~/utils';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
 
-export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
-	const { updatePaymentGateway } = useDispatch( PAYMENT_GATEWAYS_STORE_NAME );
+export const PaymentGatewaySuggestions = ({ onComplete, query }) => {
+	const { updatePaymentGateway } = useDispatch(PAYMENT_GATEWAYS_STORE_NAME);
 	const {
 		getPaymentGateway,
 		paymentGatewaySuggestions,
 		installedPaymentGateways,
 		isResolving,
 		countryCode,
-	} = useSelect( ( select ) => {
-		const { getSettings } = select( settingsStore );
-		const { general: settings = {} } = getSettings( 'general' );
+	} = useSelect((select) => {
+		const { getSettings } = select(settingsStore);
+		const { general: settings = {} } = getSettings('general');
 		return {
-			getPaymentGateway: select( PAYMENT_GATEWAYS_STORE_NAME )
+			getPaymentGateway: select(PAYMENT_GATEWAYS_STORE_NAME)
 				.getPaymentGateway,
-			getOption: select( optionsStore ).getOption,
+			getOption: select(optionsStore).getOption,
 			installedPaymentGateways: select(
 				PAYMENT_GATEWAYS_STORE_NAME
 			).getPaymentGateways(),
-			isResolving: select( onboardingStore ).isResolving(
+			isResolving: select(onboardingStore).isResolving(
 				'getPaymentGatewaySuggestions'
 			),
 			paymentGatewaySuggestions:
-				select( onboardingStore ).getPaymentGatewaySuggestions( true ),
-			countryCode: getCountryCode( settings.woocommerce_default_country ),
+				select(onboardingStore).getPaymentGatewaySuggestions(true),
+			countryCode: getCountryCode(settings.woocommerce_default_country),
 		};
-	}, [] );
+	}, []);
 
 	const paymentGateways = useMemo(
 		() =>
@@ -69,28 +69,28 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 				installedPaymentGateways,
 				paymentGatewaySuggestions
 			),
-		[ installedPaymentGateways, paymentGatewaySuggestions ]
+		[installedPaymentGateways, paymentGatewaySuggestions]
 	);
 
 	const enablePaymentGateway = useCallback(
-		( id ) => {
-			if ( ! id ) {
+		(id) => {
+			if (!id) {
 				return;
 			}
 
-			const gateway = getPaymentGateway( id );
+			const gateway = getPaymentGateway(id);
 
-			if ( ! gateway ) {
+			if (!gateway) {
 				return;
 			}
 
-			updatePaymentGateway( id, {
+			updatePaymentGateway(id, {
 				enabled: true,
-			} ).then( () => {
+			}).then(() => {
 				onComplete(
 					// use the paymentGateways variable.
 					// gateway variable doesn't have hasPlugins property.
-					! paymentGateways.get( id )?.hasPlugins
+					!paymentGateways.get(id)?.hasPlugins
 						? {
 								// If we are already on a task page, don't redirect.
 								// Otherwise, redirect to Payments task page.
@@ -99,47 +99,43 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 											{ task: getQuery().task },
 											{},
 											'/'
-									  )
-									: getNewPath(
-											{ task: 'payments' },
-											{},
-											'/'
-									  ),
-						  }
+										)
+									: getNewPath({ task: 'payments' }, {}, '/'),
+							}
 						: {}
 				);
-			} );
+			});
 		},
-		[ getPaymentGateway, updatePaymentGateway, onComplete, paymentGateways ]
+		[getPaymentGateway, updatePaymentGateway, onComplete, paymentGateways]
 	);
 
 	const markConfigured = useCallback(
-		async ( id ) => {
-			if ( ! paymentGateways.get( id ) ) {
-				throw `Payment gateway ${ id } not found in available gateways list`;
+		async (id) => {
+			if (!paymentGateways.get(id)) {
+				throw `Payment gateway ${id} not found in available gateways list`;
 			}
 
-			recordEvent( 'tasklist_payment_connect_method', {
+			recordEvent('tasklist_payment_connect_method', {
 				payment_method: id,
-			} );
+			});
 
-			enablePaymentGateway( id );
+			enablePaymentGateway(id);
 		},
-		[ paymentGateways, enablePaymentGateway ]
+		[paymentGateways, enablePaymentGateway]
 	);
 
 	const recommendation = useMemo(
 		() =>
-			Array.from( paymentGateways.values() )
-				.filter( ( gateway ) => gateway.recommendation_priority )
-				.sort( comparePaymentGatewaysByPriority )
-				.map( ( gateway ) => gateway.id )
+			Array.from(paymentGateways.values())
+				.filter((gateway) => gateway.recommendation_priority)
+				.sort(comparePaymentGatewaysByPriority)
+				.map((gateway) => gateway.id)
 				.shift(),
-		[ paymentGateways ]
+		[paymentGateways]
 	);
 
-	const currentGateway = useMemo( () => {
-		if ( ! query.id || isResolving || ! paymentGateways.size ) {
+	const currentGateway = useMemo(() => {
+		if (!query.id || isResolving || !paymentGateways.size) {
 			return null;
 		}
 
@@ -147,28 +143,26 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		// The payment gateway suggestion ID is sometimes the same as the plugin ID/slug, but not always.
 		// Sometimes it features a : separator, e.g. 'woocommerce-payments:bnpl'.
 		// We will discard the part after the : separator when searching for the current gateway.
-		const processedQueryId = getPluginSlug( query.id );
-		const gateway = Array.from( paymentGateways.entries() ).find(
-			( [ key ] ) => getPluginSlug( key ) === processedQueryId
-		)?.[ 1 ];
+		const processedQueryId = getPluginSlug(query.id);
+		const gateway = Array.from(paymentGateways.entries()).find(
+			([key]) => getPluginSlug(key) === processedQueryId
+		)?.[1];
 
-		if ( ! gateway ) {
-			throw `Current gateway ${ query.id } not found in available gateways list`;
+		if (!gateway) {
+			throw `Current gateway ${query.id} not found in available gateways list`;
 		}
 
 		return gateway;
-	}, [ isResolving, query, paymentGateways ] );
+	}, [isResolving, query, paymentGateways]);
 
 	const isWCPayOrOtherCategoryDoneSetup = useMemo(
-		() =>
-			getIsWCPayOrOtherCategoryDoneSetup( paymentGateways, countryCode ),
-		[ countryCode, paymentGateways ]
+		() => getIsWCPayOrOtherCategoryDoneSetup(paymentGateways, countryCode),
+		[countryCode, paymentGateways]
 	);
 
 	const isWCPaySupported =
-		Array.from( paymentGateways.values() ).findIndex(
-			getIsGatewayWCPay
-		) !== -1;
+		Array.from(paymentGateways.values()).findIndex(getIsGatewayWCPay) !==
+		-1;
 
 	const [
 		wcPayGateway,
@@ -191,42 +185,42 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		]
 	);
 
-	useEffect( () => {
+	useEffect(() => {
 		let shownGateways = [];
 
-		if ( ! currentGateway ) {
-			if ( wcPayGateway.length ) {
-				shownGateways.push( wcPayGateway[ 0 ].id );
+		if (!currentGateway) {
+			if (wcPayGateway.length) {
+				shownGateways.push(wcPayGateway[0].id);
 			}
-			if ( wcPayBnplGateway.length ) {
-				shownGateways.push( wcPayBnplGateway[ 0 ].id );
+			if (wcPayBnplGateway.length) {
+				shownGateways.push(wcPayBnplGateway[0].id);
 			}
-			if ( additionalGateways.length ) {
+			if (additionalGateways.length) {
 				shownGateways = shownGateways.concat(
-					additionalGateways.map( ( g ) => g.id )
+					additionalGateways.map((g) => g.id)
 				);
 			}
-			if ( shownGateways.length ) {
-				recordEvent( 'tasklist_payments_options', {
+			if (shownGateways.length) {
+				recordEvent('tasklist_payments_options', {
 					options: shownGateways,
-				} );
+				});
 			}
 		}
-	}, [ additionalGateways, currentGateway, wcPayGateway, wcPayBnplGateway ] );
+	}, [additionalGateways, currentGateway, wcPayGateway, wcPayBnplGateway]);
 
 	const trackSeeMore = () => {
-		recordEvent( 'tasklist_payment_see_more', {} );
+		recordEvent('tasklist_payment_see_more', {});
 	};
 
-	if ( query.id && ! currentGateway ) {
+	if (query.id && !currentGateway) {
 		return <SetupPlaceholder />;
 	}
 
-	if ( currentGateway ) {
+	if (currentGateway) {
 		return (
 			<Setup
-				paymentGateway={ currentGateway }
-				markConfigured={ markConfigured }
+				paymentGateway={currentGateway}
+				markConfigured={markConfigured}
 			/>
 		);
 	}
@@ -239,7 +233,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		'To start accepting online payments',
 		'woocommerce'
 	);
-	if ( isWCPayOrOtherCategoryDoneSetup ) {
+	if (isWCPayOrOtherCategoryDoneSetup) {
 		additionalSectionHeading = __(
 			'Additional payment options',
 			'woocommerce'
@@ -248,87 +242,84 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 			'Give your customers additional choices in ways to pay.',
 			'woocommerce'
 		);
-	} else if ( isWCPaySupported ) {
-		additionalSectionHeading = __(
-			'Other payment providers',
-			'woocommerce'
-		);
+	} else if (isWCPaySupported) {
+		additionalSectionHeading = __('Other payment providers', 'woocommerce');
 		additionalSectionHeadingDescription = __(
 			'Try one of the alternative payment providers.',
 			'woocommerce'
 		);
 	}
 
-	const additionalSection = !! additionalGateways.length && (
+	const additionalSection = !!additionalGateways.length && (
 		<List
-			heading={ additionalSectionHeading }
-			headingDescription={ additionalSectionHeadingDescription }
+			heading={additionalSectionHeading}
+			headingDescription={additionalSectionHeadingDescription}
 			// No recommendation if WooPayments is supported (and displayed).
-			recommendation={ isWCPaySupported ? false : recommendation }
-			paymentGateways={ additionalGateways }
-			markConfigured={ markConfigured }
+			recommendation={isWCPaySupported ? false : recommendation}
+			paymentGateways={additionalGateways}
+			markConfigured={markConfigured}
 			footerLink={
 				<TrackedLink
-					message={ __(
+					message={__(
 						// translators: {{Link}} is a placeholder for a html element.
 						'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find additional payment providers.',
 						'woocommerce'
-					) }
-					onClickCallback={ trackSeeMore }
-					targetUrl={ getAdminLink(
+					)}
+					onClickCallback={trackSeeMore}
+					targetUrl={getAdminLink(
 						'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
-					) }
+					)}
 					linkType="wc-admin"
 				/>
 			}
 		></List>
 	);
 
-	const offlineSection = !! offlineGateways.length && (
+	const offlineSection = !!offlineGateways.length && (
 		<List
-			heading={ __( 'Offline payment methods', 'woocommerce' ) }
+			heading={__('Offline payment methods', 'woocommerce')}
 			// No recommendation if WooPayments is supported (and displayed).
-			recommendation={ isWCPaySupported ? false : recommendation }
-			paymentGateways={ offlineGateways }
-			markConfigured={ markConfigured }
+			recommendation={isWCPaySupported ? false : recommendation}
+			paymentGateways={offlineGateways}
+			markConfigured={markConfigured}
 		/>
 	);
 
 	return (
 		<div className="woocommerce-task-payments">
-			{ ! paymentGateways.size && <ListPlaceholder /> }
+			{!paymentGateways.size && <ListPlaceholder />}
 
-			{ wcPayGateway.length ? (
+			{wcPayGateway.length ? (
 				<>
-					<WCPaySuggestion paymentGateway={ wcPayGateway[ 0 ] } />
-					{ additionalSection }
-					{ offlineSection }
+					<WCPaySuggestion paymentGateway={wcPayGateway[0]} />
+					{additionalSection}
+					{offlineSection}
 				</>
 			) : (
 				<>
-					{ additionalSection }
-					{ !! wcPayBnplGateway.length && (
+					{additionalSection}
+					{!!wcPayBnplGateway.length && (
 						<WCPayBNPLSuggestion
-							paymentGateway={ wcPayBnplGateway[ 0 ] }
+							paymentGateway={wcPayBnplGateway[0]}
 						/>
-					) }
-					{ offlineSection }
+					)}
+					{offlineSection}
 				</>
-			) }
+			)}
 		</div>
 	);
 };
 
-registerPlugin( 'wc-admin-onboarding-task-payments', {
+registerPlugin('wc-admin-onboarding-task-payments', {
 	scope: 'woocommerce-tasks',
 	render: () => (
 		<WooOnboardingTask id="payments">
-			{ ( { onComplete, query } ) => (
+			{({ onComplete, query }) => (
 				<PaymentGatewaySuggestions
-					onComplete={ onComplete }
-					query={ query }
+					onComplete={onComplete}
+					query={query}
 				/>
-			) }
+			)}
 		</WooOnboardingTask>
 	),
-} );
+});

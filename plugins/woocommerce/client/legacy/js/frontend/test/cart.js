@@ -103,7 +103,9 @@ describe( 'cart.js request encoding', () => {
 					documentHandlers.push( {
 						event,
 						selector: isDelegated ? selectorOrHandler : null,
-						handler: isDelegated ? delegatedHandler : selectorOrHandler,
+						handler: isDelegated
+							? delegatedHandler
+							: selectorOrHandler,
 					} );
 				} );
 				return $document;
@@ -117,7 +119,10 @@ describe( 'cart.js request encoding', () => {
 			);
 			if ( ! entry ) {
 				throw new Error(
-					'No ' + event + ' handler' + ( selector ? ' for ' + selector : '' )
+					'No ' +
+						event +
+						' handler' +
+						( selector ? ' for ' + selector : '' )
 				);
 			}
 			return entry.handler;
@@ -214,7 +219,10 @@ describe( 'cart.js request encoding', () => {
 			const buildParams = ( prefix, value ) => {
 				if ( value !== null && typeof value === 'object' ) {
 					Object.keys( value ).forEach( ( nestedKey ) =>
-						buildParams( prefix + '[' + nestedKey + ']', value[ nestedKey ] )
+						buildParams(
+							prefix + '[' + nestedKey + ']',
+							value[ nestedKey ]
+						)
 					);
 					return;
 				}
@@ -253,7 +261,10 @@ describe( 'cart.js request encoding', () => {
 			'submit',
 			'form.woocommerce-shipping-calculator'
 		);
-		const evt = { preventDefault: jest.fn(), currentTarget: shippingFormElement };
+		const evt = {
+			preventDefault: jest.fn(),
+			currentTarget: shippingFormElement,
+		};
 
 		submit( evt );
 
@@ -297,8 +308,14 @@ describe( 'cart.js request encoding', () => {
 		// submit button is the Update cart button.
 		clickedSubmitName = 'update_cart';
 		$cartForm.serialize.mockReturnValue( QUANTITY_FORM_SERIALIZED );
-		const submit = findDocumentHandler( 'submit', '.woocommerce-cart-form' );
-		const evt = { preventDefault: jest.fn(), currentTarget: cartFormElement };
+		const submit = findDocumentHandler(
+			'submit',
+			'.woocommerce-cart-form'
+		);
+		const evt = {
+			preventDefault: jest.fn(),
+			currentTarget: cartFormElement,
+		};
 
 		submit( evt );
 
@@ -317,8 +334,14 @@ describe( 'cart.js request encoding', () => {
 
 	test( 'should encode apostrophes in apply coupon data', () => {
 		clickedSubmitName = 'apply_coupon';
-		const submit = findDocumentHandler( 'submit', '.woocommerce-cart-form' );
-		const evt = { preventDefault: jest.fn(), currentTarget: cartFormElement };
+		const submit = findDocumentHandler(
+			'submit',
+			'.woocommerce-cart-form'
+		);
+		const evt = {
+			preventDefault: jest.fn(),
+			currentTarget: cartFormElement,
+		};
 
 		submit( evt );
 
@@ -336,7 +359,10 @@ describe( 'cart.js request encoding', () => {
 	} );
 
 	test( 'should encode apostrophes in remove coupon data', () => {
-		const click = findDocumentHandler( 'click', 'a.woocommerce-remove-coupon' );
+		const click = findDocumentHandler(
+			'click',
+			'a.woocommerce-remove-coupon'
+		);
 		const evt = {
 			preventDefault: jest.fn(),
 			currentTarget: removeCouponElement,

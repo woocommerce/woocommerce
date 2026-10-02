@@ -13,22 +13,22 @@ import {
 	StoreAddress,
 } from '../store-address';
 
-const AutofillWrapper = ( { options, value, onChange } ) => {
-	const [ values, setValues ] = useState( { countryState: value || '' } );
-	const setCountryState = useCallback( ( key, newValue ) => {
-		setValues( {
+const AutofillWrapper = ({ options, value, onChange }) => {
+	const [values, setValues] = useState({ countryState: value || '' });
+	const setCountryState = useCallback((key, newValue) => {
+		setValues({
 			...values,
-			[ key ]: newValue,
-		} );
-	}, [] );
-	useEffect( () => {
-		setValues( { countryState: value } );
-	}, [ value ] );
-	useEffect( () => {
-		if ( onChange ) {
-			onChange( values );
+			[key]: newValue,
+		});
+	}, []);
+	useEffect(() => {
+		setValues({ countryState: value });
+	}, [value]);
+	useEffect(() => {
+		if (onChange) {
+			onChange(values);
 		}
-	}, [ values ] );
+	}, [values]);
 	const countryStateAutofill = useGetCountryStateAutofill(
 		options,
 		values.countryState,
@@ -51,123 +51,117 @@ const DEFAULT_OPTIONS = [
 	{ key: 'IR:THR', label: 'Iran — Tehran (تهران)' },
 ];
 
-describe( 'useGetCountryStateAutofill', () => {
-	it( 'should render a country and state inputs with autoComplete', () => {
+describe('useGetCountryStateAutofill', () => {
+	it('should render a country and state inputs with autoComplete', () => {
 		const { queryAllByRole } = render(
-			<AutofillWrapper options={ [ ...DEFAULT_OPTIONS ] } />
+			<AutofillWrapper options={[...DEFAULT_OPTIONS]} />
 		);
-		const inputs = queryAllByRole( 'textbox' );
+		const inputs = queryAllByRole('textbox');
 
-		expect( inputs.length ).toBe( 2 );
-		expect( inputs[ 0 ].autocomplete ).toEqual( 'country' );
-		expect( inputs[ 1 ].autocomplete ).toEqual( 'address-level1' );
-	} );
+		expect(inputs.length).toBe(2);
+		expect(inputs[0].autocomplete).toEqual('country');
+		expect(inputs[1].autocomplete).toEqual('address-level1');
+	});
 
-	it( 'should set countryState value if a value is provided', () => {
+	it('should set countryState value if a value is provided', () => {
 		const onChange = jest.fn();
 		render(
 			<AutofillWrapper
-				options={ [ ...DEFAULT_OPTIONS ] }
+				options={[...DEFAULT_OPTIONS]}
 				value="US:KS"
-				onChange={ onChange }
+				onChange={onChange}
 			/>
 		);
 
 		// check the most recent call values
-		expect( onChange.mock.calls.pop() ).toEqual( [
-			{ countryState: 'US:KS' },
-		] );
-	} );
+		expect(onChange.mock.calls.pop()).toEqual([{ countryState: 'US:KS' }]);
+	});
 
-	it( 'should set autocomplete fields if the countryState is not empty', () => {
+	it('should set autocomplete fields if the countryState is not empty', () => {
 		const { queryAllByRole } = render(
-			<AutofillWrapper options={ [ ...DEFAULT_OPTIONS ] } value="CA:MB" />
+			<AutofillWrapper options={[...DEFAULT_OPTIONS]} value="CA:MB" />
 		);
-		const inputs = queryAllByRole( 'textbox' );
+		const inputs = queryAllByRole('textbox');
 
-		expect( inputs.length ).toBe( 2 );
-		expect( inputs[ 0 ].value ).toEqual( 'Canada' );
-		expect( inputs[ 1 ].value ).toEqual( 'Manitoba' );
-	} );
+		expect(inputs.length).toBe(2);
+		expect(inputs[0].value).toEqual('Canada');
+		expect(inputs[1].value).toEqual('Manitoba');
+	});
 
-	it( 'should set countryState if auto complete fields are changed and abbreviation is used', () => {
+	it('should set countryState if auto complete fields are changed and abbreviation is used', () => {
 		const onChange = jest.fn();
 		const { queryAllByRole } = render(
 			<AutofillWrapper
-				options={ [ ...DEFAULT_OPTIONS ] }
-				onChange={ onChange }
+				options={[...DEFAULT_OPTIONS]}
+				onChange={onChange}
 			/>
 		);
-		const inputs = queryAllByRole( 'textbox' );
-		fireEvent.change( inputs[ 0 ], { target: { value: 'United States' } } );
-		fireEvent.change( inputs[ 1 ], {
+		const inputs = queryAllByRole('textbox');
+		fireEvent.change(inputs[0], { target: { value: 'United States' } });
+		fireEvent.change(inputs[1], {
 			target: { value: 'CA' },
-		} );
-		expect( onChange ).toHaveBeenCalledWith( { countryState: 'US:CA' } );
-	} );
+		});
+		expect(onChange).toHaveBeenCalledWith({ countryState: 'US:CA' });
+	});
 
-	it( 'should set countryState if auto complete fields are changed and abbreviation is not used', () => {
+	it('should set countryState if auto complete fields are changed and abbreviation is not used', () => {
 		const onChange = jest.fn();
 		const { queryAllByRole } = render(
 			<AutofillWrapper
-				options={ [ ...DEFAULT_OPTIONS ] }
-				onChange={ onChange }
+				options={[...DEFAULT_OPTIONS]}
+				onChange={onChange}
 			/>
 		);
-		const inputs = queryAllByRole( 'textbox' );
-		fireEvent.change( inputs[ 0 ], { target: { value: 'Canada' } } );
-		fireEvent.change( inputs[ 1 ], {
+		const inputs = queryAllByRole('textbox');
+		fireEvent.change(inputs[0], { target: { value: 'Canada' } });
+		fireEvent.change(inputs[1], {
 			target: { value: 'British Columbia' },
-		} );
-		expect( onChange ).toHaveBeenCalledWith( { countryState: 'CA:BC' } );
-	} );
+		});
+		expect(onChange).toHaveBeenCalledWith({ countryState: 'CA:BC' });
+	});
 
-	it( 'should update the countryState if the auto complete fields changed and countryState was already set', () => {
+	it('should update the countryState if the auto complete fields changed and countryState was already set', () => {
 		const onChange = jest.fn();
 		const { queryAllByRole } = render(
 			<AutofillWrapper
-				options={ [ ...DEFAULT_OPTIONS ] }
-				onChange={ onChange }
+				options={[...DEFAULT_OPTIONS]}
+				onChange={onChange}
 				value="CM"
 			/>
 		);
-		const inputs = queryAllByRole( 'textbox' );
-		expect( inputs[ 0 ].value ).toEqual( 'Cameroon' );
+		const inputs = queryAllByRole('textbox');
+		expect(inputs[0].value).toEqual('Cameroon');
 		onChange.mockClear();
-		fireEvent.change( inputs[ 0 ], { target: { value: 'Canada' } } );
-		fireEvent.change( inputs[ 1 ], {
+		fireEvent.change(inputs[0], { target: { value: 'Canada' } });
+		fireEvent.change(inputs[1], {
 			target: { value: 'British Columbia' },
-		} );
-		expect( onChange ).toHaveBeenCalledWith( { countryState: 'CA:BC' } );
-	} );
+		});
+		expect(onChange).toHaveBeenCalledWith({ countryState: 'CA:BC' });
+	});
 
-	it( 'should update the auto complete fields when countryState is changed and inputs already set', () => {
+	it('should update the auto complete fields when countryState is changed and inputs already set', () => {
 		const onChange = jest.fn();
-		const options = [ ...DEFAULT_OPTIONS ];
+		const options = [...DEFAULT_OPTIONS];
 		const { rerender, queryAllByRole } = render(
-			<AutofillWrapper options={ options } onChange={ onChange } />
+			<AutofillWrapper options={options} onChange={onChange} />
 		);
-		let inputs = queryAllByRole( 'textbox' );
-		fireEvent.change( inputs[ 0 ], { target: { value: 'Canada' } } );
-		fireEvent.change( inputs[ 1 ], {
+		let inputs = queryAllByRole('textbox');
+		fireEvent.change(inputs[0], { target: { value: 'Canada' } });
+		fireEvent.change(inputs[1], {
 			target: { value: 'British Columbia' },
-		} );
-		expect( onChange ).toHaveBeenCalledWith( { countryState: 'CA:BC' } );
+		});
+		expect(onChange).toHaveBeenCalledWith({ countryState: 'CA:BC' });
 		rerender(
-			<AutofillWrapper
-				options={ options }
-				onChange={ onChange }
-				value="KH"
-			/>
+			<AutofillWrapper options={options} onChange={onChange} value="KH" />
 		);
-		inputs = queryAllByRole( 'textbox' );
-		expect( inputs[ 0 ].value ).toEqual( 'Cambodia' );
-		expect( inputs[ 1 ].value ).toEqual( '' );
-	} );
-} );
+		inputs = queryAllByRole('textbox');
+		expect(inputs[0].value).toEqual('Cambodia');
+		expect(inputs[1].value).toEqual('');
+	});
+});
 
-describe( 'getStateFilter', () => {
-	test.each( [
+describe('getStateFilter', () => {
+	test.each([
 		{
 			isStateAbbreviation: false,
 			normalizedAutofillState: 'britishcolumbia',
@@ -201,49 +195,46 @@ describe( 'getStateFilter', () => {
 			normalizedAutofillState: 'tehran',
 			expected: { key: 'IR:THR', label: 'Iran — Tehran (تهران)' },
 		},
-	] )(
+	])(
 		'should filter state matches with isStateAbbreviation=$isStateAbbreviation and normalizedAutofillState=$normalizedAutofillState',
-		( { isStateAbbreviation, normalizedAutofillState, expected } ) => {
+		({ isStateAbbreviation, normalizedAutofillState, expected }) => {
 			expect(
 				DEFAULT_OPTIONS.filter(
-					getStateFilter(
-						isStateAbbreviation,
-						normalizedAutofillState
-					)
+					getStateFilter(isStateAbbreviation, normalizedAutofillState)
 				)
-			).toEqual( [ expected ] );
+			).toEqual([expected]);
 		}
 	);
-} );
+});
 
-jest.mock( '@wordpress/data', () => {
-	const originalModule = jest.requireActual( '@wordpress/data' );
+jest.mock('@wordpress/data', () => {
+	const originalModule = jest.requireActual('@wordpress/data');
 
 	return {
 		__esModule: true,
 		...originalModule,
-		useSelect: jest.fn().mockReturnValue( {
+		useSelect: jest.fn().mockReturnValue({
 			locale: 'en_US',
 			countries: [],
 			loadingCountries: false,
 			hasFinishedResolution: true,
-		} ),
+		}),
 	};
-} );
+});
 
-describe( 'StoreAddress', () => {
-	const mockedGetInputProps = jest.fn().mockReturnValue( '' );
-	const mockedGetSelectControlProps = jest.fn().mockReturnValue( '' );
+describe('StoreAddress', () => {
+	const mockedGetInputProps = jest.fn().mockReturnValue('');
+	const mockedGetSelectControlProps = jest.fn().mockReturnValue('');
 
-	it( 'should render should in the order of Country / Region, Address, Post / Zip Code, City, Email Address.', () => {
+	it('should render should in the order of Country / Region, Address, Post / Zip Code, City, Email Address.', () => {
 		const { container } = render(
 			<StoreAddress
-				getInputProps={ mockedGetInputProps }
-				getSelectControlProps={ mockedGetSelectControlProps }
-				setValue={ jest.fn() }
+				getInputProps={mockedGetInputProps}
+				getSelectControlProps={mockedGetSelectControlProps}
+				setValue={jest.fn()}
 			/>
 		);
-		const labels = container.querySelectorAll( 'label' );
+		const labels = container.querySelectorAll('label');
 		const expectedLabelsInOrder = [
 			'Country / Region *',
 			'Address',
@@ -252,10 +243,8 @@ describe( 'StoreAddress', () => {
 			'Email address',
 		];
 
-		[ ...labels ].forEach( ( label, index ) =>
-			expect( label.textContent ).toEqual(
-				expectedLabelsInOrder[ index ]
-			)
+		[...labels].forEach((label, index) =>
+			expect(label.textContent).toEqual(expectedLabelsInOrder[index])
 		);
-	} );
-} );
+	});
+});

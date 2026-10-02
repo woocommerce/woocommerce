@@ -42,7 +42,7 @@ export default {
 				},
 			},
 			control: 'select',
-			options: [ 'input', 'text' ],
+			options: ['input', 'text'],
 			description:
 				'Whether this should be an input or just a text display.',
 		},
@@ -93,23 +93,19 @@ export default {
 			},
 		},
 	},
-} as Meta< FormattedMonetaryAmountProps >;
+} as Meta<FormattedMonetaryAmountProps>;
 
-const Template: StoryFn< FormattedMonetaryAmountProps > = ( args ) => {
+const Template: StoryFn<FormattedMonetaryAmountProps> = (args) => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const [ _, updateArgs ] = useArgs();
-	const onValueChange = ( unit: number ) => {
-		updateArgs( { value: unit } );
+	const [_, updateArgs] = useArgs();
+	const onValueChange = (unit: number) => {
+		updateArgs({ value: unit });
 	};
 
-	return (
-		<FormattedMonetaryAmount { ...args } onValueChange={ onValueChange } />
-	);
+	return <FormattedMonetaryAmount {...args} onValueChange={onValueChange} />;
 };
 
-export const Default: StoryFn< FormattedMonetaryAmountProps > = Template.bind(
-	{}
-);
+export const Default: StoryFn<FormattedMonetaryAmountProps> = Template.bind({});
 Default.args = {
 	currency: {
 		minorUnit: 2,

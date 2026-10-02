@@ -20,7 +20,6 @@ span.mce_woocommerce_shortcodes_button {
 	@include ir();
 
 	&::before {
-
 		@include icon("\e01d");
 		font-size: 0.9em;
 		line-height: 1.2;
@@ -28,9 +27,7 @@ span.mce_woocommerce_shortcodes_button {
 }
 
 #woocommerce-update {
-
 	.updating-message {
-
 		.wc_plugin_upgrade_notice {
 			display: none;
 		}
@@ -132,7 +129,6 @@ span.mce_woocommerce_shortcodes_button {
 }
 
 .wc_untested_extensions_modal--content {
-
 	h1 {
 		margin: 2px 2px 0.5em;
 		padding: 0.75em 1.154em;

@@ -11,18 +11,18 @@ import { addFilter } from '@wordpress/hooks';
  *
  * @return {Object} Filtered block attributes.
  */
-const setBlockAttributeDefaults = ( blockAttributes, blockType ) => {
-	if ( blockType.name.startsWith( 'woocommerce/' ) ) {
-		Object.keys( blockType.attributes ).map( ( key ) => {
+const setBlockAttributeDefaults = (blockAttributes, blockType) => {
+	if (blockType.name.startsWith('woocommerce/')) {
+		Object.keys(blockType.attributes).map((key) => {
 			if (
-				typeof blockAttributes[ key ] === 'undefined' &&
+				typeof blockAttributes[key] === 'undefined' &&
 				typeof blockType.defaults !== 'undefined' &&
-				typeof blockType.defaults[ key ] !== 'undefined'
+				typeof blockType.defaults[key] !== 'undefined'
 			) {
-				blockAttributes[ key ] = blockType.defaults[ key ];
+				blockAttributes[key] = blockType.defaults[key];
 			}
 			return key;
-		} );
+		});
 	}
 	return blockAttributes;
 };

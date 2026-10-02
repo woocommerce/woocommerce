@@ -1,3 +1,3 @@
-export function getMessage( state ) {
+export function getMessage(state) {
 	return state.message;
 }

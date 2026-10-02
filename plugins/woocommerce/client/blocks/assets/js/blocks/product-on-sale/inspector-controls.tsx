@@ -18,7 +18,7 @@ import { Attributes } from './types';
 
 interface ProductOnSaleInspectorControlsProps {
 	attributes: Attributes;
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
+	setAttributes: (attributes: Record<string, unknown>) => void;
 }
 
 export const ProductOnSaleInspectorControls = (
@@ -38,58 +38,58 @@ export const ProductOnSaleInspectorControls = (
 
 	return (
 		<InspectorControls key="inspector">
-			<PanelBody title={ __( 'Layout', 'woocommerce' ) } initialOpen>
+			<PanelBody title={__('Layout', 'woocommerce')} initialOpen>
 				<GridLayoutControl
-					columns={ columns }
-					rows={ rows }
-					alignButtons={ alignButtons }
-					setAttributes={ setAttributes }
-					minColumns={ getSetting< number >( 'minColumns', 1 ) }
-					maxColumns={ getSetting< number >( 'maxColumns', 6 ) }
-					minRows={ getSetting< number >( 'minRows', 1 ) }
-					maxRows={ getSetting< number >( 'maxRows', 6 ) }
+					columns={columns}
+					rows={rows}
+					alignButtons={alignButtons}
+					setAttributes={setAttributes}
+					minColumns={getSetting<number>('minColumns', 1)}
+					maxColumns={getSetting<number>('maxColumns', 6)}
+					minRows={getSetting<number>('minRows', 1)}
+					maxRows={getSetting<number>('maxRows', 6)}
 				/>
 			</PanelBody>
-			<PanelBody title={ __( 'Content', 'woocommerce' ) } initialOpen>
+			<PanelBody title={__('Content', 'woocommerce')} initialOpen>
 				<GridContentControl
-					settings={ contentVisibility }
-					onChange={ ( value ) =>
-						setAttributes( { contentVisibility: value } )
+					settings={contentVisibility}
+					onChange={(value) =>
+						setAttributes({ contentVisibility: value })
 					}
 				/>
 			</PanelBody>
 			<PanelBody
-				title={ __( 'Order By', 'woocommerce' ) }
-				initialOpen={ false }
+				title={__('Order By', 'woocommerce')}
+				initialOpen={false}
 			>
 				<ProductOrderbyControl
-					setAttributes={ setAttributes }
-					value={ orderby }
+					setAttributes={setAttributes}
+					value={orderby}
 				/>
 			</PanelBody>
 			<PanelBody
-				title={ __( 'Filter by Product Category', 'woocommerce' ) }
-				initialOpen={ false }
+				title={__('Filter by Product Category', 'woocommerce')}
+				initialOpen={false}
 			>
 				<ProductCategoryControl
-					selected={ categories }
-					onChange={ ( value = [] ) => {
-						const ids = value.map( ( { id } ) => id );
-						setAttributes( { categories: ids } );
-					} }
-					operator={ catOperator }
-					onOperatorChange={ ( value = 'any' ) =>
-						setAttributes( { catOperator: value } )
+					selected={categories}
+					onChange={(value = []) => {
+						const ids = value.map(({ id }) => id);
+						setAttributes({ categories: ids });
+					}}
+					operator={catOperator}
+					onOperatorChange={(value = 'any') =>
+						setAttributes({ catOperator: value })
 					}
 				/>
 			</PanelBody>
 			<PanelBody
-				title={ __( 'Filter by stock status', 'woocommerce' ) }
-				initialOpen={ false }
+				title={__('Filter by stock status', 'woocommerce')}
+				initialOpen={false}
 			>
 				<ProductStockControl
-					setAttributes={ setAttributes }
-					value={ stockStatus }
+					setAttributes={setAttributes}
+					value={stockStatus}
 				/>
 			</PanelBody>
 		</InspectorControls>

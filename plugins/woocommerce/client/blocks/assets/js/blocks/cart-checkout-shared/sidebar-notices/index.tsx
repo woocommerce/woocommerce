@@ -12,31 +12,31 @@ import { IncompatibleExtensionsNotice } from '@woocommerce/editor-components/inc
 import { useSelect } from '@wordpress/data';
 import { CartCheckoutFeedbackPrompt } from '@woocommerce/editor-components/feedback-prompt';
 
-const SidebarNotices = ( { clientId } ) => {
+const SidebarNotices = ({ clientId }) => {
 	const { isCart, isCheckout, parentId } = useSelect(
-		( select ) => {
+		(select) => {
 			const { getBlockParentsByBlockName, getBlockName } =
-				select( blockEditorStore );
+				select(blockEditorStore);
 
-			const parents = getBlockParentsByBlockName( clientId, [
+			const parents = getBlockParentsByBlockName(clientId, [
 				'woocommerce/cart',
 				'woocommerce/checkout',
-			] ).reduce(
+			]).reduce(
 				(
-					accumulator: Record< string, string >,
+					accumulator: Record<string, string>,
 					parentClientId: string
 				) => {
-					const parentName = getBlockName( parentClientId );
-					accumulator[ parentName ] = parentClientId;
+					const parentName = getBlockName(parentClientId);
+					accumulator[parentName] = parentClientId;
 					return accumulator;
 				},
 				{}
 			);
 
-			const currentBlockName = getBlockName( clientId );
+			const currentBlockName = getBlockName(clientId);
 			const parentBlockIsCart =
-				Object.keys( parents ).includes( 'woocommerce/cart' );
-			const parentBlockIsCheckout = Object.keys( parents ).includes(
+				Object.keys(parents).includes('woocommerce/cart');
+			const parentBlockIsCheckout = Object.keys(parents).includes(
 				'woocommerce/checkout'
 			);
 			const currentBlockIsCart =
@@ -54,23 +54,21 @@ const SidebarNotices = ( { clientId } ) => {
 				parentId:
 					currentBlockName === targetParentBlock
 						? clientId
-						: parents[ targetParentBlock ],
+						: parents[targetParentBlock],
 			};
 		},
-		[ clientId ]
+		[clientId]
 	);
 
 	return (
-		( isCart || isCheckout ) && (
+		(isCart || isCheckout) && (
 			<InspectorControls>
 				<IncompatibleExtensionsNotice
-					block={
-						isCart ? 'woocommerce/cart' : 'woocommerce/checkout'
-					}
-					clientId={ parentId }
+					block={isCart ? 'woocommerce/cart' : 'woocommerce/checkout'}
+					clientId={parentId}
 				/>
 
-				<DefaultNotice block={ isCheckout ? 'checkout' : 'cart' } />
+				<DefaultNotice block={isCheckout ? 'checkout' : 'cart'} />
 				<CartCheckoutFeedbackPrompt />
 			</InspectorControls>
 		)
@@ -78,7 +76,7 @@ const SidebarNotices = ( { clientId } ) => {
 };
 
 const withSidebarNotices = createHigherOrderComponent(
-	( BlockEdit ) => ( props ) => {
+	(BlockEdit) => (props) => {
 		const {
 			clientId,
 			name: blockName,
@@ -91,12 +89,11 @@ const withSidebarNotices = createHigherOrderComponent(
 					// Show sidebar notices only when a WooCommerce block is selected.
 					// This early check helps prevent expensive and unnecessary work
 					// in the block editor store.
-					blockName.startsWith( 'woocommerce/' ) &&
-						isBlockSelected && (
-							<SidebarNotices clientId={ clientId } />
-						)
+					blockName.startsWith('woocommerce/') && isBlockSelected && (
+						<SidebarNotices clientId={clientId} />
+					)
 				}
-				<BlockEdit key="edit" { ...props } />
+				<BlockEdit key="edit" {...props} />
 			</>
 		);
 	},
@@ -104,7 +101,7 @@ const withSidebarNotices = createHigherOrderComponent(
 );
 
 if (
-	! hasFilter(
+	!hasFilter(
 		'editor.BlockEdit',
 		'woocommerce/add/sidebar-compatibility-notice'
 	)

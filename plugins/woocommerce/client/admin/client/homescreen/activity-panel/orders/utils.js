@@ -8,12 +8,12 @@ import { settingsStore } from '@woocommerce/data';
  */
 import { DEFAULT_ACTIONABLE_STATUSES } from '../../../analytics/settings/config';
 
-export function getOrderStatuses( select ) {
-	const { getSetting: getMutableSetting } = select( settingsStore );
+export function getOrderStatuses(select) {
+	const { getSetting: getMutableSetting } = select(settingsStore);
 	const {
 		woocommerce_actionable_order_statuses:
 			orderStatuses = DEFAULT_ACTIONABLE_STATUSES,
-	} = getMutableSetting( 'wc_admin', 'wcAdminSettings', {} );
+	} = getMutableSetting('wc_admin', 'wcAdminSettings', {});
 	return orderStatuses;
 }
 

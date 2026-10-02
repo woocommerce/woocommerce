@@ -39,22 +39,20 @@ const DEFAULT_COUPON_STATUSES = [
 	'publish',
 ] as const;
 
-function ExistingCouponSettings( {
+function ExistingCouponSettings({
 	attributes,
 	setAttributes,
 }: {
 	attributes: CouponCodeAttributes;
-	setAttributes: ( attrs: Partial< CouponCodeAttributes > ) => void;
-} ): JSX.Element {
+	setAttributes: (attrs: Partial<CouponCodeAttributes>) => void;
+}): JSX.Element {
 	const couponCode = attributes.couponCode;
 
-	const [ searchValue, setSearchValue ] = useState( '' );
-	const [ coupons, setCoupons ] = useState< Coupon[] >( [] );
-	const [ isLoading, setIsLoading ] = useState( false );
-	const debounceTimerRef = useRef< ReturnType< typeof setTimeout > | null >(
-		null
-	);
-	const abortControllerRef = useRef< AbortController | null >( null );
+	const [searchValue, setSearchValue] = useState('');
+	const [coupons, setCoupons] = useState<Coupon[]>([]);
+	const [isLoading, setIsLoading] = useState(false);
+	const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const abortControllerRef = useRef<AbortController | null>(null);
 
 	const handleCreateCoupon = () => {
 		const createCouponHandler = applyFilters(
@@ -67,47 +65,47 @@ function ExistingCouponSettings( {
 			}
 		);
 
-		if ( typeof createCouponHandler === 'function' ) {
+		if (typeof createCouponHandler === 'function') {
 			createCouponHandler();
 		}
 	};
 
-	const searchCoupons = useCallback( ( search: string ) => {
-		if ( abortControllerRef.current ) {
+	const searchCoupons = useCallback((search: string) => {
+		if (abortControllerRef.current) {
 			abortControllerRef.current.abort();
 		}
 
-		if ( search.length < 2 ) {
-			setCoupons( [] );
-			setIsLoading( false );
+		if (search.length < 2) {
+			setCoupons([]);
+			setIsLoading(false);
 			return;
 		}
 
-		setIsLoading( true );
+		setIsLoading(true);
 		abortControllerRef.current = new AbortController();
 
-		const params = new URLSearchParams( {
+		const params = new URLSearchParams({
 			per_page: '20',
 			search,
-		} );
-		DEFAULT_COUPON_STATUSES.forEach( ( status ) => {
-			params.append( 'status[]', status );
-		} );
+		});
+		DEFAULT_COUPON_STATUSES.forEach((status) => {
+			params.append('status[]', status);
+		});
 
-		apiFetch< Coupon[] >( {
-			path: `/wc/v3/coupons?${ params.toString() }`,
+		apiFetch<Coupon[]>({
+			path: `/wc/v3/coupons?${params.toString()}`,
 			signal: abortControllerRef.current.signal,
-		} )
-			.then( ( results ) => {
-				setCoupons( results );
-				setIsLoading( false );
-			} )
-			.catch( ( error ) => {
-				if ( error instanceof Error && error.name === 'AbortError' ) {
+		})
+			.then((results) => {
+				setCoupons(results);
+				setIsLoading(false);
+			})
+			.catch((error) => {
+				if (error instanceof Error && error.name === 'AbortError') {
 					return;
 				}
-				if ( error.code === 'rest_forbidden' || error.status === 403 ) {
-					dispatch( 'core/notices' ).createErrorNotice(
+				if (error.code === 'rest_forbidden' || error.status === 403) {
+					dispatch('core/notices').createErrorNotice(
 						__(
 							'You do not have permission to view coupons.',
 							'woocommerce'
@@ -118,105 +116,100 @@ function ExistingCouponSettings( {
 						}
 					);
 				}
-				setIsLoading( false );
-			} );
-	}, [] );
+				setIsLoading(false);
+			});
+	}, []);
 
-	useEffect( () => {
-		if ( debounceTimerRef.current ) {
-			clearTimeout( debounceTimerRef.current );
+	useEffect(() => {
+		if (debounceTimerRef.current) {
+			clearTimeout(debounceTimerRef.current);
 		}
 
-		debounceTimerRef.current = setTimeout( () => {
-			searchCoupons( searchValue );
-		}, 300 );
+		debounceTimerRef.current = setTimeout(() => {
+			searchCoupons(searchValue);
+		}, 300);
 
 		return () => {
-			if ( debounceTimerRef.current ) {
-				clearTimeout( debounceTimerRef.current );
+			if (debounceTimerRef.current) {
+				clearTimeout(debounceTimerRef.current);
 			}
 		};
-	}, [ searchValue, searchCoupons ] );
+	}, [searchValue, searchCoupons]);
 
-	useEffect( () => {
+	useEffect(() => {
 		return () => {
-			if ( abortControllerRef.current ) {
+			if (abortControllerRef.current) {
 				abortControllerRef.current.abort();
 			}
 		};
-	}, [] );
+	}, []);
 
-	const couponOptions = coupons.map( ( coupon ) => ( {
+	const couponOptions = coupons.map((coupon) => ({
 		value: coupon.code,
 		label: coupon.code,
-	} ) );
+	}));
 
 	if (
 		couponCode &&
-		! couponOptions.some( ( option ) => option.value === couponCode )
+		!couponOptions.some((option) => option.value === couponCode)
 	) {
-		couponOptions.unshift( {
+		couponOptions.unshift({
 			value: couponCode,
 			label: couponCode,
-		} );
+		});
 	}
 
 	return (
-		<PanelBody title={ __( 'Coupon', 'woocommerce' ) } initialOpen={ true }>
-			<div style={ { marginBottom: '16px' } }>
-				<div>
-					{ __( 'Search for an existing coupon', 'woocommerce' ) }
-				</div>
+		<PanelBody title={__('Coupon', 'woocommerce')} initialOpen={true}>
+			<div style={{ marginBottom: '16px' }}>
+				<div>{__('Search for an existing coupon', 'woocommerce')}</div>
 				<ComboboxControl
-					label={ __( 'Search coupons', 'woocommerce' ) }
+					label={__('Search coupons', 'woocommerce')}
 					hideLabelFromVision
-					value={ couponCode }
-					onChange={ ( value ) => {
-						setAttributes( {
+					value={couponCode}
+					onChange={(value) => {
+						setAttributes({
 							couponCode: value || '',
-						} );
-					} }
-					onFilterValueChange={ ( value ) => {
-						setSearchValue( value );
-					} }
-					options={ couponOptions }
+						});
+					}}
+					onFilterValueChange={(value) => {
+						setSearchValue(value);
+					}}
+					options={couponOptions}
 					__nextHasNoMarginBottom
 					__next40pxDefaultSize
-					help={ ( () => {
-						if ( isLoading ) {
-							return __( 'Searching coupons…', 'woocommerce' );
+					help={(() => {
+						if (isLoading) {
+							return __('Searching coupons…', 'woocommerce');
 						}
-						if (
-							searchValue.length > 0 &&
-							searchValue.length < 2
-						) {
+						if (searchValue.length > 0 && searchValue.length < 2) {
 							return __(
 								'Type at least 2 characters to search',
 								'woocommerce'
 							);
 						}
 						return null;
-					} )() }
+					})()}
 				/>
-				{ isLoading && (
+				{isLoading && (
 					<div
-						style={ {
+						style={{
 							display: 'flex',
 							alignItems: 'center',
 							marginTop: '8px',
-						} }
+						}}
 					>
 						<Spinner />
 					</div>
-				) }
+				)}
 			</div>
 			<div>
 				<Button
 					variant="link"
-					onClick={ handleCreateCoupon }
-					style={ { padding: 0, height: 'auto' } }
+					onClick={handleCreateCoupon}
+					style={{ padding: 0, height: 'auto' }}
 				>
-					{ __( 'Create new coupon', 'woocommerce' ) }
+					{__('Create new coupon', 'woocommerce')}
 				</Button>
 			</div>
 		</PanelBody>
@@ -226,7 +219,7 @@ function ExistingCouponSettings( {
 /**
  * Edit component for the Coupon Code block.
  */
-export default function Edit( props: BlockEditProps ): JSX.Element {
+export default function Edit(props: BlockEditProps): JSX.Element {
 	const { attributes, setAttributes } = props;
 	const source = attributes.source ?? 'createNew';
 	const couponCode = attributes.couponCode;
@@ -242,8 +235,8 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 
 	// Strip block-level background/border styles off the wrapper so we can
 	// fully control visual presentation on the coupon element itself.
-	const { background, backgroundColor, border, ...baseStyle } =
-		( blockStyle || {} ) as CSSProperties;
+	const { background, backgroundColor, border, ...baseStyle } = (blockStyle ||
+		{}) as CSSProperties;
 
 	// Default styles mirror PHP CouponCode::DEFAULT_STYLES for editor/email parity.
 	const defaultStyles: CSSProperties = {
@@ -267,7 +260,7 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 		textAlign: 'center',
 	};
 
-	const supportedAlignments: Array< CSSProperties[ 'textAlign' ] > = [
+	const supportedAlignments: Array<CSSProperties['textAlign']> = [
 		'left',
 		'center',
 		'right',
@@ -277,124 +270,119 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 	];
 	const alignAttribute = attributes.align;
 	const wrapperTextAlign = supportedAlignments.includes(
-		alignAttribute as CSSProperties[ 'textAlign' ]
+		alignAttribute as CSSProperties['textAlign']
 	)
-		? ( alignAttribute as CSSProperties[ 'textAlign' ] )
+		? (alignAttribute as CSSProperties['textAlign'])
 		: 'center';
 	const wrapperStyle: CSSProperties = {
 		textAlign: wrapperTextAlign,
 	};
 
-	const classTokens = blockClassName.split( ' ' ).filter( Boolean );
+	const classTokens = blockClassName.split(' ').filter(Boolean);
 	const couponClassTokens: string[] = [];
 	const wrapperClassTokens: string[] = [];
 
-	classTokens.forEach( ( token ) => {
-		if (
-			token.startsWith( 'has-' ) ||
-			token.startsWith( 'wp-elements-' )
-		) {
-			couponClassTokens.push( token );
+	classTokens.forEach((token) => {
+		if (token.startsWith('has-') || token.startsWith('wp-elements-')) {
+			couponClassTokens.push(token);
 			return;
 		}
-		wrapperClassTokens.push( token );
-	} );
+		wrapperClassTokens.push(token);
+	});
 
 	const wrapperClassName =
 		wrapperClassTokens.length > 0
-			? wrapperClassTokens.join( ' ' )
+			? wrapperClassTokens.join(' ')
 			: undefined;
 	const couponClassName =
-		couponClassTokens.length > 0
-			? couponClassTokens.join( ' ' )
-			: undefined;
+		couponClassTokens.length > 0 ? couponClassTokens.join(' ') : undefined;
 
 	return (
 		<>
 			<InspectorControls>
 				<PanelBody
-					title={ __( 'Coupon source', 'woocommerce' ) }
-					initialOpen={ true }
+					title={__('Coupon source', 'woocommerce')}
+					initialOpen={true}
 				>
 					<SelectControl
-						label={ __( 'Coupon source', 'woocommerce' ) }
+						label={__('Coupon source', 'woocommerce')}
 						hideLabelFromVision
-						value={ source }
-						options={ [
+						value={source}
+						options={[
 							{
 								value: 'createNew',
-								label: __( 'Create new', 'woocommerce' ),
+								label: __('Create new', 'woocommerce'),
 							},
 							{
 								value: 'existing',
-								label: __( 'Use existing', 'woocommerce' ),
+								label: __('Use existing', 'woocommerce'),
 							},
-						] }
-						onChange={ ( value ) => {
-							setAttributes( {
+						]}
+						onChange={(value) => {
+							setAttributes({
 								source:
 									value === 'existing'
 										? 'existing'
 										: 'createNew',
-							} );
-						} }
+							});
+						}}
 						__nextHasNoMarginBottom
 					/>
 				</PanelBody>
 
-				{ source === 'createNew' && (
+				{source === 'createNew' && (
 					<>
 						<GeneralSettings
-							attributes={ attributes }
-							setAttributes={ setAttributes }
+							attributes={attributes}
+							setAttributes={setAttributes}
 						/>
 						<UsageLimits
-							attributes={ attributes }
-							setAttributes={ setAttributes }
+							attributes={attributes}
+							setAttributes={setAttributes}
 						/>
 						<UsageRestrictions
-							attributes={ attributes }
-							setAttributes={ setAttributes }
+							attributes={attributes}
+							setAttributes={setAttributes}
 						/>
 					</>
-				) }
+				)}
 
-				{ source === 'existing' && (
+				{source === 'existing' && (
 					<ExistingCouponSettings
-						attributes={ attributes }
-						setAttributes={ setAttributes }
+						attributes={attributes}
+						setAttributes={setAttributes}
 					/>
-				) }
+				)}
 			</InspectorControls>
 			<div
-				{ ...wrapperProps }
-				className={ wrapperClassName }
-				style={ {
-					...( wrapperProps.style as CSSProperties ),
+				{...wrapperProps}
+				className={wrapperClassName}
+				style={{
+					...(wrapperProps.style as CSSProperties),
 					...wrapperStyle,
-				} }
+				}}
 			>
-				<span className={ couponClassName } style={ couponStyles }>
-					{ displayCode ||
+				<span className={couponClassName} style={couponStyles}>
+					{displayCode ||
 						__(
 							'Coupon Code block – No coupon selected',
 							'woocommerce'
-						) }
+						)}
 				</span>
-				{ source === 'createNew' && (
+				{source === 'createNew' && (
 					<div
-						style={ {
+						style={{
 							fontSize: '12px',
 							color: '#757575',
 							marginTop: '8px',
-						} }
+						}}
 					>
-						{ __(
+						{__(
 							'A coupon code will be automatically generated at send time.',
 							'woocommerce'
-						) }
+						)}
 					</div>
-				) }
+				)}
 			</div>
 		</>
 	);

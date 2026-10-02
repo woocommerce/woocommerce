@@ -2,17 +2,17 @@
 	display: grid;
 	grid-template-columns: 1fr 1fr;
 
-
 	&.woocommerce-tax-partners__partners-count-1 {
 		grid-template-columns: 1fr;
 	}
 
-	@include breakpoint( "<782px" ) {
+	@include breakpoint("<782px") {
 		grid-template-columns: 1fr;
 	}
 }
 
-.woocommerce-tax-partners__partners-count-1 .woocommerce-tax-partners__partners {
+.woocommerce-tax-partners__partners-count-1
+	.woocommerce-tax-partners__partners {
 	grid-template-columns: 1fr;
 	justify-items: center;
 }
@@ -36,7 +36,7 @@
 	justify-content: center;
 	margin: 0;
 
-	@include breakpoint( "<782px" ) {
+	@include breakpoint("<782px") {
 		flex-direction: column;
 	}
 
@@ -54,7 +54,7 @@
 			color: $gray-400;
 			margin-left: 4px;
 
-			@include breakpoint( "<782px" ) {
+			@include breakpoint("<782px") {
 				content: "";
 			}
 		}

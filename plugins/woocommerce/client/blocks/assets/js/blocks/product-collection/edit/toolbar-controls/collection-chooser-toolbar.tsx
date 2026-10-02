@@ -4,13 +4,13 @@
 import { __ } from '@wordpress/i18n';
 import { ToolbarGroup, ToolbarButton } from '@wordpress/components';
 
-const CollectionChooserToolbar = ( props: {
+const CollectionChooserToolbar = (props: {
 	openCollectionSelectionModal: () => void;
-} ) => {
+}) => {
 	return (
 		<ToolbarGroup>
-			<ToolbarButton onClick={ props.openCollectionSelectionModal }>
-				{ __( 'Choose collection', 'woocommerce' ) }
+			<ToolbarButton onClick={props.openCollectionSelectionModal}>
+				{__('Choose collection', 'woocommerce')}
 			</ToolbarButton>
 		</ToolbarGroup>
 	);

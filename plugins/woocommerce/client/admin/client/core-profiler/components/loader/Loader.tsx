@@ -14,47 +14,43 @@ import './loader.scss';
 export type Stage = {
 	title: string;
 	image?: string | JSX.Element;
-	paragraphs: Array< {
+	paragraphs: Array<{
 		label: string;
 		text: string;
 		duration?: number;
 		element?: JSX.Element;
-	} >;
+	}>;
 };
 
-export type Stages = Array< Stage >;
+export type Stages = Array<Stage>;
 export type LoaderContextProps = Pick<
 	CoreProfilerStateMachineContext,
 	'loader'
 >;
 
-export const CoreProfilerLoader = ( {
+export const CoreProfilerLoader = ({
 	context,
 }: {
 	context: LoaderContextProps;
-} ) => {
-	const stages = getLoaderStageMeta( context.loader.useStages ?? 'default' );
-	const currentStage = stages[ context.loader.stageIndex ?? 0 ];
+}) => {
+	const stages = getLoaderStageMeta(context.loader.useStages ?? 'default');
+	const currentStage = stages[context.loader.stageIndex ?? 0];
 
 	return (
-		<Loader className={ context.loader.className }>
+		<Loader className={context.loader.className}>
 			<Loader.Layout>
-				<Loader.Illustration>
-					{ currentStage.image }
-				</Loader.Illustration>
+				<Loader.Illustration>{currentStage.image}</Loader.Illustration>
 
-				<Loader.Title>{ currentStage.title }</Loader.Title>
-				<Loader.ProgressBar
-					progress={ context.loader?.progress ?? 0 }
-				/>
-				<Loader.Sequence interval={ 3000 }>
-					{ currentStage.paragraphs.map( ( paragraph, index ) => (
-						<Loader.Subtext key={ index }>
-							<b>{ paragraph?.label }</b>
-							{ paragraph?.text }
-							{ paragraph?.element }
+				<Loader.Title>{currentStage.title}</Loader.Title>
+				<Loader.ProgressBar progress={context.loader?.progress ?? 0} />
+				<Loader.Sequence interval={3000}>
+					{currentStage.paragraphs.map((paragraph, index) => (
+						<Loader.Subtext key={index}>
+							<b>{paragraph?.label}</b>
+							{paragraph?.text}
+							{paragraph?.element}
 						</Loader.Subtext>
-					) ) }
+					))}
 				</Loader.Sequence>
 			</Loader.Layout>
 		</Loader>

@@ -17,38 +17,38 @@ type IssueStatusPropsType = {
 
 const issueStatusClassName = 'woocommerce-marketing-issue-status';
 
-export const IssueStatus = ( { registeredChannel }: IssueStatusPropsType ) => {
-	if ( registeredChannel.issueType === 'error' ) {
+export const IssueStatus = ({ registeredChannel }: IssueStatusPropsType) => {
+	if (registeredChannel.issueType === 'error') {
 		return (
 			<div
-				className={ clsx(
+				className={clsx(
 					issueStatusClassName,
-					`${ issueStatusClassName }__error`
-				) }
+					`${issueStatusClassName}__error`
+				)}
 			>
-				<GridiconNotice size={ iconSize } />
-				{ registeredChannel.issueText }
+				<GridiconNotice size={iconSize} />
+				{registeredChannel.issueText}
 			</div>
 		);
 	}
 
-	if ( registeredChannel.issueType === 'warning' ) {
+	if (registeredChannel.issueType === 'warning') {
 		return (
 			<div
-				className={ clsx(
+				className={clsx(
 					issueStatusClassName,
-					`${ issueStatusClassName }__warning`
-				) }
+					`${issueStatusClassName}__warning`
+				)}
 			>
-				<GridiconNotice size={ iconSize } />
-				{ registeredChannel.issueText }
+				<GridiconNotice size={iconSize} />
+				{registeredChannel.issueText}
 			</div>
 		);
 	}
 
 	return (
-		<div className={ issueStatusClassName }>
-			{ registeredChannel.issueText }
+		<div className={issueStatusClassName}>
+			{registeredChannel.issueText}
 		</div>
 	);
 };

@@ -16,11 +16,11 @@ export const isValidFieldValidationStatus = (
 	status: unknown
 ): status is FieldValidationStatus => {
 	return (
-		isObject( status ) &&
-		objectHasProp( status, 'message' ) &&
-		objectHasProp( status, 'hidden' ) &&
-		isString( status.message ) &&
-		isBoolean( status.hidden )
+		isObject(status) &&
+		objectHasProp(status, 'message') &&
+		objectHasProp(status, 'hidden') &&
+		isString(status.message) &&
+		isBoolean(status.hidden)
 	);
 };
 
@@ -30,12 +30,12 @@ export const isValidFieldValidationStatus = (
  */
 export const isValidValidationErrorsObject = (
 	errors: unknown
-): errors is Record< string, FieldValidationStatus > => {
+): errors is Record<string, FieldValidationStatus> => {
 	return (
-		isObject( errors ) &&
-		Object.entries( errors ).every(
-			( [ key, value ] ) =>
-				isString( key ) && isValidFieldValidationStatus( value )
+		isObject(errors) &&
+		Object.entries(errors).every(
+			([key, value]) =>
+				isString(key) && isValidFieldValidationStatus(value)
 		)
 	);
 };

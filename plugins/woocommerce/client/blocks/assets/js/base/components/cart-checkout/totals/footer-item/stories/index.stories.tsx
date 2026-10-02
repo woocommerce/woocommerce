@@ -27,47 +27,47 @@ export default {
 		currency: NZD,
 		values: { total_price: '2500', total_tax: '550' },
 	},
-} as Meta< TotalsFooterItemProps >;
+} as Meta<TotalsFooterItemProps>;
 
-const Template: StoryFn< TotalsFooterItemProps > = ( args ) => (
-	<FooterItem { ...args } />
+const Template: StoryFn<TotalsFooterItemProps> = (args) => (
+	<FooterItem {...args} />
 );
 
-export const Default = Template.bind( {} );
+export const Default = Template.bind({});
 Default.decorators = [
-	( StoryComponent ) => {
+	(StoryComponent) => {
 		allSettings.displayCartPricesIncludingTax = false;
 
 		return <StoryComponent />;
 	},
 ];
 
-export const NoTaxLabel = Template.bind( {} );
+export const NoTaxLabel = Template.bind({});
 NoTaxLabel.decorators = [
-	( StoryComponent ) => {
+	(StoryComponent) => {
 		allSettings.displayCartPricesIncludingTax = true;
 
 		return <StoryComponent />;
 	},
 ];
 
-export const SingleTaxLabel = Template.bind( {} );
+export const SingleTaxLabel = Template.bind({});
 SingleTaxLabel.args = {
 	values: {
 		total_price: '2500',
 		total_tax: '550',
-		tax_lines: [ { name: '10% VAT', price: '550', rate: '10.00' } ],
+		tax_lines: [{ name: '10% VAT', price: '550', rate: '10.00' }],
 	},
 };
 SingleTaxLabel.decorators = [
-	( StoryComponent ) => {
+	(StoryComponent) => {
 		allSettings.displayCartPricesIncludingTax = true;
 
 		return <StoryComponent />;
 	},
 ];
 
-export const MultipleTaxLabels = Template.bind( {} );
+export const MultipleTaxLabels = Template.bind({});
 MultipleTaxLabels.args = {
 	values: {
 		total_price: '2500',
@@ -79,7 +79,7 @@ MultipleTaxLabels.args = {
 	},
 };
 MultipleTaxLabels.decorators = [
-	( StoryComponent ) => {
+	(StoryComponent) => {
 		allSettings.displayCartPricesIncludingTax = true;
 
 		return <StoryComponent />;

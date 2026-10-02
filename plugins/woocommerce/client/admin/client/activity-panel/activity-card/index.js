@@ -20,9 +20,9 @@ import './style.scss';
  *
  * @param {string} value String value
  */
-const isDateString = ( value ) =>
+const isDateString = (value) =>
 	// PHP date format: Y-m-d\TH:i:s.
-	/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test( value );
+	/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value);
 
 class ActivityCard extends Component {
 	getCard() {
@@ -36,67 +36,67 @@ class ActivityCard extends Component {
 			title,
 			unread,
 		} = this.props;
-		const cardClassName = clsx( 'woocommerce-activity-card', className );
-		const actionsList = Array.isArray( actions ) ? actions : [ actions ];
-		const dateString = isDateString( date )
-			? moment.utc( date ).fromNow()
+		const cardClassName = clsx('woocommerce-activity-card', className);
+		const actionsList = Array.isArray(actions) ? actions : [actions];
+		const dateString = isDateString(date)
+			? moment.utc(date).fromNow()
 			: date;
 
 		return (
-			<section className={ cardClassName }>
-				{ unread && (
+			<section className={cardClassName}>
+				{unread && (
 					<span className="woocommerce-activity-card__unread" />
-				) }
-				{ icon && (
+				)}
+				{icon && (
 					<span
 						className="woocommerce-activity-card__icon"
 						aria-hidden
 					>
-						{ icon }
+						{icon}
 					</span>
-				) }
-				{ title && (
+				)}
+				{title && (
 					<header className="woocommerce-activity-card__header">
 						<H className="woocommerce-activity-card__title">
-							{ title }
+							{title}
 						</H>
-						{ subtitle && (
+						{subtitle && (
 							<div className="woocommerce-activity-card__subtitle">
-								{ subtitle }
+								{subtitle}
 							</div>
-						) }
-						{ dateString && (
+						)}
+						{dateString && (
 							<span className="woocommerce-activity-card__date">
-								{ dateString }
+								{dateString}
 							</span>
-						) }
+						)}
 					</header>
-				) }
-				{ children && (
+				)}
+				{children && (
 					<Section className="woocommerce-activity-card__body">
-						{ children }
+						{children}
 					</Section>
-				) }
-				{ actions && (
+				)}
+				{actions && (
 					<footer className="woocommerce-activity-card__actions">
-						{ actionsList.map( ( item, i ) =>
-							cloneElement( item, { key: i } )
-						) }
+						{actionsList.map((item, i) =>
+							cloneElement(item, { key: i })
+						)}
 					</footer>
-				) }
+				)}
 			</section>
 		);
 	}
 
 	render() {
 		const { onClick } = this.props;
-		if ( onClick ) {
+		if (onClick) {
 			return (
 				<Button
 					className="woocommerce-activity-card__button"
-					onClick={ onClick }
+					onClick={onClick}
 				>
-					{ this.getCard() }
+					{this.getCard()}
 				</Button>
 			);
 		}
@@ -105,22 +105,22 @@ class ActivityCard extends Component {
 }
 
 ActivityCard.propTypes = {
-	actions: PropTypes.oneOfType( [
-		PropTypes.arrayOf( PropTypes.element ),
+	actions: PropTypes.oneOfType([
+		PropTypes.arrayOf(PropTypes.element),
 		PropTypes.element,
-	] ),
+	]),
 	onClick: PropTypes.func,
 	className: PropTypes.string,
 	children: PropTypes.node,
 	date: PropTypes.string,
 	icon: PropTypes.node,
 	subtitle: PropTypes.node,
-	title: PropTypes.oneOfType( [ PropTypes.string, PropTypes.node ] ),
+	title: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
 	unread: PropTypes.bool,
 };
 
 ActivityCard.defaultProps = {
-	icon: <NoticeOutline size={ 48 } />,
+	icon: <NoticeOutline size={48} />,
 	unread: false,
 };
 

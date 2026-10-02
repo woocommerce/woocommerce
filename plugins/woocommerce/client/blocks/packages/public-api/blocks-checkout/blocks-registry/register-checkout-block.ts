@@ -18,33 +18,31 @@ import type { CheckoutBlockOptions } from './types';
 /**
  * Main API for registering a new checkout block within areas.
  */
-export const registerCheckoutBlock = (
-	options: CheckoutBlockOptions
-): void => {
-	assertOption( options, 'metadata', 'object' );
-	assertBlockName( options.metadata.name );
-	assertBlockParent( options.metadata.parent );
-	assertBlockComponent( options, 'component' );
+export const registerCheckoutBlock = (options: CheckoutBlockOptions): void => {
+	assertOption(options, 'metadata', 'object');
+	assertBlockName(options.metadata.name);
+	assertBlockParent(options.metadata.parent);
+	assertBlockComponent(options, 'component');
 
 	/**
 	 * This ensures the frontend component for the checkout block is available.
 	 */
-	registerBlockComponent( {
+	registerBlockComponent({
 		blockName: options.metadata.name as string,
 		component: options.component,
-	} );
+	});
 
 	// Infer the `force` value from whether the block is locked or not. But
 	// allow overriding it on block registration.
 	const force =
 		typeof options.force === 'boolean'
 			? options.force
-			: Boolean( options.metadata?.attributes?.lock?.default?.remove );
+			: Boolean(options.metadata?.attributes?.lock?.default?.remove);
 
 	/**
 	 * Store block metadata for later lookup.
 	 */
-	registeredBlocks[ options.metadata.name ] = {
+	registeredBlocks[options.metadata.name] = {
 		blockName: options.metadata.name,
 		metadata: options.metadata,
 		component: options.component,

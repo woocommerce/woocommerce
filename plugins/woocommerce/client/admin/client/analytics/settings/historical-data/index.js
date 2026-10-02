@@ -21,45 +21,45 @@ import HistoricalDataLayout from './layout';
 
 class HistoricalData extends Component {
 	constructor() {
-		super( ...arguments );
+		super(...arguments);
 
-		this.dateFormat = __( 'MM/DD/YYYY', 'woocommerce' );
+		this.dateFormat = __('MM/DD/YYYY', 'woocommerce');
 		this.intervalId = -1;
 		this.lastImportStopTimestamp = 0;
 		this.cacheNeedsClearing = true;
 
-		this.onImportFinished = this.onImportFinished.bind( this );
-		this.onImportStarted = this.onImportStarted.bind( this );
+		this.onImportFinished = this.onImportFinished.bind(this);
+		this.onImportStarted = this.onImportStarted.bind(this);
 		this.clearStatusAndTotalsCache =
-			this.clearStatusAndTotalsCache.bind( this );
-		this.stopImport = this.stopImport.bind( this );
+			this.clearStatusAndTotalsCache.bind(this);
+		this.stopImport = this.stopImport.bind(this);
 		this.startStatusCheckInterval =
-			this.startStatusCheckInterval.bind( this );
+			this.startStatusCheckInterval.bind(this);
 		this.cancelStatusCheckInterval =
-			this.cancelStatusCheckInterval.bind( this );
+			this.cancelStatusCheckInterval.bind(this);
 	}
 
 	startStatusCheckInterval() {
-		if ( this.intervalId < 0 ) {
+		if (this.intervalId < 0) {
 			this.cacheNeedsClearing = true;
-			this.intervalId = setInterval( () => {
-				this.clearCache( 'getImportStatus' );
-			}, 3 * SECOND );
+			this.intervalId = setInterval(() => {
+				this.clearCache('getImportStatus');
+			}, 3 * SECOND);
 		}
 	}
 
 	cancelStatusCheckInterval() {
-		clearInterval( this.intervalId );
+		clearInterval(this.intervalId);
 		this.intervalId = -1;
 	}
 
-	clearCache( resolver, query ) {
+	clearCache(resolver, query) {
 		const { invalidateResolution, lastImportStartTimestamp } = this.props;
 		const preparedQuery =
 			resolver === 'getImportStatus' ? lastImportStartTimestamp : query;
-		invalidateResolution( resolver, [ preparedQuery ] ).then( () => {
+		invalidateResolution(resolver, [preparedQuery]).then(() => {
 			this.cacheNeedsClearing = false;
-		} );
+		});
 	}
 
 	stopImport() {
@@ -69,8 +69,8 @@ class HistoricalData extends Component {
 
 	onImportFinished() {
 		const { debouncedSpeak } = this.props;
-		if ( ! this.cacheNeedsClearing ) {
-			debouncedSpeak( 'Import complete' );
+		if (!this.cacheNeedsClearing) {
+			debouncedSpeak('Import complete');
 			this.stopImport();
 		}
 	}
@@ -79,13 +79,13 @@ class HistoricalData extends Component {
 		const { notes, setImportStarted, updateNote } = this.props;
 
 		const historicalDataNote = notes.find(
-			( note ) => note.name === 'wc-admin-historical-data'
+			(note) => note.name === 'wc-admin-historical-data'
 		);
-		if ( historicalDataNote ) {
-			updateNote( historicalDataNote.id, { status: 'actioned' } );
+		if (historicalDataNote) {
+			updateNote(historicalDataNote.id, { status: 'actioned' });
 		}
 
-		setImportStarted( true );
+		setImportStarted(true);
 	}
 
 	clearStatusAndTotalsCache() {
@@ -96,15 +96,15 @@ class HistoricalData extends Component {
 			skipChecked
 		);
 
-		this.clearCache( 'getImportTotals', params );
-		this.clearCache( 'getImportStatus' );
+		this.clearCache('getImportTotals', params);
+		this.clearCache('getImportStatus');
 	}
 
 	isImportationInProgress() {
 		const { lastImportStartTimestamp } = this.props;
 		return (
-			( typeof lastImportStartTimestamp !== 'undefined' &&
-				typeof this.lastImportStopTimestamp === 'undefined' ) ||
+			(typeof lastImportStartTimestamp !== 'undefined' &&
+				typeof this.lastImportStopTimestamp === 'undefined') ||
 			lastImportStartTimestamp > this.lastImportStopTimestamp
 		);
 	}
@@ -120,28 +120,28 @@ class HistoricalData extends Component {
 
 		return (
 			<HistoricalDataLayout
-				activeImport={ activeImport }
-				cacheNeedsClearing={ this.cacheNeedsClearing }
-				createNotice={ createNotice }
-				dateFormat={ this.dateFormat }
-				inProgress={ this.isImportationInProgress() }
-				onImportFinished={ this.onImportFinished }
-				onImportStarted={ this.onImportStarted }
-				lastImportStartTimestamp={ lastImportStartTimestamp }
-				clearStatusAndTotalsCache={ this.clearStatusAndTotalsCache }
-				period={ selectedPeriod }
-				skipChecked={ skipChecked }
-				startStatusCheckInterval={ this.startStatusCheckInterval }
-				stopImport={ this.stopImport }
+				activeImport={activeImport}
+				cacheNeedsClearing={this.cacheNeedsClearing}
+				createNotice={createNotice}
+				dateFormat={this.dateFormat}
+				inProgress={this.isImportationInProgress()}
+				onImportFinished={this.onImportFinished}
+				onImportStarted={this.onImportStarted}
+				lastImportStartTimestamp={lastImportStartTimestamp}
+				clearStatusAndTotalsCache={this.clearStatusAndTotalsCache}
+				period={selectedPeriod}
+				skipChecked={skipChecked}
+				startStatusCheckInterval={this.startStatusCheckInterval}
+				stopImport={this.stopImport}
 			/>
 		);
 	}
 }
 
-export default compose( [
-	withSelect( ( select ) => {
-		const { getNotes } = select( notesStore );
-		const { getImportStarted, getFormSettings } = select( importStore );
+export default compose([
+	withSelect((select) => {
+		const { getNotes } = select(notesStore);
+		const { getImportStarted, getFormSettings } = select(importStore);
 
 		const notesQuery = {
 			page: 1,
@@ -149,7 +149,7 @@ export default compose( [
 			type: 'update',
 			status: 'unactioned',
 		};
-		const notes = getNotes( notesQuery );
+		const notes = getNotes(notesQuery);
 		const { activeImport, lastImportStartTimestamp } = getImportStarted();
 		const { period: selectedPeriod, skipPrevious: skipChecked } =
 			getFormSettings();
@@ -161,17 +161,17 @@ export default compose( [
 			selectedPeriod,
 			skipChecked,
 		};
-	} ),
-	withDispatch( ( dispatch ) => {
-		const { updateNote } = dispatch( notesStore );
+	}),
+	withDispatch((dispatch) => {
+		const { updateNote } = dispatch(notesStore);
 		const { invalidateResolution, setImportStarted } =
-			dispatch( importStore );
+			dispatch(importStore);
 
 		return {
 			invalidateResolution,
 			setImportStarted,
 			updateNote,
 		};
-	} ),
+	}),
 	withSpokenMessages,
-] )( HistoricalData );
+])(HistoricalData);

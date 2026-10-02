@@ -10,29 +10,29 @@ import { recordEvent, queueRecordEvent } from '@woocommerce/tracks';
 import { default as ConnectForm } from '~/dashboard/components/connect';
 import { SetupStepProps } from './setup';
 
-export const Connect = ( { onDisable, onManual }: SetupStepProps ) => {
+export const Connect = ({ onDisable, onManual }: SetupStepProps) => {
 	return (
 		// @ts-expect-error Todo: convert ConnectForm to TypeScript
 		<ConnectForm
-			onConnect={ () => {
-				recordEvent( 'tasklist_tax_connect_store', {
+			onConnect={() => {
+				recordEvent('tasklist_tax_connect_store', {
 					connect: true,
 					no_tax: false,
-				} );
-			} }
-			onSkip={ () => {
-				queueRecordEvent( 'tasklist_tax_connect_store', {
+				});
+			}}
+			onSkip={() => {
+				queueRecordEvent('tasklist_tax_connect_store', {
 					connect: false,
 					no_tax: false,
-				} );
+				});
 				onManual();
-			} }
-			skipText={ __( 'Set up tax rates manually', 'woocommerce' ) }
-			onAbort={ () => onDisable() }
-			abortText={ __(
+			}}
+			skipText={__('Set up tax rates manually', 'woocommerce')}
+			onAbort={() => onDisable()}
+			abortText={__(
 				"My business doesn't charge sales tax",
 				'woocommerce'
-			) }
+			)}
 		/>
 	);
 };

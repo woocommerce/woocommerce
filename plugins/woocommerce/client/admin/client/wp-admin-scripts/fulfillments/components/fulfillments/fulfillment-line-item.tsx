@@ -21,12 +21,12 @@ type FulfillmentItemProps = {
 	quantity: number;
 	currency: string;
 	editMode: boolean;
-	toggleItem: ( id: number, index: number, checked: boolean ) => void;
-	isChecked: ( id: number, index: number ) => boolean;
-	isIndeterminate: ( id: number ) => boolean;
+	toggleItem: (id: number, index: number, checked: boolean) => void;
+	isChecked: (id: number, index: number) => boolean;
+	isIndeterminate: (id: number) => boolean;
 };
 
-export default function FulfillmentLineItem( {
+export default function FulfillmentLineItem({
 	item,
 	quantity,
 	currency,
@@ -34,10 +34,10 @@ export default function FulfillmentLineItem( {
 	toggleItem,
 	isChecked,
 	isIndeterminate,
-}: FulfillmentItemProps ) {
-	const [ itemExpanded, setItemExpanded ] = useState( false );
+}: FulfillmentItemProps) {
+	const [itemExpanded, setItemExpanded] = useState(false);
 
-	const currencyContext = useContext( CurrencyContext );
+	const currencyContext = useContext(CurrencyContext);
 
 	const storeCurrency = currencyContext.getCurrencyConfig();
 
@@ -45,67 +45,66 @@ export default function FulfillmentLineItem( {
 		total: number | string,
 		orderCurrencyCode: string
 	) => {
-		if ( ! orderCurrencyCode ) {
+		if (!orderCurrencyCode) {
 			orderCurrencyCode = storeCurrency?.code || 'USD';
 		}
 
 		// If the order currency is the same as the store currency, we show the formatted amount.
-		if ( storeCurrency && storeCurrency.code === orderCurrencyCode ) {
-			return currencyContext.formatAmount( total );
+		if (storeCurrency && storeCurrency.code === orderCurrencyCode) {
+			return currencyContext.formatAmount(total);
 		}
 
 		const symbol =
-			window.wcFulfillmentSettings.currency_symbols[ orderCurrencyCode ];
+			window.wcFulfillmentSettings.currency_symbols[orderCurrencyCode];
 
-		if ( ! symbol ) {
+		if (!symbol) {
 			// This should never happen, but if it does, we'll just show the currency code.
-			return `${ orderCurrencyCode }${ total }`;
+			return `${orderCurrencyCode}${total}`;
 		}
 
 		// If the order currency is different from the store currency, we show the currency code and amount in the order currency.
-		return CurrencyFactory( {
+		return CurrencyFactory({
 			...storeCurrency,
-			symbol: decodeEntities( symbol ),
+			symbol: decodeEntities(symbol),
 			symbolPosition: storeCurrency.symbolPosition as
-				| SymbolPosition
-				| undefined,
+				SymbolPosition | undefined,
 			code: orderCurrencyCode,
-		} ).formatAmount( total );
+		}).formatAmount(total);
 	};
 
 	return (
 		<>
 			<div
-				className={ [
+				className={[
 					'woocommerce-fulfillment-item-container',
 					itemExpanded ? 'woocommerce-fulfillment-item-expanded' : '',
-				].join( ' ' ) }
+				].join(' ')}
 			>
-				{ editMode && (
+				{editMode && (
 					<div className="woocommerce-fulfillment-item-checkbox">
 						<CheckboxControl
-							value={ item.id }
-							checked={ isChecked( item.id, -1 ) }
-							onChange={ ( value ) => {
-								toggleItem( item.id, -1, value );
-							} }
-							indeterminate={ isIndeterminate( item.id ) }
+							value={item.id}
+							checked={isChecked(item.id, -1)}
+							onChange={(value) => {
+								toggleItem(item.id, -1, value);
+							}}
+							indeterminate={isIndeterminate(item.id)}
 							__nextHasNoMarginBottom
-							aria-label={ item.name }
+							aria-label={item.name}
 						/>
 					</div>
-				) }
-				{ editMode && quantity > 1 && (
+				)}
+				{editMode && quantity > 1 && (
 					<Button
-						onClick={ () => {
-							setItemExpanded( ! itemExpanded );
-						} }
+						onClick={() => {
+							setItemExpanded(!itemExpanded);
+						}}
 						aria-label={
 							itemExpanded
-								? __( 'Collapse item details', 'woocommerce' )
-								: __( 'Expand item details', 'woocommerce' )
+								? __('Collapse item details', 'woocommerce')
+								: __('Expand item details', 'woocommerce')
 						}
-						aria-expanded={ itemExpanded }
+						aria-expanded={itemExpanded}
 						className="woocommerce-fulfillment-item-expand-button"
 					>
 						<Icon
@@ -115,99 +114,99 @@ export default function FulfillmentLineItem( {
 									: 'arrow-down-alt2'
 							}
 							aria-hidden="true"
-							size={ 16 }
+							size={16}
 						/>
 					</Button>
-				) }
+				)}
 				<div className="woocommerce-fulfillment-item-title">
 					<div className="woocommerce-fulfillment-item-image-container">
-						{ item.image?.src && (
+						{item.image?.src && (
 							<img
-								src={ item.image?.src }
-								alt={ item.name }
-								width={ 32 }
-								height={ 32 }
+								src={item.image?.src}
+								alt={item.name}
+								width={32}
+								height={32}
 								className="woocommerce-fulfillment-item-image"
 							/>
-						) }
+						)}
 					</div>
 					<div className="woocommerce-fulfillment-item-name-sku">
 						<div className="woocommerce-fulfillment-item-name">
-							{ item.name }
+							{item.name}
 						</div>
-						{ item.sku && (
+						{item.sku && (
 							<span className="woocommerce-fulfillment-item-sku">
-								{ item.sku }
+								{item.sku}
 							</span>
-						) }
+						)}
 					</div>
 				</div>
-				{ quantity > 1 && (
+				{quantity > 1 && (
 					<div className="woocommerce-fulfillment-item-quantity">
-						{ 'x' + quantity }
+						{'x' + quantity}
 					</div>
-				) }
+				)}
 				<div className="woocommerce-fulfillment-item-price">
-					{ getFormattedItemTotal(
-						parseFloat( item.total ) * ( quantity / item.quantity ),
+					{getFormattedItemTotal(
+						parseFloat(item.total) * (quantity / item.quantity),
 						currency
-					) }
+					)}
 				</div>
 			</div>
-			{ editMode && itemExpanded && (
+			{editMode && itemExpanded && (
 				<div className="woocommerce-fulfillment-item-expansion">
-					{ range( quantity ).map( ( index ) => (
+					{range(quantity).map((index) => (
 						<div
-							key={ 'fulfillment-item-expansion-' + index }
+							key={'fulfillment-item-expansion-' + index}
 							className="woocommerce-fulfillment-item-expansion-row"
 						>
-							{ editMode && (
+							{editMode && (
 								<div className="woocommerce-fulfillment-item-checkbox">
 									<CheckboxControl
-										name={ `fulfillment-item-${ item.id }-${ index }` }
-										value={ item.id + '-' + index }
-										checked={ isChecked( item.id, index ) }
-										onChange={ ( value ) => {
-											toggleItem( item.id, index, value );
-										} }
-										aria-label={ `${ item.name } - item ${
+										name={`fulfillment-item-${item.id}-${index}`}
+										value={item.id + '-' + index}
+										checked={isChecked(item.id, index)}
+										onChange={(value) => {
+											toggleItem(item.id, index, value);
+										}}
+										aria-label={`${item.name} - item ${
 											index + 1
-										}` }
+										}`}
 										__nextHasNoMarginBottom
 									/>
 								</div>
-							) }
+							)}
 							<div className="woocommerce-fulfillment-item-title">
 								<div className="woocommerce-fulfillment-item-image-container">
 									<img
-										src={ item.image.src }
-										alt={ '' } // WCAG: gives redundant alt text alert, as item.name is already used in the title.
-										width={ 32 }
-										height={ 32 }
+										src={item.image.src}
+										alt={''} // WCAG: gives redundant alt text alert, as item.name is already used in the title.
+										width={32}
+										height={32}
 										className="woocommerce-fulfillment-item-image"
 									/>
 								</div>
 								<div className="woocommerce-fulfillment-item-name-sku">
 									<div className="woocommerce-fulfillment-item-name">
-										{ item.name }
+										{item.name}
 									</div>
-									{ item.sku && (
+									{item.sku && (
 										<span className="woocommerce-fulfillment-item-sku">
-											{ item.sku }
+											{item.sku}
 										</span>
-									) }
+									)}
 								</div>
 							</div>
 							<div className="woocommerce-fulfillment-item-price">
-								{ getFormattedItemTotal(
-									parseInt( item.total, 10 ) / item.quantity,
+								{getFormattedItemTotal(
+									parseInt(item.total, 10) / item.quantity,
 									currency
-								) }
+								)}
 							</div>
 						</div>
-					) ) }
+					))}
 				</div>
-			) }
+			)}
 		</>
 	);
 }

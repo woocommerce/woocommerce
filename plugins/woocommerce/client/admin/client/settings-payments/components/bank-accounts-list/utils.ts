@@ -10,28 +10,28 @@ import { __ } from '@wordpress/i18n';
  *
  * @return {string} The label for the sort code field.
  */
-export const getSortCodeLabel = ( country: string ): string => {
-	switch ( country ) {
+export const getSortCodeLabel = (country: string): string => {
+	switch (country) {
 		case 'AU':
-			return __( 'BSB', 'woocommerce' );
+			return __('BSB', 'woocommerce');
 		case 'CA':
-			return __( 'Bank transit number', 'woocommerce' );
+			return __('Bank transit number', 'woocommerce');
 		case 'IN':
-			return __( 'IFSC', 'woocommerce' );
+			return __('IFSC', 'woocommerce');
 		case 'IT':
-			return __( 'Branch sort', 'woocommerce' );
+			return __('Branch sort', 'woocommerce');
 		case 'NZ':
 		case 'SE':
-			return __( 'Bank code', 'woocommerce' );
+			return __('Bank code', 'woocommerce');
 		case 'US':
-			return __( 'Routing number', 'woocommerce' );
+			return __('Routing number', 'woocommerce');
 		case 'ZA':
-			return __( 'Branch code', 'woocommerce' );
+			return __('Branch code', 'woocommerce');
 		case 'GB':
 		case 'IE':
-			return __( 'Sort code', 'woocommerce' );
+			return __('Sort code', 'woocommerce');
 		default:
-			return __( 'Sort code', 'woocommerce' );
+			return __('Sort code', 'woocommerce');
 	}
 };
 
@@ -42,8 +42,8 @@ export const getSortCodeLabel = ( country: string ): string => {
  *
  * @return {boolean} True if the sort code field should be displayed, false otherwise.
  */
-export const shouldDisplaySortCode = ( country: string ): boolean => {
-	switch ( country ) {
+export const shouldDisplaySortCode = (country: string): boolean => {
+	switch (country) {
 		case 'AU':
 		case 'CA':
 		case 'IN':
@@ -68,17 +68,17 @@ export const shouldDisplaySortCode = ( country: string ): boolean => {
  *
  * @return {string} The formatted sort code.
  */
-export const formatSortCode = ( sortCode: string, country: string ): string => {
-	if ( country !== 'GB' && country !== 'IE' ) {
+export const formatSortCode = (sortCode: string, country: string): string => {
+	if (country !== 'GB' && country !== 'IE') {
 		return sortCode;
 	}
 
 	return (
 		sortCode
-			.replace( /\D/g, '' ) // Remove non-digit characters
-			.substring( 0, 6 ) // Take only first 6 digits
-			.match( /.{1,2}/g )
-			?.join( '-' ) ?? ''
+			.replace(/\D/g, '') // Remove non-digit characters
+			.substring(0, 6) // Take only first 6 digits
+			.match(/.{1,2}/g)
+			?.join('-') ?? ''
 	);
 };
 
@@ -88,4 +88,4 @@ export const formatSortCode = ( sortCode: string, country: string ): string => {
  * @return {string} A random ID string.
  */
 export const generateId = (): string =>
-	Math.random().toString( 36 ).substring( 2, 10 );
+	Math.random().toString(36).substring(2, 10);

@@ -31,88 +31,88 @@ type ShippingRecommendationsMarketplaceLinkProps = {
 };
 
 export const useInstallPlugin = () => {
-	const [ pluginsBeingSetup, setPluginsBeingSetup ] = useState<
-		Array< string >
-	>( [] );
+	const [pluginsBeingSetup, setPluginsBeingSetup] = useState<Array<string>>(
+		[]
+	);
 
-	const { installPlugins, activatePlugins } = useDispatch( pluginsStore );
+	const { installPlugins, activatePlugins } = useDispatch(pluginsStore);
 
-	const handleInstall = ( slugs: string[] ): PromiseLike< void > => {
-		if ( pluginsBeingSetup.length > 0 ) {
+	const handleInstall = (slugs: string[]): PromiseLike<void> => {
+		if (pluginsBeingSetup.length > 0) {
 			return Promise.resolve();
 		}
 
-		setPluginsBeingSetup( slugs );
+		setPluginsBeingSetup(slugs);
 
-		return installPlugins( slugs as Partial< PluginNames >[] )
-			.then( () => {
-				setPluginsBeingSetup( [] );
-			} )
-			.catch( ( response: { errors: Record< string, string > } ) => {
-				createNoticesFromResponse( response );
-				setPluginsBeingSetup( [] );
+		return installPlugins(slugs as Partial<PluginNames>[])
+			.then(() => {
+				setPluginsBeingSetup([]);
+			})
+			.catch((response: { errors: Record<string, string> }) => {
+				createNoticesFromResponse(response);
+				setPluginsBeingSetup([]);
 
 				return Promise.reject();
-			} );
+			});
 	};
 
-	const handleActivate = ( slugs: string[] ): PromiseLike< void > => {
-		if ( pluginsBeingSetup.length > 0 ) {
+	const handleActivate = (slugs: string[]): PromiseLike<void> => {
+		if (pluginsBeingSetup.length > 0) {
 			return Promise.resolve();
 		}
 
-		setPluginsBeingSetup( slugs );
+		setPluginsBeingSetup(slugs);
 
-		return activatePlugins( slugs as Partial< PluginNames >[] )
-			.then( () => {
-				setPluginsBeingSetup( [] );
-			} )
-			.catch( ( response: { errors: Record< string, string > } ) => {
-				createNoticesFromResponse( response );
-				setPluginsBeingSetup( [] );
+		return activatePlugins(slugs as Partial<PluginNames>[])
+			.then(() => {
+				setPluginsBeingSetup([]);
+			})
+			.catch((response: { errors: Record<string, string> }) => {
+				createNoticesFromResponse(response);
+				setPluginsBeingSetup([]);
 
 				return Promise.reject();
-			} );
+			});
 	};
 
-	return [ pluginsBeingSetup, handleInstall, handleActivate ] as const;
+	return [pluginsBeingSetup, handleInstall, handleActivate] as const;
 };
 
-export const ShippingRecommendationsMarketplaceLink = ( {
+export const ShippingRecommendationsMarketplaceLink = ({
 	textProps,
-}: ShippingRecommendationsMarketplaceLinkProps ) => (
+}: ShippingRecommendationsMarketplaceLinkProps) => (
 	<TrackedLink
-		textProps={ textProps }
-		message={ __(
+		textProps={textProps}
+		message={__(
 			// translators: {{Link}} is a placeholder for a html element.
 			'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find more shipping, delivery, and fulfillment solutions.',
 			'woocommerce'
-		) }
-		targetUrl={ getAdminLink(
+		)}
+		targetUrl={getAdminLink(
 			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
-		) }
+		)}
 		linkType="wc-admin"
 		eventName="settings_shipping_recommendation_visit_marketplace_click"
 	/>
 );
 
-export const ShippingRecommendationsList = ( {
+export const ShippingRecommendationsList = ({
 	children,
 	dismissState,
 }: {
 	children: React.ReactNode;
 	dismissState: DismissState;
-} ) => {
+}) => {
 	const { isDismissed, onDismiss } = dismissState;
 
 	return (
 		<DismissableList
 			className="woocommerce-recommended-shipping-extensions"
-			isDismissed={ isDismissed }
+			isDismissed={isDismissed}
 		>
-			<DismissableListHeading onDismiss={ onDismiss }>
+			<DismissableListHeading onDismiss={onDismiss}>
 				<Text variant="title.small" as="p" size="20" lineHeight="28px">
-					{ __( 'Recommended shipping solutions', 'woocommerce' ) }
+					{__('Recommended shipping solutions', 'woocommerce')}
 				</Text>
 				<Text
 					className="woocommerce-recommended-shipping__header-heading"
@@ -121,16 +121,16 @@ export const ShippingRecommendationsList = ( {
 					size="12"
 					lineHeight="16px"
 				>
-					{ __(
+					{__(
 						'We recommend adding one of the following shipping extensions to your store.',
 						'woocommerce'
-					) }
+					)}
 				</Text>
 			</DismissableListHeading>
 			<ul className="woocommerce-list">
-				{ Children.map( children, ( item ) => (
-					<li className="woocommerce-list__item">{ item }</li>
-				) ) }
+				{Children.map(children, (item) => (
+					<li className="woocommerce-list__item">{item}</li>
+				))}
 			</ul>
 			<CardFooter>
 				<ShippingRecommendationsMarketplaceLink />

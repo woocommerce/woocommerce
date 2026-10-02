@@ -9,8 +9,8 @@ import deepFreeze from 'deep-freeze';
 import reducer from '../reducers';
 import { ACTION_TYPES } from '../action-types';
 
-describe( 'paymentMethodDataReducer', () => {
-	const originalState = deepFreeze( {
+describe('paymentMethodDataReducer', () => {
+	const originalState = deepFreeze({
 		currentStatus: {
 			isPristine: true,
 			isStarted: false,
@@ -30,14 +30,14 @@ describe( 'paymentMethodDataReducer', () => {
 		errorMessage: '',
 		activePaymentMethod: '',
 		incompatiblePaymentMethods: {},
-	} );
+	});
 
-	it( 'sets state as expected when adding a payment method', () => {
-		const nextState = reducer( originalState, {
+	it('sets state as expected when adding a payment method', () => {
+		const nextState = reducer(originalState, {
 			type: ACTION_TYPES.SET_AVAILABLE_PAYMENT_METHODS,
 			paymentMethods: { 'my-new-method': { express: false } },
-		} );
-		expect( nextState ).toEqual( {
+		});
+		expect(nextState).toEqual({
 			currentStatus: {
 				isPristine: true,
 				isStarted: false,
@@ -57,11 +57,11 @@ describe( 'paymentMethodDataReducer', () => {
 			errorMessage: '',
 			activePaymentMethod: '',
 			incompatiblePaymentMethods: {},
-		} );
-	} );
+		});
+	});
 
-	it( 'sets state as expected when removing a payment method', () => {
-		const stateWithRegisteredMethod = deepFreeze( {
+	it('sets state as expected when removing a payment method', () => {
+		const stateWithRegisteredMethod = deepFreeze({
 			currentStatus: {
 				isPristine: true,
 				isStarted: false,
@@ -81,12 +81,12 @@ describe( 'paymentMethodDataReducer', () => {
 			errorMessage: '',
 			activePaymentMethod: '',
 			incompatiblePaymentMethods: {},
-		} );
-		const nextState = reducer( stateWithRegisteredMethod, {
+		});
+		const nextState = reducer(stateWithRegisteredMethod, {
 			type: ACTION_TYPES.REMOVE_AVAILABLE_PAYMENT_METHOD,
 			name: 'my-new-method',
-		} );
-		expect( nextState ).toEqual( {
+		});
+		expect(nextState).toEqual({
 			currentStatus: {
 				isPristine: true,
 				isStarted: false,
@@ -106,15 +106,15 @@ describe( 'paymentMethodDataReducer', () => {
 			errorMessage: '',
 			activePaymentMethod: '',
 			incompatiblePaymentMethods: {},
-		} );
-	} );
+		});
+	});
 
-	it( 'sets state as expected when adding an express payment method', () => {
-		const nextState = reducer( originalState, {
+	it('sets state as expected when adding an express payment method', () => {
+		const nextState = reducer(originalState, {
 			type: ACTION_TYPES.SET_AVAILABLE_EXPRESS_PAYMENT_METHODS,
 			paymentMethods: { 'my-new-method': { express: true } },
-		} );
-		expect( nextState ).toEqual( {
+		});
+		expect(nextState).toEqual({
 			currentStatus: {
 				isPristine: true,
 				isStarted: false,
@@ -136,11 +136,11 @@ describe( 'paymentMethodDataReducer', () => {
 			errorMessage: '',
 			activePaymentMethod: '',
 			incompatiblePaymentMethods: {},
-		} );
-	} );
+		});
+	});
 
-	it( 'sets state as expected when removing an express payment method', () => {
-		const stateWithRegisteredMethod = deepFreeze( {
+	it('sets state as expected when removing an express payment method', () => {
+		const stateWithRegisteredMethod = deepFreeze({
 			currentStatus: {
 				isPristine: true,
 				isStarted: false,
@@ -164,12 +164,12 @@ describe( 'paymentMethodDataReducer', () => {
 			errorMessage: '',
 			activePaymentMethod: '',
 			incompatiblePaymentMethods: {},
-		} );
-		const nextState = reducer( stateWithRegisteredMethod, {
+		});
+		const nextState = reducer(stateWithRegisteredMethod, {
 			type: ACTION_TYPES.REMOVE_AVAILABLE_EXPRESS_PAYMENT_METHOD,
 			name: 'my-new-method',
-		} );
-		expect( nextState ).toEqual( {
+		});
+		expect(nextState).toEqual({
 			currentStatus: {
 				isPristine: true,
 				isStarted: false,
@@ -189,10 +189,10 @@ describe( 'paymentMethodDataReducer', () => {
 			errorMessage: '',
 			activePaymentMethod: '',
 			incompatiblePaymentMethods: {},
-		} );
-	} );
-	it( 'removes the correct express payment method', () => {
-		const stateWithRegisteredMethod = deepFreeze( {
+		});
+	});
+	it('removes the correct express payment method', () => {
+		const stateWithRegisteredMethod = deepFreeze({
 			currentStatus: {
 				isPristine: true,
 				isStarted: false,
@@ -219,16 +219,16 @@ describe( 'paymentMethodDataReducer', () => {
 			errorMessage: '',
 			activePaymentMethod: '',
 			incompatiblePaymentMethods: {},
-		} );
-		const nextState = reducer( stateWithRegisteredMethod, {
+		});
+		const nextState = reducer(stateWithRegisteredMethod, {
 			type: ACTION_TYPES.REMOVE_AVAILABLE_EXPRESS_PAYMENT_METHOD,
 			name: 'my-new-method',
-		} );
-		expect( nextState.availableExpressPaymentMethods ).not.toHaveProperty(
+		});
+		expect(nextState.availableExpressPaymentMethods).not.toHaveProperty(
 			'my-new-method'
 		);
 
-		expect( nextState ).toEqual( {
+		expect(nextState).toEqual({
 			currentStatus: {
 				isPristine: true,
 				isStarted: false,
@@ -252,10 +252,10 @@ describe( 'paymentMethodDataReducer', () => {
 			errorMessage: '',
 			activePaymentMethod: '',
 			incompatiblePaymentMethods: {},
-		} );
-	} );
+		});
+	});
 
-	it( 'should handle SET_PAYMENT_RESULT', () => {
+	it('should handle SET_PAYMENT_RESULT', () => {
 		const mockResponse = {
 			message: 'success',
 			redirectUrl: 'https://example.com',
@@ -269,21 +269,21 @@ describe( 'paymentMethodDataReducer', () => {
 		};
 
 		expect(
-			reducer( originalState, {
+			reducer(originalState, {
 				type: ACTION_TYPES.SET_PAYMENT_RESULT,
 				data: mockResponse,
-			} )
-		).toEqual( expectedState );
-	} );
+			})
+		).toEqual(expectedState);
+	});
 
-	it( 'should handle SET_REGISTERED_EXPRESS_PAYMENT_METHODS', () => {
+	it('should handle SET_REGISTERED_EXPRESS_PAYMENT_METHODS', () => {
 		const mockRegisteredMethods = {
 			'stripe-express': {
 				name: 'stripe-express',
 				title: 'Stripe Express',
 				description: 'Pay with Stripe express checkout',
 				gatewayId: 'stripe',
-				supportsStyle: [ 'height', 'borderRadius' ],
+				supportsStyle: ['height', 'borderRadius'],
 			},
 			'paypal-express': {
 				name: 'paypal-express',
@@ -300,15 +300,15 @@ describe( 'paymentMethodDataReducer', () => {
 		};
 
 		expect(
-			reducer( originalState, {
+			reducer(originalState, {
 				type: ACTION_TYPES.SET_REGISTERED_EXPRESS_PAYMENT_METHODS,
 				paymentMethods: mockRegisteredMethods,
-			} )
-		).toEqual( expectedState );
-	} );
+			})
+		).toEqual(expectedState);
+	});
 
-	it( 'should handle SET_REGISTERED_EXPRESS_PAYMENT_METHODS with empty object', () => {
-		const stateWithRegisteredMethods = deepFreeze( {
+	it('should handle SET_REGISTERED_EXPRESS_PAYMENT_METHODS with empty object', () => {
+		const stateWithRegisteredMethods = deepFreeze({
 			...originalState,
 			registeredExpressPaymentMethods: {
 				'stripe-express': {
@@ -316,10 +316,10 @@ describe( 'paymentMethodDataReducer', () => {
 					title: 'Stripe Express',
 					description: 'Pay with Stripe express checkout',
 					gatewayId: 'stripe',
-					supportsStyle: [ 'height', 'borderRadius' ],
+					supportsStyle: ['height', 'borderRadius'],
 				},
 			},
-		} );
+		});
 
 		const expectedState = {
 			...originalState,
@@ -327,10 +327,10 @@ describe( 'paymentMethodDataReducer', () => {
 		};
 
 		expect(
-			reducer( stateWithRegisteredMethods, {
+			reducer(stateWithRegisteredMethods, {
 				type: ACTION_TYPES.SET_REGISTERED_EXPRESS_PAYMENT_METHODS,
 				paymentMethods: {},
-			} )
-		).toEqual( expectedState );
-	} );
-} );
+			})
+		).toEqual(expectedState);
+	});
+});

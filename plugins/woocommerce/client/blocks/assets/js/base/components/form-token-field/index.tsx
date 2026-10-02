@@ -12,52 +12,52 @@ import './style.scss';
 export interface Props {
 	className?: string;
 	disabled?: boolean;
-	displayTransform?: ( value: string ) => string;
+	displayTransform?: (value: string) => string;
 	label?: string;
-	messages?: Record< string, string >;
+	messages?: Record<string, string>;
 	multiple?: boolean;
-	onChange: ( value: string[] ) => void;
+	onChange: (value: string[]) => void;
 	placeholder?: string;
-	saveTransform?: ( value: string ) => string;
+	saveTransform?: (value: string) => string;
 	style?: React.CSSProperties;
 	suggestions: string[];
-	validateInput?: ( token: string ) => boolean;
+	validateInput?: (token: string) => boolean;
 	value: string[];
 }
 
-const FormTokenField = ( {
+const FormTokenField = ({
 	className,
 	style,
 	suggestions,
 	multiple = true,
-	saveTransform = ( incompleteToken ) =>
-		incompleteToken.trim().replace( /\s/g, '-' ),
+	saveTransform = (incompleteToken) =>
+		incompleteToken.trim().replace(/\s/g, '-'),
 	messages = {},
-	validateInput = ( token: string ) => suggestions.includes( token ),
+	validateInput = (token: string) => suggestions.includes(token),
 	label = '',
 	...props
-}: Props ) => {
+}: Props) => {
 	return (
 		<div
-			className={ clsx(
+			className={clsx(
 				'wc-blocks-components-form-token-field-wrapper',
 				className,
 				{
-					'single-selection': ! multiple,
+					'single-selection': !multiple,
 				}
-			) }
-			style={ style }
+			)}
+			style={style}
 		>
 			<WPFormTokenField
-				label={ label }
-				__experimentalExpandOnFocus={ true }
-				__experimentalShowHowTo={ false }
-				__experimentalValidateInput={ validateInput }
-				saveTransform={ saveTransform }
-				maxLength={ multiple ? undefined : 1 }
-				suggestions={ suggestions }
-				messages={ messages }
-				{ ...props }
+				label={label}
+				__experimentalExpandOnFocus={true}
+				__experimentalShowHowTo={false}
+				__experimentalValidateInput={validateInput}
+				saveTransform={saveTransform}
+				maxLength={multiple ? undefined : 1}
+				suggestions={suggestions}
+				messages={messages}
+				{...props}
 			/>
 		</div>
 	);

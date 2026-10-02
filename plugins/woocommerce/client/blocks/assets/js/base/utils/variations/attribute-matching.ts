@@ -11,10 +11,10 @@ import type { ProductResponseVariationsItem } from '@woocommerce/types';
  * @param name The attribute name (e.g., 'attribute_color' or 'attribute_pa_color').
  * @return The normalized name (e.g., 'color').
  */
-export const normalizeAttributeName = ( name: string ): string => {
+export const normalizeAttributeName = (name: string): string => {
 	return name
-		.replace( /^attribute_(pa_)?/, '' )
-		.replace( /-/g, ' ' )
+		.replace(/^attribute_(pa_)?/, '')
+		.replace(/-/g, ' ')
 		.toLowerCase();
 };
 
@@ -28,11 +28,8 @@ export const normalizeAttributeName = ( name: string ): string => {
  * @param name2 Second attribute name (may be label or slug format).
  * @return True if the names match after normalization.
  */
-export const attributeNamesMatch = (
-	name1: string,
-	name2: string
-): boolean => {
-	return normalizeAttributeName( name1 ) === normalizeAttributeName( name2 );
+export const attributeNamesMatch = (name1: string, name2: string): boolean => {
+	return normalizeAttributeName(name1) === normalizeAttributeName(name2);
 };
 
 /**
@@ -50,8 +47,8 @@ export const getVariationAttributeValue = (
 	variation: ProductResponseVariationsItem,
 	attributeName: string
 ): string | undefined => {
-	const attr = variation.attributes.find( ( a ) =>
-		attributeNamesMatch( attributeName, a.name )
+	const attr = variation.attributes.find((a) =>
+		attributeNamesMatch(attributeName, a.name)
 	);
 	return attr?.value;
 };

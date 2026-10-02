@@ -11,13 +11,13 @@ import {
 } from '@wordpress/block-editor';
 import clsx from 'clsx';
 
-export default function Edit( { attributes } ) {
+export default function Edit({ attributes }) {
 	const { allowedBlocks, templateLock, openByDefault, isSelected } =
 		attributes;
-	const borderProps = useBorderProps( attributes );
-	const colorProps = useColorProps( attributes );
-	const spacingProps = useSpacingProps( attributes );
-	const shadowProps = useShadowProps( attributes );
+	const borderProps = useBorderProps(attributes);
+	const colorProps = useColorProps(attributes);
+	const spacingProps = useSpacingProps(attributes);
+	const shadowProps = useShadowProps(attributes);
 
 	const blockProps = useBlockProps();
 	const innerBlocksProps = useInnerBlocksProps(
@@ -29,30 +29,30 @@ export default function Edit( { attributes } ) {
 		},
 		{
 			allowedBlocks,
-			template: [ [ 'core/paragraph', {} ] ],
+			template: [['core/paragraph', {}]],
 			templateLock,
 		}
 	);
 
 	return (
 		<div
-			{ ...blockProps }
-			className={ clsx(
+			{...blockProps}
+			className={clsx(
 				blockProps.className,
 				colorProps.className,
 				borderProps.className,
 				{
-					[ `has-custom-font-size` ]: blockProps?.style?.fontSize,
+					[`has-custom-font-size`]: blockProps?.style?.fontSize,
 				}
-			) }
-			style={ {
+			)}
+			style={{
 				...borderProps.style,
 				...colorProps.style,
 				...shadowProps.style,
-			} }
-			aria-hidden={ ! isSelected && ! openByDefault }
+			}}
+			aria-hidden={!isSelected && !openByDefault}
 		>
-			<div { ...innerBlocksProps } />
+			<div {...innerBlocksProps} />
 		</div>
 	);
 }

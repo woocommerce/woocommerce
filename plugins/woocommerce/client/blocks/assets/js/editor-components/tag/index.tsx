@@ -18,7 +18,7 @@ import './editor.scss';
  * This component can be used to show an item styled as a "tag", optionally with an `X` + "remove"
  * or with a popover that is shown on click.
  */
-const Tag = ( {
+const Tag = ({
 	id,
 	label,
 	popoverContents,
@@ -35,68 +35,68 @@ const Tag = ( {
 	// Contents to display on click in a popover
 	popoverContents?: JSX.Element;
 	// A function called when the remove X is clicked. If not used, no X icon will display.
-	remove?: ( id: string | number ) => () => void;
+	remove?: (id: string | number) => () => void;
 	// A more descriptive label for screen reader users. Defaults to the `name` prop.
 	screenReaderLabel?: string;
-} ): JSX.Element | null => {
-	const [ isVisible, setIsVisible ] = useState( false );
-	const instanceId = useInstanceId( Tag );
+}): JSX.Element | null => {
+	const [isVisible, setIsVisible] = useState(false);
+	const instanceId = useInstanceId(Tag);
 	screenReaderLabel = screenReaderLabel || label;
-	if ( ! label ) {
+	if (!label) {
 		// A null label probably means something went wrong
 		return null;
 	}
-	label = decodeEntities( label );
-	const classes = clsx( 'woocommerce-tag', className, {
-		'has-remove': !! remove,
-	} );
-	const labelId = `woocommerce-tag__label-${ instanceId }`;
+	label = decodeEntities(label);
+	const classes = clsx('woocommerce-tag', className, {
+		'has-remove': !!remove,
+	});
+	const labelId = `woocommerce-tag__label-${instanceId}`;
 	const labelTextNode = (
 		<>
-			<span className="screen-reader-text">{ screenReaderLabel }</span>
-			<span aria-hidden="true">{ label }</span>
+			<span className="screen-reader-text">{screenReaderLabel}</span>
+			<span aria-hidden="true">{label}</span>
 		</>
 	);
 
 	return (
-		<span className={ classes }>
-			{ popoverContents ? (
+		<span className={classes}>
+			{popoverContents ? (
 				<Button
 					className="woocommerce-tag__text"
-					id={ labelId }
-					onClick={ () => setIsVisible( true ) }
+					id={labelId}
+					onClick={() => setIsVisible(true)}
 				>
-					{ labelTextNode }
+					{labelTextNode}
 				</Button>
 			) : (
-				<span className="woocommerce-tag__text" id={ labelId }>
-					{ labelTextNode }
+				<span className="woocommerce-tag__text" id={labelId}>
+					{labelTextNode}
 				</span>
-			) }
-			{ popoverContents && isVisible && (
-				<Popover onClose={ () => setIsVisible( false ) }>
-					{ popoverContents }
+			)}
+			{popoverContents && isVisible && (
+				<Popover onClose={() => setIsVisible(false)}>
+					{popoverContents}
 				</Popover>
-			) }
-			{ remove && (
+			)}
+			{remove && (
 				<Button
 					className="woocommerce-tag__remove"
-					onClick={ remove( id ) }
-					label={ sprintf(
+					onClick={remove(id)}
+					label={sprintf(
 						// Translators: %s label.
-						__( 'Remove %s', 'woocommerce' ),
+						__('Remove %s', 'woocommerce'),
 						label
-					) }
-					aria-describedby={ labelId }
+					)}
+					aria-describedby={labelId}
 				>
 					<Icon
-						icon={ cancelCircleFilled }
-						size={ 20 }
+						icon={cancelCircleFilled}
+						size={20}
 						className="clear-icon"
 						role="img"
 					/>
 				</Button>
-			) }
+			)}
 		</span>
 	);
 };

@@ -53,56 +53,56 @@ export type MainContentMachineEvents =
 	| { type: 'RETURN_FROM_PAYMENTS' }
 	| congratsEvents;
 
-const contentQueryParamListener = fromCallback( ( { sendBack } ) => {
-	return createQueryParamsListener( 'content', sendBack );
-} );
+const contentQueryParamListener = fromCallback(({ sendBack }) => {
+	return createQueryParamsListener('content', sendBack);
+});
 
-export const mainContentMachine = setup( {
+export const mainContentMachine = setup({
 	types: {} as {
 		context: MainContentMachineContext;
 		events: MainContentMachineEvents;
 	},
 	actions: {
-		updateQueryParams: ( _, params: LaunchYourStoreQueryParams ) => {
-			updateQueryParams< LaunchYourStoreQueryParams >( params );
+		updateQueryParams: (_, params: LaunchYourStoreQueryParams) => {
+			updateQueryParams<LaunchYourStoreQueryParams>(params);
 		},
 		cleanupPaymentsUrl: () => {
 			// Clean up URL without causing page refresh
-			const url = new URL( window.location.href );
-			url.searchParams.delete( 'content' );
+			const url = new URL(window.location.href);
+			url.searchParams.delete('content');
 
 			// Remove any payments-related path parameters
-			if ( url.searchParams.get( 'path' )?.includes( 'woopayments' ) ) {
-				url.searchParams.set( 'path', '/launch-your-store' );
+			if (url.searchParams.get('path')?.includes('woopayments')) {
+				url.searchParams.set('path', '/launch-your-store');
 			}
-			window.history.replaceState( null, '', url.toString() );
+			window.history.replaceState(null, '', url.toString());
 		},
-		assignSiteCachedStatus: assign( {
+		assignSiteCachedStatus: assign({
 			siteIsShowingCachedContent: true,
-		} ),
-		recordSurveyResults: ( { event } ) => {
-			assertEvent( event, 'COMPLETE_SURVEY' );
-			recordEvent( 'launch_your_store_congrats_survey_complete', {
+		}),
+		recordSurveyResults: ({ event }) => {
+			assertEvent(event, 'COMPLETE_SURVEY');
+			recordEvent('launch_your_store_congrats_survey_complete', {
 				action: event.payload.action,
 				score: event.payload.score,
 				comments: event.payload.comments,
-			} );
+			});
 		},
 		recordBackToHomeClick: () => {
-			recordEvent( 'launch_your_store_congrats_back_to_home_click' );
+			recordEvent('launch_your_store_congrats_back_to_home_click');
 		},
 		recordPreviewStoreClick: () => {
-			recordEvent( 'launch_your_store_congrats_preview_store_click' );
+			recordEvent('launch_your_store_congrats_preview_store_click');
 		},
 		navigateToPreview: () => {
-			const homeUrl: string = getSetting( 'homeUrl', '' );
-			window.open( homeUrl, '_blank' );
+			const homeUrl: string = getSetting('homeUrl', '');
+			window.open(homeUrl, '_blank');
 		},
 		navigateToHome: () => {
 			const { invalidateResolutionForStoreSelector } =
-				dispatch( onboardingStore );
-			void invalidateResolutionForStoreSelector( 'getTaskLists' );
-			navigateTo( { url: '/' } );
+				dispatch(onboardingStore);
+			void invalidateResolutionForStoreSelector('getTaskLists');
+			navigateTo({ url: '/' });
 		},
 	},
 	guards: {
@@ -111,24 +111,23 @@ export const mainContentMachine = setup( {
 			{ content: contentLocation }: LaunchYourStoreQueryParams
 		) => {
 			const { content } = getQuery() as LaunchYourStoreQueryParams;
-			return !! content && content === contentLocation;
+			return !!content && content === contentLocation;
 		},
 		hasWooPaymentsOnboardingPath: () => {
 			const query = getQuery() as LaunchYourStoreQueryParams & {
 				path?: string;
 			};
 			return (
-				!! query.path &&
-				query.path.includes( '/woopayments/onboarding' )
+				!!query.path && query.path.includes('/woopayments/onboarding')
 			);
 		},
 	},
 	actors: {
 		contentQueryParamListener,
 		fetchCongratsData: congratsServices.fetchCongratsData,
-		getSiteCachedStatus: fromPromise( getSiteCachedStatus ),
+		getSiteCachedStatus: fromPromise(getSiteCachedStatus),
 	},
-} ).createMachine( {
+}).createMachine({
 	id: 'mainContent',
 	initial: 'navigate',
 	context: {
@@ -216,20 +215,20 @@ export const mainContentMachine = setup( {
 						{
 							src: 'getSiteCachedStatus',
 							onDone: {
-								actions: assign( {
-									siteIsShowingCachedContent: ( { event } ) =>
+								actions: assign({
+									siteIsShowingCachedContent: ({ event }) =>
 										event.output,
-								} ),
+								}),
 							},
 							onError: {
-								actions: assign( {
+								actions: assign({
 									siteIsShowingCachedContent: false,
-								} ),
+								}),
 							},
 						},
 					],
 					always: {
-						guard: ( { context } ) => {
+						guard: ({ context }) => {
 							return (
 								context.congratsScreen.hasLoadedCongratsData &&
 								context.siteIsShowingCachedContent !== undefined
@@ -257,15 +256,15 @@ export const mainContentMachine = setup( {
 			on: {
 				COMPLETE_SURVEY: {
 					actions: [
-						assign( congratsActions.assignCompleteSurvey ),
+						assign(congratsActions.assignCompleteSurvey),
 						'recordSurveyResults',
 					],
 				},
 				PREVIEW_STORE: {
-					actions: [ 'recordPreviewStoreClick', 'navigateToPreview' ],
+					actions: ['recordPreviewStoreClick', 'navigateToPreview'],
 				},
 				BACK_TO_HOME: {
-					actions: [ 'recordBackToHomeClick', 'navigateToHome' ],
+					actions: ['recordBackToHomeClick', 'navigateToHome'],
 				},
 			},
 		},
@@ -284,7 +283,7 @@ export const mainContentMachine = setup( {
 			target: '#launchStoreSuccess',
 		},
 		SHOW_LAUNCH_STORE_PENDING_CACHE: {
-			actions: [ 'assignSiteCachedStatus' ],
+			actions: ['assignSiteCachedStatus'],
 			target: '#launchStoreSuccess',
 		},
 		SHOW_LOADING: {
@@ -294,28 +293,26 @@ export const mainContentMachine = setup( {
 			target: '#payments',
 		},
 		POP_BROWSER_STACK: {
-			actions: assign( {
+			actions: assign({
 				siteIsShowingCachedContent: undefined,
-			} ),
+			}),
 			target: '#sitePreview',
 		},
 		RETURN_FROM_PAYMENTS: {
 			actions: [
-				assign( {
+				assign({
 					siteIsShowingCachedContent: undefined,
-				} ),
+				}),
 				'cleanupPaymentsUrl',
 			],
 			target: '#sitePreview',
 		},
 	},
-} );
-export const MainContentContainer = ( {
+});
+export const MainContentContainer = ({
 	children,
 }: {
 	children: React.ReactNode;
-} ) => {
-	return (
-		<div className="launch-your-store-layout__content">{ children }</div>
-	);
+}) => {
+	return <div className="launch-your-store-layout__content">{children}</div>;
 };

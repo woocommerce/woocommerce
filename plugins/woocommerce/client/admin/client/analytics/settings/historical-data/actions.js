@@ -15,7 +15,7 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { formatParams } from './utils';
 
-function HistoricalDataActions( {
+function HistoricalDataActions({
 	clearStatusAndTotalsCache,
 	createNotice,
 	dateFormat,
@@ -27,31 +27,31 @@ function HistoricalDataActions( {
 	status,
 	setImportStarted,
 	updateImportation,
-} ) {
-	const makeQuery = ( path, errorMessage, importStarted = false ) => {
-		updateImportation( path, importStarted )
-			.then( ( response ) => {
-				if ( response.status === 'success' ) {
-					createNotice( 'success', response.message );
+}) {
+	const makeQuery = (path, errorMessage, importStarted = false) => {
+		updateImportation(path, importStarted)
+			.then((response) => {
+				if (response.status === 'success') {
+					createNotice('success', response.message);
 				} else {
-					createNotice( 'error', errorMessage );
-					setImportStarted( false );
+					createNotice('error', errorMessage);
+					setImportStarted(false);
 					stopImport();
 				}
-			} )
-			.catch( ( error ) => {
-				if ( error && error.message ) {
-					createNotice( 'error', error.message );
-					setImportStarted( false );
+			})
+			.catch((error) => {
+				if (error && error.message) {
+					createNotice('error', error.message);
+					setImportStarted(false);
 					stopImport();
 				}
-			} );
+			});
 	};
 
 	const onStartImport = () => {
 		const path = addQueryArgs(
 			'/wc-analytics/reports/import',
-			formatParams( dateFormat, selectedPeriod, skipChecked )
+			formatParams(dateFormat, selectedPeriod, skipChecked)
 		);
 		const errorMessage = __(
 			'There was a problem rebuilding your report data.',
@@ -59,7 +59,7 @@ function HistoricalDataActions( {
 		);
 
 		const importStarted = true;
-		makeQuery( path, errorMessage, importStarted );
+		makeQuery(path, errorMessage, importStarted);
 		onImportStarted();
 	};
 
@@ -70,7 +70,7 @@ function HistoricalDataActions( {
 			'There was a problem stopping your current import.',
 			'woocommerce'
 		);
-		makeQuery( path, errorMessage );
+		makeQuery(path, errorMessage);
 	};
 
 	const deletePreviousData = () => {
@@ -79,14 +79,14 @@ function HistoricalDataActions( {
 			'There was a problem deleting your previous data.',
 			'woocommerce'
 		);
-		makeQuery( path, errorMessage );
+		makeQuery(path, errorMessage);
 
-		recordEvent( 'analytics_import_delete_previous' );
+		recordEvent('analytics_import_delete_previous');
 
-		setImportStarted( false );
+		setImportStarted(false);
 	};
 	const reimportData = () => {
-		setImportStarted( false );
+		setImportStarted(false);
 		// We need to clear the cache of the selectors `getImportTotals` and `getImportStatus`
 		clearStatusAndTotalsCache();
 	};
@@ -95,7 +95,7 @@ function HistoricalDataActions( {
 
 		// An import is currently in progress
 		if (
-			[ 'initializing', 'customers', 'orders', 'finalizing' ].includes(
+			['initializing', 'customers', 'orders', 'finalizing'].includes(
 				status
 			)
 		) {
@@ -104,41 +104,41 @@ function HistoricalDataActions( {
 					<Button
 						className="woocommerce-settings-historical-data__action-button"
 						isPrimary
-						onClick={ onStopImport }
+						onClick={onStopImport}
 					>
-						{ __( 'Stop Import', 'woocommerce' ) }
+						{__('Stop Import', 'woocommerce')}
 					</Button>
 					<div className="woocommerce-setting__help woocommerce-settings-historical-data__action-help">
-						{ __(
+						{__(
 							'Imported data will not be lost if the import is stopped.',
 							'woocommerce'
-						) }
+						)}
 						<br />
-						{ __(
+						{__(
 							'Navigating away from this page will not affect the import.',
 							'woocommerce'
-						) }
+						)}
 					</div>
 				</Fragment>
 			);
 		}
 
-		if ( [ 'ready', 'nothing' ].includes( status ) ) {
-			if ( importDate ) {
+		if (['ready', 'nothing'].includes(status)) {
+			if (importDate) {
 				return (
 					<Fragment>
 						<Button
 							isPrimary
-							onClick={ onStartImport }
-							disabled={ importDisabled }
+							onClick={onStartImport}
+							disabled={importDisabled}
 						>
-							{ __( 'Start', 'woocommerce' ) }
+							{__('Start', 'woocommerce')}
 						</Button>
-						<Button isSecondary onClick={ deletePreviousData }>
-							{ __(
+						<Button isSecondary onClick={deletePreviousData}>
+							{__(
 								'Delete Previously Imported Data',
 								'woocommerce'
-							) }
+							)}
 						</Button>
 					</Fragment>
 				);
@@ -148,16 +148,16 @@ function HistoricalDataActions( {
 				<Fragment>
 					<Button
 						isPrimary
-						onClick={ onStartImport }
-						disabled={ importDisabled }
+						onClick={onStartImport}
+						disabled={importDisabled}
 					>
-						{ __( 'Start', 'woocommerce' ) }
+						{__('Start', 'woocommerce')}
 					</Button>
 				</Fragment>
 			);
 		}
 
-		if ( status === 'error' ) {
+		if (status === 'error') {
 			createNotice(
 				'error',
 				__(
@@ -170,11 +170,11 @@ function HistoricalDataActions( {
 		// Has imported all possible data
 		return (
 			<Fragment>
-				<Button isSecondary onClick={ reimportData }>
-					{ __( 'Re-import Data', 'woocommerce' ) }
+				<Button isSecondary onClick={reimportData}>
+					{__('Re-import Data', 'woocommerce')}
 				</Button>
-				<Button isSecondary onClick={ deletePreviousData }>
-					{ __( 'Delete Previously Imported Data', 'woocommerce' ) }
+				<Button isSecondary onClick={deletePreviousData}>
+					{__('Delete Previously Imported Data', 'woocommerce')}
 				</Button>
 			</Fragment>
 		);
@@ -182,14 +182,14 @@ function HistoricalDataActions( {
 
 	return (
 		<div className="woocommerce-settings__actions woocommerce-settings-historical-data__actions">
-			{ getActions() }
+			{getActions()}
 		</div>
 	);
 }
 
-export default compose( [
-	withSelect( ( select ) => {
-		const { getFormSettings } = select( importStore );
+export default compose([
+	withSelect((select) => {
+		const { getFormSettings } = select(importStore);
 
 		const { period: selectedPeriod, skipPrevious: skipChecked } =
 			getFormSettings();
@@ -198,14 +198,14 @@ export default compose( [
 			selectedPeriod,
 			skipChecked,
 		};
-	} ),
-	withDispatch( ( dispatch ) => {
-		const { updateImportation, setImportStarted } = dispatch( importStore );
-		const { createNotice } = dispatch( 'core/notices' );
+	}),
+	withDispatch((dispatch) => {
+		const { updateImportation, setImportStarted } = dispatch(importStore);
+		const { createNotice } = dispatch('core/notices');
 		return {
 			createNotice,
 			setImportStarted,
 			updateImportation,
 		};
-	} ),
-] )( HistoricalDataActions );
+	}),
+])(HistoricalDataActions);

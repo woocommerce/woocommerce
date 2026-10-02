@@ -45,14 +45,13 @@ const mockUnregisterShortcut = jest.fn();
 
 // The useShortcut callbacks registered during render, keyed by shortcut name.
 type SaveShortcutEvent = { preventDefault: jest.Mock };
-const shortcutHandlers: Record< string, ( event: SaveShortcutEvent ) => void > =
-	{};
+const shortcutHandlers: Record<string, (event: SaveShortcutEvent) => void> = {};
 
-const mockStoreSelect = ( store: unknown ) => {
-	if ( store === editorStore ) {
+const mockStoreSelect = (store: unknown) => {
+	if (store === editorStore) {
 		return {
 			isSavingPost: () => state.isSaving,
-			getEditedPostAttribute: ( attribute: string ) =>
+			getEditedPostAttribute: (attribute: string) =>
 				attribute === 'status' ? state.postStatus : undefined,
 			isEditedPostDirty: () => state.isDirty,
 			hasNonPostEntityChanges: () => state.hasNonPostEntityChanges,
@@ -60,13 +59,13 @@ const mockStoreSelect = ( store: unknown ) => {
 			getCurrentPostType: () => 'woo_email',
 		};
 	}
-	if ( store === jest.requireMock( '@wordpress/keyboard-shortcuts' ).store ) {
+	if (store === jest.requireMock('@wordpress/keyboard-shortcuts').store) {
 		return {
-			getShortcutKeyCombination: ( name: string ) =>
+			getShortcutKeyCombination: (name: string) =>
 				name === 'core/editor/save'
 					? state.coreSaveKeyCombination
 					: null,
-			getShortcutDescription: ( name: string ) =>
+			getShortcutDescription: (name: string) =>
 				name === 'core/editor/save' ? 'Save your changes.' : undefined,
 		};
 	}
@@ -74,7 +73,7 @@ const mockStoreSelect = ( store: unknown ) => {
 		__experimentalGetDirtyEntityRecords: () => state.dirtyEntityRecords,
 		// Keyed off the arguments so a wrong kind/name/key lookup in the
 		// component surfaces as a missing record instead of passing silently.
-		getEntityRecord: ( kind: string, name: string, key: number ) =>
+		getEntityRecord: (kind: string, name: string, key: number) =>
 			kind === 'postType' &&
 			name === 'woo_email' &&
 			key === state.currentPostId &&
@@ -84,16 +83,14 @@ const mockStoreSelect = ( store: unknown ) => {
 	};
 };
 
-jest.mock( '@wordpress/data', () => ( {
-	useSelect: ( callback: ( select: unknown ) => unknown ) =>
-		callback( mockStoreSelect ),
-	useDispatch: ( store: unknown ) => {
-		if ( store === jest.requireMock( '@wordpress/editor' ).store ) {
+jest.mock('@wordpress/data', () => ({
+	useSelect: (callback: (select: unknown) => unknown) =>
+		callback(mockStoreSelect),
+	useDispatch: (store: unknown) => {
+		if (store === jest.requireMock('@wordpress/editor').store) {
 			return { editPost: mockEditPost, savePost: mockSavePost };
 		}
-		if (
-			store === jest.requireMock( '@wordpress/keyboard-shortcuts' ).store
-		) {
+		if (store === jest.requireMock('@wordpress/keyboard-shortcuts').store) {
 			return {
 				registerShortcut: mockRegisterShortcut,
 				unregisterShortcut: mockUnregisterShortcut,
@@ -101,25 +98,25 @@ jest.mock( '@wordpress/data', () => ( {
 		}
 		return { saveEditedEntityRecord: mockSaveEditedEntityRecord };
 	},
-	select: ( store: unknown ) => mockStoreSelect( store ),
-} ) );
+	select: (store: unknown) => mockStoreSelect(store),
+}));
 
-jest.mock( '@wordpress/editor', () => ( {
+jest.mock('@wordpress/editor', () => ({
 	store: { name: 'core/editor' },
-} ) );
+}));
 
-jest.mock( '@wordpress/keyboard-shortcuts', () => ( {
+jest.mock('@wordpress/keyboard-shortcuts', () => ({
 	store: { name: 'core/keyboard-shortcuts' },
 	useShortcut: (
 		name: string,
-		callback: ( event: { preventDefault: () => void } ) => void
+		callback: (event: { preventDefault: () => void }) => void
 	) => {
-		shortcutHandlers[ name ] = callback;
+		shortcutHandlers[name] = callback;
 	},
-} ) );
+}));
 
-jest.mock( '@wordpress/components', () => ( {
-	Button: ( {
+jest.mock('@wordpress/components', () => ({
+	Button: ({
 		children,
 		onClick,
 		disabled,
@@ -131,24 +128,24 @@ jest.mock( '@wordpress/components', () => ( {
 		disabled?: boolean;
 		className?: string;
 		'aria-disabled'?: boolean;
-	} ) => (
+	}) => (
 		<button
-			onClick={ onClick }
-			disabled={ disabled }
-			className={ className }
-			aria-disabled={ ariaDisabled }
+			onClick={onClick}
+			disabled={disabled}
+			className={className}
+			aria-disabled={ariaDisabled}
 		>
-			{ children }
+			{children}
 		</button>
 	),
-} ) );
+}));
 
-jest.mock( '@wordpress/core-data', () => ( {
+jest.mock('@wordpress/core-data', () => ({
 	store: { name: 'core' },
-} ) );
+}));
 
-describe( 'SaveButton', () => {
-	beforeEach( () => {
+describe('SaveButton', () => {
+	beforeEach(() => {
 		jest.clearAllMocks();
 		state.isSaving = false;
 		state.postStatus = 'draft';
@@ -158,191 +155,189 @@ describe( 'SaveButton', () => {
 		state.currentPostId = 5;
 		state.entityRecordStatus = null;
 		state.coreSaveKeyCombination = { modifier: 'primary', character: 's' };
-		Object.keys( shortcutHandlers ).forEach(
-			( key ) => delete shortcutHandlers[ key ]
+		Object.keys(shortcutHandlers).forEach(
+			(key) => delete shortcutHandlers[key]
 		);
-	} );
+	});
 
-	it( 'renders a button labeled "Save"', () => {
-		render( <SaveButton /> );
+	it('renders a button labeled "Save"', () => {
+		render(<SaveButton />);
 
 		expect(
-			screen.getByRole( 'button', { name: 'Save' } )
+			screen.getByRole('button', { name: 'Save' })
 		).toBeInTheDocument();
-	} );
+	});
 
 	// The email editor package's DOM tracking records save clicks via the
 	// `.editor-post-publish-button` selector and checks `aria-disabled`;
 	// dropping either silently kills the `header_save_button_clicked` event.
-	it( 'carries the telemetry contract: core publish-button class and aria-disabled', () => {
-		render( <SaveButton /> );
+	it('carries the telemetry contract: core publish-button class and aria-disabled', () => {
+		render(<SaveButton />);
 
-		const button = screen.getByRole( 'button', { name: 'Save' } );
-		expect( button ).toHaveClass( 'editor-post-publish-button' );
-		expect( button ).toHaveAttribute( 'aria-disabled', 'false' );
-	} );
+		const button = screen.getByRole('button', { name: 'Save' });
+		expect(button).toHaveClass('editor-post-publish-button');
+		expect(button).toHaveAttribute('aria-disabled', 'false');
+	});
 
 	// auto-draft covers legacy stray posts created outside the lazy flow.
-	it.each( [ [ 'draft' ], [ 'auto-draft' ] ] )(
+	it.each([['draft'], ['auto-draft']])(
 		'is enabled for an unpublished (%s) post even when not dirty',
-		( status ) => {
+		(status) => {
 			state.postStatus = status;
 			state.isDirty = false;
 
-			render( <SaveButton /> );
+			render(<SaveButton />);
 
-			expect(
-				screen.getByRole( 'button', { name: 'Save' } )
-			).toBeEnabled();
+			expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
 		}
 	);
 
-	it( 'is disabled while a save is already in flight', () => {
+	it('is disabled while a save is already in flight', () => {
 		state.postStatus = 'draft';
 		state.isSaving = true;
 
-		render( <SaveButton /> );
+		render(<SaveButton />);
 
-		expect( screen.getByRole( 'button', { name: 'Save' } ) ).toBeDisabled();
-	} );
+		expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+	});
 
-	it( 'is disabled when the post is published and not dirty', () => {
+	it('is disabled when the post is published and not dirty', () => {
 		state.postStatus = 'publish';
 		state.isDirty = false;
 
-		render( <SaveButton /> );
+		render(<SaveButton />);
 
-		expect( screen.getByRole( 'button', { name: 'Save' } ) ).toBeDisabled();
-	} );
+		expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+	});
 
-	it( 'publishes and saves an unpublished post on click', () => {
+	it('publishes and saves an unpublished post on click', () => {
 		state.postStatus = 'draft';
 
-		render( <SaveButton /> );
-		fireEvent.click( screen.getByRole( 'button', { name: 'Save' } ) );
+		render(<SaveButton />);
+		fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
-		expect( mockEditPost ).toHaveBeenCalledWith( { status: 'publish' } );
-		expect( mockSavePost ).toHaveBeenCalled();
-	} );
+		expect(mockEditPost).toHaveBeenCalledWith({ status: 'publish' });
+		expect(mockSavePost).toHaveBeenCalled();
+	});
 
-	it( 'saves a published post on click without re-publishing it', () => {
+	it('saves a published post on click without re-publishing it', () => {
 		state.postStatus = 'publish';
 		state.isDirty = true;
 
-		render( <SaveButton /> );
-		fireEvent.click( screen.getByRole( 'button', { name: 'Save' } ) );
+		render(<SaveButton />);
+		fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
-		expect( mockEditPost ).not.toHaveBeenCalled();
-		expect( mockSavePost ).toHaveBeenCalled();
-	} );
+		expect(mockEditPost).not.toHaveBeenCalled();
+		expect(mockSavePost).toHaveBeenCalled();
+	});
 
-	it( 'is enabled for a published, non-dirty post when non-post entities have changes', () => {
+	it('is enabled for a published, non-dirty post when non-post entities have changes', () => {
 		state.postStatus = 'publish';
 		state.isDirty = false;
 		state.hasNonPostEntityChanges = true;
 
-		render( <SaveButton /> );
+		render(<SaveButton />);
 
-		expect( screen.getByRole( 'button', { name: 'Save' } ) ).toBeEnabled();
-	} );
+		expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
+	});
 
-	describe( 'save shortcut takeover', () => {
-		const makeKeydownEvent = (): SaveShortcutEvent => ( {
+	describe('save shortcut takeover', () => {
+		const makeKeydownEvent = (): SaveShortcutEvent => ({
 			preventDefault: jest.fn(),
-		} );
+		});
 
-		it( 'replaces the core save shortcut with its own registration', () => {
-			render( <SaveButton /> );
+		it('replaces the core save shortcut with its own registration', () => {
+			render(<SaveButton />);
 
-			expect( mockUnregisterShortcut ).toHaveBeenCalledWith(
+			expect(mockUnregisterShortcut).toHaveBeenCalledWith(
 				'core/editor/save'
 			);
-			expect( mockRegisterShortcut ).toHaveBeenCalledWith(
-				expect.objectContaining( {
+			expect(mockRegisterShortcut).toHaveBeenCalledWith(
+				expect.objectContaining({
 					name: 'woocommerce/email-editor/save',
 					keyCombination: { modifier: 'primary', character: 's' },
-				} )
+				})
 			);
-		} );
+		});
 
-		it( 'does not unregister anything before core registered its shortcut', () => {
+		it('does not unregister anything before core registered its shortcut', () => {
 			// EditorKeyboardShortcutsRegister registers core/editor/save in its
 			// own mount effect — the takeover must wait for the store, not
 			// race the mount order.
 			state.coreSaveKeyCombination = null;
 
-			render( <SaveButton /> );
+			render(<SaveButton />);
 
-			expect( mockUnregisterShortcut ).not.toHaveBeenCalled();
-			expect( mockRegisterShortcut ).not.toHaveBeenCalled();
-		} );
+			expect(mockUnregisterShortcut).not.toHaveBeenCalled();
+			expect(mockRegisterShortcut).not.toHaveBeenCalled();
+		});
 
-		it( 'takes over again when core re-registers while mounted', () => {
-			const { rerender } = render( <SaveButton /> );
+		it('takes over again when core re-registers while mounted', () => {
+			const { rerender } = render(<SaveButton />);
 			mockRegisterShortcut.mockClear();
 			mockUnregisterShortcut.mockClear();
 
 			// The store reports core/editor/save as registered again (e.g. a
 			// remounted EditorKeyboardShortcutsRegister); a rerender must
 			// repeat the takeover.
-			rerender( <SaveButton /> );
+			rerender(<SaveButton />);
 
-			expect( mockUnregisterShortcut ).toHaveBeenCalledWith(
+			expect(mockUnregisterShortcut).toHaveBeenCalledWith(
 				'core/editor/save'
 			);
-			expect( mockRegisterShortcut ).toHaveBeenCalledWith(
-				expect.objectContaining( {
+			expect(mockRegisterShortcut).toHaveBeenCalledWith(
+				expect.objectContaining({
 					name: 'woocommerce/email-editor/save',
-				} )
+				})
 			);
-		} );
+		});
 
-		it( 'publishes and saves on the shortcut like a button click', () => {
+		it('publishes and saves on the shortcut like a button click', () => {
 			state.postStatus = 'draft';
 
-			render( <SaveButton /> );
+			render(<SaveButton />);
 			const event = makeKeydownEvent();
-			shortcutHandlers[ 'woocommerce/email-editor/save' ]( event );
+			shortcutHandlers['woocommerce/email-editor/save'](event);
 
-			expect( event.preventDefault ).toHaveBeenCalled();
-			expect( mockEditPost ).toHaveBeenCalledWith( {
+			expect(event.preventDefault).toHaveBeenCalled();
+			expect(mockEditPost).toHaveBeenCalledWith({
 				status: 'publish',
-			} );
-			expect( mockSavePost ).toHaveBeenCalled();
-		} );
+			});
+			expect(mockSavePost).toHaveBeenCalled();
+		});
 
-		it( 'still prevents the browser save dialog but does not save while disabled', () => {
+		it('still prevents the browser save dialog but does not save while disabled', () => {
 			state.isSaving = true;
 
-			render( <SaveButton /> );
+			render(<SaveButton />);
 			const event = makeKeydownEvent();
-			shortcutHandlers[ 'woocommerce/email-editor/save' ]( event );
+			shortcutHandlers['woocommerce/email-editor/save'](event);
 
-			expect( event.preventDefault ).toHaveBeenCalled();
-			expect( mockSavePost ).not.toHaveBeenCalled();
-		} );
+			expect(event.preventDefault).toHaveBeenCalled();
+			expect(mockSavePost).not.toHaveBeenCalled();
+		});
 
-		it( 'restores the core save shortcut on unmount', () => {
-			const { unmount } = render( <SaveButton /> );
+		it('restores the core save shortcut on unmount', () => {
+			const { unmount } = render(<SaveButton />);
 			mockRegisterShortcut.mockClear();
 			mockUnregisterShortcut.mockClear();
 
 			unmount();
 
-			expect( mockUnregisterShortcut ).toHaveBeenCalledWith(
+			expect(mockUnregisterShortcut).toHaveBeenCalledWith(
 				'woocommerce/email-editor/save'
 			);
-			expect( mockRegisterShortcut ).toHaveBeenCalledWith(
-				expect.objectContaining( {
+			expect(mockRegisterShortcut).toHaveBeenCalledWith(
+				expect.objectContaining({
 					name: 'core/editor/save',
 					keyCombination: { modifier: 'primary', character: 's' },
 					description: 'Save your changes.',
-				} )
+				})
 			);
-		} );
-	} );
+		});
+	});
 
-	it( 'saves dirty non-post entities on click but not the post entity record', () => {
+	it('saves dirty non-post entities on click but not the post entity record', () => {
 		state.postStatus = 'publish';
 		state.isDirty = true;
 		state.currentPostId = 5;
@@ -351,80 +346,80 @@ describe( 'SaveButton', () => {
 			{ kind: 'root', name: 'globalStyles', key: 1 },
 		];
 
-		render( <SaveButton /> );
-		fireEvent.click( screen.getByRole( 'button', { name: 'Save' } ) );
+		render(<SaveButton />);
+		fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
-		expect( mockSaveEditedEntityRecord ).toHaveBeenCalledTimes( 1 );
-		expect( mockSaveEditedEntityRecord ).toHaveBeenCalledWith(
+		expect(mockSaveEditedEntityRecord).toHaveBeenCalledTimes(1);
+		expect(mockSaveEditedEntityRecord).toHaveBeenCalledWith(
 			'root',
 			'globalStyles',
 			1,
 			{}
 		);
-		expect( mockSaveEditedEntityRecord ).not.toHaveBeenCalledWith(
+		expect(mockSaveEditedEntityRecord).not.toHaveBeenCalledWith(
 			'postType',
 			'woo_email',
 			5,
 			{}
 		);
-	} );
-} );
+	});
+});
 
-describe( 'registerWooEmailSaveButton', () => {
+describe('registerWooEmailSaveButton', () => {
 	// The wrap-editor filter must only inject the custom button while the
 	// post is unpublished; published posts keep core's stock save flow
 	// (including the multi-entity save panel).
 	const getWrappedEditor = () => {
 		registerWooEmailSaveButton();
-		const MockEditor = ( {
+		const MockEditor = ({
 			customSaveButton,
 		}: {
 			customSaveButton?: ReactNode;
-		} ) => <div>{ customSaveButton ?? <span>core save flow</span> }</div>;
+		}) => <div>{customSaveButton ?? <span>core save flow</span>}</div>;
 
-		const { applyFilters } = require( '@wordpress/hooks' );
+		const { applyFilters } = require('@wordpress/hooks');
 		return applyFilters(
 			'woocommerce_email_editor_wrap_editor_component',
 			MockEditor
-		) as React.ComponentType< Record< string, unknown > >;
+		) as React.ComponentType<Record<string, unknown>>;
 	};
 
-	beforeEach( () => {
+	beforeEach(() => {
 		state.entityRecordStatus = null;
-	} );
+	});
 
-	it.each( [ [ 'auto-draft' ], [ 'draft' ] ] )(
+	it.each([['auto-draft'], ['draft']])(
 		'injects the custom save button for an unpublished (%s) post',
-		( status ) => {
+		(status) => {
 			state.entityRecordStatus = status;
 			const Wrapped = getWrappedEditor();
 
-			render( <Wrapped postId={ 5 } postType="woo_email" /> );
+			render(<Wrapped postId={5} postType="woo_email" />);
 
 			expect(
-				screen.getByRole( 'button', { name: 'Save' } )
+				screen.getByRole('button', { name: 'Save' })
 			).toBeInTheDocument();
 		}
 	);
 
-	it( 'keeps the core save flow for a published post', () => {
+	it('keeps the core save flow for a published post', () => {
 		state.entityRecordStatus = 'publish';
 		const Wrapped = getWrappedEditor();
 
-		render( <Wrapped postId={ 5 } postType="woo_email" /> );
+		render(<Wrapped postId={5} postType="woo_email" />);
 
-		expect( screen.getByText( 'core save flow' ) ).toBeInTheDocument();
+		expect(screen.getByText('core save flow')).toBeInTheDocument();
 		expect(
-			screen.queryByRole( 'button', { name: 'Save' } )
+			screen.queryByRole('button', { name: 'Save' })
 		).not.toBeInTheDocument();
-	} );
+	});
 
-	it( 'keeps the core save flow while the post record is not loaded yet', () => {
+	it('keeps the core save flow while the post record is not loaded yet', () => {
 		state.entityRecordStatus = null;
 		const Wrapped = getWrappedEditor();
 
-		render( <Wrapped postId={ 5 } postType="woo_email" /> );
+		render(<Wrapped postId={5} postType="woo_email" />);
 
-		expect( screen.getByText( 'core save flow' ) ).toBeInTheDocument();
-	} );
-} );
+		expect(screen.getByText('core save flow')).toBeInTheDocument();
+	});
+});

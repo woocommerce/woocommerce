@@ -18,24 +18,24 @@ export interface Attributes {
 }
 
 const blockConfig = {
-	...( metadata as BlockConfiguration< Attributes > ),
+	...(metadata as BlockConfiguration<Attributes>),
 	edit: AddToCartFormEdit,
 	icon: {
 		src: (
 			<Icon
-				icon={ button }
+				icon={button}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
 	},
-	ancestor: [ 'woocommerce/single-product' ],
+	ancestor: ['woocommerce/single-product'],
 	transforms: {
 		to: [
 			{
 				type: 'block',
-				blocks: [ 'woocommerce/add-to-cart-with-options' ],
+				blocks: ['woocommerce/add-to-cart-with-options'],
 				transform: () =>
-					createBlock( 'woocommerce/add-to-cart-with-options' ),
+					createBlock('woocommerce/add-to-cart-with-options'),
 			},
 		],
 	},
@@ -44,6 +44,6 @@ const blockConfig = {
 	},
 };
 
-registerProductBlockType( blockConfig, {
+registerProductBlockType(blockConfig, {
 	isAvailableOnPostEditor: true,
-} );
+});

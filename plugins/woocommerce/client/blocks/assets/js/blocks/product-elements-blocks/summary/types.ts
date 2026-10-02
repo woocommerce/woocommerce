@@ -15,16 +15,13 @@ export interface Attributes {
 	summaryLength: number;
 	linkText: string;
 }
-export type SetAttributes = Pick<
-	BlockEditProps< Attributes >,
-	'setAttributes'
->;
+export type SetAttributes = Pick<BlockEditProps<Attributes>, 'setAttributes'>;
 
-export type EditProps = BlockEditProps< Attributes > & {
+export type EditProps = BlockEditProps<Attributes> & {
 	context: Context & { postId?: number };
 };
 
-export type ControlProps< T extends keyof Attributes > = Pick< Attributes, T > &
+export type ControlProps<T extends keyof Attributes> = Pick<Attributes, T> &
 	SetAttributes;
 
 export type BlockProps = Attributes & {

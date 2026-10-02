@@ -1,26 +1,24 @@
 /**
  * External dependencies
  */
-const path = require( 'path' );
-const fs = require( 'fs' );
-const { paramCase } = require( 'change-case' );
-const webpack = require( 'webpack' );
-const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
-const ProgressBarPlugin = require( 'progress-bar-webpack-plugin' );
-const CircularDependencyPlugin = require( 'circular-dependency-plugin' );
-const { BundleAnalyzerPlugin } = require( 'webpack-bundle-analyzer' );
-const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
+const path = require('path');
+const fs = require('fs');
+const { paramCase } = require('change-case');
+const webpack = require('webpack');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const ProgressBarPlugin = require('progress-bar-webpack-plugin');
+const CircularDependencyPlugin = require('circular-dependency-plugin');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 /**
  * Internal dependencies
  */
-const DependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin' );
-const {
-	WebpackRTLPlugin,
-} = require( '@woocommerce/internal-build/style-build' );
-const FilesystemCacheWarningsPlugin = require( './filesystem-cache-warnings-webpack-plugin.js' );
-const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
-const { getEntryConfig, genericBlocks } = require( './webpack-entries' );
+const DependencyExtractionWebpackPlugin = require('@woocommerce/dependency-extraction-webpack-plugin');
+const { WebpackRTLPlugin } = require('@woocommerce/internal-build/style-build');
+const FilesystemCacheWarningsPlugin = require('./filesystem-cache-warnings-webpack-plugin.js');
+const RemoveFilesPlugin = require('./remove-files-webpack-plugin');
+const { getEntryConfig, genericBlocks } = require('./webpack-entries');
 const {
 	ASSET_CHECK,
 	NODE_ENV,
@@ -30,81 +28,78 @@ const {
 	getProgressBarPluginConfig,
 	getCacheGroups,
 	getResolve,
-} = require( './webpack-helpers' );
-const AddSplitChunkDependencies = require( './add-split-chunk-dependencies' );
-const { sharedOptimizationConfig } = require( './webpack-shared-config' );
+} = require('./webpack-helpers');
+const AddSplitChunkDependencies = require('./add-split-chunk-dependencies');
+const { sharedOptimizationConfig } = require('./webpack-shared-config');
 
-const ROOT_DIR = path.resolve( __dirname, '../../../../../' );
+const ROOT_DIR = path.resolve(__dirname, '../../../../../');
 // Blocks' webpack writes directly to the WooCommerce plugin's
 // `assets/client/blocks/` so PHP can enqueue files from their final location
 // without an intermediate rsync step.
-const BUILD_DIR = path.resolve( __dirname, '../../../assets/client/blocks' );
-const BABEL_CACHE_DIR = path.join(
-	ROOT_DIR,
-	'node_modules/.cache/babel-loader'
-);
+const BUILD_DIR = path.resolve(__dirname, '../../../assets/client/blocks');
+const BABEL_CACHE_DIR = path.join(ROOT_DIR, 'node_modules/.cache/babel-loader');
 const isProduction = NODE_ENV === 'production';
 
 /**
  * Shared config for all script builds.
  */
 let initialBundleAnalyzerPort = 8888;
-const getSharedPlugins = ( {
+const getSharedPlugins = ({
 	bundleAnalyzerReportTitle,
 	checkCircularDeps = true,
 	dependencyRequestToExternal = requestToExternal,
 	dependencyRequestToHandle = requestToHandle,
-} ) =>
+}) =>
 	[
 		CHECK_CIRCULAR_DEPS === 'true' && checkCircularDeps !== false
-			? new CircularDependencyPlugin( {
+			? new CircularDependencyPlugin({
 					// This plugin calls exclude.test() directly, so it must be a
 					// single RegExp, not the array webpack's module rules accept.
 					exclude: /[\/\\](node_modules|build|docs|vendor)[\/\\]/,
 					cwd: process.cwd(),
 					failOnError: 'warn',
-			  } )
+				})
 			: false,
 		// The WP_BUNDLE_ANALYZER global variable enables a utility that represents bundle
 		// content as a convenient interactive zoomable treemap.
 		process.env.WP_BUNDLE_ANALYZER &&
-			new BundleAnalyzerPlugin( {
+			new BundleAnalyzerPlugin({
 				analyzerPort: initialBundleAnalyzerPort++,
 				reportTitle: bundleAnalyzerReportTitle,
-			} ),
-		new DependencyExtractionWebpackPlugin( {
+			}),
+		new DependencyExtractionWebpackPlugin({
 			injectPolyfill: true,
 			combineAssets: ASSET_CHECK,
 			outputFormat: ASSET_CHECK ? 'json' : 'php',
 			requestToExternal: dependencyRequestToExternal,
 			requestToHandle: dependencyRequestToHandle,
-		} ),
+		}),
 		// Substitute the `__i18n_text_domain__` identifier used by the
 		// @woocommerce/email-editor package with the WooCommerce text
 		// domain so strings extract and translate under `woocommerce`.
-		new webpack.DefinePlugin( {
-			__i18n_text_domain__: JSON.stringify( 'woocommerce' ),
-		} ),
+		new webpack.DefinePlugin({
+			__i18n_text_domain__: JSON.stringify('woocommerce'),
+		}),
 		// Suppress file system cache warnings (unsupported serialization related).
 		new FilesystemCacheWarningsPlugin(),
-	].filter( Boolean );
+	].filter(Boolean);
 
 /**
  * Build config for core packages.
  *
  * @param {Object} options Build options.
  */
-const getCoreConfig = ( options = {} ) => {
+const getCoreConfig = (options = {}) => {
 	const { alias, resolvePlugins = [] } = options;
-	const resolve = getResolve( { alias, resolvePlugins } );
+	const resolve = getResolve({ alias, resolvePlugins });
 	return {
-		entry: getEntryConfig( 'core', options.exclude || [] ),
+		entry: getEntryConfig('core', options.exclude || []),
 		output: {
-			filename: ( chunkData ) => {
-				return `${ paramCase( chunkData.chunk.name ) }.js`;
+			filename: (chunkData) => {
+				return `${paramCase(chunkData.chunk.name)}.js`;
 			},
 			path: BUILD_DIR,
-			library: [ 'wc', '[name]' ],
+			library: ['wc', '[name]'],
 			libraryTarget: 'this',
 			uniqueName: 'webpackWcBlocksCoreJsonp',
 		},
@@ -118,7 +113,7 @@ const getCoreConfig = ( options = {} ) => {
 					use: {
 						loader: 'babel-loader',
 						options: {
-							presets: [ '@wordpress/babel-preset-default' ],
+							presets: ['@wordpress/babel-preset-default'],
 							plugins: [],
 							cacheDirectory: BABEL_CACHE_DIR,
 							cacheCompression: false,
@@ -134,10 +129,10 @@ const getCoreConfig = ( options = {} ) => {
 			],
 		},
 		plugins: [
-			...getSharedPlugins( {
+			...getSharedPlugins({
 				bundleAnalyzerReportTitle: 'Core',
-			} ),
-			new ProgressBarPlugin( getProgressBarPluginConfig( 'Core' ) ),
+			}),
+			new ProgressBarPlugin(getProgressBarPluginConfig('Core')),
 		],
 		optimization: {
 			...sharedOptimizationConfig,
@@ -150,7 +145,7 @@ const getCoreConfig = ( options = {} ) => {
 		},
 		resolve: {
 			...resolve,
-			extensions: [ '.js', '.ts', '.tsx' ],
+			extensions: ['.js', '.ts', '.tsx'],
 		},
 	};
 };
@@ -160,12 +155,12 @@ const getCoreConfig = ( options = {} ) => {
  *
  * @param {Object} options Build options.
  */
-const getMainConfig = ( options = {} ) => {
+const getMainConfig = (options = {}) => {
 	const { alias, resolvePlugins = [] } = options;
 
-	const resolve = getResolve( { alias, resolvePlugins } );
+	const resolve = getResolve({ alias, resolvePlugins });
 	return {
-		entry: getEntryConfig( 'main', options.exclude || [] ),
+		entry: getEntryConfig('main', options.exclude || []),
 		output: {
 			devtoolNamespace: 'wc',
 			path: BUILD_DIR,
@@ -178,7 +173,7 @@ const getMainConfig = ( options = {} ) => {
 			// @see https://github.com/Automattic/jetpack/pull/20926
 			chunkFilename: `[name].js?ver=[contenthash]`,
 			filename: `[name].js`,
-			library: [ 'wc', 'blocks', '[name]' ],
+			library: ['wc', 'blocks', '[name]'],
 			libraryTarget: 'this',
 			uniqueName: 'webpackWcBlocksMainJsonp',
 		},
@@ -186,18 +181,16 @@ const getMainConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
+					exclude: [/[\/\\](node_modules|build|docs|vendor)[\/\\]/],
 					use: {
 						loader: 'babel-loader',
 						options: {
-							presets: [ '@wordpress/babel-preset-default' ],
+							presets: ['@wordpress/babel-preset-default'],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve('babel-plugin-transform-react-remove-prop-types')
 									: false,
-							].filter( Boolean ),
+							].filter(Boolean),
 							cacheDirectory: BABEL_CACHE_DIR,
 							cacheCompression: false,
 						},
@@ -228,45 +221,40 @@ const getMainConfig = ( options = {} ) => {
 			},
 		},
 		plugins: [
-			...getSharedPlugins( {
+			...getSharedPlugins({
 				bundleAnalyzerReportTitle: 'Main',
-			} ),
-			new ProgressBarPlugin( getProgressBarPluginConfig( 'Main' ) ),
+			}),
+			new ProgressBarPlugin(getProgressBarPluginConfig('Main')),
 			/**
 			 * Ensure that logic of this CopyWebpackPlugin is kept in sync with the copy-block-json.sh script:
 			 * https://github.com/woocommerce/woocommerce/blob/7d72fb937907bf841aabe959642be524eb093803/plugins/woocommerce/client/blocks/bin/copy-blocks-json.sh
 			 */
-			new CopyWebpackPlugin( {
+			new CopyWebpackPlugin({
 				patterns: [
 					{
 						from: './assets/js/**/block.json',
-						to( { absoluteFilename } ) {
+						to({ absoluteFilename }) {
 							/**
 							 * Getting the block name from the JSON metadata is less error prone
 							 * than extracting it from the file path.
 							 */
 							const JSONFile = fs.readFileSync(
-								path.resolve( __dirname, absoluteFilename )
+								path.resolve(__dirname, absoluteFilename)
 							);
-							const metadata = JSON.parse( JSONFile.toString() );
-							const blockName = metadata.name
-								.split( '/' )
-								.at( 1 );
+							const metadata = JSON.parse(JSONFile.toString());
+							const blockName = metadata.name.split('/').at(1);
 
-							if (
-								metadata.parent &&
-								! genericBlocks[ blockName ]
-							)
-								return `./inner-blocks/${ blockName }/block.json`;
-							return `./${ blockName }/block.json`;
+							if (metadata.parent && !genericBlocks[blockName])
+								return `./inner-blocks/${blockName}/block.json`;
+							return `./${blockName}/block.json`;
 						},
 					},
 				],
-			} ),
+			}),
 		],
 		resolve: {
 			...resolve,
-			extensions: [ '.js', '.jsx', '.ts', '.tsx' ],
+			extensions: ['.js', '.jsx', '.ts', '.tsx'],
 		},
 	};
 };
@@ -276,11 +264,11 @@ const getMainConfig = ( options = {} ) => {
  *
  * @param {Object} options Build options.
  */
-const getFrontConfig = ( options = {} ) => {
+const getFrontConfig = (options = {}) => {
 	const { alias, resolvePlugins = [] } = options;
-	const resolve = getResolve( { alias, resolvePlugins } );
+	const resolve = getResolve({ alias, resolvePlugins });
 	return {
-		entry: getEntryConfig( 'frontend', options.exclude || [] ),
+		entry: getEntryConfig('frontend', options.exclude || []),
 		output: {
 			devtoolNamespace: 'wc',
 			path: BUILD_DIR,
@@ -296,13 +284,13 @@ const getFrontConfig = ( options = {} ) => {
 				return '[name]-frontend.js';
 			},
 			uniqueName: 'webpackWcBlocksFrontendJsonp',
-			library: [ 'wc', '[name]' ],
+			library: ['wc', '[name]'],
 		},
 		module: {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
+					exclude: [/[\/\\](node_modules|build|docs|vendor)[\/\\]/],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -321,11 +309,9 @@ const getFrontConfig = ( options = {} ) => {
 							],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve('babel-plugin-transform-react-remove-prop-types')
 									: false,
-							].filter( Boolean ),
+							].filter(Boolean),
 							cacheDirectory: BABEL_CACHE_DIR,
 							cacheCompression: false,
 						},
@@ -349,7 +335,7 @@ const getFrontConfig = ( options = {} ) => {
 						test: /[\\/]node_modules[\\/]/,
 						// Note that filenames are suffixed with `frontend` so the generated file is `wc-blocks-frontend-vendors-frontend`.
 						name: 'wc-blocks-frontend-vendors',
-						chunks: ( chunk ) => {
+						chunks: (chunk) => {
 							return (
 								chunk.name !== 'product-button-interactivity'
 							);
@@ -361,15 +347,15 @@ const getFrontConfig = ( options = {} ) => {
 			},
 		},
 		plugins: [
-			...getSharedPlugins( {
+			...getSharedPlugins({
 				bundleAnalyzerReportTitle: 'Frontend',
-			} ),
-			new ProgressBarPlugin( getProgressBarPluginConfig( 'Frontend' ) ),
+			}),
+			new ProgressBarPlugin(getProgressBarPluginConfig('Frontend')),
 			new AddSplitChunkDependencies(),
 		],
 		resolve: {
 			...resolve,
-			extensions: [ '.js', '.ts', '.tsx' ],
+			extensions: ['.js', '.ts', '.tsx'],
 		},
 	};
 };
@@ -379,11 +365,11 @@ const getFrontConfig = ( options = {} ) => {
  *
  * @param {Object} options Build options.
  */
-const getPaymentsConfig = ( options = {} ) => {
+const getPaymentsConfig = (options = {}) => {
 	const { alias, resolvePlugins = [] } = options;
-	const resolve = getResolve( { alias, resolvePlugins } );
+	const resolve = getResolve({ alias, resolvePlugins });
 	return {
-		entry: getEntryConfig( 'payments', options.exclude || [] ),
+		entry: getEntryConfig('payments', options.exclude || []),
 		output: {
 			devtoolNamespace: 'wc',
 			path: BUILD_DIR,
@@ -394,7 +380,7 @@ const getPaymentsConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
+					exclude: [/[\/\\](node_modules|build|docs|vendor)[\/\\]/],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -413,11 +399,9 @@ const getPaymentsConfig = ( options = {} ) => {
 							],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve('babel-plugin-transform-react-remove-prop-types')
 									: false,
-							].filter( Boolean ),
+							].filter(Boolean),
 							cacheDirectory: BABEL_CACHE_DIR,
 							cacheCompression: false,
 						},
@@ -441,16 +425,16 @@ const getPaymentsConfig = ( options = {} ) => {
 			},
 		},
 		plugins: [
-			...getSharedPlugins( {
+			...getSharedPlugins({
 				bundleAnalyzerReportTitle: 'Payment Method Extensions',
-			} ),
+			}),
 			new ProgressBarPlugin(
-				getProgressBarPluginConfig( 'Payment Method Extensions' )
+				getProgressBarPluginConfig('Payment Method Extensions')
 			),
 		],
 		resolve: {
 			...resolve,
-			extensions: [ '.js', '.ts', '.tsx' ],
+			extensions: ['.js', '.ts', '.tsx'],
 		},
 	};
 };
@@ -460,11 +444,11 @@ const getPaymentsConfig = ( options = {} ) => {
  *
  * @param {Object} options Build options.
  */
-const getExtensionsConfig = ( options = {} ) => {
+const getExtensionsConfig = (options = {}) => {
 	const { alias, resolvePlugins = [] } = options;
-	const resolve = getResolve( { alias, resolvePlugins } );
+	const resolve = getResolve({ alias, resolvePlugins });
 	return {
-		entry: getEntryConfig( 'extensions', options.exclude || [] ),
+		entry: getEntryConfig('extensions', options.exclude || []),
 		output: {
 			devtoolNamespace: 'wc',
 			path: BUILD_DIR,
@@ -475,7 +459,7 @@ const getExtensionsConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
+					exclude: [/[\/\\](node_modules|build|docs|vendor)[\/\\]/],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -494,11 +478,9 @@ const getExtensionsConfig = ( options = {} ) => {
 							],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve('babel-plugin-transform-react-remove-prop-types')
 									: false,
-							].filter( Boolean ),
+							].filter(Boolean),
 							cacheDirectory: BABEL_CACHE_DIR,
 							cacheCompression: false,
 						},
@@ -522,16 +504,16 @@ const getExtensionsConfig = ( options = {} ) => {
 			},
 		},
 		plugins: [
-			...getSharedPlugins( {
+			...getSharedPlugins({
 				bundleAnalyzerReportTitle: 'Experimental Extensions',
-			} ),
+			}),
 			new ProgressBarPlugin(
-				getProgressBarPluginConfig( 'Experimental Extensions' )
+				getProgressBarPluginConfig('Experimental Extensions')
 			),
 		],
 		resolve: {
 			...resolve,
-			extensions: [ '.js', '.ts', '.tsx' ],
+			extensions: ['.js', '.ts', '.tsx'],
 		},
 	};
 };
@@ -541,11 +523,11 @@ const getExtensionsConfig = ( options = {} ) => {
  *
  * @param {Object} options Build options.
  */
-const getSiteEditorConfig = ( options = {} ) => {
+const getSiteEditorConfig = (options = {}) => {
 	const { alias, resolvePlugins = [] } = options;
-	const resolve = getResolve( { alias, resolvePlugins } );
+	const resolve = getResolve({ alias, resolvePlugins });
 	return {
-		entry: getEntryConfig( 'editor', options.exclude || [] ),
+		entry: getEntryConfig('editor', options.exclude || []),
 		output: {
 			devtoolNamespace: 'wc',
 			path: BUILD_DIR,
@@ -556,7 +538,7 @@ const getSiteEditorConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
+					exclude: [/[\/\\](node_modules|build|docs|vendor)[\/\\]/],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -575,11 +557,9 @@ const getSiteEditorConfig = ( options = {} ) => {
 							],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve('babel-plugin-transform-react-remove-prop-types')
 									: false,
-							].filter( Boolean ),
+							].filter(Boolean),
 							cacheDirectory: BABEL_CACHE_DIR,
 							cacheCompression: false,
 						},
@@ -603,16 +583,14 @@ const getSiteEditorConfig = ( options = {} ) => {
 			},
 		},
 		plugins: [
-			...getSharedPlugins( {
+			...getSharedPlugins({
 				bundleAnalyzerReportTitle: 'Site Editor',
-			} ),
-			new ProgressBarPlugin(
-				getProgressBarPluginConfig( 'Site Editor' )
-			),
+			}),
+			new ProgressBarPlugin(getProgressBarPluginConfig('Site Editor')),
 		],
 		resolve: {
 			...resolve,
-			extensions: [ '.js', '.ts', '.tsx' ],
+			extensions: ['.js', '.ts', '.tsx'],
 		},
 	};
 };
@@ -622,17 +600,17 @@ const getSiteEditorConfig = ( options = {} ) => {
  *
  * @param {Object} options Build options.
  */
-const getStylingConfig = ( options = {} ) => {
+const getStylingConfig = (options = {}) => {
 	const { alias, resolvePlugins = [] } = options;
 
-	const resolve = getResolve( { alias, resolvePlugins } );
+	const resolve = getResolve({ alias, resolvePlugins });
 	return {
-		entry: getEntryConfig( 'styling', options.exclude || [] ),
+		entry: getEntryConfig('styling', options.exclude || []),
 		output: {
 			devtoolNamespace: 'wc',
 			path: BUILD_DIR,
 			filename: '[name]-style.js',
-			library: [ 'wc', 'blocks', '[name]' ],
+			library: ['wc', 'blocks', '[name]'],
 			libraryTarget: 'this',
 			uniqueName: 'webpackWcBlocksStylingJsonp',
 		},
@@ -642,23 +620,20 @@ const getStylingConfig = ( options = {} ) => {
 				cacheGroups: {
 					editorStyle: {
 						// Capture all `editor` stylesheets and editor-components stylesheets.
-						test: ( module = {}, { moduleGraph } ) => {
-							if ( ! module.type.includes( 'css' ) ) {
+						test: (module = {}, { moduleGraph }) => {
+							if (!module.type.includes('css')) {
 								return false;
 							}
 
-							const moduleIssuer =
-								moduleGraph.getIssuer( module );
-							if ( ! moduleIssuer ) {
+							const moduleIssuer = moduleGraph.getIssuer(module);
+							if (!moduleIssuer) {
 								return false;
 							}
 
 							return (
-								moduleIssuer.resource.endsWith(
-									'editor.scss'
-								) ||
+								moduleIssuer.resource.endsWith('editor.scss') ||
 								moduleIssuer.resource.includes(
-									`${ path.sep }assets${ path.sep }js${ path.sep }editor-components${ path.sep }`
+									`${path.sep}assets${path.sep}js${path.sep}editor-components${path.sep}`
 								)
 							);
 						},
@@ -669,17 +644,17 @@ const getStylingConfig = ( options = {} ) => {
 					...getCacheGroups(),
 					'base-components': {
 						test: /\/assets\/js\/base\/components\//,
-						name( module, chunks, cacheGroupKey ) {
+						name(module, chunks, cacheGroupKey) {
 							const moduleFileName = module
 								.identifier()
-								.split( '/' )
-								.reduceRight( ( item ) => item )
-								.split( '|' )
-								.reduce( ( item ) => item );
+								.split('/')
+								.reduceRight((item) => item)
+								.split('|')
+								.reduce((item) => item);
 							const allChunksNames = chunks
-								.map( ( item ) => item.name )
-								.join( '~' );
-							return `${ cacheGroupKey }-${ allChunksNames }-${ moduleFileName }`;
+								.map((item) => item.name)
+								.join('~');
+							return `${cacheGroupKey}-${allChunksNames}-${moduleFileName}`;
 						},
 					},
 				},
@@ -689,18 +664,16 @@ const getStylingConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
+					exclude: [/[\/\\](node_modules|build|docs|vendor)[\/\\]/],
 					use: {
 						loader: 'babel-loader',
 						options: {
-							presets: [ '@wordpress/babel-preset-default' ],
+							presets: ['@wordpress/babel-preset-default'],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve('babel-plugin-transform-react-remove-prop-types')
 									: false,
-							].filter( Boolean ),
+							].filter(Boolean),
 							cacheDirectory: BABEL_CACHE_DIR,
 							cacheCompression: false,
 						},
@@ -716,9 +689,9 @@ const getStylingConfig = ( options = {} ) => {
 							loader: 'sass-loader',
 							options: {
 								sassOptions: {
-									includePaths: [ 'assets/css/abstracts' ],
+									includePaths: ['assets/css/abstracts'],
 								},
-								additionalData: ( content, loaderContext ) => {
+								additionalData: (content, loaderContext) => {
 									const { resourcePath, rootContext } =
 										loaderContext;
 									const relativePath = path.relative(
@@ -756,31 +729,28 @@ const getStylingConfig = ( options = {} ) => {
 			],
 		},
 		plugins: [
-			...getSharedPlugins( { bundleAnalyzerReportTitle: 'Styles' } ),
-			new ProgressBarPlugin( getProgressBarPluginConfig( 'Styles' ) ),
-			new MiniCssExtractPlugin( {
+			...getSharedPlugins({ bundleAnalyzerReportTitle: 'Styles' }),
+			new ProgressBarPlugin(getProgressBarPluginConfig('Styles')),
+			new MiniCssExtractPlugin({
 				filename: '[name].css',
-			} ),
+			}),
 			new WebpackRTLPlugin(),
 			// Remove JS files generated by MiniCssExtractPlugin.
-			new RemoveFilesPlugin( path.join( BUILD_DIR, '*style.js' ) ),
+			new RemoveFilesPlugin(path.join(BUILD_DIR, '*style.js')),
 		],
 		resolve: {
 			...resolve,
-			extensions: [ '.js', '.jsx', '.ts', '.tsx' ],
+			extensions: ['.js', '.jsx', '.ts', '.tsx'],
 		},
 	};
 };
 
-const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
+const getCartAndCheckoutFrontendConfig = (options = {}) => {
 	const { alias, resolvePlugins = [] } = options;
 
-	const resolve = getResolve( { alias, resolvePlugins } );
+	const resolve = getResolve({ alias, resolvePlugins });
 	return {
-		entry: getEntryConfig(
-			'cartAndCheckoutFrontend',
-			options.exclude || []
-		),
+		entry: getEntryConfig('cartAndCheckoutFrontend', options.exclude || []),
 		output: {
 			devtoolNamespace: 'wc',
 			path: BUILD_DIR,
@@ -792,26 +762,26 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 			// translations which we must avoid.
 			// @see https://github.com/Automattic/jetpack/pull/20926
 			chunkFilename: '[name]-frontend.js?ver=[contenthash]',
-			filename: ( pathData ) => {
+			filename: (pathData) => {
 				// blocksCheckout and blocksComponents were moved from core bundle,
 				// retain their filenames to avoid breaking translations.
 				if (
 					pathData.chunk.name === 'blocksCheckout' ||
 					pathData.chunk.name === 'blocksComponents'
 				) {
-					return `${ paramCase( pathData.chunk.name ) }.js`;
+					return `${paramCase(pathData.chunk.name)}.js`;
 				}
 
 				return `[name]-frontend.js`;
 			},
 			uniqueName: 'webpackWcBlocksCartCheckoutFrontendJsonp',
-			library: [ 'wc', '[name]' ],
+			library: ['wc', '[name]'],
 		},
 		module: {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
+					exclude: [/[\/\\](node_modules|build|docs|vendor)[\/\\]/],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -830,11 +800,9 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 							],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve('babel-plugin-transform-react-remove-prop-types')
 									: false,
-							].filter( Boolean ),
+							].filter(Boolean),
 							cacheDirectory: BABEL_CACHE_DIR,
 							cacheCompression: false,
 						},
@@ -872,17 +840,17 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 			},
 		},
 		plugins: [
-			...getSharedPlugins( {
+			...getSharedPlugins({
 				bundleAnalyzerReportTitle: 'Cart & Checkout Frontend',
-			} ),
+			}),
 			new ProgressBarPlugin(
-				getProgressBarPluginConfig( 'Cart & Checkout Frontend' )
+				getProgressBarPluginConfig('Cart & Checkout Frontend')
 			),
 			new AddSplitChunkDependencies(),
 		],
 		resolve: {
 			...resolve,
-			extensions: [ '.js', '.ts', '.tsx' ],
+			extensions: ['.js', '.ts', '.tsx'],
 		},
 	};
 };

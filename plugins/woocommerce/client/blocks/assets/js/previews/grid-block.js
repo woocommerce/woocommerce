@@ -6,9 +6,9 @@ export const gridBlockPreview = (
 		xmlns="http://www.w3.org/2000/svg"
 		fill="none"
 		viewBox="0 0 230 250"
-		style={ {
+		style={{
 			width: '100%',
-		} }
+		}}
 	>
 		<title>Grid Block Preview</title>
 		<rect

@@ -6,12 +6,12 @@ import { cartStore, checkoutStore } from '@woocommerce/block-data';
 import { renderHook } from '@testing-library/react';
 
 // Mock all problematic dependencies first - MUST be before any imports
-jest.mock( '@wordpress/data', () => ( {
+jest.mock('@wordpress/data', () => ({
 	__esModule: true,
-	...jest.requireActual( '@wordpress/data' ),
+	...jest.requireActual('@wordpress/data'),
 	useSelect: jest.fn(),
 	useDispatch: jest.fn(),
-} ) );
+}));
 
 /**
  * Internal dependencies
@@ -19,12 +19,12 @@ jest.mock( '@wordpress/data', () => ( {
 import { useUpdatePreferredAutocompleteProvider } from '../use-update-preferred-autocomplete-provider';
 
 // Mock settings
-jest.mock( '@woocommerce/settings', () => ( {
-	...jest.requireActual( '@woocommerce/settings' ),
+jest.mock('@woocommerce/settings', () => ({
+	...jest.requireActual('@woocommerce/settings'),
 	getSettingWithCoercion: jest
 		.fn()
-		.mockImplementation( ( value, fallback, typeguard ) => {
-			if ( value === 'addressAutocompleteProviders' ) {
+		.mockImplementation((value, fallback, typeguard) => {
+			if (value === 'addressAutocompleteProviders') {
 				return [
 					{
 						id: 'germany-only',
@@ -39,27 +39,27 @@ jest.mock( '@woocommerce/settings', () => ( {
 				];
 			}
 			return jest
-				.requireActual( '@woocommerce/settings' )
-				.getSettingWithCoercion( value, fallback, typeguard );
-		} ),
-} ) );
+				.requireActual('@woocommerce/settings')
+				.getSettingWithCoercion(value, fallback, typeguard);
+		}),
+}));
 
 const mockSetActiveAddressAutocompleteProvider = jest.fn();
 
-wpData.useDispatch.mockImplementation( ( storeName ) => {
-	if ( storeName === 'wc/store/checkout' ) {
+wpData.useDispatch.mockImplementation((storeName) => {
+	if (storeName === 'wc/store/checkout') {
 		return {
 			setActiveAddressAutocompleteProvider:
 				mockSetActiveAddressAutocompleteProvider,
 		};
 	}
 	return {};
-} );
+});
 
 wpData.useSelect.mockImplementation(
-	jest.fn().mockImplementation( ( passedMapSelect ) => {
-		const mockedSelect = jest.fn().mockImplementation( ( storeName ) => {
-			if ( storeName === 'wc/store/cart' || storeName === cartStore ) {
+	jest.fn().mockImplementation((passedMapSelect) => {
+		const mockedSelect = jest.fn().mockImplementation((storeName) => {
+			if (storeName === 'wc/store/cart' || storeName === cartStore) {
 				return {
 					getCartData() {
 						return {
@@ -83,77 +83,74 @@ wpData.useSelect.mockImplementation(
 					},
 				};
 			}
-			return jest.requireActual( '@wordpress/data' ).select( storeName );
-		} );
-		return passedMapSelect( mockedSelect, {
-			dispatch: jest.requireActual( '@wordpress/data' ).dispatch,
-		} );
-	} )
+			return jest.requireActual('@wordpress/data').select(storeName);
+		});
+		return passedMapSelect(mockedSelect, {
+			dispatch: jest.requireActual('@wordpress/data').dispatch,
+		});
+	})
 );
 
 /**
  * This is in a separate file as doing it in `index` led to an overly complicated set of mocks. Doing it here allows the test to be isolated.
  */
-describe( 'Autocomplete country change handler', () => {
-	it( 'should update provider when country changes', () => {
+describe('Autocomplete country change handler', () => {
+	it('should update provider when country changes', () => {
 		window.wc = {
 			addressAutocomplete: {
-				registerAddressAutocompleteProvider: ( provider ) =>
-					!! provider,
+				registerAddressAutocompleteProvider: (provider) => !!provider,
 				activeProvider: { shipping: null, billing: null },
 				providers: {
 					'germany-only': {
 						id: 'germany-only',
-						canSearch: ( country: string ) => country === 'DE',
+						canSearch: (country: string) => country === 'DE',
 						search: async () => [],
-						select: async () => ( {
+						select: async () => ({
 							address_1: 'Some Street 1',
 							address_2: '',
 							city: 'Some City',
 							postcode: '12345',
 							country: 'DE',
 							state: 'BE',
-						} ),
+						}),
 					},
 					fallback: {
 						id: 'fallback',
-						canSearch: ( country: string ) => !! country,
+						canSearch: (country: string) => !!country,
 						search: async () => [],
-						select: async () => ( {
+						select: async () => ({
 							address_1: 'Some Street 1',
 							address_2: '',
 							city: 'Some City',
 							postcode: '12345',
 							country: 'US',
 							state: 'CA',
-						} ),
+						}),
 					},
 				},
 			},
 		};
 
 		// Call the hook with both billing and shipping.
-		renderHook( () =>
-			useUpdatePreferredAutocompleteProvider( 'shipping' )
-		);
-		renderHook( () => useUpdatePreferredAutocompleteProvider( 'billing' ) );
+		renderHook(() => useUpdatePreferredAutocompleteProvider('shipping'));
+		renderHook(() => useUpdatePreferredAutocompleteProvider('billing'));
 
 		// Verify that the provider update was called with 'germany-only' provider as it's preferred and supports DE country.
-		expect( mockSetActiveAddressAutocompleteProvider ).toHaveBeenCalledWith(
+		expect(mockSetActiveAddressAutocompleteProvider).toHaveBeenCalledWith(
 			'germany-only',
 			'shipping'
 		);
-		expect( mockSetActiveAddressAutocompleteProvider ).toHaveBeenCalledWith(
+		expect(mockSetActiveAddressAutocompleteProvider).toHaveBeenCalledWith(
 			'germany-only',
 			'billing'
 		);
 
 		mockSetActiveAddressAutocompleteProvider.mockReset();
 		wpData.useSelect.mockImplementation(
-			jest.fn().mockImplementation( ( passedMapSelect ) => {
+			jest.fn().mockImplementation((passedMapSelect) => {
 				const mockedSelect = jest
 					.fn()
-					.mockImplementation( ( storeName ) => {
+					.mockImplementation((storeName) => {
 						if (
 							storeName === 'wc/store/cart' ||
 							storeName === cartStore
@@ -182,36 +179,34 @@ describe( 'Autocomplete country change handler', () => {
 							};
 						}
 						return jest
-							.requireActual( '@wordpress/data' )
-							.select( storeName );
-					} );
-				return passedMapSelect( mockedSelect, {
-					dispatch: jest.requireActual( '@wordpress/data' ).dispatch,
-				} );
-			} )
+							.requireActual('@wordpress/data')
+							.select(storeName);
+					});
+				return passedMapSelect(mockedSelect, {
+					dispatch: jest.requireActual('@wordpress/data').dispatch,
+				});
+			})
 		);
 
 		// Call it again now countries have changed.
-		renderHook( () =>
-			useUpdatePreferredAutocompleteProvider( 'shipping' )
-		);
+		renderHook(() => useUpdatePreferredAutocompleteProvider('shipping'));
 
 		// Verify that the provider update was called with fallback for shipping (US not supported) but still germany-only for billing as that is still DE.
 		expect(
 			mockSetActiveAddressAutocompleteProvider
-		).toHaveBeenLastCalledWith( 'fallback', 'shipping' );
+		).toHaveBeenLastCalledWith('fallback', 'shipping');
 
-		renderHook( () => useUpdatePreferredAutocompleteProvider( 'billing' ) );
+		renderHook(() => useUpdatePreferredAutocompleteProvider('billing'));
 		expect(
 			mockSetActiveAddressAutocompleteProvider
-		).toHaveBeenLastCalledWith( 'germany-only', 'billing' );
+		).toHaveBeenLastCalledWith('germany-only', 'billing');
 
 		// Verify active provider on window was changed too
-		expect( window.wc.addressAutocomplete.activeProvider.billing ).toBe(
-			window.wc.addressAutocomplete.providers[ 'germany-only' ]
+		expect(window.wc.addressAutocomplete.activeProvider.billing).toBe(
+			window.wc.addressAutocomplete.providers['germany-only']
 		);
-		expect( window.wc.addressAutocomplete.activeProvider.shipping ).toBe(
+		expect(window.wc.addressAutocomplete.activeProvider.shipping).toBe(
 			window.wc.addressAutocomplete.providers.fallback
 		);
-	} );
-} );
+	});
+});

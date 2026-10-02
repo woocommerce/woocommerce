@@ -1,7 +1,4 @@
 {
 	"phpVersion": "8.1",
-	"plugins": [ 
-        ".",
-        "https://downloads.wordpress.org/plugin/woocommerce.zip"
-     ]
+	"plugins": [".", "https://downloads.wordpress.org/plugin/woocommerce.zip"]
 }

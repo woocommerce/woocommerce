@@ -49,7 +49,7 @@ interface ProductCategoryControlProps {
 	showReviewCount?: boolean;
 }
 
-const ProductCategoryControl = ( {
+const ProductCategoryControl = ({
 	categories = [],
 	error = null,
 	isLoading = false,
@@ -60,15 +60,13 @@ const ProductCategoryControl = ( {
 	isCompact = false,
 	isSingle = false,
 	showReviewCount,
-}: ProductCategoryControlProps & WithInjectedSearchedCategories ) => {
-	const renderItem = (
-		args: RenderItemArgs< ProductCategoryResponseItem >
-	) => {
+}: ProductCategoryControlProps & WithInjectedSearchedCategories) => {
+	const renderItem = (args: RenderItemArgs<ProductCategoryResponseItem>) => {
 		const { item, search, depth = 0 } = args;
 
-		const accessibleName = ! item.breadcrumbs.length
+		const accessibleName = !item.breadcrumbs.length
 			? item.name
-			: `${ item.breadcrumbs.join( ', ' ) }, ${ item.name }`;
+			: `${item.breadcrumbs.join(', ')}, ${item.name}`;
 
 		const listItemAriaLabel = showReviewCount
 			? sprintf(
@@ -81,7 +79,7 @@ const ProductCategoryControl = ( {
 					),
 					accessibleName,
 					item.details?.review_count || 0
-			  )
+				)
 			: sprintf(
 					/* translators: %1$s is the item name, %2$d is the count of products for the item. */
 					_n(
@@ -92,7 +90,7 @@ const ProductCategoryControl = ( {
 					),
 					accessibleName,
 					item.details?.count || 0
-			  );
+				);
 
 		const listItemCountLabel = showReviewCount
 			? sprintf(
@@ -104,7 +102,7 @@ const ProductCategoryControl = ( {
 						'woocommerce'
 					),
 					item.details?.review_count || 0
-			  )
+				)
 			: sprintf(
 					/* translators: %d is the count of products. */
 					_n(
@@ -114,34 +112,34 @@ const ProductCategoryControl = ( {
 						'woocommerce'
 					),
 					item.details?.count || 0
-			  );
+				);
 
 		return (
 			<SearchListItem
-				className={ clsx(
+				className={clsx(
 					'woocommerce-product-categories__item',
 					'has-count',
 					{
 						'is-searching': search.length > 0,
 						'is-skip-level': depth === 0 && item.parent !== 0,
 					}
-				) }
-				{ ...args }
-				countLabel={ listItemCountLabel }
-				aria-label={ listItemAriaLabel }
+				)}
+				{...args}
+				countLabel={listItemCountLabel}
+				aria-label={listItemAriaLabel}
 			/>
 		);
 	};
 
 	const messages = {
-		clear: __( 'Clear all product categories', 'woocommerce' ),
-		list: __( 'Product Categories', 'woocommerce' ),
+		clear: __('Clear all product categories', 'woocommerce'),
+		list: __('Product Categories', 'woocommerce'),
 		noItems: __(
 			"Your store doesn't have any product categories.",
 			'woocommerce'
 		),
-		search: __( 'Search for product categories', 'woocommerce' ),
-		selected: ( n: number ) =>
+		search: __('Search for product categories', 'woocommerce'),
+		selected: (n: number) =>
 			sprintf(
 				/* translators: %d is the count of selected categories. */
 				_n(
@@ -152,11 +150,11 @@ const ProductCategoryControl = ( {
 				),
 				n
 			),
-		updated: __( 'Category search results updated.', 'woocommerce' ),
+		updated: __('Category search results updated.', 'woocommerce'),
 	};
 
-	if ( error ) {
-		return <ErrorMessage error={ error } />;
+	if (error) {
+		return <ErrorMessage error={error} />;
 	}
 
 	const currentList = categories.map(
@@ -167,33 +165,30 @@ const ProductCategoryControl = ( {
 		<>
 			<SearchListControl
 				className="woocommerce-product-categories"
-				list={ currentList }
-				isLoading={ isLoading }
-				selected={ currentList.filter( ( { id } ) =>
-					selected.includes( Number( id ) )
-				) }
-				onChange={ onChange }
-				renderItem={ renderItem }
-				messages={ messages }
-				isCompact={ isCompact }
+				list={currentList}
+				isLoading={isLoading}
+				selected={currentList.filter(({ id }) =>
+					selected.includes(Number(id))
+				)}
+				onChange={onChange}
+				renderItem={renderItem}
+				messages={messages}
+				isCompact={isCompact}
 				isHierarchical
-				isSingle={ isSingle }
+				isSingle={isSingle}
 			/>
-			{ !! onOperatorChange && (
-				<div hidden={ selected.length < 2 }>
+			{!!onOperatorChange && (
+				<div hidden={selected.length < 2}>
 					<SelectControl
 						className="woocommerce-product-categories__operator"
-						label={ __(
-							'Display products matching',
-							'woocommerce'
-						) }
-						help={ __(
+						label={__('Display products matching', 'woocommerce')}
+						help={__(
 							'Pick at least two categories to use this setting.',
 							'woocommerce'
-						) }
-						value={ operator }
-						onChange={ onOperatorChange }
-						options={ [
+						)}
+						value={operator}
+						onChange={onOperatorChange}
+						options={[
 							{
 								label: __(
 									'Any selected categories',
@@ -208,12 +203,12 @@ const ProductCategoryControl = ( {
 								),
 								value: 'all',
 							},
-						] }
+						]}
 					/>
 				</div>
-			) }
+			)}
 		</>
 	);
 };
 
-export default withSearchedCategories( ProductCategoryControl );
+export default withSearchedCategories(ProductCategoryControl);

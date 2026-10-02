@@ -31,45 +31,45 @@ import { CheckoutBlockContext } from './context';
 import { IncompatibleExtensionsFrontendNotice } from '../cart-checkout-shared/incompatible-extensions-notice';
 
 // Show the error screen only when the hydrated checkout GET response carried an error code.
-const preloadedCheckoutData = getSetting< Partial< CheckoutResponse > >(
+const preloadedCheckoutData = getSetting<Partial<CheckoutResponse>>(
 	'checkoutData',
 	{}
 );
-const hasCheckoutError = !! preloadedCheckoutData.code;
+const hasCheckoutError = !!preloadedCheckoutData.code;
 
 const MustLoginPrompt = () => {
 	return (
 		<div className="wc-block-must-login-prompt">
-			{ __( 'You must be logged in to checkout.', 'woocommerce' ) }{ ' ' }
-			<a href={ LOGIN_TO_CHECKOUT_URL }>
-				{ __( 'Click here to log in.', 'woocommerce' ) }
+			{__('You must be logged in to checkout.', 'woocommerce')}{' '}
+			<a href={LOGIN_TO_CHECKOUT_URL}>
+				{__('Click here to log in.', 'woocommerce')}
 			</a>
 		</div>
 	);
 };
 
-const Checkout = ( {
+const Checkout = ({
 	attributes,
 	children,
 }: {
 	attributes: Attributes;
 	children: React.ReactChildren;
-} ): JSX.Element => {
-	const { customerId } = useSelect( ( select ) => {
-		const store = select( checkoutStore );
+}): JSX.Element => {
+	const { customerId } = useSelect((select) => {
+		const store = select(checkoutStore);
 		return {
 			customerId: store.getCustomerId(),
 		};
-	} );
+	});
 	const { cartItems, cartIsLoading } = useStoreCart();
 
 	const { showFormStepNumbers } = attributes;
 
-	if ( ! cartIsLoading && cartItems.length === 0 ) {
+	if (!cartIsLoading && cartItems.length === 0) {
 		return <EmptyCart />;
 	}
 
-	if ( hasCheckoutError ) {
+	if (hasCheckoutError) {
 		return <CheckoutOrderError />;
 	}
 
@@ -79,27 +79,27 @@ const Checkout = ( {
 	 * account creation during the checkout flow.
 	 */
 	if (
-		isLoginRequired( customerId ) &&
-		! getSetting( 'checkoutAllowsSignup', false )
+		isLoginRequired(customerId) &&
+		!getSetting('checkoutAllowsSignup', false)
 	) {
 		return <MustLoginPrompt />;
 	}
 
 	return (
-		<CheckoutBlockContext.Provider value={ { showFormStepNumbers } }>
-			{ children }
+		<CheckoutBlockContext.Provider value={{ showFormStepNumbers }}>
+			{children}
 		</CheckoutBlockContext.Provider>
 	);
 };
 
-const ScrollOnError = ( {
+const ScrollOnError = ({
 	scrollToTop,
 }: {
-	scrollToTop: ( props: Record< string, unknown > ) => void;
-} ): null => {
+	scrollToTop: (props: Record<string, unknown>) => void;
+}): null => {
 	const { hasError: checkoutHasError, isIdle: checkoutIsIdle } = useSelect(
-		( select ) => {
-			const store = select( checkoutStore );
+		(select) => {
+			const store = select(checkoutStore);
 			return {
 				isIdle: store.isIdle(),
 				hasError: store.hasError(),
@@ -107,54 +107,54 @@ const ScrollOnError = ( {
 		},
 		[]
 	);
-	const { hasValidationErrors } = useSelect( ( select ) => {
-		const store = select( validationStore );
+	const { hasValidationErrors } = useSelect((select) => {
+		const store = select(validationStore);
 		return {
 			hasValidationErrors: store.hasValidationErrors(),
 		};
-	} );
-	const { showAllValidationErrors } = useDispatch( validationStore );
+	});
+	const { showAllValidationErrors } = useDispatch(validationStore);
 
 	const hasErrorsToDisplay =
 		checkoutIsIdle && checkoutHasError && hasValidationErrors;
 
-	useEffect( () => {
+	useEffect(() => {
 		let scrollToTopTimeout: number;
-		if ( hasErrorsToDisplay ) {
+		if (hasErrorsToDisplay) {
 			void showAllValidationErrors();
 			// Scroll after a short timeout to allow a re-render. This will allow focusableSelector to match updated components.
-			scrollToTopTimeout = window.setTimeout( () => {
-				scrollToTop( {
+			scrollToTopTimeout = window.setTimeout(() => {
+				scrollToTop({
 					focusableSelector:
 						'input:invalid, .has-error input, .has-error select',
-				} );
-			}, 50 );
+				});
+			}, 50);
 		}
 		return () => {
-			clearTimeout( scrollToTopTimeout );
+			clearTimeout(scrollToTopTimeout);
 		};
-	}, [ hasErrorsToDisplay, scrollToTop, showAllValidationErrors ] );
+	}, [hasErrorsToDisplay, scrollToTop, showAllValidationErrors]);
 
 	return null;
 };
 
-const Block = ( {
+const Block = ({
 	attributes,
 	children,
 	scrollToTop,
 }: {
 	attributes: Attributes;
 	children: React.ReactChildren;
-	scrollToTop: ( props: Record< string, unknown > ) => void;
-} ): JSX.Element => {
+	scrollToTop: (props: Record<string, unknown>) => void;
+}): JSX.Element => {
 	useShowShippingTotalWarning();
 	return (
 		<BlockErrorBoundary
-			header={ __(
+			header={__(
 				'Something went wrong. Please contact us for assistance.',
 				'woocommerce'
-			) }
-			text={ createInterpolateElement(
+			)}
+			text={createInterpolateElement(
 				__(
 					'The checkout has encountered an unexpected error. <button>Try reloading the page</button>. If the error persists, please get in touch with us so we can assist.',
 					'woocommerce'
@@ -163,29 +163,27 @@ const Block = ( {
 					button: (
 						<button
 							className="wc-block-link-button"
-							onClick={ reloadPage }
+							onClick={reloadPage}
 						/>
 					),
 				}
-			) }
-			showErrorMessage={ CURRENT_USER_IS_ADMIN }
+			)}
+			showErrorMessage={CURRENT_USER_IS_ADMIN}
 		>
 			<StoreNoticesContainer
-				context={ [ noticeContexts.CHECKOUT, noticeContexts.CART ] }
+				context={[noticeContexts.CHECKOUT, noticeContexts.CART]}
 			/>
 			<IncompatibleExtensionsFrontendNotice block="woocommerce/checkout" />
-			{ /* SlotFillProvider need to be defined before CheckoutProvider so fills have the SlotFill context ready when they mount. */ }
+			{/* SlotFillProvider need to be defined before CheckoutProvider so fills have the SlotFill context ready when they mount. */}
 			<SlotFillProvider>
 				<CheckoutProvider>
 					<SidebarLayout
-						className={ clsx( 'wc-block-checkout', {
+						className={clsx('wc-block-checkout', {
 							'has-dark-controls': attributes.hasDarkControls,
-						} ) }
+						})}
 					>
-						<Checkout attributes={ attributes }>
-							{ children }
-						</Checkout>
-						<ScrollOnError scrollToTop={ scrollToTop } />
+						<Checkout attributes={attributes}>{children}</Checkout>
+						<ScrollOnError scrollToTop={scrollToTop} />
 					</SidebarLayout>
 				</CheckoutProvider>
 			</SlotFillProvider>
@@ -193,4 +191,4 @@ const Block = ( {
 	);
 };
 
-export default withScrollToTop( Block );
+export default withScrollToTop(Block);

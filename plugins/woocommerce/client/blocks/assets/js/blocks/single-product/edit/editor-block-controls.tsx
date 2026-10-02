@@ -7,24 +7,24 @@ import { ToolbarGroup } from '@wordpress/components';
 
 interface EditorBlockControlsProps {
 	isEditing: boolean;
-	setIsEditing: ( isEditing: boolean ) => void;
+	setIsEditing: (isEditing: boolean) => void;
 }
 
-const EditorBlockControls = ( {
+const EditorBlockControls = ({
 	isEditing,
 	setIsEditing,
-}: EditorBlockControlsProps ) => {
+}: EditorBlockControlsProps) => {
 	return (
 		<BlockControls>
 			<ToolbarGroup
-				controls={ [
+				controls={[
 					{
 						icon: 'edit',
-						title: __( 'Edit selected product', 'woocommerce' ),
-						onClick: () => setIsEditing( ! isEditing ),
+						title: __('Edit selected product', 'woocommerce'),
+						onClick: () => setIsEditing(!isEditing),
 						isActive: isEditing,
 					},
-				] }
+				]}
 			/>
 		</BlockControls>
 	);

@@ -25,44 +25,44 @@ import type { EditProps } from './types';
 import metadata from './block.json';
 
 // Get the list of taxonomies that support custom ordering (drag & drop in admin).
-const sortableTaxonomies = getSetting< string[] >( 'sortableTaxonomies', [
+const sortableTaxonomies = getSetting<string[]>('sortableTaxonomies', [
 	'product_cat',
-] );
+]);
 
-export const TaxonomyFilterInspectorControls = ( {
+export const TaxonomyFilterInspectorControls = ({
 	attributes,
 	setAttributes,
 	clientId,
-}: EditProps ) => {
+}: EditProps) => {
 	const { showCounts, sortOrder, hideEmpty, displayStyle, taxonomy } =
 		attributes;
 
 	// Only show "Menu order" option for taxonomies that support custom ordering.
-	const sortOrderOptions = useMemo( () => {
+	const sortOrderOptions = useMemo(() => {
 		const baseOptions = [
 			{
-				label: __( 'Count (High to Low)', 'woocommerce' ),
+				label: __('Count (High to Low)', 'woocommerce'),
 				value: 'count-desc',
 			},
 			{
-				label: __( 'Count (Low to High)', 'woocommerce' ),
+				label: __('Count (Low to High)', 'woocommerce'),
 				value: 'count-asc',
 			},
 			{
-				label: __( 'Name (A to Z)', 'woocommerce' ),
+				label: __('Name (A to Z)', 'woocommerce'),
 				value: 'name-asc',
 			},
 			{
-				label: __( 'Name (Z to A)', 'woocommerce' ),
+				label: __('Name (Z to A)', 'woocommerce'),
 				value: 'name-desc',
 			},
 		];
 
 		// Add "Menu order" option only for sortable taxonomies.
-		if ( sortableTaxonomies.includes( taxonomy ) ) {
+		if (sortableTaxonomies.includes(taxonomy)) {
 			return [
 				{
-					label: __( 'Menu order', 'woocommerce' ),
+					label: __('Menu order', 'woocommerce'),
 					value: 'menu_order-asc',
 				},
 				...baseOptions,
@@ -70,104 +70,101 @@ export const TaxonomyFilterInspectorControls = ( {
 		}
 
 		return baseOptions;
-	}, [ taxonomy ] );
+	}, [taxonomy]);
 
 	return (
 		<InspectorControls>
 			<ToolsPanel
-				label={ __( 'Display Settings', 'woocommerce' ) }
-				resetAll={ () => {
-					setAttributes( {
+				label={__('Display Settings', 'woocommerce')}
+				resetAll={() => {
+					setAttributes({
 						sortOrder: metadata.attributes.sortOrder.default,
 						displayStyle: metadata.attributes.displayStyle.default,
 						showCounts: metadata.attributes.showCounts.default,
 						hideEmpty: metadata.attributes.hideEmpty.default,
-					} );
+					});
 					resetDisplayStyleBlock(
 						clientId,
 						metadata.attributes.displayStyle.default
 					);
-				} }
+				}}
 			>
 				<ToolsPanelItem
-					label={ __( 'Sort Order', 'woocommerce' ) }
-					hasValue={ () => sortOrder !== 'count-desc' }
-					onDeselect={ () =>
-						setAttributes( {
+					label={__('Sort Order', 'woocommerce')}
+					hasValue={() => sortOrder !== 'count-desc'}
+					onDeselect={() =>
+						setAttributes({
 							sortOrder: metadata.attributes.sortOrder.default,
-						} )
+						})
 					}
 				>
 					<SelectControl
-						label={ __( 'Sort Order', 'woocommerce' ) }
-						value={ sortOrder }
-						options={ sortOrderOptions }
-						onChange={ ( value: string ) =>
-							setAttributes( { sortOrder: value } )
+						label={__('Sort Order', 'woocommerce')}
+						value={sortOrder}
+						options={sortOrderOptions}
+						onChange={(value: string) =>
+							setAttributes({ sortOrder: value })
 						}
 					/>
 				</ToolsPanelItem>
 				<ToolsPanelItem
-					label={ __( 'Display Style', 'woocommerce' ) }
-					hasValue={ () =>
+					label={__('Display Style', 'woocommerce')}
+					hasValue={() =>
 						displayStyle !==
 						'woocommerce/product-filter-checkbox-list'
 					}
-					isShownByDefault={ true }
-					onDeselect={ () => {
-						setAttributes( {
+					isShownByDefault={true}
+					onDeselect={() => {
+						setAttributes({
 							displayStyle:
 								metadata.attributes.displayStyle.default,
-						} );
+						});
 						resetDisplayStyleBlock(
 							clientId,
 							metadata.attributes.displayStyle.default
 						);
-					} }
+					}}
 				>
 					<DisplayStyleSwitcher
-						clientId={ clientId }
-						currentStyle={ displayStyle }
-						onChange={ ( value ) =>
-							setAttributes( { displayStyle: value } )
+						clientId={clientId}
+						currentStyle={displayStyle}
+						onChange={(value) =>
+							setAttributes({ displayStyle: value })
 						}
 					/>
 				</ToolsPanelItem>
 				<ToolsPanelItem
-					label={ __( 'Product counts', 'woocommerce' ) }
-					hasValue={ () => showCounts }
-					onDeselect={ () =>
-						setAttributes( {
+					label={__('Product counts', 'woocommerce')}
+					hasValue={() => showCounts}
+					onDeselect={() =>
+						setAttributes({
 							showCounts: metadata.attributes.showCounts.default,
-						} )
+						})
 					}
-					isShownByDefault={ true }
+					isShownByDefault={true}
 				>
 					<ToggleControl
-						label={ __( 'Product counts', 'woocommerce' ) }
-						checked={ showCounts }
-						onChange={ ( value: boolean ) =>
-							setAttributes( { showCounts: value } )
+						label={__('Product counts', 'woocommerce')}
+						checked={showCounts}
+						onChange={(value: boolean) =>
+							setAttributes({ showCounts: value })
 						}
 					/>
 				</ToolsPanelItem>
 				<ToolsPanelItem
-					label={ __( 'Hide items with no products', 'woocommerce' ) }
-					hasValue={ () => ! hideEmpty }
-					onDeselect={ () =>
-						setAttributes( {
+					label={__('Hide items with no products', 'woocommerce')}
+					hasValue={() => !hideEmpty}
+					onDeselect={() =>
+						setAttributes({
 							hideEmpty: metadata.attributes.hideEmpty.default,
-						} )
+						})
 					}
 				>
 					<ToggleControl
-						label={ __(
-							'Hide items with no products',
-							'woocommerce'
-						) }
-						checked={ hideEmpty }
-						onChange={ ( value: boolean ) =>
-							setAttributes( { hideEmpty: value } )
+						label={__('Hide items with no products', 'woocommerce')}
+						checked={hideEmpty}
+						onChange={(value: boolean) =>
+							setAttributes({ hideEmpty: value })
 						}
 					/>
 				</ToolsPanelItem>

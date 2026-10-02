@@ -12,12 +12,12 @@ import { EditorContainerBlockProps } from '@woocommerce/blocks/reviews/types';
 import EditorBlock from './editor-block';
 import { getSortArgs } from './utils.js';
 
-const EditorContainerBlock = ( {
+const EditorContainerBlock = ({
 	attributes,
 	icon,
 	name,
 	noReviewsPlaceholder,
-}: EditorContainerBlockProps ) => {
+}: EditorContainerBlockProps) => {
 	const {
 		categoryIds,
 		productId,
@@ -29,22 +29,22 @@ const EditorContainerBlock = ( {
 		showReviewImage,
 		showReviewRating,
 	} = attributes;
-	const { order, orderby } = getSortArgs( attributes.orderby );
+	const { order, orderby } = getSortArgs(attributes.orderby);
 	const isAllContentHidden =
-		! showReviewContent &&
-		! showReviewRating &&
-		! showReviewDate &&
-		! showReviewerName &&
-		! showReviewImage &&
-		! showProductName;
+		!showReviewContent &&
+		!showReviewRating &&
+		!showReviewDate &&
+		!showReviewerName &&
+		!showReviewImage &&
+		!showProductName;
 
-	if ( isAllContentHidden ) {
+	if (isAllContentHidden) {
 		return (
-			<Placeholder icon={ icon } label={ name }>
-				{ __(
+			<Placeholder icon={icon} label={name}>
+				{__(
 					'The content for this block is hidden due to block settings.',
 					'woocommerce'
-				) }
+				)}
 			</Placeholder>
 		);
 	}
@@ -52,17 +52,17 @@ const EditorContainerBlock = ( {
 	return (
 		<>
 			<EditorBlock
-				attributes={ attributes }
-				categoryIds={ categoryIds }
-				delayFunction={ ( callback: () => void ) =>
-					debounce( callback, 400 )
+				attributes={attributes}
+				categoryIds={categoryIds}
+				delayFunction={(callback: () => void) =>
+					debounce(callback, 400)
 				}
-				noReviewsPlaceholder={ noReviewsPlaceholder }
-				offset={ attributes.offset ?? 0 }
-				orderby={ orderby }
-				order={ order }
-				productId={ productId }
-				reviewsToDisplay={ reviewsOnPageLoad }
+				noReviewsPlaceholder={noReviewsPlaceholder}
+				offset={attributes.offset ?? 0}
+				orderby={orderby}
+				order={order}
+				productId={productId}
+				reviewsToDisplay={reviewsOnPageLoad}
 			/>
 		</>
 	);

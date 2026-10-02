@@ -9,21 +9,21 @@ import { WooHeaderItem } from '@woocommerce/admin-layout';
  */
 import ActivityPanel from './activity-panel';
 
-const excludedPages = [ 'wc-settings' ];
+const excludedPages = ['wc-settings'];
 
 const ActivityPanelHeaderItem = () => (
-	<WooHeaderItem order={ 20 }>
-		{ ( { isEmbedded, query } ) => {
-			if ( excludedPages.includes( query.page ) ) {
+	<WooHeaderItem order={20}>
+		{({ isEmbedded, query }) => {
+			if (excludedPages.includes(query.page)) {
 				return null;
 			}
 
-			return <ActivityPanel isEmbedded={ isEmbedded } query={ query } />;
-		} }
+			return <ActivityPanel isEmbedded={isEmbedded} query={query} />;
+		}}
 	</WooHeaderItem>
 );
 
-registerPlugin( 'activity-panel-header-item', {
+registerPlugin('activity-panel-header-item', {
 	render: ActivityPanelHeaderItem,
 	scope: 'woocommerce-admin',
-} );
+});

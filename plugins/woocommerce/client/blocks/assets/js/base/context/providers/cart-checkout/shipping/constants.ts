@@ -39,7 +39,7 @@ export const DEFAULT_SHIPPING_CONTEXT_DATA = {
 		hasInvalidAddress: false,
 		hasError: false,
 	},
-	dispatchErrorStatus: ( status ) => status,
+	dispatchErrorStatus: (status) => status,
 	shippingErrorTypes: ERROR_TYPES,
 	onShippingRateSuccess: () => () => void null,
 	onShippingRateFail: () => () => void null,

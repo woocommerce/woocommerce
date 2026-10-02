@@ -19,79 +19,78 @@ import { useBackgroundImage } from './use-background-image';
 type MediaAttributes = { align: string; mediaId: number; mediaSrc: string };
 type MediaSize = { height: number; width: number };
 
-interface WithImageEditorRequiredProps< T > {
-	attributes: MediaAttributes & EditorBlock< T >[ 'attributes' ];
-	backgroundImageSize: Partial< MediaSize >;
-	setAttributes: ( attrs: Partial< MediaAttributes > ) => void;
-	useEditingImage: [ boolean, Dispatch< SetStateAction< boolean > > ];
+interface WithImageEditorRequiredProps<T> {
+	attributes: MediaAttributes & EditorBlock<T>['attributes'];
+	backgroundImageSize: Partial<MediaSize>;
+	setAttributes: (attrs: Partial<MediaAttributes>) => void;
+	useEditingImage: [boolean, Dispatch<SetStateAction<boolean>>];
 }
 
-interface WithImageEditorCategoryProps< T >
-	extends WithImageEditorRequiredProps< T > {
+interface WithImageEditorCategoryProps<
+	T,
+> extends WithImageEditorRequiredProps<T> {
 	category: WP_REST_API_Category;
 	product: never;
 }
 
-interface WithImageEditorProductProps< T >
-	extends WithImageEditorRequiredProps< T > {
+interface WithImageEditorProductProps<
+	T,
+> extends WithImageEditorRequiredProps<T> {
 	category: never;
 	product: ProductResponseItem;
 }
 
-type WithImageEditorProps< T extends EditorBlock< T > > =
-	| ( T & WithImageEditorCategoryProps< T > )
-	| ( T & WithImageEditorProductProps< T > );
+type WithImageEditorProps<T extends EditorBlock<T>> =
+	| (T & WithImageEditorCategoryProps<T>)
+	| (T & WithImageEditorProductProps<T>);
 
 interface ImageEditorProps {
 	align: string;
 	backgroundImageId: number;
-	backgroundImageSize: Partial< MediaSize >;
+	backgroundImageSize: Partial<MediaSize>;
 	backgroundImageSrc: string;
-	containerRef: RefObject< HTMLDivElement >;
+	containerRef: RefObject<HTMLDivElement>;
 	originalImgDimension: MediaSize;
-	setAttributes: ( attrs: Partial< MediaAttributes > ) => void;
-	setIsEditingImage: ( value: boolean ) => void;
+	setAttributes: (attrs: Partial<MediaAttributes>) => void;
+	setIsEditingImage: (value: boolean) => void;
 }
 
 // Adapted from:
 // https://github.com/WordPress/gutenberg/blob/v15.6.1/packages/block-library/src/image/use-client-width.js
 function useClientWidth(
-	ref: RefObject< HTMLDivElement >,
+	ref: RefObject<HTMLDivElement>,
 	dependencies: string[]
 ) {
-	const [ clientWidth, setClientWidth ]: [
+	const [clientWidth, setClientWidth]: [
 		number | undefined,
-		Dispatch< SetStateAction< number | undefined > >,
+		Dispatch<SetStateAction<number | undefined>>,
 	] = useState();
 
-	const calculateClientWidth = useCallback( () => {
-		setClientWidth( ref.current?.clientWidth );
-	}, [ ref ] );
+	const calculateClientWidth = useCallback(() => {
+		setClientWidth(ref.current?.clientWidth);
+	}, [ref]);
 
-	useEffect( calculateClientWidth, [
-		calculateClientWidth,
-		...dependencies,
-	] );
-	useEffect( () => {
-		if ( ! ref.current ) {
+	useEffect(calculateClientWidth, [calculateClientWidth, ...dependencies]);
+	useEffect(() => {
+		if (!ref.current) {
 			return;
 		}
 		const { defaultView } = ref.current.ownerDocument;
 
-		if ( ! defaultView ) {
+		if (!defaultView) {
 			return;
 		}
-		defaultView.addEventListener( 'resize', calculateClientWidth );
+		defaultView.addEventListener('resize', calculateClientWidth);
 
 		return () => {
-			defaultView.removeEventListener( 'resize', calculateClientWidth );
+			defaultView.removeEventListener('resize', calculateClientWidth);
 		};
-	}, [ ref, calculateClientWidth ] );
+	}, [ref, calculateClientWidth]);
 
 	return clientWidth;
 }
 
-export const ImageEditor = ( {
+export const ImageEditor = ({
 	align,
 	backgroundImageId,
 	backgroundImageSize,
@@ -100,8 +99,8 @@ export const ImageEditor = ( {
 	originalImgDimension,
 	setAttributes,
 	setIsEditingImage,
-}: ImageEditorProps ) => {
-	const clientWidth = useClientWidth( containerRef, [ align ] );
+}: ImageEditorProps) => {
+	const clientWidth = useClientWidth(containerRef, [align]);
 
 	// The rendered <img> only exists for plain backgrounds, so its measured
 	// size is missing for repeated/parallax ones and until it finishes
@@ -118,27 +117,27 @@ export const ImageEditor = ( {
 
 	return (
 		<GutenbergImageEditor
-			id={ backgroundImageId }
-			url={ backgroundImageSrc }
-			height={ editorHeight }
-			width={ editorWidth }
-			naturalHeight={ editorHeight }
-			naturalWidth={ editorWidth }
-			onSaveImage={ ( { id, url }: { id: number; url: string } ) => {
-				setAttributes( { mediaId: id, mediaSrc: url } );
-			} }
-			onFinishEditing={ () => setIsEditingImage( false ) }
-			clientWidth={ clientWidth }
+			id={backgroundImageId}
+			url={backgroundImageSrc}
+			height={editorHeight}
+			width={editorWidth}
+			naturalHeight={editorHeight}
+			naturalWidth={editorWidth}
+			onSaveImage={({ id, url }: { id: number; url: string }) => {
+				setAttributes({ mediaId: id, mediaSrc: url });
+			}}
+			onFinishEditing={() => setIsEditingImage(false)}
+			clientWidth={clientWidth}
 		/>
 	);
 };
 
 export const withImageEditor =
-	< T extends EditorBlock< T > >( Component: ComponentType< T > ) =>
-	( props: WithImageEditorProps< T > ) => {
-		const [ isEditingImage, setIsEditingImage ] = props.useEditingImage;
+	<T extends EditorBlock<T>>(Component: ComponentType<T>) =>
+	(props: WithImageEditorProps<T>) => {
+		const [isEditingImage, setIsEditingImage] = props.useEditingImage;
 
-		const ref = useRef< HTMLDivElement >( null );
+		const ref = useRef<HTMLDivElement>(null);
 
 		const { attributes, backgroundImageSize, name, setAttributes } = props;
 		const { mediaId, mediaSrc } = attributes;
@@ -148,29 +147,29 @@ export const withImageEditor =
 				: props.category;
 
 		const { backgroundImageId, backgroundImageSrc, originalImgDimension } =
-			useBackgroundImage( {
+			useBackgroundImage({
 				item,
 				mediaId,
 				mediaSrc,
 				blockName: name,
-			} );
+			});
 
-		if ( isEditingImage ) {
+		if (isEditingImage) {
 			return (
-				<div ref={ ref }>
+				<div ref={ref}>
 					<ImageEditor
-						align={ attributes.align }
-						backgroundImageId={ backgroundImageId }
-						backgroundImageSize={ backgroundImageSize }
-						backgroundImageSrc={ backgroundImageSrc }
-						containerRef={ ref }
-						originalImgDimension={ originalImgDimension }
-						setAttributes={ setAttributes }
-						setIsEditingImage={ setIsEditingImage }
+						align={attributes.align}
+						backgroundImageId={backgroundImageId}
+						backgroundImageSize={backgroundImageSize}
+						backgroundImageSrc={backgroundImageSrc}
+						containerRef={ref}
+						originalImgDimension={originalImgDimension}
+						setAttributes={setAttributes}
+						setIsEditingImage={setIsEditingImage}
 					/>
 				</div>
 			);
 		}
 
-		return <Component { ...props } />;
+		return <Component {...props} />;
 	};

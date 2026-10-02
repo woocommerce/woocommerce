@@ -25,9 +25,9 @@ const PORTAL_SELECTORS = [
  * `null` if nothing matches. Pure DOM lookup — no React state.
  */
 function resolvePortalTarget(): HTMLElement | null {
-	for ( const selector of PORTAL_SELECTORS ) {
-		const node = document.querySelector( selector );
-		if ( node instanceof HTMLElement ) {
+	for (const selector of PORTAL_SELECTORS) {
+		const node = document.querySelector(selector);
+		if (node instanceof HTMLElement) {
 			return node;
 		}
 	}
@@ -46,39 +46,39 @@ function resolvePortalTarget(): HTMLElement | null {
  */
 export function UpdateBannerPlugin(): JSX.Element | null {
 	const banner = useUpdateBanner();
-	const [ portalTarget, setPortalTarget ] = useState< HTMLElement | null >(
+	const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(
 		() => resolvePortalTarget() ?? document.body
 	);
 
-	useEffect( () => {
+	useEffect(() => {
 		// First-paint resolution may have run before the canvas
 		// mounted; re-resolve once on the next frame to catch up.
-		const handle = window.requestAnimationFrame( () => {
+		const handle = window.requestAnimationFrame(() => {
 			const next = resolvePortalTarget() ?? document.body;
-			setPortalTarget( ( prev ) => ( prev === next ? prev : next ) );
-		} );
+			setPortalTarget((prev) => (prev === next ? prev : next));
+		});
 		return () => {
-			window.cancelAnimationFrame( handle );
+			window.cancelAnimationFrame(handle);
 		};
-	}, [] );
+	}, []);
 
-	if ( ! banner.shouldRender || ! portalTarget ) {
+	if (!banner.shouldRender || !portalTarget) {
 		return null;
 	}
 
 	return createPortal(
 		<UpdateBanner
-			summary={ banner.summary }
-			applyState={ banner.applyState }
-			canApply={ banner.canApply }
-			canReview={ banner.canReview }
-			disabledReason={ banner.disabledReason }
-			expanded={ banner.expanded }
-			onApply={ banner.apply }
-			onReview={ banner.openReview }
-			onDismiss={ banner.dismiss }
-			onAutoDismiss={ banner.autoDismiss }
-			onToggleExpanded={ banner.toggleExpanded }
+			summary={banner.summary}
+			applyState={banner.applyState}
+			canApply={banner.canApply}
+			canReview={banner.canReview}
+			disabledReason={banner.disabledReason}
+			expanded={banner.expanded}
+			onApply={banner.apply}
+			onReview={banner.openReview}
+			onDismiss={banner.dismiss}
+			onAutoDismiss={banner.autoDismiss}
+			onToggleExpanded={banner.toggleExpanded}
 		/>,
 		portalTarget
 	);

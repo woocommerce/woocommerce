@@ -9,75 +9,75 @@ import { useDispatch, useSelect } from '@wordpress/data';
  */
 import { useOptionDismiss } from '../use-option-dismiss';
 
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
+jest.mock('@wordpress/data', () => ({
+	...jest.requireActual('@wordpress/data'),
 	useSelect: jest.fn(),
 	useDispatch: jest.fn(),
-} ) );
+}));
 
 const OPTION_NAME = 'woocommerce_test_recommendations_hidden';
 
-const mockSelect = ( {
+const mockSelect = ({
 	option,
 	hasResolved,
 }: {
 	option: string | boolean;
 	hasResolved: boolean;
-} ) => {
-	( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
-		fn( () => ( {
+}) => {
+	(useSelect as jest.Mock).mockImplementation((fn) =>
+		fn(() => ({
 			getOption: () => option,
 			hasFinishedResolution: () => hasResolved,
-		} ) )
+		}))
 	);
 };
 
-describe( 'useOptionDismiss', () => {
+describe('useOptionDismiss', () => {
 	let updateOptions: jest.Mock;
 
-	beforeEach( () => {
+	beforeEach(() => {
 		updateOptions = jest.fn();
-		( useDispatch as jest.Mock ).mockReturnValue( { updateOptions } );
-	} );
+		(useDispatch as jest.Mock).mockReturnValue({ updateOptions });
+	});
 
-	it( 'treats an unresolved option as dismissed to avoid flashing the card', () => {
-		mockSelect( { option: false, hasResolved: false } );
+	it('treats an unresolved option as dismissed to avoid flashing the card', () => {
+		mockSelect({ option: false, hasResolved: false });
 
-		const { result } = renderHook( () => useOptionDismiss( OPTION_NAME ) );
+		const { result } = renderHook(() => useOptionDismiss(OPTION_NAME));
 
-		expect( result.current.isDismissed ).toBe( true );
-		expect( result.current.hasResolved ).toBe( false );
-	} );
+		expect(result.current.isDismissed).toBe(true);
+		expect(result.current.hasResolved).toBe(false);
+	});
 
-	it( 'is dismissed when the resolved option is "yes"', () => {
-		mockSelect( { option: 'yes', hasResolved: true } );
+	it('is dismissed when the resolved option is "yes"', () => {
+		mockSelect({ option: 'yes', hasResolved: true });
 
-		const { result } = renderHook( () => useOptionDismiss( OPTION_NAME ) );
+		const { result } = renderHook(() => useOptionDismiss(OPTION_NAME));
 
-		expect( result.current.isDismissed ).toBe( true );
-		expect( result.current.hasResolved ).toBe( true );
-	} );
+		expect(result.current.isDismissed).toBe(true);
+		expect(result.current.hasResolved).toBe(true);
+	});
 
-	it( 'is not dismissed when the resolved option is not "yes"', () => {
-		mockSelect( { option: false, hasResolved: true } );
+	it('is not dismissed when the resolved option is not "yes"', () => {
+		mockSelect({ option: false, hasResolved: true });
 
-		const { result } = renderHook( () => useOptionDismiss( OPTION_NAME ) );
+		const { result } = renderHook(() => useOptionDismiss(OPTION_NAME));
 
-		expect( result.current.isDismissed ).toBe( false );
-		expect( result.current.hasResolved ).toBe( true );
-	} );
+		expect(result.current.isDismissed).toBe(false);
+		expect(result.current.hasResolved).toBe(true);
+	});
 
-	it( 'persists the dismissal through updateOptions', () => {
-		mockSelect( { option: false, hasResolved: true } );
+	it('persists the dismissal through updateOptions', () => {
+		mockSelect({ option: false, hasResolved: true });
 
-		const { result } = renderHook( () => useOptionDismiss( OPTION_NAME ) );
+		const { result } = renderHook(() => useOptionDismiss(OPTION_NAME));
 
-		act( () => {
+		act(() => {
 			result.current.onDismiss();
-		} );
+		});
 
-		expect( updateOptions ).toHaveBeenCalledWith( {
-			[ OPTION_NAME ]: 'yes',
-		} );
-	} );
-} );
+		expect(updateOptions).toHaveBeenCalledWith({
+			[OPTION_NAME]: 'yes',
+		});
+	});
+});

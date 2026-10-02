@@ -9,23 +9,23 @@ import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 const CreatePassword = () => {
-	const [ passwordStrength, setPasswordStrength ] = useState( 0 );
-	const { customerPassword } = useSelect( ( select ) => {
-		const store = select( checkoutStore );
+	const [passwordStrength, setPasswordStrength] = useState(0);
+	const { customerPassword } = useSelect((select) => {
+		const store = select(checkoutStore);
 		return {
 			customerPassword: store.getCustomerPassword(),
 		};
-	}, [] );
-	const { __internalSetCustomerPassword } = useDispatch( checkoutStore );
+	}, []);
+	const { __internalSetCustomerPassword } = useDispatch(checkoutStore);
 	const { setValidationErrors, clearValidationError } =
-		useDispatch( validationStore );
+		useDispatch(validationStore);
 
-	useEffect( () => {
-		if ( ! customerPassword ) {
+	useEffect(() => {
+		if (!customerPassword) {
 			return;
 		}
-		if ( passwordStrength < 2 ) {
-			void setValidationErrors( {
+		if (passwordStrength < 2) {
+			void setValidationErrors({
 				'account-password': {
 					message: __(
 						'Please create a stronger password',
@@ -33,30 +33,30 @@ const CreatePassword = () => {
 					),
 					hidden: true,
 				},
-			} );
+			});
 			return;
 		}
-		void clearValidationError( 'account-password' );
+		void clearValidationError('account-password');
 	}, [
 		clearValidationError,
 		customerPassword,
 		passwordStrength,
 		setValidationErrors,
-	] );
+	]);
 
 	return (
 		<ValidatedTextInput
 			type="password"
-			label={ __( 'Create a password', 'woocommerce' ) }
-			className={ `wc-block-components-address-form__password` }
-			value={ customerPassword }
-			required={ true }
-			errorId={ 'account-password' }
-			onChange={ ( value: string ) => {
-				void __internalSetCustomerPassword( value );
+			label={__('Create a password', 'woocommerce')}
+			className={`wc-block-components-address-form__password`}
+			value={customerPassword}
+			required={true}
+			errorId={'account-password'}
+			onChange={(value: string) => {
+				void __internalSetCustomerPassword(value);
 
-				if ( ! value ) {
-					void setValidationErrors( {
+				if (!value) {
+					void setValidationErrors({
 						'account-password': {
 							message: __(
 								'Please enter a valid password',
@@ -64,14 +64,14 @@ const CreatePassword = () => {
 							),
 							hidden: true,
 						},
-					} );
+					});
 				}
-			} }
+			}}
 			feedback={
 				<PasswordStrengthMeter
-					password={ customerPassword }
-					onChange={ ( strength: number ) =>
-						setPasswordStrength( strength )
+					password={customerPassword}
+					onChange={(strength: number) =>
+						setPasswordStrength(strength)
 					}
 				/>
 			}

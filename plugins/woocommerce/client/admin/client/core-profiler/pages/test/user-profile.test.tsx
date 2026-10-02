@@ -10,21 +10,21 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { UserProfile } from '../UserProfile';
 import { CoreProfilerStateMachineContext } from '../..';
 
-describe( 'UserProfile', () => {
+describe('UserProfile', () => {
 	// jsdom does not implement scrollIntoView, which the select control menu
 	// calls when it opens.
-	Object.defineProperty( window.HTMLElement.prototype, 'scrollIntoView', {
+	Object.defineProperty(window.HTMLElement.prototype, 'scrollIntoView', {
 		value: jest.fn(),
 		writable: true,
-	} );
+	});
 
 	let props: {
 		sendEvent: jest.Mock;
 		navigationProgress: number;
-		context: Pick< CoreProfilerStateMachineContext, 'userProfile' >;
+		context: Pick<CoreProfilerStateMachineContext, 'userProfile'>;
 	};
 
-	beforeEach( () => {
+	beforeEach(() => {
 		props = {
 			sendEvent: jest.fn(),
 			navigationProgress: 0,
@@ -36,47 +36,47 @@ describe( 'UserProfile', () => {
 				},
 			},
 		};
-	} );
+	});
 
-	it( 'should render user profile page', () => {
+	it('should render user profile page', () => {
 		// @ts-ignore
-		render( <UserProfile { ...props } /> );
+		render(<UserProfile {...props} />);
 		expect(
-			screen.getByText( /Which one of these best describes you?/i, {
+			screen.getByText(/Which one of these best describes you?/i, {
 				selector: 'h1',
-			} )
+			})
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole( 'button', {
+			screen.getByRole('button', {
 				name: /Continue/i,
-			} )
+			})
 		).toBeInTheDocument();
-	} );
+	});
 
-	it( 'should show online selling question when choosing "im_already_selling"', () => {
+	it('should show online selling question when choosing "im_already_selling"', () => {
 		// @ts-ignore
-		render( <UserProfile { ...props } /> );
-		const radioInput = screen.getByLabelText< HTMLInputElement >(
+		render(<UserProfile {...props} />);
+		const radioInput = screen.getByLabelText<HTMLInputElement>(
 			'I’m already selling'
 		); // Replace with the label of your radio button
 
 		// Perform the radio button selection
-		fireEvent.click( radioInput );
+		fireEvent.click(radioInput);
 
 		// Assert the expected behavior
-		expect( radioInput.checked ).toBe( true );
+		expect(radioInput.checked).toBe(true);
 
 		const onlineSellingQuestion = screen.getByText(
 			/Are you selling online?/i
 		);
-		expect( onlineSellingQuestion ).toBeInTheDocument();
-	} );
+		expect(onlineSellingQuestion).toBeInTheDocument();
+	});
 
-	it( 'should show online selling question when choosing "Yes, I’m selling online"', () => {
+	it('should show online selling question when choosing "Yes, I’m selling online"', () => {
 		render(
 			// @ts-ignore
 			<UserProfile
-				{ ...{
+				{...{
 					...props,
 					context: {
 						userProfile: {
@@ -85,18 +85,18 @@ describe( 'UserProfile', () => {
 							sellingPlatforms: null,
 						},
 					},
-				} }
+				}}
 			/>
 		);
-		const platformSelector = screen.getByLabelText( /Select an option/i );
-		expect( platformSelector ).toBeInTheDocument();
-	} );
+		const platformSelector = screen.getByLabelText(/Select an option/i);
+		expect(platformSelector).toBeInTheDocument();
+	});
 
-	it( 'should allow selecting a platform from the read-only selector', () => {
+	it('should allow selecting a platform from the read-only selector', () => {
 		render(
 			// @ts-ignore
 			<UserProfile
-				{ ...{
+				{...{
 					...props,
 					context: {
 						userProfile: {
@@ -105,46 +105,46 @@ describe( 'UserProfile', () => {
 							sellingPlatforms: null,
 						},
 					},
-				} }
+				}}
 			/>
 		);
 
 		const platformSelector = screen.getByLabelText(
 			/Use up and down arrow keys to navigate/i
 		);
-		expect( platformSelector ).toHaveAttribute( 'readonly' );
+		expect(platformSelector).toHaveAttribute('readonly');
 
-		fireEvent.focus( platformSelector );
-		fireEvent.click( screen.getByText( 'Amazon' ) );
+		fireEvent.focus(platformSelector);
+		fireEvent.click(screen.getByText('Amazon'));
 		screen
-			.getByRole( 'button', {
+			.getByRole('button', {
 				name: /Continue/i,
-			} )
+			})
 			.click();
 
-		expect( props.sendEvent ).toHaveBeenCalledWith( {
+		expect(props.sendEvent).toHaveBeenCalledWith({
 			type: 'USER_PROFILE_COMPLETED',
 			payload: {
 				userProfile: {
 					businessChoice: 'im_already_selling',
 					sellingOnlineAnswer: 'yes_im_selling_online',
-					sellingPlatforms: [ 'amazon' ],
+					sellingPlatforms: ['amazon'],
 				},
 			},
-		} );
-	} );
+		});
+	});
 
-	it( 'should call sendEvent with USER_PROFILE_COMPLETED event when button is clicked', () => {
+	it('should call sendEvent with USER_PROFILE_COMPLETED event when button is clicked', () => {
 		render(
 			// @ts-ignore
-			<UserProfile { ...props } />
+			<UserProfile {...props} />
 		);
 		screen
-			.getByRole( 'button', {
+			.getByRole('button', {
 				name: /Continue/i,
-			} )
+			})
 			.click();
-		expect( props.sendEvent ).toHaveBeenCalledWith( {
+		expect(props.sendEvent).toHaveBeenCalledWith({
 			type: 'USER_PROFILE_COMPLETED',
 			payload: {
 				userProfile: {
@@ -153,26 +153,26 @@ describe( 'UserProfile', () => {
 					sellingPlatforms: null,
 				},
 			},
-		} );
-	} );
+		});
+	});
 
-	it( 'should call sendEvent with USER_PROFILE_SKIPPED event when skip button is clicked', () => {
+	it('should call sendEvent with USER_PROFILE_SKIPPED event when skip button is clicked', () => {
 		render(
 			// @ts-ignore
-			<UserProfile { ...props } />
+			<UserProfile {...props} />
 		);
 		screen
-			.getByRole( 'button', {
+			.getByRole('button', {
 				name: /Skip this step/i,
-			} )
+			})
 			.click();
-		expect( props.sendEvent ).toHaveBeenCalledWith( {
+		expect(props.sendEvent).toHaveBeenCalledWith({
 			type: 'USER_PROFILE_SKIPPED',
 			payload: {
 				userProfile: {
 					skipped: true,
 				},
 			},
-		} );
-	} );
-} );
+		});
+	});
+});

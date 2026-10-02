@@ -19,15 +19,15 @@ import {
 
 interface ShipmentFormContextProps {
 	selectedOption: string;
-	setSelectedOption: ( selectedOption: string ) => void;
+	setSelectedOption: (selectedOption: string) => void;
 	trackingNumber: string;
-	setTrackingNumber: ( trackingNumber: string ) => void;
+	setTrackingNumber: (trackingNumber: string) => void;
 	shipmentProvider: string;
-	setShipmentProvider: ( shipmentProvider: string ) => void;
+	setShipmentProvider: (shipmentProvider: string) => void;
 	trackingUrl: string;
-	setTrackingUrl: ( trackingUrl: string ) => void;
+	setTrackingUrl: (trackingUrl: string) => void;
 	providerName: string;
-	setProviderName: ( providerName: string ) => void;
+	setProviderName: (providerName: string) => void;
 }
 
 const defaultContextProps: ShipmentFormContextProps = {
@@ -44,11 +44,11 @@ const defaultContextProps: ShipmentFormContextProps = {
 };
 
 const ShipmentFormContextValue =
-	createContext< ShipmentFormContextProps >( defaultContextProps );
+	createContext<ShipmentFormContextProps>(defaultContextProps);
 
 export const useShipmentFormContext = () => {
-	const context = React.useContext( ShipmentFormContextValue );
-	if ( ! context ) {
+	const context = React.useContext(ShipmentFormContextValue);
+	if (!context) {
 		throw new Error(
 			'useShipmentFormContext must be used within a ShipmentFormProvider'
 		);
@@ -56,31 +56,31 @@ export const useShipmentFormContext = () => {
 	return context;
 };
 
-export const ShipmentFormProvider = ( {
+export const ShipmentFormProvider = ({
 	fulfillment = null,
 	children,
 }: {
 	fulfillment?: Fulfillment | null;
 	children: React.ReactNode;
-} ) => {
-	const [ selectedOption, setSelectedOption ] = React.useState(
+}) => {
+	const [selectedOption, setSelectedOption] = React.useState(
 		defaultContextProps.selectedOption
 	);
-	const [ trackingNumber, setTrackingNumber ] = React.useState(
+	const [trackingNumber, setTrackingNumber] = React.useState(
 		defaultContextProps.trackingNumber
 	);
-	const [ shipmentProvider, setShipmentProvider ] = React.useState(
+	const [shipmentProvider, setShipmentProvider] = React.useState(
 		defaultContextProps.shipmentProvider
 	);
-	const [ trackingUrl, setTrackingUrl ] = React.useState(
+	const [trackingUrl, setTrackingUrl] = React.useState(
 		defaultContextProps.trackingUrl
 	);
-	const [ providerName, setProviderName ] = React.useState(
+	const [providerName, setProviderName] = React.useState(
 		defaultContextProps.providerName
 	);
 
 	// Update the context state when the fulfillment changes.
-	React.useEffect( () => {
+	React.useEffect(() => {
 		setSelectedOption(
 			getFulfillmentMeta(
 				fulfillment,
@@ -89,21 +89,21 @@ export const ShipmentFormProvider = ( {
 			)
 		);
 		setTrackingNumber(
-			getFulfillmentMeta( fulfillment, TRACKING_NUMBER_META_KEY, '' )
+			getFulfillmentMeta(fulfillment, TRACKING_NUMBER_META_KEY, '')
 		);
 		setShipmentProvider(
-			getFulfillmentMeta( fulfillment, SHIPMENT_PROVIDER_META_KEY, '' )
+			getFulfillmentMeta(fulfillment, SHIPMENT_PROVIDER_META_KEY, '')
 		);
 		setTrackingUrl(
-			getFulfillmentMeta( fulfillment, TRACKING_URL_META_KEY, '' )
+			getFulfillmentMeta(fulfillment, TRACKING_URL_META_KEY, '')
 		);
 		setProviderName(
-			getFulfillmentMeta( fulfillment, PROVIDER_NAME_META_KEY, '' )
+			getFulfillmentMeta(fulfillment, PROVIDER_NAME_META_KEY, '')
 		);
-	}, [ fulfillment ] );
+	}, [fulfillment]);
 
 	const contextValues = useMemo(
-		() => ( {
+		() => ({
 			selectedOption,
 			setSelectedOption,
 			trackingNumber,
@@ -114,7 +114,7 @@ export const ShipmentFormProvider = ( {
 			setTrackingUrl,
 			providerName,
 			setProviderName,
-		} ),
+		}),
 		[
 			selectedOption,
 			setSelectedOption,
@@ -130,8 +130,8 @@ export const ShipmentFormProvider = ( {
 	);
 
 	return (
-		<ShipmentFormContextValue.Provider value={ contextValues }>
-			{ children }
+		<ShipmentFormContextValue.Provider value={contextValues}>
+			{children}
 		</ShipmentFormContextValue.Provider>
 	);
 };

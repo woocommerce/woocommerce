@@ -4,21 +4,21 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 
-jest.mock( '@woocommerce/navigation', () => ( {
-	getNewPath: jest.fn( () => '/new-path' ),
+jest.mock('@woocommerce/navigation', () => ({
+	getNewPath: jest.fn(() => '/new-path'),
 	navigateTo: jest.fn(),
-} ) );
+}));
 
-jest.mock( '@woocommerce/tracks', () => ( {
+jest.mock('@woocommerce/tracks', () => ({
 	recordEvent: jest.fn(),
-} ) );
+}));
 
-jest.mock( '@woocommerce/data', () => ( {
-	useUser: jest.fn( () => ( {
+jest.mock('@woocommerce/data', () => ({
+	useUser: jest.fn(() => ({
 		user: null,
-		currentUserCan: jest.fn( () => false ),
-	} ) ),
-} ) );
+		currentUserCan: jest.fn(() => false),
+	})),
+}));
 
 /**
  * Internal dependencies
@@ -51,63 +51,63 @@ const product: Product = {
 	reviewsCount: 10,
 };
 
-function renderFooter( averageRating: number | null | undefined ) {
+function renderFooter(averageRating: number | null | undefined) {
 	return render(
-		<MarketplaceContext.Provider value={ context }>
-			<ProductCardFooter product={ { ...product, averageRating } } />
+		<MarketplaceContext.Provider value={context}>
+			<ProductCardFooter product={{ ...product, averageRating }} />
 		</MarketplaceContext.Provider>
 	);
 }
 
-describe( 'ProductCardFooter rating', () => {
-	it( 'renders the rating when the product has one', () => {
-		const { getByText } = renderFooter( 4.5 );
+describe('ProductCardFooter rating', () => {
+	it('renders the rating when the product has one', () => {
+		const { getByText } = renderFooter(4.5);
 
-		expect( getByText( '4.5' ) ).toBeInTheDocument();
-	} );
+		expect(getByText('4.5')).toBeInTheDocument();
+	});
 
-	it( 'renders no rating when the product has none', () => {
-		const { container } = renderFooter( null );
-
-		expect(
-			container.querySelector(
-				'.woocommerce-marketplace__product-card__rating'
-			)?.textContent
-		).toBe( '' );
-		expect(
-			container.querySelector(
-				'.woocommerce-marketplace__product-card__rating-icon'
-			)
-		).toBeNull();
-	} );
-
-	it( 'renders no rating when the rating is zero', () => {
-		const { container } = renderFooter( 0 );
+	it('renders no rating when the product has none', () => {
+		const { container } = renderFooter(null);
 
 		expect(
 			container.querySelector(
 				'.woocommerce-marketplace__product-card__rating'
 			)?.textContent
-		).toBe( '' );
+		).toBe('');
 		expect(
 			container.querySelector(
 				'.woocommerce-marketplace__product-card__rating-icon'
 			)
 		).toBeNull();
-	} );
+	});
 
-	it( 'renders no rating when the API omits the rating', () => {
-		const { container } = renderFooter( undefined );
+	it('renders no rating when the rating is zero', () => {
+		const { container } = renderFooter(0);
 
 		expect(
 			container.querySelector(
 				'.woocommerce-marketplace__product-card__rating'
 			)?.textContent
-		).toBe( '' );
+		).toBe('');
 		expect(
 			container.querySelector(
 				'.woocommerce-marketplace__product-card__rating-icon'
 			)
 		).toBeNull();
-	} );
-} );
+	});
+
+	it('renders no rating when the API omits the rating', () => {
+		const { container } = renderFooter(undefined);
+
+		expect(
+			container.querySelector(
+				'.woocommerce-marketplace__product-card__rating'
+			)?.textContent
+		).toBe('');
+		expect(
+			container.querySelector(
+				'.woocommerce-marketplace__product-card__rating-icon'
+			)
+		).toBeNull();
+	});
+});

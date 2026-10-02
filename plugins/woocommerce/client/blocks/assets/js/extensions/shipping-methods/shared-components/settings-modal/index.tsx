@@ -4,10 +4,10 @@
 import { Modal } from '@wordpress/components';
 import styled from '@emotion/styled';
 
-const StyledModal = styled( Modal )`
+const StyledModal = styled(Modal)`
 	max-width: 600px;
 	border-radius: 4px;
-	@media ( min-width: 600px ) {
+	@media (min-width: 600px) {
 		min-width: 560px;
 	}
 
@@ -19,7 +19,7 @@ const StyledModal = styled( Modal )`
 		width: auto;
 		margin: 0 -24px 16px;
 
-		@media ( max-width: 599px ) {
+		@media (max-width: 599px) {
 			button {
 				display: none;
 			}
@@ -30,7 +30,7 @@ const StyledModal = styled( Modal )`
 		margin: 0;
 		padding: 0 24px;
 
-		@media ( max-width: 599px ) {
+		@media (max-width: 599px) {
 			display: flex;
 			flex-direction: column;
 
@@ -56,7 +56,7 @@ const StyledFooter = styled.div`
 	padding: 24px;
 
 	> * {
-		&:not( :first-of-type ) {
+		&:not(:first-of-type) {
 			margin-inline-start: 8px;
 		}
 	}
@@ -67,7 +67,7 @@ const StyledFooter = styled.div`
 	}
 `;
 
-const SettingsModal = ( {
+const SettingsModal = ({
 	children,
 	actions,
 	title,
@@ -78,10 +78,10 @@ const SettingsModal = ( {
 	actions: React.ReactNode;
 	title: string;
 	onRequestClose: () => void;
-} ): JSX.Element => (
-	<StyledModal title={ title } onRequestClose={ onRequestClose } { ...props }>
-		{ children }
-		<StyledFooter>{ actions }</StyledFooter>
+}): JSX.Element => (
+	<StyledModal title={title} onRequestClose={onRequestClose} {...props}>
+		{children}
+		<StyledFooter>{actions}</StyledFooter>
 	</StyledModal>
 );
 

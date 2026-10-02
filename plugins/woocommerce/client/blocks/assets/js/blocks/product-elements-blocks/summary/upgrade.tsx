@@ -21,7 +21,7 @@ import { UpgradeDowngradeNotice } from '@woocommerce/editor-components/upgrade-d
 
 const CORE_NAME = 'core/post-excerpt';
 
-const isProductSummaryBlockVariation = ( props: BlockInstance ) => {
+const isProductSummaryBlockVariation = (props: BlockInstance) => {
 	const pqVariation =
 		props.attributes.__woocommerceNamespace ===
 		PQ_PRODUCT_SUMMARY_VARIATION_NAME;
@@ -29,12 +29,12 @@ const isProductSummaryBlockVariation = ( props: BlockInstance ) => {
 		props.attributes.__woocommerceNamespace ===
 		PC_PRODUCT_SUMMARY_VARIATION_NAME;
 
-	return props.name === CORE_NAME && ( pqVariation || pcVariation );
+	return props.name === CORE_NAME && (pqVariation || pcVariation);
 };
 
-const UpgradeNotice = ( { clientId }: { clientId: string } ) => {
+const UpgradeNotice = ({ clientId }: { clientId: string }) => {
 	const registry = useRegistry();
-	const { replaceBlock } = useDispatch( 'core/block-editor' );
+	const { replaceBlock } = useDispatch('core/block-editor');
 
 	const notice = createInterpolateElement(
 		__(
@@ -44,20 +44,20 @@ const UpgradeNotice = ( { clientId }: { clientId: string } ) => {
 		{
 			strongText: (
 				<strong>
-					{ __( `new version of Product Summary`, 'woocommerce' ) }
+					{__(`new version of Product Summary`, 'woocommerce')}
 				</strong>
 			),
 		}
 	);
 
-	const buttonLabel = __( 'Upgrade now (just this block)', 'woocommerce' );
+	const buttonLabel = __('Upgrade now (just this block)', 'woocommerce');
 
 	const handleClick = () => {
-		const { getBlocksByClientId } = registry.select( 'core/block-editor' );
-		const blocks = getBlocksByClientId( clientId );
+		const { getBlocksByClientId } = registry.select('core/block-editor');
+		const blocks = getBlocksByClientId(clientId);
 
-		if ( blocks?.length && blocks[ 0 ] ) {
-			const currentBlock = blocks[ 0 ];
+		if (blocks?.length && blocks[0]) {
+			const currentBlock = blocks[0];
 			const {
 				excerptLength,
 				showMoreOnNewLine,
@@ -69,33 +69,33 @@ const UpgradeNotice = ( { clientId }: { clientId: string } ) => {
 				'woocommerce/product-summary',
 				restAttributes
 			);
-			void replaceBlock( clientId, productSummaryBlock );
+			void replaceBlock(clientId, productSummaryBlock);
 		}
 	};
 
 	return (
 		<UpgradeDowngradeNotice
-			isDismissible={ false }
-			actionLabel={ buttonLabel }
-			onActionClick={ handleClick }
+			isDismissible={false}
+			actionLabel={buttonLabel}
+			onActionClick={handleClick}
 		>
-			{ notice }
+			{notice}
 		</UpgradeDowngradeNotice>
 	);
 };
 
 const withProductSummaryUpgradeNotice =
-	< T extends EditorBlock< T > >( BlockEdit: ComponentType ) =>
-	( props: BlockEditProps< T > ) => {
-		return isProductSummaryBlockVariation( props ) ? (
+	<T extends EditorBlock<T>>(BlockEdit: ComponentType) =>
+	(props: BlockEditProps<T>) => {
+		return isProductSummaryBlockVariation(props) ? (
 			<>
 				<InspectorControls>
-					<UpgradeNotice clientId={ props.clientId } />
+					<UpgradeNotice clientId={props.clientId} />
 				</InspectorControls>
-				<BlockEdit { ...props } />
+				<BlockEdit {...props} />
 			</>
 		) : (
-			<BlockEdit { ...props } />
+			<BlockEdit {...props} />
 		);
 	};
 

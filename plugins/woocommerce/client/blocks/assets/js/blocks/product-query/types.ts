@@ -59,7 +59,7 @@ export interface ProductQueryArguments {
 }
 /* eslint-enable */
 
-export type ProductQueryBlock = EditorBlock< QueryBlockAttributes >;
+export type ProductQueryBlock = EditorBlock<QueryBlockAttributes>;
 
 export type ProductQueryBlockQuery = Omit<
 	QueryBlockQuery,

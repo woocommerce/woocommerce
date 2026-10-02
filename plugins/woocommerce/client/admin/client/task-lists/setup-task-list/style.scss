@@ -139,7 +139,7 @@
 		}
 
 		.woocommerce-task-header__contents {
-			@include breakpoint( "<782px") {
+			@include breakpoint("<782px") {
 				max-width: 380px;
 			}
 			@include breakpoint("<600px") {
@@ -153,7 +153,6 @@
 			right: 6%;
 		}
 	}
-
 
 	ul {
 		li {
@@ -195,10 +194,15 @@
 	}
 
 	.woocommerce-task-list__item.in_progress .woocommerce-task__icon {
-		background: linear-gradient(to right, var(--wp-admin-theme-color) 50%, transparent 50%);
+		background: linear-gradient(
+			to right,
+			var(--wp-admin-theme-color) 50%,
+			transparent 50%
+		);
 	}
 
-	.woocommerce-task-list__item.complete:not(.complete) .woocommerce-task__icon {
+	.woocommerce-task-list__item.complete:not(.complete)
+		.woocommerce-task__icon {
 		border: none;
 	}
 
@@ -224,9 +228,11 @@
 
 	@include single-column;
 
-
 	@for $i from 1 through 10 {
-		.woocommerce-task-list__item:not(.in_progress):not(.complete).index-#{$i} .woocommerce-task__icon::after {
+		.woocommerce-task-list__item:not(.in_progress):not(
+				.complete
+			).index-#{$i}
+			.woocommerce-task__icon::after {
 			content: "#{$i}";
 			@extend .numbered-circle;
 			color: var(--wp-admin-theme-color);
@@ -234,17 +240,23 @@
 		}
 	}
 
-	@include breakpoint( "<782px" ) {
+	@include breakpoint("<782px") {
 		@include single-column;
 	}
 
-	@at-root .woocommerce-setup-panel & .woocommerce-task-header__contents-container {
+	@at-root .woocommerce-setup-panel
+			&
+			.woocommerce-task-header__contents-container {
 		padding: 16px;
 	}
 
 	@at-root .woocommerce-setup-panel .woocommerce-homescreen-card,
-	.woocommerce-setup-panel .woocommerce-homescreen-card > .components-card__header,
-	.woocommerce-setup-panel .woocommerce-homescreen-card > .components-card__footer {
+		.woocommerce-setup-panel
+			.woocommerce-homescreen-card
+			> .components-card__header,
+		.woocommerce-setup-panel
+			.woocommerce-homescreen-card
+			> .components-card__footer {
 		border-radius: 0;
 	}
 
@@ -261,7 +273,7 @@
 			display: none;
 		}
 
-		@include breakpoint( "<782px") {
+		@include breakpoint("<782px") {
 			right: 0.5%;
 			width: 40%;
 		}
@@ -288,7 +300,7 @@
 	}
 
 	.woocommerce-task-header__contents {
-		@include breakpoint( "<782px") {
+		@include breakpoint("<782px") {
 			max-width: 380px;
 		}
 

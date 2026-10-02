@@ -11,10 +11,10 @@ import { ScreenHeader } from './screen-header';
 import { recordEventOnce } from '../../../events';
 
 export function ScreenLayout(): JSX.Element {
-	recordEventOnce( 'styles_sidebar_screen_layout_opened' );
+	recordEventOnce('styles_sidebar_screen_layout_opened');
 	return (
 		<>
-			<ScreenHeader title={ __( 'Layout', __i18n_text_domain__ ) } />
+			<ScreenHeader title={__('Layout', __i18n_text_domain__)} />
 			<DimensionsPanel />
 		</>
 	);

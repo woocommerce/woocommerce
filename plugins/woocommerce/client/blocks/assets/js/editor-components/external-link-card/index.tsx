@@ -23,46 +23,46 @@ export interface ExternalLinkCardProps {
  * Show a link that displays a title, description, and an icon showing that the link is external.
  * Links are opened in a new tab.
  */
-const ExternalLinkCard = ( {
+const ExternalLinkCard = ({
 	href,
 	title,
 	description,
 	warning,
-}: ExternalLinkCardProps ): JSX.Element => {
+}: ExternalLinkCardProps): JSX.Element => {
 	return (
 		<a
-			href={ href }
+			href={href}
 			className="wc-block-editor-components-external-link-card"
 			target="_blank"
 			rel="noreferrer"
 		>
 			<span className="wc-block-editor-components-external-link-card__content">
 				<strong className="wc-block-editor-components-external-link-card__title">
-					{ title }
+					{title}
 				</strong>
-				{ description && (
+				{description && (
 					<span
 						className="wc-block-editor-components-external-link-card__description"
-						dangerouslySetInnerHTML={ {
-							__html: sanitizeHTML( description ),
-						} }
+						dangerouslySetInnerHTML={{
+							__html: sanitizeHTML(description),
+						}}
 					></span>
-				) }
-				{ warning ? (
+				)}
+				{warning ? (
 					<span className="wc-block-editor-components-external-link-card__warning">
-						<Icon icon={ <Alert status="error" /> } />
-						<span>{ warning }</span>
+						<Icon icon={<Alert status="error" />} />
+						<span>{warning}</span>
 					</span>
-				) : null }
+				) : null}
 			</span>
 			<VisuallyHidden as="span">
 				{
 					/* translators: accessibility text */
-					__( '(opens in a new tab)', 'woocommerce' )
+					__('(opens in a new tab)', 'woocommerce')
 				}
 			</VisuallyHidden>
 			<Icon
-				icon={ external }
+				icon={external}
 				className="wc-block-editor-components-external-link-card__icon"
 			/>
 		</a>

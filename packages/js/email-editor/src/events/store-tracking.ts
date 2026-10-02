@@ -13,15 +13,13 @@ import { recordEvent, isEventTrackingEnabled } from '.';
 /**
  * Handler functions for tracking individual events recorder by the listening to store actions.
  */
-const trackSetDeviceType = ( deviceType: string ) => {
-	recordEvent(
-		`header_preview_dropdown_${ deviceType.toLowerCase() }_selected`
-	);
+const trackSetDeviceType = (deviceType: string) => {
+	recordEvent(`header_preview_dropdown_${deviceType.toLowerCase()}_selected`);
 };
 
-const trackSetPreference = ( scope, name, value ) => {
-	const valueBeforeToggle = select( preferencesStore ).get( scope, name );
-	if ( valueBeforeToggle === value ) {
+const trackSetPreference = (scope, name, value) => {
+	const valueBeforeToggle = select(preferencesStore).get(scope, name);
+	if (valueBeforeToggle === value) {
 		return;
 	}
 	const trackedPreferences = {
@@ -30,60 +28,57 @@ const trackSetPreference = ( scope, name, value ) => {
 		distractionFree: 'distraction_free_toggle',
 		fixedToolbar: 'fixed_toolbar_toggle',
 	};
-	if ( trackedPreferences[ name ] ) {
-		recordEvent( trackedPreferences[ name ], { isEnabled: value } );
+	if (trackedPreferences[name]) {
+		recordEvent(trackedPreferences[name], { isEnabled: value });
 	}
 };
 
-const trackBlockAndPatternInsertion = ( ...args ) => {
-	const inserterPanelOpened = select( editorStore ).isInserterOpened();
-	const insQuickInsertOpened = !! document.getElementsByClassName(
+const trackBlockAndPatternInsertion = (...args) => {
+	const inserterPanelOpened = select(editorStore).isInserterOpened();
+	const insQuickInsertOpened = !!document.getElementsByClassName(
 		'block-editor-inserter__quick-inserter'
 	).length;
 
 	// We are a bit guessing here that user uses inserter panel when it is opened
 	let source = 'other_inserter';
-	if ( inserterPanelOpened ) {
+	if (inserterPanelOpened) {
 		source = 'inserter_sidebar';
-	} else if ( insQuickInsertOpened ) {
+	} else if (insQuickInsertOpened) {
 		source = 'quick_inserter';
 	}
-	const blockData = args[ 0 ];
-	const meta = args[ 5 ];
+	const blockData = args[0];
+	const meta = args[5];
 
 	// Single block insertion
-	if (
-		Array.isArray( blockData ) === false &&
-		typeof blockData === 'object'
-	) {
-		recordEvent( `${ source }_library_block_selected`, {
+	if (Array.isArray(blockData) === false && typeof blockData === 'object') {
+		recordEvent(`${source}_library_block_selected`, {
 			blockName: blockData.name,
-		} );
+		});
 	}
 
 	// Patter inserted
-	if ( Array.isArray( blockData ) && meta && meta.patternName ) {
-		recordEvent( `${ source }_library_pattern_selected`, {
+	if (Array.isArray(blockData) && meta && meta.patternName) {
+		recordEvent(`${source}_library_pattern_selected`, {
 			patternName: meta.patternName,
-		} );
+		});
 	}
 };
 
-const trackSetRenderingMode = ( renderingMode: string ) => {
-	const currentRenderingMode = select( editorStore ).getRenderingMode();
-	if ( currentRenderingMode === renderingMode ) {
+const trackSetRenderingMode = (renderingMode: string) => {
+	const currentRenderingMode = select(editorStore).getRenderingMode();
+	if (currentRenderingMode === renderingMode) {
 		return;
 	}
-	const isPreviewDropdownOpened = !! document.querySelector(
+	const isPreviewDropdownOpened = !!document.querySelector(
 		// eslint-disable-next-line @wordpress/i18n-text-domain
-		`[aria-label="${ __( 'View options' ) }"]`
+		`[aria-label="${__('View options')}"]`
 	);
 	// We want to track the event only from the dropdown.
 	// The mode might also change when switching between an email content and template.
-	if ( isPreviewDropdownOpened ) {
-		recordEvent( 'preview_dropdown_rendering_mode_changed', {
+	if (isPreviewDropdownOpened) {
+		recordEvent('preview_dropdown_rendering_mode_changed', {
 			renderingMode,
-		} );
+		});
 	}
 };
 
@@ -113,52 +108,50 @@ const rewrittenActions = {};
 const originalActions = {};
 
 export const initStoreTracking = () => {
-	if ( ! isEventTrackingEnabled() ) {
+	if (!isEventTrackingEnabled()) {
 		return;
 	}
 
-	use( ( registry ) => ( {
-		dispatch: ( namespace ) => {
+	use((registry) => ({
+		dispatch: (namespace) => {
 			const storeName =
 				typeof namespace === 'object' ? namespace.name : namespace;
-			const actions = registry.dispatch( storeName );
-			const trackers = TRACKED_STORE_EVENTS[ storeName ];
+			const actions = registry.dispatch(storeName);
+			const trackers = TRACKED_STORE_EVENTS[storeName];
 
-			if ( ! trackers ) {
+			if (!trackers) {
 				return actions;
 			}
 
 			// Initialize namespace level objects if not yet done.
-			if ( ! rewrittenActions[ storeName ] ) {
-				rewrittenActions[ storeName ] = {};
+			if (!rewrittenActions[storeName]) {
+				rewrittenActions[storeName] = {};
 			}
-			if ( ! originalActions[ storeName ] ) {
-				originalActions[ storeName ] = {};
+			if (!originalActions[storeName]) {
+				originalActions[storeName] = {};
 			}
 
-			for ( const [ action, event ] of Object.entries( trackers ) ) {
-				if ( ! originalActions[ storeName ][ action ] ) {
-					originalActions[ storeName ][ action ] = actions[ action ];
-					rewrittenActions[ storeName ][ action ] = ( ...args ) => {
+			for (const [action, event] of Object.entries(trackers)) {
+				if (!originalActions[storeName][action]) {
+					originalActions[storeName][action] = actions[action];
+					rewrittenActions[storeName][action] = (...args) => {
 						try {
-							if ( typeof event === 'function' ) {
-								event( ...args );
-							} else if ( typeof event === 'string' ) {
-								recordEvent( event );
+							if (typeof event === 'function') {
+								event(...args);
+							} else if (typeof event === 'string') {
+								recordEvent(event);
 							}
-						} catch ( error ) {
+						} catch (error) {
 							// eslint-disable-next-line no-console
-							console.error( 'Error tracking event', error );
+							console.error('Error tracking event', error);
 						}
-						return originalActions[ storeName ][ action ](
-							...args
-						);
+						return originalActions[storeName][action](...args);
 					};
 				}
-				actions[ action ] = rewrittenActions[ storeName ][ action ];
+				actions[action] = rewrittenActions[storeName][action];
 			}
 
 			return actions;
 		},
-	} ) );
+	}));
 };

@@ -25,7 +25,7 @@ import { __ } from '@wordpress/i18n';
  * @param {string}  [props.appSwitchRequestOrigin]
  * @return {JSX.Element} The PayPal Buttons container component.
  */
-const PayPalButtonsContainer = ( {
+const PayPalButtonsContainer = ({
 	clientId,
 	components,
 	disableFunding,
@@ -37,14 +37,14 @@ const PayPalButtonsContainer = ( {
 	pageType,
 	isProductPage,
 	appSwitchRequestOrigin,
-} ) => {
-	const [ orderReceivedUrl, setOrderReceivedURL ] = useState( '' );
-	const [ orderId, setOrderId ] = useState( '' );
-	const [ productPageCartData, setProductPageCartData ] = useState( {
+}) => {
+	const [orderReceivedUrl, setOrderReceivedURL] = useState('');
+	const [orderId, setOrderId] = useState('');
+	const [productPageCartData, setProductPageCartData] = useState({
 		id: '',
 		quantity: '',
-	} );
-	const payPalData = getPaymentMethodData( 'paypal', {} );
+	});
+	const payPalData = getPaymentMethodData('paypal', {});
 	const options = {
 		clientId: clientId || '',
 		components: components || '',
@@ -64,23 +64,23 @@ const PayPalButtonsContainer = ( {
 	 */
 	const manageCartForProductPageOrder = async () => {
 		// Get product ID from the value of the "add-to-cart" button.
-		let productId = document.querySelector( '[name="add-to-cart"]' )?.value;
+		let productId = document.querySelector('[name="add-to-cart"]')?.value;
 		const variationId = document.querySelector(
 			'[name="variation_id"]'
 		)?.value;
 
-		if ( variationId ) {
+		if (variationId) {
 			productId = variationId;
 		}
 
-		if ( ! productId ) {
+		if (!productId) {
 			return false;
 		}
 
 		// Get quantity from the value of the "quantity" input field.
-		const quantityField = document.querySelector( '[name="quantity"]' );
+		const quantityField = document.querySelector('[name="quantity"]');
 		const quantity = quantityField?.value ?? '1';
-		if ( quantity === '' ) {
+		if (quantity === '') {
 			return false;
 		}
 
@@ -97,65 +97,65 @@ const PayPalButtonsContainer = ( {
 
 		try {
 			// Empty the cart before adding the product.
-			const emptyCartResponse = await window.wp.apiFetch( {
+			const emptyCartResponse = await window.wp.apiFetch({
 				method: 'DELETE',
 				path: '/wc/store/v1/cart/items',
-			} );
+			});
 
 			// Expected response is an empty array.
-			if ( ! emptyCartResponse || emptyCartResponse.length !== 0 ) {
-				throw new Error( 'Failed to empty cart' );
+			if (!emptyCartResponse || emptyCartResponse.length !== 0) {
+				throw new Error('Failed to empty cart');
 			}
 
 			// Add the product to the cart.
-			const addToCartResponse = await window.wp.apiFetch( {
+			const addToCartResponse = await window.wp.apiFetch({
 				method: 'POST',
 				path: '/wc/store/v1/cart/items',
 				data: {
 					id: productId,
 					quantity,
 				},
-			} );
+			});
 
-			if ( ! addToCartResponse || ! addToCartResponse.key ) {
-				throw new Error( 'Failed to add product to cart' );
+			if (!addToCartResponse || !addToCartResponse.key) {
+				throw new Error('Failed to add product to cart');
 			}
-		} catch ( error ) {
+		} catch (error) {
 			return false;
 		}
 
 		// Remember what we added to the cart, so we don't have to repeat the action
 		// when the user re-opens the payment modal.
-		setProductPageCartData( {
+		setProductPageCartData({
 			id: productId,
 			quantity,
-		} );
+		});
 
 		return true;
 	};
 
-	const createOrder = async ( data ) => {
+	const createOrder = async (data) => {
 		let responseData;
 		try {
 			// If we're inside the product page, we need to empty the cart,
 			// and add the current product to the cart.
-			if ( isProductPage ) {
+			if (isProductPage) {
 				const cartSuccess = await manageCartForProductPageOrder();
-				if ( ! cartSuccess ) {
+				if (!cartSuccess) {
 					return null;
 				}
 			}
 
 			// Create a draft order in WooCommerce.
-			responseData = await apiFetch( {
+			responseData = await apiFetch({
 				method: 'GET',
 				path: '/wc/store/v1/checkout',
 				headers: {
 					Nonce: payPalData.wc_store_api_nonce,
 				},
-			} );
+			});
 
-			if ( ! responseData.order_id || ! responseData.order_key ) {
+			if (!responseData.order_id || !responseData.order_key) {
 				// eslint-disable-next-line no-console
 				console.error(
 					'Failed to create WooCommerce order',
@@ -165,7 +165,7 @@ const PayPalButtonsContainer = ( {
 			}
 
 			// Create a PayPal order.
-			const paypalResponseData = await apiFetch( {
+			const paypalResponseData = await apiFetch({
 				method: 'POST',
 				path: '/wc/v3/paypal-buttons/create-order',
 				headers: {
@@ -177,45 +177,45 @@ const PayPalButtonsContainer = ( {
 					payment_source: data.paymentSource || '',
 					app_switch_request_origin: appSwitchRequestOrigin,
 				},
-			} );
+			});
 
-			setOrderId( paypalResponseData.order_id );
-			setOrderReceivedURL( paypalResponseData.return_url );
+			setOrderId(paypalResponseData.order_id);
+			setOrderReceivedURL(paypalResponseData.return_url);
 
 			return paypalResponseData.paypal_order_id;
-		} catch ( error ) {
+		} catch (error) {
 			// eslint-disable-next-line no-console
-			console.error( 'Failed to create order', error );
+			console.error('Failed to create order', error);
 			return null;
 		}
 	};
 
 	const onApprove = () => {
-		if ( orderReceivedUrl ) {
+		if (orderReceivedUrl) {
 			window.location.href = orderReceivedUrl;
 		}
 	};
 
-	const onCancel = async ( data ) => {
+	const onCancel = async (data) => {
 		let currentOrderId = orderId;
-		if ( ! currentOrderId ) {
+		if (!currentOrderId) {
 			// When coming back from App Switch, the order ID may not be available in the
 			// client-side data. Check the URL for the order ID.
 			const orderIdFromUrl = new URLSearchParams(
 				window.location.search
-			).get( 'order_id' );
-			if ( orderIdFromUrl ) {
-				setOrderId( orderIdFromUrl );
+			).get('order_id');
+			if (orderIdFromUrl) {
+				setOrderId(orderIdFromUrl);
 				currentOrderId = orderIdFromUrl;
 			}
 		}
 
-		if ( ! currentOrderId ) {
+		if (!currentOrderId) {
 			return;
 		}
 
 		try {
-			await apiFetch( {
+			await apiFetch({
 				method: 'POST',
 				path: '/wc/v3/paypal-buttons/cancel-payment',
 				headers: {
@@ -225,31 +225,31 @@ const PayPalButtonsContainer = ( {
 					order_id: currentOrderId,
 					paypal_order_id: data.orderID,
 				},
-			} );
+			});
 
-			setOrderReceivedURL( '' );
-		} catch ( error ) {
+			setOrderReceivedURL('');
+		} catch (error) {
 			// eslint-disable-next-line no-console
-			console.error( 'Failed to cancel PayPal payment', error );
+			console.error('Failed to cancel PayPal payment', error);
 		}
 	};
 
-	const onError = ( error ) => {
+	const onError = (error) => {
 		const errorMessage =
-			error.message || __( 'An unknown error occurred', 'woocommerce' );
-		dispatch( 'core/notices' ).createErrorNotice( errorMessage, {
+			error.message || __('An unknown error occurred', 'woocommerce');
+		dispatch('core/notices').createErrorNotice(errorMessage, {
 			context: pageType === 'checkout' ? 'wc/checkout' : 'wc/cart',
-		} );
+		});
 	};
 
 	return (
-		<PayPalScriptProvider options={ options }>
+		<PayPalScriptProvider options={options}>
 			<PayPalButtons
-				appSwitchWhenAvailable={ true }
-				createOrder={ createOrder }
-				onApprove={ onApprove }
-				onCancel={ onCancel }
-				onError={ onError }
+				appSwitchWhenAvailable={true}
+				createOrder={createOrder}
+				onApprove={onApprove}
+				onCancel={onCancel}
+				onError={onError}
 			/>
 		</PayPalScriptProvider>
 	);

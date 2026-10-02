@@ -22,7 +22,7 @@ import {
 } from './use-product-step-change';
 import { useTrackPublishButton } from './use-track-publish-button';
 
-const getTourConfig = ( {
+const getTourConfig = ({
 	isExcerptEditorTmceActive,
 	isContentEditorTmceActive,
 	closeHandler,
@@ -31,9 +31,9 @@ const getTourConfig = ( {
 	isExcerptEditorTmceActive: boolean;
 	isContentEditorTmceActive: boolean;
 	closeHandler: TourKitTypes.CloseHandler;
-	onNextStepHandler: ( currentStepIndex: number ) => void;
-} ): TourKitTypes.WooConfig => {
-	const urlParams = new URLSearchParams( window.location.search );
+	onNextStepHandler: (currentStepIndex: number) => void;
+}): TourKitTypes.WooConfig => {
+	const urlParams = new URLSearchParams(window.location.search);
 	const defaultSteps: TourKitTypes.WooStep[] = [
 		{
 			referenceElements: {
@@ -44,7 +44,7 @@ const getTourConfig = ( {
 			},
 			meta: {
 				name: 'product-name',
-				heading: __( 'Product name', 'woocommerce' ),
+				heading: __('Product name', 'woocommerce'),
 				descriptions: {
 					desktop: __(
 						'Start typing your new product name here. This will be what your customers will see in your store.',
@@ -65,7 +65,7 @@ const getTourConfig = ( {
 			},
 			meta: {
 				name: 'product-description',
-				heading: __( 'Add your product description', 'woocommerce' ),
+				heading: __('Add your product description', 'woocommerce'),
 				descriptions: {
 					desktop: __(
 						'Add your full product description here. Describe your product in detail.',
@@ -83,7 +83,7 @@ const getTourConfig = ( {
 			},
 			meta: {
 				name: 'product-data',
-				heading: __( 'Add your product data', 'woocommerce' ),
+				heading: __('Add your product data', 'woocommerce'),
 				descriptions: {
 					desktop: __(
 						'Use the tabs to switch between sections and insert product details. Start by adding your product price.',
@@ -125,7 +125,7 @@ const getTourConfig = ( {
 			},
 			meta: {
 				name: 'product-image',
-				heading: __( 'Add your product image', 'woocommerce' ),
+				heading: __('Add your product image', 'woocommerce'),
 				descriptions: {
 					desktop: __(
 						'Upload an image to your product here. Ideally a JPEG or PNG about 600 px wide or bigger. This image will be shown in your store’s catalog.',
@@ -143,7 +143,7 @@ const getTourConfig = ( {
 			},
 			meta: {
 				name: 'product-tags',
-				heading: __( 'Add your product tags', 'woocommerce' ),
+				heading: __('Add your product tags', 'woocommerce'),
 				descriptions: {
 					desktop: __(
 						'Add your product tags here. Tags are a method of labeling your products to make them easier for customers to find. For example, if you sell clothing, and you have a lot of cat prints, you could make a tag for “cat.”',
@@ -158,7 +158,7 @@ const getTourConfig = ( {
 			},
 			meta: {
 				name: 'product-categories',
-				heading: __( 'Add your product categories', 'woocommerce' ),
+				heading: __('Add your product categories', 'woocommerce'),
 				descriptions: {
 					desktop: __(
 						'Add your product categories here. Assign categories to your products to make them easier to browse through and find in your store.',
@@ -176,7 +176,7 @@ const getTourConfig = ( {
 			},
 			meta: {
 				name: 'publish',
-				heading: __( 'Publish your product 🎉', 'woocommerce' ),
+				heading: __('Publish your product 🎉', 'woocommerce'),
 				descriptions: {
 					desktop: __(
 						'Good work! Now you can publish your product to your store by hitting the “Publish” button or keep editing it.',
@@ -184,7 +184,7 @@ const getTourConfig = ( {
 					),
 				},
 				primaryButton: {
-					text: __( 'Keep editing', 'woocommerce' ),
+					text: __('Keep editing', 'woocommerce'),
 				},
 			},
 		},
@@ -200,11 +200,11 @@ const getTourConfig = ( {
 	const steps: TourKitTypes.WooStep[] = applyFilters(
 		'experimental_woocommerce_admin_product_tour_steps',
 		defaultSteps,
-		urlParams.get( 'tutorial_type' )
+		urlParams.get('tutorial_type')
 	) as TourKitTypes.WooStep[];
 
-	if ( ! Array.isArray( steps ) ) {
-		throw new Error( 'Tour guide steps must be an array.' );
+	if (!Array.isArray(steps)) {
+		throw new Error('Tour guide steps must be an array.');
 	}
 
 	return {
@@ -232,11 +232,11 @@ const getTourConfig = ( {
 				{
 					name: 'arrow',
 					options: {
-						padding: ( {
+						padding: ({
 							popper,
 						}: {
 							popper: { width: number };
-						} ) => {
+						}) => {
 							return {
 								// Align the arrow to the left of the popper.
 								right: popper.width - 34,
@@ -255,97 +255,94 @@ const getTourConfig = ( {
 };
 
 export const ProductTour = () => {
-	const [ showTour, setShowTour ] = useState< boolean >( false );
+	const [showTour, setShowTour] = useState<boolean>(false);
 	const { setIsLoaded, hasUpdatedInfo } = useProductStepChange();
 
-	const { isTmce: isContentEditorTmceActive } = useActiveEditorType( {
+	const { isTmce: isContentEditorTmceActive } = useActiveEditorType({
 		editorWrapSelector: '#wp-content-wrap',
-	} );
-	const { isTmce: isExcerptEditorTmceActive } = useActiveEditorType( {
+	});
+	const { isTmce: isExcerptEditorTmceActive } = useActiveEditorType({
 		editorWrapSelector: '#wp-excerpt-wrap',
-	} );
+	});
 
-	const { style: contentTmceIframeFocusStyle } = useTmceIframeFocusStyle( {
+	const { style: contentTmceIframeFocusStyle } = useTmceIframeFocusStyle({
 		isActive: showTour && isContentEditorTmceActive,
 		iframeSelector: '#content_ifr',
-	} );
-	const { style: excerptTmceIframeFocusStyle } = useTmceIframeFocusStyle( {
+	});
+	const { style: excerptTmceIframeFocusStyle } = useTmceIframeFocusStyle({
 		isActive: showTour && isExcerptEditorTmceActive,
 		iframeSelector: '#excerpt_ifr',
-	} );
+	});
 
-	const tourConfig = getTourConfig( {
+	const tourConfig = getTourConfig({
 		isContentEditorTmceActive,
 		isExcerptEditorTmceActive,
-		closeHandler: ( steps, stepIndex ) => {
-			setShowTour( false );
-			if ( steps.length - 1 === stepIndex ) {
-				recordEvent( 'walkthrough_product_completed' );
+		closeHandler: (steps, stepIndex) => {
+			setShowTour(false);
+			if (steps.length - 1 === stepIndex) {
+				recordEvent('walkthrough_product_completed');
 			} else {
-				recordEvent( 'walkthrough_product_dismissed', {
-					step_name: steps[ stepIndex ].meta.name,
-				} );
+				recordEvent('walkthrough_product_dismissed', {
+					step_name: steps[stepIndex].meta.name,
+				});
 			}
 		},
-		onNextStepHandler: ( newStepIndex ) => {
-			const stepName = tourConfig.steps[ newStepIndex - 1 ].meta.name;
+		onNextStepHandler: (newStepIndex) => {
+			const stepName = tourConfig.steps[newStepIndex - 1].meta.name;
 
 			// This records all "next" steps and ignores the final "publish" step.
-			recordEvent( 'walkthrough_product_step_completed', {
+			recordEvent('walkthrough_product_step_completed', {
 				step_name: stepName,
-				added_info: hasUpdatedInfo( stepName as ProductTourStepName )
+				added_info: hasUpdatedInfo(stepName as ProductTourStepName)
 					? 'yes'
 					: 'no',
-			} );
+			});
 		},
-	} );
+	});
 
-	useEffect( () => {
-		bindEnableGuideModeClickEvent( ( e ) => {
+	useEffect(() => {
+		bindEnableGuideModeClickEvent((e) => {
 			e.preventDefault();
-			setShowTour( true );
-			recordEvent( 'walkthrough_product_enable_button_click' );
-		} );
+			setShowTour(true);
+			recordEvent('walkthrough_product_enable_button_click');
+		});
 
-		const query = new URLSearchParams( window.location.search );
-		if (
-			query.get( 'tutorial' ) === 'true' &&
-			tourConfig.steps?.length > 0
-		) {
+		const query = new URLSearchParams(window.location.search);
+		if (query.get('tutorial') === 'true' && tourConfig.steps?.length > 0) {
 			const intervalId = waitUntilElementTopNotChange(
-				tourConfig.steps[ 0 ].referenceElements?.desktop || '',
+				tourConfig.steps[0].referenceElements?.desktop || '',
 				() => {
-					setShowTour( true );
-					recordEvent( 'walkthrough_product_view', {
+					setShowTour(true);
+					recordEvent('walkthrough_product_view', {
 						spotlight: 'yes',
 						product_template: 'physical',
-					} );
-					setIsLoaded( true );
+					});
+					setIsLoaded(true);
 				},
 				500
 			);
-			return () => clearInterval( intervalId );
+			return () => clearInterval(intervalId);
 		}
 		// only run once
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [] );
+	}, []);
 
-	useTrackPublishButton( showTour );
+	useTrackPublishButton(showTour);
 
-	if ( ! showTour ) {
+	if (!showTour) {
 		return null;
 	}
 
 	return (
 		<>
 			<style>
-				{ contentTmceIframeFocusStyle }
-				{ excerptTmceIframeFocusStyle }
-				{ `.wp-editor-area:focus {
+				{contentTmceIframeFocusStyle}
+				{excerptTmceIframeFocusStyle}
+				{`.wp-editor-area:focus {
 						border: 1.5px solid #007CBA;
-					}` }
+					}`}
 			</style>
-			<TourKit config={ tourConfig } />
+			<TourKit config={tourConfig} />
 		</>
 	);
 };

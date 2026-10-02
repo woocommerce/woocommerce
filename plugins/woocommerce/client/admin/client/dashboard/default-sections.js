@@ -11,31 +11,35 @@ import ListOrdered from 'gridicons/dist/list-ordered';
 /**
  * Internal dependencies
  */
-const LazyDashboardCharts = lazy( () =>
-	import( /* webpackChunkName: "dashboard-charts" */ './dashboard-charts' )
+const LazyDashboardCharts = lazy(
+	() =>
+		import(/* webpackChunkName: "dashboard-charts" */ './dashboard-charts')
 );
-const LazyLeaderboards = lazy( () =>
-	import( /* webpackChunkName: "leaderboards" */ './leaderboards' )
+const LazyLeaderboards = lazy(
+	() => import(/* webpackChunkName: "leaderboards" */ './leaderboards')
 );
-const LazyStorePerformance = lazy( () =>
-	import( /* webpackChunkName: "store-performance" */ './store-performance' )
+const LazyStorePerformance = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "store-performance" */ './store-performance'
+		)
 );
 
-const DashboardCharts = ( props ) => (
-	<Suspense fallback={ <Spinner /> }>
-		<LazyDashboardCharts { ...props } />
+const DashboardCharts = (props) => (
+	<Suspense fallback={<Spinner />}>
+		<LazyDashboardCharts {...props} />
 	</Suspense>
 );
 
-const Leaderboards = ( props ) => (
-	<Suspense fallback={ <Spinner /> }>
-		<LazyLeaderboards { ...props } />
+const Leaderboards = (props) => (
+	<Suspense fallback={<Spinner />}>
+		<LazyLeaderboards {...props} />
 	</Suspense>
 );
 
-const StorePerformance = ( props ) => (
-	<Suspense fallback={ <Spinner /> }>
-		<LazyStorePerformance { ...props } />
+const StorePerformance = (props) => (
+	<Suspense fallback={<Spinner />}>
+		<LazyStorePerformance {...props} />
 	</Suspense>
 );
 
@@ -59,11 +63,11 @@ export const DEFAULT_SECTIONS_FILTER = 'woocommerce_dashboard_default_sections';
  * @filter woocommerce_dashboard_default_sections
  * @param {Array.<section>} sections Report filters.
  */
-export default applyFilters( DEFAULT_SECTIONS_FILTER, [
+export default applyFilters(DEFAULT_SECTIONS_FILTER, [
 	{
 		key: 'store-performance',
 		component: StorePerformance,
-		title: __( 'Performance', 'woocommerce' ),
+		title: __('Performance', 'woocommerce'),
 		isVisible: true,
 		icon: arrowRight,
 		hiddenBlocks: [
@@ -82,7 +86,7 @@ export default applyFilters( DEFAULT_SECTIONS_FILTER, [
 	{
 		key: 'charts',
 		component: DashboardCharts,
-		title: __( 'Charts', 'woocommerce' ),
+		title: __('Charts', 'woocommerce'),
 		isVisible: true,
 		icon: chartBar,
 		hiddenBlocks: [
@@ -103,9 +107,9 @@ export default applyFilters( DEFAULT_SECTIONS_FILTER, [
 	{
 		key: 'leaderboards',
 		component: Leaderboards,
-		title: __( 'Leaderboards', 'woocommerce' ),
+		title: __('Leaderboards', 'woocommerce'),
 		isVisible: true,
 		icon: <ListOrdered />,
-		hiddenBlocks: [ 'coupons', 'customers' ],
+		hiddenBlocks: ['coupons', 'customers'],
 	},
-] );
+]);

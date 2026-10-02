@@ -19,14 +19,14 @@ import './style.scss';
 import type { BlockAttributes } from './types';
 
 type Props = BlockAttributes &
-	HTMLAttributes< HTMLDivElement > & {
+	HTMLAttributes<HTMLDivElement> & {
 		align: boolean;
 		isDescendentOfSingleProductTemplate: boolean;
 	};
 
-export const Block = ( props: Props ): JSX.Element | null => {
+export const Block = (props: Props): JSX.Element | null => {
 	const { className, align, isDescendentOfSingleProductTemplate } = props;
-	const styleProps = useStyleProps( props );
+	const styleProps = useStyleProps(props);
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
 
@@ -35,36 +35,36 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	 * Always show in templates for preview purposes.
 	 */
 	if (
-		( ! product.id || ! product.on_sale ) &&
-		! isDescendentOfSingleProductTemplate
+		(!product.id || !product.on_sale) &&
+		!isDescendentOfSingleProductTemplate
 	) {
 		return null;
 	}
 
 	const alignClass =
 		typeof align === 'string'
-			? `wc-block-components-product-sale-badge--align-${ align }`
+			? `wc-block-components-product-sale-badge--align-${align}`
 			: '';
 
 	return (
 		<div
-			className={ clsx(
+			className={clsx(
 				'wc-block-components-product-sale-badge',
 				className,
 				alignClass,
 				{
-					[ `${ parentClassName }__product-onsale` ]: parentClassName,
+					[`${parentClassName}__product-onsale`]: parentClassName,
 				},
 				styleProps.className
-			) }
-			style={ styleProps.style }
+			)}
+			style={styleProps.style}
 		>
 			<Label
-				label={ __( 'Sale', 'woocommerce' ) }
-				screenReaderLabel={ __( 'Product on sale', 'woocommerce' ) }
+				label={__('Sale', 'woocommerce')}
+				screenReaderLabel={__('Product on sale', 'woocommerce')}
 			/>
 		</div>
 	);
 };
 
-export default withProductDataContext( Block );
+export default withProductDataContext(Block);

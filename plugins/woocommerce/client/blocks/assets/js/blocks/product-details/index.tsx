@@ -29,7 +29,7 @@ const blockConfig = {
 			save() {
 				return null;
 			},
-			migrate( attributes: Attributes ) {
+			migrate(attributes: Attributes) {
 				return {
 					...attributes,
 					// In the previous version of this block, we didn't define the align attribute.
@@ -42,6 +42,6 @@ const blockConfig = {
 	],
 };
 // @ts-expect-error blockConfig is not typed.
-registerProductBlockType( blockConfig, {
+registerProductBlockType(blockConfig, {
 	isAvailableOnPostEditor: true,
-} );
+});

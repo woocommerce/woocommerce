@@ -20,15 +20,15 @@ import { CoreCollectionNames, CoreFilterNames } from '../types';
 
 const collection = {
 	name: CoreCollectionNames.UPSELLS,
-	title: __( 'Upsells', 'woocommerce' ),
-	icon: <Icon icon={ trendingUp } />,
+	title: __('Upsells', 'woocommerce'),
+	icon: <Icon icon={trendingUp} />,
 	description: __(
 		'Upsells are typically products that are extra profitable or better quality or more expensive. Experiment with combinations to boost sales.',
 		'woocommerce'
 	),
-	keywords: [ 'boost', 'promotion' ],
-	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
-	usesReference: [ 'product', 'cart', 'order' ],
+	keywords: ['boost', 'promotion'],
+	scope: ['inserter', 'block'] as BlockVariationScope[],
+	usesReference: ['product', 'cart', 'order'],
 };
 
 const attributes = {
@@ -43,7 +43,7 @@ const attributes = {
 		perPage: 8,
 		pages: 1,
 	},
-	hideControls: [ CoreFilterNames.FILTERABLE ],
+	hideControls: [CoreFilterNames.FILTERABLE],
 };
 
 const heading: InnerBlockTemplate = [
@@ -51,7 +51,7 @@ const heading: InnerBlockTemplate = [
 	{
 		textAlign: 'left',
 		level: 2,
-		content: __( 'You may also like', 'woocommerce' ),
+		content: __('You may also like', 'woocommerce'),
 		style: { spacing: { margin: { bottom: '1rem' } } },
 	},
 ];

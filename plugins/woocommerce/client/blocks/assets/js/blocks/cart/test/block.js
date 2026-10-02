@@ -32,20 +32,20 @@ import OrderSummarySubtotalBlock from '../inner-blocks/cart-order-summary-subtot
 import OrderSummaryShippingBlock from '../inner-blocks/cart-order-summary-shipping/frontend';
 import OrderSummaryTaxesBlock from '../inner-blocks/cart-order-summary-taxes/frontend';
 
-jest.mock( '@wordpress/compose', () => ( {
-	...jest.requireActual( '@wordpress/compose' ),
-	useResizeObserver: jest.fn().mockReturnValue( [ null, { width: 0 } ] ),
-} ) );
+jest.mock('@wordpress/compose', () => ({
+	...jest.requireActual('@wordpress/compose'),
+	useResizeObserver: jest.fn().mockReturnValue([null, { width: 0 }]),
+}));
 
-const CartBlock = ( {
+const CartBlock = ({
 	attributes = {
 		showRateAfterTaxName: false,
 		checkoutPageId: 0,
 	},
-} ) => {
+}) => {
 	const { showRateAfterTaxName, checkoutPageId } = attributes;
 	return (
-		<Cart attributes={ attributes }>
+		<Cart attributes={attributes}>
 			<FilledCart>
 				<ItemsBlock>
 					<LineItemsBlock />
@@ -56,11 +56,11 @@ const CartBlock = ( {
 						<OrderSummarySubtotalBlock />
 						<OrderSummaryShippingBlock />
 						<OrderSummaryTaxesBlock
-							showRateAfterTaxName={ showRateAfterTaxName }
+							showRateAfterTaxName={showRateAfterTaxName}
 						/>
 					</OrderSummaryBlock>
 					<ExpressPaymentBlock />
-					<ProceedToCheckoutBlock checkoutPageId={ checkoutPageId } />
+					<ProceedToCheckoutBlock checkoutPageId={checkoutPageId} />
 					<AcceptedPaymentMethodsIcons />
 				</TotalsBlock>
 			</FilledCart>
@@ -71,83 +71,79 @@ const CartBlock = ( {
 	);
 };
 
-describe( 'Testing cart', () => {
-	beforeEach( () => {
+describe('Testing cart', () => {
+	beforeEach(() => {
 		// Set up MSW handlers for cart requests
 		server.use(
-			http.get( '/wc/store/v1/cart', () => {
-				return HttpResponse.json( previewCart );
-			} )
+			http.get('/wc/store/v1/cart', () => {
+				return HttpResponse.json(previewCart);
+			})
 		);
-		act( () => {
+		act(() => {
 			// need to clear the store resolution state between tests.
-			dispatch( storeKey ).invalidateResolutionForStore();
-			dispatch( storeKey ).receiveCart( defaultCartState.cartData );
-		} );
-	} );
+			dispatch(storeKey).invalidateResolutionForStore();
+			dispatch(storeKey).receiveCart(defaultCartState.cartData);
+		});
+	});
 
-	afterEach( () => {
+	afterEach(() => {
 		server.resetHandlers();
-	} );
+	});
 
-	it( 'renders cart if there are items in the cart', async () => {
-		render( <CartBlock /> );
+	it('renders cart if there are items in the cart', async () => {
+		render(<CartBlock />);
 
-		await waitFor( () =>
-			expect(
-				screen.getByText( /Proceed to Checkout/i )
-			).toBeInTheDocument()
+		await waitFor(() =>
+			expect(screen.getByText(/Proceed to Checkout/i)).toBeInTheDocument()
 		);
 
-		expect(
-			screen.getByText( /Proceed to Checkout/i )
-		).toBeInTheDocument();
-	} );
+		expect(screen.getByText(/Proceed to Checkout/i)).toBeInTheDocument();
+	});
 
-	it( 'Contains a Taxes section if Core options are set to show it', async () => {
+	it('Contains a Taxes section if Core options are set to show it', async () => {
 		allSettings.displayCartPricesIncludingTax = false;
 		// The criteria for showing the Taxes section is:
 		// Display prices during basket and checkout: 'Excluding tax'.
-		render( <CartBlock /> );
+		render(<CartBlock />);
 
-		await waitFor( () =>
-			expect( screen.getByText( /Tax/i ) ).toBeInTheDocument()
+		await waitFor(() =>
+			expect(screen.getByText(/Tax/i)).toBeInTheDocument()
 		);
-		expect( screen.getByText( /Tax/i ) ).toBeInTheDocument();
-	} );
+		expect(screen.getByText(/Tax/i)).toBeInTheDocument();
+	});
 
-	it( 'Contains a Order summary header', async () => {
-		render( <CartBlock /> );
+	it('Contains a Order summary header', async () => {
+		render(<CartBlock />);
 
-		await waitFor( () =>
-			expect( screen.getByText( /Cart totals/i ) ).toBeInTheDocument()
+		await waitFor(() =>
+			expect(screen.getByText(/Cart totals/i)).toBeInTheDocument()
 		);
-		expect( screen.getByText( /Cart totals/i ) ).toBeInTheDocument();
-	} );
+		expect(screen.getByText(/Cart totals/i)).toBeInTheDocument();
+	});
 
-	it( 'Contains a Order summary Subtotal section', async () => {
-		render( <CartBlock /> );
+	it('Contains a Order summary Subtotal section', async () => {
+		render(<CartBlock />);
 
-		await waitFor( () =>
-			expect( screen.getByText( /Subtotal/i ) ).toBeInTheDocument()
+		await waitFor(() =>
+			expect(screen.getByText(/Subtotal/i)).toBeInTheDocument()
 		);
-		expect( screen.getByText( /Subtotal/i ) ).toBeInTheDocument();
-	} );
+		expect(screen.getByText(/Subtotal/i)).toBeInTheDocument();
+	});
 
-	it( 'Shows individual tax lines if the store is set to do so', async () => {
+	it('Shows individual tax lines if the store is set to do so', async () => {
 		allSettings.displayCartPricesIncludingTax = false;
 		allSettings.displayItemizedTaxes = true;
 		// The criteria for showing the lines in the Taxes section is:
 		// Display prices during basket and checkout: 'Excluding tax'.
 		// Display tax totals: 'Itemized';
-		render( <CartBlock /> );
-		await waitFor( () =>
-			expect( screen.getByText( /Sales tax/i ) ).toBeInTheDocument()
+		render(<CartBlock />);
+		await waitFor(() =>
+			expect(screen.getByText(/Sales tax/i)).toBeInTheDocument()
 		);
-		expect( screen.getByText( /Sales tax/i ) ).toBeInTheDocument();
-	} );
+		expect(screen.getByText(/Sales tax/i)).toBeInTheDocument();
+	});
 
-	it( 'Shows rate percentages after tax lines if the block is set to do so', async () => {
+	it('Shows rate percentages after tax lines if the block is set to do so', async () => {
 		allSettings.displayCartPricesIncludingTax = false;
 		allSettings.displayItemizedTaxes = true;
 		// The criteria for showing the lines in the Taxes section is:
@@ -155,41 +151,41 @@ describe( 'Testing cart', () => {
 		// Display tax totals: 'Itemized';
 		render(
 			<CartBlock
-				attributes={ {
+				attributes={{
 					showRateAfterTaxName: true,
 					checkoutPageId: 0,
-				} }
+				}}
 			/>
 		);
-		await waitFor( () =>
-			expect( screen.getByText( /Sales tax 20%/i ) ).toBeInTheDocument()
+		await waitFor(() =>
+			expect(screen.getByText(/Sales tax 20%/i)).toBeInTheDocument()
 		);
-		expect( screen.getByText( /Sales tax 20%/i ) ).toBeInTheDocument();
-	} );
+		expect(screen.getByText(/Sales tax 20%/i)).toBeInTheDocument();
+	});
 
-	it( 'renders empty cart if there are no items in the cart', async () => {
+	it('renders empty cart if there are no items in the cart', async () => {
 		server.use(
-			http.get( '/wc/store/v1/cart', () => {
-				return HttpResponse.json( defaultCartState.cartData );
-			} )
+			http.get('/wc/store/v1/cart', () => {
+				return HttpResponse.json(defaultCartState.cartData);
+			})
 		);
-		render( <CartBlock /> );
+		render(<CartBlock />);
 
-		await waitFor( () =>
-			expect( screen.getByText( /Empty Cart/i ) ).toBeInTheDocument()
+		await waitFor(() =>
+			expect(screen.getByText(/Empty Cart/i)).toBeInTheDocument()
 		);
-		expect( screen.getByText( /Empty Cart/i ) ).toBeInTheDocument();
-	} );
+		expect(screen.getByText(/Empty Cart/i)).toBeInTheDocument();
+	});
 
-	it( 'renders correct cart line subtotal when currency has 0 decimals', async () => {
+	it('renders correct cart line subtotal when currency has 0 decimals', async () => {
 		const cart = {
 			...previewCart,
 			// Make it so there is only one item to simplify things.
 			items: [
 				{
-					...previewCart.items[ 0 ],
+					...previewCart.items[0],
 					totals: {
-						...previewCart.items[ 0 ].totals,
+						...previewCart.items[0].totals,
 						// Change price format so there are no decimals.
 						currency_minor_unit: 0,
 						currency_prefix: '',
@@ -203,29 +199,29 @@ describe( 'Testing cart', () => {
 		};
 
 		server.use(
-			http.get( '/wc/store/v1/cart', () => {
-				return HttpResponse.json( cart );
-			} )
+			http.get('/wc/store/v1/cart', () => {
+				return HttpResponse.json(cart);
+			})
 		);
 
-		render( <CartBlock /> );
+		render(<CartBlock />);
 
-		await waitFor( () =>
+		await waitFor(() =>
 			expect(
-				document.querySelector( '.wc-block-cart-item__total' )
-			).toHaveTextContent( '16€' )
+				document.querySelector('.wc-block-cart-item__total')
+			).toHaveTextContent('16€')
 		);
-	} );
+	});
 
-	it( 'updates quantity when changed in server', async () => {
-		render( <CartBlock /> );
+	it('updates quantity when changed in server', async () => {
+		render(<CartBlock />);
 
-		await waitFor( () =>
+		await waitFor(() =>
 			expect(
 				screen.getByLabelText(
-					`Quantity of ${ previewCart.items[ 1 ].name } in your cart.`
+					`Quantity of ${previewCart.items[1].name} in your cart.`
 				)
-			).toHaveValue( 1 )
+			).toHaveValue(1)
 		);
 
 		// Update the quantity of the second item to 5
@@ -233,10 +229,10 @@ describe( 'Testing cart', () => {
 			...previewCart,
 			items: [
 				{
-					...previewCart.items[ 0 ],
+					...previewCart.items[0],
 				},
 				{
-					...previewCart.items[ 1 ],
+					...previewCart.items[1],
 					quantity: 5,
 				},
 			],
@@ -244,42 +240,42 @@ describe( 'Testing cart', () => {
 		};
 
 		server.use(
-			http.get( '/wc/store/v1/cart', () => {
-				return HttpResponse.json( cart );
-			} )
+			http.get('/wc/store/v1/cart', () => {
+				return HttpResponse.json(cart);
+			})
 		);
 
-		act( () => {
-			dispatch( storeKey ).receiveCart( cart );
-		} );
+		act(() => {
+			dispatch(storeKey).receiveCart(cart);
+		});
 
 		// Check that quantity was updated to 5
-		await waitFor( () =>
+		await waitFor(() =>
 			expect(
 				screen.getByLabelText(
-					`Quantity of ${ cart.items[ 1 ].name } in your cart.`
+					`Quantity of ${cart.items[1].name} in your cart.`
 				)
-			).toHaveValue( 5 )
+			).toHaveValue(5)
 		);
-	} );
+	});
 
-	it( 'does not show the remove item button when a filter prevents this', async () => {
-		act( () => {
+	it('does not show the remove item button when a filter prevents this', async () => {
+		act(() => {
 			// We're removing the link for the first previewCart item
-			registerCheckoutFilters( 'woo-blocks-test-extension', {
-				showRemoveItemLink: ( value, extensions, { cartItem } ) => {
-					return cartItem.id !== previewCart.items[ 0 ].id;
+			registerCheckoutFilters('woo-blocks-test-extension', {
+				showRemoveItemLink: (value, extensions, { cartItem }) => {
+					return cartItem.id !== previewCart.items[0].id;
 				},
-			} );
-		} );
-		render( <CartBlock /> );
+			});
+		});
+		render(<CartBlock />);
 
-		await waitFor( () => {
+		await waitFor(() => {
 			expect(
-				screen.queryAllByRole( 'button', {
+				screen.queryAllByRole('button', {
 					name: /Remove .* from cart/i,
-				} ).length
-			).toBe( 1 );
-		} );
-	} );
-} );
+				}).length
+			).toBe(1);
+		});
+	});
+});

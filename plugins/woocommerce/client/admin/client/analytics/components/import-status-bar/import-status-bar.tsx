@@ -22,9 +22,9 @@ import './import-status-bar.scss';
  * @param {string|null} date - Date string in 'Y-m-d H:i:s' format (site timezone)
  * @return {string} Formatted date string or "Never"
  */
-const formatStatusDate = ( date: string | null ): string => {
-	if ( ! date ) {
-		return __( 'Never', 'woocommerce' );
+const formatStatusDate = (date: string | null): string => {
+	if (!date) {
+		return __('Never', 'woocommerce');
 	}
 	return dateI18n(
 		/**
@@ -32,7 +32,7 @@ const formatStatusDate = ( date: string | null ): string => {
 		 * e.g. "Nov 21 at 12:00". "M j" shows the month and day, "at" is a
 		 * literal, "H:i" shows the time (24-hour format).
 		 */
-		__( 'M j \\a\\t H:i', 'woocommerce' ),
+		__('M j \\a\\t H:i', 'woocommerce'),
 		date,
 		undefined
 	);
@@ -53,10 +53,10 @@ const formatStatusDate = ( date: string | null ): string => {
 export function ImportStatusBar(): JSX.Element | null {
 	const { status, isLoading, triggerImport, isTriggeringImport } =
 		useImportStatus();
-	const { createNotice } = useDispatch( 'core/notices' );
-	const { wcAdminSettings } = useSettings( 'wc_admin', [
+	const { createNotice } = useDispatch('core/notices');
+	const { wcAdminSettings } = useSettings('wc_admin', [
 		'wcAdminSettings',
-	] ) as unknown as {
+	]) as unknown as {
 		wcAdminSettings: {
 			woocommerce_analytics_scheduled_import: 'yes' | 'no';
 		};
@@ -65,7 +65,7 @@ export function ImportStatusBar(): JSX.Element | null {
 	// Don't render if scheduled import is disabled (immediate mode)
 	// Use the value from the settings hook rather than the status object; accessing settings is faster because they are preloaded.
 	if (
-		! wcAdminSettings?.woocommerce_analytics_scheduled_import ||
+		!wcAdminSettings?.woocommerce_analytics_scheduled_import ||
 		wcAdminSettings.woocommerce_analytics_scheduled_import === 'no'
 	) {
 		return null;
@@ -74,7 +74,7 @@ export function ImportStatusBar(): JSX.Element | null {
 	/**
 	 * Handle manual import trigger
 	 */
-	const handleTriggerImport = async (): Promise< void > => {
+	const handleTriggerImport = async (): Promise<void> => {
 		try {
 			await triggerImport();
 			createNotice(
@@ -88,15 +88,12 @@ export function ImportStatusBar(): JSX.Element | null {
 					isDismissible: true,
 				}
 			);
-		} catch ( err ) {
+		} catch (err) {
 			createNotice(
 				'error',
 				err instanceof Error
 					? err.message
-					: __(
-							'Failed to trigger analytics update.',
-							'woocommerce'
-					  ),
+					: __('Failed to trigger analytics update.', 'woocommerce'),
 				{
 					isDismissible: true,
 				}
@@ -109,68 +106,62 @@ export function ImportStatusBar(): JSX.Element | null {
 	return (
 		<div className="woocommerce-analytics-import-status-bar-wrapper">
 			<div className="woocommerce-analytics-import-status-bar-wrapper__label">
-				{ __( 'Data status', 'woocommerce' ) }
+				{__('Data status', 'woocommerce')}
 			</div>
 			<div
 				className="woocommerce-analytics-import-status-bar"
 				role="status"
 				aria-live="polite"
 				aria-atomic="true"
-				aria-busy={ isLoading || isTriggeringImport }
+				aria-busy={isLoading || isTriggeringImport}
 			>
 				<div className="woocommerce-analytics-import-status-bar__content">
 					<span className="woocommerce-analytics-import-status-bar__item">
 						<span className="woocommerce-analytics-import-status-bar__label">
-							{ __( 'Last updated', 'woocommerce' ) }
+							{__('Last updated', 'woocommerce')}
 						</span>
 						<span className="woocommerce-analytics-import-status-bar__value">
-							{ isLoading ? (
+							{isLoading ? (
 								<Spinner />
 							) : (
 								formatStatusDate(
 									status?.last_processed_date || null
 								)
-							) }
+							)}
 						</span>
 					</span>
 					<span className="woocommerce-analytics-import-status-bar__item">
 						<span className="woocommerce-analytics-import-status-bar__label">
-							{ __( 'Next update', 'woocommerce' ) }
+							{__('Next update', 'woocommerce')}
 						</span>
 						<span className="woocommerce-analytics-import-status-bar__value">
-							{ isLoading ? (
+							{isLoading ? (
 								<Spinner />
 							) : (
-								formatStatusDate(
-									status?.next_scheduled || null
-								)
-							) }
+								formatStatusDate(status?.next_scheduled || null)
+							)}
 						</span>
 					</span>
 					<Button
 						variant="tertiary"
-						onClick={ handleTriggerImport }
-						disabled={ isLoading || isBusy }
-						aria-disabled={ isLoading || isBusy }
-						aria-busy={ isBusy }
+						onClick={handleTriggerImport}
+						disabled={isLoading || isBusy}
+						aria-disabled={isLoading || isBusy}
+						aria-busy={isBusy}
 						className="woocommerce-analytics-import-status-bar__trigger"
 						aria-label={
 							isBusy
 								? __(
 										'Analytics data import in progress',
 										'woocommerce'
-								  )
+									)
 								: __(
 										'Manually trigger analytics data import',
 										'woocommerce'
-								  )
+									)
 						}
 					>
-						{ isBusy ? (
-							<Spinner />
-						) : (
-							__( 'Update now', 'woocommerce' )
-						) }
+						{isBusy ? <Spinner /> : __('Update now', 'woocommerce')}
 					</Button>
 				</div>
 			</div>

@@ -9,13 +9,13 @@ import { find, get } from 'lodash';
  * @param {Object} order An order as returned from API
  * @return {number} Tax amount as a decimal number
  */
-export function getOrderDiscountTax( order ) {
-	const coupons = get( order, 'coupon_lines', [] );
+export function getOrderDiscountTax(order) {
+	const coupons = get(order, 'coupon_lines', []);
 	const tax = coupons.reduce(
-		( sum, value ) => sum + parseFloat( value.discount_tax ),
+		(sum, value) => sum + parseFloat(value.discount_tax),
 		0
 	);
-	return parseFloat( tax ) || 0;
+	return parseFloat(tax) || 0;
 }
 
 /**
@@ -25,10 +25,10 @@ export function getOrderDiscountTax( order ) {
  * @param {number} id    The ID of the line_item
  * @return {number} Tax amount as a decimal number
  */
-export function getOrderLineItemTax( order, id ) {
-	const items = get( order, 'line_items', [] );
-	const tax = get( find( items, { id } ), 'taxes[0].total', 0 );
-	return parseFloat( tax ) || 0;
+export function getOrderLineItemTax(order, id) {
+	const items = get(order, 'line_items', []);
+	const tax = get(find(items, { id }), 'taxes[0].total', 0);
+	return parseFloat(tax) || 0;
 }
 
 /**
@@ -38,10 +38,10 @@ export function getOrderLineItemTax( order, id ) {
  * @param {number} id    The ID of a fee line in this order
  * @return {number} Tax amount as a decimal number
  */
-export function getOrderFeeTax( order, id ) {
-	const items = get( order, 'fee_lines', [] );
-	const tax = get( find( items, { id } ), 'taxes[0].total', 0 );
-	return parseFloat( tax ) || 0;
+export function getOrderFeeTax(order, id) {
+	const items = get(order, 'fee_lines', []);
+	const tax = get(find(items, { id }), 'taxes[0].total', 0);
+	return parseFloat(tax) || 0;
 }
 
 /**
@@ -50,10 +50,10 @@ export function getOrderFeeTax( order, id ) {
  * @param {Object} order An order as returned from API
  * @return {number} Tax amount as a decimal number
  */
-export function getOrderFeeTotalTax( order ) {
-	const lines = get( order, 'fee_lines', [] );
+export function getOrderFeeTotalTax(order) {
+	const lines = get(order, 'fee_lines', []);
 	return lines.reduce(
-		( sum, value ) => sum + getOrderFeeTax( order, value.id ),
+		(sum, value) => sum + getOrderFeeTax(order, value.id),
 		0
 	);
 }
@@ -64,9 +64,9 @@ export function getOrderFeeTotalTax( order ) {
  * @param {Object} order An order as returned from API
  * @return {number} Tax amount as a decimal number
  */
-export function getOrderShippingTax( order ) {
-	const tax = get( order, 'shipping_lines[0].taxes[0].total', 0 );
-	return parseFloat( tax ) || 0;
+export function getOrderShippingTax(order) {
+	const tax = get(order, 'shipping_lines[0].taxes[0].total', 0);
+	return parseFloat(tax) || 0;
 }
 
 /**
@@ -75,10 +75,10 @@ export function getOrderShippingTax( order ) {
  * @param {Object} order An order as returned from API
  * @return {number} Tax amount as a decimal number
  */
-export function getOrderSubtotalTax( order ) {
-	const items = get( order, 'line_items', [] );
+export function getOrderSubtotalTax(order) {
+	const items = get(order, 'line_items', []);
 	return items.reduce(
-		( sum, value ) => sum + getOrderLineItemTax( order, value.id ),
+		(sum, value) => sum + getOrderLineItemTax(order, value.id),
 		0
 	);
 }
@@ -89,9 +89,9 @@ export function getOrderSubtotalTax( order ) {
  * @param {Object} order An order as returned from API
  * @return {number} Tax amount as a decimal number
  */
-export function getOrderTotalTax( order ) {
-	const subtotal = getOrderSubtotalTax( order );
-	const shipping = getOrderShippingTax( order );
-	const fees = getOrderFeeTotalTax( order );
+export function getOrderTotalTax(order) {
+	const subtotal = getOrderSubtotalTax(order);
+	const shipping = getOrderShippingTax(order);
+	const fees = getOrderFeeTotalTax(order);
 	return subtotal + shipping + fees;
 }

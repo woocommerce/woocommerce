@@ -20,27 +20,27 @@ interface FilterElementLabelProps {
  * @param {string} props.name  The name for the label.
  * @param {number} props.count The count of products this status is attached to.
  */
-const FilterElementLabel = ( {
+const FilterElementLabel = ({
 	name,
 	count,
-}: FilterElementLabelProps ): JSX.Element => {
+}: FilterElementLabelProps): JSX.Element => {
 	return (
 		<>
-			{ name }
-			{ count !== null && Number.isFinite( count ) && (
+			{name}
+			{count !== null && Number.isFinite(count) && (
 				<Label
-					label={ count.toString() }
-					screenReaderLabel={ sprintf(
+					label={count.toString()}
+					screenReaderLabel={sprintf(
 						/* translators: %s number of products. */
-						_n( '%s product', '%s products', count, 'woocommerce' ),
+						_n('%s product', '%s products', count, 'woocommerce'),
 						count
-					) }
+					)}
 					wrapperElement="span"
-					wrapperProps={ {
+					wrapperProps={{
 						className: 'wc-filter-element-label-list-count',
-					} }
+					}}
 				/>
-			) }
+			)}
 		</>
 	);
 };

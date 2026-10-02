@@ -5,7 +5,7 @@ import { TaskType } from '@woocommerce/data';
 
 export type TaskProps = {
 	onComplete: () => void;
-	query: Record< string, string >;
+	query: Record<string, string>;
 	task: TaskType;
 };
 

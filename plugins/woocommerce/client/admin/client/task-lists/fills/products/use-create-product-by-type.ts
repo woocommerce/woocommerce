@@ -14,10 +14,10 @@ import { ProductTypeKey } from './constants';
 import { createNoticesFromResponse } from '../../../lib/notices';
 
 export const useCreateProductByType = () => {
-	const { createProductFromTemplate } = useDispatch( itemsStore );
-	const [ isRequesting, setIsRequesting ] = useState< boolean >( false );
+	const { createProductFromTemplate } = useDispatch(itemsStore);
+	const [isRequesting, setIsRequesting] = useState<boolean>(false);
 
-	const getProductEditPageLink = async ( type: ProductTypeKey ) => {
+	const getProductEditPageLink = async (type: ProductTypeKey) => {
 		try {
 			const data: {
 				id?: number;
@@ -26,27 +26,27 @@ export const useCreateProductByType = () => {
 					template_name: type,
 					status: 'draft',
 				},
-				{ _fields: [ 'id' ] }
+				{ _fields: ['id'] }
 			);
-			if ( data && data.id ) {
+			if (data && data.id) {
 				return getAdminLink(
-					`post.php?post=${ data.id }&action=edit&wc_onboarding_active_task=products&tutorial=true&tutorial_type=${ type }`
+					`post.php?post=${data.id}&action=edit&wc_onboarding_active_task=products&tutorial=true&tutorial_type=${type}`
 				);
 			}
-			throw new Error( 'Unexpected empty data response from server' );
-		} catch ( error ) {
-			createNoticesFromResponse( error );
+			throw new Error('Unexpected empty data response from server');
+		} catch (error) {
+			createNoticesFromResponse(error);
 		}
 	};
 
-	const createProductByType = async ( type: ProductTypeKey ) => {
-		setIsRequesting( true );
+	const createProductByType = async (type: ProductTypeKey) => {
+		setIsRequesting(true);
 
-		const url = await getProductEditPageLink( type );
-		if ( url ) {
-			navigateTo( { url } );
+		const url = await getProductEditPageLink(type);
+		if (url) {
+			navigateTo({ url });
 		}
-		setIsRequesting( false );
+		setIsRequesting(false);
 	};
 
 	return {

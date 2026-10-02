@@ -10,34 +10,34 @@ import { clsx } from 'clsx';
 import type { UpgradeDowngradeNoticeProps } from './types';
 import './style.scss';
 
-export function UpgradeDowngradeNotice( {
+export function UpgradeDowngradeNotice({
 	children,
 	className,
 	actionLabel,
 	onActionClick,
 	status = 'info',
 	...props
-}: UpgradeDowngradeNoticeProps ) {
+}: UpgradeDowngradeNoticeProps) {
 	return (
 		<Notice
-			{ ...props }
-			status={ status }
+			{...props}
+			status={status}
 			politeness="polite"
-			className={ clsx(
+			className={clsx(
 				'wc-block-editor-components-upgrade-downgrade-notice',
 				className
-			) }
-			actions={ [
+			)}
+			actions={[
 				{
 					label: actionLabel,
 					onClick: onActionClick,
 					noDefaultClasses: true,
 					variant: 'link',
 				},
-			] }
+			]}
 		>
 			<div className="wc-block-editor-components-upgrade-downgrade-notice__text">
-				{ children }
+				{children}
 			</div>
 		</Notice>
 	);

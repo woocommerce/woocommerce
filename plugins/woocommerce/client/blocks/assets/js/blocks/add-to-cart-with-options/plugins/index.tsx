@@ -17,14 +17,14 @@ function ProductTypeSwitcher() {
 
 	return (
 		<SelectControl
-			label={ __( 'Type switcher', 'woocommerce' ) }
-			value={ current?.slug }
-			options={ productTypes.map( ( productType ) => ( {
+			label={__('Type switcher', 'woocommerce')}
+			value={current?.slug}
+			options={productTypes.map((productType) => ({
 				label: productType.label,
 				value: productType.slug,
-			} ) ) }
-			onChange={ ( slug ) => {
-				set( slug );
+			}))}
+			onChange={(slug) => {
+				set(slug);
 				recordEvent(
 					'blocks_add_to_cart_with_options_product_type_switched',
 					{
@@ -33,20 +33,20 @@ function ProductTypeSwitcher() {
 						to: slug,
 					}
 				);
-			} }
-			help={ __(
+			}}
+			help={__(
 				'Switch product type to see how the template adapts to each one.',
 				'woocommerce'
-			) }
+			)}
 		/>
 	);
 }
 
 export default function ProductTypeSelectorPlugin() {
-	const { slug, type } = useSelect( ( select ) => {
-		const editorStore = select( 'core/editor' );
+	const { slug, type } = useSelect((select) => {
+		const editorStore = select('core/editor');
 		// The widget editor does not load wp-editor, so the core/editor store may be unavailable.
-		if ( ! editorStore ) {
+		if (!editorStore) {
 			return {
 				slug: '',
 				type: '',
@@ -54,16 +54,16 @@ export default function ProductTypeSelectorPlugin() {
 		}
 
 		const { slug: currentPostSlug, type: currentPostType } =
-			editorStore.getCurrentPost< {
+			editorStore.getCurrentPost<{
 				slug: string;
 				type: string;
-			} >();
+			}>();
 
 		return {
 			slug: currentPostSlug,
 			type: currentPostType,
 		};
-	}, [] );
+	}, []);
 
 	const { registeredListeners } = useProductTypeSelector();
 
@@ -73,14 +73,14 @@ export default function ProductTypeSelectorPlugin() {
 		slug === 'single-product' &&
 		registeredListeners.length > 0;
 
-	if ( ! isPanelVisible ) {
+	if (!isPanelVisible) {
 		return null;
 	}
 
 	return (
 		<PluginDocumentSettingPanel
 			name="woocommerce/product-type-selector"
-			title={ __( 'Product Type', 'woocommerce' ) }
+			title={__('Product Type', 'woocommerce')}
 		>
 			<ProductTypeSwitcher />
 		</PluginDocumentSettingPanel>

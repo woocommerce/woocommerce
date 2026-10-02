@@ -23,18 +23,18 @@ import type { emitterCallback } from '../../../event-emit';
 
 type CartEventsContextType = {
 	// Used to register a callback that will fire when the cart has been processed and has an error.
-	onProceedToCheckout: ReturnType< typeof emitterCallback >;
+	onProceedToCheckout: ReturnType<typeof emitterCallback>;
 	// Used to register a callback that will fire when the cart has been processed and has an error.
-	dispatchOnProceedToCheckout: () => Promise< unknown[] >;
+	dispatchOnProceedToCheckout: () => Promise<unknown[]>;
 };
 
-const CartEventsContext = createContext< CartEventsContextType >( {
+const CartEventsContext = createContext<CartEventsContextType>({
 	onProceedToCheckout: () => () => void null,
-	dispatchOnProceedToCheckout: () => new Promise( () => void null ),
-} );
+	dispatchOnProceedToCheckout: () => new Promise(() => void null),
+});
 
 export const useCartEventsContext = () => {
-	return useContext( CartEventsContext );
+	return useContext(CartEventsContext);
 };
 
 /**
@@ -44,19 +44,19 @@ export const useCartEventsContext = () => {
  * @param {Object} props          Incoming props for the provider.
  * @param {Object} props.children The children being wrapped.
  */
-export const CartEventsProvider = ( {
+export const CartEventsProvider = ({
 	children,
 }: {
 	children: React.ReactNode;
-} ): JSX.Element => {
-	const [ observers, observerDispatch ] = useReducer( emitReducer, {} );
-	const currentObservers = useRef( observers );
-	const { onProceedToCheckout } = useEventEmitters( observerDispatch );
+}): JSX.Element => {
+	const [observers, observerDispatch] = useReducer(emitReducer, {});
+	const currentObservers = useRef(observers);
+	const { onProceedToCheckout } = useEventEmitters(observerDispatch);
 
 	// set observers on ref so it's always current.
-	useEffect( () => {
+	useEffect(() => {
 		currentObservers.current = observers;
-	}, [ observers ] );
+	}, [observers]);
 
 	const dispatchOnProceedToCheckout = async () => {
 		return await emitEventWithAbort(
@@ -71,8 +71,8 @@ export const CartEventsProvider = ( {
 		dispatchOnProceedToCheckout,
 	};
 	return (
-		<CartEventsContext.Provider value={ cartEvents }>
-			{ children }
+		<CartEventsContext.Provider value={cartEvents}>
+			{children}
 		</CartEventsContext.Provider>
 	);
 };

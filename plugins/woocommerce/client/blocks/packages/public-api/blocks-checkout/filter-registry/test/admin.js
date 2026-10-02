@@ -3,56 +3,56 @@
  */
 import { registerCheckoutFilters, applyCheckoutFilter } from '../';
 
-jest.mock( '@woocommerce/settings', () => {
-	const originalModule = jest.requireActual( '@woocommerce/settings' );
+jest.mock('@woocommerce/settings', () => {
+	const originalModule = jest.requireActual('@woocommerce/settings');
 	return {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore We know @woocommerce/settings is an object.
 		...originalModule,
 		CURRENT_USER_IS_ADMIN: true,
 	};
-} );
+});
 
-describe( 'Checkout registry (as admin user)', () => {
-	test( 'should throw if the filter throws and user is an admin', () => {
-		expect.assertions( 1 );
+describe('Checkout registry (as admin user)', () => {
+	test('should throw if the filter throws and user is an admin', () => {
+		expect.assertions(1);
 		const filterName = 'ErrorTestFilter';
 		const value = 'Hello World';
-		registerCheckoutFilters( filterName, {
-			[ filterName ]: () => {
-				throw new Error( 'test error' );
+		registerCheckoutFilters(filterName, {
+			[filterName]: () => {
+				throw new Error('test error');
 			},
-		} );
+		});
 
 		try {
-			applyCheckoutFilter( {
+			applyCheckoutFilter({
 				filterName,
 				defaultValue: value,
-			} );
-		} catch ( e ) {
+			});
+		} catch (e) {
 			// eslint-disable-next-line  -- The toThrow helper does not stop wordpress/jest-console from erroring.
-			expect( e.message ).toBe( 'test error' );
+			expect(e.message).toBe('test error');
 		}
-	} );
+	});
 
-	test( 'should throw if validation throws and user is an admin', () => {
-		expect.assertions( 1 );
+	test('should throw if validation throws and user is an admin', () => {
+		expect.assertions(1);
 		const filterName = 'ValidationTestFilter';
 		const value = 'Hello World';
-		registerCheckoutFilters( filterName, {
-			[ filterName ]: ( val ) => val,
-		} );
+		registerCheckoutFilters(filterName, {
+			[filterName]: (val) => val,
+		});
 		try {
-			applyCheckoutFilter( {
+			applyCheckoutFilter({
 				filterName,
 				defaultValue: value,
 				validation: () => {
-					throw Error( 'validation error' );
+					throw Error('validation error');
 				},
-			} );
-		} catch ( e ) {
+			});
+		} catch (e) {
 			// eslint-disable-next-line  -- The toThrow helper does not stop wordpress/jest-console from erroring.
-			expect( e.message ).toBe( 'validation error' );
+			expect(e.message).toBe('validation error');
 		}
-	} );
-} );
+	});
+});

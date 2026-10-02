@@ -13,18 +13,15 @@ interface SidebarLayoutProps {
 	className: string;
 }
 
-const SidebarLayout = ( {
+const SidebarLayout = ({
 	children,
 	className,
-}: SidebarLayoutProps ): JSX.Element => {
+}: SidebarLayoutProps): JSX.Element => {
 	return (
 		<ContainerWidthContextProvider
-			className={ clsx(
-				'wc-block-components-sidebar-layout',
-				className
-			) }
+			className={clsx('wc-block-components-sidebar-layout', className)}
 		>
-			{ children }
+			{children}
 		</ContainerWidthContextProvider>
 	);
 };

@@ -11,17 +11,17 @@ import { registerBlockType } from '@wordpress/blocks';
 import { Edit, Save } from './edit';
 import metadata from './block.json';
 
-registerBlockType( 'woocommerce/filled-cart-block', {
+registerBlockType('woocommerce/filled-cart-block', {
 	apiVersion: metadata.apiVersion,
 	title: metadata.title,
 	icon: {
 		src: (
 			<Icon
-				icon={ filledCart }
+				icon={filledCart}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
 	},
 	edit: Edit,
 	save: Save,
-} );
+});

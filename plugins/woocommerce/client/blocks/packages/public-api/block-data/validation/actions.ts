@@ -10,49 +10,49 @@ import { FieldValidationStatus } from '@woocommerce/types';
 import { ACTION_TYPES as types } from './action-types';
 
 export const setValidationErrors = (
-	errors: Record< string, FieldValidationStatus >
-) => ( {
+	errors: Record<string, FieldValidationStatus>
+) => ({
 	type: types.SET_VALIDATION_ERRORS,
 	errors,
-} );
+});
 
 /**
  * Clears validation errors for the given ids.
  *
  * @param errors Array of error ids to clear.
  */
-export const clearValidationErrors = ( errors?: string[] | undefined ) => ( {
+export const clearValidationErrors = (errors?: string[] | undefined) => ({
 	type: types.CLEAR_VALIDATION_ERRORS,
 	errors,
-} );
+});
 
 export const clearAllValidationErrors = () => {
-	deprecated( 'clearAllValidationErrors', {
+	deprecated('clearAllValidationErrors', {
 		version: '7.3.0',
 		alternative: 'clearValidationErrors',
 		link: 'https://github.com/woocommerce/woocommerce-blocks/pull/7601',
 		hint: 'Calling `clearValidationErrors` with no arguments will clear all validation errors.',
-	} );
+	});
 
 	// Return clearValidationErrors which will clear all errors by defaults if no error ids are passed.
 	return clearValidationErrors();
 };
 
-export const clearValidationError = ( error: string ) => ( {
+export const clearValidationError = (error: string) => ({
 	type: types.CLEAR_VALIDATION_ERROR,
 	error,
-} );
+});
 
-export const hideValidationError = ( error: string ) => ( {
+export const hideValidationError = (error: string) => ({
 	type: types.HIDE_VALIDATION_ERROR,
 	error,
-} );
+});
 
-export const showValidationError = ( error: string ) => ( {
+export const showValidationError = (error: string) => ({
 	type: types.SHOW_VALIDATION_ERROR,
 	error,
-} );
+});
 
-export const showAllValidationErrors = () => ( {
+export const showAllValidationErrors = () => ({
 	type: types.SHOW_ALL_VALIDATION_ERRORS,
-} );
+});

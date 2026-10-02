@@ -12,7 +12,7 @@ import {
 	WooHeaderPageTitle,
 } from '@woocommerce/admin-layout';
 
-export const getPageTitle = ( sections: string[] ) => {
+export const getPageTitle = (sections: string[]) => {
 	let pageTitle;
 	const pagesWithTabs = [
 		'admin.php?page=wc-settings',
@@ -22,12 +22,12 @@ export const getPageTitle = ( sections: string[] ) => {
 
 	if (
 		sections.length > 2 &&
-		Array.isArray( sections[ 1 ] ) &&
-		pagesWithTabs.includes( sections[ 1 ][ 0 ] )
+		Array.isArray(sections[1]) &&
+		pagesWithTabs.includes(sections[1][0])
 	) {
-		pageTitle = sections[ 1 ][ 1 ];
+		pageTitle = sections[1][1];
 	} else {
-		pageTitle = sections[ sections.length - 1 ];
+		pageTitle = sections[sections.length - 1];
 	}
 	return pageTitle;
 };
@@ -41,7 +41,7 @@ export const getPageTitle = ( sections: string[] ) => {
  * responsibility — passed in via `suppressTitle`, `compact`, and the
  * `trailingItems` slot.
  */
-export const BaseHeader = ( {
+export const BaseHeader = ({
 	isEmbedded,
 	query,
 	sections,
@@ -52,7 +52,7 @@ export const BaseHeader = ( {
 	trailingItems,
 }: {
 	isEmbedded: boolean;
-	query: Record< string, string >;
+	query: Record<string, string>;
 	sections: string[];
 	children?: ReactNode;
 	leftAlign?: boolean;
@@ -74,44 +74,40 @@ export const BaseHeader = ( {
 	 * Screen Options and Help dropdowns.
 	 */
 	trailingItems?: ReactNode;
-} ) => {
-	const pageTitleSlot = useSlot( WC_HEADER_PAGE_TITLE_SLOT_NAME );
-	const hasPageTitleFills = Boolean( pageTitleSlot?.fills?.length );
+}) => {
+	const pageTitleSlot = useSlot(WC_HEADER_PAGE_TITLE_SLOT_NAME);
+	const hasPageTitleFills = Boolean(pageTitleSlot?.fills?.length);
 
-	const shouldRenderTitle = hasPageTitleFills || ! suppressTitle;
+	const shouldRenderTitle = hasPageTitleFills || !suppressTitle;
 
 	return (
 		<div
-			className={ clsx( 'woocommerce-layout__header', {
+			className={clsx('woocommerce-layout__header', {
 				// Chrome-only treatment: bar collapses to admin-bar height when
 				// the caller requests it (e.g. Edit Order, Edit Product, Add
 				// Product, where wp-admin renders its own title below).
 				'is-chrome-only': compact,
-			} ) }
+			})}
 		>
 			<div className="woocommerce-layout__header-wrapper">
 				<WooHeaderNavigationItem.Slot
-					fillProps={ { isEmbedded, query } }
+					fillProps={{ isEmbedded, query }}
 				/>
 
-				{ shouldRenderTitle ? (
+				{shouldRenderTitle ? (
 					<Text
-						className={ clsx(
-							'woocommerce-layout__header-heading',
-							{
-								'woocommerce-layout__header-left-align':
-									leftAlign,
-							}
-						) }
+						className={clsx('woocommerce-layout__header-heading', {
+							'woocommerce-layout__header-left-align': leftAlign,
+						})}
 						as="h1"
 					>
-						{ hasPageTitleFills ? (
+						{hasPageTitleFills ? (
 							<WooHeaderPageTitle.Slot
-								fillProps={ { isEmbedded, query } }
+								fillProps={{ isEmbedded, query }}
 							/>
 						) : (
-							decodeEntities( getPageTitle( sections ) )
-						) }
+							decodeEntities(getPageTitle(sections))
+						)}
 					</Text>
 				) : (
 					// Spacer keeps WooHeaderItem.Slot pinned right when no
@@ -120,11 +116,11 @@ export const BaseHeader = ( {
 						className="woocommerce-layout__header-spacer"
 						aria-hidden="true"
 					/>
-				) }
+				)}
 
-				{ children }
-				<WooHeaderItem.Slot fillProps={ { isEmbedded, query } } />
-				{ trailingItems }
+				{children}
+				<WooHeaderItem.Slot fillProps={{ isEmbedded, query }} />
+				{trailingItems}
 			</div>
 		</div>
 	);

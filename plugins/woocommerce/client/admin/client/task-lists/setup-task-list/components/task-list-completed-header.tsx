@@ -31,79 +31,79 @@ type TaskListCompletedHeaderProps = {
 
 const CUSTOMER_EFFORT_SCORE_ACTION = 'store_setup';
 
-function getStoreAgeInWeeks( adminInstallTimestamp: number ) {
-	if ( adminInstallTimestamp === 0 ) {
+function getStoreAgeInWeeks(adminInstallTimestamp: number) {
+	if (adminInstallTimestamp === 0) {
 		return null;
 	}
 
 	// Date.now() is ms since Unix epoch, adminInstallTimestamp is in
 	// seconds since Unix epoch.
 	const storeAgeInMs = Date.now() - adminInstallTimestamp * 1000;
-	const storeAgeInWeeks = Math.round( storeAgeInMs / WEEK );
+	const storeAgeInWeeks = Math.round(storeAgeInMs / WEEK);
 
 	return storeAgeInWeeks;
 }
 
-export const TaskListCompletedHeader = ( {
+export const TaskListCompletedHeader = ({
 	hideTasks,
 	customerEffortScore,
-}: TaskListCompletedHeaderProps ) => {
-	const { updateOptions } = useDispatch( optionsStore );
-	const [ showCesModal, setShowCesModal ] = useState( false );
-	const [ hasSubmittedScore, setHasSubmittedScore ] = useState( false );
-	const [ score, setScore ] = useState( NaN );
-	const [ hideCustomerEffortScore, setHideCustomerEffortScore ] =
-		useState( false );
+}: TaskListCompletedHeaderProps) => {
+	const { updateOptions } = useDispatch(optionsStore);
+	const [showCesModal, setShowCesModal] = useState(false);
+	const [hasSubmittedScore, setHasSubmittedScore] = useState(false);
+	const [score, setScore] = useState(NaN);
+	const [hideCustomerEffortScore, setHideCustomerEffortScore] =
+		useState(false);
 	const { storeAgeInWeeks, cesShownForActions, canShowCustomerEffortScore } =
 		useSelect(
-			( select ) => {
+			(select) => {
 				const { getOption, hasFinishedResolution } =
-					select( optionsStore );
+					select(optionsStore);
 
-				if ( customerEffortScore ) {
+				if (customerEffortScore) {
 					const allowTracking = getOption(
 						ALLOW_TRACKING_OPTION_NAME
 					) as string;
 					const adminInstallTimestamp: number =
-						( getOption(
+						(getOption(
 							ADMIN_INSTALL_TIMESTAMP_OPTION_NAME
-						) as number ) || 0;
+						) as number) || 0;
 					const cesActions = getOption(
 						SHOWN_FOR_ACTIONS_OPTION_NAME
 					) as string[];
 					const loadingOptions =
-						! hasFinishedResolution( 'getOption', [
+						!hasFinishedResolution('getOption', [
 							SHOWN_FOR_ACTIONS_OPTION_NAME,
-						] ) ||
-						! hasFinishedResolution( 'getOption', [
+						]) ||
+						!hasFinishedResolution('getOption', [
 							ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
-						] );
+						]);
 					return {
 						storeAgeInWeeks: getStoreAgeInWeeks(
 							adminInstallTimestamp
 						),
 						cesShownForActions: cesActions,
 						canShowCustomerEffortScore:
-							! loadingOptions &&
+							!loadingOptions &&
 							allowTracking &&
-							! ( cesActions || [] ).includes( 'store_setup' ),
+							!(cesActions || []).includes('store_setup'),
 						loading: loadingOptions,
 					};
 				}
 				return {};
 			},
-			[ customerEffortScore ]
+			[customerEffortScore]
 		);
 
-	useEffect( () => {
-		if ( hasSubmittedScore ) {
-			setTimeout( () => {
-				setHideCustomerEffortScore( true );
-			}, 1200 );
+	useEffect(() => {
+		if (hasSubmittedScore) {
+			setTimeout(() => {
+				setHideCustomerEffortScore(true);
+			}, 1200);
 		}
-	}, [ hasSubmittedScore ] );
+	}, [hasSubmittedScore]);
 
-	const submitScore = ( {
+	const submitScore = ({
 		firstScore,
 		secondScore,
 		comments,
@@ -111,35 +111,35 @@ export const TaskListCompletedHeader = ( {
 		firstScore: number;
 		secondScore?: number;
 		comments?: string;
-	} ) => {
-		recordEvent( 'ces_feedback', {
+	}) => {
+		recordEvent('ces_feedback', {
 			action: CUSTOMER_EFFORT_SCORE_ACTION,
 			score: firstScore,
 			score_second_question: secondScore ?? null,
-			score_combined: firstScore + ( secondScore ?? 0 ),
+			score_combined: firstScore + (secondScore ?? 0),
 			comments: comments || '',
 			store_age: storeAgeInWeeks,
-		} );
-		void updateOptions( {
-			[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
+		});
+		void updateOptions({
+			[SHOWN_FOR_ACTIONS_OPTION_NAME]: [
 				CUSTOMER_EFFORT_SCORE_ACTION,
-				...( cesShownForActions || [] ),
+				...(cesShownForActions || []),
 			],
-		} );
-		setHasSubmittedScore( true );
+		});
+		setHasSubmittedScore(true);
 	};
 
-	const recordScore = ( recordedScore: number ) => {
-		if ( recordedScore > 2 ) {
-			setScore( recordedScore );
-			submitScore( { firstScore: recordedScore } );
+	const recordScore = (recordedScore: number) => {
+		if (recordedScore > 2) {
+			setScore(recordedScore);
+			submitScore({ firstScore: recordedScore });
 		} else {
-			setScore( recordedScore );
-			setShowCesModal( true );
-			recordEvent( 'ces_view', {
+			setScore(recordedScore);
+			setShowCesModal(true);
+			recordEvent('ces_view', {
 				action: CUSTOMER_EFFORT_SCORE_ACTION,
 				store_age: storeAgeInWeeks,
-			} );
+			});
 		}
 	};
 
@@ -148,16 +148,16 @@ export const TaskListCompletedHeader = ( {
 		secondScore: number,
 		comments: string
 	) => {
-		setShowCesModal( false );
-		submitScore( { firstScore, secondScore, comments } );
+		setShowCesModal(false);
+		submitScore({ firstScore, secondScore, comments });
 	};
 
 	return (
 		<>
 			<div
-				className={ clsx(
+				className={clsx(
 					'woocommerce-task-dashboard__container setup-task-list'
-				) }
+				)}
 			>
 				<Card
 					size="large"
@@ -166,16 +166,16 @@ export const TaskListCompletedHeader = ( {
 					<CardHeader size="medium">
 						<div className="woocommerce-task-card__header">
 							<img
-								src={ HeaderImage }
+								src={HeaderImage}
 								alt="Completed"
 								className="woocommerce-task-card__finished-header-image"
 							/>
 
-							<Text size="title" as="h2" lineHeight={ 1.4 }>
-								{ __(
+							<Text size="title" as="h2" lineHeight={1.4}>
+								{__(
 									'You’ve completed store setup',
 									'woocommerce'
-								) }
+								)}
 							</Text>
 							<Text
 								variant="subtitle.small"
@@ -184,14 +184,14 @@ export const TaskListCompletedHeader = ( {
 								lineHeight="16px"
 								className="woocommerce-task-card__header-subtitle"
 							>
-								{ __(
+								{__(
 									'Congratulations! Take a moment to celebrate and look out for the first sale.',
 									'woocommerce'
-								) }
+								)}
 							</Text>
 							<div className="woocommerce-task-card__header-menu">
 								<DropdownMenu
-									controls={ [
+									controls={[
 										{
 											title: __(
 												'Hide this',
@@ -199,35 +199,35 @@ export const TaskListCompletedHeader = ( {
 											),
 											onClick: () => hideTasks(),
 										},
-									] }
-									icon={ moreVertical }
-									label={ __(
+									]}
+									icon={moreVertical}
+									label={__(
 										'Task list options',
 										'woocommerce'
-									) }
-									popoverProps={ {
+									)}
+									popoverProps={{
 										placement: 'bottom-end',
-									} }
-									toggleProps={ {
+									}}
+									toggleProps={{
 										className:
 											'woocommerce-ellipsis-menu__toggle',
-									} }
+									}}
 								/>
 							</div>
 						</div>
 					</CardHeader>
-					{ canShowCustomerEffortScore &&
-						! hideCustomerEffortScore &&
-						! hasSubmittedScore && (
+					{canShowCustomerEffortScore &&
+						!hideCustomerEffortScore &&
+						!hasSubmittedScore && (
 							<CustomerFeedbackSimple
-								label={ __(
+								label={__(
 									'How was your experience?',
 									'woocommerce'
-								) }
-								onSelect={ recordScore }
+								)}
+								onSelect={recordScore}
 							/>
-						) }
-					{ hasSubmittedScore && ! hideCustomerEffortScore && (
+						)}
+					{hasSubmittedScore && !hideCustomerEffortScore && (
 						<div className="woocommerce-task-card__header-ces-feedback">
 							<Text
 								variant="subtitle.small"
@@ -235,35 +235,35 @@ export const TaskListCompletedHeader = ( {
 								size="13"
 								lineHeight="16px"
 							>
-								🙌{ ' ' }
-								{ __(
+								🙌{' '}
+								{__(
 									'We appreciate your feedback!',
 									'woocommerce'
-								) }
+								)}
 							</Text>
 						</div>
-					) }
+					)}
 				</Card>
 			</div>
-			{ showCesModal ? (
+			{showCesModal ? (
 				<CustomerFeedbackModal
-					title={ __( 'How was your experience?', 'woocommerce' ) }
-					firstQuestion={ __(
+					title={__('How was your experience?', 'woocommerce')}
+					firstQuestion={__(
 						'The store setup is easy to complete.',
 						'woocommerce'
-					) }
-					secondQuestion={ __(
+					)}
+					secondQuestion={__(
 						'The store setup process meets my needs.',
 						'woocommerce'
-					) }
-					defaultScore={ score }
-					recordScoreCallback={ recordModalScore }
-					onCloseModal={ () => {
-						setScore( NaN );
-						setShowCesModal( false );
-					} }
+					)}
+					defaultScore={score}
+					recordScoreCallback={recordModalScore}
+					onCloseModal={() => {
+						setScore(NaN);
+						setShowCesModal(false);
+					}}
 				/>
-			) : null }
+			) : null}
 		</>
 	);
 };

@@ -9,9 +9,9 @@ import { select } from '@wordpress/data';
  */
 export const isEditor = (): boolean => {
 	return (
-		getPath( window.location.href )?.includes( 'site-editor.php' ) ||
-		getPath( window.location.href )?.includes( 'post.php' ) ||
-		!! select( 'core/editor' ) ||
+		getPath(window.location.href)?.includes('site-editor.php') ||
+		getPath(window.location.href)?.includes('post.php') ||
+		!!select('core/editor') ||
 		false
 	);
 };

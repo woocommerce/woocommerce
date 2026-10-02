@@ -5,19 +5,21 @@
 
 .woocommerce-dashboard__columns {
 	display: grid;
-	grid-template-columns: calc(50% - #{math.div($gap-large, 2)}) calc(50% - #{math.div($gap-large, 2)});
+	grid-template-columns: calc(50% - #{math.div($gap-large, 2)}) calc(
+			50% - #{math.div($gap-large, 2)}
+		);
 	grid-gap: $gap-large;
 
 	// Auto-position fix for IE11.
 	> div {
-		@include set-grid-item-position( 2, 14 );
+		@include set-grid-item-position(2, 14);
 	}
 
-	@include breakpoint( "<960px" ) {
+	@include breakpoint("<960px") {
 		grid-template-columns: 100%;
 
 		> div {
-			@include set-grid-item-position( 1, 14 );
+			@include set-grid-item-position(1, 14);
 		}
 	}
 }
@@ -94,7 +96,7 @@
 .components-modal__frame.woocommerce-cart-modal .components-modal__content {
 	margin-top: 6rem;
 
-	@include breakpoint( "<600px" ) {
+	@include breakpoint("<600px") {
 		margin-top: 7rem;
 	}
 }

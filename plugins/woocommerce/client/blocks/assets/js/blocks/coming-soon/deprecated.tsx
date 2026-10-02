@@ -28,29 +28,29 @@ const v1Metadata = {
 
 const v1 = {
 	...v1Metadata,
-	save: ( {
+	save: ({
 		attributes,
 	}: {
 		attributes: { color: string; storeOnly: boolean };
-	} ) => {
+	}) => {
 		const { color, storeOnly } = attributes;
 		const blockProps = { ...useBlockProps.save() };
-		if ( storeOnly ) {
+		if (storeOnly) {
 			return (
-				<div { ...blockProps }>
+				<div {...blockProps}>
 					<InnerBlocks.Content />
-					<style>{ `.woocommerce-breadcrumb {display: none;}` }</style>
+					<style>{`.woocommerce-breadcrumb {display: none;}`}</style>
 				</div>
 			);
 		}
 
 		return (
-			<div { ...blockProps }>
+			<div {...blockProps}>
 				<InnerBlocks.Content />
-				<style>{ generateStyles( color ) }</style>
+				<style>{generateStyles(color)}</style>
 			</div>
 		);
 	},
 };
 
-export default [ v1 ];
+export default [v1];

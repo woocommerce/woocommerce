@@ -8,10 +8,7 @@ export default [
 	...woocommerce,
 	{
 		settings: {
-			'import/core-modules': [
-				...coreModules,
-				'@testing-library/react',
-			],
+			'import/core-modules': [ ...coreModules, '@testing-library/react' ],
 			'import/resolver': {
 				node: {},
 				webpack: {},

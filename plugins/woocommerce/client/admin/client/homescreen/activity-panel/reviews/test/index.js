@@ -47,127 +47,127 @@ const REVIEW = {
 	},
 };
 
-jest.mock( '../checkmark-circle-icon', () =>
-	jest.fn().mockImplementation( () => '[checkmark-circle-icon]' )
+jest.mock('../checkmark-circle-icon', () =>
+	jest.fn().mockImplementation(() => '[checkmark-circle-icon]')
 );
 
-describe( 'ReviewsPanel', () => {
-	it( 'should render an empty review card', () => {
+describe('ReviewsPanel', () => {
+	it('should render an empty review card', () => {
 		render(
 			<ReviewsPanel
-				hasUnapprovedReviews={ false }
-				isError={ false }
-				isRequesting={ false }
-				reviews={ [] }
-				createNotice={ () => {} }
+				hasUnapprovedReviews={false}
+				isError={false}
+				isRequesting={false}
+				reviews={[]}
+				createNotice={() => {}}
 			/>
 		);
-		expect( screen.queryByRole( 'section' ) ).toBeNull();
-	} );
+		expect(screen.queryByRole('section')).toBeNull();
+	});
 
-	it( 'should render a review card with title <name> reviewed <product name>', () => {
+	it('should render a review card with title <name> reviewed <product name>', () => {
 		render(
 			<ReviewsPanel
-				hasUnapprovedReviews={ true }
-				isError={ false }
-				isRequesting={ false }
-				reviews={ [ REVIEW ] }
-				createNotice={ () => {} }
+				hasUnapprovedReviews={true}
+				isError={false}
+				isRequesting={false}
+				reviews={[REVIEW]}
+				createNotice={() => {}}
 			/>
 		);
 
-		expect( getByTextWithMarkup( 'Reviewer reviewed Cap' ) ).not.toBeNull();
-	} );
+		expect(getByTextWithMarkup('Reviewer reviewed Cap')).not.toBeNull();
+	});
 
-	it( 'should render checkmark circle icon in the review title, if review is verified owner', () => {
+	it('should render checkmark circle icon in the review title, if review is verified owner', () => {
 		render(
 			<ReviewsPanel
-				hasUnapprovedReviews={ true }
-				isError={ false }
-				isRequesting={ false }
-				reviews={ [ { ...REVIEW, verified: true } ] }
-				createNotice={ () => {} }
+				hasUnapprovedReviews={true}
+				isError={false}
+				isRequesting={false}
+				reviews={[{ ...REVIEW, verified: true }]}
+				createNotice={() => {}}
 			/>
 		);
-		const header = screen.getByRole( 'heading', { level: 3 } );
-		expect( header.innerHTML ).toMatch( /\[checkmark-circle-icon\]/ );
-	} );
+		const header = screen.getByRole('heading', { level: 3 });
+		expect(header.innerHTML).toMatch(/\[checkmark-circle-icon\]/);
+	});
 
-	describe( 'review actions', () => {
-		it( 'should render a review card with approve, mark as spam, and delete buttons', () => {
+	describe('review actions', () => {
+		it('should render a review card with approve, mark as spam, and delete buttons', () => {
 			render(
 				<ReviewsPanel
-					hasUnapprovedReviews={ true }
-					isError={ false }
-					isRequesting={ false }
-					reviews={ [ REVIEW ] }
-					createNotice={ () => {} }
+					hasUnapprovedReviews={true}
+					isError={false}
+					isRequesting={false}
+					reviews={[REVIEW]}
+					createNotice={() => {}}
 				/>
 			);
-			expect( screen.queryByText( 'Approve' ) ).toBeInTheDocument();
-			expect( screen.queryByText( 'Mark as spam' ) ).toBeInTheDocument();
-			expect( screen.queryByText( 'Delete' ) ).toBeInTheDocument();
-		} );
+			expect(screen.queryByText('Approve')).toBeInTheDocument();
+			expect(screen.queryByText('Mark as spam')).toBeInTheDocument();
+			expect(screen.queryByText('Delete')).toBeInTheDocument();
+		});
 
-		it( 'should trigger updateReview with status approved when Approve is clicked', () => {
-			const clickHandler = jest.fn( () => {
+		it('should trigger updateReview with status approved when Approve is clicked', () => {
+			const clickHandler = jest.fn(() => {
 				return Promise.resolve();
-			} );
+			});
 			render(
 				<ReviewsPanel
-					hasUnapprovedReviews={ true }
-					isError={ false }
-					isRequesting={ false }
-					reviews={ [ REVIEW ] }
-					updateReview={ clickHandler }
-					clearReviewsCache={ jest.fn() }
-					createNotice={ () => {} }
+					hasUnapprovedReviews={true}
+					isError={false}
+					isRequesting={false}
+					reviews={[REVIEW]}
+					updateReview={clickHandler}
+					clearReviewsCache={jest.fn()}
+					createNotice={() => {}}
 				/>
 			);
-			fireEvent.click( screen.getByText( 'Approve' ) );
-			expect( clickHandler ).toHaveBeenCalledWith( REVIEW.id, {
+			fireEvent.click(screen.getByText('Approve'));
+			expect(clickHandler).toHaveBeenCalledWith(REVIEW.id, {
 				status: 'approved',
-			} );
-		} );
+			});
+		});
 
-		it( 'should trigger updateReview with status spam when Mark as spam is clicked', () => {
-			const clickHandler = jest.fn( () => {
+		it('should trigger updateReview with status spam when Mark as spam is clicked', () => {
+			const clickHandler = jest.fn(() => {
 				return Promise.resolve();
-			} );
+			});
 			render(
 				<ReviewsPanel
-					hasUnapprovedReviews={ true }
-					isError={ false }
-					isRequesting={ false }
-					reviews={ [ REVIEW ] }
-					updateReview={ clickHandler }
-					clearReviewsCache={ jest.fn() }
-					createNotice={ () => {} }
+					hasUnapprovedReviews={true}
+					isError={false}
+					isRequesting={false}
+					reviews={[REVIEW]}
+					updateReview={clickHandler}
+					clearReviewsCache={jest.fn()}
+					createNotice={() => {}}
 				/>
 			);
-			fireEvent.click( screen.getByText( 'Mark as spam' ) );
-			expect( clickHandler ).toHaveBeenCalledWith( REVIEW.id, {
+			fireEvent.click(screen.getByText('Mark as spam'));
+			expect(clickHandler).toHaveBeenCalledWith(REVIEW.id, {
 				status: 'spam',
-			} );
-		} );
+			});
+		});
 
-		it( 'should trigger deleteReview with review id when delete is clicked', () => {
-			const clickHandler = jest.fn( () => {
+		it('should trigger deleteReview with review id when delete is clicked', () => {
+			const clickHandler = jest.fn(() => {
 				return Promise.resolve();
-			} );
+			});
 			render(
 				<ReviewsPanel
-					hasUnapprovedReviews={ true }
-					isError={ false }
-					isRequesting={ false }
-					reviews={ [ REVIEW ] }
-					deleteReview={ clickHandler }
-					clearReviewsCache={ jest.fn() }
-					createNotice={ () => {} }
+					hasUnapprovedReviews={true}
+					isError={false}
+					isRequesting={false}
+					reviews={[REVIEW]}
+					deleteReview={clickHandler}
+					clearReviewsCache={jest.fn()}
+					createNotice={() => {}}
 				/>
 			);
-			fireEvent.click( screen.getByText( 'Delete' ) );
-			expect( clickHandler ).toHaveBeenCalledWith( REVIEW.id );
-		} );
-	} );
-} );
+			fireEvent.click(screen.getByText('Delete'));
+			expect(clickHandler).toHaveBeenCalledWith(REVIEW.id);
+		});
+	});
+});

@@ -3,12 +3,12 @@
  *
  * @param text
  */
-export const decodeHtmlEntities = ( text: unknown ): string => {
-	if ( typeof text !== 'string' ) {
+export const decodeHtmlEntities = (text: unknown): string => {
+	if (typeof text !== 'string') {
 		return '';
 	}
 
-	const doc = document.implementation.createHTMLDocument( '' );
+	const doc = document.implementation.createHTMLDocument('');
 	doc.body.innerHTML = text;
 	return doc.body.textContent || '';
 };

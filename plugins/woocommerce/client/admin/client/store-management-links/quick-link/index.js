@@ -11,21 +11,21 @@ import { Text } from '@woocommerce/experimental';
  */
 import './style.scss';
 
-export const QuickLink = ( { icon, title, href, linkType, onClick } ) => {
+export const QuickLink = ({ icon, title, href, linkType, onClick }) => {
 	const isExternal = linkType === 'external';
 
 	return (
 		<div className="woocommerce-quick-links__item">
 			<Link
-				onClick={ onClick }
-				href={ href }
-				type={ linkType }
-				target={ isExternal ? '_blank' : null }
+				onClick={onClick}
+				href={href}
+				type={linkType}
+				target={isExternal ? '_blank' : null}
 				className="woocommerce-quick-links__item-link"
 			>
 				<Icon
 					className="woocommerce-quick-links__item-link__icon"
-					icon={ icon }
+					icon={icon}
 				/>
 				<Text
 					className="woocommerce-quick-links__item-link__text"
@@ -35,9 +35,9 @@ export const QuickLink = ( { icon, title, href, linkType, onClick } ) => {
 					size="14"
 					lineHeight="20px"
 				>
-					{ title }
+					{title}
 				</Text>
-				{ isExternal && <Icon icon={ external } /> }
+				{isExternal && <Icon icon={external} />}
 			</Link>
 		</div>
 	);

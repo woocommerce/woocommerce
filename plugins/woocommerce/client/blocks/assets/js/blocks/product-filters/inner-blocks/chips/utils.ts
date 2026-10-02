@@ -4,7 +4,7 @@
 import { getColorCSSVar } from '../../utils/colors';
 import { BlockAttributes } from './types';
 
-export function getColorVars( attributes: BlockAttributes ) {
+export function getColorVars(attributes: BlockAttributes) {
 	const {
 		chipText,
 		chipBackground,
@@ -20,7 +20,7 @@ export function getColorVars( attributes: BlockAttributes ) {
 		customSelectedChipBorder,
 	} = attributes;
 
-	const vars: Record< string, string > = {
+	const vars: Record<string, string> = {
 		'--wc-product-filter-chips-text': getColorCSSVar(
 			chipText,
 			customChipText
@@ -47,18 +47,15 @@ export function getColorVars( attributes: BlockAttributes ) {
 		),
 	};
 
-	return Object.keys( vars ).reduce(
-		( acc: Record< string, string >, key ) => {
-			if ( vars[ key ] ) {
-				acc[ key ] = vars[ key ];
-			}
-			return acc;
-		},
-		{}
-	);
+	return Object.keys(vars).reduce((acc: Record<string, string>, key) => {
+		if (vars[key]) {
+			acc[key] = vars[key];
+		}
+		return acc;
+	}, {});
 }
 
-export function getColorClasses( attributes: BlockAttributes ) {
+export function getColorClasses(attributes: BlockAttributes) {
 	const {
 		chipText,
 		chipBackground,

@@ -16,17 +16,17 @@ import HeadingLevelIcon from './heading-level-icon';
  * Allows the heading level to be chosen for a title block.
  */
 class HeadingToolbar extends Component {
-	createLevelControl( targetLevel, selectedLevel, onChange ) {
+	createLevelControl(targetLevel, selectedLevel, onChange) {
 		const isActive = targetLevel === selectedLevel;
 		return {
-			icon: <HeadingLevelIcon level={ targetLevel } />,
+			icon: <HeadingLevelIcon level={targetLevel} />,
 			title: sprintf(
 				/* translators: %s: heading level e.g: "2", "3", "4" */
-				__( 'Heading %d', 'woocommerce' ),
+				__('Heading %d', 'woocommerce'),
 				targetLevel
 			),
 			isActive,
-			onClick: () => onChange( targetLevel ),
+			onClick: () => onChange(targetLevel),
 		};
 	}
 
@@ -41,16 +41,16 @@ class HeadingToolbar extends Component {
 
 		const levels = Array.from(
 			{ length: maxLevel - minLevel + 1 },
-			( _, i ) => i + minLevel
+			(_, i) => i + minLevel
 		);
 
 		return (
 			<ToolbarGroup
-				isCollapsed={ isCollapsed }
-				icon={ <HeadingLevelIcon level={ selectedLevel } /> }
-				controls={ levels.map( ( index ) =>
-					this.createLevelControl( index, selectedLevel, onChange )
-				) }
+				isCollapsed={isCollapsed}
+				icon={<HeadingLevelIcon level={selectedLevel} />}
+				controls={levels.map((index) =>
+					this.createLevelControl(index, selectedLevel, onChange)
+				)}
 			/>
 		);
 	}

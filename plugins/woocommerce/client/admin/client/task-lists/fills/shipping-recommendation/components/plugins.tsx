@@ -17,7 +17,7 @@ import { TermsOfService } from '~/task-lists/components/terms-of-service';
 const isWcShippingOptions = (
 	wcShippingOptions: unknown
 ): wcShippingOptions is {
-	[ key: string ]: unknown;
+	[key: string]: unknown;
 } => typeof wcShippingOptions === 'object' && wcShippingOptions !== null;
 
 type Props = {
@@ -25,67 +25,65 @@ type Props = {
 	pluginsToActivate: string[];
 };
 
-export const Plugins = ( { nextStep, pluginsToActivate }: Props ) => {
-	const { updateOptions } = useDispatch( optionsStore );
-	const { isResolving, tosAccepted } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } = select( optionsStore );
-		const wcShippingOptions = getOption( 'wcshipping_options' );
+export const Plugins = ({ nextStep, pluginsToActivate }: Props) => {
+	const { updateOptions } = useDispatch(optionsStore);
+	const { isResolving, tosAccepted } = useSelect((select) => {
+		const { getOption, hasFinishedResolution } = select(optionsStore);
+		const wcShippingOptions = getOption('wcshipping_options');
 
 		return {
 			isResolving:
-				! hasFinishedResolution( 'getOption', [
+				!hasFinishedResolution('getOption', [
 					'woocommerce_setup_jetpack_opted_in',
-				] ) ||
-				! hasFinishedResolution( 'getOption', [
-					'wcshipping_options',
-				] ),
+				]) ||
+				!hasFinishedResolution('getOption', ['wcshipping_options']),
 			tosAccepted:
-				( isWcShippingOptions( wcShippingOptions ) &&
-					wcShippingOptions?.tos_accepted ) ||
-				getOption( 'woocommerce_setup_jetpack_opted_in' ) === '1',
+				(isWcShippingOptions(wcShippingOptions) &&
+					wcShippingOptions?.tos_accepted) ||
+				getOption('woocommerce_setup_jetpack_opted_in') === '1',
 		};
-	}, [] );
+	}, []);
 
-	useEffect( () => {
-		if ( ! tosAccepted || pluginsToActivate.length ) {
+	useEffect(() => {
+		if (!tosAccepted || pluginsToActivate.length) {
 			return;
 		}
 
 		nextStep();
-	}, [ nextStep, pluginsToActivate, tosAccepted ] );
+	}, [nextStep, pluginsToActivate, tosAccepted]);
 
-	if ( isResolving ) {
+	if (isResolving) {
 		return null;
 	}
 
 	return (
 		<>
-			{ ! tosAccepted && (
+			{!tosAccepted && (
 				<TermsOfService
-					buttonText={ __( 'Install & enable', 'woocommerce' ) }
+					buttonText={__('Install & enable', 'woocommerce')}
 				/>
-			) }
+			)}
 			<PluginInstaller
-				onComplete={ (
+				onComplete={(
 					activatedPlugins: string[],
 					response: InstallPluginsResponse
 				) => {
-					createNoticesFromResponse( response );
+					createNoticesFromResponse(response);
 					recordEvent(
 						'tasklist_shipping_recommendation_install_extensions',
 						{
 							install_extensions: true,
 						}
 					);
-					void updateOptions( {
+					void updateOptions({
 						woocommerce_setup_jetpack_opted_in: true,
-					} );
+					});
 					nextStep();
-				} }
-				onError={ ( errors: unknown, response: unknown ) =>
-					createNoticesFromResponse( response )
+				}}
+				onError={(errors: unknown, response: unknown) =>
+					createNoticesFromResponse(response)
 				}
-				pluginSlugs={ pluginsToActivate }
+				pluginSlugs={pluginsToActivate}
 			/>
 		</>
 	);

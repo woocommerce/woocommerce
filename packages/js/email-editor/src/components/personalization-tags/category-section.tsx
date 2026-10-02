@@ -11,7 +11,7 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
  */
 import { PersonalizationTag } from '../../store';
 
-const CategorySection = ( {
+const CategorySection = ({
 	groupedTags,
 	activeCategory,
 	onInsert,
@@ -19,77 +19,77 @@ const CategorySection = ( {
 	closeCallback,
 	openLinkModal,
 }: {
-	groupedTags: Record< string, PersonalizationTag[] >;
+	groupedTags: Record<string, PersonalizationTag[]>;
 	activeCategory: string | null;
-	onInsert: ( tag: string, isLink: boolean ) => void;
+	onInsert: (tag: string, isLink: boolean) => void;
 	canInsertLink: boolean;
 	closeCallback: () => void;
-	openLinkModal: ( tag: PersonalizationTag ) => void;
-} ) => {
-	const { updateBlockAttributes } = useDispatch( blockEditorStore );
-	const selectedBlockId = useSelect( ( select ) =>
-		select( blockEditorStore ).getSelectedBlockClientId()
+	openLinkModal: (tag: PersonalizationTag) => void;
+}) => {
+	const { updateBlockAttributes } = useDispatch(blockEditorStore);
+	const selectedBlockId = useSelect((select) =>
+		select(blockEditorStore).getSelectedBlockClientId()
 	);
-	const selectedBlock = useSelect( ( select ) =>
-		select( blockEditorStore ).getBlock( selectedBlockId )
+	const selectedBlock = useSelect((select) =>
+		select(blockEditorStore).getBlock(selectedBlockId)
 	);
-	const canSetURL = [ 'core/button' ].includes( selectedBlock?.name );
+	const canSetURL = ['core/button'].includes(selectedBlock?.name);
 
-	const categoriesToRender: [ string, PersonalizationTag[] ][] =
+	const categoriesToRender: [string, PersonalizationTag[]][] =
 		activeCategory === null
-			? Object.entries( groupedTags ) // Render all categories
-			: [ [ activeCategory, groupedTags[ activeCategory ] || [] ] ]; // Render only one selected category
+			? Object.entries(groupedTags) // Render all categories
+			: [[activeCategory, groupedTags[activeCategory] || []]]; // Render only one selected category
 
 	return (
 		<>
-			{ categoriesToRender.map(
-				( [ category, items ]: [ string, PersonalizationTag[] ] ) => (
-					<div key={ category }>
+			{categoriesToRender.map(
+				([category, items]: [string, PersonalizationTag[]]) => (
+					<div key={category}>
 						<div className="woocommerce-personalization-tags-modal-category">
-							{ category }
+							{category}
 						</div>
 						<div className="woocommerce-personalization-tags-modal-category-group">
-							{ items.map( ( item ) => {
+							{items.map((item) => {
 								// Detects if the personalization tag is expected to return a URL by checking the token name,
 								// since personalization tags lack explicit return type definitions.
-								const isURLTag = /\burl\b/.test( item.token );
+								const isURLTag = /\burl\b/.test(item.token);
 
 								return (
 									<div
 										className="woocommerce-personalization-tags-modal-category-group-item"
-										key={ item.token }
+										key={item.token}
 									>
 										<div className="woocommerce-personalization-tags-modal-item-text">
-											<strong>{ item.name }</strong>
-											{ item.valueToInsert }
+											<strong>{item.name}</strong>
+											{item.valueToInsert}
 										</div>
 										<div
-											style={ {
+											style={{
 												display: 'flex',
 												flexDirection: 'column',
 												alignItems: 'flex-end',
-											} }
+											}}
 										>
 											<Button
 												variant="link"
-												onClick={ () => {
-													if ( onInsert ) {
+												onClick={() => {
+													if (onInsert) {
 														onInsert(
 															item.valueToInsert,
 															false
 														);
 													}
-												} }
+												}}
 											>
-												{ __(
+												{__(
 													'Insert',
 													__i18n_text_domain__
-												) }
+												)}
 											</Button>
-											{ canSetURL && isURLTag && (
+											{canSetURL && isURLTag && (
 												<Button
 													variant="link"
-													onClick={ () => {
+													onClick={() => {
 														void updateBlockAttributes(
 															selectedBlockId,
 															{
@@ -97,15 +97,15 @@ const CategorySection = ( {
 															}
 														);
 														closeCallback();
-													} }
+													}}
 												>
-													{ __(
+													{__(
 														'Set as URL',
 														__i18n_text_domain__
-													) }
+													)}
 												</Button>
-											) }
-											{ category ===
+											)}
+											{category ===
 												__(
 													'Link',
 													__i18n_text_domain__
@@ -114,28 +114,28 @@ const CategorySection = ( {
 													<>
 														<Button
 															variant="link"
-															onClick={ () => {
+															onClick={() => {
 																closeCallback();
 																openLinkModal(
 																	item
 																);
-															} }
+															}}
 														>
-															{ __(
+															{__(
 																'Insert as link',
 																__i18n_text_domain__
-															) }
+															)}
 														</Button>
 													</>
-												) }
+												)}
 										</div>
 									</div>
 								);
-							} ) }
+							})}
 						</div>
 					</div>
 				)
-			) }
+			)}
 		</>
 	);
 };

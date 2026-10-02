@@ -12,12 +12,12 @@ import deprecated from './deprecated';
 import metadata from './block.json';
 
 // @ts-expect-error: `metadata` currently does not have a type definition in WordPress core
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	apiVersion: 3,
 	icon: {
 		src: (
 			<Icon
-				icon={ button }
+				icon={button}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -28,4 +28,4 @@ registerBlockType( metadata, {
 	edit,
 	save: () => null,
 	deprecated,
-} );
+});

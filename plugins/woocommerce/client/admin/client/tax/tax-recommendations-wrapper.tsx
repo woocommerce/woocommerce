@@ -16,26 +16,26 @@ const TaxRecommendationsLoader = lazy(
 		)
 );
 
-export const TaxRecommendations = ( {
+export const TaxRecommendations = ({
 	page,
 	tab,
 	section,
-}: EmbeddedBodyProps ) => {
-	if ( page !== 'wc-settings' ) {
+}: EmbeddedBodyProps) => {
+	if (page !== 'wc-settings') {
 		return null;
 	}
 
-	if ( tab !== 'tax' ) {
+	if (tab !== 'tax') {
 		return null;
 	}
 
-	if ( Boolean( section ) ) {
+	if (Boolean(section)) {
 		return null;
 	}
 
 	return (
 		<RecommendationsEligibilityWrapper>
-			<Suspense fallback={ null }>
+			<Suspense fallback={null}>
 				<TaxRecommendationsLoader />
 			</Suspense>
 		</RecommendationsEligibilityWrapper>

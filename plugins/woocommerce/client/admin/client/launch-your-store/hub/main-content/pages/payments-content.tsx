@@ -39,26 +39,26 @@ import {
  * @param slug - The plugin slug to validate.
  * @return The validated slug if valid, or undefined if invalid.
  */
-const validatePluginSlug = ( slug: unknown ): string | undefined => {
+const validatePluginSlug = (slug: unknown): string | undefined => {
 	// Must be a string.
-	if ( typeof slug !== 'string' ) {
+	if (typeof slug !== 'string') {
 		return undefined;
 	}
 
 	const trimmed = slug.trim();
 
 	// Must be non-empty after trimming.
-	if ( trimmed.length === 0 ) {
+	if (trimmed.length === 0) {
 		return undefined;
 	}
 
 	// Plugin slugs should only contain lowercase letters, numbers, dashes, and underscores.
 	// This pattern rejects control characters, slashes, spaces, and other special characters.
 	const validSlugPattern = /^[a-z0-9_-]+$/;
-	if ( ! validSlugPattern.test( trimmed ) ) {
+	if (!validSlugPattern.test(trimmed)) {
 		// eslint-disable-next-line no-console
 		console.warn(
-			`[WooCommerce Payments] Invalid plugin slug format: "${ trimmed }". Using default slug.`
+			`[WooCommerce Payments] Invalid plugin slug format: "${trimmed}". Using default slug.`
 		);
 		return undefined;
 	}
@@ -66,17 +66,17 @@ const validatePluginSlug = ( slug: unknown ): string | undefined => {
 	return trimmed;
 };
 
-const InstallWooPaymentsStep = ( {
+const InstallWooPaymentsStep = ({
 	installWooPayments,
 	isPluginInstalling,
 	isPluginInstalled,
 }: {
-	installWooPayments: ( slug: string | undefined ) => void;
+	installWooPayments: (slug: string | undefined) => void;
 	isPluginInstalling: boolean;
 	isPluginInstalled: boolean;
-} ) => {
+}) => {
 	// Track the step view.
-	useEffect( () => {
+	useEffect(() => {
 		recordPaymentsOnboardingEvent(
 			'woopayments_onboarding_modal_step_view',
 			{
@@ -85,78 +85,78 @@ const InstallWooPaymentsStep = ( {
 				source: wooPaymentsOnboardingSessionEntryLYS,
 			}
 		);
-	}, [] );
+	}, []);
 
-	const isWooPayEligible = useSelect( ( select ) => {
-		const store = select( paymentSettingsStore );
+	const isWooPayEligible = useSelect((select) => {
+		const store = select(paymentSettingsStore);
 		return store.getIsWooPayEligible();
-	}, [] );
+	}, []);
 
-	const wooPaymentsProvider = useSelect( ( select ) => {
-		const store = select( paymentSettingsStore );
+	const wooPaymentsProvider = useSelect((select) => {
+		const store = select(paymentSettingsStore);
 		return store
 			.getPaymentProviders()
-			.find( ( provider ) => isWooPayments( provider.id ) );
-	}, [] );
+			.find((provider) => isWooPayments(provider.id));
+	}, []);
 
 	const businessCountry =
 		window.wcSettings?.admin?.woocommerce_payments_nox_profile
 			?.business_country_code || null;
 
-	let buttonText = __< string >( 'Install', 'woocommerce' );
+	let buttonText = __<string>('Install', 'woocommerce');
 
-	if ( isPluginInstalled && ! isPluginInstalling ) {
-		buttonText = __( 'Enable', 'woocommerce' );
+	if (isPluginInstalled && !isPluginInstalling) {
+		buttonText = __('Enable', 'woocommerce');
 	}
 
-	if ( isPluginInstalled && isPluginInstalling ) {
-		buttonText = __( 'Enabling', 'woocommerce' );
+	if (isPluginInstalled && isPluginInstalling) {
+		buttonText = __('Enabling', 'woocommerce');
 	}
 
-	if ( ! isPluginInstalled && isPluginInstalling ) {
-		buttonText = __( 'Installing', 'woocommerce' );
+	if (!isPluginInstalled && isPluginInstalling) {
+		buttonText = __('Installing', 'woocommerce');
 	}
 
 	return (
 		<div className="launch-your-store-payments-content__step--install-woopayments">
 			<div className="launch-your-store-payments-content__step--install-woopayments-logo">
 				<img
-					src={ `${ WC_ASSET_URL }images/woo-logo.svg` }
+					src={`${WC_ASSET_URL}images/woo-logo.svg`}
 					alt=""
 					role="presentation"
 				/>
 			</div>
 			<h1 className="launch-your-store-payments-content__step--install-woopayments-title">
-				{ __( 'Accept payments with Woo', 'woocommerce' ) }
+				{__('Accept payments with Woo', 'woocommerce')}
 			</h1>
 			<p className="launch-your-store-payments-content__step--install-woopayments-description">
-				{ __(
+				{__(
 					'Set up payments for your store in just a few steps. With WooPayments, you can accept online and in-person payments, track revenue, and handle all payment activity from one place.',
 					'woocommerce'
-				) }
+				)}
 			</p>
 			<div className="launch-your-store-payments-content__step--install-woopayments-logos">
 				<WooPaymentsMethodsLogos
-					maxElements={ 10 }
-					isWooPayEligible={ isWooPayEligible }
+					maxElements={10}
+					isWooPayEligible={isWooPayEligible}
 				/>
 			</div>
 			<Button
 				className="launch-your-store-payments-content__step--install-woopayments-button"
-				onClick={ () => {
+				onClick={() => {
 					// Preload the onboarding data in the background.
 					if (
 						wooPaymentsProvider?.onboarding?._links?.preload?.href
 					) {
 						// We don't need to await this call or handle its response.
-						void apiFetch( {
+						void apiFetch({
 							url: wooPaymentsProvider?.onboarding?._links
 								?.preload?.href,
 							method: 'POST',
 							data: {
 								location: businessCountry,
 							},
-						} );
+						});
 					}
 
 					// Validate and sanitize the plugin slug before passing to installWooPayments.
@@ -165,19 +165,19 @@ const InstallWooPaymentsStep = ( {
 					const validatedSlug = validatePluginSlug(
 						wooPaymentsProvider?.plugin?.slug
 					);
-					installWooPayments( validatedSlug );
-				} }
-				isBusy={ isPluginInstalling }
-				disabled={ isPluginInstalling }
+					installWooPayments(validatedSlug);
+				}}
+				isBusy={isPluginInstalling}
+				disabled={isPluginInstalling}
 				variant="primary"
 			>
-				{ buttonText }
+				{buttonText}
 			</Button>
 		</div>
 	);
 };
 
-export const PaymentsContent = ( {} ) => {
+export const PaymentsContent = ({}) => {
 	const {
 		isWooPaymentsActive,
 		isWooPaymentsInstalled,
@@ -186,26 +186,26 @@ export const PaymentsContent = ( {} ) => {
 
 	const { refreshStoreData } = useOnboardingContext();
 
-	const [ isPluginInstalling, setIsPluginInstalling ] =
-		useState< boolean >( false );
-	const { installAndActivatePlugins } = useDispatch( pluginsStore );
-	const isMountedRef = useRef( true );
+	const [isPluginInstalling, setIsPluginInstalling] =
+		useState<boolean>(false);
+	const { installAndActivatePlugins } = useDispatch(pluginsStore);
+	const isMountedRef = useRef(true);
 
 	// Cleanup on unmount to prevent state updates after component is unmounted.
-	useEffect( () => {
+	useEffect(() => {
 		return () => {
 			isMountedRef.current = false;
 		};
-	}, [] );
+	}, []);
 
 	const installWooPayments = useCallback(
-		( realPluginSlug: string | undefined ) => {
+		(realPluginSlug: string | undefined) => {
 			// Set the plugin installation state to true to show a loading indicator.
-			setIsPluginInstalling( true );
+			setIsPluginInstalling(true);
 
-			recordPaymentsEvent( 'recommendations_setup', {
+			recordPaymentsEvent('recommendations_setup', {
 				extension_selected: wooPaymentsExtensionSlug, // Use the official slug, not the real one.
-				extension_action: ! isWooPaymentsInstalled
+				extension_action: !isWooPaymentsInstalled
 					? 'install'
 					: 'activate',
 				provider_id: wooPaymentsProviderId,
@@ -213,56 +213,56 @@ export const PaymentsContent = ( {} ) => {
 				provider_extension_slug: wooPaymentsExtensionSlug, // Use the official slug, not the real one.
 				from: 'lys',
 				source: wooPaymentsOnboardingSessionEntryLYS,
-			} );
+			});
 
 			// Install and activate the WooPayments plugin.
-			installAndActivatePlugins( [
+			installAndActivatePlugins([
 				realPluginSlug ?? wooPaymentsExtensionSlug,
-			] )
-				.then( async ( response ) => {
-					if ( ! isMountedRef.current ) {
+			])
+				.then(async (response) => {
+					if (!isMountedRef.current) {
 						return;
 					}
-					createNoticesFromResponse( response );
-					setWooPaymentsRecentlyActivated( true );
+					createNoticesFromResponse(response);
+					setWooPaymentsRecentlyActivated(true);
 					// Refresh store data after installation.
 					// This will trigger a re-render and initialize the onboarding flow.
 					refreshStoreData();
 
-					if ( ! isWooPaymentsInstalled ) {
+					if (!isWooPaymentsInstalled) {
 						// Record the extension installation event.
-						recordPaymentsEvent( 'provider_installed', {
+						recordPaymentsEvent('provider_installed', {
 							provider_id: wooPaymentsProviderId,
 							suggestion_id: wooPaymentsSuggestionId,
 							provider_extension_slug: wooPaymentsExtensionSlug,
 							from: 'lys',
 							source: wooPaymentsOnboardingSessionEntryLYS,
-						} );
+						});
 					}
 					// Note: The provider extension activation is tracked from the backend (the `provider_extension_activated` event).
 
-					setIsPluginInstalling( false );
-				} )
-				.catch( ( response: { errors: Record< string, string > } ) => {
-					if ( ! isMountedRef.current ) {
+					setIsPluginInstalling(false);
+				})
+				.catch((response: { errors: Record<string, string> }) => {
+					if (!isMountedRef.current) {
 						return;
 					}
 					// Handle errors during installation
 					let eventName = 'provider_extension_installation_failed';
-					if ( isWooPaymentsInstalled ) {
+					if (isWooPaymentsInstalled) {
 						eventName = 'provider_extension_activation_failed';
 					}
-					recordPaymentsEvent( eventName, {
+					recordPaymentsEvent(eventName, {
 						provider_id: wooPaymentsProviderId,
 						suggestion_id: wooPaymentsSuggestionId,
 						provider_extension_slug: wooPaymentsExtensionSlug,
 						from: 'lys',
 						source: wooPaymentsOnboardingSessionEntryLYS,
 						reason: 'error',
-					} );
-					createNoticesFromResponse( response );
-					setIsPluginInstalling( false );
-				} );
+					});
+					createNoticesFromResponse(response);
+					setIsPluginInstalling(false);
+				});
 		},
 		[
 			isWooPaymentsInstalled,
@@ -275,15 +275,15 @@ export const PaymentsContent = ( {} ) => {
 	return (
 		<div className="launch-your-store-payments-content">
 			<div className="launch-your-store-payments-content__canvas">
-				{ ! isWooPaymentsActive ? (
+				{!isWooPaymentsActive ? (
 					<InstallWooPaymentsStep
-						installWooPayments={ installWooPayments }
-						isPluginInstalled={ isWooPaymentsInstalled }
-						isPluginInstalling={ isPluginInstalling }
+						installWooPayments={installWooPayments}
+						isPluginInstalled={isWooPaymentsInstalled}
+						isPluginInstalling={isPluginInstalling}
 					/>
 				) : (
-					<WooPaymentsOnboarding includeSidebar={ false } />
-				) }
+					<WooPaymentsOnboarding includeSidebar={false} />
+				)}
 			</div>
 		</div>
 	);

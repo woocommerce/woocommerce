@@ -9,46 +9,43 @@ import { getPreviousDate } from '@woocommerce/date';
 
 export const DEFAULT_FILTER = 'all';
 
-export function getSelectedFilter( filters, query, selectedFilterArgs = {} ) {
-	if ( ! filters || filters.length === 0 ) {
+export function getSelectedFilter(filters, query, selectedFilterArgs = {}) {
+	if (!filters || filters.length === 0) {
 		return null;
 	}
 
-	const clonedFilters = filters.slice( 0 );
+	const clonedFilters = filters.slice(0);
 	const filterConfig = clonedFilters.pop();
 
-	if ( filterConfig.showFilters( query, selectedFilterArgs ) ) {
-		const allFilters = flattenFilters( filterConfig.filters );
+	if (filterConfig.showFilters(query, selectedFilterArgs)) {
+		const allFilters = flattenFilters(filterConfig.filters);
 		const value =
-			query[ filterConfig.param ] ||
+			query[filterConfig.param] ||
 			filterConfig.defaultValue ||
 			DEFAULT_FILTER;
-		return find( allFilters, { value } );
+		return find(allFilters, { value });
 	}
 
-	return getSelectedFilter( clonedFilters, query, selectedFilterArgs );
+	return getSelectedFilter(clonedFilters, query, selectedFilterArgs);
 }
 
-export function getChartMode( selectedFilter, query ) {
-	if ( selectedFilter && query ) {
-		const selectedFilterParam = get( selectedFilter, [
-			'settings',
-			'param',
-		] );
+export function getChartMode(selectedFilter, query) {
+	if (selectedFilter && query) {
+		const selectedFilterParam = get(selectedFilter, ['settings', 'param']);
 
 		if (
-			! selectedFilterParam ||
-			Object.keys( query ).includes( selectedFilterParam )
+			!selectedFilterParam ||
+			Object.keys(query).includes(selectedFilterParam)
 		) {
-			return get( selectedFilter, [ 'chartMode' ] );
+			return get(selectedFilter, ['chartMode']);
 		}
 	}
 
 	return null;
 }
 
-export function createDateFormatter( format ) {
-	return ( date ) => formatDate( format, date );
+export function createDateFormatter(format) {
+	return (date) => formatDate(format, date);
 }
 
 /**
@@ -61,10 +58,8 @@ export function createDateFormatter( format ) {
  * @param {string} type Chart type, e.x: `number`
  * @return {boolean} True if the values can be summed.
  */
-function isAdditiveMetric( key, type ) {
-	return (
-		type !== 'average' && type !== 'percent' && ! key.startsWith( 'avg_' )
-	);
+function isAdditiveMetric(key, type) {
+	return type !== 'average' && type !== 'percent' && !key.startsWith('avg_');
 }
 
 /**
@@ -104,29 +99,27 @@ export function buildChartData(
 	const matchByDate = currentInterval === 'day';
 	const secondaryIntervalsByDate = new Map(
 		matchByDate
-			? secondaryDataIntervals.map( ( secondaryInterval ) => [
-					moment( secondaryInterval.date_start ).format(
-						'YYYY-MM-DD'
-					),
+			? secondaryDataIntervals.map((secondaryInterval) => [
+					moment(secondaryInterval.date_start).format('YYYY-MM-DD'),
 					secondaryInterval,
-			  ] )
+				])
 			: []
 	);
 
 	const chartData = [];
 
-	for ( let index = 0; index < primaryDataIntervals.length; index++ ) {
-		const interval = primaryDataIntervals[ index ];
+	for (let index = 0; index < primaryDataIntervals.length; index++) {
+		const interval = primaryDataIntervals[index];
 
 		const primaryDateFormatted = formatDate(
 			'Y-m-d\\TH:i:s',
 			interval.date_start
 		);
-		const primaryLabel = `${ primaryDatePicker.label } (${ primaryDatePicker.range })`;
+		const primaryLabel = `${primaryDatePicker.label} (${primaryDatePicker.range})`;
 		const primaryLabelDate = interval.date_start;
-		const primaryValue = interval.subtotals[ selectedChartKey ] || 0;
+		const primaryValue = interval.subtotals[selectedChartKey] || 0;
 
-		const secondaryLabel = `${ secondaryDatePicker.label } (${ secondaryDatePicker.range })`;
+		const secondaryLabel = `${secondaryDatePicker.label} (${secondaryDatePicker.range})`;
 		const secondaryDateMoment = getPreviousDate(
 			interval.date_start,
 			primaryDatePicker.after,
@@ -141,12 +134,12 @@ export function buildChartData(
 		let secondaryLabelDateEnd;
 		let secondaryInterval;
 
-		if ( ! matchByDate ) {
-			secondaryInterval = secondaryDataIntervals[ index ];
+		if (!matchByDate) {
+			secondaryInterval = secondaryDataIntervals[index];
 		} else if (
 			yearShifted &&
 			index > 0 &&
-			secondaryDateMoment.date() !== moment( interval.date_start ).date()
+			secondaryDateMoment.date() !== moment(interval.date_start).date()
 		) {
 			// A primary 29th February has no counterpart a year earlier: moment
 			// clamps it to the 28th, which already belongs to the primary 28th.
@@ -155,38 +148,38 @@ export function buildChartData(
 			secondaryLabelDate = '-';
 		} else {
 			secondaryInterval = secondaryIntervalsByDate.get(
-				secondaryDateMoment.format( 'YYYY-MM-DD' )
+				secondaryDateMoment.format('YYYY-MM-DD')
 			);
 		}
 
 		let secondaryValue =
-			( secondaryInterval &&
-				secondaryInterval.subtotals[ selectedChartKey ] ) ||
+			(secondaryInterval &&
+				secondaryInterval.subtotals[selectedChartKey]) ||
 			0;
 
 		if (
 			matchByDate &&
 			yearShifted &&
 			secondaryInterval &&
-			isAdditiveMetric( selectedChartKey, selectedChartType )
+			isAdditiveMetric(selectedChartKey, selectedChartType)
 		) {
 			// A secondary 29th February has no column on a non-leap primary axis.
 			// Fold it into the 28th so the line still adds up to the legend total.
-			const dayAfter = secondaryDateMoment.clone().add( 1, 'days' );
+			const dayAfter = secondaryDateMoment.clone().add(1, 'days');
 			const leapDayInterval =
 				dayAfter.month() === 1 && dayAfter.date() === 29
 					? secondaryIntervalsByDate.get(
-							dayAfter.format( 'YYYY-MM-DD' )
-					  )
+							dayAfter.format('YYYY-MM-DD')
+						)
 					: undefined;
-			if ( leapDayInterval ) {
+			if (leapDayInterval) {
 				secondaryValue +=
-					leapDayInterval.subtotals[ selectedChartKey ] || 0;
+					leapDayInterval.subtotals[selectedChartKey] || 0;
 				secondaryLabelDateEnd = leapDayInterval.date_start;
 			}
 		}
 
-		chartData.push( {
+		chartData.push({
 			date: primaryDateFormatted,
 			primary: {
 				label: primaryLabel,
@@ -196,12 +189,12 @@ export function buildChartData(
 			secondary: {
 				label: secondaryLabel,
 				labelDate: secondaryLabelDate,
-				...( secondaryLabelDateEnd && {
+				...(secondaryLabelDateEnd && {
 					labelDateEnd: secondaryLabelDateEnd,
-				} ),
+				}),
 				value: secondaryValue,
 			},
-		} );
+		});
 	}
 
 	return chartData;

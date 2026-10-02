@@ -25,11 +25,11 @@ import Block from './block';
 import type { EditProps, ControlProps } from './types';
 import './editor.scss';
 
-const ShowDescriptionIfEmptyControl = ( {
+const ShowDescriptionIfEmptyControl = ({
 	showDescriptionIfEmpty,
 	setAttributes,
-}: ControlProps< 'showDescriptionIfEmpty' > ) => {
-	const label = __( 'Show description if empty', 'woocommerce' );
+}: ControlProps<'showDescriptionIfEmpty'>) => {
+	const label = __('Show description if empty', 'woocommerce');
 	const help = __(
 		"Display the product description if it doesn't have a summary",
 		'woocommerce'
@@ -37,32 +37,30 @@ const ShowDescriptionIfEmptyControl = ( {
 
 	return (
 		<ToolsPanelItem
-			label={ label }
-			hasValue={ () => showDescriptionIfEmpty === true }
-			onDeselect={ () =>
-				setAttributes( { showDescriptionIfEmpty: false } )
-			}
+			label={label}
+			hasValue={() => showDescriptionIfEmpty === true}
+			onDeselect={() => setAttributes({ showDescriptionIfEmpty: false })}
 			isShownByDefault
 		>
 			<ToggleControl
-				label={ label }
-				help={ help }
-				checked={ showDescriptionIfEmpty }
-				onChange={ ( value ) => {
-					setAttributes( {
+				label={label}
+				help={help}
+				checked={showDescriptionIfEmpty}
+				onChange={(value) => {
+					setAttributes({
 						showDescriptionIfEmpty: value,
-					} );
-				} }
+					});
+				}}
 			/>
 		</ToolsPanelItem>
 	);
 };
 
-const MaxWordCountControl = ( {
+const MaxWordCountControl = ({
 	summaryLength,
 	setAttributes,
-}: ControlProps< 'summaryLength' > ) => {
-	const label = __( 'Max word count', 'woocommerce' );
+}: ControlProps<'summaryLength'>) => {
+	const label = __('Max word count', 'woocommerce');
 	const help = __(
 		'If the content exceeds the word limit, only the first paragraph will be shown. If the content is within the limit, all paragraphs will be displayed. Set to 0 to remove the word limit.',
 		'woocommerce'
@@ -70,33 +68,33 @@ const MaxWordCountControl = ( {
 
 	return (
 		<ToolsPanelItem
-			label={ label }
-			hasValue={ () => summaryLength !== 0 }
-			onDeselect={ () => setAttributes( { summaryLength: 0 } ) }
+			label={label}
+			hasValue={() => summaryLength !== 0}
+			onDeselect={() => setAttributes({ summaryLength: 0 })}
 			isShownByDefault
 		>
 			<RangeControl
-				label={ label }
-				help={ help }
-				value={ summaryLength }
-				onChange={ ( value ) => {
-					setAttributes( {
+				label={label}
+				help={help}
+				value={summaryLength}
+				onChange={(value) => {
+					setAttributes({
 						summaryLength: value || 0,
-					} );
-				} }
-				min={ 0 }
-				max={ 200 }
-				step={ 1 }
+					});
+				}}
+				min={0}
+				max={200}
+				step={1}
 			/>
 		</ToolsPanelItem>
 	);
 };
 
-const LinkToDescriptionControl = ( {
+const LinkToDescriptionControl = ({
 	showLink,
 	setAttributes,
-}: ControlProps< 'showLink' > ) => {
-	const label = __( 'Link to description', 'woocommerce' );
+}: ControlProps<'showLink'>) => {
+	const label = __('Link to description', 'woocommerce');
 	const help = __(
 		"Display a button to let shoppers jump to the product's description",
 		'woocommerce'
@@ -104,50 +102,50 @@ const LinkToDescriptionControl = ( {
 
 	return (
 		<ToolsPanelItem
-			label={ label }
-			hasValue={ () => showLink === false }
-			onDeselect={ () => setAttributes( { showLink: false } ) }
+			label={label}
+			hasValue={() => showLink === false}
+			onDeselect={() => setAttributes({ showLink: false })}
 			isShownByDefault
 		>
 			<ToggleControl
-				label={ label }
-				help={ help }
-				checked={ showLink }
-				onChange={ ( value ) => {
-					setAttributes( {
+				label={label}
+				help={help}
+				checked={showLink}
+				onChange={(value) => {
+					setAttributes({
 						showLink: value,
-					} );
-				} }
+					});
+				}}
 			/>
 		</ToolsPanelItem>
 	);
 };
 
-const LinkToDescription = ( {
+const LinkToDescription = ({
 	linkText,
 	setAttributes,
-}: ControlProps< 'linkText' > ) => {
+}: ControlProps<'linkText'>) => {
 	return (
 		<p>
 			<RichText
 				identifier="linkToDescription"
 				className="wc-block-components-product-summary__more-link"
 				tagName="a"
-				aria-label={ __( '“Read more” link text', 'woocommerce' ) }
-				placeholder={ __( 'Add "read more" link text', 'woocommerce' ) }
-				value={ linkText }
-				onChange={ ( value ) => setAttributes( { linkText: value } ) }
+				aria-label={__('“Read more” link text', 'woocommerce')}
+				placeholder={__('Add "read more" link text', 'woocommerce')}
+				value={linkText}
+				onChange={(value) => setAttributes({ linkText: value })}
 				withoutInteractiveFormatting
 			/>
 		</p>
 	);
 };
 
-const Edit = ( {
+const Edit = ({
 	attributes,
 	context,
 	setAttributes,
-}: EditProps ): JSX.Element => {
+}: EditProps): JSX.Element => {
 	const blockProps = useBlockProps();
 	const {
 		showDescriptionIfEmpty,
@@ -157,57 +155,57 @@ const Edit = ( {
 		isDescendantOfAllProducts,
 	} = attributes;
 
-	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
+	const isDescendentOfQueryLoop = Number.isFinite(context.queryId);
 
 	let { isDescendentOfSingleProductTemplate } =
 		useIsDescendentOfSingleProductTemplate();
 
-	if ( isDescendentOfQueryLoop ) {
+	if (isDescendentOfQueryLoop) {
 		isDescendentOfSingleProductTemplate = false;
 	}
 
-	const { product } = useProduct( context.postId );
+	const { product } = useProduct(context.postId);
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<Block
-				isAdmin={ true }
-				{ ...attributes }
+				isAdmin={true}
+				{...attributes}
 				isDescendentOfSingleProductTemplate={
 					isDescendentOfSingleProductTemplate
 				}
-				product={ product }
+				product={product}
 			/>
 			<InspectorControls>
 				<ToolsPanel
-					label={ __( 'Settings', 'woocommerce' ) }
-					resetAll={ () => {
+					label={__('Settings', 'woocommerce')}
+					resetAll={() => {
 						const defaultSettings = {};
-						setAttributes( defaultSettings );
-					} }
+						setAttributes(defaultSettings);
+					}}
 				>
 					<MaxWordCountControl
-						summaryLength={ summaryLength }
-						setAttributes={ setAttributes }
+						summaryLength={summaryLength}
+						setAttributes={setAttributes}
 					/>
 					<ShowDescriptionIfEmptyControl
-						showDescriptionIfEmpty={ showDescriptionIfEmpty }
-						setAttributes={ setAttributes }
+						showDescriptionIfEmpty={showDescriptionIfEmpty}
+						setAttributes={setAttributes}
 					/>
-					{ ! isDescendantOfAllProducts && (
+					{!isDescendantOfAllProducts && (
 						<LinkToDescriptionControl
-							showLink={ showLink }
-							setAttributes={ setAttributes }
+							showLink={showLink}
+							setAttributes={setAttributes}
 						/>
-					) }
+					)}
 				</ToolsPanel>
 			</InspectorControls>
-			{ ! isDescendantOfAllProducts && showLink && (
+			{!isDescendantOfAllProducts && showLink && (
 				<LinkToDescription
-					linkText={ linkText }
-					setAttributes={ setAttributes }
+					linkText={linkText}
+					setAttributes={setAttributes}
 				/>
-			) }
+			)}
 		</div>
 	);
 };

@@ -18,24 +18,24 @@ export const buildQRLoginDeviceHeadline = (
 	device: QRLoginDeviceInfo | null
 ): string => {
 	const model = device?.model?.trim();
-	if ( model ) {
+	if (model) {
 		return sprintf(
 			/* translators: %s: device model, e.g. "iPhone 15". */
-			__( 'Signed in successfully on %s', 'woocommerce' ),
+			__('Signed in successfully on %s', 'woocommerce'),
 			model
 		);
 	}
 
 	const os = device?.os?.trim();
-	if ( os ) {
+	if (os) {
 		return sprintf(
 			/* translators: %s: OS name, e.g. "iOS" or "Android". */
-			__( 'Signed in successfully on %s', 'woocommerce' ),
+			__('Signed in successfully on %s', 'woocommerce'),
 			os
 		);
 	}
 
-	return __( 'Signed in successfully', 'woocommerce' );
+	return __('Signed in successfully', 'woocommerce');
 };
 
 /**
@@ -55,31 +55,29 @@ export const buildQRLoginDeviceLine = (
 	const parts: string[] = [];
 
 	const model = device?.model?.trim();
-	if ( model ) {
-		parts.push( model );
+	if (model) {
+		parts.push(model);
 	}
 
-	if ( device?.os ) {
+	if (device?.os) {
 		parts.push(
-			device.os_version
-				? `${ device.os } ${ device.os_version }`
-				: device.os
+			device.os_version ? `${device.os} ${device.os_version}` : device.os
 		);
 	}
 
-	if ( device?.app_version ) {
+	if (device?.app_version) {
 		parts.push(
 			sprintf(
 				/* translators: %s: mobile app version, e.g. "24.7.0". */
-				__( 'App version %s', 'woocommerce' ),
+				__('App version %s', 'woocommerce'),
 				device.app_version
 			)
 		);
 	}
 
 	return parts.length > 0
-		? parts.join( ' · ' )
-		: __( 'Mobile app', 'woocommerce' );
+		? parts.join(' · ')
+		: __('Mobile app', 'woocommerce');
 };
 
 /**
@@ -92,29 +90,27 @@ export const buildQRLoginDeviceLine = (
 export const buildQRLoginDeviceSubline = (
 	device: QRLoginDeviceInfo | null
 ): string => {
-	if ( ! device ) {
+	if (!device) {
 		return '';
 	}
 
 	const parts: string[] = [];
 
-	if ( device.os ) {
+	if (device.os) {
 		parts.push(
-			device.os_version
-				? `${ device.os } ${ device.os_version }`
-				: device.os
+			device.os_version ? `${device.os} ${device.os_version}` : device.os
 		);
 	}
 
-	if ( device.app_version ) {
+	if (device.app_version) {
 		parts.push(
 			sprintf(
 				/* translators: %s: mobile app version, e.g. "24.7.0". */
-				__( 'App version %s', 'woocommerce' ),
+				__('App version %s', 'woocommerce'),
 				device.app_version
 			)
 		);
 	}
 
-	return parts.join( ' · ' );
+	return parts.join(' · ');
 };

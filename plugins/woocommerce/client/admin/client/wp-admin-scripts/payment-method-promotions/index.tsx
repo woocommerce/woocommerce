@@ -16,33 +16,33 @@ const PAYMENT_METHOD_PROMOTIONS = [
 	},
 ];
 
-PAYMENT_METHOD_PROMOTIONS.forEach( ( paymentMethod ) => {
+PAYMENT_METHOD_PROMOTIONS.forEach((paymentMethod) => {
 	const container = document.querySelector(
-		`[data-gateway_id="${ paymentMethod.gatewayId }"]`
+		`[data-gateway_id="${paymentMethod.gatewayId}"]`
 	);
 
-	if ( container ) {
-		const columns = [ ...container.children ].map( ( child ) => {
+	if (container) {
+		const columns = [...container.children].map((child) => {
 			return {
 				className: child.className,
 				html: child.innerHTML,
-				width: child.getAttribute( 'width' ) || undefined,
+				width: child.getAttribute('width') || undefined,
 			};
-		} );
+		});
 		const title = container.getElementsByClassName(
 			'wc-payment-gateway-method-title'
 		);
-		const subTitle = container.getElementsByClassName( 'gateway-subtitle' );
+		const subTitle = container.getElementsByClassName('gateway-subtitle');
 
-		createRoot( container ).render(
+		createRoot(container).render(
 			<PaymentPromotionRow
-				columns={ columns }
-				paymentMethod={ paymentMethod }
-				title={ title.length === 1 ? title[ 0 ].innerHTML : undefined }
+				columns={columns}
+				paymentMethod={paymentMethod}
+				title={title.length === 1 ? title[0].innerHTML : undefined}
 				subTitleContent={
-					subTitle.length === 1 ? subTitle[ 0 ].innerHTML : undefined
+					subTitle.length === 1 ? subTitle[0].innerHTML : undefined
 				}
 			/>
 		);
 	}
-} );
+});

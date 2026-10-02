@@ -13,7 +13,7 @@ import './editor.scss';
 export const Edit = (): JSX.Element => {
 	const blockProps = useBlockProps();
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<Noninteractive>
 				<Block />
 			</Noninteractive>
@@ -22,5 +22,5 @@ export const Edit = (): JSX.Element => {
 };
 
 export const Save = (): JSX.Element => {
-	return <div { ...useBlockProps.save() } />;
+	return <div {...useBlockProps.save()} />;
 };

@@ -18,7 +18,7 @@ export type RegisteredChannel = {
 };
 
 export type RegisteredChannelsState = {
-	data?: Array< RegisteredChannel >;
+	data?: Array<RegisteredChannel>;
 	error?: ApiFetchError;
 };
 
@@ -40,13 +40,13 @@ export type RecommendedChannel = {
 	icon: string;
 	product: string;
 	plugin: string;
-	categories: Array< string >;
-	subcategories: Array< Subcategory >;
-	tags: Array< Tag >;
+	categories: Array<string>;
+	subcategories: Array<Subcategory>;
+	tags: Array<Tag>;
 };
 
 export type RecommendedChannelsState = {
-	data?: Array< RecommendedChannel >;
+	data?: Array<RecommendedChannel>;
 	error?: ApiFetchError;
 };
 
@@ -68,7 +68,7 @@ export type Campaign = {
 };
 
 export type CampaignsPage = {
-	data?: Array< Campaign >;
+	data?: Array<Campaign>;
 	error?: ApiFetchError;
 };
 
@@ -77,7 +77,7 @@ export type CampaignsMeta = {
 };
 
 export type CampaignsState = {
-	pages: Record< string, CampaignsPage >;
+	pages: Record<string, CampaignsPage>;
 	meta: CampaignsMeta;
 };
 
@@ -94,7 +94,7 @@ export type CampaignType = {
 };
 
 export type CampaignTypesState = {
-	data?: Array< CampaignType >;
+	data?: Array<CampaignType>;
 	error?: ApiFetchError;
 };
 

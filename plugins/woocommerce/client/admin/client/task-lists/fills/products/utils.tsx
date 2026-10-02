@@ -17,11 +17,11 @@ import {
 	SETUP_TASKLIST_PRODUCT_TYPES_FILTER,
 } from './constants';
 
-export const getProductTypes = ( {
+export const getProductTypes = ({
 	exclude,
 }: {
 	exclude?: ProductTypeKey[];
-} = {} ): ProductType[] => {
+} = {}): ProductType[] => {
 	/**
 	 * Experimental: Filter for adding custom product types to tasklist.
 	 *
@@ -33,11 +33,11 @@ export const getProductTypes = ( {
 		[]
 	) as ProductType[];
 
-	let productTypes = [ ...baseProductTypes, ...injectedProductTypes ];
+	let productTypes = [...baseProductTypes, ...injectedProductTypes];
 
-	if ( exclude && exclude?.length > 0 ) {
+	if (exclude && exclude?.length > 0) {
 		productTypes = productTypes.filter(
-			( productType ) => ! exclude.includes( productType.key )
+			(productType) => !exclude.includes(productType.key)
 		);
 	}
 
@@ -55,9 +55,9 @@ export const getSurfacedProductTypeKeys = (
 		onboardingProductTypes,
 		supportedOnboardingProductTypes
 	);
-	const sortedKeyStr = validOnboardingProductTypes.sort().join( ',' );
-	if ( ! onboardingProductTypesToSurfaced.hasOwnProperty( sortedKeyStr ) ) {
+	const sortedKeyStr = validOnboardingProductTypes.sort().join(',');
+	if (!onboardingProductTypesToSurfaced.hasOwnProperty(sortedKeyStr)) {
 		return defaultSurfacedProductTypes;
 	}
-	return onboardingProductTypesToSurfaced[ sortedKeyStr ];
+	return onboardingProductTypesToSurfaced[sortedKeyStr];
 };

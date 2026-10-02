@@ -33,11 +33,11 @@ export interface UpdatesCellProps {
 	post: EmailType;
 }
 
-export const UpdatesCell = ( { post }: UpdatesCellProps ) => {
-	const eligible = shouldShowReviewUpdate( post );
+export const UpdatesCell = ({ post }: UpdatesCellProps) => {
+	const eligible = shouldShowReviewUpdate(post);
 
-	if ( ! eligible ) {
-		return <span aria-label={ __( 'Up to date', 'woocommerce' ) }>—</span>;
+	if (!eligible) {
+		return <span aria-label={__('Up to date', 'woocommerce')}>—</span>;
 	}
 
 	const onReviewUpdate = () => {
@@ -46,17 +46,17 @@ export const UpdatesCell = ( { post }: UpdatesCellProps ) => {
 		// The detector should never stamp _wc_email_template_status on such
 		// rows, but mirror the existing `edit` row-action pattern in the
 		// listview rather than rely on that invariant.
-		if ( ! post.post_id ) {
+		if (!post.post_id) {
 			return;
 		}
 		window.location.href = getAdminLink(
-			buildEmailEditorReviewUrl( parseInt( post.post_id, 10 ) )
+			buildEmailEditorReviewUrl(parseInt(post.post_id, 10))
 		);
 	};
 
 	return (
-		<Button variant="secondary" onClick={ onReviewUpdate }>
-			{ __( 'Review update', 'woocommerce' ) }
+		<Button variant="secondary" onClick={onReviewUpdate}>
+			{__('Review update', 'woocommerce')}
 		</Button>
 	);
 };

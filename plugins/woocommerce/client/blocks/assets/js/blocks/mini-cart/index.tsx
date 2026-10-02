@@ -20,11 +20,11 @@ const featurePluginSupport = {
 	},
 };
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	icon: {
 		src: (
 			<Icon
-				icon={ miniCartAlt }
+				icon={miniCartAlt}
 				className="wc-block-editor-components-block-icon wc-block-editor-mini-cart__icon"
 			/>
 		),
@@ -42,4 +42,4 @@ registerBlockType( metadata, {
 	save() {
 		return null;
 	},
-} );
+});

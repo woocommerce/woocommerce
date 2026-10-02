@@ -21,8 +21,8 @@ export type PluginProps = {
 	isDisabled?: boolean;
 	isInstalled: boolean;
 	description?: string;
-	installAndActivate?: ( slug: string ) => void;
-	onManage?: ( slug: string ) => void;
+	installAndActivate?: (slug: string) => void;
+	onManage?: (slug: string) => void;
 	imageUrl?: string;
 	manageUrl?: string;
 	name: string;
@@ -33,10 +33,10 @@ export type PluginProps = {
 };
 
 const tagsToPillsMap = {
-	marketplace: __( 'Marketplace', 'woocommerce' ),
+	marketplace: __('Marketplace', 'woocommerce'),
 };
 
-export const Plugin = ( {
+export const Plugin = ({
 	description,
 	imageUrl,
 	installAndActivate = () => {},
@@ -52,99 +52,95 @@ export const Plugin = ( {
 	tags,
 	learnMoreLink = '',
 	installExternal = false,
-}: PluginProps ) => {
+}: PluginProps) => {
 	return (
 		<div className="woocommerce-plugin-list__plugin">
-			{ imageUrl && (
+			{imageUrl && (
 				<div className="woocommerce-plugin-list__plugin-logo">
 					<img
-						src={ imageUrl }
-						alt={ sprintf(
+						src={imageUrl}
+						alt={sprintf(
 							/* translators: %s = name of the plugin */
-							__( '%s logo', 'woocommerce' ),
+							__('%s logo', 'woocommerce'),
 							name
-						) }
+						)}
 					/>
 				</div>
-			) }
+			)}
 			<div className="woocommerce-plugin-list__plugin-text">
 				<Text variant="subtitle.small" as="h4">
-					{ name }
-					{ isBuiltByWC && (
-						<Pill>
-							{ __( 'Built by WooCommerce', 'woocommerce' ) }
-						</Pill>
-					) }
-					{ tags?.map(
-						( tag ) =>
-							tagsToPillsMap[ tag ] && (
-								<Pill key={ tag }>
-									{ tagsToPillsMap[ tag ] }
-								</Pill>
+					{name}
+					{isBuiltByWC && (
+						<Pill>{__('Built by WooCommerce', 'woocommerce')}</Pill>
+					)}
+					{tags?.map(
+						(tag) =>
+							tagsToPillsMap[tag] && (
+								<Pill key={tag}>{tagsToPillsMap[tag]}</Pill>
 							)
-					) }
+					)}
 				</Text>
-				<Text variant="subtitle.small">{ description }</Text>
+				<Text variant="subtitle.small">{description}</Text>
 			</div>
 			<div className="woocommerce-plugin-list__plugin-action">
-				{ isActive && manageUrl && (
+				{isActive && manageUrl && (
 					<Button
-						disabled={ isDisabled }
-						isBusy={ isBusy }
+						disabled={isDisabled}
+						isBusy={isBusy}
 						variant="secondary"
-						href={ getAdminLink( manageUrl ) }
-						onClick={ () => {
-							recordEvent( 'marketing_manage', {
+						href={getAdminLink(manageUrl)}
+						onClick={() => {
+							recordEvent('marketing_manage', {
 								extension_name: slug,
-							} );
-							onManage( slug );
-						} }
+							});
+							onManage(slug);
+						}}
 					>
-						{ __( 'Manage', 'woocommerce' ) }
+						{__('Manage', 'woocommerce')}
 					</Button>
-				) }
-				{ isInstalled && ! isActive && (
+				)}
+				{isInstalled && !isActive && (
 					<Button
-						disabled={ isDisabled }
-						isBusy={ isBusy }
+						disabled={isDisabled}
+						isBusy={isBusy}
 						variant="secondary"
-						onClick={ () => installAndActivate( slug ) }
+						onClick={() => installAndActivate(slug)}
 					>
-						{ __( 'Activate', 'woocommerce' ) }
+						{__('Activate', 'woocommerce')}
 					</Button>
-				) }
-				{ ! isInstalled && ! installExternal && (
+				)}
+				{!isInstalled && !installExternal && (
 					<Button
-						disabled={ isDisabled }
-						isBusy={ isBusy }
+						disabled={isDisabled}
+						isBusy={isBusy}
 						variant="secondary"
-						onClick={ () => {
-							installAndActivate( slug );
-						} }
+						onClick={() => {
+							installAndActivate(slug);
+						}}
 					>
-						{ __( 'Get started', 'woocommerce' ) }
+						{__('Get started', 'woocommerce')}
 					</Button>
-				) }
-				{ ! isInstalled && installExternal && (
+				)}
+				{!isInstalled && installExternal && (
 					<>
-						{ learnMoreLink ? (
+						{learnMoreLink ? (
 							<Button
-								disabled={ isDisabled }
-								isBusy={ isBusy }
+								disabled={isDisabled}
+								isBusy={isBusy}
 								variant="secondary"
-								onClick={ () => {
-									window.open( learnMoreLink, '_blank' );
-								} }
+								onClick={() => {
+									window.open(learnMoreLink, '_blank');
+								}}
 							>
-								{ __( 'View extension', 'woocommerce' ) }
+								{__('View extension', 'woocommerce')}
 							</Button>
 						) : (
-							<Button disabled={ true } variant="secondary">
-								{ __( 'View extension', 'woocommerce' ) }
+							<Button disabled={true} variant="secondary">
+								{__('View extension', 'woocommerce')}
 							</Button>
-						) }
+						)}
 					</>
-				) }
+				)}
 			</div>
 		</div>
 	);

@@ -4,7 +4,7 @@
 import { InnerBlockTemplate } from '@wordpress/blocks';
 
 const TEMPLATE: InnerBlockTemplate[] = [
-	[ 'woocommerce/product-reviews-title' ],
+	['woocommerce/product-reviews-title'],
 	[
 		'woocommerce/product-review-template',
 		{},
@@ -49,7 +49,7 @@ const TEMPLATE: InnerBlockTemplate[] = [
 											fontSize: 'small',
 										},
 									],
-									[ 'woocommerce/product-review-rating' ],
+									['woocommerce/product-review-rating'],
 								],
 							],
 							[
@@ -74,15 +74,15 @@ const TEMPLATE: InnerBlockTemplate[] = [
 									],
 								],
 							],
-							[ 'woocommerce/product-review-content' ],
+							['woocommerce/product-review-content'],
 						],
 					],
 				],
 			],
 		],
 	],
-	[ 'woocommerce/product-reviews-pagination' ],
-	[ 'woocommerce/product-review-form' ],
+	['woocommerce/product-reviews-pagination'],
+	['woocommerce/product-review-form'],
 ];
 
 export default TEMPLATE;

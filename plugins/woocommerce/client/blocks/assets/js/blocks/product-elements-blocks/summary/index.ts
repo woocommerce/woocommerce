@@ -33,7 +33,7 @@ const deprecated = [
 	},
 	{
 		save,
-		migrate: ( attributes: BlockAttributes ) => {
+		migrate: (attributes: BlockAttributes) => {
 			// We don't deprecate attributes, but adding new ones.
 			// For backwards compatibility, some new attributes require
 			// different defaults than new ones.
@@ -43,8 +43,7 @@ const deprecated = [
 				summaryLength: 150,
 			};
 		},
-		isEligible: ( attributes: BlockAttributes ) =>
-			isEmptyObject( attributes ),
+		isEligible: (attributes: BlockAttributes) => isEmptyObject(attributes),
 	},
 ];
 
@@ -57,6 +56,6 @@ const blockConfig = {
 	save: () => null,
 };
 
-registerProductBlockType( blockConfig, {
+registerProductBlockType(blockConfig, {
 	isAvailableOnPostEditor: true,
-} );
+});

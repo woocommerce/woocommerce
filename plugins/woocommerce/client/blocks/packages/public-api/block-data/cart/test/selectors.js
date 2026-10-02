@@ -151,54 +151,54 @@ const state = {
 	],
 };
 
-describe( 'getCartData', () => {
-	it( 'returns expected values for items existing in state', () => {
-		expect( getCartData( state ) ).toEqual( state.cartData );
-	} );
-} );
+describe('getCartData', () => {
+	it('returns expected values for items existing in state', () => {
+		expect(getCartData(state)).toEqual(state.cartData);
+	});
+});
 
-describe( 'getCartTotals', () => {
-	it( 'returns expected values for items existing in state', () => {
-		expect( getCartTotals( state ) ).toEqual( state.cartData.totals );
-	} );
-} );
+describe('getCartTotals', () => {
+	it('returns expected values for items existing in state', () => {
+		expect(getCartTotals(state)).toEqual(state.cartData.totals);
+	});
+});
 
-describe( 'getCartMeta', () => {
-	it( 'returns expected values for items existing in state', () => {
-		expect( getCartMeta( state ) ).toEqual( state.metaData );
-	} );
-} );
+describe('getCartMeta', () => {
+	it('returns expected values for items existing in state', () => {
+		expect(getCartMeta(state)).toEqual(state.metaData);
+	});
+});
 
-describe( 'getCartErrors', () => {
-	it( 'returns expected values for items existing in state', () => {
-		expect( getCartErrors( state ) ).toEqual( state.errors );
-	} );
-} );
+describe('getCartErrors', () => {
+	it('returns expected values for items existing in state', () => {
+		expect(getCartErrors(state)).toEqual(state.errors);
+	});
+});
 
-describe( 'isApplyingCoupon', () => {
-	it( 'returns expected values for items existing in state', () => {
-		expect( isApplyingCoupon( state ) ).toEqual( true );
-	} );
-} );
+describe('isApplyingCoupon', () => {
+	it('returns expected values for items existing in state', () => {
+		expect(isApplyingCoupon(state)).toEqual(true);
+	});
+});
 
-describe( 'getCouponBeingApplied', () => {
-	it( 'returns expected values for items existing in state', () => {
-		expect( getCouponBeingApplied( state ) ).toEqual(
+describe('getCouponBeingApplied', () => {
+	it('returns expected values for items existing in state', () => {
+		expect(getCouponBeingApplied(state)).toEqual(
 			state.metaData.applyingCoupon
 		);
-	} );
-} );
+	});
+});
 
-describe( 'isRemovingCoupon', () => {
-	it( 'returns expected values for items existing in state', () => {
-		expect( isRemovingCoupon( state ) ).toEqual( true );
-	} );
-} );
+describe('isRemovingCoupon', () => {
+	it('returns expected values for items existing in state', () => {
+		expect(isRemovingCoupon(state)).toEqual(true);
+	});
+});
 
-describe( 'getCouponBeingRemoved', () => {
-	it( 'returns expected values for items existing in state', () => {
-		expect( getCouponBeingRemoved( state ) ).toEqual(
+describe('getCouponBeingRemoved', () => {
+	it('returns expected values for items existing in state', () => {
+		expect(getCouponBeingRemoved(state)).toEqual(
 			state.metaData.removingCoupon
 		);
-	} );
-} );
+	});
+});

@@ -17,26 +17,26 @@ import TEMPLATE from './template';
 import { ProductReviewsEditProps } from './types';
 import { htmlElementMessages } from '../../utils/messages';
 
-const Edit = ( {
+const Edit = ({
 	attributes,
 	setAttributes,
 	clientId,
 	context,
-}: ProductReviewsEditProps ) => {
+}: ProductReviewsEditProps) => {
 	const { tagName: TagName = 'div' } = attributes;
 	const blockProps = useBlockProps();
-	const innerBlocksProps = useInnerBlocksProps( blockProps, {
+	const innerBlocksProps = useInnerBlocksProps(blockProps, {
 		template: TEMPLATE,
-	} );
+	});
 
 	const { hasInvalidContext, warningElement } =
-		useQueryLoopProductContextValidation( {
+		useQueryLoopProductContextValidation({
 			clientId,
 			postType: context.postType,
-			blockName: __( 'Product Reviews', 'woocommerce' ),
-		} );
+			blockName: __('Product Reviews', 'woocommerce'),
+		});
 
-	if ( hasInvalidContext ) {
+	if (hasInvalidContext) {
 		return warningElement;
 	}
 
@@ -47,23 +47,23 @@ const Edit = ( {
 					// @ts-expect-error missing types.
 					__nextHasNoMarginBottom
 					__next40pxDefaultSize
-					label={ __( 'HTML element', 'woocommerce' ) }
-					options={ [
+					label={__('HTML element', 'woocommerce')}
+					options={[
 						{
-							label: __( 'Default (<div>)', 'woocommerce' ),
+							label: __('Default (<div>)', 'woocommerce'),
 							value: 'div',
 						},
 						{ label: '<section>', value: 'section' },
 						{ label: '<aside>', value: 'aside' },
-					] }
-					value={ TagName }
-					onChange={ ( value: 'div' | 'section' | 'aside' ) =>
-						setAttributes( { tagName: value } )
+					]}
+					value={TagName}
+					onChange={(value: 'div' | 'section' | 'aside') =>
+						setAttributes({ tagName: value })
 					}
-					help={ htmlElementMessages[ TagName ] }
+					help={htmlElementMessages[TagName]}
 				/>
 			</InspectorControls>
-			<TagName { ...innerBlocksProps } />
+			<TagName {...innerBlocksProps} />
 		</>
 	);
 };

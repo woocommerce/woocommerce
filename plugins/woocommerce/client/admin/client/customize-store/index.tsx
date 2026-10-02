@@ -34,60 +34,60 @@ import banner2Illu from './assets/banner-2-illu.svg';
 import './style.scss';
 
 const CustomizeStoreController = () => {
-	useFullScreen( [ 'woocommerce-customize-store' ] );
+	useFullScreen(['woocommerce-customize-store']);
 
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const { updateOptions } = useDispatch(OPTIONS_STORE_NAME);
 
-	const currentTheme = useSelect( ( select ) => {
+	const currentTheme = useSelect((select) => {
 		// @ts-ignore
-		return select( 'core' ).getCurrentTheme();
-	}, [] );
+		return select('core').getCurrentTheme();
+	}, []);
 
 	const isBlockTheme = currentTheme?.is_block_theme;
 
-	const designUrl = useMemo( () => {
+	const designUrl = useMemo(() => {
 		// Encoding is needed to carry-over query parameters.
 		const encodedReturnUrl = encodeURIComponent(
 			'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store'
 		);
 
 		return isBlockTheme
-			? getAdminLink( 'site-editor.php' )
-			: getAdminLink( `customize.php?return=${ encodedReturnUrl }` );
-	}, [ isBlockTheme ] );
+			? getAdminLink('site-editor.php')
+			: getAdminLink(`customize.php?return=${encodedReturnUrl}`);
+	}, [isBlockTheme]);
 
-	const marketplaceUrl = useMemo( () => {
-		if ( isWooExpress() ) {
-			return getAdminLink( 'themes.php' );
+	const marketplaceUrl = useMemo(() => {
+		if (isWooExpress()) {
+			return getAdminLink('themes.php');
 		}
 		return getAdminLink(
 			'admin.php?page=wc-admin&tab=themes&path=%2Fextensions'
 		);
-	}, [] );
+	}, []);
 
-	useEffect( () => {
-		document.body.classList.add( 'woocommerce-customize-store' );
+	useEffect(() => {
+		document.body.classList.add('woocommerce-customize-store');
 		return () => {
-			document.body.classList.remove( 'woocommerce-customize-store' );
+			document.body.classList.remove('woocommerce-customize-store');
 		};
-	}, [] );
+	}, []);
 
 	const markTaskComplete = async () => {
-		await updateOptions( {
+		await updateOptions({
 			woocommerce_admin_customize_store_completed: 'yes',
-		} );
+		});
 	};
 
-	const isNewTabClick = ( event: React.MouseEvent ) => {
+	const isNewTabClick = (event: React.MouseEvent) => {
 		// Middle mouse button, Cmd+Click (Mac), or Ctrl+Click (Windows/Linux)
 		return event.button === 1 || event.metaKey || event.ctrlKey;
 	};
 
 	const handleClick = async (
-		event: React.MouseEvent< HTMLAnchorElement >,
+		event: React.MouseEvent<HTMLAnchorElement>,
 		href: string
 	) => {
-		if ( isNewTabClick( event ) ) {
+		if (isNewTabClick(event)) {
 			// New tab: page stays open, so fire-and-forget is safe
 			void markTaskComplete();
 			return;
@@ -99,20 +99,20 @@ const CustomizeStoreController = () => {
 	};
 
 	const handleDesignClick = async (
-		event: React.MouseEvent< HTMLAnchorElement >
+		event: React.MouseEvent<HTMLAnchorElement>
 	) => {
-		recordEvent( 'customize_your_store_intro_customize_click', {
+		recordEvent('customize_your_store_intro_customize_click', {
 			theme_type: isBlockTheme ? 'block' : 'classic',
-		} );
+		});
 
-		await handleClick( event, designUrl );
+		await handleClick(event, designUrl);
 	};
 
 	const handleMarketplaceClick = async (
-		event: React.MouseEvent< HTMLAnchorElement >
+		event: React.MouseEvent<HTMLAnchorElement>
 	) => {
-		recordEvent( 'customize_your_store_intro_browse_all_themes_click' );
-		await handleClick( event, marketplaceUrl );
+		recordEvent('customize_your_store_intro_browse_all_themes_click');
+		await handleClick(event, marketplaceUrl);
 	};
 
 	const chevronIcon = isRTL() ? chevronRight : chevronLeft;
@@ -122,51 +122,51 @@ const CustomizeStoreController = () => {
 			<div className="woocommerce-customize-store-sidebar">
 				<motion.div
 					className="woocommerce-edit-site-layout__header-container"
-					animate={ 'view' }
+					animate={'view'}
 				>
 					<SiteHub
-						variants={ {
+						variants={{
 							view: { x: 0 },
-						} }
-						isTransparent={ false }
+						}}
+						isTransparent={false}
 						className="woocommerce-edit-site-layout__hub"
 					/>
 				</motion.div>
 
 				<VStack
 					className="woocommerce-edit-site-sidebar-navigation-screen__main"
-					spacing={ 0 }
+					spacing={0}
 					justify="flex-start"
 				>
 					<HStack
-						spacing={ 4 }
+						spacing={4}
 						alignment="flex-start"
 						className="woocommerce-edit-site-sidebar-navigation-screen__title-icon"
 					>
 						<SidebarButton
-							href={ getNewPath( {}, '/', {} ) }
-							icon={ chevronIcon }
-							label={ __( 'Back', 'woocommerce' ) }
-							showTooltip={ false }
+							href={getNewPath({}, '/', {})}
+							icon={chevronIcon}
+							label={__('Back', 'woocommerce')}
+							showTooltip={false}
 						/>
 
 						<Heading
 							className="woocommerce-edit-site-sidebar-navigation-screen__title"
-							level={ 1 }
+							level={1}
 							as="h1"
 						>
-							<Button href={ getNewPath( {}, '/', {} ) }>
-								{ __( 'Customize your store', 'woocommerce' ) }
+							<Button href={getNewPath({}, '/', {})}>
+								{__('Customize your store', 'woocommerce')}
 							</Button>
 						</Heading>
 					</HStack>
 
 					<div className="woocommerce-edit-site-sidebar-navigation-screen__content">
 						<p className="woocommerce-edit-site-sidebar-navigation-screen__description">
-							{ __(
+							{__(
 								'Design a store that reflects your brand and business. Customize your active theme, select a professionally designed theme, or create a new look using our store designer.',
 								'woocommerce'
-							) }
+							)}
 						</p>
 					</div>
 				</VStack>
@@ -176,30 +176,30 @@ const CustomizeStoreController = () => {
 				<div className="woocommerce-customize-store-banner">
 					<div className="woocommerce-customize-store-banner-content">
 						<div className="woocommerce-customize-store__banner-actions">
-							<h2>{ __( 'Design your own', 'woocommerce' ) }</h2>
+							<h2>{__('Design your own', 'woocommerce')}</h2>
 							<p>
-								{ __(
+								{__(
 									'Quickly create a beautiful store using our built-in store designer. Choose your layout, select a style, and much more.',
 									'woocommerce'
-								) }
+								)}
 							</p>
 							<Button
 								variant="primary"
-								onClick={ handleDesignClick }
-								href={ designUrl }
+								onClick={handleDesignClick}
+								href={designUrl}
 							>
-								{ __( 'Start designing', 'woocommerce' ) }
+								{__('Start designing', 'woocommerce')}
 							</Button>
 						</div>
 					</div>
 					<div className="woocommerce-banner-visual">
 						<img
-							src={ banner1Shape }
+							src={banner1Shape}
 							alt=""
 							className="woocommerce-banner-shape"
 						/>
 						<img
-							src={ banner1Illu }
+							src={banner1Illu}
 							alt=""
 							className="woocommerce-banner-icon"
 						/>
@@ -210,59 +210,53 @@ const CustomizeStoreController = () => {
 					<div className="woocommerce-customize-store-banner-content">
 						<div className="woocommerce-customize-store__banner-actions">
 							<h2>
-								{ __(
-									'Pick your perfect theme',
-									'woocommerce'
-								) }
+								{__('Pick your perfect theme', 'woocommerce')}
 							</h2>
 							<div className="pick-your-theme-banner__content">
 								<p>
-									{ __(
+									{__(
 										'Bring your vision to life — no coding required. Explore hundreds of free and paid ecommerce-optimized themes.',
 										'woocommerce'
-									) }
+									)}
 								</p>
 								<ul>
 									<li>
-										{ __(
+										{__(
 											'Themes for every industry',
 											'woocommerce'
-										) }
+										)}
 									</li>
 									<li>
-										{ __(
+										{__(
 											'Ready to use out of the box',
 											'woocommerce'
-										) }
+										)}
 									</li>
 									<li>
-										{ __(
+										{__(
 											'30-day money-back guarantee',
 											'woocommerce'
-										) }
+										)}
 									</li>
 								</ul>
 							</div>
 							<Button
 								variant="primary"
-								onClick={ handleMarketplaceClick }
-								href={ marketplaceUrl }
+								onClick={handleMarketplaceClick}
+								href={marketplaceUrl}
 							>
-								{ __(
-									'Browse the Marketplace',
-									'woocommerce'
-								) }
+								{__('Browse the Marketplace', 'woocommerce')}
 							</Button>
 						</div>
 					</div>
 					<div className="woocommerce-banner-visual">
 						<img
-							src={ banner2Shape }
+							src={banner2Shape}
 							alt=""
 							className="woocommerce-banner-shape"
 						/>
 						<img
-							src={ banner2Illu }
+							src={banner2Illu}
 							alt=""
 							className="woocommerce-banner-icon"
 						/>

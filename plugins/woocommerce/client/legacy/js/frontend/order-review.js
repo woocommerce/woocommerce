@@ -33,7 +33,9 @@
 		function focusInput( input ) {
 			input.focus();
 			input.checked = true;
-			input.dispatchEvent( new window.Event( 'change', { bubbles: true } ) );
+			input.dispatchEvent(
+				new window.Event( 'change', { bubbles: true } )
+			);
 		}
 
 		// DOM order is 5..1; under row-reverse the next visual star is the previous DOM input.
@@ -102,12 +104,13 @@
 	 * @return {boolean}
 	 */
 	function isRowDirty( row ) {
-		var initialRating = parseInt(
-			row.getAttribute( 'data-initial-rating' ) || '0',
-			10
-		) || 0;
+		var initialRating =
+			parseInt( row.getAttribute( 'data-initial-rating' ) || '0', 10 ) ||
+			0;
 		// Trim to match currentText so prefilled whitespace doesn't mark the row dirty.
-		var initialText = ( row.getAttribute( 'data-initial-text' ) || '' ).trim();
+		var initialText = (
+			row.getAttribute( 'data-initial-text' ) || ''
+		).trim();
 		return (
 			currentRating( row ) !== initialRating ||
 			currentText( row ) !== initialText
@@ -247,15 +250,13 @@
 		if ( existing ) {
 			existing.parentNode.removeChild( existing );
 		}
-		var i18n =
-			( window.wcOrderReview && window.wcOrderReview.i18n ) || {};
+		var i18n = ( window.wcOrderReview && window.wcOrderReview.i18n ) || {};
 		var defaults = {
 			ok: i18n.ok || 'Thanks, your review is live.',
 			pending_moderation:
 				i18n.pending_moderation ||
 				'Thanks, your review is pending approval.',
-			error:
-				i18n.error || 'Something went wrong, please try again.',
+			error: i18n.error || 'Something went wrong, please try again.',
 		};
 		var note = document.createElement( 'p' );
 		note.className =
@@ -284,7 +285,10 @@
 
 			if ( ! validate() ) {
 				var firstError = form.querySelector( '.' + ERROR_CLASS );
-				if ( firstError && typeof firstError.scrollIntoView === 'function' ) {
+				if (
+					firstError &&
+					typeof firstError.scrollIntoView === 'function'
+				) {
 					firstError.scrollIntoView( {
 						behavior: 'smooth',
 						block: 'center',
@@ -397,7 +401,9 @@
 					);
 				} )
 				.then( function () {
-					if ( typeof form.syncReviewOrderSubmitGate === 'function' ) {
+					if (
+						typeof form.syncReviewOrderSubmitGate === 'function'
+					) {
 						form.syncReviewOrderSubmitGate();
 					} else if ( submit ) {
 						submit.disabled = false;

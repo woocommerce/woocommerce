@@ -14,48 +14,43 @@ import { getHistory, getNewPath, useQuery } from '@woocommerce/navigation';
 import Layout from './layout';
 import { getAdminSetting } from '~/utils/admin-settings';
 
-type HomescreenProps = ReturnType< typeof withSelectHandler > & {
+type HomescreenProps = ReturnType<typeof withSelectHandler> & {
 	hasFinishedResolution: boolean;
 };
 
-const Homescreen = ( {
+const Homescreen = ({
 	profileItems: {
 		completed: profilerCompleted,
 		skipped: profilerSkipped,
 	} = {},
 	hasFinishedResolution,
-}: HomescreenProps ) => {
-	useEffect( () => {
-		if (
-			hasFinishedResolution &&
-			! profilerCompleted &&
-			! profilerSkipped
-		) {
-			getHistory().push( getNewPath( {}, '/setup-wizard', {} ) );
+}: HomescreenProps) => {
+	useEffect(() => {
+		if (hasFinishedResolution && !profilerCompleted && !profilerSkipped) {
+			getHistory().push(getNewPath({}, '/setup-wizard', {}));
 		}
-	}, [ hasFinishedResolution, profilerCompleted, profilerSkipped ] );
+	}, [hasFinishedResolution, profilerCompleted, profilerSkipped]);
 
 	const query = useQuery();
 
 	// @ts-expect-error -- TODO: convert Layout to TS component
-	return <Layout query={ query } />;
+	return <Layout query={query} />;
 };
 
-const onboardingData = getAdminSetting( 'onboarding', {} );
+const onboardingData = getAdminSetting('onboarding', {});
 
-const withSelectHandler = ( select: SelectFunction ) => {
-	const { getProfileItems, hasFinishedResolution } =
-		select( onboardingStore );
+const withSelectHandler = (select: SelectFunction) => {
+	const { getProfileItems, hasFinishedResolution } = select(onboardingStore);
 
 	return {
 		profileItems: getProfileItems(),
-		hasFinishedResolution: hasFinishedResolution( 'getProfileItems', [] ),
+		hasFinishedResolution: hasFinishedResolution('getProfileItems', []),
 	};
 };
 
 export default compose(
-	withOnboardingHydration( {
+	withOnboardingHydration({
 		profileItems: onboardingData.profile,
-	} ),
-	withSelect( withSelectHandler )
-)( Homescreen );
+	}),
+	withSelect(withSelectHandler)
+)(Homescreen);

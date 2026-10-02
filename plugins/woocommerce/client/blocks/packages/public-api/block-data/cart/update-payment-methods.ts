@@ -17,11 +17,11 @@ import { store as cartStore } from './index';
  */
 export const updatePaymentMethods = async () => {
 	const isInitialized =
-		select( cartStore ).hasFinishedResolution( 'getCartData' );
-	if ( ! isInitialized ) {
+		select(cartStore).hasFinishedResolution('getCartData');
+	if (!isInitialized) {
 		return false;
 	}
-	await dispatch( paymentStore ).__internalUpdateAvailablePaymentMethods();
+	await dispatch(paymentStore).__internalUpdateAvailablePaymentMethods();
 	return true;
 };
 

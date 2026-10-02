@@ -42,13 +42,13 @@ export default {
 			},
 		},
 	},
-} as Meta< ValidationInputErrorProps >;
+} as Meta<ValidationInputErrorProps>;
 
-const Template: StoryFn< ValidationInputErrorProps > = ( args ) => {
-	return <ValidationInputError { ...args } />;
+const Template: StoryFn<ValidationInputErrorProps> = (args) => {
+	return <ValidationInputError {...args} />;
 };
 
-export const Default = Template.bind( {} );
+export const Default = Template.bind({});
 Default.args = {
 	errorMessage: 'An error message to show to the user.',
 };

@@ -29,26 +29,26 @@ import {
 } from '../edit-utils.js';
 import { ReviewsByProductEditorProps } from './types';
 
-const ReviewsByProductEditor = ( {
+const ReviewsByProductEditor = ({
 	attributes,
 	debouncedSpeak,
 	setAttributes,
-}: ReviewsByProductEditorProps ) => {
+}: ReviewsByProductEditorProps) => {
 	const { editMode, productId } = attributes;
 
 	const blockProps = useBlockProps();
 
-	const renderProductControlItem = ( args ) => {
+	const renderProductControlItem = (args) => {
 		const { item = 0 } = args;
 
 		return (
 			<SearchListItem
-				{ ...args }
-				item={ {
+				{...args}
+				item={{
 					...item,
 					count: item.details.review_count,
-				} }
-				countLabel={ sprintf(
+				}}
+				countLabel={sprintf(
 					/* translators: %d is the review count. */
 					_n(
 						'%d review',
@@ -57,8 +57,8 @@ const ReviewsByProductEditor = ( {
 						'woocommerce'
 					),
 					item.details.review_count
-				) }
-				aria-label={ sprintf(
+				)}
+				aria-label={sprintf(
 					/* translators: %1$s is the item name, and %2$d is the number of reviews for the item. */
 					_n(
 						'%1$s, has %2$d review',
@@ -66,9 +66,9 @@ const ReviewsByProductEditor = ( {
 						item.details.review_count,
 						'woocommerce'
 					),
-					decodeEntities( item.name ),
+					decodeEntities(item.name),
 					item.details.review_count
-				) }
+				)}
 			/>
 		);
 	};
@@ -77,62 +77,59 @@ const ReviewsByProductEditor = ( {
 		return (
 			<InspectorControls key="inspector">
 				<ToolsPanel
-					label={ __( 'Content', 'woocommerce' ) }
-					resetAll={ () =>
-						setAttributes( {
+					label={__('Content', 'woocommerce')}
+					resetAll={() =>
+						setAttributes({
 							showReviewRating: true,
 							showReviewerName: true,
 							showReviewImage: true,
 							showReviewDate: true,
 							showReviewContent: true,
 							imageType: 'reviewer',
-						} )
+						})
 					}
 				>
-					{ getSharedReviewContentControls(
-						attributes,
-						setAttributes
-					) }
+					{getSharedReviewContentControls(attributes, setAttributes)}
 				</ToolsPanel>
 				<ToolsPanel
-					label={ __( 'List Settings', 'woocommerce' ) }
-					resetAll={ () =>
-						setAttributes( {
+					label={__('List Settings', 'woocommerce')}
+					resetAll={() =>
+						setAttributes({
 							showOrderby: true,
 							orderby: 'most-recent',
 							reviewsOnPageLoad: 10,
 							offset: 0,
 							showLoadMore: true,
 							reviewsOnLoadMore: 10,
-						} )
+						})
 					}
 				>
-					{ getSharedReviewListControls( attributes, setAttributes, {
+					{getSharedReviewListControls(attributes, setAttributes, {
 						showOffset: true,
-					} ) }
+					})}
 				</ToolsPanel>
 				<ToolsPanel
-					label={ __( 'Product', 'woocommerce' ) }
-					resetAll={ () => setAttributes( { productId: 0 } ) }
+					label={__('Product', 'woocommerce')}
+					resetAll={() => setAttributes({ productId: 0 })}
 				>
 					<ToolsPanelItem
-						hasValue={ () => !! attributes.productId }
-						label={ __( 'Product', 'woocommerce' ) }
-						onDeselect={ () => setAttributes( { productId: 0 } ) }
+						hasValue={() => !!attributes.productId}
+						label={__('Product', 'woocommerce')}
+						onDeselect={() => setAttributes({ productId: 0 })}
 						isShownByDefault
 					>
 						<ProductControl
 							selected={
 								attributes.productId
-									? [ attributes.productId ]
+									? [attributes.productId]
 									: []
 							}
-							onChange={ ( value = [] ) => {
-								const id = value[ 0 ] ? value[ 0 ].id : 0;
-								setAttributes( { productId: id } );
-							} }
-							renderItem={ renderProductControlItem }
-							isCompact={ true }
+							onChange={(value = []) => {
+								const id = value[0] ? value[0].id : 0;
+								setAttributes({ productId: id });
+							}}
+							renderItem={renderProductControlItem}
+							isCompact={true}
 						/>
 					</ToolsPanelItem>
 				</ToolsPanel>
@@ -142,9 +139,9 @@ const ReviewsByProductEditor = ( {
 
 	const renderEditMode = () => {
 		const onDone = () => {
-			setAttributes( { editMode: false } );
+			setAttributes({ editMode: false });
 			debouncedSpeak(
-				__( 'Showing Reviews by Product block preview.', 'woocommerce' )
+				__('Showing Reviews by Product block preview.', 'woocommerce')
 			);
 		};
 
@@ -152,63 +149,63 @@ const ReviewsByProductEditor = ( {
 			<Placeholder
 				icon={
 					<Icon
-						icon={ commentContent }
+						icon={commentContent}
 						className="block-editor-block-icon"
 					/>
 				}
-				label={ __( 'Reviews by Product', 'woocommerce' ) }
+				label={__('Reviews by Product', 'woocommerce')}
 				className="wc-block-reviews-by-product"
 			>
-				{ __(
+				{__(
 					'Show reviews of your product to build trust',
 					'woocommerce'
-				) }
+				)}
 				<div className="wc-block-reviews__selection">
 					<ProductControl
 						selected={
-							attributes.productId ? [ attributes.productId ] : []
+							attributes.productId ? [attributes.productId] : []
 						}
-						onChange={ ( value = [] ) => {
-							const id = value[ 0 ] ? value[ 0 ].id : 0;
-							setAttributes( { productId: id } );
-						} }
-						queryArgs={ {
+						onChange={(value = []) => {
+							const id = value[0] ? value[0].id : 0;
+							setAttributes({ productId: id });
+						}}
+						queryArgs={{
 							orderby: 'comment_count',
 							order: 'desc',
-						} }
-						renderItem={ renderProductControlItem }
+						}}
+						renderItem={renderProductControlItem}
 					/>
-					<Button variant="primary" onClick={ onDone }>
-						{ __( 'Done', 'woocommerce' ) }
+					<Button variant="primary" onClick={onDone}>
+						{__('Done', 'woocommerce')}
 					</Button>
 				</div>
 			</Placeholder>
 		);
 	};
 
-	if ( ! productId || editMode ) {
+	if (!productId || editMode) {
 		return renderEditMode();
 	}
 
-	const buttonTitle = __( 'Edit selected product', 'woocommerce' );
+	const buttonTitle = __('Edit selected product', 'woocommerce');
 
 	return (
-		<div { ...blockProps }>
-			{ getBlockControls( editMode, setAttributes, buttonTitle ) }
-			{ getInspectorControls() }
+		<div {...blockProps}>
+			{getBlockControls(editMode, setAttributes, buttonTitle)}
+			{getInspectorControls()}
 			<EditorContainerBlock
-				attributes={ attributes }
+				attributes={attributes}
 				icon={
 					<Icon
-						icon={ commentContent }
+						icon={commentContent}
 						className="block-editor-block-icon"
 					/>
 				}
-				name={ __( 'Reviews by Product', 'woocommerce' ) }
-				noReviewsPlaceholder={ NoReviewsPlaceholder }
+				name={__('Reviews by Product', 'woocommerce')}
+				noReviewsPlaceholder={NoReviewsPlaceholder}
 			/>
 		</div>
 	);
 };
 
-export default withSpokenMessages( ReviewsByProductEditor );
+export default withSpokenMessages(ReviewsByProductEditor);

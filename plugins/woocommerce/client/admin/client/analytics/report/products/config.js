@@ -21,7 +21,7 @@ const PRODUCTS_REPORT_FILTERS_FILTER =
 const PRODUCTS_REPORT_ADVANCED_FILTERS_FILTER =
 	'woocommerce_admin_products_report_advanced_filters';
 
-const { addCesSurveyForAnalytics } = dispatch( CES_STORE_KEY );
+const { addCesSurveyForAnalytics } = dispatch(CES_STORE_KEY);
 
 /**
  * @typedef {import('../index.js').chart} chart
@@ -33,39 +33,39 @@ const { addCesSurveyForAnalytics } = dispatch( CES_STORE_KEY );
  * @filter woocommerce_admin_products_report_charts
  * @param {Array.<chart>} charts Report charts.
  */
-export const charts = applyFilters( PRODUCTS_REPORT_CHARTS_FILTER, [
+export const charts = applyFilters(PRODUCTS_REPORT_CHARTS_FILTER, [
 	{
 		key: 'items_sold',
-		label: __( 'Items sold', 'woocommerce' ),
+		label: __('Items sold', 'woocommerce'),
 		order: 'desc',
 		orderby: 'items_sold',
 		type: 'number',
 	},
 	{
 		key: 'net_revenue',
-		label: __( 'Net sales', 'woocommerce' ),
+		label: __('Net sales', 'woocommerce'),
 		order: 'desc',
 		orderby: 'net_revenue',
 		type: 'currency',
 	},
 	{
 		key: 'orders_count',
-		label: __( 'Orders', 'woocommerce' ),
+		label: __('Orders', 'woocommerce'),
 		order: 'desc',
 		orderby: 'orders_count',
 		type: 'number',
 	},
-] );
+]);
 
 const filterConfig = {
-	label: __( 'Show', 'woocommerce' ),
-	staticParams: [ 'chartType', 'paged', 'per_page' ],
+	label: __('Show', 'woocommerce'),
+	staticParams: ['chartType', 'paged', 'per_page'],
 	param: 'filter',
 	showFilters: () => true,
 	filters: [
-		{ label: __( 'All products', 'woocommerce' ), value: 'all' },
+		{ label: __('All products', 'woocommerce'), value: 'all' },
 		{
-			label: __( 'Single product', 'woocommerce' ),
+			label: __('Single product', 'woocommerce'),
 			value: 'select_product',
 			chartMode: 'item-comparison',
 			subFilters: [
@@ -73,12 +73,12 @@ const filterConfig = {
 					component: 'Search',
 					value: 'single_product',
 					chartMode: 'item-comparison',
-					path: [ 'select_product' ],
+					path: ['select_product'],
 					settings: {
 						param: 'products',
 						getLabels: getProductLabels,
 						labels: {
-							button: __( 'Single product', 'woocommerce' ),
+							button: __('Single product', 'woocommerce'),
 						},
 						searchProps: {
 							type: 'products',
@@ -92,7 +92,7 @@ const filterConfig = {
 			],
 		},
 		{
-			label: __( 'Comparison', 'woocommerce' ),
+			label: __('Comparison', 'woocommerce'),
 			value: 'compare-products',
 			chartMode: 'item-comparison',
 			settings: {
@@ -103,8 +103,8 @@ const filterConfig = {
 						'Check at least two products below to compare',
 						'woocommerce'
 					),
-					title: __( 'Compare Products', 'woocommerce' ),
-					update: __( 'Compare', 'woocommerce' ),
+					title: __('Compare Products', 'woocommerce'),
+					update: __('Compare', 'woocommerce'),
 				},
 				searchProps: {
 					type: 'products',
@@ -120,31 +120,31 @@ const filterConfig = {
 };
 
 const variationsConfig = {
-	showFilters: ( query ) =>
+	showFilters: (query) =>
 		query.filter === 'single_product' &&
-		!! query.products &&
-		query[ 'is-variable' ],
-	staticParams: [ 'filter', 'products', 'chartType', 'paged', 'per_page' ],
+		!!query.products &&
+		query['is-variable'],
+	staticParams: ['filter', 'products', 'chartType', 'paged', 'per_page'],
 	param: 'filter-variations',
 	filters: [
 		{
-			label: __( 'All variations', 'woocommerce' ),
+			label: __('All variations', 'woocommerce'),
 			chartMode: 'item-comparison',
 			value: 'all',
 		},
 		{
-			label: __( 'Single variation', 'woocommerce' ),
+			label: __('Single variation', 'woocommerce'),
 			value: 'select_variation',
 			subFilters: [
 				{
 					component: 'Search',
 					value: 'single_variation',
-					path: [ 'select_variation' ],
+					path: ['select_variation'],
 					settings: {
 						param: 'variations',
 						getLabels: getVariationLabels,
 						labels: {
-							button: __( 'Single variation', 'woocommerce' ),
+							button: __('Single variation', 'woocommerce'),
 						},
 						searchProps: {
 							type: 'variations',
@@ -158,7 +158,7 @@ const variationsConfig = {
 			],
 		},
 		{
-			label: __( 'Comparison', 'woocommerce' ),
+			label: __('Comparison', 'woocommerce'),
 			chartMode: 'item-comparison',
 			value: 'compare-variations',
 			settings: {
@@ -169,8 +169,8 @@ const variationsConfig = {
 						'Check at least two variations below to compare',
 						'woocommerce'
 					),
-					title: __( 'Compare Variations', 'woocommerce' ),
-					update: __( 'Compare', 'woocommerce' ),
+					title: __('Compare Variations', 'woocommerce'),
+					update: __('Compare', 'woocommerce'),
 				},
 				searchProps: {
 					type: 'variations',
@@ -204,15 +204,15 @@ export const advancedFilters = applyFilters(
 	}
 );
 
-if ( Object.keys( advancedFilters.filters ).length ) {
-	filterConfig.filters.push( {
-		label: __( 'Advanced Filters', 'woocommerce' ),
+if (Object.keys(advancedFilters.filters).length) {
+	filterConfig.filters.push({
+		label: __('Advanced Filters', 'woocommerce'),
 		value: 'advanced',
-	} );
-	variationsConfig.filters.push( {
-		label: __( 'Advanced Filters', 'woocommerce' ),
+	});
+	variationsConfig.filters.push({
+		label: __('Advanced Filters', 'woocommerce'),
 		value: 'advanced',
-	} );
+	});
 }
 
 /**
@@ -225,7 +225,7 @@ if ( Object.keys( advancedFilters.filters ).length ) {
  * @filter woocommerce_admin_products_report_filters
  * @param {Array.<filter>} filters Report filters.
  */
-export const filters = applyFilters( PRODUCTS_REPORT_FILTERS_FILTER, [
+export const filters = applyFilters(PRODUCTS_REPORT_FILTERS_FILTER, [
 	filterConfig,
 	variationsConfig,
-] );
+]);

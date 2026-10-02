@@ -11,8 +11,7 @@ import './style.scss';
 
 type DisabledTagNameType = 'span' | 'h3';
 
-export interface ProductNameProps
-	extends AnchorHTMLAttributes< HTMLAnchorElement > {
+export interface ProductNameProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
 	/**
 	 * If `true` renders a `span` element instead of a link
 	 */
@@ -40,7 +39,7 @@ export interface ProductNameProps
 /**
  * Render the Product name.
  */
-export const ProductName = ( {
+export const ProductName = ({
 	className = '',
 	disabled = false,
 	name,
@@ -51,36 +50,36 @@ export const ProductName = ( {
 	onClick,
 	disabledTagName = 'span',
 	...props
-}: ProductNameProps ): JSX.Element => {
-	const classes = clsx( 'wc-block-components-product-name', className );
+}: ProductNameProps): JSX.Element => {
+	const classes = clsx('wc-block-components-product-name', className);
 	const DisabledTagName = disabledTagName as DisabledTagNameType;
 
-	if ( disabled ) {
+	if (disabled) {
 		const disabledProps = props as HTMLAttributes<
 			HTMLHeadingElement | HTMLSpanElement
 		>;
 		return (
 			<DisabledTagName
-				className={ classes }
-				{ ...disabledProps }
+				className={classes}
+				{...disabledProps}
 				// eslint-disable-next-line react/no-danger
-				dangerouslySetInnerHTML={ {
+				dangerouslySetInnerHTML={{
 					__html: name,
-				} }
+				}}
 			/>
 		);
 	}
 	return (
 		<a
-			className={ classes }
-			href={ permalink }
-			target={ target }
-			{ ...props }
+			className={classes}
+			href={permalink}
+			target={target}
+			{...props}
 			// eslint-disable-next-line react/no-danger
-			dangerouslySetInnerHTML={ {
+			dangerouslySetInnerHTML={{
 				__html: name,
-			} }
-			style={ style }
+			}}
+			style={style}
 		/>
 	);
 };

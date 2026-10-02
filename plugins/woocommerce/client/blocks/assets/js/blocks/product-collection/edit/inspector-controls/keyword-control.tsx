@@ -15,42 +15,42 @@ import {
  */
 import { CoreFilterNames, QueryControlProps } from '../../types';
 
-const KeywordControl = ( props: QueryControlProps ) => {
+const KeywordControl = (props: QueryControlProps) => {
 	const { query, trackInteraction, setQueryAttribute } = props;
-	const [ querySearch, setQuerySearch ] = useState( query.search );
+	const [querySearch, setQuerySearch] = useState(query.search);
 
-	const onChangeDebounced = useDebounce( () => {
-		if ( query.search !== querySearch ) {
-			setQueryAttribute( {
+	const onChangeDebounced = useDebounce(() => {
+		if (query.search !== querySearch) {
+			setQueryAttribute({
 				search: querySearch,
-			} );
-			trackInteraction( CoreFilterNames.KEYWORD );
+			});
+			trackInteraction(CoreFilterNames.KEYWORD);
 		}
-	}, 250 );
+	}, 250);
 
-	useEffect( () => {
+	useEffect(() => {
 		onChangeDebounced();
 		return onChangeDebounced.cancel;
-	}, [ querySearch, onChangeDebounced ] );
+	}, [querySearch, onChangeDebounced]);
 
 	const deselectCallback = () => {
-		setQuerySearch( '' );
-		trackInteraction( CoreFilterNames.KEYWORD );
+		setQuerySearch('');
+		trackInteraction(CoreFilterNames.KEYWORD);
 	};
 
 	return (
 		<ToolsPanelItem
-			hasValue={ () => !! querySearch }
-			label={ __( 'Keyword', 'woocommerce' ) }
-			onDeselect={ deselectCallback }
-			resetAllFilter={ deselectCallback }
+			hasValue={() => !!querySearch}
+			label={__('Keyword', 'woocommerce')}
+			onDeselect={deselectCallback}
+			resetAllFilter={deselectCallback}
 		>
 			<TextControl
 				__next40pxDefaultSize
 				__nextHasNoMarginBottom
-				label={ __( 'Keyword', 'woocommerce' ) }
-				value={ querySearch }
-				onChange={ setQuerySearch }
+				label={__('Keyword', 'woocommerce')}
+				value={querySearch}
+				onChange={setQuerySearch}
 			/>
 		</ToolsPanelItem>
 	);

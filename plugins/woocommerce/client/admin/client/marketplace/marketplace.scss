@@ -20,7 +20,9 @@
 	.woocommerce-layout__main {
 		padding: 0;
 		/* Maintain space at the bottom in line with the overall visual hierarchy relative to the WC footer. */
-		margin-bottom: calc($content-spacing-xlarge + 30px); // 30px is the 40px height minus the 10px top padding of the WC footer.
+		margin-bottom: calc(
+			$content-spacing-xlarge + 30px
+		); // 30px is the 40px height minus the 10px top padding of the WC footer.
 
 		/* The WC footer is hidden bellow this breakpoint so we need to remove the bottom margin. */
 		@include breakpoint("<782px") {

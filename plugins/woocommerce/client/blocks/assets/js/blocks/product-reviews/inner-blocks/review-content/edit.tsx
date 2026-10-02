@@ -15,49 +15,42 @@ import {
 	useBlockProps,
 } from '@wordpress/block-editor';
 
-export default function Edit( {
+export default function Edit({
 	setAttributes,
 	attributes: { textAlign },
 	context: { commentId },
-}: BlockEditProps< {
+}: BlockEditProps<{
 	textAlign: string;
-} > & {
+}> & {
 	context: { commentId: number };
-} ) {
-	const blockProps = useBlockProps( {
-		className: clsx( {
-			[ `has-text-align-${ textAlign }` ]: textAlign,
-		} ),
-	} );
+}) {
+	const blockProps = useBlockProps({
+		className: clsx({
+			[`has-text-align-${textAlign}`]: textAlign,
+		}),
+	});
 
-	const [ content ] = useEntityProp(
-		'root',
-		'comment',
-		'content',
-		commentId
-	);
+	const [content] = useEntityProp('root', 'comment', 'content', commentId);
 
 	const blockControls = (
 		<BlockControls>
 			<AlignmentControl
-				value={ textAlign }
-				onChange={ ( newAlign: string | undefined ) => {
-					if ( newAlign !== undefined ) {
-						setAttributes( { textAlign: newAlign } );
+				value={textAlign}
+				onChange={(newAlign: string | undefined) => {
+					if (newAlign !== undefined) {
+						setAttributes({ textAlign: newAlign });
 					}
-				} }
+				}}
 			/>
 		</BlockControls>
 	);
 
-	if ( ! commentId || ! content ) {
+	if (!commentId || !content) {
 		return (
 			<>
-				{ blockControls }
-				<div { ...blockProps }>
-					<p>
-						{ _x( 'Review Content', 'block title', 'woocommerce' ) }
-					</p>
+				{blockControls}
+				<div {...blockProps}>
+					<p>{_x('Review Content', 'block title', 'woocommerce')}</p>
 				</div>
 			</>
 		);
@@ -65,10 +58,10 @@ export default function Edit( {
 
 	return (
 		<>
-			{ blockControls }
-			<div { ...blockProps }>
+			{blockControls}
+			<div {...blockProps}>
 				<Disabled>
-					<RawHTML key="html">{ content.rendered }</RawHTML>
+					<RawHTML key="html">{content.rendered}</RawHTML>
 				</Disabled>
 			</div>
 		</>

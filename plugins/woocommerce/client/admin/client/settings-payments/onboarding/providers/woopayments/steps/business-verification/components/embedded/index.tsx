@@ -29,14 +29,14 @@ import BannerNotice from '../../../../components/banner-notice';
 import { useOnboardingContext } from '../../../../data/onboarding-context';
 
 interface EmbeddedComponentProps {
-	onLoaderStart?: ( { elementTagName }: LoaderStart ) => void;
-	onLoadError?: ( { error, elementTagName }: LoadError ) => void;
+	onLoaderStart?: ({ elementTagName }: LoaderStart) => void;
+	onLoadError?: ({ error, elementTagName }: LoadError) => void;
 }
 
 interface EmbeddedAccountOnboardingProps extends EmbeddedComponentProps {
 	onboardingData: OnboardingFields;
 	onExit: () => void;
-	onStepChange?: ( step: string ) => void;
+	onStepChange?: (step: string) => void;
 	onInitializationError?: (
 		failure: EmbeddedAccountInitializationFailure
 	) => void;
@@ -49,31 +49,29 @@ const genericInitializationError = __(
 	'woocommerce'
 );
 
-const isObjectRecord = ( value: unknown ): value is Record< string, unknown > =>
-	!! value && typeof value === 'object' && ! Array.isArray( value );
+const isObjectRecord = (value: unknown): value is Record<string, unknown> =>
+	!!value && typeof value === 'object' && !Array.isArray(value);
 
-const getObjectKeys = ( value: unknown ): string[] =>
-	isObjectRecord( value ) ? Object.keys( value ).sort() : [];
+const getObjectKeys = (value: unknown): string[] =>
+	isObjectRecord(value) ? Object.keys(value).sort() : [];
 
-const isNonEmptyString = ( value: unknown ): value is string =>
+const isNonEmptyString = (value: unknown): value is string =>
 	typeof value === 'string' && value.trim() !== '';
 
-const normalizeLocale = ( value: unknown ): string =>
-	isNonEmptyString( value )
-		? value.trim().replace( /_/g, '-' )
-		: defaultLocale;
+const normalizeLocale = (value: unknown): string =>
+	isNonEmptyString(value) ? value.trim().replace(/_/g, '-') : defaultLocale;
 
 const validateEmbeddedKycSessionCreateResult = (
 	result: unknown
 ):
 	| { result: EmbeddedKycSessionCreateResult }
 	| { error: EmbeddedAccountInitializationFailure } => {
-	const session = isObjectRecord( result ) ? result.session : undefined;
-	const receivedKeys = isObjectRecord( session )
-		? getObjectKeys( session )
-		: getObjectKeys( result );
+	const session = isObjectRecord(result) ? result.session : undefined;
+	const receivedKeys = isObjectRecord(session)
+		? getObjectKeys(session)
+		: getObjectKeys(result);
 
-	if ( ! isObjectRecord( session ) ) {
+	if (!isObjectRecord(session)) {
 		return {
 			error: {
 				reason: 'bad_session',
@@ -84,8 +82,8 @@ const validateEmbeddedKycSessionCreateResult = (
 	}
 
 	if (
-		! isNonEmptyString( session.clientSecret ) ||
-		! isNonEmptyString( session.publishableKey )
+		!isNonEmptyString(session.clientSecret) ||
+		!isNonEmptyString(session.publishableKey)
 	) {
 		return {
 			error: {
@@ -97,10 +95,10 @@ const validateEmbeddedKycSessionCreateResult = (
 	}
 
 	const normalizedSession: EmbeddedKycSession = {
-		...( session as unknown as EmbeddedKycSession ),
+		...(session as unknown as EmbeddedKycSession),
 		clientSecret: session.clientSecret,
 		publishableKey: session.publishableKey,
-		locale: normalizeLocale( session.locale ),
+		locale: normalizeLocale(session.locale),
 	};
 
 	return { result: { session: normalizedSession } };
@@ -113,17 +111,17 @@ const validateEmbeddedKycSessionCreateResult = (
  *
  * @return Returns stripeConnectInstance, error, and loading state.
  */
-const useInitializeStripe = ( onboardingData: OnboardingFields ) => {
-	const [ stripeConnectInstance, setStripeConnectInstance ] =
-		useState< StripeConnectInstance | null >( null );
+const useInitializeStripe = (onboardingData: OnboardingFields) => {
+	const [stripeConnectInstance, setStripeConnectInstance] =
+		useState<StripeConnectInstance | null>(null);
 	const { currentStep, sessionEntryPoint: onboardingSource } =
 		useOnboardingContext();
 	const kycSessionUrl = currentStep?.actions?.kyc_session?.href ?? '';
-	const [ initializationError, setInitializationError ] =
-		useState< EmbeddedAccountInitializationFailure | null >( null );
-	const [ loading, setLoading ] = useState< boolean >( true );
+	const [initializationError, setInitializationError] =
+		useState<EmbeddedAccountInitializationFailure | null>(null);
+	const [loading, setLoading] = useState<boolean>(true);
 
-	useEffect( () => {
+	useEffect(() => {
 		const initializeStripe = async () => {
 			try {
 				const accountSession = await createEmbeddedKycSession(
@@ -133,16 +131,16 @@ const useInitializeStripe = ( onboardingData: OnboardingFields ) => {
 				);
 
 				const validation =
-					validateEmbeddedKycSessionCreateResult( accountSession );
-				if ( 'error' in validation ) {
-					setInitializationError( validation.error );
+					validateEmbeddedKycSessionCreateResult(accountSession);
+				if ('error' in validation) {
+					setInitializationError(validation.error);
 					return;
 				}
 
 				const { clientSecret, publishableKey, locale } =
 					validation.result.session;
 
-				const instance = loadConnectAndInitialize( {
+				const instance = loadConnectAndInitialize({
 					publishableKey,
 					fetchClientSecret: async () => clientSecret,
 					appearance: {
@@ -150,21 +148,21 @@ const useInitializeStripe = ( onboardingData: OnboardingFields ) => {
 						...appearance,
 					},
 					locale,
-				} );
+				});
 
-				setStripeConnectInstance( instance );
-			} catch ( err ) {
-				setInitializationError( {
+				setStripeConnectInstance(instance);
+			} catch (err) {
+				setInitializationError({
 					reason: 'init_error',
 					message: genericInitializationError,
-				} );
+				});
 			} finally {
-				setLoading( false );
+				setLoading(false);
 			}
 		};
 
 		void initializeStripe();
-	}, [ kycSessionUrl, onboardingData, onboardingSource ] );
+	}, [kycSessionUrl, onboardingData, onboardingSource]);
 
 	return { stripeConnectInstance, initializationError, loading };
 };
@@ -185,7 +183,7 @@ const useInitializeStripe = ( onboardingData: OnboardingFields ) => {
  */
 export const EmbeddedAccountOnboarding: React.FC<
 	EmbeddedAccountOnboardingProps
-> = ( {
+> = ({
 	onboardingData,
 	onExit,
 	onLoaderStart,
@@ -193,43 +191,43 @@ export const EmbeddedAccountOnboarding: React.FC<
 	onStepChange,
 	onInitializationError,
 	collectPayoutRequirements = false,
-} ) => {
+}) => {
 	const { stripeConnectInstance, initializationError } =
-		useInitializeStripe( onboardingData );
+		useInitializeStripe(onboardingData);
 
-	useEffect( () => {
-		if ( initializationError ) {
-			onInitializationError?.( initializationError );
+	useEffect(() => {
+		if (initializationError) {
+			onInitializationError?.(initializationError);
 		}
-	}, [ initializationError, onInitializationError ] );
+	}, [initializationError, onInitializationError]);
 
 	return (
 		<>
-			{ initializationError && ! onInitializationError && (
+			{initializationError && !onInitializationError && (
 				<BannerNotice status="error">
-					{ initializationError.message }
+					{initializationError.message}
 				</BannerNotice>
-			) }
-			{ stripeConnectInstance && (
+			)}
+			{stripeConnectInstance && (
 				<ConnectComponentsProvider
-					connectInstance={ stripeConnectInstance }
+					connectInstance={stripeConnectInstance}
 				>
 					<ConnectAccountOnboarding
-						onLoaderStart={ onLoaderStart }
-						onLoadError={ onLoadError }
-						onExit={ onExit }
-						onStepChange={ ( stepChange ) =>
-							onStepChange?.( stepChange.step )
+						onLoaderStart={onLoaderStart}
+						onLoadError={onLoadError}
+						onExit={onExit}
+						onStepChange={(stepChange) =>
+							onStepChange?.(stepChange.step)
 						}
-						collectionOptions={ {
+						collectionOptions={{
 							fields: collectPayoutRequirements
 								? 'eventually_due'
 								: 'currently_due',
 							futureRequirements: 'omit',
-						} }
+						}}
 					/>
 				</ConnectComponentsProvider>
-			) }
+			)}
 		</>
 	);
 };

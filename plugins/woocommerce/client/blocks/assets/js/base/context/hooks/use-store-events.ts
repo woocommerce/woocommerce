@@ -7,7 +7,7 @@ import { useCallback } from '@wordpress/element';
 
 type StoreEvent = (
 	eventName: string,
-	eventParams?: Partial< Record< string, unknown > >
+	eventParams?: Partial<Record<string, unknown>>
 ) => void;
 
 /**
@@ -17,37 +17,31 @@ export const useStoreEvents = (): {
 	dispatchStoreEvent: StoreEvent;
 	dispatchCheckoutEvent: StoreEvent;
 } => {
-	const dispatchStoreEvent = useCallback( ( eventName, eventParams = {} ) => {
+	const dispatchStoreEvent = useCallback((eventName, eventParams = {}) => {
 		try {
 			doAction(
-				`experimental__woocommerce_blocks-${ eventName }`,
+				`experimental__woocommerce_blocks-${eventName}`,
 				eventParams
 			);
-		} catch ( e ) {
+		} catch (e) {
 			// We don't handle thrown errors but just console.log for troubleshooting.
 			// eslint-disable-next-line no-console
-			console.error( e );
+			console.error(e);
 		}
-	}, [] );
+	}, []);
 
-	const dispatchCheckoutEvent = useCallback(
-		( eventName, eventParams = {} ) => {
-			try {
-				doAction(
-					`experimental__woocommerce_blocks-checkout-${ eventName }`,
-					{
-						...eventParams,
-						storeCart: select( 'wc/store/cart' ).getCartData(),
-					}
-				);
-			} catch ( e ) {
-				// We don't handle thrown errors but just console.log for troubleshooting.
-				// eslint-disable-next-line no-console
-				console.error( e );
-			}
-		},
-		[]
-	);
+	const dispatchCheckoutEvent = useCallback((eventName, eventParams = {}) => {
+		try {
+			doAction(`experimental__woocommerce_blocks-checkout-${eventName}`, {
+				...eventParams,
+				storeCart: select('wc/store/cart').getCartData(),
+			});
+		} catch (e) {
+			// We don't handle thrown errors but just console.log for troubleshooting.
+			// eslint-disable-next-line no-console
+			console.error(e);
+		}
+	}, []);
 
 	return { dispatchStoreEvent, dispatchCheckoutEvent };
 };

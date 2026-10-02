@@ -12,11 +12,11 @@ import './editor.scss';
 import metadata from './block.json';
 import { Edit } from './edit';
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	icon: {
 		src: (
 			<Icon
-				icon={ stack }
+				icon={stack}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -25,7 +25,7 @@ registerBlockType( metadata, {
 		...metadata.attributes,
 		columns: {
 			type: 'number',
-			default: getSetting( 'defaultColumns', 3 ),
+			default: getSetting('defaultColumns', 3),
 		},
 	},
 
@@ -34,4 +34,4 @@ registerBlockType( metadata, {
 	save: () => {
 		return null;
 	},
-} );
+});

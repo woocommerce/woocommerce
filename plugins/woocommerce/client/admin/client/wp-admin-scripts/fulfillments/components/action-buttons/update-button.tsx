@@ -18,11 +18,11 @@ import {
 } from '../../utils/fulfillment-utils';
 import { useFulfillmentDrawerContext } from '../../context/drawer-context';
 
-export default function UpdateButton( {
+export default function UpdateButton({
 	setError,
 }: {
-	setError: ( message: string | null ) => void;
-} ) {
+	setError: (message: string | null) => void;
+}) {
 	const { setIsEditing } = useFulfillmentDrawerContext();
 	const {
 		order,
@@ -31,15 +31,15 @@ export default function UpdateButton( {
 		customerNote,
 		setCustomerNote,
 	} = useFulfillmentContext();
-	const { updateFulfillment } = useDispatch( FulfillmentStore );
-	const [ isExecuting, setIsExecuting ] = useState< boolean >( false );
+	const { updateFulfillment } = useDispatch(FulfillmentStore);
+	const [isExecuting, setIsExecuting] = useState<boolean>(false);
 	const descriptionId = useInstanceId(
 		UpdateButton,
 		'update-button-description'
 	) as string;
 
 	const handleUpdateFulfillment = async () => {
-		if ( ! fulfillment || ! order ) {
+		if (!fulfillment || !order) {
 			setError(
 				__(
 					'An unexpected error has occurred. Please refresh the page and try again.',
@@ -48,49 +48,49 @@ export default function UpdateButton( {
 			);
 			return;
 		}
-		if ( getFulfillmentItems( fulfillment ).length === 0 ) {
-			setError( __( 'Select items to be fulfilled.', 'woocommerce' ) );
+		if (getFulfillmentItems(fulfillment).length === 0) {
+			setError(__('Select items to be fulfilled.', 'woocommerce'));
 			return;
 		}
 
-		setError( null );
-		setIsExecuting( true );
+		setError(null);
+		setIsExecuting(true);
 		await updateFulfillment(
 			order.id,
 			fulfillment,
 			notifyCustomer,
 			notifyCustomer ? customerNote : ''
 		);
-		const error = select( FulfillmentStore ).getError( order.id );
-		if ( error ) {
-			setError( error );
+		const error = select(FulfillmentStore).getError(order.id);
+		if (error) {
+			setError(error);
 		} else {
-			setCustomerNote( '' );
-			void refreshOrderFulfillmentStatus( order.id );
-			setIsEditing( false );
+			setCustomerNote('');
+			void refreshOrderFulfillmentStatus(order.id);
+			setIsEditing(false);
 		}
-		setIsExecuting( false );
+		setIsExecuting(false);
 	};
 
 	return (
 		<>
 			<Button
 				variant="primary"
-				onClick={ handleUpdateFulfillment }
-				disabled={ isExecuting }
-				isBusy={ isExecuting }
+				onClick={handleUpdateFulfillment}
+				disabled={isExecuting}
+				isBusy={isExecuting}
 				__next40pxDefaultSize
-				aria-describedby={ descriptionId }
+				aria-describedby={descriptionId}
 			>
-				{ isExecuting
-					? __( 'Updating…', 'woocommerce' )
-					: __( 'Update', 'woocommerce' ) }
+				{isExecuting
+					? __('Updating…', 'woocommerce')
+					: __('Update', 'woocommerce')}
 			</Button>
-			<span id={ descriptionId } className="screen-reader-text">
-				{ __(
+			<span id={descriptionId} className="screen-reader-text">
+				{__(
 					'Applies changes to the existing fulfillment',
 					'woocommerce'
-				) }
+				)}
 			</span>
 		</>
 	);

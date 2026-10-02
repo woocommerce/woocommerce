@@ -12,7 +12,7 @@ export type BlockAttributes = {
 	hideEmpty: boolean;
 };
 
-export type EditProps = BlockEditProps< BlockAttributes >;
+export type EditProps = BlockEditProps<BlockAttributes>;
 
 export type TaxonomyItem = {
 	name: string;

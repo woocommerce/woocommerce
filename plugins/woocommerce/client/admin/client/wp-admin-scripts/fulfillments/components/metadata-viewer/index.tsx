@@ -15,31 +15,31 @@ interface MetadataViewerProps {
 	fulfillment: Fulfillment;
 }
 
-export default function MetadataViewer( { fulfillment }: MetadataViewerProps ) {
+export default function MetadataViewer({ fulfillment }: MetadataViewerProps) {
 	const publicMetadata = fulfillment.meta_data.filter(
-		( meta ) => meta.key.startsWith( '_' ) === false
+		(meta) => meta.key.startsWith('_') === false
 	);
 
 	return (
 		<FulfillmentCard
-			isCollapsible={ true }
+			isCollapsible={true}
 			header={
 				<>
 					<PostListIcon />
-					<h3>{ __( 'Fulfillment details', 'woocommerce' ) }</h3>
+					<h3>{__('Fulfillment details', 'woocommerce')}</h3>
 				</>
 			}
 		>
-			{ publicMetadata.length === 0 && (
-				<p>{ __( 'No metadata available.', 'woocommerce' ) }</p>
-			) }
-			{ publicMetadata.length > 0 && (
+			{publicMetadata.length === 0 && (
+				<p>{__('No metadata available.', 'woocommerce')}</p>
+			)}
+			{publicMetadata.length > 0 && (
 				<MetaList
-					metaList={ publicMetadata.map( ( d ) => {
+					metaList={publicMetadata.map((d) => {
 						return { label: d.key, value: d.value as string };
-					} ) }
+					})}
 				/>
-			) }
+			)}
 		</FulfillmentCard>
 	);
 }

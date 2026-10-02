@@ -16,62 +16,59 @@ export type DefaultProgressTitleProps = {
 	taskListId: string;
 };
 
-export const DefaultProgressTitle = ( {
+export const DefaultProgressTitle = ({
 	taskListId,
-}: DefaultProgressTitleProps ) => {
+}: DefaultProgressTitleProps) => {
 	const { loading, tasksCount, completedCount, hasVisitedTasks } = useSelect(
-		( select ) => {
-			const taskList =
-				select( onboardingStore ).getTaskList( taskListId );
+		(select) => {
+			const taskList = select(onboardingStore).getTaskList(taskListId);
 			const finishedResolution = select(
 				onboardingStore
-			).hasFinishedResolution( 'getTaskList', [ taskListId ] );
-			const visibleTasks = getVisibleTasks( taskList?.tasks || [] );
+			).hasFinishedResolution('getTaskList', [taskListId]);
+			const visibleTasks = getVisibleTasks(taskList?.tasks || []);
 
 			return {
-				loading: ! finishedResolution,
+				loading: !finishedResolution,
 				tasksCount: visibleTasks?.length,
-				completedCount: visibleTasks?.filter(
-					( task ) => task.isComplete
-				).length,
+				completedCount: visibleTasks?.filter((task) => task.isComplete)
+					.length,
 				hasVisitedTasks:
 					visibleTasks?.filter(
-						( task ) =>
-							task.isVisited && task.id !== 'store_details'
+						(task) => task.isVisited && task.id !== 'store_details'
 					).length > 0,
 			};
 		},
-		[ taskListId ]
+		[taskListId]
 	);
 
-	const title = useMemo( () => {
-		if ( ! hasVisitedTasks || completedCount === tasksCount ) {
-			const siteTitle = getSetting( 'siteTitle' );
+	const title = useMemo(() => {
+		if (!hasVisitedTasks || completedCount === tasksCount) {
+			const siteTitle = getSetting('siteTitle');
 			return siteTitle
 				? sprintf(
 						/* translators: %s = site title */
-						__( 'Welcome to %s', 'woocommerce' ),
+						__('Welcome to %s', 'woocommerce'),
 						siteTitle as string
-				  )
-				: __( 'Welcome to your store', 'woocommerce' );
+					)
+				: __('Welcome to your store', 'woocommerce');
 		}
-		if ( completedCount <= 3 ) {
-			return __( 'Let’s get you started', 'woocommerce' ) + '   🚀';
+		if (completedCount <= 3) {
+			return __('Let’s get you started', 'woocommerce') + '   🚀';
 		}
-		if ( completedCount > 3 && completedCount < 6 ) {
-			return __( 'You’re on the right track', 'woocommerce' );
+		if (completedCount > 3 && completedCount < 6) {
+			return __('You’re on the right track', 'woocommerce');
 		}
-		return __( 'You’re almost there', 'woocommerce' );
-	}, [ completedCount, hasVisitedTasks, tasksCount ] );
+		return __('You’re almost there', 'woocommerce');
+	}, [completedCount, hasVisitedTasks, tasksCount]);
 
-	if ( loading ) {
+	if (loading) {
 		return null;
 	}
 
 	return (
 		<h1
 			className="woocommerce-task-progress-header__title"
-			dangerouslySetInnerHTML={ sanitizeHTML( title ) }
+			dangerouslySetInnerHTML={sanitizeHTML(title)}
 		/>
 	);
 };

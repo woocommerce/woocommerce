@@ -15,16 +15,16 @@ import { registerElementVariation } from './utils';
 import blockJson from '../../block.json';
 
 export const CORE_NAME = 'core/post-title';
-export const VARIATION_NAME = `${ blockJson.name }/product-title`;
+export const VARIATION_NAME = `${blockJson.name}/product-title`;
 
 const registerProductTitle = () => {
-	registerElementVariation( CORE_NAME, {
+	registerElementVariation(CORE_NAME, {
 		blockDescription: description,
-		blockIcon: <Icon icon={ heading } />,
+		blockIcon: <Icon icon={heading} />,
 		blockTitle: title,
 		variationName: VARIATION_NAME,
-		scope: [ 'block', 'inserter' ],
-	} );
+		scope: ['block', 'inserter'],
+	});
 };
 
 export default registerProductTitle;

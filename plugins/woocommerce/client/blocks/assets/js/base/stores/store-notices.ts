@@ -22,11 +22,11 @@ const getStoreNoticeContext = (): {
 	notice: NoticeWithId;
 } | null => {
 	try {
-		return getContextFn< {
+		return getContextFn<{
 			notices: NoticeWithId[];
 			notice: NoticeWithId;
-		} >();
-	} catch ( e ) {
+		}>();
+	} catch (e) {
 		return null;
 	}
 };
@@ -37,10 +37,10 @@ const getProductCollectionContext = (): {
 	notices: NoticeWithId[];
 } | null => {
 	try {
-		return getContextFn< {
+		return getContextFn<{
 			notices: NoticeWithId[];
-		} >( 'woocommerce/product-collection' );
-	} catch ( e ) {
+		}>('woocommerce/product-collection');
+	} catch (e) {
 		return null;
 	}
 };
@@ -56,8 +56,8 @@ type StoreNoticesState = {
 export type Store = {
 	state: StoreNoticesState;
 	actions: {
-		addNotice: ( notice: Notice ) => string;
-		removeNotice: ( noticeId: string | PointerEvent ) => void;
+		addNotice: (notice: Notice) => string;
+		removeNotice: (noticeId: string | PointerEvent) => void;
 	};
 	callbacks: {
 		renderNoticeContent: () => void;
@@ -68,9 +68,7 @@ export type Store = {
 
 const generateNoticeId = () => {
 	// semi-random with low collision probability.
-	return `${ Date.now() }-${ Math.random()
-		.toString( 36 )
-		.substring( 2, 15 ) }`;
+	return `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
 };
 
 const ICON_PATHS = {
@@ -80,7 +78,7 @@ const ICON_PATHS = {
 };
 
 // Todo: export this store once the store is public.
-const { state } = store< Store >(
+const { state } = store<Store>(
 	'woocommerce/store-notices',
 	{
 		state: {
@@ -109,13 +107,13 @@ const { state } = store< Store >(
 			},
 			get notices() {
 				const productCollectionContext = getProductCollectionContext();
-				if ( productCollectionContext?.notices ) {
+				if (productCollectionContext?.notices) {
 					return productCollectionContext.notices;
 				}
 
 				const context = getStoreNoticeContext();
 
-				if ( context?.notices ) {
+				if (context?.notices) {
 					return context.notices;
 				}
 
@@ -123,28 +121,28 @@ const { state } = store< Store >(
 			},
 		},
 		actions: {
-			addNotice: ( notice: Notice ): string => {
+			addNotice: (notice: Notice): string => {
 				const { notices } = state;
 
 				// Prevent adding an extra notice with the same message.
 				const existingNotice = notices.find(
-					( n ) => n.notice === notice.notice
+					(n) => n.notice === notice.notice
 				);
 				const noticeId = existingNotice
 					? existingNotice.id
 					: generateNoticeId();
 
-				if ( ! existingNotice ) {
-					notices.push( {
+				if (!existingNotice) {
+					notices.push({
 						...notice,
 						id: noticeId,
-					} );
+					});
 				}
 
 				return noticeId;
 			},
 
-			removeNotice: ( noticeId: string | PointerEvent ) => {
+			removeNotice: (noticeId: string | PointerEvent) => {
 				const { notices } = state;
 
 				const resolvedId =
@@ -153,13 +151,11 @@ const { state } = store< Store >(
 						: getStoreNoticeContext()?.notice?.id;
 
 				// If noticeId is not found (e.g., context was null), do nothing.
-				if ( ! resolvedId ) return;
+				if (!resolvedId) return;
 
-				const index = notices.findIndex(
-					( { id } ) => id === resolvedId
-				);
-				if ( index !== -1 ) {
-					notices.splice( index, 1 );
+				const index = notices.findIndex(({ id }) => id === resolvedId);
+				if (index !== -1) {
+					notices.splice(index, 1);
 				}
 			},
 		},
@@ -168,7 +164,7 @@ const { state } = store< Store >(
 				const context = getStoreNoticeContext();
 				const { ref } = getElement();
 
-				if ( ref && context?.notice ) {
+				if (ref && context?.notice) {
 					// Note: Notice content is sanitized server-side via wp_kses.
 					ref.innerHTML = context.notice.notice;
 				}
@@ -177,8 +173,8 @@ const { state } = store< Store >(
 			scrollIntoView: () => {
 				const { ref } = getElement();
 
-				if ( ref ) {
-					ref.scrollIntoView( { behavior: 'smooth' } );
+				if (ref) {
+					ref.scrollIntoView({ behavior: 'smooth' });
 				}
 			},
 
@@ -187,13 +183,13 @@ const { state } = store< Store >(
 				const { ref } = getElement();
 
 				// Guard against missing context or notice to prevent wrong icon injection.
-				if ( ! ref || ! context?.notice ) {
+				if (!ref || !context?.notice) {
 					return;
 				}
 
 				// Remove existing icon SVG if present (watch may run multiple times).
-				const existingSvg = ref.querySelector( ':scope > svg' );
-				if ( existingSvg ) {
+				const existingSvg = ref.querySelector(':scope > svg');
+				if (existingSvg) {
 					existingSvg.remove();
 				}
 
@@ -201,12 +197,12 @@ const { state } = store< Store >(
 					'http://www.w3.org/2000/svg',
 					'svg'
 				);
-				svg.setAttribute( 'xmlns', 'http://www.w3.org/2000/svg' );
-				svg.setAttribute( 'viewBox', '0 0 24 24' );
-				svg.setAttribute( 'width', '24' );
-				svg.setAttribute( 'height', '24' );
-				svg.setAttribute( 'aria-hidden', 'true' );
-				svg.setAttribute( 'focusable', 'false' );
+				svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+				svg.setAttribute('viewBox', '0 0 24 24');
+				svg.setAttribute('width', '24');
+				svg.setAttribute('height', '24');
+				svg.setAttribute('aria-hidden', 'true');
+				svg.setAttribute('focusable', 'false');
 
 				const path = document.createElementNS(
 					'http://www.w3.org/2000/svg',
@@ -218,10 +214,10 @@ const { state } = store< Store >(
 						? ICON_PATHS.errorOrInfo
 						: ICON_PATHS.success
 				);
-				svg.appendChild( path );
+				svg.appendChild(path);
 
 				// Insert as first child.
-				ref.prepend( svg );
+				ref.prepend(svg);
 			},
 		},
 	},

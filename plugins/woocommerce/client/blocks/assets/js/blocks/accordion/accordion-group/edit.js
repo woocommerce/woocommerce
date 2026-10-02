@@ -27,19 +27,19 @@ const ACCORDION_BLOCK = {
  *
  * @return {JSX.Element} The deprecation notice component.
  */
-function DeprecatedBlockEdit( { clientId } ) {
-	const { replaceBlocks } = useDispatch( blockEditorStore );
+function DeprecatedBlockEdit({ clientId }) {
+	const { replaceBlocks } = useDispatch(blockEditorStore);
 
 	const { currentBlockAttributes, innerBlocks } = useSelect(
-		( select ) => {
-			const blockEditor = select( blockEditorStore );
+		(select) => {
+			const blockEditor = select(blockEditorStore);
 			return {
 				currentBlockAttributes:
-					blockEditor.getBlockAttributes( clientId ),
-				innerBlocks: blockEditor.getBlocks( clientId ),
+					blockEditor.getBlockAttributes(clientId),
+				innerBlocks: blockEditor.getBlocks(clientId),
 			};
 		},
-		[ clientId ]
+		[clientId]
 	);
 
 	/**
@@ -49,7 +49,7 @@ function DeprecatedBlockEdit( { clientId } ) {
 	 *
 	 * @return {Array<*>} The converted blocks.
 	 */
-	const convertInnerBlocks = ( blocks ) => {
+	const convertInnerBlocks = (blocks) => {
 		// Define attributes to REMOVE for each block type.
 		const attributesToRemove = {
 			'woocommerce/accordion-header': [
@@ -64,42 +64,42 @@ function DeprecatedBlockEdit( { clientId } ) {
 			],
 		};
 
-		return blocks.map( ( block ) => {
+		return blocks.map((block) => {
 			let newBlockName = block.name;
 			const newAttributes = { ...block.attributes };
 
 			// Map WooCommerce block names to WordPress core block names.
-			if ( block.name === 'woocommerce/accordion-item' ) {
+			if (block.name === 'woocommerce/accordion-item') {
 				newBlockName = 'core/accordion-item';
 				// No attribute changes needed.
-			} else if ( block.name === 'woocommerce/accordion-header' ) {
+			} else if (block.name === 'woocommerce/accordion-header') {
 				newBlockName = 'core/accordion-heading';
 
 				// Convert icon to showIcon.
-				if ( block.attributes.icon !== undefined ) {
+				if (block.attributes.icon !== undefined) {
 					newAttributes.showIcon = block.attributes.icon !== false;
 				}
 
 				// Remove incompatible attributes.
 				const headerAttrs =
-					attributesToRemove[ 'woocommerce/accordion-header' ];
-				headerAttrs.forEach( ( attr ) => {
-					delete newAttributes[ attr ];
-				} );
-			} else if ( block.name === 'woocommerce/accordion-panel' ) {
+					attributesToRemove['woocommerce/accordion-header'];
+				headerAttrs.forEach((attr) => {
+					delete newAttributes[attr];
+				});
+			} else if (block.name === 'woocommerce/accordion-panel') {
 				newBlockName = 'core/accordion-panel';
 
 				// Remove incompatible attributes.
 				const panelAttrs =
-					attributesToRemove[ 'woocommerce/accordion-panel' ];
-				panelAttrs.forEach( ( attr ) => {
-					delete newAttributes[ attr ];
-				} );
+					attributesToRemove['woocommerce/accordion-panel'];
+				panelAttrs.forEach((attr) => {
+					delete newAttributes[attr];
+				});
 			}
 
 			// Recursively convert inner blocks.
 			const convertedInnerBlocks = block.innerBlocks?.length
-				? convertInnerBlocks( block.innerBlocks )
+				? convertInnerBlocks(block.innerBlocks)
 				: [];
 
 			return createBlock(
@@ -107,15 +107,15 @@ function DeprecatedBlockEdit( { clientId } ) {
 				newAttributes,
 				convertedInnerBlocks
 			);
-		} );
+		});
 	};
 
 	const updateBlock = () => {
-		if ( ! currentBlockAttributes ) {
+		if (!currentBlockAttributes) {
 			return;
 		}
 
-		const convertedInnerBlocks = convertInnerBlocks( innerBlocks );
+		const convertedInnerBlocks = convertInnerBlocks(innerBlocks);
 
 		// Filter accordion-group attributes - remove 'allowedBlocks'.
 		const { allowedBlocks, ...filteredGroupAttributes } =
@@ -132,17 +132,17 @@ function DeprecatedBlockEdit( { clientId } ) {
 	};
 
 	const actions = [
-		<Button key="update" onClick={ updateBlock } variant="primary">
-			{ __( 'Upgrade Block', 'woocommerce' ) }
+		<Button key="update" onClick={updateBlock} variant="primary">
+			{__('Upgrade Block', 'woocommerce')}
 		</Button>,
 	];
 
 	return (
-		<Warning actions={ actions } className="wc-block-components-actions">
-			{ __(
+		<Warning actions={actions} className="wc-block-components-actions">
+			{__(
 				'This version of the Accordion block is outdated. Upgrade to continue using.',
 				'woocommerce'
-			) }
+			)}
 		</Warning>
 	);
 }
@@ -158,50 +158,47 @@ function DeprecatedBlockEdit( { clientId } ) {
  *
  * @return {JSX.Element} The edit component.
  */
-export default function Edit( {
+export default function Edit({
 	attributes: { autoclose },
 	setAttributes,
 	clientId,
-} ) {
+}) {
 	const blockProps = useBlockProps();
 
-	const innerBlocksProps = useInnerBlocksProps( blockProps, {
-		template: [ [ ACCORDION_BLOCK_NAME ], [ ACCORDION_BLOCK_NAME ] ],
+	const innerBlocksProps = useInnerBlocksProps(blockProps, {
+		template: [[ACCORDION_BLOCK_NAME], [ACCORDION_BLOCK_NAME]],
 		defaultBlock: ACCORDION_BLOCK,
 		directInsert: true,
-	} );
+	});
 
 	// Show deprecation notice for WordPress 6.9+.
-	if ( isWpVersion( '6.9', '>=' ) ) {
-		return <DeprecatedBlockEdit clientId={ clientId } />;
+	if (isWpVersion('6.9', '>=')) {
+		return <DeprecatedBlockEdit clientId={clientId} />;
 	}
 
 	// Original edit UI for WordPress 6.8 and below.
 	return (
 		<>
 			<InspectorControls key="setting">
-				<PanelBody
-					title={ __( 'Settings', 'woocommerce' ) }
-					initialOpen
-				>
+				<PanelBody title={__('Settings', 'woocommerce')} initialOpen>
 					<ToggleControl
 						isBlock
 						__nextHasNoMarginBottom
-						label={ __( 'Auto-close', 'woocommerce' ) }
-						onChange={ ( value ) => {
-							setAttributes( {
+						label={__('Auto-close', 'woocommerce')}
+						onChange={(value) => {
+							setAttributes({
 								autoclose: value,
-							} );
-						} }
-						checked={ autoclose }
-						help={ __(
+							});
+						}}
+						checked={autoclose}
+						help={__(
 							'Automatically close accordions when a new one is opened.',
 							'woocommerce'
-						) }
+						)}
 					/>
 				</PanelBody>
 			</InspectorControls>
-			<div { ...innerBlocksProps } />
+			<div {...innerBlocksProps} />
 		</>
 	);
 }

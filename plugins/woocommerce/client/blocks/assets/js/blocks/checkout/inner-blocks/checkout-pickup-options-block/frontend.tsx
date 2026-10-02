@@ -15,7 +15,7 @@ import { useCheckoutBlockContext } from '@woocommerce/blocks/checkout/context';
 import Block from './block';
 import attributes from './attributes';
 
-const FrontendBlock = ( {
+const FrontendBlock = ({
 	title,
 	description,
 	children,
@@ -26,36 +26,34 @@ const FrontendBlock = ( {
 	showStepNumber: boolean;
 	children: JSX.Element;
 	className?: string;
-} ) => {
-	const { checkoutIsProcessing, prefersCollection } = useSelect(
-		( select ) => {
-			const checkoutStore = select( checkoutStoreDescriptor );
-			return {
-				checkoutIsProcessing: checkoutStore.isProcessing(),
-				prefersCollection: checkoutStore.prefersCollection(),
-			};
-		}
-	);
+}) => {
+	const { checkoutIsProcessing, prefersCollection } = useSelect((select) => {
+		const checkoutStore = select(checkoutStoreDescriptor);
+		return {
+			checkoutIsProcessing: checkoutStore.isProcessing(),
+			prefersCollection: checkoutStore.prefersCollection(),
+		};
+	});
 
 	const { showFormStepNumbers } = useCheckoutBlockContext();
 
-	if ( ! prefersCollection || ! LOCAL_PICKUP_ENABLED ) {
+	if (!prefersCollection || !LOCAL_PICKUP_ENABLED) {
 		return null;
 	}
 
 	return (
 		<FormStep
 			id="pickup-options"
-			disabled={ checkoutIsProcessing }
-			className={ clsx( 'wc-block-checkout__pickup-options', className ) }
-			title={ title }
-			description={ description }
-			showStepNumber={ showFormStepNumbers }
+			disabled={checkoutIsProcessing}
+			className={clsx('wc-block-checkout__pickup-options', className)}
+			title={title}
+			description={description}
+			showStepNumber={showFormStepNumbers}
 		>
 			<Block />
-			{ children }
+			{children}
 		</FormStep>
 	);
 };
 
-export default withFilteredAttributes( attributes )( FrontendBlock );
+export default withFilteredAttributes(attributes)(FrontendBlock);

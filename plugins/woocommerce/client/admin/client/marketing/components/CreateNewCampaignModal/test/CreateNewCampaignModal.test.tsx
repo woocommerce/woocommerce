@@ -10,22 +10,22 @@ import userEvent from '@testing-library/user-event';
 import { useCampaignTypes, useRecommendedChannels } from '~/marketing/hooks';
 import { CreateNewCampaignModal } from '../CreateNewCampaignModal';
 
-jest.mock( '@woocommerce/components', () => {
-	const originalModule = jest.requireActual( '@woocommerce/components' );
+jest.mock('@woocommerce/components', () => {
+	const originalModule = jest.requireActual('@woocommerce/components');
 
 	return {
 		__esModule: true,
 		...originalModule,
 		Spinner: () => <div data-testid="spinner">Spinner</div>,
 	};
-} );
+});
 
-jest.mock( '~/marketing/hooks', () => ( {
+jest.mock('~/marketing/hooks', () => ({
 	useCampaignTypes: jest.fn(),
 	useRecommendedChannels: jest.fn(),
-	useRegisteredChannels: jest.fn( () => ( {} ) ),
-	useInstalledPluginsWithoutChannels: jest.fn( () => ( {} ) ),
-} ) );
+	useRegisteredChannels: jest.fn(() => ({})),
+	useInstalledPluginsWithoutChannels: jest.fn(() => ({})),
+}));
 
 const google = {
 	id: 'google-ads',
@@ -48,8 +48,8 @@ const pinterest = {
 	icon: 'https://woocommerce.com/wp-content/plugins/wccom-plugins/marketing-tab-rest-api/icons/pinterest.svg',
 	product: 'pinterest-for-woocommerce',
 	plugin: 'pinterest-for-woocommerce/pinterest-for-woocommerce.php',
-	categories: [ 'marketing' ],
-	subcategories: [ { slug: 'sales-channels', name: 'Sales channels' } ],
+	categories: ['marketing'],
+	subcategories: [{ slug: 'sales-channels', name: 'Sales channels' }],
 	tags: [
 		{
 			slug: 'built-by-woocommerce',
@@ -59,17 +59,17 @@ const pinterest = {
 	show_extension_promotions: true,
 };
 
-describe( 'CreateNewCampaignModal component', () => {
-	it( 'renders new campaign types with recommended channels', async () => {
-		( useCampaignTypes as jest.Mock ).mockReturnValue( {
-			data: [ google ],
-		} );
-		( useRecommendedChannels as jest.Mock ).mockReturnValue( {
-			data: [ pinterest ],
-		} );
-		render( <CreateNewCampaignModal onRequestClose={ () => {} } /> );
+describe('CreateNewCampaignModal component', () => {
+	it('renders new campaign types with recommended channels', async () => {
+		(useCampaignTypes as jest.Mock).mockReturnValue({
+			data: [google],
+		});
+		(useRecommendedChannels as jest.Mock).mockReturnValue({
+			data: [pinterest],
+		});
+		render(<CreateNewCampaignModal onRequestClose={() => {}} />);
 
-		expect( screen.getByText( 'Google Ads' ) ).toBeInTheDocument();
+		expect(screen.getByText('Google Ads')).toBeInTheDocument();
 		expect(
 			screen.getByText(
 				'Boost your product listings with a campaign that is automatically optimized to meet your goals.'
@@ -78,30 +78,30 @@ describe( 'CreateNewCampaignModal component', () => {
 
 		// Click button to expand recommended channels section.
 		await userEvent.click(
-			screen.getByRole( 'button', {
+			screen.getByRole('button', {
 				name: 'Add channels for other campaign types',
-			} )
+			})
 		);
 
 		expect(
-			screen.getByText( 'Pinterest for WooCommerce' )
+			screen.getByText('Pinterest for WooCommerce')
 		).toBeInTheDocument();
-	} );
+	});
 
-	it( 'does not render recommended channels section when there are no recommended channels', async () => {
-		( useCampaignTypes as jest.Mock ).mockReturnValue( {
-			data: [ google ],
-		} );
-		( useRecommendedChannels as jest.Mock ).mockReturnValue( {
+	it('does not render recommended channels section when there are no recommended channels', async () => {
+		(useCampaignTypes as jest.Mock).mockReturnValue({
+			data: [google],
+		});
+		(useRecommendedChannels as jest.Mock).mockReturnValue({
 			data: [],
-		} );
-		render( <CreateNewCampaignModal onRequestClose={ () => {} } /> );
+		});
+		render(<CreateNewCampaignModal onRequestClose={() => {}} />);
 
 		// The expand button should not be there.
 		expect(
-			screen.queryByRole( 'button', {
+			screen.queryByRole('button', {
 				name: 'Add channels for other campaign types',
-			} )
+			})
 		).not.toBeInTheDocument();
-	} );
-} );
+	});
+});

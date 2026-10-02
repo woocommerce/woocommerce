@@ -9,12 +9,12 @@ export enum responseTypes {
 	ERROR = 'error',
 }
 
-export interface ObserverResponse extends Record< string, unknown > {
+export interface ObserverResponse extends Record<string, unknown> {
 	type: responseTypes;
 	errorMessage?: string;
 	context?: string;
-	meta?: Record< string, unknown >;
-	validationErrors?: Record< string, FieldValidationStatus >;
+	meta?: Record<string, unknown>;
+	validationErrors?: Record<string, FieldValidationStatus>;
 }
 
 /**
@@ -23,10 +23,10 @@ export interface ObserverResponse extends Record< string, unknown > {
 export const isObserverResponse = (
 	response: unknown
 ): response is ObserverResponse => {
-	return isObject( response ) && objectHasProp( response, 'type' );
+	return isObject(response) && objectHasProp(response, 'type');
 };
 
-export interface ResponseType extends Record< string, unknown > {
+export interface ResponseType extends Record<string, unknown> {
 	type: responseTypes;
 	retry?: boolean;
 }
@@ -35,13 +35,13 @@ const isResponseOf = (
 	response: unknown,
 	type: string extends responseTypes ? never : responseTypes
 ): response is ResponseType => {
-	return isObject( response ) && 'type' in response && response.type === type;
+	return isObject(response) && 'type' in response && response.type === type;
 };
 
 export const isSuccessResponse = (
 	response: unknown
 ): response is ObserverSuccessResponse => {
-	return isResponseOf( response, responseTypes.SUCCESS );
+	return isResponseOf(response, responseTypes.SUCCESS);
 };
 export interface ObserverSuccessResponse extends ObserverResponse {
 	type: responseTypes.SUCCESS;
@@ -49,7 +49,7 @@ export interface ObserverSuccessResponse extends ObserverResponse {
 export const isErrorResponse = (
 	response: unknown
 ): response is ObserverErrorResponse => {
-	return isResponseOf( response, responseTypes.ERROR );
+	return isResponseOf(response, responseTypes.ERROR);
 };
 export interface ObserverErrorResponse extends ObserverResponse {
 	type: responseTypes.ERROR;
@@ -61,5 +61,5 @@ export interface ObserverFailResponse extends ObserverResponse {
 export const isFailResponse = (
 	response: unknown
 ): response is ObserverFailResponse => {
-	return isResponseOf( response, responseTypes.FAIL );
+	return isResponseOf(response, responseTypes.FAIL);
 };

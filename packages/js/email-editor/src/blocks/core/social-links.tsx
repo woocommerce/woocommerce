@@ -50,19 +50,19 @@ const supportedVariations = [
 
 function unregisterBlockVariations() {
 	// Remove unsupported social links and disable layout support
-	updateBlockSettings( 'core/social-link', ( current ) => ( {
+	updateBlockSettings('core/social-link', (current) => ({
 		...current,
 		variations:
 			// @ts-expect-error Type BlockConfiguration is missing variations.
-			( ( current as BlockConfiguration ).variations || [] ).filter(
-				( variation: { name: string } ) =>
-					supportedVariations.includes( variation.name )
+			((current as BlockConfiguration).variations || []).filter(
+				(variation: { name: string }) =>
+					supportedVariations.includes(variation.name)
 			),
 		supports: {
 			...current.supports,
 			layout: false,
 		},
-	} ) );
+	}));
 }
 
 function registerCustomSocialLinksBlockVariation() {
@@ -95,7 +95,7 @@ function registerCustomSocialLinksBlockVariation() {
 		},
 	];
 
-	registerBlockVariationForEmail( 'core/social-links', {
+	registerBlockVariationForEmail('core/social-links', {
 		name: 'social-links-default',
 		title: 'Social Icons',
 		attributes: {
@@ -106,20 +106,20 @@ function registerCustomSocialLinksBlockVariation() {
 		},
 		isDefault: true, // set this as the default variation
 		innerBlocks: socialLinksVariations,
-	} );
+	});
 }
 
 const disableIconColor =
-	( BlockEdit: React.ElementType ) => ( props: Block< unknown > ) => {
-		if ( props.name !== 'core/social-links' ) {
-			return <BlockEdit { ...props } />;
+	(BlockEdit: React.ElementType) => (props: Block<unknown>) => {
+		if (props.name !== 'core/social-links') {
+			return <BlockEdit {...props} />;
 		}
 		// we are doing this because we don't want to show the icon color picker in the social links block (we can't change png image color)
 		// and there isn't a great way to remove the icon color from the core block attributes
 		// eslint-disable-next-line @wordpress/i18n-text-domain -- using core label.
-		const labelText = __( 'Icon color' );
+		const labelText = __('Icon color');
 		const customCss = `
-		.block-editor-tools-panel-color-gradient-settings__item:has([title="${ labelText }"]) {
+		.block-editor-tools-panel-color-gradient-settings__item:has([title="${labelText}"]) {
 			display: none !important;
 		}
 		.block-editor-tools-panel-color-gradient-settings__item:nth-child(2 of .block-editor-tools-panel-color-gradient-settings__item){
@@ -131,9 +131,9 @@ const disableIconColor =
 
 		return (
 			<>
-				<BlockEdit { ...props } />
+				<BlockEdit {...props} />
 				<InspectorControls group="color">
-					<style>{ customCss }</style>
+					<style>{customCss}</style>
 				</InspectorControls>
 			</>
 		);

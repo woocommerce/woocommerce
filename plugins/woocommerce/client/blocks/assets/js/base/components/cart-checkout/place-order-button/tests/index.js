@@ -9,77 +9,77 @@ import { render, screen } from '@testing-library/react';
 import PlaceOrderButton from '..';
 
 const mockUseCheckoutSubmit = jest.fn();
-jest.mock( '@woocommerce/base-context/hooks', () => ( {
+jest.mock('@woocommerce/base-context/hooks', () => ({
 	useCheckoutSubmit: () => mockUseCheckoutSubmit(),
-	usePaymentMethodInterface: () => ( {
+	usePaymentMethodInterface: () => ({
 		onSubmit: jest.fn(),
 		validate: jest.fn(),
 		activePaymentMethod: 'test-payment',
-	} ),
-	useStoreCart: () => ( {
+	}),
+	useStoreCart: () => ({
 		cartIsLoading: false,
-	} ),
-} ) );
+	}),
+}));
 
-jest.mock( '@woocommerce/blocks-components', () => ( {
+jest.mock('@woocommerce/blocks-components', () => ({
 	FormattedMonetaryAmount: () => <span>$10.00</span>,
 	Spinner: () => <span>Loading...</span>,
-} ) );
+}));
 
-const CustomButtonMock = jest.fn( () => <button>Custom Button</button> );
+const CustomButtonMock = jest.fn(() => <button>Custom Button</button>);
 
-describe( 'PlaceOrderButton', () => {
-	beforeEach( () => {
+describe('PlaceOrderButton', () => {
+	beforeEach(() => {
 		jest.clearAllMocks();
-		mockUseCheckoutSubmit.mockReturnValue( {
+		mockUseCheckoutSubmit.mockReturnValue({
 			onSubmit: jest.fn(),
 			isCalculating: false,
 			isDisabled: false,
 			waitingForProcessing: false,
 			waitingForRedirect: false,
-		} );
-	} );
+		});
+	});
 
-	it( 'renders default button', () => {
-		render( <PlaceOrderButton label="Place Order" /> );
+	it('renders default button', () => {
+		render(<PlaceOrderButton label="Place Order" />);
 
-		expect( screen.queryByText( 'Place Order' ) ).toBeInTheDocument();
-		expect( screen.queryByText( 'Custom Button' ) ).not.toBeInTheDocument();
-	} );
+		expect(screen.queryByText('Place Order')).toBeInTheDocument();
+		expect(screen.queryByText('Custom Button')).not.toBeInTheDocument();
+	});
 
-	it( 'displays the provided label', () => {
-		render( <PlaceOrderButton label="Confirm Purchase" /> );
+	it('displays the provided label', () => {
+		render(<PlaceOrderButton label="Confirm Purchase" />);
 
-		expect( screen.getByText( 'Confirm Purchase' ) ).toBeInTheDocument();
-	} );
+		expect(screen.getByText('Confirm Purchase')).toBeInTheDocument();
+	});
 
-	it( 'renders CustomButtonComponent when provided', () => {
+	it('renders CustomButtonComponent when provided', () => {
 		render(
 			<PlaceOrderButton
 				label="Place Order"
-				CustomButtonComponent={ CustomButtonMock }
+				CustomButtonComponent={CustomButtonMock}
 			/>
 		);
 
-		expect( screen.queryByText( 'Custom Button' ) ).toBeInTheDocument();
-		expect( screen.queryByText( 'Place Order' ) ).not.toBeInTheDocument();
-	} );
+		expect(screen.queryByText('Custom Button')).toBeInTheDocument();
+		expect(screen.queryByText('Place Order')).not.toBeInTheDocument();
+	});
 
-	it( 'spreads paymentMethodInterface props to the custom component', () => {
+	it('spreads paymentMethodInterface props to the custom component', () => {
 		render(
 			<PlaceOrderButton
 				label="Place Order"
-				CustomButtonComponent={ CustomButtonMock }
+				CustomButtonComponent={CustomButtonMock}
 			/>
 		);
 
-		expect( CustomButtonMock ).toHaveBeenCalledWith(
-			expect.objectContaining( {
-				onSubmit: expect.any( Function ),
-				validate: expect.any( Function ),
+		expect(CustomButtonMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				onSubmit: expect.any(Function),
+				validate: expect.any(Function),
 				activePaymentMethod: 'test-payment',
-			} ),
+			}),
 			expect.anything()
 		);
-	} );
-} );
+	});
+});

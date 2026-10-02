@@ -55,35 +55,35 @@ interface WooPaymentsResetAccountModalProps {
 /**
  * A modal component that allows users to reset their WooPayments account.
  */
-export const WooPaymentsResetAccountModal = ( {
+export const WooPaymentsResetAccountModal = ({
 	isOpen,
 	onClose,
 	hasAccount,
 	isTestMode,
 	isEmbeddedResetFlow = false,
 	resetUrl,
-}: WooPaymentsResetAccountModalProps ) => {
-	const [ isResettingAccount, setIsResettingAccount ] = useState( false );
+}: WooPaymentsResetAccountModalProps) => {
+	const [isResettingAccount, setIsResettingAccount] = useState(false);
 	const { invalidateResolutionForStoreSelector: invalidatePaymentGateways } =
-		useDispatch( paymentSettingsStore );
+		useDispatch(paymentSettingsStore);
 	const {
 		invalidateResolutionForStoreSelector: invalidateWooPaymentsOnboarding,
-	} = useDispatch( woopaymentsOnboardingStore );
-	const { createNotice } = useDispatch( 'core/notices' );
+	} = useDispatch(woopaymentsOnboardingStore);
+	const { createNotice } = useDispatch('core/notices');
 
 	/**
 	 * Handles the "Reset Account" action.
 	 */
 	const handleResetAccount = () => {
-		setIsResettingAccount( true );
+		setIsResettingAccount(true);
 
-		if ( ! resetUrl ) {
-			recordPaymentsEvent( 'provider_reset_onboarding_failed', {
+		if (!resetUrl) {
+			recordPaymentsEvent('provider_reset_onboarding_failed', {
 				provider_id: wooPaymentsProviderId,
 				suggestion_id: wooPaymentsSuggestionId,
 				provider_extension_slug: wooPaymentsExtensionSlug,
 				reason: 'missing_reset_url',
-			} );
+			});
 			createNotice(
 				'error',
 				__(
@@ -92,32 +92,32 @@ export const WooPaymentsResetAccountModal = ( {
 				),
 				{ isDismissible: true }
 			);
-			setIsResettingAccount( false );
+			setIsResettingAccount(false);
 			return;
 		}
 
-		apiFetch( {
+		apiFetch({
 			url: resetUrl,
 			method: 'POST',
-		} )
-			.then( () => {
-				recordPaymentsEvent( 'provider_reset_onboarding_success', {
+		})
+			.then(() => {
+				recordPaymentsEvent('provider_reset_onboarding_success', {
 					provider_id: wooPaymentsProviderId,
 					suggestion_id: wooPaymentsSuggestionId,
 					provider_extension_slug: wooPaymentsExtensionSlug,
-				} );
+				});
 				// Refresh the providers store.
-				void invalidatePaymentGateways( 'getPaymentProviders' );
+				void invalidatePaymentGateways('getPaymentProviders');
 				// Refresh the WooPayments in-context onboarding store.
-				void invalidateWooPaymentsOnboarding( 'getOnboardingData' );
-			} )
-			.catch( () => {
-				recordPaymentsEvent( 'provider_reset_onboarding_failed', {
+				void invalidateWooPaymentsOnboarding('getOnboardingData');
+			})
+			.catch(() => {
+				recordPaymentsEvent('provider_reset_onboarding_failed', {
 					provider_id: wooPaymentsProviderId,
 					suggestion_id: wooPaymentsSuggestionId,
 					provider_extension_slug: wooPaymentsExtensionSlug,
 					reason: 'error',
-				} );
+				});
 				createNotice(
 					'error',
 					hasAccount
@@ -128,7 +128,7 @@ export const WooPaymentsResetAccountModal = ( {
 									'woocommerce'
 								),
 								'WooPayments'
-						  )
+							)
 						: sprintf(
 								/* translators: %s: Provider name */
 								__(
@@ -136,25 +136,25 @@ export const WooPaymentsResetAccountModal = ( {
 									'woocommerce'
 								),
 								'WooPayments'
-						  ),
+							),
 					{
 						isDismissible: true,
 					}
 				);
-			} )
-			.finally( () => {
-				setIsResettingAccount( false );
+			})
+			.finally(() => {
+				setIsResettingAccount(false);
 				onClose();
-			} );
+			});
 	};
 
 	let title: string;
 	let content: string;
 	let buttonText: string;
-	if ( hasAccount ) {
+	if (hasAccount) {
 		title = isTestMode
-			? __( 'Reset your test account', 'woocommerce' )
-			: __( 'Reset your account', 'woocommerce' );
+			? __('Reset your test account', 'woocommerce')
+			: __('Reset your account', 'woocommerce');
 
 		content = isTestMode
 			? sprintf(
@@ -164,7 +164,7 @@ export const WooPaymentsResetAccountModal = ( {
 						'woocommerce'
 					),
 					'WooPayments'
-			  )
+				)
 			: sprintf(
 					/* translators: %s: Provider name */
 					__(
@@ -172,8 +172,8 @@ export const WooPaymentsResetAccountModal = ( {
 						'woocommerce'
 					),
 					'WooPayments'
-			  );
-		if ( isEmbeddedResetFlow ) {
+				);
+		if (isEmbeddedResetFlow) {
 			// If resetting the account from NOX, override the content.
 			content = sprintf(
 				/* translators: 1: Provider name, 2: Provider name */
@@ -187,10 +187,10 @@ export const WooPaymentsResetAccountModal = ( {
 		}
 
 		buttonText = isTestMode
-			? __( 'Yes, reset test account', 'woocommerce' )
-			: __( 'Yes, reset account', 'woocommerce' );
+			? __('Yes, reset test account', 'woocommerce')
+			: __('Yes, reset account', 'woocommerce');
 	} else {
-		title = __( 'Reset onboarding', 'woocommerce' );
+		title = __('Reset onboarding', 'woocommerce');
 		content = sprintf(
 			/* translators: %s: Provider name */
 			__(
@@ -199,41 +199,41 @@ export const WooPaymentsResetAccountModal = ( {
 			),
 			'WooPayments'
 		);
-		buttonText = __( 'Yes, reset onboarding', 'woocommerce' );
+		buttonText = __('Yes, reset onboarding', 'woocommerce');
 	}
 	return (
 		<>
-			{ isOpen && (
+			{isOpen && (
 				<Modal
-					title={ title }
+					title={title}
 					className="woocommerce-woopayments-modal"
-					isDismissible={ true }
-					onRequestClose={ onClose }
+					isDismissible={true}
+					onRequestClose={onClose}
 				>
 					<div className="woocommerce-woopayments-modal__content">
 						<div className="woocommerce-woopayments-modal__content__item">
 							<div>
-								<span>{ content }</span>
+								<span>{content}</span>
 							</div>
 						</div>
 						<div className="woocommerce-woopayments-modal__content__item">
 							<h3>
-								{ __(
+								{__(
 									"Are you sure you'd like to continue?",
 									'woocommerce'
-								) }
+								)}
 							</h3>
 						</div>
 					</div>
 					<div className="woocommerce-woopayments-modal__actions">
 						<Button
-							className={ isEmbeddedResetFlow ? '' : 'danger' }
+							className={isEmbeddedResetFlow ? '' : 'danger'}
 							variant={
 								isEmbeddedResetFlow ? 'primary' : 'secondary'
 							}
-							isBusy={ isResettingAccount }
-							disabled={ isResettingAccount }
-							onClick={ () => {
+							isBusy={isResettingAccount}
+							disabled={isResettingAccount}
+							onClick={() => {
 								recordPaymentsEvent(
 									'provider_reset_onboarding_confirmation_click',
 									{
@@ -244,13 +244,13 @@ export const WooPaymentsResetAccountModal = ( {
 									}
 								);
 								handleResetAccount();
-							} }
+							}}
 						>
-							{ buttonText }
+							{buttonText}
 						</Button>
 					</div>
 				</Modal>
-			) }
+			)}
 		</>
 	);
 };

@@ -12,19 +12,19 @@ import {
 	WooHomescreenWCPayFeatureItem,
 } from './utils';
 
-export const WooHomescreenWCPayFeature = ( {
+export const WooHomescreenWCPayFeature = ({
 	className,
 }: {
 	className: string;
-} ) => {
-	const slot = useSlot( EXPERIMENTAL_WC_HOMESCREEN_WC_PAY_FEATURE_SLOT_NAME );
-	const hasFills = Boolean( slot?.fills?.length );
+}) => {
+	const slot = useSlot(EXPERIMENTAL_WC_HOMESCREEN_WC_PAY_FEATURE_SLOT_NAME);
+	const hasFills = Boolean(slot?.fills?.length);
 
-	if ( ! hasFills ) {
+	if (!hasFills) {
 		return null;
 	}
 	return (
-		<div className={ clsx( 'woocommerce-homescreen__header', className ) }>
+		<div className={clsx('woocommerce-homescreen__header', className)}>
 			<WooHomescreenWCPayFeatureItem.Slot />
 		</div>
 	);

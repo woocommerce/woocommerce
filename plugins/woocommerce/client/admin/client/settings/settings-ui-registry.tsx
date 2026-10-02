@@ -14,14 +14,14 @@ declare global {
 	interface Window {
 		wc?: {
 			settingsUi?: {
-				SettingsUIErrorBoundary: ComponentType< {
+				SettingsUIErrorBoundary: ComponentType<{
 					children: ReactNode;
-				} >;
-				SettingsUIPage: ( props: {
+				}>;
+				SettingsUIPage: (props: {
 					schema: SettingsUISchema;
 					page: string;
 					section?: string;
-				} ) => JSX.Element | null;
+				}) => JSX.Element | null;
 			};
 		};
 	}
@@ -31,9 +31,9 @@ const getSchema = (
 	page: string,
 	section: string
 ): SettingsUISchema | undefined => {
-	const settings = getAdminSetting( 'settingsUI', {} );
+	const settings = getAdminSetting('settingsUI', {});
 	const sectionKey = section || 'default';
-	return settings?.[ page ]?.[ sectionKey ];
+	return settings?.[page]?.[sectionKey];
 };
 
 export const registerSettingsUIScreens = () => {
@@ -41,10 +41,8 @@ export const registerSettingsUIScreens = () => {
 		window.wc?.settingsUi?.SettingsUIErrorBoundary;
 	const SettingsUIPage = window.wc?.settingsUi?.SettingsUIPage;
 
-	if ( ! SettingsUIErrorBoundary || ! SettingsUIPage ) {
-		if (
-			document.querySelector< HTMLElement >( '[data-wc-settings-ui="1"]' )
-		) {
+	if (!SettingsUIErrorBoundary || !SettingsUIPage) {
+		if (document.querySelector<HTMLElement>('[data-wc-settings-ui="1"]')) {
 			// eslint-disable-next-line no-console
 			console.warn(
 				'[WooCommerce settings UI] The wc-settings-ui script is missing.'
@@ -54,13 +52,13 @@ export const registerSettingsUIScreens = () => {
 	}
 
 	document
-		.querySelectorAll< HTMLElement >( '[data-wc-settings-ui="1"]' )
-		.forEach( ( element ) => {
+		.querySelectorAll<HTMLElement>('[data-wc-settings-ui="1"]')
+		.forEach((element) => {
 			const page = element.dataset.wcSettingsPage || '';
 			const section = element.dataset.wcSettingsSection || '';
-			const schema = getSchema( page, section );
+			const schema = getSchema(page, section);
 
-			if ( ! schema ) {
+			if (!schema) {
 				// eslint-disable-next-line no-console
 				console.warn(
 					'[WooCommerce settings UI] Settings payload is missing.',
@@ -69,16 +67,16 @@ export const registerSettingsUIScreens = () => {
 				return;
 			}
 
-			createRoot( element ).render(
+			createRoot(element).render(
 				createElement(
 					SettingsUIErrorBoundary,
 					null,
-					createElement( SettingsUIPage, {
+					createElement(SettingsUIPage, {
 						schema,
 						page,
 						section,
-					} )
+					})
 				)
 			);
-		} );
+		});
 };

@@ -22,71 +22,71 @@ import { getAdminSetting } from '~/utils/admin-settings';
  * @param {Function}        [handleData] - function applied to each iteration of data
  * @return {Function} - a function of ids returning a promise
  */
-export function getRequestByIdString( path, handleData = identity ) {
-	return function ( queryString = '', query ) {
-		const pathString = typeof path === 'function' ? path( query ) : path;
-		const idList = getIdsFromQuery( queryString );
-		if ( idList.length < 1 ) {
-			return Promise.resolve( [] );
+export function getRequestByIdString(path, handleData = identity) {
+	return function (queryString = '', query) {
+		const pathString = typeof path === 'function' ? path(query) : path;
+		const idList = getIdsFromQuery(queryString);
+		if (idList.length < 1) {
+			return Promise.resolve([]);
 		}
 		const payload = {
-			include: idList.join( ',' ),
+			include: idList.join(','),
 			per_page: idList.length,
 		};
-		return apiFetch( {
-			path: addQueryArgs( pathString, payload ),
-		} ).then( ( data ) => data.map( handleData ) );
+		return apiFetch({
+			path: addQueryArgs(pathString, payload),
+		}).then((data) => data.map(handleData));
 	};
 }
 
 export const getAttributeLabels = getRequestByIdString(
 	NAMESPACE + '/products/attributes',
-	( attribute ) => ( {
+	(attribute) => ({
 		key: attribute.id,
 		label: attribute.name,
-	} )
+	})
 );
 
 export const getCategoryLabels = getRequestByIdString(
 	NAMESPACE + '/products/categories',
-	( category ) => ( {
+	(category) => ({
 		key: category.id,
 		label: category.name,
-	} )
+	})
 );
 
 export const getCouponLabels = getRequestByIdString(
 	NAMESPACE + '/coupons',
-	( coupon ) => ( {
+	(coupon) => ({
 		key: coupon.id,
 		label: coupon.code,
-	} )
+	})
 );
 
 export const getCustomerLabels = getRequestByIdString(
 	NAMESPACE + '/customers',
-	( customer ) => ( {
+	(customer) => ({
 		key: customer.id,
 		// Customers can be registered without a first or last name, so fall back
 		// to the fields that are always set.
 		label: customer.name || customer.username || customer.email,
-	} )
+	})
 );
 
 export const getProductLabels = getRequestByIdString(
 	NAMESPACE + '/products',
-	( product ) => ( {
+	(product) => ({
 		key: product.id,
 		label: product.name,
-	} )
+	})
 );
 
 export const getTaxRateLabels = getRequestByIdString(
 	NAMESPACE + '/taxes',
-	( taxRate ) => ( {
+	(taxRate) => ({
 		key: taxRate.id,
-		label: getTaxCode( taxRate ),
-	} )
+		label: getTaxCode(taxRate),
+	})
 );
 
 /**
@@ -98,48 +98,48 @@ export const getTaxRateLabels = getRequestByIdString(
  * @param {string} variation.name       - name of variation.
  * @return {string} - formatted variation name
  */
-export function getVariationName( { attributes, name } ) {
+export function getVariationName({ attributes, name }) {
 	const separator = getAdminSetting(
 		'variationTitleAttributesSeparator',
 		' - '
 	);
 
-	if ( name && name.indexOf( separator ) > -1 ) {
+	if (name && name.indexOf(separator) > -1) {
 		return name;
 	}
 
-	const attributeList = ( attributes || [] )
-		.map( ( { name: attributeName, option } ) => {
-			if ( ! option ) {
+	const attributeList = (attributes || [])
+		.map(({ name: attributeName, option }) => {
+			if (!option) {
 				attributeName =
-					attributeName.charAt( 0 ).toUpperCase() +
-					attributeName.slice( 1 );
+					attributeName.charAt(0).toUpperCase() +
+					attributeName.slice(1);
 				option = sprintf(
 					// translators: %s: the attribute name.
-					__( 'Any %s', 'woocommerce' ),
+					__('Any %s', 'woocommerce'),
 					attributeName
 				);
 			}
 			return option;
-		} )
-		.join( ', ' );
+		})
+		.join(', ');
 
 	return attributeList ? name + separator + attributeList : name;
 }
 
 export const getVariationLabels = getRequestByIdString(
-	( { products } ) => {
+	({ products }) => {
 		// If a product was specified, get just its variations.
-		if ( products ) {
-			return NAMESPACE + `/products/${ products }/variations`;
+		if (products) {
+			return NAMESPACE + `/products/${products}/variations`;
 		}
 
 		return NAMESPACE + '/variations';
 	},
-	( variation ) => {
+	(variation) => {
 		return {
 			key: variation.id,
-			label: getVariationName( variation ),
+			label: getVariationName(variation),
 		};
 	}
 );

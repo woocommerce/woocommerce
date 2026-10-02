@@ -6,23 +6,23 @@ import { defaultState } from '../default-state';
 import { STATUS } from '../constants';
 import * as actions from '../actions';
 
-describe( 'Checkout Store Reducer', () => {
-	it( 'should return the initial state', () => {
-		expect( reducer( undefined, {} ) ).toEqual( defaultState );
-	} );
+describe('Checkout Store Reducer', () => {
+	it('should return the initial state', () => {
+		expect(reducer(undefined, {})).toEqual(defaultState);
+	});
 
-	it( 'should handle SET_IDLE', () => {
+	it('should handle SET_IDLE', () => {
 		const expectedState = {
 			...defaultState,
 			status: STATUS.IDLE,
 		};
 
-		expect( reducer( defaultState, actions.__internalSetIdle() ) ).toEqual(
+		expect(reducer(defaultState, actions.__internalSetIdle())).toEqual(
 			expectedState
 		);
-	} );
+	});
 
-	it( 'should handle SET_REDIRECT_URL', () => {
+	it('should handle SET_REDIRECT_URL', () => {
 		const expectedState = {
 			...defaultState,
 			redirectUrl: 'https://example.com',
@@ -31,12 +31,12 @@ describe( 'Checkout Store Reducer', () => {
 		expect(
 			reducer(
 				defaultState,
-				actions.__internalSetRedirectUrl( 'https://example.com' )
+				actions.__internalSetRedirectUrl('https://example.com')
 			)
-		).toEqual( expectedState );
-	} );
+		).toEqual(expectedState);
+	});
 
-	it( 'should handle SET_COMPLETE', () => {
+	it('should handle SET_COMPLETE', () => {
 		const expectedState = {
 			...defaultState,
 			status: STATUS.COMPLETE,
@@ -46,25 +46,25 @@ describe( 'Checkout Store Reducer', () => {
 		expect(
 			reducer(
 				defaultState,
-				actions.__internalSetComplete( {
+				actions.__internalSetComplete({
 					redirectUrl: 'https://example.com',
-				} )
+				})
 			)
-		).toEqual( expectedState );
-	} );
+		).toEqual(expectedState);
+	});
 
-	it( 'should handle SET_PROCESSING', () => {
+	it('should handle SET_PROCESSING', () => {
 		const expectedState = {
 			...defaultState,
 			status: STATUS.PROCESSING,
 		};
 
 		expect(
-			reducer( defaultState, actions.__internalSetProcessing() )
-		).toEqual( expectedState );
-	} );
+			reducer(defaultState, actions.__internalSetProcessing())
+		).toEqual(expectedState);
+	});
 
-	it( 'should handle SET_HAS_ERROR when status is PROCESSING', () => {
+	it('should handle SET_HAS_ERROR when status is PROCESSING', () => {
 		const initialState = { ...defaultState, status: STATUS.PROCESSING };
 
 		const expectedState = {
@@ -74,11 +74,11 @@ describe( 'Checkout Store Reducer', () => {
 		};
 
 		expect(
-			reducer( initialState, actions.__internalSetHasError( true ) )
-		).toEqual( expectedState );
-	} );
+			reducer(initialState, actions.__internalSetHasError(true))
+		).toEqual(expectedState);
+	});
 
-	it( 'should handle SET_HAS_ERROR when status is BEFORE_PROCESSING', () => {
+	it('should handle SET_HAS_ERROR when status is BEFORE_PROCESSING', () => {
 		const initialState = {
 			...defaultState,
 			status: STATUS.BEFORE_PROCESSING,
@@ -91,11 +91,11 @@ describe( 'Checkout Store Reducer', () => {
 		};
 
 		expect(
-			reducer( initialState, actions.__internalSetHasError( true ) )
-		).toEqual( expectedState );
-	} );
+			reducer(initialState, actions.__internalSetHasError(true))
+		).toEqual(expectedState);
+	});
 
-	it( 'should handle SET_HAS_ERROR when status is anything else', () => {
+	it('should handle SET_HAS_ERROR when status is anything else', () => {
 		const initialState = {
 			...defaultState,
 			status: STATUS.AFTER_PROCESSING,
@@ -108,44 +108,44 @@ describe( 'Checkout Store Reducer', () => {
 		};
 
 		expect(
-			reducer( initialState, actions.__internalSetHasError( false ) )
-		).toEqual( expectedState );
-	} );
+			reducer(initialState, actions.__internalSetHasError(false))
+		).toEqual(expectedState);
+	});
 
-	it( 'should handle SET_BEFORE_PROCESSING', () => {
+	it('should handle SET_BEFORE_PROCESSING', () => {
 		const expectedState = {
 			...defaultState,
 			status: STATUS.BEFORE_PROCESSING,
 		};
 
 		expect(
-			reducer( defaultState, actions.__internalSetBeforeProcessing() )
-		).toEqual( expectedState );
-	} );
+			reducer(defaultState, actions.__internalSetBeforeProcessing())
+		).toEqual(expectedState);
+	});
 
-	it( 'should handle SET_AFTER_PROCESSING', () => {
+	it('should handle SET_AFTER_PROCESSING', () => {
 		const expectedState = {
 			...defaultState,
 			status: STATUS.AFTER_PROCESSING,
 		};
 
 		expect(
-			reducer( defaultState, actions.__internalSetAfterProcessing() )
-		).toEqual( expectedState );
-	} );
+			reducer(defaultState, actions.__internalSetAfterProcessing())
+		).toEqual(expectedState);
+	});
 
-	it( 'should handle INCREMENT_CALCULATING', () => {
+	it('should handle INCREMENT_CALCULATING', () => {
 		const expectedState = {
 			...defaultState,
 			calculatingCount: 1,
 		};
 
 		expect(
-			reducer( defaultState, actions.__internalStartCalculation() )
-		).toEqual( expectedState );
-	} );
+			reducer(defaultState, actions.__internalStartCalculation())
+		).toEqual(expectedState);
+	});
 
-	it( 'should handle DECREMENT_CALCULATING', () => {
+	it('should handle DECREMENT_CALCULATING', () => {
 		const initialState = {
 			...defaultState,
 			calculatingCount: 1,
@@ -157,25 +157,25 @@ describe( 'Checkout Store Reducer', () => {
 		};
 
 		expect(
-			reducer( initialState, actions.__internalFinishCalculation() )
-		).toEqual( expectedState );
-	} );
+			reducer(initialState, actions.__internalFinishCalculation())
+		).toEqual(expectedState);
+	});
 
-	it( 'should handle INCREMENT_CALCULATING using deprecated action', () => {
+	it('should handle INCREMENT_CALCULATING using deprecated action', () => {
 		const expectedState = {
 			...defaultState,
 			calculatingCount: 1,
 		};
 
 		expect(
-			reducer( defaultState, actions.__internalIncrementCalculating() )
-		).toEqual( expectedState );
-		expect( console ).toHaveWarnedWith(
+			reducer(defaultState, actions.__internalIncrementCalculating())
+		).toEqual(expectedState);
+		expect(console).toHaveWarnedWith(
 			'__internalIncrementCalculating is deprecated and will be removed from WooCommerce in version 9.9.0. Please use disableCheckoutFor instead.'
 		);
-	} );
+	});
 
-	it( 'should handle DECREMENT_CALCULATING using deprecated action', () => {
+	it('should handle DECREMENT_CALCULATING using deprecated action', () => {
 		const initialState = {
 			...defaultState,
 			calculatingCount: 1,
@@ -187,25 +187,25 @@ describe( 'Checkout Store Reducer', () => {
 		};
 
 		expect(
-			reducer( initialState, actions.__internalDecrementCalculating() )
-		).toEqual( expectedState );
-		expect( console ).toHaveWarnedWith(
+			reducer(initialState, actions.__internalDecrementCalculating())
+		).toEqual(expectedState);
+		expect(console).toHaveWarnedWith(
 			'__internalDecrementCalculating is deprecated and will be removed from WooCommerce in version 9.9.0. Please use disableCheckoutFor instead.'
 		);
-	} );
+	});
 
-	it( 'should handle SET_CUSTOMER_ID', () => {
+	it('should handle SET_CUSTOMER_ID', () => {
 		const expectedState = {
 			...defaultState,
 			customerId: 1,
 		};
 
 		expect(
-			reducer( defaultState, actions.__internalSetCustomerId( 1 ) )
-		).toEqual( expectedState );
-	} );
+			reducer(defaultState, actions.__internalSetCustomerId(1))
+		).toEqual(expectedState);
+	});
 
-	it( 'should handle SET_USE_SHIPPING_AS_BILLING', () => {
+	it('should handle SET_USE_SHIPPING_AS_BILLING', () => {
 		const expectedState = {
 			...defaultState,
 			useShippingAsBilling: false,
@@ -214,12 +214,12 @@ describe( 'Checkout Store Reducer', () => {
 		expect(
 			reducer(
 				defaultState,
-				actions.__internalSetUseShippingAsBilling( false )
+				actions.__internalSetUseShippingAsBilling(false)
 			)
-		).toEqual( expectedState );
-	} );
+		).toEqual(expectedState);
+	});
 
-	it( 'should handle SET_SHOULD_CREATE_ACCOUNT', () => {
+	it('should handle SET_SHOULD_CREATE_ACCOUNT', () => {
 		const expectedState = {
 			...defaultState,
 			shouldCreateAccount: true,
@@ -228,24 +228,24 @@ describe( 'Checkout Store Reducer', () => {
 		expect(
 			reducer(
 				defaultState,
-				actions.__internalSetShouldCreateAccount( true )
+				actions.__internalSetShouldCreateAccount(true)
 			)
-		).toEqual( expectedState );
-	} );
+		).toEqual(expectedState);
+	});
 
-	it( 'should handle SET_ORDER_NOTES', () => {
+	it('should handle SET_ORDER_NOTES', () => {
 		const expectedState = {
 			...defaultState,
 			orderNotes: 'test',
 		};
 
 		expect(
-			reducer( defaultState, actions.__internalSetOrderNotes( 'test' ) )
-		).toEqual( expectedState );
-	} );
+			reducer(defaultState, actions.__internalSetOrderNotes('test'))
+		).toEqual(expectedState);
+	});
 
-	describe( 'should handle SET_EXTENSION_DATA', () => {
-		it( 'should set data under a namespace', () => {
+	describe('should handle SET_EXTENSION_DATA', () => {
+		it('should set data under a namespace', () => {
 			const mockExtensionData = {
 				extensionNamespace: {
 					testKey: 'test-value',
@@ -264,9 +264,9 @@ describe( 'Checkout Store Reducer', () => {
 						mockExtensionData.extensionNamespace
 					)
 				)
-			).toEqual( expectedState );
-		} );
-		it( 'should append data under a namespace', () => {
+			).toEqual(expectedState);
+		});
+		it('should append data under a namespace', () => {
 			const mockExtensionData = {
 				extensionNamespace: {
 					testKey: 'test-value',
@@ -279,19 +279,19 @@ describe( 'Checkout Store Reducer', () => {
 			};
 			const firstState = reducer(
 				defaultState,
-				actions.setExtensionData( 'extensionNamespace', {
+				actions.setExtensionData('extensionNamespace', {
 					testKey: 'test-value',
-				} )
+				})
 			);
 			const secondState = reducer(
 				firstState,
-				actions.setExtensionData( 'extensionNamespace', {
+				actions.setExtensionData('extensionNamespace', {
 					testKey2: 'test-value-2',
-				} )
+				})
 			);
-			expect( secondState ).toEqual( expectedState );
-		} );
-		it( 'support replacing data under a namespace', () => {
+			expect(secondState).toEqual(expectedState);
+		});
+		it('support replacing data under a namespace', () => {
 			const mockExtensionData = {
 				extensionNamespace: {
 					testKey: 'test-value',
@@ -303,9 +303,9 @@ describe( 'Checkout Store Reducer', () => {
 			};
 			const firstState = reducer(
 				defaultState,
-				actions.setExtensionData( 'extensionNamespace', {
+				actions.setExtensionData('extensionNamespace', {
 					testKeyOld: 'test-value',
-				} )
+				})
 			);
 			const secondState = reducer(
 				firstState,
@@ -315,9 +315,9 @@ describe( 'Checkout Store Reducer', () => {
 					true
 				)
 			);
-			expect( secondState ).toEqual( expectedState );
-		} );
-		it( 'should work with deprecated __internalSetExtensionData and show deprecation warning', () => {
+			expect(secondState).toEqual(expectedState);
+		});
+		it('should work with deprecated __internalSetExtensionData and show deprecation warning', () => {
 			const mockExtensionData = {
 				extensionNamespace: {
 					testKey: 'test-value',
@@ -336,89 +336,89 @@ describe( 'Checkout Store Reducer', () => {
 				)
 			);
 
-			expect( state ).toEqual( expectedState );
-			expect( console ).toHaveWarnedWith(
+			expect(state).toEqual(expectedState);
+			expect(console).toHaveWarnedWith(
 				'__internalSetExtensionData is deprecated and will be removed from WooCommerce in version 9.9.0. Please use setExtensionData instead.'
 			);
-		} );
-	} );
+		});
+	});
 
-	describe( 'should handle ADD_ADDRESS_AUTOCOMPLETE_PROVIDER', () => {
-		it( 'should add a new provider to empty list', () => {
+	describe('should handle ADD_ADDRESS_AUTOCOMPLETE_PROVIDER', () => {
+		it('should add a new provider to empty list', () => {
 			const expectedState = {
 				...defaultState,
-				addressAutocompleteProviders: [ 'google-places' ],
+				addressAutocompleteProviders: ['google-places'],
 			};
 
 			expect(
 				reducer(
 					defaultState,
-					actions.addAddressAutocompleteProvider( 'google-places' )
+					actions.addAddressAutocompleteProvider('google-places')
 				)
-			).toEqual( expectedState );
-		} );
+			).toEqual(expectedState);
+		});
 
-		it( 'should add a new provider to existing list', () => {
+		it('should add a new provider to existing list', () => {
 			const initialState = {
 				...defaultState,
-				addressAutocompleteProviders: [ 'google-places' ],
+				addressAutocompleteProviders: ['google-places'],
 			};
 
 			const expectedState = {
 				...defaultState,
-				addressAutocompleteProviders: [ 'google-places', 'mapbox' ],
+				addressAutocompleteProviders: ['google-places', 'mapbox'],
 			};
 
 			expect(
 				reducer(
 					initialState,
-					actions.addAddressAutocompleteProvider( 'mapbox' )
+					actions.addAddressAutocompleteProvider('mapbox')
 				)
-			).toEqual( expectedState );
-		} );
+			).toEqual(expectedState);
+		});
 
-		it( 'should not add duplicate providers', () => {
+		it('should not add duplicate providers', () => {
 			const initialState = {
 				...defaultState,
-				addressAutocompleteProviders: [ 'google-places' ],
+				addressAutocompleteProviders: ['google-places'],
 			};
 
 			const expectedState = {
 				...defaultState,
-				addressAutocompleteProviders: [ 'google-places' ],
+				addressAutocompleteProviders: ['google-places'],
 			};
 
 			expect(
 				reducer(
 					initialState,
-					actions.addAddressAutocompleteProvider( 'google-places' )
+					actions.addAddressAutocompleteProvider('google-places')
 				)
-			).toEqual( expectedState );
-		} );
+			).toEqual(expectedState);
+		});
 
-		it( 'should not add provider if providerId is not a string', () => {
+		it('should not add provider if providerId is not a string', () => {
 			const expectedState = defaultState;
 
 			expect(
 				reducer(
 					defaultState,
 					// @ts-expect-error Testing invalid input
-					actions.addAddressAutocompleteProvider( null )
+					actions.addAddressAutocompleteProvider(null)
 				)
-			).toEqual( expectedState );
+			).toEqual(expectedState);
 
 			expect(
 				reducer(
 					defaultState,
 					// @ts-expect-error Testing invalid input
-					actions.addAddressAutocompleteProvider( 123 )
+					actions.addAddressAutocompleteProvider(123)
 				)
-			).toEqual( expectedState );
-		} );
-	} );
+			).toEqual(expectedState);
+		});
+	});
 
-	describe( 'should handle SET_ACTIVE_ADDRESS_AUTOCOMPLETE_PROVIDER', () => {
-		it( 'should set active provider for billing address', () => {
+	describe('should handle SET_ACTIVE_ADDRESS_AUTOCOMPLETE_PROVIDER', () => {
+		it('should set active provider for billing address', () => {
 			const expectedState = {
 				...defaultState,
 				activeAddressAutocompleteProvider: {
@@ -435,10 +435,10 @@ describe( 'Checkout Store Reducer', () => {
 						'billing'
 					)
 				)
-			).toEqual( expectedState );
-		} );
+			).toEqual(expectedState);
+		});
 
-		it( 'should set active provider for shipping address', () => {
+		it('should set active provider for shipping address', () => {
 			const expectedState = {
 				...defaultState,
 				activeAddressAutocompleteProvider: {
@@ -455,10 +455,10 @@ describe( 'Checkout Store Reducer', () => {
 						'shipping'
 					)
 				)
-			).toEqual( expectedState );
-		} );
+			).toEqual(expectedState);
+		});
 
-		it( 'should update existing provider for an address type', () => {
+		it('should update existing provider for an address type', () => {
 			const initialState = {
 				...defaultState,
 				activeAddressAutocompleteProvider: {
@@ -483,10 +483,10 @@ describe( 'Checkout Store Reducer', () => {
 						'billing'
 					)
 				)
-			).toEqual( expectedState );
-		} );
+			).toEqual(expectedState);
+		});
 
-		it( 'should not update if same provider is already active', () => {
+		it('should not update if same provider is already active', () => {
 			const initialState = {
 				...defaultState,
 				activeAddressAutocompleteProvider: {
@@ -505,10 +505,10 @@ describe( 'Checkout Store Reducer', () => {
 						'billing'
 					)
 				)
-			).toEqual( expectedState );
-		} );
+			).toEqual(expectedState);
+		});
 
-		it( 'should not update for invalid address type', () => {
+		it('should not update for invalid address type', () => {
 			const expectedState = defaultState;
 
 			expect(
@@ -520,10 +520,10 @@ describe( 'Checkout Store Reducer', () => {
 						'invalid'
 					)
 				)
-			).toEqual( expectedState );
-		} );
+			).toEqual(expectedState);
+		});
 
-		it( 'should not update if providerId is not a string', () => {
+		it('should not update if providerId is not a string', () => {
 			const expectedState = defaultState;
 
 			expect(
@@ -535,7 +535,7 @@ describe( 'Checkout Store Reducer', () => {
 						'billing'
 					)
 				)
-			).toEqual( expectedState );
+			).toEqual(expectedState);
 
 			expect(
 				reducer(
@@ -546,10 +546,10 @@ describe( 'Checkout Store Reducer', () => {
 						'shipping'
 					)
 				)
-			).toEqual( expectedState );
-		} );
+			).toEqual(expectedState);
+		});
 
-		it( 'should preserve other address type when updating one', () => {
+		it('should preserve other address type when updating one', () => {
 			const initialState = {
 				...defaultState,
 				activeAddressAutocompleteProvider: {
@@ -574,7 +574,7 @@ describe( 'Checkout Store Reducer', () => {
 						'billing'
 					)
 				)
-			).toEqual( expectedState );
-		} );
-	} );
-} );
+			).toEqual(expectedState);
+		});
+	});
+});

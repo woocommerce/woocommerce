@@ -26,7 +26,7 @@ export default {
 		},
 		headingLevel: {
 			control: 'select',
-			options: [ '1', '2', '3', '4', '5', '6' ],
+			options: ['1', '2', '3', '4', '5', '6'],
 			table: {
 				type: {
 					summary: "'1' | '2' | '3' | '4' | '5' | '6'",
@@ -45,22 +45,22 @@ export default {
 			description: 'The text/children to render in the title element.',
 		},
 	},
-} as Meta< TitleProps >;
+} as Meta<TitleProps>;
 
-const Template: StoryFn< TitleProps > = ( args ) => {
+const Template: StoryFn<TitleProps> = (args) => {
 	const { children, headingLevel, ...rest } = args;
 	return (
 		<Title
-			{ ...rest }
-			headingLevel={ headingLevel }
-			className={ `h${ headingLevel }` }
+			{...rest}
+			headingLevel={headingLevel}
+			className={`h${headingLevel}`}
 		>
-			{ children }
+			{children}
 		</Title>
 	);
 };
 
-export const Default: StoryFn< TitleProps > = Template.bind( {} );
+export const Default: StoryFn<TitleProps> = Template.bind({});
 
 Default.args = {
 	headingLevel: '1',

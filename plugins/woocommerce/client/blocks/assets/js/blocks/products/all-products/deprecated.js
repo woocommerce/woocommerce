@@ -12,20 +12,20 @@ import { getBlockClassName } from '../utils.js';
 const { attributes: attributeDefinitions } = metadata;
 
 const v1 = {
-	attributes: Object.assign( {}, attributeDefinitions, {
+	attributes: Object.assign({}, attributeDefinitions, {
 		rows: { type: 'number', default: 1 },
-	} ),
-	save( { attributes } ) {
+	}),
+	save({ attributes }) {
 		const data = {
-			'data-attributes': JSON.stringify( attributes ),
+			'data-attributes': JSON.stringify(attributes),
 		};
 		return (
 			<div
-				className={ getBlockClassName(
+				className={getBlockClassName(
 					'wc-block-all-products',
 					attributes
-				) }
-				{ ...data }
+				)}
+				{...data}
 			>
 				<InnerBlocks.Content />
 			</div>
@@ -33,4 +33,4 @@ const v1 = {
 	},
 };
 
-export default [ v1 ];
+export default [v1];

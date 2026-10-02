@@ -12,13 +12,13 @@ import attributes from './attributes';
 import metadata from './block.json';
 import './style.scss';
 
-registerBlockType( 'woocommerce/checkout-pickup-options-block', {
+registerBlockType('woocommerce/checkout-pickup-options-block', {
 	apiVersion: metadata.apiVersion,
 	title: metadata.title,
 	icon: {
 		src: (
 			<Icon
-				icon={ store }
+				icon={store}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -26,4 +26,4 @@ registerBlockType( 'woocommerce/checkout-pickup-options-block', {
 	attributes,
 	edit: Edit,
 	save: Save,
-} );
+});

@@ -112,10 +112,10 @@ export const commonIcons: PaymentMethodIcon[] = [
  */
 export const getCommonIconProps = (
 	id: string
-): PaymentMethodIcon | Record< string, unknown > => {
+): PaymentMethodIcon | Record<string, unknown> => {
 	return (
-		commonIcons.find( ( icon ) => {
+		commonIcons.find((icon) => {
 			return icon.id === id;
-		} ) || {}
+		}) || {}
 	);
 };

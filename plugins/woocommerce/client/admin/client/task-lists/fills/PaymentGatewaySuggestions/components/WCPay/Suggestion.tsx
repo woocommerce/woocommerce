@@ -28,13 +28,13 @@ interface PaymentGateway {
 
 interface SuggestionProps {
 	paymentGateway: PaymentGateway;
-	onSetupCallback?: ( () => void ) | null;
+	onSetupCallback?: (() => void) | null;
 }
 
-export const Suggestion = ( {
+export const Suggestion = ({
 	paymentGateway,
 	onSetupCallback = null,
-}: SuggestionProps ) => {
+}: SuggestionProps) => {
 	const {
 		id,
 		needsSetup,
@@ -43,20 +43,20 @@ export const Suggestion = ( {
 		installed: isInstalled,
 	} = paymentGateway;
 
-	const isWooPayEligible = useSelect( ( select ) => {
-		const store = select( paymentSettingsStore );
+	const isWooPayEligible = useSelect((select) => {
+		const store = select(paymentSettingsStore);
 		return store.getIsWooPayEligible();
-	}, [] );
+	}, []);
 
-	const { createNotice } = useDispatch( 'core/notices' );
+	const { createNotice } = useDispatch('core/notices');
 	// When WCPay is installed and onSetupCallback is null
 	// Overwrite onSetupCallback to redirect to the setup page
 	// when the user clicks on the "Finish setup" button.
 	// WCPay doesn't need to be configured in WCA.
 	// It should be configured in its onboarding flow.
-	if ( installed && onSetupCallback === null ) {
+	if (installed && onSetupCallback === null) {
 		onSetupCallback = () => {
-			connectWcpay( createNotice );
+			connectWcpay(createNotice);
 		};
 	}
 
@@ -67,25 +67,22 @@ export const Suggestion = ( {
 					textPosition="left"
 					actionButton={
 						<Action
-							id={ id }
-							hasSetup={ true }
-							needsSetup={ needsSetup }
-							isEnabled={ isEnabled }
-							isRecommended={ true }
-							isInstalled={ isInstalled }
-							hasPlugins={ true }
-							setupButtonText={ __(
-								'Get started',
-								'woocommerce'
-							) }
-							onSetupCallback={ onSetupCallback }
+							id={id}
+							hasSetup={true}
+							needsSetup={needsSetup}
+							isEnabled={isEnabled}
+							isRecommended={true}
+							isInstalled={isInstalled}
+							hasPlugins={true}
+							setupButtonText={__('Get started', 'woocommerce')}
+							onSetupCallback={onSetupCallback}
 						/>
 					}
-					bannerImage={ <WCPayBannerImageCut /> }
-					isWooPayEligible={ isWooPayEligible }
+					bannerImage={<WCPayBannerImageCut />}
+					isWooPayEligible={isWooPayEligible}
 				/>
-				<WCPayBenefits isWooPayEligible={ isWooPayEligible } />
-				<WCPayBannerFooter isWooPayEligible={ isWooPayEligible } />
+				<WCPayBenefits isWooPayEligible={isWooPayEligible} />
+				<WCPayBannerFooter isWooPayEligible={isWooPayEligible} />
 			</WCPayBanner>
 		</div>
 	);

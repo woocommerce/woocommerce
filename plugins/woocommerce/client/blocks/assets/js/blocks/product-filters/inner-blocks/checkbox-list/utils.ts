@@ -4,7 +4,7 @@
 import { getColorCSSVar } from '../../utils/colors';
 import { BlockAttributes } from './types';
 
-export function getColorVars( attributes: BlockAttributes ) {
+export function getColorVars(attributes: BlockAttributes) {
 	const {
 		optionElement,
 		optionElementBorder,
@@ -16,36 +16,30 @@ export function getColorVars( attributes: BlockAttributes ) {
 		customLabelElement,
 	} = attributes;
 
-	const vars: Record< string, string > = {
+	const vars: Record<string, string> = {
 		'--wc-product-filter-checkbox-list-option-element': getColorCSSVar(
 			optionElement,
 			customOptionElement
 		),
 		'--wc-product-filter-checkbox-list-option-element-border':
-			getColorCSSVar( optionElementBorder, customOptionElementBorder ),
+			getColorCSSVar(optionElementBorder, customOptionElementBorder),
 		'--wc-product-filter-checkbox-list-option-element-selected':
-			getColorCSSVar(
-				optionElementSelected,
-				customOptionElementSelected
-			),
+			getColorCSSVar(optionElementSelected, customOptionElementSelected),
 		'--wc-product-filter-checkbox-list-label-element': getColorCSSVar(
 			labelElement,
 			customLabelElement
 		),
 	};
 
-	return Object.keys( vars ).reduce(
-		( acc: Record< string, string >, key ) => {
-			if ( vars[ key ] ) {
-				acc[ key ] = vars[ key ];
-			}
-			return acc;
-		},
-		{}
-	);
+	return Object.keys(vars).reduce((acc: Record<string, string>, key) => {
+		if (vars[key]) {
+			acc[key] = vars[key];
+		}
+		return acc;
+	}, {});
 }
 
-export function getColorClasses( attributes: BlockAttributes ) {
+export function getColorClasses(attributes: BlockAttributes) {
 	const {
 		optionElement,
 		optionElementBorder,

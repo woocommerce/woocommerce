@@ -22,8 +22,8 @@ export const useCheckoutSubmit = () => {
 		isAfterProcessing,
 		isComplete,
 		hasError,
-	} = useSelect( ( select ) => {
-		const store = select( checkoutStore );
+	} = useSelect((select) => {
+		const store = select(checkoutStore);
 		return {
 			isCalculating: store.isCalculating(),
 			isBeforeProcessing: store.isBeforeProcessing(),
@@ -32,10 +32,10 @@ export const useCheckoutSubmit = () => {
 			isComplete: store.isComplete(),
 			hasError: store.hasError(),
 		};
-	} );
+	});
 	const { activePaymentMethod, isExpressPaymentMethodActive } = useSelect(
-		( select ) => {
-			const store = select( paymentStore );
+		(select) => {
+			const store = select(paymentStore);
 
 			return {
 				activePaymentMethod: store.getActivePaymentMethod(),
@@ -48,10 +48,10 @@ export const useCheckoutSubmit = () => {
 	const { onSubmit } = useCheckoutEventsContext();
 
 	const { paymentMethods = {} } = usePaymentMethods();
-	const paymentMethod = paymentMethods[ activePaymentMethod ] || {};
+	const paymentMethod = paymentMethods[activePaymentMethod] || {};
 	const waitingForProcessing =
 		isProcessing || isAfterProcessing || isBeforeProcessing;
-	const waitingForRedirect = isComplete && ! hasError;
+	const waitingForRedirect = isComplete && !hasError;
 	const paymentMethodButtonLabel = paymentMethod.placeOrderButtonLabel;
 	const paymentMethodPlaceOrderButton = paymentMethod.placeOrderButton;
 

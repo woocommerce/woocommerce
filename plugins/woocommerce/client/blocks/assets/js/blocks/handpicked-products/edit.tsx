@@ -18,46 +18,43 @@ import { HandpickedProductsInspectorControls } from './inspector-controls';
 import { HandpickedProductsEditMode } from './edit-mode';
 import { HandpickedProductsBlock } from './block';
 
-export const EditBlock = ( props: Props ): JSX.Element => {
+export const EditBlock = (props: Props): JSX.Element => {
 	const blockProps = useBlockProps();
 
 	const {
 		attributes: { products },
 	} = props;
 
-	const [ isEditing, setIsEditing ] = useState( ! products.length );
+	const [isEditing, setIsEditing] = useState(!products.length);
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<BlockControls>
 				<ToolbarGroup
-					controls={ [
+					controls={[
 						{
 							icon: 'edit',
-							title: __(
-								'Edit selected products',
-								'woocommerce'
-							),
-							onClick: () => setIsEditing( ! isEditing ),
+							title: __('Edit selected products', 'woocommerce'),
+							onClick: () => setIsEditing(!isEditing),
 							isActive: isEditing,
 						},
-					] }
+					]}
 				/>
 			</BlockControls>
-			<HandpickedProductsInspectorControls { ...props } />
-			{ isEditing ? (
+			<HandpickedProductsInspectorControls {...props} />
+			{isEditing ? (
 				<HandpickedProductsEditMode
-					isEditing={ isEditing }
-					setIsEditing={ setIsEditing }
-					{ ...props }
+					isEditing={isEditing}
+					setIsEditing={setIsEditing}
+					{...props}
 				/>
 			) : (
 				<Disabled>
-					<HandpickedProductsBlock { ...props } />
+					<HandpickedProductsBlock {...props} />
 				</Disabled>
-			) }
+			)}
 		</div>
 	);
 };
 
-export const Edit = withSpokenMessages( EditBlock );
+export const Edit = withSpokenMessages(EditBlock);

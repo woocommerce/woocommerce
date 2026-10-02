@@ -6,8 +6,8 @@ import { Popover, Button, TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 type PersonalizationTagsPopoverProps = {
-	contentRef: React.RefObject< HTMLElement >;
-	onUpdate: ( originalValue: string, updatedValue: string ) => void;
+	contentRef: React.RefObject<HTMLElement>;
+	onUpdate: (originalValue: string, updatedValue: string) => void;
 };
 
 /**
@@ -18,93 +18,93 @@ type PersonalizationTagsPopoverProps = {
  * @param root0.contentRef Reference to the container where the popover should be displayed
  * @param root0.onUpdate   Callback to update the personalization tag
  */
-const PersonalizationTagsPopover = ( {
+const PersonalizationTagsPopover = ({
 	contentRef,
 	onUpdate,
-}: PersonalizationTagsPopoverProps ) => {
-	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
-	const [ anchor, setAnchor ] = useState< HTMLElement | null >( null );
-	const [ updatedValue, setUpdatedValue ] = useState( '' );
-	const [ originalValue, setOriginalValue ] = useState( '' );
+}: PersonalizationTagsPopoverProps) => {
+	const [isPopoverVisible, setIsPopoverVisible] = useState(false);
+	const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+	const [updatedValue, setUpdatedValue] = useState('');
+	const [originalValue, setOriginalValue] = useState('');
 
-	useEffect( () => {
-		if ( ! contentRef || ! contentRef.current ) {
+	useEffect(() => {
+		if (!contentRef || !contentRef.current) {
 			return undefined;
 		}
 
 		const container = contentRef.current;
 
 		// Handle clicks within the referenced container
-		const handleContainerClick = ( event: Event ) => {
+		const handleContainerClick = (event: Event) => {
 			const target = event.target as HTMLElement;
 			const commentSpan = target.closest(
 				'span[data-rich-text-comment]'
 			) as HTMLElement;
 
-			if ( commentSpan ) {
+			if (commentSpan) {
 				// Remove brackets from the text content for better user experience
 				const textContent = commentSpan.innerText.replace(
 					/^\[|\]$/g,
 					''
 				);
-				setOriginalValue( textContent );
-				setUpdatedValue( textContent );
-				setAnchor( commentSpan );
-				setIsPopoverVisible( true );
+				setOriginalValue(textContent);
+				setUpdatedValue(textContent);
+				setAnchor(commentSpan);
+				setIsPopoverVisible(true);
 			}
 		};
 
 		// Add the event listener to the container
-		container.addEventListener( 'click', handleContainerClick );
+		container.addEventListener('click', handleContainerClick);
 
 		// Cleanup function to remove the event listener on unmount
 		return () => {
-			container.removeEventListener( 'click', handleContainerClick );
+			container.removeEventListener('click', handleContainerClick);
 		};
-	}, [ contentRef ] );
+	}, [contentRef]);
 
 	return (
 		<>
-			{ isPopoverVisible && anchor && (
+			{isPopoverVisible && anchor && (
 				<Popover
 					position="bottom right"
-					onClose={ () => setIsPopoverVisible( false ) }
-					anchor={ anchor } // Directly use commentSpan as the anchor
+					onClose={() => setIsPopoverVisible(false)}
+					anchor={anchor} // Directly use commentSpan as the anchor
 					className="woocommerce-personalization-tag-popover"
 				>
 					<div className="woocommerce-personalization-tag-popover-content">
 						<TextControl
-							label={ __(
+							label={__(
 								'Personalization Tag',
 								__i18n_text_domain__
-							) }
-							value={ updatedValue }
-							onChange={ ( value ) => setUpdatedValue( value ) }
+							)}
+							value={updatedValue}
+							onChange={(value) => setUpdatedValue(value)}
 							__nextHasNoMarginBottom // To avoid warning about deprecation in console
 							__next40pxDefaultSize
 						/>
 						<div className="woocommerce-personalization-tag-popover-content-buttons">
 							<Button
 								isTertiary
-								onClick={ () => {
-									setIsPopoverVisible( false );
-								} }
+								onClick={() => {
+									setIsPopoverVisible(false);
+								}}
 							>
-								{ __( 'Cancel', __i18n_text_domain__ ) }
+								{__('Cancel', __i18n_text_domain__)}
 							</Button>
 							<Button
 								isPrimary
-								onClick={ () => {
-									onUpdate( originalValue, updatedValue );
-									setIsPopoverVisible( false );
-								} }
+								onClick={() => {
+									onUpdate(originalValue, updatedValue);
+									setIsPopoverVisible(false);
+								}}
 							>
-								{ __( 'Update', __i18n_text_domain__ ) }
+								{__('Update', __i18n_text_domain__)}
 							</Button>
 						</div>
 					</div>
 				</Popover>
-			) }
+			)}
 		</>
 	);
 };

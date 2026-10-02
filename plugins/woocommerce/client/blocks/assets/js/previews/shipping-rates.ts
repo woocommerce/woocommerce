@@ -11,12 +11,12 @@ import { getSetting } from '@woocommerce/settings';
 import { API_SITE_CURRENCY, displayForMinorUnit } from './utils';
 
 // Get local pickup locations from the settings and format into some preview shipping rates for the response.
-const localPickupEnabled = getSetting< boolean >( 'localPickupEnabled', false );
-const localPickupTitle = getSetting< string >(
+const localPickupEnabled = getSetting<boolean>('localPickupEnabled', false);
+const localPickupTitle = getSetting<string>(
 	'localPickupText',
-	__( 'Local pickup', 'woocommerce' )
+	__('Local pickup', 'woocommerce')
 );
-const localPickupCost = getSetting< string >( 'localPickupCost', '' );
+const localPickupCost = getSetting<string>('localPickupCost', '');
 const localPickupLocations = localPickupEnabled
 	? getSetting<
 			{
@@ -25,38 +25,36 @@ const localPickupLocations = localPickupEnabled
 				formatted_address: string;
 				details: string;
 			}[]
-	  >( 'localPickupLocations', [] )
+		>('localPickupLocations', [])
 	: [];
 
 const localPickupRates = localPickupLocations
-	? Object.values( localPickupLocations ).map(
-			( location, index: number ) => ( {
-				...API_SITE_CURRENCY,
-				name: `${ localPickupTitle } (${ location.name })`,
-				description: '',
-				delivery_time: '',
-				price: displayForMinorUnit( localPickupCost, 0 ) || '0',
-				taxes: '0',
-				rate_id: `pickup_location:${ index + 1 }`,
-				instance_id: index + 1,
-				meta_data: [
-					{
-						key: 'pickup_location',
-						value: location.name,
-					},
-					{
-						key: 'pickup_address',
-						value: location.formatted_address,
-					},
-					{
-						key: 'pickup_details',
-						value: location.details,
-					},
-				],
-				method_id: 'pickup_location',
-				selected: false,
-			} )
-	  )
+	? Object.values(localPickupLocations).map((location, index: number) => ({
+			...API_SITE_CURRENCY,
+			name: `${localPickupTitle} (${location.name})`,
+			description: '',
+			delivery_time: '',
+			price: displayForMinorUnit(localPickupCost, 0) || '0',
+			taxes: '0',
+			rate_id: `pickup_location:${index + 1}`,
+			instance_id: index + 1,
+			meta_data: [
+				{
+					key: 'pickup_location',
+					value: location.name,
+				},
+				{
+					key: 'pickup_address',
+					value: location.formatted_address,
+				},
+				{
+					key: 'pickup_details',
+					value: location.details,
+				},
+			],
+			method_id: 'pickup_location',
+			selected: false,
+		}))
 	: [];
 
 export const previewShippingRates: CartResponseShippingRate[] = [
@@ -70,7 +68,7 @@ export const previewShippingRates: CartResponseShippingRate[] = [
 			country: '',
 		},
 		package_id: 0,
-		name: __( 'Shipping', 'woocommerce' ),
+		name: __('Shipping', 'woocommerce'),
 		items: [
 			{
 				key: '33e75ff09dd601bbe69f351039152189',
@@ -94,10 +92,10 @@ export const previewShippingRates: CartResponseShippingRate[] = [
 		shipping_rates: [
 			{
 				...API_SITE_CURRENCY,
-				name: __( 'Flat rate shipping', 'woocommerce' ),
+				name: __('Flat rate shipping', 'woocommerce'),
 				description: '',
 				delivery_time: '',
-				price: displayForMinorUnit( '500' ),
+				price: displayForMinorUnit('500'),
 				taxes: '0',
 				rate_id: 'flat_rate:0',
 				instance_id: 0,
@@ -107,7 +105,7 @@ export const previewShippingRates: CartResponseShippingRate[] = [
 			},
 			{
 				...API_SITE_CURRENCY,
-				name: __( 'Free shipping', 'woocommerce' ),
+				name: __('Free shipping', 'woocommerce'),
 				description: '',
 				delivery_time: '',
 				price: '0',

@@ -10,7 +10,7 @@ export const MobileAppInstallationInfo = () => {
 				value={
 					'https://woocommerce.com/mobile/?utm_source=wc_onboarding_mobile_task'
 				}
-				size={ 140 }
+				size={140}
 			/>
 		</div>
 	);

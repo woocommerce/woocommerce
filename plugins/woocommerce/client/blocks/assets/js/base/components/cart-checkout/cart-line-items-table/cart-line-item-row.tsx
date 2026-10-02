@@ -44,15 +44,14 @@ import ProductSaleBadge from '../product-sale-badge';
  * @return {number} Amount with new minor unit precision.
  */
 const getAmountFromRawPrice = (
-	priceObject: Dinero< number >,
+	priceObject: Dinero<number>,
 	currency: Currency
 ) => {
-	return toSnapshot( transformScale( priceObject, currency.minorUnit ) )
-		.amount;
+	return toSnapshot(transformScale(priceObject, currency.minorUnit)).amount;
 };
 
 interface CartLineItemRowProps {
-	lineItem: CartItem | Record< string, never >;
+	lineItem: CartItem | Record<string, never>;
 	onRemove?: () => void;
 	tabIndex?: number;
 }
@@ -61,12 +60,9 @@ interface CartLineItemRowProps {
  * Cart line item table row component.
  */
 const CartLineItemRow: React.ForwardRefExoticComponent<
-	CartLineItemRowProps & React.RefAttributes< HTMLTableRowElement >
-> = forwardRef< HTMLTableRowElement, CartLineItemRowProps >(
-	(
-		{ lineItem, onRemove = () => void null, tabIndex },
-		ref
-	): JSX.Element => {
+	CartLineItemRowProps & React.RefAttributes<HTMLTableRowElement>
+> = forwardRef<HTMLTableRowElement, CartLineItemRowProps>(
+	({ lineItem, onRemove = () => void null, tabIndex }, ref): JSX.Element => {
 		const {
 			name: initialName = '',
 			catalog_visibility: catalogVisibility = 'visible',
@@ -118,10 +114,10 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 		} = lineItem;
 
 		const { quantity, setItemQuantity, removeItem, isPendingDelete } =
-			useStoreCartItemQuantity( lineItem );
+			useStoreCartItemQuantity(lineItem);
 		const { saveForLater, isSaving: isSavingForLater } = useSaveForLater();
 		const { dispatchStoreEvent } = useStoreEvents();
-		const isUserLoggedIn = !! getSetting< number >( 'currentUserId', 0 );
+		const isUserLoggedIn = !!getSetting<number>('currentUserId', 0);
 		const isSaveForLaterFeatureEnabled = getSettingWithCoercion(
 			'experimentalCartSaveForLater',
 			false,
@@ -150,130 +146,130 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 		// eslint-disable-next-line no-unused-vars
 		const { receiveCart, ...cart } = useStoreCart();
 		const arg = useMemo(
-			() => ( {
+			() => ({
 				context: 'cart',
 				cartItem: lineItem,
 				cart,
-			} ),
-			[ lineItem, cart ]
+			}),
+			[lineItem, cart]
 		);
-		const priceCurrency = getCurrencyFromPriceResponse( prices );
-		const name = applyCheckoutFilter( {
+		const priceCurrency = getCurrencyFromPriceResponse(prices);
+		const name = applyCheckoutFilter({
 			filterName: 'itemName',
 			defaultValue: initialName,
 			extensions,
 			arg,
-		} );
+		});
 		// `name` is a raw HTML string; decode entities for screen-reader text (aria-label, speak).
-		const decodedName = decodeEntities( name );
+		const decodedName = decodeEntities(name);
 
-		const regularAmountSingle = dinero( {
-			amount: parseInt( prices.raw_prices.regular_price, 10 ),
+		const regularAmountSingle = dinero({
+			amount: parseInt(prices.raw_prices.regular_price, 10),
 			currency: USD,
 			scale: prices.raw_prices.precision,
-		} );
-		const purchaseAmountSingle = dinero( {
-			amount: parseInt( prices.raw_prices.price, 10 ),
+		});
+		const purchaseAmountSingle = dinero({
+			amount: parseInt(prices.raw_prices.price, 10),
 			currency: USD,
 			scale: prices.raw_prices.precision,
-		} );
+		});
 		const saleAmountSingle = calculateSaleAmount(
 			prices,
 			priceCurrency.minorUnit
 		);
-		const totalsCurrency = getCurrencyFromPriceResponse( totals );
-		let lineSubtotal = parseInt( totals.line_subtotal, 10 );
-		if ( getSetting( 'displayCartPricesIncludingTax', false ) ) {
-			lineSubtotal += parseInt( totals.line_subtotal_tax, 10 );
+		const totalsCurrency = getCurrencyFromPriceResponse(totals);
+		let lineSubtotal = parseInt(totals.line_subtotal, 10);
+		if (getSetting('displayCartPricesIncludingTax', false)) {
+			lineSubtotal += parseInt(totals.line_subtotal_tax, 10);
 		}
-		const subtotalPrice = dinero( {
+		const subtotalPrice = dinero({
 			amount: lineSubtotal,
 			currency: USD,
 			scale: totalsCurrency.minorUnit,
-		} );
+		});
 
-		const firstImage = images.length ? images[ 0 ] : {};
+		const firstImage = images.length ? images[0] : {};
 		const isProductHiddenFromCatalog =
 			catalogVisibility === 'hidden' || catalogVisibility === 'search';
 
-		const cartItemClassNameFilter = applyCheckoutFilter( {
+		const cartItemClassNameFilter = applyCheckoutFilter({
 			filterName: 'cartItemClass',
 			defaultValue: '',
 			extensions,
 			arg,
-		} );
+		});
 
 		// Allow extensions to filter how the price is displayed. Ie: prepending or appending some values.
-		const productPriceFormat = applyCheckoutFilter( {
+		const productPriceFormat = applyCheckoutFilter({
 			filterName: 'cartItemPrice',
 			defaultValue: '<price/>',
 			extensions,
 			arg,
 			validation: productPriceValidation,
-		} );
+		});
 
-		const subtotalPriceFormat = applyCheckoutFilter( {
+		const subtotalPriceFormat = applyCheckoutFilter({
 			filterName: 'subtotalPriceFormat',
 			defaultValue: '<price/>',
 			extensions,
 			arg,
 			validation: productPriceValidation,
-		} );
+		});
 
-		const saleBadgePriceFormat = applyCheckoutFilter( {
+		const saleBadgePriceFormat = applyCheckoutFilter({
 			filterName: 'saleBadgePriceFormat',
 			defaultValue: '<price/>',
 			extensions,
 			arg,
 			validation: productPriceValidation,
-		} );
+		});
 
-		const showRemoveItemLink = applyCheckoutFilter( {
+		const showRemoveItemLink = applyCheckoutFilter({
 			filterName: 'showRemoveItemLink',
 			defaultValue: true,
 			extensions,
 			arg,
-		} );
+		});
 
 		return (
 			<tr
 				// Restores the row role that `display: grid` strips in the responsive layout.
 				role="row"
-				data-cart-item-key={ lineItem.key }
-				className={ clsx(
+				data-cart-item-key={lineItem.key}
+				className={clsx(
 					'wc-block-cart-items__row',
 					cartItemClassNameFilter,
 					{
 						'is-disabled': isPendingDelete,
 					}
-				) }
-				ref={ ref }
-				tabIndex={ tabIndex }
+				)}
+				ref={ref}
+				tabIndex={tabIndex}
 			>
-				{ /* Decorative image, hidden from screen readers so the row isn't announced as an empty "Product" cell. */ }
+				{/* Decorative image, hidden from screen readers so the row isn't announced as an empty "Product" cell. */}
 				<td className="wc-block-cart-item__image" aria-hidden="true">
-					{ isProductHiddenFromCatalog ? (
+					{isProductHiddenFromCatalog ? (
 						<ProductImage
-							image={ firstImage }
-							fallbackAlt={ name }
-							width={ 80 }
-							height={ 80 }
+							image={firstImage}
+							fallbackAlt={name}
+							width={80}
+							height={80}
 						/>
 					) : (
-						<a href={ permalink } tabIndex={ -1 }>
+						<a href={permalink} tabIndex={-1}>
 							<ProductImage
-								image={ firstImage }
-								fallbackAlt={ name }
-								width={ 80 }
-								height={ 80 }
+								image={firstImage}
+								fallbackAlt={name}
+								width={80}
+								height={80}
 							/>
 						</a>
-					) }
+					)}
 				</td>
 				<td
 					role="rowheader"
 					// Name the rowheader after the product only, not the whole cell's contents.
-					aria-label={ decodedName }
+					aria-label={decodedName}
 					className="wc-block-cart-item__product"
 				>
 					<div className="wc-block-cart-item__wrap">
@@ -281,44 +277,44 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 							disabled={
 								isPendingDelete || isProductHiddenFromCatalog
 							}
-							name={ name }
-							permalink={ permalink }
+							name={name}
+							permalink={permalink}
 						/>
-						{ showBackorderBadge && <ProductBackorderBadge /> }
+						{showBackorderBadge && <ProductBackorderBadge />}
 
 						<div className="wc-block-cart-item__prices">
 							<ProductPrice
-								currency={ priceCurrency }
-								regularPrice={ getAmountFromRawPrice(
+								currency={priceCurrency}
+								regularPrice={getAmountFromRawPrice(
 									regularAmountSingle,
 									priceCurrency
-								) }
-								price={ getAmountFromRawPrice(
+								)}
+								price={getAmountFromRawPrice(
 									purchaseAmountSingle,
 									priceCurrency
-								) }
-								format={ subtotalPriceFormat }
+								)}
+								format={subtotalPriceFormat}
 							/>
 						</div>
 
 						<ProductMetadata
-							shortDescription={ shortDescription }
-							fullDescription={ fullDescription }
-							itemData={ itemData }
-							variation={ variation }
+							shortDescription={shortDescription}
+							fullDescription={fullDescription}
+							itemData={itemData}
+							variation={variation}
 						/>
 
 						<div className="wc-block-cart-item__quantity">
-							{ ! soldIndividually && (
+							{!soldIndividually && (
 								<QuantitySelector
-									disabled={ isPendingDelete }
-									editable={ quantityLimits.editable }
-									quantity={ quantity }
-									minimum={ quantityLimits.minimum }
-									maximum={ quantityLimits.maximum }
-									step={ quantityLimits.multiple_of }
-									onChange={ ( newQuantity ) => {
-										setItemQuantity( newQuantity );
+									disabled={isPendingDelete}
+									editable={quantityLimits.editable}
+									quantity={quantity}
+									minimum={quantityLimits.minimum}
+									maximum={quantityLimits.maximum}
+									step={quantityLimits.multiple_of}
+									onChange={(newQuantity) => {
+										setItemQuantity(newQuantity);
 										dispatchStoreEvent(
 											'cart-set-item-quantity',
 											{
@@ -326,31 +322,28 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 												quantity: newQuantity,
 											}
 										);
-									} }
-									itemName={ decodedName }
+									}}
+									itemName={decodedName}
 								/>
-							) }
-							{ showRemoveItemLink && (
+							)}
+							{showRemoveItemLink && (
 								<button
 									className="wc-block-cart-item__remove-link"
-									aria-label={ sprintf(
+									aria-label={sprintf(
 										/* translators: %s refers to the item's name in the cart. */
 										__(
 											'Remove %s from cart',
 											'woocommerce'
 										),
 										decodedName
-									) }
-									onClick={ () => {
+									)}
+									onClick={() => {
 										onRemove();
 										void removeItem();
-										dispatchStoreEvent(
-											'cart-remove-item',
-											{
-												product: lineItem,
-												quantity,
-											}
-										);
+										dispatchStoreEvent('cart-remove-item', {
+											product: lineItem,
+											quantity,
+										});
 										speak(
 											sprintf(
 												/* translators: %s refers to the item name in the cart. */
@@ -361,23 +354,23 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 												decodedName
 											)
 										);
-									} }
-									disabled={ isPendingDelete }
+									}}
+									disabled={isPendingDelete}
 								>
-									<Icon icon={ trash } size={ 24 } />
+									<Icon icon={trash} size={24} />
 								</button>
-							) }
+							)}
 						</div>
-						{ showSaveForLater && (
+						{showSaveForLater && (
 							<div className="wc-block-cart-item__save-for-later">
 								<button
 									type="button"
 									className="wc-block-cart-item__save-for-later-link"
-									onClick={ async () => {
+									onClick={async () => {
 										const saved = await saveForLater(
 											lineItem.key
 										);
-										if ( ! saved ) {
+										if (!saved) {
 											return;
 										}
 										// removeItem surfaces its own errors
@@ -390,13 +383,10 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 										// 'cart-save-for-later' store event so
 										// analytics can distinguish a save
 										// from a plain remove.
-										dispatchStoreEvent(
-											'cart-remove-item',
-											{
-												product: lineItem,
-												quantity,
-											}
-										);
+										dispatchStoreEvent('cart-remove-item', {
+											product: lineItem,
+											quantity,
+										});
 										speak(
 											sprintf(
 												/* translators: %s refers to the item name. */
@@ -407,34 +397,31 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 												decodedName
 											)
 										);
-									} }
+									}}
 									disabled={
 										isPendingDelete || isSavingForLater
 									}
 								>
-									{ isSavingForLater
-										? __( 'Saving…', 'woocommerce' )
-										: __(
-												'Save for later',
-												'woocommerce'
-										  ) }
+									{isSavingForLater
+										? __('Saving…', 'woocommerce')
+										: __('Save for later', 'woocommerce')}
 								</button>
 							</div>
-						) }
+						)}
 					</div>
 				</td>
 				<td className="wc-block-cart-item__total">
 					<div className="wc-block-cart-item__total-price-and-sale-badge-wrapper">
 						<ProductPrice
-							currency={ totalsCurrency }
-							format={ productPriceFormat }
-							price={ toSnapshot( subtotalPrice ).amount }
+							currency={totalsCurrency}
+							format={productPriceFormat}
+							price={toSnapshot(subtotalPrice).amount}
 						/>
 
 						<ProductSaleBadge
-							currency={ priceCurrency }
-							saleAmount={ saleAmountSingle * quantity }
-							format={ saleBadgePriceFormat }
+							currency={priceCurrency}
+							saleAmount={saleAmountSingle * quantity}
+							format={saleBadgePriceFormat}
 						/>
 					</div>
 				</td>

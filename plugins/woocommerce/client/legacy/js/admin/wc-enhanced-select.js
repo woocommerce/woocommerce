@@ -335,7 +335,9 @@ jQuery( function ( $ ) {
 								: false,
 							placeholder: $( this ).data( 'placeholder' ),
 							minimumInputLength:
-								minimumInputLength != null ? minimumInputLength : 3,
+								minimumInputLength != null
+									? minimumInputLength
+									: 3,
 							escapeMarkup: function ( m ) {
 								return m;
 							},
@@ -558,7 +560,7 @@ jQuery( function ( $ ) {
 										undefined
 										? $( this ).data(
 												'minimum_input_length'
-										  )
+											)
 										: '3',
 								escapeMarkup: function ( m ) {
 									return m;
@@ -662,7 +664,7 @@ jQuery( function ( $ ) {
 										undefined
 										? $( this ).data(
 												'minimum_input_length'
-										  )
+											)
 										: '3',
 								escapeMarkup: function ( m ) {
 									return m;

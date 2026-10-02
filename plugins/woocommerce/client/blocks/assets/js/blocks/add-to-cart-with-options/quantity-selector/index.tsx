@@ -10,12 +10,12 @@ import { Icon, button } from '@wordpress/icons';
 import metadata from './block.json';
 import AddToCartWithOptionsQuantitySelectorEdit from './edit';
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	edit: AddToCartWithOptionsQuantitySelectorEdit,
 	icon: {
 		src: (
 			<Icon
-				icon={ button }
+				icon={button}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -23,4 +23,4 @@ registerBlockType( metadata, {
 	save() {
 		return null;
 	},
-} );
+});

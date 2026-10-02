@@ -12,4 +12,4 @@ export type Attributes = {
 	hideTabTitle: boolean;
 };
 
-export type ProductDetailsEditProps = BlockEditProps< Attributes > & Context;
+export type ProductDetailsEditProps = BlockEditProps<Attributes> & Context;

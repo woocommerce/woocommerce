@@ -44,7 +44,7 @@ export type TaskListProps = TaskListType & {
 	cesHeader?: boolean;
 };
 
-export const SetupTaskList = ( {
+export const SetupTaskList = ({
 	query,
 	id,
 	eventName,
@@ -54,113 +54,109 @@ export const SetupTaskList = ( {
 	isComplete,
 	displayProgressHeader,
 	cesHeader = true,
-}: TaskListProps ) => {
+}: TaskListProps) => {
 	const listEventPrefix = eventName ? eventName + '_' : eventPrefix;
-	const { profileItems } = useSelect( ( select ) => {
-		const { getProfileItems } = select( onboardingStore );
+	const { profileItems } = useSelect((select) => {
+		const { getProfileItems } = select(onboardingStore);
 		return {
 			profileItems: getProfileItems(),
 		};
-	}, [] );
+	}, []);
 	const {
 		hideTaskList,
 		visitedTask,
 		keepCompletedTaskList: keepCompletedTasks,
 		invalidateResolutionForStoreSelector,
-	} = useDispatch( onboardingStore );
+	} = useDispatch(onboardingStore);
 	const userPreferences = useUserPreferences();
-	const [ headerData, setHeaderData ] = useState< {
+	const [headerData, setHeaderData] = useState<{
 		task?: TaskType;
 		goToTask?: () => void;
 		trackClick?: () => void;
-	} >( {} );
-	const [ activeTaskId, setActiveTaskId ] = useState( '' );
-	const [ showDismissModal, setShowDismissModal ] = useState( false );
+	}>({});
+	const [activeTaskId, setActiveTaskId] = useState('');
+	const [showDismissModal, setShowDismissModal] = useState(false);
 	const { layoutString } = useLayoutContext();
 
-	const prevQueryRef = useRef( query );
+	const prevQueryRef = useRef(query);
 
-	const visibleTasks = getVisibleTasks( tasks );
+	const visibleTasks = getVisibleTasks(tasks);
 	const recordTaskListView = () => {
-		if ( query.task ) {
+		if (query.task) {
 			return;
 		}
 
-		recordEvent( `${ listEventPrefix }view`, {
+		recordEvent(`${listEventPrefix}view`, {
 			number_tasks: visibleTasks.length,
 			store_connected: profileItems.wccom_connected,
 			context: layoutString,
-		} );
+		});
 	};
 
-	useEffect( () => {
+	useEffect(() => {
 		recordTaskListView();
-	}, [] );
+	}, []);
 
 	const taskListCompletionSlot = useSlot(
 		EXPERIMENTAL_WC_TASK_LIST_COMPLETION_SLOT_NAME
 	);
 
-	useEffect( () => {
+	useEffect(() => {
 		const { task: prevTask } = prevQueryRef.current;
 		const { task } = query;
 
-		if ( prevTask !== task ) {
+		if (prevTask !== task) {
 			window.document.documentElement.scrollTop = 0;
 			prevQueryRef.current = query;
 		}
-	}, [ query ] );
+	}, [query]);
 
 	const incompleteTasks = tasks.filter(
-		( task ) => ! task.isComplete && ! task.isDismissed
+		(task) => !task.isComplete && !task.isDismissed
 	);
 
 	const hideTasks = () => {
-		void hideTaskList( id );
+		void hideTaskList(id);
 	};
 
 	const keepTasks = () => {
-		void keepCompletedTasks( id );
+		void keepCompletedTasks(id);
 	};
 
 	const renderMenu = () => {
 		return (
 			<div className="woocommerce-card__menu woocommerce-card__header-item">
 				<EllipsisMenu
-					className={ id }
-					label={ __( 'Task List Options', 'woocommerce' ) }
-					renderContent={ ( {
-						onToggle,
-					}: {
-						onToggle: () => void;
-					} ) => (
+					className={id}
+					label={__('Task List Options', 'woocommerce')}
+					renderContent={({ onToggle }: { onToggle: () => void }) => (
 						<div className="woocommerce-task-card__section-controls">
 							<Button
-								onClick={ () => {
-									if ( incompleteTasks.length > 0 ) {
-										setShowDismissModal( true );
+								onClick={() => {
+									if (incompleteTasks.length > 0) {
+										setShowDismissModal(true);
 										onToggle();
 									} else {
 										hideTasks();
 									}
-								} }
+								}}
 							>
-								{ __( 'Hide this', 'woocommerce' ) }
+								{__('Hide this', 'woocommerce')}
 							</Button>
 						</div>
-					) }
+					)}
 				/>
 			</div>
 		);
 	};
 
 	let selectedHeaderCard = visibleTasks.find(
-		( listTask ) => listTask.isComplete === false
+		(listTask) => listTask.isComplete === false
 	);
 
 	// If nothing is selected, default to the last task since everything is completed.
-	if ( ! selectedHeaderCard ) {
-		selectedHeaderCard = visibleTasks[ visibleTasks.length - 1 ];
+	if (!selectedHeaderCard) {
+		selectedHeaderCard = visibleTasks[visibleTasks.length - 1];
 	}
 
 	const taskListHeaderSlot = useSlot(
@@ -172,86 +168,86 @@ export const SetupTaskList = ( {
 		taskListHeaderSlot?.fills?.length
 	);
 
-	const getTaskStartedCount = ( taskId: string ) => {
+	const getTaskStartedCount = (taskId: string) => {
 		const trackedStartedTasks =
 			userPreferences.task_list_tracked_started_tasks;
-		if ( ! trackedStartedTasks || ! trackedStartedTasks[ taskId ] ) {
+		if (!trackedStartedTasks || !trackedStartedTasks[taskId]) {
 			return 0;
 		}
-		return trackedStartedTasks[ taskId ];
+		return trackedStartedTasks[taskId];
 	};
 
 	// @todo This would be better as a task endpoint that handles updating the count.
-	const updateTrackStartedCount = async ( taskId: string ) => {
-		const newCount = getTaskStartedCount( taskId ) + 1;
+	const updateTrackStartedCount = async (taskId: string) => {
+		const newCount = getTaskStartedCount(taskId) + 1;
 		const trackedStartedTasks =
 			userPreferences.task_list_tracked_started_tasks || {};
 
-		void visitedTask( taskId );
-		await userPreferences.updateUserPreferences( {
+		void visitedTask(taskId);
+		await userPreferences.updateUserPreferences({
 			task_list_tracked_started_tasks: {
-				...( trackedStartedTasks || {} ),
-				[ taskId ]: newCount,
+				...(trackedStartedTasks || {}),
+				[taskId]: newCount,
 			},
-		} );
+		});
 	};
 
-	const trackClick = async ( task: TaskType ) => {
-		recordEvent( `${ listEventPrefix }click`, {
+	const trackClick = async (task: TaskType) => {
+		recordEvent(`${listEventPrefix}click`, {
 			task_name: task.id,
 			context: layoutString,
-			...( task?.additionalData?.wooPaymentsIncentiveId && {
+			...(task?.additionalData?.wooPaymentsIncentiveId && {
 				woopayments_incentive_id:
 					task.additionalData.wooPaymentsIncentiveId,
-			} ),
-		} );
+			}),
+		});
 
-		if ( ! task.isComplete ) {
-			await updateTrackStartedCount( task.id );
+		if (!task.isComplete) {
+			await updateTrackStartedCount(task.id);
 		}
 	};
 
-	const goToTask = ( task: TaskType ) => {
-		void trackClick( task ).then( () => {
-			if ( ! isComplete ) {
+	const goToTask = (task: TaskType) => {
+		void trackClick(task).then(() => {
+			if (!isComplete) {
 				// Invalidate the task list selector cache to force a re-fetch.
 				// This ensures the task completion status is up-to-date after visiting a task.
-				void invalidateResolutionForStoreSelector( 'getTaskLists' );
+				void invalidateResolutionForStoreSelector('getTaskLists');
 			}
-		} );
+		});
 
-		if ( task.actionUrl ) {
-			navigateTo( {
+		if (task.actionUrl) {
+			navigateTo({
 				url: task.actionUrl,
-			} );
+			});
 			return;
 		}
 
-		navigateTo( { url: getNewPath( { task: task.id }, '/', {} ) } );
+		navigateTo({ url: getNewPath({ task: task.id }, '/', {}) });
 	};
 
-	const showTaskHeader = ( task: TaskType ) => {
+	const showTaskHeader = (task: TaskType) => {
 		if (
-			taskHeaders[ task.id ] ||
+			taskHeaders[task.id] ||
 			hasTaskListHeaderSlotFills ||
 			task.imageUrl
 		) {
-			setHeaderData( {
+			setHeaderData({
 				task,
-				goToTask: () => goToTask( task ),
-				trackClick: () => trackClick( task ),
-			} );
-			setActiveTaskId( task.id );
+				goToTask: () => goToTask(task),
+				trackClick: () => trackClick(task),
+			});
+			setActiveTaskId(task.id);
 		}
 	};
 
-	useEffect( () => {
-		if ( selectedHeaderCard ) {
-			showTaskHeader( selectedHeaderCard );
+	useEffect(() => {
+		if (selectedHeaderCard) {
+			showTaskHeader(selectedHeaderCard);
 		}
-	}, [ selectedHeaderCard ] );
+	}, [selectedHeaderCard]);
 
-	if ( ! visibleTasks.length ) {
+	if (!visibleTasks.length) {
 		return <div className="woocommerce-task-dashboard__container"></div>;
 	}
 
@@ -259,48 +255,46 @@ export const SetupTaskList = ( {
 		taskListCompletionSlot?.fills?.length
 	);
 
-	if ( isComplete && keepCompletedTaskList !== 'yes' ) {
-		if ( hasTaskListCompletionSlotFills ) {
+	if (isComplete && keepCompletedTaskList !== 'yes') {
+		if (hasTaskListCompletionSlotFills) {
 			return (
 				<TaskListCompletionSlot
-					fillProps={ {
+					fillProps={{
 						hideTasks,
 						keepTasks,
 						customerEffortScore: cesHeader,
-					} }
+					}}
 				/>
 			);
 		}
 		return (
 			<>
-				{ cesHeader ? (
+				{cesHeader ? (
 					<TaskListCompletedHeader
-						hideTasks={ hideTasks }
-						customerEffortScore={ true }
+						hideTasks={hideTasks}
+						customerEffortScore={true}
 					/>
 				) : (
-					<TaskListCompleted hideTasks={ hideTasks } />
-				) }
+					<TaskListCompleted hideTasks={hideTasks} />
+				)}
 			</>
 		);
 	}
 
 	return (
 		<>
-			{ showDismissModal && (
+			{showDismissModal && (
 				<DismissModal
-					showDismissModal={ showDismissModal }
-					setShowDismissModal={ setShowDismissModal }
-					hideTasks={ hideTasks }
+					showDismissModal={showDismissModal}
+					setShowDismissModal={setShowDismissModal}
+					hideTasks={hideTasks}
 				/>
-			) }
-			{ displayProgressHeader ? (
-				<ProgressHeader taskListId={ id } />
-			) : null }
+			)}
+			{displayProgressHeader ? <ProgressHeader taskListId={id} /> : null}
 			<div
-				className={ clsx(
-					`woocommerce-task-dashboard__container woocommerce-task-list__${ id } setup-task-list`
-				) }
+				className={clsx(
+					`woocommerce-task-dashboard__container woocommerce-task-list__${id} setup-task-list`
+				)}
 			>
 				<Card
 					size="large"
@@ -308,35 +302,35 @@ export const SetupTaskList = ( {
 				>
 					<div className="woocommerce-task-card__header-container">
 						<div className="woocommerce-task-card__header">
-							{ hasTaskListHeaderSlotFills ? (
+							{hasTaskListHeaderSlotFills ? (
 								<WooOnboardingTaskListHeader.Slot
-									id={ selectedHeaderCard?.id }
-									fillProps={ headerData }
+									id={selectedHeaderCard?.id}
+									fillProps={headerData}
 								/>
 							) : (
 								headerData?.task &&
 								createElement(
-									taskHeaders[ headerData.task.id ] ??
+									taskHeaders[headerData.task.id] ??
 										DefaultTaskHeader,
 									headerData
 								)
-							) }
+							)}
 						</div>
-						{ ! displayProgressHeader && renderMenu() }
+						{!displayProgressHeader && renderMenu()}
 					</div>
 					<List animation="custom">
-						{ visibleTasks.map( ( task, index ) => {
+						{visibleTasks.map((task, index) => {
 							return (
 								<TaskListItem
-									key={ task.id }
-									taskIndex={ ++index }
-									activeTaskId={ activeTaskId }
-									task={ task }
-									goToTask={ () => goToTask( task ) }
-									trackClick={ () => trackClick( task ) }
+									key={task.id}
+									taskIndex={++index}
+									activeTaskId={activeTaskId}
+									task={task}
+									goToTask={() => goToTask(task)}
+									trackClick={() => trackClick(task)}
 								/>
 							);
-						} ) }
+						})}
 					</List>
 					<ExperimentalWooTaskListFooter />
 				</Card>

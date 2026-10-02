@@ -12,7 +12,7 @@ export const ProfileSpinner = () => {
 	return (
 		<>
 			<div
-				className={ `woocommerce-profile-wizard__spinner` }
+				className={`woocommerce-profile-wizard__spinner`}
 				data-testid="core-profiler-loading-screen"
 			>
 				<Spinner />

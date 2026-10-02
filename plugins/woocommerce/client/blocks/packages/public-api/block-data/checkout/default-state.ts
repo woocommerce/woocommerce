@@ -14,7 +14,7 @@ export type CheckoutState = {
 	calculatingCount: number; // If any of the totals, taxes, shipping, etc need to be calculated, the count will be increased here
 	customerId: number; // This is the ID of the customer the draft order belongs to.
 	customerPassword: string; // Customer password for account creation, if applicable.
-	extensionData: Record< string, Record< string, unknown > >; // Custom checkout data passed to the store API on processing.
+	extensionData: Record<string, Record<string, unknown>>; // Custom checkout data passed to the store API on processing.
 	hasError: boolean; // True when the checkout is in an error state. Whatever caused the error (validation/payment method) will likely have triggered a notice.
 	orderId: number; // This is the ID for the draft order if one exists.
 	orderNotes: string; // Order notes introduced by the user in the checkout form.
@@ -26,20 +26,20 @@ export type CheckoutState = {
 	editingBillingAddress: boolean; // Is the billing address being edited?
 	editingShippingAddress: boolean; // Is the shipping address being edited?
 	addressAutocompleteProviders: string[]; // IDs of registered address autocomplete providers, if any.
-	activeAddressAutocompleteProvider: { [ key in AddressFormType ]: string }; // Active address autocomplete provider.
+	activeAddressAutocompleteProvider: { [key in AddressFormType]: string }; // Active address autocomplete provider.
 };
 
 // Default editing state for CustomerAddress component comes from the current address and whether or not we're in the editor.
-const hasBillingAddress = !! (
+const hasBillingAddress = !!(
 	checkoutData.billing_address.address_1 &&
-	( checkoutData.billing_address.first_name ||
-		checkoutData.billing_address.last_name )
+	(checkoutData.billing_address.first_name ||
+		checkoutData.billing_address.last_name)
 );
 
-const hasShippingAddress = !! (
+const hasShippingAddress = !!(
 	checkoutData.shipping_address.address_1 &&
-	( checkoutData.shipping_address.first_name ||
-		checkoutData.shipping_address.last_name )
+	(checkoutData.shipping_address.first_name ||
+		checkoutData.shipping_address.last_name)
 );
 
 const billingMatchesShipping = isSameAddress(
@@ -61,8 +61,8 @@ export const defaultState: CheckoutState = {
 	shouldCreateAccount: false,
 	status: STATUS.IDLE,
 	useShippingAsBilling: billingMatchesShipping,
-	editingBillingAddress: ! hasBillingAddress,
-	editingShippingAddress: ! hasShippingAddress,
+	editingBillingAddress: !hasBillingAddress,
+	editingShippingAddress: !hasShippingAddress,
 	addressAutocompleteProviders: [],
 	activeAddressAutocompleteProvider: {
 		billing: '',

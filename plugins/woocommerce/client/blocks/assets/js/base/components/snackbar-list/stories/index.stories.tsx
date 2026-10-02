@@ -39,13 +39,13 @@ export default {
 		},
 	},
 	component: SnackbarList,
-} as Meta< SnackbarListProps >;
+} as Meta<SnackbarListProps>;
 
-const Template: StoryFn< SnackbarListProps > = ( args ) => {
-	return <SnackbarList { ...args } />;
+const Template: StoryFn<SnackbarListProps> = (args) => {
+	return <SnackbarList {...args} />;
 };
 
-export const Default = Template.bind( {} );
+export const Default = Template.bind({});
 Default.args = {
 	notices: [
 		{

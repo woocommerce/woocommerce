@@ -18,36 +18,36 @@ interface EmailImprovementsModalProps {
 	type: 'enabled' | 'try';
 }
 
-export const EmailImprovementsModal = ( {
+export const EmailImprovementsModal = ({
 	type,
-}: EmailImprovementsModalProps ) => {
-	const [ guideIsOpen, setGuideIsOpen ] = useState( false );
-	const [ searchParams ] = useSearchParams();
+}: EmailImprovementsModalProps) => {
+	const [guideIsOpen, setGuideIsOpen] = useState(false);
+	const [searchParams] = useSearchParams();
 
-	let title = __< string >(
+	let title = __<string>(
 		'Your store emails have had an upgrade!',
 		'woocommerce'
 	);
-	let description = __< string >(
+	let description = __<string>(
 		'We’ve made some exciting improvements to your email templates, including modern, shopper-friendly designs and new customization options. Head to your email settings to explore the new changes.',
 		'woocommerce'
 	);
 
-	if ( type === 'try' ) {
-		title = __( 'Store emails have had an upgrade!', 'woocommerce' );
+	if (type === 'try') {
+		title = __('Store emails have had an upgrade!', 'woocommerce');
 		description = __(
 			'We’ve made some exciting improvements to our email templates, including modern, shopper-friendly designs and new customization options. Head to your email settings to explore the new features.',
 			'woocommerce'
 		);
 	}
 
-	useEffect( () => {
-		if ( searchParams.get( 'emailImprovementsModal' ) ) {
-			setGuideIsOpen( true );
+	useEffect(() => {
+		if (searchParams.get('emailImprovementsModal')) {
+			setGuideIsOpen(true);
 		} else {
-			setGuideIsOpen( false );
+			setGuideIsOpen(false);
 		}
-	}, [ searchParams ] );
+	}, [searchParams]);
 
 	const clearQueryString = () => {
 		updateQueryString(
@@ -55,38 +55,38 @@ export const EmailImprovementsModal = ( {
 				emailImprovementsModal: undefined,
 			},
 			undefined,
-			Object.fromEntries( searchParams.entries() )
+			Object.fromEntries(searchParams.entries())
 		);
 	};
 
 	const onFinish = () => {
 		clearQueryString();
-		setGuideIsOpen( false );
+		setGuideIsOpen(false);
 	};
 
 	return (
 		<>
-			{ guideIsOpen && (
+			{guideIsOpen && (
 				<Guide
-					onFinish={ onFinish }
+					onFinish={onFinish}
 					contentLabel=""
 					className="woocommerce__email-improvements-modal"
-					pages={ [
+					pages={[
 						{
 							content: (
 								<div className="email-improvements-modal-layout">
 									<div className="email-improvements-modal-content">
 										<div className="email-improvements-modal-content-image">
 											<img
-												src={ Illustration }
+												src={Illustration}
 												alt=""
-												width={ 250 }
-												height={ 240 }
+												width={250}
+												height={240}
 											/>
 										</div>
 										<div>
-											<h1>{ title }</h1>
-											<p>{ description }</p>
+											<h1>{title}</h1>
+											<p>{description}</p>
 										</div>
 										<div className="email-improvements-modal-footer">
 											<Button
@@ -94,53 +94,53 @@ export const EmailImprovementsModal = ( {
 												href="https://developer.woocommerce.com/2025/04/09/woocommerce-9-8-modernized-designs-and-email-previews/"
 												target="_blank"
 											>
-												{ __(
+												{__(
 													'Learn more',
 													'woocommerce'
-												) }
+												)}
 											</Button>
-											{ type === 'try' ? (
+											{type === 'try' ? (
 												<Button
 													variant="primary"
 													href="?page=wc-settings&tab=email&try-new-templates"
 												>
-													{ __(
+													{__(
 														'Try the new templates',
 														'woocommerce'
-													) }
+													)}
 												</Button>
 											) : (
 												<Button
 													variant="primary"
 													href="?page=wc-settings&tab=email"
 												>
-													{ __(
+													{__(
 														'Customize your emails',
 														'woocommerce'
-													) }
+													)}
 												</Button>
-											) }
+											)}
 										</div>
 									</div>
 									<Button
 										variant="tertiary"
 										className="email-improvements-modal-close-button"
-										label={ __( 'Close', 'woocommerce' ) }
+										label={__('Close', 'woocommerce')}
 										icon={
 											<Icon
-												icon={ closeSmall }
+												icon={closeSmall}
 												viewBox="6 4 12 14"
 											/>
 										}
-										iconSize={ 24 }
-										onClick={ onFinish }
+										iconSize={24}
+										onClick={onFinish}
 									></Button>
 								</div>
 							),
 						},
-					] }
+					]}
 				/>
-			) }
+			)}
 		</>
 	);
 };

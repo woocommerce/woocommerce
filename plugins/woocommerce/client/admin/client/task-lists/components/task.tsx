@@ -20,50 +20,50 @@ export type TaskProps = {
 	task: TaskType;
 };
 
-export const Task = ( { query, task }: TaskProps ) => {
+export const Task = ({ query, task }: TaskProps) => {
 	const id = query.task || '';
-	if ( ! id ) {
+	if (!id) {
 		// eslint-disable-next-line no-console
-		console.warn( 'No task id provided' );
+		console.warn('No task id provided');
 		// eslint-enable-next-line no-console
 	}
 
 	const { invalidateResolutionForStoreSelector, optimisticallyCompleteTask } =
-		useDispatch( onboardingStore );
+		useDispatch(onboardingStore);
 
-	const updateBadge = useCallback( async () => {
+	const updateBadge = useCallback(async () => {
 		const badgeElements = document.querySelectorAll(
 			'#adminmenu .woocommerce-task-list-remaining-tasks-badge'
 		);
 
-		if ( ! badgeElements?.length ) {
+		if (!badgeElements?.length) {
 			return;
 		}
 
 		const setupTaskList =
-			await resolveSelect( onboardingStore ).getTaskList( 'setup' );
-		if ( ! setupTaskList ) {
+			await resolveSelect(onboardingStore).getTaskList('setup');
+		if (!setupTaskList) {
 			return;
 		}
 
 		const remainingTasksCount = setupTaskList.tasks.filter(
-			( _task: TaskType ) => ! _task.isComplete
+			(_task: TaskType) => !_task.isComplete
 		).length;
 
-		badgeElements.forEach( ( badge ) => {
+		badgeElements.forEach((badge) => {
 			badge.textContent = remainingTasksCount.toString();
-		} );
-	}, [] );
+		});
+	}, []);
 
 	const onComplete = useCallback(
-		( options: Record< string, unknown > ) => {
-			void optimisticallyCompleteTask( id );
+		(options: Record<string, unknown>) => {
+			void optimisticallyCompleteTask(id);
 			getHistory().push(
 				options && options.redirectPath
 					? options.redirectPath
-					: getNewPath( {}, '/', {} )
+					: getNewPath({}, '/', {})
 			);
-			void invalidateResolutionForStoreSelector( 'getTaskLists' );
+			void invalidateResolutionForStoreSelector('getTaskLists');
 			void updateBadge();
 		},
 		[
@@ -77,12 +77,12 @@ export const Task = ( { query, task }: TaskProps ) => {
 	return (
 		<>
 			<WooHeaderNavigationItem>
-				<BackButton title={ task.title } />
+				<BackButton title={task.title} />
 			</WooHeaderNavigationItem>
-			<WooHeaderPageTitle>{ task.title }</WooHeaderPageTitle>
+			<WooHeaderPageTitle>{task.title}</WooHeaderPageTitle>
 			<WooOnboardingTask.Slot
-				id={ id }
-				fillProps={ { onComplete, query, task } }
+				id={id}
+				fillProps={{ onComplete, query, task }}
 			/>
 		</>
 	);

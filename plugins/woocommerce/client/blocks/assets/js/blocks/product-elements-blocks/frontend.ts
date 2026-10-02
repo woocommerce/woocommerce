@@ -18,7 +18,7 @@ import {
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: productsState } = store< ProductsStore >(
+const { state: productsState } = store<ProductsStore>(
 	'woocommerce/products',
 	{},
 	{ lock: universalLock }
@@ -35,15 +35,15 @@ store(
 			updateValue: () => {
 				const product = productsState.productInContext;
 
-				if ( ! product ) {
+				if (!product) {
 					return;
 				}
 
-				const { productElementKey } = getContext< Context >();
+				const { productElementKey } = getContext<Context>();
 
 				swapPreformattedHtml(
 					getElement().ref,
-					product[ productElementKey ],
+					product[productElementKey],
 					PRODUCT_ELEMENT_HTML_CONFIG
 				);
 			},

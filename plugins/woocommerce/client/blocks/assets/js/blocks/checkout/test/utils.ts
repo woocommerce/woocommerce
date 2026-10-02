@@ -4,8 +4,8 @@
 import { CartBillingAddress } from '@woocommerce/type-defs/cart';
 import { extractName, formatAddress } from '@woocommerce/blocks/checkout/utils';
 
-describe( 'extractName', () => {
-	it.each( [
+describe('extractName', () => {
+	it.each([
 		[
 			'{name}\n{company}\n{address_1}\n{address_2}\n{city}\n{state}\n{postcode}\n{country}',
 			'{name}',
@@ -54,14 +54,11 @@ describe( 'extractName', () => {
 			'{company}\n{address_1}\n{address_2}\n{city}\n{state}\n{last_name} {first_name} \n{postcode}\n{country}',
 			'{last_name} {first_name}',
 		],
-	] )(
-		'should extract the name token from the format',
-		( format, expected ) => {
-			expect( extractName( format ) ).toBe( expected );
-		}
-	);
-} );
-describe( 'formatAddress', () => {
+	])('should extract the name token from the format', (format, expected) => {
+		expect(extractName(format)).toBe(expected);
+	});
+});
+describe('formatAddress', () => {
 	const defaultAddress: CartBillingAddress = {
 		first_name: 'John',
 		last_name: 'Doe',
@@ -76,7 +73,7 @@ describe( 'formatAddress', () => {
 		phone: '1234567890',
 	};
 
-	it.each( [
+	it.each([
 		[
 			defaultAddress,
 			'{name}\n{company}\n{address_1}\n{address_2}\n{city}\n{state}\n{postcode}\n{country}',
@@ -234,7 +231,7 @@ describe( 'formatAddress', () => {
 			'{name}\n{company}\n{address_1}\n{address_2}\n{city}\n{state}\n{postcode}\n{country}',
 			{
 				name: '',
-				address: [ 'WooCommerce' ],
+				address: ['WooCommerce'],
 			},
 		],
 		// Test partial address values.
@@ -255,15 +252,12 @@ describe( 'formatAddress', () => {
 			'{name}\n{company}\n{address_1}\n{address_2}\n{city}\n{state}\n{postcode}\n{country}',
 			{
 				name: 'Jon',
-				address: [ 'WooCommerce', 'Toronto' ],
+				address: ['WooCommerce', 'Toronto'],
 			},
 		],
-	] )(
-		'should format the address correctly',
-		( address, format, expected ) => {
-			const formattedAddress = formatAddress( address, format );
-			expect( formattedAddress.name ).toBe( expected.name );
-			expect( formattedAddress.address ).toEqual( expected.address );
-		}
-	);
-} );
+	])('should format the address correctly', (address, format, expected) => {
+		const formattedAddress = formatAddress(address, format);
+		expect(formattedAddress.name).toBe(expected.name);
+		expect(formattedAddress.address).toEqual(expected.address);
+	});
+});

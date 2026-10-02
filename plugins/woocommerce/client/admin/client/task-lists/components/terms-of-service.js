@@ -6,15 +6,15 @@ import interpolateComponents from '@automattic/interpolate-components';
 import { __, sprintf } from '@wordpress/i18n';
 import { Link } from '@woocommerce/components';
 
-export const TermsOfService = ( { buttonText } ) => (
+export const TermsOfService = ({ buttonText }) => (
 	<Text
 		variant="caption"
 		className="woocommerce-task__caption is-tos"
 		size="12"
 		lineHeight="16px"
-		style={ { display: 'block' } }
+		style={{ display: 'block' }}
 	>
-		{ interpolateComponents( {
+		{interpolateComponents({
 			mixedString: sprintf(
 				/* translators: button text, most likely something like 'Install and Enable' or Continue setup' */
 				__(
@@ -26,7 +26,7 @@ export const TermsOfService = ( { buttonText } ) => (
 			components: {
 				tosLink: (
 					<Link
-						href={ 'https://wordpress.com/tos/' }
+						href={'https://wordpress.com/tos/'}
 						target="_blank"
 						type="external"
 					>
@@ -35,7 +35,7 @@ export const TermsOfService = ( { buttonText } ) => (
 				),
 				privacyPolicyLink: (
 					<Link
-						href={ 'https://automattic.com/privacy/' }
+						href={'https://automattic.com/privacy/'}
 						target="_blank"
 						type="external"
 					>
@@ -43,6 +43,6 @@ export const TermsOfService = ( { buttonText } ) => (
 					</Link>
 				),
 			},
-		} ) }
+		})}
 	</Text>
 );

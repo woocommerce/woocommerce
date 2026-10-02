@@ -22,7 +22,7 @@ import { SITE_CURRENCY } from '@woocommerce/settings';
 import type { BlockAttributes } from './types';
 
 type Props = BlockAttributes &
-	HTMLAttributes< HTMLDivElement > & {
+	HTMLAttributes<HTMLDivElement> & {
 		isAdmin: boolean;
 		isExperimentalWcRestApiV4Enabled: boolean;
 		isDescendentOfSingleProductTemplate: boolean;
@@ -62,11 +62,11 @@ export const convertAdminPriceToStoreApiFormat = (
 ) => {
 	const multiplier = 10 ** currency.minorUnit;
 	return Math.round(
-		Number.parseFloat( priceString ?? fallback ) * multiplier
+		Number.parseFloat(priceString ?? fallback) * multiplier
 	).toString();
 };
 
-export const Block = ( props: Props ): JSX.Element | null => {
+export const Block = (props: Props): JSX.Element | null => {
 	const {
 		className,
 		textAlign,
@@ -86,7 +86,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 			? {
 					isAdmin,
 					product: productData,
-			  }
+				}
 			: undefined
 	);
 
@@ -96,7 +96,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		parentName ===
 		'woocommerce/add-to-cart-with-options-grouped-product-item';
 
-	const styleProps = useStyleProps( props );
+	const styleProps = useStyleProps(props);
 	const {
 		margin,
 		marginTop,
@@ -114,33 +114,33 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	};
 
 	const showPricePreview =
-		( isDescendentOfSingleProductTemplate &&
-			! isDescendentOfAddToCartGroupedProductSelectorBlock ) ||
-		! product;
+		(isDescendentOfSingleProductTemplate &&
+			!isDescendentOfAddToCartGroupedProductSelectorBlock) ||
+		!product;
 
 	const blockClassName = clsx(
 		'wp-block-woocommerce-product-price',
 		className
 	);
-	const wrapperClassName = clsx( styleProps.className, {
-		[ `${ parentClassName }__product-price` ]: parentClassName,
-	} );
+	const wrapperClassName = clsx(styleProps.className, {
+		[`${parentClassName}__product-price`]: parentClassName,
+	});
 
-	if ( ! product?.id && ! isDescendentOfSingleProductTemplate ) {
+	if (!product?.id && !isDescendentOfSingleProductTemplate) {
 		const productPriceComponent = (
 			<ProductPrice
-				align={ textAlign }
-				className={ wrapperClassName }
-				style={ priceStyle }
+				align={textAlign}
+				className={wrapperClassName}
+				style={priceStyle}
 			/>
 		);
-		if ( isDescendentOfAllProductsBlock ) {
+		if (isDescendentOfAllProductsBlock) {
 			return (
 				<div
-					className={ blockClassName }
-					style={ isAdmin ? undefined : blockMarginStyle }
+					className={blockClassName}
+					style={isAdmin ? undefined : blockMarginStyle}
 				>
-					{ productPriceComponent }
+					{productPriceComponent}
 				</div>
 			);
 		}
@@ -150,30 +150,27 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	let prices: PriceProps = product?.prices ?? {};
 	const currency = showPricePreview
 		? getCurrencyFromPriceResponse()
-		: getCurrencyFromPriceResponse( prices );
+		: getCurrencyFromPriceResponse(prices);
 
-	if ( isExperimentalWcRestApiV4Enabled ) {
+	if (isExperimentalWcRestApiV4Enabled) {
 		prices = {
-			price: convertAdminPriceToStoreApiFormat(
-				product?.price,
-				currency
-			),
-			...( product?.sale_price
+			price: convertAdminPriceToStoreApiFormat(product?.price, currency),
+			...(product?.sale_price
 				? {
 						sale_price: convertAdminPriceToStoreApiFormat(
 							product?.sale_price,
 							currency
 						),
-				  }
-				: {} ),
-			...( product?.regular_price
+					}
+				: {}),
+			...(product?.regular_price
 				? {
 						regular_price: convertAdminPriceToStoreApiFormat(
 							product?.regular_price,
 							currency
 						),
-				  }
-				: {} ),
+					}
+				: {}),
 			currency_minor_unit: SITE_CURRENCY.minorUnit,
 			price_range:
 				product?.max_price && product?.min_price
@@ -186,61 +183,60 @@ export const Block = ( props: Props ): JSX.Element | null => {
 								product.max_price,
 								currency
 							),
-					  }
+						}
 					: null,
 		};
 	}
 
 	const pricePreview = '5000';
 	const isOnSale = prices.price !== prices.regular_price;
-	const priceClassName = clsx( {
-		[ `${ parentClassName }__product-price__value` ]: parentClassName,
-		[ `${ parentClassName }__product-price__value--on-sale` ]: isOnSale,
-	} );
+	const priceClassName = clsx({
+		[`${parentClassName}__product-price__value`]: parentClassName,
+		[`${parentClassName}__product-price__value--on-sale`]: isOnSale,
+	});
 
 	const productPriceComponent = (
 		<ProductPrice
-			align={ textAlign }
-			className={ wrapperClassName }
-			style={ priceStyle }
-			priceClassName={ priceClassName }
-			currency={ currency }
-			price={ showPricePreview ? pricePreview : prices.price }
+			align={textAlign}
+			className={wrapperClassName}
+			style={priceStyle}
+			priceClassName={priceClassName}
+			currency={currency}
+			price={showPricePreview ? pricePreview : prices.price}
 			// Range price props
-			minPrice={ prices?.price_range?.min_amount }
-			maxPrice={ prices?.price_range?.max_amount }
+			minPrice={prices?.price_range?.min_amount}
+			maxPrice={prices?.price_range?.max_amount}
 			// This is the regular or original price when the `price` value is a sale price.
 			regularPrice={
 				showPricePreview ? pricePreview : prices.regular_price
 			}
-			regularPriceClassName={ clsx( {
-				[ `${ parentClassName }__product-price__regular` ]:
-					parentClassName,
-			} ) }
+			regularPriceClassName={clsx({
+				[`${parentClassName}__product-price__regular`]: parentClassName,
+			})}
 		/>
 	);
-	if ( isDescendentOfAllProductsBlock ) {
+	if (isDescendentOfAllProductsBlock) {
 		return (
 			<div
-				className={ blockClassName }
-				style={ isAdmin ? undefined : blockMarginStyle }
+				className={blockClassName}
+				style={isAdmin ? undefined : blockMarginStyle}
 			>
-				{ productPriceComponent }
+				{productPriceComponent}
 			</div>
 		);
 	}
 	return productPriceComponent;
 };
 
-export default ( props: Props ) => {
+export default (props: Props) => {
 	// It is necessary because this block has to support several contexts:
 	// - Inside `All Products Block` -> `withProductDataContext` HOC
 	// - Inside `Products Block` -> Gutenberg Context
 	// - Inside `Single Product Template` -> Gutenberg Context
 	// - Without any parent -> `WithSelector` and `withProductDataContext` HOCs
 	// For more details, check https://github.com/woocommerce/woocommerce-blocks/pull/8609
-	if ( props.isDescendentOfSingleProductTemplate ) {
-		return <Block { ...props } />;
+	if (props.isDescendentOfSingleProductTemplate) {
+		return <Block {...props} />;
 	}
-	return withProductDataContext( Block )( props );
+	return withProductDataContext(Block)(props);
 };

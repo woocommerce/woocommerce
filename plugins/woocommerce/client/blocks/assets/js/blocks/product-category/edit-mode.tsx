@@ -13,9 +13,9 @@ import { Attributes, Props } from './types';
 
 export interface EditModeProps extends Props {
 	isEditing: boolean;
-	setIsEditing: ( isEditing: boolean ) => void;
-	changedAttributes: Partial< Attributes >;
-	setChangedAttributes: ( changedAttributes: Partial< Attributes > ) => void;
+	setIsEditing: (isEditing: boolean) => void;
+	changedAttributes: Partial<Attributes>;
+	setChangedAttributes: (changedAttributes: Partial<Attributes>) => void;
 }
 
 export const ProductsByCategoryEditMode = (
@@ -32,14 +32,14 @@ export const ProductsByCategoryEditMode = (
 	const currentAttributes = { ...attributes, ...changedAttributes };
 
 	const stopEditing = () => {
-		setIsEditing( false );
-		setChangedAttributes( {} );
+		setIsEditing(false);
+		setChangedAttributes({});
 	};
 
 	const save = () => {
 		const { setAttributes } = props;
 
-		setAttributes( changedAttributes );
+		setAttributes(changedAttributes);
 		stopEditing();
 	};
 
@@ -65,35 +65,35 @@ export const ProductsByCategoryEditMode = (
 
 	return (
 		<Placeholder
-			icon={ <Icon icon={ file } /> }
-			label={ __( 'Products by Category', 'woocommerce' ) }
+			icon={<Icon icon={file} />}
+			label={__('Products by Category', 'woocommerce')}
 			className="wc-block-products-grid wc-block-products-category"
 		>
-			{ __(
+			{__(
 				'Display a grid of products from your selected categories.',
 				'woocommerce'
-			) }
+			)}
 			<div className="wc-block-products-category__selection">
 				<ProductCategoryControl
-					selected={ currentAttributes.categories }
-					onChange={ ( value = [] ) => {
-						const ids = value.map( ( { id } ) => id );
-						setChangedAttributes( { categories: ids } );
-					} }
-					operator={ currentAttributes.catOperator }
-					onOperatorChange={ ( value = 'any' ) =>
-						setChangedAttributes( { catOperator: value } )
+					selected={currentAttributes.categories}
+					onChange={(value = []) => {
+						const ids = value.map(({ id }) => id);
+						setChangedAttributes({ categories: ids });
+					}}
+					operator={currentAttributes.catOperator}
+					onOperatorChange={(value = 'any') =>
+						setChangedAttributes({ catOperator: value })
 					}
 				/>
-				<Button variant="primary" onClick={ onDone }>
-					{ __( 'Done', 'woocommerce' ) }
+				<Button variant="primary" onClick={onDone}>
+					{__('Done', 'woocommerce')}
 				</Button>
 				<Button
 					className="wc-block-products-category__cancel-button"
 					variant="tertiary"
-					onClick={ onCancel }
+					onClick={onCancel}
 				>
-					{ __( 'Cancel', 'woocommerce' ) }
+					{__('Cancel', 'woocommerce')}
 				</Button>
 			</div>
 		</Placeholder>

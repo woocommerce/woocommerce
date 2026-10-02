@@ -21,114 +21,114 @@ const WRAPPER_CLASS = 'wc-admin-visual-attribute-color-picker-root';
 const FALLBACK_COLOR = '#000000';
 const EMPTY_COLOR_VALUE = '';
 
-const normalizeColor = ( value: string ) => {
-	if ( typeof value !== 'string' || ! value ) {
+const normalizeColor = (value: string) => {
+	if (typeof value !== 'string' || !value) {
 		return '';
 	}
 
 	return value.trim().toLowerCase();
 };
 
-const getInitialColor = ( input: HTMLInputElement ) => {
+const getInitialColor = (input: HTMLInputElement) => {
 	const attributeValue = normalizeColor(
-		input.value || input.getAttribute( 'value' ) || ''
+		input.value || input.getAttribute('value') || ''
 	);
 
 	return attributeValue;
 };
 
-const ColorField = ( { input }: { input: HTMLInputElement } ) => {
-	const [ color, setColor ] = useState( () => getInitialColor( input ) );
-	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
-	const triggerRef = useRef< HTMLButtonElement | null >( null );
+const ColorField = ({ input }: { input: HTMLInputElement }) => {
+	const [color, setColor] = useState(() => getInitialColor(input));
+	const [isPopoverVisible, setIsPopoverVisible] = useState(false);
+	const triggerRef = useRef<HTMLButtonElement | null>(null);
 
 	// Listen to changes in the input field. Because WP core uses jQuery, we
 	// can't listen to native `change` and `input` events. Instead, we override
 	// the `value` property to sync input changes to the color picker.
 	// @see https://github.com/WordPress/wordpress-develop/blob/bd4e3c97903743ab455682f32dbf38d1b38b715a/src/js/_enqueues/admin/tags.js#L194
-	useEffect( () => {
-		return observeInputValueChanges( input, ( nextValue ) => {
-			const nextColor = normalizeColor( nextValue );
-			setColor( nextColor );
-		} );
-	}, [ input ] );
+	useEffect(() => {
+		return observeInputValueChanges(input, (nextValue) => {
+			const nextColor = normalizeColor(nextValue);
+			setColor(nextColor);
+		});
+	}, [input]);
 
-	useEffect( () => {
-		if ( normalizeColor( input.value ) === color ) {
+	useEffect(() => {
+		if (normalizeColor(input.value) === color) {
 			return;
 		}
 		input.value = color;
-		input.dispatchEvent( new Event( 'input', { bubbles: true } ) );
-		input.dispatchEvent( new Event( 'change', { bubbles: true } ) );
-	}, [ color, input ] );
+		input.dispatchEvent(new Event('input', { bubbles: true }));
+		input.dispatchEvent(new Event('change', { bubbles: true }));
+	}, [color, input]);
 
-	const handleColorSelection = ( value: string ) => {
-		const nextColor = normalizeColor( value );
+	const handleColorSelection = (value: string) => {
+		const nextColor = normalizeColor(value);
 
-		if ( nextColor ) {
-			clearSiblingVisualInput( input, IMAGE_INPUT_SELECTOR );
+		if (nextColor) {
+			clearSiblingVisualInput(input, IMAGE_INPUT_SELECTOR);
 		}
 
-		setColor( nextColor );
+		setColor(nextColor);
 	};
 
 	const clearColor = () => {
-		setColor( EMPTY_COLOR_VALUE );
-		setIsPopoverVisible( false );
+		setColor(EMPTY_COLOR_VALUE);
+		setIsPopoverVisible(false);
 	};
 
 	const displayedColorValue = color
 		? color.toUpperCase()
-		: __( 'Select a color', 'woocommerce' );
+		: __('Select a color', 'woocommerce');
 
 	const popoverColor = color || FALLBACK_COLOR;
 
 	return (
 		<>
 			<button
-				ref={ triggerRef }
+				ref={triggerRef}
 				type="button"
 				className="wc-admin-visual-attribute-color-picker-trigger"
-				onClick={ () => setIsPopoverVisible( true ) }
+				onClick={() => setIsPopoverVisible(true)}
 				aria-haspopup="dialog"
-				aria-expanded={ isPopoverVisible }
+				aria-expanded={isPopoverVisible}
 			>
 				<span
-					className={ `wc-admin-color-swatch${
+					className={`wc-admin-color-swatch${
 						color ? '' : ' is-empty'
-					}` }
-					style={ color ? { backgroundColor: color } : undefined }
+					}`}
+					style={color ? { backgroundColor: color } : undefined}
 					aria-hidden="true"
 				/>
-				<span>{ displayedColorValue }</span>
+				<span>{displayedColorValue}</span>
 			</button>
-			{ color && (
+			{color && (
 				<button
 					type="button"
 					className="button-link wc-admin-visual-attribute-color-picker-clear"
-					onClick={ clearColor }
+					onClick={clearColor}
 				>
-					{ __( 'Clear', 'woocommerce' ) }
+					{__('Clear', 'woocommerce')}
 				</button>
-			) }
-			{ isPopoverVisible && triggerRef.current && (
+			)}
+			{isPopoverVisible && triggerRef.current && (
 				<Popover
-					anchor={ triggerRef.current }
-					onClose={ () => setIsPopoverVisible( false ) }
+					anchor={triggerRef.current}
+					onClose={() => setIsPopoverVisible(false)}
 					placement="bottom-start"
 				>
 					<ColorPicker
-						color={ popoverColor }
-						onChange={ handleColorSelection }
+						color={popoverColor}
+						onChange={handleColorSelection}
 					/>
 				</Popover>
-			) }
+			)}
 		</>
 	);
 };
 
-const mountColorPicker = ( input: HTMLInputElement ) => {
-	if ( input.dataset.wcColorPickerMounted === '1' ) {
+const mountColorPicker = (input: HTMLInputElement) => {
+	if (input.dataset.wcColorPickerMounted === '1') {
 		return;
 	}
 
@@ -143,59 +143,59 @@ const mountColorPicker = ( input: HTMLInputElement ) => {
 	input.style.pointerEvents = 'none';
 	input.style.userSelect = 'none';
 
-	const wrapper = document.createElement( 'div' );
+	const wrapper = document.createElement('div');
 	wrapper.className = WRAPPER_CLASS;
-	input.insertAdjacentElement( 'beforebegin', wrapper );
+	input.insertAdjacentElement('beforebegin', wrapper);
 
-	const root = createRoot( wrapper );
-	root.render( <ColorField input={ input } /> );
+	const root = createRoot(wrapper);
+	root.render(<ColorField input={input} />);
 
 	// Make sure labels associated to the input also trigger the color picker.
-	const associatedLabels = input.labels ? Array.from( input.labels ) : [];
-	associatedLabels.forEach( ( labelElement ) => {
-		labelElement.addEventListener( 'click', ( event ) => {
+	const associatedLabels = input.labels ? Array.from(input.labels) : [];
+	associatedLabels.forEach((labelElement) => {
+		labelElement.addEventListener('click', (event) => {
 			event.preventDefault();
 
-			const trigger = wrapper.querySelector< HTMLButtonElement >(
+			const trigger = wrapper.querySelector<HTMLButtonElement>(
 				'.wc-admin-visual-attribute-color-picker-trigger'
 			);
 
 			trigger?.click();
-		} );
-	} );
+		});
+	});
 };
 
-const mountAllColorPickers = ( context: ParentNode = document ) => {
-	const colorInputs = context.querySelectorAll( COLOR_INPUT_SELECTOR );
+const mountAllColorPickers = (context: ParentNode = document) => {
+	const colorInputs = context.querySelectorAll(COLOR_INPUT_SELECTOR);
 
-	colorInputs.forEach( ( inputElement ) => {
-		if ( inputElement instanceof HTMLInputElement ) {
-			mountColorPicker( inputElement );
+	colorInputs.forEach((inputElement) => {
+		if (inputElement instanceof HTMLInputElement) {
+			mountColorPicker(inputElement);
 		}
-	} );
+	});
 };
 
-const mountAllVisualAttributeFields = ( context: ParentNode = document ) => {
-	mountAllColorPickers( context );
-	mountAllImagePickers( context );
-	mountAllVisualTypeSwitchers( context );
+const mountAllVisualAttributeFields = (context: ParentNode = document) => {
+	mountAllColorPickers(context);
+	mountAllImagePickers(context);
+	mountAllVisualTypeSwitchers(context);
 };
 
 const startObserver = () => {
-	const observer = new MutationObserver( ( mutationList ) => {
-		mutationList.forEach( ( mutation ) => {
-			mutation.addedNodes.forEach( ( node ) => {
-				if ( node instanceof HTMLElement ) {
-					mountAllVisualAttributeFields( node );
+	const observer = new MutationObserver((mutationList) => {
+		mutationList.forEach((mutation) => {
+			mutation.addedNodes.forEach((node) => {
+				if (node instanceof HTMLElement) {
+					mountAllVisualAttributeFields(node);
 				}
-			} );
-		} );
-	} );
+			});
+		});
+	});
 
-	observer.observe( document.body, {
+	observer.observe(document.body, {
 		childList: true,
 		subtree: true,
-	} );
+	});
 };
 
 mountAllVisualAttributeFields();

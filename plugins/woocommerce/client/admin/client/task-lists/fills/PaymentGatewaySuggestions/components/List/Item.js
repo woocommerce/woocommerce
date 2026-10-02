@@ -16,7 +16,7 @@ import { Action } from '../Action';
 import './List.scss';
 import fallbackImage from './fallback.png';
 
-export const Item = ( { isRecommended, markConfigured, paymentGateway } ) => {
+export const Item = ({ isRecommended, markConfigured, paymentGateway }) => {
 	const {
 		image_72x72: image72x72,
 		content,
@@ -34,14 +34,12 @@ export const Item = ( { isRecommended, markConfigured, paymentGateway } ) => {
 		transaction_processors: transactionProcessors,
 	} = paymentGateway;
 
-	const connectSlot = useSlot(
-		`woocommerce_payment_gateway_configure_${ id }`
-	);
-	const setupSlot = useSlot( `woocommerce_payment_gateway_setup_${ id }` );
+	const connectSlot = useSlot(`woocommerce_payment_gateway_configure_${id}`);
+	const setupSlot = useSlot(`woocommerce_payment_gateway_setup_${id}`);
 
 	const hasFills =
-		Boolean( connectSlot?.fills?.length ) ||
-		Boolean( setupSlot?.fills?.length );
+		Boolean(connectSlot?.fills?.length) ||
+		Boolean(setupSlot?.fills?.length);
 
 	const hasSetup = Boolean(
 		plugins.length || requiredSettings.length || hasFills || externalLink
@@ -56,68 +54,62 @@ export const Item = ( { isRecommended, markConfigured, paymentGateway } ) => {
 	);
 
 	return (
-		<Fragment key={ id }>
+		<Fragment key={id}>
 			<CardBody
-				style={ { paddingLeft: 0, marginBottom: 0 } }
-				className={ classes }
+				style={{ paddingLeft: 0, marginBottom: 0 }}
+				className={classes}
 			>
 				<CardMedia isBorderless>
 					<img
-						src={ image72x72 }
-						alt={ title }
-						onError={ ( e ) =>
-							( e.currentTarget.src = fallbackImage )
-						}
+						src={image72x72}
+						alt={title}
+						onError={(e) => (e.currentTarget.src = fallbackImage)}
 					/>
 				</CardMedia>
 				<div className="woocommerce-task-payment__description">
 					<Text as="h3" className="woocommerce-task-payment__title">
-						<span>{ title }</span>
-						{ showRecommended && (
-							<Pill
-								className={ ! isLocalPartner && 'pill-green' }
-							>
-								{ isLocalPartner
-									? __( 'Local Partner', 'woocommerce' )
-									: __( 'Recommended', 'woocommerce' ) }
+						<span>{title}</span>
+						{showRecommended && (
+							<Pill className={!isLocalPartner && 'pill-green'}>
+								{isLocalPartner
+									? __('Local Partner', 'woocommerce')
+									: __('Recommended', 'woocommerce')}
 							</Pill>
-						) }
-						{ isInstalled && needsSetup && !! plugins.length && (
+						)}
+						{isInstalled && needsSetup && !!plugins.length && (
 							<SetupRequired />
-						) }
+						)}
 					</Text>
 					<div className="woocommerce-task-payment__content">
-						{ content }
+						{content}
 					</div>
-					{ transactionProcessors && (
+					{transactionProcessors && (
 						<div className="woocommerce-task-payment__transaction-processors_images">
-							{ Object.keys( transactionProcessors ).map(
-								( key ) => {
-									return (
-										<img
-											src={ transactionProcessors[ key ] }
-											alt={ key }
-											key={ key }
-										/>
-									);
-								}
-							) }
+							{Object.keys(transactionProcessors).map((key) => {
+								return (
+									<img
+										src={transactionProcessors[key]}
+										alt={key}
+										key={key}
+									/>
+								);
+							})}
 						</div>
-					) }
+					)}
 				</div>
 				<div className="woocommerce-task-payment__footer">
 					<Action
-						manageUrl={ manageUrl }
-						id={ id }
-						hasSetup={ hasSetup }
-						needsSetup={ needsSetup }
-						isEnabled={ isEnabled }
-						isInstalled={ isInstalled }
-						hasPlugins={ Boolean( plugins.length ) }
-						isRecommended={ isRecommended }
-						isLoading={ loading }
-						markConfigured={ markConfigured }
-						externalLink={ externalLink }
+						manageUrl={manageUrl}
+						id={id}
+						hasSetup={hasSetup}
+						needsSetup={needsSetup}
+						isEnabled={isEnabled}
+						isInstalled={isInstalled}
+						hasPlugins={Boolean(plugins.length)}
+						isRecommended={isRecommended}
+						isLoading={loading}
+						markConfigured={markConfigured}
+						externalLink={externalLink}
 					/>
 				</div>
 			</CardBody>

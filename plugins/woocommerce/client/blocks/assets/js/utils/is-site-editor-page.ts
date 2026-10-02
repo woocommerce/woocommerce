@@ -9,7 +9,7 @@ import { select } from '@wordpress/data';
 import { CORE_EDITOR_STORE } from './wordpress-stores';
 
 export const isSiteEditorPage = (): boolean => {
-	const editor = select( CORE_EDITOR_STORE );
+	const editor = select(CORE_EDITOR_STORE);
 	const editedPostType = editor?.getCurrentPostType?.();
 
 	return (

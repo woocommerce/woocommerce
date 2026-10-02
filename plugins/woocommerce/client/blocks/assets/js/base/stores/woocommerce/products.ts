@@ -32,12 +32,12 @@ export type ProductsStoreState = {
 	 * Products keyed by product ID.
 	 * These are in Store API format (ProductResponseItem).
 	 */
-	products: Record< number, ProductResponseItem >;
+	products: Record<number, ProductResponseItem>;
 	/**
 	 * Product variations keyed by variation ID.
 	 * These are in Store API format (ProductResponseItem).
 	 */
-	productVariations: Record< number, ProductResponseItem >;
+	productVariations: Record<number, ProductResponseItem>;
 	/**
 	 * Look up a product by ID. If the ID exists in `productVariations`,
 	 * returns the variation directly (ignoring `selectedAttributes`).
@@ -45,10 +45,10 @@ export type ProductsStoreState = {
 	 * `selectedAttributes`, returns the matching variation or `null`;
 	 * for all other cases returns the product itself.
 	 */
-	findProduct: ( args: {
+	findProduct: (args: {
 		id: number;
 		selectedAttributes?: SelectedAttributes[] | null;
-	} ) => ProductResponseItem | null;
+	}) => ProductResponseItem | null;
 	/**
 	 * The current product ID from state or per-element context.
 	 */
@@ -93,14 +93,14 @@ export type ProductsStore = {
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const normalizeAttributeName = ( name: string ): string =>
+const normalizeAttributeName = (name: string): string =>
 	name
-		.replace( /^attribute_(pa_)?/, '' )
-		.replace( /-/g, ' ' )
+		.replace(/^attribute_(pa_)?/, '')
+		.replace(/-/g, ' ')
 		.toLowerCase();
 
-const attributeNamesMatch = ( a: string, b: string ): boolean =>
-	normalizeAttributeName( a ) === normalizeAttributeName( b );
+const attributeNamesMatch = (a: string, b: string): boolean =>
+	normalizeAttributeName(a) === normalizeAttributeName(b);
 
 /**
  * The woocommerce/products store.
@@ -114,48 +114,48 @@ const attributeNamesMatch = ( a: string, b: string ): boolean =>
  *
  * See ./README.md for the complete model, loaders, and consumer patterns.
  */
-const { state: productsState } = store< ProductsStore >(
+const { state: productsState } = store<ProductsStore>(
 	'woocommerce/products',
 	{
 		state: {
 			products: {},
 			productVariations: {},
-			findProduct( {
+			findProduct({
 				id,
 				selectedAttributes,
 			}: {
 				id: number;
 				selectedAttributes?: SelectedAttributes[] | null;
-			} ): ProductResponseItem | null {
-				const variation = productsState.productVariations[ id ];
-				if ( variation ) {
+			}): ProductResponseItem | null {
+				const variation = productsState.productVariations[id];
+				if (variation) {
 					return variation;
 				}
 
-				const product = productsState.products[ id ];
+				const product = productsState.products[id];
 
-				if ( ! product ) {
+				if (!product) {
 					return null;
 				}
 
 				if (
 					product.type !== 'variable' ||
-					! selectedAttributes?.length
+					!selectedAttributes?.length
 				) {
 					return product;
 				}
 
-				const matchedVariation = product.variations?.find( ( v ) =>
-					v.attributes.every( ( attr ) => {
+				const matchedVariation = product.variations?.find((v) =>
+					v.attributes.every((attr) => {
 						const selectedAttr = selectedAttributes.find(
-							( selected ) =>
+							(selected) =>
 								attributeNamesMatch(
 									attr.name,
 									selected.attribute
 								)
 						);
 
-						if ( attr.value === null ) {
+						if (attr.value === null) {
 							return (
 								selectedAttr !== undefined &&
 								selectedAttr.value !== null
@@ -163,21 +163,20 @@ const { state: productsState } = store< ProductsStore >(
 						}
 
 						return selectedAttr?.value === attr.value;
-					} )
+					})
 				);
 
-				if ( ! matchedVariation ) {
+				if (!matchedVariation) {
 					return null;
 				}
 
 				return (
-					productsState.productVariations[ matchedVariation.id ] ??
-					null
+					productsState.productVariations[matchedVariation.id] ?? null
 				);
 			},
 
 			get mainProductInContext(): ProductResponseItem | null {
-				const context = getContext< ProductContext >(
+				const context = getContext<ProductContext>(
 					'woocommerce/products'
 				);
 				const productId =
@@ -185,24 +184,24 @@ const { state: productsState } = store< ProductsStore >(
 						? context.productId
 						: productsState.productId;
 
-				if ( ! productId ) {
+				if (!productId) {
 					return null;
 				}
-				return productsState.products[ productId ] ?? null;
+				return productsState.products[productId] ?? null;
 			},
 
 			get productVariationInContext(): ProductResponseItem | null {
-				const context = getContext< ProductContext >(
+				const context = getContext<ProductContext>(
 					'woocommerce/products'
 				);
 				const variationId =
 					context && 'variationId' in context
 						? context.variationId
 						: productsState.variationId;
-				if ( ! variationId ) {
+				if (!variationId) {
 					return null;
 				}
-				return productsState.productVariations[ variationId ] ?? null;
+				return productsState.productVariations[variationId] ?? null;
 			},
 
 			get productInContext(): ProductResponseItem | null {

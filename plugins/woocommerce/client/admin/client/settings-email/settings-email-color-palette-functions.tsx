@@ -11,39 +11,39 @@ const colorFieldMap = {
 	woocommerce_email_footer_text_color: 'footerTextColor',
 };
 
-const setColor = ( inputId: string, color: string ) => {
-	const inputElement = document.getElementById( inputId ) as HTMLInputElement;
+const setColor = (inputId: string, color: string) => {
+	const inputElement = document.getElementById(inputId) as HTMLInputElement;
 	inputElement.value = color;
-	inputElement.dispatchEvent( new Event( 'change' ) );
+	inputElement.dispatchEvent(new Event('change'));
 };
 
-const getColor = ( inputId: string ): string => {
-	const inputElement = document.getElementById( inputId ) as HTMLInputElement;
+const getColor = (inputId: string): string => {
+	const inputElement = document.getElementById(inputId) as HTMLInputElement;
 	return inputElement.value;
 };
 
-export const setColors = ( colors: DefaultColors ) => {
-	for ( const [ inputId, colorName ] of Object.entries( colorFieldMap ) ) {
-		setColor( inputId, colors[ colorName as keyof DefaultColors ] );
+export const setColors = (colors: DefaultColors) => {
+	for (const [inputId, colorName] of Object.entries(colorFieldMap)) {
+		setColor(inputId, colors[colorName as keyof DefaultColors]);
 	}
 };
 
 export const getColors = (): DefaultColors => {
 	const colors = {} as DefaultColors;
-	for ( const [ inputId, colorName ] of Object.entries( colorFieldMap ) ) {
-		colors[ colorName as keyof DefaultColors ] = getColor( inputId );
+	for (const [inputId, colorName] of Object.entries(colorFieldMap)) {
+		colors[colorName as keyof DefaultColors] = getColor(inputId);
 	}
 	return colors;
 };
 
-export const areColorsChanged = ( colors: DefaultColors ): boolean => {
-	for ( const [ inputId, colorName ] of Object.entries( colorFieldMap ) ) {
+export const areColorsChanged = (colors: DefaultColors): boolean => {
+	for (const [inputId, colorName] of Object.entries(colorFieldMap)) {
 		const inputElement = document.getElementById(
 			inputId
 		) as HTMLInputElement;
 		if (
 			inputElement.value.toLowerCase() !==
-			colors[ colorName as keyof DefaultColors ].toLowerCase()
+			colors[colorName as keyof DefaultColors].toLowerCase()
 		) {
 			return true;
 		}
@@ -51,23 +51,23 @@ export const areColorsChanged = ( colors: DefaultColors ): boolean => {
 	return false;
 };
 
-export const addListeners = ( listener: () => void ) => {
+export const addListeners = (listener: () => void) => {
 	// Input listeners
-	for ( const inputId of Object.keys( colorFieldMap ) ) {
-		const field = jQuery( `#${ inputId }` );
-		if ( field.length ) {
+	for (const inputId of Object.keys(colorFieldMap)) {
+		const field = jQuery(`#${inputId}`);
+		if (field.length) {
 			// Using jQuery events due to iris (color picker) usage
-			field.on( 'change', listener );
+			field.on('change', listener);
 		}
 	}
 };
 
-export const removeListeners = ( listener: () => void ) => {
+export const removeListeners = (listener: () => void) => {
 	// Input listeners
-	for ( const inputId of Object.keys( colorFieldMap ) ) {
-		const field = jQuery( `#${ inputId }` );
-		if ( field.length ) {
-			field.off( 'change', listener );
+	for (const inputId of Object.keys(colorFieldMap)) {
+		const field = jQuery(`#${inputId}`);
+		if (field.length) {
+			field.off('change', listener);
 		}
 	}
 };

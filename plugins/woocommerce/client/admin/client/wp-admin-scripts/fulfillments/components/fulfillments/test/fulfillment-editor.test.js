@@ -9,48 +9,46 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '../../../test-helper/global-mock';
 import FulfillmentEditor from '../fulfillment-editor';
 
-jest.mock( '@wordpress/components', () => ( {
-	Button: ( { onClick, children } ) => (
-		<button data-testid="button" onClick={ onClick }>
-			{ children }
+jest.mock('@wordpress/components', () => ({
+	Button: ({ onClick, children }) => (
+		<button data-testid="button" onClick={onClick}>
+			{children}
 		</button>
 	),
-	Icon: ( { icon } ) => <span data-testid="icon">{ icon }</span>,
-} ) );
+	Icon: ({ icon }) => <span data-testid="icon">{icon}</span>,
+}));
 jest.mock(
 	'../../action-buttons/edit-fulfillment-button',
 	() =>
-		( { onClick } ) => (
-			<button data-testid="edit-fulfillment-button" onClick={ onClick }>
+		({ onClick }) => (
+			<button data-testid="edit-fulfillment-button" onClick={onClick}>
 				Edit
 			</button>
 		)
 );
-jest.mock( '../../action-buttons/fulfill-items-button', () => () => (
+jest.mock('../../action-buttons/fulfill-items-button', () => () => (
 	<button data-testid="fulfill-items-button">Fulfill items</button>
-) );
-jest.mock( '../../action-buttons/cancel-link', () => ( { onClick } ) => (
-	<button data-testid="cancel-link" onClick={ onClick }>
+));
+jest.mock('../../action-buttons/cancel-link', () => ({ onClick }) => (
+	<button data-testid="cancel-link" onClick={onClick}>
 		Cancel
 	</button>
-) );
-jest.mock( '../../action-buttons/remove-button', () => () => (
+));
+jest.mock('../../action-buttons/remove-button', () => () => (
 	<button data-testid="remove-button">Remove</button>
-) );
-jest.mock( '../../action-buttons/update-button', () => () => (
+));
+jest.mock('../../action-buttons/update-button', () => () => (
 	<button data-testid="update-button">Update</button>
-) );
-jest.mock( '../item-selector', () => () => (
-	<div data-testid="item-selector" />
-) );
-jest.mock( '../fulfillment-status-badge', () => () => (
+));
+jest.mock('../item-selector', () => () => <div data-testid="item-selector" />);
+jest.mock('../fulfillment-status-badge', () => () => (
 	<div data-testid="fulfillment-status-badge" />
-) );
-jest.mock( '../../customer-notification-form', () => () => (
+));
+jest.mock('../../customer-notification-form', () => () => (
 	<div data-testid="fulfillment-customer-notification-form" />
-) );
+));
 
-describe( 'FulfillmentEditor', () => {
+describe('FulfillmentEditor', () => {
 	const mockProps = {
 		index: 0,
 		expanded: false,
@@ -141,36 +139,36 @@ describe( 'FulfillmentEditor', () => {
 		},
 	};
 
-	it( 'renders the header and status badge', () => {
-		render( <FulfillmentEditor { ...mockProps } /> );
-		expect( screen.getByText( 'Fulfillment #1' ) ).toBeInTheDocument();
+	it('renders the header and status badge', () => {
+		render(<FulfillmentEditor {...mockProps} />);
+		expect(screen.getByText('Fulfillment #1')).toBeInTheDocument();
 		expect(
-			screen.getByTestId( 'fulfillment-status-badge' )
+			screen.getByTestId('fulfillment-status-badge')
 		).toBeInTheDocument();
-	} );
+	});
 
-	it( 'calls onExpand when header is clicked and not expanded', () => {
-		const { container } = render( <FulfillmentEditor { ...mockProps } /> );
+	it('calls onExpand when header is clicked and not expanded', () => {
+		const { container } = render(<FulfillmentEditor {...mockProps} />);
 		fireEvent.click(
 			container.querySelector(
 				'.woocommerce-fulfillment-stored-fulfillment-list-item-header'
 			)
 		);
-		expect( mockProps.onExpand ).toHaveBeenCalled();
-	} );
+		expect(mockProps.onExpand).toHaveBeenCalled();
+	});
 
-	it( 'calls onCollapse when header is clicked and expanded', () => {
+	it('calls onCollapse when header is clicked and expanded', () => {
 		const { container } = render(
-			<FulfillmentEditor { ...mockProps } expanded={ true } />
+			<FulfillmentEditor {...mockProps} expanded={true} />
 		);
 		fireEvent.click(
 			container.querySelector(
 				'.woocommerce-fulfillment-stored-fulfillment-list-item-header'
 			)
 		);
-		expect( mockProps.onCollapse ).toHaveBeenCalled();
-	} );
-	it( 'doesn`t show the buttons when fulfillment is locked - default message', () => {
+		expect(mockProps.onCollapse).toHaveBeenCalled();
+	});
+	it('doesn`t show the buttons when fulfillment is locked - default message', () => {
 		const lockMetadata = [
 			{
 				id: 2,
@@ -190,34 +188,30 @@ describe( 'FulfillmentEditor', () => {
 			},
 			fulfillments: [
 				{
-					...mockProps.fulfillments[ 0 ],
+					...mockProps.fulfillments[0],
 					meta_data: [
-						...mockProps.fulfillments[ 0 ].meta_data,
+						...mockProps.fulfillments[0].meta_data,
 						...lockMetadata,
 					],
 				},
 			],
 		};
-		render( <FulfillmentEditor { ...lockedProps } /> );
+		render(<FulfillmentEditor {...lockedProps} />);
 		expect(
-			screen.queryByTestId( 'edit-fulfillment-button' )
+			screen.queryByTestId('edit-fulfillment-button')
 		).not.toBeInTheDocument();
 		expect(
-			screen.queryByTestId( 'fulfill-items-button' )
+			screen.queryByTestId('fulfill-items-button')
 		).not.toBeInTheDocument();
-		expect( screen.queryByTestId( 'cancel-link' ) ).not.toBeInTheDocument();
-		expect(
-			screen.queryByTestId( 'remove-button' )
-		).not.toBeInTheDocument();
-		expect(
-			screen.queryByTestId( 'update-button' )
-		).not.toBeInTheDocument();
+		expect(screen.queryByTestId('cancel-link')).not.toBeInTheDocument();
+		expect(screen.queryByTestId('remove-button')).not.toBeInTheDocument();
+		expect(screen.queryByTestId('update-button')).not.toBeInTheDocument();
 		// Check that the lock message is displayed
 		expect(
-			screen.getByText( 'This item is locked and cannot be edited.' )
+			screen.getByText('This item is locked and cannot be edited.')
 		).toBeInTheDocument();
-	} );
-	it( 'doesn`t show the buttons when fulfillment is locked - custom message', () => {
+	});
+	it('doesn`t show the buttons when fulfillment is locked - custom message', () => {
 		const lockMetadata = [
 			{
 				id: 2,
@@ -242,46 +236,40 @@ describe( 'FulfillmentEditor', () => {
 			},
 			fulfillments: [
 				{
-					...mockProps.fulfillments[ 0 ],
+					...mockProps.fulfillments[0],
 					meta_data: [
-						...mockProps.fulfillments[ 0 ].meta_data,
+						...mockProps.fulfillments[0].meta_data,
 						...lockMetadata,
 					],
 				},
 			],
 		};
-		render( <FulfillmentEditor { ...lockedProps } /> );
+		render(<FulfillmentEditor {...lockedProps} />);
 		expect(
-			screen.queryByTestId( 'edit-fulfillment-button' )
+			screen.queryByTestId('edit-fulfillment-button')
 		).not.toBeInTheDocument();
 		expect(
-			screen.queryByTestId( 'fulfill-items-button' )
+			screen.queryByTestId('fulfill-items-button')
 		).not.toBeInTheDocument();
-		expect( screen.queryByTestId( 'cancel-link' ) ).not.toBeInTheDocument();
-		expect(
-			screen.queryByTestId( 'remove-button' )
-		).not.toBeInTheDocument();
-		expect(
-			screen.queryByTestId( 'update-button' )
-		).not.toBeInTheDocument();
+		expect(screen.queryByTestId('cancel-link')).not.toBeInTheDocument();
+		expect(screen.queryByTestId('remove-button')).not.toBeInTheDocument();
+		expect(screen.queryByTestId('update-button')).not.toBeInTheDocument();
 		// Check that the lock message is displayed
 		expect(
-			screen.getByText( 'This fulfillment is locked.' )
+			screen.getByText('This fulfillment is locked.')
 		).toBeInTheDocument();
-	} );
+	});
 
-	it( 'should render content when expanded', () => {
-		render( <FulfillmentEditor { ...mockProps } expanded={ true } /> );
+	it('should render content when expanded', () => {
+		render(<FulfillmentEditor {...mockProps} expanded={true} />);
 
 		// Verify expanded content is rendered
 		expect(
-			screen.getByTestId( 'edit-fulfillment-button' )
+			screen.getByTestId('edit-fulfillment-button')
 		).toBeInTheDocument();
-		expect(
-			screen.getByTestId( 'fulfill-items-button' )
-		).toBeInTheDocument();
+		expect(screen.getByTestId('fulfill-items-button')).toBeInTheDocument();
 
 		// Verify the component renders without errors when expanded
-		expect( screen.getByText( 'Fulfillment #1' ) ).toBeInTheDocument();
-	} );
-} );
+		expect(screen.getByText('Fulfillment #1')).toBeInTheDocument();
+	});
+});

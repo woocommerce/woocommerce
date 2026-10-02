@@ -7,9 +7,9 @@ import { UpgradeDowngradeNotice } from '@woocommerce/editor-components/upgrade-d
 import { useDispatch, select } from '@wordpress/data';
 import { createBlock } from '@wordpress/blocks';
 
-export const UpgradeNotice = ( { clientId }: { clientId: string } ) => {
+export const UpgradeNotice = ({ clientId }: { clientId: string }) => {
 	const { replaceBlock, removeBlock, updateBlockAttributes, selectBlock } =
-		useDispatch( 'core/block-editor' );
+		useDispatch('core/block-editor');
 
 	const notice = createInterpolateElement(
 		__(
@@ -17,29 +17,27 @@ export const UpgradeNotice = ( { clientId }: { clientId: string } ) => {
 			'woocommerce'
 		),
 		{
-			strongText: (
-				<strong>{ __( `Product Filters`, 'woocommerce' ) }</strong>
-			),
+			strongText: <strong>{__(`Product Filters`, 'woocommerce')}</strong>,
 		}
 	);
 
-	const buttonLabel = __( 'Upgrade all Filter blocks', 'woocommerce' );
+	const buttonLabel = __('Upgrade all Filter blocks', 'woocommerce');
 
 	const handleClick = () => {
 		const { getBlocksByName, getBlockParentsByBlockName } =
-			select( 'core/block-editor' );
+			select('core/block-editor');
 
 		const blockParent = getBlockParentsByBlockName(
 			clientId,
 			'woocommerce/filter-wrapper'
 		);
 
-		const newBlock = createBlock( 'woocommerce/product-filters' );
+		const newBlock = createBlock('woocommerce/product-filters');
 
-		if ( blockParent.length ) {
-			void replaceBlock( blockParent[ 0 ], newBlock );
+		if (blockParent.length) {
+			void replaceBlock(blockParent[0], newBlock);
 		} else {
-			void replaceBlock( clientId, newBlock );
+			void replaceBlock(clientId, newBlock);
 		}
 
 		const legacyFilterBlockWrapper = getBlocksByName(
@@ -47,16 +45,16 @@ export const UpgradeNotice = ( { clientId }: { clientId: string } ) => {
 		);
 
 		// We want to remove all the legacy filter blocks on the page.
-		legacyFilterBlockWrapper.forEach( ( blockId: string ) => {
+		legacyFilterBlockWrapper.forEach((blockId: string) => {
 			// We need to disable locked blocks first.
-			void updateBlockAttributes( blockId, {
+			void updateBlockAttributes(blockId, {
 				lock: {
 					remove: false,
 				},
-			} );
+			});
 
-			void removeBlock( blockId );
-		} );
+			void removeBlock(blockId);
+		});
 
 		// These are the v1 legacy filters without the wrapper block.
 		const v1LegacyFilterBlocks = [
@@ -66,32 +64,32 @@ export const UpgradeNotice = ( { clientId }: { clientId: string } ) => {
 			'woocommerce/stock-filter',
 		];
 
-		v1LegacyFilterBlocks.forEach( ( blockName ) => {
-			const block = getBlocksByName( blockName );
+		v1LegacyFilterBlocks.forEach((blockName) => {
+			const block = getBlocksByName(blockName);
 
-			if ( block.length ) {
+			if (block.length) {
 				// We need to disable locked blocks first.
-				void updateBlockAttributes( block[ 0 ], {
+				void updateBlockAttributes(block[0], {
 					lock: {
 						remove: false,
 					},
-				} );
+				});
 
-				void removeBlock( block[ 0 ] );
+				void removeBlock(block[0]);
 			}
-		} );
+		});
 
 		// Make sure to put the focus on the newly added Product Filters block.
-		void selectBlock( newBlock.clientId );
+		void selectBlock(newBlock.clientId);
 	};
 
 	return (
 		<UpgradeDowngradeNotice
-			isDismissible={ false }
-			actionLabel={ buttonLabel }
-			onActionClick={ handleClick }
+			isDismissible={false}
+			actionLabel={buttonLabel}
+			onActionClick={handleClick}
 		>
-			{ notice }
+			{notice}
 		</UpgradeDowngradeNotice>
 	);
 };

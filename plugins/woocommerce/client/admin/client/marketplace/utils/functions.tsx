@@ -47,86 +47,86 @@ const maxFetchCacheSize = 100;
 const fetchCache = new Map();
 
 function maybePruneFetchCache() {
-	while ( fetchCache.size > maxFetchCacheSize ) {
-		fetchCache.delete( fetchCache.keys().next().value );
+	while (fetchCache.size > maxFetchCacheSize) {
+		fetchCache.delete(fetchCache.keys().next().value);
 	}
 }
 
 // Wrapper around apiFetch() that caches results in memory
-async function apiFetchWithCache( params: object ): Promise< object > {
+async function apiFetchWithCache(params: object): Promise<object> {
 	// Attempt to fetch from cache:
-	const cacheKey = JSON.stringify( params );
-	if ( fetchCache.get( cacheKey ) ) {
-		return new Promise( ( resolve ) => {
-			resolve( fetchCache.get( cacheKey ) );
-		} );
+	const cacheKey = JSON.stringify(params);
+	if (fetchCache.get(cacheKey)) {
+		return new Promise((resolve) => {
+			resolve(fetchCache.get(cacheKey));
+		});
 	}
 
 	// Failing that, fetch using apiCache:
-	return new Promise( ( resolve, reject ) => {
-		apiFetch( params )
-			.then( ( json ) => {
-				fetchCache.set( cacheKey, json );
+	return new Promise((resolve, reject) => {
+		apiFetch(params)
+			.then((json) => {
+				fetchCache.set(cacheKey, json);
 				maybePruneFetchCache();
-				resolve( json as object );
-			} )
-			.catch( () => {
+				resolve(json as object);
+			})
+			.catch(() => {
 				reject();
-			} );
-	} );
+			});
+	});
 }
 
 // Wrapper around fetch() that caches results in memory
 async function fetchJsonWithCache(
 	url: string,
-	headers: Record< string, string > = {},
+	headers: Record<string, string> = {},
 	abortSignal?: AbortSignal
-): Promise< object > {
+): Promise<object> {
 	// Attempt to fetch from cache:
-	if ( fetchCache.get( url ) ) {
-		return new Promise( ( resolve ) => {
-			resolve( fetchCache.get( url ) );
-		} );
+	if (fetchCache.get(url)) {
+		return new Promise((resolve) => {
+			resolve(fetchCache.get(url));
+		});
 	}
 
 	// Failing that, fetch from net:
-	return new Promise( ( resolve, reject ) => {
-		fetch( url, { signal: abortSignal, headers } )
-			.then( ( response ) => {
-				if ( ! response.ok ) {
-					throw new Error( response.statusText );
+	return new Promise((resolve, reject) => {
+		fetch(url, { signal: abortSignal, headers })
+			.then((response) => {
+				if (!response.ok) {
+					throw new Error(response.statusText);
 				}
 				return response.json();
-			} )
-			.then( ( json ) => {
-				fetchCache.set( url, json );
+			})
+			.then((json) => {
+				fetchCache.set(url, json);
 				maybePruneFetchCache();
-				resolve( json );
-			} )
-			.catch( () => {
+				resolve(json);
+			})
+			.catch(() => {
 				reject();
-			} );
-	} );
+			});
+	});
 }
 
 // Fetch search results for a given set of URLSearchParams from the WooCommerce.com API
 async function fetchSearchResults(
 	params: URLSearchParams,
 	abortSignal?: AbortSignal
-): Promise< {
+): Promise<{
 	products: Product[];
 	totalPages: number;
 	totalProducts: number;
-} > {
+}> {
 	// add user locale to search params if not already present
-	if ( LOCALE.userLocale && ! params.get( 'locale' ) ) {
-		params.set( 'locale', LOCALE.userLocale );
+	if (LOCALE.userLocale && !params.get('locale')) {
+		params.set('locale', LOCALE.userLocale);
 	}
 
-	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
-	params.set( 'connection', wccomSettings.isConnected ? '1' : '0' );
+	const wccomSettings = getAdminSetting('wccomHelper', {});
+	params.set('connection', wccomSettings.isConnected ? '1' : '0');
 
-	params.set( 'tracking_allowed', wccomSettings.trackingAllowed ? '1' : '0' );
+	params.set('tracking_allowed', wccomSettings.trackingAllowed ? '1' : '0');
 
 	const url =
 		MARKETPLACE_HOST +
@@ -141,15 +141,15 @@ async function fetchSearchResults(
 	};
 
 	// Fetch data from WCCOM API
-	return new Promise( ( resolve, reject ) => {
-		fetchJsonWithCache( url, headers, abortSignal )
-			.then( ( json ) => {
+	return new Promise((resolve, reject) => {
+		fetchJsonWithCache(url, headers, abortSignal)
+			.then((json) => {
 				/**
 				 * Product card component expects a Product type.
 				 * So we build that object from the API response.
 				 */
-				const products = ( json as SearchAPIJSONType ).products.map(
-					( product: SearchAPIProductType ): Product => {
+				const products = (json as SearchAPIJSONType).products.map(
+					(product: SearchAPIProductType): Product => {
 						return {
 							id: product.id,
 							slug: product.slug,
@@ -180,53 +180,53 @@ async function fetchSearchResults(
 						};
 					}
 				);
-				const totalPages = ( json as SearchAPIJSONType ).total_pages;
-				const totalProducts = ( json as SearchAPIJSONType )
+				const totalPages = (json as SearchAPIJSONType).total_pages;
+				const totalProducts = (json as SearchAPIJSONType)
 					.total_products;
-				resolve( { products, totalPages, totalProducts } );
-			} )
-			.catch( reject );
-	} );
+				resolve({ products, totalPages, totalProducts });
+			})
+			.catch(reject);
+	});
 }
 
 // Fetch data for the discover page from the WooCommerce.com API
-async function fetchDiscoverPageData(): Promise< ProductGroup[] > {
+async function fetchDiscoverPageData(): Promise<ProductGroup[]> {
 	let url = '/wc/v3/marketplace/featured';
 
-	if ( LOCALE.userLocale ) {
-		url = `${ url }?locale=${ LOCALE.userLocale }`;
+	if (LOCALE.userLocale) {
+		url = `${url}?locale=${LOCALE.userLocale}`;
 	}
 
 	try {
-		return ( await apiFetchWithCache( {
+		return (await apiFetchWithCache({
 			path: url.toString(),
-		} ) ) as Promise< ProductGroup[] >;
-	} catch ( error ) {
+		})) as Promise<ProductGroup[]>;
+	} catch (error) {
 		return [];
 	}
 }
 
 async function fetchProductPreview(
 	productId: number
-): Promise< { data: { html: string; css: string } } > {
-	let url = `/wc/v1/marketplace/product-preview?product_id=${ productId }`;
+): Promise<{ data: { html: string; css: string } }> {
+	let url = `/wc/v1/marketplace/product-preview?product_id=${productId}`;
 
-	if ( LOCALE.userLocale ) {
-		url = `${ url }&locale=${ LOCALE.userLocale }`;
+	if (LOCALE.userLocale) {
+		url = `${url}&locale=${LOCALE.userLocale}`;
 	}
 
 	try {
-		const response = await apiFetchWithCache( {
+		const response = await apiFetchWithCache({
 			path: url.toString(),
-		} );
+		});
 		return response as { data: { html: string; css: string } };
-	} catch ( error ) {
+	} catch (error) {
 		return { data: { html: '', css: '' } };
 	}
 }
 
-function getProductType( tab: string ): ProductType {
-	switch ( tab ) {
+function getProductType(tab: string): ProductType {
+	switch (tab) {
 		case 'themes':
 			return ProductType.theme;
 		case 'business-services':
@@ -236,77 +236,75 @@ function getProductType( tab: string ): ProductType {
 	}
 }
 
-function fetchCategories( type: ProductType ): Promise< CategoryAPIItem[] > {
-	const url = new URL( MARKETPLACE_HOST + MARKETPLACE_CATEGORY_API_PATH );
+function fetchCategories(type: ProductType): Promise<CategoryAPIItem[]> {
+	const url = new URL(MARKETPLACE_HOST + MARKETPLACE_CATEGORY_API_PATH);
 
-	if ( LOCALE.userLocale ) {
-		url.searchParams.set( 'locale', LOCALE.userLocale );
+	if (LOCALE.userLocale) {
+		url.searchParams.set('locale', LOCALE.userLocale);
 	}
 
 	// We don't define parent for extensions since that is provided by default
 	// This is to ensure the old marketplace continues to work when this isn't defined
-	if ( type === ProductType.theme ) {
-		url.searchParams.set( 'parent', 'themes' );
-	} else if ( type === ProductType.businessService ) {
-		url.searchParams.set( 'parent', 'business-services' );
+	if (type === ProductType.theme) {
+		url.searchParams.set('parent', 'themes');
+	} else if (type === ProductType.businessService) {
+		url.searchParams.set('parent', 'business-services');
 	}
 
-	return (
-		fetchJsonWithCache( url.toString() ) as Promise< CategoryAPIItem[] >
-	 )
-		.then( ( json ) => {
+	return (fetchJsonWithCache(url.toString()) as Promise<CategoryAPIItem[]>)
+		.then((json) => {
 			return json;
-		} )
-		.catch( () => {
+		})
+		.catch(() => {
 			return [];
-		} );
+		});
 }
 
-async function fetchSubscriptions(): Promise< Array< Subscription > > {
+async function fetchSubscriptions(): Promise<Array<Subscription>> {
 	const url = '/wc/v3/marketplace/subscriptions';
-	return await apiFetch( { path: url.toString() } );
+	return await apiFetch({ path: url.toString() });
 }
 
-async function refreshSubscriptions(): Promise< Array< Subscription > > {
+async function refreshSubscriptions(): Promise<Array<Subscription>> {
 	const url = '/wc/v3/marketplace/refresh';
-	return await apiFetch( {
+	return await apiFetch({
 		path: url.toString(),
 		method: 'POST',
-	} );
+	});
 }
 
-function connectProduct( subscription: Subscription ): Promise< void > {
-	if ( subscription.active === true ) {
+function connectProduct(subscription: Subscription): Promise<void> {
+	if (subscription.active === true) {
 		return Promise.resolve();
 	}
 	const url = '/wc/v3/marketplace/subscriptions/connect';
 	const data = new URLSearchParams();
-	data.append( 'product_key', subscription.product_key );
-	return apiFetch( {
+	data.append('product_key', subscription.product_key);
+	return apiFetch({
 		path: url.toString(),
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/x-www-form-urlencoded',
 		},
 		body: data,
-	} );
+	});
 }
 
-function activateProductPlugin( subscription: Subscription ): Promise< void > {
-	if ( subscription.active === true ) {
+function activateProductPlugin(subscription: Subscription): Promise<void> {
+	if (subscription.active === true) {
 		return Promise.resolve();
 	}
 	const url = '/wc/v3/marketplace/subscriptions/activate-plugin';
 	const data = new URLSearchParams();
-	data.append( 'product_key', subscription.product_key );
-	return apiFetch( {
+	data.append('product_key', subscription.product_key);
+	return apiFetch({
 		path: url.toString(),
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/x-www-form-urlencoded',
 		},
 		body: data,
-	} );
+	});
 }
 
 /**
@@ -318,36 +316,36 @@ function activateProductPlugin( subscription: Subscription ): Promise< void > {
 function setProductAutoUpdate(
 	subscription: Subscription,
 	enabled: boolean
-): Promise< void > {
+): Promise<void> {
 	const data = new URLSearchParams();
-	data.append( 'product_key', subscription.product_key );
-	data.append( 'enabled', enabled ? '1' : '0' );
+	data.append('product_key', subscription.product_key);
+	data.append('enabled', enabled ? '1' : '0');
 
-	return apiFetch( {
+	return apiFetch({
 		path: '/wc/v3/marketplace/subscriptions/auto-update',
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/x-www-form-urlencoded',
 		},
 		body: data,
-	} );
+	});
 }
 
-function disconnectProduct( subscription: Subscription ): Promise< void > {
-	if ( subscription.active === false ) {
+function disconnectProduct(subscription: Subscription): Promise<void> {
+	if (subscription.active === false) {
 		return Promise.resolve();
 	}
 	const url = '/wc/v3/marketplace/subscriptions/disconnect';
 	const data = new URLSearchParams();
-	data.append( 'product_key', subscription.product_key );
-	return apiFetch( {
+	data.append('product_key', subscription.product_key);
+	return apiFetch({
 		path: url.toString(),
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/x-www-form-urlencoded',
 		},
 		body: data,
-	} );
+	});
 }
 
 type WpAjaxResponse = {
@@ -368,51 +366,51 @@ function wpAjax(
 		theme?: string;
 		success?: boolean;
 	}
-): Promise< WpAjaxResponse > {
-	return new Promise( ( resolve, reject ) => {
-		if ( ! window.wp.updates ) {
-			reject( __( 'Please reload and try again', 'woocommerce' ) );
+): Promise<WpAjaxResponse> {
+	return new Promise((resolve, reject) => {
+		if (!window.wp.updates) {
+			reject(__('Please reload and try again', 'woocommerce'));
 			return;
 		}
 
-		window.wp.updates.ajax( action, {
+		window.wp.updates.ajax(action, {
 			...data,
-			success: ( response: WpAjaxResponseData ) => {
-				resolve( {
+			success: (response: WpAjaxResponseData) => {
+				resolve({
 					success: true,
 					data: response,
-				} );
+				});
 			},
-			error: ( error: WpAjaxResponseData ) => {
-				reject( {
+			error: (error: WpAjaxResponseData) => {
+				reject({
 					success: false,
 					data: {
 						message: error.errorMessage,
 					},
-				} );
+				});
 			},
-		} );
-	} );
+		});
+	});
 }
 
-function activateProduct( subscription: Subscription ): Promise< void > {
-	if ( subscription.local.active === true ) {
+function activateProduct(subscription: Subscription): Promise<void> {
+	if (subscription.local.active === true) {
 		return Promise.resolve();
 	}
 	const url = '/wc/v3/marketplace/subscriptions/activate';
 	const data = new URLSearchParams();
-	data.append( 'product_key', subscription.product_key );
-	return apiFetch( {
+	data.append('product_key', subscription.product_key);
+	return apiFetch({
 		path: url.toString(),
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/x-www-form-urlencoded',
 		},
 		body: data,
-	} )
-		.then( () => Promise.resolve() )
-		.catch( () =>
-			Promise.reject( {
+	})
+		.then(() => Promise.resolve())
+		.catch(() =>
+			Promise.reject({
 				success: false,
 				data: {
 					message: sprintf(
@@ -424,79 +422,71 @@ function activateProduct( subscription: Subscription ): Promise< void > {
 						subscription.product_name
 					),
 				},
-			} )
+			})
 		);
 }
 
-function getInstallUrl( subscription: Subscription ): Promise< string > {
-	return apiFetch( {
+function getInstallUrl(subscription: Subscription): Promise<string> {
+	return apiFetch({
 		path:
 			'/wc/v3/marketplace/subscriptions/install-url?product_key=' +
 			subscription.product_key,
-	} ).then( ( response ) => {
-		return ( response as { data: { url: string } } )?.data.url;
-	} );
+	}).then((response) => {
+		return (response as { data: { url: string } })?.data.url;
+	});
 }
 
-function downloadProduct( productType: string, zipSlug: string ) {
-	return wpAjax( 'install-' + productType, {
+function downloadProduct(productType: string, zipSlug: string) {
+	return wpAjax('install-' + productType, {
 		// The slug prefix is required for the install to use WCCOM install filters.
 		slug: zipSlug,
-	} );
+	});
 }
 
-function installProduct( subscription: Subscription ): Promise< void > {
-	return connectProduct( subscription ).then( () => {
-		return downloadProduct(
-			subscription.product_type,
-			subscription.zip_slug
-		)
-			.then( () => {
-				return activateProduct( subscription );
-			} )
-			.catch( ( error ) => {
+function installProduct(subscription: Subscription): Promise<void> {
+	return connectProduct(subscription).then(() => {
+		return downloadProduct(subscription.product_type, subscription.zip_slug)
+			.then(() => {
+				return activateProduct(subscription);
+			})
+			.catch((error) => {
 				// If install fails disconnect the product
-				return disconnectProduct( subscription ).finally( () =>
-					Promise.reject( error )
+				return disconnectProduct(subscription).finally(() =>
+					Promise.reject(error)
 				);
-			} );
-	} );
+			});
+	});
 }
 
-function updateProduct(
-	subscription: Subscription
-): Promise< WpAjaxResponse > {
-	return wpAjax( 'update-' + subscription.product_type, {
+function updateProduct(subscription: Subscription): Promise<WpAjaxResponse> {
+	return wpAjax('update-' + subscription.product_type, {
 		slug: subscription.local.slug,
-		[ subscription.product_type ]: subscription.local.path,
-	} );
+		[subscription.product_type]: subscription.local.path,
+	});
 }
 
 function addNotice(
 	productKey: string,
 	message: string,
 	status?: NoticeStatus,
-	options?: Partial< NoticeOptions >
+	options?: Partial<NoticeOptions>
 ) {
-	if ( status === NoticeStatus.Error ) {
-		void dispatch( noticeStore ).addNotice(
+	if (status === NoticeStatus.Error) {
+		void dispatch(noticeStore).addNotice(
 			productKey,
 			message,
 			status,
 			options
 		);
 	} else {
-		if ( ! options?.icon ) {
+		if (!options?.icon) {
 			options = {
 				...options,
 				icon: <Icon icon="saved" />,
 			};
 		}
 
-		void dispatch( coreNoticesStore ).createSuccessNotice(
-			message,
-			options
-		);
+		void dispatch(coreNoticesStore).createSuccessNotice(message, options);
 	}
 }
 
@@ -515,23 +505,22 @@ function addNotice(
  * @param error The rejection value from apiFetch.
  * @return The best available message.
  */
-const getRefreshErrorMessage = ( error: unknown ): string => {
+const getRefreshErrorMessage = (error: unknown): string => {
 	const candidate = error as
-		| { data?: { message?: unknown }; message?: unknown }
-		| undefined;
+		{ data?: { message?: unknown }; message?: unknown } | undefined;
 
-	const message = [ candidate?.data?.message, candidate?.message ].find(
-		( value ): value is string => typeof value === 'string' && value !== ''
+	const message = [candidate?.data?.message, candidate?.message].find(
+		(value): value is string => typeof value === 'string' && value !== ''
 	);
 
-	return message ?? __( 'Unexpected error.', 'woocommerce' );
+	return message ?? __('Unexpected error.', 'woocommerce');
 };
 
-const removeNotice = ( productKey: string ) => {
-	void dispatch( noticeStore ).removeNotice( productKey );
+const removeNotice = (productKey: string) => {
+	void dispatch(noticeStore).removeNotice(productKey);
 };
 
-const subscriptionToProduct = ( subscription: Subscription ): Product => {
+const subscriptionToProduct = (subscription: Subscription): Product => {
 	return {
 		id: subscription.product_id,
 		title: subscription.product_name,
@@ -555,54 +544,54 @@ const subscriptionToProduct = ( subscription: Subscription ): Product => {
 // Append UTM parameters to a URL, being aware of existing query parameters
 const appendURLParams = (
 	url: string,
-	utmParams: Array< [ string, string ] >
+	utmParams: Array<[string, string]>
 ): string => {
-	if ( ! url ) {
+	if (!url) {
 		return url;
 	}
 
-	const urlObject = new URL( url );
-	if ( ! urlObject ) {
+	const urlObject = new URL(url);
+	if (!urlObject) {
 		return url;
 	}
-	utmParams.forEach( ( [ key, value ] ) => {
-		urlObject.searchParams.set( key, value );
-	} );
+	utmParams.forEach(([key, value]) => {
+		urlObject.searchParams.set(key, value);
+	});
 	return urlObject.toString();
 };
 
-const enableAutorenewalUrl = ( subscription: Subscription ): string => {
-	if ( ! subscription.product_key ) {
+const enableAutorenewalUrl = (subscription: Subscription): string => {
+	if (!subscription.product_key) {
 		// review subscriptions on the Marketplace
 		return MARKETPLACE_RENEW_SUBSCRIPTION_PATH;
 	}
-	return appendURLParams( MARKETPLACE_RENEW_SUBSCRIPTION_PATH, [
-		[ 'key', subscription.product_key.toString() ],
-	] );
+	return appendURLParams(MARKETPLACE_RENEW_SUBSCRIPTION_PATH, [
+		['key', subscription.product_key.toString()],
+	]);
 };
 
-const renewUrl = ( subscription: Subscription ): string => {
-	return appendURLParams( MARKETPLACE_CART_PATH, [
-		[ 'renew_product', subscription.product_id.toString() ],
-		[ 'product_key', subscription.product_key ],
-		[ 'order_id', subscription.order_id.toString() ],
-	] );
+const renewUrl = (subscription: Subscription): string => {
+	return appendURLParams(MARKETPLACE_CART_PATH, [
+		['renew_product', subscription.product_id.toString()],
+		['product_key', subscription.product_key],
+		['order_id', subscription.order_id.toString()],
+	]);
 };
 
-const subscribeUrl = ( subscription: Subscription ): string => {
-	return appendURLParams( MARKETPLACE_CART_PATH, [
-		[ 'add-to-cart', subscription.product_id.toString() ],
-	] );
+const subscribeUrl = (subscription: Subscription): string => {
+	return appendURLParams(MARKETPLACE_CART_PATH, [
+		['add-to-cart', subscription.product_id.toString()],
+	]);
 };
 
 // If you need to add support for a different page, make sure to
 // update WC_Helper::get_source_page() in the backend.
-const connectUrl = ( page = 'wc-admin', reconnect = false ): string => {
-	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+const connectUrl = (page = 'wc-admin', reconnect = false): string => {
+	const wccomSettings = getAdminSetting('wccomHelper', {});
 
-	if ( ! reconnect && ! wccomSettings.connectURL ) {
+	if (!reconnect && !wccomSettings.connectURL) {
 		return '';
-	} else if ( reconnect && ! wccomSettings.reConnectURL ) {
+	} else if (reconnect && !wccomSettings.reConnectURL) {
 		return '';
 	}
 
@@ -612,13 +601,13 @@ const connectUrl = ( page = 'wc-admin', reconnect = false ): string => {
 
 	// We have to manipulate `page` from the frontend, since `wccomHelper`
 	// settings remain static when switching pages on the frontend.
-	const updatedHref = new URL( window.location.href );
-	updatedHref.searchParams.set( 'page', page );
+	const updatedHref = new URL(window.location.href);
+	updatedHref.searchParams.set('page', page);
 
-	return appendURLParams( url, [
-		[ 'redirect_admin_url', encodeURIComponent( updatedHref.toString() ) ],
-		[ 'page', page ],
-	] );
+	return appendURLParams(url, [
+		['redirect_admin_url', encodeURIComponent(updatedHref.toString())],
+		['page', page],
+	]);
 };
 
 export {

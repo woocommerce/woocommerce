@@ -22,7 +22,8 @@ a.woocommerce-experimental-list__item {
 	}
 
 	&:focus:not(.expanded) {
-		box-shadow: inset 0 0 0 1px $studio-wordpress-blue,
+		box-shadow:
+			inset 0 0 0 1px $studio-wordpress-blue,
 			inset 0 0 0 2px $studio-white;
 	}
 
@@ -42,7 +43,10 @@ a.woocommerce-experimental-list__item {
 			opacity: 1;
 			max-height: 100vh;
 			transform: translateX(0%);
-			transition: opacity 500ms, transform 500ms, max-height 500ms;
+			transition:
+				opacity 500ms,
+				transform 500ms,
+				max-height 500ms;
 		}
 
 		&.woocommerce-list__item-exit {
@@ -55,7 +59,10 @@ a.woocommerce-experimental-list__item {
 			opacity: 0;
 			max-height: 0;
 			transform: translateX(50%);
-			transition: opacity 500ms, transform 500ms, max-height 500ms;
+			transition:
+				opacity 500ms,
+				transform 500ms,
+				max-height 500ms;
 		}
 	}
 
@@ -67,7 +74,8 @@ a.woocommerce-experimental-list__item {
 		padding: $gap $gap-large;
 
 		&:focus {
-			box-shadow: inset 0 0 0 1px $studio-wordpress-blue,
+			box-shadow:
+				inset 0 0 0 1px $studio-wordpress-blue,
 				inset 0 0 0 2px $studio-white;
 		}
 	}

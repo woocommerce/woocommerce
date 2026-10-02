@@ -11,10 +11,10 @@ import type { ProductTypeProps } from './types';
 type ProductTypeSelector = {
 	productTypes: ProductTypeProps[];
 	current: ProductTypeProps | undefined;
-	set: ( productType: string ) => void;
+	set: (productType: string) => void;
 	registeredListeners: string[];
-	registerListener: ( listener: string ) => void;
-	unregisterListener: ( listener: string ) => void;
+	registerListener: (listener: string) => void;
+	unregisterListener: (listener: string) => void;
 };
 
 /**
@@ -30,12 +30,12 @@ export default function useProductTypeSelector(): ProductTypeSelector {
 	 * from the store.
 	 */
 	const { productTypes, current, registeredListeners } = useSelect(
-		( select ) => {
+		(select) => {
 			const {
 				getProductTypes,
 				getCurrentProductType,
 				getRegisteredListeners,
-			} = select( productTypeTemplateStateStore );
+			} = select(productTypeTemplateStateStore);
 
 			return {
 				productTypes: getProductTypes(),
@@ -47,7 +47,7 @@ export default function useProductTypeSelector(): ProductTypeSelector {
 	);
 
 	const { switchProductType, registerListener, unregisterListener } =
-		useDispatch( productTypeTemplateStateStore );
+		useDispatch(productTypeTemplateStateStore);
 
 	return {
 		productTypes,

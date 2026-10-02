@@ -40,20 +40,20 @@ import { isObserverResponse } from '../../types/type-guards/observers';
 import { isValidValidationErrorsObject } from '../../types/type-guards/validation';
 
 interface PaymentThunkArgs {
-	select?: CurriedSelectorsOf< typeof paymentStore >;
-	dispatch: ActionCreatorsOf< ConfigOf< typeof paymentStore > >;
+	select?: CurriedSelectorsOf<typeof paymentStore>;
+	dispatch: ActionCreatorsOf<ConfigOf<typeof paymentStore>>;
 	registry: { dispatch: DispatchFunction; select: SelectFunction };
 }
 
-export const __internalSetExpressPaymentError = ( message?: string ) => {
-	return ( { registry }: PaymentThunkArgs ) => {
+export const __internalSetExpressPaymentError = (message?: string) => {
+	return ({ registry }: PaymentThunkArgs) => {
 		const { createErrorNotice, removeNotice } =
-			registry.dispatch( noticesStore );
-		if ( message ) {
-			void createErrorNotice( message, {
+			registry.dispatch(noticesStore);
+		if (message) {
+			void createErrorNotice(message, {
 				id: 'wc-express-payment-error',
 				context: noticeContexts.EXPRESS_PAYMENTS,
-			} );
+			});
 		} else {
 			void removeNotice(
 				'wc-express-payment-error',
@@ -70,31 +70,28 @@ export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 	currentObserver,
 	setValidationErrors
 ) => {
-	return ( { dispatch, registry }: PaymentThunkArgs ) => {
+	return ({ dispatch, registry }: PaymentThunkArgs) => {
 		const { createErrorNotice, removeNotice } =
-			registry.dispatch( noticesStore );
+			registry.dispatch(noticesStore);
 
-		void removeNotice( 'wc-payment-error', noticeContexts.PAYMENTS );
+		void removeNotice('wc-payment-error', noticeContexts.PAYMENTS);
 		return emitEventWithAbort(
 			currentObserver,
 			EMIT_TYPES.PAYMENT_SETUP,
 			{}
-		).then( ( observerResponses ) => {
+		).then((observerResponses) => {
 			let successResponse: ObserverResponse | undefined,
 				errorResponse: ObserverResponse | undefined,
 				billingAddress: BillingAddress | undefined,
 				shippingAddress: ShippingAddress | undefined;
-			observerResponses.forEach( ( response ) => {
-				if ( isSuccessResponse( response ) ) {
+			observerResponses.forEach((response) => {
+				if (isSuccessResponse(response)) {
 					// The last observer response always "wins" for success.
 					successResponse = response;
 				}
 
 				// We consider both failed and error responses as an error.
-				if (
-					isErrorResponse( response ) ||
-					isFailResponse( response )
-				) {
+				if (isErrorResponse(response) || isFailResponse(response)) {
 					errorResponse = response;
 				}
 				// Extensions may return shippingData, shippingAddress, billingData, and billingAddress in the response,
@@ -115,7 +112,7 @@ export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 				shippingAddress =
 					shippingAddressFromResponse as ShippingAddress;
 
-				if ( billingDataFromResponse ) {
+				if (billingDataFromResponse) {
 					// Set this here so that old extensions still using billingData can set the billingAddress.
 					billingAddress = billingDataFromResponse as BillingAddress;
 					deprecated(
@@ -129,7 +126,7 @@ export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 				}
 
 				if (
-					objectHasProp( shippingDataFromResponse, 'address' ) &&
+					objectHasProp(shippingDataFromResponse, 'address') &&
 					shippingDataFromResponse.address
 				) {
 					// Set this here so that old extensions still using shippingData can set the shippingAddress.
@@ -144,76 +141,76 @@ export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 						}
 					);
 				}
-			} );
+			});
 
 			const { setBillingAddress, setShippingAddress } =
-				registry.dispatch( cartStore );
+				registry.dispatch(cartStore);
 
 			// Observer returned success, we sync the payment method data and billing address.
-			if ( isObserverResponse( successResponse ) && ! errorResponse ) {
+			if (isObserverResponse(successResponse) && !errorResponse) {
 				const { paymentMethodData } = successResponse?.meta || {};
 
-				if ( isBillingAddress( billingAddress ) ) {
-					setBillingAddress( billingAddress );
+				if (isBillingAddress(billingAddress)) {
+					setBillingAddress(billingAddress);
 				}
-				if ( isShippingAddress( shippingAddress ) ) {
-					setShippingAddress( shippingAddress );
+				if (isShippingAddress(shippingAddress)) {
+					setShippingAddress(shippingAddress);
 				}
 
 				void dispatch.__internalSetPaymentMethodData(
-					isObject( paymentMethodData ) ? paymentMethodData : {}
+					isObject(paymentMethodData) ? paymentMethodData : {}
 				);
 				void dispatch.__internalSetPaymentReady();
-			} else if ( isFailResponse( errorResponse ) ) {
+			} else if (isFailResponse(errorResponse)) {
 				const { paymentMethodData } = errorResponse?.meta || {};
 
 				if (
-					objectHasProp( errorResponse, 'message' ) &&
-					isString( errorResponse.message ) &&
+					objectHasProp(errorResponse, 'message') &&
+					isString(errorResponse.message) &&
 					errorResponse.message.length
 				) {
 					let context: string = noticeContexts.PAYMENTS;
 					if (
-						objectHasProp( errorResponse, 'messageContext' ) &&
-						isString( errorResponse.messageContext ) &&
+						objectHasProp(errorResponse, 'messageContext') &&
+						isString(errorResponse.messageContext) &&
 						errorResponse.messageContext.length
 					) {
 						context = errorResponse.messageContext;
 					}
-					void createErrorNotice( errorResponse.message, {
+					void createErrorNotice(errorResponse.message, {
 						id: 'wc-payment-error',
 						isDismissible: false,
 						context,
-					} );
+					});
 				}
 
-				if ( isBillingAddress( billingAddress ) ) {
-					setBillingAddress( billingAddress );
+				if (isBillingAddress(billingAddress)) {
+					setBillingAddress(billingAddress);
 				}
 
 				void dispatch.__internalSetPaymentMethodData(
-					isObject( paymentMethodData ) ? paymentMethodData : {}
+					isObject(paymentMethodData) ? paymentMethodData : {}
 				);
 				void dispatch.__internalSetPaymentError();
-			} else if ( isErrorResponse( errorResponse ) ) {
+			} else if (isErrorResponse(errorResponse)) {
 				if (
-					objectHasProp( errorResponse, 'message' ) &&
-					isString( errorResponse.message ) &&
+					objectHasProp(errorResponse, 'message') &&
+					isString(errorResponse.message) &&
 					errorResponse.message.length
 				) {
 					let context: string = noticeContexts.PAYMENTS;
 					if (
-						objectHasProp( errorResponse, 'messageContext' ) &&
-						isString( errorResponse.messageContext ) &&
+						objectHasProp(errorResponse, 'messageContext') &&
+						isString(errorResponse.messageContext) &&
 						errorResponse.messageContext.length
 					) {
 						context = errorResponse.messageContext;
 					}
-					void createErrorNotice( errorResponse.message, {
+					void createErrorNotice(errorResponse.message, {
 						id: 'wc-payment-error',
 						isDismissible: false,
 						context,
-					} );
+					});
 				}
 
 				void dispatch.__internalSetPaymentError();
@@ -223,12 +220,12 @@ export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 						errorResponse.validationErrors
 					)
 				) {
-					setValidationErrors( errorResponse.validationErrors );
+					setValidationErrors(errorResponse.validationErrors);
 				}
 			} else {
 				// Otherwise there are no payment methods doing anything so just assume payment method is ready.
 				void dispatch.__internalSetPaymentReady();
 			}
-		} );
+		});
 	};
 };

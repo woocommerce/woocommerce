@@ -4,8 +4,8 @@
 import { useBlockProps } from '@wordpress/block-editor';
 import type { FunctionComponent } from 'react';
 
-export function Edit< T >( Block: FunctionComponent< T > ) {
-	return function WithBlock( props: T ): JSX.Element {
+export function Edit<T>(Block: FunctionComponent<T>) {
+	return function WithBlock(props: T): JSX.Element {
 		const blockProps = useBlockProps();
 
 		// The useBlockProps function returns the style with the `color`.
@@ -13,8 +13,8 @@ export function Edit< T >( Block: FunctionComponent< T > ) {
 		const { color, ...styles } = blockProps.style;
 
 		return (
-			<div { ...blockProps } style={ styles }>
-				<Block { ...props } />
+			<div {...blockProps} style={styles}>
+				<Block {...props} />
 			</div>
 		);
 	};

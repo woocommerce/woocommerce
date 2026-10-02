@@ -10,13 +10,13 @@ export type TasksPlaceholderProps = {
 	};
 };
 
-export const TasksPlaceholder = ( {
+export const TasksPlaceholder = ({
 	numTasks = 5,
 	query,
-}: TasksPlaceholderProps ) => {
-	const isSingleTask = Boolean( query.task );
+}: TasksPlaceholderProps) => {
+	const isSingleTask = Boolean(query.task);
 
-	if ( isSingleTask ) {
+	if (isSingleTask) {
 		return null;
 	}
 
@@ -35,9 +35,9 @@ export const TasksPlaceholder = ( {
 				</div>
 				<div className="woocommerce-card__body">
 					<div className="woocommerce-list">
-						{ Array.from( new Array( numTasks ) ).map( ( v, i ) => (
+						{Array.from(new Array(numTasks)).map((v, i) => (
 							<div
-								key={ i }
+								key={i}
 								className="woocommerce-list__item has-action"
 							>
 								<div className="woocommerce-list__item-inner">
@@ -54,7 +54,7 @@ export const TasksPlaceholder = ( {
 									</div>
 								</div>
 							</div>
-						) ) }
+						))}
 					</div>
 				</div>
 			</div>

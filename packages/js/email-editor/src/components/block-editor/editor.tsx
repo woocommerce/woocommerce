@@ -21,11 +21,11 @@ import {
 // `unknown` and EditorKeyboardShortcutsRegister returns DOM `Element` instead
 // of `JSX.Element`. Cast them so they are usable as JSX components.
 const AutosaveMonitor = _AutosaveMonitor as unknown as React.ComponentType<
-	Record< string, never >
+	Record<string, never>
 >;
 const EditorKeyboardShortcutsRegister =
 	_EditorKeyboardShortcutsRegister as unknown as React.ComponentType<
-		Record< string, never >
+		Record<string, never>
 	>;
 
 /**
@@ -49,7 +49,7 @@ import { BackButtonContent } from '../header/back-button-content';
 import { TemplateCanvasAffordance } from '../template-canvas-affordance';
 import { recordEventOnce } from '../../events';
 
-export function InnerEditor( {
+export function InnerEditor({
 	postId: initialPostId,
 	postType: initialPostType,
 	settings,
@@ -59,24 +59,20 @@ export function InnerEditor( {
 }: {
 	postId: number | string;
 	postType: string;
-	settings: Record< string, unknown >;
-	contentRef?: React.Ref< HTMLDivElement > | null;
+	settings: Record<string, unknown>;
+	contentRef?: React.Ref<HTMLDivElement> | null;
 	customSavePanel?: React.ReactElement;
 	customSaveButton?: React.ReactElement;
-} ) {
+}) {
 	const {
 		currentPost,
 		onNavigateToEntityRecord,
 		onNavigateToPreviousEntityRecord,
-	} = useNavigateToEntityRecord(
-		initialPostId,
-		initialPostType,
-		'post-only'
-	);
+	} = useNavigateToEntityRecord(initialPostId, initialPostType, 'post-only');
 
 	const { post, template } = useSelect(
-		( select ) => {
-			const { getEditedEntityRecord } = select( coreStore );
+		(select) => {
+			const { getEditedEntityRecord } = select(coreStore);
 			const editedPost = getEditedEntityRecord(
 				'postType',
 				currentPost.postType,
@@ -84,37 +80,37 @@ export function InnerEditor( {
 			);
 
 			// getEditedEntityRecord can return false/undefined if not found
-			if ( ! editedPost || typeof editedPost === 'boolean' ) {
+			if (!editedPost || typeof editedPost === 'boolean') {
 				return { post: null, template: null };
 			}
 
 			const postData = editedPost as unknown as Post;
 
 			// Get template for non-template post types
-			if ( currentPost.postType === 'wp_template' ) {
+			if (currentPost.postType === 'wp_template') {
 				return { post: postData, template: null };
 			}
 
-			const { getEditedPostTemplate } = select( storeName );
-			const templateData = getEditedPostTemplate( postData.template );
+			const { getEditedPostTemplate } = select(storeName);
+			const templateData = getEditedPostTemplate(postData.template);
 
 			return {
 				post: postData,
 				template: templateData,
 			};
 		},
-		[ currentPost.postType, currentPost.postId ]
+		[currentPost.postType, currentPost.postId]
 	);
 
 	// isFullScreenForced – comes from settings and cannot be changed by the user
 	// isFullscreenEnabled – indicates if a user has enabled fullscreen mode
-	const { isFullscreenEnabled, allCommands } = useSelect( ( select ) => {
+	const { isFullscreenEnabled, allCommands } = useSelect((select) => {
 		return {
 			isFullscreenEnabled:
-				select( storeName ).isFeatureActive( 'fullscreenMode' ),
-			allCommands: select( commandsStore ).getCommands(),
+				select(storeName).isFeatureActive('fullscreenMode'),
+			allCommands: select(commandsStore).getCommands(),
 		};
-	}, [] );
+	}, []);
 
 	const {
 		isFullScreenForced,
@@ -122,15 +118,15 @@ export function InnerEditor( {
 		disableSnackbarNotices,
 	} = settings;
 
-	const { removeEditorPanel } = useDispatch( editorStore );
-	useEffect( () => {
-		void removeEditorPanel( 'post-status' );
-	}, [ removeEditorPanel ] );
+	const { removeEditorPanel } = useDispatch(editorStore);
+	useEffect(() => {
+		void removeEditorPanel('post-status');
+	}, [removeEditorPanel]);
 
-	const [ styles ] = useEmailCss();
+	const [styles] = useEmailCss();
 
 	const editorSettings = useMemo(
-		() => ( {
+		() => ({
 			...settings,
 			onNavigateToEntityRecord,
 			onNavigateToPreviousEntityRecord,
@@ -140,7 +136,7 @@ export function InnerEditor( {
 					: 'template-locked',
 			supportsTemplateMode: true,
 			styles,
-		} ),
+		}),
 		[
 			settings,
 			onNavigateToEntityRecord,
@@ -151,11 +147,11 @@ export function InnerEditor( {
 	);
 	const canRenderEditor =
 		post &&
-		( currentPost.postType === 'wp_template' ||
+		(currentPost.postType === 'wp_template' ||
 			post.template === template?.slug || // If the post has a template, check proper template is loaded.
-			( ! post.template && template ) ); // If the post has no template, we render with the default template.
+			(!post.template && template)); // If the post has no template, we render with the default template.
 
-	if ( ! canRenderEditor ) {
+	if (!canRenderEditor) {
 		return (
 			<div className="spinner-container">
 				<ProgressBar />
@@ -165,24 +161,24 @@ export function InnerEditor( {
 	// In WordPress 6.8 WooCommerce commands are registered because Core does
 	// not mount the global CommandMenu. Use that as a signal to render our own
 	// CommandMenu fallback. Core loads it starting in WordPress 6.9.
-	const isWordPress68 = allCommands.every( ( { name } ) =>
-		name.includes( 'woocommerce' )
+	const isWordPress68 = allCommands.every(({ name }) =>
+		name.includes('woocommerce')
 	);
 
-	recordEventOnce( 'editor_layout_loaded' );
+	recordEventOnce('editor_layout_loaded');
 	return (
 		<SlotFillProvider>
 			<ErrorBoundary canCopyContent>
-				{ /* Keep this fallback only for WordPress 6.8. Core mounts the CommandMenu in 6.9+. */ }
-				{ isWordPress68 && <CommandMenu /> }
+				{/* Keep this fallback only for WordPress 6.8. Core mounts the CommandMenu in 6.9+. */}
+				{isWordPress68 && <CommandMenu />}
 				<Editor
-					postId={ currentPost.postId }
-					postType={ currentPost.postType }
-					settings={ editorSettings }
-					templateId={ template && template.id }
-					contentRef={ contentRef }
-					styles={ styles } // This is needed for BC for Gutenberg below v22
-					customSavePanel={ customSavePanel }
+					postId={currentPost.postId}
+					postType={currentPost.postType}
+					settings={editorSettings}
+					templateId={template && template.id}
+					contentRef={contentRef}
+					styles={styles} // This is needed for BC for Gutenberg below v22
+					customSavePanel={customSavePanel}
 					customSaveButton={
 						currentPost.postType === 'wp_template'
 							? undefined
@@ -200,18 +196,18 @@ export function InnerEditor( {
 					<SendPreview />
 					<PreviewSaveGuard />
 					<FullscreenMode
-						isActive={ isFullScreenForced || isFullscreenEnabled }
+						isActive={isFullScreenForced || isFullscreenEnabled}
 					/>
-					{ ( isFullScreenForced || isFullscreenEnabled ) && (
+					{(isFullScreenForced || isFullscreenEnabled) && (
 						<BackButtonContent />
-					) }
-					{ ! isFullScreenForced && <MoreMenu /> }
-					{ currentPost.postType === 'wp_template' ? (
+					)}
+					{!isFullScreenForced && <MoreMenu />}
+					{currentPost.postType === 'wp_template' ? (
 						<TemplateSettingsPanel />
 					) : (
 						<SettingsPanel />
-					) }
-					{ displaySendEmailButton && <PublishSave /> }
+					)}
+					{displaySendEmailButton && <PublishSave />}
 					<EditorNotices
 						disableSnackbarNotices={
 							disableSnackbarNotices as boolean | undefined

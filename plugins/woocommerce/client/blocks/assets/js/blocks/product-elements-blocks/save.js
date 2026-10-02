@@ -3,7 +3,7 @@
  */
 import clsx from 'clsx';
 
-const save = ( { attributes } ) => {
+const save = ({ attributes }) => {
 	if (
 		attributes.isDescendentOfQueryLoop ||
 		attributes.isDescendentOfSingleProductBlock ||
@@ -12,7 +12,7 @@ const save = ( { attributes } ) => {
 		return null;
 	}
 
-	return <div className={ clsx( 'is-loading', attributes.className ) } />;
+	return <div className={clsx('is-loading', attributes.className)} />;
 };
 
 export default save;

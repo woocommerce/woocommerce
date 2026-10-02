@@ -12,10 +12,10 @@ export const getObserversByPriority = (
 	observers: EventObserversType,
 	eventType: string
 ): ObserverType[] => {
-	return observers[ eventType ]
-		? Array.from( observers[ eventType ].values() ).sort( ( a, b ) => {
+	return observers[eventType]
+		? Array.from(observers[eventType].values()).sort((a, b) => {
 				return a.priority - b.priority;
-		  } )
+			})
 		: [];
 };
 
@@ -32,9 +32,9 @@ export enum noticeContexts {
 	ORDER_INFORMATION = 'wc/checkout/order-information',
 }
 
-export const shouldRetry = ( response: unknown ): boolean => {
+export const shouldRetry = (response: unknown): boolean => {
 	return (
-		! isObject( response ) ||
+		!isObject(response) ||
 		typeof response.retry === 'undefined' ||
 		response.retry === true
 	);

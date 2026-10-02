@@ -11,44 +11,44 @@ import { __ } from '@wordpress/i18n';
 import { Subscription } from '../../types';
 import { ADMIN_URL } from '../../../../../utils/admin-settings';
 
-export default function ActionsDropdownMenu( props: {
+export default function ActionsDropdownMenu(props: {
 	subscription: Subscription;
-} ) {
+}) {
 	const controls = [
 		{
-			title: __< string >( 'Manage in Plugins', 'woocommerce' ),
+			title: __<string>('Manage in Plugins', 'woocommerce'),
 			onClick: () => {
 				window.location.href = ADMIN_URL + 'plugins.php';
 			},
 		},
 	];
 
-	if ( ! props.subscription.is_shared ) {
-		controls.unshift( {
-			title: __( 'Manage on WooCommerce.com', 'woocommerce' ),
+	if (!props.subscription.is_shared) {
+		controls.unshift({
+			title: __('Manage on WooCommerce.com', 'woocommerce'),
 			onClick: () => {
 				window.open(
 					'https://woocommerce.com/my-account/my-subscriptions',
 					'_blank'
 				);
 			},
-		} );
+		});
 	}
 
-	if ( props.subscription.documentation_url ) {
-		controls.unshift( {
-			title: __( 'View documentation', 'woocommerce' ),
+	if (props.subscription.documentation_url) {
+		controls.unshift({
+			title: __('View documentation', 'woocommerce'),
 			onClick: () => {
-				window.open( props.subscription.documentation_url, '_blank' );
+				window.open(props.subscription.documentation_url, '_blank');
 			},
-		} );
+		});
 	}
 
 	return (
 		<DropdownMenu
-			icon={ moreVertical }
-			label={ __( 'Actions', 'woocommerce' ) }
-			controls={ controls }
+			icon={moreVertical}
+			label={__('Actions', 'woocommerce')}
+			controls={controls}
 		/>
 	);
 }

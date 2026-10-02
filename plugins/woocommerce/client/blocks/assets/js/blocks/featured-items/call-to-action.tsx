@@ -11,12 +11,12 @@ interface CallToActionProps {
 	permalink: string;
 }
 
-export const CallToAction = ( {
+export const CallToAction = ({
 	itemId,
 	linkText,
 	permalink,
-}: CallToActionProps ) => {
-	const buttonClasses = clsx( 'wp-block-button__link', 'is-style-fill' );
+}: CallToActionProps) => {
+	const buttonClasses = clsx('wp-block-button__link', 'is-style-fill');
 	const buttonStyle = {
 		backgroundColor: 'vivid-green-cyan',
 		borderRadius: '5px',
@@ -25,20 +25,20 @@ export const CallToAction = ( {
 		width: '100%',
 	};
 	return itemId === 'preview' ? (
-		<div className="wp-block-button aligncenter" style={ wrapperStyle }>
+		<div className="wp-block-button aligncenter" style={wrapperStyle}>
 			<RichText.Content
 				tagName="a"
-				className={ buttonClasses }
-				href={ permalink }
-				title={ linkText }
-				style={ buttonStyle }
-				value={ linkText }
-				target={ permalink }
+				className={buttonClasses}
+				href={permalink}
+				title={linkText}
+				style={buttonStyle}
+				value={linkText}
+				target={permalink}
 			/>
 		</div>
 	) : (
 		<InnerBlocks
-			template={ [
+			template={[
 				[
 					'core/buttons',
 					{
@@ -48,13 +48,13 @@ export const CallToAction = ( {
 						[
 							'core/button',
 							{
-								text: __( 'Shop now', 'woocommerce' ),
+								text: __('Shop now', 'woocommerce'),
 								url: permalink,
 							},
 						],
 					],
 				],
-			] }
+			]}
 		/>
 	);
 };

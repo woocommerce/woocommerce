@@ -19,35 +19,33 @@ const {
 	Fill: ExperimentalOrderLocalPickupPackages,
 	Slot: OrderLocalPickupPackagesSlot,
 	// eslint-disable-next-line @typescript-eslint/naming-convention
-} = createSlotFill( slotName );
+} = createSlotFill(slotName);
 
 interface ExperimentalOrderLocalPickupPackagesProps {
-	extensions: Record< string, unknown >;
+	extensions: Record<string, unknown>;
 	cart: Cart;
-	components: Record< string, Component >;
+	components: Record<string, Component>;
 	renderPickupLocation: (
 		option: CartShippingPackageShippingRate,
 		packageCount: number,
 		clientSelectedOption?: string
 	) => RadioControlOption;
 }
-const Slot = ( {
+const Slot = ({
 	extensions,
 	cart,
 	components,
 	renderPickupLocation,
-}: ExperimentalOrderLocalPickupPackagesProps ) => {
+}: ExperimentalOrderLocalPickupPackagesProps) => {
 	return (
 		<OrderLocalPickupPackagesSlot
-			className={ clsx(
-				'wc-block-components-local-pickup-rates-control'
-			) }
-			fillProps={ {
+			className={clsx('wc-block-components-local-pickup-rates-control')}
+			fillProps={{
 				extensions,
 				cart,
 				components,
 				renderPickupLocation,
-			} }
+			}}
 		/>
 	);
 };

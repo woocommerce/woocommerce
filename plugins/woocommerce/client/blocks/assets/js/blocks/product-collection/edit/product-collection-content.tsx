@@ -37,11 +37,11 @@ const useQueryId = (
 	attributes: ProductCollectionAttributes,
 	ProductCollectionContent: React.FC
 ) => {
-	const instanceId = useInstanceId( ProductCollectionContent );
+	const instanceId = useInstanceId(ProductCollectionContent);
 
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore These selectors aren't getting their types loaded for some reason.
-	const { getBlockParentsByBlockName } = useSelect( blockEditorStore );
+	const { getBlockParentsByBlockName } = useSelect(blockEditorStore);
 
 	// In order to properly support pagination this block has a queryId attribute that
 	// is initialized to a unique value when the block is first added to the editor.
@@ -57,21 +57,21 @@ const useQueryId = (
 	// on the same page, updating one will cause the other to be re-inserted.
 	// If we change the ID on init it will trigger a loop as each competes
 	// to set a new queryId and update the sync pattern.
-	const blockParents = useMemo( () => {
-		return getBlockParentsByBlockName( clientId, 'core/block' );
-	}, [ getBlockParentsByBlockName, clientId ] );
-	if ( blockParents.length > 0 ) {
+	const blockParents = useMemo(() => {
+		return getBlockParentsByBlockName(clientId, 'core/block');
+	}, [getBlockParentsByBlockName, clientId]);
+	if (blockParents.length > 0) {
 		queryId = attributes.queryId;
 	}
 
 	return queryId;
 };
 
-const ProductCollectionContent = ( {
+const ProductCollectionContent = ({
 	preview: { setPreviewState, initialPreviewState } = {},
 	...props
-}: ProductCollectionContentProps ) => {
-	const isInitialAttributesSet = useRef( false );
+}: ProductCollectionContentProps) => {
+	const isInitialAttributesSet = useRef(false);
 	const {
 		clientId,
 		attributes,
@@ -82,13 +82,13 @@ const ProductCollectionContent = ( {
 
 	const isEmailEditor = useIsEmailEditor();
 
-	useSetPreviewState( {
+	useSetPreviewState({
 		setPreviewState,
 		setAttributes,
 		location,
 		attributes,
 		isUsingReferencePreviewMode,
-	} );
+	});
 
 	const blockProps = useBlockProps();
 	const innerBlocksProps = useInnerBlocksProps(
@@ -107,17 +107,17 @@ const ProductCollectionContent = ( {
 	const defaultAttributesValue = {
 		...DEFAULT_ATTRIBUTES,
 		query: {
-			...( DEFAULT_ATTRIBUTES.query as ProductCollectionQuery ),
+			...(DEFAULT_ATTRIBUTES.query as ProductCollectionQuery),
 			inherit: getDefaultValueOfInherit(),
 			filterable: getDefaultValueOfFilterable(),
 		},
-		...( attributes as Partial< ProductCollectionAttributes > ),
+		...(attributes as Partial<ProductCollectionAttributes>),
 		queryId,
 		// If initialPreviewState is provided, set it as previewState.
-		...( !! attributes.collection &&
+		...(!!attributes.collection &&
 			initialPreviewState && {
 				__privatePreviewState: initialPreviewState,
-			} ),
+			}),
 	};
 
 	let style = {};
@@ -136,7 +136,7 @@ const ProductCollectionContent = ( {
 	}
 
 	const { __unstableMarkNextChangeAsNotPersistent } =
-		useDispatch( blockEditorStore );
+		useDispatch(blockEditorStore);
 
 	/**
 	 * Because of issue https://github.com/WordPress/gutenberg/issues/7342,
@@ -145,7 +145,7 @@ const ProductCollectionContent = ( {
 	useEffect(
 		() => {
 			__unstableMarkNextChangeAsNotPersistent();
-			setAttributes( defaultAttributesValue );
+			setAttributes(defaultAttributesValue);
 			isInitialAttributesSet.current = true;
 		},
 		// This hook is only needed on initialization and sets default attributes.
@@ -159,33 +159,31 @@ const ProductCollectionContent = ( {
 	 */
 	isInitialAttributesSet.current =
 		isInitialAttributesSet.current ||
-		fastDeepEqual( attributes, defaultAttributesValue );
-	if ( ! isInitialAttributesSet.current ) {
+		fastDeepEqual(attributes, defaultAttributesValue);
+	if (!isInitialAttributesSet.current) {
 		return null;
 	}
 
 	return (
-		<div { ...blockProps }>
-			{ attributes.__privatePreviewState?.isPreview &&
-				( isEmailEditor || props.isSelected ) && (
+		<div {...blockProps}>
+			{attributes.__privatePreviewState?.isPreview &&
+				(isEmailEditor || props.isSelected) && (
 					<Button
 						variant="primary"
 						size="small"
 						showTooltip
-						label={
-							attributes.__privatePreviewState?.previewMessage
-						}
+						label={attributes.__privatePreviewState?.previewMessage}
 						className="wc-block-product-collection__preview-button"
 						data-testid="product-collection-preview-button"
 					>
 						Preview
 					</Button>
-				) }
+				)}
 
-			<InspectorControls { ...props } />
-			<InspectorAdvancedControls { ...props } />
-			<ToolbarControls { ...props } />
-			<div { ...innerBlocksProps } style={ style } />
+			<InspectorControls {...props} />
+			<InspectorAdvancedControls {...props} />
+			<ToolbarControls {...props} />
+			<div {...innerBlocksProps} style={style} />
 		</div>
 	);
 };

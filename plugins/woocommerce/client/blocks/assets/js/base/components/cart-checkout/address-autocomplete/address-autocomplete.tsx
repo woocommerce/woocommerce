@@ -33,9 +33,9 @@ const TYPING_RESET_MS = 200;
  * Safari Contacts applies :-webkit-autofill during/after its fill.
  * Firefox does not support this selector and throws, so we catch that.
  */
-function isAutofilled( el: HTMLInputElement ): boolean {
+function isAutofilled(el: HTMLInputElement): boolean {
 	try {
-		return el.matches( ':-webkit-autofill' );
+		return el.matches(':-webkit-autofill');
 	} catch {
 		return false;
 	}
@@ -49,81 +49,80 @@ function isAutofilled( el: HTMLInputElement ): boolean {
  * @param props.id          - ID for the input field.
  * @return Address Autocomplete component.
  */
-export const AddressAutocomplete = ( {
+export const AddressAutocomplete = ({
 	addressType,
 	id,
 	...props
-}: { addressType: AddressFormType; id: string } & ValidatedTextInputProps ) => {
+}: { addressType: AddressFormType; id: string } & ValidatedTextInputProps) => {
 	// This hook will monitor for changes in country and update the provider accordingly.
-	useUpdatePreferredAutocompleteProvider( addressType );
+	useUpdatePreferredAutocompleteProvider(addressType);
 
 	const { useShippingAsBilling, useBillingAsShipping } = useCheckoutAddress();
-	const inputRef = useRef< ValidatedTextInputHandle >( null );
-	const observerRef = useRef< MutationObserver | null >( null );
+	const inputRef = useRef<ValidatedTextInputHandle>(null);
+	const observerRef = useRef<MutationObserver | null>(null);
 	const serverProviders = getSettingWithCoercion<
 		ServerAddressAutocompleteProvider[]
 	>(
 		'addressAutocompleteProviders',
 		[],
-		( type: unknown ): type is ServerAddressAutocompleteProvider[] => {
-			if ( ! Array.isArray( type ) ) {
+		(type: unknown): type is ServerAddressAutocompleteProvider[] => {
+			if (!Array.isArray(type)) {
 				return false;
 			}
 
-			return type.every( ( item ) => {
+			return type.every((item) => {
 				return (
 					typeof item.name === 'string' &&
 					typeof item.id === 'string' &&
 					typeof item.branding_html === 'string'
 				);
-			} );
+			});
 		}
 	);
 
 	const { country, registeredProviders } = useSelect(
-		( select ) => {
-			const cartSelectors = select( cartStore );
-			const checkoutSelectors = select( checkoutStore );
+		(select) => {
+			const cartSelectors = select(cartStore);
+			const checkoutSelectors = select(checkoutStore);
 			const key =
 				addressType === 'shipping'
 					? 'shippingAddress'
 					: 'billingAddress';
 			const cartData = cartSelectors.getCartData();
 			return {
-				country: cartData?.[ key ]?.country || '',
+				country: cartData?.[key]?.country || '',
 				registeredProviders:
 					checkoutSelectors.getRegisteredAutocompleteProviders() ||
 					[],
 			};
 		},
-		[ addressType ]
+		[addressType]
 	);
 
-	const { setActiveAddressAutocompleteProvider } =
-		useDispatch( checkoutStore );
-	const { setBillingAddress, setShippingAddress } = useDispatch( cartStore );
-	const [ activeProviderBranding, setActiveProviderBranding ] =
-		useState< string >( '' );
+	const { setActiveAddressAutocompleteProvider } = useDispatch(checkoutStore);
+	const { setBillingAddress, setShippingAddress } = useDispatch(cartStore);
+	const [activeProviderBranding, setActiveProviderBranding] =
+		useState<string>('');
 
 	const activeProvider = useSelect(
-		( select ) => {
-			return select( checkoutStore ).getActiveAutocompleteProvider(
+		(select) => {
+			return select(checkoutStore).getActiveAutocompleteProvider(
 				addressType
 			);
 		},
-		[ addressType ]
+		[addressType]
 	);
 
 	// Used to set active provider on mount and when country changes.
-	useEffect( () => {
-		if ( ! window?.wc?.addressAutocomplete?.providers ) {
+	useEffect(() => {
+		if (!window?.wc?.addressAutocomplete?.providers) {
 			return;
 		}
 
 		const activeProviderBrandingHtml =
-			serverProviders.find( ( p ) => p.id === activeProvider )
+			serverProviders.find((p) => p.id === activeProvider)
 				?.branding_html || '';
-		setActiveProviderBranding( activeProviderBrandingHtml );
+		setActiveProviderBranding(activeProviderBrandingHtml);
 	}, [
 		country,
 		registeredProviders,
@@ -131,33 +130,33 @@ export const AddressAutocomplete = ( {
 		addressType,
 		serverProviders,
 		activeProvider,
-	] );
+	]);
 
-	const [ suggestions, setSuggestions ] = useState<
-		AddressAutocompleteResult[]
-	>( [] );
+	const [suggestions, setSuggestions] = useState<AddressAutocompleteResult[]>(
+		[]
+	);
 
-	const [ searchValue, setSearchValue ] = useState( '' );
-	const [ isSettingAddress, setIsSettingAddress ] = useState( false );
-	const suppressSearchTimeoutRef = useRef< NodeJS.Timeout | null >( null );
+	const [searchValue, setSearchValue] = useState('');
+	const [isSettingAddress, setIsSettingAddress] = useState(false);
+	const suppressSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
 	// Tracks whether the current value change originated from the user typing
 	// (as opposed to browser autofill). Browser autofill fires onChange but
 	// does NOT fire keydown events, and its native input event has
 	// inputType "insertReplacementText" rather than "insertText".
-	const userIsTypingRef = useRef( false );
-	const typingTimeoutRef = useRef< NodeJS.Timeout | null >( null );
-	const autofillDetectedRef = useRef( false );
-	const searchGenerationRef = useRef( 0 );
+	const userIsTypingRef = useRef(false);
+	const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const autofillDetectedRef = useRef(false);
+	const searchGenerationRef = useRef(0);
 
 	// Trigger search when searchValue changes
-	useEffect( () => {
+	useEffect(() => {
 		if (
 			isSettingAddress ||
 			searchValue.length < 3 ||
 			suppressSearchTimeoutRef.current
 		) {
-			setSuggestions( [] );
+			setSuggestions([]);
 			return;
 		}
 
@@ -167,84 +166,83 @@ export const AddressAutocomplete = ( {
 				addressType as 'shipping' | 'billing'
 			];
 
-		if ( provider ) {
+		if (provider) {
 			const generation = ++searchGenerationRef.current;
 			provider
-				.search( searchValue, country )
-				.then( ( results ) => {
+				.search(searchValue, country)
+				.then((results) => {
 					// Discard stale results from a superseded search.
-					if ( generation !== searchGenerationRef.current ) {
+					if (generation !== searchGenerationRef.current) {
 						return;
 					}
 
 					// Discard results if the field entered browser autofill
 					// state while the search was in-flight (Safari Contacts).
 					const el = inputRef.current?.inputRef?.current;
-					if ( el && isAutofilled( el ) ) {
-						setSuggestions( [] );
+					if (el && isAutofilled(el)) {
+						setSuggestions([]);
 						return;
 					}
 
-					if ( results && results.length ) {
-						setSuggestions( results );
+					if (results && results.length) {
+						setSuggestions(results);
 					} else {
-						setSuggestions( [] );
+						setSuggestions([]);
 					}
-				} )
-				.catch( () => {
-					setSuggestions( [] );
-				} );
+				})
+				.catch(() => {
+					setSuggestions([]);
+				});
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to run this when searchValue changes, debouncedSearch is stable.
-	}, [ searchValue ] );
+	}, [searchValue]);
 
 	// Cleanup timeouts on unmount
-	useEffect( () => {
+	useEffect(() => {
 		return () => {
-			if ( suppressSearchTimeoutRef.current ) {
-				clearTimeout( suppressSearchTimeoutRef.current );
+			if (suppressSearchTimeoutRef.current) {
+				clearTimeout(suppressSearchTimeoutRef.current);
 			}
-			if ( typingTimeoutRef.current ) {
-				clearTimeout( typingTimeoutRef.current );
+			if (typingTimeoutRef.current) {
+				clearTimeout(typingTimeoutRef.current);
 			}
 		};
-	}, [] );
+	}, []);
 
 	// Disable browser autocomplete when searching
-	useEffect( () => {
+	useEffect(() => {
 		// Get the actual input element from the ref
 		const inputElement = inputRef.current?.inputRef?.current;
-		if ( ! inputElement ) {
+		if (!inputElement) {
 			return;
 		}
 
 		// Create MutationObserver to enforce autocomplete="none"
-		observerRef.current = new MutationObserver( () => {
+		observerRef.current = new MutationObserver(() => {
 			const disableAutofill =
-				inputElement.getAttribute( 'data-disable-autocomplete' ) ===
-				'on';
+				inputElement.getAttribute('data-disable-autocomplete') === 'on';
 
 			// To prevent 1Password and browser autocomplete clashes, we disable 1Password on the address search field.
 			// This is achieved by setting the data-1p-ignore attribute and refocusing on the field so that the new attribute takes effect.
-			if ( disableAutofill ) {
-				inputElement.setAttribute( 'data-1p-ignore', 'true' );
-				inputElement.setAttribute( 'autocomplete', 'none' );
+			if (disableAutofill) {
+				inputElement.setAttribute('data-1p-ignore', 'true');
+				inputElement.setAttribute('autocomplete', 'none');
 			} else {
-				inputElement.removeAttribute( 'data-1p-ignore' );
+				inputElement.removeAttribute('data-1p-ignore');
 				// An empty value is not valid autofill grammar; browsers
 				// guess as if the attribute were absent.
-				if ( props.autoComplete ) {
+				if (props.autoComplete) {
 					inputElement.setAttribute(
 						'autocomplete',
 						props.autoComplete
 					);
 				} else {
-					inputElement.removeAttribute( 'autocomplete' );
+					inputElement.removeAttribute('autocomplete');
 				}
 			}
 
 			const parentElement = inputElement.parentElement;
-			if ( parentElement ) {
+			if (parentElement) {
 				// Store current focus state and cursor position
 				const hasFocus =
 					inputElement.ownerDocument.activeElement === inputElement;
@@ -253,13 +251,13 @@ export const AddressAutocomplete = ( {
 
 				// Remove and re-add the element
 				parentElement.appendChild(
-					parentElement.removeChild( inputElement )
+					parentElement.removeChild(inputElement)
 				);
 
 				// Restore focus and cursor position if it had focus
-				if ( hasFocus ) {
+				if (hasFocus) {
 					inputElement.focus();
-					if ( selectionStart !== null && selectionEnd !== null ) {
+					if (selectionStart !== null && selectionEnd !== null) {
 						inputElement.setSelectionRange(
 							selectionStart,
 							selectionEnd
@@ -267,209 +265,206 @@ export const AddressAutocomplete = ( {
 					}
 				}
 			}
-		} );
+		});
 
-		observerRef.current.observe( inputElement, {
+		observerRef.current.observe(inputElement, {
 			attributes: true,
-			attributeFilter: [ 'data-disable-autocomplete' ],
-		} );
+			attributeFilter: ['data-disable-autocomplete'],
+		});
 
 		// Cleanup on unmount or when isSearching changes
 		return () => {
-			if ( observerRef.current ) {
+			if (observerRef.current) {
 				observerRef.current.disconnect();
 				observerRef.current = null;
 			}
 		};
-	}, [ props.autoComplete ] );
+	}, [props.autoComplete]);
 
 	// Detect browser autofill vs user typing via the native input event's
 	// inputType property. Browser autofill produces "insertReplacementText"
 	// while user typing produces "insertText" (or "insertCompositionText"
 	// for CJK/IME input). This listener sets flags that addressChangeHandler
 	// checks before triggering a provider search.
-	useEffect( () => {
+	useEffect(() => {
 		const inputElement = inputRef.current?.inputRef?.current;
-		if ( ! inputElement ) {
+		if (!inputElement) {
 			return;
 		}
 
-		const handleNativeInput = ( event: Event ) => {
+		const handleNativeInput = (event: Event) => {
 			const inputEvent = event as InputEvent;
 			const { inputType } = inputEvent;
 
-			if ( inputType === 'insertReplacementText' ) {
+			if (inputType === 'insertReplacementText') {
 				// Browser autofill (Chrome/Firefox). Flag it so
 				// addressChangeHandler suppresses the search.
 				autofillDetectedRef.current = true;
-			} else if ( inputType ) {
+			} else if (inputType) {
 				// Any other known inputType is user-initiated (typing,
 				// paste, drag-drop, IME, undo/redo, etc.).
 				userIsTypingRef.current = true;
-				if ( typingTimeoutRef.current ) {
-					clearTimeout( typingTimeoutRef.current );
+				if (typingTimeoutRef.current) {
+					clearTimeout(typingTimeoutRef.current);
 				}
-				typingTimeoutRef.current = setTimeout( () => {
+				typingTimeoutRef.current = setTimeout(() => {
 					userIsTypingRef.current = false;
-				}, TYPING_RESET_MS );
+				}, TYPING_RESET_MS);
 			}
 		};
 
-		inputElement.addEventListener( 'input', handleNativeInput );
+		inputElement.addEventListener('input', handleNativeInput);
 		return () => {
-			inputElement.removeEventListener( 'input', handleNativeInput );
+			inputElement.removeEventListener('input', handleNativeInput);
 		};
-	}, [] );
+	}, []);
 
-	const addressChangeHandler = ( value: string ) => {
-		props.onChange( value );
+	const addressChangeHandler = (value: string) => {
+		props.onChange(value);
 
 		// Don't trigger search when we're programmatically setting the address
 		// or when search is temporarily suppressed after address selection.
-		if ( isSettingAddress || suppressSearchTimeoutRef.current ) {
+		if (isSettingAddress || suppressSearchTimeoutRef.current) {
 			return;
 		}
 
 		// Suppress search when browser autofill was detected via inputType
 		// (Chrome/Firefox fire "insertReplacementText" for autofill).
-		if ( autofillDetectedRef.current ) {
+		if (autofillDetectedRef.current) {
 			autofillDetectedRef.current = false;
-			setSearchValue( '' );
-			setSuggestions( [] );
+			setSearchValue('');
+			setSuggestions([]);
 			return;
 		}
 
 		// Only trigger search when keyboard or IME activity preceded the
 		// change. This is the fallback for browsers that don't support
 		// inputType or :-webkit-autofill.
-		if ( userIsTypingRef.current ) {
-			setSearchValue( value );
+		if (userIsTypingRef.current) {
+			setSearchValue(value);
 		}
 	};
 
-	const [ selectedSuggestion, setSelectedSuggestion ] =
-		useState< number >( -1 );
+	const [selectedSuggestion, setSelectedSuggestion] = useState<number>(-1);
 
-	const handleKeyDown = (
-		event: React.KeyboardEvent< HTMLInputElement >
-	) => {
-		if ( suggestions.length === 0 ) {
+	const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+		if (suggestions.length === 0) {
 			return;
 		}
 
-		if ( event.key === 'ArrowDown' ) {
+		if (event.key === 'ArrowDown') {
 			event.preventDefault();
-			setSelectedSuggestion( ( prevIndex ) =>
+			setSelectedSuggestion((prevIndex) =>
 				prevIndex < suggestions.length - 1 ? prevIndex + 1 : 0
 			);
-		} else if ( event.key === 'ArrowUp' ) {
+		} else if (event.key === 'ArrowUp') {
 			event.preventDefault();
-			setSelectedSuggestion( ( prevIndex ) =>
+			setSelectedSuggestion((prevIndex) =>
 				prevIndex > 0 ? prevIndex - 1 : suggestions.length - 1
 			);
-		} else if ( event.key === 'Enter' ) {
+		} else if (event.key === 'Enter') {
 			event.preventDefault();
 			if (
 				selectedSuggestion >= 0 &&
 				selectedSuggestion < suggestions.length
 			) {
-				const selected = suggestions[ selectedSuggestion ];
+				const selected = suggestions[selectedSuggestion];
 				const provider =
 					window?.wc?.addressAutocomplete?.activeProvider?.[
 						addressType
 					];
-				if ( provider ) {
-					setIsSettingAddress( true );
+				if (provider) {
+					setIsSettingAddress(true);
 					// Immediately suppress search to prevent any change events from triggering search
-					suppressSearchTimeoutRef.current = setTimeout( () => {
+					suppressSearchTimeoutRef.current = setTimeout(() => {
 						suppressSearchTimeoutRef.current = null;
-					}, 1000 );
+					}, 1000);
 					void provider
-						.select( selected.id, country )
-						.then( ( address ) => {
-							if ( addressType === 'shipping' ) {
-								setShippingAddress( address );
-								if ( useShippingAsBilling ) {
-									setBillingAddress( address );
+						.select(selected.id, country)
+						.then((address) => {
+							if (addressType === 'shipping') {
+								setShippingAddress(address);
+								if (useShippingAsBilling) {
+									setBillingAddress(address);
 								}
 							} else {
-								setBillingAddress( address );
-								if ( useBillingAsShipping ) {
-									setShippingAddress( address );
+								setBillingAddress(address);
+								if (useBillingAsShipping) {
+									setShippingAddress(address);
 								}
 							}
-						} )
-						.finally( () => {
+						})
+						.finally(() => {
 							// Clear suggestions.
-							setIsSettingAddress( false );
-							setSuggestions( [] );
-							setSelectedSuggestion( -1 );
-						} );
+							setIsSettingAddress(false);
+							setSuggestions([]);
+							setSelectedSuggestion(-1);
+						});
 				}
 			}
-		} else if ( event.key === 'Escape' ) {
-			setSuggestions( [] );
-			setSelectedSuggestion( -1 );
+		} else if (event.key === 'Escape') {
+			setSuggestions([]);
+			setSelectedSuggestion(-1);
 		}
 	};
 
-	const handleSuggestionClick = async ( suggestionId: string ) => {
+	const handleSuggestionClick = async (suggestionId: string) => {
 		const provider =
-			window?.wc?.addressAutocomplete?.activeProvider?.[ addressType ];
-		if ( provider ) {
-			setIsSettingAddress( true );
+			window?.wc?.addressAutocomplete?.activeProvider?.[addressType];
+		if (provider) {
+			setIsSettingAddress(true);
 			// Immediately suppress search to prevent any change events from triggering search
-			suppressSearchTimeoutRef.current = setTimeout( () => {
+			suppressSearchTimeoutRef.current = setTimeout(() => {
 				suppressSearchTimeoutRef.current = null;
-			}, 1000 );
+			}, 1000);
 			try {
-				const address = await provider.select( suggestionId, country );
-				if ( addressType === 'shipping' ) {
-					setShippingAddress( address );
-					if ( useShippingAsBilling ) {
-						setBillingAddress( address );
+				const address = await provider.select(suggestionId, country);
+				if (addressType === 'shipping') {
+					setShippingAddress(address);
+					if (useShippingAsBilling) {
+						setBillingAddress(address);
 					}
 				} else {
-					setBillingAddress( address );
-					if ( useBillingAsShipping ) {
-						setShippingAddress( address );
+					setBillingAddress(address);
+					if (useBillingAsShipping) {
+						setShippingAddress(address);
 					}
 				}
 			} finally {
 				// Clear suggestions.
-				setIsSettingAddress( false );
-				setSuggestions( [] );
-				setSelectedSuggestion( -1 );
+				setIsSettingAddress(false);
+				setSuggestions([]);
+				setSelectedSuggestion(-1);
 			}
 		}
 	};
 
 	const handleBlur = () => {
 		// Use a small delay to allow clicks on suggestions to register
-		setTimeout( () => {
-			setSuggestions( [] );
-			setSelectedSuggestion( -1 );
-		}, 200 );
+		setTimeout(() => {
+			setSuggestions([]);
+			setSelectedSuggestion(-1);
+		}, 200);
 	};
 
-	const listId = `address-suggestions-${ addressType }-list`;
+	const listId = `address-suggestions-${addressType}-list`;
 	const activeDescendantId =
 		selectedSuggestion >= 0
-			? `suggestion-item-${ addressType }-${ selectedSuggestion }`
+			? `suggestion-item-${addressType}-${selectedSuggestion}`
 			: undefined;
 
 	return (
 		<div className="wc-block-components-address-autocomplete-container">
 			<ValidatedTextInput
-				{ ...props }
-				id={ id }
-				ref={ inputRef }
-				onChange={ addressChangeHandler }
-				onKeyDown={ handleKeyDown }
-				onBlurCapture={ handleBlur }
-				aria-expanded={ suggestions.length > 0 }
-				aria-owns={ suggestions.length > 0 ? listId : undefined }
-				aria-activedescendant={ activeDescendantId }
+				{...props}
+				id={id}
+				ref={inputRef}
+				onChange={addressChangeHandler}
+				onKeyDown={handleKeyDown}
+				onBlurCapture={handleBlur}
+				aria-expanded={suggestions.length > 0}
+				aria-owns={suggestions.length > 0 ? listId : undefined}
+				aria-activedescendant={activeDescendantId}
 				aria-autocomplete="list"
 				role="combobox"
 				data-disable-autocomplete={
@@ -484,15 +479,15 @@ export const AddressAutocomplete = ( {
 					) : null
 				}
 			/>
-			{ searchValue.length >= 3 && suggestions.length > 0 ? (
+			{searchValue.length >= 3 && suggestions.length > 0 ? (
 				<Suggestions
-					selectedSuggestion={ selectedSuggestion }
-					suggestions={ suggestions }
-					branding={ activeProviderBranding }
-					addressType={ addressType }
-					onSuggestionClick={ handleSuggestionClick }
+					selectedSuggestion={selectedSuggestion}
+					suggestions={suggestions}
+					branding={activeProviderBranding}
+					addressType={addressType}
+					onSuggestionClick={handleSuggestionClick}
 				/>
-			) : null }
+			) : null}
 		</div>
 	);
 };

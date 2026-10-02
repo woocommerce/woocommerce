@@ -5,16 +5,16 @@ import * as React from '@wordpress/element';
 import { MenuGroup, MenuItem } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
-const CategoryMenu = ( {
+const CategoryMenu = ({
 	groupedTags,
 	activeCategory,
 	onCategorySelect,
 }: {
-	groupedTags: Record< string, unknown[] >;
+	groupedTags: Record<string, unknown[]>;
 	activeCategory: string | null;
-	onCategorySelect: ( category: string | null ) => void;
-} ) => {
-	const getMenuItemClass = ( category: string | null ) =>
+	onCategorySelect: (category: string | null) => void;
+}) => {
+	const getMenuItemClass = (category: string | null) =>
 		category === activeCategory
 			? 'woocommerce-personalization-tags-modal-menu-item-active'
 			: '';
@@ -22,10 +22,10 @@ const CategoryMenu = ( {
 	return (
 		<MenuGroup className="woocommerce-personalization-tags-modal-menu">
 			<MenuItem
-				onClick={ () => onCategorySelect( null ) }
-				className={ getMenuItemClass( null ) }
+				onClick={() => onCategorySelect(null)}
+				className={getMenuItemClass(null)}
 			>
-				{ __( 'All', __i18n_text_domain__ ) }
+				{__('All', __i18n_text_domain__)}
 			</MenuItem>
 			<div
 				className="woocommerce-personalization-tags-modal-menu-separator"
@@ -33,24 +33,24 @@ const CategoryMenu = ( {
 				role="presentation"
 				data-testid="woocommerce-personalization-tags-modal-menu-separator"
 			></div>
-			{ Object.keys( groupedTags ).map( ( category, index, array ) => (
-				<React.Fragment key={ category }>
+			{Object.keys(groupedTags).map((category, index, array) => (
+				<React.Fragment key={category}>
 					<MenuItem
-						onClick={ () => onCategorySelect( category ) }
-						className={ getMenuItemClass( category ) }
+						onClick={() => onCategorySelect(category)}
+						className={getMenuItemClass(category)}
 					>
-						{ category }
+						{category}
 					</MenuItem>
-					{ index < array.length - 1 && (
+					{index < array.length - 1 && (
 						<div
 							className="woocommerce-personalization-tags-modal-menu-separator"
 							aria-hidden="true"
 							role="presentation"
 							data-testid="woocommerce-personalization-tags-modal-menu-separator"
 						></div>
-					) }
+					)}
 				</React.Fragment>
-			) ) }
+			))}
 		</MenuGroup>
 	);
 };

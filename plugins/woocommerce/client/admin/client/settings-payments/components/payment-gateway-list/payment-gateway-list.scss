@@ -37,7 +37,7 @@
 			padding: $gap-large 0;
 			align-items: flex-start;
 
-			@media screen and ( max-width: $break-medium ) {
+			@media screen and (max-width: $break-medium) {
 				display: grid;
 				// Configuring the grid layout to three columns, resulting in the buttons shifting to a new row.
 				grid-template-columns: 30px minmax(200px, 1fr) 40px;
@@ -56,7 +56,7 @@
 				min-height: 40px;
 			}
 
-			@media screen and ( max-width: $break-medium ) {
+			@media screen and (max-width: $break-medium) {
 				margin-right: 0;
 
 				.drag-handle {
@@ -82,7 +82,7 @@
 			gap: 10px;
 			align-items: center;
 
-			@media screen and ( max-width: $break-medium ) {
+			@media screen and (max-width: $break-medium) {
 				font-size: 15px;
 				font-weight: 500;
 
@@ -95,7 +95,7 @@
 		&-text {
 			margin-right: $gap;
 
-			@media screen and ( max-width: $break-medium ) {
+			@media screen and (max-width: $break-medium) {
 				margin-right: 0;
 			}
 		}
@@ -111,13 +111,13 @@
 				padding: $gap-small 0 0 0; /* Top, Right, Bottom, Left */
 			}
 
-			@media screen and ( max-width: $break-medium ) {
+			@media screen and (max-width: $break-medium) {
 				margin-top: $gap-small;
 			}
 		}
 
 		.woocommerce-woopayments-payment-methods-logos {
-			@media screen and ( max-width: $break-medium ) {
+			@media screen and (max-width: $break-medium) {
 				padding-bottom: 0;
 			}
 		}
@@ -127,7 +127,7 @@
 			margin-left: auto;
 			min-height: 48px;
 
-			@media screen and ( max-width: $break-medium ) {
+			@media screen and (max-width: $break-medium) {
 				order: 4; /* Position the column in the 4th spot to ensure the buttons appear on a new row */
 				grid-column: 2; /* Start below the 2nd column */
 				grid-row: 2; /* Move to the second row */
@@ -141,7 +141,7 @@
 				gap: $gap;
 				align-self: center;
 
-				@media screen and ( min-width: $break-medium ) and ( max-width: $break-xlarge ) {
+				@media screen and (min-width: $break-medium) and (max-width: $break-xlarge) {
 					flex-wrap: nowrap;
 					justify-content: flex-end;
 				}
@@ -157,7 +157,7 @@
 			margin-left: $gap;
 			min-height: 48px;
 
-			@media screen and ( max-width: $break-medium ) {
+			@media screen and (max-width: $break-medium) {
 				order: 3; /* Position the column in the 3rd spot to ensure the dots appear on the first row */
 				min-height: auto;
 			}
@@ -188,7 +188,7 @@
 	}
 }
 
-@media screen and ( max-width: $break-xlarge ) {
+@media screen and (max-width: $break-xlarge) {
 	.settings-payment-gateways__list {
 		.woocommerce-list__item {
 			padding: 0 $gap-large;
@@ -196,7 +196,7 @@
 	}
 }
 
-@media screen and ( max-width: $break-medium ) {
+@media screen and (max-width: $break-medium) {
 	.settings-payment-gateways__list {
 		.woocommerce-list__item {
 			padding: 0 $gap;
@@ -218,7 +218,7 @@ html[dir="rtl"] {
 				margin-right: 0;
 				margin-left: $gap;
 
-				@media screen and ( max-width: $break-medium ) {
+				@media screen and (max-width: $break-medium) {
 					margin-left: 0;
 				}
 			}
@@ -227,7 +227,7 @@ html[dir="rtl"] {
 				margin-right: 0;
 				margin-left: $gap;
 
-				@media screen and ( max-width: $break-medium ) {
+				@media screen and (max-width: $break-medium) {
 					margin-left: 0;
 				}
 			}
@@ -236,12 +236,12 @@ html[dir="rtl"] {
 				margin-left: 0;
 				margin-right: auto;
 
-				@media screen and ( max-width: $break-medium ) {
+				@media screen and (max-width: $break-medium) {
 					margin-right: 0;
 				}
 
 				&__actions {
-					@media screen and ( min-width: $break-medium ) and ( max-width: $break-xlarge ) {
+					@media screen and (min-width: $break-medium) and (max-width: $break-xlarge) {
 						justify-content: flex-start;
 					}
 				}

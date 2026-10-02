@@ -14,26 +14,24 @@ import type {
 } from '@woocommerce/settings';
 
 export type WordCountType =
-	| 'words'
-	| 'characters_excluding_spaces'
-	| 'characters_including_spaces';
+	'words' | 'characters_excluding_spaces' | 'characters_including_spaces';
 
 export interface WcBlocksConfig {
 	pluginUrl: string;
 	productCount?: number;
 	defaultAvatar: string;
-	restApiRoutes: Record< string, string[] >;
+	restApiRoutes: Record<string, string[]>;
 	wordCountType: WordCountType;
 	experimentalBlocksEnabled?: boolean;
 }
 
-export const blocksConfig = getSetting( 'wcBlocksConfig', {
+export const blocksConfig = getSetting('wcBlocksConfig', {
 	pluginUrl: '',
 	productCount: 0,
 	defaultAvatar: '',
 	restApiRoutes: {},
 	wordCountType: 'words',
-} ) as WcBlocksConfig;
+}) as WcBlocksConfig;
 
 export const WC_BLOCKS_IMAGE_URL = blocksConfig.pluginUrl + 'assets/images/';
 export const WC_BLOCKS_BUILD_URL =
@@ -49,57 +47,51 @@ export const CART_PAGE_ID = STORE_PAGES.cart?.id;
 export const CART_URL = STORE_PAGES.cart?.permalink;
 export const LOGIN_URL = STORE_PAGES.myaccount?.permalink
 	? STORE_PAGES.myaccount.permalink
-	: getSetting( 'wpLoginUrl', '/wp-login.php' );
+	: getSetting('wpLoginUrl', '/wp-login.php');
 
-export const LOCAL_PICKUP_ENABLED = getSetting< boolean >(
+export const LOCAL_PICKUP_ENABLED = getSetting<boolean>(
 	'localPickupEnabled',
 	false
 );
 
-export const SHIPPING_METHODS_EXIST = getSetting< boolean >(
+export const SHIPPING_METHODS_EXIST = getSetting<boolean>(
 	'shippingMethodsExist',
 	false
 );
-export const SHIPPING_ENABLED = getSetting< boolean >(
-	'shippingEnabled',
-	true
-);
+export const SHIPPING_ENABLED = getSetting<boolean>('shippingEnabled', true);
 
 type FieldsLocations = {
-	address: Array< keyof AddressForm >;
-	contact: Array< keyof ContactForm >;
-	order: Array< keyof OrderForm >;
+	address: Array<keyof AddressForm>;
+	contact: Array<keyof ContactForm>;
+	order: Array<keyof OrderForm>;
 };
 
 // Contains country names.
-const countries = getSettingWithCoercion( 'countries', {}, isObject );
+const countries = getSettingWithCoercion('countries', {}, isObject);
 
 // Contains country settings.
-const countryData = getSetting< Record< string, CountryData > >(
-	'countryData',
-	{}
-);
+const countryData = getSetting<Record<string, CountryData>>('countryData', {});
 
 export const ALLOWED_COUNTRIES = Object.fromEntries(
-	Object.keys( countryData )
-		.filter( ( countryCode ) => {
-			return countryData[ countryCode ].allowBilling === true;
-		} )
-		.map( ( countryCode ) => {
-			const countryName = countries[ countryCode ];
-			return [ countryCode, isString( countryName ) ? countryName : '' ];
-		} )
+	Object.keys(countryData)
+		.filter((countryCode) => {
+			return countryData[countryCode].allowBilling === true;
+		})
+		.map((countryCode) => {
+			const countryName = countries[countryCode];
+			return [countryCode, isString(countryName) ? countryName : ''];
+		})
 );
 
 export const SHIPPING_COUNTRIES = Object.fromEntries(
-	Object.keys( countryData )
-		.filter( ( countryCode ) => {
-			return countryData[ countryCode ].allowShipping === true;
-		} )
-		.map( ( countryCode ) => {
-			const countryName = countries[ countryCode ];
-			return [ countryCode, isString( countryName ) ? countryName : '' ];
-		} )
+	Object.keys(countryData)
+		.filter((countryCode) => {
+			return countryData[countryCode].allowShipping === true;
+		})
+		.map((countryCode) => {
+			const countryName = countries[countryCode];
+			return [countryCode, isString(countryName) ? countryName : ''];
+		})
 );
 
 // Previously we used ALLOWED_COUNTRIES and SHIPPING_COUNTRIES, however, this lead to problems when syncing values
@@ -111,15 +103,15 @@ export const COUNTRIES = {
 };
 
 export const STATES = Object.fromEntries(
-	Object.keys( COUNTRIES ).map( ( countryCode ) => {
-		return [ countryCode, countryData[ countryCode ].states || {} ];
-	} )
+	Object.keys(COUNTRIES).map((countryCode) => {
+		return [countryCode, countryData[countryCode].states || {}];
+	})
 );
 
 export const COUNTRY_LOCALE = Object.fromEntries(
-	Object.keys( COUNTRIES ).map( ( countryCode ) => {
-		return [ countryCode, countryData[ countryCode ].locale || {} ];
-	} )
+	Object.keys(COUNTRIES).map((countryCode) => {
+		return [countryCode, countryData[countryCode].locale || {}];
+	})
 );
 
 const defaultFieldsLocations: FieldsLocations = {
@@ -135,21 +127,21 @@ const defaultFieldsLocations: FieldsLocations = {
 		'state',
 		'phone',
 	],
-	contact: [ 'email' ],
+	contact: ['email'],
 	order: [],
 };
 
-export const ADDRESS_FORM_KEYS = getSetting< FieldsLocations >(
+export const ADDRESS_FORM_KEYS = getSetting<FieldsLocations>(
 	'addressFieldsLocations',
 	defaultFieldsLocations
 ).address;
 
-export const CONTACT_FORM_KEYS = getSetting< FieldsLocations >(
+export const CONTACT_FORM_KEYS = getSetting<FieldsLocations>(
 	'addressFieldsLocations',
 	defaultFieldsLocations
 ).contact;
 
-export const ORDER_FORM_KEYS = getSetting< FieldsLocations >(
+export const ORDER_FORM_KEYS = getSetting<FieldsLocations>(
 	'addressFieldsLocations',
 	defaultFieldsLocations
 ).order;
@@ -160,15 +152,15 @@ export interface CheckoutField {
 	options: { label: string; value: string }[];
 }
 
-export const ORDER_FORM_FIELDS = getSetting< CheckoutField[] >(
+export const ORDER_FORM_FIELDS = getSetting<CheckoutField[]>(
 	'additionalOrderFields',
 	{}
 );
-export const CONTACT_FORM_FIELDS = getSetting< CheckoutField[] >(
+export const CONTACT_FORM_FIELDS = getSetting<CheckoutField[]>(
 	'additionalContactFields',
 	{}
 );
-export const ADDRESS_FORM_FIELDS = getSetting< CheckoutField[] >(
+export const ADDRESS_FORM_FIELDS = getSetting<CheckoutField[]>(
 	'additionalAddressFields',
 	{}
 );

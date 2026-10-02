@@ -13,7 +13,7 @@
 	&--disabled {
 		background-color: $gray-100;
 		border-color: $gray-400;
-		opacity: 1.0;
+		opacity: 1;
 		.woocommerce-experimental-select-control {
 			&__items-wrapper {
 				opacity: 0.5;
@@ -59,12 +59,13 @@
 	position: absolute;
 	right: 6px;
 	top: 50%;
-	transform: translateY( -50% );
+	transform: translateY(-50%);
 	> svg {
 		margin-top: 4px;
 	}
 }
 
-.woocommerce-experimental-select-control:not( .is-focused ) .woocommerce-experimental-select-control__combox-box-toggle-button {
+.woocommerce-experimental-select-control:not(.is-focused)
+	.woocommerce-experimental-select-control__combox-box-toggle-button {
 	pointer-events: none; // Prevents the icon from being clickable when the combobox is not focused, because otherwise we get a race condition when clicking on the icon, because focussing the combobox opens the menu, then sequentially the icon toggles it back closed
 }

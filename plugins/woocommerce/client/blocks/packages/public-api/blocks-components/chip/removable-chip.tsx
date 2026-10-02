@@ -7,7 +7,7 @@ import { Icon, closeSmall } from '@wordpress/icons';
 import type { ComponentProps } from 'react';
 
 declare module '@wordpress/icons' {
-	interface IconProps extends Partial< ComponentProps< 'div' > > {
+	interface IconProps extends Partial<ComponentProps<'div'>> {
 		icon: JSX.Element;
 		size?: number;
 	}
@@ -45,7 +45,7 @@ export interface RemovableChipProps extends ChipProps {
  * Component used to render a "chip" -- an item containing some text with
  * an X button to remove/dismiss each chip.
  */
-export const RemovableChip = ( {
+export const RemovableChip = ({
 	ariaLabel = '',
 	className = '',
 	disabled = false,
@@ -54,10 +54,10 @@ export const RemovableChip = ( {
 	text,
 	screenReaderText = '',
 	...props
-}: RemovableChipProps ): JSX.Element => {
+}: RemovableChipProps): JSX.Element => {
 	const RemoveElement = removeOnAnyClick ? 'span' : 'button';
 
-	if ( ! ariaLabel ) {
+	if (!ariaLabel) {
 		const ariaLabelText =
 			screenReaderText && typeof screenReaderText === 'string'
 				? screenReaderText
@@ -65,20 +65,20 @@ export const RemovableChip = ( {
 		ariaLabel =
 			typeof ariaLabelText !== 'string'
 				? /* translators: Remove chip. */
-				  __( 'Remove', 'woocommerce' )
+					__('Remove', 'woocommerce')
 				: sprintf(
 						/* translators: %s text of the chip to remove. */
-						__( 'Remove "%s"', 'woocommerce' ),
+						__('Remove "%s"', 'woocommerce'),
 						ariaLabelText
-				  );
+					);
 	}
 
 	const clickableElementProps = {
 		'aria-label': ariaLabel,
 		disabled,
 		onClick: onRemove,
-		onKeyDown: ( e: React.KeyboardEvent ) => {
-			if ( e.key === 'Backspace' || e.key === 'Delete' ) {
+		onKeyDown: (e: React.KeyboardEvent) => {
+			if (e.key === 'Backspace' || e.key === 'Delete') {
 				onRemove();
 			}
 		},
@@ -91,21 +91,21 @@ export const RemovableChip = ( {
 
 	return (
 		<Chip
-			{ ...props }
-			{ ...chipProps }
-			className={ clsx( className, 'is-removable' ) }
-			element={ removeOnAnyClick ? 'button' : props.element || 'li' }
-			screenReaderText={ screenReaderText }
-			text={ text }
+			{...props}
+			{...chipProps}
+			className={clsx(className, 'is-removable')}
+			element={removeOnAnyClick ? 'button' : props.element || 'li'}
+			screenReaderText={screenReaderText}
+			text={text}
 		>
 			<RemoveElement
 				className="wc-block-components-chip__remove"
-				{ ...removeProps }
+				{...removeProps}
 			>
 				<Icon
 					className="wc-block-components-chip__remove-icon"
-					icon={ closeSmall }
-					size={ 16 }
+					icon={closeSmall}
+					size={16}
 					role="img"
 				/>
 			</RemoveElement>

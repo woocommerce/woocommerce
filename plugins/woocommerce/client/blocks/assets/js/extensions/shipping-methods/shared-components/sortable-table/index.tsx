@@ -25,7 +25,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { objectHasProp } from '@woocommerce/types';
 
-export interface SortableData extends Record< string, unknown > {
+export interface SortableData extends Record<string, unknown> {
 	id: UniqueIdentifier;
 }
 
@@ -34,37 +34,37 @@ type ColumnProps = {
 	label: string;
 	width?: string;
 	align?: string;
-	renderCallback?: ( row: SortableData ) => JSX.Element;
+	renderCallback?: (row: SortableData) => JSX.Element;
 };
 
-const TableRow = ( {
+const TableRow = ({
 	children,
 	id,
 }: {
 	children: JSX.Element[];
 	id: UniqueIdentifier;
-} ): JSX.Element => {
+}): JSX.Element => {
 	const { attributes, listeners, transform, transition, setNodeRef } =
-		useSortable( {
+		useSortable({
 			id,
-		} );
+		});
 	const style = {
-		transform: CSS.Transform.toString( transform ),
+		transform: CSS.Transform.toString(transform),
 		transition,
 	};
 	return (
-		<tr ref={ setNodeRef } style={ style }>
+		<tr ref={setNodeRef} style={style}>
 			<>
-				<td style={ { width: '1%' } }>
+				<td style={{ width: '1%' }}>
 					<span
-						className={ 'sortable-table__handle' }
-						{ ...attributes }
-						{ ...listeners }
+						className={'sortable-table__handle'}
+						{...attributes}
+						{...listeners}
 					>
-						<Icon icon={ dragHandle } size={ 14 } />
+						<Icon icon={dragHandle} size={14} />
 					</span>
 				</td>
-				{ children }
+				{children}
 			</>
 		</tr>
 	);
@@ -74,7 +74,7 @@ const StyledTable = styled.table`
 	background: #fff;
 	border: 0;
 	border-radius: 3px;
-	box-shadow: 0 0 0 1px rgb( 0 0 0 / 10% );
+	box-shadow: 0 0 0 1px rgb(0 0 0 / 10%);
 	border-spacing: 0;
 	width: 100%;
 	clear: both;
@@ -138,8 +138,8 @@ const StyledTable = styled.table`
 	tbody {
 		td,
 		th {
-			border-top: 1px solid rgb( 0 0 0 / 10% );
-			border-bottom: 1px solid rgb( 0 0 0 / 10% );
+			border-top: 1px solid rgb(0 0 0 / 10%);
+			border-bottom: 1px solid rgb(0 0 0 / 10%);
 			padding: 16px 0 16px 24px;
 			line-height: 1.5;
 
@@ -163,7 +163,7 @@ const StyledTable = styled.table`
 	}
 `;
 
-export const SortableTable = ( {
+export const SortableTable = ({
 	columns,
 	data,
 	setData,
@@ -173,124 +173,124 @@ export const SortableTable = ( {
 }: {
 	columns: ColumnProps[];
 	data: SortableData[];
-	setData: ( data: SortableData[] ) => void;
+	setData: (data: SortableData[]) => void;
 	className?: string;
-	placeholder?: string | ( () => JSX.Element );
+	placeholder?: string | (() => JSX.Element);
 	footerContent?: () => JSX.Element;
-} ): JSX.Element => {
-	const items = useMemo( () => data.map( ( { id } ) => id ), [ data ] );
+}): JSX.Element => {
+	const items = useMemo(() => data.map(({ id }) => id), [data]);
 
 	const sensors = useSensors(
-		useSensor( MouseSensor, {} ),
-		useSensor( TouchSensor, {} ),
-		useSensor( KeyboardSensor, {} )
+		useSensor(MouseSensor, {}),
+		useSensor(TouchSensor, {}),
+		useSensor(KeyboardSensor, {})
 	);
 
-	function handleDragEnd( event: DragEndEvent ) {
+	function handleDragEnd(event: DragEndEvent) {
 		const { active, over } = event;
 
-		if ( active !== null && over !== null && active?.id !== over?.id ) {
+		if (active !== null && over !== null && active?.id !== over?.id) {
 			const newData = arrayMove(
 				data,
-				items.indexOf( active.id ),
-				items.indexOf( over.id )
+				items.indexOf(active.id),
+				items.indexOf(over.id)
 			);
-			setData( newData );
+			setData(newData);
 		}
 	}
 
-	const getColumnProps = ( column: ColumnProps, parentClassName: string ) => {
+	const getColumnProps = (column: ColumnProps, parentClassName: string) => {
 		const align = column?.align || 'left';
 		const width = column?.width || 'auto';
 
 		return {
-			className: `${ parentClassName }-${ column.name } align-${ align }`,
+			className: `${parentClassName}-${column.name} align-${align}`,
 			style: { width },
 		};
 	};
 
 	return (
 		<DndContext
-			sensors={ sensors }
-			onDragEnd={ handleDragEnd }
-			collisionDetection={ closestCenter }
-			modifiers={ [ restrictToVerticalAxis ] }
+			sensors={sensors}
+			onDragEnd={handleDragEnd}
+			collisionDetection={closestCenter}
+			modifiers={[restrictToVerticalAxis]}
 		>
-			<StyledTable className={ `${ className } sortable-table` }>
+			<StyledTable className={`${className} sortable-table`}>
 				<thead>
 					<tr>
-						{ columns.map( ( column, index ) => (
+						{columns.map((column, index) => (
 							<th
-								key={ column.name }
-								{ ...getColumnProps(
+								key={column.name}
+								{...getColumnProps(
 									column,
 									`sortable-table__column`
-								) }
-								colSpan={ index === 0 ? 2 : 1 }
+								)}
+								colSpan={index === 0 ? 2 : 1}
 							>
-								{ column.label }
+								{column.label}
 							</th>
-						) ) }
+						))}
 					</tr>
 				</thead>
-				{ FooterContent && (
+				{FooterContent && (
 					<tfoot>
 						<tr>
-							<td colSpan={ columns.length + 1 }>
+							<td colSpan={columns.length + 1}>
 								<FooterContent />
 							</td>
 						</tr>
 					</tfoot>
-				) }
+				)}
 				<tbody>
 					<SortableContext
-						items={ items }
-						strategy={ verticalListSortingStrategy }
+						items={items}
+						strategy={verticalListSortingStrategy}
 					>
-						{ !! data.length ? (
+						{!!data.length ? (
 							data.map(
-								( row ) =>
+								(row) =>
 									row && (
 										<TableRow
-											key={ row.id }
-											id={ row.id }
-											className={ className }
+											key={row.id}
+											id={row.id}
+											className={className}
 										>
-											{ columns.map( ( column ) => (
+											{columns.map((column) => (
 												<td
-													key={ `${ row.id }-${ column.name }` }
-													{ ...getColumnProps(
+													key={`${row.id}-${column.name}`}
+													{...getColumnProps(
 														column,
 														`sortable-table__column`
-													) }
+													)}
 												>
-													{ column.renderCallback ? (
+													{column.renderCallback ? (
 														column.renderCallback(
 															row
 														)
 													) : (
 														<>
-															{ objectHasProp(
+															{objectHasProp(
 																row,
 																column.name
 															) &&
 																row[
 																	column.name
-																] }
+																]}
 														</>
-													) }
+													)}
 												</td>
-											) ) }
+											))}
 										</TableRow>
 									)
 							)
 						) : (
 							<tr>
-								<td colSpan={ columns.length + 1 }>
-									{ placeholder }
+								<td colSpan={columns.length + 1}>
+									{placeholder}
 								</td>
 							</tr>
-						) }
+						)}
 					</SortableContext>
 				</tbody>
 			</StyledTable>

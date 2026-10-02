@@ -30,17 +30,17 @@ import StatsList from './stats-list';
 import { InstallJetpackCTA } from './install-jetpack-cta';
 import { getAdminSetting } from '~/utils/admin-settings';
 
-const { performanceIndicators = [] } = getAdminSetting( 'dataEndpoints', {
+const { performanceIndicators = [] } = getAdminSetting('dataEndpoints', {
 	performanceIndicators: [],
-} );
+});
 
-const stats = performanceIndicators.filter( ( indicator ) => {
-	return DEFAULT_STATS.includes( indicator.stat );
-} );
+const stats = performanceIndicators.filter((indicator) => {
+	return DEFAULT_STATS.includes(indicator.stat);
+});
 
 const HeaderText = () => (
 	<Text variant="title.small" size="20" lineHeight="28px">
-		{ __( 'Stats overview', 'woocommerce' ) }
+		{__('Stats overview', 'woocommerce')}
 	</Text>
 );
 
@@ -48,34 +48,34 @@ export const StatsOverview = () => {
 	const { updateUserPreferences, ...userPrefs } = useUserPreferences();
 	const hiddenStats = get(
 		userPrefs,
-		[ 'homepage_stats', 'hiddenStats' ],
+		['homepage_stats', 'hiddenStats'],
 		DEFAULT_HIDDEN_STATS
 	);
 
-	const jetPackIsConnectedAndActivated = useSelect( ( select ) => {
-		const store = select( pluginsStore );
+	const jetPackIsConnectedAndActivated = useSelect((select) => {
+		const store = select(pluginsStore);
 		return (
 			store.isJetpackConnected() &&
-			store.getPluginInstallState( 'jetpack' ) === 'activated'
+			store.getPluginInstallState('jetpack') === 'activated'
 		);
-	}, [] );
+	}, []);
 
 	const homePageStats = userPrefs.homepage_stats || {};
 	const userDismissedJetpackInstall = homePageStats.installJetpackDismissed;
 
-	const toggleStat = ( stat ) => {
-		const nextHiddenStats = xor( hiddenStats, [ stat ] );
-		updateUserPreferences( {
+	const toggleStat = (stat) => {
+		const nextHiddenStats = xor(hiddenStats, [stat]);
+		updateUserPreferences({
 			homepage_stats: { hiddenStats: nextHiddenStats },
-		} );
-		recordEvent( 'statsoverview_indicators_toggle', {
+		});
+		recordEvent('statsoverview_indicators_toggle', {
 			indicator_name: stat,
-			status: nextHiddenStats.includes( stat ) ? 'off' : 'on',
-		} );
+			status: nextHiddenStats.includes(stat) ? 'off' : 'on',
+		});
 	};
 
 	const activeStats = stats.filter(
-		( item ) => ! hiddenStats.includes( item.stat )
+		(item) => !hiddenStats.includes(item.stat)
 	);
 
 	return (
@@ -86,95 +86,88 @@ export const StatsOverview = () => {
 			<CardHeader size="medium">
 				<HeaderText />
 				<DropdownMenu
-					icon={ moreVertical }
-					label={ __(
-						'Choose which values to display',
-						'woocommerce'
-					) }
-					popoverProps={ { placement: 'bottom-end' } }
-					toggleProps={ {
+					icon={moreVertical}
+					label={__('Choose which values to display', 'woocommerce')}
+					popoverProps={{ placement: 'bottom-end' }}
+					toggleProps={{
 						className: 'woocommerce-ellipsis-menu__toggle',
-					} }
+					}}
 				>
-					{ () => (
-						<MenuGroup
-							label={ __( 'Display stats', 'woocommerce' ) }
-						>
-							{ stats.map( ( item ) => {
-								const checked = ! hiddenStats.includes(
+					{() => (
+						<MenuGroup label={__('Display stats', 'woocommerce')}>
+							{stats.map((item) => {
+								const checked = !hiddenStats.includes(
 									item.stat
 								);
 
 								return (
 									<MenuItem
 										className="woocommerce-stats-overview__dropdown-item"
-										icon={ check }
+										icon={check}
 										iconPosition="left"
-										isSelected={ checked }
-										key={ item.stat }
-										onClick={ () =>
-											toggleStat( item.stat )
-										}
+										isSelected={checked}
+										key={item.stat}
+										onClick={() => toggleStat(item.stat)}
 										role="menuitemcheckbox"
 									>
-										{ item.label }
+										{item.label}
 									</MenuItem>
 								);
-							} ) }
+							})}
 						</MenuGroup>
-					) }
+					)}
 				</DropdownMenu>
 			</CardHeader>
 			<TabPanel
 				className="woocommerce-stats-overview__tabs"
-				onSelect={ ( period ) => {
-					recordEvent( 'statsoverview_date_picker_update', {
+				onSelect={(period) => {
+					recordEvent('statsoverview_date_picker_update', {
 						period,
-					} );
-				} }
-				tabs={ [
+					});
+				}}
+				tabs={[
 					{
-						title: __( 'Today', 'woocommerce' ),
+						title: __('Today', 'woocommerce'),
 						name: 'today',
 					},
 					{
-						title: __( 'Week to date', 'woocommerce' ),
+						title: __('Week to date', 'woocommerce'),
 						name: 'week',
 					},
 					{
-						title: __( 'Month to date', 'woocommerce' ),
+						title: __('Month to date', 'woocommerce'),
 						name: 'month',
 					},
-				] }
+				]}
 			>
-				{ ( tab ) => (
+				{(tab) => (
 					<Fragment>
-						{ ! jetPackIsConnectedAndActivated &&
-							! userDismissedJetpackInstall && (
+						{!jetPackIsConnectedAndActivated &&
+							!userDismissedJetpackInstall && (
 								<InstallJetpackCTA />
-							) }
+							)}
 						<StatsList
-							query={ {
+							query={{
 								period: tab.name,
 								compare: 'previous_period',
-							} }
-							stats={ activeStats }
+							}}
+							stats={activeStats}
 						/>
 					</Fragment>
-				) }
+				)}
 			</TabPanel>
 			<CardFooter>
 				<Link
 					className="woocommerce-stats-overview__more-btn"
-					href={ getNewPath( {}, '/analytics/overview' ) }
+					href={getNewPath({}, '/analytics/overview')}
 					type="wc-admin"
-					onClick={ () => {
-						recordEvent( 'statsoverview_indicators_click', {
+					onClick={() => {
+						recordEvent('statsoverview_indicators_click', {
 							key: 'view_detailed_stats',
-						} );
-					} }
+						});
+					}}
 				>
-					{ __( 'View detailed stats', 'woocommerce' ) }
+					{__('View detailed stats', 'woocommerce')}
 				</Link>
 			</CardFooter>
 		</Card>

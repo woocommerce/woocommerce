@@ -14,13 +14,13 @@ import './style.scss';
  * component comes with a limitation: this component is meant to be placed
  * directly inside the block wrapper element that holds block props.
  */
-export const InitialDisabled = ( {
+export const InitialDisabled = ({
 	children,
 }: {
 	children: React.ReactNode;
-} ): JSX.Element => (
+}): JSX.Element => (
 	<div className="wc-block-product-filter-components-initial-disabled">
 		<div className="wc-block-product-filter-components-initial-disabled-overlay" />
-		{ children }
+		{children}
 	</div>
 );

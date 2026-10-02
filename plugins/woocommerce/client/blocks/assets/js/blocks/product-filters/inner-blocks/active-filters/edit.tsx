@@ -20,26 +20,26 @@ const Edit = () => {
 	const { children, ...innerBlocksProps } = useInnerBlocksProps(
 		useBlockProps(),
 		{
-			allowedBlocks: getAllowedBlocks( EXCLUDED_BLOCKS ),
+			allowedBlocks: getAllowedBlocks(EXCLUDED_BLOCKS),
 			template: [
-				[ 'woocommerce/product-filter-removable-chips' ],
-				[ 'woocommerce/product-filter-clear-button' ],
+				['woocommerce/product-filter-removable-chips'],
+				['woocommerce/product-filter-clear-button'],
 			],
 		}
 	);
 
 	return (
-		<div { ...innerBlocksProps }>
+		<div {...innerBlocksProps}>
 			<InitialDisabled>
 				<BlockContextProvider
-					value={ {
+					value={{
 						'woocommerce/removableItems': {
 							items: filtersPreview,
 							storeNamespace: 'woocommerce/product-filters',
 						} satisfies RemovableItemsContext,
-					} }
+					}}
 				>
-					{ children }
+					{children}
 				</BlockContextProvider>
 			</InitialDisabled>
 		</div>

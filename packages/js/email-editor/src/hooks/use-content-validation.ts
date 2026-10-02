@@ -37,8 +37,8 @@ export const validateEmailContent = (
 			message: string,
 			actions: unknown[]
 		) => void;
-		hasValidationNotice: ( id?: string ) => boolean;
-		removeValidationNotice: ( id: string ) => void;
+		hasValidationNotice: (id?: string) => boolean;
+		removeValidationNotice: (id: string) => void;
 	}
 ): boolean => {
 	const rules: EmailContentValidationRule[] = applyFilters(
@@ -47,15 +47,15 @@ export const validateEmailContent = (
 	) as EmailContentValidationRule[];
 
 	let isValid = true;
-	rules.forEach( ( { id, testContent, message, actions } ) => {
+	rules.forEach(({ id, testContent, message, actions }) => {
 		// Check both content and template content for the rule.
-		if ( testContent( content + templateContent ) ) {
-			addValidationNotice( id, message, actions );
+		if (testContent(content + templateContent)) {
+			addValidationNotice(id, message, actions);
 			isValid = false;
-		} else if ( hasValidationNotice( id ) ) {
-			removeValidationNotice( id );
+		} else if (hasValidationNotice(id)) {
+			removeValidationNotice(id);
 		}
-	} );
+	});
 	return isValid;
 };
 
@@ -63,54 +63,51 @@ export const useContentValidation = (): ContentValidationData => {
 	const { addValidationNotice, hasValidationNotice, removeValidationNotice } =
 		useValidationNotices();
 
-	const { editedContent, editedTemplateContent } = useSelect(
-		( mapSelect ) => ( {
-			editedContent:
-				mapSelect( emailEditorStore ).getEditedEmailContent(),
-			editedTemplateContent:
-				mapSelect( emailEditorStore ).getCurrentTemplateContent(),
-		} )
-	);
+	const { editedContent, editedTemplateContent } = useSelect((mapSelect) => ({
+		editedContent: mapSelect(emailEditorStore).getEditedEmailContent(),
+		editedTemplateContent:
+			mapSelect(emailEditorStore).getCurrentTemplateContent(),
+	}));
 
-	const content = useShallowEqual( editedContent );
-	const templateContent = useShallowEqual( editedTemplateContent );
+	const content = useShallowEqual(editedContent);
+	const templateContent = useShallowEqual(editedTemplateContent);
 
-	const validateContent = useCallback( (): boolean => {
-		return validateEmailContent( content, templateContent, {
+	const validateContent = useCallback((): boolean => {
+		return validateEmailContent(content, templateContent, {
 			addValidationNotice,
 			hasValidationNotice,
 			removeValidationNotice,
-		} );
+		});
 	}, [
 		content,
 		templateContent,
 		addValidationNotice,
 		removeValidationNotice,
 		hasValidationNotice,
-	] );
+	]);
 
 	// Register the validation function with the store
-	useEffect( () => {
-		void dispatch( emailEditorStore ).setContentValidation( {
+	useEffect(() => {
+		void dispatch(emailEditorStore).setContentValidation({
 			validateContent,
-		} );
+		});
 
 		return () => {
-			void dispatch( emailEditorStore ).setContentValidation( undefined );
+			void dispatch(emailEditorStore).setContentValidation(undefined);
 		};
-	}, [ validateContent ] );
+	}, [validateContent]);
 
 	// Subscribe to updates so notices can be dismissed once resolved.
-	useEffect( () => {
-		const unsubscribe = subscribe( () => {
-			if ( ! hasValidationNotice() ) {
+	useEffect(() => {
+		const unsubscribe = subscribe(() => {
+			if (!hasValidationNotice()) {
 				return;
 			}
 			validateContent();
-		}, coreDataStore );
+		}, coreDataStore);
 
 		return () => unsubscribe();
-	}, [ hasValidationNotice, validateContent ] );
+	}, [hasValidationNotice, validateContent]);
 
 	return {
 		validateContent,

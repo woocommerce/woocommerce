@@ -3,20 +3,20 @@
  */
 import { useLayoutEffect, useRef } from 'react';
 
-export default function ErrorLabel( { error }: { error: string } ) {
-	const labelRef = useRef< HTMLDivElement >( null );
-	useLayoutEffect( () => {
-		if ( error ) {
+export default function ErrorLabel({ error }: { error: string }) {
+	const labelRef = useRef<HTMLDivElement>(null);
+	useLayoutEffect(() => {
+		if (error) {
 			// Scroll to the top of the error label when an error occurs.
-			labelRef.current?.scrollIntoView( {
+			labelRef.current?.scrollIntoView({
 				behavior: 'smooth',
 				block: 'start',
 				inline: 'nearest',
-			} );
+			});
 		}
-	}, [ error ] );
+	}, [error]);
 	return (
-		<div className="woocommerce-fulfillment-error-label" ref={ labelRef }>
+		<div className="woocommerce-fulfillment-error-label" ref={labelRef}>
 			<span
 				className="woocommerce-fulfillment-error-label__icon"
 				aria-hidden="true"
@@ -38,7 +38,7 @@ export default function ErrorLabel( { error }: { error: string } ) {
 				</svg>
 			</span>
 			<span className="woocommerce-fulfillment-error-label__text">
-				{ error }
+				{error}
 			</span>
 		</div>
 	);

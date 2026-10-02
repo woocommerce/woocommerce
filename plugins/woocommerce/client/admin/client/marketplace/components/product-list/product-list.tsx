@@ -16,7 +16,7 @@ interface ProductListProps {
 	groupURLText: string | null;
 	groupURLType: 'wc-admin' | 'wp-admin' | 'external' | undefined; // types defined by Link component
 	groupId?: string;
-	containerRef?: ( element: HTMLDivElement | null ) => void;
+	containerRef?: (element: HTMLDivElement | null) => void;
 }
 
 export default function ProductList(
@@ -39,22 +39,22 @@ export default function ProductList(
 	return (
 		<div
 			className="woocommerce-marketplace__product-list"
-			data-group-id={ groupId }
-			ref={ containerRef }
+			data-group-id={groupId}
+			ref={containerRef}
 		>
 			<ProductListHeader
-				title={ title }
-				groupURL={ groupURL }
-				groupURLText={ groupURLText }
-				description={ description }
-				groupURLType={ groupURLType }
+				title={title}
+				groupURL={groupURL}
+				groupURLText={groupURLText}
+				description={description}
+				groupURLType={groupURLType}
 			/>
 			<ProductListContent
-				group={ title }
-				products={ products }
-				type={ type }
-				cardType={ cardType }
-				productGroup={ productGroup }
+				group={title}
+				products={products}
+				type={type}
+				cardType={cardType}
+				productGroup={productGroup}
 			/>
 		</div>
 	);

@@ -38,7 +38,7 @@ const localState = {
  * Initializes the customer data cache on the first run.
  */
 const initialize = () => {
-	localState.customerData = select( cartStore ).getCustomerData();
+	localState.customerData = select(cartStore).getCustomerData();
 	localState.customerDataIsInitialized = true;
 };
 
@@ -47,7 +47,7 @@ const initialize = () => {
  */
 const updateDirtyProps = () => {
 	// Returns all current customer data from the store.
-	const newCustomerData = select( cartStore ).getCustomerData();
+	const newCustomerData = select(cartStore).getCustomerData();
 
 	localState.dirtyProps.billingAddress = [
 		...localState.dirtyProps.billingAddress,
@@ -75,30 +75,30 @@ const updateDirtyProps = () => {
 	const customerBillingAddress = localState.customerData.billingAddress;
 
 	// Check if country is changing without state
-	const shippingCountryChanged = dirtyShippingAddress.includes( 'country' );
-	const billingCountryChanged = dirtyBillingAddress.includes( 'country' );
-	const shippingStateChanged = dirtyShippingAddress.includes( 'state' );
-	const billingStateChanged = dirtyBillingAddress.includes( 'state' );
-	const shippingPostcodeChanged = dirtyShippingAddress.includes( 'postcode' );
-	const billingPostcodeChanged = dirtyBillingAddress.includes( 'postcode' );
+	const shippingCountryChanged = dirtyShippingAddress.includes('country');
+	const billingCountryChanged = dirtyBillingAddress.includes('country');
+	const shippingStateChanged = dirtyShippingAddress.includes('state');
+	const billingStateChanged = dirtyBillingAddress.includes('state');
+	const shippingPostcodeChanged = dirtyShippingAddress.includes('postcode');
+	const billingPostcodeChanged = dirtyBillingAddress.includes('postcode');
 
-	if ( shippingCountryChanged && ! shippingPostcodeChanged ) {
-		dirtyShippingAddress.push( 'postcode' );
+	if (shippingCountryChanged && !shippingPostcodeChanged) {
+		dirtyShippingAddress.push('postcode');
 		customerShippingAddress.postcode = '';
 	}
 
-	if ( billingCountryChanged && ! billingPostcodeChanged ) {
-		dirtyBillingAddress.push( 'postcode' );
+	if (billingCountryChanged && !billingPostcodeChanged) {
+		dirtyBillingAddress.push('postcode');
 		customerBillingAddress.postcode = '';
 	}
 
-	if ( shippingCountryChanged && ! shippingStateChanged ) {
-		dirtyShippingAddress.push( 'state' );
+	if (shippingCountryChanged && !shippingStateChanged) {
+		dirtyShippingAddress.push('state');
 		customerShippingAddress.state = '';
 	}
 
-	if ( billingCountryChanged && ! billingStateChanged ) {
-		dirtyBillingAddress.push( 'state' );
+	if (billingCountryChanged && !billingStateChanged) {
+		dirtyBillingAddress.push('state');
 		customerBillingAddress.state = '';
 	}
 };
@@ -106,7 +106,7 @@ const updateDirtyProps = () => {
 /**
  * Fields a country change resets, since their values only make sense for the previous country.
  */
-const countryDependentFields = [ 'state', 'postcode' ] as const;
+const countryDependentFields = ['state', 'postcode'] as const;
 
 /**
  * Returns the dirty props that need to pass validation before the address can be pushed.
@@ -119,24 +119,22 @@ const getDirtyPropsToValidate = (
 	dirtyProps: BaseAddressKey[],
 	address: CartBillingAddress | CartShippingAddress
 ): BaseAddressKey[] => {
-	if ( ! dirtyProps.includes( 'country' ) ) {
+	if (!dirtyProps.includes('country')) {
 		return dirtyProps;
 	}
 
 	const emptiedByCountryChange = countryDependentFields.filter(
-		( field ) => ! address[ field ]
+		(field) => !address[field]
 	) as BaseAddressKey[];
 
-	return dirtyProps.filter(
-		( key ) => ! emptiedByCountryChange.includes( key )
-	);
+	return dirtyProps.filter((key) => !emptiedByCountryChange.includes(key));
 };
 
 /**
  * Function to dispatch an update to the server.
  */
 const updateCustomerData = (): void => {
-	if ( localState.doingPush ) {
+	if (localState.doingPush) {
 		return;
 	}
 
@@ -154,14 +152,14 @@ const updateCustomerData = (): void => {
 	// Do we need to push anything?
 	const needsPush = isBillingAddressDirty || isShippingAddressDirty;
 
-	if ( ! needsPush ) {
+	if (!needsPush) {
 		localState.doingPush = false;
 		return;
 	}
 
 	// Check props are valid, or abort.
 	if (
-		! validateDirtyProps( {
+		!validateDirtyProps({
 			billingAddress: getDirtyPropsToValidate(
 				localState.dirtyProps.billingAddress,
 				localState.customerData.billingAddress
@@ -170,51 +168,51 @@ const updateCustomerData = (): void => {
 				localState.dirtyProps.shippingAddress,
 				localState.customerData.shippingAddress
 			),
-		} )
+		})
 	) {
 		localState.doingPush = false;
 		return;
 	}
 
 	const haveAddressFieldsForShippingRatesChanged =
-		localState.dirtyProps.shippingAddress.some( ( field ) =>
-			addressFieldsForShippingRates.includes( field as string )
+		localState.dirtyProps.shippingAddress.some((field) =>
+			addressFieldsForShippingRates.includes(field as string)
 		);
 
-	dispatch( cartStore )
+	dispatch(cartStore)
 		.updateCustomerData(
 			{
-				...( isBillingAddressDirty && {
+				...(isBillingAddressDirty && {
 					billing_address: localState.customerData.billingAddress,
-				} ),
-				...( isShippingAddressDirty && {
+				}),
+				...(isShippingAddressDirty && {
 					shipping_address: localState.customerData.shippingAddress,
-				} ),
+				}),
 			},
 			true,
 			haveAddressFieldsForShippingRatesChanged
 		)
-		.then( () => {
+		.then(() => {
 			localState.dirtyProps.billingAddress = [];
 			localState.dirtyProps.shippingAddress = [];
 			localState.doingPush = false;
-		} )
-		.catch( ( response ) => {
+		})
+		.catch((response) => {
 			localState.doingPush = false;
-			processErrorResponse( response );
-		} );
+			processErrorResponse(response);
+		});
 };
 
 /**
  * Function to dispatch an update to the server. This is debounced.
  */
-const debouncedUpdateCustomerData = debounce( () => {
-	if ( localState.doingPush ) {
+const debouncedUpdateCustomerData = debounce(() => {
+	if (localState.doingPush) {
 		debouncedUpdateCustomerData();
 		return;
 	}
 	updateCustomerData();
-}, 1500 );
+}, 1500);
 
 /**
  * After cart has fully initialized, pushes changes to the server when data in the store is changed. Updates to the
@@ -223,23 +221,23 @@ const debouncedUpdateCustomerData = debounce( () => {
  * Any update to the store triggers this, so we do a shallow compare on the important data to know if we really need to
  * schedule a push.
  */
-export const pushChanges = ( debounced = true ): void => {
-	if ( ! select( cartStore ).hasFinishedResolution( 'getCartData' ) ) {
+export const pushChanges = (debounced = true): void => {
+	if (!select(cartStore).hasFinishedResolution('getCartData')) {
 		return;
 	}
 
-	if ( ! localState.customerDataIsInitialized ) {
+	if (!localState.customerDataIsInitialized) {
 		initialize();
 		return;
 	}
 
-	const customerData = select( cartStore ).getCustomerData();
+	const customerData = select(cartStore).getCustomerData();
 
-	if ( isShallowEqual( localState.customerData, customerData ) ) {
+	if (isShallowEqual(localState.customerData, customerData)) {
 		return;
 	}
 
-	if ( ! debounced ) {
+	if (!debounced) {
 		updateCustomerData();
 		return;
 	}
@@ -255,7 +253,7 @@ export const pushChanges = ( debounced = true ): void => {
 		customerData.shippingAddress.country !==
 			localState.customerData.shippingAddress.country;
 
-	if ( countryChanged ) {
+	if (countryChanged) {
 		// Push now rather than flushing the debounce: while a push is running this is a no-op,
 		// and the run scheduled above still sends the change once that push finishes.
 		updateCustomerData();
@@ -264,7 +262,7 @@ export const pushChanges = ( debounced = true ): void => {
 
 // Cancel the debounced updateCustomerData function and trigger it immediately.
 export const flushChanges = (): void => {
-	if ( localState.doingPush ) {
+	if (localState.doingPush) {
 		// A push is already running, so this one would be a no-op anyway. Leave the scheduled
 		// run alone: flushing it here would cancel it, and the changes made during the running
 		// push would never reach the server.

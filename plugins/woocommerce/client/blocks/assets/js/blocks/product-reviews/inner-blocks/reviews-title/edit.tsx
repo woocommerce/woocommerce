@@ -29,13 +29,13 @@ function getProductReviewsTitle(
 	showProductTitle: boolean,
 	productTitle: string
 ) {
-	if ( showReviewsCount && showProductTitle ) {
+	if (showReviewsCount && showProductTitle) {
 		return reviewsCount === 1
 			? sprintf(
 					/* translators: %s: Product title. */
-					__( 'One review for %s', 'woocommerce' ),
+					__('One review for %s', 'woocommerce'),
 					productTitle
-			  )
+				)
 			: sprintf(
 					/* translators: 1: Number of comments, 2: Product title. */
 					_n(
@@ -46,45 +46,40 @@ function getProductReviewsTitle(
 					),
 					reviewsCount,
 					productTitle
-			  );
+				);
 	}
 
-	if ( ! showReviewsCount && showProductTitle ) {
+	if (!showReviewsCount && showProductTitle) {
 		return reviewsCount === 1
 			? sprintf(
 					/* translators: %s: Product title. */
-					__( 'Review for %s', 'woocommerce' ),
+					__('Review for %s', 'woocommerce'),
 					productTitle
-			  )
+				)
 			: sprintf(
 					/* translators: %s: Product title. */
-					__( 'Reviews for %s', 'woocommerce' ),
+					__('Reviews for %s', 'woocommerce'),
 					productTitle
-			  );
+				);
 	}
 
-	if ( showReviewsCount && ! showProductTitle ) {
+	if (showReviewsCount && !showProductTitle) {
 		return reviewsCount === 1
-			? __( 'One review', 'woocommerce' )
+			? __('One review', 'woocommerce')
 			: sprintf(
 					/* translators: %s: Number of reviews. */
-					_n(
-						'%s review',
-						'%s reviews',
-						reviewsCount,
-						'woocommerce'
-					),
+					_n('%s review', '%s reviews', reviewsCount, 'woocommerce'),
 					reviewsCount
-			  );
+				);
 	}
 
-	if ( reviewsCount === 1 ) {
-		return __( 'Review', 'woocommerce' );
+	if (reviewsCount === 1) {
+		return __('Review', 'woocommerce');
 	}
-	return __( 'Reviews', 'woocommerce' );
+	return __('Reviews', 'woocommerce');
 }
 
-export default function Edit( {
+export default function Edit({
 	attributes: {
 		textAlign,
 		showProductTitle,
@@ -94,47 +89,47 @@ export default function Edit( {
 	},
 	setAttributes,
 	context: { postType, postId },
-}: ProductReviewsTitleEditProps ) {
+}: ProductReviewsTitleEditProps) {
 	const TagName = 'h' + level;
-	const [ reviewsCount, setReviewsCount ] = useState< number >( 3 );
-	const [ rawTitle ] = useEntityProp( 'postType', postType, 'title', postId );
+	const [reviewsCount, setReviewsCount] = useState<number>(3);
+	const [rawTitle] = useEntityProp('postType', postType, 'title', postId);
 	const isSiteEditor = typeof postId === 'undefined';
-	const blockProps = useBlockProps( {
-		className: clsx( {
-			[ `has-text-align-${ textAlign }` ]: textAlign,
-		} ),
-	} );
+	const blockProps = useBlockProps({
+		className: clsx({
+			[`has-text-align-${textAlign}`]: textAlign,
+		}),
+	});
 
-	useEffect( () => {
-		if ( isSiteEditor ) {
-			setReviewsCount( 3 );
+	useEffect(() => {
+		if (isSiteEditor) {
+			setReviewsCount(3);
 			return;
 		}
-		resolveSelect( reviewsStore )
-			.getReviewsTotalCount( {
-				product: [ Number( postId ) ],
-			} )
-			.then( ( totalCount: number ) => {
-				setReviewsCount( totalCount );
-			} )
-			.catch( () => {
-				setReviewsCount( 0 );
-			} );
-	}, [ postId, isSiteEditor ] );
+		resolveSelect(reviewsStore)
+			.getReviewsTotalCount({
+				product: [Number(postId)],
+			})
+			.then((totalCount: number) => {
+				setReviewsCount(totalCount);
+			})
+			.catch(() => {
+				setReviewsCount(0);
+			});
+	}, [postId, isSiteEditor]);
 
 	const blockControls = (
 		<BlockControls group="block">
 			<AlignmentControl
-				value={ textAlign }
-				onChange={ ( newAlign: string ) =>
-					setAttributes( { textAlign: newAlign } )
+				value={textAlign}
+				onChange={(newAlign: string) =>
+					setAttributes({ textAlign: newAlign })
 				}
 			/>
 			<HeadingLevelDropdown
-				value={ level }
-				options={ levelOptions }
-				onChange={ ( newLevel: number ) =>
-					setAttributes( { level: newLevel } )
+				value={level}
+				options={levelOptions}
+				onChange={(newLevel: number) =>
+					setAttributes({ level: newLevel })
 				}
 			/>
 		</BlockControls>
@@ -142,23 +137,23 @@ export default function Edit( {
 
 	const inspectorControls = (
 		<InspectorControls>
-			<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
+			<PanelBody title={__('Settings', 'woocommerce')}>
 				<ToggleControl
 					// @ts-expect-error ToggleControl is not typed.
 					__nextHasNoMarginBottom
-					label={ __( 'Show Product Title', 'woocommerce' ) }
-					checked={ showProductTitle }
-					onChange={ ( value ) =>
-						setAttributes( { showProductTitle: value } )
+					label={__('Show Product Title', 'woocommerce')}
+					checked={showProductTitle}
+					onChange={(value) =>
+						setAttributes({ showProductTitle: value })
 					}
 				/>
 				<ToggleControl
 					// @ts-expect-error ToggleControl is not typed.
 					__nextHasNoMarginBottom
-					label={ __( 'Show Reviews Count', 'woocommerce' ) }
-					checked={ showReviewsCount }
-					onChange={ ( value ) =>
-						setAttributes( { showReviewsCount: value } )
+					label={__('Show Reviews Count', 'woocommerce')}
+					checked={showReviewsCount}
+					onChange={(value) =>
+						setAttributes({ showReviewsCount: value })
 					}
 				/>
 			</PanelBody>
@@ -166,7 +161,7 @@ export default function Edit( {
 	);
 
 	const productTitle = isSiteEditor
-		? __( 'Product Title', 'woocommerce' )
+		? __('Product Title', 'woocommerce')
 		: rawTitle;
 
 	const placeholder = getProductReviewsTitle(
@@ -178,9 +173,9 @@ export default function Edit( {
 
 	return (
 		<>
-			{ blockControls }
-			{ inspectorControls }
-			<TagName { ...blockProps }>{ placeholder }</TagName>
+			{blockControls}
+			{inspectorControls}
+			<TagName {...blockProps}>{placeholder}</TagName>
 		</>
 	);
 }

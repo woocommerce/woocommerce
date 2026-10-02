@@ -14,18 +14,18 @@ export type ContainerWidthContextProps = {
 	isLarge: boolean;
 };
 
-const ContainerWidthContext: React.Context< ContainerWidthContextProps > =
-	createContext< ContainerWidthContextProps >( {
+const ContainerWidthContext: React.Context<ContainerWidthContextProps> =
+	createContext<ContainerWidthContextProps>({
 		hasContainerWidth: false,
 		containerClassName: '',
 		isMobile: false,
 		isSmall: false,
 		isMedium: false,
 		isLarge: false,
-	} );
+	});
 
 export const useContainerWidthContext = (): ContainerWidthContextProps => {
-	return useContext( ContainerWidthContext );
+	return useContext(ContainerWidthContext);
 };
 
 interface ContainerWidthContextProviderProps {
@@ -37,11 +37,11 @@ interface ContainerWidthContextProviderProps {
  * Provides an interface to useContainerQueries so children can see what size is being used by the
  * container.
  */
-export const ContainerWidthContextProvider = ( {
+export const ContainerWidthContextProvider = ({
 	children,
 	className = '',
-}: ContainerWidthContextProviderProps ): JSX.Element => {
-	const [ resizeListener, containerClassName ] = useContainerQueries();
+}: ContainerWidthContextProviderProps): JSX.Element => {
+	const [resizeListener, containerClassName] = useContainerQueries();
 
 	const contextValue = {
 		hasContainerWidth: containerClassName !== '',
@@ -53,10 +53,10 @@ export const ContainerWidthContextProvider = ( {
 	};
 
 	return (
-		<ContainerWidthContext.Provider value={ contextValue }>
-			<div className={ clsx( className, containerClassName ) }>
-				{ resizeListener }
-				{ children }
+		<ContainerWidthContext.Provider value={contextValue}>
+			<div className={clsx(className, containerClassName)}>
+				{resizeListener}
+				{children}
 			</div>
 		</ContainerWidthContext.Provider>
 	);

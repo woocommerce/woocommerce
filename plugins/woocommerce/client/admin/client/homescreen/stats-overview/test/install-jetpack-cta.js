@@ -9,123 +9,123 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { JetpackCTA } from '../install-jetpack-cta';
 
-jest.mock( '@woocommerce/tracks', () => ( {
+jest.mock('@woocommerce/tracks', () => ({
 	recordEvent: jest.fn(),
-} ) );
+}));
 
-describe( 'JetpackCTA', () => {
-	it( 'shows buttons as busy and disabled when isBusy is true', () => {
+describe('JetpackCTA', () => {
+	it('shows buttons as busy and disabled when isBusy is true', () => {
 		const { queryAllByRole } = render(
 			<JetpackCTA
-				onClickInstall={ () => {} }
-				onClickDismiss={ () => {} }
-				isBusy={ true }
-				jetpackInstallState={ '' }
+				onClickInstall={() => {}}
+				onClickDismiss={() => {}}
+				isBusy={true}
+				jetpackInstallState={''}
 			/>
 		);
 
-		const buttons = queryAllByRole( 'button' );
+		const buttons = queryAllByRole('button');
 
-		expect( buttons[ 0 ] ).toHaveClass( 'is-busy' );
-		expect( buttons[ 1 ] ).toHaveClass( 'is-busy' );
-		expect( buttons[ 0 ] ).toHaveAttribute( 'disabled' );
-		expect( buttons[ 1 ] ).toHaveAttribute( 'disabled' );
-	} );
+		expect(buttons[0]).toHaveClass('is-busy');
+		expect(buttons[1]).toHaveClass('is-busy');
+		expect(buttons[0]).toHaveAttribute('disabled');
+		expect(buttons[1]).toHaveAttribute('disabled');
+	});
 
-	it( 'shows buttons as not busy and enabled when isBusy is false', () => {
+	it('shows buttons as not busy and enabled when isBusy is false', () => {
 		const { queryAllByRole } = render(
 			<JetpackCTA
-				onClickInstall={ () => {} }
-				onClickDismiss={ () => {} }
-				isBusy={ false }
-				jetpackInstallState={ '' }
+				onClickInstall={() => {}}
+				onClickDismiss={() => {}}
+				isBusy={false}
+				jetpackInstallState={''}
 			/>
 		);
 
-		const buttons = queryAllByRole( 'button' );
+		const buttons = queryAllByRole('button');
 
-		expect( buttons[ 0 ] ).not.toHaveClass( 'is-busy' );
-		expect( buttons[ 1 ] ).not.toHaveClass( 'is-busy' );
-		expect( buttons[ 0 ] ).not.toHaveAttribute( 'disabled' );
-		expect( buttons[ 1 ] ).not.toHaveAttribute( 'disabled' );
-	} );
+		expect(buttons[0]).not.toHaveClass('is-busy');
+		expect(buttons[1]).not.toHaveClass('is-busy');
+		expect(buttons[0]).not.toHaveAttribute('disabled');
+		expect(buttons[1]).not.toHaveAttribute('disabled');
+	});
 
-	it( 'calls the onClickInstall handler and records a track when the install button is clicked', () => {
+	it('calls the onClickInstall handler and records a track when the install button is clicked', () => {
 		const onClickInstallSpy = jest.fn();
 		const { queryAllByRole } = render(
 			<JetpackCTA
-				onClickInstall={ onClickInstallSpy }
-				onClickDismiss={ () => {} }
-				isBusy={ false }
-				jetpackInstallState={ '' }
+				onClickInstall={onClickInstallSpy}
+				onClickDismiss={() => {}}
+				isBusy={false}
+				jetpackInstallState={''}
 			/>
 		);
 
-		const installButton = queryAllByRole( 'button' )[ 0 ];
+		const installButton = queryAllByRole('button')[0];
 
-		fireEvent.click( installButton );
+		fireEvent.click(installButton);
 
-		expect( recordEvent ).toHaveBeenCalledWith(
+		expect(recordEvent).toHaveBeenCalledWith(
 			'statsoverview_install_jetpack'
 		);
 
-		expect( onClickInstallSpy ).toHaveBeenCalledTimes( 1 );
-	} );
+		expect(onClickInstallSpy).toHaveBeenCalledTimes(1);
+	});
 
-	it( 'calls the onClickDismiss handler and records a track when the dismiss button is clicked', () => {
+	it('calls the onClickDismiss handler and records a track when the dismiss button is clicked', () => {
 		const onClickDismissSpy = jest.fn();
 		const { queryAllByRole } = render(
 			<JetpackCTA
-				onClickInstall={ () => {} }
-				onClickDismiss={ onClickDismissSpy }
-				isBusy={ false }
-				jetpackInstallState={ '' }
+				onClickInstall={() => {}}
+				onClickDismiss={onClickDismissSpy}
+				isBusy={false}
+				jetpackInstallState={''}
 			/>
 		);
 
-		const dismissButton = queryAllByRole( 'button' )[ 1 ];
+		const dismissButton = queryAllByRole('button')[1];
 
-		fireEvent.click( dismissButton );
+		fireEvent.click(dismissButton);
 
-		expect( recordEvent ).toHaveBeenCalledWith(
+		expect(recordEvent).toHaveBeenCalledWith(
 			'statsoverview_dismiss_install_jetpack'
 		);
 
-		expect( onClickDismissSpy ).toHaveBeenCalledTimes( 1 );
-	} );
+		expect(onClickDismissSpy).toHaveBeenCalledTimes(1);
+	});
 
-	it( 'displays text based on the install status of Jetpack', () => {
+	it('displays text based on the install status of Jetpack', () => {
 		const { queryByText, rerender } = render(
 			<JetpackCTA
-				onClickInstall={ () => {} }
-				onClickDismiss={ () => {} }
-				isBusy={ false }
-				jetpackInstallState={ 'unavailable' }
+				onClickInstall={() => {}}
+				onClickDismiss={() => {}}
+				isBusy={false}
+				jetpackInstallState={'unavailable'}
 			/>
 		);
 
-		expect( queryByText( 'Get Jetpack' ) ).toBeInTheDocument();
+		expect(queryByText('Get Jetpack')).toBeInTheDocument();
 
 		rerender(
 			<JetpackCTA
-				onClickInstall={ () => {} }
-				onClickDismiss={ () => {} }
-				isBusy={ false }
-				jetpackInstallState={ 'installed' }
+				onClickInstall={() => {}}
+				onClickDismiss={() => {}}
+				isBusy={false}
+				jetpackInstallState={'installed'}
 			/>
 		);
 
-		expect( queryByText( 'Activate Jetpack' ) ).toBeInTheDocument();
+		expect(queryByText('Activate Jetpack')).toBeInTheDocument();
 
 		rerender(
 			<JetpackCTA
-				onClickInstall={ () => {} }
-				onClickDismiss={ () => {} }
-				isBusy={ false }
-				jetpackInstallState={ 'activated' }
+				onClickInstall={() => {}}
+				onClickDismiss={() => {}}
+				isBusy={false}
+				jetpackInstallState={'activated'}
 			/>
 		);
 
-		expect( queryByText( 'Connect Jetpack' ) ).toBeInTheDocument();
-	} );
-} );
+		expect(queryByText('Connect Jetpack')).toBeInTheDocument();
+	});
+});

@@ -9,7 +9,7 @@ import clsx from 'clsx';
  */
 import './editor.scss';
 
-export const Edit = ( {
+export const Edit = ({
 	attributes,
 	setAttributes,
 }: {
@@ -17,20 +17,18 @@ export const Edit = ( {
 		content: string;
 		className: string;
 	};
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ): JSX.Element => {
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}): JSX.Element => {
 	const { content = '', className = '' } = attributes;
 	const blockProps = useBlockProps();
 	return (
-		<div { ...blockProps }>
-			<h2 className={ clsx( className, 'wc-block-cart__totals-title' ) }>
+		<div {...blockProps}>
+			<h2 className={clsx(className, 'wc-block-cart__totals-title')}>
 				<PlainText
-					className={ '' }
-					value={ content }
-					onChange={ ( value ) =>
-						setAttributes( { content: value } )
-					}
-					style={ { backgroundColor: 'transparent' } }
+					className={''}
+					value={content}
+					onChange={(value) => setAttributes({ content: value })}
+					style={{ backgroundColor: 'transparent' }}
 				/>
 			</h2>
 		</div>
@@ -38,5 +36,5 @@ export const Edit = ( {
 };
 
 export const Save = (): JSX.Element => {
-	return <div { ...useBlockProps.save() } />;
+	return <div {...useBlockProps.save()} />;
 };

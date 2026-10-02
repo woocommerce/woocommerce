@@ -8,8 +8,8 @@ let currentNonce = '';
 let currentTimestamp = 0;
 
 try {
-	const storedNonceValue = window.localStorage.getItem( 'storeApiNonce' );
-	const storedNonce = storedNonceValue ? JSON.parse( storedNonceValue ) : {};
+	const storedNonceValue = window.localStorage.getItem('storeApiNonce');
+	const storedNonce = storedNonceValue ? JSON.parse(storedNonceValue) : {};
 	currentNonce = storedNonce?.nonce || '';
 	currentTimestamp = storedNonce?.timestamp || 0;
 } catch {
@@ -23,12 +23,12 @@ try {
  *
  * @return {boolean} Returns true if this is a store request.
  */
-export const isStoreApiRequest = ( options ) => {
+export const isStoreApiRequest = (options) => {
 	const url = options.url || options.path;
-	if ( ! url || ! options.method || options.method === 'GET' ) {
+	if (!url || !options.method || options.method === 'GET') {
 		return false;
 	}
-	return /wc\/store\/v1\//.exec( url ) !== null;
+	return /wc\/store\/v1\//.exec(url) !== null;
 };
 
 /**
@@ -37,14 +37,14 @@ export const isStoreApiRequest = ( options ) => {
  * @param {string} nonce     Incoming nonce string.
  * @param {number} timestamp Timestamp from server of nonce.
  */
-const updateNonce = ( nonce, timestamp ) => {
+const updateNonce = (nonce, timestamp) => {
 	// If the "new" nonce matches the current nonce, we don't need to update.
-	if ( nonce === currentNonce ) {
+	if (nonce === currentNonce) {
 		return;
 	}
 
 	// Only update the nonce if newer. It might be coming from cache.
-	if ( currentTimestamp && timestamp < currentTimestamp ) {
+	if (currentTimestamp && timestamp < currentTimestamp) {
 		return;
 	}
 
@@ -54,10 +54,10 @@ const updateNonce = ( nonce, timestamp ) => {
 	// Update the persisted values.
 	window.localStorage.setItem(
 		'storeApiNonce',
-		JSON.stringify( {
+		JSON.stringify({
 			nonce: currentNonce,
 			timestamp: currentTimestamp,
-		} )
+		})
 	);
 };
 
@@ -66,22 +66,22 @@ const updateNonce = ( nonce, timestamp ) => {
  *
  * @param {Object} headers Headers object.
  */
-const setNonce = ( headers ) => {
+const setNonce = (headers) => {
 	const nonce =
 		typeof headers?.get === 'function'
-			? headers.get( 'Nonce' )
+			? headers.get('Nonce')
 			: headers.Nonce;
 	const timestamp =
 		typeof headers?.get === 'function'
-			? headers.get( 'Nonce-Timestamp' )
-			: headers[ 'Nonce-Timestamp' ];
+			? headers.get('Nonce-Timestamp')
+			: headers['Nonce-Timestamp'];
 
-	if ( nonce ) {
-		updateNonce( nonce, timestamp );
+	if (nonce) {
+		updateNonce(nonce, timestamp);
 	}
 };
 
-const appendNonceHeader = ( request ) => {
+const appendNonceHeader = (request) => {
 	const headers = request.headers || {};
 	request.headers = {
 		...headers,
@@ -97,20 +97,20 @@ const appendNonceHeader = ( request ) => {
  * @param {Function} next    The next middleware or fetchHandler to call.
  * @return {*} The evaluated result of the remaining middleware chain.
  */
-const storeNonceMiddleware = ( options, next ) => {
-	if ( isStoreApiRequest( options ) ) {
-		options = appendNonceHeader( options );
+const storeNonceMiddleware = (options, next) => {
+	if (isStoreApiRequest(options)) {
+		options = appendNonceHeader(options);
 
 		// Add nonce to sub-requests
-		if ( Array.isArray( options?.data?.requests ) ) {
+		if (Array.isArray(options?.data?.requests)) {
 			options.data.requests =
-				options.data.requests.map( appendNonceHeader );
+				options.data.requests.map(appendNonceHeader);
 		}
 	}
-	return next( options, next );
+	return next(options, next);
 };
 
-apiFetch.use( storeNonceMiddleware );
+apiFetch.use(storeNonceMiddleware);
 apiFetch.setNonce = setNonce;
 
 updateNonce(

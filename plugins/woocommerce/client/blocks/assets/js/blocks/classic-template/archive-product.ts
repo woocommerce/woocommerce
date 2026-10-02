@@ -43,27 +43,27 @@ const getBlockifiedTemplate = (
 	withTermDescription = false
 ) =>
 	[
-		createBlock( 'woocommerce/breadcrumbs', inheritedAttributes ),
-		createArchiveTitleBlock( 'archive-title', inheritedAttributes ),
+		createBlock('woocommerce/breadcrumbs', inheritedAttributes),
+		createArchiveTitleBlock('archive-title', inheritedAttributes),
 		withTermDescription
-			? createBlock( 'core/term-description', inheritedAttributes )
+			? createBlock('core/term-description', inheritedAttributes)
 			: null,
-		createBlock( 'woocommerce/store-notices', inheritedAttributes ),
+		createBlock('woocommerce/store-notices', inheritedAttributes),
 		createRowBlock(
 			[
-				createBlock( 'woocommerce/product-results-count' ),
-				createBlock( 'woocommerce/catalog-sorting' ),
+				createBlock('woocommerce/product-results-count'),
+				createBlock('woocommerce/catalog-sorting'),
 			],
 			inheritedAttributes
 		),
-		createProductCollectionBlock( inheritedAttributes ),
-	].filter( Boolean ) as BlockInstance[];
+		createProductCollectionBlock(inheritedAttributes),
+	].filter(Boolean) as BlockInstance[];
 
 const getBlockifiedTemplateWithTermDescription = (
 	inheritedAttributes: InheritedAttributes
-) => getBlockifiedTemplate( inheritedAttributes, true );
+) => getBlockifiedTemplate(inheritedAttributes, true);
 
-const getDescription = ( templateTitle: string ) =>
+const getDescription = (templateTitle: string) =>
 	sprintf(
 		/* translators: %s is the template title */
 		__(
@@ -73,55 +73,53 @@ const getDescription = ( templateTitle: string ) =>
 		templateTitle
 	);
 
-const getButtonLabel = () => __( 'Transform into blocks', 'woocommerce' );
+const getButtonLabel = () => __('Transform into blocks', 'woocommerce');
 
-const onClickCallback = ( {
+const onClickCallback = ({
 	clientId,
 	attributes,
 	getBlocks,
 	replaceBlock,
 	selectBlock,
-}: OnClickCallbackParameter ) => {
-	replaceBlock( clientId, getBlockifiedTemplate( attributes ) );
+}: OnClickCallbackParameter) => {
+	replaceBlock(clientId, getBlockifiedTemplate(attributes));
 
 	const blocks = getBlocks();
 
 	const groupBlock = blocks.find(
-		( block ) =>
+		(block) =>
 			block.name === 'core/group' &&
 			block.innerBlocks.some(
-				( innerBlock ) =>
-					innerBlock.name === 'woocommerce/store-notices'
+				(innerBlock) => innerBlock.name === 'woocommerce/store-notices'
 			)
 	);
 
-	if ( groupBlock ) {
-		selectBlock( groupBlock.clientId );
+	if (groupBlock) {
+		selectBlock(groupBlock.clientId);
 	}
 };
 
-const onClickCallbackWithTermDescription = ( {
+const onClickCallbackWithTermDescription = ({
 	clientId,
 	attributes,
 	getBlocks,
 	replaceBlock,
 	selectBlock,
-}: OnClickCallbackParameter ) => {
-	replaceBlock( clientId, getBlockifiedTemplate( attributes, true ) );
+}: OnClickCallbackParameter) => {
+	replaceBlock(clientId, getBlockifiedTemplate(attributes, true));
 
 	const blocks = getBlocks();
 
 	const groupBlock = blocks.find(
-		( block ) =>
+		(block) =>
 			block.name === 'core/group' &&
 			block.innerBlocks.some(
-				( innerBlock ) =>
-					innerBlock.name === 'woocommerce/store-notices'
+				(innerBlock) => innerBlock.name === 'woocommerce/store-notices'
 			)
 	);
 
-	if ( groupBlock ) {
-		selectBlock( groupBlock.clientId );
+	if (groupBlock) {
+		selectBlock(groupBlock.clientId);
 	}
 };
 

@@ -18,10 +18,10 @@ export type CheckboxListOptionControlProps = {
 	checked: boolean;
 	disabled: boolean;
 	renderedShowMore: false | JSX.Element;
-	onChange: ( value: string ) => void;
+	onChange: (value: string) => void;
 };
 
-export function CheckboxListOptionControl( {
+export function CheckboxListOptionControl({
 	option,
 	shouldTruncateOptions,
 	showExpanded,
@@ -31,7 +31,7 @@ export function CheckboxListOptionControl( {
 	disabled,
 	renderedShowMore,
 	onChange,
-}: CheckboxListOptionControlProps ) {
+}: CheckboxListOptionControlProps) {
 	const checkboxControlInstanceId = useInstanceId(
 		CheckboxListOptionControl,
 		'wc-block-checkbox-list-option'
@@ -40,23 +40,23 @@ export function CheckboxListOptionControl( {
 	return (
 		<>
 			<li
-				{ ...( shouldTruncateOptions &&
-					! showExpanded &&
-					index >= limit && { hidden: true } ) }
+				{...(shouldTruncateOptions &&
+					!showExpanded &&
+					index >= limit && { hidden: true })}
 			>
 				<CheckboxControl
-					id={ checkboxControlInstanceId }
+					id={checkboxControlInstanceId}
 					className="wc-block-checkbox-list__checkbox"
-					label={ option.label }
-					checked={ checked }
-					value={ option.value }
-					onChange={ () => {
-						onChange( option.value );
-					} }
-					disabled={ disabled }
+					label={option.label}
+					checked={checked}
+					value={option.value}
+					onChange={() => {
+						onChange(option.value);
+					}}
+					disabled={disabled}
 				/>
 			</li>
-			{ shouldTruncateOptions && index === limit - 1 && renderedShowMore }
+			{shouldTruncateOptions && index === limit - 1 && renderedShowMore}
 		</>
 	);
 }

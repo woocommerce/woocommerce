@@ -28,73 +28,73 @@ import {
 } from '../../types';
 import { DEFAULT_FILTERS } from '../../constants';
 
-const CreatedControl = ( props: QueryControlProps ) => {
+const CreatedControl = (props: QueryControlProps) => {
 	const { query, trackInteraction, setQueryAttribute } = props;
 	const { timeFrame } = query;
 
 	const deselectCallback = () => {
-		setQueryAttribute( {
+		setQueryAttribute({
 			timeFrame: DEFAULT_FILTERS.timeFrame,
-		} );
-		trackInteraction( CoreFilterNames.CREATED );
+		});
+		trackInteraction(CoreFilterNames.CREATED);
 	};
 
 	return (
 		<ToolsPanelItem
-			label={ __( 'Created', 'woocommerce' ) }
-			hasValue={ () => timeFrame?.operator && timeFrame?.value }
-			onDeselect={ deselectCallback }
-			resetAllFilter={ deselectCallback }
+			label={__('Created', 'woocommerce')}
+			hasValue={() => timeFrame?.operator && timeFrame?.value}
+			onDeselect={deselectCallback}
+			resetAllFilter={deselectCallback}
 		>
-			<Flex direction="column" gap={ 3 }>
+			<Flex direction="column" gap={3}>
 				<FlexItem>
 					<ToggleGroupControl
 						__next40pxDefaultSize
 						__nextHasNoMarginBottom
-						label={ __( 'Created', 'woocommerce' ) }
+						label={__('Created', 'woocommerce')}
 						isBlock
-						onChange={ ( value: ETimeFrameOperator ) => {
-							setQueryAttribute( {
+						onChange={(value: ETimeFrameOperator) => {
+							setQueryAttribute({
 								timeFrame: {
 									...timeFrame,
 									operator: value,
 								},
-							} );
-							trackInteraction( CoreFilterNames.CREATED );
-						} }
-						value={ timeFrame?.operator || ETimeFrameOperator.IN }
+							});
+							trackInteraction(CoreFilterNames.CREATED);
+						}}
+						value={timeFrame?.operator || ETimeFrameOperator.IN}
 					>
 						<ToggleGroupControlOption
-							value={ ETimeFrameOperator.IN }
-							label={ _x(
+							value={ETimeFrameOperator.IN}
+							label={_x(
 								'Within',
 								'Product Collection query operator',
 								'woocommerce'
-							) }
+							)}
 						/>
 						<ToggleGroupControlOption
-							value={ ETimeFrameOperator.NOT_IN }
-							label={ _x(
+							value={ETimeFrameOperator.NOT_IN}
+							label={_x(
 								'Before',
 								'Product Collection query operator',
 								'woocommerce'
-							) }
+							)}
 						/>
 					</ToggleGroupControl>
 				</FlexItem>
 				<FlexItem>
 					<RadioControl
-						onChange={ ( value: string ) => {
-							setQueryAttribute( {
+						onChange={(value: string) => {
+							setQueryAttribute({
 								timeFrame: {
 									operator: ETimeFrameOperator.IN,
 									...timeFrame,
 									value,
 								},
-							} );
-							trackInteraction( CoreFilterNames.CREATED );
-						} }
-						options={ [
+							});
+							trackInteraction(CoreFilterNames.CREATED);
+						}}
+						options={[
 							{
 								label: 'last 24 hours',
 								value: '-1 day',
@@ -111,8 +111,8 @@ const CreatedControl = ( props: QueryControlProps ) => {
 								label: 'last 3 months',
 								value: '-3 months',
 							},
-						] }
-						selected={ timeFrame?.value }
+						]}
+						selected={timeFrame?.value}
 					/>
 				</FlexItem>
 			</Flex>

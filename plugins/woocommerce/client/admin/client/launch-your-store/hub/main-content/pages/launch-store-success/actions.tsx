@@ -11,14 +11,14 @@ import apiFetch from '@wordpress/api-fetch';
 import type { MainContentMachineContext } from '../../../main-content/xstate';
 
 export const assignCompleteSurvey = {
-	congratsScreen: ( { context }: { context: MainContentMachineContext } ) => {
-		apiFetch( {
+	congratsScreen: ({ context }: { context: MainContentMachineContext }) => {
+		apiFetch({
 			path: '/wc-admin/launch-your-store/update-survey-status',
 			data: {
 				status: 'yes',
 			},
 			method: 'POST',
-		} ).catch( () => {} );
+		}).catch(() => {});
 
 		return {
 			...context.congratsScreen,
@@ -28,17 +28,17 @@ export const assignCompleteSurvey = {
 };
 
 export const assignCongratsData = {
-	congratsScreen: ( {
+	congratsScreen: ({
 		context,
 		event,
 	}: {
 		context: MainContentMachineContext;
-		event: DoneActorEvent< {
+		event: DoneActorEvent<{
 			surveyCompleted: string | null;
 			tasklists: TaskListType[];
 			activePlugins: string[];
-		} >;
-	} ) => {
+		}>;
+	}) => {
 		return {
 			...context.congratsScreen,
 			hasLoadedCongratsData: true,

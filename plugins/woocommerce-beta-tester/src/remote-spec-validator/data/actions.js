@@ -9,16 +9,16 @@ import { apiFetch } from '@wordpress/data-controls';
 import TYPES from './action-types';
 import { API_NAMESPACE } from './constants';
 
-export function* validate( jsonString ) {
+export function* validate(jsonString) {
 	try {
-		const response = yield apiFetch( {
+		const response = yield apiFetch({
 			method: 'POST',
-			path: `${ API_NAMESPACE }/remote-spec-validator/validate`,
+			path: `${API_NAMESPACE}/remote-spec-validator/validate`,
 			data: {
-				spec: JSON.stringify( JSON.parse( jsonString ) ),
+				spec: JSON.stringify(JSON.parse(jsonString)),
 			},
-		} );
-		if ( response.valid ) {
+		});
+		if (response.valid) {
 			yield {
 				type: TYPES.SET_MESSAGE,
 				message: {
@@ -40,7 +40,7 @@ export function* validate( jsonString ) {
 	}
 }
 
-export function setMessage( type, text ) {
+export function setMessage(type, text) {
 	return {
 		type: TYPES.SET_MESSAGE,
 		message: {

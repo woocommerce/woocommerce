@@ -15,8 +15,8 @@ import {
 import { DisplayLayoutControlProps } from '../../types';
 import { getDefaultDisplayLayout } from '../../utils';
 
-const columnsLabel = __( 'Columns', 'woocommerce' );
-const toggleLabel = __( 'Responsive', 'woocommerce' );
+const columnsLabel = __('Columns', 'woocommerce');
+const toggleLabel = __('Responsive', 'woocommerce');
 const toggleHelp = __(
 	'Automatically adjust the number of columns to better fit smaller screens.',
 	'woocommerce'
@@ -27,38 +27,38 @@ interface ColumnsControlProps extends DisplayLayoutControlProps {
 	hideResponsiveToggle?: boolean;
 }
 
-const ColumnsControl = ( props: ColumnsControlProps ) => {
+const ColumnsControl = (props: ColumnsControlProps) => {
 	const { maxColumns, hideResponsiveToggle } = props;
 	const { type, columns, shrinkColumns } = props.displayLayout;
 	const showColumnsControl = type === 'flex';
 
 	const defaultLayout = getDefaultDisplayLayout();
 
-	const onShrinkColumnsToggleChange = ( value: boolean ) => {
-		props.setAttributes( {
+	const onShrinkColumnsToggleChange = (value: boolean) => {
+		props.setAttributes({
 			displayLayout: {
 				...props.displayLayout,
 				shrinkColumns: value,
 			},
-		} );
+		});
 	};
 
 	const onPanelDeselect = () => {
-		props.setAttributes( {
+		props.setAttributes({
 			displayLayout: defaultLayout,
-		} );
+		});
 	};
 
-	const onColumnsChange = ( value?: number ) => {
-		if ( value === undefined ) {
+	const onColumnsChange = (value?: number) => {
+		if (value === undefined) {
 			return;
 		}
-		props.setAttributes( {
+		props.setAttributes({
 			displayLayout: {
 				...props.displayLayout,
 				columns: value,
 			},
-		} );
+		});
 	};
 
 	const defaultMaxColumns = 6;
@@ -67,39 +67,39 @@ const ColumnsControl = ( props: ColumnsControlProps ) => {
 	return showColumnsControl ? (
 		<>
 			<ToolsPanelItem
-				label={ columnsLabel }
-				hasValue={ () => defaultLayout?.columns !== columns }
+				label={columnsLabel}
+				hasValue={() => defaultLayout?.columns !== columns}
 				isShownByDefault
-				onDeselect={ onPanelDeselect }
+				onDeselect={onPanelDeselect}
 			>
 				<RangeControl
 					__next40pxDefaultSize
 					__nextHasNoMarginBottom
-					label={ columnsLabel }
-					onChange={ onColumnsChange }
-					value={ columns }
-					min={ 1 }
-					max={ Math.max( effectiveMaxColumns, columns ) }
+					label={columnsLabel}
+					onChange={onColumnsChange}
+					value={columns}
+					min={1}
+					max={Math.max(effectiveMaxColumns, columns)}
 				/>
 			</ToolsPanelItem>
-			{ ! hideResponsiveToggle && (
+			{!hideResponsiveToggle && (
 				<ToolsPanelItem
-					label={ toggleLabel }
-					hasValue={ () =>
+					label={toggleLabel}
+					hasValue={() =>
 						defaultLayout?.shrinkColumns !== shrinkColumns
 					}
 					isShownByDefault
-					onDeselect={ onPanelDeselect }
+					onDeselect={onPanelDeselect}
 				>
 					<ToggleControl
 						__nextHasNoMarginBottom
-						checked={ !! shrinkColumns }
-						label={ toggleLabel }
-						help={ toggleHelp }
-						onChange={ onShrinkColumnsToggleChange }
+						checked={!!shrinkColumns}
+						label={toggleLabel}
+						help={toggleHelp}
+						onChange={onShrinkColumnsToggleChange}
 					/>
 				</ToolsPanelItem>
-			) }
+			)}
 		</>
 	) : null;
 };

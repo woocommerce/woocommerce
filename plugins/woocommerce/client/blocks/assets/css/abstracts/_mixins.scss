@@ -34,10 +34,12 @@ $fontSizes: (
 }
 
 @mixin font-x-small-locked {
-	font-size: var(--wp--preset--font-size--x-small, calc( var(--wp--preset--font-size--small, 14px) * 0.875 ) );
+	font-size: var(
+		--wp--preset--font-size--x-small,
+		calc(var(--wp--preset--font-size--small, 14px) * 0.875)
+	);
 	line-height: 1.4;
 }
-
 
 @mixin font-for-inputs-locked {
 	font-size: 16px;

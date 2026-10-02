@@ -21,7 +21,7 @@ import {
  */
 const readSlugsDismissedBeforeScoping = (): string[] =>
 	readDismissalsFromBeforeScoping().filter(
-		( entry ): entry is string => typeof entry === 'string'
+		(entry): entry is string => typeof entry === 'string'
 	);
 
 interface IncompatibleExtension {
@@ -37,24 +37,24 @@ interface IncompatibleExtension {
  * mistaken for "nothing is incompatible any more".
  */
 const getIncompatibleExtensions = (): {
-	extensions: Record< string, string >;
+	extensions: Record<string, string>;
 	slugs: string[];
 	isKnown: boolean;
 } => {
-	const data = getSetting< IncompatibleExtension[] | undefined >(
+	const data = getSetting<IncompatibleExtension[] | undefined>(
 		'incompatibleExtensions',
 		undefined
 	);
 
-	if ( ! Array.isArray( data ) ) {
+	if (!Array.isArray(data)) {
 		return { extensions: {}, slugs: [], isKnown: false };
 	}
 
-	const extensions: Record< string, string > = {};
-	data.forEach( ( ext ) => {
-		extensions[ ext.id ] = ext.title;
-	} );
-	return { extensions, slugs: Object.keys( extensions ), isKnown: true };
+	const extensions: Record<string, string> = {};
+	data.forEach((ext) => {
+		extensions[ext.id] = ext.title;
+	});
+	return { extensions, slugs: Object.keys(extensions), isKnown: true };
 };
 
 interface Props {
@@ -66,7 +66,7 @@ interface Props {
  * shopper, who would otherwise persist an empty `[]` under this site's key and
  * close the one-shot migration for the administrator who comes along later.
  */
-const IncompatibleExtensionsBanner = ( { block }: Props ) => {
+const IncompatibleExtensionsBanner = ({ block }: Props) => {
 	const storageKey = getFrontendStorageKey();
 
 	// Seeding the initial value migrates the pre-scoping dismissals in one shot:
@@ -75,24 +75,22 @@ const IncompatibleExtensionsBanner = ( { block }: Props ) => {
 	// is evaluated on every render even though only the first one consumes it.
 	const initialDismissedSlugs = useMemo(
 		() =>
-			readInitialDismissals(
-				storageKey,
-				readSlugsDismissedBeforeScoping
-			),
-		[ storageKey ]
+			readInitialDismissals(storageKey, readSlugsDismissedBeforeScoping),
+		[storageKey]
 	);
 
-	const [ dismissedSlugs, setDismissedSlugs ] = useLocalStorageState<
-		string[]
-	>( storageKey, initialDismissedSlugs );
+	const [dismissedSlugs, setDismissedSlugs] = useLocalStorageState<string[]>(
+		storageKey,
+		initialDismissedSlugs
+	);
 
 	// Plain localStorage that anything can overwrite, so nothing about the
 	// stored value's shape is guaranteed. Narrow it rather than let a corrupt
 	// value throw on the storefront.
-	const acknowledgedSlugs = Array.isArray( dismissedSlugs )
+	const acknowledgedSlugs = Array.isArray(dismissedSlugs)
 		? dismissedSlugs.filter(
-				( slug ): slug is string => typeof slug === 'string'
-		  )
+				(slug): slug is string => typeof slug === 'string'
+			)
 		: [];
 
 	const { extensions, slugs, isKnown } = getIncompatibleExtensions();
@@ -101,9 +99,9 @@ const IncompatibleExtensionsBanner = ( { block }: Props ) => {
 	// Stay dismissed while every currently-incompatible extension has already
 	// been acknowledged; deactivating one keeps it dismissed, while a new,
 	// never-acknowledged extension brings the notice back.
-	const isDismissedAndUpToDate = isSubsetOf( slugs, acknowledgedSlugs );
+	const isDismissedAndUpToDate = isSubsetOf(slugs, acknowledgedSlugs);
 
-	const shouldShow = count > 0 && ! isDismissedAndUpToDate;
+	const shouldShow = count > 0 && !isDismissedAndUpToDate;
 
 	// An acknowledgement only lasts while the extension stays incompatible:
 	// slugs no longer incompatible are dropped, so a reactivated extension
@@ -113,32 +111,32 @@ const IncompatibleExtensionsBanner = ( { block }: Props ) => {
 	// list, indistinguishable from "nothing is incompatible", and pruning on
 	// that would erase a real acknowledgement.
 	const prunedAcknowledgement =
-		isKnown && ! isSubsetOf( acknowledgedSlugs, slugs )
-			? acknowledgedSlugs.filter( ( slug ) => slugs.includes( slug ) )
+		isKnown && !isSubsetOf(acknowledgedSlugs, slugs)
+			? acknowledgedSlugs.filter((slug) => slugs.includes(slug))
 			: null;
 
 	// Deliberately no dependency array: a pruned set is always strictly smaller
 	// than what is stored, so the write settles.
-	useEffect( () => {
-		if ( prunedAcknowledgement !== null ) {
-			setDismissedSlugs( prunedAcknowledgement );
+	useEffect(() => {
+		if (prunedAcknowledgement !== null) {
+			setDismissedSlugs(prunedAcknowledgement);
 		}
-	} );
+	});
 
-	if ( ! shouldShow ) {
+	if (!shouldShow) {
 		return null;
 	}
 
 	// The merchant has just seen and accepted exactly what is incompatible now.
 	const dismissNotice = () => {
-		setDismissedSlugs( slugs );
+		setDismissedSlugs(slugs);
 	};
 
-	const extensionNames = Object.values( extensions );
+	const extensionNames = Object.values(extensions);
 	const blockLabel =
 		block === 'woocommerce/cart'
-			? __( 'Cart', 'woocommerce' )
-			: __( 'Checkout', 'woocommerce' );
+			? __('Cart', 'woocommerce')
+			: __('Checkout', 'woocommerce');
 
 	const message =
 		count === 1
@@ -148,9 +146,9 @@ const IncompatibleExtensionsBanner = ( { block }: Props ) => {
 						'%1$s may not be compatible with the %2$s block.',
 						'woocommerce'
 					),
-					extensionNames[ 0 ],
+					extensionNames[0],
 					blockLabel
-			  )
+				)
 			: sprintf(
 					/* translators: %s is block name */
 					__(
@@ -158,24 +156,24 @@ const IncompatibleExtensionsBanner = ( { block }: Props ) => {
 						'woocommerce'
 					),
 					blockLabel
-			  );
+				);
 
 	return (
 		<NoticeBanner
 			status="warning"
-			isDismissible={ true }
-			onRemove={ dismissNotice }
+			isDismissible={true}
+			onRemove={dismissNotice}
 		>
-			{ message }
-			{ count > 1 && (
-				<ul style={ { margin: '0.5em 0 0 1.5em', padding: 0 } }>
-					{ extensionNames.map( ( name ) => (
-						<li key={ name }>{ name }</li>
-					) ) }
+			{message}
+			{count > 1 && (
+				<ul style={{ margin: '0.5em 0 0 1.5em', padding: 0 }}>
+					{extensionNames.map((name) => (
+						<li key={name}>{name}</li>
+					))}
 				</ul>
-			) }
+			)}
 			<em>
-				{ __( '(Only administrators see this notice)', 'woocommerce' ) }
+				{__('(Only administrators see this notice)', 'woocommerce')}
 			</em>
 		</NoticeBanner>
 	);
@@ -187,10 +185,10 @@ const IncompatibleExtensionsBanner = ( { block }: Props ) => {
  * Returns before the banner mounts for anyone else, so a shopper's page view
  * never reads or writes this site's dismissal storage.
  */
-export const IncompatibleExtensionsFrontendNotice = ( { block }: Props ) => {
-	if ( ! CURRENT_USER_IS_ADMIN ) {
+export const IncompatibleExtensionsFrontendNotice = ({ block }: Props) => {
+	if (!CURRENT_USER_IS_ADMIN) {
 		return null;
 	}
 
-	return <IncompatibleExtensionsBanner block={ block } />;
+	return <IncompatibleExtensionsBanner block={block} />;
 };

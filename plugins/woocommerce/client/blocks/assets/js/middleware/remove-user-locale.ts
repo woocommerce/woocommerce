@@ -22,17 +22,17 @@ import { isStoreApiRequest } from './store-api-nonce';
  */
 const removeUserLocaleMiddleware = (
 	options: { url?: string; path?: string },
-	next: ( options: { url?: string; path?: string } ) => Promise< unknown >
-): Promise< unknown > => {
-	if ( typeof options.url === 'string' && isStoreApiRequest( options ) ) {
-		options.url = addQueryArgs( options.url, { _locale: 'site' } );
+	next: (options: { url?: string; path?: string }) => Promise<unknown>
+): Promise<unknown> => {
+	if (typeof options.url === 'string' && isStoreApiRequest(options)) {
+		options.url = addQueryArgs(options.url, { _locale: 'site' });
 	}
 
-	if ( typeof options.path === 'string' && isStoreApiRequest( options ) ) {
-		options.path = addQueryArgs( options.path, { _locale: 'site' } );
+	if (typeof options.path === 'string' && isStoreApiRequest(options)) {
+		options.path = addQueryArgs(options.path, { _locale: 'site' });
 	}
 
-	return next( options );
+	return next(options);
 };
 
-apiFetch.use( removeUserLocaleMiddleware );
+apiFetch.use(removeUserLocaleMiddleware);

@@ -1,6 +1,6 @@
 // This is the shape of the API exposed to the express payment methods via props
 // Note that this is a public API!
-export const getExpectedExpressPaymentProps = ( name: string ) => ( {
+export const getExpectedExpressPaymentProps = (name: string) => ({
 	activePaymentMethod: undefined,
 	billing: {
 		appliedCoupons: [],
@@ -94,11 +94,11 @@ export const getExpectedExpressPaymentProps = ( name: string ) => ( {
 		isProcessing: false,
 	},
 	components: {
-		LoadingMask: expect.any( Function ),
-		PaymentMethodIcons: expect.any( Function ),
-		PaymentMethodLabel: expect.any( Function ),
-		Skeleton: expect.any( Function ),
-		ValidationInputError: expect.any( Function ),
+		LoadingMask: expect.any(Function),
+		PaymentMethodIcons: expect.any(Function),
+		PaymentMethodLabel: expect.any(Function),
+		Skeleton: expect.any(Function),
+		ValidationInputError: expect.any(Function),
 	},
 	emitResponse: {
 		noticeContexts: {
@@ -120,25 +120,25 @@ export const getExpectedExpressPaymentProps = ( name: string ) => ( {
 		},
 	},
 	eventRegistration: {
-		onCheckoutAfterProcessingWithError: expect.any( Function ),
-		onCheckoutAfterProcessingWithSuccess: expect.any( Function ),
-		onCheckoutBeforeProcessing: expect.any( Function ),
-		onCheckoutFail: expect.any( Function ),
-		onCheckoutSuccess: expect.any( Function ),
-		onCheckoutValidation: expect.any( Function ),
-		onCheckoutValidationBeforeProcessing: expect.any( Function ),
-		onPaymentProcessing: expect.any( Function ),
-		onPaymentSetup: expect.any( Function ),
-		onShippingRateFail: expect.any( Function ),
-		onShippingRateSelectFail: expect.any( Function ),
-		onShippingRateSelectSuccess: expect.any( Function ),
-		onShippingRateSuccess: expect.any( Function ),
+		onCheckoutAfterProcessingWithError: expect.any(Function),
+		onCheckoutAfterProcessingWithSuccess: expect.any(Function),
+		onCheckoutBeforeProcessing: expect.any(Function),
+		onCheckoutFail: expect.any(Function),
+		onCheckoutSuccess: expect.any(Function),
+		onCheckoutValidation: expect.any(Function),
+		onCheckoutValidationBeforeProcessing: expect.any(Function),
+		onPaymentProcessing: expect.any(Function),
+		onPaymentSetup: expect.any(Function),
+		onShippingRateFail: expect.any(Function),
+		onShippingRateSelectFail: expect.any(Function),
+		onShippingRateSelectSuccess: expect.any(Function),
+		onShippingRateSuccess: expect.any(Function),
 	},
 	name,
-	onClick: expect.any( Function ),
-	onClose: expect.any( Function ),
-	onError: expect.any( Function ),
-	onSubmit: expect.any( Function ),
+	onClick: expect.any(Function),
+	onClose: expect.any(Function),
+	onError: expect.any(Function),
+	onSubmit: expect.any(Function),
 	paymentStatus: {
 		hasError: false,
 		hasFailed: false,
@@ -151,13 +151,13 @@ export const getExpectedExpressPaymentProps = ( name: string ) => ( {
 		isStarted: false,
 		isSuccessful: false,
 	},
-	setExpressPaymentError: expect.any( Function ),
+	setExpressPaymentError: expect.any(Function),
 	shippingData: {
 		isSelectingRate: false,
 		needsShipping: true,
 		selectedRates: {},
-		setSelectedRates: expect.any( Function ),
-		setShippingAddress: expect.any( Function ),
+		setSelectedRates: expect.any(Function),
+		setShippingAddress: expect.any(Function),
 		shippingAddress: {
 			address_1: '',
 			address_2: '',
@@ -187,4 +187,4 @@ export const getExpectedExpressPaymentProps = ( name: string ) => ( {
 		},
 	},
 	shouldSavePayment: false,
-} );
+});

@@ -4,7 +4,7 @@
 import { Currency, CurrencyResponse } from '@woocommerce/types';
 import { snakeCaseKeys } from '@woocommerce/base-utils';
 
-export const currencies: Record< string, Currency > = {
+export const currencies: Record<string, Currency> = {
 	EUR: {
 		code: 'EUR',
 		symbol: '€',
@@ -25,16 +25,16 @@ export const currencies: Record< string, Currency > = {
 	},
 } as const;
 
-export const currenciesAPIShape: Record< string, CurrencyResponse > =
+export const currenciesAPIShape: Record<string, CurrencyResponse> =
 	Object.fromEntries(
-		Object.entries( currencies ).map( ( [ key, value ] ) => [
+		Object.entries(currencies).map(([key, value]) => [
 			key,
-			snakeCaseKeys( value ),
-		] )
+			snakeCaseKeys(value),
+		])
 	);
 
 export const currencyControl = {
 	control: 'select',
 	options: currencies,
-	mapping: Object.keys( currencies ),
+	mapping: Object.keys(currencies),
 };

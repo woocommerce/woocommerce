@@ -9,7 +9,7 @@ import { Button } from '@wordpress/components';
 import { Bullet } from './bullet';
 import './partner-card.scss';
 
-export const PartnerCard = ( {
+export const PartnerCard = ({
 	name,
 	logo,
 	description,
@@ -23,56 +23,56 @@ export const PartnerCard = ( {
 	name: string;
 	logo: string;
 	description: string;
-	benefits: ( string | JSX.Element )[];
+	benefits: (string | JSX.Element)[];
 	terms: string | JSX.Element;
 	children?: React.ReactNode;
 	actionText?: string;
 	onClick: () => void;
 	isBusy?: boolean;
-} ) => {
+}) => {
 	return (
 		<div className="woocommerce-tax-partner-card">
 			<div className="woocommerce-tax-partner-card__logo">
-				<img src={ logo } alt={ name } />
+				<img src={logo} alt={name} />
 			</div>
 
 			<div className="woocommerce-tax-partner-card__description">
-				{ description }
+				{description}
 			</div>
 			<ul className="woocommerce-tax-partner-card__benefits">
-				{ benefits.map( ( benefit, i ) => {
+				{benefits.map((benefit, i) => {
 					return (
 						<li
 							className="woocommerce-tax-partner-card__benefit"
-							key={ i }
+							key={i}
 						>
 							<span className="woocommerce-tax-partner-card__benefit-bullet">
 								<Bullet />
 							</span>
 							<span className="woocommerce-tax-partner-card__benefit-text">
-								{ benefit }
+								{benefit}
 							</span>
 						</li>
 					);
-				} ) }
+				})}
 			</ul>
 
 			<div className="woocommerce-tax-partner-card__action">
 				<div className="woocommerce-tax-partner-card__terms">
-					{ terms }
+					{terms}
 				</div>
-				{ children ? (
+				{children ? (
 					children
 				) : (
 					<Button
 						isSecondary
-						onClick={ onClick }
-						isBusy={ isBusy }
-						disabled={ isBusy }
+						onClick={onClick}
+						isBusy={isBusy}
+						disabled={isBusy}
 					>
-						{ actionText }
+						{actionText}
 					</Button>
-				) }
+				)}
 			</div>
 		</div>
 	);

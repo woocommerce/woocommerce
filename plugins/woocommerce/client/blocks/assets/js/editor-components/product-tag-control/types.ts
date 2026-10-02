@@ -5,9 +5,9 @@ import type { SearchListItem as SearchListItemProps } from '../search-list-contr
 
 export type ProductTagControlProps = {
 	isCompact?: boolean;
-	onChange: ( selected: SearchListItemProps[] ) => void;
-	onOperatorChange?: ( operator: string ) => void;
+	onChange: (selected: SearchListItemProps[]) => void;
+	onOperatorChange?: (operator: string) => void;
 	operator?: string;
 	// Selected tag ids.
-	selected: ( number | string )[];
+	selected: (number | string)[];
 };

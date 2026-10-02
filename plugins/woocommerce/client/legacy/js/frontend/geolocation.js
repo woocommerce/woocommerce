@@ -1,5 +1,5 @@
 /*global wc_geolocation_params */
-jQuery( function( $ ) {
+jQuery( function ( $ ) {
 	/**
 	 * Contains the current geo hash (or false if the hash
 	 * is not set/cannot be determined).
@@ -31,23 +31,31 @@ jQuery( function( $ ) {
 	 * @returns {boolean}
 	 */
 	function needs_refresh() {
-		return geo_hash && ( new URLSearchParams( window.location.search ) ).get( 'v' ) !== geo_hash;
+		return (
+			geo_hash &&
+			new URLSearchParams( window.location.search ).get( 'v' ) !==
+				geo_hash
+		);
 	}
 
 	/**
 	 * Appends (or replaces) the geo hash used for links on the current page.
 	 */
-	var $append_hashes = function() {
+	var $append_hashes = function () {
 		if ( ! geo_hash ) {
 			return;
 		}
 
-		$( 'a[href^="' + wc_geolocation_params.home_url + '"]:not(a[href*="v="]), a[href^="/"]:not(a[href*="v="])' ).each( function() {
-			var $this      = $( this ),
-				href       = $this.attr( 'href' ),
+		$(
+			'a[href^="' +
+				wc_geolocation_params.home_url +
+				'"]:not(a[href*="v="]), a[href^="/"]:not(a[href*="v="])'
+		).each( function () {
+			var $this = $( this ),
+				href = $this.attr( 'href' ),
 				href_parts = href.split( '#' );
 
-			href = href_parts[0];
+			href = href_parts[ 0 ];
 
 			if ( href.indexOf( '?' ) > 0 ) {
 				href = href + '&v=' + geo_hash;
@@ -55,22 +63,31 @@ jQuery( function( $ ) {
 				href = href + '?v=' + geo_hash;
 			}
 
-			if ( typeof href_parts[1] !== 'undefined' && href_parts[1] !== null ) {
-				href = href + '#' + href_parts[1];
+			if (
+				typeof href_parts[ 1 ] !== 'undefined' &&
+				href_parts[ 1 ] !== null
+			) {
+				href = href + '#' + href_parts[ 1 ];
 			}
 
 			$this.attr( 'href', href );
-		});
+		} );
 	};
 
 	var $geolocate_customer = {
-		url: wc_geolocation_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'get_customer_location' ),
+		url: wc_geolocation_params.wc_ajax_url
+			.toString()
+			.replace( '%%endpoint%%', 'get_customer_location' ),
 		type: 'GET',
-		success: function( response ) {
-			if ( response.success && response.data.hash && response.data.hash !== geo_hash ) {
+		success: function ( response ) {
+			if (
+				response.success &&
+				response.data.hash &&
+				response.data.hash !== geo_hash
+			) {
 				$geolocation_redirect( response.data.hash );
 			}
-		}
+		},
 	};
 
 	/**
@@ -79,11 +96,11 @@ jQuery( function( $ ) {
 	 *
 	 * @param {string} hash
 	 */
-	var $geolocation_redirect = function( hash ) {
+	var $geolocation_redirect = function ( hash ) {
 		// Updates our (cookie-based) cache of the hash value. Expires in 1 hour.
 		Cookies.set( 'woocommerce_geo_hash', hash, { expires: 1 / 24 } );
 
-		const urlQuery     = new URL( window.location ).searchParams;
+		const urlQuery = new URL( window.location ).searchParams;
 		const existingHash = urlQuery.get( 'v' );
 
 		// If the current URL does not contain the expected hash, redirect.
@@ -107,7 +124,9 @@ jQuery( function( $ ) {
 			var hasField = $this.find( 'input[name="v"]' ).length > 0;
 
 			if ( method && 'get' === method.toLowerCase() && ! hasField ) {
-				$this.append( '<input type="hidden" name="v" value="' + geo_hash + '" />' );
+				$this.append(
+					'<input type="hidden" name="v" value="' + geo_hash + '" />'
+				);
 			} else {
 				var href = $this.attr( 'action' );
 				if ( href ) {
@@ -118,7 +137,7 @@ jQuery( function( $ ) {
 					}
 				}
 			}
-		});
+		} );
 	}
 
 	// Get the current geo hash. If it doesn't exist, or if it doesn't match the current
@@ -131,12 +150,12 @@ jQuery( function( $ ) {
 	update_forms();
 	$append_hashes();
 
-	$( document.body ).on( 'added_to_cart', function() {
+	$( document.body ).on( 'added_to_cart', function () {
 		$append_hashes();
-	});
+	} );
 
 	// Enable user to trigger manual append hashes on AJAX operations
-	$( document.body ).on( 'woocommerce_append_geo_hashes', function() {
+	$( document.body ).on( 'woocommerce_append_geo_hashes', function () {
 		$append_hashes();
-	});
-});
+	} );
+} );

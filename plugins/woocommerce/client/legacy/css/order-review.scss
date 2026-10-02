@@ -2,9 +2,7 @@
 // sibling selector can fill stars 1..N without `:has()`.
 
 .woocommerce-review-order {
-
 	&.is-success {
-
 		.woocommerce-review-order__title,
 		.woocommerce-review-order__intro,
 		.woocommerce-review-order__legend,
@@ -144,7 +142,6 @@
 	}
 
 	@media (max-width: 600px) {
-
 		&__item-row {
 			flex-direction: column;
 		}
@@ -216,7 +213,9 @@
 	}
 
 	// Checked input fills its own star + every following sibling (visual left).
-	&__input:checked ~ .woocommerce-star-rating__star .woocommerce-star-rating__icon {
+	&__input:checked
+		~ .woocommerce-star-rating__star
+		.woocommerce-star-rating__icon {
 		opacity: 1;
 	}
 
@@ -225,7 +224,9 @@
 	}
 
 	&__star:hover .woocommerce-star-rating__icon,
-	&__star:hover ~ .woocommerce-star-rating__star .woocommerce-star-rating__icon {
+	&__star:hover
+		~ .woocommerce-star-rating__star
+		.woocommerce-star-rating__icon {
 		opacity: 1;
 	}
 

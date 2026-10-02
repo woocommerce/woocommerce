@@ -22,21 +22,18 @@ export const usePriceConstraint = (
 ) => {
 	const step = 1 * 10 ** minorUnit;
 	let currentConstraint = null;
-	const parsedPrice = parseFloat( price );
+	const parsedPrice = parseFloat(price);
 
-	if ( ! isNaN( parsedPrice ) ) {
-		if ( direction === ROUND_UP ) {
-			currentConstraint = Math.ceil( parsedPrice / step ) * step;
-		} else if ( direction === ROUND_DOWN ) {
-			currentConstraint = Math.floor( parsedPrice / step ) * step;
+	if (!isNaN(parsedPrice)) {
+		if (direction === ROUND_UP) {
+			currentConstraint = Math.ceil(parsedPrice / step) * step;
+		} else if (direction === ROUND_DOWN) {
+			currentConstraint = Math.floor(parsedPrice / step) * step;
 		}
 	}
 
-	const previousConstraint = usePrevious(
-		currentConstraint,
-		Number.isFinite
-	);
-	return Number.isFinite( currentConstraint )
+	const previousConstraint = usePrevious(currentConstraint, Number.isFinite);
+	return Number.isFinite(currentConstraint)
 		? currentConstraint
 		: previousConstraint;
 };
@@ -49,7 +46,7 @@ export const usePriceConstraint = (
  * @param {string|undefined} priceData.maxPrice  Max price in minor unit, e.g. cents.
  * @param {number}           priceData.minorUnit Price minor unit (number of digits after the decimal separator).
  */
-export default ( {
+export default ({
 	minPrice,
 	maxPrice,
 	minorUnit,
@@ -57,17 +54,13 @@ export default ( {
 	minPrice: string | undefined;
 	maxPrice: string | undefined;
 	minorUnit: number;
-} ) => {
+}) => {
 	return {
 		minConstraint: usePriceConstraint(
 			minPrice || '',
 			minorUnit,
 			ROUND_DOWN
 		),
-		maxConstraint: usePriceConstraint(
-			maxPrice || '',
-			minorUnit,
-			ROUND_UP
-		),
+		maxConstraint: usePriceConstraint(maxPrice || '', minorUnit, ROUND_UP),
 	};
 };

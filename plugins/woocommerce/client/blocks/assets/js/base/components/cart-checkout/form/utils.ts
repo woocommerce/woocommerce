@@ -24,7 +24,7 @@ export interface FieldProps {
 	className: string;
 }
 
-const SECTIONED_ADDRESS_TYPES = [ 'billing', 'shipping' ];
+const SECTIONED_ADDRESS_TYPES = ['billing', 'shipping'];
 
 /**
  * Build the `autocomplete` attribute value for a checkout field.
@@ -46,25 +46,25 @@ export const getAutoCompleteValue = (
 ): string | undefined => {
 	// Registered field config reaches us from PHP unvalidated, so neither
 	// argument is guaranteed to be the string its type claims.
-	if ( typeof autocomplete !== 'string' ) {
+	if (typeof autocomplete !== 'string') {
 		return undefined;
 	}
 
 	const value = autocomplete.trim();
 
-	if ( ! value ) {
+	if (!value) {
 		return undefined;
 	}
 
 	const lowerCaseValue = value.toLowerCase();
 
-	if ( lowerCaseValue === 'on' || lowerCaseValue === 'off' ) {
+	if (lowerCaseValue === 'on' || lowerCaseValue === 'off') {
 		return value;
 	}
 
 	// A field that already supplies its own tokens would overflow the token
 	// limit once prefixed, and the browser drops the whole value.
-	if ( value.includes( ' ' ) ) {
+	if (value.includes(' ')) {
 		return value;
 	}
 
@@ -73,52 +73,52 @@ export const getAutoCompleteValue = (
 			? fieldAddressType.trim().toLowerCase()
 			: '';
 
-	if ( ! SECTIONED_ADDRESS_TYPES.includes( addressType ) ) {
+	if (!SECTIONED_ADDRESS_TYPES.includes(addressType)) {
 		return value;
 	}
 
-	return `section-${ addressType } ${ addressType } ${ value }`;
+	return `section-${addressType} ${addressType} ${value}`;
 };
 
 export const createFieldProps = (
-	field: KeyedParsedFormFields[ number ],
+	field: KeyedParsedFormFields[number],
 	formId: string,
 	fieldAddressType: string
-): FieldProps => ( {
-	id: `${ formId }-${ field?.key }`.replaceAll( '/', '-' ), // Replace all slashes with hyphens to avoid invalid HTML ID.
-	errorId: `${ fieldAddressType }_${ field?.key }`,
-	name: `${ fieldAddressType }_${ field?.key }`,
-	label: ( field?.required ? field?.label : field?.optionalLabel ) || '',
+): FieldProps => ({
+	id: `${formId}-${field?.key}`.replaceAll('/', '-'), // Replace all slashes with hyphens to avoid invalid HTML ID.
+	errorId: `${fieldAddressType}_${field?.key}`,
+	name: `${fieldAddressType}_${field?.key}`,
+	label: (field?.required ? field?.label : field?.optionalLabel) || '',
 	autoCapitalize: field?.autocapitalize,
-	autoComplete: getAutoCompleteValue( field?.autocomplete, fieldAddressType ),
+	autoComplete: getAutoCompleteValue(field?.autocomplete, fieldAddressType),
 	errorMessage: field?.errorMessage || '',
 	required: field?.required,
 	placeholder: field?.placeholder,
-	className: `wc-block-components-address-form__${ field?.key }`.replaceAll(
+	className: `wc-block-components-address-form__${field?.key}`.replaceAll(
 		'/',
 		'-'
 	), // Replace all slashes with hyphens to avoid invalid HTML classes.,
 	...field?.attributes,
-} );
+});
 
-export const createCheckboxFieldProps = ( fieldProps: FieldProps ) => {
+export const createCheckboxFieldProps = (fieldProps: FieldProps) => {
 	const { autoCapitalize, autoComplete, placeholder, ...rest } = fieldProps;
 	return rest;
 };
-export const getFieldData = < T extends keyof AddressForm >(
+export const getFieldData = <T extends keyof AddressForm>(
 	key: T,
 	fields: KeyedParsedFormFields,
 	values: AddressFormValues
 ): {
-	field: AddressForm[ typeof key ] & {
+	field: AddressForm[typeof key] & {
 		key: typeof key;
 		errorMessage?: string;
 	};
 	value: string;
 } | null => {
-	const addressField = fields.find( ( _field ) => _field.key === key );
-	const addressValue = objectHasProp( values, key ) ? values[ key ] : '';
-	if ( ! addressField ) {
+	const addressField = fields.find((_field) => _field.key === key);
+	const addressValue = objectHasProp(values, key) ? values[key] : '';
+	if (!addressField) {
 		return null;
 	}
 
@@ -132,7 +132,7 @@ export const hasSchemaRules = (
 	field: Field,
 	key: 'required' | 'hidden' | 'validation'
 ): field is Field & {
-	[ K in typeof key ]: JSONSchemaType< DocumentObject< 'global' > >;
+	[K in typeof key]: JSONSchemaType<DocumentObject<'global'>>;
 } => {
-	return isObject( field[ key ] ) && Object.keys( field[ key ] ).length > 0;
+	return isObject(field[key]) && Object.keys(field[key]).length > 0;
 };

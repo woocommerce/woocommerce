@@ -49,7 +49,7 @@ const WC_ANALYTICS_ORDER_ATTRIBUTION_ADMIN_URL =
  * @return {JSX.Element} The rendered component.
  *
  */
-export const OrderAttributionInstallBanner = ( {
+export const OrderAttributionInstallBanner = ({
 	bannerImage = null,
 	bannerType = BANNER_TYPE_BIG,
 	eventContext = 'analytics-overview',
@@ -58,73 +58,73 @@ export const OrderAttributionInstallBanner = ( {
 	title = '',
 	description = '',
 	buttonText = '',
-} ) => {
-	const [ isInstalling, setIsInstalling ] = useState( false );
+}) => {
+	const [isInstalling, setIsInstalling] = useState(false);
 	const { isDismissed, dismiss, shouldShowBanner } =
-		useOrderAttributionInstallBanner( { isInstalling } );
-	const { installAndActivatePlugins } = useDispatch( pluginsStore );
+		useOrderAttributionInstallBanner({ isInstalling });
+	const { installAndActivatePlugins } = useDispatch(pluginsStore);
 
 	const onButtonClick = () => {
-		setIsInstalling( true );
-		recordEvent( 'order_attribution_install_banner_clicked', {
+		setIsInstalling(true);
+		recordEvent('order_attribution_install_banner_clicked', {
 			path: getPath(),
 			context: eventContext,
-		} );
+		});
 
-		installAndActivatePlugins( [ WC_ANALYTICS_PLUGIN_SLUG ] )
-			.then( ( response ) => {
+		installAndActivatePlugins([WC_ANALYTICS_PLUGIN_SLUG])
+			.then((response) => {
 				window.location.href = WC_ANALYTICS_ORDER_ATTRIBUTION_ADMIN_URL;
-				createNoticesFromResponse( response );
-			} )
-			.catch( ( error ) => {
-				createNoticesFromResponse( error );
-				setIsInstalling( false );
-			} );
+				createNoticesFromResponse(response);
+			})
+			.catch((error) => {
+				createNoticesFromResponse(error);
+				setIsInstalling(false);
+			});
 	};
 
-	const getShouldRender = useCallback( () => {
+	const getShouldRender = useCallback(() => {
 		// The header banner should be shown if shouldShowBanner is true and the big banner is dismissed
-		if ( bannerType === BANNER_TYPE_HEADER ) {
+		if (bannerType === BANNER_TYPE_HEADER) {
 			return shouldShowBanner && isDismissed;
 		}
 
 		// The small banner should always be shown if shouldShowBanner is true.
-		if ( ! dismissable ) {
+		if (!dismissable) {
 			return shouldShowBanner;
 		}
 
 		// The big banner should be shown if shouldShowBanner is true and the banner is not dismissed.
-		return shouldShowBanner && ! isDismissed;
-	}, [ bannerType, shouldShowBanner, isDismissed, dismissable ] );
+		return shouldShowBanner && !isDismissed;
+	}, [bannerType, shouldShowBanner, isDismissed, dismissable]);
 
 	const shouldRender = getShouldRender();
 
-	useEffect( () => {
-		if ( ! shouldRender ) {
+	useEffect(() => {
+		if (!shouldRender) {
 			return;
 		}
-		recordEvent( 'order_attribution_install_banner_viewed', {
+		recordEvent('order_attribution_install_banner_viewed', {
 			path: getPath(),
 			context: eventContext,
-		} );
-	}, [ eventContext, shouldRender ] );
+		});
+	}, [eventContext, shouldRender]);
 
-	if ( ! shouldRender ) {
+	if (!shouldRender) {
 		return null;
 	}
 
-	if ( bannerType === BANNER_TYPE_HEADER ) {
+	if (bannerType === BANNER_TYPE_HEADER) {
 		return (
 			<Button
 				className="woocommerce-order-attribution-install-header-banner"
 				variant="secondary"
-				icon={ plugins }
+				icon={plugins}
 				size="default"
-				onClick={ onButtonClick }
-				isBusy={ isInstalling }
-				disabled={ isInstalling }
+				onClick={onButtonClick}
+				isBusy={isInstalling}
+				disabled={isInstalling}
 			>
-				{ __( 'Try Order Attribution', 'woocommerce' ) }
+				{__('Try Order Attribution', 'woocommerce')}
 			</Button>
 		);
 	}
@@ -134,24 +134,24 @@ export const OrderAttributionInstallBanner = ( {
 	return (
 		<Card
 			size="medium"
-			className={ `woocommerce-order-attribution-install-banner ${
+			className={`woocommerce-order-attribution-install-banner ${
 				isSmallBanner ? 'small' : ''
-			}` }
+			}`}
 		>
 			<CardBody
-				className={ `woocommerce-order-attribution-install-banner__body ${
+				className={`woocommerce-order-attribution-install-banner__body ${
 					isSmallBanner ? 'small' : ''
-				}` }
+				}`}
 			>
 				<div className="woocommerce-order-attribution-install-banner__image_container">
-					{ bannerImage }
+					{bannerImage}
 				</div>
 				<div
-					className={ `woocommerce-order-attribution-install-banner__text_container ${
+					className={`woocommerce-order-attribution-install-banner__text_container ${
 						isSmallBanner ? 'small' : ''
-					}` }
+					}`}
 				>
-					{ badgeText && (
+					{badgeText && (
 						<div className="woocommerce-order-attribution-install-banner__text-badge">
 							<Text
 								className="woocommerce-order-attribution-install-banner__text-description"
@@ -159,48 +159,48 @@ export const OrderAttributionInstallBanner = ( {
 								size="12"
 								align="center"
 							>
-								{ badgeText }
+								{badgeText}
 							</Text>
 						</div>
-					) }
-					{ title && (
+					)}
+					{title && (
 						<Text
 							className="woocommerce-order-attribution-install-banner__text-title"
 							as="p"
 							size="16"
 						>
-							{ title }
+							{title}
 						</Text>
-					) }
-					{ description && (
+					)}
+					{description && (
 						<Text
 							className="woocommerce-order-attribution-install-banner__text-description"
 							as="p"
 							size="12"
 						>
-							{ description }
+							{description}
 						</Text>
-					) }
+					)}
 					<div>
 						<Button
-							className={ isSmallBanner ? 'small' : '' }
-							variant={ isSmallBanner ? 'secondary' : 'primary' }
-							onClick={ onButtonClick }
-							iconPosition={ isSmallBanner ? 'right' : null }
-							isBusy={ isInstalling }
-							disabled={ isInstalling }
+							className={isSmallBanner ? 'small' : ''}
+							variant={isSmallBanner ? 'secondary' : 'primary'}
+							onClick={onButtonClick}
+							iconPosition={isSmallBanner ? 'right' : null}
+							isBusy={isInstalling}
+							disabled={isInstalling}
 						>
-							{ buttonText }
+							{buttonText}
 						</Button>
-						{ dismissable && (
+						{dismissable && (
 							<Button
 								variant="tertiary"
-								onClick={ () => dismiss( eventContext ) }
-								disabled={ isInstalling }
+								onClick={() => dismiss(eventContext)}
+								disabled={isInstalling}
 							>
-								{ __( 'Dismiss', 'woocommerce' ) }
+								{__('Dismiss', 'woocommerce')}
 							</Button>
-						) }
+						)}
 					</div>
 				</div>
 			</CardBody>

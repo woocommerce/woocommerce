@@ -4,5 +4,5 @@
 import { useBlockProps } from '@wordpress/block-editor';
 
 export const Save = () => {
-	return <div { ...useBlockProps.save() }></div>;
+	return <div {...useBlockProps.save()}></div>;
 };

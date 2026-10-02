@@ -12,18 +12,18 @@ import {
 	hasAllFieldsForShippingRates,
 } from '@woocommerce/base-utils';
 
-const Block = ( {
+const Block = ({
 	className = '',
 }: {
 	className?: string;
-} ): JSX.Element | null => {
+}): JSX.Element | null => {
 	const { cartNeedsShipping, shippingRates, shippingAddress } =
 		useStoreCart();
-	const prefersCollection = useSelect( ( select ) =>
-		select( checkoutStore ).prefersCollection()
+	const prefersCollection = useSelect((select) =>
+		select(checkoutStore).prefersCollection()
 	);
 
-	if ( ! cartNeedsShipping ) {
+	if (!cartNeedsShipping) {
 		return null;
 	}
 
@@ -32,27 +32,21 @@ const Block = ( {
 		prefersCollection ?? false
 	);
 
-	const hasCompleteAddress = hasAllFieldsForShippingRates( shippingAddress );
+	const hasCompleteAddress = hasAllFieldsForShippingRates(shippingAddress);
 	return (
-		<TotalsWrapper className={ className }>
+		<TotalsWrapper className={className}>
 			<TotalsShipping
-				shippingRates={ filteredRates }
+				shippingRates={filteredRates}
 				label={
 					prefersCollection
-						? __( 'Pickup', 'woocommerce' )
-						: __( 'Delivery', 'woocommerce' )
+						? __('Pickup', 'woocommerce')
+						: __('Delivery', 'woocommerce')
 				}
 				placeholder={
 					<span className="wc-block-components-shipping-placeholder__value">
-						{ hasCompleteAddress
-							? __(
-									'No available delivery option',
-									'woocommerce'
-							  )
-							: __(
-									'Enter address to calculate',
-									'woocommerce'
-							  ) }
+						{hasCompleteAddress
+							? __('No available delivery option', 'woocommerce')
+							: __('Enter address to calculate', 'woocommerce')}
 					</span>
 				}
 			/>

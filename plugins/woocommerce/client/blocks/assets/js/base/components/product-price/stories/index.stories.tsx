@@ -9,7 +9,7 @@ import { currencyControl } from '@woocommerce/storybook-controls';
  */
 import ProductPrice, { ProductPriceProps } from '..';
 
-const ALLOWED_ALIGN_VALUES = [ 'left', 'center', 'right' ];
+const ALLOWED_ALIGN_VALUES = ['left', 'center', 'right'];
 
 export default {
 	title: 'Base Components/ProductPrice',
@@ -35,21 +35,21 @@ export default {
 			suffix: '',
 		},
 	},
-} as Meta< ProductPriceProps >;
+} as Meta<ProductPriceProps>;
 
-const Template: StoryFn< ProductPriceProps > = ( args ) => (
-	<ProductPrice { ...args } />
+const Template: StoryFn<ProductPriceProps> = (args) => (
+	<ProductPrice {...args} />
 );
 
-export const Default = Template.bind( {} );
+export const Default = Template.bind({});
 Default.args = {};
 
-export const Sale = Template.bind( {} );
+export const Sale = Template.bind({});
 Sale.args = {
 	regularPrice: 4500,
 };
 
-export const Range = Template.bind( {} );
+export const Range = Template.bind({});
 Range.args = {
 	maxPrice: 5000,
 	minPrice: 3000,

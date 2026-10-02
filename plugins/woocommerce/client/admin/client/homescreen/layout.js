@@ -47,56 +47,54 @@ import {
 import { hasTwoColumnLayout } from './utils';
 import { isFeatureEnabled } from '~/utils/features';
 
-const TaskLists = lazy( () =>
-	import( /* webpackChunkName: "tasks" */ '../task-lists' ).then(
-		( module ) => ( {
-			default: module.TaskLists,
-		} )
-	)
+const TaskLists = lazy(() =>
+	import(/* webpackChunkName: "tasks" */ '../task-lists').then((module) => ({
+		default: module.TaskLists,
+	}))
 );
 
-export const Layout = ( {
+export const Layout = ({
 	defaultHomescreenLayout,
 	query,
 	hasTaskList,
 	hasStaleTask,
 	showingProgressHeader,
 	isLoadingTaskLists,
-} ) => {
+}) => {
 	const userPrefs = useUserPreferences();
-	const { createInfoNotice } = dispatch( 'core/notices' );
+	const { createInfoNotice } = dispatch('core/notices');
 
 	// Use hook to get setup task list state so when the task list is completed or hidden, the homescreen layout is updated immediately
 	const { setupTaskListActive: isSetupTaskListActive, setupTaskListHidden } =
-		useTaskListsState( {
+		useTaskListsState({
 			setupTasklist: true,
 			extendedTaskList: false,
-		} );
+		});
 
-	const isTaskScreen = Object.keys( query ).length > 0 && !! query.task; // ?&task=<x> query param is used to show tasks instead of the homescreen
-	const isDashboardShown = ! isTaskScreen;
+	const isTaskScreen = Object.keys(query).length > 0 && !!query.task; // ?&task=<x> query param is used to show tasks instead of the homescreen
+	const isDashboardShown = !isTaskScreen;
 	const twoColumns = hasTwoColumnLayout(
 		userPrefs.homepage_layout,
 		defaultHomescreenLayout,
 		isSetupTaskListActive
 	);
 
-	const isWideViewport = useRef( true );
-	const maybeToggleColumns = useCallback( () => {
+	const isWideViewport = useRef(true);
+	const maybeToggleColumns = useCallback(() => {
 		isWideViewport.current = window.innerWidth >= 782;
-	}, [] );
+	}, []);
 
-	useLayoutEffect( () => {
+	useLayoutEffect(() => {
 		maybeToggleColumns();
-		window.addEventListener( 'resize', maybeToggleColumns );
+		window.addEventListener('resize', maybeToggleColumns);
 
 		return () => {
-			window.removeEventListener( 'resize', maybeToggleColumns );
+			window.removeEventListener('resize', maybeToggleColumns);
 		};
-	}, [ maybeToggleColumns ] );
+	}, [maybeToggleColumns]);
 
-	useEffect( () => {
-		if ( query?.nox === 'test_account_created' ) {
+	useEffect(() => {
+		if (query?.nox === 'test_account_created') {
 			createInfoNotice(
 				__(
 					'Your WooPayments test account was successfully created.',
@@ -108,14 +106,14 @@ export const Layout = ( {
 				}
 			);
 		}
-	}, [ query?.nox, createInfoNotice ] );
+	}, [query?.nox, createInfoNotice]);
 
 	// A stale task would render a blank screen, so send it to the homescreen instead
-	useEffect( () => {
-		if ( hasStaleTask ) {
-			getHistory().replace( getNewPath( {}, '/', {} ) );
+	useEffect(() => {
+		if (hasStaleTask) {
+			getHistory().replace(getNewPath({}, '/', {}));
 		}
-	}, [ hasStaleTask ] );
+	}, [hasStaleTask]);
 
 	const shouldStickColumns = isWideViewport.current && twoColumns;
 	const shouldShowMobileAppModal = query.mobileAppModal ?? false;
@@ -126,13 +124,13 @@ export const Layout = ( {
 
 	const renderTaskList = () => {
 		return (
-			<Suspense fallback={ <TasksPlaceholder query={ query } /> }>
-				{ ! setupTaskListHidden && isDashboardShown && (
+			<Suspense fallback={<TasksPlaceholder query={query} />}>
+				{!setupTaskListHidden && isDashboardShown && (
 					<>
 						<ProgressTitle taskListId="setup" />
 					</>
-				) }
-				<TaskLists query={ query } />
+				)}
+				<TaskLists query={query} />
 			</Suspense>
 		);
 	};
@@ -140,26 +138,26 @@ export const Layout = ( {
 	const renderColumns = () => {
 		return (
 			<>
-				<Column shouldStick={ shouldStickColumns }>
-					{ ! isLoadingTaskLists && ! showingProgressHeader && (
+				<Column shouldStick={shouldStickColumns}>
+					{!isLoadingTaskLists && !showingProgressHeader && (
 						<ActivityHeader
 							className="your-store-today"
-							title={ __( 'Your store today', 'woocommerce' ) }
-							subtitle={ __(
+							title={__('Your store today', 'woocommerce')}
+							subtitle={__(
 								'To-dos, tips, and insights for your business',
 								'woocommerce'
-							) }
+							)}
 						/>
-					) }
-					{ ! isSetupTaskListActive && <WooHomescreenWCPayFeature /> }
-					{ ! isTaskListVisible( 'setup' ) && <ActivityPanel /> }
-					{ hasTaskList && renderTaskList() }
+					)}
+					{!isSetupTaskListActive && <WooHomescreenWCPayFeature />}
+					{!isTaskListVisible('setup') && <ActivityPanel />}
+					{hasTaskList && renderTaskList()}
 					<Promotions format="promo-card" />
 					<InboxPanel />
 				</Column>
-				<Column shouldStick={ shouldStickColumns }>
-					{ isFeatureEnabled( 'analytics' ) && <StatsOverview /> }
-					{ ! isSetupTaskListActive && <StoreManagementLinks /> }
+				<Column shouldStick={shouldStickColumns}>
+					{isFeatureEnabled('analytics') && <StatsOverview />}
+					{!isSetupTaskListActive && <StoreManagementLinks />}
 				</Column>
 			</>
 		);
@@ -167,23 +165,23 @@ export const Layout = ( {
 
 	return (
 		<>
-			{ isDashboardShown && (
+			{isDashboardShown && (
 				<WooHomescreenHeaderBanner
-					className={ clsx( 'woocommerce-homescreen', {
-						'woocommerce-homescreen-column': ! twoColumns,
-					} ) }
+					className={clsx('woocommerce-homescreen', {
+						'woocommerce-homescreen-column': !twoColumns,
+					})}
 				/>
-			) }
+			)}
 			<div
-				className={ clsx( 'woocommerce-homescreen', {
+				className={clsx('woocommerce-homescreen', {
 					'two-columns': twoColumns,
-				} ) }
+				})}
 			>
-				{ isDashboardShown ? renderColumns() : renderTaskList() }
-				{ shouldShowMobileAppModal && <MobileAppModal /> }
-				{ shouldShowEmailImprovementsModal && (
-					<EmailImprovementsModal type={ emailImprovementsType } />
-				) }
+				{isDashboardShown ? renderColumns() : renderTaskList()}
+				{shouldShowMobileAppModal && <MobileAppModal />}
+				{shouldShowEmailImprovementsModal && (
+					<EmailImprovementsModal type={emailImprovementsType} />
+				)}
 			</div>
 		</>
 	);
@@ -213,48 +211,47 @@ Layout.propTypes = {
 };
 
 export default compose(
-	withSelect( ( select, { query } ) => {
-		const { isNotesRequesting } = select( notesStore );
-		const { getOption } = select( optionsStore );
+	withSelect((select, { query }) => {
+		const { isNotesRequesting } = select(notesStore);
+		const { getOption } = select(optionsStore);
 		const defaultHomescreenLayout =
-			getOption( 'woocommerce_default_homepage_layout' ) ||
-			'single_column';
+			getOption('woocommerce_default_homepage_layout') || 'single_column';
 
 		const {
 			getTask,
 			getTaskLists,
 			hasFinishedResolution: taskListFinishResolution,
-		} = select( onboardingStore );
+		} = select(onboardingStore);
 
-		const visibleTaskListIds = getAdminSetting( 'visibleTaskListIds', [] );
+		const visibleTaskListIds = getAdminSetting('visibleTaskListIds', []);
 		const hasTaskList = visibleTaskListIds.length > 0;
 
 		// Only fetch task lists if there are any visible task lists to avoid unnecessary API calls
 		// The task screen renders even when no task list is visible, so the stale task check below needs the fetch too
 		let isLoadingTaskLists = false;
 		let taskLists = [];
-		if ( hasTaskList || query.task ) {
-			isLoadingTaskLists = ! taskListFinishResolution( 'getTaskLists' );
+		if (hasTaskList || query.task) {
+			isLoadingTaskLists = !taskListFinishResolution('getTaskLists');
 			taskLists = getTaskLists();
 		}
 
 		// A task param is stale when it matches no fetched task: it was removed, or its list is hidden and the endpoint strips those tasks
 		// Empty task lists mean a failed or unfinished fetch, never a stale task
 		const hasStaleTask =
-			!! query.task &&
-			! isLoadingTaskLists &&
+			!!query.task &&
+			!isLoadingTaskLists &&
 			taskLists.length > 0 &&
-			! getTask( query.task );
+			!getTask(query.task);
 
 		return {
 			defaultHomescreenLayout,
-			isBatchUpdating: isNotesRequesting( 'batchUpdateNotes' ),
+			isBatchUpdating: isNotesRequesting('batchUpdateNotes'),
 			isLoadingTaskLists,
 			hasTaskList,
 			hasStaleTask,
-			showingProgressHeader: !! taskLists.find(
-				( list ) => list.isVisible && list.displayProgressHeader
+			showingProgressHeader: !!taskLists.find(
+				(list) => list.isVisible && list.displayProgressHeader
 			),
 		};
-	} )
-)( Layout );
+	})
+)(Layout);

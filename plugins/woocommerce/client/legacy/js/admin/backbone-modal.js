@@ -1,5 +1,5 @@
 /*global jQuery, Backbone, _ */
-( function( $, Backbone, _ ) {
+( function ( $, Backbone, _ ) {
 	'use strict';
 
 	/**
@@ -7,10 +7,10 @@
 	 *
 	 * @param {object} options
 	 */
-	$.fn.WCBackboneModal = function( options ) {
-		return this.each( function() {
-			( new $.WCBackboneModal( $( this ), options ) );
-		});
+	$.fn.WCBackboneModal = function ( options ) {
+		return this.each( function () {
+			new $.WCBackboneModal( $( this ), options );
+		} );
 	};
 
 	/**
@@ -19,15 +19,19 @@
 	 * @param {object} element [description]
 	 * @param {object} options [description]
 	 */
-	$.WCBackboneModal = function( element, options ) {
+	$.WCBackboneModal = function ( element, options ) {
 		// Set settings
-		var settings = $.extend( {}, $.WCBackboneModal.defaultOptions, options );
+		var settings = $.extend(
+			{},
+			$.WCBackboneModal.defaultOptions,
+			options
+		);
 
 		if ( settings.template ) {
-			new $.WCBackboneModal.View({
+			new $.WCBackboneModal.View( {
 				target: settings.template,
-				string: settings.variable
-			});
+				string: settings.variable,
+			} );
 		}
 	};
 
@@ -38,7 +42,7 @@
 	 */
 	$.WCBackboneModal.defaultOptions = {
 		template: '',
-		variable: {}
+		variable: {},
 	};
 
 	/**
@@ -46,128 +50,164 @@
 	 *
 	 * @return {null}
 	 */
-	$.WCBackboneModal.View = Backbone.View.extend({
+	$.WCBackboneModal.View = Backbone.View.extend( {
 		tagName: 'div',
 		id: 'wc-backbone-modal-dialog',
 		_target: undefined,
 		_string: undefined,
 		events: {
 			'click .modal-close': 'closeButton',
-			'click #btn-ok'     : 'addButton',
-			'click #btn-back'   : 'backButton',
-			'click #btn-next'   : 'nextButton',
+			'click #btn-ok': 'addButton',
+			'click #btn-back': 'backButton',
+			'click #btn-next': 'nextButton',
 			'touchstart #btn-ok': 'addButton',
-			'keydown'           : 'keyboardActions',
-			'input'             : 'handleInputValidation'
+			keydown: 'keyboardActions',
+			input: 'handleInputValidation',
 		},
-		resizeContent: function() {
-			var $content  = $( '.wc-backbone-modal-content' ).find( 'article' );
-			var max_h     = $( window ).height() * 0.75;
+		resizeContent: function () {
+			var $content = $( '.wc-backbone-modal-content' ).find( 'article' );
+			var max_h = $( window ).height() * 0.75;
 
-			$content.css({
-				'max-height': max_h + 'px'
-			});
+			$content.css( {
+				'max-height': max_h + 'px',
+			} );
 		},
-		initialize: function( data ) {
-			var view     = this;
+		initialize: function ( data ) {
+			var view = this;
 			this._target = data.target;
 			this._string = data.string;
 			_.bindAll( this, 'render' );
 			this.render();
 
-			$( window ).on( 'resize', function() {
+			$( window ).on( 'resize', function () {
 				view.resizeContent();
-			});
+			} );
 		},
-		render: function() {
+		render: function () {
 			var template = wp.template( this._target );
 
-			this.$el.append(
-				template( this._string )
-			);
+			this.$el.append( template( this._string ) );
 
-			$( document.body ).css({
-				'overflow': 'hidden'
-			}).append( this.$el );
+			$( document.body )
+				.css( {
+					overflow: 'hidden',
+				} )
+				.append( this.$el );
 
 			this.resizeContent();
-			this.$( '.wc-backbone-modal-content' ).attr( 'tabindex' , '0' ).trigger( 'focus' );
+			this.$( '.wc-backbone-modal-content' )
+				.attr( 'tabindex', '0' )
+				.trigger( 'focus' );
 
 			$( document.body ).trigger( 'init_tooltips' );
 
-			$( document.body ).trigger( 'wc_backbone_modal_loaded', this._target );
+			$( document.body ).trigger(
+				'wc_backbone_modal_loaded',
+				this._target
+			);
 		},
-		closeButton: function( e, addButtonCalled ) {
+		closeButton: function ( e, addButtonCalled ) {
 			e.preventDefault();
-			$( document.body ).trigger( 'wc_backbone_modal_before_remove', [ this._target, this.getFormData(), !!addButtonCalled ] );
+			$( document.body ).trigger( 'wc_backbone_modal_before_remove', [
+				this._target,
+				this.getFormData(),
+				!! addButtonCalled,
+			] );
 			this.undelegateEvents();
 			$( document ).off( 'focusin' );
-			$( document.body ).css({
-				'overflow': 'auto'
-			});
+			$( document.body ).css( {
+				overflow: 'auto',
+			} );
 			this.remove();
-			$( document.body ).trigger( 'wc_backbone_modal_removed', this._target );
+			$( document.body ).trigger(
+				'wc_backbone_modal_removed',
+				this._target
+			);
 		},
-		addButton: function( e ) {
+		addButton: function ( e ) {
 			// Allow listeners to cancel the response via event.preventDefault(),
 			// e.g. to validate inputs and keep the modal open. Covers click,
 			// touch and keyboard paths.
 			var beforeResponse = $.Event( 'wc_backbone_modal_before_response' );
-			$( document.body ).trigger( beforeResponse, [ this._target, this.$el ] );
+			$( document.body ).trigger( beforeResponse, [
+				this._target,
+				this.$el,
+			] );
 
 			if ( beforeResponse.isDefaultPrevented() ) {
 				return;
 			}
 
-			$( document.body ).trigger( 'wc_backbone_modal_response', [ this._target, this.getFormData() ] );
+			$( document.body ).trigger( 'wc_backbone_modal_response', [
+				this._target,
+				this.getFormData(),
+			] );
 			this.closeButton( e, true );
 		},
-		backButton: function( e ) {
-			$( document.body ).trigger( 'wc_backbone_modal_back_response', [ this._target, this.getFormData() ] );
+		backButton: function ( e ) {
+			$( document.body ).trigger( 'wc_backbone_modal_back_response', [
+				this._target,
+				this.getFormData(),
+			] );
 			this.closeButton( e, false );
 		},
-		nextButton: function( e ) {
+		nextButton: function ( e ) {
 			var context = this;
 			function closeModal() {
 				context.closeButton( e );
 			}
-			$( document.body ).trigger( 'wc_backbone_modal_next_response', [ this._target, this.getFormData(), closeModal ] );
+			$( document.body ).trigger( 'wc_backbone_modal_next_response', [
+				this._target,
+				this.getFormData(),
+				closeModal,
+			] );
 		},
-		getFormData: function( updating = true ) {
+		getFormData: function ( updating = true ) {
 			var data = {};
 
 			if ( updating ) {
-				$( document.body ).trigger( 'wc_backbone_modal_before_update', this._target );
+				$( document.body ).trigger(
+					'wc_backbone_modal_before_update',
+					this._target
+				);
 			}
 
-			$.each( $( 'form', this.$el ).serializeArray(), function( index, item ) {
-				if ( item.name.indexOf( '[]' ) !== -1 ) {
-					item.name = item.name.replace( '[]', '' );
-					data[ item.name ] = $.makeArray( data[ item.name ] );
-					data[ item.name ].push( item.value );
-				} else {
-					data[ item.name ] = item.value;
+			$.each(
+				$( 'form', this.$el ).serializeArray(),
+				function ( index, item ) {
+					if ( item.name.indexOf( '[]' ) !== -1 ) {
+						item.name = item.name.replace( '[]', '' );
+						data[ item.name ] = $.makeArray( data[ item.name ] );
+						data[ item.name ].push( item.value );
+					} else {
+						data[ item.name ] = item.value;
+					}
 				}
-			});
+			);
 
 			return data;
 		},
-		handleInputValidation: function() {
-			$( document.body ).trigger( 'wc_backbone_modal_validation', [ this._target, this.getFormData( false ) ] );
+		handleInputValidation: function () {
+			$( document.body ).trigger( 'wc_backbone_modal_validation', [
+				this._target,
+				this.getFormData( false ),
+			] );
 		},
-		keyboardActions: function( e ) {
+		keyboardActions: function ( e ) {
 			var button = e.keyCode || e.which;
 
 			// Enter key
 			if ( 13 === button ) {
-				var isFormField = e.target.tagName &&
+				var isFormField =
+					e.target.tagName &&
 					( e.target.tagName.toLowerCase() === 'input' ||
 						e.target.tagName.toLowerCase() === 'textarea' );
 
 				// Let selectWoo handle Enter on an enhanced-select control instead of submitting the modal.
-				var inEnhancedSelect = $( e.target ).closest(
-					'.select2-container, .select2-selection, .select2-search__field, [role="combobox"]'
-				).length > 0;
+				var inEnhancedSelect =
+					$( e.target ).closest(
+						'.select2-container, .select2-selection, .select2-search__field, [role="combobox"]'
+					).length > 0;
 
 				if ( ! isFormField && ! inEnhancedSelect ) {
 					var $okButton = this.$( '#btn-ok' );
@@ -175,7 +215,7 @@
 						if ( ! $okButton.prop( 'disabled' ) ) {
 							this.addButton( e );
 						}
-					}	else if ( $( '#btn-next' ).length ) {
+					} else if ( $( '#btn-next' ).length ) {
 						this.nextButton( e );
 					}
 				}
@@ -185,7 +225,6 @@
 			if ( 27 === button ) {
 				this.closeButton( e );
 			}
-		}
-	});
-
-}( jQuery, Backbone, _ ));
+		},
+	} );
+} )( jQuery, Backbone, _ );

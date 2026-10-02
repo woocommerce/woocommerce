@@ -34,7 +34,7 @@ export enum innerBlockAreas {
 	CHECKOUT_ORDER_SUMMARY_TOTALS = 'woocommerce/checkout-order-summary-totals-block',
 }
 
-interface CheckoutBlockOptionsMetadata extends Partial< BlockConfiguration > {
+interface CheckoutBlockOptionsMetadata extends Partial<BlockConfiguration> {
 	name: string;
 	parent: string[];
 }
@@ -46,13 +46,13 @@ export type RegisteredBlock = {
 	force: boolean;
 };
 
-export type RegisteredBlocks = Record< string, RegisteredBlock >;
+export type RegisteredBlocks = Record<string, RegisteredBlock>;
 
 export type CheckoutBlockOptions = {
 	metadata: CheckoutBlockOptionsMetadata;
 	force?: boolean;
 	component:
-		| LazyExoticComponent< React.ComponentType< unknown > >
-		| ( () => JSX.Element | null )
+		| LazyExoticComponent<React.ComponentType<unknown>>
+		| (() => JSX.Element | null)
 		| null;
 };

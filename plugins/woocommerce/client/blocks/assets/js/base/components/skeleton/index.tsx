@@ -19,7 +19,7 @@ export interface SkeletonProps {
 	ariaMessage?: string;
 }
 
-export const Skeleton = ( {
+export const Skeleton = ({
 	tag: Tag = 'div',
 	width = '100%',
 	height = '8px',
@@ -28,30 +28,30 @@ export const Skeleton = ( {
 	borderRadius = '',
 	isStatic = false,
 	ariaMessage,
-}: SkeletonProps ): JSX.Element => {
+}: SkeletonProps): JSX.Element => {
 	return (
 		<Tag
-			className={ clsx(
+			className={clsx(
 				'wc-block-components-skeleton__element',
 				{
 					'wc-block-components-skeleton__element--static': isStatic,
 				},
 				className
-			) }
-			{ ...( ariaMessage
+			)}
+			{...(ariaMessage
 				? {
 						'aria-live': 'polite',
 						'aria-label': ariaMessage,
-				  }
+					}
 				: {
 						'aria-hidden': 'true',
-				  } ) }
-			style={ {
+					})}
+			style={{
 				width,
 				height,
 				borderRadius,
 				maxWidth,
-			} }
+			}}
 		/>
 	);
 };

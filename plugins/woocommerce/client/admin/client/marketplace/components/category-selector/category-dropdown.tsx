@@ -14,17 +14,17 @@ import { recordEvent } from '@woocommerce/tracks';
 import { Category } from './types';
 import { ProductType } from '../product-list/types';
 
-function DropdownContent( props: {
+function DropdownContent(props: {
 	readonly categories: Category[];
 	readonly selected?: Category;
 	readonly onClick: () => void;
-} ): React.JSX.Element {
+}): React.JSX.Element {
 	function updateCategorySelection(
-		event: React.MouseEvent< HTMLButtonElement >
+		event: React.MouseEvent<HTMLButtonElement>
 	) {
 		const slug = event.currentTarget.value;
 
-		if ( ! slug ) {
+		if (!slug) {
 			return;
 		}
 
@@ -34,33 +34,33 @@ function DropdownContent( props: {
 		 */
 		props.onClick();
 
-		navigateTo( {
-			url: getNewPath( { category: slug } ),
-		} );
+		navigateTo({
+			url: getNewPath({ category: slug }),
+		});
 	}
 
 	return (
 		<ul className="woocommerce-marketplace__category-dropdown-list">
-			{ props.categories.map( ( category ) => (
+			{props.categories.map((category) => (
 				<li
 					className="woocommerce-marketplace__category-dropdown-item"
-					key={ category.slug }
+					key={category.slug}
 				>
 					<button
-						className={ clsx(
+						className={clsx(
 							'woocommerce-marketplace__category-dropdown-item-button',
 							{
 								'woocommerce-marketplace__category-dropdown-item-button--selected':
 									category.slug === props.selected?.slug,
 							}
-						) }
-						value={ category.slug }
-						onClick={ updateCategorySelection }
+						)}
+						value={category.slug}
+						onClick={updateCategorySelection}
 					>
-						{ category.label }
+						{category.label}
 					</button>
 				</li>
-			) ) }
+			))}
 		</ul>
 	);
 }
@@ -80,43 +80,40 @@ export default function CategoryDropdown(
 	props: CategoryDropdownProps
 ): React.JSX.Element {
 	function dropDownTracksEvent() {
-		recordEvent( 'marketplace_category_dropdown_opened', {
+		recordEvent('marketplace_category_dropdown_opened', {
 			type: props.type,
-		} );
+		});
 	}
 
 	return (
 		<Dropdown
-			renderToggle={ ( { isOpen, onToggle } ) => (
+			renderToggle={({ isOpen, onToggle }) => (
 				<button
-					onClick={ () => {
-						if ( ! isOpen ) {
+					onClick={() => {
+						if (!isOpen) {
 							dropDownTracksEvent();
 						}
 						onToggle();
-					} }
-					className={ props.buttonClassName }
-					aria-label={ __(
-						'Toggle category dropdown',
-						'woocommerce'
-					) }
+					}}
+					className={props.buttonClassName}
+					aria-label={__('Toggle category dropdown', 'woocommerce')}
 				>
-					{ props.label }
+					{props.label}
 					<Icon
-						icon={ isOpen ? chevronUp : chevronDown }
-						size={ props.arrowIconSize }
+						icon={isOpen ? chevronUp : chevronDown}
+						size={props.arrowIconSize}
 					/>
 				</button>
-			) }
-			className={ props.className }
-			renderContent={ ( { onToggle } ) => (
+			)}
+			className={props.className}
+			renderContent={({ onToggle }) => (
 				<DropdownContent
-					categories={ props.categories }
-					selected={ props.selected }
-					onClick={ onToggle }
+					categories={props.categories}
+					selected={props.selected}
+					onClick={onToggle}
 				/>
-			) }
-			contentClassName={ props.contentClassName }
+			)}
+			contentClassName={props.contentClassName}
 		/>
 	);
 }

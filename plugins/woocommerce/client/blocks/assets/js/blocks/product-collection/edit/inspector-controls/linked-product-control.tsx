@@ -35,91 +35,91 @@ const REFERENCE_TYPE_PRODUCT = 'product';
 const REFERENCE_TYPE_CART = 'cart';
 const REFERENCE_TYPE_ORDER = 'order';
 
-const ProductButton: React.FC< {
+const ProductButton: React.FC<{
 	isOpen: boolean;
 	onToggle: () => void;
 	product: ProductResponseItem | null;
 	isLoading: boolean;
-} > = ( { isOpen, onToggle, product, isLoading } ) => {
-	if ( isLoading && ! product ) {
+}> = ({ isOpen, onToggle, product, isLoading }) => {
+	if (isLoading && !product) {
 		return <Spinner />;
 	}
 
-	const showPlaceholder = ! product;
-	const showPlaceholderImg = showPlaceholder || ! product?.images?.[ 0 ]?.src;
+	const showPlaceholder = !product;
+	const showPlaceholderImg = showPlaceholder || !product?.images?.[0]?.src;
 	const imgSrc = showPlaceholderImg
-		? `${ WC_BLOCKS_IMAGE_URL }/blocks/product-collection/placeholder.svg`
-		: product.images[ 0 ].src;
+		? `${WC_BLOCKS_IMAGE_URL}/blocks/product-collection/placeholder.svg`
+		: product.images[0].src;
 	const imgAlt = showPlaceholderImg ? '' : product?.name;
 
 	return (
 		<Button
 			className="wc-block-product-collection-linked-product-control__button"
-			onClick={ onToggle }
-			aria-expanded={ isOpen }
-			disabled={ isLoading }
+			onClick={onToggle}
+			aria-expanded={isOpen}
+			disabled={isLoading}
 		>
 			<Flex direction="row" expanded justify="flex-start">
 				<FlexItem className="wc-block-product-collection-linked-product-control__image-container">
-					<img src={ imgSrc } alt={ imgAlt } />
+					<img src={imgSrc} alt={imgAlt} />
 				</FlexItem>
 
 				<Flex
 					direction="column"
 					align="flex-start"
-					gap={ 1 }
+					gap={1}
 					className="wc-block-product-collection-linked-product-control__content"
 				>
-					{ showPlaceholder ? (
+					{showPlaceholder ? (
 						<FlexItem>
-							<Text color="inherit" lineHeight={ 1 }>
-								{ __( 'Select product', 'woocommerce' ) }
+							<Text color="inherit" lineHeight={1}>
+								{__('Select product', 'woocommerce')}
 							</Text>
 						</FlexItem>
 					) : (
 						<>
 							<FlexItem>
-								<Text color="inherit" lineHeight={ 1 }>
-									{ product?.name
-										? decodeEntities( product.name )
-										: '' }
+								<Text color="inherit" lineHeight={1}>
+									{product?.name
+										? decodeEntities(product.name)
+										: ''}
 								</Text>
 							</FlexItem>
 							<FlexItem>
-								<Text color="inherit" lineHeight={ 1 }>
-									{ product?.sku }
+								<Text color="inherit" lineHeight={1}>
+									{product?.sku}
 								</Text>
 							</FlexItem>
 						</>
-					) }
+					)}
 				</Flex>
 			</Flex>
 		</Button>
 	);
 };
 
-const LinkedProductPopoverContent: React.FC< {
+const LinkedProductPopoverContent: React.FC<{
 	query: ProductCollectionQuery;
 	setAttributes: ProductCollectionSetAttributes;
-	setIsDropdownOpen: React.Dispatch< React.SetStateAction< boolean > >;
-} > = ( { query, setAttributes, setIsDropdownOpen } ) => (
+	setIsDropdownOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}> = ({ query, setAttributes, setIsDropdownOpen }) => (
 	<ProductControl
-		selected={ query?.productReference as SelectedOption }
-		onChange={ ( value: { id: number }[] = [] ) => {
-			const productId = value[ 0 ]?.id ?? null;
-			if ( productId !== null ) {
-				setAttributes( {
+		selected={query?.productReference as SelectedOption}
+		onChange={(value: { id: number }[] = []) => {
+			const productId = value[0]?.id ?? null;
+			if (productId !== null) {
+				setAttributes({
 					query: {
 						...query,
 						productReference: productId,
 					},
-				} );
-				setIsDropdownOpen( false );
+				});
+				setIsDropdownOpen(false);
 			}
-		} }
-		messages={ {
-			search: __( 'Select a product', 'woocommerce' ),
-		} }
+		}}
+		messages={{
+			search: __('Select a product', 'woocommerce'),
+		}}
 	/>
 );
 
@@ -133,18 +133,18 @@ const getFromCurrentProductRadioLabel = (
 	hasCartReference: boolean,
 	hasOrderReference: boolean
 ): string => {
-	if ( currentLocation === REFERENCE_TYPE_CART && hasCartReference ) {
-		return __( 'From products in the cart', 'woocommerce' );
+	if (currentLocation === REFERENCE_TYPE_CART && hasCartReference) {
+		return __('From products in the cart', 'woocommerce');
 	}
 
-	if ( currentLocation === REFERENCE_TYPE_ORDER && hasOrderReference ) {
-		return __( 'From products in the order', 'woocommerce' );
+	if (currentLocation === REFERENCE_TYPE_ORDER && hasOrderReference) {
+		return __('From products in the order', 'woocommerce');
 	}
 
-	return __( 'From the current product', 'woocommerce' );
+	return __('From the current product', 'woocommerce');
 };
 
-const LinkedProductControl = ( {
+const LinkedProductControl = ({
 	query,
 	setAttributes,
 	location,
@@ -154,74 +154,73 @@ const LinkedProductControl = ( {
 	setAttributes: ProductCollectionSetAttributes;
 	location: WooCommerceBlockLocation;
 	usesReference: string[] | undefined;
-} ) => {
+}) => {
 	const isProductLocation = location.type === REFERENCE_TYPE_PRODUCT;
-	const hasProductReference = !! usesReference?.includes(
+	const hasProductReference = !!usesReference?.includes(
 		REFERENCE_TYPE_PRODUCT
 	);
 	const isCartLocation = location.type === REFERENCE_TYPE_CART;
-	const hasCartReference = !! usesReference?.includes( REFERENCE_TYPE_CART );
+	const hasCartReference = !!usesReference?.includes(REFERENCE_TYPE_CART);
 
 	const isOrderLocation = location.type === REFERENCE_TYPE_ORDER;
-	const hasOrderReference =
-		!! usesReference?.includes( REFERENCE_TYPE_ORDER );
+	const hasOrderReference = !!usesReference?.includes(REFERENCE_TYPE_ORDER);
 
 	const { productReference } = query;
 
-	const { product, isLoading } = useGetProduct( productReference );
-	const [ isDropdownOpen, setIsDropdownOpen ] = useState< boolean >( false );
-	const [ radioControlState, setRadioControlState ] =
-		useState< PRODUCT_REFERENCE_TYPE >(
-			( isProductLocation || isCartLocation || isOrderLocation ) &&
-				isEmpty( productReference )
+	const { product, isLoading } = useGetProduct(productReference);
+	const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+	const [radioControlState, setRadioControlState] =
+		useState<PRODUCT_REFERENCE_TYPE>(
+			(isProductLocation || isCartLocation || isOrderLocation) &&
+				isEmpty(productReference)
 				? PRODUCT_REFERENCE_TYPE.CURRENT_PRODUCT
 				: PRODUCT_REFERENCE_TYPE.SPECIFIC_PRODUCT
 		);
-	const prevReference = useRef< number | undefined >( undefined );
+	const prevReference = useRef<number | undefined>(undefined);
 
 	const showRadioControl =
-		( isProductLocation && hasProductReference ) ||
-		( isCartLocation && hasCartReference ) ||
-		( isOrderLocation && hasOrderReference );
+		(isProductLocation && hasProductReference) ||
+		(isCartLocation && hasCartReference) ||
+		(isOrderLocation && hasOrderReference);
 	const showSpecificProductSelector = showRadioControl
 		? radioControlState === PRODUCT_REFERENCE_TYPE.SPECIFIC_PRODUCT
-		: ! isEmpty( productReference );
+		: !isEmpty(productReference);
 
 	const showLinkedProductControl =
-		( showRadioControl || showSpecificProductSelector ) &&
+		(showRadioControl || showSpecificProductSelector) &&
 		/**
 		 * Linked control is only useful for collection which uses product, cart or order reference.
 		 */
-		( hasProductReference || hasCartReference || hasOrderReference );
-	if ( ! showLinkedProductControl ) return null;
+		(hasProductReference || hasCartReference || hasOrderReference);
+	if (!showLinkedProductControl) return null;
 
 	const radioControlHelp =
 		radioControlState === PRODUCT_REFERENCE_TYPE.CURRENT_PRODUCT
 			? __(
 					'Linked products will be pulled from the product a shopper is currently viewing',
 					'woocommerce'
-			  )
+				)
 			: __(
 					'Select a product to pull the linked products from',
 					'woocommerce'
-			  );
+				);
 
-	const handleRadioControlChange = ( newValue: PRODUCT_REFERENCE_TYPE ) => {
-		if ( newValue === PRODUCT_REFERENCE_TYPE.CURRENT_PRODUCT ) {
+	const handleRadioControlChange = (newValue: PRODUCT_REFERENCE_TYPE) => {
+		if (newValue === PRODUCT_REFERENCE_TYPE.CURRENT_PRODUCT) {
 			const { productReference: toSave, ...rest } = query;
 			prevReference.current = toSave;
-			setAttributes( { query: rest } );
+			setAttributes({ query: rest });
 		} else {
-			setAttributes( {
+			setAttributes({
 				query: prevReference.current
 					? {
 							...query,
 							productReference: prevReference.current,
-					  }
+						}
 					: query,
-			} );
+			});
 		}
-		setRadioControlState( newValue );
+		setRadioControlState(newValue);
 	};
 
 	const fromCurrentProductRadioLabel = getFromCurrentProductRadioLabel(
@@ -231,15 +230,15 @@ const LinkedProductControl = ( {
 	);
 
 	return (
-		<PanelBody title={ __( 'Linked Product', 'woocommerce' ) }>
-			{ showRadioControl && (
+		<PanelBody title={__('Linked Product', 'woocommerce')}>
+			{showRadioControl && (
 				<PanelRow>
 					<RadioControl
 						className="wc-block-product-collection-product-reference-radio"
-						label={ __( 'Products to show', 'woocommerce' ) }
-						help={ radioControlHelp }
-						selected={ radioControlState }
-						options={ [
+						label={__('Products to show', 'woocommerce')}
+						help={radioControlHelp}
+						selected={radioControlState}
+						options={[
 							{
 								label: fromCurrentProductRadioLabel,
 								value: PRODUCT_REFERENCE_TYPE.CURRENT_PRODUCT,
@@ -251,37 +250,37 @@ const LinkedProductControl = ( {
 								),
 								value: PRODUCT_REFERENCE_TYPE.SPECIFIC_PRODUCT,
 							},
-						] }
-						onChange={ handleRadioControlChange }
+						]}
+						onChange={handleRadioControlChange}
 					/>
 				</PanelRow>
-			) }
-			{ showSpecificProductSelector && (
+			)}
+			{showSpecificProductSelector && (
 				<PanelRow>
 					<Dropdown
 						className="wc-block-product-collection-linked-product-control"
 						contentClassName="wc-block-product-collection-linked-product__popover-content"
-						popoverProps={ { placement: 'left-start' } }
-						renderToggle={ ( { isOpen, onToggle } ) => (
+						popoverProps={{ placement: 'left-start' }}
+						renderToggle={({ isOpen, onToggle }) => (
 							<ProductButton
-								isOpen={ isOpen }
-								onToggle={ onToggle }
-								product={ product }
-								isLoading={ isLoading }
+								isOpen={isOpen}
+								onToggle={onToggle}
+								product={product}
+								isLoading={isLoading}
 							/>
-						) }
-						renderContent={ () => (
+						)}
+						renderContent={() => (
 							<LinkedProductPopoverContent
-								query={ query }
-								setAttributes={ setAttributes }
-								setIsDropdownOpen={ setIsDropdownOpen }
+								query={query}
+								setAttributes={setAttributes}
+								setIsDropdownOpen={setIsDropdownOpen}
 							/>
-						) }
-						open={ isDropdownOpen }
-						onToggle={ () => setIsDropdownOpen( ! isDropdownOpen ) }
+						)}
+						open={isDropdownOpen}
+						onToggle={() => setIsDropdownOpen(!isDropdownOpen)}
 					/>
 				</PanelRow>
-			) }
+			)}
 		</PanelBody>
 	);
 };

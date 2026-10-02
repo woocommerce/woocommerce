@@ -34,38 +34,38 @@ import {
 import { getDefaultStockStatuses } from '../product-collection/constants';
 import { usePlaceholderProducts } from './use-placeholder-products';
 
-const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection' ];
+const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = ['collection'];
 
 const ProductTemplateInnerBlocks = () => {
 	const innerBlocksProps = useInnerBlocksProps(
 		{ className: 'wc-block-product' },
 		{ __unstableDisableLayoutClassNames: true }
 	);
-	return <li { ...innerBlocksProps } />;
+	return <li {...innerBlocksProps} />;
 };
 
 type ProductTemplateBlockPreviewProps = {
 	blocks: object[];
 	blockContextId: string | number;
 	isHidden: boolean;
-	setActiveBlockContextId: ( blockContextId: string | number ) => void;
+	setActiveBlockContextId: (blockContextId: string | number) => void;
 };
 
-const ProductTemplateBlockPreview = ( {
+const ProductTemplateBlockPreview = ({
 	blocks,
 	blockContextId,
 	isHidden,
 	setActiveBlockContextId,
-}: ProductTemplateBlockPreviewProps ) => {
-	const blockPreviewProps = useBlockPreview( {
+}: ProductTemplateBlockPreviewProps) => {
+	const blockPreviewProps = useBlockPreview({
 		blocks,
 		props: {
 			className: 'wc-block-product',
 		},
-	} );
+	});
 
 	const handleOnClick = () => {
-		setActiveBlockContextId( blockContextId );
+		setActiveBlockContextId(blockContextId);
 	};
 
 	const style = {
@@ -74,18 +74,18 @@ const ProductTemplateBlockPreview = ( {
 
 	return (
 		<li
-			{ ...blockPreviewProps }
-			tabIndex={ 0 }
+			{...blockPreviewProps}
+			tabIndex={0}
 			// eslint-disable-next-line jsx-a11y/no-noninteractive-element-to-interactive-role
 			role="button"
-			onClick={ handleOnClick }
-			onKeyPress={ handleOnClick }
-			style={ style }
+			onClick={handleOnClick}
+			onKeyPress={handleOnClick}
+			style={style}
 		/>
 	);
 };
 
-const MemoizedProductTemplateBlockPreview = memo( ProductTemplateBlockPreview );
+const MemoizedProductTemplateBlockPreview = memo(ProductTemplateBlockPreview);
 
 type ProductContentProps = {
 	attributes: { productId: string | number };
@@ -95,26 +95,23 @@ type ProductContentProps = {
 		postType: string;
 		postId: string | number;
 	};
-	setActiveBlockContextId: ( id: string | number ) => void;
+	setActiveBlockContextId: (id: string | number) => void;
 };
 
-const ProductContent = ( {
+const ProductContent = ({
 	displayTemplate,
 	blocks,
 	blockContext,
 	setActiveBlockContextId,
-}: ProductContentProps ) => {
+}: ProductContentProps) => {
 	return (
-		<BlockContextProvider
-			key={ blockContext.postId }
-			value={ blockContext }
-		>
-			{ displayTemplate ? <ProductTemplateInnerBlocks /> : null }
+		<BlockContextProvider key={blockContext.postId} value={blockContext}>
+			{displayTemplate ? <ProductTemplateInnerBlocks /> : null}
 			<MemoizedProductTemplateBlockPreview
-				blocks={ blocks }
-				blockContextId={ blockContext.postId }
-				setActiveBlockContextId={ setActiveBlockContextId }
-				isHidden={ displayTemplate }
+				blocks={blocks}
+				blockContextId={blockContext.postId}
+				setActiveBlockContextId={setActiveBlockContextId}
+				isHidden={displayTemplate}
 			/>
 		</BlockContextProvider>
 	);
@@ -124,7 +121,7 @@ const ProductContent = ( {
 // But because it's causing performance issues in editor, it's extracted to a separate component
 // and will be removed once all inner blocks are migrated from withProduct to useProduct HOC.
 const ProductContentWithProduct = withProduct(
-	( {
+	({
 		isLoading,
 		product,
 		displayTemplate,
@@ -134,22 +131,22 @@ const ProductContentWithProduct = withProduct(
 	}: ProductContentProps & {
 		isLoading: boolean;
 		product: ProductResponseItem;
-	} ) => {
+	}) => {
 		return (
 			<BlockContextProvider
-				key={ blockContext.postId }
-				value={ blockContext }
+				key={blockContext.postId}
+				value={blockContext}
 			>
 				<ProductDataContextProvider
-					product={ product }
-					isLoading={ isLoading }
+					product={product}
+					isLoading={isLoading}
 				>
-					{ displayTemplate ? <ProductTemplateInnerBlocks /> : null }
+					{displayTemplate ? <ProductTemplateInnerBlocks /> : null}
 					<MemoizedProductTemplateBlockPreview
-						blocks={ blocks }
-						blockContextId={ blockContext.postId }
-						setActiveBlockContextId={ setActiveBlockContextId }
-						isHidden={ displayTemplate }
+						blocks={blocks}
+						blockContextId={blockContext.postId}
+						setActiveBlockContextId={setActiveBlockContextId}
+						isHidden={displayTemplate}
 					/>
 				</ProductDataContextProvider>
 			</BlockContextProvider>
@@ -157,8 +154,8 @@ const ProductContentWithProduct = withProduct(
 	}
 );
 
-const getOrderPropertiesForDefaultQuery = ( defaultSetting: string ) => {
-	switch ( defaultSetting ) {
+const getOrderPropertiesForDefaultQuery = (defaultSetting: string) => {
+	switch (defaultSetting) {
 		case 'title':
 			return {
 				orderby: 'title',
@@ -198,9 +195,9 @@ const getOrderPropertiesForDefaultQuery = ( defaultSetting: string ) => {
 };
 
 const ProductTemplateEdit = (
-	props: BlockEditProps< {
+	props: BlockEditProps<{
 		clientId: string;
-	} > & {
+	}> & {
 		context: ProductCollectionAttributes;
 		__unstableLayoutClassNames: string;
 	}
@@ -220,7 +217,7 @@ const ProductTemplateEdit = (
 				pages,
 				...restQueryArgs
 			},
-			queryContext = [ { page: 1 } ],
+			queryContext = [{ page: 1 }],
 			templateSlug,
 			displayLayout: { type: layoutType, columns, shrinkColumns } = {
 				type: 'flex',
@@ -232,10 +229,10 @@ const ProductTemplateEdit = (
 		},
 		__unstableLayoutClassNames,
 	} = props;
-	const location = useGetLocation( props.context, props.clientId );
+	const location = useGetLocation(props.context, props.clientId);
 
-	const [ { page } ] = queryContext;
-	const [ activeBlockContextId, setActiveBlockContextId ] = useState<
+	const [{ page }] = queryContext;
+	const [activeBlockContextId, setActiveBlockContextId] = useState<
 		string | number
 	>();
 	const postType = 'product';
@@ -248,84 +245,84 @@ const ProductTemplateEdit = (
 	// Add default query context attributes to queryContextIncludes
 	const queryContextIncludesWithDefaults = [
 		...new Set(
-			queryContextIncludes.concat( DEFAULT_QUERY_CONTEXT_ATTRIBUTES )
+			queryContextIncludes.concat(DEFAULT_QUERY_CONTEXT_ATTRIBUTES)
 		),
 	];
 
-	const productCollectionQueryContext = useProductCollectionQueryContext( {
+	const productCollectionQueryContext = useProductCollectionQueryContext({
 		clientId,
 		queryContextIncludes: queryContextIncludesWithDefaults,
-	} );
+	});
 
 	const { products, isInSingleProductBlock, blocks } = useSelect(
-		( select ) => {
+		(select) => {
 			const { getEntityRecords, getEditedEntityRecord, getTaxonomies } =
-				select( coreStore );
+				select(coreStore);
 			const { getBlocks, getBlockParentsByBlockName } =
-				select( blockEditorStore );
-			const taxonomies = getTaxonomies( {
+				select(blockEditorStore);
+			const taxonomies = getTaxonomies({
 				type: postType,
 				per_page: -1,
 				context: 'view',
-			} );
-			const query: Record< string, unknown > = {
+			});
+			const query: Record<string, unknown> = {
 				postType,
-				offset: perPage ? perPage * ( page - 1 ) + offset : 0,
+				offset: perPage ? perPage * (page - 1) + offset : 0,
 				order,
 				orderby: orderBy,
 			};
 			// There is no need to build the taxQuery if we inherit.
-			if ( taxQuery && ! inherit ) {
+			if (taxQuery && !inherit) {
 				// We have to build the tax query for the REST API and use as
 				// keys the taxonomies `rest_base` with the `term ids` as values.
-				const builtTaxQuery = Object.entries( taxQuery ).reduce(
-					( accumulator, [ taxonomySlug, terms ] ) => {
+				const builtTaxQuery = Object.entries(taxQuery).reduce(
+					(accumulator, [taxonomySlug, terms]) => {
 						const taxonomy = taxonomies?.find(
-							( { slug } ) => slug === taxonomySlug
+							({ slug }) => slug === taxonomySlug
 						);
-						if ( taxonomy?.rest_base ) {
-							accumulator[ taxonomy?.rest_base ] = terms;
+						if (taxonomy?.rest_base) {
+							accumulator[taxonomy?.rest_base] = terms;
 						}
 						return accumulator;
 					},
 					{}
 				);
-				if ( !! Object.keys( builtTaxQuery ).length ) {
-					Object.assign( query, builtTaxQuery );
+				if (!!Object.keys(builtTaxQuery).length) {
+					Object.assign(query, builtTaxQuery);
 				}
 			}
-			if ( perPage ) {
+			if (perPage) {
 				query.per_page = perPage;
 			}
-			if ( search ) {
+			if (search) {
 				query.search = search;
 			}
-			if ( exclude?.length ) {
+			if (exclude?.length) {
 				query.exclude = exclude;
 			}
 			// If `inherit` is truthy, adjust conditionally the query to create a better preview.
-			if ( inherit ) {
-				const { taxonomy, slug } = parseTemplateSlug( templateSlug );
+			if (inherit) {
+				const { taxonomy, slug } = parseTemplateSlug(templateSlug);
 
-				if ( taxonomy && slug ) {
+				if (taxonomy && slug) {
 					const taxonomyRecord = getEntityRecords(
 						'taxonomy',
 						taxonomy,
 						{
 							context: 'view',
 							per_page: 1,
-							_fields: [ 'id' ],
+							_fields: ['id'],
 							slug,
 						}
 					);
 
-					if ( taxonomyRecord ) {
-						const taxonomyId = taxonomyRecord[ 0 ]?.id;
-						if ( taxonomy === 'category' ) {
+					if (taxonomyRecord) {
+						const taxonomyId = taxonomyRecord[0]?.id;
+						if (taxonomy === 'category') {
 							query.categories = taxonomyId;
 						} else {
 							// If taxonomy is not `category`, we expect either `product_cat` or `product_tag`
-							query[ taxonomy ] = taxonomyId;
+							query[taxonomy] = taxonomyId;
 						}
 					}
 				}
@@ -335,7 +332,7 @@ const ProductTemplateEdit = (
 					'root',
 					'site',
 					undefined
-				) as unknown as Record< string, string >;
+				) as unknown as Record<string, string>;
 
 				const orderProperties = getOrderPropertiesForDefaultQuery(
 					settings.woocommerce_default_catalog_orderby
@@ -344,7 +341,7 @@ const ProductTemplateEdit = (
 				query.order = orderProperties.order;
 			}
 			return {
-				products: getEntityRecords( 'postType', postType, {
+				products: getEntityRecords('postType', postType, {
 					...query,
 					...restQueryArgs,
 					productCollectionLocation: location,
@@ -355,15 +352,15 @@ const ProductTemplateEdit = (
 					 * which stock statuses to include if inherit query
 					 * from template is true.
 					 */
-					...( inherit && {
+					...(inherit && {
 						woocommerceStockStatus: getDefaultStockStatuses(),
-					} ),
-				} ),
+					}),
+				}),
 				isInSingleProductBlock:
-					getBlockParentsByBlockName( clientId, [
+					getBlockParentsByBlockName(clientId, [
 						'woocommerce/single-product',
-					] ).length > 0,
-				blocks: getBlocks( clientId ),
+					]).length > 0,
+				blocks: getBlocks(clientId),
 			};
 		},
 		[
@@ -388,121 +385,121 @@ const ProductTemplateEdit = (
 	);
 	const blockContexts = useMemo(
 		() =>
-			products?.map( ( product ) => ( {
+			products?.map((product) => ({
 				postType: product.type,
 				postId: product.id,
-			} ) ),
-		[ products ]
+			})),
+		[products]
 	);
 
 	const hasLayoutFlex = layoutType === 'flex' && columns > 1;
 	let customClassName = '';
 
 	const isPreviewWithNoProducts =
-		!! __privateProductCollectionPreviewState?.isPreview &&
-		!! products &&
-		! products.length;
+		!!__privateProductCollectionPreviewState?.isPreview &&
+		!!products &&
+		!products.length;
 
 	const {
 		blockContexts: placeholderContexts,
 		placeholderProductMap,
 		isReady: placeholdersReady,
-	} = usePlaceholderProducts( {
+	} = usePlaceholderProducts({
 		isPreviewWithNoProducts,
 		count: perPage ?? 4,
-	} );
+	});
 
 	// Apply layout styles when products are present or when showing preview placeholders.
 	if (
-		( ( products && products.length ) || isPreviewWithNoProducts ) &&
+		((products && products.length) || isPreviewWithNoProducts) &&
 		hasLayoutFlex
 	) {
-		const dynamicGrid = `wc-block-product-template__responsive columns-${ columns }`;
-		const staticGrid = `is-flex-container columns-${ columns }`;
+		const dynamicGrid = `wc-block-product-template__responsive columns-${columns}`;
+		const staticGrid = `is-flex-container columns-${columns}`;
 
 		customClassName = shrinkColumns ? dynamicGrid : staticGrid;
 	}
 
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className: clsx(
 			__unstableLayoutClassNames,
 			'wc-block-product-template',
 			customClassName,
-			{ [ `is-product-collection-layout-${ layoutType }` ]: layoutType }
+			{ [`is-product-collection-layout-${layoutType}`]: layoutType }
 		),
-	} );
+	});
 
 	const ProductContentComponent = isInSingleProductBlock
 		? ProductContentWithProduct
 		: ProductContent;
 
-	if ( ! products ) {
+	if (!products) {
 		return (
-			<p { ...blockProps }>
+			<p {...blockProps}>
 				<Spinner className="wc-block-product-template__spinner" />
 			</p>
 		);
 	}
 
-	if ( ! products.length ) {
+	if (!products.length) {
 		if (
 			isPreviewWithNoProducts &&
 			placeholdersReady &&
 			placeholderContexts
 		) {
 			return (
-				<ul { ...blockProps }>
-					{ placeholderContexts.map( ( blockContext ) => {
+				<ul {...blockProps}>
+					{placeholderContexts.map((blockContext) => {
 						const displayTemplate =
 							blockContext.postId ===
-							( activeBlockContextId ||
-								placeholderContexts[ 0 ]?.postId );
+							(activeBlockContextId ||
+								placeholderContexts[0]?.postId);
 
 						return (
 							<ProductDataContextProvider
-								key={ blockContext.postId }
+								key={blockContext.postId}
 								product={
 									placeholderProductMap.get(
 										blockContext.postId as number
 									) ?? null
 								}
-								isLoading={ false }
+								isLoading={false}
 							>
-								{ /* Always use ProductContent for placeholders to avoid
-								   withProduct HOC making failing API calls for negative IDs. */ }
+								{/* Always use ProductContent for placeholders to avoid
+								   withProduct HOC making failing API calls for negative IDs. */}
 								<ProductContent
-									attributes={ {
+									attributes={{
 										productId: blockContext.postId,
-									} }
-									blocks={ blocks }
-									displayTemplate={ displayTemplate }
-									blockContext={ blockContext }
+									}}
+									blocks={blocks}
+									displayTemplate={displayTemplate}
+									blockContext={blockContext}
 									setActiveBlockContextId={
 										setActiveBlockContextId
 									}
 								/>
 							</ProductDataContextProvider>
 						);
-					} ) }
+					})}
 				</ul>
 			);
 		}
 
-		if ( isPreviewWithNoProducts && ! placeholdersReady ) {
+		if (isPreviewWithNoProducts && !placeholdersReady) {
 			return (
-				<p { ...blockProps }>
+				<p {...blockProps}>
 					<Spinner className="wc-block-product-template__spinner" />
 				</p>
 			);
 		}
 
 		return (
-			<p { ...blockProps }>
-				{ ' ' }
-				{ __(
+			<p {...blockProps}>
+				{' '}
+				{__(
 					'No products to display. Try adjusting the filters in the block settings panel.',
 					'woocommerce'
-				) }
+				)}
 			</p>
 		);
 	}
@@ -512,28 +509,28 @@ const ProductTemplateEdit = (
 	// This ensures that when it is displayed again, the cached rendering of the
 	// block preview is used, instead of having to re-render the preview from scratch.
 	return (
-		<ul { ...blockProps }>
-			{ blockContexts &&
-				blockContexts.map( ( blockContext ) => {
+		<ul {...blockProps}>
+			{blockContexts &&
+				blockContexts.map((blockContext) => {
 					const displayTemplate =
 						blockContext.postId ===
-						( activeBlockContextId || blockContexts[ 0 ]?.postId );
+						(activeBlockContextId || blockContexts[0]?.postId);
 
 					return (
 						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 						// @ts-ignore isLoading and product props are missing as they're coming from untyped withProduct HOC.
 						<ProductContentComponent
-							key={ blockContext.postId }
-							attributes={ {
+							key={blockContext.postId}
+							attributes={{
 								productId: blockContext.postId,
-							} }
-							blocks={ blocks }
-							displayTemplate={ displayTemplate }
-							blockContext={ blockContext }
-							setActiveBlockContextId={ setActiveBlockContextId }
+							}}
+							blocks={blocks}
+							displayTemplate={displayTemplate}
+							blockContext={blockContext}
+							setActiveBlockContextId={setActiveBlockContextId}
 						/>
 					);
-				} ) }
+				})}
 		</ul>
 	);
 };

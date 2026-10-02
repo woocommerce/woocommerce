@@ -45,9 +45,9 @@ interface ExtendedBlockSupports {
 
 export function register(
 	Block: FunctionComponent,
-	example: { attributes: Record< string, unknown > },
+	example: { attributes: Record<string, unknown> },
 	metadata: BlockConfiguration & ExtendedBlockSupports,
-	settings: Partial< BlockConfiguration >
+	settings: Partial<BlockConfiguration>
 ): void {
 	const DEFAULT_SETTINGS = {
 		attributes: {
@@ -63,7 +63,7 @@ export function register(
 			 */
 			minHeight: {
 				type: 'number',
-				default: getSetting( 'defaultHeight', 500 ),
+				default: getSetting('defaultHeight', 500),
 			},
 		},
 		supports: {
@@ -94,14 +94,14 @@ export function register(
 			dimRatio: 50,
 			hasParallax: false,
 			isRepeated: false,
-			height: getSetting( 'defaultHeight', 500 ),
+			height: getSetting('defaultHeight', 500),
 			mediaSrc: '',
 			overlayColor: '#000000',
 			showDesc: true,
 		},
 	};
 
-	registerBlockType( metadata, {
+	registerBlockType(metadata, {
 		...DEFAULT_SETTINGS,
 		example: {
 			...DEFAULT_EXAMPLE,
@@ -112,11 +112,11 @@ export function register(
 		 *
 		 * @param {Object} props Props to pass to block.
 		 */
-		edit: Edit( Block ),
+		edit: Edit(Block),
 		/**
 		 * Block content is rendered in PHP, not via save function.
 		 */
 		save: () => <InnerBlocks.Content />,
 		...settings,
-	} );
+	});
 }

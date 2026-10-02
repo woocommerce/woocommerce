@@ -5,12 +5,12 @@ import { useContext, useEffect } from '@wordpress/element';
 import { CurrencyContext } from '@woocommerce/currency';
 
 export const ShippingCurrencyContext = () => {
-	const context = useContext( CurrencyContext );
+	const context = useContext(CurrencyContext);
 
-	useEffect( () => {
+	useEffect(() => {
 		window.wc.ShippingCurrencyContext =
 			window.wc.ShippingCurrencyContext || context;
-	}, [ context ] );
+	}, [context]);
 
 	return null;
 };

@@ -64,7 +64,7 @@
  * Deprecated
  * Vendor prefix no longer required.
  */
-@mixin opacity( $opacity: 0.75 ) {
+@mixin opacity($opacity: 0.75) {
 	opacity: $opacity;
 }
 
@@ -72,7 +72,13 @@
  * Deprecated
  * Vendor prefix no longer required.
  */
-@mixin box_shadow($shadow_x: 3px, $shadow_y: 3px, $shadow_rad: 3px, $shadow_in: 3px, $shadow_color: #888) {
+@mixin box_shadow(
+	$shadow_x: 3px,
+	$shadow_y: 3px,
+	$shadow_rad: 3px,
+	$shadow_in: 3px,
+	$shadow_color: #888
+) {
 	box-shadow: $shadow_x $shadow_y $shadow_rad $shadow_in $shadow_color;
 }
 
@@ -80,7 +86,13 @@
  * Deprecated
  * Vendor prefix no longer required.
  */
-@mixin inset_box_shadow($shadow_x: 3px, $shadow_y: 3px, $shadow_rad: 3px, $shadow_in: 3px, $shadow_color: #888) {
+@mixin inset_box_shadow(
+	$shadow_x: 3px,
+	$shadow_y: 3px,
+	$shadow_rad: 3px,
+	$shadow_in: 3px,
+	$shadow_color: #888
+) {
 	box-shadow: inset $shadow_x $shadow_y $shadow_rad $shadow_in $shadow_color;
 }
 
@@ -88,7 +100,12 @@
  * Deprecated
  * Vendor prefix no longer required.
  */
-@mixin text_shadow($shadow_x: 3px, $shadow_y: 3px, $shadow_rad: 3px, $shadow_color: #fff) {
+@mixin text_shadow(
+	$shadow_x: 3px,
+	$shadow_y: 3px,
+	$shadow_rad: 3px,
+	$shadow_color: #fff
+) {
 	text-shadow: $shadow_x $shadow_y $shadow_rad $shadow_color;
 }
 
@@ -128,12 +145,9 @@
 }
 
 @mixin darkorlighttextshadow($a, $opacity: 0.8) {
-
 	@if lightness($a) >= 65% {
-
 		@include text_shadow(0, -1px, 0, rgba(0, 0, 0, $opacity));
 	} @else {
-
 		@include text_shadow(0, 1px, 0, rgba(255, 255, 255, $opacity));
 	}
 }
@@ -142,7 +156,6 @@
  * Objects
  */
 @mixin menu() {
-
 	@include clearfix();
 
 	li {
@@ -151,7 +164,6 @@
 }
 
 @mixin mediaright() {
-
 	@include clearfix();
 
 	img {
@@ -161,7 +173,6 @@
 }
 
 @mixin medialeft() {
-
 	@include clearfix();
 
 	img {
@@ -178,7 +189,7 @@
 	width: 1em;
 }
 
-@mixin icon( $glyph: "\e001" ) {
+@mixin icon($glyph: "\e001") {
 	font-family: WooCommerce;
 	speak: never;
 	font-weight: 400;
@@ -196,7 +207,7 @@
 	content: $glyph;
 }
 
-@mixin icon_dashicons( $glyph: "\f333" ) {
+@mixin icon_dashicons($glyph: "\f333") {
 	font-family: Dashicons;
 	speak: never;
 	font-weight: 400;
@@ -215,7 +226,7 @@
 	content: $glyph;
 }
 
-@mixin iconbefore( $glyph: "\e001" ) {
+@mixin iconbefore($glyph: "\e001") {
 	font-family: WooCommerce;
 	speak: never;
 	font-weight: 400;
@@ -228,7 +239,7 @@
 	text-decoration: none;
 }
 
-@mixin iconbeforedashicons( $glyph: "\f333" ) {
+@mixin iconbeforedashicons($glyph: "\f333") {
 	font-family: Dashicons;
 	speak: never;
 	font-weight: 400;
@@ -240,7 +251,7 @@
 	text-decoration: none;
 }
 
-@mixin iconafter( $glyph: "\e001" ) {
+@mixin iconafter($glyph: "\e001") {
 	font-family: WooCommerce;
 	speak: never;
 	font-weight: 400;
@@ -254,7 +265,6 @@
 }
 
 @mixin loader() {
-
 	&::before {
 		height: 1em;
 		width: 1em;
@@ -287,7 +297,6 @@
 }
 
 @mixin table-marks() {
-
 	mark {
 		background: transparent none;
 	}

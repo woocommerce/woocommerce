@@ -2,18 +2,12 @@ declare global {
 	interface Window {
 		wcTracks: {
 			isEnabled: boolean;
-			validateEvent: (
-				name: string,
-				properties: unknown,
-			) => void;
-			recordEvent: (
-				name: string,
-				properties: unknown,
-			) => void;
+			validateEvent: ( name: string, properties: unknown ) => void;
+			recordEvent: ( name: string, properties: unknown ) => void;
 		};
 		_tkq: {
-			[key: string]: number;
-		}
+			[ key: string ]: number;
+		};
 	}
 }
 

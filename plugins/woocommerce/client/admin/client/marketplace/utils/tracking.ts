@@ -16,7 +16,7 @@ interface MarketplaceViewProps {
 }
 
 function isWCComConnected(): boolean {
-	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+	const wccomSettings = getAdminSetting('wccomHelper', {});
 	return wccomSettings?.isConnected ?? false;
 }
 
@@ -24,10 +24,10 @@ function isWCComConnected(): boolean {
  * Record a marketplace view event.
  * This is a new event that is easier to understand and implement consistently
  */
-function recordMarketplaceView( props: MarketplaceViewProps ) {
+function recordMarketplaceView(props: MarketplaceViewProps) {
 	// The category prop changes to a blank string on first viewing all products after a search.
 	// This is undesirable and causes a duplicate event that will artificially inflate event counts.
-	if ( props.category === '' ) {
+	if (props.category === '') {
 		return;
 	}
 
@@ -37,23 +37,23 @@ function recordMarketplaceView( props: MarketplaceViewProps ) {
 	const category = props.category || null;
 
 	const eventProps = {
-		...( view && { view } ),
-		...( search_term && { search_term } ),
-		...( product_type && { product_type } ),
-		...( category && { category } ),
+		...(view && { view }),
+		...(search_term && { search_term }),
+		...(product_type && { product_type }),
+		...(category && { category }),
 		wccom_connected: isWCComConnected(),
 	};
 
 	// User sees the default extensions, themes or business services view
 	if (
 		view &&
-		[ 'extensions', 'themes', 'business-services' ].includes( view ) &&
-		! category
+		['extensions', 'themes', 'business-services'].includes(view) &&
+		!category
 	) {
 		eventProps.category = '_all';
 	}
 
-	recordEvent( 'marketplace_view', eventProps );
+	recordEvent('marketplace_view', eventProps);
 }
 
 /**
@@ -62,9 +62,9 @@ function recordMarketplaceView( props: MarketplaceViewProps ) {
  *
  * @param props The props object containing view, search_term, section, and category.
  */
-function recordLegacyTabView( props: MarketplaceViewProps ) {
+function recordLegacyTabView(props: MarketplaceViewProps) {
 	// product_type will artificially inflate legacy event counts.
-	if ( props.product_type ) {
+	if (props.product_type) {
 		return;
 	}
 	let oldEventName = 'extensions_view';
@@ -74,13 +74,13 @@ function recordLegacyTabView( props: MarketplaceViewProps ) {
 
 	const oldEventProps = {
 		// legacy event refers to "section" instead of "view"
-		...( view && { section: view } ),
-		...( search_term && { search_term } ),
+		...(view && { section: view }),
+		...(search_term && { search_term }),
 		version: '2',
 		wccom_connected: isWCComConnected(),
 	};
 
-	switch ( view ) {
+	switch (view) {
 		case 'extensions':
 			oldEventProps.section = category || '_all';
 			break;
@@ -93,7 +93,7 @@ function recordLegacyTabView( props: MarketplaceViewProps ) {
 			break;
 	}
 
-	recordEvent( oldEventName, oldEventProps );
+	recordEvent(oldEventName, oldEventProps);
 }
 
 export { recordMarketplaceView, recordLegacyTabView };

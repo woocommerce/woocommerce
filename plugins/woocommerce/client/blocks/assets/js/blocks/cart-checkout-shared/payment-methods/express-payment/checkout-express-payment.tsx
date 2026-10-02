@@ -29,9 +29,9 @@ const CheckoutExpressPayment = () => {
 		expressPaymentMethodsInitialized,
 		isExpressPaymentMethodActive,
 		registeredExpressPaymentMethods = {},
-	} = useSelect( ( select ) => {
-		const checkout = select( checkoutStore );
-		const payment = select( paymentStore );
+	} = useSelect((select) => {
+		const checkout = select(checkoutStore);
+		const payment = select(paymentStore);
 		return {
 			isCalculating: checkout.isCalculating(),
 			isProcessing: checkout.isProcessing(),
@@ -48,7 +48,7 @@ const CheckoutExpressPayment = () => {
 			registeredExpressPaymentMethods:
 				payment.getRegisteredExpressPaymentMethods(),
 		};
-	}, [] );
+	}, []);
 	const { isEditor } = useEditorContext();
 
 	const {
@@ -56,22 +56,22 @@ const CheckoutExpressPayment = () => {
 		hasRegisteredNotInitializedExpressPaymentMethods,
 		hasNoValidRegisteredExpressPaymentMethods,
 		availableExpressPaymentsCount,
-	} = getExpressPaymentMethodsState( {
+	} = getExpressPaymentMethodsState({
 		availableExpressPaymentMethods,
 		expressPaymentMethodsInitialized,
 		registeredExpressPaymentMethods,
-	} );
+	});
 
 	if (
-		! hasRegisteredExpressPaymentMethods ||
+		!hasRegisteredExpressPaymentMethods ||
 		hasNoValidRegisteredExpressPaymentMethods
 	) {
 		// Make sure errors are shown in the editor and for admins. For example,
 		// when a payment method fails to register.
-		if ( isEditor || CURRENT_USER_IS_ADMIN ) {
+		if (isEditor || CURRENT_USER_IS_ADMIN) {
 			return (
 				<StoreNoticesContainer
-					context={ noticeContexts.EXPRESS_PAYMENTS }
+					context={noticeContexts.EXPRESS_PAYMENTS}
 				/>
 			);
 		}
@@ -84,7 +84,7 @@ const CheckoutExpressPayment = () => {
 		isProcessing ||
 		isAfterProcessing ||
 		isBeforeProcessing ||
-		( isComplete && ! hasError ) ||
+		(isComplete && !hasError) ||
 		isExpressPaymentMethodActive;
 
 	// We show the skeleton when
@@ -92,73 +92,73 @@ const CheckoutExpressPayment = () => {
 	// the checkout is calculating, because it can result in different express payment methods
 	// or when the express payment methods are not initialized
 	const showSkeleton =
-		! isExpressPaymentMethodActive &&
-		( isCalculating || hasRegisteredNotInitializedExpressPaymentMethods );
+		!isExpressPaymentMethodActive &&
+		(isCalculating || hasRegisteredNotInitializedExpressPaymentMethods);
 
 	return (
 		<>
 			<div
-				className={ clsx(
+				className={clsx(
 					'wc-block-components-express-payment',
 					'wc-block-components-express-payment--checkout',
 					{
 						'wc-block-components-express-payment--disabled':
 							isAreaDisabled,
 					}
-				) }
-				aria-disabled={ isAreaDisabled }
+				)}
+				aria-disabled={isAreaDisabled}
 				aria-live="polite"
-				{ ...( isAreaDisabled && {
+				{...(isAreaDisabled && {
 					'aria-busy': true,
 					'aria-label': __(
 						'Processing express checkout',
 						'woocommerce'
 					),
-				} ) }
+				})}
 			>
 				<div className="wc-block-components-express-payment__title-container">
 					<h2 className="wc-block-components-express-payment__title">
-						{ hasRegisteredNotInitializedExpressPaymentMethods ? (
+						{hasRegisteredNotInitializedExpressPaymentMethods ? (
 							<Skeleton
 								width="127px"
 								height="20px"
-								ariaMessage={ __(
+								ariaMessage={__(
 									'Loading express payment area…',
 									'woocommerce'
-								) }
+								)}
 							/>
 						) : (
-							__( ' Express Checkout', 'woocommerce' )
-						) }
+							__(' Express Checkout', 'woocommerce')
+						)}
 					</h2>
 				</div>
 				<div className="wc-block-components-express-payment__content">
 					<StoreNoticesContainer
-						context={ noticeContexts.EXPRESS_PAYMENTS }
+						context={noticeContexts.EXPRESS_PAYMENTS}
 					/>
-					{ showSkeleton ? (
+					{showSkeleton ? (
 						<ul className="wc-block-components-express-payment__event-buttons">
-							{ Array.from( {
+							{Array.from({
 								length: availableExpressPaymentsCount,
-							} ).map( ( _, index ) => (
-								<li key={ index }>
+							}).map((_, index) => (
+								<li key={index}>
 									<Skeleton
 										height="48px"
-										ariaMessage={ __(
+										ariaMessage={__(
 											'Loading express payment method…',
 											'woocommerce'
-										) }
+										)}
 									/>
 								</li>
-							) ) }
+							))}
 						</ul>
 					) : (
 						<ExpressPaymentMethods />
-					) }
+					)}
 				</div>
 			</div>
 			<div className="wc-block-components-express-payment-continue-rule wc-block-components-express-payment-continue-rule--checkout">
-				{ __( 'Or continue below', 'woocommerce' ) }
+				{__('Or continue below', 'woocommerce')}
 			</div>
 		</>
 	);

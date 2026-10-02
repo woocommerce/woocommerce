@@ -28,63 +28,63 @@ import {
  * can add custom stock statuses which don't conform to our naming
  * conventions.
  */
-function getStockStatusIdByLabel( statusLabel: FormTokenField.Value ) {
+function getStockStatusIdByLabel(statusLabel: FormTokenField.Value) {
 	const label =
 		typeof statusLabel === 'string' ? statusLabel : statusLabel.value;
 
-	return Object.entries( STOCK_STATUS_OPTIONS ).find(
-		( [ , value ] ) => value === label
-	)?.[ 0 ];
+	return Object.entries(STOCK_STATUS_OPTIONS).find(
+		([, value]) => value === label
+	)?.[0];
 }
 
-const StockStatusControl = ( props: QueryControlProps ) => {
+const StockStatusControl = (props: QueryControlProps) => {
 	const { query, trackInteraction, setQueryAttribute } = props;
 
 	const deselectCallback = () => {
-		setQueryAttribute( {
+		setQueryAttribute({
 			woocommerceStockStatus: DEFAULT_FILTERS.woocommerceStockStatus,
-		} );
-		trackInteraction( CoreFilterNames.STOCK_STATUS );
+		});
+		trackInteraction(CoreFilterNames.STOCK_STATUS);
 	};
 
 	return (
 		<ToolsPanelItem
-			label={ __( 'Stock Status', 'woocommerce' ) }
-			hasValue={ () =>
-				! fastDeepEqual(
+			label={__('Stock Status', 'woocommerce')}
+			hasValue={() =>
+				!fastDeepEqual(
 					query.woocommerceStockStatus,
 					getDefaultStockStatuses()
 				)
 			}
-			onDeselect={ deselectCallback }
-			resetAllFilter={ deselectCallback }
+			onDeselect={deselectCallback}
+			resetAllFilter={deselectCallback}
 			isShownByDefault
 		>
 			<FormTokenField
 				__next40pxDefaultSize
 				__nextHasNoMarginBottom
-				label={ __( 'Stock Status', 'woocommerce' ) }
-				onChange={ ( statusLabels ) => {
+				label={__('Stock Status', 'woocommerce')}
+				onChange={(statusLabels) => {
 					const woocommerceStockStatus = statusLabels
-						.map( getStockStatusIdByLabel )
-						.filter( Boolean ) as string[];
+						.map(getStockStatusIdByLabel)
+						.filter(Boolean) as string[];
 
-					setQueryAttribute( {
+					setQueryAttribute({
 						woocommerceStockStatus,
-					} );
-					trackInteraction( CoreFilterNames.STOCK_STATUS );
-				} }
-				suggestions={ Object.values( STOCK_STATUS_OPTIONS ) }
-				validateInput={ ( value: string ) =>
-					Object.values( STOCK_STATUS_OPTIONS ).includes( value )
+					});
+					trackInteraction(CoreFilterNames.STOCK_STATUS);
+				}}
+				suggestions={Object.values(STOCK_STATUS_OPTIONS)}
+				validateInput={(value: string) =>
+					Object.values(STOCK_STATUS_OPTIONS).includes(value)
 				}
 				value={
 					query?.woocommerceStockStatus?.map(
-						( key ) => STOCK_STATUS_OPTIONS[ key ]
+						(key) => STOCK_STATUS_OPTIONS[key]
 					) || []
 				}
-				__experimentalExpandOnFocus={ true }
-				__experimentalShowHowTo={ false }
+				__experimentalExpandOnFocus={true}
+				__experimentalShowHowTo={false}
 			/>
 		</ToolsPanelItem>
 	);

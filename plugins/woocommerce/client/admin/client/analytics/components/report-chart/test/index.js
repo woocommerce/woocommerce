@@ -3,8 +3,8 @@
  */
 import { getChartMode, getSelectedFilter } from '../utils';
 
-describe( 'ReportChart', () => {
-	test( 'should set the mode prop depending on the active filter', () => {
+describe('ReportChart', () => {
+	test('should set the mode prop depending on the active filter', () => {
 		const filters = [
 			{
 				param: 'filter',
@@ -21,8 +21,8 @@ describe( 'ReportChart', () => {
 			},
 		];
 		const query = { filter: 'lorem-ipsum', filter2: 'ipsum-lorem' };
-		const selectedFilter = getSelectedFilter( filters, query );
-		const mode = getChartMode( selectedFilter, query );
-		expect( mode ).toEqual( 'item-comparison' );
-	} );
-} );
+		const selectedFilter = getSelectedFilter(filters, query);
+		const mode = getChartMode(selectedFilter, query);
+		expect(mode).toEqual('item-comparison');
+	});
+});

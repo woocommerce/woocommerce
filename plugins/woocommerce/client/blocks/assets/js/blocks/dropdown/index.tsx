@@ -10,8 +10,8 @@ import { registerBlockType } from '@wordpress/blocks';
 import metadata from './block.json';
 import Edit from './edit';
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	edit: Edit,
 	icon: productFilterOptions,
 	save: () => null,
-} );
+});

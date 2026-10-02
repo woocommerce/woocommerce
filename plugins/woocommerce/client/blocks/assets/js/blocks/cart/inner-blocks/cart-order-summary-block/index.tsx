@@ -12,13 +12,13 @@ import { Edit, Save } from './edit';
 import deprecated from './deprecated';
 import metadata from './block.json';
 
-registerBlockType( 'woocommerce/cart-order-summary-block', {
+registerBlockType('woocommerce/cart-order-summary-block', {
 	apiVersion: metadata.apiVersion,
 	title: metadata.title,
 	icon: {
 		src: (
 			<Icon
-				icon={ totals }
+				icon={totals}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -26,4 +26,4 @@ registerBlockType( 'woocommerce/cart-order-summary-block', {
 	edit: Edit,
 	save: Save,
 	deprecated,
-} );
+});

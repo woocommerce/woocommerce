@@ -6,26 +6,26 @@ import { Button, Placeholder } from '@wordpress/components';
 import { ADMIN_URL } from '@woocommerce/settings';
 import { Icon, external } from '@wordpress/icons';
 
-export const renderNoProductsPlaceholder = ( blockTitle, blockIcon ) => (
+export const renderNoProductsPlaceholder = (blockTitle, blockIcon) => (
 	<Placeholder
 		className="wc-block-products"
-		icon={ blockIcon }
-		label={ blockTitle }
+		icon={blockIcon}
+		label={blockTitle}
 	>
 		<p>
-			{ __(
+			{__(
 				"You haven't published any products to list here yet.",
 				'woocommerce'
-			) }
+			)}
 		</p>
 		<Button
 			className="wc-block-products__add-product-button"
 			variant="secondary"
-			href={ ADMIN_URL + 'post-new.php?post_type=product' }
+			href={ADMIN_URL + 'post-new.php?post_type=product'}
 			target="_top"
 		>
-			{ __( 'Add new product', 'woocommerce' ) + ' ' }
-			<Icon icon={ external } />
+			{__('Add new product', 'woocommerce') + ' '}
+			<Icon icon={external} />
 		</Button>
 		<Button
 			className="wc-block-products__read_more_button"
@@ -33,20 +33,20 @@ export const renderNoProductsPlaceholder = ( blockTitle, blockIcon ) => (
 			href="https://woocommerce.com/document/managing-products/"
 			target="_blank"
 		>
-			{ __( 'Learn more', 'woocommerce' ) }
+			{__('Learn more', 'woocommerce')}
 		</Button>
 	</Placeholder>
 );
 
-export const renderHiddenContentPlaceholder = ( blockTitle, blockIcon ) => (
+export const renderHiddenContentPlaceholder = (blockTitle, blockIcon) => (
 	<Placeholder
 		className="wc-block-products"
-		icon={ blockIcon }
-		label={ blockTitle }
+		icon={blockIcon}
+		label={blockTitle}
 	>
-		{ __(
+		{__(
 			'The content for this block is hidden due to block settings.',
 			'woocommerce'
-		) }
+		)}
 	</Placeholder>
 );

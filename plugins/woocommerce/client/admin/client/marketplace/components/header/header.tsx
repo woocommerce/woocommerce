@@ -13,9 +13,9 @@ export default function Header() {
 			<header className="woocommerce-marketplace__header">
 				<HeaderTitle />
 				<Tabs
-					additionalClassNames={ [
+					additionalClassNames={[
 						'woocommerce-marketplace__header-tabs',
-					] }
+					]}
 				/>
 				<Search />
 				<div className="woocommerce-marketplace__header-meta">

@@ -21,76 +21,76 @@ interface Props {
 	handleSetup: () => void;
 }
 
-const Banner = ( { isSubmitted, handleSetup }: Props ) => {
-	const { first_name } = getAdminSetting( 'currentUserData', {} );
+const Banner = ({ isSubmitted, handleSetup }: Props) => {
+	const { first_name } = getAdminSetting('currentUserData', {});
 	const { description, cta_label, tc_url } = getAdminSetting(
 		'wcpayWelcomePageIncentive'
 	);
 
-	const [ isNoThanksClicked, setNoThanksClicked ] = useState( false );
-	const [ isExitSurveyModalOpen, setExitSurveyModalOpen ] = useState( false );
+	const [isNoThanksClicked, setNoThanksClicked] = useState(false);
+	const [isExitSurveyModalOpen, setExitSurveyModalOpen] = useState(false);
 
-	const isWooPayEligible = useSelect( ( select ) => {
-		const store = select( paymentSettingsStore );
+	const isWooPayEligible = useSelect((select) => {
+		const store = select(paymentSettingsStore);
 		return store.getIsWooPayEligible();
-	}, [] );
+	}, []);
 
 	const handleNoThanks = () => {
-		setNoThanksClicked( true );
-		setExitSurveyModalOpen( true );
+		setNoThanksClicked(true);
+		setExitSurveyModalOpen(true);
 	};
 
 	return (
 		<Card className="__CLASS__">
 			<CardBody className="woopayments-welcome-page__header">
-				<img src={ WooPaymentsLogo } alt="WooPayments logo" />
-				<h1>{ strings.heading( first_name ) }</h1>
+				<img src={WooPaymentsLogo} alt="WooPayments logo" />
+				<h1>{strings.heading(first_name)}</h1>
 			</CardBody>
 			<CardBody className="woopayments-welcome-page__offer">
 				<div className="woopayments-welcome-page__offer-pill">
-					{ strings.limitedTimeOffer }
+					{strings.limitedTimeOffer}
 				</div>
 				<h2
-					dangerouslySetInnerHTML={ sanitizeHTML(
+					dangerouslySetInnerHTML={sanitizeHTML(
 						description + '<span class="tos-asterix">*</span>'
-					) }
+					)}
 				/>
 				<Button
 					variant="primary"
-					isBusy={ isSubmitted }
-					disabled={ isSubmitted }
-					onClick={ handleSetup }
+					isBusy={isSubmitted}
+					disabled={isSubmitted}
+					onClick={handleSetup}
 				>
-					{ cta_label }
+					{cta_label}
 				</Button>
 				<Button
 					variant="tertiary"
-					isBusy={ isNoThanksClicked && isExitSurveyModalOpen }
-					disabled={ isNoThanksClicked && isExitSurveyModalOpen }
-					onClick={ handleNoThanks }
+					isBusy={isNoThanksClicked && isExitSurveyModalOpen}
+					disabled={isNoThanksClicked && isExitSurveyModalOpen}
+					onClick={handleNoThanks}
 				>
-					{ strings.noThanks }
+					{strings.noThanks}
 				</Button>
 				<p>
-					{ isWooPayEligible ?? false
+					{(isWooPayEligible ?? false)
 						? strings.TosAndPpWooPay
-						: strings.TosAndPp }
+						: strings.TosAndPp}
 				</p>
-				<p>{ strings.termsAndConditions( tc_url ) }</p>
+				<p>{strings.termsAndConditions(tc_url)}</p>
 			</CardBody>
 			<CardDivider />
 			<CardBody className="woopayments-welcome-page__payments">
-				<p>{ strings.paymentOptions }</p>
+				<p>{strings.paymentOptions}</p>
 				<WooPaymentsMethodsLogos
-					isWooPayEligible={ isWooPayEligible }
-					maxElements={ 10 }
+					isWooPayEligible={isWooPayEligible}
+					maxElements={10}
 				/>
 			</CardBody>
-			{ isExitSurveyModalOpen && (
+			{isExitSurveyModalOpen && (
 				<ExitSurveyModal
-					setExitSurveyModalOpen={ setExitSurveyModalOpen }
+					setExitSurveyModalOpen={setExitSurveyModalOpen}
 				/>
-			) }
+			)}
 		</Card>
 	);
 };

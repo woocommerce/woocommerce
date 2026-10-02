@@ -1,13 +1,14 @@
 /* global marketplace_suggestions, ajaxurl, Cookies */
-( function( $, marketplace_suggestions, ajaxurl ) {
-	$( function() {
+( function ( $, marketplace_suggestions, ajaxurl ) {
+	$( function () {
 		if ( 'undefined' === typeof marketplace_suggestions ) {
 			return;
 		}
 
 		// Stand-in wcTracks.recordEvent in case tracks is not available (for any reason).
 		window.wcTracks = window.wcTracks || {};
-		window.wcTracks.recordEvent = window.wcTracks.recordEvent  || function() { };
+		window.wcTracks.recordEvent =
+			window.wcTracks.recordEvent || function () {};
 
 		// Tracks events sent in this file:
 		// - marketplace_suggestion_displayed
@@ -18,43 +19,60 @@
 
 		// Helper function to construct admin URLs similar to getAdminLink from @woocommerce/settings
 		function getAdminLink( path ) {
-			if ( ! marketplace_suggestions.admin_base_url || ! path || typeof path !== 'string' ) {
+			if (
+				! marketplace_suggestions.admin_base_url ||
+				! path ||
+				typeof path !== 'string'
+			) {
 				return '';
 			}
-			var cleanPath = path.charAt(0) === '/' ? path.slice(1) : path;
+			var cleanPath = path.charAt( 0 ) === '/' ? path.slice( 1 ) : path;
 			return marketplace_suggestions.admin_base_url + cleanPath;
 		}
 
 		// Dismiss the specified suggestion from the UI, and save the dismissal in settings.
-		function dismissSuggestion( context, product, promoted, url, suggestionSlug ) {
+		function dismissSuggestion(
+			context,
+			product,
+			promoted,
+			url,
+			suggestionSlug
+		) {
 			// hide the suggestion in the UI
 			var selector = '[data-suggestion-slug=' + suggestionSlug + ']';
-			$( selector ).fadeOut( function() {
+			$( selector ).fadeOut( function () {
 				$( this ).remove();
 				tidyProductEditMetabox();
 			} );
 
 			// save dismissal in user settings
-			jQuery.post(
-				ajaxurl,
-				{
-					'action': 'woocommerce_add_dismissed_marketplace_suggestion',
-					'_wpnonce': marketplace_suggestions.dismiss_suggestion_nonce,
-					'slug': suggestionSlug
-				}
-			);
+			jQuery.post( ajaxurl, {
+				action: 'woocommerce_add_dismissed_marketplace_suggestion',
+				_wpnonce: marketplace_suggestions.dismiss_suggestion_nonce,
+				slug: suggestionSlug,
+			} );
 
 			// if this is a high-use area, delay new suggestion that area for a short while
 			var highUseSuggestionContexts = [ 'products-list-inline' ];
 			if ( _.contains( highUseSuggestionContexts, context ) ) {
 				// snooze suggestions in that area for 2 days
-				var contextSnoozeCookie = 'woocommerce_snooze_suggestions__' + context;
+				var contextSnoozeCookie =
+					'woocommerce_snooze_suggestions__' + context;
 				Cookies.set( contextSnoozeCookie, 'true', { expires: 2 } );
 
 				// keep track of how often this area gets dismissed in a cookie
-				var contextDismissalCountCookie = 'woocommerce_dismissed_suggestions__' + context;
-				var previousDismissalsInThisContext = parseInt( Cookies.get( contextDismissalCountCookie ), 10 ) || 0;
-				Cookies.set( contextDismissalCountCookie, previousDismissalsInThisContext + 1, { expires: 31 } );
+				var contextDismissalCountCookie =
+					'woocommerce_dismissed_suggestions__' + context;
+				var previousDismissalsInThisContext =
+					parseInt(
+						Cookies.get( contextDismissalCountCookie ),
+						10
+					) || 0;
+				Cookies.set(
+					contextDismissalCountCookie,
+					previousDismissalsInThisContext + 1,
+					{ expires: 31 }
+				);
 			}
 
 			window.wcTracks.recordEvent( 'marketplace_suggestion_dismissed', {
@@ -62,20 +80,35 @@
 				context: context,
 				product: product || '',
 				promoted: promoted || '',
-				target: url || ''
+				target: url || '',
 			} );
 		}
 
 		// Render DOM element for suggestion dismiss button.
-		function renderDismissButton( context, product, promoted, url, suggestionSlug ) {
+		function renderDismissButton(
+			context,
+			product,
+			promoted,
+			url,
+			suggestionSlug
+		) {
 			var dismissButton = document.createElement( 'a' );
 
 			dismissButton.classList.add( 'suggestion-dismiss' );
-			dismissButton.setAttribute( 'title', marketplace_suggestions.i18n_marketplace_suggestions_dismiss_tooltip );
+			dismissButton.setAttribute(
+				'title',
+				marketplace_suggestions.i18n_marketplace_suggestions_dismiss_tooltip
+			);
 			dismissButton.setAttribute( 'href', '#' );
-			dismissButton.onclick = function( event ) {
+			dismissButton.onclick = function ( event ) {
 				event.preventDefault();
-				dismissSuggestion( context, product, promoted, url, suggestionSlug );
+				dismissSuggestion(
+					context,
+					product,
+					promoted,
+					url,
+					suggestionSlug
+				);
 			};
 
 			return dismissButton;
@@ -88,28 +121,29 @@
 			urlParams.utm_medium = 'product';
 
 			var sourceContextMap = {
-				'productstable': [
-					'products-list-inline'
-				],
-				'productsempty': [
+				productstable: [ 'products-list-inline' ],
+				productsempty: [
 					'products-list-empty-header',
 					'products-list-empty-footer',
-					'products-list-empty-body'
+					'products-list-empty-body',
 				],
-				'ordersempty': [
+				ordersempty: [
 					'orders-list-empty-header',
 					'orders-list-empty-footer',
-					'orders-list-empty-body'
+					'orders-list-empty-body',
 				],
-				'editproduct': [
+				editproduct: [
 					'product-edit-meta-tab-header',
 					'product-edit-meta-tab-footer',
-					'product-edit-meta-tab-body'
-				]
+					'product-edit-meta-tab-body',
+				],
 			};
-			var utmSource = _.findKey( sourceContextMap, function( sourceInfo ) {
-				return _.contains( sourceInfo, context );
-			} );
+			var utmSource = _.findKey(
+				sourceContextMap,
+				function ( sourceInfo ) {
+					return _.contains( sourceInfo, context );
+				}
+			);
 			if ( utmSource ) {
 				urlParams.utm_source = utmSource;
 			}
@@ -118,7 +152,16 @@
 		}
 
 		// Render DOM element for suggestion linkout, optionally with button style.
-		function renderLinkout( context, product, promoted, slug, url, iamUrl, text, isButton ) {
+		function renderLinkout(
+			context,
+			product,
+			promoted,
+			slug,
+			url,
+			iamUrl,
+			text,
+			isButton
+		) {
 			var linkoutButton = document.createElement( 'a' );
 			var utmUrl = addURLParameters( context, url );
 			var isInternalLink = Boolean( iamUrl );
@@ -133,7 +176,7 @@
 				'product-edit-meta-tab-header',
 				'product-edit-meta-tab-footer',
 				'product-edit-meta-tab-body',
-				'products-list-empty-footer'
+				'products-list-empty-footer',
 			];
 			if ( _.includes( newTabContexts, context ) ) {
 				linkoutButton.setAttribute( 'target', 'blank' );
@@ -141,13 +184,13 @@
 
 			linkoutButton.textContent = text;
 
-			linkoutButton.onclick = function() {
+			linkoutButton.onclick = function () {
 				window.wcTracks.recordEvent( 'marketplace_suggestion_clicked', {
 					suggestion_slug: slug,
 					context: context,
 					product: product || '',
 					promoted: promoted || '',
-					target: targetUrl || ''
+					target: targetUrl || '',
 				} );
 			};
 
@@ -155,9 +198,12 @@
 				linkoutButton.classList.add( 'button' );
 			} else {
 				linkoutButton.classList.add( 'linkout' );
-				if ( !isInternalLink ) {
-				var linkoutIcon = document.createElement( 'span' );
-					linkoutIcon.classList.add( 'dashicons', 'dashicons-external' );
+				if ( ! isInternalLink ) {
+					var linkoutIcon = document.createElement( 'span' );
+					linkoutIcon.classList.add(
+						'dashicons',
+						'dashicons-external'
+					);
 					linkoutButton.appendChild( linkoutIcon );
 				}
 			}
@@ -182,7 +228,9 @@
 		function renderSuggestionContent( slug, title, copy ) {
 			var container = document.createElement( 'div' );
 
-			container.classList.add( 'marketplace-suggestion-container-content' );
+			container.classList.add(
+				'marketplace-suggestion-container-content'
+			);
 
 			if ( title ) {
 				var titleHeading = document.createElement( 'h4' );
@@ -200,18 +248,22 @@
 			// metabox footer (based on suggestion slug).
 			var slugsWithManage = [
 				'product-edit-empty-footer-browse-all',
-				'product-edit-meta-tab-footer-browse-all'
+				'product-edit-meta-tab-footer-browse-all',
 			];
 			if ( -1 !== slugsWithManage.indexOf( slug ) ) {
 				container.classList.add( 'has-manage-link' );
 
 				var manageSuggestionsLink = document.createElement( 'a' );
-				manageSuggestionsLink.classList.add( 'marketplace-suggestion-manage-link', 'linkout' );
+				manageSuggestionsLink.classList.add(
+					'marketplace-suggestion-manage-link',
+					'linkout'
+				);
 				manageSuggestionsLink.setAttribute(
 					'href',
 					marketplace_suggestions.manage_suggestions_url
 				);
-				manageSuggestionsLink.textContent =  marketplace_suggestions.i18n_marketplace_suggestions_manage_suggestions;
+				manageSuggestionsLink.textContent =
+					marketplace_suggestions.i18n_marketplace_suggestions_manage_suggestions;
 
 				container.appendChild( manageSuggestionsLink );
 			}
@@ -220,21 +272,43 @@
 		}
 
 		// Render DOM elements for suggestion call-to-action – button or link with dismiss 'x'.
-		function renderSuggestionCTA( context, product, promoted, slug, url, iamUrl, linkText, linkIsButton, allowDismiss ) {
+		function renderSuggestionCTA(
+			context,
+			product,
+			promoted,
+			slug,
+			url,
+			iamUrl,
+			linkText,
+			linkIsButton,
+			allowDismiss
+		) {
 			var container = document.createElement( 'div' );
 
 			if ( ! linkText ) {
-				linkText = marketplace_suggestions.i18n_marketplace_suggestions_default_cta;
+				linkText =
+					marketplace_suggestions.i18n_marketplace_suggestions_default_cta;
 			}
 
 			container.classList.add( 'marketplace-suggestion-container-cta' );
 			if ( url && linkText ) {
-				var linkoutElement = renderLinkout( context, product, promoted, slug, url, iamUrl, linkText, linkIsButton );
+				var linkoutElement = renderLinkout(
+					context,
+					product,
+					promoted,
+					slug,
+					url,
+					iamUrl,
+					linkText,
+					linkIsButton
+				);
 				container.appendChild( linkoutElement );
 			}
 
 			if ( allowDismiss ) {
-				container.appendChild( renderDismissButton( context, product, promoted, url, slug ) );
+				container.appendChild(
+					renderDismissButton( context, product, promoted, url, slug )
+				);
 			}
 
 			return container;
@@ -268,41 +342,68 @@
 				renderSuggestionContent( slug, title, copy )
 			);
 			container.appendChild(
-				renderSuggestionCTA( context, product, promoted, slug, url, iamUrl, linkText, linkIsButton, allowDismiss )
+				renderSuggestionCTA(
+					context,
+					product,
+					promoted,
+					slug,
+					url,
+					iamUrl,
+					linkText,
+					linkIsButton,
+					allowDismiss
+				)
 			);
 
 			return container;
 		}
 
 		// Filter suggestion data to remove less-relevant suggestions.
-		function getRelevantPromotions( marketplaceSuggestionsApiData, displayContext ) {
+		function getRelevantPromotions(
+			marketplaceSuggestionsApiData,
+			displayContext
+		) {
 			// select based on display context
-			var promos = _.filter( marketplaceSuggestionsApiData, function( promo ) {
-				if ( _.isArray( promo.context ) ) {
-					return _.contains( promo.context, displayContext );
+			var promos = _.filter(
+				marketplaceSuggestionsApiData,
+				function ( promo ) {
+					if ( _.isArray( promo.context ) ) {
+						return _.contains( promo.context, displayContext );
+					}
+					return displayContext === promo.context;
 				}
-				return ( displayContext === promo.context );
-			} );
+			);
 
 			// hide promos the user has dismissed
-			promos = _.filter( promos, function( promo ) {
-				return ! _.contains( marketplace_suggestions.dismissed_suggestions, promo.slug );
+			promos = _.filter( promos, function ( promo ) {
+				return ! _.contains(
+					marketplace_suggestions.dismissed_suggestions,
+					promo.slug
+				);
 			} );
 
 			// hide promos for things the user already has installed
-			promos = _.filter( promos, function( promo ) {
-				return ! _.contains( marketplace_suggestions.active_plugins, promo.product );
+			promos = _.filter( promos, function ( promo ) {
+				return ! _.contains(
+					marketplace_suggestions.active_plugins,
+					promo.product
+				);
 			} );
 
 			// hide promos that are not applicable based on user's installed extensions
-			promos = _.filter( promos, function( promo ) {
-				if ( ! promo['show-if-active'] ) {
+			promos = _.filter( promos, function ( promo ) {
+				if ( ! promo[ 'show-if-active' ] ) {
 					// this promotion is relevant to all
 					return true;
 				}
 
 				// if the user has any of the prerequisites, show the promo
-				return ( _.intersection( marketplace_suggestions.active_plugins, promo['show-if-active'] ).length > 0 );
+				return (
+					_.intersection(
+						marketplace_suggestions.active_plugins,
+						promo[ 'show-if-active' ]
+					).length > 0
+				);
 			} );
 
 			return promos;
@@ -310,10 +411,11 @@
 
 		// Show and hide page elements dependent on suggestion state.
 		function hidePageElementsForSuggestionState( usedSuggestionsContexts ) {
-			var showingEmptyStateSuggestions = _.intersection(
-				usedSuggestionsContexts,
-				[ 'products-list-empty-body', 'orders-list-empty-body' ]
-			).length > 0;
+			var showingEmptyStateSuggestions =
+				_.intersection( usedSuggestionsContexts, [
+					'products-list-empty-body',
+					'orders-list-empty-body',
+				] ).length > 0;
 
 			// Streamline onboarding UI if we're in 'empty state' welcome mode.
 			if ( showingEmptyStateSuggestions ) {
@@ -322,10 +424,18 @@
 
 			// Hide the header & footer, they don't make sense without specific promotion content
 			if ( ! showingEmptyStateSuggestions ) {
-				$( '.marketplace-suggestions-container[data-marketplace-suggestions-context="products-list-empty-header"]' ).hide();
-				$( '.marketplace-suggestions-container[data-marketplace-suggestions-context="products-list-empty-footer"]' ).hide();
-				$( '.marketplace-suggestions-container[data-marketplace-suggestions-context="orders-list-empty-header"]' ).hide();
-				$( '.marketplace-suggestions-container[data-marketplace-suggestions-context="orders-list-empty-footer"]' ).hide();
+				$(
+					'.marketplace-suggestions-container[data-marketplace-suggestions-context="products-list-empty-header"]'
+				).hide();
+				$(
+					'.marketplace-suggestions-container[data-marketplace-suggestions-context="products-list-empty-footer"]'
+				).hide();
+				$(
+					'.marketplace-suggestions-container[data-marketplace-suggestions-context="orders-list-empty-header"]'
+				).hide();
+				$(
+					'.marketplace-suggestions-container[data-marketplace-suggestions-context="orders-list-empty-footer"]'
+				).hide();
 			}
 		}
 
@@ -342,18 +452,24 @@
 				metaboxSuggestionsUISelector +=
 					', .marketplace-suggestions-container[data-marketplace-suggestions-context="product-edit-meta-tab-footer"]';
 				$( metaboxSuggestionsUISelector ).fadeOut( {
-					complete: function() {
-						$( '.marketplace-suggestions-metabox-nosuggestions-placeholder' ).fadeIn();
-					}
+					complete: function () {
+						$(
+							'.marketplace-suggestions-metabox-nosuggestions-placeholder'
+						).fadeIn();
+					},
 				} );
-
 			}
 		}
 
 		function addManageSuggestionsTracksHandler() {
-			$( 'a.marketplace-suggestion-manage-link' ).on( 'click', function() {
-				window.wcTracks.recordEvent( 'marketplace_suggestions_manage_clicked' );
-			} );
+			$( 'a.marketplace-suggestion-manage-link' ).on(
+				'click',
+				function () {
+					window.wcTracks.recordEvent(
+						'marketplace_suggestions_manage_clicked'
+					);
+				}
+			);
 		}
 
 		function isContextHiddenOnPageLoad( context ) {
@@ -362,7 +478,7 @@
 			var revealableSuggestionsContexts = [
 				'product-edit-meta-tab-header',
 				'product-edit-meta-tab-body',
-				'product-edit-meta-tab-footer'
+				'product-edit-meta-tab-footer',
 			];
 			return _.includes( revealableSuggestionsContexts, context );
 		}
@@ -378,40 +494,56 @@
 			var recommendationsCount = 5; // default fallback
 			if (
 				marketplace_suggestions.suggestions_data &&
-				marketplace_suggestions.suggestions_data[0] &&
-				marketplace_suggestions.suggestions_data[0]['recommendations-count']
+				marketplace_suggestions.suggestions_data[ 0 ] &&
+				marketplace_suggestions.suggestions_data[ 0 ][
+					'recommendations-count'
+				]
 			) {
-				var apiCount = marketplace_suggestions.suggestions_data[0]['recommendations-count'];
+				var apiCount =
+					marketplace_suggestions.suggestions_data[ 0 ][
+						'recommendations-count'
+					];
 				// Validate that it's a positive number and within reasonable bounds
-				if ( typeof apiCount === 'number' && apiCount > 0 && apiCount <= 50 ) {
+				if (
+					typeof apiCount === 'number' &&
+					apiCount > 0 &&
+					apiCount <= 50
+				) {
 					recommendationsCount = Math.floor( apiCount );
 				}
 			}
 
 			// iterate over all suggestions containers, rendering promos
-			$( '.marketplace-suggestions-container' ).each( function() {
+			$( '.marketplace-suggestions-container' ).each( function () {
 				// determine the context / placement we're populating
 				var context = this.dataset.marketplaceSuggestionsContext;
 
 				// find promotions that target this context
-				var promos = getRelevantPromotions( marketplaceSuggestionsApiData, context );
+				var promos = getRelevantPromotions(
+					marketplaceSuggestionsApiData,
+					context
+				);
 
 				// shuffle/randomly select suggestions to display based on API count
-				var suggestionsToDisplay = _.sample( promos, recommendationsCount );
+				var suggestionsToDisplay = _.sample(
+					promos,
+					recommendationsCount
+				);
 
 				// render the promo content
 				for ( var i in suggestionsToDisplay ) {
-
-					var linkText = suggestionsToDisplay[ i ]['link-text'];
+					var linkText = suggestionsToDisplay[ i ][ 'link-text' ];
 					var linkoutIsButton = true;
-					if ( suggestionsToDisplay[ i ]['link-text'] ) {
-						linkText = suggestionsToDisplay[ i ]['link-text'];
+					if ( suggestionsToDisplay[ i ][ 'link-text' ] ) {
+						linkText = suggestionsToDisplay[ i ][ 'link-text' ];
 						linkoutIsButton = false;
 					}
 
 					// dismiss is allowed by default
 					var allowDismiss = true;
-					if ( suggestionsToDisplay[ i ]['allow-dismiss'] === false ) {
+					if (
+						suggestionsToDisplay[ i ][ 'allow-dismiss' ] === false
+					) {
 						allowDismiss = false;
 					}
 
@@ -424,7 +556,7 @@
 						suggestionsToDisplay[ i ].title,
 						suggestionsToDisplay[ i ].copy,
 						suggestionsToDisplay[ i ].url,
-						suggestionsToDisplay[ i ]['iam-url'] || '',
+						suggestionsToDisplay[ i ][ 'iam-url' ] || '',
 						linkText,
 						linkoutIsButton,
 						allowDismiss
@@ -435,18 +567,25 @@
 
 					if ( ! isContextHiddenOnPageLoad( context ) ) {
 						// Fire 'displayed' tracks events for immediately visible suggestions.
-						window.wcTracks.recordEvent( 'marketplace_suggestion_displayed', {
-							suggestion_slug: suggestionsToDisplay[ i ].slug,
-							context: context,
-							product: suggestionsToDisplay[ i ].product || '',
-							promoted: suggestionsToDisplay[ i ].promoted || '',
-							target: suggestionsToDisplay[ i ].url || ''
-						} );
+						window.wcTracks.recordEvent(
+							'marketplace_suggestion_displayed',
+							{
+								suggestion_slug: suggestionsToDisplay[ i ].slug,
+								context: context,
+								product:
+									suggestionsToDisplay[ i ].product || '',
+								promoted:
+									suggestionsToDisplay[ i ].promoted || '',
+								target: suggestionsToDisplay[ i ].url || '',
+							}
+						);
 					}
 				}
 
 				// Track when suggestions are displayed (and not already visible).
-				$( 'ul.product_data_tabs li.marketplace-suggestions_options a' ).on( 'click', function( e ) {
+				$(
+					'ul.product_data_tabs li.marketplace-suggestions_options a'
+				).on( 'click', function ( e ) {
 					e.preventDefault();
 
 					if ( '#marketplace_suggestions' === currentTab ) {
@@ -459,13 +598,18 @@
 					}
 
 					for ( var i in suggestionsToDisplay ) {
-						window.wcTracks.recordEvent( 'marketplace_suggestion_displayed', {
-							suggestion_slug: suggestionsToDisplay[ i ].slug,
-							context: context,
-							product: suggestionsToDisplay[ i ].product || '',
-							promoted: suggestionsToDisplay[ i ].promoted || '',
-							target: suggestionsToDisplay[ i ].url || ''
-						} );
+						window.wcTracks.recordEvent(
+							'marketplace_suggestion_displayed',
+							{
+								suggestion_slug: suggestionsToDisplay[ i ].slug,
+								context: context,
+								product:
+									suggestionsToDisplay[ i ].product || '',
+								promoted:
+									suggestionsToDisplay[ i ].promoted || '',
+								target: suggestionsToDisplay[ i ].url || '',
+							}
+						);
 					}
 				} );
 			} );
@@ -478,13 +622,12 @@
 			displaySuggestions( marketplace_suggestions.suggestions_data );
 
 			// track the current product data tab to avoid over-reporting suggestion views
-			$( 'ul.product_data_tabs' ).on( 'click', 'li a', function( e ) {
+			$( 'ul.product_data_tabs' ).on( 'click', 'li a', function ( e ) {
 				e.preventDefault();
 				currentTab = $( this ).attr( 'href' );
 			} );
 		}
 
 		addManageSuggestionsTracksHandler();
-	});
-
-})( jQuery, marketplace_suggestions, ajaxurl );
+	} );
+} )( jQuery, marketplace_suggestions, ajaxurl );

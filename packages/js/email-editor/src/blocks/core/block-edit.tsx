@@ -11,29 +11,23 @@ import { addFilterForEmail } from '../../config-tools/filters';
 
 interface UrlAttributes {
 	url?: string;
-	[ key: string ]: unknown;
+	[key: string]: unknown;
 }
 
 const setUrlAttribute =
-	( BlockEdit: React.ElementType ) =>
-	( props: BlockEditProps< unknown > ) => {
+	(BlockEdit: React.ElementType) => (props: BlockEditProps<unknown>) => {
 		const { setAttributes } = props;
 		const wrappedSetAttributes = useCallback(
-			( attributes: UrlAttributes ) => {
+			(attributes: UrlAttributes) => {
 				// Remove the `http://` prefix that is being set automatically by the link control.
-				if (
-					attributes?.url &&
-					attributes.url?.startsWith( 'http://[' )
-				) {
-					attributes.url = attributes.url.replace( 'http://[', '[' );
+				if (attributes?.url && attributes.url?.startsWith('http://[')) {
+					attributes.url = attributes.url.replace('http://[', '[');
 				}
-				setAttributes( attributes );
+				setAttributes(attributes);
 			},
-			[ setAttributes ]
+			[setAttributes]
 		);
-		return (
-			<BlockEdit { ...props } setAttributes={ wrappedSetAttributes } />
-		);
+		return <BlockEdit {...props} setAttributes={wrappedSetAttributes} />;
 	};
 
 function filterSetUrlAttribute(): void {

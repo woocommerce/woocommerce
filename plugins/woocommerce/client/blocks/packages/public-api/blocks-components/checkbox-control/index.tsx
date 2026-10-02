@@ -13,13 +13,13 @@ import './style.scss';
 
 export type CheckboxControlProps = {
 	label?: ReactNode;
-	onChange: ( value: boolean ) => void;
+	onChange: (value: boolean) => void;
 	children?: ReactNode;
 	hasError?: boolean;
 	errorId?: string;
 	errorMessage?: string;
 } & Pick<
-	InputHTMLAttributes< HTMLInputElement >,
+	InputHTMLAttributes<HTMLInputElement>,
 	| 'value'
 	| 'name'
 	| 'aria-label'
@@ -54,33 +54,31 @@ export const CheckboxControl = forwardRef<
 		}: CheckboxControlProps,
 		forwardedRef
 	): JSX.Element => {
-		const instanceId = useInstanceId( CheckboxControl );
-		const checkboxId = id || `checkbox-control-${ instanceId }`;
+		const instanceId = useInstanceId(CheckboxControl);
+		const checkboxId = id || `checkbox-control-${instanceId}`;
 
 		return (
 			<div
-				className={ clsx(
+				className={clsx(
 					'wc-block-components-checkbox',
 					{
 						'has-error': hasError,
 					},
 					className
-				) }
+				)}
 			>
-				<label htmlFor={ checkboxId }>
+				<label htmlFor={checkboxId}>
 					<input
-						ref={ forwardedRef }
-						id={ checkboxId }
+						ref={forwardedRef}
+						id={checkboxId}
 						className="wc-block-components-checkbox__input"
 						type="checkbox"
-						onChange={ ( event ) =>
-							onChange?.( event.target.checked )
-						}
-						aria-invalid={ hasError === true }
-						checked={ checked }
-						disabled={ disabled }
-						value={ value }
-						{ ...rest }
+						onChange={(event) => onChange?.(event.target.checked)}
+						aria-invalid={hasError === true}
+						checked={checked}
+						disabled={disabled}
+						value={value}
+						{...rest}
 					/>
 					<svg
 						className="wc-block-components-checkbox__mark"
@@ -89,12 +87,12 @@ export const CheckboxControl = forwardRef<
 					>
 						<path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
 					</svg>
-					{ label && (
+					{label && (
 						<span className="wc-block-components-checkbox__label">
-							{ label }
+							{label}
 						</span>
-					) }
-					{ children }
+					)}
+					{children}
 				</label>
 			</div>
 		);

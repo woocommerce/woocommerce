@@ -21,26 +21,26 @@ const DiscountSlotFill = (): JSX.Element => {
 		context: 'woocommerce/checkout',
 	};
 
-	return <ExperimentalDiscountsMeta.Slot { ...discountsSlotFillProps } />;
+	return <ExperimentalDiscountsMeta.Slot {...discountsSlotFillProps} />;
 };
 
-const Block = ( { className = '' }: { className?: string } ): JSX.Element => {
+const Block = ({ className = '' }: { className?: string }): JSX.Element => {
 	const { cartTotals, cartCoupons } = useStoreCart();
 	const { removeCoupon, isRemovingCoupon } =
-		useStoreCartCoupons( 'wc/checkout' );
+		useStoreCartCoupons('wc/checkout');
 	const { isLoading } = useOrderSummaryLoadingState();
-	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
+	const totalsCurrency = getCurrencyFromPriceResponse(cartTotals);
 
 	return (
 		<>
-			<TotalsWrapper className={ className }>
+			<TotalsWrapper className={className}>
 				<TotalsDiscount
-					cartCoupons={ cartCoupons }
-					currency={ totalsCurrency }
-					isRemovingCoupon={ isRemovingCoupon }
-					removeCoupon={ removeCoupon }
-					values={ cartTotals }
-					isLoading={ isLoading }
+					cartCoupons={cartCoupons}
+					currency={totalsCurrency}
+					isRemovingCoupon={isRemovingCoupon}
+					removeCoupon={removeCoupon}
+					values={cartTotals}
+					isLoading={isLoading}
 				/>
 			</TotalsWrapper>
 			<DiscountSlotFill />

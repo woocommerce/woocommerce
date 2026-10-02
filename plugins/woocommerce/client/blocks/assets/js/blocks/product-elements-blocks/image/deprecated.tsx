@@ -22,14 +22,14 @@ const v1 = {
 			default: false,
 		},
 	},
-	isEligible: ( { showSaleBadge }: BlockAttributes ) =>
-		isTryingToDisplayLegacySaleBadge( showSaleBadge ),
-	migrate: ( attributes: BlockAttributes ) => {
+	isEligible: ({ showSaleBadge }: BlockAttributes) =>
+		isTryingToDisplayLegacySaleBadge(showSaleBadge),
+	migrate: (attributes: BlockAttributes) => {
 		const { showSaleBadge, saleBadgeAlign } = attributes;
 
 		// If showSaleBadge is false, it means that the sale badge was explicitly set to false.
-		if ( showSaleBadge === false ) {
-			return [ attributes ];
+		if (showSaleBadge === false) {
+			return [attributes];
 		}
 		// Otherwise, it's either:
 		// - true explicitly or
@@ -41,9 +41,9 @@ const v1 = {
 				showSaleBadge: false,
 			},
 			[
-				createBlock( 'woocommerce/product-sale-badge', {
+				createBlock('woocommerce/product-sale-badge', {
 					align: saleBadgeAlign,
-				} ),
+				}),
 			],
 		];
 	},
@@ -63,4 +63,4 @@ const v2 = {
 	apiVersion: 3,
 };
 
-export default [ v2, v1 ];
+export default [v2, v1];

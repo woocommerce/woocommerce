@@ -22,14 +22,14 @@ import {
 } from '@woocommerce/block-data';
 import type Ajv from 'ajv';
 
-const useDocumentObject = < T extends FormType | 'global' >(
+const useDocumentObject = <T extends FormType | 'global'>(
 	formType: T
-): DocumentObject< T > => {
-	const currentResults = useRef< DocumentObject< T > >( {
+): DocumentObject<T> => {
+	const currentResults = useRef<DocumentObject<T>>({
 		cart: {},
 		checkout: {},
 		customer: {},
-	} );
+	});
 
 	const {
 		cartData,
@@ -39,10 +39,10 @@ const useDocumentObject = < T extends FormType | 'global' >(
 		additionalFields,
 		activePaymentMethod,
 		customerId,
-	} = useSelect( ( select ) => {
-		const cartDataStore = select( cartStore );
-		const checkoutDataStore = select( checkoutStore );
-		const paymentDataStore = select( paymentStore );
+	} = useSelect((select) => {
+		const cartDataStore = select(cartStore);
+		const checkoutDataStore = select(checkoutStore);
+		const paymentDataStore = select(paymentStore);
 		return {
 			cartData: cartDataStore.getCartData(),
 			prefersCollection: checkoutDataStore.prefersCollection(),
@@ -52,9 +52,9 @@ const useDocumentObject = < T extends FormType | 'global' >(
 			activePaymentMethod: paymentDataStore.getActivePaymentMethod(),
 			customerId: checkoutDataStore.getCustomerId(),
 		};
-	}, [] );
+	}, []);
 
-	const data = useMemo( () => {
+	const data = useMemo(() => {
 		const {
 			coupons,
 			shippingRates,
@@ -70,26 +70,25 @@ const useDocumentObject = < T extends FormType | 'global' >(
 
 		const documentObject = {
 			cart: {
-				coupons: coupons.map( ( coupon ) => coupon.code ),
+				coupons: coupons.map((coupon) => coupon.code),
 				shippingRates: [
 					...new Set(
 						shippingRates
 							.map(
-								( shippingPackage ) =>
+								(shippingPackage) =>
 									shippingPackage.shipping_rates.find(
-										( rate ) => rate.selected
+										(rate) => rate.selected
 									)?.rate_id
 							)
-							.filter( Boolean )
+							.filter(Boolean)
 					),
 				],
 				items: items
 					.map(
-						( item ) =>
-							Array( Math.ceil( item.quantity ) ).fill( item.id ) // Rounds up to nearest integer.
+						(item) => Array(Math.ceil(item.quantity)).fill(item.id) // Rounds up to nearest integer.
 					)
 					.flat(),
-				itemsType: [ ...new Set( items.map( ( item ) => item.type ) ) ],
+				itemsType: [...new Set(items.map((item) => item.type))],
 				itemsCount,
 				itemsWeight,
 				needsShipping,
@@ -98,8 +97,8 @@ const useDocumentObject = < T extends FormType | 'global' >(
 						? prefersCollection
 						: false,
 				totals: {
-					total_price: Number( totals.total_price ),
-					total_tax: Number( totals.total_tax ),
+					total_price: Number(totals.total_price),
+					total_tax: Number(totals.total_tax),
 				},
 				extensions,
 			},
@@ -107,8 +106,8 @@ const useDocumentObject = < T extends FormType | 'global' >(
 				createAccount: shouldCreateAccount,
 				customerNote: orderNotes,
 				additionalFields: Object.fromEntries(
-					Object.entries( additionalFields ).filter( ( [ key ] ) =>
-						ORDER_FORM_KEYS.includes( key as keyof OrderFormValues )
+					Object.entries(additionalFields).filter(([key]) =>
+						ORDER_FORM_KEYS.includes(key as keyof OrderFormValues)
 					)
 				) as OrderFormValues,
 				paymentMethod: activePaymentMethod,
@@ -118,33 +117,33 @@ const useDocumentObject = < T extends FormType | 'global' >(
 				billingAddress,
 				shippingAddress,
 				additionalFields: Object.fromEntries(
-					Object.entries( additionalFields ).filter( ( [ key ] ) =>
+					Object.entries(additionalFields).filter(([key]) =>
 						CONTACT_FORM_KEYS.includes(
 							key as keyof ContactFormValues
 						)
 					)
 				) as ContactFormValues,
-				...( formType === 'billing' || formType === 'shipping'
+				...(formType === 'billing' || formType === 'shipping'
 					? {
 							address:
 								formType === 'billing'
 									? billingAddress
 									: shippingAddress,
-					  }
-					: {} ),
+						}
+					: {}),
 			},
 		};
 
 		return {
-			cart: snakeCaseKeys( documentObject.cart ) as DocumentObject<
+			cart: snakeCaseKeys(documentObject.cart) as DocumentObject<
 				typeof formType
-			>[ 'cart' ],
-			checkout: snakeCaseKeys(
-				documentObject.checkout
-			) as DocumentObject< typeof formType >[ 'checkout' ],
-			customer: snakeCaseKeys(
-				documentObject.customer
-			) as DocumentObject< typeof formType >[ 'customer' ],
+			>['cart'],
+			checkout: snakeCaseKeys(documentObject.checkout) as DocumentObject<
+				typeof formType
+			>['checkout'],
+			customer: snakeCaseKeys(documentObject.customer) as DocumentObject<
+				typeof formType
+			>['customer'],
 		};
 	}, [
 		cartData,
@@ -155,11 +154,11 @@ const useDocumentObject = < T extends FormType | 'global' >(
 		activePaymentMethod,
 		customerId,
 		formType,
-	] );
+	]);
 
 	if (
-		! currentResults.current ||
-		! fastDeepEqual( currentResults.current, data )
+		!currentResults.current ||
+		!fastDeepEqual(currentResults.current, data)
 	) {
 		currentResults.current = data;
 	}
@@ -167,14 +166,14 @@ const useDocumentObject = < T extends FormType | 'global' >(
 	return currentResults.current;
 };
 
-export const useSchemaParser = < T extends FormType | 'global' >(
+export const useSchemaParser = <T extends FormType | 'global'>(
 	formType: T
 ): {
 	parser: Ajv | null;
-	data: DocumentObject< T > | null;
+	data: DocumentObject<T> | null;
 } => {
-	const data = useDocumentObject< T >( formType );
-	if ( window.schemaParser ) {
+	const data = useDocumentObject<T>(formType);
+	if (window.schemaParser) {
 		return {
 			parser: window.schemaParser,
 			data,
@@ -186,7 +185,7 @@ export const useSchemaParser = < T extends FormType | 'global' >(
 	};
 };
 
-export interface DocumentObject< T extends FormType | 'global' > {
+export interface DocumentObject<T extends FormType | 'global'> {
 	cart:
 		| {
 				coupons: string[];
@@ -201,9 +200,9 @@ export interface DocumentObject< T extends FormType | 'global' > {
 					total_price: number;
 					total_tax: number;
 				};
-				extensions: Record< string, object | object[] >;
+				extensions: Record<string, object | object[]>;
 		  }
-		| Record< string, never >;
+		| Record<string, never>;
 	checkout:
 		| {
 				create_account: boolean;
@@ -211,7 +210,7 @@ export interface DocumentObject< T extends FormType | 'global' > {
 				payment_method: string;
 				additional_fields: OrderFormValues;
 		  }
-		| Record< string, never >;
+		| Record<string, never>;
 	customer:
 		| {
 				id: number;
@@ -221,8 +220,8 @@ export interface DocumentObject< T extends FormType | 'global' > {
 				address: T extends 'billing'
 					? AddressFormValues
 					: T extends 'shipping'
-					? AddressFormValues
-					: null;
+						? AddressFormValues
+						: null;
 		  }
-		| Record< string, never >;
+		| Record<string, never>;
 }

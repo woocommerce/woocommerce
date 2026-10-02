@@ -105,7 +105,7 @@ const program = new Command()
 					? ( await getMostRecentFinal() ).tag_name
 					: `${ semverVersion.major }.${ semverVersion.minor }.${
 							semverVersion.patch
-					  }-beta.${ prereleaseVersion - 1 }`;
+						}-beta.${ prereleaseVersion - 1 }`;
 
 			const semverPreviousVersion = semver.parse( previousVersion );
 
@@ -187,9 +187,9 @@ const program = new Command()
 					}.${ semverPreviousVersion.patch }${
 						semverPreviousVersion.prerelease.length
 							? ' ' +
-							  semverPreviousVersion.prerelease[ 0 ] +
-							  ' ' +
-							  semverPreviousVersion.prerelease[ 1 ]
+								semverPreviousVersion.prerelease[ 0 ] +
+								' ' +
+								semverPreviousVersion.prerelease[ 1 ]
 							: ''
 					}`,
 					rcReleaseDate: getFirstTuesdayOfTheMonth(

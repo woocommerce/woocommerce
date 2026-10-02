@@ -19,7 +19,7 @@ import { getMissingBlocks, findBlockPosition } from './utils';
 /**
  * Hook to ensure FORCED blocks are rendered in the correct place.
  */
-export const useForcedLayout = ( {
+export const useForcedLayout = ({
 	clientId,
 	registeredBlocks,
 	defaultTemplate = [],
@@ -27,56 +27,56 @@ export const useForcedLayout = ( {
 	// Client ID of the parent block.
 	clientId: string;
 	// An array of registered blocks that may be forced in this particular layout.
-	registeredBlocks: Array< string >;
+	registeredBlocks: Array<string>;
 	// The default template for the inner blocks in this layout.
 	defaultTemplate?: TemplateArray;
-} ) => {
-	const currentRegisteredBlocks = useRef( registeredBlocks );
-	const currentDefaultTemplate = useRef( defaultTemplate );
+}) => {
+	const currentRegisteredBlocks = useRef(registeredBlocks);
+	const currentDefaultTemplate = useRef(defaultTemplate);
 	const registry = useRegistry();
 	const { isPreview } = useEditorContext();
 
-	useEffect( () => {
+	useEffect(() => {
 		let templateSynced = false;
 
-		if ( isPreview ) {
+		if (isPreview) {
 			return;
 		}
 
-		const { replaceInnerBlocks } = dispatch( 'core/block-editor' );
+		const { replaceInnerBlocks } = dispatch('core/block-editor');
 
-		return registry.subscribe( () => {
+		return registry.subscribe(() => {
 			const currentBlock = registry
-				.select( 'core/block-editor' )
-				.getBlock( clientId );
+				.select('core/block-editor')
+				.getBlock(clientId);
 
 			// If the block is removed we shouldn't reinsert its inner blocks.
-			if ( ! currentBlock ) {
+			if (!currentBlock) {
 				return;
 			}
 
 			const innerBlocks = registry
-				.select( 'core/block-editor' )
-				.getBlocks( clientId );
+				.select('core/block-editor')
+				.getBlocks(clientId);
 
 			// If there are NO inner blocks, sync with the given template.
 			if (
 				innerBlocks.length === 0 &&
 				currentDefaultTemplate.current.length > 0 &&
-				! templateSynced
+				!templateSynced
 			) {
 				const nextBlocks = createBlocksFromInnerBlocksTemplate(
 					currentDefaultTemplate.current
 				);
-				if ( nextBlocks.length !== 0 ) {
+				if (nextBlocks.length !== 0) {
 					templateSynced = true;
-					replaceInnerBlocks( clientId, nextBlocks );
+					replaceInnerBlocks(clientId, nextBlocks);
 					return;
 				}
 			}
 
 			const registeredBlockTypes = currentRegisteredBlocks.current.map(
-				( blockName: string ) => getBlockType( blockName )
+				(blockName: string) => getBlockType(blockName)
 			);
 
 			const missingBlocks = getMissingBlocks(
@@ -84,7 +84,7 @@ export const useForcedLayout = ( {
 				registeredBlockTypes
 			);
 
-			if ( missingBlocks.length === 0 ) {
+			if (missingBlocks.length === 0) {
 				return;
 			}
 
@@ -92,31 +92,31 @@ export const useForcedLayout = ( {
 			// we check where the forced blocks should be inserted. This gets set to >= 0 if we find a missing block,
 			// so we know we can skip calculating it.
 			let insertAtPosition = -1;
-			const blockConfig = missingBlocks.map( ( block ) => {
+			const blockConfig = missingBlocks.map((block) => {
 				const defaultTemplatePosition =
 					currentDefaultTemplate.current.findIndex(
-						( [ blockName ] ) => blockName === block.name
+						([blockName]) => blockName === block.name
 					);
-				const createdBlock = createBlock( block.name );
+				const createdBlock = createBlock(block.name);
 
 				// As mentioned above, if this is not -1, this is the first time we're calculating the position, if it's
 				// already been calculated we can skip doing so.
-				if ( insertAtPosition === -1 ) {
-					insertAtPosition = findBlockPosition( {
+				if (insertAtPosition === -1) {
+					insertAtPosition = findBlockPosition({
 						defaultTemplatePosition,
 						innerBlocks,
 						currentDefaultTemplate,
-					} );
+					});
 				}
 
 				return createdBlock;
-			} );
+			});
 
-			registry.batch( () => {
+			registry.batch(() => {
 				void registry
-					.dispatch( 'core/block-editor' )
-					.insertBlocks( blockConfig, insertAtPosition, clientId );
-			} );
-		}, 'core/block-editor' );
-	}, [ clientId, isPreview, registry ] );
+					.dispatch('core/block-editor')
+					.insertBlocks(blockConfig, insertAtPosition, clientId);
+			});
+		}, 'core/block-editor');
+	}, [clientId, isPreview, registry]);
 };

@@ -34,7 +34,8 @@ $payments-header-row-height: 38px;
 }
 
 .stripe-spinner {
-	animation: SpinnerAnimationShow 250ms ease,
+	animation:
+		SpinnerAnimationShow 250ms ease,
 		SpinnerAnimationRotation 0.7s linear infinite; // The timings are exactly like Stripe Spinner component.
 	transition-timing-function: ease;
 	transition-property: opacity, transform;
@@ -303,7 +304,9 @@ $payments-header-row-height: 38px;
 				border-bottom: 1px solid $gray-100;
 
 				// The last element with this class.
-				&:nth-last-child(1 of .other-payment-gateways__content__category-container) {
+				&:nth-last-child(
+					1 of .other-payment-gateways__content__category-container
+				) {
 					border-bottom: none;
 
 					.other-payment-gateways__content__grid {
@@ -432,7 +435,8 @@ $payments-header-row-height: 38px;
 							// Loading animation from here https://stackoverflow.com/a/40991531.
 							&::after {
 								display: inline-block;
-								animation: three-dots-loader steps(1, end) 1s infinite;
+								animation: three-dots-loader steps(1, end) 1s
+									infinite;
 								content: "";
 							}
 						}

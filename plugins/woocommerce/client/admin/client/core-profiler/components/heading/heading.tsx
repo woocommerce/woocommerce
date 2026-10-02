@@ -14,15 +14,15 @@ type Props = {
 	className?: string;
 };
 
-export const Heading = ( { className, title, subTitle }: Props ) => {
+export const Heading = ({ className, title, subTitle }: Props) => {
 	return (
-		<div className={ clsx( 'woocommerce-profiler-heading', className ) }>
-			<h1 className="woocommerce-profiler-heading__title">{ title }</h1>
-			{ subTitle && (
+		<div className={clsx('woocommerce-profiler-heading', className)}>
+			<h1 className="woocommerce-profiler-heading__title">{title}</h1>
+			{subTitle && (
 				<h2 className="woocommerce-profiler-heading__subtitle">
-					{ subTitle }
+					{subTitle}
 				</h2>
-			) }
+			)}
 		</div>
 	);
 };

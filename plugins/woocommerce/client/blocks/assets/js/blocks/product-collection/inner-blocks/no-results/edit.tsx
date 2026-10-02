@@ -22,28 +22,28 @@ const TEMPLATE: Template[] = [
 				{
 					textAlign: 'center',
 					fontSize: 'medium',
-					content: `<strong>${ __(
+					content: `<strong>${__(
 						'No results found',
 						'woocommerce'
-					) }</strong>`,
+					)}</strong>`,
 				},
 			],
 			[
 				'core/paragraph',
 				{
-					content: `${ __(
+					content: `${__(
 						'You can try',
 						'woocommerce'
-					) } <a href="#" class="wc-link-clear-any-filters">${ __(
+					)} <a href="#" class="wc-link-clear-any-filters">${__(
 						'clearing any filters',
 						'woocommerce'
-					) }</a> ${ __(
+					)}</a> ${__(
 						'or head to our',
 						'woocommerce'
-					) } <a href="#" class="wc-link-stores-home">${ __(
+					)} <a href="#" class="wc-link-stores-home">${__(
 						"store's home",
 						'woocommerce'
-					) }</a>`,
+					)}</a>`,
 				},
 			],
 		],
@@ -51,13 +51,13 @@ const TEMPLATE: Template[] = [
 ];
 
 const Edit = () => {
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className: 'wc-block-product-collection-no-results',
-	} );
+	});
 
 	return (
-		<div { ...blockProps }>
-			<InnerBlocks template={ TEMPLATE } />
+		<div {...blockProps}>
+			<InnerBlocks template={TEMPLATE} />
 		</div>
 	);
 };

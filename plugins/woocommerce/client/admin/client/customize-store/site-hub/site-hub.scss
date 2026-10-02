@@ -21,7 +21,8 @@
 	width: $header-height;
 	flex-shrink: 0;
 
-	&.has-transparent-background .woocommerce-edit-site-layout__view-mode-toggle-icon {
+	&.has-transparent-background
+		.woocommerce-edit-site-layout__view-mode-toggle-icon {
 		background: transparent;
 	}
 }
@@ -37,7 +38,7 @@
 	padding-right: $grid-unit-20;
 
 	// Create 12px gap between site icon and site title
-	margin-left: - $grid-unit-05;
+	margin-left: -$grid-unit-05;
 	position: relative;
 	text-decoration: none;
 	text-overflow: ellipsis;
@@ -57,7 +58,10 @@
 
 	&:focus-visible {
 		// Push the shadow away from the title.
-		box-shadow: 0 0 0 var(--wp-admin-border-width-focus) $gray-900, 0 0 0 calc(2 * var(--wp-admin-border-width-focus)) var(--wp-admin-theme-color);
+		box-shadow:
+			0 0 0 var(--wp-admin-border-width-focus) $gray-900,
+			0 0 0 calc(2 * var(--wp-admin-border-width-focus))
+				var(--wp-admin-theme-color);
 
 		// Windows High Contrast mode will show this outline, but not the box-shadow.
 		outline: 2px solid transparent;

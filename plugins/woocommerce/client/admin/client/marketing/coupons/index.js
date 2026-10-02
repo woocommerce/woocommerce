@@ -17,39 +17,35 @@ import '../data';
 const CouponsOverview = () => {
 	const { currentUserCan } = useUser();
 
-	const showSuggestions = !! getAdminSetting(
+	const showSuggestions = !!getAdminSetting(
 		'allowMarketplaceSuggestions',
 		false
 	);
 
-	const showExtensions =
-		showSuggestions && currentUserCan( 'install_plugins' );
+	const showExtensions = showSuggestions && currentUserCan('install_plugins');
 
 	return (
 		<div className="woocommerce-marketing-coupons">
 			<Promotions format="promo-card" />
-			{ showExtensions && (
+			{showExtensions && (
 				<RecommendedExtensions
-					title={ __(
-						'Recommended coupon extensions',
-						'woocommerce'
-					) }
-					description={ __(
+					title={__('Recommended coupon extensions', 'woocommerce')}
+					description={__(
 						'Take your coupon marketing to the next level with our recommended coupon extensions.',
 						'woocommerce'
-					) }
+					)}
 					category="coupons"
 				/>
-			) }
-			{ showSuggestions && (
+			)}
+			{showSuggestions && (
 				<KnowledgeBase
 					category="coupons"
-					description={ __(
+					description={__(
 						'Learn the ins and outs of successful coupon marketing from the experts at WooCommerce.',
 						'woocommerce'
-					) }
+					)}
 				/>
-			) }
+			)}
 		</div>
 	);
 };

@@ -33,21 +33,21 @@ export function TemplateSettingsPanel() {
 		tracking
 	) as TemplatePanelSection[];
 
-	if ( templateSections.length === 0 ) {
+	if (templateSections.length === 0) {
 		return null;
 	}
 
 	return (
 		<PluginDocumentSettingPanel
 			name="template-settings-panel"
-			title={ __( 'Settings', __i18n_text_domain__ ) }
+			title={__('Settings', __i18n_text_domain__)}
 			className="woocommerce-email-editor__settings-panel"
 		>
-			{ templateSections.map( ( section ) => (
-				<ErrorBoundary key={ `error-boundary-${ section.id }` }>
-					<div key={ section.id }>{ section.render() }</div>
+			{templateSections.map((section) => (
+				<ErrorBoundary key={`error-boundary-${section.id}`}>
+					<div key={section.id}>{section.render()}</div>
 				</ErrorBoundary>
-			) ) }
+			))}
 		</PluginDocumentSettingPanel>
 	);
 }

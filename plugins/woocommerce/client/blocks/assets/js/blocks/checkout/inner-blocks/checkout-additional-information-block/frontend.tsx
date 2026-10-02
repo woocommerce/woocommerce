@@ -17,7 +17,7 @@ import { useFormFields } from '@woocommerce/base-components/cart-checkout';
 import Block from './block';
 import attributes from './attributes';
 
-const FrontendBlock = ( {
+const FrontendBlock = ({
 	title,
 	description,
 	children,
@@ -27,18 +27,18 @@ const FrontendBlock = ( {
 	description: string;
 	children: JSX.Element;
 	className?: string;
-} ) => {
+}) => {
 	const { showFormStepNumbers } = useCheckoutBlockContext();
 	const { defaultFields } = useCheckoutAddress();
-	const formFields = useFormFields( ORDER_FORM_KEYS, defaultFields, 'order' );
+	const formFields = useFormFields(ORDER_FORM_KEYS, defaultFields, 'order');
 	const checkoutIsProcessing = useSelect(
-		( select ) => select( checkoutStore ).isProcessing(),
+		(select) => select(checkoutStore).isProcessing(),
 		[]
 	);
 
 	if (
 		formFields.length === 0 ||
-		formFields.every( ( field ) => !! field.hidden )
+		formFields.every((field) => !!field.hidden)
 	) {
 		return null;
 	}
@@ -46,16 +46,16 @@ const FrontendBlock = ( {
 	return (
 		<FormStep
 			id="order-fields"
-			disabled={ checkoutIsProcessing }
-			className={ clsx( 'wc-block-checkout__order-fields', className ) }
-			title={ title }
-			description={ description }
-			showStepNumber={ showFormStepNumbers }
+			disabled={checkoutIsProcessing}
+			className={clsx('wc-block-checkout__order-fields', className)}
+			title={title}
+			description={description}
+			showStepNumber={showFormStepNumbers}
 		>
 			<Block />
-			{ children }
+			{children}
 		</FormStep>
 	);
 };
 
-export default withFilteredAttributes( attributes )( FrontendBlock );
+export default withFilteredAttributes(attributes)(FrontendBlock);

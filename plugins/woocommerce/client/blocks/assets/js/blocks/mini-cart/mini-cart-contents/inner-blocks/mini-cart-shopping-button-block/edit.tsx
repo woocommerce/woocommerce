@@ -12,19 +12,19 @@ import {
  */
 import { defaultStartShoppingButtonLabel } from './constants';
 
-export const Edit = ( {
+export const Edit = ({
 	attributes,
 	setAttributes,
 }: {
 	attributes: {
 		startShoppingButtonLabel: string;
 	};
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ): JSX.Element => {
-	const blockProps = useBlockProps( {
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}): JSX.Element => {
+	const blockProps = useBlockProps({
 		className: 'wp-block-button aligncenter',
-	} );
-	const colorProps = useColorProps( attributes );
+	});
+	const colorProps = useColorProps(attributes);
 	const { startShoppingButtonLabel } = attributes;
 
 	// Same markup and classes as a core Button block, so the theme's button styles apply in the editor too.
@@ -34,29 +34,29 @@ export const Edit = ( {
 		'wc-block-mini-cart__shopping-button',
 		colorProps.className,
 	]
-		.filter( Boolean )
-		.join( ' ' );
+		.filter(Boolean)
+		.join(' ');
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<RichText
 				tagName="a"
-				className={ linkClassName }
-				style={ colorProps.style }
-				multiline={ false }
-				allowedFormats={ [] }
-				value={ startShoppingButtonLabel }
-				placeholder={ defaultStartShoppingButtonLabel }
-				onChange={ ( content ) => {
-					setAttributes( {
+				className={linkClassName}
+				style={colorProps.style}
+				multiline={false}
+				allowedFormats={[]}
+				value={startShoppingButtonLabel}
+				placeholder={defaultStartShoppingButtonLabel}
+				onChange={(content) => {
+					setAttributes({
 						startShoppingButtonLabel: content,
-					} );
-				} }
+					});
+				}}
 			/>
 		</div>
 	);
 };
 
 export const Save = (): JSX.Element => {
-	return <div { ...useBlockProps.save() }></div>;
+	return <div {...useBlockProps.save()}></div>;
 };

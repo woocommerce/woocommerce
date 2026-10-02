@@ -29,13 +29,13 @@ const DOWNLOADS_REPORT_ADVANCED_FILTERS_FILTER =
  * @filter woocommerce_admin_downloads_report_charts
  * @param {Array.<chart>} charts Report charts.
  */
-export const charts = applyFilters( DOWNLOADS_REPORT_CHARTS_FILTER, [
+export const charts = applyFilters(DOWNLOADS_REPORT_CHARTS_FILTER, [
 	{
 		key: 'download_count',
-		label: __( 'Downloads', 'woocommerce' ),
+		label: __('Downloads', 'woocommerce'),
 		type: 'number',
 	},
-] );
+]);
 
 /**
  * @typedef {import('../index.js').filter} filter
@@ -47,21 +47,21 @@ export const charts = applyFilters( DOWNLOADS_REPORT_CHARTS_FILTER, [
  * @filter woocommerce_admin_downloads_report_filters
  * @param {Array.<filter>} filters Report filters.
  */
-export const filters = applyFilters( DOWNLOADS_REPORT_FILTERS_FILTER, [
+export const filters = applyFilters(DOWNLOADS_REPORT_FILTERS_FILTER, [
 	{
-		label: __( 'Show', 'woocommerce' ),
-		staticParams: [ 'chartType', 'paged', 'per_page' ],
+		label: __('Show', 'woocommerce'),
+		staticParams: ['chartType', 'paged', 'per_page'],
 		param: 'filter',
 		showFilters: () => true,
 		filters: [
-			{ label: __( 'All downloads', 'woocommerce' ), value: 'all' },
+			{ label: __('All downloads', 'woocommerce'), value: 'all' },
 			{
-				label: __( 'Advanced filters', 'woocommerce' ),
+				label: __('Advanced filters', 'woocommerce'),
 				value: 'advanced',
 			},
 		],
 	},
-] );
+]);
 
 /**
  * Downloads Report Advanced Filters.
@@ -82,27 +82,27 @@ export const advancedFilters = applyFilters(
 		filters: {
 			product: {
 				labels: {
-					add: __( 'Product', 'woocommerce' ),
-					placeholder: __( 'Search', 'woocommerce' ),
-					remove: __( 'Remove product filter', 'woocommerce' ),
-					rule: __( 'Select a product filter match', 'woocommerce' ),
+					add: __('Product', 'woocommerce'),
+					placeholder: __('Search', 'woocommerce'),
+					remove: __('Remove product filter', 'woocommerce'),
+					rule: __('Select a product filter match', 'woocommerce'),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/ccxhyH2mEDg */
 					title: __(
 						'<title>Product</title> <rule/> <filter/>',
 						'woocommerce'
 					),
-					filter: __( 'Select product', 'woocommerce' ),
+					filter: __('Select product', 'woocommerce'),
 				},
 				rules: [
 					{
 						value: 'includes',
 						/* translators: Sentence fragment, logical, "Includes" refers to products including a given product(s). Screenshot for context: https://cloudup.com/ccxhyH2mEDg */
-						label: _x( 'Includes', 'products', 'woocommerce' ),
+						label: _x('Includes', 'products', 'woocommerce'),
 					},
 					{
 						value: 'excludes',
 						/* translators: Sentence fragment, logical, "Excludes" refers to products excluding a products(s). Screenshot for context: https://cloudup.com/ccxhyH2mEDg */
-						label: _x( 'Excludes', 'products', 'woocommerce' ),
+						label: _x('Excludes', 'products', 'woocommerce'),
 					},
 				],
 				input: {
@@ -113,27 +113,27 @@ export const advancedFilters = applyFilters(
 			},
 			customer: {
 				labels: {
-					add: __( 'Customer', 'woocommerce' ),
-					placeholder: __( 'Search customer', 'woocommerce' ),
-					remove: __( 'Remove customer filter', 'woocommerce' ),
-					rule: __( 'Select a customer filter match', 'woocommerce' ),
+					add: __('Customer', 'woocommerce'),
+					placeholder: __('Search customer', 'woocommerce'),
+					remove: __('Remove customer filter', 'woocommerce'),
+					rule: __('Select a customer filter match', 'woocommerce'),
 					/* translators: A sentence describing a customer filter. See screen shot for context: https://cloudup.com/ccxhyH2mEDg */
 					title: __(
 						'<title>Customer</title> <rule/> <filter />',
 						'woocommerce'
 					),
-					filter: __( 'Select customer', 'woocommerce' ),
+					filter: __('Select customer', 'woocommerce'),
 				},
 				rules: [
 					{
 						value: 'includes',
 						/* translators: Sentence fragment, logical, "Includes" refers to customers including a given customer(s). Screenshot for context: https://cloudup.com/ccxhyH2mEDg */
-						label: _x( 'Includes', 'customers', 'woocommerce' ),
+						label: _x('Includes', 'customers', 'woocommerce'),
 					},
 					{
 						value: 'excludes',
 						/* translators: Sentence fragment, logical, "Excludes" refers to customers excluding a given customer(s). Screenshot for context: https://cloudup.com/ccxhyH2mEDg */
-						label: _x( 'Excludes', 'customers', 'woocommerce' ),
+						label: _x('Excludes', 'customers', 'woocommerce'),
 					},
 				],
 				input: {
@@ -147,9 +147,9 @@ export const advancedFilters = applyFilters(
 			},
 			order: {
 				labels: {
-					add: __( 'Order #', 'woocommerce' ),
-					placeholder: __( 'Search order number', 'woocommerce' ),
-					remove: __( 'Remove order number filter', 'woocommerce' ),
+					add: __('Order #', 'woocommerce'),
+					placeholder: __('Search order number', 'woocommerce'),
+					remove: __('Remove order number filter', 'woocommerce'),
 					rule: __(
 						'Select an order number filter match',
 						'woocommerce'
@@ -159,37 +159,37 @@ export const advancedFilters = applyFilters(
 						'<title>Order #</title> <rule/> <filter/>',
 						'woocommerce'
 					),
-					filter: __( 'Select order number', 'woocommerce' ),
+					filter: __('Select order number', 'woocommerce'),
 				},
 				rules: [
 					{
 						value: 'includes',
 						/* translators: Sentence fragment, logical, "Includes" refers to order numbers including a given order(s). Screenshot for context: https://cloudup.com/ccxhyH2mEDg */
-						label: _x( 'Includes', 'order numbers', 'woocommerce' ),
+						label: _x('Includes', 'order numbers', 'woocommerce'),
 					},
 					{
 						value: 'excludes',
 						/* translators: Sentence fragment, logical, "Excludes" refers to order numbers excluding a given order(s). Screenshot for context: https://cloudup.com/ccxhyH2mEDg */
-						label: _x( 'Excludes', 'order numbers', 'woocommerce' ),
+						label: _x('Excludes', 'order numbers', 'woocommerce'),
 					},
 				],
 				input: {
 					component: 'Search',
 					type: 'orders',
-					getLabels: async ( value ) => {
-						const orderIds = value.split( ',' );
-						return await orderIds.map( ( orderId ) => ( {
+					getLabels: async (value) => {
+						const orderIds = value.split(',');
+						return await orderIds.map((orderId) => ({
 							id: orderId,
 							label: '#' + orderId,
-						} ) );
+						}));
 					},
 				},
 			},
 			ip_address: {
 				labels: {
-					add: __( 'IP Address', 'woocommerce' ),
-					placeholder: __( 'Search IP address', 'woocommerce' ),
-					remove: __( 'Remove IP address filter', 'woocommerce' ),
+					add: __('IP Address', 'woocommerce'),
+					placeholder: __('Search IP address', 'woocommerce'),
+					remove: __('Remove IP address filter', 'woocommerce'),
 					rule: __(
 						'Select an IP address filter match',
 						'woocommerce'
@@ -199,31 +199,31 @@ export const advancedFilters = applyFilters(
 						'<title>IP Address</title> <rule/> <filter/>',
 						'woocommerce'
 					),
-					filter: __( 'Select IP address', 'woocommerce' ),
+					filter: __('Select IP address', 'woocommerce'),
 				},
 				rules: [
 					{
 						value: 'includes',
 						/* translators: Sentence fragment, logical, "Includes" refers to IP addresses including a given address(s). Screenshot for context: https://cloudup.com/ccxhyH2mEDg */
-						label: _x( 'Includes', 'IP addresses', 'woocommerce' ),
+						label: _x('Includes', 'IP addresses', 'woocommerce'),
 					},
 					{
 						value: 'excludes',
 						/* translators: Sentence fragment, logical, "Excludes" refers to IP addresses excluding a given address(s). Screenshot for context: https://cloudup.com/ccxhyH2mEDg */
-						label: _x( 'Excludes', 'IP addresses', 'woocommerce' ),
+						label: _x('Excludes', 'IP addresses', 'woocommerce'),
 					},
 				],
 				input: {
 					component: 'Search',
 					type: 'downloadIps',
-					getLabels: async ( value ) => {
-						const ips = value.split( ',' );
-						return await ips.map( ( ip ) => {
+					getLabels: async (value) => {
+						const ips = value.split(',');
+						return await ips.map((ip) => {
 							return {
 								id: ip,
 								label: ip,
 							};
-						} );
+						});
 					},
 				},
 			},

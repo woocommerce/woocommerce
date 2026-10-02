@@ -18,9 +18,9 @@ export default function ProductCollectionAdvancedInspectorControls(
 	return (
 		<InspectorAdvancedControls>
 			<ForcePageReloadControl
-				clientId={ clientId }
-				forcePageReload={ forcePageReload }
-				setAttributes={ setAttributes }
+				clientId={clientId}
+				forcePageReload={forcePageReload}
+				setAttributes={setAttributes}
 			/>
 		</InspectorAdvancedControls>
 	);

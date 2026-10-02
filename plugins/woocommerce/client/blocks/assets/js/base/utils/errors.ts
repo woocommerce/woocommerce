@@ -21,8 +21,8 @@ type SimpleError = {
 
 export const formatError = async (
 	error: SimpleError | Response
-): Promise< ErrorObject > => {
-	if ( 'json' in error ) {
+): Promise<ErrorObject> => {
+	if ('json' in error) {
 		try {
 			const parsedError = await error.json();
 			return {
@@ -30,11 +30,11 @@ export const formatError = async (
 				message: parsedError.message,
 				type: parsedError.type || 'api',
 			};
-		} catch ( e ) {
+		} catch (e) {
 			return {
 				// We could only return this if e is instanceof Error but, to avoid changing runtime
 				// behaviour, we'll just cast it instead.
-				message: ( e as Error ).message,
+				message: (e as Error).message,
 				type: 'general',
 			};
 		}

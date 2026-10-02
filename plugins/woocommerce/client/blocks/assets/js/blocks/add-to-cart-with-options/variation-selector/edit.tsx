@@ -14,16 +14,16 @@ interface Attributes {
 }
 
 export default function AddToCartWithOptionsVariationSelectorEdit(
-	props: BlockEditProps< Attributes >
+	props: BlockEditProps<Attributes>
 ) {
 	const { className } = props.attributes;
 
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className,
-	} );
-	const innerBlocksProps = useInnerBlocksProps( blockProps, {
+	});
+	const innerBlocksProps = useInnerBlocksProps(blockProps, {
 		template: ATTRIBUTE_ITEM_TEMPLATE,
-	} );
+	});
 
-	return <div { ...innerBlocksProps } />;
+	return <div {...innerBlocksProps} />;
 }

@@ -7,15 +7,12 @@ import { TourKit, TourKitTypes } from '@woocommerce/components';
 import { useUserPreferences } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
-function getStepName(
-	steps: TourKitTypes.WooStep[],
-	currentStepIndex: number
-) {
-	return steps[ currentStepIndex ]?.meta?.name;
+function getStepName(steps: TourKitTypes.WooStep[], currentStepIndex: number) {
+	return steps[currentStepIndex]?.meta?.name;
 }
 
 export const VariableProductTour = () => {
-	const [ isTourOpen, setIsTourOpen ] = useState( false );
+	const [isTourOpen, setIsTourOpen] = useState(false);
 
 	const { updateUserPreferences, variable_product_tour_shown: hasShownTour } =
 		useUserPreferences();
@@ -31,7 +28,7 @@ export const VariableProductTour = () => {
 				},
 				meta: {
 					name: 'attributes',
-					heading: __( 'Start by adding attributes', 'woocommerce' ),
+					heading: __('Start by adding attributes', 'woocommerce'),
 					descriptions: {
 						desktop: __(
 							'Add attributes like size and color for customers to choose from on the product page. We will use them to generate product variations.',
@@ -39,7 +36,7 @@ export const VariableProductTour = () => {
 						),
 					},
 					primaryButton: {
-						text: __( 'Got it', 'woocommerce' ),
+						text: __('Got it', 'woocommerce'),
 					},
 				},
 			},
@@ -62,50 +59,50 @@ export const VariableProductTour = () => {
 				},
 			},
 		},
-		closeHandler: ( steps, currentStepIndex ) => {
-			void updateUserPreferences( {
+		closeHandler: (steps, currentStepIndex) => {
+			void updateUserPreferences({
 				variable_product_tour_shown: 'yes',
-			} );
-			setIsTourOpen( false );
+			});
+			setIsTourOpen(false);
 
-			if ( currentStepIndex === steps.length - 1 ) {
-				recordEvent( 'variable_product_tour_completed', {
+			if (currentStepIndex === steps.length - 1) {
+				recordEvent('variable_product_tour_completed', {
 					step: getStepName(
 						steps as TourKitTypes.WooStep[],
 						currentStepIndex
 					),
-				} );
+				});
 			} else {
-				recordEvent( 'variable_product_tour_dismissed', {
+				recordEvent('variable_product_tour_dismissed', {
 					step: getStepName(
 						steps as TourKitTypes.WooStep[],
 						currentStepIndex
 					),
-				} );
+				});
 			}
 		},
 	};
 
 	// show the tour when the product type is changed to variable
-	useEffect( () => {
+	useEffect(() => {
 		const productTypeSelect = document.querySelector(
 			'#product-type'
 		) as HTMLSelectElement;
 
-		if ( hasShownTour === 'yes' || ! productTypeSelect ) {
+		if (hasShownTour === 'yes' || !productTypeSelect) {
 			return;
 		}
 
 		function handleProductTypeChange() {
-			if ( productTypeSelect.value === 'variable' ) {
-				setIsTourOpen( true );
-				recordEvent( 'variable_product_tour_started', {
-					step: getStepName( config.steps, 0 ),
-				} );
+			if (productTypeSelect.value === 'variable') {
+				setIsTourOpen(true);
+				recordEvent('variable_product_tour_started', {
+					step: getStepName(config.steps, 0),
+				});
 			}
 		}
 
-		productTypeSelect.addEventListener( 'change', handleProductTypeChange );
+		productTypeSelect.addEventListener('change', handleProductTypeChange);
 
 		return () => {
 			productTypeSelect.removeEventListener(
@@ -113,11 +110,11 @@ export const VariableProductTour = () => {
 				handleProductTypeChange
 			);
 		};
-	} );
+	});
 
-	if ( ! isTourOpen ) {
+	if (!isTourOpen) {
 		return null;
 	}
 
-	return <TourKit config={ config } />;
+	return <TourKit config={config} />;
 };

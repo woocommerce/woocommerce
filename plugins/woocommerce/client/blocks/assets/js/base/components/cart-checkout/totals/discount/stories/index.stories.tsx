@@ -43,20 +43,19 @@ const EXAMPLE_COUPONS: CartResponseCouponItemWithLabel[] = [
 ];
 
 function extractValuesFromCoupons(
-	coupons: LooselyMustHave< CartResponseCouponItemWithLabel, 'totals' >[]
+	coupons: LooselyMustHave<CartResponseCouponItemWithLabel, 'totals'>[]
 ) {
 	return coupons.reduce(
-		( acc, curr ) => {
+		(acc, curr) => {
 			const totalDiscount =
-				Number( acc.total_discount ) +
-				Number( curr.totals.total_discount );
+				Number(acc.total_discount) + Number(curr.totals.total_discount);
 			const totalDiscountTax =
-				Number( acc.total_discount_tax ) +
-				Number( curr.totals.total_discount_tax );
+				Number(acc.total_discount_tax) +
+				Number(curr.totals.total_discount_tax);
 
 			return {
-				total_discount: String( totalDiscount ),
-				total_discount_tax: String( totalDiscountTax ),
+				total_discount: String(totalDiscount),
+				total_discount_tax: String(totalDiscountTax),
 			};
 		},
 		{ total_discount: '0', total_discount_tax: '0' } as LooselyMustHave<
@@ -76,36 +75,36 @@ export default {
 	args: {
 		cartCoupons: EXAMPLE_COUPONS,
 		isRemovingCoupon: false,
-		values: extractValuesFromCoupons( EXAMPLE_COUPONS ),
+		values: extractValuesFromCoupons(EXAMPLE_COUPONS),
 	},
-} as Meta< TotalsDiscountProps >;
+} as Meta<TotalsDiscountProps>;
 
-const Template: StoryFn< TotalsDiscountProps > = ( args ) => {
-	const [ {}, setArgs ] = useArgs();
+const Template: StoryFn<TotalsDiscountProps> = (args) => {
+	const [{}, setArgs] = useArgs();
 
-	const removeCoupon = ( code: string ) => {
-		args.removeCoupon( code );
-		setArgs( { isRemovingCoupon: true } );
+	const removeCoupon = (code: string) => {
+		args.removeCoupon(code);
+		setArgs({ isRemovingCoupon: true });
 
 		const cartCoupons = args.cartCoupons.filter(
-			( coupon ) => coupon.code !== code
+			(coupon) => coupon.code !== code
 		);
 
-		const values = extractValuesFromCoupons( cartCoupons );
+		const values = extractValuesFromCoupons(cartCoupons);
 
 		setTimeout(
-			() => setArgs( { cartCoupons, values, isRemovingCoupon: false } ),
+			() => setArgs({ cartCoupons, values, isRemovingCoupon: false }),
 			INTERACTION_TIMEOUT
 		);
 	};
 
-	return <Discount { ...args } removeCoupon={ removeCoupon } />;
+	return <Discount {...args} removeCoupon={removeCoupon} />;
 };
 
-export const Default = Template.bind( {} );
+export const Default = Template.bind({});
 Default.args = {};
 
-export const RemovingCoupon = Template.bind( {} );
+export const RemovingCoupon = Template.bind({});
 RemovingCoupon.args = {
 	isRemovingCoupon: true,
 };

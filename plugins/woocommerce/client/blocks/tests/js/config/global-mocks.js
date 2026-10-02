@@ -1,9 +1,9 @@
-const { webcrypto } = require( 'node:crypto' );
+const { webcrypto } = require('node:crypto');
 
 global.crypto = webcrypto;
 
-global.TextEncoder = require( 'util' ).TextEncoder;
-global.TextDecoder = require( 'util' ).TextDecoder;
+global.TextEncoder = require('util').TextEncoder;
+global.TextDecoder = require('util').TextDecoder;
 
 // The @woocommerce/email-editor package reads `__i18n_text_domain__` as its
 // text domain. It is normally replaced by `webpack.DefinePlugin` at bundle
@@ -17,7 +17,7 @@ global.__i18n_text_domain__ = 'woocommerce';
  */
 global.wp = {};
 
-require( '@wordpress/data' );
+require('@wordpress/data');
 
 /**
  * wcSettings is required by @woocommerce/* packages.
@@ -49,7 +49,7 @@ global.wcSettings = {
 	locale: {
 		siteLocale: 'en_US',
 		userLocale: 'en_US',
-		weekdaysShort: [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ],
+		weekdaysShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
 	},
 	countries: {
 		AT: 'Austria',
@@ -309,8 +309,8 @@ global.wcSettings = {
 			'phone',
 			'country',
 		],
-		contact: [ 'email', 'namespace/contact_field' ],
-		order: [ 'namespace/order_field' ],
+		contact: ['email', 'namespace/contact_field'],
+		order: ['namespace/order_field'],
 	},
 	checkoutData: {
 		order_id: 100,
@@ -321,10 +321,10 @@ global.wcSettings = {
 	},
 };
 
-global.jQuery = () => ( {
+global.jQuery = () => ({
 	on: () => void null,
 	off: () => void null,
-} );
+});
 
 global.IntersectionObserver = function () {
 	return {
@@ -338,15 +338,15 @@ global.IntersectionObserver = function () {
 	};
 };
 
-global.ResizeObserver = require( 'resize-observer-polyfill' );
+global.ResizeObserver = require('resize-observer-polyfill');
 
 global.__webpack_public_path__ = '';
 
-Object.defineProperty( window, 'matchMedia', {
+Object.defineProperty(window, 'matchMedia', {
 	writable: true,
-	value: jest.fn().mockImplementation( ( query ) => ( {
+	value: jest.fn().mockImplementation((query) => ({
 		// Return true for prefers-reduced-motion queries to skip animations in tests
-		matches: /prefers-reduced-motion/.test( query ),
+		matches: /prefers-reduced-motion/.test(query),
 		media: query,
 		onchange: null,
 		addListener: jest.fn(), // Deprecated
@@ -354,15 +354,15 @@ Object.defineProperty( window, 'matchMedia', {
 		addEventListener: jest.fn(),
 		removeEventListener: jest.fn(),
 		dispatchEvent: jest.fn(),
-	} ) ),
-} );
+	})),
+});
 
 /**
  * The following mock is for block integration tests that might render
  * components leveraging DOMRect. For example, the Cover block which now renders
  * its ResizableBox control via the BlockPopover component.
  */
-if ( ! window.DOMRect ) {
+if (!window.DOMRect) {
 	window.DOMRect = class DOMRect {};
 }
 
@@ -372,7 +372,7 @@ if ( ! window.DOMRect ) {
  * Stub it so tests that render `<BlockToolbarPopover>` and friends don't
  * crash.
  */
-if ( ! window.DOMRectReadOnly ) {
+if (!window.DOMRectReadOnly) {
 	window.DOMRectReadOnly = class DOMRectReadOnly {};
 }
 
@@ -381,15 +381,15 @@ if ( ! window.DOMRectReadOnly ) {
  * ES6 module only, in order to use it in node environment, we need to mock it.
  * See: https://github.com/Touffy/client-zip/issues/28
  */
-jest.mock( 'client-zip', () => ( {
+jest.mock('client-zip', () => ({
 	downloadZip: jest.fn(),
-} ) );
+}));
 
 /**
  * Mock isEditor to return false by default in tests, since the core/editor
  * store may be registered in the test environment without an actual editor
  * context. Individual tests can override this mock if needed.
  */
-jest.mock( '@woocommerce/block-data/utils/is-editor', () => ( {
-	isEditor: jest.fn().mockReturnValue( false ),
-} ) );
+jest.mock('@woocommerce/block-data/utils/is-editor', () => ({
+	isEditor: jest.fn().mockReturnValue(false),
+}));

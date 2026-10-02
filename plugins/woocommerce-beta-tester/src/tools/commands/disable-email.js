@@ -9,15 +9,15 @@ import { useSelect } from '@wordpress/data';
 import { store } from '../data';
 
 export const DisableEmail = () => {
-	const { isEmailDisabled } = useSelect( ( select ) => {
-		const { getIsEmailDisabled } = select( store );
+	const { isEmailDisabled } = useSelect((select) => {
+		const { getIsEmailDisabled } = select(store);
 		return {
 			isEmailDisabled: getIsEmailDisabled(),
 		};
-	} );
+	});
 
 	const getEmailStatus = () => {
-		switch ( isEmailDisabled ) {
+		switch (isEmailDisabled) {
 			case 'yes':
 				return 'WooCommerce emails are turned off 🔴';
 			case 'no':
@@ -29,5 +29,5 @@ export const DisableEmail = () => {
 		}
 	};
 
-	return <div className="disable-wc-email">{ getEmailStatus() }</div>;
+	return <div className="disable-wc-email">{getEmailStatus()}</div>;
 };

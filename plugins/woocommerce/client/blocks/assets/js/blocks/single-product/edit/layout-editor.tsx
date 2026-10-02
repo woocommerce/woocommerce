@@ -32,58 +32,48 @@ interface LayoutEditorProps {
 	clientId: string;
 }
 
-const LayoutEditor = ( {
-	isLoading,
-	product,
-	clientId,
-}: LayoutEditorProps ) => {
+const LayoutEditor = ({ isLoading, product, clientId }: LayoutEditorProps) => {
 	const baseClassName = 'wc-block-editor-single-product';
-	const { replaceInnerBlocks } = useDispatch( 'core/block-editor' );
+	const { replaceInnerBlocks } = useDispatch('core/block-editor');
 
-	const resetInnerBlocks = useCallback( () => {
+	const resetInnerBlocks = useCallback(() => {
 		void replaceInnerBlocks(
 			clientId,
-			createBlocksFromInnerBlocksTemplate( DEFAULT_INNER_BLOCKS ),
+			createBlocksFromInnerBlocksTemplate(DEFAULT_INNER_BLOCKS),
 			false
 		);
-	}, [ clientId, replaceInnerBlocks ] );
+	}, [clientId, replaceInnerBlocks]);
 
 	return (
 		<InnerBlockLayoutContextProvider
-			parentName={ metadata.name }
-			parentClassName={ baseClassName }
+			parentName={metadata.name}
+			parentClassName={baseClassName}
 		>
-			<ProductDataContextProvider
-				product={ product }
-				isLoading={ isLoading }
-			>
+			<ProductDataContextProvider product={product} isLoading={isLoading}>
 				<InspectorControls>
 					<PanelBody
-						title={ __( 'Layout', 'woocommerce' ) }
-						initialOpen={ true }
+						title={__('Layout', 'woocommerce')}
+						initialOpen={true}
 					>
 						<Button
-							label={ __(
-								'Reset layout to default',
-								'woocommerce'
-							) }
-							onClick={ resetInnerBlocks }
+							label={__('Reset layout to default', 'woocommerce')}
+							onClick={resetInnerBlocks}
 							variant="tertiary"
 							className="wc-block-editor-single-product__reset-layout"
-							icon={ backup }
+							icon={backup}
 						>
-							{ __( 'Reset layout', 'woocommerce' ) }
+							{__('Reset layout', 'woocommerce')}
 						</Button>
 					</PanelBody>
 				</InspectorControls>
-				<div className={ baseClassName }>
+				<div className={baseClassName}>
 					<BlockContextProvider
-						value={ { postId: product?.id, postType: 'product' } }
+						value={{ postId: product?.id, postType: 'product' }}
 					>
 						<InnerBlocks
-							template={ DEFAULT_INNER_BLOCKS }
-							allowedBlocks={ ALLOWED_INNER_BLOCKS }
-							templateLock={ false }
+							template={DEFAULT_INNER_BLOCKS}
+							allowedBlocks={ALLOWED_INNER_BLOCKS}
+							templateLock={false}
 						/>
 					</BlockContextProvider>
 				</div>

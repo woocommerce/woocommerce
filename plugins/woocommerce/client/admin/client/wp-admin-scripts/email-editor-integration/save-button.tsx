@@ -36,80 +36,75 @@ const SAVE_SHORTCUT_NAME = 'woocommerce/email-editor/save';
  * @param onSave     Save handler shared with the button.
  * @param isDisabled Whether saving is currently disabled.
  */
-function useSaveShortcutTakeover( onSave: () => void, isDisabled: boolean ) {
+function useSaveShortcutTakeover(onSave: () => void, isDisabled: boolean) {
 	const coreShortcut = useSelect(
-		( select ) => ( {
+		(select) => ({
 			keyCombination: select(
 				keyboardShortcutsStore
 			).getShortcutKeyCombination(
 				'core/editor/save'
 			) as ShortcutKeyCombination | null,
-			description: select(
-				keyboardShortcutsStore
-			).getShortcutDescription( 'core/editor/save' ) as
-				| string
-				| undefined,
-		} ),
+			description: select(keyboardShortcutsStore).getShortcutDescription(
+				'core/editor/save'
+			) as string | undefined,
+		}),
 		[]
 	);
 	const { registerShortcut, unregisterShortcut } = useDispatch(
 		keyboardShortcutsStore
 	);
-	const stashedShortcut = useRef< {
+	const stashedShortcut = useRef<{
 		keyCombination: ShortcutKeyCombination;
 		description: string | undefined;
-	} | null >( null );
+	} | null>(null);
 
 	// Driven by the store, not mount order: EditorKeyboardShortcutsRegister
 	// registers `core/editor/save` in its own mount effect, so a plain mount
 	// effect here could run earlier and unregister nothing. Re-runs whenever
 	// core's registration reappears while the button stays mounted, so the
 	// takeover cannot be undone by a re-registration.
-	useEffect( () => {
-		if ( ! coreShortcut.keyCombination ) {
+	useEffect(() => {
+		if (!coreShortcut.keyCombination) {
 			return;
 		}
-		if ( ! stashedShortcut.current ) {
+		if (!stashedShortcut.current) {
 			stashedShortcut.current = {
 				keyCombination: coreShortcut.keyCombination,
 				description: coreShortcut.description,
 			};
 		}
-		void unregisterShortcut( 'core/editor/save' );
-		void registerShortcut( {
+		void unregisterShortcut('core/editor/save');
+		void registerShortcut({
 			name: SAVE_SHORTCUT_NAME,
 			category: 'global',
-			description: __( 'Save your changes.', 'woocommerce' ),
+			description: __('Save your changes.', 'woocommerce'),
 			keyCombination: coreShortcut.keyCombination,
-		} );
-	}, [ coreShortcut, registerShortcut, unregisterShortcut ] );
+		});
+	}, [coreShortcut, registerShortcut, unregisterShortcut]);
 
-	useEffect( () => {
+	useEffect(() => {
 		return () => {
-			if ( ! stashedShortcut.current ) {
+			if (!stashedShortcut.current) {
 				return;
 			}
-			void unregisterShortcut( SAVE_SHORTCUT_NAME );
-			void registerShortcut( {
+			void unregisterShortcut(SAVE_SHORTCUT_NAME);
+			void registerShortcut({
 				name: 'core/editor/save',
 				category: 'global',
 				description: stashedShortcut.current.description,
 				keyCombination: stashedShortcut.current.keyCombination,
-			} );
+			});
 			stashedShortcut.current = null;
 		};
-	}, [ registerShortcut, unregisterShortcut ] );
+	}, [registerShortcut, unregisterShortcut]);
 
-	useShortcut(
-		SAVE_SHORTCUT_NAME,
-		( event: { preventDefault: () => void } ) => {
-			event.preventDefault();
-			if ( isDisabled ) {
-				return;
-			}
-			onSave();
+	useShortcut(SAVE_SHORTCUT_NAME, (event: { preventDefault: () => void }) => {
+		event.preventDefault();
+		if (isDisabled) {
+			return;
 		}
-	);
+		onSave();
+	});
 }
 
 /**
@@ -123,26 +118,25 @@ function useSaveShortcutTakeover( onSave: () => void, isDisabled: boolean ) {
  */
 export function SaveButton() {
 	const { isSaving, postStatus, isDirty } = useSelect(
-		( select ) => ( {
-			isSaving: select( editorStore ).isSavingPost(),
-			postStatus:
-				select( editorStore ).getEditedPostAttribute( 'status' ),
+		(select) => ({
+			isSaving: select(editorStore).isSavingPost(),
+			postStatus: select(editorStore).getEditedPostAttribute('status'),
 			isDirty:
-				select( editorStore ).isEditedPostDirty() ||
-				select( editorStore ).hasNonPostEntityChanges(),
-		} ),
+				select(editorStore).isEditedPostDirty() ||
+				select(editorStore).hasNonPostEntityChanges(),
+		}),
 		[]
 	);
-	const { editPost, savePost } = useDispatch( editorStore );
-	const { saveEditedEntityRecord } = useDispatch( coreDataStore );
+	const { editPost, savePost } = useDispatch(editorStore);
+	const { saveEditedEntityRecord } = useDispatch(coreDataStore);
 
 	// An unpublished post must stay savable even without edits so the user can
 	// accept the file template defaults as-is.
-	const isDisabled = isSaving || ( postStatus === 'publish' && ! isDirty );
+	const isDisabled = isSaving || (postStatus === 'publish' && !isDirty);
 
 	const onClick = () => {
-		const currentPostId = dataSelect( editorStore ).getCurrentPostId();
-		const currentPostType = dataSelect( editorStore ).getCurrentPostType();
+		const currentPostId = dataSelect(editorStore).getCurrentPostId();
+		const currentPostType = dataSelect(editorStore).getCurrentPostType();
 		const dirtyRecords = dataSelect(
 			coreDataStore
 		).__experimentalGetDirtyEntityRecords() as {
@@ -151,8 +145,8 @@ export function SaveButton() {
 			key: string | number;
 		}[];
 
-		if ( postStatus !== 'publish' ) {
-			void editPost( { status: 'publish' } );
+		if (postStatus !== 'publish') {
+			void editPost({ status: 'publish' });
 		}
 		void savePost();
 
@@ -161,24 +155,24 @@ export function SaveButton() {
 		// savePost() above.
 		dirtyRecords
 			.filter(
-				( record ) =>
-					! (
+				(record) =>
+					!(
 						record.kind === 'postType' &&
 						record.name === currentPostType &&
 						record.key === currentPostId
 					)
 			)
-			.forEach( ( record ) => {
+			.forEach((record) => {
 				void saveEditedEntityRecord(
 					record.kind,
 					record.name,
 					record.key,
 					{}
 				);
-			} );
+			});
 	};
 
-	useSaveShortcutTakeover( onClick, isDisabled );
+	useSaveShortcutTakeover(onClick, isDisabled);
 
 	return (
 		<Button
@@ -190,12 +184,12 @@ export function SaveButton() {
 			// canary), and its guard also requires the `aria-disabled`
 			// attribute below.
 			className="editor-post-publish-button editor-post-publish-button__button"
-			onClick={ onClick }
-			isBusy={ isSaving }
-			disabled={ isDisabled }
-			aria-disabled={ isDisabled }
+			onClick={onClick}
+			isBusy={isSaving}
+			disabled={isDisabled}
+			aria-disabled={isDisabled}
 		>
-			{ __( 'Save', 'woocommerce' ) }
+			{__('Save', 'woocommerce')}
 		</Button>
 	);
 }
@@ -213,27 +207,25 @@ export function SaveButton() {
 export function registerWooEmailSaveButton() {
 	addFilter(
 		'woocommerce_email_editor_wrap_editor_component',
-		`${ NAME_SPACE }/save-button`,
-		( EditorComponent: React.ComponentType< Record< string, unknown > > ) =>
-			function EditorWithWooSaveButton(
-				props: Record< string, unknown >
-			) {
+		`${NAME_SPACE}/save-button`,
+		(EditorComponent: React.ComponentType<Record<string, unknown>>) =>
+			function EditorWithWooSaveButton(props: Record<string, unknown>) {
 				const postStatus = useSelect(
-					( select ) =>
+					(select) =>
 						(
-							select( coreDataStore ).getEntityRecord(
+							select(coreDataStore).getEntityRecord(
 								'postType',
 								props.postType as string,
 								props.postId as string | number
 							) as { status?: string } | undefined
-						 )?.status,
-					[ props.postType, props.postId ]
+						)?.status,
+					[props.postType, props.postId]
 				);
-				const isUnpublished = !! postStatus && postStatus !== 'publish';
+				const isUnpublished = !!postStatus && postStatus !== 'publish';
 
 				return (
 					<EditorComponent
-						{ ...props }
+						{...props}
 						customSaveButton={
 							isUnpublished ? <SaveButton /> : undefined
 						}

@@ -20,45 +20,45 @@ import { reducer } from './reducer';
 import * as selectors from './selectors';
 
 const getConfig = () =>
-	( {
+	({
 		actions,
 		controls,
 		selectors,
 		resolvers: {},
 		reducer,
 		initialState: getInitialState(),
-	} ) as const;
+	}) as const;
 
-export type EditorStoreConfig = ReturnType< typeof getConfig >;
+export type EditorStoreConfig = ReturnType<typeof getConfig>;
 
 export const createStore = () => {
 	// Check if store is already registered
-	const storeState = select( storeName );
-	if ( storeState !== undefined ) {
-		return select( storeName );
+	const storeState = select(storeName);
+	if (storeState !== undefined) {
+		return select(storeName);
 	}
 
-	const store = createReduxStore( storeName, getConfig() );
-	register( store );
+	const store = createReduxStore(storeName, getConfig());
+	register(store);
 
 	// Register personalization tag entity with core-data
-	void dispatch( coreStore ).addEntities( [ PERSONALIZATION_TAG_ENTITY ] );
+	void dispatch(coreStore).addEntities([PERSONALIZATION_TAG_ENTITY]);
 
 	return store;
 };
 
 export interface EmailEditorStore {
-	getActions: () => EditorStoreConfig[ 'actions' ];
-	getSelectors: () => EditorStoreConfig[ 'selectors' ];
+	getActions: () => EditorStoreConfig['actions'];
+	getSelectors: () => EditorStoreConfig['selectors'];
 }
 
 declare module '@wordpress/data' {
 	interface StoreRegistry {
-		[ storeName ]: GenericStoreDescriptor<
+		[storeName]: GenericStoreDescriptor<
 			ReduxStoreConfig<
 				unknown,
-				ReturnType< EmailEditorStore[ 'getActions' ] >,
-				ReturnType< EmailEditorStore[ 'getSelectors' ] >
+				ReturnType<EmailEditorStore['getActions']>,
+				ReturnType<EmailEditorStore['getSelectors']>
 			>
 		>;
 	}

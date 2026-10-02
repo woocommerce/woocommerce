@@ -15,21 +15,21 @@ import * as icons from './icons';
 
 class ProductIcon extends Component {
 	render() {
-		const product = camelCase( this.props.product );
+		const product = camelCase(this.props.product);
 		let iconComponent = icons.blank;
 
-		if ( product in icons ) {
-			iconComponent = icons[ product ];
+		if (product in icons) {
+			iconComponent = icons[product];
 		}
 
 		return (
 			<div
-				className={ clsx(
+				className={clsx(
 					this.props.className,
 					'woocommerce-admin-marketing-product-icon'
-				) }
+				)}
 			>
-				<Icon icon={ iconComponent } size={ 36 } />
+				<Icon icon={iconComponent} size={36} />
 			</div>
 		);
 	}

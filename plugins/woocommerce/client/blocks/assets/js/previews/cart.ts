@@ -27,7 +27,7 @@ import { API_SITE_CURRENCY, displayForMinorUnit } from './utils';
  * Handling the display settings server-side helps work around rounding/display issues that can arise from manually
  * adding tax to a price.
  */
-const displayWithTax = getSetting( 'displayCartPricesIncludingTax', false );
+const displayWithTax = getSetting('displayCartPricesIncludingTax', false);
 
 // Sample data for cart block.
 // This closely resembles the data returned from the Store API /cart endpoint.
@@ -35,8 +35,8 @@ const displayWithTax = getSetting( 'displayCartPricesIncludingTax', false );
 export const previewCart: CartResponse = {
 	coupons: [],
 	shipping_rates:
-		getSetting( 'shippingMethodsExist', false ) ||
-		getSetting( 'localPickupEnabled', false )
+		getSetting('shippingMethodsExist', false) ||
+		getSetting('localPickupEnabled', false)
 			? previewShippingRates
 			: [],
 	items: [
@@ -46,9 +46,9 @@ export const previewCart: CartResponse = {
 			type: 'simple',
 			quantity: 2,
 			catalog_visibility: 'visible',
-			name: __( 'Beanie', 'woocommerce' ),
-			summary: __( 'Beanie', 'woocommerce' ),
-			short_description: __( 'Warm hat for winter', 'woocommerce' ),
+			name: __('Beanie', 'woocommerce'),
+			summary: __('Beanie', 'woocommerce'),
+			short_description: __('Warm hat for winter', 'woocommerce'),
 			description:
 				'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.',
 			sku: 'woo-beanie',
@@ -76,19 +76,17 @@ export const previewCart: CartResponse = {
 			],
 			variation: [
 				{
-					attribute: __( 'Color', 'woocommerce' ),
-					value: __( 'Yellow', 'woocommerce' ),
+					attribute: __('Color', 'woocommerce'),
+					value: __('Yellow', 'woocommerce'),
 				},
 				{
-					attribute: __( 'Size', 'woocommerce' ),
-					value: __( 'Small', 'woocommerce' ),
+					attribute: __('Size', 'woocommerce'),
+					value: __('Small', 'woocommerce'),
 				},
 			],
 			prices: {
 				...API_SITE_CURRENCY,
-				price: displayForMinorUnit(
-					displayWithTax ? '12000' : '10000'
-				),
+				price: displayForMinorUnit(displayWithTax ? '12000' : '10000'),
 				regular_price: displayForMinorUnit(
 					displayWithTax ? '120' : '100'
 				),
@@ -105,10 +103,10 @@ export const previewCart: CartResponse = {
 			},
 			totals: {
 				...API_SITE_CURRENCY,
-				line_subtotal: displayForMinorUnit( '2000' ),
-				line_subtotal_tax: displayForMinorUnit( '400' ),
-				line_total: displayForMinorUnit( '2000' ),
-				line_total_tax: displayForMinorUnit( '400' ),
+				line_subtotal: displayForMinorUnit('2000'),
+				line_subtotal_tax: displayForMinorUnit('400'),
+				line_total: displayForMinorUnit('2000'),
+				line_total_tax: displayForMinorUnit('400'),
 			},
 			extensions: {},
 			item_data: [],
@@ -119,9 +117,9 @@ export const previewCart: CartResponse = {
 			type: 'simple',
 			quantity: 1,
 			catalog_visibility: 'visible',
-			name: __( 'Cap', 'woocommerce' ),
-			summary: __( 'Cap', 'woocommerce' ),
-			short_description: __( 'Lightweight baseball cap', 'woocommerce' ),
+			name: __('Cap', 'woocommerce'),
+			summary: __('Cap', 'woocommerce'),
+			short_description: __('Lightweight baseball cap', 'woocommerce'),
 			description:
 				'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.',
 			sku: 'woo-cap',
@@ -149,13 +147,13 @@ export const previewCart: CartResponse = {
 			],
 			variation: [
 				{
-					attribute: __( 'Color', 'woocommerce' ),
-					value: __( 'Orange', 'woocommerce' ),
+					attribute: __('Color', 'woocommerce'),
+					value: __('Orange', 'woocommerce'),
 				},
 			],
 			prices: {
 				...API_SITE_CURRENCY,
-				price: displayForMinorUnit( displayWithTax ? '2400' : '2000' ),
+				price: displayForMinorUnit(displayWithTax ? '2400' : '2000'),
 				regular_price: displayForMinorUnit(
 					displayWithTax ? '2400' : '2000'
 				),
@@ -172,10 +170,10 @@ export const previewCart: CartResponse = {
 			},
 			totals: {
 				...API_SITE_CURRENCY,
-				line_subtotal: displayForMinorUnit( '2000' ),
-				line_subtotal_tax: displayForMinorUnit( '400' ),
-				line_total: displayForMinorUnit( '2000' ),
-				line_total_tax: displayForMinorUnit( '400' ),
+				line_subtotal: displayForMinorUnit('2000'),
+				line_subtotal_tax: displayForMinorUnit('400'),
+				line_total: displayForMinorUnit('2000'),
+				line_total_tax: displayForMinorUnit('400'),
 			},
 			extensions: {},
 			item_data: [],
@@ -184,21 +182,19 @@ export const previewCart: CartResponse = {
 	cross_sells: [
 		{
 			id: 1,
-			name: __( 'Polo', 'woocommerce' ),
+			name: __('Polo', 'woocommerce'),
 			slug: 'polo',
 			parent: 0,
 			type: 'simple',
 			variation: '',
 			permalink: 'https://example.org',
 			sku: 'woo-polo',
-			short_description: __( 'Polo', 'woocommerce' ),
-			description: __( 'Polo', 'woocommerce' ),
+			short_description: __('Polo', 'woocommerce'),
+			description: __('Polo', 'woocommerce'),
 			on_sale: false,
 			prices: {
 				...API_SITE_CURRENCY,
-				price: displayForMinorUnit(
-					displayWithTax ? '24000' : '20000'
-				),
+				price: displayForMinorUnit(displayWithTax ? '24000' : '20000'),
 				regular_price: displayForMinorUnit(
 					displayWithTax ? '24000' : '20000'
 				),
@@ -242,21 +238,19 @@ export const previewCart: CartResponse = {
 		},
 		{
 			id: 2,
-			name: __( 'Long Sleeve Tee', 'woocommerce' ),
+			name: __('Long Sleeve Tee', 'woocommerce'),
 			slug: 'long-sleeve-tee',
 			parent: 0,
 			type: 'simple',
 			variation: '',
 			permalink: 'https://example.org',
 			sku: 'woo-long-sleeve-tee',
-			short_description: __( 'Long Sleeve Tee', 'woocommerce' ),
-			description: __( 'Long Sleeve Tee', 'woocommerce' ),
+			short_description: __('Long Sleeve Tee', 'woocommerce'),
+			description: __('Long Sleeve Tee', 'woocommerce'),
 			on_sale: false,
 			prices: {
 				...API_SITE_CURRENCY,
-				price: displayForMinorUnit(
-					displayWithTax ? '30000' : '25000'
-				),
+				price: displayForMinorUnit(displayWithTax ? '30000' : '25000'),
 				regular_price: displayForMinorUnit(
 					displayWithTax ? '30000' : '25000'
 				),
@@ -301,21 +295,19 @@ export const previewCart: CartResponse = {
 		},
 		{
 			id: 3,
-			name: __( 'Hoodie with Zipper', 'woocommerce' ),
+			name: __('Hoodie with Zipper', 'woocommerce'),
 			slug: 'hoodie-with-zipper',
 			parent: 0,
 			type: 'simple',
 			variation: '',
 			permalink: 'https://example.org',
 			sku: 'woo-hoodie-with-zipper',
-			short_description: __( 'Hoodie with Zipper', 'woocommerce' ),
-			description: __( 'Hoodie with Zipper', 'woocommerce' ),
+			short_description: __('Hoodie with Zipper', 'woocommerce'),
+			description: __('Hoodie with Zipper', 'woocommerce'),
 			on_sale: true,
 			prices: {
 				...API_SITE_CURRENCY,
-				price: displayForMinorUnit(
-					displayWithTax ? '15000' : '12500'
-				),
+				price: displayForMinorUnit(displayWithTax ? '15000' : '12500'),
 				regular_price: displayForMinorUnit(
 					displayWithTax ? '30000' : '25000'
 				),
@@ -361,19 +353,19 @@ export const previewCart: CartResponse = {
 		},
 		{
 			id: 4,
-			name: __( 'Hoodie with Logo', 'woocommerce' ),
+			name: __('Hoodie with Logo', 'woocommerce'),
 			slug: 'hoodie-with-logo',
 			parent: 0,
 			type: 'simple',
 			variation: '',
 			permalink: 'https://example.org',
 			sku: 'woo-hoodie-with-logo',
-			short_description: __( 'Polo', 'woocommerce' ),
-			description: __( 'Polo', 'woocommerce' ),
+			short_description: __('Polo', 'woocommerce'),
+			description: __('Polo', 'woocommerce'),
 			on_sale: false,
 			prices: {
 				...API_SITE_CURRENCY,
-				price: displayForMinorUnit( displayWithTax ? '4500' : '4250' ),
+				price: displayForMinorUnit(displayWithTax ? '4500' : '4250'),
 				regular_price: displayForMinorUnit(
 					displayWithTax ? '4500' : '4250'
 				),
@@ -418,19 +410,19 @@ export const previewCart: CartResponse = {
 		},
 		{
 			id: 5,
-			name: __( 'Hoodie with Pocket', 'woocommerce' ),
+			name: __('Hoodie with Pocket', 'woocommerce'),
 			slug: 'hoodie-with-pocket',
 			parent: 0,
 			type: 'simple',
 			variation: '',
 			permalink: 'https://example.org',
 			sku: 'woo-hoodie-with-pocket',
-			short_description: __( 'Hoodie with Pocket', 'woocommerce' ),
-			description: __( 'Hoodie with Pocket', 'woocommerce' ),
+			short_description: __('Hoodie with Pocket', 'woocommerce'),
+			description: __('Hoodie with Pocket', 'woocommerce'),
 			on_sale: true,
 			prices: {
 				...API_SITE_CURRENCY,
-				price: displayForMinorUnit( displayWithTax ? '3500' : '3250' ),
+				price: displayForMinorUnit(displayWithTax ? '3500' : '3250'),
 				regular_price: displayForMinorUnit(
 					displayWithTax ? '4500' : '4250'
 				),
@@ -476,19 +468,19 @@ export const previewCart: CartResponse = {
 		},
 		{
 			id: 6,
-			name: __( 'T-Shirt', 'woocommerce' ),
+			name: __('T-Shirt', 'woocommerce'),
 			slug: 't-shirt',
 			parent: 0,
 			type: 'simple',
 			variation: '',
 			permalink: 'https://example.org',
 			sku: 'woo-t-shirt',
-			short_description: __( 'T-Shirt', 'woocommerce' ),
-			description: __( 'T-Shirt', 'woocommerce' ),
+			short_description: __('T-Shirt', 'woocommerce'),
+			description: __('T-Shirt', 'woocommerce'),
 			on_sale: false,
 			prices: {
 				...API_SITE_CURRENCY,
-				price: displayForMinorUnit( displayWithTax ? '1800' : '1500' ),
+				price: displayForMinorUnit(displayWithTax ? '1800' : '1500'),
 				regular_price: displayForMinorUnit(
 					displayWithTax ? '1800' : '1500'
 				),
@@ -534,11 +526,11 @@ export const previewCart: CartResponse = {
 	fees: [
 		{
 			id: 'fee',
-			name: __( 'Fee', 'woocommerce' ),
+			name: __('Fee', 'woocommerce'),
 			totals: {
 				...API_SITE_CURRENCY,
-				total: displayForMinorUnit( '100' ),
-				total_tax: displayForMinorUnit( '20' ),
+				total: displayForMinorUnit('100'),
+				total_tax: displayForMinorUnit('20'),
 			},
 		},
 	],
@@ -574,26 +566,26 @@ export const previewCart: CartResponse = {
 	},
 	totals: {
 		...API_SITE_CURRENCY,
-		total_items: displayForMinorUnit( '4000' ),
-		total_items_tax: displayForMinorUnit( '800' ),
-		total_fees: displayForMinorUnit( '100' ),
-		total_fees_tax: displayForMinorUnit( '20' ),
+		total_items: displayForMinorUnit('4000'),
+		total_items_tax: displayForMinorUnit('800'),
+		total_fees: displayForMinorUnit('100'),
+		total_fees_tax: displayForMinorUnit('20'),
 		total_discount: '0',
 		total_discount_tax: '0',
 		total_shipping: '0',
 		total_shipping_tax: '0',
-		total_tax: displayForMinorUnit( '820' ),
-		total_price: displayForMinorUnit( '4920' ),
+		total_tax: displayForMinorUnit('820'),
+		total_price: displayForMinorUnit('4920'),
 		tax_lines: [
 			{
-				name: __( 'Sales tax', 'woocommerce' ),
+				name: __('Sales tax', 'woocommerce'),
 				rate: '20%',
-				price: displayForMinorUnit( '820' ),
+				price: displayForMinorUnit('820'),
 			},
 		],
 	},
 	errors: [],
-	payment_methods: [ 'cod', 'bacs', 'cheque' ],
-	payment_requirements: [ 'products' ],
+	payment_methods: ['cod', 'bacs', 'cheque'],
+	payment_requirements: ['products'],
 	extensions: {},
 };

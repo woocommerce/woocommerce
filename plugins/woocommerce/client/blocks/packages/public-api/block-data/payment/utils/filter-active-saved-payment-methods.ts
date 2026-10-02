@@ -15,35 +15,35 @@ export const filterActiveSavedPaymentMethods = (
 	availablePaymentMethods: string[] = [],
 	savedPaymentMethods: SavedPaymentMethods
 ): SavedPaymentMethods => {
-	if ( availablePaymentMethods.length === 0 ) {
+	if (availablePaymentMethods.length === 0) {
 		return {};
 	}
 	const registeredPaymentMethods = getPaymentMethods();
 	const availablePaymentMethodsWithConfig = Object.fromEntries(
-		availablePaymentMethods.map( ( name ) => [
+		availablePaymentMethods.map((name) => [
 			name,
-			registeredPaymentMethods[ name ],
-		] )
+			registeredPaymentMethods[name],
+		])
 	);
 
-	const paymentMethodKeys = Object.keys( savedPaymentMethods );
+	const paymentMethodKeys = Object.keys(savedPaymentMethods);
 	const activeSavedPaymentMethods = {} as SavedPaymentMethods;
-	paymentMethodKeys.forEach( ( type ) => {
-		const methods = savedPaymentMethods[ type ].filter(
-			( {
+	paymentMethodKeys.forEach((type) => {
+		const methods = savedPaymentMethods[type].filter(
+			({
 				method: { gateway },
 			}: {
 				method: {
 					gateway: string;
 				};
-			} ) =>
+			}) =>
 				gateway in availablePaymentMethodsWithConfig &&
-				availablePaymentMethodsWithConfig[ gateway ].supports
+				availablePaymentMethodsWithConfig[gateway].supports
 					?.showSavedCards
 		);
-		if ( methods.length ) {
-			activeSavedPaymentMethods[ type ] = methods;
+		if (methods.length) {
+			activeSavedPaymentMethods[type] = methods;
 		}
-	} );
+	});
 	return activeSavedPaymentMethods;
 };

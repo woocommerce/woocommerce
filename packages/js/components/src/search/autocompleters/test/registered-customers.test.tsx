@@ -95,7 +95,9 @@ describe( 'registered customers autocompleter', () => {
 	} );
 
 	it( 'highlights the match inside the appended field', () => {
-		render( <>{ registeredCustomers.getOptionLabel( named, 'example' ) }</> );
+		render(
+			<>{ registeredCustomers.getOptionLabel( named, 'example' ) }</>
+		);
 
 		expect( screen.getByText( 'example' ).tagName ).toBe( 'STRONG' );
 	} );

@@ -9,7 +9,7 @@ const Lightbulb = () => {
 		>
 			<mask
 				id="mask0_1133_132689"
-				style={ { maskType: 'alpha' } }
+				style={{ maskType: 'alpha' }}
 				maskUnits="userSpaceOnUse"
 				x="5"
 				y="2"

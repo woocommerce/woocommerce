@@ -29,37 +29,35 @@ interface StepPlaceholderProps {
  * // Render 3 animated placeholder steps
  * <StepPlaceholder rows={3} />
  */
-export const StepPlaceholder = ( { rows }: StepPlaceholderProps ) => {
+export const StepPlaceholder = ({ rows }: StepPlaceholderProps) => {
 	// Create an array of placeholder items based on the number of rows.
-	const placeholderItems = Array.from( { length: rows } ).map(
-		( _, index ) => (
-			<motion.div
-				key={ index }
-				className="step-placeholder__item payment-step payment-step--disabled"
-				initial={ { opacity: 0, x: -20 } }
-				animate={ { opacity: 1, x: 0 } }
-				transition={ {
-					duration: 0.3,
-					delay: index * 0.1, // Stagger the animation
-					ease: 'easeOut',
-				} }
-			>
-				<div className="step-placeholder__icon step-placeholder__shimmer" />
-				<div className="step-placeholder__content">
-					<div className="step-placeholder__text step-placeholder__shimmer" />
-				</div>
-			</motion.div>
-		)
-	);
+	const placeholderItems = Array.from({ length: rows }).map((_, index) => (
+		<motion.div
+			key={index}
+			className="step-placeholder__item payment-step payment-step--disabled"
+			initial={{ opacity: 0, x: -20 }}
+			animate={{ opacity: 1, x: 0 }}
+			transition={{
+				duration: 0.3,
+				delay: index * 0.1, // Stagger the animation
+				ease: 'easeOut',
+			}}
+		>
+			<div className="step-placeholder__icon step-placeholder__shimmer" />
+			<div className="step-placeholder__content">
+				<div className="step-placeholder__text step-placeholder__shimmer" />
+			</div>
+		</motion.div>
+	));
 
 	return (
 		<motion.div
 			className="step-placeholder"
-			initial={ { opacity: 0 } }
-			animate={ { opacity: 1 } }
-			transition={ { duration: 0.2 } }
+			initial={{ opacity: 0 }}
+			animate={{ opacity: 1 }}
+			transition={{ duration: 0.2 }}
 		>
-			{ placeholderItems }
+			{placeholderItems}
 		</motion.div>
 	);
 };

@@ -24,7 +24,7 @@ import { SETTINGS_SLOT_FILL_CONSTANT } from '../../settings/settings-slots';
 import { BlueprintUploadDropzone } from '../components/BlueprintUploadDropzone';
 import './style.scss';
 
-const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
+const { Fill } = createSlotFill(SETTINGS_SLOT_FILL_CONSTANT);
 const PLUGIN_ID = 'woocommerce-admin-blueprint-settings-slotfill';
 
 const icons = {
@@ -34,27 +34,27 @@ const icons = {
 };
 
 const Blueprint = () => {
-	const [ exportEnabled, setExportEnabled ] = useState( true );
-	const [ exportError, setExportError ] = useState( null );
+	const [exportEnabled, setExportEnabled] = useState(true);
+	const [exportError, setExportError] = useState(null);
 
 	const blueprintStepGroups =
 		window.wcSettings?.admin?.blueprint_step_groups || [];
 
-	const [ checkedState, setCheckedState ] = useState(
-		blueprintStepGroups.reduce( ( acc, group ) => {
-			acc[ group.id ] = group.items.reduce( ( groupAcc, item ) => {
-				groupAcc[ item.id ] = item.checked ?? false;
+	const [checkedState, setCheckedState] = useState(
+		blueprintStepGroups.reduce((acc, group) => {
+			acc[group.id] = group.items.reduce((groupAcc, item) => {
+				groupAcc[item.id] = item.checked ?? false;
 				return groupAcc;
-			}, {} );
+			}, {});
 			return acc;
-		}, {} )
+		}, {})
 	);
 
 	const { currentUserCan } = useUser();
 
-	const exportBlueprint = async ( _steps ) => {
-		setExportError( null );
-		setExportEnabled( false );
+	const exportBlueprint = async (_steps) => {
+		setExportError(null);
+		setExportEnabled(false);
 
 		const linkContainer = document.getElementById(
 			'download-link-container'
@@ -62,55 +62,55 @@ const Blueprint = () => {
 		linkContainer.innerHTML = '';
 
 		try {
-			const response = await apiFetch( {
+			const response = await apiFetch({
 				path: '/wc-admin/blueprint/export',
 				method: 'POST',
 				data: {
 					steps: _steps,
 				},
-			} );
+			});
 
-			const link = document.createElement( 'a' );
+			const link = document.createElement('a');
 			let url = null;
 
-			if ( response.type === 'zip' ) {
+			if (response.type === 'zip') {
 				link.href = response.data;
 				link.target = '_blank';
 			} else {
 				// Create a link element and trigger the download
 				url = window.URL.createObjectURL(
-					new Blob( [ JSON.stringify( response.data, null, 2 ) ] )
+					new Blob([JSON.stringify(response.data, null, 2)])
 				);
 				link.href = url;
-				link.setAttribute( 'download', 'woo-blueprint.json' );
+				link.setAttribute('download', 'woo-blueprint.json');
 			}
 
-			linkContainer.appendChild( link );
+			linkContainer.appendChild(link);
 
 			link.click();
-			if ( url ) {
-				window.URL.revokeObjectURL( url );
+			if (url) {
+				window.URL.revokeObjectURL(url);
 			}
 
-			recordEvent( 'blueprint_export_success', {
+			recordEvent('blueprint_export_success', {
 				has_plugins: _steps.plugins?.length > 0,
 				has_themes: _steps.themes?.length > 0,
 				has_settings: _steps.settings?.length > 0,
 				settings_exported: _steps.settings,
-			} );
-		} catch ( e ) {
-			recordEvent( 'blueprint_export_error', {
+			});
+		} catch (e) {
+			recordEvent('blueprint_export_error', {
 				error_message: e.message || 'unknown',
-			} );
+			});
 
-			setExportError( e.message );
+			setExportError(e.message);
 
-			switch ( true ) {
+			switch (true) {
 				case e instanceof Error:
-					setExportError( e.message );
+					setExportError(e.message);
 					break;
 				case typeof e === 'string':
-					setExportError( e );
+					setExportError(e);
 					break;
 				case e.errors &&
 					e.errors.wooblueprint_insufficient_permissions &&
@@ -132,26 +132,26 @@ const Blueprint = () => {
 					break;
 			}
 		} finally {
-			setExportEnabled( true );
+			setExportEnabled(true);
 		}
 	};
 
 	// Handle checkbox change
-	const handleOnChange = ( groupId, itemId ) => {
-		setCheckedState( ( prevState ) => ( {
+	const handleOnChange = (groupId, itemId) => {
+		setCheckedState((prevState) => ({
 			...prevState,
-			[ groupId ]: {
-				...prevState[ groupId ],
-				[ itemId ]: ! prevState[ groupId ][ itemId ], // Toggle the checkbox state
+			[groupId]: {
+				...prevState[groupId],
+				[itemId]: !prevState[groupId][itemId], // Toggle the checkbox state
 			},
-		} ) );
+		}));
 	};
 
 	return (
 		<div className="blueprint-settings-slotfill">
-			<h3>{ __( 'Blueprint', 'woocommerce' ) }</h3>
+			<h3>{__('Blueprint', 'woocommerce')}</h3>
 			<p className="blueprint-settings-intro-text">
-				{ createInterpolateElement(
+				{createInterpolateElement(
 					__(
 						'Blueprints are setup files containing WooCommerce settings, plugins, and themes. Simplify setup, streamline team collaboration, and <docLink />.',
 						'woocommerce'
@@ -163,109 +163,109 @@ const Blueprint = () => {
 								target="_blank"
 								className="woocommerce-admin-inline-documentation-link"
 								rel="noreferrer"
-								onClick={ () => {
-									recordEvent( 'blueprint_learn_more_click' );
-								} }
+								onClick={() => {
+									recordEvent('blueprint_learn_more_click');
+								}}
 							>
-								{ __( 'more', 'woocommerce' ) }
+								{__('more', 'woocommerce')}
 							</a>
 						),
 					}
-				) }
+				)}
 			</p>
-			{ currentUserCan( 'manage_options' ) && (
+			{currentUserCan('manage_options') && (
 				<>
-					<h4>{ __( 'Import', 'woocommerce' ) }</h4>
+					<h4>{__('Import', 'woocommerce')}</h4>
 					<p>
-						{ __(
+						{__(
 							'Import a .json file. You can import only one Blueprint at a time.',
 							'woocommerce'
-						) }
+						)}
 					</p>
 					<BlueprintUploadDropzone />
 				</>
-			) }
-			<h4>{ __( 'Export', 'woocommerce' ) }</h4>
+			)}
+			<h4>{__('Export', 'woocommerce')}</h4>
 			<p className="blueprint-settings-export-intro">
-				{ __(
+				{__(
 					'Select the settings, plugins, and themes to export as a .json file. Payment settings are not exported and must be configured manually after import.',
 					'woocommerce'
-				) }
+				)}
 			</p>
-			{ exportError && (
+			{exportError && (
 				<Notice
 					className="blueprint-export-error"
 					status="error"
-					onRemove={ () => {
-						setExportError( null );
-					} }
+					onRemove={() => {
+						setExportError(null);
+					}}
 					isDismissible
 				>
-					{ exportError }
+					{exportError}
 				</Notice>
-			) }
-			{ blueprintStepGroups.map( ( group, index ) => (
+			)}
+			{blueprintStepGroups.map((group, index) => (
 				<div
-					key={ index }
+					key={index}
 					className="blueprint-settings-export-group wc-settings-prevent-change-event"
 				>
 					<Icon
-						icon={ icons[ group.icon ] ?? icons.settings }
-						alt={ sprintf(
+						icon={icons[group.icon] ?? icons.settings}
+						alt={sprintf(
 							// translators: %s: icon name. Does not need to be translated.
-							__( 'Blueprint setting icon - %s', 'woocommerce' ),
+							__('Blueprint setting icon - %s', 'woocommerce'),
 							group.icon
-						) }
+						)}
 					/>
 					<span className="blueprint-settings-export-group-item-count">
 						{
-							Object.values( checkedState[ group.id ] ).filter(
-								( checked ) => checked
+							Object.values(checkedState[group.id]).filter(
+								(checked) => checked
 							).length
 						}
 					</span>
 
 					<CollapsibleContent
-						key={ index }
-						toggleText={ group.label }
-						initialCollapsed={ true }
+						key={index}
+						toggleText={group.label}
+						initialCollapsed={true}
 					>
-						{ group.items.map( ( step ) => (
+						{group.items.map((step) => (
 							<ToggleControl
 								__nextHasNoMarginBottom
-								key={ step.id }
-								label={ step.label }
-								checked={ checkedState[ group.id ][ step.id ] }
-								onChange={ () => {
-									handleOnChange( group.id, step.id );
-								} }
-								help={ step.description }
+								key={step.id}
+								label={step.label}
+								checked={checkedState[group.id][step.id]}
+								onChange={() => {
+									handleOnChange(group.id, step.id);
+								}}
+								help={step.description}
 							/>
-						) ) }
+						))}
 					</CollapsibleContent>
 				</div>
-			) ) }
+			))}
 
 			<div id="download-link-container"></div>
 			<Button
 				className="blueprint-settings-export-button"
 				variant="primary"
-				onClick={ () => {
-					const selectedSteps = Object.entries( checkedState ).reduce(
-						( acc, [ groupId, groupState ] ) => {
-							acc[ groupId ] = Object.keys( groupState ).filter(
-								( itemId ) => groupState[ itemId ]
+				onClick={() => {
+					const selectedSteps = Object.entries(checkedState).reduce(
+						(acc, [groupId, groupState]) => {
+							acc[groupId] = Object.keys(groupState).filter(
+								(itemId) => groupState[itemId]
 							);
 							return acc;
 						},
 						{}
 					);
-					exportBlueprint( selectedSteps );
-				} }
-				disabled={ ! exportEnabled }
-				isBusy={ ! exportEnabled }
+					exportBlueprint(selectedSteps);
+				}}
+				disabled={!exportEnabled}
+				isBusy={!exportEnabled}
 			>
-				{ __( 'Export', 'woocommerce' ) }
+				{__('Export', 'woocommerce')}
 			</Button>
 		</div>
 	);
@@ -280,11 +280,11 @@ const BlueprintSlotfill = () => {
 };
 
 export const registerBlueprintSlotfill = () => {
-	if ( getPlugin( PLUGIN_ID ) ) {
+	if (getPlugin(PLUGIN_ID)) {
 		return;
 	}
-	registerPlugin( PLUGIN_ID, {
+	registerPlugin(PLUGIN_ID, {
 		scope: 'woocommerce-blueprint-settings',
 		render: BlueprintSlotfill,
-	} );
+	});
 };

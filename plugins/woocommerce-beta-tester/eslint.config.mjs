@@ -11,12 +11,7 @@ import woocommerce from '@woocommerce/eslint-config';
 
 export default [
 	// node_modules is ignored by default.
-	globalIgnores( [
-		'**/*.min.js',
-		'build/**',
-		'build-module/**',
-		'vendor/**',
-	] ),
+	globalIgnores(['**/*.min.js', 'build/**', 'build-module/**', 'vendor/**']),
 	...woocommerce,
 	{
 		languageOptions: {

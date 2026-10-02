@@ -1,6 +1,6 @@
 module.exports = {
 	extends: '@wordpress/stylelint-config/scss-stylistic',
-	ignoreFiles: [ './vendor/**/*.scss' ],
+	ignoreFiles: ['./vendor/**/*.scss'],
 	rules: {
 		'at-rule-empty-line-before': null,
 		'at-rule-no-unknown': null,
@@ -27,7 +27,7 @@ module.exports = {
 		'scss/selector-no-redundant-nesting-selector': null,
 		'selector-id-pattern': null,
 		'no-invalid-position-at-import-rule': null,
-		'length-zero-no-unit': [ true, { ignoreFunctions: [ 'calc', 'var' ] } ],
+		'length-zero-no-unit': [true, { ignoreFunctions: ['calc', 'var'] }],
 		// Enabled by the preset since @wordpress/stylelint-config 23.x.
 		// TODO: re-enable once update-banner.scss uses valid WPDS tokens.
 		'plugin-wpds/no-unknown-ds-tokens': null,

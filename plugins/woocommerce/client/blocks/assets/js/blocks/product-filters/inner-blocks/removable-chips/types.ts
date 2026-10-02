@@ -24,14 +24,14 @@ export type BlockAttributes = {
 	};
 };
 
-export type EditProps = BlockEditProps< BlockAttributes > & {
-	style: Record< string, string >;
+export type EditProps = BlockEditProps<BlockAttributes> & {
+	style: Record<string, string>;
 	context: RemovableItemsBlockContext;
 	chipText: Color;
-	setChipText: ( value: string ) => void;
+	setChipText: (value: string) => void;
 	chipBackground: Color;
-	setChipBackground: ( value: string ) => void;
+	setChipBackground: (value: string) => void;
 	chipBorder: Color;
-	setChipBorder: ( value: string ) => void;
+	setChipBorder: (value: string) => void;
 	name: string;
 };

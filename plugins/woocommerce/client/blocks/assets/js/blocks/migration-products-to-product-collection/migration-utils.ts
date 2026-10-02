@@ -11,36 +11,36 @@ import { isBoolean } from '@woocommerce/types';
  */
 import type { IsBlockType, GetBlocksClientIds } from './types';
 
-const isProductsBlock: IsBlockType = ( block ) =>
+const isProductsBlock: IsBlockType = (block) =>
 	block.name === 'core/query' &&
 	block.attributes.namespace === 'woocommerce/product-query';
 
-const isConvertedProductCollectionBlock: IsBlockType = ( block ) =>
+const isConvertedProductCollectionBlock: IsBlockType = (block) =>
 	block.name === 'woocommerce/product-collection' &&
 	block.attributes.convertedFromProducts;
 
 const getBlockClientIdsByPredicate = (
 	blocks: BlockInstance[],
-	predicate: ( block: BlockInstance ) => boolean
+	predicate: (block: BlockInstance) => boolean
 ): string[] => {
 	let clientIds: string[] = [];
-	blocks.forEach( ( block ) => {
-		if ( predicate( block ) ) {
-			clientIds = [ ...clientIds, block.clientId ];
+	blocks.forEach((block) => {
+		if (predicate(block)) {
+			clientIds = [...clientIds, block.clientId];
 		}
 		clientIds = [
 			...clientIds,
-			...getBlockClientIdsByPredicate( block.innerBlocks, predicate ),
+			...getBlockClientIdsByPredicate(block.innerBlocks, predicate),
 		];
-	} );
+	});
 	return clientIds;
 };
 
-const getProductsBlockClientIds: GetBlocksClientIds = ( blocks ) =>
-	getBlockClientIdsByPredicate( blocks, isProductsBlock );
+const getProductsBlockClientIds: GetBlocksClientIds = (blocks) =>
+	getBlockClientIdsByPredicate(blocks, isProductsBlock);
 
-const getProductCollectionBlockClientIds: GetBlocksClientIds = ( blocks ) =>
-	getBlockClientIdsByPredicate( blocks, isConvertedProductCollectionBlock );
+const getProductCollectionBlockClientIds: GetBlocksClientIds = (blocks) =>
+	getBlockClientIdsByPredicate(blocks, isConvertedProductCollectionBlock);
 
 const checkIfBlockCanBeInserted = (
 	clientId: string,
@@ -51,9 +51,8 @@ const checkIfBlockCanBeInserted = (
 	// that would determine if replacement happened or not.
 	// https://github.com/WordPress/gutenberg/issues/46740
 	const rootClientId =
-		select( 'core/block-editor' ).getBlockRootClientId( clientId ) ||
-		undefined;
-	return select( 'core/block-editor' ).canInsertBlockType(
+		select('core/block-editor').getBlockRootClientId(clientId) || undefined;
+	return select('core/block-editor').canInsertBlockType(
 		blockToBeInserted,
 		rootClientId
 	);

@@ -96,7 +96,7 @@ export const getLatestReleaseZipUrl = async ( {
 
 	const release = prerelease
 		? // eslint-disable-next-line @typescript-eslint/no-shadow
-		  response.data.find( ( { prerelease } ) => prerelease )
+			response.data.find( ( { prerelease } ) => prerelease )
 		: response.data;
 
 	// If response contains assets, return URL of first asset.

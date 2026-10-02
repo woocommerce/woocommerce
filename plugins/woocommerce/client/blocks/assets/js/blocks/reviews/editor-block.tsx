@@ -28,16 +28,16 @@ interface EditorBlockProps {
 	error?: ErrorObject;
 	hasReviewsHiddenByOffset: boolean;
 	isLoading: boolean;
-	noReviewsPlaceholder: React.ComponentType< {
-		attributes: EditorBlockProps[ 'attributes' ];
+	noReviewsPlaceholder: React.ComponentType<{
+		attributes: EditorBlockProps['attributes'];
 		reason: 'no-reviews' | 'offset';
-	} >;
+	}>;
 }
 
 /**
  * Block rendered in the editor.
  */
-class EditorBlock extends Component< EditorBlockProps > {
+class EditorBlock extends Component<EditorBlockProps> {
 	render() {
 		const {
 			attributes,
@@ -49,52 +49,50 @@ class EditorBlock extends Component< EditorBlockProps > {
 			totalReviews,
 		} = this.props;
 
-		if ( error ) {
+		if (error) {
 			return (
 				<ErrorPlaceholder
 					className="wc-block-featured-product-error"
-					error={ error }
-					isLoading={ isLoading }
+					error={error}
+					isLoading={isLoading}
 				/>
 			);
 		}
 
-		if ( reviews.length === 0 && ! isLoading ) {
+		if (reviews.length === 0 && !isLoading) {
 			return (
 				<NoReviewsPlaceholder
-					attributes={ attributes }
-					reason={
-						hasReviewsHiddenByOffset ? 'offset' : 'no-reviews'
-					}
+					attributes={attributes}
+					reason={hasReviewsHiddenByOffset ? 'offset' : 'no-reviews'}
 				/>
 			);
 		}
 
-		const reviewRatingsEnabled = getSetting( 'reviewRatingsEnabled', true );
+		const reviewRatingsEnabled = getSetting('reviewRatingsEnabled', true);
 
 		return (
 			<Disabled>
-				{ attributes.showOrderby && reviewRatingsEnabled && (
+				{attributes.showOrderby && reviewRatingsEnabled && (
 					<ReviewSortSelect
 						readOnly
-						value={ attributes.orderby }
-						onChange={ () => null }
+						value={attributes.orderby}
+						onChange={() => null}
 					/>
-				) }
+				)}
 
-				<ReviewList attributes={ attributes } reviews={ reviews } />
-				{ attributes.showLoadMore && totalReviews > reviews.length && (
+				<ReviewList attributes={attributes} reviews={reviews} />
+				{attributes.showLoadMore && totalReviews > reviews.length && (
 					<LoadMoreButton
-						screenReaderLabel={ __(
+						screenReaderLabel={__(
 							'Load more reviews',
 							'woocommerce'
-						) }
-						onClick={ () => null }
+						)}
+						onClick={() => null}
 					/>
-				) }
+				)}
 			</Disabled>
 		);
 	}
 }
 
-export default withReviews( EditorBlock );
+export default withReviews(EditorBlock);

@@ -24,11 +24,11 @@ const initialValues = window.shippingZoneMethodsLocalizeScript?.locations ?? [];
 const ShippingApp = () => {
 	return (
 		<div>
-			<RegionPicker options={ options } initialValues={ initialValues } />
+			<RegionPicker options={options} initialValues={initialValues} />
 		</div>
 	);
 };
 
-if ( shippingZoneRegionPickerRoot ) {
-	createRoot( shippingZoneRegionPickerRoot ).render( <ShippingApp /> );
+if (shippingZoneRegionPickerRoot) {
+	createRoot(shippingZoneRegionPickerRoot).render(<ShippingApp />);
 }

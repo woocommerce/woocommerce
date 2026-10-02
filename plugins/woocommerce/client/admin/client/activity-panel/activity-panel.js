@@ -37,62 +37,63 @@ import { useLaunchYourStore } from '~/launch-your-store';
 import { useTaskListsState } from '~/hooks/use-tasklists-state';
 import HeaderAccount from '../marketplace/components/header-account/header-account';
 
-const HelpPanel = lazy( () =>
-	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
+const HelpPanel = lazy(
+	() => import(/* webpackChunkName: "activity-panels-help" */ './panels/help')
 );
 
-const SetupTasksPanel = lazy( () =>
-	import(
-		/* webpackChunkName: "activity-panels-setup" */ './panels/setup-tasks/setup-tasks-panel.tsx'
-	)
+const SetupTasksPanel = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "activity-panels-setup" */ './panels/setup-tasks/setup-tasks-panel.tsx'
+		)
 );
 
-export const ActivityPanel = ( { isEmbedded, query } ) => {
-	const isHomescreen = query.page === 'wc-admin' && ! query.path;
+export const ActivityPanel = ({ isEmbedded, query }) => {
+	const isHomescreen = query.page === 'wc-admin' && !query.path;
 
-	const [ currentTab, setCurrentTab ] = useState( '' );
-	const [ isPanelClosing, setIsPanelClosing ] = useState( false );
-	const [ isPanelOpen, setIsPanelOpen ] = useState( false );
-	const [ isPanelSwitching, setIsPanelSwitching ] = useState( false );
-	const { comingSoon } = useLaunchYourStore( {
+	const [currentTab, setCurrentTab] = useState('');
+	const [isPanelClosing, setIsPanelClosing] = useState(false);
+	const [isPanelOpen, setIsPanelOpen] = useState(false);
+	const [isPanelSwitching, setIsPanelSwitching] = useState(false);
+	const { comingSoon } = useLaunchYourStore({
 		enabled: isHomescreen,
-	} );
+	});
 
 	const closePanel = () => {
-		setIsPanelClosing( true );
-		setIsPanelOpen( false );
+		setIsPanelClosing(true);
+		setIsPanelOpen(false);
 	};
 
 	const clearPanel = () => {
-		if ( ! isPanelOpen ) {
-			setIsPanelClosing( false );
-			setIsPanelSwitching( false );
-			setCurrentTab( '' );
+		if (!isPanelOpen) {
+			setIsPanelClosing(false);
+			setIsPanelSwitching(false);
+			setCurrentTab('');
 		}
 	};
 
-	useEffect( () => {
-		return addHistoryListener( () => {
+	useEffect(() => {
+		return addHistoryListener(() => {
 			closePanel();
 			clearPanel();
-		} );
-	}, [] );
+		});
+	}, []);
 
-	const updatedLayoutContext = useExtendLayout( 'activity-panel' );
+	const updatedLayoutContext = useExtendLayout('activity-panel');
 
 	const getPreviewSiteBtnTrackData = useCallback(
-		( select, getOption ) => {
+		(select, getOption) => {
 			let trackData = {};
-			if ( query.page === 'wc-admin' && query.task === 'appearance' ) {
-				const { getTaskLists } = select( onboardingStore );
+			if (query.page === 'wc-admin' && query.task === 'appearance') {
+				const { getTaskLists } = select(onboardingStore);
 				const taskLists = getTaskLists();
 				const tasks = taskLists.reduce(
-					( acc, taskList ) => [ ...acc, ...taskList.tasks ],
+					(acc, taskList) => [...acc, ...taskList.tasks],
 					[]
 				);
-				const task = tasks.find( ( t ) => t.id === 'appearance' );
+				const task = tasks.find((t) => t.id === 'appearance');
 
-				const demoNotice = getOption( 'woocommerce_demo_store_notice' );
+				const demoNotice = getOption('woocommerce_demo_store_notice');
 				trackData = {
 					set_notice: demoNotice ? 'Y' : 'N',
 					create_homepage:
@@ -105,21 +106,21 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 
 			return trackData;
 		},
-		[ query.page, query.task ]
+		[query.page, query.task]
 	);
 
 	const {
 		requestingTaskListOptions,
 		setupTaskListComplete,
 		setupTaskListHidden,
-	} = useTaskListsState( {
+	} = useTaskListsState({
 		setupTasklist: true,
 		extendedTaskList: false,
-	} );
+	});
 
 	const { previewSiteBtnTrackData } = useSelect(
-		( select ) => {
-			const { getOption } = select( optionsStore );
+		(select) => {
+			const { getOption } = select(optionsStore);
 
 			return {
 				previewSiteBtnTrackData: getPreviewSiteBtnTrackData(
@@ -128,10 +129,10 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				),
 			};
 		},
-		[ getPreviewSiteBtnTrackData ]
+		[getPreviewSiteBtnTrackData]
 	);
 
-	const { showCesModal } = useDispatch( CES_STORE_KEY );
+	const { showCesModal } = useDispatch(CES_STORE_KEY);
 
 	const { currentUserCan } = useUser();
 
@@ -141,8 +142,8 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	// state (currentTab, isPanelOpen) rather than the click target's intent
 	// — that way a focus-outside close racing with a same-tab click can't
 	// flip the panel back open after blur fires closePanel().
-	const togglePanel = ( tab ) => {
-		if ( tab.onClick ) {
+	const togglePanel = (tab) => {
+		if (tab.onClick) {
 			tab.onClick();
 			return;
 		}
@@ -150,40 +151,40 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		const tabName = tab.name;
 		// Same-tab re-click during a pending close: do nothing. The close
 		// from useFocusOutside is already in flight; let it finish.
-		if ( isPanelClosing && tabName === currentTab ) {
+		if (isPanelClosing && tabName === currentTab) {
 			return;
 		}
 
 		const isSameTab = tabName === currentTab;
 		const isClosing = isSameTab && isPanelOpen;
-		const isSwitching = ! isSameTab && currentTab !== '' && isPanelOpen;
+		const isSwitching = !isSameTab && currentTab !== '' && isPanelOpen;
 
 		// Record a Tracks event when a panel is being opened or switched in
 		// (not when closing). Previously the Tabs child fired this — moved
 		// here so it stays consistent with the rest of the intent logic.
-		if ( ! isClosing ) {
-			recordEvent( 'activity_panel_open', { tab: tabName } );
+		if (!isClosing) {
+			recordEvent('activity_panel_open', { tab: tabName });
 		}
 
-		setCurrentTab( tabName );
-		setIsPanelOpen( ! isClosing );
-		setIsPanelSwitching( isSwitching );
-		setIsPanelClosing( isClosing );
+		setCurrentTab(tabName);
+		setIsPanelOpen(!isClosing);
+		setIsPanelSwitching(isSwitching);
+		setIsPanelClosing(isClosing);
 	};
 
 	const isProductScreen = () => {
-		const [ firstPathSegment ] = getSegmentsFromPath( query.path );
+		const [firstPathSegment] = getSegmentsFromPath(query.path);
 		return (
 			firstPathSegment === 'add-product' || firstPathSegment === 'product'
 		);
 	};
 
 	const isAddProductPage = () => {
-		const urlParams = getUrlParams( window.location.search );
+		const urlParams = getUrlParams(window.location.search);
 
 		return (
 			isEmbedded &&
-			/post-new\.php$/.test( window.location.pathname ) &&
+			/post-new\.php$/.test(window.location.pathname) &&
 			urlParams?.post_type === 'product'
 		);
 	};
@@ -191,21 +192,21 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const isPerformingSetupTask = () => {
 		return (
 			query.task &&
-			! query.path &&
-			( requestingTaskListOptions === true ||
-				( setupTaskListHidden === false &&
-					setupTaskListComplete === false ) )
+			!query.path &&
+			(requestingTaskListOptions === true ||
+				(setupTaskListHidden === false &&
+					setupTaskListComplete === false))
 		);
 	};
 
 	const getTabs = () => {
 		const feedback = {
 			name: 'feedback',
-			title: __( 'Feedback', 'woocommerce' ),
-			icon: <Icon icon={ comment } size={ 18 } />,
+			title: __('Feedback', 'woocommerce'),
+			icon: <Icon icon={comment} size={18} />,
 			onClick: () => {
-				setCurrentTab( 'feedback' );
-				setIsPanelOpen( true );
+				setCurrentTab('feedback');
+				setIsPanelOpen(true);
 				showCesModal(
 					{
 						action: 'product_feedback',
@@ -224,12 +225,12 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 					},
 					{
 						onRecordScore: () => {
-							setCurrentTab( '' );
-							setIsPanelOpen( false );
+							setCurrentTab('');
+							setIsPanelOpen(false);
 						},
 						onCloseModal: () => {
-							setCurrentTab( '' );
-							setIsPanelOpen( false );
+							setCurrentTab('');
+							setIsPanelOpen(false);
 						},
 					},
 					{
@@ -243,32 +244,32 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 
 		const setup = {
 			name: 'setup',
-			title: __( 'Finish setup', 'woocommerce' ),
-			icon: <Icon icon={ listView } size={ 18 } />,
+			title: __('Finish setup', 'woocommerce'),
+			icon: <Icon icon={listView} size={18} />,
 			visible:
-				currentUserCan( 'manage_woocommerce' ) &&
-				! requestingTaskListOptions &&
-				! setupTaskListHidden &&
-				! setupTaskListComplete &&
-				! isHomescreen &&
-				! isProductScreen(),
+				currentUserCan('manage_woocommerce') &&
+				!requestingTaskListOptions &&
+				!setupTaskListHidden &&
+				!setupTaskListComplete &&
+				!isHomescreen &&
+				!isProductScreen(),
 		};
 
 		const help = {
 			name: 'help',
-			icon: <Icon icon={ helpIcon } />,
+			icon: <Icon icon={helpIcon} />,
 			visible:
-				currentUserCan( 'manage_woocommerce' ) &&
-				( ( isHomescreen && ! isEmbedded ) || isPerformingSetupTask() ),
+				currentUserCan('manage_woocommerce') &&
+				((isHomescreen && !isEmbedded) || isPerformingSetupTask()),
 		};
 
 		const displayOptions = {
 			component: DisplayOptions,
 			visible:
-				currentUserCan( 'manage_woocommerce' ) &&
-				! isEmbedded &&
+				currentUserCan('manage_woocommerce') &&
+				!isEmbedded &&
 				isHomescreen &&
-				! isPerformingSetupTask(),
+				!isPerformingSetupTask(),
 		};
 
 		const headerAccount = {
@@ -282,11 +283,11 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 
 		const previewSite = {
 			name: 'previewSite',
-			title: __( 'Preview site', 'woocommerce' ),
-			icon: <Icon icon={ external } />,
+			title: __('Preview site', 'woocommerce'),
+			icon: <Icon icon={external} />,
 			visible: isHomescreen && query.task === 'appearance',
 			onClick: () => {
-				window.open( getAdminSetting( 'siteUrl' ) );
+				window.open(getAdminSetting('siteUrl'));
 				recordEvent(
 					'wcadmin_tasklist_previewsite',
 					previewSiteBtnTrackData
@@ -299,19 +300,18 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		const previewStore = {
 			name: 'previewStore',
 			title:
-				( comingSoon === 'yes' &&
-					__( 'Preview store', 'woocommerce' ) ) ||
-				__( 'View store', 'woocommerce' ),
+				(comingSoon === 'yes' && __('Preview store', 'woocommerce')) ||
+				__('View store', 'woocommerce'),
 			// Tiny shopfront icon for the literal "View store" / "Preview
 			// store" semantic, distinct from the other icons in the bar.
 			// Required because activity-panel tabs are now icon-only —
 			// a tab without an icon renders as an empty button on the
 			// floating header.
-			icon: <Icon icon={ store } />,
+			icon: <Icon icon={store} />,
 			visible: isHomescreen && query.task !== 'appearance',
 			onClick: () => {
-				window.open( getAdminSetting( 'shopUrl' ) );
-				recordEvent( 'wcadmin_previewstore_click' );
+				window.open(getAdminSetting('shopUrl'));
+				recordEvent('wcadmin_previewstore_click');
 
 				return null;
 			},
@@ -325,51 +325,51 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			displayOptions,
 			headerAccount,
 			help,
-		].filter( ( tab ) => tab.visible );
+		].filter((tab) => tab.visible);
 	};
 
-	const getPanelContent = ( tab ) => {
+	const getPanelContent = (tab) => {
 		const { task } = query;
 
-		switch ( tab ) {
+		switch (tab) {
 			case 'help':
-				return <HelpPanel taskName={ task } />;
+				return <HelpPanel taskName={task} />;
 			case 'setup':
-				return <SetupTasksPanel query={ query } />;
+				return <SetupTasksPanel query={query} />;
 			default:
 				return null;
 		}
 	};
 
 	const tabs = getTabs();
-	const headerId = uniqueId( 'activity-panel-header_' );
+	const headerId = uniqueId('activity-panel-header_');
 
 	return (
-		<LayoutContextProvider value={ updatedLayoutContext }>
+		<LayoutContextProvider value={updatedLayoutContext}>
 			<div>
-				<H id={ headerId } className="screen-reader-text">
-					{ __( 'Store Activity', 'woocommerce' ) }
+				<H id={headerId} className="screen-reader-text">
+					{__('Store Activity', 'woocommerce')}
 				</H>
 				<Section
 					component="aside"
 					id="woocommerce-activity-panel"
 					className="woocommerce-layout__activity-panel"
-					aria-labelledby={ headerId }
+					aria-labelledby={headerId}
 				>
 					<Tabs
-						tabs={ tabs }
-						tabOpen={ isPanelOpen }
-						selectedTab={ currentTab }
-						onTabClick={ togglePanel }
+						tabs={tabs}
+						tabOpen={isPanelOpen}
+						selectedTab={currentTab}
+						onTabClick={togglePanel}
 					/>
 					<Panel
 						currentTab
-						isPanelOpen={ isPanelOpen }
-						isPanelSwitching={ isPanelSwitching }
-						tab={ find( getTabs(), { name: currentTab } ) }
-						content={ getPanelContent( currentTab ) }
-						closePanel={ () => closePanel() }
-						clearPanel={ () => clearPanel() }
+						isPanelOpen={isPanelOpen}
+						isPanelSwitching={isPanelSwitching}
+						tab={find(getTabs(), { name: currentTab })}
+						content={getPanelContent(currentTab)}
+						closePanel={() => closePanel()}
+						clearPanel={() => clearPanel()}
 					/>
 				</Section>
 			</div>

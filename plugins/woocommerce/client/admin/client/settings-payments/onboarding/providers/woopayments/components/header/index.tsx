@@ -17,22 +17,22 @@ interface WooPaymentsStepHeaderProps {
 /**
  * WooPaymentsStepHeader component for WooPayments onboarding
  */
-export default function WooPaymentsStepHeader( {
+export default function WooPaymentsStepHeader({
 	onClose,
-}: WooPaymentsStepHeaderProps ): React.ReactNode {
+}: WooPaymentsStepHeaderProps): React.ReactNode {
 	return (
 		<div className="settings-payments-onboarding-modal__header">
 			<img
-				src={ `${ WC_ASSET_URL }images/woo-logo.svg` }
+				src={`${WC_ASSET_URL}images/woo-logo.svg`}
 				alt=""
 				role="presentation"
 				className="settings-payments-onboarding-modal__header--logo"
 			/>
 			<Button
 				className="settings-payments-onboarding-modal__header--close"
-				onClick={ onClose }
+				onClick={onClose}
 			>
-				<Icon icon={ close } />
+				<Icon icon={close} />
 			</Button>
 		</div>
 	);

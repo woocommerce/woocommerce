@@ -31,37 +31,37 @@ type QRLoginSuccessStepProps = {
  * DELETE call — a stray click should not silently sign the merchant out of
  * their own phone.
  */
-export const QRLoginSuccessStep = ( {
+export const QRLoginSuccessStep = ({
 	apUuid,
 	deviceInfo,
-}: QRLoginSuccessStepProps ) => {
-	const deviceDetails = buildQRLoginDeviceLine( deviceInfo );
-	const [ isConfirmingRevoke, setIsConfirmingRevoke ] =
-		useState< boolean >( false );
+}: QRLoginSuccessStepProps) => {
+	const deviceDetails = buildQRLoginDeviceLine(deviceInfo);
+	const [isConfirmingRevoke, setIsConfirmingRevoke] =
+		useState<boolean>(false);
 	const { revoke, isRevoking, isRevoked, errorMessage } =
 		useRevokeQRLoginAccess();
 
 	const openConfirmDialog = () => {
-		recordEvent( 'mobile_app_qr_direct_login_revoke_intent' );
-		setIsConfirmingRevoke( true );
+		recordEvent('mobile_app_qr_direct_login_revoke_intent');
+		setIsConfirmingRevoke(true);
 	};
 
 	const closeConfirmDialog = () => {
-		if ( isRevoking ) {
+		if (isRevoking) {
 			return;
 		}
-		setIsConfirmingRevoke( false );
+		setIsConfirmingRevoke(false);
 	};
 
 	const confirmRevoke = async () => {
-		if ( ! apUuid ) {
+		if (!apUuid) {
 			return;
 		}
-		recordEvent( 'mobile_app_qr_direct_login_revoke_attempt' );
-		await revoke( apUuid );
+		recordEvent('mobile_app_qr_direct_login_revoke_attempt');
+		await revoke(apUuid);
 	};
 
-	if ( isRevoked ) {
+	if (isRevoked) {
 		return (
 			<div
 				className="qr-login-success-step qr-login-success-step--revoked"
@@ -69,13 +69,13 @@ export const QRLoginSuccessStep = ( {
 				aria-live="polite"
 			>
 				<h2 className="qr-login-success-step__heading">
-					{ __( 'Access revoked', 'woocommerce' ) }
+					{__('Access revoked', 'woocommerce')}
 				</h2>
 				<p className="qr-login-success-step__description">
-					{ __(
+					{__(
 						'The mobile app will be signed out the next time it makes a request.',
 						'woocommerce'
-					) }
+					)}
 				</p>
 			</div>
 		);
@@ -88,67 +88,67 @@ export const QRLoginSuccessStep = ( {
 				role="status"
 				aria-live="polite"
 			>
-				{ deviceDetails && (
+				{deviceDetails && (
 					<p className="qr-login-success-step__device-details">
-						{ deviceDetails }
+						{deviceDetails}
 					</p>
-				) }
+				)}
 
 				<div className="qr-login-success-step__revoke-row">
 					<p className="qr-login-success-step__challenge">
-						{ __( "It wasn't you?", 'woocommerce' ) }
+						{__("It wasn't you?", 'woocommerce')}
 					</p>
 					<Button
 						variant="primary"
 						className="qr-login-success-step__revoke-button"
-						onClick={ openConfirmDialog }
-						disabled={ ! apUuid }
+						onClick={openConfirmDialog}
+						disabled={!apUuid}
 					>
-						{ __( 'Revoke access', 'woocommerce' ) }
+						{__('Revoke access', 'woocommerce')}
 					</Button>
 				</div>
 
-				{ errorMessage && (
+				{errorMessage && (
 					<p className="qr-login-success-step__error" role="alert">
-						{ errorMessage }
+						{errorMessage}
 					</p>
-				) }
+				)}
 			</div>
 
-			{ isConfirmingRevoke && (
+			{isConfirmingRevoke && (
 				<Modal
-					title={ __( 'Revoke access?', 'woocommerce' ) }
-					onRequestClose={ closeConfirmDialog }
+					title={__('Revoke access?', 'woocommerce')}
+					onRequestClose={closeConfirmDialog}
 					className="qr-login-success-step__confirm-modal"
-					shouldCloseOnEsc={ ! isRevoking }
-					shouldCloseOnClickOutside={ ! isRevoking }
+					shouldCloseOnEsc={!isRevoking}
+					shouldCloseOnClickOutside={!isRevoking}
 				>
 					<p>
-						{ __(
+						{__(
 							'The mobile app will be signed out the next time it tries to reach your store. You can sign in again any time by scanning a new QR code.',
 							'woocommerce'
-						) }
+						)}
 					</p>
 					<div className="qr-login-success-step__confirm-actions">
 						<Button
 							variant="tertiary"
-							onClick={ closeConfirmDialog }
-							disabled={ isRevoking }
+							onClick={closeConfirmDialog}
+							disabled={isRevoking}
 						>
-							{ __( 'Cancel', 'woocommerce' ) }
+							{__('Cancel', 'woocommerce')}
 						</Button>
 						<Button
 							variant="primary"
-							onClick={ confirmRevoke }
-							isBusy={ isRevoking }
-							disabled={ isRevoking }
+							onClick={confirmRevoke}
+							isBusy={isRevoking}
+							disabled={isRevoking}
 							className="qr-login-success-step__confirm-revoke-button"
 						>
-							{ __( 'Revoke access', 'woocommerce' ) }
+							{__('Revoke access', 'woocommerce')}
 						</Button>
 					</div>
 				</Modal>
-			) }
+			)}
 		</>
 	);
 };

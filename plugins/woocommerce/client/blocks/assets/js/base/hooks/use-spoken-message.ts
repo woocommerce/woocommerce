@@ -13,13 +13,13 @@ export const useSpokenMessage = (
 	politeness: 'polite' | 'assertive' | undefined
 ) => {
 	const spokenMessage =
-		typeof message === 'string' ? message : renderToString( message );
+		typeof message === 'string' ? message : renderToString(message);
 
-	useEffect( () => {
-		if ( spokenMessage ) {
-			speak( spokenMessage, politeness );
+	useEffect(() => {
+		if (spokenMessage) {
+			speak(spokenMessage, politeness);
 		}
-	}, [ spokenMessage, politeness ] );
+	}, [spokenMessage, politeness]);
 };
 
 export default useSpokenMessage;

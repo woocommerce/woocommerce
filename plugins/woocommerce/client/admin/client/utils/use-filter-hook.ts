@@ -14,39 +14,36 @@ import { addAction, removeAction, didFilter } from '@wordpress/hooks';
  * @param dependencies Optional dependency array for re-computation
  * @return The current filtered value
  */
-export function useFilterHook< T >(
+export function useFilterHook<T>(
 	filterName: string,
 	getterFn: () => T,
 	dependencies: React.DependencyList = []
 ): T {
-	const [ value, setValue ] = useState< T >( getterFn );
+	const [value, setValue] = useState<T>(getterFn);
 
-	useEffect( () => {
+	useEffect(() => {
 		/**
 		 * Handler for new hooks being added after the initial filter has been run,
 		 * so that if any hooks are added later, they can still be applied
 		 * instead of being missed due to the race condition.
 		 */
-		const handleHookAdded = ( hookName: string ) => {
-			if (
-				hookName === filterName &&
-				( didFilter( filterName ) ?? 0 ) > 0
-			) {
-				setValue( getterFn() );
+		const handleHookAdded = (hookName: string) => {
+			if (hookName === filterName && (didFilter(filterName) ?? 0) > 0) {
+				setValue(getterFn());
 			}
 		};
 
-		const namespace = `woocommerce/woocommerce/watch_${ filterName }`;
-		addAction( 'hookAdded', namespace, handleHookAdded );
+		const namespace = `woocommerce/woocommerce/watch_${filterName}`;
+		addAction('hookAdded', namespace, handleHookAdded);
 
 		// Refresh value to catch any hooks added between initial getter and this effect
-		setValue( getterFn() );
+		setValue(getterFn());
 
 		return () => {
-			removeAction( 'hookAdded', namespace );
+			removeAction('hookAdded', namespace);
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- The filter name and getterFn are expected to be the same.
-	}, dependencies );
+	}, dependencies);
 
 	return value;
 }

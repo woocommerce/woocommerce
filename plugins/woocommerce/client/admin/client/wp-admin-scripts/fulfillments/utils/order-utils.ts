@@ -25,18 +25,18 @@ export interface ItemSelection {
  * @param order The order received from the API
  * @return Array<ItemSelection> The items in the order
  */
-export const getItemsFromOrder = ( order: Order ): ItemSelection[] => {
+export const getItemsFromOrder = (order: Order): ItemSelection[] => {
 	const items: ItemSelection[] = [];
-	order.line_items.forEach( ( item: LineItem ) => {
-		items.push( {
+	order.line_items.forEach((item: LineItem) => {
+		items.push({
 			item_id: item.id,
 			item,
-			selection: range( item.quantity ).map( ( index ) => ( {
+			selection: range(item.quantity).map((index) => ({
 				index,
 				checked: false,
-			} ) ),
-		} as ItemSelection );
-	} );
+			})),
+		} as ItemSelection);
+	});
 	return items;
 };
 
@@ -51,27 +51,27 @@ export const getItemsFromFulfillment = (
 	order: Order,
 	fulfillment: Fulfillment
 ): ItemSelection[] => {
-	const fulfillmentItems = getFulfillmentItems( fulfillment );
-	return fulfillmentItems.map( ( item ) => {
+	const fulfillmentItems = getFulfillmentItems(fulfillment);
+	return fulfillmentItems.map((item) => {
 		const orderItem = order.line_items.find(
-			( lineItem ) => lineItem.id === item.item_id
+			(lineItem) => lineItem.id === item.item_id
 		);
 
 		return {
 			item_id: item.item_id,
-			item: orderItem ? orderItem : ( {} as LineItem ),
-			selection: range( item.qty ).map( ( index ) => ( {
+			item: orderItem ? orderItem : ({} as LineItem),
+			selection: range(item.qty).map((index) => ({
 				index,
 				checked: true,
-			} ) ),
+			})),
 		} as ItemSelection;
-	} );
+	});
 };
 
-export const getOrderItemsCount = ( order: Order ): number => {
-	return order.line_items.reduce( ( acc, item ) => {
+export const getOrderItemsCount = (order: Order): number => {
+	return order.line_items.reduce((acc, item) => {
 		return acc + item.quantity;
-	}, 0 );
+	}, 0);
 };
 
 /**
@@ -85,25 +85,25 @@ export const combineItems = (
 	items1: ItemSelection[],
 	items2: ItemSelection[]
 ): ItemSelection[] => {
-	const itemMap: Record< string, ItemSelection > = {};
-	items1.forEach( ( item ) => {
-		itemMap[ item.item_id ] = { ...item };
-	} );
-	items2.forEach( ( item ) => {
-		if ( itemMap[ item.item_id ] ) {
-			itemMap[ item.item_id ].selection = [
-				...itemMap[ item.item_id ].selection,
+	const itemMap: Record<string, ItemSelection> = {};
+	items1.forEach((item) => {
+		itemMap[item.item_id] = { ...item };
+	});
+	items2.forEach((item) => {
+		if (itemMap[item.item_id]) {
+			itemMap[item.item_id].selection = [
+				...itemMap[item.item_id].selection,
 				...item.selection,
-			].map( ( selection, index ) => {
+			].map((selection, index) => {
 				selection.index = index;
 				return selection;
-			} );
+			});
 		} else {
-			itemMap[ item.item_id ] = { ...item };
+			itemMap[item.item_id] = { ...item };
 		}
-	} );
+	});
 
-	return Object.values( itemMap );
+	return Object.values(itemMap);
 };
 
 /**
@@ -118,30 +118,27 @@ const reduceItems = (
 	items: ItemSelection[],
 	itemsToReduce: ItemSelection[]
 ): ItemSelection[] => {
-	const itemMap: Record< string, ItemSelection > = {};
-	items.forEach( ( item ) => {
-		itemMap[ item.item_id ] = { ...item } as ItemSelection;
-	} );
-	itemsToReduce.forEach( ( item ) => {
-		if ( itemMap[ item.item_id ] ) {
+	const itemMap: Record<string, ItemSelection> = {};
+	items.forEach((item) => {
+		itemMap[item.item_id] = { ...item } as ItemSelection;
+	});
+	itemsToReduce.forEach((item) => {
+		if (itemMap[item.item_id]) {
 			// Reduce the selection count
-			itemMap[ item.item_id ].selection.splice(
-				0,
-				item.selection.length
-			);
+			itemMap[item.item_id].selection.splice(0, item.selection.length);
 			// Reorder the selection indices
-			itemMap[ item.item_id ].selection = itemMap[
+			itemMap[item.item_id].selection = itemMap[
 				item.item_id
-			].selection.map( ( selection, index ) => {
+			].selection.map((selection, index) => {
 				selection.index = index;
 				return selection;
-			} );
+			});
 		} else {
-			itemMap[ item.item_id ] = { ...item } as ItemSelection;
+			itemMap[item.item_id] = { ...item } as ItemSelection;
 		}
-	} );
+	});
 
-	return Object.values( itemMap );
+	return Object.values(itemMap);
 };
 
 /**
@@ -157,43 +154,41 @@ export const getItemsNotInAnyFulfillment = (
 	order: Order,
 	refunds: Refund[] = []
 ): ItemSelection[] => {
-	let itemsFromOrder = getItemsFromOrder( order );
+	let itemsFromOrder = getItemsFromOrder(order);
 
-	if ( refunds.length > 0 ) {
-		const itemsRefunded = refunds.reduce( ( acc, refund ) => {
-			const refundedItems = refund.line_items.map(
-				( item: LineItem ) => ( {
-					// Refunded items have a different item_id, find the original item in the order.
-					item_id:
-						itemsFromOrder.find(
-							( orderItem ) =>
-								orderItem.item.product_id === item.product_id
-						)?.item_id || item.id,
-					item,
-					selection: range( -item.quantity ).map( ( index ) => ( {
-						index,
-						checked: true,
-					} ) ),
-				} )
-			);
-			return combineItems( acc, refundedItems );
-		}, [] as ItemSelection[] );
+	if (refunds.length > 0) {
+		const itemsRefunded = refunds.reduce((acc, refund) => {
+			const refundedItems = refund.line_items.map((item: LineItem) => ({
+				// Refunded items have a different item_id, find the original item in the order.
+				item_id:
+					itemsFromOrder.find(
+						(orderItem) =>
+							orderItem.item.product_id === item.product_id
+					)?.item_id || item.id,
+				item,
+				selection: range(-item.quantity).map((index) => ({
+					index,
+					checked: true,
+				})),
+			}));
+			return combineItems(acc, refundedItems);
+		}, [] as ItemSelection[]);
 
 		// Reduce the refunded items from the order items.
-		itemsFromOrder = reduceItems( itemsFromOrder, itemsRefunded );
+		itemsFromOrder = reduceItems(itemsFromOrder, itemsRefunded);
 	}
 
-	if ( fulfillments.length > 0 ) {
+	if (fulfillments.length > 0) {
 		// If there are fulfillments, combine the items from all fulfillments and reduce them from the order items.
 		const itemsInAnyFulfillment = fulfillments.reduce(
-			( acc, fulfillment ) => {
-				const items = getItemsFromFulfillment( order, fulfillment );
-				return combineItems( acc, items );
+			(acc, fulfillment) => {
+				const items = getItemsFromFulfillment(order, fulfillment);
+				return combineItems(acc, items);
 			},
 			[] as ItemSelection[]
 		);
-		itemsFromOrder = reduceItems( itemsFromOrder, itemsInAnyFulfillment );
+		itemsFromOrder = reduceItems(itemsFromOrder, itemsInAnyFulfillment);
 	}
 
-	return itemsFromOrder.filter( ( item ) => item.selection.length > 0 );
+	return itemsFromOrder.filter((item) => item.selection.length > 0);
 };

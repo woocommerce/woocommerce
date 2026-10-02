@@ -31,39 +31,39 @@ type Props = {
  * @param root0.description
  * @param root0.onBack
  */
-export function ScreenHeader( { title, description, onBack }: Props ) {
+export function ScreenHeader({ title, description, onBack }: Props) {
 	return (
-		<VStack spacing={ 0 }>
+		<VStack spacing={0}>
 			<View>
-				<Spacer marginBottom={ 0 } paddingX={ 4 } paddingY={ 3 }>
-					<HStack spacing={ 2 }>
+				<Spacer marginBottom={0} paddingX={4} paddingY={3}>
+					<HStack spacing={2}>
 						<Navigator.BackButton
-							style={ { minWidth: 24, padding: 0 } }
-							icon={ chevronLeft }
+							style={{ minWidth: 24, padding: 0 }}
+							icon={chevronLeft}
 							size="small"
-							aria-label={ __(
+							aria-label={__(
 								'Navigate to the previous view',
 								__i18n_text_domain__
-							) }
-							onClick={ onBack }
+							)}
+							onClick={onBack}
 						/>
 						<Spacer>
 							<Heading
 								className="woocommerce-email-editor-styles-header"
-								level={ 2 }
-								size={ 13 }
+								level={2}
+								size={13}
 							>
-								{ title }
+								{title}
 							</Heading>
 						</Spacer>
 					</HStack>
 				</Spacer>
 			</View>
-			{ description && (
+			{description && (
 				<p className="woocommerce-email-editor-styles-header-description">
-					{ description }
+					{description}
 				</p>
-			) }
+			)}
 		</VStack>
 	);
 }

@@ -16,40 +16,40 @@ import { scrollPopperToVisibleAreaIfNeeded } from './utils';
 import { getSteps } from './get-steps';
 
 const WCAddonsTour = () => {
-	const [ showTour, setShowTour ] = useState( true );
+	const [showTour, setShowTour] = useState(true);
 
-	const { updateOptions } = useDispatch( optionsStore );
+	const { updateOptions } = useDispatch(optionsStore);
 
 	const steps = getSteps();
 	const defaultAutoScrollBlock: ScrollLogicalPosition = 'center';
 
-	useEffect( () => {
-		const query = new URLSearchParams( location.search );
-		if ( query.get( 'tutorial' ) === 'true' ) {
+	useEffect(() => {
+		const query = new URLSearchParams(location.search);
+		if (query.get('tutorial') === 'true') {
 			const intervalId = waitUntilElementTopNotChange(
-				steps[ 0 ].referenceElements?.desktop || '',
+				steps[0].referenceElements?.desktop || '',
 				() => {
-					const stepName = steps[ 0 ]?.meta?.name;
-					setShowTour( true );
-					recordEvent( 'in_app_marketplace_tour_started', {
+					const stepName = steps[0]?.meta?.name;
+					setShowTour(true);
+					recordEvent('in_app_marketplace_tour_started', {
 						step: stepName,
-					} );
+					});
 				},
 				500
 			);
-			return () => clearInterval( intervalId );
+			return () => clearInterval(intervalId);
 		}
 		// only run once
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [] );
+	}, []);
 
-	useEffect( () => {
-		if ( showTour ) {
+	useEffect(() => {
+		if (showTour) {
 			function showPopper() {
 				const tourKitElement = document.querySelector(
 					'.tour-kit-frame__container'
 				);
-				if ( tourKitElement ) {
+				if (tourKitElement) {
 					scrollPopperToVisibleAreaIfNeeded(
 						tourKitElement.getBoundingClientRect()
 					);
@@ -59,7 +59,7 @@ const WCAddonsTour = () => {
 			// In a rare case, admin notices might load before observe is added below (moving `.wc-addons-wrap`).
 			// In such a case, if Tour is shown before this effect is called, it might not be position correctly.
 			// Updating popper's position here, ensures it's always visible.
-			const timeoutId = setTimeout( showPopper, 500 );
+			const timeoutId = setTimeout(showPopper, 500);
 
 			const intervalId = observePositionChange(
 				'.woocommerce-marketplace',
@@ -67,13 +67,13 @@ const WCAddonsTour = () => {
 				150
 			);
 			return () => {
-				clearTimeout( timeoutId );
-				clearInterval( intervalId );
+				clearTimeout(timeoutId);
+				clearInterval(intervalId);
 			};
 		}
-	}, [ showTour ] );
+	}, [showTour]);
 
-	if ( ! showTour ) {
+	if (!showTour) {
 		return null;
 	}
 
@@ -81,41 +81,41 @@ const WCAddonsTour = () => {
 		tourSteps,
 		currentStepIndex
 	) => {
-		setShowTour( false );
+		setShowTour(false);
 		// mark tour as completed
-		void updateOptions( {
+		void updateOptions({
 			woocommerce_admin_dismissed_in_app_marketplace_tour: 'yes',
-		} );
+		});
 		// remove `tutorial` from search query, so it's not shown on page refresh
-		const url = new URL( window.location.href );
-		url.searchParams.delete( 'tutorial' );
-		window.history.replaceState( null, '', url );
+		const url = new URL(window.location.href);
+		url.searchParams.delete('tutorial');
+		window.history.replaceState(null, '', url);
 
-		if ( steps.length - 1 === currentStepIndex ) {
-			recordEvent( 'in_app_marketplace_tour_completed' );
+		if (steps.length - 1 === currentStepIndex) {
+			recordEvent('in_app_marketplace_tour_completed');
 		} else {
-			const stepName = tourSteps[ currentStepIndex ]?.meta?.name;
-			recordEvent( 'in_app_marketplace_tour_dismissed', {
+			const stepName = tourSteps[currentStepIndex]?.meta?.name;
+			recordEvent('in_app_marketplace_tour_dismissed', {
 				step: stepName,
-			} );
+			});
 		}
 	};
 
-	const onNextStepHandler = ( newStepIndex: number ) => {
-		const stepName = steps[ newStepIndex ]?.meta?.name || '';
-		recordEvent( 'in_app_marketplace_tour_step_viewed', {
+	const onNextStepHandler = (newStepIndex: number) => {
+		const stepName = steps[newStepIndex]?.meta?.name || '';
+		recordEvent('in_app_marketplace_tour_step_viewed', {
 			step: stepName,
-		} );
+		});
 	};
 
-	const tourConfig = getTourConfig( {
+	const tourConfig = getTourConfig({
 		closeHandler,
 		onNextStepHandler,
 		autoScrollBlock: defaultAutoScrollBlock,
 		steps,
-	} );
+	});
 
-	return <TourKit config={ tourConfig } />;
+	return <TourKit config={tourConfig} />;
 };
 
 export default WCAddonsTour;

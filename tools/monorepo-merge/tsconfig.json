@@ -8,15 +8,11 @@
 		"outDir": "dist",
 		"rootDir": "src",
 		"strict": true,
-		"typeRoots": [
-			"./node_modules/@types"
-		],
+		"typeRoots": [ "./node_modules/@types" ],
 		"skipLibCheck": true
 	},
 	"ts-node": {
 		"esm": false
 	},
-	"include": [
-		"src/**/*"
-	]
+	"include": [ "src/**/*" ]
 }

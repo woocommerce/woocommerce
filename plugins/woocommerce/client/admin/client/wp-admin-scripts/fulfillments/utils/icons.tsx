@@ -68,34 +68,31 @@ export const EnvelopeIcon = () => (
 	</svg>
 );
 
-export const CopyIcon = ( { copyText }: { copyText: string } ) => {
-	const [ copied, setCopied ] = useState( false );
-	const timeoutRef = useRef< ReturnType< typeof setTimeout > >();
+export const CopyIcon = ({ copyText }: { copyText: string }) => {
+	const [copied, setCopied] = useState(false);
+	const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
-	useEffect( () => {
+	useEffect(() => {
 		return () => {
-			if ( timeoutRef.current ) {
-				clearTimeout( timeoutRef.current );
+			if (timeoutRef.current) {
+				clearTimeout(timeoutRef.current);
 			}
 		};
-	}, [] );
+	}, []);
 
-	const handleCopy = ( event: React.MouseEvent ) => {
+	const handleCopy = (event: React.MouseEvent) => {
 		event.stopPropagation();
-		navigator.clipboard.writeText( copyText ).then(
+		navigator.clipboard.writeText(copyText).then(
 			() => {
-				setCopied( true );
-				if ( timeoutRef.current ) {
-					clearTimeout( timeoutRef.current );
+				setCopied(true);
+				if (timeoutRef.current) {
+					clearTimeout(timeoutRef.current);
 				}
-				timeoutRef.current = setTimeout(
-					() => setCopied( false ),
-					2000
-				);
+				timeoutRef.current = setTimeout(() => setCopied(false), 2000);
 			},
-			( err ) => {
+			(err) => {
 				// eslint-disable-next-line no-console
-				console.error( 'Failed to copy to clipboard:', err );
+				console.error('Failed to copy to clipboard:', err);
 			}
 		);
 	};
@@ -103,8 +100,8 @@ export const CopyIcon = ( { copyText }: { copyText: string } ) => {
 	return (
 		<Button
 			size="small"
-			iconSize={ 14 }
-			onClick={ handleCopy }
+			iconSize={14}
+			onClick={handleCopy}
 			icon={
 				copied ? (
 					<svg
@@ -136,8 +133,8 @@ export const CopyIcon = ( { copyText }: { copyText: string } ) => {
 					</svg>
 				)
 			}
-			aria-label={ copied ? 'Copied' : 'Copy' }
-			label={ copied ? 'Copied' : 'Copy' }
+			aria-label={copied ? 'Copied' : 'Copy'}
+			label={copied ? 'Copied' : 'Copy'}
 			__next40pxDefaultSize
 		/>
 	);

@@ -50,65 +50,61 @@ const blockifiedFallbackConfig = {
 	onClickCallback: () => void 0,
 };
 
-const conversionConfig: { [ key: string ]: BlockifiedTemplateConfig } = {
-	[ TYPES.productCatalog ]: blockifiedProductCatalogConfig,
-	[ TYPES.productTaxonomy ]: blockifiedProductTaxonomyConfig,
-	[ TYPES.singleProduct ]: blockifiedSingleProduct,
-	[ TYPES.productSearchResults ]: blockifiedProductSearchResults,
-	[ TYPES.orderConfirmation ]: blockifiedOrderConfirmation,
+const conversionConfig: { [key: string]: BlockifiedTemplateConfig } = {
+	[TYPES.productCatalog]: blockifiedProductCatalogConfig,
+	[TYPES.productTaxonomy]: blockifiedProductTaxonomyConfig,
+	[TYPES.singleProduct]: blockifiedSingleProduct,
+	[TYPES.productSearchResults]: blockifiedProductSearchResults,
+	[TYPES.orderConfirmation]: blockifiedOrderConfirmation,
 	fallback: blockifiedFallbackConfig,
 };
 
-const pickBlockClientIds = ( blocks: Array< BlockInstance > ) =>
-	blocks.reduce< Array< string > >( ( acc, block ) => {
-		if ( block.name === 'core/template-part' ) {
+const pickBlockClientIds = (blocks: Array<BlockInstance>) =>
+	blocks.reduce<Array<string>>((acc, block) => {
+		if (block.name === 'core/template-part') {
 			return acc;
 		}
 
-		return [ ...acc, block.clientId ];
-	}, [] );
+		return [...acc, block.clientId];
+	}, []);
 
-const ConvertTemplate = ( { blockifyConfig, clientId, attributes } ) => {
+const ConvertTemplate = ({ blockifyConfig, clientId, attributes }) => {
 	const { getButtonLabel, onClickCallback, getBlockifiedTemplate } =
 		blockifyConfig;
 
-	const [ isPopoverOpen, setIsPopoverOpen ] = useState( false );
+	const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 	const { replaceBlock, selectBlock, replaceBlocks } =
-		useDispatch( blockEditorStore );
+		useDispatch(blockEditorStore);
 
-	const { getBlocks } = useSelect( ( sel ) => {
+	const { getBlocks } = useSelect((sel) => {
 		return {
-			getBlocks: sel( blockEditorStore ).getBlocks,
+			getBlocks: sel(blockEditorStore).getBlocks,
 		};
-	}, [] );
+	}, []);
 
-	const { createInfoNotice } = useDispatch( noticesStore );
+	const { createInfoNotice } = useDispatch(noticesStore);
 
 	return (
 		<div className="wp-block-woocommerce-classic-template__placeholder-migration-button-container">
 			<Button
 				variant="primary"
-				onClick={ () => {
-					onClickCallback( {
+				onClick={() => {
+					onClickCallback({
 						clientId,
 						getBlocks,
 						attributes,
 						replaceBlock,
 						selectBlock,
-					} );
+					});
 					void createInfoNotice(
-						__(
-							'Template transformed into blocks!',
-							'woocommerce'
-						),
+						__('Template transformed into blocks!', 'woocommerce'),
 						{
 							actions: [
 								{
-									label: __( 'Undo', 'woocommerce' ),
+									label: __('Undo', 'woocommerce'),
 									onClick: () => {
-										const clientIds = pickBlockClientIds(
-											getBlocks()
-										);
+										const clientIds =
+											pickBlockClientIds(getBlocks());
 
 										void replaceBlocks(
 											clientIds,
@@ -137,15 +133,15 @@ const ConvertTemplate = ( { blockifyConfig, clientId, attributes } ) => {
 							type: 'snackbar',
 						}
 					);
-				} }
-				onMouseEnter={ () => setIsPopoverOpen( true ) }
-				onMouseLeave={ () => setIsPopoverOpen( false ) }
-				text={ getButtonLabel ? getButtonLabel() : '' }
+				}}
+				onMouseEnter={() => setIsPopoverOpen(true)}
+				onMouseLeave={() => setIsPopoverOpen(false)}
+				text={getButtonLabel ? getButtonLabel() : ''}
 			>
-				{ isPopoverOpen && (
-					<Popover resize={ false } placement="right-end">
+				{isPopoverOpen && (
+					<Popover resize={false} placement="right-end">
 						<div
-							style={ {
+							style={{
 								minWidth: '250px',
 								width: '250px',
 								maxWidth: '250px',
@@ -153,58 +149,54 @@ const ConvertTemplate = ( { blockifyConfig, clientId, attributes } ) => {
 								height: '300px',
 								maxHeight: '300px',
 								cursor: 'pointer',
-							} }
+							}}
 						>
 							<BlockPreview
-								blocks={ getBlockifiedTemplate( {
+								blocks={getBlockifiedTemplate({
 									...attributes,
 									isPreview: true,
-								} ) }
-								viewportWidth={ 1200 }
-								additionalStyles={ [
+								})}
+								viewportWidth={1200}
+								additionalStyles={[
 									{
 										css: 'body { padding: 20px !important; height: fit-content !important; overflow:hidden}',
 									},
-								] }
+								]}
 							/>
 						</div>
 					</Popover>
-				) }
+				)}
 			</Button>
 		</div>
 	);
 };
 
-const Edit = ( {
+const Edit = ({
 	clientId,
 	attributes,
 	setAttributes,
-}: BlockEditProps< Attributes > ) => {
+}: BlockEditProps<Attributes>) => {
 	const blockProps = useBlockProps();
 	const { __unstableMarkNextChangeAsNotPersistent } =
-		useDispatch( blockEditorStore );
-	const { currentPostId } = useSelect( ( sel ) => {
+		useDispatch(blockEditorStore);
+	const { currentPostId } = useSelect((sel) => {
 		return {
-			currentPostId: sel( CORE_EDITOR_STORE )?.getCurrentPostId?.() ?? 0,
+			currentPostId: sel(CORE_EDITOR_STORE)?.getCurrentPostId?.() ?? 0,
 		};
-	}, [] );
+	}, []);
 
-	const template = useEntityRecord(
-		'postType',
-		'wp_template',
-		currentPostId
-	);
+	const template = useEntityRecord('postType', 'wp_template', currentPostId);
 
 	const templateSlug = template.record?.slug as string;
 
-	const templateDetails = getTemplateDetailsBySlug( templateSlug, TEMPLATES );
+	const templateDetails = getTemplateDetailsBySlug(templateSlug, TEMPLATES);
 
 	const templateTitle =
 		template.record?.title.rendered?.toLowerCase() ?? attributes.template;
 	const templatePlaceholder = templateDetails?.placeholder ?? 'fallback';
 	const templateType = templateDetails?.type ?? 'fallback';
 
-	useEffect( () => {
+	useEffect(() => {
 		const nextTemplate = templateSlug ?? attributes.template;
 		const nextAlign = attributes.align ?? 'wide';
 
@@ -213,10 +205,10 @@ const Edit = ( {
 			nextAlign !== attributes.align
 		) {
 			__unstableMarkNextChangeAsNotPersistent();
-			setAttributes( {
+			setAttributes({
 				template: nextTemplate,
 				align: nextAlign,
-			} );
+			});
 		}
 	}, [
 		attributes.align,
@@ -224,83 +216,75 @@ const Edit = ( {
 		setAttributes,
 		templateSlug,
 		__unstableMarkNextChangeAsNotPersistent,
-	] );
+	]);
 
 	const { getDescription, getSkeleton, blockifyConfig } =
-		conversionConfig[ templateType ];
+		conversionConfig[templateType];
 
 	const skeleton = getSkeleton ? (
 		getSkeleton()
 	) : (
 		<img
 			className="wp-block-woocommerce-classic-template__placeholder-image"
-			src={ `${ WC_BLOCKS_IMAGE_URL }template-placeholders/${ templatePlaceholder }.svg` }
-			alt={ templateTitle }
+			src={`${WC_BLOCKS_IMAGE_URL}template-placeholders/${templatePlaceholder}.svg`}
+			alt={templateTitle}
 		/>
 	);
 
-	const canConvert = !! templateDetails?.type;
-	const placeholderDescription = getDescription( templateTitle );
+	const canConvert = !!templateDetails?.type;
+	const placeholderDescription = getDescription(templateTitle);
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<Placeholder className="wp-block-woocommerce-classic-template__placeholder">
 				<div className="wp-block-woocommerce-classic-template__placeholder-wireframe">
-					{ skeleton }
+					{skeleton}
 				</div>
 				<div className="wp-block-woocommerce-classic-template__placeholder-copy">
 					<div className="wp-block-woocommerce-classic-template__placeholder-copy__icon-container">
-						<h1>{ __( 'WooCommerce', 'woocommerce' ) }</h1>
+						<h1>{__('WooCommerce', 'woocommerce')}</h1>
 						<span>
-							{ __(
-								'Classic Template Placeholder',
-								'woocommerce'
-							) }
+							{__('Classic Template Placeholder', 'woocommerce')}
 						</span>
 					</div>
-					{ canConvert && (
+					{canConvert && (
 						<p
-							dangerouslySetInnerHTML={ {
+							dangerouslySetInnerHTML={{
 								__html: placeholderDescription,
-							} }
+							}}
 						/>
-					) }
+					)}
 					<p>
-						{ __(
+						{__(
 							'You cannot edit the content of this block. However, you can move it and place other blocks around it.',
 							'woocommerce'
-						) }
+						)}
 					</p>
-					{ canConvert && blockifyConfig && (
+					{canConvert && blockifyConfig && (
 						<ConvertTemplate
-							clientId={ clientId }
-							blockifyConfig={ blockifyConfig }
-							attributes={ attributes }
+							clientId={clientId}
+							blockifyConfig={blockifyConfig}
+							attributes={attributes}
 						/>
-					) }
+					)}
 				</div>
 			</Placeholder>
 		</div>
 	);
 };
 
-registerBlockType( BLOCK_SLUG, {
-	title: __( 'WooCommerce Classic Template', 'woocommerce' ),
-	icon: (
-		<Icon icon={ box } className="wc-block-editor-components-block-icon" />
-	),
+registerBlockType(BLOCK_SLUG, {
+	title: __('WooCommerce Classic Template', 'woocommerce'),
+	icon: <Icon icon={box} className="wc-block-editor-components-block-icon" />,
 	category: 'woocommerce',
 	apiVersion: 3,
-	keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
-	description: __(
-		'Renders classic WooCommerce PHP template.',
-		'woocommerce'
-	),
+	keywords: [__('WooCommerce', 'woocommerce')],
+	description: __('Renders classic WooCommerce PHP template.', 'woocommerce'),
 	supports: {
 		interactivity: {
 			clientNavigation: false,
 		},
-		align: [ 'wide', 'full' ],
+		align: ['wide', 'full'],
 		html: false,
 		multiple: false,
 		reusable: false,
@@ -319,18 +303,18 @@ registerBlockType( BLOCK_SLUG, {
 			default: 'wide',
 		},
 	},
-	edit: ( {
+	edit: ({
 		attributes,
 		clientId,
 		setAttributes,
-	}: BlockEditProps< Attributes > ) => {
+	}: BlockEditProps<Attributes>) => {
 		return (
 			<Edit
-				attributes={ attributes }
-				setAttributes={ setAttributes }
-				clientId={ clientId }
+				attributes={attributes}
+				setAttributes={setAttributes}
+				clientId={clientId}
 			/>
 		);
 	},
 	save: () => null,
-} );
+});

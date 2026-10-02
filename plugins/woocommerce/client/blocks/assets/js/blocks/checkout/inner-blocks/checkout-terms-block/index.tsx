@@ -11,17 +11,17 @@ import { Edit, Save } from './edit';
 import metadata from './block.json';
 import './style.scss';
 
-registerBlockType( 'woocommerce/checkout-terms-block', {
+registerBlockType('woocommerce/checkout-terms-block', {
 	apiVersion: metadata.apiVersion,
 	title: metadata.title,
 	icon: {
 		src: (
 			<Icon
-				icon={ customPostType }
+				icon={customPostType}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
 	},
 	edit: Edit,
 	save: Save,
-} );
+});

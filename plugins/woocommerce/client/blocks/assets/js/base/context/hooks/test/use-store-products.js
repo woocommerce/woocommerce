@@ -10,16 +10,16 @@ import { COLLECTIONS_STORE_KEY as storeKey } from '@woocommerce/block-data';
  */
 import { useStoreProducts } from '../use-store-products';
 
-jest.mock( '@woocommerce/block-data', () => ( {
+jest.mock('@woocommerce/block-data', () => ({
 	__esModule: true,
 	COLLECTIONS_STORE_KEY: 'test/store',
-} ) );
+}));
 
-describe( 'useStoreProducts', () => {
+describe('useStoreProducts', () => {
 	let registry, mocks;
 
-	const wrapper = ( { children } ) => (
-		<RegistryProvider value={ registry }>{ children }</RegistryProvider>
+	const wrapper = ({ children }) => (
+		<RegistryProvider value={registry}>{children}</RegistryProvider>
 	);
 
 	const setUpMocks = () => {
@@ -30,57 +30,57 @@ describe( 'useStoreProducts', () => {
 		// unchanged; the previous `() => ({ foo: 'bar' })` mock returned a
 		// fresh object every call, which wp-data correctly flagged.
 		const collectionCache = new Map();
-		const getCollection = jest.fn().mockImplementation( ( ...args ) => {
-			const key = JSON.stringify( args );
-			if ( ! collectionCache.has( key ) ) {
-				collectionCache.set( key, { foo: 'bar' } );
+		const getCollection = jest.fn().mockImplementation((...args) => {
+			const key = JSON.stringify(args);
+			if (!collectionCache.has(key)) {
+				collectionCache.set(key, { foo: 'bar' });
 			}
-			return collectionCache.get( key );
-		} );
+			return collectionCache.get(key);
+		});
 		mocks = {
 			selectors: {
-				getCollectionError: jest.fn().mockReturnValue( false ),
+				getCollectionError: jest.fn().mockReturnValue(false),
 				getCollection,
-				getCollectionHeader: jest.fn().mockReturnValue( 22 ),
-				hasFinishedResolution: jest.fn().mockReturnValue( true ),
+				getCollectionHeader: jest.fn().mockReturnValue(22),
+				hasFinishedResolution: jest.fn().mockReturnValue(true),
 			},
 		};
-		registry.registerStore( storeKey, {
-			reducer: () => ( {} ),
+		registry.registerStore(storeKey, {
+			reducer: () => ({}),
 			selectors: mocks.selectors,
-		} );
+		});
 	};
 
-	beforeEach( () => {
+	beforeEach(() => {
 		registry = createRegistry();
 		mocks = {};
 		setUpMocks();
-	} );
+	});
 	it(
 		'should return expected behaviour for equivalent query on props ' +
 			'across renders',
 		() => {
 			const { result, rerender, unmount } = renderHook(
-				( { query } ) => useStoreProducts( query ),
+				({ query }) => useStoreProducts(query),
 				{ initialProps: { query: { bar: 'foo' } }, wrapper }
 			);
 			const { products } = result.current;
 			// rerender
-			rerender( { query: { bar: 'foo' } } );
+			rerender({ query: { bar: 'foo' } });
 			// re-render should result in same products object because although
 			// query-state is a different instance, it's still equivalent.
 			const { products: newProducts } = result.current;
-			expect( newProducts ).toBe( products );
+			expect(newProducts).toBe(products);
 			// now let's change the query passed through to verify new object
 			// is created.
 			// remember this won't actually change the results because the mock
 			// selector is returning an equivalent object when it is called,
 			// however it SHOULD be a new object instance.
-			rerender( { query: { foo: 'bar' } } );
+			rerender({ query: { foo: 'bar' } });
 			const { products: productsVerification } = result.current;
-			expect( productsVerification ).not.toBe( products );
-			expect( productsVerification ).toEqual( products );
+			expect(productsVerification).not.toBe(products);
+			expect(productsVerification).toEqual(products);
 			unmount();
 		}
 	);
-} );
+});

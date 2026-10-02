@@ -11,7 +11,7 @@ import { Button } from '@wordpress/components';
 import { SettingsSection } from '../shared-components';
 import { useSettingsContext } from './settings-context';
 
-const SaveSectionWrapper = styled( SettingsSection )`
+const SaveSectionWrapper = styled(SettingsSection)`
 	text-align: right;
 	padding-top: 0;
 	margin-top: 0;
@@ -21,23 +21,23 @@ const SaveSettings = () => {
 	const { isSaving, save, isDirty } = useSettingsContext();
 
 	return (
-		<SaveSectionWrapper className={ 'submit' }>
+		<SaveSectionWrapper className={'submit'}>
 			<Button
 				variant="primary"
-				isBusy={ isSaving }
-				disabled={ isSaving || ! isDirty }
-				onClick={ (
-					event: React.MouseEvent< HTMLButtonElement, MouseEvent >
+				isBusy={isSaving}
+				disabled={isSaving || !isDirty}
+				onClick={(
+					event: React.MouseEvent<HTMLButtonElement, MouseEvent>
 				) => {
 					event.preventDefault();
 					const target = event.target as HTMLButtonElement;
-					if ( target?.form?.reportValidity() ) {
+					if (target?.form?.reportValidity()) {
 						save();
 					}
-				} }
+				}}
 				type="submit"
 			>
-				{ __( 'Save changes', 'woocommerce' ) }
+				{__('Save changes', 'woocommerce')}
 			</Button>
 		</SaveSectionWrapper>
 	);

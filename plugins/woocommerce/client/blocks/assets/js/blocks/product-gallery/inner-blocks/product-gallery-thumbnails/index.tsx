@@ -11,10 +11,10 @@ import { Edit } from './edit';
 import metadata from './block.json';
 
 // @ts-expect-error: `metadata` currently does not have a type definition in WordPress core
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	icon,
 	edit: Edit,
 	save() {
 		return null;
 	},
-} );
+});

@@ -11,19 +11,19 @@ import { recordEvent } from '@woocommerce/tracks';
 import { BusinessInfo } from '../BusinessInfo';
 import { CoreProfilerStateMachineContext } from '../..';
 
-jest.mock( '@woocommerce/tracks', () => ( {
-	...jest.requireActual( '@woocommerce/tracks' ),
+jest.mock('@woocommerce/tracks', () => ({
+	...jest.requireActual('@woocommerce/tracks'),
 	recordEvent: jest.fn(),
-} ) );
+}));
 
-describe( 'BusinessInfo', () => {
+describe('BusinessInfo', () => {
 	let props: {
 		sendEvent: jest.Mock;
 		navigationProgress: number;
 		context: CoreProfilerStateMachineContext;
 	};
 
-	beforeEach( () => {
+	beforeEach(() => {
 		props = {
 			sendEvent: jest.fn(),
 			navigationProgress: 0,
@@ -49,41 +49,39 @@ describe( 'BusinessInfo', () => {
 				// @ts-expect-error -- we don't need the other props in the tests
 				onboardingProfile: {
 					is_store_country_set: false,
-					industry: [ 'other' ],
+					industry: ['other'],
 				},
 			},
 		};
-	} );
+	});
 
-	it( 'should render business info page', () => {
-		render( <BusinessInfo { ...props } /> );
+	it('should render business info page', () => {
+		render(<BusinessInfo {...props} />);
 		expect(
-			screen.getByText( /Tell us a bit about your store/i, {
+			screen.getByText(/Tell us a bit about your store/i, {
 				selector: 'h1',
-			} )
+			})
 		).toBeInTheDocument();
 
+		expect(screen.getByText(/Give your store a name/i)).toBeInTheDocument();
+
 		expect(
-			screen.getByText( /Give your store a name/i )
+			screen.getByText(/Where is your store located?/i)
 		).toBeInTheDocument();
 
-		expect(
-			screen.getByText( /Where is your store located?/i )
-		).toBeInTheDocument();
-
-		expect( screen.getByText( /Your email address/i ) ).toBeInTheDocument();
+		expect(screen.getByText(/Your email address/i)).toBeInTheDocument();
 
 		expect(
-			screen.getByRole( 'button', {
+			screen.getByRole('button', {
 				name: /Continue/i,
-			} )
+			})
 		).toBeInTheDocument();
-	} );
+	});
 
-	it( 'should show the correct label for each businessChoice', () => {
+	it('should show the correct label for each businessChoice', () => {
 		props.context.userProfile.businessChoice =
 			'im_just_starting_my_business';
-		render( <BusinessInfo { ...props } /> );
+		render(<BusinessInfo {...props} />);
 		expect(
 			screen.getByText(
 				/What type of products or services do you plan to sell?/i
@@ -91,20 +89,20 @@ describe( 'BusinessInfo', () => {
 		).toBeInTheDocument();
 
 		props.context.userProfile.businessChoice = 'im_already_selling';
-		render( <BusinessInfo { ...props } /> );
+		render(<BusinessInfo {...props} />);
 		expect(
-			screen.getByText( /Which industry is your business in?/i )
+			screen.getByText(/Which industry is your business in?/i)
 		).toBeInTheDocument();
 
 		props.context.userProfile.businessChoice =
 			'im_setting_up_a_store_for_a_client';
-		render( <BusinessInfo { ...props } /> );
+		render(<BusinessInfo {...props} />);
 		expect(
-			screen.getByText( /Which industry is your client’s business in?/i )
+			screen.getByText(/Which industry is your client’s business in?/i)
 		).toBeInTheDocument();
-	} );
+	});
 
-	it( 'should prepopulate the store country selector if geolocation is available', () => {
+	it('should prepopulate the store country selector if geolocation is available', () => {
 		props.context.geolocatedLocation = {
 			latitude: '-37.83961',
 			longitude: '144.94228',
@@ -113,55 +111,55 @@ describe( 'BusinessInfo', () => {
 			region: 'Victoria',
 			city: 'Port Melbourne',
 		};
-		render( <BusinessInfo { ...props } /> );
+		render(<BusinessInfo {...props} />);
 		expect(
-			screen.getByRole( 'combobox', {
+			screen.getByRole('combobox', {
 				name: '', // unfortunately the SelectControl loses its name when its populated and there's no other unique identifier
-			} )
-		).toHaveValue( 'Australia — Victoria' );
-	} );
+			})
+		).toHaveValue('Australia — Victoria');
+	});
 
-	it( 'should not prepopulate the store country selector if geolocation is not available', () => {
-		render( <BusinessInfo { ...props } /> );
+	it('should not prepopulate the store country selector if geolocation is not available', () => {
+		render(<BusinessInfo {...props} />);
 		expect(
-			screen.getByRole( 'combobox', {
+			screen.getByRole('combobox', {
 				name: /Select country\/region/i,
-			} )
-		).toHaveValue( '' );
-	} );
+			})
+		).toHaveValue('');
+	});
 
-	it( 'should correctly prepopulate the store name if it is passed in', () => {
+	it('should correctly prepopulate the store name if it is passed in', () => {
 		props.context.businessInfo.storeName = 'Test Store Name';
-		render( <BusinessInfo { ...props } /> );
+		render(<BusinessInfo {...props} />);
 		expect(
-			screen.getByRole( 'textbox', {
+			screen.getByRole('textbox', {
 				name: /Give your store a name/i,
-			} )
-		).toHaveValue( 'Test Store Name' );
-	} );
+			})
+		).toHaveValue('Test Store Name');
+	});
 
-	it( 'should correctly prepopulate the industry if it is passed in', () => {
-		props.context.onboardingProfile.industry = [ 'food_and_drink' ];
-		render( <BusinessInfo { ...props } /> );
+	it('should correctly prepopulate the industry if it is passed in', () => {
+		props.context.onboardingProfile.industry = ['food_and_drink'];
+		render(<BusinessInfo {...props} />);
 		expect(
-			screen.getByRole( 'combobox', {
+			screen.getByRole('combobox', {
 				name: /Select an industry/i,
-			} )
-		).toHaveValue( 'Food and drink' );
-	} );
+			})
+		).toHaveValue('Food and drink');
+	});
 
-	it( 'should correctly prepopulate the store location if it is passed in', () => {
+	it('should correctly prepopulate the store location if it is passed in', () => {
 		props.context.businessInfo.location = 'AW';
 		props.context.onboardingProfile.is_store_country_set = true;
-		render( <BusinessInfo { ...props } /> );
+		render(<BusinessInfo {...props} />);
 		expect(
-			screen.getByRole( 'combobox', {
+			screen.getByRole('combobox', {
 				name: '',
-			} )
-		).toHaveValue( 'Aruba' );
-	} );
+			})
+		).toHaveValue('Aruba');
+	});
 
-	it( 'should correctly send event with empty form inputs when continue is clicked', () => {
+	it('should correctly send event with empty form inputs when continue is clicked', () => {
 		props.context.geolocatedLocation = {
 			latitude: '-37.83961',
 			longitude: '144.94228',
@@ -170,12 +168,12 @@ describe( 'BusinessInfo', () => {
 			region: 'Victoria',
 			city: 'Port Melbourne',
 		};
-		render( <BusinessInfo { ...props } /> );
-		const continueButton = screen.getByRole( 'button', {
+		render(<BusinessInfo {...props} />);
+		const continueButton = screen.getByRole('button', {
 			name: /Continue/i,
-		} );
-		userEvent.click( continueButton );
-		expect( props.sendEvent ).toHaveBeenCalledWith( {
+		});
+		userEvent.click(continueButton);
+		expect(props.sendEvent).toHaveBeenCalledWith({
 			payload: {
 				geolocationOverruled: false,
 				industry: 'other',
@@ -185,10 +183,10 @@ describe( 'BusinessInfo', () => {
 				storeEmailAddress: '',
 			},
 			type: 'BUSINESS_INFO_COMPLETED',
-		} );
-	} );
+		});
+	});
 
-	it( 'should show the warning tooltip if geolocation is available and the user has manually changed the country, and send the event with geolocationOverruled', async () => {
+	it('should show the warning tooltip if geolocation is available and the user has manually changed the country, and send the event with geolocationOverruled', async () => {
 		props.context.geolocatedLocation = {
 			latitude: '-37.83961',
 			longitude: '144.94228',
@@ -197,25 +195,25 @@ describe( 'BusinessInfo', () => {
 			region: 'Victoria',
 			city: 'Port Melbourne',
 		};
-		render( <BusinessInfo { ...props } /> );
-		const countrySelector = screen.getByRole( 'combobox', {
+		render(<BusinessInfo {...props} />);
+		const countrySelector = screen.getByRole('combobox', {
 			name: '',
-		} );
+		});
 
 		countrySelector.focus();
 
-		await waitFor( () => {
+		await waitFor(() => {
 			expect(
-				screen.getByRole( 'option', {
+				screen.getByRole('option', {
 					name: /Aruba/i,
-				} )
+				})
 			).toBeInTheDocument();
-		} );
+		});
 
 		await userEvent.click(
-			screen.getByRole( 'option', {
+			screen.getByRole('option', {
 				name: /Aruba/i,
-			} )
+			})
 		);
 
 		expect(
@@ -224,11 +222,11 @@ describe( 'BusinessInfo', () => {
 			)
 		).toBeInTheDocument();
 
-		const continueButton = screen.getByRole( 'button', {
+		const continueButton = screen.getByRole('button', {
 			name: /Continue/i,
-		} );
-		userEvent.click( continueButton );
-		expect( props.sendEvent ).toHaveBeenCalledWith( {
+		});
+		userEvent.click(continueButton);
+		expect(props.sendEvent).toHaveBeenCalledWith({
 			payload: {
 				geolocationOverruled: true,
 				industry: 'other',
@@ -238,10 +236,10 @@ describe( 'BusinessInfo', () => {
 				storeEmailAddress: '',
 			},
 			type: 'BUSINESS_INFO_COMPLETED',
-		} );
-	} );
+		});
+	});
 
-	it( 'should correctly send event with inputs filled in a fresh form when continue is clicked', async () => {
+	it('should correctly send event with inputs filled in a fresh form when continue is clicked', async () => {
 		props.context.geolocatedLocation = {
 			latitude: '-37.83961',
 			longitude: '144.94228',
@@ -250,36 +248,36 @@ describe( 'BusinessInfo', () => {
 			region: 'Victoria',
 			city: 'Port Melbourne',
 		};
-		render( <BusinessInfo { ...props } /> );
-		const storeNameInput = screen.getByRole( 'textbox', {
+		render(<BusinessInfo {...props} />);
+		const storeNameInput = screen.getByRole('textbox', {
 			name: /Give your store a name/i,
-		} );
-		userEvent.type( storeNameInput, 'Test Store Name' );
-		const industrySelector = screen.getByRole( 'combobox', {
+		});
+		userEvent.type(storeNameInput, 'Test Store Name');
+		const industrySelector = screen.getByRole('combobox', {
 			name: /Select an industry/i,
-		} );
+		});
 
 		industrySelector.focus();
 
-		await waitFor( () => {
+		await waitFor(() => {
 			expect(
-				screen.getByRole( 'option', {
+				screen.getByRole('option', {
 					name: /Food and drink/i,
-				} )
+				})
 			).toBeInTheDocument();
-		} );
+		});
 
 		await userEvent.click(
-			screen.getByRole( 'option', {
+			screen.getByRole('option', {
 				name: /Food and drink/i,
-			} )
+			})
 		);
 
-		const continueButton = screen.getByRole( 'button', {
+		const continueButton = screen.getByRole('button', {
 			name: /Continue/i,
-		} );
-		userEvent.click( continueButton );
-		expect( props.sendEvent ).toHaveBeenCalledWith( {
+		});
+		userEvent.click(continueButton);
+		expect(props.sendEvent).toHaveBeenCalledWith({
 			payload: {
 				geolocationOverruled: false,
 				industry: 'food_and_drink',
@@ -289,10 +287,10 @@ describe( 'BusinessInfo', () => {
 				storeEmailAddress: '',
 			},
 			type: 'BUSINESS_INFO_COMPLETED',
-		} );
-	} );
+		});
+	});
 
-	it( 'should send the event with the correct values if the form has been pre-filled from context', () => {
+	it('should send the event with the correct values if the form has been pre-filled from context', () => {
 		props.context.geolocatedLocation = {
 			latitude: '-37.83961',
 			longitude: '144.94228',
@@ -301,15 +299,15 @@ describe( 'BusinessInfo', () => {
 			region: 'Victoria',
 			city: 'Port Melbourne',
 		};
-		props.context.onboardingProfile.industry = [ 'food_and_drink' ];
+		props.context.onboardingProfile.industry = ['food_and_drink'];
 		props.context.businessInfo.storeName = 'Test Store Name';
 		props.context.businessInfo.location = 'AU:VIC';
-		render( <BusinessInfo { ...props } /> );
-		const continueButton = screen.getByRole( 'button', {
+		render(<BusinessInfo {...props} />);
+		const continueButton = screen.getByRole('button', {
 			name: /Continue/i,
-		} );
-		userEvent.click( continueButton );
-		expect( props.sendEvent ).toHaveBeenCalledWith( {
+		});
+		userEvent.click(continueButton);
+		expect(props.sendEvent).toHaveBeenCalledWith({
 			payload: {
 				geolocationOverruled: false,
 				industry: 'food_and_drink',
@@ -319,51 +317,51 @@ describe( 'BusinessInfo', () => {
 				storeEmailAddress: '',
 			},
 			type: 'BUSINESS_INFO_COMPLETED',
-		} );
-	} );
+		});
+	});
 
-	describe( 'business info page, email marketing opt-in', () => {
-		it( 'should not disable the continue field when opt in checkbox is not checked and email field is empty', () => {
+	describe('business info page, email marketing opt-in', () => {
+		it('should not disable the continue field when opt in checkbox is not checked and email field is empty', () => {
 			props.context.businessInfo.location = 'AW';
 			props.context.onboardingProfile.is_store_country_set = true;
-			render( <BusinessInfo { ...props } /> );
-			const continueButton = screen.getByRole( 'button', {
+			render(<BusinessInfo {...props} />);
+			const continueButton = screen.getByRole('button', {
 				name: /Continue/i,
-			} );
-			expect( continueButton ).not.toBeDisabled();
-		} );
+			});
+			expect(continueButton).not.toBeDisabled();
+		});
 
-		it( 'should disable the continue field when opt in checkbox is checked and email field is empty', () => {
+		it('should disable the continue field when opt in checkbox is checked and email field is empty', () => {
 			props.context.businessInfo.location = 'AW';
 			props.context.onboardingProfile.is_store_country_set = true;
-			render( <BusinessInfo { ...props } /> );
-			const checkbox = screen.getByRole( 'checkbox', {
+			render(<BusinessInfo {...props} />);
+			const checkbox = screen.getByRole('checkbox', {
 				name: /Get tips, discounts, and recommendations from Woo./i,
-			} );
-			userEvent.click( checkbox );
-			const continueButton = screen.getByRole( 'button', {
+			});
+			userEvent.click(checkbox);
+			const continueButton = screen.getByRole('button', {
 				name: /Continue/i,
-			} );
-			expect( continueButton ).toBeDisabled();
-		} );
+			});
+			expect(continueButton).toBeDisabled();
+		});
 
-		it( 'should correctly send event with opt-in true when opt in checkbox is checked and email field is filled', () => {
+		it('should correctly send event with opt-in true when opt in checkbox is checked and email field is filled', () => {
 			props.context.businessInfo.location = 'AW';
 			props.context.onboardingProfile.is_store_country_set = true;
-			render( <BusinessInfo { ...props } /> );
-			const checkbox = screen.getByRole( 'checkbox', {
+			render(<BusinessInfo {...props} />);
+			const checkbox = screen.getByRole('checkbox', {
 				name: /Get tips, discounts, and recommendations from Woo./i,
-			} );
-			userEvent.click( checkbox );
-			const emailInput = screen.getByRole( 'textbox', {
+			});
+			userEvent.click(checkbox);
+			const emailInput = screen.getByRole('textbox', {
 				name: /Your email address/i,
-			} );
-			userEvent.type( emailInput, 'wordpress@automattic.com' );
-			const continueButton = screen.getByRole( 'button', {
+			});
+			userEvent.type(emailInput, 'wordpress@automattic.com');
+			const continueButton = screen.getByRole('button', {
 				name: /Continue/i,
-			} );
-			userEvent.click( continueButton );
-			expect( props.sendEvent ).toHaveBeenCalledWith( {
+			});
+			userEvent.click(continueButton);
+			expect(props.sendEvent).toHaveBeenCalledWith({
 				payload: {
 					geolocationOverruled: false,
 					industry: 'other',
@@ -373,185 +371,185 @@ describe( 'BusinessInfo', () => {
 					storeEmailAddress: 'wordpress@automattic.com',
 				},
 				type: 'BUSINESS_INFO_COMPLETED',
-			} );
-		} );
+			});
+		});
 
-		it( 'should correctly prepopulate the email field if populated in the onboarding profile', () => {
+		it('should correctly prepopulate the email field if populated in the onboarding profile', () => {
 			props.context.onboardingProfile.store_email =
 				'wordpress@automattic.com';
-			render( <BusinessInfo { ...props } /> );
-			const emailInput = screen.getByRole( 'textbox', {
+			render(<BusinessInfo {...props} />);
+			const emailInput = screen.getByRole('textbox', {
 				name: /Your email address/i,
-			} );
-			expect( emailInput ).toHaveValue( 'wordpress@automattic.com' );
-		} );
+			});
+			expect(emailInput).toHaveValue('wordpress@automattic.com');
+		});
 
-		it( 'should correctly prepopulate the email field if populated in the current user', () => {
+		it('should correctly prepopulate the email field if populated in the current user', () => {
 			props.context.currentUserEmail = 'currentUser@automattic.com';
-			render( <BusinessInfo { ...props } /> );
-			const emailInput = screen.getByRole( 'textbox', {
+			render(<BusinessInfo {...props} />);
+			const emailInput = screen.getByRole('textbox', {
 				name: /Your email address/i,
-			} );
-			expect( emailInput ).toHaveValue( 'currentUser@automattic.com' );
-		} );
+			});
+			expect(emailInput).toHaveValue('currentUser@automattic.com');
+		});
 
-		it( 'should correctly favor the onboarding profile email over the current user email', () => {
+		it('should correctly favor the onboarding profile email over the current user email', () => {
 			props.context.currentUserEmail = 'currentUser@automattic.com';
 			props.context.onboardingProfile.store_email =
 				'wordpress@automattic.com';
-			render( <BusinessInfo { ...props } /> );
-			const emailInput = screen.getByRole( 'textbox', {
+			render(<BusinessInfo {...props} />);
+			const emailInput = screen.getByRole('textbox', {
 				name: /Your email address/i,
-			} );
-			expect( emailInput ).toHaveValue( 'wordpress@automattic.com' );
-		} );
+			});
+			expect(emailInput).toHaveValue('wordpress@automattic.com');
+		});
 
-		it( 'should not show an error for invalid email if isOptInMarketing is false', () => {
+		it('should not show an error for invalid email if isOptInMarketing is false', () => {
 			props.context.businessInfo.location = 'AW';
-			render( <BusinessInfo { ...props } /> );
-			const emailInput = screen.getByRole( 'textbox', {
+			render(<BusinessInfo {...props} />);
+			const emailInput = screen.getByRole('textbox', {
 				name: /Your email address/i,
-			} );
-			userEvent.type( emailInput, 'invalid email' );
+			});
+			userEvent.type(emailInput, 'invalid email');
 			expect(
-				screen.queryByText( /This email is not valid./i )
+				screen.queryByText(/This email is not valid./i)
 			).not.toBeInTheDocument();
-		} );
+		});
 
-		it( 'should validate the email field when isOptInMarketing is true', () => {
+		it('should validate the email field when isOptInMarketing is true', () => {
 			props.context.businessInfo.location = 'AW';
-			render( <BusinessInfo { ...props } /> );
-			const checkbox = screen.getByRole( 'checkbox', {
+			render(<BusinessInfo {...props} />);
+			const checkbox = screen.getByRole('checkbox', {
 				name: /Get tips, discounts, and recommendations from Woo./i,
-			} );
-			userEvent.click( checkbox );
-			const emailInput = screen.getByRole( 'textbox', {
+			});
+			userEvent.click(checkbox);
+			const emailInput = screen.getByRole('textbox', {
 				name: /Your email address/i,
-			} );
-			userEvent.type( emailInput, 'invalid email' );
+			});
+			userEvent.type(emailInput, 'invalid email');
 			expect(
-				screen.getByText( /This email is not valid./i )
+				screen.getByText(/This email is not valid./i)
 			).toBeInTheDocument();
-		} );
+		});
 
-		it( 'should not show an error for invalid email if isOptInMarketing is true and email is valid', () => {
+		it('should not show an error for invalid email if isOptInMarketing is true and email is valid', () => {
 			props.context.businessInfo.location = 'AW';
-			render( <BusinessInfo { ...props } /> );
-			const checkbox = screen.getByRole( 'checkbox', {
+			render(<BusinessInfo {...props} />);
+			const checkbox = screen.getByRole('checkbox', {
 				name: /Get tips, discounts, and recommendations from Woo./i,
-			} );
-			userEvent.click( checkbox );
-			const emailInput = screen.getByRole( 'textbox', {
+			});
+			userEvent.click(checkbox);
+			const emailInput = screen.getByRole('textbox', {
 				name: /Your email address/i,
-			} );
-			userEvent.type( emailInput, 'valid@email.com' );
-		} );
+			});
+			userEvent.type(emailInput, 'valid@email.com');
+		});
 
-		it( 'should show an error for invalid email if isOptInMarketing is checked after the invalid email has already been filled out', () => {
+		it('should show an error for invalid email if isOptInMarketing is checked after the invalid email has already been filled out', () => {
 			props.context.businessInfo.location = 'AW';
-			render( <BusinessInfo { ...props } /> );
+			render(<BusinessInfo {...props} />);
 			expect(
-				screen.queryByText( /This email is not valid./i )
+				screen.queryByText(/This email is not valid./i)
 			).not.toBeInTheDocument();
-			const emailInput = screen.getByRole( 'textbox', {
+			const emailInput = screen.getByRole('textbox', {
 				name: /Your email address/i,
-			} );
-			userEvent.type( emailInput, 'invalid email' );
-			const checkbox = screen.getByRole( 'checkbox', {
+			});
+			userEvent.type(emailInput, 'invalid email');
+			const checkbox = screen.getByRole('checkbox', {
 				name: /Get tips, discounts, and recommendations from Woo./i,
-			} );
-			userEvent.click( checkbox );
+			});
+			userEvent.click(checkbox);
 			expect(
-				screen.getByText( /This email is not valid./i )
+				screen.getByText(/This email is not valid./i)
 			).toBeInTheDocument();
-		} );
+		});
 
-		it( 'should hide the error after the invalid email has been corrected', () => {
+		it('should hide the error after the invalid email has been corrected', () => {
 			props.context.businessInfo.location = 'AW';
-			render( <BusinessInfo { ...props } /> );
-			const checkbox = screen.getByRole( 'checkbox', {
+			render(<BusinessInfo {...props} />);
+			const checkbox = screen.getByRole('checkbox', {
 				name: /Get tips, discounts, and recommendations from Woo./i,
-			} );
-			userEvent.click( checkbox );
-			const emailInput = screen.getByRole( 'textbox', {
+			});
+			userEvent.click(checkbox);
+			const emailInput = screen.getByRole('textbox', {
 				name: /Your email address/i,
-			} );
-			userEvent.type( emailInput, 'invalid email' );
+			});
+			userEvent.type(emailInput, 'invalid email');
 			expect(
-				screen.getByText( /This email is not valid./i )
+				screen.getByText(/This email is not valid./i)
 			).toBeInTheDocument();
-			userEvent.clear( emailInput );
-			userEvent.type( emailInput, 'valid@email.com' );
+			userEvent.clear(emailInput);
+			userEvent.type(emailInput, 'valid@email.com');
 			expect(
-				screen.queryByText( /This email is not valid./i )
+				screen.queryByText(/This email is not valid./i)
 			).not.toBeInTheDocument();
-		} );
+		});
 
-		it( 'should not allow the continue button to be pressed if email is invalid and isOptInMarketing is checked', () => {
+		it('should not allow the continue button to be pressed if email is invalid and isOptInMarketing is checked', () => {
 			props.context.businessInfo.location = 'AW';
-			render( <BusinessInfo { ...props } /> );
-			const checkbox = screen.getByRole( 'checkbox', {
+			render(<BusinessInfo {...props} />);
+			const checkbox = screen.getByRole('checkbox', {
 				name: /Get tips, discounts, and recommendations from Woo./i,
-			} );
-			userEvent.click( checkbox );
-			const emailInput = screen.getByRole( 'textbox', {
+			});
+			userEvent.click(checkbox);
+			const emailInput = screen.getByRole('textbox', {
 				name: /Your email address/i,
-			} );
-			userEvent.type( emailInput, 'invalid email' );
-			const continueButton = screen.getByRole( 'button', {
+			});
+			userEvent.type(emailInput, 'invalid email');
+			const continueButton = screen.getByRole('button', {
 				name: /Continue/i,
-			} );
-			expect( continueButton ).toBeDisabled();
-		} );
+			});
+			expect(continueButton).toBeDisabled();
+		});
 
-		it( 'should allow the continue button to be pressed if email is invalid and isOptInMarketing is unchecked', () => {
+		it('should allow the continue button to be pressed if email is invalid and isOptInMarketing is unchecked', () => {
 			props.context.businessInfo.location = 'AW';
 			props.context.onboardingProfile.is_store_country_set = true;
 
-			render( <BusinessInfo { ...props } /> );
-			const emailInput = screen.getByRole( 'textbox', {
+			render(<BusinessInfo {...props} />);
+			const emailInput = screen.getByRole('textbox', {
 				name: /Your email address/i,
-			} );
+			});
 
-			userEvent.type( emailInput, 'invalid email' );
-			const continueButton = screen.getByRole( 'button', {
+			userEvent.type(emailInput, 'invalid email');
+			const continueButton = screen.getByRole('button', {
 				name: /Continue/i,
-			} );
-			expect( continueButton ).not.toBeDisabled();
-		} );
+			});
+			expect(continueButton).not.toBeDisabled();
+		});
 
-		it( 'should allow the continue button to be pressed if email is valid and isOptInMarketing is checked', () => {
+		it('should allow the continue button to be pressed if email is valid and isOptInMarketing is checked', () => {
 			props.context.businessInfo.location = 'AW';
 			props.context.onboardingProfile.is_store_country_set = true;
-			render( <BusinessInfo { ...props } /> );
-			const checkbox = screen.getByRole( 'checkbox', {
+			render(<BusinessInfo {...props} />);
+			const checkbox = screen.getByRole('checkbox', {
 				name: /Get tips, discounts, and recommendations from Woo./i,
-			} );
-			userEvent.click( checkbox );
-			const emailInput = screen.getByRole( 'textbox', {
+			});
+			userEvent.click(checkbox);
+			const emailInput = screen.getByRole('textbox', {
 				name: /Your email address/i,
-			} );
-			userEvent.type( emailInput, 'valid@email.com' );
-			const continueButton = screen.getByRole( 'button', {
+			});
+			userEvent.type(emailInput, 'valid@email.com');
+			const continueButton = screen.getByRole('button', {
 				name: /Continue/i,
-			} );
-			expect( continueButton ).not.toBeDisabled();
-		} );
+			});
+			expect(continueButton).not.toBeDisabled();
+		});
 
-		it( 'should link to the privacy policy and record a Tracks event when it is clicked', () => {
-			render( <BusinessInfo { ...props } /> );
-			const link = screen.getByRole( 'link', {
+		it('should link to the privacy policy and record a Tracks event when it is clicked', () => {
+			render(<BusinessInfo {...props} />);
+			const link = screen.getByRole('link', {
 				name: 'Privacy Policy (opens in a new tab)',
-			} );
-			expect( link ).toHaveAttribute(
+			});
+			expect(link).toHaveAttribute(
 				'href',
 				'https://automattic.com/privacy/'
 			);
-			userEvent.click( link );
-			expect( recordEvent ).toHaveBeenCalledWith(
+			userEvent.click(link);
+			expect(recordEvent).toHaveBeenCalledWith(
 				'coreprofiler_business_info_privacy_policy_click',
 				{}
 			);
-		} );
-	} );
-} );
+		});
+	});
+});

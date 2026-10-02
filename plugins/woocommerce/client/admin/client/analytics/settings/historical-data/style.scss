@@ -1,20 +1,22 @@
 .woocommerce-settings-historical-data__columns {
 	display: grid;
 	grid-column-gap: $gap-large;
-	grid-template-columns: calc(50% - #{math.div($gap-large, 2)}) calc(50% - #{math.div($gap-large, 2)});
+	grid-template-columns: calc(50% - #{math.div($gap-large, 2)}) calc(
+			50% - #{math.div($gap-large, 2)}
+		);
 
 	.woocommerce-settings-historical-data__column {
 		align-self: end;
 		margin-top: $gap-small;
 		// Auto-position fix for IE11.
-		@include set-grid-item-position( 2, 2 );
+		@include set-grid-item-position(2, 2);
 	}
 
-	@include breakpoint( "<960px" ) {
+	@include breakpoint("<960px") {
 		grid-template-columns: 100%;
 
 		.woocommerce-settings-historical-data__column {
-			@include set-grid-item-position( 1, 2 );
+			@include set-grid-item-position(1, 2);
 		}
 	}
 

@@ -18,7 +18,7 @@ export type PreformattedHtmlConfig = {
 // Bidi isolation (dir) and no-translate (translate) attributes wc_price()
 // puts on the currency symbol. Stripping them lets the bidi algorithm move
 // an RTL-script symbol to the wrong side of the amount.
-const CURRENCY_SYMBOL_ATTR = [ 'dir', 'translate' ] as const;
+const CURRENCY_SYMBOL_ATTR = ['dir', 'translate'] as const;
 
 // Covers what wc_price() (sale/discount markup, currency symbol) and product
 // element fields rendered by the product-elements `updateValue` callback emit.
@@ -99,8 +99,8 @@ export const swapPreformattedHtml = (
 	html: unknown,
 	config: PreformattedHtmlConfig
 ): void => {
-	if ( ! ref || typeof html !== 'string' ) {
+	if (!ref || typeof html !== 'string') {
 		return;
 	}
-	ref.innerHTML = sanitizeHTML( html, config );
+	ref.innerHTML = sanitizeHTML(html, config);
 };

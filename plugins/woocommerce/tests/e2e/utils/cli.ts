@@ -23,10 +23,10 @@ const wpCLI = async ( command: string | string[] ) => {
 				'cli',
 				'--',
 				...command,
-		  ] )
+			] )
 		: await execAsync(
 				`pnpm exec wp-env --config .wp-env.e2e.json run cli -- ${ command }`
-		  );
+			);
 
 	return { stdout, stderr };
 };

@@ -13,11 +13,11 @@ import attributes from './attributes';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore -- TypeScript expects some required properties which we already
 // registered in PHP.
-registerBlockType( 'woocommerce/mini-cart-cart-button-block', {
+registerBlockType('woocommerce/mini-cart-cart-button-block', {
 	icon: {
 		src: (
 			<Icon
-				icon={ button }
+				icon={button}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -25,4 +25,4 @@ registerBlockType( 'woocommerce/mini-cart-cart-button-block', {
 	attributes,
 	edit: Edit,
 	save: Save,
-} );
+});

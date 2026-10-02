@@ -15,7 +15,7 @@ import {
 // Drive `<QRDirectLoginCode />` from the tests by mocking its shared token
 // hook. The real component is rendered so we exercise the integration
 // surface of this page against the component we claim to reuse.
-jest.mock( '~/homescreen/mobile-app-modal/components/useQRLoginToken', () => {
+jest.mock('~/homescreen/mobile-app-modal/components/useQRLoginToken', () => {
 	const actual = jest.requireActual(
 		'~/homescreen/mobile-app-modal/components/useQRLoginToken'
 	);
@@ -23,7 +23,7 @@ jest.mock( '~/homescreen/mobile-app-modal/components/useQRLoginToken', () => {
 		...actual,
 		useQRLoginToken: jest.fn(),
 	};
-} );
+});
 
 // Short-circuit the up-front /qr-login-availability probe so these tests
 // reach the QR / error / expired states the assertions care about,
@@ -37,25 +37,25 @@ jest.mock(
 		);
 		return {
 			...actual,
-			useQRLoginAvailability: () => ( {
+			useQRLoginAvailability: () => ({
 				isLoading: false,
 				available: true,
 				reason: null,
-			} ),
+			}),
 		};
 	}
 );
 
 // Keep tests isolated from analytics side-effects.
-jest.mock( '@woocommerce/tracks', () => ( {
+jest.mock('@woocommerce/tracks', () => ({
 	recordEvent: jest.fn(),
-} ) );
+}));
 
 const mockedUseQRLoginToken = useQRLoginToken as jest.MockedFunction<
 	typeof useQRLoginToken
 >;
 
-const makeReadyState = () => ( {
+const makeReadyState = () => ({
 	state: QRLoginTokenStates.READY,
 	qrUrl: 'woocommerce://qr-login?token=abc&siteUrl=https%3A%2F%2Fexample.test',
 	secondsRemaining: 300,
@@ -69,73 +69,73 @@ const makeReadyState = () => ( {
 	refreshToken: jest.fn(),
 	chooseNumber: jest.fn(),
 	revoke: jest.fn(),
-} );
+});
 
-describe( 'MobileAppLoginPage', () => {
-	beforeEach( () => {
+describe('MobileAppLoginPage', () => {
+	beforeEach(() => {
 		jest.clearAllMocks();
-		mockedUseQRLoginToken.mockReturnValue( makeReadyState() );
-	} );
+		mockedUseQRLoginToken.mockReturnValue(makeReadyState());
+	});
 
-	it( 'renders the heading, scan-first intro, and the QR code', () => {
-		render( <MobileAppLoginPage /> );
+	it('renders the heading, scan-first intro, and the QR code', () => {
+		render(<MobileAppLoginPage />);
 
 		expect(
-			screen.getByRole( 'heading', {
+			screen.getByRole('heading', {
 				name: /Sign in to the Woo mobile app/i,
 				level: 1,
-			} )
+			})
 		).toBeInTheDocument();
 
 		// The scan-first intro mentions the in-app action merchants have to
 		// tap — the exact phrasing is what engineering Happiness reads back
 		// to users on support tickets, so we assert on it literally.
-		expect( screen.getByText( /Scan QR code/ ) ).toBeInTheDocument();
+		expect(screen.getByText(/Scan QR code/)).toBeInTheDocument();
 		expect(
-			screen.getByText( /Open the Woo mobile app on your phone/i )
+			screen.getByText(/Open the Woo mobile app on your phone/i)
 		).toBeInTheDocument();
 
 		// `<QRDirectLoginCode />` in READY state renders its countdown copy.
 		// That copy is the load-bearing signal that the QR is on screen
 		// because the SVG payload itself is not easily queryable.
-		expect( screen.getByText( /Code expires in/i ) ).toBeInTheDocument();
-	} );
+		expect(screen.getByText(/Code expires in/i)).toBeInTheDocument();
+	});
 
-	it( 'renders the FAQ link pointing at the help doc', () => {
-		render( <MobileAppLoginPage /> );
+	it('renders the FAQ link pointing at the help doc', () => {
+		render(<MobileAppLoginPage />);
 
 		// Copy synced with the homescreen modal so both surfaces share the
 		// same wording ("Any troubles signing in? Check out the FAQ.").
-		const faqLink = screen.getByRole( 'link', {
+		const faqLink = screen.getByRole('link', {
 			name: /FAQ/i,
-		} );
-		expect( faqLink ).toHaveAttribute(
+		});
+		expect(faqLink).toHaveAttribute(
 			'href',
 			'https://woocommerce.com/document/android-ios-apps-login-help-faq/'
 		);
-	} );
+	});
 
-	it( 'does not offer a manual refresh while a QR code is still valid', () => {
+	it('does not offer a manual refresh while a QR code is still valid', () => {
 		const fetchToken = jest.fn();
-		mockedUseQRLoginToken.mockReturnValue( {
+		mockedUseQRLoginToken.mockReturnValue({
 			...makeReadyState(),
 			fetchToken,
-		} );
+		});
 
-		render( <MobileAppLoginPage /> );
+		render(<MobileAppLoginPage />);
 
 		// First mount fires exactly one fetch (from QRDirectLoginCode's
 		// initial `useEffect`).
-		expect( fetchToken ).toHaveBeenCalledTimes( 1 );
+		expect(fetchToken).toHaveBeenCalledTimes(1);
 
 		expect(
-			screen.queryByRole( 'button', { name: /Refresh code/i } )
+			screen.queryByRole('button', { name: /Refresh code/i })
 		).not.toBeInTheDocument();
-	} );
+	});
 
-	it( 'lets the shared QR component generate a new code after expiry', () => {
+	it('lets the shared QR component generate a new code after expiry', () => {
 		const refreshToken = jest.fn();
-		mockedUseQRLoginToken.mockReturnValue( {
+		mockedUseQRLoginToken.mockReturnValue({
 			state: QRLoginTokenStates.EXPIRED,
 			qrUrl: null,
 			secondsRemaining: 0,
@@ -149,80 +149,76 @@ describe( 'MobileAppLoginPage', () => {
 			refreshToken,
 			chooseNumber: jest.fn(),
 			revoke: jest.fn(),
-		} );
+		});
 
-		render( <MobileAppLoginPage /> );
+		render(<MobileAppLoginPage />);
 
 		fireEvent.click(
-			screen.getByRole( 'button', { name: /Generate new code/i } )
+			screen.getByRole('button', { name: /Generate new code/i })
 		);
 
-		expect( refreshToken ).toHaveBeenCalledTimes( 1 );
-	} );
+		expect(refreshToken).toHaveBeenCalledTimes(1);
+	});
 
-	it( 'renders a recovery action when READY has no QR URL', () => {
+	it('renders a recovery action when READY has no QR URL', () => {
 		const refreshToken = jest.fn();
-		mockedUseQRLoginToken.mockReturnValue( {
+		mockedUseQRLoginToken.mockReturnValue({
 			...makeReadyState(),
 			qrUrl: null,
 			refreshToken,
-		} );
+		});
 
-		render( <MobileAppLoginPage /> );
+		render(<MobileAppLoginPage />);
 
 		expect(
-			screen.getByText( /could not generate the login code/i )
+			screen.getByText(/could not generate the login code/i)
 		).toBeInTheDocument();
 
-		fireEvent.click(
-			screen.getByRole( 'button', { name: /Renew code/i } )
-		);
+		fireEvent.click(screen.getByRole('button', { name: /Renew code/i }));
 
-		expect( refreshToken ).toHaveBeenCalledTimes( 1 );
-	} );
+		expect(refreshToken).toHaveBeenCalledTimes(1);
+	});
 
-	it( 'renders a recovery action when SCANNED has no candidate numbers', () => {
+	it('renders a recovery action when SCANNED has no candidate numbers', () => {
 		const refreshToken = jest.fn();
-		mockedUseQRLoginToken.mockReturnValue( {
+		mockedUseQRLoginToken.mockReturnValue({
 			...makeReadyState(),
 			state: QRLoginTokenStates.SCANNED,
 			qrUrl: null,
 			candidateNumbers: null,
 			refreshToken,
-		} );
+		});
 
-		render( <MobileAppLoginPage /> );
+		render(<MobileAppLoginPage />);
 
 		expect(
-			screen.getByText( /could not load the confirmation challenge/i )
+			screen.getByText(/could not load the confirmation challenge/i)
 		).toBeInTheDocument();
 
-		fireEvent.click( screen.getByRole( 'button', { name: /Try again/i } ) );
+		fireEvent.click(screen.getByRole('button', { name: /Try again/i }));
 
-		expect( refreshToken ).toHaveBeenCalledTimes( 1 );
-	} );
+		expect(refreshToken).toHaveBeenCalledTimes(1);
+	});
 
-	it( 'does not render the magic-link button (regression guard — modal-only feature)', () => {
-		render( <MobileAppLoginPage /> );
+	it('does not render the magic-link button (regression guard — modal-only feature)', () => {
+		render(<MobileAppLoginPage />);
 
 		// The onboarding modal ships a "Send the sign-in link" button when
 		// a WordPress.com account is linked. That button must never appear
 		// on this standalone page — the audience here is app-install-ready
 		// merchants who just need to scan, not magic-link recipients.
 		expect(
-			screen.queryByRole( 'button', {
+			screen.queryByRole('button', {
 				name: /Send the sign-in link/i,
-			} )
+			})
 		).not.toBeInTheDocument();
 		expect(
-			screen.queryByText(
-				/Or get a WordPress\.com sign-in link by email/i
-			)
+			screen.queryByText(/Or get a WordPress\.com sign-in link by email/i)
 		).not.toBeInTheDocument();
-	} );
+	});
 
-	it( 'surfaces the QR error state from useQRLoginToken without breaking the page shell', () => {
-		mockedUseQRLoginToken.mockReturnValue( {
+	it('surfaces the QR error state from useQRLoginToken without breaking the page shell', () => {
+		mockedUseQRLoginToken.mockReturnValue({
 			state: QRLoginTokenStates.ERROR,
 			qrUrl: null,
 			secondsRemaining: 0,
@@ -236,29 +232,27 @@ describe( 'MobileAppLoginPage', () => {
 			refreshToken: jest.fn(),
 			chooseNumber: jest.fn(),
 			revoke: jest.fn(),
-		} );
+		});
 
-		render( <MobileAppLoginPage /> );
+		render(<MobileAppLoginPage />);
 
 		// The heading and FAQ link are static shell — they must still render
 		// even when the QR surfaces an error from the backend.
 		expect(
-			screen.getByRole( 'heading', {
+			screen.getByRole('heading', {
 				name: /Sign in to the Woo mobile app/i,
-			} )
+			})
 		).toBeInTheDocument();
-		expect(
-			screen.getByRole( 'link', { name: /FAQ/i } )
-		).toBeInTheDocument();
+		expect(screen.getByRole('link', { name: /FAQ/i })).toBeInTheDocument();
 
 		// Error text from the hook leaks through the shared component.
 		expect(
-			screen.getByText( /QR login requires an HTTPS connection/i )
+			screen.getByText(/QR login requires an HTTPS connection/i)
 		).toBeInTheDocument();
-	} );
+	});
 
-	it( 'renders consumed-state revoke errors on the standalone page', () => {
-		mockedUseQRLoginToken.mockReturnValue( {
+	it('renders consumed-state revoke errors on the standalone page', () => {
+		mockedUseQRLoginToken.mockReturnValue({
 			state: QRLoginTokenStates.CONSUMED,
 			qrUrl: null,
 			secondsRemaining: 0,
@@ -272,15 +266,15 @@ describe( 'MobileAppLoginPage', () => {
 			refreshToken: jest.fn(),
 			chooseNumber: jest.fn(),
 			revoke: jest.fn(),
-		} );
+		});
 
-		render( <MobileAppLoginPage /> );
+		render(<MobileAppLoginPage />);
 
 		expect(
-			screen.getByText( /Signed in successfully on iPhone 15/i )
+			screen.getByText(/Signed in successfully on iPhone 15/i)
 		).toBeInTheDocument();
 		expect(
-			screen.getByText( /Failed to revoke access/i )
+			screen.getByText(/Failed to revoke access/i)
 		).toBeInTheDocument();
-	} );
-} );
+	});
+});

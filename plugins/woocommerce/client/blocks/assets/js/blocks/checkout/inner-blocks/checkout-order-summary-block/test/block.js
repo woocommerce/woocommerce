@@ -11,8 +11,8 @@ import {
 	textContentMatcher,
 	textContentMatcherAcrossSiblings,
 } from '../../../../../../../tests/utils/find-by-text';
-const baseContextHooks = jest.requireMock( '@woocommerce/base-context/hooks' );
-const woocommerceSettings = jest.requireMock( '@woocommerce/settings' );
+const baseContextHooks = jest.requireMock('@woocommerce/base-context/hooks');
+const woocommerceSettings = jest.requireMock('@woocommerce/settings');
 import SummaryBlock from '../frontend';
 import SubtotalBlock from '../../checkout-order-summary-subtotal/frontend';
 import FeeBlock from '../../checkout-order-summary-fee/frontend';
@@ -22,7 +22,7 @@ import CouponsBlock from '../../checkout-order-summary-coupon-form/frontend';
 import ShippingBlock from '../../checkout-order-summary-shipping/frontend';
 import CartItemsBlock from '../../checkout-order-summary-cart-items/frontend';
 
-const Block = ( { showRateAfterTaxName = false } ) => (
+const Block = ({ showRateAfterTaxName = false }) => (
 	<SummaryBlock>
 		<CartItemsBlock />
 		<SubtotalBlock />
@@ -30,7 +30,7 @@ const Block = ( { showRateAfterTaxName = false } ) => (
 		<DiscountBlock />
 		<CouponsBlock />
 		<ShippingBlock />
-		<TaxesBlock showRateAfterTaxName={ showRateAfterTaxName } />
+		<TaxesBlock showRateAfterTaxName={showRateAfterTaxName} />
 	</SummaryBlock>
 );
 
@@ -46,15 +46,15 @@ const defaultUseStoreCartValue = {
 	cartHasCalculatedShipping: mockPreviewCart.has_calculated_shipping,
 };
 
-jest.mock( '@wordpress/data', () => {
+jest.mock('@wordpress/data', () => {
 	return {
 		__esModule: true,
-		...jest.requireActual( '@wordpress/data' ),
+		...jest.requireActual('@wordpress/data'),
 	};
-} );
+});
 
-jest.mock( '@woocommerce/settings', () => ( {
-	...jest.requireActual( '@woocommerce/settings' ),
+jest.mock('@woocommerce/settings', () => ({
+	...jest.requireActual('@woocommerce/settings'),
 	SITE_CURRENCY: {
 		code: 'USD',
 		symbol: '$',
@@ -64,16 +64,16 @@ jest.mock( '@woocommerce/settings', () => ( {
 		prefix: '$',
 		suffix: '',
 	},
-} ) );
+}));
 
-jest.mock( '@woocommerce/base-context/hooks', () => ( {
-	...jest.requireActual( '@woocommerce/base-context/hooks' ),
+jest.mock('@woocommerce/base-context/hooks', () => ({
+	...jest.requireActual('@woocommerce/base-context/hooks'),
 
 	/*
 	We need to redefine this here despite the defaultUseStoreCartValue above
 	because jest doesn't like to set up mocks with out of scope variables
 	*/
-	useStoreCart: jest.fn().mockReturnValue( {
+	useStoreCart: jest.fn().mockReturnValue({
 		cartItems: mockPreviewCart.items,
 		cartTotals: mockPreviewCart.totals,
 		cartCoupons: mockPreviewCart.coupons,
@@ -83,8 +83,8 @@ jest.mock( '@woocommerce/base-context/hooks', () => ( {
 		shippingAddress: mockPreviewCart.shipping_address,
 		billingAddress: mockPreviewCart.billing_address,
 		cartHasCalculatedShipping: mockPreviewCart.has_calculated_shipping,
-	} ),
-	useShippingData: jest.fn().mockReturnValue( {
+	}),
+	useShippingData: jest.fn().mockReturnValue({
 		needsShipping: true,
 		shippingRates: [
 			{
@@ -186,19 +186,19 @@ jest.mock( '@woocommerce/base-context/hooks', () => ( {
 				],
 			},
 		],
-	} ),
-} ) );
+	}),
+}));
 
-jest.mock( '@woocommerce/base-context', () => ( {
-	...jest.requireActual( '@woocommerce/base-context' ),
-	useContainerWidthContext: jest.fn().mockReturnValue( {
+jest.mock('@woocommerce/base-context', () => ({
+	...jest.requireActual('@woocommerce/base-context'),
+	useContainerWidthContext: jest.fn().mockReturnValue({
 		hasContainerWidth: true,
 		isLarge: true,
-	} ),
-} ) );
+	}),
+}));
 
-jest.mock( '@woocommerce/settings', () => {
-	const originalModule = jest.requireActual( '@woocommerce/settings' );
+jest.mock('@woocommerce/settings', () => {
+	const originalModule = jest.requireActual('@woocommerce/settings');
 
 	return {
 		...originalModule,
@@ -211,82 +211,82 @@ jest.mock( '@woocommerce/settings', () => {
 			prefix: '$',
 			suffix: '',
 		},
-		getSetting: jest.fn().mockImplementation( ( setting, ...rest ) => {
-			if ( setting === 'couponsEnabled' ) {
+		getSetting: jest.fn().mockImplementation((setting, ...rest) => {
+			if (setting === 'couponsEnabled') {
 				return true;
 			}
-			return originalModule.getSetting( setting, ...rest );
-		} ),
+			return originalModule.getSetting(setting, ...rest);
+		}),
 	};
-} );
+});
 
-const setUseStoreCartReturnValue = ( value = defaultUseStoreCartValue ) => {
-	baseContextHooks.useStoreCart.mockReturnValue( value );
+const setUseStoreCartReturnValue = (value = defaultUseStoreCartValue) => {
+	baseContextHooks.useStoreCart.mockReturnValue(value);
 };
 
-const setGetSettingImplementation = ( implementation ) => {
-	woocommerceSettings.getSetting.mockImplementation( implementation );
+const setGetSettingImplementation = (implementation) => {
+	woocommerceSettings.getSetting.mockImplementation(implementation);
 };
 
-const setUseShippingDataReturnValue = ( value ) => {
-	baseContextHooks.useShippingData.mockReturnValue( value );
+const setUseShippingDataReturnValue = (value) => {
+	baseContextHooks.useShippingData.mockReturnValue(value);
 };
 
-describe( 'Checkout Order Summary', () => {
-	beforeEach( () => {
+describe('Checkout Order Summary', () => {
+	beforeEach(() => {
 		setUseStoreCartReturnValue();
-	} );
+	});
 
-	it( 'Renders the standard preview items in the sidebar', async () => {
-		const { container } = render( <Block showRateAfterTaxName={ true } /> );
+	it('Renders the standard preview items in the sidebar', async () => {
+		const { container } = render(<Block showRateAfterTaxName={true} />);
 		expect(
-			await findByText( container, 'Warm hat for winter' )
+			await findByText(container, 'Warm hat for winter')
 		).toBeInTheDocument();
 		expect(
-			await findByText( container, 'Lightweight baseball cap' )
+			await findByText(container, 'Lightweight baseball cap')
 		).toBeInTheDocument();
 
 		// Checking if variable product is rendered.
 		expect(
-			await findByText( container, textContentMatcher( 'Color: Yellow' ) )
+			await findByText(container, textContentMatcher('Color: Yellow'))
 		).toBeInTheDocument();
 		expect(
-			await findByText( container, textContentMatcher( 'Size: Small' ) )
+			await findByText(container, textContentMatcher('Size: Small'))
 		).toBeInTheDocument();
-	} );
+	});
 
-	it( 'Renders the items subtotal correctly', async () => {
-		const { container } = render( <Block showRateAfterTaxName={ true } /> );
+	it('Renders the items subtotal correctly', async () => {
+		const { container } = render(<Block showRateAfterTaxName={true} />);
 
 		expect(
 			await findByText(
 				container,
-				textContentMatcherAcrossSiblings( 'Subtotal $40.00' )
+				textContentMatcherAcrossSiblings('Subtotal $40.00')
 			)
 		).toBeInTheDocument();
-	} );
+	});
 
 	// The cart_totals value of useStoreCart is what drives this
-	it( 'If discounted items are in the cart the discount subtotal is shown correctly', async () => {
-		setUseStoreCartReturnValue( {
+	it('If discounted items are in the cart the discount subtotal is shown correctly', async () => {
+		setUseStoreCartReturnValue({
 			...defaultUseStoreCartValue,
 			cartTotals: {
 				...mockPreviewCart.totals,
 				total_discount: 1000,
 				total_price: 3800,
 			},
-		} );
-		const { container } = render( <Block showRateAfterTaxName={ true } /> );
+		});
+		const { container } = render(<Block showRateAfterTaxName={true} />);
 		expect(
 			await findByText(
 				container,
-				textContentMatcherAcrossSiblings( 'Discount -$10.00' )
+				textContentMatcherAcrossSiblings('Discount -$10.00')
 			)
 		).toBeInTheDocument();
-	} );
+	});
 
-	it( 'If coupons are in the cart they are shown correctly', async () => {
-		setUseStoreCartReturnValue( {
+	it('If coupons are in the cart they are shown correctly', async () => {
+		setUseStoreCartReturnValue({
 			...defaultUseStoreCartValue,
 			cartTotals: {
 				...mockPreviewCart.totals,
@@ -311,15 +311,15 @@ describe( 'Checkout Order Summary', () => {
 					label: '10off',
 				},
 			],
-		} );
-		const { container } = render( <Block showRateAfterTaxName={ true } /> );
+		});
+		const { container } = render(<Block showRateAfterTaxName={true} />);
 		expect(
-			await findByText( container, 'Coupon: 10off' )
+			await findByText(container, 'Coupon: 10off')
 		).toBeInTheDocument();
-	} );
+	});
 
-	it( 'Shows fees if the cart_fees are set', async () => {
-		setUseStoreCartReturnValue( {
+	it('Shows fees if the cart_fees are set', async () => {
+		setUseStoreCartReturnValue({
 			...defaultUseStoreCartValue,
 			cartFees: [
 				{
@@ -336,132 +336,122 @@ describe( 'Checkout Order Summary', () => {
 					},
 				},
 			],
-		} );
-		const { container } = render( <Block showRateAfterTaxName={ true } /> );
+		});
+		const { container } = render(<Block showRateAfterTaxName={true} />);
 		expect(
 			await findByText(
 				container,
-				textContentMatcherAcrossSiblings( 'Fee $10.00' )
+				textContentMatcherAcrossSiblings('Fee $10.00')
 			)
 		).toBeInTheDocument();
-	} );
+	});
 
-	it( 'Shows the coupon entry form when coupons are enabled', async () => {
+	it('Shows the coupon entry form when coupons are enabled', async () => {
 		setUseStoreCartReturnValue();
-		const { container } = render( <Block showRateAfterTaxName={ true } /> );
-		expect(
-			await findByText( container, 'Add coupons' )
-		).toBeInTheDocument();
-	} );
+		const { container } = render(<Block showRateAfterTaxName={true} />);
+		expect(await findByText(container, 'Add coupons')).toBeInTheDocument();
+	});
 
-	it( 'Does not show the coupon entry if coupons are not enabled', () => {
+	it('Does not show the coupon entry if coupons are not enabled', () => {
 		setUseStoreCartReturnValue();
-		setGetSettingImplementation( ( setting, ...rest ) => {
-			if ( setting === 'couponsEnabled' ) {
+		setGetSettingImplementation((setting, ...rest) => {
+			if (setting === 'couponsEnabled') {
 				return false;
 			}
-			const originalModule = jest.requireActual(
-				'@woocommerce/settings'
-			);
-			return originalModule.getSetting( setting, ...rest );
-		} );
-		const { container } = render( <Block showRateAfterTaxName={ true } /> );
-		expect(
-			queryByText( container, 'Coupon code' )
-		).not.toBeInTheDocument();
-	} );
+			const originalModule = jest.requireActual('@woocommerce/settings');
+			return originalModule.getSetting(setting, ...rest);
+		});
+		const { container } = render(<Block showRateAfterTaxName={true} />);
+		expect(queryByText(container, 'Coupon code')).not.toBeInTheDocument();
+	});
 
-	it( 'Does not show the shipping section if needsShipping is false on the cart', () => {
-		setUseStoreCartReturnValue( {
+	it('Does not show the shipping section if needsShipping is false on the cart', () => {
+		setUseStoreCartReturnValue({
 			...defaultUseStoreCartValue,
 			cartNeedsShipping: false,
-		} );
+		});
 
-		const { container } = render( <Block showRateAfterTaxName={ true } /> );
-		expect( queryByText( container, 'Shipping' ) ).not.toBeInTheDocument();
-	} );
+		const { container } = render(<Block showRateAfterTaxName={true} />);
+		expect(queryByText(container, 'Shipping')).not.toBeInTheDocument();
+	});
 
-	it( 'Does not show the taxes section if displayCartPricesIncludingTax is true', () => {
-		setUseStoreCartReturnValue( {
+	it('Does not show the taxes section if displayCartPricesIncludingTax is true', () => {
+		setUseStoreCartReturnValue({
 			...defaultUseStoreCartValue,
 			cartTotals: {
 				...mockPreviewCart.totals,
 				total_tax: '1000',
-				tax_lines: [ { name: 'Tax', price: '1000', rate: '5%' } ],
+				tax_lines: [{ name: 'Tax', price: '1000', rate: '5%' }],
 			},
-		} );
-		setGetSettingImplementation( ( setting, ...rest ) => {
-			if ( setting === 'displayCartPricesIncludingTax' ) {
+		});
+		setGetSettingImplementation((setting, ...rest) => {
+			if (setting === 'displayCartPricesIncludingTax') {
 				return true;
 			}
-			if ( setting === 'taxesEnabled' ) {
+			if (setting === 'taxesEnabled') {
 				return true;
 			}
-			const originalModule = jest.requireActual(
-				'@woocommerce/settings'
-			);
-			return originalModule.getSetting( setting, ...rest );
-		} );
-		const { container } = render( <Block showRateAfterTaxName={ true } /> );
+			const originalModule = jest.requireActual('@woocommerce/settings');
+			return originalModule.getSetting(setting, ...rest);
+		});
+		const { container } = render(<Block showRateAfterTaxName={true} />);
 
 		expect(
 			queryByText(
 				container,
-				textContentMatcherAcrossSiblings( 'Taxes $10.00' )
+				textContentMatcherAcrossSiblings('Taxes $10.00')
 			)
 		).not.toBeInTheDocument();
-	} );
+	});
 
-	it( 'Shows the taxes section if displayCartPricesIncludingTax is false and a tax total is set', async () => {
-		setUseStoreCartReturnValue( {
+	it('Shows the taxes section if displayCartPricesIncludingTax is false and a tax total is set', async () => {
+		setUseStoreCartReturnValue({
 			...defaultUseStoreCartValue,
 			cartTotals: {
 				...mockPreviewCart.totals,
 				total_tax: '1000',
-				tax_lines: [ { name: 'Tax', price: '1000', rate: '5%' } ],
+				tax_lines: [{ name: 'Tax', price: '1000', rate: '5%' }],
 			},
-		} );
-		setUseShippingDataReturnValue( { needsShipping: false } );
-		setGetSettingImplementation( ( setting, ...rest ) => {
-			if ( setting === 'displayCartPricesIncludingTax' ) {
+		});
+		setUseShippingDataReturnValue({ needsShipping: false });
+		setGetSettingImplementation((setting, ...rest) => {
+			if (setting === 'displayCartPricesIncludingTax') {
 				return false;
 			}
-			if ( setting === 'taxesEnabled' ) {
+			if (setting === 'taxesEnabled') {
 				return true;
 			}
-			const originalModule = jest.requireActual(
-				'@woocommerce/settings'
-			);
-			return originalModule.getSetting( setting, ...rest );
-		} );
-		const { container } = render( <Block showRateAfterTaxName={ true } /> );
+			const originalModule = jest.requireActual('@woocommerce/settings');
+			return originalModule.getSetting(setting, ...rest);
+		});
+		const { container } = render(<Block showRateAfterTaxName={true} />);
 		expect(
 			await findByText(
 				container,
-				textContentMatcherAcrossSiblings( 'Taxes $10.00' )
+				textContentMatcherAcrossSiblings('Taxes $10.00')
 			)
 		).toBeInTheDocument();
-	} );
+	});
 
-	it( 'Shows the grand total correctly', async () => {
-		setUseStoreCartReturnValue( {
+	it('Shows the grand total correctly', async () => {
+		setUseStoreCartReturnValue({
 			...defaultUseStoreCartValue,
 			cartTotals: {
 				...mockPreviewCart.totals,
 			},
 			cartNeedsShipping: false,
-		} );
-		const { container } = render( <Block showRateAfterTaxName={ true } /> );
+		});
+		const { container } = render(<Block showRateAfterTaxName={true} />);
 		expect(
 			await findByText(
 				container,
-				textContentMatcherAcrossSiblings( 'Total $49.20' )
+				textContentMatcherAcrossSiblings('Total $49.20')
 			)
 		).toBeInTheDocument();
-	} );
+	});
 
-	it( 'Correctly shows the shipping section if the cart requires shipping', async () => {
-		setUseStoreCartReturnValue( {
+	it('Correctly shows the shipping section if the cart requires shipping', async () => {
+		setUseStoreCartReturnValue({
 			...defaultUseStoreCartValue,
 			cartTotals: {
 				...defaultUseStoreCartValue.cartTotals,
@@ -520,14 +510,14 @@ describe( 'Checkout Order Summary', () => {
 					],
 				},
 			],
-		} );
+		});
 
-		const { container } = render( <Block showRateAfterTaxName={ true } /> );
+		const { container } = render(<Block showRateAfterTaxName={true} />);
 		expect(
 			await findByText(
 				container,
-				textContentMatcherAcrossSiblings( 'Free shipping $40.00' )
+				textContentMatcherAcrossSiblings('Free shipping $40.00')
 			)
 		).toBeInTheDocument();
-	} );
-} );
+	});
+});

@@ -12,26 +12,26 @@ interface LoadMoreProps {
 	disabled: boolean;
 }
 
-export default function LoadMoreButton( props: LoadMoreProps ) {
+export default function LoadMoreButton(props: LoadMoreProps) {
 	const { onLoadMore, isBusy, disabled } = props;
 	function handleClick() {
-		queueRecordEvent( 'marketplace_load_more_button_clicked', {} );
+		queueRecordEvent('marketplace_load_more_button_clicked', {});
 		onLoadMore();
 	}
 
-	if ( isBusy ) {
-		speak( __( 'Loading more products', 'woocommerce' ) );
+	if (isBusy) {
+		speak(__('Loading more products', 'woocommerce'));
 	}
 
 	return (
 		<Button
 			className="woocommerce-marketplace__load-more"
-			variant={ 'secondary' }
-			onClick={ handleClick }
-			isBusy={ isBusy }
-			disabled={ disabled }
+			variant={'secondary'}
+			onClick={handleClick}
+			isBusy={isBusy}
+			disabled={disabled}
 		>
-			{ __( 'Load more', 'woocommerce' ) }
+			{__('Load more', 'woocommerce')}
 		</Button>
 	);
 }

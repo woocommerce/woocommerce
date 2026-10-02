@@ -13,7 +13,7 @@ import { Product, ProductCardType, ProductType } from '../product-list/types';
 import { appendURLParams } from '../../utils/functions';
 import { getAdminSetting } from '~/utils/admin-settings';
 
-export default function ProductListContent( props: {
+export default function ProductListContent(props: {
 	products: Product[];
 	group?: string;
 	productGroup?: string;
@@ -22,33 +22,33 @@ export default function ProductListContent( props: {
 	className?: string;
 	searchTerm?: string;
 	category?: string;
-} ): React.JSX.Element {
-	const wccomHelperSettings = getAdminSetting( 'wccomHelper', {} );
+}): React.JSX.Element {
+	const wccomHelperSettings = getAdminSetting('wccomHelper', {});
 
-	const [ productsToShow, setProductsToShow ] = useState( props.products );
-	const [ columns, setColumns ] = useState( 1 );
+	const [productsToShow, setProductsToShow] = useState(props.products);
+	const [columns, setColumns] = useState(1);
 
 	const updateColumns = () => {
 		const screenWidth = window.innerWidth;
-		if ( screenWidth >= 1920 ) {
-			setColumns( 4 );
-		} else if ( screenWidth >= 1024 ) {
-			setColumns( 3 );
-		} else if ( screenWidth >= 769 ) {
-			setColumns( 2 );
+		if (screenWidth >= 1920) {
+			setColumns(4);
+		} else if (screenWidth >= 1024) {
+			setColumns(3);
+		} else if (screenWidth >= 769) {
+			setColumns(2);
 		} else {
-			setColumns( 1 );
+			setColumns(1);
 		}
 	};
 
-	useEffect( () => {
+	useEffect(() => {
 		updateColumns();
 
 		// Update columns on screen resize to adjust for responsive layout
-		window.addEventListener( 'resize', updateColumns );
+		window.addEventListener('resize', updateColumns);
 
-		return () => window.removeEventListener( 'resize', updateColumns );
-	}, [] );
+		return () => window.removeEventListener('resize', updateColumns);
+	}, []);
 
 	/**
 	 * If the product group is set, we are showing featured products. This a curated list
@@ -61,45 +61,45 @@ export default function ProductListContent( props: {
 	 * To do this, this useEffect listens for changes to columns and calculates the number
 	 * rows. Depending on the number of rows, it will slice the props.products.
 	 */
-	useEffect( () => {
+	useEffect(() => {
 		/**
 		 * If the product group is not set, don't operate. This could be a search or category result, where we
 		 * want to show the full result set.
 		 *
 		 * If the productGroups set, component is likely used on Discover or NoResult component.
 		 */
-		if ( ! props.productGroup ) {
-			setProductsToShow( props.products );
+		if (!props.productGroup) {
+			setProductsToShow(props.products);
 			return;
 		}
 
 		// For compact cards, show all products.
-		if ( props.cardType === ProductCardType.compact ) {
-			setProductsToShow( props.products );
+		if (props.cardType === ProductCardType.compact) {
+			setProductsToShow(props.products);
 			return;
 		}
 
 		// If we don't have enough products to fill a row, show all products.
-		if ( props.products.length < columns ) {
-			setProductsToShow( props.products );
+		if (props.products.length < columns) {
+			setProductsToShow(props.products);
 
 			return;
 		}
 
 		// Calculate the number of complete rows we can show.
-		let completeRows = Math.floor( props.products.length / columns );
+		let completeRows = Math.floor(props.products.length / columns);
 
-		if ( columns === 1 ) {
-			completeRows = Math.min( completeRows, 4 );
+		if (columns === 1) {
+			completeRows = Math.min(completeRows, 4);
 		}
 
-		if ( columns === 2 ) {
-			completeRows = Math.min( completeRows, 2 );
+		if (columns === 2) {
+			completeRows = Math.min(completeRows, 2);
 		}
 
 		// Slice the products, this will get rid of any rows that are not fully filled.
-		setProductsToShow( props.products.slice( 0, completeRows * columns ) );
-	}, [ columns, props.products, props.productGroup, props.cardType ] );
+		setProductsToShow(props.products.slice(0, completeRows * columns));
+	}, [columns, props.products, props.productGroup, props.cardType]);
 
 	const classes = clsx(
 		'woocommerce-marketplace__product-list-content',
@@ -108,13 +108,13 @@ export default function ProductListContent( props: {
 
 	return (
 		<>
-			<div className={ classes }>
-				{ productsToShow.map( ( product, index ) => (
-					<Fragment key={ product.id }>
+			<div className={classes}>
+				{productsToShow.map((product, index) => (
+					<Fragment key={product.id}>
 						<ProductCard
-							type={ props.type }
-							cardType={ props.cardType }
-							product={ {
+							type={props.type}
+							cardType={props.cardType}
+							product={{
 								id: product.id,
 								slug: product.slug,
 								title: product.title,
@@ -126,25 +126,22 @@ export default function ProductListContent( props: {
 								primary_color: product.primary_color,
 								vendorName: product.vendorName,
 								vendorUrl: product.vendorUrl
-									? appendURLParams( product.vendorUrl, [
-											[
-												'utm_source',
-												'extensionsscreen',
-											],
-											[ 'utm_medium', 'product' ],
-											[ 'utm_campaign', 'wcaddons' ],
-											[ 'utm_content', 'devpartner' ],
-									  ] )
+									? appendURLParams(product.vendorUrl, [
+											['utm_source', 'extensionsscreen'],
+											['utm_medium', 'product'],
+											['utm_campaign', 'wcaddons'],
+											['utm_content', 'devpartner'],
+										])
 									: '',
 								price: product.price,
 								url: appendURLParams(
 									product.url,
-									Object.entries( {
+									Object.entries({
 										...wccomHelperSettings.inAppPurchaseURLParams,
-										...( props.productGroup !== undefined
+										...(props.productGroup !== undefined
 											? { utm_group: props.productGroup }
-											: {} ),
-									} )
+											: {}),
+									})
 								),
 								averageRating: product.averageRating,
 								reviewsCount: product.reviewsCount,
@@ -160,26 +157,26 @@ export default function ProductListContent( props: {
 								isOnSale: product.isOnSale,
 								regularPrice: product.regularPrice,
 								hasQualityBadge: product.hasQualityBadge,
-							} }
-							tracksData={ {
+							}}
+							tracksData={{
 								position: index + 1,
-								...( product.label && {
+								...(product.label && {
 									label: product.label,
-								} ),
-								...( props.productGroup && {
+								}),
+								...(props.productGroup && {
 									group_id: props.productGroup,
-								} ),
-								...( props.group && { group: props.group } ),
-								...( props.searchTerm && {
+								}),
+								...(props.group && { group: props.group }),
+								...(props.searchTerm && {
 									searchTerm: props.searchTerm,
-								} ),
-								...( props.category && {
+								}),
+								...(props.category && {
 									category: props.category,
-								} ),
-							} }
+								}),
+							}}
 						/>
 					</Fragment>
-				) ) }
+				))}
 			</div>
 		</>
 	);

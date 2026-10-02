@@ -15,11 +15,11 @@ import './editor.scss';
 /**
  * Register and run the "Products by Tag" block.
  */
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	icon: {
 		src: (
 			<Icon
-				icon={ tag }
+				icon={tag}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -28,11 +28,11 @@ registerBlockType( metadata, {
 		...metadata.attributes,
 		columns: {
 			type: 'number',
-			default: getSetting( 'defaultColumns', 3 ),
+			default: getSetting('defaultColumns', 3),
 		},
 		rows: {
 			type: 'number',
-			default: getSetting( 'defaultRows', 3 ),
+			default: getSetting('defaultRows', 3),
 		},
 		tags: {
 			type: 'array',
@@ -40,7 +40,7 @@ registerBlockType( metadata, {
 		},
 		stockStatus: {
 			type: 'array',
-			default: Object.keys( getSetting( 'stockStatusOptions', [] ) ),
+			default: Object.keys(getSetting('stockStatusOptions', [])),
 		},
 	},
 
@@ -49,4 +49,4 @@ registerBlockType( metadata, {
 	save: () => {
 		return null;
 	},
-} );
+});

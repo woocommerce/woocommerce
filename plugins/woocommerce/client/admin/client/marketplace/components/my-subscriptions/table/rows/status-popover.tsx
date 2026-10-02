@@ -10,88 +10,88 @@ import clsx from 'clsx';
  */
 import { StatusLevel } from '../../types';
 
-export default function StatusPopover( props: {
+export default function StatusPopover(props: {
 	text: string;
 	level: StatusLevel;
 	explanation: string | React.JSX.Element;
 	explanationOnHover?: boolean;
 	icon?: React.JSX.Element;
-} ) {
-	const [ isHovered, setIsHovered ] = useState( false );
-	const [ isClicked, setIsClicked ] = useState( false );
-	const hoverTimeoutId = useRef< null | NodeJS.Timeout >( null );
+}) {
+	const [isHovered, setIsHovered] = useState(false);
+	const [isClicked, setIsClicked] = useState(false);
+	const hoverTimeoutId = useRef<null | NodeJS.Timeout>(null);
 
-	useEffect( () => {
+	useEffect(() => {
 		return () => {
-			if ( hoverTimeoutId.current ) {
-				clearTimeout( hoverTimeoutId.current );
+			if (hoverTimeoutId.current) {
+				clearTimeout(hoverTimeoutId.current);
 			}
 		};
-	}, [] );
+	}, []);
 
 	const startHover = () => {
-		if ( ! props.explanationOnHover ) {
+		if (!props.explanationOnHover) {
 			return;
 		}
 
-		if ( hoverTimeoutId.current ) {
-			clearTimeout( hoverTimeoutId.current );
+		if (hoverTimeoutId.current) {
+			clearTimeout(hoverTimeoutId.current);
 		}
 
-		setIsHovered( true );
+		setIsHovered(true);
 	};
 
 	const endHover = () => {
-		if ( ! props.explanationOnHover ) {
+		if (!props.explanationOnHover) {
 			return;
 		}
 
-		if ( hoverTimeoutId.current ) {
-			clearTimeout( hoverTimeoutId.current );
+		if (hoverTimeoutId.current) {
+			clearTimeout(hoverTimeoutId.current);
 		}
 
 		// Add a small delay in case user hovers from the button to the popover.
 		// In such a case we don't want to hide the popover.
-		hoverTimeoutId.current = setTimeout( () => {
-			setIsHovered( false );
-		}, 350 );
+		hoverTimeoutId.current = setTimeout(() => {
+			setIsHovered(false);
+		}, 350);
 	};
 
 	function shouldShowExplanation() {
-		if ( props.explanation === '' ) {
+		if (props.explanation === '') {
 			return false;
 		}
 
-		return isClicked || ( props.explanationOnHover && isHovered );
+		return isClicked || (props.explanationOnHover && isHovered);
 	}
 
 	return (
 		<button
-			onClick={ () => setIsClicked( ! isClicked ) }
-			onMouseOver={ startHover }
-			onFocus={ startHover }
-			onMouseOut={ endHover }
-			onBlur={ endHover }
-			className={ clsx(
+			onClick={() => setIsClicked(!isClicked)}
+			onMouseOver={startHover}
+			onFocus={startHover}
+			onMouseOut={endHover}
+			onBlur={endHover}
+			className={clsx(
 				'woocommerce-marketplace__my-subscriptions__product-status',
-				`woocommerce-marketplace__my-subscriptions__product-status--${ props.level }`
-			) }
+				`woocommerce-marketplace__my-subscriptions__product-status--${props.level}`
+			)}
 		>
-			{ props.icon }
-			{ props.text }
-			{ shouldShowExplanation() && (
+			{props.icon}
+			{props.text}
+			{shouldShowExplanation() && (
 				<Popover
 					className="woocommerce-marketplace__my-subscriptions__popover"
 					position="top center"
-					focusOnMount={ false }
-					onMouseOver={ startHover }
-					onMouseOut={ endHover }
-					onFocus={ startHover }
-					onBlur={ endHover }
+					focusOnMount={false}
+					onMouseOver={startHover}
+					onMouseOut={endHover}
+					onFocus={startHover}
+					onBlur={endHover}
 				>
-					{ props.explanation }
+					{props.explanation}
 				</Popover>
-			) }
+			)}
 		</button>
 	);
 }

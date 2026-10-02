@@ -15,14 +15,14 @@ import { register } from '../register';
 import { example } from './example';
 import deprecated from './deprecated';
 
-register( Block, example, metadata, {
+register(Block, example, metadata, {
 	deprecated,
 	icon: {
 		src: (
 			<Icon
-				icon={ folderStarred }
+				icon={folderStarred}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
 	},
-} );
+});

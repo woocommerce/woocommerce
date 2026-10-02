@@ -25,21 +25,21 @@ import { LOCALE } from '~/utils/admin-settings';
 class ReportFilters extends Component {
 	constructor() {
 		super();
-		this.onDateSelect = this.onDateSelect.bind( this );
-		this.onFilterSelect = this.onFilterSelect.bind( this );
-		this.onAdvancedFilterAction = this.onAdvancedFilterAction.bind( this );
+		this.onDateSelect = this.onDateSelect.bind(this);
+		this.onFilterSelect = this.onFilterSelect.bind(this);
+		this.onAdvancedFilterAction = this.onAdvancedFilterAction.bind(this);
 	}
 
-	onDateSelect( data ) {
+	onDateSelect(data) {
 		const { report, addCesSurveyForAnalytics } = this.props;
 		addCesSurveyForAnalytics();
-		recordEvent( 'datepicker_update', {
+		recordEvent('datepicker_update', {
 			report,
-			...omitBy( data, isUndefined ),
-		} );
+			...omitBy(data, isUndefined),
+		});
 	}
 
-	onFilterSelect( data ) {
+	onFilterSelect(data) {
 		const { report, addCesSurveyForAnalytics } = this.props;
 
 		// This event gets triggered in the following cases.
@@ -54,8 +54,8 @@ class ReportFilters extends Component {
 			'single_coupon',
 			'single_variation',
 		];
-		const filterName = data.filter || data[ 'filter-variations' ];
-		if ( triggerCesFor.includes( filterName ) ) {
+		const filterName = data.filter || data['filter-variations'];
+		if (triggerCesFor.includes(filterName)) {
 			addCesSurveyForAnalytics();
 		}
 
@@ -64,51 +64,51 @@ class ReportFilters extends Component {
 			filter: data.filter || 'all',
 		};
 
-		if ( data.filter === 'single_product' ) {
+		if (data.filter === 'single_product') {
 			eventProperties.filter_variation =
-				data[ 'filter-variations' ] || 'all';
+				data['filter-variations'] || 'all';
 		}
 
-		recordEvent( 'analytics_filter', eventProperties );
+		recordEvent('analytics_filter', eventProperties);
 	}
 
-	onAdvancedFilterAction( action, data ) {
+	onAdvancedFilterAction(action, data) {
 		const { report, addCesSurveyForAnalytics } = this.props;
-		switch ( action ) {
+		switch (action) {
 			case 'add':
-				recordEvent( 'analytics_filters_add', {
+				recordEvent('analytics_filters_add', {
 					report,
 					filter: data.key,
-				} );
+				});
 				break;
 			case 'remove':
-				recordEvent( 'analytics_filters_remove', {
+				recordEvent('analytics_filters_remove', {
 					report,
 					filter: data.key,
-				} );
+				});
 				break;
 			case 'filter':
-				const snakeCaseData = Object.keys( data ).reduce(
-					( result, property ) => {
-						result[ snakeCase( property ) ] = data[ property ];
+				const snakeCaseData = Object.keys(data).reduce(
+					(result, property) => {
+						result[snakeCase(property)] = data[property];
 						return result;
 					},
 					{}
 				);
 				addCesSurveyForAnalytics();
-				recordEvent( 'analytics_filters_filter', {
+				recordEvent('analytics_filters_filter', {
 					report,
 					...snakeCaseData,
-				} );
+				});
 				break;
 			case 'clear_all':
-				recordEvent( 'analytics_filters_clear_all', { report } );
+				recordEvent('analytics_filters_clear_all', { report });
 				break;
 			case 'match':
-				recordEvent( 'analytics_filters_all_any', {
+				recordEvent('analytics_filters_all_any', {
 					report,
 					value: data.match,
-				} );
+				});
 				break;
 		}
 	}
@@ -127,7 +127,7 @@ class ReportFilters extends Component {
 			defaultDateRange
 		);
 		const { primary: primaryDate, secondary: secondaryDate } =
-			getCurrentDates( query, defaultDateRange );
+			getCurrentDates(query, defaultDateRange);
 		const dateQuery = {
 			period,
 			compare,
@@ -140,18 +140,18 @@ class ReportFilters extends Component {
 
 		return (
 			<Filters
-				query={ query }
-				siteLocale={ LOCALE.siteLocale }
-				currency={ Currency.getCurrencyConfig() }
-				path={ path }
-				filters={ filters }
-				advancedFilters={ advancedFilters }
-				showDatePicker={ showDatePicker }
-				onDateSelect={ this.onDateSelect }
-				onFilterSelect={ this.onFilterSelect }
-				onAdvancedFilterAction={ this.onAdvancedFilterAction }
-				dateQuery={ dateQuery }
-				isoDateFormat={ isoDateFormat }
+				query={query}
+				siteLocale={LOCALE.siteLocale}
+				currency={Currency.getCurrencyConfig()}
+				path={path}
+				filters={filters}
+				advancedFilters={advancedFilters}
+				showDatePicker={showDatePicker}
+				onDateSelect={this.onDateSelect}
+				onFilterSelect={this.onFilterSelect}
+				onAdvancedFilterAction={this.onAdvancedFilterAction}
+				dateQuery={dateQuery}
+				isoDateFormat={isoDateFormat}
 			/>
 		);
 	}
@@ -160,17 +160,17 @@ class ReportFilters extends Component {
 ReportFilters.contextType = CurrencyContext;
 
 export default compose(
-	withSelect( ( select ) => {
+	withSelect((select) => {
 		const { woocommerce_default_date_range: defaultDateRange } = select(
 			settingsStore
-		).getSetting( 'wc_admin', 'wcAdminSettings' );
+		).getSetting('wc_admin', 'wcAdminSettings');
 		return { defaultDateRange };
-	} ),
-	withDispatch( ( dispatch ) => {
-		const { addCesSurveyForAnalytics } = dispatch( CES_STORE_KEY );
+	}),
+	withDispatch((dispatch) => {
+		const { addCesSurveyForAnalytics } = dispatch(CES_STORE_KEY);
 		return { addCesSurveyForAnalytics };
-	} )
-)( ReportFilters );
+	})
+)(ReportFilters);
 
 ReportFilters.propTypes = {
 	/**

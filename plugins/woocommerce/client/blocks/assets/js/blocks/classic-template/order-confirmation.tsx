@@ -9,14 +9,14 @@ import { __ } from '@wordpress/i18n';
  */
 import type { OnClickCallbackParameter, InheritedAttributes } from './types';
 
-const getButtonLabel = () => __( 'Transform into blocks', 'woocommerce' );
+const getButtonLabel = () => __('Transform into blocks', 'woocommerce');
 
-const getBlockifiedTemplate = ( inheritedAttributes: InheritedAttributes ) =>
+const getBlockifiedTemplate = (inheritedAttributes: InheritedAttributes) =>
 	[
-		createBlock( 'woocommerce/order-confirmation-status', {
+		createBlock('woocommerce/order-confirmation-status', {
 			...inheritedAttributes,
 			fontSize: 'large',
-		} ),
+		}),
 		createBlock(
 			'woocommerce/order-confirmation-summary',
 			inheritedAttributes
@@ -36,18 +36,18 @@ const getBlockifiedTemplate = ( inheritedAttributes: InheritedAttributes ) =>
 				className: 'wc-block-order-confirmation-address-wrapper',
 			},
 			[
-				createBlock( 'core/column', inheritedAttributes, [
+				createBlock('core/column', inheritedAttributes, [
 					createBlock(
 						'woocommerce/order-confirmation-shipping-wrapper',
 						inheritedAttributes
 					),
-				] ),
-				createBlock( 'core/column', inheritedAttributes, [
+				]),
+				createBlock('core/column', inheritedAttributes, [
 					createBlock(
 						'woocommerce/order-confirmation-billing-wrapper',
 						inheritedAttributes
 					),
-				] ),
+				]),
 			]
 		),
 		createBlock(
@@ -58,30 +58,29 @@ const getBlockifiedTemplate = ( inheritedAttributes: InheritedAttributes ) =>
 			'woocommerce/order-confirmation-additional-information',
 			inheritedAttributes
 		),
-	].filter( Boolean ) as BlockInstance[];
+	].filter(Boolean) as BlockInstance[];
 
-const onClickCallback = ( {
+const onClickCallback = ({
 	clientId,
 	attributes,
 	getBlocks,
 	replaceBlock,
 	selectBlock,
-}: OnClickCallbackParameter ) => {
-	replaceBlock( clientId, getBlockifiedTemplate( attributes ) );
+}: OnClickCallbackParameter) => {
+	replaceBlock(clientId, getBlockifiedTemplate(attributes));
 
 	const blocks = getBlocks();
 
 	const groupBlock = blocks.find(
-		( block ) =>
+		(block) =>
 			block.name === 'core/group' &&
 			block.innerBlocks.some(
-				( innerBlock ) =>
-					innerBlock.name === 'woocommerce/store-notices'
+				(innerBlock) => innerBlock.name === 'woocommerce/store-notices'
 			)
 	);
 
-	if ( groupBlock ) {
-		selectBlock( groupBlock.clientId );
+	if (groupBlock) {
+		selectBlock(groupBlock.clientId);
 	}
 };
 
@@ -96,54 +95,53 @@ const getSkeleton = () => {
 	return (
 		<div className="woocommerce-page">
 			<div className="woocommerce-order">
-				<h1>{ __( 'Order received', 'woocommerce' ) }</h1>
+				<h1>{__('Order received', 'woocommerce')}</h1>
 				<p className="woocommerce-notice woocommerce-notice--success woocommerce-thankyou-order-confirmation">
-					{ __(
+					{__(
 						'Thank you. Your order has been received.',
 						'woocommerce'
-					) }
+					)}
 				</p>
 				<ul className="woocommerce-order-overview woocommerce-thankyou-order-details order_details">
 					<li className="woocommerce-order-overview__order order">
-						{ __( 'Order number', 'woocommerce' ) }:{ ' ' }
+						{__('Order number', 'woocommerce')}:{' '}
 						<strong>123</strong>
 					</li>
 					<li className="woocommerce-order-overview__date date">
-						{ __( 'Date', 'woocommerce' ) }:{ ' ' }
+						{__('Date', 'woocommerce')}:{' '}
 						<strong>May 25, 2023</strong>
 					</li>
 					<li className="woocommerce-order-overview__email email">
-						{ __( 'Email', 'woocommerce' ) }:{ ' ' }
+						{__('Email', 'woocommerce')}:{' '}
 						<strong>shopper@woocommerce.com</strong>
 					</li>
 					<li className="woocommerce-order-overview__total total">
-						{ __( 'Total', 'woocommerce' ) }:{ ' ' }
-						<strong>$20.00</strong>
+						{__('Total', 'woocommerce')}: <strong>$20.00</strong>
 					</li>
 				</ul>
 
 				<section className="woocommerce-order-details">
 					<h2 className="woocommerce-order-details__title">
-						{ __( 'Order details', 'woocommerce' ) }
+						{__('Order details', 'woocommerce')}
 					</h2>
 					<table className="woocommerce-table woocommerce-table--order-details shop_table order_details">
 						<thead>
 							<tr>
 								<th className="woocommerce-table__product-name product-name">
-									{ __( 'Product', 'woocommerce' ) }
+									{__('Product', 'woocommerce')}
 								</th>
 								<th className="woocommerce-table__product-table product-total">
-									{ __( 'Total', 'woocommerce' ) }
+									{__('Total', 'woocommerce')}
 								</th>
 							</tr>
 						</thead>
 						<tbody>
 							<tr className="woocommerce-table__line-item order_item">
 								<td className="woocommerce-table__product-name product-name">
-									Sample Product{ ' ' }
+									Sample Product{' '}
 									<strong className="product-quantity">
 										×&nbsp;2
-									</strong>{ ' ' }
+									</strong>{' '}
 								</td>
 
 								<td className="woocommerce-table__product-total product-total">
@@ -154,13 +152,13 @@ const getSkeleton = () => {
 						<tfoot>
 							<tr>
 								<th scope="row">
-									{ __( 'Subtotal', 'woocommerce' ) }:
+									{__('Subtotal', 'woocommerce')}:
 								</th>
 								<td>$20.00</td>
 							</tr>
 							<tr>
 								<th scope="row">
-									{ __( 'Total', 'woocommerce' ) }:
+									{__('Total', 'woocommerce')}:
 								</th>
 								<td>$20.00</td>
 							</tr>
@@ -172,7 +170,7 @@ const getSkeleton = () => {
 					<section className="woocommerce-columns woocommerce-columns--2 woocommerce-columns--addresses col2-set addresses">
 						<div className="woocommerce-column woocommerce-column--1 woocommerce-column--billing-address col-1">
 							<h2 className="woocommerce-column__title">
-								{ __( 'Billing address', 'woocommerce' ) }
+								{__('Billing address', 'woocommerce')}
 							</h2>
 							<address>
 								123 Main St
@@ -185,7 +183,7 @@ const getSkeleton = () => {
 
 						<div className="woocommerce-column woocommerce-column--2 woocommerce-column--shipping-address col-2">
 							<h2 className="woocommerce-column__title">
-								{ __( 'Shipping address', 'woocommerce' ) }
+								{__('Shipping address', 'woocommerce')}
 							</h2>
 							<address>
 								123 Main St

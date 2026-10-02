@@ -17,23 +17,23 @@ interface ProductSummaryProps {
  * @param {string} props.shortDescription Short description for the product.
  * @param {string} props.fullDescription  Full description for the product.
  */
-const ProductSummary = ( {
+const ProductSummary = ({
 	className,
 	shortDescription = '',
 	fullDescription = '',
-}: ProductSummaryProps ): JSX.Element | null => {
+}: ProductSummaryProps): JSX.Element | null => {
 	const source = shortDescription ? shortDescription : fullDescription;
 
-	if ( ! source ) {
+	if (!source) {
 		return null;
 	}
 
 	return (
 		<Summary
-			className={ className }
-			source={ source }
-			maxLength={ 15 }
-			countType={ blocksConfig.wordCountType || 'words' }
+			className={className}
+			source={source}
+			maxLength={15}
+			countType={blocksConfig.wordCountType || 'words'}
 		/>
 	);
 };

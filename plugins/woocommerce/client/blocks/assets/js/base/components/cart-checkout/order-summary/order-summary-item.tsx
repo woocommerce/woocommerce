@@ -36,10 +36,10 @@ interface OrderSummaryProps {
 	disableProductDescriptions: boolean;
 }
 
-const OrderSummaryItem = ( {
+const OrderSummaryItem = ({
 	cartItem,
 	disableProductDescriptions,
-}: OrderSummaryProps ): JSX.Element => {
+}: OrderSummaryProps): JSX.Element => {
 	const {
 		images,
 		show_backorder_badge: showBackorderBadge,
@@ -61,59 +61,59 @@ const OrderSummaryItem = ( {
 	const { receiveCart, ...cart } = useStoreCart();
 
 	const arg = useMemo(
-		() => ( {
+		() => ({
 			context: 'summary',
 			cartItem,
 			cart,
-		} ),
-		[ cartItem, cart ]
+		}),
+		[cartItem, cart]
 	);
 
-	const priceCurrency = getCurrencyFromPriceResponse( prices );
+	const priceCurrency = getCurrencyFromPriceResponse(prices);
 
-	const name = applyCheckoutFilter( {
+	const name = applyCheckoutFilter({
 		filterName: 'itemName',
 		defaultValue: initialName,
 		extensions,
 		arg,
-	} );
+	});
 
-	const rawPrecision = isString( prices.raw_prices.precision )
-		? parseInt( prices.raw_prices.precision, 10 )
+	const rawPrecision = isString(prices.raw_prices.precision)
+		? parseInt(prices.raw_prices.precision, 10)
 		: prices.raw_prices.precision;
 
 	const regularPriceSingle = toSnapshot(
 		transformScale(
-			dinero( {
-				amount: parseInt( prices.raw_prices.regular_price, 10 ),
+			dinero({
+				amount: parseInt(prices.raw_prices.regular_price, 10),
 				currency: USD,
 				scale: rawPrecision,
-			} ),
+			}),
 			priceCurrency.minorUnit
 		)
 	).amount;
 	const priceSingle = toSnapshot(
 		transformScale(
-			dinero( {
-				amount: parseInt( prices.raw_prices.price, 10 ),
+			dinero({
+				amount: parseInt(prices.raw_prices.price, 10),
 				currency: USD,
 				scale: rawPrecision,
-			} ),
+			}),
 			priceCurrency.minorUnit
 		)
 	).amount;
-	const totalsCurrency = getCurrencyFromPriceResponse( totals );
+	const totalsCurrency = getCurrencyFromPriceResponse(totals);
 
-	let lineSubtotal = parseInt( totals.line_subtotal, 10 );
-	if ( getSetting( 'displayCartPricesIncludingTax', false ) ) {
-		lineSubtotal += parseInt( totals.line_subtotal_tax, 10 );
+	let lineSubtotal = parseInt(totals.line_subtotal, 10);
+	if (getSetting('displayCartPricesIncludingTax', false)) {
+		lineSubtotal += parseInt(totals.line_subtotal_tax, 10);
 	}
 	const subtotalPrice = toSnapshot(
-		dinero( {
+		dinero({
 			amount: lineSubtotal,
 			currency: USD,
 			scale: totalsCurrency.minorUnit,
-		} )
+		})
 	).amount;
 
 	const saleAmountSingle = calculateSaleAmount(
@@ -121,30 +121,30 @@ const OrderSummaryItem = ( {
 		priceCurrency.minorUnit
 	);
 
-	const subtotalPriceFormat = applyCheckoutFilter( {
+	const subtotalPriceFormat = applyCheckoutFilter({
 		filterName: 'subtotalPriceFormat',
 		defaultValue: '<price/>',
 		extensions,
 		arg,
 		validation: productPriceValidation,
-	} );
+	});
 
-	const saleBadgePriceFormat = applyCheckoutFilter( {
+	const saleBadgePriceFormat = applyCheckoutFilter({
 		filterName: 'saleBadgePriceFormat',
 		defaultValue: '<price/>',
 		extensions,
 		arg,
 		validation: productPriceValidation,
-	} );
+	});
 
 	// Allow extensions to filter how the price is displayed. Ie: prepending or appending some values.
-	const productPriceFormat = applyCheckoutFilter( {
+	const productPriceFormat = applyCheckoutFilter({
 		filterName: 'cartItemPrice',
 		defaultValue: '<price/>',
 		extensions,
 		arg,
 		validation: productPriceValidation,
-	} );
+	});
 
 	/* translators: <quantity/>, <productName/> and <price/> are placeholders and should not be translated. */
 	const productPriceScreenReaderDefault = _n(
@@ -154,103 +154,98 @@ const OrderSummaryItem = ( {
 		'woocommerce'
 	);
 
-	const productPriceScreenReaderFormat = applyCheckoutFilter( {
+	const productPriceScreenReaderFormat = applyCheckoutFilter({
 		filterName: 'cartItemScreenReaderPrice',
 		defaultValue: productPriceScreenReaderDefault,
 		extensions,
 		arg,
 		validation: productPriceScreenReaderValidation,
-	} );
+	});
 
 	// Build as one string (not React nodes) so screen readers announce the
 	// full sentence as a single unit rather than separate sibling text nodes.
 	const productPriceScreenReaderText = productPriceScreenReaderFormat.replace(
 		/<(quantity|productName|price)\/>/g,
-		( _match, key ) => {
-			switch ( key ) {
+		(_match, key) => {
+			switch (key) {
 				case 'quantity':
-					return String( quantity );
+					return String(quantity);
 				case 'productName':
 					return name;
 				case 'price':
-					return formatPrice( subtotalPrice, totalsCurrency );
+					return formatPrice(subtotalPrice, totalsCurrency);
 			}
 			return '';
 		}
 	);
 
-	const cartItemClassNameFilter = applyCheckoutFilter( {
+	const cartItemClassNameFilter = applyCheckoutFilter({
 		filterName: 'cartItemClass',
 		defaultValue: '',
 		extensions,
 		arg,
-	} );
+	});
 
 	const productMetaProps = disableProductDescriptions
 		? {
 				itemData,
 				variation,
-		  }
+			}
 		: {
 				itemData,
 				variation,
 				shortDescription,
 				fullDescription,
-		  };
+			};
 
 	return (
 		<div
-			className={ clsx(
+			className={clsx(
 				'wc-block-components-order-summary-item',
 				cartItemClassNameFilter
-			) }
+			)}
 		>
 			<div className="wc-block-components-order-summary-item__image">
 				<div className="wc-block-components-order-summary-item__quantity">
 					<Label
-						label={ quantity.toString() }
-						screenReaderLabel={ sprintf(
+						label={quantity.toString()}
+						screenReaderLabel={sprintf(
 							/* translators: %d number of products of the same type in the cart */
-							_n(
-								'%d item',
-								'%d items',
-								quantity,
-								'woocommerce'
-							),
+							_n('%d item', '%d items', quantity, 'woocommerce'),
 							quantity
-						) }
+						)}
 					/>
 				</div>
 				<ProductImage
-					image={ images.length ? images[ 0 ] : {} }
-					fallbackAlt={ name }
-					width={ 48 }
-					height={ 48 }
+					image={images.length ? images[0] : {}}
+					fallbackAlt={name}
+					width={48}
+					height={48}
 				/>
 			</div>
 			<div className="wc-block-components-order-summary-item__description">
 				<ProductName
-					disabled={ true }
-					name={ name }
-					permalink={ permalink }
+					disabled={true}
+					name={name}
+					permalink={permalink}
 					disabledTagName="h3"
 				/>
 				<div className="wc-block-cart-item__prices">
 					<ProductPrice
-						currency={ priceCurrency }
-						price={ priceSingle }
-						regularPrice={ regularPriceSingle }
+						currency={priceCurrency}
+						price={priceSingle}
+						regularPrice={regularPriceSingle}
 						className="wc-block-components-order-summary-item__individual-prices"
 						priceClassName="wc-block-components-order-summary-item__individual-price"
 						regularPriceClassName="wc-block-components-order-summary-item__regular-individual-price"
-						format={ subtotalPriceFormat }
+						format={subtotalPriceFormat}
 					/>
 				</div>
-				{ showBackorderBadge && <ProductBackorderBadge /> }
-				<ProductMetadata { ...productMetaProps } />
+				{showBackorderBadge && <ProductBackorderBadge />}
+				<ProductMetadata {...productMetaProps} />
 			</div>
 			<span className="screen-reader-text">
-				{ productPriceScreenReaderText }
+				{productPriceScreenReaderText}
 			</span>
 			<div
 				className="wc-block-components-order-summary-item__total-price"
@@ -258,14 +253,14 @@ const OrderSummaryItem = ( {
 			>
 				<div className="wc-block-cart-item__total-price-and-sale-badge-wrapper">
 					<ProductPrice
-						currency={ totalsCurrency }
-						format={ productPriceFormat }
-						price={ subtotalPrice }
+						currency={totalsCurrency}
+						format={productPriceFormat}
+						price={subtotalPrice}
 					/>
 					<ProductSaleBadge
-						currency={ priceCurrency }
-						saleAmount={ saleAmountSingle * quantity }
-						format={ saleBadgePriceFormat }
+						currency={priceCurrency}
+						saleAmount={saleAmountSingle * quantity}
+						format={saleBadgePriceFormat}
 					/>
 				</div>
 			</div>

@@ -35,52 +35,52 @@ const testPaymentMethodData = {
 	payment_method: 'test',
 };
 
-describe( 'wc/store/payment thunks', () => {
+describe('wc/store/payment thunks', () => {
 	const testPaymentProcessingCallback = jest.fn();
 	const testPaymentProcessingCallback2 = jest.fn();
 	const currentObservers: EventObserversType = {
 		payment_setup: new Map(),
 	};
-	currentObservers.payment_setup.set( 'test', {
+	currentObservers.payment_setup.set('test', {
 		callback: testPaymentProcessingCallback,
 		priority: 10,
-	} );
-	currentObservers.payment_setup.set( 'test2', {
+	});
+	currentObservers.payment_setup.set('test2', {
 		callback: testPaymentProcessingCallback2,
 		priority: 10,
-	} );
+	});
 
-	describe( '__internalEmitPaymentProcessingEvent', () => {
-		beforeEach( () => {
+	describe('__internalEmitPaymentProcessingEvent', () => {
+		beforeEach(() => {
 			jest.resetAllMocks();
-		} );
-		it( 'calls all registered observers', async () => {
+		});
+		it('calls all registered observers', async () => {
 			const {
 				__internalEmitPaymentProcessingEvent:
 					__internalEmitPaymentProcessingEventFromStore,
-			} = wpDataFunctions.dispatch( paymentStore );
+			} = wpDataFunctions.dispatch(paymentStore);
 			await __internalEmitPaymentProcessingEventFromStore(
 				currentObservers,
 				jest.fn()
 			);
-			expect( testPaymentProcessingCallback ).toHaveBeenCalled();
-			expect( testPaymentProcessingCallback2 ).toHaveBeenCalled();
-		} );
+			expect(testPaymentProcessingCallback).toHaveBeenCalled();
+			expect(testPaymentProcessingCallback2).toHaveBeenCalled();
+		});
 
-		it( 'sets metadata if successful observers return it', async () => {
-			const testSuccessCallbackWithMetadata = jest.fn().mockReturnValue( {
+		it('sets metadata if successful observers return it', async () => {
+			const testSuccessCallbackWithMetadata = jest.fn().mockReturnValue({
 				type: 'success',
 				meta: {
 					billingAddress: testBillingAddress,
 					shippingAddress: testShippingAddress,
 					paymentMethodData: testPaymentMethodData,
 				},
-			} );
+			});
 
-			currentObservers.payment_setup.set( 'test3', {
+			currentObservers.payment_setup.set('test3', {
 				callback: testSuccessCallbackWithMetadata,
 				priority: 10,
-			} );
+			});
 
 			const setBillingAddressMock = jest.fn();
 			const setShippingAddressMock = jest.fn();
@@ -88,13 +88,13 @@ describe( 'wc/store/payment thunks', () => {
 			const registryMock = {
 				dispatch: jest
 					.fn()
-					.mockImplementation( ( store: typeof paymentStore ) => {
+					.mockImplementation((store: typeof paymentStore) => {
 						return {
-							...wpDataFunctions.dispatch( store ),
+							...wpDataFunctions.dispatch(store),
 							setBillingAddress: setBillingAddressMock,
 							setShippingAddress: setShippingAddressMock,
 						};
-					} ),
+					}),
 			};
 
 			// Await here because the function returned by the __internalEmitPaymentProcessingEvent action creator
@@ -102,52 +102,52 @@ describe( 'wc/store/payment thunks', () => {
 			await __internalEmitPaymentProcessingEvent(
 				currentObservers,
 				jest.fn()
-			)( {
+			)({
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore - it would be too much work to mock the entire registry, so we only mock dispatch on it,
 				// which is all we need to test this thunk.
 				registry: registryMock,
 				dispatch: {
-					...wpDataFunctions.dispatch( paymentStore ),
+					...wpDataFunctions.dispatch(paymentStore),
 					__internalSetPaymentMethodData: setPaymentMethodDataMock,
 				},
-			} );
+			});
 
-			expect( setBillingAddressMock ).toHaveBeenCalledWith(
+			expect(setBillingAddressMock).toHaveBeenCalledWith(
 				testBillingAddress
 			);
-			expect( setShippingAddressMock ).toHaveBeenCalledWith(
+			expect(setShippingAddressMock).toHaveBeenCalledWith(
 				testShippingAddress
 			);
-			expect( setPaymentMethodDataMock ).toHaveBeenCalledWith(
+			expect(setPaymentMethodDataMock).toHaveBeenCalledWith(
 				testPaymentMethodData
 			);
-		} );
-		it( 'sets metadata if failed observers return it', async () => {
-			const testFailingCallbackWithMetadata = jest.fn().mockReturnValue( {
+		});
+		it('sets metadata if failed observers return it', async () => {
+			const testFailingCallbackWithMetadata = jest.fn().mockReturnValue({
 				type: 'failure',
 				meta: {
 					billingAddress: testBillingAddress,
 					paymentMethodData: testPaymentMethodData,
 				},
-			} );
+			});
 
-			currentObservers.payment_setup.set( 'test4', {
+			currentObservers.payment_setup.set('test4', {
 				callback: testFailingCallbackWithMetadata,
 				priority: 10,
-			} );
+			});
 
 			const setBillingAddressMock = jest.fn();
 			const setPaymentMethodDataMock = jest.fn();
 			const registryMock = {
 				dispatch: jest
 					.fn()
-					.mockImplementation( ( store: typeof paymentStore ) => {
+					.mockImplementation((store: typeof paymentStore) => {
 						return {
-							...wpDataFunctions.dispatch( store ),
+							...wpDataFunctions.dispatch(store),
 							setBillingAddress: setBillingAddressMock,
 						};
-					} ),
+					}),
 			};
 
 			// Await here because the function returned by the __internalEmitPaymentProcessingEvent action creator
@@ -155,52 +155,52 @@ describe( 'wc/store/payment thunks', () => {
 			await __internalEmitPaymentProcessingEvent(
 				currentObservers,
 				jest.fn()
-			)( {
+			)({
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore - it would be too much work to mock the entire registry, so we only mock dispatch on it,
 				// which is all we need to test this thunk.
 				registry: registryMock,
 				dispatch: {
-					...wpDataFunctions.dispatch( paymentStore ),
+					...wpDataFunctions.dispatch(paymentStore),
 					__internalSetPaymentMethodData: setPaymentMethodDataMock,
 				},
-			} );
+			});
 
-			expect( setBillingAddressMock ).toHaveBeenCalledWith(
+			expect(setBillingAddressMock).toHaveBeenCalledWith(
 				testBillingAddress
 			);
-			expect( setPaymentMethodDataMock ).toHaveBeenCalledWith(
+			expect(setPaymentMethodDataMock).toHaveBeenCalledWith(
 				testPaymentMethodData
 			);
-		} );
-		it( 'sets payment status to error if one observer is successful, but another errors', async () => {
+		});
+		it('sets payment status to error if one observer is successful, but another errors', async () => {
 			const testErrorCallbackWithMetadata = jest
 				.fn()
-				.mockImplementation( () => {
+				.mockImplementation(() => {
 					return {
 						type: 'error',
 					};
-				} );
+				});
 
-			const testSuccessCallback = jest.fn().mockReturnValue( {
+			const testSuccessCallback = jest.fn().mockReturnValue({
 				type: 'success',
-			} );
+			});
 
-			currentObservers.payment_setup.set( 'test5', {
+			currentObservers.payment_setup.set('test5', {
 				callback: testErrorCallbackWithMetadata,
 				priority: 10,
-			} );
-			currentObservers.payment_setup.set( 'test6', {
+			});
+			currentObservers.payment_setup.set('test6', {
 				callback: testSuccessCallback,
 				priority: 9,
-			} );
+			});
 
 			const setPaymentErrorMock = jest.fn();
 			const setPaymentReadyMock = jest.fn();
 			const registryMock = {
 				dispatch: jest
 					.fn()
-					.mockImplementation( wpDataFunctions.dispatch ),
+					.mockImplementation(wpDataFunctions.dispatch),
 			};
 
 			// Await here because the function returned by the __internalEmitPaymentProcessingEvent action creator
@@ -208,22 +208,22 @@ describe( 'wc/store/payment thunks', () => {
 			await __internalEmitPaymentProcessingEvent(
 				currentObservers,
 				jest.fn()
-			)( {
+			)({
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore - it would be too much work to mock the entire registry, so we only mock dispatch on it,
 				// which is all we need to test this thunk.
 				registry: registryMock,
 				dispatch: {
-					...wpDataFunctions.dispatch( paymentStore ),
+					...wpDataFunctions.dispatch(paymentStore),
 					__internalSetPaymentError: setPaymentErrorMock,
 					__internalSetPaymentReady: setPaymentReadyMock,
 				},
-			} );
+			});
 
 			// The observer throwing will cause this.
 			//expect( console ).toHaveErroredWith( new Error( 'test error' ) );
-			expect( setPaymentErrorMock ).toHaveBeenCalled();
-			expect( setPaymentReadyMock ).not.toHaveBeenCalled();
-		} );
-	} );
-} );
+			expect(setPaymentErrorMock).toHaveBeenCalled();
+			expect(setPaymentReadyMock).not.toHaveBeenCalled();
+		});
+	});
+});

@@ -10,25 +10,25 @@ import userEvent from '@testing-library/user-event';
 import { ResetStylesControl } from '../settings-email-color-palette-control';
 import type { DefaultColors } from '../settings-email-color-palette-slotfill';
 
-type JQueryAdapter = ( selector: string ) => {
+type JQueryAdapter = (selector: string) => {
 	length: number;
-	on: ( eventName: string, listener: () => void ) => void;
-	off: ( eventName: string, listener: () => void ) => void;
+	on: (eventName: string, listener: () => void) => void;
+	off: (eventName: string, listener: () => void) => void;
 };
 
-const jQueryAdapter: JQueryAdapter = ( selector ) => {
-	const elements = Array.from( document.querySelectorAll( selector ) );
+const jQueryAdapter: JQueryAdapter = (selector) => {
+	const elements = Array.from(document.querySelectorAll(selector));
 
 	return {
 		length: elements.length,
-		on: ( eventName, listener ) => {
-			elements.forEach( ( element ) =>
-				element.addEventListener( eventName, listener )
+		on: (eventName, listener) => {
+			elements.forEach((element) =>
+				element.addEventListener(eventName, listener)
 			);
 		},
-		off: ( eventName, listener ) => {
-			elements.forEach( ( element ) =>
-				element.removeEventListener( eventName, listener )
+		off: (eventName, listener) => {
+			elements.forEach((element) =>
+				element.removeEventListener(eventName, listener)
 			);
 		},
 	};
@@ -79,33 +79,33 @@ const themeColors: DefaultColors = {
 };
 
 const changeAccent = () => {
-	fireEvent.change( screen.getByLabelText( 'Accent' ), {
+	fireEvent.change(screen.getByLabelText('Accent'), {
 		target: { value: '#abcdef' },
-	} );
+	});
 };
 
-describe( 'ResetStylesControl', () => {
-	let settingsFixture = document.createElement( 'div' );
-	let autoSyncInput = document.createElement( 'input' );
-	let unmount: undefined | ( () => void );
+describe('ResetStylesControl', () => {
+	let settingsFixture = document.createElement('div');
+	let autoSyncInput = document.createElement('input');
+	let unmount: undefined | (() => void);
 
-	const appendColorInputs = ( colors: DefaultColors ) => {
-		for ( const field of colorFields ) {
-			const label = document.createElement( 'label' );
-			const input = document.createElement( 'input' );
+	const appendColorInputs = (colors: DefaultColors) => {
+		for (const field of colorFields) {
+			const label = document.createElement('label');
+			const input = document.createElement('input');
 
 			label.htmlFor = field.id;
 			label.textContent = field.label;
 			input.id = field.id;
-			input.value = colors[ field.key ];
-			settingsFixture?.append( label, input );
+			input.value = colors[field.key];
+			settingsFixture?.append(label, input);
 		}
 	};
 
-	const expectColors = ( colors: DefaultColors ) => {
-		for ( const field of colorFields ) {
-			expect( screen.getByLabelText( field.label ) ).toHaveValue(
-				colors[ field.key ]
+	const expectColors = (colors: DefaultColors) => {
+		for (const field of colorFields) {
+			expect(screen.getByLabelText(field.label)).toHaveValue(
+				colors[field.key]
 			);
 		}
 	};
@@ -113,87 +113,87 @@ describe( 'ResetStylesControl', () => {
 	const renderWithThemeDefaults = () => {
 		const renderResult = render(
 			<ResetStylesControl
-				defaultColors={ initialColors }
+				defaultColors={initialColors}
 				hasThemeJson
 				autoSync
-				autoSyncInput={ autoSyncInput }
+				autoSyncInput={autoSyncInput}
 			/>
 		);
 		unmount = renderResult.unmount;
 
 		renderResult.rerender(
 			<ResetStylesControl
-				defaultColors={ themeColors }
+				defaultColors={themeColors}
 				hasThemeJson
 				autoSync
-				autoSyncInput={ autoSyncInput }
+				autoSyncInput={autoSyncInput}
 			/>
 		);
 	};
 
-	beforeEach( () => {
+	beforeEach(() => {
 		unmount = undefined;
-		settingsFixture = document.createElement( 'div' );
-		settingsFixture.setAttribute( 'aria-label', 'Email color settings' );
-		document.body.appendChild( settingsFixture );
-		appendColorInputs( initialColors );
+		settingsFixture = document.createElement('div');
+		settingsFixture.setAttribute('aria-label', 'Email color settings');
+		document.body.appendChild(settingsFixture);
+		appendColorInputs(initialColors);
 
-		autoSyncInput = document.createElement( 'input' );
+		autoSyncInput = document.createElement('input');
 		autoSyncInput.type = 'hidden';
 		autoSyncInput.id = 'woocommerce_email_auto_sync_with_theme';
 		autoSyncInput.value = 'yes';
-		settingsFixture.appendChild( autoSyncInput );
+		settingsFixture.appendChild(autoSyncInput);
 
-		Object.defineProperty( globalThis, 'jQuery', {
+		Object.defineProperty(globalThis, 'jQuery', {
 			configurable: true,
 			value: jQueryAdapter,
-		} );
-	} );
+		});
+	});
 
-	afterEach( () => {
+	afterEach(() => {
 		unmount?.();
 		settingsFixture.remove();
-		delete ( globalThis as typeof globalThis & { jQuery?: JQueryAdapter } )
+		delete (globalThis as typeof globalThis & { jQuery?: JQueryAdapter })
 			.jQuery;
-	} );
+	});
 
-	it( 'shows sync and undo controls after a color change', () => {
+	it('shows sync and undo controls after a color change', () => {
 		renderWithThemeDefaults();
 		changeAccent();
 
-		expect( autoSyncInput ).toHaveValue( 'no' );
+		expect(autoSyncInput).toHaveValue('no');
 		expect(
-			screen.getByRole( 'button', { name: 'Sync with theme' } )
+			screen.getByRole('button', { name: 'Sync with theme' })
 		).toBeVisible();
 		expect(
-			screen.getByRole( 'button', { name: 'Undo changes' } )
+			screen.getByRole('button', { name: 'Undo changes' })
 		).toBeVisible();
-	} );
+	});
 
-	it( 'syncs theme defaults and re-enables auto-sync', async () => {
+	it('syncs theme defaults and re-enables auto-sync', async () => {
 		renderWithThemeDefaults();
 		changeAccent();
 
 		await userEvent.click(
-			screen.getByRole( 'button', { name: 'Sync with theme' } )
+			screen.getByRole('button', { name: 'Sync with theme' })
 		);
 
-		expectColors( themeColors );
-		expect( autoSyncInput ).toHaveValue( 'yes' );
-	} );
+		expectColors(themeColors);
+		expect(autoSyncInput).toHaveValue('yes');
+	});
 
-	it( 'restores the initial colors and auto-sync setting with Undo', async () => {
+	it('restores the initial colors and auto-sync setting with Undo', async () => {
 		renderWithThemeDefaults();
 		changeAccent();
 
 		await userEvent.click(
-			screen.getByRole( 'button', { name: 'Undo changes' } )
+			screen.getByRole('button', { name: 'Undo changes' })
 		);
 
-		expectColors( initialColors );
-		expect( autoSyncInput ).toHaveValue( 'yes' );
+		expectColors(initialColors);
+		expect(autoSyncInput).toHaveValue('yes');
 		expect(
-			screen.queryByRole( 'button', { name: 'Undo changes' } )
+			screen.queryByRole('button', { name: 'Undo changes' })
 		).not.toBeInTheDocument();
-	} );
-} );
+	});
+});

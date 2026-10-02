@@ -15,12 +15,12 @@ import sharedAttributes, {
 import { Edit } from './edit';
 import metadata from './block.json';
 
-registerBlockType( metadata, {
-	title: __( 'Newest Products', 'woocommerce' ),
+registerBlockType(metadata, {
+	title: __('Newest Products', 'woocommerce'),
 	icon: {
 		src: (
 			<Icon
-				icon={ sparkles }
+				icon={sparkles}
 				className="wc-block-editor-components-block-icon wc-block-editor-components-block-icon--sparkles"
 			/>
 		),
@@ -34,10 +34,10 @@ registerBlockType( metadata, {
 			{
 				type: 'block',
 				blocks: sharedAttributeBlockTypes.filter(
-					( value ) => value !== 'woocommerce/product-new'
+					(value) => value !== 'woocommerce/product-new'
 				),
-				transform: ( attributes ) =>
-					createBlock( 'woocommerce/product-new', attributes ),
+				transform: (attributes) =>
+					createBlock('woocommerce/product-new', attributes),
 			},
 		],
 	},
@@ -50,4 +50,4 @@ registerBlockType( metadata, {
 	save() {
 		return null;
 	},
-} );
+});

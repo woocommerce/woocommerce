@@ -10,7 +10,7 @@ interface ExpandableSearchListItemProps extends RenderItemArgs {
 	isLoading: boolean;
 }
 
-const ExpandableSearchListItem = ( {
+const ExpandableSearchListItem = ({
 	className,
 	item,
 	isSelected,
@@ -18,32 +18,32 @@ const ExpandableSearchListItem = ( {
 	onSelect,
 	disabled,
 	...rest
-}: ExpandableSearchListItemProps ): JSX.Element => {
+}: ExpandableSearchListItemProps): JSX.Element => {
 	return (
 		<>
 			<SearchListItem
-				{ ...rest }
-				key={ item.id }
-				{ ...( className && { className } ) }
-				isSelected={ isSelected }
-				item={ item }
-				onSelect={ onSelect }
-				{ ...( disabled && { disabled } ) }
+				{...rest}
+				key={item.id}
+				{...(className && { className })}
+				isSelected={isSelected}
+				item={item}
+				onSelect={onSelect}
+				{...(disabled && { disabled })}
 			/>
-			{ isSelected && isLoading && (
+			{isSelected && isLoading && (
 				<div
 					key="loading"
-					className={ clsx(
+					className={clsx(
 						'woocommerce-search-list__item',
 						'woocommerce-product-attributes__item',
 						'depth-1',
 						'is-loading',
 						'is-not-active'
-					) }
+					)}
 				>
 					<Spinner />
 				</div>
-			) }
+			)}
 		</>
 	);
 };

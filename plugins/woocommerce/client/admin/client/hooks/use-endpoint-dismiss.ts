@@ -30,17 +30,17 @@ export const useEndpointDismiss = (
 	path: string,
 	initial: boolean
 ): DismissState => {
-	const [ isDismissed, setIsDismissed ] = useState< boolean >( initial );
+	const [isDismissed, setIsDismissed] = useState<boolean>(initial);
 
 	const onDismiss = () => {
 		// Optimistically hide the card, then persist the dismissal site-wide.
-		setIsDismissed( true );
-		apiFetch( { path, method: 'POST' } ).catch( ( response ) => {
+		setIsDismissed(true);
+		apiFetch({ path, method: 'POST' }).catch((response) => {
 			// Restore the card and surface the failure so the state stays
 			// accurate and the merchant is not left without feedback.
-			setIsDismissed( false );
-			createNoticesFromResponse( response );
-		} );
+			setIsDismissed(false);
+			createNoticesFromResponse(response);
+		});
 	};
 
 	return { isDismissed, hasResolved: true, onDismiss };

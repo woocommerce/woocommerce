@@ -9,9 +9,9 @@ import { autop } from '@wordpress/autop';
  * @param {string} htmlString String to remove tags from.
  * @return {string} Plain text string.
  */
-export const removeTags = ( htmlString: string ) => {
+export const removeTags = (htmlString: string) => {
 	const tagsRegExp = /<\/?[a-z][^>]*?>/gi;
-	return htmlString.replace( tagsRegExp, '' );
+	return htmlString.replace(tagsRegExp, '');
 };
 
 /**
@@ -21,8 +21,8 @@ export const removeTags = ( htmlString: string ) => {
  * @param {string} moreText Text to append.
  * @return {string} String with appended characters.
  */
-export const appendMoreText = ( text: string, moreText: string ) => {
-	return text.replace( /[\s|\.\,]+$/i, '' ) + moreText;
+export const appendMoreText = (text: string, moreText: string) => {
+	return text.replace(/[\s|\.\,]+$/i, '') + moreText;
 };
 
 /**
@@ -40,21 +40,18 @@ export const trimWords = (
 	moreText = '&hellip;',
 	useAutop = true
 ) => {
-	const textToTrim = removeTags( text );
-	const trimmedText = textToTrim
-		.split( ' ' )
-		.splice( 0, maxLength )
-		.join( ' ' );
+	const textToTrim = removeTags(text);
+	const trimmedText = textToTrim.split(' ').splice(0, maxLength).join(' ');
 
-	if ( trimmedText === textToTrim ) {
-		return useAutop ? autop( textToTrim ) : textToTrim;
+	if (trimmedText === textToTrim) {
+		return useAutop ? autop(textToTrim) : textToTrim;
 	}
 
-	if ( ! useAutop ) {
-		return appendMoreText( trimmedText, moreText );
+	if (!useAutop) {
+		return appendMoreText(trimmedText, moreText);
 	}
 
-	return autop( appendMoreText( trimmedText, moreText ) );
+	return autop(appendMoreText(trimmedText, moreText));
 };
 
 /**
@@ -74,27 +71,27 @@ export const trimCharacters = (
 	moreText = '&hellip;',
 	useAutop = true
 ) => {
-	const textToTrim = removeTags( text );
-	const trimmedText = textToTrim.slice( 0, maxLength );
+	const textToTrim = removeTags(text);
+	const trimmedText = textToTrim.slice(0, maxLength);
 
-	if ( trimmedText === textToTrim ) {
-		return useAutop ? autop( textToTrim ) : textToTrim;
+	if (trimmedText === textToTrim) {
+		return useAutop ? autop(textToTrim) : textToTrim;
 	}
 
-	if ( includeSpaces ) {
-		return autop( appendMoreText( trimmedText, moreText ) );
+	if (includeSpaces) {
+		return autop(appendMoreText(trimmedText, moreText));
 	}
 
-	const matchSpaces = trimmedText.match( /([\s]+)/g );
+	const matchSpaces = trimmedText.match(/([\s]+)/g);
 	const spaceCount = matchSpaces ? matchSpaces.length : 0;
 	const trimmedTextExcludingSpaces = textToTrim.slice(
 		0,
 		maxLength + spaceCount
 	);
 
-	if ( ! useAutop ) {
-		return appendMoreText( trimmedTextExcludingSpaces, moreText );
+	if (!useAutop) {
+		return appendMoreText(trimmedTextExcludingSpaces, moreText);
 	}
 
-	return autop( appendMoreText( trimmedTextExcludingSpaces, moreText ) );
+	return autop(appendMoreText(trimmedTextExcludingSpaces, moreText));
 };

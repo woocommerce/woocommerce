@@ -92,31 +92,31 @@ export interface EmitResponseProps {
 
 export interface EventRegistrationProps {
 	// Deprecated in favour of onCheckoutFail.
-	onCheckoutAfterProcessingWithError: ReturnType< typeof emitterCallback >;
+	onCheckoutAfterProcessingWithError: ReturnType<typeof emitterCallback>;
 	// Deprecated in favour of onCheckoutSuccess.
-	onCheckoutAfterProcessingWithSuccess: ReturnType< typeof emitterCallback >;
+	onCheckoutAfterProcessingWithSuccess: ReturnType<typeof emitterCallback>;
 	// Used to subscribe callbacks firing before checkout begins processing.
-	onCheckoutBeforeProcessing: ReturnType< typeof emitterCallback >;
+	onCheckoutBeforeProcessing: ReturnType<typeof emitterCallback>;
 	// Used to register a callback that will fire if the api call to /checkout is successful
-	onCheckoutSuccess: ReturnType< typeof emitterCallback >;
+	onCheckoutSuccess: ReturnType<typeof emitterCallback>;
 	// Used to register a callback that will fire if the api call to /checkout fails
-	onCheckoutFail: ReturnType< typeof emitterCallback >;
+	onCheckoutFail: ReturnType<typeof emitterCallback>;
 	// Used to register a callback that will fire when the checkout performs validation on the form
-	onCheckoutValidation: ReturnType< typeof emitterCallback >;
+	onCheckoutValidation: ReturnType<typeof emitterCallback>;
 	// Deprecated in favour of onCheckoutValidation.
-	onCheckoutValidationBeforeProcessing: ReturnType< typeof emitterCallback >;
+	onCheckoutValidationBeforeProcessing: ReturnType<typeof emitterCallback>;
 	// Deprecated in favour of onPaymentSetup
-	onPaymentProcessing: ReturnType< typeof emitterCallback >;
+	onPaymentProcessing: ReturnType<typeof emitterCallback>;
 	// Event registration callback for registering observers for the payment setup event.
-	onPaymentSetup: ReturnType< typeof emitterCallback >;
+	onPaymentSetup: ReturnType<typeof emitterCallback>;
 	// Used to subscribe callbacks that will fire when retrieving shipping rates failed.
-	onShippingRateFail: ReturnType< typeof emitterCallback >;
+	onShippingRateFail: ReturnType<typeof emitterCallback>;
 	// Used to subscribe callbacks that will fire after selecting a shipping rate unsuccessfully.
-	onShippingRateSelectFail: ReturnType< typeof emitterCallback >;
+	onShippingRateSelectFail: ReturnType<typeof emitterCallback>;
 	// Used to subscribe callbacks that will fire after selecting a shipping rate successfully.
-	onShippingRateSelectSuccess: ReturnType< typeof emitterCallback >;
+	onShippingRateSelectSuccess: ReturnType<typeof emitterCallback>;
 	// Used to subscribe callbacks that will fire when shipping rates for a given address have been received successfully.
-	onShippingRateSuccess: ReturnType< typeof emitterCallback >;
+	onShippingRateSuccess: ReturnType<typeof emitterCallback>;
 }
 
 export interface ShippingDataProps {
@@ -125,14 +125,14 @@ export interface ShippingDataProps {
 	// True if cart requires shipping.
 	needsShipping: boolean;
 	// An object containing package IDs as the key and selected rate as the value (rate ids).
-	selectedRates: Record< string, unknown >;
+	selectedRates: Record<string, unknown>;
 	// A function for setting selected rates (receives id).
 	setSelectedRates: (
 		newShippingRateId: string,
 		packageId: string | number
 	) => unknown;
 	// A function for setting the shipping address.
-	setShippingAddress: ( data: CartResponseShippingAddress ) => void;
+	setShippingAddress: (data: CartResponseShippingAddress) => void;
 	// The current set shipping address.
 	shippingAddress: CartResponseShippingAddress;
 	// All the available shipping rates.
@@ -185,7 +185,7 @@ export type PaymentMethodInterface = {
 		isDoingExpressPayment: boolean;
 	};
 	// Deprecated. For setting an error (error message string) for express payment methods. Does not change payment status.
-	setExpressPaymentError: ( errorMessage?: string ) => void;
+	setExpressPaymentError: (errorMessage?: string) => void;
 	// Various data related to shipping.
 	shippingData: ShippingDataProps;
 	// Various shipping status helpers.
@@ -201,7 +201,7 @@ export type PaymentMethodInterface = {
 export type CustomPlaceOrderButtonProps = PaymentMethodInterface & {
 	// Validates the checkout form without starting processing. Returns a promise with validation results.
 	// If validation fails, automatically scrolls to the first error.
-	validate: () => Promise< { hasError: boolean } >;
+	validate: () => Promise<{ hasError: boolean }>;
 	// Whether checkout is waiting for server processing.
 	waitingForProcessing: boolean;
 	// Whether checkout is waiting to redirect after success.
@@ -218,4 +218,4 @@ export type CustomPlaceOrderButtonProps = PaymentMethodInterface & {
  * Type for custom place order button components.
  */
 export type CustomPlaceOrderButtonComponent =
-	ComponentType< CustomPlaceOrderButtonProps >;
+	ComponentType<CustomPlaceOrderButtonProps>;

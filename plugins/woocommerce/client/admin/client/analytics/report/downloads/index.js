@@ -21,33 +21,33 @@ export default class DownloadsReport extends Component {
 		return (
 			<Fragment>
 				<ReportHeader
-					query={ query }
-					path={ path }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
+					query={query}
+					path={path}
+					filters={filters}
+					advancedFilters={advancedFilters}
 					report="downloads"
 				/>
 				<ReportSummary
-					charts={ charts }
+					charts={charts}
 					endpoint="downloads"
-					query={ query }
-					selectedChart={ getSelectedChart( query.chart, charts ) }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
+					query={query}
+					selectedChart={getSelectedChart(query.chart, charts)}
+					filters={filters}
+					advancedFilters={advancedFilters}
 				/>
 				<ReportChart
-					charts={ charts }
+					charts={charts}
 					endpoint="downloads"
-					path={ path }
-					query={ query }
-					selectedChart={ getSelectedChart( query.chart, charts ) }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
+					path={path}
+					query={query}
+					selectedChart={getSelectedChart(query.chart, charts)}
+					filters={filters}
+					advancedFilters={advancedFilters}
 				/>
 				<DownloadsReportTable
-					query={ query }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
+					query={query}
+					filters={filters}
+					advancedFilters={advancedFilters}
 				/>
 			</Fragment>
 		);

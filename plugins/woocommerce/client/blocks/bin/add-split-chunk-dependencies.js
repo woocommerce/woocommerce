@@ -11,10 +11,10 @@
 // This means for any split chunk you build you'll only need to register it in PHP, but all
 // files that depend on it will automatically include it as a dependency.
 class AddSplitChunkDependencies {
-	apply( compiler ) {
+	apply(compiler) {
 		compiler.hooks.thisCompilation.tap(
 			'AddStableChunksToAssets',
-			( compilation ) => {
+			(compilation) => {
 				compilation.hooks.processAssets.tap(
 					{
 						name: 'AddStableChunksToAssets',
@@ -24,25 +24,23 @@ class AddSplitChunkDependencies {
 					() => {
 						const { chunks } = compilation;
 
-						const splitChunks = chunks.filter( ( chunk ) => {
-							return chunk?.chunkReason?.includes( 'split' );
-						} );
+						const splitChunks = chunks.filter((chunk) => {
+							return chunk?.chunkReason?.includes('split');
+						});
 
 						// find files that have an asset.php file
-						const chunksToAddSplitsTo = chunks.filter(
-							( chunk ) => {
-								return (
-									! chunk?.chunkReason?.includes( 'split' ) &&
-									chunk.files.find( ( file ) =>
-										file.endsWith( 'asset.php' )
-									)
-								);
-							}
-						);
+						const chunksToAddSplitsTo = chunks.filter((chunk) => {
+							return (
+								!chunk?.chunkReason?.includes('split') &&
+								chunk.files.find((file) =>
+									file.endsWith('asset.php')
+								)
+							);
+						});
 
-						for ( const chunk of chunksToAddSplitsTo ) {
-							const assetFile = chunk.files.find( ( file ) =>
-								file.endsWith( 'asset.php' )
+						for (const chunk of chunksToAddSplitsTo) {
+							const assetFile = chunk.files.find((file) =>
+								file.endsWith('asset.php')
 							);
 
 							const assetFileContent = compilation.assets[
@@ -52,15 +50,15 @@ class AddSplitChunkDependencies {
 								.toString();
 
 							const extraDependencies = splitChunks
-								.map( ( c ) => `'${ c.name }'` )
-								.join( ', ' );
+								.map((c) => `'${c.name}'`)
+								.join(', ');
 
 							const updatedFileContent = assetFileContent.replace(
 								/('dependencies'\s*=>\s*array\s*\(\s*)([^)]*)\)/,
-								`$1${ extraDependencies }, $2)`
+								`$1${extraDependencies}, $2)`
 							);
 
-							compilation.assets[ assetFile ] = {
+							compilation.assets[assetFile] = {
 								source: () => updatedFileContent,
 								size: () => updatedFileContent.length,
 							};

@@ -30,7 +30,7 @@ export const LYS_RECENTLY_ACTIONED_TASKS_KEY = 'lys_recently_actioned_tasks';
 export const {
 	getWithExpiry: getRecentlyActionedTasks,
 	setWithExpiry: saveRecentlyActionedTask,
-} = createStorageUtils< string[] >(
+} = createStorageUtils<string[]>(
 	LYS_RECENTLY_ACTIONED_TASKS_KEY,
 	SEVEN_DAYS_IN_SECONDS
 );
@@ -53,12 +53,12 @@ export const getLysTasklist = async () => {
 	 */
 	const filteredTasks = applyFilters(
 		'woocommerce_launch_your_store_tasklist_whitelist',
-		[ ...LYS_TASKS_WHITELIST ]
+		[...LYS_TASKS_WHITELIST]
 	) as string[];
 
-	const tasklist = await resolveSelect( onboardingStore ).getTaskListsByIds( [
+	const tasklist = await resolveSelect(onboardingStore).getTaskListsByIds([
 		'setup',
-	] );
+	]);
 
 	const recentlyActionedTasks = getRecentlyActionedTasks() ?? [];
 
@@ -67,18 +67,18 @@ export const getLysTasklist = async () => {
 	 * 1. part of the whitelist of tasks to show in LYS
 	 * 2. either not completed or recently actioned
 	 */
-	const visibleTasks = tasklist[ 0 ].tasks.filter(
-		( task: TaskType ) =>
-			filteredTasks.includes( task.id ) &&
-			( ! task.isComplete || recentlyActionedTasks.includes( task.id ) )
+	const visibleTasks = tasklist[0].tasks.filter(
+		(task: TaskType) =>
+			filteredTasks.includes(task.id) &&
+			(!task.isComplete || recentlyActionedTasks.includes(task.id))
 	);
 
 	return {
-		...tasklist[ 0 ],
+		...tasklist[0],
 		tasks: visibleTasks,
 		recentlyActionedTasks,
-		fullLysTaskList: tasklist[ 0 ].tasks.filter( ( task: TaskType ) =>
-			filteredTasks.includes( task.id )
+		fullLysTaskList: tasklist[0].tasks.filter((task: TaskType) =>
+			filteredTasks.includes(task.id)
 		),
 	};
 };
@@ -96,7 +96,7 @@ export const getPaymentsTaskFromLysTasklist = async (): Promise<
 		const tasklist = await getLysTasklist();
 
 		// Validate that fullLysTaskList is an array
-		if ( ! Array.isArray( tasklist?.fullLysTaskList ) ) {
+		if (!Array.isArray(tasklist?.fullLysTaskList)) {
 			// eslint-disable-next-line no-console
 			console.error(
 				'Invalid tasklist data: fullLysTaskList is not an array'
@@ -104,40 +104,38 @@ export const getPaymentsTaskFromLysTasklist = async (): Promise<
 			return undefined;
 		}
 
-		return tasklist.fullLysTaskList.find(
-			( task ) => task.id === 'payments'
-		);
-	} catch ( error ) {
+		return tasklist.fullLysTaskList.find((task) => task.id === 'payments');
+	} catch (error) {
 		// eslint-disable-next-line no-console
-		console.error( 'Error fetching payments task:', error );
+		console.error('Error fetching payments task:', error);
 		return undefined;
 	}
 };
 
-export function taskClickedAction( event: {
+export function taskClickedAction(event: {
 	type: 'TASK_CLICKED';
 	task: TaskType;
-} ) {
+}) {
 	const recentlyActionedTasks = getRecentlyActionedTasks() ?? [];
-	saveRecentlyActionedTask( [ ...recentlyActionedTasks, event.task.id ] );
-	window.sessionStorage.setItem( 'lysWaiting', 'yes' );
+	saveRecentlyActionedTask([...recentlyActionedTasks, event.task.id]);
+	window.sessionStorage.setItem('lysWaiting', 'yes');
 
 	const { setWithExpiry: saveTaskReferral } = accessTaskReferralStorage(
 		{ taskId: event.task.id, referralLifetime: 60 * 60 * 24 } // 24 hours
 	);
 
-	saveTaskReferral( {
+	saveTaskReferral({
 		referrer: 'launch-your-store',
 		returnUrl: getAdminLink(
 			'admin.php?page=wc-admin&path=/launch-your-store'
 		),
-	} );
+	});
 
-	recordEvent( 'launch_your_store_hub_task_clicked', {
+	recordEvent('launch_your_store_hub_task_clicked', {
 		task: event.task.id,
-	} );
+	});
 
-	if ( event.task.id === 'payments' ) {
+	if (event.task.id === 'payments') {
 		const {
 			wooPaymentsIsActive,
 			wooPaymentsSettingsCountryIsSupported,
@@ -151,15 +149,13 @@ export function taskClickedAction( event: {
 			// Only show the NOX if the store is in a WooPayments-supported geo, and:
 			wooPaymentsSettingsCountryIsSupported &&
 			// Use case 1: Merchant has no payment extensions installed, and their store is in a WooPayments-supported geo.
-			( ( ! wooPaymentsIsActive &&
-				! wooPaymentsHasOtherProvidersEnabled ) ||
+			((!wooPaymentsIsActive && !wooPaymentsHasOtherProvidersEnabled) ||
 				// Use case 2: Merchant has the WooPayments extension installed, but they have not completed setup.
-				( wooPaymentsIsActive && ! wooPaymentsIsOnboarded ) ||
+				(wooPaymentsIsActive && !wooPaymentsIsOnboarded) ||
 				// Use case 3: Merchant has the WooPayments extension installed and configured with a test account.
-				( wooPaymentsIsActive && wooPaymentsHasTestAccount ) ||
+				(wooPaymentsIsActive && wooPaymentsHasTestAccount) ||
 				// Use case 4: Merchant has multiple payment extensions installed but not set up, and the WooPayments extension is one of them.
-				( wooPaymentsIsActive &&
-					wooPaymentsHasOtherProvidersNeedSetup ) )
+				(wooPaymentsIsActive && wooPaymentsHasOtherProvidersNeedSetup))
 		) {
 			// Record the "modal" being opened to keep consistency with the Payments Settings flow.
 			recordPaymentsOnboardingEvent(
@@ -175,32 +171,32 @@ export function taskClickedAction( event: {
 		// Otherwise, we navigate to the task's action URL - this will generally be the Payments Settings page.
 	}
 
-	if ( event.task.actionUrl ) {
-		navigateTo( { url: event.task.actionUrl } );
+	if (event.task.actionUrl) {
+		navigateTo({ url: event.task.actionUrl });
 	} else {
-		navigateTo( {
-			url: getNewPath( { task: event.task.id }, '/', {} ),
-		} );
+		navigateTo({
+			url: getNewPath({ task: event.task.id }, '/', {}),
+		});
 	}
 }
 
-export const CompletedTaskItem = ( {
+export const CompletedTaskItem = ({
 	task,
 	classNames,
 }: {
 	task: TaskType;
 	classNames?: string;
-} ) => (
+}) => (
 	<SidebarNavigationItem
-		className={ clsx( task.id, 'is-complete', classNames ) }
-		icon={ taskCompleteIcon }
-		disabled={ true }
+		className={clsx(task.id, 'is-complete', classNames)}
+		icon={taskCompleteIcon}
+		disabled={true}
 	>
-		{ task.title }
+		{task.title}
 	</SidebarNavigationItem>
 );
 
-export const IncompleteTaskItem = ( {
+export const IncompleteTaskItem = ({
 	task,
 	classNames,
 	onClick,
@@ -208,13 +204,13 @@ export const IncompleteTaskItem = ( {
 	task: TaskType;
 	classNames?: string;
 	onClick: () => void;
-} ) => (
+}) => (
 	<SidebarNavigationItem
-		className={ clsx( task.id, classNames ) }
-		icon={ taskIcons[ task.id ] }
+		className={clsx(task.id, classNames)}
+		icon={taskIcons[task.id]}
 		withChevron
-		onClick={ onClick }
+		onClick={onClick}
 	>
-		{ task.title }
+		{task.title}
 	</SidebarNavigationItem>
 );

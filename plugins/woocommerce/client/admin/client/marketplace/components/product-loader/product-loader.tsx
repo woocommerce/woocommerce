@@ -22,24 +22,24 @@ export default function ProductLoader(
 
 	return (
 		<div className="woocommerce-marketplace__product-list">
-			{ hasTitle !== false && (
+			{hasTitle !== false && (
 				<ProductListHeader
 					title=""
-					groupURL={ null }
+					groupURL={null}
 					description=""
-					groupURLText={ null }
-					groupURLType={ undefined }
+					groupURLText={null}
+					groupURLType={undefined}
 				/>
-			) }
+			)}
 			<div className="woocommerce-marketplace__product-list-content">
-				{ [ ...Array( placeholderCount ) ].map( ( element, i ) => (
+				{[...Array(placeholderCount)].map((element, i) => (
 					<ProductCard
-						key={ i }
-						isLoading={ true }
-						type={ type }
-						tracksData={ {} }
+						key={i}
+						isLoading={true}
+						type={type}
+						tracksData={{}}
 					/>
-				) ) }
+				))}
 			</div>
 		</div>
 	);

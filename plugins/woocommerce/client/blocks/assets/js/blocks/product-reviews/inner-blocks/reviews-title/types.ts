@@ -15,5 +15,4 @@ type Context = {
 	context: { postId: string; postType: string };
 };
 
-export type ProductReviewsTitleEditProps = BlockEditProps< Attributes > &
-	Context;
+export type ProductReviewsTitleEditProps = BlockEditProps<Attributes> & Context;

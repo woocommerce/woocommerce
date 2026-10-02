@@ -19,10 +19,10 @@ const MAX_COMMENTS_PER_PAGE = 100;
  * Return an object with the query args needed to fetch the default page of
  * comments.
  */
-export const useCommentQueryArgs = ( { postId }: { postId: number } ) => {
+export const useCommentQueryArgs = ({ postId }: { postId: number }) => {
 	// Initialize the query args that are not going to change.
 	const queryArgs = useMemo(
-		() => ( {
+		() => ({
 			status: 'approve',
 			order: 'asc',
 			context: 'embed',
@@ -30,7 +30,7 @@ export const useCommentQueryArgs = ( { postId }: { postId: number } ) => {
 			type: 'review',
 			// Request embedded children so we can show direct replies.
 			_embed: 'children',
-		} ),
+		}),
 		[]
 	);
 
@@ -40,7 +40,7 @@ export const useCommentQueryArgs = ( { postId }: { postId: number } ) => {
 	 * index is by using the `X-WP-TotalPages` header, which forces to make an
 	 * additional request.
 	 */
-	const useDefaultPageIndex = ( {
+	const useDefaultPageIndex = ({
 		defaultPage,
 		postId: commentPostId,
 		perPage,
@@ -49,50 +49,50 @@ export const useCommentQueryArgs = ( { postId }: { postId: number } ) => {
 		defaultPage: string;
 		postId: number;
 		perPage: number;
-		queryArgs: Record< string, unknown >;
-	} ) => {
+		queryArgs: Record<string, unknown>;
+	}) => {
 		// Store the default page indices.
-		const [ defaultPages, setDefaultPages ] = useState<
-			Record< string, number >
-		>( {} );
-		const key = `${ commentPostId }_${ perPage }`;
-		const page = defaultPages[ key ] || 0;
+		const [defaultPages, setDefaultPages] = useState<
+			Record<string, number>
+		>({});
+		const key = `${commentPostId}_${perPage}`;
+		const page = defaultPages[key] || 0;
 
-		useEffect( () => {
+		useEffect(() => {
 			// Do nothing if the page is already known or not the newest page.
-			if ( page || defaultPage !== 'newest' ) {
+			if (page || defaultPage !== 'newest') {
 				return;
 			}
 			// We need to fetch comments to know the index. Use HEAD and limit
 			// fields just to ID, to make this call as light as possible.
-			apiFetch( {
-				path: addQueryArgs( '/wp/v2/comments', {
+			apiFetch({
+				path: addQueryArgs('/wp/v2/comments', {
 					...defaultPageQueryArgs,
 					post: commentPostId,
 					per_page: perPage,
 					_fields: 'id',
-				} ),
+				}),
 				method: 'HEAD',
 				parse: false,
-			} )
-				.then( ( res ) => {
+			})
+				.then((res) => {
 					const response = res as Response;
 					const pages = parseInt(
-						response.headers.get( 'X-WP-TotalPages' ) || '1',
+						response.headers.get('X-WP-TotalPages') || '1',
 						10
 					);
-					setDefaultPages( {
+					setDefaultPages({
 						...defaultPages,
-						[ key ]: pages <= 1 ? 1 : pages, // If there are 0 pages, it means that there are no comments, but there is no 0th page.
-					} );
-				} )
-				.catch( () => {
+						[key]: pages <= 1 ? 1 : pages, // If there are 0 pages, it means that there are no comments, but there is no 0th page.
+					});
+				})
+				.catch(() => {
 					// There's no 0th page, but we can't know the number of pages, fallback to 1.
-					setDefaultPages( {
+					setDefaultPages({
 						...defaultPages,
-						[ key ]: 1,
-					} );
-				} );
+						[key]: 1,
+					});
+				});
 		}, [
 			defaultPage,
 			commentPostId,
@@ -102,7 +102,7 @@ export const useCommentQueryArgs = ( { postId }: { postId: number } ) => {
 			defaultPageQueryArgs,
 			defaultPages,
 			key,
-		] );
+		]);
 
 		// The oldest one is always the first one.
 		return defaultPage === 'newest' ? page : 1;
@@ -113,8 +113,8 @@ export const useCommentQueryArgs = ( { postId }: { postId: number } ) => {
 		pageComments,
 		commentsPerPage,
 		defaultCommentsPage: defaultPage,
-	} = useSelect( ( select ) => {
-		const { getSettings } = select( blockEditorStore ) as unknown as {
+	} = useSelect((select) => {
+		const { getSettings } = select(blockEditorStore) as unknown as {
 			getSettings(): {
 				// eslint-disable-next-line @typescript-eslint/naming-convention
 				__experimentalDiscussionSettings: {
@@ -126,66 +126,64 @@ export const useCommentQueryArgs = ( { postId }: { postId: number } ) => {
 		};
 		const { __experimentalDiscussionSettings } = getSettings();
 		return __experimentalDiscussionSettings;
-	}, [] );
+	}, []);
 
 	// WP REST API doesn't allow fetching more than max items limit set per single page of data.
 	// As for the editor performance is more important than completeness of data and fetching only the
 	// max allowed for single page should be enough for the purpose of design and laying out the page.
 	// Fetching over the limit would return an error here but would work with backend query.
 	const perPage = pageComments
-		? Math.min( commentsPerPage, MAX_COMMENTS_PER_PAGE )
+		? Math.min(commentsPerPage, MAX_COMMENTS_PER_PAGE)
 		: MAX_COMMENTS_PER_PAGE;
 
 	// Get the number of the default page.
-	const page = useDefaultPageIndex( {
+	const page = useDefaultPageIndex({
 		defaultPage,
 		postId,
 		perPage,
 		queryArgs,
-	} );
+	});
 
 	// Merge, memoize and return all query arguments, unless the default page's
 	// number is not known yet.
-	return useMemo( () => {
+	return useMemo(() => {
 		return page
 			? {
 					...queryArgs,
 					post: postId,
 					per_page: perPage,
 					page,
-			  }
+				}
 			: null;
-	}, [ page, queryArgs, postId, perPage ] );
+	}, [page, queryArgs, postId, perPage]);
 };
 
 /**
  * Generate a tree structure of comment IDs from a list of review entities.
  */
 export const useCommentTree = (
-	topLevelComments: Array< {
+	topLevelComments: Array<{
 		id: number;
-		children?: Array< { id: number } >;
-	} >,
+		children?: Array<{ id: number }>;
+	}>,
 	commentOrder: string
 ) => {
-	const commentTree = useMemo( () => {
-		const comments: Comment[] = topLevelComments.map(
-			( { id, children } ) => {
-				return {
-					commentId: id,
-					children: Array.isArray( children )
-						? children.map( ( child ) => ( {
-								commentId: child.id,
-						  } ) )
-						: [],
-				};
-			}
-		);
-		if ( commentOrder === 'desc' ) {
+	const commentTree = useMemo(() => {
+		const comments: Comment[] = topLevelComments.map(({ id, children }) => {
+			return {
+				commentId: id,
+				children: Array.isArray(children)
+					? children.map((child) => ({
+							commentId: child.id,
+						}))
+					: [],
+			};
+		});
+		if (commentOrder === 'desc') {
 			return comments.reverse();
 		}
 		return comments;
-	}, [ topLevelComments, commentOrder ] );
+	}, [topLevelComments, commentOrder]);
 
 	return commentTree;
 };

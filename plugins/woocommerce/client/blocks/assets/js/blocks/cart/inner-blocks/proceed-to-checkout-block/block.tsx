@@ -23,7 +23,7 @@ import { defaultButtonLabel } from './constants';
 /**
  * Checkout button rendered in the full cart page.
  */
-const Block = ( {
+const Block = ({
 	checkoutPageId,
 	className,
 	buttonLabel,
@@ -31,19 +31,19 @@ const Block = ( {
 	checkoutPageId: number;
 	className: string;
 	buttonLabel: string;
-} ): JSX.Element => {
-	const link = getSetting< string >( 'page-' + checkoutPageId, false );
+}): JSX.Element => {
+	const link = getSetting<string>('page-' + checkoutPageId, false);
 	const { cartIsLoading } = useStoreCart();
 	const isCalculating = useSelect(
-		( select ) => select( checkoutStore ).isCalculating(),
+		(select) => select(checkoutStore).isCalculating(),
 		[]
 	);
 
-	const [ positionReferenceElement, positionRelativeToViewport ] =
+	const [positionReferenceElement, positionRelativeToViewport] =
 		usePositionRelativeToViewport();
-	const [ showSpinner, setShowSpinner ] = useState( false );
+	const [showSpinner, setShowSpinner] = useState(false);
 
-	useEffect( () => {
+	useEffect(() => {
 		// Add a listener to remove the spinner on the checkout button, so the saved page snapshot does not
 		// contain the spinner class. See https://archive.is/lOEW0 for why this is needed for Safari.
 
@@ -55,62 +55,60 @@ const Block = ( {
 		}
 
 		const hideSpinner = () => {
-			setShowSpinner( false );
+			setShowSpinner(false);
 		};
 
-		global.addEventListener( 'pageshow', hideSpinner );
+		global.addEventListener('pageshow', hideSpinner);
 
 		return () => {
-			global.removeEventListener( 'pageshow', hideSpinner );
+			global.removeEventListener('pageshow', hideSpinner);
 		};
-	}, [] );
-	const cart = useSelect( ( select ) => {
-		return select( cartStore ).getCartData();
-	}, [] );
+	}, []);
+	const cart = useSelect((select) => {
+		return select(cartStore).getCartData();
+	}, []);
 
-	const label = applyCheckoutFilter< string >( {
+	const label = applyCheckoutFilter<string>({
 		filterName: 'proceedToCheckoutButtonLabel',
 		defaultValue: buttonLabel || defaultButtonLabel,
 		arg: { cart },
-	} );
+	});
 
-	const filteredLink = applyCheckoutFilter< string >( {
+	const filteredLink = applyCheckoutFilter<string>({
 		filterName: 'proceedToCheckoutButtonLink',
 		defaultValue: link || CHECKOUT_URL,
 		arg: { cart },
-	} );
+	});
 
 	const { dispatchOnProceedToCheckout } = useCartEventsContext();
 
 	const submitContainerContents = (
 		<Button
-			className={ clsx( 'wc-block-cart__submit-button', {
+			className={clsx('wc-block-cart__submit-button', {
 				'wc-block-cart__submit-button--loading': showSpinner,
-			} ) }
-			href={ filteredLink }
-			disabled={ isCalculating || cartIsLoading }
-			onClick={ ( e ) => {
-				void dispatchOnProceedToCheckout().then(
-					( observerResponses ) => {
-						if ( observerResponses.some( isErrorResponse ) ) {
-							e.preventDefault();
-							return;
-						}
-						setShowSpinner( true );
+			})}
+			href={filteredLink}
+			disabled={isCalculating || cartIsLoading}
+			onClick={(e) => {
+				void dispatchOnProceedToCheckout().then((observerResponses) => {
+					if (observerResponses.some(isErrorResponse)) {
+						e.preventDefault();
+						return;
 					}
-				);
-			} }
+					setShowSpinner(true);
+				});
+			}}
 		>
-			{ showSpinner && <Spinner /> }
-			{ label }
+			{showSpinner && <Spinner />}
+			{label}
 		</Button>
 	);
 
 	// Get the body background color to use as the sticky container background color.
-	const backgroundColor = useMemo( () => {
-		const computedColor = getComputedStyle( document.body ).backgroundColor;
+	const backgroundColor = useMemo(() => {
+		const computedColor = getComputedStyle(document.body).backgroundColor;
 		if (
-			! computedColor ||
+			!computedColor ||
 			computedColor === 'rgba(0, 0, 0, 0)' ||
 			computedColor === 'transparent'
 		) {
@@ -118,22 +116,22 @@ const Block = ( {
 		}
 
 		return computedColor;
-	}, [] );
+	}, []);
 
 	const displayStickyContainer = positionRelativeToViewport === 'below';
 
-	const submitContainerClass = clsx( 'wc-block-cart__submit-container', {
+	const submitContainerClass = clsx('wc-block-cart__submit-container', {
 		'wc-block-cart__submit-container--sticky': displayStickyContainer,
-	} );
+	});
 
 	return (
-		<div className={ clsx( 'wc-block-cart__submit', className ) }>
-			{ positionReferenceElement }
+		<div className={clsx('wc-block-cart__submit', className)}>
+			{positionReferenceElement}
 			<div
-				className={ submitContainerClass }
-				style={ displayStickyContainer ? { backgroundColor } : {} }
+				className={submitContainerClass}
+				style={displayStickyContainer ? { backgroundColor } : {}}
 			>
-				{ submitContainerContents }
+				{submitContainerContents}
 			</div>
 		</div>
 	);

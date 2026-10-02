@@ -31,110 +31,108 @@ import {
 import { ButtonPositionProps, ProductSearchBlockProps } from './types';
 import { PositionOptions } from './constants';
 
-const ProductSearchControls = ( props: ProductSearchBlockProps ) => {
+const ProductSearchControls = (props: ProductSearchBlockProps) => {
 	const { attributes, setAttributes } = props;
 	const { buttonPosition, buttonUseIcon, showLabel } = attributes;
-	const [ initialPosition, setInitialPosition ] =
-		useState< ButtonPositionProps >( buttonPosition );
+	const [initialPosition, setInitialPosition] =
+		useState<ButtonPositionProps>(buttonPosition);
 
-	useEffect( () => {
+	useEffect(() => {
 		if (
-			isInputAndButtonOption( buttonPosition ) &&
+			isInputAndButtonOption(buttonPosition) &&
 			initialPosition !== buttonPosition
 		) {
-			setInitialPosition( buttonPosition );
+			setInitialPosition(buttonPosition);
 		}
-	}, [ buttonPosition, initialPosition ] );
+	}, [buttonPosition, initialPosition]);
 
 	return (
 		<InspectorControls group="styles">
-			<PanelBody title={ __( 'Styles', 'woocommerce' ) }>
+			<PanelBody title={__('Styles', 'woocommerce')}>
 				<RadioControl
-					selected={ getSelectedRadioControlOption( buttonPosition ) }
-					options={ [
+					selected={getSelectedRadioControlOption(buttonPosition)}
+					options={[
 						{
-							label: __( 'Input and button', 'woocommerce' ),
+							label: __('Input and button', 'woocommerce'),
 							value: PositionOptions.INPUT_AND_BUTTON,
 						},
 						{
-							label: __( 'Input only', 'woocommerce' ),
+							label: __('Input only', 'woocommerce'),
 							value: PositionOptions.NO_BUTTON,
 						},
 						{
-							label: __( 'Button only', 'woocommerce' ),
+							label: __('Button only', 'woocommerce'),
 							value: PositionOptions.BUTTON_ONLY,
 						},
-					] }
-					onChange={ (
-						selected: Partial< ButtonPositionProps > &
+					]}
+					onChange={(
+						selected: Partial<ButtonPositionProps> &
 							PositionOptions.INPUT_AND_BUTTON
 					) => {
-						if ( selected !== PositionOptions.INPUT_AND_BUTTON ) {
-							setAttributes( {
+						if (selected !== PositionOptions.INPUT_AND_BUTTON) {
+							setAttributes({
 								buttonPosition: selected,
-							} );
+							});
 						} else {
 							const newButtonPosition =
-								getInputAndButtonOption( initialPosition );
-							setAttributes( {
+								getInputAndButtonOption(initialPosition);
+							setAttributes({
 								buttonPosition: newButtonPosition,
-							} );
+							});
 						}
-					} }
+					}}
 				/>
-				{ buttonPosition !== PositionOptions.NO_BUTTON && (
+				{buttonPosition !== PositionOptions.NO_BUTTON && (
 					<>
-						{ buttonPosition !== PositionOptions.BUTTON_ONLY && (
+						{buttonPosition !== PositionOptions.BUTTON_ONLY && (
 							<ToggleGroupControl
-								label={ __( 'BUTTON POSITION', 'woocommerce' ) }
+								label={__('BUTTON POSITION', 'woocommerce')}
 								isBlock
-								onChange={ ( value: ButtonPositionProps ) => {
-									setAttributes( {
+								onChange={(value: ButtonPositionProps) => {
+									setAttributes({
 										buttonPosition: value,
-									} );
-								} }
-								value={ getInputAndButtonOption(
-									buttonPosition
-								) }
+									});
+								}}
+								value={getInputAndButtonOption(buttonPosition)}
 							>
 								<ToggleGroupControlOption
-									value={ PositionOptions.INSIDE }
-									label={ __( 'Inside', 'woocommerce' ) }
+									value={PositionOptions.INSIDE}
+									label={__('Inside', 'woocommerce')}
 								/>
 								<ToggleGroupControlOption
-									value={ PositionOptions.OUTSIDE }
-									label={ __( 'Outside', 'woocommerce' ) }
+									value={PositionOptions.OUTSIDE}
+									label={__('Outside', 'woocommerce')}
 								/>
 							</ToggleGroupControl>
-						) }
+						)}
 						<ToggleGroupControl
-							label={ __( 'BUTTON APPEARANCE', 'woocommerce' ) }
+							label={__('BUTTON APPEARANCE', 'woocommerce')}
 							isBlock
-							onChange={ ( value: boolean ) => {
-								setAttributes( {
+							onChange={(value: boolean) => {
+								setAttributes({
 									buttonUseIcon: value,
-								} );
-							} }
-							value={ buttonUseIcon }
+								});
+							}}
+							value={buttonUseIcon}
 						>
 							<ToggleGroupControlOption
-								value={ false }
-								label={ __( 'Text', 'woocommerce' ) }
+								value={false}
+								label={__('Text', 'woocommerce')}
 							/>
 							<ToggleGroupControlOption
-								value={ true }
-								label={ __( 'Icon', 'woocommerce' ) }
+								value={true}
+								label={__('Icon', 'woocommerce')}
 							/>
 						</ToggleGroupControl>
 					</>
-				) }
+				)}
 				<ToggleControl
-					label={ __( 'Show input label', 'woocommerce' ) }
-					checked={ showLabel }
-					onChange={ ( showInputLabel: boolean ) =>
-						setAttributes( {
+					label={__('Show input label', 'woocommerce')}
+					checked={showLabel}
+					onChange={(showInputLabel: boolean) =>
+						setAttributes({
 							showLabel: showInputLabel,
-						} )
+						})
 					}
 				/>
 			</PanelBody>
@@ -143,14 +141,14 @@ const ProductSearchControls = ( props: ProductSearchBlockProps ) => {
 };
 
 export const withProductSearchControls =
-	< T extends EditorBlock< T > >( BlockEdit: ElementType ) =>
-	( props: ProductSearchBlockProps ) => {
-		return isWooSearchBlockVariation( props ) ? (
+	<T extends EditorBlock<T>>(BlockEdit: ElementType) =>
+	(props: ProductSearchBlockProps) => {
+		return isWooSearchBlockVariation(props) ? (
 			<>
-				<ProductSearchControls { ...props } />
-				<BlockEdit { ...props } />
+				<ProductSearchControls {...props} />
+				<BlockEdit {...props} />
 			</>
 		) : (
-			<BlockEdit { ...props } />
+			<BlockEdit {...props} />
 		);
 	};

@@ -7,7 +7,7 @@ const Save = () => {
 	const blockProps = useBlockProps.save();
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<InnerBlocks.Content />
 		</div>
 	);

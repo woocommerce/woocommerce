@@ -12,28 +12,28 @@ import SaveAsDraftButton from '../save-draft-button';
 import { useFulfillmentContext } from '../../../context/fulfillment-context';
 
 // Mock dependencies
-jest.mock( '@wordpress/data', () => {
-	const originalModule = jest.requireActual( '@wordpress/data' );
+jest.mock('@wordpress/data', () => {
+	const originalModule = jest.requireActual('@wordpress/data');
 	return {
 		...originalModule,
-		useDispatch: jest.fn( () => {} ),
+		useDispatch: jest.fn(() => {}),
 	};
-} );
+});
 
-jest.mock( '../../../context/fulfillment-context', () => ( {
+jest.mock('../../../context/fulfillment-context', () => ({
 	useFulfillmentContext: jest.fn(),
-} ) );
+}));
 
 const setError = jest.fn();
 
-describe( 'SaveAsDraftButton component', () => {
-	beforeEach( () => {
+describe('SaveAsDraftButton component', () => {
+	beforeEach(() => {
 		// Reset mocks
 		jest.clearAllMocks();
 
 		// Default mock implementations
-		useDispatch.mockReturnValue( { saveFulfillment: jest.fn() } );
-		useFulfillmentContext.mockReturnValue( {
+		useDispatch.mockReturnValue({ saveFulfillment: jest.fn() });
+		useFulfillmentContext.mockReturnValue({
 			order: { id: 123 },
 			fulfillment: {
 				id: 456,
@@ -56,17 +56,17 @@ describe( 'SaveAsDraftButton component', () => {
 					},
 				],
 			},
-		} );
-	} );
+		});
+	});
 
-	it( 'should render button with correct text', () => {
-		render( <SaveAsDraftButton setError={ setError } /> );
-		expect( screen.getByText( 'Save as draft' ) ).toBeInTheDocument();
-	} );
+	it('should render button with correct text', () => {
+		render(<SaveAsDraftButton setError={setError} />);
+		expect(screen.getByText('Save as draft')).toBeInTheDocument();
+	});
 
-	it( 'should call saveFulfillment when button is clicked', async () => {
-		const mockSaveFulfillment = jest.fn( () => Promise.resolve() );
-		useDispatch.mockReturnValue( { saveFulfillment: mockSaveFulfillment } );
+	it('should call saveFulfillment when button is clicked', async () => {
+		const mockSaveFulfillment = jest.fn(() => Promise.resolve());
+		useDispatch.mockReturnValue({ saveFulfillment: mockSaveFulfillment });
 
 		const mockFulfillment = {
 			id: 456,
@@ -89,93 +89,93 @@ describe( 'SaveAsDraftButton component', () => {
 				},
 			],
 		};
-		useFulfillmentContext.mockReturnValue( {
+		useFulfillmentContext.mockReturnValue({
 			order: { id: 123 },
 			fulfillment: mockFulfillment,
 			notifyCustomer: true,
-		} );
+		});
 
-		render( <SaveAsDraftButton setError={ setError } /> );
-		fireEvent.click( screen.getByText( 'Save as draft' ) );
+		render(<SaveAsDraftButton setError={setError} />);
+		fireEvent.click(screen.getByText('Save as draft'));
 
-		await waitFor( () => {
-			expect( mockSaveFulfillment ).toHaveBeenCalledWith(
+		await waitFor(() => {
+			expect(mockSaveFulfillment).toHaveBeenCalledWith(
 				123,
 				mockFulfillment,
 				true
 			);
-		} );
-	} );
+		});
+	});
 
-	it( 'should not call saveFulfillment when fulfillment is undefined', () => {
+	it('should not call saveFulfillment when fulfillment is undefined', () => {
 		const mockSaveFulfillment = jest.fn();
-		useDispatch.mockReturnValue( { saveFulfillment: mockSaveFulfillment } );
+		useDispatch.mockReturnValue({ saveFulfillment: mockSaveFulfillment });
 
-		useFulfillmentContext.mockReturnValue( {
+		useFulfillmentContext.mockReturnValue({
 			order: { id: 123 },
 			fulfillment: undefined,
-		} );
+		});
 
-		render( <SaveAsDraftButton setError={ setError } /> );
-		fireEvent.click( screen.getByText( 'Save as draft' ) );
+		render(<SaveAsDraftButton setError={setError} />);
+		fireEvent.click(screen.getByText('Save as draft'));
 
-		expect( mockSaveFulfillment ).not.toHaveBeenCalled();
-	} );
+		expect(mockSaveFulfillment).not.toHaveBeenCalled();
+	});
 
-	describe( 'Accessibility', () => {
-		it( 'should not have redundant aria-label overriding visible text', () => {
-			render( <SaveAsDraftButton setError={ setError } /> );
+	describe('Accessibility', () => {
+		it('should not have redundant aria-label overriding visible text', () => {
+			render(<SaveAsDraftButton setError={setError} />);
 
-			const button = screen.getByRole( 'button' );
-			expect( button ).not.toHaveAttribute( 'aria-label' );
-		} );
+			const button = screen.getByRole('button');
+			expect(button).not.toHaveAttribute('aria-label');
+		});
 
-		it( 'should have aria-describedby with unique prefix', () => {
-			render( <SaveAsDraftButton setError={ setError } /> );
+		it('should have aria-describedby with unique prefix', () => {
+			render(<SaveAsDraftButton setError={setError} />);
 
-			const button = screen.getByRole( 'button' );
-			expect( button.getAttribute( 'aria-describedby' ) ).toMatch(
+			const button = screen.getByRole('button');
+			expect(button.getAttribute('aria-describedby')).toMatch(
 				/^save-draft-description/
 			);
-		} );
+		});
 
-		it( 'should have hidden description for screen readers', () => {
-			render( <SaveAsDraftButton setError={ setError } /> );
+		it('should have hidden description for screen readers', () => {
+			render(<SaveAsDraftButton setError={setError} />);
 
 			const description = screen.getByText(
 				'Saves the fulfillment without marking items as fulfilled'
 			);
-			expect( description ).toBeInTheDocument();
-			expect( description.getAttribute( 'id' ) ).toMatch(
+			expect(description).toBeInTheDocument();
+			expect(description.getAttribute('id')).toMatch(
 				/^save-draft-description/
 			);
-			expect( description ).toHaveClass( 'screen-reader-text' );
-		} );
+			expect(description).toHaveClass('screen-reader-text');
+		});
 
-		it( 'should update button text when executing', () => {
+		it('should update button text when executing', () => {
 			const mockSaveFulfillment = jest.fn(
-				() => new Promise( ( resolve ) => setTimeout( resolve, 100 ) )
+				() => new Promise((resolve) => setTimeout(resolve, 100))
 			);
-			useDispatch.mockReturnValue( {
+			useDispatch.mockReturnValue({
 				saveFulfillment: mockSaveFulfillment,
-			} );
+			});
 
-			render( <SaveAsDraftButton setError={ setError } /> );
-			const button = screen.getByRole( 'button' );
+			render(<SaveAsDraftButton setError={setError} />);
+			const button = screen.getByRole('button');
 
-			fireEvent.click( button );
+			fireEvent.click(button);
 
 			// Check that the button text updates during execution
-			expect( screen.getByText( 'Saving…' ) ).toBeInTheDocument();
-			expect( button ).toBeDisabled();
-		} );
+			expect(screen.getByText('Saving…')).toBeInTheDocument();
+			expect(button).toBeDisabled();
+		});
 
-		it( 'should be keyboard accessible', () => {
-			render( <SaveAsDraftButton setError={ setError } /> );
+		it('should be keyboard accessible', () => {
+			render(<SaveAsDraftButton setError={setError} />);
 
-			const button = screen.getByRole( 'button' );
+			const button = screen.getByRole('button');
 			button.focus();
-			expect( button.ownerDocument.activeElement ).toBe( button );
-		} );
-	} );
-} );
+			expect(button.ownerDocument.activeElement).toBe(button);
+		});
+	});
+});

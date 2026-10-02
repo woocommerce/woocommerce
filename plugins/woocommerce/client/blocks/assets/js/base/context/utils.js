@@ -20,42 +20,38 @@
  *
  * @throws {Error}
  */
-export const assertValidContextValue = (
-	contextName,
-	validationMap,
-	value
-) => {
-	if ( typeof value !== 'object' ) {
+export const assertValidContextValue = (contextName, validationMap, value) => {
+	if (typeof value !== 'object') {
 		throw new Error(
-			`${ contextName } expects an object for its context value`
+			`${contextName} expects an object for its context value`
 		);
 	}
 	const errors = [];
-	for ( const expectedProperty in validationMap ) {
+	for (const expectedProperty in validationMap) {
 		if (
-			validationMap[ expectedProperty ].required &&
-			typeof value[ expectedProperty ] === 'undefined'
+			validationMap[expectedProperty].required &&
+			typeof value[expectedProperty] === 'undefined'
 		) {
 			errors.push(
-				`The ${ expectedProperty } is required and is not present.`
+				`The ${expectedProperty} is required and is not present.`
 			);
 		} else if (
-			typeof value[ expectedProperty ] !== 'undefined' &&
-			typeof value[ expectedProperty ] !==
-				validationMap[ expectedProperty ].type
+			typeof value[expectedProperty] !== 'undefined' &&
+			typeof value[expectedProperty] !==
+				validationMap[expectedProperty].type
 		) {
 			errors.push(
-				`The ${ expectedProperty } must be of ${
-					validationMap[ expectedProperty ].type
-				} and instead was ${ typeof value[ expectedProperty ] }`
+				`The ${expectedProperty} must be of ${
+					validationMap[expectedProperty].type
+				} and instead was ${typeof value[expectedProperty]}`
 			);
 		}
 	}
-	if ( errors.length > 0 ) {
+	if (errors.length > 0) {
 		throw new Error(
-			`There was a problem with the value passed in on ${ contextName }:\n ${ errors.join(
+			`There was a problem with the value passed in on ${contextName}:\n ${errors.join(
 				'\n'
-			) }`
+			)}`
 		);
 	}
 };

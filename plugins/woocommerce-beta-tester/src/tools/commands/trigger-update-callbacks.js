@@ -15,46 +15,45 @@ export const TRIGGER_UPDATE_CALLBACKS_ACTION_NAME =
 
 export const TriggerUpdateCallbacks = () => {
 	const dbUpdateVersions = useSelect(
-		( select ) => select( store ).getDBUpdateVersions(),
+		(select) => select(store).getDBUpdateVersions(),
 		[]
 	);
 	const selectedVersion = useSelect(
-		( select ) =>
-			select( store ).getCommandParams(
-				TRIGGER_UPDATE_CALLBACKS_ACTION_NAME
-			).runSelectedUpdateCallbacks.version,
+		(select) =>
+			select(store).getCommandParams(TRIGGER_UPDATE_CALLBACKS_ACTION_NAME)
+				.runSelectedUpdateCallbacks.version,
 		[]
 	);
-	const { updateCommandParams } = useDispatch( store );
+	const { updateCommandParams } = useDispatch(store);
 
-	function onChange( version ) {
-		updateCommandParams( TRIGGER_UPDATE_CALLBACKS_ACTION_NAME, {
+	function onChange(version) {
+		updateCommandParams(TRIGGER_UPDATE_CALLBACKS_ACTION_NAME, {
 			version,
-		} );
+		});
 	}
 
 	const options = useMemo(
 		() =>
-			dbUpdateVersions.map( ( version ) => ( {
+			dbUpdateVersions.map((version) => ({
 				label: version,
 				value: version,
-			} ) ),
-		[ dbUpdateVersions ]
+			})),
+		[dbUpdateVersions]
 	);
 
 	return (
 		<div className="select-description">
-			{ ! dbUpdateVersions ? (
+			{!dbUpdateVersions ? (
 				<p>Loading ...</p>
 			) : (
 				<SelectControl
 					label="Select a version to run"
-					onChange={ onChange }
+					onChange={onChange}
 					labelPosition="side"
-					options={ options }
-					value={ selectedVersion }
+					options={options}
+					value={selectedVersion}
 				/>
-			) }
+			)}
 		</div>
 	);
 };

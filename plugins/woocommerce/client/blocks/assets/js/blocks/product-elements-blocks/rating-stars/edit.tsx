@@ -16,12 +16,12 @@ import Block from './block';
 import { BlockAttributes } from './types';
 
 const Edit = (
-	props: BlockEditProps< BlockAttributes > & { context: Context }
+	props: BlockEditProps<BlockAttributes> & { context: Context }
 ): JSX.Element => {
 	const { attributes, setAttributes, context } = props;
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className: 'wp-block-woocommerce-product-rating',
-	} );
+	});
 	const blockAttrs = {
 		...attributes,
 		...context,
@@ -32,14 +32,14 @@ const Edit = (
 		<>
 			<BlockControls>
 				<AlignmentToolbar
-					value={ attributes.textAlign }
-					onChange={ ( newAlign ) => {
-						setAttributes( { textAlign: newAlign || '' } );
-					} }
+					value={attributes.textAlign}
+					onChange={(newAlign) => {
+						setAttributes({ textAlign: newAlign || '' });
+					}}
 				/>
 			</BlockControls>
-			<div { ...blockProps }>
-				<Block { ...blockAttrs } />
+			<div {...blockProps}>
+				<Block {...blockAttrs} />
 			</div>
 		</>
 	);

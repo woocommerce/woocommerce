@@ -14,7 +14,7 @@ import {
  */
 import { getAdminSetting } from '~/utils/admin-settings';
 
-type Selectors = CurriedSelectorsOf< typeof onboardingStore >;
+type Selectors = CurriedSelectorsOf<typeof onboardingStore>;
 
 /**
  * Get the number of things to do next
@@ -22,16 +22,16 @@ type Selectors = CurriedSelectorsOf< typeof onboardingStore >;
  * @param {Object} extendedTaskList The extended task list
  * @return {number} The number of things to do next
  */
-function getThingsToDoNextCount( extendedTaskList: TaskListType | undefined ) {
+function getThingsToDoNextCount(extendedTaskList: TaskListType | undefined) {
 	if (
-		! extendedTaskList ||
-		! extendedTaskList.tasks.length ||
+		!extendedTaskList ||
+		!extendedTaskList.tasks.length ||
 		extendedTaskList.isHidden
 	) {
 		return 0;
 	}
 	return extendedTaskList.tasks.filter(
-		( task ) => task.canView && ! task.isComplete && ! task.isDismissed
+		(task) => task.canView && !task.isComplete && !task.isDismissed
 	).length;
 }
 
@@ -41,8 +41,8 @@ function getThingsToDoNextCount( extendedTaskList: TaskListType | undefined ) {
  * @param {string} taskListId The ID of the task list to check
  * @return {boolean} True if the task list is visible, false otherwise
  */
-export const isTaskListVisible = ( taskListId: string ) =>
-	getAdminSetting( 'visibleTaskListIds', [] ).includes( taskListId );
+export const isTaskListVisible = (taskListId: string) =>
+	getAdminSetting('visibleTaskListIds', []).includes(taskListId);
 
 /**
  * Check if a task list is completed
@@ -50,8 +50,8 @@ export const isTaskListVisible = ( taskListId: string ) =>
  * @param {string} taskListId The ID of the task list to check
  * @return {boolean} True if the task list is completed, false otherwise
  */
-export const isTaskListCompleted = ( taskListId: string ) =>
-	getAdminSetting( 'completedTaskListIds', [] ).includes( taskListId );
+export const isTaskListCompleted = (taskListId: string) =>
+	getAdminSetting('completedTaskListIds', []).includes(taskListId);
 
 /**
  * Check if a task list is active (visible and not completed)
@@ -59,8 +59,8 @@ export const isTaskListCompleted = ( taskListId: string ) =>
  * @param {string} taskListId The ID of the task list to check
  * @return {boolean} True if the task list is active, false otherwise
  */
-export const isTaskListActive = ( taskListId: string ) =>
-	isTaskListVisible( taskListId ) && ! isTaskListCompleted( taskListId );
+export const isTaskListActive = (taskListId: string) =>
+	isTaskListVisible(taskListId) && !isTaskListCompleted(taskListId);
 
 /**
  * Get default state values when task lists are not visible
@@ -68,9 +68,9 @@ export const isTaskListActive = ( taskListId: string ) =>
  * @return {Object} Default state values
  */
 const getDefaultState = () => {
-	const setupTaskListHidden = ! isTaskListVisible( 'setup' );
-	const setupTaskListComplete = isTaskListCompleted( 'setup' );
-	const setupTaskListActive = isTaskListActive( 'setup' );
+	const setupTaskListHidden = !isTaskListVisible('setup');
+	const setupTaskListComplete = isTaskListCompleted('setup');
+	const setupTaskListActive = isTaskListActive('setup');
 
 	return {
 		requestingTaskListOptions: false,
@@ -89,16 +89,15 @@ const getDefaultState = () => {
  * @param {Object} selectors Store selectors
  * @return {Object} Setup task list states
  */
-const getSetupTaskListState = ( selectors: Selectors ) => {
+const getSetupTaskListState = (selectors: Selectors) => {
 	const { getTaskList, hasFinishedResolution } = selectors;
-	const setupList = getTaskList( 'setup' );
-	const setupVisibleTasks = getVisibleTasks( setupList?.tasks || [] );
+	const setupList = getTaskList('setup');
+	const setupVisibleTasks = getVisibleTasks(setupList?.tasks || []);
 
 	// Use the task list object to determine the state to override the default state.
 	const setupTaskListHidden = setupList ? setupList.isHidden : true;
 	const setupTaskListComplete = setupList?.isComplete;
-	const setupTaskListActive =
-		! setupTaskListHidden && ! setupTaskListComplete;
+	const setupTaskListActive = !setupTaskListHidden && !setupTaskListComplete;
 
 	return {
 		setupTaskListHidden,
@@ -106,9 +105,9 @@ const getSetupTaskListState = ( selectors: Selectors ) => {
 		setupTaskListActive,
 		setupTasksCount: setupVisibleTasks.length,
 		setupTasksCompleteCount: setupVisibleTasks.filter(
-			( task ) => task.isComplete
+			(task) => task.isComplete
 		).length,
-		requestingTaskListOptions: ! hasFinishedResolution( 'getTaskLists' ),
+		requestingTaskListOptions: !hasFinishedResolution('getTaskLists'),
 	};
 };
 
@@ -118,13 +117,13 @@ const getSetupTaskListState = ( selectors: Selectors ) => {
  * @param {Object} selectors Store selectors
  * @return {Object} Extended task list states
  */
-const getExtendedTaskListState = ( selectors: Selectors ) => {
+const getExtendedTaskListState = (selectors: Selectors) => {
 	const { getTaskList, hasFinishedResolution } = selectors;
-	const extendedTaskList = getTaskList( 'extended' );
+	const extendedTaskList = getTaskList('extended');
 
 	return {
-		thingsToDoNextCount: getThingsToDoNextCount( extendedTaskList ),
-		requestingTaskListOptions: ! hasFinishedResolution( 'getTaskLists' ),
+		thingsToDoNextCount: getThingsToDoNextCount(extendedTaskList),
+		requestingTaskListOptions: !hasFinishedResolution('getTaskLists'),
 	};
 };
 
@@ -145,42 +144,42 @@ export const useTaskListsState = (
 		extendedTaskList: true,
 	}
 ) => {
-	const shouldGetSetupTaskList = setupTasklist && isTaskListActive( 'setup' );
+	const shouldGetSetupTaskList = setupTasklist && isTaskListActive('setup');
 	const shouldGetExtendedTaskList =
-		extendedTaskList && isTaskListActive( 'extended' );
+		extendedTaskList && isTaskListActive('extended');
 
 	return useSelect(
-		( select ) => {
+		(select) => {
 			// If no task lists are visible, return default state
-			if ( ! shouldGetSetupTaskList && ! shouldGetExtendedTaskList ) {
+			if (!shouldGetSetupTaskList && !shouldGetExtendedTaskList) {
 				return getDefaultState();
 			}
 
-			const selectors = select( ONBOARDING_STORE_NAME );
+			const selectors = select(ONBOARDING_STORE_NAME);
 
 			// If setup task list is not visible, return extended-only state
-			if ( ! shouldGetSetupTaskList ) {
+			if (!shouldGetSetupTaskList) {
 				return {
 					...getDefaultState(),
-					...getExtendedTaskListState( selectors ),
+					...getExtendedTaskListState(selectors),
 				};
 			}
 
 			// If extended task list is not visible, return setup-only state
-			if ( ! shouldGetExtendedTaskList ) {
+			if (!shouldGetExtendedTaskList) {
 				return {
 					...getDefaultState(),
-					...getSetupTaskListState( selectors ),
+					...getSetupTaskListState(selectors),
 				};
 			}
 
 			// Return full state with both setup and extended task lists
 			return {
 				...getDefaultState(),
-				...getSetupTaskListState( selectors ),
-				...getExtendedTaskListState( selectors ),
+				...getSetupTaskListState(selectors),
+				...getExtendedTaskListState(selectors),
 			};
 		},
-		[ shouldGetSetupTaskList, shouldGetExtendedTaskList ]
+		[shouldGetSetupTaskList, shouldGetExtendedTaskList]
 	);
 };

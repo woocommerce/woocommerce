@@ -1,50 +1,50 @@
 /**
  * External dependencies
  */
-const { get } = require( 'lodash' );
-const path = require( 'path' );
-const fs = require( 'fs' );
-const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
-const { BundleAnalyzerPlugin } = require( 'webpack-bundle-analyzer' );
-const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin' );
-const webpack = require( 'webpack' );
+const { get } = require('lodash');
+const path = require('path');
+const fs = require('fs');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
+const webpack = require('webpack');
 
 /**
  * Internal dependencies
  */
 const {
 	webpackConfig: styleConfig,
-} = require( '@woocommerce/internal-build/style-build' );
-const WooCommerceDependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin/src/index' );
-const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-plugin' );
-const UnminifyWebpackPlugin = require( './bin/unminify-webpack-plugin.js' );
+} = require('@woocommerce/internal-build/style-build');
+const WooCommerceDependencyExtractionWebpackPlugin = require('@woocommerce/dependency-extraction-webpack-plugin/src/index');
+const CustomTemplatedPathPlugin = require('./bin/custom-templated-path-webpack-plugin');
+const UnminifyWebpackPlugin = require('./bin/unminify-webpack-plugin.js');
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const WC_ADMIN_PHASE = process.env.WC_ADMIN_PHASE || 'development';
-const isHot = Boolean( process.env.HOT );
+const isHot = Boolean(process.env.HOT);
 const isProduction = NODE_ENV === 'production';
-const isWatch = ! isProduction && process.argv.includes( '--watch' );
+const isWatch = !isProduction && process.argv.includes('--watch');
 
-const getSubdirectoriesAt = ( searchPath ) => {
-	const dir = path.resolve( __dirname, searchPath );
+const getSubdirectoriesAt = (searchPath) => {
+	const dir = path.resolve(__dirname, searchPath);
 	return fs
-		.readdirSync( dir, { withFileTypes: true } )
-		.filter( ( entry ) => entry.isDirectory() )
-		.map( ( entry ) => entry.name );
+		.readdirSync(dir, { withFileTypes: true })
+		.filter((entry) => entry.isDirectory())
+		.map((entry) => entry.name);
 };
 
 const WC_ADMIN_PACKAGES_DIR = '../../../../packages/js';
 const WP_ADMIN_SCRIPTS_DIR = './client/wp-admin-scripts';
 const SETTINGS_UI_PACKAGE_DIR = path.resolve(
 	__dirname,
-	`${ WC_ADMIN_PACKAGES_DIR }/settings-ui`
+	`${WC_ADMIN_PACKAGES_DIR}/settings-ui`
 );
 
-const resolvePackageDirectory = ( packageName, fromDirectory ) =>
+const resolvePackageDirectory = (packageName, fromDirectory) =>
 	path.dirname(
-		require.resolve( `${ packageName }/package.json`, {
-			paths: [ fromDirectory ],
-		} )
+		require.resolve(`${packageName}/package.json`, {
+			paths: [fromDirectory],
+		})
 	);
 
 const dataViewsPackageDirectory = resolvePackageDirectory(
@@ -57,25 +57,22 @@ const dataViewsUiPackageDirectory = resolvePackageDirectory(
 );
 const dataViewsBundledPackageDirectories = [
 	dataViewsPackageDirectory,
-	resolvePackageDirectory(
-		'@wordpress/components',
-		dataViewsPackageDirectory
-	),
-	resolvePackageDirectory( '@wordpress/compose', dataViewsPackageDirectory ),
-	resolvePackageDirectory( '@wordpress/data', dataViewsPackageDirectory ),
+	resolvePackageDirectory('@wordpress/components', dataViewsPackageDirectory),
+	resolvePackageDirectory('@wordpress/compose', dataViewsPackageDirectory),
+	resolvePackageDirectory('@wordpress/data', dataViewsPackageDirectory),
 	dataViewsUiPackageDirectory,
-	resolvePackageDirectory( '@wordpress/theme', dataViewsUiPackageDirectory ),
+	resolvePackageDirectory('@wordpress/theme', dataViewsUiPackageDirectory),
 ];
 const dataViewsBundledDependencyRoots = [
 	...new Set(
-		dataViewsBundledPackageDirectories.map( ( packageDirectory ) =>
-			path.resolve( packageDirectory, '../..' )
+		dataViewsBundledPackageDirectories.map((packageDirectory) =>
+			path.resolve(packageDirectory, '../..')
 		)
 	),
 ];
-const dataViewsWpEntry = require.resolve( '@wordpress/dataviews/wp', {
-	paths: [ SETTINGS_UI_PACKAGE_DIR ],
-} );
+const dataViewsWpEntry = require.resolve('@wordpress/dataviews/wp', {
+	paths: [SETTINGS_UI_PACKAGE_DIR],
+});
 const settingsUIDataFormRuntimeEntry = path.resolve(
 	SETTINGS_UI_PACKAGE_DIR,
 	'src/dataform-runtime.ts'
@@ -84,11 +81,11 @@ const settingsUIDataFormRuntimeEntry = path.resolve(
 // Admin writes directly to the plugin's `assets/client/admin/` so PHP can
 // enqueue without an intermediate copy step. The JS config and every composed
 // package CSS config use this constant for `output.path`.
-const BUILD_DIR = path.resolve( __dirname, '../../assets/client/admin' );
+const BUILD_DIR = path.resolve(__dirname, '../../assets/client/admin');
 
 // wpAdminScripts are loaded on wp-admin pages outside the context of WooCommerce Admin
 // See ./client/wp-admin-scripts/README.md for more details
-const wpAdminScripts = getSubdirectoriesAt( WP_ADMIN_SCRIPTS_DIR ); // automatically include all subdirs
+const wpAdminScripts = getSubdirectoriesAt(WP_ADMIN_SCRIPTS_DIR); // automatically include all subdirs
 const wcAdminPackages = [
 	// we use a whitelist for this instead of dynamically generating it because not all folders are packages meant for consumption
 	'admin-layout',
@@ -117,19 +114,19 @@ const wcAdminPackages = [
 // collapse the entry into a `window.wc.<name>` shim that re-exports itself.
 // Pointing entries at the filesystem dodges that match while still letting
 // transitive `@woocommerce/*` imports inside the bundle externalize normally.
-const resolvePackageSourceEntry = ( name ) => {
+const resolvePackageSourceEntry = (name) => {
 	const pkgJsonPath = path.resolve(
 		__dirname,
-		`${ WC_ADMIN_PACKAGES_DIR }/${ name }/package.json`
+		`${WC_ADMIN_PACKAGES_DIR}/${name}/package.json`
 	);
-	const pkgJson = require( pkgJsonPath );
-	const source = pkgJson.exports?.[ '.' ]?.[ 'wc-source' ];
-	if ( ! source ) {
+	const pkgJson = require(pkgJsonPath);
+	const source = pkgJson.exports?.['.']?.['wc-source'];
+	if (!source) {
 		throw new Error(
-			`Package @woocommerce/${ name } has no exports["."]["wc-source"] entry in ${ pkgJsonPath }`
+			`Package @woocommerce/${name} has no exports["."]["wc-source"] entry in ${pkgJsonPath}`
 		);
 	}
-	return path.resolve( path.dirname( pkgJsonPath ), source );
+	return path.resolve(path.dirname(pkgJsonPath), source);
 };
 
 // Packages opt into having admin bundle their stylesheet by exporting a
@@ -137,12 +134,12 @@ const resolvePackageSourceEntry = ( name ) => {
 // `src/index.ts` (consumers historically relied on a separate `style.css`
 // asset), so we add it as a second entry tuple. Webpack bundles both into
 // the same chunk and MiniCssExtractPlugin emits `<pkg>/style.css`.
-const resolvePackageStyleEntry = ( name ) => {
+const resolvePackageStyleEntry = (name) => {
 	const styleScss = path.resolve(
 		__dirname,
-		`${ WC_ADMIN_PACKAGES_DIR }/${ name }/src/style.scss`
+		`${WC_ADMIN_PACKAGES_DIR}/${name}/src/style.scss`
 	);
-	return fs.existsSync( styleScss ) ? styleScss : null;
+	return fs.existsSync(styleScss) ? styleScss : null;
 };
 
 const getEntryPoints = () => {
@@ -150,20 +147,20 @@ const getEntryPoints = () => {
 		app: './client/index.tsx',
 		embed: './client/embed.tsx',
 	};
-	wcAdminPackages.forEach( ( name ) => {
-		const source = resolvePackageSourceEntry( name );
-		const style = resolvePackageStyleEntry( name );
+	wcAdminPackages.forEach((name) => {
+		const source = resolvePackageSourceEntry(name);
+		const style = resolvePackageStyleEntry(name);
 		const privateRuntime =
 			name === 'settings-ui' ? settingsUIDataFormRuntimeEntry : null;
 		// Order matters: webpack uses the last item in an array entry as the
 		// chunk's export source. Private runtime and stylesheet entries come
 		// first so only `src/index.ts` exports land on `window.wc.<name>`.
-		const entries = [ style, privateRuntime, source ].filter( Boolean );
-		entryPoints[ name ] = entries.length === 1 ? source : entries;
-	} );
-	wpAdminScripts.forEach( ( name ) => {
-		entryPoints[ name ] = `${ WP_ADMIN_SCRIPTS_DIR }/${ name }`;
-	} );
+		const entries = [style, privateRuntime, source].filter(Boolean);
+		entryPoints[name] = entries.length === 1 ? source : entries;
+	});
+	wpAdminScripts.forEach((name) => {
+		entryPoints[name] = `${WP_ADMIN_SCRIPTS_DIR}/${name}`;
+	});
 	return entryPoints;
 };
 
@@ -183,7 +180,7 @@ const jsConfig = {
 					type: 'filesystem',
 					cacheDirectory: path.resolve(
 						__dirname,
-						`node_modules/.cache/webpack-${ WC_ADMIN_PHASE }-source`
+						`node_modules/.cache/webpack-${WC_ADMIN_PHASE}-source`
 					),
 					buildDependencies: {
 						config: [
@@ -192,29 +189,25 @@ const jsConfig = {
 								__dirname,
 								'../../../../pnpm-lock.yaml'
 							),
-							require.resolve(
-								'@woocommerce/dependency-extraction-webpack-plugin'
-							),
-							require.resolve(
-								'@woocommerce/internal-build/style-build'
-							),
+							require.resolve('@woocommerce/dependency-extraction-webpack-plugin'),
+							require.resolve('@woocommerce/internal-build/style-build'),
 						],
 					},
-			  },
+				},
 	entry: getEntryPoints(),
 	output: {
-		filename: ( data ) => {
+		filename: (data) => {
 			// Output wpAdminScripts to wp-admin-scripts folder
 			// See https://github.com/woocommerce/woocommerce-admin/pull/3061
-			return wpAdminScripts.includes( data.chunk.name )
-				? `wp-admin-scripts/[name]${ outputSuffix }.js`
-				: `[name]/index${ outputSuffix }.js`;
+			return wpAdminScripts.includes(data.chunk.name)
+				? `wp-admin-scripts/[name]${outputSuffix}.js`
+				: `[name]/index${outputSuffix}.js`;
 		},
-		chunkFilename: `chunks/[name]${ outputSuffix }.js?ver=[contenthash]`,
+		chunkFilename: `chunks/[name]${outputSuffix}.js?ver=[contenthash]`,
 		path: BUILD_DIR,
 		library: {
 			// Expose the exports of entry points so we can consume the libraries in window.wc.[modulename] with WooCommerceDependencyExtractionWebpackPlugin.
-			name: [ 'wc', '[modulename]' ],
+			name: ['wc', '[modulename]'],
 			type: 'window',
 		},
 		// A unique name of the webpack build to avoid multiple webpack runtimes to conflict when using globals.
@@ -261,16 +254,14 @@ const jsConfig = {
 						// Prevent babel.config.js (Jest/Node context) from merging into this browser build and duplicating presets.
 						configFile: false,
 						sourceType: 'unambiguous',
-						presets: [ '@wordpress/babel-preset-default' ],
+						presets: ['@wordpress/babel-preset-default'],
 						plugins: [
-							! isProduction &&
+							!isProduction &&
 								isHot &&
-								require.resolve( 'react-refresh/babel' ),
+								require.resolve('react-refresh/babel'),
 							isProduction &&
-								require.resolve(
-									'babel-plugin-transform-react-remove-prop-types'
-								),
-						].filter( Boolean ),
+								require.resolve('babel-plugin-transform-react-remove-prop-types'),
+						].filter(Boolean),
 						cacheDirectory: path.resolve(
 							__dirname,
 							'../../../../node_modules/.cache/babel-loader'
@@ -304,7 +295,7 @@ const jsConfig = {
 			fs: false,
 			path: false,
 		},
-		extensions: [ '.json', '.js', '.jsx', '.ts', '.tsx' ],
+		extensions: ['.json', '.js', '.jsx', '.ts', '.tsx'],
 		// Activate the `"wc-source"` conditional export declared in each
 		// `packages/js/*` package.json. Webpack walks the package's exports map
 		// and picks `./src/index.ts` directly — no per-package alias is
@@ -312,11 +303,11 @@ const jsConfig = {
 		// through the same mechanism. The condition is namespaced (`wc-` prefix)
 		// so it never collides with third-party packages that publish their own
 		// `"source"` conditional export. `'...'` extends the default list.
-		conditionNames: [ 'wc-source', '...' ],
+		conditionNames: ['wc-source', '...'],
 		alias: {
-			'~': path.resolve( __dirname + '/client' ),
-			'react/jsx-dev-runtime': require.resolve( 'react/jsx-dev-runtime' ),
-			'react/jsx-runtime': require.resolve( 'react/jsx-runtime' ),
+			'~': path.resolve(__dirname + '/client'),
+			'react/jsx-dev-runtime': require.resolve('react/jsx-dev-runtime'),
+			'react/jsx-runtime': require.resolve('react/jsx-runtime'),
 		},
 	},
 	plugins: [
@@ -324,31 +315,31 @@ const jsConfig = {
 		// Substitute the `__i18n_text_domain__` identifier used by the
 		// @woocommerce/email-editor package with the WooCommerce text
 		// domain so strings extract and translate under `woocommerce`.
-		new webpack.DefinePlugin( {
-			__i18n_text_domain__: JSON.stringify( 'woocommerce' ),
-		} ),
-		new CustomTemplatedPathPlugin( {
-			modulename( outputPath, data ) {
-				const entryName = get( data, [ 'chunk', 'name' ] );
-				if ( entryName ) {
+		new webpack.DefinePlugin({
+			__i18n_text_domain__: JSON.stringify('woocommerce'),
+		}),
+		new CustomTemplatedPathPlugin({
+			modulename(outputPath, data) {
+				const entryName = get(data, ['chunk', 'name']);
+				if (entryName) {
 					// Convert the dash-case name to a camel case module name.
 					// For example, 'csv-export' -> 'csvExport'
-					return entryName.replace( /-([a-z])/g, ( match, letter ) =>
+					return entryName.replace(/-([a-z])/g, (match, letter) =>
 						letter.toUpperCase()
 					);
 				}
 				return outputPath;
 			},
-		} ),
+		}),
 
 		// React Fast Refresh.
-		! isProduction && isHot && new ReactRefreshWebpackPlugin(),
+		!isProduction && isHot && new ReactRefreshWebpackPlugin(),
 
 		// We reuse this Webpack setup for Storybook, where we need to disable dependency extraction.
-		! process.env.STORYBOOK &&
-			new WooCommerceDependencyExtractionWebpackPlugin( {
-				requestToExternal( request ) {
-					switch ( request ) {
+		!process.env.STORYBOOK &&
+			new WooCommerceDependencyExtractionWebpackPlugin({
+				requestToExternal(request) {
+					switch (request) {
 						case 'moment-timezone':
 							// Use WordPress core's window.moment (which includes moment-timezone)
 							// instead of bundling a stripped copy.
@@ -374,52 +365,48 @@ const jsConfig = {
 							return null;
 					}
 
-					if ( request.startsWith( '@wordpress/dataviews' ) ) {
+					if (request.startsWith('@wordpress/dataviews')) {
 						return null;
 					}
 
-					if ( request.startsWith( '@wordpress/theme' ) ) {
+					if (request.startsWith('@wordpress/theme')) {
 						return null;
 					}
 
-					if ( request.startsWith( '@wordpress/ui' ) ) {
+					if (request.startsWith('@wordpress/ui')) {
 						return null;
 					}
 
 					// Skip requesting to external if the import path is from the build or build-module directory for WordPress packages.
 					// This is required for @wordpress/edit-site to work and also can reduce the bundle size when we don't need to load the entire WordPress package.
-					if (
-						request.match( /^@wordpress\/.*\/build(?:-module)?/ )
-					) {
+					if (request.match(/^@wordpress\/.*\/build(?:-module)?/)) {
 						return null;
 					}
 
 					// Skip requesting to external if the import path is from the build or build-module directory for WooCommerce packages.
 					// This can reduce the bundle size when we don't need to load the entire WooCommerce package.
-					if (
-						request.match( /^@woocommerce\/.*\/build(?:-module)?/ )
-					) {
+					if (request.match(/^@woocommerce\/.*\/build(?:-module)?/)) {
 						return null;
 					}
 				},
-				requestToHandle( request ) {
-					if ( request === 'moment-timezone' ) {
+				requestToHandle(request) {
+					if (request === 'moment-timezone') {
 						return 'moment';
 					}
-					if ( request === 'react-dom/client' ) {
+					if (request === 'react-dom/client') {
 						return 'react-dom';
 					}
 				},
-			} ),
+			}),
 		process.env.ANALYZE && new BundleAnalyzerPlugin(),
 		// We only want to generate unminified files in the development phase.
 		WC_ADMIN_PHASE === 'development' &&
 			// Generate unminified files to load the unminified version when `define( 'SCRIPT_DEBUG', true );` is set in wp-config.
-			new UnminifyWebpackPlugin( {
+			new UnminifyWebpackPlugin({
 				test: /\.js($|\?)/i,
 				mainEntry: 'app/index.min.js',
-			} ),
-	].filter( Boolean ),
+			}),
+	].filter(Boolean),
 	optimization: {
 		minimize: NODE_ENV !== 'development',
 		splitChunks: {
@@ -429,11 +416,11 @@ const jsConfig = {
 		},
 	},
 };
-if ( ! isProduction || WC_ADMIN_PHASE === 'development' ) {
+if (!isProduction || WC_ADMIN_PHASE === 'development') {
 	// Set default sourcemap mode if it wasn't set by WP_DEVTOOL.
 	jsConfig.devtool = jsConfig.devtool || 'source-map';
 
-	if ( isHot ) {
+	if (isHot) {
 		// Add dev server config
 		// Copied from https://github.com/WordPress/gutenberg/blob/05bea6dd5c6198b0287c41a401d36a06b48831eb/packages/scripts/config/webpack.config.js#L312-L326
 		jsConfig.devServer = {

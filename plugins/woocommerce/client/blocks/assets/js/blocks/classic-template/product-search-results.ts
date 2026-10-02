@@ -21,22 +21,22 @@ import { createArchiveTitleBlock, createRowBlock } from './utils';
 import { OnClickCallbackParameter, type InheritedAttributes } from './types';
 
 const createNoResultsParagraph = () =>
-	createBlock( 'core/paragraph', {
+	createBlock('core/paragraph', {
 		content: __(
 			'No products were found matching your selection.',
 			'woocommerce'
 		),
-	} );
+	});
 
 const createProductSearch = () =>
-	createBlock( 'core/search', {
+	createBlock('core/search', {
 		buttonPosition: 'button-outside',
-		buttonText: __( 'Search', 'woocommerce' ),
+		buttonText: __('Search', 'woocommerce'),
 		buttonUseIcon: false,
 		showLabel: false,
-		placeholder: __( 'Search products…', 'woocommerce' ),
+		placeholder: __('Search products…', 'woocommerce'),
 		query: { post_type: 'product' },
-	} );
+	});
 
 const extendInnerBlocksWithNoResultsContent = (
 	innerBlocks: InnerBlockTemplate[],
@@ -54,11 +54,11 @@ const extendInnerBlocksWithNoResultsContent = (
 
 	const noResultsBlockName = 'woocommerce/product-collection-no-results';
 	const noResultsBlockIndex = innerBlocks.findIndex(
-		( block ) => block[ nameArrayIndex ] === noResultsBlockName
+		(block) => block[nameArrayIndex] === noResultsBlockName
 	);
-	const noResultsBlock = innerBlocks[ noResultsBlockIndex ];
+	const noResultsBlock = innerBlocks[noResultsBlockIndex];
 	const attributes = {
-		...( noResultsBlock[ attributesArrayIndex ] || {} ),
+		...(noResultsBlock[attributesArrayIndex] || {}),
 		...inheritedAttributes,
 	};
 
@@ -69,9 +69,9 @@ const extendInnerBlocksWithNoResultsContent = (
 	];
 
 	return [
-		...innerBlocks.slice( 0, noResultsBlockIndex ),
+		...innerBlocks.slice(0, noResultsBlockIndex),
 		extendedNoResults,
-		...innerBlocks.slice( noResultsBlockIndex + 1 ),
+		...innerBlocks.slice(noResultsBlockIndex + 1),
 	];
 };
 
@@ -100,21 +100,21 @@ const createProductCollectionBlock = (
 	);
 };
 
-const getBlockifiedTemplate = ( inheritedAttributes: InheritedAttributes ) =>
+const getBlockifiedTemplate = (inheritedAttributes: InheritedAttributes) =>
 	[
-		createArchiveTitleBlock( 'search-title', inheritedAttributes ),
-		createBlock( 'woocommerce/store-notices', inheritedAttributes ),
+		createArchiveTitleBlock('search-title', inheritedAttributes),
+		createBlock('woocommerce/store-notices', inheritedAttributes),
 		createRowBlock(
 			[
-				createBlock( 'woocommerce/product-results-count' ),
-				createBlock( 'woocommerce/catalog-sorting' ),
+				createBlock('woocommerce/product-results-count'),
+				createBlock('woocommerce/catalog-sorting'),
 			],
 			inheritedAttributes
 		),
-		createProductCollectionBlock( inheritedAttributes ),
-	].filter( Boolean ) as BlockInstance[];
+		createProductCollectionBlock(inheritedAttributes),
+	].filter(Boolean) as BlockInstance[];
 
-const getDescription = ( templateTitle: string ) =>
+const getDescription = (templateTitle: string) =>
 	sprintf(
 		/* translators: %s is the template title */
 		__(
@@ -124,32 +124,31 @@ const getDescription = ( templateTitle: string ) =>
 		templateTitle
 	);
 
-const onClickCallback = ( {
+const onClickCallback = ({
 	clientId,
 	attributes,
 	getBlocks,
 	replaceBlock,
 	selectBlock,
-}: OnClickCallbackParameter ) => {
-	replaceBlock( clientId, getBlockifiedTemplate( attributes ) );
+}: OnClickCallbackParameter) => {
+	replaceBlock(clientId, getBlockifiedTemplate(attributes));
 
 	const blocks = getBlocks();
 
 	const groupBlock = blocks.find(
-		( block ) =>
+		(block) =>
 			block.name === 'core/group' &&
 			block.innerBlocks.some(
-				( innerBlock ) =>
-					innerBlock.name === 'woocommerce/store-notices'
+				(innerBlock) => innerBlock.name === 'woocommerce/store-notices'
 			)
 	);
 
-	if ( groupBlock ) {
-		selectBlock( groupBlock.clientId );
+	if (groupBlock) {
+		selectBlock(groupBlock.clientId);
 	}
 };
 
-const getButtonLabel = () => __( 'Transform into blocks', 'woocommerce' );
+const getButtonLabel = () => __('Transform into blocks', 'woocommerce');
 
 const blockifyConfig = {
 	getButtonLabel,

@@ -9,19 +9,19 @@ import NoticeBanner, {
 /**
  * Wrapper for NoticeBanner component.
  */
-const StoreNotice = ( {
+const StoreNotice = ({
 	className,
 	children,
 	status,
 	...props
-}: NoticeBannerProps ) => {
+}: NoticeBannerProps) => {
 	return (
 		<NoticeBanner
-			className={ clsx( 'wc-block-store-notice', className ) }
-			status={ status }
-			{ ...props }
+			className={clsx('wc-block-store-notice', className)}
+			status={status}
+			{...props}
 		>
-			{ children }
+			{children}
 		</NoticeBanner>
 	);
 };

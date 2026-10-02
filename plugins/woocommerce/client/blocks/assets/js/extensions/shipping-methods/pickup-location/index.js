@@ -12,7 +12,7 @@ const settingsContainer = document.getElementById(
 	'wc-shipping-method-pickup-location-settings-container'
 );
 
-if ( settingsContainer ) {
-	const root = createRoot( settingsContainer );
-	root.render( <SettingsPage /> );
+if (settingsContainer) {
+	const root = createRoot(settingsContainer);
+	root.render(<SettingsPage />);
 }

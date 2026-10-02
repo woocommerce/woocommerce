@@ -24,7 +24,7 @@ interface QueryLoopProductContextValidation {
  * @param {string} params.blockName - The name of the block to display in warning.
  * @return {QueryLoopProductContextValidation} Object containing validation state and warning element.
  */
-export const useQueryLoopProductContextValidation = ( {
+export const useQueryLoopProductContextValidation = ({
 	clientId,
 	postType,
 	blockName,
@@ -32,28 +32,28 @@ export const useQueryLoopProductContextValidation = ( {
 	clientId: string;
 	postType: string;
 	blockName: string;
-} ): QueryLoopProductContextValidation => {
+}): QueryLoopProductContextValidation => {
 	const hasInvalidContext = useSelect(
-		( select ) => {
+		(select) => {
 			const queryLoopAncestors = select(
 				blockEditorStore
-			).getBlockParentsByBlockName( clientId, 'core/post-template' );
+			).getBlockParentsByBlockName(clientId, 'core/post-template');
 			return queryLoopAncestors.length > 0 && postType !== 'product';
 		},
-		[ clientId, postType ]
+		[clientId, postType]
 	);
 
 	const warningElement = (
-		<div { ...useBlockProps() }>
+		<div {...useBlockProps()}>
 			<Warning>
-				{ sprintf(
+				{sprintf(
 					/* translators: %s: block name */
 					__(
 						'The %s block requires a product context. When used in a Query Loop, the Query Loop must be configured to display products.',
 						'woocommerce'
 					),
 					blockName
-				) }
+				)}
 			</Warning>
 		</div>
 	);

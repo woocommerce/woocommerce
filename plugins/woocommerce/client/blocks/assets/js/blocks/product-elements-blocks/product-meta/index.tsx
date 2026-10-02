@@ -17,16 +17,16 @@ const blockConfig = {
 	icon: {
 		src: (
 			<Icon
-				icon={ productMeta }
+				icon={productMeta}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
 	},
 	edit,
 	save,
-	ancestor: [ 'woocommerce/single-product' ],
+	ancestor: ['woocommerce/single-product'],
 };
 
-registerProductBlockType( blockConfig, {
+registerProductBlockType(blockConfig, {
 	isAvailableOnPostEditor: true,
-} );
+});

@@ -22,7 +22,7 @@ export type FilterItemFields = {
 	visual?: VisualAttributeTerm;
 };
 
-export type FilterOptionItem = SelectableItem< FilterItemFields >;
+export type FilterOptionItem = SelectableItem<FilterItemFields>;
 
 // ----------------------------------------
 // Parent store context + active-filter shape
@@ -36,7 +36,7 @@ export type ActiveFilterItem = {
 
 export type ProductFiltersContext = {
 	isOverlayOpened: boolean;
-	params: Record< string, string >;
+	params: Record<string, string>;
 	activeFilters: ActiveFilterItem[];
 	items?: FilterOptionItem[];
 	item: FilterOptionItem;
@@ -60,4 +60,4 @@ export type BlockAttributes = {
 	overlayPosition?: 'left' | 'right';
 };
 
-export type EditProps = BlockEditProps< BlockAttributes >;
+export type EditProps = BlockEditProps<BlockAttributes>;

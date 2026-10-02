@@ -26,15 +26,15 @@ export type BlockAttributes = {
 	customSlider: string;
 };
 
-export interface EditProps extends BlockEditProps< BlockAttributes > {
+export interface EditProps extends BlockEditProps<BlockAttributes> {
 	context: RangeInputBlockContext;
 
 	sliderHandle: Color;
-	setSliderHandle: ( color: string ) => void;
+	setSliderHandle: (color: string) => void;
 
 	sliderHandleBorder: Color;
-	setSliderHandleBorder: ( color: string ) => void;
+	setSliderHandleBorder: (color: string) => void;
 
 	slider: Color;
-	setSlider: ( color: string ) => void;
+	setSlider: (color: string) => void;
 }

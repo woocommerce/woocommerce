@@ -6,11 +6,11 @@ import { store as editorStore } from '@wordpress/editor';
 
 export function useEditorMode() {
 	const { isEditingTemplate } = useSelect(
-		( select ) => ( {
+		(select) => ({
 			isEditingTemplate:
-				select( editorStore ).getCurrentPostType() === 'wp_template',
-		} ),
+				select(editorStore).getCurrentPostType() === 'wp_template',
+		}),
 		[]
 	);
-	return [ isEditingTemplate ? 'template' : 'email' ];
+	return [isEditingTemplate ? 'template' : 'email'];
 }

@@ -7,25 +7,25 @@ import type { FormEvent } from 'react';
 interface FormProps {
 	className: string;
 	children?: React.ReactChildren;
-	onSubmit: ( event: FormEvent ) => void;
+	onSubmit: (event: FormEvent) => void;
 }
 
-const Form = ( {
+const Form = ({
 	className,
 	children,
-	onSubmit = ( event ) => void event,
-}: FormProps ): JSX.Element => {
-	const formOnSubmit = ( event: FormEvent ) => {
+	onSubmit = (event) => void event,
+}: FormProps): JSX.Element => {
+	const formOnSubmit = (event: FormEvent) => {
 		event.preventDefault();
-		onSubmit( event );
+		onSubmit(event);
 	};
 
 	return (
 		<form
-			className={ clsx( 'wc-block-components-form', className ) }
-			onSubmit={ formOnSubmit }
+			className={clsx('wc-block-components-form', className)}
+			onSubmit={formOnSubmit}
 		>
-			{ children }
+			{children}
 		</form>
 	);
 };

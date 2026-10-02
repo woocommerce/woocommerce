@@ -14,7 +14,7 @@ import { getSetting } from '@woocommerce/settings';
  * *stopped* being incompatible need to tell "we don't know" apart from "none".
  */
 export const useIncompatibleExtensionNotice = (): [
-	{ [ k: string ]: string },
+	{ [k: string]: string },
 	string[],
 	number,
 	boolean,
@@ -24,21 +24,21 @@ export const useIncompatibleExtensionNotice = (): [
 		title: string;
 	}
 
-	const declared = getSetting< GlobalIncompatibleExtensions[] | undefined >(
+	const declared = getSetting<GlobalIncompatibleExtensions[] | undefined>(
 		'incompatibleExtensions',
 		undefined
 	);
-	const areIncompatibleExtensionsKnown = Array.isArray( declared );
+	const areIncompatibleExtensionsKnown = Array.isArray(declared);
 
-	const incompatibleExtensions: Record< string, string > = {};
+	const incompatibleExtensions: Record<string, string> = {};
 
-	if ( areIncompatibleExtensionsKnown ) {
-		declared.forEach( ( extension ) => {
-			incompatibleExtensions[ extension.id ] = extension.title;
-		} );
+	if (areIncompatibleExtensionsKnown) {
+		declared.forEach((extension) => {
+			incompatibleExtensions[extension.id] = extension.title;
+		});
 	}
 
-	const incompatibleExtensionSlugs = Object.keys( incompatibleExtensions );
+	const incompatibleExtensionSlugs = Object.keys(incompatibleExtensions);
 	const incompatibleExtensionCount = incompatibleExtensionSlugs.length;
 
 	return [

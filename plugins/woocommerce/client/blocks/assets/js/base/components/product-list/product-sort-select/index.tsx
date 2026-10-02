@@ -10,42 +10,42 @@ import { SortSelect } from '@woocommerce/blocks-components';
 import './style.scss';
 import { ProductSortSelectProps } from '../types';
 
-const ProductSortSelect = ( {
+const ProductSortSelect = ({
 	onChange,
 	value,
-}: ProductSortSelectProps ): JSX.Element => {
+}: ProductSortSelectProps): JSX.Element => {
 	return (
 		<SortSelect
 			className="wc-block-product-sort-select wc-block-components-product-sort-select"
-			onChange={ onChange }
-			options={ [
+			onChange={onChange}
+			options={[
 				{
 					key: 'menu_order',
-					label: __( 'Default sorting', 'woocommerce' ),
+					label: __('Default sorting', 'woocommerce'),
 				},
 				{
 					key: 'popularity',
-					label: __( 'Popularity', 'woocommerce' ),
+					label: __('Popularity', 'woocommerce'),
 				},
 				{
 					key: 'rating',
-					label: __( 'Average rating', 'woocommerce' ),
+					label: __('Average rating', 'woocommerce'),
 				},
 				{
 					key: 'date',
-					label: __( 'Latest', 'woocommerce' ),
+					label: __('Latest', 'woocommerce'),
 				},
 				{
 					key: 'price',
-					label: __( 'Price: low to high', 'woocommerce' ),
+					label: __('Price: low to high', 'woocommerce'),
 				},
 				{
 					key: 'price-desc',
-					label: __( 'Price: high to low', 'woocommerce' ),
+					label: __('Price: high to low', 'woocommerce'),
 				},
-			] }
-			screenReaderLabel={ __( 'Order products by', 'woocommerce' ) }
-			value={ value }
+			]}
+			screenReaderLabel={__('Order products by', 'woocommerce')}
+			value={value}
 		/>
 	);
 };

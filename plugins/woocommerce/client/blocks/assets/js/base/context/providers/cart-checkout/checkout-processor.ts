@@ -60,8 +60,8 @@ const CheckoutProcessor = () => {
 		orderNotes,
 		redirectUrl,
 		shouldCreateAccount,
-	} = useSelect( ( select ) => {
-		const store = select( checkoutStore );
+	} = useSelect((select) => {
+		const store = select(checkoutStore);
 		return {
 			additionalFields: store.getAdditionalFields(),
 			customerId: store.getCustomerId(),
@@ -75,13 +75,13 @@ const CheckoutProcessor = () => {
 			redirectUrl: store.getRedirectUrl(),
 			shouldCreateAccount: store.getShouldCreateAccount(),
 		};
-	}, [] );
+	}, []);
 
 	const { __internalSetHasError, __internalProcessCheckoutResponse } =
-		useDispatch( checkoutStore );
+		useDispatch(checkoutStore);
 
 	const hasValidationErrors = useSelect(
-		( select ) => select( validationStore ).hasValidationErrors,
+		(select) => select(validationStore).hasValidationErrors,
 		[]
 	);
 	const { shippingErrorStatus } = useShippingDataContext();
@@ -103,8 +103,8 @@ const CheckoutProcessor = () => {
 		hasPaymentError,
 		isPaymentReady,
 		shouldSavePayment,
-	} = useSelect( ( select ) => {
-		const store = select( paymentStore );
+	} = useSelect((select) => {
+		const store = select(paymentStore);
 
 		return {
 			activePaymentMethod: store.getActivePaymentMethod(),
@@ -114,42 +114,42 @@ const CheckoutProcessor = () => {
 			isPaymentReady: store.isPaymentReady(),
 			shouldSavePayment: store.getShouldSavePaymentMethod(),
 		};
-	}, [] );
+	}, []);
 
 	const paymentMethods = getPaymentMethods();
 	const expressPaymentMethods = getExpressPaymentMethods();
-	const currentBillingAddress = useRef( billingAddress );
-	const currentShippingAddress = useRef( shippingAddress );
-	const currentRedirectUrl = useRef( redirectUrl );
-	const [ isProcessingOrder, setIsProcessingOrder ] = useState( false );
+	const currentBillingAddress = useRef(billingAddress);
+	const currentShippingAddress = useRef(shippingAddress);
+	const currentRedirectUrl = useRef(redirectUrl);
+	const [isProcessingOrder, setIsProcessingOrder] = useState(false);
 
-	const paymentMethodId = useMemo( () => {
+	const paymentMethodId = useMemo(() => {
 		const merged = {
 			...expressPaymentMethods,
 			...paymentMethods,
 		};
-		return merged?.[ activePaymentMethod ]?.paymentMethodId;
-	}, [ activePaymentMethod, expressPaymentMethods, paymentMethods ] );
+		return merged?.[activePaymentMethod]?.paymentMethodId;
+	}, [activePaymentMethod, expressPaymentMethods, paymentMethods]);
 
 	const checkoutWillHaveError =
-		( hasValidationErrors() && ! isExpressPaymentMethodActive ) ||
+		(hasValidationErrors() && !isExpressPaymentMethodActive) ||
 		hasPaymentError ||
 		shippingErrorStatus.hasError;
 
 	const paidAndWithoutErrors =
-		! checkoutHasError &&
-		! checkoutWillHaveError &&
-		( isPaymentReady || ! cartNeedsPayment ) &&
+		!checkoutHasError &&
+		!checkoutWillHaveError &&
+		(isPaymentReady || !cartNeedsPayment) &&
 		checkoutIsProcessing;
 
 	// Determine if checkout has an error.
-	useEffect( () => {
+	useEffect(() => {
 		if (
 			checkoutWillHaveError !== checkoutHasError &&
-			( checkoutIsProcessing || checkoutIsBeforeProcessing ) &&
-			! isExpressPaymentMethodActive
+			(checkoutIsProcessing || checkoutIsBeforeProcessing) &&
+			!isExpressPaymentMethodActive
 		) {
-			void __internalSetHasError( checkoutWillHaveError );
+			void __internalSetHasError(checkoutWillHaveError);
 		}
 	}, [
 		checkoutWillHaveError,
@@ -158,20 +158,20 @@ const CheckoutProcessor = () => {
 		checkoutIsBeforeProcessing,
 		isExpressPaymentMethodActive,
 		__internalSetHasError,
-	] );
+	]);
 
 	// Keep the billing, shipping and redirectUrl current
-	useEffect( () => {
+	useEffect(() => {
 		currentBillingAddress.current = billingAddress;
 		currentShippingAddress.current = shippingAddress;
 		currentRedirectUrl.current = redirectUrl;
-	}, [ billingAddress, shippingAddress, redirectUrl ] );
+	}, [billingAddress, shippingAddress, redirectUrl]);
 
-	const checkValidation = useCallback( () => {
-		if ( hasValidationErrors() ) {
+	const checkValidation = useCallback(() => {
+		if (hasValidationErrors()) {
 			// If there is a shipping rates validation error, return the error message to be displayed.
 			if (
-				selectStore( validationStore ).getValidationError(
+				selectStore(validationStore).getValidationError(
 					'shipping-rates-error'
 				) !== undefined
 			) {
@@ -185,7 +185,7 @@ const CheckoutProcessor = () => {
 			}
 			return false;
 		}
-		if ( hasPaymentError ) {
+		if (hasPaymentError) {
 			return {
 				type: responseTypes.ERROR,
 				errorMessage: __(
@@ -195,7 +195,7 @@ const CheckoutProcessor = () => {
 				context: 'wc/checkout/payments',
 			};
 		}
-		if ( shippingErrorStatus.hasError ) {
+		if (shippingErrorStatus.hasError) {
 			return {
 				type: responseTypes.ERROR,
 				errorMessage: __(
@@ -207,44 +207,40 @@ const CheckoutProcessor = () => {
 		}
 
 		return true;
-	}, [ hasValidationErrors, hasPaymentError, shippingErrorStatus.hasError ] );
+	}, [hasValidationErrors, hasPaymentError, shippingErrorStatus.hasError]);
 
 	// Validate the checkout using the CHECKOUT_VALIDATION_BEFORE_PROCESSING event
-	useEffect( () => {
+	useEffect(() => {
 		let unsubscribeProcessing: () => void;
-		if ( ! isExpressPaymentMethodActive ) {
-			unsubscribeProcessing = onCheckoutValidation( checkValidation, 0 );
+		if (!isExpressPaymentMethodActive) {
+			unsubscribeProcessing = onCheckoutValidation(checkValidation, 0);
 		}
 		return () => {
 			if (
-				! isExpressPaymentMethodActive &&
+				!isExpressPaymentMethodActive &&
 				typeof unsubscribeProcessing === 'function'
 			) {
 				unsubscribeProcessing();
 			}
 		};
-	}, [
-		onCheckoutValidation,
-		checkValidation,
-		isExpressPaymentMethodActive,
-	] );
+	}, [onCheckoutValidation, checkValidation, isExpressPaymentMethodActive]);
 
 	// Redirect when checkout is complete and there is a redirect url.
-	useEffect( () => {
+	useEffect(() => {
 		window.localStorage.removeItem(
 			'WOOCOMMERCE_CHECKOUT_IS_CUSTOMER_DATA_DIRTY'
 		);
-		if ( currentRedirectUrl.current ) {
+		if (currentRedirectUrl.current) {
 			window.location.href = currentRedirectUrl.current;
 		}
-	}, [ checkoutIsComplete ] );
+	}, [checkoutIsComplete]);
 
 	// POST to the Store API and process and display any errors, or set order complete
-	const processOrder = useCallback( async () => {
-		if ( isProcessingOrder ) {
+	const processOrder = useCallback(async () => {
+		if (isProcessingOrder) {
 			return;
 		}
-		setIsProcessingOrder( true );
+		setIsProcessingOrder(true);
 		removeAllNotices();
 
 		const paymentData = cartNeedsPayment
@@ -255,7 +251,7 @@ const CheckoutProcessor = () => {
 						shouldSavePayment,
 						activePaymentMethod
 					),
-			  }
+				}
 			: {};
 
 		const billingAddressData = currentBillingAddress.current;
@@ -278,11 +274,11 @@ const CheckoutProcessor = () => {
 			// order if it no longer matches (e.g. a product, price or quantity changed during
 			// checkout). Express payment methods may not know the final total up front, so
 			// they opt out of this check.
-			...( ! isExpressPaymentMethodActive &&
+			...(!isExpressPaymentMethodActive &&
 			cartTotals &&
 			cartTotals.total_price !== ''
 				? { expected_total: cartTotals.total_price }
-				: {} ),
+				: {}),
 			...paymentData,
 		};
 
@@ -290,63 +286,61 @@ const CheckoutProcessor = () => {
 		// before placing the order.
 		clearCheckoutPutRequests();
 
-		triggerFetch( {
+		triggerFetch({
 			path: '/wc/store/v1/checkout',
 			method: 'POST',
 			data,
 			cache: 'no-store',
 			parse: false,
-		} )
-			.then( ( response: unknown ) => {
-				assertResponseIsValid< CheckoutResponseSuccess >( response );
-				processCheckoutResponseHeaders( response.headers );
-				if ( ! response.ok ) {
+		})
+			.then((response: unknown) => {
+				assertResponseIsValid<CheckoutResponseSuccess>(response);
+				processCheckoutResponseHeaders(response.headers);
+				if (!response.ok) {
 					throw response;
 				}
 				return response.json();
-			} )
-			.then( ( responseJson: CheckoutResponseSuccess ) => {
-				void __internalProcessCheckoutResponse( responseJson );
-				setIsProcessingOrder( false );
-			} )
-			.catch( ( errorResponse: ApiResponse< CheckoutResponseError > ) => {
-				processCheckoutResponseHeaders( errorResponse?.headers );
+			})
+			.then((responseJson: CheckoutResponseSuccess) => {
+				void __internalProcessCheckoutResponse(responseJson);
+				setIsProcessingOrder(false);
+			})
+			.catch((errorResponse: ApiResponse<CheckoutResponseError>) => {
+				processCheckoutResponseHeaders(errorResponse?.headers);
 				try {
 					// This attempts to parse a JSON error response where the status code was 4xx/5xx.
 					void errorResponse
 						.json()
-						.then(
-							( response ) => response as CheckoutResponseError
-						)
-						.then( ( response: CheckoutResponseError ) => {
-							if ( response.data?.cart ) {
+						.then((response) => response as CheckoutResponseError)
+						.then((response: CheckoutResponseError) => {
+							if (response.data?.cart) {
 								// We don't want to receive the address here because it will overwrite fields.
-								receiveCartContents( response.data.cart );
+								receiveCartContents(response.data.cart);
 							}
-							processErrorResponse( response );
-							void __internalProcessCheckoutResponse( response );
-						} );
+							processErrorResponse(response);
+							void __internalProcessCheckoutResponse(response);
+						});
 				} catch {
 					let errorMessage = __(
 						'Something went wrong when placing the order. Check your email for order updates before retrying.',
 						'woocommerce'
 					);
 
-					if ( customerId !== 0 ) {
+					if (customerId !== 0) {
 						errorMessage = __(
 							"Something went wrong when placing the order. Check your account's order history or your email for order updates before retrying.",
 							'woocommerce'
 						);
 					}
-					processErrorResponse( {
+					processErrorResponse({
 						code: 'unknown_error',
 						message: errorMessage,
 						data: null,
-					} );
+					});
 				}
-				void __internalSetHasError( true );
-				setIsProcessingOrder( false );
-			} );
+				void __internalSetHasError(true);
+				setIsProcessingOrder(false);
+			});
 	}, [
 		isProcessingOrder,
 		cartNeedsPayment,
@@ -367,14 +361,14 @@ const CheckoutProcessor = () => {
 		__internalSetHasError,
 		__internalProcessCheckoutResponse,
 		useBillingAsShipping,
-	] );
+	]);
 
 	// Process order if conditions are good.
-	useEffect( () => {
-		if ( paidAndWithoutErrors && ! isProcessingOrder ) {
+	useEffect(() => {
+		if (paidAndWithoutErrors && !isProcessingOrder) {
 			void processOrder();
 		}
-	}, [ processOrder, paidAndWithoutErrors, isProcessingOrder ] );
+	}, [processOrder, paidAndWithoutErrors, isProcessingOrder]);
 
 	return null;
 };

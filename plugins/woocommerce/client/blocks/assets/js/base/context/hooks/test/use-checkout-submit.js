@@ -17,7 +17,7 @@ import {
 } from '@woocommerce/block-data/payment';
 import { useCheckoutSubmit } from '../use-checkout-submit';
 
-jest.mock( '../../providers/cart-checkout/checkout-events', () => {
+jest.mock('../../providers/cart-checkout/checkout-events', () => {
 	const original = jest.requireActual(
 		'../../providers/cart-checkout/checkout-events'
 	);
@@ -27,31 +27,31 @@ jest.mock( '../../providers/cart-checkout/checkout-events', () => {
 			return { onSubmit: jest.fn() };
 		},
 	};
-} );
+});
 
-describe( 'useCheckoutSubmit', () => {
+describe('useCheckoutSubmit', () => {
 	let registry;
 
-	const wrapper = ( { children } ) => (
-		<RegistryProvider value={ registry }>{ children }</RegistryProvider>
+	const wrapper = ({ children }) => (
+		<RegistryProvider value={registry}>{children}</RegistryProvider>
 	);
 
-	beforeEach( () => {
-		registry = createRegistry( {
-			[ CHECKOUT_STORE_KEY ]: checkoutStoreConfig,
-			[ PAYMENT_STORE_KEY ]: paymentDataStoreConfig,
-		} );
-	} );
+	beforeEach(() => {
+		registry = createRegistry({
+			[CHECKOUT_STORE_KEY]: checkoutStoreConfig,
+			[PAYMENT_STORE_KEY]: paymentDataStoreConfig,
+		});
+	});
 
-	it( 'onSubmit calls the correct action in the checkout events context', () => {
-		const { result } = renderHook( () => useCheckoutSubmit(), {
+	it('onSubmit calls the correct action in the checkout events context', () => {
+		const { result } = renderHook(() => useCheckoutSubmit(), {
 			wrapper,
-		} );
+		});
 
 		const { onSubmit } = result.current;
 
 		onSubmit();
 
-		expect( onSubmit ).toHaveBeenCalledTimes( 1 );
-	} );
-} );
+		expect(onSubmit).toHaveBeenCalledTimes(1);
+	});
+});

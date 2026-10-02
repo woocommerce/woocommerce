@@ -9,9 +9,9 @@ import { createElement } from '@wordpress/element';
  */
 import { RecommendedExtensionsPlaceholder } from '..';
 
-describe( 'RecommendedExtensionsPlaceholder', () => {
-	test( 'should render a default placeholder', () => {
-		const { container } = render( <RecommendedExtensionsPlaceholder /> );
-		expect( container ).toMatchSnapshot();
-	} );
-} );
+describe('RecommendedExtensionsPlaceholder', () => {
+	test('should render a default placeholder', () => {
+		const { container } = render(<RecommendedExtensionsPlaceholder />);
+		expect(container).toMatchSnapshot();
+	});
+});

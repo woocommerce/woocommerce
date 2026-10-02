@@ -25,36 +25,36 @@ interface ProductSaleBadgeProps {
  * @param {string} [props.format]   Format to change the price.
  * @return {*} The component.
  */
-const ProductSaleBadge = ( {
+const ProductSaleBadge = ({
 	currency,
 	saleAmount,
 	format = '<price/>',
-}: ProductSaleBadgeProps ): JSX.Element | null => {
-	if ( ! saleAmount || saleAmount <= 0 ) {
+}: ProductSaleBadgeProps): JSX.Element | null => {
+	if (!saleAmount || saleAmount <= 0) {
 		return null;
 	}
-	if ( ! format.includes( '<price/>' ) ) {
+	if (!format.includes('<price/>')) {
 		format = '<price/>';
 		// eslint-disable-next-line no-console
-		console.error( 'Price formats need to include the `<price/>` tag.' );
+		console.error('Price formats need to include the `<price/>` tag.');
 	}
 
 	const formattedMessage = sprintf(
 		/* translators: %s will be replaced by the discount amount */
-		__( `Save %s`, 'woocommerce' ),
+		__(`Save %s`, 'woocommerce'),
 		format
 	);
 
 	return (
 		<ProductBadge className="wc-block-components-sale-badge">
-			{ createInterpolateElement( formattedMessage, {
+			{createInterpolateElement(formattedMessage, {
 				price: (
 					<FormattedMonetaryAmount
-						currency={ currency }
-						value={ saleAmount }
+						currency={currency}
+						value={saleAmount}
 					/>
 				),
-			} ) }
+			})}
 		</ProductBadge>
 	);
 };

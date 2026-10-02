@@ -81,28 +81,28 @@ export default {
 			action: 'toggled',
 		},
 	},
-} as Meta< CheckboxListProps >;
+} as Meta<CheckboxListProps>;
 
-const Template: StoryFn< CheckboxListProps > = ( args ) => {
-	const [ { checked, onChange: argsOnChange }, updateArgs ] = useArgs();
-	const onChange = ( checkedOption: string ) => {
-		argsOnChange( checkedOption );
-		if ( checked?.includes( checkedOption ) ) {
-			updateArgs( {
+const Template: StoryFn<CheckboxListProps> = (args) => {
+	const [{ checked, onChange: argsOnChange }, updateArgs] = useArgs();
+	const onChange = (checkedOption: string) => {
+		argsOnChange(checkedOption);
+		if (checked?.includes(checkedOption)) {
+			updateArgs({
 				checked: checked.filter(
-					( option: string ) => option !== checkedOption
+					(option: string) => option !== checkedOption
 				),
-			} );
+			});
 			return;
 		}
-		checked.push( checkedOption );
-		updateArgs( { ...args, checked } );
+		checked.push(checkedOption);
+		updateArgs({ ...args, checked });
 	};
 
-	return <CheckboxList { ...args } onChange={ onChange } />;
+	return <CheckboxList {...args} onChange={onChange} />;
 };
 
-export const Default: StoryFn< CheckboxListProps > = Template.bind( {} );
+export const Default: StoryFn<CheckboxListProps> = Template.bind({});
 Default.args = {
 	options: [
 		{ label: '🍏 Apple', value: 'apple' },
@@ -114,5 +114,5 @@ Default.args = {
 		{ label: '🍓 Strawberry', value: 'strawberry' },
 		{ label: '🍑 Peach', value: 'peach' },
 	],
-	checked: [ 'apple' ],
+	checked: ['apple'],
 };

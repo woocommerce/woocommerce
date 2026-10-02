@@ -12,15 +12,15 @@
  * limitation as json2md.
  */
 
-const isListItem = ( line ) => /^([-*+]|\d+[.)])\s/.test( line );
+const isListItem = (line) => /^([-*+]|\d+[.)])\s/.test(line);
 
-const getFenceMarker = ( line ) => {
-	const match = line.match( /^(`{3,}|~{3,})/ );
-	return match ? match[ 1 ] : null;
+const getFenceMarker = (line) => {
+	const match = line.match(/^(`{3,}|~{3,})/);
+	return match ? match[1] : null;
 };
 
-const docblockToMarkdown = ( text ) => {
-	if ( ! text ) {
+const docblockToMarkdown = (text) => {
+	if (!text) {
 		return text;
 	}
 
@@ -31,58 +31,58 @@ const docblockToMarkdown = ( text ) => {
 	// The delimiter run that opened the current code fence, if any.
 	let openFence = null;
 
-	for ( const rawLine of String( text ).split( '\n' ) ) {
+	for (const rawLine of String(text).split('\n')) {
 		const line = rawLine.trimEnd();
 		const trimmed = line.trim();
 
-		if ( openFence ) {
+		if (openFence) {
 			// Per CommonMark, only a bare marker of the same character
 			// with at least the opening length closes the fence; any
 			// other line is code-block content.
-			const closeMarker = getFenceMarker( trimmed );
+			const closeMarker = getFenceMarker(trimmed);
 			if (
 				closeMarker === trimmed &&
-				closeMarker[ 0 ] === openFence[ 0 ] &&
+				closeMarker[0] === openFence[0] &&
 				closeMarker.length >= openFence.length
 			) {
 				openFence = null;
-				out.push( trimmed );
+				out.push(trimmed);
 				joinable = false;
 			} else {
-				out.push( line );
+				out.push(line);
 			}
 			continue;
 		}
-		const fenceMarker = getFenceMarker( trimmed );
-		if ( fenceMarker ) {
+		const fenceMarker = getFenceMarker(trimmed);
+		if (fenceMarker) {
 			openFence = fenceMarker;
-			out.push( trimmed );
+			out.push(trimmed);
 			joinable = false;
 			continue;
 		}
-		if ( ! trimmed ) {
-			if ( out.length && out[ out.length - 1 ] !== '' ) {
-				out.push( '' );
+		if (!trimmed) {
+			if (out.length && out[out.length - 1] !== '') {
+				out.push('');
 			}
 			joinable = false;
 			continue;
 		}
-		if ( isListItem( trimmed ) ) {
-			const prev = out.length ? out[ out.length - 1 ] : '';
-			if ( prev && ! isListItem( prev ) ) {
-				out.push( '' );
+		if (isListItem(trimmed)) {
+			const prev = out.length ? out[out.length - 1] : '';
+			if (prev && !isListItem(prev)) {
+				out.push('');
 			}
-			out.push( trimmed );
+			out.push(trimmed);
 			joinable = true;
-		} else if ( joinable ) {
-			out[ out.length - 1 ] += ` ${ trimmed }`;
+		} else if (joinable) {
+			out[out.length - 1] += ` ${trimmed}`;
 		} else {
-			out.push( trimmed );
+			out.push(trimmed);
 			joinable = true;
 		}
 	}
 
-	return out.join( '\n' ).trim();
+	return out.join('\n').trim();
 };
 
 module.exports = { docblockToMarkdown };

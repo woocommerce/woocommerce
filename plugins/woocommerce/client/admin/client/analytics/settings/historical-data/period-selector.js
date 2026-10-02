@@ -9,53 +9,50 @@ import { dateValidationMessages } from '@woocommerce/date';
 import { importStore } from '@woocommerce/data';
 import { withDispatch } from '@wordpress/data';
 
-function HistoricalDataPeriodSelector( {
+function HistoricalDataPeriodSelector({
 	dateFormat,
 	disabled,
 	setImportPeriod,
 	value,
-} ) {
-	const onSelectChange = ( val ) => {
-		setImportPeriod( val );
+}) {
+	const onSelectChange = (val) => {
+		setImportPeriod(val);
 	};
-	const onDatePickerChange = ( val ) => {
+	const onDatePickerChange = (val) => {
 		const dateModified = true;
-		if ( val.date && val.date.isValid ) {
-			setImportPeriod( val.date.format( dateFormat ), dateModified );
+		if (val.date && val.date.isValid) {
+			setImportPeriod(val.date.format(dateFormat), dateModified);
 		} else {
-			setImportPeriod( val.text, dateModified );
+			setImportPeriod(val.text, dateModified);
 		}
 	};
 
-	const getDatePickerError = ( momentDate ) => {
-		if (
-			! momentDate.isValid() ||
-			value.date.length !== dateFormat.length
-		) {
+	const getDatePickerError = (momentDate) => {
+		if (!momentDate.isValid() || value.date.length !== dateFormat.length) {
 			return dateValidationMessages.invalid;
 		}
-		if ( momentDate.isAfter( new Date(), 'day' ) ) {
+		if (momentDate.isAfter(new Date(), 'day')) {
 			return dateValidationMessages.future;
 		}
 		return null;
 	};
 	const getDatePicker = () => {
-		const momentDate = moment( value.date, dateFormat );
+		const momentDate = moment(value.date, dateFormat);
 		return (
 			<div className="woocommerce-settings-historical-data__column">
 				<div className="woocommerce-settings-historical-data__column-label">
-					{ __( 'Beginning on', 'woocommerce' ) }
+					{__('Beginning on', 'woocommerce')}
 				</div>
 				<DatePicker
-					date={ momentDate.isValid() ? momentDate.toDate() : null }
-					dateFormat={ dateFormat }
-					disabled={ disabled }
-					error={ getDatePickerError( momentDate ) }
-					isInvalidDate={ ( date ) =>
-						moment( date ).isAfter( new Date(), 'day' )
+					date={momentDate.isValid() ? momentDate.toDate() : null}
+					dateFormat={dateFormat}
+					disabled={disabled}
+					error={getDatePickerError(momentDate)}
+					isInvalidDate={(date) =>
+						moment(date).isAfter(new Date(), 'day')
 					}
-					onUpdate={ onDatePickerChange }
-					text={ value.date }
+					onUpdate={onDatePickerChange}
+					text={value.date}
 				/>
 			</div>
 		);
@@ -66,11 +63,11 @@ function HistoricalDataPeriodSelector( {
 			<div className="woocommerce-settings-historical-data__column">
 				<SelectControl
 					__next40pxDefaultSize
-					label={ __( 'Import historical data', 'woocommerce' ) }
-					value={ value.label }
-					disabled={ disabled }
-					onChange={ onSelectChange }
-					options={ [
+					label={__('Import historical data', 'woocommerce')}
+					value={value.label}
+					disabled={disabled}
+					onChange={onSelectChange}
+					options={[
 						{ label: 'All', value: 'all' },
 						{ label: 'Last 365 days', value: '365' },
 						{ label: 'Last 90 days', value: '90' },
@@ -78,15 +75,15 @@ function HistoricalDataPeriodSelector( {
 						{ label: 'Last 7 days', value: '7' },
 						{ label: 'Last 24 hours', value: '1' },
 						{ label: 'Custom', value: 'custom' },
-					] }
+					]}
 				/>
 			</div>
-			{ value.label === 'custom' && getDatePicker() }
+			{value.label === 'custom' && getDatePicker()}
 		</div>
 	);
 }
 
-export default withDispatch( ( dispatch ) => {
-	const { setImportPeriod } = dispatch( importStore );
+export default withDispatch((dispatch) => {
+	const { setImportPeriod } = dispatch(importStore);
 	return { setImportPeriod };
-} )( HistoricalDataPeriodSelector );
+})(HistoricalDataPeriodSelector);

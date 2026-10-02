@@ -10,8 +10,8 @@ import { WC_ASSET_URL } from '~/utils/admin-settings';
 
 const vimeo = (
 	<img
-		src={ `${ WC_ASSET_URL }images/marketing/vimeo.png` }
-		alt={ __( 'Vimeo', 'woocommerce' ) }
+		src={`${WC_ASSET_URL}images/marketing/vimeo.png`}
+		alt={__('Vimeo', 'woocommerce')}
 	/>
 );
 

@@ -10,24 +10,24 @@ import { useStoreCart } from '@woocommerce/base-context/hooks';
  */
 import { useCartBlockContext } from '../../context';
 
-const FrontendBlock = ( {
+const FrontendBlock = ({
 	children,
 	className,
 }: {
 	children: JSX.Element | JSX.Element[];
 	className: string;
-} ): JSX.Element | null => {
+}): JSX.Element | null => {
 	const { cartItems, cartIsLoading } = useStoreCart();
 	const { hasDarkControls } = useCartBlockContext();
 
-	if ( cartIsLoading || cartItems.length >= 1 ) {
+	if (cartIsLoading || cartItems.length >= 1) {
 		return (
 			<SidebarLayout
-				className={ clsx( 'wc-block-cart', className, {
+				className={clsx('wc-block-cart', className, {
 					'has-dark-controls': hasDarkControls,
-				} ) }
+				})}
 			>
-				{ children }
+				{children}
 			</SidebarLayout>
 		);
 	}

@@ -13,101 +13,101 @@ import { STATUS } from './constants';
 import { CheckoutState } from './default-state';
 import { STORE_KEY as cartStoreKey } from '../cart/constants';
 
-export const getCustomerId = ( state: CheckoutState ) => {
+export const getCustomerId = (state: CheckoutState) => {
 	return state.customerId;
 };
 
-export const getCustomerPassword = ( state: CheckoutState ) => {
+export const getCustomerPassword = (state: CheckoutState) => {
 	return state.customerPassword;
 };
 
-export const getOrderId = ( state: CheckoutState ) => {
+export const getOrderId = (state: CheckoutState) => {
 	return state.orderId;
 };
 
-export const getOrderNotes = ( state: CheckoutState ) => {
+export const getOrderNotes = (state: CheckoutState) => {
 	return state.orderNotes;
 };
 
-export const getRedirectUrl = ( state: CheckoutState ) => {
+export const getRedirectUrl = (state: CheckoutState) => {
 	return state.redirectUrl;
 };
 
-export const getUseShippingAsBilling = ( state: CheckoutState ) => {
+export const getUseShippingAsBilling = (state: CheckoutState) => {
 	return state.useShippingAsBilling;
 };
 
-export const getEditingBillingAddress = ( state: CheckoutState ) => {
+export const getEditingBillingAddress = (state: CheckoutState) => {
 	return state.editingBillingAddress;
 };
 
-export const getEditingShippingAddress = ( state: CheckoutState ) => {
+export const getEditingShippingAddress = (state: CheckoutState) => {
 	return state.editingShippingAddress;
 };
 
-export const getExtensionData = ( state: CheckoutState ) => {
+export const getExtensionData = (state: CheckoutState) => {
 	return state.extensionData;
 };
 
-export const getShouldCreateAccount = ( state: CheckoutState ) => {
+export const getShouldCreateAccount = (state: CheckoutState) => {
 	return state.shouldCreateAccount;
 };
 
-export const getAdditionalFields = ( state: CheckoutState ) => {
+export const getAdditionalFields = (state: CheckoutState) => {
 	return state.additionalFields;
 };
 
-export const getCheckoutStatus = ( state: CheckoutState ) => {
+export const getCheckoutStatus = (state: CheckoutState) => {
 	return state.status;
 };
 
-export const hasError = ( state: CheckoutState ) => {
+export const hasError = (state: CheckoutState) => {
 	return state.hasError;
 };
 
-export const hasOrder = ( state: CheckoutState ) => {
-	return !! state.orderId;
+export const hasOrder = (state: CheckoutState) => {
+	return !!state.orderId;
 };
 
-export const isComplete = ( state: CheckoutState ) => {
+export const isComplete = (state: CheckoutState) => {
 	return state.status === STATUS.COMPLETE;
 };
 
-export const isIdle = ( state: CheckoutState ) => {
+export const isIdle = (state: CheckoutState) => {
 	return state.status === STATUS.IDLE;
 };
 
-export const isBeforeProcessing = ( state: CheckoutState ) => {
+export const isBeforeProcessing = (state: CheckoutState) => {
 	return state.status === STATUS.BEFORE_PROCESSING;
 };
 
-export const isAfterProcessing = ( state: CheckoutState ) => {
+export const isAfterProcessing = (state: CheckoutState) => {
 	return state.status === STATUS.AFTER_PROCESSING;
 };
 
-export const isProcessing = ( state: CheckoutState ) => {
+export const isProcessing = (state: CheckoutState) => {
 	return state.status === STATUS.PROCESSING;
 };
 
-export const isCalculating = ( state: CheckoutState ) => {
+export const isCalculating = (state: CheckoutState) => {
 	return state.calculatingCount > 0;
 };
 
-export const prefersCollection = ( state: CheckoutState ) => {
-	if ( typeof state.prefersCollection === 'undefined' ) {
-		const shippingRates = select( cartStoreKey ).getShippingRates();
-		if ( ! shippingRates || ! shippingRates.length ) {
+export const prefersCollection = (state: CheckoutState) => {
+	if (typeof state.prefersCollection === 'undefined') {
+		const shippingRates = select(cartStoreKey).getShippingRates();
+		if (!shippingRates || !shippingRates.length) {
 			return false;
 		}
-		const selectedRate = shippingRates[ 0 ].shipping_rates.find(
-			( rate ) => rate.selected
+		const selectedRate = shippingRates[0].shipping_rates.find(
+			(rate) => rate.selected
 		);
 
 		if (
-			objectHasProp( selectedRate, 'method_id' ) &&
-			isString( selectedRate.method_id )
+			objectHasProp(selectedRate, 'method_id') &&
+			isString(selectedRate.method_id)
 		) {
-			return hasCollectableRate( selectedRate?.method_id );
+			return hasCollectableRate(selectedRate?.method_id);
 		}
 	}
 	return state.prefersCollection;
@@ -118,7 +118,7 @@ export const prefersCollection = ( state: CheckoutState ) => {
  *
  * @param state
  */
-export const getRegisteredAutocompleteProviders = ( state: CheckoutState ) => {
+export const getRegisteredAutocompleteProviders = (state: CheckoutState) => {
 	return state.addressAutocompleteProviders;
 };
 
@@ -132,5 +132,5 @@ export const getActiveAutocompleteProvider = (
 	state: CheckoutState,
 	type: AddressFormType
 ) => {
-	return state.activeAddressAutocompleteProvider?.[ type ];
+	return state.activeAddressAutocompleteProvider?.[type];
 };

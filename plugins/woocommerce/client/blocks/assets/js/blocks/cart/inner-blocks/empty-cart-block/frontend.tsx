@@ -10,26 +10,24 @@ import { dispatchEvent } from '@woocommerce/base-utils';
  */
 import './style.scss';
 
-const FrontendBlock = ( {
+const FrontendBlock = ({
 	children,
 	className,
 }: {
 	children: JSX.Element;
 	className: string;
-} ): JSX.Element | null => {
+}): JSX.Element | null => {
 	const { cartItems, cartIsLoading } = useStoreCart();
-	useEffect( () => {
-		if ( cartItems.length !== 0 || cartIsLoading ) {
+	useEffect(() => {
+		if (cartItems.length !== 0 || cartIsLoading) {
 			return;
 		}
-		dispatchEvent( 'wc-blocks_render_blocks_frontend', {
-			element: document.body.querySelector(
-				'.wp-block-woocommerce-cart'
-			),
-		} );
-	}, [ cartIsLoading, cartItems ] );
-	if ( ! cartIsLoading && cartItems.length === 0 ) {
-		return <div className={ className }>{ children }</div>;
+		dispatchEvent('wc-blocks_render_blocks_frontend', {
+			element: document.body.querySelector('.wp-block-woocommerce-cart'),
+		});
+	}, [cartIsLoading, cartItems]);
+	if (!cartIsLoading && cartItems.length === 0) {
+		return <div className={className}>{children}</div>;
 	}
 	return null;
 };

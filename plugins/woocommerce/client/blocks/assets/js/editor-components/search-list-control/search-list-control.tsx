@@ -40,11 +40,11 @@ import type {
 } from './types';
 import './style.scss';
 
-const defaultRenderListItem = ( args: RenderItemArgs ): JSX.Element => {
-	return <SearchListItem { ...args } />;
+const defaultRenderListItem = (args: RenderItemArgs): JSX.Element => {
+	return <SearchListItem {...args} />;
 };
 
-const ListItems = ( props: ListItemsProps ): JSX.Element | null => {
+const ListItems = (props: ListItemsProps): JSX.Element | null => {
 	const {
 		list,
 		selected,
@@ -60,31 +60,29 @@ const ListItems = ( props: ListItemsProps ): JSX.Element | null => {
 		useExpandedPanelId,
 	} = props;
 
-	const [ expandedPanelId ] = useExpandedPanelId;
+	const [expandedPanelId] = useExpandedPanelId;
 
-	if ( ! list ) {
+	if (!list) {
 		return null;
 	}
 	return (
 		<>
-			{ list.map( ( item ) => {
+			{list.map((item) => {
 				const childrenCount = item.children?.length ?? 0;
-				const isSelected = !! selected.find(
-					( { id } ) => id === item.id
-				);
+				const isSelected = !!selected.find(({ id }) => id === item.id);
 				const isExpanded = isExpandedOrDescendantIsExpanded(
 					item,
 					expandedPanelId
 				);
-				const totalChildrenForItem = totalChildren?.[ item.id ];
+				const totalChildrenForItem = totalChildren?.[item.id];
 				const hasMoreChildren =
 					typeof totalChildrenForItem === 'number' &&
 					childrenCount < totalChildrenForItem;
 
 				return (
-					<Fragment key={ item.id }>
+					<Fragment key={item.id}>
 						<li>
-							{ renderItem( {
+							{renderItem({
 								item,
 								isSelected,
 								onSelect,
@@ -94,98 +92,93 @@ const ListItems = ( props: ListItemsProps ): JSX.Element | null => {
 								depth,
 								useExpandedPanelId,
 								controlId: instanceId,
-							} ) }
+							})}
 						</li>
-						{ isExpanded ? (
+						{isExpanded ? (
 							<>
 								<ListItems
-									{ ...props }
+									{...props}
 									list={
 										item.children as SearchListItemProps[]
 									}
-									depth={ depth + 1 }
+									depth={depth + 1}
 								/>
-								{ onLoadMoreChildren && hasMoreChildren ? (
+								{onLoadMoreChildren && hasMoreChildren ? (
 									<li>
 										<button
 											type="button"
 											className="woocommerce-search-list__item woocommerce-search-list__item-load-more"
-											onClick={ () =>
-												onLoadMoreChildren()
-											}
+											onClick={() => onLoadMoreChildren()}
 										>
-											{ loadMoreChildrenText ||
-												__(
-													'Load more',
-													'woocommerce'
-												) }
+											{loadMoreChildrenText ||
+												__('Load more', 'woocommerce')}
 										</button>
 									</li>
-								) : null }
+								) : null}
 							</>
-						) : null }
+						) : null}
 					</Fragment>
 				);
-			} ) }
+			})}
 		</>
 	);
 };
 
-const SelectedListItems = < T extends object = object >( {
+const SelectedListItems = <T extends object = object>({
 	isLoading,
 	isSingle,
 	selected,
 	messages,
 	onChange,
 	onRemove,
-}: SearchListControlProps< T > & {
+}: SearchListControlProps<T> & {
 	messages: SearchListMessages;
-	onRemove: ( itemId: string | number ) => () => void;
-} ) => {
-	if ( isLoading || isSingle || ! selected ) {
+	onRemove: (itemId: string | number) => () => void;
+}) => {
+	if (isLoading || isSingle || !selected) {
 		return null;
 	}
 	const selectedCount = selected.length;
 	return (
 		<div className="woocommerce-search-list__selected">
 			<div className="woocommerce-search-list__selected-header">
-				<strong>{ messages.selected( selectedCount ) }</strong>
-				{ selectedCount > 0 ? (
+				<strong>{messages.selected(selectedCount)}</strong>
+				{selectedCount > 0 ? (
 					<Button
 						variant="link"
 						isDestructive
-						onClick={ () => onChange( [] ) }
-						aria-label={ messages.clear }
+						onClick={() => onChange([])}
+						aria-label={messages.clear}
 					>
-						{ __( 'Clear all', 'woocommerce' ) }
+						{__('Clear all', 'woocommerce')}
 					</Button>
-				) : null }
+				) : null}
 			</div>
-			{ selectedCount > 0 ? (
+			{selectedCount > 0 ? (
 				<ul>
-					{ selected.map( ( item, i ) => (
-						<li key={ i }>
+					{selected.map((item, i) => (
+						<li key={i}>
 							<Tag
-								label={ item.name }
-								id={ item.id }
-								remove={ onRemove }
+								label={item.name}
+								id={item.id}
+								remove={onRemove}
 							/>
 						</li>
-					) ) }
+					))}
 				</ul>
-			) : null }
+			) : null}
 		</div>
 	);
 };
 
-const ListItemsContainer = < T extends object = object >( {
+const ListItemsContainer = <T extends object = object>({
 	filteredList,
 	search,
 	onSelect,
 	instanceId,
 	useExpandedPanelId,
 	...props
-}: SearchListItemsContainerProps< T > ) => {
+}: SearchListItemsContainerProps<T>) => {
 	const {
 		messages,
 		renderItem,
@@ -197,17 +190,17 @@ const ListItemsContainer = < T extends object = object >( {
 	} = props;
 	const renderItemCallback = renderItem || defaultRenderListItem;
 
-	if ( filteredList.length === 0 ) {
+	if (filteredList.length === 0) {
 		return (
 			<div className="woocommerce-search-list__list is-not-found">
 				<span className="woocommerce-search-list__not-found-icon">
-					<Icon icon={ info } role="img" />
+					<Icon icon={info} role="img" />
 				</span>
 				<span className="woocommerce-search-list__not-found-text">
-					{ search
+					{search
 						? // eslint-disable-next-line @wordpress/valid-sprintf
-						  sprintf( messages.noResults, search )
-						: messages.noItems }
+							sprintf(messages.noResults, search)
+						: messages.noItems}
 				</span>
 			</div>
 		);
@@ -216,17 +209,17 @@ const ListItemsContainer = < T extends object = object >( {
 	return (
 		<ul className="woocommerce-search-list__list">
 			<ListItems
-				useExpandedPanelId={ useExpandedPanelId }
-				list={ filteredList }
-				selected={ selected }
-				renderItem={ renderItemCallback }
-				loadMoreChildrenText={ loadMoreChildrenText }
-				onLoadMoreChildren={ onLoadMoreChildren }
-				totalChildren={ totalChildren }
-				onSelect={ onSelect }
-				instanceId={ instanceId }
-				isSingle={ isSingle }
-				search={ search }
+				useExpandedPanelId={useExpandedPanelId}
+				list={filteredList}
+				selected={selected}
+				renderItem={renderItemCallback}
+				loadMoreChildrenText={loadMoreChildrenText}
+				onLoadMoreChildren={onLoadMoreChildren}
+				totalChildren={totalChildren}
+				onSelect={onSelect}
+				instanceId={instanceId}
+				isSingle={isSingle}
+				search={search}
 			/>
 		</ul>
 	);
@@ -235,8 +228,8 @@ const ListItemsContainer = < T extends object = object >( {
 /**
  * Component to display a searchable, selectable list of items.
  */
-export const SearchListControl = < T extends object = object >(
-	props: SearchListControlProps< T >
+export const SearchListControl = <T extends object = object>(
+	props: SearchListControlProps<T>
 ) => {
 	const {
 		className = '',
@@ -253,145 +246,139 @@ export const SearchListControl = < T extends object = object >(
 		debouncedSpeak,
 	} = props;
 
-	const [ search, setSearch ] = useState( '' );
-	const useExpandedPanelId = useState< string | number | null >( null );
-	const instanceId = useInstanceId( SearchListControl );
+	const [search, setSearch] = useState('');
+	const useExpandedPanelId = useState<string | number | null>(null);
+	const instanceId = useInstanceId(SearchListControl);
 	const messages = useMemo(
-		() => ( { ...defaultMessages, ...customMessages } ),
-		[ customMessages ]
+		() => ({ ...defaultMessages, ...customMessages }),
+		[customMessages]
 	);
-	const filteredList = useMemo( () => {
-		return getFilteredList( list, search, isHierarchical );
-	}, [ list, search, isHierarchical ] );
+	const filteredList = useMemo(() => {
+		return getFilteredList(list, search, isHierarchical);
+	}, [list, search, isHierarchical]);
 
-	useEffect( () => {
-		if ( debouncedSpeak ) {
-			debouncedSpeak( messages.updated );
+	useEffect(() => {
+		if (debouncedSpeak) {
+			debouncedSpeak(messages.updated);
 		}
-	}, [ debouncedSpeak, messages ] );
+	}, [debouncedSpeak, messages]);
 
-	useEffect( () => {
-		if ( typeof onSearch === 'function' ) {
-			onSearch( search );
+	useEffect(() => {
+		if (typeof onSearch === 'function') {
+			onSearch(search);
 		}
-	}, [ search, onSearch ] );
+	}, [search, onSearch]);
 
 	const onRemove = useCallback(
-		( itemId: string | number ) => () => {
-			if ( isSingle ) {
-				onChange( [] );
+		(itemId: string | number) => () => {
+			if (isSingle) {
+				onChange([]);
 			}
 			const i = selected.findIndex(
-				( { id: selectedId } ) => selectedId === itemId
+				({ id: selectedId }) => selectedId === itemId
 			);
-			onChange( [
-				...selected.slice( 0, i ),
-				...selected.slice( i + 1 ),
-			] );
+			onChange([...selected.slice(0, i), ...selected.slice(i + 1)]);
 		},
-		[ isSingle, selected, onChange ]
+		[isSingle, selected, onChange]
 	);
 
 	const onSelect = useCallback(
-		( item: SearchListItemProps< T > | SearchListItemProps< T >[] ) =>
-			() => {
-				if ( Array.isArray( item ) ) {
-					onChange( item );
-					return;
-				}
+		(item: SearchListItemProps<T> | SearchListItemProps<T>[]) => () => {
+			if (Array.isArray(item)) {
+				onChange(item);
+				return;
+			}
 
-				if (
-					selected.findIndex( ( { id } ) => id === item.id ) !== -1
-				) {
-					onRemove( item.id )();
-					return;
-				}
-				if ( isSingle ) {
-					onChange( [ item ] );
-				} else {
-					onChange( [ ...selected, item ] );
-				}
-			},
-		[ isSingle, onRemove, onChange, selected ]
+			if (selected.findIndex(({ id }) => id === item.id) !== -1) {
+				onRemove(item.id)();
+				return;
+			}
+			if (isSingle) {
+				onChange([item]);
+			} else {
+				onChange([...selected, item]);
+			}
+		},
+		[isSingle, onRemove, onChange, selected]
 	);
 
 	const onRemoveToken = useCallback(
-		( tokens: Array< SearchListItemProps & { value: string } > ) => {
-			const [ removedItem ] = selected.filter(
-				( item ) => ! tokens.find( ( token ) => item.id === token.id )
+		(tokens: Array<SearchListItemProps & { value: string }>) => {
+			const [removedItem] = selected.filter(
+				(item) => !tokens.find((token) => item.id === token.id)
 			);
 
-			onRemove( removedItem.id )();
+			onRemove(removedItem.id)();
 		},
-		[ onRemove, selected ]
+		[onRemove, selected]
 	);
 
 	return (
 		<div
-			className={ clsx( 'woocommerce-search-list', className, {
+			className={clsx('woocommerce-search-list', className, {
 				'is-compact': isCompact,
 				'is-loading': isLoading,
 				'is-token': type === 'token',
-			} ) }
+			})}
 		>
-			{ type === 'text' && (
+			{type === 'text' && (
 				<SelectedListItems
-					{ ...props }
-					onRemove={ onRemove }
-					messages={ messages }
+					{...props}
+					onRemove={onRemove}
+					messages={messages}
 				/>
-			) }
+			)}
 			<div className="woocommerce-search-list__search">
-				{ type === 'text' ? (
+				{type === 'text' ? (
 					<TextControl
 						__next40pxDefaultSize
 						__nextHasNoMarginBottom
-						label={ messages.search }
+						label={messages.search}
 						type="search"
-						value={ search }
-						onChange={ ( value ) => setSearch( value ) }
+						value={search}
+						onChange={(value) => setSearch(value)}
 					/>
 				) : (
 					<FormTokenField
 						__next40pxDefaultSize
 						__nextHasNoMarginBottom
-						disabled={ isLoading }
-						label={ messages.search }
-						onChange={ onRemoveToken }
-						onInputChange={ ( value ) => setSearch( value ) }
-						suggestions={ [] }
+						disabled={isLoading}
+						label={messages.search}
+						onChange={onRemoveToken}
+						onInputChange={(value) => setSearch(value)}
+						suggestions={[]}
 						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 						// @ts-ignore - Ignoring because `__experimentalValidateInput` is not yet in the type definitions.
-						__experimentalValidateInput={ () => false }
+						__experimentalValidateInput={() => false}
 						value={
 							isLoading
-								? [ __( 'Loading…', 'woocommerce' ) ]
-								: selected.map( ( token ) => ( {
+								? [__('Loading…', 'woocommerce')]
+								: selected.map((token) => ({
 										...token,
 										value: token.name,
-								  } ) )
+									}))
 						}
-						__experimentalShowHowTo={ false }
+						__experimentalShowHowTo={false}
 					/>
-				) }
+				)}
 			</div>
-			{ isLoading ? (
+			{isLoading ? (
 				<div className="woocommerce-search-list__list">
 					<Spinner />
 				</div>
 			) : (
 				<ListItemsContainer
-					{ ...props }
-					search={ search }
-					filteredList={ filteredList }
-					messages={ messages }
-					onSelect={ onSelect }
-					instanceId={ instanceId }
-					useExpandedPanelId={ useExpandedPanelId }
+					{...props}
+					search={search}
+					filteredList={filteredList}
+					messages={messages}
+					onSelect={onSelect}
+					instanceId={instanceId}
+					useExpandedPanelId={useExpandedPanelId}
 				/>
-			) }
+			)}
 		</div>
 	);
 };
 
-export default withSpokenMessages( SearchListControl );
+export default withSpokenMessages(SearchListControl);

@@ -8,12 +8,11 @@ import { isString } from '@woocommerce/types';
  */
 import metadata from './block.json';
 
-export const parseAttributes = ( data: Record< string, unknown > ) => {
+export const parseAttributes = (data: Record<string, unknown>) => {
 	return {
-		heading: isString( data?.heading ) ? data.heading : '',
+		heading: isString(data?.heading) ? data.heading : '',
 		headingLevel:
-			( isString( data?.headingLevel ) &&
-				parseInt( data.headingLevel, 10 ) ) ||
+			(isString(data?.headingLevel) && parseInt(data.headingLevel, 10)) ||
 			metadata.attributes.headingLevel.default,
 		showFilterButton: data?.showFilterButton === 'true',
 		showInputFields: data?.showInputFields !== 'false',

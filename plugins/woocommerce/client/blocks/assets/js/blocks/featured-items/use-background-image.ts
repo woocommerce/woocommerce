@@ -37,53 +37,53 @@ interface BackgroundImage {
 	originalImgDimension: BgImageDimensions;
 }
 
-export function useBackgroundImage( {
+export function useBackgroundImage({
 	blockName,
 	item,
 	mediaId,
 	mediaSrc,
-}: BackgroundProps ): BackgroundImage {
-	const [ backgroundImageId, setBackgroundImageId ] = useState( 0 );
-	const [ backgroundImageSrc, setBackgroundImageSrc ] = useState( '' );
-	const [ isImageBgTransparent, setIsImageBgTransparent ] =
-		useState< boolean >( false );
-	const [ originalImgDimension, setOriginalImgDimension ] =
-		useState< BgImageDimensions >( { height: 0, width: 0 } );
-	const shadowImgRef = useRef< HTMLImageElement | null >( null );
-	const shadowCanvasRef = useRef< HTMLCanvasElement | null >( null );
+}: BackgroundProps): BackgroundImage {
+	const [backgroundImageId, setBackgroundImageId] = useState(0);
+	const [backgroundImageSrc, setBackgroundImageSrc] = useState('');
+	const [isImageBgTransparent, setIsImageBgTransparent] =
+		useState<boolean>(false);
+	const [originalImgDimension, setOriginalImgDimension] =
+		useState<BgImageDimensions>({ height: 0, width: 0 });
+	const shadowImgRef = useRef<HTMLImageElement | null>(null);
+	const shadowCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
-	useEffect( () => {
-		if ( mediaId ) {
-			setBackgroundImageId( mediaId );
+	useEffect(() => {
+		if (mediaId) {
+			setBackgroundImageId(mediaId);
 		} else {
 			setBackgroundImageId(
 				blockName === BLOCK_NAMES.featuredProduct
-					? getImageIdFromProduct( item as ProductResponseItem )
-					: getCategoryImageId( item as WP_REST_API_Category )
+					? getImageIdFromProduct(item as ProductResponseItem)
+					: getCategoryImageId(item as WP_REST_API_Category)
 			);
 		}
-	}, [ blockName, item, mediaId ] );
+	}, [blockName, item, mediaId]);
 
-	useEffect( () => {
-		if ( mediaSrc ) {
-			setBackgroundImageSrc( mediaSrc );
+	useEffect(() => {
+		if (mediaSrc) {
+			setBackgroundImageSrc(mediaSrc);
 		} else {
 			setBackgroundImageSrc(
 				blockName === BLOCK_NAMES.featuredProduct
-					? getImageSrcFromProduct( item as ProductResponseItem )
-					: getCategoryImageSrc( item as WP_REST_API_Category )
+					? getImageSrcFromProduct(item as ProductResponseItem)
+					: getCategoryImageSrc(item as WP_REST_API_Category)
 			);
 		}
-	}, [ blockName, item, mediaSrc ] );
+	}, [blockName, item, mediaSrc]);
 
-	useEffect( () => {
-		if ( backgroundImageSrc ) {
-			if ( ! shadowImgRef.current ) {
+	useEffect(() => {
+		if (backgroundImageSrc) {
+			if (!shadowImgRef.current) {
 				shadowImgRef.current = new Image();
 			}
 
-			if ( ! shadowCanvasRef.current ) {
-				shadowCanvasRef.current = document.createElement( 'canvas' );
+			if (!shadowCanvasRef.current) {
+				shadowCanvasRef.current = document.createElement('canvas');
 			}
 
 			const img = shadowImgRef.current;
@@ -94,24 +94,24 @@ export function useBackgroundImage( {
 				const width = img.naturalWidth;
 				const height = img.naturalHeight;
 
-				if ( height !== null && width !== null ) {
-					setOriginalImgDimension( {
+				if (height !== null && width !== null) {
+					setOriginalImgDimension({
 						height,
 						width,
-					} );
+					});
 				}
 
 				canvas.width = width;
 				canvas.height = height;
 
 				// Draw the image on the canvas element.
-				const ctx = canvas.getContext( '2d', {
+				const ctx = canvas.getContext('2d', {
 					willReadFrequently: true,
-				} );
+				});
 
-				if ( ! ctx ) return;
+				if (!ctx) return;
 
-				ctx.drawImage( img, 0, 0, width, height );
+				ctx.drawImage(img, 0, 0, width, height);
 
 				const imagePixelData = ctx.getImageData(
 					0,
@@ -121,27 +121,27 @@ export function useBackgroundImage( {
 				).data;
 
 				// Check for transparency (alpha channel < 255).
-				const hasTransparentPixels = ( () => {
-					for ( let i = 3; i < imagePixelData.length; i += 4 ) {
-						if ( imagePixelData[ i ] < 255 ) {
+				const hasTransparentPixels = (() => {
+					for (let i = 3; i < imagePixelData.length; i += 4) {
+						if (imagePixelData[i] < 255) {
 							return true;
 						}
 					}
 					return false;
-				} )();
+				})();
 
-				setIsImageBgTransparent( hasTransparentPixels );
+				setIsImageBgTransparent(hasTransparentPixels);
 			};
 		} else {
-			setIsImageBgTransparent( true );
+			setIsImageBgTransparent(true);
 		}
 
 		return () => {
-			if ( shadowImgRef.current ) {
+			if (shadowImgRef.current) {
 				shadowImgRef.current.onload = null; // Clean up image onload event on unmount.
 			}
 		};
-	}, [ backgroundImageSrc ] );
+	}, [backgroundImageSrc]);
 
 	return {
 		backgroundImageId,

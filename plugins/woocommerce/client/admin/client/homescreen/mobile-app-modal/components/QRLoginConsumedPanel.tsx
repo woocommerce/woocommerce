@@ -29,14 +29,14 @@ type QRLoginConsumedPanelProps = {
  * signed in (so the merchant can spot a wrong-device scan) and offers an
  * "It wasn't you?" path that revokes the AP server-side.
  */
-export const QRLoginConsumedPanel = ( {
+export const QRLoginConsumedPanel = ({
 	deviceInfo,
 	onRevoke,
 	onDone,
 	errorMessage,
-}: QRLoginConsumedPanelProps ) => {
-	const headline = buildQRLoginDeviceHeadline( deviceInfo );
-	const subline = buildQRLoginDeviceSubline( deviceInfo );
+}: QRLoginConsumedPanelProps) => {
+	const headline = buildQRLoginDeviceHeadline(deviceInfo);
+	const subline = buildQRLoginDeviceSubline(deviceInfo);
 
 	return (
 		<div
@@ -45,35 +45,35 @@ export const QRLoginConsumedPanel = ( {
 			aria-live="polite"
 		>
 			<p className="woocommerce-qr-direct-login__consumed-headline">
-				{ headline }
+				{headline}
 			</p>
-			{ subline && (
+			{subline && (
 				<p className="woocommerce-qr-direct-login__consumed-subline">
-					{ subline }
+					{subline}
 				</p>
-			) }
+			)}
 
-			{ errorMessage && (
+			{errorMessage && (
 				<p className="woocommerce-qr-direct-login__error" role="alert">
-					{ errorMessage }
+					{errorMessage}
 				</p>
-			) }
+			)}
 
-			{ onDone && (
-				<Button variant="primary" onClick={ onDone }>
-					{ __( 'Done', 'woocommerce' ) }
+			{onDone && (
+				<Button variant="primary" onClick={onDone}>
+					{__('Done', 'woocommerce')}
 				</Button>
-			) }
+			)}
 
 			<Button
 				variant="link"
 				className="woocommerce-qr-direct-login__revoke"
-				onClick={ () => {
-					recordEvent( 'mobile_app_qr_direct_login_revoke_attempt' );
+				onClick={() => {
+					recordEvent('mobile_app_qr_direct_login_revoke_attempt');
 					onRevoke();
-				} }
+				}}
 			>
-				{ __( "It wasn't you? Revoke access", 'woocommerce' ) }
+				{__("It wasn't you? Revoke access", 'woocommerce')}
 			</Button>
 		</div>
 	);

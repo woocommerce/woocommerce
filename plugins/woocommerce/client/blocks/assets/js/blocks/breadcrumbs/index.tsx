@@ -12,11 +12,11 @@ import edit from './edit';
 import { queryPaginationIcon } from './icon';
 import './style.scss';
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	icon: {
 		src: (
 			<Icon
-				icon={ queryPaginationIcon }
+				icon={queryPaginationIcon}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -28,4 +28,4 @@ registerBlockType( metadata, {
 	save() {
 		return null;
 	},
-} );
+});

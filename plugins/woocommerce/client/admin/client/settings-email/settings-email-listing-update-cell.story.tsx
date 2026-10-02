@@ -23,30 +23,30 @@ const baseEmail: EmailType = {
 
 export const CoreUpdatedCustomized = () => (
 	<UpdatesCell
-		post={ {
+		post={{
 			...baseEmail,
 			templateStatus: 'core_updated_customized',
 			templateVersion: '10.6.0',
 			currentVersion: '10.7.0',
-		} }
+		}}
 	/>
 );
 
 export const InSync = () => (
-	<UpdatesCell post={ { ...baseEmail, templateStatus: 'in_sync' } } />
+	<UpdatesCell post={{ ...baseEmail, templateStatus: 'in_sync' }} />
 );
 
 export const CoreUpdatedUncustomized = () => (
 	<UpdatesCell
-		post={ {
+		post={{
 			...baseEmail,
 			templateStatus: 'core_updated_uncustomized',
-		} }
+		}}
 	/>
 );
 
 export const ThirdPartyNotOptedIn = () => (
-	<UpdatesCell post={ { ...baseEmail, templateStatus: null } } />
+	<UpdatesCell post={{ ...baseEmail, templateStatus: null }} />
 );
 
 export default {

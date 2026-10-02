@@ -14,7 +14,7 @@ import ProductBadge from '../product-badge';
 const ProductBackorderBadge = (): JSX.Element => {
 	return (
 		<ProductBadge className="wc-block-components-product-backorder-badge">
-			{ __( 'Available on backorder', 'woocommerce' ) }
+			{__('Available on backorder', 'woocommerce')}
 		</ProductBadge>
 	);
 };

@@ -10,40 +10,38 @@ import { Item } from './Item';
 
 import './List.scss';
 
-export const List = ( {
+export const List = ({
 	heading,
 	headingDescription,
 	markConfigured,
 	recommendation,
 	paymentGateways,
 	footerLink,
-} ) => {
+}) => {
 	return (
 		<Card>
-			{ heading && (
+			{heading && (
 				<CardHeader as="h2">
-					{ heading }
-					{ headingDescription && (
+					{heading}
+					{headingDescription && (
 						<p className="woocommerce-task-payment-header__description">
-							{ headingDescription }
+							{headingDescription}
 						</p>
-					) }
+					)}
 				</CardHeader>
-			) }
-			{ paymentGateways.map( ( paymentGateway ) => {
+			)}
+			{paymentGateways.map((paymentGateway) => {
 				const { id } = paymentGateway;
 				return (
 					<Item
-						key={ id }
-						isRecommended={ recommendation === id }
-						markConfigured={ markConfigured }
-						paymentGateway={ paymentGateway }
+						key={id}
+						isRecommended={recommendation === id}
+						markConfigured={markConfigured}
+						paymentGateway={paymentGateway}
 					/>
 				);
-			} ) }
-			{ footerLink && (
-				<CardFooter isBorderless>{ footerLink }</CardFooter>
-			) }
+			})}
+			{footerLink && <CardFooter isBorderless>{footerLink}</CardFooter>}
 		</Card>
 	);
 };

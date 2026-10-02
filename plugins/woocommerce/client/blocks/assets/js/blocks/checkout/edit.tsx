@@ -44,15 +44,15 @@ const ALLOWED_BLOCKS: string[] = [
 	'woocommerce/checkout-totals-block',
 ];
 
-export const Edit = ( {
+export const Edit = ({
 	clientId,
 	attributes,
 	setAttributes,
 }: {
 	clientId: string;
 	attributes: Attributes;
-	setAttributes: ( attributes: Record< string, unknown > ) => undefined;
-} ): JSX.Element => {
+	setAttributes: (attributes: Record<string, unknown>) => undefined;
+}): JSX.Element => {
 	const {
 		showOrderNotes,
 		showPolicyLinks,
@@ -63,12 +63,12 @@ export const Edit = ( {
 		hasDarkControls = false,
 	} = attributes;
 
-	const fieldSettings = useSelect( ( select ) => {
-		return select( coreStore as unknown as string ).getEditedEntityRecord(
+	const fieldSettings = useSelect((select) => {
+		return select(coreStore as unknown as string).getEditedEntityRecord(
 			'root',
 			'site'
-		) as Record< string, string >;
-	}, [] );
+		) as Record<string, string>;
+	}, []);
 
 	const fieldsWithDefaults = {
 		phone: 'optional',
@@ -79,73 +79,70 @@ export const Edit = ( {
 	const defaultFields = {
 		...defaultFieldsSetting,
 		...Object.fromEntries(
-			Object.entries( fieldsWithDefaults ).map(
-				( [ field, defaultValue ] ) => {
-					const value =
-						fieldSettings[
-							`woocommerce_checkout_${ field }_field`
-						] || defaultValue;
-					return [
-						field,
-						{
-							...defaultFieldsSetting[
-								field as keyof typeof defaultFieldsSetting
-							],
-							required: value === 'required',
-							hidden: value === 'hidden',
-						},
-					];
-				}
-			)
+			Object.entries(fieldsWithDefaults).map(([field, defaultValue]) => {
+				const value =
+					fieldSettings[`woocommerce_checkout_${field}_field`] ||
+					defaultValue;
+				return [
+					field,
+					{
+						...defaultFieldsSetting[
+							field as keyof typeof defaultFieldsSetting
+						],
+						required: value === 'required',
+						hidden: value === 'hidden',
+					},
+				];
+			})
 		),
 	};
 
 	// This focuses on the block when a certain query param is found. This is used on the link from the task list.
-	const focus = useRef( getQueryArg( window.location.href, 'focus' ) );
+	const focus = useRef(getQueryArg(window.location.href, 'focus'));
 
-	useEffect( () => {
+	useEffect(() => {
 		if (
 			focus.current === 'checkout' &&
-			! selectData( 'core/block-editor' ).hasSelectedBlock()
+			!selectData('core/block-editor').hasSelectedBlock()
 		) {
-			dispatch( 'core/block-editor' ).selectBlock( clientId );
-			dispatch( 'core/interface' ).enableComplementaryArea(
+			dispatch('core/block-editor').selectBlock(clientId);
+			dispatch('core/interface').enableComplementaryArea(
 				'core/edit-site',
 				'edit-site/block-inspector'
 			);
 		}
-	}, [ clientId ] );
+	}, [clientId]);
 
 	const defaultTemplate = [
-		[ 'woocommerce/checkout-totals-block', {}, [] ],
-		[ 'woocommerce/checkout-fields-block', {}, [] ],
+		['woocommerce/checkout-totals-block', {}, []],
+		['woocommerce/checkout-fields-block', {}, []],
 	] as TemplateArray;
 
 	const blockProps = useBlockPropsWithLocking();
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<InspectorControls>
 				<BlockSettings
-					attributes={ attributes }
-					setAttributes={ setAttributes }
+					attributes={attributes}
+					setAttributes={setAttributes}
 				/>
 			</InspectorControls>
 			<EditorProvider
-				previewData={ {
+				previewData={{
 					previewCart,
 					previewSavedPaymentMethods,
 					defaultFields,
-				} }
+				}}
 			>
 				<SlotFillProvider>
 					<CheckoutProvider>
 						<SidebarLayout
-							className={ clsx( 'wc-block-checkout', {
+							className={clsx('wc-block-checkout', {
 								'has-dark-controls': hasDarkControls,
-							} ) }
+							})}
 						>
 							<CheckoutBlockContext.Provider
-								value={ {
+								value={{
 									showOrderNotes,
 									showPolicyLinks,
 									showReturnToCart,
@@ -153,11 +150,11 @@ export const Edit = ( {
 									showRateAfterTaxName,
 									showFormStepNumbers,
 									defaultFields,
-								} }
+								}}
 							>
 								<InnerBlocks
-									allowedBlocks={ ALLOWED_BLOCKS }
-									template={ defaultTemplate }
+									allowedBlocks={ALLOWED_BLOCKS}
+									template={defaultTemplate}
 									templateLock="insert"
 								/>
 							</CheckoutBlockContext.Provider>
@@ -172,9 +169,9 @@ export const Edit = ( {
 export const Save = (): JSX.Element => {
 	return (
 		<div
-			{ ...useBlockProps.save( {
+			{...useBlockProps.save({
 				className: 'wc-block-checkout is-loading',
-			} ) }
+			})}
 		>
 			<InnerBlocks.Content />
 		</div>

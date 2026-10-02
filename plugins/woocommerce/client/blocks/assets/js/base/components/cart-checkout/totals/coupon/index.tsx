@@ -38,62 +38,62 @@ export interface TotalsCouponProps {
 	/**
 	 * Submit handler
 	 */
-	onSubmit?: ( couponValue: string ) => Promise< boolean > | undefined;
+	onSubmit?: (couponValue: string) => Promise<boolean> | undefined;
 }
 
-export const TotalsCoupon = ( {
+export const TotalsCoupon = ({
 	instanceId,
 	isLoading = false,
 	onSubmit,
 	displayCouponForm = false,
-}: TotalsCouponProps ): JSX.Element => {
-	const [ couponValue, setCouponValue ] = useState( '' );
-	const [ isCouponFormVisible, setIsCouponFormVisible ] =
-		useState( displayCouponForm );
-	const textInputId = `wc-block-components-totals-coupon__input-${ instanceId }`;
+}: TotalsCouponProps): JSX.Element => {
+	const [couponValue, setCouponValue] = useState('');
+	const [isCouponFormVisible, setIsCouponFormVisible] =
+		useState(displayCouponForm);
+	const textInputId = `wc-block-components-totals-coupon__input-${instanceId}`;
 	const { validationErrorId } = useSelect(
-		( select ) => {
-			const store = select( validationStore );
+		(select) => {
+			const store = select(validationStore);
 			return {
-				validationErrorId: store.getValidationErrorId( instanceId ),
+				validationErrorId: store.getValidationErrorId(instanceId),
 			};
 		},
-		[ instanceId ]
+		[instanceId]
 	);
-	const inputRef = useRef< ValidatedTextInputHandle >( null );
+	const inputRef = useRef<ValidatedTextInputHandle>(null);
 
-	const handleCouponSubmit: MouseEventHandler< HTMLButtonElement > = (
-		e: MouseEvent< HTMLButtonElement >
+	const handleCouponSubmit: MouseEventHandler<HTMLButtonElement> = (
+		e: MouseEvent<HTMLButtonElement>
 	) => {
 		e.preventDefault();
-		if ( typeof onSubmit !== 'undefined' ) {
-			void onSubmit( couponValue )?.then( ( result ) => {
-				if ( result ) {
-					setCouponValue( '' );
-					setIsCouponFormVisible( false );
-				} else if ( inputRef.current?.focus ) {
+		if (typeof onSubmit !== 'undefined') {
+			void onSubmit(couponValue)?.then((result) => {
+				if (result) {
+					setCouponValue('');
+					setIsCouponFormVisible(false);
+				} else if (inputRef.current?.focus) {
 					inputRef.current.focus();
 				}
-			} );
+			});
 		} else {
-			setCouponValue( '' );
-			setIsCouponFormVisible( true );
+			setCouponValue('');
+			setIsCouponFormVisible(true);
 		}
 	};
 
 	return (
 		<Panel
 			className="wc-block-components-totals-coupon"
-			initialOpen={ isCouponFormVisible }
-			hasBorder={ false }
-			headingLevel={ 2 }
-			title={ __( 'Add coupons', 'woocommerce' ) }
-			state={ [ isCouponFormVisible, setIsCouponFormVisible ] }
+			initialOpen={isCouponFormVisible}
+			hasBorder={false}
+			headingLevel={2}
+			title={__('Add coupons', 'woocommerce')}
+			state={[isCouponFormVisible, setIsCouponFormVisible]}
 		>
 			<LoadingMask
-				screenReaderLabel={ __( 'Applying coupon…', 'woocommerce' ) }
-				isLoading={ isLoading }
-				showSpinner={ false }
+				screenReaderLabel={__('Applying coupon…', 'woocommerce')}
+				isLoading={isLoading}
+				showSpinner={false}
 			>
 				<div className="wc-block-components-totals-coupon__content">
 					<form
@@ -101,39 +101,39 @@ export const TotalsCoupon = ( {
 						id="wc-block-components-totals-coupon__form"
 					>
 						<ValidatedTextInput
-							id={ textInputId }
+							id={textInputId}
 							errorId="coupon"
 							className="wc-block-components-totals-coupon__input"
-							label={ __( 'Enter code', 'woocommerce' ) }
-							value={ couponValue }
-							ariaDescribedBy={ validationErrorId || '' }
-							onChange={ ( newCouponValue ) => {
-								setCouponValue( newCouponValue );
-							} }
-							focusOnMount={ true }
-							validateOnMount={ false }
-							showError={ false }
-							ref={ inputRef }
+							label={__('Enter code', 'woocommerce')}
+							value={couponValue}
+							ariaDescribedBy={validationErrorId || ''}
+							onChange={(newCouponValue) => {
+								setCouponValue(newCouponValue);
+							}}
+							focusOnMount={true}
+							validateOnMount={false}
+							showError={false}
+							ref={inputRef}
 						/>
 						<Button
-							className={ clsx(
+							className={clsx(
 								'wc-block-components-totals-coupon__button',
 								{
 									'wc-block-components-totals-coupon__button--loading':
 										isLoading,
 								}
-							) }
-							disabled={ isLoading || ! couponValue }
-							onClick={ handleCouponSubmit }
+							)}
+							disabled={isLoading || !couponValue}
+							onClick={handleCouponSubmit}
 							type="submit"
 						>
-							{ isLoading && <Spinner /> }
-							{ __( 'Apply', 'woocommerce' ) }
+							{isLoading && <Spinner />}
+							{__('Apply', 'woocommerce')}
 						</Button>
 					</form>
 					<ValidationInputError
 						propertyName="coupon"
-						elementId={ instanceId }
+						elementId={instanceId}
 					/>
 				</div>
 			</LoadingMask>

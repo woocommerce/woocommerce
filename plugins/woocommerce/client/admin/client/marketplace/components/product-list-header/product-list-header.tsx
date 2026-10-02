@@ -25,39 +25,39 @@ export default function ProductListHeader(
 	const { title, description, groupURL, groupURLText, groupURLType } = props;
 	const isLoading = title === '';
 
-	const classNames = clsx( 'woocommerce-marketplace__product-list-header', {
+	const classNames = clsx('woocommerce-marketplace__product-list-header', {
 		'is-loading': isLoading,
-	} );
+	});
 
 	return (
-		<div className={ classNames } aria-hidden={ isLoading }>
+		<div className={classNames} aria-hidden={isLoading}>
 			<h2 className="woocommerce-marketplace__product-list-title">
-				{ title }
+				{title}
 			</h2>
-			{ description && (
+			{description && (
 				<p className="woocommerce-marketplace__product-list-description">
-					{ description }
+					{description}
 				</p>
-			) }
-			{ groupURL !== null && (
+			)}
+			{groupURL !== null && (
 				<span className="woocommerce-marketplace__product-list-link">
 					<Link
-						href={ groupURL }
-						type={ groupURLType }
+						href={groupURL}
+						type={groupURLType}
 						target={
 							groupURLType === 'external' ? '_blank' : undefined
 						}
-						onClick={ () => {
-							recordEvent( 'marketplace_see_more_clicked', {
+						onClick={() => {
+							recordEvent('marketplace_see_more_clicked', {
 								group_title: title,
 								group_url: groupURL,
-							} );
-						} }
+							});
+						}}
 					>
-						{ groupURLText ?? __( 'See more', 'woocommerce' ) }
+						{groupURLText ?? __('See more', 'woocommerce')}
 					</Link>
 				</span>
-			) }
+			)}
 		</div>
 	);
 }

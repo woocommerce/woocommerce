@@ -10,12 +10,12 @@ import { isString } from '@woocommerce/types';
 export const normalizeIconConfig = (
 	icons: PaymentMethodIcons
 ): PaymentMethodIcon[] => {
-	const normalizedIcons: Record< string, PaymentMethodIcon > = {};
+	const normalizedIcons: Record<string, PaymentMethodIcon> = {};
 
-	icons.forEach( ( raw ) => {
-		let icon: Partial< PaymentMethodIcon > = {};
+	icons.forEach((raw) => {
+		let icon: Partial<PaymentMethodIcon> = {};
 
-		if ( typeof raw === 'string' ) {
+		if (typeof raw === 'string') {
 			icon = {
 				id: raw,
 				alt: raw,
@@ -23,7 +23,7 @@ export const normalizeIconConfig = (
 			};
 		}
 
-		if ( typeof raw === 'object' ) {
+		if (typeof raw === 'object') {
 			icon = {
 				id: raw.id || '',
 				alt: raw.alt || '',
@@ -31,10 +31,10 @@ export const normalizeIconConfig = (
 			};
 		}
 
-		if ( icon.id && isString( icon.id ) && ! normalizedIcons[ icon.id ] ) {
-			normalizedIcons[ icon.id ] = < PaymentMethodIcon >icon;
+		if (icon.id && isString(icon.id) && !normalizedIcons[icon.id]) {
+			normalizedIcons[icon.id] = <PaymentMethodIcon>icon;
 		}
-	} );
+	});
 
-	return Object.values( normalizedIcons );
+	return Object.values(normalizedIcons);
 };

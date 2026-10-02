@@ -1,16 +1,16 @@
-jest.mock( '../utils', () => ( {
-	...jest.requireActual( '../utils' ),
+jest.mock('../utils', () => ({
+	...jest.requireActual('../utils'),
 	getReviews: jest
 		.fn()
-		.mockReturnValue( Promise.resolve( { reviews: [], totalReviews: 0 } ) ),
-} ) );
+		.mockReturnValue(Promise.resolve({ reviews: [], totalReviews: 0 })),
+}));
 
-jest.mock( '@woocommerce/settings', () => ( {
-	...jest.requireActual( '@woocommerce/settings' ),
+jest.mock('@woocommerce/settings', () => ({
+	...jest.requireActual('@woocommerce/settings'),
 	getSetting: jest
 		.fn()
-		.mockImplementation( ( setting, defaultValue ) => defaultValue ),
-} ) );
+		.mockImplementation((setting, defaultValue) => defaultValue),
+}));
 
 /**
  * External dependencies
@@ -24,7 +24,7 @@ import { getSetting } from '@woocommerce/settings';
 import ReviewsFrontendBlock from '../frontend-block';
 import { getReviews } from '../utils';
 
-describe( 'ReviewsFrontendBlock', () => {
+describe('ReviewsFrontendBlock', () => {
 	const dummyReview = {
 		date_created: '2021-08-04T15: 00: 00',
 		date_created_gmt: '2021-08-04T15: 00: 00',
@@ -48,89 +48,89 @@ describe( 'ReviewsFrontendBlock', () => {
 		rating: 1,
 	};
 
-	it( 'Does not render when there are no reviews', async () => {
+	it('Does not render when there are no reviews', async () => {
 		const { container } = render(
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore - withReviews HOC will need refactoring to TS to fix this.
 			<ReviewsFrontendBlock
-				attributes={ {} }
-				sortSelectValue={ 'most-recent' }
-				reviewsToDisplay={ 0 }
-				orderby={ 'reviewer' }
-				order={ 'asc' }
-				onAppendReviews={ jest.fn() }
-				onChangeOrderby={ jest.fn() }
+				attributes={{}}
+				sortSelectValue={'most-recent'}
+				reviewsToDisplay={0}
+				orderby={'reviewer'}
+				order={'asc'}
+				onAppendReviews={jest.fn()}
+				onChangeOrderby={jest.fn()}
 			/>
 		);
-		await act( async () => {
-			expect( container ).toBeEmptyDOMElement();
-		} );
-	} );
+		await act(async () => {
+			expect(container).toBeEmptyDOMElement();
+		});
+	});
 
-	it( 'Shows load more button when there are more reviews than displayed.', async () => {
-		( getReviews as jest.Mock ).mockResolvedValue( {
-			reviews: [ dummyReview, dummyReview, dummyReview ],
+	it('Shows load more button when there are more reviews than displayed.', async () => {
+		(getReviews as jest.Mock).mockResolvedValue({
+			reviews: [dummyReview, dummyReview, dummyReview],
 			totalReviews: 3,
-		} );
+		});
 
 		const { findByText } = render(
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore - we can't fix this until withReviews is converted to TS.
 			<ReviewsFrontendBlock
-				attributes={ { showLoadMore: 'true' } }
-				sortSelectValue={ 'most-recent' }
-				reviewsToDisplay={ 1 }
-				orderby={ 'reviewer' }
-				order={ 'asc' }
-				onChangeOrderby={ jest.fn() }
+				attributes={{ showLoadMore: 'true' }}
+				sortSelectValue={'most-recent'}
+				reviewsToDisplay={1}
+				orderby={'reviewer'}
+				order={'asc'}
+				onChangeOrderby={jest.fn()}
 			/>
 		);
 
-		const loadMoreButton = await findByText( 'Load more' );
-		expect( loadMoreButton ).toBeInTheDocument();
-	} );
+		const loadMoreButton = await findByText('Load more');
+		expect(loadMoreButton).toBeInTheDocument();
+	});
 
-	it( 'renders a order by select when showOrderby is passed as attribute and reviewRatingsEnabled is not set (defaults to true).', async () => {
-		( getReviews as jest.Mock ).mockResolvedValue( {
-			reviews: [ dummyReview, dummyReview, dummyReview ],
+	it('renders a order by select when showOrderby is passed as attribute and reviewRatingsEnabled is not set (defaults to true).', async () => {
+		(getReviews as jest.Mock).mockResolvedValue({
+			reviews: [dummyReview, dummyReview, dummyReview],
 			totalReviews: 3,
-		} );
+		});
 
 		const { findByText } = render(
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore - we can't fix this until withReviews is converted to TS.
 			<ReviewsFrontendBlock
-				attributes={ { showLoadMore: true, showOrderby: true } }
-				sortSelectValue={ 'most-recent' }
-				reviewsToDisplay={ 1 }
-				orderby={ 'reviewer' }
-				order={ 'asc' }
-				onChangeOrderby={ jest.fn() }
+				attributes={{ showLoadMore: true, showOrderby: true }}
+				sortSelectValue={'most-recent'}
+				reviewsToDisplay={1}
+				orderby={'reviewer'}
+				order={'asc'}
+				onChangeOrderby={jest.fn()}
 			/>
 		);
 
-		const orderBySelect = await findByText( 'Order by' );
-		expect( orderBySelect ).toBeInTheDocument();
-	} );
+		const orderBySelect = await findByText('Order by');
+		expect(orderBySelect).toBeInTheDocument();
+	});
 
-	it( 'when reviewRatingsEnabled is set to false the order by select is not shown.', async () => {
-		( getReviews as jest.Mock ).mockResolvedValue( {
-			reviews: [ dummyReview, dummyReview, dummyReview ],
+	it('when reviewRatingsEnabled is set to false the order by select is not shown.', async () => {
+		(getReviews as jest.Mock).mockResolvedValue({
+			reviews: [dummyReview, dummyReview, dummyReview],
 			totalReviews: 3,
-		} );
+		});
 
-		( getSetting as jest.Mock ).mockReturnValue( false );
+		(getSetting as jest.Mock).mockReturnValue(false);
 
 		const { findByText } = render(
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore - we can't fix this until withReviews is converted to TS.
 			<ReviewsFrontendBlock
-				attributes={ { showLoadMore: true, showOrderby: true } }
-				sortSelectValue={ 'most-recent' }
-				reviewsToDisplay={ 1 }
-				orderby={ 'reviewer' }
-				order={ 'asc' }
-				onChangeOrderby={ jest.fn() }
+				attributes={{ showLoadMore: true, showOrderby: true }}
+				sortSelectValue={'most-recent'}
+				reviewsToDisplay={1}
+				orderby={'reviewer'}
+				order={'asc'}
+				onChangeOrderby={jest.fn()}
 			/>
 		);
 
@@ -138,6 +138,6 @@ describe( 'ReviewsFrontendBlock', () => {
 		 * This test fails if the eslint rule is enabled. This block is deprecated so we can ignore it.
 		 */
 		// eslint-disable-next-line jest/valid-expect
-		expect( findByText( 'Order by' ) ).rejects.toThrow();
-	} );
-} );
+		expect(findByText('Order by')).rejects.toThrow();
+	});
+});

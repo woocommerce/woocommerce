@@ -13,11 +13,11 @@ import { getStateForContext } from './utils';
  */
 const parsedContextCache = new Map();
 
-const getParsedContext = ( serialized ) => {
-	if ( ! parsedContextCache.has( serialized ) ) {
-		parsedContextCache.set( serialized, JSON.parse( serialized ) );
+const getParsedContext = (serialized) => {
+	if (!parsedContextCache.has(serialized)) {
+		parsedContextCache.set(serialized, JSON.parse(serialized));
 	}
-	return parsedContextCache.get( serialized );
+	return parsedContextCache.get(serialized);
 };
 
 /**
@@ -37,13 +37,13 @@ export const getValueForQueryKey = (
 	queryKey,
 	defaultValue = {}
 ) => {
-	const stateContext = getStateForContext( state, context );
-	if ( stateContext === null ) {
+	const stateContext = getStateForContext(state, context);
+	if (stateContext === null) {
 		return defaultValue;
 	}
-	const parsed = getParsedContext( stateContext );
-	return typeof parsed[ queryKey ] !== 'undefined'
-		? parsed[ queryKey ]
+	const parsed = getParsedContext(stateContext);
+	return typeof parsed[queryKey] !== 'undefined'
+		? parsed[queryKey]
 		: defaultValue;
 };
 
@@ -58,13 +58,9 @@ export const getValueForQueryKey = (
  * @return {*} The currently stored query-state for the given context or
  *             defaultValue if not present in state.
  */
-export const getValueForQueryContext = (
-	state,
-	context,
-	defaultValue = {}
-) => {
-	const stateContext = getStateForContext( state, context );
+export const getValueForQueryContext = (state, context, defaultValue = {}) => {
+	const stateContext = getStateForContext(state, context);
 	return stateContext === null
 		? defaultValue
-		: getParsedContext( stateContext );
+		: getParsedContext(stateContext);
 };

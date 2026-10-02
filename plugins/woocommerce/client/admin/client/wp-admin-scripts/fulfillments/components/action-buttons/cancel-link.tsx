@@ -9,7 +9,7 @@ import { useInstanceId } from '@wordpress/compose';
  * Internal dependencies
  */
 
-export default function CancelLink( { onClick }: { onClick: () => void } ) {
+export default function CancelLink({ onClick }: { onClick: () => void }) {
 	const descriptionId = useInstanceId(
 		CancelLink,
 		'cancel-link-description'
@@ -19,18 +19,18 @@ export default function CancelLink( { onClick }: { onClick: () => void } ) {
 		<>
 			<Button
 				variant="link"
-				onClick={ onClick }
-				style={ { flex: 1 } }
+				onClick={onClick}
+				style={{ flex: 1 }}
 				__next40pxDefaultSize
-				aria-describedby={ descriptionId }
+				aria-describedby={descriptionId}
 			>
-				{ __( 'Cancel', 'woocommerce' ) }
+				{__('Cancel', 'woocommerce')}
 			</Button>
-			<span id={ descriptionId } className="screen-reader-text">
-				{ __(
+			<span id={descriptionId} className="screen-reader-text">
+				{__(
 					'Cancels the current operation without saving changes',
 					'woocommerce'
-				) }
+				)}
 			</span>
 		</>
 	);

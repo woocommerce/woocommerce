@@ -3,7 +3,7 @@
  */
 import type { ReactNode } from 'react';
 
-export type SelectableItem< T = unknown > = (
+export type SelectableItem<T = unknown> = (
 	| { label: string; ariaLabel?: string }
 	| { label: ReactNode; ariaLabel: string }
 ) & {
@@ -15,8 +15,8 @@ export type SelectableItem< T = unknown > = (
 	type?: string;
 } & T;
 
-export interface SelectableItemsContext< T = unknown > {
-	items: SelectableItem< T >[];
+export interface SelectableItemsContext<T = unknown> {
+	items: SelectableItem<T>[];
 	selectionMode: 'single' | 'multiple';
 	storeNamespace: string;
 	groupLabel?: string;
@@ -29,9 +29,9 @@ export interface SelectableItemsContext< T = unknown > {
 	filterType?: string;
 }
 
-export type SelectableItemsBlockContext< T = unknown > = {
+export type SelectableItemsBlockContext<T = unknown> = {
 	// eslint-disable-next-line @typescript-eslint/naming-convention
-	'woocommerce/selectableItems': SelectableItemsContext< T >;
+	'woocommerce/selectableItems': SelectableItemsContext<T>;
 };
 
 /**
@@ -46,11 +46,11 @@ export type SelectableItemsBlockContext< T = unknown > = {
  *
  * `toggle` accepts an optional item so both patterns work.
  */
-export interface SelectableItemsParentStore< T = unknown > {
+export interface SelectableItemsParentStore<T = unknown> {
 	state: {
-		selectableItems: readonly SelectableItem< T >[];
+		selectableItems: readonly SelectableItem<T>[];
 	};
 	actions: {
-		toggle: ( item?: SelectableItem< T > ) => void;
+		toggle: (item?: SelectableItem<T>) => void;
 	};
 }

@@ -14,9 +14,9 @@ import { AdditionalFieldsPlaceholder } from '@woocommerce/base-components/cart-c
 import './style.scss';
 
 const Edit = (): JSX.Element => {
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className: 'wc-block-order-confirmation-additional-fields',
-	} );
+	});
 
 	const additionalFields = {
 		...ORDER_FORM_FIELDS,
@@ -24,10 +24,8 @@ const Edit = (): JSX.Element => {
 	};
 
 	return (
-		<div { ...blockProps }>
-			<AdditionalFieldsPlaceholder
-				additionalFields={ additionalFields }
-			/>
+		<div {...blockProps}>
+			<AdditionalFieldsPlaceholder additionalFields={additionalFields} />
 		</div>
 	);
 };

@@ -21,11 +21,11 @@ interface CommonProps {
 	error?: string;
 }
 
-export type TextFieldProps = ComponentProps< typeof TextControl > & CommonProps;
-export type SelectFieldProps< ItemType > = SelectControlProps< ItemType > &
+export type TextFieldProps = ComponentProps<typeof TextControl> & CommonProps;
+export type SelectFieldProps<ItemType> = SelectControlProps<ItemType> &
 	CommonProps;
-export type GroupedSelectFieldProps< ItemType > =
-	GroupedSelectControlProps< ItemType > & CommonProps;
+export type GroupedSelectFieldProps<ItemType> =
+	GroupedSelectControlProps<ItemType> & CommonProps;
 
 /**
  * Creates a field component decorating a control to display validation errors.
@@ -37,33 +37,33 @@ export type GroupedSelectFieldProps< ItemType > =
  */
 const makeField = (
 	Control: React.ElementType,
-	props: CommonProps & Record< any, any >, // eslint-disable-line @typescript-eslint/no-explicit-any
-	ref?: React.Ref< HTMLInputElement >
+	props: CommonProps & Record<any, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
+	ref?: React.Ref<HTMLInputElement>
 ) => {
 	const { error, ...rest } = props;
-	if ( ! error ) return <Control { ...rest } ref={ ref } />;
+	if (!error) return <Control {...rest} ref={ref} />;
 	return (
 		<>
 			<Control
-				{ ...rest }
-				ref={ ref }
-				className={ clsx( rest.className, 'has-error' ) }
+				{...rest}
+				ref={ref}
+				className={clsx(rest.className, 'has-error')}
 			/>
-			{ <div className="components-form-field__error">{ error }</div> }
+			{<div className="components-form-field__error">{error}</div>}
 		</>
 	);
 };
 
-export const TextField = forwardRef< HTMLInputElement, TextFieldProps >(
-	( props, ref ) => {
-		return makeField( TextControl, props, ref );
+export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
+	(props, ref) => {
+		return makeField(TextControl, props, ref);
 	}
 );
 
-export const SelectField = < ItemType extends SelectItem >(
-	props: SelectFieldProps< ItemType >
-): JSX.Element => makeField( CustomSelectControl, props );
+export const SelectField = <ItemType extends SelectItem>(
+	props: SelectFieldProps<ItemType>
+): JSX.Element => makeField(CustomSelectControl, props);
 
-export const GroupedSelectField = < ItemType extends GroupedSelectItem >(
-	props: GroupedSelectControlProps< ItemType >
-): JSX.Element => makeField( GroupedSelectControl, props );
+export const GroupedSelectField = <ItemType extends GroupedSelectItem>(
+	props: GroupedSelectControlProps<ItemType>
+): JSX.Element => makeField(GroupedSelectControl, props);

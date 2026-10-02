@@ -13,9 +13,9 @@ import save from './save';
 import deprecated from './deprecated';
 
 // @ts-expect-error: `registerBlockType` is a function that is typed in WordPress core.
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	icon: BLOCK_ICON,
 	edit,
 	save,
 	deprecated,
-} );
+});

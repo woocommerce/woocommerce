@@ -7,13 +7,13 @@
  */
 
 async function enableXStateV4Inspect() {
-	const { inspect } = await import( '@xstate/inspect' );
-	const { Interpreter } = await import( 'xstate' );
+	const { inspect } = await import('@xstate/inspect');
+	const { Interpreter } = await import('xstate');
 	// configure the XState inspector to open in a new tab
-	inspect( {
+	inspect({
 		url: 'https://stately.ai/viz?inspect',
 		iframe: false,
-	} );
+	});
 	// configure all XServices to use the inspector
 	Interpreter.defaultOptions.devTools = true;
 	// eslint-disable-next-line no-console
@@ -38,15 +38,15 @@ async function enableXStateV5Inspect() {
 }
 
 const isXStateInspectEnabled =
-	window.localStorage.getItem( 'xstate_inspect' ) === 'true';
+	window.localStorage.getItem('xstate_inspect') === 'true';
 const isXStateV5InspectEnabled =
-	window.localStorage.getItem( 'xstateV5_inspect' ) === 'true';
+	window.localStorage.getItem('xstateV5_inspect') === 'true';
 const isDevelopmentEnvironment = process.env.NODE_ENV === 'development';
 
 let versionEnabled; // not enabled
-if ( isDevelopmentEnvironment && isXStateInspectEnabled ) {
+if (isDevelopmentEnvironment && isXStateInspectEnabled) {
 	// XState V5 inspector malfunctions when V4 is also enabled
-	if ( isXStateV5InspectEnabled ) {
+	if (isXStateV5InspectEnabled) {
 		versionEnabled = 'V5';
 		enableXStateV5Inspect();
 	} else {
@@ -55,7 +55,7 @@ if ( isDevelopmentEnvironment && isXStateInspectEnabled ) {
 	}
 }
 
-export const useXStateInspect = ( machineVersion ) => {
+export const useXStateInspect = (machineVersion) => {
 	let xstateV5Inspector;
 	if (
 		isDevelopmentEnvironment &&

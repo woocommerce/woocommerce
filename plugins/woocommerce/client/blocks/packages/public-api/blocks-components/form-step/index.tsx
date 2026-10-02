@@ -14,19 +14,19 @@ interface StepHeadingProps {
 	stepHeadingContent?: JSX.Element | undefined;
 }
 
-const StepHeading = ( { title, stepHeadingContent }: StepHeadingProps ) => (
+const StepHeading = ({ title, stepHeadingContent }: StepHeadingProps) => (
 	<div className="wc-block-components-checkout-step__heading">
 		<Title
 			className="wc-block-components-checkout-step__title"
 			headingLevel="2"
 		>
-			{ title }
+			{title}
 		</Title>
-		{ !! stepHeadingContent && (
+		{!!stepHeadingContent && (
 			<span className="wc-block-components-checkout-step__heading-content">
-				{ stepHeadingContent }
+				{stepHeadingContent}
 			</span>
-		) }
+		)}
 	</div>
 );
 
@@ -42,7 +42,7 @@ export interface FormStepProps {
 	stepHeadingContent?: () => JSX.Element | undefined;
 }
 
-const FormStep = ( {
+const FormStep = ({
 	id,
 	className,
 	title,
@@ -52,43 +52,43 @@ const FormStep = ( {
 	disabled = false,
 	showStepNumber = true,
 	stepHeadingContent = () => undefined,
-}: FormStepProps ): JSX.Element => {
+}: FormStepProps): JSX.Element => {
 	// If the form step doesn't have a legend or title, render a <div> instead
 	// of a <fieldset>.
 	const Element = legend || title ? 'fieldset' : 'div';
 
 	return (
 		<Element
-			className={ clsx( className, 'wc-block-components-checkout-step', {
+			className={clsx(className, 'wc-block-components-checkout-step', {
 				'wc-block-components-checkout-step--with-step-number':
 					showStepNumber,
 				'wc-block-components-checkout-step--disabled': disabled,
-			} ) }
-			id={ id }
-			disabled={ disabled }
+			})}
+			id={id}
+			disabled={disabled}
 		>
-			{ !! ( legend || title ) && (
+			{!!(legend || title) && (
 				<legend className="screen-reader-text">
-					{ legend || title }
+					{legend || title}
 				</legend>
-			) }
-			{ !! ( title || description ) && (
+			)}
+			{!!(title || description) && (
 				<div className="wc-block-components-checkout-step__heading-container">
-					{ !! title && (
+					{!!title && (
 						<StepHeading
-							title={ title }
-							stepHeadingContent={ stepHeadingContent() }
+							title={title}
+							stepHeadingContent={stepHeadingContent()}
 						/>
-					) }
-					{ !! description && (
+					)}
+					{!!description && (
 						<p className="wc-block-components-checkout-step__description">
-							{ description }
+							{description}
 						</p>
-					) }
+					)}
 				</div>
-			) }
+			)}
 			<div className="wc-block-components-checkout-step__content">
-				{ children }
+				{children}
 			</div>
 		</Element>
 	);

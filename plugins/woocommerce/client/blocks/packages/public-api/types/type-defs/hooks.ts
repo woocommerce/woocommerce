@@ -22,8 +22,8 @@ import type { ApiErrorResponse } from './api-error-response';
 export interface StoreCartItemQuantity {
 	isPendingDelete: boolean;
 	quantity: number;
-	setItemQuantity: React.Dispatch< React.SetStateAction< number > >;
-	removeItem: () => Promise< boolean >;
+	setItemQuantity: React.Dispatch<React.SetStateAction<number>>;
+	removeItem: () => Promise<boolean>;
 	cartItemQuantityErrors: CartResponseErrorItem[];
 }
 
@@ -31,8 +31,8 @@ export interface StoreCartItemQuantity {
 export interface StoreCartCoupon {
 	appliedCoupons: CartResponseCouponItem[];
 	isLoading: boolean;
-	applyCoupon: ( coupon: string ) => Promise< boolean >;
-	removeCoupon: ( coupon: string ) => Promise< boolean >;
+	applyCoupon: (coupon: string) => Promise<boolean>;
+	removeCoupon: (coupon: string) => Promise<boolean>;
 	isApplyingCoupon: boolean;
 	isRemovingCoupon: boolean;
 }
@@ -54,13 +54,13 @@ export interface StoreCart {
 	cartNeedsShipping: boolean;
 	cartTotals: CartResponseTotals;
 	crossSellsProducts: ProductResponseItem[];
-	extensions: Record< string, unknown >;
+	extensions: Record<string, unknown>;
 	hasPendingItemsOperations: boolean;
 	isLoadingRates: boolean;
 	paymentMethods: string[];
 	paymentRequirements: string[];
-	receiveCart: ( cart: CartResponse ) => void;
-	receiveCartContents: ( cart: CartResponse ) => void;
+	receiveCart: (cart: CartResponse) => void;
+	receiveCartContents: (cart: CartResponse) => void;
 	shippingAddress: CartResponseShippingAddress;
 	shippingRates: CartResponseShippingRate[];
 }

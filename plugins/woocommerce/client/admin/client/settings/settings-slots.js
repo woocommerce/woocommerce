@@ -8,7 +8,7 @@ import { PluginArea } from '@wordpress/plugins';
 export const SETTINGS_SLOT_FILL_CONSTANT =
 	'__EXPERIMENTAL__WcAdminSettingsSlots';
 
-const { Slot } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
+const { Slot } = createSlotFill(SETTINGS_SLOT_FILL_CONSTANT);
 
 export const possiblyRenderSettingsSlots = () => {
 	const slots = [
@@ -48,18 +48,18 @@ export const possiblyRenderSettingsSlots = () => {
 		},
 	];
 
-	slots.forEach( ( slot ) => {
-		const slotDomElement = document.getElementById( slot.id );
+	slots.forEach((slot) => {
+		const slotDomElement = document.getElementById(slot.id);
 
-		if ( slotDomElement ) {
-			createRoot( slotDomElement ).render(
+		if (slotDomElement) {
+			createRoot(slotDomElement).render(
 				<>
 					<SlotFillProvider>
 						<Slot />
-						<PluginArea scope={ slot.scope } />
+						<PluginArea scope={slot.scope} />
 					</SlotFillProvider>
 				</>
 			);
 		}
-	} );
+	});
 };

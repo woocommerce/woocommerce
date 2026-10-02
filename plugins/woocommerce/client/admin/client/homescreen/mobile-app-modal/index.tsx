@@ -28,84 +28,82 @@ import './style.scss';
 import { SETUP_TASK_HELP_ITEMS_FILTER } from '../../activity-panel/panels/help';
 
 export const MobileAppModal = () => {
-	const [ guideIsOpen, setGuideIsOpen ] = useState( false );
-	const [ isReturningFromWordpressConnection, setIsReturning ] =
-		useState( false );
+	const [guideIsOpen, setGuideIsOpen] = useState(false);
+	const [isReturningFromWordpressConnection, setIsReturning] =
+		useState(false);
 
 	const { state, jetpackConnectionData } = useJetpackPluginState();
-	const { updateOptions } = useDispatch( optionsStore );
+	const { updateOptions } = useDispatch(optionsStore);
 
-	const [ pageContent, setPageContent ] = useState< React.ReactNode >();
-	const [ searchParams ] = useSearchParams();
+	const [pageContent, setPageContent] = useState<React.ReactNode>();
+	const [searchParams] = useSearchParams();
 
 	const { invalidateResolutionForStoreSelector } =
-		useDispatch( onboardingStore );
+		useDispatch(onboardingStore);
 
-	useEffect( () => {
-		if ( searchParams.get( 'mobileAppModal' ) ) {
-			setGuideIsOpen( true );
+	useEffect(() => {
+		if (searchParams.get('mobileAppModal')) {
+			setGuideIsOpen(true);
 		} else {
-			setGuideIsOpen( false );
+			setGuideIsOpen(false);
 		}
 
-		if ( searchParams.get( 'jetpackState' ) === 'returning' ) {
-			setIsReturning( true );
+		if (searchParams.get('jetpackState') === 'returning') {
+			setIsReturning(true);
 		}
-	}, [ searchParams ] );
+	}, [searchParams]);
 
-	const [ appInstalledClicked, setAppInstalledClicked ] = useState( false );
-	const [ hasSentEmail, setHasSentEmail ] = useState( false );
-	const [ isRetryingMagicLinkSend, setIsRetryingMagicLinkSend ] =
-		useState( false );
+	const [appInstalledClicked, setAppInstalledClicked] = useState(false);
+	const [hasSentEmail, setHasSentEmail] = useState(false);
+	const [isRetryingMagicLinkSend, setIsRetryingMagicLinkSend] =
+		useState(false);
 
 	const { requestState: magicLinkRequestStatus, fetchMagicLinkApiCall } =
 		useSendMagicLink();
 
-	const completeAppInstallationStep = useCallback( () => {
-		setAppInstalledClicked( true );
-		recordEvent( 'onboarding_app_install_click' );
-	}, [] );
+	const completeAppInstallationStep = useCallback(() => {
+		setAppInstalledClicked(true);
+		recordEvent('onboarding_app_install_click');
+	}, []);
 
-	const sendMagicLink = useCallback( () => {
+	const sendMagicLink = useCallback(() => {
 		fetchMagicLinkApiCall();
-		recordEvent( 'magic_prompt_send_signin_link_click' );
-	}, [ fetchMagicLinkApiCall ] );
+		recordEvent('magic_prompt_send_signin_link_click');
+	}, [fetchMagicLinkApiCall]);
 
-	useEffect( () => {
-		if ( magicLinkRequestStatus === SendMagicLinkStates.SUCCESS ) {
-			setHasSentEmail( true );
+	useEffect(() => {
+		if (magicLinkRequestStatus === SendMagicLinkStates.SUCCESS) {
+			setHasSentEmail(true);
 		}
-	}, [ magicLinkRequestStatus ] );
+	}, [magicLinkRequestStatus]);
 
-	useEffect( () => {
-		if ( hasSentEmail ) {
+	useEffect(() => {
+		if (hasSentEmail) {
 			setPageContent(
 				<EmailSentPage
-					returnToSendLinkPage={ () => {
-						setHasSentEmail( false );
-						setIsRetryingMagicLinkSend( true );
-						recordEvent( 'magic_prompt_retry_send_signin_link' );
-					} }
+					returnToSendLinkPage={() => {
+						setHasSentEmail(false);
+						setIsRetryingMagicLinkSend(true);
+						recordEvent('magic_prompt_retry_send_signin_link');
+					}}
 				/>
 			);
 		} else {
 			const isJetpackPluginInstalled =
-				( state === JetpackPluginStates.FULL_CONNECTION &&
+				(state === JetpackPluginStates.FULL_CONNECTION &&
 					jetpackConnectionData?.currentUser?.wpcomUser?.email !==
-						undefined ) ??
+						undefined) ??
 				false;
 			const wordpressAccountEmailAddress =
 				jetpackConnectionData?.currentUser?.wpcomUser?.email;
 			setPageContent(
 				<MobileAppLoginStepperPage
-					appInstalledClicked={ appInstalledClicked }
-					isJetpackPluginInstalled={ isJetpackPluginInstalled }
-					wordpressAccountEmailAddress={
-						wordpressAccountEmailAddress
-					}
-					completeInstallationHandler={ completeAppInstallationStep }
-					sendMagicLinkHandler={ sendMagicLink }
-					sendMagicLinkStatus={ magicLinkRequestStatus }
+					appInstalledClicked={appInstalledClicked}
+					isJetpackPluginInstalled={isJetpackPluginInstalled}
+					wordpressAccountEmailAddress={wordpressAccountEmailAddress}
+					completeInstallationHandler={completeAppInstallationStep}
+					sendMagicLinkHandler={sendMagicLink}
+					sendMagicLinkStatus={magicLinkRequestStatus}
 				/>
 			);
 		}
@@ -119,9 +117,9 @@ export const MobileAppModal = () => {
 		isRetryingMagicLinkSend,
 		magicLinkRequestStatus,
 		completeAppInstallationStep,
-	] );
+	]);
 
-	const clearQueryString = useCallback( () => {
+	const clearQueryString = useCallback(() => {
 		// clear the search params that we use so that the URL is clean
 		updateQueryString(
 			{
@@ -129,40 +127,38 @@ export const MobileAppModal = () => {
 				mobileAppModal: undefined,
 			},
 			undefined,
-			Object.fromEntries( searchParams.entries() )
+			Object.fromEntries(searchParams.entries())
 		);
-	}, [ searchParams ] );
+	}, [searchParams]);
 
 	const onFinish = () => {
-		void updateOptions( {
+		void updateOptions({
 			woocommerce_admin_dismissed_mobile_app_modal: 'yes',
-		} ).then( () =>
-			invalidateResolutionForStoreSelector( 'getTaskLists' )
-		);
+		}).then(() => invalidateResolutionForStoreSelector('getTaskLists'));
 
 		clearQueryString();
-		setGuideIsOpen( false );
+		setGuideIsOpen(false);
 	};
 
 	return (
 		<>
-			{ guideIsOpen && (
+			{guideIsOpen && (
 				<Guide
-					onFinish={ onFinish }
+					onFinish={onFinish}
 					contentLabel=""
-					className={ 'woocommerce__mobile-app-welcome-modal' }
-					pages={ [
+					className={'woocommerce__mobile-app-welcome-modal'}
+					pages={[
 						{
 							content: (
 								<ModalIllustrationLayout
-									body={ pageContent }
-									onDismiss={ onFinish }
+									body={pageContent}
+									onDismiss={onFinish}
 								/>
 							),
 						},
-					] }
+					]}
 				/>
-			) }
+			)}
 		</>
 	);
 };
@@ -176,16 +172,16 @@ export const MOBILE_APP_MODAL_HELP_ENTRY_FILTER_CALLBACK =
 export const MobileAppHelpMenuEntryLoader = () => {
 	const addMobileAppHelpEntry = useCallback(
 		(
-			helpMenuEntries: Array< {
+			helpMenuEntries: Array<{
 				title: string;
 				link: string;
 				linkType?: string;
-			} >
+			}>
 		) => {
 			return [
 				...helpMenuEntries,
 				{
-					title: __( 'Get the WooCommerce app', 'woocommerce' ),
+					title: __('Get the WooCommerce app', 'woocommerce'),
 					link: getAdminLink(
 						'./admin.php?page=wc-admin&mobileAppModal=true'
 					),
@@ -196,7 +192,7 @@ export const MobileAppHelpMenuEntryLoader = () => {
 		[]
 	);
 
-	useEffect( () => {
+	useEffect(() => {
 		removeFilter(
 			SETUP_TASK_HELP_ITEMS_FILTER,
 			MOBILE_APP_MODAL_HELP_ENTRY_FILTER_CALLBACK
@@ -207,12 +203,12 @@ export const MobileAppHelpMenuEntryLoader = () => {
 			addMobileAppHelpEntry,
 			10
 		);
-	}, [ addMobileAppHelpEntry ] );
+	}, [addMobileAppHelpEntry]);
 
 	return null;
 };
 
-registerPlugin( 'woocommerce-mobile-app-modal', {
+registerPlugin('woocommerce-mobile-app-modal', {
 	render: MobileAppHelpMenuEntryLoader,
 	scope: 'woocommerce-admin',
-} );
+});

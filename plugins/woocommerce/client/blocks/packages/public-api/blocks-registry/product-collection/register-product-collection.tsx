@@ -37,9 +37,9 @@ export interface ProductCollectionConfig extends BlockVariation {
  * does not meet the expected criteria. It will bail early and return false, if any of the
  * required properties are missing or invalid.
  */
-const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
+const isValidCollectionConfig = (config: ProductCollectionConfig) => {
 	// Basic checks for the top-level argument
-	if ( typeof config !== 'object' || config === null ) {
+	if (typeof config !== 'object' || config === null) {
 		console.error(
 			'Invalid arguments: You must pass an object to __experimentalRegisterProductCollection.'
 		);
@@ -50,21 +50,19 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 	 * BlockVariation properties validation
 	 */
 	// name
-	if ( typeof config.name !== 'string' || config.name.length === 0 ) {
-		console.error( 'Invalid name: name must be a non-empty string.' );
+	if (typeof config.name !== 'string' || config.name.length === 0) {
+		console.error('Invalid name: name must be a non-empty string.');
 		return false;
 	} else if (
-		! config.name.match(
-			/^[a-zA-Z0-9-]+\/product-collection\/[a-zA-Z0-9-]+$/
-		)
+		!config.name.match(/^[a-zA-Z0-9-]+\/product-collection\/[a-zA-Z0-9-]+$/)
 	) {
 		console.warn(
 			`To prevent conflicts with other collections, please use a unique name following the pattern: "<plugin-name>/product-collection/<collection-name>". Ensure "<plugin-name>" is your plugin name and "<collection-name>" is your collection name. Both should consist only of alphanumeric characters and hyphens (e.g., "my-plugin/product-collection/my-collection").`
 		);
 	}
 	// title
-	if ( typeof config.title !== 'string' || config.title.length === 0 ) {
-		console.error( 'Invalid title: title must be a non-empty string.' );
+	if (typeof config.title !== 'string' || config.title.length === 0) {
+		console.error('Invalid title: title must be a non-empty string.');
 		return false;
 	}
 	// description
@@ -72,20 +70,15 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 		config.description !== undefined &&
 		typeof config.description !== 'string'
 	) {
-		console.warn( 'Invalid description: description must be a string.' );
+		console.warn('Invalid description: description must be a string.');
 	}
 	// category
-	if (
-		config.category !== undefined &&
-		typeof config.category !== 'string'
-	) {
-		console.warn( 'Invalid category: category must be a string.' );
+	if (config.category !== undefined && typeof config.category !== 'string') {
+		console.warn('Invalid category: category must be a string.');
 	}
 	// keywords
-	if ( config.keywords !== undefined && ! Array.isArray( config.keywords ) ) {
-		console.warn(
-			'Invalid keywords: keywords must be an array of strings.'
-		);
+	if (config.keywords !== undefined && !Array.isArray(config.keywords)) {
+		console.warn('Invalid keywords: keywords must be an array of strings.');
 	}
 	// icon
 	if (
@@ -93,14 +86,14 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 		typeof config.icon !== 'string' &&
 		typeof config.icon !== 'object'
 	) {
-		console.warn( 'Invalid icon: icon must be a string or an object.' );
+		console.warn('Invalid icon: icon must be a string or an object.');
 	}
 	// example
-	if ( config.example !== undefined && typeof config.example !== 'object' ) {
-		console.warn( 'Invalid example: example must be an object.' );
+	if (config.example !== undefined && typeof config.example !== 'object') {
+		console.warn('Invalid example: example must be an object.');
 	}
 	// scope
-	if ( config.scope !== undefined && ! Array.isArray( config.scope ) ) {
+	if (config.scope !== undefined && !Array.isArray(config.scope)) {
 		console.warn(
 			'Invalid scope: scope must be an array of type WPBlockVariationScope.'
 		);
@@ -114,77 +107,77 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 		config.attributes !== undefined &&
 		typeof config.attributes !== 'object'
 	) {
-		console.warn( 'Invalid attributes: attributes must be an object.' );
+		console.warn('Invalid attributes: attributes must be an object.');
 	}
 	// attributes.query
 	if (
 		config.attributes?.query !== undefined &&
 		typeof config.attributes.query !== 'object'
 	) {
-		console.warn( 'Invalid query: query must be an object.' );
+		console.warn('Invalid query: query must be an object.');
 	}
 	// attributes.query.offset
 	if (
 		config.attributes?.query?.offset !== undefined &&
 		typeof config.attributes.query.offset !== 'number'
 	) {
-		console.warn( 'Invalid offset: offset must be a number.' );
+		console.warn('Invalid offset: offset must be a number.');
 	}
 	// attributes.query.order
 	if (
 		config.attributes?.query?.order !== undefined &&
 		typeof config.attributes.query.order !== 'string'
 	) {
-		console.warn( 'Invalid order: order must be a string.' );
+		console.warn('Invalid order: order must be a string.');
 	}
 	// attributes.query.orderBy
 	if (
 		config.attributes?.query?.orderBy !== undefined &&
 		typeof config.attributes.query.orderBy !== 'string'
 	) {
-		console.warn( 'Invalid orderBy: orderBy must be a string.' );
+		console.warn('Invalid orderBy: orderBy must be a string.');
 	}
 	// attributes.query.pages
 	if (
 		config.attributes?.query?.pages !== undefined &&
 		typeof config.attributes.query.pages !== 'number'
 	) {
-		console.warn( 'Invalid pages: pages must be a number.' );
+		console.warn('Invalid pages: pages must be a number.');
 	}
 	// attributes.query.perPage
 	if (
 		config.attributes?.query?.perPage !== undefined &&
 		typeof config.attributes.query.perPage !== 'number'
 	) {
-		console.warn( 'Invalid perPage: perPage must be a number.' );
+		console.warn('Invalid perPage: perPage must be a number.');
 	}
 	// attributes.query.search
 	if (
 		config.attributes?.query?.search !== undefined &&
 		typeof config.attributes.query.search !== 'string'
 	) {
-		console.warn( 'Invalid search: search must be a string.' );
+		console.warn('Invalid search: search must be a string.');
 	}
 	// attributes.query.taxQuery
 	if (
 		config.attributes?.query?.taxQuery !== undefined &&
 		typeof config.attributes.query.taxQuery !== 'object'
 	) {
-		console.warn( 'Invalid taxQuery: taxQuery must be an object.' );
+		console.warn('Invalid taxQuery: taxQuery must be an object.');
 	}
 	// attributes.query.featured
 	if (
 		config.attributes?.query?.featured !== undefined &&
 		typeof config.attributes.query.featured !== 'boolean'
 	) {
-		console.warn( 'Invalid featured: featured must be a boolean.' );
+		console.warn('Invalid featured: featured must be a boolean.');
 	}
 	// attributes.query.timeFrame
 	if (
 		config.attributes?.query?.timeFrame !== undefined &&
 		typeof config.attributes.query.timeFrame !== 'object'
 	) {
-		console.warn( 'Invalid timeFrame: timeFrame must be an object.' );
+		console.warn('Invalid timeFrame: timeFrame must be an object.');
 	}
 	// attributes.query.woocommerceOnSale
 	if (
@@ -198,7 +191,7 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 	// attributes.query.woocommerceStockStatus
 	if (
 		config.attributes?.query?.woocommerceStockStatus !== undefined &&
-		! Array.isArray( config.attributes.query.woocommerceStockStatus )
+		!Array.isArray(config.attributes.query.woocommerceStockStatus)
 	) {
 		console.warn(
 			'Invalid woocommerceStockStatus: woocommerceStockStatus must be an array.'
@@ -207,7 +200,7 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 	// attributes.query.woocommerceAttributes
 	if (
 		config.attributes?.query?.woocommerceAttributes !== undefined &&
-		! Array.isArray( config.attributes.query.woocommerceAttributes )
+		!Array.isArray(config.attributes.query.woocommerceAttributes)
 	) {
 		console.warn(
 			'Invalid woocommerceAttributes: woocommerceAttributes must be an array.'
@@ -216,7 +209,7 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 	// attributes.query.woocommerceHandPickedProducts
 	if (
 		config.attributes?.query?.woocommerceHandPickedProducts !== undefined &&
-		! Array.isArray( config.attributes.query.woocommerceHandPickedProducts )
+		!Array.isArray(config.attributes.query.woocommerceHandPickedProducts)
 	) {
 		console.warn(
 			'Invalid woocommerceHandPickedProducts: woocommerceHandPickedProducts must be an array.'
@@ -227,28 +220,26 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 		config.attributes?.query?.priceRange !== undefined &&
 		typeof config.attributes.query.priceRange !== 'object'
 	) {
-		console.warn( 'Invalid priceRange: priceRange must be an object.' );
+		console.warn('Invalid priceRange: priceRange must be an object.');
 	}
 	// attributes.displayLayout
 	if (
 		config.attributes?.displayLayout !== undefined &&
 		typeof config.attributes.displayLayout !== 'object'
 	) {
-		console.warn(
-			'Invalid displayLayout: displayLayout must be an object.'
-		);
+		console.warn('Invalid displayLayout: displayLayout must be an object.');
 	}
 	// attributes.dimensions
 	if (
 		config.attributes?.dimensions !== undefined &&
 		typeof config.attributes.dimensions !== 'object'
 	) {
-		console.warn( 'Invalid dimensions: dimensions must be an object.' );
+		console.warn('Invalid dimensions: dimensions must be an object.');
 	}
 	// attributes.hideControls
 	if (
 		config.attributes?.hideControls !== undefined &&
-		! Array.isArray( config.attributes.hideControls )
+		!Array.isArray(config.attributes.hideControls)
 	) {
 		console.warn(
 			'Invalid hideControls: hideControls must be an array of strings.'
@@ -257,7 +248,7 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 	// attributes.queryContextIncludes
 	if (
 		config.attributes?.queryContextIncludes !== undefined &&
-		! Array.isArray( config.attributes.queryContextIncludes )
+		!Array.isArray(config.attributes.queryContextIncludes)
 	) {
 		console.warn(
 			'Invalid queryContextIncludes: queryContextIncludes must be an array of strings.'
@@ -267,10 +258,10 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 	/**
 	 * Preview validation
 	 */
-	if ( config.preview !== undefined ) {
+	if (config.preview !== undefined) {
 		// preview
-		if ( typeof config.preview !== 'object' || config.preview === null ) {
-			console.warn( 'Invalid preview: preview must be an object.' );
+		if (typeof config.preview !== 'object' || config.preview === null) {
+			console.warn('Invalid preview: preview must be an object.');
 		}
 		// preview.setPreviewState
 		if (
@@ -282,9 +273,9 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 			);
 		}
 
-		if ( config.preview.initialPreviewState !== undefined ) {
+		if (config.preview.initialPreviewState !== undefined) {
 			// preview.initialPreviewState
-			if ( typeof config.preview.initialPreviewState !== 'object' ) {
+			if (typeof config.preview.initialPreviewState !== 'object') {
 				console.warn(
 					'Invalid preview: initialPreviewState must be an object.'
 				);
@@ -313,7 +304,7 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 	// usesReference
 	if (
 		config.usesReference !== undefined &&
-		! Array.isArray( config.usesReference )
+		!Array.isArray(config.usesReference)
 	) {
 		console.error(
 			'Invalid usesReference: usesReference must be an array of strings.'
@@ -335,7 +326,7 @@ export const __experimentalRegisterProductCollection = (
 	config: ProductCollectionConfig
 ) => {
 	// If the config is invalid, return early.
-	if ( ! isValidCollectionConfig( config ) ) {
+	if (!isValidCollectionConfig(config)) {
 		console.error(
 			'Collection could not be registered due to invalid configuration.'
 		);
@@ -360,10 +351,10 @@ export const __experimentalRegisterProductCollection = (
 	 * We always need to hide the inherit control.
 	 */
 	const hideControls = [
-		...new Set( [
+		...new Set([
 			CoreFilterNames.INHERIT,
-			...( config.attributes?.hideControls || [] ),
-		] ),
+			...(config.attributes?.hideControls || []),
+		]),
 	];
 	const collectionConfigWithoutExtraArgs = {
 		name: config.name,
@@ -378,41 +369,41 @@ export const __experimentalRegisterProductCollection = (
 			...config.attributes, // Allow users to pass extra attributes.
 			query: {
 				...DEFAULT_QUERY,
-				...( query.offset !== undefined && { offset: query.offset } ),
-				...( query.order !== undefined && { order: query.order } ),
-				...( query.orderBy !== undefined && {
+				...(query.offset !== undefined && { offset: query.offset }),
+				...(query.order !== undefined && { order: query.order }),
+				...(query.orderBy !== undefined && {
 					orderBy: query.orderBy,
-				} ),
-				...( query.pages !== undefined && { pages: query.pages } ),
-				...( query.perPage !== undefined && {
+				}),
+				...(query.pages !== undefined && { pages: query.pages }),
+				...(query.perPage !== undefined && {
 					perPage: query.perPage,
-				} ),
-				...( query.search !== undefined && { search: query.search } ),
-				...( query.taxQuery !== undefined && {
+				}),
+				...(query.search !== undefined && { search: query.search }),
+				...(query.taxQuery !== undefined && {
 					taxQuery: query.taxQuery,
-				} ),
-				...( query.featured !== undefined && {
+				}),
+				...(query.featured !== undefined && {
 					featured: query.featured,
-				} ),
-				...( query.timeFrame !== undefined && {
+				}),
+				...(query.timeFrame !== undefined && {
 					timeFrame: query.timeFrame,
-				} ),
-				...( query.woocommerceOnSale !== undefined && {
+				}),
+				...(query.woocommerceOnSale !== undefined && {
 					woocommerceOnSale: query.woocommerceOnSale,
-				} ),
-				...( query.woocommerceStockStatus !== undefined && {
+				}),
+				...(query.woocommerceStockStatus !== undefined && {
 					woocommerceStockStatus: query.woocommerceStockStatus,
-				} ),
-				...( query.woocommerceAttributes !== undefined && {
+				}),
+				...(query.woocommerceAttributes !== undefined && {
 					woocommerceAttributes: query.woocommerceAttributes,
-				} ),
-				...( query.woocommerceHandPickedProducts !== undefined && {
+				}),
+				...(query.woocommerceHandPickedProducts !== undefined && {
 					woocommerceHandPickedProducts:
 						query.woocommerceHandPickedProducts,
-				} ),
-				...( query.priceRange !== undefined && {
+				}),
+				...(query.priceRange !== undefined && {
 					priceRange: query.priceRange,
-				} ),
+				}),
 			},
 			hideControls,
 			// collection should be set to the name of the collection i.e. config.name
@@ -435,7 +426,7 @@ export const __experimentalRegisterProductCollection = (
 	if (
 		setPreviewState ||
 		initialPreviewState ||
-		( Array.isArray( usesReference ) && usesReference.length > 0 )
+		(Array.isArray(usesReference) && usesReference.length > 0)
 	) {
 		/**
 		 * This function is used to inject following props to the BlockEdit component:
@@ -443,30 +434,30 @@ export const __experimentalRegisterProductCollection = (
 		 * 2. usesReference
 		 */
 		const withAdditionalProps =
-			< T extends EditorBlock< T > >( BlockEdit: ElementType ) =>
-			( props: BlockEditProps< ProductCollectionAttributes > ) => {
+			<T extends EditorBlock<T>>(BlockEdit: ElementType) =>
+			(props: BlockEditProps<ProductCollectionAttributes>) => {
 				// If collection name does not match, return the original BlockEdit component.
 				if (
 					props.attributes.collection !==
 					collectionConfigWithoutExtraArgs.name
 				) {
-					return <BlockEdit { ...props } />;
+					return <BlockEdit {...props} />;
 				}
 
 				// Otherwise, inject the setPreviewState & initialPreviewState props.
 				return (
 					<BlockEdit
-						{ ...props }
+						{...props}
 						// Inject preview prop only if setPreviewState or initialPreviewState is provided.
-						{ ...( initialPreviewState || setPreviewState
+						{...(initialPreviewState || setPreviewState
 							? {
 									preview: {
 										setPreviewState,
 										initialPreviewState,
 									},
-							  }
-							: {} ) }
-						usesReference={ usesReference }
+								}
+							: {})}
+						usesReference={usesReference}
 					/>
 				);
 			};
@@ -487,8 +478,8 @@ export const __experimentalRegisterProductCollection = (
 	 * package that is exclusively loaded in the editor. This strategy will eliminate
 	 * the need to directly use `wp.blocks.registerBlockVariation`.
 	 */
-	if ( wp?.blocks?.registerBlockVariation ) {
-		wp.blocks.registerBlockVariation( BLOCK_NAME, {
+	if (wp?.blocks?.registerBlockVariation) {
+		wp.blocks.registerBlockVariation(BLOCK_NAME, {
 			...collectionConfigWithoutExtraArgs,
 			attributes: {
 				...DEFAULT_ATTRIBUTES,
@@ -503,6 +494,6 @@ export const __experimentalRegisterProductCollection = (
 						?.displayLayout,
 				},
 			},
-		} );
+		});
 	}
 };

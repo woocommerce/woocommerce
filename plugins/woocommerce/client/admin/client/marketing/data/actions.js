@@ -11,57 +11,57 @@ import { __ } from '@wordpress/i18n';
 import TYPES from './action-types';
 import { API_NAMESPACE } from './constants';
 
-export function receiveInstalledPlugins( plugins ) {
+export function receiveInstalledPlugins(plugins) {
 	return {
 		type: TYPES.SET_INSTALLED_PLUGINS,
 		plugins,
 	};
 }
 
-export function receiveActivatingPlugin( pluginSlug ) {
+export function receiveActivatingPlugin(pluginSlug) {
 	return {
 		type: TYPES.SET_ACTIVATING_PLUGIN,
 		pluginSlug,
 	};
 }
 
-export function removeActivatingPlugin( pluginSlug ) {
+export function removeActivatingPlugin(pluginSlug) {
 	return {
 		type: TYPES.REMOVE_ACTIVATING_PLUGIN,
 		pluginSlug,
 	};
 }
 
-export function receiveRecommendedPlugins( plugins, category ) {
+export function receiveRecommendedPlugins(plugins, category) {
 	return {
 		type: TYPES.SET_RECOMMENDED_PLUGINS,
 		data: { plugins, category },
 	};
 }
 
-export function receiveMiscRecommendations( miscRecommendations ) {
+export function receiveMiscRecommendations(miscRecommendations) {
 	return {
 		type: TYPES.SET_MISC_RECOMMENDATIONS,
 		data: { miscRecommendations },
 	};
 }
 
-export function receiveBlogPosts( posts, category ) {
+export function receiveBlogPosts(posts, category) {
 	return {
 		type: TYPES.SET_BLOG_POSTS,
 		data: { posts, category },
 	};
 }
 
-export function handleFetchError( error, message ) {
-	const { createNotice } = dispatch( 'core/notices' );
-	createNotice( 'error', message );
+export function handleFetchError(error, message) {
+	const { createNotice } = dispatch('core/notices');
+	createNotice('error', message);
 
 	// eslint-disable-next-line no-console
-	console.log( error );
+	console.log(error);
 }
 
-export function setError( category, error ) {
+export function setError(category, error) {
 	return {
 		type: TYPES.SET_ERROR,
 		category,
@@ -69,19 +69,19 @@ export function setError( category, error ) {
 	};
 }
 
-export function* loadInstalledPluginsAfterActivation( activatedPluginSlug ) {
+export function* loadInstalledPluginsAfterActivation(activatedPluginSlug) {
 	try {
-		const response = yield apiFetch( {
-			path: `${ API_NAMESPACE }/overview/installed-plugins`,
-		} );
+		const response = yield apiFetch({
+			path: `${API_NAMESPACE}/overview/installed-plugins`,
+		});
 
-		if ( response ) {
-			yield receiveInstalledPlugins( response );
-			yield removeActivatingPlugin( activatedPluginSlug );
+		if (response) {
+			yield receiveInstalledPlugins(response);
+			yield removeActivatingPlugin(activatedPluginSlug);
 		} else {
 			throw new Error();
 		}
-	} catch ( error ) {
+	} catch (error) {
 		yield handleFetchError(
 			error,
 			__(
@@ -92,20 +92,20 @@ export function* loadInstalledPluginsAfterActivation( activatedPluginSlug ) {
 	}
 }
 
-export function* activateInstalledPlugin( pluginSlug ) {
-	const { createNotice } = dispatch( 'core/notices' );
-	yield receiveActivatingPlugin( pluginSlug );
+export function* activateInstalledPlugin(pluginSlug) {
+	const { createNotice } = dispatch('core/notices');
+	yield receiveActivatingPlugin(pluginSlug);
 
 	try {
-		const response = yield apiFetch( {
+		const response = yield apiFetch({
 			path: API_NAMESPACE + '/overview/activate-plugin',
 			method: 'POST',
 			data: {
 				plugin: pluginSlug,
 			},
-		} );
+		});
 
-		if ( response ) {
+		if (response) {
 			yield createNotice(
 				'success',
 				__(
@@ -114,11 +114,11 @@ export function* activateInstalledPlugin( pluginSlug ) {
 				)
 			);
 			// Deliberately load the new plugin data in a new request.
-			yield loadInstalledPluginsAfterActivation( pluginSlug );
+			yield loadInstalledPluginsAfterActivation(pluginSlug);
 		} else {
 			throw new Error();
 		}
-	} catch ( error ) {
+	} catch (error) {
 		yield handleFetchError(
 			error,
 			__(
@@ -126,7 +126,7 @@ export function* activateInstalledPlugin( pluginSlug ) {
 				'woocommerce'
 			)
 		);
-		yield removeActivatingPlugin( pluginSlug );
+		yield removeActivatingPlugin(pluginSlug);
 	}
 
 	return true;

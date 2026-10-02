@@ -17,11 +17,11 @@ import { CanMakePaymentArgument } from '@woocommerce/types';
  */
 import { checkPaymentMethodsCanPay } from '../utils/check-payment-methods';
 
-jest.mock( '@woocommerce/utils', () => ( {
-	isSiteEditorPage: jest.fn().mockReturnValue( true ),
-} ) );
+jest.mock('@woocommerce/utils', () => ({
+	isSiteEditorPage: jest.fn().mockReturnValue(true),
+}));
 
-const requiredKeyCheck = ( args: CanMakePaymentArgument ) => {
+const requiredKeyCheck = (args: CanMakePaymentArgument) => {
 	const requiredKeys = [
 		'billingData',
 		'billingAddress',
@@ -33,7 +33,7 @@ const requiredKeyCheck = ( args: CanMakePaymentArgument ) => {
 		'selectedShippingMethods',
 		'shippingAddress',
 	];
-	const argKeys = Object.keys( args );
+	const argKeys = Object.keys(args);
 
 	const requiredCartKeys = [
 		'cartCoupons',
@@ -58,7 +58,7 @@ const requiredKeyCheck = ( args: CanMakePaymentArgument ) => {
 		'paymentRequirements',
 		'receiveCart',
 	];
-	const cartKeys = Object.keys( args.cart );
+	const cartKeys = Object.keys(args.cart);
 	const requiredTotalsKeys = [
 		'total_items',
 		'total_items_tax',
@@ -79,22 +79,22 @@ const requiredKeyCheck = ( args: CanMakePaymentArgument ) => {
 		'currency_prefix',
 		'currency_suffix',
 	];
-	const totalsKeys = Object.keys( args.cartTotals );
+	const totalsKeys = Object.keys(args.cartTotals);
 	return (
-		requiredKeys.every( ( key ) => argKeys.includes( key ) ) &&
-		requiredTotalsKeys.every( ( key ) => totalsKeys.includes( key ) ) &&
-		requiredCartKeys.every( ( key ) => cartKeys.includes( key ) )
+		requiredKeys.every((key) => argKeys.includes(key)) &&
+		requiredTotalsKeys.every((key) => totalsKeys.includes(key)) &&
+		requiredCartKeys.every((key) => cartKeys.includes(key))
 	);
 };
 
-const mockedCanMakePayment = jest.fn().mockImplementation( requiredKeyCheck );
+const mockedCanMakePayment = jest.fn().mockImplementation(requiredKeyCheck);
 const mockedExpressCanMakePayment = jest
 	.fn()
-	.mockImplementation( requiredKeyCheck );
+	.mockImplementation(requiredKeyCheck);
 
-const registerMockPaymentMethods = ( savedCards = true ) => {
-	[ 'credit-card' ].forEach( ( name ) => {
-		registerPaymentMethod( {
+const registerMockPaymentMethods = (savedCards = true) => {
+	['credit-card'].forEach((name) => {
+		registerPaymentMethod({
 			name,
 			label: name,
 			content: <div>A payment method</div>,
@@ -104,28 +104,28 @@ const registerMockPaymentMethods = ( savedCards = true ) => {
 			supports: {
 				showSavedCards: savedCards,
 				showSaveOption: true,
-				features: [ 'products' ],
+				features: ['products'],
 			},
 			ariaLabel: name,
-		} );
-	} );
-	[ 'express-payment' ].forEach( ( name ) => {
-		const Content = ( {
+		});
+	});
+	['express-payment'].forEach((name) => {
+		const Content = ({
 			onClose = () => void null,
 			onClick = () => void null,
-		} ) => {
+		}) => {
 			return (
 				<>
-					<button onClick={ onClick }>
-						{ name + ' express payment method' }
+					<button onClick={onClick}>
+						{name + ' express payment method'}
 					</button>
-					<button onClick={ onClose }>
-						{ name + ' express payment method close' }
+					<button onClick={onClose}>
+						{name + ' express payment method close'}
 					</button>
 				</>
 			);
 		};
-		registerExpressPaymentMethod( {
+		registerExpressPaymentMethod({
 			name,
 			title: 'Express Payment Method',
 			description: 'A test express payment method',
@@ -135,39 +135,39 @@ const registerMockPaymentMethods = ( savedCards = true ) => {
 			canMakePayment: mockedExpressCanMakePayment,
 			paymentMethodId: name,
 			supports: {
-				features: [ 'products' ],
+				features: ['products'],
 			},
-		} );
-	} );
+		});
+	});
 	wpDataFunctions
-		.dispatch( paymentStore )
+		.dispatch(paymentStore)
 		.__internalUpdateAvailablePaymentMethods();
-	wpDataFunctions.dispatch( cartStore ).receiveCart( {
+	wpDataFunctions.dispatch(cartStore).receiveCart({
 		...previewCart,
-		payment_methods: [ 'cheque', 'bacs', 'credit-card' ],
-	} );
+		payment_methods: ['cheque', 'bacs', 'credit-card'],
+	});
 };
 
 const resetMockPaymentMethods = () => {
-	[ 'cheque', 'bacs', 'credit-card' ].forEach( ( name ) => {
-		__experimentalDeRegisterPaymentMethod( name );
-	} );
-	[ 'express-payment' ].forEach( ( name ) => {
-		__experimentalDeRegisterExpressPaymentMethod( name );
-	} );
+	['cheque', 'bacs', 'credit-card'].forEach((name) => {
+		__experimentalDeRegisterPaymentMethod(name);
+	});
+	['express-payment'].forEach((name) => {
+		__experimentalDeRegisterExpressPaymentMethod(name);
+	});
 };
 
-describe( 'checkPaymentMethods', () => {
-	beforeEach( registerMockPaymentMethods );
-	afterEach( resetMockPaymentMethods );
+describe('checkPaymentMethods', () => {
+	beforeEach(registerMockPaymentMethods);
+	afterEach(resetMockPaymentMethods);
 
-	it( `Sends correct arguments to regular payment methods' canMakePayment functions`, async () => {
+	it(`Sends correct arguments to regular payment methods' canMakePayment functions`, async () => {
 		await checkPaymentMethodsCanPay();
-		expect( mockedCanMakePayment ).toHaveReturnedWith( true );
-	} );
+		expect(mockedCanMakePayment).toHaveReturnedWith(true);
+	});
 
-	it( `Sends correct arguments to express payment methods' canMakePayment functions`, async () => {
-		await checkPaymentMethodsCanPay( true );
-		expect( mockedExpressCanMakePayment ).toHaveReturnedWith( true );
-	} );
-} );
+	it(`Sends correct arguments to express payment methods' canMakePayment functions`, async () => {
+		await checkPaymentMethodsCanPay(true);
+		expect(mockedExpressCanMakePayment).toHaveReturnedWith(true);
+	});
+});

@@ -16,22 +16,22 @@ import { CurrencyContext } from '@woocommerce/currency';
 import ReportTable from '../../components/report-table';
 import { getAdminSetting } from '~/utils/admin-settings';
 
-const capitalizeFirstLetter = ( expr ) =>
-	expr.charAt( 0 ).toUpperCase() + expr.slice( 1 );
+const capitalizeFirstLetter = (expr) =>
+	expr.charAt(0).toUpperCase() + expr.slice(1);
 
 class OrdersReportTable extends Component {
 	constructor() {
 		super();
 
-		this.getHeadersContent = this.getHeadersContent.bind( this );
-		this.getRowsContent = this.getRowsContent.bind( this );
-		this.getSummary = this.getSummary.bind( this );
+		this.getHeadersContent = this.getHeadersContent.bind(this);
+		this.getRowsContent = this.getRowsContent.bind(this);
+		this.getSummary = this.getSummary.bind(this);
 	}
 
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Date', 'woocommerce' ),
+				label: __('Date', 'woocommerce'),
 				key: 'date',
 				required: true,
 				defaultSort: true,
@@ -39,61 +39,61 @@ class OrdersReportTable extends Component {
 				isSortable: true,
 			},
 			{
-				label: __( 'Order #', 'woocommerce' ),
-				screenReaderLabel: __( 'Order Number', 'woocommerce' ),
+				label: __('Order #', 'woocommerce'),
+				screenReaderLabel: __('Order Number', 'woocommerce'),
 				key: 'order_number',
 				required: true,
 			},
 			{
-				label: __( 'Status', 'woocommerce' ),
+				label: __('Status', 'woocommerce'),
 				key: 'status',
 				required: false,
 				isSortable: false,
 			},
 			{
-				label: __( 'Customer', 'woocommerce' ),
+				label: __('Customer', 'woocommerce'),
 				key: 'customer_id',
 				required: false,
 				isSortable: false,
 			},
 			{
-				label: __( 'Customer type', 'woocommerce' ),
+				label: __('Customer type', 'woocommerce'),
 				key: 'customer_type',
 				required: false,
 				isSortable: false,
 			},
 			{
-				label: __( 'Product(s)', 'woocommerce' ),
-				screenReaderLabel: __( 'Products', 'woocommerce' ),
+				label: __('Product(s)', 'woocommerce'),
+				screenReaderLabel: __('Products', 'woocommerce'),
 				key: 'products',
 				required: false,
 				isSortable: false,
 			},
 			{
-				label: __( 'Items sold', 'woocommerce' ),
+				label: __('Items sold', 'woocommerce'),
 				key: 'num_items_sold',
 				required: false,
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Coupon(s)', 'woocommerce' ),
-				screenReaderLabel: __( 'Coupons', 'woocommerce' ),
+				label: __('Coupon(s)', 'woocommerce'),
+				screenReaderLabel: __('Coupons', 'woocommerce'),
 				key: 'coupons',
 				required: false,
 				isSortable: false,
 			},
 			{
-				label: __( 'Net sales', 'woocommerce' ),
-				screenReaderLabel: __( 'Net sales', 'woocommerce' ),
+				label: __('Net sales', 'woocommerce'),
+				screenReaderLabel: __('Net sales', 'woocommerce'),
 				key: 'net_total',
 				required: true,
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Attribution', 'woocommerce' ),
-				screenReaderLabel: __( 'Attribution', 'woocommerce' ),
+				label: __('Attribution', 'woocommerce'),
+				screenReaderLabel: __('Attribution', 'woocommerce'),
 				key: 'attribution',
 				required: false,
 				isSortable: false,
@@ -101,26 +101,26 @@ class OrdersReportTable extends Component {
 		];
 	}
 
-	getCustomerName( customer ) {
+	getCustomerName(customer) {
 		const { first_name: firstName, last_name: lastName } = customer || {};
 
-		if ( ! firstName && ! lastName ) {
+		if (!firstName && !lastName) {
 			return '';
 		}
 
-		return [ firstName, lastName ].join( ' ' );
+		return [firstName, lastName].join(' ');
 	}
 
-	getRowsContent( tableData ) {
+	getRowsContent(tableData) {
 		const { query } = this.props;
-		const persistedQuery = getPersistedQuery( query );
+		const persistedQuery = getPersistedQuery(query);
 		const dateFormat = getAdminSetting(
 			'dateFormat',
 			defaultTableDateFormat
 		);
 		const { render: renderCurrency, getCurrencyConfig } = this.context;
 
-		return map( tableData, ( row ) => {
+		return map(tableData, (row) => {
 			const {
 				currency,
 				date,
@@ -136,29 +136,27 @@ class OrdersReportTable extends Component {
 			const { coupons, customer, products } = extendedInfo;
 
 			const formattedProducts = products
-				.sort( ( itemA, itemB ) => itemB.quantity - itemA.quantity )
-				.map( ( item ) => ( {
+				.sort((itemA, itemB) => itemB.quantity - itemA.quantity)
+				.map((item) => ({
 					label: item.name,
 					quantity: item.quantity,
-					href: getNewPath( persistedQuery, '/analytics/products', {
+					href: getNewPath(persistedQuery, '/analytics/products', {
 						filter: 'single_product',
 						products: item.id,
-					} ),
-				} ) );
+					}),
+				}));
 
-			const formattedCoupons = coupons.map( ( coupon ) => ( {
+			const formattedCoupons = coupons.map((coupon) => ({
 				label: coupon.code,
-				href: getNewPath( persistedQuery, '/analytics/coupons', {
+				href: getNewPath(persistedQuery, '/analytics/coupons', {
 					filter: 'single_coupon',
 					coupons: coupon.id,
-				} ),
-			} ) );
+				}),
+			}));
 
 			return [
 				{
-					display: (
-						<Date date={ date } visibleFormat={ dateFormat } />
-					),
+					display: <Date date={date} visibleFormat={dateFormat} />,
 					value: date,
 				},
 				{
@@ -166,13 +164,13 @@ class OrdersReportTable extends Component {
 						<Link
 							href={
 								'post.php?post=' +
-								( parentId ? parentId : orderId ) +
+								(parentId ? parentId : orderId) +
 								'&action=edit' +
-								( parentId ? '#order_refunds' : '' )
+								(parentId ? '#order_refunds' : '')
 							}
 							type="wp-admin"
 						>
-							{ orderNumber }
+							{orderNumber}
 						</Link>
 					),
 					value: orderNumber,
@@ -181,49 +179,47 @@ class OrdersReportTable extends Component {
 					display: (
 						<OrderStatus
 							className="woocommerce-orders-table__status"
-							order={ { status } }
-							labelPositionToLeft={ true }
-							orderStatusMap={ getAdminSetting(
+							order={{ status }}
+							labelPositionToLeft={true}
+							orderStatusMap={getAdminSetting(
 								'orderStatuses',
 								{}
-							) }
+							)}
 						/>
 					),
 					value: status,
 				},
 				{
-					display: this.getCustomerName( customer ),
-					value: this.getCustomerName( customer ),
+					display: this.getCustomerName(customer),
+					value: this.getCustomerName(customer),
 				},
 				{
-					display: capitalizeFirstLetter( customerType ),
+					display: capitalizeFirstLetter(customerType),
 					value: customerType,
 				},
 				{
 					display: this.renderList(
-						formattedProducts.length
-							? [ formattedProducts[ 0 ] ]
-							: [],
-						formattedProducts.map( ( product ) => ( {
+						formattedProducts.length ? [formattedProducts[0]] : [],
+						formattedProducts.map((product) => ({
 							label: sprintf(
 								/* translators: 1: quantity, 2: product name */
-								__( '%1$s× %2$s', 'woocommerce' ),
+								__('%1$s× %2$s', 'woocommerce'),
 								product.quantity,
 								product.label
 							),
 							href: product.href,
-						} ) )
+						}))
 					),
 					value: formattedProducts
-						.map( ( { quantity, label } ) =>
+						.map(({ quantity, label }) =>
 							sprintf(
 								/* translators: %1$s: quantity, %2$s: product name */
-								__( '%1$s× %2$s', 'woocommerce' ),
+								__('%1$s× %2$s', 'woocommerce'),
 								quantity,
 								label
 							)
 						)
-						.join( ', ' ),
+						.join(', '),
 				},
 				{
 					display: formatValue(
@@ -235,17 +231,15 @@ class OrdersReportTable extends Component {
 				},
 				{
 					display: this.renderList(
-						formattedCoupons.length
-							? [ formattedCoupons[ 0 ] ]
-							: [],
+						formattedCoupons.length ? [formattedCoupons[0]] : [],
 						formattedCoupons
 					),
 					value: formattedCoupons
-						.map( ( coupon ) => coupon.label )
-						.join( ', ' ),
+						.map((coupon) => coupon.label)
+						.join(', '),
 				},
 				{
-					display: renderCurrency( netTotal, currency ),
+					display: renderCurrency(netTotal, currency),
 					value: netTotal,
 				},
 				{
@@ -253,10 +247,10 @@ class OrdersReportTable extends Component {
 					value: extendedInfo.attribution.origin,
 				},
 			];
-		} );
+		});
 	}
 
-	getSummary( totals ) {
+	getSummary(totals) {
 		const {
 			orders_count: ordersCount = 0,
 			total_customers: totalCustomers = 0,
@@ -269,8 +263,8 @@ class OrdersReportTable extends Component {
 		const currency = getCurrencyConfig();
 		return [
 			{
-				label: _n( 'Order', 'Orders', ordersCount, 'woocommerce' ),
-				value: formatValue( currency, 'number', ordersCount ),
+				label: _n('Order', 'Orders', ordersCount, 'woocommerce'),
+				value: formatValue(currency, 'number', ordersCount),
 			},
 			{
 				label: _n(
@@ -279,11 +273,11 @@ class OrdersReportTable extends Component {
 					totalCustomers,
 					'woocommerce'
 				),
-				value: formatValue( currency, 'number', totalCustomers ),
+				value: formatValue(currency, 'number', totalCustomers),
 			},
 			{
-				label: _n( 'Product', 'Products', products, 'woocommerce' ),
-				value: formatValue( currency, 'number', products ),
+				label: _n('Product', 'Products', products, 'woocommerce'),
+				value: formatValue(currency, 'number', products),
 			},
 			{
 				label: _n(
@@ -292,34 +286,34 @@ class OrdersReportTable extends Component {
 					numItemsSold,
 					'woocommerce'
 				),
-				value: formatValue( currency, 'number', numItemsSold ),
+				value: formatValue(currency, 'number', numItemsSold),
 			},
 			{
-				label: _n( 'Coupon', 'Coupons', couponsCount, 'woocommerce' ),
-				value: formatValue( currency, 'number', couponsCount ),
+				label: _n('Coupon', 'Coupons', couponsCount, 'woocommerce'),
+				value: formatValue(currency, 'number', couponsCount),
 			},
 			{
-				label: __( 'net sales', 'woocommerce' ),
-				value: formatAmount( netRevenue ),
+				label: __('net sales', 'woocommerce'),
+				value: formatAmount(netRevenue),
 			},
 		];
 	}
 
-	renderLinks( items = [] ) {
-		return items.map( ( item, i ) => (
-			<Link href={ item.href } key={ i } type="wc-admin">
-				{ item.label }
+	renderLinks(items = []) {
+		return items.map((item, i) => (
+			<Link href={item.href} key={i} type="wc-admin">
+				{item.label}
 			</Link>
-		) );
+		));
 	}
 
-	renderList( visibleItems, popoverItems ) {
+	renderList(visibleItems, popoverItems) {
 		return (
 			<Fragment>
-				{ this.renderLinks( visibleItems ) }
-				{ popoverItems.length > 1 && (
-					<ViewMoreList items={ this.renderLinks( popoverItems ) } />
-				) }
+				{this.renderLinks(visibleItems)}
+				{popoverItems.length > 1 && (
+					<ViewMoreList items={this.renderLinks(popoverItems)} />
+				)}
 			</Fragment>
 		);
 	}
@@ -330,25 +324,25 @@ class OrdersReportTable extends Component {
 		return (
 			<ReportTable
 				endpoint="orders"
-				getHeadersContent={ this.getHeadersContent }
-				getRowsContent={ this.getRowsContent }
-				getSummary={ this.getSummary }
-				summaryFields={ [
+				getHeadersContent={this.getHeadersContent}
+				getRowsContent={this.getRowsContent}
+				getSummary={this.getSummary}
+				summaryFields={[
 					'orders_count',
 					'total_customers',
 					'products',
 					'num_items_sold',
 					'coupons_count',
 					'net_revenue',
-				] }
-				query={ query }
-				tableQuery={ {
+				]}
+				query={query}
+				tableQuery={{
 					extended_info: true,
-				} }
-				title={ __( 'Orders', 'woocommerce' ) }
+				}}
+				title={__('Orders', 'woocommerce')}
 				columnPrefsKey="orders_report_columns"
-				filters={ filters }
-				advancedFilters={ advancedFilters }
+				filters={filters}
+				advancedFilters={advancedFilters}
 			/>
 		);
 	}

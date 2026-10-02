@@ -6,30 +6,30 @@ import { Button, SelectControl } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
 
 export const AddNote = () => {
-	const [ isAdding, setIsAdding ] = useState( false );
-	const [ hasAdded, setHasAdded ] = useState( false );
-	const [ errorMessage, setErrorMessage ] = useState( false );
-	const [ noteType, setNoteType ] = useState( 'info' );
+	const [isAdding, setIsAdding] = useState(false);
+	const [hasAdded, setHasAdded] = useState(false);
+	const [errorMessage, setErrorMessage] = useState(false);
+	const [noteType, setNoteType] = useState('info');
 
 	async function triggerAddNote() {
-		setIsAdding( true );
-		setHasAdded( false );
-		setErrorMessage( false );
+		setIsAdding(true);
+		setHasAdded(false);
+		setErrorMessage(false);
 
-		const name = prompt( 'Enter the note name' );
-		if ( ! name ) {
-			setIsAdding( false );
+		const name = prompt('Enter the note name');
+		if (!name) {
+			setIsAdding(false);
 			return;
 		}
 
-		const title = prompt( 'Enter the note title' );
-		if ( ! title ) {
-			setIsAdding( false );
+		const title = prompt('Enter the note title');
+		if (!title) {
+			setIsAdding(false);
 			return;
 		}
 
 		try {
-			await apiFetch( {
+			await apiFetch({
 				path: '/wc-admin-test-helper/admin-notes/add-note/v1',
 				method: 'POST',
 				data: {
@@ -37,29 +37,29 @@ export const AddNote = () => {
 					type: noteType,
 					title,
 				},
-			} );
-			setHasAdded( true );
-		} catch ( ex ) {
-			setErrorMessage( ex.message );
+			});
+			setHasAdded(true);
+		} catch (ex) {
+			setErrorMessage(ex.message);
 		}
 
-		setIsAdding( false );
+		setIsAdding(false);
 	}
 
-	function onTypeChange( val ) {
-		setNoteType( val );
+	function onTypeChange(val) {
+		setNoteType(val);
 	}
 
 	function getAddNoteDescription() {
-		switch ( noteType ) {
+		switch (noteType) {
 			case 'email':
 				return (
 					<>
 						This will add a new <strong>email</strong> note. Enable
-						email insights{ ' ' }
+						email insights{' '}
 						<a href="/wp-admin/admin.php?page=wc-settings&tab=email">
 							here
-						</a>{ ' ' }
+						</a>{' '}
 						and run the cron to send the note by email.
 					</>
 				);
@@ -79,37 +79,37 @@ export const AddNote = () => {
 				<strong>Add a note</strong>
 			</p>
 			<div>
-				{ getAddNoteDescription() }
+				{getAddNoteDescription()}
 				<br />
 				<div className="woocommerce-admin-test-helper__add-notes">
 					<Button
-						onClick={ triggerAddNote }
-						disabled={ isAdding }
+						onClick={triggerAddNote}
+						disabled={isAdding}
 						isPrimary
 					>
 						Add admin note
 					</Button>
 					<SelectControl
 						label="Type"
-						onChange={ onTypeChange }
+						onChange={onTypeChange}
 						labelPosition="side"
-						options={ [
+						options={[
 							{ label: 'Info', value: 'info' },
 							{ label: 'Update', value: 'update' },
 							{ label: 'Email', value: 'email' },
-						] }
-						value={ noteType }
+						]}
+						value={noteType}
 					/>
 				</div>
 				<br />
 				<span className="woocommerce-admin-test-helper__action-status">
-					{ isAdding && 'Adding, please wait' }
-					{ hasAdded && 'Note added' }
-					{ errorMessage && (
+					{isAdding && 'Adding, please wait'}
+					{hasAdded && 'Note added'}
+					{errorMessage && (
 						<>
-							<strong>Error:</strong> { errorMessage }
+							<strong>Error:</strong> {errorMessage}
 						</>
-					) }
+					)}
 				</span>
 			</div>
 		</>

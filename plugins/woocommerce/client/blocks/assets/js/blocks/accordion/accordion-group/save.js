@@ -4,7 +4,7 @@
 import clsx from 'clsx';
 import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
 
-export default function save( { attributes } ) {
+export default function save({ attributes }) {
 	const { iconPosition } = attributes;
 	const blockProps = useBlockProps.save();
 	const className = clsx(
@@ -14,7 +14,5 @@ export default function save( { attributes } ) {
 		blockProps.className
 	);
 
-	return (
-		<div { ...useInnerBlocksProps.save( { ...blockProps, className } ) } />
-	);
+	return <div {...useInnerBlocksProps.save({ ...blockProps, className })} />;
 }

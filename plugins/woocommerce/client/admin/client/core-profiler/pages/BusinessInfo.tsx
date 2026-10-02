@@ -39,47 +39,47 @@ export const POSSIBLY_DEFAULT_STORE_NAMES = [
 	'Site Title',
 	'',
 ];
-export type IndustryChoice = ( typeof industryChoices )[ number ][ 'key' ];
+export type IndustryChoice = (typeof industryChoices)[number]['key'];
 export const industryChoices = [
 	{
-		label: __( 'Clothing and accessories', 'woocommerce' ),
+		label: __('Clothing and accessories', 'woocommerce'),
 		key: 'clothing_and_accessories' as const,
 	},
 	{
-		label: __( 'Food and drink', 'woocommerce' ),
+		label: __('Food and drink', 'woocommerce'),
 		key: 'food_and_drink' as const,
 	},
 	{
-		label: __( 'Electronics and computers', 'woocommerce' ),
+		label: __('Electronics and computers', 'woocommerce'),
 		key: 'electronics_and_computers' as const,
 	},
 	{
-		label: __( 'Health and beauty', 'woocommerce' ),
+		label: __('Health and beauty', 'woocommerce'),
 		key: 'health_and_beauty' as const,
 	},
 	{
-		label: __( 'Education and learning', 'woocommerce' ),
+		label: __('Education and learning', 'woocommerce'),
 		key: 'education_and_learning' as const,
 	},
 	{
-		label: __( 'Home, furniture and garden', 'woocommerce' ),
+		label: __('Home, furniture and garden', 'woocommerce'),
 		key: 'home_furniture_and_garden' as const,
 	},
 	{
-		label: __( 'Arts and crafts', 'woocommerce' ),
+		label: __('Arts and crafts', 'woocommerce'),
 		key: 'arts_and_crafts' as const,
 	},
 	{
-		label: __( 'Sports and recreation', 'woocommerce' ),
+		label: __('Sports and recreation', 'woocommerce'),
 		key: 'sports_and_recreation' as const,
 	},
 	{
-		label: __( 'Other', 'woocommerce' ),
+		label: __('Other', 'woocommerce'),
 		key: 'other' as const,
 	},
 ];
 
-export type IndustryChoiceOption = ( typeof industryChoices )[ number ];
+export type IndustryChoiceOption = (typeof industryChoices)[number];
 
 export const selectIndustryMapping = {
 	im_just_starting_my_business: __(
@@ -101,24 +101,24 @@ export type BusinessInfoContextProps = Pick<
 	'geolocatedLocation' | 'userProfile' | 'businessInfo' | 'countries'
 > & {
 	onboardingProfile: Pick<
-		CoreProfilerStateMachineContext[ 'onboardingProfile' ],
+		CoreProfilerStateMachineContext['onboardingProfile'],
 		| 'industry'
 		| 'business_choice'
 		| 'is_store_country_set'
 		| 'is_agree_marketing'
 		| 'store_email'
 	>;
-} & Partial< Pick< CoreProfilerStateMachineContext, 'currentUserEmail' > >;
+} & Partial<Pick<CoreProfilerStateMachineContext, 'currentUserEmail'>>;
 
-export const BusinessInfo = ( {
+export const BusinessInfo = ({
 	context,
 	navigationProgress,
 	sendEvent,
 }: {
 	context: BusinessInfoContextProps;
 	navigationProgress: number;
-	sendEvent: ( event: BusinessInfoEvent ) => void;
-} ) => {
+	sendEvent: (event: BusinessInfoEvent) => void;
+}) => {
 	const {
 		geolocatedLocation,
 		userProfile: { businessChoice },
@@ -134,38 +134,33 @@ export const BusinessInfo = ( {
 		currentUserEmail,
 	} = context;
 
-	const [ storeName, setStoreName ] = useState(
-		businessInfo.storeName || ''
-	);
+	const [storeName, setStoreName] = useState(businessInfo.storeName || '');
 
-	const [ storeCountry, setStoreCountry ] = useState< CountryStateOption >( {
+	const [storeCountry, setStoreCountry] = useState<CountryStateOption>({
 		key: '',
 		label: '',
-	} );
+	});
 
-	useEffect( () => {
-		if ( isStoreCountrySet ) {
+	useEffect(() => {
+		if (isStoreCountrySet) {
 			const previouslyStoredCountryOption = countries.find(
-				( country ) => country.key === businessInfo.location
+				(country) => country.key === businessInfo.location
 			);
 			setStoreCountry(
 				previouslyStoredCountryOption || { key: '', label: '' }
 			);
 		}
-	}, [ businessInfo.location, countries, isStoreCountrySet ] );
+	}, [businessInfo.location, countries, isStoreCountrySet]);
 
-	const [ industry, setIndustry ] = useState<
-		IndustryChoiceOption | undefined
-	>(
+	const [industry, setIndustry] = useState<IndustryChoiceOption | undefined>(
 		industryFromOnboardingProfile
 			? industryChoices.find(
-					( choice ) =>
-						choice.key === industryFromOnboardingProfile[ 0 ]
-			  )
+					(choice) => choice.key === industryFromOnboardingProfile[0]
+				)
 			: undefined
 	);
 
-	const selectCountryLabel = __( 'Select country/region', 'woocommerce' );
+	const selectCountryLabel = __('Select country/region', 'woocommerce');
 	const selectIndustryQuestionLabel =
 		selectIndustryMapping[
 			businessChoice ||
@@ -173,49 +168,43 @@ export const BusinessInfo = ( {
 				'im_just_starting_my_business'
 		];
 
-	const [ hasSubmitted, setHasSubmitted ] = useState( false );
+	const [hasSubmitted, setHasSubmitted] = useState(false);
 
-	const [ isEmailInvalid, setIsEmailInvalid ] = useState( false );
+	const [isEmailInvalid, setIsEmailInvalid] = useState(false);
 
-	const [ storeEmailAddress, setEmailAddress ] = useState(
+	const [storeEmailAddress, setEmailAddress] = useState(
 		storeEmailAddressFromOnboardingProfile || currentUserEmail || ''
 	);
 
-	const [ isOptInMarketing, setIsOptInMarketing ] = useState< boolean >(
+	const [isOptInMarketing, setIsOptInMarketing] = useState<boolean>(
 		isOptInMarketingFromOnboardingProfile || false
 	);
 
-	const [ doValidate, setDoValidate ] = useState( false );
-	const [ geolocationOverruled, setGeolocationOverruled ] = useState( false );
+	const [doValidate, setDoValidate] = useState(false);
+	const [geolocationOverruled, setGeolocationOverruled] = useState(false);
 
-	useEffect( () => {
-		if ( doValidate ) {
-			const parseEmail = z
-				.string()
-				.email()
-				.safeParse( storeEmailAddress );
-			setIsEmailInvalid( isOptInMarketing && ! parseEmail.success );
-			setDoValidate( false );
+	useEffect(() => {
+		if (doValidate) {
+			const parseEmail = z.string().email().safeParse(storeEmailAddress);
+			setIsEmailInvalid(isOptInMarketing && !parseEmail.success);
+			setDoValidate(false);
 		}
-	}, [ isOptInMarketing, doValidate, storeEmailAddress ] );
+	}, [isOptInMarketing, doValidate, storeEmailAddress]);
 
 	return (
 		<div
 			className="woocommerce-profiler-business-information"
 			data-testid="core-profiler-business-information"
 		>
-			<Navigation percentage={ navigationProgress } />
+			<Navigation percentage={navigationProgress} />
 			<div className="woocommerce-profiler-page__content woocommerce-profiler-business-information__content">
 				<Heading
 					className="woocommerce-profiler__stepper-heading"
-					title={ __(
-						'Tell us a bit about your store',
-						'woocommerce'
-					) }
-					subTitle={ __(
+					title={__('Tell us a bit about your store', 'woocommerce')}
+					subTitle={__(
 						'We’ll use this information to help you set up payments, shipping, and taxes, as well as recommending the best theme for your store.',
 						'woocommerce'
-					) }
+					)}
 				/>
 
 				<form
@@ -225,80 +214,67 @@ export const BusinessInfo = ( {
 					<TextControl
 						__nextHasNoMarginBottom
 						className="woocommerce-profiler-business-info-store-name"
-						onChange={ ( value ) => {
-							setStoreName( value );
-						} }
-						value={ decodeEntities( storeName ) }
+						onChange={(value) => {
+							setStoreName(value);
+						}}
+						value={decodeEntities(storeName)}
 						label={
-							<>
-								{ __(
-									'Give your store a name',
-									'woocommerce'
-								) }
-							</>
+							<>{__('Give your store a name', 'woocommerce')}</>
 						}
-						placeholder={ __(
-							'Ex. My awesome store',
-							'woocommerce'
-						) }
+						placeholder={__('Ex. My awesome store', 'woocommerce')}
 					/>
 					<p className="woocommerce-profiler-question-subtext">
-						{ __(
+						{__(
 							'Don’t worry — you can always change it later!',
 							'woocommerce'
-						) }
+						)}
 					</p>
 					<p className="woocommerce-profiler-question-label">
-						{ selectIndustryQuestionLabel }
+						{selectIndustryQuestionLabel}
 					</p>
 					<SelectControl
 						className="woocommerce-profiler-select-control__industry"
-						instanceId={ 1 }
-						placeholder={ __(
-							'Select an industry',
-							'woocommerce'
-						) }
-						label={ __( 'Select an industry', 'woocommerce' ) }
-						options={ industryChoices }
-						excludeSelectedOptions={ false }
-						help={ <Icon icon={ chevronDown } /> }
-						onChange={ ( results ) => {
-							if ( Array.isArray( results ) && results.length ) {
-								setIndustry(
-									results[ 0 ] as IndustryChoiceOption
-								);
+						instanceId={1}
+						placeholder={__('Select an industry', 'woocommerce')}
+						label={__('Select an industry', 'woocommerce')}
+						options={industryChoices}
+						excludeSelectedOptions={false}
+						help={<Icon icon={chevronDown} />}
+						onChange={(results) => {
+							if (Array.isArray(results) && results.length) {
+								setIndustry(results[0] as IndustryChoiceOption);
 							}
-						} }
-						selected={ industry ? [ industry ] : [] }
+						}}
+						selected={industry ? [industry] : []}
 						showAllOnFocus
 						isSearchable
 					/>
 					<p className="woocommerce-profiler-question-label">
-						{ __( 'Where is your store located?', 'woocommerce' ) }
+						{__('Where is your store located?', 'woocommerce')}
 						<span className="woocommerce-profiler-question-required">
-							{ '*' }
+							{'*'}
 						</span>
 					</p>
 					<GeolocationCountrySelect
-						label={ selectCountryLabel }
-						placeholder={ selectCountryLabel }
-						countries={ countries }
-						initialValue={ storeCountry }
-						onChange={ ( countryStateOption ) => {
-							setStoreCountry( countryStateOption );
-						} }
-						geolocatedLocation={ geolocatedLocation }
-						onGeolocationOverruledChange={ ( overruled ) => {
-							setGeolocationOverruled( overruled );
-						} }
+						label={selectCountryLabel}
+						placeholder={selectCountryLabel}
+						countries={countries}
+						initialValue={storeCountry}
+						onChange={(countryStateOption) => {
+							setStoreCountry(countryStateOption);
+						}}
+						geolocatedLocation={geolocatedLocation}
+						onGeolocationOverruledChange={(overruled) => {
+							setGeolocationOverruled(overruled);
+						}}
 					/>
-					{ countries.length === 0 && (
+					{countries.length === 0 && (
 						<Notice
 							className="woocommerce-profiler-select-control__country-error"
-							isDismissible={ false }
+							isDismissible={false}
 							status="error"
 						>
-							{ createInterpolateElement(
+							{createInterpolateElement(
 								__(
 									'Oops! We encountered a problem while fetching the list of countries to choose from. <retryButton/> or <skipButton/>',
 									'woocommerce'
@@ -306,105 +282,105 @@ export const BusinessInfo = ( {
 								{
 									retryButton: (
 										<Button
-											onClick={ () => {
-												sendEvent( {
+											onClick={() => {
+												sendEvent({
 													type: 'RETRY_PRE_BUSINESS_INFO',
-												} );
-											} }
+												});
+											}}
 											variant="tertiary"
 										>
-											{ __(
+											{__(
 												'Please try again',
 												'woocommerce'
-											) }
+											)}
 										</Button>
 									),
 									skipButton: (
 										<Button
-											onClick={ () => {
-												sendEvent( {
+											onClick={() => {
+												sendEvent({
 													type: 'SKIP_BUSINESS_INFO_STEP',
-												} );
-											} }
+												});
+											}}
 											variant="tertiary"
 										>
-											{ __(
+											{__(
 												'Skip this step',
 												'woocommerce'
-											) }
+											)}
 										</Button>
 									),
 								}
-							) }
+							)}
 						</Notice>
-					) }
+					)}
 					{
 						<>
 							<TextControl
 								__nextHasNoMarginBottom
-								className={ clsx(
+								className={clsx(
 									'woocommerce-profiler-business-info-email-address',
 									{ 'is-error': isEmailInvalid }
-								) }
-								onChange={ ( value ) => {
-									if ( isEmailInvalid ) {
-										setDoValidate( true ); // trigger validation as we want to feedback to the user as soon as it becomes valid
+								)}
+								onChange={(value) => {
+									if (isEmailInvalid) {
+										setDoValidate(true); // trigger validation as we want to feedback to the user as soon as it becomes valid
 									}
-									setEmailAddress( value );
-								} }
-								onBlur={ () => {
-									setDoValidate( true );
-								} }
-								value={ decodeEntities( storeEmailAddress ) }
+									setEmailAddress(value);
+								}}
+								onBlur={() => {
+									setDoValidate(true);
+								}}
+								value={decodeEntities(storeEmailAddress)}
 								label={
 									<>
-										{ __(
+										{__(
 											'Your email address',
 											'woocommerce'
-										) }
-										{ isOptInMarketing && (
+										)}
+										{isOptInMarketing && (
 											<span className="woocommerce-profiler-question-required">
-												{ '*' }
+												{'*'}
 											</span>
-										) }
+										)}
 									</>
 								}
-								placeholder={ __(
+								placeholder={__(
 									'wordpress@example.com',
 									'woocommerce'
-								) }
+								)}
 							/>
-							{ isEmailInvalid && (
+							{isEmailInvalid && (
 								<FormInputValidation
 									isError
-									text={ __(
+									text={__(
 										'This email is not valid.',
 										'woocommerce'
-									) }
+									)}
 								/>
-							) }
+							)}
 							<CheckboxControl
 								__nextHasNoMarginBottom
 								className="core-profiler__checkbox"
 								// @ts-expect-error - Type definition is not correct. Label can be a string or JSX.Element.
 								label={
 									<TrackedLink
-										message={ __(
+										message={__(
 											// translators: {{Link}} is a placeholder for a html element.
 											'Get tips, discounts, and recommendations from Woo. You can opt out at any time. We track email opens and clicks to improve our emails. See our {{Link}}Privacy Policy{{/Link}} for details.',
 											'woocommerce'
-										) }
+										)}
 										eventName="coreprofiler_business_info_privacy_policy_click"
 										targetUrl="https://automattic.com/privacy/"
 										linkType="external"
 										target="_blank"
 									/>
 								}
-								checked={ isOptInMarketing }
-								onChange={ ( isChecked ) => {
-									setIsOptInMarketing( isChecked );
-									setDoValidate( true );
-								} }
+								checked={isOptInMarketing}
+								onChange={(isChecked) => {
+									setIsOptInMarketing(isChecked);
+									setDoValidate(true);
+								}}
 							/>
 						</>
 					}
@@ -413,9 +389,9 @@ export const BusinessInfo = ( {
 					<Button
 						className="woocommerce-profiler-button"
 						variant="primary"
-						disabled={ ! storeCountry.key || isEmailInvalid }
-						onClick={ () => {
-							sendEvent( {
+						disabled={!storeCountry.key || isEmailInvalid}
+						onClick={() => {
+							sendEvent({
 								type: 'BUSINESS_INFO_COMPLETED',
 								payload: {
 									storeName,
@@ -426,15 +402,15 @@ export const BusinessInfo = ( {
 									isOptInMarketing,
 									storeEmailAddress,
 								},
-							} );
-							setHasSubmitted( true );
-						} }
+							});
+							setHasSubmitted(true);
+						}}
 					>
-						{ hasSubmitted ? (
+						{hasSubmitted ? (
 							<Spinner />
 						) : (
-							__( 'Continue', 'woocommerce' )
-						) }
+							__('Continue', 'woocommerce')
+						)}
 					</Button>
 				</div>
 			</div>

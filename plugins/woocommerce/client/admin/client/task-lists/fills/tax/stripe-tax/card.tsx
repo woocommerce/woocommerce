@@ -25,63 +25,60 @@ const redirectToStripeTaxSettings = () => {
 	);
 };
 
-export const Card = ( {
+export const Card = ({
 	task: {
 		additionalData: { stripeTaxActivated } = {
 			stripeTaxActivated: false,
 		},
 	},
-}: TaxChildProps ) => {
-	const { createSuccessNotice } = useDispatch( 'core/notices' );
+}: TaxChildProps) => {
+	const { createSuccessNotice } = useDispatch('core/notices');
 
 	return (
 		<PartnerCard
-			name={ __( 'Stripe Tax', 'woocommerce' ) }
-			logo={ StripeTaxLogo }
-			description={ __( 'Powerful global tax tool', 'woocommerce' ) }
-			benefits={ [
-				__( 'Real-time sales tax calculation', 'woocommerce' ),
-				__( 'Multi-economic nexus compliance', 'woocommerce' ),
-				__( 'Detailed tax transaction reports', 'woocommerce' ),
-				__( 'Coverage in over 55 countries', 'woocommerce' ),
-			] }
-			terms={ __(
-				'Free to install, then pay as you go.',
-				'woocommerce'
-			) }
-			onClick={ () => {} }
+			name={__('Stripe Tax', 'woocommerce')}
+			logo={StripeTaxLogo}
+			description={__('Powerful global tax tool', 'woocommerce')}
+			benefits={[
+				__('Real-time sales tax calculation', 'woocommerce'),
+				__('Multi-economic nexus compliance', 'woocommerce'),
+				__('Detailed tax transaction reports', 'woocommerce'),
+				__('Coverage in over 55 countries', 'woocommerce'),
+			]}
+			terms={__('Free to install, then pay as you go.', 'woocommerce')}
+			onClick={() => {}}
 		>
-			{ stripeTaxActivated ? (
+			{stripeTaxActivated ? (
 				<Button
 					variant="secondary"
-					onClick={ () => {
+					onClick={() => {
 						recordEvent(
 							'tasklist_tax_setup_stripe_tax_to_settings'
 						);
 						redirectToStripeTaxSettings();
-					} }
+					}}
 				>
-					{ __( 'Continue to settings', 'woocommerce' ) }
+					{__('Continue to settings', 'woocommerce')}
 				</Button>
 			) : (
 				<Plugins
-					installText={ __( 'Install for free', 'woocommerce' ) }
-					onClick={ () => {
-						recordEvent( 'tasklist_tax_select_option', {
+					installText={__('Install for free', 'woocommerce')}
+					onClick={() => {
+						recordEvent('tasklist_tax_select_option', {
 							selected_option: STRIPE_TAX_PLUGIN_SLUG,
-						} );
-					} }
-					onComplete={ () => {
-						recordEvent( 'tasklist_tax_install_plugin_success', {
+						});
+					}}
+					onComplete={() => {
+						recordEvent('tasklist_tax_install_plugin_success', {
 							selected_option: STRIPE_TAX_PLUGIN_SLUG,
-						} );
+						});
 						const { updateAndPersistSettingsForGroup } =
-							dispatch( settingsStore );
-						void updateAndPersistSettingsForGroup( 'general', {
+							dispatch(settingsStore);
+						void updateAndPersistSettingsForGroup('general', {
 							general: {
 								woocommerce_calc_taxes: 'yes', // Stripe tax requires tax calculation to be enabled so let's do it here to save the user from doing it manually
 							},
-						} ).then( () => {
+						}).then(() => {
 							createSuccessNotice(
 								__(
 									"Stripe Tax for WooCommerce has been successfully installed. Let's configure it now.",
@@ -89,19 +86,19 @@ export const Card = ( {
 								)
 							);
 							redirectToStripeTaxSettings();
-						} );
-					} }
-					onError={ ( errors, response ) => {
-						recordEvent( 'tasklist_tax_install_plugin_error', {
+						});
+					}}
+					onError={(errors, response) => {
+						recordEvent('tasklist_tax_install_plugin_error', {
 							selected_option: STRIPE_TAX_PLUGIN_SLUG,
 							errors,
-						} );
-						createNoticesFromResponse( response );
-					} }
+						});
+						createNoticesFromResponse(response);
+					}}
 					installButtonVariant="secondary"
-					pluginSlugs={ [ STRIPE_TAX_PLUGIN_SLUG ] }
+					pluginSlugs={[STRIPE_TAX_PLUGIN_SLUG]}
 				/>
-			) }
+			)}
 		</PartnerCard>
 	);
 };

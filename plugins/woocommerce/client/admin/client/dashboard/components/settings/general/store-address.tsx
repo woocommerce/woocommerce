@@ -38,20 +38,18 @@ type Option = { key: string; label: string };
  * @return {Function} Validator function.
  */
 // Note: param was removed because its not used, callers still assume its needed. TODO: Fix this.
-export function getStoreAddressValidator( /* locale: Locale = {} */ ) {
+export function getStoreAddressValidator(/* locale: Locale = {} */) {
 	/**
 	 * Form validator.
 	 *
 	 * @param {Object} values Keyed values of all fields in the form.
 	 * @return {Object} Key value of fields and error messages, { myField: 'This field is required' }
 	 */
-	return (
-		values: Record< ( typeof storeAddressFields )[ number ], string >
-	) => {
+	return (values: Record<(typeof storeAddressFields)[number], string>) => {
 		const errors: {
-			[ key: string ]: string;
+			[key: string]: string;
 		} = {};
-		if ( ! values.countryState.trim().length ) {
+		if (!values.countryState.trim().length) {
 			errors.countryState = __(
 				'Please select a country / region',
 				'woocommerce'
@@ -67,34 +65,31 @@ export function getStoreAddressValidator( /* locale: Locale = {} */ ) {
  *
  * @return {Object} Select options, { value: 'US:GA', label: 'United States - Georgia' }
  */
-export function getCountryStateOptions( countries: Country[] ) {
-	const countryStateOptions = countries.reduce(
-		( acc: Option[], country ) => {
-			if ( ! country.states.length ) {
-				acc.push( {
-					key: country.code,
-					label: decodeEntities( country.name ),
-				} );
-
-				return acc;
-			}
-
-			const countryStates = country.states.map( ( state ) => {
-				return {
-					key: country.code + ':' + state.code,
-					label:
-						decodeEntities( country.name ) +
-						' — ' +
-						decodeEntities( state.name ),
-				};
-			} );
-
-			acc.push( ...countryStates );
+export function getCountryStateOptions(countries: Country[]) {
+	const countryStateOptions = countries.reduce((acc: Option[], country) => {
+		if (!country.states.length) {
+			acc.push({
+				key: country.code,
+				label: decodeEntities(country.name),
+			});
 
 			return acc;
-		},
-		[]
-	);
+		}
+
+		const countryStates = country.states.map((state) => {
+			return {
+				key: country.code + ':' + state.code,
+				label:
+					decodeEntities(country.name) +
+					' — ' +
+					decodeEntities(state.name),
+			};
+		});
+
+		acc.push(...countryStates);
+
+		return acc;
+	}, []);
 
 	return countryStateOptions;
 }
@@ -105,8 +100,8 @@ export function getCountryStateOptions( countries: Country[] ) {
  * @param {string} state The state to normalize.
  * @return {Function} filter function.
  */
-export const normalizeState = ( state: string ): string => {
-	return state.replace( /\s/g, '' ).toLowerCase();
+export const normalizeState = (state: string): string => {
+	return state.replace(/\s/g, '').toLowerCase();
 };
 
 /**
@@ -120,39 +115,37 @@ export const getStateFilter =
 	(
 		isStateAbbreviation: boolean,
 		normalizedAutofillState: string
-	): ( ( option: Option ) => boolean ) =>
-	( option: Option ) => {
+	): ((option: Option) => boolean) =>
+	(option: Option) => {
 		const countryStateArray = isStateAbbreviation
-			? option.key.split( ':' )
-			: option.label.split( '—' );
+			? option.key.split(':')
+			: option.label.split('—');
 
 		// No region options in the country
-		if ( countryStateArray.length <= 1 ) {
+		if (countryStateArray.length <= 1) {
 			return false;
 		}
 
-		const state = countryStateArray[ 1 ];
+		const state = countryStateArray[1];
 		// Handle special case, for example: China — Beijing / 北京
-		if ( state.includes( '/' ) ) {
-			const stateStrList = state.split( '/' );
+		if (state.includes('/')) {
+			const stateStrList = state.split('/');
 			return (
-				normalizeState( stateStrList[ 0 ] ) ===
-					normalizedAutofillState ||
-				normalizeState( stateStrList[ 1 ] ) === normalizedAutofillState
+				normalizeState(stateStrList[0]) === normalizedAutofillState ||
+				normalizeState(stateStrList[1]) === normalizedAutofillState
 			);
 		}
 
 		// Handle special case, for example: Iran — Alborz (البرز)
-		if ( state.includes( '(' ) && state.includes( ')' ) ) {
-			const stateStrList = state.replace( ')', '' ).split( '(' );
+		if (state.includes('(') && state.includes(')')) {
+			const stateStrList = state.replace(')', '').split('(');
 			return (
-				normalizeState( stateStrList[ 0 ] ) ===
-					normalizedAutofillState ||
-				normalizeState( stateStrList[ 1 ] ) === normalizedAutofillState
+				normalizeState(stateStrList[0]) === normalizedAutofillState ||
+				normalizeState(stateStrList[1]) === normalizedAutofillState
 			);
 		}
 
-		return normalizeState( state ) === normalizedAutofillState;
+		return normalizeState(state) === normalizedAutofillState;
 	};
 
 /**
@@ -166,121 +159,111 @@ export const getStateFilter =
 export function useGetCountryStateAutofill(
 	options: Option[],
 	countryState: string,
-	setValue: ( key: string, value: string ) => void
+	setValue: (key: string, value: string) => void
 ): JSX.Element {
-	const [ autofillCountry, setAutofillCountry ] = useState( '' );
-	const [ autofillState, setAutofillState ] = useState( '' );
-	const isAutofillChange = useRef< boolean >();
+	const [autofillCountry, setAutofillCountry] = useState('');
+	const [autofillState, setAutofillState] = useState('');
+	const isAutofillChange = useRef<boolean>();
 
 	// Sync the autofill fields on first render and the countryState value changes.
-	useEffect( () => {
-		if ( ! isAutofillChange.current ) {
-			const option = options.find( ( opt ) => opt.key === countryState );
-			const labels = option
-				? option.label.split( /\u2013|\u2014|\-/ )
-				: [];
-			const newCountry = ( labels[ 0 ] || '' ).trim();
-			const newState = ( labels[ 1 ] || '' ).trim();
+	useEffect(() => {
+		if (!isAutofillChange.current) {
+			const option = options.find((opt) => opt.key === countryState);
+			const labels = option ? option.label.split(/\u2013|\u2014|\-/) : [];
+			const newCountry = (labels[0] || '').trim();
+			const newState = (labels[1] || '').trim();
 
-			if (
-				newCountry !== autofillCountry ||
-				newState !== autofillState
-			) {
-				setAutofillCountry( newCountry );
-				setAutofillState( newState );
+			if (newCountry !== autofillCountry || newState !== autofillState) {
+				setAutofillCountry(newCountry);
+				setAutofillState(newState);
 			}
 		}
 		isAutofillChange.current = false;
 		// Disable reason: If we include autofillCountry/autofillState in the dependency array, we will have an unnecessary function call because we also update them in this function.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ countryState, options ] );
+	}, [countryState, options]);
 
 	// Sync the countryState value the autofill fields changes
-	useEffect( () => {
+	useEffect(() => {
 		// Skip on first render since we only want to update the value when the autofill fields changes.
-		if ( isAutofillChange.current === undefined ) {
+		if (isAutofillChange.current === undefined) {
 			return;
 		}
 
-		if ( ! autofillCountry && ! autofillState && countryState ) {
+		if (!autofillCountry && !autofillState && countryState) {
 			// Clear form
 			isAutofillChange.current = true;
-			setValue( 'countryState', '' );
+			setValue('countryState', '');
 			return;
 		}
-		const countrySearch = new RegExp(
-			escapeRegExp( autofillCountry ),
-			'i'
-		);
+		const countrySearch = new RegExp(escapeRegExp(autofillCountry), 'i');
 		const isCountryAbbreviation = autofillCountry.length < 3;
 		const isStateAbbreviation =
-			autofillState.length < 3 && !! autofillState.match( /^[\w]+$/ );
+			autofillState.length < 3 && !!autofillState.match(/^[\w]+$/);
 		let filteredOptions: Option[] = [];
 
-		if ( autofillCountry.length && autofillState.length ) {
-			filteredOptions = options.filter( ( option ) =>
+		if (autofillCountry.length && autofillState.length) {
+			filteredOptions = options.filter((option) =>
 				countrySearch.test(
 					isCountryAbbreviation ? option.key : option.label
 				)
 			);
 			// no country matches so use all options for state filter.
-			if ( ! filteredOptions.length ) {
-				filteredOptions = [ ...options ];
+			if (!filteredOptions.length) {
+				filteredOptions = [...options];
 			}
-			if ( filteredOptions.length > 1 ) {
+			if (filteredOptions.length > 1) {
 				filteredOptions = filteredOptions.filter(
 					getStateFilter(
 						isStateAbbreviation,
-						normalizeState( autofillState )
+						normalizeState(autofillState)
 					)
 				);
 			}
-		} else if ( autofillCountry.length ) {
-			filteredOptions = options.filter( ( option ) =>
+		} else if (autofillCountry.length) {
+			filteredOptions = options.filter((option) =>
 				countrySearch.test(
 					isCountryAbbreviation ? option.key : option.label
 				)
 			);
-		} else if ( autofillState.length ) {
+		} else if (autofillState.length) {
 			filteredOptions = options.filter(
 				getStateFilter(
 					isStateAbbreviation,
-					normalizeState( autofillState )
+					normalizeState(autofillState)
 				)
 			);
 		}
 		if (
 			filteredOptions.length === 1 &&
-			countryState !== filteredOptions[ 0 ].key
+			countryState !== filteredOptions[0].key
 		) {
 			isAutofillChange.current = true;
-			setValue( 'countryState', filteredOptions[ 0 ].key );
+			setValue('countryState', filteredOptions[0].key);
 		}
 		// Disable reason: If we include countryState in the dependency array, we will have an unnecessary function call because we also update it in this function.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ autofillCountry, autofillState, options, setValue ] );
+	}, [autofillCountry, autofillState, options, setValue]);
 
 	return (
 		<>
 			<input
-				onChange={ ( event ) =>
-					setAutofillCountry( event.target.value )
-				}
-				value={ autofillCountry }
+				onChange={(event) => setAutofillCountry(event.target.value)}
+				value={autofillCountry}
 				name="country"
 				type="text"
 				className="woocommerce-select-control__autofill-input"
-				tabIndex={ -1 }
+				tabIndex={-1}
 				autoComplete="country"
 			/>
 
 			<input
-				onChange={ ( event ) => setAutofillState( event.target.value ) }
-				value={ autofillState }
+				onChange={(event) => setAutofillState(event.target.value)}
+				value={autofillState}
 				name="state"
 				type="text"
 				className="woocommerce-select-control__autofill-input"
-				tabIndex={ -1 }
+				tabIndex={-1}
 				autoComplete="address-level1"
 			/>
 		</>
@@ -288,9 +271,9 @@ export function useGetCountryStateAutofill(
 }
 
 type StoreAddressProps = {
-	getInputProps: FormContextType< FormValues >[ 'getInputProps' ];
-	getSelectControlProps: FormContextType< FormValues >[ 'getSelectControlProps' ];
-	setValue: ( key: string, value: string ) => void;
+	getInputProps: FormContextType<FormValues>['getInputProps'];
+	getSelectControlProps: FormContextType<FormValues>['getSelectControlProps'];
+	setValue: (key: string, value: string) => void;
 };
 
 /**
@@ -301,24 +284,24 @@ type StoreAddressProps = {
  * @param {Function} props.getSelectControlProps Get select control props.
  * @param {Function} props.setValue              Set value of the countryState input.
  */
-export function StoreAddress( {
+export function StoreAddress({
 	getInputProps,
 	getSelectControlProps,
 	setValue,
-}: StoreAddressProps ): JSX.Element {
-	const countryState = getInputProps( 'countryState' ).value;
+}: StoreAddressProps): JSX.Element {
+	const countryState = getInputProps('countryState').value;
 	const { locale, hasFinishedResolution, countries, loadingCountries } =
 		useSelect(
-			( select ) => {
+			(select) => {
 				const {
 					getLocale,
 					getCountries,
 					hasFinishedResolution: hasFinishedCountryResolution,
-				} = select( countriesStore );
+				} = select(countriesStore);
 				return {
-					locale: getLocale( countryState ) as Locale,
+					locale: getLocale(countryState) as Locale,
 					countries: getCountries(),
-					loadingCountries: ! hasFinishedCountryResolution(
+					loadingCountries: !hasFinishedCountryResolution(
 						'getCountries',
 						undefined
 					),
@@ -328,11 +311,11 @@ export function StoreAddress( {
 					),
 				};
 			},
-			[ countryState ]
+			[countryState]
 		);
 	const countryStateOptions = useMemo(
-		() => getCountryStateOptions( countries ),
-		[ countries ]
+		() => getCountryStateOptions(countries),
+		[countries]
 	);
 	const countryStateAutofill = useGetCountryStateAutofill(
 		countryStateOptions,
@@ -340,98 +323,97 @@ export function StoreAddress( {
 		setValue
 	);
 
-	const isLocaleKey = ( key: string ): key is keyof typeof locale => {
-		return locale.hasOwnProperty( key );
+	const isLocaleKey = (key: string): key is keyof typeof locale => {
+		return locale.hasOwnProperty(key);
 	};
 
-	useEffect( () => {
-		if ( locale ) {
-			storeAddressFields.forEach( ( field ) => {
+	useEffect(() => {
+		if (locale) {
+			storeAddressFields.forEach((field) => {
 				const fieldKey = field
-					.replace( /(address)Line([0-9])/, '$1$2' )
+					.replace(/(address)Line([0-9])/, '$1$2')
 					.toLowerCase();
-				const props = getInputProps( field );
+				const props = getInputProps(field);
 
 				if (
-					isLocaleKey( fieldKey ) &&
-					locale[ fieldKey ]?.hidden &&
+					isLocaleKey(fieldKey) &&
+					locale[fieldKey]?.hidden &&
 					props.value?.length > 0
 				) {
 					// Clear hidden field.
-					setValue( field, '' );
+					setValue(field, '');
 				}
-			} );
+			});
 		}
-	}, [ countryState, locale ] );
-	if ( ! hasFinishedResolution || loadingCountries ) {
+	}, [countryState, locale]);
+	if (!hasFinishedResolution || loadingCountries) {
 		return <Spinner />;
 	}
 
 	const { onChange: onCountryStateChange, ...restCountryStateProps } =
-		getSelectControlProps( 'countryState' );
+		getSelectControlProps('countryState');
 
 	return (
 		<div className="woocommerce-store-address-fields">
 			<SelectControl
-				label={ __( 'Country / Region', 'woocommerce' ) + ' *' }
+				label={__('Country / Region', 'woocommerce') + ' *'}
 				autoComplete="new-password" // disable autocomplete and autofill
-				getSearchExpression={ ( query: string ) => {
+				getSearchExpression={(query: string) => {
 					return new RegExp(
 						'(^' + query + '| — (' + query + '))',
 						'i'
 					);
-				} }
-				options={ countryStateOptions }
-				excludeSelectedOptions={ false }
+				}}
+				options={countryStateOptions}
+				excludeSelectedOptions={false}
 				showAllOnFocus
 				isSearchable
-				{ ...restCountryStateProps }
-				onChange={ ( selected ) => {
-					onCountryStateChange( selected as string );
-				} }
-				controlClassName={ getInputProps( 'countryState' ).className }
-				virtualScroll={ true }
-				virtualItemHeight={ 56 }
-				virtualListHeight={ 56 * 6 }
+				{...restCountryStateProps}
+				onChange={(selected) => {
+					onCountryStateChange(selected as string);
+				}}
+				controlClassName={getInputProps('countryState').className}
+				virtualScroll={true}
+				virtualItemHeight={56}
+				virtualListHeight={56 * 6}
 			>
-				{ countryStateAutofill }
+				{countryStateAutofill}
 			</SelectControl>
 
-			{ ! locale?.address_1?.hidden && (
+			{!locale?.address_1?.hidden && (
 				<TextControl
 					__nextHasNoMarginBottom
-					id={ 'woocommerce-store-address-form-address_1' }
+					id={'woocommerce-store-address-form-address_1'}
 					label={
-						locale?.address_1?.label ||
-						__( 'Address', 'woocommerce' )
+						locale?.address_1?.label || __('Address', 'woocommerce')
 					}
 					autoComplete="address-line1"
-					{ ...getInputProps( 'addressLine1' ) }
+					{...getInputProps('addressLine1')}
 				/>
-			) }
+			)}
 
-			{ ! locale?.postcode?.hidden && (
+			{!locale?.postcode?.hidden && (
 				<TextControl
 					__nextHasNoMarginBottom
-					id={ 'woocommerce-store-address-form-postcode' }
+					id={'woocommerce-store-address-form-postcode'}
 					label={
 						locale?.postcode?.label ||
-						__( 'Post code', 'woocommerce' )
+						__('Post code', 'woocommerce')
 					}
 					autoComplete="postal-code"
-					{ ...getInputProps( 'postCode' ) }
+					{...getInputProps('postCode')}
 				/>
-			) }
+			)}
 
-			{ ! locale?.city?.hidden && (
+			{!locale?.city?.hidden && (
 				<TextControl
 					__nextHasNoMarginBottom
-					id={ 'woocommerce-store-address-form-city' }
-					label={ locale?.city?.label || __( 'City', 'woocommerce' ) }
-					{ ...getInputProps( 'city' ) }
+					id={'woocommerce-store-address-form-city'}
+					label={locale?.city?.label || __('City', 'woocommerce')}
+					{...getInputProps('city')}
 					autoComplete="address-level2"
 				/>
-			) }
+			)}
 		</div>
 	);
 }

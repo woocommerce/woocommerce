@@ -80,6 +80,7 @@ catalogs:
         '@babel/runtime': 7.25.7
         postcss: ^8.5.26
         webpack: 5.97.x
+        '@wordpress/prettier-config': 4.56.0
         '@wordpress/scripts': 36.0.0
 
 packages:

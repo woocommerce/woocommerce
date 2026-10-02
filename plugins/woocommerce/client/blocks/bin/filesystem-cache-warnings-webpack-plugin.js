@@ -3,15 +3,15 @@
 
 function FilesystemCacheWarningsPlugin() {}
 
-FilesystemCacheWarningsPlugin.prototype.apply = function ( compiler ) {
+FilesystemCacheWarningsPlugin.prototype.apply = function (compiler) {
 	compiler.hooks.infrastructureLog.tap(
 		'SuppressExternalModuleCacheWarning',
-		( name, type, args ) => {
+		(name, type, args) => {
 			if (
 				type === 'warn' &&
 				name === 'webpack.cache.PackFileCacheStrategy'
 			) {
-				return args[ 0 ]?.includes?.(
+				return args[0]?.includes?.(
 					'No serializer registered for Warning'
 				);
 			}

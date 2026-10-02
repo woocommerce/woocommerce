@@ -31,16 +31,16 @@ const queryCache = new Map<
 export function getPersonalizationTagsQuery(
 	postId: number | string | undefined
 ): PersonalizationTagsQuery {
-	let query = queryCache.get( postId );
+	let query = queryCache.get(postId);
 
-	if ( ! query ) {
+	if (!query) {
 		query = {
 			context: 'view',
 			per_page: -1,
 			// Include post_id for context-aware tag filtering (e.g., automation emails)
-			...( postId ? { post_id: postId } : {} ),
+			...(postId ? { post_id: postId } : {}),
 		};
-		queryCache.set( postId, query );
+		queryCache.set(postId, query);
 	}
 
 	return query;

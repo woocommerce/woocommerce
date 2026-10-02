@@ -10,10 +10,10 @@ import { createInterpolateElement } from '@wordpress/element';
  */
 import './style.scss';
 
-export const SiteVisibilityTour = ( { onClose }: { onClose: () => void } ) => {
+export const SiteVisibilityTour = ({ onClose }: { onClose: () => void }) => {
 	return (
 		<TourKit
-			config={ {
+			config={{
 				placement: 'bottom',
 				options: {
 					effects: {
@@ -33,13 +33,13 @@ export const SiteVisibilityTour = ( { onClose }: { onClose: () => void } ) => {
 							name: 'auto',
 							enabled: true,
 							phase: 'beforeWrite',
-							requires: [ 'computeStyles' ],
+							requires: ['computeStyles'],
 						},
 						{
 							name: 'offset',
 							options: {
 								offset: () => {
-									return [ 52, 16 ];
+									return [52, 16];
 								},
 							},
 						},
@@ -80,7 +80,7 @@ export const SiteVisibilityTour = ( { onClose }: { onClose: () => void } ) => {
 					},
 				],
 				closeHandler: onClose,
-			} }
+			}}
 		></TourKit>
 	);
 };

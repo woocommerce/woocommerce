@@ -50,7 +50,7 @@ interface CompleteSetupButtonProps {
 	/**
 	 * Function to set the onboarding modal open.
 	 */
-	setOnboardingModalOpen: ( isOnboardingModalOpen: boolean ) => void;
+	setOnboardingModalOpen: (isOnboardingModalOpen: boolean) => void;
 	/**
 	 * The onboarding type for the gateway.
 	 */
@@ -60,7 +60,7 @@ interface CompleteSetupButtonProps {
 	 *
 	 * @param id Incentive ID.
 	 */
-	acceptIncentive?: ( id: string ) => void;
+	acceptIncentive?: (id: string) => void;
 	/**
 	 * Incentive data. If provided, the incentive will be accepted when the button is clicked.
 	 */
@@ -80,57 +80,54 @@ interface CompleteSetupButtonProps {
  * The button dynamically determines the appropriate action (e.g., redirecting to onboarding
  * or settings) based on the gateway's and onboarding state.
  */
-export const CompleteSetupButton = ( {
+export const CompleteSetupButton = ({
 	gatewayProvider,
 	settingsHref,
 	onboardingHref,
 	gatewayHasRecommendedPaymentMethods,
 	installingPlugin,
-	buttonText = __( 'Complete setup', 'woocommerce' ),
+	buttonText = __('Complete setup', 'woocommerce'),
 	setOnboardingModalOpen,
 	onboardingType,
 	acceptIncentive = () => {},
 	incentive = null,
 	disabled = false,
 	ariaLabel,
-}: CompleteSetupButtonProps ) => {
-	const [ isUpdating, setIsUpdating ] = useState( false );
-	const [ showUpdateModal, setShowUpdateModal ] = useState( false );
+}: CompleteSetupButtonProps) => {
+	const [isUpdating, setIsUpdating] = useState(false);
+	const [showUpdateModal, setShowUpdateModal] = useState(false);
 
 	// Get the store's `select` function to trigger selector resolution later (in useEffect).
 	// We don't need to select data directly here, just the function itself.
-	const { select } = useSelect(
-		( selectFn ) => ( { select: selectFn } ),
-		[]
-	);
+	const { select } = useSelect((selectFn) => ({ select: selectFn }), []);
 
 	const accountConnected = gatewayProvider.state.account_connected;
 	const onboardingStarted = gatewayProvider.onboarding.state.started;
 	const onboardingCompleted = gatewayProvider.onboarding.state.completed;
 
-	useEffect( () => {
+	useEffect(() => {
 		// Prefetch WooPayments onboarding data if conditions are met
 		if (
-			isWooPayments( gatewayProvider.id ) &&
+			isWooPayments(gatewayProvider.id) &&
 			onboardingType === 'native_in_context' &&
-			! onboardingCompleted
+			!onboardingCompleted
 		) {
 			// Calling the selector triggers the data fetch
-			select( woopaymentsOnboardingStore ).getOnboardingData();
+			select(woopaymentsOnboardingStore).getOnboardingData();
 		}
-	}, [ gatewayProvider.id, onboardingCompleted, onboardingType, select ] );
+	}, [gatewayProvider.id, onboardingCompleted, onboardingType, select]);
 
 	const completeSetup = () => {
 		// Record the click of this button.
-		recordPaymentsProviderEvent( 'complete_setup_click', gatewayProvider );
+		recordPaymentsProviderEvent('complete_setup_click', gatewayProvider);
 
-		setIsUpdating( true );
+		setIsUpdating(true);
 
-		if ( incentive ) {
-			acceptIncentive( incentive.promo_id );
+		if (incentive) {
+			acceptIncentive(incentive.promo_id);
 		}
 
-		if ( onboardingType === 'native_in_context' ) {
+		if (onboardingType === 'native_in_context') {
 			recordPaymentsOnboardingEvent(
 				'woopayments_onboarding_modal_opened',
 				{
@@ -138,11 +135,11 @@ export const CompleteSetupButton = ( {
 					source: wooPaymentsOnboardingSessionEntrySettings,
 				}
 			);
-			setOnboardingModalOpen( true );
-		} else if ( ! accountConnected || ! onboardingStarted ) {
-			if ( gatewayHasRecommendedPaymentMethods ) {
-				setShowUpdateModal( true );
-				setIsUpdating( false );
+			setOnboardingModalOpen(true);
+		} else if (!accountConnected || !onboardingStarted) {
+			if (gatewayHasRecommendedPaymentMethods) {
+				setShowUpdateModal(true);
+				setIsUpdating(false);
 			} else {
 				// Redirect to the gateway's onboarding URL if it needs setup.
 				window.location.href = onboardingHref;
@@ -151,7 +148,7 @@ export const CompleteSetupButton = ( {
 		} else if (
 			accountConnected &&
 			onboardingStarted &&
-			! onboardingCompleted
+			!onboardingCompleted
 		) {
 			// Redirect to the gateway's onboarding URL if it needs setup.
 			window.location.href = onboardingHref;
@@ -162,24 +159,24 @@ export const CompleteSetupButton = ( {
 			return;
 		}
 
-		setIsUpdating( false );
+		setIsUpdating(false);
 	};
 
 	return (
 		<>
 			<Button
-				key={ gatewayProvider.id }
+				key={gatewayProvider.id}
 				variant="primary"
-				isBusy={ isUpdating }
-				disabled={ disabled || isUpdating || !! installingPlugin }
-				onClick={ completeSetup }
-				aria-label={ ariaLabel }
+				isBusy={isUpdating}
+				disabled={disabled || isUpdating || !!installingPlugin}
+				onClick={completeSetup}
+				aria-label={ariaLabel}
 			>
-				{ buttonText }
+				{buttonText}
 			</Button>
 			<WooPaymentsUpdateRequiredModal
-				isOpen={ showUpdateModal }
-				onClose={ () => setShowUpdateModal( false ) }
+				isOpen={showUpdateModal}
+				onClose={() => setShowUpdateModal(false)}
 			/>
 		</>
 	);

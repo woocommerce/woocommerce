@@ -13,19 +13,19 @@ import type { RecommendedChannel } from '~/marketing/data-multichannel/types';
 
 type UseRecommendedChannels = {
 	loading: boolean;
-	data?: Array< RecommendedChannel >;
+	data?: Array<RecommendedChannel>;
 };
 
 export const useRecommendedChannels = (): UseRecommendedChannels => {
-	return useSelect( ( select ) => {
+	return useSelect((select) => {
 		const { hasFinishedResolution, getRecommendedChannels } =
-			select( STORE_KEY );
+			select(STORE_KEY);
 		const { data, error } = getRecommendedChannels() as {
 			data?: RecommendedChannel[];
 			error?: unknown;
 		};
 
-		const { getActivePlugins } = select( pluginsStore );
+		const { getActivePlugins } = select(pluginsStore);
 		const activePlugins = getActivePlugins();
 
 		/**
@@ -34,14 +34,14 @@ export const useRecommendedChannels = (): UseRecommendedChannels => {
 		 */
 		const nonActiveRecommendedChannels =
 			data &&
-			differenceWith( data, activePlugins, ( a, b ) => {
+			differenceWith(data, activePlugins, (a, b) => {
 				return a.product === b;
-			} );
+			});
 
 		return {
-			loading: ! hasFinishedResolution( 'getRecommendedChannels', [] ),
+			loading: !hasFinishedResolution('getRecommendedChannels', []),
 			data: nonActiveRecommendedChannels,
 			error,
 		};
-	}, [] );
+	}, []);
 };

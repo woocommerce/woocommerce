@@ -9,10 +9,10 @@ interface Attributes {
 		rating: boolean;
 		button: boolean;
 	};
-	categories: Array< number >;
+	categories: Array<number>;
 	catOperator: string;
 	isPreview: boolean;
-	stockStatus: Array< string >;
+	stockStatus: Array<string>;
 	editMode: boolean;
 	orderby:
 		| 'date'
@@ -36,5 +36,5 @@ export interface ProductNewestBlockProps {
 	/**
 	 * A callback to update attributes
 	 */
-	setAttributes: ( attributes: Partial< Attributes > ) => void;
+	setAttributes: (attributes: Partial<Attributes>) => void;
 }

@@ -20,101 +20,93 @@ const mockCurrency: Currency = {
 	minorUnit: 2,
 };
 
-describe( 'TotalsItem', () => {
-	it( 'renders label and value correctly', () => {
+describe('TotalsItem', () => {
+	it('renders label and value correctly', () => {
 		render(
-			<TotalsItem
-				label="Subtotal"
-				value={ 2599 }
-				currency={ mockCurrency }
-			/>
+			<TotalsItem label="Subtotal" value={2599} currency={mockCurrency} />
 		);
 
-		expect( screen.getByText( 'Subtotal' ) ).toBeInTheDocument();
+		expect(screen.getByText('Subtotal')).toBeInTheDocument();
 		expect(
-			screen.getByText( textContentMatcher( '$25.99' ) )
+			screen.getByText(textContentMatcher('$25.99'))
 		).toBeInTheDocument();
-	} );
+	});
 
-	it( 'renders value of 0 correctly', () => {
+	it('renders value of 0 correctly', () => {
 		render(
-			<TotalsItem
-				label="Discount"
-				value={ 0 }
-				currency={ mockCurrency }
-			/>
+			<TotalsItem label="Discount" value={0} currency={mockCurrency} />
 		);
 
-		expect( screen.getByText( 'Discount' ) ).toBeInTheDocument();
+		expect(screen.getByText('Discount')).toBeInTheDocument();
 		expect(
-			screen.getByText( textContentMatcher( '$0.00' ) )
+			screen.getByText(textContentMatcher('$0.00'))
 		).toBeInTheDocument();
-	} );
+	});
 
-	it( 'renders ReactNode value correctly', () => {
+	it('renders ReactNode value correctly', () => {
 		const customValue = (
 			<span data-testid="custom-value">Custom Value</span>
 		);
 
-		render( <TotalsItem label="Custom" value={ customValue } /> );
+		render(<TotalsItem label="Custom" value={customValue} />);
 
-		expect( screen.getByText( 'Custom' ) ).toBeInTheDocument();
-		expect( screen.getByTestId( 'custom-value' ) ).toBeInTheDocument();
-	} );
+		expect(screen.getByText('Custom')).toBeInTheDocument();
+		expect(screen.getByTestId('custom-value')).toBeInTheDocument();
+	});
 
-	it( 'renders description when provided', () => {
+	it('renders description when provided', () => {
 		render(
 			<TotalsItem
 				label="Tax"
-				value={ 599 }
-				currency={ mockCurrency }
+				value={599}
+				currency={mockCurrency}
 				description="Including VAT"
 			/>
 		);
 
-		expect( screen.getByText( 'Tax' ) ).toBeInTheDocument();
+		expect(screen.getByText('Tax')).toBeInTheDocument();
 		expect(
-			screen.getByText( textContentMatcher( '$5.99' ) )
+			screen.getByText(textContentMatcher('$5.99'))
 		).toBeInTheDocument();
-		expect( screen.getByText( 'Including VAT' ) ).toBeInTheDocument();
-	} );
+		expect(screen.getByText('Including VAT')).toBeInTheDocument();
+	});
 
-	it( 'shows skeleton when showSkeleton is true', () => {
+	it('shows skeleton when showSkeleton is true', () => {
 		render(
 			<TotalsItem
 				label="Loading"
-				value={ 100 }
-				currency={ mockCurrency }
-				showSkeleton={ true }
+				value={100}
+				currency={mockCurrency}
+				showSkeleton={true}
 			/>
 		);
 
-		expect( screen.getByLabelText( 'Loading price…' ) ).toBeInTheDocument();
+		expect(screen.getByLabelText('Loading price…')).toBeInTheDocument();
 		expect(
-			screen.queryByText( textContentMatcher( '$1.00' ) )
+			screen.queryByText(textContentMatcher('$1.00'))
 		).not.toBeInTheDocument();
-	} );
+	});
 
-	it( 'does not show skeleton when showSkeleton is false', () => {
+	it('does not show skeleton when showSkeleton is false', () => {
 		render(
 			<TotalsItem
 				label="Loaded"
-				value={ 155 }
-				currency={ mockCurrency }
-				showSkeleton={ false }
+				value={155}
+				currency={mockCurrency}
+				showSkeleton={false}
 			/>
 		);
 
-		expect( screen.getByText( 'Loaded' ) ).toBeInTheDocument();
+		expect(screen.getByText('Loaded')).toBeInTheDocument();
 		expect(
-			screen.getByText( textContentMatcher( '$1.55' ) )
+			screen.getByText(textContentMatcher('$1.55'))
 		).toBeInTheDocument();
 		expect(
-			screen.queryByLabelText( 'Loading price…' )
+			screen.queryByLabelText('Loading price…')
 		).not.toBeInTheDocument();
-	} );
+	});
 
-	it( 'handles currency with different decimal places', () => {
+	it('handles currency with different decimal places', () => {
 		const jpyCurrency: Currency = {
 			...mockCurrency,
 			code: 'JPY',
@@ -125,22 +117,22 @@ describe( 'TotalsItem', () => {
 		};
 
 		render(
-			<TotalsItem label="Total" value={ 1000 } currency={ jpyCurrency } />
+			<TotalsItem label="Total" value={1000} currency={jpyCurrency} />
 		);
 
-		expect( screen.getByText( 'Total' ) ).toBeInTheDocument();
+		expect(screen.getByText('Total')).toBeInTheDocument();
 		expect(
-			screen.getByText( textContentMatcher( '¥1,000' ) )
+			screen.getByText(textContentMatcher('¥1,000'))
 		).toBeInTheDocument();
-	} );
+	});
 
-	it( 'renders without currency when not provided', () => {
-		render( <TotalsItem label="Amount" value={ 42 } /> );
+	it('renders without currency when not provided', () => {
+		render(<TotalsItem label="Amount" value={42} />);
 
-		expect( screen.getByText( 'Amount' ) ).toBeInTheDocument();
+		expect(screen.getByText('Amount')).toBeInTheDocument();
 		// When no currency is provided, the value should still render
 		expect(
-			screen.getByText( textContentMatcher( '$0.42' ) )
+			screen.getByText(textContentMatcher('$0.42'))
 		).toBeInTheDocument();
-	} );
-} );
+	});
+});

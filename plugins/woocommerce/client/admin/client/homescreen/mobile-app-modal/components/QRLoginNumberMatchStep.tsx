@@ -19,7 +19,7 @@ type QRLoginNumberMatchStepProps = {
 	 * underlying token is in the SCANNED state. The wc-admin client never
 	 * knows which one is the real one — server compares constant-time.
 	 */
-	numbers: [ string, string, string ];
+	numbers: [string, string, string];
 	/**
 	 * Device info reported by the mobile app on /qr-login-scan. Surfaced so
 	 * the merchant can spot a wrong-device scan before approving.
@@ -34,7 +34,7 @@ type QRLoginNumberMatchStepProps = {
 	 * Submit a number choice — server will return approved or rejected. Empty
 	 * string is the explicit cancel sentinel from the "It wasn't me" link.
 	 */
-	onChooseNumber: ( choice: string ) => Promise< void > | void;
+	onChooseNumber: (choice: string) => Promise<void> | void;
 	/**
 	 * Optional error surfaced after an approval request fails without a state
 	 * transition.
@@ -57,77 +57,72 @@ type QRLoginNumberMatchStepProps = {
  * fast double-click registering as two attempts — that would race the state
  * transition on the server side and pessimize the UX.
  */
-export const QRLoginNumberMatchStep = ( {
+export const QRLoginNumberMatchStep = ({
 	numbers,
 	deviceInfo,
 	challengeExpiresAt,
 	onChooseNumber,
 	errorMessage = null,
-}: QRLoginNumberMatchStepProps ) => {
-	const [ inFlight, setInFlight ] = useState( false );
+}: QRLoginNumberMatchStepProps) => {
+	const [inFlight, setInFlight] = useState(false);
 	// Tracks which choice is currently being submitted so we can render the
 	// busy state only on the tapped tile (or the cancel link). Empty-string
 	// sentinel matches the cancel path; null means nothing is in flight.
-	const [ pendingChoice, setPendingChoice ] = useState< string | null >(
-		null
-	);
-	const [ secondsRemaining, setSecondsRemaining ] = useState< number >( () =>
-		Math.max( 0, Math.floor( challengeExpiresAt - Date.now() / 1000 ) )
+	const [pendingChoice, setPendingChoice] = useState<string | null>(null);
+	const [secondsRemaining, setSecondsRemaining] = useState<number>(() =>
+		Math.max(0, Math.floor(challengeExpiresAt - Date.now() / 1000))
 	);
 
 	// Local countdown that mirrors the server's challenge expiry. Driven off
 	// challengeExpiresAt rather than a duration prop so it stays in sync if
 	// the parent re-mounts mid-window.
-	useEffect( () => {
+	useEffect(() => {
 		const tick = () => {
 			setSecondsRemaining(
-				Math.max(
-					0,
-					Math.floor( challengeExpiresAt - Date.now() / 1000 )
-				)
+				Math.max(0, Math.floor(challengeExpiresAt - Date.now() / 1000))
 			);
 		};
 		tick();
-		const id = setInterval( tick, 1000 );
-		return () => clearInterval( id );
-	}, [ challengeExpiresAt ] );
+		const id = setInterval(tick, 1000);
+		return () => clearInterval(id);
+	}, [challengeExpiresAt]);
 
-	useEffect( () => {
-		recordEvent( 'mobile_app_qr_login_number_match_displayed' );
-	}, [] );
+	useEffect(() => {
+		recordEvent('mobile_app_qr_login_number_match_displayed');
+	}, []);
 
 	const deviceLine = useMemo(
-		() => buildQRLoginDeviceLine( deviceInfo ),
-		[ deviceInfo ]
+		() => buildQRLoginDeviceLine(deviceInfo),
+		[deviceInfo]
 	);
 
 	const expired = secondsRemaining <= 0;
 	const tilesDisabled = inFlight || expired;
 
-	const handleChoose = async ( choice: string ) => {
-		if ( tilesDisabled ) {
+	const handleChoose = async (choice: string) => {
+		if (tilesDisabled) {
 			return;
 		}
 
-		setInFlight( true );
-		setPendingChoice( choice );
-		recordEvent( 'mobile_app_qr_login_number_match_chosen' );
+		setInFlight(true);
+		setPendingChoice(choice);
+		recordEvent('mobile_app_qr_login_number_match_chosen');
 
 		try {
-			await onChooseNumber( choice );
+			await onChooseNumber(choice);
 		} finally {
 			// Note: even on a wrong pick the parent flips state to REJECTED
 			// and unmounts this component, so resetting `inFlight` is mostly
 			// defensive — it matters only if the request errors out without
 			// a state transition.
-			setInFlight( false );
-			setPendingChoice( null );
+			setInFlight(false);
+			setPendingChoice(null);
 		}
 	};
 
 	const headline = sprintf(
 		/* translators: %s: device summary, e.g. "Pixel 10 · Android 16 · App version 24.6". */
-		__( 'Match this number on %s', 'woocommerce' ),
+		__('Match this number on %s', 'woocommerce'),
 		deviceLine
 	);
 
@@ -135,24 +130,24 @@ export const QRLoginNumberMatchStep = ( {
 		<div
 			className="woocommerce-qr-direct-login woocommerce-qr-direct-login--number-match"
 			role="group"
-			aria-label={ __( 'Confirm sign-in', 'woocommerce' ) }
+			aria-label={__('Confirm sign-in', 'woocommerce')}
 		>
 			<p className="woocommerce-qr-direct-login__match-headline">
-				{ headline }
+				{headline}
 			</p>
 			<p className="woocommerce-qr-direct-login__match-description">
-				{ __(
+				{__(
 					'Tap the number that matches what you see on your phone.',
 					'woocommerce'
-				) }
+				)}
 			</p>
 
 			<div
 				className="woocommerce-qr-direct-login__number-tiles"
 				role="group"
-				aria-label={ __( 'Number-match candidates', 'woocommerce' ) }
+				aria-label={__('Number-match candidates', 'woocommerce')}
 			>
-				{ numbers.map( ( candidate, index ) => {
+				{numbers.map((candidate, index) => {
 					// Only the tile that was tapped shows the busy state.
 					// the other two stay disabled but un-spinnered so the
 					// merchant can see which one is being submitted.
@@ -160,72 +155,69 @@ export const QRLoginNumberMatchStep = ( {
 						inFlight && pendingChoice === candidate;
 					return (
 						<Button
-							key={ `${ candidate }-${ index }` }
+							key={`${candidate}-${index}`}
 							variant="secondary"
 							className="woocommerce-qr-direct-login__number-tile"
-							disabled={ tilesDisabled }
-							aria-disabled={ tilesDisabled }
-							isBusy={ isThisTilePending }
-							aria-label={ sprintf(
+							disabled={tilesDisabled}
+							aria-disabled={tilesDisabled}
+							isBusy={isThisTilePending}
+							aria-label={sprintf(
 								/* translators: %s: 3-digit candidate number. */
-								__(
-									'Confirm with the number %s',
-									'woocommerce'
-								),
+								__('Confirm with the number %s', 'woocommerce'),
 								candidate
-							) }
-							onClick={ () => handleChoose( candidate ) }
+							)}
+							onClick={() => handleChoose(candidate)}
 						>
-							{ candidate }
+							{candidate}
 						</Button>
 					);
-				} ) }
+				})}
 			</div>
 
 			<p
 				className="woocommerce-qr-direct-login__match-countdown"
-				aria-live={ expired ? 'polite' : 'off' }
+				aria-live={expired ? 'polite' : 'off'}
 			>
-				{ expired
-					? __( 'This sign-in attempt has expired.', 'woocommerce' )
+				{expired
+					? __('This sign-in attempt has expired.', 'woocommerce')
 					: sprintf(
 							/* translators: %d: seconds remaining before the challenge expires. */
-							__( 'Expires in %ds', 'woocommerce' ),
+							__('Expires in %ds', 'woocommerce'),
 							secondsRemaining
-					  ) }
+						)}
 			</p>
 
-			{ errorMessage && (
+			{errorMessage && (
 				<p className="woocommerce-qr-direct-login__error" role="alert">
-					{ errorMessage }
+					{errorMessage}
 				</p>
-			) }
+			)}
 
 			<div className="woocommerce-qr-direct-login__match-cancel-row">
 				<p className="woocommerce-qr-direct-login__match-cancel-text">
-					{ __( "I don't recognise this device", 'woocommerce' ) }
+					{__("I don't recognise this device", 'woocommerce')}
 				</p>
 				<Button
 					variant="secondary"
 					className="woocommerce-qr-direct-login__match-cancel-button"
-					disabled={ tilesDisabled }
-					onClick={ () => {
+					disabled={tilesDisabled}
+					onClick={() => {
 						recordEvent(
 							'mobile_app_qr_login_number_match_cancelled'
 						);
 						// Empty string is treated by the server as a non-matching
 						// pick — same one-strike rejection path as a wrong tap.
-						void handleChoose( '' );
-					} }
+						void handleChoose('');
+					}}
 				>
-					{ inFlight && pendingChoice === '' ? (
+					{inFlight && pendingChoice === '' ? (
 						<>
 							<Spinner />
-							<span>{ __( 'Cancelling…', 'woocommerce' ) }</span>
+							<span>{__('Cancelling…', 'woocommerce')}</span>
 						</>
 					) : (
-						__( 'Cancel login', 'woocommerce' )
-					) }
+						__('Cancel login', 'woocommerce')
+					)}
 				</Button>
 			</div>
 		</div>

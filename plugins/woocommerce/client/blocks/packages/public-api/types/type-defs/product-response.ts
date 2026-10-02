@@ -30,7 +30,7 @@ export interface ProductResponseItemBaseData {
 }
 
 export type ProductResponseItemData = ProductResponseItemBaseData &
-	( { key: string; name?: never } | { key?: never; name: string } );
+	({ key: string; name?: never } | { key?: never; name: string });
 
 export interface ProductResponseImageItem {
 	id: number;
@@ -55,12 +55,12 @@ export interface ProductResponseAttributeItem {
 	name: string;
 	taxonomy: string;
 	has_variations: boolean;
-	terms: Array< ProductResponseTermItem >;
+	terms: Array<ProductResponseTermItem>;
 }
 
 export interface ProductResponseVariationsItem {
 	id: number;
-	attributes: Array< ProductResponseVariationAttributeItem >;
+	attributes: Array<ProductResponseVariationAttributeItem>;
 }
 
 export interface ProductResponseVariationAttributeItem {
@@ -83,11 +83,11 @@ export interface ProductResponseItem {
 	price_html: string;
 	average_rating: string;
 	review_count: number;
-	images: Array< ProductResponseImageItem >;
-	categories: Array< ProductResponseTermItem >;
-	tags: Array< ProductResponseTermItem >;
-	attributes: Array< ProductResponseAttributeItem >;
-	variations: Array< ProductResponseVariationsItem >;
+	images: Array<ProductResponseImageItem>;
+	categories: Array<ProductResponseTermItem>;
+	tags: Array<ProductResponseTermItem>;
+	attributes: Array<ProductResponseAttributeItem>;
+	variations: Array<ProductResponseVariationsItem>;
 	has_options: boolean;
 	is_purchasable: boolean;
 	is_in_stock: boolean;
@@ -116,7 +116,7 @@ export interface ProductResponseItem {
 		single_text: string;
 	};
 	slug: string;
-	grouped_products: Array< number >;
+	grouped_products: Array<number>;
 	price: string;
 	regular_price: string;
 	sale_price: string;

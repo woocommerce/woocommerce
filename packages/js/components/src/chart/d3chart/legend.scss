@@ -99,7 +99,7 @@
 				background-color: $studio-white;
 
 				&::after {
-					content: '';
+					content: "";
 					position: absolute;
 					display: none;
 				}
@@ -162,7 +162,7 @@
 		}
 
 		&:last-child::after {
-			content: '';
+			content: "";
 			display: block;
 			height: $gap-small;
 			width: 100%;
@@ -209,9 +209,13 @@
 	text-transform: uppercase;
 
 	&::before {
-		background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2));
+		background: linear-gradient(
+			180deg,
+			rgba(0, 0, 0, 0),
+			rgba(0, 0, 0, 0.2)
+		);
 		bottom: 100%;
-		content: '';
+		content: "";
 		height: 20px;
 		left: 0;
 		opacity: 0;

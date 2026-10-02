@@ -12,21 +12,21 @@ import Settings from '../index';
 import { SCHEDULED_IMPORT_SETTING_NAME } from '../config';
 
 // Mock dependencies.
-jest.mock( '@woocommerce/data', () => ( {
-	...jest.requireActual( '@woocommerce/data' ),
+jest.mock('@woocommerce/data', () => ({
+	...jest.requireActual('@woocommerce/data'),
 	useSettings: jest.fn(),
-} ) );
+}));
 
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
+jest.mock('@wordpress/data', () => ({
+	...jest.requireActual('@wordpress/data'),
 	useDispatch: jest.fn(),
-} ) );
+}));
 
-jest.mock( '@woocommerce/tracks', () => ( {
+jest.mock('@woocommerce/tracks', () => ({
 	recordEvent: jest.fn(),
-} ) );
+}));
 
-jest.mock( '../config', () => ( {
+jest.mock('../config', () => ({
 	config: {
 		woocommerce_analytics_scheduled_import: {
 			name: 'woocommerce_analytics_scheduled_import',
@@ -48,14 +48,14 @@ jest.mock( '../config', () => ( {
 		},
 	},
 	SCHEDULED_IMPORT_SETTING_NAME: 'woocommerce_analytics_scheduled_import',
-} ) );
+}));
 
-jest.mock( '../historical-data', () => ( {
+jest.mock('../historical-data', () => ({
 	__esModule: true,
 	default: () => <div>Historical Data</div>,
-} ) );
+}));
 
-describe( 'Settings - Import Mode Modal', () => {
+describe('Settings - Import Mode Modal', () => {
 	const mockUpdateSettings = jest.fn();
 	const mockPersistSettings = jest.fn();
 	const mockUpdateAndPersistSettings = jest.fn();
@@ -64,7 +64,7 @@ describe( 'Settings - Import Mode Modal', () => {
 	const mockCreateNotice = jest.fn();
 	let settingsState;
 
-	beforeEach( () => {
+	beforeEach(() => {
 		jest.clearAllMocks();
 
 		settingsState = {
@@ -75,12 +75,12 @@ describe( 'Settings - Import Mode Modal', () => {
 			updateAndPersistSettings: mockUpdateAndPersistSettings,
 			updateSettings: mockUpdateSettings,
 			wcAdminSettings: {
-				[ SCHEDULED_IMPORT_SETTING_NAME ]: 'yes',
+				[SCHEDULED_IMPORT_SETTING_NAME]: 'yes',
 			},
 		};
-		useSettings.mockImplementation( () => settingsState );
-		useDispatch.mockImplementation( ( store ) => {
-			if ( store === 'core/notices' ) {
+		useSettings.mockImplementation(() => settingsState);
+		useDispatch.mockImplementation((store) => {
+			if (store === 'core/notices') {
 				return { createNotice: mockCreateNotice };
 			}
 			return {
@@ -89,108 +89,106 @@ describe( 'Settings - Import Mode Modal', () => {
 						? mockInvalidateReportResolutions
 						: mockInvalidateItemResolutions,
 			};
-		} );
+		});
 		window.wpNavMenuUrlUpdate = jest.fn();
-	} );
+	});
 
-	afterEach( () => {
+	afterEach(() => {
 		delete window.wcAdminFeatures;
 		delete window.wpNavMenuUrlUpdate;
 		jest.restoreAllMocks();
-	} );
-	it( 'renders import mode radio control', () => {
-		render( <Settings createNotice={ jest.fn() } query={ {} } /> );
+	});
+	it('renders import mode radio control', () => {
+		render(<Settings createNotice={jest.fn()} query={{}} />);
 
 		// Verify radio buttons are rendered.
 		expect(
-			screen.getByRole( 'radio', { name: /scheduled/i } )
+			screen.getByRole('radio', { name: /scheduled/i })
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole( 'radio', { name: /immediately/i } )
+			screen.getByRole('radio', { name: /immediately/i })
 		).toBeInTheDocument();
 
 		// Verify scheduled is selected by default.
-		expect(
-			screen.getByRole( 'radio', { name: /scheduled/i } )
-		).toBeChecked();
-	} );
+		expect(screen.getByRole('radio', { name: /scheduled/i })).toBeChecked();
+	});
 
-	it( 'shows modal when switching from scheduled to immediate mode', async () => {
-		render( <Settings createNotice={ jest.fn() } query={ {} } /> );
+	it('shows modal when switching from scheduled to immediate mode', async () => {
+		render(<Settings createNotice={jest.fn()} query={{}} />);
 
 		// Find the "Immediately" radio button.
-		const immediatelyRadio = screen.getByRole( 'radio', {
+		const immediatelyRadio = screen.getByRole('radio', {
 			name: /immediately/i,
-		} );
+		});
 
 		// Click the radio button.
-		fireEvent.click( immediatelyRadio );
+		fireEvent.click(immediatelyRadio);
 
 		// Modal should appear - WordPress Modal uses dialog role.
-		expect( await screen.findByRole( 'dialog' ) ).toBeInTheDocument();
+		expect(await screen.findByRole('dialog')).toBeInTheDocument();
 
-		expect( screen.getByText( /are you sure\?/i ) ).toBeInTheDocument();
+		expect(screen.getByText(/are you sure\?/i)).toBeInTheDocument();
 
 		expect(
 			screen.getByText(
 				/immediate updates to analytics can impact your performance/i
 			)
 		).toBeInTheDocument();
-	} );
+	});
 
-	it( 'does not update setting when modal is cancelled', async () => {
-		render( <Settings createNotice={ jest.fn() } query={ {} } /> );
+	it('does not update setting when modal is cancelled', async () => {
+		render(<Settings createNotice={jest.fn()} query={{}} />);
 
 		// Click "Immediately" radio button.
-		const immediatelyRadio = screen.getByRole( 'radio', {
+		const immediatelyRadio = screen.getByRole('radio', {
 			name: /immediately/i,
-		} );
-		fireEvent.click( immediatelyRadio );
+		});
+		fireEvent.click(immediatelyRadio);
 
 		// Wait for modal to appear.
-		expect( await screen.findByRole( 'dialog' ) ).toBeInTheDocument();
+		expect(await screen.findByRole('dialog')).toBeInTheDocument();
 
 		// Click Cancel button.
-		const cancelButton = screen.getByRole( 'button', {
+		const cancelButton = screen.getByRole('button', {
 			name: /cancel/i,
-		} );
-		fireEvent.click( cancelButton );
+		});
+		fireEvent.click(cancelButton);
 
 		// Modal should close and setting should not be updated.
-		await waitFor( () => {
-			expect( screen.queryByRole( 'dialog' ) ).not.toBeInTheDocument();
-		} );
+		await waitFor(() => {
+			expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+		});
 
-		expect( mockUpdateSettings ).not.toHaveBeenCalled();
-	} );
+		expect(mockUpdateSettings).not.toHaveBeenCalled();
+	});
 
-	it( 'updates setting when modal is confirmed', async () => {
-		render( <Settings createNotice={ jest.fn() } query={ {} } /> );
+	it('updates setting when modal is confirmed', async () => {
+		render(<Settings createNotice={jest.fn()} query={{}} />);
 
 		// Click "Immediately" radio button.
-		const immediatelyRadio = screen.getByRole( 'radio', {
+		const immediatelyRadio = screen.getByRole('radio', {
 			name: /immediately/i,
-		} );
-		fireEvent.click( immediatelyRadio );
+		});
+		fireEvent.click(immediatelyRadio);
 
 		// Wait for modal to appear.
-		expect( await screen.findByRole( 'dialog' ) ).toBeInTheDocument();
+		expect(await screen.findByRole('dialog')).toBeInTheDocument();
 
 		// Click Confirm button.
-		const confirmButton = screen.getByRole( 'button', {
+		const confirmButton = screen.getByRole('button', {
 			name: /confirm/i,
-		} );
-		fireEvent.click( confirmButton );
+		});
+		fireEvent.click(confirmButton);
 
 		// Setting should be updated.
-		expect( mockUpdateSettings ).toHaveBeenCalledWith( 'wcAdminSettings', {
+		expect(mockUpdateSettings).toHaveBeenCalledWith('wcAdminSettings', {
 			woocommerce_analytics_scheduled_import: 'no',
-		} );
-	} );
+		});
+	});
 
-	it( 'does not show modal when switching from immediate to scheduled', async () => {
+	it('does not show modal when switching from immediate to scheduled', async () => {
 		// Set initial state to immediate mode.
-		useSettings.mockReturnValue( {
+		useSettings.mockReturnValue({
 			settingsError: false,
 			isRequesting: false,
 			isDirty: false,
@@ -200,116 +198,110 @@ describe( 'Settings - Import Mode Modal', () => {
 			wcAdminSettings: {
 				woocommerce_analytics_scheduled_import: 'no',
 			},
-		} );
+		});
 
-		render( <Settings createNotice={ jest.fn() } query={ {} } /> );
+		render(<Settings createNotice={jest.fn()} query={{}} />);
 
 		// Click "Scheduled" radio button.
-		const scheduledRadio = screen.getByRole( 'radio', {
+		const scheduledRadio = screen.getByRole('radio', {
 			name: /scheduled/i,
-		} );
-		fireEvent.click( scheduledRadio );
+		});
+		fireEvent.click(scheduledRadio);
 
 		// Modal should NOT appear.
-		expect( screen.queryByRole( 'dialog' ) ).not.toBeInTheDocument();
+		expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 
 		// Setting should be updated immediately.
-		expect( mockUpdateSettings ).toHaveBeenCalledWith( 'wcAdminSettings', {
+		expect(mockUpdateSettings).toHaveBeenCalledWith('wcAdminSettings', {
 			woocommerce_analytics_scheduled_import: 'yes',
-		} );
-	} );
+		});
+	});
 
-	it( 'invalidates report resolutions only after settings are saved', () => {
+	it('invalidates report resolutions only after settings are saved', () => {
 		const { rerender } = render(
-			<Settings createNotice={ jest.fn() } query={ {} } />
+			<Settings createNotice={jest.fn()} query={{}} />
 		);
 
-		fireEvent.click(
-			screen.getByRole( 'button', { name: /save settings/i } )
-		);
+		fireEvent.click(screen.getByRole('button', { name: /save settings/i }));
 
-		expect( mockPersistSettings ).toHaveBeenCalled();
-		expect( mockInvalidateReportResolutions ).not.toHaveBeenCalled();
-		expect( mockInvalidateItemResolutions ).not.toHaveBeenCalled();
+		expect(mockPersistSettings).toHaveBeenCalled();
+		expect(mockInvalidateReportResolutions).not.toHaveBeenCalled();
+		expect(mockInvalidateItemResolutions).not.toHaveBeenCalled();
 
 		settingsState = { ...settingsState, isRequesting: true };
-		rerender( <Settings createNotice={ jest.fn() } query={ {} } /> );
-		expect( mockInvalidateReportResolutions ).not.toHaveBeenCalled();
-		expect( mockInvalidateItemResolutions ).not.toHaveBeenCalled();
+		rerender(<Settings createNotice={jest.fn()} query={{}} />);
+		expect(mockInvalidateReportResolutions).not.toHaveBeenCalled();
+		expect(mockInvalidateItemResolutions).not.toHaveBeenCalled();
 
 		settingsState = { ...settingsState, isRequesting: false };
-		rerender( <Settings createNotice={ jest.fn() } query={ {} } /> );
+		rerender(<Settings createNotice={jest.fn()} query={{}} />);
 
-		expect( useDispatch ).toHaveBeenCalledWith( 'core/notices' );
-		expect( useDispatch ).toHaveBeenCalledWith( reportsStore );
-		expect( useDispatch ).toHaveBeenCalledWith( itemsStore );
-		expect( mockInvalidateReportResolutions ).toHaveBeenNthCalledWith(
+		expect(useDispatch).toHaveBeenCalledWith('core/notices');
+		expect(useDispatch).toHaveBeenCalledWith(reportsStore);
+		expect(useDispatch).toHaveBeenCalledWith(itemsStore);
+		expect(mockInvalidateReportResolutions).toHaveBeenNthCalledWith(
 			1,
 			'getReportItems'
 		);
-		expect( mockInvalidateReportResolutions ).toHaveBeenNthCalledWith(
+		expect(mockInvalidateReportResolutions).toHaveBeenNthCalledWith(
 			2,
 			'getReportStats'
 		);
-		expect( mockInvalidateItemResolutions ).toHaveBeenCalledWith(
-			'getItems'
-		);
-	} );
+		expect(mockInvalidateItemResolutions).toHaveBeenCalledWith('getItems');
+	});
 
-	it( 'does not invalidate report resolutions when saving fails', () => {
+	it('does not invalidate report resolutions when saving fails', () => {
 		const { rerender } = render(
-			<Settings createNotice={ jest.fn() } query={ {} } />
+			<Settings createNotice={jest.fn()} query={{}} />
 		);
 
 		settingsState = { ...settingsState, isRequesting: true };
-		rerender( <Settings createNotice={ jest.fn() } query={ {} } /> );
+		rerender(<Settings createNotice={jest.fn()} query={{}} />);
 		settingsState = {
 			...settingsState,
 			isRequesting: false,
 			settingsError: true,
 		};
-		rerender( <Settings createNotice={ jest.fn() } query={ {} } /> );
+		rerender(<Settings createNotice={jest.fn()} query={{}} />);
 
-		expect( mockInvalidateReportResolutions ).not.toHaveBeenCalled();
-		expect( mockInvalidateItemResolutions ).not.toHaveBeenCalled();
-		expect( mockCreateNotice ).toHaveBeenCalledWith(
+		expect(mockInvalidateReportResolutions).not.toHaveBeenCalled();
+		expect(mockInvalidateItemResolutions).not.toHaveBeenCalled();
+		expect(mockCreateNotice).toHaveBeenCalledWith(
 			'error',
 			'There was an error saving your settings. Please try again.'
 		);
-	} );
+	});
 
-	it( 'invalidates report resolutions after resetting defaults', () => {
-		jest.spyOn( window, 'confirm' ).mockReturnValue( true );
+	it('invalidates report resolutions after resetting defaults', () => {
+		jest.spyOn(window, 'confirm').mockReturnValue(true);
 		const { rerender } = render(
-			<Settings createNotice={ jest.fn() } query={ {} } />
+			<Settings createNotice={jest.fn()} query={{}} />
 		);
 
 		fireEvent.click(
-			screen.getByRole( 'button', { name: /reset defaults/i } )
+			screen.getByRole('button', { name: /reset defaults/i })
 		);
 
-		expect( mockUpdateAndPersistSettings ).toHaveBeenCalledWith(
+		expect(mockUpdateAndPersistSettings).toHaveBeenCalledWith(
 			'wcAdminSettings',
 			{
-				[ SCHEDULED_IMPORT_SETTING_NAME ]: 'yes',
+				[SCHEDULED_IMPORT_SETTING_NAME]: 'yes',
 			}
 		);
-		expect( mockInvalidateReportResolutions ).not.toHaveBeenCalled();
-		expect( mockInvalidateItemResolutions ).not.toHaveBeenCalled();
+		expect(mockInvalidateReportResolutions).not.toHaveBeenCalled();
+		expect(mockInvalidateItemResolutions).not.toHaveBeenCalled();
 
 		settingsState = { ...settingsState, isRequesting: true };
-		rerender( <Settings createNotice={ jest.fn() } query={ {} } /> );
+		rerender(<Settings createNotice={jest.fn()} query={{}} />);
 		settingsState = { ...settingsState, isRequesting: false };
-		rerender( <Settings createNotice={ jest.fn() } query={ {} } /> );
+		rerender(<Settings createNotice={jest.fn()} query={{}} />);
 
-		expect( mockInvalidateReportResolutions ).toHaveBeenCalledWith(
+		expect(mockInvalidateReportResolutions).toHaveBeenCalledWith(
 			'getReportItems'
 		);
-		expect( mockInvalidateReportResolutions ).toHaveBeenCalledWith(
+		expect(mockInvalidateReportResolutions).toHaveBeenCalledWith(
 			'getReportStats'
 		);
-		expect( mockInvalidateItemResolutions ).toHaveBeenCalledWith(
-			'getItems'
-		);
-	} );
-} );
+		expect(mockInvalidateItemResolutions).toHaveBeenCalledWith('getItems');
+	});
+});

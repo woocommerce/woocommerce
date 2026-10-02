@@ -24,19 +24,19 @@ export const PreviewSaveGuard = () => {
 	 *
 	 * @param {Event} event The triggered event.
 	 */
-	const guard = async ( event ) => {
+	const guard = async (event) => {
 		const target = event.target;
 
 		// Find the triggering element by the selector and early return if not found.
-		const triggerEl = target?.closest( selector );
-		if ( ! triggerEl ) {
+		const triggerEl = target?.closest(selector);
+		if (!triggerEl) {
 			return;
 		}
 
-		const editorStoreInstance = select( editorStore );
+		const editorStoreInstance = select(editorStore);
 		const isDirty = editorStoreInstance?.isEditedPostDirty();
 
-		if ( ! isDirty ) {
+		if (!isDirty) {
 			return;
 		}
 
@@ -45,7 +45,7 @@ export const PreviewSaveGuard = () => {
 		event.stopPropagation();
 		event.stopImmediatePropagation();
 
-		void dispatch( noticesStore ).createNotice(
+		void dispatch(noticesStore).createNotice(
 			'warning',
 			__(
 				'You have unsaved changes. Please save the post before previewing.',
@@ -64,38 +64,38 @@ export const PreviewSaveGuard = () => {
 	 * @param {KeyboardEvent} event The triggered event.
 	 */
 	const keydownHandler = useCallback(
-		( event ) => {
+		(event) => {
 			try {
 				const target = event.target;
 				if (
-					( event.key === 'Enter' || event.key === ' ' ) &&
-					target?.closest( selector )
+					(event.key === 'Enter' || event.key === ' ') &&
+					target?.closest(selector)
 				) {
-					void guard( event );
+					void guard(event);
 				}
-			} catch ( error ) {
+			} catch (error) {
 				// eslint-disable-next-line no-console
-				console.warn( 'Preview save message guard error:', error );
+				console.warn('Preview save message guard error:', error);
 			}
 		},
-		[ selector ]
+		[selector]
 	);
 
-	useEffect( () => {
+	useEffect(() => {
 		// Add event listeners when the component is mounted.
 		// We use the 'capture' phase to ensure our handler runs before the default React handler.
-		document.addEventListener( 'click', guard, true );
-		document.addEventListener( 'auxclick', guard, true );
-		document.addEventListener( 'keydown', keydownHandler, true );
+		document.addEventListener('click', guard, true);
+		document.addEventListener('auxclick', guard, true);
+		document.addEventListener('keydown', keydownHandler, true);
 
 		// The cleanup function, which runs when the component is unmounted.
 		// This ensures the listeners are properly removed, preventing memory leaks.
 		return () => {
-			document.removeEventListener( 'click', guard, true );
-			document.removeEventListener( 'auxclick', guard, true );
-			document.removeEventListener( 'keydown', keydownHandler, true );
+			document.removeEventListener('click', guard, true);
+			document.removeEventListener('auxclick', guard, true);
+			document.removeEventListener('keydown', keydownHandler, true);
 		};
-	}, [ keydownHandler ] );
+	}, [keydownHandler]);
 
 	return null;
 };

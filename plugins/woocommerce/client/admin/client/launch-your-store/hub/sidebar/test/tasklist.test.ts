@@ -1,56 +1,56 @@
 // Mock problematic imports before importing the module under test.
 jest.mock(
 	'@wordpress/edit-site/build-module/components/sidebar-navigation-item',
-	() => ( {
+	() => ({
 		__esModule: true,
 		default: () => null,
-	} )
+	})
 );
 
-jest.mock( '@woocommerce/navigation', () => ( {
+jest.mock('@woocommerce/navigation', () => ({
 	getNewPath: jest.fn(),
 	navigateTo: jest.fn(),
-} ) );
+}));
 
-jest.mock( '@wordpress/hooks', () => ( {
-	applyFilters: jest.fn( ( _filter, value ) => value ),
-} ) );
+jest.mock('@wordpress/hooks', () => ({
+	applyFilters: jest.fn((_filter, value) => value),
+}));
 
-jest.mock( '@woocommerce/tracks', () => ( {
+jest.mock('@woocommerce/tracks', () => ({
 	recordEvent: jest.fn(),
-} ) );
+}));
 
-jest.mock( '@woocommerce/onboarding', () => ( {
-	accessTaskReferralStorage: jest.fn( () => ( {
+jest.mock('@woocommerce/onboarding', () => ({
+	accessTaskReferralStorage: jest.fn(() => ({
 		setWithExpiry: jest.fn(),
-	} ) ),
-	createStorageUtils: jest.fn( () => ( {
-		getWithExpiry: jest.fn( () => [] ),
+	})),
+	createStorageUtils: jest.fn(() => ({
+		getWithExpiry: jest.fn(() => []),
 		setWithExpiry: jest.fn(),
-	} ) ),
-} ) );
+	})),
+}));
 
-jest.mock( '@woocommerce/settings', () => ( {
-	getAdminLink: jest.fn( ( path ) => path ),
-} ) );
+jest.mock('@woocommerce/settings', () => ({
+	getAdminLink: jest.fn((path) => path),
+}));
 
-jest.mock( '~/settings-payments/utils', () => ( {
+jest.mock('~/settings-payments/utils', () => ({
 	recordPaymentsOnboardingEvent: jest.fn(),
-} ) );
+}));
 
 // Mock the entire @woocommerce/data module to avoid complex initialization.
-jest.mock( '@woocommerce/data', () => ( {
+jest.mock('@woocommerce/data', () => ({
 	onboardingStore: 'onboarding-store',
-} ) );
+}));
 
 // Create a mock function for resolveSelect's chain.
 const mockGetTaskListsByIds = jest.fn();
 
-jest.mock( '@wordpress/data', () => ( {
-	resolveSelect: jest.fn( () => ( {
+jest.mock('@wordpress/data', () => ({
+	resolveSelect: jest.fn(() => ({
 		getTaskListsByIds: mockGetTaskListsByIds,
-	} ) ),
-} ) );
+	})),
+}));
 
 /**
  * Internal dependencies
@@ -86,7 +86,7 @@ interface TaskType {
 	isInProgress: boolean;
 	inProgressLabel: string;
 	recordViewEvent: boolean;
-	additionalData?: Record< string, unknown >;
+	additionalData?: Record<string, unknown>;
 }
 
 /**
@@ -95,7 +95,7 @@ interface TaskType {
  * @param overrides - Partial TaskType to override default values.
  * @return A complete mock TaskType object.
  */
-const createMockTask = ( overrides: Partial< TaskType > = {} ): TaskType => ( {
+const createMockTask = (overrides: Partial<TaskType> = {}): TaskType => ({
 	id: 'test-task',
 	parentId: '',
 	title: 'Test Task',
@@ -121,7 +121,7 @@ const createMockTask = ( overrides: Partial< TaskType > = {} ): TaskType => ( {
 	inProgressLabel: '',
 	recordViewEvent: false,
 	...overrides,
-} );
+});
 
 /**
  * Creates a mock tasklist array for getTaskListsByIds.
@@ -129,7 +129,7 @@ const createMockTask = ( overrides: Partial< TaskType > = {} ): TaskType => ( {
  * @param tasks - The tasks to include in the tasklist.
  * @return A mock tasklist array.
  */
-const createMockTasklistResponse = ( tasks: TaskType[] ) => [
+const createMockTasklistResponse = (tasks: TaskType[]) => [
 	{
 		id: 'setup',
 		title: 'Setup',
@@ -143,50 +143,50 @@ const createMockTasklistResponse = ( tasks: TaskType[] ) => [
 	},
 ];
 
-describe( 'getPaymentsTaskFromLysTasklist', () => {
+describe('getPaymentsTaskFromLysTasklist', () => {
 	let consoleErrorSpy: jest.SpyInstance;
 
-	beforeEach( () => {
+	beforeEach(() => {
 		jest.clearAllMocks();
 		// Spy on console.error to verify error logging.
 		consoleErrorSpy = jest
-			.spyOn( console, 'error' )
-			.mockImplementation( () => {} );
-	} );
+			.spyOn(console, 'error')
+			.mockImplementation(() => {});
+	});
 
-	afterEach( () => {
+	afterEach(() => {
 		consoleErrorSpy.mockRestore();
-	} );
+	});
 
-	describe( 'successful retrieval', () => {
-		it( 'returns the payments task when fullLysTaskList contains a task with id "payments"', async () => {
-			const paymentsTask = createMockTask( {
+	describe('successful retrieval', () => {
+		it('returns the payments task when fullLysTaskList contains a task with id "payments"', async () => {
+			const paymentsTask = createMockTask({
 				id: 'payments',
 				title: 'Set up payments',
-			} );
-			const otherTask = createMockTask( {
+			});
+			const otherTask = createMockTask({
 				id: 'shipping',
 				title: 'Set up shipping',
-			} );
+			});
 
 			mockGetTaskListsByIds.mockResolvedValue(
-				createMockTasklistResponse( [ paymentsTask, otherTask ] )
+				createMockTasklistResponse([paymentsTask, otherTask])
 			);
 
 			const result = await getPaymentsTaskFromLysTasklist();
 
-			expect( result ).toEqual( paymentsTask );
-			expect( consoleErrorSpy ).not.toHaveBeenCalled();
-		} );
-	} );
+			expect(result).toEqual(paymentsTask);
+			expect(consoleErrorSpy).not.toHaveBeenCalled();
+		});
+	});
 
-	describe( 'invalid tasklist data', () => {
+	describe('invalid tasklist data', () => {
 		// Note: When tasks is not an array, getLysTasklist() throws an error
 		// when trying to call .filter() on it. The error is caught by the
 		// try/catch in getPaymentsTaskFromLysTasklist and logged.
-		it( 'returns undefined and logs an error when tasks is not an array', async () => {
+		it('returns undefined and logs an error when tasks is not an array', async () => {
 			// Return a tasklist where tasks is not an array.
-			mockGetTaskListsByIds.mockResolvedValue( [
+			mockGetTaskListsByIds.mockResolvedValue([
 				{
 					id: 'setup',
 					title: 'Setup',
@@ -198,20 +198,20 @@ describe( 'getPaymentsTaskFromLysTasklist', () => {
 					keepCompletedTaskList: 'no' as const,
 					tasks: 'not-an-array',
 				},
-			] );
+			]);
 
 			const result = await getPaymentsTaskFromLysTasklist();
 
-			expect( result ).toBeUndefined();
+			expect(result).toBeUndefined();
 			// Error is caught from getLysTasklist when it tries to filter.
-			expect( consoleErrorSpy ).toHaveBeenCalledWith(
+			expect(consoleErrorSpy).toHaveBeenCalledWith(
 				'Error fetching payments task:',
-				expect.any( TypeError )
+				expect.any(TypeError)
 			);
-		} );
+		});
 
-		it( 'returns undefined and logs an error when tasks is null', async () => {
-			mockGetTaskListsByIds.mockResolvedValue( [
+		it('returns undefined and logs an error when tasks is null', async () => {
+			mockGetTaskListsByIds.mockResolvedValue([
 				{
 					id: 'setup',
 					title: 'Setup',
@@ -223,20 +223,20 @@ describe( 'getPaymentsTaskFromLysTasklist', () => {
 					keepCompletedTaskList: 'no' as const,
 					tasks: null,
 				},
-			] );
+			]);
 
 			const result = await getPaymentsTaskFromLysTasklist();
 
-			expect( result ).toBeUndefined();
+			expect(result).toBeUndefined();
 			// Error is caught from getLysTasklist when it tries to filter.
-			expect( consoleErrorSpy ).toHaveBeenCalledWith(
+			expect(consoleErrorSpy).toHaveBeenCalledWith(
 				'Error fetching payments task:',
-				expect.any( TypeError )
+				expect.any(TypeError)
 			);
-		} );
+		});
 
-		it( 'returns undefined and logs an error when tasks is undefined', async () => {
-			mockGetTaskListsByIds.mockResolvedValue( [
+		it('returns undefined and logs an error when tasks is undefined', async () => {
+			mockGetTaskListsByIds.mockResolvedValue([
 				{
 					id: 'setup',
 					title: 'Setup',
@@ -248,76 +248,76 @@ describe( 'getPaymentsTaskFromLysTasklist', () => {
 					keepCompletedTaskList: 'no' as const,
 					tasks: undefined,
 				},
-			] );
+			]);
 
 			const result = await getPaymentsTaskFromLysTasklist();
 
-			expect( result ).toBeUndefined();
+			expect(result).toBeUndefined();
 			// Error is caught from getLysTasklist when it tries to filter.
-			expect( consoleErrorSpy ).toHaveBeenCalledWith(
+			expect(consoleErrorSpy).toHaveBeenCalledWith(
 				'Error fetching payments task:',
-				expect.any( TypeError )
+				expect.any(TypeError)
 			);
-		} );
-	} );
+		});
+	});
 
-	describe( 'payments task absent', () => {
-		it( 'returns undefined when the payments task is absent from fullLysTaskList', async () => {
-			const shippingTask = createMockTask( {
+	describe('payments task absent', () => {
+		it('returns undefined when the payments task is absent from fullLysTaskList', async () => {
+			const shippingTask = createMockTask({
 				id: 'shipping',
 				title: 'Set up shipping',
-			} );
-			const taxTask = createMockTask( {
+			});
+			const taxTask = createMockTask({
 				id: 'tax',
 				title: 'Set up tax',
-			} );
+			});
 
 			mockGetTaskListsByIds.mockResolvedValue(
-				createMockTasklistResponse( [ shippingTask, taxTask ] )
+				createMockTasklistResponse([shippingTask, taxTask])
 			);
 
 			const result = await getPaymentsTaskFromLysTasklist();
 
-			expect( result ).toBeUndefined();
-			expect( consoleErrorSpy ).not.toHaveBeenCalled();
-		} );
+			expect(result).toBeUndefined();
+			expect(consoleErrorSpy).not.toHaveBeenCalled();
+		});
 
-		it( 'returns undefined when fullLysTaskList is an empty array', async () => {
+		it('returns undefined when fullLysTaskList is an empty array', async () => {
 			mockGetTaskListsByIds.mockResolvedValue(
-				createMockTasklistResponse( [] )
+				createMockTasklistResponse([])
 			);
 
 			const result = await getPaymentsTaskFromLysTasklist();
 
-			expect( result ).toBeUndefined();
-			expect( consoleErrorSpy ).not.toHaveBeenCalled();
-		} );
-	} );
+			expect(result).toBeUndefined();
+			expect(consoleErrorSpy).not.toHaveBeenCalled();
+		});
+	});
 
-	describe( 'error handling', () => {
-		it( 'returns undefined and logs an error when getLysTasklist throws', async () => {
-			const testError = new Error( 'Network error' );
-			mockGetTaskListsByIds.mockRejectedValue( testError );
+	describe('error handling', () => {
+		it('returns undefined and logs an error when getLysTasklist throws', async () => {
+			const testError = new Error('Network error');
+			mockGetTaskListsByIds.mockRejectedValue(testError);
 
 			const result = await getPaymentsTaskFromLysTasklist();
 
-			expect( result ).toBeUndefined();
-			expect( consoleErrorSpy ).toHaveBeenCalledWith(
+			expect(result).toBeUndefined();
+			expect(consoleErrorSpy).toHaveBeenCalledWith(
 				'Error fetching payments task:',
 				testError
 			);
-		} );
+		});
 
-		it( 'returns undefined and logs an error when getLysTasklist throws a non-Error value', async () => {
-			mockGetTaskListsByIds.mockRejectedValue( 'String error' );
+		it('returns undefined and logs an error when getLysTasklist throws a non-Error value', async () => {
+			mockGetTaskListsByIds.mockRejectedValue('String error');
 
 			const result = await getPaymentsTaskFromLysTasklist();
 
-			expect( result ).toBeUndefined();
-			expect( consoleErrorSpy ).toHaveBeenCalledWith(
+			expect(result).toBeUndefined();
+			expect(consoleErrorSpy).toHaveBeenCalledWith(
 				'Error fetching payments task:',
 				'String error'
 			);
-		} );
-	} );
-} );
+		});
+	});
+});

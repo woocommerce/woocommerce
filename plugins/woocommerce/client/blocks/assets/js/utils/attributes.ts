@@ -13,7 +13,7 @@ import {
 } from '@woocommerce/types';
 import { dispatch, select } from '@wordpress/data';
 
-const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
+const ATTRIBUTES = getSetting<AttributeSetting[]>('attributes', []);
 
 /**
  * Format an attribute from the settings into an object with standardized keys.
@@ -23,11 +23,11 @@ const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 const attributeSettingToObject = (
 	attribute: AttributeSetting
 ): AttributeObjectForDisplay | null => {
-	if ( ! attribute || ! attribute.attribute_name ) {
+	if (!attribute || !attribute.attribute_name) {
 		return null;
 	}
 	return {
-		id: parseInt( attribute.attribute_id, 10 ),
+		id: parseInt(attribute.attribute_id, 10),
 		name: attribute.attribute_name,
 		taxonomy: 'pa_' + attribute.attribute_name,
 		label: attribute.attribute_label,
@@ -39,11 +39,11 @@ const attributeSettingToObject = (
  * Format all attribute settings into objects.
  */
 const attributeObjects = ATTRIBUTES.reduce(
-	( acc: AttributeObjectForDisplay[], current ) => {
-		const attributeObject = attributeSettingToObject( current );
+	(acc: AttributeObjectForDisplay[], current) => {
+		const attributeObject = attributeSettingToObject(current);
 
-		if ( attributeObject && attributeObject.id ) {
-			acc.push( attributeObject );
+		if (attributeObject && attributeObject.id) {
+			acc.push(attributeObject);
 		}
 
 		return acc;
@@ -66,7 +66,7 @@ export const convertAttributeObjectToSearchItem = (
 		parent,
 		breadcrumbs: [],
 		children: [],
-		value: isAttributeTerm( attribute ) ? attribute.attr_slug : '',
+		value: isAttributeTerm(attribute) ? attribute.attr_slug : '',
 	};
 };
 
@@ -76,13 +76,13 @@ export const convertAttributeObjectToSearchItem = (
  * @param {number} attributeId The attribute ID.
  * @return {Object|undefined} The attribute object if it exists.
  */
-export const getAttributeFromID = ( attributeId: number ) => {
-	if ( ! attributeId ) {
+export const getAttributeFromID = (attributeId: number) => {
+	if (!attributeId) {
 		return;
 	}
-	return attributeObjects.find( ( attribute ) => {
+	return attributeObjects.find((attribute) => {
 		return attribute.id === attributeId;
-	} );
+	});
 };
 
 /**
@@ -91,13 +91,13 @@ export const getAttributeFromID = ( attributeId: number ) => {
  * @param {string} taxonomy The attribute taxonomy name e.g. pa_color.
  * @return {Object|undefined} The attribute object if it exists.
  */
-export const getAttributeFromTaxonomy = ( taxonomy: string ) => {
-	if ( ! taxonomy ) {
+export const getAttributeFromTaxonomy = (taxonomy: string) => {
+	if (!taxonomy) {
 		return;
 	}
-	return attributeObjects.find( ( attribute ) => {
+	return attributeObjects.find((attribute) => {
 		return attribute.taxonomy === taxonomy;
-	} );
+	});
 };
 
 /**
@@ -106,11 +106,11 @@ export const getAttributeFromTaxonomy = ( taxonomy: string ) => {
  * @param {number} attributeId The attribute ID.
  * @return {string} The taxonomy name.
  */
-export const getTaxonomyFromAttributeId = ( attributeId: number ) => {
-	if ( ! attributeId ) {
+export const getTaxonomyFromAttributeId = (attributeId: number) => {
+	if (!attributeId) {
 		return null;
 	}
-	const attribute = getAttributeFromID( attributeId );
+	const attribute = getAttributeFromID(attributeId);
 	return attribute ? attribute.taxonomy : null;
 };
 
@@ -124,24 +124,24 @@ export const updateAttributeInSiblingBlock = (
 	newValue: unknown,
 	siblingBlockName: string
 ) => {
-	const store = select( 'core/block-editor' );
-	const actions = dispatch( 'core/block-editor' );
-	const parentBlocks = store.getBlockParents( clientId );
+	const store = select('core/block-editor');
+	const actions = dispatch('core/block-editor');
+	const parentBlocks = store.getBlockParents(clientId);
 
 	let shippingMethodsBlockClientId = '';
 
 	// Loop through parent block's children until we find woocommerce/checkout-shipping-methods-block.
 	// Also set this attribute in the woocommerce/checkout-shipping-methods-block.
-	parentBlocks.forEach( ( parent ) => {
+	parentBlocks.forEach((parent) => {
 		const childBlock = store
-			.getBlock( parent )
-			.innerBlocks.find( ( child ) => child.name === siblingBlockName );
-		if ( ! childBlock ) {
+			.getBlock(parent)
+			.innerBlocks.find((child) => child.name === siblingBlockName);
+		if (!childBlock) {
 			return;
 		}
 		shippingMethodsBlockClientId = childBlock.clientId;
-	} );
-	actions.updateBlockAttributes( shippingMethodsBlockClientId, {
-		[ attribute ]: newValue,
-	} );
+	});
+	actions.updateBlockAttributes(shippingMethodsBlockClientId, {
+		[attribute]: newValue,
+	});
 };

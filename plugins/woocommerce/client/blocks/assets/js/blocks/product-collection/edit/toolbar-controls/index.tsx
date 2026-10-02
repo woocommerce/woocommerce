@@ -10,25 +10,20 @@ import CollectionChooserToolbar from './collection-chooser-toolbar';
 import type { ProductCollectionContentProps } from '../../types';
 import { getCollectionByName } from '../../collections';
 
-export default function ToolbarControls(
-	props: ProductCollectionContentProps
-) {
+export default function ToolbarControls(props: ProductCollectionContentProps) {
 	const { openCollectionSelectionModal } = props;
 
-	const collection = getCollectionByName( props.attributes.collection );
+	const collection = getCollectionByName(props.attributes.collection);
 	const showCollectionChooserToolbar =
-		collection?.scope?.includes( 'block' ) ||
-		collection?.scope === undefined;
+		collection?.scope?.includes('block') || collection?.scope === undefined;
 
 	return (
 		<BlockControls>
-			{ showCollectionChooserToolbar && (
+			{showCollectionChooserToolbar && (
 				<CollectionChooserToolbar
-					openCollectionSelectionModal={
-						openCollectionSelectionModal
-					}
+					openCollectionSelectionModal={openCollectionSelectionModal}
 				/>
-			) }
+			)}
 		</BlockControls>
 	);
 }

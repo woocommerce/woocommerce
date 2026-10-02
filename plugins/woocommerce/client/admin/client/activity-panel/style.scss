@@ -117,12 +117,16 @@
 			box-shadow: none;
 		}
 		&:focus-visible,
-		&.components-button:not(:disabled):not([aria-disabled="true"]):focus-visible {
-			box-shadow: inset -1px -1px 0 $gray-700, inset 1px 1px 0 $gray-700;
+		&.components-button:not(:disabled):not(
+				[aria-disabled="true"]
+			):focus-visible {
+			box-shadow:
+				inset -1px -1px 0 $gray-700,
+				inset 1px 1px 0 $gray-700;
 		}
 
 		// Hide display options if we're in single column.
-		@include breakpoint( "<782px" ) {
+		@include breakpoint("<782px") {
 			&.display-options {
 				display: none;
 			}
@@ -153,7 +157,7 @@
 	transition-property: transform box-shadow;
 	transition-duration: 300ms;
 	transition-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
-	@media screen and ( prefers-reduced-motion: reduce ) {
+	@media screen and (prefers-reduced-motion: reduce) {
 		transition-duration: 1ms;
 	}
 }
@@ -166,28 +170,41 @@
 		outline: none;
 	}
 
-	height: calc(100vh - var(--woocommerce-admin-header-height) - #{$adminbar-height-mobile});
+	height: calc(
+		100vh - var(--woocommerce-admin-header-height) -
+			#{$adminbar-height-mobile}
+	);
 	background: $gray-100;
 	width: 430px;
-	@include breakpoint( "<782px" ) {
+	@include breakpoint("<782px") {
 		width: 100%;
 	}
 	transform: translateX(100%);
 	@include activity-panel-slide();
 	position: fixed;
 	right: 0;
-	top: calc(var(--woocommerce-admin-header-height) + #{$adminbar-height-mobile + $header-border-width});
+	top: calc(
+		var(--woocommerce-admin-header-height) + #{$adminbar-height-mobile +
+			$header-border-width}
+	);
 	z-index: 1000;
 	overflow-x: hidden;
 	overflow-y: auto;
 
-	@include breakpoint( ">782px" ) {
-		height: calc(100vh - var(--woocommerce-admin-header-height) - #{$adminbar-height});
-		top: calc(var(--woocommerce-admin-header-height) + #{$adminbar-height + $header-border-width});
+	@include breakpoint(">782px") {
+		height: calc(
+			100vh - var(--woocommerce-admin-header-height) - #{$adminbar-height}
+		);
+		top: calc(
+			var(--woocommerce-admin-header-height) + #{$adminbar-height +
+				$header-border-width}
+		);
 	}
 	.is-wp-toolbar-disabled & {
 		height: calc(100vh - var(--woocommerce-admin-header-height));
-		top: calc(var(--woocommerce-admin-header-height) + #{$header-border-width});
+		top: calc(
+			var(--woocommerce-admin-header-height) + #{$header-border-width}
+		);
 	}
 	.has-woocommerce-navigation & {
 		height: calc(100vh - var(--woocommerce-admin-header-height));
@@ -203,7 +220,7 @@
 		animation: tabSwitch;
 		animation-duration: 300ms;
 
-		@media screen and ( prefers-reduced-motion: reduce ) {
+		@media screen and (prefers-reduced-motion: reduce) {
 			animation: none;
 		}
 	}

@@ -14,18 +14,18 @@ interface BlockProps {
 	columns: number;
 }
 
-const Block = ( { className, columns }: BlockProps ): JSX.Element => {
+const Block = ({ className, columns }: BlockProps): JSX.Element => {
 	const { crossSellsProducts } = useStoreCart();
 
-	if ( typeof columns === 'undefined' ) {
+	if (typeof columns === 'undefined') {
 		columns = metadata.attributes.columns.default;
 	}
 
 	return (
 		<CartCrossSellsProductList
-			className={ className }
-			columns={ columns }
-			products={ crossSellsProducts }
+			className={className}
+			columns={columns}
+			products={crossSellsProducts}
 		/>
 	);
 };

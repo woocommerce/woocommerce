@@ -19,10 +19,10 @@ export const config = {
 	__experimentalUseThunks: true,
 };
 
-export const store = createReduxStore( STORE_KEY, config );
-register( store );
+export const store = createReduxStore(STORE_KEY, config);
+register(store);
 export type CheckoutStoreDescriptor = typeof store;
 
-subscribe( pushChanges, store );
+subscribe(pushChanges, store);
 
 export const CHECKOUT_STORE_KEY = STORE_KEY;

@@ -35,7 +35,7 @@ const defaultTemplate = [
 			level: 3,
 			content: sprintf(
 				/* translators: %s: site name */
-				__( 'Create an account with %s', 'woocommerce' ),
+				__('Create an account with %s', 'woocommerce'),
 				SITE_TITLE
 			),
 		},
@@ -49,13 +49,13 @@ const defaultTemplate = [
 			[
 				'core/list-item',
 				{
-					content: __( 'Faster future purchases', 'woocommerce' ),
+					content: __('Faster future purchases', 'woocommerce'),
 				},
 			],
 			[
 				'core/list-item',
 				{
-					content: __( 'Securely save payment info', 'woocommerce' ),
+					content: __('Securely save payment info', 'woocommerce'),
 				},
 			],
 			[
@@ -75,95 +75,90 @@ type EditProps = {
 	attributes: {
 		hasDarkControls: boolean;
 	};
-	setAttributes: ( attrs: BlockAttributes ) => void;
+	setAttributes: (attrs: BlockAttributes) => void;
 };
 
-export const Edit = ( {
+export const Edit = ({
 	attributes,
 	setAttributes,
-}: EditProps ): JSX.Element | null => {
-	const className = clsx( 'wc-block-order-confirmation-create-account', {
+}: EditProps): JSX.Element | null => {
+	const className = clsx('wc-block-order-confirmation-create-account', {
 		'has-dark-controls': attributes.hasDarkControls,
-	} );
-	const blockProps = useBlockProps( {
+	});
+	const blockProps = useBlockProps({
 		className,
-	} );
-	const isEnabled = getSetting( 'delayedAccountCreationEnabled', true );
+	});
+	const isEnabled = getSetting('delayedAccountCreationEnabled', true);
 
-	if ( ! isEnabled ) {
+	if (!isEnabled) {
 		return null;
 	}
 
-	const generatePassword = getSetting( 'registrationGeneratePassword', true );
+	const generatePassword = getSetting('registrationGeneratePassword', true);
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<InnerBlocks
-				allowedBlocks={ [
+				allowedBlocks={[
 					'core/heading',
 					'core/paragraph',
 					'core/list',
 					'core/list-item',
 					'core/image',
-				] }
-				template={ defaultTemplate }
-				templateLock={ false }
+				]}
+				template={defaultTemplate}
+				templateLock={false}
 			/>
 			<Disabled>
-				<Form isEditor={ true } />
+				<Form isEditor={true} />
 			</Disabled>
-			{ ! generatePassword && (
+			{!generatePassword && (
 				<InspectorControls>
 					<ToolsPanel
-						label={ __( 'Style', 'woocommerce' ) }
-						resetAll={ () => {
-							setAttributes( { hasDarkControls: false } );
-						} }
+						label={__('Style', 'woocommerce')}
+						resetAll={() => {
+							setAttributes({ hasDarkControls: false });
+						}}
 					>
 						<ToolsPanelItem
-							hasValue={ () =>
-								attributes.hasDarkControls === true
-							}
-							label={ __( 'Dark mode inputs', 'woocommerce' ) }
-							onDeselect={ () =>
-								setAttributes( { hasDarkControls: false } )
+							hasValue={() => attributes.hasDarkControls === true}
+							label={__('Dark mode inputs', 'woocommerce')}
+							onDeselect={() =>
+								setAttributes({ hasDarkControls: false })
 							}
 							isShownByDefault
 						>
 							<ToggleControl
 								__nextHasNoMarginBottom
-								label={ __(
-									'Dark mode inputs',
-									'woocommerce'
-								) }
-								help={ __(
+								label={__('Dark mode inputs', 'woocommerce')}
+								help={__(
 									'Inputs styled specifically for use on dark background colors.',
 									'woocommerce'
-								) }
-								checked={ attributes.hasDarkControls }
-								onChange={ () =>
-									setAttributes( {
+								)}
+								checked={attributes.hasDarkControls}
+								onChange={() =>
+									setAttributes({
 										hasDarkControls:
-											! attributes.hasDarkControls,
-									} )
+											!attributes.hasDarkControls,
+									})
 								}
 							/>
 						</ToolsPanelItem>
 					</ToolsPanel>
 				</InspectorControls>
-			) }
+			)}
 			<InspectorControls>
 				<PanelBody>
 					<p>
-						{ __(
+						{__(
 							'Configure this feature in your store settings.',
 							'woocommerce'
-						) }
+						)}
 					</p>
 					<ExternalLink
-						href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=account` }
+						href={`${ADMIN_URL}admin.php?page=wc-settings&tab=account`}
 					>
-						{ __( 'Manage account settings', 'woocommerce' ) }
+						{__('Manage account settings', 'woocommerce')}
 					</ExternalLink>
 				</PanelBody>
 			</InspectorControls>
@@ -173,7 +168,7 @@ export const Edit = ( {
 
 export const Save = (): JSX.Element => {
 	return (
-		<div { ...useBlockProps.save() }>
+		<div {...useBlockProps.save()}>
 			<InnerBlocks.Content />
 		</div>
 	);

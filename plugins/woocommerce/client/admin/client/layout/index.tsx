@@ -54,10 +54,10 @@ import { TransientNotices } from './transient-notices';
 import { usePageClasses, Page } from './hooks/use-page-classes';
 import MarketplaceBanner from '../marketplace/components/banner/banner';
 
-const BaseLayout = ( { page }: { page: Page } ) => {
+const BaseLayout = ({ page }: { page: Page }) => {
 	const { activePlugins, installedPlugins, isJetpackConnected } = useSelect(
-		( select ) => {
-			const selector = select( pluginsStore );
+		(select) => {
+			const selector = select(pluginsStore);
 
 			return {
 				activePlugins: selector.getActivePlugins(),
@@ -68,44 +68,44 @@ const BaseLayout = ( { page }: { page: Page } ) => {
 		[]
 	);
 	const location = useLocation();
-	const matchFromRouter = useMatch( location.pathname );
+	const matchFromRouter = useMatch(location.pathname);
 	const params = useParams();
 	const match = { params, url: matchFromRouter?.pathname };
-	const isMarketplacePage = location.pathname.includes( '/extensions' );
+	const isMarketplacePage = location.pathname.includes('/extensions');
 
-	usePageClasses( page );
+	usePageClasses(page);
 
 	function recordPageViewTrack() {
 		const { pathname } = location;
-		if ( ! pathname ) {
+		if (!pathname) {
 			return;
 		}
 
 		// Remove leading slash, and camel case remaining pathname
-		let path = pathname.substring( 1 ).replace( /\//g, '_' );
+		let path = pathname.substring(1).replace(/\//g, '_');
 
 		// When pathname is `/` we are on the home screen.
-		if ( path.length === 0 ) {
+		if (path.length === 0) {
 			path = 'home_screen';
 		}
 
-		recordPageView( path, {
-			jetpack_installed: installedPlugins.includes( 'jetpack' ),
-			jetpack_active: activePlugins.includes( 'jetpack' ),
+		recordPageView(path, {
+			jetpack_installed: installedPlugins.includes('jetpack'),
+			jetpack_active: activePlugins.includes('jetpack'),
 			jetpack_connected: isJetpackConnected,
-		} );
+		});
 	}
 
-	useEffect( () => {
+	useEffect(() => {
 		triggerExitPageCesSurvey();
-	}, [] );
+	}, []);
 
-	useEffect( () => {
+	useEffect(() => {
 		recordPageViewTrack();
-		setTimeout( () => {
+		setTimeout(() => {
 			triggerExitPageCesSurvey();
-		}, 0 );
-	}, [ location?.pathname ] );
+		}, 0);
+	}, [location?.pathname]);
 
 	const {
 		breadcrumbs,
@@ -117,71 +117,71 @@ const BaseLayout = ( { page }: { page: Page } ) => {
 		showPluginArea = true,
 	} = layout;
 
-	const query = getQuery() as Record< string, string >;
+	const query = getQuery() as Record<string, string>;
 
-	useEffect( () => {
-		const wpbody = document.getElementById( 'wpbody' );
-		if ( showHeader ) {
-			wpbody?.classList.remove( 'no-header' );
+	useEffect(() => {
+		const wpbody = document.getElementById('wpbody');
+		if (showHeader) {
+			wpbody?.classList.remove('no-header');
 		} else {
-			wpbody?.classList.add( 'no-header' );
+			wpbody?.classList.add('no-header');
 		}
-	}, [ showHeader ] );
+	}, [showHeader]);
 
 	const isDashboardShown =
-		query.page && query.page === 'wc-admin' && ! query.path && ! query.task; // ?&task=<x> query param is used to show tasks instead of the homescreen
-	useEffect( () => {
+		query.page && query.page === 'wc-admin' && !query.path && !query.task; // ?&task=<x> query param is used to show tasks instead of the homescreen
+	useEffect(() => {
 		// Catch-all to redirect to LYS hub when it was previously opened.
 		const isLYSWaiting =
-			window.sessionStorage.getItem( 'lysWaiting' ) === 'yes';
-		if ( isDashboardShown && isLYSWaiting ) {
-			navigateTo( {
-				url: getNewPath( {}, '/launch-your-store' ),
-			} );
+			window.sessionStorage.getItem('lysWaiting') === 'yes';
+		if (isDashboardShown && isLYSWaiting) {
+			navigateTo({
+				url: getNewPath({}, '/launch-your-store'),
+			});
 		}
-	}, [ isDashboardShown ] );
+	}, [isDashboardShown]);
 
 	return (
 		<LayoutContextProvider
-			value={ getLayoutContextValue( [
+			value={getLayoutContextValue([
 				page?.navArgs?.id?.toLowerCase() || 'page',
-			] ) }
+			])}
 		>
 			<SlotFillProvider>
 				<div className="woocommerce-layout">
-					{ isMarketplacePage && <MarketplaceBanner /> }
-					{ showHeader && (
+					{isMarketplacePage && <MarketplaceBanner />}
+					{showHeader && (
 						<Header
 							sections={
-								isFunction( breadcrumbs )
-									? breadcrumbs( { match } )
+								isFunction(breadcrumbs)
+									? breadcrumbs({ match })
 									: breadcrumbs
 							}
-							query={ query }
+							query={query}
 						/>
-					) }
+					)}
 					<TransientNotices />
 					<PrimaryLayout
-						showNotices={ page?.layout?.showNotices }
-						showStoreAlerts={ page?.layout?.showStoreAlerts }
+						showNotices={page?.layout?.showNotices}
+						showStoreAlerts={page?.layout?.showStoreAlerts}
 					>
 						<div className="woocommerce-layout__main">
 							<Controller
-								page={ page }
-								match={ match }
-								query={ query }
+								page={page}
+								match={match}
+								query={query}
 							/>
 						</div>
 					</PrimaryLayout>
-					{ showFooter && <Footer /> }
+					{showFooter && <Footer />}
 					<CustomerEffortScoreModalContainer />
 				</div>
-				{ showPluginArea && (
+				{showPluginArea && (
 					<>
 						<PluginArea scope="woocommerce-admin" />
 						<PluginArea scope="woocommerce-tasks" />
 					</>
-				) }
+				)}
 			</SlotFillProvider>
 		</LayoutContextProvider>
 	);
@@ -193,45 +193,43 @@ export const _Layout = () => {
 
 	// get the basename, usually 'wp-admin/' but can be something else if the site installation changed it
 	const path = document.location.pathname;
-	const basename = path.substring( 0, path.lastIndexOf( '/' ) );
+	const basename = path.substring(0, path.lastIndexOf('/'));
 
 	return (
-		<HistoryRouter history={ getHistory() }>
-			{ /* @ts-expect-error basename is not typed */ }
-			<Routes basename={ basename }>
-				{ pages
+		<HistoryRouter history={getHistory()}>
+			{/* @ts-expect-error basename is not typed */}
+			<Routes basename={basename}>
+				{pages
 					.filter(
-						( page ) =>
-							! page.capability ||
-							currentUserCan( page.capability )
+						(page) =>
+							!page.capability || currentUserCan(page.capability)
 					)
-					.map( ( page ) => {
+					.map((page) => {
 						return (
 							<Route
-								key={ page.path }
-								path={ page.path || '' }
+								key={page.path}
+								path={page.path || ''}
 								// @ts-expect-error react-router-dom v6 dropped the `exact` prop; kept here for runtime compatibility.
 								exact
-								element={ <BaseLayout page={ page } /> }
+								element={<BaseLayout page={page} />}
 							/>
 						);
-					} ) }
+					})}
 			</Routes>
 		</HistoryRouter>
 	);
 };
 
-const dataEndpoints = getAdminSetting( 'dataEndpoints' );
+const dataEndpoints = getAdminSetting('dataEndpoints');
 
 export const Layout = compose(
 	window.wcSettings.admin
-		? withOptionsHydration( {
-				...getAdminSetting( 'preloadOptions', {} ),
-		  } )
+		? withOptionsHydration({
+				...getAdminSetting('preloadOptions', {}),
+			})
 		: identity,
-	withPluginsHydration( {
-		...getAdminSetting( 'plugins', {} ),
-		jetpackStatus:
-			( dataEndpoints && dataEndpoints.jetpackStatus ) || false,
-	} )
-)( _Layout ) as React.ComponentType< Record< string, unknown > >;
+	withPluginsHydration({
+		...getAdminSetting('plugins', {}),
+		jetpackStatus: (dataEndpoints && dataEndpoints.jetpackStatus) || false,
+	})
+)(_Layout) as React.ComponentType<Record<string, unknown>>;

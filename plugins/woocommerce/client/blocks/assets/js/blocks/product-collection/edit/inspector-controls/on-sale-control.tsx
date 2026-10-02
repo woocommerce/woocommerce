@@ -14,34 +14,34 @@ import {
 import { CoreFilterNames, QueryControlProps } from '../../types';
 import { DEFAULT_FILTERS } from '../../constants';
 
-const OnSaleControl = ( props: QueryControlProps ) => {
+const OnSaleControl = (props: QueryControlProps) => {
 	const { query, trackInteraction, setQueryAttribute } = props;
 
 	const deselectCallback = () => {
-		setQueryAttribute( {
+		setQueryAttribute({
 			woocommerceOnSale: DEFAULT_FILTERS.woocommerceOnSale,
-		} );
-		trackInteraction( CoreFilterNames.ON_SALE );
+		});
+		trackInteraction(CoreFilterNames.ON_SALE);
 	};
 
 	return (
 		<ToolsPanelItem
-			label={ __( 'On Sale', 'woocommerce' ) }
-			hasValue={ () => query.woocommerceOnSale === true }
+			label={__('On Sale', 'woocommerce')}
+			hasValue={() => query.woocommerceOnSale === true}
 			isShownByDefault
-			onDeselect={ deselectCallback }
-			resetAllFilter={ deselectCallback }
+			onDeselect={deselectCallback}
+			resetAllFilter={deselectCallback}
 		>
 			<ToggleControl
 				__nextHasNoMarginBottom
-				label={ __( 'Show only products on sale', 'woocommerce' ) }
-				checked={ query.woocommerceOnSale || false }
-				onChange={ ( woocommerceOnSale ) => {
-					setQueryAttribute( {
+				label={__('Show only products on sale', 'woocommerce')}
+				checked={query.woocommerceOnSale || false}
+				onChange={(woocommerceOnSale) => {
+					setQueryAttribute({
 						woocommerceOnSale,
-					} );
-					trackInteraction( CoreFilterNames.ON_SALE );
-				} }
+					});
+					trackInteraction(CoreFilterNames.ON_SALE);
+				}}
 			/>
 		</ToolsPanelItem>
 	);

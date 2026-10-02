@@ -42,8 +42,8 @@ const FALLBACK_ERROR_MESSAGE = __(
  * @param message - The error message to normalize.
  * @return A safe string suitable for rendering.
  */
-const normalizeErrorMessage = ( message: unknown ): string => {
-	if ( typeof message === 'string' && message.trim().length > 0 ) {
+const normalizeErrorMessage = (message: unknown): string => {
+	if (typeof message === 'string' && message.trim().length > 0) {
 		return message.trim();
 	}
 	return FALLBACK_ERROR_MESSAGE;
@@ -56,15 +56,14 @@ export const BusinessVerificationStep: React.FC = () => {
 	const initialData = {
 		business_name: window.wcSettings?.siteTitle,
 		mcc: getMccFromIndustry(
-			( currentStep?.context?.fields?.mccs_display_tree ??
-				[] ) as string[]
+			(currentStep?.context?.fields?.mccs_display_tree ?? []) as string[]
 		),
 		site:
 			location.hostname === 'localhost'
 				? 'https://wcpay.test'
 				: window.wcSettings?.homeUrl + getComingSoonShareKey(),
 		country: currentStep?.context?.fields?.location,
-		...( currentStep?.context?.self_assessment ?? {} ),
+		...(currentStep?.context?.self_assessment ?? {}),
 	};
 	const hasTestAccount = currentStep?.context?.has_test_account ?? false;
 	const hasSandboxAccount =
@@ -78,49 +77,45 @@ export const BusinessVerificationStep: React.FC = () => {
 	// The activate step can handle disabling the test or sandbox account and proceed to live onboarding.
 	const showActivateSubStep =
 		hasTestAccount ||
-		( hasSandboxAccount && currentStep?.status === 'not_started' );
+		(hasSandboxAccount && currentStep?.status === 'not_started');
 	const subStepsList = [
-		...( showActivateSubStep ? [ 'activate' ] : [] ),
+		...(showActivateSubStep ? ['activate'] : []),
 		'business',
 		'embedded',
 	];
 
 	// Find the first not completed sub-step.
-	const initialStep = subStepsList.find( ( stepId ) => {
-		return (
-			currentStep?.context?.sub_steps[ stepId ]?.status !== 'completed'
-		);
-	} );
+	const initialStep = subStepsList.find((stepId) => {
+		return currentStep?.context?.sub_steps[stepId]?.status !== 'completed';
+	});
 
 	const handleStepChange = () => {
-		window.scroll( 0, 0 );
+		window.scroll(0, 0);
 	};
 
 	return (
 		<div className="settings-payments-onboarding-modal__step-business-verification">
-			<WooPaymentsStepHeader onClose={ closeModal } />
+			<WooPaymentsStepHeader onClose={closeModal} />
 			<div className="settings-payments-onboarding-modal__step-business-verification-content">
-				{ currentStep?.errors && currentStep.errors.length > 0 && (
+				{currentStep?.errors && currentStep.errors.length > 0 && (
 					<Notice
 						status="error"
-						isDismissible={ false }
+						isDismissible={false}
 						className="settings-payments-onboarding-modal__step-business-verification-error"
 						// Adding role="alert" for explicit screen reader announcement.
 						// While @wordpress/components Notice uses speak() internally,
 						// role="alert" provides better backwards compatibility with older AT.
 						// Type assertion needed as Notice component types don't include standard HTML attributes.
-						{ ...( {
+						{...({
 							role: 'alert',
-						} as React.HTMLAttributes< HTMLDivElement > ) }
+						} as React.HTMLAttributes<HTMLDivElement>)}
 					>
-						{ currentStep.errors.length <= MAX_DISPLAYED_ERRORS ? (
+						{currentStep.errors.length <= MAX_DISPLAYED_ERRORS ? (
 							// Display individual error messages when count is manageable.
-							( currentStep.errors as OnboardingError[] ).map(
-								( error, index ) => (
-									<p key={ error?.code ?? index }>
-										{ normalizeErrorMessage(
-											error?.message
-										) }
+							(currentStep.errors as OnboardingError[]).map(
+								(error, index) => (
+									<p key={error?.code ?? index}>
+										{normalizeErrorMessage(error?.message)}
 									</p>
 								)
 							)
@@ -128,7 +123,7 @@ export const BusinessVerificationStep: React.FC = () => {
 							// Display a summary when there are too many errors.
 							<>
 								<p>
-									{ sprintf(
+									{sprintf(
 										/* translators: %d: number of errors */
 										_n(
 											'%d error occurred during setup.',
@@ -137,19 +132,17 @@ export const BusinessVerificationStep: React.FC = () => {
 											'woocommerce'
 										),
 										currentStep.errors.length
-									) }
+									)}
 								</p>
-								<p>{ FALLBACK_ERROR_MESSAGE }</p>
+								<p>{FALLBACK_ERROR_MESSAGE}</p>
 							</>
-						) }
+						)}
 					</Notice>
-				) }
-				<BusinessVerificationContextProvider
-					initialData={ initialData }
-				>
+				)}
+				<BusinessVerificationContextProvider initialData={initialData}>
 					<Stepper
-						initialStep={ initialStep }
-						onStepView={ ( stepId ) => {
+						initialStep={initialStep}
+						onStepView={(stepId) => {
 							recordPaymentsOnboardingEvent(
 								'woopayments_onboarding_modal_step_view',
 								{
@@ -158,9 +151,9 @@ export const BusinessVerificationStep: React.FC = () => {
 									source: sessionEntryPoint,
 								}
 							);
-						} }
-						onStepChange={ handleStepChange }
-						onExit={ () => {
+						}}
+						onStepChange={handleStepChange}
+						onExit={() => {
 							recordPaymentsOnboardingEvent(
 								'woopayments_onboarding_modal_step_exit',
 								{
@@ -168,8 +161,8 @@ export const BusinessVerificationStep: React.FC = () => {
 									source: sessionEntryPoint,
 								}
 							);
-						} }
-						onComplete={ () => {
+						}}
+						onComplete={() => {
 							recordPaymentsOnboardingEvent(
 								'woopayments_onboarding_modal_step_complete',
 								{
@@ -177,19 +170,19 @@ export const BusinessVerificationStep: React.FC = () => {
 									source: sessionEntryPoint,
 								}
 							);
-						} }
+						}}
 					>
-						{ showActivateSubStep && (
-							<Step name="activate" showHeading={ false }>
+						{showActivateSubStep && (
+							<Step name="activate" showHeading={false}>
 								<ActivatePayments />
 							</Step>
-						) }
+						)}
 						<Step name="business">
 							<OnboardingForm>
 								<BusinessDetails />
 							</OnboardingForm>
 						</Step>
-						<Step name="embedded" showHeading={ false }>
+						<Step name="embedded" showHeading={false}>
 							<EmbeddedKyc />
 						</Step>
 					</Stepper>

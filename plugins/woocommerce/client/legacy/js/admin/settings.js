@@ -103,31 +103,36 @@
 		} );
 
 		// Edit prompt
-		function editPrompt () {
+		function editPrompt() {
 			var changed = false;
-			let $prevent_change_elements = $( '.wp-list-table .check-column, .wc-settings-prevent-change-event' );
+			let $prevent_change_elements = $(
+				'.wp-list-table .check-column, .wc-settings-prevent-change-event'
+			);
 
-			$( 'input, textarea, select, checkbox' ).on( 'change input', function (
-				event
-			) {
-				// Prevent change event on specific elements, that don't change the form. E.g.:
-				// - WP List Table checkboxes that only (un)select rows
-				// - Changing email type in email preview
-				if (
-					$prevent_change_elements.length &&
-					$prevent_change_elements.has( event.target ).length
-				) {
-					return;
-				}
+			$( 'input, textarea, select, checkbox' ).on(
+				'change input',
+				function ( event ) {
+					// Prevent change event on specific elements, that don't change the form. E.g.:
+					// - WP List Table checkboxes that only (un)select rows
+					// - Changing email type in email preview
+					if (
+						$prevent_change_elements.length &&
+						$prevent_change_elements.has( event.target ).length
+					) {
+						return;
+					}
 
-				if ( ! changed ) {
-					window.onbeforeunload = function () {
-						return params.i18n_nav_warning;
-					};
-					changed = true;
-					$( '.woocommerce-save-button' ).removeAttr( 'disabled' );
+					if ( ! changed ) {
+						window.onbeforeunload = function () {
+							return params.i18n_nav_warning;
+						};
+						changed = true;
+						$( '.woocommerce-save-button' ).removeAttr(
+							'disabled'
+						);
+					}
 				}
-			} );
+			);
 
 			$( '.iris-picker' ).on( 'click', function () {
 				if ( ! changed ) {
@@ -155,13 +160,14 @@
 		}
 
 		const nodeListContainsFormElements = ( nodes ) => {
-			if ( ! nodes.length	) {
+			if ( ! nodes.length ) {
 				return false;
 			}
 			return Array.from( nodes ).some( ( element ) => {
-				return $( element ).find( 'input, textarea, select, checkbox' ).length;
+				return $( element ).find( 'input, textarea, select, checkbox' )
+					.length;
 			} );
-		}
+		};
 
 		const form = document.querySelector( '#mainform' );
 		const observer = new MutationObserver( ( mutationsList ) => {
@@ -169,9 +175,15 @@
 				if ( mutation.type === 'childList' ) {
 					if ( nodeListContainsFormElements( mutation.addedNodes ) ) {
 						editPrompt();
-						$( '.woocommerce-save-button' ).removeAttr( 'disabled' );
-					} else if ( nodeListContainsFormElements( mutation.removedNodes ) ) {
-						$( '.woocommerce-save-button' ).removeAttr( 'disabled' );
+						$( '.woocommerce-save-button' ).removeAttr(
+							'disabled'
+						);
+					} else if (
+						nodeListContainsFormElements( mutation.removedNodes )
+					) {
+						$( '.woocommerce-save-button' ).removeAttr(
+							'disabled'
+						);
 					}
 				}
 			}
@@ -200,7 +212,9 @@
 			},
 			stop: function ( event, ui ) {
 				ui.item.removeAttr( 'style' );
-				ui.item.trigger( 'updateMoveButtons', { isInitialLoad: false } );
+				ui.item.trigger( 'updateMoveButtons', {
+					isInitialLoad: false,
+				} );
 			},
 		} );
 
@@ -252,7 +266,9 @@
 				}
 
 				moveBtn.trigger( 'focus' ); // Re-focus after the container was moved.
-				moveBtn.closest( 'table' ).trigger( 'updateMoveButtons', { isInitialLoad: false } );
+				moveBtn
+					.closest( 'table' )
+					.trigger( 'updateMoveButtons', { isInitialLoad: false } );
 			} );
 
 		$( '.wc-item-reorder-nav' )
@@ -325,11 +341,14 @@
 			} );
 		} );
 
-		$( '.woocommerce-save-button.components-button' ).on( 'click', function ( e ) {
-			if ( ! $( this ).attr( 'disabled' ) ) {
-				$( this ).addClass( 'is-busy' );
+		$( '.woocommerce-save-button.components-button' ).on(
+			'click',
+			function ( e ) {
+				if ( ! $( this ).attr( 'disabled' ) ) {
+					$( this ).addClass( 'is-busy' );
+				}
 			}
-		} );
+		);
 
 		/**
 		 * Support conditionally displaying a settings field description when another element
@@ -339,33 +358,43 @@
 		 * Note that we can't avoid jQuery here, because of our current dependence on Select2
 		 * for various controls.
 		 */
-		document.querySelectorAll( 'body.woocommerce_page_wc-settings #mainform .conditional.description' ).forEach( description => {
-			const $underObservation = $( description.dataset.dependsOn );
-			const showIfEquals      = description.dataset.showIfEquals;
+		document
+			.querySelectorAll(
+				'body.woocommerce_page_wc-settings #mainform .conditional.description'
+			)
+			.forEach( ( description ) => {
+				const $underObservation = $( description.dataset.dependsOn );
+				const showIfEquals = description.dataset.showIfEquals;
 
-			if ( undefined === showIfEquals || $underObservation.length === 0 ) {
-				return;
-			}
+				if (
+					undefined === showIfEquals ||
+					$underObservation.length === 0
+				) {
+					return;
+				}
 
-			/**
-			 * Set visibility of the description element according to whether its value
-			 * matches that of showIfEquals.
-			 */
-			const changeAgent = () => {
-				description.style.visibility = $underObservation.val() === showIfEquals ? 'visible' : 'hidden';
-			};
+				/**
+				 * Set visibility of the description element according to whether its value
+				 * matches that of showIfEquals.
+				 */
+				const changeAgent = () => {
+					description.style.visibility =
+						$underObservation.val() === showIfEquals
+							? 'visible'
+							: 'hidden';
+				};
 
-			// Monitor future changes, and take action based on the current state.
-			$underObservation.on( 'change', changeAgent );
-			changeAgent();
-		} );
+				// Monitor future changes, and take action based on the current state.
+				$underObservation.on( 'change', changeAgent );
+				changeAgent();
+			} );
 
 		// Ensures the active tab is visible and centered on small screens if it's out of view in a scrollable tab list.
 		function settings_scroll_to_active_tab() {
 			const body = document.body;
 			if (
-				! body.classList.contains('mobile') ||
-				! body.classList.contains('woocommerce_page_wc-settings')
+				! body.classList.contains( 'mobile' ) ||
+				! body.classList.contains( 'woocommerce_page_wc-settings' )
 			) {
 				return;
 			}
@@ -391,14 +420,18 @@
 			const scrollLeft = parent.scrollLeft;
 			const visibleLeft = scrollLeft;
 			const visibleRight = scrollLeft + parent.clientWidth;
-			const isOutOfView = tabLeft < visibleLeft || tabRight > visibleRight;
+			const isOutOfView =
+				tabLeft < visibleLeft || tabRight > visibleRight;
 
 			// If it’s out of view, scroll the parent so the tab is centered
 			if ( isOutOfView ) {
-				const offset = tabLeft - parent.clientWidth / 2 + activeTab.offsetWidth / 2;
-					parent.scrollTo( {
+				const offset =
+					tabLeft -
+					parent.clientWidth / 2 +
+					activeTab.offsetWidth / 2;
+				parent.scrollTo( {
 					left: offset,
-					behavior: 'auto' // Instant scroll (no animation)
+					behavior: 'auto', // Instant scroll (no animation)
 				} );
 			}
 		}
@@ -409,24 +442,24 @@
 		function settings_fix_nav_width() {
 			const body = document.body;
 			if (
-				! body.classList.contains('mobile') ||
-				! body.classList.contains('woocommerce_page_wc-settings')
+				! body.classList.contains( 'mobile' ) ||
+				! body.classList.contains( 'woocommerce_page_wc-settings' )
 			) {
 				return;
 			}
-			const navWrapper = document.getElementsByClassName('nav-tab-wrapper');
+			const navWrapper =
+				document.getElementsByClassName( 'nav-tab-wrapper' );
 			if ( ! navWrapper.length ) {
 				return;
 			}
 
-			const navWrapperWidth = navWrapper[0].offsetWidth;
-			if ( navWrapperWidth !== window.innerWidth) {
-				navWrapper[0].style.width = window.innerWidth + 'px';
+			const navWrapperWidth = navWrapper[ 0 ].offsetWidth;
+			if ( navWrapperWidth !== window.innerWidth ) {
+				navWrapper[ 0 ].style.width = window.innerWidth + 'px';
 			}
 		}
 
 		settings_scroll_to_active_tab();
 		settings_fix_nav_width();
-
 	} );
 } )( jQuery, woocommerce_settings_params, wp );

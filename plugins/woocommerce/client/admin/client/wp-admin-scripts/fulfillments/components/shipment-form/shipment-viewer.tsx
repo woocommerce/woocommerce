@@ -28,75 +28,73 @@ export default function ShipmentViewer() {
 
 	const shipmentProviderObject =
 		shipmentProvider !== 'other'
-			? ShipmentProviders.find( ( p ) => p.value === shipmentProvider )
+			? ShipmentProviders.find((p) => p.value === shipmentProvider)
 			: null;
 
 	const getShipmentProviderLabel = (
 		savedProvider: string,
 		savedProviderName: string
 	) => {
-		if ( savedProvider === 'other' ) {
+		if (savedProvider === 'other') {
 			return savedProviderName;
 		}
 		return (
-			findShipmentProviderName( savedProvider ) ||
+			findShipmentProviderName(savedProvider) ||
 			savedProviderName ||
-			__( 'Unknown', 'woocommerce' )
+			__('Unknown', 'woocommerce')
 		);
 	};
 
 	return (
 		<FulfillmentCard
-			isCollapsible={ isShipmentInformationProvided }
+			isCollapsible={isShipmentInformationProvided}
 			initialState="collapsed"
 			header={
 				isShipmentInformationProvided ? (
 					<>
-						{ shipmentProviderObject?.icon ? (
+						{shipmentProviderObject?.icon ? (
 							<img
-								src={ shipmentProviderObject.icon }
-								alt={ shipmentProviderObject.label || '' }
+								src={shipmentProviderObject.icon}
+								alt={shipmentProviderObject.label || ''}
 							/>
 						) : (
 							<TruckIcon />
-						) }
+						)}
 						<h3>
-							{ trackingNumber }{ ' ' }
-							<CopyIcon copyText={ trackingNumber } />
+							{trackingNumber}{' '}
+							<CopyIcon copyText={trackingNumber} />
 						</h3>
 					</>
 				) : (
 					<>
 						<TruckIcon />
-						<h3>
-							{ __( 'No shipment information', 'woocommerce' ) }
-						</h3>
+						<h3>{__('No shipment information', 'woocommerce')}</h3>
 					</>
 				)
 			}
 		>
-			{ isShipmentInformationProvided && (
+			{isShipmentInformationProvided && (
 				<MetaList
-					metaList={ [
+					metaList={[
 						{
-							label: __( 'Tracking number', 'woocommerce' ),
+							label: __('Tracking number', 'woocommerce'),
 							value: trackingNumber,
 						},
 						{
-							label: __( 'Provider name', 'woocommerce' ),
+							label: __('Provider name', 'woocommerce'),
 							value: getShipmentProviderLabel(
 								shipmentProvider,
 								providerName
 							),
 						},
 						{
-							label: __( 'Tracking URL', 'woocommerce' ),
+							label: __('Tracking URL', 'woocommerce'),
 							value: trackingUrl,
 							href: trackingUrl || undefined,
 						},
-					] }
+					]}
 				/>
-			) }
+			)}
 		</FulfillmentCard>
 	);
 }

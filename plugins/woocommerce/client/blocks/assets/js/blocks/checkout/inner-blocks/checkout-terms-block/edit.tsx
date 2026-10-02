@@ -26,13 +26,13 @@ import { termsConsentDefaultText, termsCheckboxDefaultText } from './constants';
 
 const noop = () => undefined;
 
-export const Edit = ( {
+export const Edit = ({
 	attributes: { checkbox, text, showSeparator },
 	setAttributes,
 }: {
 	attributes: { text: string; checkbox: boolean; showSeparator: boolean };
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ) => {
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}) => {
 	const blockProps = useBlockProps();
 
 	const defaultText = checkbox
@@ -41,59 +41,59 @@ export const Edit = ( {
 
 	const currentText = text || defaultText;
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<InspectorControls>
-				{ /* Show this notice if a terms page or a privacy page is not setup. */ }
-				{ ( ! TERMS_URL || ! PRIVACY_URL ) && (
+				{/* Show this notice if a terms page or a privacy page is not setup. */}
+				{(!TERMS_URL || !PRIVACY_URL) && (
 					<Notice
 						className="wc-block-checkout__terms_notice"
 						status="warning"
-						isDismissible={ false }
+						isDismissible={false}
 					>
-						{ __(
+						{__(
 							"Link to your store's Terms and Conditions and Privacy Policy pages by creating pages for them.",
 							'woocommerce'
-						) }
+						)}
 						<br />
-						{ ! TERMS_URL && (
+						{!TERMS_URL && (
 							<>
 								<br />
 								<ExternalLink
-									href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=advanced` }
+									href={`${ADMIN_URL}admin.php?page=wc-settings&tab=advanced`}
 								>
-									{ __(
+									{__(
 										'Setup a Terms and Conditions page',
 										'woocommerce'
-									) }
+									)}
 								</ExternalLink>
 							</>
-						) }
-						{ ! PRIVACY_URL && (
+						)}
+						{!PRIVACY_URL && (
 							<>
 								<br />
 								<ExternalLink
-									href={ `${ ADMIN_URL }options-privacy.php` }
+									href={`${ADMIN_URL}options-privacy.php`}
 								>
-									{ __(
+									{__(
 										'Setup a Privacy Policy page',
 										'woocommerce'
-									) }
+									)}
 								</ExternalLink>
 							</>
-						) }
+						)}
 					</Notice>
-				) }
-				{ /* Show this notice if we have both a terms and privacy pages, but they're not present in the text. */ }
-				{ TERMS_URL &&
+				)}
+				{/* Show this notice if we have both a terms and privacy pages, but they're not present in the text. */}
+				{TERMS_URL &&
 					PRIVACY_URL &&
-					! (
-						currentText.includes( TERMS_URL ) &&
-						currentText.includes( PRIVACY_URL )
+					!(
+						currentText.includes(TERMS_URL) &&
+						currentText.includes(PRIVACY_URL)
 					) && (
 						<Notice
 							className="wc-block-checkout__terms_notice"
 							status="warning"
-							isDismissible={ false }
+							isDismissible={false}
 							actions={
 								termsConsentDefaultText !== text
 									? [
@@ -103,80 +103,76 @@ export const Edit = ( {
 													'woocommerce'
 												),
 												onClick: () =>
-													setAttributes( {
+													setAttributes({
 														text: '',
-													} ),
+													}),
 											},
-									  ]
+										]
 									: []
 							}
 						>
 							<p>
-								{ __(
+								{__(
 									'Ensure you add links to your policy pages in this section.',
 									'woocommerce'
-								) }
+								)}
 							</p>
 						</Notice>
-					) }
-				<PanelBody title={ __( 'Display options', 'woocommerce' ) }>
+					)}
+				<PanelBody title={__('Display options', 'woocommerce')}>
 					<ToggleControl
 						__nextHasNoMarginBottom
-						label={ __( 'Require checkbox', 'woocommerce' ) }
-						checked={ checkbox }
-						onChange={ () =>
-							setAttributes( {
-								checkbox: ! checkbox,
-							} )
+						label={__('Require checkbox', 'woocommerce')}
+						checked={checkbox}
+						onChange={() =>
+							setAttributes({
+								checkbox: !checkbox,
+							})
 						}
 					/>
 					<ToggleControl
 						__nextHasNoMarginBottom
-						label={ __( 'Show separator', 'woocommerce' ) }
-						checked={ showSeparator }
-						onChange={ () =>
-							setAttributes( {
-								showSeparator: ! showSeparator,
-							} )
+						label={__('Show separator', 'woocommerce')}
+						checked={showSeparator}
+						onChange={() =>
+							setAttributes({
+								showSeparator: !showSeparator,
+							})
 						}
 					/>
 				</PanelBody>
 			</InspectorControls>
 			<div
-				className={ clsx( 'wc-block-checkout__terms', {
+				className={clsx('wc-block-checkout__terms', {
 					'wc-block-checkout__terms--with-separator': showSeparator,
-				} ) }
+				})}
 			>
-				{ checkbox ? (
+				{checkbox ? (
 					<>
 						<div className="wc-block-checkout__terms-checkbox-wrapper">
 							<CheckboxControl
 								id="terms-condition"
-								checked={ false }
-								onChange={ noop }
+								checked={false}
+								onChange={noop}
 							/>
 						</div>
 						<RichText
-							value={ currentText }
-							onChange={ ( value ) =>
-								setAttributes( { text: value } )
-							}
+							value={currentText}
+							onChange={(value) => setAttributes({ text: value })}
 						/>
 					</>
 				) : (
 					<RichText
 						tagName="span"
-						value={ currentText }
-						onChange={ ( value ) =>
-							setAttributes( { text: value } )
-						}
+						value={currentText}
+						onChange={(value) => setAttributes({ text: value })}
 					/>
-				) }
+				)}
 			</div>
 		</div>
 	);
 };
 
 export const Save = () => {
-	return <div { ...useBlockProps.save() } />;
+	return <div {...useBlockProps.save()} />;
 };

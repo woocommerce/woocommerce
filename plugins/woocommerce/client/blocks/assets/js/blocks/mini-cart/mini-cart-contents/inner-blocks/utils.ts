@@ -9,11 +9,11 @@ export const getVariant = (
 	className = '',
 	defaultVariant: Variant
 ): Variant => {
-	if ( className.includes( 'is-style-outline' ) ) {
+	if (className.includes('is-style-outline')) {
 		return 'outlined';
 	}
 
-	if ( className.includes( 'is-style-fill' ) ) {
+	if (className.includes('is-style-fill')) {
 		return 'contained';
 	}
 
@@ -26,5 +26,5 @@ export const getVariant = (
  * @return {string} The description text for the totals item.
  */
 export const getTotalsItemDescription = (): string => {
-	return getSetting( 'miniCartFooterDescription', '' );
+	return getSetting('miniCartFooterDescription', '');
 };

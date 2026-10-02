@@ -9,7 +9,7 @@ import { without } from 'lodash';
 import TYPES from './action-types';
 import { getAdminSetting } from '~/utils/admin-settings';
 
-const { installedExtensions } = getAdminSetting( 'marketing', {} );
+const { installedExtensions } = getAdminSetting('marketing', {});
 
 const DEFAULT_STATE = {
 	installedPlugins: installedExtensions,
@@ -20,8 +20,8 @@ const DEFAULT_STATE = {
 	errors: {},
 };
 
-const reducer = ( state = DEFAULT_STATE, action ) => {
-	switch ( action.type ) {
+const reducer = (state = DEFAULT_STATE, action) => {
+	switch (action.type) {
 		case TYPES.SET_INSTALLED_PLUGINS:
 			return {
 				...state,
@@ -48,21 +48,19 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 				...state,
 				recommendedPlugins: {
 					...state.recommendedPlugins,
-					[ action.data.category ]: action.data.plugins,
+					[action.data.category]: action.data.plugins,
 				},
 			};
 		case TYPES.INSTALL_AND_ACTIVATE_RECOMMENDED_PLUGIN:
 			const newPlugins = state.recommendedPlugins[
 				action.data.category
-			]?.filter(
-				( plugin ) => plugin.product !== action.data.pluginSlug
-			);
+			]?.filter((plugin) => plugin.product !== action.data.pluginSlug);
 
 			return {
 				...state,
 				recommendedPlugins: {
 					...state.recommendedPlugins,
-					[ action.data.category ]: newPlugins,
+					[action.data.category]: newPlugins,
 				},
 			};
 		case TYPES.SET_BLOG_POSTS:
@@ -70,7 +68,7 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 				...state,
 				blogPosts: {
 					...state.blogPosts,
-					[ action.data.category ]: action.data.posts,
+					[action.data.category]: action.data.posts,
 				},
 			};
 		case TYPES.SET_MISC_RECOMMENDATIONS:
@@ -85,7 +83,7 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 					...state.errors,
 					blogPosts: {
 						...state.errors.blogPosts,
-						[ action.category ]: action.error,
+						[action.category]: action.error,
 					},
 				},
 			};

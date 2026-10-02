@@ -14,19 +14,16 @@ addFilter(
 	'blocks.registerBlockType',
 	'woocommerce/hide-incompatible-template-parts',
 	(
-		blockSettings: { variations?: BlockVariation< { area?: string } >[] },
+		blockSettings: { variations?: BlockVariation<{ area?: string }>[] },
 		blockName: string
 	) => {
-		if (
-			blockName !== 'core/template-part' ||
-			! blockSettings.variations
-		) {
+		if (blockName !== 'core/template-part' || !blockSettings.variations) {
 			return blockSettings;
 		}
 
 		return {
 			...blockSettings,
-			variations: blockSettings.variations.map( ( variation ) => {
+			variations: blockSettings.variations.map((variation) => {
 				if (
 					INCOMPATIBLE_TEMPLATE_PART_AREAS.includes(
 						variation.attributes?.area ?? ''
@@ -34,13 +31,13 @@ addFilter(
 				) {
 					return {
 						...variation,
-						scope: ( variation.scope ?? [] ).filter(
-							( scope ) => scope !== 'inserter'
+						scope: (variation.scope ?? []).filter(
+							(scope) => scope !== 'inserter'
 						),
 					};
 				}
 				return variation;
-			} ),
+			}),
 		};
 	}
 );

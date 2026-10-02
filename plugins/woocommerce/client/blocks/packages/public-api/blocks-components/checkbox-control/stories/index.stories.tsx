@@ -17,21 +17,21 @@ export default {
 		label: 'Check me out',
 		checked: false,
 	},
-} as Meta< CheckboxControlProps >;
+} as Meta<CheckboxControlProps>;
 
-const Template: StoryFn< CheckboxControlProps > = ( args ) => {
-	const [ checked, setChecked ] = useState( args.checked );
-	useEffect( () => {
-		setChecked( args.checked );
-	}, [ args.checked ] );
+const Template: StoryFn<CheckboxControlProps> = (args) => {
+	const [checked, setChecked] = useState(args.checked);
+	useEffect(() => {
+		setChecked(args.checked);
+	}, [args.checked]);
 	return (
 		<CheckboxControl
-			{ ...args }
-			onChange={ ( value ) => setChecked( value ) }
-			checked={ checked }
+			{...args}
+			onChange={(value) => setChecked(value)}
+			checked={checked}
 		/>
 	);
 };
 
-export const Default: StoryFn< CheckboxControlProps > = Template.bind( {} );
+export const Default: StoryFn<CheckboxControlProps> = Template.bind({});
 Default.args = {};

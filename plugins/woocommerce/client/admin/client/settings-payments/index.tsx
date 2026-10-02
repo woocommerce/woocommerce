@@ -77,13 +77,13 @@ interface OfflinePaymentGatewayWrapperProps {
 	chunkComponent: React.ComponentType;
 }
 
-const OfflinePaymentGatewayWrapper = ( {
+const OfflinePaymentGatewayWrapper = ({
 	title,
 	chunkComponent: ChunkComponent,
-}: OfflinePaymentGatewayWrapperProps ) => {
-	useEffect( () => {
-		window.scrollTo( 0, 0 ); // Scrolls to the top of the page.
-	}, [] );
+}: OfflinePaymentGatewayWrapperProps) => {
+	useEffect(() => {
+		window.scrollTo(0, 0); // Scrolls to the top of the page.
+	}, []);
 
 	return (
 		<>
@@ -92,21 +92,21 @@ const OfflinePaymentGatewayWrapper = ( {
 					<div className="settings-payments-offline__header">
 						<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align settings-payments-offline__header-title">
 							<BackButton
-								href={ getNewPath( {}, '/offline' ) }
-								tooltipText={ __(
+								href={getNewPath({}, '/offline')}
+								tooltipText={__(
 									'Return to offline payment methods',
 									'woocommerce'
-								) }
-								isRoute={ true }
-								from={ 'woopayments_payment_methods' }
+								)}
+								isRoute={true}
+								from={'woopayments_payment_methods'}
 							>
 								<span className="woocommerce-settings-payments-header__title">
-									{ title }
+									{title}
 								</span>
 							</BackButton>
 						</h1>
 					</div>
-					<Suspense fallback={ <Placeholder /> }>
+					<Suspense fallback={<Placeholder />}>
 						<ChunkComponent />
 					</Suspense>
 				</div>
@@ -118,13 +118,13 @@ const OfflinePaymentGatewayWrapper = ( {
 /**
  * Hides or displays the WooCommerce navigation tab based on the provided display style.
  */
-const hideWooCommerceNavTab = ( display: string ) => {
-	const externalElement = document.querySelector< HTMLElement >(
+const hideWooCommerceNavTab = (display: string) => {
+	const externalElement = document.querySelector<HTMLElement>(
 		'.woo-nav-tab-wrapper'
 	);
 
 	// Add the 'hidden' class to hide the element.
-	if ( externalElement ) {
+	if (externalElement) {
 		externalElement.style.display = display;
 	}
 };
@@ -135,11 +135,11 @@ const hideWooCommerceNavTab = ( display: string ) => {
 const SettingsPaymentsMain = () => {
 	const location = useLocation();
 
-	useEffect( () => {
-		if ( location.pathname === '' ) {
-			hideWooCommerceNavTab( 'flex' );
+	useEffect(() => {
+		if (location.pathname === '') {
+			hideWooCommerceNavTab('flex');
 		}
-	}, [ location ] );
+	}, [location]);
 	return (
 		<>
 			<Suspense
@@ -149,36 +149,33 @@ const SettingsPaymentsMain = () => {
 							<div className="settings-payment-gateways">
 								<div className="settings-payment-gateways__header">
 									<div className="settings-payment-gateways__header-title">
-										{ __(
-											'Payment providers',
-											'woocommerce'
-										) }
+										{__('Payment providers', 'woocommerce')}
 									</div>
 									<div className="settings-payment-gateways__header-select-container">
 										<SelectControl
 											className="woocommerce-select-control__country"
-											prefix={ __(
+											prefix={__(
 												'Business location :',
 												'woocommerce'
-											) }
+											)}
 											// @ts-expect-error placeholder was removed from SelectControl's public types but is still accepted at runtime.
-											placeholder={ '' }
-											label={ '' }
-											options={ [] }
-											onChange={ () => {} }
+											placeholder={''}
+											label={''}
+											options={[]}
+											onChange={() => {}}
 										/>
 									</div>
 								</div>
-								<ListPlaceholder rows={ 5 } />
+								<ListPlaceholder rows={5} />
 							</div>
 							<div className="other-payment-gateways">
 								<div className="other-payment-gateways__header">
 									<div className="other-payment-gateways__header__title">
 										<span>
-											{ __(
+											{__(
 												'More payment options',
 												'woocommerce'
-											) }
+											)}
 										</span>
 										<>
 											<div className="other-payment-gateways__header__title__image-placeholder" />
@@ -187,9 +184,9 @@ const SettingsPaymentsMain = () => {
 										</>
 									</div>
 									<Button
-										variant={ 'link' }
-										onClick={ () => {} }
-										aria-expanded={ false }
+										variant={'link'}
+										onClick={() => {}}
+										aria-expanded={false}
 									>
 										<Gridicon icon="chevron-down" />
 									</Button>
@@ -209,9 +206,9 @@ const SettingsPaymentsMain = () => {
  * Wraps the offline payment gateways settings page.
  */
 export const SettingsPaymentsOfflineWrapper = () => {
-	useEffect( () => {
-		window.scrollTo( 0, 0 ); // Scrolls to the top of the page.
-	}, [] );
+	useEffect(() => {
+		window.scrollTo(0, 0); // Scrolls to the top of the page.
+	}, []);
 
 	return (
 		<>
@@ -219,25 +216,25 @@ export const SettingsPaymentsOfflineWrapper = () => {
 				<div className="settings-payments-offline__header">
 					<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align">
 						<BackButton
-							href={ getNewPath(
+							href={getNewPath(
 								{ page: 'wc-settings', tab: 'checkout' },
 								'/',
 								{}
-							) }
-							tooltipText={ __(
+							)}
+							tooltipText={__(
 								'Return to payments settings',
 								'woocommerce'
-							) }
-							isRoute={ true }
-							from={ 'woopayments_payment_methods' }
+							)}
+							isRoute={true}
+							from={'woopayments_payment_methods'}
 						>
 							<span className="woocommerce-settings-payments-header__title">
-								{ __( 'Take offline payments', 'woocommerce' ) }
+								{__('Take offline payments', 'woocommerce')}
 							</span>
 						</BackButton>
 					</h1>
 				</div>
-				<Suspense fallback={ <ListPlaceholder rows={ 3 } /> }>
+				<Suspense fallback={<ListPlaceholder rows={3} />}>
 					<SettingsPaymentsOfflineChunk />
 				</Suspense>
 			</div>
@@ -251,15 +248,15 @@ export const SettingsPaymentsOfflineWrapper = () => {
 export const SettingsPaymentsWooPaymentsWrapper = () => {
 	return (
 		<>
-			<Header title={ __( 'Settings', 'woocommerce' ) } />
+			<Header title={__('Settings', 'woocommerce')} />
 			<Suspense
 				fallback={
 					<div>
-						{ sprintf(
+						{sprintf(
 							/* translators: %s: WooPayments */
-							__( 'Loading %s settings…', 'woocommerce' ),
+							__('Loading %s settings…', 'woocommerce'),
 							'WooPayments'
-						) }
+						)}
 					</div>
 				}
 			>
@@ -270,22 +267,22 @@ export const SettingsPaymentsWooPaymentsWrapper = () => {
 };
 
 export const SettingsPaymentsBacsWrapper = () =>
-	OfflinePaymentGatewayWrapper( {
-		title: __( 'Direct bank transfer', 'woocommerce' ),
+	OfflinePaymentGatewayWrapper({
+		title: __('Direct bank transfer', 'woocommerce'),
 		chunkComponent: SettingsPaymentsBacsChunk,
-	} );
+	});
 
 export const SettingsPaymentsCodWrapper = () =>
-	OfflinePaymentGatewayWrapper( {
-		title: __( 'Cash on delivery', 'woocommerce' ),
+	OfflinePaymentGatewayWrapper({
+		title: __('Cash on delivery', 'woocommerce'),
 		chunkComponent: SettingsPaymentsCodChunk,
-	} );
+	});
 
 export const SettingsPaymentsChequeWrapper = () =>
-	OfflinePaymentGatewayWrapper( {
-		title: __( 'Check payments', 'woocommerce' ),
+	OfflinePaymentGatewayWrapper({
+		title: __('Check payments', 'woocommerce'),
 		chunkComponent: SettingsPaymentsChequeChunk,
-	} );
+	});
 
 /**
  * Wraps the main payment settings and payment methods settings pages.
@@ -293,26 +290,26 @@ export const SettingsPaymentsChequeWrapper = () =>
 export const SettingsPaymentsMainWrapper = () => {
 	return (
 		<>
-			<Header title={ __( 'Settings', 'woocommerce' ) } />
-			<HistoryRouter history={ getHistory() }>
+			<Header title={__('Settings', 'woocommerce')} />
+			<HistoryRouter history={getHistory()}>
 				<Routes>
 					<Route
 						path="/offline"
-						element={ <SettingsPaymentsOfflineWrapper /> }
+						element={<SettingsPaymentsOfflineWrapper />}
 					/>
 					<Route
 						path="/offline/bacs"
-						element={ <SettingsPaymentsBacsWrapper /> }
+						element={<SettingsPaymentsBacsWrapper />}
 					/>
 					<Route
 						path="/offline/cod"
-						element={ <SettingsPaymentsCodWrapper /> }
+						element={<SettingsPaymentsCodWrapper />}
 					/>
 					<Route
 						path="/offline/cheque"
-						element={ <SettingsPaymentsChequeWrapper /> }
+						element={<SettingsPaymentsChequeWrapper />}
 					/>
-					<Route path="/*" element={ <SettingsPaymentsMain /> } />
+					<Route path="/*" element={<SettingsPaymentsMain />} />
 				</Routes>
 			</HistoryRouter>
 		</>

@@ -7,12 +7,12 @@ import {
 	useProductDataContext,
 } from '@woocommerce/shared-context';
 
-const getProductById = ( products, id ) =>
-	products.find( ( product ) => product.id === id );
+const getProductById = (products, id) =>
+	products.find((product) => product.id === id);
 
-const getProductId = ( isDescendentOfQueryLoop, productId, postId ) => {
+const getProductId = (isDescendentOfQueryLoop, productId, postId) => {
 	// Keep for backwards compatibility of Products (Deprecated) block.
-	if ( isDescendentOfQueryLoop ) {
+	if (isDescendentOfQueryLoop) {
 		return postId;
 	}
 
@@ -24,7 +24,7 @@ const getProductId = ( isDescendentOfQueryLoop, productId, postId ) => {
  *
  * @param {Object} props Component props.
  */
-const OriginalComponentWithContext = ( props ) => {
+const OriginalComponentWithContext = (props) => {
 	const {
 		productId,
 		OriginalComponent,
@@ -33,34 +33,32 @@ const OriginalComponentWithContext = ( props ) => {
 		isDescendentOfQueryLoop,
 	} = props;
 
-	const id = getProductId( isDescendentOfQueryLoop, productId, postId );
+	const id = getProductId(isDescendentOfQueryLoop, productId, postId);
 
-	const { products, productsLoading } = useStoreProducts( {
+	const { products, productsLoading } = useStoreProducts({
 		include: id,
-	} );
+	});
 
 	const productFromAPI = {
 		product:
-			id > 0 && products.length > 0
-				? getProductById( products, id )
-				: null,
+			id > 0 && products.length > 0 ? getProductById(products, id) : null,
 		isLoading: productsLoading,
 	};
 
-	if ( product ) {
+	if (product) {
 		return (
-			<ProductDataContextProvider product={ product } isLoading={ false }>
-				<OriginalComponent { ...props } />
+			<ProductDataContextProvider product={product} isLoading={false}>
+				<OriginalComponent {...props} />
 			</ProductDataContextProvider>
 		);
 	}
 
 	return (
 		<ProductDataContextProvider
-			product={ productFromAPI.product }
-			isLoading={ productFromAPI.isLoading }
+			product={productFromAPI.product}
+			isLoading={productFromAPI.isLoading}
 		>
-			<OriginalComponent { ...props } />
+			<OriginalComponent {...props} />
 		</ProductDataContextProvider>
 	);
 };
@@ -71,26 +69,26 @@ const OriginalComponentWithContext = ( props ) => {
  *
  * @param {Function} OriginalComponent Component being wrapped.
  */
-export const withProductDataContext = ( OriginalComponent ) => {
-	return ( props ) => {
-		const productDataContext = useProductDataContext( {
+export const withProductDataContext = (OriginalComponent) => {
+	return (props) => {
+		const productDataContext = useProductDataContext({
 			isAdmin: props.isAdmin,
 			product: props.product,
-		} );
+		});
 
 		// If a product prop was provided, use this as the context for the tree.
 		if (
-			( !! props.product || ! productDataContext.hasContext ) &&
-			! props.isAdmin
+			(!!props.product || !productDataContext.hasContext) &&
+			!props.isAdmin
 		) {
 			return (
 				<OriginalComponentWithContext
-					{ ...props }
-					OriginalComponent={ OriginalComponent }
+					{...props}
+					OriginalComponent={OriginalComponent}
 				/>
 			);
 		}
 
-		return <OriginalComponent { ...props } />;
+		return <OriginalComponent {...props} />;
 	};
 };

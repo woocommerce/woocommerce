@@ -24,18 +24,16 @@ import CheckoutProcessor from './checkout-processor';
  *                                     redirect to after successful
  *                                     submit.
  */
-export const CheckoutProvider = ( { children, redirectUrl } ) => {
+export const CheckoutProvider = ({ children, redirectUrl }) => {
 	return (
-		<CheckoutEventsProvider redirectUrl={ redirectUrl }>
+		<CheckoutEventsProvider redirectUrl={redirectUrl}>
 			<ShippingDataProvider>
 				<PaymentEventsProvider>
-					{ children }
-					{ /* If the current user is an admin, we let BlockErrorBoundary render
-								the error, or we simply die silently. */ }
+					{children}
+					{/* If the current user is an admin, we let BlockErrorBoundary render
+								the error, or we simply die silently. */}
 					<BlockErrorBoundary
-						renderError={
-							CURRENT_USER_IS_ADMIN ? null : () => null
-						}
+						renderError={CURRENT_USER_IS_ADMIN ? null : () => null}
 					>
 						<PluginArea scope="woocommerce-checkout" />
 					</BlockErrorBoundary>

@@ -12,10 +12,10 @@ import { updateBlockSettings } from '../../config-tools/block-config';
 import { addFilterForEmail } from '../../config-tools/filters';
 
 const imageEditCallback = createHigherOrderComponent(
-	( BlockEdit ) =>
-		function alterBlocksEdits( props ) {
-			if ( props.name !== 'core/image' ) {
-				return <BlockEdit { ...props } />;
+	(BlockEdit) =>
+		function alterBlocksEdits(props) {
+			if (props.name !== 'core/image') {
+				return <BlockEdit {...props} />;
 			}
 			// Because we cannot support displaying the modal with image after clicking in the email we have to hide the toggle
 			const deactivateToggleCss = `
@@ -24,9 +24,9 @@ const imageEditCallback = createHigherOrderComponent(
 
 			return (
 				<>
-					<BlockEdit { ...props } />
+					<BlockEdit {...props} />
 					<InspectorControls>
-						<style>{ deactivateToggleCss }</style>
+						<style>{deactivateToggleCss}</style>
 					</InspectorControls>
 				</>
 			);
@@ -38,17 +38,17 @@ const imageEditCallback = createHigherOrderComponent(
  * Because CSS property filter is not supported in almost 50% of email clients we have to disable it
  */
 function disableImageFilter() {
-	updateBlockSettings( 'core/image', ( current ) => ( {
+	updateBlockSettings('core/image', (current) => ({
 		...current,
 		supports: {
-			...( current.supports || {} ),
+			...(current.supports || {}),
 			filter: {
 				// @ts-expect-error filter is not supported in the types
-				...( ( current.supports as BlockSupports )?.filter || {} ),
+				...((current.supports as BlockSupports)?.filter || {}),
 				duetone: false,
 			},
 		},
-	} ) );
+	}));
 }
 
 function hideExpandOnClick() {

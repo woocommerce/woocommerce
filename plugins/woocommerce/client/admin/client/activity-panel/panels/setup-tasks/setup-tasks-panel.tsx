@@ -9,10 +9,10 @@ type QueryTypeProps = {
 	};
 };
 
-export const SetupTasksPanel = ( { query }: QueryTypeProps ) => {
+export const SetupTasksPanel = ({ query }: QueryTypeProps) => {
 	return (
 		<div className="woocommerce-setup-panel">
-			<TaskLists query={ query } />
+			<TaskLists query={query} />
 		</div>
 	);
 };

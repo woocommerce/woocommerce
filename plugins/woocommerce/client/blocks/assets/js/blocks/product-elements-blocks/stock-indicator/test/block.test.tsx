@@ -11,21 +11,21 @@ import { getSetting } from '@woocommerce/settings';
  */
 import { Block } from '../block';
 
-jest.mock( '@wordpress/data', () => {
-	const originalModule = jest.requireActual( '@wordpress/data' );
+jest.mock('@wordpress/data', () => {
+	const originalModule = jest.requireActual('@wordpress/data');
 	return {
 		...originalModule,
-		useSelect: jest.fn( () => ( {
+		useSelect: jest.fn(() => ({
 			selectedProductType: {
 				slug: 'simple',
 			},
-		} ) ),
+		})),
 	};
-} );
+});
 
-jest.mock( '@woocommerce/settings', () => ( {
-	getSetting: jest.fn().mockImplementation( ( param ) => {
-		if ( param === 'wcBlocksConfig' ) {
+jest.mock('@woocommerce/settings', () => ({
+	getSetting: jest.fn().mockImplementation((param) => {
+		if (param === 'wcBlocksConfig') {
 			return {
 				pluginUrl: '/mock-url/',
 				productCount: 0,
@@ -34,7 +34,7 @@ jest.mock( '@woocommerce/settings', () => ( {
 				wordCountType: 'words',
 			};
 		}
-		if ( param === 'attributes' ) {
+		if (param === 'attributes') {
 			return [
 				{
 					attribute_id: '1',
@@ -46,24 +46,24 @@ jest.mock( '@woocommerce/settings', () => ( {
 				},
 			];
 		}
-		if ( param === 'stockStatusOptions' ) {
+		if (param === 'stockStatusOptions') {
 			return {
 				instock: 'In stock',
 				outofstock: 'Out of stock',
 				onbackorder: 'On backorder',
 			};
 		}
-		if ( param === 'productTypes' ) {
+		if (param === 'productTypes') {
 			return {
 				simple: 'Simple product',
 			};
 		}
-		if ( param === 'globalPaymentMethods' ) {
+		if (param === 'globalPaymentMethods') {
 			return [];
 		}
 		return {};
-	} ),
-	getSettingWithCoercion: jest.fn().mockReturnValue( false ),
+	}),
+	getSettingWithCoercion: jest.fn().mockReturnValue(false),
 	STORE_PAGES: {
 		shop: null,
 		cart: null,
@@ -90,17 +90,17 @@ jest.mock( '@woocommerce/settings', () => ( {
 		phone: '',
 		email: '',
 	},
-} ) );
+}));
 
-jest.mock( '@woocommerce/base-hooks', () => ( {
+jest.mock('@woocommerce/base-hooks', () => ({
 	__esModule: true,
-	useStyleProps: jest.fn( () => ( {
+	useStyleProps: jest.fn(() => ({
 		className: '',
 		style: {},
-	} ) ),
-} ) );
+	})),
+}));
 
-jest.mock( '@woocommerce/block-settings', () => ( {
+jest.mock('@woocommerce/block-settings', () => ({
 	ADDRESS_FORM_KEYS: [
 		'first_name',
 		'last_name',
@@ -121,7 +121,7 @@ jest.mock( '@woocommerce/block-settings', () => ( {
 	blocksConfig: {
 		defaultAvatar: 'test-avatar-url',
 	},
-} ) );
+}));
 
 const defaultProduct: ProductResponseItem = {
 	name: 'Test Product',
@@ -176,30 +176,30 @@ const defaultProduct: ProductResponseItem = {
 	slug: '',
 };
 
-describe( 'Stock Indicator Block', () => {
-	beforeEach( () => {
-		( getSetting as jest.Mock ).mockImplementation( ( setting ) => {
-			if ( setting === 'productTypesWithoutStockIndicator' ) {
-				return [ 'external', 'grouped', 'variable' ];
+describe('Stock Indicator Block', () => {
+	beforeEach(() => {
+		(getSetting as jest.Mock).mockImplementation((setting) => {
+			if (setting === 'productTypesWithoutStockIndicator') {
+				return ['external', 'grouped', 'variable'];
 			}
 			return undefined;
-		} );
-	} );
-	it( 'should not show stock indicator when stock_availability is empty', () => {
+		});
+	});
+	it('should not show stock indicator when stock_availability is empty', () => {
 		const product = {
 			...defaultProduct,
 		};
 
 		const { container } = render(
-			<ProductDataContextProvider product={ product } isLoading={ false }>
-				<Block isDescendantOfAllProducts={ false } />
+			<ProductDataContextProvider product={product} isLoading={false}>
+				<Block isDescendantOfAllProducts={false} />
 			</ProductDataContextProvider>
 		);
 
-		expect( container.firstChild ).toBeNull();
-	} );
+		expect(container.firstChild).toBeNull();
+	});
 
-	it( 'should show stock indicator for out of stock products', () => {
+	it('should show stock indicator for out of stock products', () => {
 		const product = {
 			...defaultProduct,
 			is_in_stock: false,
@@ -210,16 +210,16 @@ describe( 'Stock Indicator Block', () => {
 		};
 
 		const { container } = render(
-			<ProductDataContextProvider product={ product } isLoading={ false }>
-				<Block isDescendantOfAllProducts={ false } />
+			<ProductDataContextProvider product={product} isLoading={false}>
+				<Block isDescendantOfAllProducts={false} />
 			</ProductDataContextProvider>
 		);
 
-		expect( container.firstChild ).not.toBeNull();
-		expect( container.firstChild ).toHaveTextContent( 'Out of stock' );
-	} );
+		expect(container.firstChild).not.toBeNull();
+		expect(container.firstChild).toHaveTextContent('Out of stock');
+	});
 
-	it( 'should show stock indicator for in stock products', () => {
+	it('should show stock indicator for in stock products', () => {
 		const product = {
 			...defaultProduct,
 			stock_availability: {
@@ -229,16 +229,16 @@ describe( 'Stock Indicator Block', () => {
 		};
 
 		const { container } = render(
-			<ProductDataContextProvider product={ product } isLoading={ false }>
-				<Block isDescendantOfAllProducts={ false } />
+			<ProductDataContextProvider product={product} isLoading={false}>
+				<Block isDescendantOfAllProducts={false} />
 			</ProductDataContextProvider>
 		);
 
-		expect( container.firstChild ).not.toBeNull();
-		expect( container.firstChild ).toHaveTextContent( 'In stock' );
-	} );
+		expect(container.firstChild).not.toBeNull();
+		expect(container.firstChild).toHaveTextContent('In stock');
+	});
 
-	it( 'should show stock indicator when is descendent of single product template', () => {
+	it('should show stock indicator when is descendent of single product template', () => {
 		const product = {
 			...defaultProduct,
 			id: 0,
@@ -246,12 +246,12 @@ describe( 'Stock Indicator Block', () => {
 		};
 
 		const { container } = render(
-			<ProductDataContextProvider product={ product } isLoading={ false }>
-				<Block isDescendantOfAllProducts={ false } />
+			<ProductDataContextProvider product={product} isLoading={false}>
+				<Block isDescendantOfAllProducts={false} />
 			</ProductDataContextProvider>
 		);
 
-		expect( container.firstChild ).not.toBeNull();
-		expect( container.firstChild ).toHaveTextContent( 'In stock' );
-	} );
-} );
+		expect(container.firstChild).not.toBeNull();
+		expect(container.firstChild).toHaveTextContent('In stock');
+	});
+});

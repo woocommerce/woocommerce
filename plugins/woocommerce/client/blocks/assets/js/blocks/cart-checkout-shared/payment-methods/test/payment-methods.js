@@ -20,47 +20,45 @@ import { dispatch } from '@wordpress/data';
  */
 import PaymentMethods from '../payment-methods';
 
-jest.mock( '../saved-payment-method-options', () => ( { onChange } ) => {
+jest.mock('../saved-payment-method-options', () => ({ onChange }) => {
 	return (
 		<>
 			<span>Saved payment method options</span>
-			<button onClick={ () => onChange( '0' ) }>Select saved</button>
+			<button onClick={() => onChange('0')}>Select saved</button>
 		</>
 	);
-} );
+});
 
-jest.mock( '@woocommerce/blocks-components', () => {
-	const originalModule = jest.requireActual(
-		'@woocommerce/blocks-components'
-	);
+jest.mock('@woocommerce/blocks-components', () => {
+	const originalModule = jest.requireActual('@woocommerce/blocks-components');
 
 	return {
 		__esModule: true,
 		...originalModule,
-		RadioControlAccordion: ( { onChange, className = '' } ) => (
+		RadioControlAccordion: ({ onChange, className = '' }) => (
 			<>
 				<span>Payment method options</span>
 				<span data-testid="payment-method-options-class-name">
-					{ className }
+					{className}
 				</span>
-				<button onClick={ () => onChange( 'credit-card' ) }>
+				<button onClick={() => onChange('credit-card')}>
 					Select new payment
 				</button>
 			</>
 		),
 	};
-} );
+});
 
-jest.mock( '@wordpress/data', () => {
-	const originalModule = jest.requireActual( '@wordpress/data' );
+jest.mock('@wordpress/data', () => {
+	const originalModule = jest.requireActual('@wordpress/data');
 	const originalBlockDataModule = jest.requireActual(
 		'@woocommerce/block-data'
 	);
 	return {
 		...originalModule,
-		select: jest.fn( ( storeDescriptor ) => {
+		select: jest.fn((storeDescriptor) => {
 			const paymentStoreInMock = originalBlockDataModule.paymentStore;
-			const originalStore = originalModule.select( storeDescriptor );
+			const originalStore = originalModule.select(storeDescriptor);
 			if (
 				storeDescriptor === paymentStoreInMock ||
 				storeDescriptor === 'wc/store/payment'
@@ -79,13 +77,13 @@ jest.mock( '@wordpress/data', () => {
 				};
 			}
 			return originalStore;
-		} ),
+		}),
 	};
-} );
+});
 
-const registerMockPaymentMethodsByName = ( names ) => {
-	names.forEach( ( name ) => {
-		registerPaymentMethod( {
+const registerMockPaymentMethodsByName = (names) => {
+	names.forEach((name) => {
+		registerPaymentMethod({
 			name,
 			label: name,
 			content: <div>A payment method</div>,
@@ -95,152 +93,148 @@ const registerMockPaymentMethodsByName = ( names ) => {
 			supports: {
 				showSavedCards: true,
 				showSaveOption: true,
-				features: [ 'products' ],
+				features: ['products'],
 			},
 			ariaLabel: name,
-		} );
-	} );
-	dispatch( paymentStore ).__internalUpdateAvailablePaymentMethods();
+		});
+	});
+	dispatch(paymentStore).__internalUpdateAvailablePaymentMethods();
 };
 
 const registerMockPaymentMethods = () => {
-	registerMockPaymentMethodsByName( [ 'cod', 'credit-card' ] );
+	registerMockPaymentMethodsByName(['cod', 'credit-card']);
 };
 
 const registerMockExpressPaymentMethods = () => {
-	registerExpressPaymentMethod( {
+	registerExpressPaymentMethod({
 		name: 'dummy-express',
 		label: 'dummy express',
 		content: <div>A payment method</div>,
 		edit: <div>A payment method</div>,
 		canMakePayment: () => true,
-	} );
-	dispatch( paymentStore ).__internalUpdateAvailablePaymentMethods();
+	});
+	dispatch(paymentStore).__internalUpdateAvailablePaymentMethods();
 };
 
 const registerMockSinglePaymentMethod = () => {
-	registerMockPaymentMethodsByName( [ 'cod' ] );
+	registerMockPaymentMethodsByName(['cod']);
 };
 
-const resetMockPaymentMethodsByName = ( names ) => {
-	names.forEach( ( name ) => {
-		__experimentalDeRegisterPaymentMethod( name );
-	} );
+const resetMockPaymentMethodsByName = (names) => {
+	names.forEach((name) => {
+		__experimentalDeRegisterPaymentMethod(name);
+	});
 };
 
 const resetMockPaymentMethods = () => {
-	resetMockPaymentMethodsByName( [ 'cod', 'credit-card' ] );
+	resetMockPaymentMethodsByName(['cod', 'credit-card']);
 };
 
 const resetMockSinglePaymentMethod = () => {
-	resetMockPaymentMethodsByName( [ 'cod' ] );
+	resetMockPaymentMethodsByName(['cod']);
 };
 
 const resetMockExpressPaymentMethods = () => {
-	[ 'dummy-express' ].forEach( ( name ) => {
-		__experimentalDeRegisterExpressPaymentMethod( name );
-	} );
+	['dummy-express'].forEach((name) => {
+		__experimentalDeRegisterExpressPaymentMethod(name);
+	});
 };
 
-describe( 'PaymentMethods', () => {
-	beforeEach( () => {
+describe('PaymentMethods', () => {
+	beforeEach(() => {
 		// Setup MSW handlers for cart API
 		server.use(
-			http.get( '/wc/store/v1/cart', () => {
-				return HttpResponse.json( previewCart );
-			} )
+			http.get('/wc/store/v1/cart', () => {
+				return HttpResponse.json(previewCart);
+			})
 		);
 
 		// need to clear the store resolution state between tests.
-		wpDataFunctions
-			.dispatch( CART_STORE_KEY )
-			.invalidateResolutionForStore();
-		wpDataFunctions.dispatch( CART_STORE_KEY ).receiveCart( {
+		wpDataFunctions.dispatch(CART_STORE_KEY).invalidateResolutionForStore();
+		wpDataFunctions.dispatch(CART_STORE_KEY).receiveCart({
 			...previewCart,
-			payment_methods: [ 'cod', 'credit-card' ],
-		} );
-	} );
+			payment_methods: ['cod', 'credit-card'],
+		});
+	});
 
-	test( 'should show no payment methods component when there are no payment methods', async () => {
-		render( <PaymentMethods /> );
+	test('should show no payment methods component when there are no payment methods', async () => {
+		render(<PaymentMethods />);
 
-		await waitFor( () => {
+		await waitFor(() => {
 			const noPaymentMethods = screen.queryAllByText(
 				/no payment methods available/
 			);
 			// We might get more than one match because the `speak()` function
 			// creates an extra `div` with the notice contents used for a11y.
-			expect( noPaymentMethods.length ).toBeGreaterThanOrEqual( 1 );
-		} );
-	} );
+			expect(noPaymentMethods.length).toBeGreaterThanOrEqual(1);
+		});
+	});
 
-	test( 'should show only express payments component when only express payment methods are available', async () => {
+	test('should show only express payments component when only express payment methods are available', async () => {
 		// Register only express payment methods, no regular payment methods
-		act( () => {
+		act(() => {
 			registerMockExpressPaymentMethods();
-		} );
+		});
 
 		// Wait for express payment methods to be initialized
-		await waitFor( () => {
+		await waitFor(() => {
 			expect(
 				wpDataFunctions
-					.select( paymentStore )
+					.select(paymentStore)
 					.expressPaymentMethodsInitialized()
-			).toBe( true );
-		} );
+			).toBe(true);
+		});
 
 		const customOnlyExpressPayments = (
 			<div>Only express payments available</div>
 		);
 
 		render(
-			<PaymentMethods onlyExpressPayments={ customOnlyExpressPayments } />
+			<PaymentMethods onlyExpressPayments={customOnlyExpressPayments} />
 		);
 
-		await waitFor( () => {
+		await waitFor(() => {
 			const onlyExpressPayments = screen.getByText(
 				'Only express payments available'
 			);
-			expect( onlyExpressPayments ).toBeInTheDocument();
-		} );
+			expect(onlyExpressPayments).toBeInTheDocument();
+		});
 
 		// Clean up
-		act( () => {
+		act(() => {
 			resetMockExpressPaymentMethods();
-		} );
-	} );
+		});
+	});
 
-	test( 'selecting new payment method', async () => {
+	test('selecting new payment method', async () => {
 		const user = userEvent.setup();
 
 		const ShowActivePaymentMethod = () => {
 			const { activePaymentMethod, activeSavedToken } =
-				wpDataFunctions.useSelect( ( select ) => {
-					const store = select( paymentStore );
+				wpDataFunctions.useSelect((select) => {
+					const store = select(paymentStore);
 					return {
 						activePaymentMethod: store.getActivePaymentMethod(),
 						activeSavedToken: store.getActiveSavedToken(),
 					};
-				} );
+				});
 			return (
 				<>
-					<div>
-						{ 'Active Payment Method: ' + activePaymentMethod }
-					</div>
-					<div>{ 'Active Saved Token: ' + activeSavedToken }</div>
+					<div>{'Active Payment Method: ' + activePaymentMethod}</div>
+					<div>{'Active Saved Token: ' + activeSavedToken}</div>
 				</>
 			);
 		};
 
-		act( () => {
+		act(() => {
 			registerMockPaymentMethods();
-		} );
+		});
 		// Wait for the payment methods to finish loading before rendering.
-		await waitFor( () => {
+		await waitFor(() => {
 			expect(
-				wpDataFunctions.select( paymentStore ).getActivePaymentMethod()
-			).toBe( 'cod' );
-		} );
+				wpDataFunctions.select(paymentStore).getActivePaymentMethod()
+			).toBe('cod');
+		});
 
 		render(
 			<>
@@ -249,70 +243,70 @@ describe( 'PaymentMethods', () => {
 			</>
 		);
 
-		await waitFor( () => {
+		await waitFor(() => {
 			const savedPaymentMethodOptions = screen.queryByText(
 				/Saved payment method options/
 			);
-			expect( savedPaymentMethodOptions ).not.toBeNull();
-		} );
+			expect(savedPaymentMethodOptions).not.toBeNull();
+		});
 
-		await waitFor( () => {
+		await waitFor(() => {
 			const paymentMethodOptions = screen.queryByText(
 				/Payment method options/
 			);
-			expect( paymentMethodOptions ).not.toBeNull();
-		} );
+			expect(paymentMethodOptions).not.toBeNull();
+		});
 
-		await waitFor( () => {
+		await waitFor(() => {
 			const savedToken = screen.queryByText(
 				/Active Payment Method: credit-card/
 			);
-			expect( savedToken ).toBeNull();
-		} );
+			expect(savedToken).toBeNull();
+		});
 
-		await act( async () => {
-			await user.click( screen.getByText( 'Select new payment' ) );
-		} );
+		await act(async () => {
+			await user.click(screen.getByText('Select new payment'));
+		});
 
-		await waitFor( () => {
+		await waitFor(() => {
 			const activePaymentMethod = screen.queryByText(
 				/Active Payment Method: credit-card/
 			);
-			expect( activePaymentMethod ).not.toBeNull();
-		} );
+			expect(activePaymentMethod).not.toBeNull();
+		});
 
-		act( () => resetMockPaymentMethods() );
-	} );
+		act(() => resetMockPaymentMethods());
+	});
 
-	test( 'should not apply single-method radio disable class when only one payment method is available', async () => {
-		act( () => {
+	test('should not apply single-method radio disable class when only one payment method is available', async () => {
+		act(() => {
 			registerMockSinglePaymentMethod();
-		} );
+		});
 
-		wpDataFunctions.dispatch( CART_STORE_KEY ).receiveCart( {
+		wpDataFunctions.dispatch(CART_STORE_KEY).receiveCart({
 			...previewCart,
-			payment_methods: [ 'cod' ],
-		} );
+			payment_methods: ['cod'],
+		});
 
-		await waitFor( () => {
+		await waitFor(() => {
 			expect(
-				wpDataFunctions.select( paymentStore ).getActivePaymentMethod()
-			).toBe( 'cod' );
-		} );
+				wpDataFunctions.select(paymentStore).getActivePaymentMethod()
+			).toBe('cod');
+		});
 
-		render( <PaymentMethods /> );
+		render(<PaymentMethods />);
 
-		await waitFor( () => {
+		await waitFor(() => {
 			const paymentMethodOptions = screen.queryByText(
 				/Payment method options/
 			);
-			expect( paymentMethodOptions ).not.toBeNull();
-		} );
+			expect(paymentMethodOptions).not.toBeNull();
+		});
 
 		expect(
-			screen.getByTestId( 'payment-method-options-class-name' )
-		).not.toHaveTextContent( /disable-radio-control/ );
+			screen.getByTestId('payment-method-options-class-name')
+		).not.toHaveTextContent(/disable-radio-control/);
 
-		act( () => resetMockSinglePaymentMethod() );
-	} );
-} );
+		act(() => resetMockSinglePaymentMethod());
+	});
+});

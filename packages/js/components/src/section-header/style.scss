@@ -1,12 +1,10 @@
-
-
 .woocommerce-section-header {
 	padding: ($gap - 3);
 	border-bottom: none;
 	display: flex;
 	justify-content: space-between;
 
-	@include breakpoint( '<782px' ) {
+	@include breakpoint("<782px") {
 		margin-left: -16px;
 		margin-right: -16px;
 		margin-bottom: $gap-small;
@@ -22,7 +20,7 @@
 		margin: 0 10px;
 	}
 
-	@include breakpoint( '<782px' ) {
+	@include breakpoint("<782px") {
 		&.has-interval-select {
 			position: relative;
 			padding-bottom: 30px;
@@ -69,7 +67,7 @@
 	// EllipsisMenu is 24px, so to match we add 6px padding around the
 	// heading text, which we know is 18px from line-height.
 	padding: 3px 0;
-	@include font-size( 20 );
+	@include font-size(20);
 	line-height: 2.2;
 	font-weight: 400;
 }

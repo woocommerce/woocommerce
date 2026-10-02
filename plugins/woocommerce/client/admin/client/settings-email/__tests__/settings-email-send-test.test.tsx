@@ -19,21 +19,21 @@ import {
 	type SendTestEmailTarget,
 } from '../settings-email-send-test';
 
-jest.mock( '@wordpress/api-fetch', () => jest.fn() );
+jest.mock('@wordpress/api-fetch', () => jest.fn());
 
 const recordEventMock = jest.fn();
-jest.mock( '@woocommerce/tracks', () => ( {
-	recordEvent: ( name: string, payload: Record< string, unknown > ) =>
-		recordEventMock( name, payload ),
-} ) );
+jest.mock('@woocommerce/tracks', () => ({
+	recordEvent: (name: string, payload: Record<string, unknown>) =>
+		recordEventMock(name, payload),
+}));
 
-jest.mock( '~/utils/admin-settings', () => ( {
+jest.mock('~/utils/admin-settings', () => ({
 	getAdminSetting: () => 'test-nonce',
-} ) );
+}));
 
 const apiFetchMock = apiFetch as unknown as jest.Mock;
 
-const Harness = ( {
+const Harness = ({
 	target,
 	source,
 	onCancel = () => {},
@@ -41,19 +41,19 @@ const Harness = ( {
 	target: SendTestEmailTarget;
 	source: SendTestEmailSource;
 	onCancel?: () => void;
-} ) => {
+}) => {
 	const { email, setEmail, isSending, notice, noticeType, sendEmail } =
-		useSendTestEmail( target, source );
+		useSendTestEmail(target, source);
 
 	return (
 		<SendTestEmailForm
-			email={ email }
-			onEmailChange={ setEmail }
-			isSending={ isSending }
-			notice={ notice }
-			noticeType={ noticeType }
-			onSend={ sendEmail }
-			onCancel={ onCancel }
+			email={email}
+			onEmailChange={setEmail}
+			isSending={isSending}
+			notice={notice}
+			noticeType={noticeType}
+			onSend={sendEmail}
+			onCancel={onCancel}
 		/>
 	);
 };
@@ -70,138 +70,136 @@ const settingsTarget: SendTestEmailTarget = {
 	emailType: 'WC_Email_New_Order',
 };
 
-const enterEmailAndSend = ( address: string ) => {
-	fireEvent.change( screen.getByLabelText( 'Send to' ), {
+const enterEmailAndSend = (address: string) => {
+	fireEvent.change(screen.getByLabelText('Send to'), {
 		target: { value: address },
-	} );
-	fireEvent.click(
-		screen.getByRole( 'button', { name: 'Send test email' } )
-	);
+	});
+	fireEvent.click(screen.getByRole('button', { name: 'Send test email' }));
 };
 
-describe( 'useSendTestEmail + SendTestEmailForm', () => {
-	beforeEach( () => {
+describe('useSendTestEmail + SendTestEmailForm', () => {
+	beforeEach(() => {
 		apiFetchMock.mockReset();
 		recordEventMock.mockClear();
-	} );
+	});
 
-	it( 'disables the send button until a valid email is entered', () => {
-		render( <Harness target={ editorTarget } source="email_listing" /> );
+	it('disables the send button until a valid email is entered', () => {
+		render(<Harness target={editorTarget} source="email_listing" />);
 
-		const sendButton = screen.getByRole( 'button', {
+		const sendButton = screen.getByRole('button', {
 			name: 'Send test email',
-		} );
-		expect( sendButton ).toBeDisabled();
+		});
+		expect(sendButton).toBeDisabled();
 
-		fireEvent.change( screen.getByLabelText( 'Send to' ), {
+		fireEvent.change(screen.getByLabelText('Send to'), {
 			target: { value: 'not-an-email' },
-		} );
-		expect( sendButton ).toBeDisabled();
+		});
+		expect(sendButton).toBeDisabled();
 
-		fireEvent.change( screen.getByLabelText( 'Send to' ), {
+		fireEvent.change(screen.getByLabelText('Send to'), {
 			target: { value: 'merchant@example.com' },
-		} );
-		expect( sendButton ).toBeEnabled();
-	} );
+		});
+		expect(sendButton).toBeEnabled();
+	});
 
-	it( 'editor target without a post: posts the email type so the server renders the file template', async () => {
-		apiFetchMock.mockResolvedValue( { success: true, result: true } );
+	it('editor target without a post: posts the email type so the server renders the file template', async () => {
+		apiFetchMock.mockResolvedValue({ success: true, result: true });
 
 		render(
 			<Harness
-				target={ { ...editorTarget, postId: null } }
+				target={{ ...editorTarget, postId: null }}
 				source="email_listing"
 			/>
 		);
 
-		enterEmailAndSend( 'merchant@example.com' );
+		enterEmailAndSend('merchant@example.com');
 
-		await waitFor( () =>
+		await waitFor(() =>
 			expect(
-				screen.getByText( 'Test email sent successfully!' )
+				screen.getByText('Test email sent successfully!')
 			).toBeInTheDocument()
 		);
 
-		expect( apiFetchMock ).toHaveBeenCalledWith( {
+		expect(apiFetchMock).toHaveBeenCalledWith({
 			path: '/woocommerce-email-editor/v1/send_preview_email',
 			method: 'POST',
 			data: {
 				email: 'merchant@example.com',
 				emailType: 'new_order',
 			},
-		} );
-	} );
+		});
+	});
 
-	it( 'editor target: posts the post ID to the email editor endpoint and shows the success notice', async () => {
-		apiFetchMock.mockResolvedValue( { success: true, result: true } );
+	it('editor target: posts the post ID to the email editor endpoint and shows the success notice', async () => {
+		apiFetchMock.mockResolvedValue({ success: true, result: true });
 
-		render( <Harness target={ editorTarget } source="email_listing" /> );
+		render(<Harness target={editorTarget} source="email_listing" />);
 
-		enterEmailAndSend( 'merchant@example.com' );
+		enterEmailAndSend('merchant@example.com');
 
-		await waitFor( () =>
+		await waitFor(() =>
 			expect(
-				screen.getByText( 'Test email sent successfully!' )
+				screen.getByText('Test email sent successfully!')
 			).toBeInTheDocument()
 		);
 
-		expect( apiFetchMock ).toHaveBeenCalledWith( {
+		expect(apiFetchMock).toHaveBeenCalledWith({
 			path: '/woocommerce-email-editor/v1/send_preview_email',
 			method: 'POST',
 			data: {
 				email: 'merchant@example.com',
 				postId: 123,
 			},
-		} );
-		expect( recordEventMock ).toHaveBeenCalledWith(
+		});
+		expect(recordEventMock).toHaveBeenCalledWith(
 			'settings_emails_preview_test_sent_successful',
 			{
 				email_type: 'WC_Email_New_Order',
 				source: 'email_listing',
 			}
 		);
-	} );
+	});
 
-	it( 'settings target: posts the email type class name to the send-preview endpoint and shows the response message', async () => {
-		apiFetchMock.mockResolvedValue( { message: 'Test email sent.' } );
+	it('settings target: posts the email type class name to the send-preview endpoint and shows the response message', async () => {
+		apiFetchMock.mockResolvedValue({ message: 'Test email sent.' });
 
-		render( <Harness target={ settingsTarget } source="email_preview" /> );
+		render(<Harness target={settingsTarget} source="email_preview" />);
 
-		enterEmailAndSend( 'merchant@example.com' );
+		enterEmailAndSend('merchant@example.com');
 
-		await waitFor( () =>
-			expect( screen.getByText( 'Test email sent.' ) ).toBeInTheDocument()
+		await waitFor(() =>
+			expect(screen.getByText('Test email sent.')).toBeInTheDocument()
 		);
 
-		expect( apiFetchMock ).toHaveBeenCalledWith( {
+		expect(apiFetchMock).toHaveBeenCalledWith({
 			path: 'wc-admin-email/settings/email/send-preview?nonce=test-nonce',
 			method: 'POST',
 			data: {
 				email: 'merchant@example.com',
 				type: 'WC_Email_New_Order',
 			},
-		} );
-		expect( recordEventMock ).toHaveBeenCalledWith(
+		});
+		expect(recordEventMock).toHaveBeenCalledWith(
 			'settings_emails_preview_test_sent_successful',
 			{
 				email_type: 'WC_Email_New_Order',
 				source: 'email_preview',
 			}
 		);
-	} );
+	});
 
-	it( 'shows the friendly error message and records the failure with its source', async () => {
-		apiFetchMock.mockRejectedValue( {
+	it('shows the friendly error message and records the failure with its source', async () => {
+		apiFetchMock.mockRejectedValue({
 			code: 'rest_cookie_invalid_nonce',
 			message: 'Cookie check failed',
 			data: { status: 403 },
-		} );
+		});
 
-		render( <Harness target={ editorTarget } source="email_listing" /> );
+		render(<Harness target={editorTarget} source="email_listing" />);
 
-		enterEmailAndSend( 'merchant@example.com' );
+		enterEmailAndSend('merchant@example.com');
 
-		await waitFor( () =>
+		await waitFor(() =>
 			expect(
 				screen.getByText(
 					'Your session expired. Refresh the page and try again.'
@@ -209,7 +207,7 @@ describe( 'useSendTestEmail + SendTestEmailForm', () => {
 			).toBeInTheDocument()
 		);
 
-		expect( recordEventMock ).toHaveBeenCalledWith(
+		expect(recordEventMock).toHaveBeenCalledWith(
 			'settings_emails_preview_test_sent_failed',
 			{
 				email_type: 'WC_Email_New_Order',
@@ -218,72 +216,72 @@ describe( 'useSendTestEmail + SendTestEmailForm', () => {
 				source: 'email_listing',
 			}
 		);
-	} );
+	});
 
-	it( 'shows the busy "Sending…" state while the request is in flight', async () => {
-		let resolveRequest: ( value: unknown ) => void = () => {};
+	it('shows the busy "Sending…" state while the request is in flight', async () => {
+		let resolveRequest: (value: unknown) => void = () => {};
 		apiFetchMock.mockImplementation(
 			() =>
-				new Promise( ( resolve ) => {
+				new Promise((resolve) => {
 					resolveRequest = resolve;
-				} )
+				})
 		);
 
-		render( <Harness target={ editorTarget } source="email_listing" /> );
+		render(<Harness target={editorTarget} source="email_listing" />);
 
-		enterEmailAndSend( 'merchant@example.com' );
+		enterEmailAndSend('merchant@example.com');
 
-		const sendingButton = await screen.findByRole( 'button', {
+		const sendingButton = await screen.findByRole('button', {
 			name: 'Sending…',
-		} );
-		expect( sendingButton ).toBeDisabled();
+		});
+		expect(sendingButton).toBeDisabled();
 
-		resolveRequest( { success: true, result: true } );
+		resolveRequest({ success: true, result: true });
 
-		await waitFor( () =>
+		await waitFor(() =>
 			expect(
-				screen.getByRole( 'button', { name: 'Send test email' } )
+				screen.getByRole('button', { name: 'Send test email' })
 			).toBeEnabled()
 		);
-	} );
+	});
 
-	it( 'submits the form when Enter is pressed in the email field, but not while the email is invalid', async () => {
-		apiFetchMock.mockResolvedValue( { success: true, result: true } );
+	it('submits the form when Enter is pressed in the email field, but not while the email is invalid', async () => {
+		apiFetchMock.mockResolvedValue({ success: true, result: true });
 
-		render( <Harness target={ editorTarget } source="email_listing" /> );
+		render(<Harness target={editorTarget} source="email_listing" />);
 
-		const emailField = screen.getByLabelText( 'Send to' );
+		const emailField = screen.getByLabelText('Send to');
 
-		fireEvent.change( emailField, {
+		fireEvent.change(emailField, {
 			target: { value: 'not-an-email' },
-		} );
-		fireEvent.submit( emailField );
-		expect( apiFetchMock ).not.toHaveBeenCalled();
+		});
+		fireEvent.submit(emailField);
+		expect(apiFetchMock).not.toHaveBeenCalled();
 
-		fireEvent.change( emailField, {
+		fireEvent.change(emailField, {
 			target: { value: 'merchant@example.com' },
-		} );
-		fireEvent.submit( emailField );
+		});
+		fireEvent.submit(emailField);
 
-		await waitFor( () =>
+		await waitFor(() =>
 			expect(
-				screen.getByText( 'Test email sent successfully!' )
+				screen.getByText('Test email sent successfully!')
 			).toBeInTheDocument()
 		);
-	} );
+	});
 
-	it( 'invokes onCancel when the cancel button is clicked', () => {
+	it('invokes onCancel when the cancel button is clicked', () => {
 		const onCancel = jest.fn();
 		render(
 			<Harness
-				target={ editorTarget }
+				target={editorTarget}
 				source="email_listing"
-				onCancel={ onCancel }
+				onCancel={onCancel}
 			/>
 		);
 
-		fireEvent.click( screen.getByRole( 'button', { name: 'Cancel' } ) );
+		fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 
-		expect( onCancel ).toHaveBeenCalled();
-	} );
-} );
+		expect(onCancel).toHaveBeenCalled();
+	});
+});

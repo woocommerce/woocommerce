@@ -68,15 +68,15 @@ const defaultProductData: ProductResponseItem = {
  *
  * @member {Object} ProductDataContext A react context object
  */
-const ProductDataContext = createContext< {
+const ProductDataContext = createContext<{
 	product: ProductResponseItem | ProductEntityResponse;
 	hasContext: boolean;
 	isLoading: boolean;
-} >( {
+}>({
 	product: defaultProductData,
 	hasContext: false,
 	isLoading: false,
-} );
+});
 
 type UseProductDataContextProps = {
 	isAdmin?: boolean | undefined;
@@ -105,10 +105,10 @@ export const useProductDataContext = (
 		isAdmin: false,
 	}
 ) => {
-	const context = useContext( ProductDataContext );
+	const context = useContext(ProductDataContext);
 	const { isAdmin, product, isResolving } = props;
 
-	if ( ! isAdmin || ! product ) {
+	if (!isAdmin || !product) {
 		return context;
 	}
 
@@ -132,11 +132,11 @@ interface ProductDataContextProviderProps {
  * @param {Object}   object.children  The product data to be passed down
  * @param {boolean}  object.isLoading The product data to be passed down
  */
-export const ProductDataContextProvider = ( {
+export const ProductDataContextProvider = ({
 	product = null,
 	children,
 	isLoading,
-}: ProductDataContextProviderProps ) => {
+}: ProductDataContextProviderProps) => {
 	const contextValue = {
 		product: product || defaultProductData,
 		isLoading,
@@ -144,12 +144,12 @@ export const ProductDataContextProvider = ( {
 	};
 
 	return (
-		<ProductDataContext.Provider value={ contextValue }>
-			{ isLoading ? (
-				<div className="is-loading">{ children }</div>
+		<ProductDataContext.Provider value={contextValue}>
+			{isLoading ? (
+				<div className="is-loading">{children}</div>
 			) : (
 				children
-			) }
+			)}
 		</ProductDataContext.Provider>
 	);
 };

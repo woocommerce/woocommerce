@@ -54,7 +54,7 @@ interface ProductControlProps {
 	/**
 	 * The total number of variations.
 	 */
-	totalVariations?: Record< number, number | null >;
+	totalVariations?: Record<number, number | null>;
 	/**
 	 * Callback to search products by their name.
 	 */
@@ -62,7 +62,7 @@ interface ProductControlProps {
 	/**
 	 * Callback to render each item in the selection list, allows any custom object-type rendering.
 	 */
-	renderItem: SearchListControlProps[ 'renderItem' ] | null;
+	renderItem: SearchListControlProps['renderItem'] | null;
 	/**
 	 * The ID of the currently selected item (product or variation).
 	 */
@@ -84,10 +84,10 @@ interface ProductControlProps {
 }
 
 const messages = {
-	list: __( 'Products', 'woocommerce' ),
-	noItems: __( "Your store doesn't have any products.", 'woocommerce' ),
-	search: __( 'Search for a product to display', 'woocommerce' ),
-	updated: __( 'Product search results updated.', 'woocommerce' ),
+	list: __('Products', 'woocommerce'),
+	noItems: __("Your store doesn't have any products.", 'woocommerce'),
+	search: __('Search for a product to display', 'woocommerce'),
+	updated: __('Product search results updated.', 'woocommerce'),
 };
 
 const ProductControl = (
@@ -115,7 +115,7 @@ const ProductControl = (
 	} = props;
 
 	const renderItemWithVariations = (
-		args: RenderItemArgs< ProductResponseItem >
+		args: RenderItemArgs<ProductResponseItem>
 	) => {
 		const {
 			item,
@@ -125,7 +125,7 @@ const ProductControl = (
 			onSelect,
 			useExpandedPanelId,
 		} = args;
-		const [ expandedPanelId, setExpandedPanelId ] = useExpandedPanelId ?? [
+		const [expandedPanelId, setExpandedPanelId] = useExpandedPanelId ?? [
 			null,
 			// eslint-disable-next-line @typescript-eslint/no-empty-function
 			() => {},
@@ -135,13 +135,13 @@ const ProductControl = (
 			expandedPanelId
 		);
 		const variationsCount =
-			item.details?.variations && Array.isArray( item.details.variations )
+			item.details?.variations && Array.isArray(item.details.variations)
 				? item.details.variations.length
 				: 0;
 		const classes = clsx(
 			'woocommerce-search-product__item',
 			'woocommerce-search-list__item',
-			`depth-${ depth }`,
+			`depth-${depth}`,
 			'has-count',
 			{
 				'is-searching': search.length > 0,
@@ -151,37 +151,37 @@ const ProductControl = (
 		);
 
 		// Top level items custom rendering based on SearchListItem.
-		if ( ! item.breadcrumbs.length ) {
+		if (!item.breadcrumbs.length) {
 			const hasVariations =
 				item.details?.variations && item.details.variations.length > 0;
 
 			return (
 				<ExpandableSearchListItem
-					{ ...args }
-					className={ clsx( classes, {
+					{...args}
+					className={clsx(classes, {
 						'is-selected': isSelected,
-					} ) }
-					isSelected={ isSelected }
-					item={ item }
-					onSelect={ () => {
+					})}
+					isSelected={isSelected}
+					item={item}
+					onSelect={() => {
 						return () => {
-							onSelect( item )();
-							if ( ! isExpanded ) {
-								setExpandedPanelId( item.id );
+							onSelect(item)();
+							if (!isExpanded) {
+								setExpandedPanelId(item.id);
 							}
 						};
-					} }
-					isLoading={ isLoading || variationsLoading }
+					}}
+					isLoading={isLoading || variationsLoading}
 					countLabel={
 						hasVariations
 							? sprintf(
 									/* translators: %1$d is the number of variations of a product product. */
-									__( '%1$d variations', 'woocommerce' ),
+									__('%1$d variations', 'woocommerce'),
 									item.details?.variations.length
-							  )
+								)
 							: null
 					}
-					name={ `products-${ instanceId }` }
+					name={`products-${instanceId}`}
 					aria-label={
 						hasVariations
 							? sprintf(
@@ -195,14 +195,14 @@ const ProductControl = (
 									),
 									item.name,
 									item.details?.variations.length
-							  )
+								)
 							: undefined
 					}
 				/>
 			);
 		}
 
-		const itemArgs = isEmpty( item.details?.variation )
+		const itemArgs = isEmpty(item.details?.variation)
 			? args
 			: {
 					...args,
@@ -210,72 +210,70 @@ const ProductControl = (
 						...args.item,
 						name: item.details?.variation as string,
 					},
-					'aria-label': `${ item.breadcrumbs[ 0 ] }: ${ item.details?.variation }`,
-			  };
+					'aria-label': `${item.breadcrumbs[0]}: ${item.details?.variation}`,
+				};
 
 		return (
 			<SearchListItem
-				{ ...itemArgs }
-				className={ classes }
-				name={ `variations-${ instanceId }` }
+				{...itemArgs}
+				className={classes}
+				name={`variations-${instanceId}`}
 			/>
 		);
 	};
 
 	const getRenderItemFunc = () => {
-		if ( renderItem ) {
+		if (renderItem) {
 			return renderItem;
-		} else if ( showVariations ) {
+		} else if (showVariations) {
 			return renderItemWithVariations;
 		}
 		return undefined;
 	};
 
-	if ( error ) {
-		return <ErrorMessage error={ error } />;
+	if (error) {
+		return <ErrorMessage error={error} />;
 	}
 
 	const currentVariations =
-		variations && expandedProduct && variations[ expandedProduct ]
-			? variations[ expandedProduct ]
+		variations && expandedProduct && variations[expandedProduct]
+			? variations[expandedProduct]
 			: [];
-	const currentList = [ ...products, ...currentVariations ].map(
+	const currentList = [...products, ...currentVariations].map(
 		convertProductResponseItemToSearchItem
 	);
 
 	return (
 		<SearchListControl
 			className="woocommerce-products"
-			list={ currentList }
-			isCompact={ isCompact }
-			isLoading={ isLoading }
+			list={currentList}
+			isCompact={isCompact}
+			isLoading={isLoading}
 			isSingle
-			selected={ currentList.filter( ( { id } ) =>
-				selected.includes( Number( id ) )
-			) }
-			onChange={ onChange }
+			selected={currentList.filter(({ id }) =>
+				selected.includes(Number(id))
+			)}
+			onChange={onChange}
 			loadMoreChildrenText={
 				showVariations
-					? __( 'Load more variations', 'woocommerce' )
+					? __('Load more variations', 'woocommerce')
 					: undefined
 			}
 			onLoadMoreChildren={
 				showVariations ? onLoadMoreVariations : undefined
 			}
-			totalChildren={ showVariations ? totalVariations : undefined }
-			renderItem={ getRenderItemFunc() }
-			onSearch={ onSearch }
-			messages={ {
+			totalChildren={showVariations ? totalVariations : undefined}
+			renderItem={getRenderItemFunc()}
+			onSearch={onSearch}
+			messages={{
 				...messages,
 				...props.messages,
-			} }
+			}}
 			isHierarchical
 		/>
 	);
 };
 
 export default withTransformSingleSelectToMultipleSelect(
-	withSearchedProducts(
-		withProductVariations( withInstanceId( ProductControl ) )
-	)
+	withSearchedProducts(withProductVariations(withInstanceId(ProductControl)))
 );

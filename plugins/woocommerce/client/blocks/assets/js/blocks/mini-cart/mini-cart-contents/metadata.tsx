@@ -8,18 +8,18 @@ import { BlockConfiguration } from '@wordpress/blocks';
 
 export const metadata: BlockConfiguration = {
 	apiVersion: 3,
-	title: __( 'Mini-Cart Contents', 'woocommerce' ),
+	title: __('Mini-Cart Contents', 'woocommerce'),
 	icon: {
 		src: (
 			<Icon
-				icon={ cart }
+				icon={cart}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
 	},
 	category: 'woocommerce',
-	keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
-	description: __( 'Display a Mini-Cart widget.', 'woocommerce' ),
+	keywords: [__('WooCommerce', 'woocommerce')],
+	description: __('Display a Mini-Cart widget.', 'woocommerce'),
 	supports: {
 		align: false,
 		html: false,

@@ -3,17 +3,11 @@
 	"compilerOptions": {
 		"module": "Node16",
 		"moduleResolution": "Node16",
-		"typeRoots": [
-			"./typings",
-			"./node_modules/@types"
-		]
+		"typeRoots": [ "./typings", "./node_modules/@types" ]
 	},
 	"ts-node": {
 		"transpileOnly": true,
-		"files": true,
+		"files": true
 	},
-	"include": [
-		"index.ts",
-		"src/**/*"
-	]
+	"include": [ "index.ts", "src/**/*" ]
 }

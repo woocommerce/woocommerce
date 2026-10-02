@@ -7,18 +7,18 @@ const DEFAULT_STATE = {
 	experiments: [],
 };
 
-const reducer = ( state = DEFAULT_STATE, action ) => {
-	switch ( action.type ) {
+const reducer = (state = DEFAULT_STATE, action) => {
+	switch (action.type) {
 		case TYPES.DELETE_EXPERIMENT:
 			return {
 				...state,
-				experiments: state.experiments.filter( ( experiment ) => {
+				experiments: state.experiments.filter((experiment) => {
 					return experiment.name !== action.experimentName;
-				} ),
+				}),
 			};
 		case TYPES.ADD_EXPERIMENT:
 			const existingExperimentIndex = state.experiments.findIndex(
-				( element ) => {
+				(element) => {
 					return element.name === action.experimentName;
 				}
 			);
@@ -29,8 +29,8 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 			const newExperiments =
 				existingExperimentIndex !== -1
 					? state.experiments
-							.slice( 0, existingExperimentIndex )
-							.concat( newExperiment )
+							.slice(0, existingExperimentIndex)
+							.concat(newExperiment)
 							.concat(
 								state.experiments.slice(
 									existingExperimentIndex + 1
@@ -42,7 +42,7 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 								name: action.experimentName,
 								variation: action.variation,
 							},
-					  ];
+						];
 
 			return {
 				...state,
@@ -51,13 +51,13 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 		case TYPES.TOGGLE_EXPERIMENT:
 			return {
 				...state,
-				experiments: state.experiments.map( ( experiment ) => ( {
+				experiments: state.experiments.map((experiment) => ({
 					...experiment,
 					variation:
 						experiment.name === action.experimentName
 							? action.newVariation
 							: experiment.variation,
-				} ) ),
+				})),
 			};
 		case TYPES.SET_EXPERIMENTS:
 			return {

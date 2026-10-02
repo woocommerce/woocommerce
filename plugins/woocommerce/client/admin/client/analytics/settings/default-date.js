@@ -9,27 +9,25 @@ import {
 	isoDateFormat,
 } from '@woocommerce/date';
 
-const DefaultDate = ( { value, onChange } ) => {
-	const { wcAdminSettings } = useSettings( 'wc_admin', [
-		'wcAdminSettings',
-	] );
+const DefaultDate = ({ value, onChange }) => {
+	const { wcAdminSettings } = useSettings('wc_admin', ['wcAdminSettings']);
 	const { woocommerce_default_date_range: defaultDateRange } =
 		wcAdminSettings;
-	const change = ( query ) => {
+	const change = (query) => {
 		const sanitizedQuery = Object.fromEntries(
-			Object.entries( query ).filter(
-				( [ , queryValue ] ) => typeof queryValue !== 'undefined'
+			Object.entries(query).filter(
+				([, queryValue]) => typeof queryValue !== 'undefined'
 			)
 		);
-		onChange( {
+		onChange({
 			target: {
 				name: 'woocommerce_default_date_range',
-				value: new URLSearchParams( sanitizedQuery ).toString(),
+				value: new URLSearchParams(sanitizedQuery).toString(),
 			},
-		} );
+		});
 	};
 	const query = Object.fromEntries(
-		new URLSearchParams( value.replace( /&amp;/g, '&' ) )
+		new URLSearchParams(value.replace(/&amp;/g, '&'))
 	);
 	const { period, compare, before, after } = getDateParamsFromQuery(
 		query,
@@ -49,10 +47,10 @@ const DefaultDate = ( { value, onChange } ) => {
 	};
 	return (
 		<DateRangeFilterPicker
-			query={ query }
-			onRangeSelect={ change }
-			dateQuery={ dateQuery }
-			isoDateFormat={ isoDateFormat }
+			query={query}
+			onRangeSelect={change}
+			dateQuery={dateQuery}
+			isoDateFormat={isoDateFormat}
 		/>
 	);
 };

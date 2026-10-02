@@ -21,9 +21,9 @@ import { useEmailStyles } from '../../../hooks';
 import { getElementStyles } from '../utils';
 import { recordEvent } from '../../../events';
 
-function ElementItem( { element, label }: { element: string; label: string } ) {
+function ElementItem({ element, label }: { element: string; label: string }) {
 	const { styles } = useEmailStyles();
-	const elementStyles = getElementStyles( styles, element, null, true );
+	const elementStyles = getElementStyles(styles, element, null, true);
 
 	const {
 		fontFamily,
@@ -38,22 +38,22 @@ function ElementItem( { element, label }: { element: string; label: string } ) {
 	const background = elementStyles.color?.background || '#f0f0f0';
 	const navigationButtonLabel = sprintf(
 		// translators: %s: is a subset of Typography, e.g., 'text' or 'links'.
-		__( 'Typography %s styles', __i18n_text_domain__ ),
+		__('Typography %s styles', __i18n_text_domain__),
 		label
 	);
 
 	return (
 		<Item>
 			<NavigatorButton
-				path={ `/typography/${ element }` }
-				aria-label={ navigationButtonLabel }
-				onClick={ () =>
+				path={`/typography/${element}`}
+				aria-label={navigationButtonLabel}
+				onClick={() =>
 					recordEvent(
 						'styles_sidebar_screen_typography_button_click',
 						{
 							element,
 							label,
-							path: `typography/${ element }`,
+							path: `typography/${element}`,
 						}
 					)
 				}
@@ -61,7 +61,7 @@ function ElementItem( { element, label }: { element: string; label: string } ) {
 				<HStack justify="flex-start">
 					<FlexItem
 						className="edit-site-global-styles-screen-typography__indicator"
-						style={ {
+						style={{
 							fontFamily: fontFamily ?? 'serif',
 							background,
 							color: textColor,
@@ -70,13 +70,13 @@ function ElementItem( { element, label }: { element: string; label: string } ) {
 							letterSpacing: letterSpacing ?? 'normal',
 							textDecoration:
 								textDecoration ??
-								( element === 'link' ? 'underline' : 'none' ),
+								(element === 'link' ? 'underline' : 'none'),
 							textTransform: textTransform ?? 'none',
-						} }
+						}}
 					>
 						Aa
 					</FlexItem>
-					<FlexItem>{ label }</FlexItem>
+					<FlexItem>{label}</FlexItem>
 				</HStack>
 			</NavigatorButton>
 		</Item>
@@ -87,29 +87,29 @@ export function TypographyPanel() {
 	return (
 		<Card size="small" variant="primary" isBorderless>
 			<CardBody>
-				<VStack spacing={ 3 }>
+				<VStack spacing={3}>
 					<Heading
-						level={ 3 }
+						level={3}
 						className="edit-site-global-styles-subtitle"
 					>
-						{ __( 'Elements', __i18n_text_domain__ ) }
+						{__('Elements', __i18n_text_domain__)}
 					</Heading>
 					<ItemGroup isBordered isSeparated size="small">
 						<ElementItem
 							element="text"
-							label={ __( 'Text', __i18n_text_domain__ ) }
+							label={__('Text', __i18n_text_domain__)}
 						/>
 						<ElementItem
 							element="link"
-							label={ __( 'Links', __i18n_text_domain__ ) }
+							label={__('Links', __i18n_text_domain__)}
 						/>
 						<ElementItem
 							element="heading"
-							label={ __( 'Headings', __i18n_text_domain__ ) }
+							label={__('Headings', __i18n_text_domain__)}
 						/>
 						<ElementItem
 							element="button"
-							label={ __( 'Buttons', __i18n_text_domain__ ) }
+							label={__('Buttons', __i18n_text_domain__)}
 						/>
 					</ItemGroup>
 				</VStack>

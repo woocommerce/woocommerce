@@ -59,18 +59,18 @@ $promo-actions-border-bottom: $gray-100;
 	}
 
 	.woocommerce-summary__item-container:nth-last-of-type(1)
-	.woocommerce-summary__item {
+		.woocommerce-summary__item {
 		border-bottom: none;
 	}
 
 	&.is-even
-	.woocommerce-summary__item-container:nth-last-of-type(2)
-	.woocommerce-summary__item {
+		.woocommerce-summary__item-container:nth-last-of-type(2)
+		.woocommerce-summary__item {
 		border-bottom: none;
 	}
 
 	.woocommerce-summary__item-container:nth-of-type(even)
-	.woocommerce-summary__item {
+		.woocommerce-summary__item {
 		border-right: none;
 	}
 
@@ -94,7 +94,7 @@ article.woocommerce-stats-overview__install-jetpack-promo {
 
 	h2 {
 		color: $gray-900;
-		@include font-size( 16 );
+		@include font-size(16);
 		font-style: normal;
 		line-height: 1.5;
 		font-weight: normal;
@@ -104,7 +104,7 @@ article.woocommerce-stats-overview__install-jetpack-promo {
 		color: $gray-700;
 		font-style: normal;
 		font-weight: normal;
-		@include font-size( 14 );
+		@include font-size(14);
 		line-height: 20px;
 		margin: $gap-smaller 0;
 	}

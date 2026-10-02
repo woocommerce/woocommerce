@@ -14,20 +14,20 @@ import { SendPreviewEmail } from './send-preview-email';
 import { recordEvent } from '../../events';
 
 export function SendPreview() {
-	const { togglePreviewModal } = useDispatch( storeName );
+	const { togglePreviewModal } = useDispatch(storeName);
 
 	return (
 		<>
 			<PluginPreviewMenuItem
-				icon={ external }
-				onClick={ () => {
+				icon={external}
+				onClick={() => {
 					recordEvent(
 						'header_preview_dropdown_send_test_email_selected'
 					);
-					void togglePreviewModal( true );
-				} }
+					void togglePreviewModal(true);
+				}}
 			>
-				{ __( 'Send a test email', __i18n_text_domain__ ) }
+				{__('Send a test email', __i18n_text_domain__)}
 			</PluginPreviewMenuItem>
 			<SendPreviewEmail />
 		</>

@@ -25,8 +25,8 @@ export const settings = {
 		to: [
 			{
 				type: 'block',
-				blocks: [ 'woocommerce/classic-shortcode' ],
-				transform: ( attributes ) => {
+				blocks: ['woocommerce/classic-shortcode'],
+				transform: (attributes) => {
 					return createBlock(
 						'woocommerce/classic-shortcode',
 						{
@@ -43,16 +43,14 @@ export const settings = {
 	deprecated: [
 		{
 			attributes: blockAttributes,
-			save: ( { attributes } ) => {
+			save: ({ attributes }) => {
 				return (
-					<div
-						className={ clsx( 'is-loading', attributes.className ) }
-					>
+					<div className={clsx('is-loading', attributes.className)}>
 						<InnerBlocks.Content />
 					</div>
 				);
 			},
-			migrate: ( attributes, innerBlocks ) => {
+			migrate: (attributes, innerBlocks) => {
 				const { checkoutPageId, align } = attributes;
 				return [
 					attributes,
@@ -61,7 +59,7 @@ export const settings = {
 							'woocommerce/filled-cart-block',
 							{ align },
 							[
-								createBlock( 'woocommerce/cart-items-block' ),
+								createBlock('woocommerce/cart-items-block'),
 								createBlock(
 									'woocommerce/cart-totals-block',
 									{},
@@ -92,13 +90,13 @@ export const settings = {
 					],
 				];
 			},
-			isEligible: ( _, innerBlocks ) => {
-				return ! innerBlocks.find(
-					( block ) => block.name === 'woocommerce/filled-cart-block'
+			isEligible: (_, innerBlocks) => {
+				return !innerBlocks.find(
+					(block) => block.name === 'woocommerce/filled-cart-block'
 				);
 			},
 		},
 	],
 };
 
-registerBlockType( blockName, settings );
+registerBlockType(blockName, settings);

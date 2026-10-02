@@ -13,32 +13,32 @@ import { ViewMoreMenuGroup } from '../../private-apis';
 import { storeName } from '../../store';
 
 export const MoreMenu = () => {
-	const isLargeViewport = useViewportMatch( 'large' );
+	const isLargeViewport = useViewportMatch('large');
 
 	return (
 		<>
-			{ isLargeViewport && (
+			{isLargeViewport && (
 				<ViewMoreMenuGroup>
 					<PreferenceToggleMenuItem
-						scope={ storeName }
+						scope={storeName}
 						name="fullscreenMode"
-						label={ __( 'Fullscreen mode', __i18n_text_domain__ ) }
-						info={ __(
+						label={__('Fullscreen mode', __i18n_text_domain__)}
+						info={__(
 							'Show and hide the admin user interface',
 							__i18n_text_domain__
-						) }
-						messageActivated={ __(
+						)}
+						messageActivated={__(
 							'Fullscreen mode activated.',
 							__i18n_text_domain__
-						) }
-						messageDeactivated={ __(
+						)}
+						messageDeactivated={__(
 							'Fullscreen mode deactivated.',
 							__i18n_text_domain__
-						) }
-						shortcut={ displayShortcut.secondary( 'f' ) }
+						)}
+						shortcut={displayShortcut.secondary('f')}
 					/>
 				</ViewMoreMenuGroup>
-			) }
+			)}
 		</>
 	);
 };

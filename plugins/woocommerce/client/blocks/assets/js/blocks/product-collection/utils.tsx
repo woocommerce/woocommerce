@@ -55,37 +55,36 @@ import {
  */
 export const getUpdatedQuery = (
 	query: ProductCollectionQuery,
-	queryParams: Partial< ProductCollectionQuery >
+	queryParams: Partial<ProductCollectionQuery>
 ): ProductCollectionQuery => {
 	const { taxQuery, ...queryParamsWithoutTaxQuery } = queryParams;
 	const hasTaxQueryUpdates =
-		taxQuery && typeof taxQuery === 'object' && ! Array.isArray( taxQuery );
+		taxQuery && typeof taxQuery === 'object' && !Array.isArray(taxQuery);
 
 	return {
 		...query,
 		...queryParamsWithoutTaxQuery,
-		...( hasTaxQueryUpdates && {
+		...(hasTaxQueryUpdates && {
 			taxQuery: {
 				...query.taxQuery,
 				...taxQuery,
 			},
-		} ),
+		}),
 	};
 };
 
 export function setQueryAttribute(
-	block: BlockEditProps< ProductCollectionAttributes >,
-	queryParams: Partial< ProductCollectionQuery >
+	block: BlockEditProps<ProductCollectionAttributes>,
+	queryParams: Partial<ProductCollectionQuery>
 ) {
-	const currentBlock = select( blockEditorStore ).getBlock( block.clientId );
+	const currentBlock = select(blockEditorStore).getBlock(block.clientId);
 	const currentAttributes = currentBlock?.attributes as
-		| ProductCollectionAttributes
-		| undefined;
+		ProductCollectionAttributes | undefined;
 	const query = currentAttributes?.query || block.attributes.query;
 
-	block.setAttributes( {
-		query: getUpdatedQuery( query, queryParams ),
-	} );
+	block.setAttributes({
+		query: getUpdatedQuery(query, queryParams),
+	});
 }
 
 const isInProductArchive = () => {
@@ -107,18 +106,17 @@ const isInProductArchive = () => {
 	];
 
 	// @ts-expect-error getEditedPostSlug is not typed
-	const currentTemplateId =
-		select( CORE_EDITOR_STORE )?.getEditedPostSlug?.();
+	const currentTemplateId = select(CORE_EDITOR_STORE)?.getEditedPostSlug?.();
 
 	/**
 	 * Set inherit value when Product Collection block is first added to the page.
 	 * We want inherit value to be true when block is added to ARCHIVE_PRODUCT_TEMPLATES
 	 * and false when added to somewhere else.
 	 */
-	if ( currentTemplateId ) {
-		return ARCHIVE_PRODUCT_TEMPLATES.some( ( template ) =>
-			isString( currentTemplateId )
-				? currentTemplateId.includes( template )
+	if (currentTemplateId) {
+		return ARCHIVE_PRODUCT_TEMPLATES.some((template) =>
+			isString(currentTemplateId)
+				? currentTemplateId.includes(template)
 				: false
 		);
 	}
@@ -131,31 +129,31 @@ const isFirstBlockThatUsesPageContext = (
 ) => {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet, natively.
-	const { getBlocksByName, getBlock } = select( blockEditorStore );
+	const { getBlocksByName, getBlock } = select(blockEditorStore);
 	const productCollectionBlockIDs = getBlocksByName(
 		'woocommerce/product-collection'
 	) as string[];
 
 	const blockAlreadySyncedWithQuery = productCollectionBlockIDs.find(
-		( clientId ) => {
-			const block = getBlock( clientId );
+		(clientId) => {
+			const block = getBlock(clientId);
 
-			return block.attributes?.query?.[ property ];
+			return block.attributes?.query?.[property];
 		}
 	);
 
-	return ! blockAlreadySyncedWithQuery;
+	return !blockAlreadySyncedWithQuery;
 };
 
 export function getDefaultValueOfInherit() {
 	return isInProductArchive()
-		? isFirstBlockThatUsesPageContext( 'inherit' )
+		? isFirstBlockThatUsesPageContext('inherit')
 		: false;
 }
 
 export function getDefaultValueOfFilterable() {
-	return ! isInProductArchive()
-		? isFirstBlockThatUsesPageContext( 'filterable' )
+	return !isInProductArchive()
+		? isFirstBlockThatUsesPageContext('filterable')
 		: false;
 }
 
@@ -167,24 +165,24 @@ export const addProductCollectionToQueryPaginationParentOrAncestor = () => {
 	addFilter(
 		'blocks.registerBlockType',
 		'woocommerce/add-product-collection-block-to-parent-array-of-pagination-block',
-		( blockSettings: Block, blockName: string ) => {
-			if ( blockName !== coreQueryPaginationBlockName ) {
+		(blockSettings: Block, blockName: string) => {
+			if (blockName !== coreQueryPaginationBlockName) {
 				return blockSettings;
 			}
 
-			if ( blockSettings?.ancestor ) {
+			if (blockSettings?.ancestor) {
 				return {
 					...blockSettings,
-					ancestor: [ ...blockSettings.ancestor, blockJson.name ],
+					ancestor: [...blockSettings.ancestor, blockJson.name],
 				};
 			}
 
 			// Below condition is to support WP >=6.4 where Pagination specifies the parent.
 			// Can be removed when minimum WP version is set to 6.5 and higher.
-			if ( blockSettings?.parent ) {
+			if (blockSettings?.parent) {
 				return {
 					...blockSettings,
-					parent: [ ...blockSettings.parent, blockJson.name ],
+					parent: [...blockSettings.parent, blockJson.name],
 				};
 			}
 
@@ -201,8 +199,8 @@ export const getUsesReferencePreviewMessage = (
 	location: WooCommerceBlockLocation,
 	isUsingReferencePreviewMode: boolean
 ) => {
-	if ( isUsingReferencePreviewMode ) {
-		if ( location.type === LocationType.Product ) {
+	if (isUsingReferencePreviewMode) {
+		if (location.type === LocationType.Product) {
 			return __(
 				'Actual products will vary depending on the product being viewed.',
 				'woocommerce'
@@ -218,7 +216,7 @@ export const getUsesReferencePreviewMessage = (
 	return '';
 };
 
-export const useProductCollectionUIState = ( {
+export const useProductCollectionUIState = ({
 	location,
 	usesReference,
 	attributes,
@@ -228,45 +226,45 @@ export const useProductCollectionUIState = ( {
 	usesReference?: string[] | undefined;
 	attributes: ProductCollectionAttributes;
 	hasInnerBlocks: boolean;
-} ) => {
+}) => {
 	// Fetch product to check if it's deleted.
 	// `product` will be undefined if it doesn't exist.
 	const productReference = attributes.query?.productReference;
 	const { product, hasResolved } = useSelect(
-		( selectFunc ) => {
-			if ( ! productReference ) {
+		(selectFunc) => {
+			if (!productReference) {
 				return { product: null, hasResolved: true };
 			}
 
 			const { getEntityRecord, hasFinishedResolution } =
-				selectFunc( coreDataStore );
-			const selectorArgs = [ 'postType', 'product', productReference ];
+				selectFunc(coreDataStore);
+			const selectorArgs = ['postType', 'product', productReference];
 			return {
-				product: getEntityRecord( ...selectorArgs ),
+				product: getEntityRecord(...selectorArgs),
 				hasResolved: hasFinishedResolution(
 					'getEntityRecord',
 					selectorArgs
 				),
 			};
 		},
-		[ productReference ]
+		[productReference]
 	);
 
-	const productCollectionUIStateInEditor = useMemo( () => {
-		const isInRequiredLocation = usesReference?.includes( location.type );
-		const isCollectionSelected = !! attributes.collection;
+	const productCollectionUIStateInEditor = useMemo(() => {
+		const isInRequiredLocation = usesReference?.includes(location.type);
+		const isCollectionSelected = !!attributes.collection;
 
 		/**
 		 * Case 1: Product context picker
 		 */
-		const isProductContextRequired = usesReference?.includes( 'product' );
+		const isProductContextRequired = usesReference?.includes('product');
 		const isProductContextSelected =
-			( attributes.query?.productReference ?? null ) !== null;
+			(attributes.query?.productReference ?? null) !== null;
 		if (
 			isCollectionSelected &&
 			isProductContextRequired &&
-			! isInRequiredLocation &&
-			! isProductContextSelected
+			!isInRequiredLocation &&
+			!isProductContextSelected
 		) {
 			return ProductCollectionUIStatesInEditor.PRODUCT_REFERENCE_PICKER;
 		}
@@ -275,13 +273,13 @@ export const useProductCollectionUIState = ( {
 		if (
 			isCollectionSelected &&
 			isProductContextRequired &&
-			! isInRequiredLocation &&
+			!isInRequiredLocation &&
 			isProductContextSelected
 		) {
 			const isProductDeleted =
 				productReference &&
-				( product === undefined || product?.status === 'trash' );
-			if ( isProductDeleted ) {
+				(product === undefined || product?.status === 'trash');
+			if (isProductDeleted) {
 				return ProductCollectionUIStatesInEditor.DELETED_PRODUCT_REFERENCE;
 			}
 		}
@@ -294,13 +292,12 @@ export const useProductCollectionUIState = ( {
 		const isHandPickedCollection =
 			attributes.collection === CoreCollectionNames.HAND_PICKED;
 		const hasHandPickedProducts =
-			( attributes.query?.woocommerceHandPickedProducts?.length ?? 0 ) >
-			0;
+			(attributes.query?.woocommerceHandPickedProducts?.length ?? 0) > 0;
 
 		if (
 			isCollectionSelected &&
 			isHandPickedCollection &&
-			! hasHandPickedProducts
+			!hasHandPickedProducts
 		) {
 			return ProductCollectionUIStatesInEditor.HAND_PICKED_PRODUCTS_PICKER;
 		}
@@ -314,9 +311,9 @@ export const useProductCollectionUIState = ( {
 			attributes.collection === CoreCollectionNames.BY_TAG ||
 			attributes.collection === CoreCollectionNames.BY_BRAND;
 
-		if ( isCollectionSelected && isTaxonomyCollection ) {
+		if (isCollectionSelected && isTaxonomyCollection) {
 			let taxonomySlug: string;
-			switch ( attributes.collection ) {
+			switch (attributes.collection) {
 				case CoreCollectionNames.BY_CATEGORY:
 					taxonomySlug = 'product_cat';
 					break;
@@ -331,10 +328,10 @@ export const useProductCollectionUIState = ( {
 			}
 
 			const selectedTermIds =
-				attributes.query?.taxQuery?.[ taxonomySlug ] || [];
+				attributes.query?.taxQuery?.[taxonomySlug] || [];
 			const hasSelectedTerms = selectedTermIds.length > 0;
 
-			if ( ! hasSelectedTerms ) {
+			if (!hasSelectedTerms) {
 				return ProductCollectionUIStatesInEditor.TAXONOMY_PICKER;
 			}
 		}
@@ -342,7 +339,7 @@ export const useProductCollectionUIState = ( {
 		/**
 		 * Case 5: Preview mode - based on `usesReference` value
 		 */
-		if ( isInRequiredLocation ) {
+		if (isInRequiredLocation) {
 			/**
 			 * Block shouldn't be in preview mode when:
 			 * 1. Current location is archive and termId is available.
@@ -352,16 +349,16 @@ export const useProductCollectionUIState = ( {
 			 */
 			const isArchiveLocationWithTermId =
 				location.type === LocationType.Archive &&
-				( location.sourceData?.termId ?? null ) !== null;
+				(location.sourceData?.termId ?? null) !== null;
 			const isProductLocationWithProductId =
 				location.type === LocationType.Product &&
-				( location.sourceData?.productId ?? null ) !== null;
+				(location.sourceData?.productId ?? null) !== null;
 
 			if (
-				! isArchiveLocationWithTermId &&
-				! isProductLocationWithProductId &&
+				!isArchiveLocationWithTermId &&
+				!isProductLocationWithProductId &&
 				// If there's a user-selected product reference, don't show the preview label
-				! productReference
+				!productReference
 			) {
 				return ProductCollectionUIStatesInEditor.VALID_WITH_PREVIEW;
 			}
@@ -370,7 +367,7 @@ export const useProductCollectionUIState = ( {
 		/**
 		 * Case 4: Collection chooser
 		 */
-		if ( ! hasInnerBlocks && ! isCollectionSelected ) {
+		if (!hasInnerBlocks && !isCollectionSelected) {
 			return ProductCollectionUIStatesInEditor.COLLECTION_PICKER;
 		}
 
@@ -387,12 +384,12 @@ export const useProductCollectionUIState = ( {
 		attributes.query?.productReference,
 		attributes.query?.woocommerceHandPickedProducts,
 		attributes.query?.taxQuery,
-	] );
+	]);
 
-	return { productCollectionUIStateInEditor, isLoading: ! hasResolved };
+	return { productCollectionUIStateInEditor, isLoading: !hasResolved };
 };
 
-export const useSetPreviewState = ( {
+export const useSetPreviewState = ({
 	setPreviewState,
 	location,
 	attributes,
@@ -402,23 +399,21 @@ export const useSetPreviewState = ( {
 	setPreviewState?: SetPreviewState | undefined;
 	location: WooCommerceBlockLocation;
 	attributes: ProductCollectionAttributes;
-	setAttributes: (
-		attributes: Partial< ProductCollectionAttributes >
-	) => void;
+	setAttributes: (attributes: Partial<ProductCollectionAttributes>) => void;
 	usesReference?: string[] | undefined;
 	isUsingReferencePreviewMode: boolean;
-} ) => {
+}) => {
 	const { __unstableMarkNextChangeAsNotPersistent } =
-		useDispatch( blockEditorStore );
+		useDispatch(blockEditorStore);
 
-	const setState = ( newPreviewState: PreviewState ) => {
+	const setState = (newPreviewState: PreviewState) => {
 		__unstableMarkNextChangeAsNotPersistent();
-		setAttributes( {
+		setAttributes({
 			__privatePreviewState: {
 				...attributes.__privatePreviewState,
 				...newPreviewState,
 			},
-		} );
+		});
 	};
 
 	/**
@@ -429,42 +424,42 @@ export const useSetPreviewState = ( {
 		location,
 		isUsingReferencePreviewMode
 	);
-	useEffect( () => {
-		if ( isUsingReferencePreviewMode ) {
+	useEffect(() => {
+		if (isUsingReferencePreviewMode) {
 			__unstableMarkNextChangeAsNotPersistent();
-			setAttributes( {
+			setAttributes({
 				__privatePreviewState: {
 					isPreview: usesReferencePreviewMessage.length > 0,
 					previewMessage: usesReferencePreviewMessage,
 				},
-			} );
+			});
 		}
 	}, [
 		setAttributes,
 		usesReferencePreviewMessage,
 		isUsingReferencePreviewMode,
 		__unstableMarkNextChangeAsNotPersistent,
-	] );
+	]);
 
 	// Running setPreviewState function provided by Collection, if it exists.
-	useLayoutEffect( () => {
-		if ( ! setPreviewState && ! isUsingReferencePreviewMode ) {
+	useLayoutEffect(() => {
+		if (!setPreviewState && !isUsingReferencePreviewMode) {
 			return;
 		}
 
-		const cleanup = setPreviewState?.( {
+		const cleanup = setPreviewState?.({
 			setState,
 			location,
 			attributes,
-		} );
+		});
 
-		if ( cleanup ) {
+		if (cleanup) {
 			return cleanup;
 		}
 
 		// It should re-run only when setPreviewState changes to avoid performance issues.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ setPreviewState ] );
+	}, [setPreviewState]);
 
 	/**
 	 * For all Product Collection blocks that inherit query from the template,
@@ -479,23 +474,23 @@ export const useSetPreviewState = ( {
 		location.type === LocationType.Archive
 			? location.sourceData?.termId
 			: null;
-	useEffect( () => {
-		if ( ! setPreviewState && ! isUsingReferencePreviewMode ) {
+	useEffect(() => {
+		if (!setPreviewState && !isUsingReferencePreviewMode) {
 			const isGenericArchiveTemplate =
 				location.type === LocationType.Archive && termId === null;
 
 			__unstableMarkNextChangeAsNotPersistent();
-			setAttributes( {
+			setAttributes({
 				__privatePreviewState: {
 					isPreview: isGenericArchiveTemplate
-						? !! attributes?.query?.inherit
+						? !!attributes?.query?.inherit
 						: false,
 					previewMessage: __(
 						'Actual products will vary depending on the page being viewed.',
 						'woocommerce'
 					),
 				},
-			} );
+			});
 		}
 	}, [
 		attributes?.query?.inherit,
@@ -506,11 +501,11 @@ export const useSetPreviewState = ( {
 		setPreviewState,
 		isUsingReferencePreviewMode,
 		__unstableMarkNextChangeAsNotPersistent,
-	] );
+	]);
 };
 export const getDefaultQueryForSettingsSection = (
 	currentQuery: ProductCollectionQuery
-): ProductCollectionQuery => ( {
+): ProductCollectionQuery => ({
 	...currentQuery,
 	orderBy: DEFAULT_QUERY.orderBy as TProductCollectionOrderBy,
 	order: DEFAULT_QUERY.order as TProductCollectionOrder,
@@ -519,18 +514,18 @@ export const getDefaultQueryForSettingsSection = (
 	perPage: DEFAULT_QUERY.perPage,
 	offset: DEFAULT_QUERY.offset,
 	pages: DEFAULT_QUERY.pages,
-} );
+});
 
 export const getDefaultDisplayLayout = () =>
 	DEFAULT_ATTRIBUTES.displayLayout as ProductCollectionDisplayLayout;
 
 export const getDefaultSettings = (
 	currentAttributes: ProductCollectionAttributes
-): Partial< ProductCollectionAttributes > => ( {
+): Partial<ProductCollectionAttributes> => ({
 	displayLayout: getDefaultDisplayLayout(),
-	query: getDefaultQueryForSettingsSection( currentAttributes.query ),
+	query: getDefaultQueryForSettingsSection(currentAttributes.query),
 	dimensions: DEFAULT_ATTRIBUTES.dimensions,
-} );
+});
 
 export const getDefaultProductCollection = () =>
 	createBlock(
@@ -543,7 +538,7 @@ export const getDefaultProductCollection = () =>
 				filterable: getDefaultValueOfFilterable(),
 			},
 		},
-		createBlocksFromInnerBlocksTemplate( INNER_BLOCKS_TEMPLATE )
+		createBlocksFromInnerBlocksTemplate(INNER_BLOCKS_TEMPLATE)
 	);
 
 /**
@@ -555,75 +550,73 @@ export const getDefaultProductCollection = () =>
  * default archive-template fallback behavior in useSetPreviewState is
  * preserved (providing setPreviewState suppresses the generic fallback).
  */
-export const setEmailEditorPreviewState: SetPreviewState = ( {
+export const setEmailEditorPreviewState: SetPreviewState = ({
 	setState,
 	location,
 	attributes,
-} ) => {
+}) => {
 	let isEmailEditor = false;
 	try {
 		// Detect the email editor by checking for its store.
 		// Depending on @wordpress/data version, select() may throw
 		// or return undefined for unregistered stores — handle both.
-		isEmailEditor = !! select( 'email-editor/editor' );
+		isEmailEditor = !!select('email-editor/editor');
 	} catch {
 		// Not in email editor context.
 	}
 
-	if ( isEmailEditor ) {
-		setState( {
+	if (isEmailEditor) {
+		setState({
 			isPreview: true,
 			previewMessage: __(
 				'Sample products shown for preview. Actual products will be based on store inventory.',
 				'woocommerce'
 			),
-		} );
+		});
 	} else {
 		// Replicate the generic archive-template fallback: show preview
 		// label only when inheriting query in a generic archive template.
 		const isGenericArchiveTemplate =
 			location.type === LocationType.Archive &&
-			! location.sourceData?.termId;
-		setState( {
+			!location.sourceData?.termId;
+		setState({
 			isPreview: isGenericArchiveTemplate
-				? !! attributes?.query?.inherit
+				? !!attributes?.query?.inherit
 				: false,
 			previewMessage: __(
 				'Actual products will vary depending on the page being viewed.',
 				'woocommerce'
 			),
-		} );
+		});
 	}
 };
 
-export const useGetProduct = ( productId: number | undefined ) => {
-	const [ product, setProduct ] = useState< ProductResponseItem | null >(
-		null
-	);
-	const [ isLoading, setIsLoading ] = useState< boolean >( false );
+export const useGetProduct = (productId: number | undefined) => {
+	const [product, setProduct] = useState<ProductResponseItem | null>(null);
+	const [isLoading, setIsLoading] = useState<boolean>(false);
 
-	useEffect( () => {
+	useEffect(() => {
 		const fetchProduct = async () => {
-			if ( productId ) {
-				setIsLoading( true );
+			if (productId) {
+				setIsLoading(true);
 				try {
-					const fetchedProduct = ( await getProduct(
+					const fetchedProduct = (await getProduct(
 						productId
-					) ) as ProductResponseItem;
-					setProduct( fetchedProduct );
-				} catch ( error ) {
-					setProduct( null );
+					)) as ProductResponseItem;
+					setProduct(fetchedProduct);
+				} catch (error) {
+					setProduct(null);
 				} finally {
-					setIsLoading( false );
+					setIsLoading(false);
 				}
 			} else {
-				setProduct( null );
-				setIsLoading( false );
+				setProduct(null);
+				setIsLoading(false);
 			}
 		};
 
 		void fetchProduct();
-	}, [ productId ] );
+	}, [productId]);
 
 	return { product, isLoading };
 };

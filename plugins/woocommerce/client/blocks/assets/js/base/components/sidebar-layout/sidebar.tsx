@@ -9,14 +9,14 @@ import clsx from 'clsx';
  */
 import { ForwardRefProps } from './types';
 
-const Sidebar = forwardRef< HTMLDivElement, ForwardRefProps >(
-	( { children, className = '' }, ref ): JSX.Element => {
+const Sidebar = forwardRef<HTMLDivElement, ForwardRefProps>(
+	({ children, className = '' }, ref): JSX.Element => {
 		return (
 			<div
-				ref={ ref }
-				className={ clsx( 'wc-block-components-sidebar', className ) }
+				ref={ref}
+				className={clsx('wc-block-components-sidebar', className)}
 			>
-				{ children }
+				{children}
 			</div>
 		);
 	}

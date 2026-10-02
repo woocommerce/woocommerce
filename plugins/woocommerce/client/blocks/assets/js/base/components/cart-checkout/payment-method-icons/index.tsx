@@ -21,14 +21,14 @@ interface PaymentMethodIconsProps {
  * For a given list of icons, render each as a list item, using common icons
  * where available.
  */
-export const PaymentMethodIcons = ( {
+export const PaymentMethodIcons = ({
 	icons = [],
 	align = 'center',
 	className,
-}: PaymentMethodIconsProps ): JSX.Element | null => {
-	const iconConfigs = normalizeIconConfig( icons );
+}: PaymentMethodIconsProps): JSX.Element | null => {
+	const iconConfigs = normalizeIconConfig(icons);
 
-	if ( iconConfigs.length === 0 ) {
+	if (iconConfigs.length === 0) {
 		return null;
 	}
 
@@ -44,19 +44,19 @@ export const PaymentMethodIcons = ( {
 	);
 
 	return (
-		<div className={ containerClass }>
-			{ iconConfigs.map( ( icon ) => {
+		<div className={containerClass}>
+			{iconConfigs.map((icon) => {
 				const iconProps = {
 					...icon,
-					...getCommonIconProps( icon.id ),
+					...getCommonIconProps(icon.id),
 				};
 				return (
 					<PaymentMethodIcon
-						key={ 'payment-method-icon-' + icon.id }
-						{ ...iconProps }
+						key={'payment-method-icon-' + icon.id}
+						{...iconProps}
 					/>
 				);
-			} ) }
+			})}
 		</div>
 	);
 };

@@ -38,14 +38,14 @@ import { getEmptyMessage, hasEmptySearchResults } from '../utils';
  * Component that renders the chart in reports.
  */
 export class ReportChart extends Component {
-	shouldComponentUpdate( nextProps ) {
+	shouldComponentUpdate(nextProps) {
 		if (
 			nextProps.isRequesting !== this.props.isRequesting ||
 			nextProps.primaryData.isRequesting !==
 				this.props.primaryData.isRequesting ||
 			nextProps.secondaryData.isRequesting !==
 				this.props.secondaryData.isRequesting ||
-			! isEqual( nextProps.query, this.props.query )
+			!isEqual(nextProps.query, this.props.query)
 		) {
 			return true;
 		}
@@ -55,29 +55,27 @@ export class ReportChart extends Component {
 
 	getItemChartData() {
 		const { primaryData, selectedChart } = this.props;
-		const chartData = primaryData.data.intervals.map(
-			function ( interval ) {
-				const intervalData = {};
-				interval.subtotals.segments.forEach( function ( segment ) {
-					if ( segment.segment_label ) {
-						const label = intervalData[ segment.segment_label ]
-							? segment.segment_label +
-							  ' (#' +
-							  segment.segment_id +
-							  ')'
-							: segment.segment_label;
-						intervalData[ segment.segment_id ] = {
-							label,
-							value: segment.subtotals[ selectedChart.key ] || 0,
-						};
-					}
-				} );
-				return {
-					date: formatDate( 'Y-m-d\\TH:i:s', interval.date_start ),
-					...intervalData,
-				};
-			}
-		);
+		const chartData = primaryData.data.intervals.map(function (interval) {
+			const intervalData = {};
+			interval.subtotals.segments.forEach(function (segment) {
+				if (segment.segment_label) {
+					const label = intervalData[segment.segment_label]
+						? segment.segment_label +
+							' (#' +
+							segment.segment_id +
+							')'
+						: segment.segment_label;
+					intervalData[segment.segment_id] = {
+						label,
+						value: segment.subtotals[selectedChart.key] || 0,
+					};
+				}
+			});
+			return {
+				date: formatDate('Y-m-d\\TH:i:s', interval.date_start),
+				...intervalData,
+			};
+		});
 		return chartData;
 	}
 
@@ -89,11 +87,8 @@ export class ReportChart extends Component {
 			selectedChart,
 			defaultDateRange,
 		} = this.props;
-		const currentInterval = getIntervalForQuery( query, defaultDateRange );
-		const { primary, secondary } = getCurrentDates(
-			query,
-			defaultDateRange
-		);
+		const currentInterval = getIntervalForQuery(query, defaultDateRange);
+		const { primary, secondary } = getCurrentDates(query, defaultDateRange);
 
 		return buildChartData(
 			primaryData,
@@ -113,18 +108,18 @@ export class ReportChart extends Component {
 		return {
 			primary: get(
 				primaryData,
-				[ 'data', 'totals', selectedChart.key ],
+				['data', 'totals', selectedChart.key],
 				null
 			),
 			secondary: get(
 				secondaryData,
-				[ 'data', 'totals', selectedChart.key ],
+				['data', 'totals', selectedChart.key],
 				null
 			),
 		};
 	}
 
-	renderChart( mode, isRequesting, chartData, legendTotals ) {
+	renderChart(mode, isRequesting, chartData, legendTotals) {
 		const {
 			endpoint,
 			filterParam,
@@ -139,7 +134,7 @@ export class ReportChart extends Component {
 			primaryData,
 			defaultDateRange,
 		} = this.props;
-		const currentInterval = getIntervalForQuery( query, defaultDateRange );
+		const currentInterval = getIntervalForQuery(query, defaultDateRange);
 		const allowedIntervals = getAllowedIntervalsForQuery(
 			query,
 			defaultDateRange
@@ -151,46 +146,45 @@ export class ReportChart extends Component {
 		);
 		const emptyMessage = getEmptyMessage(
 			query,
-			limitProperties || [ endpoint ]
+			limitProperties || [endpoint]
 		);
 		const { formatAmount, getCurrencyConfig } = this.context;
 		return (
 			<Chart
-				allowedIntervals={ allowedIntervals }
-				data={ chartData }
-				dateParser={ '%Y-%m-%dT%H:%M:%S' }
-				emptyMessage={ emptyMessage }
-				filterParam={ filterParam }
-				interactiveLegend={ interactiveLegend }
-				interval={ currentInterval }
-				isRequesting={ isRequesting }
-				itemsLabel={ itemsLabel }
-				legendPosition={ legendPosition }
-				legendTotals={ legendTotals }
-				mode={ mode }
-				path={ path }
-				query={ query }
-				screenReaderFormat={ createDateFormatter(
+				allowedIntervals={allowedIntervals}
+				data={chartData}
+				dateParser={'%Y-%m-%dT%H:%M:%S'}
+				emptyMessage={emptyMessage}
+				filterParam={filterParam}
+				interactiveLegend={interactiveLegend}
+				interval={currentInterval}
+				isRequesting={isRequesting}
+				itemsLabel={itemsLabel}
+				legendPosition={legendPosition}
+				legendTotals={legendTotals}
+				mode={mode}
+				path={path}
+				query={query}
+				screenReaderFormat={createDateFormatter(
 					formats.screenReaderFormat
-				) }
-				showHeaderControls={ showHeaderControls }
-				title={ selectedChart.label }
-				tooltipLabelFormat={ createDateFormatter(
+				)}
+				showHeaderControls={showHeaderControls}
+				title={selectedChart.label}
+				tooltipLabelFormat={createDateFormatter(
 					formats.tooltipLabelFormat
-				) }
+				)}
 				tooltipTitle={
-					( mode === 'time-comparison' && selectedChart.label ) ||
-					null
+					(mode === 'time-comparison' && selectedChart.label) || null
 				}
-				tooltipValueFormat={ getTooltipValueFormat(
+				tooltipValueFormat={getTooltipValueFormat(
 					selectedChart.type,
 					formatAmount
-				) }
-				chartType={ getChartTypeForQuery( query ) }
-				valueType={ selectedChart.type }
-				xFormat={ createDateFormatter( formats.xFormat ) }
-				x2Format={ createDateFormatter( formats.x2Format ) }
-				currency={ getCurrencyConfig() }
+				)}
+				chartType={getChartTypeForQuery(query)}
+				valueType={selectedChart.type}
+				xFormat={createDateFormatter(formats.xFormat)}
+				x2Format={createDateFormatter(formats.x2Format)}
+				currency={getCurrencyConfig()}
 			/>
 		);
 	}
@@ -198,7 +192,7 @@ export class ReportChart extends Component {
 	renderItemComparison() {
 		const { isRequesting, primaryData } = this.props;
 
-		if ( primaryData.isError ) {
+		if (primaryData.isError) {
 			return <AnalyticsError />;
 		}
 
@@ -215,7 +209,7 @@ export class ReportChart extends Component {
 	renderTimeComparison() {
 		const { isRequesting, primaryData, secondaryData } = this.props;
 
-		if ( ! primaryData || primaryData.isError || secondaryData.isError ) {
+		if (!primaryData || primaryData.isError || secondaryData.isError) {
 			return <AnalyticsError />;
 		}
 
@@ -236,7 +230,7 @@ export class ReportChart extends Component {
 
 	render() {
 		const { mode } = this.props;
-		if ( mode === 'item-comparison' ) {
+		if (mode === 'item-comparison') {
 			return this.renderItemComparison();
 		}
 		return this.renderTimeComparison();
@@ -287,7 +281,7 @@ ReportChart.propTypes = {
 	/**
 	 * Properties of the selected chart.
 	 */
-	selectedChart: PropTypes.shape( {
+	selectedChart: PropTypes.shape({
 		/**
 		 * Key of the selected chart.
 		 */
@@ -299,7 +293,7 @@ ReportChart.propTypes = {
 		/**
 		 * Order query argument.
 		 */
-		order: PropTypes.oneOf( [ 'asc', 'desc' ] ),
+		order: PropTypes.oneOf(['asc', 'desc']),
 		/**
 		 * Order by query argument.
 		 */
@@ -307,8 +301,8 @@ ReportChart.propTypes = {
 		/**
 		 * Number type for formatting.
 		 */
-		type: PropTypes.oneOf( [ 'average', 'number', 'currency' ] ).isRequired,
-	} ).isRequired,
+		type: PropTypes.oneOf(['average', 'number', 'currency']).isRequired,
+	}).isRequired,
 };
 
 ReportChart.defaultProps = {
@@ -330,7 +324,7 @@ ReportChart.defaultProps = {
 };
 
 export default compose(
-	withSelect( ( select, props ) => {
+	withSelect((select, props) => {
 		const {
 			charts,
 			endpoint,
@@ -340,16 +334,16 @@ export default compose(
 			query,
 			advancedFilters,
 		} = props;
-		const limitBy = limitProperties || [ endpoint ];
-		const selectedFilter = getSelectedFilter( filters, query );
-		const filterParam = get( selectedFilter, [ 'settings', 'param' ] );
+		const limitBy = limitProperties || [endpoint];
+		const selectedFilter = getSelectedFilter(filters, query);
+		const filterParam = get(selectedFilter, ['settings', 'param']);
 		const chartMode =
 			props.mode ||
-			getChartMode( selectedFilter, query ) ||
+			getChartMode(selectedFilter, query) ||
 			'time-comparison';
 		const { woocommerce_default_date_range: defaultDateRange } = select(
 			settingsStore
-		).getSetting( 'wc_admin', 'wcAdminSettings' );
+		).getSetting('wc_admin', 'wcAdminSettings');
 
 		const newProps = {
 			mode: chartMode,
@@ -357,20 +351,20 @@ export default compose(
 			defaultDateRange,
 		};
 
-		if ( isRequesting ) {
+		if (isRequesting) {
 			return newProps;
 		}
 
 		// Nothing matched, so skip the request and let the chart render its empty state.
-		if ( hasEmptySearchResults( query, limitBy ) ) {
+		if (hasEmptySearchResults(query, limitBy)) {
 			return newProps;
 		}
 
-		const reportStoreSelector = select( reportsStore );
+		const reportStoreSelector = select(reportsStore);
 
-		const fields = charts && charts.map( ( chart ) => chart.key );
+		const fields = charts && charts.map((chart) => chart.key);
 
-		const primaryData = getReportChartData( {
+		const primaryData = getReportChartData({
 			endpoint,
 			dataType: 'primary',
 			query,
@@ -380,16 +374,16 @@ export default compose(
 			advancedFilters,
 			defaultDateRange,
 			fields,
-		} );
+		});
 
-		if ( chartMode === 'item-comparison' ) {
+		if (chartMode === 'item-comparison') {
 			return {
 				...newProps,
 				primaryData,
 			};
 		}
 
-		const secondaryData = getReportChartData( {
+		const secondaryData = getReportChartData({
 			endpoint,
 			dataType: 'secondary',
 			query,
@@ -399,12 +393,12 @@ export default compose(
 			advancedFilters,
 			defaultDateRange,
 			fields,
-		} );
+		});
 
 		return {
 			...newProps,
 			primaryData,
 			secondaryData,
 		};
-	} )
-)( ReportChart );
+	})
+)(ReportChart);

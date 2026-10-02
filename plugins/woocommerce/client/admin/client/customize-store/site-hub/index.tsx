@@ -33,33 +33,33 @@ export const SiteHub = forwardRef<
 	{
 		isTransparent: boolean;
 		className: string;
-		variants?: Record< string, Record< string, string | number > >;
+		variants?: Record<string, Record<string, string | number>>;
 	}
->( ( { isTransparent, ...restProps }, ref ) => {
-	const { siteTitle } = useSelect( ( select ) => {
-		const { getSite } = select( coreStore );
+>(({ isTransparent, ...restProps }, ref) => {
+	const { siteTitle } = useSelect((select) => {
+		const { getSite } = select(coreStore);
 
 		return {
 			siteTitle: getSite()?.title,
 		};
-	}, [] );
+	}, []);
 
 	const disableMotion = useReducedMotion();
 
 	return (
 		<motion.div
-			ref={ ref }
-			{ ...restProps }
-			className={ clsx(
+			ref={ref}
+			{...restProps}
+			className={clsx(
 				'woocommerce-edit-site-site-hub',
 				restProps.className
-			) }
-			initial={ false }
-			transition={ {
+			)}
+			initial={false}
+			transition={{
 				type: 'tween',
 				duration: disableMotion ? 0 : HUB_ANIMATION_DURATION,
 				ease: 'easeOut',
-			} }
+			}}
 		>
 			<HStack
 				justify="space-between"
@@ -72,55 +72,55 @@ export const SiteHub = forwardRef<
 					spacing="0"
 				>
 					<div
-						className={ clsx(
+						className={clsx(
 							'woocommerce-edit-site-site-hub__view-mode-toggle-container',
 							{
 								'has-transparent-background': isTransparent,
 							}
-						) }
+						)}
 					>
 						<Link
-							href={ getNewPath( getPersistedQuery(), '/', {} ) }
+							href={getNewPath(getPersistedQuery(), '/', {})}
 							type="wp-admin"
 						>
-							{ isEntrepreneurFlow() ? (
+							{isEntrepreneurFlow() ? (
 								<WordPressLogo
-									size={ 24 }
+									size={24}
 									className="woocommerce-cys-wordpress-header-logo"
 								/>
 							) : (
 								<SiteIcon className="woocommerce-edit-site-layout__view-mode-toggle-icon" />
-							) }
+							)}
 						</Link>
 					</div>
 
-					{ ! isEntrepreneurFlow() && (
+					{!isEntrepreneurFlow() && (
 						<AnimatePresence>
 							<motion.div
-								layout={ false }
-								animate={ {
+								layout={false}
+								animate={{
 									opacity: 1,
-								} }
-								exit={ {
+								}}
+								exit={{
 									opacity: 0,
-								} }
-								className={ clsx(
+								}}
+								className={clsx(
 									'woocommerce-edit-site-site-hub__site-title',
 									{ 'is-transparent': isTransparent }
-								) }
-								transition={ {
+								)}
+								transition={{
 									type: 'tween',
 									duration: disableMotion ? 0 : 0.2,
 									ease: 'easeOut',
 									delay: 0.1,
-								} }
+								}}
 							>
-								{ decodeEntities( siteTitle ?? '' ) }
+								{decodeEntities(siteTitle ?? '')}
 							</motion.div>
 						</AnimatePresence>
-					) }
+					)}
 				</HStack>
 			</HStack>
 		</motion.div>
 	);
-} );
+});

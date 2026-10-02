@@ -9,10 +9,10 @@ export const hasTwoColumnLayout = (
 	isSetupTaskListActive: boolean
 ) => {
 	const hasTwoColumnContent =
-		! isSetupTaskListActive || isFeatureEnabled( 'analytics' );
+		!isSetupTaskListActive || isFeatureEnabled('analytics');
 
 	return (
-		( userPrefLayout || defaultHomescreenLayout ) === 'two_columns' &&
+		(userPrefLayout || defaultHomescreenLayout) === 'two_columns' &&
 		hasTwoColumnContent
 	);
 };

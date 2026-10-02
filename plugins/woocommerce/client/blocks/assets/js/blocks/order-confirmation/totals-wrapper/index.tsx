@@ -19,7 +19,7 @@ registerBlockType(
 		icon: {
 			src: (
 				<Icon
-					icon={ totals }
+					icon={totals}
 					className="wc-block-editor-components-block-icon"
 				/>
 			),
@@ -29,5 +29,5 @@ registerBlockType(
 			return <InnerBlocks.Content />;
 		},
 		attributes,
-	} as unknown as Partial< BlockConfiguration >
+	} as unknown as Partial<BlockConfiguration>
 );

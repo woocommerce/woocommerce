@@ -24,8 +24,8 @@ function getArrowPaths( container: HTMLElement ) {
 	const buttons = container.querySelectorAll(
 		'.woocommerce-pagination__link'
 	);
-	return Array.from( buttons ).map(
-		( button ) => button.querySelector( 'path' )?.getAttribute( 'd' )
+	return Array.from( buttons ).map( ( button ) =>
+		button.querySelector( 'path' )?.getAttribute( 'd' )
 	);
 }
 

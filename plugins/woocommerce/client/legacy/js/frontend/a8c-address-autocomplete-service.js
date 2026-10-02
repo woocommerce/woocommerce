@@ -71,7 +71,7 @@
 				: new Promise( ( resolve ) => {
 						// Store the resolve function to be called when the function executes
 						lastArgs._resolve = resolve;
-				  } );
+					} );
 		}
 
 		function remainingWait( time ) {
@@ -249,13 +249,21 @@
 						return;
 					case 'rate_limit_exceeded':
 						permanentlyDisabledServices.push( key );
-						setTimeout( () => {
-							const index =
-								permanentlyDisabledServices.indexOf( key );
-							if ( index !== -1 ) {
-								permanentlyDisabledServices.splice( index, 1 );
-							}
-						}, ( Number( response.headers.get( 'RateLimit-Retry-After' ) ) || 60 ) * 1000 );
+						setTimeout(
+							() => {
+								const index =
+									permanentlyDisabledServices.indexOf( key );
+								if ( index !== -1 ) {
+									permanentlyDisabledServices.splice(
+										index,
+										1
+									);
+								}
+							},
+							( Number(
+								response.headers.get( 'RateLimit-Retry-After' )
+							) || 60 ) * 1000
+						);
 						console.error(
 							`Automattic Address Suggestion (${ key }) has been disabled due to rate limit exceeded`
 						);

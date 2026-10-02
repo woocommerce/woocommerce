@@ -27,9 +27,9 @@ import fastDeepEqual from 'fast-deep-equal/es6';
  */
 import { hasSchemaRules } from './utils';
 
-type FormErrors = Partial< {
-	[ key in keyof FormFields ]: string;
-} >;
+type FormErrors = Partial<{
+	[key in keyof FormFields]: string;
+}>;
 
 /**
  * Get the key of the field from the instance path.
@@ -38,54 +38,52 @@ type FormErrors = Partial< {
  * @return string The key of the field.
  */
 const getFieldKey = (
-	instancePath: ErrorObject[ 'instancePath' ]
+	instancePath: ErrorObject['instancePath']
 ): keyof FormFields => {
 	return instancePath
-		.split( '/' )
+		.split('/')
 		.pop()
-		?.replace( '~1', '/' ) as keyof FormFields; // Only place where we need to use as keyof FormFields because we're transforming a string.
+		?.replace('~1', '/') as keyof FormFields; // Only place where we need to use as keyof FormFields because we're transforming a string.
 };
 
 const getErrorsMap = (
 	errors: ErrorObject[],
 	formFields: KeyedFormFields
 ): FormErrors => {
-	return errors.reduce< FormErrors >( ( acc, error ) => {
-		const fieldKey = getFieldKey( error.instancePath );
-		const formField = formFields.find(
-			( field ) => field.key === fieldKey
-		);
-		if ( ! formField || ! fieldKey ) {
+	return errors.reduce<FormErrors>((acc, error) => {
+		const fieldKey = getFieldKey(error.instancePath);
+		const formField = formFields.find((field) => field.key === fieldKey);
+		if (!formField || !fieldKey) {
 			return acc;
 		}
 
-		const fieldLabel = getFieldLabel( formField.label );
+		const fieldLabel = getFieldLabel(formField.label);
 		const defaultMessage = sprintf(
 			// translators: %s is the label of the field.
-			__( '%s is invalid', 'woocommerce' ),
+			__('%s is invalid', 'woocommerce'),
 			fieldLabel
 		);
-		if ( fieldKey ) {
-			switch ( error.keyword ) {
+		if (fieldKey) {
+			switch (error.keyword) {
 				case 'errorMessage':
-					acc[ fieldKey ] = error.message ?? defaultMessage;
+					acc[fieldKey] = error.message ?? defaultMessage;
 					break;
 				case 'pattern':
-					acc[ fieldKey ] = sprintf(
+					acc[fieldKey] = sprintf(
 						// translators: %1$s is the label of the field, %2$s is the pattern.
-						__( '%1$s must match the pattern %2$s', 'woocommerce' ),
+						__('%1$s must match the pattern %2$s', 'woocommerce'),
 						fieldLabel,
 						error.params.pattern
 					);
 					break;
 				default:
-					acc[ fieldKey ] = defaultMessage;
+					acc[fieldKey] = defaultMessage;
 					break;
 			}
 		}
 
 		return acc;
-	}, {} );
+	}, {});
 };
 
 const EMPTY_OBJECT: FormErrors = {};
@@ -102,11 +100,11 @@ export const useFormValidation = (
 	errors: FormErrors;
 	previousErrors: FormErrors | undefined;
 } => {
-	const { parser, data } = useSchemaParser< typeof formType >( formType );
-	const currentResults = useRef< FormErrors >( EMPTY_OBJECT );
-	const previousErrors = usePrevious( currentResults.current );
+	const { parser, data } = useSchemaParser<typeof formType>(formType);
+	const currentResults = useRef<FormErrors>(EMPTY_OBJECT);
+	const previousErrors = usePrevious(currentResults.current);
 
-	if ( ! data ) {
+	if (!data) {
 		return {
 			errors: currentResults.current,
 			previousErrors: undefined,
@@ -117,12 +115,12 @@ export const useFormValidation = (
 		| AddressFormValues
 		| ContactFormValues
 		| OrderFormValues
-		| Record< string, never >;
+		| Record<string, never>;
 
-	if ( overrideValues ) {
+	if (overrideValues) {
 		values = overrideValues;
 	} else {
-		switch ( formType ) {
+		switch (formType) {
 			case 'billing':
 			case 'shipping':
 				values = data.customer.address || {};
@@ -141,29 +139,29 @@ export const useFormValidation = (
 		Partial<
 			Record<
 				keyof FormFields,
-				JSONSchemaType< DocumentObject< typeof formType > >
+				JSONSchemaType<DocumentObject<typeof formType>>
 			>
 		>
-	>( ( acc, field ) => {
+	>((acc, field) => {
 		if (
-			hasSchemaRules( field, 'validation' ) && // Schema validation only run for fields with validation rules.
-			! field.hidden && // And visible
+			hasSchemaRules(field, 'validation') && // Schema validation only run for fields with validation rules.
+			!field.hidden && // And visible
 			// @ts-expect-error field.key is part of values but TS can't seem to figure that out.
-			( field.required || values[ field.key ] ) // And is required or has a optional with a value (or both).
+			(field.required || values[field.key]) // And is required or has a optional with a value (or both).
 		) {
-			acc[ field.key ] = field.validation;
+			acc[field.key] = field.validation;
 		}
 		return acc;
-	}, {} );
+	}, {});
 
 	let schemaErrorsMap = EMPTY_OBJECT;
 
-	if ( Object.keys( partialSchema ).length > 0 && parser ) {
+	if (Object.keys(partialSchema).length > 0 && parser) {
 		const schema = {
 			type: 'object',
 			properties: {},
 		};
-		switch ( formType ) {
+		switch (formType) {
 			case 'shipping':
 				schema.properties = {
 					customer: {
@@ -204,28 +202,28 @@ export const useFormValidation = (
 				};
 				break;
 		}
-		const validate = parser.compile( schema );
+		const validate = parser.compile(schema);
 		// AJV mutates validate function and errors to it, so we reach from it. Result only has a boolean value if errors are present.
-		const result = validate( data );
+		const result = validate(data);
 
-		if ( ! result && validate.errors ) {
-			schemaErrorsMap = getErrorsMap( validate.errors, formFields );
+		if (!result && validate.errors) {
+			schemaErrorsMap = getErrorsMap(validate.errors, formFields);
 		} else {
 			schemaErrorsMap = EMPTY_OBJECT;
 		}
 	}
 
 	const customValidation = formFields
-		.map( ( field ) => {
-			if ( schemaErrorsMap[ field.key ] ) {
-				return [ field.key, schemaErrorsMap[ field.key ] ];
+		.map((field) => {
+			if (schemaErrorsMap[field.key]) {
+				return [field.key, schemaErrorsMap[field.key]];
 			}
 
 			if (
 				// Skip validation if
 				field.hidden || // the field is hidden
 				// @ts-expect-error field.key is part of values but TS can't seem to figure that out.
-				! ( field.required || values[ field.key ] ) // the field is not required and doesn't have a value
+				!(field.required || values[field.key]) // the field is not required and doesn't have a value
 				// the field is not in the values
 			) {
 				return null;
@@ -234,39 +232,39 @@ export const useFormValidation = (
 			if (
 				field.key === 'postcode' &&
 				'country' in values &&
-				! isPostcode( {
+				!isPostcode({
 					postcode: values.postcode,
 					country: values.country,
-				} )
+				})
 			) {
 				return [
 					field.key,
-					__( 'Please enter a valid postcode', 'woocommerce' ),
+					__('Please enter a valid postcode', 'woocommerce'),
 				];
 			}
 
 			if (
 				field.key === 'email' &&
 				'email' in values &&
-				! isEmail( values.email )
+				!isEmail(values.email)
 			) {
 				return [
 					field.key,
-					__( 'Please enter a valid email address', 'woocommerce' ),
+					__('Please enter a valid email address', 'woocommerce'),
 				];
 			}
 
 			return null;
-		} )
-		.filter( nonNullable );
+		})
+		.filter(nonNullable);
 
 	if (
-		! fastDeepEqual(
+		!fastDeepEqual(
 			currentResults.current,
-			Object.fromEntries( customValidation )
+			Object.fromEntries(customValidation)
 		)
 	) {
-		currentResults.current = Object.fromEntries( customValidation );
+		currentResults.current = Object.fromEntries(customValidation);
 	}
 
 	return {

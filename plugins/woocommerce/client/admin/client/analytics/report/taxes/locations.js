@@ -19,46 +19,45 @@ let allLocations = null;
  * @return {Promise<Array<{key: string, label: string, country: string, keywords: string[]}>>} Locations.
  */
 async function getLocations() {
-	if ( allLocations ) {
+	if (allLocations) {
 		return allLocations;
 	}
 
-	const countries =
-		await resolveSelect( COUNTRIES_STORE_NAME ).getCountries();
+	const countries = await resolveSelect(COUNTRIES_STORE_NAME).getCountries();
 
-	const locations = ( countries || [] ).reduce( ( carry, country ) => {
-		const countryName = decodeEntities( country.name );
+	const locations = (countries || []).reduce((carry, country) => {
+		const countryName = decodeEntities(country.name);
 
-		carry.push( {
+		carry.push({
 			key: country.code,
 			label: countryName,
 			country: country.code,
-			keywords: [ country.code, countryName ],
-		} );
+			keywords: [country.code, countryName],
+		});
 
-		( country.states || [] ).forEach( ( state ) => {
-			const stateName = decodeEntities( state.name );
-			const key = `${ country.code }:${ state.code }`;
+		(country.states || []).forEach((state) => {
+			const stateName = decodeEntities(state.name);
+			const key = `${country.code}:${state.code}`;
 
-			carry.push( {
+			carry.push({
 				key,
 				// The country code rather than its name: the filter input is narrow, and a
 				// long label wraps a character at a time in the results list.
 				label: sprintf(
 					/* translators: 1: state name, 2: country code. Example: California (US) */
-					__( '%1$s (%2$s)', 'woocommerce' ),
+					__('%1$s (%2$s)', 'woocommerce'),
 					stateName,
 					country.code
 				),
 				country: country.code,
-				keywords: [ key, stateName ],
-			} );
-		} );
+				keywords: [key, stateName],
+			});
+		});
 
 		return carry;
-	}, [] );
+	}, []);
 
-	if ( locations.length ) {
+	if (locations.length) {
 		allLocations = locations;
 	}
 
@@ -72,19 +71,17 @@ async function getLocations() {
  * @param {string} query Search query.
  * @return {Object} Label split around the match.
  */
-function highlightMatch( label, query ) {
-	const start = query
-		? label.toLowerCase().indexOf( query.toLowerCase() )
-		: -1;
+function highlightMatch(label, query) {
+	const start = query ? label.toLowerCase().indexOf(query.toLowerCase()) : -1;
 
-	if ( start === -1 ) {
+	if (start === -1) {
 		return { before: label, match: '', after: '' };
 	}
 
 	return {
-		before: label.substring( 0, start ),
-		match: label.substring( start, start + query.length ),
-		after: label.substring( start + query.length ),
+		before: label.substring(0, start),
+		match: label.substring(start, start + query.length),
+		after: label.substring(start + query.length),
 	};
 }
 
@@ -97,45 +94,42 @@ export const locationsAutocompleter = {
 	className: 'woocommerce-search__country-result',
 	isDebounced: true,
 	options: getLocations,
-	getOptionIdentifier( location ) {
+	getOptionIdentifier(location) {
 		return location.key;
 	},
-	getOptionKeywords( location ) {
+	getOptionKeywords(location) {
 		return location.keywords;
 	},
-	getSearchExpression( query ) {
+	getSearchExpression(query) {
 		return '^' + query;
 	},
-	getOptionLabel( location, query ) {
-		const { before, match, after } = highlightMatch(
-			location.label,
-			query
-		);
+	getOptionLabel(location, query) {
+		const { before, match, after } = highlightMatch(location.label, query);
 
 		return (
 			<>
 				<Flag
 					key="thumbnail"
 					className="woocommerce-search__result-thumbnail"
-					code={ location.country }
-					size={ 18 }
+					code={location.country}
+					size={18}
 					hideFromScreenReader
 				/>
 				<span
 					key="name"
 					className="woocommerce-search__result-name"
-					aria-label={ location.label }
+					aria-label={location.label}
 				>
-					{ before }
+					{before}
 					<strong className="components-form-token-field__suggestion-match">
-						{ match }
+						{match}
 					</strong>
-					{ after }
+					{after}
 				</span>
 			</>
 		);
 	},
-	getOptionCompletion( location ) {
+	getOptionCompletion(location) {
 		return {
 			key: location.key,
 			label: location.label,
@@ -149,11 +143,11 @@ export const locationsAutocompleter = {
  * @param {string} value Comma separated list of location keys.
  * @return {Promise<Array<{key: string, label: string}>>} Labels.
  */
-export async function getLocationLabels( value ) {
-	const keys = value.split( ',' ).filter( Boolean );
+export async function getLocationLabels(value) {
+	const keys = value.split(',').filter(Boolean);
 	const locations = await getLocations();
 
 	return locations
-		.filter( ( location ) => keys.includes( location.key ) )
-		.map( ( { key, label } ) => ( { key, label } ) );
+		.filter((location) => keys.includes(location.key))
+		.map(({ key, label }) => ({ key, label }));
 }

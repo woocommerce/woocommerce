@@ -24,7 +24,7 @@ export interface QuantitySelectorProps {
 	/**
 	 * Event handler triggered when the quantity is changed
 	 */
-	onChange: ( newQuantity: number ) => void;
+	onChange: (newQuantity: number) => void;
 	/**
 	 * Name of the item the quantity selector refers to
 	 *

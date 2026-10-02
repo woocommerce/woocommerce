@@ -20,7 +20,7 @@ const v1 = {
 		},
 		...blockAttributes,
 	},
-	save: ( { attributes }: { attributes: Attributes } ) => {
+	save: ({ attributes }: { attributes: Attributes }) => {
 		const {
 			className,
 			showCounts,
@@ -28,20 +28,20 @@ const v1 = {
 			headingLevel,
 			showFilterButton,
 		} = attributes;
-		const data: Record< string, unknown > = {
+		const data: Record<string, unknown> = {
 			'data-show-counts': showCounts,
 			'data-heading': heading,
 			'data-heading-level': headingLevel,
 		};
-		if ( showFilterButton ) {
-			data[ 'data-show-filter-button' ] = showFilterButton;
+		if (showFilterButton) {
+			data['data-show-filter-button'] = showFilterButton;
 		}
 		return (
 			<div
-				{ ...useBlockProps.save( {
-					className: clsx( 'is-loading', className ),
-				} ) }
-				{ ...data }
+				{...useBlockProps.save({
+					className: clsx('is-loading', className),
+				})}
+				{...data}
 			>
 				<span
 					aria-hidden
@@ -52,6 +52,6 @@ const v1 = {
 	},
 };
 
-const deprecated = [ v1 ];
+const deprecated = [v1];
 
 export default deprecated;

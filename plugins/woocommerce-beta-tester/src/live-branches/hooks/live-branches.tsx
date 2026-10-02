@@ -22,39 +22,37 @@ export type Branch = {
 };
 
 type LiveBranchesResponse = {
-	pr: { [ key: string ]: Branch };
+	pr: { [key: string]: Branch };
 	master: Branch;
 };
 
 export const useLiveBranchesData = () => {
-	const [ branches, setBranches ] = useState< Branch[] >( [] );
-	const [ loading, setLoading ] = useState< boolean >( true );
-	const [ isError, setIsError ] = useState< boolean >( false );
+	const [branches, setBranches] = useState<Branch[]>([]);
+	const [loading, setLoading] = useState<boolean>(true);
+	const [isError, setIsError] = useState<boolean>(false);
 
-	useEffect( () => {
+	useEffect(() => {
 		const getBranches = async () => {
 			try {
-				const res = await apiFetch< LiveBranchesResponse >( {
-					path: `${ API_NAMESPACE }/live-branches/manifest/v1`,
+				const res = await apiFetch<LiveBranchesResponse>({
+					path: `${API_NAMESPACE}/live-branches/manifest/v1`,
 					method: 'GET',
-				} );
+				});
 
-				const prBranches = Object.entries( res.pr ).map(
-					( [ , value ] ) => {
-						return value;
-					}
-				) as Branch[];
+				const prBranches = Object.entries(res.pr).map(([, value]) => {
+					return value;
+				}) as Branch[];
 
-				setBranches( [ res.master, ...prBranches ] );
-				setLoading( false );
-			} catch ( e ) {
-				setIsError( true );
-				setLoading( false );
+				setBranches([res.master, ...prBranches]);
+				setLoading(false);
+			} catch (e) {
+				setIsError(true);
+				setLoading(false);
 			}
 		};
 
 		void getBranches();
-	}, [] );
+	}, []);
 
 	return { branches, isLoading: loading, isError };
 };
@@ -65,87 +63,87 @@ export const useLiveBranchInstall = (
 	version: string,
 	status: PluginStatus
 ) => {
-	const [ isInProgress, setIsInProgress ] = useState( false );
-	const [ isError, setIsError ] = useState( false );
-	const [ pluginStatus, setPluginStatus ] = useState( status );
+	const [isInProgress, setIsInProgress] = useState(false);
+	const [isError, setIsError] = useState(false);
+	const [pluginStatus, setPluginStatus] = useState(status);
 
 	const activate = async () => {
-		setIsInProgress( true );
+		setIsInProgress(true);
 
 		try {
-			const deactivateResult = await apiFetch< Response >( {
-				path: `${ API_NAMESPACE }/live-branches/deactivate/v1`,
-			} );
+			const deactivateResult = await apiFetch<Response>({
+				path: `${API_NAMESPACE}/live-branches/deactivate/v1`,
+			});
 
-			if ( deactivateResult.status >= 400 ) {
-				throw new Error( 'Could not deactivate' );
+			if (deactivateResult.status >= 400) {
+				throw new Error('Could not deactivate');
 			}
 
-			const activateResult = await apiFetch< Response >( {
-				path: `${ API_NAMESPACE }/live-branches/activate/v1`,
+			const activateResult = await apiFetch<Response>({
+				path: `${API_NAMESPACE}/live-branches/activate/v1`,
 				method: 'POST',
 				data: {
 					version,
 				},
-			} );
+			});
 
-			if ( activateResult.status >= 400 ) {
-				throw new Error( 'Could not activate' );
+			if (activateResult.status >= 400) {
+				throw new Error('Could not activate');
 			}
-		} catch ( e ) {
-			setIsError( true );
+		} catch (e) {
+			setIsError(true);
 		}
 
-		setPluginStatus( 'active' );
-		setIsInProgress( false );
+		setPluginStatus('active');
+		setIsInProgress(false);
 	};
 
 	const installAndActivate = async () => {
-		setIsInProgress( true );
+		setIsInProgress(true);
 
 		try {
-			const installResult = await apiFetch< Response >( {
-				path: `${ API_NAMESPACE }/live-branches/install/v1`,
+			const installResult = await apiFetch<Response>({
+				path: `${API_NAMESPACE}/live-branches/install/v1`,
 				method: 'POST',
 				data: {
 					pr_name: prName,
 					download_url: downloadUrl,
 					version,
 				},
-			} );
+			});
 
-			if ( installResult.status >= 400 ) {
-				throw new Error( 'Could not install' );
+			if (installResult.status >= 400) {
+				throw new Error('Could not install');
 			}
 
-			setPluginStatus( 'installed' );
+			setPluginStatus('installed');
 
-			const deactivateResult = await apiFetch< Response >( {
-				path: `${ API_NAMESPACE }/live-branches/deactivate/v1`,
-			} );
+			const deactivateResult = await apiFetch<Response>({
+				path: `${API_NAMESPACE}/live-branches/deactivate/v1`,
+			});
 
-			if ( deactivateResult.status >= 400 ) {
-				throw new Error( 'Could not deactivate' );
+			if (deactivateResult.status >= 400) {
+				throw new Error('Could not deactivate');
 			}
 
-			const activateResult = await apiFetch< Response >( {
-				path: `${ API_NAMESPACE }/live-branches/activate/v1`,
+			const activateResult = await apiFetch<Response>({
+				path: `${API_NAMESPACE}/live-branches/activate/v1`,
 				method: 'POST',
 				data: {
 					version,
 				},
-			} );
+			});
 
-			if ( activateResult.status >= 400 ) {
-				throw new Error( 'Could not activate' );
+			if (activateResult.status >= 400) {
+				throw new Error('Could not activate');
 			}
 
-			setPluginStatus( 'active' );
-		} catch ( e ) {
-			setIsError( true );
+			setPluginStatus('active');
+		} catch (e) {
+			setIsError(true);
 		}
 
-		setIsInProgress( false );
+		setIsInProgress(false);
 	};
 
 	return {

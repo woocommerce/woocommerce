@@ -8,10 +8,8 @@ export const isStockStatusQueryCollection = (
 	value: unknown
 ): value is StockStatus[] => {
 	return (
-		Array.isArray( value ) &&
-		value.every( ( v ) =>
-			[ 'instock', 'outofstock', 'onbackorder' ].includes( v )
-		)
+		Array.isArray(value) &&
+		value.every((v) => ['instock', 'outofstock', 'onbackorder'].includes(v))
 	);
 };
 
@@ -19,9 +17,9 @@ export const isStockStatusOptions = (
 	value: unknown
 ): value is StockStatusOptions => {
 	return (
-		isObject( value ) &&
-		Object.keys( value ).every( ( v ) =>
-			[ 'instock', 'outofstock', 'onbackorder' ].includes( v )
+		isObject(value) &&
+		Object.keys(value).every((v) =>
+			['instock', 'outofstock', 'onbackorder'].includes(v)
 		)
 	);
 };

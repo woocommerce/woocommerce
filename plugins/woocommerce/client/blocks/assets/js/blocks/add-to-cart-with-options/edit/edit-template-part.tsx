@@ -32,62 +32,62 @@ const AddToWishlistPreview = () => (
 			disabled
 		>
 			<span className="wc-block-add-to-wishlist-button__icon wc-block-add-to-wishlist-button__icon--empty">
-				<Icon icon={ starEmpty } size={ 24 } />
+				<Icon icon={starEmpty} size={24} />
 			</span>
 			<span className="wc-block-add-to-wishlist-button__label">
-				{ __( 'Add to wishlist', 'woocommerce' ) }
+				{__('Add to wishlist', 'woocommerce')}
 			</span>
 		</button>
 	</div>
 );
 
-const TemplatePartInnerBlocks = ( {
+const TemplatePartInnerBlocks = ({
 	blockProps,
 	productType,
 	templatePartId,
 	showAddToWishlist,
 }: {
-	blockProps: Record< string, unknown >;
+	blockProps: Record<string, unknown>;
 	productType: string;
 	templatePartId: string | undefined;
 	showAddToWishlist: boolean;
-} ) => {
-	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
+}) => {
+	const [blocks, onInput, onChange] = useEntityBlockEditor(
 		'postType',
 		'wp_template_part',
 		{ id: templatePartId }
 	);
 
 	const { isLoading } = useSelect(
-		( select ) => {
-			const { hasFinishedResolution } = select( coreStore );
+		(select) => {
+			const { hasFinishedResolution } = select(coreStore);
 
 			const hasResolvedEntity = hasFinishedResolution(
 				'getEditedEntityRecord',
-				[ 'postType', 'wp_template_part', templatePartId ]
+				['postType', 'wp_template_part', templatePartId]
 			);
 
 			return {
-				isLoading: ! hasResolvedEntity,
+				isLoading: !hasResolvedEntity,
 			};
 		},
-		[ templatePartId ]
+		[templatePartId]
 	);
 
-	const innerBlocksProps = useInnerBlocksProps( blockProps, {
+	const innerBlocksProps = useInnerBlocksProps(blockProps, {
 		value: blocks,
 		onInput,
 		onChange,
 		renderAppender:
-			! isLoading && blocks.length === 0
+			!isLoading && blocks.length === 0
 				? InnerBlocks.ButtonBlockAppender
 				: null,
-	} );
+	});
 
-	if ( isLoading ) {
+	if (isLoading) {
 		return (
-			<div { ...blockProps }>
-				<Skeleton productType={ productType } isLoading={ true } />
+			<div {...blockProps}>
+				<Skeleton productType={productType} isLoading={true} />
 			</div>
 		);
 	}
@@ -95,80 +95,80 @@ const TemplatePartInnerBlocks = ( {
 	const { children, ...innerBlocksWrapperProps } = innerBlocksProps;
 
 	return (
-		<div { ...innerBlocksWrapperProps }>
-			{ children }
-			{ showAddToWishlist && <AddToWishlistPreview /> }
+		<div {...innerBlocksWrapperProps}>
+			{children}
+			{showAddToWishlist && <AddToWishlistPreview />}
 		</div>
 	);
 };
 
-export const AddToCartWithOptionsEditTemplatePart = ( {
+export const AddToCartWithOptionsEditTemplatePart = ({
 	productType,
 	showAddToWishlist,
 }: {
 	productType: string;
 	showAddToWishlist: boolean;
-} ) => {
+}) => {
 	const addToCartWithOptionsTemplatePartIds = getSetting(
 		'addToCartWithOptionsTemplatePartIds',
 		{}
-	) as Record< string, string | null >;
+	) as Record<string, string | null>;
 
-	const templatePartId = addToCartWithOptionsTemplatePartIds?.[ productType ];
+	const templatePartId = addToCartWithOptionsTemplatePartIds?.[productType];
 
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className: 'wc-block-add-to-cart-with-options',
-	} );
+	});
 
 	const { canEditTemplatePart, isLoading } = useSelect(
-		( select ) => {
-			if ( ! templatePartId ) {
+		(select) => {
+			if (!templatePartId) {
 				return {
 					canEditTemplatePart: false,
 					isLoading: false,
 				};
 			}
 
-			const { canUser, hasFinishedResolution } = select( coreStore );
+			const { canUser, hasFinishedResolution } = select(coreStore);
 
-			const canUserUpdate = canUser( 'update', {
+			const canUserUpdate = canUser('update', {
 				kind: 'postType',
 				name: 'wp_template_part',
 				id: templatePartId,
-			} );
+			});
 
-			const isLoadingCanUserUpdate = ! hasFinishedResolution( 'canUser', [
+			const isLoadingCanUserUpdate = !hasFinishedResolution('canUser', [
 				'update',
 				{
 					kind: 'postType',
 					name: 'wp_template_part',
 					id: templatePartId,
 				},
-			] );
+			]);
 
 			return {
 				canEditTemplatePart: canUserUpdate,
 				isLoading: isLoadingCanUserUpdate,
 			};
 		},
-		[ templatePartId ]
+		[templatePartId]
 	);
 
-	if ( ! templatePartId || ! canEditTemplatePart ) {
+	if (!templatePartId || !canEditTemplatePart) {
 		return (
-			<div { ...blockProps }>
-				<Skeleton productType={ productType } isLoading={ isLoading } />
-				{ showAddToWishlist && <AddToWishlistPreview /> }
+			<div {...blockProps}>
+				<Skeleton productType={productType} isLoading={isLoading} />
+				{showAddToWishlist && <AddToWishlistPreview />}
 			</div>
 		);
 	}
 
 	return (
 		<TemplatePartInnerBlocks
-			blockProps={ blockProps }
-			productType={ productType }
-			templatePartId={ templatePartId }
-			showAddToWishlist={ showAddToWishlist }
+			blockProps={blockProps}
+			productType={productType}
+			templatePartId={templatePartId}
+			showAddToWishlist={showAddToWishlist}
 		/>
 	);
 };

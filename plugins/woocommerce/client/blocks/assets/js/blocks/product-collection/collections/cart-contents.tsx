@@ -17,14 +17,14 @@ import { CoreCollectionNames, CoreFilterNames } from '../types';
 
 const collection = {
 	name: CoreCollectionNames.CART_CONTENTS,
-	title: __( 'Cart Contents', 'woocommerce' ),
-	icon: <Icon icon={ cart } />,
+	title: __('Cart Contents', 'woocommerce'),
+	icon: <Icon icon={cart} />,
 	description: __(
 		'Display products from the customer cart for abandoned cart emails.',
 		'woocommerce'
 	),
-	keywords: [ 'cart', 'email', 'abandoned' ],
-	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
+	keywords: ['cart', 'email', 'abandoned'],
+	scope: ['inserter', 'block'] as BlockVariationScope[],
 };
 
 const attributes = {
@@ -54,7 +54,7 @@ const attributes = {
 		CoreFilterNames.CREATED,
 		CoreFilterNames.PRICE_RANGE,
 	],
-	queryContextIncludes: [ 'cart' ],
+	queryContextIncludes: ['cart'],
 };
 
 const heading: InnerBlockTemplate = [
@@ -62,7 +62,7 @@ const heading: InnerBlockTemplate = [
 	{
 		textAlign: 'center',
 		level: 2,
-		content: __( 'Your Cart', 'woocommerce' ),
+		content: __('Your Cart', 'woocommerce'),
 		style: { spacing: { margin: { bottom: '1rem' } } },
 	},
 ];

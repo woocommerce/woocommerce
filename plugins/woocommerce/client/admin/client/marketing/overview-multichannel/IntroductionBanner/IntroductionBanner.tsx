@@ -24,18 +24,16 @@ type IntroductionBannerProps = {
 	onAddChannelsClick: () => void;
 };
 
-export const IntroductionBanner = ( {
+export const IntroductionBanner = ({
 	onDismissClick,
 	onAddChannelsClick,
-}: IntroductionBannerProps ) => {
-	const [ isModalOpen, setModalOpen ] = useState( false );
+}: IntroductionBannerProps) => {
+	const [isModalOpen, setModalOpen] = useState(false);
 	const { data: dataRegistered } = useRegisteredChannels();
 	const { data: dataRecommended } = useRecommendedChannels();
 	const { data: dataCampaignTypes } = useCampaignTypes();
 
-	const showButtons = !! (
-		dataRegistered?.length && dataCampaignTypes?.length
-	);
+	const showButtons = !!(dataRegistered?.length && dataCampaignTypes?.length);
 
 	/**
 	 * Boolean to display the "Add channels" button in the introduction banner.
@@ -51,7 +49,7 @@ export const IntroductionBanner = ( {
 	 * and clicking on the "Add channels" button in this introduction banner
 	 * will scroll to the button in Channels card.
 	 */
-	const showAddChannelsButton = !! (
+	const showAddChannelsButton = !!(
 		dataRegistered?.length && dataRecommended?.length
 	);
 
@@ -59,95 +57,95 @@ export const IntroductionBanner = ( {
 		<Card className="woocommerce-marketing-introduction-banner">
 			<div className="woocommerce-marketing-introduction-banner-content">
 				<div className="woocommerce-marketing-introduction-banner-title">
-					{ __(
+					{__(
 						'Reach new customers and increase sales without leaving WooCommerce',
 						'woocommerce'
-					) }
+					)}
 				</div>
 				<Flex
 					className="woocommerce-marketing-introduction-banner-features"
 					direction="column"
-					gap={ 1 }
-					expanded={ false }
+					gap={1}
+					expanded={false}
 				>
 					<FlexItem>
 						<Flex>
-							<Icon icon={ trendingUp } />
+							<Icon icon={trendingUp} />
 							<FlexBlock>
-								{ __(
+								{__(
 									'Reach customers on other sales channels',
 									'woocommerce'
-								) }
+								)}
 							</FlexBlock>
 						</Flex>
 					</FlexItem>
 					<FlexItem>
 						<Flex>
-							<Icon icon={ megaphone } />
+							<Icon icon={megaphone} />
 							<FlexBlock>
-								{ __(
+								{__(
 									'Advertise with marketing campaigns',
 									'woocommerce'
-								) }
+								)}
 							</FlexBlock>
 						</Flex>
 					</FlexItem>
 					<FlexItem>
 						<Flex>
 							<img
-								src={ wooIconUrl }
-								alt={ __( 'WooCommerce logo', 'woocommerce' ) }
+								src={wooIconUrl}
+								alt={__('WooCommerce logo', 'woocommerce')}
 								width="24"
 								height="24"
 							/>
 							<FlexBlock>
-								{ __( 'Built by WooCommerce', 'woocommerce' ) }
+								{__('Built by WooCommerce', 'woocommerce')}
 							</FlexBlock>
 						</Flex>
 					</FlexItem>
 				</Flex>
-				{ showButtons && (
+				{showButtons && (
 					<Flex
 						className="woocommerce-marketing-introduction-banner-buttons"
 						justify="flex-start"
 					>
 						<Button
 							variant="primary"
-							onClick={ () => {
-								setModalOpen( true );
-							} }
+							onClick={() => {
+								setModalOpen(true);
+							}}
 						>
-							{ __( 'Create a campaign', 'woocommerce' ) }
+							{__('Create a campaign', 'woocommerce')}
 						</Button>
-						{ showAddChannelsButton && (
+						{showAddChannelsButton && (
 							<Button
 								variant="secondary"
-								onClick={ onAddChannelsClick }
+								onClick={onAddChannelsClick}
 							>
-								{ __( 'Add channels', 'woocommerce' ) }
+								{__('Add channels', 'woocommerce')}
 							</Button>
-						) }
+						)}
 					</Flex>
-				) }
-				{ isModalOpen && (
+				)}
+				{isModalOpen && (
 					<CreateNewCampaignModal
-						onRequestClose={ () => setModalOpen( false ) }
+						onRequestClose={() => setModalOpen(false)}
 					/>
-				) }
+				)}
 			</div>
 			<div className="woocommerce-marketing-introduction-banner-illustration">
 				<Button
 					isSmall
 					className="woocommerce-marketing-introduction-banner-close-button"
-					onClick={ onDismissClick }
+					onClick={onDismissClick}
 				>
-					<Icon icon={ closeSmall } />
+					<Icon icon={closeSmall} />
 				</Button>
 				<div
 					className="woocommerce-marketing-introduction-banner-image-placeholder"
-					style={ {
-						backgroundImage: `url("${ illustrationUrl }")`,
-					} }
+					style={{
+						backgroundImage: `url("${illustrationUrl}")`,
+					}}
 				/>
 			</div>
 		</Card>

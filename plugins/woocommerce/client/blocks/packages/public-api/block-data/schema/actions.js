@@ -13,7 +13,7 @@ import { API_BLOCK_NAMESPACE } from '../constants';
  *
  * @return  {Object}             The action object.
  */
-export function receiveRoutes( routes, namespace = API_BLOCK_NAMESPACE ) {
+export function receiveRoutes(routes, namespace = API_BLOCK_NAMESPACE) {
 	return {
 		type: types.RECEIVE_MODEL_ROUTES,
 		routes,

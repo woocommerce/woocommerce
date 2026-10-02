@@ -16,17 +16,17 @@ import { getAdminSetting } from '~/utils/admin-settings';
  * @param {Object} queryArgs
  * @return {string} url with in-app-purchase query parameters
  */
-export const getInAppPurchaseUrl = ( url, queryArgs = {} ) => {
+export const getInAppPurchaseUrl = (url, queryArgs = {}) => {
 	const { pathname, search } = window.location;
-	const connectNonce = getSetting( 'connectNonce', '' );
+	const connectNonce = getSetting('connectNonce', '');
 	queryArgs = {
-		'wccom-site': getAdminSetting( 'siteUrl' ),
+		'wccom-site': getAdminSetting('siteUrl'),
 		// If the site is installed in a directory the directory must be included in the back param path.
 		'wccom-back': pathname + search,
-		'wccom-woo-version': getSetting( 'wcVersion' ),
+		'wccom-woo-version': getSetting('wcVersion'),
 		'wccom-connect-nonce': connectNonce,
 		...queryArgs,
 	};
 
-	return addQueryArgs( url, queryArgs );
+	return addQueryArgs(url, queryArgs);
 };

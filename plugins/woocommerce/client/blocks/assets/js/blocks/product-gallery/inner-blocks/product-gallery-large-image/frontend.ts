@@ -17,41 +17,41 @@ type Context = {
 	};
 } & ProductGalleryContext;
 
-const getContext = ( ns?: string ) => getContextFn< Context >( ns );
+const getContext = (ns?: string) => getContextFn<Context>(ns);
 
 type Store = typeof viewer & ProductGallery;
 
 const viewer = {
 	actions: {
-		startZoom: ( event: MouseEvent ) => {
+		startZoom: (event: MouseEvent) => {
 			const target = event.target as HTMLElement;
 			const isMouseEventFromViewer = target.classList.contains(
 				'wc-block-woocommerce-product-gallery-large-image__image'
 			);
 
-			if ( ! isMouseEventFromViewer ) {
-				return actions.resetZoom( event );
+			if (!isMouseEventFromViewer) {
+				return actions.resetZoom(event);
 			}
 
 			const element = event.target as HTMLElement;
-			const percentageX = ( event.offsetX / element.clientWidth ) * 100;
-			const percentageY = ( event.offsetY / element.clientHeight ) * 100;
+			const percentageX = (event.offsetX / element.clientWidth) * 100;
+			const percentageY = (event.offsetY / element.clientHeight) * 100;
 
 			const { selectedImageId } = getContext();
 
 			const imageId = parseInt(
-				target.getAttribute( 'data-image-id' ) ?? '0',
+				target.getAttribute('data-image-id') ?? '0',
 				10
 			);
-			if ( selectedImageId === imageId ) {
+			if (selectedImageId === imageId) {
 				target.style.transform = `scale(1.3)`;
-				target.style.transformOrigin = `${ percentageX }% ${ percentageY }%`;
+				target.style.transformOrigin = `${percentageX}% ${percentageY}%`;
 			}
 		},
-		resetZoom: ( event: MouseEvent ) => {
+		resetZoom: (event: MouseEvent) => {
 			const target = event.target as HTMLElement;
 
-			if ( ! target ) {
+			if (!target) {
 				return;
 			}
 
@@ -61,6 +61,6 @@ const viewer = {
 	},
 };
 
-const { actions } = store< Store >( 'woocommerce/product-gallery', viewer, {
+const { actions } = store<Store>('woocommerce/product-gallery', viewer, {
 	lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
-} );
+});

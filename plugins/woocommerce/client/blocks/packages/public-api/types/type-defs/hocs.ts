@@ -14,16 +14,16 @@ export interface WithInjectedProductVariations {
 	 * The id of the currently expanded product
 	 */
 	expandedProduct: number | null;
-	variations: Record< number, ProductResponseItem[] >;
+	variations: Record<number, ProductResponseItem[]>;
 	variationsLoading: boolean;
 	onLoadMoreVariations?: () => void;
-	totalVariations?: Record< number, number | null >;
+	totalVariations?: Record<number, number | null>;
 }
 
 export interface WithInjectedSearchedProducts {
 	error: ErrorObject | null;
 	isLoading: boolean;
-	onSearch: ( ( search: string ) => void ) | null;
+	onSearch: ((search: string) => void) | null;
 	products: ProductResponseItem[];
 	selected: number[];
 }

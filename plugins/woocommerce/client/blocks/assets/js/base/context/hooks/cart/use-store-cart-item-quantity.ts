@@ -29,12 +29,12 @@ import { useStoreCart } from './use-store-cart';
  */
 const cartItemHasQuantityAndKey = (
 	cartItem: unknown /* Object that may have quantity and key */
-): cartItem is Partial< CartItem > =>
-	isObject( cartItem ) &&
-	objectHasProp( cartItem, 'key' ) &&
-	objectHasProp( cartItem, 'quantity' ) &&
-	isString( cartItem.key ) &&
-	isNumber( cartItem.quantity );
+): cartItem is Partial<CartItem> =>
+	isObject(cartItem) &&
+	objectHasProp(cartItem, 'key') &&
+	objectHasProp(cartItem, 'quantity') &&
+	isString(cartItem.key) &&
+	isNumber(cartItem.quantity);
 
 /**
  * This is a custom hook for loading the Store API /cart/ endpoint and actions for removing or changing item quantity.
@@ -45,11 +45,11 @@ const cartItemHasQuantityAndKey = (
  * @return {StoreCartItemQuantity} An object exposing data and actions relating to cart items.
  */
 export const useStoreCartItemQuantity = (
-	cartItem: CartItem | Record< string, unknown >
+	cartItem: CartItem | Record<string, unknown>
 ): StoreCartItemQuantity => {
 	const verifiedCartItem = { key: '', quantity: 1 };
 
-	if ( cartItemHasQuantityAndKey( cartItem ) ) {
+	if (cartItemHasQuantityAndKey(cartItem)) {
 		verifiedCartItem.key = cartItem.key;
 		verifiedCartItem.quantity = cartItem.quantity;
 	}
@@ -57,31 +57,31 @@ export const useStoreCartItemQuantity = (
 		verifiedCartItem;
 	const { cartErrors } = useStoreCart();
 	const { __internalStartCalculation, __internalFinishCalculation } =
-		useDispatch( checkoutStore );
+		useDispatch(checkoutStore);
 
 	// Store quantity in hook state. This is used to keep the UI updated while server request is updated.
-	const [ quantity, setQuantity ] = useState< number >( cartItemQuantity );
-	const [ debouncedQuantity ] = useDebounce< number >( quantity, 400 );
-	const previousDebouncedQuantity = usePrevious( debouncedQuantity );
+	const [quantity, setQuantity] = useState<number>(cartItemQuantity);
+	const [debouncedQuantity] = useDebounce<number>(quantity, 400);
+	const previousDebouncedQuantity = usePrevious(debouncedQuantity);
 	const { removeItemFromCart, changeCartItemQuantity } =
-		useDispatch( cartStore );
+		useDispatch(cartStore);
 
 	// Track when things are already pending updates.
 	const isPending = useSelect(
-		( select ) => {
-			if ( ! cartItemKey ) {
+		(select) => {
+			if (!cartItemKey) {
 				return {
 					quantity: false,
 					delete: false,
 				};
 			}
-			const store = select( cartStore );
+			const store = select(cartStore);
 			return {
-				quantity: store.isItemPendingQuantity( cartItemKey ),
-				delete: store.isItemPendingDelete( cartItemKey ),
+				quantity: store.isItemPendingQuantity(cartItemKey),
+				delete: store.isItemPendingDelete(cartItemKey),
 			};
 		},
-		[ cartItemKey ]
+		[cartItemKey]
 	);
 
 	// Update local state when server updates, but only if:
@@ -90,7 +90,7 @@ export const useStoreCartItemQuantity = (
 	// 3. No API call about to fire (debounce just caught up but thunk hasn't started)
 	// This prevents stale API responses from overwriting user's pending changes,
 	// while still allowing server-initiated changes (e.g., bundled products) to sync.
-	useEffect( () => {
+	useEffect(() => {
 		const hasPendingLocalChange = quantity !== debouncedQuantity;
 		const hasInflightRequest = isPending.quantity;
 		// Only block if debounce JUST caught up and differs from server (about to fire API)
@@ -100,11 +100,11 @@ export const useStoreCartItemQuantity = (
 		const aboutToFireApiCall =
 			debouncedJustChanged && debouncedQuantity !== cartItemQuantity;
 		if (
-			! hasPendingLocalChange &&
-			! hasInflightRequest &&
-			! aboutToFireApiCall
+			!hasPendingLocalChange &&
+			!hasInflightRequest &&
+			!aboutToFireApiCall
 		) {
-			setQuantity( cartItemQuantity );
+			setQuantity(cartItemQuantity);
 		}
 	}, [
 		cartItemQuantity,
@@ -112,28 +112,28 @@ export const useStoreCartItemQuantity = (
 		debouncedQuantity,
 		previousDebouncedQuantity,
 		isPending.quantity,
-	] );
+	]);
 
-	const removeItem = useCallback( () => {
-		if ( cartItemKey ) {
-			return removeItemFromCart( cartItemKey ).catch( ( error ) => {
-				processErrorResponse( error );
-			} );
+	const removeItem = useCallback(() => {
+		if (cartItemKey) {
+			return removeItemFromCart(cartItemKey).catch((error) => {
+				processErrorResponse(error);
+			});
 		}
-		return Promise.resolve( false );
-	}, [ cartItemKey, removeItemFromCart ] );
+		return Promise.resolve(false);
+	}, [cartItemKey, removeItemFromCart]);
 
 	// Observe debounced quantity value, fire action to update server on change.
-	useEffect( () => {
+	useEffect(() => {
 		if (
 			cartItemKey &&
-			isNumber( previousDebouncedQuantity ) &&
-			Number.isFinite( previousDebouncedQuantity ) &&
+			isNumber(previousDebouncedQuantity) &&
+			Number.isFinite(previousDebouncedQuantity) &&
 			previousDebouncedQuantity !== debouncedQuantity
 		) {
-			changeCartItemQuantity( cartItemKey, debouncedQuantity ).catch(
-				( error ) => {
-					processErrorResponse( error );
+			changeCartItemQuantity(cartItemKey, debouncedQuantity).catch(
+				(error) => {
+					processErrorResponse(error);
 				}
 			);
 		}
@@ -142,16 +142,16 @@ export const useStoreCartItemQuantity = (
 		changeCartItemQuantity,
 		debouncedQuantity,
 		previousDebouncedQuantity,
-	] );
+	]);
 
-	useEffect( () => {
-		if ( isPending.delete ) {
+	useEffect(() => {
+		if (isPending.delete) {
 			__internalStartCalculation();
 		} else {
 			__internalFinishCalculation();
 		}
 		return () => {
-			if ( isPending.delete ) {
+			if (isPending.delete) {
 				__internalFinishCalculation();
 			}
 		};
@@ -159,16 +159,16 @@ export const useStoreCartItemQuantity = (
 		__internalFinishCalculation,
 		__internalStartCalculation,
 		isPending.delete,
-	] );
+	]);
 
-	useEffect( () => {
-		if ( isPending.quantity || debouncedQuantity !== quantity ) {
+	useEffect(() => {
+		if (isPending.quantity || debouncedQuantity !== quantity) {
 			__internalStartCalculation();
 		} else {
 			__internalFinishCalculation();
 		}
 		return () => {
-			if ( isPending.quantity || debouncedQuantity !== quantity ) {
+			if (isPending.quantity || debouncedQuantity !== quantity) {
 				__internalFinishCalculation();
 			}
 		};
@@ -178,7 +178,7 @@ export const useStoreCartItemQuantity = (
 		isPending.quantity,
 		debouncedQuantity,
 		quantity,
-	] );
+	]);
 
 	return {
 		isPendingDelete: isPending.delete,

@@ -5,8 +5,8 @@
  * @return {boolean} - Whether or not the stock is low.
  */
 
-export function isLowStock( status, quantity, threshold ) {
-	if ( ! quantity ) {
+export function isLowStock(status, quantity, threshold) {
+	if (!quantity) {
 		// Sites that don't do inventory tracking will always return false.
 		return false;
 	}

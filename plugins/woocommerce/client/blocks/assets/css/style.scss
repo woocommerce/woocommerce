@@ -214,9 +214,10 @@ body.wc-block-product-gallery-modal-open {
 	.wc-block-grid__product-onsale,
 	.wc-block-components-product-title,
 	.wc-block-components-product-sale-badge {
-		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-			Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans",
-			"Helvetica Neue", sans-serif;
+		font-family:
+			-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+			Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue",
+			sans-serif;
 	}
 	.wc-block-grid__product-title::before {
 		display: none;
@@ -233,8 +234,9 @@ body.wc-block-product-gallery-modal-open {
 }
 
 .theme-twentytwenty {
-	$twentytwenty-headings: -apple-system, blinkmacsystemfont, "Helvetica Neue",
-		helvetica, sans-serif;
+	$twentytwenty-headings:
+		-apple-system, blinkmacsystemfont, "Helvetica Neue", helvetica,
+		sans-serif;
 	$twentytwenty-highlights-color: #cd2653;
 
 	.wc-block-grid__product-link {

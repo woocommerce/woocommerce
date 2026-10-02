@@ -115,7 +115,7 @@ function getItemLabel( item: LinkedTree, text: string ) {
 						components: {
 							bold: <b />,
 						},
-				  } )
+					} )
 				: item.data.label }
 		</span>
 	);

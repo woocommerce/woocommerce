@@ -11,17 +11,17 @@ import { registerBlockType } from '@wordpress/blocks';
 import { Edit, Save } from './edit';
 import metadata from './block.json';
 
-registerBlockType( 'woocommerce/checkout-order-summary-subtotal-block', {
+registerBlockType('woocommerce/checkout-order-summary-subtotal-block', {
 	apiVersion: metadata.apiVersion,
 	title: metadata.title,
 	icon: {
 		src: (
 			<Icon
-				icon={ totals }
+				icon={totals}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
 	},
 	edit: Edit,
 	save: Save,
-} );
+});

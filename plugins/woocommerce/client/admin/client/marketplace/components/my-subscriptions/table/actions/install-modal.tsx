@@ -28,20 +28,20 @@ export default function InstallModal() {
 	const query = useQuery();
 	const installingProductKey = query?.install;
 
-	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
-	const isConnected = !! wccomSettings?.isConnected;
+	const wccomSettings = getAdminSetting('wccomHelper', {});
+	const isConnected = !!wccomSettings?.isConnected;
 
-	const [ showModal, setShowModal ] = useState< boolean >( false );
-	const [ isInstalled, setIsInstalled ] = useState< boolean >( false );
+	const [showModal, setShowModal] = useState<boolean>(false);
+	const [isInstalled, setIsInstalled] = useState<boolean>(false);
 
-	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
+	const { subscriptions, isLoading } = useContext(SubscriptionsContext);
 
 	const subscription: Subscription | undefined = subscriptions.find(
-		( s: Subscription ) => s.product_key === installingProductKey
+		(s: Subscription) => s.product_key === installingProductKey
 	);
 
-	const removeInstallQuery = useCallback( () => {
-		navigateTo( {
+	const removeInstallQuery = useCallback(() => {
+		navigateTo({
 			url: getNewPath(
 				{
 					...query,
@@ -50,11 +50,11 @@ export default function InstallModal() {
 				MARKETPLACE_PATH,
 				{}
 			),
-		} );
-	}, [ query ] );
+		});
+	}, [query]);
 
-	useEffect( () => {
-		if ( isLoading ) {
+	useEffect(() => {
+		if (isLoading) {
 			return;
 		}
 
@@ -62,8 +62,8 @@ export default function InstallModal() {
 		if (
 			installingProductKey &&
 			isConnected &&
-			! isLoading &&
-			! subscription
+			!isLoading &&
+			!subscription
 		) {
 			addNotice(
 				installingProductKey,
@@ -79,7 +79,7 @@ export default function InstallModal() {
 			);
 			removeInstallQuery();
 		} else {
-			setShowModal( !! installingProductKey );
+			setShowModal(!!installingProductKey);
 		}
 	}, [
 		isConnected,
@@ -87,60 +87,60 @@ export default function InstallModal() {
 		installingProductKey,
 		removeInstallQuery,
 		subscription,
-	] );
+	]);
 
-	useEffect( () => {
-		if ( subscription && subscription.local.installed ) {
-			setIsInstalled( true );
+	useEffect(() => {
+		if (subscription && subscription.local.installed) {
+			setIsInstalled(true);
 		}
-	}, [ subscription ] );
+	}, [subscription]);
 
 	const onClose = () => {
 		removeInstallQuery();
-		setShowModal( false );
+		setShowModal(false);
 	};
 
 	const modalTitle = () => {
-		if ( isInstalled ) {
-			return __( 'You are ready to go!', 'woocommerce' );
+		if (isInstalled) {
+			return __('You are ready to go!', 'woocommerce');
 		}
 
-		return __( 'Add to store', 'woocommerce' );
+		return __('Add to store', 'woocommerce');
 	};
 
 	const modalContent = () => {
-		if ( ! isConnected ) {
+		if (!isConnected) {
 			return (
-				<Notice status="warning" isDismissible={ false }>
-					{ __(
+				<Notice status="warning" isDismissible={false}>
+					{__(
 						'In order to install a product, you need to first connect your account.',
 						'woocommerce'
-					) }
+					)}
 				</Notice>
 			);
-		} else if ( subscription ) {
+		} else if (subscription) {
 			const installContent = isInstalled
 				? __(
 						'Keep the momentum going and start setting up your extension.',
 						'woocommerce'
-				  )
+					)
 				: __(
 						'Would you like to install this extension?',
 						'woocommerce'
-				  );
+					);
 			return (
 				<>
 					<p className="woocommerce-marketplace__header-account-modal-text">
-						{ installContent }
+						{installContent}
 					</p>
 					<ProductCard
-						product={ subscriptionToProduct( subscription ) }
-						small={ true }
-						tracksData={ {
+						product={subscriptionToProduct(subscription)}
+						small={true}
+						tracksData={{
 							position: 1,
 							group: 'subscriptions',
 							label: 'install',
-						} }
+						}}
 					/>
 				</>
 			);
@@ -148,81 +148,81 @@ export default function InstallModal() {
 	};
 	const modalButtons = () => {
 		const buttons = [];
-		if ( isInstalled ) {
+		if (isInstalled) {
 			buttons.push(
 				<Button
 					variant="secondary"
-					href={ subscription?.documentation_url }
+					href={subscription?.documentation_url}
 					target="_blank"
 					className="woocommerce-marketplace__header-account-modal-button"
-					key={ 'docs' }
+					key={'docs'}
 				>
-					{ __( 'View docs', 'woocommerce' ) }
+					{__('View docs', 'woocommerce')}
 				</Button>
 			);
 			buttons.push(
 				<Button
 					variant="primary"
-					href={ WP_ADMIN_PLUGIN_LIST_URL }
+					href={WP_ADMIN_PLUGIN_LIST_URL}
 					className="woocommerce-marketplace__header-account-modal-button"
-					key={ 'plugin-list' }
+					key={'plugin-list'}
 				>
-					{ __( 'View in Plugins', 'woocommerce' ) }
+					{__('View in Plugins', 'woocommerce')}
 				</Button>
 			);
 		} else {
 			buttons.push(
 				<Button
 					variant="tertiary"
-					onClick={ onClose }
+					onClick={onClose}
 					className="woocommerce-marketplace__header-account-modal-button"
-					key={ 'cancel' }
+					key={'cancel'}
 				>
-					{ __( 'Cancel', 'woocommerce' ) }
+					{__('Cancel', 'woocommerce')}
 				</Button>
 			);
 
-			if ( ! isConnected ) {
+			if (!isConnected) {
 				buttons.push(
 					<ConnectAccountButton
 						variant="primary"
-						install={ installingProductKey }
-						key={ 'connect' }
+						install={installingProductKey}
+						key={'connect'}
 					/>
 				);
-			} else if ( subscription ) {
+			} else if (subscription) {
 				buttons.push(
 					<Install
-						subscription={ subscription }
+						subscription={subscription}
 						variant="primary"
-						onError={ onClose }
-						key={ 'install' }
+						onError={onClose}
+						key={'install'}
 					/>
 				);
 			}
 		}
 		return (
 			<ButtonGroup className="woocommerce-marketplace__header-account-modal-button-group">
-				{ buttons }
+				{buttons}
 			</ButtonGroup>
 		);
 	};
 
-	if ( ! showModal ) {
+	if (!showModal) {
 		return null;
 	}
 
 	return (
 		<Modal
-			title={ modalTitle() }
-			onRequestClose={ onClose }
-			focusOnMount={ true }
+			title={modalTitle()}
+			onRequestClose={onClose}
+			focusOnMount={true}
 			className="woocommerce-marketplace__header-account-modal has-size-medium"
-			style={ { borderRadius: 4 } }
+			style={{ borderRadius: 4 }}
 			overlayClassName="woocommerce-marketplace__header-account-modal-overlay"
 		>
-			{ modalContent() }
-			{ modalButtons() }
+			{modalContent()}
+			{modalButtons()}
 		</Modal>
 	);
 }

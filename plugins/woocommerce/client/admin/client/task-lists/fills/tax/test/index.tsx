@@ -11,43 +11,41 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { Tax } from '..';
 
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
+jest.mock('@wordpress/data', () => ({
+	...jest.requireActual('@wordpress/data'),
 	useSelect: jest.fn(),
-} ) );
+}));
 
-jest.mock( '@woocommerce/tracks', () => ( {
+jest.mock('@woocommerce/tracks', () => ({
 	recordEvent: jest.fn(),
-} ) );
+}));
 
-jest.mock( '~/utils/features', () => ( {
+jest.mock('~/utils/features', () => ({
 	isFeatureEnabled: jest.fn(),
-} ) );
+}));
 
 const fakeTask: {
 	additionalData: {
-		[ key: string ]: boolean | string | string[];
+		[key: string]: boolean | string | string[];
 	};
 } = {
 	additionalData: {},
 };
 
-beforeEach( () => {
+beforeEach(() => {
 	fakeTask.additionalData = {
-		woocommerceTaxCountries: [ 'US' ],
+		woocommerceTaxCountries: ['US'],
 	};
 
-	( useSelect as jest.Mock ).mockImplementation( () => ( {
+	(useSelect as jest.Mock).mockImplementation(() => ({
 		generalSettings: {
 			woocommerce_default_country: 'US',
 		},
-	} ) );
-} );
+	}));
+});
 
 const assertWooCommerceTaxIsNotRecommended = () => {
-	expect(
-		screen.queryByText( 'Choose a tax partner' )
-	).not.toBeInTheDocument();
+	expect(screen.queryByText('Choose a tax partner')).not.toBeInTheDocument();
 
 	expect(
 		screen.getByText(
@@ -56,117 +54,89 @@ const assertWooCommerceTaxIsNotRecommended = () => {
 	).toBeInTheDocument();
 };
 
-it( 'renders WooCommerce Tax (powered by WCS&T)', () => {
+it('renders WooCommerce Tax (powered by WCS&T)', () => {
 	render(
-		<Tax
-			onComplete={ () => {} }
-			query={ {} }
-			task={ fakeTask as TaskType }
-		/>
+		<Tax onComplete={() => {}} query={{}} task={fakeTask as TaskType} />
 	);
 
-	expect( screen.getByText( 'Choose a tax partner' ) ).toBeInTheDocument();
-} );
+	expect(screen.getByText('Choose a tax partner')).toBeInTheDocument();
+});
 
-it( `does not render WooCommerce Tax (powered by WCS&T) if the WooCommerce Tax plugin is active`, () => {
+it(`does not render WooCommerce Tax (powered by WCS&T) if the WooCommerce Tax plugin is active`, () => {
 	fakeTask.additionalData.woocommerceTaxActivated = true;
 
 	render(
-		<Tax
-			onComplete={ () => {} }
-			query={ {} }
-			task={ fakeTask as TaskType }
-		/>
+		<Tax onComplete={() => {}} query={{}} task={fakeTask as TaskType} />
 	);
 
 	assertWooCommerceTaxIsNotRecommended();
-} );
+});
 
-it( `does not render WooCommerce Tax (powered by WCS&T) if the WooCommerce Shipping plugin is active`, () => {
+it(`does not render WooCommerce Tax (powered by WCS&T) if the WooCommerce Shipping plugin is active`, () => {
 	fakeTask.additionalData.woocommerceShippingActivated = true;
 
 	render(
-		<Tax
-			onComplete={ () => {} }
-			query={ {} }
-			task={ fakeTask as TaskType }
-		/>
+		<Tax onComplete={() => {}} query={{}} task={fakeTask as TaskType} />
 	);
 
 	assertWooCommerceTaxIsNotRecommended();
-} );
+});
 
-it( `does not render WooCommerce Tax (powered by WCS&T) if the TaxJar plugin is active`, () => {
+it(`does not render WooCommerce Tax (powered by WCS&T) if the TaxJar plugin is active`, () => {
 	fakeTask.additionalData.taxJarActivated = true;
 
 	render(
-		<Tax
-			onComplete={ () => {} }
-			query={ {} }
-			task={ fakeTask as TaskType }
-		/>
+		<Tax onComplete={() => {}} query={{}} task={fakeTask as TaskType} />
 	);
 
 	assertWooCommerceTaxIsNotRecommended();
-} );
+});
 
-it( 'does not render WooCommerce Tax (powered by WCS&T) if not in a supported country', () => {
-	( useSelect as jest.Mock ).mockReturnValue( {
+it('does not render WooCommerce Tax (powered by WCS&T) if not in a supported country', () => {
+	(useSelect as jest.Mock).mockReturnValue({
 		generalSettings: { woocommerce_default_country: 'FOO' },
-	} );
+	});
 
 	render(
-		<Tax
-			onComplete={ () => {} }
-			query={ {} }
-			task={ fakeTask as TaskType }
-		/>
+		<Tax onComplete={() => {}} query={{}} task={fakeTask as TaskType} />
 	);
 
 	assertWooCommerceTaxIsNotRecommended();
-} );
+});
 
-it( 'should trigger event tasklist_tax_visit_marketplace_click when clicking the WooCommerce Marketplace link', () => {
+it('should trigger event tasklist_tax_visit_marketplace_click when clicking the WooCommerce Marketplace link', () => {
 	render(
-		<Tax
-			onComplete={ () => {} }
-			query={ {} }
-			task={ fakeTask as TaskType }
-		/>
+		<Tax onComplete={() => {}} query={{}} task={fakeTask as TaskType} />
 	);
 
-	fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
+	fireEvent.click(screen.getByText('the WooCommerce Marketplace'));
 
-	expect( recordEvent ).toHaveBeenCalledWith(
+	expect(recordEvent).toHaveBeenCalledWith(
 		'tasklist_tax_visit_marketplace_click',
 		{}
 	);
-} );
+});
 
-it( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', async () => {
-	const { isFeatureEnabled } = jest.requireMock( '~/utils/features' );
-	( isFeatureEnabled as jest.Mock ).mockReturnValue( true );
+it('should navigate to the marketplace when clicking the WooCommerce Marketplace link', async () => {
+	const { isFeatureEnabled } = jest.requireMock('~/utils/features');
+	(isFeatureEnabled as jest.Mock).mockReturnValue(true);
 
 	const mockLocation = {
 		href: 'test',
 	} as Location;
 
 	mockLocation.href = 'test';
-	Object.defineProperty( global.window, 'location', {
+	Object.defineProperty(global.window, 'location', {
 		value: mockLocation,
-	} );
+	});
 
 	render(
-		<Tax
-			onComplete={ () => {} }
-			query={ {} }
-			task={ fakeTask as TaskType }
-		/>
+		<Tax onComplete={() => {}} query={{}} task={fakeTask as TaskType} />
 	);
 
-	fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
+	fireEvent.click(screen.getByText('the WooCommerce Marketplace'));
 
-	expect( mockLocation.href ).toContain(
+	expect(mockLocation.href).toContain(
 		'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=operations'
 	);
-} );
+});

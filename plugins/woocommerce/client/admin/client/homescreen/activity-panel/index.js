@@ -29,27 +29,27 @@ import { getUrlParams } from '../../utils';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { isTaskListVisible } from '~/hooks/use-tasklists-state';
 
-const ORDERS_QUERY_PARAMS = { _fields: [ 'id' ] };
+const ORDERS_QUERY_PARAMS = { _fields: ['id'] };
 const PUBLISHED_PRODUCTS_QUERY_PARAMS = {
 	status: 'publish',
-	_fields: [ 'id' ],
+	_fields: ['id'],
 };
 
 export const ActivityPanel = () => {
-	const panelsData = useSelect( ( select ) => {
+	const panelsData = useSelect((select) => {
 		const {
 			getOrdersTotalCount,
 			hasFinishedResolution: hasFinishedOrdersResolution,
-		} = select( ordersStore );
+		} = select(ordersStore);
 		const {
 			getProductsTotalCount,
 			hasFinishedResolution: hasFinishedProductsResolution,
-		} = select( productsStore );
-		const totalOrderCount = getOrdersTotalCount( ORDERS_QUERY_PARAMS, 0 );
-		const orderStatuses = getOrderStatuses( select );
-		const reviewsEnabled = getAdminSetting( 'reviewsEnabled', 'no' );
-		const manageStock = getAdminSetting( 'manageStock', 'no' );
-		const counts = select( activityPanelStore ).getActivityPanelCounts();
+		} = select(productsStore);
+		const totalOrderCount = getOrdersTotalCount(ORDERS_QUERY_PARAMS, 0);
+		const orderStatuses = getOrderStatuses(select);
+		const reviewsEnabled = getAdminSetting('reviewsEnabled', 'no');
+		const manageStock = getAdminSetting('manageStock', 'no');
+		const counts = select(activityPanelStore).getActivityPanelCounts();
 		const unreadOrdersCount = counts?.orders_to_fulfill_count ?? null;
 		const lowStockProductsCount =
 			counts?.products_low_in_stock_count ?? null;
@@ -60,14 +60,14 @@ export const ActivityPanel = () => {
 			0
 		);
 		const loadingOrderAndProductCount =
-			! hasFinishedOrdersResolution( 'getOrdersTotalCount', [
+			!hasFinishedOrdersResolution('getOrdersTotalCount', [
 				ORDERS_QUERY_PARAMS,
 				0,
-			] ) ||
-			! hasFinishedProductsResolution( 'getProductsTotalCount', [
+			]) ||
+			!hasFinishedProductsResolution('getProductsTotalCount', [
 				PUBLISHED_PRODUCTS_QUERY_PARAMS,
 				0,
-			] );
+			]);
 
 		return {
 			loadingOrderAndProductCount,
@@ -75,37 +75,37 @@ export const ActivityPanel = () => {
 			unapprovedReviewsCount,
 			unreadOrdersCount,
 			manageStock,
-			isTaskListHidden: ! isTaskListVisible( 'setup' ),
+			isTaskListHidden: !isTaskListVisible('setup'),
 			publishedProductCount,
 			reviewsEnabled,
 			totalOrderCount,
 			orderStatuses,
 		};
-	} );
+	});
 
 	const panels = panelsData.loadingOrderAndProductCount
 		? []
-		: getAllPanels( panelsData );
+		: getAllPanels(panelsData);
 
-	useEffect( () => {
-		if ( panelsData.isTaskListHidden !== undefined ) {
+	useEffect(() => {
+		if (panelsData.isTaskListHidden !== undefined) {
 			const visiblePanels = panels.reduce(
-				( acc, panel ) => {
-					const panelId = snakeCase( panel.id );
-					acc[ panelId ] = true;
+				(acc, panel) => {
+					const panelId = snakeCase(panel.id);
+					acc[panelId] = true;
 					return acc;
 				},
 				{ task_list: panelsData.isTaskListHidden }
 			);
-			recordEvent( 'activity_panel_visible_panels', visiblePanels );
+			recordEvent('activity_panel_visible_panels', visiblePanels);
 		}
-	}, [ panelsData.isTaskListHidden, panels ] );
+	}, [panelsData.isTaskListHidden, panels]);
 
-	if ( panels.length === 0 ) {
+	if (panels.length === 0) {
 		return null;
 	}
 
-	const getInitialOpenState = ( panelId ) => {
+	const getInitialOpenState = (panelId) => {
 		const { opened_panel: openedPanel } = getUrlParams(
 			window.location.search
 		);
@@ -114,7 +114,7 @@ export const ActivityPanel = () => {
 
 	return (
 		<Panel className="woocommerce-activity-panel">
-			{ panels.map( ( panelData ) => {
+			{panels.map((panelData) => {
 				const {
 					className,
 					count,
@@ -126,60 +126,57 @@ export const ActivityPanel = () => {
 				} = panelData;
 				return collapsible ? (
 					<PanelBody
-						title={ [
+						title={[
 							<Text
-								key={ title }
+								key={title}
 								variant="title.small"
 								size="20"
 								lineHeight="28px"
 							>
-								{ title }
+								{title}
 							</Text>,
 							count !== null && (
-								<Badge
-									key={ `${ title }-badge` }
-									count={ count }
-								/>
+								<Badge key={`${title}-badge`} count={count} />
 							),
-						] }
-						key={ id }
-						className={ className }
-						initialOpen={ getInitialOpenState( id ) || initialOpen }
-						collapsible={ collapsible }
-						disabled={ ! collapsible }
-						onToggle={ ( isOpen ) => {
-							if ( ! isOpen ) {
+						]}
+						key={id}
+						className={className}
+						initialOpen={getInitialOpenState(id) || initialOpen}
+						collapsible={collapsible}
+						disabled={!collapsible}
+						onToggle={(isOpen) => {
+							if (!isOpen) {
 								return;
 							}
 
-							recordEvent( 'activity_panel_open', {
+							recordEvent('activity_panel_open', {
 								tab: id,
-							} );
-						} }
+							});
+						}}
 					>
-						<PanelRow>{ panel }</PanelRow>
+						<PanelRow>{panel}</PanelRow>
 					</PanelBody>
 				) : (
-					<div className="components-panel__body" key={ id }>
+					<div className="components-panel__body" key={id}>
 						<h2 className="components-panel__body-title">
 							<Button
 								className="components-panel__body-toggle"
-								aria-expanded={ false }
-								disabled={ true }
+								aria-expanded={false}
+								disabled={true}
 							>
 								<Text
 									variant="title.small"
 									size="20"
 									lineHeight="28px"
 								>
-									{ title }
+									{title}
 								</Text>
-								{ count !== null && <Badge count={ count } /> }
+								{count !== null && <Badge count={count} />}
 							</Button>
 						</h2>
 					</div>
 				);
-			} ) }
+			})}
 		</Panel>
 	);
 };

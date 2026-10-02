@@ -1,11 +1,11 @@
-export function getNotifications( state ) {
+export function getNotifications(state) {
 	return state.notifications;
 }
 
-export function isLoading( state ) {
+export function isLoading(state) {
 	return state.isLoading;
 }
 
-export function getNotice( state ) {
+export function getNotice(state) {
 	return state.notice;
 }

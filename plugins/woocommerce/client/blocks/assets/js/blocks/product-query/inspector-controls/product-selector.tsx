@@ -19,39 +19,37 @@ import { ProductQueryBlock } from '../types';
 import { setQueryAttribute } from '../utils';
 
 function useProductsList() {
-	const [ productsList, setProductsList ] = useState< ProductResponseItem[] >(
-		[]
-	);
+	const [productsList, setProductsList] = useState<ProductResponseItem[]>([]);
 
-	useEffect( () => {
-		void getProducts( { selected: [] } ).then( ( results ) => {
-			setProductsList( results as ProductResponseItem[] );
-		} );
-	}, [] );
+	useEffect(() => {
+		void getProducts({ selected: [] }).then((results) => {
+			setProductsList(results as ProductResponseItem[]);
+		});
+	}, []);
 
 	return productsList;
 }
 
-export const ProductSelector = ( props: ProductQueryBlock ) => {
+export const ProductSelector = (props: ProductQueryBlock) => {
 	const { query } = props.attributes;
 
 	const productsList = useProductsList();
 
-	const onTokenChange = ( values: FormTokenField.Value[] ) => {
+	const onTokenChange = (values: FormTokenField.Value[]) => {
 		const ids = values
 			.map(
-				( nameOrId ) =>
+				(nameOrId) =>
 					productsList.find(
-						( product ) =>
+						(product) =>
 							product.name === nameOrId ||
-							product.id === Number( nameOrId )
+							product.id === Number(nameOrId)
 					)?.id
 			)
-			.filter( Boolean )
-			.map( String );
+			.filter(Boolean)
+			.map(String);
 
-		if ( ! ids.length && props.attributes.query.include ) {
-			const prunedQuery = objectOmit( props.attributes.query, 'include' );
+		if (!ids.length && props.attributes.query.include) {
+			const prunedQuery = objectOmit(props.attributes.query, 'include');
 
 			setQueryAttribute(
 				{
@@ -64,38 +62,38 @@ export const ProductSelector = ( props: ProductQueryBlock ) => {
 				{}
 			);
 		} else {
-			setQueryAttribute( props, {
+			setQueryAttribute(props, {
 				include: ids,
-			} );
+			});
 		}
 	};
 
 	return (
 		<ToolsPanelItem
-			label={ __( 'Hand-picked Products', 'woocommerce' ) }
-			hasValue={ () => query.include?.length }
+			label={__('Hand-picked Products', 'woocommerce')}
+			hasValue={() => query.include?.length}
 		>
 			<FormTokenField
-				disabled={ ! productsList.length }
-				displayTransform={ ( token: string ) =>
-					Number.isNaN( Number( token ) )
+				disabled={!productsList.length}
+				displayTransform={(token: string) =>
+					Number.isNaN(Number(token))
 						? token
 						: productsList.find(
-								( product ) => product.id === Number( token )
-						  )?.name || ''
+								(product) => product.id === Number(token)
+							)?.name || ''
 				}
-				label={ __( 'Pick some products', 'woocommerce' ) }
-				onChange={ onTokenChange }
-				suggestions={ productsList.map( ( product ) => product.name ) }
-				validateInput={ ( value: string ) =>
-					productsList.find( ( product ) => product.name === value )
+				label={__('Pick some products', 'woocommerce')}
+				onChange={onTokenChange}
+				suggestions={productsList.map((product) => product.name)}
+				validateInput={(value: string) =>
+					productsList.find((product) => product.name === value)
 				}
 				value={
-					! productsList.length
-						? [ __( 'Loading…', 'woocommerce' ) ]
+					!productsList.length
+						? [__('Loading…', 'woocommerce')]
 						: query?.include || []
 				}
-				__experimentalExpandOnFocus={ true }
+				__experimentalExpandOnFocus={true}
 			/>
 		</ToolsPanelItem>
 	);

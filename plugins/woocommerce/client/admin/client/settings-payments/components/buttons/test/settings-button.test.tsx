@@ -16,12 +16,12 @@ import {
  */
 import { SettingsButton } from '..';
 
-jest.mock( '@woocommerce/tracks', () => ( {
+jest.mock('@woocommerce/tracks', () => ({
 	recordEvent: jest.fn(),
-} ) );
+}));
 
-describe( 'SettingsButton', () => {
-	it( 'should record settings_payments_provider_manage_click event on click of the button', () => {
+describe('SettingsButton', () => {
+	it('should record settings_payments_provider_manage_click event on click of the button', () => {
 		const { getByRole } = render(
 			<Router>
 				<SettingsButton
@@ -51,17 +51,17 @@ describe( 'SettingsButton', () => {
 							_type: 'gateway',
 						} as PaymentGatewayProvider
 					}
-					settingsHref={ '' }
+					settingsHref={''}
 				/>
 			</Router>
 		);
-		fireEvent.click( getByRole( 'button', { name: 'Manage' } ) );
-		expect( recordEvent ).toHaveBeenCalledWith(
+		fireEvent.click(getByRole('button', { name: 'Manage' }));
+		expect(recordEvent).toHaveBeenCalledWith(
 			'settings_payments_provider_manage_click',
-			expect.objectContaining( {
-				business_country: expect.any( String ),
+			expect.objectContaining({
+				business_country: expect.any(String),
 				provider_id: 'test-gateway',
-			} )
+			})
 		);
-	} );
-} );
+	});
+});

@@ -24,7 +24,7 @@ import { useCheckoutBlockContext } from '@woocommerce/blocks/checkout/context';
 import Block from './block';
 import attributes from './attributes';
 
-const FrontendBlock = ( {
+const FrontendBlock = ({
 	title,
 	description,
 	children,
@@ -42,51 +42,47 @@ const FrontendBlock = ( {
 	showIcon: boolean;
 	shippingText: string;
 	localPickupText: string;
-} ) => {
+}) => {
 	const { showFormStepNumbers } = useCheckoutBlockContext();
-	const { checkoutIsProcessing, prefersCollection } = useSelect(
-		( select ) => {
-			const checkoutStore = select( checkoutStoreDescriptor );
-			return {
-				checkoutIsProcessing: checkoutStore.isProcessing(),
-				prefersCollection: checkoutStore.prefersCollection(),
-			};
-		}
-	);
+	const { checkoutIsProcessing, prefersCollection } = useSelect((select) => {
+		const checkoutStore = select(checkoutStoreDescriptor);
+		return {
+			checkoutIsProcessing: checkoutStore.isProcessing(),
+			prefersCollection: checkoutStore.prefersCollection(),
+		};
+	});
 
-	const { setPrefersCollection } = useDispatch( checkoutStoreDescriptor );
-	const { selectShippingRate } = useDispatch( cartStore );
+	const { setPrefersCollection } = useDispatch(checkoutStoreDescriptor);
+	const { selectShippingRate } = useDispatch(cartStore);
 	const { needsShipping, isCollectable, shippingRates } = useShippingData();
 
 	// Note that display logic is also found in plugins/woocommerce/client/blocks/assets/js/blocks/checkout/inner-blocks/register-components.ts
 	// where the block is not registered if the conditions are not met.
 	if (
-		! SHIPPING_ENABLED ||
-		! needsShipping ||
-		! isCollectable ||
-		! LOCAL_PICKUP_ENABLED ||
-		! SHIPPING_METHODS_EXIST
+		!SHIPPING_ENABLED ||
+		!needsShipping ||
+		!isCollectable ||
+		!LOCAL_PICKUP_ENABLED ||
+		!SHIPPING_METHODS_EXIST
 	) {
 		return null;
 	}
 
-	const onChange = ( method: string ) => {
-		if ( method === 'pickup' ) {
-			void setPrefersCollection( true );
+	const onChange = (method: string) => {
+		if (method === 'pickup') {
+			void setPrefersCollection(true);
 		} else {
-			void setPrefersCollection( false );
+			void setPrefersCollection(false);
 
 			// When switching to Ship, if no non-pickup shipping rates are
 			// available (hidden because no address entered), clear the pickup
 			// selection from the session so totals don't show the pickup cost.
 			const hasNonPickupRates = shippingRates.some(
-				( { shipping_rates: rates } ) =>
-					rates.some(
-						( rate ) => ! hasCollectableRate( rate.method_id )
-					)
+				({ shipping_rates: rates }) =>
+					rates.some((rate) => !hasCollectableRate(rate.method_id))
 			);
-			if ( ! hasNonPickupRates ) {
-				selectShippingRate( '', null );
+			if (!hasNonPickupRates) {
+				selectShippingRate('', null);
 			}
 		}
 	};
@@ -94,26 +90,23 @@ const FrontendBlock = ( {
 	return (
 		<FormStep
 			id="shipping-method"
-			disabled={ checkoutIsProcessing }
-			className={ clsx(
-				'wc-block-checkout__shipping-method',
-				className
-			) }
-			title={ title }
-			description={ description }
-			showStepNumber={ showFormStepNumbers }
+			disabled={checkoutIsProcessing}
+			className={clsx('wc-block-checkout__shipping-method', className)}
+			title={title}
+			description={description}
+			showStepNumber={showFormStepNumbers}
 		>
 			<Block
-				checked={ prefersCollection ? 'pickup' : 'shipping' }
-				onChange={ onChange }
-				showPrice={ showPrice }
-				showIcon={ showIcon }
-				localPickupText={ localPickupText }
-				shippingText={ shippingText }
+				checked={prefersCollection ? 'pickup' : 'shipping'}
+				onChange={onChange}
+				showPrice={showPrice}
+				showIcon={showIcon}
+				localPickupText={localPickupText}
+				shippingText={shippingText}
 			/>
-			{ children }
+			{children}
 		</FormStep>
 	);
 };
 
-export default withFilteredAttributes( attributes )( FrontendBlock );
+export default withFilteredAttributes(attributes)(FrontendBlock);

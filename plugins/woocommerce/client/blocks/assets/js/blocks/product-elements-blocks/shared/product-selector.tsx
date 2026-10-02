@@ -8,7 +8,7 @@ import { BlockControls } from '@wordpress/block-editor';
 import TextToolbarButton from '@woocommerce/editor-components/text-toolbar-button';
 import { useState } from '@wordpress/element';
 
-export const ProductSelector = ( {
+export const ProductSelector = ({
 	productId,
 	icon,
 	label,
@@ -20,38 +20,38 @@ export const ProductSelector = ( {
 	icon: string;
 	label: string;
 	description: string;
-	setAttributes: ( obj: Record< string, string > ) => void;
+	setAttributes: (obj: Record<string, string>) => void;
 	children: React.ReactNode;
-} ) => {
-	const [ isEditing, setIsEditing ] = useState( ! productId );
+}) => {
+	const [isEditing, setIsEditing] = useState(!productId);
 
 	return (
 		<>
-			{ isEditing ? (
+			{isEditing ? (
 				<Placeholder
-					icon={ icon || '' }
-					label={ label || '' }
+					icon={icon || ''}
+					label={label || ''}
 					className="wc-atomic-blocks-product"
 				>
-					{ !! description && <div>{ description }</div> }
+					{!!description && <div>{description}</div>}
 					<div className="wc-atomic-blocks-product__selection">
 						<ProductControl
-							selected={ productId || 0 }
+							selected={productId || 0}
 							showVariations
-							onChange={ ( value = [] ) => {
-								setAttributes( {
-									productId: value[ 0 ] ? value[ 0 ].id : 0,
-								} );
-							} }
+							onChange={(value = []) => {
+								setAttributes({
+									productId: value[0] ? value[0].id : 0,
+								});
+							}}
 						/>
 						<Button
 							variant="secondary"
-							disabled={ ! productId }
-							onClick={ () => {
-								setIsEditing( false );
-							} }
+							disabled={!productId}
+							onClick={() => {
+								setIsEditing(false);
+							}}
 						>
-							{ __( 'Done', 'woocommerce' ) }
+							{__('Done', 'woocommerce')}
 						</Button>
 					</div>
 				</Placeholder>
@@ -60,15 +60,15 @@ export const ProductSelector = ( {
 					<BlockControls>
 						<ToolbarGroup>
 							<TextToolbarButton
-								onClick={ () => setIsEditing( true ) }
+								onClick={() => setIsEditing(true)}
 							>
-								{ __( 'Switch product…', 'woocommerce' ) }
+								{__('Switch product…', 'woocommerce')}
 							</TextToolbarButton>
 						</ToolbarGroup>
 					</BlockControls>
-					{ children }
+					{children}
 				</>
-			) }
+			)}
 		</>
 	);
 };

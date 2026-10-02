@@ -31,19 +31,19 @@ export type BlockAttributes = {
 	returnToCartButtonLabel: string;
 };
 
-const Block = ( {
+const Block = ({
 	cartPageId,
 	showReturnToCart,
 	className,
 	placeOrderButtonLabel,
 	returnToCartButtonLabel,
 	priceSeparator,
-}: BlockAttributes ) => {
+}: BlockAttributes) => {
 	const { paymentMethodButtonLabel, paymentMethodPlaceOrderButton } =
 		useCheckoutSubmit();
 
 	const activeSavedToken = useSelect(
-		( select ) => select( paymentStore ).getActiveSavedToken(),
+		(select) => select(paymentStore).getActiveSavedToken(),
 		[]
 	);
 
@@ -52,43 +52,41 @@ const Block = ( {
 		? undefined
 		: paymentMethodPlaceOrderButton;
 
-	const label = applyCheckoutFilter( {
+	const label = applyCheckoutFilter({
 		filterName: 'placeOrderButtonLabel',
 		defaultValue:
 			paymentMethodButtonLabel ||
 			placeOrderButtonLabel ||
 			defaultPlaceOrderButtonLabel,
-	} );
+	});
 
-	const cartHref = getSetting( 'page-' + cartPageId, false );
+	const cartHref = getSetting('page-' + cartPageId, false);
 	const cartLink = cartHref || CART_URL;
 	const shouldShowReturnToCart = cartLink && showReturnToCart;
 
-	const showPrice = className?.includes( 'is-style-with-price' ) || false;
+	const showPrice = className?.includes('is-style-with-price') || false;
 
 	return (
-		<div className={ clsx( 'wc-block-checkout__actions', className ) }>
+		<div className={clsx('wc-block-checkout__actions', className)}>
 			<CheckoutOrderSummarySlot />
-			<StoreNoticesContainer
-				context={ noticeContexts.CHECKOUT_ACTIONS }
-			/>
+			<StoreNoticesContainer context={noticeContexts.CHECKOUT_ACTIONS} />
 			<div
-				className={ clsx( 'wc-block-checkout__actions_row', {
+				className={clsx('wc-block-checkout__actions_row', {
 					'wc-block-checkout__actions_row--justify-flex-end':
-						! shouldShowReturnToCart,
-				} ) }
+						!shouldShowReturnToCart,
+				})}
 			>
-				{ shouldShowReturnToCart && (
-					<ReturnToCartButton href={ cartLink }>
-						{ returnToCartButtonLabel }
+				{shouldShowReturnToCart && (
+					<ReturnToCartButton href={cartLink}>
+						{returnToCartButtonLabel}
 					</ReturnToCartButton>
-				) }
+				)}
 				<PlaceOrderButton
-					CustomButtonComponent={ CustomButtonComponent }
-					label={ label }
-					fullWidth={ ! shouldShowReturnToCart }
-					showPrice={ showPrice }
-					priceSeparator={ priceSeparator }
+					CustomButtonComponent={CustomButtonComponent}
+					label={label}
+					fullWidth={!shouldShowReturnToCart}
+					showPrice={showPrice}
+					priceSeparator={priceSeparator}
 				/>
 			</div>
 		</div>

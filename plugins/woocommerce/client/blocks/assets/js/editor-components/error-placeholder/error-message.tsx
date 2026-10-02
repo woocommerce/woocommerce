@@ -16,33 +16,33 @@ export interface ErrorMessageProps {
 	error: ErrorObject;
 }
 
-const getErrorMessage = ( { message, type }: ErrorObject ) => {
-	if ( ! message ) {
+const getErrorMessage = ({ message, type }: ErrorObject) => {
+	if (!message) {
 		return __(
 			'An error has prevented the block from being updated.',
 			'woocommerce'
 		);
 	}
 
-	if ( type === 'general' ) {
+	if (type === 'general') {
 		return (
 			<span>
-				{ __( 'The following error was returned', 'woocommerce' ) }
+				{__('The following error was returned', 'woocommerce')}
 				<br />
-				<code>{ escapeHTML( message ) }</code>
+				<code>{escapeHTML(message)}</code>
 			</span>
 		);
 	}
 
-	if ( type === 'api' ) {
+	if (type === 'api') {
 		return (
 			<span>
-				{ __(
+				{__(
 					'The following error was returned from the API',
 					'woocommerce'
-				) }
+				)}
 				<br />
-				<code>{ escapeHTML( message ) }</code>
+				<code>{escapeHTML(message)}</code>
 			</span>
 		);
 	}
@@ -50,8 +50,8 @@ const getErrorMessage = ( { message, type }: ErrorObject ) => {
 	return message;
 };
 
-const ErrorMessage = ( { error }: ErrorMessageProps ): JSX.Element => (
-	<div className="wc-block-error-message">{ getErrorMessage( error ) }</div>
+const ErrorMessage = ({ error }: ErrorMessageProps): JSX.Element => (
+	<div className="wc-block-error-message">{getErrorMessage(error)}</div>
 );
 
 export default ErrorMessage;

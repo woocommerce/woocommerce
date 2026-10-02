@@ -18,42 +18,42 @@ import useRecordCompletionTime from '../use-record-completion-time';
 type StackProps = StackWithLoadSampleBlurb | StackWithoutText;
 
 type StackWithLoadSampleBlurb = {
-	items: ( ProductType & {
+	items: (ProductType & {
 		onClick: () => void;
-	} )[];
+	})[];
 	onClickLoadSampleProduct: () => void;
 	showOtherOptions?: boolean;
 	isTaskListItemClicked?: boolean;
 };
 
 type StackWithoutText = {
-	items: ( ProductType & {
+	items: (ProductType & {
 		onClick: () => void;
-	} )[];
+	})[];
 	showOtherOptions: false;
 	onClickLoadSampleProduct?: () => void;
 	isTaskListItemClicked?: boolean;
 };
 
-const Stack = ( {
+const Stack = ({
 	items,
 	onClickLoadSampleProduct = () => {},
 	showOtherOptions = true,
 	isTaskListItemClicked = false,
-}: StackProps ) => {
-	const { recordCompletionTime } = useRecordCompletionTime( 'products' );
+}: StackProps) => {
+	const { recordCompletionTime } = useRecordCompletionTime('products');
 
 	return (
 		<div className="woocommerce-products-stack">
-			{ isTaskListItemClicked && (
+			{isTaskListItemClicked && (
 				<div className="woocommerce-stack__overlay-spinner">
 					<Spinner className="list-overlay" />
 				</div>
-			) }
-			<List items={ items } />
-			{ showOtherOptions && (
+			)}
+			<List items={items} />
+			{showOtherOptions && (
 				<Text className="woocommerce-stack__other-options">
-					{ interpolateComponents( {
+					{interpolateComponents({
 						mixedString: __(
 							'Can’t find your product type? {{sbLink}}Start Blank{{/sbLink}} or {{LspLink}}Load Sample Products{{/LspLink}} to see what they look like in your store.',
 							'woocommerce'
@@ -61,16 +61,16 @@ const Stack = ( {
 						components: {
 							sbLink: (
 								<Link
-									onClick={ () => {
-										recordEvent( 'tasklist_add_product', {
+									onClick={() => {
+										recordEvent('tasklist_add_product', {
 											method: 'manually',
-										} );
+										});
 										recordCompletionTime();
 										window.location.href = getAdminLink(
 											'post-new.php?post_type=product&wc_onboarding_active_task=products&tutorial=true'
 										);
 										return false;
-									} }
+									}}
 									href=""
 									type="wc-admin"
 								>
@@ -81,18 +81,18 @@ const Stack = ( {
 								<Link
 									href=""
 									type="wc-admin"
-									onClick={ () => {
+									onClick={() => {
 										onClickLoadSampleProduct();
 										return false;
-									} }
+									}}
 								>
 									<></>
 								</Link>
 							),
 						},
-					} ) }
+					})}
 				</Text>
-			) }
+			)}
 		</div>
 	);
 };

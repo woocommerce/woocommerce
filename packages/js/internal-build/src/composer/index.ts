@@ -240,7 +240,7 @@ function runComposer( args: string[], projectDir: string ): Promise< void > {
 						new Error(
 							`composer ${ args.join( ' ' ) } exited ${ code }`
 						)
-				  )
+					)
 		);
 		child.on( 'error', reject );
 	} );

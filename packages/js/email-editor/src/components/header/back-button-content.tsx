@@ -51,25 +51,25 @@ const siteIconVariants = {
 
 function useCloseAction() {
 	const { urls } = useSelect(
-		( select ) => ( {
-			urls: select( storeName ).getUrls(),
-		} ),
+		(select) => ({
+			urls: select(storeName).getUrls(),
+		}),
 		[]
 	);
 
 	return () => {
-		recordEvent( 'header_close_button_clicked' );
+		recordEvent('header_close_button_clicked');
 		const defaultAction = () => {
-			if ( ! urls.back ) {
+			if (!urls.back) {
 				return;
 			}
 			try {
 				// Resolve against the full current URL so relative paths
 				// keep the same meaning as a direct location assignment.
-				const backUrl = new URL( urls.back, window.location.href );
+				const backUrl = new URL(urls.back, window.location.href);
 				// Only navigate to web URLs so schemes like javascript:
 				// cannot reach window.location.
-				if ( [ 'http:', 'https:' ].includes( backUrl.protocol ) ) {
+				if (['http:', 'https:'].includes(backUrl.protocol)) {
 					window.location.href = backUrl.href;
 				}
 			} catch {
@@ -80,7 +80,7 @@ function useCloseAction() {
 			'woocommerce_email_editor_close_action_callback',
 			defaultAction
 		);
-		( typeof action === 'function' ? action : defaultAction )();
+		(typeof action === 'function' ? action : defaultAction)();
 	};
 }
 
@@ -94,11 +94,11 @@ const CompactBackButtonContent = () => {
 	return (
 		<Button
 			size="compact"
-			icon={ isRTL() ? chevronRight : chevronLeft }
-			label={ __( 'Close editor', __i18n_text_domain__ ) }
+			icon={isRTL() ? chevronRight : chevronLeft}
+			label={__('Close editor', __i18n_text_domain__)}
 			showTooltip
 			tooltipPosition="middle right"
-			onClick={ onClose }
+			onClick={onClose}
 		/>
 	);
 };
@@ -114,35 +114,35 @@ const FullscreenBackButtonContent = () => {
 	return (
 		<motion.div
 			className="woocommerce-email-editor__view-mode-toggle"
-			transition={ {
+			transition={{
 				duration: 0.2,
-			} }
+			}}
 			animate="edit"
 			initial="edit"
 			whileHover="hover"
 			whileTap="tap"
 		>
 			<Button
-				label={ __( 'Close editor', __i18n_text_domain__ ) }
+				label={__('Close editor', __i18n_text_domain__)}
 				showTooltip
 				tooltipPosition="middle right"
-				onClick={ onClose }
+				onClick={onClose}
 			>
-				<motion.div variants={ siteIconVariants }>
+				<motion.div variants={siteIconVariants}>
 					<div className="woocommerce-email-editor__view-mode-toggle-icon">
 						<Icon
 							className="woocommerce-email-editor-icon__icon"
-							icon={ wordpress }
-							size={ 48 }
+							icon={wordpress}
+							size={48}
 						/>
 					</div>
 				</motion.div>
 			</Button>
 			<motion.div
 				className="woocommerce-email-editor-icon"
-				variants={ toggleHomeIconVariants }
+				variants={toggleHomeIconVariants}
 			>
-				<Icon icon={ arrowLeft } />
+				<Icon icon={arrowLeft} />
 			</motion.div>
 		</motion.div>
 	);
@@ -155,13 +155,11 @@ const FullscreenBackButtonContent = () => {
  * support for WordPress 7.0.
  */
 const DefaultBackButtonContent = () => {
-	const measureRef = useRef< HTMLDivElement >( null );
-	const [ isCompactSlot, setIsCompactSlot ] = useState< boolean | null >(
-		null
-	);
+	const measureRef = useRef<HTMLDivElement>(null);
+	const [isCompactSlot, setIsCompactSlot] = useState<boolean | null>(null);
 
-	useLayoutEffect( () => {
-		const slot = measureRef.current?.closest< HTMLElement >(
+	useLayoutEffect(() => {
+		const slot = measureRef.current?.closest<HTMLElement>(
 			'.editor-header__back-button'
 		);
 		const reservedWidth = slot?.getBoundingClientRect().width;
@@ -169,10 +167,10 @@ const DefaultBackButtonContent = () => {
 			reservedWidth !== undefined &&
 				reservedWidth <= COMPACT_SLOT_MAX_WIDTH
 		);
-	}, [] );
+	}, []);
 
-	if ( isCompactSlot === null ) {
-		return <div ref={ measureRef } />;
+	if (isCompactSlot === null) {
+		return <div ref={measureRef} />;
 	}
 
 	return isCompactSlot ? (
@@ -190,7 +188,7 @@ export const BackButtonContent = () => {
 
 	return (
 		<BackButton>
-			{ ( { length } ) => length <= 1 && <BackButtonUsedContent /> }
+			{({ length }) => length <= 1 && <BackButtonUsedContent />}
 		</BackButton>
 	);
 };

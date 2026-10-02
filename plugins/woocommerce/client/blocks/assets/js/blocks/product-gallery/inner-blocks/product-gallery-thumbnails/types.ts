@@ -12,6 +12,6 @@ export type ProductGalleryThumbnailsBlockAttributes = {
 export type ProductGalleryThumbnailsSettingsProps = {
 	attributes: ProductGalleryThumbnailsBlockAttributes;
 	setAttributes: (
-		attributes: Partial< ProductGalleryThumbnailsBlockAttributes >
+		attributes: Partial<ProductGalleryThumbnailsBlockAttributes>
 	) => void;
 };

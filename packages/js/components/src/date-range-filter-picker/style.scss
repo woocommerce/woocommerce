@@ -41,11 +41,11 @@
 		align-items: center;
 	}
 
-	@include set-grid-item-position( 2, 2 );
+	@include set-grid-item-position(2, 2);
 }
 
 .woocommerce-filters-date__text {
-	@include font-size( 12 );
+	@include font-size(12);
 	font-weight: 100;
 	text-transform: uppercase;
 	text-align: center;

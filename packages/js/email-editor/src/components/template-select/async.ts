@@ -11,8 +11,8 @@ const blockPreviewQueue = createQueue();
  *
  * @param {*} props
  */
-export function Async( { children, placeholder } ) {
-	const [ shouldRender, setShouldRender ] = useState( false );
+export function Async({ children, placeholder }) {
+	const [shouldRender, setShouldRender] = useState(false);
 
 	// In the future, we could try to use startTransition here, but currently
 	// react will batch all transitions, which means all previews will be
@@ -22,21 +22,21 @@ export function Async( { children, placeholder } ) {
 	// > together. This is a limitation that will likely be removed in a future
 	// > release.
 
-	useEffect( () => {
+	useEffect(() => {
 		const context = {};
-		blockPreviewQueue.add( context, () => {
+		blockPreviewQueue.add(context, () => {
 			// Synchronously run all renders so it consumes timeRemaining.
 			// See https://github.com/WordPress/gutenberg/pull/48238
-			flushSync( () => {
-				setShouldRender( true );
-			} );
-		} );
+			flushSync(() => {
+				setShouldRender(true);
+			});
+		});
 		return () => {
-			blockPreviewQueue.cancel( context );
+			blockPreviewQueue.cancel(context);
 		};
-	}, [] );
+	}, []);
 
-	if ( ! shouldRender ) {
+	if (!shouldRender) {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 		return placeholder;
 	}

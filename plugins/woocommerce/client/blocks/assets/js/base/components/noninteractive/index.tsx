@@ -29,66 +29,66 @@ const FOCUSABLE_NODE_NAMES = [
  *
  * @see https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/disabled/index.js
  */
-const Noninteractive = ( {
+const Noninteractive = ({
 	children,
 	style = {},
 	...props
 }: {
 	children: React.ReactNode;
-	style?: Record< string, string >;
-} ): JSX.Element => {
-	const node = useRef< HTMLDivElement >( null );
+	style?: Record<string, string>;
+}): JSX.Element => {
+	const node = useRef<HTMLDivElement>(null);
 
 	const disableFocus = () => {
-		if ( node.current ) {
-			focus.focusable.find( node.current ).forEach( ( focusable ) => {
-				if ( FOCUSABLE_NODE_NAMES.includes( focusable.nodeName ) ) {
-					focusable.setAttribute( 'tabindex', '-1' );
+		if (node.current) {
+			focus.focusable.find(node.current).forEach((focusable) => {
+				if (FOCUSABLE_NODE_NAMES.includes(focusable.nodeName)) {
+					focusable.setAttribute('tabindex', '-1');
 				}
-				if ( focusable.hasAttribute( 'contenteditable' ) ) {
-					focusable.setAttribute( 'contenteditable', 'false' );
+				if (focusable.hasAttribute('contenteditable')) {
+					focusable.setAttribute('contenteditable', 'false');
 				}
-			} );
+			});
 		}
 	};
 
 	// Debounce re-disable since disabling process itself will incur additional mutations which should be ignored.
-	const debounced = useDebouncedCallback( disableFocus, 0, {
+	const debounced = useDebouncedCallback(disableFocus, 0, {
 		leading: true,
-	} );
+	});
 
-	useLayoutEffect( () => {
+	useLayoutEffect(() => {
 		let observer: MutationObserver | undefined;
 		disableFocus();
-		if ( node.current ) {
-			observer = new window.MutationObserver( debounced );
-			observer.observe( node.current, {
+		if (node.current) {
+			observer = new window.MutationObserver(debounced);
+			observer.observe(node.current, {
 				childList: true,
 				attributes: true,
 				subtree: true,
-			} );
+			});
 		}
 		return () => {
-			if ( observer ) {
+			if (observer) {
 				observer.disconnect();
 			}
 			debounced.cancel();
 		};
-	}, [ debounced ] );
+	}, [debounced]);
 
 	return (
 		<div
-			ref={ node }
+			ref={node}
 			aria-disabled="true"
-			style={ {
+			style={{
 				userSelect: 'none',
 				pointerEvents: 'none',
 				cursor: 'normal',
 				...style,
-			} }
-			{ ...props }
+			}}
+			{...props}
 		>
-			{ children }
+			{children}
 		</div>
 	);
 };

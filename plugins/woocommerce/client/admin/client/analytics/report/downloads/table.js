@@ -24,15 +24,15 @@ class DownloadsReportTable extends Component {
 	constructor() {
 		super();
 
-		this.getHeadersContent = this.getHeadersContent.bind( this );
-		this.getRowsContent = this.getRowsContent.bind( this );
-		this.getSummary = this.getSummary.bind( this );
+		this.getHeadersContent = this.getHeadersContent.bind(this);
+		this.getRowsContent = this.getRowsContent.bind(this);
+		this.getSummary = this.getSummary.bind(this);
 	}
 
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Date', 'woocommerce' ),
+				label: __('Date', 'woocommerce'),
 				key: 'date',
 				defaultSort: true,
 				required: true,
@@ -40,40 +40,40 @@ class DownloadsReportTable extends Component {
 				isSortable: true,
 			},
 			{
-				label: __( 'Product title', 'woocommerce' ),
+				label: __('Product title', 'woocommerce'),
 				key: 'product',
 				isSortable: true,
 				required: true,
 			},
 			{
-				label: __( 'File name', 'woocommerce' ),
+				label: __('File name', 'woocommerce'),
 				key: 'file_name',
 			},
 			{
-				label: __( 'Order #', 'woocommerce' ),
-				screenReaderLabel: __( 'Order Number', 'woocommerce' ),
+				label: __('Order #', 'woocommerce'),
+				screenReaderLabel: __('Order Number', 'woocommerce'),
 				key: 'order_number',
 			},
 			{
-				label: __( 'Username', 'woocommerce' ),
+				label: __('Username', 'woocommerce'),
 				key: 'user_id',
 			},
 			{
-				label: __( 'IP', 'woocommerce' ),
+				label: __('IP', 'woocommerce'),
 				key: 'ip_address',
 			},
 		];
 	}
 
-	getRowsContent( downloads ) {
+	getRowsContent(downloads) {
 		const { query } = this.props;
-		const persistedQuery = getPersistedQuery( query );
+		const persistedQuery = getPersistedQuery(query);
 		const dateFormat = getAdminSetting(
 			'dateFormat',
 			defaultTableDateFormat
 		);
 
-		return map( downloads, ( download ) => {
+		return map(downloads, (download) => {
 			const {
 				_embedded,
 				date,
@@ -86,14 +86,13 @@ class DownloadsReportTable extends Component {
 				username,
 			} = download;
 
-			const { code: errorCode, name: productName } =
-				_embedded.product[ 0 ];
+			const { code: errorCode, name: productName } = _embedded.product[0];
 			let productDisplay, productValue;
 
 			// Handle deleted products.
-			if ( errorCode === 'woocommerce_rest_product_invalid_id' ) {
-				productDisplay = __( '(Deleted)', 'woocommerce' );
-				productValue = __( '(Deleted)', 'woocommerce' );
+			if (errorCode === 'woocommerce_rest_product_invalid_id') {
+				productDisplay = __('(Deleted)', 'woocommerce');
+				productValue = __('(Deleted)', 'woocommerce');
 			} else {
 				const productURL = getNewPath(
 					persistedQuery,
@@ -105,8 +104,8 @@ class DownloadsReportTable extends Component {
 				);
 
 				productDisplay = (
-					<Link href={ productURL } type="wc-admin">
-						{ productName }
+					<Link href={productURL} type="wc-admin">
+						{productName}
 					</Link>
 				);
 				productValue = productName;
@@ -114,9 +113,7 @@ class DownloadsReportTable extends Component {
 
 			return [
 				{
-					display: (
-						<Date date={ date } visibleFormat={ dateFormat } />
-					),
+					display: <Date date={date} visibleFormat={dateFormat} />,
 					value: date,
 				},
 				{
@@ -125,8 +122,8 @@ class DownloadsReportTable extends Component {
 				},
 				{
 					display: (
-						<Link href={ filePath } type="external">
-							{ fileName }
+						<Link href={filePath} type="external">
+							{fileName}
 						</Link>
 					),
 					value: fileName,
@@ -134,12 +131,12 @@ class DownloadsReportTable extends Component {
 				{
 					display: (
 						<Link
-							href={ getAdminLink(
-								`post.php?post=${ orderId }&action=edit`
-							) }
+							href={getAdminLink(
+								`post.php?post=${orderId}&action=edit`
+							)}
 							type="wp-admin"
 						>
-							{ orderNumber }
+							{orderNumber}
 						</Link>
 					),
 					value: orderNumber,
@@ -153,22 +150,22 @@ class DownloadsReportTable extends Component {
 					value: ipAddress,
 				},
 			];
-		} );
+		});
 	}
 
-	getSummary( totals ) {
+	getSummary(totals) {
 		const { download_count: downloadCount = 0 } = totals;
 		const { query, defaultDateRange } = this.props;
-		const dates = getCurrentDates( query, defaultDateRange );
-		const after = moment( dates.primary.after );
-		const before = moment( dates.primary.before );
-		const days = before.diff( after, 'days' ) + 1;
+		const dates = getCurrentDates(query, defaultDateRange);
+		const after = moment(dates.primary.after);
+		const before = moment(dates.primary.before);
+		const days = before.diff(after, 'days') + 1;
 		const currency = this.context.getCurrencyConfig();
 
 		return [
 			{
-				label: _n( 'day', 'days', days, 'woocommerce' ),
-				value: formatValue( currency, 'number', days ),
+				label: _n('day', 'days', days, 'woocommerce'),
+				value: formatValue(currency, 'number', days),
 			},
 			{
 				label: _n(
@@ -177,7 +174,7 @@ class DownloadsReportTable extends Component {
 					downloadCount,
 					'woocommerce'
 				),
-				value: formatValue( currency, 'number', downloadCount ),
+				value: formatValue(currency, 'number', downloadCount),
 			},
 		];
 	}
@@ -188,18 +185,18 @@ class DownloadsReportTable extends Component {
 		return (
 			<ReportTable
 				endpoint="downloads"
-				getHeadersContent={ this.getHeadersContent }
-				getRowsContent={ this.getRowsContent }
-				getSummary={ this.getSummary }
-				summaryFields={ [ 'download_count' ] }
-				query={ query }
-				tableQuery={ {
+				getHeadersContent={this.getHeadersContent}
+				getRowsContent={this.getRowsContent}
+				getSummary={this.getSummary}
+				summaryFields={['download_count']}
+				query={query}
+				tableQuery={{
 					_embed: true,
-				} }
-				title={ __( 'Downloads', 'woocommerce' ) }
+				}}
+				title={__('Downloads', 'woocommerce')}
 				columnPrefsKey="downloads_report_columns"
-				filters={ filters }
-				advancedFilters={ advancedFilters }
+				filters={filters}
+				advancedFilters={advancedFilters}
 			/>
 		);
 	}
@@ -207,9 +204,9 @@ class DownloadsReportTable extends Component {
 
 DownloadsReportTable.contextType = CurrencyContext;
 
-export default withSelect( ( select ) => {
+export default withSelect((select) => {
 	const { woocommerce_default_date_range: defaultDateRange } = select(
 		settingsStore
-	).getSetting( 'wc_admin', 'wcAdminSettings' );
+	).getSetting('wc_admin', 'wcAdminSettings');
 	return { defaultDateRange };
-} )( DownloadsReportTable );
+})(DownloadsReportTable);

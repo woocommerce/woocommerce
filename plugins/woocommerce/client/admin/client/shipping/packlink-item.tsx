@@ -14,7 +14,7 @@ import type { ShippingPartnerTrackingProps } from './woocommerce-shipping-item';
 
 const PACKLINK_PLUGIN_SLUG = 'packlink-pro-shipping';
 
-const PacklinkItem = ( {
+const PacklinkItem = ({
 	isPluginInstalled,
 	isPluginActive,
 	onInstallClick,
@@ -24,48 +24,48 @@ const PacklinkItem = ( {
 }: {
 	isPluginInstalled: boolean;
 	isPluginActive: boolean;
-	pluginsBeingSetup: Array< string >;
-	onInstallClick: ( slugs: string[] ) => PromiseLike< void >;
-	onActivateClick: ( slugs: string[] ) => PromiseLike< void >;
+	pluginsBeingSetup: Array<string>;
+	onInstallClick: (slugs: string[]) => PromiseLike<void>;
+	onActivateClick: (slugs: string[]) => PromiseLike<void>;
 	tracking?: ShippingPartnerTrackingProps;
-} ) => {
-	const { createSuccessNotice } = useDispatch( 'core/notices' );
+}) => {
+	const { createSuccessNotice } = useDispatch('core/notices');
 
 	const handleClick = () => {
 		const trackingBase = {
-			...( tracking ?? {} ),
+			...(tracking ?? {}),
 			selected_plugin: PACKLINK_PLUGIN_SLUG,
 		};
 
-		recordEvent( 'shipping_partner_click', trackingBase );
-		recordEvent( 'settings_shipping_recommendation_setup_click', {
+		recordEvent('shipping_partner_click', trackingBase);
+		recordEvent('settings_shipping_recommendation_setup_click', {
 			plugin: PACKLINK_PLUGIN_SLUG,
 			action: isPluginInstalled ? 'activate' : 'install',
-		} );
+		});
 
 		const action = isPluginInstalled ? onActivateClick : onInstallClick;
 		const eventName = isPluginInstalled
 			? 'shipping_partner_activate'
 			: 'shipping_partner_install';
 
-		action( [ PACKLINK_PLUGIN_SLUG ] ).then(
+		action([PACKLINK_PLUGIN_SLUG]).then(
 			() => {
-				recordEvent( eventName, {
+				recordEvent(eventName, {
 					...trackingBase,
 					success: true,
-				} );
+				});
 				createSuccessNotice(
 					isPluginInstalled
-						? __( 'Packlink PRO activated!', 'woocommerce' )
-						: __( 'Packlink PRO is installed!', 'woocommerce' ),
+						? __('Packlink PRO activated!', 'woocommerce')
+						: __('Packlink PRO is installed!', 'woocommerce'),
 					{}
 				);
 			},
 			() => {
-				recordEvent( eventName, {
+				recordEvent(eventName, {
 					...trackingBase,
 					success: false,
-				} );
+				});
 			}
 		);
 	};
@@ -81,45 +81,45 @@ const PacklinkItem = ( {
 			</div>
 			<div className="woocommerce-list__item-text">
 				<span className="woocommerce-list__item-title">
-					{ __( 'Packlink PRO', 'woocommerce' ) }
+					{__('Packlink PRO', 'woocommerce')}
 				</span>
 				<span className="woocommerce-list__item-content">
-					{ __(
+					{__(
 						'Leverage a multi-carrier shipping platform that automates order shipping and delivery, optimizes logistics, and offers pre-negotiated rates with carriers such as Royal Mail, Evri, UPS, DPD, Yodel and GlobalPost. Manage orders, print shipping labels individually or in bulk, track shipments in real time, and handle returns from a single dashboard.',
 						'woocommerce'
-					) }
+					)}
 					<br />
 					<ExternalLink href="https://woocommerce.com/products/packlink-pro/">
-						{ __( 'Learn more', 'woocommerce' ) }
+						{__('Learn more', 'woocommerce')}
 					</ExternalLink>
 				</span>
 			</div>
 			<div className="woocommerce-list__item-after">
-				{ isPluginActive ? (
+				{isPluginActive ? (
 					<Button
 						variant="secondary"
 						aria-disabled="true"
-						aria-label={ __(
+						aria-label={__(
 							'Packlink PRO is already active',
 							'woocommerce'
-						) }
+						)}
 					>
-						{ __( 'Active', 'woocommerce' ) }
+						{__('Active', 'woocommerce')}
 					</Button>
 				) : (
 					<Button
-						variant={ isPluginInstalled ? 'primary' : 'secondary' }
-						onClick={ handleClick }
-						isBusy={ pluginsBeingSetup.includes(
+						variant={isPluginInstalled ? 'primary' : 'secondary'}
+						onClick={handleClick}
+						isBusy={pluginsBeingSetup.includes(
 							PACKLINK_PLUGIN_SLUG
-						) }
-						disabled={ pluginsBeingSetup.length > 0 }
+						)}
+						disabled={pluginsBeingSetup.length > 0}
 					>
-						{ isPluginInstalled
-							? __( 'Activate', 'woocommerce' )
-							: __( 'Install', 'woocommerce' ) }
+						{isPluginInstalled
+							? __('Activate', 'woocommerce')
+							: __('Install', 'woocommerce')}
 					</Button>
-				) }
+				)}
 			</div>
 		</div>
 	);

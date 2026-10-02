@@ -21,7 +21,7 @@ import {
 } from './utils';
 import { AddressFieldControls } from '../../address-field-controls';
 
-export const Edit = ( {
+export const Edit = ({
 	attributes,
 	setAttributes,
 }: {
@@ -31,12 +31,12 @@ export const Edit = ( {
 		showStepNumber: boolean;
 		className: string;
 	};
-	setAttributes: ( attributes: BlockAttributes ) => void;
-} ): JSX.Element | null => {
+	setAttributes: (attributes: BlockAttributes) => void;
+}): JSX.Element | null => {
 	const { showBillingFields, forcedBillingAddress, useBillingAsShipping } =
 		useCheckoutAddress();
 
-	if ( ! showBillingFields && ! useBillingAsShipping ) {
+	if (!showBillingFields && !useBillingAsShipping) {
 		return null;
 	}
 	attributes.title = getBillingAddressBlockTitle(
@@ -50,23 +50,23 @@ export const Edit = ( {
 
 	return (
 		<FormStepBlock
-			setAttributes={ setAttributes }
-			attributes={ attributes }
-			className={ clsx(
+			setAttributes={setAttributes}
+			attributes={attributes}
+			className={clsx(
 				'wc-block-checkout__billing-fields',
 				attributes?.className
-			) }
+			)}
 		>
 			<AddressFieldControls />
 			<Block />
-			<AdditionalFields block={ innerBlockAreas.BILLING_ADDRESS } />
+			<AdditionalFields block={innerBlockAreas.BILLING_ADDRESS} />
 		</FormStepBlock>
 	);
 };
 
 export const Save = (): JSX.Element => {
 	return (
-		<div { ...useBlockProps.save() }>
+		<div {...useBlockProps.save()}>
 			<AdditionalFieldsContent />
 		</div>
 	);

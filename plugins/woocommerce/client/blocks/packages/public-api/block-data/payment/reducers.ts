@@ -11,12 +11,12 @@ import { defaultPaymentState, PaymentState } from './default-state';
 import { ACTION_TYPES } from './action-types';
 import { STATUS } from './constants';
 
-const reducer: Reducer< PaymentState > = (
+const reducer: Reducer<PaymentState> = (
 	state = defaultPaymentState,
 	action
 ) => {
 	let newState = state;
-	switch ( action.type ) {
+	switch (action.type) {
 		case ACTION_TYPES.SET_PAYMENT_IDLE:
 			newState = {
 				...state,
@@ -77,7 +77,7 @@ const reducer: Reducer< PaymentState > = (
 			const previousAvailablePaymentMethods = {
 				...state.availablePaymentMethods,
 			};
-			delete previousAvailablePaymentMethods[ action.name ];
+			delete previousAvailablePaymentMethods[action.name];
 
 			newState = {
 				...state,
@@ -91,7 +91,7 @@ const reducer: Reducer< PaymentState > = (
 			const previousAvailableExpressPaymentMethods = {
 				...state.availableExpressPaymentMethods,
 			};
-			delete previousAvailableExpressPaymentMethods[ action.name ];
+			delete previousAvailableExpressPaymentMethods[action.name];
 			newState = {
 				...state,
 				availableExpressPaymentMethods: {
@@ -148,6 +148,6 @@ const reducer: Reducer< PaymentState > = (
 	}
 	return newState;
 };
-export type State = ReturnType< typeof reducer >;
+export type State = ReturnType<typeof reducer>;
 
 export default reducer;

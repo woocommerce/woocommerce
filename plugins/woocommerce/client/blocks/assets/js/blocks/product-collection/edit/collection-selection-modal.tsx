@@ -14,22 +14,22 @@ import { recordEvent } from '@woocommerce/tracks';
 import CollectionChooser, { applyCollection } from './collection-chooser';
 import type { ProductCollectionAttributes } from '../types';
 
-const PatternSelectionModal = ( props: {
+const PatternSelectionModal = (props: {
 	clientId: string;
 	attributes: ProductCollectionAttributes;
 	tracksLocation: string;
 	closePatternSelectionModal: () => void;
-} ) => {
+}) => {
 	const { clientId, attributes, tracksLocation, closePatternSelectionModal } =
 		props;
 	const { collection } = attributes;
 	// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/actions.d.ts
-	const { replaceBlock } = useDispatch( blockEditorStore );
+	const { replaceBlock } = useDispatch(blockEditorStore);
 
-	const [ chosenCollection, selectCollectionName ] = useState( collection );
+	const [chosenCollection, selectCollectionName] = useState(collection);
 
 	const onContinueClick = () => {
-		if ( chosenCollection ) {
+		if (chosenCollection) {
 			recordEvent(
 				'blocks_product_collection_collection_replaced_from_placeholder',
 				{
@@ -38,11 +38,11 @@ const PatternSelectionModal = ( props: {
 					location: tracksLocation,
 				}
 			);
-			applyCollection( chosenCollection, clientId, replaceBlock );
+			applyCollection(chosenCollection, clientId, replaceBlock);
 		}
 	};
 
-	const handleModalClose = ( action: 'cancel' | 'close' ) => {
+	const handleModalClose = (action: 'cancel' | 'close') => {
 		recordEvent(
 			'blocks_product_collection_collection_replaced_from_placeholder',
 			{
@@ -53,27 +53,27 @@ const PatternSelectionModal = ( props: {
 		closePatternSelectionModal();
 	};
 
-	const onCancelClick = () => handleModalClose( 'cancel' );
-	const onCloseModal = () => handleModalClose( 'close' );
+	const onCancelClick = () => handleModalClose('cancel');
+	const onCloseModal = () => handleModalClose('close');
 
 	return (
 		<Modal
 			overlayClassName="wc-blocks-product-collection__modal"
-			title={ __( 'What products do you want to show?', 'woocommerce' ) }
-			onRequestClose={ onCloseModal }
-			size={ 'large' }
+			title={__('What products do you want to show?', 'woocommerce')}
+			onRequestClose={onCloseModal}
+			size={'large'}
 		>
 			<div className="wc-blocks-product-collection__content">
 				<CollectionChooser
-					chosenCollection={ chosenCollection }
-					onCollectionClick={ selectCollectionName }
+					chosenCollection={chosenCollection}
+					onCollectionClick={selectCollectionName}
 				/>
 				<div className="wc-blocks-product-collection__footer">
-					<Button variant="tertiary" onClick={ onCancelClick }>
-						{ __( 'Cancel', 'woocommerce' ) }
+					<Button variant="tertiary" onClick={onCancelClick}>
+						{__('Cancel', 'woocommerce')}
 					</Button>
-					<Button variant="primary" onClick={ onContinueClick }>
-						{ __( 'Continue', 'woocommerce' ) }
+					<Button variant="primary" onClick={onContinueClick}>
+						{__('Continue', 'woocommerce')}
 					</Button>
 				</div>
 			</div>

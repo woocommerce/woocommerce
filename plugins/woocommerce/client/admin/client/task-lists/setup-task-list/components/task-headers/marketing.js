@@ -9,28 +9,28 @@ import { __ } from '@wordpress/i18n';
  */
 import { WC_ASSET_URL } from '../../../../utils/admin-settings';
 
-const MarketingHeader = ( { task, goToTask } ) => {
+const MarketingHeader = ({ task, goToTask }) => {
 	return (
 		<div className="woocommerce-task-header__contents-container">
 			<img
-				alt={ __( 'Marketing illustration', 'woocommerce' ) }
-				src={ WC_ASSET_URL + 'images/task_list/sales-illustration.svg' }
+				alt={__('Marketing illustration', 'woocommerce')}
+				src={WC_ASSET_URL + 'images/task_list/sales-illustration.svg'}
 				className="svg-background"
 			/>
 			<div className="woocommerce-task-header__contents">
-				<h1>{ __( 'Reach more customers', 'woocommerce' ) }</h1>
+				<h1>{__('Reach more customers', 'woocommerce')}</h1>
 				<p>
-					{ __(
+					{__(
 						'Start growing your business by showcasing your products on social media and Google, boost engagement with email marketing, and more!',
 						'woocommerce'
-					) }
+					)}
 				</p>
 				<Button
-					isSecondary={ task.isComplete }
-					isPrimary={ ! task.isComplete }
-					onClick={ goToTask }
+					isSecondary={task.isComplete}
+					isPrimary={!task.isComplete}
+					onClick={goToTask}
 				>
-					{ __( 'Grow your business', 'woocommerce' ) }
+					{__('Grow your business', 'woocommerce')}
 				</Button>
 			</div>
 		</div>

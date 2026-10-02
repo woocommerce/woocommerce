@@ -5,7 +5,7 @@
 	display: inline-block;
 	padding: $gap-smallest $gap-smaller;
 
-	@include breakpoint( '<320px' ) {
+	@include breakpoint("<320px") {
 		font-size: 11px;
 	}
 }

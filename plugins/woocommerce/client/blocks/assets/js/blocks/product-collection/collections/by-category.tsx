@@ -19,13 +19,13 @@ import { CoreCollectionNames, CoreFilterNames } from '../types';
 
 const collection = {
 	name: CoreCollectionNames.BY_CATEGORY,
-	title: __( 'Products by Category', 'woocommerce' ),
-	icon: <Icon icon={ category } />,
+	title: __('Products by Category', 'woocommerce'),
+	icon: <Icon icon={category} />,
 	description: __(
 		'Display products from specific categories.',
 		'woocommerce'
 	),
-	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
+	scope: ['inserter', 'block'] as BlockVariationScope[],
 };
 
 const attributes = {
@@ -34,7 +34,7 @@ const attributes = {
 		columns: 5,
 		shrinkColumns: true,
 	},
-	hideControls: [ CoreFilterNames.HAND_PICKED, CoreFilterNames.FILTERABLE ],
+	hideControls: [CoreFilterNames.HAND_PICKED, CoreFilterNames.FILTERABLE],
 };
 
 const heading: InnerBlockTemplate = [
@@ -42,7 +42,7 @@ const heading: InnerBlockTemplate = [
 	{
 		textAlign: 'center',
 		level: 2,
-		content: __( 'Products by Category', 'woocommerce' ),
+		content: __('Products by Category', 'woocommerce'),
 		style: { spacing: { margin: { bottom: '1rem' } } },
 	},
 ];

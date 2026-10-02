@@ -53,10 +53,11 @@
 // imagery (e.g. logos rendered in a popover) with a single class and without
 // !important, regardless of stylesheet load order.
 :where(
-	.wc-block-checkout__payment-method
-	.wc-block-components-radio-control-accordion-option
-	.wc-block-components-radio-control__label
-) img {
+		.wc-block-checkout__payment-method
+			.wc-block-components-radio-control-accordion-option
+			.wc-block-components-radio-control__label
+	)
+	img {
 	height: 24px;
 	max-height: 24px;
 	max-width: 100%;

@@ -17,18 +17,18 @@ export interface TotalsWrapperProps {
 	className?: string;
 }
 
-const TotalsWrapper = ( {
+const TotalsWrapper = ({
 	children,
 	slotWrapper = false,
 	className,
-}: TotalsWrapperProps ): JSX.Element | null => {
-	return Children.count( children ) ? (
+}: TotalsWrapperProps): JSX.Element | null => {
+	return Children.count(children) ? (
 		<div
-			className={ clsx( className, 'wc-block-components-totals-wrapper', {
+			className={clsx(className, 'wc-block-components-totals-wrapper', {
 				'slot-wrapper': slotWrapper,
-			} ) }
+			})}
 		>
-			{ children }
+			{children}
 		</div>
 	) : null;
 };

@@ -8,7 +8,7 @@ interface WithClass {
 }
 
 interface WithStyle {
-	style: Record< string, unknown >;
+	style: Record<string, unknown>;
 }
 
 export interface BlockAttributes {
@@ -51,6 +51,6 @@ export interface AddToCartButtonAttributes {
 		is_in_stock: boolean;
 		button_text: string;
 	};
-	textAlign?: ( WithClass & WithStyle ) | undefined;
+	textAlign?: (WithClass & WithStyle) | undefined;
 	collection?: string | undefined;
 }

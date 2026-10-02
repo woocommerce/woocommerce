@@ -12,31 +12,31 @@ import { store as noticesStore } from '@wordpress/notices';
  */
 export const useRemoveSavingFailedNotices = () => {
 	// Create a regular expression that escapes special characters and matches the beginning of the string
-	const savingFailedRegex = useMemo( () => {
+	const savingFailedRegex = useMemo(() => {
 		// Get the translated "Saving failed" message once
 		// eslint-disable-next-line @wordpress/i18n-text-domain -- We want to match WordPress translation here.
-		const savingFailedMessage = __( 'Saving failed.' );
+		const savingFailedMessage = __('Saving failed.');
 		return new RegExp(
-			'^' + savingFailedMessage.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' )
+			'^' + savingFailedMessage.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 		);
-	}, [] );
+	}, []);
 
-	useEffect( () => {
-		const unsubscribe = subscribe( () => {
-			select( noticesStore )
+	useEffect(() => {
+		const unsubscribe = subscribe(() => {
+			select(noticesStore)
 				.getNotices()
-				.forEach( ( notice ) => {
+				.forEach((notice) => {
 					if (
 						typeof notice.content === 'string' &&
-						savingFailedRegex.test( notice.content )
+						savingFailedRegex.test(notice.content)
 					) {
-						void dispatch( noticesStore ).removeNotice( notice.id );
+						void dispatch(noticesStore).removeNotice(notice.id);
 					}
-				} );
-		} );
+				});
+		});
 
 		return () => {
 			unsubscribe(); // Clean up subscription
 		};
-	}, [ savingFailedRegex ] );
+	}, [savingFailedRegex]);
 };

@@ -33,9 +33,9 @@ interface ProductSearchBlockProps {
 		align: string;
 	};
 }
-const ProductSearchBlock = ( {
+const ProductSearchBlock = ({
 	attributes: { label, placeholder, formId, className, hasLabel, align },
-}: ProductSearchBlockProps ) => {
+}: ProductSearchBlockProps) => {
 	const classes = clsx(
 		'wc-block-product-search',
 		align ? 'align' + align : '',
@@ -43,31 +43,31 @@ const ProductSearchBlock = ( {
 	);
 
 	return (
-		<div className={ classes }>
-			<form role="search" method="get" action={ HOME_URL }>
+		<div className={classes}>
+			<form role="search" method="get" action={HOME_URL}>
 				<label
-					htmlFor={ formId }
+					htmlFor={formId}
 					className={
 						hasLabel
 							? 'wc-block-product-search__label'
 							: 'wc-block-product-search__label screen-reader-text'
 					}
 				>
-					{ label }
+					{label}
 				</label>
 				<div className="wc-block-product-search__fields">
 					<input
 						type="search"
-						id={ formId }
+						id={formId}
 						className="wc-block-product-search__field"
-						placeholder={ placeholder }
+						placeholder={placeholder}
 						name="s"
 					/>
 					<input type="hidden" name="post_type" value="product" />
 					<button
 						type="submit"
 						className="wc-block-product-search__button"
-						aria-label={ __( 'Search', 'woocommerce' ) }
+						aria-label={__('Search', 'woocommerce')}
 					>
 						<svg
 							aria-hidden="true"

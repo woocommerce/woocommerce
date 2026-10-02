@@ -12,28 +12,28 @@ import {
 	useProduct as useProductInternal,
 } from '../../internal/entities';
 
-const deprecationNoticesShown = new Set< string >();
+const deprecationNoticesShown = new Set<string>();
 
-const showDeprecationNotice = ( functionName: string ) => {
-	if ( deprecationNoticesShown.has( functionName ) ) {
+const showDeprecationNotice = (functionName: string) => {
+	if (deprecationNoticesShown.has(functionName)) {
 		return;
 	}
 
-	deprecated( `wc.wcEntities.${ functionName }()`, {
+	deprecated(`wc.wcEntities.${functionName}()`, {
 		since: '11.1.0',
 		plugin: 'WooCommerce',
 		hint: 'The wc.wcEntities global is deprecated and will be removed in a future release.',
-	} );
-	deprecationNoticesShown.add( functionName );
+	});
+	deprecationNoticesShown.add(functionName);
 };
 
 /**
  * @deprecated Since WooCommerce 11.1.0. The wc.wcEntities global will be
  * removed in a future release.
  */
-export const useProduct: typeof useProductInternal = ( postId ) => {
-	showDeprecationNotice( 'useProduct' );
-	return useProductInternal( postId );
+export const useProduct: typeof useProductInternal = (postId) => {
+	showDeprecationNotice('useProduct');
+	return useProductInternal(postId);
 };
 
 /**
@@ -43,8 +43,8 @@ export const useProduct: typeof useProductInternal = ( postId ) => {
 export const isExternalProduct: typeof isExternalProductInternal = (
 	product
 ) => {
-	showDeprecationNotice( 'isExternalProduct' );
-	return isExternalProductInternal( product );
+	showDeprecationNotice('isExternalProduct');
+	return isExternalProductInternal(product);
 };
 
 /**
@@ -54,6 +54,6 @@ export const isExternalProduct: typeof isExternalProductInternal = (
 export const isProductResponseItem: typeof isProductResponseItemInternal = (
 	product
 ) => {
-	showDeprecationNotice( 'isProductResponseItem' );
-	return isProductResponseItemInternal( product );
+	showDeprecationNotice('isProductResponseItem');
+	return isProductResponseItemInternal(product);
 };

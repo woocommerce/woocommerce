@@ -2,16 +2,17 @@
 $border: $gray-200;
 
 // A local mixin to generate the grid template and border logic
-@mixin make-cols( $i ) {
+@mixin make-cols($i) {
 	grid-template-columns: repeat($i, 1fr);
 
 	.woocommerce-summary__item-container:nth-of-type(#{$i}n)
-	.woocommerce-summary__item {
+		.woocommerce-summary__item {
 		border-right-color: $border;
 	}
 
-	.woocommerce-summary__item-container:nth-of-type(#{$i}n
-+ 1):nth-last-of-type(-n + #{$i}) {
+	.woocommerce-summary__item-container:nth-of-type(
+			#{$i}n + 1
+		):nth-last-of-type(-n + #{$i}) {
 		.woocommerce-summary__item,
 		& ~ .woocommerce-summary__item-container .woocommerce-summary__item {
 			border-bottom-color: $border;
@@ -38,7 +39,7 @@ $border: $gray-200;
 	box-shadow: inset -1px -1px 0 $border;
 	width: 100%;
 
-	@include breakpoint( '<782px' ) {
+	@include breakpoint("<782px") {
 		& {
 			border-width: 0;
 		}
@@ -110,38 +111,38 @@ $border: $gray-200;
 	}
 
 	&.has-2-items {
-		@include make-cols( 2 );
+		@include make-cols(2);
 	}
 
 	&.has-3-items {
-		@include make-cols( 3 );
+		@include make-cols(3);
 	}
 
 	&.has-4-items,
 	&.has-7-items,
 	&.has-8-items {
-		@include make-cols( 4 );
+		@include make-cols(4);
 	}
 
 	&.has-5-items {
-		@include make-cols( 5 );
+		@include make-cols(5);
 		@include wrap-contents;
 	}
 
-	@include breakpoint( '>1440px' ) {
+	@include breakpoint(">1440px") {
 		&.has-6-items {
-			@include make-cols( 6 );
+			@include make-cols(6);
 			@include wrap-contents;
 		}
 
 		&.has-9-items,
 		&.has-10-items {
-			@include make-cols( 5 );
+			@include make-cols(5);
 			@include wrap-contents;
 		}
 	}
 
-	@include breakpoint( '<1440px' ) {
+	@include breakpoint("<1440px") {
 		&.has-4-items,
 		&.has-7-items,
 		&.has-8-items {
@@ -150,31 +151,31 @@ $border: $gray-200;
 
 		&.has-6-items,
 		&.has-9-items {
-			@include make-cols( 3 );
+			@include make-cols(3);
 		}
 
 		&.has-10-items {
-			@include make-cols( 4 );
+			@include make-cols(4);
 			@include wrap-contents;
 		}
 
 		&.has-9-items,
 		&.has-10-items {
 			.woocommerce-summary__item-container:nth-of-type(5n)
-			.woocommerce-summary__item {
+				.woocommerce-summary__item {
 				border-right-color: $border;
 			}
 		}
 	}
 
-	@include breakpoint( '<960px' ) {
+	@include breakpoint("<960px") {
 		.woocommerce-summary__item {
 			// One-col layout for all items means right border is always "outer"
 			border-right-color: $border;
 		}
 	}
 
-	@include breakpoint( '<782px' ) {
+	@include breakpoint("<782px") {
 		.woocommerce-summary__item-container {
 			margin-left: -16px;
 			margin-right: -16px;
@@ -216,7 +217,7 @@ $border: $gray-200;
 			display: block;
 		}
 
-		@include breakpoint( '<782px' ) {
+		@include breakpoint("<782px") {
 			border-right: none;
 		}
 	}
@@ -288,13 +289,17 @@ $border: $gray-200;
 
 	&:focus {
 		// !important to override button styles
-		box-shadow: inset -1px 1px 0 $gray-700, inset 1px -1px 0 $gray-700 !important;
+		box-shadow:
+			inset -1px 1px 0 $gray-700,
+			inset 1px -1px 0 $gray-700 !important;
 	}
 
 	&.is-selected {
 		&:focus {
 			// !important to override button styles
-			box-shadow: inset -1px -1px 0 $gray-700, inset 1px 0 0 $gray-700,
+			box-shadow:
+				inset -1px -1px 0 $gray-700,
+				inset 1px 0 0 $gray-700,
 				inset 0 4px 0 var(--wp-admin-theme-color) !important;
 		}
 	}
@@ -304,7 +309,7 @@ $border: $gray-200;
 		width: 100%;
 		padding-right: 2 * $gap + 24px;
 
-		@include breakpoint( '<782px' ) {
+		@include breakpoint("<782px") {
 			border-right: none;
 		}
 	}

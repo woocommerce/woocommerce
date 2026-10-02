@@ -18,17 +18,17 @@ const v1 = {
 			default: true,
 		},
 	},
-	save: ( { attributes }: { attributes: Attributes } ) => {
+	save: ({ attributes }: { attributes: Attributes }) => {
 		const { className, showCounts } = attributes;
-		const data: Record< string, unknown > = {
+		const data: Record<string, unknown> = {
 			'data-show-counts': showCounts,
 		};
 		return (
 			<div
-				{ ...useBlockProps.save( {
-					className: clsx( 'is-loading', className ),
-				} ) }
-				{ ...data }
+				{...useBlockProps.save({
+					className: clsx('is-loading', className),
+				})}
+				{...data}
 			>
 				<span
 					aria-hidden
@@ -39,6 +39,6 @@ const v1 = {
 	},
 };
 
-const deprecated = [ v1 ];
+const deprecated = [v1];
 
 export default deprecated;

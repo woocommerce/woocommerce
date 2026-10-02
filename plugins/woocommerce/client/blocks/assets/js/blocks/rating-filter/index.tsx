@@ -14,11 +14,11 @@ import metadata from './block.json';
 import type { Attributes } from './types';
 import deprecated from './deprecated';
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	icon: {
 		src: (
 			<Icon
-				icon={ starEmpty }
+				icon={starEmpty}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -28,16 +28,16 @@ registerBlockType( metadata, {
 	},
 	edit,
 	// Save the props to post content.
-	save( { attributes }: { attributes: Attributes } ) {
+	save({ attributes }: { attributes: Attributes }) {
 		const { className } = attributes;
 
 		return (
 			<div
-				{ ...useBlockProps.save( {
-					className: clsx( 'is-loading', className ),
-				} ) }
+				{...useBlockProps.save({
+					className: clsx('is-loading', className),
+				})}
 			/>
 		);
 	},
 	deprecated,
-} );
+});

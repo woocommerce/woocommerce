@@ -3,7 +3,7 @@
 	color: $gray-text;
 	background: $studio-white;
 	border-radius: 2px;
-	@include font-size( 13 );
+	@include font-size(13);
 	margin: 0 0;
 	&:hover {
 		background: $gray-100;
@@ -47,7 +47,7 @@
 .woocommerce-inbox-message__content {
 	.woocommerce-inbox-message__title {
 		color: $gray-900;
-		@include font-size( 16 );
+		@include font-size(16);
 		font-style: normal;
 		line-height: 1.5;
 		font-weight: bold;
@@ -70,7 +70,7 @@
 
 	.woocommerce-inbox-message__date {
 		color: $gray-700;
-		@include font-size( 12 );
+		@include font-size(12);
 		margin-bottom: $gap;
 		font-style: normal;
 		font-weight: normal;
@@ -92,7 +92,7 @@
 	color: $gray-700;
 	font-style: normal;
 	font-weight: normal;
-	@include font-size( 14 );
+	@include font-size(14);
 	line-height: 20px;
 	text-wrap: pretty;
 	& > p:first-child {
@@ -210,7 +210,7 @@
 }
 
 // Tweak to fix dropdown and placeholder in IE 11
-@media all and ( -ms-high-contrast: none ), ( -ms-high-contrast: active ) {
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
 	.woocommerce-admin-dismiss-dropdown {
 		margin-top: 0;
 	}

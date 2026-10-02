@@ -12,44 +12,44 @@ const SCHEDULED_IMPORT_OPTION = 'woocommerce_analytics_scheduled_import';
 
 export default function ScheduledUpdatesPromotionNotice() {
 	// Get settings to check option value (hooks must be called before early returns)
-	const settings = useSettings( 'wc_admin', [ 'wcAdminSettings' ] );
+	const settings = useSettings('wc_admin', ['wcAdminSettings']);
 	const wcAdminSettings = (
-		settings as { wcAdminSettings?: Record< string, string > }
-	 )?.wcAdminSettings;
+		settings as { wcAdminSettings?: Record<string, string> }
+	)?.wcAdminSettings;
 
 	const { updateUserPreferences, ...userData } = useUserPreferences();
 
-	const optionValue = wcAdminSettings?.[ SCHEDULED_IMPORT_OPTION ];
+	const optionValue = wcAdminSettings?.[SCHEDULED_IMPORT_OPTION];
 	// No need to show notice if option is already set.
-	if ( optionValue === 'yes' || optionValue === 'no' ) {
+	if (optionValue === 'yes' || optionValue === 'no') {
 		return null;
 	}
 
 	const isDismissed =
 		userData?.scheduled_updates_promotion_notice_dismissed === 'yes';
 
-	if ( isDismissed ) {
+	if (isDismissed) {
 		return null;
 	}
 
 	const onDismiss = () => {
-		void updateUserPreferences( {
+		void updateUserPreferences({
 			scheduled_updates_promotion_notice_dismissed: 'yes',
-		} );
-		recordEvent( 'scheduled_updates_promotion_notice_dismissed' );
+		});
+		recordEvent('scheduled_updates_promotion_notice_dismissed');
 	};
 
 	return (
 		<div className="notice notice-info is-dismissible">
 			<Button
 				variant="tertiary"
-				aria-label={ __( 'Dismiss this notice.', 'woocommerce' ) }
+				aria-label={__('Dismiss this notice.', 'woocommerce')}
 				className="woocommerce-message-close notice-dismiss"
-				onClick={ onDismiss }
+				onClick={onDismiss}
 			/>
 
 			<p>
-				{ createInterpolateElement(
+				{createInterpolateElement(
 					/* translators: <a> is a link to the analytics settings page. */
 					__(
 						'Analytics now supports scheduled updates, providing improved performance. Enable it in <a>Settings</a>.',
@@ -58,17 +58,17 @@ export default function ScheduledUpdatesPromotionNotice() {
 					{
 						a: (
 							<a
-								href={ getAdminLink(
+								href={getAdminLink(
 									'admin.php?page=wc-admin&path=/analytics/settings'
-								) }
-								aria-label={ __(
+								)}
+								aria-label={__(
 									'Analytics settings',
 									'woocommerce'
-								) }
+								)}
 							/>
 						),
 					}
-				) }
+				)}
 			</p>
 		</div>
 	);

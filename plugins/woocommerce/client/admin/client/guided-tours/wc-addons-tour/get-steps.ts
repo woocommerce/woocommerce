@@ -6,7 +6,7 @@ import { createElement, createInterpolateElement } from '@wordpress/element';
 import { TourKitTypes } from '@woocommerce/components';
 
 export const getSteps = (): TourKitTypes.WooStep[] => {
-	const lineBreak = createElement( 'br' );
+	const lineBreak = createElement('br');
 	return [
 		{
 			referenceElements: {
@@ -45,7 +45,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 			},
 			meta: {
 				name: 'wc-extensions-search',
-				heading: __( 'Find exactly what you need', 'woocommerce' ),
+				heading: __('Find exactly what you need', 'woocommerce'),
 				descriptions: {
 					desktop: __(
 						'Use the search box to find specific extensions or solutions.',
@@ -63,7 +63,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 			},
 			meta: {
 				name: 'wc-addons-categories',
-				heading: __( 'Browse for new ideas', 'woocommerce' ),
+				heading: __('Browse for new ideas', 'woocommerce'),
 				descriptions: {
 					desktop: createInterpolateElement(
 						__(
@@ -86,7 +86,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 			},
 			meta: {
 				name: 'wc-addons-featured',
-				heading: __( 'Learn more about each product', 'woocommerce' ),
+				heading: __('Learn more about each product', 'woocommerce'),
 				descriptions: {
 					desktop: createInterpolateElement(
 						__(
@@ -109,7 +109,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 			},
 			meta: {
 				name: 'wc-addons-my-subscriptions',
-				heading: __( 'Manage your purchases', 'woocommerce' ),
+				heading: __('Manage your purchases', 'woocommerce'),
 				descriptions: {
 					desktop: createInterpolateElement(
 						__(
@@ -126,10 +126,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 										'woocommerce'
 									),
 								},
-								__(
-									'30-day money-back guarantee',
-									'woocommerce'
-								)
+								__('30-day money-back guarantee', 'woocommerce')
 							),
 							a2: createElement(
 								'a',
@@ -140,10 +137,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 										'woocommerce'
 									),
 								},
-								__(
-									'email and live chat support',
-									'woocommerce'
-								)
+								__('email and live chat support', 'woocommerce')
 							),
 							br: lineBreak,
 						}

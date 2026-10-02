@@ -17,22 +17,22 @@ interface FilterResetButtonProps {
 	screenReaderLabel?: string;
 }
 
-const FilterResetButton = ( {
+const FilterResetButton = ({
 	className,
 	/* translators: Reset button text for filters. */
-	label = __( 'Reset', 'woocommerce' ),
+	label = __('Reset', 'woocommerce'),
 	onClick,
-	screenReaderLabel = __( 'Reset filter', 'woocommerce' ),
-}: FilterResetButtonProps ): JSX.Element => {
+	screenReaderLabel = __('Reset filter', 'woocommerce'),
+}: FilterResetButtonProps): JSX.Element => {
 	return (
 		<button
-			className={ clsx(
+			className={clsx(
 				'wc-block-components-filter-reset-button',
 				className
-			) }
-			onClick={ onClick }
+			)}
+			onClick={onClick}
 		>
-			<Label label={ label } screenReaderLabel={ screenReaderLabel } />
+			<Label label={label} screenReaderLabel={screenReaderLabel} />
 		</button>
 	);
 };

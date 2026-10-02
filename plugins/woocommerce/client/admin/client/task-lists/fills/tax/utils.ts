@@ -7,7 +7,7 @@ import { TaskType } from '@woocommerce/data';
 /**
  * Plugins required to automate taxes.
  */
-export const AUTOMATION_PLUGINS = [ 'woocommerce-services' ];
+export const AUTOMATION_PLUGINS = ['woocommerce-services'];
 
 /**
  * Countries where WooCommerce Tax automated taxes are supported.
@@ -57,7 +57,7 @@ export const WOOCOMMERCE_TAX_SUPPORTED_COUNTRIES = [
  * @param {Object} generalSettings.woocommerce_store_postcode  Store postal code.
  */
 export const hasCompleteAddress = (
-	generalSettings: Record< string, string >,
+	generalSettings: Record<string, string>,
 	requiresPostcode = true
 ): boolean => {
 	const {
@@ -65,10 +65,10 @@ export const hasCompleteAddress = (
 		woocommerce_default_country: defaultCountry,
 		woocommerce_store_postcode: storePostCode,
 	} = generalSettings;
-	if ( requiresPostcode ) {
-		return Boolean( storeAddress && defaultCountry && storePostCode );
+	if (requiresPostcode) {
+		return Boolean(storeAddress && defaultCountry && storePostCode);
 	}
-	return Boolean( storeAddress && defaultCountry );
+	return Boolean(storeAddress && defaultCountry);
 };
 
 /**
@@ -98,10 +98,8 @@ export type TaxChildProps = {
  * @param {string|null} countryCode Country code.
  * @return {boolean} If WooCommerce Tax is supported.
  */
-export const supportsWooCommerceTax = (
-	countryCode: string | null
-): boolean => {
-	if ( ! countryCode ) {
+export const supportsWooCommerceTax = (countryCode: string | null): boolean => {
+	if (!countryCode) {
 		return false;
 	}
 
@@ -116,7 +114,7 @@ export const supportsWooCommerceTax = (
  * @param {string} countryCode Country code.
  * @return {boolean} If the country is supported.
  */
-export const supportsAvalara = ( countryCode: string ): boolean => {
+export const supportsAvalara = (countryCode: string): boolean => {
 	const countries = [
 		'AF',
 		'AL',
@@ -340,5 +338,5 @@ export const supportsAvalara = ( countryCode: string ): boolean => {
 		'ZW',
 	];
 
-	return countries.includes( countryCode );
+	return countries.includes(countryCode);
 };

@@ -14,7 +14,7 @@ import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 /**
  * Stepper component that renders only the active step from its children
  */
-export default function Stepper( {
+export default function Stepper({
 	activeTopLevelStep,
 	activeSubStep,
 	steps,
@@ -54,15 +54,13 @@ export default function Stepper( {
 	context?: {
 		sessionEntryPoint?: string;
 	};
-} ): React.ReactNode {
+}): React.ReactNode {
 	// Find the active step component
-	const topLevelStep = steps.find(
-		( step ) => step.id === activeTopLevelStep
-	);
+	const topLevelStep = steps.find((step) => step.id === activeTopLevelStep);
 
 	// Track the step view.
-	useEffect( () => {
-		if ( activeSubStep ) {
+	useEffect(() => {
+		if (activeSubStep) {
 			recordPaymentsOnboardingEvent(
 				'woopayments_onboarding_modal_step_view',
 				{
@@ -71,12 +69,12 @@ export default function Stepper( {
 				}
 			);
 		}
-	}, [ activeSubStep ] );
+	}, [activeSubStep]);
 
-	if ( ! topLevelStep ) return null;
+	if (!topLevelStep) return null;
 
 	const activeStepIndex =
-		steps.findIndex( ( step ) => step.id === activeTopLevelStep ) + 1;
+		steps.findIndex((step) => step.id === activeTopLevelStep) + 1;
 
 	// Helper function to determine if a step is completed
 	const isStepCompleted = (
@@ -90,53 +88,53 @@ export default function Stepper( {
 	};
 
 	// Sort steps to show completed ones first
-	const sortedSteps = steps.sort( ( a, b ) => {
-		const aCompleted = isStepCompleted( a );
-		const bCompleted = isStepCompleted( b );
+	const sortedSteps = steps.sort((a, b) => {
+		const aCompleted = isStepCompleted(a);
+		const bCompleted = isStepCompleted(b);
 
-		if ( aCompleted === bCompleted ) {
+		if (aCompleted === bCompleted) {
 			return 0;
 		}
 		return aCompleted ? -1 : 1;
-	} );
+	});
 
 	// Renders only the active step based on the current step ID.
 	return (
 		<>
-			{ includeSidebar && (
+			{includeSidebar && (
 				<div className="settings-payments-onboarding-modal__sidebar">
 					<div className="settings-payments-onboarding-modal__sidebar--header">
 						<h2 className="settings-payments-onboarding-modal__sidebar--header-title">
-							{ sidebarTitle }
+							{sidebarTitle}
 						</h2>
 						<div className="settings-payments-onboarding-modal__sidebar--header-steps">
-							{ /* translators: %1$s: current step number, %2$s: total number of steps */ }
-							{ sprintf(
+							{/* translators: %1$s: current step number, %2$s: total number of steps */}
+							{sprintf(
 								/* translators: %1$s: current step number, %2$s: total number of steps */
-								__( 'Step %1$s of %2$s', 'woocommerce' ),
+								__('Step %1$s of %2$s', 'woocommerce'),
 								activeStepIndex.toString(),
 								steps.length.toString()
-							) }
+							)}
 						</div>
 					</div>
 					<div className="settings-payments-onboarding-modal__sidebar--list">
-						{ sortedSteps.map( ( step ) => (
+						{sortedSteps.map((step) => (
 							<SidebarItem
-								key={ step.id }
-								label={ step.label }
-								isCompleted={ isStepCompleted( step ) }
-								isActive={ step.id === activeTopLevelStep }
+								key={step.id}
+								label={step.label}
+								isCompleted={isStepCompleted(step)}
+								isActive={step.id === activeTopLevelStep}
 							/>
-						) ) }
+						))}
 					</div>
 				</div>
-			) }
+			)}
 			<div className="settings-payments-onboarding-modal__content">
 				<div
 					className="settings-payments-onboarding-modal__step"
-					id={ activeSubStep?.id }
+					id={activeSubStep?.id}
 				>
-					{ activeSubStep?.content }
+					{activeSubStep?.content}
 				</div>
 			</div>
 		</>

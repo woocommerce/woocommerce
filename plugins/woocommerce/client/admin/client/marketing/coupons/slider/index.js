@@ -12,19 +12,19 @@ import { debounce } from 'lodash';
  */
 import './style.scss';
 
-const Slider = ( { children, animationKey, animate } ) => {
-	const [ height, updateHeight ] = useState( null );
+const Slider = ({ children, animationKey, animate }) => {
+	const [height, updateHeight] = useState(null);
 
 	const container = useRef();
 
 	const containerClasses = clsx(
 		'woocommerce-marketing-slider',
-		animate && `animate-${ animate }`
+		animate && `animate-${animate}`
 	);
 
 	const style = {};
 
-	if ( height ) {
+	if (height) {
 		style.height = height;
 	}
 
@@ -35,38 +35,38 @@ const Slider = ( { children, animationKey, animate } ) => {
 		const slide = container.current.querySelector(
 			'.woocommerce-marketing-slider__slide'
 		);
-		updateHeight( slide.clientHeight );
+		updateHeight(slide.clientHeight);
 	};
 
-	const debouncedUpdateSliderHeight = debounce( updateSliderHeight, 50 );
+	const debouncedUpdateSliderHeight = debounce(updateSliderHeight, 50);
 
-	useEffect( () => {
+	useEffect(() => {
 		// Update the slider height on Resize
-		window.addEventListener( 'resize', debouncedUpdateSliderHeight );
+		window.addEventListener('resize', debouncedUpdateSliderHeight);
 		return () => {
-			window.removeEventListener( 'resize', debouncedUpdateSliderHeight );
+			window.removeEventListener('resize', debouncedUpdateSliderHeight);
 		};
-	}, [] );
+	}, []);
 
 	/**
 	 * Fix slider height before a slide enters because slides are absolutely position
 	 */
 	const onEnter = () => {
-		const newSlide = container.current.querySelector( '.slide-enter' );
-		updateHeight( newSlide.clientHeight );
+		const newSlide = container.current.querySelector('.slide-enter');
+		updateHeight(newSlide.clientHeight);
 	};
 
 	return (
-		<div className={ containerClasses } ref={ container } style={ style }>
+		<div className={containerClasses} ref={container} style={style}>
 			<TransitionGroup>
 				<CSSTransition
-					timeout={ timeout }
+					timeout={timeout}
 					classNames="slide"
-					key={ animationKey }
-					onEnter={ onEnter }
+					key={animationKey}
+					onEnter={onEnter}
 				>
 					<div className="woocommerce-marketing-slider__slide">
-						{ children }
+						{children}
 					</div>
 				</CSSTransition>
 			</TransitionGroup>
@@ -82,7 +82,7 @@ Slider.propTypes = {
 	/**
 	 * null, 'left', 'right', to designate which direction to slide on a change.
 	 */
-	animate: PropTypes.oneOf( [ null, 'left', 'right' ] ),
+	animate: PropTypes.oneOf([null, 'left', 'right']),
 };
 
 export default Slider;

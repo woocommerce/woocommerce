@@ -30,11 +30,11 @@ export default {
 			total_tax: '2000',
 		},
 	},
-} as Meta< TotalsTaxesProps >;
+} as Meta<TotalsTaxesProps>;
 
-const Template: StoryFn< TotalsTaxesProps > = ( args ) => <Taxes { ...args } />;
+const Template: StoryFn<TotalsTaxesProps> = (args) => <Taxes {...args} />;
 
-export const Default: StoryFn< TotalsTaxesProps > = Template.bind( {} );
+export const Default: StoryFn<TotalsTaxesProps> = Template.bind({});
 Default.args = {
 	currency: currencies.USD,
 };

@@ -10,10 +10,10 @@ import { Icon, heading } from '@wordpress/icons';
 import metadata from './block.json';
 import AttributeNameEdit from './edit';
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	edit: AttributeNameEdit,
 	icon: {
-		src: <Icon icon={ heading } />,
+		src: <Icon icon={heading} />,
 	},
 	save: () => null,
-} );
+});

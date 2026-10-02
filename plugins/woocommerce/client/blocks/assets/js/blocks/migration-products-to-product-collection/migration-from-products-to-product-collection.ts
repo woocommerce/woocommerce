@@ -24,7 +24,7 @@ import {
 	ProductCollectionDisplayLayout,
 } from '../product-collection/types';
 
-const mapAttributes = ( attributes: Record< string, unknown > ) => {
+const mapAttributes = (attributes: Record<string, unknown>) => {
 	const { query, namespace, ...restAttributes } = attributes;
 	const {
 		__woocommerceAttributes,
@@ -49,22 +49,22 @@ const mapAttributes = ( attributes: Record< string, unknown > ) => {
 	};
 };
 
-const isPostTemplate: IsBlockType = ( { name, attributes } ) =>
+const isPostTemplate: IsBlockType = ({ name, attributes }) =>
 	name === 'core/post-template' &&
 	attributes.__woocommerceNamespace ===
 		'woocommerce/product-query/product-template';
 
-const isPostTitle: IsBlockType = ( { name, attributes } ) =>
+const isPostTitle: IsBlockType = ({ name, attributes }) =>
 	name === 'core/post-title' &&
 	attributes.__woocommerceNamespace ===
 		'woocommerce/product-query/product-title';
 
-const isPostSummary: IsBlockType = ( { name, attributes } ) =>
+const isPostSummary: IsBlockType = ({ name, attributes }) =>
 	name === 'core/post-excerpt' &&
 	attributes.__woocommerceNamespace ===
 		'woocommerce/product-query/product-summary';
 
-const transformPostTemplate: TransformBlock = ( block, innerBlocks ) => {
+const transformPostTemplate: TransformBlock = (block, innerBlocks) => {
 	const { __woocommerceNamespace, className, layout, ...restAttributes } =
 		block.attributes;
 
@@ -75,7 +75,7 @@ const transformPostTemplate: TransformBlock = ( block, innerBlocks ) => {
 	);
 };
 
-const transformPostTitle: TransformBlock = ( block, innerBlocks ) => {
+const transformPostTitle: TransformBlock = (block, innerBlocks) => {
 	const { __woocommerceNamespace, ...restAttributes } = block.attributes;
 	return createBlock(
 		'core/post-title',
@@ -88,7 +88,7 @@ const transformPostTitle: TransformBlock = ( block, innerBlocks ) => {
 	);
 };
 
-const transformPostSummary: TransformBlock = ( block, innerBlocks ) => {
+const transformPostSummary: TransformBlock = (block, innerBlocks) => {
 	const { __woocommerceNamespace, ...restAttributes } = block.attributes;
 	return createBlock(
 		'core/post-excerpt',
@@ -101,11 +101,11 @@ const transformPostSummary: TransformBlock = ( block, innerBlocks ) => {
 	);
 };
 
-const mapLayoutType = ( type: PostTemplateLayoutTypes ): LayoutOptions => {
-	if ( type === 'grid' ) {
+const mapLayoutType = (type: PostTemplateLayoutTypes): LayoutOptions => {
+	if (type === 'grid') {
 		return LayoutOptions.GRID;
 	}
-	if ( type === 'default' ) {
+	if (type === 'default') {
 		return LayoutOptions.STACK;
 	}
 	return LayoutOptions.GRID;
@@ -114,14 +114,14 @@ const mapLayoutType = ( type: PostTemplateLayoutTypes ): LayoutOptions => {
 const mapLayoutPropertiesFromPostTemplateToProductCollection = (
 	layout: PostTemplateLayout
 ): ProductCollectionDisplayLayout => {
-	if ( layout === undefined ) {
+	if (layout === undefined) {
 		return DEFAULT_ATTRIBUTES.displayLayout as ProductCollectionDisplayLayout;
 	}
 
 	const { type, columnCount } = layout;
 
 	return {
-		type: mapLayoutType( type ),
+		type: mapLayoutType(type),
 		columns: columnCount,
 	};
 };
@@ -133,60 +133,60 @@ const getLayoutAttribute = (
 	// Starting from GB 16, it's not Query Loop that keeps the layout, but the Post Template block.
 	// We need to account for that and in that case, move the layout properties
 	// from Post Template to Product Collection.
-	const postTemplate = innerBlocks.find( isPostTemplate );
+	const postTemplate = innerBlocks.find(isPostTemplate);
 	const { layout: postTemplateLayout } = postTemplate?.attributes || {};
 	return postTemplateHasSupportForGridView
 		? mapLayoutPropertiesFromPostTemplateToProductCollection(
 				postTemplateLayout
-		  )
+			)
 		: attributes.displayLayout;
 };
 
-const mapInnerBlocks = ( innerBlocks: BlockInstance[] ): BlockInstance[] => {
-	const mappedInnerBlocks = innerBlocks.map( ( innerBlock ) => {
+const mapInnerBlocks = (innerBlocks: BlockInstance[]): BlockInstance[] => {
+	const mappedInnerBlocks = innerBlocks.map((innerBlock) => {
 		const { name, attributes } = innerBlock;
 
-		const mappedInnerInnerBlocks = mapInnerBlocks( innerBlock.innerBlocks );
+		const mappedInnerInnerBlocks = mapInnerBlocks(innerBlock.innerBlocks);
 
-		if ( isPostTemplate( innerBlock ) ) {
-			return transformPostTemplate( innerBlock, mappedInnerInnerBlocks );
+		if (isPostTemplate(innerBlock)) {
+			return transformPostTemplate(innerBlock, mappedInnerInnerBlocks);
 		}
 
-		if ( isPostTitle( innerBlock ) ) {
-			return transformPostTitle( innerBlock, mappedInnerInnerBlocks );
+		if (isPostTitle(innerBlock)) {
+			return transformPostTitle(innerBlock, mappedInnerInnerBlocks);
 		}
 
-		if ( isPostSummary( innerBlock ) ) {
-			return transformPostSummary( innerBlock, mappedInnerInnerBlocks );
+		if (isPostSummary(innerBlock)) {
+			return transformPostSummary(innerBlock, mappedInnerInnerBlocks);
 		}
-		return createBlock( name, attributes, mappedInnerInnerBlocks );
-	} );
+		return createBlock(name, attributes, mappedInnerInnerBlocks);
+	});
 
 	return mappedInnerBlocks;
 };
 
-const replaceProductsBlock = ( clientId: string ) => {
-	const productsBlock = select( 'core/block-editor' ).getBlock( clientId );
+const replaceProductsBlock = (clientId: string) => {
+	const productsBlock = select('core/block-editor').getBlock(clientId);
 	const canBeInserted = checkIfBlockCanBeInserted(
 		clientId,
 		'woocommerce/product-collection'
 	);
 
-	if ( productsBlock && canBeInserted ) {
+	if (productsBlock && canBeInserted) {
 		const { attributes = {}, innerBlocks = [] } = productsBlock;
-		const displayLayout = getLayoutAttribute( attributes, innerBlocks );
-		const adjustedAttributes = mapAttributes( {
+		const displayLayout = getLayoutAttribute(attributes, innerBlocks);
+		const adjustedAttributes = mapAttributes({
 			...attributes,
 			displayLayout,
-		} );
-		const adjustedInnerBlocks = mapInnerBlocks( innerBlocks );
+		});
+		const adjustedInnerBlocks = mapInnerBlocks(innerBlocks);
 
 		const productCollectionBlock = createBlock(
 			'woocommerce/product-collection',
 			adjustedAttributes,
 			adjustedInnerBlocks
 		);
-		dispatch( 'core/block-editor' ).replaceBlock(
+		dispatch('core/block-editor').replaceBlock(
 			clientId,
 			productCollectionBlock
 		);
@@ -195,27 +195,27 @@ const replaceProductsBlock = ( clientId: string ) => {
 	return false;
 };
 
-const replaceProductsBlocks = ( productsBlockClientIds: string[] ) => {
-	const results = productsBlockClientIds.map( replaceProductsBlock );
-	return !! results.length && results.every( ( result ) => !! result );
+const replaceProductsBlocks = (productsBlockClientIds: string[]) => {
+	const results = productsBlockClientIds.map(replaceProductsBlock);
+	return !!results.length && results.every((result) => !!result);
 };
 
 export const replaceProductsWithProductCollection = () => {
 	const queryBlocksCount =
-		select( 'core/block-editor' ).getGlobalBlockCount( 'core/query' );
-	if ( queryBlocksCount === 0 ) {
+		select('core/block-editor').getGlobalBlockCount('core/query');
+	if (queryBlocksCount === 0) {
 		return;
 	}
 
-	const blocks = select( 'core/block-editor' ).getBlocks();
-	const productsBlockClientIds = getProductsBlockClientIds( blocks );
+	const blocks = select('core/block-editor').getBlocks();
+	const productsBlockClientIds = getProductsBlockClientIds(blocks);
 	const productsBlocksCount = productsBlockClientIds.length;
 
-	if ( productsBlocksCount === 0 ) {
+	if (productsBlocksCount === 0) {
 		return;
 	}
 
-	replaceProductsBlocks( productsBlockClientIds );
+	replaceProductsBlocks(productsBlockClientIds);
 };
 
 export const manualUpdate = () => {

@@ -23,47 +23,44 @@ import { usePreviewTemplates } from '../../hooks';
 
 export function TemplateSelection() {
 	const { template, currentEmailContent, canUpdateTemplates, postType } =
-		useSelect( ( select ) => {
+		useSelect((select) => {
 			return {
-				template: select( storeName ).getCurrentTemplate(),
-				currentEmailContent:
-					select( storeName ).getEditedEmailContent(),
-				canUpdateTemplates: select( storeName ).canUserEditTemplates(),
-				postType: select( storeName ).getEmailPostType(),
+				template: select(storeName).getCurrentTemplate(),
+				currentEmailContent: select(storeName).getEditedEmailContent(),
+				canUpdateTemplates: select(storeName).canUserEditTemplates(),
+				postType: select(storeName).getEmailPostType(),
 			};
-		}, [] );
-	const [ templates ] = usePreviewTemplates( 'swap' );
+		}, []);
+	const [templates] = usePreviewTemplates('swap');
 
-	const [ isEditTemplateModalOpen, setEditTemplateModalOpen ] =
-		useState( false );
-	const [ isSelectTemplateModalOpen, setSelectTemplateModalOpen ] =
-		useState( false );
+	const [isEditTemplateModalOpen, setEditTemplateModalOpen] = useState(false);
+	const [isSelectTemplateModalOpen, setSelectTemplateModalOpen] =
+		useState(false);
 
 	return (
 		<>
-			{ template && (
+			{template && (
 				<PanelRow>
-					<Flex justify={ 'start' }>
+					<Flex justify={'start'}>
 						<FlexItem className="editor-post-panel__row-label">
-							{ __( 'Template', __i18n_text_domain__ ) }
+							{__('Template', __i18n_text_domain__)}
 						</FlexItem>
 						<FlexItem>
-							{ ! (
-								templates?.length > 1 || canUpdateTemplates
-							) && <b>{ template?.title }</b> }
-							{ ( templates?.length > 1 ||
-								canUpdateTemplates ) && (
+							{!(templates?.length > 1 || canUpdateTemplates) && (
+								<b>{template?.title}</b>
+							)}
+							{(templates?.length > 1 || canUpdateTemplates) && (
 								<DropdownMenu
-									icon={ null }
-									text={ template?.title }
-									toggleProps={ {
+									icon={null}
+									text={template?.title}
+									toggleProps={{
 										variant: 'tertiary',
-									} }
-									label={ __(
+									}}
+									label={__(
 										'Template actions',
 										__i18n_text_domain__
-									) }
-									onToggle={ ( isOpen ) =>
+									)}
+									onToggle={(isOpen) =>
 										recordEvent(
 											'sidebar_template_actions_clicked',
 											{
@@ -74,11 +71,11 @@ export function TemplateSelection() {
 										)
 									}
 								>
-									{ ( { onClose } ) => (
+									{({ onClose }) => (
 										<>
-											{ canUpdateTemplates && (
+											{canUpdateTemplates && (
 												<MenuItem
-													onClick={ () => {
+													onClick={() => {
 														recordEvent(
 															'sidebar_template_actions_edit_template_clicked'
 														);
@@ -86,18 +83,18 @@ export function TemplateSelection() {
 															true
 														);
 														onClose();
-													} }
+													}}
 												>
-													{ __(
+													{__(
 														'Edit template',
 														__i18n_text_domain__
-													) }
+													)}
 												</MenuItem>
-											) }
+											)}
 
-											{ templates?.length > 1 && (
+											{templates?.length > 1 && (
 												<MenuItem
-													onClick={ () => {
+													onClick={() => {
 														recordEvent(
 															'sidebar_template_actions_swap_template_clicked'
 														);
@@ -105,40 +102,38 @@ export function TemplateSelection() {
 															true
 														);
 														onClose();
-													} }
+													}}
 												>
-													{ __(
+													{__(
 														'Swap template',
 														__i18n_text_domain__
-													) }
+													)}
 												</MenuItem>
-											) }
+											)}
 										</>
-									) }
+									)}
 								</DropdownMenu>
-							) }
+							)}
 						</FlexItem>
 					</Flex>
 				</PanelRow>
-			) }
-			{ isEditTemplateModalOpen && (
+			)}
+			{isEditTemplateModalOpen && (
 				<EditTemplateModal
-					close={ () => {
-						recordEvent( 'edit_template_modal_closed' );
-						return setEditTemplateModalOpen( false );
-					} }
+					close={() => {
+						recordEvent('edit_template_modal_closed');
+						return setEditTemplateModalOpen(false);
+					}}
 				/>
-			) }
-			{ isSelectTemplateModalOpen && (
+			)}
+			{isSelectTemplateModalOpen && (
 				<SelectTemplateModal
-					onSelectCallback={ () =>
-						setSelectTemplateModalOpen( false )
-					}
-					closeCallback={ () => setSelectTemplateModalOpen( false ) }
-					previewContent={ currentEmailContent }
-					postType={ postType }
+					onSelectCallback={() => setSelectTemplateModalOpen(false)}
+					closeCallback={() => setSelectTemplateModalOpen(false)}
+					previewContent={currentEmailContent}
+					postType={postType}
 				/>
-			) }
+			)}
 		</>
 	);
 }

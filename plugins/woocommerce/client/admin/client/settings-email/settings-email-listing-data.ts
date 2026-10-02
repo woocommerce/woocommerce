@@ -44,7 +44,7 @@ type WPError = {
 };
 
 const emailListingNonce = () => {
-	return getAdminSetting( 'email_listing_nonce' );
+	return getAdminSetting('email_listing_nonce');
 };
 
 /**
@@ -55,17 +55,15 @@ const emailListingNonce = () => {
  */
 export const recreateEmailPostRequest = async (
 	emailId: string
-): Promise< EmailListingRecreateEmailPostResponse | null > => {
+): Promise<EmailListingRecreateEmailPostResponse | null> => {
 	try {
-		const response: EmailListingRecreateEmailPostResponse = await apiFetch(
-			{
-				path: `wc-admin-email/settings/email/listing/recreate-email-post?nonce=${ emailListingNonce() }`,
-				method: 'POST',
-				data: { email_id: emailId },
-			}
-		);
+		const response: EmailListingRecreateEmailPostResponse = await apiFetch({
+			path: `wc-admin-email/settings/email/listing/recreate-email-post?nonce=${emailListingNonce()}`,
+			method: 'POST',
+			data: { email_id: emailId },
+		});
 		return response;
-	} catch ( e ) {
+	} catch (e) {
 		const wpError = e as WPError;
 		// eslint-disable-next-line no-console
 		console.error(
@@ -79,26 +77,23 @@ export const recreateEmailPostRequest = async (
 /**
  * Hook providing transactional emails enriched by woo_email post data for DataViews component.
  */
-export const useTransactionalEmails = (
-	emailTypes: EmailType[],
-	view: View
-) => {
-	const [ emailTypesData, setEmailTypesData ] =
-		useState< EmailType[] >( emailTypes );
-	const postIdsMap = useMemo( () => {
-		const map = new Map< string, string >();
-		emailTypesData.forEach( ( emailType: EmailType ) => {
-			map.set( emailType.id, emailType.post_id );
-		} );
+export const useTransactionalEmails = (emailTypes: EmailType[], view: View) => {
+	const [emailTypesData, setEmailTypesData] =
+		useState<EmailType[]>(emailTypes);
+	const postIdsMap = useMemo(() => {
+		const map = new Map<string, string>();
+		emailTypesData.forEach((emailType: EmailType) => {
+			map.set(emailType.id, emailType.post_id);
+		});
 		return map;
-	}, [ emailTypesData ] );
+	}, [emailTypesData]);
 
-	const validPostIds = Array.from( postIdsMap.values() ).filter( Boolean );
+	const validPostIds = Array.from(postIdsMap.values()).filter(Boolean);
 	const emailPosts = useEntityRecords(
 		'postType',
 		'woo_email',
 		{
-			include: validPostIds.join( ',' ),
+			include: validPostIds.join(','),
 			per_page: -1,
 			status: 'any',
 		},
@@ -107,33 +102,32 @@ export const useTransactionalEmails = (
 		{ enabled: validPostIds.length > 0 }
 	) as { records: Post[] };
 
-	const { updateAndPersistSettingsForGroup } = useDispatch( settingsStore );
+	const { updateAndPersistSettingsForGroup } = useDispatch(settingsStore);
 
 	const emails = useMemo(
 		() =>
-			emailTypesData.map( ( emailType: EmailType ) => {
-				const postId = postIdsMap.get( emailType.id ) || '';
+			emailTypesData.map((emailType: EmailType) => {
+				const postId = postIdsMap.get(emailType.id) || '';
 				const post: Post | null = emailPosts.records?.find(
-					( p ) => p.id === parseInt( postId, 10 )
+					(p) => p.id === parseInt(postId, 10)
 				) as Post | null;
 				let status = emailType.enabled ? 'enabled' : 'disabled';
-				if ( emailType.manual ) {
+				if (emailType.manual) {
 					status = 'manual';
 				}
 
 				// RSM-140: project template-status and template-version meta auto-
 				// surfaced under `meta` in the wp/v2/woo_email REST response (the
 				// post type declares 'custom-fields' support). Read-only.
-				const meta = (
-					post as { meta?: Record< string, unknown > } | null
-				 )?.meta;
+				const meta = (post as { meta?: Record<string, unknown> } | null)
+					?.meta;
 				const rawStatus = meta?._wc_email_template_status;
 				const templateStatus: TemplateStatus | null =
 					typeof rawStatus === 'string' &&
-					( VALID_TEMPLATE_STATUSES as readonly string[] ).includes(
+					(VALID_TEMPLATE_STATUSES as readonly string[]).includes(
 						rawStatus
 					)
-						? ( rawStatus as TemplateStatus )
+						? (rawStatus as TemplateStatus)
 						: null;
 
 				const rawVersion = meta?._wc_email_template_version;
@@ -153,7 +147,7 @@ export const useTransactionalEmails = (
 				// `currentVersion` (camel) for the row's TS contract.
 				const rawCurrentVersion = (
 					emailType as unknown as { current_version?: string | null }
-				 ).current_version;
+				).current_version;
 				const currentVersion: string | null =
 					typeof rawCurrentVersion === 'string' &&
 					rawCurrentVersion.length > 0
@@ -164,62 +158,62 @@ export const useTransactionalEmails = (
 					...emailType,
 					link: post?.link || '',
 					postStatus:
-						( post as { status?: string } | null )?.status ?? null,
+						(post as { status?: string } | null)?.status ?? null,
 					status: status as EmailStatus,
 					templateStatus,
 					templateVersion,
 					currentVersion,
 					wasBackfilled,
 				};
-			} ),
-		[ emailTypesData, emailPosts, postIdsMap ]
+			}),
+		[emailTypesData, emailPosts, postIdsMap]
 	);
 
 	// Apply Sort
 	let sortedEmails: EmailType[] = emails;
-	if ( view.sort ) {
-		sortedEmails = sortedEmails.sort( ( a, b ) => {
+	if (view.sort) {
+		sortedEmails = sortedEmails.sort((a, b) => {
 			const field = view.sort.field as keyof EmailType;
 			if (
-				a[ field ] === undefined ||
-				b[ field ] === undefined ||
-				typeof a[ field ] !== 'string' ||
-				typeof b[ field ] !== 'string'
+				a[field] === undefined ||
+				b[field] === undefined ||
+				typeof a[field] !== 'string' ||
+				typeof b[field] !== 'string'
 			) {
 				return 0;
 			}
 			const direction = view.sort.direction === 'asc' ? 1 : -1;
-			return direction * a[ field ].localeCompare( b[ field ] );
-		} );
+			return direction * a[field].localeCompare(b[field]);
+		});
 	}
 
 	let filteredEmails: EmailType[] = [];
 	// Apply search filter
-	filteredEmails = sortedEmails.filter( ( email ) => {
-		if ( ! view.search ) {
+	filteredEmails = sortedEmails.filter((email) => {
+		if (!view.search) {
 			return true;
 		}
-		return email.title.toLowerCase().includes( view.search.toLowerCase() );
-	} );
+		return email.title.toLowerCase().includes(view.search.toLowerCase());
+	});
 
 	// Apply Filter
-	filteredEmails = filteredEmails.filter( ( email ) => {
+	filteredEmails = filteredEmails.filter((email) => {
 		const statusFilter = view.filters.find(
-			( filter: View.Filter ) => filter.field === 'status'
+			(filter: View.Filter) => filter.field === 'status'
 		);
-		if ( ! statusFilter || ! statusFilter.value ) {
+		if (!statusFilter || !statusFilter.value) {
 			return true;
 		}
-		return statusFilter.value.includes( email.status );
-	} );
+		return statusFilter.value.includes(email.status);
+	});
 
 	// Apply Recipient Filter.
-	filteredEmails = filteredEmails.filter( ( email ) => {
+	filteredEmails = filteredEmails.filter((email) => {
 		const recipientFilter = view.filters.find(
-			( filter: View.Filter ) => filter.field === 'recipients'
+			(filter: View.Filter) => filter.field === 'recipients'
 		);
 
-		if ( ! recipientFilter || ! recipientFilter.value ) {
+		if (!recipientFilter || !recipientFilter.value) {
 			return true;
 		}
 
@@ -227,157 +221,155 @@ export const useTransactionalEmails = (
 
 		// Check for 'Customers' filter.
 		if (
-			selectedRecipients.includes( 'customer' ) &&
-			( ! email.recipients.to || email.recipients.to.length === 0 )
+			selectedRecipients.includes('customer') &&
+			(!email.recipients.to || email.recipients.to.length === 0)
 		) {
 			return true;
 		}
 
 		// Check for specific email recipients.
 		const emailRecipients = [
-			...( email.recipients.to
+			...(email.recipients.to
 				? email.recipients.to
-						.split( ',' )
-						.map( ( r ) => r.trim() )
-						.filter( Boolean )
-				: [] ),
-			...( email.recipients.cc
+						.split(',')
+						.map((r) => r.trim())
+						.filter(Boolean)
+				: []),
+			...(email.recipients.cc
 				? email.recipients.cc
-						.split( ',' )
-						.map( ( r ) => r.trim() )
-						.filter( Boolean )
-				: [] ),
-			...( email.recipients.bcc
+						.split(',')
+						.map((r) => r.trim())
+						.filter(Boolean)
+				: []),
+			...(email.recipients.bcc
 				? email.recipients.bcc
-						.split( ',' )
-						.map( ( r ) => r.trim() )
-						.filter( Boolean )
-				: [] ),
+						.split(',')
+						.map((r) => r.trim())
+						.filter(Boolean)
+				: []),
 		];
 
-		return selectedRecipients.some( ( filterRecipient ) =>
-			emailRecipients.includes( filterRecipient )
+		return selectedRecipients.some((filterRecipient) =>
+			emailRecipients.includes(filterRecipient)
 		);
-	} );
+	});
 
 	// Apply Updates Filter (RSM-140)
-	filteredEmails = filteredEmails.filter( ( email ) => {
+	filteredEmails = filteredEmails.filter((email) => {
 		const updatesFilter = view.filters.find(
-			( filter: View.Filter ) => filter.field === 'updates'
+			(filter: View.Filter) => filter.field === 'updates'
 		);
-		if ( ! updatesFilter || ! updatesFilter.value ) {
+		if (!updatesFilter || !updatesFilter.value) {
 			return true;
 		}
-		const selected = Array.isArray( updatesFilter.value )
-			? ( updatesFilter.value as string[] )
-			: [ updatesFilter.value as string ];
-		const emailValue = shouldShowReviewUpdate( email )
-			? 'available'
-			: 'none';
-		return selected.includes( emailValue );
-	} );
+		const selected = Array.isArray(updatesFilter.value)
+			? (updatesFilter.value as string[])
+			: [updatesFilter.value as string];
+		const emailValue = shouldShowReviewUpdate(email) ? 'available' : 'none';
+		return selected.includes(emailValue);
+	});
 
 	// Apply pagination
-	const startIndex = ( view.page - 1 ) * view.perPage;
+	const startIndex = (view.page - 1) * view.perPage;
 	const endIndex = startIndex + view.perPage;
-	const renderedEmails = filteredEmails.slice( startIndex, endIndex );
+	const renderedEmails = filteredEmails.slice(startIndex, endIndex);
 
 	const updateEmailEnabledStatusInState = useCallback(
-		( emailId: string, value: boolean ) => {
-			const updatedEmailTypesData = [ ...emailTypesData ];
+		(emailId: string, value: boolean) => {
+			const updatedEmailTypesData = [...emailTypesData];
 			const emailIndex = updatedEmailTypesData.findIndex(
-				( email ) => email.id === emailId
+				(email) => email.id === emailId
 			);
-			if ( emailIndex !== -1 ) {
-				updatedEmailTypesData[ emailIndex ].enabled = value;
-				setEmailTypesData( updatedEmailTypesData );
+			if (emailIndex !== -1) {
+				updatedEmailTypesData[emailIndex].enabled = value;
+				setEmailTypesData(updatedEmailTypesData);
 			}
 		},
-		[ emailTypesData ]
+		[emailTypesData]
 	);
 
 	const updateEmailPostIdInState = useCallback(
-		( emailId: string, value: string ) => {
-			if ( ! value ) {
+		(emailId: string, value: string) => {
+			if (!value) {
 				return;
 			}
-			const updatedEmailTypesData = [ ...emailTypesData ];
+			const updatedEmailTypesData = [...emailTypesData];
 			const emailIndex = updatedEmailTypesData.findIndex(
-				( email ) => email.id === emailId
+				(email) => email.id === emailId
 			);
-			if ( emailIndex !== -1 ) {
-				updatedEmailTypesData[ emailIndex ].post_id = value;
-				setEmailTypesData( updatedEmailTypesData );
+			if (emailIndex !== -1) {
+				updatedEmailTypesData[emailIndex].post_id = value;
+				setEmailTypesData(updatedEmailTypesData);
 			}
 		},
-		[ emailTypesData ]
+		[emailTypesData]
 	);
 
 	const updateEmailEnabledStatus = useCallback(
-		async ( emailId: string, value: boolean ) => {
+		async (emailId: string, value: boolean) => {
 			// Optimistic update of local state to update UI
-			updateEmailEnabledStatusInState( emailId, value );
+			updateEmailEnabledStatusInState(emailId, value);
 
 			try {
 				// Store the new status via API
 				const enabled = value ? 'yes' : 'no';
-				const settingsGroup = `email_${ emailId }`;
+				const settingsGroup = `email_${emailId}`;
 
 				// The email settings has to be stored in DB complete.
 				// In case the settings are not available in the store, we need to fetch them via API and wait for the resolution to complete.
 				if (
-					! select( settingsStore ).hasFinishedResolution(
+					!select(settingsStore).hasFinishedResolution(
 						'getSettings',
-						[ settingsGroup ]
+						[settingsGroup]
 					)
 				) {
-					await select( settingsStore ).getSettings( settingsGroup );
-					await new Promise( ( resolve ) => {
-						const unsubscribe = subscribe( () => {
+					await select(settingsStore).getSettings(settingsGroup);
+					await new Promise((resolve) => {
+						const unsubscribe = subscribe(() => {
 							const finished = select(
 								settingsStore
-							).hasFinishedResolution( 'getSettings', [
+							).hasFinishedResolution('getSettings', [
 								settingsGroup,
-							] );
-							if ( finished ) {
+							]);
+							if (finished) {
 								unsubscribe();
-								resolve( true );
+								resolve(true);
 							}
-						} );
-					} );
+						});
+					});
 				}
 
 				// Now we can fetch the old settings and update the settings
 				const currentSettings =
-					await select( settingsStore ).getSettings( settingsGroup );
+					await select(settingsStore).getSettings(settingsGroup);
 				const updatedSettings = { ...currentSettings } as {
-					[ key: string ]: { [ key: string ]: unknown };
+					[key: string]: { [key: string]: unknown };
 				};
-				updatedSettings[ settingsGroup ].enabled = enabled;
+				updatedSettings[settingsGroup].enabled = enabled;
 				await updateAndPersistSettingsForGroup(
 					settingsGroup,
 					updatedSettings
 				);
-			} catch ( error ) {
+			} catch (error) {
 				// Switch the UI status back on error
-				updateEmailEnabledStatusInState( emailId, ! value );
+				updateEmailEnabledStatusInState(emailId, !value);
 				// Log error to help with debugging email status update failures
 				// eslint-disable-next-line no-console
-				console.error( error );
+				console.error(error);
 			}
 		},
-		[ emailTypesData, updateAndPersistSettingsForGroup ]
+		[emailTypesData, updateAndPersistSettingsForGroup]
 	);
 
 	const recreateEmailPost = useCallback(
 		async (
 			emailId: string
-		): Promise< EmailListingRecreateEmailPostResponse | null > => {
-			const response = await recreateEmailPostRequest( emailId );
-			updateEmailPostIdInState( emailId, response?.post_id || '' );
+		): Promise<EmailListingRecreateEmailPostResponse | null> => {
+			const response = await recreateEmailPostRequest(emailId);
+			updateEmailPostIdInState(emailId, response?.post_id || '');
 			return response;
 		},
-		[ updateEmailPostIdInState ]
+		[updateEmailPostIdInState]
 	);
 
 	return {

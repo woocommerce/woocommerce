@@ -16,41 +16,41 @@ import { allSettings } from './settings-init';
  * the `fallback` will be returned instead. An optional `filter`
  * callback can be passed to format the returned value.
  */
-export const getSetting = < T >(
+export const getSetting = <T>(
 	name: string,
 	fallback: unknown = false,
-	filter = ( val: unknown, fb: unknown ) =>
+	filter = (val: unknown, fb: unknown) =>
 		typeof val !== 'undefined' ? val : fb
 ): T => {
 	let value = fallback;
 
-	if ( name in allSettings ) {
-		value = allSettings[ name ];
-	} else if ( name.includes( '_data' ) ) {
+	if (name in allSettings) {
+		value = allSettings[name];
+	} else if (name.includes('_data')) {
 		// This handles back compat with payment data _data properties after the move to camelCase and the dedicated
 		// paymentMethodData setting.
-		const nameWithoutData = name.replace( '_data', '' );
-		const paymentMethodData = getSetting(
-			'paymentMethodData',
-			{}
-		) as Record< string, unknown >;
+		const nameWithoutData = name.replace('_data', '');
+		const paymentMethodData = getSetting('paymentMethodData', {}) as Record<
+			string,
+			unknown
+		>;
 
 		value =
 			nameWithoutData in paymentMethodData
-				? paymentMethodData[ nameWithoutData ]
+				? paymentMethodData[nameWithoutData]
 				: fallback;
 	}
 
-	return filter( value, fallback ) as T;
+	return filter(value, fallback) as T;
 };
 
-export const getSettingWithCoercion = < T >(
+export const getSettingWithCoercion = <T>(
 	name: string,
 	fallback: T,
-	typeguard: ( val: unknown, fb: unknown ) => val is T
+	typeguard: (val: unknown, fb: unknown) => val is T
 ): T => {
-	const value = name in allSettings ? allSettings[ name ] : fallback;
-	return typeguard( value, fallback ) ? value : fallback;
+	const value = name in allSettings ? allSettings[name] : fallback;
+	return typeguard(value, fallback) ? value : fallback;
 };
 
 /**
@@ -73,18 +73,18 @@ const compareVersionSettingIgnorePrerelease = (
 	version: string,
 	operator: compareVersions.CompareOperator
 ): boolean => {
-	const settingValue = getSetting( setting, '' ) as string;
+	const settingValue = getSetting(setting, '') as string;
 	let cleanVersion = settingValue;
 
 	// Only augment version if missing patch number.
-	if ( /^\d+\.\d+-.*$/.test( cleanVersion ) ) {
-		cleanVersion = cleanVersion.replace( /-[a-zA-Z0-9]*[\-.]*/, '.0-rc.' );
-		cleanVersion = cleanVersion.endsWith( '.' )
-			? cleanVersion.substring( 0, cleanVersion.length - 1 )
+	if (/^\d+\.\d+-.*$/.test(cleanVersion)) {
+		cleanVersion = cleanVersion.replace(/-[a-zA-Z0-9]*[\-.]*/, '.0-rc.');
+		cleanVersion = cleanVersion.endsWith('.')
+			? cleanVersion.substring(0, cleanVersion.length - 1)
 			: cleanVersion;
 	}
 
-	return compareVersions.compare( cleanVersion, version, operator );
+	return compareVersions.compare(cleanVersion, version, operator);
 };
 
 /**
@@ -129,8 +129,8 @@ export const isWcVersion = (
  * @param {string} path Relative path.
  * @return {string} Full admin URL.
  */
-export const getAdminLink = ( path: string ): string =>
-	getSetting( 'adminUrl' ) + path;
+export const getAdminLink = (path: string): string =>
+	getSetting('adminUrl') + path;
 
 /**
  * Get payment method data from the paymentMethodData setting.
@@ -139,11 +139,11 @@ export const getPaymentMethodData = (
 	paymentMethodId: string,
 	defaultValue: null | unknown = null
 ) => {
-	const paymentMethodData = getSetting( 'paymentMethodData', {} ) as Record<
+	const paymentMethodData = getSetting('paymentMethodData', {}) as Record<
 		string,
 		unknown
 	>;
-	return paymentMethodData[ paymentMethodId ] ?? defaultValue;
+	return paymentMethodData[paymentMethodId] ?? defaultValue;
 };
 
 /**
@@ -159,7 +159,7 @@ export const getCurrencyPrefix = (
 		right: '',
 		right_space: '',
 	};
-	return prefixes[ symbolPosition ] || '';
+	return prefixes[symbolPosition] || '';
 };
 
 /**
@@ -175,5 +175,5 @@ export const getCurrencySuffix = (
 		right: symbol,
 		right_space: ' ' + symbol,
 	};
-	return suffixes[ symbolPosition ] || '';
+	return suffixes[symbolPosition] || '';
 };

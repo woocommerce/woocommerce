@@ -33,19 +33,17 @@ type OnboardingFormProps = {
 	children: React.ReactNode;
 };
 
-export const OnboardingForm: React.FC< OnboardingFormProps > = ( {
-	children,
-} ) => {
+export const OnboardingForm: React.FC<OnboardingFormProps> = ({ children }) => {
 	const { data, errors, touched, setTouched } =
 		useBusinessVerificationContext();
 	const { currentStep, sessionEntryPoint } = useOnboardingContext();
 	const { nextStep } = useStepperContext();
-	const [ isContinueButtonLoading, setIsContinueButtonLoading ] =
-		useState( false );
+	const [isContinueButtonLoading, setIsContinueButtonLoading] =
+		useState(false);
 
-	const handleContinue = (): Promise< void > => {
-		if ( isEmpty( errors ) && isPreKycComplete( data ) ) {
-			setIsContinueButtonLoading( true );
+	const handleContinue = (): Promise<void> => {
+		if (isEmpty(errors) && isPreKycComplete(data)) {
+			setIsContinueButtonLoading(true);
 
 			// Complete the business sub-step.
 			return completeSubStep(
@@ -53,7 +51,7 @@ export const OnboardingForm: React.FC< OnboardingFormProps > = ( {
 				currentStep?.actions?.save?.href ?? undefined,
 				currentStep?.context?.sub_steps ?? {}
 			)
-				.then( () => {
+				.then(() => {
 					recordPaymentsOnboardingEvent(
 						'woopayments_onboarding_modal_kyc_sub_step_completed',
 						{
@@ -65,19 +63,19 @@ export const OnboardingForm: React.FC< OnboardingFormProps > = ( {
 						}
 					);
 
-					setIsContinueButtonLoading( false );
+					setIsContinueButtonLoading(false);
 
 					return nextStep();
-				} )
-				.catch( () => {
+				})
+				.catch(() => {
 					// Handle any errors that occur during the process.
-					setIsContinueButtonLoading( false );
+					setIsContinueButtonLoading(false);
 					// Error tracking is handled on the backend, so we don't need to do anything here.
-				} );
+				});
 		}
 
 		// If there are validation errors, set all fields as touched to show validation errors.
-		setTouched( mapValues( touched, () => true ) );
+		setTouched(mapValues(touched, () => true));
 
 		// Return a resolved promise when there are errors.
 		return Promise.resolve();
@@ -85,17 +83,17 @@ export const OnboardingForm: React.FC< OnboardingFormProps > = ( {
 
 	return (
 		<form
-			onSubmit={ async ( event ) => {
+			onSubmit={async (event) => {
 				event.preventDefault();
 				await handleContinue();
-			} }
+			}}
 		>
-			{ children }
+			{children}
 			<Button
-				variant={ 'primary' }
+				variant={'primary'}
 				type="submit"
 				className="stepper__cta"
-				onClick={ () => {
+				onClick={() => {
 					recordPaymentsOnboardingEvent(
 						'woopayments_onboarding_modal_click',
 						{
@@ -105,128 +103,126 @@ export const OnboardingForm: React.FC< OnboardingFormProps > = ( {
 							source: sessionEntryPoint,
 						}
 					);
-				} }
-				isBusy={ isContinueButtonLoading }
-				disabled={ isContinueButtonLoading }
+				}}
+				isBusy={isContinueButtonLoading}
+				disabled={isContinueButtonLoading}
 			>
-				{ strings.continue }
+				{strings.continue}
 			</Button>
 		</form>
 	);
 };
 
-interface OnboardingTextFieldProps extends Partial< TextFieldProps > {
+interface OnboardingTextFieldProps extends Partial<TextFieldProps> {
 	name: keyof OnboardingFields;
 }
 
-export const OnboardingTextField: React.FC< OnboardingTextFieldProps > = (
+export const OnboardingTextField: React.FC<OnboardingTextFieldProps> = (
 	props
 ) => {
 	const { name } = props;
 	const { data, setData, touched } = useBusinessVerificationContext();
-	const { validate, error } = useValidation( name );
-	const inputRef = React.useRef< HTMLInputElement >( null );
+	const { validate, error } = useValidation(name);
+	const inputRef = React.useRef<HTMLInputElement>(null);
 
 	return (
 		<TextField
-			ref={ inputRef as React.RefObject< HTMLInputElement > }
-			label={ strings.fields[ name ] }
-			value={ data[ name ] || '' }
-			onChange={ ( value: string ) => {
-				setData( { [ name ]: value } );
+			ref={inputRef as React.RefObject<HTMLInputElement>}
+			label={strings.fields[name]}
+			value={data[name] || ''}
+			onChange={(value: string) => {
+				setData({ [name]: value });
 				if (
-					touched[ name ] ||
+					touched[name] ||
 					inputRef.current !==
 						inputRef.current?.ownerDocument.activeElement
 				)
-					validate( value );
-			} }
-			onBlur={ () => validate() }
-			onKeyDown={ ( event: React.KeyboardEvent< HTMLInputElement > ) => {
-				if ( event.key === 'Enter' ) validate();
-			} }
-			error={ error() }
-			{ ...props }
+					validate(value);
+			}}
+			onBlur={() => validate()}
+			onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
+				if (event.key === 'Enter') validate();
+			}}
+			error={error()}
+			{...props}
 		/>
 	);
 };
 
-interface OnboardingSelectFieldProps< ItemType >
-	extends Partial< Omit< SelectFieldProps< ItemType >, 'onChange' > > {
+interface OnboardingSelectFieldProps<ItemType> extends Partial<
+	Omit<SelectFieldProps<ItemType>, 'onChange'>
+> {
 	name: keyof OnboardingFields;
-	onChange?: ( name: keyof OnboardingFields, item?: ItemType | null ) => void;
+	onChange?: (name: keyof OnboardingFields, item?: ItemType | null) => void;
 }
 
-export const OnboardingSelectField = < ItemType extends SelectItem >( {
+export const OnboardingSelectField = <ItemType extends SelectItem>({
 	onChange,
 	...rest
-}: OnboardingSelectFieldProps< ItemType > ): JSX.Element => {
+}: OnboardingSelectFieldProps<ItemType>): JSX.Element => {
 	const { name } = rest;
 	const { data, setData } = useBusinessVerificationContext();
-	const { validate, error } = useValidation( name );
+	const { validate, error } = useValidation(name);
 
 	return (
 		<SelectField
-			label={ strings.fields[ name ] }
-			value={ rest.options?.find(
-				( item ) => item.key === data[ name ]
-			) }
+			label={strings.fields[name]}
+			value={rest.options?.find((item) => item.key === data[name])}
 			placeholder={
-				( strings.placeholders as Record< string, string > )[ name ] ??
+				(strings.placeholders as Record<string, string>)[name] ??
 				strings.placeholders.generic
 			}
-			onChange={ ( { selectedItem } ) => {
-				if ( onChange ) {
-					onChange?.( name, selectedItem );
+			onChange={({ selectedItem }) => {
+				if (onChange) {
+					onChange?.(name, selectedItem);
 				} else {
-					setData( { [ name ]: selectedItem?.key } );
+					setData({ [name]: selectedItem?.key });
 				}
-				validate( selectedItem?.key );
-			} }
-			options={ [] }
-			error={ error() }
-			{ ...rest }
+				validate(selectedItem?.key);
+			}}
+			options={[]}
+			error={error()}
+			{...rest}
 		/>
 	);
 };
 
-interface OnboardingGroupedSelectFieldProps< ItemType >
-	extends Partial< Omit< GroupedSelectFieldProps< ItemType >, 'onChange' > > {
+interface OnboardingGroupedSelectFieldProps<ItemType> extends Partial<
+	Omit<GroupedSelectFieldProps<ItemType>, 'onChange'>
+> {
 	name: keyof OnboardingFields;
-	onChange?: ( name: keyof OnboardingFields, item?: ItemType | null ) => void;
+	onChange?: (name: keyof OnboardingFields, item?: ItemType | null) => void;
 }
 
 export const OnboardingGroupedSelectField = <
 	ListItemType extends GroupedSelectItem,
->( {
+>({
 	onChange,
 	...rest
-}: OnboardingGroupedSelectFieldProps< ListItemType > ): JSX.Element => {
+}: OnboardingGroupedSelectFieldProps<ListItemType>): JSX.Element => {
 	const { name } = rest;
 	const { data, setData } = useBusinessVerificationContext();
-	const { validate, error } = useValidation( name );
+	const { validate, error } = useValidation(name);
 
 	return (
 		<GroupedSelectField
-			label={ strings.fields[ name ] }
-			value={ rest.options?.find(
-				( item ) => item.key === data[ name ]
-			) }
+			label={strings.fields[name]}
+			value={rest.options?.find((item) => item.key === data[name])}
 			placeholder={
-				( strings.placeholders as Record< string, string > )[ name ] ??
+				(strings.placeholders as Record<string, string>)[name] ??
 				strings.placeholders.generic
 			}
-			onChange={ ( { selectedItem } ) => {
-				if ( onChange ) {
-					onChange?.( name, selectedItem );
+			onChange={({ selectedItem }) => {
+				if (onChange) {
+					onChange?.(name, selectedItem);
 				} else {
-					setData( { [ name ]: selectedItem?.key } );
+					setData({ [name]: selectedItem?.key });
 				}
-				validate( selectedItem?.key );
-			} }
-			options={ [] }
-			error={ error() }
-			{ ...rest }
+				validate(selectedItem?.key);
+			}}
+			options={[]}
+			error={error()}
+			{...rest}
 		/>
 	);
 };

@@ -13,27 +13,27 @@ import { cartStore } from '@woocommerce/block-data';
 import { AddressAutocomplete } from '../address-autocomplete';
 
 const mockUseCheckoutAddress = jest.fn();
-jest.mock( '@woocommerce/base-context', () => ( {
-	...jest.requireActual( '@woocommerce/base-context' ),
+jest.mock('@woocommerce/base-context', () => ({
+	...jest.requireActual('@woocommerce/base-context'),
 	useCheckoutAddress: () => mockUseCheckoutAddress(),
-} ) );
+}));
 
-jest.mock( '@wordpress/data', () => ( {
+jest.mock('@wordpress/data', () => ({
 	__esModule: true,
-	...jest.requireActual( '@wordpress/data' ),
+	...jest.requireActual('@wordpress/data'),
 	useSelect: jest.fn(),
 	useDispatch: jest.fn(),
-} ) );
+}));
 
 const mockUseSelect = useSelect as jest.Mock;
 const mockUseDispatch = useDispatch as jest.Mock;
 
-jest.mock( '@woocommerce/settings', () => ( {
-	...jest.requireActual( '@woocommerce/settings' ),
+jest.mock('@woocommerce/settings', () => ({
+	...jest.requireActual('@woocommerce/settings'),
 	getSettingWithCoercion: jest
 		.fn()
-		.mockImplementation( ( value, fallback, typeguard ) => {
-			if ( value === 'addressAutocompleteProviders' ) {
+		.mockImplementation((value, fallback, typeguard) => {
+			if (value === 'addressAutocompleteProviders') {
 				return [
 					{
 						id: 'generic-provider',
@@ -43,25 +43,25 @@ jest.mock( '@woocommerce/settings', () => ( {
 				];
 			}
 			return jest
-				.requireActual( '@woocommerce/settings' )
-				.getSettingWithCoercion( value, fallback, typeguard );
-		} ),
-} ) );
+				.requireActual('@woocommerce/settings')
+				.getSettingWithCoercion(value, fallback, typeguard);
+		}),
+}));
 // Skipped: AddressAutocomplete's autofill-detection logic (userIsTypingRef)
 // relies on native `input` events with `inputType` properties that
 // jsdom/userEvent don't fully replicate. The suggestion rendering path
 // never fires because the typing guard isn't tripped. These tests should
 // be migrated to Playwright E2E where real browser events are available.
-describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', () => {
-	beforeAll( () => {
+describe.skip('Suggestions - when rendered in AddressAutocomplete component', () => {
+	beforeAll(() => {
 		// Mock use select so we can override it when wc/store/cart or
 		// wc/store/checkout is accessed, but return the original select
 		// function if any other store is accessed.
 		mockUseSelect.mockImplementation(
-			jest.fn().mockImplementation( ( passedMapSelect ) => {
+			jest.fn().mockImplementation((passedMapSelect) => {
 				const mockedSelect = jest
 					.fn()
-					.mockImplementation( ( storeName ) => {
+					.mockImplementation((storeName) => {
 						const name =
 							typeof storeName === 'string'
 								? storeName
@@ -88,7 +88,7 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 						// wp-6.8: useUpdatePreferredAutocompleteProvider and
 						// AddressAutocomplete both select from the checkout
 						// store to read registered/active providers.
-						if ( name === 'wc/store/checkout' ) {
+						if (name === 'wc/store/checkout') {
 							return {
 								getRegisteredAutocompleteProviders: () => [
 									'generic-provider',
@@ -99,25 +99,25 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 						}
 
 						return jest
-							.requireActual( '@wordpress/data' )
-							.select( storeName );
-					} );
-				return passedMapSelect( mockedSelect, {
-					dispatch: jest.requireActual( '@wordpress/data' ).dispatch,
-				} );
-			} )
+							.requireActual('@wordpress/data')
+							.select(storeName);
+					});
+				return passedMapSelect(mockedSelect, {
+					dispatch: jest.requireActual('@wordpress/data').dispatch,
+				});
+			})
 		);
 
 		mockUseDispatch.mockImplementation(
-			( store: string | { name: string } ) => {
+			(store: string | { name: string }) => {
 				const storeName =
 					typeof store === 'string' ? store : store?.name;
 
-				if ( storeName === 'wc/store/cart' || store === cartStore ) {
+				if (storeName === 'wc/store/cart' || store === cartStore) {
 					return {
 						...jest
-							.requireActual( '@wordpress/data' )
-							.useDispatch( store ),
+							.requireActual('@wordpress/data')
+							.useDispatch(store),
 						setShippingAddress: jest.fn(),
 						setBillingAddress: jest.fn(),
 					};
@@ -128,47 +128,45 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 				// provider. Without this mock, the dispatch returns a
 				// no-op and the active provider is never set, so the
 				// search callback in AddressAutocomplete never fires.
-				if ( storeName === 'wc/store/checkout' ) {
+				if (storeName === 'wc/store/checkout') {
 					return {
 						setActiveAddressAutocompleteProvider: jest.fn(),
 					};
 				}
 
-				return jest
-					.requireActual( '@wordpress/data' )
-					.useDispatch( store );
+				return jest.requireActual('@wordpress/data').useDispatch(store);
 			}
 		);
 
-		mockUseCheckoutAddress.mockReturnValue( {
+		mockUseCheckoutAddress.mockReturnValue({
 			useShippingAsBilling: false,
 			useBillingAsShipping: false,
-		} );
+		});
 
 		const genericProvider = {
 			id: 'generic-provider',
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			canSearch: ( country: string ) => {
+			canSearch: (country: string) => {
 				return true;
 			},
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			search: async ( inputValue: string, country: string ) => {
+			search: async (inputValue: string, country: string) => {
 				// Mock search results.
 				return [
 					{
 						label: '123 Example St, Berlin, Germany',
 						id: '1',
-						matchedSubstrings: [ { length: 3, offset: 0 } ],
+						matchedSubstrings: [{ length: 3, offset: 0 }],
 					},
 					{
 						label: '456 Sample Rd, Munich, Germany',
 						id: '2',
-						matchedSubstrings: [ { length: 3, offset: 0 } ],
+						matchedSubstrings: [{ length: 3, offset: 0 }],
 					},
 				];
 			},
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			select: async ( addressId: string, country: string ) => {
+			select: async (addressId: string, country: string) => {
 				return {
 					address_1: '123 Example St',
 					address_2: 'Address 2',
@@ -181,1125 +179,1112 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 		};
 
 		window.wc = {
-			...( window.wc || {} ),
+			...(window.wc || {}),
 			addressAutocomplete: {
 				providers: { 'generic-provider': genericProvider },
 				activeProvider: { billing: null, shipping: null },
-				registerAddressAutocompleteProvider( provider ) {
-					return !! provider;
+				registerAddressAutocompleteProvider(provider) {
+					return !!provider;
 				},
 			},
 		};
-	} );
+	});
 
-	afterEach( () => {
-		mockUseCheckoutAddress.mockReturnValue( {
+	afterEach(() => {
+		mockUseCheckoutAddress.mockReturnValue({
 			useShippingAsBilling: false,
 			useBillingAsShipping: false,
-		} );
-	} );
+		});
+	});
 
-	it( 'Shows suggestions when provider returns results', async () => {
+	it('Shows suggestions when provider returns results', async () => {
 		const Component = () => {
-			const [ value, setValue ] = useState( '' );
+			const [value, setValue] = useState('');
 			return (
 				<AddressAutocomplete
 					addressType="billing"
 					id="billing-test"
 					label="Address 1"
-					onChange={ setValue }
-					value={ value }
+					onChange={setValue}
+					value={value}
 				/>
 			);
 		};
-		const { container } = render( <Component /> );
+		const { container } = render(<Component />);
 		//screen.debug( container );
-		expect(
-			container.querySelectorAll( '.suggestions-list li' ).length
-		).toBe( 0 );
-		await act( async () => {
-			await userEvent.type(
-				screen.getByLabelText( 'Address 1' ),
-				'1234'
-			);
-		} );
+		expect(container.querySelectorAll('.suggestions-list li').length).toBe(
+			0
+		);
+		await act(async () => {
+			await userEvent.type(screen.getByLabelText('Address 1'), '1234');
+		});
 
 		await waitFor(
 			() => {
 				expect(
-					container.querySelectorAll( '.suggestions-list li' ).length
-				).toBe( 2 );
+					container.querySelectorAll('.suggestions-list li').length
+				).toBe(2);
 			},
 			{ timeout: 3000 }
 		);
-	} );
-	it( 'Shows branding element in results', async () => {
+	});
+	it('Shows branding element in results', async () => {
 		const Component = () => {
-			const [ value, setValue ] = useState( '' );
+			const [value, setValue] = useState('');
 			return (
 				<AddressAutocomplete
 					addressType="billing"
 					id="billing-test"
 					label="Address 1"
-					onChange={ setValue }
-					value={ value }
+					onChange={setValue}
+					value={value}
 				/>
 			);
 		};
-		render( <Component /> );
-		await act( async () => {
-			await userEvent.type(
-				screen.getByLabelText( 'Address 1' ),
-				'1234'
-			);
-		} );
+		render(<Component />);
+		await act(async () => {
+			await userEvent.type(screen.getByLabelText('Address 1'), '1234');
+		});
 
 		await waitFor(
 			() => {
 				expect(
-					screen.getByText( 'Test Provider - Generic' )
+					screen.getByText('Test Provider - Generic')
 				).toBeInTheDocument();
 			},
 			{ timeout: 3000 }
 		);
-	} );
-	it( 'Using arrow keys navigates through suggestions', async () => {
+	});
+	it('Using arrow keys navigates through suggestions', async () => {
 		const Component = () => {
-			const [ value, setValue ] = useState( '' );
+			const [value, setValue] = useState('');
 			return (
 				<AddressAutocomplete
 					addressType="billing"
 					id="billing-test"
 					label="Address 1"
-					onChange={ setValue }
-					value={ value }
+					onChange={setValue}
+					value={value}
 				/>
 			);
 		};
-		render( <Component /> );
-		await act( async () => {
-			await userEvent.type(
-				screen.getByLabelText( 'Address 1' ),
-				'1234'
-			);
-		} );
+		render(<Component />);
+		await act(async () => {
+			await userEvent.type(screen.getByLabelText('Address 1'), '1234');
+		});
 		await waitFor(
 			() => {
 				expect(
-					screen.getByText( 'Test Provider - Generic' )
+					screen.getByText('Test Provider - Generic')
 				).toBeInTheDocument();
 			},
 			{ timeout: 3000 }
 		);
-		const input = screen.getByLabelText( 'Address 1' );
+		const input = screen.getByLabelText('Address 1');
 		// Press down arrow to select first item.
-		await act( async () => {
-			await userEvent.type( input, '{arrowdown}' );
-		} );
-		let firstSuggestion = screen.getByText( '123' );
-		expect( firstSuggestion.closest( 'li' ) ).toHaveClass( 'active' );
+		await act(async () => {
+			await userEvent.type(input, '{arrowdown}');
+		});
+		let firstSuggestion = screen.getByText('123');
+		expect(firstSuggestion.closest('li')).toHaveClass('active');
 		// Press down arrow to select second item.
-		await act( async () => {
-			await userEvent.type( input, '{arrowdown}' );
-		} );
-		const secondSuggestion = screen.getByText( '456' );
-		expect( secondSuggestion.closest( 'li' ) ).toHaveClass( 'active' );
-		expect( firstSuggestion.closest( 'li' ) ).not.toHaveClass( 'active' );
+		await act(async () => {
+			await userEvent.type(input, '{arrowdown}');
+		});
+		const secondSuggestion = screen.getByText('456');
+		expect(secondSuggestion.closest('li')).toHaveClass('active');
+		expect(firstSuggestion.closest('li')).not.toHaveClass('active');
 		// Press up arrow to go back to first item.
-		await act( async () => {
-			await userEvent.type( input, '{arrowup}' );
-		} );
-		firstSuggestion = screen.getByText( '123' );
-		expect( firstSuggestion.closest( 'li' ) ).toHaveClass( 'active' );
-		expect( secondSuggestion.closest( 'li' ) ).not.toHaveClass( 'active' );
-	} );
+		await act(async () => {
+			await userEvent.type(input, '{arrowup}');
+		});
+		firstSuggestion = screen.getByText('123');
+		expect(firstSuggestion.closest('li')).toHaveClass('active');
+		expect(secondSuggestion.closest('li')).not.toHaveClass('active');
+	});
 
-	describe( 'ARIA accessibility attributes', () => {
-		it( 'Sets correct ARIA roles and attributes on input when suggestions are shown', async () => {
+	describe('ARIA accessibility attributes', () => {
+		it('Sets correct ARIA roles and attributes on input when suggestions are shown', async () => {
 			const Component = () => {
-				const [ value, setValue ] = useState( '' );
+				const [value, setValue] = useState('');
 				return (
 					<AddressAutocomplete
 						addressType="billing"
 						id="billing-test"
 						label="Address 1"
-						onChange={ setValue }
-						value={ value }
+						onChange={setValue}
+						value={value}
 					/>
 				);
 			};
-			render( <Component /> );
-			const input = screen.getByLabelText( 'Address 1' );
+			render(<Component />);
+			const input = screen.getByLabelText('Address 1');
 
 			// Initially, no suggestions - check ARIA state
-			expect( input ).toHaveAttribute( 'role', 'combobox' );
-			expect( input ).toHaveAttribute( 'aria-autocomplete', 'list' );
-			expect( input ).toHaveAttribute( 'aria-expanded', 'false' );
-			expect( input ).not.toHaveAttribute( 'aria-owns' );
-			expect( input ).not.toHaveAttribute( 'aria-activedescendant' );
+			expect(input).toHaveAttribute('role', 'combobox');
+			expect(input).toHaveAttribute('aria-autocomplete', 'list');
+			expect(input).toHaveAttribute('aria-expanded', 'false');
+			expect(input).not.toHaveAttribute('aria-owns');
+			expect(input).not.toHaveAttribute('aria-activedescendant');
 
 			// Type to trigger suggestions
-			await act( async () => {
-				await userEvent.type( input, '1234' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '1234');
+			});
 
 			await waitFor(
 				() => {
-					expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
+					expect(screen.getByRole('listbox')).toBeInTheDocument();
 				},
 				{ timeout: 3000 }
 			);
 
 			// Check ARIA attributes when suggestions are shown
-			expect( input ).toHaveAttribute( 'aria-expanded', 'true' );
-			expect( input ).toHaveAttribute(
+			expect(input).toHaveAttribute('aria-expanded', 'true');
+			expect(input).toHaveAttribute(
 				'aria-owns',
 				'address-suggestions-billing-list'
 			);
-			expect( input ).not.toHaveAttribute( 'aria-activedescendant' );
+			expect(input).not.toHaveAttribute('aria-activedescendant');
 
 			// Check listbox exists with correct attributes
-			const listbox = screen.getByRole( 'listbox' );
-			expect( listbox ).toHaveAttribute(
+			const listbox = screen.getByRole('listbox');
+			expect(listbox).toHaveAttribute(
 				'id',
 				'address-suggestions-billing-list'
 			);
-			expect( listbox ).toHaveAttribute(
+			expect(listbox).toHaveAttribute(
 				'aria-label',
 				'Address suggestions'
 			);
-		} );
+		});
 
-		it( 'Updates aria-activedescendant when navigating with keyboard', async () => {
+		it('Updates aria-activedescendant when navigating with keyboard', async () => {
 			const Component = () => {
-				const [ value, setValue ] = useState( '' );
+				const [value, setValue] = useState('');
 				return (
 					<AddressAutocomplete
 						addressType="shipping"
 						id="shipping-test"
 						label="Address 1"
-						onChange={ setValue }
-						value={ value }
+						onChange={setValue}
+						value={value}
 					/>
 				);
 			};
-			render( <Component /> );
-			const input = screen.getByLabelText( 'Address 1' );
+			render(<Component />);
+			const input = screen.getByLabelText('Address 1');
 
 			// Type to trigger suggestions
-			await act( async () => {
-				await userEvent.type( input, '1234' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '1234');
+			});
 
 			await waitFor(
 				() => {
-					expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
+					expect(screen.getByRole('listbox')).toBeInTheDocument();
 				},
 				{ timeout: 3000 }
 			);
 
 			// Initially no active descendant
-			expect( input ).not.toHaveAttribute( 'aria-activedescendant' );
+			expect(input).not.toHaveAttribute('aria-activedescendant');
 
 			// Press down arrow to select first item
-			await act( async () => {
-				await userEvent.type( input, '{arrowdown}' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '{arrowdown}');
+			});
 
 			// Check aria-activedescendant points to first item
-			expect( input ).toHaveAttribute(
+			expect(input).toHaveAttribute(
 				'aria-activedescendant',
 				'suggestion-item-shipping-0'
 			);
 
 			// Press down arrow to select second item
-			await act( async () => {
-				await userEvent.type( input, '{arrowdown}' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '{arrowdown}');
+			});
 
 			// Check aria-activedescendant updates to second item
-			expect( input ).toHaveAttribute(
+			expect(input).toHaveAttribute(
 				'aria-activedescendant',
 				'suggestion-item-shipping-1'
 			);
 
 			// Press up arrow to go back to first item
-			await act( async () => {
-				await userEvent.type( input, '{arrowup}' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '{arrowup}');
+			});
 
 			// Check aria-activedescendant points back to first item
-			expect( input ).toHaveAttribute(
+			expect(input).toHaveAttribute(
 				'aria-activedescendant',
 				'suggestion-item-shipping-0'
 			);
-		} );
+		});
 
-		it( 'Sets correct ARIA attributes on suggestion items', async () => {
+		it('Sets correct ARIA attributes on suggestion items', async () => {
 			const Component = () => {
-				const [ value, setValue ] = useState( '' );
+				const [value, setValue] = useState('');
 				return (
 					<AddressAutocomplete
 						addressType="billing"
 						id="billing-test"
 						label="Address 1"
-						onChange={ setValue }
-						value={ value }
+						onChange={setValue}
+						value={value}
 					/>
 				);
 			};
-			render( <Component /> );
+			render(<Component />);
 
 			// Type to trigger suggestions
-			await act( async () => {
+			await act(async () => {
 				await userEvent.type(
-					screen.getByLabelText( 'Address 1' ),
+					screen.getByLabelText('Address 1'),
 					'1234'
 				);
-			} );
+			});
 
 			await waitFor(
 				() => {
-					expect( screen.getAllByRole( 'option' ) ).toHaveLength( 2 );
+					expect(screen.getAllByRole('option')).toHaveLength(2);
 				},
 				{ timeout: 3000 }
 			);
 
-			const options = screen.getAllByRole( 'option' );
+			const options = screen.getAllByRole('option');
 
 			// Check all options have correct initial ARIA state
-			options.forEach( ( option, index ) => {
-				expect( option ).toHaveAttribute(
+			options.forEach((option, index) => {
+				expect(option).toHaveAttribute(
 					'id',
-					`suggestion-item-billing-${ index }`
+					`suggestion-item-billing-${index}`
 				);
-				expect( option ).toHaveAttribute( 'aria-selected', 'false' );
-				expect( option ).toHaveAttribute( 'tabIndex', '-1' );
-			} );
+				expect(option).toHaveAttribute('aria-selected', 'false');
+				expect(option).toHaveAttribute('tabIndex', '-1');
+			});
 
 			// Navigate to first option
-			const input = screen.getByLabelText( 'Address 1' );
-			await act( async () => {
-				await userEvent.type( input, '{arrowdown}' );
-			} );
+			const input = screen.getByLabelText('Address 1');
+			await act(async () => {
+				await userEvent.type(input, '{arrowdown}');
+			});
 
 			// Check first option is selected
-			expect( options[ 0 ] ).toHaveAttribute( 'aria-selected', 'true' );
-			expect( options[ 1 ] ).toHaveAttribute( 'aria-selected', 'false' );
+			expect(options[0]).toHaveAttribute('aria-selected', 'true');
+			expect(options[1]).toHaveAttribute('aria-selected', 'false');
 
 			// Navigate to second option
-			await act( async () => {
-				await userEvent.type( input, '{arrowdown}' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '{arrowdown}');
+			});
 
 			// Check second option is selected
-			expect( options[ 0 ] ).toHaveAttribute( 'aria-selected', 'false' );
-			expect( options[ 1 ] ).toHaveAttribute( 'aria-selected', 'true' );
-		} );
+			expect(options[0]).toHaveAttribute('aria-selected', 'false');
+			expect(options[1]).toHaveAttribute('aria-selected', 'true');
+		});
 
-		it( 'Includes aria-live region for announcements', async () => {
+		it('Includes aria-live region for announcements', async () => {
 			const Component = () => {
-				const [ value, setValue ] = useState( '' );
+				const [value, setValue] = useState('');
 				return (
 					<AddressAutocomplete
 						addressType="billing"
 						id="billing-test"
 						label="Address 1"
-						onChange={ setValue }
-						value={ value }
+						onChange={setValue}
+						value={value}
 					/>
 				);
 			};
-			render( <Component /> );
+			render(<Component />);
 
 			// Type to trigger suggestions
-			await act( async () => {
+			await act(async () => {
 				await userEvent.type(
-					screen.getByLabelText( 'Address 1' ),
+					screen.getByLabelText('Address 1'),
 					'1234'
 				);
-			} );
+			});
 
 			await waitFor(
 				() => {
-					expect( screen.getByRole( 'region' ) ).toBeInTheDocument();
+					expect(screen.getByRole('region')).toBeInTheDocument();
 				},
 				{ timeout: 3000 }
 			);
 
 			// Check aria-live region exists
-			const liveRegion = screen.getByRole( 'region' );
-			expect( liveRegion ).toHaveAttribute( 'aria-live', 'polite' );
+			const liveRegion = screen.getByRole('region');
+			expect(liveRegion).toHaveAttribute('aria-live', 'polite');
 
 			// Check it contains the suggestions
-			const listbox = screen.getByRole( 'listbox' );
-			expect( liveRegion ).toContainElement( listbox );
-		} );
+			const listbox = screen.getByRole('listbox');
+			expect(liveRegion).toContainElement(listbox);
+		});
 
-		it( 'Clears ARIA attributes when suggestions are hidden', async () => {
+		it('Clears ARIA attributes when suggestions are hidden', async () => {
 			const Component = () => {
-				const [ value, setValue ] = useState( '' );
+				const [value, setValue] = useState('');
 				return (
 					<AddressAutocomplete
 						addressType="billing"
 						id="billing-test"
 						label="Address 1"
-						onChange={ setValue }
-						value={ value }
+						onChange={setValue}
+						value={value}
 					/>
 				);
 			};
-			render( <Component /> );
-			const input = screen.getByLabelText( 'Address 1' );
+			render(<Component />);
+			const input = screen.getByLabelText('Address 1');
 
 			// Type to trigger suggestions
-			await act( async () => {
-				await userEvent.type( input, '1234' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '1234');
+			});
 
 			await waitFor(
 				() => {
-					expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
+					expect(screen.getByRole('listbox')).toBeInTheDocument();
 				},
 				{ timeout: 3000 }
 			);
 
 			// Navigate to select an item
-			await act( async () => {
-				await userEvent.type( input, '{arrowdown}' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '{arrowdown}');
+			});
 
 			// Verify ARIA attributes are set
-			expect( input ).toHaveAttribute( 'aria-expanded', 'true' );
-			expect( input ).toHaveAttribute(
+			expect(input).toHaveAttribute('aria-expanded', 'true');
+			expect(input).toHaveAttribute(
 				'aria-activedescendant',
 				'suggestion-item-billing-0'
 			);
 
 			// Press Escape to clear suggestions
-			await act( async () => {
-				await userEvent.type( input, '{Escape}' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '{Escape}');
+			});
 
 			// Check ARIA attributes are cleared
-			expect( input ).toHaveAttribute( 'aria-expanded', 'false' );
-			expect( input ).not.toHaveAttribute( 'aria-owns' );
-			expect( input ).not.toHaveAttribute( 'aria-activedescendant' );
+			expect(input).toHaveAttribute('aria-expanded', 'false');
+			expect(input).not.toHaveAttribute('aria-owns');
+			expect(input).not.toHaveAttribute('aria-activedescendant');
 
 			// Suggestions should be gone
-			expect( screen.queryByRole( 'listbox' ) ).not.toBeInTheDocument();
-		} );
+			expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+		});
 
-		it( 'Maintains focus on input during keyboard navigation', async () => {
+		it('Maintains focus on input during keyboard navigation', async () => {
 			const Component = () => {
-				const [ value, setValue ] = useState( '' );
+				const [value, setValue] = useState('');
 				return (
 					<AddressAutocomplete
 						addressType="billing"
 						id="billing-test"
 						label="Address 1"
-						onChange={ setValue }
-						value={ value }
+						onChange={setValue}
+						value={value}
 					/>
 				);
 			};
-			render( <Component /> );
-			const input = screen.getByLabelText( 'Address 1' );
+			render(<Component />);
+			const input = screen.getByLabelText('Address 1');
 
 			// Focus the input
-			await act( async () => {
+			await act(async () => {
 				input.focus();
-			} );
-			expect( input ).toHaveFocus();
+			});
+			expect(input).toHaveFocus();
 
 			// Type to trigger suggestions
-			await act( async () => {
-				await userEvent.type( input, '1234' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '1234');
+			});
 
 			await waitFor(
 				() => {
-					expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
+					expect(screen.getByRole('listbox')).toBeInTheDocument();
 				},
 				{ timeout: 3000 }
 			);
 
 			// Navigate with arrow keys
-			await act( async () => {
-				await userEvent.type( input, '{arrowdown}' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '{arrowdown}');
+			});
 
 			// Focus should remain on input
-			expect( input ).toHaveFocus();
+			expect(input).toHaveFocus();
 
-			await act( async () => {
-				await userEvent.type( input, '{arrowdown}' );
-			} );
-
-			// Focus should still be on input
-			expect( input ).toHaveFocus();
-
-			await act( async () => {
-				await userEvent.type( input, '{arrowup}' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '{arrowdown}');
+			});
 
 			// Focus should still be on input
-			expect( input ).toHaveFocus();
-		} );
+			expect(input).toHaveFocus();
 
-		it( 'Pressing Escape key hides suggestions and resets all ARIA states', async () => {
+			await act(async () => {
+				await userEvent.type(input, '{arrowup}');
+			});
+
+			// Focus should still be on input
+			expect(input).toHaveFocus();
+		});
+
+		it('Pressing Escape key hides suggestions and resets all ARIA states', async () => {
 			const Component = () => {
-				const [ value, setValue ] = useState( '' );
+				const [value, setValue] = useState('');
 				return (
 					<AddressAutocomplete
 						addressType="billing"
 						id="billing-test"
 						label="Address 1"
-						onChange={ setValue }
-						value={ value }
+						onChange={setValue}
+						value={value}
 					/>
 				);
 			};
-			render( <Component /> );
-			const input = screen.getByLabelText( 'Address 1' );
+			render(<Component />);
+			const input = screen.getByLabelText('Address 1');
 
 			// Type to trigger suggestions
-			await act( async () => {
-				await userEvent.type( input, '1234' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '1234');
+			});
 
 			await waitFor(
 				() => {
-					expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
+					expect(screen.getByRole('listbox')).toBeInTheDocument();
 				},
 				{ timeout: 3000 }
 			);
 
 			// Navigate to select an item (to set aria-activedescendant)
-			await act( async () => {
-				await userEvent.type( input, '{arrowdown}' );
-			} );
-			await act( async () => {
-				await userEvent.type( input, '{arrowdown}' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '{arrowdown}');
+			});
+			await act(async () => {
+				await userEvent.type(input, '{arrowdown}');
+			});
 
 			// Verify suggestions are visible and ARIA attributes are set
-			expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
-			expect( screen.getAllByRole( 'option' ) ).toHaveLength( 2 );
-			expect( input ).toHaveAttribute( 'aria-expanded', 'true' );
-			expect( input ).toHaveAttribute(
+			expect(screen.getByRole('listbox')).toBeInTheDocument();
+			expect(screen.getAllByRole('option')).toHaveLength(2);
+			expect(input).toHaveAttribute('aria-expanded', 'true');
+			expect(input).toHaveAttribute(
 				'aria-owns',
 				'address-suggestions-billing-list'
 			);
-			expect( input ).toHaveAttribute(
+			expect(input).toHaveAttribute(
 				'aria-activedescendant',
 				'suggestion-item-billing-1'
 			);
 
 			// Verify second option is selected
-			const options = screen.getAllByRole( 'option' );
-			expect( options[ 1 ] ).toHaveAttribute( 'aria-selected', 'true' );
-			expect( options[ 1 ] ).toHaveClass( 'active' );
+			const options = screen.getAllByRole('option');
+			expect(options[1]).toHaveAttribute('aria-selected', 'true');
+			expect(options[1]).toHaveClass('active');
 
 			// Press Escape to close suggestions
-			await act( async () => {
-				await userEvent.type( input, '{Escape}' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '{Escape}');
+			});
 
 			// Verify suggestions are hidden
-			expect( screen.queryByRole( 'listbox' ) ).not.toBeInTheDocument();
-			expect( screen.queryByRole( 'region' ) ).not.toBeInTheDocument();
-			expect( screen.queryAllByRole( 'option' ) ).toHaveLength( 0 );
+			expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+			expect(screen.queryByRole('region')).not.toBeInTheDocument();
+			expect(screen.queryAllByRole('option')).toHaveLength(0);
 
 			// Verify all ARIA attributes are reset
-			expect( input ).toHaveAttribute( 'role', 'combobox' );
-			expect( input ).toHaveAttribute( 'aria-autocomplete', 'list' );
-			expect( input ).toHaveAttribute( 'aria-expanded', 'false' );
-			expect( input ).not.toHaveAttribute( 'aria-owns' );
-			expect( input ).not.toHaveAttribute( 'aria-activedescendant' );
+			expect(input).toHaveAttribute('role', 'combobox');
+			expect(input).toHaveAttribute('aria-autocomplete', 'list');
+			expect(input).toHaveAttribute('aria-expanded', 'false');
+			expect(input).not.toHaveAttribute('aria-owns');
+			expect(input).not.toHaveAttribute('aria-activedescendant');
 
 			// Verify focus remains on input
-			expect( input ).toHaveFocus();
+			expect(input).toHaveFocus();
 
 			// Verify input value is preserved
-			expect( input ).toHaveValue( '1234' );
-		} );
+			expect(input).toHaveValue('1234');
+		});
 
-		it( 'Escape key works at any point during navigation', async () => {
+		it('Escape key works at any point during navigation', async () => {
 			const Component = () => {
-				const [ value, setValue ] = useState( '' );
+				const [value, setValue] = useState('');
 				return (
 					<AddressAutocomplete
 						addressType="shipping"
 						id="shipping-test"
 						label="Address 1"
-						onChange={ setValue }
-						value={ value }
+						onChange={setValue}
+						value={value}
 					/>
 				);
 			};
-			const { container } = render( <Component /> );
-			const input = screen.getByLabelText( 'Address 1' );
+			const { container } = render(<Component />);
+			const input = screen.getByLabelText('Address 1');
 
 			// Test 1: Escape immediately after suggestions appear (no selection)
-			await act( async () => {
-				await userEvent.type( input, '123' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '123');
+			});
 
 			await waitFor(
 				() => {
-					expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
+					expect(screen.getByRole('listbox')).toBeInTheDocument();
 				},
 				{ timeout: 3000 }
 			);
 
-			await act( async () => {
-				await userEvent.type( input, '{Escape}' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '{Escape}');
+			});
 
-			expect( screen.queryByRole( 'listbox' ) ).not.toBeInTheDocument();
+			expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
 
 			// Test 2: Escape after navigating to first item
-			await act( async () => {
-				await userEvent.type( input, '4' ); // Now "1234"
-			} );
+			await act(async () => {
+				await userEvent.type(input, '4'); // Now "1234"
+			});
 
 			await waitFor(
 				() => {
-					expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
+					expect(screen.getByRole('listbox')).toBeInTheDocument();
 				},
 				{ timeout: 3000 }
 			);
 
-			await act( async () => {
-				await userEvent.type( input, '{arrowdown}' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '{arrowdown}');
+			});
 
-			expect( input ).toHaveAttribute(
+			expect(input).toHaveAttribute(
 				'aria-activedescendant',
 				'suggestion-item-shipping-0'
 			);
 
-			await act( async () => {
-				await userEvent.type( input, '{Escape}' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '{Escape}');
+			});
 
-			expect( screen.queryByRole( 'listbox' ) ).not.toBeInTheDocument();
-			expect( input ).not.toHaveAttribute( 'aria-activedescendant' );
+			expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+			expect(input).not.toHaveAttribute('aria-activedescendant');
 
 			// Verify we can still type and get suggestions again after Escape
-			await act( async () => {
-				await userEvent.clear( input );
-				await userEvent.type( input, 'test' );
-			} );
+			await act(async () => {
+				await userEvent.clear(input);
+				await userEvent.type(input, 'test');
+			});
 
 			await waitFor(
 				() => {
-					expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
+					expect(screen.getByRole('listbox')).toBeInTheDocument();
 				},
 				{ timeout: 3000 }
 			);
 
 			expect(
-				container.querySelectorAll( '.suggestions-list li' ).length
-			).toBe( 2 );
-		} );
+				container.querySelectorAll('.suggestions-list li').length
+			).toBe(2);
+		});
 
-		it( 'Pressing Enter key on selected suggestion calls correct dispatch function', async () => {
+		it('Pressing Enter key on selected suggestion calls correct dispatch function', async () => {
 			const mockSetBillingAddress = jest.fn();
 			const mockSetShippingAddress = jest.fn();
 
 			// Override the mock for this specific test
 			mockUseDispatch.mockImplementation(
-				( store: string | { name: string } ) => {
-					if ( store === cartStore || store === 'wc/store/cart' ) {
+				(store: string | { name: string }) => {
+					if (store === cartStore || store === 'wc/store/cart') {
 						return {
 							...jest
-								.requireActual( '@wordpress/data' )
-								.useDispatch( store ),
+								.requireActual('@wordpress/data')
+								.useDispatch(store),
 							setShippingAddress: mockSetShippingAddress,
 							setBillingAddress: mockSetBillingAddress,
 						};
 					}
 					return jest
-						.requireActual( '@wordpress/data' )
-						.useDispatch( store );
+						.requireActual('@wordpress/data')
+						.useDispatch(store);
 				}
 			);
 
 			const Component = () => {
-				const [ value, setValue ] = useState( '' );
+				const [value, setValue] = useState('');
 				return (
 					<AddressAutocomplete
 						addressType="billing"
 						id="billing-test"
 						label="Address 1"
-						onChange={ setValue }
-						value={ value }
+						onChange={setValue}
+						value={value}
 					/>
 				);
 			};
-			render( <Component /> );
-			const input = screen.getByLabelText( 'Address 1' );
+			render(<Component />);
+			const input = screen.getByLabelText('Address 1');
 
 			// Type to trigger suggestions
-			await act( async () => {
-				await userEvent.type( input, '1234' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '1234');
+			});
 
 			await waitFor(
 				() => {
-					expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
+					expect(screen.getByRole('listbox')).toBeInTheDocument();
 				},
 				{ timeout: 3000 }
 			);
 
 			// Navigate to first suggestion
-			await act( async () => {
-				await userEvent.type( input, '{arrowdown}' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '{arrowdown}');
+			});
 
 			// Verify the suggestion is selected
-			expect( input ).toHaveAttribute(
+			expect(input).toHaveAttribute(
 				'aria-activedescendant',
 				'suggestion-item-billing-0'
 			);
 
 			// Press Enter to select the address
-			await act( async () => {
-				await userEvent.type( input, '{Enter}' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '{Enter}');
+			});
 
 			// Wait for the async select operation
 			await waitFor(
 				() => {
-					expect( mockSetBillingAddress ).toHaveBeenCalled();
+					expect(mockSetBillingAddress).toHaveBeenCalled();
 				},
 				{ timeout: 3000 }
 			);
 
 			// Verify setBillingAddress was called with the correct data
-			expect( mockSetBillingAddress ).toHaveBeenCalledWith( {
+			expect(mockSetBillingAddress).toHaveBeenCalledWith({
 				address_1: '123 Example St',
 				address_2: 'Address 2',
 				city: 'Berlin',
 				state: 'BE',
 				postcode: '10115',
 				country: 'DE',
-			} );
+			});
 
 			// Verify setShippingAddress was NOT called
-			expect( mockSetShippingAddress ).not.toHaveBeenCalled();
+			expect(mockSetShippingAddress).not.toHaveBeenCalled();
 
 			// Verify suggestions are hidden after selection
-			await waitFor( () => {
-				expect(
-					screen.queryByRole( 'listbox' )
-				).not.toBeInTheDocument();
-			} );
+			await waitFor(() => {
+				expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+			});
 
 			// Verify ARIA attributes are reset
-			expect( input ).toHaveAttribute( 'aria-expanded', 'false' );
-			expect( input ).not.toHaveAttribute( 'aria-activedescendant' );
-			expect( input ).not.toHaveAttribute( 'aria-owns' );
-		} );
+			expect(input).toHaveAttribute('aria-expanded', 'false');
+			expect(input).not.toHaveAttribute('aria-activedescendant');
+			expect(input).not.toHaveAttribute('aria-owns');
+		});
 
-		it( 'Pressing Enter on shipping address calls setShippingAddress', async () => {
+		it('Pressing Enter on shipping address calls setShippingAddress', async () => {
 			const mockSetBillingAddress = jest.fn();
 			const mockSetShippingAddress = jest.fn();
 
 			// Override the mock for this specific test
 			mockUseDispatch.mockImplementation(
-				( store: string | { name: string } ) => {
-					if ( store === cartStore || store === 'wc/store/cart' ) {
+				(store: string | { name: string }) => {
+					if (store === cartStore || store === 'wc/store/cart') {
 						return {
 							...jest
-								.requireActual( '@wordpress/data' )
-								.useDispatch( store ),
+								.requireActual('@wordpress/data')
+								.useDispatch(store),
 							setShippingAddress: mockSetShippingAddress,
 							setBillingAddress: mockSetBillingAddress,
 						};
 					}
 					return jest
-						.requireActual( '@wordpress/data' )
-						.useDispatch( store );
+						.requireActual('@wordpress/data')
+						.useDispatch(store);
 				}
 			);
 
 			const Component = () => {
-				const [ value, setValue ] = useState( '' );
+				const [value, setValue] = useState('');
 				return (
 					<AddressAutocomplete
 						addressType="shipping"
 						id="shipping-test"
 						label="Address 1"
-						onChange={ setValue }
-						value={ value }
+						onChange={setValue}
+						value={value}
 					/>
 				);
 			};
-			render( <Component /> );
-			const input = screen.getByLabelText( 'Address 1' );
+			render(<Component />);
+			const input = screen.getByLabelText('Address 1');
 
 			// Type to trigger suggestions
-			await act( async () => {
-				await userEvent.type( input, 'test' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, 'test');
+			});
 
 			await waitFor(
 				() => {
-					expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
+					expect(screen.getByRole('listbox')).toBeInTheDocument();
 				},
 				{ timeout: 3000 }
 			);
 
 			// Navigate to second suggestion
-			await act( async () => {
-				await userEvent.type( input, '{arrowdown}' );
-				await userEvent.type( input, '{arrowdown}' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '{arrowdown}');
+				await userEvent.type(input, '{arrowdown}');
+			});
 
 			// Press Enter to select the address
-			await act( async () => {
-				await userEvent.type( input, '{Enter}' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '{Enter}');
+			});
 
 			// Wait for the async select operation
 			await waitFor(
 				() => {
-					expect( mockSetShippingAddress ).toHaveBeenCalled();
+					expect(mockSetShippingAddress).toHaveBeenCalled();
 				},
 				{ timeout: 3000 }
 			);
 
 			// Verify setShippingAddress was called
-			expect( mockSetShippingAddress ).toHaveBeenCalledWith( {
+			expect(mockSetShippingAddress).toHaveBeenCalledWith({
 				address_1: '123 Example St',
 				address_2: 'Address 2',
 				city: 'Berlin',
 				state: 'BE',
 				postcode: '10115',
 				country: 'DE',
-			} );
+			});
 
 			// Verify setBillingAddress was NOT called
-			expect( mockSetBillingAddress ).not.toHaveBeenCalled();
-		} );
+			expect(mockSetBillingAddress).not.toHaveBeenCalled();
+		});
 
-		it( 'Enter key does nothing when no suggestion is selected', async () => {
+		it('Enter key does nothing when no suggestion is selected', async () => {
 			const mockSetBillingAddress = jest.fn();
 			const mockSetShippingAddress = jest.fn();
 
 			// Override the mock for this specific test
 			mockUseDispatch.mockImplementation(
-				( store: string | { name: string } ) => {
-					if ( store === cartStore || store === 'wc/store/cart' ) {
+				(store: string | { name: string }) => {
+					if (store === cartStore || store === 'wc/store/cart') {
 						return {
 							...jest
-								.requireActual( '@wordpress/data' )
-								.useDispatch( store ),
+								.requireActual('@wordpress/data')
+								.useDispatch(store),
 							setShippingAddress: mockSetShippingAddress,
 							setBillingAddress: mockSetBillingAddress,
 						};
 					}
 					return jest
-						.requireActual( '@wordpress/data' )
-						.useDispatch( store );
+						.requireActual('@wordpress/data')
+						.useDispatch(store);
 				}
 			);
 
 			const Component = () => {
-				const [ value, setValue ] = useState( '' );
+				const [value, setValue] = useState('');
 				return (
 					<AddressAutocomplete
 						addressType="billing"
 						id="billing-test"
 						label="Address 1"
-						onChange={ setValue }
-						value={ value }
+						onChange={setValue}
+						value={value}
 					/>
 				);
 			};
-			render( <Component /> );
-			const input = screen.getByLabelText( 'Address 1' );
+			render(<Component />);
+			const input = screen.getByLabelText('Address 1');
 
 			// Type to trigger suggestions
-			await act( async () => {
-				await userEvent.type( input, '1234' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '1234');
+			});
 
 			await waitFor(
 				() => {
-					expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
+					expect(screen.getByRole('listbox')).toBeInTheDocument();
 				},
 				{ timeout: 3000 }
 			);
 
 			// Press Enter without selecting any suggestion
-			await act( async () => {
-				await userEvent.type( input, '{Enter}' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '{Enter}');
+			});
 
 			// Wait a moment to ensure no async operations happen
-			await act( async () => {
-				await new Promise( ( resolve ) => setTimeout( resolve, 100 ) );
-			} );
+			await act(async () => {
+				await new Promise((resolve) => setTimeout(resolve, 100));
+			});
 
 			// Verify no dispatch functions were called
-			expect( mockSetBillingAddress ).not.toHaveBeenCalled();
-			expect( mockSetShippingAddress ).not.toHaveBeenCalled();
+			expect(mockSetBillingAddress).not.toHaveBeenCalled();
+			expect(mockSetShippingAddress).not.toHaveBeenCalled();
 
 			// Suggestions should still be visible
-			expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
-		} );
+			expect(screen.getByRole('listbox')).toBeInTheDocument();
+		});
 
-		it( 'Clicking on a suggestion calls correct dispatch function', async () => {
+		it('Clicking on a suggestion calls correct dispatch function', async () => {
 			const mockSetBillingAddress = jest.fn();
 			const mockSetShippingAddress = jest.fn();
 
 			// Override the mock for this specific test
 			mockUseDispatch.mockImplementation(
-				( store: string | { name: string } ) => {
-					if ( store === cartStore || store === 'wc/store/cart' ) {
+				(store: string | { name: string }) => {
+					if (store === cartStore || store === 'wc/store/cart') {
 						return {
 							...jest
-								.requireActual( '@wordpress/data' )
-								.useDispatch( store ),
+								.requireActual('@wordpress/data')
+								.useDispatch(store),
 							setShippingAddress: mockSetShippingAddress,
 							setBillingAddress: mockSetBillingAddress,
 						};
 					}
 					return jest
-						.requireActual( '@wordpress/data' )
-						.useDispatch( store );
+						.requireActual('@wordpress/data')
+						.useDispatch(store);
 				}
 			);
 
 			const Component = () => {
-				const [ value, setValue ] = useState( '' );
+				const [value, setValue] = useState('');
 				return (
 					<AddressAutocomplete
 						addressType="billing"
 						id="billing-test"
 						label="Address 1"
-						onChange={ setValue }
-						value={ value }
+						onChange={setValue}
+						value={value}
 					/>
 				);
 			};
-			render( <Component /> );
+			render(<Component />);
 
 			// Type to trigger suggestions
-			await act( async () => {
+			await act(async () => {
 				await userEvent.type(
-					screen.getByLabelText( 'Address 1' ),
+					screen.getByLabelText('Address 1'),
 					'1234'
 				);
-			} );
+			});
 
 			await waitFor(
 				() => {
-					expect( screen.getAllByRole( 'option' ) ).toHaveLength( 2 );
+					expect(screen.getAllByRole('option')).toHaveLength(2);
 				},
 				{ timeout: 3000 }
 			);
 
-			const options = screen.getAllByRole( 'option' );
+			const options = screen.getAllByRole('option');
 
 			// Click on the second suggestion
-			await act( async () => {
-				await userEvent.click( options[ 1 ] );
-			} );
+			await act(async () => {
+				await userEvent.click(options[1]);
+			});
 
 			// Wait for the async select operation
 			await waitFor(
 				() => {
-					expect( mockSetBillingAddress ).toHaveBeenCalled();
+					expect(mockSetBillingAddress).toHaveBeenCalled();
 				},
 				{ timeout: 3000 }
 			);
 
 			// Verify setBillingAddress was called with the correct data
-			expect( mockSetBillingAddress ).toHaveBeenCalledWith( {
+			expect(mockSetBillingAddress).toHaveBeenCalledWith({
 				address_1: '123 Example St',
 				address_2: 'Address 2',
 				city: 'Berlin',
 				state: 'BE',
 				postcode: '10115',
 				country: 'DE',
-			} );
+			});
 
 			// Verify setShippingAddress was NOT called
-			expect( mockSetShippingAddress ).not.toHaveBeenCalled();
+			expect(mockSetShippingAddress).not.toHaveBeenCalled();
 
 			// Verify suggestions are hidden after selection
-			await waitFor( () => {
-				expect(
-					screen.queryByRole( 'listbox' )
-				).not.toBeInTheDocument();
-			} );
-		} );
+			await waitFor(() => {
+				expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+			});
+		});
 
-		it( 'Clicking on shipping address suggestion calls setShippingAddress', async () => {
+		it('Clicking on shipping address suggestion calls setShippingAddress', async () => {
 			const mockSetBillingAddress = jest.fn();
 			const mockSetShippingAddress = jest.fn();
 
 			// Override the mock for this specific test
 			mockUseDispatch.mockImplementation(
-				( store: string | { name: string } ) => {
-					if ( store === cartStore || store === 'wc/store/cart' ) {
+				(store: string | { name: string }) => {
+					if (store === cartStore || store === 'wc/store/cart') {
 						return {
 							...jest
-								.requireActual( '@wordpress/data' )
-								.useDispatch( store ),
+								.requireActual('@wordpress/data')
+								.useDispatch(store),
 							setShippingAddress: mockSetShippingAddress,
 							setBillingAddress: mockSetBillingAddress,
 						};
 					}
 					return jest
-						.requireActual( '@wordpress/data' )
-						.useDispatch( store );
+						.requireActual('@wordpress/data')
+						.useDispatch(store);
 				}
 			);
 
 			const Component = () => {
-				const [ value, setValue ] = useState( '' );
+				const [value, setValue] = useState('');
 				return (
 					<AddressAutocomplete
 						addressType="shipping"
 						id="shipping-test"
 						label="Address 1"
-						onChange={ setValue }
-						value={ value }
+						onChange={setValue}
+						value={value}
 					/>
 				);
 			};
-			render( <Component /> );
+			render(<Component />);
 
 			// Type to trigger suggestions
-			await act( async () => {
+			await act(async () => {
 				await userEvent.type(
-					screen.getByLabelText( 'Address 1' ),
+					screen.getByLabelText('Address 1'),
 					'test'
 				);
-			} );
+			});
 
 			await waitFor(
 				() => {
-					expect( screen.getAllByRole( 'option' ) ).toHaveLength( 2 );
+					expect(screen.getAllByRole('option')).toHaveLength(2);
 				},
 				{ timeout: 3000 }
 			);
 
-			const options = screen.getAllByRole( 'option' );
+			const options = screen.getAllByRole('option');
 
 			// Click on the first suggestion
-			await act( async () => {
-				await userEvent.click( options[ 0 ] );
-			} );
+			await act(async () => {
+				await userEvent.click(options[0]);
+			});
 
 			// Wait for the async select operation
 			await waitFor(
 				() => {
-					expect( mockSetShippingAddress ).toHaveBeenCalled();
+					expect(mockSetShippingAddress).toHaveBeenCalled();
 				},
 				{ timeout: 3000 }
 			);
 
 			// Verify setShippingAddress was called
-			expect( mockSetShippingAddress ).toHaveBeenCalledWith( {
+			expect(mockSetShippingAddress).toHaveBeenCalledWith({
 				address_1: '123 Example St',
 				address_2: 'Address 2',
 				city: 'Berlin',
 				state: 'BE',
 				postcode: '10115',
 				country: 'DE',
-			} );
+			});
 
 			// Verify setBillingAddress was NOT called
-			expect( mockSetBillingAddress ).not.toHaveBeenCalled();
-		} );
+			expect(mockSetBillingAddress).not.toHaveBeenCalled();
+		});
 
-		it( 'Handles search function errors gracefully without breaking the input', async () => {
+		it('Handles search function errors gracefully without breaking the input', async () => {
 			// Create a provider that throws an error during search
 			const errorProvider = {
 				id: 'error-provider',
-				canSearch: ( country: string ) => {
+				canSearch: (country: string) => {
 					return country === 'DE';
 				},
 				search: async () => {
-					throw new Error( 'Search API failed' );
+					throw new Error('Search API failed');
 				},
 				select: async () => {
-					throw new Error( 'Select API failed' );
+					throw new Error('Select API failed');
 				},
 			};
 
 			// Replace the generic provider with our error provider
-			window.wc.addressAutocomplete.providers[ 'generic-provider' ] =
+			window.wc.addressAutocomplete.providers['generic-provider'] =
 				errorProvider;
 			window.wc.addressAutocomplete.activeProvider.billing =
 				errorProvider;
 
 			const Component = () => {
-				const [ value, setValue ] = useState( '' );
+				const [value, setValue] = useState('');
 				return (
 					<AddressAutocomplete
 						addressType="billing"
 						id="billing-test"
 						label="Address 1"
-						onChange={ setValue }
-						value={ value }
+						onChange={setValue}
+						value={value}
 					/>
 				);
 			};
-			const { container } = render( <Component /> );
-			const input = screen.getByLabelText( 'Address 1' );
+			const { container } = render(<Component />);
+			const input = screen.getByLabelText('Address 1');
 
 			// Type to trigger search (which will fail)
-			await act( async () => {
-				await userEvent.type( input, '1234' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '1234');
+			});
 
 			// Wait a bit to ensure the search attempt happens
-			await act( async () => {
-				await new Promise( ( resolve ) => setTimeout( resolve, 200 ) );
-			} );
+			await act(async () => {
+				await new Promise((resolve) => setTimeout(resolve, 200));
+			});
 
 			// Verify no suggestions are shown
-			expect( screen.queryByRole( 'listbox' ) ).not.toBeInTheDocument();
+			expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
 			expect(
-				container.querySelectorAll( '.suggestions-list li' ).length
-			).toBe( 0 );
+				container.querySelectorAll('.suggestions-list li').length
+			).toBe(0);
 
 			// Verify the input still works - we can continue typing
-			await act( async () => {
-				await userEvent.type( input, '5678' );
-			} );
+			await act(async () => {
+				await userEvent.type(input, '5678');
+			});
 
 			// Verify the value was updated
-			expect( input ).toHaveValue( '12345678' );
+			expect(input).toHaveValue('12345678');
 
 			// Verify ARIA attributes indicate no suggestions
-			expect( input ).toHaveAttribute( 'aria-expanded', 'false' );
-			expect( input ).not.toHaveAttribute( 'aria-owns' );
-			expect( input ).not.toHaveAttribute( 'aria-activedescendant' );
+			expect(input).toHaveAttribute('aria-expanded', 'false');
+			expect(input).not.toHaveAttribute('aria-owns');
+			expect(input).not.toHaveAttribute('aria-activedescendant');
 
 			// Clear and type again to ensure it still works
-			await act( async () => {
-				await userEvent.clear( input );
-				await userEvent.type( input, 'test address' );
-			} );
+			await act(async () => {
+				await userEvent.clear(input);
+				await userEvent.type(input, 'test address');
+			});
 
-			expect( input ).toHaveValue( 'test address' );
+			expect(input).toHaveValue('test address');
 
 			// Still no suggestions should appear
-			expect( screen.queryByRole( 'listbox' ) ).not.toBeInTheDocument();
-		} );
-	} );
+			expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+		});
+	});
 
-	describe( 'Address sync behavior', () => {
-		beforeEach( () => {
+	describe('Address sync behavior', () => {
+		beforeEach(() => {
 			const genericProvider = {
 				id: 'generic-provider',
 				canSearch: () => true,
@@ -1307,108 +1292,103 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 					{
 						label: '123 Example St, Berlin, Germany',
 						id: '1',
-						matchedSubstrings: [ { length: 3, offset: 0 } ],
+						matchedSubstrings: [{ length: 3, offset: 0 }],
 					},
 					{
 						label: '456 Sample Rd, Munich, Germany',
 						id: '2',
-						matchedSubstrings: [ { length: 3, offset: 0 } ],
+						matchedSubstrings: [{ length: 3, offset: 0 }],
 					},
 				],
-				select: async () => ( {
+				select: async () => ({
 					address_1: '123 Example St',
 					address_2: 'Address 2',
 					city: 'Berlin',
 					state: 'BE',
 					postcode: '10115',
 					country: 'DE',
-				} ),
+				}),
 			};
 
-			window.wc.addressAutocomplete.providers[ 'generic-provider' ] =
+			window.wc.addressAutocomplete.providers['generic-provider'] =
 				genericProvider;
 			window.wc.addressAutocomplete.activeProvider.shipping =
 				genericProvider;
 			window.wc.addressAutocomplete.activeProvider.billing =
 				genericProvider;
-		} );
+		});
 
-		it.each( [ 'Enter key', 'click' ] )(
+		it.each(['Enter key', 'click'])(
 			'Shipping autocomplete syncs to billing when useShippingAsBilling is true (%s)',
-			async ( interactionMethod ) => {
+			async (interactionMethod) => {
 				const mockSetBillingAddress = jest.fn();
 				const mockSetShippingAddress = jest.fn();
 
-				mockUseCheckoutAddress.mockReturnValue( {
+				mockUseCheckoutAddress.mockReturnValue({
 					useShippingAsBilling: true,
 					useBillingAsShipping: false,
-				} );
+				});
 
 				mockUseDispatch.mockImplementation(
-					( store: string | { name: string } ) => {
-						if (
-							store === cartStore ||
-							store === 'wc/store/cart'
-						) {
+					(store: string | { name: string }) => {
+						if (store === cartStore || store === 'wc/store/cart') {
 							return {
 								...jest
-									.requireActual( '@wordpress/data' )
-									.useDispatch( store ),
+									.requireActual('@wordpress/data')
+									.useDispatch(store),
 								setShippingAddress: mockSetShippingAddress,
 								setBillingAddress: mockSetBillingAddress,
 							};
 						}
 						return jest
-							.requireActual( '@wordpress/data' )
-							.useDispatch( store );
+							.requireActual('@wordpress/data')
+							.useDispatch(store);
 					}
 				);
 
 				const Component = () => {
-					const [ value, setValue ] = useState( '' );
+					const [value, setValue] = useState('');
 					return (
 						<AddressAutocomplete
 							addressType="shipping"
 							id="shipping-test"
 							label="Address 1"
-							onChange={ setValue }
-							value={ value }
+							onChange={setValue}
+							value={value}
 						/>
 					);
 				};
-				render( <Component /> );
-				const input = screen.getByLabelText( 'Address 1' );
+				render(<Component />);
+				const input = screen.getByLabelText('Address 1');
 
-				await act( async () => {
-					await userEvent.type( input, '1234' );
-				} );
+				await act(async () => {
+					await userEvent.type(input, '1234');
+				});
 
 				await waitFor(
 					() => {
-						expect(
-							screen.getByRole( 'listbox' )
-						).toBeInTheDocument();
+						expect(screen.getByRole('listbox')).toBeInTheDocument();
 					},
 					{ timeout: 3000 }
 				);
 
-				if ( interactionMethod === 'Enter key' ) {
-					await act( async () => {
-						await userEvent.type( input, '{arrowdown}' );
-					} );
-					await act( async () => {
-						await userEvent.type( input, '{Enter}' );
-					} );
+				if (interactionMethod === 'Enter key') {
+					await act(async () => {
+						await userEvent.type(input, '{arrowdown}');
+					});
+					await act(async () => {
+						await userEvent.type(input, '{Enter}');
+					});
 				} else {
-					const options = screen.getAllByRole( 'option' );
-					await act( async () => {
-						await userEvent.click( options[ 0 ] );
-					} );
+					const options = screen.getAllByRole('option');
+					await act(async () => {
+						await userEvent.click(options[0]);
+					});
 				}
 
 				await waitFor(
 					() => {
-						expect( mockSetShippingAddress ).toHaveBeenCalled();
+						expect(mockSetShippingAddress).toHaveBeenCalled();
 					},
 					{ timeout: 3000 }
 				);
@@ -1422,91 +1402,86 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 					country: 'DE',
 				};
 
-				expect( mockSetShippingAddress ).toHaveBeenCalledWith(
+				expect(mockSetShippingAddress).toHaveBeenCalledWith(
 					expectedAddress
 				);
-				expect( mockSetBillingAddress ).toHaveBeenCalledWith(
+				expect(mockSetBillingAddress).toHaveBeenCalledWith(
 					expectedAddress
 				);
 			}
 		);
 
-		it.each( [ 'Enter key', 'click' ] )(
+		it.each(['Enter key', 'click'])(
 			'Billing autocomplete syncs to shipping when useBillingAsShipping is true (%s)',
-			async ( interactionMethod ) => {
+			async (interactionMethod) => {
 				const mockSetBillingAddress = jest.fn();
 				const mockSetShippingAddress = jest.fn();
 
-				mockUseCheckoutAddress.mockReturnValue( {
+				mockUseCheckoutAddress.mockReturnValue({
 					useShippingAsBilling: false,
 					useBillingAsShipping: true,
-				} );
+				});
 
 				mockUseDispatch.mockImplementation(
-					( store: string | { name: string } ) => {
-						if (
-							store === cartStore ||
-							store === 'wc/store/cart'
-						) {
+					(store: string | { name: string }) => {
+						if (store === cartStore || store === 'wc/store/cart') {
 							return {
 								...jest
-									.requireActual( '@wordpress/data' )
-									.useDispatch( store ),
+									.requireActual('@wordpress/data')
+									.useDispatch(store),
 								setShippingAddress: mockSetShippingAddress,
 								setBillingAddress: mockSetBillingAddress,
 							};
 						}
 						return jest
-							.requireActual( '@wordpress/data' )
-							.useDispatch( store );
+							.requireActual('@wordpress/data')
+							.useDispatch(store);
 					}
 				);
 
 				const Component = () => {
-					const [ value, setValue ] = useState( '' );
+					const [value, setValue] = useState('');
 					return (
 						<AddressAutocomplete
 							addressType="billing"
 							id="billing-test"
 							label="Address 1"
-							onChange={ setValue }
-							value={ value }
+							onChange={setValue}
+							value={value}
 						/>
 					);
 				};
-				render( <Component /> );
-				const input = screen.getByLabelText( 'Address 1' );
+				render(<Component />);
+				const input = screen.getByLabelText('Address 1');
 
-				await act( async () => {
-					await userEvent.type( input, '1234' );
-				} );
+				await act(async () => {
+					await userEvent.type(input, '1234');
+				});
 
 				await waitFor(
 					() => {
-						expect(
-							screen.getByRole( 'listbox' )
-						).toBeInTheDocument();
+						expect(screen.getByRole('listbox')).toBeInTheDocument();
 					},
 					{ timeout: 3000 }
 				);
 
-				if ( interactionMethod === 'Enter key' ) {
-					await act( async () => {
-						await userEvent.type( input, '{arrowdown}' );
-					} );
-					await act( async () => {
-						await userEvent.type( input, '{Enter}' );
-					} );
+				if (interactionMethod === 'Enter key') {
+					await act(async () => {
+						await userEvent.type(input, '{arrowdown}');
+					});
+					await act(async () => {
+						await userEvent.type(input, '{Enter}');
+					});
 				} else {
-					const options = screen.getAllByRole( 'option' );
-					await act( async () => {
-						await userEvent.click( options[ 0 ] );
-					} );
+					const options = screen.getAllByRole('option');
+					await act(async () => {
+						await userEvent.click(options[0]);
+					});
 				}
 
 				await waitFor(
 					() => {
-						expect( mockSetBillingAddress ).toHaveBeenCalled();
+						expect(mockSetBillingAddress).toHaveBeenCalled();
 					},
 					{ timeout: 3000 }
 				);
@@ -1520,13 +1495,13 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 					country: 'DE',
 				};
 
-				expect( mockSetBillingAddress ).toHaveBeenCalledWith(
+				expect(mockSetBillingAddress).toHaveBeenCalledWith(
 					expectedAddress
 				);
-				expect( mockSetShippingAddress ).toHaveBeenCalledWith(
+				expect(mockSetShippingAddress).toHaveBeenCalledWith(
 					expectedAddress
 				);
 			}
 		);
-	} );
-} );
+	});
+});

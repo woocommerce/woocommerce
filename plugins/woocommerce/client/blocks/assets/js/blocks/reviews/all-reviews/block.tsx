@@ -30,17 +30,17 @@ import type { AllReviewsEditorProps } from './types';
  * @param {Object}            props.attributes    Incoming block attributes.
  * @param {function(any):any} props.setAttributes Setter for block attributes.
  */
-const AllReviewsEditor = ( {
+const AllReviewsEditor = ({
 	attributes,
 	setAttributes,
-}: AllReviewsEditorProps ) => {
+}: AllReviewsEditorProps) => {
 	const getInspectorControls = () => {
 		return (
 			<InspectorControls key="inspector">
 				<ToolsPanel
-					label={ __( 'Content', 'woocommerce' ) }
-					resetAll={ () =>
-						setAttributes( {
+					label={__('Content', 'woocommerce')}
+					resetAll={() =>
+						setAttributes({
 							showProductName: true,
 							showReviewRating: true,
 							showReviewerName: true,
@@ -48,47 +48,44 @@ const AllReviewsEditor = ( {
 							showReviewDate: true,
 							showReviewContent: true,
 							imageType: 'reviewer',
-						} )
+						})
 					}
 				>
 					<ToolsPanelItem
-						hasValue={ () => ! attributes.showProductName }
-						label={ __( 'Product name', 'woocommerce' ) }
-						onDeselect={ () =>
-							setAttributes( { showProductName: true } )
+						hasValue={() => !attributes.showProductName}
+						label={__('Product name', 'woocommerce')}
+						onDeselect={() =>
+							setAttributes({ showProductName: true })
 						}
 						isShownByDefault
 					>
 						<ToggleControl
 							__nextHasNoMarginBottom
-							label={ __( 'Product name', 'woocommerce' ) }
-							checked={ attributes.showProductName }
-							onChange={ () =>
-								setAttributes( {
+							label={__('Product name', 'woocommerce')}
+							checked={attributes.showProductName}
+							onChange={() =>
+								setAttributes({
 									showProductName:
-										! attributes.showProductName,
-								} )
+										!attributes.showProductName,
+								})
 							}
 						/>
 					</ToolsPanelItem>
-					{ getSharedReviewContentControls(
-						attributes,
-						setAttributes
-					) }
+					{getSharedReviewContentControls(attributes, setAttributes)}
 				</ToolsPanel>
 				<ToolsPanel
-					label={ __( 'List Settings', 'woocommerce' ) }
-					resetAll={ () =>
-						setAttributes( {
+					label={__('List Settings', 'woocommerce')}
+					resetAll={() =>
+						setAttributes({
 							showOrderby: true,
 							orderby: 'most-recent',
 							reviewsOnPageLoad: 10,
 							showLoadMore: true,
 							reviewsOnLoadMore: 10,
-						} )
+						})
 					}
 				>
-					{ getSharedReviewListControls( attributes, setAttributes ) }
+					{getSharedReviewListControls(attributes, setAttributes)}
 				</ToolsPanel>
 			</InspectorControls>
 		);
@@ -96,17 +93,17 @@ const AllReviewsEditor = ( {
 
 	return (
 		<>
-			{ getInspectorControls() }
+			{getInspectorControls()}
 			<EditorContainerBlock
-				attributes={ attributes }
+				attributes={attributes}
 				icon={
 					<Icon
-						icon={ postComments }
+						icon={postComments}
 						className="block-editor-block-icon"
 					/>
 				}
-				name={ __( 'All Reviews', 'woocommerce' ) }
-				noReviewsPlaceholder={ NoReviewsPlaceholder }
+				name={__('All Reviews', 'woocommerce')}
+				noReviewsPlaceholder={NoReviewsPlaceholder}
 			/>
 		</>
 	);

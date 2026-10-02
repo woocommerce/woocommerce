@@ -25,32 +25,32 @@ interface SwitchToClassicShortcodeButtonProps {
 	type: 'incompatible' | 'generic';
 }
 
-export function SwitchToClassicShortcodeButton( {
+export function SwitchToClassicShortcodeButton({
 	block,
 	clientId,
 	type,
-}: SwitchToClassicShortcodeButtonProps ): JSX.Element {
-	const { createInfoNotice } = useDispatch( noticesStore );
-	const { replaceBlock, selectBlock } = useDispatch( blockEditorStore );
+}: SwitchToClassicShortcodeButtonProps): JSX.Element {
+	const { createInfoNotice } = useDispatch(noticesStore);
+	const { replaceBlock, selectBlock } = useDispatch(blockEditorStore);
 
-	const [ isOpen, setOpen ] = useState( false );
-	const openModal = () => setOpen( true );
-	const closeModal = () => setOpen( false );
-	const { undo } = useDispatch( coreStore );
+	const [isOpen, setOpen] = useState(false);
+	const openModal = () => setOpen(true);
+	const closeModal = () => setOpen(false);
+	const { undo } = useDispatch(coreStore);
 
 	// Skipping the first two values in the array.
-	const [ , , incompatibleExtensions, incompatibleExtensionsCount ] =
-		useCombinedIncompatibilityNotice( block );
+	const [, , incompatibleExtensions, incompatibleExtensionsCount] =
+		useCombinedIncompatibilityNotice(block);
 
 	const isCart = block === 'woocommerce/cart';
 
 	const switchButtonLabel = isCart
-		? __( 'Switch to classic cart', 'woocommerce' )
-		: __( 'Switch to classic checkout', 'woocommerce' );
+		? __('Switch to classic cart', 'woocommerce')
+		: __('Switch to classic checkout', 'woocommerce');
 
 	const snackbarLabel = isCart
-		? __( 'Switched to classic cart.', 'woocommerce' )
-		: __( 'Switched to classic checkout.', 'woocommerce' );
+		? __('Switched to classic cart.', 'woocommerce')
+		: __('Switched to classic checkout.', 'woocommerce');
 
 	const notice =
 		type === 'incompatible' ? 'incompatible_notice' : 'generic_notice';
@@ -61,96 +61,93 @@ export function SwitchToClassicShortcodeButton( {
 		shortcode,
 		notice,
 		incompatible_extensions_count: incompatibleExtensionsCount,
-		incompatible_extensions_names: JSON.stringify( incompatibleExtensions ),
+		incompatible_extensions_names: JSON.stringify(incompatibleExtensions),
 	};
 
-	const { getBlocks } = useSelect( ( select ) => {
+	const { getBlocks } = useSelect((select) => {
 		return {
-			getBlocks: select( blockEditorStore ).getBlocks,
+			getBlocks: select(blockEditorStore).getBlocks,
 		};
-	}, [] );
+	}, []);
 
 	const selectClassicShortcodeBlock = () => {
-		const classicShortcodeBlock = findBlock( {
+		const classicShortcodeBlock = findBlock({
 			blocks: getBlocks(),
-			findCondition: ( foundBlock: BlockInstance ) =>
+			findCondition: (foundBlock: BlockInstance) =>
 				foundBlock.name === 'woocommerce/classic-shortcode',
-		} );
+		});
 
-		if ( classicShortcodeBlock ) {
-			void selectBlock( classicShortcodeBlock.clientId );
+		if (classicShortcodeBlock) {
+			void selectBlock(classicShortcodeBlock.clientId);
 		}
 	};
 
 	const handleSwitchToClassicShortcodeClick = () => {
-		recordEvent( 'switch_to_classic_shortcode_click', eventValue );
+		recordEvent('switch_to_classic_shortcode_click', eventValue);
 		openModal();
 	};
 
 	const handleUndoClick = () => {
 		void undo();
-		recordEvent( 'switch_to_classic_shortcode_undo', eventValue );
+		recordEvent('switch_to_classic_shortcode_undo', eventValue);
 	};
 
 	const handleSwitchClick = () => {
 		void replaceBlock(
 			clientId,
-			createBlock( 'woocommerce/classic-shortcode', {
+			createBlock('woocommerce/classic-shortcode', {
 				shortcode,
-			} )
+			})
 		);
-		recordEvent( 'switch_to_classic_shortcode_confirm', eventValue );
+		recordEvent('switch_to_classic_shortcode_confirm', eventValue);
 		selectClassicShortcodeBlock();
-		void createInfoNotice( snackbarLabel, {
+		void createInfoNotice(snackbarLabel, {
 			actions: [
 				{
-					label: __( 'Undo', 'woocommerce' ),
+					label: __('Undo', 'woocommerce'),
 					onClick: handleUndoClick,
 				},
 			],
 			type: 'snackbar',
-		} );
+		});
 		closeModal();
 	};
 
 	const handleCancelClick = () => {
-		recordEvent( 'switch_to_classic_shortcode_cancel', eventValue );
+		recordEvent('switch_to_classic_shortcode_cancel', eventValue);
 		closeModal();
 	};
 
 	return (
 		<>
 			<Button
-				variant={ 'secondary' }
-				onClick={ handleSwitchToClassicShortcodeClick }
+				variant={'secondary'}
+				onClick={handleSwitchToClassicShortcodeClick}
 			>
-				{ switchButtonLabel }
+				{switchButtonLabel}
 			</Button>
-			{ isOpen && (
+			{isOpen && (
 				<Modal
 					size="medium"
-					title={ switchButtonLabel }
-					onRequestClose={ closeModal }
+					title={switchButtonLabel}
+					onRequestClose={closeModal}
 					className="wc-blocks-switch-to-classic-shortcode-modal-content"
 				>
-					<ModalContent blockType={ block } />
+					<ModalContent blockType={block} />
 					<TabbableContainer className="wc-blocks-switch-to-classic-shortcode-modal-actions">
 						<Button
 							variant="primary"
-							isDestructive={ true }
-							onClick={ handleSwitchClick }
+							isDestructive={true}
+							onClick={handleSwitchClick}
 						>
-							{ __( 'Switch', 'woocommerce' ) }
-						</Button>{ ' ' }
-						<Button
-							variant="secondary"
-							onClick={ handleCancelClick }
-						>
-							{ __( 'Cancel', 'woocommerce' ) }
+							{__('Switch', 'woocommerce')}
+						</Button>{' '}
+						<Button variant="secondary" onClick={handleCancelClick}>
+							{__('Cancel', 'woocommerce')}
 						</Button>
 					</TabbableContainer>
 				</Modal>
-			) }
+			)}
 		</>
 	);
 }

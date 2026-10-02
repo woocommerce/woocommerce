@@ -10,27 +10,27 @@ import clsx from 'clsx';
  */
 import type { RenderItemArgs } from '../search-list-control/types';
 
-export const ProductTagItem = ( {
+export const ProductTagItem = ({
 	item,
 	search,
 	depth = 0,
 	...rest
-}: RenderItemArgs ): JSX.Element => {
-	const accessibleName = ! item.breadcrumbs.length
+}: RenderItemArgs): JSX.Element => {
+	const accessibleName = !item.breadcrumbs.length
 		? item.name
-		: `${ item.breadcrumbs.join( ', ' ) }, ${ item.name }`;
+		: `${item.breadcrumbs.join(', ')}, ${item.name}`;
 
 	return (
 		<SearchListItem
-			className={ clsx( 'woocommerce-product-tags__item', 'has-count', {
+			className={clsx('woocommerce-product-tags__item', 'has-count', {
 				'is-searching': search.length > 0,
 				'is-skip-level': depth === 0 && item.parent !== 0,
-			} ) }
-			item={ item }
-			search={ search }
-			depth={ depth }
-			{ ...rest }
-			ariaLabel={ sprintf(
+			})}
+			item={item}
+			search={search}
+			depth={depth}
+			{...rest}
+			ariaLabel={sprintf(
 				/* translators: %1$d is the count of products, %2$s is the name of the tag. */
 				_n(
 					'%1$d product tagged as %2$s',
@@ -40,7 +40,7 @@ export const ProductTagItem = ( {
 				),
 				item.count,
 				accessibleName
-			) }
+			)}
 		/>
 	);
 };

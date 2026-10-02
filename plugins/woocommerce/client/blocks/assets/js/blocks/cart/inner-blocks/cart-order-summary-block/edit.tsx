@@ -18,45 +18,43 @@ import {
 } from '../../../cart-checkout-shared';
 import { OrderMetaSlotFill } from './slotfills';
 
-export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
+export const Edit = ({ clientId }: { clientId: string }): JSX.Element => {
 	const blockProps = useBlockProps();
 	const { cartTotals } = useStoreCart();
-	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
-	const allowedBlocks = getAllowedBlocks(
-		innerBlockAreas.CART_ORDER_SUMMARY
-	);
+	const totalsCurrency = getCurrencyFromPriceResponse(cartTotals);
+	const allowedBlocks = getAllowedBlocks(innerBlockAreas.CART_ORDER_SUMMARY);
 	const defaultTemplate = [
 		[
 			'woocommerce/cart-order-summary-heading-block',
 			{
-				content: __( 'Cart totals', 'woocommerce' ),
+				content: __('Cart totals', 'woocommerce'),
 			},
 			[],
 		],
-		[ 'woocommerce/cart-order-summary-coupon-form-block', {}, [] ],
-		[ 'woocommerce/cart-order-summary-totals-block', {}, [] ],
+		['woocommerce/cart-order-summary-coupon-form-block', {}, []],
+		['woocommerce/cart-order-summary-totals-block', {}, []],
 	] as TemplateArray;
 
-	useForcedLayout( {
+	useForcedLayout({
 		clientId,
 		registeredBlocks: allowedBlocks,
 		defaultTemplate,
-	} );
+	});
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<InnerBlocks
-				allowedBlocks={ allowedBlocks }
-				template={ defaultTemplate }
+				allowedBlocks={allowedBlocks}
+				template={defaultTemplate}
 			/>
 			<div className="wc-block-components-totals-wrapper">
 				<TotalsFooterItem
-					currency={ totalsCurrency }
-					values={ cartTotals }
-					isEstimate={ true }
+					currency={totalsCurrency}
+					values={cartTotals}
+					isEstimate={true}
 				/>
 			</div>
-			{ /* do I put an totals wrapper here? */ }
+			{/* do I put an totals wrapper here? */}
 			<OrderMetaSlotFill />
 		</div>
 	);
@@ -64,7 +62,7 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 
 export const Save = (): JSX.Element => {
 	return (
-		<div { ...useBlockProps.save() }>
+		<div {...useBlockProps.save()}>
 			<InnerBlocks.Content />
 		</div>
 	);

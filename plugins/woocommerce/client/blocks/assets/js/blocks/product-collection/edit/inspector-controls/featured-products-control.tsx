@@ -15,38 +15,38 @@ import {
 import { CoreFilterNames, QueryControlProps } from '../../types';
 import { DEFAULT_FILTERS } from '../../constants';
 
-const FeaturedProductsControl = ( props: QueryControlProps ) => {
+const FeaturedProductsControl = (props: QueryControlProps) => {
 	const { query, trackInteraction, setQueryAttribute } = props;
 
 	const deselectCallback = () => {
-		setQueryAttribute( {
+		setQueryAttribute({
 			featured: DEFAULT_FILTERS.featured,
-		} );
-		trackInteraction( CoreFilterNames.FEATURED );
+		});
+		trackInteraction(CoreFilterNames.FEATURED);
 	};
 
 	return (
 		<ToolsPanelItem
-			label={ __( 'Featured', 'woocommerce' ) }
-			hasValue={ () => query.featured === true }
-			onDeselect={ deselectCallback }
-			resetAllFilter={ deselectCallback }
+			label={__('Featured', 'woocommerce')}
+			hasValue={() => query.featured === true}
+			onDeselect={deselectCallback}
+			resetAllFilter={deselectCallback}
 		>
 			<BaseControl
 				__nextHasNoMarginBottom
 				id="product-collection-featured-products-control"
-				label={ __( 'Featured', 'woocommerce' ) }
+				label={__('Featured', 'woocommerce')}
 			>
 				<ToggleControl
 					__nextHasNoMarginBottom
-					label={ __( 'Show only featured products', 'woocommerce' ) }
-					checked={ query.featured || false }
-					onChange={ ( featured ) => {
-						setQueryAttribute( {
+					label={__('Show only featured products', 'woocommerce')}
+					checked={query.featured || false}
+					onChange={(featured) => {
+						setQueryAttribute({
 							featured,
-						} );
-						trackInteraction( CoreFilterNames.FEATURED );
-					} }
+						});
+						trackInteraction(CoreFilterNames.FEATURED);
+					}}
 				/>
 			</BaseControl>
 		</ToolsPanelItem>

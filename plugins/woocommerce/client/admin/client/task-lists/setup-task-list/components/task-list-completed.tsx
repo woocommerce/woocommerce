@@ -10,17 +10,13 @@ import { __ } from '@wordpress/i18n';
  */
 import HeaderImage from '../assets/task-list-completed.svg';
 
-export const TaskListCompleted = ( {
-	hideTasks,
-}: {
-	hideTasks: () => void;
-} ) => {
+export const TaskListCompleted = ({ hideTasks }: { hideTasks: () => void }) => {
 	return (
 		<>
 			<div
-				className={ clsx(
+				className={clsx(
 					'woocommerce-task-dashboard__container setup-task-list'
-				) }
+				)}
 			>
 				<Card
 					size="large"
@@ -28,15 +24,15 @@ export const TaskListCompleted = ( {
 				>
 					<CardHeader size="medium">
 						<div className="woocommerce-task-card__header">
-							<img src={ HeaderImage } alt="Completed" />
+							<img src={HeaderImage} alt="Completed" />
 							<h2>
-								{ __(
+								{__(
 									'You’ve completed store setup',
 									'woocommerce'
-								) }
+								)}
 							</h2>
-							<Button variant="primary" onClick={ hideTasks }>
-								{ __( 'Hide this list', 'woocommerce' ) }
+							<Button variant="primary" onClick={hideTasks}>
+								{__('Hide this list', 'woocommerce')}
 							</Button>
 						</div>
 					</CardHeader>

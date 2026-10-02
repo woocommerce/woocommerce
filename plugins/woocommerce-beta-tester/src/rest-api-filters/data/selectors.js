@@ -1,7 +1,7 @@
-export function getFilters( state ) {
+export function getFilters(state) {
 	return state.filters;
 }
 
-export function isLoading( state ) {
+export function isLoading(state) {
 	return state.isLoading;
 }

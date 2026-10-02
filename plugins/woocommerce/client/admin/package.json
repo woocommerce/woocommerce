@@ -172,7 +172,6 @@
 		"@wordpress/jest-preset-default": "next",
 		"@wordpress/postcss-plugins-preset": "next",
 		"@wordpress/postcss-themes": "next",
-		"@wordpress/prettier-config": "4.49.0",
 		"@wordpress/scripts": "catalog:tooling",
 		"@wordpress/stylelint-config": "^23.14.0",
 		"@xstate/inspect": "0.8.0",

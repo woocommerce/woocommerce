@@ -4,11 +4,11 @@
 import { Cart } from '@woocommerce/type-defs/cart';
 
 export interface ShippingData {
-	needsShipping: Cart[ 'needsShipping' ];
-	hasCalculatedShipping: Cart[ 'hasCalculatedShipping' ];
-	shippingRates: Cart[ 'shippingRates' ];
+	needsShipping: Cart['needsShipping'];
+	hasCalculatedShipping: Cart['hasCalculatedShipping'];
+	shippingRates: Cart['shippingRates'];
 	isLoadingRates: boolean;
-	selectedRates: Record< string, string | unknown >;
+	selectedRates: Record<string, string | unknown>;
 	// Returns a function that accepts a shipping rate ID and a package ID.
 	selectShippingRate: (
 		newShippingRateId: string,

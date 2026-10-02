@@ -1,5 +1,4 @@
 #woocommerce_network_orders {
-
 	.inside {
 		margin: 0;
 		padding: 0;
@@ -18,14 +17,12 @@
 
 	.woocommerce-network-orders-no-orders,
 	.woocommerce-network-order-table-loading {
-
 		p {
 			text-align: center;
 		}
 	}
 
 	.woocommerce-network-order-table {
-
 		&.is-active {
 			display: table;
 		}
@@ -43,11 +40,8 @@
 	}
 
 	.post-type-shop_order {
-
 		.woocommerce-network-order-table {
-
 			tbody {
-
 				th,
 				td {
 					border-top: 1px solid #f5f5f5;

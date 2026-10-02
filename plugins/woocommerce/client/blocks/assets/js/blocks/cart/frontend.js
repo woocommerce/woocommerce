@@ -16,39 +16,39 @@ import Block from './block';
 import { blockName, blockAttributes } from './attributes';
 import { metadata } from './metadata';
 
-const getProps = ( el ) => {
+const getProps = (el) => {
 	return {
 		attributes: getValidBlockAttributes(
 			blockAttributes,
-			!! el ? el.dataset : {}
+			!!el ? el.dataset : {}
 		),
 	};
 };
 
-const Wrapper = ( { children } ) => {
+const Wrapper = ({ children }) => {
 	// we need to pluck out receiveCart.
 	// eslint-disable-next-line no-unused-vars
 	const { extensions, receiveCart, ...cart } = useStoreCart();
-	return Children.map( children, ( child ) => {
-		if ( isValidElement( child ) ) {
+	return Children.map(children, (child) => {
+		if (isValidElement(child)) {
 			const componentProps = {
 				extensions,
 				cart,
 			};
-			return cloneElement( child, componentProps );
+			return cloneElement(child, componentProps);
 		}
 		return child;
-	} );
+	});
 };
 
-renderParentBlock( {
+renderParentBlock({
 	Block,
 	blockName,
 	selector: '.wp-block-woocommerce-cart',
 	getProps,
-	blockMap: getRegisteredBlockComponents( blockName ),
+	blockMap: getRegisteredBlockComponents(blockName),
 	blockWrapper: Wrapper,
 	options: {
 		multiple: metadata.supports?.multiple ?? false,
 	},
-} );
+});

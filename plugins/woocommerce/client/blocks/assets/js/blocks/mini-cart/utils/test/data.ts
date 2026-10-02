@@ -12,11 +12,11 @@ const mockAttributes = {
 	iconColorValue: '#ffffff',
 	productCountColorValue: '#ff0000',
 };
-describe( 'migrateAttributesToColorPanel tests', () => {
-	test( 'it correctly migrates attributes to color panel', () => {
+describe('migrateAttributesToColorPanel tests', () => {
+	test('it correctly migrates attributes to color panel', () => {
 		const migratedAttributes =
-			migrateAttributesToColorPanel( mockAttributes );
-		expect( migratedAttributes ).toEqual( {
+			migrateAttributesToColorPanel(mockAttributes);
+		expect(migratedAttributes).toEqual({
 			miniCartIcon: 'cart',
 			addToCartBehaviour: 'inline',
 			hasHiddenPrice: false,
@@ -30,6 +30,6 @@ describe( 'migrateAttributesToColorPanel tests', () => {
 			productCountColor: {
 				color: '#ff0000',
 			},
-		} );
-	} );
-} );
+		});
+	});
+});

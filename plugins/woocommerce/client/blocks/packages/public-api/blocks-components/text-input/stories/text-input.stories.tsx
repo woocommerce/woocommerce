@@ -17,7 +17,7 @@ export default {
 	component: TextInput,
 	parameters: {
 		actions: {
-			handles: [ 'blur', 'change' ],
+			handles: ['blur', 'change'],
 		},
 	},
 	argTypes: {
@@ -150,27 +150,27 @@ export default {
 			},
 		},
 	},
-} as Meta< TextInputProps >;
+} as Meta<TextInputProps>;
 
-const Template: StoryFn< TextInputProps > = ( args ) => {
+const Template: StoryFn<TextInputProps> = (args) => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const [ _, updateArgs ] = useArgs();
-	const onChange = ( value: string ) => {
-		action( 'change' )( value || '' );
-		updateArgs( { value } );
+	const [_, updateArgs] = useArgs();
+	const onChange = (value: string) => {
+		action('change')(value || '');
+		updateArgs({ value });
 	};
 
-	return <TextInput { ...args } onChange={ onChange } />;
+	return <TextInput {...args} onChange={onChange} />;
 };
 
-export const Default: StoryFn< TextInputProps > = Template.bind( {} );
+export const Default: StoryFn<TextInputProps> = Template.bind({});
 Default.args = {
 	id: 'unique-id',
 	label: 'Enter your value',
 	value: 'Lorem ipsum',
 };
 
-export const WithError: StoryFn< TextInputProps > = Template.bind( {} );
+export const WithError: StoryFn<TextInputProps> = Template.bind({});
 WithError.args = {
 	id: 'unique-id',
 	label: 'Enter your value',
@@ -182,7 +182,7 @@ WithError.args = {
 	),
 };
 
-export const WithHelp: StoryFn< TextInputProps > = Template.bind( {} );
+export const WithHelp: StoryFn<TextInputProps> = Template.bind({});
 WithHelp.args = {
 	id: 'unique-id',
 	label: 'Enter your value',

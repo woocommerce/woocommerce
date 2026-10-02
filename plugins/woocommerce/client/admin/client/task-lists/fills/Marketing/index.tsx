@@ -29,7 +29,7 @@ import { getPluginSlug } from '../../../utils';
 import { TaskPromo } from './TaskPromo';
 
 // We display the list of plugins ordered by this list.
-const ALLOWED_PLUGIN_LISTS = [ 'task-list/grow', 'task-list/reach' ];
+const ALLOWED_PLUGIN_LISTS = ['task-list/grow', 'task-list/reach'];
 
 export const transformExtensionToPlugin = (
 	extension: Extension,
@@ -47,13 +47,13 @@ export const transformExtensionToPlugin = (
 		tags,
 		install_external,
 	} = extension;
-	const slug = getPluginSlug( key );
+	const slug = getPluginSlug(key);
 	return {
 		description,
 		slug,
 		imageUrl: image_url,
-		isActive: activePlugins.includes( slug ),
-		isInstalled: installedPlugins.includes( slug ),
+		isActive: activePlugins.includes(slug),
+		isInstalled: installedPlugins.includes(slug),
 		isBuiltByWC: is_built_by_wc,
 		manageUrl: manage_url,
 		name,
@@ -67,37 +67,37 @@ export const getMarketingExtensionLists = (
 	freeExtensions: ExtensionList[],
 	activePlugins: string[],
 	installedPlugins: string[]
-): [ PluginProps[], PluginListProps[] ] => {
+): [PluginProps[], PluginListProps[]] => {
 	const installed: PluginProps[] = [];
 	const lists: PluginListProps[] = [];
 
 	freeExtensions
-		.sort( ( a: ExtensionList, b: ExtensionList ) => {
+		.sort((a: ExtensionList, b: ExtensionList) => {
 			return (
-				ALLOWED_PLUGIN_LISTS.indexOf( a.key ) -
-				ALLOWED_PLUGIN_LISTS.indexOf( b.key )
+				ALLOWED_PLUGIN_LISTS.indexOf(a.key) -
+				ALLOWED_PLUGIN_LISTS.indexOf(b.key)
 			);
-		} )
-		.forEach( ( list ) => {
-			if ( ! ALLOWED_PLUGIN_LISTS.includes( list.key ) ) {
+		})
+		.forEach((list) => {
+			if (!ALLOWED_PLUGIN_LISTS.includes(list.key)) {
 				return;
 			}
 
 			const listPlugins: PluginProps[] = [];
-			list.plugins.forEach( ( extension ) => {
+			list.plugins.forEach((extension) => {
 				const plugin = transformExtensionToPlugin(
 					extension,
 					activePlugins,
 					installedPlugins
 				);
-				if ( plugin.isInstalled ) {
-					installed.push( plugin );
+				if (plugin.isInstalled) {
+					installed.push(plugin);
 					return;
 				}
-				listPlugins.push( plugin );
-			} );
+				listPlugins.push(plugin);
+			});
 
-			if ( ! listPlugins.length ) {
+			if (!listPlugins.length) {
 				return;
 			}
 
@@ -105,91 +105,89 @@ export const getMarketingExtensionLists = (
 				...list,
 				plugins: listPlugins,
 			};
-			lists.push( transformedList );
-		} );
+			lists.push(transformedList);
+		});
 
-	return [ installed, lists ];
+	return [installed, lists];
 };
 
 export type MarketingProps = {
-	onComplete: ( option?: { redirectPath: string } ) => void;
+	onComplete: (option?: { redirectPath: string }) => void;
 };
 
-const Marketing = ( { onComplete }: MarketingProps ) => {
-	const [ currentPlugin, setCurrentPlugin ] = useState< string | null >(
-		null
-	);
-	const { actionTask } = useDispatch( onboardingStore );
-	const { installAndActivatePlugins } = useDispatch( pluginsStore );
+const Marketing = ({ onComplete }: MarketingProps) => {
+	const [currentPlugin, setCurrentPlugin] = useState<string | null>(null);
+	const { actionTask } = useDispatch(onboardingStore);
+	const { installAndActivatePlugins } = useDispatch(pluginsStore);
 	const { activePlugins, freeExtensions, installedPlugins, isResolving } =
-		useSelect( ( select ) => {
+		useSelect((select) => {
 			const { getActivePlugins, getInstalledPlugins } =
-				select( pluginsStore );
+				select(pluginsStore);
 			const { getFreeExtensions, hasFinishedResolution } =
-				select( onboardingStore );
+				select(onboardingStore);
 
 			return {
 				activePlugins: getActivePlugins(),
 				freeExtensions: getFreeExtensions(),
 				installedPlugins: getInstalledPlugins(),
-				isResolving: ! hasFinishedResolution( 'getFreeExtensions', [] ),
+				isResolving: !hasFinishedResolution('getFreeExtensions', []),
 			};
-		}, [] );
+		}, []);
 
-	const [ installedExtensions, pluginLists ] = useMemo(
+	const [installedExtensions, pluginLists] = useMemo(
 		() =>
 			getMarketingExtensionLists(
 				freeExtensions,
 				activePlugins,
 				installedPlugins
 			),
-		[ installedPlugins, activePlugins, freeExtensions ]
+		[installedPlugins, activePlugins, freeExtensions]
 	);
 
-	const installAndActivate = ( slug: string ) => {
-		setCurrentPlugin( slug );
-		void actionTask( 'marketing' );
-		installAndActivatePlugins( [ slug ] )
-			.then( ( response: unknown ) => {
-				recordEvent( 'tasklist_marketing_install', {
+	const installAndActivate = (slug: string) => {
+		setCurrentPlugin(slug);
+		void actionTask('marketing');
+		installAndActivatePlugins([slug])
+			.then((response: unknown) => {
+				recordEvent('tasklist_marketing_install', {
 					selected_extension: slug,
 					installed_extensions: installedExtensions.map(
-						( extension ) => extension.slug
+						(extension) => extension.slug
 					),
 					section_order: pluginLists
-						.map( ( list ) => list.key )
-						.join( ', ' ),
-				} );
+						.map((list) => list.key)
+						.join(', '),
+				});
 
-				createNoticesFromResponse( response );
-				setCurrentPlugin( null );
-				onComplete( {
-					redirectPath: getNewPath( { task: 'marketing' } ),
-				} );
-			} )
-			.catch( ( response: { errors: Record< string, string > } ) => {
-				createNoticesFromResponse( response );
-				setCurrentPlugin( null );
-			} );
+				createNoticesFromResponse(response);
+				setCurrentPlugin(null);
+				onComplete({
+					redirectPath: getNewPath({ task: 'marketing' }),
+				});
+			})
+			.catch((response: { errors: Record<string, string> }) => {
+				createNoticesFromResponse(response);
+				setCurrentPlugin(null);
+			});
 	};
 
 	const onManage = () => {
-		void actionTask( 'marketing' );
+		void actionTask('marketing');
 	};
 
 	const trackPromoButtonClick = () => {
-		recordEvent( 'task_marketing_marketplace_promo_clicked', {
+		recordEvent('task_marketing_marketplace_promo_clicked', {
 			task: 'marketing',
-		} );
+		});
 	};
 
-	if ( isResolving ) {
+	if (isResolving) {
 		return <Spinner />;
 	}
 
 	return (
 		<div className="woocommerce-task-marketing">
-			{ !! installedExtensions.length && (
+			{!!installedExtensions.length && (
 				<Card className="woocommerce-task-card">
 					<CardHeader>
 						<Text
@@ -197,21 +195,21 @@ const Marketing = ( { onComplete }: MarketingProps ) => {
 							as="h2"
 							className="woocommerce-task-card__title"
 						>
-							{ __(
+							{__(
 								'Installed marketing extensions',
 								'woocommerce'
-							) }
+							)}
 						</Text>
 					</CardHeader>
 					<PluginList
-						currentPlugin={ currentPlugin }
-						installAndActivate={ installAndActivate }
-						onManage={ onManage }
-						plugins={ installedExtensions }
+						currentPlugin={currentPlugin}
+						installAndActivate={installAndActivate}
+						onManage={onManage}
+						plugins={installedExtensions}
 					/>
 				</Card>
-			) }
-			{ !! pluginLists.length && (
+			)}
+			{!!pluginLists.length && (
 				<Card className="woocommerce-task-card">
 					<CardHeader>
 						<Text
@@ -219,62 +217,59 @@ const Marketing = ( { onComplete }: MarketingProps ) => {
 							as="h2"
 							className="woocommerce-task-card__title"
 						>
-							{ __(
+							{__(
 								'Recommended marketing extensions',
 								'woocommerce'
-							) }
+							)}
 						</Text>
 						<Text as="span">
-							{ __(
+							{__(
 								'We recommend adding one of the following marketing tools for your store. The extension will be installed and activated for you when you click "Get started".',
 								'woocommerce'
-							) }
+							)}
 						</Text>
 					</CardHeader>
-					{ pluginLists.map( ( list ) => {
+					{pluginLists.map((list) => {
 						const { key, title, plugins } = list;
 						return (
 							<PluginList
-								currentPlugin={ currentPlugin }
-								installAndActivate={ installAndActivate }
-								onManage={ onManage }
-								key={ key }
-								plugins={ plugins }
-								title={ title }
+								currentPlugin={currentPlugin}
+								installAndActivate={installAndActivate}
+								onManage={onManage}
+								key={key}
+								plugins={plugins}
+								title={title}
 							/>
 						);
-					} ) }
+					})}
 				</Card>
-			) }
-			{ window?.wcTracks?.isEnabled && (
+			)}
+			{window?.wcTracks?.isEnabled && (
 				<TaskPromo
-					title={ __(
-						"Boost your store's potential",
-						'woocommerce'
-					) }
-					text={ __(
+					title={__("Boost your store's potential", 'woocommerce')}
+					text={__(
 						'Discover hand-picked extensions to grow your business in' +
 							' the WooCommerce marketplace.',
 						'woocommerce'
-					) }
-					buttonHref={ getAdminLink(
+					)}
+					buttonHref={getAdminLink(
 						'admin.php?page=wc-admin&tab=extensions&path=%2Fextensions&category=marketing-extensions'
-					) }
-					buttonText={ __( 'Start growing', 'woocommerce' ) }
-					onButtonClick={ trackPromoButtonClick }
+					)}
+					buttonText={__('Start growing', 'woocommerce')}
+					onButtonClick={trackPromoButtonClick}
 				/>
-			) }
+			)}
 		</div>
 	);
 };
 
-registerPlugin( 'wc-admin-onboarding-task-marketing', {
+registerPlugin('wc-admin-onboarding-task-marketing', {
 	scope: 'woocommerce-tasks',
 	render: () => (
 		<WooOnboardingTask id="marketing">
-			{ ( { onComplete } ) => {
-				return <Marketing onComplete={ onComplete } />;
-			} }
+			{({ onComplete }) => {
+				return <Marketing onComplete={onComplete} />;
+			}}
 		</WooOnboardingTask>
 	),
-} );
+});

@@ -21,23 +21,20 @@ export interface TotalsTaxesProps {
 	className?: string;
 	currency: Currency;
 	showRateAfterTaxName: boolean;
-	values: Values | Record< string, never >;
+	values: Values | Record<string, never>;
 	showSkeleton?: boolean;
 }
 
-const TotalsTaxes = ( {
+const TotalsTaxes = ({
 	currency,
 	values,
 	className,
 	showRateAfterTaxName,
 	showSkeleton,
-}: TotalsTaxesProps ): ReactElement | null => {
+}: TotalsTaxesProps): ReactElement | null => {
 	const { total_tax: totalTax, tax_lines: taxLines } = values;
 
-	if (
-		! getSetting( 'taxesEnabled', true ) &&
-		parseInt( totalTax, 10 ) <= 0
-	) {
+	if (!getSetting('taxesEnabled', true) && parseInt(totalTax, 10) <= 0) {
 		return null;
 	}
 
@@ -49,24 +46,24 @@ const TotalsTaxes = ( {
 	const itemisedTaxItems: ReactElement | null =
 		showItemisedTaxes && taxLines.length > 0 ? (
 			<>
-				{ taxLines.map( ( { name, rate, price }, i ) => {
-					const label = `${ name }${
-						showRateAfterTaxName ? ` ${ rate }` : ''
+				{taxLines.map(({ name, rate, price }, i) => {
+					const label = `${name}${
+						showRateAfterTaxName ? ` ${rate}` : ''
 					}`;
 					return (
 						<TotalsItem
-							key={ `tax-line-${ i }` }
-							className={ clsx(
+							key={`tax-line-${i}`}
+							className={clsx(
 								'wc-block-components-totals-taxes',
 								className
-							) }
-							currency={ currency }
-							label={ label }
-							value={ parseInt( price, 10 ) }
-							showSkeleton={ showSkeleton }
+							)}
+							currency={currency}
+							label={label}
+							value={parseInt(price, 10)}
+							showSkeleton={showSkeleton}
 						/>
 					);
-				} ) }{ ' ' }
+				})}{' '}
 			</>
 		) : null;
 
@@ -75,14 +72,11 @@ const TotalsTaxes = ( {
 	) : (
 		<>
 			<TotalsItem
-				className={ clsx(
-					'wc-block-components-totals-taxes',
-					className
-				) }
-				currency={ currency }
-				label={ __( 'Taxes', 'woocommerce' ) }
-				value={ parseInt( totalTax, 10 ) }
-				description={ null }
+				className={clsx('wc-block-components-totals-taxes', className)}
+				currency={currency}
+				label={__('Taxes', 'woocommerce')}
+				value={parseInt(totalTax, 10)}
+				description={null}
 			/>
 		</>
 	);

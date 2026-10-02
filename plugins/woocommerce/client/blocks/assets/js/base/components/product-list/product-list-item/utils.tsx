@@ -20,19 +20,19 @@ import { LayoutConfig } from '../types';
  */
 export const renderProductLayout = (
 	blockName: string,
-	product: Partial< ProductResponseItem >,
+	product: Partial<ProductResponseItem>,
 	layoutConfig: LayoutConfig | undefined,
 	componentId: number
-): ( JSX.Element | null )[] | undefined => {
-	if ( ! layoutConfig ) {
+): (JSX.Element | null)[] | undefined => {
+	if (!layoutConfig) {
 		return;
 	}
 
-	const blockMap = getBlockMap( blockName );
-	return layoutConfig.map( ( [ name, props = {} ], index ) => {
-		let children = [] as ( JSX.Element | null )[] | undefined;
+	const blockMap = getBlockMap(blockName);
+	return layoutConfig.map(([name, props = {}], index) => {
+		let children = [] as (JSX.Element | null)[] | undefined;
 
-		if ( !! props.children && props.children.length > 0 ) {
+		if (!!props.children && props.children.length > 0) {
 			// props.children here refers to the children stored in the block attributes. which
 			// has the same shape as `layoutConfig`, not React children, which has a different shape */
 			children = renderProductLayout(
@@ -43,28 +43,28 @@ export const renderProductLayout = (
 			);
 		}
 
-		const LayoutComponent = blockMap[ name ] as React.ComponentType< {
-			product: Partial< ProductResponseItem >;
-		} >;
+		const LayoutComponent = blockMap[name] as React.ComponentType<{
+			product: Partial<ProductResponseItem>;
+		}>;
 
-		if ( ! LayoutComponent ) {
+		if (!LayoutComponent) {
 			return null;
 		}
 
 		const productID = product.id || 0;
-		const keyParts = [ 'layout', name, index, componentId, productID ];
+		const keyParts = ['layout', name, index, componentId, productID];
 
 		return (
 			<Suspense
-				key={ keyParts.join( '_' ) }
-				fallback={ <div className="wc-block-placeholder" /> }
+				key={keyParts.join('_')}
+				fallback={<div className="wc-block-placeholder" />}
 			>
 				<LayoutComponent
-					{ ...props }
-					children={ children }
-					product={ product }
+					{...props}
+					children={children}
+					product={product}
 				/>
 			</Suspense>
 		);
-	} );
+	});
 };

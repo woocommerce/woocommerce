@@ -29,7 +29,7 @@ export interface Item {
 	style?: React.CSSProperties;
 }
 
-export interface ControlProps< ItemType > {
+export interface ControlProps<ItemType> {
 	name?: string;
 	className?: string;
 	label: string;
@@ -37,13 +37,13 @@ export interface ControlProps< ItemType > {
 	options: ItemType[];
 	value?: ItemType | null;
 	placeholder?: string;
-	onChange?: ( changes: Partial< UseSelectState< ItemType > > ) => void;
-	children?: ( item: ItemType ) => JSX.Element;
+	onChange?: (changes: Partial<UseSelectState<ItemType>>) => void;
+	children?: (item: ItemType) => JSX.Element;
 }
 
-const itemToString = ( item: { name?: string } | null ) => item?.name || '';
+const itemToString = (item: { name?: string } | null) => item?.name || '';
 
-function CustomSelectControl< ItemType extends Item >( {
+function CustomSelectControl<ItemType extends Item>({
 	name,
 	className,
 	label,
@@ -53,7 +53,7 @@ function CustomSelectControl< ItemType extends Item >( {
 	value,
 	placeholder,
 	children,
-}: ControlProps< ItemType > ): JSX.Element {
+}: ControlProps<ItemType>): JSX.Element {
 	const {
 		getLabelProps,
 		getToggleButtonProps,
@@ -62,103 +62,101 @@ function CustomSelectControl< ItemType extends Item >( {
 		isOpen,
 		highlightedIndex,
 		selectedItem,
-	} = useSelect( {
-		initialSelectedItem: items[ 0 ],
+	} = useSelect({
+		initialSelectedItem: items[0],
 		items,
 		itemToString,
 		onSelectedItemChange,
-		selectedItem: value || ( {} as ItemType ),
-	} );
+		selectedItem: value || ({} as ItemType),
+	});
 
-	const itemString = itemToString( selectedItem );
+	const itemString = itemToString(selectedItem);
 
 	function getDescribedBy() {
-		if ( describedBy ) {
+		if (describedBy) {
 			return describedBy;
 		}
 
-		if ( ! itemString ) {
-			return __( 'No selection', 'woocommerce' );
+		if (!itemString) {
+			return __('No selection', 'woocommerce');
 		}
 
 		return sprintf(
 			/* translators: %s: The selected option. */
-			__( 'Currently selected: %s', 'woocommerce' ),
+			__('Currently selected: %s', 'woocommerce'),
 			itemString
 		);
 	}
 
-	const menuProps = getMenuProps( {
+	const menuProps = getMenuProps({
 		className: 'components-custom-select-control__menu',
-		'aria-hidden': ! isOpen,
-	} ) as Record< string, any >; // eslint-disable-line @typescript-eslint/no-explicit-any
+		'aria-hidden': !isOpen,
+	}) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 	const onKeyDownHandler = useCallback(
-		( e: React.KeyboardEvent ) => {
+		(e: React.KeyboardEvent) => {
 			e.stopPropagation();
 			(
-				menuProps as { onKeyDown?: ( e: React.KeyboardEvent ) => void }
-			 )?.onKeyDown?.( e );
+				menuProps as { onKeyDown?: (e: React.KeyboardEvent) => void }
+			)?.onKeyDown?.(e);
 		},
-		[ menuProps ]
+		[menuProps]
 	);
 
 	// We need this here, because the null active descendant is not fully ARIA compliant.
-	if (
-		menuProps[ 'aria-activedescendant' ]?.startsWith( 'downshift-null' )
-	) {
-		delete menuProps[ 'aria-activedescendant' ];
+	if (menuProps['aria-activedescendant']?.startsWith('downshift-null')) {
+		delete menuProps['aria-activedescendant'];
 	}
 	return (
 		<div
-			className={ clsx(
+			className={clsx(
 				'woopayments components-custom-select-control',
 				className
-			) }
+			)}
 		>
 			{
 				/* eslint-disable-next-line jsx-a11y/label-has-associated-control, jsx-a11y/label-has-for */
 				<label
-					{ ...getLabelProps( {
+					{...getLabelProps({
 						className: 'components-custom-select-control__label',
-					} ) }
+					})}
 				>
-					{ label }
+					{label}
 				</label>
 			}
 			<Button
-				{ ...getToggleButtonProps( {
+				{...getToggleButtonProps({
 					// This is needed because some speech recognition software don't support `aria-labelledby`.
 					'aria-label': label,
 					'aria-labelledby': undefined,
 					'aria-describedby': getDescribedBy(),
 					className: clsx(
 						'components-custom-select-control__button',
-						{ placeholder: ! itemString }
+						{ placeholder: !itemString }
 					),
 					name,
-				} ) }
+				})}
 			>
 				<span className="components-custom-select-control__button-value">
-					{ itemString || placeholder }
+					{itemString || placeholder}
 				</span>
 				<Icon
-					icon={ chevronDown }
+					icon={chevronDown}
 					className="components-custom-select-control__button-icon"
 				/>
 			</Button>
-			<div { ...menuProps }>
-				{ /* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */ }
+			<div {...menuProps}>
+				{/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
 				<ul
 					className="components-custom-select-control__menu-container"
-					onKeyDown={ onKeyDownHandler }
+					onKeyDown={onKeyDownHandler}
 				>
-					{ isOpen &&
-						items.map( ( item, index ) => (
+					{isOpen &&
+						items.map((item, index) => (
 							// eslint-disable-next-line react/jsx-key
 							<li
-								key={ item.key }
-								{ ...getItemProps( {
+								key={item.key}
+								{...getItemProps({
 									item,
 									index,
 									className: clsx(
@@ -170,17 +168,17 @@ function CustomSelectControl< ItemType extends Item >( {
 										}
 									),
 									style: item.style,
-								} ) }
+								})}
 							>
-								{ children ? children( item ) : item.name }
-								{ item === selectedItem && (
+								{children ? children(item) : item.name}
+								{item === selectedItem && (
 									<Icon
-										icon={ check }
+										icon={check}
 										className="components-custom-select-control__item-icon"
 									/>
-								) }
+								)}
 							</li>
-						) ) }
+						))}
 				</ul>
 			</div>
 		</div>

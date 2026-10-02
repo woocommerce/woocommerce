@@ -1,15 +1,15 @@
 /**
  * External dependencies
  */
-const TerserPlugin = require( 'terser-webpack-plugin' );
+const TerserPlugin = require('terser-webpack-plugin');
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const isProduction = NODE_ENV === 'production';
 
 const sharedOptimizationConfig = {
-	concatenateModules: isProduction && ! process.env.WP_BUNDLE_ANALYZER,
+	concatenateModules: isProduction && !process.env.WP_BUNDLE_ANALYZER,
 	minimizer: [
-		new TerserPlugin( {
+		new TerserPlugin({
 			parallel: true,
 			terserOptions: {
 				output: {
@@ -19,11 +19,11 @@ const sharedOptimizationConfig = {
 					passes: isProduction ? 2 : 1,
 				},
 				mangle: {
-					reserved: [ '__', '_n', '_nx', '_x' ],
+					reserved: ['__', '_n', '_nx', '_x'],
 				},
 			},
 			extractComments: false,
-		} ),
+		}),
 	],
 };
 

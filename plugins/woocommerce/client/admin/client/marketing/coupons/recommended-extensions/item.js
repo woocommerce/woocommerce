@@ -12,39 +12,35 @@ import { ProductIcon } from '~/marketing/components';
 import { getRecommendationSource } from '~/marketing/utils';
 import { getInAppPurchaseUrl } from '~/lib/in-app-purchase';
 
-const RecommendedExtensionsItem = ( {
+const RecommendedExtensionsItem = ({
 	title,
 	description,
 	url,
 	product,
 	category,
-} ) => {
+}) => {
 	const onProductClick = () => {
-		recordEvent( 'marketing_recommended_extension', {
+		recordEvent('marketing_recommended_extension', {
 			name: title,
 			source: getRecommendationSource(),
-		} );
+		});
 	};
 
 	const classNameBase = 'woocommerce-marketing-recommended-extensions-item';
-	const connectURL = getInAppPurchaseUrl( url );
+	const connectURL = getInAppPurchaseUrl(url);
 
 	// Temporary fix to account for different styles between marketing & coupons
-	if ( category === 'coupons' && product === 'automatewoo' ) {
+	if (category === 'coupons' && product === 'automatewoo') {
 		product = `automatewoo-alt`;
 	}
 
 	return (
-		<a
-			href={ connectURL }
-			className={ classNameBase }
-			onClick={ onProductClick }
-		>
-			<ProductIcon product={ product } />
+		<a href={connectURL} className={classNameBase} onClick={onProductClick}>
+			<ProductIcon product={product} />
 
-			<div className={ `${ classNameBase }__text` }>
-				<h4>{ title }</h4>
-				<p>{ description }</p>
+			<div className={`${classNameBase}__text`}>
+				<h4>{title}</h4>
+				<p>{description}</p>
 			</div>
 		</a>
 	);

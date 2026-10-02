@@ -43,17 +43,17 @@ import type { CartStoreDescriptor } from '../../cart';
  * Get the argument that will be passed to a payment method's `canMakePayment` method.
  */
 export const getCanMakePaymentArg = (): CanMakePaymentArgument => {
-	const isEditor = !! select( 'core/editor' );
+	const isEditor = !!select('core/editor');
 	let canPayArgument: CanMakePaymentArgument;
 
-	if ( ! isEditor ) {
+	if (!isEditor) {
 		const store = select(
 			CART_STORE_KEY
-		) as CurriedSelectorsOf< CartStoreDescriptor >;
+		) as CurriedSelectorsOf<CartStoreDescriptor>;
 		const cart = store.getCartData();
 		const cartErrors = store.getCartErrors();
 		const cartTotals = store.getCartTotals();
-		const cartIsLoading = ! store.hasFinishedResolution( 'getCartData' );
+		const cartIsLoading = !store.hasFinishedResolution('getCartData');
 		const isLoadingRates = store.isAddressFieldsForShippingRatesUpdating();
 		const selectedShippingMethods = deriveSelectedShippingRates(
 			cart.shippingRates
@@ -72,19 +72,19 @@ export const getCanMakePaymentArg = (): CanMakePaymentArgument => {
 			cartTotals,
 			cartIsLoading,
 			cartErrors,
-			billingData: emptyHiddenAddressFields( cart.billingAddress ),
-			billingAddress: emptyHiddenAddressFields( cart.billingAddress ),
-			shippingAddress: emptyHiddenAddressFields( cart.shippingAddress ),
+			billingData: emptyHiddenAddressFields(cart.billingAddress),
+			billingAddress: emptyHiddenAddressFields(cart.billingAddress),
+			shippingAddress: emptyHiddenAddressFields(cart.shippingAddress),
 			extensions: cart.extensions,
 			shippingRates: cart.shippingRates,
 			isLoadingRates,
 			cartHasCalculatedShipping: cart.hasCalculatedShipping,
 			paymentRequirements: cart.paymentRequirements,
 			receiveCart: (
-				dispatch( CART_STORE_KEY ) as ActionCreatorsOf<
-					ConfigOf< CartStoreDescriptor >
+				dispatch(CART_STORE_KEY) as ActionCreatorsOf<
+					ConfigOf<CartStoreDescriptor>
 				>
-			 ).receiveCart,
+			).receiveCart,
 		};
 		canPayArgument = {
 			cart: cartForCanPayArgument,
@@ -141,12 +141,11 @@ export const getCanMakePaymentArg = (): CanMakePaymentArgument => {
 
 const registrationErrorNotice = (
 	paymentMethod:
-		| ExpressPaymentMethodConfigInstance
-		| PaymentMethodConfigInstance,
+		ExpressPaymentMethodConfigInstance | PaymentMethodConfigInstance,
 	errorMessage: string,
 	express = false
 ) => {
-	const { createErrorNotice } = dispatch( 'core/notices' );
+	const { createErrorNotice } = dispatch('core/notices');
 	const noticeContext = express
 		? noticeContexts.EXPRESS_PAYMENTS
 		: noticeContexts.PAYMENTS;
@@ -158,13 +157,13 @@ const registrationErrorNotice = (
 		),
 		paymentMethod.paymentMethodId
 	);
-	createErrorNotice( `${ errorText } ${ errorMessage }`, {
+	createErrorNotice(`${errorText} ${errorMessage}`, {
 		context: noticeContext,
-		id: `wc-${ paymentMethod.paymentMethodId }-registration-error`,
-	} );
+		id: `wc-${paymentMethod.paymentMethodId}-registration-error`,
+	});
 };
 
-export const checkPaymentMethodsCanPay = async ( express = false ) => {
+export const checkPaymentMethodsCanPay = async (express = false) => {
 	let availablePaymentMethods = {};
 
 	const paymentMethods = express
@@ -173,10 +172,9 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 
 	const addAvailablePaymentMethod = (
 		paymentMethod:
-			| PaymentMethodConfigInstance
-			| ExpressPaymentMethodConfigInstance
+			PaymentMethodConfigInstance | ExpressPaymentMethodConfigInstance
 	) => {
-		if ( express ) {
+		if (express) {
 			const {
 				name,
 				title,
@@ -188,7 +186,7 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 
 			availablePaymentMethods = {
 				...availablePaymentMethods,
-				[ paymentMethod.name ]: {
+				[paymentMethod.name]: {
 					name,
 					title,
 					description,
@@ -202,7 +200,7 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 
 			availablePaymentMethods = {
 				...availablePaymentMethods,
-				[ paymentMethod.name ]: {
+				[paymentMethod.name]: {
 					name,
 				},
 			};
@@ -211,22 +209,22 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 
 	// Order payment methods.
 	const paymentMethodsOrder = express
-		? Object.keys( paymentMethods )
+		? Object.keys(paymentMethods)
 		: Array.from(
-				new Set( [
-					...( getSetting( 'paymentMethodSortOrder', [] ) as [] ),
-					...Object.keys( paymentMethods ),
-				] )
-		  );
+				new Set([
+					...(getSetting('paymentMethodSortOrder', []) as []),
+					...Object.keys(paymentMethods),
+				])
+			);
 	const canPayArgument = getCanMakePaymentArg();
 	const cartPaymentMethods = canPayArgument.paymentMethods as string[];
-	const isEditor = !! select( 'core/editor' );
+	const isEditor = !!select('core/editor');
 
-	for ( let i = 0; i < paymentMethodsOrder.length; i++ ) {
-		const paymentMethodName = paymentMethodsOrder[ i ];
-		const paymentMethod = paymentMethods[ paymentMethodName ];
+	for (let i = 0; i < paymentMethodsOrder.length; i++) {
+		const paymentMethodName = paymentMethodsOrder[i];
+		const paymentMethod = paymentMethods[paymentMethodName];
 
-		if ( ! paymentMethod ) {
+		if (!paymentMethod) {
 			continue;
 		}
 
@@ -235,41 +233,41 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 			const validForCart =
 				isEditor || express
 					? true
-					: cartPaymentMethods.includes( paymentMethodName );
+					: cartPaymentMethods.includes(paymentMethodName);
 			const canPay = isEditor
 				? true
 				: validForCart &&
-				  ( await Promise.resolve(
-						paymentMethod.canMakePayment( canPayArgument )
-				  ) );
+					(await Promise.resolve(
+						paymentMethod.canMakePayment(canPayArgument)
+					));
 
-			if ( canPay ) {
-				if ( typeof canPay === 'object' && canPay.error ) {
-					throw new Error( canPay.error.message );
+			if (canPay) {
+				if (typeof canPay === 'object' && canPay.error) {
+					throw new Error(canPay.error.message);
 				}
-				addAvailablePaymentMethod( paymentMethod );
+				addAvailablePaymentMethod(paymentMethod);
 			}
-		} catch ( e ) {
-			if ( CURRENT_USER_IS_ADMIN || isEditor ) {
-				registrationErrorNotice( paymentMethod, e as string, express );
+		} catch (e) {
+			if (CURRENT_USER_IS_ADMIN || isEditor) {
+				registrationErrorNotice(paymentMethod, e as string, express);
 			}
 		}
 	}
 
 	const paymentSelectors = select(
 		PAYMENT_STORE_KEY
-	) as CurriedSelectorsOf< PaymentStoreDescriptor >;
+	) as CurriedSelectorsOf<PaymentStoreDescriptor>;
 
-	const availablePaymentMethodNames = Object.keys( availablePaymentMethods );
+	const availablePaymentMethodNames = Object.keys(availablePaymentMethods);
 	const currentlyAvailablePaymentMethods = express
 		? paymentSelectors.getAvailableExpressPaymentMethods()
 		: paymentSelectors.getAvailablePaymentMethods();
 
 	if (
-		Object.keys( currentlyAvailablePaymentMethods ).length ===
+		Object.keys(currentlyAvailablePaymentMethods).length ===
 			availablePaymentMethodNames.length &&
-		Object.keys( currentlyAvailablePaymentMethods ).every( ( current ) =>
-			availablePaymentMethodNames.includes( current )
+		Object.keys(currentlyAvailablePaymentMethods).every((current) =>
+			availablePaymentMethodNames.includes(current)
 		)
 	) {
 		// All the names are the same, no need to dispatch more actions.
@@ -279,14 +277,14 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 	const {
 		__internalSetAvailablePaymentMethods,
 		__internalSetAvailableExpressPaymentMethods,
-	} = dispatch( PAYMENT_STORE_KEY ) as ActionCreatorsOf<
-		ConfigOf< PaymentStoreDescriptor >
+	} = dispatch(PAYMENT_STORE_KEY) as ActionCreatorsOf<
+		ConfigOf<PaymentStoreDescriptor>
 	>;
 
 	const setCallback = express
 		? __internalSetAvailableExpressPaymentMethods
 		: __internalSetAvailablePaymentMethods;
 
-	void setCallback( availablePaymentMethods );
+	void setCallback(availablePaymentMethods);
 	return true;
 };

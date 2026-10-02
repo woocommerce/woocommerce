@@ -8,9 +8,11 @@ declare global {
 	interface Window {
 		wc: {
 			addressAutocomplete: {
-				providers: Record< string, ClientAddressAutocompleteProvider >;
+				providers: Record<string, ClientAddressAutocompleteProvider>;
 				activeProvider: {
-					[ key in AddressFormType ]?: ClientAddressAutocompleteProvider | null;
+					[
+						key in AddressFormType
+					]?: ClientAddressAutocompleteProvider | null;
 				};
 				registerAddressAutocompleteProvider: (
 					provider: ClientAddressAutocompleteProvider
@@ -34,11 +36,11 @@ export interface AddressAutocompleteResult {
 
 export interface ClientAddressAutocompleteProvider {
 	id: string;
-	canSearch: ( country: string ) => boolean;
+	canSearch: (country: string) => boolean;
 	search: (
 		inputValue: string,
 		country: string
-	) => Promise< AddressAutocompleteResult[] >;
+	) => Promise<AddressAutocompleteResult[]>;
 	select: (
 		addressId: string,
 		country: string

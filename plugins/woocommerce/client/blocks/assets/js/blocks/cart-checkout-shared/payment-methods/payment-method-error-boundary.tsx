@@ -17,9 +17,9 @@ interface PaymentMethodErrorBoundaryProps {
 	children: React.ReactNode;
 }
 
-class PaymentMethodErrorBoundary extends Component< PaymentMethodErrorBoundaryProps > {
+class PaymentMethodErrorBoundary extends Component<PaymentMethodErrorBoundaryProps> {
 	state = { errorMessage: '', hasError: false };
-	static getDerivedStateFromError( error: ReactError ): DerivedStateReturn {
+	static getDerivedStateFromError(error: ReactError): DerivedStateReturn {
 		return {
 			errorMessage: error.message,
 			hasError: true,
@@ -30,13 +30,13 @@ class PaymentMethodErrorBoundary extends Component< PaymentMethodErrorBoundaryPr
 		const { hasError, errorMessage } = this.state;
 		const { isEditor } = this.props;
 
-		if ( hasError ) {
+		if (hasError) {
 			let errorText = __(
 				'We are experiencing difficulties with this payment method. Please contact us for assistance.',
 				'woocommerce'
 			);
-			if ( isEditor || CURRENT_USER_IS_ADMIN ) {
-				if ( errorMessage ) {
+			if (isEditor || CURRENT_USER_IS_ADMIN) {
+				if (errorMessage) {
 					errorText = errorMessage;
 				} else {
 					errorText = __(
@@ -55,8 +55,8 @@ class PaymentMethodErrorBoundary extends Component< PaymentMethodErrorBoundaryPr
 			];
 			return (
 				<StoreNoticesContainer
-					additionalNotices={ notices }
-					context={ noticeContexts.PAYMENTS }
+					additionalNotices={notices}
+					context={noticeContexts.PAYMENTS}
 				/>
 			);
 		}

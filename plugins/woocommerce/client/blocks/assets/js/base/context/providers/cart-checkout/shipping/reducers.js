@@ -10,8 +10,8 @@ import { ERROR_TYPES } from './constants';
  * @param {Object} action      The incoming action.
  * @param {string} action.type The type of action.
  */
-export const errorStatusReducer = ( state, { type } ) => {
-	if ( Object.values( ERROR_TYPES ).includes( type ) ) {
+export const errorStatusReducer = (state, { type }) => {
+	if (Object.values(ERROR_TYPES).includes(type)) {
 		return type;
 	}
 	return state;

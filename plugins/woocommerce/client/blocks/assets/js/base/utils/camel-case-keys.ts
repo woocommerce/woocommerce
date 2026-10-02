@@ -8,5 +8,5 @@ import { camelCase } from 'change-case';
  */
 import { mapKeys } from './map-keys';
 
-export const camelCaseKeys = ( obj: object ) =>
-	mapKeys( obj, ( _, key ) => camelCase( key ) );
+export const camelCaseKeys = (obj: object) =>
+	mapKeys(obj, (_, key) => camelCase(key));

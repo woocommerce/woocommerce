@@ -9,12 +9,12 @@ import { gridBlockPreview } from '@woocommerce/resource-previews';
  */
 import { Props } from './types';
 
-export const HandpickedProductsBlock = ( props: Props ): JSX.Element => {
+export const HandpickedProductsBlock = (props: Props): JSX.Element => {
 	const { attributes, name } = props;
 
-	if ( attributes.isPreview ) {
+	if (attributes.isPreview) {
 		return gridBlockPreview;
 	}
 
-	return <ServerSideRender block={ name } attributes={ attributes } />;
+	return <ServerSideRender block={name} attributes={attributes} />;
 };

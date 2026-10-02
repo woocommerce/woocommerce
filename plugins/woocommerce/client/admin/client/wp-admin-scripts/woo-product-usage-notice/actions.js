@@ -5,9 +5,9 @@ import { addQueryArgs } from '@wordpress/url';
 import { getSetting } from '@woocommerce/settings';
 import apiFetch from '@wordpress/api-fetch';
 
-const request = ( { action, productId, nonce }, callback ) => {
+const request = ({ action, productId, nonce }, callback) => {
 	const url = addQueryArgs(
-		new URL( 'admin-ajax.php', getSetting( 'adminUrl' ) ).toString(),
+		new URL('admin-ajax.php', getSetting('adminUrl')).toString(),
 		{
 			action,
 			product_id: productId,
@@ -19,15 +19,15 @@ const request = ( { action, productId, nonce }, callback ) => {
 		'Content-Type': 'application/json',
 	};
 
-	apiFetch( {
+	apiFetch({
 		url,
 		method: 'GET',
 		headers,
-	} ).then( ( response ) => {
-		if ( callback ) {
-			callback( response );
+	}).then((response) => {
+		if (callback) {
+			callback(response);
 		}
-	} );
+	});
 };
 
 export const dismissRequest = (
@@ -39,7 +39,7 @@ export const dismissRequest = (
 		productId,
 		nonce: dismissNonce,
 	};
-	request( args, callback );
+	request(args, callback);
 };
 
 export const remindLaterRequest = (
@@ -51,5 +51,5 @@ export const remindLaterRequest = (
 		productId,
 		nonce: remindLaterNonce,
 	};
-	request( args, callback );
+	request(args, callback);
 };

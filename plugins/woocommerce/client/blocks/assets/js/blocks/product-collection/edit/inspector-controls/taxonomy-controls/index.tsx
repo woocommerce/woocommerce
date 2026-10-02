@@ -25,36 +25,36 @@ import useTaxonomyControls from './use-taxonomy-controls';
  * Hook that returns the taxonomies associated with product post type.
  */
 export const useTaxonomies = (): Taxonomy[] => {
-	const taxonomies = useSelect( ( select ) => {
-		const { getTaxonomies } = select( coreStore );
-		const filteredTaxonomies: Taxonomy[] = getTaxonomies( {
+	const taxonomies = useSelect((select) => {
+		const { getTaxonomies } = select(coreStore);
+		const filteredTaxonomies: Taxonomy[] = getTaxonomies({
 			type: 'product',
 			per_page: -1,
-		} );
+		});
 		return filteredTaxonomies;
-	}, [] );
-	return useMemo( () => {
+	}, []);
+	return useMemo(() => {
 		return taxonomies?.filter(
-			( { visibility } ) => !! visibility?.publicly_queryable
+			({ visibility }) => !!visibility?.publicly_queryable
 		);
-	}, [ taxonomies ] );
+	}, [taxonomies]);
 };
 
 /**
  * Normalize the name so first letter of every word is capitalized.
  */
-const normalizeName = ( name: string | undefined | null ) => {
-	if ( ! name ) {
+const normalizeName = (name: string | undefined | null) => {
+	if (!name) {
 		return '';
 	}
 
 	return name
-		.split( ' ' )
-		.map( ( word ) => word.charAt( 0 ).toUpperCase() + word.slice( 1 ) )
-		.join( ' ' );
+		.split(' ')
+		.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+		.join(' ');
 };
 
-function TaxonomyControls( {
+function TaxonomyControls({
 	setQueryAttribute,
 	trackInteraction,
 	query,
@@ -62,64 +62,64 @@ function TaxonomyControls( {
 	renderMode = 'panel',
 }: QueryControlProps & { collection: string | undefined } & {
 	renderMode?: 'panel' | 'standalone';
-} ) {
+}) {
 	const {
 		filteredTaxonomies,
 		taxQuery,
 		createHandleChange,
 		shouldShowTaxonomyControl,
-	} = useTaxonomyControls( {
+	} = useTaxonomyControls({
 		query,
 		collection,
 		setQueryAttribute,
 		trackInteraction,
 		isFiltersPanel: renderMode === 'panel',
-	} );
+	});
 
-	if ( ! shouldShowTaxonomyControl ) {
+	if (!shouldShowTaxonomyControl) {
 		return null;
 	}
 
-	const createTaxonomyControl = ( taxonomy: Taxonomy ) => {
+	const createTaxonomyControl = (taxonomy: Taxonomy) => {
 		const { slug } = taxonomy;
-		const termIds = taxQuery?.[ slug ] || [];
-		const handleChange = createHandleChange( slug );
+		const termIds = taxQuery?.[slug] || [];
+		const handleChange = createHandleChange(slug);
 
 		// Adapter for SearchListControl-based components that return SearchListItem[]
-		const handleSearchListChange = ( items: SearchListItem[] ) => {
-			const ids = items.map( ( { id } ) => Number( id ) );
-			handleChange( ids );
+		const handleSearchListChange = (items: SearchListItem[]) => {
+			const ids = items.map(({ id }) => Number(id));
+			handleChange(ids);
 		};
 
 		// Use dedicated controls for known taxonomies
-		switch ( slug ) {
+		switch (slug) {
 			case 'product_cat':
 				return (
 					<ProductCategoryControl
-						key={ slug }
-						selected={ termIds }
-						onChange={ handleSearchListChange }
-						isCompact={ true }
+						key={slug}
+						selected={termIds}
+						onChange={handleSearchListChange}
+						isCompact={true}
 						type="token"
 					/>
 				);
 			case 'product_tag':
 				return (
 					<ProductTagControl
-						key={ slug }
-						selected={ termIds }
-						onChange={ handleSearchListChange }
-						isCompact={ true }
+						key={slug}
+						selected={termIds}
+						onChange={handleSearchListChange}
+						isCompact={true}
 						type="token"
 					/>
 				);
 			case 'product_brand':
 				return (
 					<ProductBrandControl
-						key={ slug }
-						selected={ termIds }
-						onChange={ handleSearchListChange }
-						isCompact={ true }
+						key={slug}
+						selected={termIds}
+						onChange={handleSearchListChange}
+						isCompact={true}
 						type="token"
 					/>
 				);
@@ -127,41 +127,41 @@ function TaxonomyControls( {
 				// Fallback to FormTokenField for unknown taxonomies (e.g., attributes)
 				return (
 					<TaxonomyItem
-						key={ slug }
-						taxonomy={ taxonomy }
-						termIds={ termIds }
-						onChange={ handleChange }
+						key={slug}
+						taxonomy={taxonomy}
+						termIds={termIds}
+						onChange={handleChange}
 					/>
 				);
 		}
 	};
 
-	const createTaxonomyToolsPanelItem = ( taxonomy: Taxonomy ) => {
+	const createTaxonomyToolsPanelItem = (taxonomy: Taxonomy) => {
 		const { slug, name } = taxonomy;
-		const termIds = taxQuery?.[ slug ] || [];
-		const handleChange = createHandleChange( slug );
-		const deselectCallback = () => handleChange( [] );
+		const termIds = taxQuery?.[slug] || [];
+		const handleChange = createHandleChange(slug);
+		const deselectCallback = () => handleChange([]);
 
 		return (
 			<ToolsPanelItem
-				key={ slug }
-				label={ normalizeName( name ) }
-				hasValue={ () => termIds.length > 0 }
-				onDeselect={ deselectCallback }
-				resetAllFilter={ deselectCallback }
+				key={slug}
+				label={normalizeName(name)}
+				hasValue={() => termIds.length > 0}
+				onDeselect={deselectCallback}
+				resetAllFilter={deselectCallback}
 			>
-				{ createTaxonomyControl( taxonomy ) }
+				{createTaxonomyControl(taxonomy)}
 			</ToolsPanelItem>
 		);
 	};
 
 	return (
 		<>
-			{ filteredTaxonomies.map( ( taxonomy: Taxonomy ) => {
+			{filteredTaxonomies.map((taxonomy: Taxonomy) => {
 				return renderMode === 'panel'
-					? createTaxonomyToolsPanelItem( taxonomy )
-					: createTaxonomyControl( taxonomy );
-			} ) }
+					? createTaxonomyToolsPanelItem(taxonomy)
+					: createTaxonomyControl(taxonomy);
+			})}
 		</>
 	);
 }

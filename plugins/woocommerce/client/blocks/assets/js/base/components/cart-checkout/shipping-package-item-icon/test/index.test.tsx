@@ -11,8 +11,8 @@ import ShippingPackageItemIcon from '../index';
 import type { PackageItem } from '../../shipping-rates-control-package/types';
 
 // Mock the ProductImage component
-jest.mock( '../../product-image', () => {
-	return function ProductImage( {
+jest.mock('../../product-image', () => {
+	return function ProductImage({
 		image,
 		fallbackAlt,
 		width,
@@ -22,18 +22,18 @@ jest.mock( '../../product-image', () => {
 		fallbackAlt: string;
 		width?: number;
 		height?: number;
-	} ) {
+	}) {
 		return (
 			<img
 				data-testid="product-image"
-				src={ image.thumbnail || '' }
-				alt={ image.alt || fallbackAlt }
-				width={ width }
-				height={ height }
+				src={image.thumbnail || ''}
+				alt={image.alt || fallbackAlt}
+				width={width}
+				height={height}
 			/>
 		);
 	};
-} );
+});
 
 const mockPackageItem: PackageItem = {
 	key: 'test-item-key',
@@ -125,62 +125,62 @@ const mockCartItemWithoutImages: CartItem = {
 	images: [],
 };
 
-describe( 'ShippingPackageItemIcon', () => {
-	it( 'renders ProductImage with the first image and correct props when cart item has images', () => {
+describe('ShippingPackageItemIcon', () => {
+	it('renders ProductImage with the first image and correct props when cart item has images', () => {
 		render(
 			<ShippingPackageItemIcon
-				packageItem={ mockPackageItem }
-				cartItems={ [ mockCartItemWithImages ] }
+				packageItem={mockPackageItem}
+				cartItems={[mockCartItemWithImages]}
 			/>
 		);
 
-		const image = screen.getByTestId( 'product-image' );
-		expect( image ).toBeInTheDocument();
-		expect( image ).toHaveAttribute(
+		const image = screen.getByTestId('product-image');
+		expect(image).toBeInTheDocument();
+		expect(image).toHaveAttribute(
 			'src',
 			'https://example.com/image1-thumb.jpg'
 		);
-		expect( image ).toHaveAttribute( 'alt', 'Test Product Image' );
-	} );
+		expect(image).toHaveAttribute('alt', 'Test Product Image');
+	});
 
-	it.each( [
+	it.each([
 		[
 			'cart item has no images',
 			mockPackageItem,
-			[ mockCartItemWithoutImages ],
+			[mockCartItemWithoutImages],
 			'Test Product',
 		],
 		[
 			'cart item is not found',
 			{ ...mockPackageItem, key: 'non-existent' },
-			[ mockCartItemWithImages ],
+			[mockCartItemWithImages],
 			'',
 		],
-		[ 'cartItems is empty', mockPackageItem, [], '' ],
+		['cartItems is empty', mockPackageItem, [], ''],
 		[
 			'cartItems is undefined',
 			mockPackageItem,
 			undefined as unknown as CartItem[],
 			'',
 		],
-	] )(
+	])(
 		'renders placeholder when %s',
-		( _, packageItem, cartItems, expectedAlt ) => {
+		(_, packageItem, cartItems, expectedAlt) => {
 			render(
 				<ShippingPackageItemIcon
-					packageItem={ packageItem }
-					cartItems={ cartItems }
+					packageItem={packageItem}
+					cartItems={cartItems}
 				/>
 			);
 
-			const image = screen.getByTestId( 'product-image' );
-			expect( image ).toBeInTheDocument();
-			expect( image ).toHaveAttribute( 'src', '' );
-			expect( image ).toHaveAttribute( 'alt', expectedAlt );
+			const image = screen.getByTestId('product-image');
+			expect(image).toBeInTheDocument();
+			expect(image).toHaveAttribute('src', '');
+			expect(image).toHaveAttribute('alt', expectedAlt);
 		}
 	);
 
-	it( 'uses cart item name as fallback alt text', () => {
+	it('uses cart item name as fallback alt text', () => {
 		const cartItemWithImageNoAlt: CartItem = {
 			...mockCartItemWithImages,
 			images: [
@@ -198,16 +198,16 @@ describe( 'ShippingPackageItemIcon', () => {
 
 		render(
 			<ShippingPackageItemIcon
-				packageItem={ mockPackageItem }
-				cartItems={ [ cartItemWithImageNoAlt ] }
+				packageItem={mockPackageItem}
+				cartItems={[cartItemWithImageNoAlt]}
 			/>
 		);
 
-		const image = screen.getByTestId( 'product-image' );
-		expect( image ).toHaveAttribute( 'alt', 'Test Product' );
-	} );
+		const image = screen.getByTestId('product-image');
+		expect(image).toHaveAttribute('alt', 'Test Product');
+	});
 
-	it( 'correctly matches cart item by key', () => {
+	it('correctly matches cart item by key', () => {
 		const cartItems: CartItem[] = [
 			{ ...mockCartItemWithoutImages, key: 'item-1' },
 			{ ...mockCartItemWithImages, key: 'test-item-key' },
@@ -216,15 +216,15 @@ describe( 'ShippingPackageItemIcon', () => {
 
 		render(
 			<ShippingPackageItemIcon
-				packageItem={ mockPackageItem }
-				cartItems={ cartItems }
+				packageItem={mockPackageItem}
+				cartItems={cartItems}
 			/>
 		);
 
-		const image = screen.getByTestId( 'product-image' );
-		expect( image ).toHaveAttribute(
+		const image = screen.getByTestId('product-image');
+		expect(image).toHaveAttribute(
 			'src',
 			'https://example.com/image1-thumb.jpg'
 		);
-	} );
-} );
+	});
+});

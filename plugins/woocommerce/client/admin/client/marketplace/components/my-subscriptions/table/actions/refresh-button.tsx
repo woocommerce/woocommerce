@@ -21,56 +21,53 @@ import {
 } from '../../../../contexts/types';
 
 export function RefreshButton() {
-	const { refreshSubscriptions } = useContext( SubscriptionsContext );
-	const [ isLoading, setIsLoading ] = useState( false );
+	const { refreshSubscriptions } = useContext(SubscriptionsContext);
+	const [isLoading, setIsLoading] = useState(false);
 
 	const refresh = () => {
-		if ( isLoading ) {
+		if (isLoading) {
 			return;
 		}
 
-		removeNotice( NOTICE_ID );
-		setIsLoading( true );
+		removeNotice(NOTICE_ID);
+		setIsLoading(true);
 
 		refreshSubscriptions()
-			.then( () => {
+			.then(() => {
 				addNotice(
 					NOTICE_ID,
-					__( 'Subscriptions refreshed.', 'woocommerce' ),
+					__('Subscriptions refreshed.', 'woocommerce'),
 					NoticeStatus.Success
 				);
-			} )
-			.catch( ( error ) => {
+			})
+			.catch((error) => {
 				addNotice(
 					NOTICE_ID,
 					sprintf(
 						// translators: %s is the error message.
-						__(
-							'Error refreshing subscriptions: %s',
-							'woocommerce'
-						),
-						getRefreshErrorMessage( error )
+						__('Error refreshing subscriptions: %s', 'woocommerce'),
+						getRefreshErrorMessage(error)
 					),
 					NoticeStatus.Error
 				);
-			} )
-			.finally( () => {
-				setIsLoading( false );
-			} );
+			})
+			.finally(() => {
+				setIsLoading(false);
+			});
 	};
 
 	return (
 		<Button
 			className="woocommerce-marketplace__refresh-subscriptions"
-			onClick={ refresh }
-			isBusy={ isLoading }
+			onClick={refresh}
+			isBusy={isLoading}
 		>
 			<img
-				src={ RefreshIcon }
-				alt={ __( 'Refresh subscriptions', 'woocommerce' ) }
+				src={RefreshIcon}
+				alt={__('Refresh subscriptions', 'woocommerce')}
 				className="woocommerce-marketplace__refresh-subscriptions-icon"
 			/>
-			{ __( 'Refresh', 'woocommerce' ) }
+			{__('Refresh', 'woocommerce')}
 		</Button>
 	);
 }

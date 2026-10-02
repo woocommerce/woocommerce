@@ -30,7 +30,7 @@ export const DiscoverTools = () => {
 	 * - Otherwise, it renders PluginsTabPanel.
 	 */
 	const renderCardContent = () => {
-		if ( isInitializing ) {
+		if (isInitializing) {
 			return (
 				<CardBody>
 					<CenteredSpinner />
@@ -38,27 +38,24 @@ export const DiscoverTools = () => {
 			);
 		}
 
-		if ( data.length === 0 ) {
+		if (data.length === 0) {
 			return (
 				<CardBody className="woocommerce-marketing-discover-tools-card-body-empty-content">
-					<Icon icon={ trendingUp } size={ 32 } />
+					<Icon icon={trendingUp} size={32} />
 					<div>
-						{ __(
+						{__(
 							'Continue to reach the right audiences and promote your products in ways that matter to them with our range of marketing solutions.',
 							'woocommerce'
-						) }
+						)}
 					</div>
 					<Button
 						variant="tertiary"
 						href="https://woocommerce.com/product-category/woocommerce-extensions/marketing-extensions/"
-						onClick={ () => {
-							recordEvent( 'marketing_explore_more_extensions' );
-						} }
+						onClick={() => {
+							recordEvent('marketing_explore_more_extensions');
+						}}
 					>
-						{ __(
-							'Explore more marketing extensions',
-							'woocommerce'
-						) }
+						{__('Explore more marketing extensions', 'woocommerce')}
 					</Button>
 				</CardBody>
 			);
@@ -66,18 +63,18 @@ export const DiscoverTools = () => {
 
 		return (
 			<PluginsTabPanel
-				plugins={ data }
-				isLoading={ isLoading }
-				onInstallAndActivate={ installAndActivate }
+				plugins={data}
+				isLoading={isLoading}
+				onInstallAndActivate={installAndActivate}
 			/>
 		);
 	};
 
 	return (
 		<CollapsibleCard
-			header={ __( 'Discover more marketing tools', 'woocommerce' ) }
+			header={__('Discover more marketing tools', 'woocommerce')}
 		>
-			{ renderCardContent() }
+			{renderCardContent()}
 		</CollapsibleCard>
 	);
 };

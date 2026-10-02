@@ -12,10 +12,10 @@ import { updateBlockSettings } from '../../config-tools/block-config';
 import { addFilterForEmail } from '../../config-tools/filters';
 
 const columnsEditCallback = createHigherOrderComponent(
-	( BlockEdit ) =>
-		function alterBlocksEdits( props ) {
-			if ( props.name !== 'core/columns' ) {
-				return <BlockEdit { ...props } />;
+	(BlockEdit) =>
+		function alterBlocksEdits(props) {
+			if (props.name !== 'core/columns') {
+				return <BlockEdit {...props} />;
 			}
 			// CSS sets opacity by the class is-disabled by the toggle component from the Gutenberg package
 			// To deactivating the input we use CSS pointer-events because we want to avoid JavaScript hacks
@@ -27,9 +27,9 @@ const columnsEditCallback = createHigherOrderComponent(
 
 			return (
 				<>
-					<BlockEdit { ...props } />
+					<BlockEdit {...props} />
 					<InspectorControls>
-						<style>{ deactivateToggleCss }</style>
+						<style>{deactivateToggleCss}</style>
 					</InspectorControls>
 				</>
 			);
@@ -45,7 +45,7 @@ function deactivateStackOnMobile() {
 	);
 }
 
-const COLUMN_BLOCKS = [ 'core/column', 'core/columns' ];
+const COLUMN_BLOCKS = ['core/column', 'core/columns'];
 
 /**
  * Disables layout support for columns and column blocks because
@@ -54,22 +54,21 @@ const COLUMN_BLOCKS = [ 'core/column', 'core/columns' ];
  * Also, enhances the columns block to support background image.
  */
 function disableColumnsLayoutAndEnhanceColumnsBlock() {
-	COLUMN_BLOCKS.forEach( ( blockName ) => {
-		updateBlockSettings( blockName, ( current ) => ( {
+	COLUMN_BLOCKS.forEach((blockName) => {
+		updateBlockSettings(blockName, (current) => ({
 			...current,
 			supports: {
-				...( current.supports || {} ),
+				...(current.supports || {}),
 				layout: false,
 				background: {
 					// Preserve any existing background supports and enable backgroundImage
 					// @ts-expect-error BlockSupports type not complete
-					...( ( current.support as BlockSupports )?.background ||
-						{} ),
+					...((current.support as BlockSupports)?.background || {}),
 					backgroundImage: true,
 				},
 			},
-		} ) );
-	} );
+		}));
+	});
 }
 
 export { deactivateStackOnMobile, disableColumnsLayoutAndEnhanceColumnsBlock };

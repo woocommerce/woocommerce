@@ -36,9 +36,9 @@ import { InitialDisabled } from '../../components/initial-disabled';
 import { Notice } from '../../components/notice';
 import { sortFilterOptions } from '../../utils/sort-filter-options';
 
-const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
+const ATTRIBUTES = getSetting<AttributeSetting[]>('attributes', []);
 
-const Edit = ( props: EditProps ) => {
+const Edit = (props: EditProps) => {
 	const { attributes: blockAttributes } = props;
 
 	const {
@@ -51,72 +51,68 @@ const Edit = ( props: EditProps ) => {
 		hideEmpty,
 	} = blockAttributes;
 
-	const attributeObject = getAttributeFromId( attributeId );
+	const attributeObject = getAttributeFromId(attributeId);
 
-	const [ attributeOptions, setAttributeOptions ] = useState<
+	const [attributeOptions, setAttributeOptions] = useState<
 		FilterOptionItem[]
-	>( [] );
-	const [ isOptionsLoading, setIsOptionsLoading ] =
-		useState< boolean >( true );
+	>([]);
+	const [isOptionsLoading, setIsOptionsLoading] = useState<boolean>(true);
 
 	const { results: attributeTerms, isLoading: isTermsLoading } =
-		useCollection< AttributeTerm >( {
+		useCollection<AttributeTerm>({
 			namespace: '/wc/store/v1',
 			resourceName: 'products/attributes/terms',
-			resourceValues: [ attributeObject?.id || 0 ],
-			shouldSelect: !! attributeObject?.id,
+			resourceValues: [attributeObject?.id || 0],
+			shouldSelect: !!attributeObject?.id,
 			query: {
 				orderby: 'menu_order',
 				hide_empty: hideEmpty,
 				__experimental_visual: true,
 			},
-		} );
+		});
 
 	const { data: filteredCounts, isLoading: isFilterCountsLoading } =
-		useCollectionData( {
+		useCollectionData({
 			queryAttribute: {
 				taxonomy: attributeObject?.taxonomy || '',
 				queryType,
 			},
 			queryState: {},
 			isEditor: true,
-		} );
+		});
 
-	useEffect( () => {
-		if ( isTermsLoading || isFilterCountsLoading ) return;
+	useEffect(() => {
+		if (isTermsLoading || isFilterCountsLoading) return;
 
 		const termIdHasProducts =
-			objectHasProp( filteredCounts, 'attribute_counts' ) &&
-			isAttributeCounts( filteredCounts.attribute_counts )
-				? filteredCounts.attribute_counts.map( ( term ) => term.term )
+			objectHasProp(filteredCounts, 'attribute_counts') &&
+			isAttributeCounts(filteredCounts.attribute_counts)
+				? filteredCounts.attribute_counts.map((term) => term.term)
 				: [];
 
-		if ( termIdHasProducts.length === 0 && hideEmpty ) {
-			setAttributeOptions( [] );
+		if (termIdHasProducts.length === 0 && hideEmpty) {
+			setAttributeOptions([]);
 		} else {
 			const filteredOptions = attributeTerms
-				.filter( ( term ) => {
-					if ( hideEmpty )
-						return termIdHasProducts.includes( term.id );
+				.filter((term) => {
+					if (hideEmpty) return termIdHasProducts.includes(term.id);
 					return true;
-				} )
-				.map( ( term, index ) => ( {
+				})
+				.map((term, index) => ({
 					id: term.id.toString(),
 					label: term.name,
 					value: term.id.toString(),
 					selected: index === 0,
-					...( showCounts && { count: term.count } ),
-					...( term.__experimentalVisual && {
+					...(showCounts && { count: term.count }),
+					...(term.__experimentalVisual && {
 						visual: term.__experimentalVisual,
-					} ),
-				} ) );
+					}),
+				}));
 
-			setAttributeOptions(
-				sortFilterOptions( filteredOptions, sortOrder )
-			);
+			setAttributeOptions(sortFilterOptions(filteredOptions, sortOrder));
 		}
 
-		setIsOptionsLoading( false );
+		setIsOptionsLoading(false);
 	}, [
 		showCounts,
 		attributeTerms,
@@ -126,12 +122,12 @@ const Edit = ( props: EditProps ) => {
 		isTermsLoading,
 		isFilterCountsLoading,
 		attributeObject,
-	] );
+	]);
 
 	const { children, ...innerBlocksProps } = useInnerBlocksProps(
 		useBlockProps(),
 		{
-			allowedBlocks: getAllowedBlocks( EXCLUDED_BLOCKS ),
+			allowedBlocks: getAllowedBlocks(EXCLUDED_BLOCKS),
 			template: [
 				[
 					'core/heading',
@@ -139,7 +135,7 @@ const Edit = ( props: EditProps ) => {
 						level: 3,
 						content:
 							attributeObject?.label ||
-							__( 'Attribute', 'woocommerce' ),
+							__('Attribute', 'woocommerce'),
 						style: {
 							spacing: {
 								margin: {
@@ -150,7 +146,7 @@ const Edit = ( props: EditProps ) => {
 						},
 					},
 				],
-				[ displayStyle ],
+				[displayStyle],
 			],
 		}
 	);
@@ -158,57 +154,57 @@ const Edit = ( props: EditProps ) => {
 	const isLoading =
 		isTermsLoading || isFilterCountsLoading || isOptionsLoading;
 
-	if ( Object.keys( ATTRIBUTES ).length === 0 )
+	if (Object.keys(ATTRIBUTES).length === 0)
 		return (
-			<div { ...innerBlocksProps }>
-				<Inspector { ...props } />
+			<div {...innerBlocksProps}>
+				<Inspector {...props} />
 				<Notice>
 					<p>
-						{ __(
+						{__(
 							"Attributes are needed for filtering your products. You haven't created any attributes yet.",
 							'woocommerce'
-						) }
+						)}
 					</p>
 				</Notice>
 			</div>
 		);
 
-	if ( ! attributeId || ! attributeObject )
+	if (!attributeId || !attributeObject)
 		return (
-			<div { ...innerBlocksProps }>
-				<Inspector { ...props } />
+			<div {...innerBlocksProps}>
+				<Inspector {...props} />
 				<Notice>
 					<p>
-						{ __(
+						{__(
 							'Please select an attribute to use this filter!',
 							'woocommerce'
-						) }
+						)}
 					</p>
 				</Notice>
 			</div>
 		);
 
-	if ( ! isLoading && attributeTerms.length === 0 )
+	if (!isLoading && attributeTerms.length === 0)
 		return (
-			<div { ...innerBlocksProps }>
-				<Inspector { ...props } />
+			<div {...innerBlocksProps}>
+				<Inspector {...props} />
 				<Notice>
 					<p>
-						{ __(
+						{__(
 							'There are no products with the selected attributes.',
 							'woocommerce'
-						) }
+						)}
 					</p>
 				</Notice>
 			</div>
 		);
 
 	return (
-		<div { ...innerBlocksProps }>
-			<Inspector { ...props } />
+		<div {...innerBlocksProps}>
+			<Inspector {...props} />
 			<InitialDisabled>
 				<BlockContextProvider
-					value={ {
+					value={{
 						'woocommerce/selectableItems': {
 							items:
 								attributeOptions.length === 0 && isPreview
@@ -217,14 +213,14 @@ const Edit = ( props: EditProps ) => {
 							selectionMode: 'multiple' as const,
 							storeNamespace: 'woocommerce/product-filters',
 							isLoading,
-						} satisfies SelectableItemsContext< FilterItemFields >,
-					} }
+						} satisfies SelectableItemsContext<FilterItemFields>,
+					}}
 				>
-					{ children }
+					{children}
 				</BlockContextProvider>
 			</InitialDisabled>
 		</div>
 	);
 };
 
-export default withSpokenMessages( Edit );
+export default withSpokenMessages(Edit);

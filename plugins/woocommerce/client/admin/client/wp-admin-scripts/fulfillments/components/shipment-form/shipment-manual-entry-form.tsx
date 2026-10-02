@@ -12,28 +12,28 @@ import { useShipmentFormContext } from '../../context/shipment-form-context';
 import ShipmentProviders from '../../data/shipment-providers';
 import { SearchIcon, TruckIcon } from '../../utils/icons';
 
-const ShippingProviderListItem = ( {
+const ShippingProviderListItem = ({
 	item,
 }: {
 	item: ComboboxControlOption;
-} ) => {
+}) => {
 	return (
 		<div
-			className={ [
+			className={[
 				'woocommerce-fulfillment-shipping-provider-list-item',
 				'woocommerce-fulfillment-shipping-provider-list-item-' +
 					item.value,
-			].join( ' ' ) }
+			].join(' ')}
 		>
 			<div className="woocommerce-fulfillment-shipping-provider-list-item-icon">
-				{ item.icon ? (
-					<img src={ item.icon } alt={ item.label } />
+				{item.icon ? (
+					<img src={item.icon} alt={item.label} />
 				) : (
 					<TruckIcon />
-				) }
+				)}
 			</div>
 			<div className="woocommerce-fulfillment-shipping-provider-list-item-label">
-				{ item.label }
+				{item.label}
 			</div>
 		</div>
 	);
@@ -53,23 +53,20 @@ export default function ShipmentManualEntryForm() {
 	return (
 		<>
 			<p className="woocommerce-fulfillment-description">
-				{ __(
+				{__(
 					'Provide the shipment information for this fulfillment.',
 					'woocommerce'
-				) }
+				)}
 			</p>
 			<div className="woocommerce-fulfillment-input-container">
 				<div className="woocommerce-fulfillment-input-group">
 					<TextControl
-						label={ __( 'Tracking Number', 'woocommerce' ) }
+						label={__('Tracking Number', 'woocommerce')}
 						type="text"
-						placeholder={ __(
-							'Enter tracking number',
-							'woocommerce'
-						) }
-						value={ trackingNumber }
-						onChange={ ( value: string ) => {
-							setTrackingNumber( value );
+						placeholder={__('Enter tracking number', 'woocommerce')}
+						value={trackingNumber}
+						onChange={(value: string) => {
+							setTrackingNumber(value);
 							if (
 								shipmentProvider &&
 								shipmentProvider !== 'other'
@@ -81,11 +78,11 @@ export default function ShipmentManualEntryForm() {
 										]?.url ?? ''
 									).replace(
 										/__placeholder__/i,
-										encodeURIComponent( value )
+										encodeURIComponent(value)
 									)
 								);
 							}
-						} }
+						}}
 						__next40pxDefaultSize
 						__nextHasNoMarginBottom
 					/>
@@ -94,23 +91,23 @@ export default function ShipmentManualEntryForm() {
 			<div className="woocommerce-fulfillment-input-container">
 				<div className="woocommerce-fulfillment-input-group">
 					<ComboboxControl
-						label={ __( 'Provider', 'woocommerce' ) }
-						__experimentalRenderItem={ ( { item } ) => (
-							<ShippingProviderListItem item={ item } />
-						) }
-						allowReset={ false }
+						label={__('Provider', 'woocommerce')}
+						__experimentalRenderItem={({ item }) => (
+							<ShippingProviderListItem item={item} />
+						)}
+						allowReset={false}
 						__next40pxDefaultSize
-						value={ shipmentProvider }
-						options={ ShipmentProviders }
-						onChange={ ( value ) => {
-							if ( typeof value !== 'string' ) {
+						value={shipmentProvider}
+						options={ShipmentProviders}
+						onChange={(value) => {
+							if (typeof value !== 'string') {
 								return;
 							}
-							if ( ! value ) {
-								setTrackingUrl( '' );
+							if (!value) {
+								setTrackingUrl('');
 								return;
 							}
-							setShipmentProvider( value as string );
+							setShipmentProvider(value as string);
 							setTrackingUrl(
 								(
 									window.wcFulfillmentSettings.providers[
@@ -118,10 +115,10 @@ export default function ShipmentManualEntryForm() {
 									]?.url ?? ''
 								).replace(
 									/__placeholder__/i,
-									encodeURIComponent( trackingNumber ?? '' )
+									encodeURIComponent(trackingNumber ?? '')
 								)
 							);
-						} }
+						}}
 						__nextHasNoMarginBottom
 					/>
 					<div className="woocommerce-fulfillment-shipment-provider-search-icon">
@@ -129,39 +126,36 @@ export default function ShipmentManualEntryForm() {
 					</div>
 				</div>
 			</div>
-			{ shipmentProvider === 'other' && (
+			{shipmentProvider === 'other' && (
 				<div className="woocommerce-fulfillment-input-container">
 					<div className="woocommerce-fulfillment-input-group">
 						<TextControl
-							label={ __( 'Provider Name', 'woocommerce' ) }
+							label={__('Provider Name', 'woocommerce')}
 							type="text"
-							placeholder={ __(
+							placeholder={__(
 								'Enter provider name',
 								'woocommerce'
-							) }
-							value={ providerName }
-							onChange={ ( value: string ) => {
-								setProviderName( value );
-							} }
+							)}
+							value={providerName}
+							onChange={(value: string) => {
+								setProviderName(value);
+							}}
 							__next40pxDefaultSize
 							__nextHasNoMarginBottom
 						/>
 					</div>
 				</div>
-			) }
+			)}
 			<div className="woocommerce-fulfillment-input-container">
 				<div className="woocommerce-fulfillment-input-group">
 					<TextControl
-						label={ __( 'Tracking URL', 'woocommerce' ) }
+						label={__('Tracking URL', 'woocommerce')}
 						type="text"
-						placeholder={ __(
-							'Enter tracking URL',
-							'woocommerce'
-						) }
-						value={ trackingUrl }
-						onChange={ ( value: string ) => {
-							setTrackingUrl( value );
-						} }
+						placeholder={__('Enter tracking URL', 'woocommerce')}
+						value={trackingUrl}
+						onChange={(value: string) => {
+							setTrackingUrl(value);
+						}}
 						__next40pxDefaultSize
 						__nextHasNoMarginBottom
 					/>

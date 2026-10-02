@@ -20,28 +20,28 @@ import metadata from './block.json';
  * @param {number} minPrice The min price, if set.
  * @param {number} maxPrice The max price, if set.
  */
-export const formatPriceRange = ( minPrice: number, maxPrice: number ) => {
-	if ( Number.isFinite( minPrice ) && Number.isFinite( maxPrice ) ) {
+export const formatPriceRange = (minPrice: number, maxPrice: number) => {
+	if (Number.isFinite(minPrice) && Number.isFinite(maxPrice)) {
 		return sprintf(
 			/* translators: %1$s min price, %2$s max price */
-			__( 'Between %1$s and %2$s', 'woocommerce' ),
-			formatPrice( minPrice ),
-			formatPrice( maxPrice )
+			__('Between %1$s and %2$s', 'woocommerce'),
+			formatPrice(minPrice),
+			formatPrice(maxPrice)
 		);
 	}
 
-	if ( Number.isFinite( minPrice ) ) {
+	if (Number.isFinite(minPrice)) {
 		return sprintf(
 			/* translators: %s min price */
-			__( 'From %s', 'woocommerce' ),
-			formatPrice( minPrice )
+			__('From %s', 'woocommerce'),
+			formatPrice(minPrice)
 		);
 	}
 
 	return sprintf(
 		/* translators: %s max price */
-		__( 'Up to %s', 'woocommerce' ),
-		formatPrice( maxPrice )
+		__('Up to %s', 'woocommerce'),
+		formatPrice(maxPrice)
 	);
 };
 
@@ -67,26 +67,26 @@ interface RemovableListItemProps {
  * @param {boolean}  [listItem.showLabel=true] Should the label be shown for
  *                                             this item?
  */
-export const renderRemovableListItem = ( {
+export const renderRemovableListItem = ({
 	type,
 	name,
 	prefix = '',
 	removeCallback = () => null,
 	showLabel = true,
 	displayStyle,
-}: RemovableListItemProps ) => {
+}: RemovableListItemProps) => {
 	const prefixedName = prefix ? (
 		<>
-			{ prefix }
+			{prefix}
 			&nbsp;
-			{ name }
+			{name}
 		</>
 	) : (
 		name
 	);
 	const removeText = sprintf(
 		/* translators: 1: filter type, 2: attribute value used in the filter. For example: Remove Size Large filter. */
-		__( 'Remove %1$s %2$s filter', 'woocommerce' ),
+		__('Remove %1$s %2$s filter', 'woocommerce'),
 		type,
 		name
 	);
@@ -94,37 +94,37 @@ export const renderRemovableListItem = ( {
 	return (
 		<li
 			className="wc-block-active-filters__list-item"
-			key={ type + ':' + name }
+			key={type + ':' + name}
 		>
-			{ showLabel && (
+			{showLabel && (
 				<span className="wc-block-active-filters__list-item-type">
-					{ type + ': ' }
+					{type + ': '}
 				</span>
-			) }
-			{ displayStyle === 'chips' ? (
+			)}
+			{displayStyle === 'chips' ? (
 				<RemovableChip
 					element="span"
-					text={ prefixedName }
-					onRemove={ removeCallback }
+					text={prefixedName}
+					onRemove={removeCallback}
 					radius="large"
-					ariaLabel={ removeText }
+					ariaLabel={removeText}
 				/>
 			) : (
 				<span className="wc-block-active-filters__list-item-name">
 					<button
 						className="wc-block-active-filters__list-item-remove"
-						onClick={ removeCallback }
+						onClick={removeCallback}
 					>
 						<Icon
 							className="wc-block-components-chip__remove-icon"
-							icon={ closeSmall }
-							size={ 16 }
+							icon={closeSmall}
+							size={16}
 						/>
-						<Label screenReaderLabel={ removeText } />
+						<Label screenReaderLabel={removeText} />
 					</button>
-					{ prefixedName }
+					{prefixedName}
 				</span>
-			) }
+			)}
 		</li>
 	);
 };
@@ -136,38 +136,36 @@ export const renderRemovableListItem = ( {
  * @param {Array<string|Record<string, string>>} args Args to remove
  */
 export const removeArgsFromFilterUrl = (
-	...args: ( string | Record< string, string > )[]
+	...args: (string | Record<string, string>)[]
 ) => {
-	if ( ! window ) {
+	if (!window) {
 		return;
 	}
 
 	const url = window.location.href;
-	const currentQuery = getQueryArgs( url );
-	const cleanUrl = removeQueryArgs( url, ...Object.keys( currentQuery ) );
+	const currentQuery = getQueryArgs(url);
+	const cleanUrl = removeQueryArgs(url, ...Object.keys(currentQuery));
 
-	args.forEach( ( item ) => {
-		if ( typeof item === 'string' ) {
-			return delete currentQuery[ item ];
+	args.forEach((item) => {
+		if (typeof item === 'string') {
+			return delete currentQuery[item];
 		}
-		if ( typeof item === 'object' ) {
-			const key = Object.keys( item )[ 0 ];
-			const currentQueryValue = currentQuery[ key ]
-				.toString()
-				.split( ',' );
-			currentQuery[ key ] = currentQueryValue
-				.filter( ( value ) => value !== item[ key ] )
-				.join( ',' );
+		if (typeof item === 'object') {
+			const key = Object.keys(item)[0];
+			const currentQueryValue = currentQuery[key].toString().split(',');
+			currentQuery[key] = currentQueryValue
+				.filter((value) => value !== item[key])
+				.join(',');
 		}
-	} );
+	});
 
 	const filteredQuery = Object.fromEntries(
-		Object.entries( currentQuery ).filter( ( [ , value ] ) => value )
+		Object.entries(currentQuery).filter(([, value]) => value)
 	);
 
-	const newUrl = addQueryArgs( cleanUrl, filteredQuery );
+	const newUrl = addQueryArgs(cleanUrl, filteredQuery);
 
-	changeUrl( newUrl );
+	changeUrl(newUrl);
 };
 
 /**
@@ -184,13 +182,13 @@ const FILTER_QUERY_VALUES = [
 /**
  * Check if the URL contains arguments that could be Woo filter keys.
  */
-const keyIsAFilter = ( key: string ): boolean => {
+const keyIsAFilter = (key: string): boolean => {
 	let keyIsFilter = false;
 
-	for ( let i = 0; FILTER_QUERY_VALUES.length > i; i++ ) {
-		const keyToMatch = FILTER_QUERY_VALUES[ i ];
-		const trimmedKey = key.substring( 0, keyToMatch.length );
-		if ( keyToMatch === trimmedKey ) {
+	for (let i = 0; FILTER_QUERY_VALUES.length > i; i++) {
+		const keyToMatch = FILTER_QUERY_VALUES[i];
+		const trimmedKey = key.substring(0, keyToMatch.length);
+		if (keyToMatch === trimmedKey) {
 			keyIsFilter = true;
 			break;
 		}
@@ -203,43 +201,43 @@ const keyIsAFilter = ( key: string ): boolean => {
  * Clean the filter URL.
  */
 export const cleanFilterUrl = () => {
-	if ( ! window ) {
+	if (!window) {
 		return;
 	}
 
 	const url = window.location.href;
-	const args = getQueryArgs( url );
-	const cleanUrl = removeQueryArgs( url, ...Object.keys( args ) );
+	const args = getQueryArgs(url);
+	const cleanUrl = removeQueryArgs(url, ...Object.keys(args));
 	const remainingArgs = Object.fromEntries(
-		Object.keys( args )
-			.filter( ( arg ) => {
-				if ( keyIsAFilter( arg ) ) {
+		Object.keys(args)
+			.filter((arg) => {
+				if (keyIsAFilter(arg)) {
 					return false;
 				}
 
 				return true;
-			} )
-			.map( ( key ) => [ key, args[ key ] ] )
+			})
+			.map((key) => [key, args[key]])
 	);
 
-	const newUrl = addQueryArgs( cleanUrl, remainingArgs );
+	const newUrl = addQueryArgs(cleanUrl, remainingArgs);
 
-	changeUrl( newUrl );
+	changeUrl(newUrl);
 };
 
 export const maybeUrlContainsFilters = (): boolean => {
-	if ( ! window ) {
+	if (!window) {
 		return false;
 	}
 
 	const url = window.location.href;
-	const args = getQueryArgs( url );
-	const filterKeys = Object.keys( args );
+	const args = getQueryArgs(url);
+	const filterKeys = Object.keys(args);
 	let maybeHasFilter = false;
 
-	for ( let i = 0; filterKeys.length > i; i++ ) {
-		const key = filterKeys[ i ];
-		if ( keyIsAFilter( key ) ) {
+	for (let i = 0; filterKeys.length > i; i++) {
+		const key = filterKeys[i];
+		if (keyIsAFilter(key)) {
 			maybeHasFilter = true;
 			break;
 		}
@@ -260,22 +258,22 @@ export interface StoreAttributes {
 export const urlContainsAttributeFilter = (
 	attributes: StoreAttributes[]
 ): boolean => {
-	if ( ! window ) {
+	if (!window) {
 		return false;
 	}
 
 	const storeAttributeKeys = attributes.map(
-		( attr ) => `filter_${ attr.attribute_name }`
+		(attr) => `filter_${attr.attribute_name}`
 	);
 
 	const url = window.location.href;
-	const args = getQueryArgs( url );
-	const urlFilterKeys = Object.keys( args );
+	const args = getQueryArgs(url);
+	const urlFilterKeys = Object.keys(args);
 	let filterIsInUrl = false;
 
-	for ( let i = 0; urlFilterKeys.length > i; i++ ) {
-		const urlKey = urlFilterKeys[ i ];
-		if ( storeAttributeKeys.includes( urlKey ) ) {
+	for (let i = 0; urlFilterKeys.length > i; i++) {
+		const urlKey = urlFilterKeys[i];
+		if (storeAttributeKeys.includes(urlKey)) {
 			filterIsInUrl = true;
 			break;
 		}
@@ -284,15 +282,14 @@ export const urlContainsAttributeFilter = (
 	return filterIsInUrl;
 };
 
-export const parseAttributes = ( data: Record< string, unknown > ) => {
+export const parseAttributes = (data: Record<string, unknown>) => {
 	return {
-		heading: isString( data?.heading ) ? data.heading : '',
+		heading: isString(data?.heading) ? data.heading : '',
 		headingLevel:
-			( isString( data?.headingLevel ) &&
-				parseInt( data.headingLevel, 10 ) ) ||
+			(isString(data?.headingLevel) && parseInt(data.headingLevel, 10)) ||
 			metadata.attributes.headingLevel.default,
 		displayStyle:
-			( isString( data?.displayStyle ) && data.displayStyle ) ||
+			(isString(data?.displayStyle) && data.displayStyle) ||
 			metadata.attributes.displayStyle.default,
 	};
 };

@@ -33,7 +33,7 @@ export interface Comment {
 interface ReviewTemplateInnerBlocksProps {
 	comment: Comment;
 	activeCommentId: number;
-	setActiveCommentId: ( id: number ) => void;
+	setActiveCommentId: (id: number) => void;
 	firstCommentId: number;
 	blocks: BlockInstance[];
 }
@@ -41,7 +41,7 @@ interface ReviewTemplateInnerBlocksProps {
 interface ReviewTemplatePreviewProps {
 	blocks: BlockInstance[];
 	commentId: number;
-	setActiveCommentId: ( id: number ) => void;
+	setActiveCommentId: (id: number) => void;
 	isHidden: boolean;
 }
 
@@ -50,10 +50,10 @@ type ReviewTemplateAttributes = {
 };
 
 const TEMPLATE = [
-	[ 'core/avatar' ],
-	[ 'woocommerce/product-review-author-name' ],
-	[ 'woocommerce/product-review-date' ],
-	[ 'woocommerce/product-review-content' ],
+	['core/avatar'],
+	['woocommerce/product-review-author-name'],
+	['woocommerce/product-review-date'],
+	['woocommerce/product-review-content'],
 ];
 
 interface ReviewSettings {
@@ -61,29 +61,29 @@ interface ReviewSettings {
 	pageComments: boolean;
 }
 
-const getCommentsPlaceholder = ( {
+const getCommentsPlaceholder = ({
 	perPage,
 	pageComments,
-}: ReviewSettings ): Comment[] => {
-	const numberOfComments = pageComments ? Math.min( perPage, 3 ) : 3;
+}: ReviewSettings): Comment[] => {
+	const numberOfComments = pageComments ? Math.min(perPage, 3) : 3;
 
-	return Array.from( { length: numberOfComments }, ( _, i ) => ( {
-		commentId: -( i + 1 ),
-	} ) );
+	return Array.from({ length: numberOfComments }, (_, i) => ({
+		commentId: -(i + 1),
+	}));
 };
 
-const ReviewTemplatePreview = ( {
+const ReviewTemplatePreview = ({
 	blocks,
 	commentId,
 	setActiveCommentId,
 	isHidden,
-}: ReviewTemplatePreviewProps ) => {
-	const blockPreviewProps = useBlockPreview( {
+}: ReviewTemplatePreviewProps) => {
+	const blockPreviewProps = useBlockPreview({
 		blocks,
-	} );
+	});
 
 	const handleOnClick = () => {
-		setActiveCommentId( commentId );
+		setActiveCommentId(commentId);
 	};
 
 	const style = {
@@ -92,83 +92,83 @@ const ReviewTemplatePreview = ( {
 
 	return (
 		<div
-			{ ...blockPreviewProps }
-			tabIndex={ 0 }
+			{...blockPreviewProps}
+			tabIndex={0}
 			role="button"
-			style={ style }
-			onClick={ handleOnClick }
-			onKeyDown={ handleOnClick }
+			style={style}
+			onClick={handleOnClick}
+			onKeyDown={handleOnClick}
 		/>
 	);
 };
 
-const MemoizedReviewTemplatePreview = memo( ReviewTemplatePreview );
+const MemoizedReviewTemplatePreview = memo(ReviewTemplatePreview);
 
-const ReviewTemplateInnerBlocks = memo( function ReviewTemplateInnerBlocks( {
+const ReviewTemplateInnerBlocks = memo(function ReviewTemplateInnerBlocks({
 	comment,
 	activeCommentId,
 	setActiveCommentId,
 	firstCommentId,
 	blocks,
-}: ReviewTemplateInnerBlocksProps ) {
+}: ReviewTemplateInnerBlocksProps) {
 	const { children, ...innerBlocksProps } = useInnerBlocksProps(
 		{},
 		{ template: TEMPLATE }
 	);
 
 	return (
-		<li { ...innerBlocksProps }>
-			{ comment.commentId === ( activeCommentId || firstCommentId )
+		<li {...innerBlocksProps}>
+			{comment.commentId === (activeCommentId || firstCommentId)
 				? children
-				: null }
+				: null}
 
 			<MemoizedReviewTemplatePreview
-				blocks={ blocks }
-				commentId={ comment.commentId }
-				setActiveCommentId={ setActiveCommentId }
+				blocks={blocks}
+				commentId={comment.commentId}
+				setActiveCommentId={setActiveCommentId}
 				isHidden={
-					comment.commentId === ( activeCommentId || firstCommentId )
+					comment.commentId === (activeCommentId || firstCommentId)
 				}
 			/>
-			{ comment.children && comment.children.length > 0 ? (
+			{comment.children && comment.children.length > 0 ? (
 				<ol>
-					{ comment.children.map( ( child, index ) => (
+					{comment.children.map((child, index) => (
 						<BlockContextProvider
-							key={ child.commentId || index }
-							value={ {
+							key={child.commentId || index}
+							value={{
 								commentId:
 									child.commentId < 0
 										? null
 										: child.commentId,
-							} }
+							}}
 						>
 							<ReviewTemplateInnerBlocks
-								comment={ child }
-								activeCommentId={ activeCommentId }
-								setActiveCommentId={ setActiveCommentId }
-								blocks={ blocks }
-								firstCommentId={ firstCommentId }
+								comment={child}
+								activeCommentId={activeCommentId}
+								setActiveCommentId={setActiveCommentId}
+								blocks={blocks}
+								firstCommentId={firstCommentId}
 							/>
 						</BlockContextProvider>
-					) ) }
+					))}
 				</ol>
-			) : null }
+			) : null}
 		</li>
 	);
-} );
+});
 
-export default function ReviewTemplateEdit( {
+export default function ReviewTemplateEdit({
 	clientId,
 	context: { postId },
-}: BlockEditProps< ReviewTemplateAttributes > & {
+}: BlockEditProps<ReviewTemplateAttributes> & {
 	context: { postId: number };
-} ) {
+}) {
 	const blockProps = useBlockProps();
 
-	const [ activeCommentId, setActiveCommentId ] = useState< number >( 0 );
+	const [activeCommentId, setActiveCommentId] = useState<number>(0);
 	const { commentOrder, commentsPerPage, pageComments } = useSelect(
-		( select ) => {
-			const { getSettings } = select( blockEditorStore ) as unknown as {
+		(select) => {
+			const { getSettings } = select(blockEditorStore) as unknown as {
 				getSettings(): {
 					// eslint-disable-next-line @typescript-eslint/naming-convention
 					__experimentalDiscussionSettings: {
@@ -183,104 +183,100 @@ export default function ReviewTemplateEdit( {
 		[]
 	);
 
-	const commentQuery = useCommentQueryArgs( {
+	const commentQuery = useCommentQueryArgs({
 		postId: postId ?? 0,
-	} );
+	});
 
 	const { topLevelComments, blocks } = useSelect(
-		( select ) => {
-			const { getEntityRecords } = select( coreStore );
-			const { getBlocks } = select( blockEditorStore ) as unknown as {
-				getBlocks( clientId: string ): BlockInstance[];
+		(select) => {
+			const { getEntityRecords } = select(coreStore);
+			const { getBlocks } = select(blockEditorStore) as unknown as {
+				getBlocks(clientId: string): BlockInstance[];
 			};
 			return {
 				topLevelComments: commentQuery
-					? ( getEntityRecords(
+					? (getEntityRecords(
 							'root',
 							'comment',
 							commentQuery
-					  ) as ( WPComment & {
+						) as (WPComment & {
 							// eslint-disable-next-line @typescript-eslint/naming-convention
 							_embedded?: { children?: WPComment[][] };
-					  } )[] )
+						})[])
 					: null,
-				blocks: getBlocks( clientId ),
+				blocks: getBlocks(clientId),
 			};
 		},
-		[ clientId, commentQuery ]
+		[clientId, commentQuery]
 	);
 
 	let commentTree = useCommentTree(
-		Array.isArray( topLevelComments )
-			? topLevelComments.map( ( comment ) => {
+		Array.isArray(topLevelComments)
+			? topLevelComments.map((comment) => {
 					const children = comment._embedded?.children;
 
 					if (
-						Array.isArray( children ) &&
+						Array.isArray(children) &&
 						children.length >= 1 &&
-						Array.isArray( children[ 0 ] )
+						Array.isArray(children[0])
 					) {
 						return {
 							id: comment.id,
-							children: children[ 0 ].map( ( child ) => ( {
+							children: children[0].map((child) => ({
 								id: child.id,
-							} ) ),
+							})),
 						};
 					}
 
 					return {
 						id: comment.id,
 					};
-			  } )
+				})
 			: [],
 		commentOrder
 	);
 
-	if ( ! topLevelComments ) {
+	if (!topLevelComments) {
 		return (
-			<p { ...blockProps }>
+			<p {...blockProps}>
 				<Spinner />
 			</p>
 		);
 	}
 
-	if ( ! postId ) {
-		commentTree = getCommentsPlaceholder( {
+	if (!postId) {
+		commentTree = getCommentsPlaceholder({
 			perPage: commentsPerPage,
 			pageComments,
-		} );
+		});
 	}
 
-	if ( ! commentTree.length ) {
-		return (
-			<p { ...blockProps }>
-				{ __( 'No results found.', 'woocommerce' ) }
-			</p>
-		);
+	if (!commentTree.length) {
+		return <p {...blockProps}>{__('No results found.', 'woocommerce')}</p>;
 	}
 
 	return (
-		<ol { ...blockProps }>
-			{ commentTree &&
-				commentTree.map( ( comment, index ) => (
+		<ol {...blockProps}>
+			{commentTree &&
+				commentTree.map((comment, index) => (
 					<BlockContextProvider
-						key={ comment.commentId || index }
-						value={ {
+						key={comment.commentId || index}
+						value={{
 							commentId:
 								comment.commentId < 0
 									? null
 									: comment.commentId,
-						} }
+						}}
 					>
 						<ReviewTemplateInnerBlocks
-							comment={ comment }
-							activeCommentId={ activeCommentId }
-							setActiveCommentId={ setActiveCommentId }
-							blocks={ blocks }
-							firstCommentId={ commentTree[ 0 ]?.commentId }
+							comment={comment}
+							activeCommentId={activeCommentId}
+							setActiveCommentId={setActiveCommentId}
+							blocks={blocks}
+							firstCommentId={commentTree[0]?.commentId}
 						/>
 					</BlockContextProvider>
-				) ) }
+				))}
 		</ol>
 	);
 }

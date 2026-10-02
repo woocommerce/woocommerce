@@ -28,15 +28,17 @@
 	}
 
 	$row-text-height: 1.1375rem;
-	$row-height: '#{$gap * 2} + #{$row-text-height} + 1px';
-	$header-row-height: '#{$gap-smaller * 2} + #{$row-text-height} + 1px';
+	$row-height: "#{$gap * 2} + #{$row-text-height} + 1px";
+	$header-row-height: "#{$gap-smaller * 2} + #{$row-text-height} + 1px";
 	&.is-empty {
 		align-items: center;
 		background: $gray-100;
 		color: $gray-700;
 		display: flex;
 
-		height: calc(#{$header-row-height} + ( #{$row-height} ) * var(--number-of-rows));
+		height: calc(
+			#{$header-row-height} + (#{$row-height}) * var(--number-of-rows)
+		);
 		justify-content: center;
 		padding: $gap;
 		text-align: center;
@@ -57,7 +59,7 @@
 		grid-template-columns: auto 1fr auto;
 	}
 
-	@include breakpoint( '<960px' ) {
+	@include breakpoint("<960px") {
 		&.has-search {
 			.woocommerce-table__actions {
 				grid-gap: $gap-small;
@@ -93,7 +95,7 @@
 }
 
 .woocommerce-table__caption {
-	@include font-size( 24 );
+	@include font-size(24);
 	text-align: left;
 }
 
@@ -106,7 +108,7 @@
 
 	&::after,
 	&::before {
-		content: '';
+		content: "";
 		position: absolute;
 		top: 0;
 		width: 60px;
@@ -155,7 +157,7 @@
 
 .woocommerce-table__header,
 .woocommerce-table__item {
-	@include font-size( 13 );
+	@include font-size(13);
 	text-align: left;
 	border-bottom: 1px solid $table-border;
 
@@ -218,12 +220,12 @@
 
 .woocommerce-table__empty-item {
 	text-align: center;
-	@include font-size( 18 );
+	@include font-size(18);
 	color: $gray-700;
 	font-weight: bold;
 
-	@include breakpoint( '<782px' ) {
-		@include font-size( 13 );
+	@include breakpoint("<782px") {
+		@include font-size(13);
 	}
 }
 

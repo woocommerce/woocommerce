@@ -11,30 +11,30 @@ import { __, sprintf, getLocaleData } from '@wordpress/i18n';
  * @param label The label to get the casing for.
  * @return The field label with the correct casing.
  */
-export const getFieldLabel = ( label: string | undefined ) => {
+export const getFieldLabel = (label: string | undefined) => {
 	const localeData = getLocaleData();
-	const shouldKeepOriginalCase = [ 'de', 'de_AT', 'de_CH' ].includes(
-		localeData?.[ '' ]?.lang ?? 'en'
+	const shouldKeepOriginalCase = ['de', 'de_AT', 'de_CH'].includes(
+		localeData?.['']?.lang ?? 'en'
 	);
 
 	const fieldLabel = shouldKeepOriginalCase
 		? label
-		: label?.toLocaleLowerCase() || __( 'field', 'woocommerce' );
+		: label?.toLocaleLowerCase() || __('field', 'woocommerce');
 
 	return fieldLabel;
 };
 
 const defaultValidityMessage =
-	( label: string | undefined, inputElement: HTMLInputElement ) =>
-	( validity: ValidityState ): string | undefined => {
-		const fieldLabel = getFieldLabel( label );
+	(label: string | undefined, inputElement: HTMLInputElement) =>
+	(validity: ValidityState): string | undefined => {
+		const fieldLabel = getFieldLabel(label);
 		let message = sprintf(
 			/* translators: %s field label */
-			__( 'Please enter a valid %s', 'woocommerce' ),
+			__('Please enter a valid %s', 'woocommerce'),
 			fieldLabel
 		);
 
-		if ( inputElement.type === 'checkbox' ) {
+		if (inputElement.type === 'checkbox') {
 			message = __(
 				'Please check this box if you want to proceed.',
 				'woocommerce'
@@ -59,18 +59,18 @@ const defaultValidityMessage =
 export const getValidityMessageForInput = (
 	label: string | undefined,
 	inputElement: HTMLInputElement,
-	customValidityMessage?: ( validity: ValidityState ) => string
+	customValidityMessage?: (validity: ValidityState) => string
 ): string => {
 	// No errors, or custom error - return early.
-	if ( inputElement.validity.valid || inputElement.validity.customError ) {
+	if (inputElement.validity.valid || inputElement.validity.customError) {
 		return inputElement.validationMessage;
 	}
 
 	const validityMessageCallback =
-		customValidityMessage || defaultValidityMessage( label, inputElement );
+		customValidityMessage || defaultValidityMessage(label, inputElement);
 
 	return (
-		validityMessageCallback( inputElement.validity ) ||
+		validityMessageCallback(inputElement.validity) ||
 		inputElement.validationMessage
 	);
 };

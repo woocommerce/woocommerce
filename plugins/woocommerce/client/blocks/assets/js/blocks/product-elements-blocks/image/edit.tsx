@@ -42,58 +42,58 @@ const DEFAULT_ATTRIBUTES = {
 	showProductLink: true,
 };
 
-const Edit = ( {
+const Edit = ({
 	attributes,
 	setAttributes,
 	context,
 	clientId,
-}: BlockEditProps< BlockAttributes > & { context: Context } ): JSX.Element => {
+}: BlockEditProps<BlockAttributes> & { context: Context }): JSX.Element => {
 	const { showProductLink, width, height, scale } = attributes;
 
-	const ref = useRef< HTMLDivElement >( null );
+	const ref = useRef<HTMLDivElement>(null);
 
 	const blockProps = useBlockProps();
 	const { wasBlockJustInserted, isInProductGallery } = useSelect(
-		( select ) => {
+		(select) => {
 			return {
 				wasBlockJustInserted:
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 					// @ts-expect-error method exists but not typed
-					select( blockEditorStore ).wasBlockJustInserted( clientId ),
+					select(blockEditorStore).wasBlockJustInserted(clientId),
 				isInProductGallery:
-					select( blockEditorStore ).getBlockParentsByBlockName(
+					select(blockEditorStore).getBlockParentsByBlockName(
 						clientId,
 						'woocommerce/product-gallery'
 					).length > 0,
 			};
 		},
-		[ clientId ]
+		[clientId]
 	);
 
-	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
+	const isDescendentOfQueryLoop = Number.isFinite(context.queryId);
 	const { isDescendentOfSingleProductBlock } =
-		useIsDescendentOfSingleProductBlock( {
+		useIsDescendentOfSingleProductBlock({
 			blockClientId: blockProps?.id,
-		} );
+		});
 
 	const showAllControls =
 		isDescendentOfQueryLoop || isDescendentOfSingleProductBlock;
 	const showSaleBadge = showAllControls ? false : attributes.showSaleBadge;
 
 	// Persist this so PHP doesn't render the legacy sale badge alongside the inner block.
-	useEffect( () => {
+	useEffect(() => {
 		if (
-			( isDescendentOfQueryLoop || isDescendentOfSingleProductBlock ) &&
+			(isDescendentOfQueryLoop || isDescendentOfSingleProductBlock) &&
 			attributes.showSaleBadge !== false
 		) {
-			setAttributes( { showSaleBadge: false } );
+			setAttributes({ showSaleBadge: false });
 		}
 	}, [
 		isDescendentOfQueryLoop,
 		isDescendentOfSingleProductBlock,
 		attributes.showSaleBadge,
 		setAttributes,
-	] );
+	]);
 
 	const innerBlockProps = useInnerBlocksProps(
 		{
@@ -105,75 +105,72 @@ const Edit = ( {
 		}
 	);
 
-	const { product, isResolving } = useProduct( context.postId );
+	const { product, isResolving } = useProduct(context.postId);
 
 	return (
-		<div { ...blockProps }>
-			{ /* Don't show controls in product gallery as we rely on
-			core supports API (aspect ratio setting) */ }
-			{ showAllControls && ! isInProductGallery && (
+		<div {...blockProps}>
+			{/* Don't show controls in product gallery as we rely on
+			core supports API (aspect ratio setting) */}
+			{showAllControls && !isInProductGallery && (
 				<InspectorControls>
 					<ImageSizeSettings
-						scale={ scale }
-						width={ width }
-						height={ height }
-						setAttributes={ setAttributes }
+						scale={scale}
+						width={width}
+						height={height}
+						setAttributes={setAttributes}
 					/>
 					<ToolsPanel
-						label={ __( 'Content', 'woocommerce' ) }
-						resetAll={ () =>
-							setAttributes( {
+						label={__('Content', 'woocommerce')}
+						resetAll={() =>
+							setAttributes({
 								showProductLink:
 									DEFAULT_ATTRIBUTES.showProductLink,
-							} )
+							})
 						}
 					>
 						<ToolsPanelItem
-							label={ __(
-								'Link to Product Page',
-								'woocommerce'
-							) }
-							hasValue={ () =>
+							label={__('Link to Product Page', 'woocommerce')}
+							hasValue={() =>
 								showProductLink !==
 								DEFAULT_ATTRIBUTES.showProductLink
 							}
-							onDeselect={ () =>
-								setAttributes( {
+							onDeselect={() =>
+								setAttributes({
 									showProductLink:
 										DEFAULT_ATTRIBUTES.showProductLink,
-								} )
+								})
 							}
 							isShownByDefault
 						>
 							<ToggleControl
 								__nextHasNoMarginBottom
-								label={ __(
+								label={__(
 									'Link to Product Page',
 									'woocommerce'
-								) }
-								help={ __(
+								)}
+								help={__(
 									'Links the image to the single product listing.',
 									'woocommerce'
-								) }
-								checked={ showProductLink }
-								onChange={ () =>
-									setAttributes( {
-										showProductLink: ! showProductLink,
-									} )
+								)}
+								checked={showProductLink}
+								onChange={() =>
+									setAttributes({
+										showProductLink: !showProductLink,
+									})
 								}
 							/>
 						</ToolsPanelItem>
 					</ToolsPanel>
 				</InspectorControls>
-			) }
+			)}
 			<Block
-				{ ...{ ...attributes, ...context } }
-				showSaleBadge={ showSaleBadge }
-				isAdmin={ true }
-				product={ product }
-				isResolving={ isResolving }
+				{...{ ...attributes, ...context }}
+				showSaleBadge={showSaleBadge}
+				isAdmin={true}
+				product={product}
+				isResolving={isResolving}
 			>
-				{ showAllControls && <div { ...innerBlockProps } /> }
+				{showAllControls && <div {...innerBlockProps} />}
 			</Block>
 		</div>
 	);

@@ -9,19 +9,19 @@ import { Modal } from '@wordpress/components';
 import { OnboardingModalProps } from '../../types';
 import './style.scss';
 
-export default function OnboardingModal( {
+export default function OnboardingModal({
 	setIsOpen,
 	children,
-}: OnboardingModalProps ) {
+}: OnboardingModalProps) {
 	return (
 		<Modal
 			className="settings-payments-onboarding-modal"
 			isFullScreen
 			__experimentalHideHeader
-			onRequestClose={ () => setIsOpen( false ) }
-			shouldCloseOnClickOutside={ false }
+			onRequestClose={() => setIsOpen(false)}
+			shouldCloseOnClickOutside={false}
 		>
-			{ children }
+			{children}
 		</Modal>
 	);
 }

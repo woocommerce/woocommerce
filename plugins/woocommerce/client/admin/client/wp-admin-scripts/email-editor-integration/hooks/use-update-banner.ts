@@ -30,13 +30,13 @@ import {
  * if `a > b`. Lightweight implementation — template versions don't carry
  * pre-release / build metadata so we don't need full semver semantics.
  */
-function compareTemplateVersions( a: string, b: string ): number {
-	const partsA = a.split( '.' ).map( ( s ) => parseInt( s, 10 ) || 0 );
-	const partsB = b.split( '.' ).map( ( s ) => parseInt( s, 10 ) || 0 );
-	const len = Math.max( partsA.length, partsB.length );
-	for ( let i = 0; i < len; i++ ) {
-		const diff = ( partsA[ i ] ?? 0 ) - ( partsB[ i ] ?? 0 );
-		if ( diff !== 0 ) {
+function compareTemplateVersions(a: string, b: string): number {
+	const partsA = a.split('.').map((s) => parseInt(s, 10) || 0);
+	const partsB = b.split('.').map((s) => parseInt(s, 10) || 0);
+	const len = Math.max(partsA.length, partsB.length);
+	for (let i = 0; i < len; i++) {
+		const diff = (partsA[i] ?? 0) - (partsB[i] ?? 0);
+		if (diff !== 0) {
 			return diff;
 		}
 	}
@@ -48,12 +48,12 @@ function compareTemplateVersions( a: string, b: string ): number {
  * the merchant has customized the post body (`had_customizations`) by
  * comparing against the `source_hash_from` recorded at upgrade time.
  */
-async function sha1Hex( input: string ): Promise< string > {
-	const buf = new TextEncoder().encode( input );
-	const digest = await crypto.subtle.digest( 'SHA-1', buf );
-	return Array.from( new Uint8Array( digest ) )
-		.map( ( b ) => b.toString( 16 ).padStart( 2, '0' ) )
-		.join( '' );
+async function sha1Hex(input: string): Promise<string> {
+	const buf = new TextEncoder().encode(input);
+	const digest = await crypto.subtle.digest('SHA-1', buf);
+	return Array.from(new Uint8Array(digest))
+		.map((b) => b.toString(16).padStart(2, '0'))
+		.join('');
 }
 
 /**
@@ -80,7 +80,7 @@ interface UseUpdateBannerResult {
 	hasConflicts: boolean;
 	expanded: boolean;
 	toggleExpanded: () => void;
-	apply: () => Promise< void >;
+	apply: () => Promise<void>;
 	openReview: () => void;
 	/**
 	 * User-initiated dismiss. Removes the banner for this session and
@@ -125,38 +125,36 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 	// test mock) means the lambda's contract is obvious from one
 	// glance — and the test can bypass the lambda entirely.
 	const { postId, postType, isDirty, canUserUpdate, isDismissed } = useSelect(
-		( selectFn ) => {
+		(selectFn) => {
 			// We pass string store keys here because importing `store as
 			// editorStore` from `@wordpress/editor` pulls in a transitive
 			// module that Jest can't resolve in this package's test setup.
 			// Stable WP store keys: `core/editor`, `core` (core-data).
 			const { getCurrentPostId, getCurrentPostType, isEditedPostDirty } =
-				selectFn( 'core/editor' );
-			const { canUser } = selectFn( 'core' );
-			const { isUpdateBannerDismissedFor } = selectFn( STORE_NAME );
+				selectFn('core/editor');
+			const { canUser } = selectFn('core');
+			const { isUpdateBannerDismissedFor } = selectFn(STORE_NAME);
 
 			const rawId = getCurrentPostId();
 			const id = typeof rawId === 'number' ? rawId : null;
 			const type = getCurrentPostType() ?? null;
-			const dirty = Boolean( isEditedPostDirty() );
+			const dirty = Boolean(isEditedPostDirty());
 
 			// `canUser` is `undefined` while the resolver is in flight; treat
 			// undefined as permissive so we don't flicker the banner away
 			// during the initial load. Only an explicit `false` denies.
 			const canUpdateRaw =
 				id !== null
-					? canUser( 'update', {
+					? canUser('update', {
 							kind: 'postType',
 							name: 'woo_email',
 							id,
-					  } )
+						})
 					: undefined;
 			const canUpdate = canUpdateRaw === false ? false : true;
 
 			const dismissed =
-				id !== null
-					? Boolean( isUpdateBannerDismissedFor( id ) )
-					: false;
+				id !== null ? Boolean(isUpdateBannerDismissedFor(id)) : false;
 
 			return {
 				postId: id,
@@ -178,15 +176,15 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 	) as {
 		record: {
 			slug?: unknown;
-			meta?: Record< string, unknown >;
+			meta?: Record<string, unknown>;
 			content?: { raw?: string };
 		} | null;
 	};
 
-	const meta = postId !== null ? record?.meta ?? null : null;
+	const meta = postId !== null ? (record?.meta ?? null) : null;
 	const status =
 		meta && typeof meta._wc_email_template_status === 'string'
-			? ( meta._wc_email_template_status as string )
+			? (meta._wc_email_template_status as string)
 			: null;
 
 	const isEligibleByStatus = status === VALID_STATUS;
@@ -195,7 +193,7 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 		postId !== null &&
 		isCorrectPostType &&
 		isEligibleByStatus &&
-		! isDismissed;
+		!isDismissed;
 
 	// Fetch the change-summary only once we've decided the banner is
 	// eligible to render — avoids a needless network call on every
@@ -205,7 +203,7 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 		isLoading: isLoadingSummary,
 		error: summaryError,
 		refetch: refetchSummary,
-	} = useChangeSummary( postId, shouldRender );
+	} = useChangeSummary(postId, shouldRender);
 
 	// When the review drawer closes — typically right after a drawer-driven
 	// `/apply` succeeds — refresh the change-summary so its `version_from`
@@ -214,22 +212,22 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 	// and unmounts the banner. A merchant who just opens and closes the
 	// drawer without applying triggers an extra fetch — acceptable cost.
 	const isReviewDrawerOpen = useSelect(
-		( selectFn ) => selectFn( STORE_NAME ).isReviewDrawerOpen(),
+		(selectFn) => selectFn(STORE_NAME).isReviewDrawerOpen(),
 		[]
 	);
-	const prevDrawerOpenRef = useRef< boolean >( false );
-	useEffect( () => {
-		if ( prevDrawerOpenRef.current && ! isReviewDrawerOpen ) {
+	const prevDrawerOpenRef = useRef<boolean>(false);
+	useEffect(() => {
+		if (prevDrawerOpenRef.current && !isReviewDrawerOpen) {
 			refetchSummary();
 		}
 		prevDrawerOpenRef.current = isReviewDrawerOpen;
-	}, [ isReviewDrawerOpen, refetchSummary ] );
+	}, [isReviewDrawerOpen, refetchSummary]);
 
 	// Cache the most recent non-null summary so the banner doesn't briefly
 	// flip variants while a refetch is in flight (which clears `rawSummary`
 	// to null inside `useChangeSummary` before the new response arrives).
-	const lastNonNullSummaryRef = useRef< ChangeSummary | null >( null );
-	if ( rawSummary !== null ) {
+	const lastNonNullSummaryRef = useRef<ChangeSummary | null>(null);
+	if (rawSummary !== null) {
 		lastNonNullSummaryRef.current = rawSummary;
 	}
 	const effectiveSummary: ChangeSummary | null =
@@ -259,7 +257,7 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 	// conditions during core upgrade, manual meta edits).
 	const summaryShowsNoChanges =
 		effectiveSummary !== null &&
-		! effectiveSummary.is_fallback &&
+		!effectiveSummary.is_fallback &&
 		effectiveSummary.summary_lines.length === 0 &&
 		effectiveSummary.added_blocks.length === 0 &&
 		effectiveSummary.removed_blocks.length === 0 &&
@@ -267,7 +265,7 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 		effectiveSummary.structural_changes.length === 0;
 
 	const finalShouldRender =
-		shouldRender && ! summaryShowsReviewed && ! summaryShowsNoChanges;
+		shouldRender && !summaryShowsReviewed && !summaryShowsNoChanges;
 	const summary: ChangeSummary | null = finalShouldRender
 		? effectiveSummary
 		: null;
@@ -275,14 +273,14 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 	// Apply. `undefined` is the two-way fallback (no base) and stays gated.
 	const hasConflicts =
 		summary !== null &&
-		summary.copy_changes.some( ( cc ) => cc.auto_resolvable !== true );
+		summary.copy_changes.some((cc) => cc.auto_resolvable !== true);
 
 	// `@wordpress/data`'s typed dispatch surface isn't exhaustive for
 	// custom stores; cast loosely to grab our integration-store actions.
-	const integrationDispatch = useDispatch( STORE_NAME ) as unknown as {
-		dismissUpdateBanner: ( id: number ) => void;
-		clearDismissedForPost: ( id: number ) => void;
-		markUpdateBannerViewed: ( id: number, versionTo: string ) => void;
+	const integrationDispatch = useDispatch(STORE_NAME) as unknown as {
+		dismissUpdateBanner: (id: number) => void;
+		clearDismissedForPost: (id: number) => void;
+		markUpdateBannerViewed: (id: number, versionTo: string) => void;
 		openReviewDrawer: () => void;
 	};
 	const {
@@ -294,66 +292,66 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 
 	// Build the shared Tracks payload once per render of the eligible
 	// banner; reused by `_viewed`, `_dismissed`, `_applied`.
-	const sharedPayload = useMemo< SharedTracksPayload | null >(
+	const sharedPayload = useMemo<SharedTracksPayload | null>(
 		() =>
 			finalShouldRender
-				? buildSharedTracksPayload( { record, summary } )
+				? buildSharedTracksPayload({ record, summary })
 				: null,
 		// `record` is the upstream entity reference; `summary` is the
 		// fetched change-summary. Both are stable across renders unless
 		// the underlying data actually changed.
-		[ finalShouldRender, record, summary ]
+		[finalShouldRender, record, summary]
 	);
 
-	const { apply: doApply } = useApplyUpdate( postId, {
+	const { apply: doApply } = useApplyUpdate(postId, {
 		// The banner surfaces its own failure state via `applyState`;
 		// suppress the global snackbar to avoid double-error UI.
 		suppressSnackbarOnError: true,
-	} );
+	});
 
-	const [ applyState, setApplyState ] = useState< ApplyState >( 'idle' );
+	const [applyState, setApplyState] = useState<ApplyState>('idle');
 
 	const canApply =
 		finalShouldRender &&
 		canUserUpdate &&
-		! isDirty &&
-		! hasConflicts &&
+		!isDirty &&
+		!hasConflicts &&
 		applyState === 'idle';
 
 	const canReview =
 		finalShouldRender && canUserUpdate && applyState === 'idle';
 
-	let disabledReason: UseUpdateBannerResult[ 'disabledReason' ] = null;
-	if ( ! canUserUpdate ) {
+	let disabledReason: UseUpdateBannerResult['disabledReason'] = null;
+	if (!canUserUpdate) {
 		disabledReason = 'read_only';
-	} else if ( isDirty ) {
+	} else if (isDirty) {
 		disabledReason = 'dirty';
-	} else if ( hasConflicts ) {
+	} else if (hasConflicts) {
 		disabledReason = 'has_conflicts';
 	}
 
-	const [ expanded, setExpanded ] = useState< boolean >( false );
-	const toggleExpanded = useCallback( () => setExpanded( ( v ) => ! v ), [] );
+	const [expanded, setExpanded] = useState<boolean>(false);
+	const toggleExpanded = useCallback(() => setExpanded((v) => !v), []);
 
 	// Clear the previous post's dismiss flag when the editor swaps to a
 	// different `woo_email` post, so the user dismissing the banner on
 	// post A doesn't keep it suppressed on post B.
-	const prevPostIdRef = useRef< number | null >( null );
-	useEffect( () => {
+	const prevPostIdRef = useRef<number | null>(null);
+	useEffect(() => {
 		const prev = prevPostIdRef.current;
-		if ( prev !== null && prev !== postId ) {
-			clearDismissedForPost( prev );
+		if (prev !== null && prev !== postId) {
+			clearDismissedForPost(prev);
 		}
 		prevPostIdRef.current = postId;
-	}, [ postId, clearDismissedForPost ] );
+	}, [postId, clearDismissedForPost]);
 
 	// Fire the `_viewed` Tracks event exactly once per
 	// (postId, version_to) pair — store-backed dedup survives
 	// re-renders and unmount/remount cycles within a session.
-	useEffect( () => {
+	useEffect(() => {
 		if (
-			! finalShouldRender ||
-			! sharedPayload ||
+			!finalShouldRender ||
+			!sharedPayload ||
 			postId === null ||
 			sharedPayload.template_version_to === null
 		) {
@@ -361,8 +359,8 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 		}
 		// Imperative consultation (not a `useSelect` lambda dep) so the
 		// effect doesn't re-run just because the dedup set mutates.
-		const integration = select( STORE_NAME ) as unknown as {
-			wasUpdateBannerViewedFor: ( id: number, v: string ) => boolean;
+		const integration = select(STORE_NAME) as unknown as {
+			wasUpdateBannerViewedFor: (id: number, v: string) => boolean;
 		};
 		if (
 			integration.wasUpdateBannerViewedFor(
@@ -372,21 +370,21 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 		) {
 			return;
 		}
-		markUpdateBannerViewed( postId, sharedPayload.template_version_to );
-		recordEvent( 'block_email_update_viewed', {
+		markUpdateBannerViewed(postId, sharedPayload.template_version_to);
+		recordEvent('block_email_update_viewed', {
 			...sharedPayload,
 			viewed_from: VIEWED_FROM_EDITOR_BANNER,
-		} );
-	}, [ finalShouldRender, postId, sharedPayload, markUpdateBannerViewed ] );
+		});
+	}, [finalShouldRender, postId, sharedPayload, markUpdateBannerViewed]);
 
-	const apply = useCallback( async () => {
-		if ( ! sharedPayload || ! record ) {
-			setApplyState( 'failed' );
+	const apply = useCallback(async () => {
+		if (!sharedPayload || !record) {
+			setApplyState('failed');
 			return;
 		}
 		// Flip to `applying` synchronously so the UI reflects the click
 		// even before the (fast) sha1 microtask + the apply round-trip.
-		setApplyState( 'applying' );
+		setApplyState('applying');
 		try {
 			// Compute `had_customizations` BEFORE the apply round-trip so
 			// the comparison is against the pre-apply content, not the
@@ -396,58 +394,58 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 			// (RSM-145 §15.4) — read it directly from the entity record's
 			// meta and use it only as an in-memory comparison input.
 			const contentRaw =
-				( record as { content?: { raw?: string } } ).content?.raw ?? '';
+				(record as { content?: { raw?: string } }).content?.raw ?? '';
 			const sourceHashFrom =
 				record?.meta &&
 				typeof record.meta._wc_email_template_source_hash === 'string'
-					? ( record.meta._wc_email_template_source_hash as string )
+					? (record.meta._wc_email_template_source_hash as string)
 					: '';
 			const hadCustomizations = sourceHashFrom
-				? ( await sha1Hex( contentRaw ) ) !== sourceHashFrom
+				? (await sha1Hex(contentRaw)) !== sourceHashFrom
 				: false;
 
-			const res = await doApply( [] );
-			if ( res ) {
-				setApplyState( 'applied' );
-				recordEvent( 'block_email_update_applied', {
+			const res = await doApply([]);
+			if (res) {
+				setApplyState('applied');
+				recordEvent('block_email_update_applied', {
 					...sharedPayload,
 					applied_from: APPLIED_FROM_EDITOR_BANNER,
 					auto_resolved: true,
 					had_customizations: hadCustomizations,
-				} );
+				});
 			} else {
-				setApplyState( 'failed' );
+				setApplyState('failed');
 			}
 		} catch {
 			// `doApply` already swallows fetch errors, but `sha1Hex` (Web
 			// Crypto) and any future async work in here can throw — make
 			// sure the banner can recover instead of getting stuck in
 			// `applying`.
-			setApplyState( 'failed' );
+			setApplyState('failed');
 		}
-	}, [ doApply, sharedPayload, record ] );
+	}, [doApply, sharedPayload, record]);
 
-	const openReview = useCallback( () => {
+	const openReview = useCallback(() => {
 		openReviewDrawer();
-	}, [ openReviewDrawer ] );
+	}, [openReviewDrawer]);
 
-	const dismiss = useCallback( () => {
-		if ( postId === null || ! sharedPayload ) {
+	const dismiss = useCallback(() => {
+		if (postId === null || !sharedPayload) {
 			return;
 		}
-		dismissUpdateBanner( postId );
-		recordEvent( 'block_email_update_dismissed', sharedPayload );
-	}, [ postId, sharedPayload, dismissUpdateBanner ] );
+		dismissUpdateBanner(postId);
+		recordEvent('block_email_update_dismissed', sharedPayload);
+	}, [postId, sharedPayload, dismissUpdateBanner]);
 
 	// Auto-dismiss path — used by the success morph (timer + ×). Mirrors
 	// `dismiss` minus the Tracks event; spec §9.2 excludes the success
 	// auto-dismiss from the `_dismissed` event surface.
-	const autoDismiss = useCallback( () => {
-		if ( postId === null ) {
+	const autoDismiss = useCallback(() => {
+		if (postId === null) {
 			return;
 		}
-		dismissUpdateBanner( postId );
-	}, [ postId, dismissUpdateBanner ] );
+		dismissUpdateBanner(postId);
+	}, [postId, dismissUpdateBanner]);
 
 	return {
 		shouldRender: finalShouldRender,

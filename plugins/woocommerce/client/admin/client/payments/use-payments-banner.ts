@@ -18,32 +18,32 @@ export const usePaymentsBanner = () => {
 		installedPaymentGateways,
 		paymentGatewaySuggestions,
 		hasFinishedResolution,
-	} = useSelect( ( select ) => {
+	} = useSelect((select) => {
 		return {
 			installedPaymentGateways: select(
 				PAYMENT_GATEWAYS_STORE_NAME
 			).getPaymentGateways(),
 			paymentGatewaySuggestions:
-				select( onboardingStore ).getPaymentGatewaySuggestions(),
+				select(onboardingStore).getPaymentGatewaySuggestions(),
 			hasFinishedResolution:
-				select( onboardingStore ).hasFinishedResolution(
+				select(onboardingStore).hasFinishedResolution(
 					'getPaymentGatewaySuggestions',
 					[]
 				) &&
-				select( PAYMENT_GATEWAYS_STORE_NAME ).hasFinishedResolution(
+				select(PAYMENT_GATEWAYS_STORE_NAME).hasFinishedResolution(
 					'getPaymentGateways'
 				),
 		};
-	}, [] );
+	}, []);
 
 	const isWcPayInstalled = installedPaymentGateways.some(
-		( gateway: PaymentGateway ) => {
+		(gateway: PaymentGateway) => {
 			return gateway.id === 'woocommerce_payments';
 		}
 	);
 
 	const isWcPayDisabled = installedPaymentGateways.find(
-		( gateway: PaymentGateway ) => {
+		(gateway: PaymentGateway) => {
 			return (
 				gateway.id === 'woocommerce_payments' &&
 				gateway.enabled === false
@@ -52,7 +52,7 @@ export const usePaymentsBanner = () => {
 	);
 
 	const shouldShowBanner =
-		isWcPaySupported( paymentGatewaySuggestions ) &&
+		isWcPaySupported(paymentGatewaySuggestions) &&
 		isWcPayInstalled &&
 		isWcPayDisabled;
 

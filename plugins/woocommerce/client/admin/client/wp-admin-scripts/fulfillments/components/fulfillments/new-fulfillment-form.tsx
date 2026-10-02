@@ -29,40 +29,40 @@ const NewFulfillmentForm: React.FC = () => {
 		setOpenSection,
 		isEditing,
 	} = useFulfillmentDrawerContext();
-	const [ error, setError ] = useState< string | null >( null );
+	const [error, setError] = useState<string | null>(null);
 
 	// Reset error when order changes
-	useEffect( () => {
-		setError( null );
-	}, [ order?.id ] );
+	useEffect(() => {
+		setError(null);
+	}, [order?.id]);
 
 	const remainingItems = useMemo(
 		() =>
 			getItemsNotInAnyFulfillment(
 				fulfillments,
-				order ?? ( { line_items: [] as LineItem[] } as Order ),
+				order ?? ({ line_items: [] as LineItem[] } as Order),
 				refunds ?? []
-			).map( ( item ) => ( {
+			).map((item) => ({
 				...item,
-				selection: item.selection.map( ( selection ) => ( {
+				selection: item.selection.map((selection) => ({
 					...selection,
 					checked: true,
-				} ) ),
-			} ) ),
-		[ fulfillments, order, refunds ]
+				})),
+			})),
+		[fulfillments, order, refunds]
 	);
 
-	if ( ! order ) {
+	if (!order) {
 		return null;
 	}
 
-	if ( remainingItems.length === 0 ) {
+	if (remainingItems.length === 0) {
 		return null;
 	}
 
 	return (
 		<div
-			className={ [
+			className={[
 				'woocommerce-fulfillment-new-fulfillment-form',
 				isEditing
 					? 'woocommerce-fulfillment-new-fulfillment-form__disabled'
@@ -70,45 +70,43 @@ const NewFulfillmentForm: React.FC = () => {
 				fulfillments.length === 0
 					? 'woocommerce-fulfillment-new-fulfillment-form__first'
 					: '',
-			].join( ' ' ) }
+			].join(' ')}
 		>
 			<div
-				className={ [
+				className={[
 					'woocommerce-fulfillment-new-fulfillment-form__header',
 					openSection === 'order' ? 'is-open' : '',
-				].join( ' ' ) }
-				onClick={ () => {
-					if ( fulfillments.length > 0 ) {
-						setOpenSection(
-							openSection === 'order' ? '' : 'order'
-						);
+				].join(' ')}
+				onClick={() => {
+					if (fulfillments.length > 0) {
+						setOpenSection(openSection === 'order' ? '' : 'order');
 					}
-				} }
-				onKeyDown={ ( event ) => {
-					if ( fulfillments.length > 0 ) {
-						if ( event.key === 'Enter' || event.key === ' ' ) {
+				}}
+				onKeyDown={(event) => {
+					if (fulfillments.length > 0) {
+						if (event.key === 'Enter' || event.key === ' ') {
 							event.preventDefault();
 							setOpenSection(
 								openSection === 'order' ? '' : 'order'
 							);
 						}
 					}
-				} }
-				tabIndex={ fulfillments.length > 0 ? 0 : -1 }
+				}}
+				tabIndex={fulfillments.length > 0 ? 0 : -1}
 				role="button"
-				aria-expanded={ openSection === 'order' }
+				aria-expanded={openSection === 'order'}
 				aria-label={
 					openSection === 'order'
-						? __( 'Collapse pending items', 'woocommerce' )
-						: __( 'Expand pending items', 'woocommerce' )
+						? __('Collapse pending items', 'woocommerce')
+						: __('Expand pending items', 'woocommerce')
 				}
 			>
 				<h3>
-					{ fulfillments.length === 0
-						? __( 'Order Items', 'woocommerce' )
-						: __( 'Pending Items', 'woocommerce' ) }
+					{fulfillments.length === 0
+						? __('Order Items', 'woocommerce')
+						: __('Pending Items', 'woocommerce')}
 				</h3>
-				{ fulfillments.length > 0 && (
+				{fulfillments.length > 0 && (
 					<div aria-hidden="true">
 						<Icon
 							icon={
@@ -116,32 +114,32 @@ const NewFulfillmentForm: React.FC = () => {
 									? 'arrow-up-alt2'
 									: 'arrow-down-alt2'
 							}
-							size={ 16 }
+							size={16}
 						/>
 					</div>
-				) }
+				)}
 			</div>
-			{ ! isEditing && openSection === 'order' && (
+			{!isEditing && openSection === 'order' && (
 				<div className="woocommerce-fulfillment-new-fulfillment-form__content">
-					{ error && <ErrorLabel error={ error } /> }
+					{error && <ErrorLabel error={error} />}
 					<ShipmentFormProvider>
 						<FulfillmentProvider
-							order={ order }
-							fulfillment={ null }
-							items={ remainingItems }
+							order={order}
+							fulfillment={null}
+							items={remainingItems}
 						>
-							<ItemSelector editMode={ true } />
+							<ItemSelector editMode={true} />
 
 							<ShipmentForm />
 							<CustomerNotificationBox type="fulfill" />
 							<div className="woocommerce-fulfillment-item-actions">
-								<SaveAsDraftButton setError={ setError } />
-								<FulfillItemsButton setError={ setError } />
+								<SaveAsDraftButton setError={setError} />
+								<FulfillItemsButton setError={setError} />
 							</div>
 						</FulfillmentProvider>
 					</ShipmentFormProvider>
 				</div>
-			) }
+			)}
 		</div>
 	);
 };

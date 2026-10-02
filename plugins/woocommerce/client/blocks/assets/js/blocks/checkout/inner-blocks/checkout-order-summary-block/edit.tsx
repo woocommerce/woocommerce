@@ -23,67 +23,67 @@ import {
 import { OrderMetaSlotFill } from './slotfills';
 import { useOrderSummaryToggle } from './use-order-summary-toggle';
 
-export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
+export const Edit = ({ clientId }: { clientId: string }): JSX.Element => {
 	const blockProps = useBlockProps();
 	const { cartTotals } = useStoreCart();
-	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
-	const totalPrice = parseInt( cartTotals.total_price, 10 );
+	const totalsCurrency = getCurrencyFromPriceResponse(cartTotals);
+	const totalPrice = parseInt(cartTotals.total_price, 10);
 	const allowedBlocks = getAllowedBlocks(
 		innerBlockAreas.CHECKOUT_ORDER_SUMMARY
 	);
 	const { isOpen, ariaControlsId, toggleProps } = useOrderSummaryToggle();
 
 	const defaultTemplate = [
-		[ 'woocommerce/checkout-order-summary-cart-items-block', {}, [] ],
-		[ 'woocommerce/checkout-order-summary-coupon-form-block', {}, [] ],
-		[ 'woocommerce/checkout-order-summary-totals-block', {}, [] ],
+		['woocommerce/checkout-order-summary-cart-items-block', {}, []],
+		['woocommerce/checkout-order-summary-coupon-form-block', {}, []],
+		['woocommerce/checkout-order-summary-totals-block', {}, []],
 	] as TemplateArray;
 
-	useForcedLayout( {
+	useForcedLayout({
 		clientId,
 		registeredBlocks: allowedBlocks,
 		defaultTemplate,
-	} );
+	});
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<div
 				className="wc-block-components-checkout-order-summary__title"
-				{ ...toggleProps }
+				{...toggleProps}
 			>
 				<p
 					className="wc-block-components-checkout-order-summary__title-text"
 					role="heading"
-					aria-level={ 2 }
+					aria-level={2}
 				>
-					{ __( 'Order summary', 'woocommerce' ) }
+					{__('Order summary', 'woocommerce')}
 				</p>
 				<FormattedMonetaryAmount
-					currency={ totalsCurrency }
-					value={ totalPrice }
+					currency={totalsCurrency}
+					value={totalPrice}
 					className="wc-block-components-checkout-order-summary__title-price"
 				/>
 				<span className="wc-block-components-checkout-order-summary__title-icon">
-					<Icon icon={ isOpen ? chevronUp : chevronDown } />
+					<Icon icon={isOpen ? chevronUp : chevronDown} />
 				</span>
 			</div>
 			<div
-				className={ clsx(
+				className={clsx(
 					'wc-block-components-checkout-order-summary__content',
 					{
 						'is-open': isOpen,
 					}
-				) }
-				id={ ariaControlsId }
+				)}
+				id={ariaControlsId}
 			>
 				<InnerBlocks
-					allowedBlocks={ allowedBlocks }
-					template={ defaultTemplate }
+					allowedBlocks={allowedBlocks}
+					template={defaultTemplate}
 				/>
 				<div className="wc-block-components-totals-wrapper">
 					<TotalsFooterItem
-						currency={ totalsCurrency }
-						values={ cartTotals }
+						currency={totalsCurrency}
+						values={cartTotals}
 					/>
 				</div>
 				<OrderMetaSlotFill />
@@ -94,7 +94,7 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 
 export const Save = (): JSX.Element => {
 	return (
-		<div { ...useBlockProps.save() }>
+		<div {...useBlockProps.save()}>
 			<InnerBlocks.Content />
 		</div>
 	);

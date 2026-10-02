@@ -31,36 +31,36 @@ import type { ProductsByTagBlockProps } from './types';
 /**
  * Component to handle edit mode of "Products by Tag".
  */
-const ProductsByTagBlock = ( {
+const ProductsByTagBlock = ({
 	attributes,
 	name,
 	setAttributes,
 	debouncedSpeak,
-}: ProductsByTagBlockProps ) => {
-	const [ changedAttributes, setChangedAttributes ] = useState<
-		Partial< ProductsByTagBlockProps[ 'attributes' ] >
-	>( {} );
-	const [ isEditing, setIsEditing ] = useState( false );
+}: ProductsByTagBlockProps) => {
+	const [changedAttributes, setChangedAttributes] = useState<
+		Partial<ProductsByTagBlockProps['attributes']>
+	>({});
+	const [isEditing, setIsEditing] = useState(false);
 
-	useEffect( () => {
-		if ( ! attributes.tags.length ) {
+	useEffect(() => {
+		if (!attributes.tags.length) {
 			// We've removed all selected categories, or no categories have been selected yet.
-			setIsEditing( true );
+			setIsEditing(true);
 		}
-	}, [ attributes.tags.length ] );
+	}, [attributes.tags.length]);
 
 	const startEditing = () => {
-		setIsEditing( true );
-		setChangedAttributes( {} );
+		setIsEditing(true);
+		setChangedAttributes({});
 	};
 
 	const stopEditing = () => {
-		setIsEditing( false );
-		setChangedAttributes( {} );
+		setIsEditing(false);
+		setChangedAttributes({});
 	};
 
 	const save = () => {
-		setAttributes( changedAttributes );
+		setAttributes(changedAttributes);
 		stopEditing();
 	};
 
@@ -78,74 +78,66 @@ const ProductsByTagBlock = ( {
 		return (
 			<InspectorControls key="inspector">
 				<PanelBody
-					title={ __( 'Product Tag', 'woocommerce' ) }
-					initialOpen={ ! attributes.tags.length && ! isEditing }
+					title={__('Product Tag', 'woocommerce')}
+					initialOpen={!attributes.tags.length && !isEditing}
 				>
 					<ProductTagControl
-						selected={ attributes.tags }
-						onChange={ ( value = [] ) => {
-							const ids = value.map( ( { id } ) => id );
-							setAttributes( { tags: ids } );
-						} }
-						operator={ tagOperator }
-						onOperatorChange={ ( value = 'any' ) =>
-							setAttributes( { tagOperator: value } )
+						selected={attributes.tags}
+						onChange={(value = []) => {
+							const ids = value.map(({ id }) => id);
+							setAttributes({ tags: ids });
+						}}
+						operator={tagOperator}
+						onOperatorChange={(value = 'any') =>
+							setAttributes({ tagOperator: value })
 						}
-						isCompact={ true }
+						isCompact={true}
 					/>
 				</PanelBody>
-				<PanelBody title={ __( 'Layout', 'woocommerce' ) } initialOpen>
+				<PanelBody title={__('Layout', 'woocommerce')} initialOpen>
 					<GridLayoutControl
-						columns={ columns }
-						rows={ rows }
-						alignButtons={ alignButtons }
-						setAttributes={ setAttributes }
-						minColumns={ getSettingWithCoercion(
+						columns={columns}
+						rows={rows}
+						alignButtons={alignButtons}
+						setAttributes={setAttributes}
+						minColumns={getSettingWithCoercion(
 							'minColumns',
 							1,
 							isNumber
-						) }
-						maxColumns={ getSettingWithCoercion(
+						)}
+						maxColumns={getSettingWithCoercion(
 							'maxColumns',
 							6,
 							isNumber
-						) }
-						minRows={ getSettingWithCoercion(
-							'minRows',
-							6,
-							isNumber
-						) }
-						maxRows={ getSettingWithCoercion(
-							'maxRows',
-							6,
-							isNumber
-						) }
+						)}
+						minRows={getSettingWithCoercion('minRows', 6, isNumber)}
+						maxRows={getSettingWithCoercion('maxRows', 6, isNumber)}
 					/>
 				</PanelBody>
-				<PanelBody title={ __( 'Content', 'woocommerce' ) } initialOpen>
+				<PanelBody title={__('Content', 'woocommerce')} initialOpen>
 					<GridContentControl
-						settings={ contentVisibility }
-						onChange={ ( value ) =>
-							setAttributes( { contentVisibility: value } )
+						settings={contentVisibility}
+						onChange={(value) =>
+							setAttributes({ contentVisibility: value })
 						}
 					/>
 				</PanelBody>
 				<PanelBody
-					title={ __( 'Order By', 'woocommerce' ) }
-					initialOpen={ false }
+					title={__('Order By', 'woocommerce')}
+					initialOpen={false}
 				>
 					<ProductOrderbyControl
-						setAttributes={ setAttributes }
-						value={ orderby }
+						setAttributes={setAttributes}
+						value={orderby}
 					/>
 				</PanelBody>
 				<PanelBody
-					title={ __( 'Filter by stock status', 'woocommerce' ) }
-					initialOpen={ false }
+					title={__('Filter by stock status', 'woocommerce')}
+					initialOpen={false}
 				>
 					<ProductStockControl
-						setAttributes={ setAttributes }
-						value={ stockStatus }
+						setAttributes={setAttributes}
+						value={stockStatus}
 					/>
 				</PanelBody>
 			</InspectorControls>
@@ -157,55 +149,53 @@ const ProductsByTagBlock = ( {
 		const onDone = () => {
 			save();
 			debouncedSpeak(
-				__( 'Showing Products by Tag block preview.', 'woocommerce' )
+				__('Showing Products by Tag block preview.', 'woocommerce')
 			);
 		};
 		const onCancel = () => {
 			stopEditing();
 			debouncedSpeak(
-				__( 'Showing Products by Tag block preview.', 'woocommerce' )
+				__('Showing Products by Tag block preview.', 'woocommerce')
 			);
 		};
 
 		return (
 			<Placeholder
-				icon={
-					<Icon icon={ tag } className="block-editor-block-icon" />
-				}
-				label={ __( 'Products by Tag', 'woocommerce' ) }
+				icon={<Icon icon={tag} className="block-editor-block-icon" />}
+				label={__('Products by Tag', 'woocommerce')}
 				className="wc-block-products-grid wc-block-product-tag"
 			>
-				{ __(
+				{__(
 					'Display a grid of products from your selected tags.',
 					'woocommerce'
-				) }
+				)}
 				<div className="wc-block-product-tag__selection">
 					<ProductTagControl
-						selected={ currentAttributes.tags }
-						onChange={ ( value = [] ) => {
-							const ids = value.map( ( { id } ) => id );
-							setChangedAttributes( {
+						selected={currentAttributes.tags}
+						onChange={(value = []) => {
+							const ids = value.map(({ id }) => id);
+							setChangedAttributes({
 								...changedAttributes,
 								tags: ids,
-							} );
-						} }
-						operator={ currentAttributes.tagOperator }
-						onOperatorChange={ ( value = 'any' ) =>
-							setChangedAttributes( {
+							});
+						}}
+						operator={currentAttributes.tagOperator}
+						onOperatorChange={(value = 'any') =>
+							setChangedAttributes({
 								...changedAttributes,
 								tagOperator: value,
-							} )
+							})
 						}
 					/>
-					<Button variant="primary" onClick={ onDone }>
-						{ __( 'Done', 'woocommerce' ) }
+					<Button variant="primary" onClick={onDone}>
+						{__('Done', 'woocommerce')}
 					</Button>
 					<Button
 						className="wc-block-product-tag__cancel-button"
 						variant="tertiary"
-						onClick={ onCancel }
+						onClick={onCancel}
 					>
-						{ __( 'Cancel', 'woocommerce' ) }
+						{__('Cancel', 'woocommerce')}
 					</Button>
 				</div>
 			</Placeholder>
@@ -216,65 +206,62 @@ const ProductsByTagBlock = ( {
 
 		return (
 			<Disabled>
-				{ selectedTags ? (
-					<ServerSideRender
-						block={ name }
-						attributes={ attributes }
-					/>
+				{selectedTags ? (
+					<ServerSideRender block={name} attributes={attributes} />
 				) : (
 					<Placeholder
 						icon={
 							<Icon
-								icon={ tag }
+								icon={tag}
 								className="block-editor-block-icon"
 							/>
 						}
-						label={ __( 'Products by Tag', 'woocommerce' ) }
+						label={__('Products by Tag', 'woocommerce')}
 						className="wc-block-products-grid wc-block-product-tag"
 					>
-						{ __(
+						{__(
 							'This block displays products from selected tags. Select at least one tag to display its products.',
 							'woocommerce'
-						) }
+						)}
 					</Placeholder>
-				) }
+				)}
 			</Disabled>
 		);
 	};
 
-	if ( attributes.isPreview ) {
+	if (attributes.isPreview) {
 		return gridBlockPreview;
 	}
 
-	return getSetting( 'hasTags', true ) ? (
+	return getSetting('hasTags', true) ? (
 		<>
 			<BlockControls>
 				<ToolbarGroup
-					controls={ [
+					controls={[
 						{
 							icon: 'edit',
-							title: __( 'Edit selected tags', 'woocommerce' ),
+							title: __('Edit selected tags', 'woocommerce'),
 							onClick: () =>
 								isEditing ? stopEditing() : startEditing(),
 							isActive: isEditing,
 						},
-					] }
+					]}
 				/>
 			</BlockControls>
-			{ getInspectorControls() }
-			{ isEditing ? renderEditMode() : renderViewMode() }
+			{getInspectorControls()}
+			{isEditing ? renderEditMode() : renderViewMode()}
 		</>
 	) : (
 		<Placeholder
-			icon={ <Icon icon={ tag } className="block-editor-block-icon" /> }
-			label={ __( 'Products by Tag', 'woocommerce' ) }
+			icon={<Icon icon={tag} className="block-editor-block-icon" />}
+			label={__('Products by Tag', 'woocommerce')}
 			className="wc-block-products-grid wc-block-product-tag"
 		>
-			{ __(
+			{__(
 				'This block displays products from selected tags. To use it you first need to create products and assign tags to them.',
 				'woocommerce'
-			) }
+			)}
 		</Placeholder>
 	);
 };
-export default withSpokenMessages( ProductsByTagBlock );
+export default withSpokenMessages(ProductsByTagBlock);

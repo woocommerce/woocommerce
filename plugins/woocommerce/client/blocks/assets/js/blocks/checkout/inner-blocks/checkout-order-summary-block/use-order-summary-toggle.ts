@@ -9,7 +9,7 @@ export type OrderSummaryToggle = {
 	isOpen: boolean;
 	isLarge: boolean;
 	ariaControlsId: string;
-	toggleProps: HTMLAttributes< HTMLDivElement >;
+	toggleProps: HTMLAttributes<HTMLDivElement>;
 };
 
 /**
@@ -27,26 +27,26 @@ export type OrderSummaryToggle = {
  */
 export const useOrderSummaryToggle = (): OrderSummaryToggle => {
 	const { isLarge } = useContainerWidthContext();
-	const [ isOpen, setIsOpen ] = useState( false );
+	const [isOpen, setIsOpen] = useState(false);
 	const ariaControlsId = useId();
 
-	const toggleProps = ! isLarge
+	const toggleProps = !isLarge
 		? {
 				role: 'button',
-				onClick: () => setIsOpen( ! isOpen ),
+				onClick: () => setIsOpen(!isOpen),
 				'aria-expanded': isOpen,
 				'aria-controls': ariaControlsId,
 				tabIndex: 0,
-				onKeyDown: ( event: KeyboardEvent ) => {
-					if ( event.key === 'Enter' || event.key === ' ' ) {
+				onKeyDown: (event: KeyboardEvent) => {
+					if (event.key === 'Enter' || event.key === ' ') {
 						// Space scrolls the page and Enter submits the
 						// surrounding checkout form. A real button would
 						// suppress both for us.
 						event.preventDefault();
-						setIsOpen( ! isOpen );
+						setIsOpen(!isOpen);
 					}
 				},
-		  }
+			}
 		: {};
 
 	return { isOpen, isLarge, ariaControlsId, toggleProps };

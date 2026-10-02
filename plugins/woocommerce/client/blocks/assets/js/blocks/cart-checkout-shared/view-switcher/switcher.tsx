@@ -15,7 +15,7 @@ import { eye } from '@woocommerce/icons';
 import type { View } from './types';
 import { getView, selectView } from './utils';
 
-export const Switcher = ( {
+export const Switcher = ({
 	currentView,
 	views,
 	clientId,
@@ -23,37 +23,37 @@ export const Switcher = ( {
 	currentView: string;
 	views: View[];
 	clientId: string;
-} ): JSX.Element | null => {
+}): JSX.Element | null => {
 	const {
 		getBlockName,
 		getSelectedBlockClientId,
 		getBlockParentsByBlockName,
-	} = useSelect( ( select ) => {
-		const blockEditor = select( 'core/block-editor' );
+	} = useSelect((select) => {
+		const blockEditor = select('core/block-editor');
 		return {
 			getBlockName: blockEditor.getBlockName,
 			getSelectedBlockClientId: blockEditor.getSelectedBlockClientId,
 			getBlockParentsByBlockName: blockEditor.getBlockParentsByBlockName,
 		};
-	}, [] );
+	}, []);
 	const selectedBlockClientId = getSelectedBlockClientId();
-	const currentViewObject = getView( currentView, views ) || views[ 0 ];
+	const currentViewObject = getView(currentView, views) || views[0];
 	const currentViewLabel = currentViewObject.label;
 
-	useLayoutEffect( () => {
+	useLayoutEffect(() => {
 		const selectedBlock = selectedBlockClientId
-			? getBlockName( selectedBlockClientId )
+			? getBlockName(selectedBlockClientId)
 			: null;
 
 		// If there is no selected block, or the selected block is the current view, do nothing.
-		if ( ! selectedBlock || currentView === selectedBlock ) {
+		if (!selectedBlock || currentView === selectedBlock) {
 			return;
 		}
 
-		const viewNames = views.map( ( view ) => view.view );
+		const viewNames = views.map((view) => view.view);
 
-		if ( viewNames.includes( selectedBlock ) ) {
-			selectView( clientId, selectedBlock );
+		if (viewNames.includes(selectedBlock)) {
+			selectView(clientId, selectedBlock);
 			return;
 		}
 
@@ -65,15 +65,15 @@ export const Switcher = ( {
 
 		const parentBlock =
 			parentBlockClientIds.length === 1
-				? getBlockName( parentBlockClientIds[ 0 ] )
+				? getBlockName(parentBlockClientIds[0])
 				: null;
 
 		// If there is no parent block, or the parent block is the current view, do nothing.
-		if ( ! parentBlock || currentView === parentBlock ) {
+		if (!parentBlock || currentView === parentBlock) {
 			return;
 		}
 
-		selectView( clientId, parentBlock, false );
+		selectView(clientId, parentBlock, false);
 	}, [
 		clientId,
 		currentView,
@@ -81,29 +81,27 @@ export const Switcher = ( {
 		getBlockParentsByBlockName,
 		selectedBlockClientId,
 		views,
-	] );
+	]);
 
 	return (
 		<BlockControls>
 			<ToolbarGroup>
 				<ToolbarDropdownMenu
-					label={ __( 'Switch view', 'woocommerce' ) }
-					text={ currentViewLabel }
-					icon={
-						<Icon icon={ eye } style={ { marginRight: '8px' } } />
-					}
-					controls={ views.map( ( view ) => ( {
+					label={__('Switch view', 'woocommerce')}
+					text={currentViewLabel}
+					icon={<Icon icon={eye} style={{ marginRight: '8px' }} />}
+					controls={views.map((view) => ({
 						...view,
 						title: (
-							<span style={ { marginLeft: '8px' } }>
-								{ view.label }
+							<span style={{ marginLeft: '8px' }}>
+								{view.label}
 							</span>
 						),
 						isActive: view.view === currentView,
 						onClick: () => {
-							selectView( clientId, view.view );
+							selectView(clientId, view.view);
 						},
-					} ) ) }
+					}))}
 				/>
 			</ToolbarGroup>
 		</BlockControls>

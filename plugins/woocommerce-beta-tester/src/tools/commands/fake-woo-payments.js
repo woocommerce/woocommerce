@@ -11,11 +11,11 @@ import { store } from '../data';
 export const FAKE_WOO_PAYMENTS_ACTION_NAME = 'fakeWooPayments';
 
 export const FakeWooPayments = () => {
-	const isEnabled = useSelect( ( select ) =>
-		select( store ).getIsFakeWooPaymentsEnabled()
+	const isEnabled = useSelect((select) =>
+		select(store).getIsFakeWooPaymentsEnabled()
 	);
 	const getDescription = () => {
-		switch ( isEnabled ) {
+		switch (isEnabled) {
 			case 'yes':
 				return 'Enabled 🟢';
 			case 'no':
@@ -27,5 +27,5 @@ export const FakeWooPayments = () => {
 		}
 	};
 
-	return <div>{ getDescription() }</div>;
+	return <div>{getDescription()}</div>;
 };

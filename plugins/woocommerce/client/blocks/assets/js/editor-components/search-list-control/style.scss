@@ -214,7 +214,7 @@
 		> label:has(.woocommerce-search-list__item-label) {
 			display: contents;
 		}
-		
+
 		.woocommerce-search-list__item-label {
 			display: flex;
 			flex: 1;
@@ -312,7 +312,10 @@
 
 	.woocommerce-search-list__item-load-more {
 		border: none;
-		color: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
+		color: var(
+			--wp-components-color-accent,
+			var(--wp-admin-theme-color, #3858e9)
+		);
 		cursor: pointer;
 		padding-left: calc($gap * 2 + 24px);
 		width: 100%;

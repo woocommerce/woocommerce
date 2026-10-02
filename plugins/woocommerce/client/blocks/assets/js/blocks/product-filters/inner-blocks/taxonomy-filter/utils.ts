@@ -9,15 +9,15 @@ import { __ } from '@wordpress/i18n';
  */
 import type { TaxonomyItem } from './types';
 
-const taxonomies = getSetting< TaxonomyItem[] >(
+const taxonomies = getSetting<TaxonomyItem[]>(
 	'filterableProductTaxonomies',
 	[]
 );
 
-export function getTaxonomyLabel( taxonomy: string ) {
-	const match = taxonomies.find( ( item ) => item.name === taxonomy );
-	if ( match ) {
+export function getTaxonomyLabel(taxonomy: string) {
+	const match = taxonomies.find((item) => item.name === taxonomy);
+	if (match) {
 		return match.label;
 	}
-	return __( 'Taxonomy', 'woocommerce' );
+	return __('Taxonomy', 'woocommerce');
 }

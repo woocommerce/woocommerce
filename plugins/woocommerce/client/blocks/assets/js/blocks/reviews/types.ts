@@ -8,7 +8,7 @@ export interface PreviewReviews {
 	product_permalink: string;
 	reviewer: string;
 	review: string;
-	reviewer_avatar_urls: { [ id: number ]: string };
+	reviewer_avatar_urls: { [id: number]: string };
 	rating: number;
 	verified: boolean;
 }

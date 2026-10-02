@@ -14,20 +14,20 @@ export interface RadioControlAccordionProps {
 	className?: string;
 	instanceId: number;
 	id: string;
-	onChange: ( value: string ) => void;
-	options: Array< {
+	onChange: (value: string) => void;
+	options: Array<{
 		value: string;
 		label: string | JSX.Element;
-		onChange?: ( value: string ) => void;
+		onChange?: (value: string) => void;
 		name: string;
 		content: JSX.Element;
-	} >;
+	}>;
 	selected: string | null;
 	// Should the selected option be highlighted with a border?
 	highlightChecked?: boolean;
 }
 
-const RadioControlAccordion = ( {
+const RadioControlAccordion = ({
 	className,
 	instanceId,
 	id,
@@ -35,19 +35,19 @@ const RadioControlAccordion = ( {
 	onChange,
 	options = [],
 	highlightChecked = false,
-}: RadioControlAccordionProps ): JSX.Element | null => {
+}: RadioControlAccordionProps): JSX.Element | null => {
 	const radioControlId = id || instanceId;
 
-	const selectedOptionNumber = useMemo( () => {
-		return options.findIndex( ( option ) => option.value === selected );
-	}, [ options, selected ] );
+	const selectedOptionNumber = useMemo(() => {
+		return options.findIndex((option) => option.value === selected);
+	}, [options, selected]);
 
-	if ( ! options.length ) {
+	if (!options.length) {
 		return null;
 	}
 	return (
 		<div
-			className={ clsx(
+			className={clsx(
 				'wc-block-components-radio-control',
 				{
 					'wc-block-components-radio-control--highlight-checked':
@@ -59,55 +59,55 @@ const RadioControlAccordion = ( {
 						selectedOptionNumber === options.length - 1,
 				},
 				className
-			) }
+			)}
 		>
-			{ options.map( ( option ) => {
+			{options.map((option) => {
 				const hasOptionContent =
 					typeof option === 'object' && 'content' in option;
 				const checked = option.value === selected;
-				const name = `radio-control-${ radioControlId }`;
+				const name = `radio-control-${radioControlId}`;
 				return (
 					<div
-						className={ clsx(
+						className={clsx(
 							'wc-block-components-radio-control-accordion-option',
 							{
 								'wc-block-components-radio-control-accordion-option--checked-option-highlighted':
 									checked && highlightChecked,
 							}
-						) }
-						key={ option.value }
+						)}
+						key={option.value}
 					>
 						<RadioControlOption
-							name={ name }
-							checked={ checked }
-							option={ option }
-							onChange={ ( value ) => {
-								onChange( value );
-								if ( typeof option.onChange === 'function' ) {
-									option.onChange( value );
+							name={name}
+							checked={checked}
+							option={option}
+							onChange={(value) => {
+								onChange(value);
+								if (typeof option.onChange === 'function') {
+									option.onChange(value);
 								}
-							} }
+							}}
 						/>
-						{ hasOptionContent && checked && (
+						{hasOptionContent && checked && (
 							<div
-								id={ `${ name }-${ option.value }__content` }
-								className={ clsx(
+								id={`${name}-${option.value}__content`}
+								className={clsx(
 									'wc-block-components-radio-control-accordion-content',
 									{
 										'wc-block-components-radio-control-accordion-content-hide':
-											! checked,
+											!checked,
 									}
-								) }
+								)}
 							>
-								{ option.content }
+								{option.content}
 							</div>
-						) }
+						)}
 					</div>
 				);
-			} ) }
+			})}
 		</div>
 	);
 };
 
-export default withInstanceId( RadioControlAccordion );
+export default withInstanceId(RadioControlAccordion);
 export { RadioControlAccordion };

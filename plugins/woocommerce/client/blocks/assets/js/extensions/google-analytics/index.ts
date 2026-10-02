@@ -29,24 +29,24 @@ import {
  * @see https://developers.google.com/analytics/devguides/collection/gtagjs/enhanced-ecommerce#1_measure_checkout_steps
  */
 addAction(
-	`${ actionPrefix }-checkout-render-checkout-form`,
+	`${actionPrefix}-checkout-render-checkout-form`,
 	namespace,
-	trackCheckoutStep( 0 )
+	trackCheckoutStep(0)
 );
 addAction(
-	`${ actionPrefix }-checkout-set-email-address`,
+	`${actionPrefix}-checkout-set-email-address`,
 	namespace,
-	trackCheckoutStep( 1 )
+	trackCheckoutStep(1)
 );
 addAction(
-	`${ actionPrefix }-checkout-set-shipping-address`,
+	`${actionPrefix}-checkout-set-shipping-address`,
 	namespace,
-	trackCheckoutStep( 2 )
+	trackCheckoutStep(2)
 );
 addAction(
-	`${ actionPrefix }-checkout-set-billing-address`,
+	`${actionPrefix}-checkout-set-billing-address`,
 	namespace,
-	trackCheckoutStep( 3 )
+	trackCheckoutStep(3)
 );
 
 /**
@@ -56,14 +56,14 @@ addAction(
  * @see https://developers.google.com/analytics/devguides/collection/gtagjs/enhanced-ecommerce#2_measure_checkout_options
  */
 addAction(
-	`${ actionPrefix }-checkout-set-selected-shipping-rate`,
+	`${actionPrefix}-checkout-set-selected-shipping-rate`,
 	namespace,
-	( { shippingRateId }: { shippingRateId: string } ): void => {
-		trackCheckoutOption( {
+	({ shippingRateId }: { shippingRateId: string }): void => {
+		trackCheckoutOption({
 			step: 4,
-			option: __( 'Shipping Method', 'woocommerce' ),
+			option: __('Shipping Method', 'woocommerce'),
 			value: shippingRateId,
-		} )();
+		})();
 	}
 );
 
@@ -74,14 +74,14 @@ addAction(
  * @see https://developers.google.com/analytics/devguides/collection/gtagjs/enhanced-ecommerce#2_measure_checkout_options
  */
 addAction(
-	`${ actionPrefix }-checkout-set-active-payment-method`,
+	`${actionPrefix}-checkout-set-active-payment-method`,
 	namespace,
-	( { paymentMethodSlug }: { paymentMethodSlug: string } ): void => {
-		trackCheckoutOption( {
+	({ paymentMethodSlug }: { paymentMethodSlug: string }): void => {
+		trackCheckoutOption({
 			step: 5,
-			option: __( 'Payment Method', 'woocommerce' ),
+			option: __('Payment Method', 'woocommerce'),
 			value: paymentMethodSlug,
-		} )();
+		})();
 	}
 );
 
@@ -94,9 +94,9 @@ addAction(
  * @summary Track the add_payment_info event
  * @see https://developers.google.com/gtagjs/reference/ga4-events#add_payment_info
  */
-addAction( `${ actionPrefix }-checkout-submit`, namespace, (): void => {
-	trackEvent( 'add_payment_info' );
-} );
+addAction(`${actionPrefix}-checkout-submit`, namespace, (): void => {
+	trackEvent('add_payment_info');
+});
 
 /**
  * Add to cart.
@@ -107,20 +107,20 @@ addAction( `${ actionPrefix }-checkout-submit`, namespace, (): void => {
  * @see https://developers.google.com/gtagjs/reference/ga4-events#add_to_cart
  */
 addAction(
-	`${ actionPrefix }-cart-add-item`,
+	`${actionPrefix}-cart-add-item`,
 	namespace,
-	( {
+	({
 		product,
 		quantity = 1,
 	}: {
 		product: ProductResponseItem;
 		quantity: number;
-	} ): void => {
-		trackEvent( 'add_to_cart', {
+	}): void => {
+		trackEvent('add_to_cart', {
 			event_category: 'ecommerce',
-			event_label: __( 'Add to Cart', 'woocommerce' ),
-			items: [ getProductFieldObject( product, quantity ) ],
-		} );
+			event_label: __('Add to Cart', 'woocommerce'),
+			items: [getProductFieldObject(product, quantity)],
+		});
 	}
 );
 
@@ -131,20 +131,20 @@ addAction(
  * @see https://developers.google.com/gtagjs/reference/ga4-events#remove_from_cart
  */
 addAction(
-	`${ actionPrefix }-cart-remove-item`,
+	`${actionPrefix}-cart-remove-item`,
 	namespace,
-	( {
+	({
 		product,
 		quantity = 1,
 	}: {
 		product: CartResponseItem;
 		quantity: number;
-	} ): void => {
-		trackEvent( 'remove_from_cart', {
+	}): void => {
+		trackEvent('remove_from_cart', {
 			event_category: 'ecommerce',
-			event_label: __( 'Remove Cart Item', 'woocommerce' ),
-			items: [ getProductFieldObject( product, quantity ) ],
-		} );
+			event_label: __('Remove Cart Item', 'woocommerce'),
+			items: [getProductFieldObject(product, quantity)],
+		});
 	}
 );
 
@@ -154,20 +154,20 @@ addAction(
  * @summary Custom change_cart_quantity event.
  */
 addAction(
-	`${ actionPrefix }-cart-set-item-quantity`,
+	`${actionPrefix}-cart-set-item-quantity`,
 	namespace,
-	( {
+	({
 		product,
 		quantity = 1,
 	}: {
 		product: CartResponseItem;
 		quantity: number;
-	} ): void => {
-		trackEvent( 'change_cart_quantity', {
+	}): void => {
+		trackEvent('change_cart_quantity', {
 			event_category: 'ecommerce',
-			event_label: __( 'Change Cart Item Quantity', 'woocommerce' ),
-			items: [ getProductFieldObject( product, quantity ) ],
-		} );
+			event_label: __('Change Cart Item Quantity', 'woocommerce'),
+			items: [getProductFieldObject(product, quantity)],
+		});
 	}
 );
 
@@ -178,26 +178,26 @@ addAction(
  * @see https://developers.google.com/gtagjs/reference/ga4-events#view_item_list
  */
 addAction(
-	`${ actionPrefix }-product-list-render`,
+	`${actionPrefix}-product-list-render`,
 	namespace,
-	( {
+	({
 		products,
-		listName = __( 'Product List', 'woocommerce' ),
+		listName = __('Product List', 'woocommerce'),
 	}: {
-		products: Array< ProductResponseItem >;
+		products: Array<ProductResponseItem>;
 		listName: string;
-	} ): void => {
-		if ( products.length === 0 ) {
+	}): void => {
+		if (products.length === 0) {
 			return;
 		}
-		trackEvent( 'view_item_list', {
+		trackEvent('view_item_list', {
 			event_category: 'engagement',
-			event_label: __( 'Viewing products', 'woocommerce' ),
-			items: products.map( ( product, index ) => ( {
-				...getProductImpressionObject( product, listName ),
+			event_label: __('Viewing products', 'woocommerce'),
+			items: products.map((product, index) => ({
+				...getProductImpressionObject(product, listName),
 				list_position: index + 1,
-			} ) ),
-		} );
+			})),
+		});
 	}
 );
 
@@ -208,19 +208,19 @@ addAction(
  * @see https://developers.google.com/gtagjs/reference/ga4-events#select_content
  */
 addAction(
-	`${ actionPrefix }-product-view-link`,
+	`${actionPrefix}-product-view-link`,
 	namespace,
-	( {
+	({
 		product,
 		listName,
 	}: {
 		product: ProductResponseItem;
 		listName: string;
-	} ): void => {
-		trackEvent( 'select_content', {
+	}): void => {
+		trackEvent('select_content', {
 			content_type: 'product',
-			items: [ getProductImpressionObject( product, listName ) ],
-		} );
+			items: [getProductImpressionObject(product, listName)],
+		});
 	}
 );
 
@@ -231,12 +231,12 @@ addAction(
  * @see https://developers.google.com/gtagjs/reference/ga4-events#search
  */
 addAction(
-	`${ actionPrefix }-product-search`,
+	`${actionPrefix}-product-search`,
 	namespace,
-	( { searchTerm }: { searchTerm: string } ): void => {
-		trackEvent( 'search', {
+	({ searchTerm }: { searchTerm: string }): void => {
+		trackEvent('search', {
 			search_term: searchTerm,
-		} );
+		});
 	}
 );
 
@@ -247,19 +247,19 @@ addAction(
  * @see https://developers.google.com/gtagjs/reference/ga4-events#view_item
  */
 addAction(
-	`${ actionPrefix }-product-render`,
+	`${actionPrefix}-product-render`,
 	namespace,
-	( {
+	({
 		product,
 		listName,
 	}: {
 		product: ProductResponseItem;
 		listName: string;
-	} ): void => {
-		if ( product ) {
-			trackEvent( 'view_item', {
-				items: [ getProductImpressionObject( product, listName ) ],
-			} );
+	}): void => {
+		if (product) {
+			trackEvent('view_item', {
+				items: [getProductImpressionObject(product, listName)],
+			});
 		}
 	}
 );
@@ -271,14 +271,14 @@ addAction(
  * @see https://developers.google.com/analytics/devguides/collection/gtagjs/exceptions
  */
 addAction(
-	`${ actionPrefix }-store-notice-create`,
+	`${actionPrefix}-store-notice-create`,
 	namespace,
-	( { status, content }: { status: string; content: string } ): void => {
-		if ( status === 'error' ) {
-			trackEvent( 'exception', {
+	({ status, content }: { status: string; content: string }): void => {
+		if (status === 'error') {
+			trackEvent('exception', {
 				description: content,
 				fatal: false,
-			} );
+			});
 		}
 	}
 );

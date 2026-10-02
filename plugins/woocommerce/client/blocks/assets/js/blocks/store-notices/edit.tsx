@@ -11,17 +11,17 @@ import NoticeBanner from '@woocommerce/base-components/notice-banner';
 import './editor.scss';
 
 const Edit = (): JSX.Element => {
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className: 'wc-block-store-notices',
-	} );
+	});
 
 	return (
-		<div { ...blockProps }>
-			<NoticeBanner status="info" isDismissible={ false }>
-				{ __(
+		<div {...blockProps}>
+			<NoticeBanner status="info" isDismissible={false}>
+				{__(
 					'Notices added by WooCommerce or extensions will show up here.',
 					'woocommerce'
-				) }
+				)}
 			</NoticeBanner>
 		</div>
 	);

@@ -29,20 +29,14 @@ import { ValidatedTextInputProps } from './types';
  * Input types whose value the browser parses rather than storing verbatim. Assigning to `value` on these
  * clears anything the shopper has partially entered, so their value is left untouched before validating.
  */
-const PARSED_INPUT_TYPES = [
-	'date',
-	'datetime-local',
-	'month',
-	'time',
-	'week',
-];
+const PARSED_INPUT_TYPES = ['date', 'datetime-local', 'month', 'time', 'week'];
 
 export type ValidatedTextInputHandle = {
 	focus?: () => void;
 	revalidate: () => void;
 	isFocused: () => boolean;
-	setErrorMessage: ( errorMessage: string ) => void;
-	inputRef: React.RefObject< HTMLInputElement >;
+	setErrorMessage: (errorMessage: string) => void;
+	inputRef: React.RefObject<HTMLInputElement>;
 };
 
 /**
@@ -67,7 +61,7 @@ const ValidatedTextInput = forwardRef<
 			customValidation = () => true,
 			customValidityMessage,
 			feedback = null,
-			customFormatter = ( newValue: string ) => newValue,
+			customFormatter = (newValue: string) => newValue,
 			label,
 			validateOnMount = true,
 			instanceId: preferredInstanceId = '',
@@ -77,13 +71,13 @@ const ValidatedTextInput = forwardRef<
 		forwardedRef
 	): JSX.Element => {
 		// True on mount.
-		const [ isPristine, setIsPristine ] = useState( true );
+		const [isPristine, setIsPristine] = useState(true);
 
 		// Track incoming value.
-		const previousValue = usePrevious( value );
+		const previousValue = usePrevious(value);
 
 		// Ref for the input element.
-		const inputRef = useRef< HTMLInputElement >( null );
+		const inputRef = useRef<HTMLInputElement>(null);
 
 		const instanceId = useInstanceId(
 			ValidatedTextInput,
@@ -99,53 +93,53 @@ const ValidatedTextInput = forwardRef<
 			hideValidationError,
 			clearValidationError,
 			showValidationError,
-		} = useDispatch( validationStore );
+		} = useDispatch(validationStore);
 
 		// Ref for validation callback.
-		const customValidationRef = useRef( customValidation );
+		const customValidationRef = useRef(customValidation);
 
 		// Update ref when validation callback changes.
-		useEffect( () => {
+		useEffect(() => {
 			customValidationRef.current = customValidation;
-		}, [ customValidation ] );
+		}, [customValidation]);
 
 		const { validationError, validationErrorId } = useSelect(
-			( select ) => {
-				const store = select( validationStore );
+			(select) => {
+				const store = select(validationStore);
 				return {
-					validationError: store.getValidationError( errorIdString ),
+					validationError: store.getValidationError(errorIdString),
 					validationErrorId:
-						store.getValidationErrorId( errorIdString ),
+						store.getValidationErrorId(errorIdString),
 				};
 			},
-			[ errorIdString ]
+			[errorIdString]
 		);
 
 		const validateInput = useCallback(
-			( errorsHidden = true ) => {
+			(errorsHidden = true) => {
 				const inputObject = inputRef.current || null;
 
-				if ( inputObject === null ) {
+				if (inputObject === null) {
 					return;
 				}
 
 				// Trim white space before validation.
-				if ( ! PARSED_INPUT_TYPES.includes( inputObject.type ) ) {
+				if (!PARSED_INPUT_TYPES.includes(inputObject.type)) {
 					inputObject.value = inputObject.value.trim();
 				}
-				inputObject.setCustomValidity( '' );
+				inputObject.setCustomValidity('');
 
 				if (
 					inputObject.checkValidity() &&
-					customValidationRef.current( inputObject ) &&
+					customValidationRef.current(inputObject) &&
 					errorsHidden
 				) {
-					void clearValidationError( errorIdString );
+					void clearValidationError(errorIdString);
 					return;
 				}
 
-				if ( ! errorsHidden ) {
-					void showValidationError( errorIdString );
+				if (!errorsHidden) {
+					void showValidationError(errorIdString);
 				}
 
 				const validityMessage = getValidityMessageForInput(
@@ -154,13 +148,13 @@ const ValidatedTextInput = forwardRef<
 					customValidityMessage
 				);
 
-				if ( validityMessage ) {
-					void setValidationErrors( {
-						[ errorIdString ]: {
+				if (validityMessage) {
+					void setValidationErrors({
+						[errorIdString]: {
 							message: validityMessage,
 							hidden: errorsHidden,
 						},
-					} );
+					});
 				}
 			},
 			[
@@ -182,7 +176,7 @@ const ValidatedTextInput = forwardRef<
 						inputRef.current?.focus();
 					},
 					revalidate() {
-						validateInput( ! value );
+						validateInput(!value);
 					},
 					isFocused() {
 						return (
@@ -190,13 +184,13 @@ const ValidatedTextInput = forwardRef<
 							inputRef.current
 						);
 					},
-					setErrorMessage( errorMessage: string ) {
-						inputRef.current?.setCustomValidity( errorMessage );
+					setErrorMessage(errorMessage: string) {
+						inputRef.current?.setCustomValidity(errorMessage);
 					},
 					inputRef,
 				};
 			},
-			[ validateInput, value ]
+			[validateInput, value]
 		);
 
 		/**
@@ -208,26 +202,24 @@ const ValidatedTextInput = forwardRef<
 		 *
 		 * Errors are immediately visible.
 		 */
-		useEffect( () => {
+		useEffect(() => {
 			if (
 				value !== previousValue &&
-				( value || previousValue ) &&
+				(value || previousValue) &&
 				inputRef &&
 				inputRef.current !== null &&
 				inputRef.current?.ownerDocument?.activeElement !==
 					inputRef.current
 			) {
-				const formattedValue = customFormatter(
-					inputRef.current.value
-				);
+				const formattedValue = customFormatter(inputRef.current.value);
 
-				if ( formattedValue !== value ) {
-					onChange( formattedValue );
+				if (formattedValue !== value) {
+					onChange(formattedValue);
 				} else {
-					validateInput( true );
+					validateInput(true);
 				}
 			}
-		}, [ validateInput, customFormatter, value, previousValue, onChange ] );
+		}, [validateInput, customFormatter, value, previousValue, onChange]);
 
 		/**
 		 * Validation on mount.
@@ -237,20 +229,20 @@ const ValidatedTextInput = forwardRef<
 		 *
 		 * Errors are hidden until blur.
 		 */
-		useEffect( () => {
-			if ( ! isPristine ) {
+		useEffect(() => {
+			if (!isPristine) {
 				return;
 			}
 
-			setIsPristine( false );
+			setIsPristine(false);
 
-			if ( focusOnMount ) {
+			if (focusOnMount) {
 				inputRef.current?.focus();
 			}
 
 			// if validateOnMount is false, only validate input if focusOnMount is also false
-			if ( validateOnMount || ! focusOnMount ) {
-				validateInput( true );
+			if (validateOnMount || !focusOnMount) {
+				validateInput(true);
 			}
 		}, [
 			validateOnMount,
@@ -258,28 +250,28 @@ const ValidatedTextInput = forwardRef<
 			isPristine,
 			setIsPristine,
 			validateInput,
-		] );
+		]);
 
 		// Remove validation errors when unmounted.
-		useEffect( () => {
+		useEffect(() => {
 			return () => {
-				void clearValidationError( errorIdString );
+				void clearValidationError(errorIdString);
 			};
-		}, [ clearValidationError, errorIdString ] );
+		}, [clearValidationError, errorIdString]);
 
-		if ( passedErrorMessage !== '' && isObject( validationError ) ) {
+		if (passedErrorMessage !== '' && isObject(validationError)) {
 			validationError.message = passedErrorMessage;
 		}
 
-		const hasError = validationError?.message && ! validationError?.hidden;
+		const hasError = validationError?.message && !validationError?.hidden;
 
 		return (
 			<TextInput
-				className={ clsx( className, {
+				className={clsx(className, {
 					'has-error': hasError,
-				} ) }
-				aria-invalid={ hasError === true }
-				id={ textInputId }
+				})}
+				aria-invalid={hasError === true}
+				id={textInputId}
 				aria-errormessage={
 					// we're using the internal `aria-errormessage` attribute, calculated from the data store.
 					// If a consumer wants to overwrite the attribute, they can pass a prop.
@@ -287,58 +279,57 @@ const ValidatedTextInput = forwardRef<
 						? validationErrorId
 						: undefined
 				}
-				type={ type }
+				type={type}
 				feedback={
 					showError && hasError ? (
 						<ValidationInputError
-							errorMessage={ passedErrorMessage }
-							propertyName={ errorIdString }
-							elementId={ errorIdString }
+							errorMessage={passedErrorMessage}
+							propertyName={errorIdString}
+							elementId={errorIdString}
 						/>
 					) : (
 						feedback
 					)
 				}
-				ref={ inputRef }
-				onChange={ ( newValue ) => {
+				ref={inputRef}
+				onChange={(newValue) => {
 					// Hide errors while typing.
-					void hideValidationError( errorIdString );
+					void hideValidationError(errorIdString);
 
 					// Validate the input value.
-					validateInput( true );
+					validateInput(true);
 
 					// Push the changes up to the parent component.
-					const formattedValue = customFormatter( newValue );
+					const formattedValue = customFormatter(newValue);
 
-					if ( formattedValue !== value ) {
-						onChange( formattedValue );
+					if (formattedValue !== value) {
+						onChange(formattedValue);
 					}
-				} }
-				onBlur={ () => {
+				}}
+				onBlur={() => {
 					// A value the browser can't parse reads back as an empty `value`, but the shopper did
 					// enter something, so it gets the same immediate error as any other invalid entry.
 					const isEmpty =
-						! inputRef.current?.value.trim() &&
-						! inputRef.current?.validity?.badInput;
+						!inputRef.current?.value.trim() &&
+						!inputRef.current?.validity?.badInput;
 
-					if ( isEmpty ) {
+					if (isEmpty) {
 						// If the error was already shown (e.g. after form
 						// submission), keep it visible. Otherwise, keep it
 						// hidden until the next form submission.
 						validateInput(
-							! validationError?.message ||
-								validationError?.hidden
+							!validationError?.message || validationError?.hidden
 						);
 					} else {
-						validateInput( false );
+						validateInput(false);
 					}
-				} }
-				aria-describedby={ ariaDescribedBy }
-				value={ value }
+				}}
+				aria-describedby={ariaDescribedBy}
+				value={value}
 				title="" // This prevents the same error being shown on hover.
-				label={ label }
-				icon={ icon }
-				{ ...rest }
+				label={label}
+				icon={icon}
+				{...rest}
 			/>
 		);
 	}

@@ -34,25 +34,23 @@ const DEFAULT_ATTRIBUTES = {
 	width: undefined,
 };
 
-function WidthPanel( {
+function WidthPanel({
 	selectedWidth,
 	setAttributes,
 }: {
 	selectedWidth: number | undefined;
-	setAttributes: ( attributes: BlockAttributes ) => void;
-} ) {
+	setAttributes: (attributes: BlockAttributes) => void;
+}) {
 	return (
 		<ToolsPanel
-			label={ __( 'Width settings', 'woocommerce' ) }
-			resetAll={ () =>
-				setAttributes( { width: DEFAULT_ATTRIBUTES.width } )
-			}
+			label={__('Width settings', 'woocommerce')}
+			resetAll={() => setAttributes({ width: DEFAULT_ATTRIBUTES.width })}
 		>
 			<ToolsPanelItem
-				label={ __( 'Button width', 'woocommerce' ) }
-				hasValue={ () => selectedWidth !== DEFAULT_ATTRIBUTES.width }
-				onDeselect={ () =>
-					setAttributes( { width: DEFAULT_ATTRIBUTES.width } )
+				label={__('Button width', 'woocommerce')}
+				hasValue={() => selectedWidth !== DEFAULT_ATTRIBUTES.width}
+				onDeselect={() =>
+					setAttributes({ width: DEFAULT_ATTRIBUTES.width })
 				}
 				isShownByDefault
 			>
@@ -60,66 +58,66 @@ function WidthPanel( {
 					__next40pxDefaultSize
 					__nextHasNoMarginBottom
 					hideLabelFromVision
-					label={ __( 'Button width', 'woocommerce' ) }
-					value={ selectedWidth }
+					label={__('Button width', 'woocommerce')}
+					value={selectedWidth}
 					isDeselectable
-					onChange={ ( value?: number ) =>
-						setAttributes( { width: value } )
+					onChange={(value?: number) =>
+						setAttributes({ width: value })
 					}
 				>
-					{ [ 25, 50, 75, 100 ].map( ( widthValue ) => (
+					{[25, 50, 75, 100].map((widthValue) => (
 						<ToggleGroupControlOption
-							key={ widthValue }
-							value={ widthValue }
-							label={ `${ widthValue }%` }
+							key={widthValue}
+							value={widthValue}
+							label={`${widthValue}%`}
 						/>
-					) ) }
+					))}
 				</ToggleGroupControl>
 			</ToolsPanelItem>
 		</ToolsPanel>
 	);
 }
 
-const Edit = ( {
+const Edit = ({
 	attributes,
 	setAttributes,
 	context,
-}: BlockEditProps< BlockAttributes > & {
+}: BlockEditProps<BlockAttributes> & {
 	context?: Context | undefined;
-} ): JSX.Element => {
+}): JSX.Element => {
 	const blockProps = useBlockProps();
-	const { product } = useProduct( context?.postId );
+	const { product } = useProduct(context?.postId);
 	const { width } = attributes;
 	return (
 		<>
 			<BlockControls>
 				<AlignmentToolbar
-					value={ attributes.textAlign }
-					onChange={ ( newAlign ) => {
-						setAttributes( { textAlign: newAlign || '' } );
-					} }
+					value={attributes.textAlign}
+					onChange={(newAlign) => {
+						setAttributes({ textAlign: newAlign || '' });
+					}}
 				/>
 			</BlockControls>
 			<InspectorControls>
 				<WidthPanel
-					selectedWidth={ width }
-					setAttributes={ setAttributes }
+					selectedWidth={width}
+					setAttributes={setAttributes}
 				/>
 			</InspectorControls>
-			<div { ...blockProps }>
+			<div {...blockProps}>
 				<Disabled>
 					<Block
-						{ ...{ ...attributes, ...context } }
-						product={ {
+						{...{ ...attributes, ...context }}
+						product={{
 							...product,
 							button_text: product?.button_text || '',
-						} }
-						isAdmin={ true }
-						blockClientId={ blockProps?.id }
-						className={ clsx( attributes.className, {
-							[ `has-custom-width wp-block-button__width-${ width }` ]:
+						}}
+						isAdmin={true}
+						blockClientId={blockProps?.id}
+						className={clsx(attributes.className, {
+							[`has-custom-width wp-block-button__width-${width}`]:
 								width,
-						} ) }
+						})}
 					/>
 				</Disabled>
 			</div>

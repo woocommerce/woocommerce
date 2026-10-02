@@ -8,4 +8,4 @@ export type Attributes = {
 	filterType: string;
 };
 
-export type EditProps = BlockEditProps< Attributes >;
+export type EditProps = BlockEditProps<Attributes>;

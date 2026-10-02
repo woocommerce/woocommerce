@@ -1,6 +1,5 @@
 /* global wc_add_to_cart_params */
-jQuery( function( $ ) {
-
+jQuery( function ( $ ) {
 	if ( typeof wc_add_to_cart_params === 'undefined' ) {
 		return false;
 	}
@@ -8,29 +7,59 @@ jQuery( function( $ ) {
 	/**
 	 * AddToCartHandler class.
 	 */
-	var AddToCartHandler = function() {
-		this.requests    = [];
-		this.addRequest  = this.addRequest.bind( this );
-		this.run         = this.run.bind( this );
+	var AddToCartHandler = function () {
+		this.requests = [];
+		this.addRequest = this.addRequest.bind( this );
+		this.run = this.run.bind( this );
 		this.$liveRegion = this.createLiveRegion();
 
 		$( document.body )
-			.on( 'click', '.add_to_cart_button:not(.wc-interactive)', { addToCartHandler: this }, this.onAddToCart )
-			// Handle when pressing the Space key on the add to cart anchor with role="button" attribute.
-			.on( 'keydown', '.add_to_cart_button:not(.wc-interactive)', { addToCartHandler: this },
-				( e ) => { if ( e.key === ' ' ) { e.preventDefault(); e.target.click(); } }
+			.on(
+				'click',
+				'.add_to_cart_button:not(.wc-interactive)',
+				{ addToCartHandler: this },
+				this.onAddToCart
 			)
-			.on( 'click', '.remove_from_cart_button', { addToCartHandler: this }, this.onRemoveFromCart )
-			.on( 'keydown', '.remove_from_cart_button', this.onKeydownRemoveFromCart )
-			.on( 'added_to_cart', { addToCartHandler: this }, this.onAddedToCart )
-			.on( 'removed_from_cart', { addToCartHandler: this }, this.onRemovedFromCart )
+			// Handle when pressing the Space key on the add to cart anchor with role="button" attribute.
+			.on(
+				'keydown',
+				'.add_to_cart_button:not(.wc-interactive)',
+				{ addToCartHandler: this },
+				( e ) => {
+					if ( e.key === ' ' ) {
+						e.preventDefault();
+						e.target.click();
+					}
+				}
+			)
+			.on(
+				'click',
+				'.remove_from_cart_button',
+				{ addToCartHandler: this },
+				this.onRemoveFromCart
+			)
+			.on(
+				'keydown',
+				'.remove_from_cart_button',
+				this.onKeydownRemoveFromCart
+			)
+			.on(
+				'added_to_cart',
+				{ addToCartHandler: this },
+				this.onAddedToCart
+			)
+			.on(
+				'removed_from_cart',
+				{ addToCartHandler: this },
+				this.onRemovedFromCart
+			)
 			.on( 'ajax_request_not_sent.adding_to_cart', this.updateButton );
 	};
 
 	/**
 	 * Add add to cart event.
 	 */
-	AddToCartHandler.prototype.addRequest = function( request ) {
+	AddToCartHandler.prototype.addRequest = function ( request ) {
 		this.requests.push( request );
 
 		if ( 1 === this.requests.length ) {
@@ -41,11 +70,11 @@ jQuery( function( $ ) {
 	/**
 	 * Run add to cart events.
 	 */
-	AddToCartHandler.prototype.run = function() {
+	AddToCartHandler.prototype.run = function () {
 		var requestManager = this,
-			originalCallback = requestManager.requests[0].complete;
+			originalCallback = requestManager.requests[ 0 ].complete;
 
-		requestManager.requests[0].complete = function() {
+		requestManager.requests[ 0 ].complete = function () {
 			if ( typeof originalCallback === 'function' ) {
 				originalCallback();
 			}
@@ -57,13 +86,13 @@ jQuery( function( $ ) {
 			}
 		};
 
-		$.ajax( this.requests[0] );
+		$.ajax( this.requests[ 0 ] );
 	};
 
 	/**
 	 * Handle the add to cart event.
 	 */
-	AddToCartHandler.prototype.onAddToCart = function( e ) {
+	AddToCartHandler.prototype.onAddToCart = function ( e ) {
 		var $thisbutton = $( this );
 
 		if ( $thisbutton.is( '.ajax_add_to_cart' ) ) {
@@ -83,32 +112,46 @@ jQuery( function( $ ) {
 			$thisbutton.addClass( 'loading' );
 
 			// Allow 3rd parties to validate and quit early.
-			if ( false === $( document.body ).triggerHandler( 'should_send_ajax_request.adding_to_cart', [ $thisbutton ] ) ) {
-				$( document.body ).trigger( 'ajax_request_not_sent.adding_to_cart', [ false, false, $thisbutton ] );
+			if (
+				false ===
+				$( document.body ).triggerHandler(
+					'should_send_ajax_request.adding_to_cart',
+					[ $thisbutton ]
+				)
+			) {
+				$( document.body ).trigger(
+					'ajax_request_not_sent.adding_to_cart',
+					[ false, false, $thisbutton ]
+				);
 				return true;
 			}
 
 			var data = {};
 
 			// Fetch changes that are directly added by calling $thisbutton.data( key, value )
-			$.each( $thisbutton.data(), function( key, value ) {
+			$.each( $thisbutton.data(), function ( key, value ) {
 				data[ key ] = value;
-			});
+			} );
 
 			// Fetch data attributes in $thisbutton. Give preference to data-attributes because they can be directly modified by javascript
 			// while `.data` are jquery specific memory stores.
-			$.each( $thisbutton[0].dataset, function( key, value ) {
+			$.each( $thisbutton[ 0 ].dataset, function ( key, value ) {
 				data[ key ] = value;
-			});
+			} );
 
 			// Trigger event.
-			$( document.body ).trigger( 'adding_to_cart', [ $thisbutton, data ] );
+			$( document.body ).trigger( 'adding_to_cart', [
+				$thisbutton,
+				data,
+			] );
 
-			e.data.addToCartHandler.addRequest({
+			e.data.addToCartHandler.addRequest( {
 				type: 'POST',
-				url: wc_add_to_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'add_to_cart' ),
+				url: wc_add_to_cart_params.wc_ajax_url
+					.toString()
+					.replace( '%%endpoint%%', 'add_to_cart' ),
 				data: data,
-				success: function( response ) {
+				success: function ( response ) {
 					if ( ! response ) {
 						return;
 					}
@@ -119,25 +162,31 @@ jQuery( function( $ ) {
 					}
 
 					// Redirect to cart option
-					if ( wc_add_to_cart_params.cart_redirect_after_add === 'yes' ) {
+					if (
+						wc_add_to_cart_params.cart_redirect_after_add === 'yes'
+					) {
 						window.location = wc_add_to_cart_params.cart_url;
 						return;
 					}
 
 					// Trigger event so themes can refresh other areas.
-					$( document.body ).trigger( 'added_to_cart', [ response.fragments, response.cart_hash, $thisbutton ] );
+					$( document.body ).trigger( 'added_to_cart', [
+						response.fragments,
+						response.cart_hash,
+						$thisbutton,
+					] );
 				},
-				dataType: 'json'
-			});
+				dataType: 'json',
+			} );
 		}
 	};
 
 	/**
 	 * Update fragments after remove from cart event in mini-cart.
 	 */
-	AddToCartHandler.prototype.onRemoveFromCart = function( e ) {
+	AddToCartHandler.prototype.onRemoveFromCart = function ( e ) {
 		var $thisbutton = $( this ),
-			$row        = $thisbutton.closest( '.woocommerce-mini-cart-item' );
+			$row = $thisbutton.closest( '.woocommerce-mini-cart-item' );
 
 		e.data.addToCartHandler.$liveRegion
 			.text( '' )
@@ -145,33 +194,39 @@ jQuery( function( $ ) {
 
 		e.preventDefault();
 
-		$row.block({
+		$row.block( {
 			message: null,
 			overlayCSS: {
-				opacity: 0.6
-			}
-		});
-
-		e.data.addToCartHandler.addRequest({
-			type: 'POST',
-			url: wc_add_to_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'remove_from_cart' ),
-			data: {
-				cart_item_key : $thisbutton.data( 'cart_item_key' )
+				opacity: 0.6,
 			},
-			success: function( response ) {
+		} );
+
+		e.data.addToCartHandler.addRequest( {
+			type: 'POST',
+			url: wc_add_to_cart_params.wc_ajax_url
+				.toString()
+				.replace( '%%endpoint%%', 'remove_from_cart' ),
+			data: {
+				cart_item_key: $thisbutton.data( 'cart_item_key' ),
+			},
+			success: function ( response ) {
 				if ( ! response || ! response.fragments ) {
 					window.location = $thisbutton.attr( 'href' );
 					return;
 				}
 
-				$( document.body ).trigger( 'removed_from_cart', [ response.fragments, response.cart_hash, $thisbutton ] );
+				$( document.body ).trigger( 'removed_from_cart', [
+					response.fragments,
+					response.cart_hash,
+					$thisbutton,
+				] );
 			},
-			error: function() {
+			error: function () {
 				window.location = $thisbutton.attr( 'href' );
 				return;
 			},
-			dataType: 'json'
-		});
+			dataType: 'json',
+		} );
 	};
 
 	/**
@@ -179,7 +234,7 @@ jQuery( function( $ ) {
 	 * This is necessary because the link got the role="button" attribute
 	 * and needs to act like a button.
 	 */
-	AddToCartHandler.prototype.onKeydownRemoveFromCart = function( event ) {
+	AddToCartHandler.prototype.onKeydownRemoveFromCart = function ( event ) {
 		if ( event.key === ' ' ) {
 			event.preventDefault();
 			$( this ).trigger( 'click' );
@@ -189,7 +244,12 @@ jQuery( function( $ ) {
 	/**
 	 * Update cart page elements after add to cart events.
 	 */
-	AddToCartHandler.prototype.updateButton = function( e, fragments, cart_hash, $button ) {
+	AddToCartHandler.prototype.updateButton = function (
+		e,
+		fragments,
+		cart_hash,
+		$button
+	) {
 		// Some themes and plugins manually trigger added_to_cart without passing a button element, which in turn calls this function.
 		// If there is no button we don't want to crash.
 		$button = typeof $button === 'undefined' ? false : $button;
@@ -202,7 +262,11 @@ jQuery( function( $ ) {
 			}
 
 			// View cart text.
-			if ( fragments && ! wc_add_to_cart_params.is_cart && $button.parent().find( '.added_to_cart' ).length === 0 ) {
+			if (
+				fragments &&
+				! wc_add_to_cart_params.is_cart &&
+				$button.parent().find( '.added_to_cart' ).length === 0
+			) {
 				var anchor = document.createElement( 'a' );
 				anchor.href = wc_add_to_cart_params.cart_url;
 				anchor.className = 'added_to_cart wc-forward';
@@ -218,24 +282,24 @@ jQuery( function( $ ) {
 	/**
 	 * Update fragments after add to cart events.
 	 */
-	AddToCartHandler.prototype.updateFragments = function( e, fragments ) {
+	AddToCartHandler.prototype.updateFragments = function ( e, fragments ) {
 		if ( fragments ) {
-			$.each( fragments, function( key ) {
+			$.each( fragments, function ( key ) {
 				$( key )
 					.addClass( 'updating' )
 					.fadeTo( '400', '0.6' )
-					.block({
+					.block( {
 						message: null,
 						overlayCSS: {
-							opacity: 0.6
-						}
-					});
-			});
+							opacity: 0.6,
+						},
+					} );
+			} );
 
-			$.each( fragments, function( key, value ) {
+			$.each( fragments, function ( key, value ) {
 				$( key ).replaceWith( value );
 				$( key ).stop( true ).css( 'opacity', '1' ).unblock();
-			});
+			} );
 
 			$( document.body ).trigger( 'wc_fragments_loaded' );
 		}
@@ -244,7 +308,12 @@ jQuery( function( $ ) {
 	/**
 	 * Update cart live region message after add/remove cart events.
 	 */
-	AddToCartHandler.prototype.alertCartUpdated = function( e, fragments, cart_hash, $button ) {
+	AddToCartHandler.prototype.alertCartUpdated = function (
+		e,
+		fragments,
+		cart_hash,
+		$button
+	) {
 		// Some themes and plugins manually trigger added_to_cart without passing a button element, which in turn calls this function.
 		// If there is no button we don't want to crash.
 		$button = typeof $button === 'undefined' ? false : $button;
@@ -252,7 +321,7 @@ jQuery( function( $ ) {
 		if ( $button ) {
 			var message = $button.data( 'success_message' );
 
-			if ( !message ) {
+			if ( ! message ) {
 				return;
 			}
 
@@ -260,7 +329,7 @@ jQuery( function( $ ) {
 			// screen readers may not have time to identify the changes in the live region element.
 			// So, we add a delay to ensure an interval between messages.
 			e.data.addToCartHandler.$liveRegion
-				.delay(1000)
+				.delay( 1000 )
 				.text( message )
 				.attr( 'aria-relevant', 'all' );
 		}
@@ -269,35 +338,62 @@ jQuery( function( $ ) {
 	/**
 	 * Add live region into the body element.
 	 */
-	AddToCartHandler.prototype.createLiveRegion = function() {
+	AddToCartHandler.prototype.createLiveRegion = function () {
 		var existingLiveRegion = $( '.widget_shopping_cart_live_region' );
 
 		if ( existingLiveRegion.length ) {
 			return existingLiveRegion;
 		}
 
-		return $( '<div class="widget_shopping_cart_live_region screen-reader-text" role="status"></div>' ).appendTo( 'body' );
+		return $(
+			'<div class="widget_shopping_cart_live_region screen-reader-text" role="status"></div>'
+		).appendTo( 'body' );
 	};
 
 	/**
 	 * Callbacks after added to cart event.
 	 */
-	AddToCartHandler.prototype.onAddedToCart = function( e, fragments, cart_hash, $button ) {
-		e.data.addToCartHandler.updateButton( e, fragments, cart_hash, $button );
+	AddToCartHandler.prototype.onAddedToCart = function (
+		e,
+		fragments,
+		cart_hash,
+		$button
+	) {
+		e.data.addToCartHandler.updateButton(
+			e,
+			fragments,
+			cart_hash,
+			$button
+		);
 		e.data.addToCartHandler.updateFragments( e, fragments );
-		e.data.addToCartHandler.alertCartUpdated( e, fragments, cart_hash, $button );
+		e.data.addToCartHandler.alertCartUpdated(
+			e,
+			fragments,
+			cart_hash,
+			$button
+		);
 	};
 
 	/**
 	 * Callbacks after removed from cart event.
 	 */
-	AddToCartHandler.prototype.onRemovedFromCart = function( e, fragments, cart_hash, $button ) {
+	AddToCartHandler.prototype.onRemovedFromCart = function (
+		e,
+		fragments,
+		cart_hash,
+		$button
+	) {
 		e.data.addToCartHandler.updateFragments( e, fragments );
-		e.data.addToCartHandler.alertCartUpdated( e, fragments, cart_hash, $button );
+		e.data.addToCartHandler.alertCartUpdated(
+			e,
+			fragments,
+			cart_hash,
+			$button
+		);
 	};
 
 	/**
 	 * Init AddToCartHandler.
 	 */
 	new AddToCartHandler();
-});
+} );

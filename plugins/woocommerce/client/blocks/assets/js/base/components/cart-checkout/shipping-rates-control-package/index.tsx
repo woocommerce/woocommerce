@@ -20,7 +20,7 @@ import PackageRates from './package-rates';
 import type { PackageProps } from './types';
 import './style.scss';
 
-export const ShippingRatesControlPackage = ( {
+export const ShippingRatesControlPackage = ({
 	packageId,
 	className = '',
 	noResultsMessage,
@@ -30,33 +30,33 @@ export const ShippingRatesControlPackage = ( {
 	showItems,
 	highlightChecked = false,
 	manageSelectionLocally = true,
-}: PackageProps ) => {
+}: PackageProps) => {
 	const { selectShippingRate, shippingRates } = useShippingData();
 	const { cartItems } = useStoreCart();
 
 	const internalPackageCount = shippingRates?.length || 1;
 
 	const packageClass = 'wc-block-components-shipping-rates-control__package';
-	const [ instanceCount, setInstanceCount ] = useState( 0 );
+	const [instanceCount, setInstanceCount] = useState(0);
 
 	// We have no built-in way of checking if other extensions have added packages e.g. if subscriptions has added them.
 	const multiplePackages = internalPackageCount > 1 || instanceCount > 1;
 
-	useEffect( () => {
+	useEffect(() => {
 		const updateCount = () => {
 			setInstanceCount(
-				document.querySelectorAll( `.${ packageClass }` ).length
+				document.querySelectorAll(`.${packageClass}`).length
 			);
 		};
 		updateCount();
 
-		const observer = new MutationObserver( updateCount );
-		observer.observe( document.body, { childList: true, subtree: true } );
+		const observer = new MutationObserver(updateCount);
+		observer.observe(document.body, { childList: true, subtree: true });
 
 		return () => {
 			observer.disconnect();
 		};
-	}, [] );
+	}, []);
 
 	// If showItems is not set, we check if we have multiple packages.
 	// We sometimes don't want to show items even if we have multiple packages.
@@ -67,49 +67,45 @@ export const ShippingRatesControlPackage = ( {
 	const shouldBeCollapsible = collapsible ?? multiplePackages;
 
 	const selectedOption: CartShippingPackageShippingRate | undefined = useMemo(
-		() => packageData?.shipping_rates?.find( ( rate ) => rate?.selected ),
-		[ packageData?.shipping_rates ]
+		() => packageData?.shipping_rates?.find((rate) => rate?.selected),
+		[packageData?.shipping_rates]
 	);
 
 	// Collapsible and non-collapsible header handling.
 	let header = null;
 
-	if ( shouldBeCollapsible || shouldShowItems ) {
+	if (shouldBeCollapsible || shouldShowItems) {
 		header = (
 			<div className="wc-block-components-shipping-rates-control__package-header">
 				<div
 					className="wc-block-components-shipping-rates-control__package-title"
-					dangerouslySetInnerHTML={ {
-						__html: sanitizeHTML(
-							String( packageData.name ?? '' )
-						),
-					} }
+					dangerouslySetInnerHTML={{
+						__html: sanitizeHTML(String(packageData.name ?? '')),
+					}}
 				/>
-				{ shouldBeCollapsible && (
+				{shouldBeCollapsible && (
 					<div className="wc-block-components-totals-shipping__via">
-						{ decodeEntities( selectedOption?.name ) }
+						{decodeEntities(selectedOption?.name)}
 					</div>
-				) }
-				{ shouldShowItems && (
-					<PackageItems packageData={ packageData } />
-				) }
+				)}
+				{shouldShowItems && <PackageItems packageData={packageData} />}
 			</div>
 		);
 
-		if ( multiplePackages ) {
+		if (multiplePackages) {
 			const packageItems = packageData.items || [];
 
 			header = (
 				<div className="wc-block-components-shipping-rates-control__package-container">
-					{ header }
+					{header}
 					<div className="wc-block-components-shipping-rates-control__package-thumbnails">
-						{ packageItems.slice( 0, 3 ).map( ( item ) => (
+						{packageItems.slice(0, 3).map((item) => (
 							<ShippingPackageItemIcon
-								key={ item.key }
-								packageItem={ item }
-								cartItems={ cartItems }
+								key={item.key}
+								packageItem={item}
+								cartItems={cartItems}
 							/>
-						) ) }
+						))}
 					</div>
 				</div>
 			);
@@ -117,10 +113,10 @@ export const ShippingRatesControlPackage = ( {
 	}
 
 	const onSelectRate = useCallback(
-		( newShippingRateId: string ) => {
-			selectShippingRate( newShippingRateId, packageId );
+		(newShippingRateId: string) => {
+			selectShippingRate(newShippingRateId, packageId);
 		},
-		[ packageId, selectShippingRate ]
+		[packageId, selectShippingRate]
 	);
 
 	const packageRatesProps = {
@@ -128,46 +124,44 @@ export const ShippingRatesControlPackage = ( {
 		noResultsMessage,
 		rates: packageData.shipping_rates,
 		onSelectRate,
-		selectedRate: packageData.shipping_rates.find(
-			( rate ) => rate.selected
-		),
+		selectedRate: packageData.shipping_rates.find((rate) => rate.selected),
 		renderOption,
 		highlightChecked,
 		manageSelectionLocally,
 	};
 
-	if ( shouldBeCollapsible ) {
+	if (shouldBeCollapsible) {
 		return (
 			<Panel
-				className={ clsx(
+				className={clsx(
 					'wc-block-components-shipping-rates-control__package',
 					multiplePackages &&
 						'wc-block-components-shipping-rates-control__package--multiple',
 					className
-				) }
+				)}
 				// initialOpen remembers only the first value provided to it, so by the
 				// time we know we have several packages, initialOpen would be hardcoded to true.
 				// If we're rendering a panel, we're more likely rendering several
 				// packages and we want to them to be closed initially.
-				initialOpen={ false }
-				title={ header }
+				initialOpen={false}
+				title={header}
 			>
-				<PackageRates { ...packageRatesProps } />
+				<PackageRates {...packageRatesProps} />
 			</Panel>
 		);
 	}
 
 	return (
 		<div
-			className={ clsx(
+			className={clsx(
 				'wc-block-components-shipping-rates-control__package',
 				multiplePackages &&
 					'wc-block-components-shipping-rates-control__package--multiple',
 				className
-			) }
+			)}
 		>
-			{ header }
-			<PackageRates { ...packageRatesProps } />
+			{header}
+			<PackageRates {...packageRatesProps} />
 		</div>
 	);
 };

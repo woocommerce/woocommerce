@@ -9,7 +9,7 @@ import { Extension } from '@woocommerce/data';
  */
 import { computePluginsSelection, joinWithAnd, Plugins } from '../Plugins';
 
-describe( 'Plugins Component', () => {
+describe('Plugins Component', () => {
 	const mockSendEvent = jest.fn();
 	const mockContext = {
 		pluginsAvailable: [
@@ -67,12 +67,12 @@ describe( 'Plugins Component', () => {
 	};
 	const navigationProgress = 80;
 
-	it( 'renders correctly', () => {
+	it('renders correctly', () => {
 		render(
 			<Plugins
-				context={ mockContext }
-				sendEvent={ mockSendEvent }
-				navigationProgress={ navigationProgress }
+				context={mockContext}
+				sendEvent={mockSendEvent}
+				navigationProgress={navigationProgress}
 			/>
 		);
 		expect(
@@ -80,94 +80,94 @@ describe( 'Plugins Component', () => {
 				/No commitment required – you can remove them at any time/
 			)
 		).toBeInTheDocument();
-		expect( screen.getByText( 'Plugin 1' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'Plugin 2' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'Plugin 3' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'Plugin 4' ) ).toBeInTheDocument();
-	} );
+		expect(screen.getByText('Plugin 1')).toBeInTheDocument();
+		expect(screen.getByText('Plugin 2')).toBeInTheDocument();
+		expect(screen.getByText('Plugin 3')).toBeInTheDocument();
+		expect(screen.getByText('Plugin 4')).toBeInTheDocument();
+	});
 
-	it( 'handles plugin selection', () => {
+	it('handles plugin selection', () => {
 		render(
 			<Plugins
-				context={ mockContext }
-				sendEvent={ mockSendEvent }
-				navigationProgress={ navigationProgress }
+				context={mockContext}
+				sendEvent={mockSendEvent}
+				navigationProgress={navigationProgress}
 			/>
 		);
-		const checkboxLabel = screen.getByText( 'Plugin 1' );
-		fireEvent.click( checkboxLabel ); // because the checkbox is enabled by default, let's uncheck it
-		fireEvent.click( checkboxLabel ); // then check it
-		const checkboxLabel3 = screen.getByText( 'Plugin 3' );
-		fireEvent.click( checkboxLabel3 );
-		const checkboxLabel4 = screen.getByText( 'Plugin 4' ); // attempt to uncheck 4, but it shouldn't do anything since it is already unchecked
-		fireEvent.click( checkboxLabel4 );
-		const installButton = screen.getByText( 'Continue' );
-		fireEvent.click( installButton );
+		const checkboxLabel = screen.getByText('Plugin 1');
+		fireEvent.click(checkboxLabel); // because the checkbox is enabled by default, let's uncheck it
+		fireEvent.click(checkboxLabel); // then check it
+		const checkboxLabel3 = screen.getByText('Plugin 3');
+		fireEvent.click(checkboxLabel3);
+		const checkboxLabel4 = screen.getByText('Plugin 4'); // attempt to uncheck 4, but it shouldn't do anything since it is already unchecked
+		fireEvent.click(checkboxLabel4);
+		const installButton = screen.getByText('Continue');
+		fireEvent.click(installButton);
 
-		expect( mockSendEvent ).toHaveBeenCalledWith( {
+		expect(mockSendEvent).toHaveBeenCalledWith({
 			type: 'PLUGINS_INSTALLATION_REQUESTED',
 			payload: {
-				pluginsSelected: [ 'plugin1' ],
-				pluginsShown: [ 'plugin1', 'plugin2', 'plugin3', 'plugin4' ],
-				pluginsUnselected: [ 'plugin3', 'plugin4' ],
+				pluginsSelected: ['plugin1'],
+				pluginsShown: ['plugin1', 'plugin2', 'plugin3', 'plugin4'],
+				pluginsUnselected: ['plugin3', 'plugin4'],
 			},
-		} );
-	} );
+		});
+	});
 
-	it( 'handles case where all plugins are already installed', () => {
+	it('handles case where all plugins are already installed', () => {
 		render(
 			<Plugins
-				context={ {
+				context={{
 					...mockContext,
 					pluginsAvailable: mockContext.pluginsAvailable.map(
-						( plugin ) => ( {
+						(plugin) => ({
 							...plugin,
 							is_activated: true,
-						} )
+						})
 					),
-				} }
-				sendEvent={ mockSendEvent }
-				navigationProgress={ navigationProgress }
+				}}
+				sendEvent={mockSendEvent}
+				navigationProgress={navigationProgress}
 			/>
 		);
 		const plugin1Card = screen
-			.getByText( 'Plugin 1' )
-			.closest( '.woocommerce-profiler-plugins-plugin-card' );
-		expect( plugin1Card ).toHaveClass( 'is-installed' );
-		expect( plugin1Card ).toHaveTextContent( 'Installed' );
+			.getByText('Plugin 1')
+			.closest('.woocommerce-profiler-plugins-plugin-card');
+		expect(plugin1Card).toHaveClass('is-installed');
+		expect(plugin1Card).toHaveTextContent('Installed');
 		expect(
 			screen
-				.getByText( 'Plugin 2' )
-				.closest( '.woocommerce-profiler-plugins-plugin-card' )
-		).toHaveTextContent( 'Installed' );
-		const continueButton = screen.getByText( 'Continue' );
-		fireEvent.click( continueButton );
-		expect( mockSendEvent ).toHaveBeenCalledWith( {
+				.getByText('Plugin 2')
+				.closest('.woocommerce-profiler-plugins-plugin-card')
+		).toHaveTextContent('Installed');
+		const continueButton = screen.getByText('Continue');
+		fireEvent.click(continueButton);
+		expect(mockSendEvent).toHaveBeenCalledWith({
 			type: 'PLUGINS_PAGE_COMPLETED_WITHOUT_SELECTING_PLUGINS',
-		} );
-	} );
+		});
+	});
 
-	it( 'initialises with all plugins selected when there were no errors previously', () => {
+	it('initialises with all plugins selected when there were no errors previously', () => {
 		render(
 			<Plugins
-				context={ mockContext }
-				sendEvent={ mockSendEvent }
-				navigationProgress={ navigationProgress }
+				context={mockContext}
+				sendEvent={mockSendEvent}
+				navigationProgress={navigationProgress}
 			/>
 		);
-		const checkboxLabels = screen.getAllByRole( 'checkbox' );
-		expect( checkboxLabels ).toHaveLength( 3 );
-		checkboxLabels.forEach( ( checkbox ) => {
-			expect( checkbox ).toBeChecked();
-		} );
-	} );
+		const checkboxLabels = screen.getAllByRole('checkbox');
+		expect(checkboxLabels).toHaveLength(3);
+		checkboxLabels.forEach((checkbox) => {
+			expect(checkbox).toBeChecked();
+		});
+	});
 
-	it( 'initialises with the previous selection correctly when there were errors previously', () => {
+	it('initialises with the previous selection correctly when there were errors previously', () => {
 		render(
 			<Plugins
-				context={ {
+				context={{
 					...mockContext,
-					pluginsAvailable: [ ...mockContext.pluginsAvailable ],
+					pluginsAvailable: [...mockContext.pluginsAvailable],
 					pluginsInstallationErrors: [
 						{
 							plugin: 'plugin4',
@@ -182,128 +182,126 @@ describe( 'Plugins Component', () => {
 							},
 						},
 					],
-					pluginsSelected: [ 'plugin4' ],
-				} }
-				sendEvent={ mockSendEvent }
-				navigationProgress={ navigationProgress }
+					pluginsSelected: ['plugin4'],
+				}}
+				sendEvent={mockSendEvent}
+				navigationProgress={navigationProgress}
 			/>
 		);
 		expect(
-			screen.getByText(
-				/Oops! We encountered a problem while installing/
-			)
+			screen.getByText(/Oops! We encountered a problem while installing/)
 		).toBeInTheDocument();
 		const checkbox1 = screen
-			.getByText( 'Plugin 1' )
-			.closest( '.woocommerce-profiler-plugins-plugin-card' )
-			?.querySelector( 'input[type="checkbox"]' );
-		expect( checkbox1 ).not.toBeChecked();
+			.getByText('Plugin 1')
+			.closest('.woocommerce-profiler-plugins-plugin-card')
+			?.querySelector('input[type="checkbox"]');
+		expect(checkbox1).not.toBeChecked();
 		const checkbox3 = screen
-			.getByText( 'Plugin 3' )
-			.closest( '.woocommerce-profiler-plugins-plugin-card' )
-			?.querySelector( 'input[type="checkbox"]' );
-		expect( checkbox3 ).not.toBeChecked();
+			.getByText('Plugin 3')
+			.closest('.woocommerce-profiler-plugins-plugin-card')
+			?.querySelector('input[type="checkbox"]');
+		expect(checkbox3).not.toBeChecked();
 		const checkbox4 = screen
 			// use role because error message also contains the plugin name
-			.getByRole( 'heading', { level: 3, name: 'Plugin 4' } )
-			.closest( '.woocommerce-profiler-plugins-plugin-card' )
-			?.querySelector( 'input[type="checkbox"]' );
-		expect( checkbox4 ).toBeChecked();
-	} );
+			.getByRole('heading', { level: 3, name: 'Plugin 4' })
+			.closest('.woocommerce-profiler-plugins-plugin-card')
+			?.querySelector('input[type="checkbox"]');
+		expect(checkbox4).toBeChecked();
+	});
 
-	it( 'handles skip action', () => {
+	it('handles skip action', () => {
 		render(
 			<Plugins
-				context={ mockContext }
-				sendEvent={ mockSendEvent }
-				navigationProgress={ navigationProgress }
+				context={mockContext}
+				sendEvent={mockSendEvent}
+				navigationProgress={navigationProgress}
 			/>
 		);
-		const skipButton = screen.getByText( 'Skip this step' );
-		fireEvent.click( skipButton );
-		expect( mockSendEvent ).toHaveBeenCalledWith( {
+		const skipButton = screen.getByText('Skip this step');
+		fireEvent.click(skipButton);
+		expect(mockSendEvent).toHaveBeenCalledWith({
 			type: 'PLUGINS_PAGE_SKIPPED',
-		} );
-	} );
-} );
+		});
+	});
+});
 
-describe( 'computePluginsSelection', () => {
+describe('computePluginsSelection', () => {
 	const mockPluginsAvailable = [
 		{ key: 'plugin1', is_activated: false },
 		{ key: 'plugin2', is_activated: true },
 		{ key: 'plugin3', is_activated: false },
 	];
 
-	it( 'correctly computes selection when no plugins are selected', () => {
-		const selectedPlugins = new Set< Extension >();
+	it('correctly computes selection when no plugins are selected', () => {
+		const selectedPlugins = new Set<Extension>();
 		const result = computePluginsSelection(
 			mockPluginsAvailable as Extension[],
 			selectedPlugins
 		);
 
-		expect( result ).toEqual( {
-			pluginsShown: [ 'plugin1', 'plugin2', 'plugin3' ],
-			pluginsUnselected: [ 'plugin1', 'plugin3' ],
+		expect(result).toEqual({
+			pluginsShown: ['plugin1', 'plugin2', 'plugin3'],
+			pluginsUnselected: ['plugin1', 'plugin3'],
 			selectedPluginSlugs: [],
-		} );
-	} );
+		});
+	});
 
-	it( 'correctly computes selection when some plugins are selected', () => {
-		const selectedPlugins = new Set( [
+	it('correctly computes selection when some plugins are selected', () => {
+		const selectedPlugins = new Set([
 			{ key: 'plugin1' },
 			{ key: 'plugin3' },
-		] as Extension[] );
+		] as Extension[]);
 		const result = computePluginsSelection(
 			mockPluginsAvailable as Extension[],
 			selectedPlugins
 		);
 
-		expect( result ).toEqual( {
-			pluginsShown: [ 'plugin1', 'plugin2', 'plugin3' ],
+		expect(result).toEqual({
+			pluginsShown: ['plugin1', 'plugin2', 'plugin3'],
 			pluginsUnselected: [],
-			selectedPluginSlugs: [ 'plugin1', 'plugin3' ],
-		} );
-	} );
+			selectedPluginSlugs: ['plugin1', 'plugin3'],
+		});
+	});
 
-	it( 'correctly handles already installed plugins', () => {
-		const selectedPlugins = new Set< Extension >( [
+	it('correctly handles already installed plugins', () => {
+		const selectedPlugins = new Set<Extension>([
 			{ key: 'plugin1' } as Extension,
-		] );
+		]);
 		const result = computePluginsSelection(
 			mockPluginsAvailable as Extension[],
 			selectedPlugins
 		);
 
-		expect( result ).toEqual( {
-			pluginsShown: [ 'plugin1', 'plugin2', 'plugin3' ],
-			pluginsUnselected: [ 'plugin3' ],
-			selectedPluginSlugs: [ 'plugin1' ],
-		} );
-	} );
+		expect(result).toEqual({
+			pluginsShown: ['plugin1', 'plugin2', 'plugin3'],
+			pluginsUnselected: ['plugin3'],
+			selectedPluginSlugs: ['plugin1'],
+		});
+	});
 
-	it( 'returns empty arrays when no plugins are available', () => {
-		const selectedPlugins = new Set< Extension >();
-		const result = computePluginsSelection( [], selectedPlugins );
+	it('returns empty arrays when no plugins are available', () => {
+		const selectedPlugins = new Set<Extension>();
+		const result = computePluginsSelection([], selectedPlugins);
 
-		expect( result ).toEqual( {
+		expect(result).toEqual({
 			pluginsShown: [],
 			pluginsUnselected: [],
 			selectedPluginSlugs: [],
-		} );
-	} );
-} );
+		});
+	});
+});
 
-describe( 'joinWithAnd', () => {
-	it( 'should fallback to en_US locale when current locale is invalid', () => {
-		const items = [ 'apple', 'banana', 'orange' ];
-		const result = joinWithAnd( items, 'invalid-locale' );
+describe('joinWithAnd', () => {
+	it('should fallback to en_US locale when current locale is invalid', () => {
+		const items = ['apple', 'banana', 'orange'];
+		const result = joinWithAnd(items, 'invalid-locale');
 
-		expect( result ).toEqual( [
+		expect(result).toEqual([
 			{ type: 'element', value: 'apple' },
 			{ type: 'literal', value: ', ' },
 			{ type: 'element', value: 'banana' },
 			{ type: 'literal', value: ', and ' },
 			{ type: 'element', value: 'orange' },
-		] );
-	} );
-} );
+		]);
+	});
+});

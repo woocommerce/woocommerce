@@ -15,7 +15,7 @@ export const awaitResponseJson = (
 
 const controls = {
 	...dataControls,
-	AWAIT_RESPONSE_JSON( action: AnyAction ) {
+	AWAIT_RESPONSE_JSON(action: AnyAction) {
 		return action.response.json();
 	},
 };

@@ -21,16 +21,16 @@ export type ShippingErrorTypes = {
 
 export type ShippingDataContextType = {
 	// A function for dispatching a shipping rate error status.
-	dispatchErrorStatus: React.Dispatch< {
+	dispatchErrorStatus: React.Dispatch<{
 		type: string;
-	} >;
-	onShippingRateFail: ReturnType< typeof emitterCallback >;
+	}>;
+	onShippingRateFail: ReturnType<typeof emitterCallback>;
 	// Used to register a callback to be invoked when shipping rate is selected unsuccessfully
-	onShippingRateSelectFail: ReturnType< typeof emitterCallback >;
+	onShippingRateSelectFail: ReturnType<typeof emitterCallback>;
 	// Used to register a callback to be invoked when shipping rate is selected.
-	onShippingRateSelectSuccess: ReturnType< typeof emitterCallback >;
+	onShippingRateSelectSuccess: ReturnType<typeof emitterCallback>;
 	// Used to register a callback to be invoked when shipping rates are retrieved.
-	onShippingRateSuccess: ReturnType< typeof emitterCallback >;
+	onShippingRateSuccess: ReturnType<typeof emitterCallback>;
 	// The current shipping error status.
 	shippingErrorStatus: ShippingErrorStatus;
 	// The error type constants for the shipping rate error status.

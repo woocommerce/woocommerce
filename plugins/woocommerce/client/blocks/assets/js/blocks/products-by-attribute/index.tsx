@@ -12,11 +12,11 @@ import './editor.scss';
 import metadata from './block.json';
 import { Edit } from './edit';
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	icon: {
 		src: (
 			<Icon
-				icon={ category }
+				icon={category}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -25,15 +25,15 @@ registerBlockType( metadata, {
 		...metadata.attributes,
 		columns: {
 			type: 'number',
-			default: getSetting( 'defaultColumns', 3 ),
+			default: getSetting('defaultColumns', 3),
 		},
 		rows: {
 			type: 'number',
-			default: getSetting( 'defaultRows', 3 ),
+			default: getSetting('defaultRows', 3),
 		},
 		stockStatus: {
 			type: 'array',
-			default: Object.keys( getSetting( 'stockStatusOptions', [] ) ),
+			default: Object.keys(getSetting('stockStatusOptions', [])),
 		},
 	},
 
@@ -42,4 +42,4 @@ registerBlockType( metadata, {
 	save: () => {
 		return null;
 	},
-} );
+});

@@ -9,9 +9,9 @@ const splitDecimal = (
 	beforeDecimal: string;
 	afterDecimal: string;
 } => {
-	const parts = numberString.split( '.' );
-	const beforeDecimal = parts[ 0 ];
-	const afterDecimal = parts[ 1 ] || '';
+	const parts = numberString.split('.');
+	const beforeDecimal = parts[0];
+	const afterDecimal = parts[1] || '';
 	return {
 		beforeDecimal,
 		afterDecimal,
@@ -23,15 +23,12 @@ const applyDecimal = (
 	decimalSeparator: string,
 	minorUnit: number
 ): string => {
-	if ( afterDecimal ) {
-		return `${ decimalSeparator }${ afterDecimal.padEnd(
-			minorUnit,
-			'0'
-		) }`;
+	if (afterDecimal) {
+		return `${decimalSeparator}${afterDecimal.padEnd(minorUnit, '0')}`;
 	}
 
-	if ( minorUnit > 0 ) {
-		return `${ decimalSeparator }${ '0'.repeat( minorUnit ) }`;
+	if (minorUnit > 0) {
+		return `${decimalSeparator}${'0'.repeat(minorUnit)}`;
 	}
 
 	return '';
@@ -41,14 +38,14 @@ const applyThousandSeparator = (
 	numberString: string,
 	thousandSeparator: string
 ): string => {
-	return numberString.replace( /\B(?=(\d{3})+(?!\d))/g, thousandSeparator );
+	return numberString.replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator);
 };
 
 export const normalizeCurrencyResponse = (
-	currencyData: Partial< CurrencyResponse > | undefined,
+	currencyData: Partial<CurrencyResponse> | undefined,
 	defaultCurrency: Currency
 ): Currency => {
-	if ( ! currencyData?.currency_code ) {
+	if (!currencyData?.currency_code) {
 		return defaultCurrency;
 	}
 
@@ -74,9 +71,8 @@ export const normalizeCurrencyResponse = (
 				? decimalSeparator
 				: defaultCurrency.decimalSeparator,
 		minorUnit:
-			Number.isInteger( minorUnit as number ) &&
-			( minorUnit as number ) >= 0
-				? ( minorUnit as number )
+			Number.isInteger(minorUnit as number) && (minorUnit as number) >= 0
+				? (minorUnit as number)
 				: defaultCurrency.minorUnit,
 		prefix: typeof prefix === 'string' ? prefix : defaultCurrency.prefix,
 		suffix: typeof suffix === 'string' ? suffix : defaultCurrency.suffix,
@@ -96,19 +92,15 @@ const formatNumberAsCurrencyString = (
 		formattedPrice.toString()
 	);
 
-	const formattedValue = `${ prefix }${ applyThousandSeparator(
+	const formattedValue = `${prefix}${applyThousandSeparator(
 		beforeDecimal,
 		thousandSeparator
-	) }${ applyDecimal(
-		afterDecimal,
-		decimalSeparator,
-		minorUnit
-	) }${ suffix }`;
+	)}${applyDecimal(afterDecimal, decimalSeparator, minorUnit)}${suffix}`;
 
 	// Use a textarea to decode HTML currency symbols.
 	// This used to use @wordpress/html-entities, but that was not necessary
 	// for this simple use case and avoids issues with ESM modules / @wordpress packages.
-	const txt = document.createElement( 'textarea' );
+	const txt = document.createElement('textarea');
 	txt.innerHTML = formattedValue;
 	return txt.value;
 };
@@ -116,15 +108,15 @@ const formatNumberAsCurrencyString = (
 export const formatPriceWithCurrency = (
 	price: number | string,
 	defaultCurrency: Currency,
-	currencyOverride?: Partial< Currency >
+	currencyOverride?: Partial<Currency>
 ): string => {
-	if ( price === '' || price === undefined ) {
+	if (price === '' || price === undefined) {
 		return '';
 	}
 
-	const priceInt = typeof price === 'number' ? price : parseInt( price, 10 );
+	const priceInt = typeof price === 'number' ? price : parseInt(price, 10);
 
-	if ( ! Number.isFinite( priceInt ) ) {
+	if (!Number.isFinite(priceInt)) {
 		return '';
 	}
 
@@ -133,5 +125,5 @@ export const formatPriceWithCurrency = (
 		...currencyOverride,
 	};
 
-	return formatNumberAsCurrencyString( priceInt, currency );
+	return formatNumberAsCurrencyString(priceInt, currency);
 };

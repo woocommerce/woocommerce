@@ -9,15 +9,15 @@ import { CustomerEffortScoreTracksContainer } from '@woocommerce/customer-effort
 import { createRoot } from '@wordpress/element';
 import debugFactory from 'debug';
 
-const debug = debugFactory( 'wc-admin:client' );
+const debug = debugFactory('wc-admin:client');
 
-export const renderCustomerEffortScoreTracks = ( root: HTMLElement ) => {
-	if ( ! root ) {
-		debug( 'Customer Effort Score Tracks root not found' );
+export const renderCustomerEffortScoreTracks = (root: HTMLElement) => {
+	if (!root) {
+		debug('Customer Effort Score Tracks root not found');
 		return;
 	}
 
-	createRoot(
-		root.insertBefore( document.createElement( 'div' ), null )
-	).render( <CustomerEffortScoreTracksContainer /> );
+	createRoot(root.insertBefore(document.createElement('div'), null)).render(
+		<CustomerEffortScoreTracksContainer />
+	);
 };

@@ -7,7 +7,7 @@ import type { StoryFn, Meta } from '@storybook/react-webpack5';
  * Internal dependencies
  */
 import Snackbar, { SnackbarProps } from '../snackbar';
-const availableStatus = [ 'default', 'success', 'error', 'warning', 'info' ];
+const availableStatus = ['default', 'success', 'error', 'warning', 'info'];
 
 export default {
 	title: 'Base Components/SnackbarList/Snackbar',
@@ -39,7 +39,7 @@ export default {
 		},
 		politeness: {
 			control: 'radio',
-			options: [ 'polite', 'assertive' ],
+			options: ['polite', 'assertive'],
 			description:
 				'Determines the level of politeness for the notice for assistive technology.',
 		},
@@ -55,13 +55,13 @@ export default {
 		},
 	},
 	component: Snackbar,
-} as Meta< SnackbarProps >;
+} as Meta<SnackbarProps>;
 
-const Template: StoryFn< SnackbarProps > = ( args ) => {
-	return <Snackbar { ...args } />;
+const Template: StoryFn<SnackbarProps> = (args) => {
+	return <Snackbar {...args} />;
 };
 
-export const Default = Template.bind( {} );
+export const Default = Template.bind({});
 Default.args = {
 	children: 'This is a default snackbar notice',
 	status: 'default',
@@ -72,25 +72,25 @@ Default.args = {
 	politeness: undefined,
 };
 
-export const Error = Template.bind( {} );
+export const Error = Template.bind({});
 Error.args = {
 	children: 'This is an error snackbar notice',
 	status: 'error',
 };
 
-export const Warning = Template.bind( {} );
+export const Warning = Template.bind({});
 Warning.args = {
 	children: 'This is a warning snackbar notice',
 	status: 'warning',
 };
 
-export const Info = Template.bind( {} );
+export const Info = Template.bind({});
 Info.args = {
 	children: 'This is an informational snackbar notice',
 	status: 'info',
 };
 
-export const Success = Template.bind( {} );
+export const Success = Template.bind({});
 Success.args = {
 	children: 'This is a success snackbar notice',
 	status: 'success',

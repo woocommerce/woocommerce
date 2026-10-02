@@ -24,35 +24,35 @@ import { getAdminSetting } from '~/utils/admin-settings';
 
 import './style.scss';
 
-const manageStock = getAdminSetting( 'manageStock', 'no' );
-const stockStatuses = getAdminSetting( 'stockStatuses', {} );
+const manageStock = getAdminSetting('manageStock', 'no');
+const stockStatuses = getAdminSetting('stockStatuses', {});
 
 class ProductsReportTable extends Component {
 	constructor() {
 		super();
 
-		this.getHeadersContent = this.getHeadersContent.bind( this );
-		this.getRowsContent = this.getRowsContent.bind( this );
-		this.getSummary = this.getSummary.bind( this );
+		this.getHeadersContent = this.getHeadersContent.bind(this);
+		this.getRowsContent = this.getRowsContent.bind(this);
+		this.getSummary = this.getSummary.bind(this);
 	}
 
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Product title', 'woocommerce' ),
+				label: __('Product title', 'woocommerce'),
 				key: 'product_name',
 				required: true,
 				isLeftAligned: true,
 				isSortable: true,
 			},
 			{
-				label: __( 'SKU', 'woocommerce' ),
+				label: __('SKU', 'woocommerce'),
 				key: 'sku',
 				hiddenByDefault: true,
 				isSortable: true,
 			},
 			{
-				label: __( 'Items sold', 'woocommerce' ),
+				label: __('Items sold', 'woocommerce'),
 				key: 'items_sold',
 				required: true,
 				defaultSort: true,
@@ -60,47 +60,47 @@ class ProductsReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'Net sales', 'woocommerce' ),
-				screenReaderLabel: __( 'Net sales', 'woocommerce' ),
+				label: __('Net sales', 'woocommerce'),
+				screenReaderLabel: __('Net sales', 'woocommerce'),
 				key: 'net_revenue',
 				required: true,
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Orders', 'woocommerce' ),
+				label: __('Orders', 'woocommerce'),
 				key: 'orders_count',
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Category', 'woocommerce' ),
+				label: __('Category', 'woocommerce'),
 				key: 'product_cat',
 			},
 			{
-				label: __( 'Variations', 'woocommerce' ),
+				label: __('Variations', 'woocommerce'),
 				key: 'variations',
 				isSortable: true,
 			},
 			manageStock === 'yes'
 				? {
-						label: __( 'Status', 'woocommerce' ),
+						label: __('Status', 'woocommerce'),
 						key: 'stock_status',
-				  }
+					}
 				: null,
 			manageStock === 'yes'
 				? {
-						label: __( 'Stock', 'woocommerce' ),
+						label: __('Stock', 'woocommerce'),
 						key: 'stock',
 						isNumeric: true,
-				  }
+					}
 				: null,
-		].filter( Boolean );
+		].filter(Boolean);
 	}
 
-	getRowsContent( data = [] ) {
+	getRowsContent(data = []) {
 		const { query } = this.props;
-		const persistedQuery = getPersistedQuery( query );
+		const persistedQuery = getPersistedQuery(query);
 		const {
 			render: renderCurrency,
 			formatDecimal: getCurrencyFormatDecimal,
@@ -108,7 +108,7 @@ class ProductsReportTable extends Component {
 		} = this.context;
 		const currency = getCurrencyConfig();
 
-		return map( data, ( row ) => {
+		return map(data, (row) => {
 			const {
 				product_id: productId,
 				items_sold: itemsSold,
@@ -126,15 +126,11 @@ class ProductsReportTable extends Component {
 				variations = [],
 			} = extendedInfo;
 
-			const name = decodeEntities( extendedInfo.name );
-			const ordersLink = getNewPath(
-				persistedQuery,
-				'/analytics/orders',
-				{
-					filter: 'advanced',
-					product_includes: productId,
-				}
-			);
+			const name = decodeEntities(extendedInfo.name);
+			const ordersLink = getNewPath(persistedQuery, '/analytics/orders', {
+				filter: 'advanced',
+				product_includes: productId,
+			});
 			const productDetailLink = getNewPath(
 				persistedQuery,
 				'/analytics/products',
@@ -146,11 +142,11 @@ class ProductsReportTable extends Component {
 			const { categories } = this.props;
 
 			const productCategories =
-				( categoryIds &&
+				(categoryIds &&
 					categories &&
 					categoryIds
-						.map( ( categoryId ) => categories.get( categoryId ) )
-						.filter( Boolean ) ) ||
+						.map((categoryId) => categories.get(categoryId))
+						.filter(Boolean)) ||
 				[];
 
 			const stockStatus = isLowStock(
@@ -159,26 +155,22 @@ class ProductsReportTable extends Component {
 				lowStockAmount
 			) ? (
 				<Link
-					href={ getAdminLink(
+					href={getAdminLink(
 						'post.php?action=edit&post=' + productId
-					) }
+					)}
 					type="wp-admin"
 				>
-					{ _x(
-						'Low',
-						'Indication of a low quantity',
-						'woocommerce'
-					) }
+					{_x('Low', 'Indication of a low quantity', 'woocommerce')}
 				</Link>
 			) : (
-				stockStatuses[ extendedInfoStockStatus ]
+				stockStatuses[extendedInfoStockStatus]
 			);
 
 			return [
 				{
 					display: (
-						<Link href={ productDetailLink } type="wc-admin">
-							{ name }
+						<Link href={productDetailLink} type="wc-admin">
+							{name}
 						</Link>
 					),
 					value: name,
@@ -188,17 +180,17 @@ class ProductsReportTable extends Component {
 					value: sku,
 				},
 				{
-					display: formatValue( currency, 'number', itemsSold ),
+					display: formatValue(currency, 'number', itemsSold),
 					value: itemsSold,
 				},
 				{
-					display: renderCurrency( netRevenue ),
-					value: getCurrencyFormatDecimal( netRevenue ),
+					display: renderCurrency(netRevenue),
+					value: getCurrencyFormatDecimal(netRevenue),
 				},
 				{
 					display: (
-						<Link href={ ordersLink } type="wc-admin">
-							{ ordersCount }
+						<Link href={ordersLink} type="wc-admin">
+							{ordersCount}
 						</Link>
 					),
 					value: ordersCount,
@@ -206,15 +198,15 @@ class ProductsReportTable extends Component {
 				{
 					display: (
 						<div className="woocommerce-table__product-categories">
-							{ productCategories[ 0 ] && (
+							{productCategories[0] && (
 								<CategoryBreacrumbs
-									category={ productCategories[ 0 ] }
-									categories={ categories }
+									category={productCategories[0]}
+									categories={categories}
 								/>
-							) }
-							{ productCategories.length > 1 && (
+							)}
+							{productCategories.length > 1 && (
 								<Tag
-									label={ sprintf(
+									label={sprintf(
 										/* translators: %d: number of categories */
 										_x(
 											'+%d more',
@@ -222,60 +214,52 @@ class ProductsReportTable extends Component {
 											'woocommerce'
 										),
 										productCategories.length - 1
-									) }
-									popoverContents={ productCategories.map(
-										( category ) => (
+									)}
+									popoverContents={productCategories.map(
+										(category) => (
 											<CategoryBreacrumbs
-												category={ category }
-												categories={ categories }
-												key={ category.id }
-												query={ query }
+												category={category}
+												categories={categories}
+												key={category.id}
+												query={query}
 											/>
 										)
-									) }
+									)}
 								/>
-							) }
+							)}
 						</div>
 					),
 					value: productCategories
-						.map( ( category ) => category.name )
-						.join( ', ' ),
+						.map((category) => category.name)
+						.join(', '),
 				},
 				{
-					display: formatValue(
-						currency,
-						'number',
-						variations.length
-					),
+					display: formatValue(currency, 'number', variations.length),
 					value: variations.length,
 				},
 				manageStock === 'yes'
 					? {
 							display: extendedInfoManageStock
 								? stockStatus
-								: __( 'N/A', 'woocommerce' ),
+								: __('N/A', 'woocommerce'),
 							value: extendedInfoManageStock
-								? stockStatuses[ extendedInfoStockStatus ]
+								? stockStatuses[extendedInfoStockStatus]
 								: null,
-					  }
+						}
 					: null,
 				manageStock === 'yes'
 					? {
 							display: extendedInfoManageStock
-								? formatValue(
-										currency,
-										'number',
-										stockQuantity
-								  )
-								: __( 'N/A', 'woocommerce' ),
+								? formatValue(currency, 'number', stockQuantity)
+								: __('N/A', 'woocommerce'),
 							value: stockQuantity,
-					  }
+						}
 					: null,
-			].filter( Boolean );
-		} );
+			].filter(Boolean);
+		});
 	}
 
-	getSummary( totals ) {
+	getSummary(totals) {
 		const {
 			products_count: productsCount = 0,
 			items_sold: itemsSold = 0,
@@ -286,30 +270,20 @@ class ProductsReportTable extends Component {
 		const currency = getCurrencyConfig();
 		return [
 			{
-				label: _n(
-					'Product',
-					'Products',
-					productsCount,
-					'woocommerce'
-				),
-				value: formatValue( currency, 'number', productsCount ),
+				label: _n('Product', 'Products', productsCount, 'woocommerce'),
+				value: formatValue(currency, 'number', productsCount),
 			},
 			{
-				label: _n(
-					'Item sold',
-					'Items sold',
-					itemsSold,
-					'woocommerce'
-				),
-				value: formatValue( currency, 'number', itemsSold ),
+				label: _n('Item sold', 'Items sold', itemsSold, 'woocommerce'),
+				value: formatValue(currency, 'number', itemsSold),
 			},
 			{
-				label: __( 'Net sales', 'woocommerce' ),
-				value: formatAmount( netRevenue ),
+				label: __('Net sales', 'woocommerce'),
+				value: formatAmount(netRevenue),
 			},
 			{
-				label: _n( 'Order', 'Orders', ordersCount, 'woocommerce' ),
-				value: formatValue( currency, 'number', ordersCount ),
+				label: _n('Order', 'Orders', ordersCount, 'woocommerce'),
+				value: formatValue(currency, 'number', ordersCount),
 			},
 		];
 	}
@@ -330,39 +304,39 @@ class ProductsReportTable extends Component {
 				'Check at least two products below to compare',
 				'woocommerce'
 			),
-			placeholder: __( 'Search by product name or SKU', 'woocommerce' ),
+			placeholder: __('Search by product name or SKU', 'woocommerce'),
 		};
 
 		return (
 			<ReportTable
-				compareBy={ hideCompare ? undefined : 'products' }
+				compareBy={hideCompare ? undefined : 'products'}
 				endpoint="products"
-				getHeadersContent={ this.getHeadersContent }
-				getRowsContent={ this.getRowsContent }
-				getSummary={ this.getSummary }
-				summaryFields={ [
+				getHeadersContent={this.getHeadersContent}
+				getRowsContent={this.getRowsContent}
+				getSummary={this.getSummary}
+				summaryFields={[
 					'products_count',
 					'items_sold',
 					'net_revenue',
 					'orders_count',
-				] }
+				]}
 				itemIdField="product_id"
-				isRequesting={ isRequesting }
-				labels={ labels }
-				query={ query }
+				isRequesting={isRequesting}
+				labels={labels}
+				query={query}
 				searchBy="products"
-				limitProperties={ limitProperties }
-				baseSearchQuery={ baseSearchQuery }
-				tableQuery={ {
+				limitProperties={limitProperties}
+				baseSearchQuery={baseSearchQuery}
+				tableQuery={{
 					orderby: query.orderby || 'items_sold',
 					order: query.order || 'desc',
 					extended_info: true,
 					segmentby: query.segmentby,
-				} }
-				title={ __( 'Products', 'woocommerce' ) }
+				}}
+				title={__('Products', 'woocommerce')}
 				columnPrefsKey="products_report_columns"
-				filters={ filters }
-				advancedFilters={ advancedFilters }
+				filters={filters}
+				advancedFilters={advancedFilters}
 			/>
 		);
 	}
@@ -371,25 +345,22 @@ class ProductsReportTable extends Component {
 ProductsReportTable.contextType = CurrencyContext;
 
 export default compose(
-	withSelect( ( select, props ) => {
+	withSelect((select, props) => {
 		const { isRequesting } = props;
 
-		if ( isRequesting ) {
+		if (isRequesting) {
 			return {};
 		}
 
-		const { getItems, getItemsError, isResolving } = select( itemsStore );
+		const { getItems, getItemsError, isResolving } = select(itemsStore);
 		const tableQuery = {
 			per_page: -1,
 		};
 
-		const categories = getItems( 'categories', tableQuery );
-		const isError = Boolean( getItemsError( 'categories', tableQuery ) );
-		const isLoading = isResolving( 'getItems', [
-			'categories',
-			tableQuery,
-		] );
+		const categories = getItems('categories', tableQuery);
+		const isError = Boolean(getItemsError('categories', tableQuery));
+		const isLoading = isResolving('getItems', ['categories', tableQuery]);
 
 		return { categories, isError, isRequesting: isLoading };
-	} )
-)( ProductsReportTable );
+	})
+)(ProductsReportTable);

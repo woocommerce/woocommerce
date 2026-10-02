@@ -24,15 +24,15 @@ import { useEditorContext } from '../providers/editor-context';
 interface CheckoutAddress {
 	shippingAddress: ShippingAddress;
 	billingAddress: BillingAddress;
-	setShippingAddress: ( data: Partial< ShippingAddress > ) => void;
-	setBillingAddress: ( data: Partial< BillingAddress > ) => void;
-	setEmail: ( value: string ) => void;
+	setShippingAddress: (data: Partial<ShippingAddress>) => void;
+	setBillingAddress: (data: Partial<BillingAddress>) => void;
+	setEmail: (value: string) => void;
 	useShippingAsBilling: boolean;
 	editingBillingAddress: boolean;
 	editingShippingAddress: boolean;
-	setUseShippingAsBilling: ( useShippingAsBilling: boolean ) => void;
-	setEditingBillingAddress: ( isEditing: boolean ) => void;
-	setEditingShippingAddress: ( isEditing: boolean ) => void;
+	setUseShippingAsBilling: (useShippingAsBilling: boolean) => void;
+	setEditingBillingAddress: (isEditing: boolean) => void;
+	setEditingShippingAddress: (isEditing: boolean) => void;
 	defaultFields: FormFields;
 	showShippingFields: boolean;
 	showBillingFields: boolean;
@@ -53,19 +53,18 @@ export const useCheckoutAddress = (): CheckoutAddress => {
 		prefersCollection,
 		editingBillingAddress,
 		editingShippingAddress,
-	} = useSelect( ( select ) => ( {
-		useShippingAsBilling: select( checkoutStore ).getUseShippingAsBilling(),
-		prefersCollection: select( checkoutStore ).prefersCollection(),
-		editingBillingAddress:
-			select( checkoutStore ).getEditingBillingAddress(),
+	} = useSelect((select) => ({
+		useShippingAsBilling: select(checkoutStore).getUseShippingAsBilling(),
+		prefersCollection: select(checkoutStore).prefersCollection(),
+		editingBillingAddress: select(checkoutStore).getEditingBillingAddress(),
 		editingShippingAddress:
-			select( checkoutStore ).getEditingShippingAddress(),
-	} ) );
+			select(checkoutStore).getEditingShippingAddress(),
+	}));
 	const {
 		__internalSetUseShippingAsBilling,
 		setEditingBillingAddress,
 		setEditingShippingAddress,
-	} = useDispatch( checkoutStore );
+	} = useDispatch(checkoutStore);
 	const {
 		billingAddress: rawBillingAddress,
 		setBillingAddress,
@@ -73,24 +72,24 @@ export const useCheckoutAddress = (): CheckoutAddress => {
 		setShippingAddress,
 	} = useCustomerData();
 
-	const stableBillingAddress = useShallowEqual( rawBillingAddress );
-	const stableShippingAddress = useShallowEqual( rawShippingAddress );
+	const stableBillingAddress = useShallowEqual(rawBillingAddress);
+	const stableShippingAddress = useShallowEqual(rawShippingAddress);
 
 	const billingAddress = useMemo(
-		() => emptyHiddenAddressFields( stableBillingAddress ),
-		[ stableBillingAddress ]
+		() => emptyHiddenAddressFields(stableBillingAddress),
+		[stableBillingAddress]
 	);
 	const shippingAddress = useMemo(
-		() => emptyHiddenAddressFields( stableShippingAddress ),
-		[ stableShippingAddress ]
+		() => emptyHiddenAddressFields(stableShippingAddress),
+		[stableShippingAddress]
 	);
 
 	const setEmail = useCallback(
-		( value: string ) =>
-			void setBillingAddress( {
+		(value: string) =>
+			void setBillingAddress({
 				email: value,
-			} ),
-		[ setBillingAddress ]
+			}),
+		[setBillingAddress]
 	);
 
 	const forcedBillingAddress: boolean = getSetting(
@@ -104,7 +103,7 @@ export const useCheckoutAddress = (): CheckoutAddress => {
 		setBillingAddress,
 		setEmail,
 		defaultFields: isEditor
-			? ( getPreviewData( 'defaultFields', defaultFields ) as FormFields )
+			? (getPreviewData('defaultFields', defaultFields) as FormFields)
 			: defaultFields,
 		useShippingAsBilling,
 		setUseShippingAsBilling: __internalSetUseShippingAsBilling,
@@ -114,11 +113,11 @@ export const useCheckoutAddress = (): CheckoutAddress => {
 		setEditingShippingAddress,
 		needsShipping,
 		showShippingFields:
-			! forcedBillingAddress && needsShipping && ! prefersCollection,
-		showShippingMethods: needsShipping && ! prefersCollection,
+			!forcedBillingAddress && needsShipping && !prefersCollection,
+		showShippingMethods: needsShipping && !prefersCollection,
 		showBillingFields:
-			! needsShipping || ! useShippingAsBilling || !! prefersCollection,
+			!needsShipping || !useShippingAsBilling || !!prefersCollection,
 		forcedBillingAddress,
-		useBillingAsShipping: forcedBillingAddress || !! prefersCollection,
+		useBillingAsShipping: forcedBillingAddress || !!prefersCollection,
 	};
 };

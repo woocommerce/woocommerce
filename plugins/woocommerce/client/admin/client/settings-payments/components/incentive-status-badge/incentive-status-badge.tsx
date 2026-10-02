@@ -27,40 +27,37 @@ interface IncentiveStatusBadgeProps {
  * // Render an incentive status badge which displays a popover.
  * <IncentiveStatusBadge incentive={ incentive } />
  */
-export const IncentiveStatusBadge = ( {
+export const IncentiveStatusBadge = ({
 	incentive,
-}: IncentiveStatusBadgeProps ) => {
+}: IncentiveStatusBadgeProps) => {
 	return (
 		<StatusBadge
-			status={ 'has_incentive' }
-			message={ incentive.badge }
+			status={'has_incentive'}
+			message={incentive.badge}
 			popoverContent={
 				<>
-					<p className={ 'woocommerce-incentive-popover__title' }>
-						{ incentive.title }
+					<p className={'woocommerce-incentive-popover__title'}>
+						{incentive.title}
 					</p>
-					<p className={ 'woocommerce-incentive-popover__terms' }>
-						{ createInterpolateElement(
-							__(
-								'See <termsLink /> for details.',
-								'woocommerce'
-							),
+					<p className={'woocommerce-incentive-popover__terms'}>
+						{createInterpolateElement(
+							__('See <termsLink /> for details.', 'woocommerce'),
 							{
 								termsLink: (
 									<Link
-										href={ incentive.tc_url }
+										href={incentive.tc_url}
 										target="_blank"
 										rel="noreferrer"
 										type="external"
 									>
-										{ __(
+										{__(
 											'Terms and Conditions',
 											'woocommerce'
-										) }
+										)}
 									</Link>
 								),
 							}
-						) }
+						)}
 					</p>
 				</>
 			}

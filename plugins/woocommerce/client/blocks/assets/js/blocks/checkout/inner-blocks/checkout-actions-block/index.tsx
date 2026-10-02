@@ -20,14 +20,14 @@ const blockConfig: BlockConfiguration = {
 	example: {
 		attributes: {
 			showPrice: true,
-			placeOrderButtonLabel: __( 'Place Order', 'woocommerce' ),
+			placeOrderButtonLabel: __('Place Order', 'woocommerce'),
 			showReturnToCart: false,
 		},
 	},
 	icon: {
 		src: (
 			<Icon
-				icon={ button }
+				icon={button}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -37,4 +37,4 @@ const blockConfig: BlockConfiguration = {
 	edit: Edit,
 };
 
-registerBlockType( 'woocommerce/checkout-actions-block', blockConfig );
+registerBlockType('woocommerce/checkout-actions-block', blockConfig);

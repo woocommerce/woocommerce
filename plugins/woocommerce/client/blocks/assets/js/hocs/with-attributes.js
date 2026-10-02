@@ -16,9 +16,9 @@ import { formatError } from '../base/utils/errors';
  * @param {Array|null} attributeList List of attributes.
  * @param {string}     matchField    Field to match on. e.g. id or slug.
  */
-const getAttributeData = ( attributeId, attributeList, matchField = 'id' ) => {
-	return Array.isArray( attributeList )
-		? attributeList.find( ( attr ) => attr[ matchField ] === attributeId )
+const getAttributeData = (attributeId, attributeList, matchField = 'id') => {
+	return Array.isArray(attributeList)
+		? attributeList.find((attr) => attr[matchField] === attributeId)
 		: null;
 };
 
@@ -27,94 +27,94 @@ const getAttributeData = ( attributeId, attributeList, matchField = 'id' ) => {
  *
  * @param {Function} OriginalComponent Component being wrapped.
  */
-const withAttributes = ( OriginalComponent ) => {
-	return ( props ) => {
+const withAttributes = (OriginalComponent) => {
+	return (props) => {
 		const { selected = [] } = props;
-		const selectedSlug = selected.length ? selected[ 0 ].attr_slug : null;
-		const [ attributes, setAttributes ] = useState( null );
-		const [ expandedAttribute, setExpandedAttribute ] = useState( 0 );
-		const [ termsList, setTermsList ] = useState( {} );
-		const [ loading, setLoading ] = useState( true );
-		const [ termsLoading, setTermsLoading ] = useState( false );
-		const [ error, setError ] = useState( null );
+		const selectedSlug = selected.length ? selected[0].attr_slug : null;
+		const [attributes, setAttributes] = useState(null);
+		const [expandedAttribute, setExpandedAttribute] = useState(0);
+		const [termsList, setTermsList] = useState({});
+		const [loading, setLoading] = useState(true);
+		const [termsLoading, setTermsLoading] = useState(false);
+		const [error, setError] = useState(null);
 
-		useEffect( () => {
-			if ( attributes === null ) {
+		useEffect(() => {
+			if (attributes === null) {
 				getAttributes()
-					.then( ( newAttributes ) => {
-						newAttributes = newAttributes.map( ( attribute ) => ( {
+					.then((newAttributes) => {
+						newAttributes = newAttributes.map((attribute) => ({
 							...attribute,
 							parent: 0,
-						} ) );
+						}));
 
-						setAttributes( newAttributes );
+						setAttributes(newAttributes);
 
-						if ( selectedSlug ) {
+						if (selectedSlug) {
 							const selectedAttributeFromTerm = getAttributeData(
 								selectedSlug,
 								newAttributes,
 								'taxonomy'
 							);
 
-							if ( selectedAttributeFromTerm ) {
+							if (selectedAttributeFromTerm) {
 								setExpandedAttribute(
 									selectedAttributeFromTerm.id
 								);
 							}
 						}
-					} )
-					.catch( async ( e ) => {
-						setError( await formatError( e ) );
-					} )
-					.finally( () => {
-						setLoading( false );
-					} );
+					})
+					.catch(async (e) => {
+						setError(await formatError(e));
+					})
+					.finally(() => {
+						setLoading(false);
+					});
 			}
-		}, [ attributes, selectedSlug ] );
+		}, [attributes, selectedSlug]);
 
-		useEffect( () => {
+		useEffect(() => {
 			const attributeData = getAttributeData(
 				expandedAttribute,
 				attributes
 			);
 
-			if ( ! attributeData ) {
+			if (!attributeData) {
 				return;
 			}
 
-			setTermsLoading( true );
+			setTermsLoading(true);
 
-			getTerms( expandedAttribute )
-				.then( ( newTerms ) => {
-					newTerms = newTerms.map( ( term ) => ( {
+			getTerms(expandedAttribute)
+				.then((newTerms) => {
+					newTerms = newTerms.map((term) => ({
 						...term,
 						parent: expandedAttribute,
 						attr_slug: attributeData.taxonomy,
-					} ) );
+					}));
 
-					setTermsList( ( previousTermsList ) => ( {
+					setTermsList((previousTermsList) => ({
 						...previousTermsList,
-						[ expandedAttribute ]: newTerms,
-					} ) );
-				} )
-				.catch( async ( e ) => {
-					setError( await formatError( e ) );
-				} )
-				.finally( () => {
-					setTermsLoading( false );
-				} );
-		}, [ expandedAttribute, attributes ] );
+						[expandedAttribute]: newTerms,
+					}));
+				})
+				.catch(async (e) => {
+					setError(await formatError(e));
+				})
+				.finally(() => {
+					setTermsLoading(false);
+				});
+		}, [expandedAttribute, attributes]);
 
 		return (
 			<OriginalComponent
-				{ ...props }
-				attributes={ attributes || [] }
-				error={ error }
-				expandedAttribute={ expandedAttribute }
-				onExpandAttribute={ setExpandedAttribute }
-				isLoading={ loading }
-				termsAreLoading={ termsLoading }
-				termsList={ termsList }
+				{...props}
+				attributes={attributes || []}
+				error={error}
+				expandedAttribute={expandedAttribute}
+				onExpandAttribute={setExpandedAttribute}
+				isLoading={loading}
+				termsAreLoading={termsLoading}
+				termsList={termsList}
 			/>
 		);
 	};

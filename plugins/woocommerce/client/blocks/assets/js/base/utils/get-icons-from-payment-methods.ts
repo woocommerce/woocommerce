@@ -15,10 +15,10 @@ import type {
 export const getIconsFromPaymentMethods = (
 	paymentMethods: PaymentMethods
 ): PaymentMethodIconsType => {
-	return Object.values( paymentMethods ).reduce( ( acc, paymentMethod ) => {
-		if ( paymentMethod.icons !== null ) {
-			acc = acc.concat( paymentMethod.icons );
+	return Object.values(paymentMethods).reduce((acc, paymentMethod) => {
+		if (paymentMethod.icons !== null) {
+			acc = acc.concat(paymentMethod.icons);
 		}
 		return acc;
-	}, [] as PaymentMethodIconsType );
+	}, [] as PaymentMethodIconsType);
 };

@@ -7,5 +7,5 @@ export const unapprovedReviewsQuery = {
 	per_page: 1,
 	status: 'hold',
 	_embed: 1,
-	_fields: [ 'id' ],
+	_fields: ['id'],
 };

@@ -17,8 +17,16 @@ jQuery( function ( $ ) {
 				.on( 'click', 'a.debug-report', this.generateReport )
 				.on( 'click', '#copy-for-support', this.copyReport )
 				.on( 'click', '#copy-for-github', this.copyGithubReport )
-				.on( 'aftercopy', '#copy-for-support, #copy-for-github', this.copySuccess )
-				.on( 'aftercopyfailure', '#copy-for-support, #copy-for-github', this.copyFail )
+				.on(
+					'aftercopy',
+					'#copy-for-support, #copy-for-github',
+					this.copySuccess
+				)
+				.on(
+					'aftercopyfailure',
+					'#copy-for-support, #copy-for-github',
+					this.copyFail
+				)
 				.on( 'click', '#download-for-support', this.downloadReport );
 
 			this.maybePollTools();
@@ -27,7 +35,7 @@ jQuery( function ( $ ) {
 		/**
 		 * Start polling the tools page if a background tool is running.
 		 */
-		maybePollTools: function() {
+		maybePollTools: function () {
 			if (
 				this.toolsPollTimer ||
 				! woocommerce_admin_system_status.tools_url ||
@@ -38,7 +46,10 @@ jQuery( function ( $ ) {
 
 			this.toolsPollTimer = window.setInterval(
 				$.proxy( this.pollTools, this ),
-				parseInt( woocommerce_admin_system_status.tools_poll_interval, 10 ) || 10000
+				parseInt(
+					woocommerce_admin_system_status.tools_poll_interval,
+					10
+				) || 10000
 			);
 		},
 
@@ -47,17 +58,22 @@ jQuery( function ( $ ) {
 		 *
 		 * @return {Bool}
 		 */
-		shouldPollTools: function() {
-			return $( '.wc_status_table--tools tr.requires-refresh' ).is( function() {
-				var $row = $( this );
-				return $row.find( '.run-tool-status' ).length > 0 || $row.find( '.run-tool .button:disabled' ).length > 0;
-			});
+		shouldPollTools: function () {
+			return $( '.wc_status_table--tools tr.requires-refresh' ).is(
+				function () {
+					var $row = $( this );
+					return (
+						$row.find( '.run-tool-status' ).length > 0 ||
+						$row.find( '.run-tool .button:disabled' ).length > 0
+					);
+				}
+			);
 		},
 
 		/**
 		 * Refresh background tool rows from the tools page.
 		 */
-		pollTools: function() {
+		pollTools: function () {
 			if ( this.toolsPollInProgress ) {
 				return;
 			}
@@ -66,39 +82,51 @@ jQuery( function ( $ ) {
 
 			var self = this;
 			var toolsUrl = woocommerce_admin_system_status.tools_url;
-			var pollUrl = toolsUrl + ( toolsUrl.indexOf( '?' ) === -1 ? '?' : '&' ) + 'wc_status_tools_poll=' + Date.now();
+			var pollUrl =
+				toolsUrl +
+				( toolsUrl.indexOf( '?' ) === -1 ? '?' : '&' ) +
+				'wc_status_tools_poll=' +
+				Date.now();
 
 			$.get( pollUrl )
-				.done( function( response ) {
-					var $response = $( '<div>' ).append( $.parseHTML( response ) );
+				.done( function ( response ) {
+					var $response = $( '<div>' ).append(
+						$.parseHTML( response )
+					);
 
-					$( '.wc_status_table--tools tr.requires-refresh' ).each( function() {
-						var $currentRow = $( this );
-						var action      = $currentRow.data( 'tool-action' );
+					$( '.wc_status_table--tools tr.requires-refresh' ).each(
+						function () {
+							var $currentRow = $( this );
+							var action = $currentRow.data( 'tool-action' );
 
-						if ( ! action ) {
-							return;
+							if ( ! action ) {
+								return;
+							}
+
+							var $updatedRow = $response.find(
+								'.wc_status_table--tools tr[data-tool-action="' +
+									action +
+									'"]'
+							);
+
+							if ( $updatedRow.length ) {
+								$currentRow.replaceWith( $updatedRow );
+							}
 						}
-
-						var $updatedRow = $response.find( '.wc_status_table--tools tr[data-tool-action="' + action + '"]' );
-
-						if ( $updatedRow.length ) {
-							$currentRow.replaceWith( $updatedRow );
-						}
-					});
+					);
 
 					if ( ! self.shouldPollTools() ) {
 						window.clearInterval( self.toolsPollTimer );
 						self.toolsPollTimer = null;
 					}
-				})
-				.fail( function() {
+				} )
+				.fail( function () {
 					window.clearInterval( self.toolsPollTimer );
 					self.toolsPollTimer = null;
-				})
-				.always( function() {
+				} )
+				.always( function () {
 					self.toolsPollInProgress = false;
-				});
+				} );
 		},
 
 		/**
@@ -106,7 +134,7 @@ jQuery( function ( $ ) {
 		 *
 		 * @return {Bool}
 		 */
-		preventTipTipClick: function() {
+		preventTipTipClick: function () {
 			return false;
 		},
 
@@ -115,51 +143,78 @@ jQuery( function ( $ ) {
 		 *
 		 * @return {Bool}
 		 */
-		generateReport: function() {
+		generateReport: function () {
 			var report = '';
 
-			$( '.wc_status_table thead, .wc_status_table tbody' ).each( function() {
-				if ( $( this ).is( 'thead' ) ) {
-					var label = $( this ).find( 'th:eq(0)' ).data( 'exportLabel' ) || $( this ).text();
-					report = report + '\n### ' + label.trim() + ' ###\n\n';
-				} else {
-					$( 'tr', $( this ) ).each( function() {
-						var label       = $( this ).find( 'td:eq(0)' ).data( 'exportLabel' ) || $( this ).find( 'td:eq(0)' ).text();
-						var the_name    = label.trim().replace( /(<([^>]+)>)/ig, '' ); // Remove HTML.
+			$( '.wc_status_table thead, .wc_status_table tbody' ).each(
+				function () {
+					if ( $( this ).is( 'thead' ) ) {
+						var label =
+							$( this )
+								.find( 'th:eq(0)' )
+								.data( 'exportLabel' ) || $( this ).text();
+						report = report + '\n### ' + label.trim() + ' ###\n\n';
+					} else {
+						$( 'tr', $( this ) ).each( function () {
+							var label =
+								$( this )
+									.find( 'td:eq(0)' )
+									.data( 'exportLabel' ) ||
+								$( this ).find( 'td:eq(0)' ).text();
+							var the_name = label
+								.trim()
+								.replace( /(<([^>]+)>)/gi, '' ); // Remove HTML.
 
-						// Find value
-						var $value_html = $( this ).find( 'td:eq(2)' ).clone();
-						$value_html.find( '.private' ).remove();
-						$value_html.find( '.dashicons-yes' ).replaceWith( '&#10004;' );
-						$value_html.find( '.dashicons-no-alt, .dashicons-warning' ).replaceWith( '&#10060;' );
+							// Find value
+							var $value_html = $( this )
+								.find( 'td:eq(2)' )
+								.clone();
+							$value_html.find( '.private' ).remove();
+							$value_html
+								.find( '.dashicons-yes' )
+								.replaceWith( '&#10004;' );
+							$value_html
+								.find( '.dashicons-no-alt, .dashicons-warning' )
+								.replaceWith( '&#10060;' );
 
-						// Format value
-						var the_value   = $value_html.text().trim();
-						var value_array = the_value.split( ', ' );
+							// Format value
+							var the_value = $value_html.text().trim();
+							var value_array = the_value.split( ', ' );
 
-						if ( value_array.length > 1 ) {
-							// If value have a list of plugins ','.
-							// Split to add new line.
-							var temp_line ='';
-							$.each( value_array, function( key, line ) {
-								temp_line = temp_line + line + '\n';
-							});
+							if ( value_array.length > 1 ) {
+								// If value have a list of plugins ','.
+								// Split to add new line.
+								var temp_line = '';
+								$.each( value_array, function ( key, line ) {
+									temp_line = temp_line + line + '\n';
+								} );
 
-							the_value = temp_line;
-						}
+								the_value = temp_line;
+							}
 
-						if ( the_name || the_value ) {
-							report = report + '' + the_name + ': ' + the_value + '\n';
-						} else {
-							report = report + '\n';
-						}
-					});
+							if ( the_name || the_value ) {
+								report =
+									report +
+									'' +
+									the_name +
+									': ' +
+									the_value +
+									'\n';
+							} else {
+								report = report + '\n';
+							}
+						} );
+					}
 				}
-			});
+			);
 
 			try {
 				$( '#debug-report' ).slideDown();
-				$( '#debug-report' ).find( 'textarea' ).val( '`' + report + '`' ).trigger( 'focus' ).trigger( 'select' );
+				$( '#debug-report' )
+					.find( 'textarea' )
+					.val( '`' + report + '`' )
+					.trigger( 'focus' )
+					.trigger( 'select' );
 				$( this ).fadeOut();
 				return false;
 			} catch ( e ) {
@@ -175,9 +230,12 @@ jQuery( function ( $ ) {
 		 *
 		 * @param {Object} evt Copy event.
 		 */
-		copyReport: function( evt ) {
+		copyReport: function ( evt ) {
 			wcClearClipboard();
-			wcSetClipboard( $( '#debug-report' ).find( 'textarea' ).val(), $( this ) );
+			wcSetClipboard(
+				$( '#debug-report' ).find( 'textarea' ).val(),
+				$( this )
+			);
 			evt.preventDefault();
 		},
 		/**
@@ -187,21 +245,24 @@ jQuery( function ( $ ) {
 			var redactions = [
 				{
 					regex: /(WordPress address \(URL\):)[^\n]*/,
-					replacement: "$1 [Redacted]"
+					replacement: '$1 [Redacted]',
 				},
 				{
 					regex: /(Site address \(URL\):)[^\n]*/,
-					replacement: "$1 [Redacted]"
+					replacement: '$1 [Redacted]',
 				},
 				{
 					regex: /(### Database ###\n)([\s\S]*?)(\n### Post Type Counts ###)/,
-					replacement: "$1\n[REDACTED]\n$3"
-				}
+					replacement: '$1\n[REDACTED]\n$3',
+				},
 			];
 
-			redactions.forEach( function( redaction ) {
-				report = report.replace( redaction.regex, redaction.replacement );
-			});
+			redactions.forEach( function ( redaction ) {
+				report = report.replace(
+					redaction.regex,
+					redaction.replacement
+				);
+			} );
 			return report;
 		},
 		/**
@@ -209,12 +270,15 @@ jQuery( function ( $ ) {
 		 *
 		 * @param {Object} event Copy event.
 		 */
-		copyGithubReport: function( event ) {
+		copyGithubReport: function ( event ) {
 			wcClearClipboard();
 			var reportValue = $( '#debug-report' ).find( 'textarea' ).val();
 			var redactedReport = wcSystemStatus.applyRedactions( reportValue );
 
-			var reportForGithub = '<details><summary>System Status Report</summary>\n\n``' + redactedReport + '``\n</details>';
+			var reportForGithub =
+				'<details><summary>System Status Report</summary>\n\n``' +
+				redactedReport +
+				'``\n</details>';
 
 			wcSetClipboard( reportForGithub, $( this ) );
 			event.preventDefault();
@@ -223,49 +287,73 @@ jQuery( function ( $ ) {
 		/**
 		 * Display a "Copied!" tip when success copying
 		 */
-		copySuccess: function( event ) {
-			$( event.target ).tipTip({
-				'attribute':  'data-tip',
-				'activation': 'focus',
-				'fadeIn':     50,
-				'fadeOut':    50,
-				'delay':      0
-			}).trigger( 'focus' );
+		copySuccess: function ( event ) {
+			$( event.target )
+				.tipTip( {
+					attribute: 'data-tip',
+					activation: 'focus',
+					fadeIn: 50,
+					fadeOut: 50,
+					delay: 0,
+				} )
+				.trigger( 'focus' );
 		},
 
 		/**
 		 * Displays the copy error message when failure copying.
 		 */
-		copyFail: function() {
+		copyFail: function () {
 			$( '.copy-error' ).removeClass( 'hidden' );
-			$( '#debug-report' ).find( 'textarea' ).trigger( 'focus' ).trigger( 'select' );
+			$( '#debug-report' )
+				.find( 'textarea' )
+				.trigger( 'focus' )
+				.trigger( 'select' );
 		},
 
-		downloadReport: function() {
-			var ssr_text = new Blob( [ $( '#debug-report' ).find( 'textarea' ).val() ], { type: 'text/plain' } );
+		downloadReport: function () {
+			var ssr_text = new Blob(
+				[ $( '#debug-report' ).find( 'textarea' ).val() ],
+				{ type: 'text/plain' }
+			);
 
 			var domain = window.location.hostname;
-			var datetime = new Date().toISOString().slice( 0, 19 ).replace( /:/g, '-' );
+			var datetime = new Date()
+				.toISOString()
+				.slice( 0, 19 )
+				.replace( /:/g, '-' );
 
 			var a = document.createElement( 'a' );
-			a.download = 'SystemStatusReport_' + domain + '_' + datetime + '.txt';
+			a.download =
+				'SystemStatusReport_' + domain + '_' + datetime + '.txt';
 			a.href = window.URL.createObjectURL( ssr_text );
 			a.textContent = 'Download ready';
-			a.style='display:none';
+			a.style = 'display:none';
 			a.click();
 			a.remove();
-		}
+		},
 	};
 
 	wcSystemStatus.init();
 
-	$( '.wc_status_table' ).on( 'click', '.run-tool input.button', function( evt ) {
-		evt.stopImmediatePropagation();
-		return window.confirm( woocommerce_admin_system_status.run_tool_confirmation );
-	});
+	$( '.wc_status_table' ).on(
+		'click',
+		'.run-tool input.button',
+		function ( evt ) {
+			evt.stopImmediatePropagation();
+			return window.confirm(
+				woocommerce_admin_system_status.run_tool_confirmation
+			);
+		}
+	);
 
-	$( '#log-viewer-select' ).on( 'click', 'h2 a.page-title-action', function( evt ) {
-		evt.stopImmediatePropagation();
-		return window.confirm( woocommerce_admin_system_status.delete_log_confirmation );
-	});
-});
+	$( '#log-viewer-select' ).on(
+		'click',
+		'h2 a.page-title-action',
+		function ( evt ) {
+			evt.stopImmediatePropagation();
+			return window.confirm(
+				woocommerce_admin_system_status.delete_log_confirmation
+			);
+		}
+	);
+} );

@@ -18,21 +18,21 @@ import type { HTMLAttributes } from 'react';
 import './style.scss';
 import { Attributes } from './types';
 
-type Props = Attributes & HTMLAttributes< HTMLDivElement >;
+type Props = Attributes & HTMLAttributes<HTMLDivElement>;
 
-interface TagNameProps extends HTMLAttributes< HTMLOrSVGElement > {
+interface TagNameProps extends HTMLAttributes<HTMLOrSVGElement> {
 	headingLevel: number;
 	elementType?: keyof JSX.IntrinsicElements;
 }
 
-const TagName = ( {
+const TagName = ({
 	children,
 	headingLevel,
 	elementType:
-		ElementType = `h${ headingLevel }` as keyof JSX.IntrinsicElements,
+		ElementType = `h${headingLevel}` as keyof JSX.IntrinsicElements,
 	...props
-}: TagNameProps ): JSX.Element => {
-	return <ElementType { ...props }>{ children }</ElementType>;
+}: TagNameProps): JSX.Element => {
+	return <ElementType {...props}>{children}</ElementType>;
 };
 
 /**
@@ -47,7 +47,7 @@ const TagName = ( {
  *                                          will be used if this is not provided.
  * @return {*} The component.
  */
-export const Block = ( props: Props ): JSX.Element => {
+export const Block = (props: Props): JSX.Element => {
 	const {
 		className,
 		headingLevel = 2,
@@ -55,59 +55,58 @@ export const Block = ( props: Props ): JSX.Element => {
 		linkTarget,
 		align,
 	} = props;
-	const styleProps = useStyleProps( props );
+	const styleProps = useStyleProps(props);
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
 	const { dispatchStoreEvent } = useStoreEvents();
 
-	if ( ! product.id ) {
+	if (!product.id) {
 		return (
 			<TagName
-				headingLevel={ headingLevel }
-				className={ clsx(
+				headingLevel={headingLevel}
+				className={clsx(
 					className,
 					styleProps.className,
 					'wc-block-components-product-title',
 					{
-						[ `${ parentClassName }__product-title` ]:
-							parentClassName,
-						[ `wc-block-components-product-title--align-${ align }` ]:
+						[`${parentClassName}__product-title`]: parentClassName,
+						[`wc-block-components-product-title--align-${align}`]:
 							align,
 					}
-				) }
-				style={ styleProps.style }
+				)}
+				style={styleProps.style}
 			/>
 		);
 	}
 
 	return (
 		<TagName
-			headingLevel={ headingLevel }
-			className={ clsx(
+			headingLevel={headingLevel}
+			className={clsx(
 				className,
 				styleProps.className,
 				'wc-block-components-product-title',
 				{
-					[ `${ parentClassName }__product-title` ]: parentClassName,
-					[ `wc-block-components-product-title--align-${ align }` ]:
+					[`${parentClassName}__product-title`]: parentClassName,
+					[`wc-block-components-product-title--align-${align}`]:
 						align,
 				}
-			) }
-			style={ styleProps.style }
+			)}
+			style={styleProps.style}
 		>
 			<ProductName
-				disabled={ ! showProductLink }
-				name={ product.name }
-				permalink={ product.permalink }
-				target={ linkTarget }
-				onClick={ () => {
-					dispatchStoreEvent( 'product-view-link', {
+				disabled={!showProductLink}
+				name={product.name}
+				permalink={product.permalink}
+				target={linkTarget}
+				onClick={() => {
+					dispatchStoreEvent('product-view-link', {
 						product,
-					} );
-				} }
+					});
+				}}
 			/>
 		</TagName>
 	);
 };
 
-export default withProductDataContext( Block );
+export default withProductDataContext(Block);

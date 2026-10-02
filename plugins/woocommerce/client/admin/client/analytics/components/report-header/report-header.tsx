@@ -19,7 +19,7 @@ interface ReportHeaderProps {
 	/**
 	 * Config option passed through to `FilterPicker`
 	 */
-	filters?: Array< unknown >;
+	filters?: Array<unknown>;
 	/**
 	 * The `path` parameter supplied by React-Router
 	 */
@@ -38,11 +38,11 @@ interface ReportHeaderProps {
 	report: string;
 }
 
-export default function ReportHeader( props: ReportHeaderProps ): JSX.Element {
+export default function ReportHeader(props: ReportHeaderProps): JSX.Element {
 	return (
 		<div className="woocommerce-analytics-report-header">
-			{ /* @ts-expect-error - ReportFilters is a valid component but not typed */ }
-			<ReportFilters { ...props } />
+			{/* @ts-expect-error - ReportFilters is a valid component but not typed */}
+			<ReportFilters {...props} />
 			<ImportStatusBar />
 		</div>
 	);

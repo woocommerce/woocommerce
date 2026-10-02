@@ -57,7 +57,7 @@ export const DEFAULT_CONTROLS = {
 	textColumns: true,
 };
 
-export function TypographyElementPanel( {
+export function TypographyElementPanel({
 	element,
 	headingLevel,
 	defaultControls = DEFAULT_CONTROLS,
@@ -65,16 +65,16 @@ export function TypographyElementPanel( {
 	element: string;
 	headingLevel: string;
 	defaultControls?: typeof DEFAULT_CONTROLS;
-} ) {
-	const [ fontSizes, blockLevelFontFamilies ] = useSettings(
+}) {
+	const [fontSizes, blockLevelFontFamilies] = useSettings(
 		'typography.fontSizes',
 		'typography.fontFamilies'
 	);
-	const [ availableUnits ] = useSettings( 'spacing.units' ) as [ string[] ];
+	const [availableUnits] = useSettings('spacing.units') as [string[]];
 
 	// Ref: https://github.com/WordPress/gutenberg/issues/59778
 	const fontFamilies = blockLevelFontFamilies?.default || [];
-	const theme = useSelect( ( select ) => select( storeName ).getTheme(), [] );
+	const theme = useSelect((select) => select(storeName).getTheme(), []);
 	const colorGradientSettings = useMultipleOriginColorsAndGradients();
 	// Text color renders here only when the running WordPress no longer offers
 	// it in the Colors screen (WordPress 7.1 moved it to the typography panel).
@@ -82,7 +82,7 @@ export function TypographyElementPanel( {
 		useHasTextColorInTypographyPanel() && element === 'text';
 	const { styles, defaultStyles, userStyles, updateStyleProp, updateStyles } =
 		useEmailStyles();
-	const elementStyles = getElementStyles( styles, element, headingLevel );
+	const elementStyles = getElementStyles(styles, element, headingLevel);
 	const defaultElementStyles = getElementStyles(
 		defaultStyles,
 		element,
@@ -120,14 +120,10 @@ export function TypographyElementPanel( {
 		elementStyles.color?.text
 	);
 	const decodedUserTextColor = userTextColor
-		? getValueFromVariable(
-				{ settings: theme?.settings },
-				'',
-				userTextColor
-		  )
+		? getValueFromVariable({ settings: theme?.settings }, '', userTextColor)
 		: undefined;
 
-	const hasTextColor = () => !! userTextColor;
+	const hasTextColor = () => !!userTextColor;
 	const hasFontFamily = () => fontFamily !== defaultFontFamily;
 	const hasFontSize = () => fontSize !== defaultFontSize;
 	const hasFontAppearance = () =>
@@ -140,22 +136,19 @@ export function TypographyElementPanel( {
 		element !== 'heading' || headingLevel !== 'heading';
 
 	const updateElementStyleProp = useCallback(
-		( path, newValue ) => {
-			if ( element === 'heading' ) {
-				updateStyleProp(
-					[ 'elements', headingLevel, ...path ],
-					newValue
-				);
-			} else if ( element === 'text' ) {
-				updateStyleProp( [ ...path ], newValue );
+		(path, newValue) => {
+			if (element === 'heading') {
+				updateStyleProp(['elements', headingLevel, ...path], newValue);
+			} else if (element === 'text') {
+				updateStyleProp([...path], newValue);
 			} else {
-				updateStyleProp( [ 'elements', element, ...path ], newValue );
+				updateStyleProp(['elements', element, ...path], newValue);
 			}
 		},
-		[ element, updateStyleProp, headingLevel ]
+		[element, updateStyleProp, headingLevel]
 	);
 
-	const setTextColor = ( newValue ) => {
+	const setTextColor = (newValue) => {
 		// Store palette colors as preset references so later palette changes
 		// propagate, matching how the core ColorPanel writes them.
 		const encodedValue =
@@ -166,8 +159,8 @@ export function TypographyElementPanel( {
 						undefined,
 						'color.text',
 						newValue
-				  );
-		updateElementStyleProp( [ 'color', 'text' ], encodedValue );
+					);
+		updateElementStyleProp(['color', 'text'], encodedValue);
 		debouncedRecordEvent(
 			'styles_sidebar_screen_typography_element_panel_set_text_color',
 			{
@@ -178,8 +171,8 @@ export function TypographyElementPanel( {
 		);
 	};
 
-	const setLetterSpacing = ( newValue ) => {
-		updateElementStyleProp( [ 'typography', 'letterSpacing' ], newValue );
+	const setLetterSpacing = (newValue) => {
+		updateElementStyleProp(['typography', 'letterSpacing'], newValue);
 		debouncedRecordEvent(
 			'styles_sidebar_screen_typography_element_panel_set_letter_spacing',
 			{
@@ -190,8 +183,8 @@ export function TypographyElementPanel( {
 		);
 	};
 
-	const setLineHeight = ( newValue ) => {
-		updateElementStyleProp( [ 'typography', 'lineHeight' ], newValue );
+	const setLineHeight = (newValue) => {
+		updateElementStyleProp(['typography', 'lineHeight'], newValue);
 		debouncedRecordEvent(
 			'styles_sidebar_screen_typography_element_panel_set_line_height',
 			{
@@ -202,8 +195,8 @@ export function TypographyElementPanel( {
 		);
 	};
 
-	const setFontSize = ( newValue ) => {
-		updateElementStyleProp( [ 'typography', 'fontSize' ], newValue );
+	const setFontSize = (newValue) => {
+		updateElementStyleProp(['typography', 'fontSize'], newValue);
 		debouncedRecordEvent(
 			'styles_sidebar_screen_typography_element_panel_set_font_size',
 			{
@@ -215,8 +208,8 @@ export function TypographyElementPanel( {
 		);
 	};
 
-	const setFontFamily = ( newValue ) => {
-		updateElementStyleProp( [ 'typography', 'fontFamily' ], newValue );
+	const setFontFamily = (newValue) => {
+		updateElementStyleProp(['typography', 'fontFamily'], newValue);
 		debouncedRecordEvent(
 			'styles_sidebar_screen_typography_element_panel_set_font_family',
 			{
@@ -227,8 +220,8 @@ export function TypographyElementPanel( {
 		);
 	};
 
-	const setTextDecoration = ( newValue ) => {
-		updateElementStyleProp( [ 'typography', 'textDecoration' ], newValue );
+	const setTextDecoration = (newValue) => {
+		updateElementStyleProp(['typography', 'textDecoration'], newValue);
 		debouncedRecordEvent(
 			'styles_sidebar_screen_typography_element_panel_set_text_decoration',
 			{
@@ -240,8 +233,8 @@ export function TypographyElementPanel( {
 		);
 	};
 
-	const setTextTransform = ( newValue ) => {
-		updateElementStyleProp( [ 'typography', 'textTransform' ], newValue );
+	const setTextTransform = (newValue) => {
+		updateElementStyleProp(['typography', 'textTransform'], newValue);
 		debouncedRecordEvent(
 			'styles_sidebar_screen_typography_element_panel_set_text_transform',
 			{
@@ -252,12 +245,12 @@ export function TypographyElementPanel( {
 		);
 	};
 
-	const setFontAppearance = ( {
+	const setFontAppearance = ({
 		fontStyle: newFontStyle,
 		fontWeight: newFontWeight,
-	} ) => {
-		updateElementStyleProp( [ 'typography', 'fontStyle' ], newFontStyle );
-		updateElementStyleProp( [ 'typography', 'fontWeight' ], newFontWeight );
+	}) => {
+		updateElementStyleProp(['typography', 'fontStyle'], newFontStyle);
+		updateElementStyleProp(['typography', 'fontWeight'], newFontWeight);
 		debouncedRecordEvent(
 			'styles_sidebar_screen_typography_element_panel_set_font_appearance',
 			{
@@ -271,22 +264,22 @@ export function TypographyElementPanel( {
 	};
 
 	const resetAll = () => {
-		if ( showTextColor ) {
+		if (showTextColor) {
 			// Single update — a second updateStyleProp call in the same
 			// handler would work from a stale userTheme and clobber this edit.
 			updateStyles(
 				setImmutably(
 					setImmutably(
 						userStyles ?? {},
-						[ 'color', 'text' ],
+						['color', 'text'],
 						undefined
 					),
-					[ 'typography' ],
+					['typography'],
 					{}
 				)
 			);
 		} else {
-			updateElementStyleProp( [ 'typography' ], {} );
+			updateElementStyleProp(['typography'], {});
 		}
 		recordEvent(
 			'styles_sidebar_screen_typography_element_panel_reset_all_styles_selected',
@@ -299,73 +292,73 @@ export function TypographyElementPanel( {
 
 	return (
 		<ToolsPanel
-			label={ __( 'Typography', __i18n_text_domain__ ) }
-			resetAll={ resetAll }
+			label={__('Typography', __i18n_text_domain__)}
+			resetAll={resetAll}
 		>
-			{ showTextColor && (
+			{showTextColor && (
 				<ColorDropdownItem
-					label={ __( 'Color', __i18n_text_domain__ ) }
-					hasValue={ hasTextColor }
-					resetValue={ () => setTextColor( undefined ) }
-					isShownByDefault={ defaultControls.textColor }
-					inheritedValue={ decodedTextColor }
-					userValue={ decodedUserTextColor }
-					setValue={ setTextColor }
-					colorGradientControlSettings={ colorGradientSettings }
+					label={__('Color', __i18n_text_domain__)}
+					hasValue={hasTextColor}
+					resetValue={() => setTextColor(undefined)}
+					isShownByDefault={defaultControls.textColor}
+					inheritedValue={decodedTextColor}
+					userValue={decodedUserTextColor}
+					setValue={setTextColor}
+					colorGradientControlSettings={colorGradientSettings}
 				/>
-			) }
+			)}
 			<ToolsPanelItem
-				label={ __( 'Font family', __i18n_text_domain__ ) }
-				hasValue={ hasFontFamily }
-				onDeselect={ () => setFontFamily( undefined ) }
-				isShownByDefault={ defaultControls.fontFamily }
+				label={__('Font family', __i18n_text_domain__)}
+				hasValue={hasFontFamily}
+				onDeselect={() => setFontFamily(undefined)}
+				isShownByDefault={defaultControls.fontFamily}
 			>
 				<FontFamilyControl
-					value={ fontFamily }
-					onChange={ setFontFamily }
+					value={fontFamily}
+					onChange={setFontFamily}
 					size="__unstable-large"
-					fontFamilies={ fontFamilies }
+					fontFamilies={fontFamilies}
 					__nextHasNoMarginBottom
 				/>
 			</ToolsPanelItem>
-			{ showToolFontSize && (
+			{showToolFontSize && (
 				<ToolsPanelItem
-					label={ __( 'Font size', __i18n_text_domain__ ) }
-					hasValue={ hasFontSize }
-					onDeselect={ () => setFontSize( undefined ) }
-					isShownByDefault={ defaultControls.fontSize }
+					label={__('Font size', __i18n_text_domain__)}
+					hasValue={hasFontSize}
+					onDeselect={() => setFontSize(undefined)}
+					isShownByDefault={defaultControls.fontSize}
 				>
 					<FontSizePicker
-						value={ fontSize }
-						onChange={ setFontSize }
-						fontSizes={ fontSizes }
-						units={ availableUnits }
-						disableCustomFontSizes={ false }
-						withReset={ false }
+						value={fontSize}
+						onChange={setFontSize}
+						fontSizes={fontSizes}
+						units={availableUnits}
+						disableCustomFontSizes={false}
+						withReset={false}
 						withSlider
 						size="__unstable-large"
 						__nextHasNoMarginBottom
 					/>
 				</ToolsPanelItem>
-			) }
+			)}
 			<ToolsPanelItem
 				className="single-column"
-				label={ __( 'Appearance', __i18n_text_domain__ ) }
-				hasValue={ hasFontAppearance }
-				onDeselect={ () => {
-					setFontAppearance( {
+				label={__('Appearance', __i18n_text_domain__)}
+				hasValue={hasFontAppearance}
+				onDeselect={() => {
+					setFontAppearance({
 						fontStyle: undefined,
 						fontWeight: undefined,
-					} );
-				} }
-				isShownByDefault={ defaultControls.fontAppearance }
+					});
+				}}
+				isShownByDefault={defaultControls.fontAppearance}
 			>
 				<FontAppearanceControl
-					value={ {
+					value={{
 						fontStyle,
 						fontWeight,
-					} }
-					onChange={ setFontAppearance }
+					}}
+					onChange={setFontAppearance}
 					hasFontStyles
 					hasFontWeights
 					size="__unstable-large"
@@ -373,56 +366,56 @@ export function TypographyElementPanel( {
 			</ToolsPanelItem>
 			<ToolsPanelItem
 				className="single-column"
-				label={ __( 'Line height', __i18n_text_domain__ ) }
-				hasValue={ hasLineHeight }
-				onDeselect={ () => setLineHeight( undefined ) }
-				isShownByDefault={ defaultControls.lineHeight }
+				label={__('Line height', __i18n_text_domain__)}
+				hasValue={hasLineHeight}
+				onDeselect={() => setLineHeight(undefined)}
+				isShownByDefault={defaultControls.lineHeight}
 			>
 				<LineHeightControl
 					__nextHasNoMarginBottom
 					__unstableInputWidth="auto"
-					value={ lineHeight }
-					onChange={ setLineHeight }
+					value={lineHeight}
+					onChange={setLineHeight}
 					size="__unstable-large"
 				/>
 			</ToolsPanelItem>
 			<ToolsPanelItem
 				className="single-column"
-				label={ __( 'Letter spacing', __i18n_text_domain__ ) }
-				hasValue={ hasLetterSpacing }
-				onDeselect={ () => setLetterSpacing( undefined ) }
-				isShownByDefault={ defaultControls.letterSpacing }
+				label={__('Letter spacing', __i18n_text_domain__)}
+				hasValue={hasLetterSpacing}
+				onDeselect={() => setLetterSpacing(undefined)}
+				isShownByDefault={defaultControls.letterSpacing}
 			>
 				<LetterSpacingControl
-					value={ letterSpacing }
-					onChange={ setLetterSpacing }
+					value={letterSpacing}
+					onChange={setLetterSpacing}
 					size="__unstable-large"
 					__unstableInputWidth="auto"
 				/>
 			</ToolsPanelItem>
 			<ToolsPanelItem
 				className="single-column"
-				label={ __( 'Text decoration', __i18n_text_domain__ ) }
-				hasValue={ hasTextDecoration }
-				onDeselect={ () => setTextDecoration( undefined ) }
-				isShownByDefault={ defaultControls.textDecoration }
+				label={__('Text decoration', __i18n_text_domain__)}
+				hasValue={hasTextDecoration}
+				onDeselect={() => setTextDecoration(undefined)}
+				isShownByDefault={defaultControls.textDecoration}
 			>
 				<TextDecorationControl
-					value={ textDecoration }
-					onChange={ setTextDecoration }
+					value={textDecoration}
+					onChange={setTextDecoration}
 					size="__unstable-large"
 					__unstableInputWidth="auto"
 				/>
 			</ToolsPanelItem>
 			<ToolsPanelItem
-				label={ __( 'Letter case', __i18n_text_domain__ ) }
-				hasValue={ hasTextTransform }
-				onDeselect={ () => setTextTransform( defaultTextTransform ) }
-				isShownByDefault={ defaultControls.textTransform }
+				label={__('Letter case', __i18n_text_domain__)}
+				hasValue={hasTextTransform}
+				onDeselect={() => setTextTransform(defaultTextTransform)}
+				isShownByDefault={defaultControls.textTransform}
 			>
 				<TextTransformControl
-					value={ textTransform }
-					onChange={ setTextTransform }
+					value={textTransform}
+					onChange={setTextTransform}
 					showNone
 					isBlock
 					size="__unstable-large"

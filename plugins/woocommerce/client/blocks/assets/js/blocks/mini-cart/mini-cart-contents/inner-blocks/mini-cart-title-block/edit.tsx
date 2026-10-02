@@ -4,23 +4,23 @@
 import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 
 export const Edit = (): JSX.Element => {
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className: 'wc-block-mini-cart__title',
-	} );
+	});
 
 	const TEMPLATE = [
-		[ 'woocommerce/mini-cart-title-label-block', {} ],
-		[ 'woocommerce/mini-cart-title-items-counter-block', {} ],
+		['woocommerce/mini-cart-title-label-block', {}],
+		['woocommerce/mini-cart-title-items-counter-block', {}],
 	];
 
 	return (
-		<h2 { ...blockProps }>
+		<h2 {...blockProps}>
 			<InnerBlocks
-				allowedBlocks={ [
+				allowedBlocks={[
 					'woocommerce/mini-cart-title-label-block',
 					'woocommerce/mini-cart-title-items-counter-block',
-				] }
-				template={ TEMPLATE }
+				]}
+				template={TEMPLATE}
 				templateLock="all"
 			/>
 		</h2>
@@ -29,7 +29,7 @@ export const Edit = (): JSX.Element => {
 
 export const Save = (): JSX.Element => {
 	return (
-		<div { ...useBlockProps.save() }>
+		<div {...useBlockProps.save()}>
 			<InnerBlocks.Content />
 		</div>
 	);

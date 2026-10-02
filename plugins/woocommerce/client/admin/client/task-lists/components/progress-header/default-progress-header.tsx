@@ -15,44 +15,42 @@ export type DefaultProgressHeaderProps = {
 	taskListId: string;
 };
 
-export const DefaultProgressHeader = ( {
+export const DefaultProgressHeader = ({
 	taskListId,
-}: DefaultProgressHeaderProps ) => {
+}: DefaultProgressHeaderProps) => {
 	const { loading, tasksCount, completedCount } = useSelect(
-		( select ) => {
-			const taskList =
-				select( onboardingStore ).getTaskList( taskListId );
+		(select) => {
+			const taskList = select(onboardingStore).getTaskList(taskListId);
 			const finishedResolution = select(
 				onboardingStore
-			).hasFinishedResolution( 'getTaskList', [ taskListId ] );
-			const visibleTasks = getVisibleTasks( taskList?.tasks || [] );
+			).hasFinishedResolution('getTaskList', [taskListId]);
+			const visibleTasks = getVisibleTasks(taskList?.tasks || []);
 
 			return {
-				loading: ! finishedResolution,
+				loading: !finishedResolution,
 				tasksCount: visibleTasks?.length,
-				completedCount: visibleTasks?.filter(
-					( task ) => task.isComplete
-				).length,
+				completedCount: visibleTasks?.filter((task) => task.isComplete)
+					.length,
 			};
 		},
-		[ taskListId ]
+		[taskListId]
 	);
 
-	if ( loading ) {
+	if (loading) {
 		return null;
 	}
 
 	return (
 		<div className="woocommerce-task-progress-header">
 			<TaskListMenu
-				id={ taskListId }
-				hideTaskListText={ __( 'Hide setup list', 'woocommerce' ) }
+				id={taskListId}
+				hideTaskListText={__('Hide setup list', 'woocommerce')}
 			/>
 			<div className="woocommerce-task-progress-header__contents">
-				{ completedCount !== tasksCount ? (
+				{completedCount !== tasksCount ? (
 					<>
 						<p>
-							{ sprintf(
+							{sprintf(
 								/* translators: 1: completed tasks, 2: total tasks */
 								__(
 									'Follow these steps to start selling quickly. %1$d out of %2$d complete.',
@@ -60,15 +58,15 @@ export const DefaultProgressHeader = ( {
 								),
 								completedCount,
 								tasksCount
-							) }
+							)}
 						</p>
 						<progress
 							className="woocommerce-task-progress-header__progress-bar"
-							max={ tasksCount }
-							value={ completedCount || 0.25 }
+							max={tasksCount}
+							value={completedCount || 0.25}
 						/>
 					</>
-				) : null }
+				) : null}
 			</div>
 		</div>
 	);

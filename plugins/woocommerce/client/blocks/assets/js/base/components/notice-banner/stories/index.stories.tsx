@@ -7,7 +7,7 @@ import type { StoryFn, Meta } from '@storybook/react-webpack5';
  * Internal dependencies
  */
 import NoticeBanner, { NoticeBannerProps } from '../';
-const availableStatus = [ 'default', 'success', 'error', 'warning', 'info' ];
+const availableStatus = ['default', 'success', 'error', 'warning', 'info'];
 
 export default {
 	title: 'Base Components/NoticeBanner',
@@ -39,7 +39,7 @@ export default {
 		},
 		politeness: {
 			control: 'radio',
-			options: [ 'polite', 'assertive' ],
+			options: ['polite', 'assertive'],
 			description:
 				'Determines the level of politeness for the notice for assistive technology.',
 		},
@@ -55,13 +55,13 @@ export default {
 		},
 	},
 	component: NoticeBanner,
-} as Meta< NoticeBannerProps >;
+} as Meta<NoticeBannerProps>;
 
-const Template: StoryFn< NoticeBannerProps > = ( args ) => {
-	return <NoticeBanner { ...args } />;
+const Template: StoryFn<NoticeBannerProps> = (args) => {
+	return <NoticeBanner {...args} />;
 };
 
-export const Default = Template.bind( {} );
+export const Default = Template.bind({});
 Default.args = {
 	children: 'This is a default notice',
 	status: 'default',
@@ -72,31 +72,31 @@ Default.args = {
 	politeness: undefined,
 };
 
-export const Error = Template.bind( {} );
+export const Error = Template.bind({});
 Error.args = {
 	children: 'This is an error notice',
 	status: 'error',
 };
 
-export const Warning = Template.bind( {} );
+export const Warning = Template.bind({});
 Warning.args = {
 	children: 'This is a warning notice',
 	status: 'warning',
 };
 
-export const Info = Template.bind( {} );
+export const Info = Template.bind({});
 Info.args = {
 	children: 'This is an informational notice',
 	status: 'info',
 };
 
-export const Success = Template.bind( {} );
+export const Success = Template.bind({});
 Success.args = {
 	children: 'This is a success notice',
 	status: 'success',
 };
 
-export const ErrorSummary = Template.bind( {} );
+export const ErrorSummary = Template.bind({});
 ErrorSummary.args = {
 	summary: 'Please fix the following errors',
 	children: (

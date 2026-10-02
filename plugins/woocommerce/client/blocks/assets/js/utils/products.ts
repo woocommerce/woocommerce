@@ -13,7 +13,7 @@ import type {
  */
 export const convertProductResponseItemToSearchItem = (
 	product: ProductResponseItem
-): SearchListItem< ProductResponseItem > => {
+): SearchListItem<ProductResponseItem> => {
 	const { id, name, parent } = product;
 
 	return {
@@ -32,7 +32,7 @@ export const convertProductResponseItemToSearchItem = (
  */
 export const convertProductCategoryResponseItemToSearchItem = (
 	category: ProductCategoryResponseItem
-): SearchListItem< ProductCategoryResponseItem > => {
+): SearchListItem<ProductCategoryResponseItem> => {
 	const { id, name, parent, count } = category;
 
 	return {
@@ -52,7 +52,7 @@ export const convertProductCategoryResponseItemToSearchItem = (
  */
 export const convertProductBrandResponseItemToSearchItem = (
 	brand: ProductBrandResponseItem
-): SearchListItem< ProductBrandResponseItem > => {
+): SearchListItem<ProductBrandResponseItem> => {
 	const { id, name, parent, count } = brand;
 
 	return {
@@ -70,21 +70,21 @@ export const convertProductBrandResponseItemToSearchItem = (
 /**
  * Get the src of the first image attached to a product (the featured image).
  */
-export function getImageSrcFromProduct( product: ProductResponseItem ) {
-	if ( ! product || ! product.images || ! product.images.length ) {
+export function getImageSrcFromProduct(product: ProductResponseItem) {
+	if (!product || !product.images || !product.images.length) {
 		return '';
 	}
 
-	return product.images[ 0 ].src || '';
+	return product.images[0].src || '';
 }
 
 /**
  * Get the ID of the first image attached to a product (the featured image).
  */
-export function getImageIdFromProduct( product: ProductResponseItem ) {
-	if ( ! product || ! product.images || ! product.images.length ) {
+export function getImageIdFromProduct(product: ProductResponseItem) {
+	if (!product || !product.images || !product.images.length) {
 		return 0;
 	}
 
-	return product.images[ 0 ].id || 0;
+	return product.images[0].id || 0;
 }

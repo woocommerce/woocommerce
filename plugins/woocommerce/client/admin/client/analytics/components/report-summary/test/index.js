@@ -11,23 +11,23 @@ import { createElement } from '@wordpress/element';
 import { ReportSummary } from '../';
 
 const expectTooltipToBeVisible = () =>
-	expect( screen.getByRole( 'tooltip' ) ).toBeVisible();
+	expect(screen.getByRole('tooltip')).toBeVisible();
 
 const expectTooltipToBeHidden = () =>
-	expect( screen.queryByRole( 'tooltip' ) ).not.toBeInTheDocument();
+	expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
 
-const waitExpectTooltipToShow = async ( timeout = 3000 ) =>
-	await waitFor( expectTooltipToBeVisible, { timeout } );
+const waitExpectTooltipToShow = async (timeout = 3000) =>
+	await waitFor(expectTooltipToBeVisible, { timeout });
 
-const waitExpectTooltipToHide = async ( timeout = 3000 ) =>
-	await waitFor( expectTooltipToBeHidden, { timeout } );
+const waitExpectTooltipToHide = async (timeout = 3000) =>
+	await waitFor(expectTooltipToBeHidden, { timeout });
 
 const hoverOutside = async () => {
-	await userEvent.hover( document.body );
-	await userEvent.hover( document.body, { clientX: 10, clientY: 10 } );
+	await userEvent.hover(document.body);
+	await userEvent.hover(document.body, { clientX: 10, clientY: 10 });
 };
 
-describe( 'ReportSummary', () => {
+describe('ReportSummary', () => {
 	function renderChart(
 		type,
 		primaryValue,
@@ -41,7 +41,7 @@ describe( 'ReportSummary', () => {
 			label: 'Total sales',
 			type,
 		};
-		const charts = [ selectedChart ];
+		const charts = [selectedChart];
 		const endpoint = 'revenue';
 		const query = {};
 		const summaryData = {
@@ -58,120 +58,120 @@ describe( 'ReportSummary', () => {
 		};
 		return render(
 			<ReportSummary
-				charts={ charts }
-				endpoint={ endpoint }
-				query={ query }
-				selectedChart={ selectedChart }
-				summaryData={ summaryData }
-				{ ...props }
+				charts={charts}
+				endpoint={endpoint}
+				query={query}
+				selectedChart={selectedChart}
+				summaryData={summaryData}
+				{...props}
 			/>
 		);
 	}
 
-	test( 'should set the correct prop values for the SummaryNumber components', async () => {
-		renderChart( 'number', 1000.5, 500.25 );
+	test('should set the correct prop values for the SummaryNumber components', async () => {
+		renderChart('number', 1000.5, 500.25);
 
-		expect( screen.getByText( '1,000.5' ) ).toBeInTheDocument();
-		const delta = screen.getByText( '100%' );
-		expect( delta ).toBeInTheDocument();
+		expect(screen.getByText('1,000.5')).toBeInTheDocument();
+		const delta = screen.getByText('100%');
+		expect(delta).toBeInTheDocument();
 		expectTooltipToBeHidden();
 
-		userEvent.hover( delta );
+		userEvent.hover(delta);
 		await waitExpectTooltipToShow();
 
-		const tooltip = await screen.findByText( 'Previous year: 500.25' );
-		expect( tooltip ).toBeInTheDocument();
+		const tooltip = await screen.findByText('Previous year: 500.25');
+		expect(tooltip).toBeInTheDocument();
 
 		await hoverOutside();
 		await waitExpectTooltipToHide();
 
-		expect( screen.queryByText( 'Previous year: 500.25' ) ).toBeNull();
-	} );
+		expect(screen.queryByText('Previous year: 500.25')).toBeNull();
+	});
 
-	test( 'should format currency numbers properly', async () => {
-		renderChart( 'currency', 1000.5, 500.25 );
+	test('should format currency numbers properly', async () => {
+		renderChart('currency', 1000.5, 500.25);
 
-		expect( screen.getByText( '$1,000.50' ) ).toBeInTheDocument();
+		expect(screen.getByText('$1,000.50')).toBeInTheDocument();
 
-		const delta = screen.getByText( '100%' );
-		expect( delta ).toBeInTheDocument();
+		const delta = screen.getByText('100%');
+		expect(delta).toBeInTheDocument();
 		expectTooltipToBeHidden();
 
-		userEvent.hover( delta );
-		const tooltip = await screen.findByText( 'Previous year: $500.25' );
+		userEvent.hover(delta);
+		const tooltip = await screen.findByText('Previous year: $500.25');
 
-		expect( tooltip ).toBeInTheDocument();
-		expect( tooltip ).toBeInTheDocument();
+		expect(tooltip).toBeInTheDocument();
+		expect(tooltip).toBeInTheDocument();
 
 		await hoverOutside();
 		await waitExpectTooltipToHide();
 
-		expect( screen.queryByText( 'Previous year: $500.25' ) ).toBeNull();
-	} );
+		expect(screen.queryByText('Previous year: $500.25')).toBeNull();
+	});
 
-	test( 'should format average numbers properly', async () => {
-		renderChart( 'average', 1000.5, 500.25 );
+	test('should format average numbers properly', async () => {
+		renderChart('average', 1000.5, 500.25);
 
-		expect( screen.getByText( '1001' ) ).toBeInTheDocument();
+		expect(screen.getByText('1001')).toBeInTheDocument();
 
-		const delta = screen.getByText( '100%' );
-		expect( delta ).toBeInTheDocument();
+		const delta = screen.getByText('100%');
+		expect(delta).toBeInTheDocument();
 		expectTooltipToBeHidden();
 
-		userEvent.hover( delta );
-		const tooltip = await screen.findByText( 'Previous year: 500' );
-		expect( tooltip ).toBeInTheDocument();
+		userEvent.hover(delta);
+		const tooltip = await screen.findByText('Previous year: 500');
+		expect(tooltip).toBeInTheDocument();
 
 		await hoverOutside();
 		await waitExpectTooltipToHide();
 
-		expect( screen.queryByText( 'Previous year: 500' ) ).toBeNull();
-	} );
+		expect(screen.queryByText('Previous year: 500')).toBeNull();
+	});
 
-	test( 'should not break if secondary value is 0', async () => {
-		renderChart( 'number', 1000.5, 0 );
+	test('should not break if secondary value is 0', async () => {
+		renderChart('number', 1000.5, 0);
 
-		expect( screen.getByText( '1,000.5' ) ).toBeInTheDocument();
+		expect(screen.getByText('1,000.5')).toBeInTheDocument();
 
-		const delta = screen.getByText( '0%' );
-		expect( delta ).toBeInTheDocument();
+		const delta = screen.getByText('0%');
+		expect(delta).toBeInTheDocument();
 		expectTooltipToBeHidden();
 
-		userEvent.hover( delta );
-		const tooltip = await screen.findByText( 'Previous year: 0' );
+		userEvent.hover(delta);
+		const tooltip = await screen.findByText('Previous year: 0');
 		await waitExpectTooltipToShow();
-		expect( tooltip ).toBeInTheDocument();
+		expect(tooltip).toBeInTheDocument();
 
 		await hoverOutside();
 		await waitExpectTooltipToHide();
 
-		expect( screen.queryByText( 'Previous year: 0' ) ).toBeNull();
-	} );
+		expect(screen.queryByText('Previous year: 0')).toBeNull();
+	});
 
-	test( 'should show 0s when displaying an empty search', async () => {
-		renderChart( 'number', null, undefined );
+	test('should show 0s when displaying an empty search', async () => {
+		renderChart('number', null, undefined);
 
-		expect( screen.getAllByText( 'N/A' ) ).not.toBeNull();
+		expect(screen.getAllByText('N/A')).not.toBeNull();
 
-		const delta = screen.getByLabelText( 'No change from Previous year:' );
-		expect( delta ).toBeInTheDocument();
-	} );
+		const delta = screen.getByLabelText('No change from Previous year:');
+		expect(delta).toBeInTheDocument();
+	});
 
-	test( 'should display AnalyticsError when isError is true', () => {
-		renderChart( 'number', null, null, true );
+	test('should display AnalyticsError when isError is true', () => {
+		renderChart('number', null, null, true);
 
 		expect(
 			screen.getByText(
 				'There was an error getting your stats. Please try again.'
 			)
 		).toBeInTheDocument();
-	} );
+	});
 
-	test( 'should display SummaryListPlaceholder when summaryData.isRequesting is true', () => {
-		const { container } = renderChart( 'number', null, null, false, true );
+	test('should display SummaryListPlaceholder when summaryData.isRequesting is true', () => {
+		const { container } = renderChart('number', null, null, false, true);
 
 		expect(
-			container.querySelector( '.woocommerce-summary.is-placeholder' )
+			container.querySelector('.woocommerce-summary.is-placeholder')
 		).toBeInTheDocument();
-	} );
-} );
+	});
+});

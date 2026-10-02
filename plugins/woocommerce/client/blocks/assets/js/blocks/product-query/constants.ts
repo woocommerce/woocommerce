@@ -19,7 +19,7 @@ export const EDIT_ATTRIBUTES_URL =
 
 export const QUERY_LOOP_ID = 'core/query';
 
-export const DEFAULT_CORE_ALLOWED_CONTROLS = [ 'taxQuery', 'search' ];
+export const DEFAULT_CORE_ALLOWED_CONTROLS = ['taxQuery', 'search'];
 
 export const ALL_PRODUCT_QUERY_CONTROLS = [
 	'attributes',
@@ -35,12 +35,12 @@ export const DEFAULT_ALLOWED_CONTROLS = [
 	...ALL_PRODUCT_QUERY_CONTROLS,
 ];
 
-export const STOCK_STATUS_OPTIONS = getSetting< Record< string, string > >(
+export const STOCK_STATUS_OPTIONS = getSetting<Record<string, string>>(
 	'stockStatusOptions',
 	[]
 );
 
-const GLOBAL_HIDE_OUT_OF_STOCK = getSetting< boolean >(
+const GLOBAL_HIDE_OUT_OF_STOCK = getSetting<boolean>(
 	'hideOutOfStockItems',
 	false
 );
@@ -65,8 +65,8 @@ export const QUERY_DEFAULT_ATTRIBUTES: QueryBlockAttributes = {
 		inherit: false,
 		__woocommerceAttributes: [],
 		__woocommerceStockStatus: GLOBAL_HIDE_OUT_OF_STOCK
-			? Object.keys( objectOmit( STOCK_STATUS_OPTIONS, 'outofstock' ) )
-			: Object.keys( STOCK_STATUS_OPTIONS ),
+			? Object.keys(objectOmit(STOCK_STATUS_OPTIONS, 'outofstock'))
+			: Object.keys(STOCK_STATUS_OPTIONS),
 	},
 };
 
@@ -86,9 +86,9 @@ export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 			 * This class is used to add default styles for inner blocks.
 			 */
 			className: 'products-block-post-template',
-			...( postTemplateHasSupportForGridView && {
+			...(postTemplateHasSupportForGridView && {
 				layout: { type: 'grid', columnCount: 3 },
-			} ),
+			}),
 		},
 		[
 			[
@@ -144,5 +144,5 @@ export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 			},
 		},
 	],
-	[ 'core/query-no-results' ],
+	['core/query-no-results'],
 ];

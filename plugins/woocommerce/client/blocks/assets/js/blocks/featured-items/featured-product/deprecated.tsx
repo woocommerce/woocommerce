@@ -12,7 +12,7 @@ import metadata from './block.json';
 interface BlockAttributes {
 	showDesc?: boolean;
 	showPrice?: boolean;
-	[ key: string ]: unknown;
+	[key: string]: unknown;
 }
 
 // Version 1: Migration from legacy showDesc/showPrice attributes to inner blocks
@@ -29,12 +29,12 @@ const v1 = {
 		},
 	},
 	save: () => <InnerBlocks.Content />,
-	isEligible: ( attributes: BlockAttributes ) => {
+	isEligible: (attributes: BlockAttributes) => {
 		// If the block has editMode attribute as boolean value, it's a legacy block
 		// and it should be migrated to use inner blocks instead.
 		return typeof attributes.editMode === 'boolean';
 	},
-	migrate: ( attributes: BlockAttributes, innerBlocks: BlockInstance[] ) => {
+	migrate: (attributes: BlockAttributes, innerBlocks: BlockInstance[]) => {
 		const { editMode, showDesc, showPrice, ...otherAttributes } =
 			attributes;
 
@@ -44,9 +44,9 @@ const v1 = {
 
 		// We check if these legacy attributes are explicitly set to false, because
 		// the default value is true (i.e. `undefined` meant `true`).
-		if ( showPrice !== false ) {
+		if (showPrice !== false) {
 			innerBlocks.unshift(
-				createBlock( 'woocommerce/product-price', {
+				createBlock('woocommerce/product-price', {
 					style: {
 						spacing: {
 							padding: {
@@ -55,13 +55,13 @@ const v1 = {
 						},
 					},
 					textAlign: 'center',
-				} )
+				})
 			);
 		}
 
-		if ( showDesc !== false ) {
+		if (showDesc !== false) {
 			innerBlocks.unshift(
-				createBlock( 'woocommerce/product-summary', {
+				createBlock('woocommerce/product-summary', {
 					showDescriptionIfEmpty: true,
 					summaryLength: 80,
 					style: {
@@ -69,21 +69,21 @@ const v1 = {
 							textAlign: 'center',
 						},
 					},
-				} )
+				})
 			);
 		}
 		innerBlocks.unshift(
-			createBlock( 'core/post-title', {
+			createBlock('core/post-title', {
 				level: 2,
 				isLink: false,
 				textAlign: 'center',
 				__woocommerceNamespace:
 					'woocommerce/product-collection/product-title',
-			} )
+			})
 		);
 
-		return [ otherAttributes, innerBlocks ];
+		return [otherAttributes, innerBlocks];
 	},
 };
 
-export default [ v1 ];
+export default [v1];

@@ -19,40 +19,40 @@ import { sort } from 'fast-sort';
  */
 export const removeAttributeFilterBySlug = (
 	query: AttributeQuery[] = [],
-	setQuery: ( query: AttributeQuery[] ) => void,
+	setQuery: (query: AttributeQuery[]) => void,
 	attribute: AttributeObject,
 	slug = ''
 ) => {
 	// Get current filter for provided attribute.
 	const foundQuery = query.filter(
-		( item ) => item.attribute === attribute.taxonomy
+		(item) => item.attribute === attribute.taxonomy
 	);
 
-	const currentQuery = foundQuery.length ? foundQuery[ 0 ] : null;
+	const currentQuery = foundQuery.length ? foundQuery[0] : null;
 
 	if (
-		! currentQuery ||
-		! currentQuery.slug ||
-		! Array.isArray( currentQuery.slug ) ||
-		! currentQuery.slug.includes( slug )
+		!currentQuery ||
+		!currentQuery.slug ||
+		!Array.isArray(currentQuery.slug) ||
+		!currentQuery.slug.includes(slug)
 	) {
 		return;
 	}
 
-	const newSlugs = currentQuery.slug.filter( ( item ) => item !== slug );
+	const newSlugs = currentQuery.slug.filter((item) => item !== slug);
 
 	// Remove current attribute filter from query.
 	const returnQuery = query.filter(
-		( item ) => item.attribute !== attribute.taxonomy
+		(item) => item.attribute !== attribute.taxonomy
 	);
 
 	// Add a new query for selected terms, if provided.
-	if ( newSlugs.length > 0 ) {
+	if (newSlugs.length > 0) {
 		currentQuery.slug = newSlugs.sort();
-		returnQuery.push( currentQuery );
+		returnQuery.push(currentQuery);
 	}
 
-	setQuery( sort( returnQuery ).asc( 'attribute' ) );
+	setQuery(sort(returnQuery).asc('attribute'));
 };
 
 /**
@@ -68,28 +68,28 @@ export const removeAttributeFilterBySlug = (
  */
 export const updateAttributeFilter = (
 	query: AttributeQuery[] = [],
-	setQuery: ( query: AttributeQuery[] ) => void,
+	setQuery: (query: AttributeQuery[]) => void,
 	attribute?: AttributeObjectForDisplay,
 	attributeTerms: AttributeTerm[] = [],
 	operator: 'in' | 'and' = 'in'
 ) => {
-	if ( ! attribute || ! attribute.taxonomy ) {
+	if (!attribute || !attribute.taxonomy) {
 		return [];
 	}
 
 	const returnQuery = query.filter(
-		( item ) => item.attribute !== attribute.taxonomy
+		(item) => item.attribute !== attribute.taxonomy
 	);
 
-	if ( attributeTerms.length === 0 ) {
-		setQuery( returnQuery );
+	if (attributeTerms.length === 0) {
+		setQuery(returnQuery);
 	} else {
-		returnQuery.push( {
+		returnQuery.push({
 			attribute: attribute.taxonomy,
 			operator,
-			slug: attributeTerms.map( ( { slug } ) => slug ).sort(),
-		} );
-		setQuery( sort( returnQuery ).asc( 'attribute' ) );
+			slug: attributeTerms.map(({ slug }) => slug).sort(),
+		});
+		setQuery(sort(returnQuery).asc('attribute'));
 	}
 
 	return returnQuery;

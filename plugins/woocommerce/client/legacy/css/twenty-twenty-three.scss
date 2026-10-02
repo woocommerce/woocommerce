@@ -14,22 +14,22 @@
 	Layout fix.
  */
 .woocommerce-page {
-
 	main {
 		// This is to allow .woocommerce div to have width of 1000px on styles with full width layout (such as Pitch).
-		max-width: calc(1000px + var(--wp--style--root--padding-right) + var(--wp--style--root--padding-left));
+		max-width: calc(
+			1000px + var(--wp--style--root--padding-right) +
+				var(--wp--style--root--padding-left)
+		);
 		margin-left: auto;
 		margin-right: auto;
 
 		.woocommerce {
-
 			@include clearfix();
 		}
 	}
 }
 
 .theme-twentytwentythree {
-
 	.container-colors {
 		display: flex;
 		flex-direction: row;
@@ -61,19 +61,15 @@
 	.tertiary {
 		background-color: var(--wp--preset--color--tertiary);
 	}
-
-
 }
 
 .woocommerce {
-
 	/*
 	    Common/global
 	 */
 
 	// Make quantity selector less wide.
 	.quantity {
-
 		input[type="number"] {
 			width: 3em;
 		}
@@ -95,7 +91,6 @@
 	}
 	// Checkout notice group styling.
 	.woocommerce-NoticeGroup-checkout {
-
 		ul.woocommerce-error[role="alert"] {
 			color: var(--wp--preset--color--contrast);
 			background: var(--wp--preset--color--primary);
@@ -134,7 +129,8 @@
 	// Reset the margin top in the Add to Cart + Options block.
 	// @see https://github.com/woocommerce/woocommerce/pull/60413
 	// Extra class for specificity.
-	.wp-block-add-to-cart-with-options .wp-block-button__link.wp-block-button__link {
+	.wp-block-add-to-cart-with-options
+		.wp-block-button__link.wp-block-button__link {
 		margin-top: 0;
 	}
 
@@ -154,7 +150,6 @@
 
 	// Products.
 	ul.products {
-
 		padding-inline-start: 0;
 		display: flex;
 		align-items: stretch;
@@ -207,7 +202,6 @@
 			a.added_to_cart {
 				margin: 1rem auto;
 			}
-
 		}
 	}
 
@@ -246,7 +240,6 @@
 
 		// How price gets displayed
 		.entry-summary {
-
 			.woocommerce-Price-amount,
 			del,
 			.price {
@@ -258,7 +251,6 @@
 			position: relative;
 
 			.woocommerce-product-gallery__trigger {
-
 				@include woocommerce-product-gallery__trigger;
 			}
 
@@ -266,7 +258,6 @@
 			div.woocommerce-product-gallery__wrapper {
 				margin: 0;
 			}
-
 		}
 
 		.woocommerce-product-gallery__image a {
@@ -289,7 +280,6 @@
 			}
 
 			.woocommerce-product-rating {
-
 				.star-rating {
 					display: inline-block;
 				}
@@ -305,7 +295,6 @@
 		}
 
 		table.variations tr {
-
 			display: table-row;
 			margin-bottom: 0;
 			text-align: left;
@@ -319,7 +308,9 @@
 			margin-top: var(--wp--style--block-gap);
 
 			// Prevent height flickering when selecting a variation.
-			.single_variation .woocommerce-variation-description > :first-child {
+			.single_variation
+				.woocommerce-variation-description
+				> :first-child {
 				margin-top: 0;
 			}
 		}
@@ -335,7 +326,6 @@
 				width: 18%;
 				margin-right: 1rem;
 			}
-
 		}
 
 		a.reset_variations {
@@ -343,7 +333,6 @@
 		}
 
 		table.group_table {
-
 			td {
 				padding-right: 0.5rem;
 				padding-bottom: 1rem;
@@ -364,7 +353,6 @@
 
 	// Reviews tab.
 	.woocommerce-Reviews {
-
 		ol.commentlist {
 			list-style: none;
 			padding-left: 0;
@@ -394,7 +382,6 @@
 		}
 
 		.comment-form-rating {
-
 			label {
 				display: inline-block;
 				padding-right: var(--wp--style--block-gap);
@@ -411,7 +398,6 @@
 		}
 
 		.comment-form-comment {
-
 			label {
 				float: left;
 				padding-right: var(--wp--style--block-gap);
@@ -491,7 +477,6 @@
 			}
 
 			&:hover {
-
 				~ a::before {
 					content: "\e021";
 				}
@@ -499,9 +484,7 @@
 		}
 
 		&:hover {
-
 			a {
-
 				&::before {
 					content: "\e020";
 				}
@@ -509,9 +492,7 @@
 		}
 
 		&.selected {
-
 			a.active {
-
 				&::before {
 					content: "\e020";
 				}
@@ -522,7 +503,6 @@
 			}
 
 			a:not(.active) {
-
 				&::before {
 					content: "\e020";
 				}
@@ -586,9 +566,7 @@ ul.wc-tabs {
 
 	// Attributes table styles.
 	table.woocommerce-product-attributes {
-
 		tbody {
-
 			td,
 			th {
 				padding: 0.2rem 0.2rem 0.2rem 0;
@@ -607,16 +585,13 @@ ul.wc-tabs {
 }
 
 .woocommerce-page {
-
 	.woocommerce-cart-form {
-
 		// Make coupon code input less ginormous.
 		#coupon_code {
 			padding: 0 1rem;
 		}
 
 		.actions {
-
 			button.button {
 				height: initial;
 			}
@@ -624,20 +599,17 @@ ul.wc-tabs {
 
 		// Cart table, aka review of cart items.
 		table.shop_table_responsive {
-
 			td,
 			th {
 				padding: 1rem 0 0.5rem 1rem;
 			}
 
 			tbody {
-
 				tr:last-of-type {
 					border-top: none;
 				}
 
 				@media only screen and (max-width: 768px) {
-
 					td {
 						padding-left: 0;
 					}
@@ -672,7 +644,6 @@ ul.wc-tabs {
 		}
 
 		table.shop_table_responsive {
-
 			tr {
 				border-top: none;
 			}
@@ -703,7 +674,6 @@ ul.wc-tabs {
 		display: none;
 
 		+ label {
-
 			&::before {
 				content: "";
 				display: inline-block;
@@ -724,7 +694,6 @@ ul.wc-tabs {
 		}
 
 		&:checked + label {
-
 			&::before {
 				background: radial-gradient(circle at center, #000 45%, #fff 0);
 			}
@@ -737,7 +706,6 @@ ul.wc-tabs {
 		cursor: pointer;
 
 		span {
-
 			&::before {
 				content: "";
 				display: inline-block;
@@ -756,7 +724,9 @@ ul.wc-tabs {
 
 		input[type="checkbox"]:checked + span::before {
 			background: var(--wp--preset--color--black);
-			box-shadow: inset 0.2rem 0.2rem var(--wp--preset--color--white), inset -0.2rem -0.2rem var(--wp--preset--color--white);
+			box-shadow:
+				inset 0.2rem 0.2rem var(--wp--preset--color--white),
+				inset -0.2rem -0.2rem var(--wp--preset--color--white);
 		}
 	}
 
@@ -775,13 +745,11 @@ ul.wc-tabs {
 		}
 
 		tbody {
-
 			tr {
 				border-top: 1px solid var(--wp--preset--color--contrast);
 			}
 
 			td {
-
 				a.button,
 				button {
 					margin-bottom: 1rem;
@@ -789,7 +757,6 @@ ul.wc-tabs {
 				}
 
 				&.woocommerce-orders-table__cell-order-actions {
-
 					a.button {
 						display: block;
 
@@ -805,13 +772,9 @@ ul.wc-tabs {
 
 	table.shop_table,
 	table.shop_table_responsive {
-
 		tbody {
-
 			.product-name {
-
 				.variation {
-
 					dt {
 						font-style: italic;
 						margin-right: 0.25rem;
@@ -842,7 +805,6 @@ ul.wc-tabs {
 		width: calc(100% - 1.5rem);
 
 		.form-row {
-
 			button[name="apply_coupon"] {
 				margin-top: 0;
 			}
@@ -908,7 +870,6 @@ ul.wc-tabs {
 		}
 
 		@media only screen and (max-width: 768px) {
-
 			.col2-set,
 			#customer_details {
 				width: 100%;
@@ -961,7 +922,6 @@ ul.wc-tabs {
 			.tax-rate,
 			input[type="radio"].shipping_method:checked + label,
 			input[type="hidden"].shipping_method + label {
-
 				.woocommerce-Price-amount {
 					font-weight: 700;
 				}
@@ -985,13 +945,11 @@ ul.wc-tabs {
 
 	// Bottom section of the Thank you page---customer details: align, add border, make it look nice.
 	.woocommerce-customer-details {
-
 		address {
 			border: 1px solid var(--wp--preset--color--black);
 			font-style: inherit;
 
 			p[class^="woocommerce-customer-details--"] {
-
 				&:first-of-type {
 					margin-top: 2rem;
 				}
@@ -1045,21 +1003,18 @@ ul.wc-tabs {
  */
 
 .woocommerce-account {
-
 	// Make sure the floated content of My Account section doesn't overlap with the footer.
 	.woocommerce {
 		overflow: auto;
 
 		table.woocommerce-table--order-downloads,
 		table.woocommerce-MyAccount-orders {
-
 			thead tr {
 				border-top: 2px solid var(--wp--preset--color--contrast);
 
 				span {
 					font-weight: 700;
 				}
-
 			}
 
 			tbody a.button {
@@ -1068,9 +1023,7 @@ ul.wc-tabs {
 		}
 
 		.woocommerce-MyAccount-navigation li {
-
 			&.is-active a {
-
 				&::before {
 					content: "> ";
 				}
@@ -1084,8 +1037,6 @@ ul.wc-tabs {
 				}
 			}
 		}
-
-
 	}
 
 	// Make the Log in form on My Account page less wide.
@@ -1093,7 +1044,6 @@ ul.wc-tabs {
 		max-width: 516px;
 		margin: 0 auto;
 	}
-
 }
 
 // Store-wide notice
@@ -1161,14 +1111,12 @@ Notice messages (like 'Added to cart', 'Billing address needs to be filled in', 
 }
 
 .woocommerce-error {
-
 	&[role="alert"]::before {
 		content: "X";
 	}
 }
 
 .woocommerce-message {
-
 	&[role="alert"]::before {
 		content: "\2713";
 	}
@@ -1178,18 +1126,14 @@ Notice messages (like 'Added to cart', 'Billing address needs to be filled in', 
  * Coupon error notice
  */
 .woocommerce-cart {
-
 	td.actions .coupon .coupon-error-notice {
-
 		@include coupon-error-notice-cart();
 		margin-top: 0;
 	}
 }
 
 form.checkout_coupon {
-
 	.coupon-error-notice {
-
 		@include coupon-error-notice-checkout();
 	}
 
@@ -1202,13 +1146,11 @@ form.checkout_coupon {
  * Checkout error message
  */
 .woocommerce-checkout {
-
 	form .form-row.woocommerce-invalid input.input-text {
 		border-color: var(--wc-red);
 	}
 
 	.checkout-inline-error-message {
-
 		@include checkout-inline-error-message();
 	}
 }

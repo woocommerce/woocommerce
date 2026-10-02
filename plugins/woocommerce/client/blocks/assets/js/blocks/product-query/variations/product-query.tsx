@@ -37,20 +37,20 @@ const ARCHIVE_PRODUCT_TEMPLATES = [
 	'product-search-results',
 ];
 
-const registerProductsBlock = ( attributes: QueryBlockAttributes ) => {
-	registerBlockVariation( QUERY_LOOP_ID, {
+const registerProductsBlock = (attributes: QueryBlockAttributes) => {
+	registerBlockVariation(QUERY_LOOP_ID, {
 		description: __(
 			'A block that displays a selection of products in your store.',
 			'woocommerce'
 		),
 		name: PRODUCT_QUERY_VARIATION_NAME,
 		/* translators: "Products" is the name of the block. */
-		title: __( 'Products (Deprecated)', 'woocommerce' ),
-		isActive: ( blockAttributes ) =>
+		title: __('Products (Deprecated)', 'woocommerce'),
+		isActive: (blockAttributes) =>
 			blockAttributes.namespace === PRODUCT_QUERY_VARIATION_NAME,
 		icon: (
 			<Icon
-				icon={ stacks }
+				icon={stacks}
 				className="wc-block-editor-components-block-icon wc-block-editor-components-block-icon--stacks"
 			/>
 		),
@@ -65,29 +65,29 @@ const registerProductsBlock = ( attributes: QueryBlockAttributes ) => {
 		allowedControls: DEFAULT_ALLOWED_CONTROLS,
 		innerBlocks: INNER_BLOCKS_TEMPLATE,
 		scope: [],
-	} );
+	});
 };
 
 let currentTemplateSlug: string | undefined;
-subscribe( () => {
+subscribe(() => {
 	const previousTemplateSlug = currentTemplateSlug;
-	currentTemplateSlug = select( CORE_EDITOR_STORE )?.getEditedPostSlug?.();
-	if ( previousTemplateSlug === currentTemplateSlug ) {
+	currentTemplateSlug = select(CORE_EDITOR_STORE)?.getEditedPostSlug?.();
+	if (previousTemplateSlug === currentTemplateSlug) {
 		return;
 	}
 
-	if ( isSiteEditorPage() ) {
-		const inherit = ARCHIVE_PRODUCT_TEMPLATES.some( ( template ) =>
-			isString( currentTemplateSlug )
-				? currentTemplateSlug.includes( template )
+	if (isSiteEditorPage()) {
+		const inherit = ARCHIVE_PRODUCT_TEMPLATES.some((template) =>
+			isString(currentTemplateSlug)
+				? currentTemplateSlug.includes(template)
 				: false
 		);
 
-		const inheritQuery: Partial< ProductQueryBlockQuery > = {
+		const inheritQuery: Partial<ProductQueryBlockQuery> = {
 			inherit,
 		};
 
-		if ( inherit ) {
+		if (inherit) {
 			inheritQuery.perPage = getSettingWithCoercion(
 				'loopShopPerPage',
 				12,
@@ -103,16 +103,16 @@ subscribe( () => {
 			},
 		};
 
-		unregisterBlockVariation( QUERY_LOOP_ID, PRODUCT_QUERY_VARIATION_NAME );
+		unregisterBlockVariation(QUERY_LOOP_ID, PRODUCT_QUERY_VARIATION_NAME);
 
-		registerProductsBlock( queryAttributes );
+		registerProductsBlock(queryAttributes);
 	}
-}, 'core/edit-site' );
+}, 'core/edit-site');
 
 let isBlockRegistered = false;
-subscribe( () => {
-	if ( ! isBlockRegistered ) {
+subscribe(() => {
+	if (!isBlockRegistered) {
 		isBlockRegistered = true;
-		registerProductsBlock( QUERY_DEFAULT_ATTRIBUTES );
+		registerProductsBlock(QUERY_DEFAULT_ATTRIBUTES);
 	}
-}, 'core/edit-post' );
+}, 'core/edit-post');

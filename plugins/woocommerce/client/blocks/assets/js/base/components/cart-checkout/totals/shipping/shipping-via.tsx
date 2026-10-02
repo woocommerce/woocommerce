@@ -7,16 +7,14 @@ import { getSelectedShippingRateNames } from '@woocommerce/base-utils';
 
 export const ShippingVia = (): JSX.Element | null => {
 	const { shippingRates } = useStoreCart();
-	const rateNames = getSelectedShippingRateNames( shippingRates );
+	const rateNames = getSelectedShippingRateNames(shippingRates);
 	return rateNames ? (
 		<div className="wc-block-components-totals-shipping__via">
-			{ decodeEntities(
+			{decodeEntities(
 				rateNames
-					.filter(
-						( item, index ) => rateNames.indexOf( item ) === index
-					)
-					.join( ', ' )
-			) }
+					.filter((item, index) => rateNames.indexOf(item) === index)
+					.join(', ')
+			)}
 		</div>
 	) : null;
 };

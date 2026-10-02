@@ -10,7 +10,7 @@ import { __ } from '@wordpress/i18n';
  * Get accordion block names based on WordPress version
  */
 const getAccordionBlockNames = () => {
-	if ( isWpVersion( '6.9', '>=' ) ) {
+	if (isWpVersion('6.9', '>=')) {
 		return {
 			group: 'core/accordion',
 			item: 'core/accordion-item',
@@ -29,18 +29,16 @@ const getAccordionBlockNames = () => {
 export const isAdditionalProductDataEmpty = (
 	product: PartialProduct
 ): boolean => {
-	const isDimensionsEmpty = ( value: ProductDimensions | undefined ) => {
+	const isDimensionsEmpty = (value: ProductDimensions | undefined) => {
 		return (
-			! value ||
-			Object.values( value ).every(
-				( val ) => ! val || val.trim() === ''
-			)
+			!value ||
+			Object.values(value).every((val) => !val || val.trim() === '')
 		);
 	};
 	return (
-		isEmpty( product.weight ) &&
-		isDimensionsEmpty( product.dimensions ) &&
-		isEmpty( product.attributes )
+		isEmpty(product.weight) &&
+		isDimensionsEmpty(product.dimensions) &&
+		isEmpty(product.attributes)
 	);
 };
 
@@ -53,7 +51,7 @@ export const getTemplate = (
 	const additionalProductDataEmpty =
 		product !== null &&
 		product !== undefined &&
-		isAdditionalProductDataEmpty( product ) &&
+		isAdditionalProductDataEmpty(product) &&
 		isInnerBlockOfSingleProductBlock;
 
 	const blockNames = getAccordionBlockNames();
@@ -75,17 +73,17 @@ export const getTemplate = (
 					[
 						[
 							blockNames.header,
-							{ title: __( 'Description', 'woocommerce' ) },
+							{ title: __('Description', 'woocommerce') },
 							[],
 						],
 						[
 							blockNames.panel,
 							{},
-							[ [ 'woocommerce/product-description', {}, [] ] ],
+							[['woocommerce/product-description', {}, []]],
 						],
 					],
 				],
-				...( ! additionalProductDataEmpty
+				...(!additionalProductDataEmpty
 					? [
 							[
 								blockNames.item,
@@ -113,21 +111,21 @@ export const getTemplate = (
 									],
 								],
 							],
-					  ]
-					: [] ),
+						]
+					: []),
 				[
 					blockNames.item,
 					{},
 					[
 						[
 							blockNames.header,
-							{ title: __( 'Reviews', 'woocommerce' ) },
+							{ title: __('Reviews', 'woocommerce') },
 							[],
 						],
 						[
 							blockNames.panel,
 							{},
-							[ [ 'woocommerce/product-reviews', {} ] ],
+							[['woocommerce/product-reviews', {}]],
 						],
 					],
 				],

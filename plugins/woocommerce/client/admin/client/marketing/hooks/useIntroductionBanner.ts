@@ -16,25 +16,25 @@ const OPTION_NAME_BANNER_DISMISSED =
 const OPTION_VALUE_YES = 'yes';
 
 export const useIntroductionBanner = (): UseIntroductionBanner => {
-	const { updateOptions } = useDispatch( optionsStore );
+	const { updateOptions } = useDispatch(optionsStore);
 
 	const dismissIntroductionBanner = () => {
-		void updateOptions( {
-			[ OPTION_NAME_BANNER_DISMISSED ]: OPTION_VALUE_YES,
-		} );
-		recordEvent( 'marketing_multichannel_banner_dismissed', {} );
+		void updateOptions({
+			[OPTION_NAME_BANNER_DISMISSED]: OPTION_VALUE_YES,
+		});
+		recordEvent('marketing_multichannel_banner_dismissed', {});
 	};
 
-	const { loading, data } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } = select( optionsStore );
+	const { loading, data } = useSelect((select) => {
+		const { getOption, hasFinishedResolution } = select(optionsStore);
 
 		return {
-			loading: ! hasFinishedResolution( 'getOption', [
+			loading: !hasFinishedResolution('getOption', [
 				OPTION_NAME_BANNER_DISMISSED,
-			] ),
-			data: getOption( OPTION_NAME_BANNER_DISMISSED ),
+			]),
+			data: getOption(OPTION_NAME_BANNER_DISMISSED),
 		};
-	}, [] );
+	}, []);
 
 	return {
 		loading,

@@ -14,46 +14,46 @@ import {
 	generateShippingRate,
 } from '../../../../../mocks/shipping-package';
 
-jest.mock( '@woocommerce/base-context/hooks' );
+jest.mock('@woocommerce/base-context/hooks');
 
-const testPackageData = generateShippingPackage( {
+const testPackageData = generateShippingPackage({
 	packageId: 0,
 	shippingRates: [
-		generateShippingRate( {
+		generateShippingRate({
 			rateId: 'flat_rate:1',
 			name: 'Flat rate',
 			price: '1000',
 			instanceID: 1,
-		} ),
-		generateShippingRate( {
+		}),
+		generateShippingRate({
 			rateId: 'flat_rate:2',
 			name: 'Flat rate (premium)',
 			price: '1500',
 			instanceID: 5,
-		} ),
+		}),
 	],
-} );
+});
 
-test( 'renders available shipping rates', async () => {
+test('renders available shipping rates', async () => {
 	const selectShippingRate = jest.fn();
-	( useShippingData as jest.Mock ).mockImplementation( () => {
+	(useShippingData as jest.Mock).mockImplementation(() => {
 		return {
 			selectShippingRate,
 			isSelectingRate: false,
-			shippingRates: [ testPackageData ],
+			shippingRates: [testPackageData],
 		};
-	} );
+	});
 
-	( useStoreCart as jest.Mock ).mockImplementation( () => {
+	(useStoreCart as jest.Mock).mockImplementation(() => {
 		return {
 			cartItems: [],
 		};
-	} );
+	});
 
 	render(
 		<ShippingRatesControlPackage
-			packageData={ testPackageData }
-			packageId={ testPackageData.package_id }
+			packageData={testPackageData}
+			packageId={testPackageData.package_id}
 			noResultsMessage={
 				<span>No shipping rates available at the moment</span>
 			}
@@ -63,253 +63,251 @@ test( 'renders available shipping rates', async () => {
 	// The space between the symbol and the amount is a jsdom artifact: it joins
 	// text across elements with a space when computing the accessible name.
 	// Real browsers report "Flat rate $10.00".
-	const firstRate = await screen.findByRole( 'radio', {
+	const firstRate = await screen.findByRole('radio', {
 		name: 'Flat rate $ 10.00',
-	} );
+	});
 
-	expect( firstRate ).toBeInTheDocument();
+	expect(firstRate).toBeInTheDocument();
 	// even though it's not selected we mark first one as checked by default
-	expect( firstRate ).toBeChecked();
+	expect(firstRate).toBeChecked();
 
 	expect(
-		screen.getByRole( 'radio', {
+		screen.getByRole('radio', {
 			name: 'Flat rate (premium) $ 15.00',
-		} )
+		})
 	).toBeInTheDocument();
-	expect( selectShippingRate ).toHaveBeenCalledTimes( 1 );
-	expect( selectShippingRate ).toHaveBeenCalledWith( 'flat_rate:1', 0 );
-} );
+	expect(selectShippingRate).toHaveBeenCalledTimes(1);
+	expect(selectShippingRate).toHaveBeenCalledWith('flat_rate:1', 0);
+});
 
-test( 'skips mount selection when disabled but still handles user selection', async () => {
+test('skips mount selection when disabled but still handles user selection', async () => {
 	const selectShippingRate = jest.fn();
 
-	( useShippingData as jest.Mock ).mockImplementation( () => {
+	(useShippingData as jest.Mock).mockImplementation(() => {
 		return {
 			selectShippingRate,
 			isSelectingRate: false,
-			shippingRates: [ testPackageData ],
+			shippingRates: [testPackageData],
 		};
-	} );
+	});
 
-	( useStoreCart as jest.Mock ).mockImplementation( () => {
+	(useStoreCart as jest.Mock).mockImplementation(() => {
 		return {
 			cartItems: [],
 		};
-	} );
+	});
 
 	render(
 		<ShippingRatesControlPackage
-			packageData={ testPackageData }
-			packageId={ testPackageData.package_id }
+			packageData={testPackageData}
+			packageId={testPackageData.package_id}
 			noResultsMessage={
 				<span>No shipping rates available at the moment</span>
 			}
-			manageSelectionLocally={ false }
+			manageSelectionLocally={false}
 		/>
 	);
 
-	expect( selectShippingRate ).not.toHaveBeenCalled();
+	expect(selectShippingRate).not.toHaveBeenCalled();
 
 	// This Jest environment requires an explicit boundary for controlled radio updates.
 	// eslint-disable-next-line testing-library/no-unnecessary-act
-	await act( async () => {
+	await act(async () => {
 		await userEvent.click(
-			screen.getByRole( 'radio', {
+			screen.getByRole('radio', {
 				name: 'Flat rate (premium) $ 15.00',
-			} )
+			})
 		);
-	} );
+	});
 
-	expect( selectShippingRate ).toHaveBeenCalledTimes( 1 );
-	expect( selectShippingRate ).toHaveBeenCalledWith( 'flat_rate:2', 0 );
-} );
+	expect(selectShippingRate).toHaveBeenCalledTimes(1);
+	expect(selectShippingRate).toHaveBeenCalledWith('flat_rate:2', 0);
+});
 
-test( 'changes rate selection locally and informs API about it', async () => {
+test('changes rate selection locally and informs API about it', async () => {
 	const selectShippingRate = jest.fn();
 
-	( useShippingData as jest.Mock ).mockImplementation( () => {
+	(useShippingData as jest.Mock).mockImplementation(() => {
 		return {
 			selectShippingRate,
 			isSelectingRate: false,
-			shippingRates: [ testPackageData ],
+			shippingRates: [testPackageData],
 		};
-	} );
+	});
 
-	( useStoreCart as jest.Mock ).mockImplementation( () => {
+	(useStoreCart as jest.Mock).mockImplementation(() => {
 		return {
 			cartItems: [],
 		};
-	} );
+	});
 
 	render(
 		<ShippingRatesControlPackage
-			packageData={ testPackageData }
-			packageId={ testPackageData.package_id }
+			packageData={testPackageData}
+			packageId={testPackageData.package_id}
 			noResultsMessage={
 				<span>No shipping rates available at the moment</span>
 			}
 		/>
 	);
 
-	const firstRate = await screen.findByRole( 'radio', {
+	const firstRate = await screen.findByRole('radio', {
 		name: 'Flat rate $ 10.00',
-	} );
-	const secondRate = screen.getByRole( 'radio', {
+	});
+	const secondRate = screen.getByRole('radio', {
 		name: 'Flat rate (premium) $ 15.00',
-	} );
+	});
 
-	expect( firstRate ).toBeInTheDocument();
-	expect( firstRate ).toBeChecked();
+	expect(firstRate).toBeInTheDocument();
+	expect(firstRate).toBeChecked();
 
-	await act( async () => {
-		await userEvent.click( secondRate );
-	} );
+	await act(async () => {
+		await userEvent.click(secondRate);
+	});
 
-	expect( secondRate ).toBeChecked();
-	expect( selectShippingRate ).toHaveBeenLastCalledWith( 'flat_rate:2', 0 );
-} );
+	expect(secondRate).toBeChecked();
+	expect(selectShippingRate).toHaveBeenLastCalledWith('flat_rate:2', 0);
+});
 
-test( 'upstream rate selection updates are properly reflected in local state', async () => {
-	const packageData = generateShippingPackage( {
+test('upstream rate selection updates are properly reflected in local state', async () => {
+	const packageData = generateShippingPackage({
 		packageId: 0,
 		shippingRates: [
-			generateShippingRate( {
+			generateShippingRate({
 				rateId: 'flat_rate:1',
 				name: 'Flat rate',
 				price: '1000',
 				instanceID: 1,
 				selected: false,
-			} ),
-			generateShippingRate( {
+			}),
+			generateShippingRate({
 				rateId: 'flat_rate:2',
 				name: 'Flat rate (premium)',
 				price: '1500',
 				instanceID: 5,
 				selected: true,
-			} ),
+			}),
 		],
-	} );
+	});
 
-	( useShippingData as jest.Mock ).mockImplementation( () => {
+	(useShippingData as jest.Mock).mockImplementation(() => {
 		return {
 			selectShippingRate: jest.fn(),
 			isSelectingRate: false,
-			shippingRates: [ packageData ],
+			shippingRates: [packageData],
 		};
-	} );
+	});
 
-	( useStoreCart as jest.Mock ).mockImplementation( () => {
+	(useStoreCart as jest.Mock).mockImplementation(() => {
 		return {
 			cartItems: [],
 		};
-	} );
+	});
 
 	const { rerender } = render(
 		<ShippingRatesControlPackage
-			packageData={ packageData }
-			packageId={ packageData.package_id }
+			packageData={packageData}
+			packageId={packageData.package_id}
 			noResultsMessage={
 				<span>No shipping rates available at the moment</span>
 			}
 		/>
 	);
 
-	const firstRate = await screen.findByRole( 'radio', {
+	const firstRate = await screen.findByRole('radio', {
 		name: 'Flat rate $ 10.00',
-	} );
-	const secondRate = screen.getByRole( 'radio', {
+	});
+	const secondRate = screen.getByRole('radio', {
 		name: 'Flat rate (premium) $ 15.00',
-	} );
+	});
 
-	expect( firstRate ).toBeInTheDocument();
-	expect( secondRate ).toBeInTheDocument();
-	expect( firstRate ).not.toBeChecked();
-	expect( secondRate ).toBeChecked();
+	expect(firstRate).toBeInTheDocument();
+	expect(secondRate).toBeInTheDocument();
+	expect(firstRate).not.toBeChecked();
+	expect(secondRate).toBeChecked();
 
-	const packageDataWithFlippedSelection = generateShippingPackage( {
+	const packageDataWithFlippedSelection = generateShippingPackage({
 		packageId: 0,
 		shippingRates: [
-			generateShippingRate( {
+			generateShippingRate({
 				rateId: 'flat_rate:1',
 				name: 'Flat rate',
 				price: '1000',
 				instanceID: 1,
 				selected: true,
-			} ),
-			generateShippingRate( {
+			}),
+			generateShippingRate({
 				rateId: 'flat_rate:2',
 				name: 'Flat rate (premium)',
 				price: '1500',
 				instanceID: 5,
 				selected: false,
-			} ),
+			}),
 		],
-	} );
+	});
 
-	( useShippingData as jest.Mock ).mockImplementation( () => {
+	(useShippingData as jest.Mock).mockImplementation(() => {
 		return {
 			selectShippingRate: jest.fn(),
 			isSelectingRate: false,
 			shippingRates: packageDataWithFlippedSelection,
 		};
-	} );
+	});
 
 	rerender(
 		<ShippingRatesControlPackage
-			packageData={ packageDataWithFlippedSelection }
-			packageId={ packageDataWithFlippedSelection.package_id }
+			packageData={packageDataWithFlippedSelection}
+			packageId={packageDataWithFlippedSelection.package_id}
 			noResultsMessage={
 				<span>No shipping rates available at the moment</span>
 			}
 		/>
 	);
 
-	expect( firstRate ).toBeInTheDocument();
-	expect( secondRate ).toBeInTheDocument();
-	expect( firstRate ).toBeChecked();
-	expect( secondRate ).not.toBeChecked();
-} );
+	expect(firstRate).toBeInTheDocument();
+	expect(secondRate).toBeInTheDocument();
+	expect(firstRate).toBeChecked();
+	expect(secondRate).not.toBeChecked();
+});
 
-test( 'Core clears a rejected selection so the shopper can retry it', async () => {
+test('Core clears a rejected selection so the shopper can retry it', async () => {
 	const selectShippingRate = jest.fn();
-	( useShippingData as jest.Mock ).mockReturnValue( {
+	(useShippingData as jest.Mock).mockReturnValue({
 		selectShippingRate,
-		shippingRates: [ testPackageData ],
-	} );
-	( useStoreCart as jest.Mock ).mockReturnValue( { cartItems: [] } );
+		shippingRates: [testPackageData],
+	});
+	(useStoreCart as jest.Mock).mockReturnValue({ cartItems: [] });
 	const selectedPackage = {
 		...testPackageData,
-		shipping_rates: testPackageData.shipping_rates.map(
-			( rate, index ) => ( {
-				...rate,
-				selected: index === 0,
-			} )
-		),
+		shipping_rates: testPackageData.shipping_rates.map((rate, index) => ({
+			...rate,
+			selected: index === 0,
+		})),
 	};
 	const { rerender } = render(
 		<ShippingRatesControlPackage
-			packageData={ selectedPackage }
-			packageId={ 0 }
-			manageSelectionLocally={ false }
-			noResultsMessage={ <span>No rates</span> }
+			packageData={selectedPackage}
+			packageId={0}
+			manageSelectionLocally={false}
+			noResultsMessage={<span>No rates</span>}
 		/>
 	);
-	const flatRate = screen.getByRole( 'radio', { name: 'Flat rate $ 10.00' } );
-	expect( flatRate ).toBeChecked();
+	const flatRate = screen.getByRole('radio', { name: 'Flat rate $ 10.00' });
+	expect(flatRate).toBeChecked();
 
 	// Pickup is filtered out of Shipping, leaving no visible selected rate after rollback.
 	rerender(
 		<ShippingRatesControlPackage
-			packageData={ testPackageData }
-			packageId={ 0 }
-			manageSelectionLocally={ false }
-			noResultsMessage={ <span>No rates</span> }
+			packageData={testPackageData}
+			packageId={0}
+			manageSelectionLocally={false}
+			noResultsMessage={<span>No rates</span>}
 		/>
 	);
-	expect( flatRate ).not.toBeChecked();
-	expect( selectShippingRate ).not.toHaveBeenCalled();
+	expect(flatRate).not.toBeChecked();
+	expect(selectShippingRate).not.toHaveBeenCalled();
 
-	await userEvent.click( flatRate );
-	expect( selectShippingRate ).toHaveBeenCalledTimes( 1 );
-	expect( selectShippingRate ).toHaveBeenCalledWith( 'flat_rate:1', 0 );
-} );
+	await userEvent.click(flatRate);
+	expect(selectShippingRate).toHaveBeenCalledTimes(1);
+	expect(selectShippingRate).toHaveBeenCalledWith('flat_rate:1', 0);
+});

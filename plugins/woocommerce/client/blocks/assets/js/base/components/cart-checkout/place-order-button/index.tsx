@@ -31,13 +31,13 @@ interface PlaceOrderButtonProps {
 	CustomButtonComponent?: CustomPlaceOrderButtonComponent;
 }
 
-const PlaceOrderButton = ( {
+const PlaceOrderButton = ({
 	label,
 	fullWidth = false,
 	showPrice = false,
 	priceSeparator = '·',
 	CustomButtonComponent,
-}: PlaceOrderButtonProps ): JSX.Element => {
+}: PlaceOrderButtonProps): JSX.Element => {
 	const {
 		onSubmit,
 		isCalculating,
@@ -53,11 +53,11 @@ const PlaceOrderButton = ( {
 	const { cartTotals, cartIsLoading } = useStoreCart();
 
 	// when provided, the `CustomButtonComponent` should take precedence over the default button.
-	if ( CustomButtonComponent ) {
+	if (CustomButtonComponent) {
 		return (
 			<CustomButtonComponent
-				waitingForProcessing={ waitingForProcessing }
-				waitingForRedirect={ waitingForRedirect }
+				waitingForProcessing={waitingForProcessing}
+				waitingForRedirect={waitingForRedirect}
 				disabled={
 					isCalculating ||
 					isDisabled ||
@@ -65,17 +65,17 @@ const PlaceOrderButton = ( {
 					waitingForRedirect ||
 					cartIsLoading
 				}
-				isEditor={ isEditor }
-				isPreview={ isPreview }
-				validate={ validateCheckout }
-				{ ...paymentMethodInterface }
+				isEditor={isEditor}
+				isPreview={isPreview}
+				validate={validateCheckout}
+				{...paymentMethodInterface}
 			/>
 		);
 	}
 
 	return (
 		<Button
-			className={ clsx(
+			className={clsx(
 				'wc-block-components-checkout-place-order-button',
 				{
 					'wc-block-components-checkout-place-order-button--full-width':
@@ -85,8 +85,8 @@ const PlaceOrderButton = ( {
 					'wc-block-components-checkout-place-order-button--loading':
 						waitingForProcessing || waitingForRedirect,
 				}
-			) }
-			onClick={ onSubmit }
+			)}
+			onClick={onSubmit}
 			disabled={
 				isCalculating ||
 				isDisabled ||
@@ -95,8 +95,8 @@ const PlaceOrderButton = ( {
 				cartIsLoading
 			}
 		>
-			{ waitingForProcessing && <Spinner /> }
-			{ waitingForRedirect && (
+			{waitingForProcessing && <Spinner />}
+			{waitingForRedirect && (
 				<svg
 					className="wc-block-components-checkout-place-order-button__icon"
 					xmlns="http://www.w3.org/2000/svg"
@@ -108,35 +108,35 @@ const PlaceOrderButton = ( {
 				>
 					<path d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z" />
 				</svg>
-			) }
+			)}
 			<div
 				className={
 					'wc-block-components-checkout-place-order-button__text'
 				}
 			>
-				{ label }
-				{ showPrice && (
+				{label}
+				{showPrice && (
 					<>
 						<style>
-							{ `.wp-block-woocommerce-checkout-actions-block {
+							{`.wp-block-woocommerce-checkout-actions-block {
 							.wc-block-components-checkout-place-order-button__separator {
 								&::after {
-									content: "${ priceSeparator }";
+									content: "${priceSeparator}";
 								}
 							}
-						}` }
+						}`}
 						</style>
 						<div className="wc-block-components-checkout-place-order-button__separator" />
 						<div className="wc-block-components-checkout-place-order-button__price">
 							<FormattedMonetaryAmount
-								value={ cartTotals.total_price }
-								currency={ getCurrencyFromPriceResponse(
+								value={cartTotals.total_price}
+								currency={getCurrencyFromPriceResponse(
 									cartTotals
-								) }
+								)}
 							/>
 						</div>
 					</>
-				) }
+				)}
 			</div>
 		</Button>
 	);

@@ -22,21 +22,21 @@ import './style.scss';
 /**
  * PaymentMethods component.
  */
-const PaymentMethods = ( {
+const PaymentMethods = ({
 	noPaymentMethods = <NoPaymentMethods />,
 	onlyExpressPayments = <OnlyExpressPayments />,
 }: {
 	noPaymentMethods?: JSX.Element | undefined;
 	onlyExpressPayments?: JSX.Element | undefined;
-} ) => {
+}) => {
 	const {
 		paymentMethodsInitialized,
 		expressPaymentMethodsInitialized,
 		availablePaymentMethods,
 		availableExpressPaymentMethods,
 		savedPaymentMethods,
-	} = useSelect( ( select ) => {
-		const store = select( paymentStore );
+	} = useSelect((select) => {
+		const store = select(paymentStore);
 		return {
 			paymentMethodsInitialized: store.paymentMethodsInitialized(),
 			expressPaymentMethodsInitialized:
@@ -46,27 +46,21 @@ const PaymentMethods = ( {
 				store.getAvailableExpressPaymentMethods(),
 			savedPaymentMethods: store.getSavedPaymentMethods(),
 		};
-	} );
+	});
 
 	const hasAvailablePaymentMethods =
-		Object.keys( availablePaymentMethods ).length > 0;
+		Object.keys(availablePaymentMethods).length > 0;
 	const hasAvailableExpressPaymentMethods =
-		Object.keys( availableExpressPaymentMethods ).length > 0;
+		Object.keys(availableExpressPaymentMethods).length > 0;
 
-	if ( paymentMethodsInitialized && expressPaymentMethodsInitialized ) {
+	if (paymentMethodsInitialized && expressPaymentMethodsInitialized) {
 		// No payment methods available at all
-		if (
-			! hasAvailablePaymentMethods &&
-			! hasAvailableExpressPaymentMethods
-		) {
+		if (!hasAvailablePaymentMethods && !hasAvailableExpressPaymentMethods) {
 			return noPaymentMethods;
 		}
 
 		// Only express payment methods available
-		if (
-			hasAvailableExpressPaymentMethods &&
-			! hasAvailablePaymentMethods
-		) {
+		if (hasAvailableExpressPaymentMethods && !hasAvailablePaymentMethods) {
 			return onlyExpressPayments;
 		}
 	}
@@ -74,26 +68,25 @@ const PaymentMethods = ( {
 	return (
 		<DelayedContentWithSkeleton
 			isLoading={
-				! paymentMethodsInitialized ||
-				! expressPaymentMethodsInitialized
+				!paymentMethodsInitialized || !expressPaymentMethodsInitialized
 			}
-			skeleton={ <CheckoutPaymentSkeleton /> }
+			skeleton={<CheckoutPaymentSkeleton />}
 		>
 			<SavedPaymentMethodOptions />
-			{ Object.keys( savedPaymentMethods ).length > 0 && (
+			{Object.keys(savedPaymentMethods).length > 0 && (
 				<Label
-					label={ __( 'Use another payment method.', 'woocommerce' ) }
-					screenReaderLabel={ __(
+					label={__('Use another payment method.', 'woocommerce')}
+					screenReaderLabel={__(
 						'Other available payment methods',
 						'woocommerce'
-					) }
+					)}
 					wrapperElement="p"
-					wrapperProps={ {
+					wrapperProps={{
 						className:
 							'wc-block-components-checkout-step__description-payments-aligned',
-					} }
+					}}
 				/>
-			) }
+			)}
 			<PaymentMethodOptions />
 		</DelayedContentWithSkeleton>
 	);

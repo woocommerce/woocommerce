@@ -1,5 +1,3 @@
-
-
 /* stylelint-disable block-closing-brace-newline-after */
 
 // Breakpoints
@@ -9,13 +7,13 @@
 // The list below is based on wp-admin's main breakpoints
 $breakpoints: 320px, 400px, 600px, 782px, 960px, 1280px, 1440px;
 
-@mixin breakpoint( $sizes... ) {
+@mixin breakpoint($sizes...) {
 	@each $size in $sizes {
-		@if type-of( $size ) == string {
+		@if type-of($size) == string {
 			$approved-value: 0;
 			@each $breakpoint in $breakpoints {
-				$and-larger: '>' + $breakpoint;
-				$and-smaller: '<' + $breakpoint;
+				$and-larger: ">" + $breakpoint;
+				$and-smaller: "<" + $breakpoint;
 
 				@if $size == $and-smaller {
 					$approved-value: 1;
@@ -30,7 +28,7 @@ $breakpoints: 320px, 400px, 600px, 782px, 960px, 1280px, 1440px;
 						}
 					} @else {
 						@each $breakpoint-end in $breakpoints {
-							$range: $breakpoint + '-' + $breakpoint-end;
+							$range: $breakpoint + "-" + $breakpoint-end;
 							@if $size == $range {
 								$approved-value: 3;
 								@media (min-width: $breakpoint + 1) and (max-width: $breakpoint-end) {
@@ -42,16 +40,16 @@ $breakpoints: 320px, 400px, 600px, 782px, 960px, 1280px, 1440px;
 				}
 			}
 			@if $approved-value == 0 {
-				$sizes: '';
+				$sizes: "";
 				@each $breakpoint in $breakpoints {
-					$sizes: $sizes + ' ' + $breakpoint;
+					$sizes: $sizes + " " + $breakpoint;
 				}
 				@warn 'ERROR in breakpoint( #{ $size } ) : You can only use these sizes[ #{$sizes} ] using the following syntax [ <#{ nth( $breakpoints, 1 ) } >#{ nth( $breakpoints, 1 ) } #{ nth( $breakpoints, 1 ) }-#{ nth( $breakpoints, 2 ) } ]';
 			}
 		} @else {
-			$sizes: '';
+			$sizes: "";
 			@each $breakpoint in $breakpoints {
-				$sizes: $sizes + ' ' + $breakpoint;
+				$sizes: $sizes + " " + $breakpoint;
 			}
 			@error 'ERROR in breakpoint( #{ $size } ) : Please wrap the breakpoint $size in parenthesis. You can use these sizes[ #{$sizes} ] using the following syntax [ <#{ nth( $breakpoints, 1 ) } >#{ nth( $breakpoints, 1 ) } #{ nth( $breakpoints, 1 ) }-#{ nth( $breakpoints, 2 ) } ]';
 		}

@@ -16,12 +16,12 @@ import { blockAttributes } from './attributes';
 import { Attributes } from './types';
 import deprecated from './deprecated';
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	apiVersion: 3,
 	icon: {
 		src: (
 			<Icon
-				icon={ toggle }
+				icon={toggle}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -32,14 +32,14 @@ registerBlockType( metadata, {
 	},
 	edit,
 	// Save the props to post content.
-	save( { attributes }: { attributes: Attributes } ) {
+	save({ attributes }: { attributes: Attributes }) {
 		const { className } = attributes;
 
 		return (
 			<div
-				{ ...useBlockProps.save( {
-					className: clsx( 'is-loading', className ),
-				} ) }
+				{...useBlockProps.save({
+					className: clsx('is-loading', className),
+				})}
 			>
 				<span
 					aria-hidden
@@ -49,4 +49,4 @@ registerBlockType( metadata, {
 		);
 	},
 	deprecated,
-} );
+});

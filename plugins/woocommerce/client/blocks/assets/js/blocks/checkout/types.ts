@@ -1,10 +1,10 @@
 export type InnerBlockTemplate = [
 	string,
-	Record< string, unknown >,
+	Record<string, unknown>,
 	InnerBlockTemplate[] | undefined,
 ];
 
-export interface Attributes extends Record< string, boolean | number > {
+export interface Attributes extends Record<string, boolean | number> {
 	hasDarkControls: boolean;
 	showFormStepNumbers: boolean;
 	// Deprecated.

@@ -20,51 +20,48 @@ import Card from '../card';
 import Slider from '../slider';
 import KnowledgebaseCardPostPlaceholder from './placeholder';
 
-const KnowledgeBase = ( {
+const KnowledgeBase = ({
 	posts,
 	isLoading,
 	error,
-	title = __( 'WooCommerce knowledge base', 'woocommerce' ),
+	title = __('WooCommerce knowledge base', 'woocommerce'),
 	description = __(
 		'Learn the ins and outs of successful marketing from the experts at WooCommerce.',
 		'woocommerce'
 	),
 	category,
-} ) => {
-	const [ page, updatePage ] = useState( 1 );
-	const [ animate, updateAnimate ] = useState( null );
+}) => {
+	const [page, updatePage] = useState(1);
+	const [animate, updateAnimate] = useState(null);
 
-	const onPaginationPageChange = ( newPage ) => {
+	const onPaginationPageChange = (newPage) => {
 		let newAnimate;
-		if ( newPage > page ) {
+		if (newPage > page) {
 			newAnimate = 'left';
-			recordEvent( 'marketing_knowledge_carousel', {
+			recordEvent('marketing_knowledge_carousel', {
 				direction: 'forward',
 				page: newPage,
-			} );
+			});
 		} else {
 			newAnimate = 'right';
-			recordEvent( 'marketing_knowledge_carousel', {
+			recordEvent('marketing_knowledge_carousel', {
 				direction: 'back',
 				page: newPage,
-			} );
+			});
 		}
-		updatePage( newPage );
-		updateAnimate( newAnimate );
+		updatePage(newPage);
+		updateAnimate(newAnimate);
 	};
 
-	const onPostClick = ( post ) => {
-		recordEvent( 'marketing_knowledge_article', { title: post.title } );
+	const onPostClick = (post) => {
+		recordEvent('marketing_knowledge_article', { title: post.title });
 	};
 
 	/**
 	 * Get the 2 posts we need for the current page
 	 */
 	const getCurrentSlide = () => {
-		const currentPosts = posts.slice(
-			( page - 1 ) * 2,
-			( page - 1 ) * 2 + 2
-		);
+		const currentPosts = posts.slice((page - 1) * 2, (page - 1) * 2 + 2);
 		const pageClass = clsx(
 			'woocommerce-marketing-knowledgebase-card__page',
 			{
@@ -72,56 +69,56 @@ const KnowledgeBase = ( {
 			}
 		);
 
-		const displayPosts = currentPosts.map( ( post, index ) => {
+		const displayPosts = currentPosts.map((post, index) => {
 			return (
 				<a
 					className="woocommerce-marketing-knowledgebase-card__post"
-					href={ post.link }
-					key={ index }
-					onClick={ () => {
-						onPostClick( post );
-					} }
+					href={post.link}
+					key={index}
+					onClick={() => {
+						onPostClick(post);
+					}}
 					target="_blank"
 					rel="noopener noreferrer"
 				>
-					{ !! post.image && (
+					{!!post.image && (
 						<div className="woocommerce-marketing-knowledgebase-card__post-img">
-							<img src={ post.image } alt="" />
+							<img src={post.image} alt="" />
 						</div>
-					) }
+					)}
 					<div className="woocommerce-marketing-knowledgebase-card__post-text">
-						<h3>{ post.title }</h3>
+						<h3>{post.title}</h3>
 						<p className="woocommerce-marketing-knowledgebase-card__post-meta">
-							{ __( 'By', 'woocommerce' ) + ' ' }
-							{ post.author_name }
-							{ !! post.author_avatar && (
+							{__('By', 'woocommerce') + ' '}
+							{post.author_name}
+							{!!post.author_avatar && (
 								<img
-									src={ post.author_avatar.replace(
+									src={post.author_avatar.replace(
 										's=96',
 										's=32'
-									) }
+									)}
 									className="woocommerce-gravatar"
 									alt=""
 									width="16"
 									height="16"
 								/>
-							) }
+							)}
 						</p>
 					</div>
 				</a>
 			);
-		} );
+		});
 
-		return <div className={ pageClass }>{ displayPosts }</div>;
+		return <div className={pageClass}>{displayPosts}</div>;
 	};
 
 	const renderEmpty = () => {
-		const emptyTitle = __( 'No posts yet', 'woocommerce' );
+		const emptyTitle = __('No posts yet', 'woocommerce');
 
 		return (
 			<EmptyContent
-				title={ emptyTitle }
-				message={ <ReadBlogMessage /> }
+				title={emptyTitle}
+				message={<ReadBlogMessage />}
 				illustration=""
 				actionLabel=""
 			/>
@@ -136,8 +133,8 @@ const KnowledgeBase = ( {
 
 		return (
 			<EmptyContent
-				title={ errorTitle }
-				message={ <ReadBlogMessage /> }
+				title={errorTitle}
+				message={<ReadBlogMessage />}
 				illustration=""
 				actionLabel=""
 			/>
@@ -147,17 +144,17 @@ const KnowledgeBase = ( {
 	const renderPosts = () => {
 		return (
 			<div className="woocommerce-marketing-knowledgebase-card__posts">
-				<Slider animationKey={ page } animate={ animate }>
-					{ getCurrentSlide() }
+				<Slider animationKey={page} animate={animate}>
+					{getCurrentSlide()}
 				</Slider>
 				<Pagination
-					page={ page }
-					perPage={ 2 }
-					total={ posts.length }
-					onPageChange={ onPaginationPageChange }
-					showPagePicker={ false }
-					showPerPagePicker={ false }
-					showPageArrowsLabel={ false }
+					page={page}
+					perPage={2}
+					total={posts.length}
+					onPageChange={onPaginationPageChange}
+					showPagePicker={false}
+					showPerPagePicker={false}
+					showPageArrowsLabel={false}
 				/>
 			</div>
 		);
@@ -178,11 +175,11 @@ const KnowledgeBase = ( {
 	};
 
 	const renderCardBody = () => {
-		if ( isLoading ) {
+		if (isLoading) {
 			return renderPlaceholder();
 		}
 
-		if ( error ) {
+		if (error) {
 			return renderError();
 		}
 
@@ -190,19 +187,19 @@ const KnowledgeBase = ( {
 	};
 
 	const categoryClass = category
-		? `woocommerce-marketing-knowledgebase-card__category-${ category }`
+		? `woocommerce-marketing-knowledgebase-card__category-${category}`
 		: '';
 
 	return (
 		<Card
-			title={ title }
-			description={ description }
-			className={ clsx(
+			title={title}
+			description={description}
+			className={clsx(
 				'woocommerce-marketing-knowledgebase-card',
 				categoryClass
-			) }
+			)}
 		>
-			{ renderCardBody() }
+			{renderCardBody()}
 		</Card>
 	);
 };
@@ -211,7 +208,7 @@ KnowledgeBase.propTypes = {
 	/**
 	 * Array of posts.
 	 */
-	posts: PropTypes.arrayOf( PropTypes.object ).isRequired,
+	posts: PropTypes.arrayOf(PropTypes.object).isRequired,
 	/**
 	 * Whether the card is loading.
 	 */
@@ -233,21 +230,21 @@ KnowledgeBase.propTypes = {
 export { KnowledgeBase };
 
 export default compose(
-	withSelect( ( select, props ) => {
+	withSelect((select, props) => {
 		const { getBlogPosts, getBlogPostsError, isResolving } =
-			select( STORE_KEY );
+			select(STORE_KEY);
 
 		return {
-			posts: getBlogPosts( props.category ),
-			isLoading: isResolving( 'getBlogPosts', [ props.category ] ),
-			error: getBlogPostsError( props.category ),
+			posts: getBlogPosts(props.category),
+			isLoading: isResolving('getBlogPosts', [props.category]),
+			error: getBlogPostsError(props.category),
 		};
-	} ),
-	withDispatch( ( dispatch ) => {
-		const { createNotice } = dispatch( 'core/notices' );
+	}),
+	withDispatch((dispatch) => {
+		const { createNotice } = dispatch('core/notices');
 
 		return {
 			createNotice,
 		};
-	} )
-)( KnowledgeBase );
+	})
+)(KnowledgeBase);

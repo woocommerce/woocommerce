@@ -11,7 +11,7 @@ import interpolateComponents from '@automattic/interpolate-components';
 import { PluginInstallError } from '../../../../services/installAndActivatePlugins';
 import { joinWithAnd, composeListFormatParts } from '../../Plugins';
 
-export const PluginErrorBanner = ( {
+export const PluginErrorBanner = ({
 	pluginsInstallationPermissionsFailure,
 	pluginsInstallationErrors,
 	pluginsSlugToName = {},
@@ -19,15 +19,15 @@ export const PluginErrorBanner = ( {
 }: {
 	pluginsInstallationPermissionsFailure?: boolean;
 	pluginsInstallationErrors?: PluginInstallError[];
-	pluginsSlugToName?: Record< string, string >;
+	pluginsSlugToName?: Record<string, string>;
 	onClick?: () => void;
-} ) => {
+}) => {
 	let installationErrorMessage;
-	switch ( true ) {
+	switch (true) {
 		case pluginsInstallationPermissionsFailure:
 		case pluginsInstallationErrors?.some(
 			// it really shouldn't get here since permissions are pre-checked. but we'll check for 403 just to be safe.
-			( e ) => e.errorDetails?.data?.data?.status === 403 // 403 is the code representing rest_authorization_required_code()
+			(e) => e.errorDetails?.data?.data?.status === 403 // 403 is the code representing rest_authorization_required_code()
 		):
 			installationErrorMessage = __(
 				'You do not have permissions to manage plugins. Please contact your site administrator.',
@@ -45,27 +45,27 @@ export const PluginErrorBanner = ( {
 
 	const failedPluginNames = [
 		...new Set(
-			( pluginsInstallationErrors || [] ).map(
+			(pluginsInstallationErrors || []).map(
 				// Use the plugin name if available, otherwise use the plugin slug
-				( error ) => pluginsSlugToName[ error.plugin ] || error.plugin
+				(error) => pluginsSlugToName[error.plugin] || error.plugin
 			)
 		),
 	];
 
 	return (
 		<p className="plugin-error">
-			{ interpolateComponents( {
+			{interpolateComponents({
 				mixedString: sprintf(
 					installationErrorMessage,
-					joinWithAnd( failedPluginNames )
-						.map( composeListFormatParts )
-						.join( '' )
+					joinWithAnd(failedPluginNames)
+						.map(composeListFormatParts)
+						.join('')
 				),
 				components: {
 					span: <span />,
-					link: <Button variant="link" onClick={ onClick } />,
+					link: <Button variant="link" onClick={onClick} />,
 				},
-			} ) }
+			})}
 		</p>
 	);
 };

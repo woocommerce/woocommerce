@@ -16,31 +16,31 @@ interface EditorContextType {
 	currentView: string;
 
 	// Object containing preview data for the editor.
-	previewData: Record< string, unknown >;
+	previewData: Record<string, unknown>;
 
 	// Get data by name.
 	getPreviewData: (
 		name: string,
-		fallback?: Record< string, unknown >
-	) => Record< string, unknown >;
+		fallback?: Record<string, unknown>
+	) => Record<string, unknown>;
 
 	// Indicates whether in the preview context.
 	isPreview?: boolean;
 }
 
-const EditorContext = createContext( {
+const EditorContext = createContext({
 	isEditor: false,
 	currentPostId: 0,
 	currentView: '',
 	previewData: {},
-	getPreviewData: () => ( {} ),
-} as EditorContextType );
+	getPreviewData: () => ({}),
+} as EditorContextType);
 
 export const useEditorContext = (): EditorContextType => {
-	return useContext( EditorContext );
+	return useContext(EditorContext);
 };
 
-export const EditorProvider = ( {
+export const EditorProvider = ({
 	children,
 	currentPostId = 0,
 	previewData = {},
@@ -48,29 +48,29 @@ export const EditorProvider = ( {
 }: {
 	children: React.ReactNode;
 	currentPostId?: number | undefined;
-	previewData?: Record< string, unknown > | undefined;
+	previewData?: Record<string, unknown> | undefined;
 	currentView?: string | undefined;
-} ) => {
+}) => {
 	const isPreviewMode = usePreviewMode();
 	const editingPostId = useSelect(
-		( select ): number =>
+		(select): number =>
 			currentPostId
 				? currentPostId
-				: select( 'core/editor' ).getCurrentPostId(),
-		[ currentPostId ]
+				: select('core/editor').getCurrentPostId(),
+		[currentPostId]
 	);
 
 	const getPreviewData = useCallback(
 		(
 			name: string,
-			fallback: Record< string, unknown > = {}
-		): Record< string, unknown > => {
-			if ( previewData && name in previewData ) {
-				return previewData[ name ] as Record< string, unknown >;
+			fallback: Record<string, unknown> = {}
+		): Record<string, unknown> => {
+			if (previewData && name in previewData) {
+				return previewData[name] as Record<string, unknown>;
 			}
 			return fallback;
 		},
-		[ previewData ]
+		[previewData]
 	);
 
 	const editorData: EditorContextType = {
@@ -83,8 +83,8 @@ export const EditorProvider = ( {
 	};
 
 	return (
-		<EditorContext.Provider value={ editorData }>
-			{ children }
+		<EditorContext.Provider value={editorData}>
+			{children}
 		</EditorContext.Provider>
 	);
 };

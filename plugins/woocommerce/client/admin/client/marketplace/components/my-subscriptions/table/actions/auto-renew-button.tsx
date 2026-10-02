@@ -12,28 +12,28 @@ import { queueRecordEvent } from '@woocommerce/tracks';
 import { enableAutorenewalUrl } from '../../../../utils/functions';
 import { Subscription } from '../../types';
 
-type ButtonProps = ComponentProps< typeof Button >;
+type ButtonProps = ComponentProps<typeof Button>;
 
 interface AutoRenewProps {
 	subscription: Subscription;
-	variant?: ButtonProps[ 'variant' ];
+	variant?: ButtonProps['variant'];
 }
 
-export default function AutoRenewButton( props: AutoRenewProps ) {
+export default function AutoRenewButton(props: AutoRenewProps) {
 	function recordTracksEvent() {
-		queueRecordEvent( 'marketplace_auto_renew_button_clicked', {
+		queueRecordEvent('marketplace_auto_renew_button_clicked', {
 			order_id: props.subscription.order_id,
 			product_id: props.subscription.product_id,
-		} );
+		});
 	}
 
 	return (
 		<Button
-			href={ enableAutorenewalUrl( props.subscription ) }
-			variant={ props.variant ?? 'secondary' }
-			onClick={ recordTracksEvent }
+			href={enableAutorenewalUrl(props.subscription)}
+			variant={props.variant ?? 'secondary'}
+			onClick={recordTracksEvent}
 		>
-			{ __( 'Renew', 'woocommerce' ) }
+			{__('Renew', 'woocommerce')}
 		</Button>
 	);
 }

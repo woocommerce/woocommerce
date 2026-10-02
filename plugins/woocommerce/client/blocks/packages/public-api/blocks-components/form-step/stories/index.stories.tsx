@@ -96,28 +96,28 @@ export default {
 			description: 'Content to render in the step heading.',
 		},
 	},
-} as Meta< FormStepProps >;
+} as Meta<FormStepProps>;
 
 const InputWithState = () => {
-	const [ value, setValue ] = useState( 'John Doe' );
+	const [value, setValue] = useState('John Doe');
 	return (
 		<ValidatedTextInput
-			label={ 'Name' }
-			instanceId={ '1' }
-			value={ value }
-			onChange={ setValue }
+			label={'Name'}
+			instanceId={'1'}
+			value={value}
+			onChange={setValue}
 		/>
 	);
 };
-const Template: StoryFn< FormStepProps > = ( args ) => (
+const Template: StoryFn<FormStepProps> = (args) => (
 	<div className="wc-block-components-form">
-		<FormStep { ...args }>
+		<FormStep {...args}>
 			<InputWithState />
 		</FormStep>
 	</div>
 );
 
-export const Default: StoryFn< FormStepProps > = Template.bind( {} );
+export const Default: StoryFn<FormStepProps> = Template.bind({});
 
 Default.args = {
 	stepHeadingContent: () => <span>Step heading content</span>,

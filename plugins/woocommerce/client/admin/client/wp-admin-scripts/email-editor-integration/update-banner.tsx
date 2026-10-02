@@ -56,11 +56,11 @@ interface UpdateBannerProps {
  * needed; for `null` (no guard) the buttons are enabled.
  */
 function tooltipText(
-	reason: UpdateBannerProps[ 'disabledReason' ]
+	reason: UpdateBannerProps['disabledReason']
 ): string | null {
-	switch ( reason ) {
+	switch (reason) {
 		case 'dirty':
-			return __( 'Save your changes first.', 'woocommerce' );
+			return __('Save your changes first.', 'woocommerce');
 		case 'read_only':
 			return __(
 				"You don't have permission to update this email.",
@@ -80,18 +80,18 @@ function tooltipText(
  * change-summary detector flagged the diff as a fallback, or the
  * detector returned an empty `summary_lines`.
  */
-function defaultSubtitle( summary: ChangeSummary | null ): string {
-	if ( summary === null || summary.is_fallback ) {
-		return __( 'WooCommerce updated this template.', 'woocommerce' );
+function defaultSubtitle(summary: ChangeSummary | null): string {
+	if (summary === null || summary.is_fallback) {
+		return __('WooCommerce updated this template.', 'woocommerce');
 	}
-	if ( summary.summary_lines.length === 0 ) {
+	if (summary.summary_lines.length === 0) {
 		return sprintf(
 			// translators: %s is a WooCommerce version number, e.g. "1.2.3".
-			__( 'WooCommerce %s refreshed this template.', 'woocommerce' ),
+			__('WooCommerce %s refreshed this template.', 'woocommerce'),
 			summary.version_to
 		);
 	}
-	return summary.summary_lines[ 0 ];
+	return summary.summary_lines[0];
 }
 
 /**
@@ -105,21 +105,21 @@ function defaultSubtitle( summary: ChangeSummary | null ): string {
  * tooltip's hover/focus heuristics don't fire (and so tests can query
  * the help text without simulating hover delays).
  */
-function MaybeTooltip( {
+function MaybeTooltip({
 	tip,
 	children,
 }: {
 	tip: string | null;
 	children: JSX.Element;
-} ): JSX.Element {
-	if ( ! tip ) {
+}): JSX.Element {
+	if (!tip) {
 		return children;
 	}
 	return (
-		<Tooltip text={ tip }>
+		<Tooltip text={tip}>
 			<span className="wc-update-banner__tooltip-wrap">
-				{ children }
-				<span className="screen-reader-text">{ tip }</span>
+				{children}
+				<span className="screen-reader-text">{tip}</span>
 			</span>
 		</Tooltip>
 	);
@@ -137,7 +137,7 @@ function MaybeTooltip( {
  *   - `failed`  → failure morph, manual recovery only
  *   - default   → idle / applying — the actionable banner
  */
-export function UpdateBanner( {
+export function UpdateBanner({
 	summary,
 	applyState,
 	canApply,
@@ -149,23 +149,23 @@ export function UpdateBanner( {
 	onDismiss,
 	onAutoDismiss,
 	onToggleExpanded,
-}: UpdateBannerProps ): JSX.Element {
+}: UpdateBannerProps): JSX.Element {
 	// ---- Success morph ---------------------------------------------------
 	// Schedule the auto-dismiss timer once the morph mounts; clean it up
 	// on unmount or if `onAutoDismiss` changes mid-lifecycle.
-	useEffect( () => {
-		if ( applyState !== 'applied' ) {
+	useEffect(() => {
+		if (applyState !== 'applied') {
 			return;
 		}
-		const handle = setTimeout( () => {
+		const handle = setTimeout(() => {
 			onAutoDismiss();
-		}, SUCCESS_AUTODISMISS_MS );
+		}, SUCCESS_AUTODISMISS_MS);
 		return () => {
-			clearTimeout( handle );
+			clearTimeout(handle);
 		};
-	}, [ applyState, onAutoDismiss ] );
+	}, [applyState, onAutoDismiss]);
 
-	if ( applyState === 'applied' ) {
+	if (applyState === 'applied') {
 		return (
 			<div
 				className="wc-update-banner wc-update-banner--success"
@@ -174,32 +174,29 @@ export function UpdateBanner( {
 			>
 				<div className="wc-update-banner__body">
 					<div className="wc-update-banner__title">
-						{ __( 'Template updated', 'woocommerce' ) }
+						{__('Template updated', 'woocommerce')}
 					</div>
 					<div className="wc-update-banner__subtitle">
-						{ __(
+						{__(
 							'Your customizations were preserved.',
 							'woocommerce'
-						) }
+						)}
 					</div>
 				</div>
 				<button
 					type="button"
 					className="wc-update-banner__dismiss"
-					aria-label={ __(
-						'Dismiss for this session',
-						'woocommerce'
-					) }
-					onClick={ onAutoDismiss }
+					aria-label={__('Dismiss for this session', 'woocommerce')}
+					onClick={onAutoDismiss}
 				>
-					{ '×' }
+					{'×'}
 				</button>
 			</div>
 		);
 	}
 
 	// ---- Failure morph ---------------------------------------------------
-	if ( applyState === 'failed' ) {
+	if (applyState === 'failed') {
 		return (
 			<div
 				className="wc-update-banner wc-update-banner--failure"
@@ -207,27 +204,24 @@ export function UpdateBanner( {
 			>
 				<div className="wc-update-banner__body">
 					<div className="wc-update-banner__title">
-						{ __( "Couldn't apply", 'woocommerce' ) }
+						{__("Couldn't apply", 'woocommerce')}
 					</div>
 				</div>
 				<div className="wc-update-banner__actions">
-					<Button variant="primary" onClick={ onApply }>
-						{ __( 'Try again', 'woocommerce' ) }
+					<Button variant="primary" onClick={onApply}>
+						{__('Try again', 'woocommerce')}
 					</Button>
-					<Button variant="tertiary" onClick={ onReview }>
-						{ __( 'Review changes', 'woocommerce' ) }
+					<Button variant="tertiary" onClick={onReview}>
+						{__('Review changes', 'woocommerce')}
 					</Button>
 				</div>
 				<button
 					type="button"
 					className="wc-update-banner__dismiss"
-					aria-label={ __(
-						'Dismiss for this session',
-						'woocommerce'
-					) }
-					onClick={ onDismiss }
+					aria-label={__('Dismiss for this session', 'woocommerce')}
+					onClick={onDismiss}
 				>
-					{ '×' }
+					{'×'}
 				</button>
 			</div>
 		);
@@ -239,46 +233,46 @@ export function UpdateBanner( {
 	// Pull out the lines once so the JSX below doesn't need non-null
 	// assertions on `summary` — the local is narrowed to `string[]`.
 	const expandableLines: string[] =
-		summary !== null && ! summary.is_fallback ? summary.summary_lines : [];
+		summary !== null && !summary.is_fallback ? summary.summary_lines : [];
 	const hasExpandableChanges = expandableLines.length > 0;
-	const subtitle = defaultSubtitle( summary );
-	const tip = tooltipText( disabledReason );
+	const subtitle = defaultSubtitle(summary);
+	const tip = tooltipText(disabledReason);
 
 	const applyLabel = isApplying
-		? __( 'Applying…', 'woocommerce' )
-		: __( 'Apply', 'woocommerce' );
+		? __('Applying…', 'woocommerce')
+		: __('Apply', 'woocommerce');
 
 	// In the conflict variant the Apply slot becomes the primary
 	// "Review changes" CTA — a disabled Apply button would be the wrong
 	// affordance, since the user can't apply until they resolve the
 	// conflicts in the review drawer.
 	const applySlot = isConflict ? (
-		<Button variant="primary" onClick={ onReview }>
-			{ __( 'Review changes', 'woocommerce' ) }
+		<Button variant="primary" onClick={onReview}>
+			{__('Review changes', 'woocommerce')}
 		</Button>
 	) : (
-		<MaybeTooltip tip={ tip }>
+		<MaybeTooltip tip={tip}>
 			<Button
 				variant="primary"
-				onClick={ onApply }
-				disabled={ ! canApply || isApplying }
-				aria-disabled={ ! canApply ? 'true' : undefined }
-				isBusy={ isApplying }
+				onClick={onApply}
+				disabled={!canApply || isApplying}
+				aria-disabled={!canApply ? 'true' : undefined}
+				isBusy={isApplying}
 			>
-				{ applyLabel }
+				{applyLabel}
 			</Button>
 		</MaybeTooltip>
 	);
 
 	const reviewSlot = isConflict ? null : (
-		<MaybeTooltip tip={ tip }>
+		<MaybeTooltip tip={tip}>
 			<Button
 				variant="tertiary"
-				onClick={ onReview }
-				disabled={ ! canReview || isApplying }
-				aria-disabled={ ! canReview ? 'true' : undefined }
+				onClick={onReview}
+				disabled={!canReview || isApplying}
+				aria-disabled={!canReview ? 'true' : undefined}
 			>
-				{ __( 'Review', 'woocommerce' ) }
+				{__('Review', 'woocommerce')}
 			</Button>
 		</MaybeTooltip>
 	);
@@ -287,20 +281,20 @@ export function UpdateBanner( {
 		<div className="wc-update-banner" role="status" aria-live="polite">
 			<div className="wc-update-banner__body">
 				<div className="wc-update-banner__title">
-					{ __( 'Template update available', 'woocommerce' ) }
+					{__('Template update available', 'woocommerce')}
 				</div>
-				<div className="wc-update-banner__subtitle">{ subtitle }</div>
-				{ hasExpandableChanges && (
+				<div className="wc-update-banner__subtitle">{subtitle}</div>
+				{hasExpandableChanges && (
 					<>
 						<button
 							type="button"
 							className="wc-update-banner__expand"
-							aria-expanded={ expanded }
-							aria-controls={ CHANGES_LIST_ID }
-							onClick={ onToggleExpanded }
+							aria-expanded={expanded}
+							aria-controls={CHANGES_LIST_ID}
+							onClick={onToggleExpanded}
 						>
-							{ expanded
-								? __( 'Hide changes', 'woocommerce' )
+							{expanded
+								? __('Hide changes', 'woocommerce')
 								: sprintf(
 										/* translators: %d is the number of summary changes. */
 										_n(
@@ -310,33 +304,33 @@ export function UpdateBanner( {
 											'woocommerce'
 										),
 										expandableLines.length
-								  ) }
+									)}
 						</button>
-						{ expanded && (
+						{expanded && (
 							<ul
-								id={ CHANGES_LIST_ID }
+								id={CHANGES_LIST_ID}
 								className="wc-update-banner__changes"
 							>
-								{ expandableLines.map( ( line, i ) => (
-									<li key={ i }>{ line }</li>
-								) ) }
+								{expandableLines.map((line, i) => (
+									<li key={i}>{line}</li>
+								))}
 							</ul>
-						) }
+						)}
 					</>
-				) }
+				)}
 			</div>
 			<div className="wc-update-banner__actions">
-				{ applySlot }
-				{ reviewSlot }
+				{applySlot}
+				{reviewSlot}
 			</div>
 			<button
 				type="button"
 				className="wc-update-banner__dismiss"
-				aria-label={ __( 'Dismiss for this session', 'woocommerce' ) }
-				onClick={ onDismiss }
-				disabled={ isApplying }
+				aria-label={__('Dismiss for this session', 'woocommerce')}
+				onClick={onDismiss}
+				disabled={isApplying}
 			>
-				{ '×' }
+				{'×'}
 			</button>
 		</div>
 	);

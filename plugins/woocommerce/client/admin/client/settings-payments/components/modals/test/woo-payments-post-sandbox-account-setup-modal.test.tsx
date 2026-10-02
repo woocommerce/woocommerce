@@ -9,54 +9,54 @@ import { render, fireEvent } from '@testing-library/react';
  */
 import { WooPaymentsPostSandboxAccountSetupModal } from '..';
 
-jest.mock( '@woocommerce/tracks', () => ( {
+jest.mock('@woocommerce/tracks', () => ({
 	recordEvent: jest.fn(),
-} ) );
+}));
 
-describe( 'WooPaymentsPostSandboxAccountSetupModal', () => {
-	it( 'should record settings_payments_switch_to_live_account_click event when Activate Payments button is clicked', () => {
+describe('WooPaymentsPostSandboxAccountSetupModal', () => {
+	it('should record settings_payments_switch_to_live_account_click event when Activate Payments button is clicked', () => {
 		const { getByRole } = render(
 			<WooPaymentsPostSandboxAccountSetupModal
-				isOpen={ true }
-				devMode={ false }
-				onClose={ jest.fn() }
+				isOpen={true}
+				devMode={false}
+				onClose={jest.fn()}
 			/>
 		);
 
-		const activatePaymentsButton = getByRole( 'button', {
+		const activatePaymentsButton = getByRole('button', {
 			name: 'Activate payments',
-		} );
-		fireEvent.click( activatePaymentsButton );
+		});
+		fireEvent.click(activatePaymentsButton);
 
-		expect( recordEvent ).toHaveBeenCalledWith(
+		expect(recordEvent).toHaveBeenCalledWith(
 			'settings_payments_switch_to_live_account_click',
-			expect.objectContaining( {
-				business_country: expect.any( String ),
+			expect.objectContaining({
+				business_country: expect.any(String),
 				provider_id: 'woocommerce_payments',
-			} )
+			})
 		);
-	} );
+	});
 
-	it( 'should record settings_payments_continue_store_setup_click event when Continue Store Setup button is clicked', async () => {
+	it('should record settings_payments_continue_store_setup_click event when Continue Store Setup button is clicked', async () => {
 		const { getByRole } = render(
 			<WooPaymentsPostSandboxAccountSetupModal
-				isOpen={ true }
-				devMode={ false }
-				onClose={ jest.fn() }
+				isOpen={true}
+				devMode={false}
+				onClose={jest.fn()}
 			/>
 		);
 
-		const continueStoreSetupButton = getByRole( 'button', {
+		const continueStoreSetupButton = getByRole('button', {
 			name: 'Continue store setup',
-		} );
-		fireEvent.click( continueStoreSetupButton );
+		});
+		fireEvent.click(continueStoreSetupButton);
 
-		expect( recordEvent ).toHaveBeenCalledWith(
+		expect(recordEvent).toHaveBeenCalledWith(
 			'settings_payments_continue_store_setup_click',
-			expect.objectContaining( {
-				business_country: expect.any( String ),
+			expect.objectContaining({
+				business_country: expect.any(String),
 				provider_id: 'woocommerce_payments',
-			} )
+			})
 		);
-	} );
-} );
+	});
+});

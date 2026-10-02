@@ -17,29 +17,29 @@ import type { Attributes } from './types';
 
 // Register a plugin that adds a product type selector to the template sidebar.
 const PLUGIN_NAME = 'document-settings-template-selector-pane';
-if ( ! getPlugin( PLUGIN_NAME ) ) {
-	registerPlugin( PLUGIN_NAME, {
+if (!getPlugin(PLUGIN_NAME)) {
+	registerPlugin(PLUGIN_NAME, {
 		render: ProductTypeSelectorPlugin,
-	} );
+	});
 }
 
 // Register the block
-registerProductBlockType< Attributes >(
+registerProductBlockType<Attributes>(
 	{
-		...( metadata as BlockConfiguration< Attributes > ),
+		...(metadata as BlockConfiguration<Attributes>),
 		icon: {
-			src: ( { size }: { size?: number } ) => (
+			src: ({ size }: { size?: number }) => (
 				<span
 					className="wp-block-woocommerce-add-to-cart-with-options__block-icon"
-					style={ { height: size, width: size } }
+					style={{ height: size, width: size }}
 				>
-					{ button }
+					{button}
 				</span>
 			),
 		},
 		edit: AddToCartOptionsEdit,
 		save: () => null,
-		ancestor: [ 'woocommerce/single-product' ],
+		ancestor: ['woocommerce/single-product'],
 	},
 	{
 		isAvailableOnPostEditor: true,

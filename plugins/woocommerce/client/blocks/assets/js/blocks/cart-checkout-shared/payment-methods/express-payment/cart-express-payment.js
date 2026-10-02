@@ -22,8 +22,8 @@ const CartExpressPayment = () => {
 		expressPaymentMethodsInitialized,
 		isExpressPaymentMethodActive,
 		registeredExpressPaymentMethods = {},
-	} = useSelect( ( select ) => {
-		const payment = select( paymentStore );
+	} = useSelect((select) => {
+		const payment = select(paymentStore);
 		return {
 			availableExpressPaymentMethods:
 				payment.getAvailableExpressPaymentMethods(),
@@ -34,7 +34,7 @@ const CartExpressPayment = () => {
 			registeredExpressPaymentMethods:
 				payment.getRegisteredExpressPaymentMethods(),
 		};
-	}, [] );
+	}, []);
 	const { hasPendingItemsOperations } = useStoreCart();
 
 	const {
@@ -42,23 +42,23 @@ const CartExpressPayment = () => {
 		hasRegisteredNotInitializedExpressPaymentMethods,
 		hasNoValidRegisteredExpressPaymentMethods,
 		availableExpressPaymentsCount,
-	} = getExpressPaymentMethodsState( {
+	} = getExpressPaymentMethodsState({
 		availableExpressPaymentMethods,
 		expressPaymentMethodsInitialized,
 		registeredExpressPaymentMethods,
-	} );
+	});
 
 	// We show the skeleton when
 	// the express payment method is not active (because they trigger recalculations) and
 	// cart items are being added, updated, or deleted, because it can result in different express payment methods
 	// or when the express payment methods are not initialized
 	const showSkeleton =
-		! isExpressPaymentMethodActive &&
-		( hasPendingItemsOperations ||
-			hasRegisteredNotInitializedExpressPaymentMethods );
+		!isExpressPaymentMethodActive &&
+		(hasPendingItemsOperations ||
+			hasRegisteredNotInitializedExpressPaymentMethods);
 
 	if (
-		! hasRegisteredExpressPaymentMethods ||
+		!hasRegisteredExpressPaymentMethods ||
 		hasNoValidRegisteredExpressPaymentMethods
 	) {
 		return null;
@@ -80,52 +80,52 @@ const CartExpressPayment = () => {
 	return (
 		<>
 			<div
-				className={ clsx(
+				className={clsx(
 					'wc-block-components-express-payment',
 					'wc-block-components-express-payment--cart',
 					{
 						'wc-block-components-express-payment--disabled':
 							isExpressPaymentMethodActive,
 					}
-				) }
-				aria-disabled={ isExpressPaymentMethodActive }
+				)}
+				aria-disabled={isExpressPaymentMethodActive}
 				aria-live="polite"
-				{ ...( isExpressPaymentMethodActive && {
+				{...(isExpressPaymentMethodActive && {
 					'aria-busy': true,
 					'aria-label': __(
 						'Processing express checkout',
 						'woocommerce'
 					),
-				} ) }
+				})}
 			>
 				<div className="wc-block-components-express-payment__content">
 					<StoreNoticesContainer
-						context={ noticeContexts.EXPRESS_PAYMENTS }
+						context={noticeContexts.EXPRESS_PAYMENTS}
 					/>
-					{ showSkeleton ? (
+					{showSkeleton ? (
 						<ExpressPayWrapper className="wc-block-components-express-payment__event-buttons">
-							{ Array.from( {
+							{Array.from({
 								length: availableExpressPaymentsCount,
-							} ).map( ( _, index ) => (
-								<ExpressPayItem key={ index }>
+							}).map((_, index) => (
+								<ExpressPayItem key={index}>
 									<Skeleton
 										height="48px"
-										ariaMessage={ __(
+										ariaMessage={__(
 											'Loading express payment method…',
 											'woocommerce'
-										) }
+										)}
 									/>
 								</ExpressPayItem>
-							) ) }
+							))}
 						</ExpressPayWrapper>
 					) : (
 						<ExpressPaymentMethods />
-					) }
+					)}
 				</div>
 			</div>
 			<div className="wc-block-components-express-payment-continue-rule wc-block-components-express-payment-continue-rule--cart">
-				{ /* translators: Shown in the Cart block between the express payment methods and the Proceed to Checkout button */ }
-				{ __( 'Or', 'woocommerce' ) }
+				{/* translators: Shown in the Cart block between the express payment methods and the Proceed to Checkout button */}
+				{__('Or', 'woocommerce')}
 			</div>
 		</>
 	);

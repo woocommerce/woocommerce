@@ -16,7 +16,6 @@ module.exports = function ( grunt ) {
 			jsDest: '../../assets/js',
 		},
 
-
 		// Sass linting with Stylelint.
 		stylelint: {
 			options: {
@@ -150,8 +149,7 @@ module.exports = function ( grunt ) {
 						dest: '<%= dirs.cssDest %>/photoswipe/',
 					},
 					{
-						src:
-							'<%= dirs.css %>/photoswipe/default-skin/*.min.css',
+						src: '<%= dirs.css %>/photoswipe/default-skin/*.min.css',
 						dest: '<%= dirs.cssDest %>/photoswipe/default-skin/',
 					},
 				],
@@ -191,7 +189,10 @@ module.exports = function ( grunt ) {
 					{
 						expand: true,
 						flatten: true,
-						src: ['node_modules/sourcebuster/dist/sourcebuster*','node_modules/sourcebuster/LICENSE'],
+						src: [
+							'node_modules/sourcebuster/dist/sourcebuster*',
+							'node_modules/sourcebuster/LICENSE',
+						],
 						dest: '<%= dirs.jsDest %>/sourcebuster/',
 					},
 				],
@@ -283,11 +284,7 @@ module.exports = function ( grunt ) {
 					ignored: '**/*.min.js',
 				} )
 				.on( 'all', () =>
-					runQueued( [
-						'copy:js',
-						'concat:js',
-						'newer:uglify',
-					] )
+					runQueued( [ 'copy:js', 'concat:js', 'newer:uglify' ] )
 				);
 
 			grunt.log.writeln( 'Watching css/ and js/ for changes...' );

@@ -28,18 +28,18 @@ const APPLICATION_PASSWORDS_DOCS_URL =
  * of mounting the QR component, spinning, hitting `/qr-login-token`, and only
  * then seeing a generic error.
  */
-export const QRLoginUnavailableCard = ( {
+export const QRLoginUnavailableCard = ({
 	reason,
 }: {
 	reason: QRLoginUnavailableReason | null;
-} ) => {
+}) => {
 	// Each reason gets its own headline so the merchant can act on it. The
 	// AP-disabled-by-filter case is the most common third-party-plugin
 	// scenario; the AP-unsupported and HTTPS branches are typically infra
 	// setup issues. All branches share the docs link because the diagnostic
 	// flow is the same regardless.
 	let headline: ReactNode;
-	if ( reason === QRLoginUnavailableReasons.HTTPS_REQUIRED ) {
+	if (reason === QRLoginUnavailableReasons.HTTPS_REQUIRED) {
 		headline = __(
 			'QR sign-in is unavailable because this site is not served over HTTPS. Application passwords require an HTTPS connection.',
 			'woocommerce'
@@ -56,7 +56,7 @@ export const QRLoginUnavailableCard = ( {
 			{
 				link: (
 					<Link
-						href={ APPLICATION_PASSWORDS_DOCS_URL }
+						href={APPLICATION_PASSWORDS_DOCS_URL}
 						target="_blank"
 						type="external"
 					/>
@@ -70,38 +70,36 @@ export const QRLoginUnavailableCard = ( {
 			<Notice
 				className="woocommerce-qr-direct-login__unavailable-notice"
 				status="warning"
-				isDismissible={ false }
+				isDismissible={false}
 			>
-				{ headline }
+				{headline}
 			</Notice>
 
-			{ /*
+			{/*
 			   Native <details> — full keyboard + screen-reader support out
 			   of the box, and the collapsed state keeps the headline
 			   scannable.
-			*/ }
+			*/}
 			<details className="woocommerce-qr-direct-login__why">
-				<summary>
-					{ __( 'Why am I seeing this?', 'woocommerce' ) }
-				</summary>
+				<summary>{__('Why am I seeing this?', 'woocommerce')}</summary>
 				<ul>
 					<li>
-						{ __(
+						{__(
 							'A security plugin (e.g. Wordfence, Solid Security, iThemes Security) may have disabled application passwords.',
 							'woocommerce'
-						) }
+						)}
 					</li>
 					<li>
-						{ __(
+						{__(
 							'A custom code snippet using the wp_is_application_passwords_available filter may have disabled them.',
 							'woocommerce'
-						) }
+						)}
 					</li>
 					<li>
-						{ __(
+						{__(
 							'On most hosts, application passwords also require an HTTPS connection.',
 							'woocommerce'
-						) }
+						)}
 					</li>
 				</ul>
 			</details>

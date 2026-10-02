@@ -9,23 +9,23 @@ import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import './editor.scss';
 import { useForcedLayout, getAllowedBlocks } from '../../cart-checkout-shared';
 
-export const AdditionalFields = ( {
+export const AdditionalFields = ({
 	block,
 }: {
 	// Name of the parent block.
 	block: string;
-} ): JSX.Element => {
+}): JSX.Element => {
 	const { 'data-block': clientId } = useBlockProps();
-	const allowedBlocks = getAllowedBlocks( block );
+	const allowedBlocks = getAllowedBlocks(block);
 
-	useForcedLayout( {
+	useForcedLayout({
 		clientId,
 		registeredBlocks: allowedBlocks,
-	} );
+	});
 
 	return (
 		<div className="wc-block-checkout__additional_fields">
-			<InnerBlocks allowedBlocks={ allowedBlocks } />
+			<InnerBlocks allowedBlocks={allowedBlocks} />
 		</div>
 	);
 };

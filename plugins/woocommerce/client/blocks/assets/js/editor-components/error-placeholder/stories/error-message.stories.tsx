@@ -11,13 +11,13 @@ import ErrorMessage, { ErrorMessageProps } from '../error-message';
 export default {
 	title: 'Editor Components/Errors/Base Error Atom',
 	component: ErrorMessage,
-} as Meta< ErrorMessageProps >;
+} as Meta<ErrorMessageProps>;
 
-const Template: StoryFn< ErrorMessageProps > = ( args ) => (
-	<ErrorMessage { ...args } />
+const Template: StoryFn<ErrorMessageProps> = (args) => (
+	<ErrorMessage {...args} />
 );
 
-export const BaseErrorAtom = Template.bind( {} );
+export const BaseErrorAtom = Template.bind({});
 BaseErrorAtom.args = {
 	error: {
 		message:

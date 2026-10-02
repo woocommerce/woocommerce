@@ -13,15 +13,13 @@ interface ProductBadgeProps {
 	children?: ReactNode;
 	className?: string;
 }
-const ProductBadge = ( {
+const ProductBadge = ({
 	children,
 	className,
-}: ProductBadgeProps ): JSX.Element => {
+}: ProductBadgeProps): JSX.Element => {
 	return (
-		<div
-			className={ clsx( 'wc-block-components-product-badge', className ) }
-		>
-			{ children }
+		<div className={clsx('wc-block-components-product-badge', className)}>
+			{children}
 		</div>
 	);
 };

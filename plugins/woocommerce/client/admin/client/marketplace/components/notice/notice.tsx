@@ -32,7 +32,7 @@ const iconMap = {
 	percent,
 };
 
-export default function Notice( props: NoticeProps ): React.JSX.Element | null {
+export default function Notice(props: NoticeProps): React.JSX.Element | null {
 	const {
 		id,
 		description,
@@ -44,71 +44,71 @@ export default function Notice( props: NoticeProps ): React.JSX.Element | null {
 		onClose,
 		onLoad,
 	} = props;
-	const [ isVisible, setIsVisible ] = useState(
-		localStorage.getItem( `wc-marketplaceNoticeClosed-${ id }` ) !== 'true'
+	const [isVisible, setIsVisible] = useState(
+		localStorage.getItem(`wc-marketplaceNoticeClosed-${id}`) !== 'true'
 	);
 
 	const handleClose = () => {
-		setIsVisible( false );
-		localStorage.setItem( `wc-marketplaceNoticeClosed-${ id }`, 'true' );
-		if ( typeof onClose === 'function' ) {
+		setIsVisible(false);
+		localStorage.setItem(`wc-marketplaceNoticeClosed-${id}`, 'true');
+		if (typeof onClose === 'function') {
 			onClose();
 		}
 	};
 
-	useEffect( () => {
-		if ( isVisible && typeof onLoad === 'function' ) {
+	useEffect(() => {
+		if (isVisible && typeof onLoad === 'function') {
 			onLoad();
 		}
 		// only run once
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ isVisible ] );
+	}, [isVisible]);
 
-	if ( ! isVisible ) return null;
+	if (!isVisible) return null;
 
 	const classes = clsx(
 		'woocommerce-marketplace__notice',
-		`woocommerce-marketplace__notice--${ variant }`,
+		`woocommerce-marketplace__notice--${variant}`,
 		{
 			'is-dismissible': isDismissible,
 		},
 		className
 	);
 
-	const iconElement = iconMap[ ( icon || 'info' ) as IconKey ];
+	const iconElement = iconMap[(icon || 'info') as IconKey];
 
 	const iconClass = clsx(
 		'woocommerce-marketplace__notice-icon',
-		`woocommerce-marketplace__notice-icon--${ variant }`
+		`woocommerce-marketplace__notice-icon--${variant}`
 	);
 
 	return (
-		<div className={ classes }>
-			{ icon && (
-				<span className={ iconClass }>
-					<Icon icon={ iconElement } />
+		<div className={classes}>
+			{icon && (
+				<span className={iconClass}>
+					<Icon icon={iconElement} />
 				</span>
-			) }
+			)}
 			<div className="woocommerce-marketplace__notice-content">
 				<p
 					className="woocommerce-marketplace__notice-description"
-					dangerouslySetInnerHTML={ sanitizeHTML( description ) }
+					dangerouslySetInnerHTML={sanitizeHTML(description)}
 				/>
-				{ children && (
+				{children && (
 					<div className="woocommerce-marketplace__notice-children">
-						{ children }
+						{children}
 					</div>
-				) }
+				)}
 			</div>
-			{ isDismissible && (
+			{isDismissible && (
 				<button
 					className="woocommerce-marketplace__notice-close"
 					aria-label="Close"
-					onClick={ handleClose }
+					onClick={handleClose}
 				>
-					<Icon icon={ closeSmall } />
+					<Icon icon={closeSmall} />
 				</button>
-			) }
+			)}
 		</div>
 	);
 }

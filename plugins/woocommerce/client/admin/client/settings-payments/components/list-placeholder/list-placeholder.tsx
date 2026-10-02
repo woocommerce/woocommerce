@@ -32,12 +32,12 @@ interface ListPlaceholderProps {
  * // Render a placeholder list with 3 rows without drag icons
  * <ListPlaceholder rows={3} hasDragIcon={false} />
  */
-export const ListPlaceholder = ( {
+export const ListPlaceholder = ({
 	rows,
 	hasDragIcon = true,
-}: ListPlaceholderProps ) => {
+}: ListPlaceholderProps) => {
 	// Create an array of placeholder items based on the number of rows.
-	const items = Array.from( { length: rows } ).map( () => {
+	const items = Array.from({ length: rows }).map(() => {
 		return {
 			content: <div className="list-placeholder__content" />,
 			className:
@@ -46,12 +46,12 @@ export const ListPlaceholder = ( {
 			after: <div className="list-placeholder__after" />,
 			before: (
 				<>
-					{ hasDragIcon && <DefaultDragHandle /> }
+					{hasDragIcon && <DefaultDragHandle />}
 					<div className="list-placeholder__before" />
 				</>
 			),
 		};
-	} );
+	});
 
-	return <List items={ items } />;
+	return <List items={items} />;
 };

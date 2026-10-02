@@ -19,35 +19,33 @@ import './report-date-tour.scss';
 
 const DATE_TYPE_OPTION = 'woocommerce_date_type';
 
-export const ReportDateTour = ( {
+export const ReportDateTour = ({
 	optionName,
 	headingText,
 }: {
 	optionName: string;
 	headingText: string;
-} ) => {
-	const [ isDismissed, setIsDismissed ] = useState( false );
-	const { updateOptions } = useDispatch( optionsStore );
+}) => {
+	const [isDismissed, setIsDismissed] = useState(false);
+	const { updateOptions } = useDispatch(optionsStore);
 
 	const { shouldShowTour, isResolving } = useSelect(
-		( select ) => {
-			const { getOption, hasFinishedResolution } = select( optionsStore );
+		(select) => {
+			const { getOption, hasFinishedResolution } = select(optionsStore);
 
 			return {
 				shouldShowTour:
-					getOption( optionName ) !== 'yes' &&
-					getOption( DATE_TYPE_OPTION ) === false,
+					getOption(optionName) !== 'yes' &&
+					getOption(DATE_TYPE_OPTION) === false,
 				isResolving:
-					! hasFinishedResolution( 'getOption', [ optionName ] ) ||
-					! hasFinishedResolution( 'getOption', [
-						DATE_TYPE_OPTION,
-					] ),
+					!hasFinishedResolution('getOption', [optionName]) ||
+					!hasFinishedResolution('getOption', [DATE_TYPE_OPTION]),
 			};
 		},
-		[ optionName ]
+		[optionName]
 	);
 
-	if ( isDismissed || ! shouldShowTour || isResolving ) {
+	if (isDismissed || !shouldShowTour || isResolving) {
 		return null;
 	}
 
@@ -72,7 +70,7 @@ export const ReportDateTour = ( {
 								'woocommerce'
 							),
 							{
-								link: createElement( 'a', {
+								link: createElement('a', {
 									href: getAdminLink(
 										'admin.php?page=wc-admin&path=/analytics/settings'
 									),
@@ -80,12 +78,12 @@ export const ReportDateTour = ( {
 										'Analytics date settings',
 										'woocommerce'
 									),
-								} ),
+								}),
 							}
 						),
 					},
 					primaryButton: {
-						text: __( 'Got it', 'woocommerce' ),
+						text: __('Got it', 'woocommerce'),
 					},
 				},
 				options: {
@@ -96,12 +94,12 @@ export const ReportDateTour = ( {
 			},
 		],
 		closeHandler: () => {
-			void updateOptions( {
-				[ optionName ]: 'yes',
-			} );
-			setIsDismissed( true );
+			void updateOptions({
+				[optionName]: 'yes',
+			});
+			setIsDismissed(true);
 		},
 	};
 
-	return <TourKit config={ config } />;
+	return <TourKit config={config} />;
 };

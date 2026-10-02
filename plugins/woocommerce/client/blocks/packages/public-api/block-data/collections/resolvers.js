@@ -17,17 +17,17 @@ import { apiFetchWithHeadersControl } from '../shared-controls';
  *
  * @param {number} timestamp Last update timestamp.
  */
-function* invalidateModifiedCollection( timestamp ) {
+function* invalidateModifiedCollection(timestamp) {
 	const lastModified = yield controls.resolveSelect(
 		STORE_KEY,
 		'getCollectionLastModified'
 	);
 
-	if ( ! lastModified ) {
-		yield controls.dispatch( STORE_KEY, 'receiveLastModified', timestamp );
-	} else if ( timestamp > lastModified ) {
-		yield controls.dispatch( STORE_KEY, 'invalidateResolutionForStore' );
-		yield controls.dispatch( STORE_KEY, 'receiveLastModified', timestamp );
+	if (!lastModified) {
+		yield controls.dispatch(STORE_KEY, 'receiveLastModified', timestamp);
+	} else if (timestamp > lastModified) {
+		yield controls.dispatch(STORE_KEY, 'invalidateResolutionForStore');
+		yield controls.dispatch(STORE_KEY, 'receiveLastModified', timestamp);
 	}
 }
 
@@ -39,7 +39,7 @@ function* invalidateModifiedCollection( timestamp ) {
  * @param {Object} query
  * @param {Array}  ids
  */
-export function* getCollection( namespace, resourceName, query, ids ) {
+export function* getCollection(namespace, resourceName, query, ids) {
 	const route = yield controls.resolveSelect(
 		SCHEMA_STORE_KEY,
 		'getRoute',
@@ -47,29 +47,29 @@ export function* getCollection( namespace, resourceName, query, ids ) {
 		resourceName,
 		ids
 	);
-	const queryString = addQueryArgs( '', query );
-	if ( ! route ) {
-		yield receiveCollection( namespace, resourceName, queryString, ids );
+	const queryString = addQueryArgs('', query);
+	if (!route) {
+		yield receiveCollection(namespace, resourceName, queryString, ids);
 		return;
 	}
 
 	try {
 		const { response = DEFAULT_EMPTY_ARRAY, headers } =
-			yield apiFetchWithHeadersControl( { path: route + queryString } );
+			yield apiFetchWithHeadersControl({ path: route + queryString });
 
-		if ( headers && headers.get && headers.has( 'last-modified' ) ) {
+		if (headers && headers.get && headers.has('last-modified')) {
 			// Do any invalidation before the collection is received to prevent
 			// this query running again.
 			yield invalidateModifiedCollection(
-				parseInt( headers.get( 'last-modified' ), 10 )
+				parseInt(headers.get('last-modified'), 10)
 			);
 		}
 
-		yield receiveCollection( namespace, resourceName, queryString, ids, {
+		yield receiveCollection(namespace, resourceName, queryString, ids, {
 			items: response,
 			headers,
-		} );
-	} catch ( error ) {
+		});
+	} catch (error) {
 		yield receiveCollectionError(
 			namespace,
 			resourceName,
@@ -102,9 +102,9 @@ export function* getCollectionHeader(
 	// feed the correct number of args in for the select so we don't resolve
 	// unnecessarily. Any undefined args will be excluded. This is important
 	// because resolver resolution is cached by both number and value of args.
-	const args = [ namespace, resourceName, query, ids ].filter(
-		( arg ) => typeof arg !== 'undefined'
+	const args = [namespace, resourceName, query, ids].filter(
+		(arg) => typeof arg !== 'undefined'
 	);
 	// we call this simply to do any resolution of the collection if necessary.
-	yield controls.resolveSelect( STORE_KEY, 'getCollection', ...args );
+	yield controls.resolveSelect(STORE_KEY, 'getCollection', ...args);
 }

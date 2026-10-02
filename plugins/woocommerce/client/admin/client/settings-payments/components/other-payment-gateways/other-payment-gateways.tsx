@@ -63,22 +63,22 @@ interface OtherPaymentGatewaysProps {
  * When collapsed, it shows a few icons representing the suggestions. When expanded, it displays detailed
  * information about each suggestion and allows the user to install them.
  */
-export const OtherPaymentGateways = ( {
+export const OtherPaymentGateways = ({
 	suggestions,
 	suggestionCategories,
 	installingPlugin,
 	setUpPlugin,
 	isFetching,
 	morePaymentOptionsLink,
-}: OtherPaymentGatewaysProps ) => {
-	const urlParams = new URLSearchParams( window.location.search );
+}: OtherPaymentGatewaysProps) => {
+	const urlParams = new URLSearchParams(window.location.search);
 
 	// Determine the initial expanded state based on URL params.
-	const initialExpanded = urlParams.get( 'other_pes_section' ) === 'expanded';
-	const [ isExpanded, setIsExpanded ] = useState( initialExpanded );
-	const [ categoryIdWithPopoverVisible, setCategoryIdWithPopoverVisible ] =
-		useState( '' );
-	const buttonRefs = useRef< Record< string, HTMLSpanElement | null > >( {} );
+	const initialExpanded = urlParams.get('other_pes_section') === 'expanded';
+	const [isExpanded, setIsExpanded] = useState(initialExpanded);
+	const [categoryIdWithPopoverVisible, setCategoryIdWithPopoverVisible] =
+		useState('');
+	const buttonRefs = useRef<Record<string, HTMLSpanElement | null>>({});
 
 	const handleInfoIconClick = (
 		event: React.MouseEvent | React.KeyboardEvent,
@@ -89,8 +89,8 @@ export const OtherPaymentGateways = ( {
 			'.other-payment-gateways__content__title__icon-container'
 		);
 
-		const targetRef = buttonRefs.current[ categoryId ] ?? null;
-		if ( targetRef && parentSpan !== targetRef ) {
+		const targetRef = buttonRefs.current[categoryId] ?? null;
+		if (targetRef && parentSpan !== targetRef) {
 			return;
 		}
 
@@ -100,7 +100,7 @@ export const OtherPaymentGateways = ( {
 	};
 
 	const handleFocusOutsidePopover = () => {
-		setCategoryIdWithPopoverVisible( '' );
+		setCategoryIdWithPopoverVisible('');
 	};
 
 	const handleInfoIconKeyDown = (
@@ -112,26 +112,26 @@ export const OtherPaymentGateways = ( {
 			categoryId === categoryIdWithPopoverVisible
 		) {
 			event.stopPropagation();
-			setCategoryIdWithPopoverVisible( '' );
-			buttonRefs.current[ categoryId ]?.focus();
-		} else if ( event.key === 'Enter' || event.key === ' ' ) {
+			setCategoryIdWithPopoverVisible('');
+			buttonRefs.current[categoryId]?.focus();
+		} else if (event.key === 'Enter' || event.key === ' ') {
 			event.preventDefault();
-			handleInfoIconClick( event, categoryId );
+			handleInfoIconClick(event, categoryId);
 		}
 	};
 
 	const handleSectionToggle = () => {
-		const expand = ! isExpanded;
+		const expand = !isExpanded;
 
 		// Record the event when user clicks on the section.
-		recordPaymentsEvent( 'other_payment_options_section_click', {
+		recordPaymentsEvent('other_payment_options_section_click', {
 			action: expand ? 'expand' : 'collapse',
-		} );
+		});
 
-		setIsExpanded( expand );
+		setIsExpanded(expand);
 
 		// Update the URL params to reflect the expanded state.
-		urlParams.set( 'other_pes_section', expand ? 'expanded' : 'collapsed' );
+		urlParams.set('other_pes_section', expand ? 'expanded' : 'collapsed');
 		window.history.replaceState(
 			{},
 			document.title,
@@ -152,16 +152,16 @@ export const OtherPaymentGateways = ( {
 					return {
 						category,
 						suggestions: suggestions.filter(
-							( suggestion ) => suggestion._type === category.id
+							(suggestion) => suggestion._type === category.id
 						),
 					};
 				}
 			),
-		[ suggestions, suggestionCategories ]
+		[suggestions, suggestionCategories]
 	);
 
 	// Memoize the collapsed images to avoid re-rendering when not expanded
-	const collapsedImages = useMemo( () => {
+	const collapsedImages = useMemo(() => {
 		return isFetching ? (
 			<>
 				<div className="other-payment-gateways__header__title-image-placeholder" />
@@ -171,28 +171,28 @@ export const OtherPaymentGateways = ( {
 		) : (
 			// Go through the category hierarchy so we render the collapsed images in the same order as when expanded.
 			suggestionsByCategory.map(
-				( { suggestions: categorySuggestions } ) => {
-					if ( categorySuggestions.length === 0 ) {
+				({ suggestions: categorySuggestions }) => {
+					if (categorySuggestions.length === 0) {
 						return null;
 					}
 
-					return categorySuggestions.map( ( extension ) => (
+					return categorySuggestions.map((extension) => (
 						<img
-							key={ extension.id }
-							src={ extension.icon }
-							alt={ extension.title + ' small logo' }
+							key={extension.id}
+							src={extension.icon}
+							alt={extension.title + ' small logo'}
 							width="24"
 							height="24"
 							className="other-payment-gateways__header__title-image"
 						/>
-					) );
+					));
 				}
 			)
 		);
-	}, [ suggestionsByCategory, isFetching ] );
+	}, [suggestionsByCategory, isFetching]);
 
 	// Memoize the expanded content to avoid re-rendering when expanded
-	const expandedContent = useMemo( () => {
+	const expandedContent = useMemo(() => {
 		return isFetching ? (
 			<>
 				<GridItemPlaceholder />
@@ -201,68 +201,65 @@ export const OtherPaymentGateways = ( {
 			</>
 		) : (
 			suggestionsByCategory.map(
-				( { category, suggestions: categorySuggestions } ) => {
-					if ( categorySuggestions.length === 0 ) {
+				({ category, suggestions: categorySuggestions }) => {
+					if (categorySuggestions.length === 0) {
 						return null;
 					}
 
 					return (
 						<div
 							className="other-payment-gateways__content__category-container"
-							key={ category.id }
+							key={category.id}
 						>
 							<div className="other-payment-gateways__content__title">
 								<h3 className="other-payment-gateways__content__title__h3">
-									{ decodeEntities( category.title ) }
+									{decodeEntities(category.title)}
 								</h3>
 								<span
 									className="other-payment-gateways__content__title__icon-container"
-									onClick={ ( event ) =>
-										handleInfoIconClick(
-											event,
-											category.id
-										)
+									onClick={(event) =>
+										handleInfoIconClick(event, category.id)
 									}
-									onKeyDown={ ( event ) =>
+									onKeyDown={(event) =>
 										handleInfoIconKeyDown(
 											event,
 											category.id
 										)
 									}
-									tabIndex={ 0 }
+									tabIndex={0}
 									role="button"
-									ref={ ( el ) => {
-										buttonRefs.current[ category.id ] = el;
-									} }
+									ref={(el) => {
+										buttonRefs.current[category.id] = el;
+									}}
 								>
 									<Gridicon
 										icon="info-outline"
 										className="other-payment-gateways__content__title__icon"
 									/>
-									{ category.id ===
+									{category.id ===
 										categoryIdWithPopoverVisible && (
 										<Popover
 											className="other-payment-gateways__content__title-popover"
 											placement="top-start"
-											offset={ 4 }
+											offset={4}
 											variant="unstyled"
-											focusOnMount={ true }
-											noArrow={ true }
-											shift={ true }
+											focusOnMount={true}
+											noArrow={true}
+											shift={true}
 											onFocusOutside={
 												handleFocusOutsidePopover
 											}
-											onKeyDown={ ( event ) =>
+											onKeyDown={(event) =>
 												handleInfoIconKeyDown(
 													event,
 													category.id
 												)
 											}
 										>
-											{ /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */ }
+											{/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
 											<div
 												className="components-popover__content-container"
-												onKeyDown={ ( event ) =>
+												onKeyDown={(event) =>
 													handleInfoIconKeyDown(
 														event,
 														category.id
@@ -270,18 +267,18 @@ export const OtherPaymentGateways = ( {
 												}
 											>
 												<p>
-													{ decodeEntities(
+													{decodeEntities(
 														category.description
-													) }
+													)}
 												</p>
 											</div>
 										</Popover>
-									) }
+									)}
 								</span>
 							</div>
 
 							<div className="other-payment-gateways__content__grid">
-								{ categorySuggestions.map( ( extension ) => {
+								{categorySuggestions.map((extension) => {
 									const isPluginAlreadyInstalled =
 										extension.plugin.status === 'installed';
 
@@ -291,36 +288,33 @@ export const OtherPaymentGateways = ( {
 
 									// By default, the CTA is to install a plugin.
 									let ctaLabel = isCurrentlyBusy
-										? __< string >(
+										? __<string>(
 												'Installing',
 												'woocommerce'
-										  )
-										: __< string >(
-												'Install',
-												'woocommerce'
-										  );
+											)
+										: __<string>('Install', 'woocommerce');
 
 									// If the plugin is already installed, the CTA is to activate it.
-									if ( isPluginAlreadyInstalled ) {
+									if (isPluginAlreadyInstalled) {
 										ctaLabel = isCurrentlyBusy
-											? __< string >(
+											? __<string>(
 													'Activating',
 													'woocommerce'
-											  )
-											: __< string >(
+												)
+											: __<string>(
 													'Activate',
 													'woocommerce'
-											  );
+												);
 									}
 
 									return (
 										<div
 											className="other-payment-gateways__content__grid-item"
-											key={ extension.id }
+											key={extension.id}
 										>
 											<img
 												className="other-payment-gateways__content__grid-item-image"
-												src={ extension.icon }
+												src={extension.icon}
 												alt={
 													decodeEntities(
 														extension.title
@@ -329,15 +323,15 @@ export const OtherPaymentGateways = ( {
 											/>
 											<div className="other-payment-gateways__content__grid-item__content">
 												<span className="other-payment-gateways__content__grid-item__content__title">
-													{ extension.title }
-													{ extension?._incentive && (
+													{extension.title}
+													{extension?._incentive && (
 														<IncentiveStatusBadge
 															incentive={
 																extension._incentive
 															}
 														/>
-													) }
-													{ /* All payment extension suggestions are official. */ }
+													)}
+													{/* All payment extension suggestions are official. */}
 													<OfficialBadge
 														variant="expanded"
 														suggestionId={
@@ -346,14 +340,14 @@ export const OtherPaymentGateways = ( {
 													/>
 												</span>
 												<span className="other-payment-gateways__content__grid-item__content__description">
-													{ decodeEntities(
+													{decodeEntities(
 														extension.description
-													) }
+													)}
 												</span>
 												<div className="other-payment-gateways__content__grid-item__content__actions">
 													<Button
 														variant="link"
-														onClick={ () =>
+														onClick={() =>
 															setUpPlugin(
 																extension,
 																null, // Suggested gateways won't have an onboarding URL.
@@ -361,29 +355,27 @@ export const OtherPaymentGateways = ( {
 																extension.plugin
 																	.status ===
 																	'not_installed'
-																	? extension
+																	? (extension
 																			._links
 																			?.attach
 																			?.href ??
-																			null
+																			null)
 																	: null,
 																'wc_settings_payments__other_payment_options'
 															)
 														}
-														isBusy={
-															isCurrentlyBusy
-														}
+														isBusy={isCurrentlyBusy}
 														disabled={
-															!! installingPlugin
+															!!installingPlugin
 														}
 													>
-														{ ctaLabel }
+														{ctaLabel}
 													</Button>
 												</div>
 											</div>
 										</div>
 									);
-								} ) }
+								})}
 							</div>
 						</div>
 					);
@@ -396,42 +388,42 @@ export const OtherPaymentGateways = ( {
 		setUpPlugin,
 		isFetching,
 		categoryIdWithPopoverVisible,
-	] );
+	]);
 
 	return (
 		<div
 			className={
-				'other-payment-gateways' + ( isExpanded ? ' is-expanded' : '' )
+				'other-payment-gateways' + (isExpanded ? ' is-expanded' : '')
 			}
 		>
 			<button
 				className="other-payment-gateways__header"
-				onClick={ handleSectionToggle }
-				aria-expanded={ isExpanded }
+				onClick={handleSectionToggle}
+				aria-expanded={isExpanded}
 				type="button"
 			>
 				<span className="other-payment-gateways__header__title">
-					<span>{ __( 'More payment options', 'woocommerce' ) }</span>
-					{ ! isExpanded && <>{ collapsedImages }</> }
+					<span>{__('More payment options', 'woocommerce')}</span>
+					{!isExpanded && <>{collapsedImages}</>}
 				</span>
 				<Gridicon
 					className="other-payment-gateways__header__arrow"
-					icon={ isExpanded ? 'chevron-up' : 'chevron-down' }
+					icon={isExpanded ? 'chevron-up' : 'chevron-down'}
 				/>
 				<span className="screen-reader-text">
-					{ isExpanded
-						? __( 'Collapse section', 'woocommerce' )
-						: __( 'Expand section', 'woocommerce' ) }
+					{isExpanded
+						? __('Collapse section', 'woocommerce')
+						: __('Expand section', 'woocommerce')}
 				</span>
 			</button>
-			{ isExpanded && (
+			{isExpanded && (
 				<div className="other-payment-gateways__content">
-					{ expandedContent }
+					{expandedContent}
 					<div className="other-payment-gateways__content__external-icon">
-						{ morePaymentOptionsLink }
+						{morePaymentOptionsLink}
 					</div>
 				</div>
-			) }
+			)}
 		</div>
 	);
 };

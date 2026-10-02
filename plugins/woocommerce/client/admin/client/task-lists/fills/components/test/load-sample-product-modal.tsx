@@ -8,9 +8,9 @@ import { render } from '@testing-library/react';
  */
 import LoadSampleProductModal from '../load-sample-product-modal';
 
-describe( 'LoadSampleProductModal', () => {
-	it( 'should render LoadSampleProductModal', () => {
-		const { queryByText } = render( <LoadSampleProductModal /> );
-		expect( queryByText( 'Loading sample products' ) ).toBeInTheDocument();
-	} );
-} );
+describe('LoadSampleProductModal', () => {
+	it('should render LoadSampleProductModal', () => {
+		const { queryByText } = render(<LoadSampleProductModal />);
+		expect(queryByText('Loading sample products')).toBeInTheDocument();
+	});
+});

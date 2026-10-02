@@ -15,14 +15,14 @@ const v1 = {
 		const blockProps = useBlockProps.save();
 
 		return (
-			<div { ...blockProps }>
-				{ /* @ts-expect-error: `InnerBlocks.Content` is a component that is typed in WordPress core*/ }
+			<div {...blockProps}>
+				{/* @ts-expect-error: `InnerBlocks.Content` is a component that is typed in WordPress core*/}
 				<InnerBlocks.Content />
 			</div>
 		);
 	},
 };
 
-const deprecated = [ v1 ];
+const deprecated = [v1];
 
 export default deprecated;

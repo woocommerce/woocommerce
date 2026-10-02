@@ -20,12 +20,12 @@ import { WooPaymentsMethodsLogos } from '@woocommerce/onboarding';
  */
 import './payment-promotion-row.scss';
 
-function sanitizeHTMLForReact( html: string ) {
+function sanitizeHTMLForReact(html: string) {
 	return {
-		__html: sanitizeHTML( html, {
-			tags: [ 'a', 'img', 'br' ],
-			attr: [ 'href', 'src', 'class', 'alt', 'target' ],
-		} ),
+		__html: sanitizeHTML(html, {
+			tags: ['a', 'img', 'br'],
+			attr: ['href', 'src', 'class', 'alt', 'target'],
+		}),
 	};
 }
 
@@ -44,27 +44,26 @@ type PaymentPromotionRowProps = {
 	subTitleContent?: string;
 };
 
-export const PaymentPromotionRow = ( {
+export const PaymentPromotionRow = ({
 	paymentMethod,
 	title,
 	subTitleContent,
 	columns,
-}: PaymentPromotionRowProps ) => {
+}: PaymentPromotionRowProps) => {
 	const { gatewayId, pluginSlug, url } = paymentMethod;
-	const [ installing, setInstalling ] = useState( false );
-	const [ isVisible, setIsVisible ] = useState( true );
-	const { installAndActivatePlugins } = useDispatch( pluginsStore );
-	const { createNotice } = useDispatch( 'core/notices' );
-	const { updatePaymentGateway } = useDispatch( paymentGatewaysStore );
-	const { gatewayIsActive, paymentGateway } = useSelect( ( select ) => {
-		const { getPaymentGateway } = select( paymentGatewaysStore );
-		const activePlugins: string[] =
-			select( pluginsStore ).getActivePlugins();
-		const isActive = activePlugins && activePlugins.includes( pluginSlug );
+	const [installing, setInstalling] = useState(false);
+	const [isVisible, setIsVisible] = useState(true);
+	const { installAndActivatePlugins } = useDispatch(pluginsStore);
+	const { createNotice } = useDispatch('core/notices');
+	const { updatePaymentGateway } = useDispatch(paymentGatewaysStore);
+	const { gatewayIsActive, paymentGateway } = useSelect((select) => {
+		const { getPaymentGateway } = select(paymentGatewaysStore);
+		const activePlugins: string[] = select(pluginsStore).getActivePlugins();
+		const isActive = activePlugins && activePlugins.includes(pluginSlug);
 		let paymentGatewayData;
-		if ( isActive ) {
+		if (isActive) {
 			paymentGatewayData = getPaymentGateway(
-				pluginSlug.replace( /\-/g, '_' )
+				pluginSlug.replace(/\-/g, '_')
 			);
 		}
 
@@ -72,138 +71,129 @@ export const PaymentPromotionRow = ( {
 			gatewayIsActive: isActive,
 			paymentGateway: paymentGatewayData,
 		};
-	}, [] );
+	}, []);
 
-	const isWooPayEligible = useSelect( ( select ) => {
-		const store = select( paymentSettingsStore );
+	const isWooPayEligible = useSelect((select) => {
+		const store = select(paymentSettingsStore);
 		return store.getIsWooPayEligible();
-	}, [] );
+	}, []);
 
-	useEffect( () => {
-		if (
-			gatewayIsActive &&
-			paymentGateway &&
-			paymentGateway.settings_url
-		) {
+	useEffect(() => {
+		if (gatewayIsActive && paymentGateway && paymentGateway.settings_url) {
 			window.location.href = paymentGateway.settings_url;
 		}
-	}, [ gatewayIsActive, paymentGateway ] );
+	}, [gatewayIsActive, paymentGateway]);
 
 	const installPaymentGateway = () => {
-		if ( installing ) {
+		if (installing) {
 			return;
 		}
-		setInstalling( true );
-		recordEvent( 'settings_payments_recommendations_setup', {
+		setInstalling(true);
+		recordEvent('settings_payments_recommendations_setup', {
 			extension_selected: pluginSlug,
-		} );
-		installAndActivatePlugins( [ pluginSlug ] ).catch(
-			( response: { message?: string } ) => {
-				if ( response.message ) {
-					createNotice( 'error', response.message );
+		});
+		installAndActivatePlugins([pluginSlug]).catch(
+			(response: { message?: string }) => {
+				if (response.message) {
+					createNotice('error', response.message);
 				}
-				setInstalling( false );
+				setInstalling(false);
 			}
 		);
 	};
 
 	const onDismiss = () => {
-		setIsVisible( false );
-		recordEvent( 'settings_payments_promotions_dismiss', {
+		setIsVisible(false);
+		recordEvent('settings_payments_promotions_dismiss', {
 			id: gatewayId,
-		} );
-		void updatePaymentGateway( gatewayId, {
+		});
+		void updatePaymentGateway(gatewayId, {
 			settings: {
 				is_dismissed: 'yes',
 			},
-		} );
+		});
 	};
 
-	if ( ! isVisible ) {
+	if (!isVisible) {
 		return null;
 	}
 
 	return (
 		<>
-			{ columns.map( ( column ) => {
-				if ( column.className.includes( 'name' ) ) {
+			{columns.map((column) => {
+				if (column.className.includes('name')) {
 					return (
-						<td className="name" key={ column.className }>
+						<td className="name" key={column.className}>
 							<div className="wc-payment-gateway-method__name">
 								<Link
 									target="_blank"
 									type="external"
 									rel="noreferrer"
-									href={ url }
+									href={url}
 								>
-									{ title }
+									{title}
 								</Link>
-								{ gatewayId ===
+								{gatewayId ===
 									'pre_install_woocommerce_payments_promotion' && (
 									<div className="pre-install-payment-gateway__subtitle">
 										<WooPaymentsMethodsLogos
-											maxElements={ 5 }
-											isWooPayEligible={
-												isWooPayEligible
-											}
+											maxElements={5}
+											isWooPayEligible={isWooPayEligible}
 										/>
 									</div>
-								) }
-								{ gatewayId !==
+								)}
+								{gatewayId !==
 									'pre_install_woocommerce_payments_promotion' &&
 								subTitleContent ? (
 									<div
 										className="pre-install-payment-gateway__subtitle"
 										// eslint-disable-next-line react/no-danger -- innerHTML from the element with class name: gateway-subtitle.
-										dangerouslySetInnerHTML={ sanitizeHTMLForReact(
+										dangerouslySetInnerHTML={sanitizeHTMLForReact(
 											subTitleContent
-										) }
+										)}
 									></div>
-								) : null }
+								) : null}
 							</div>
 						</td>
 					);
-				} else if ( column.className.includes( 'status' ) ) {
+				} else if (column.className.includes('status')) {
 					return (
 						<td
 							className="pre-install-payment-gateway__status"
-							key={ column.className }
+							key={column.className}
 						></td>
 					);
-				} else if ( column.className.includes( 'action' ) ) {
+				} else if (column.className.includes('action')) {
 					return (
-						<td className="action" key={ column.className }>
+						<td className="action" key={column.className}>
 							<div className="pre-install-payment-gateway__actions">
 								<EllipsisMenu
-									label={ __(
+									label={__(
 										'Payment Promotion Options',
 										'woocommerce'
-									) }
+									)}
 									className="pre-install-payment-gateway__actions-menu"
-									onToggle={ (
+									onToggle={(
 										e:
 											| React.MouseEvent
 											| React.KeyboardEvent
-									) => e.stopPropagation() }
-									renderContent={ () => (
+									) => e.stopPropagation()}
+									renderContent={() => (
 										<div className="pre-install-payment-gateway__actions-menu-options">
-											<Button onClick={ onDismiss }>
-												{ __(
-													'Dismiss',
-													'woocommerce'
-												) }
+											<Button onClick={onDismiss}>
+												{__('Dismiss', 'woocommerce')}
 											</Button>
 										</div>
-									) }
+									)}
 								/>
 								<Button
 									className="button alignright"
-									onClick={ () => installPaymentGateway() }
+									onClick={() => installPaymentGateway()}
 									isSecondary
-									isBusy={ installing }
-									aria-disabled={ installing }
+									isBusy={installing}
+									aria-disabled={installing}
 								>
-									{ __( 'Install', 'woocommerce' ) }
+									{__('Install', 'woocommerce')}
 								</Button>
 							</div>
 						</td>
@@ -211,20 +201,20 @@ export const PaymentPromotionRow = ( {
 				}
 				return (
 					<td
-						key={ column.className }
-						className={ column.className }
-						width={ column.width }
+						key={column.className}
+						className={column.className}
+						width={column.width}
 						dangerouslySetInnerHTML={
-							column.className.includes( 'sort' ) ||
-							column.className.includes( 'renewals' )
+							column.className.includes('sort') ||
+							column.className.includes('renewals')
 								? {
 										__html: column.html,
-								  }
-								: sanitizeHTMLForReact( column.html )
+									}
+								: sanitizeHTMLForReact(column.html)
 						}
 					></td>
 				);
-			} ) }
+			})}
 		</>
 	);
 };

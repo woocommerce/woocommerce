@@ -13,7 +13,7 @@ import { BlueprintStep } from './types';
  * WooCommerce Settings sections the import will overwrite, so describing them
  * again here would only repeat what the user has been told.
  */
-const SETTINGS_STEPS = [ 'setSiteOptions' ];
+const SETTINGS_STEPS = ['setSiteOptions'];
 
 /**
  * Human descriptions for the steps a Blueprint can contain, in the order they
@@ -23,8 +23,8 @@ const SETTINGS_STEPS = [ 'setSiteOptions' ];
  * of these descriptions is to let that administrator see what a file will do
  * before they confirm it, rather than only seeing its name.
  */
-const STEP_ACTIONS: Record< string, ( count: number ) => string > = {
-	runSql: ( count ) =>
+const STEP_ACTIONS: Record<string, (count: number) => string> = {
+	runSql: (count) =>
 		sprintf(
 			/* translators: %d: number of database queries a Blueprint will run. */
 			_n(
@@ -35,18 +35,13 @@ const STEP_ACTIONS: Record< string, ( count: number ) => string > = {
 			),
 			count
 		),
-	installPlugin: ( count ) =>
+	installPlugin: (count) =>
 		sprintf(
 			/* translators: %d: number of plugins a Blueprint will install. */
-			_n(
-				'Install %d plugin',
-				'Install %d plugins',
-				count,
-				'woocommerce'
-			),
+			_n('Install %d plugin', 'Install %d plugins', count, 'woocommerce'),
 			count
 		),
-	activatePlugin: ( count ) =>
+	activatePlugin: (count) =>
 		sprintf(
 			/* translators: %d: number of plugins a Blueprint will activate. */
 			_n(
@@ -57,21 +52,16 @@ const STEP_ACTIONS: Record< string, ( count: number ) => string > = {
 			),
 			count
 		),
-	installTheme: ( count ) =>
+	installTheme: (count) =>
 		sprintf(
 			/* translators: %d: number of themes a Blueprint will install. */
-			_n( 'Install %d theme', 'Install %d themes', count, 'woocommerce' ),
+			_n('Install %d theme', 'Install %d themes', count, 'woocommerce'),
 			count
 		),
-	activateTheme: ( count ) =>
+	activateTheme: (count) =>
 		sprintf(
 			/* translators: %d: number of themes a Blueprint will activate. */
-			_n(
-				'Activate %d theme',
-				'Activate %d themes',
-				count,
-				'woocommerce'
-			),
+			_n('Activate %d theme', 'Activate %d themes', count, 'woocommerce'),
 			count
 		),
 };
@@ -86,26 +76,26 @@ const STEP_ACTIONS: Record< string, ( count: number ) => string > = {
  * @param steps a list of Blueprint steps
  * @return string[] a list of descriptions, ready to show as a list
  */
-export const getStepActions = ( steps: BlueprintStep[] ): string[] => {
-	const counts = steps.reduce< Map< string, number > >( ( acc, step ) => {
+export const getStepActions = (steps: BlueprintStep[]): string[] => {
+	const counts = steps.reduce<Map<string, number>>((acc, step) => {
 		const name = step?.step;
-		if ( name && ! SETTINGS_STEPS.includes( name ) ) {
-			acc.set( name, ( acc.get( name ) || 0 ) + 1 );
+		if (name && !SETTINGS_STEPS.includes(name)) {
+			acc.set(name, (acc.get(name) || 0) + 1);
 		}
 		return acc;
-	}, new Map() );
+	}, new Map());
 
-	const actions = Object.keys( STEP_ACTIONS )
-		.filter( ( name ) => counts.has( name ) )
-		.map( ( name ) => STEP_ACTIONS[ name ]( counts.get( name ) || 0 ) );
+	const actions = Object.keys(STEP_ACTIONS)
+		.filter((name) => counts.has(name))
+		.map((name) => STEP_ACTIONS[name](counts.get(name) || 0));
 
-	const unrecognized = Array.from( counts.keys() )
-		.filter( ( name ) => ! Object.hasOwn( STEP_ACTIONS, name ) )
+	const unrecognized = Array.from(counts.keys())
+		.filter((name) => !Object.hasOwn(STEP_ACTIONS, name))
 		.sort();
 
-	if ( unrecognized.length ) {
+	if (unrecognized.length) {
 		const total = unrecognized.reduce(
-			( sum, name ) => sum + ( counts.get( name ) || 0 ),
+			(sum, name) => sum + (counts.get(name) || 0),
 			0
 		);
 
@@ -119,7 +109,7 @@ export const getStepActions = ( steps: BlueprintStep[] ): string[] => {
 					'woocommerce'
 				),
 				total,
-				unrecognized.join( ', ' )
+				unrecognized.join(', ')
 			)
 		);
 	}

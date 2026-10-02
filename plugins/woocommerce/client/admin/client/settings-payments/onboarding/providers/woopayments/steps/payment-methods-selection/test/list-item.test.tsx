@@ -16,53 +16,51 @@ type MockComponentProps = {
 	'data-testid'?: string;
 };
 
-jest.mock( '@wordpress/components', () => ( {
-	ToggleControl: ( { checked }: { checked?: boolean } ) => (
-		<input type="checkbox" checked={ checked } readOnly />
+jest.mock('@wordpress/components', () => ({
+	ToggleControl: ({ checked }: { checked?: boolean }) => (
+		<input type="checkbox" checked={checked} readOnly />
 	),
-} ) );
+}));
 
-jest.mock( '@wordpress/ui', () => ( {
+jest.mock('@wordpress/ui', () => ({
 	Notice: {
-		Root: ( {
+		Root: ({
 			children,
 			className,
 			intent,
 			spokenMessage,
 			'data-testid': testId,
-		}: MockComponentProps ) => (
+		}: MockComponentProps) => (
 			<div
-				className={ className }
-				data-intent={ intent }
-				data-spoken-message={ spokenMessage }
-				data-testid={ testId }
+				className={className}
+				data-intent={intent}
+				data-spoken-message={spokenMessage}
+				data-testid={testId}
 			>
-				{ children }
+				{children}
 			</div>
 		),
-		Description: ( { children }: MockComponentProps ) => (
-			<span>{ children }</span>
+		Description: ({ children }: MockComponentProps) => (
+			<span>{children}</span>
 		),
-		Actions: ( { children }: MockComponentProps ) => (
-			<div>{ children }</div>
-		),
-		ActionLink: ( {
+		Actions: ({ children }: MockComponentProps) => <div>{children}</div>,
+		ActionLink: ({
 			children,
 			href,
 			openInNewTab,
 			rel,
-		}: MockComponentProps ) => (
+		}: MockComponentProps) => (
 			// eslint-disable-next-line react/jsx-no-target-blank -- The mock forwards rel so tests can assert the component contract.
 			<a
-				href={ href }
-				rel={ rel }
-				target={ openInNewTab ? '_blank' : undefined }
+				href={href}
+				rel={rel}
+				target={openInNewTab ? '_blank' : undefined}
 			>
-				{ children }
+				{children}
 			</a>
 		),
 	},
-} ) );
+}));
 
 /**
  * Internal dependencies
@@ -70,8 +68,8 @@ jest.mock( '@wordpress/ui', () => ( {
 import { PaymentMethodListItem } from '../list-item';
 
 const createMethod = (
-	overrides: Partial< RecommendedPaymentMethod > = {}
-): RecommendedPaymentMethod => ( {
+	overrides: Partial<RecommendedPaymentMethod> = {}
+): RecommendedPaymentMethod => ({
 	id: 'test_method',
 	_order: 0,
 	title: 'Test Method',
@@ -82,75 +80,69 @@ const createMethod = (
 	extraDescription: '',
 	extraIcon: '',
 	...overrides,
-} );
+});
 
 const defaultProps = {
-	paymentMethodsState: { test_method: false } as Record< string, boolean >,
+	paymentMethodsState: { test_method: false } as Record<string, boolean>,
 	setPaymentMethodsState: jest.fn(),
 	isExpanded: true,
 	initialVisibilityStatus: true,
 };
 
-describe( 'PaymentMethodListItem', () => {
-	beforeEach( () => {
+describe('PaymentMethodListItem', () => {
+	beforeEach(() => {
 		jest.clearAllMocks();
-	} );
+	});
 
-	describe( 'Notice badge', () => {
-		it( 'renders a badge chip when notice.badge is set', () => {
-			const method = createMethod( {
+	describe('Notice badge', () => {
+		it('renders a badge chip when notice.badge is set', () => {
+			const method = createMethod({
 				notice: {
 					badge: 'Verification required',
 					message: '',
 					link_text: '',
 					link_url: '',
 				},
-			} );
+			});
 
-			render(
-				<PaymentMethodListItem { ...defaultProps } method={ method } />
-			);
+			render(<PaymentMethodListItem {...defaultProps} method={method} />);
 
 			expect(
-				screen.getByText( 'Verification required' )
+				screen.getByText('Verification required')
 			).toBeInTheDocument();
-		} );
+		});
 
-		it( 'does not render a badge chip when notice.badge is empty', () => {
-			const method = createMethod( {
+		it('does not render a badge chip when notice.badge is empty', () => {
+			const method = createMethod({
 				notice: {
 					badge: '',
 					message: 'Some warning.',
 					link_text: '',
 					link_url: '',
 				},
-			} );
+			});
 
-			render(
-				<PaymentMethodListItem { ...defaultProps } method={ method } />
-			);
+			render(<PaymentMethodListItem {...defaultProps} method={method} />);
 
 			expect(
-				screen.queryByTestId( 'payment-method-notice-badge' )
+				screen.queryByTestId('payment-method-notice-badge')
 			).not.toBeInTheDocument();
-		} );
+		});
 
-		it( 'does not render a badge chip when notice is not provided', () => {
+		it('does not render a badge chip when notice is not provided', () => {
 			const method = createMethod();
 
-			render(
-				<PaymentMethodListItem { ...defaultProps } method={ method } />
-			);
+			render(<PaymentMethodListItem {...defaultProps} method={method} />);
 
 			expect(
-				screen.queryByTestId( 'payment-method-notice-badge' )
+				screen.queryByTestId('payment-method-notice-badge')
 			).not.toBeInTheDocument();
-		} );
-	} );
+		});
+	});
 
-	describe( 'Payment method notice', () => {
-		it( 'renders a notice when method is enabled and notice.message is set', () => {
-			const method = createMethod( {
+	describe('Payment method notice', () => {
+		it('renders a notice when method is enabled and notice.message is set', () => {
+			const method = createMethod({
 				id: 'p24',
 				notice: {
 					badge: 'Verification required',
@@ -158,41 +150,41 @@ describe( 'PaymentMethodListItem', () => {
 					link_text: 'Review requirements &amp; terms',
 					link_url: 'https://example.com/docs',
 				},
-			} );
+			});
 
 			render(
 				<PaymentMethodListItem
-					{ ...defaultProps }
-					method={ method }
-					paymentMethodsState={ { p24: true } }
+					{...defaultProps}
+					method={method}
+					paymentMethodsState={{ p24: true }}
 				/>
 			);
 
-			const notice = screen.getByTestId( 'payment-method-notice-info' );
-			expect( notice ).toHaveAttribute( 'data-intent', 'info' );
-			expect( notice ).toHaveAttribute(
+			const notice = screen.getByTestId('payment-method-notice-info');
+			expect(notice).toHaveAttribute('data-intent', 'info');
+			expect(notice).toHaveAttribute(
 				'data-spoken-message',
 				'Strict requirements & eligibility apply.'
 			);
-			expect( notice ).toHaveTextContent(
+			expect(notice).toHaveTextContent(
 				'Strict requirements & eligibility apply.'
 			);
-			const requirementsLink = screen.getByRole( 'link', {
+			const requirementsLink = screen.getByRole('link', {
 				name: /review requirements & terms/i,
-			} );
-			expect( requirementsLink ).toHaveAttribute(
+			});
+			expect(requirementsLink).toHaveAttribute(
 				'href',
 				'https://example.com/docs'
 			);
-			expect( requirementsLink ).toHaveAttribute( 'target', '_blank' );
-			expect( requirementsLink ).toHaveAttribute(
+			expect(requirementsLink).toHaveAttribute('target', '_blank');
+			expect(requirementsLink).toHaveAttribute(
 				'rel',
 				'noopener noreferrer'
 			);
-		} );
+		});
 
-		it( 'does not render a notice when method is disabled', () => {
-			const method = createMethod( {
+		it('does not render a notice when method is disabled', () => {
+			const method = createMethod({
 				id: 'p24',
 				notice: {
 					badge: 'Verification required',
@@ -200,46 +192,46 @@ describe( 'PaymentMethodListItem', () => {
 					link_text: 'Review requirements',
 					link_url: 'https://example.com/docs',
 				},
-			} );
+			});
 
 			render(
 				<PaymentMethodListItem
-					{ ...defaultProps }
-					method={ method }
-					paymentMethodsState={ { p24: false } }
+					{...defaultProps}
+					method={method}
+					paymentMethodsState={{ p24: false }}
 				/>
 			);
 
 			expect(
-				screen.queryByText( 'Strict requirements apply.' )
+				screen.queryByText('Strict requirements apply.')
 			).not.toBeInTheDocument();
-		} );
+		});
 
-		it( 'does not render a notice when notice.message is empty', () => {
-			const method = createMethod( {
+		it('does not render a notice when notice.message is empty', () => {
+			const method = createMethod({
 				notice: {
 					badge: 'Verification required',
 					message: '',
 					link_text: '',
 					link_url: '',
 				},
-			} );
+			});
 
 			render(
 				<PaymentMethodListItem
-					{ ...defaultProps }
-					method={ method }
-					paymentMethodsState={ { test_method: true } }
+					{...defaultProps}
+					method={method}
+					paymentMethodsState={{ test_method: true }}
 				/>
 			);
 
 			expect(
-				screen.queryByTestId( 'payment-method-notice-info' )
+				screen.queryByTestId('payment-method-notice-info')
 			).not.toBeInTheDocument();
-		} );
+		});
 
-		it( 'shows notice after rerender with enabled state', () => {
-			const method = createMethod( {
+		it('shows notice after rerender with enabled state', () => {
+			const method = createMethod({
 				id: 'p24',
 				notice: {
 					badge: 'Verification required',
@@ -247,35 +239,35 @@ describe( 'PaymentMethodListItem', () => {
 					link_text: '',
 					link_url: '',
 				},
-			} );
+			});
 
 			const { rerender } = render(
 				<PaymentMethodListItem
-					{ ...defaultProps }
-					method={ method }
-					paymentMethodsState={ { p24: false } }
+					{...defaultProps}
+					method={method}
+					paymentMethodsState={{ p24: false }}
 				/>
 			);
 
 			expect(
-				screen.queryByTestId( 'payment-method-notice-info' )
+				screen.queryByTestId('payment-method-notice-info')
 			).not.toBeInTheDocument();
 
 			rerender(
 				<PaymentMethodListItem
-					{ ...defaultProps }
-					method={ method }
-					paymentMethodsState={ { p24: true } }
+					{...defaultProps}
+					method={method}
+					paymentMethodsState={{ p24: true }}
 				/>
 			);
 
 			expect(
-				screen.getByTestId( 'payment-method-notice-info' )
+				screen.getByTestId('payment-method-notice-info')
 			).toBeInTheDocument();
-		} );
+		});
 
-		it( 'renders notice without link when link_url is empty', () => {
-			const method = createMethod( {
+		it('renders notice without link when link_url is empty', () => {
+			const method = createMethod({
 				id: 'p24',
 				notice: {
 					badge: '',
@@ -283,22 +275,20 @@ describe( 'PaymentMethodListItem', () => {
 					link_text: 'Click here',
 					link_url: '',
 				},
-			} );
+			});
 
 			render(
 				<PaymentMethodListItem
-					{ ...defaultProps }
-					method={ method }
-					paymentMethodsState={ { p24: true } }
+					{...defaultProps}
+					method={method}
+					paymentMethodsState={{ p24: true }}
 				/>
 			);
 
+			expect(screen.getByText('Warning message.')).toBeInTheDocument();
 			expect(
-				screen.getByText( 'Warning message.' )
-			).toBeInTheDocument();
-			expect(
-				screen.queryByRole( 'link', { name: /click here/i } )
+				screen.queryByRole('link', { name: /click here/i })
 			).not.toBeInTheDocument();
-		} );
-	} );
-} );
+		});
+	});
+});

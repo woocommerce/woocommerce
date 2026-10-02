@@ -17,7 +17,7 @@ interface PriceRangeProps {
 	/**
 	 * Currency configuration object
 	 */
-	currency: Currency | Record< string, never > | undefined;
+	currency: Currency | Record<string, never> | undefined;
 	/**
 	 * The maximum price for the range
 	 */
@@ -40,42 +40,42 @@ interface PriceRangeProps {
 	priceStyle?: React.CSSProperties | undefined;
 }
 
-const PriceRange = ( {
+const PriceRange = ({
 	currency,
 	maxPrice,
 	minPrice,
 	priceClassName,
 	priceStyle = {},
-}: PriceRangeProps ) => {
+}: PriceRangeProps) => {
 	return (
 		<>
 			<span className="screen-reader-text">
-				{ sprintf(
+				{sprintf(
 					/* translators: %1$s min price, %2$s max price */
-					__( 'Price between %1$s and %2$s', 'woocommerce' ),
-					formatPrice( minPrice ),
-					formatPrice( maxPrice )
-				) }
+					__('Price between %1$s and %2$s', 'woocommerce'),
+					formatPrice(minPrice),
+					formatPrice(maxPrice)
+				)}
 			</span>
-			<span aria-hidden={ true }>
+			<span aria-hidden={true}>
 				<FormattedMonetaryAmount
-					className={ clsx(
+					className={clsx(
 						'wc-block-components-product-price__value',
 						priceClassName
-					) }
-					currency={ currency }
-					value={ minPrice }
-					style={ priceStyle }
+					)}
+					currency={currency}
+					value={minPrice}
+					style={priceStyle}
 				/>
 				&nbsp;&mdash;&nbsp;
 				<FormattedMonetaryAmount
-					className={ clsx(
+					className={clsx(
 						'wc-block-components-product-price__value',
 						priceClassName
-					) }
-					currency={ currency }
-					value={ maxPrice }
-					style={ priceStyle }
+					)}
+					currency={currency}
+					value={maxPrice}
+					style={priceStyle}
 				/>
 			</span>
 		</>
@@ -86,7 +86,7 @@ interface SalePriceProps {
 	/**
 	 * Currency configuration object
 	 */
-	currency: Currency | Record< string, never > | undefined;
+	currency: Currency | Record<string, never> | undefined;
 	/**
 	 * CSS class to be applied to the regular price container
 	 *
@@ -121,7 +121,7 @@ interface SalePriceProps {
 	price: number | string | undefined;
 }
 
-const SalePrice = ( {
+const SalePrice = ({
 	currency,
 	regularPriceClassName,
 	regularPriceStyle,
@@ -129,43 +129,40 @@ const SalePrice = ( {
 	priceClassName,
 	priceStyle,
 	price,
-}: SalePriceProps ) => {
+}: SalePriceProps) => {
 	return (
 		<>
 			<span className="screen-reader-text">
-				{ __( 'Previous price:', 'woocommerce' ) }
+				{__('Previous price:', 'woocommerce')}
 			</span>
-			{ /* The price is nested rather than rendered through renderText so it
-			     keeps the markup that isolates the currency symbol. */ }
+			{/* The price is nested rather than rendered through renderText so it
+			     keeps the markup that isolates the currency symbol. */}
 			<del
-				className={ clsx(
+				className={clsx(
 					'wc-block-components-product-price__regular',
 					regularPriceClassName
-				) }
-				style={ regularPriceStyle }
+				)}
+				style={regularPriceStyle}
 				translate="no"
 			>
 				<FormattedMonetaryAmount
-					currency={ currency }
-					value={ regularPrice }
+					currency={currency}
+					value={regularPrice}
 				/>
 			</del>
 			<span className="screen-reader-text">
-				{ __( 'Discounted price:', 'woocommerce' ) }
+				{__('Discounted price:', 'woocommerce')}
 			</span>
 			<ins
-				className={ clsx(
+				className={clsx(
 					'wc-block-components-product-price__value',
 					'is-discounted',
 					priceClassName
-				) }
-				style={ priceStyle }
+				)}
+				style={priceStyle}
 				translate="no"
 			>
-				<FormattedMonetaryAmount
-					currency={ currency }
-					value={ price }
-				/>
+				<FormattedMonetaryAmount currency={currency} value={price} />
 			</ins>
 		</>
 	);
@@ -186,7 +183,7 @@ export interface ProductPriceProps {
 	/**
 	 * Currency configuration object
 	 */
-	currency?: Currency | Record< string, never >;
+	currency?: Currency | Record<string, never>;
 	/**
 	 * The string version of the element to use for the price interpolation
 	 *
@@ -240,7 +237,7 @@ export interface ProductPriceProps {
 	style?: React.CSSProperties | undefined;
 }
 
-const ProductPrice = ( {
+const ProductPrice = ({
 	align,
 	className,
 	currency,
@@ -254,20 +251,20 @@ const ProductPrice = ( {
 	regularPriceClassName,
 	regularPriceStyle,
 	style,
-}: ProductPriceProps ): JSX.Element => {
+}: ProductPriceProps): JSX.Element => {
 	const wrapperClassName = clsx(
 		className,
 		'price',
 		'wc-block-components-product-price',
 		{
-			[ `wc-block-components-product-price--align-${ align }` ]: align,
+			[`wc-block-components-product-price--align-${align}`]: align,
 		}
 	);
 
-	if ( ! format.includes( '<price/>' ) ) {
+	if (!format.includes('<price/>')) {
 		format = '<price/>';
 		// eslint-disable-next-line no-console
-		console.error( 'Price formats need to include the `<price/>` tag.' );
+		console.error('Price formats need to include the `<price/>` tag.');
 	}
 
 	// Explicitly check for undefined values because 0 is a valid price.
@@ -278,54 +275,54 @@ const ProductPrice = ( {
 
 	let priceComponent = (
 		<span
-			className={ clsx(
+			className={clsx(
 				'wc-block-components-product-price__value',
 				priceClassName
-			) }
+			)}
 		/>
 	);
 
-	if ( isDiscounted ) {
+	if (isDiscounted) {
 		priceComponent = (
 			<SalePrice
-				currency={ currency }
-				price={ price }
-				priceClassName={ priceClassName }
-				priceStyle={ priceStyle }
-				regularPrice={ regularPrice }
-				regularPriceClassName={ regularPriceClassName }
-				regularPriceStyle={ regularPriceStyle }
+				currency={currency}
+				price={price}
+				priceClassName={priceClassName}
+				priceStyle={priceStyle}
+				regularPrice={regularPrice}
+				regularPriceClassName={regularPriceClassName}
+				regularPriceStyle={regularPriceStyle}
 			/>
 		);
-	} else if ( minPrice !== undefined && maxPrice !== undefined ) {
+	} else if (minPrice !== undefined && maxPrice !== undefined) {
 		priceComponent = (
 			<PriceRange
-				currency={ currency }
-				maxPrice={ maxPrice }
-				minPrice={ minPrice }
-				priceClassName={ priceClassName }
-				priceStyle={ priceStyle }
+				currency={currency}
+				maxPrice={maxPrice}
+				minPrice={minPrice}
+				priceClassName={priceClassName}
+				priceStyle={priceStyle}
 			/>
 		);
-	} else if ( price || price === 0 ) {
+	} else if (price || price === 0) {
 		priceComponent = (
 			<FormattedMonetaryAmount
-				className={ clsx(
+				className={clsx(
 					'wc-block-components-product-price__value',
 					priceClassName
-				) }
-				currency={ currency }
-				value={ price }
-				style={ priceStyle }
+				)}
+				currency={currency}
+				value={price}
+				style={priceStyle}
 			/>
 		);
 	}
 
 	return (
-		<span className={ wrapperClassName } style={ style }>
-			{ createInterpolateElement( format, {
+		<span className={wrapperClassName} style={style}>
+			{createInterpolateElement(format, {
 				price: priceComponent,
-			} ) }
+			})}
 		</span>
 	);
 };

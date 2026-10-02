@@ -25,32 +25,32 @@ import { createRoot } from 'react-dom/client';
 
 const STORE = 'test/prune-convergence-payment';
 
-let mockIncompatibleExtensions: Array< { id: string; title: string } > = [];
+let mockIncompatibleExtensions: Array<{ id: string; title: string }> = [];
 
-jest.mock( '@woocommerce/settings', () => ( {
-	...jest.requireActual( '@woocommerce/settings' ),
+jest.mock('@woocommerce/settings', () => ({
+	...jest.requireActual('@woocommerce/settings'),
 	get CURRENT_SITE_ID() {
 		return 1;
 	},
 	get IS_MULTISITE() {
 		return false;
 	},
-	getSetting: jest.fn().mockImplementation( ( name: string, ...rest ) => {
-		if ( name === 'incompatibleExtensions' ) {
+	getSetting: jest.fn().mockImplementation((name: string, ...rest) => {
+		if (name === 'incompatibleExtensions') {
 			return mockIncompatibleExtensions;
 		}
 		return jest
-			.requireActual( '@woocommerce/settings' )
-			.getSetting( name, ...rest );
-	} ),
-} ) );
+			.requireActual('@woocommerce/settings')
+			.getSetting(name, ...rest);
+	}),
+}));
 
 // Point the hook's payment store at a real registered store so the genuine
 // `useSelect` subscription drives re-renders.
-jest.mock( '@woocommerce/block-data', () => ( {
+jest.mock('@woocommerce/block-data', () => ({
 	__esModule: true,
 	paymentStore: 'test/prune-convergence-payment',
-} ) );
+}));
 
 /**
  * Internal dependencies
@@ -59,17 +59,17 @@ import { useCombinedIncompatibilityNotice } from '../use-combined-incompatibilit
 import { getEditorStorageKey } from '../storage';
 
 type State = {
-	express: Record< string, string >;
-	regular: Record< string, string >;
+	express: Record<string, string>;
+	regular: Record<string, string>;
 	initialized: boolean;
 };
 
-const store = createReduxStore( STORE, {
+const store = createReduxStore(STORE, {
 	reducer: (
 		state: State = { express: {}, regular: {}, initialized: false },
-		action: { type: string; value?: Record< string, string > }
+		action: { type: string; value?: Record<string, string> }
 	): State => {
-		switch ( action.type ) {
+		switch (action.type) {
 			case 'SET_EXPRESS':
 				return { ...state, express: action.value ?? {} };
 			case 'SET_REGULAR':
@@ -83,26 +83,26 @@ const store = createReduxStore( STORE, {
 		}
 	},
 	actions: {
-		setExpress: ( value: Record< string, string > ) => ( {
+		setExpress: (value: Record<string, string>) => ({
 			type: 'SET_EXPRESS',
 			value,
-		} ),
-		setRegular: ( value: Record< string, string > ) => ( {
+		}),
+		setRegular: (value: Record<string, string>) => ({
 			type: 'SET_REGULAR',
 			value,
-		} ),
-		initialize: () => ( { type: 'INITIALIZE' } ),
-		deinitialize: () => ( { type: 'DEINITIALIZE' } ),
+		}),
+		initialize: () => ({ type: 'INITIALIZE' }),
+		deinitialize: () => ({ type: 'DEINITIALIZE' }),
 	},
 	selectors: {
 		// Memoised on the same state slices production's `createSelector` uses,
 		// so `useSelect` sees a stable reference for unchanged state exactly as
 		// it does against the real payment store.
-		getIncompatiblePaymentMethods: ( () => {
+		getIncompatiblePaymentMethods: (() => {
 			let lastExpress: unknown;
 			let lastRegular: unknown;
-			let lastResult: Record< string, string > = {};
-			return ( state: State ) => {
+			let lastResult: Record<string, string> = {};
+			return (state: State) => {
 				if (
 					state.express !== lastExpress ||
 					state.regular !== lastRegular
@@ -113,92 +113,91 @@ const store = createReduxStore( STORE, {
 				}
 				return lastResult;
 			};
-		} )(),
-		paymentMethodsInitialized: ( state: State ) => state.initialized,
-		expressPaymentMethodsInitialized: ( state: State ) => state.initialized,
+		})(),
+		paymentMethodsInitialized: (state: State) => state.initialized,
+		expressPaymentMethodsInitialized: (state: State) => state.initialized,
 	},
-} );
-register( store );
+});
+register(store);
 
 const CHECKOUT = 'woocommerce/checkout';
 
 const Harness = () => {
-	useCombinedIncompatibilityNotice( CHECKOUT );
+	useCombinedIncompatibilityNotice(CHECKOUT);
 	return null;
 };
 
 const acknowledgedSlugs = () =>
 	JSON.parse(
-		window.localStorage.getItem( getEditorStorageKey() ) || 'null'
-	)?.[ 0 ]?.[ CHECKOUT ];
+		window.localStorage.getItem(getEditorStorageKey()) || 'null'
+	)?.[0]?.[CHECKOUT];
 
 // Lets React's scheduler run its post-commit work, the way a real frame does.
 // Several turns, not one: passive effects flush on a scheduler task, and the
 // state update a prune makes needs a further render to reach `localStorage`.
 const settle = async () => {
-	for ( let turn = 0; turn < 5; turn++ ) {
-		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
+	for (let turn = 0; turn < 5; turn++) {
+		await new Promise((resolve) => setTimeout(resolve, 0));
 	}
 };
 
-describe( 'prune convergence across consecutive shrinks', () => {
+describe('prune convergence across consecutive shrinks', () => {
 	let container: HTMLDivElement;
-	let root: ReturnType< typeof createRoot >;
+	let root: ReturnType<typeof createRoot>;
 	let wasActEnvironment: unknown;
 
-	beforeEach( () => {
-		wasActEnvironment = ( global as Record< string, unknown > )
+	beforeEach(() => {
+		wasActEnvironment = (global as Record<string, unknown>)
 			.IS_REACT_ACT_ENVIRONMENT;
-		( global as Record< string, unknown > ).IS_REACT_ACT_ENVIRONMENT =
-			false;
+		(global as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = false;
 
 		window.localStorage.clear();
-		mockIncompatibleExtensions = [ { id: 'ext_x', title: 'Ext X' } ];
-		dispatch( STORE ).setExpress( { gw_express: 'Express Gateway' } );
-		dispatch( STORE ).setRegular( { gw_regular: 'Regular Gateway' } );
-		dispatch( STORE ).initialize();
+		mockIncompatibleExtensions = [{ id: 'ext_x', title: 'Ext X' }];
+		dispatch(STORE).setExpress({ gw_express: 'Express Gateway' });
+		dispatch(STORE).setRegular({ gw_regular: 'Regular Gateway' });
+		dispatch(STORE).initialize();
 
-		container = document.createElement( 'div' );
-		document.body.appendChild( container );
-		root = createRoot( container );
-	} );
+		container = document.createElement('div');
+		document.body.appendChild(container);
+		root = createRoot(container);
+	});
 
-	afterEach( () => {
+	afterEach(() => {
 		root.unmount();
 		container.remove();
-		( global as Record< string, unknown > ).IS_REACT_ACT_ENVIRONMENT =
+		(global as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT =
 			wasActEnvironment;
-	} );
+	});
 
 	// The one prune scenario the act-based suite cannot represent; everything
 	// else about pruning lives in test/use-combined-incompatibility-notice.ts.
-	it( 'drops both halves when the express and regular sets shrink in separate renders', async () => {
+	it('drops both halves when the express and regular sets shrink in separate renders', async () => {
 		// The merchant acknowledged everything that was incompatible.
 		window.localStorage.setItem(
 			getEditorStorageKey(),
-			JSON.stringify( [
-				{ [ CHECKOUT ]: [ 'ext_x', 'gw_express', 'gw_regular' ] },
-			] )
+			JSON.stringify([
+				{ [CHECKOUT]: ['ext_x', 'gw_express', 'gw_regular'] },
+			])
 		);
 
-		root.render( createElement( Harness ) );
+		root.render(createElement(Harness));
 		await settle();
-		expect( acknowledgedSlugs() ).toEqual( [
+		expect(acknowledgedSlugs()).toEqual([
 			'ext_x',
 			'gw_express',
 			'gw_regular',
-		] );
+		]);
 
 		// Mirrors __internalUpdateAvailablePaymentMethods: two awaited calls,
 		// each dispatching its own set action, with the gate already open.
 		await Promise.resolve();
-		dispatch( STORE ).setExpress( {} );
+		dispatch(STORE).setExpress({});
 		await Promise.resolve();
-		dispatch( STORE ).setRegular( {} );
+		dispatch(STORE).setRegular({});
 		await settle();
 
 		// Both gateways stopped being incompatible, so neither acknowledgement
 		// may survive: if either comes back it has to warn again.
-		expect( acknowledgedSlugs() ).toEqual( [ 'ext_x' ] );
-	} );
-} );
+		expect(acknowledgedSlugs()).toEqual(['ext_x']);
+	});
+});

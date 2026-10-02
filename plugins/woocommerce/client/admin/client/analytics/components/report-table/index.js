@@ -49,7 +49,7 @@ import './style.scss';
 
 const TABLE_FILTER = 'woocommerce_admin_report_table';
 
-const ReportTable = ( props ) => {
+const ReportTable = (props) => {
 	const {
 		getHeadersContent,
 		getRowsContent,
@@ -82,62 +82,62 @@ const ReportTable = ( props ) => {
 
 	const { items, query: reportQuery } = tableData;
 
-	const initialSelectedRows = query[ compareParam ]
-		? getIdsFromQuery( query[ compareBy ] )
+	const initialSelectedRows = query[compareParam]
+		? getIdsFromQuery(query[compareBy])
 		: [];
-	const [ selectedRows, setSelectedRows ] = useState( initialSelectedRows );
-	const scrollPointRef = useRef( null );
+	const [selectedRows, setSelectedRows] = useState(initialSelectedRows);
+	const scrollPointRef = useRef(null);
 
 	const { updateUserPreferences, ...userData } = useUserPreferences();
 
 	// Bail early if we've encountered an error.
 	const isError = tableData.isError || primaryData.isError;
 
-	if ( isError ) {
+	if (isError) {
 		return <AnalyticsError />;
 	}
 
 	let userPrefColumns = [];
-	if ( columnPrefsKey ) {
+	if (columnPrefsKey) {
 		userPrefColumns =
-			userData && userData[ columnPrefsKey ]
-				? userData[ columnPrefsKey ]
+			userData && userData[columnPrefsKey]
+				? userData[columnPrefsKey]
 				: userPrefColumns;
 	}
 
-	const onPageChange = ( newPage, source ) => {
+	const onPageChange = (newPage, source) => {
 		scrollPointRef.current.scrollIntoView();
 		const tableElement = scrollPointRef.current.nextSibling.querySelector(
 			'.woocommerce-table__table'
 		);
-		const focusableElements = focus.focusable.find( tableElement );
+		const focusableElements = focus.focusable.find(tableElement);
 
-		if ( focusableElements.length ) {
-			focusableElements[ 0 ].focus();
+		if (focusableElements.length) {
+			focusableElements[0].focus();
 		}
 
-		if ( source ) {
-			if ( source === 'goto' ) {
-				recordEvent( 'analytics_table_go_to_page', {
+		if (source) {
+			if (source === 'goto') {
+				recordEvent('analytics_table_go_to_page', {
 					report: endpoint,
 					page: newPage,
-				} );
+				});
 			} else {
-				recordEvent( 'analytics_table_page_click', {
+				recordEvent('analytics_table_page_click', {
 					report: endpoint,
 					direction: source,
-				} );
+				});
 			}
 		}
 	};
 
 	const trackTableSearch = () => {
 		// @todo: decide if this should only fire for new tokens (not any/all changes).
-		recordEvent( 'analytics_table_filter', { report: endpoint } );
+		recordEvent('analytics_table_filter', { report: endpoint });
 	};
 
-	const onSort = ( key, direction ) => {
-		onQueryChange( 'sort' )( key, direction );
+	const onSort = (key, direction) => {
+		onQueryChange('sort')(key, direction);
 
 		const eventProps = {
 			report: endpoint,
@@ -145,27 +145,27 @@ const ReportTable = ( props ) => {
 			direction,
 		};
 
-		recordEvent( 'analytics_table_sort', eventProps );
+		recordEvent('analytics_table_sort', eventProps);
 	};
 
-	const filterShownHeaders = ( headers, hiddenKeys ) => {
+	const filterShownHeaders = (headers, hiddenKeys) => {
 		// If no user preferences, set visibility based on column default.
-		if ( ! hiddenKeys ) {
-			return headers.map( ( header ) => ( {
+		if (!hiddenKeys) {
+			return headers.map((header) => ({
 				...header,
-				visible: header.required || ! header.hiddenByDefault,
-			} ) );
+				visible: header.required || !header.hiddenByDefault,
+			}));
 		}
 
 		// Set visibility based on user preferences.
-		return headers.map( ( header ) => ( {
+		return headers.map((header) => ({
 			...header,
-			visible: header.required || ! hiddenKeys.includes( header.key ),
-		} ) );
+			visible: header.required || !hiddenKeys.includes(header.key),
+		}));
 	};
 
-	const applyTableFilters = ( data, totals, totalResults ) => {
-		const summary = getSummary ? getSummary( totals, totalResults ) : null;
+	const applyTableFilters = (data, totals, totalResults) => {
+		const summary = getSummary ? getSummary(totals, totalResults) : null;
 
 		/**
 		 * Filter report table for the CSV download.
@@ -181,43 +181,43 @@ const ReportTable = ( props ) => {
 		 * @param {Array}  reportTableData.summary  - summary numbers data.
 		 * @param {Object} reportTableData.items    - response from api requerst.
 		 */
-		return applyFilters( TABLE_FILTER, {
+		return applyFilters(TABLE_FILTER, {
 			endpoint,
 			headers: getHeadersContent(),
-			rows: getRowsContent( data ),
+			rows: getRowsContent(data),
 			totals,
 			summary,
 			items,
-		} );
+		});
 	};
 
 	const onClickDownload = () => {
 		const { createNotice, startExport, title, filters, advancedFilters } =
 			props;
-		const params = Object.assign( {}, query );
+		const params = Object.assign({}, query);
 		const { data, totalResults } = items;
 		let downloadType = 'browser';
 
 		// Delete unnecessary items from filename.
 		delete params.extended_info;
-		if ( params.search ) {
-			delete params[ searchBy ];
+		if (params.search) {
+			delete params[searchBy];
 		}
 
-		if ( data && data.length === totalResults ) {
-			const { headers, rows } = applyTableFilters( data, totalResults );
+		if (data && data.length === totalResults) {
+			const { headers, rows } = applyTableFilters(data, totalResults);
 
 			downloadCSVFile(
-				generateCSVFileName( title, params ),
-				generateCSVDataFromTable( headers, rows )
+				generateCSVFileName(title, params),
+				generateCSVDataFromTable(headers, rows)
 			);
 		} else {
 			downloadType = 'email';
 			startExport(
 				endpoint,
-				getExportQuery( reportQuery, query, filters, advancedFilters )
+				getExportQuery(reportQuery, query, filters, advancedFilters)
 			)
-				.then( () =>
+				.then(() =>
 					createNotice(
 						'success',
 						sprintf(
@@ -230,7 +230,7 @@ const ReportTable = ( props ) => {
 						)
 					)
 				)
-				.catch( ( error ) =>
+				.catch((error) =>
 					createNotice(
 						'error',
 						error.message ||
@@ -246,76 +246,74 @@ const ReportTable = ( props ) => {
 				);
 		}
 
-		recordEvent( 'analytics_table_download', {
+		recordEvent('analytics_table_download', {
 			report: endpoint,
 			rows: totalResults,
 			download_type: downloadType,
-		} );
+		});
 	};
 
 	const onCompare = () => {
-		if ( compareBy ) {
-			onQueryChange( 'compare' )(
+		if (compareBy) {
+			onQueryChange('compare')(
 				compareBy,
 				compareParam,
-				selectedRows.join( ',' )
+				selectedRows.join(',')
 			);
 		}
 	};
 
-	const onSearchChange = ( values ) => {
+	const onSearchChange = (values) => {
 		const { baseSearchQuery = {}, addCesSurveyForCustomerSearch } = props;
 		// A comma is used as a separator between search terms, so we want to escape
 		// any comma they contain.
-		const searchTerms = values.map( ( v ) =>
-			v.label.replace( ',', '%2C' )
-		);
-		if ( searchTerms.length ) {
-			updateQueryString( {
+		const searchTerms = values.map((v) => v.label.replace(',', '%2C'));
+		if (searchTerms.length) {
+			updateQueryString({
 				filter: undefined,
-				[ compareParam ]: undefined,
-				[ searchBy ]: undefined,
+				[compareParam]: undefined,
+				[searchBy]: undefined,
 				...baseSearchQuery,
-				search: uniq( searchTerms ).join( ',' ),
-			} );
+				search: uniq(searchTerms).join(','),
+			});
 
 			// Prompt survey if user is searching for something.
 			addCesSurveyForCustomerSearch();
 		} else {
-			updateQueryString( {
+			updateQueryString({
 				search: undefined,
-			} );
+			});
 		}
 
 		trackTableSearch();
 	};
 
-	const selectAllRows = ( checked ) => {
+	const selectAllRows = (checked) => {
 		const { ids } = props;
-		setSelectedRows( checked ? ids : [] );
+		setSelectedRows(checked ? ids : []);
 	};
 
-	const selectRow = ( i, checked ) => {
+	const selectRow = (i, checked) => {
 		const { ids } = props;
-		if ( checked ) {
-			setSelectedRows( uniq( [ ids[ i ], ...selectedRows ] ) );
+		if (checked) {
+			setSelectedRows(uniq([ids[i], ...selectedRows]));
 		} else {
-			const index = selectedRows.indexOf( ids[ i ] );
-			setSelectedRows( [
-				...selectedRows.slice( 0, index ),
-				...selectedRows.slice( index + 1 ),
-			] );
+			const index = selectedRows.indexOf(ids[i]);
+			setSelectedRows([
+				...selectedRows.slice(0, index),
+				...selectedRows.slice(index + 1),
+			]);
 		}
 	};
 
-	const getCheckbox = ( i ) => {
+	const getCheckbox = (i) => {
 		const { ids = [] } = props;
-		const isChecked = selectedRows.indexOf( ids[ i ] ) !== -1;
+		const isChecked = selectedRows.indexOf(ids[i]) !== -1;
 		return {
 			display: (
 				<CheckboxControl
-					onChange={ partial( selectRow, i ) }
-					checked={ isChecked }
+					onChange={partial(selectRow, i)}
+					checked={isChecked}
 				/>
 			),
 			value: false,
@@ -331,10 +329,10 @@ const ReportTable = ( props ) => {
 			key: 'compare',
 			label: (
 				<CheckboxControl
-					onChange={ selectAllRows }
-					aria-label={ __( 'Select All', 'woocommerce' ) }
-					checked={ isAllChecked }
-					disabled={ ! hasData }
+					onChange={selectAllRows}
+					aria-label={__('Select All', 'woocommerce')}
+					checked={isAllChecked}
+					disabled={!hasData}
 				/>
 			),
 			required: true,
@@ -343,15 +341,15 @@ const ReportTable = ( props ) => {
 
 	const isLoading =
 		isRequesting || tableData.isRequesting || primaryData.isRequesting;
-	const totals = get( primaryData, [ 'data', 'totals' ], {} );
+	const totals = get(primaryData, ['data', 'totals'], {});
 	const totalResults = items.totalResults || 0;
 	const downloadable = totalResults > 0;
 	// Search words are in the query string, not the table query.
-	const searchWords = getSearchWords( query );
-	const searchedLabels = searchWords.map( ( v ) => ( {
+	const searchWords = getSearchWords(query);
+	const searchedLabels = searchWords.map((v) => ({
 		key: v,
 		label: v,
-	} ) );
+	}));
 
 	const { data } = items;
 	const applyTableFiltersResult = applyTableFilters(
@@ -362,56 +360,56 @@ const ReportTable = ( props ) => {
 	let { headers, rows } = applyTableFiltersResult;
 	const { summary } = applyTableFiltersResult;
 
-	const onColumnsChange = ( shownColumns, toggledColumn ) => {
-		const columns = headers.map( ( header ) => header.key );
+	const onColumnsChange = (shownColumns, toggledColumn) => {
+		const columns = headers.map((header) => header.key);
 		const hiddenColumns = columns.filter(
-			( column ) => ! shownColumns.includes( column )
+			(column) => !shownColumns.includes(column)
 		);
-		if ( columnPrefsKey ) {
+		if (columnPrefsKey) {
 			const userDataFields = {
-				[ columnPrefsKey ]: hiddenColumns,
+				[columnPrefsKey]: hiddenColumns,
 			};
-			updateUserPreferences( userDataFields );
+			updateUserPreferences(userDataFields);
 		}
 
-		if ( toggledColumn ) {
+		if (toggledColumn) {
 			const eventProps = {
 				report: endpoint,
 				column: toggledColumn,
-				status: shownColumns.includes( toggledColumn ) ? 'on' : 'off',
+				status: shownColumns.includes(toggledColumn) ? 'on' : 'off',
 			};
 
-			recordEvent( 'analytics_table_header_toggle', eventProps );
+			recordEvent('analytics_table_header_toggle', eventProps);
 		}
 	};
 
 	// Add in selection for comparisons.
-	if ( compareBy ) {
-		rows = rows.map( ( row, i ) => {
-			return [ getCheckbox( i ), ...row ];
-		} );
-		headers = [ getAllCheckbox(), ...headers ];
+	if (compareBy) {
+		rows = rows.map((row, i) => {
+			return [getCheckbox(i), ...row];
+		});
+		headers = [getAllCheckbox(), ...headers];
 	}
 
 	// Hide any headers based on user prefs, if loaded.
-	const filteredHeaders = filterShownHeaders( headers, userPrefColumns );
+	const filteredHeaders = filterShownHeaders(headers, userPrefColumns);
 
 	return (
 		<Fragment>
 			<div
 				className="woocommerce-report-table__scroll-point"
-				ref={ scrollPointRef }
+				ref={scrollPointRef}
 				aria-hidden
 			/>
 			<TableCard
-				className={ 'woocommerce-report-table' }
-				hasSearch={ !! searchBy }
-				actions={ [
+				className={'woocommerce-report-table'}
+				hasSearch={!!searchBy}
+				actions={[
 					compareBy && (
 						<CompareButton
 							key="compare"
 							className="woocommerce-table__compare"
-							count={ selectedRows.length }
+							count={selectedRows.length}
 							helpText={
 								labels.helpText ||
 								__(
@@ -419,58 +417,58 @@ const ReportTable = ( props ) => {
 									'woocommerce'
 								)
 							}
-							onClick={ onCompare }
-							disabled={ ! downloadable }
+							onClick={onCompare}
+							disabled={!downloadable}
 						>
-							{ labels.compareButton ||
-								__( 'Compare', 'woocommerce' ) }
+							{labels.compareButton ||
+								__('Compare', 'woocommerce')}
 						</CompareButton>
 					),
 					searchBy && (
 						<Search
-							allowFreeTextSearch={ true }
+							allowFreeTextSearch={true}
 							inlineTags
 							key="search"
-							onChange={ onSearchChange }
+							onChange={onSearchChange}
 							placeholder={
 								labels.placeholder ||
-								__( 'Search by item name', 'woocommerce' )
+								__('Search by item name', 'woocommerce')
 							}
-							selected={ searchedLabels }
-							showClearButton={ true }
-							type={ searchBy }
-							disabled={ ! downloadable }
+							selected={searchedLabels}
+							showClearButton={true}
+							type={searchBy}
+							disabled={!downloadable}
 						/>
 					),
 					downloadable && (
 						<Button
 							key="download"
 							className="woocommerce-table__download-button"
-							disabled={ isLoading }
-							onClick={ onClickDownload }
+							disabled={isLoading}
+							onClick={onClickDownload}
 						>
 							<DownloadIcon />
 							<span className="woocommerce-table__download-button__label">
-								{ labels.downloadButton ||
-									__( 'Download', 'woocommerce' ) }
+								{labels.downloadButton ||
+									__('Download', 'woocommerce')}
 							</span>
 						</Button>
 					),
-				] }
-				headers={ filteredHeaders }
-				isLoading={ isLoading }
-				onQueryChange={ onQueryChange }
-				onColumnsChange={ onColumnsChange }
-				onSort={ onSort }
-				onPageChange={ onPageChange }
-				rows={ rows }
+				]}
+				headers={filteredHeaders}
+				isLoading={isLoading}
+				onQueryChange={onQueryChange}
+				onColumnsChange={onColumnsChange}
+				onSort={onSort}
+				onPageChange={onPageChange}
+				rows={rows}
 				rowsPerPage={
-					parseInt( reportQuery.per_page, 10 ) ||
+					parseInt(reportQuery.per_page, 10) ||
 					QUERY_DEFAULTS.pageSize
 				}
-				summary={ summary }
-				totalRows={ totalResults }
-				{ ...tableProps }
+				summary={summary}
+				totalRows={totalResults}
+				{...tableProps}
 			/>
 		</Fragment>
 	);
@@ -506,11 +504,11 @@ ReportTable.propTypes = {
 	 * load more data for table items. If omitted, no call will be made and only
 	 * the data returned by the reports endpoint will be used.
 	 */
-	extendItemsMethodNames: PropTypes.shape( {
+	extendItemsMethodNames: PropTypes.shape({
 		getError: PropTypes.string,
 		isRequesting: PropTypes.string,
 		load: PropTypes.string,
-	} ),
+	}),
 	/**
 	 * Name of store on which extendItemsMethodNames can be found.
 	 */
@@ -534,12 +532,12 @@ ReportTable.propTypes = {
 	/**
 	 * Custom labels for table header actions.
 	 */
-	labels: PropTypes.shape( {
+	labels: PropTypes.shape({
 		compareButton: PropTypes.string,
 		downloadButton: PropTypes.string,
 		helpText: PropTypes.string,
 		placeholder: PropTypes.string,
-	} ),
+	}),
 	/**
 	 * Properties used to limit the results. It will be used in the API call to send the IDs.
 	 * Defaults to the `endpoint`.
@@ -557,7 +555,7 @@ ReportTable.propTypes = {
 	/**
 	 * List of fields used for summary numbers. (Reduces queries)
 	 */
-	summaryFields: PropTypes.arrayOf( PropTypes.string ),
+	summaryFields: PropTypes.arrayOf(PropTypes.string),
 	/**
 	 * Table data of that report. If it's not provided, it will be automatically
 	 * loaded via the provided `endpoint`.
@@ -577,7 +575,7 @@ const EMPTY_ARRAY = [];
 const EMPTY_OBJECT = {};
 
 export default compose(
-	withSelect( ( select, props ) => {
+	withSelect((select, props) => {
 		const {
 			endpoint,
 			getSummary,
@@ -593,25 +591,25 @@ export default compose(
 			extendedItemsStoreName,
 		} = props;
 
-		const limitBy = limitProperties || [ endpoint ];
+		const limitBy = limitProperties || [endpoint];
 
 		const extendedStoreSelector = extendedItemsStoreName
-			? select( extendedItemsStoreName )
+			? select(extendedItemsStoreName)
 			: null;
 
-		if ( isRequesting || hasEmptySearchResults( query, limitBy ) ) {
+		if (isRequesting || hasEmptySearchResults(query, limitBy)) {
 			return EMPTY_OBJECT;
 		}
 
-		const reportStoreSelector = select( reportsStore );
+		const reportStoreSelector = select(reportsStore);
 		const { woocommerce_default_date_range: defaultDateRange } = select(
 			settingsStore
-		).getSetting( 'wc_admin', 'wcAdminSettings' );
+		).getSetting('wc_admin', 'wcAdminSettings');
 
 		// Category charts are powered by the /reports/products/stats endpoint.
 		const chartEndpoint = endpoint === 'categories' ? 'products' : endpoint;
 		const primaryData = getSummary
-			? getReportChartData( {
+			? getReportChartData({
 					endpoint: chartEndpoint,
 					selector: reportStoreSelector,
 					dataType: 'primary',
@@ -621,11 +619,11 @@ export default compose(
 					advancedFilters,
 					defaultDateRange,
 					fields: summaryFields,
-			  } )
+				})
 			: EMPTY_OBJECT;
 		const queriedTableData =
 			tableData ||
-			getReportTableData( {
+			getReportTableData({
 				endpoint,
 				query,
 				selector: reportStoreSelector,
@@ -634,10 +632,10 @@ export default compose(
 				filters,
 				advancedFilters,
 				defaultDateRange,
-			} );
+			});
 
 		const extendedTableData = extendedStoreSelector
-			? extendTableData( extendedStoreSelector, props, queriedTableData )
+			? extendTableData(extendedStoreSelector, props, queriedTableData)
 			: queriedTableData;
 
 		return {
@@ -645,22 +643,22 @@ export default compose(
 			ids:
 				itemIdField && extendedTableData.items.data
 					? extendedTableData.items.data.map(
-							( item ) => item[ itemIdField ]
-					  )
+							(item) => item[itemIdField]
+						)
 					: EMPTY_ARRAY,
 			tableData: extendedTableData,
 			query,
 		};
-	} ),
-	withDispatch( ( dispatch ) => {
-		const { startExport } = dispatch( EXPORT_STORE_NAME );
-		const { createNotice } = dispatch( 'core/notices' );
-		const { addCesSurveyForCustomerSearch } = dispatch( CES_STORE_KEY );
+	}),
+	withDispatch((dispatch) => {
+		const { startExport } = dispatch(EXPORT_STORE_NAME);
+		const { createNotice } = dispatch('core/notices');
+		const { addCesSurveyForCustomerSearch } = dispatch(CES_STORE_KEY);
 
 		return {
 			createNotice,
 			startExport,
 			addCesSurveyForCustomerSearch,
 		};
-	} )
-)( ReportTable );
+	})
+)(ReportTable);

@@ -34,8 +34,8 @@ import { getAdminSetting } from '~/utils/admin-settings';
 import { isFeatureEnabled } from '~/utils/features';
 import './style.scss';
 
-function recordOrderEvent( eventName ) {
-	recordEvent( `activity_panel_orders_${ eventName }`, {} );
+function recordOrderEvent(eventName) {
+	recordEvent(`activity_panel_orders_${eventName}`, {});
 }
 
 const renderEmptyCard = () => {
@@ -54,100 +54,96 @@ const renderEmptyCard = () => {
 					🎉
 				</span>
 				<H id="woocommerce-order-empty-message">
-					{ __( 'You’ve fulfilled all your orders', 'woocommerce' ) }
+					{__('You’ve fulfilled all your orders', 'woocommerce')}
 				</H>
 			</ActivityCard>
 			<Link
-				href={ 'edit.php?post_type=shop_order' }
-				onClick={ () => recordOrderEvent( 'orders_manage' ) }
+				href={'edit.php?post_type=shop_order'}
+				onClick={() => recordOrderEvent('orders_manage')}
 				className="woocommerce-layout__activity-panel-outbound-link woocommerce-layout__activity-panel-empty"
 				type="wp-admin"
 			>
-				{ __( 'Manage all orders', 'woocommerce' ) }
+				{__('Manage all orders', 'woocommerce')}
 			</Link>
 		</>
 	);
 };
 
-function renderOrders( orders, customers, getFormattedOrderTotal ) {
-	if ( orders.length === 0 ) {
+function renderOrders(orders, customers, getFormattedOrderTotal) {
+	if (orders.length === 0) {
 		return renderEmptyCard();
 	}
 
-	const getCustomerString = ( name ) => {
-		if ( ! name ) {
+	const getCustomerString = (name) => {
+		if (!name) {
 			return '';
 		}
 
-		return `<customerLink>${ name }</customerLink>`;
+		return `<customerLink>${name}</customerLink>`;
 	};
 
-	const orderCardTitle = ( order ) => {
+	const orderCardTitle = (order) => {
 		const {
 			id: orderId,
 			number: orderNumber,
 			customer_id: customerId,
 			billing,
 		} = order;
-		const customer =
-			customers.find( ( c ) => c.user_id === customerId ) || {};
+		const customer = customers.find((c) => c.user_id === customerId) || {};
 		let customerUrl = null;
-		if ( customer && customer.id ) {
-			customerUrl = isFeatureEnabled( 'analytics' )
-				? getNewPath( {}, '/analytics/customers', {
+		if (customer && customer.id) {
+			customerUrl = isFeatureEnabled('analytics')
+				? getNewPath({}, '/analytics/customers', {
 						filter: 'single_customer',
 						customers: customer.id,
-				  } )
-				: getAdminLink( 'user-edit.php?user_id=' + customer.id );
+					})
+				: getAdminLink('user-edit.php?user_id=' + customer.id);
 		}
 
 		// Guest orders have no customer record; fall back to the billing name.
 		// createInterpolateElement parses <word> as a token, so strip angle
 		// brackets from the name to keep it from being read as markup.
-		const sanitizeName = ( name ) =>
-			( name || '' ).replace( /[<>]/g, '' ).trim();
+		const sanitizeName = (name) => (name || '').replace(/[<>]/g, '').trim();
 		const guestName = billing
-			? `${ billing.first_name || '' } ${ billing.last_name || '' }`
+			? `${billing.first_name || ''} ${billing.last_name || ''}`
 			: '';
-		const customerName = sanitizeName( customer?.name || guestName );
+		const customerName = sanitizeName(customer?.name || guestName);
 
 		const formattedString = sprintf(
 			/* translators: 1: order number, 2: customer name */
-			__( '<orderLink>Order #%1$s</orderLink> %2$s', 'woocommerce' ),
+			__('<orderLink>Order #%1$s</orderLink> %2$s', 'woocommerce'),
 			orderNumber,
-			getCustomerString( customerName )
+			getCustomerString(customerName)
 		);
 
 		return (
 			<>
-				{ createInterpolateElement( formattedString, {
+				{createInterpolateElement(formattedString, {
 					orderLink: (
 						<Link
-							href={ getAdminLink(
+							href={getAdminLink(
 								'post.php?action=edit&post=' + orderId
-							) }
-							onClick={ () => recordOrderEvent( 'order_number' ) }
+							)}
+							onClick={() => recordOrderEvent('order_number')}
 							type="wp-admin"
 						/>
 					),
 					customerLink: customerUrl ? (
 						<Link
-							href={ customerUrl }
-							onClick={ () =>
-								recordOrderEvent( 'customer_name' )
-							}
+							href={customerUrl}
+							onClick={() => recordOrderEvent('customer_name')}
 							type="wc-admin"
 						/>
 					) : (
 						<span />
 					),
-				} ) }
+				})}
 			</>
 		);
 	};
 
 	const cards = [];
-	orders.forEach( ( order ) => {
+	orders.forEach((order) => {
 		const {
 			date_created_gmt: dateCreatedGmt,
 			line_items: lineItems,
@@ -157,22 +153,22 @@ function renderOrders( orders, customers, getFormattedOrderTotal ) {
 
 		cards.push(
 			<ActivityCard
-				key={ orderId }
+				key={orderId}
 				className="woocommerce-order-activity-card"
-				title={ orderCardTitle( order ) }
-				date={ dateCreatedGmt }
-				onClick={ ( { target } ) => {
-					recordOrderEvent( 'orders_begin_fulfillment' );
-					if ( ! target.href ) {
+				title={orderCardTitle(order)}
+				date={dateCreatedGmt}
+				onClick={({ target }) => {
+					recordOrderEvent('orders_begin_fulfillment');
+					if (!target.href) {
 						window.location.href = getAdminLink(
-							`post.php?action=edit&post=${ orderId }`
+							`post.php?action=edit&post=${orderId}`
 						);
 					}
-				} }
+				}}
 				subtitle={
 					<div>
 						<span>
-							{ sprintf(
+							{sprintf(
 								/* translators: %d: number of products */
 								_n(
 									'%d product',
@@ -181,42 +177,42 @@ function renderOrders( orders, customers, getFormattedOrderTotal ) {
 									'woocommerce'
 								),
 								productsCount
-							) }
+							)}
 						</span>
 						<span>
-							{ getFormattedOrderTotal(
+							{getFormattedOrderTotal(
 								order.total,
 								order.currency
-							) }
+							)}
 						</span>
 					</div>
 				}
 			>
 				<OrderStatus
-					order={ order }
-					orderStatusMap={ getAdminSetting( 'orderStatuses', {} ) }
+					order={order}
+					orderStatusMap={getAdminSetting('orderStatuses', {})}
 				/>
 			</ActivityCard>
 		);
-	} );
+	});
 	return (
 		<>
-			{ cards }
+			{cards}
 			<Link
-				href={ 'edit.php?post_type=shop_order' }
+				href={'edit.php?post_type=shop_order'}
 				className="woocommerce-layout__activity-panel-outbound-link"
-				onClick={ () => recordOrderEvent( 'orders_manage' ) }
+				onClick={() => recordOrderEvent('orders_manage')}
 				type="wp-admin"
 			>
-				{ __( 'Manage all orders', 'woocommerce' ) }
+				{__('Manage all orders', 'woocommerce')}
 			</Link>
 		</>
 	);
 }
 
-function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
+function OrdersPanel({ unreadOrdersCount, orderStatuses }) {
 	const actionableOrdersQuery = useMemo(
-		() => ( {
+		() => ({
 			page: 1,
 			per_page: 5,
 			status: orderStatuses,
@@ -232,36 +228,36 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 				'customer_id',
 				'date_created_gmt',
 			],
-		} ),
-		[ orderStatuses ]
+		}),
+		[orderStatuses]
 	);
 
-	const currencyContext = useContext( CurrencyContext );
+	const currencyContext = useContext(CurrencyContext);
 
 	const storeCurrency = currencyContext.getCurrencyConfig();
-	const { currencySymbols = {} } = getAdminSetting( 'onboarding', {} );
-	const getFormattedOrderTotal = ( total, orderCurrencyCode ) => {
-		if ( ! orderCurrencyCode ) {
+	const { currencySymbols = {} } = getAdminSetting('onboarding', {});
+	const getFormattedOrderTotal = (total, orderCurrencyCode) => {
+		if (!orderCurrencyCode) {
 			return null;
 		}
 
 		// If the order currency is the same as the store currency, we show the formatted amount.
-		if ( storeCurrency && storeCurrency.code === orderCurrencyCode ) {
-			return currencyContext.formatAmount( total );
+		if (storeCurrency && storeCurrency.code === orderCurrencyCode) {
+			return currencyContext.formatAmount(total);
 		}
-		const symbol = currencySymbols[ orderCurrencyCode ];
+		const symbol = currencySymbols[orderCurrencyCode];
 
-		if ( ! symbol ) {
+		if (!symbol) {
 			// This should never happen, but if it does, we'll just show the currency code.
-			return `${ orderCurrencyCode }${ total }`;
+			return `${orderCurrencyCode}${total}`;
 		}
 
 		// If the order currency is different from the store currency, we show the currency code and amount in the order currency.
-		return CurrencyFactory( {
+		return CurrencyFactory({
 			...storeCurrency,
-			symbol: decodeEntities( symbol ),
+			symbol: decodeEntities(symbol),
 			code: orderCurrencyCode,
-		} ).formatAmount( total );
+		}).formatAmount(total);
 	};
 
 	const {
@@ -269,20 +265,20 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 		isRequesting,
 		isError,
 		customerItems,
-	} = useSelect( ( select ) => {
+	} = useSelect((select) => {
 		const { getOrders, hasFinishedResolution, getOrdersError } =
-			select( ordersStore );
+			select(ordersStore);
 
-		if ( ! orderStatuses.length && unreadOrdersCount === 0 ) {
+		if (!orderStatuses.length && unreadOrdersCount === 0) {
 			return { isRequesting: false };
 		}
 
 		/* eslint-disable @wordpress/no-unused-vars-before-return */
-		const actionableOrders = getOrders( actionableOrdersQuery, null );
+		const actionableOrders = getOrders(actionableOrdersQuery, null);
 
-		const isRequestingActionable = hasFinishedResolution( 'getOrders', [
+		const isRequestingActionable = hasFinishedResolution('getOrders', [
 			actionableOrdersQuery,
-		] );
+		]);
 
 		if (
 			isRequestingActionable ||
@@ -290,43 +286,43 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 			actionableOrders === null
 		) {
 			return {
-				isError: Boolean( getOrdersError( actionableOrdersQuery ) ),
+				isError: Boolean(getOrdersError(actionableOrdersQuery)),
 				isRequesting: true,
 				orderStatuses,
 			};
 		}
 
-		const { getItems } = select( itemsStore );
+		const { getItems } = select(itemsStore);
 
-		const customers = getItems( 'customers', {
+		const customers = getItems('customers', {
 			users: actionableOrders
-				.map( ( order ) => order.customer_id )
-				.filter( ( id ) => id !== 0 ),
-			_fields: [ 'id', 'name', 'country', 'user_id' ],
-		} );
+				.map((order) => order.customer_id)
+				.filter((id) => id !== 0),
+			_fields: ['id', 'name', 'country', 'user_id'],
+		});
 
 		return {
 			orders: actionableOrders,
-			isError: Boolean( getOrdersError( actionableOrders ) ),
+			isError: Boolean(getOrdersError(actionableOrders)),
 			isRequesting: isRequestingActionable,
 			orderStatuses,
 			customerItems: customers,
 		};
-	} );
+	});
 
-	if ( isError ) {
-		if ( ! orderStatuses.length && isFeatureEnabled( 'analytics' ) ) {
+	if (isError) {
+		if (!orderStatuses.length && isFeatureEnabled('analytics')) {
 			return (
 				<EmptyContent
-					title={ __(
+					title={__(
 						'You currently don’t have any actionable statuses. ' +
 							'To display orders here, select orders that require further review in settings.',
 						'woocommerce'
-					) }
-					actionLabel={ __( 'Settings', 'woocommerce' ) }
-					actionURL={ getAdminLink(
+					)}
+					actionLabel={__('Settings', 'woocommerce')}
+					actionURL={getAdminLink(
 						'admin.php?page=wc-admin&path=/analytics/settings'
-					) }
+					)}
 				/>
 			);
 		}
@@ -336,22 +332,22 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 		);
 	}
 	const customerList = customerItems
-		? Array.from( customerItems, ( [ , value ] ) => value )
+		? Array.from(customerItems, ([, value]) => value)
 		: [];
 
 	return (
 		<>
 			<Section>
-				{ isRequesting ? (
+				{isRequesting ? (
 					<ActivityCardPlaceholder
 						className="woocommerce-order-activity-card"
 						hasAction
 						hasDate
-						lines={ 1 }
+						lines={1}
 					/>
 				) : (
-					renderOrders( orders, customerList, getFormattedOrderTotal )
-				) }
+					renderOrders(orders, customerList, getFormattedOrderTotal)
+				)}
 			</Section>
 		</>
 	);

@@ -20,8 +20,8 @@ const config = {
 	selectors,
 	resolvers,
 };
-export const store = createReduxStore( STORE_KEY, config );
+export const store = createReduxStore(STORE_KEY, config);
 
-register( store );
+register(store);
 
 export const SCHEMA_STORE_KEY = STORE_KEY;

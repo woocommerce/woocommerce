@@ -17,41 +17,41 @@ import {
 	type EmailType,
 } from '../settings-email-listing-slotfill';
 
-jest.mock( '@woocommerce/tracks', () => ( {
+jest.mock('@woocommerce/tracks', () => ({
 	recordEvent: jest.fn(),
-} ) );
+}));
 
-jest.mock( '@wordpress/components', () => ( {
-	createSlotFill: () => ( {
-		Fill: ( { children }: { children: React.ReactNode } ) => (
-			<div>{ children }</div>
+jest.mock('@wordpress/components', () => ({
+	createSlotFill: () => ({
+		Fill: ({ children }: { children: React.ReactNode }) => (
+			<div>{children}</div>
 		),
-	} ),
-	Button: ( { children }: { children: React.ReactNode } ) => (
-		<button>{ children }</button>
+	}),
+	Button: ({ children }: { children: React.ReactNode }) => (
+		<button>{children}</button>
 	),
-	Notice: ( { children }: { children: React.ReactNode } ) => (
-		<div role="alert">{ children }</div>
+	Notice: ({ children }: { children: React.ReactNode }) => (
+		<div role="alert">{children}</div>
 	),
-} ) );
+}));
 
 // Stands in for a chunk request that fails: the dynamic import rejects.
-jest.mock( '../settings-email-listing-listview', () => {
-	throw new Error( 'Loading chunk failed' );
-} );
+jest.mock('../settings-email-listing-listview', () => {
+	throw new Error('Loading chunk failed');
+});
 
-jest.mock( '../settings-email-listing-data', () => ( {
+jest.mock('../settings-email-listing-data', () => ({
 	recreateEmailPostRequest: jest.fn(),
-} ) );
+}));
 
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	dispatch: () => ( { createErrorNotice: jest.fn() } ),
-} ) );
+jest.mock('@wordpress/data', () => ({
+	...jest.requireActual('@wordpress/data'),
+	dispatch: () => ({ createErrorNotice: jest.fn() }),
+}));
 
-jest.mock( '@woocommerce/settings', () => ( {
-	getAdminLink: ( path: string ) => `https://example.com/wp-admin/${ path }`,
-} ) );
+jest.mock('@woocommerce/settings', () => ({
+	getAdminLink: (path: string) => `https://example.com/wp-admin/${path}`,
+}));
 
 const email: EmailType = {
 	id: 'new-order',
@@ -71,21 +71,21 @@ const email: EmailType = {
 	wasBackfilled: false,
 };
 
-describe( 'EmailListingFill when the list view chunk fails to load', () => {
-	it( 'shows a notice and keeps the rest of the fill', async () => {
+describe('EmailListingFill when the list view chunk fails to load', () => {
+	it('shows a notice and keeps the rest of the fill', async () => {
 		render(
 			<EmailListingFill
-				emailTypes={ [ email ] }
-				editTemplateUrl={ null }
-				emailTemplateId={ null }
+				emailTypes={[email]}
+				editTemplateUrl={null}
+				emailTemplateId={null}
 			/>
 		);
 
 		expect(
-			await screen.findByText( /email list could not be loaded/i )
+			await screen.findByText(/email list could not be loaded/i)
 		).toBeInTheDocument();
 		expect(
-			screen.getByText( /Manage email notifications/ )
+			screen.getByText(/Manage email notifications/)
 		).toBeInTheDocument();
-	} );
-} );
+	});
+});

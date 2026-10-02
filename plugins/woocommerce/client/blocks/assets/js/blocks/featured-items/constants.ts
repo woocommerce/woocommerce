@@ -25,8 +25,8 @@ export const FEATURED_CATEGORY_DEFAULT_TEMPLATE = (
 	category: WP_REST_API_Category,
 	inheritCategory = false
 ): InnerBlockTemplate[] => [
-	[ 'woocommerce/category-title', { level: 2, textAlign: 'center' } ],
-	[ 'woocommerce/category-description', { textAlign: 'center' } ],
+	['woocommerce/category-title', { level: 2, textAlign: 'center' }],
+	['woocommerce/category-description', { textAlign: 'center' }],
 	[
 		'core/buttons',
 		{
@@ -39,9 +39,9 @@ export const FEATURED_CATEGORY_DEFAULT_TEMPLATE = (
 			[
 				'core/button',
 				{
-					text: __( 'Shop now', 'woocommerce' ),
+					text: __('Shop now', 'woocommerce'),
 					url: category.permalink,
-					...( inheritCategory && {
+					...(inheritCategory && {
 						metadata: {
 							bindings: {
 								url: {
@@ -50,7 +50,7 @@ export const FEATURED_CATEGORY_DEFAULT_TEMPLATE = (
 								},
 							},
 						},
-					} ),
+					}),
 				},
 			],
 		],
@@ -106,7 +106,7 @@ export const FEATURED_PRODUCT_DEFAULT_TEMPLATE = (
 			[
 				'core/button',
 				{
-					text: __( 'Shop now', 'woocommerce' ),
+					text: __('Shop now', 'woocommerce'),
 					url: product.permalink,
 				},
 			],

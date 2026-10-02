@@ -30,28 +30,28 @@ const FormSubmit = () => {
 		isProcessing,
 		requestParams,
 	} = useAddToCartFormContext();
-	const { showAllValidationErrors } = useDispatch( VALIDATION_STORE_KEY );
-	const hasValidationErrors = useSelect( ( select ) => {
-		const store = select( VALIDATION_STORE_KEY );
+	const { showAllValidationErrors } = useDispatch(VALIDATION_STORE_KEY);
+	const hasValidationErrors = useSelect((select) => {
+		const store = select(VALIDATION_STORE_KEY);
 		return store.hasValidationErrors;
-	} );
-	const { createErrorNotice, removeNotice } = useDispatch( 'core/notices' );
+	});
+	const { createErrorNotice, removeNotice } = useDispatch('core/notices');
 	const { receiveCart } = useStoreCart();
-	const [ isSubmitting, setIsSubmitting ] = useState( false );
-	const doSubmit = ! hasError && isProcessing;
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const doSubmit = !hasError && isProcessing;
 
-	const checkValidationContext = useCallback( () => {
-		if ( hasValidationErrors() ) {
+	const checkValidationContext = useCallback(() => {
+		if (hasValidationErrors()) {
 			showAllValidationErrors();
 			return {
 				type: 'error',
 			};
 		}
 		return true;
-	}, [ hasValidationErrors, showAllValidationErrors ] );
+	}, [hasValidationErrors, showAllValidationErrors]);
 
 	// Subscribe to emitter before processing.
-	useEffect( () => {
+	useEffect(() => {
 		const unsubscribeProcessing =
 			eventRegistration.onAddToCartBeforeProcessing(
 				checkValidationContext,
@@ -60,14 +60,14 @@ const FormSubmit = () => {
 		return () => {
 			unsubscribeProcessing();
 		};
-	}, [ eventRegistration, checkValidationContext ] );
+	}, [eventRegistration, checkValidationContext]);
 
 	// Triggers form submission to the API.
-	const submitFormCallback = useCallback( () => {
-		setIsSubmitting( true );
+	const submitFormCallback = useCallback(() => {
+		setIsSubmitting(true);
 		removeNotice(
 			'add-to-cart',
-			`woocommerce/single-product/${ product?.id || 0 }`
+			`woocommerce/single-product/${product?.id || 0}`
 		);
 
 		const fetchData = {
@@ -76,27 +76,27 @@ const FormSubmit = () => {
 			...requestParams,
 		};
 
-		triggerFetch( {
+		triggerFetch({
 			path: '/wc/store/v1/cart/add-item',
 			method: 'POST',
 			data: fetchData,
 			cache: 'no-store',
 			parse: false,
-		} )
-			.then( ( fetchResponse ) => {
+		})
+			.then((fetchResponse) => {
 				// Update nonce.
-				triggerFetch.setNonce( fetchResponse.headers );
+				triggerFetch.setNonce(fetchResponse.headers);
 
 				// Update cart hash.
-				triggerFetch.setCartHash( fetchResponse.headers );
+				triggerFetch.setCartHash(fetchResponse.headers);
 
 				// Handle response.
-				fetchResponse.json().then( function ( response ) {
-					if ( ! fetchResponse.ok ) {
+				fetchResponse.json().then(function (response) {
+					if (!fetchResponse.ok) {
 						// We received an error response.
-						if ( response.body && response.body.message ) {
+						if (response.body && response.body.message) {
 							createErrorNotice(
-								decodeEntities( response.body.message ),
+								decodeEntities(response.body.message),
 								{
 									id: 'add-to-cart',
 									context: `woocommerce/single-product/${
@@ -120,24 +120,24 @@ const FormSubmit = () => {
 						}
 						dispatchActions.setHasError();
 					} else {
-						receiveCart( response );
+						receiveCart(response);
 					}
-					triggerAddedToCartEvent( { preserveCartData: true } );
-					dispatchActions.setAfterProcessing( response );
-					setIsSubmitting( false );
-				} );
-			} )
-			.catch( ( error ) => {
-				error.json().then( function ( response ) {
+					triggerAddedToCartEvent({ preserveCartData: true });
+					dispatchActions.setAfterProcessing(response);
+					setIsSubmitting(false);
+				});
+			})
+			.catch((error) => {
+				error.json().then(function (response) {
 					// If updated cart state was returned, also update that.
-					if ( response.data?.cart ) {
-						receiveCart( response.data.cart );
+					if (response.data?.cart) {
+						receiveCart(response.data.cart);
 					}
 					dispatchActions.setHasError();
-					dispatchActions.setAfterProcessing( response );
-					setIsSubmitting( false );
-				} );
-			} );
+					dispatchActions.setAfterProcessing(response);
+					setIsSubmitting(false);
+				});
+			});
 	}, [
 		product,
 		createErrorNotice,
@@ -146,13 +146,13 @@ const FormSubmit = () => {
 		dispatchActions,
 		quantity,
 		requestParams,
-	] );
+	]);
 
-	useEffect( () => {
-		if ( doSubmit && ! isSubmitting ) {
+	useEffect(() => {
+		if (doSubmit && !isSubmitting) {
 			submitFormCallback();
 		}
-	}, [ doSubmit, submitFormCallback, isSubmitting ] );
+	}, [doSubmit, submitFormCallback, isSubmitting]);
 
 	return null;
 };

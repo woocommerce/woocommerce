@@ -153,8 +153,8 @@ jQuery( function ( $ ) {
 			// .woocommerce-cart-form is replaced with the new form.
 			var $old_coupon_field_val = $( '#coupon_code' ).val();
 			var $old_coupon_error_msg = $( '#coupon_code' )
-					.closest( '.coupon' )
-					.find( '.coupon-error-notice' );
+				.closest( '.coupon' )
+				.find( '.coupon-error-notice' );
 
 			$( '.woocommerce-cart-form' ).replaceWith( $new_form );
 			$( '.woocommerce-cart-form' )
@@ -162,14 +162,21 @@ jQuery( function ( $ ) {
 				.prop( 'disabled', true );
 
 			if ( preserve_notices && $old_coupon_error_msg.length > 0 ) {
-				var $new_coupon_field = $( '.woocommerce-cart-form' ).find( '#coupon_code' );
-				var $new_coupon_field_wrapper = $new_coupon_field.closest( '.coupon' );
+				var $new_coupon_field = $( '.woocommerce-cart-form' ).find(
+					'#coupon_code'
+				);
+				var $new_coupon_field_wrapper =
+					$new_coupon_field.closest( '.coupon' );
 
 				$new_coupon_field.val( $old_coupon_field_val );
 				// The coupon input with error needs to be focused before adding the live region
 				// with the error message, otherwise the screen reader won't read it.
 				$new_coupon_field.trigger( 'focus' );
-				show_coupon_error( $old_coupon_error_msg, $new_coupon_field_wrapper, true );
+				show_coupon_error(
+					$old_coupon_error_msg,
+					$new_coupon_field_wrapper,
+					true
+				);
 			}
 
 			if ( $notices.length > 0 ) {
@@ -228,18 +235,19 @@ jQuery( function ( $ ) {
 				return;
 			}
 
-			$coupon_error_el = $('<p>', {
+			$coupon_error_el = $( '<p>', {
 				class: 'coupon-error-notice',
 				id: 'coupon-error-notice',
-				text: msg
-			});
+				text: msg,
+			} );
 		}
 
 		if ( is_live_region ) {
 			$coupon_error_el.attr( 'role', 'alert' );
 		}
 
-		$target.find( '#coupon_code' )
+		$target
+			.find( '#coupon_code' )
 			.addClass( 'has-error' )
 			.attr( 'aria-invalid', 'true' )
 			.attr( 'aria-describedby', 'coupon-error-notice' );
@@ -312,7 +320,10 @@ jQuery( function ( $ ) {
 				setTimeout( function () {
 					var $form = $( self );
 
-					$target.attr( 'aria-expanded', $form.is( ':visible' ) ? 'true' : 'false' );
+					$target.attr(
+						'aria-expanded',
+						$form.is( ':visible' ) ? 'true' : 'false'
+					);
 				}, 0 );
 			} );
 
@@ -350,7 +361,9 @@ jQuery( function ( $ ) {
 				success: function ( response ) {
 					update_cart_totals_div( response );
 
-					var newCurrentTarget = document.getElementById( event.currentTarget.id );
+					var newCurrentTarget = document.getElementById(
+						event.currentTarget.id
+					);
 
 					if ( newCurrentTarget ) {
 						newCurrentTarget.focus();
@@ -642,18 +655,25 @@ jQuery( function ( $ ) {
 				success: function ( response ) {
 					$(
 						'.woocommerce-error, .woocommerce-message, .woocommerce-info, ' +
-						'.is-error, .is-info, .is-success, .coupon-error-notice'
+							'.is-error, .is-info, .is-success, .coupon-error-notice'
 					).remove();
 
 					// We only want to show coupon notices if they are not errors.
 					// Coupon errors are shown under the input.
-					if ( response.indexOf( 'woocommerce-error' ) === -1 && response.indexOf( 'is-error' ) === -1 ) {
+					if (
+						response.indexOf( 'woocommerce-error' ) === -1 &&
+						response.indexOf( 'is-error' ) === -1
+					) {
 						show_notice( response );
 					} else {
 						var $coupon_wrapper = $text_field.closest( '.coupon' );
 
 						if ( $coupon_wrapper.length > 0 ) {
-							show_coupon_error( response, $coupon_wrapper, false );
+							show_coupon_error(
+								response,
+								$coupon_wrapper,
+								false
+							);
 						}
 
 						$( document.body ).trigger( 'errored_coupon', [
@@ -704,12 +724,12 @@ jQuery( function ( $ ) {
 					show_notice( response );
 					$( document.body ).trigger( 'removed_coupon', [ coupon ] );
 					$( '#coupon_code' )
-						.val('')
-						.removeClass('has-error')
-						.removeAttr('aria-invalid')
-						.removeAttr('aria-describedby')
-						.closest('.coupon')
-						.find('.coupon-error-notice')
+						.val( '' )
+						.removeClass( 'has-error' )
+						.removeAttr( 'aria-invalid' )
+						.removeAttr( 'aria-describedby' )
+						.closest( '.coupon' )
+						.find( '.coupon-error-notice' )
 						.remove();
 					unblock( $wrapper );
 				},
@@ -792,7 +812,9 @@ jQuery( function ( $ ) {
 					unblock( $form );
 					unblock( $( 'div.cart_totals' ) );
 					$.scroll_to_notices( $( '[role="alert"]' ) );
-					$( document.body ).trigger( 'item_removed_from_classic_cart');
+					$( document.body ).trigger(
+						'item_removed_from_classic_cart'
+					);
 				},
 			} );
 		},

@@ -15,16 +15,16 @@ import {
 import blockJson from '../../block.json';
 
 export const CORE_NAME = 'core/post-excerpt';
-export const VARIATION_NAME = `${ blockJson.name }/product-summary`;
+export const VARIATION_NAME = `${blockJson.name}/product-summary`;
 
 const registerProductSummary = () => {
-	registerElementVariation( CORE_NAME, {
+	registerElementVariation(CORE_NAME, {
 		blockDescription: BLOCK_DESCRIPTION,
-		blockIcon: <Icon icon={ page } />,
+		blockIcon: <Icon icon={page} />,
 		blockTitle: BLOCK_TITLE,
 		variationName: VARIATION_NAME,
 		scope: [],
-	} );
+	});
 };
 
 export default registerProductSummary;

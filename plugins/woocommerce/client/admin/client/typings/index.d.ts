@@ -1,9 +1,9 @@
 declare module '@woocommerce/settings' {
-	export declare function getAdminLink( path: string ): string;
-	export declare function getSetting< T >(
+	export declare function getAdminLink(path: string): string;
+	export declare function getSetting<T>(
 		name: string,
 		fallback?: unknown,
-		filter = ( val: unknown, fb: unknown ) =>
+		filter = (val: unknown, fb: unknown) =>
 			typeof val !== 'undefined' ? val : fb
 	): T;
 }
@@ -17,13 +17,13 @@ declare module '@wordpress/keyboard-shortcuts' {
 		import('@wordpress/data').ReduxStoreConfig<
 			unknown,
 			{
-				registerShortcut: ( shortcut: {
+				registerShortcut: (shortcut: {
 					name: string;
 					category: string;
 					description?: string;
 					keyCombination: ShortcutKeyCombination;
-				} ) => unknown;
-				unregisterShortcut: ( name: string ) => unknown;
+				}) => unknown;
+				unregisterShortcut: (name: string) => unknown;
 			},
 			{
 				getShortcutKeyCombination: (
@@ -39,7 +39,7 @@ declare module '@wordpress/keyboard-shortcuts' {
 	>;
 	export declare function useShortcut(
 		name: string,
-		callback: ( event: { preventDefault: () => void } ) => void,
+		callback: (event: { preventDefault: () => void }) => void,
 		options?: { isDisabled?: boolean }
 	): void;
 }
@@ -48,10 +48,10 @@ declare module '@wordpress/components/build/ui' {
 	export * from '@wordpress/components/build-types/ui';
 }
 declare module 'gridicons/dist/*' {
-	const value: React.ElementType< {
+	const value: React.ElementType<{
 		size?: 12 | 18 | 24 | 36 | 48 | 54 | 72;
-		onClick?: ( event: MouseEvent | KeyboardEvent ) => void;
-	} >;
+		onClick?: (event: MouseEvent | KeyboardEvent) => void;
+	}>;
 	export default value;
 }
 declare module '*.png';

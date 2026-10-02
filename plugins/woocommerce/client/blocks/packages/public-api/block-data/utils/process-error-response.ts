@@ -32,11 +32,11 @@ type ApiParamError = {
 export const getErrorDetails = (
 	response: ApiErrorResponse
 ): ApiParamError[] => {
-	const errorDetails = objectHasProp( response.data, 'details' )
-		? Object.entries( response.data.details )
+	const errorDetails = objectHasProp(response.data, 'details')
+		? Object.entries(response.data.details)
 		: null;
 
-	if ( ! errorDetails ) {
+	if (!errorDetails) {
 		return [];
 	}
 
@@ -57,23 +57,23 @@ export const getErrorDetails = (
 				...acc,
 				{
 					param,
-					id: `${ param }_${ code }`,
+					id: `${param}_${code}`,
 					code,
-					message: decodeEntities( message ),
+					message: decodeEntities(message),
 					data,
 				},
-				...( Array.isArray( additionalErrors )
-					? additionalErrors.flatMap( ( additionalError ) => {
+				...(Array.isArray(additionalErrors)
+					? additionalErrors.flatMap((additionalError) => {
 							if (
-								! objectHasProp( additionalError, 'code' ) ||
-								! objectHasProp( additionalError, 'message' )
+								!objectHasProp(additionalError, 'code') ||
+								!objectHasProp(additionalError, 'message')
 							) {
 								return [];
 							}
 							const errorObject = [
 								{
 									param,
-									id: `${ param }_${ additionalError.code }`,
+									id: `${param}_${additionalError.code}`,
 									code: additionalError.code,
 									message: decodeEntities(
 										additionalError.message
@@ -81,15 +81,15 @@ export const getErrorDetails = (
 									data: additionalError.data,
 								},
 							];
-							if ( typeof additionalError.data !== 'undefined' ) {
+							if (typeof additionalError.data !== 'undefined') {
 								return [
 									...errorObject,
-									...getErrorDetails( additionalError ),
+									...getErrorDetails(additionalError),
 								];
 							}
 							return errorObject;
-					  } )
-					: [] ),
+						})
+					: []),
 			];
 		},
 		[] as ApiParamError[]
@@ -99,8 +99,8 @@ export const getErrorDetails = (
 /**
  * Gets appropriate error context from error code.
  */
-const getErrorContextFromCode = ( code: string ): string => {
-	switch ( code ) {
+const getErrorContextFromCode = (code: string): string => {
+	switch (code) {
 		case 'woocommerce_rest_missing_email_address':
 		case 'woocommerce_rest_invalid_email_address':
 			return noticeContexts.CONTACT_INFORMATION;
@@ -117,11 +117,11 @@ const getErrorContextFromParam = (
 	param: string,
 	code: string
 ): string | undefined => {
-	switch ( param ) {
+	switch (param) {
 		case 'invalid_email':
 			return noticeContexts.CONTACT_INFORMATION;
 		case 'billing_address':
-			if ( code === 'invalid_email' ) {
+			if (code === 'invalid_email') {
 				return noticeContexts.CONTACT_INFORMATION;
 			}
 			return noticeContexts.BILLING_ADDRESS;
@@ -138,7 +138,7 @@ const getErrorContextFromParam = (
 const getErrorContextFromAdditionalFieldLocation = (
 	location: string
 ): string | undefined => {
-	switch ( location ) {
+	switch (location) {
 		case 'contact':
 			return noticeContexts.CONTACT_INFORMATION;
 		case 'order':
@@ -159,10 +159,10 @@ const getNoticeOptionsForParamError = (
 	let additionalFieldId: string | undefined = '';
 	// Check if this error response comes from an additional field.
 	if (
-		isObject( data ) &&
-		objectHasProp( data, 'key' ) &&
-		objectHasProp( data, 'location' ) &&
-		isString( data.location )
+		isObject(data) &&
+		objectHasProp(data, 'key') &&
+		objectHasProp(data, 'location') &&
+		isString(data.location)
 	) {
 		additionalFieldContext = getErrorContextFromAdditionalFieldLocation(
 			data.location
@@ -171,8 +171,8 @@ const getNoticeOptionsForParamError = (
 
 	// If the error response comes from an additional field we need to use the key as the ID so we can remove it later.
 	// It's also needed to ensure additional fields don't replace each other when there are multiple.
-	if ( objectHasProp( data, 'key' ) && isString( data.key ) ) {
-		additionalFieldId = `${ data.key }__${ id }`;
+	if (objectHasProp(data, 'key') && isString(data.key)) {
+		additionalFieldId = `${data.key}__${id}`;
 	}
 
 	return {
@@ -180,8 +180,8 @@ const getNoticeOptionsForParamError = (
 		context:
 			context ||
 			additionalFieldContext ||
-			getErrorContextFromParam( param, code ) ||
-			getErrorContextFromCode( code ),
+			getErrorContextFromParam(param, code) ||
+			getErrorContextFromCode(code),
 	};
 };
 
@@ -192,15 +192,15 @@ const createErrorNoticesForInvalidParams = (
 	response: ApiErrorResponse,
 	context: string | undefined
 ) => {
-	const errorDetails = getErrorDetails( response );
+	const errorDetails = getErrorDetails(response);
 
-	errorDetails.forEach( ( error ) => {
+	errorDetails.forEach((error) => {
 		createNotice(
 			'error',
 			error.message,
-			getNoticeOptionsForParamError( error, context )
+			getNoticeOptionsForParamError(error, context)
 		);
-	} );
+	});
 };
 
 /**
@@ -210,11 +210,11 @@ export const getInvalidParamNoticeContext = (
 	errorResponse: ApiErrorResponse,
 	context?: string | undefined
 ) => {
-	const errorDetails = getErrorDetails( errorResponse );
+	const errorDetails = getErrorDetails(errorResponse);
 
-	return errorDetails.map( ( error ) => {
-		return getNoticeOptionsForParamError( error, context );
-	} );
+	return errorDetails.map((error) => {
+		return getNoticeOptionsForParamError(error, context);
+	});
 };
 
 /**
@@ -224,8 +224,8 @@ export const getNoticeContextFromErrorResponse = (
 	errorResponse: ApiErrorResponse,
 	context?: string | undefined
 ) => {
-	if ( errorResponse.code === 'rest_invalid_param' ) {
-		return getInvalidParamNoticeContext( errorResponse, context );
+	if (errorResponse.code === 'rest_invalid_param') {
+		return getInvalidParamNoticeContext(errorResponse, context);
 	}
 
 	return [
@@ -234,7 +234,7 @@ export const getNoticeContextFromErrorResponse = (
 			context:
 				context ||
 				errorResponse?.data?.context ||
-				getErrorContextFromCode( errorResponse.code ),
+				getErrorContextFromCode(errorResponse.code),
 		},
 	];
 };
@@ -248,27 +248,27 @@ export const processErrorResponse = (
 	response: ApiErrorResponse | null,
 	context?: string | undefined
 ) => {
-	if ( ! isApiErrorResponse( response ) ) {
+	if (!isApiErrorResponse(response)) {
 		return;
 	}
 
-	if ( response.code === 'rest_invalid_param' ) {
-		return createErrorNoticesForInvalidParams( response, context );
+	if (response.code === 'rest_invalid_param') {
+		return createErrorNoticesForInvalidParams(response, context);
 	}
 
 	let errorMessage =
-		decodeEntities( response.message ) || DEFAULT_ERROR_MESSAGE;
+		decodeEntities(response.message) || DEFAULT_ERROR_MESSAGE;
 
 	// Replace the generic invalid JSON message with something more user friendly.
-	if ( response.code === 'invalid_json' ) {
+	if (response.code === 'invalid_json') {
 		errorMessage = DEFAULT_ERROR_MESSAGE;
 	}
 
-	createNotice( 'error', errorMessage, {
+	createNotice('error', errorMessage, {
 		id: response.code,
 		context:
 			context ||
 			response?.data?.context ||
-			getErrorContextFromCode( response.code ),
-	} );
+			getErrorContextFromCode(response.code),
+	});
 };

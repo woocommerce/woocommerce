@@ -12,16 +12,16 @@ import { checkoutEvents } from '@woocommerce/blocks-checkout-events';
 import { CheckoutEventsProvider } from '../index';
 
 // Mock the registry functions
-jest.mock( '@woocommerce/blocks-registry', () => ( {
-	getPaymentMethods: jest.fn( () => ( {} ) ),
-	getExpressPaymentMethods: jest.fn( () => ( {
+jest.mock('@woocommerce/blocks-registry', () => ({
+	getPaymentMethods: jest.fn(() => ({})),
+	getExpressPaymentMethods: jest.fn(() => ({
 		stripe: {
 			name: 'stripe',
 			title: 'Stripe',
 			description: 'Pay with Stripe',
 			gatewayId: 'stripe',
 			supports: {
-				style: [ 'height', 'borderRadius' ],
+				style: ['height', 'borderRadius'],
 			},
 		},
 		paypal: {
@@ -33,38 +33,38 @@ jest.mock( '@woocommerce/blocks-registry', () => ( {
 				style: [],
 			},
 		},
-	} ) ),
-} ) );
+	})),
+}));
 
-describe( 'CheckoutEventsContext', () => {
+describe('CheckoutEventsContext', () => {
 	let mockSetRegisteredExpressPaymentMethods: jest.Mock;
 
-	beforeEach( () => {
+	beforeEach(() => {
 		jest.clearAllMocks();
-		dispatch( checkoutStore ).__internalSetIdle();
+		dispatch(checkoutStore).__internalSetIdle();
 
 		// Mock the payment store dispatch action
 		mockSetRegisteredExpressPaymentMethods = jest.fn();
 		jest.spyOn(
-			dispatch( paymentStore ),
+			dispatch(paymentStore),
 			'__internalSetRegisteredExpressPaymentMethods'
-		).mockImplementation( mockSetRegisteredExpressPaymentMethods );
-	} );
+		).mockImplementation(mockSetRegisteredExpressPaymentMethods);
+	});
 
-	it( '__internalSetRegisteredExpressPaymentMethods is called when component renders', () => {
+	it('__internalSetRegisteredExpressPaymentMethods is called when component renders', () => {
 		render(
 			<CheckoutEventsProvider redirectUrl="local">
 				<div />
 			</CheckoutEventsProvider>
 		);
 
-		expect( mockSetRegisteredExpressPaymentMethods ).toHaveBeenCalledWith( {
+		expect(mockSetRegisteredExpressPaymentMethods).toHaveBeenCalledWith({
 			stripe: {
 				name: 'stripe',
 				title: 'Stripe',
 				description: 'Pay with Stripe',
 				gatewayId: 'stripe',
-				supportsStyle: [ 'height', 'borderRadius' ],
+				supportsStyle: ['height', 'borderRadius'],
 			},
 			paypal: {
 				name: 'paypal',
@@ -73,77 +73,75 @@ describe( 'CheckoutEventsContext', () => {
 				gatewayId: 'paypal',
 				supportsStyle: [],
 			},
-		} );
-	} );
+		});
+	});
 
-	it( 'onCheckoutValidation observers are called when the checkout is in the "beforeProcessing" state', async () => {
+	it('onCheckoutValidation observers are called when the checkout is in the "beforeProcessing" state', async () => {
 		const callback = jest.fn();
 		const callback2 = jest.fn();
-		checkoutEvents.onCheckoutValidation( callback );
-		checkoutEvents.onCheckoutValidation( callback2 );
+		checkoutEvents.onCheckoutValidation(callback);
+		checkoutEvents.onCheckoutValidation(callback2);
 		const { rerender } = render(
 			<CheckoutEventsProvider redirectUrl="local">
 				<div />
 			</CheckoutEventsProvider>
 		);
-		await act( () =>
-			dispatch( checkoutStore ).__internalSetBeforeProcessing()
+		await act(() =>
+			dispatch(checkoutStore).__internalSetBeforeProcessing()
 		);
 		rerender(
 			<CheckoutEventsProvider redirectUrl="local">
 				<div />
 			</CheckoutEventsProvider>
 		);
-		expect( callback ).toHaveBeenCalled();
-		expect( callback2 ).toHaveBeenCalled();
-	} );
-	it( 'onCheckoutSuccess observers are called when the checkout is in the "afterProcessing" state and no error exists, onCheckoutFail observers are not called', async () => {
+		expect(callback).toHaveBeenCalled();
+		expect(callback2).toHaveBeenCalled();
+	});
+	it('onCheckoutSuccess observers are called when the checkout is in the "afterProcessing" state and no error exists, onCheckoutFail observers are not called', async () => {
 		const successCallback = jest.fn();
 		const successCallback2 = jest.fn();
 		const failCallback = jest.fn();
-		checkoutEvents.onCheckoutSuccess( successCallback );
-		checkoutEvents.onCheckoutSuccess( successCallback2 );
-		checkoutEvents.onCheckoutFail( failCallback );
+		checkoutEvents.onCheckoutSuccess(successCallback);
+		checkoutEvents.onCheckoutSuccess(successCallback2);
+		checkoutEvents.onCheckoutFail(failCallback);
 		const { rerender } = render(
 			<CheckoutEventsProvider redirectUrl="local">
 				<div />
 			</CheckoutEventsProvider>
 		);
-		await act( () =>
-			dispatch( checkoutStore ).__internalSetAfterProcessing()
-		);
+		await act(() => dispatch(checkoutStore).__internalSetAfterProcessing());
 		rerender(
 			<CheckoutEventsProvider redirectUrl="local">
 				<div />
 			</CheckoutEventsProvider>
 		);
-		expect( successCallback ).toHaveBeenCalled();
-		expect( successCallback2 ).toHaveBeenCalled();
-		expect( failCallback ).not.toHaveBeenCalled();
-	} );
-	it( 'onCheckoutSuccess observers are not called when the checkout is in the "afterProcessing" state and an error exists, onCheckoutFail observers are called', async () => {
+		expect(successCallback).toHaveBeenCalled();
+		expect(successCallback2).toHaveBeenCalled();
+		expect(failCallback).not.toHaveBeenCalled();
+	});
+	it('onCheckoutSuccess observers are not called when the checkout is in the "afterProcessing" state and an error exists, onCheckoutFail observers are called', async () => {
 		const successCallback = jest.fn();
 		const successCallback2 = jest.fn();
 		const failCallback = jest.fn();
-		checkoutEvents.onCheckoutSuccess( successCallback );
-		checkoutEvents.onCheckoutSuccess( successCallback2 );
-		checkoutEvents.onCheckoutFail( failCallback );
+		checkoutEvents.onCheckoutSuccess(successCallback);
+		checkoutEvents.onCheckoutSuccess(successCallback2);
+		checkoutEvents.onCheckoutFail(failCallback);
 		const { rerender } = render(
 			<CheckoutEventsProvider redirectUrl="local">
 				<div />
 			</CheckoutEventsProvider>
 		);
-		await act( () => {
-			dispatch( checkoutStore ).__internalSetHasError( true );
-			dispatch( checkoutStore ).__internalSetAfterProcessing();
-		} );
+		await act(() => {
+			dispatch(checkoutStore).__internalSetHasError(true);
+			dispatch(checkoutStore).__internalSetAfterProcessing();
+		});
 		rerender(
 			<CheckoutEventsProvider redirectUrl="local">
 				<div />
 			</CheckoutEventsProvider>
 		);
-		expect( successCallback ).not.toHaveBeenCalled();
-		expect( successCallback2 ).not.toHaveBeenCalled();
-		expect( failCallback ).toHaveBeenCalled();
-	} );
-} );
+		expect(successCallback).not.toHaveBeenCalled();
+		expect(successCallback2).not.toHaveBeenCalled();
+		expect(failCallback).toHaveBeenCalled();
+	});
+});

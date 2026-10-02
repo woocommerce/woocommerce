@@ -15,22 +15,22 @@ const WC_ADMIN_FEATURES_PROXY_MARKER = '__wcRetiredFeatureFlagsProxy';
 if (
 	typeof window !== 'undefined' &&
 	window.wcAdminFeatures &&
-	! ( window.wcAdminFeatures as Record< string, boolean > )[
+	!(window.wcAdminFeatures as Record<string, boolean>)[
 		WC_ADMIN_FEATURES_PROXY_MARKER
 	]
 ) {
-	window.wcAdminFeatures = new Proxy( window.wcAdminFeatures, {
-		get( target, property, receiver ) {
+	window.wcAdminFeatures = new Proxy(window.wcAdminFeatures, {
+		get(target, property, receiver) {
 			if (
 				typeof property === 'string' &&
-				isRetiredFeatureFlag( property )
+				isRetiredFeatureFlag(property)
 			) {
-				warnRetiredFeatureFlag( property );
+				warnRetiredFeatureFlag(property);
 			}
 
-			return Reflect.get( target, property, receiver );
+			return Reflect.get(target, property, receiver);
 		},
-	} );
+	});
 
 	Object.defineProperty(
 		window.wcAdminFeatures,
@@ -47,9 +47,9 @@ if (
  * @param featureId The feature id
  * @return The feature flag
  */
-export function getFeature( featureId: string ): Feature | undefined {
-	const features = getAdminSetting( ADMIN_SETTINGS_FEATURES_NAME );
-	return features && features[ featureId ];
+export function getFeature(featureId: string): Feature | undefined {
+	const features = getAdminSetting(ADMIN_SETTINGS_FEATURES_NAME);
+	return features && features[featureId];
 }
 
 /**
@@ -58,9 +58,9 @@ export function getFeature( featureId: string ): Feature | undefined {
  * @param featureId The feature id
  * @return `true` or `false` if the given feature is enabled
  */
-export function isFeatureEnabled( featureId: string ): boolean {
-	const feature = getFeature( featureId );
-	return Boolean( feature?.is_enabled );
+export function isFeatureEnabled(featureId: string): boolean {
+	const feature = getFeature(featureId);
+	return Boolean(feature?.is_enabled);
 }
 
 /**
@@ -69,7 +69,7 @@ export function isFeatureEnabled( featureId: string ): boolean {
  * @param featureId The feature id
  * @return `true` or `false` if the given feature is experimental
  */
-export function isFeatureExperimental( featureId: string ): boolean {
-	const feature = getFeature( featureId );
-	return Boolean( feature?.is_experimental );
+export function isFeatureExperimental(featureId: string): boolean {
+	const feature = getFeature(featureId);
+	return Boolean(feature?.is_experimental);
 }

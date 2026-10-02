@@ -22,60 +22,58 @@ export const HandpickedProductsInspectorControls = (
 
 	return (
 		<InspectorControls key="inspector">
-			<PanelBody title={ __( 'Layout', 'woocommerce' ) } initialOpen>
+			<PanelBody title={__('Layout', 'woocommerce')} initialOpen>
 				<RangeControl
-					label={ __( 'Columns', 'woocommerce' ) }
-					value={ columns }
-					onChange={ ( value ) =>
-						setAttributes( { columns: value } )
-					}
-					min={ getSetting( 'minColumns', 1 ) }
-					max={ getSetting( 'maxColumns', 6 ) }
+					label={__('Columns', 'woocommerce')}
+					value={columns}
+					onChange={(value) => setAttributes({ columns: value })}
+					min={getSetting('minColumns', 1)}
+					max={getSetting('maxColumns', 6)}
 				/>
 				<ToggleControl
-					label={ __( 'Align Buttons', 'woocommerce' ) }
+					label={__('Align Buttons', 'woocommerce')}
 					help={
 						alignButtons
 							? __(
 									'Buttons are aligned vertically.',
 									'woocommerce'
-							  )
-							: __( 'Buttons follow content.', 'woocommerce' )
+								)
+							: __('Buttons follow content.', 'woocommerce')
 					}
-					checked={ alignButtons }
-					onChange={ () =>
-						setAttributes( { alignButtons: ! alignButtons } )
+					checked={alignButtons}
+					onChange={() =>
+						setAttributes({ alignButtons: !alignButtons })
 					}
 				/>
 			</PanelBody>
-			<PanelBody title={ __( 'Content', 'woocommerce' ) } initialOpen>
+			<PanelBody title={__('Content', 'woocommerce')} initialOpen>
 				<GridContentControl
-					settings={ contentVisibility }
-					onChange={ ( value ) =>
-						setAttributes( { contentVisibility: value } )
+					settings={contentVisibility}
+					onChange={(value) =>
+						setAttributes({ contentVisibility: value })
 					}
 				/>
 			</PanelBody>
 			<PanelBody
-				title={ __( 'Order By', 'woocommerce' ) }
-				initialOpen={ false }
+				title={__('Order By', 'woocommerce')}
+				initialOpen={false}
 			>
 				<ProductOrderbyControl
-					setAttributes={ setAttributes }
-					value={ orderby }
+					setAttributes={setAttributes}
+					value={orderby}
 				/>
 			</PanelBody>
 			<PanelBody
-				title={ __( 'Products', 'woocommerce' ) }
-				initialOpen={ false }
+				title={__('Products', 'woocommerce')}
+				initialOpen={false}
 			>
 				<ProductsControl
-					selected={ attributes.products }
-					onChange={ ( value = [] ) => {
-						const ids = value.map( ( { id } ) => id );
-						setAttributes( { products: ids } );
-					} }
-					isCompact={ true }
+					selected={attributes.products}
+					onChange={(value = []) => {
+						const ids = value.map(({ id }) => id);
+						setAttributes({ products: ids });
+					}}
+					isCompact={true}
 				/>
 			</PanelBody>
 		</InspectorControls>

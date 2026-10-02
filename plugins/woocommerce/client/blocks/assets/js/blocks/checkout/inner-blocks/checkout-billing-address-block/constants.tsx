@@ -3,8 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 
-export const DEFAULT_TITLE = __( 'Billing address', 'woocommerce' );
-export const DEFAULT_DESCRIPTION = __( '', 'woocommerce' );
+export const DEFAULT_TITLE = __('Billing address', 'woocommerce');
+export const DEFAULT_DESCRIPTION = __('', 'woocommerce');
 
 export const DEFAULT_FORCED_BILLING_TITLE = __(
 	'Billing and shipping address',

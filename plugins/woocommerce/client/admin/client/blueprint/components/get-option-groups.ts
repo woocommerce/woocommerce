@@ -128,16 +128,14 @@ const OPTIONS_GROUPS = {
  * @param options a list of options
  * @return string[] a list of groups
  */
-export const getOptionGroups = ( options: string[] ) => {
+export const getOptionGroups = (options: string[]) => {
 	const groups = new Set();
-	options.forEach( ( option ) => {
-		if ( OPTIONS_GROUPS[ option as keyof typeof OPTIONS_GROUPS ] ) {
-			groups.add(
-				OPTIONS_GROUPS[ option as keyof typeof OPTIONS_GROUPS ]
-			);
+	options.forEach((option) => {
+		if (OPTIONS_GROUPS[option as keyof typeof OPTIONS_GROUPS]) {
+			groups.add(OPTIONS_GROUPS[option as keyof typeof OPTIONS_GROUPS]);
 		}
-	} );
-	return Array.from( groups );
+	});
+	return Array.from(groups);
 };
 
 /**
@@ -147,14 +145,14 @@ export const getOptionGroups = ( options: string[] ) => {
  * @return string[] a list of groups
  */
 export const getOptionGroupsFromSteps = (
-	steps: ( BlueprintStep & { options?: Record< string, string > } )[]
+	steps: (BlueprintStep & { options?: Record<string, string> })[]
 ) => {
-	const options = steps.reduce< string[] >( ( acc, step ) => {
-		if ( step.step === 'setSiteOptions' && step.options ) {
-			acc.push( ...Object.keys( step.options ) );
+	const options = steps.reduce<string[]>((acc, step) => {
+		if (step.step === 'setSiteOptions' && step.options) {
+			acc.push(...Object.keys(step.options));
 		}
 		return acc;
-	}, [] );
+	}, []);
 
-	return getOptionGroups( options );
+	return getOptionGroups(options);
 };

@@ -16,57 +16,57 @@ import clsx from 'clsx';
 const ACCORDION_HEADER_BLOCK_NAME = 'woocommerce/accordion-header';
 const ACCORDION_PANEL_BLOCK_NAME = 'woocommerce/accordion-panel';
 
-export default function Edit( {
+export default function Edit({
 	attributes: { openByDefault },
 	clientId,
 	setAttributes,
-} ) {
+}) {
 	const isSelected = useSelect(
-		( select ) => {
+		(select) => {
 			const { isBlockSelected, hasSelectedInnerBlock } =
-				select( blockEditorStore );
+				select(blockEditorStore);
 			return (
-				isBlockSelected( clientId ) ||
-				hasSelectedInnerBlock( clientId, true )
+				isBlockSelected(clientId) ||
+				hasSelectedInnerBlock(clientId, true)
 			);
 		},
-		[ clientId ]
+		[clientId]
 	);
 
 	const getBlockOrder = useSelect(
-		( select ) => select( blockEditorStore ).getBlockOrder,
+		(select) => select(blockEditorStore).getBlockOrder,
 		[]
 	);
 
-	const contentBlockClientId = getBlockOrder( clientId )[ 1 ];
+	const contentBlockClientId = getBlockOrder(clientId)[1];
 	const { updateBlockAttributes, __unstableMarkNextChangeAsNotPersistent } =
-		useDispatch( blockEditorStore );
+		useDispatch(blockEditorStore);
 
-	useEffect( () => {
-		if ( contentBlockClientId ) {
+	useEffect(() => {
+		if (contentBlockClientId) {
 			__unstableMarkNextChangeAsNotPersistent();
-			updateBlockAttributes( contentBlockClientId, {
+			updateBlockAttributes(contentBlockClientId, {
 				isSelected,
-			} );
+			});
 		}
 	}, [
 		isSelected,
 		contentBlockClientId,
 		__unstableMarkNextChangeAsNotPersistent,
 		updateBlockAttributes,
-	] );
+	]);
 
 	const blockProps = useBlockProps();
 	const innerBlocksProps = useInnerBlocksProps(
 		{
 			...blockProps,
-			className: clsx( blockProps.className, {
+			className: clsx(blockProps.className, {
 				'is-open': openByDefault || isSelected,
-			} ),
+			}),
 		},
 		{
 			template: [
-				[ ACCORDION_HEADER_BLOCK_NAME, {} ],
+				[ACCORDION_HEADER_BLOCK_NAME, {}],
 				[
 					ACCORDION_PANEL_BLOCK_NAME,
 					{
@@ -83,29 +83,29 @@ export default function Edit( {
 	return (
 		<>
 			<InspectorControls key="setting">
-				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
+				<PanelBody title={__('Settings', 'woocommerce')}>
 					<ToggleControl
-						label={ __( 'Open by default', 'woocommerce' ) }
+						label={__('Open by default', 'woocommerce')}
 						__nextHasNoMarginBottom
-						onChange={ ( value ) => {
-							setAttributes( {
+						onChange={(value) => {
+							setAttributes({
 								openByDefault: value,
-							} );
-							if ( contentBlockClientId ) {
-								updateBlockAttributes( contentBlockClientId, {
+							});
+							if (contentBlockClientId) {
+								updateBlockAttributes(contentBlockClientId, {
 									openByDefault: value,
-								} );
+								});
 							}
-						} }
-						checked={ openByDefault }
-						help={ __(
+						}}
+						checked={openByDefault}
+						help={__(
 							'Accordion content will be displayed by default.',
 							'woocommerce'
-						) }
+						)}
 					/>
 				</PanelBody>
 			</InspectorControls>
-			<div { ...innerBlocksProps } />
+			<div {...innerBlocksProps} />
 		</>
 	);
 }

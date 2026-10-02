@@ -22,22 +22,22 @@ import { useSettingsContext } from './settings-context';
 
 const GeneralSettingsDescription = () => (
 	<>
-		<h2>{ _x( 'General', 'Admin settings', 'woocommerce' ) }</h2>
+		<h2>{_x('General', 'Admin settings', 'woocommerce')}</h2>
 		<p>
-			{ __(
+			{__(
 				'Enable or disable local pickup on your store, and define costs. Local pickup is only available from the block checkout.',
 				'woocommerce'
-			) }
+			)}
 		</p>
 		<ExternalLink
-			href={ `${ ADMIN_URL }post.php?post=${ CHECKOUT_PAGE_ID }&action=edit` }
+			href={`${ADMIN_URL}post.php?post=${CHECKOUT_PAGE_ID}&action=edit`}
 		>
-			{ __( 'View checkout page', 'woocommerce' ) }
+			{__('View checkout page', 'woocommerce')}
 		</ExternalLink>
 	</>
 );
 
-const StyledNotice = styled( Notice )`
+const StyledNotice = styled(Notice)`
 	margin-left: 0;
 	margin-right: 0;
 `;
@@ -45,14 +45,14 @@ const StyledNotice = styled( Notice )`
 const GeneralSettings = () => {
 	const { settings, setSettingField, readOnlySettings } =
 		useSettingsContext();
-	const [ showCosts, setShowCosts ] = useState( !! settings.cost );
+	const [showCosts, setShowCosts] = useState(!!settings.cost);
 
 	return (
-		<SettingsSection Description={ GeneralSettingsDescription }>
+		<SettingsSection Description={GeneralSettingsDescription}>
 			<SettingsCard>
-				{ readOnlySettings.hasLegacyPickup && (
-					<StyledNotice status="warning" isDismissible={ false }>
-						{ createInterpolateElement(
+				{readOnlySettings.hasLegacyPickup && (
+					<StyledNotice status="warning" isDismissible={false}>
+						{createInterpolateElement(
 							__(
 								"By enabling Local Pickup with more valuable features for your store, it's recommended that you remove the legacy Local Pickup option from your <a>shipping zones</a>.",
 								'woocommerce'
@@ -61,108 +61,103 @@ const GeneralSettings = () => {
 								a: (
 									// eslint-disable-next-line jsx-a11y/anchor-has-content
 									<a
-										href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping` }
+										href={`${ADMIN_URL}admin.php?page=wc-settings&tab=shipping`}
 									/>
 								),
 							}
-						) }
+						)}
 					</StyledNotice>
-				) }
+				)}
 				<CheckboxControl
-					checked={ settings.enabled }
+					checked={settings.enabled}
 					name="local_pickup_enabled"
-					onChange={ setSettingField( 'enabled' ) }
-					label={ __( 'Enable local pickup', 'woocommerce' ) }
-					help={ __(
+					onChange={setSettingField('enabled')}
+					label={__('Enable local pickup', 'woocommerce')}
+					help={__(
 						'When enabled, local pickup will appear as an option on the block based checkout.',
 						'woocommerce'
-					) }
+					)}
 				/>
 				<TextControl
-					label={ __( 'Title', 'woocommerce' ) }
+					label={__('Title', 'woocommerce')}
 					name="local_pickup_title"
-					help={ __(
+					help={__(
 						'This is the shipping method title shown to customers.',
 						'woocommerce'
-					) }
-					placeholder={ __( 'Pickup', 'woocommerce' ) }
-					value={ settings.title }
-					onChange={ setSettingField( 'title' ) }
-					disabled={ false }
+					)}
+					placeholder={__('Pickup', 'woocommerce')}
+					value={settings.title}
+					onChange={setSettingField('title')}
+					disabled={false}
 					autoComplete="off"
-					required={ true }
-					onInvalid={ (
-						event: React.InvalidEvent< HTMLInputElement >
+					required={true}
+					onInvalid={(
+						event: React.InvalidEvent<HTMLInputElement>
 					) => {
 						event.target.setCustomValidity(
-							__(
-								'Local pickup title is required',
-								'woocommerce'
-							)
+							__('Local pickup title is required', 'woocommerce')
 						);
-					} }
-					onInput={ (
-						event: React.ChangeEvent< HTMLInputElement >
-					) => {
-						event.target.setCustomValidity( '' );
-					} }
+					}}
+					onInput={(event: React.ChangeEvent<HTMLInputElement>) => {
+						event.target.setCustomValidity('');
+					}}
 				/>
 				<CheckboxControl
-					checked={ showCosts }
-					onChange={ () => {
-						setShowCosts( ! showCosts );
-						setSettingField( 'cost' )( '' );
-					} }
-					label={ __(
+					checked={showCosts}
+					onChange={() => {
+						setShowCosts(!showCosts);
+						setSettingField('cost')('');
+					}}
+					label={__(
 						'Add a price for customers who choose local pickup',
 						'woocommerce'
-					) }
-					help={ __(
+					)}
+					help={__(
 						'By default, the local pickup shipping method is free.',
 						'woocommerce'
-					) }
+					)}
 				/>
-				{ showCosts ? (
+				{showCosts ? (
 					<>
 						<TextControl
-							label={ __( 'Cost', 'woocommerce' ) }
+							label={__('Cost', 'woocommerce')}
 							name="local_pickup_cost"
-							help={ __(
+							help={__(
 								'Optional cost to charge for local pickup.',
 								'woocommerce'
-							) }
-							placeholder={ __( 'Free', 'woocommerce' ) }
+							)}
+							placeholder={__('Free', 'woocommerce')}
 							type="number"
 							pattern="[0-9]+\.?[0-9]*"
-							min={ 0 }
-							value={ settings.cost }
-							onChange={ setSettingField( 'cost' ) }
-							disabled={ false }
+							min={0}
+							value={settings.cost}
+							onChange={setSettingField('cost')}
+							disabled={false}
 							autoComplete="off"
 						/>
 						<SelectControl
-							label={ __( 'Taxes', 'woocommerce' ) }
+							label={__('Taxes', 'woocommerce')}
 							name="local_pickup_tax_status"
-							help={ __(
+							help={__(
 								'If a cost is defined, this controls if taxes are applied to that cost.',
 								'woocommerce'
-							) }
-							options={ [
+							)}
+							options={[
 								{
-									label: __( 'Taxable', 'woocommerce' ),
+									label: __('Taxable', 'woocommerce'),
 									value: 'taxable',
 								},
 								{
-									label: __( 'Not taxable', 'woocommerce' ),
+									label: __('Not taxable', 'woocommerce'),
 									value: 'none',
 								},
-							] }
-							value={ settings.tax_status }
-							onChange={ setSettingField( 'tax_status' ) }
-							disabled={ false }
+							]}
+							value={settings.tax_status}
+							onChange={setSettingField('tax_status')}
+							disabled={false}
 						/>
 					</>
-				) : null }
+				) : null}
 			</SettingsCard>
 		</SettingsSection>
 	);

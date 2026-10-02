@@ -28,18 +28,18 @@ export type BlockAttributes = {
 	customLabelElement: string;
 };
 
-export type EditProps = BlockEditProps< BlockAttributes > & {
-	context: SelectableItemsBlockContext< {
+export type EditProps = BlockEditProps<BlockAttributes> & {
+	context: SelectableItemsBlockContext<{
 		count?: number;
 		visual?: VisualAttributeTerm;
 		depth?: number;
-	} >;
+	}>;
 	optionElementBorder: Color;
-	setOptionElementBorder: ( value: string ) => void;
+	setOptionElementBorder: (value: string) => void;
 	optionElementSelected: Color;
-	setOptionElementSelected: ( value: string ) => void;
+	setOptionElementSelected: (value: string) => void;
 	optionElement: Color;
-	setOptionElement: ( value: string ) => void;
+	setOptionElement: (value: string) => void;
 	labelElement: Color;
-	setLabelElement: ( value: string ) => void;
+	setLabelElement: (value: string) => void;
 };

@@ -3,7 +3,7 @@
  */
 import { prepareTotalItems } from '../utils';
 
-describe( 'prepareTotalItems', () => {
+describe('prepareTotalItems', () => {
 	const fixture = {
 		total_items: '200',
 		total_items_tax: '20',
@@ -50,12 +50,10 @@ describe( 'prepareTotalItems', () => {
 			valueWithTax: 55,
 		},
 	];
-	it( 'returns expected values when needsShipping is false', () => {
-		expect( prepareTotalItems( fixture, false ) ).toEqual( expected );
-	} );
-	it( 'returns expected values when needsShipping is true', () => {
-		expect( prepareTotalItems( fixture, true ) ).toEqual(
-			expectedWithShipping
-		);
-	} );
-} );
+	it('returns expected values when needsShipping is false', () => {
+		expect(prepareTotalItems(fixture, false)).toEqual(expected);
+	});
+	it('returns expected values when needsShipping is true', () => {
+		expect(prepareTotalItems(fixture, true)).toEqual(expectedWithShipping);
+	});
+});

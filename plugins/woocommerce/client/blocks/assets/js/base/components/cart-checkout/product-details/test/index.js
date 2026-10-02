@@ -8,38 +8,38 @@ import { render, screen } from '@testing-library/react';
  */
 import ProductDetails from '..';
 
-describe( 'ProductDetails', () => {
-	test( 'should render details', () => {
+describe('ProductDetails', () => {
+	test('should render details', () => {
 		const details = [
 			{ name: 'Lorem', value: 'Ipsum' },
 			{ name: 'LOREM', value: 'Ipsum', display: 'IPSUM' },
 			{ value: 'Ipsum' },
 		];
 
-		const { container } = render( <ProductDetails details={ details } /> );
+		const { container } = render(<ProductDetails details={details} />);
 
 		// Should render as div
 		const wrapper = container.querySelector(
 			'div.wc-block-components-product-details'
 		);
-		expect( wrapper ).toBeInTheDocument();
+		expect(wrapper).toBeInTheDocument();
 
 		// Should have 3 span items
 		const items = container.querySelectorAll(
 			'.wc-block-components-product-details > span'
 		);
-		expect( items ).toHaveLength( 3 );
+		expect(items).toHaveLength(3);
 
 		// First item should have name and value
-		expect( screen.getByText( 'Lorem:' ) ).toBeInTheDocument();
-		expect( screen.getAllByText( 'Ipsum' ) ).toHaveLength( 2 ); // First and third items
+		expect(screen.getByText('Lorem:')).toBeInTheDocument();
+		expect(screen.getAllByText('Ipsum')).toHaveLength(2); // First and third items
 
 		// Second item should use display instead of value
-		expect( screen.getByText( 'LOREM:' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'IPSUM' ) ).toBeInTheDocument();
+		expect(screen.getByText('LOREM:')).toBeInTheDocument();
+		expect(screen.getByText('IPSUM')).toBeInTheDocument();
 
 		// Third item should only have value (no name)
-		const thirdItem = items[ 2 ];
+		const thirdItem = items[2];
 		expect(
 			thirdItem.querySelector(
 				'.wc-block-components-product-details__name'
@@ -50,126 +50,126 @@ describe( 'ProductDetails', () => {
 				'.wc-block-components-product-details__value'
 			)
 		).toBeInTheDocument();
-	} );
+	});
 
-	test( 'should not render hidden details', () => {
+	test('should not render hidden details', () => {
 		const details = [
 			{ name: 'Lorem', value: 'Ipsum', hidden: '1' },
 			{ name: 'LOREM', value: 'Ipsum', display: 'IPSUM' },
 			{ name: 'LOREM 2', value: 'Ipsum2', display: 'IPSUM 2' },
 		];
 
-		const { container } = render( <ProductDetails details={ details } /> );
+		const { container } = render(<ProductDetails details={details} />);
 
 		// Should render as div
 		const wrapper = container.querySelector(
 			'div.wc-block-components-product-details'
 		);
-		expect( wrapper ).toBeInTheDocument();
+		expect(wrapper).toBeInTheDocument();
 
 		// Should only have 2 items (hidden one filtered out)
 		const items = container.querySelectorAll(
 			'.wc-block-components-product-details > span'
 		);
-		expect( items ).toHaveLength( 2 );
+		expect(items).toHaveLength(2);
 
 		// Hidden item should not be rendered
-		expect( screen.queryByText( 'Lorem:' ) ).not.toBeInTheDocument();
+		expect(screen.queryByText('Lorem:')).not.toBeInTheDocument();
 
 		// Visible items should be rendered
-		expect( screen.getByText( 'LOREM:' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'IPSUM' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'LOREM 2:' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'IPSUM 2' ) ).toBeInTheDocument();
-	} );
+		expect(screen.getByText('LOREM:')).toBeInTheDocument();
+		expect(screen.getByText('IPSUM')).toBeInTheDocument();
+		expect(screen.getByText('LOREM 2:')).toBeInTheDocument();
+		expect(screen.getByText('IPSUM 2')).toBeInTheDocument();
+	});
 
 	// The Store API runs every item_data value through wp_kses_post(), which
 	// string-coerces, so an extension's boolean arrives as '1' or ''.
-	test( 'should treat the string hidden flags the Store API actually sends', () => {
+	test('should treat the string hidden flags the Store API actually sends', () => {
 		const details = [
 			{ name: 'Hidden', value: 'Ipsum', hidden: '1' },
 			{ name: 'Visible', value: 'Ipsum2', hidden: '' },
 		];
 
-		render( <ProductDetails details={ details } /> );
+		render(<ProductDetails details={details} />);
 
-		expect( screen.queryByText( 'Hidden:' ) ).not.toBeInTheDocument();
-		expect( screen.getByText( 'Visible:' ) ).toBeInTheDocument();
-	} );
+		expect(screen.queryByText('Hidden:')).not.toBeInTheDocument();
+		expect(screen.getByText('Visible:')).toBeInTheDocument();
+	});
 
-	test( 'should not render anything if all details are hidden', () => {
+	test('should not render anything if all details are hidden', () => {
 		const details = [
 			{ name: 'Lorem', value: 'Ipsum', hidden: '1' },
 			{ name: 'LOREM', value: 'Ipsum', display: 'IPSUM', hidden: '1' },
 		];
 
-		const { container } = render( <ProductDetails details={ details } /> );
+		const { container } = render(<ProductDetails details={details} />);
 
 		// Should not render any product details container
 		expect(
-			container.querySelector( '.wc-block-components-product-details' )
+			container.querySelector('.wc-block-components-product-details')
 		).not.toBeInTheDocument();
-		expect( container.firstChild ).toBeNull();
-	} );
+		expect(container.firstChild).toBeNull();
+	});
 
-	test( 'should not render anything if details is an empty array', () => {
+	test('should not render anything if details is an empty array', () => {
 		const details = [];
 
-		const { container } = render( <ProductDetails details={ details } /> );
+		const { container } = render(<ProductDetails details={details} />);
 
 		// Should not render any product details container
 		expect(
-			container.querySelector( '.wc-block-components-product-details' )
+			container.querySelector('.wc-block-components-product-details')
 		).not.toBeInTheDocument();
-		expect( container.firstChild ).toBeNull();
-	} );
+		expect(container.firstChild).toBeNull();
+	});
 
-	test( 'should render separators between multiple details', () => {
+	test('should render separators between multiple details', () => {
 		const details = [
 			{ name: 'Color', value: 'Red' },
 			{ name: 'Size', value: 'Large' },
 			{ name: 'Material', value: 'Cotton' },
 		];
 
-		const { container } = render( <ProductDetails details={ details } /> );
+		const { container } = render(<ProductDetails details={details} />);
 
 		const wrapper = container.querySelector(
 			'div.wc-block-components-product-details'
 		);
 
 		// Should have separators between items but not after last
-		expect( wrapper.textContent ).toBe(
+		expect(wrapper.textContent).toBe(
 			'Color: Red / Size: Large / Material: Cotton'
 		);
 
 		// Separators should be hidden from screen readers
-		const separators = container.querySelectorAll( '[aria-hidden="true"]' );
-		expect( separators ).toHaveLength( 2 );
-	} );
+		const separators = container.querySelectorAll('[aria-hidden="true"]');
+		expect(separators).toHaveLength(2);
+	});
 
-	test( 'should render single detail without separator', () => {
-		const details = [ { name: 'LOREM', value: 'Ipsum', display: 'IPSUM' } ];
+	test('should render single detail without separator', () => {
+		const details = [{ name: 'LOREM', value: 'Ipsum', display: 'IPSUM' }];
 
-		const { container } = render( <ProductDetails details={ details } /> );
+		const { container } = render(<ProductDetails details={details} />);
 
 		// Should render as div
 		const wrapper = container.querySelector(
 			'div.wc-block-components-product-details'
 		);
-		expect( wrapper ).toBeInTheDocument();
+		expect(wrapper).toBeInTheDocument();
 
 		// Should have one span item
 		const items = container.querySelectorAll(
 			'.wc-block-components-product-details > span'
 		);
-		expect( items ).toHaveLength( 1 );
+		expect(items).toHaveLength(1);
 
 		// Should contain name and value
-		expect( screen.getByText( 'LOREM:' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'IPSUM' ) ).toBeInTheDocument();
+		expect(screen.getByText('LOREM:')).toBeInTheDocument();
+		expect(screen.getByText('IPSUM')).toBeInTheDocument();
 
 		// Should not have separator (single item)
-		expect( items[ 0 ].textContent ).toBe( 'LOREM: IPSUM' );
+		expect(items[0].textContent).toBe('LOREM: IPSUM');
 
 		// Should have proper CSS classes
 		expect(
@@ -182,28 +182,28 @@ describe( 'ProductDetails', () => {
 				'.wc-block-components-product-details__value'
 			)
 		).toBeInTheDocument();
-	} );
+	});
 
-	test( 'should handle details with key property instead of name', () => {
+	test('should handle details with key property instead of name', () => {
 		const details = [
 			{ key: 'Color', value: 'Red' },
 			{ key: 'Size', value: 'Large', display: 'L' },
 		];
 
-		const { container } = render( <ProductDetails details={ details } /> );
+		const { container } = render(<ProductDetails details={details} />);
 
 		const items = container.querySelectorAll(
 			'.wc-block-components-product-details > span'
 		);
 		// First item has separator, last item does not
-		expect( items[ 0 ].textContent ).toBe( 'Color: Red / ' );
-		expect( items[ 1 ].textContent ).toBe( 'Size: L' );
-	} );
+		expect(items[0].textContent).toBe('Color: Red / ');
+		expect(items[1].textContent).toBe('Size: L');
+	});
 
-	test( 'should apply correct CSS classes', () => {
-		const details = [ { name: 'Test <b>Name</b>', value: 'Test Value' } ];
+	test('should apply correct CSS classes', () => {
+		const details = [{ name: 'Test <b>Name</b>', value: 'Test Value' }];
 
-		const { container } = render( <ProductDetails details={ details } /> );
+		const { container } = render(<ProductDetails details={details} />);
 
 		// Should have kebab-case class name
 		expect(
@@ -223,9 +223,9 @@ describe( 'ProductDetails', () => {
 				'.wc-block-components-product-details__value'
 			)
 		).toBeInTheDocument();
-	} );
+	});
 
-	test( 'should sanitize and render HTML content in name and value', () => {
+	test('should sanitize and render HTML content in name and value', () => {
 		const details = [
 			{
 				name: 'Your <b>Gift Message</b>',
@@ -233,30 +233,30 @@ describe( 'ProductDetails', () => {
 			},
 		];
 
-		const { container } = render( <ProductDetails details={ details } /> );
+		const { container } = render(<ProductDetails details={details} />);
 
 		// Should render HTML in name (bold tag should be preserved)
 		const nameSpan = container.querySelector(
 			'.wc-block-components-product-details__name'
 		);
-		expect( nameSpan ).toBeInTheDocument();
-		expect( nameSpan.querySelector( 'b' ) ).toBeInTheDocument();
-		expect( nameSpan.textContent ).toBe( 'Your Gift Message:' );
+		expect(nameSpan).toBeInTheDocument();
+		expect(nameSpan.querySelector('b')).toBeInTheDocument();
+		expect(nameSpan.textContent).toBe('Your Gift Message:');
 
 		// Should render HTML in value (link should be preserved with allowed attributes)
 		const valueSpan = container.querySelector(
 			'.wc-block-components-product-details__value'
 		);
-		expect( valueSpan ).toBeInTheDocument();
+		expect(valueSpan).toBeInTheDocument();
 
-		const link = valueSpan.querySelector( 'a' );
-		expect( link ).toBeInTheDocument();
-		expect( link ).toHaveAttribute( 'href', 'https://www.woocommerce.com' );
-		expect( link ).toHaveAttribute( 'target', '_blank' );
-		expect( link ).toHaveAttribute( 'rel', 'noopener noreferrer' );
+		const link = valueSpan.querySelector('a');
+		expect(link).toBeInTheDocument();
+		expect(link).toHaveAttribute('href', 'https://www.woocommerce.com');
+		expect(link).toHaveAttribute('target', '_blank');
+		expect(link).toHaveAttribute('rel', 'noopener noreferrer');
 		// Should not have the 'extra' attribute as it's not in allowed attributes
-		expect( link ).not.toHaveAttribute( 'extra' );
-		expect( link.textContent ).toBe( 'Click & see' );
+		expect(link).not.toHaveAttribute('extra');
+		expect(link.textContent).toBe('Click & see');
 
 		// Should have proper CSS class based on name with HTML tags stripped
 		expect(
@@ -264,5 +264,5 @@ describe( 'ProductDetails', () => {
 				'.wc-block-components-product-details__your-gift-message'
 			)
 		).toBeInTheDocument();
-	} );
-} );
+	});
+});

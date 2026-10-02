@@ -13,86 +13,84 @@ import { getFieldLabel } from '@woocommerce/blocks-checkout';
 import { AddressLineFieldProps } from './types';
 import './style.scss';
 
-const AddressLine2Field = ( {
+const AddressLine2Field = ({
 	field,
 	props,
 	onChange,
 	value,
-}: AddressLineFieldProps ): JSX.Element => {
+}: AddressLineFieldProps): JSX.Element => {
 	const isFieldRequired = field?.required ?? false;
-	const previousIsFieldRequired = usePrevious( isFieldRequired );
+	const previousIsFieldRequired = usePrevious(isFieldRequired);
 
 	// Display the input field if it has a value or if it is required.
-	const [ isFieldVisible, setIsFieldVisible ] = useState(
-		() => Boolean( value ) || isFieldRequired
+	const [isFieldVisible, setIsFieldVisible] = useState(
+		() => Boolean(value) || isFieldRequired
 	);
 
-	const fieldLabel = getFieldLabel( field.label );
+	const fieldLabel = getFieldLabel(field.label);
 	// Re-render if the isFieldVisible prop changes.
-	useEffect( () => {
-		if ( previousIsFieldRequired !== isFieldRequired ) {
-			setIsFieldVisible( Boolean( value ) || isFieldRequired );
+	useEffect(() => {
+		if (previousIsFieldRequired !== isFieldRequired) {
+			setIsFieldVisible(Boolean(value) || isFieldRequired);
 		}
-	}, [ value, previousIsFieldRequired, isFieldRequired ] );
+	}, [value, previousIsFieldRequired, isFieldRequired]);
 
 	const handleHiddenInputChange = useCallback(
-		( newValue: string ) => {
-			onChange( newValue );
-			setIsFieldVisible( true );
+		(newValue: string) => {
+			onChange(newValue);
+			setIsFieldVisible(true);
 		},
-		[ onChange ]
+		[onChange]
 	);
 
 	// Rerender if value changes to anything non-empty.
-	useEffect( () => {
-		if ( value ) {
-			setIsFieldVisible( true );
+	useEffect(() => {
+		if (value) {
+			setIsFieldVisible(true);
 		}
-	}, [ value ] );
+	}, [value]);
 
 	return (
 		<Fragment>
-			{ isFieldVisible ? (
+			{isFieldVisible ? (
 				<ValidatedTextInput
-					{ ...props }
-					type={ field.type }
-					label={
-						isFieldRequired ? field.label : field.optionalLabel
-					}
-					className={ `wc-block-components-address-form__address_2` }
-					value={ value }
-					onChange={ ( newValue: string ) => onChange( newValue ) }
+					{...props}
+					type={field.type}
+					label={isFieldRequired ? field.label : field.optionalLabel}
+					className={`wc-block-components-address-form__address_2`}
+					value={value}
+					onChange={(newValue: string) => onChange(newValue)}
 				/>
 			) : (
 				<>
 					<Button
-						render={ <span /> }
+						render={<span />}
 						className={
 							'wc-block-components-address-form__address_2-toggle'
 						}
-						onClick={ () => setIsFieldVisible( true ) }
+						onClick={() => setIsFieldVisible(true)}
 					>
-						{ sprintf(
+						{sprintf(
 							// translators: %s: address 2 field label.
-							__( '+ Add %s', 'woocommerce' ),
+							__('+ Add %s', 'woocommerce'),
 							fieldLabel
-						) }
+						)}
 					</Button>
 					<input
 						type="text"
-						tabIndex={ -1 }
+						tabIndex={-1}
 						className="wc-block-components-address-form__address_2-hidden-input"
 						aria-hidden="true"
-						aria-label={ field.label }
-						autoComplete={ props?.autoComplete }
-						id={ props?.id }
-						value={ value }
-						onChange={ ( event ) =>
-							handleHiddenInputChange( event.target.value )
+						aria-label={field.label}
+						autoComplete={props?.autoComplete}
+						id={props?.id}
+						value={value}
+						onChange={(event) =>
+							handleHiddenInputChange(event.target.value)
 						}
 					/>
 				</>
-			) }
+			)}
 		</Fragment>
 	);
 };

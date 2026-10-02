@@ -23,10 +23,10 @@ class ChartBlock extends Component {
 	handleChartClick = () => {
 		const { selectedChart } = this.props;
 
-		getHistory().push( this.getChartPath( selectedChart ) );
+		getHistory().push(this.getChartPath(selectedChart));
 	};
 
-	getChartPath( chart ) {
+	getChartPath(chart) {
 		return getNewPath(
 			{ chart: chart.key },
 			'/analytics/' + chart.endpoint,
@@ -38,7 +38,7 @@ class ChartBlock extends Component {
 		const { charts, endpoint, path, query, selectedChart, filters } =
 			this.props;
 
-		if ( ! selectedChart ) {
+		if (!selectedChart) {
 			return null;
 		}
 
@@ -46,42 +46,37 @@ class ChartBlock extends Component {
 			<div
 				role="presentation"
 				className="woocommerce-dashboard__chart-block-wrapper"
-				onClick={ this.handleChartClick }
+				onClick={this.handleChartClick}
 			>
 				<Card className="woocommerce-dashboard__chart-block">
 					<CardHeader>
-						<Text
-							as="h3"
-							size={ 16 }
-							weight={ 600 }
-							color="#23282d"
-						>
-							{ selectedChart.label }
+						<Text as="h3" size={16} weight={600} color="#23282d">
+							{selectedChart.label}
 						</Text>
 					</CardHeader>
 					<CardBody size="none">
 						<a
 							className="screen-reader-text"
-							href={ getAdminLink(
-								this.getChartPath( selectedChart )
-							) }
+							href={getAdminLink(
+								this.getChartPath(selectedChart)
+							)}
 						>
-							{ sprintf(
+							{sprintf(
 								/* translators: %s is the chart type */
-								__( '%s Report', 'woocommerce' ),
+								__('%s Report', 'woocommerce'),
 								selectedChart.label
-							) }
+							)}
 						</a>
 						<ReportChart
-							charts={ charts }
-							endpoint={ endpoint }
-							query={ query }
-							interactiveLegend={ false }
+							charts={charts}
+							endpoint={endpoint}
+							query={query}
+							interactiveLegend={false}
 							legendPosition="bottom"
-							path={ path }
-							selectedChart={ selectedChart }
-							showHeaderControls={ false }
-							filters={ filters }
+							path={path}
+							selectedChart={selectedChart}
+							showHeaderControls={false}
+							filters={filters}
 						/>
 					</CardBody>
 				</Card>

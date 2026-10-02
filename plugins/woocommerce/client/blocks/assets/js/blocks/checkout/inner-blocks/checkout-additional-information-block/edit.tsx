@@ -13,7 +13,7 @@ import { useFormFields } from '@woocommerce/base-components/cart-checkout';
  */
 import Block from './block';
 
-export const Edit = ( {
+export const Edit = ({
 	attributes,
 	setAttributes,
 }: {
@@ -23,25 +23,25 @@ export const Edit = ( {
 		showStepNumber: boolean;
 		className: string;
 	};
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ) => {
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}) => {
 	const { defaultFields } = useCheckoutAddress();
-	const formFields = useFormFields( ORDER_FORM_KEYS, defaultFields, 'order' );
+	const formFields = useFormFields(ORDER_FORM_KEYS, defaultFields, 'order');
 	if (
 		formFields.length === 0 ||
-		formFields.every( ( field ) => !! field.hidden )
+		formFields.every((field) => !!field.hidden)
 	) {
 		return null;
 	}
 
 	return (
 		<FormStepBlock
-			setAttributes={ setAttributes }
-			attributes={ attributes }
-			className={ clsx(
+			setAttributes={setAttributes}
+			attributes={attributes}
+			className={clsx(
 				'wc-block-checkout__additional-information-fields',
 				attributes?.className
-			) }
+			)}
 		>
 			<Block />
 		</FormStepBlock>
@@ -49,5 +49,5 @@ export const Edit = ( {
 };
 
 export const Save = (): JSX.Element => {
-	return <div { ...useBlockProps.save() } />;
+	return <div {...useBlockProps.save()} />;
 };

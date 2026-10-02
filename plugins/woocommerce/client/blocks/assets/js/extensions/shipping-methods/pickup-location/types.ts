@@ -41,10 +41,10 @@ export type SettingsContextType = {
 	readOnlySettings: ReadOnlySettings;
 	setSettingField: (
 		field: keyof ShippingMethodSettings
-	) => ( value: unknown ) => void;
+	) => (value: unknown) => void;
 	pickupLocations: SortablePickupLocation[];
-	setPickupLocations: ( locations: SortablePickupLocation[] ) => void;
-	toggleLocation: ( rowId: UniqueIdentifier ) => void;
+	setPickupLocations: (locations: SortablePickupLocation[]) => void;
+	toggleLocation: (rowId: UniqueIdentifier) => void;
 	updateLocation: (
 		rowId: UniqueIdentifier | 'new',
 		location: SortablePickupLocation | null

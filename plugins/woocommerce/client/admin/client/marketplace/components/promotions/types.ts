@@ -11,13 +11,13 @@ export type Promotion = {
 	format: string;
 	style?: string;
 	pages: Page[];
-	content: { [ locale: string ]: string };
+	content: { [locale: string]: string };
 	icon?: string;
-	title?: { [ locale: string ]: string };
+	title?: { [locale: string]: string };
 	is_dismissible?: boolean;
 	menu_item_id?: string;
 	cta_label?: {
-		[ locale: string ]: string;
+		[locale: string]: string;
 	};
 	cta_link?: string;
 };

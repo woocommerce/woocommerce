@@ -9,18 +9,15 @@ import { getValidBlockAttributes } from '@woocommerce/base-utils';
  * @param {Object} blockAttributes Component being wrapped.
  */
 export const withFilteredAttributes =
-	( blockAttributes ) => ( OriginalComponent ) => {
-		return ( ownProps ) => {
+	(blockAttributes) => (OriginalComponent) => {
+		return (ownProps) => {
 			const validBlockAttributes = getValidBlockAttributes(
 				blockAttributes,
 				ownProps
 			);
 
 			return (
-				<OriginalComponent
-					{ ...ownProps }
-					{ ...validBlockAttributes }
-				/>
+				<OriginalComponent {...ownProps} {...validBlockAttributes} />
 			);
 		};
 	};

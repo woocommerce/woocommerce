@@ -9,18 +9,18 @@ import { useSelect } from '@wordpress/data';
 import { store as marketingStore } from '~/marketing/data';
 import { Post } from './types';
 
-export const useBlogPosts = ( category: string ) => {
+export const useBlogPosts = (category: string) => {
 	return useSelect(
-		( select ) => {
+		(select) => {
 			const { getBlogPosts, getBlogPostsError, isResolving } =
-				select( marketingStore );
+				select(marketingStore);
 
 			return {
-				isLoading: isResolving( 'getBlogPosts', [ category ] ),
-				error: getBlogPostsError( category ),
-				posts: getBlogPosts( category ) as Post[],
+				isLoading: isResolving('getBlogPosts', [category]),
+				error: getBlogPostsError(category),
+				posts: getBlogPosts(category) as Post[],
 			};
 		},
-		[ category ]
+		[category]
 	);
 };

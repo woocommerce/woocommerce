@@ -11,7 +11,7 @@ const StyledSectionWrapper = styled.div`
 	&:last-child {
 		margin-bottom: 0;
 	}
-	@media ( min-width: 800px ) {
+	@media (min-width: 800px) {
 		flex-flow: row;
 	}
 	.components-base-control {
@@ -24,7 +24,7 @@ const StyledSectionWrapper = styled.div`
 const StyledDescriptionWrapper = styled.div`
 	flex: 0 1 auto;
 	margin-bottom: 24px;
-	@media ( min-width: 800px ) {
+	@media (min-width: 800px) {
 		flex: 0 0 250px;
 		margin: 0 32px 0 0;
 	}
@@ -47,7 +47,7 @@ const StyledSectionControls = styled.div`
 	margin-bottom: 12px;
 `;
 
-const SettingsSection = ( {
+const SettingsSection = ({
 	Description = () => null,
 	children,
 	...props
@@ -55,12 +55,12 @@ const SettingsSection = ( {
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	Description?: () => JSX.Element | null;
 	children: React.ReactNode;
-} ): JSX.Element => (
-	<StyledSectionWrapper { ...props }>
+}): JSX.Element => (
+	<StyledSectionWrapper {...props}>
 		<StyledDescriptionWrapper>
 			<Description />
 		</StyledDescriptionWrapper>
-		<StyledSectionControls>{ children }</StyledSectionControls>
+		<StyledSectionControls>{children}</StyledSectionControls>
 	</StyledSectionWrapper>
 );
 

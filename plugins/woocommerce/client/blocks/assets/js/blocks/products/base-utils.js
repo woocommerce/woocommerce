@@ -22,10 +22,10 @@ export const DEFAULT_PRODUCT_LIST_LAYOUT = [
 			},
 		},
 	],
-	[ 'woocommerce/product-title' ],
-	[ 'woocommerce/product-price' ],
-	[ 'woocommerce/product-rating' ],
-	[ 'woocommerce/product-button' ],
+	['woocommerce/product-title'],
+	['woocommerce/product-price'],
+	['woocommerce/product-rating'],
+	['woocommerce/product-button'],
 ];
 
 /**
@@ -33,12 +33,12 @@ export const DEFAULT_PRODUCT_LIST_LAYOUT = [
  *
  * @param {Object[]} innerBlocks Inner block components.
  */
-export const getProductLayoutConfig = ( innerBlocks ) => {
-	if ( ! innerBlocks || innerBlocks.length === 0 ) {
+export const getProductLayoutConfig = (innerBlocks) => {
+	if (!innerBlocks || innerBlocks.length === 0) {
 		return [];
 	}
 
-	return innerBlocks.map( ( block ) => {
+	return innerBlocks.map((block) => {
 		return [
 			block.name,
 			{
@@ -46,19 +46,19 @@ export const getProductLayoutConfig = ( innerBlocks ) => {
 				product: undefined,
 				children:
 					block.innerBlocks.length > 0
-						? getProductLayoutConfig( block.innerBlocks )
+						? getProductLayoutConfig(block.innerBlocks)
 						: [],
 				/**
 				 * Add custom width class to Add to cart button,
 				 * This is needed to support "Width Setting" controls available in
 				 * "woocommerce/product-button" block.
 				 */
-				...( block.name === addToCartButtonMetadata.name && {
-					className: clsx( block.attributes.className, {
-						[ `has-custom-width wp-block-button__width-${ block.attributes?.width }` ]:
+				...(block.name === addToCartButtonMetadata.name && {
+					className: clsx(block.attributes.className, {
+						[`has-custom-width wp-block-button__width-${block.attributes?.width}`]:
 							block.attributes?.width,
-					} ),
-				} ),
+					}),
+				}),
 				/**
 				 * For product elements, special handing is required if product
 				 * elements are used in the "All Products" block.
@@ -66,5 +66,5 @@ export const getProductLayoutConfig = ( innerBlocks ) => {
 				isDescendantOfAllProducts: true,
 			},
 		];
-	} );
+	});
 };

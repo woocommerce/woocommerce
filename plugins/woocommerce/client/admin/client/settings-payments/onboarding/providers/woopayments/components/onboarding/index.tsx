@@ -15,11 +15,11 @@ import { useOnboardingContext } from '../../data/onboarding-context';
 /**
  * WooPaymentsOnboarding component for the WooPayments onboarding modal.
  */
-export default function WooPaymentsOnboarding( {
+export default function WooPaymentsOnboarding({
 	includeSidebar = true,
 }: {
 	includeSidebar?: boolean;
-} ): React.ReactNode {
+}): React.ReactNode {
 	const {
 		steps,
 		isLoading,
@@ -33,17 +33,17 @@ export default function WooPaymentsOnboarding( {
 	const location = useLocation();
 
 	// Forces navigation to the current step only if the URL does not already match.
-	useEffect( () => {
+	useEffect(() => {
 		if (
 			currentTopLevelStep &&
-			! location.pathname.endsWith( currentTopLevelStep?.path ?? '' )
+			!location.pathname.endsWith(currentTopLevelStep?.path ?? '')
 		) {
-			navigateToStep( currentTopLevelStep.id );
+			navigateToStep(currentTopLevelStep.id);
 		}
-	}, [ currentTopLevelStep, navigateToStep, location.pathname ] );
+	}, [currentTopLevelStep, navigateToStep, location.pathname]);
 
 	// Displays a loading indicator if the content is still loading.
-	if ( isLoading ) {
+	if (isLoading) {
 		return (
 			<div className="settings-payments-onboarding-modal__loading">
 				<StripeSpinner />
@@ -52,7 +52,7 @@ export default function WooPaymentsOnboarding( {
 	}
 
 	// Renders the Stepper if there are steps available.
-	if ( steps && steps.length > 0 ) {
+	if (steps && steps.length > 0) {
 		return (
 			<Routes>
 				<Route
@@ -60,20 +60,20 @@ export default function WooPaymentsOnboarding( {
 					element={
 						<div className="settings-payments-onboarding-modal__wrapper">
 							<Stepper
-								steps={ steps }
+								steps={steps}
 								activeTopLevelStep={
 									currentTopLevelStep?.id ?? ''
 								}
-								activeSubStep={ currentStep }
-								justCompletedStepId={ justCompletedStepId }
-								includeSidebar={ includeSidebar }
-								sidebarTitle={ __(
+								activeSubStep={currentStep}
+								justCompletedStepId={justCompletedStepId}
+								includeSidebar={includeSidebar}
+								sidebarTitle={__(
 									'Set up WooPayments',
 									'woocommerce'
-								) }
-								context={ {
+								)}
+								context={{
 									sessionEntryPoint,
-								} }
+								}}
 							/>
 						</div>
 					}

@@ -19,9 +19,9 @@ const DEFAULT_STATE: InstallingState = {
 	installingProducts: [],
 };
 
-const store = createReduxStore( INSTALLING_STORE_NAME, {
-	reducer( state: InstallingState | undefined = DEFAULT_STATE, action ) {
-		switch ( action.type ) {
+const store = createReduxStore(INSTALLING_STORE_NAME, {
+	reducer(state: InstallingState | undefined = DEFAULT_STATE, action) {
+		switch (action.type) {
 			case 'START_INSTALLING':
 				return {
 					...state,
@@ -35,7 +35,7 @@ const store = createReduxStore( INSTALLING_STORE_NAME, {
 					...state,
 					installingProducts: [
 						...state.installingProducts.filter(
-							( productKey ) => productKey !== action.productKey
+							(productKey) => productKey !== action.productKey
 						),
 					],
 				};
@@ -44,13 +44,13 @@ const store = createReduxStore( INSTALLING_STORE_NAME, {
 		return state;
 	},
 	actions: {
-		startInstalling( productKey: string ) {
+		startInstalling(productKey: string) {
 			return {
 				type: 'START_INSTALLING',
 				productKey,
 			};
 		},
-		stopInstalling( productKey: string ) {
+		stopInstalling(productKey: string) {
 			return {
 				type: 'STOP_INSTALLING',
 				productKey,
@@ -62,14 +62,14 @@ const store = createReduxStore( INSTALLING_STORE_NAME, {
 			state: InstallingState | undefined,
 			productKey: string
 		): boolean {
-			if ( ! state ) {
+			if (!state) {
 				return false;
 			}
-			return state.installingProducts.includes( productKey );
+			return state.installingProducts.includes(productKey);
 		},
 	},
-} );
+});
 
-register( store );
+register(store);
 
 export { store as installingStore, INSTALLING_STORE_NAME };

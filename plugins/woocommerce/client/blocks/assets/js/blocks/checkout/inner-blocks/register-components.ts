@@ -39,113 +39,113 @@ import CheckoutOrderSummaryTaxesBlock from './checkout-order-summary-taxes/front
 __webpack_public_path__ = WC_BLOCKS_BUILD_URL;
 
 // @todo When forcing all blocks at once, they will append based on the order they are registered. Introduce formal sorting param.
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CHECKOUT_FIELDS,
 	component: CheckoutFieldsBlock,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CHECKOUT_EXPRESS_PAYMENT,
 	component: CheckoutExpressPaymentBlock,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CHECKOUT_CONTACT_INFORMATION,
 	component: CheckoutContactInformationBlock,
-} );
+});
 
-if ( LOCAL_PICKUP_ENABLED ) {
-	registerCheckoutBlock( {
+if (LOCAL_PICKUP_ENABLED) {
+	registerCheckoutBlock({
 		metadata: metadata.CHECKOUT_SHIPPING_METHOD,
 		component: CheckoutShippingMethodBlock,
-	} );
-	registerCheckoutBlock( {
+	});
+	registerCheckoutBlock({
 		metadata: metadata.CHECKOUT_PICKUP_LOCATION,
 		component: CheckoutPickupOptionsBlock,
-	} );
+	});
 }
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CHECKOUT_SHIPPING_ADDRESS,
 	component: CheckoutShippingAddressBlock,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CHECKOUT_BILLING_ADDRESS,
 	component: CheckoutBillingAddressBlock,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CHECKOUT_SHIPPING_METHODS,
 	component: CheckoutShippingMethodsBlock,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CHECKOUT_PAYMENT,
 	component: CheckoutPaymentBlock,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CHECKOUT_ORDER_INFORMATION,
 	component: CheckoutAdditionalInformationBlock,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CHECKOUT_ORDER_NOTE,
 	component: CheckoutOrderNoteBlock,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CHECKOUT_TERMS,
 	component: CheckoutTermsBlock,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CHECKOUT_ACTIONS,
 	component: CheckoutActionsBlock,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CHECKOUT_TOTALS,
 	component: CheckoutTotalsBlock,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CHECKOUT_ORDER_SUMMARY,
 	component: CheckoutOrderSummaryBlock,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CHECKOUT_ORDER_SUMMARY_CART_ITEMS,
 	component: CheckoutOrderSummaryCartItemsBlock,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CHECKOUT_ORDER_SUMMARY_SUBTOTAL,
 	component: CheckoutOrderSummarySubtotalBlock,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CHECKOUT_ORDER_SUMMARY_FEE,
 	component: CheckoutOrderSummaryFeeBlock,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CHECKOUT_ORDER_SUMMARY_DISCOUNT,
 	component: CheckoutOrderSummaryDiscountBlock,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CHECKOUT_ORDER_SUMMARY_COUPON_FORM,
 	component: CheckoutOrderSummaryCouponFormBlock,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CHECKOUT_ORDER_SUMMARY_SHIPPING,
 	component: CheckoutOrderSummaryShippingBlock,
-} );
+});
 
-registerCheckoutBlock( {
+registerCheckoutBlock({
 	metadata: metadata.CHECKOUT_ORDER_SUMMARY_TAXES,
 	component: CheckoutOrderSummaryTaxesBlock,
-} );
+});

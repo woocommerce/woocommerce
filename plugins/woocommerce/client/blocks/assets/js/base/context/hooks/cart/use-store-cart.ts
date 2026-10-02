@@ -38,7 +38,7 @@ import { useStoreCartEventListeners } from './use-store-cart-event-listeners';
 
 declare module '@wordpress/html-entities' {
 	// eslint-disable-next-line @typescript-eslint/no-shadow
-	export function decodeEntities< T >( coupon: T ): T;
+	export function decodeEntities<T>(coupon: T): T;
 }
 const defaultShippingAddress: CartResponseShippingAddress = {
 	first_name: '',
@@ -81,7 +81,7 @@ const defaultCartTotals: CartResponseTotals = {
 
 const decodeValues = <
 	T extends
-		| Record< string, unknown >
+		| Record<string, unknown>
 		| CartResponseBillingAddress
 		| CartResponseShippingAddress
 		| CartShippingPackageShippingRate,
@@ -89,10 +89,10 @@ const decodeValues = <
 	object: T
 ): T => {
 	return Object.fromEntries(
-		Object.entries( object ).map( ( [ key, value ] ) => [
+		Object.entries(object).map(([key, value]) => [
 			key,
-			decodeEntities( value ),
-		] )
+			decodeEntities(value),
+		])
 	) as T;
 };
 
@@ -101,44 +101,42 @@ const normalizeAddress = <
 	T extends CartResponseBillingAddress | CartResponseShippingAddress,
 >(
 	address: T,
-	addressRef: React.MutableRefObject< T >
+	addressRef: React.MutableRefObject<T>
 ): T => {
-	const normalizedAddress = emptyHiddenAddressFields(
-		decodeValues( address )
-	);
-	if ( ! fastDeepEqual( addressRef.current, normalizedAddress ) ) {
+	const normalizedAddress = emptyHiddenAddressFields(decodeValues(address));
+	if (!fastDeepEqual(addressRef.current, normalizedAddress)) {
 		addressRef.current = normalizedAddress;
 	}
 	return addressRef.current;
 };
 
-const normalizeCoupons = ( coupons: CartResponseCouponItem[] ) => {
+const normalizeCoupons = (coupons: CartResponseCouponItem[]) => {
 	return coupons.length > 0
-		? coupons.map( ( coupon: CartResponseCouponItem ) => ( {
+		? coupons.map((coupon: CartResponseCouponItem) => ({
 				...coupon,
-				label: decodeEntities( coupon.code ),
-		  } ) )
+				label: decodeEntities(coupon.code),
+			}))
 		: EMPTY_CART_COUPONS;
 };
 
-const normalizeFees = ( fees: CartResponseFeeItem[] ) => {
+const normalizeFees = (fees: CartResponseFeeItem[]) => {
 	return fees.length > 0
-		? fees.map( ( fee: CartResponseFeeItem ) => decodeValues( fee ) )
+		? fees.map((fee: CartResponseFeeItem) => decodeValues(fee))
 		: EMPTY_CART_FEES;
 };
 
-const normalizeShippingRates = ( shippingRates: CartShippingRate[] ) => {
+const normalizeShippingRates = (shippingRates: CartShippingRate[]) => {
 	return shippingRates.length > 0
-		? shippingRates.map( ( shippingRate: CartShippingRate ) => ( {
+		? shippingRates.map((shippingRate: CartShippingRate) => ({
 				...shippingRate,
 				shipping_rates:
 					shippingRate.shipping_rates.length > 0
 						? shippingRate.shipping_rates.map(
-								( rate: CartShippingPackageShippingRate ) =>
-									decodeValues( rate )
-						  )
+								(rate: CartShippingPackageShippingRate) =>
+									decodeValues(rate)
+							)
 						: [],
-		  } ) )
+			}))
 		: [];
 };
 
@@ -176,14 +174,14 @@ export const useStoreCart = (
 	options: { shouldSelect: boolean } = { shouldSelect: true }
 ): StoreCart => {
 	const { shouldSelect } = options;
-	const currentStoreCart = useRef< StoreCart >();
-	const billingAddressRef = useRef( defaultBillingAddress );
-	const shippingAddressRef = useRef( defaultShippingAddress );
+	const currentStoreCart = useRef<StoreCart>();
+	const billingAddressRef = useRef(defaultBillingAddress);
+	const shippingAddressRef = useRef(defaultShippingAddress);
 
 	// This will keep track of jQuery and DOM events that invalidate the store resolution.
 	useStoreCartEventListeners();
 
-	const { receiveCart, receiveCartContents } = useDispatch( cartStore );
+	const { receiveCart, receiveCartContents } = useDispatch(cartStore);
 	const {
 		cartData,
 		cartErrors,
@@ -191,11 +189,11 @@ export const useStoreCart = (
 		cartIsLoading,
 		isLoadingRates,
 		hasPendingItemsOperations,
-	} = useSelect( ( select ) => {
-		const store = select( cartStore );
+	} = useSelect((select) => {
+		const store = select(cartStore);
 
 		// Base loading state - whether initial cart data resolution has finished
-		const baseCartIsLoading = ! store.hasFinishedResolution(
+		const baseCartIsLoading = !store.hasFinishedResolution(
 			'getCartData',
 			[]
 		);
@@ -208,9 +206,9 @@ export const useStoreCart = (
 			isLoadingRates: store.isAddressFieldsForShippingRatesUpdating(),
 			hasPendingItemsOperations: store.hasPendingItemsOperations(),
 		};
-	}, [] );
+	}, []);
 
-	if ( ! shouldSelect ) {
+	if (!shouldSelect) {
 		return defaultCartData;
 	}
 
@@ -220,15 +218,15 @@ export const useStoreCart = (
 	);
 
 	const shippingAddress = cartData.needsShipping
-		? normalizeAddress( cartData.shippingAddress, shippingAddressRef )
+		? normalizeAddress(cartData.shippingAddress, shippingAddressRef)
 		: billingAddress;
 
 	const storeCart: StoreCart = {
 		billingAddress,
 		billingData: billingAddress,
-		cartCoupons: normalizeCoupons( cartData.coupons ),
+		cartCoupons: normalizeCoupons(cartData.coupons),
 		cartErrors,
-		cartFees: normalizeFees( cartData.fees ),
+		cartFees: normalizeFees(cartData.fees),
 		cartHasCalculatedShipping: cartData.hasCalculatedShipping,
 		cartIsLoading,
 		cartItemErrors: cartData.errors,
@@ -247,12 +245,12 @@ export const useStoreCart = (
 		receiveCart,
 		receiveCartContents,
 		shippingAddress,
-		shippingRates: normalizeShippingRates( cartData.shippingRates ),
+		shippingRates: normalizeShippingRates(cartData.shippingRates),
 	};
 
 	if (
-		! currentStoreCart.current ||
-		! fastDeepEqual( currentStoreCart.current, storeCart )
+		!currentStoreCart.current ||
+		!fastDeepEqual(currentStoreCart.current, storeCart)
 	) {
 		currentStoreCart.current = storeCart;
 	}

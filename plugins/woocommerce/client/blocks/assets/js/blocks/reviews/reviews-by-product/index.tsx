@@ -15,11 +15,11 @@ import metadata from './block.json';
 /**
  * Register and run the "Reviews by Product" block.
  */
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	icon: {
 		src: (
 			<Icon
-				icon={ commentContent }
+				icon={commentContent}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -53,12 +53,12 @@ registerBlockType( metadata, {
 	 *
 	 * @param {Object} props Props to pass to block.
 	 */
-	edit( props ) {
-		return <Editor { ...props } />;
+	edit(props) {
+		return <Editor {...props} />;
 	},
 
 	/**
 	 * Save the props to post content.
 	 */
 	save,
-} );
+});

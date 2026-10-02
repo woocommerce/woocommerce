@@ -8,11 +8,11 @@ import { useState, useCallback } from '@wordpress/element';
  *
  * @see https://github.com/facebook/react/issues/14981
  */
-export const useThrowError = (): ( ( error: Error ) => void ) => {
-	const [ , setState ] = useState();
-	return useCallback( ( error: Error ): void => {
-		setState( () => {
+export const useThrowError = (): ((error: Error) => void) => {
+	const [, setState] = useState();
+	return useCallback((error: Error): void => {
+		setState(() => {
 			throw error;
-		} );
-	}, [] );
+		});
+	}, []);
 };

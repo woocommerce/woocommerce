@@ -17,49 +17,45 @@ import { AnyEventObject } from 'xstate5';
  */
 export const createQueryParamsListener = (
 	paramName: string,
-	sendBack: ( event: AnyEventObject ) => void
+	sendBack: (event: AnyEventObject) => void
 ) => {
-	let previousLocation: ReturnType< typeof getHistory >[ 'location' ] =
+	let previousLocation: ReturnType<typeof getHistory>['location'] =
 		getHistory().location;
-	const unlisten = getHistory().listen( ( { action, location } ) => {
-		if ( action === 'POP' ) {
-			const previousQuery = new URLSearchParams(
-				previousLocation.search
-			);
-			const currentQuery = new URLSearchParams( location.search );
-			if (
-				previousQuery.get( paramName ) !== currentQuery.get( paramName )
-			) {
+	const unlisten = getHistory().listen(({ action, location }) => {
+		if (action === 'POP') {
+			const previousQuery = new URLSearchParams(previousLocation.search);
+			const currentQuery = new URLSearchParams(location.search);
+			if (previousQuery.get(paramName) !== currentQuery.get(paramName)) {
 				previousLocation = location;
-				sendBack( { type: 'EXTERNAL_URL_UPDATE' } );
+				sendBack({ type: 'EXTERNAL_URL_UPDATE' });
 			}
 		}
 		previousLocation = location;
-	} );
+	});
 
 	return () => {
 		unlisten();
 	};
 };
 
-export const updateQueryParams = < T extends Record< string, string > >(
-	params: Partial< T >
+export const updateQueryParams = <T extends Record<string, string>>(
+	params: Partial<T>
 ) => {
 	const queryParams = getQuery() as T;
 
-	const changes = Object.entries( params ).reduce(
-		( acc: Partial< T >, [ key, value ] ) => {
+	const changes = Object.entries(params).reduce(
+		(acc: Partial<T>, [key, value]) => {
 			// Check if the value is different from the current queryParams.
 			// Include if explicitly passed, even if it's undefined.
-			if ( queryParams[ key as keyof T ] !== value ) {
-				acc[ key as keyof T ] = value;
+			if (queryParams[key as keyof T] !== value) {
+				acc[key as keyof T] = value;
 			}
 			return acc;
 		},
-		{} as Partial< T >
+		{} as Partial<T>
 	);
 
-	if ( Object.keys( changes ).length > 0 ) {
-		updateQueryString( changes );
+	if (Object.keys(changes).length > 0) {
+		updateQueryString(changes);
 	}
 };

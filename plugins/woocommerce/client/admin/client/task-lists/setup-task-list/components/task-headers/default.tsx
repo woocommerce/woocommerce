@@ -17,26 +17,26 @@ interface DefaultTaskHeaderProps {
  * header on My Home using the same metadata consumed by the legacy dashboard
  * setup widget.
  */
-const DefaultTaskHeader = ( { task, goToTask }: DefaultTaskHeaderProps ) => {
-	if ( ! task.imageUrl ) {
+const DefaultTaskHeader = ({ task, goToTask }: DefaultTaskHeaderProps) => {
+	if (!task.imageUrl) {
 		return null;
 	}
 
 	return (
 		<div className="woocommerce-task-header__contents-container">
 			<img
-				alt={ task.imageAlt || '' }
-				src={ task.imageUrl }
+				alt={task.imageAlt || ''}
+				src={task.imageUrl}
 				className="svg-background"
 			/>
 			<div className="woocommerce-task-header__contents">
-				<h1>{ task.title }</h1>
-				<p>{ task.content }</p>
+				<h1>{task.title}</h1>
+				<p>{task.content}</p>
 				<Button
-					variant={ task.isComplete ? 'secondary' : 'primary' }
-					onClick={ goToTask }
+					variant={task.isComplete ? 'secondary' : 'primary'}
+					onClick={goToTask}
 				>
-					{ task.actionLabel || __( "Let's go", 'woocommerce' ) }
+					{task.actionLabel || __("Let's go", 'woocommerce')}
 				</Button>
 			</div>
 		</div>

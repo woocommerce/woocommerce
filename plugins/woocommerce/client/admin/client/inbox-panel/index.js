@@ -58,38 +58,35 @@ const DEFAULT_INBOX_QUERY = {
 	],
 };
 
-const supportedLocales = [ 'en_US', 'en_AU', 'en_CA', 'en_GB', 'en_ZA' ];
+const supportedLocales = ['en_US', 'en_AU', 'en_CA', 'en_GB', 'en_ZA'];
 
-const WC_VERSION_61_RELEASE_DATE = moment(
-	'2022-01-11',
-	'YYYY-MM-DD'
-).valueOf();
+const WC_VERSION_61_RELEASE_DATE = moment('2022-01-11', 'YYYY-MM-DD').valueOf();
 
 const renderEmptyCard = () => (
 	<ActivityCard
 		className="woocommerce-empty-activity-card"
-		title={ __( 'Your inbox is empty', 'woocommerce' ) }
-		icon={ false }
+		title={__('Your inbox is empty', 'woocommerce')}
+		icon={false}
 	>
-		{ __(
+		{__(
 			'As things begin to happen in your store your inbox will start to fill up. ' +
 				'You’ll see things like achievements, new feature announcements, extension recommendations and more!',
 			'woocommerce'
-		) }
+		)}
 	</ActivityCard>
 );
 
-const onBodyLinkClick = ( note, innerLink ) => {
-	recordEvent( 'inbox_action_click', {
+const onBodyLinkClick = (note, innerLink) => {
+	recordEvent('inbox_action_click', {
 		note_name: note.name,
 		note_title: note.title,
 		note_content_inner_link: innerLink,
-	} );
+	});
 };
 
 let hasFiredPanelViewTrack = false;
 
-const renderNotes = ( {
+const renderNotes = ({
 	hasNotes,
 	isBatchUpdating,
 	notes,
@@ -102,83 +99,83 @@ const renderNotes = ( {
 	allNotesFetched,
 	notesHaveResolved,
 	unreadNotesCount,
-} ) => {
-	if ( isBatchUpdating ) {
+}) => {
+	if (isBatchUpdating) {
 		return;
 	}
 
-	if ( ! hasNotes ) {
+	if (!hasNotes) {
 		return renderEmptyCard();
 	}
 
-	if ( ! hasFiredPanelViewTrack ) {
-		recordEvent( 'inbox_panel_view', {
+	if (!hasFiredPanelViewTrack) {
+		recordEvent('inbox_panel_view', {
 			total: notes.length,
-		} );
+		});
 		hasFiredPanelViewTrack = true;
 	}
 
-	const notesArray = Object.keys( notes ).map( ( key ) => notes[ key ] );
+	const notesArray = Object.keys(notes).map((key) => notes[key]);
 
 	return (
 		<Card
 			className="woocommerce-homescreen-card woocommerce-inbox-card"
 			size="large"
 		>
-			{ showHeader && (
+			{showHeader && (
 				<CardHeader size="medium">
 					<div className="woocommerce-inbox-card__header">
 						<Text size="20" lineHeight="28px" variant="title.small">
-							{ __( 'Inbox', 'woocommerce' ) }
+							{__('Inbox', 'woocommerce')}
 						</Text>
-						<Badge count={ unreadNotesCount } />
+						<Badge count={unreadNotesCount} />
 					</div>
 					<DropdownMenu
-						controls={ [
+						controls={[
 							{
-								title: __( 'Dismiss all', 'woocommerce' ),
+								title: __('Dismiss all', 'woocommerce'),
 								onClick: () => {
-									onDismissAll( true );
+									onDismissAll(true);
 								},
 							},
-						] }
-						icon={ moreVertical }
-						label={ __( 'Inbox notes options', 'woocommerce' ) }
-						popoverProps={ { placement: 'bottom-end' } }
-						toggleProps={ {
+						]}
+						icon={moreVertical}
+						label={__('Inbox notes options', 'woocommerce')}
+						popoverProps={{ placement: 'bottom-end' }}
+						toggleProps={{
 							className: 'woocommerce-ellipsis-menu__toggle',
-						} }
+						}}
 					/>
 				</CardHeader>
-			) }
+			)}
 			<TransitionGroup role="menu">
-				{ notesArray.map( ( note ) => {
+				{notesArray.map((note) => {
 					const { id: noteId, is_deleted: isDeleted } = note;
-					if ( isDeleted ) {
+					if (isDeleted) {
 						return null;
 					}
 					return (
 						<CSSTransition
-							key={ noteId }
-							timeout={ 500 }
+							key={noteId}
+							timeout={500}
 							classNames="woocommerce-inbox-message"
 						>
 							<InboxNoteCard
-								key={ noteId }
-								note={ note }
-								onDismiss={ onDismiss }
-								onNoteActionClick={ onNoteActionClick }
-								onBodyLinkClick={ onBodyLinkClick }
-								onNoteVisible={ onNoteVisible }
+								key={noteId}
+								note={note}
+								onDismiss={onDismiss}
+								onNoteActionClick={onNoteActionClick}
+								onBodyLinkClick={onBodyLinkClick}
+								onNoteVisible={onNoteVisible}
 							/>
 						</CSSTransition>
 					);
-				} ) }
+				})}
 			</TransitionGroup>
-			{ allNotesFetched
+			{allNotesFetched
 				? null
-				: ( () => {
-						if ( ! notesHaveResolved ) {
+				: (() => {
+						if (!notesHaveResolved) {
 							return (
 								<InboxNotePlaceholder className="banner message-is-unread" />
 							);
@@ -190,47 +187,47 @@ const renderNotes = ( {
 								size="medium"
 							>
 								<Button
-									icon={ chevronDown }
+									icon={chevronDown}
 									iconPosition="right"
-									onClick={ () => {
+									onClick={() => {
 										loadMoreNotes();
-									} }
+									}}
 									variant="tertiary"
 								>
-									{ notesArray.length >
+									{notesArray.length >
 									DEFAULT_INBOX_QUERY.per_page
-										? __( 'Show more', 'woocommerce' )
-										: __( 'Show older', 'woocommerce' ) }
+										? __('Show more', 'woocommerce')
+										: __('Show older', 'woocommerce')}
 								</Button>
 							</CardFooter>
 						);
-				  } )() }
+					})()}
 		</Card>
 	);
 };
 
-const InboxPanel = ( { showHeader = true } ) => {
-	const [ noteDisplayQty, setNoteDisplayQty ] = useState(
+const InboxPanel = ({ showHeader = true }) => {
+	const [noteDisplayQty, setNoteDisplayQty] = useState(
 		DEFAULT_INBOX_QUERY.per_page
 	);
-	const [ allNotesFetched, setAllNotesFetched ] = useState( false );
-	const [ allNotes, setAllNotes ] = useState( [] );
-	const [ viewedNotes, setViewedNotes ] = useState( {} );
-	const { createNotice } = useDispatch( 'core/notices' );
+	const [allNotesFetched, setAllNotesFetched] = useState(false);
+	const [allNotes, setAllNotes] = useState([]);
+	const [viewedNotes, setViewedNotes] = useState({});
+	const { createNotice } = useDispatch('core/notices');
 	const {
 		removeNote,
 		updateNote,
 		triggerNoteAction,
 		invalidateResolutionForStoreSelector,
-	} = useDispatch( notesStore );
+	} = useDispatch(notesStore);
 	const screen = getScreenName();
 
-	const inboxQuery = useMemo( () => {
+	const inboxQuery = useMemo(() => {
 		return {
 			...DEFAULT_INBOX_QUERY,
 			per_page: noteDisplayQty,
 		};
-	}, [ noteDisplayQty ] );
+	}, [noteDisplayQty]);
 
 	const {
 		isError,
@@ -238,107 +235,104 @@ const InboxPanel = ( { showHeader = true } ) => {
 		notesHaveResolved,
 		isBatchUpdating,
 		unreadNotesCount,
-	} = useSelect( ( select ) => {
+	} = useSelect((select) => {
 		const {
 			getNotes,
 			getNotesError,
 			isNotesRequesting,
 			hasFinishedResolution,
-		} = select( notesStore );
+		} = select(notesStore);
 
 		return {
-			notes: getNotes( inboxQuery ),
-			unreadNotesCount: getNotes( {
+			notes: getNotes(inboxQuery),
+			unreadNotesCount: getNotes({
 				...DEFAULT_INBOX_QUERY,
 				is_read: false,
 				per_page: -1,
-			} ).length,
-			isError: Boolean( getNotesError( 'getNotes', [ inboxQuery ] ) ),
-			isBatchUpdating: isNotesRequesting( 'batchUpdateNotes' ),
+			}).length,
+			isError: Boolean(getNotesError('getNotes', [inboxQuery])),
+			isBatchUpdating: isNotesRequesting('batchUpdateNotes'),
 			notesHaveResolved:
-				! isNotesRequesting( 'batchUpdateNotes' ) &&
-				hasFinishedResolution( 'getNotes', [ inboxQuery ] ),
+				!isNotesRequesting('batchUpdateNotes') &&
+				hasFinishedResolution('getNotes', [inboxQuery]),
 		};
-	} );
+	});
 
-	useEffect( () => {
-		if ( notesHaveResolved && notes.length < noteDisplayQty ) {
-			setAllNotesFetched( true );
+	useEffect(() => {
+		if (notesHaveResolved && notes.length < noteDisplayQty) {
+			setAllNotesFetched(true);
 		}
 
-		if ( notesHaveResolved && notes.length ) {
+		if (notesHaveResolved && notes.length) {
 			setAllNotes(
-				notes.map( ( note ) => {
+				notes.map((note) => {
 					const noteDate = moment(
 						note.date_created_gmt,
 						'YYYY-MM-DD'
 					).valueOf();
 
 					if (
-						supportedLocales.includes( note.locale ) &&
+						supportedLocales.includes(note.locale) &&
 						noteDate >= WC_VERSION_61_RELEASE_DATE
 					) {
 						return {
 							...note,
-							content: truncateRenderableHTML(
-								note.content,
-								320
-							),
+							content: truncateRenderableHTML(note.content, 320),
 						};
 					}
 					return note;
-				} )
+				})
 			);
 		}
-	}, [ notes, notesHaveResolved ] );
+	}, [notes, notesHaveResolved]);
 
-	const [ showDismissAllModal, setShowDismissAllModal ] = useState( false );
+	const [showDismissAllModal, setShowDismissAllModal] = useState(false);
 
-	const onNoteVisible = ( note ) => {
-		if ( ! viewedNotes[ note.id ] && ! note.is_read ) {
-			setViewedNotes( { ...viewedNotes, [ note.id ]: true } );
-			setTimeout( () => {
-				updateNote( note.id, {
+	const onNoteVisible = (note) => {
+		if (!viewedNotes[note.id] && !note.is_read) {
+			setViewedNotes({ ...viewedNotes, [note.id]: true });
+			setTimeout(() => {
+				updateNote(note.id, {
 					is_read: true,
-				} );
-			}, 3000 );
+				});
+			}, 3000);
 		}
-		recordEvent( 'inbox_note_view', {
+		recordEvent('inbox_note_view', {
 			note_content: note.content,
 			note_name: note.name,
 			note_title: note.title,
 			note_type: note.type,
 			screen,
-		} );
+		});
 	};
 
-	const onDismiss = async ( note ) => {
-		recordEvent( 'inbox_action_dismiss', {
+	const onDismiss = async (note) => {
+		recordEvent('inbox_action_dismiss', {
 			note_name: note.name,
 			note_title: note.title,
 			note_name_dismiss_all: false,
 			note_name_dismiss_confirmation: true,
 			screen,
-		} );
+		});
 
 		const noteId = note.id;
 		try {
-			await removeNote( noteId );
-			invalidateResolutionForStoreSelector( 'getNotes' );
-			createNotice( 'success', __( 'Message dismissed', 'woocommerce' ), {
+			await removeNote(noteId);
+			invalidateResolutionForStoreSelector('getNotes');
+			createNotice('success', __('Message dismissed', 'woocommerce'), {
 				actions: [
 					{
-						label: __( 'Undo', 'woocommerce' ),
+						label: __('Undo', 'woocommerce'),
 						onClick: async () => {
-							await updateNote( noteId, {
+							await updateNote(noteId, {
 								is_deleted: 0,
-							} );
-							invalidateResolutionForStoreSelector( 'getNotes' );
+							});
+							invalidateResolutionForStoreSelector('getNotes');
 						},
 					},
 				],
-			} );
-		} catch ( e ) {
+			});
+		} catch (e) {
 			createNotice(
 				'error',
 				_n(
@@ -351,12 +345,12 @@ const InboxPanel = ( { showHeader = true } ) => {
 		}
 	};
 
-	if ( isError ) {
+	if (isError) {
 		const title = __(
 			'There was an error getting your inbox. Please try again.',
 			'woocommerce'
 		);
-		const actionLabel = __( 'Reload', 'woocommerce' );
+		const actionLabel = __('Reload', 'woocommerce');
 		const actionCallback = () => {
 			// @todo Add tracking for how often an error is displayed, and the reload action is clicked.
 			window.location.reload();
@@ -364,50 +358,50 @@ const InboxPanel = ( { showHeader = true } ) => {
 
 		return (
 			<EmptyContent
-				title={ title }
-				actionLabel={ actionLabel }
-				actionURL={ null }
-				actionCallback={ actionCallback }
+				title={title}
+				actionLabel={actionLabel}
+				actionURL={null}
+				actionCallback={actionCallback}
 			/>
 		);
 	}
 
-	if ( notesHaveResolved && ! allNotes.length ) {
+	if (notesHaveResolved && !allNotes.length) {
 		return null;
 	}
 
 	return (
 		<>
-			{ showDismissAllModal && (
+			{showDismissAllModal && (
 				<DismissAllModal
-					onClose={ () => {
-						setShowDismissAllModal( false );
-					} }
+					onClose={() => {
+						setShowDismissAllModal(false);
+					}}
 				/>
-			) }
+			)}
 			<div className="woocommerce-homepage-notes-wrapper">
-				{ ! notesHaveResolved && ! allNotes.length && (
+				{!notesHaveResolved && !allNotes.length && (
 					<Section>
 						<InboxNotePlaceholder className="banner message-is-unread" />
 					</Section>
-				) }
+				)}
 				<Section>
-					{ Boolean( allNotes.length ) &&
-						renderNotes( {
+					{Boolean(allNotes.length) &&
+						renderNotes({
 							loadMoreNotes: () => {
-								recordEvent( 'inbox_action_load_more', {
+								recordEvent('inbox_action_load_more', {
 									quantity_shown: allNotes.length,
-								} );
+								});
 								setNoteDisplayQty(
 									noteDisplayQty + ADD_NOTES_AMOUNT
 								);
 							},
-							hasNotes: hasValidNotes( allNotes ),
+							hasNotes: hasValidNotes(allNotes),
 							isBatchUpdating,
 							notes: allNotes,
 							onDismiss,
-							onNoteActionClick: ( note, action ) => {
-								triggerNoteAction( note.id, action.id );
+							onNoteActionClick: (note, action) => {
+								triggerNoteAction(note.id, action.id);
 							},
 							onNoteVisible,
 							setShowDismissAllModal,
@@ -415,7 +409,7 @@ const InboxPanel = ( { showHeader = true } ) => {
 							allNotesFetched,
 							notesHaveResolved,
 							unreadNotesCount,
-						} ) }
+						})}
 				</Section>
 			</div>
 		</>

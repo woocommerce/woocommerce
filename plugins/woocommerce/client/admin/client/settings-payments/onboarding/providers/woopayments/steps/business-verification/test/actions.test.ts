@@ -8,14 +8,14 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { createEmbeddedKycSession } from '../utils/actions';
 
-jest.mock( '@wordpress/api-fetch', () => jest.fn() );
+jest.mock('@wordpress/api-fetch', () => jest.fn());
 
 const mockApiFetch = apiFetch as jest.Mock;
 
-describe( 'business verification actions', () => {
-	beforeEach( () => {
+describe('business verification actions', () => {
+	beforeEach(() => {
 		jest.clearAllMocks();
-		mockApiFetch.mockResolvedValue( {
+		mockApiFetch.mockResolvedValue({
 			session: {
 				clientSecret: 'test-secret',
 				expiresAt: 123,
@@ -25,10 +25,10 @@ describe( 'business verification actions', () => {
 				publishableKey: 'pk_test',
 				locale: 'en_US',
 			},
-		} );
-	} );
+		});
+	});
 
-	it( 'omits company structure when it is unset', async () => {
+	it('omits company structure when it is unset', async () => {
 		await createEmbeddedKycSession(
 			{
 				country: 'JP',
@@ -40,7 +40,7 @@ describe( 'business verification actions', () => {
 			'settings'
 		);
 
-		expect( mockApiFetch ).toHaveBeenCalledWith( {
+		expect(mockApiFetch).toHaveBeenCalledWith({
 			url: '/wc/v3/payments/onboarding/kyc/session',
 			method: 'POST',
 			data: {
@@ -51,6 +51,6 @@ describe( 'business verification actions', () => {
 				},
 				source: 'settings',
 			},
-		} );
-	} );
-} );
+		});
+	});
+});

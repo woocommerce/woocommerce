@@ -59,7 +59,8 @@ ul.woocommerce_stats {
 	}
 
 	strong {
-		font-family: Georgia, "Times New Roman", "Bitstream Charter", Times, serif;
+		font-family:
+			Georgia, "Times New Roman", "Bitstream Charter", Times, serif;
 		font-size: 4em;
 		line-height: 1.2em;
 		font-weight: 400;
@@ -69,16 +70,13 @@ ul.woocommerce_stats {
 }
 
 #woocommerce_dashboard_status {
-
 	.inside {
 		padding: 0;
 		margin: 0;
 	}
 
 	.best-seller-this-month {
-
 		a {
-
 			strong {
 				margin-right: 48px;
 			}
@@ -88,7 +86,8 @@ ul.woocommerce_stats {
 	.wc_status_list {
 		overflow: hidden;
 		margin: 0;
-		border-radius: 0 0 var(--wc-card-border-radius, 8px) var(--wc-card-border-radius, 8px);
+		border-radius: 0 0 var(--wc-card-border-radius, 8px)
+			var(--wc-card-border-radius, 8px);
 
 		li {
 			width: 50%;
@@ -133,8 +132,7 @@ ul.woocommerce_stats {
 				}
 
 				&::before {
-
-					@include icon_dashicons( "\f14c" );
+					@include icon_dashicons("\f14c");
 					font-size: 20px;
 					position: absolute;
 					top: 50%;
@@ -154,7 +152,9 @@ ul.woocommerce_stats {
 			border-top: 0;
 		}
 
-		li:not(.sales-this-month):not(.best-seller-this-month):not(.processing-orders):not(.on-hold-orders):not(.low-in-stock):not(.out-of-stock) {
+		li:not(.sales-this-month):not(.best-seller-this-month):not(
+				.processing-orders
+			):not(.on-hold-orders):not(.low-in-stock):not(.out-of-stock) {
 			clear: both;
 			width: 100%;
 		}
@@ -184,7 +184,6 @@ ul.woocommerce_stats {
 		}
 
 		li.on-hold-orders {
-
 			a::before {
 				content: "\f523";
 			}
@@ -199,7 +198,6 @@ ul.woocommerce_stats {
 		}
 
 		li.out-of-stock {
-
 			a::before {
 				content: "\f158";
 			}
@@ -208,7 +206,6 @@ ul.woocommerce_stats {
 }
 
 #woocommerce_dashboard_recent_reviews {
-
 	#wc-recent-reviews-widget-content > p {
 		margin-bottom: 0;
 	}
@@ -305,13 +302,9 @@ ul.woocommerce_stats {
 }
 
 #dashboard_activity {
-
 	#activity-widget {
-
 		#the-comment-list {
-
 			.review.comment-item {
-
 				.avatar {
 					margin-right: 12px;
 					position: relative;

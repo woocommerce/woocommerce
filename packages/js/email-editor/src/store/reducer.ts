@@ -3,8 +3,8 @@
  */
 import { State } from './types';
 
-export function reducer( state: State, action ): State {
-	switch ( action.type ) {
+export function reducer(state: State, action): State {
+	switch (action.type) {
 		case 'CHANGE_PREVIEW_STATE':
 			return {
 				...state,

@@ -22,19 +22,17 @@ export type BlockAttributes = {
 };
 
 export const DEFAULT_SORT_ORDER = metadata.attributes.sortOrder
-	.default as BlockAttributes[ 'sortOrder' ];
+	.default as BlockAttributes['sortOrder'];
 export const DEFAULT_QUERY_TYPE = metadata.attributes.queryType
-	.default as BlockAttributes[ 'queryType' ];
+	.default as BlockAttributes['queryType'];
 
-export interface EditProps extends BlockEditProps< BlockAttributes > {
-	debouncedSpeak: ( label: string ) => void;
+export interface EditProps extends BlockEditProps<BlockAttributes> {
+	debouncedSpeak: (label: string) => void;
 }
 
-export function isAttributeCounts(
-	target: unknown
-): target is AttributeCount[] {
+export function isAttributeCounts(target: unknown): target is AttributeCount[] {
 	return (
-		Array.isArray( target ) &&
-		target.every( ( item ) => 'term' in item && 'count' in item )
+		Array.isArray(target) &&
+		target.every((item) => 'term' in item && 'count' in item)
 	);
 }

@@ -79,7 +79,7 @@ export const GROUPED_PRODUCT_ITEM_TEMPLATE: TemplateArray = [
 									},
 								},
 							],
-							[ 'woocommerce/product-stock-indicator' ],
+							['woocommerce/product-stock-indicator'],
 						],
 					],
 				],

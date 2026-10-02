@@ -19,16 +19,16 @@ interface Props {
 	clientId: string;
 }
 
-export const Edit = ( { clientId }: Props ): JSX.Element => {
-	const blockProps = useBlockProps( { className: 'wc-block-cart__main' } );
-	const allowedBlocks = getAllowedBlocks( innerBlockAreas.CART_ITEMS );
+export const Edit = ({ clientId }: Props): JSX.Element => {
+	const blockProps = useBlockProps({ className: 'wc-block-cart__main' });
+	const allowedBlocks = getAllowedBlocks(innerBlockAreas.CART_ITEMS);
 	// Product collection is used for the Cross-Sells block.
 	// We don't want to set a parent on the product collection block
 	// so we add it here manually.
-	allowedBlocks.push( 'woocommerce/product-collection' );
+	allowedBlocks.push('woocommerce/product-collection');
 
 	const defaultTemplate = [
-		[ 'woocommerce/cart-line-items-block', {}, [] ],
+		['woocommerce/cart-line-items-block', {}, []],
 		[
 			'woocommerce/product-collection',
 			{
@@ -47,18 +47,18 @@ export const Edit = ( { clientId }: Props ): JSX.Element => {
 		],
 	] as unknown as TemplateArray;
 
-	useForcedLayout( {
+	useForcedLayout({
 		clientId,
 		registeredBlocks: allowedBlocks,
 		defaultTemplate,
-	} );
+	});
 	return (
-		<Main { ...blockProps }>
+		<Main {...blockProps}>
 			<InnerBlocks
-				allowedBlocks={ allowedBlocks }
-				template={ defaultTemplate }
-				templateLock={ false }
-				renderAppender={ InnerBlocks.ButtonBlockAppender }
+				allowedBlocks={allowedBlocks}
+				template={defaultTemplate}
+				templateLock={false}
+				renderAppender={InnerBlocks.ButtonBlockAppender}
 			/>
 		</Main>
 	);
@@ -66,7 +66,7 @@ export const Edit = ( { clientId }: Props ): JSX.Element => {
 
 export const Save = (): JSX.Element => {
 	return (
-		<div { ...useBlockProps.save() }>
+		<div {...useBlockProps.save()}>
 			<InnerBlocks.Content />
 		</div>
 	);

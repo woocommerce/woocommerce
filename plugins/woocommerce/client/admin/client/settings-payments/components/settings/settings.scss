@@ -9,7 +9,7 @@ $settings-section-leading: $gap;
 	display: flex;
 	flex-flow: row;
 
-	@include breakpoint( "<960px" ) {
+	@include breakpoint("<960px") {
 		flex-flow: column;
 	}
 
@@ -38,7 +38,7 @@ $settings-section-leading: $gap;
 		margin-bottom: 24px;
 	}
 
-	@include breakpoint( "<782px" ) {
+	@include breakpoint("<782px") {
 		flex-flow: column;
 	}
 
@@ -46,7 +46,7 @@ $settings-section-leading: $gap;
 		flex: 0 0 33%;
 		margin: 0 24px 0 0;
 
-		@include breakpoint( "<782px" ) {
+		@include breakpoint("<782px") {
 			margin: 0 0 40px 0;
 			max-width: 328px;
 		}
@@ -89,7 +89,7 @@ $settings-section-leading: $gap;
 		flex: 1 1 auto;
 
 		// The columns stack here, so there is no heading to align against.
-		@include breakpoint( "<782px" ) {
+		@include breakpoint("<782px") {
 			margin-top: 0;
 		}
 	}

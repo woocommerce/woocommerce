@@ -18,7 +18,7 @@ export interface CheckboxListProps {
 	isDisabled?: boolean | undefined;
 	limit?: number | undefined;
 	checked?: string[] | undefined;
-	onChange: ( value: string ) => void | undefined;
+	onChange: (value: string) => void | undefined;
 	options?: CheckboxListOptions[] | undefined;
 }
 
@@ -34,7 +34,7 @@ export interface CheckboxListProps {
  * @param {boolean}              props.isDisabled If inputs are disabled or not.
  * @param {number}               props.limit      Whether to limit the number of inputs showing.
  */
-const CheckboxList = ( {
+const CheckboxList = ({
 	className,
 	onChange,
 	options = [],
@@ -42,36 +42,36 @@ const CheckboxList = ( {
 	isLoading = false,
 	isDisabled = false,
 	limit = 10,
-}: CheckboxListProps ): JSX.Element => {
-	const [ showExpanded, setShowExpanded ] = useState( false );
+}: CheckboxListProps): JSX.Element => {
+	const [showExpanded, setShowExpanded] = useState(false);
 
-	const placeholder = useMemo( () => {
-		return [ ...Array( 5 ) ].map( ( x, i ) => (
+	const placeholder = useMemo(() => {
+		return [...Array(5)].map((x, i) => (
 			<li
-				key={ i }
-				style={ {
+				key={i}
+				style={{
 					/* stylelint-disable */
-					width: Math.floor( Math.random() * 75 ) + 25 + '%',
-				} }
+					width: Math.floor(Math.random() * 75) + 25 + '%',
+				}}
 			>
-				{ /* The &nbsp; is required to give the placeholder content and therefore height, without it the placeholder rows do not render */ }
+				{/* The &nbsp; is required to give the placeholder content and therefore height, without it the placeholder rows do not render */}
 				&nbsp;
 			</li>
-		) );
-	}, [] );
+		));
+	}, []);
 
-	const renderedShowMore = useMemo( () => {
+	const renderedShowMore = useMemo(() => {
 		const optionCount = options.length;
 		const remainingOptionsCount = optionCount - limit;
 		return (
-			! showExpanded && (
+			!showExpanded && (
 				<li key="show-more" className="show-more">
 					<button
-						onClick={ () => {
-							setShowExpanded( true );
-						} }
-						aria-expanded={ false }
-						aria-label={ sprintf(
+						onClick={() => {
+							setShowExpanded(true);
+						}}
+						aria-expanded={false}
+						aria-label={sprintf(
 							/* translators: %s is referring the remaining count of options */
 							_n(
 								'Show %s more option',
@@ -80,9 +80,9 @@ const CheckboxList = ( {
 								'woocommerce'
 							),
 							remainingOptionsCount
-						) }
+						)}
 					>
-						{ sprintf(
+						{sprintf(
 							/* translators: %s number of options to reveal. */
 							_n(
 								'Show %s more',
@@ -91,52 +91,52 @@ const CheckboxList = ( {
 								'woocommerce'
 							),
 							remainingOptionsCount
-						) }
+						)}
 					</button>
 				</li>
 			)
 		);
-	}, [ options, limit, showExpanded ] );
+	}, [options, limit, showExpanded]);
 
-	const renderedShowLess = useMemo( () => {
+	const renderedShowLess = useMemo(() => {
 		return (
 			showExpanded && (
 				<li key="show-less" className="show-less">
 					<button
-						onClick={ () => {
-							setShowExpanded( false );
-						} }
-						aria-expanded={ true }
-						aria-label={ __( 'Show less options', 'woocommerce' ) }
+						onClick={() => {
+							setShowExpanded(false);
+						}}
+						aria-expanded={true}
+						aria-label={__('Show less options', 'woocommerce')}
 					>
-						{ __( 'Show less', 'woocommerce' ) }
+						{__('Show less', 'woocommerce')}
 					</button>
 				</li>
 			)
 		);
-	}, [ showExpanded ] );
+	}, [showExpanded]);
 
-	const renderedOptions = useMemo( () => {
+	const renderedOptions = useMemo(() => {
 		// Truncate options if > the limit + 5.
 		const optionCount = options.length;
 		const shouldTruncateOptions = optionCount > limit + 5;
 		return (
 			<>
-				{ options.map( ( option, index ) => (
+				{options.map((option, index) => (
 					<CheckboxListOptionControl
-						key={ option.value }
-						option={ option }
-						shouldTruncateOptions={ shouldTruncateOptions }
-						showExpanded={ showExpanded }
-						index={ index }
-						limit={ limit }
-						checked={ checked.includes( option.value ) }
-						disabled={ isDisabled }
-						renderedShowMore={ renderedShowMore }
-						onChange={ onChange }
+						key={option.value}
+						option={option}
+						shouldTruncateOptions={shouldTruncateOptions}
+						showExpanded={showExpanded}
+						index={index}
+						limit={limit}
+						checked={checked.includes(option.value)}
+						disabled={isDisabled}
+						renderedShowMore={renderedShowMore}
+						onChange={onChange}
 					/>
-				) ) }
-				{ shouldTruncateOptions && renderedShowLess }
+				))}
+				{shouldTruncateOptions && renderedShowLess}
 			</>
 		);
 	}, [
@@ -148,7 +148,7 @@ const CheckboxList = ( {
 		renderedShowLess,
 		renderedShowMore,
 		isDisabled,
-	] );
+	]);
 
 	const classes = clsx(
 		'wc-block-checkbox-list',
@@ -160,9 +160,7 @@ const CheckboxList = ( {
 	);
 
 	return (
-		<ul className={ classes }>
-			{ isLoading ? placeholder : renderedOptions }
-		</ul>
+		<ul className={classes}>{isLoading ? placeholder : renderedOptions}</ul>
 	);
 };
 

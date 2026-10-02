@@ -9,7 +9,7 @@ const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 const getInputElementFromEvent = (
-	event: HTMLElementEvent< HTMLButtonElement >
+	event: HTMLElementEvent<HTMLButtonElement>
 ) => {
 	const target = event.target as HTMLButtonElement;
 
@@ -20,22 +20,22 @@ const getInputElementFromEvent = (
 	return inputElement;
 };
 
-const getInputData = ( event: HTMLElementEvent< HTMLButtonElement > ) => {
-	const inputElement = getInputElementFromEvent( event );
+const getInputData = (event: HTMLElementEvent<HTMLButtonElement>) => {
+	const inputElement = getInputElementFromEvent(event);
 
-	if ( ! inputElement ) {
+	if (!inputElement) {
 		return;
 	}
 
-	const parsedValue = parseFloat( inputElement.value );
-	const parsedMinValue = parseFloat( inputElement.min );
-	const parsedMaxValue = parseFloat( inputElement.max );
-	const parsedStep = parseFloat( inputElement.step );
+	const parsedValue = parseFloat(inputElement.value);
+	const parsedMinValue = parseFloat(inputElement.min);
+	const parsedMaxValue = parseFloat(inputElement.max);
+	const parsedStep = parseFloat(inputElement.step);
 
-	const currentValue = isNaN( parsedValue ) ? 0 : parsedValue;
-	const minValue = isNaN( parsedMinValue ) ? 1 : parsedMinValue;
-	const maxValue = isNaN( parsedMaxValue ) ? undefined : parsedMaxValue;
-	const step = isNaN( parsedStep ) ? 1 : parsedStep;
+	const currentValue = isNaN(parsedValue) ? 0 : parsedValue;
+	const minValue = isNaN(parsedMinValue) ? 1 : parsedMinValue;
+	const maxValue = isNaN(parsedMaxValue) ? undefined : parsedMaxValue;
+	const step = isNaN(parsedStep) ? 1 : parsedStep;
 
 	return {
 		currentValue,
@@ -52,11 +52,11 @@ const roundDecimals = (
 	max: number,
 	step: number
 ): string => {
-	const stepDecimals = ( step.toString().split( '.' )[ 1 ] || '' ).length;
-	const minDecimals = ( min.toString().split( '.' )[ 1 ] || '' ).length;
-	const maxDecimals = ( max.toString().split( '.' )[ 1 ] || '' ).length;
-	const decimals = Math.max( stepDecimals, minDecimals, maxDecimals );
-	return value.toFixed( decimals );
+	const stepDecimals = (step.toString().split('.')[1] || '').length;
+	const minDecimals = (min.toString().split('.')[1] || '').length;
+	const maxDecimals = (max.toString().split('.')[1] || '').length;
+	const decimals = Math.max(stepDecimals, minDecimals, maxDecimals);
+	return value.toFixed(decimals);
 };
 
 /**
@@ -71,10 +71,10 @@ const roundDecimals = (
  *
  * @param inputElement - The quantity input element to dispatch the event on.
  */
-const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
-	const event = new Event( 'change', { bubbles: true } );
+const dispatchChangeEvent = (inputElement: HTMLInputElement) => {
+	const event = new Event('change', { bubbles: true });
 
-	inputElement.dispatchEvent( event );
+	inputElement.dispatchEvent(event);
 };
 
 // Note: this store is also used by the Add to Cart + Options block when
@@ -91,46 +91,42 @@ store(
 			},
 		},
 		actions: {
-			increaseQuantity: (
-				event: HTMLElementEvent< HTMLButtonElement >
-			) => {
-				const inputData = getInputData( event );
-				if ( ! inputData ) {
+			increaseQuantity: (event: HTMLElementEvent<HTMLButtonElement>) => {
+				const inputData = getInputData(event);
+				if (!inputData) {
 					return;
 				}
 				const { currentValue, minValue, maxValue, step, inputElement } =
 					inputData;
 				const newValue = currentValue + step;
 
-				if ( maxValue === undefined || newValue <= maxValue ) {
+				if (maxValue === undefined || newValue <= maxValue) {
 					inputElement.value = roundDecimals(
 						newValue,
 						minValue,
 						maxValue ?? Infinity,
 						step
 					);
-					dispatchChangeEvent( inputElement );
+					dispatchChangeEvent(inputElement);
 				}
 			},
-			decreaseQuantity: (
-				event: HTMLElementEvent< HTMLButtonElement >
-			) => {
-				const inputData = getInputData( event );
-				if ( ! inputData ) {
+			decreaseQuantity: (event: HTMLElementEvent<HTMLButtonElement>) => {
+				const inputData = getInputData(event);
+				if (!inputData) {
 					return;
 				}
 				const { currentValue, minValue, maxValue, step, inputElement } =
 					inputData;
 				const newValue = currentValue - step;
 
-				if ( newValue >= minValue ) {
+				if (newValue >= minValue) {
 					inputElement.value = roundDecimals(
 						newValue,
 						minValue,
 						maxValue ?? Infinity,
 						step
 					);
-					dispatchChangeEvent( inputElement );
+					dispatchChangeEvent(inputElement);
 				}
 			},
 		},

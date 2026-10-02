@@ -24,7 +24,10 @@
 		border-radius: 2px;
 
 		&.is-highlighted {
-			background: rgba(var(--wp-admin-theme-color--rgb, 0, 124, 186), 0.08);
+			background: rgba(
+				var(--wp-admin-theme-color--rgb, 0, 124, 186),
+				0.08
+			);
 			outline: 2px solid var(--wp-admin-theme-color, #007cba);
 			outline-offset: -2px;
 		}
@@ -100,14 +103,18 @@
 		position: absolute;
 		transition: none;
 		z-index: 1000;
-		box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.05), 0 4px 5px 0 rgba(0, 0, 0, 0.04), 0 4px 5px 0 rgba(0, 0, 0, 0.03), 0 16px 16px 0 rgba(0, 0, 0, 0.02);
+		box-shadow:
+			0 2px 3px 0 rgba(0, 0, 0, 0.05),
+			0 4px 5px 0 rgba(0, 0, 0, 0.04),
+			0 4px 5px 0 rgba(0, 0, 0, 0.03),
+			0 16px 16px 0 rgba(0, 0, 0, 0.02);
 	}
 
 	&__list {
 		overflow: auto;
 		max-height: 300px;
-		-ms-overflow-style: none;  /* IE and Edge */
-		scrollbar-width: none;  /* Firefox */
+		-ms-overflow-style: none; /* IE and Edge */
+		scrollbar-width: none; /* Firefox */
 
 		&::-webkit-scrollbar {
 			display: none;

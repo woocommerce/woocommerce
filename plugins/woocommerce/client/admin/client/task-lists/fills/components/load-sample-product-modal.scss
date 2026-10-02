@@ -2,19 +2,17 @@
 	top: 0;
 	background: rgba(255, 255, 255, 0.8);
 
-	@media (min-width: 783px ) {
+	@media (min-width: 783px) {
 		& {
 			inset-inline-start: 35px;
 		}
 	}
-
 
 	@include break-large {
 		& {
 			inset-inline-start: 160px;
 		}
 	}
-
 }
 
 .woocommerce-products-load-sample-product-modal {

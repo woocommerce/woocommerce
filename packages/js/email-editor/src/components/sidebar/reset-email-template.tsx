@@ -23,17 +23,17 @@ import apiFetch from '@wordpress/api-fetch';
 import { type PostWithPermissions } from '../../store';
 import { recordEvent } from '../../events';
 
-function getItemTitle( item: {
+function getItemTitle(item: {
 	title: string | { rendered: string } | { raw: string };
-} ) {
-	if ( typeof item.title === 'string' ) {
-		return decodeEntities( item.title );
+}) {
+	if (typeof item.title === 'string') {
+		return decodeEntities(item.title);
 	}
-	if ( item.title && 'rendered' in item.title ) {
-		return decodeEntities( item.title.rendered );
+	if (item.title && 'rendered' in item.title) {
+		return decodeEntities(item.title.rendered);
 	}
-	if ( item.title && 'raw' in item.title ) {
-		return decodeEntities( item.title.raw );
+	if (item.title && 'raw' in item.title) {
+		return decodeEntities(item.title.raw);
 	}
 	return '';
 }
@@ -45,22 +45,20 @@ const getResetEmailTemplateAction = () => {
 	 */
 	const resetEmailTemplate = {
 		id: 'reset-email-template',
-		label: __( 'Reset', __i18n_text_domain__ ),
+		label: __('Reset', __i18n_text_domain__),
 		supportsBulk: false,
 		icon: backup,
-		isEligible( item: PostWithPermissions ) {
+		isEligible(item: PostWithPermissions) {
 			// Only for wp_template post type
-			if ( item.type !== 'wp_template' ) {
+			if (item.type !== 'wp_template') {
 				return false;
 			}
 			// Match Gutenberg's isTemplateRevertible logic:
 			// Must be customized AND have an original to revert to
-			if ( item.source !== 'custom' ) {
+			if (item.source !== 'custom') {
 				return false;
 			}
-			if (
-				! ( Boolean( item.plugin ) || Boolean( item.has_theme_file ) )
-			) {
+			if (!(Boolean(item.plugin) || Boolean(item.has_theme_file))) {
 				return false;
 			}
 			const { permissions } = item;
@@ -68,57 +66,57 @@ const getResetEmailTemplateAction = () => {
 		},
 		hideModalHeader: true,
 		modalFocusOnMount: 'firstContentElement',
-		RenderModal: ( { items, closeModal, onActionPerformed } ) => {
-			const [ isBusy, setIsBusy ] = useState( false );
+		RenderModal: ({ items, closeModal, onActionPerformed }) => {
+			const [isBusy, setIsBusy] = useState(false);
 			const { createSuccessNotice, createErrorNotice } =
-				useDispatch( noticesStore );
+				useDispatch(noticesStore);
 			const {
 				invalidateResolution,
 				editEntityRecord,
 				saveEditedEntityRecord,
-			} = useDispatch( coreStore );
+			} = useDispatch(coreStore);
 
-			const item = items[ 0 ];
+			const item = items[0];
 			const modalTitle = sprintf(
 				// translators: %s: The template's title
 				__(
 					'Are you sure you want to reset "%s" to default?',
 					__i18n_text_domain__
 				),
-				getItemTitle( item )
+				getItemTitle(item)
 			);
 
 			return (
 				<VStack spacing="5">
-					<Text>{ modalTitle }</Text>
+					<Text>{modalTitle}</Text>
 					<HStack justify="right">
 						<Button
 							variant="tertiary"
-							onClick={ () => {
+							onClick={() => {
 								closeModal?.();
 								recordEvent(
 									'reset_modal_cancel_button_clicked'
 								);
-							} }
-							disabled={ isBusy }
+							}}
+							disabled={isBusy}
 							__next40pxDefaultSize
 						>
-							{ __( 'Cancel', __i18n_text_domain__ ) }
+							{__('Cancel', __i18n_text_domain__)}
 						</Button>
 						<Button
 							variant="primary"
-							onClick={ async () => {
+							onClick={async () => {
 								recordEvent(
 									'reset_modal_confirm_button_clicked'
 								);
-								setIsBusy( true );
+								setIsBusy(true);
 
 								try {
 									// Fetch the original template from theme/plugin file
 									// Uses the origin field to get the original source version
-									const fileTemplate = ( await apiFetch( {
-										path: `/wp/v2/templates/${ item.id }?context=edit&source=${ item.origin }`,
-									} ) ) as WpTemplate;
+									const fileTemplate = (await apiFetch({
+										path: `/wp/v2/templates/${item.id}?context=edit&source=${item.origin}`,
+									})) as WpTemplate;
 
 									// Parse blocks from the original template content
 									const blocks = parse(
@@ -132,7 +130,7 @@ const getResetEmailTemplateAction = () => {
 										item.id,
 										{
 											blocks,
-											content: serialize( blocks ),
+											content: serialize(blocks),
 											source: item.origin,
 										}
 									);
@@ -147,15 +145,15 @@ const getResetEmailTemplateAction = () => {
 
 									// Delete the custom database post so WordPress falls back to the file version
 									// This ensures source becomes 'plugin'/'theme' instead of staying 'custom'
-									await apiFetch( {
-										path: `/wp/v2/templates/${ item.id }`,
+									await apiFetch({
+										path: `/wp/v2/templates/${item.id}`,
 										method: 'DELETE',
-									} );
+									});
 
 									// Invalidate to ensure editor and actions menu see the file version
 									void invalidateResolution(
 										'getEntityRecord',
-										[ 'postType', item.type, item.id ]
+										['postType', item.type, item.id]
 									);
 
 									const successMessage = sprintf(
@@ -164,19 +162,19 @@ const getResetEmailTemplateAction = () => {
 											'"%s" reset to default.',
 											__i18n_text_domain__
 										),
-										getItemTitle( item )
+										getItemTitle(item)
 									);
 
-									void createSuccessNotice( successMessage, {
+									void createSuccessNotice(successMessage, {
 										type: 'snackbar',
 										id: 'reset-email-template-action',
-									} );
+									});
 
-									onActionPerformed?.( items );
-									setIsBusy( false );
+									onActionPerformed?.(items);
+									setIsBusy(false);
 									closeModal?.();
-								} catch ( error ) {
-									let errorMessage = __< string >(
+								} catch (error) {
+									let errorMessage = __<string>(
 										'An error occurred while resetting the template.',
 										__i18n_text_domain__
 									);
@@ -187,26 +185,26 @@ const getResetEmailTemplateAction = () => {
 										'message' in error
 									) {
 										errorMessage =
-											error.message as TranslatableText< string >;
+											error.message as TranslatableText<string>;
 									}
 
-									recordEvent( 'reset_modal_error', {
+									recordEvent('reset_modal_error', {
 										errorMessage,
-									} );
+									});
 
-									void createErrorNotice( errorMessage, {
+									void createErrorNotice(errorMessage, {
 										type: 'snackbar',
-									} );
+									});
 
-									setIsBusy( false );
+									setIsBusy(false);
 									closeModal?.();
 								}
-							} }
-							isBusy={ isBusy }
-							disabled={ isBusy }
+							}}
+							isBusy={isBusy}
+							disabled={isBusy}
 							__next40pxDefaultSize
 						>
-							{ __( 'Reset', __i18n_text_domain__ ) }
+							{__('Reset', __i18n_text_domain__)}
 						</Button>
 					</HStack>
 				</VStack>

@@ -1,5 +1,5 @@
 export type SearchAPIJSONType = {
-	products: Array< SearchAPIProductType >;
+	products: Array<SearchAPIProductType>;
 	total_pages: number;
 	total_products: number;
 };

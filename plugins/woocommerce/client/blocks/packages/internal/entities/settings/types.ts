@@ -4,7 +4,7 @@ export interface SettingsEntityRecord {
 	id: string;
 	title?: string;
 	description?: string;
-	values?: Record< string, SettingsEntityValue >;
+	values?: Record<string, SettingsEntityValue>;
 	groups?: Record<
 		string,
 		{

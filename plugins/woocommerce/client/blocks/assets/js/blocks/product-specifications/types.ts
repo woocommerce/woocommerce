@@ -14,4 +14,4 @@ interface ProductSpecificationsAttributes {
 }
 
 export type ProductSpecificationsEditProps =
-	BlockEditProps< ProductSpecificationsAttributes > & Context;
+	BlockEditProps<ProductSpecificationsAttributes> & Context;

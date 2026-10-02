@@ -15,10 +15,10 @@ import type {
 	BlockErrorBoundaryProps,
 } from './types';
 
-class BlockErrorBoundary extends Component< BlockErrorBoundaryProps > {
+class BlockErrorBoundary extends Component<BlockErrorBoundaryProps> {
 	state = { errorMessage: '', hasError: false };
 
-	static getDerivedStateFromError( error: ReactError ): DerivedStateReturn {
+	static getDerivedStateFromError(error: ReactError): DerivedStateReturn {
 		if (
 			typeof error.statusText !== 'undefined' &&
 			typeof error.status !== 'undefined'
@@ -26,8 +26,8 @@ class BlockErrorBoundary extends Component< BlockErrorBoundaryProps > {
 			return {
 				errorMessage: (
 					<>
-						<strong>{ error.status }</strong>:&nbsp;
-						{ error.statusText }
+						<strong>{error.status}</strong>:&nbsp;
+						{error.statusText}
 					</>
 				),
 				hasError: true,
@@ -50,19 +50,19 @@ class BlockErrorBoundary extends Component< BlockErrorBoundaryProps > {
 		} = this.props;
 		const { errorMessage, hasError } = this.state;
 
-		if ( hasError ) {
-			if ( typeof renderError === 'function' ) {
-				return renderError( { errorMessage } );
+		if (hasError) {
+			if (typeof renderError === 'function') {
+				return renderError({ errorMessage });
 			}
 			return (
 				<BlockError
-					showErrorBlock={ showErrorBlock }
-					errorMessage={ showErrorMessage ? errorMessage : null }
-					header={ header }
-					imageUrl={ imageUrl }
-					text={ text }
-					errorMessagePrefix={ errorMessagePrefix }
-					button={ button }
+					showErrorBlock={showErrorBlock}
+					errorMessage={showErrorMessage ? errorMessage : null}
+					header={header}
+					imageUrl={imageUrl}
+					text={text}
+					errorMessagePrefix={errorMessagePrefix}
+					button={button}
 				/>
 			);
 		}

@@ -54,7 +54,7 @@ export interface BaseAddress {
 }
 
 export type AddressFieldsForShippingRates = Array<
-	Exclude< keyof BaseAddress, 'address_1' | 'address_2' >
+	Exclude<keyof BaseAddress, 'address_1' | 'address_2'>
 >;
 
 export interface CartShippingPackageShippingRate extends CurrencyInfo {
@@ -66,7 +66,7 @@ export interface CartShippingPackageShippingRate extends CurrencyInfo {
 	taxes: string;
 	instance_id: number;
 	method_id: string;
-	meta_data: Array< MetaKeyValue >;
+	meta_data: Array<MetaKeyValue>;
 	selected: boolean;
 }
 
@@ -74,8 +74,8 @@ export interface CartShippingRate {
 	package_id: string | number;
 	name: string;
 	destination: BaseAddress;
-	items: Array< ShippingRateItem >;
-	shipping_rates: Array< CartShippingPackageShippingRate >;
+	items: Array<ShippingRateItem>;
+	shipping_rates: Array<CartShippingPackageShippingRate>;
 }
 
 export interface CartShippingAddress extends BaseAddress, FirstNameLastName {
@@ -149,8 +149,8 @@ export interface CartItem {
 	show_backorder_badge: boolean;
 	sold_individually: boolean;
 	permalink: string;
-	images: Array< CartImageItem >;
-	variation: Array< CartVariationItem >;
+	images: Array<CartImageItem>;
+	variation: Array<CartVariationItem>;
 	prices: CartItemPrices;
 	totals: CartItemTotals;
 	extensions: ExtensionsData;
@@ -186,26 +186,26 @@ export interface CartTotals extends CurrencyInfo {
 	total_shipping_tax: string;
 	total_price: string;
 	total_tax: string;
-	tax_lines: Array< CartTotalsTaxLineItem >;
+	tax_lines: Array<CartTotalsTaxLineItem>;
 }
 
-export interface Cart extends Record< string, unknown > {
-	coupons: Array< CartCouponItem >;
-	shippingRates: Array< CartShippingRate >;
+export interface Cart extends Record<string, unknown> {
+	coupons: Array<CartCouponItem>;
+	shippingRates: Array<CartShippingRate>;
 	shippingAddress: CartShippingAddress;
 	billingAddress: CartBillingAddress;
-	items: Array< CartItem >;
+	items: Array<CartItem>;
 	itemsCount: number;
 	itemsWeight: number;
-	crossSells: Array< ProductResponseItem >;
+	crossSells: Array<ProductResponseItem>;
 	needsPayment: boolean;
 	needsShipping: boolean;
 	hasCalculatedShipping: boolean;
-	fees: Array< CartFeeItem >;
+	fees: Array<CartFeeItem>;
 	totals: CartTotals;
-	errors: Array< ApiErrorResponse >;
-	paymentMethods: Array< string >;
-	paymentRequirements: Array< string >;
+	errors: Array<ApiErrorResponse>;
+	paymentMethods: Array<string>;
+	paymentRequirements: Array<string>;
 	extensions: ExtensionsData;
 }
 export interface CartMeta {
@@ -217,7 +217,7 @@ export interface CartMeta {
 	removingCoupon: string;
 }
 export interface ExtensionCartUpdateArgs {
-	data: Record< string, unknown >;
+	data: Record<string, unknown>;
 	namespace: string;
 	overwriteDirtyCustomerData?:
 		| undefined
@@ -229,6 +229,6 @@ export interface ExtensionCartUpdateArgs {
 }
 
 export interface BillingAddressShippingAddress {
-	billing_address: Partial< CartBillingAddress >;
-	shipping_address: Partial< CartShippingAddress >;
+	billing_address: Partial<CartBillingAddress>;
+	shipping_address: Partial<CartShippingAddress>;
 }

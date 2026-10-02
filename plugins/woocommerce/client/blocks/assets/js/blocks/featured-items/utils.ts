@@ -15,23 +15,23 @@ import { BgImageDimensions } from './use-background-image';
  *
  * Useful for converting to a CSS-compatible position string.
  */
-export function calculatePercentPositionFromCoordinates( coords: Coordinates ) {
-	if ( ! coords ) return '';
+export function calculatePercentPositionFromCoordinates(coords: Coordinates) {
+	if (!coords) return '';
 
-	const x = Math.round( coords.x * 100 );
-	const y = Math.round( coords.y * 100 );
+	const x = Math.round(coords.x * 100);
+	const y = Math.round(coords.y * 100);
 
-	return `${ x }% ${ y }%`;
+	return `${x}% ${y}%`;
 }
 
 /**
  * Given x and y coordinates between 0 and 1 returns a CSS `objectPosition`.
  */
-export function calculateBackgroundImagePosition( coords: Coordinates ) {
-	if ( ! coords ) return {};
+export function calculateBackgroundImagePosition(coords: Coordinates) {
+	if (!coords) return {};
 
 	return {
-		objectPosition: calculatePercentPositionFromCoordinates( coords ),
+		objectPosition: calculatePercentPositionFromCoordinates(coords),
 	};
 }
 
@@ -41,7 +41,7 @@ export function calculateBackgroundImagePosition( coords: Coordinates ) {
  * It outputs styles for either an `img` element or a `div` with a background,
  * depending on what is needed.
  */
-export function getBackgroundImageStyles( {
+export function getBackgroundImageStyles({
 	focalPoint,
 	imageFit,
 	isImgElement,
@@ -53,27 +53,27 @@ export function getBackgroundImageStyles( {
 	isImgElement: boolean;
 	isRepeated: boolean;
 	url: string;
-} ) {
+}) {
 	let styles = {};
 
-	if ( isImgElement ) {
+	if (isImgElement) {
 		styles = {
 			...styles,
-			...calculateBackgroundImagePosition( focalPoint ),
+			...calculateBackgroundImagePosition(focalPoint),
 			objectFit: imageFit,
 		};
 	} else {
 		styles = {
 			...styles,
-			...( url && {
-				backgroundImage: `url(${ url })`,
-			} ),
+			...(url && {
+				backgroundImage: `url(${url})`,
+			}),
 			backgroundPosition:
-				calculatePercentPositionFromCoordinates( focalPoint ),
-			...( ! isRepeated && {
+				calculatePercentPositionFromCoordinates(focalPoint),
+			...(!isRepeated && {
 				backgroundRepeat: 'no-repeat',
 				backgroundSize: imageFit === 'cover' ? imageFit : 'auto',
-			} ),
+			}),
 		};
 	}
 
@@ -83,8 +83,8 @@ export function getBackgroundImageStyles( {
 /**
  * Generates the CSS class prefix for scoping elements to a block.
  */
-export function getClassPrefixFromName( blockName: string ) {
-	return `wc-block-${ blockName.split( '/' )[ 1 ] }`;
+export function getClassPrefixFromName(blockName: string) {
+	return `wc-block-${blockName.split('/')[1]}`;
 }
 
 /**
@@ -93,10 +93,10 @@ export function getClassPrefixFromName( blockName: string ) {
  * @param ratio Selected opacity from 0 to 100.
  * @return The class name, if applicable (not used for ratio 0 or 50).
  */
-export function dimRatioToClass( ratio: number ) {
+export function dimRatioToClass(ratio: number) {
 	return ratio === 0 || ratio === 50
 		? null
-		: `has-background-dim-${ 10 * Math.round( ratio / 10 ) }`;
+		: `has-background-dim-${10 * Math.round(ratio / 10)}`;
 }
 
 /**
@@ -105,23 +105,23 @@ export function dimRatioToClass( ratio: number ) {
  * @param {string} name current item name.
  * @return {string} The description message for unavailable item.
  */
-export function getInvalidItemDescription( name: string ): string {
+export function getInvalidItemDescription(name: string): string {
 	return name === BLOCK_NAMES.featuredProduct
 		? __(
 				'Previously selected product is no longer available',
 				'woocommerce'
-		  )
+			)
 		: __(
 				'Previously selected category is no longer available',
 				'woocommerce'
-		  );
+			);
 }
 
 /**
  * Determines whether the background color behind an image will be visible,
  * based on the image's transparency, repetition, fit, and container size.
  */
-export const getBackgroundColorVisibilityStatus = ( {
+export const getBackgroundColorVisibilityStatus = ({
 	isImageBgTransparent,
 	originalImgDimension,
 	parentContainerDimension,
@@ -133,8 +133,8 @@ export const getBackgroundColorVisibilityStatus = ( {
 	parentContainerDimension: BgImageDimensions;
 	isRepeated: boolean;
 	imageFit: 'cover' | 'none';
-} ) => {
-	if ( isImageBgTransparent ) {
+}) => {
+	if (isImageBgTransparent) {
 		return {
 			isBackgroundVisible: true,
 			message: null,
@@ -142,8 +142,8 @@ export const getBackgroundColorVisibilityStatus = ( {
 	}
 
 	// Checks if bg-image is not transparent and repeated all-over parent div or covers available parent div space.
-	if ( ! isImageBgTransparent && ( isRepeated || imageFit === 'cover' ) ) {
-		if ( isRepeated ) {
+	if (!isImageBgTransparent && (isRepeated || imageFit === 'cover')) {
+		if (isRepeated) {
 			return {
 				isBackgroundVisible: false,
 				message: __(
@@ -164,7 +164,7 @@ export const getBackgroundColorVisibilityStatus = ( {
 
 	// Checks if bg-image is not transparent and original-bg-image size is bigger than parent container's available space.
 	if (
-		! isImageBgTransparent &&
+		!isImageBgTransparent &&
 		originalImgDimension.height >= parentContainerDimension.height &&
 		originalImgDimension.width >= parentContainerDimension.width
 	) {

@@ -3,8 +3,8 @@
  *
  * @param {string} id Icon ID.
  */
-const getIconClassName = ( id: string ): string => {
-	return `wc-block-components-payment-method-icon wc-block-components-payment-method-icon--${ id }`;
+const getIconClassName = (id: string): string => {
+	return `wc-block-components-payment-method-icon wc-block-components-payment-method-icon--${id}`;
 };
 
 interface PaymentMethodIconProps {
@@ -20,15 +20,15 @@ interface PaymentMethodIconProps {
  * @param {string|null} props.src Optional src value for icon.
  * @param {string}      props.alt Optional alt value for icon.
  */
-const PaymentMethodIcon = ( {
+const PaymentMethodIcon = ({
 	id,
 	src = null,
 	alt = '',
-}: PaymentMethodIconProps ): JSX.Element | null => {
-	if ( ! src ) {
+}: PaymentMethodIconProps): JSX.Element | null => {
+	if (!src) {
 		return null;
 	}
-	return <img className={ getIconClassName( id ) } src={ src } alt={ alt } />;
+	return <img className={getIconClassName(id)} src={src} alt={alt} />;
 };
 
 export default PaymentMethodIcon;

@@ -21,7 +21,7 @@ import { noop } from 'lodash';
 import './style.scss';
 
 const SHOW_CLASS = 'highlight-tooltip__show';
-function HighlightTooltip( {
+function HighlightTooltip({
 	title,
 	closeButtonText,
 	content,
@@ -32,103 +32,101 @@ function HighlightTooltip( {
 	onShow = noop,
 	useAnchor = false,
 	shouldCloseOnClickOutside = true,
-} ) {
-	const [ showHighlight, setShowHighlight ] = useState(
-		delay > 0 ? null : show
-	);
-	const [ node, setNode ] = useState( null );
-	const showTooltip = ( container ) => {
-		if ( container ) {
-			container.classList.add( SHOW_CLASS );
+}) {
+	const [showHighlight, setShowHighlight] = useState(delay > 0 ? null : show);
+	const [node, setNode] = useState(null);
+	const showTooltip = (container) => {
+		if (container) {
+			container.classList.add(SHOW_CLASS);
 		}
-		setShowHighlight( true );
+		setShowHighlight(true);
 		onShow();
 	};
 
-	const triggerShowTooltip = ( container ) => {
+	const triggerShowTooltip = (container) => {
 		let timeoutId = null;
-		if ( delay > 0 ) {
-			timeoutId = setTimeout( () => {
+		if (delay > 0) {
+			timeoutId = setTimeout(() => {
 				timeoutId = null;
-				showTooltip( container );
-			}, delay );
-		} else if ( ! showHighlight ) {
-			showTooltip( container );
+				showTooltip(container);
+			}, delay);
+		} else if (!showHighlight) {
+			showTooltip(container);
 		}
 		return timeoutId;
 	};
 
-	useEffect( () => {
-		const element = document.getElementById( id );
+	useEffect(() => {
+		const element = document.getElementById(id);
 		let container, parent;
-		if ( element && ! node ) {
+		if (element && !node) {
 			// Add tooltip container
-			if ( ! useAnchor ) {
+			if (!useAnchor) {
 				parent = element.parentElement;
 			} else {
-				parent = document.createElement( 'div' );
-				document.body.appendChild( parent );
+				parent = document.createElement('div');
+				document.body.appendChild(parent);
 			}
-			container = document.createElement( 'div' );
-			container.classList.add( 'highlight-tooltip__container' );
-			parent.appendChild( container );
-			setNode( container );
+			container = document.createElement('div');
+			container.classList.add('highlight-tooltip__container');
+			parent.appendChild(container);
+			setNode(container);
 		}
-		const timeoutId = triggerShowTooltip( container );
+		const timeoutId = triggerShowTooltip(container);
 
 		return () => {
-			if ( container ) {
+			if (container) {
 				const parentElement = container.parentElement;
-				parentElement.removeChild( container );
-				if ( useAnchor ) {
+				parentElement.removeChild(container);
+				if (useAnchor) {
 					parentElement.remove();
 				}
 			}
-			if ( timeoutId ) {
-				clearTimeout( timeoutId );
+			if (timeoutId) {
+				clearTimeout(timeoutId);
 			}
 		};
-	}, [] );
+	}, []);
 
-	useEffect( () => {
-		if ( ! showHighlight && node ) {
-			node.classList.remove( SHOW_CLASS );
+	useEffect(() => {
+		if (!showHighlight && node) {
+			node.classList.remove(SHOW_CLASS);
 		}
-	}, [ showHighlight ] );
+	}, [showHighlight]);
 
-	useEffect( () => {
-		if ( show !== showHighlight && showHighlight !== null && node ) {
-			setShowHighlight( show );
-			if ( ! show ) {
-				node.classList.remove( SHOW_CLASS );
-			} else if ( node ) {
-				triggerShowTooltip( node );
+	useEffect(() => {
+		if (show !== showHighlight && showHighlight !== null && node) {
+			setShowHighlight(show);
+			if (!show) {
+				node.classList.remove(SHOW_CLASS);
+			} else if (node) {
+				triggerShowTooltip(node);
 			}
 		}
-	}, [ show ] );
+	}, [show]);
 
 	const triggerClose = () => {
-		setShowHighlight( false );
-		if ( onClose ) {
+		setShowHighlight(false);
+		if (onClose) {
 			onClose();
 		}
 	};
 
-	if ( ! node ) {
+	if (!node) {
 		return null;
 	}
 
 	return createPortal(
 		<div className="highlight-tooltip__portal">
-			{ showHighlight ? (
+			{showHighlight ? (
 				<>
 					{
 						/* eslint-disable jsx-a11y/no-static-element-interactions */
 						<div
 							className="highlight-tooltip__overlay"
-							onMouseDown={ ( event ) =>
+							onMouseDown={(event) =>
 								shouldCloseOnClickOutside
-									? setShowHighlight( false )
+									? setShowHighlight(false)
 									: event.stopPropagation()
 							}
 						/>
@@ -136,34 +134,34 @@ function HighlightTooltip( {
 					}
 					<Popover
 						className="highlight-tooltip__popover"
-						noArrow={ false }
-						anchor={ document.getElementById( id ) }
+						noArrow={false}
+						anchor={document.getElementById(id)}
 						focusOnMount="container"
 					>
 						<Card size="medium">
 							<CardHeader>
-								{ title }
+								{title}
 								<Button
 									isSmall
-									onClick={ triggerClose }
-									icon={ close }
+									onClick={triggerClose}
+									icon={close}
 								/>
 							</CardHeader>
-							<CardBody>{ content || null }</CardBody>
-							<CardFooter isBorderless={ true }>
+							<CardBody>{content || null}</CardBody>
+							<CardFooter isBorderless={true}>
 								<Button
 									size="small"
 									isPrimary
-									onClick={ triggerClose }
+									onClick={triggerClose}
 								>
-									{ closeButtonText ||
-										__( 'Close', 'woocommerce' ) }
+									{closeButtonText ||
+										__('Close', 'woocommerce')}
 								</Button>
 							</CardFooter>
 						</Card>
 					</Popover>
 				</>
-			) : null }
+			) : null}
 		</div>,
 		node
 	);
@@ -185,7 +183,7 @@ HighlightTooltip.propTypes = {
 	/**
 	 * Content of the popup, can be either text or react element.
 	 */
-	content: PropTypes.oneOfType( [ PropTypes.string, PropTypes.node ] ),
+	content: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
 	/**
 	 * If to show the popup, defaults to true.
 	 */

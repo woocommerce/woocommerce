@@ -27,37 +27,37 @@ export const dispatchEvent = (
 		detail = {},
 	}: DispatchedEventProperties
 ): void => {
-	if ( ! CustomEvent ) {
+	if (!CustomEvent) {
 		return;
 	}
-	if ( ! element ) {
+	if (!element) {
 		element = document.body;
 	}
-	const event = new CustomEvent( name, {
+	const event = new CustomEvent(name, {
 		bubbles,
 		cancelable,
 		detail,
-	} );
-	element.dispatchEvent( event );
+	});
+	element.dispatchEvent(event);
 };
 
-export const triggerProductListRenderedEvent = ( payload: {
+export const triggerProductListRenderedEvent = (payload: {
 	collection?: CoreCollectionNames | string;
-} ) => {
-	dispatchEvent( 'wc-blocks_product_list_rendered', {
+}) => {
+	dispatchEvent('wc-blocks_product_list_rendered', {
 		bubbles: true,
 		cancelable: true,
 		detail: payload,
-	} );
+	});
 };
 
-export const triggerViewedProductEvent = ( payload: {
+export const triggerViewedProductEvent = (payload: {
 	collection?: CoreCollectionNames | string;
 	productId: number;
-} ): void => {
-	dispatchEvent( 'wc-blocks_viewed_product', {
+}): void => {
+	dispatchEvent('wc-blocks_viewed_product', {
 		bubbles: true,
 		cancelable: true,
 		detail: payload,
-	} );
+	});
 };

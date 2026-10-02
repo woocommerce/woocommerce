@@ -38,40 +38,40 @@ function isValidFilterOptionItem(
 	);
 }
 
-function getFilterLabel( item: ValidFilterOptionItem ): string {
+function getFilterLabel(item: ValidFilterOptionItem): string {
 	const label = item.ariaLabel ?? item.label;
 	return typeof label === 'string' && label.length > 0 ? label : item.value;
 }
 
-function selectFilter( item: ValidFilterOptionItem ) {
-	const context = getContext< ProductFiltersContext >();
+function selectFilter(item: ValidFilterOptionItem) {
+	const context = getContext<ProductFiltersContext>();
 	const newActiveFilter: ActiveFilterItem = {
 		value: item.value,
 		type: item.type,
 		activeLabel: context.activeLabelTemplate.replace(
 			'{{label}}',
-			getFilterLabel( item )
+			getFilterLabel(item)
 		),
 	};
-	if ( item.attributeQueryType ) {
+	if (item.attributeQueryType) {
 		newActiveFilter.attributeQueryType = item.attributeQueryType;
 	}
 	const newActiveFilters = context.activeFilters.filter(
-		( activeFilter ) =>
-			! (
+		(activeFilter) =>
+			!(
 				activeFilter.value === newActiveFilter.value &&
 				activeFilter.type === newActiveFilter.type
 			)
 	);
 
-	newActiveFilters.push( newActiveFilter );
+	newActiveFilters.push(newActiveFilter);
 
 	context.activeFilters = newActiveFilters;
 }
 
-function unselectFilter( item: ValidFilterOptionItem ) {
+function unselectFilter(item: ValidFilterOptionItem) {
 	actions.removeActiveFiltersBy(
-		( activeFilter ) =>
+		(activeFilter) =>
 			activeFilter.type === item.type && activeFilter.value === item.value
 	);
 }
@@ -79,66 +79,66 @@ function unselectFilter( item: ValidFilterOptionItem ) {
 const productFiltersStore = {
 	state: {
 		get params() {
-			const params: Record< string, string > = {};
+			const params: Record<string, string> = {};
 
-			function addParam( key: string, value: string ) {
-				if ( key in params && params[ key ].length > 0 )
-					return ( params[ key ] = `${ params[ key ] },${ value }` );
-				params[ key ] = value;
+			function addParam(key: string, value: string) {
+				if (key in params && params[key].length > 0)
+					return (params[key] = `${params[key]},${value}`);
+				params[key] = value;
 			}
 
-			const config = getConfig( BLOCK_NAME );
+			const config = getConfig(BLOCK_NAME);
 			const taxonomyParamsMap = config?.taxonomyParamsMap || {};
 
-			state.activeFilters.forEach( ( filter ) => {
+			state.activeFilters.forEach((filter) => {
 				// todo: refactor this to use params data from Automattic\WooCommerce\Internal\ProductFilters\Params.
 				const { type, value } = filter;
 
-				if ( ! value ) return;
+				if (!value) return;
 
-				if ( type === 'price' ) {
-					const [ min, max ] = value.split( '|' );
-					if ( min ) params.min_price = min;
-					if ( max ) params.max_price = max;
+				if (type === 'price') {
+					const [min, max] = value.split('|');
+					if (min) params.min_price = min;
+					if (max) params.max_price = max;
 				}
 
-				if ( type === 'status' ) {
-					addParam( 'filter_stock_status', value );
+				if (type === 'status') {
+					addParam('filter_stock_status', value);
 				}
 
-				if ( type === 'rating' ) {
-					addParam( `rating_filter`, value );
+				if (type === 'rating') {
+					addParam(`rating_filter`, value);
 				}
 
-				if ( type.includes( 'attribute' ) ) {
-					const [ , slug ] = type.split( '/' );
-					addParam( `filter_${ slug }`, value );
-					params[ `query_type_${ slug }` ] =
+				if (type.includes('attribute')) {
+					const [, slug] = type.split('/');
+					addParam(`filter_${slug}`, value);
+					params[`query_type_${slug}`] =
 						filter.attributeQueryType || 'or';
 				}
 
-				if ( type.includes( 'taxonomy' ) ) {
-					const [ , taxonomy ] = type.split( '/' );
-					const paramKey = taxonomyParamsMap[ taxonomy ];
-					addParam( paramKey, value );
+				if (type.includes('taxonomy')) {
+					const [, taxonomy] = type.split('/');
+					const paramKey = taxonomyParamsMap[taxonomy];
+					addParam(paramKey, value);
 				}
-			} );
+			});
 			return params;
 		},
 		get activeFilters() {
-			const { activeFilters } = getContext< ProductFiltersContext >();
+			const { activeFilters } = getContext<ProductFiltersContext>();
 			return activeFilters
-				.filter( ( item ) => !! item.value )
-				.sort( ( a, b ) => {
+				.filter((item) => !!item.value)
+				.sort((a, b) => {
 					return a.activeLabel
 						.toLowerCase()
-						.localeCompare( b.activeLabel.toLowerCase() );
-				} )
-				.map( ( item ) => ( {
+						.localeCompare(b.activeLabel.toLowerCase());
+				})
+				.map((item) => ({
 					...item,
-					activeLabel: decodeHtmlEntities( item.activeLabel ),
-					uid: `${ item.type }/${ item.value }`,
-				} ) );
+					activeLabel: decodeHtmlEntities(item.activeLabel),
+					uid: `${item.type}/${item.value}`,
+				}));
 		},
 		get selectableItems() {
 			// Items are server-owned (narrow on every navigation); read
@@ -146,24 +146,24 @@ const productFiltersStore = {
 			// `getContext()` soft-merges and would keep the stale client
 			// snapshot.
 			const server = getServerContext
-				? getServerContext< ProductFiltersContext >()
-				: getContext< ProductFiltersContext >();
+				? getServerContext<ProductFiltersContext>()
+				: getContext<ProductFiltersContext>();
 			const items = server.items;
-			if ( ! Array.isArray( items ) ) return [];
-			return items.map( ( item ) => ( {
+			if (!Array.isArray(items)) return [];
+			return items.map((item) => ({
 				...item,
 				selected: state.activeFilters.some(
-					( filter ) =>
+					(filter) =>
 						filter.type === item.type && filter.value === item.value
 				),
-			} ) );
+			}));
 		},
 	},
 	actions: {
 		openOverlay: () => {
-			const context = getContext< ProductFiltersContext >();
+			const context = getContext<ProductFiltersContext>();
 			context.isOverlayOpened = true;
-			if ( document.getElementById( 'wpadminbar' ) ) {
+			if (document.getElementById('wpadminbar')) {
 				const scrollTop = (
 					document.documentElement ||
 					document.body.parentNode ||
@@ -171,71 +171,69 @@ const productFiltersStore = {
 				).scrollTop;
 				document.body.style.setProperty(
 					'--adminbar-mobile-padding',
-					`max(calc(var(--wp-admin--admin-bar--height) - ${ scrollTop }px), 0px)`
+					`max(calc(var(--wp-admin--admin-bar--height) - ${scrollTop}px), 0px)`
 				);
 			}
 		},
 		closeOverlay: () => {
-			const context = getContext< ProductFiltersContext >();
+			const context = getContext<ProductFiltersContext>();
 			context.isOverlayOpened = false;
 		},
-		closeOverlayOnBackdrop: ( event: MouseEvent ) => {
-			if ( event.target === event.currentTarget ) {
+		closeOverlayOnBackdrop: (event: MouseEvent) => {
+			if (event.target === event.currentTarget) {
 				actions.closeOverlay();
 			}
 		},
-		closeOverlayOnEscape: ( event: KeyboardEvent ) => {
-			const context = getContext< ProductFiltersContext >();
-			if ( context.isOverlayOpened && event.key === 'Escape' ) {
+		closeOverlayOnEscape: (event: KeyboardEvent) => {
+			const context = getContext<ProductFiltersContext>();
+			if (context.isOverlayOpened && event.key === 'Escape') {
 				actions.closeOverlay();
 			}
 		},
 		removeActiveFiltersBy: (
-			callback: ( item: ActiveFilterItem ) => boolean
+			callback: (item: ActiveFilterItem) => boolean
 		) => {
-			const context = getContext< ProductFiltersContext >();
+			const context = getContext<ProductFiltersContext>();
 			context.activeFilters = context.activeFilters.filter(
-				( item ) => ! callback( item )
+				(item) => !callback(item)
 			);
 		},
-		toggle: ( itemArg?: FilterOptionItem | Event ) => {
-			const context = getContext< ProductFiltersContext >();
+		toggle: (itemArg?: FilterOptionItem | Event) => {
+			const context = getContext<ProductFiltersContext>();
 			const item =
-				itemArg && ! ( itemArg instanceof Event )
-					? itemArg
-					: context.item;
-			if ( ! item || ! isValidFilterOptionItem( item ) ) return;
+				itemArg && !(itemArg instanceof Event) ? itemArg : context.item;
+			if (!item || !isValidFilterOptionItem(item)) return;
 			const isSelected = state.activeFilters.some(
-				( f ) => f.type === item.type && f.value === item.value
+				(f) => f.type === item.type && f.value === item.value
 			);
-			if ( isSelected ) {
-				unselectFilter( item );
+			if (isSelected) {
+				unselectFilter(item);
 			} else {
-				selectFilter( item );
+				selectFilter(item);
 			}
 			void actions.navigate();
 		},
 		*navigate() {
 			const context = getServerContext
-				? getServerContext< ProductFiltersContext >()
-				: getContext< ProductFiltersContext >();
+				? getServerContext<ProductFiltersContext>()
+				: getContext<ProductFiltersContext>();
 
-			const config = getConfig( BLOCK_NAME );
-			const url = new URL( config.canonicalUrl );
+			const config = getConfig(BLOCK_NAME);
+			const url = new URL(config.canonicalUrl);
 			const { searchParams } = url;
 
-			for ( const key in context.params ) {
-				searchParams.delete( key );
+			for (const key in context.params) {
+				searchParams.delete(key);
 			}
 
-			for ( const key in state.params ) {
-				const value = state.params[ key ];
+			for (const key in state.params) {
+				const value = state.params[key];
 				let decodedValue = value;
 
 				try {
-					decodedValue = decodeURIComponent( value );
-				} catch ( error ) {
-					if ( error instanceof URIError ) {
+					decodedValue = decodeURIComponent(value);
+				} catch (error) {
+					if (error instanceof URIError) {
 						// eslint-disable-next-line no-console
 						console.warn(
 							'woocommerce/product-filters: Failed to decode filter parameter',
@@ -245,10 +243,10 @@ const productFiltersStore = {
 					}
 				}
 
-				searchParams.set( key, decodedValue );
+				searchParams.set(key, decodedValue);
 			}
 
-			if ( window.location.href === url.href ) {
+			if (window.location.href === url.href) {
 				return;
 			}
 
@@ -260,21 +258,21 @@ const productFiltersStore = {
 					? context.forcePageReload
 					: config?.forcePageReload;
 
-			if ( forcePageReload ) {
-				reload( url.href );
+			if (forcePageReload) {
+				reload(url.href);
 				return;
 			}
 
 			const routerModule: typeof import('@wordpress/interactivity-router') =
-				yield import( '@wordpress/interactivity-router' );
+				yield import('@wordpress/interactivity-router');
 
-			yield routerModule.actions.navigate( url.href );
+			yield routerModule.actions.navigate(url.href);
 		},
 	},
 	callbacks: {
 		initColors: () => {
 			const el = getElement();
-			if ( ! el.ref ) return;
+			if (!el.ref) return;
 
 			const style = el.ref.style;
 			const hasBg = style.getPropertyValue(
@@ -284,48 +282,48 @@ const productFiltersStore = {
 				'--wc-product-filters-text-color'
 			);
 
-			if ( ! hasBg ) {
-				const bg = getClosestColor( el.ref, 'backgroundColor' );
-				if ( bg ) {
+			if (!hasBg) {
+				const bg = getClosestColor(el.ref, 'backgroundColor');
+				if (bg) {
 					style.setProperty(
 						'--wc-product-filters-background-color',
 						bg
 					);
 				}
 			}
-			if ( ! hasFg ) {
-				const fg = getClosestColor( el.ref, 'color' );
-				if ( fg ) {
-					style.setProperty( '--wc-product-filters-text-color', fg );
+			if (!hasFg) {
+				const fg = getClosestColor(el.ref, 'color');
+				if (fg) {
+					style.setProperty('--wc-product-filters-text-color', fg);
 				}
 			}
 		},
 		scrollLimit: () => {
-			const { isOverlayOpened } = getContext< ProductFiltersContext >();
-			if ( isOverlayOpened ) {
+			const { isOverlayOpened } = getContext<ProductFiltersContext>();
+			if (isOverlayOpened) {
 				document.body.style.overflow = 'hidden';
 			} else {
 				document.body.style.overflow = 'auto';
 			}
 		},
 		syncActiveFiltersWithServer: () => {
-			if ( ! getServerContext ) return;
-			const context = getContext< ProductFiltersContext >();
-			const serverContext = getServerContext< ProductFiltersContext >();
+			if (!getServerContext) return;
+			const context = getContext<ProductFiltersContext>();
+			const serverContext = getServerContext<ProductFiltersContext>();
 
-			context.activeFilters = Array.isArray( serverContext.activeFilters )
-				? serverContext.activeFilters.map( ( item ) => ( { ...item } ) )
+			context.activeFilters = Array.isArray(serverContext.activeFilters)
+				? serverContext.activeFilters.map((item) => ({ ...item }))
 				: [];
 		},
 	},
 };
 
 // Compile-time protocol conformance check.
-productFiltersStore satisfies SelectableItemsParentStore< FilterItemFields >;
+productFiltersStore satisfies SelectableItemsParentStore<FilterItemFields>;
 
 export type ProductFiltersStore = typeof productFiltersStore;
 
-const { state, actions } = store< ProductFiltersStore >(
+const { state, actions } = store<ProductFiltersStore>(
 	BLOCK_NAME,
 	productFiltersStore
 );

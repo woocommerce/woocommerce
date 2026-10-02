@@ -13,7 +13,7 @@ import StarImage from './shipping-providers/assets/star.svg';
 export const SinglePartnerFeatures = [
 	{
 		icon: TimerImage,
-		title: __( 'Save time', 'woocommerce' ),
+		title: __('Save time', 'woocommerce'),
 		description: __(
 			'Automatically import order information to quickly print your labels.',
 			'woocommerce'
@@ -21,7 +21,7 @@ export const SinglePartnerFeatures = [
 	},
 	{
 		icon: DiscountImage,
-		title: __( 'Save money', 'woocommerce' ),
+		title: __('Save money', 'woocommerce'),
 		description: __(
 			'Shop for the best shipping rates, and access pre-negotiated discounted rates.',
 			'woocommerce'
@@ -29,7 +29,7 @@ export const SinglePartnerFeatures = [
 	},
 	{
 		icon: StarImage,
-		title: __( 'Wow your shoppers', 'woocommerce' ),
+		title: __('Wow your shoppers', 'woocommerce'),
 		description: __(
 			'Keep your customers informed with tracking notifications.',
 			'woocommerce'

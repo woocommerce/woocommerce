@@ -18,20 +18,20 @@
  */
 export const REVIEW_DRAWER_PARAM = 'wc_email_review_drawer';
 
-export function buildEmailEditorReviewUrl( postId: number ): string {
-	if ( ! Number.isInteger( postId ) || postId <= 0 ) {
+export function buildEmailEditorReviewUrl(postId: number): string {
+	if (!Number.isInteger(postId) || postId <= 0) {
 		throw new Error(
-			`buildEmailEditorReviewUrl: postId must be a positive integer (got ${ String(
+			`buildEmailEditorReviewUrl: postId must be a positive integer (got ${String(
 				postId
-			) }).`
+			)}).`
 		);
 	}
 
-	const params = new URLSearchParams( {
-		post: String( postId ),
+	const params = new URLSearchParams({
+		post: String(postId),
 		action: 'edit',
-		[ REVIEW_DRAWER_PARAM ]: '1',
-	} );
+		[REVIEW_DRAWER_PARAM]: '1',
+	});
 
-	return `post.php?${ params.toString() }`;
+	return `post.php?${params.toString()}`;
 }

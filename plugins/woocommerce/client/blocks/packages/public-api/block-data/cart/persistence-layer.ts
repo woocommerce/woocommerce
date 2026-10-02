@@ -3,51 +3,49 @@
  */
 import type { Cart } from '@woocommerce/types';
 
-const getCookie = ( name: string ): string | Record< string, string > => {
+const getCookie = (name: string): string | Record<string, string> => {
 	const cookies = document.cookie
-		.split( ';' )
-		.reduce< Record< string, string > >( ( acc, cookieString ) => {
-			const [ key, value ] = cookieString
-				.split( '=' )
-				.map( ( s ) => s.trim() );
-			if ( key && value ) {
-				acc[ key ] = decodeURIComponent( value );
+		.split(';')
+		.reduce<Record<string, string>>((acc, cookieString) => {
+			const [key, value] = cookieString.split('=').map((s) => s.trim());
+			if (key && value) {
+				acc[key] = decodeURIComponent(value);
 			}
 			return acc;
-		}, {} );
-	return name ? cookies[ name ] || '' : cookies;
+		}, {});
+	return name ? cookies[name] || '' : cookies;
 };
 
 const hasValidHash = () => {
-	const sessionHash = getCookie( 'woocommerce_cart_hash' );
-	const cachedHash = window.localStorage?.getItem( 'storeApiCartHash' ) || '';
+	const sessionHash = getCookie('woocommerce_cart_hash');
+	const cachedHash = window.localStorage?.getItem('storeApiCartHash') || '';
 	return cachedHash === sessionHash;
 };
 
 export const hasCartSession = () => {
-	return !! getCookie( 'woocommerce_items_in_cart' );
+	return !!getCookie('woocommerce_items_in_cart');
 };
 
 export const isAddingToCart = () => {
-	return !! window.location?.search?.match( /add-to-cart/ );
+	return !!window.location?.search?.match(/add-to-cart/);
 };
 
 export const persistenceLayer = {
 	get: (): Cart | null => {
 		try {
-			if ( ! hasCartSession() || ! hasValidHash() ) {
+			if (!hasCartSession() || !hasValidHash()) {
 				return null;
 			}
 
-			const cached = window.localStorage?.getItem( 'storeApiCartData' );
+			const cached = window.localStorage?.getItem('storeApiCartData');
 
-			if ( ! cached ) {
+			if (!cached) {
 				return null;
 			}
 
-			const parsed: unknown = JSON.parse( cached );
+			const parsed: unknown = JSON.parse(cached);
 
-			if ( ! parsed || typeof parsed !== 'object' ) {
+			if (!parsed || typeof parsed !== 'object') {
 				return null;
 			}
 
@@ -62,7 +60,7 @@ export const persistenceLayer = {
 			return null;
 		}
 	},
-	set: ( cartData: Cart ) => {
+	set: (cartData: Cart) => {
 		// Wrap in try/catch for two reasons:
 		//
 		// 1. In Jest, when a jsdom `Window` is torn down between tests while
@@ -80,7 +78,7 @@ export const persistenceLayer = {
 		try {
 			window.localStorage?.setItem(
 				'storeApiCartData',
-				JSON.stringify( cartData )
+				JSON.stringify(cartData)
 			);
 		} catch {
 			// Intentionally empty — persistence is best-effort.

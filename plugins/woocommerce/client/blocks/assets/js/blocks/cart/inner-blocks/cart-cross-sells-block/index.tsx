@@ -30,18 +30,18 @@ export const createCrossSellsProductCollection = () => {
 			},
 			collection: 'woocommerce/product-collection/cross-sells',
 		},
-		createBlocksFromInnerBlocksTemplate( crossSells.innerBlocks )
+		createBlocksFromInnerBlocksTemplate(crossSells.innerBlocks)
 	);
 };
 
 // @ts-expect-error - blockName can be either string or object
-registerBlockType( 'woocommerce/cart-cross-sells-block', {
+registerBlockType('woocommerce/cart-cross-sells-block', {
 	apiVersion: metadata.apiVersion,
 	title: metadata.title,
 	icon: {
 		src: (
 			<Icon
-				icon={ column }
+				icon={column}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -52,9 +52,9 @@ registerBlockType( 'woocommerce/cart-cross-sells-block', {
 		to: [
 			{
 				type: 'block',
-				blocks: [ 'woocommerce/product-collection' ],
+				blocks: ['woocommerce/product-collection'],
 				transform: createCrossSellsProductCollection,
 			},
 		],
 	},
-} );
+});

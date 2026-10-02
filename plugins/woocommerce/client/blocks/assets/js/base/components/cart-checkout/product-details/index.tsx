@@ -11,7 +11,7 @@ import type { ProductResponseItemData } from '@woocommerce/types';
  */
 import './style.scss';
 
-const CONTENT_TAGS = [ 'a', 'b', 'em', 'i', 'strong', 'br', 'abbr', 'span' ];
+const CONTENT_TAGS = ['a', 'b', 'em', 'i', 'strong', 'br', 'abbr', 'span'];
 
 const CONTENT_ATTR = [
 	'target',
@@ -28,61 +28,61 @@ interface ProductDetailsProps {
 }
 
 // Component to display cart item data and variations.
-const ProductDetails = ( {
+const ProductDetails = ({
 	details = [],
-}: ProductDetailsProps ): JSX.Element | null => {
-	if ( ! Array.isArray( details ) ) {
+}: ProductDetailsProps): JSX.Element | null => {
+	if (!Array.isArray(details)) {
 		return null;
 	}
 
-	const filteredDetails = details.filter( ( detail ) => ! detail.hidden );
+	const filteredDetails = details.filter((detail) => !detail.hidden);
 
-	if ( filteredDetails.length === 0 ) {
+	if (filteredDetails.length === 0) {
 		return null;
 	}
 
 	return (
 		<div className="wc-block-components-product-details">
-			{ filteredDetails.map( ( detail, index ) => {
+			{filteredDetails.map((detail, index) => {
 				// Support both `key` and `name` props
 				const name = detail?.key || detail.name || '';
 				// Strip HTML tags from name for CSS class generation
-				const tempDiv = document.createElement( 'div' );
+				const tempDiv = document.createElement('div');
 				tempDiv.innerHTML = name;
 				const nameForClass =
 					tempDiv.textContent || tempDiv.innerText || '';
 				const className =
 					detail?.className ||
-					( nameForClass
-						? `wc-block-components-product-details__${ kebabCase(
+					(nameForClass
+						? `wc-block-components-product-details__${kebabCase(
 								nameForClass
-						  ) }`
-						: '' );
+							)}`
+						: '');
 
 				const isLast = index === filteredDetails.length - 1;
 
 				return (
 					<span
-						key={ name + ( detail.display || detail.value ) }
-						className={ className }
+						key={name + (detail.display || detail.value)}
+						className={className}
 					>
-						{ name && (
+						{name && (
 							<>
 								<span
 									className="wc-block-components-product-details__name"
-									dangerouslySetInnerHTML={ {
+									dangerouslySetInnerHTML={{
 										__html:
-											sanitizeHTML( name, {
+											sanitizeHTML(name, {
 												tags: CONTENT_TAGS,
 												attr: CONTENT_ATTR,
-											} ) + ':',
-									} }
-								/>{ ' ' }
+											}) + ':',
+									}}
+								/>{' '}
 							</>
-						) }
+						)}
 						<span
 							className="wc-block-components-product-details__value"
-							dangerouslySetInnerHTML={ {
+							dangerouslySetInnerHTML={{
 								__html: sanitizeHTML(
 									detail.display || detail.value,
 									{
@@ -90,12 +90,12 @@ const ProductDetails = ( {
 										attr: CONTENT_ATTR,
 									}
 								),
-							} }
+							}}
 						/>
-						{ ! isLast && <span aria-hidden="true"> / </span> }
+						{!isLast && <span aria-hidden="true"> / </span>}
 					</span>
 				);
-			} ) }
+			})}
 		</div>
 	);
 };

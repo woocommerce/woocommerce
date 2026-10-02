@@ -65,24 +65,21 @@ export interface FeaturedItemRequiredAttributes {
 	__woocommerceBlockVersion: number;
 }
 
-interface FeaturedCategoryRequiredAttributes
-	extends FeaturedItemRequiredAttributes {
+interface FeaturedCategoryRequiredAttributes extends FeaturedItemRequiredAttributes {
 	categoryId: number | 'preview';
 	productId: never;
 }
 
-interface FeaturedProductRequiredAttributes
-	extends FeaturedItemRequiredAttributes {
+interface FeaturedProductRequiredAttributes extends FeaturedItemRequiredAttributes {
 	categoryId: never;
 	productId: number | 'preview';
 }
 
-interface FeaturedItemRequiredProps< T > {
+interface FeaturedItemRequiredProps<T> {
 	attributes: (
-		| FeaturedCategoryRequiredAttributes
-		| FeaturedProductRequiredAttributes
+		FeaturedCategoryRequiredAttributes | FeaturedProductRequiredAttributes
 	) &
-		EditorBlock< T >[ 'attributes' ] & {
+		EditorBlock<T>['attributes'] & {
 			// This is hardcoded because border and color are not yet included
 			// in Gutenberg's official types.
 			style: {
@@ -93,36 +90,35 @@ interface FeaturedItemRequiredProps< T > {
 		};
 	isLoading: boolean;
 	canEditItem: boolean;
-	setAttributes: ( attrs: Partial< FeaturedItemRequiredAttributes > ) => void;
-	useEditingImage: [ boolean, Dispatch< SetStateAction< boolean > > ];
-	useEditMode: [ boolean, Dispatch< SetStateAction< boolean > > ];
+	setAttributes: (attrs: Partial<FeaturedItemRequiredAttributes>) => void;
+	useEditingImage: [boolean, Dispatch<SetStateAction<boolean>>];
+	useEditMode: [boolean, Dispatch<SetStateAction<boolean>>];
 }
 
-interface FeaturedCategoryProps< T > extends FeaturedItemRequiredProps< T > {
+interface FeaturedCategoryProps<T> extends FeaturedItemRequiredProps<T> {
 	category: WP_REST_API_Category;
 	product: never;
 }
 
-interface FeaturedProductProps< T > extends FeaturedItemRequiredProps< T > {
+interface FeaturedProductProps<T> extends FeaturedItemRequiredProps<T> {
 	category: never;
 	product: ProductResponseItem;
 }
 
-type FeaturedItemProps< T extends EditorBlock< T > > =
-	| ( T & FeaturedCategoryProps< T > )
-	| ( T & FeaturedProductProps< T > );
+type FeaturedItemProps<T extends EditorBlock<T>> =
+	(T & FeaturedCategoryProps<T>) | (T & FeaturedProductProps<T>);
 
 export const withFeaturedItem =
-	( {
+	({
 		emptyMessage,
 		icon,
 		label,
 		noSelectionButtonLabel,
-	}: WithFeaturedItemConfig ) =>
-	< T extends EditorBlock< T > >( Component: ComponentType< T > ) =>
-	( props: FeaturedItemProps< T > ) => {
-		const [ isEditingImage ] = props.useEditingImage;
-		const [ , setEditMode ] = props.useEditMode;
+	}: WithFeaturedItemConfig) =>
+	<T extends EditorBlock<T>>(Component: ComponentType<T>) =>
+	(props: FeaturedItemProps<T>) => {
+		const [isEditingImage] = props.useEditingImage;
+		const [, setEditMode] = props.useEditMode;
 
 		const {
 			attributes,
@@ -136,53 +132,53 @@ export const withFeaturedItem =
 		} = props;
 		const { mediaId, mediaSrc, isRepeated, imageFit } = attributes;
 		const item = category || product;
-		const [ backgroundImageSize, setBackgroundImageSize ] = useState( {} );
+		const [backgroundImageSize, setBackgroundImageSize] = useState({});
 		const {
 			backgroundImageSrc,
 			isImageBgTransparent,
 			originalImgDimension,
-		} = useBackgroundImage( {
+		} = useBackgroundImage({
 			item,
 			mediaId,
 			mediaSrc,
 			blockName: name,
-		} );
-		const featuredProductParentRef = useRef( null );
-		const [ parentContainerDimension, setParentContainerDimension ] =
-			useState< BgImageDimensions >( { height: 0, width: 0 } );
+		});
+		const featuredProductParentRef = useRef(null);
+		const [parentContainerDimension, setParentContainerDimension] =
+			useState<BgImageDimensions>({ height: 0, width: 0 });
 
-		useEffect( () => {
+		useEffect(() => {
 			// Observes the resizable block's dimension changes.
-			const observer = new ResizeObserver( ( entries ) => {
-				setParentContainerDimension( {
-					height: entries[ 0 ].contentRect.height,
-					width: entries[ 0 ].contentRect.width,
-				} );
-			} );
+			const observer = new ResizeObserver((entries) => {
+				setParentContainerDimension({
+					height: entries[0].contentRect.height,
+					width: entries[0].contentRect.width,
+				});
+			});
 
-			if ( isLoading === false ) {
+			if (isLoading === false) {
 				const element =
 					featuredProductParentRef.current as HTMLElement | null;
 
-				if ( ! element ) {
+				if (!element) {
 					return;
 				}
 
-				observer.observe( element );
+				observer.observe(element);
 			}
 
 			return () => observer.disconnect();
-		}, [ isLoading ] );
+		}, [isLoading]);
 
 		const backgroundColorVisibilityStatus = useMemo(
 			() =>
-				getBackgroundColorVisibilityStatus( {
+				getBackgroundColorVisibilityStatus({
 					isImageBgTransparent,
 					originalImgDimension,
 					parentContainerDimension,
 					isRepeated,
 					imageFit,
-				} ),
+				}),
 			[
 				parentContainerDimension,
 				originalImgDimension,
@@ -192,60 +188,57 @@ export const withFeaturedItem =
 			]
 		);
 
-		const className = getClassPrefixFromName( name );
+		const className = getClassPrefixFromName(name);
 
 		const onResize = useCallback(
-			( _event, _direction, elt ) => {
-				setAttributes( {
-					minHeight: parseInt( elt.style.height, 10 ),
-				} );
+			(_event, _direction, elt) => {
+				setAttributes({
+					minHeight: parseInt(elt.style.height, 10),
+				});
 			},
-			[ setAttributes ]
+			[setAttributes]
 		);
 
 		const renderNoItemContent = () => {
-			if ( ! canEditItem ) {
+			if (!canEditItem) {
 				return (
 					<p>
-						{ __(
-							'No product category is available.',
-							'woocommerce'
-						) }
+						{__('No product category is available.', 'woocommerce')}
 					</p>
 				);
 			}
 
 			return (
 				<>
-					<p>{ emptyMessage }</p>
-					<div style={ { flexBasis: '100%', height: '0' } }></div>
+					<p>{emptyMessage}</p>
+					<div style={{ flexBasis: '100%', height: '0' }}></div>
 					<button
 						type="button"
 						className="components-button is-secondary"
-						onClick={ () => setEditMode( true ) }
+						onClick={() => setEditMode(true)}
 					>
-						{ noSelectionButtonLabel }
+						{noSelectionButtonLabel}
 					</button>
 				</>
 			);
 		};
 
 		const renderInnerBlocks = () => {
-			if ( product ) {
+			if (product) {
 				const innerBlocksTemplate =
-					FEATURED_PRODUCT_DEFAULT_TEMPLATE( product );
+					FEATURED_PRODUCT_DEFAULT_TEMPLATE(product);
 				return (
 					<BlockContextProvider
-						value={ { postId: product.id, postType: 'product' } }
+						value={{ postId: product.id, postType: 'product' }}
 					>
 						<ProductDataContextProvider
-							product={ product }
-							isLoading={ isLoading }
+							product={product}
+							isLoading={isLoading}
 						>
-							<div className={ `${ className }__inner-blocks` }>
+							<div className={`${className}__inner-blocks`}>
 								<InnerBlocks
-									template={ innerBlocksTemplate }
-									templateLock={ false }
+									template={innerBlocksTemplate}
+									templateLock={false}
 								/>
 							</div>
 						</ProductDataContextProvider>
@@ -255,22 +248,22 @@ export const withFeaturedItem =
 
 			return (
 				<BlockContextProvider
-					value={ {
+					value={{
 						termId:
 							attributes.categoryId === 'preview'
 								? undefined
 								: category.id,
 						termTaxonomy: 'product_cat',
 						taxonomy: 'product_cat',
-					} }
+					}}
 				>
-					<div className={ `${ className }__inner-blocks` }>
+					<div className={`${className}__inner-blocks`}>
 						<InnerBlocks
-							template={ FEATURED_CATEGORY_DEFAULT_TEMPLATE(
+							template={FEATURED_CATEGORY_DEFAULT_TEMPLATE(
 								category,
-								! attributes.categoryId
-							) }
-							templateLock={ false }
+								!attributes.categoryId
+							)}
+							templateLock={false}
 						/>
 					</div>
 				</BlockContextProvider>
@@ -279,15 +272,15 @@ export const withFeaturedItem =
 
 		const renderNoItem = () => (
 			<Placeholder
-				className={ className }
-				icon={ <Icon icon={ icon } /> }
-				label={ label }
+				className={className}
+				icon={<Icon icon={icon} />}
+				label={label}
 			>
-				{ isLoading ? <Spinner /> : renderNoItemContent() }
+				{isLoading ? <Spinner /> : renderNoItemContent()}
 			</Placeholder>
 		);
 
-		const styleProps = useStyleProps( attributes );
+		const styleProps = useStyleProps(attributes);
 
 		const renderItem = () => {
 			const {
@@ -309,35 +302,35 @@ export const withFeaturedItem =
 						isSelected &&
 						attributes.categoryId !== 'preview' &&
 						attributes.productId !== 'preview',
-					'is-loading': ! item && isLoading,
-					'is-not-found': ! item && ! isLoading,
+					'is-loading': !item && isLoading,
+					'is-not-found': !item && !isLoading,
 					'has-background-dim': dimRatio !== 0,
 					'is-repeated': isRepeated,
 				},
-				dimRatioToClass( dimRatio ),
-				contentAlign !== 'center' && `has-${ contentAlign }-content`,
+				dimRatioToClass(dimRatio),
+				contentAlign !== 'center' && `has-${contentAlign}-content`,
 				styleProps.className
 			);
 
 			const containerStyle: React.CSSProperties = {
 				borderRadius: style?.border?.radius,
 				color: textColor
-					? `var(--wp--preset--color--${ textColor })`
+					? `var(--wp--preset--color--${textColor})`
 					: style?.color?.text,
 				boxSizing: 'border-box',
 				minHeight,
 				...styleProps.style,
 			};
 
-			const isImgElement = ! isRepeated && ! hasParallax;
+			const isImgElement = !isRepeated && !hasParallax;
 
-			const backgroundImageStyle = getBackgroundImageStyles( {
+			const backgroundImageStyle = getBackgroundImageStyles({
 				focalPoint,
 				imageFit,
 				isImgElement,
 				isRepeated,
 				url: backgroundImageSrc,
-			} );
+			});
 
 			const overlayStyle = {
 				background: overlayGradient,
@@ -347,64 +340,64 @@ export const withFeaturedItem =
 			return (
 				<>
 					<ConstrainedResizable
-						enable={ { bottom: true } }
-						onResize={ onResize }
-						showHandle={ isSelected }
-						style={ { minHeight } }
+						enable={{ bottom: true }}
+						onResize={onResize}
+						showHandle={isSelected}
+						style={{ minHeight }}
 					/>
 					<div
-						className={ containerClass }
-						ref={ featuredProductParentRef }
-						style={ containerStyle }
+						className={containerClass}
+						ref={featuredProductParentRef}
+						style={containerStyle}
 					>
-						<div className={ `${ className }__wrapper` }>
+						<div className={`${className}__wrapper`}>
 							<div
 								className="background-dim__overlay"
-								style={ overlayStyle }
+								style={overlayStyle}
 							/>
-							{ backgroundImageSrc &&
-								( isImgElement ? (
+							{backgroundImageSrc &&
+								(isImgElement ? (
 									<img
-										alt={ item.name }
-										className={ `${ className }__background-image` }
-										src={ backgroundImageSrc }
-										style={ backgroundImageStyle }
-										onLoad={ ( e ) => {
-											setBackgroundImageSize( {
+										alt={item.name}
+										className={`${className}__background-image`}
+										src={backgroundImageSrc}
+										style={backgroundImageStyle}
+										onLoad={(e) => {
+											setBackgroundImageSize({
 												height: e.currentTarget
 													?.naturalHeight,
 												width: e.currentTarget
 													?.naturalWidth,
-											} );
-										} }
+											});
+										}}
 									/>
 								) : (
 									<div
-										className={ clsx(
-											`${ className }__background-image`,
+										className={clsx(
+											`${className}__background-image`,
 											{
 												'has-parallax': hasParallax,
 											}
-										) }
-										style={ backgroundImageStyle }
+										)}
+										style={backgroundImageStyle}
 									/>
-								) ) }
-							{ renderInnerBlocks() }
+								))}
+							{renderInnerBlocks()}
 						</div>
 					</div>
 				</>
 			);
 		};
 
-		if ( ! item && isLoading && ! canEditItem ) {
+		if (!item && isLoading && !canEditItem) {
 			return null;
 		}
 
-		if ( isEditingImage ) {
+		if (isEditingImage) {
 			return (
 				<Component
-					{ ...props }
-					backgroundImageSize={ backgroundImageSize }
+					{...props}
+					backgroundImageSize={backgroundImageSize}
 					backgroundColorVisibilityStatus={
 						backgroundColorVisibilityStatus
 					}
@@ -415,13 +408,13 @@ export const withFeaturedItem =
 		return (
 			<>
 				<Component
-					{ ...props }
-					backgroundImageSize={ backgroundImageSize }
+					{...props}
+					backgroundImageSize={backgroundImageSize}
 					backgroundColorVisibilityStatus={
 						backgroundColorVisibilityStatus
 					}
 				/>
-				{ item ? renderItem() : renderNoItem() }
+				{item ? renderItem() : renderNoItem()}
 			</>
 		);
 	};

@@ -24,22 +24,22 @@ const {
 	screenId,
 } = window.wooProductUsageNotice;
 
-const container = document.createElement( 'div' );
-container.setAttribute( 'id', 'woo-product-usage-notice' );
+const container = document.createElement('div');
+container.setAttribute('id', 'woo-product-usage-notice');
 
-createRoot( document.body.appendChild( container ) ).render(
+createRoot(document.body.appendChild(container)).render(
 	<ProductUsageNoticeModal
-		renewUrl={ renewUrl }
-		subscribeUrl={ subscribeUrl }
-		productId={ productId }
-		productName={ productName }
-		productRegularPrice={ productRegularPrice }
-		dismissAction={ dismissAction }
-		dismissNonce={ dismissNonce }
-		remindLaterAction={ remindLaterAction }
-		remindLaterNonce={ remindLaterNonce }
-		colorScheme={ colorScheme }
-		subscriptionState={ subscriptionState }
-		screenId={ screenId }
+		renewUrl={renewUrl}
+		subscribeUrl={subscribeUrl}
+		productId={productId}
+		productName={productName}
+		productRegularPrice={productRegularPrice}
+		dismissAction={dismissAction}
+		dismissNonce={dismissNonce}
+		remindLaterAction={remindLaterAction}
+		remindLaterNonce={remindLaterNonce}
+		colorScheme={colorScheme}
+		subscriptionState={subscriptionState}
+		screenId={screenId}
 	/>
 );

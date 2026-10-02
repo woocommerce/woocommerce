@@ -19,10 +19,10 @@ type CardListProps = {
 	items: Card[];
 };
 
-const CardList = ( { items }: CardListProps ) => {
+const CardList = ({ items }: CardListProps) => {
 	return (
 		<div className="woocommerce-products-card-list">
-			<List items={ items } />
+			<List items={items} />
 		</div>
 	);
 };

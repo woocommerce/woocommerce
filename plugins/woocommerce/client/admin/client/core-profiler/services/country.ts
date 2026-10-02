@@ -22,25 +22,25 @@ export function getCountryStateOptions(
 	countries: Country[]
 ): CountryStateOption[] {
 	const countryStateOptions: CountryStateOption[] = countries.reduce(
-		( acc, country ) => {
-			if ( ! country.states.length ) {
-				acc.push( {
+		(acc, country) => {
+			if (!country.states.length) {
+				acc.push({
 					key: country.code,
-					label: decodeEntities( country.name ),
-				} );
+					label: decodeEntities(country.name),
+				});
 				return acc;
 			}
 
-			const countryStates = country.states.map( ( state ) => {
+			const countryStates = country.states.map((state) => {
 				return {
 					key: country.code + ':' + state.code,
 					label:
-						decodeEntities( country.name ) +
+						decodeEntities(country.name) +
 						' — ' +
-						decodeEntities( state.name ),
+						decodeEntities(state.name),
 				};
-			} );
-			acc.push( ...countryStates );
+			});
+			acc.push(...countryStates);
 
 			return acc;
 		},

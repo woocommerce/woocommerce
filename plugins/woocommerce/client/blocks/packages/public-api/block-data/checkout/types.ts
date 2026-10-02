@@ -13,11 +13,11 @@ import type { PaymentState } from '../payment/default-state';
 import type { CheckoutThunkArgs } from './thunks';
 
 export type CheckoutAfterProcessingWithErrorEventData = {
-	redirectUrl: CheckoutState[ 'redirectUrl' ];
-	orderId: CheckoutState[ 'orderId' ];
-	customerId: CheckoutState[ 'customerId' ];
-	orderNotes: CheckoutState[ 'orderNotes' ];
-	processingResponse: PaymentState[ 'paymentResult' ];
+	redirectUrl: CheckoutState['redirectUrl'];
+	orderId: CheckoutState['orderId'];
+	customerId: CheckoutState['customerId'];
+	orderNotes: CheckoutState['orderNotes'];
+	processingResponse: PaymentState['paymentResult'];
 };
 export type CheckoutAndPaymentNotices = {
 	checkoutNotices: WPNotice[];
@@ -28,22 +28,22 @@ export type CheckoutAndPaymentNotices = {
 /**
  * Type for emitAfterProcessingEventsType() thunk
  */
-export type emitAfterProcessingEventsType = ( {
+export type emitAfterProcessingEventsType = ({
 	notices,
 }: {
 	notices: CheckoutAndPaymentNotices;
-} ) => ( { select, dispatch, registry }: CheckoutThunkArgs ) => void;
+}) => ({ select, dispatch, registry }: CheckoutThunkArgs) => void;
 
 /**
  * Type for emitValidateEventType() thunk
  */
-export type emitValidateEventType = ( {
+export type emitValidateEventType = ({
 	setValidationErrors,
 }: {
 	setValidationErrors: (
-		errors: Record< string, FieldValidationStatus >
+		errors: Record<string, FieldValidationStatus>
 	) => void;
-} ) => ( { dispatch, registry }: CheckoutThunkArgs ) => void;
+}) => ({ dispatch, registry }: CheckoutThunkArgs) => void;
 
 export type CheckoutPutData = {
 	additional_fields?: AdditionalValues;

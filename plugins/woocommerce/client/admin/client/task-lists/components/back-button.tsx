@@ -17,31 +17,31 @@ export type BackButtonProps = {
 	title: string;
 };
 
-export const BackButton = ( { title }: BackButtonProps ) => {
-	const homeText = __( 'WooCommerce Home', 'woocommerce' );
+export const BackButton = ({ title }: BackButtonProps) => {
+	const homeText = __('WooCommerce Home', 'woocommerce');
 
 	const navigateHome = () => {
-		recordEvent( 'topbar_back_button', {
+		recordEvent('topbar_back_button', {
 			page_name: title,
-		} );
-		updateQueryString( {}, '/', {} );
+		});
+		updateQueryString({}, '/', {});
 	};
 
 	// if it's a task list page, render a back button to the homescreen
 	return (
-		<Tooltip text={ homeText }>
+		<Tooltip text={homeText}>
 			<div
-				tabIndex={ 0 }
+				tabIndex={0}
 				role="button"
 				data-testid="header-back-button"
 				className="woocommerce-layout__header-back-button"
-				onKeyDown={ ( { keyCode } ) => {
-					if ( keyCode === ENTER || keyCode === SPACE ) {
+				onKeyDown={({ keyCode }) => {
+					if (keyCode === ENTER || keyCode === SPACE) {
 						navigateHome();
 					}
-				} }
+				}}
 			>
-				<Icon icon={ chevronLeft } onClick={ navigateHome } />
+				<Icon icon={chevronLeft} onClick={navigateHome} />
 			</div>
 		</Tooltip>
 	);

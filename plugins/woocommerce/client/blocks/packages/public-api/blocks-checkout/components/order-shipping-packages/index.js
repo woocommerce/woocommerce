@@ -12,9 +12,9 @@ const slotName = '__experimentalOrderShippingPackages';
 const {
 	Fill: ExperimentalOrderShippingPackages,
 	Slot: OrderShippingPackagesSlot,
-} = createSlotFill( slotName );
+} = createSlotFill(slotName);
 
-const Slot = ( {
+const Slot = ({
 	className,
 	noResultsMessage,
 	renderOption,
@@ -24,14 +24,14 @@ const Slot = ( {
 	context,
 	collapsible,
 	showItems,
-} ) => {
+}) => {
 	return (
 		<OrderShippingPackagesSlot
-			className={ clsx(
+			className={clsx(
 				'wc-block-components-shipping-rates-control',
 				className
-			) }
-			fillProps={ {
+			)}
+			fillProps={{
 				collapse: collapsible,
 				collapsible,
 				showItems,
@@ -41,7 +41,7 @@ const Slot = ( {
 				cart,
 				components,
 				context,
-			} }
+			}}
 		/>
 	);
 };

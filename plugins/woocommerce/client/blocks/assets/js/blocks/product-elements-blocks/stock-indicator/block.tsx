@@ -20,7 +20,7 @@ import { useProductTypeSelector } from '../../../shared/stores/product-type-temp
 import type { BlockAttributes } from './types';
 import './style.scss';
 
-type Props = BlockAttributes & HTMLAttributes< HTMLDivElement >;
+type Props = BlockAttributes & HTMLAttributes<HTMLDivElement>;
 
 /**
  * Determines whether the stock indicator should be visible based on product type and availability.
@@ -36,23 +36,23 @@ const isStockIndicatorVisible = (
 	selectedProductType: string | undefined
 ) => {
 	// If we have product data, rely on availability text.
-	if ( product.id !== 0 ) {
+	if (product.id !== 0) {
 		return availabilityText !== '';
 	}
 
-	const productTypesWithoutStockIndicator = getSetting< string[] >(
+	const productTypesWithoutStockIndicator = getSetting<string[]>(
 		'productTypesWithoutStockIndicator',
-		[ 'external', 'grouped', 'variable' ]
+		['external', 'grouped', 'variable']
 	);
 
 	const productType = selectedProductType || product?.type;
 
-	return ! productTypesWithoutStockIndicator.includes( productType );
+	return !productTypesWithoutStockIndicator.includes(productType);
 };
 
-export const Block = ( props: Props ): JSX.Element | null => {
+export const Block = (props: Props): JSX.Element | null => {
 	const { className } = props;
-	const styleProps = useStyleProps( props );
+	const styleProps = useStyleProps(props);
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
 	const { text: availabilityText, class: availabilityClass } =
@@ -61,7 +61,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	const { current: currentProductType } = useProductTypeSelector();
 
 	if (
-		! isStockIndicatorVisible(
+		!isStockIndicatorVisible(
 			product,
 			availabilityText,
 			currentProductType?.slug
@@ -74,39 +74,36 @@ export const Block = ( props: Props ): JSX.Element | null => {
 
 	return (
 		<div
-			className={ clsx( className, {
-				[ `${ parentClassName }__stock-indicator` ]: parentClassName,
-				[ `wc-block-components-product-stock-indicator--${ availabilityClass }` ]:
+			className={clsx(className, {
+				[`${parentClassName}__stock-indicator`]: parentClassName,
+				[`wc-block-components-product-stock-indicator--${availabilityClass}`]:
 					availabilityClass,
 				'wc-block-components-product-stock-indicator--in-stock':
 					isInTemplate,
 				'wc-block-components-product-stock-indicator--low-stock':
-					!! lowStock,
+					!!lowStock,
 				// When inside All products block
-				...( props.isDescendantOfAllProducts && {
-					[ styleProps.className ]: styleProps.className,
-					'wc-block-components-product-stock-indicator wp-block-woocommerce-product-stock-indicator':
-						true,
-				} ),
-			} ) }
+				...(props.isDescendantOfAllProducts && {
+					[styleProps.className]: styleProps.className,
+					'wc-block-components-product-stock-indicator wp-block-woocommerce-product-stock-indicator': true,
+				}),
+			})}
 			// When inside All products block
-			{ ...( props.isDescendantOfAllProducts && {
+			{...(props.isDescendantOfAllProducts && {
 				style: styleProps.style,
-			} ) }
+			})}
 		>
-			{ isInTemplate
-				? __( 'In stock', 'woocommerce' )
-				: availabilityText }
+			{isInTemplate ? __('In stock', 'woocommerce') : availabilityText}
 		</div>
 	);
 };
 
-const StockIndicatorBlock: React.FC< Props > = ( props ) => {
+const StockIndicatorBlock: React.FC<Props> = (props) => {
 	const { product } = useProductDataContext();
-	if ( product.id === 0 ) {
-		return <Block { ...props } />;
+	if (product.id === 0) {
+		return <Block {...props} />;
 	}
-	return withProductDataContext( Block )( props );
+	return withProductDataContext(Block)(props);
 };
 
 export default StockIndicatorBlock;

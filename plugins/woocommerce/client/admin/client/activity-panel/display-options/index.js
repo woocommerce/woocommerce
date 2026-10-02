@@ -21,7 +21,7 @@ import { TwoColumnsIcon } from './icons/two-columns';
 import { isTaskListActive } from '../../hooks/use-tasklists-state';
 import { isFeatureEnabled } from '~/utils/features';
 
-const { Fill, Slot } = createSlotFill( 'DisplayOptions' );
+const { Fill, Slot } = createSlotFill('DisplayOptions');
 
 Fill.Slot = Slot;
 
@@ -33,7 +33,7 @@ const LAYOUTS = [
 		label: (
 			<>
 				<SingleColumnIcon />
-				{ __( 'Single column', 'woocommerce' ) }
+				{__('Single column', 'woocommerce')}
 			</>
 		),
 	},
@@ -42,66 +42,66 @@ const LAYOUTS = [
 		label: (
 			<>
 				<TwoColumnsIcon />
-				{ __( 'Two columns', 'woocommerce' ) }
+				{__('Two columns', 'woocommerce')}
 			</>
 		),
 	},
 ];
 
 export const DisplayOptions = () => {
-	const { defaultHomescreenLayout } = useSelect( ( select ) => {
-		const { getOption } = select( optionsStore );
+	const { defaultHomescreenLayout } = useSelect((select) => {
+		const { getOption } = select(optionsStore);
 
 		return {
 			defaultHomescreenLayout:
-				getOption( 'woocommerce_default_homepage_layout' ) ||
+				getOption('woocommerce_default_homepage_layout') ||
 				'single_column',
 		};
-	} );
+	});
 
 	const { updateUserPreferences, homepage_layout: layout } =
 		useUserPreferences();
 
 	const hasTwoColumnContent =
-		! isTaskListActive( 'setup' ) || isFeatureEnabled( 'analytics' );
+		!isTaskListActive('setup') || isFeatureEnabled('analytics');
 
 	return (
 		<Slot>
-			{ ( fills ) => {
+			{(fills) => {
 				// If there is no fill to render and only single column content, don't render the display.
-				if ( fills.length === 0 && ! hasTwoColumnContent ) {
+				if (fills.length === 0 && !hasTwoColumnContent) {
 					return null;
 				}
 				return (
 					<DropdownMenu
-						icon={ <DisplayIcon /> }
+						icon={<DisplayIcon />}
 						/* translators: button label text should, if possible, be under 16 characters. */
-						label={ __( 'Display options', 'woocommerce' ) }
-						toggleProps={ {
+						label={__('Display options', 'woocommerce')}
+						toggleProps={{
 							className:
 								'woocommerce-layout__activity-panel-tab display-options',
 							onClick: () =>
-								recordEvent( 'homescreen_display_click' ),
-						} }
-						popoverProps={ {
+								recordEvent('homescreen_display_click'),
+						}}
+						popoverProps={{
 							className:
 								'woocommerce-layout__activity-panel-popover',
-						} }
+						}}
 					>
-						{ ( { onClose } ) => (
+						{({ onClose }) => (
 							<>
-								{ fills }
-								{ hasTwoColumnContent ? (
+								{fills}
+								{hasTwoColumnContent ? (
 									<MenuGroup
 										className="woocommerce-layout__homescreen-display-options"
-										label={ __( 'Layout', 'woocommerce' ) }
+										label={__('Layout', 'woocommerce')}
 									>
 										<MenuItemsChoice
-											choices={ LAYOUTS }
-											onSelect={ ( newLayout ) => {
-												updateUserPreferences( {
+											choices={LAYOUTS}
+											onSelect={(newLayout) => {
+												updateUserPreferences({
 													homepage_layout: newLayout,
-												} );
+												});
 												onClose();
 												recordEvent(
 													'homescreen_display_option',
@@ -110,19 +110,19 @@ export const DisplayOptions = () => {
 															newLayout,
 													}
 												);
-											} }
+											}}
 											value={
 												layout ||
 												defaultHomescreenLayout
 											}
 										/>
 									</MenuGroup>
-								) : null }
+								) : null}
 							</>
-						) }
+						)}
 					</DropdownMenu>
 				);
-			} }
+			}}
 		</Slot>
 	);
 };

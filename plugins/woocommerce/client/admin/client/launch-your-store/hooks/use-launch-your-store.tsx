@@ -22,8 +22,8 @@ export const useLaunchYourStore = (
 		privateLink,
 		shareKey,
 	} = useSelect(
-		( select ) => {
-			if ( ! enabled ) {
+		(select) => {
+			if (!enabled) {
 				return {
 					isLoading: false,
 					comingSoon: null,
@@ -34,32 +34,30 @@ export const useLaunchYourStore = (
 				};
 			}
 
-			const { hasFinishedResolution, getOption } = select( optionsStore );
+			const { hasFinishedResolution, getOption } = select(optionsStore);
 
 			const allOptionResolutionsFinished =
-				! hasFinishedResolution( 'getOption', [
+				!hasFinishedResolution('getOption', [
 					'woocommerce_coming_soon',
-				] ) &&
-				! hasFinishedResolution( 'getOption', [
+				]) &&
+				!hasFinishedResolution('getOption', [
 					'woocommerce_store_pages_only',
-				] ) &&
-				! hasFinishedResolution( 'getOption', [
+				]) &&
+				!hasFinishedResolution('getOption', [
 					'woocommerce_private_link',
-				] ) &&
-				! hasFinishedResolution( 'getOption', [
-					'woocommerce_share_key',
-				] );
+				]) &&
+				!hasFinishedResolution('getOption', ['woocommerce_share_key']);
 
 			return {
 				isLoading: allOptionResolutionsFinished,
-				comingSoon: getOption( 'woocommerce_coming_soon' ),
-				storePagesOnly: getOption( 'woocommerce_store_pages_only' ),
-				privateLink: getOption( 'woocommerce_private_link' ),
-				shareKey: getOption( 'woocommerce_share_key' ),
+				comingSoon: getOption('woocommerce_coming_soon'),
+				storePagesOnly: getOption('woocommerce_store_pages_only'),
+				privateLink: getOption('woocommerce_private_link'),
+				shareKey: getOption('woocommerce_share_key'),
 				launchYourStoreEnabled: true,
 			};
 		},
-		[ enabled ]
+		[enabled]
 	);
 
 	return {

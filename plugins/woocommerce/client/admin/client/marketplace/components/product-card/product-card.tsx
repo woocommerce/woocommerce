@@ -35,15 +35,15 @@ export interface ProductCardProps {
 	cardType?: ProductCardType;
 }
 
-function ProductCard( props: ProductCardProps ): React.JSX.Element {
+function ProductCard(props: ProductCardProps): React.JSX.Element {
 	const SPONSORED_PRODUCT_LABEL = 'promoted'; // what product.label indicates a sponsored placement
 	const SPONSORED_PRODUCT_STRIPE_SIZE = '5px'; // unfortunately can't be defined in CSS - height of "stripe"
 
 	const { isLoading, cardType } = props;
 	const isCompact = cardType === 'compact';
 	const query = useQuery();
-	const [ isPreviewModalOpen, setIsPreviewModalOpen ] = useState( false );
-	const linkRef = useRef< HTMLAnchorElement | null >( null );
+	const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+	const linkRef = useRef<HTMLAnchorElement | null>(null);
 	// Get the product if provided; if not provided, render a skeleton loader
 	const product = props.product ?? {
 		id: null,
@@ -79,29 +79,29 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 
 	const isTheme = type === ProductType.theme;
 	const isBusinessService = type === ProductType.businessService;
-	const { iamSettings } = useContext( MarketplaceContext );
+	const { iamSettings } = useContext(MarketplaceContext);
 	const shouldShowPreview =
 		iamSettings?.product_previews === 'modal' &&
-		! isTheme &&
-		! isBusinessService;
+		!isTheme &&
+		!isBusinessService;
 	// Business service cards use a layout with no slot for the badge.
 	const showsQualityBadge =
-		! isLoading &&
-		! isBusinessService &&
-		getVisibleQualityBadge( props.product, iamSettings ) !== null;
+		!isLoading &&
+		!isBusinessService &&
+		getVisibleQualityBadge(props.product, iamSettings) !== null;
 
-	const showVendor = ! isCompact && ! isLoading;
-	const showVendorLoading = ! isCompact && isLoading;
-	const showDescription = ! isTheme && ! isCompact;
-	const showCardIcon = ! isTheme || isCompact;
-	const showBigImage = isTheme && ! isCompact;
-	const decodedDescription = decodeEntities( product.description );
+	const showVendor = !isCompact && !isLoading;
+	const showVendorLoading = !isCompact && isLoading;
+	const showDescription = !isTheme && !isCompact;
+	const showCardIcon = !isTheme || isCompact;
+	const showBigImage = isTheme && !isCompact;
+	const decodedDescription = decodeEntities(product.description);
 
 	function isSponsored(): boolean {
 		return SPONSORED_PRODUCT_LABEL === product.label;
 	}
 
-	const showSponsoredLabel = ! isLoading && isSponsored();
+	const showSponsoredLabel = !isLoading && isSponsored();
 	const showVendorDetails = showVendor || showSponsoredLabel;
 
 	/**
@@ -110,72 +110,72 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 	 * attr() doesn't have very good support yet, so we need to apply some inline CSS to stripe sponsored results.
 	 */
 	function inlineCss(): object {
-		if ( ! isSponsored() || ! product.primary_color ) {
+		if (!isSponsored() || !product.primary_color) {
 			return {};
 		}
 		return {
-			background: `linear-gradient(${ product.primary_color } 0, ${ product.primary_color } ${ SPONSORED_PRODUCT_STRIPE_SIZE }, white ${ SPONSORED_PRODUCT_STRIPE_SIZE }, white)`,
+			background: `linear-gradient(${product.primary_color} 0, ${product.primary_color} ${SPONSORED_PRODUCT_STRIPE_SIZE}, white ${SPONSORED_PRODUCT_STRIPE_SIZE}, white)`,
 		};
 	}
 
-	function recordTracksEvent( event: string, data: ExtraProperties ) {
+	function recordTracksEvent(event: string, data: ExtraProperties) {
 		const { tracksData } = props;
 
-		if ( tracksData.position ) {
+		if (tracksData.position) {
 			data.position = tracksData.position;
 		}
 
-		if ( tracksData.label ) {
+		if (tracksData.label) {
 			data.label = tracksData.label;
 		}
 
-		if ( tracksData.group ) {
+		if (tracksData.group) {
 			data.group = tracksData.group;
 		}
 
-		if ( tracksData.group_id ) {
+		if (tracksData.group_id) {
 			data.group_id = tracksData.group_id;
 		}
 
-		if ( tracksData.searchTerm ) {
+		if (tracksData.searchTerm) {
 			data.search_term = tracksData.searchTerm;
 		}
 
-		if ( tracksData.category ) {
+		if (tracksData.category) {
 			data.category = tracksData.category;
 		}
 
 		data.tab = query.tab || 'discover';
 
-		queueRecordEvent( event, data );
+		queueRecordEvent(event, data);
 	}
 
 	const screenReaderText = (
 		<span className="screen-reader-text">
-			{ __( 'Opens in a new tab', 'woocommerce' ) }
+			{__('Opens in a new tab', 'woocommerce')}
 		</span>
 	);
 
-	const createVendorLink = ( eventName: string ) => {
-		if ( ! product?.vendorName || ! product?.vendorUrl ) {
+	const createVendorLink = (eventName: string) => {
+		if (!product?.vendorName || !product?.vendorUrl) {
 			return product?.vendorName || null;
 		}
 
 		return (
 			<a
-				href={ product.vendorUrl }
+				href={product.vendorUrl}
 				rel="noopener noreferrer"
 				target="_blank"
-				onClick={ () => {
-					recordTracksEvent( eventName, {
+				onClick={() => {
+					recordTracksEvent(eventName, {
 						product: product.title,
 						vendor: product.vendorName,
 						product_type: type,
-					} );
-				} }
+					});
+				}}
 			>
-				{ product.vendorName }
-				{ screenReaderText }
+				{product.vendorName}
+				{screenReaderText}
 			</a>
 		);
 	};
@@ -185,25 +185,23 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 	);
 
 	const productUrl = () => {
-		if ( query.ref ) {
-			return appendURLParams( product.url, [
-				[ 'utm_content', query.ref ],
-			] );
+		if (query.ref) {
+			return appendURLParams(product.url, [['utm_content', query.ref]]);
 		}
 		return product.url;
 	};
 
 	const handleCardClick = () => {
-		recordTracksEvent( 'marketplace_product_card_clicked', {
+		recordTracksEvent('marketplace_product_card_clicked', {
 			product_id: product.id,
 			product_name: product.title,
 			vendor: product.vendorName,
 			product_type: type,
 			has_quality_badge: showsQualityBadge,
-		} );
+		});
 
-		if ( shouldShowPreview ) {
-			setIsPreviewModalOpen( true );
+		if (shouldShowPreview) {
+			setIsPreviewModalOpen(true);
 		}
 	};
 
@@ -215,10 +213,10 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 			product_type: type,
 		};
 
-		recordTracksEvent( 'marketplace_product_preview_modal_opened', data );
+		recordTracksEvent('marketplace_product_preview_modal_opened', data);
 	};
 
-	const handleModalClose = ( closeType?: string ) => {
+	const handleModalClose = (closeType?: string) => {
 		const data: ExtraProperties = {
 			product_id: product.id,
 			product_name: product.title,
@@ -229,13 +227,13 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 		const tracksEvent =
 			closeType || 'marketplace_product_preview_modal_dismissed';
 
-		recordTracksEvent( tracksEvent, data );
-		setIsPreviewModalOpen( false );
+		recordTracksEvent(tracksEvent, data);
+		setIsPreviewModalOpen(false);
 	};
 
 	const classNames = clsx(
 		'woocommerce-marketplace__product-card',
-		`woocommerce-marketplace__product-card--${ type }`,
+		`woocommerce-marketplace__product-card--${type}`,
 		{
 			'is-loading': isLoading,
 			'is-small': props.small,
@@ -247,20 +245,20 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 	const CardLink = () => {
 		return (
 			<a
-				ref={ linkRef }
+				ref={linkRef}
 				className="woocommerce-marketplace__product-card__link"
-				href={ productUrl() }
+				href={productUrl()}
 				rel="noopener noreferrer"
 				target="_blank"
-				onClick={ ( e ) => {
-					if ( shouldShowPreview ) {
+				onClick={(e) => {
+					if (shouldShowPreview) {
 						e.preventDefault();
 					}
 					handleCardClick();
-				} }
+				}}
 			>
-				{ isLoading ? ' ' : product.title }
-				{ screenReaderText }
+				{isLoading ? ' ' : product.title}
+				{screenReaderText}
 			</a>
 		);
 	};
@@ -272,12 +270,12 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 			<div className="woocommerce-marketplace__business-card">
 				<div
 					className="woocommerce-marketplace__business-card__header"
-					style={ { backgroundColor: product.color } }
+					style={{ backgroundColor: product.color }}
 				>
 					<img
-						src={ `${
+						src={`${
 							mainImage || product.featuredImage
-						}?h=${ imageHeight }` }
+						}?h=${imageHeight}`}
 						alt=""
 					/>
 				</div>
@@ -287,11 +285,11 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 							<CardLink />
 						</h2>
 						<p className="woocommerce-marketplace__product-card__description">
-							{ decodedDescription }
+							{decodedDescription}
 						</p>
 					</div>
 					<div className="woocommerce-marketplace__business-card__badge">
-						<span>{ product.productCategory }</span>
+						<span>{product.productCategory}</span>
 					</div>
 				</div>
 			</div>
@@ -300,72 +298,70 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 
 	const qualityBadge =
 		showsQualityBadge && props.product ? (
-			<QualityBadge product={ props.product } />
+			<QualityBadge product={props.product} />
 		) : null;
 
-	const footer = ! isBusinessService ? (
+	const footer = !isBusinessService ? (
 		<footer className="woocommerce-marketplace__product-card__footer">
-			{ isLoading && (
+			{isLoading && (
 				<div className="woocommerce-marketplace__product-card__price" />
-			) }
-			{ /* Regular cards show the badge on its own row above the price;
-			     compact cards show it between the title and the price. */ }
-			{ ! isCompact && qualityBadge }
-			{ ! isLoading && props.product && (
-				<ProductCardFooter product={ props.product } />
-			) }
+			)}
+			{/* Regular cards show the badge on its own row above the price;
+			     compact cards show it between the title and the price. */}
+			{!isCompact && qualityBadge}
+			{!isLoading && props.product && (
+				<ProductCardFooter product={props.product} />
+			)}
 		</footer>
 	) : null;
 
 	const cardContent = (
 		<div className="woocommerce-marketplace__product-card__content">
-			{ showBigImage && (
+			{showBigImage && (
 				<div className="woocommerce-marketplace__product-card__image">
-					{ ! isLoading && (
+					{!isLoading && (
 						<img
 							className="woocommerce-marketplace__product-card__image-inner"
-							src={ product.image }
-							alt={ product.title }
+							src={product.image}
+							alt={product.title}
 						/>
-					) }
+					)}
 				</div>
-			) }
+			)}
 			<div className="woocommerce-marketplace__product-card__header">
 				<div className="woocommerce-marketplace__product-card__details">
-					{ showCardIcon && (
+					{showCardIcon && (
 						<>
-							{ isLoading && (
+							{isLoading && (
 								<div className="woocommerce-marketplace__product-card__icon" />
-							) }
-							{ ! isLoading && product.icon && (
+							)}
+							{!isLoading && product.icon && (
 								<img
 									className="woocommerce-marketplace__product-card__icon"
-									src={ product.icon || product.image }
-									alt={ product.title }
+									src={product.icon || product.image}
+									alt={product.title}
 								/>
-							) }
+							)}
 						</>
-					) }
+					)}
 					<div className="woocommerce-marketplace__product-card__meta">
 						<h2 className="woocommerce-marketplace__product-card__title">
 							<CardLink />
 						</h2>
-						{ showVendorLoading && (
+						{showVendorLoading && (
 							<p className="woocommerce-marketplace__product-card__vendor-details">
 								<span className="woocommerce-marketplace__product-card__vendor" />
 							</p>
-						) }
-						{ showVendorDetails && (
+						)}
+						{showVendorDetails && (
 							<p className="woocommerce-marketplace__product-card__vendor-details">
-								{ showVendor && productVendor && (
+								{showVendor && productVendor && (
 									<span className="woocommerce-marketplace__product-card__vendor">
-										<span>
-											{ __( 'By', 'woocommerce' ) }
-										</span>{ ' ' }
-										{ productVendor }
+										<span>{__('By', 'woocommerce')}</span>{' '}
+										{productVendor}
 									</span>
-								) }
-								{ showVendor &&
+								)}
+								{showVendor &&
 									productVendor &&
 									showSponsoredLabel && (
 										<span
@@ -374,36 +370,36 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 										>
 											·
 										</span>
-									) }
-								{ showSponsoredLabel && (
+									)}
+								{showSponsoredLabel && (
 									<span className="woocommerce-marketplace__product-card__sponsored-label">
-										{ __( 'Sponsored', 'woocommerce' ) }
+										{__('Sponsored', 'woocommerce')}
 									</span>
-								) }
+								)}
 							</p>
-						) }
-						{ isCompact && qualityBadge }
-						{ isCompact && footer }
+						)}
+						{isCompact && qualityBadge}
+						{isCompact && footer}
 					</div>
 				</div>
 			</div>
-			{ showDescription && (
+			{showDescription && (
 				<p className="woocommerce-marketplace__product-card__description">
-					{ ! isLoading && decodedDescription }
+					{!isLoading && decodedDescription}
 				</p>
-			) }
-			{ ! isCompact && footer }
+			)}
+			{!isCompact && footer}
 		</div>
 	);
 
 	const CardWrapper = () => {
-		if ( isLoading ) {
+		if (isLoading) {
 			return isBusinessService ? <BusinessService /> : cardContent;
 		}
 
 		return (
 			<div className="woocommerce-marketplace__product-card-wrapper">
-				{ isBusinessService ? <BusinessService /> : cardContent }
+				{isBusinessService ? <BusinessService /> : cardContent}
 			</div>
 		);
 	};
@@ -411,28 +407,28 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 	return (
 		<>
 			<Card
-				className={ classNames }
-				id={ `product-${ product.id }` }
-				tabIndex={ -1 }
-				aria-hidden={ isLoading }
-				style={ inlineCss() }
+				className={classNames}
+				id={`product-${product.id}`}
+				tabIndex={-1}
+				aria-hidden={isLoading}
+				style={inlineCss()}
 			>
 				<CardWrapper />
 			</Card>
 
-			{ shouldShowPreview && isPreviewModalOpen && product && (
+			{shouldShowPreview && isPreviewModalOpen && product && (
 				<ProductPreviewModal
-					productTitle={ product.title }
-					productVendor={ createVendorLink(
+					productTitle={product.title}
+					productVendor={createVendorLink(
 						'marketplace_product_preview_vendor_clicked'
-					) }
-					productIcon={ product.icon || '' }
-					onOpen={ handleModalOpen }
-					onClose={ handleModalClose }
-					productId={ product.id as number }
-					triggerRef={ linkRef }
+					)}
+					productIcon={product.icon || ''}
+					onOpen={handleModalOpen}
+					onClose={handleModalClose}
+					productId={product.id as number}
+					triggerRef={linkRef}
 				/>
-			) }
+			)}
 		</>
 	);
 }

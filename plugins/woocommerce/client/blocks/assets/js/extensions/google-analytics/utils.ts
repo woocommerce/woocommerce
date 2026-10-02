@@ -23,7 +23,7 @@ export const getProductFieldObject = (
 	const productIdentifier = product.sku ? product.sku : '#' + product.id;
 	const productCategory =
 		'categories' in product && product.categories.length
-			? product.categories[ 0 ].name
+			? product.categories[0].name
 			: '';
 	return {
 		id: productIdentifier,
@@ -31,7 +31,7 @@ export const getProductFieldObject = (
 		quantity,
 		category: productCategory,
 		price: (
-			parseInt( product.prices.price, 10 ) /
+			parseInt(product.prices.price, 10) /
 			10 ** product.prices.currency_minor_unit
 		).toString(),
 	};
@@ -48,7 +48,7 @@ export const getProductImpressionObject = (
 ): ImpressionItem => {
 	const productIdentifier = product.sku ? product.sku : '#' + product.id;
 	const productCategory = product.categories.length
-		? product.categories[ 0 ].name
+		? product.categories[0].name
 		: '';
 	return {
 		id: productIdentifier,
@@ -56,7 +56,7 @@ export const getProductImpressionObject = (
 		list_name: listName,
 		category: productCategory,
 		price: (
-			parseInt( product.prices.price, 10 ) /
+			parseInt(product.prices.price, 10) /
 			10 ** product.prices.currency_minor_unit
 		).toString(),
 	};
@@ -69,37 +69,37 @@ export const trackEvent = (
 	eventName: Gtag.EventNames | string,
 	eventParams?: Gtag.ControlParams | Gtag.EventParams | Gtag.CustomParams
 ): void => {
-	if ( typeof gtag !== 'function' ) {
-		throw new Error( 'Function gtag not implemented.' );
+	if (typeof gtag !== 'function') {
+		throw new Error('Function gtag not implemented.');
 	}
 	// eslint-disable-next-line no-console
-	console.log( `Tracking event ${ eventName }` );
-	window.gtag( 'event', eventName, eventParams );
+	console.log(`Tracking event ${eventName}`);
+	window.gtag('event', eventName, eventParams);
 };
 
 let currentStep = -1;
 
 export const trackCheckoutStep =
-	( step: number ) =>
-	( { storeCart }: { storeCart: StoreCart } ): void => {
-		if ( currentStep === step ) {
+	(step: number) =>
+	({ storeCart }: { storeCart: StoreCart }): void => {
+		if (currentStep === step) {
 			return;
 		}
-		trackEvent( step === 0 ? 'begin_checkout' : 'checkout_progress', {
-			items: storeCart.cartItems.map( getProductFieldObject ),
-			coupon: storeCart.cartCoupons[ 0 ]?.code || '',
+		trackEvent(step === 0 ? 'begin_checkout' : 'checkout_progress', {
+			items: storeCart.cartItems.map(getProductFieldObject),
+			coupon: storeCart.cartCoupons[0]?.code || '',
 			currency: storeCart.cartTotals.currency_code,
 			value: (
-				parseInt( storeCart.cartTotals.total_price, 10 ) /
+				parseInt(storeCart.cartTotals.total_price, 10) /
 				10 ** storeCart.cartTotals.currency_minor_unit
 			).toString(),
 			checkout_step: step,
-		} );
+		});
 		currentStep = step;
 	};
 
 export const trackCheckoutOption =
-	( {
+	({
 		step,
 		option,
 		value,
@@ -107,12 +107,12 @@ export const trackCheckoutOption =
 		step: number;
 		option: string;
 		value: string;
-	} ) =>
+	}) =>
 	(): void => {
-		trackEvent( 'set_checkout_option', {
+		trackEvent('set_checkout_option', {
 			checkout_step: step,
 			checkout_option: option,
 			value,
-		} );
+		});
 		currentStep = step;
 	};

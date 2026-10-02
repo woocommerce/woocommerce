@@ -3,13 +3,13 @@
 /**
  * External dependencies
  */
-const fs = require( 'fs' );
-const path = require( 'path' );
+const fs = require('fs');
+const path = require('path');
 const {
 	POSTCODE_REGEXES,
-} = require( 'postcode-validator/lib/cjs/postcode-regexes.js' );
-const { version } = require( 'postcode-validator/package.json' );
-const { dependencies } = require( '../package.json' );
+} = require('postcode-validator/lib/cjs/postcode-regexes.js');
+const { version } = require('postcode-validator/package.json');
+const { dependencies } = require('../package.json');
 
 const OUTPUT_PATH = path.resolve(
 	__dirname,
@@ -104,9 +104,9 @@ const COMPATIBILITY_OVERRIDES = {
 	SK: { pattern: '(?:SK-)?[0-9]{3}\\s?[0-9]{2}' },
 };
 
-if ( dependencies[ 'postcode-validator' ] !== version ) {
+if (dependencies['postcode-validator'] !== version) {
 	throw new Error(
-		`Installed postcode-validator ${ version } does not match the ${ dependencies[ 'postcode-validator' ] } pin`
+		`Installed postcode-validator ${version} does not match the ${dependencies['postcode-validator']} pin`
 	);
 }
 
@@ -117,12 +117,12 @@ if ( dependencies[ 'postcode-validator' ] !== version ) {
  * @param {RegExp} regex Upstream regular expression.
  * @return {string} Portable, unanchored expression source.
  */
-function removeAnchors( regex ) {
-	if ( ! regex.source.startsWith( '^' ) || ! regex.source.endsWith( '$' ) ) {
-		throw new Error( `Expected an anchored expression: ${ regex.source }` );
+function removeAnchors(regex) {
+	if (!regex.source.startsWith('^') || !regex.source.endsWith('$')) {
+		throw new Error(`Expected an anchored expression: ${regex.source}`);
 	}
 
-	return regex.source.slice( 1, -1 );
+	return regex.source.slice(1, -1);
 }
 
 /**
@@ -133,41 +133,39 @@ function removeAnchors( regex ) {
  * @param {string} pattern Regular expression source.
  * @return {string} Expression source with portable space matching.
  */
-function replaceWhitespaceTokens( pattern ) {
-	return pattern.replaceAll( '\\s', '[ ]' );
+function replaceWhitespaceTokens(pattern) {
+	return pattern.replaceAll('\\s', '[ ]');
 }
 
 const rules = Object.fromEntries(
-	COUNTRY_CODES.map( ( countryCode ) => {
-		const upstreamRegex = POSTCODE_REGEXES.get( countryCode );
-		if ( ! upstreamRegex ) {
-			throw new Error(
-				`No postcode-validator rule for ${ countryCode }`
-			);
+	COUNTRY_CODES.map((countryCode) => {
+		const upstreamRegex = POSTCODE_REGEXES.get(countryCode);
+		if (!upstreamRegex) {
+			throw new Error(`No postcode-validator rule for ${countryCode}`);
 		}
 
 		const sourceRule = {
-			pattern: removeAnchors( upstreamRegex ),
-			...( upstreamRegex.flags ? { flags: upstreamRegex.flags } : {} ),
-			...COMPATIBILITY_OVERRIDES[ countryCode ],
+			pattern: removeAnchors(upstreamRegex),
+			...(upstreamRegex.flags ? { flags: upstreamRegex.flags } : {}),
+			...COMPATIBILITY_OVERRIDES[countryCode],
 		};
 		const rule = {
 			...sourceRule,
-			pattern: replaceWhitespaceTokens( sourceRule.pattern ),
+			pattern: replaceWhitespaceTokens(sourceRule.pattern),
 		};
 
-		if ( rule.pattern.includes( '~' ) ) {
-			throw new Error( `Unsupported delimiter in ${ countryCode } rule` );
+		if (rule.pattern.includes('~')) {
+			throw new Error(`Unsupported delimiter in ${countryCode} rule`);
 		}
-		if ( rule.flags && rule.flags !== 'i' ) {
-			throw new Error( `Unsupported flags in ${ countryCode } rule` );
+		if (rule.flags && rule.flags !== 'i') {
+			throw new Error(`Unsupported flags in ${countryCode} rule`);
 		}
 
 		// Catch malformed generated rules before they reach either consumer.
-		new RegExp( `^(?:${ rule.pattern })$`, rule.flags || '' );
+		new RegExp(`^(?:${rule.pattern})$`, rule.flags || '');
 
-		return [ countryCode, rule ];
-	} )
+		return [countryCode, rule];
+	})
 );
 
 const artifact = {
@@ -178,7 +176,4 @@ const artifact = {
 	rules,
 };
 
-fs.writeFileSync(
-	OUTPUT_PATH,
-	`${ JSON.stringify( artifact, null, '\t' ) }\n`
-);
+fs.writeFileSync(OUTPUT_PATH, `${JSON.stringify(artifact, null, '\t')}\n`);

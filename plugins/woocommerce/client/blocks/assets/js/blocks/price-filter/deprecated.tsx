@@ -16,7 +16,7 @@ const v1 = {
 		...metadata.attributes,
 		...blockAttributes,
 	},
-	save: ( { attributes }: { attributes: Attributes } ) => {
+	save: ({ attributes }: { attributes: Attributes }) => {
 		const {
 			className,
 			showInputFields,
@@ -32,10 +32,10 @@ const v1 = {
 		};
 		return (
 			<div
-				{ ...useBlockProps.save( {
-					className: clsx( 'is-loading', className ),
-				} ) }
-				{ ...data }
+				{...useBlockProps.save({
+					className: clsx('is-loading', className),
+				})}
+				{...data}
 			>
 				<span
 					aria-hidden
@@ -46,6 +46,6 @@ const v1 = {
 	},
 };
 
-const deprecated = [ v1 ];
+const deprecated = [v1];
 
 export default deprecated;

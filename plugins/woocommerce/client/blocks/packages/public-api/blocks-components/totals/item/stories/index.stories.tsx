@@ -21,11 +21,11 @@ export default {
 		label: 'Interesting item',
 		value: 2000,
 	},
-} as Meta< TotalsItemProps >;
+} as Meta<TotalsItemProps>;
 
-const Template: StoryFn< TotalsItemProps > = ( args ) => <Item { ...args } />;
+const Template: StoryFn<TotalsItemProps> = (args) => <Item {...args} />;
 
-export const Default: StoryFn< TotalsItemProps > = Template.bind( {} );
+export const Default: StoryFn<TotalsItemProps> = Template.bind({});
 Default.args = {
 	currency: currencies.USD,
 	description: 'This item is so interesting',

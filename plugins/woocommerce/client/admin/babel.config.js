@@ -1,5 +1,5 @@
-module.exports = function ( api ) {
-	api.cache( true );
+module.exports = function (api) {
+	api.cache(true);
 
 	return {
 		presets: [
@@ -15,7 +15,7 @@ module.exports = function ( api ) {
 		],
 		sourceType: 'unambiguous',
 		plugins: [],
-		ignore: [ 'packages/**/node_modules' ],
+		ignore: ['packages/**/node_modules'],
 		env: {
 			production: {},
 		},

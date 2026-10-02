@@ -25,13 +25,13 @@ import {
 	getWcsLabelPurchaseConfigs,
 } from '../wcs-api';
 
-const wcAssetUrl = getSetting( 'wcAssetUrl', '' );
+const wcAssetUrl = getSetting('wcAssetUrl', '');
 const wcShippingPluginSlug = 'woocommerce-shipping';
 const wcstPluginSlug = 'woocommerce-services';
 
 export class ShippingBanner extends Component {
-	constructor( props ) {
-		super( props );
+	constructor(props) {
+		super(props);
 
 		this.state = {
 			showShippingBanner: true,
@@ -50,7 +50,7 @@ export class ShippingBanner extends Component {
 	componentDidMount() {
 		const { showShippingBanner } = this.state;
 
-		if ( showShippingBanner ) {
+		if (showShippingBanner) {
 			this.trackImpression();
 		}
 	}
@@ -58,180 +58,178 @@ export class ShippingBanner extends Component {
 	isSetupError = () => this.state.wcsSetupError;
 
 	closeDismissModal = () => {
-		this.setState( { isDismissModalOpen: false } );
-		this.trackElementClicked(
-			'shipping_banner_dismiss_modal_close_button'
-		);
+		this.setState({ isDismissModalOpen: false });
+		this.trackElementClicked('shipping_banner_dismiss_modal_close_button');
 	};
 
 	openDismissModal = () => {
-		this.setState( { isDismissModalOpen: true } );
-		this.trackElementClicked( 'shipping_banner_dimiss' );
+		this.setState({ isDismissModalOpen: true });
+		this.trackElementClicked('shipping_banner_dimiss');
 	};
 
 	hideBanner = () => {
-		this.setState( { showShippingBanner: false } );
+		this.setState({ showShippingBanner: false });
 	};
 
 	createShippingLabelClicked = () => {
-		if ( this.state.isPluginInstalledAndActivated ) {
-			window.location.reload( true );
+		if (this.state.isPluginInstalledAndActivated) {
+			window.location.reload(true);
 			return;
 		}
 
 		const { activePlugins, isRequesting } = this.props;
-		if ( isRequesting ) {
+		if (isRequesting) {
 			return;
 		}
 
-		this.setState( {
+		this.setState({
 			isShippingLabelButtonBusy: true,
 			infoMessage: __(
 				'Installing and activating WooCommerce Shipping in the background…',
 				'woocommerce'
 			),
 			wcsSetupError: false,
-		} );
-		this.trackElementClicked( 'shipping_banner_create_label' );
-		if ( ! activePlugins.includes( wcShippingPluginSlug ) ) {
-			this.installAndActivatePlugins( wcShippingPluginSlug );
+		});
+		this.trackElementClicked('shipping_banner_create_label');
+		if (!activePlugins.includes(wcShippingPluginSlug)) {
+			this.installAndActivatePlugins(wcShippingPluginSlug);
 		} else {
 			this.acceptTosAndGetWCSAssets();
 		}
 	};
 
-	async installAndActivatePlugins( pluginSlug ) {
+	async installAndActivatePlugins(pluginSlug) {
 		// Avoid double activating.
 		const { installPlugins, activatePlugins, isRequesting } = this.props;
-		if ( isRequesting ) {
-			this.setState( { isShippingLabelButtonBusy: false } );
+		if (isRequesting) {
+			this.setState({ isShippingLabelButtonBusy: false });
 			return false;
 		}
 
 		try {
-			const install = await installPlugins( [ pluginSlug ] );
-			if ( ! install || install.success !== true ) {
-				this.setState( {
+			const install = await installPlugins([pluginSlug]);
+			if (!install || install.success !== true) {
+				this.setState({
 					setupErrorReason: setupErrorTypes.INSTALL,
 					wcsSetupError: true,
 					isShippingLabelButtonBusy: false,
 					infoMessage: null,
-				} );
+				});
 				return;
 			}
-		} catch ( error ) {
-			this.setState( {
+		} catch (error) {
+			this.setState({
 				setupErrorReason: setupErrorTypes.INSTALL,
 				wcsSetupError: true,
 				isShippingLabelButtonBusy: false,
 				infoMessage: null,
-			} );
+			});
 			return;
 		}
 
 		try {
-			const activation = await activatePlugins( [ pluginSlug ] );
-			if ( ! activation || activation.success !== true ) {
-				this.setState( {
+			const activation = await activatePlugins([pluginSlug]);
+			if (!activation || activation.success !== true) {
+				this.setState({
 					setupErrorReason: setupErrorTypes.ACTIVATE,
 					wcsSetupError: true,
 					isShippingLabelButtonBusy: false,
 					infoMessage: null,
-				} );
+				});
 				return;
 			}
-		} catch ( error ) {
-			this.setState( {
+		} catch (error) {
+			this.setState({
 				setupErrorReason: setupErrorTypes.ACTIVATE,
 				wcsSetupError: true,
 				isShippingLabelButtonBusy: false,
 				infoMessage: null,
-			} );
+			});
 			return;
 		}
 
-		this.setState( {
+		this.setState({
 			isPluginInstalledAndActivated: true,
 			isShippingLabelButtonBusy: false,
 			infoMessage: __(
 				'WooCommerce Shipping is installed and activated. Please reload the page to get started.',
 				'woocommerce'
 			),
-		} );
+		});
 	}
 
 	woocommerceServiceLinkClicked = () => {
-		this.trackElementClicked( 'shipping_banner_woocommerce_service_link' );
+		this.trackElementClicked('shipping_banner_woocommerce_service_link');
 	};
 
-	trackBannerEvent = ( eventName, customProps = {} ) => {
+	trackBannerEvent = (eventName, customProps = {}) => {
 		const { activePlugins, isJetpackConnected } = this.props;
-		recordEvent( eventName, {
+		recordEvent(eventName, {
 			banner_name: 'wcadmin_install_wcs_prompt',
-			jetpack_installed: activePlugins.includes( 'jetpack' ),
+			jetpack_installed: activePlugins.includes('jetpack'),
 			jetpack_connected: isJetpackConnected,
-			wcs_installed: activePlugins.includes( wcShippingPluginSlug ),
+			wcs_installed: activePlugins.includes(wcShippingPluginSlug),
 			...customProps,
-		} );
+		});
 	};
 
 	trackImpression = () => {
-		this.trackBannerEvent( 'banner_impression' );
+		this.trackBannerEvent('banner_impression');
 	};
 
-	trackElementClicked = ( element ) => {
-		this.trackBannerEvent( 'banner_element_clicked', {
+	trackElementClicked = (element) => {
+		this.trackBannerEvent('banner_element_clicked', {
 			element,
-		} );
+		});
 	};
 
 	acceptTosAndGetWCSAssets = () => {
 		return acceptWcsTos()
-			.then( () => getWcsLabelPurchaseConfigs( this.props.orderId ) )
-			.then( ( configs ) => {
+			.then(() => getWcsLabelPurchaseConfigs(this.props.orderId))
+			.then((configs) => {
 				window.WCShipping_Config = configs.config;
 				return configs;
-			} )
-			.then( () => getWcsAssets() )
-			.then( ( wcsAssets ) => this.loadWcsAssets( wcsAssets ) )
-			.catch( () => {
-				this.setState( {
+			})
+			.then(() => getWcsAssets())
+			.then((wcsAssets) => this.loadWcsAssets(wcsAssets))
+			.catch(() => {
+				this.setState({
 					wcsSetupError: true,
 					wcsAssetsLoading: false,
 					isShippingLabelButtonBusy: false,
 					infoMessage: null,
-				} );
-			} );
+				});
+			});
 	};
 
-	generateMetaBoxHtml( nodeId, title, args ) {
-		const togglePanelText = __( 'Toggle panel:', 'woocommerce' );
+	generateMetaBoxHtml(nodeId, title, args) {
+		const togglePanelText = __('Toggle panel:', 'woocommerce');
 
 		return `
-<div id="${ nodeId }" class="postbox">
+<div id="${nodeId}" class="postbox">
 	<div class="postbox-header">
-		<h2 class="hndle"><span>${ title }</span></h2>
+		<h2 class="hndle"><span>${title}</span></h2>
 		<div class="handle-actions">
 			<button type="button" class="handlediv" aria-expanded="true">
-				<span class="screen-reader-text">${ togglePanelText } ${ title }</span>
+				<span class="screen-reader-text">${togglePanelText} ${title}</span>
 				<span class="toggle-indicator" aria-hidden="true"></span>
 			</button>
 		</div>
 	</div>
 	<div class="inside">
-		<div class="wcc-root woocommerce woocommerce-shipping-shipping-label" id="woocommerce-shipping-shipping-label-${ args.context }"></div>
+		<div class="wcc-root woocommerce woocommerce-shipping-shipping-label" id="woocommerce-shipping-shipping-label-${args.context}"></div>
 	</div>
 </div>
 `;
 	}
 
-	loadWcsAssets( { assets } ) {
-		if ( this.state.wcsAssetsLoaded || this.state.wcsAssetsLoading ) {
+	loadWcsAssets({ assets }) {
+		if (this.state.wcsAssetsLoaded || this.state.wcsAssetsLoading) {
 			this.openWcsModal();
 			return;
 		}
 
-		this.setState( { wcsAssetsLoading: true } );
+		this.setState({ wcsAssetsLoading: true });
 
 		const labelPurchaseMetaboxId = 'woocommerce-order-label';
 		const shipmentTrackingMetaboxId = 'woocommerce-order-shipment-tracking';
@@ -245,67 +243,67 @@ export class ShippingBanner extends Component {
 
 		const { activePlugins } = this.props;
 
-		document.getElementById( labelPurchaseMetaboxId )?.remove();
+		document.getElementById(labelPurchaseMetaboxId)?.remove();
 		const shippingLabelContainerHtml = this.generateMetaBoxHtml(
 			labelPurchaseMetaboxId,
-			__( 'Shipping Label', 'woocommerce' ),
+			__('Shipping Label', 'woocommerce'),
 			{
 				context: 'shipping_label',
 			}
 		);
 		// Insert shipping label metabox just above main order details box.
 		document
-			.getElementById( 'woocommerce-order-data' )
-			.insertAdjacentHTML( 'beforebegin', shippingLabelContainerHtml );
+			.getElementById('woocommerce-order-data')
+			.insertAdjacentHTML('beforebegin', shippingLabelContainerHtml);
 
-		document.getElementById( shipmentTrackingMetaboxId )?.remove();
+		document.getElementById(shipmentTrackingMetaboxId)?.remove();
 		const shipmentTrackingHtml = this.generateMetaBoxHtml(
 			shipmentTrackingMetaboxId,
-			__( 'Shipment Tracking', 'woocommerce' ),
+			__('Shipment Tracking', 'woocommerce'),
 			{
 				context: 'shipment_tracking',
 			}
 		);
 		// Insert tracking metabox in the side after the order actions.
 		document
-			.getElementById( 'woocommerce-order-actions' )
-			.insertAdjacentHTML( 'afterend', shipmentTrackingHtml );
+			.getElementById('woocommerce-order-actions')
+			.insertAdjacentHTML('afterend', shipmentTrackingHtml);
 
-		if ( window.jQuery ) {
+		if (window.jQuery) {
 			// Need to refresh so the new metaboxes are sortable.
-			window.jQuery( '#normal-sortables' ).sortable( 'refresh' );
-			window.jQuery( '#side-sortables' ).sortable( 'refresh' );
+			window.jQuery('#normal-sortables').sortable('refresh');
+			window.jQuery('#side-sortables').sortable('refresh');
 
-			window.jQuery( '#woocommerce-order-label' ).hide();
+			window.jQuery('#woocommerce-order-label').hide();
 		}
 
 		document
-			.querySelectorAll( 'script[src*="/woocommerce-services/"]' )
-			.forEach( ( node ) => node.remove?.() );
+			.querySelectorAll('script[src*="/woocommerce-services/"]')
+			.forEach((node) => node.remove?.());
 		document
-			.querySelectorAll( 'link[href*="/woocommerce-services/"]' )
-			.forEach( ( node ) => node.remove?.() );
+			.querySelectorAll('link[href*="/woocommerce-services/"]')
+			.forEach((node) => node.remove?.());
 
-		return Promise.all( [
-			new Promise( ( resolve, reject ) => {
-				const script = document.createElement( 'script' );
+		return Promise.all([
+			new Promise((resolve, reject) => {
+				const script = document.createElement('script');
 				script.src = jsPath;
 				script.async = true;
 				script.onload = resolve;
 				script.onerror = reject;
-				document.body.appendChild( script );
-			} ),
-			new Promise( ( resolve, reject ) => {
-				const script = document.createElement( 'script' );
+				document.body.appendChild(script);
+			}),
+			new Promise((resolve, reject) => {
+				const script = document.createElement('script');
 				script.src = shipmentTrackingJsPath;
 				script.async = true;
 				script.onload = resolve;
 				script.onerror = reject;
-				document.body.appendChild( script );
-			} ),
-			new Promise( ( resolve, reject ) => {
-				if ( stylePath !== '' ) {
-					const link = document.createElement( 'link' );
+				document.body.appendChild(script);
+			}),
+			new Promise((resolve, reject) => {
+				if (stylePath !== '') {
+					const link = document.createElement('link');
 					link.rel = 'stylesheet';
 					link.type = 'text/css';
 					link.href = stylePath;
@@ -313,14 +311,14 @@ export class ShippingBanner extends Component {
 					link.onload = resolve;
 					link.onerror = reject;
 					link.id = 'wcshipping-injected-styles';
-					document.head.appendChild( link );
+					document.head.appendChild(link);
 				} else {
 					resolve();
 				}
-			} ),
-			new Promise( ( resolve, reject ) => {
-				if ( shipmentTrackingStylePath !== '' ) {
-					const link = document.createElement( 'link' );
+			}),
+			new Promise((resolve, reject) => {
+				if (shipmentTrackingStylePath !== '') {
+					const link = document.createElement('link');
 					link.rel = 'stylesheet';
 					link.type = 'text/css';
 					link.href = shipmentTrackingStylePath;
@@ -328,21 +326,21 @@ export class ShippingBanner extends Component {
 					link.onload = resolve;
 					link.onerror = reject;
 					link.id = 'wcshipping-injected-styles';
-					document.head.appendChild( link );
+					document.head.appendChild(link);
 				} else {
 					resolve();
 				}
-			} ),
-		] ).then( () => {
-			this.setState( {
+			}),
+		]).then(() => {
+			this.setState({
 				wcsAssetsLoaded: true,
 				wcsAssetsLoading: false,
 				isShippingLabelButtonBusy: false,
-			} );
+			});
 
 			// Reshow the shipping label metabox.
-			if ( window.jQuery ) {
-				window.jQuery( '#woocommerce-order-label' ).show();
+			if (window.jQuery) {
+				window.jQuery('#woocommerce-order-label').show();
 			}
 
 			document.getElementById(
@@ -353,10 +351,10 @@ export class ShippingBanner extends Component {
 			 * We'll only get to this point if either WCS&T is not active or is active but compatible with WooCommerce Shipping
 			 * so once we check if the WCS&T is not active, we can open the label purchase modal immediately.
 			 */
-			if ( ! activePlugins.includes( wcstPluginSlug ) ) {
+			if (!activePlugins.includes(wcstPluginSlug)) {
 				this.openWcsModal();
 			}
-		} );
+		});
 	}
 
 	openWcsModal() {
@@ -364,11 +362,11 @@ export class ShippingBanner extends Component {
 
 		const buttonSelector =
 			'#woocommerce-shipping-shipping-label-shipping_label button';
-		if ( window.MutationObserver ) {
+		if (window.MutationObserver) {
 			const observer = new window.MutationObserver(
-				( mutationsList, observing ) => {
-					const button = document.querySelector( buttonSelector );
-					if ( button ) {
+				(mutationsList, observing) => {
+					const button = document.querySelector(buttonSelector);
+					if (button) {
 						button.click();
 						observing.disconnect();
 					}
@@ -379,7 +377,7 @@ export class ShippingBanner extends Component {
 				document.getElementById(
 					'woocommerce-shipping-shipping-label-shipping_label'
 				) ??
-					document.getElementById( 'wpbody-content' ) ??
+					document.getElementById('wpbody-content') ??
 					document.body,
 				{
 					childList: true,
@@ -387,13 +385,13 @@ export class ShippingBanner extends Component {
 				}
 			);
 		} else {
-			const interval = setInterval( () => {
-				const targetElement = document.querySelector( buttonSelector );
-				if ( targetElement ) {
+			const interval = setInterval(() => {
+				const targetElement = document.querySelector(buttonSelector);
+				if (targetElement) {
 					targetElement.click();
-					clearInterval( interval );
+					clearInterval(interval);
 				}
-			}, 300 );
+			}, 300);
 		}
 	}
 
@@ -404,15 +402,15 @@ export class ShippingBanner extends Component {
 			isShippingLabelButtonBusy,
 		} = this.state;
 		const { isWcstCompatible } = this.props;
-		if ( ! showShippingBanner && ! isWcstCompatible ) {
+		if (!showShippingBanner && !isWcstCompatible) {
 			document
-				.getElementById( 'woocommerce-admin-print-label' )
-				.classList.add( 'error' );
+				.getElementById('woocommerce-admin-print-label')
+				.classList.add('error');
 
 			return (
 				<p>
 					<strong>
-						{ interpolateComponents( {
+						{interpolateComponents({
 							mixedString: __(
 								'Please {{pluginPageLink}}update{{/pluginPageLink}} the WooCommerce Shipping & Tax plugin to the latest version to ensure compatibility with WooCommerce Shipping.',
 								'woocommerce'
@@ -420,26 +418,26 @@ export class ShippingBanner extends Component {
 							components: {
 								pluginPageLink: (
 									<Link
-										href={ getAdminLink( 'plugins.php' ) }
+										href={getAdminLink('plugins.php')}
 										target="_blank"
 										type="wp-admin"
 									/>
 								),
 							},
-						} ) }
+						})}
 					</strong>
 				</p>
 			);
 		}
 
-		if ( ! showShippingBanner ) {
+		if (!showShippingBanner) {
 			return null;
 		}
 
 		const { actionButtonLabel, headline } = this.props;
 		const { isPluginInstalledAndActivated, infoMessage } = this.state;
 		const buttonLabel = isPluginInstalledAndActivated
-			? __( 'Reload page', 'woocommerce' )
+			? __('Reload page', 'woocommerce')
 			: actionButtonLabel;
 
 		return (
@@ -447,14 +445,14 @@ export class ShippingBanner extends Component {
 				<div className="wc-admin-shipping-banner-container">
 					<img
 						className="wc-admin-shipping-banner-illustration"
-						src={ wcAssetUrl + 'images/shippingillustration.svg' }
-						alt={ __( 'Shipping ', 'woocommerce' ) }
+						src={wcAssetUrl + 'images/shippingillustration.svg'}
+						alt={__('Shipping ', 'woocommerce')}
 					/>
 					<div className="wc-admin-shipping-banner-blob">
-						<h3>{ headline }</h3>
-						{ ! isPluginInstalledAndActivated && (
+						<h3>{headline}</h3>
+						{!isPluginInstalledAndActivated && (
 							<p>
-								{ interpolateComponents( {
+								{interpolateComponents({
 									mixedString: sprintf(
 										// translators: %s is the action button label.
 										__(
@@ -483,40 +481,40 @@ export class ShippingBanner extends Component {
 											/>
 										),
 									},
-								} ) }
+								})}
 							</p>
-						) }
+						)}
 						<SetupNotice
-							isSetupError={ this.isSetupError() }
-							errorReason={ this.state.setupErrorReason }
-							infoMessage={ infoMessage }
+							isSetupError={this.isSetupError()}
+							errorReason={this.state.setupErrorReason}
+							infoMessage={infoMessage}
 						/>
 					</div>
 					<Button
-						disabled={ isShippingLabelButtonBusy }
+						disabled={isShippingLabelButtonBusy}
 						isPrimary
-						isBusy={ isShippingLabelButtonBusy }
-						onClick={ this.createShippingLabelClicked }
+						isBusy={isShippingLabelButtonBusy}
+						onClick={this.createShippingLabelClicked}
 					>
-						{ buttonLabel }
+						{buttonLabel}
 					</Button>
 
 					<button
-						onClick={ this.openDismissModal }
+						onClick={this.openDismissModal}
 						type="button"
 						className="notice-dismiss"
-						disabled={ this.state.isShippingLabelButtonBusy }
+						disabled={this.state.isShippingLabelButtonBusy}
 					>
 						<span className="screen-reader-text">
-							{ __( 'Close Print Label Banner.', 'woocommerce' ) }
+							{__('Close Print Label Banner.', 'woocommerce')}
 						</span>
 					</button>
 				</div>
 				<DismissModal
-					visible={ isDismissModalOpen }
-					onClose={ this.closeDismissModal }
-					onCloseAll={ this.hideBanner }
-					trackElementClicked={ this.trackElementClicked }
+					visible={isDismissModalOpen}
+					onClose={this.closeDismissModal}
+					onCloseAll={this.hideBanner}
+					trackElementClicked={this.trackElementClicked}
 				/>
 			</div>
 		);
@@ -534,47 +532,47 @@ ShippingBanner.propTypes = {
 };
 
 export default compose(
-	withSelect( ( select ) => {
+	withSelect((select) => {
 		const { isPluginsRequesting, isJetpackConnected, getActivePlugins } =
-			select( pluginsStore );
+			select(pluginsStore);
 
 		const isRequesting =
-			isPluginsRequesting( 'activatePlugins' ) ||
-			isPluginsRequesting( 'installPlugins' );
+			isPluginsRequesting('activatePlugins') ||
+			isPluginsRequesting('installPlugins');
 		const activePlugins = getActivePlugins();
-		const actionButtonLabel = activePlugins.includes( wcstPluginSlug )
-			? __( 'Install WooCommerce Shipping', 'woocommerce' )
-			: __( 'Create shipping label', 'woocommerce' );
-		const headline = activePlugins.includes( wcstPluginSlug )
+		const actionButtonLabel = activePlugins.includes(wcstPluginSlug)
+			? __('Install WooCommerce Shipping', 'woocommerce')
+			: __('Create shipping label', 'woocommerce');
+		const headline = activePlugins.includes(wcstPluginSlug)
 			? __(
 					'Print discounted shipping labels with a click, now with the dedicated plugin!',
 					'woocommerce'
-			  )
+				)
 			: __(
 					'Print discounted shipping labels with a click.',
 					'woocommerce'
-			  );
+				);
 		return {
 			isRequesting,
 			isJetpackConnected: isJetpackConnected(),
 			activePlugins,
 			actionButtonLabel,
 			headline,
-			orderId: parseInt( window.wcShippingCoreData.order_id, 10 ),
-			isWcstCompatible: [ 1, '1' ].includes(
+			orderId: parseInt(window.wcShippingCoreData.order_id, 10),
+			isWcstCompatible: [1, '1'].includes(
 				window.wcShippingCoreData.is_wcst_compatible
 			),
-			isIncompatibleWCShippingInstalled: [ 1, '1' ].includes(
+			isIncompatibleWCShippingInstalled: [1, '1'].includes(
 				window.wcShippingCoreData.is_incompatible_wcshipping_installed
 			),
 		};
-	} ),
-	withDispatch( ( dispatch ) => {
-		const { activatePlugins, installPlugins } = dispatch( pluginsStore );
+	}),
+	withDispatch((dispatch) => {
+		const { activatePlugins, installPlugins } = dispatch(pluginsStore);
 
 		return {
 			activatePlugins,
 			installPlugins,
 		};
-	} )
-)( ShippingBanner );
+	})
+)(ShippingBanner);

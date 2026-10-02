@@ -16,74 +16,74 @@ type RatingProps = {
 
 export const getAverageRating = (
 	product:
-		| ( Omit< ProductResponseItem, 'average_rating' > & {
+		| (Omit<ProductResponseItem, 'average_rating'> & {
 				average_rating: string;
-		  } )
+		  })
 		| ProductEntityResponse
 ) => {
-	const rating = parseFloat( product.average_rating );
+	const rating = parseFloat(product.average_rating);
 
-	return Number.isFinite( rating ) && rating > 0 ? rating : 0;
+	return Number.isFinite(rating) && rating > 0 ? rating : 0;
 };
 
 export const getRatingCount = (
 	product: ProductResponseItem | ProductEntityResponse
 ) => {
-	if ( 'review_count' in product ) {
-		const count = isNumber( product.review_count )
+	if ('review_count' in product) {
+		const count = isNumber(product.review_count)
 			? product.review_count
-			: parseInt( product.review_count, 10 );
+			: parseInt(product.review_count, 10);
 
-		return Number.isFinite( count ) && count > 0 ? count : 0;
+		return Number.isFinite(count) && count > 0 ? count : 0;
 	}
 
-	if ( 'rating_count' in product ) {
-		const count = isNumber( product.rating_count )
+	if ('rating_count' in product) {
+		const count = isNumber(product.rating_count)
 			? product.rating_count
-			: parseInt( product.rating_count, 10 );
+			: parseInt(product.rating_count, 10);
 
-		return Number.isFinite( count ) && count > 0 ? count : 0;
+		return Number.isFinite(count) && count > 0 ? count : 0;
 	}
 
 	return 0;
 };
 
-const getStarStyle = ( rating: number ) => ( {
-	width: ( rating / 5 ) * 100 + '%',
-} );
+const getStarStyle = (rating: number) => ({
+	width: (rating / 5) * 100 + '%',
+});
 
-const NoRating = ( {
+const NoRating = ({
 	className,
 	parentClassName,
 }: {
 	className: string;
 	parentClassName: string;
-} ) => {
-	const starStyle = getStarStyle( 0 );
+}) => {
+	const starStyle = getStarStyle(0);
 
 	return (
 		<div
-			className={ clsx(
-				`${ className }__norating-container`,
-				`${ parentClassName }-product-rating__norating-container`
-			) }
+			className={clsx(
+				`${className}__norating-container`,
+				`${parentClassName}-product-rating__norating-container`
+			)}
 		>
-			<div className={ `${ className }__norating` } role="img">
-				<span style={ starStyle } />
+			<div className={`${className}__norating`} role="img">
+				<span style={starStyle} />
 			</div>
-			<span>{ __( 'No Reviews', 'woocommerce' ) }</span>
+			<span>{__('No Reviews', 'woocommerce')}</span>
 		</div>
 	);
 };
 
-const Rating = ( props: RatingProps ): JSX.Element => {
+const Rating = (props: RatingProps): JSX.Element => {
 	const { className, rating, reviews, parentClassName } = props;
 
-	const starStyle = getStarStyle( rating );
+	const starStyle = getStarStyle(rating);
 
 	const ratingText = sprintf(
 		/* translators: %f is referring to the average rating value */
-		__( 'Rated %f out of 5', 'woocommerce' ),
+		__('Rated %f out of 5', 'woocommerce'),
 		rating
 	);
 
@@ -96,28 +96,28 @@ const Rating = ( props: RatingProps ): JSX.Element => {
 				reviews,
 				'woocommerce'
 			),
-			sprintf( '<strong class="rating">%f</strong>', rating ),
-			sprintf( '<span class="rating">%d</span>', reviews )
+			sprintf('<strong class="rating">%f</strong>', rating),
+			sprintf('<span class="rating">%d</span>', reviews)
 		),
 	};
 	return (
 		<div
-			className={ clsx(
-				`${ className }__stars`,
-				`${ parentClassName }__product-rating__stars`
-			) }
+			className={clsx(
+				`${className}__stars`,
+				`${parentClassName}__product-rating__stars`
+			)}
 			role="img"
-			aria-label={ ratingText }
+			aria-label={ratingText}
 		>
-			<span style={ starStyle } dangerouslySetInnerHTML={ ratingHTML } />
+			<span style={starStyle} dangerouslySetInnerHTML={ratingHTML} />
 		</div>
 	);
 };
 
-const ReviewsCount = ( props: {
+const ReviewsCount = (props: {
 	className: string;
 	reviews: number;
-} ): JSX.Element => {
+}): JSX.Element => {
 	const { className, reviews } = props;
 
 	const reviewsCount = sprintf(
@@ -132,9 +132,7 @@ const ReviewsCount = ( props: {
 	);
 
 	return (
-		<span className={ `${ className }__reviews_count` }>
-			{ reviewsCount }
-		</span>
+		<span className={`${className}__reviews_count`}>{reviewsCount}</span>
 	);
 };
 
@@ -166,21 +164,21 @@ export const ProductRating = (
 		textAlign,
 	} = props;
 
-	const wrapperClassName = clsx( styleProps.className, className, {
-		[ `${ parentClassName }__product-rating` ]: parentClassName,
-		[ `has-text-align-${ textAlign }` ]: textAlign,
-	} );
+	const wrapperClassName = clsx(styleProps.className, className, {
+		[`${parentClassName}__product-rating`]: parentClassName,
+		[`has-text-align-${textAlign}`]: textAlign,
+	});
 
 	const mockedRatings = showMockedReviews && (
-		<NoRating className={ className } parentClassName={ parentClassName } />
+		<NoRating className={className} parentClassName={parentClassName} />
 	);
 
 	const content = reviews ? (
 		<Rating
-			className={ className }
-			rating={ rating }
-			reviews={ reviews }
-			parentClassName={ parentClassName }
+			className={className}
+			rating={rating}
+			reviews={reviews}
+			parentClassName={parentClassName}
 		/>
 	) : (
 		mockedRatings
@@ -189,12 +187,12 @@ export const ProductRating = (
 	const isReviewCountVisible = reviews && showReviewCount;
 
 	return (
-		<div className={ wrapperClassName } style={ styleProps.style }>
-			<div className={ `${ className }__container` }>
-				{ content }
-				{ isReviewCountVisible ? (
-					<ReviewsCount className={ className } reviews={ reviews } />
-				) : null }
+		<div className={wrapperClassName} style={styleProps.style}>
+			<div className={`${className}__container`}>
+				{content}
+				{isReviewCountVisible ? (
+					<ReviewsCount className={className} reviews={reviews} />
+				) : null}
 			</div>
 		</div>
 	);

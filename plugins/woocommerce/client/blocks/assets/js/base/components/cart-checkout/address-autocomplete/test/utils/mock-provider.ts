@@ -16,12 +16,12 @@ export const MOCK_SEARCH_RESULTS = [
 	{
 		label: '123 Example St, Berlin, Germany',
 		id: 'result-1',
-		matchedSubstrings: [ { length: 3, offset: 0 } ],
+		matchedSubstrings: [{ length: 3, offset: 0 }],
 	},
 	{
 		label: '456 Sample Rd, Munich, Germany',
 		id: 'result-2',
-		matchedSubstrings: [ { length: 3, offset: 0 } ],
+		matchedSubstrings: [{ length: 3, offset: 0 }],
 	},
 ];
 
@@ -47,9 +47,9 @@ export interface MockProvider extends ClientAddressAutocompleteProvider {
 export function createMockProvider(): MockProvider {
 	return {
 		id: MOCK_PROVIDER_ID,
-		canSearch: jest.fn().mockReturnValue( true ),
-		search: jest.fn().mockResolvedValue( MOCK_SEARCH_RESULTS ),
-		select: jest.fn().mockResolvedValue( MOCK_SELECTED_ADDRESS ),
+		canSearch: jest.fn().mockReturnValue(true),
+		search: jest.fn().mockResolvedValue(MOCK_SEARCH_RESULTS),
+		select: jest.fn().mockResolvedValue(MOCK_SELECTED_ADDRESS),
 	};
 }
 
@@ -57,17 +57,17 @@ export function createMockProvider(): MockProvider {
  * Installs the given mock provider onto window.wc.addressAutocomplete
  * as the active provider for both billing and shipping.
  */
-export function installMockProvider( provider: MockProvider ): void {
+export function installMockProvider(provider: MockProvider): void {
 	window.wc = {
-		...( window.wc || {} ),
+		...(window.wc || {}),
 		addressAutocomplete: {
-			providers: { [ MOCK_PROVIDER_ID ]: provider },
+			providers: { [MOCK_PROVIDER_ID]: provider },
 			activeProvider: {
 				billing: provider,
 				shipping: provider,
 			},
-			registerAddressAutocompleteProvider( p ) {
-				return !! p;
+			registerAddressAutocompleteProvider(p) {
+				return !!p;
 			},
 		},
 	};

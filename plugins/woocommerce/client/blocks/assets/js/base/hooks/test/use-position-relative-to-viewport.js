@@ -8,63 +8,63 @@ import { render, screen, act } from '@testing-library/react';
  */
 import { usePositionRelativeToViewport } from '../use-position-relative-to-viewport';
 
-describe( 'usePositionRelativeToViewport', () => {
+describe('usePositionRelativeToViewport', () => {
 	function setup() {
 		const TestComponent = () => {
-			const [ referenceElement, positionRelativeToViewport ] =
+			const [referenceElement, positionRelativeToViewport] =
 				usePositionRelativeToViewport();
 
 			return (
 				<>
-					{ referenceElement }
-					{ positionRelativeToViewport === 'below' && (
+					{referenceElement}
+					{positionRelativeToViewport === 'below' && (
 						<p data-testid="below"></p>
-					) }
-					{ positionRelativeToViewport === 'visible' && (
+					)}
+					{positionRelativeToViewport === 'visible' && (
 						<p data-testid="visible"></p>
-					) }
-					{ positionRelativeToViewport === 'above' && (
+					)}
+					{positionRelativeToViewport === 'above' && (
 						<p data-testid="above"></p>
-					) }
+					)}
 				</>
 			);
 		};
 
-		return render( <TestComponent /> );
+		return render(<TestComponent />);
 	}
 
-	it( "calls IntersectionObserver's `observe` and `unobserve` events", async () => {
+	it("calls IntersectionObserver's `observe` and `unobserve` events", async () => {
 		const observe = jest.fn();
 		const unobserve = jest.fn();
 
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
-		IntersectionObserver = jest.fn( () => ( {
+		IntersectionObserver = jest.fn(() => ({
 			observe,
 			unobserve,
-		} ) );
+		}));
 
 		const { unmount } = setup();
 
-		expect( observe ).toHaveBeenCalled();
+		expect(observe).toHaveBeenCalled();
 		unmount();
-		expect( unobserve ).toHaveBeenCalled();
-	} );
+		expect(unobserve).toHaveBeenCalled();
+	});
 
 	it.each`
-		position       | isIntersecting | top
-		${ 'visible' } | ${ true }      | ${ 0 }
-		${ 'below' }   | ${ false }     | ${ 10 }
-		${ 'above' }   | ${ false }     | ${ 0 }
-		${ 'above' }   | ${ false }     | ${ -10 }
+		position     | isIntersecting | top
+		${'visible'} | ${true}        | ${0}
+		${'below'}   | ${false}       | ${10}
+		${'above'}   | ${false}       | ${0}
+		${'above'}   | ${false}       | ${-10}
 	`(
 		"position relative to viewport is '$position' with isIntersecting=$isIntersecting and top=$top",
-		( { position, isIntersecting, top } ) => {
-			let intersectionObserverCallback = ( entries ) => entries;
+		({ position, isIntersecting, top }) => {
+			let intersectionObserverCallback = (entries) => entries;
 
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
-			IntersectionObserver = jest.fn( ( callback ) => {
+			IntersectionObserver = jest.fn((callback) => {
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore
 				intersectionObserverCallback = callback;
@@ -73,17 +73,17 @@ describe( 'usePositionRelativeToViewport', () => {
 					observe: () => void null,
 					unobserve: () => void null,
 				};
-			} );
+			});
 
 			setup();
 
-			act( () => {
-				intersectionObserverCallback( [
+			act(() => {
+				intersectionObserverCallback([
 					{ isIntersecting, boundingClientRect: { top } },
-				] );
-			} );
+				]);
+			});
 
-			expect( screen.getAllByTestId( position ) ).toHaveLength( 1 );
+			expect(screen.getAllByTestId(position)).toHaveLength(1);
 		}
 	);
-} );
+});

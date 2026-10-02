@@ -4,7 +4,7 @@
 import { useSelect } from '@wordpress/data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 
-type EditorSettingsWithGlobalStyles = Record< string | symbol, unknown > & {
+type EditorSettingsWithGlobalStyles = Record<string | symbol, unknown> & {
 	blocks?: Record<
 		string,
 		{
@@ -19,16 +19,16 @@ type EditorSettingsWithGlobalStyles = Record< string | symbol, unknown > & {
  * Returns the theme.json font size for the Store Breadcrumbs block.
  */
 export function useBreadcrumbsThemeFontSize(): string | undefined {
-	return useSelect( ( select ) => {
+	return useSelect((select) => {
 		const settings = select(
 			blockEditorStore
-		).getSettings() as unknown as Record< string | symbol, unknown >;
+		).getSettings() as unknown as Record<string | symbol, unknown>;
 
-		const globalStylesKey = Object.getOwnPropertySymbols( settings ).find(
-			( key ) => key.description === 'globalStylesDataKey'
+		const globalStylesKey = Object.getOwnPropertySymbols(settings).find(
+			(key) => key.description === 'globalStylesDataKey'
 		);
 
-		if ( ! globalStylesKey ) {
+		if (!globalStylesKey) {
 			return undefined;
 		}
 
@@ -36,7 +36,7 @@ export function useBreadcrumbsThemeFontSize(): string | undefined {
 			globalStylesKey
 		] as EditorSettingsWithGlobalStyles;
 
-		return globalStyles?.blocks?.[ 'woocommerce/breadcrumbs' ]?.typography
+		return globalStyles?.blocks?.['woocommerce/breadcrumbs']?.typography
 			?.fontSize;
-	}, [] );
+	}, []);
 }

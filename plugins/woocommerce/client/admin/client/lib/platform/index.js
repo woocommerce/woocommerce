@@ -8,9 +8,9 @@ export const UNKNOWN_PLATFORM = 'unknown';
  * this for non-critical display logic.
  */
 export const platform = () => {
-	if ( /iPhone|iPad|iPod/i.test( window.navigator.userAgent ) ) {
+	if (/iPhone|iPad|iPod/i.test(window.navigator.userAgent)) {
 		return IOS_PLATFORM;
-	} else if ( /Android/i.test( window.navigator.userAgent ) ) {
+	} else if (/Android/i.test(window.navigator.userAgent)) {
 		return ANDROID_PLATFORM;
 	}
 

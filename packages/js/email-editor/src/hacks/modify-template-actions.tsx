@@ -22,19 +22,19 @@ import getResetEmailTemplateAction from '../components/sidebar/reset-email-templ
  *
  * @param postType - The post type to modify actions for.
  */
-const modifyActionsForPostType = ( postType: string ) => {
+const modifyActionsForPostType = (postType: string) => {
 	// Only modify actions for wp_template post type.
-	if ( postType !== 'wp_template' ) {
+	if (postType !== 'wp_template') {
 		return;
 	}
 	// Remove the default duplicate action.
-	unregisterEntityAction( 'postType', postType, 'duplicate-post' );
+	unregisterEntityAction('postType', postType, 'duplicate-post');
 
 	// Remove the default Gutenberg reset action.
-	unregisterEntityAction( 'postType', postType, 'reset-post' );
+	unregisterEntityAction('postType', postType, 'reset-post');
 
 	// Add the custom reset email template action.
-	registerEntityAction( 'postType', postType, getResetEmailTemplateAction() );
+	registerEntityAction('postType', postType, getResetEmailTemplateAction());
 };
 
 /**
@@ -47,8 +47,8 @@ function modifyTemplateActions() {
 	addActionForEmail(
 		'core.registerPostTypeSchema',
 		'woocommerce-email-editor/modify-template-actions',
-		( postType ) => {
-			modifyActionsForPostType( postType );
+		(postType) => {
+			modifyActionsForPostType(postType);
 		}
 	);
 
@@ -56,8 +56,8 @@ function modifyTemplateActions() {
 	addActionForEmail(
 		'core.registerPostTypeActions',
 		'woocommerce-email-editor/modify-template-actions',
-		( postType ) => {
-			modifyActionsForPostType( postType );
+		(postType) => {
+			modifyActionsForPostType(postType);
 		}
 	);
 }

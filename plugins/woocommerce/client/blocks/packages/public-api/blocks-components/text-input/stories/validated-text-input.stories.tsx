@@ -18,10 +18,10 @@ import { ValidatedTextInputProps } from '../types';
 
 const getFormattedValue = (
 	val: string | number | readonly string[] | undefined,
-	customFormatter?: ValidatedTextInputProps[ 'customFormatter' ]
+	customFormatter?: ValidatedTextInputProps['customFormatter']
 ) => {
-	const stringVal = typeof val === 'string' ? val : String( val || '' );
-	return customFormatter ? customFormatter( stringVal ) : stringVal;
+	const stringVal = typeof val === 'string' ? val : String(val || '');
+	return customFormatter ? customFormatter(stringVal) : stringVal;
 };
 
 export default {
@@ -29,7 +29,7 @@ export default {
 	component: ValidatedTextInput,
 	parameters: {
 		actions: {
-			handles: [ 'blur', 'change' ],
+			handles: ['blur', 'change'],
 		},
 	},
 	argTypes: {
@@ -220,78 +220,68 @@ export default {
 			},
 		},
 	},
-} as Meta< ValidatedTextInputProps >;
+} as Meta<ValidatedTextInputProps>;
 
-const Template: StoryFn< ValidatedTextInputProps > = ( args ) => {
+const Template: StoryFn<ValidatedTextInputProps> = (args) => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const [ _, updateArgs ] = useArgs();
+	const [_, updateArgs] = useArgs();
 	const { customFormatter } = args;
 
-	const [ inputValue, setInputValue ] = useState(
-		getFormattedValue( args.value, customFormatter )
+	const [inputValue, setInputValue] = useState(
+		getFormattedValue(args.value, customFormatter)
 	);
 	const { setValidationErrors, showValidationError } =
-		useDispatch( validationStore );
+		useDispatch(validationStore);
 
-	useEffect( () => {
-		setInputValue( getFormattedValue( args.value, customFormatter ) );
-	}, [ args.value, customFormatter ] );
+	useEffect(() => {
+		setInputValue(getFormattedValue(args.value, customFormatter));
+	}, [args.value, customFormatter]);
 
-	const onChange = ( newValue: string ) => {
-		const formattedValue = getFormattedValue( newValue, customFormatter );
+	const onChange = (newValue: string) => {
+		const formattedValue = getFormattedValue(newValue, customFormatter);
 
-		setInputValue( formattedValue );
+		setInputValue(formattedValue);
 
-		action( 'change' )( newValue || '' );
-		updateArgs( { value: newValue } );
+		action('change')(newValue || '');
+		updateArgs({ value: newValue });
 
 		// Always show error for WithError story.
-		if ( args.id === 'with-error-id' ) {
-			setValidationErrors( {
-				[ args.id ]: {
+		if (args.id === 'with-error-id') {
+			setValidationErrors({
+				[args.id]: {
 					message: 'This field cannot be empty',
 					hidden: true,
 				},
-			} );
-			showValidationError( args.id );
+			});
+			showValidationError(args.id);
 			return;
 		}
 
 		// Default: only show error if input is empty and showError is true.
-		if (
-			args.showError &&
-			! newValue.trim() &&
-			args.id !== 'with-error-id'
-		) {
-			setValidationErrors( {
-				[ args.id || 'unique-id' ]: {
+		if (args.showError && !newValue.trim() && args.id !== 'with-error-id') {
+			setValidationErrors({
+				[args.id || 'unique-id']: {
 					message: 'This field cannot be empty',
 					hidden: true,
 				},
-			} );
-			showValidationError( args.id || 'unique-id' );
+			});
+			showValidationError(args.id || 'unique-id');
 		}
 	};
 
 	return (
-		<ValidatedTextInput
-			{ ...args }
-			value={ inputValue }
-			onChange={ onChange }
-		/>
+		<ValidatedTextInput {...args} value={inputValue} onChange={onChange} />
 	);
 };
 
-export const Default: StoryFn< ValidatedTextInputProps > = Template.bind( {} );
+export const Default: StoryFn<ValidatedTextInputProps> = Template.bind({});
 Default.args = {
 	id: 'unique-id',
 	label: 'Enter your value',
 	value: '',
 };
 
-export const WithError: StoryFn< ValidatedTextInputProps > = Template.bind(
-	{}
-);
+export const WithError: StoryFn<ValidatedTextInputProps> = Template.bind({});
 WithError.args = {
 	id: 'with-error-id',
 	label: 'Enter your value',
@@ -300,13 +290,13 @@ WithError.args = {
 	showError: true,
 };
 
-export const WithCustomFormatter: StoryFn< ValidatedTextInputProps > =
-	Template.bind( {} );
+export const WithCustomFormatter: StoryFn<ValidatedTextInputProps> =
+	Template.bind({});
 WithCustomFormatter.args = {
 	id: 'unique-id',
 	label: 'Enter your value',
 	value: 'The custom formatter will turn this lowercase string to uppercase.',
-	customFormatter: ( value: string ) => {
+	customFormatter: (value: string) => {
 		return value.toUpperCase();
 	},
 };

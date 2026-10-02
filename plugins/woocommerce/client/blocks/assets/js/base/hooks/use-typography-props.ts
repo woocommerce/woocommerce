@@ -17,22 +17,22 @@ type blockAttributes = {
 	fontFamily?: string | undefined;
 };
 
-export const useTypographyProps = ( props: blockAttributes ): StyleProps => {
-	const typography = isObject( props.style.typography )
+export const useTypographyProps = (props: blockAttributes): StyleProps => {
+	const typography = isObject(props.style.typography)
 		? props.style.typography
 		: {};
-	const classNameFallback = isString( typography.fontFamily )
+	const classNameFallback = isString(typography.fontFamily)
 		? typography.fontFamily
 		: '';
 	const className = props.fontFamily
-		? `has-${ props.fontFamily }-font-family`
+		? `has-${props.fontFamily}-font-family`
 		: classNameFallback;
 
 	return {
 		className,
 		style: {
 			fontSize: props.fontSize
-				? `var(--wp--preset--font-size--${ props.fontSize })`
+				? `var(--wp--preset--font-size--${props.fontSize})`
 				: typography.fontSize,
 			fontStyle: typography.fontStyle,
 			fontWeight: typography.fontWeight,

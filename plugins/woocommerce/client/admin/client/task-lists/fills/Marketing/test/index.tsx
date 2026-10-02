@@ -71,10 +71,10 @@ const extensionLists = [
 	},
 ];
 
-describe( 'transformExtensionToPlugin', () => {
-	test( 'should return the formatted extension', () => {
-		const plugin = transformExtensionToPlugin( basicPlugins[ 0 ], [], [] );
-		expect( plugin ).toEqual( {
+describe('transformExtensionToPlugin', () => {
+	test('should return the formatted extension', () => {
+		const plugin = transformExtensionToPlugin(basicPlugins[0], [], []);
+		expect(plugin).toEqual({
 			description: 'Basic plugin description',
 			slug: 'basic-plugin',
 			imageUrl: 'basic.jpeg',
@@ -83,74 +83,70 @@ describe( 'transformExtensionToPlugin', () => {
 			isBuiltByWC: true,
 			manageUrl: '#',
 			name: 'Basic Plugin',
-		} );
-	} );
+		});
+	});
 
-	test( 'should get the plugin slug when a colon exists', () => {
-		const plugin = transformExtensionToPlugin( growPlugins[ 1 ], [], [] );
-		expect( plugin.slug ).toEqual( 'grow-plugin-two' );
-	} );
+	test('should get the plugin slug when a colon exists', () => {
+		const plugin = transformExtensionToPlugin(growPlugins[1], [], []);
+		expect(plugin.slug).toEqual('grow-plugin-two');
+	});
 
-	test( 'should mark the plugin as active when in the active plugins', () => {
+	test('should mark the plugin as active when in the active plugins', () => {
 		const plugin = transformExtensionToPlugin(
-			basicPlugins[ 0 ],
-			[ 'basic-plugin' ],
+			basicPlugins[0],
+			['basic-plugin'],
 			[]
 		);
-		expect( plugin.isActive ).toBeTruthy();
-	} );
+		expect(plugin.isActive).toBeTruthy();
+	});
 
-	test( 'should mark the plugin as installed when in the installed plugins', () => {
+	test('should mark the plugin as installed when in the installed plugins', () => {
 		const plugin = transformExtensionToPlugin(
-			basicPlugins[ 0 ],
+			basicPlugins[0],
 			[],
-			[ 'basic-plugin' ]
+			['basic-plugin']
 		);
-		expect( plugin.isInstalled ).toBeTruthy();
-	} );
-} );
+		expect(plugin.isInstalled).toBeTruthy();
+	});
+});
 
-describe( 'getMarketingExtensionLists', () => {
-	test( 'should only return the allowed lists', () => {
-		const [ , lists ] = getMarketingExtensionLists(
+describe('getMarketingExtensionLists', () => {
+	test('should only return the allowed lists', () => {
+		const [, lists] = getMarketingExtensionLists(extensionLists, [], []);
+
+		expect(lists.length).toBe(2);
+		expect(lists[0].key).toBe('task-list/grow');
+		expect(lists[1].key).toBe('task-list/reach');
+	});
+
+	test('should separate installed plugins', () => {
+		const [installed] = getMarketingExtensionLists(
 			extensionLists,
 			[],
-			[]
+			['grow-plugin']
 		);
 
-		expect( lists.length ).toBe( 2 );
-		expect( lists[ 0 ].key ).toBe( 'task-list/grow' );
-		expect( lists[ 1 ].key ).toBe( 'task-list/reach' );
-	} );
+		expect(installed.length).toBe(1);
+		expect(installed[0].slug).toBe('grow-plugin');
+	});
 
-	test( 'should separate installed plugins', () => {
-		const [ installed ] = getMarketingExtensionLists(
+	test('should not include installed plugins in the extensions list', () => {
+		const [, lists] = getMarketingExtensionLists(
 			extensionLists,
 			[],
-			[ 'grow-plugin' ]
+			['grow-plugin']
 		);
 
-		expect( installed.length ).toBe( 1 );
-		expect( installed[ 0 ].slug ).toBe( 'grow-plugin' );
-	} );
+		expect(lists[1].plugins?.length).toBe(1);
+	});
 
-	test( 'should not include installed plugins in the extensions list', () => {
-		const [ , lists ] = getMarketingExtensionLists(
+	test('should only include allowed list plugins in the installed list', () => {
+		const [installed] = getMarketingExtensionLists(
 			extensionLists,
 			[],
-			[ 'grow-plugin' ]
+			['basic-plugin']
 		);
 
-		expect( lists[ 1 ].plugins?.length ).toBe( 1 );
-	} );
-
-	test( 'should only include allowed list plugins in the installed list', () => {
-		const [ installed ] = getMarketingExtensionLists(
-			extensionLists,
-			[],
-			[ 'basic-plugin' ]
-		);
-
-		expect( installed.length ).toBe( 0 );
-	} );
-} );
+		expect(installed.length).toBe(0);
+	});
+});

@@ -22,7 +22,7 @@ export * as services from './services';
 export type CongratsProps = {
 	hasCompleteSurvey: boolean;
 	isWooExpress: boolean;
-	completeSurvey: ( surveyData: SurveyData ) => void;
+	completeSurvey: (surveyData: SurveyData) => void;
 	children?: React.ReactNode;
 	siteIsShowingCachedContent: boolean;
 };
@@ -47,48 +47,45 @@ import { WhatsNext } from './WhatsNext';
 import { LysSurvey } from './Survey';
 import { useFullScreen } from '~/utils';
 
-export const LaunchYourStoreSuccess = ( {
+export const LaunchYourStoreSuccess = ({
 	context: {
 		congratsScreen: { activePlugins, allTasklists, hasCompleteSurvey },
 		siteIsShowingCachedContent,
 	},
 	sendEventToMainContent,
 	className,
-}: MainContentComponentProps ) => {
-	const copyLink = __( 'Copy link', 'woocommerce' );
-	const copied = __< string >( 'Copied!', 'woocommerce' );
-	const homeUrl: string = getSetting( 'homeUrl', '' );
-	const urlObject = new URL( homeUrl );
+}: MainContentComponentProps) => {
+	const copyLink = __('Copy link', 'woocommerce');
+	const copied = __<string>('Copied!', 'woocommerce');
+	const homeUrl: string = getSetting('homeUrl', '');
+	const urlObject = new URL(homeUrl);
 	let hostname: string = urlObject?.hostname;
-	if ( urlObject?.port ) {
+	if (urlObject?.port) {
 		hostname += ':' + urlObject.port;
 	}
 
-	const [ copyLinkText, setCopyLinkText ] = useState< string >( copyLink );
+	const [copyLinkText, setCopyLinkText] = useState<string>(copyLink);
 
-	const copyClipboardRef = useCopyToClipboard< HTMLAnchorElement >(
+	const copyClipboardRef = useCopyToClipboard<HTMLAnchorElement>(
 		homeUrl,
 		() => {
-			setCopyLinkText( copied );
-			setTimeout( () => {
-				setCopyLinkText( copyLink );
-			}, 2000 );
+			setCopyLinkText(copied);
+			setTimeout(() => {
+				setCopyLinkText(copyLink);
+			}, 2000);
 		}
 	);
 
-	useFullScreen( [ 'woocommerce-launch-your-store-success' ] );
+	useFullScreen(['woocommerce-launch-your-store-success']);
 
 	return (
 		<div
-			className={ clsx(
-				'launch-store-success-page__container',
-				className
-			) }
+			className={clsx('launch-store-success-page__container', className)}
 		>
 			<div className="woocommerce-launch-store__congrats">
 				<ConfettiAnimation
-					delay={ 1000 }
-					colors={ [
+					delay={1000}
+					colors={[
 						'#DFD1FB',
 						'#FB79D9',
 						'#FFA60E',
@@ -96,37 +93,37 @@ export const LaunchYourStoreSuccess = ( {
 						'#AD86E9',
 						'#7F54B3',
 						'#3C2861',
-					] }
+					]}
 				/>
 				<div className="woocommerce-launch-store__congrats-header-container">
 					<span className="woologo">
 						<WooLogo />
 					</span>
 					<Button
-						onClick={ () => {
-							sendEventToMainContent( { type: 'BACK_TO_HOME' } );
-						} }
+						onClick={() => {
+							sendEventToMainContent({ type: 'BACK_TO_HOME' });
+						}}
 						className="back-to-home-button"
 						variant="link"
 					>
 						<Dashicon icon="arrow-left-alt2"></Dashicon>
-						<span>{ __( 'Back to Home', 'woocommerce' ) }</span>
+						<span>{__('Back to Home', 'woocommerce')}</span>
 					</Button>
 				</div>
 				<div className="woocommerce-launch-store__congrats-content">
 					<h1 className="woocommerce-launch-store__congrats-heading">
-						{ siteIsShowingCachedContent
+						{siteIsShowingCachedContent
 							? __(
 									'Congratulations! Your store will launch soon',
 									'woocommerce'
-							  )
+								)
 							: __(
 									'Congratulations! Your store is now live',
 									'woocommerce'
-							  ) }
+								)}
 					</h1>
 					<h2 className="woocommerce-launch-store__congrats-subheading">
-						{ siteIsShowingCachedContent
+						{siteIsShowingCachedContent
 							? createInterpolateElement(
 									__(
 										'It’ll be ready to view as soon as your <link></link> have updated. Please wait, or contact your web host to find out how to do this manually.',
@@ -139,65 +136,65 @@ export const LaunchYourStoreSuccess = ( {
 												target="_blank"
 												rel="noreferrer"
 											>
-												{ __(
+												{__(
 													'server caches',
 													'woocommerce'
-												) }
+												)}
 											</a>
 										),
 									}
-							  )
+								)
 							: __(
 									'You’ve successfully launched your store and are ready to start selling! We can’t wait to see your business grow.',
 									'woocommerce'
-							  ) }
+								)}
 					</h2>
 					<div className="woocommerce-launch-store__congrats-midsection-container">
 						<div className="woocommerce-launch-store__congrats-visit-store">
-							<p className="store-name">{ hostname }</p>
+							<p className="store-name">{hostname}</p>
 							<div className="buttons-container">
 								<Button
 									className=""
 									variant="secondary"
-									ref={ copyClipboardRef }
-									onClick={ () => {
+									ref={copyClipboardRef}
+									onClick={() => {
 										recordEvent(
 											'launch_your_store_congrats_copy_store_link_click'
 										);
-									} }
+									}}
 								>
-									{ copyLinkText }
+									{copyLinkText}
 								</Button>
 								<Button
 									className=""
 									variant="primary"
-									onClick={ () => {
-										sendEventToMainContent( {
+									onClick={() => {
+										sendEventToMainContent({
 											type: 'PREVIEW_STORE',
-										} );
-									} }
+										});
+									}}
 								>
-									{ __( 'Visit your store', 'woocommerce' ) }
+									{__('Visit your store', 'woocommerce')}
 								</Button>
 							</div>
 						</div>
 
 						<LysSurvey
-							hasCompleteSurvey={ hasCompleteSurvey }
-							onSubmit={ ( surveyData: SurveyData ) => {
-								sendEventToMainContent( {
+							hasCompleteSurvey={hasCompleteSurvey}
+							onSubmit={(surveyData: SurveyData) => {
+								sendEventToMainContent({
 									type: 'COMPLETE_SURVEY',
 									payload: surveyData,
-								} );
-							} }
+								});
+							}}
 						/>
 					</div>
 					<h2 className="woocommerce-launch-store__congrats-main-actions-title">
-						{ __( 'What’s next?', 'woocommerce' ) }
+						{__('What’s next?', 'woocommerce')}
 					</h2>
 					<WhatsNext
-						activePlugins={ activePlugins }
-						allTasklists={ allTasklists }
+						activePlugins={activePlugins}
+						allTasklists={allTasklists}
 					/>
 				</div>
 			</div>

@@ -27,10 +27,10 @@ interface UpdateProps {
 	wooUpdateManagerActive: boolean;
 }
 
-export default function Update( props: UpdateProps ) {
-	const [ showModal, setShowModal ] = useState( false );
-	const [ isUpdating, setIsUpdating ] = useState( false );
-	const { loadSubscriptions } = useContext( SubscriptionsContext );
+export default function Update(props: UpdateProps) {
+	const [showModal, setShowModal] = useState(false);
+	const [isUpdating, setIsUpdating] = useState(false);
+	const { loadSubscriptions } = useContext(SubscriptionsContext);
 
 	const canUpdate =
 		props.subscription.active &&
@@ -40,24 +40,24 @@ export default function Update( props: UpdateProps ) {
 		props.wooUpdateManagerActive;
 
 	function update() {
-		recordEvent( 'marketplace_product_update_button_clicked', {
+		recordEvent('marketplace_product_update_button_clicked', {
 			product_zip_slug: props.subscription.zip_slug,
 			product_id: props.subscription.product_id,
 			product_installed_version: props.subscription.local.installed,
 			product_current_version: props.subscription.version,
-		} );
+		});
 
-		if ( ! canUpdate ) {
-			setShowModal( true );
+		if (!canUpdate) {
+			setShowModal(true);
 			return;
 		}
-		removeNotice( props.subscription.product_key );
-		if ( ! window.wp.updates ) {
+		removeNotice(props.subscription.product_key);
+		if (!window.wp.updates) {
 			addNotice(
 				props.subscription.product_key,
 				sprintf(
 					// translators: %s is the product name.
-					__( '%s couldn’t be updated.', 'woocommerce' ),
+					__('%s couldn’t be updated.', 'woocommerce'),
 					props.subscription.product_name
 				),
 				NoticeStatus.Error,
@@ -79,93 +79,93 @@ export default function Update( props: UpdateProps ) {
 			return;
 		}
 
-		setIsUpdating( true );
+		setIsUpdating(true);
 
-		updateProduct( props.subscription )
-			.then( () => {
-				void loadSubscriptions( false ).then( () => {
+		updateProduct(props.subscription)
+			.then(() => {
+				void loadSubscriptions(false).then(() => {
 					addNotice(
 						props.subscription.product_key,
 						sprintf(
 							// translators: %s is the product name.
-							__( '%s updated successfully.', 'woocommerce' ),
+							__('%s updated successfully.', 'woocommerce'),
 							props.subscription.product_name
 						),
 						NoticeStatus.Success
 					);
-					setIsUpdating( false );
-				} );
+					setIsUpdating(false);
+				});
 
-				recordEvent( 'marketplace_product_updated', {
+				recordEvent('marketplace_product_updated', {
 					product_zip_slug: props.subscription.zip_slug,
 					product_id: props.subscription.product_id,
 					product_installed_version:
 						props.subscription.local.installed,
 					product_current_version: props.subscription.version,
-				} );
-			} )
-			.catch( () => {
+				});
+			})
+			.catch(() => {
 				addNotice(
 					props.subscription.product_key,
 					sprintf(
 						// translators: %s is the product name.
-						__( '%s couldn’t be updated.', 'woocommerce' ),
+						__('%s couldn’t be updated.', 'woocommerce'),
 						props.subscription.product_name
 					),
 					NoticeStatus.Error,
 					{
 						actions: [
 							{
-								label: __( 'Try again', 'woocommerce' ),
+								label: __('Try again', 'woocommerce'),
 								onClick: update,
 								url: '',
 							},
 						],
 					}
 				);
-				setIsUpdating( false );
+				setIsUpdating(false);
 
-				recordEvent( 'marketplace_product_update_failed', {
+				recordEvent('marketplace_product_update_failed', {
 					product_zip_slug: props.subscription.zip_slug,
 					product_id: props.subscription.product_id,
 					product_installed_version:
 						props.subscription.local.installed,
 					product_current_version: props.subscription.version,
-				} );
-			} );
+				});
+			});
 	}
 
 	const modal = () => {
-		if ( ! showModal ) {
+		if (!showModal) {
 			return null;
 		}
 
-		if ( props.subscription.product_key === '' ) {
+		if (props.subscription.product_key === '') {
 			return (
 				<SubscribeModal
-					onClose={ () => setShowModal( false ) }
-					subscription={ props.subscription }
+					onClose={() => setShowModal(false)}
+					subscription={props.subscription}
 				/>
 			);
-		} else if ( props.subscription.expired ) {
+		} else if (props.subscription.expired) {
 			return (
 				<RenewModal
-					subscription={ props.subscription }
-					onClose={ () => setShowModal( false ) }
+					subscription={props.subscription}
+					onClose={() => setShowModal(false)}
 				/>
 			);
-		} else if ( ! props.subscription.active ) {
+		} else if (!props.subscription.active) {
 			return (
 				<ConnectModal
-					subscription={ props.subscription }
-					onClose={ () => setShowModal( false ) }
+					subscription={props.subscription}
+					onClose={() => setShowModal(false)}
 				/>
 			);
-		} else if ( ! props.wooUpdateManagerActive ) {
+		} else if (!props.wooUpdateManagerActive) {
 			return (
 				<InstallWooConnectModal
-					subscription={ props.subscription }
-					onClose={ () => setShowModal( false ) }
+					subscription={props.subscription}
+					onClose={() => setShowModal(false)}
 				/>
 			);
 		}
@@ -175,24 +175,24 @@ export default function Update( props: UpdateProps ) {
 
 	return (
 		<>
-			{ modal() }
+			{modal()}
 			<Button
 				variant="link"
 				className="woocommerce-marketplace__my-subscriptions-update"
-				onClick={ update }
-				isBusy={ isUpdating }
-				disabled={ isUpdating }
-				label={ sprintf(
+				onClick={update}
+				isBusy={isUpdating}
+				disabled={isUpdating}
+				label={sprintf(
 					// translators: %s is the product version.
-					__( 'Update to %s', 'woocommerce' ),
+					__('Update to %s', 'woocommerce'),
 					props.subscription.version
-				) }
-				showTooltip={ true }
+				)}
+				showTooltip={true}
 				tooltipPosition="top center"
 			>
-				{ isUpdating
-					? __( 'Updating', 'woocommerce' )
-					: __( 'Update', 'woocommerce' ) }
+				{isUpdating
+					? __('Updating', 'woocommerce')
+					: __('Update', 'woocommerce')}
 			</Button>
 		</>
 	);

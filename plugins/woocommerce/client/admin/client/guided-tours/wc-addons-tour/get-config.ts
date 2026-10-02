@@ -8,17 +8,17 @@ import { TourKitTypes } from '@woocommerce/components';
  */
 import { scrollPopperToVisibleAreaIfNeeded } from './utils';
 
-export const getTourConfig = ( {
+export const getTourConfig = ({
 	closeHandler,
 	onNextStepHandler,
 	autoScrollBlock,
 	steps,
 }: {
 	closeHandler: TourKitTypes.CloseHandler;
-	onNextStepHandler: ( currentStepIndex: number ) => void;
+	onNextStepHandler: (currentStepIndex: number) => void;
 	autoScrollBlock: ScrollLogicalPosition;
 	steps: TourKitTypes.WooStep[];
-} ): TourKitTypes.WooConfig => {
+}): TourKitTypes.WooConfig => {
 	let previousPopperTopPosition: number | null = null;
 	let previousPopperRef: unknown = null;
 	const defaultPlacement = 'top-start';
@@ -42,14 +42,14 @@ export const getTourConfig = ( {
 				{
 					name: 'offset',
 					options: {
-						offset: [ 20, 20 ],
+						offset: [20, 20],
 					},
 				},
 				{
 					name: 'flip',
 					options: {
-						allowedAutoPlacements: [ 'right', 'bottom', 'top' ],
-						fallbackPlacements: [ 'bottom-start', 'right' ],
+						allowedAutoPlacements: ['right', 'bottom', 'top'],
+						fallbackPlacements: ['bottom-start', 'right'],
 						flipVariations: false,
 						boundary: 'clippingParents',
 					},
@@ -58,19 +58,19 @@ export const getTourConfig = ( {
 					name: 'inAppTourPopperModifications',
 					enabled: true,
 					phase: 'read',
-					fn( { state, instance } ) {
+					fn({ state, instance }) {
 						// 1. First modification - force `right` placement for items in admin menu.
-						if ( previousPopperRef !== state.elements.reference ) {
+						if (previousPopperRef !== state.elements.reference) {
 							const isAdminMenuItem = (
 								state.elements.reference as HTMLElement
-							 ).closest( '#adminmenu' );
+							).closest('#adminmenu');
 							const desiredPlacement = isAdminMenuItem
 								? 'right'
 								: defaultPlacement;
-							if ( state.placement !== desiredPlacement ) {
-								void instance.setOptions( {
+							if (state.placement !== desiredPlacement) {
+								void instance.setOptions({
 									placement: desiredPlacement,
-								} );
+								});
 							}
 						}
 

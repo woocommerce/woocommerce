@@ -19,11 +19,11 @@ import { ProductNewestBlockProps } from './types';
 /**
  * Component to handle edit mode of "Newest Products".
  */
-export const ProductNewestBlock = ( {
+export const ProductNewestBlock = ({
 	attributes,
 	name,
 	setAttributes,
-}: ProductNewestBlockProps ): JSX.Element => {
+}: ProductNewestBlockProps): JSX.Element => {
 	const {
 		categories,
 		catOperator,
@@ -37,62 +37,62 @@ export const ProductNewestBlock = ( {
 	const getInspectorControls = () => {
 		return (
 			<InspectorControls key="inspector">
-				<PanelBody title={ __( 'Layout', 'woocommerce' ) } initialOpen>
+				<PanelBody title={__('Layout', 'woocommerce')} initialOpen>
 					<GridLayoutControl
-						columns={ columns }
-						rows={ rows }
-						alignButtons={ alignButtons }
-						setAttributes={ setAttributes }
-						minColumns={ getSetting( 'minColumns', 1 ) }
-						maxColumns={ getSetting( 'maxColumns', 6 ) }
-						minRows={ getSetting( 'minRows', 1 ) }
-						maxRows={ getSetting( 'maxRows', 6 ) }
+						columns={columns}
+						rows={rows}
+						alignButtons={alignButtons}
+						setAttributes={setAttributes}
+						minColumns={getSetting('minColumns', 1)}
+						maxColumns={getSetting('maxColumns', 6)}
+						minRows={getSetting('minRows', 1)}
+						maxRows={getSetting('maxRows', 6)}
 					/>
 				</PanelBody>
-				<PanelBody title={ __( 'Content', 'woocommerce' ) } initialOpen>
+				<PanelBody title={__('Content', 'woocommerce')} initialOpen>
 					<GridContentControl
-						settings={ contentVisibility }
-						onChange={ ( value ) =>
-							setAttributes( { contentVisibility: value } )
+						settings={contentVisibility}
+						onChange={(value) =>
+							setAttributes({ contentVisibility: value })
 						}
 					/>
 				</PanelBody>
 				<PanelBody
-					title={ __( 'Filter by stock status', 'woocommerce' ) }
-					initialOpen={ false }
+					title={__('Filter by stock status', 'woocommerce')}
+					initialOpen={false}
 				>
 					<ProductStockControl
-						setAttributes={ setAttributes }
-						value={ stockStatus }
+						setAttributes={setAttributes}
+						value={stockStatus}
 					/>
 				</PanelBody>
 				<PanelBody
-					title={ __( 'Filter by Product Category', 'woocommerce' ) }
-					initialOpen={ false }
+					title={__('Filter by Product Category', 'woocommerce')}
+					initialOpen={false}
 				>
 					<ProductCategoryControl
-						selected={ categories }
-						onChange={ ( value = [] ) => {
-							const ids = value.map( ( { id } ) => id );
-							setAttributes( { categories: ids } );
-						} }
-						operator={ catOperator }
-						onOperatorChange={ ( value = 'any' ) =>
-							setAttributes( { catOperator: value } )
+						selected={categories}
+						onChange={(value = []) => {
+							const ids = value.map(({ id }) => id);
+							setAttributes({ categories: ids });
+						}}
+						operator={catOperator}
+						onOperatorChange={(value = 'any') =>
+							setAttributes({ catOperator: value })
 						}
 					/>
 				</PanelBody>
 			</InspectorControls>
 		);
 	};
-	if ( isPreview ) {
+	if (isPreview) {
 		return gridBlockPreview;
 	}
 	return (
 		<>
-			{ getInspectorControls() }
+			{getInspectorControls()}
 			<Disabled>
-				<ServerSideRender block={ name } attributes={ attributes } />
+				<ServerSideRender block={name} attributes={attributes} />
 			</Disabled>
 		</>
 	);

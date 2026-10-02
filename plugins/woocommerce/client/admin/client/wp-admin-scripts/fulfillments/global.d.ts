@@ -17,13 +17,10 @@ declare global {
 
 	interface Window {
 		wcFulfillmentSettings: {
-			providers: Record< string, ShipmentProvider >;
-			currency_symbols: Record< string, string >;
-			fulfillment_statuses: Record< string, FulfillmentStatusProps >;
-			order_fulfillment_statuses: Record<
-				string,
-				FulfillmentStatusProps
-			>;
+			providers: Record<string, ShipmentProvider>;
+			currency_symbols: Record<string, string>;
+			fulfillment_statuses: Record<string, FulfillmentStatusProps>;
+			order_fulfillment_statuses: Record<string, FulfillmentStatusProps>;
 		};
 	}
 }

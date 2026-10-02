@@ -19,33 +19,28 @@ export const getShippingRatesPackageCount = (
 	return shippingRates.length;
 };
 
-const collectableMethodIds = getSetting< string[] >(
-	'collectableMethodIds',
-	[]
-);
+const collectableMethodIds = getSetting<string[]>('collectableMethodIds', []);
 
 /**
  * If the package rate's method_id is in the collectableMethodIds array, return true.
  */
 export const isPackageRateCollectable = (
 	rate: CartShippingPackageShippingRate
-): boolean => collectableMethodIds.includes( rate.method_id );
+): boolean => collectableMethodIds.includes(rate.method_id);
 
 /**
  * Check if the specified rates are collectable. Accepts either an array of rate names, or a single string.
  */
-export const hasCollectableRate = (
-	chosenRates: string[] | string
-): boolean => {
-	if ( ! LOCAL_PICKUP_ENABLED ) {
+export const hasCollectableRate = (chosenRates: string[] | string): boolean => {
+	if (!LOCAL_PICKUP_ENABLED) {
 		return false;
 	}
-	if ( Array.isArray( chosenRates ) ) {
-		return !! chosenRates.find( ( rate ) =>
-			collectableMethodIds.includes( rate )
+	if (Array.isArray(chosenRates)) {
+		return !!chosenRates.find((rate) =>
+			collectableMethodIds.includes(rate)
 		);
 	}
-	return collectableMethodIds.includes( chosenRates );
+	return collectableMethodIds.includes(chosenRates);
 };
 /**
  * Get the number of rates in a shippingRates array.
@@ -55,9 +50,9 @@ export const hasCollectableRate = (
 export const getShippingRatesRateCount = (
 	shippingRates: CartShippingRate[]
 ) => {
-	return shippingRates.reduce( function ( count, shippingPackage ) {
+	return shippingRates.reduce(function (count, shippingPackage) {
 		return count + shippingPackage.shipping_rates.length;
-	}, 0 );
+	}, 0);
 };
 
 /**
@@ -67,12 +62,9 @@ export const getShippingRatesRateCount = (
  * @param {Array} shippingRates An array of packages and rates.
  * @return {boolean} True if a rate exists.
  */
-export const hasShippingRate = (
-	shippingRates: CartShippingRate[]
-): boolean => {
+export const hasShippingRate = (shippingRates: CartShippingRate[]): boolean => {
 	return shippingRates.some(
-		( shippingRatesPackage ) =>
-			!! shippingRatesPackage.shipping_rates.length
+		(shippingRatesPackage) => !!shippingRatesPackage.shipping_rates.length
 	);
 };
 
@@ -86,16 +78,16 @@ export const hasShippingRate = (
 export const getSelectedOrFirstRateId = (
 	rates: CartShippingPackageShippingRate[]
 ): string | undefined =>
-	rates.find( ( rate ) => rate.selected )?.rate_id ?? rates[ 0 ]?.rate_id;
+	rates.find((rate) => rate.selected)?.rate_id ?? rates[0]?.rate_id;
 
 export const hasSelectedShippingRate = (
 	shippingRates: CartShippingRate[]
 ): boolean => {
-	if ( ! hasShippingRate( shippingRates ) ) {
+	if (!hasShippingRate(shippingRates)) {
 		return false;
 	}
-	return shippingRates.some( ( shippingRatesPackage ) =>
-		shippingRatesPackage.shipping_rates.some( ( rate ) => rate.selected )
+	return shippingRates.some((shippingRatesPackage) =>
+		shippingRatesPackage.shipping_rates.some((rate) => rate.selected)
 	);
 };
 
@@ -106,37 +98,35 @@ export const filterShippingRatesByPrefersCollection = (
 	shippingRates: CartShippingRate[],
 	prefersCollection: boolean
 ) => {
-	return shippingRates.map( ( shippingRatesPackage ) => {
+	return shippingRates.map((shippingRatesPackage) => {
 		return {
 			...shippingRatesPackage,
 			shipping_rates: shippingRatesPackage.shipping_rates.filter(
-				( rate ) => {
-					const collectableRate = hasCollectableRate(
-						rate.method_id
-					);
+				(rate) => {
+					const collectableRate = hasCollectableRate(rate.method_id);
 
-					if ( prefersCollection ) {
+					if (prefersCollection) {
 						return collectableRate;
 					}
 
-					return ! collectableRate;
+					return !collectableRate;
 				}
 			),
 		};
-	} );
+	});
 };
 
 /**
  * Calculates the total shipping value based on store settings.
  */
-export const getTotalShippingValue = ( values: {
+export const getTotalShippingValue = (values: {
 	total_shipping: string;
 	total_shipping_tax: string;
-} ): number => {
-	return getSetting( 'displayCartPricesIncludingTax', false )
-		? parseInt( values.total_shipping, 10 ) +
-				parseInt( values.total_shipping_tax, 10 )
-		: parseInt( values.total_shipping, 10 );
+}): number => {
+	return getSetting('displayCartPricesIncludingTax', false)
+		? parseInt(values.total_shipping, 10) +
+				parseInt(values.total_shipping_tax, 10)
+		: parseInt(values.total_shipping, 10);
 };
 
 /**
@@ -148,11 +138,11 @@ export const getSelectedShippingRateNames = (
 	// This is to ensure we don't have duplicate rate names in the array.
 	return Array.from(
 		new Set(
-			shippingRates.flatMap( ( shippingPackage ) => {
+			shippingRates.flatMap((shippingPackage) => {
 				return shippingPackage.shipping_rates
-					.filter( ( rate ) => rate.selected )
-					.map( ( rate ) => rate.name );
-			} )
+					.filter((rate) => rate.selected)
+					.map((rate) => rate.name);
+			})
 		)
 	);
 };
@@ -160,24 +150,23 @@ export const getSelectedShippingRateNames = (
 export const selectedRatesAreCollectable = (
 	shippingRates: CartShippingRate[]
 ): boolean => {
-	return hasShippingRate( shippingRates )
-		? shippingRates.every( ( shippingPackage ) => {
+	return hasShippingRate(shippingRates)
+		? shippingRates.every((shippingPackage) => {
 				return shippingPackage.shipping_rates.every(
-					( rate ) =>
-						! rate.selected || isPackageRateCollectable( rate )
+					(rate) => !rate.selected || isPackageRateCollectable(rate)
 				);
-		  } )
+			})
 		: false;
 };
 
 export const allRatesAreCollectable = (
 	shippingRates: CartShippingRate[]
 ): boolean => {
-	return hasShippingRate( shippingRates )
-		? shippingRates.every( ( shippingPackage ) => {
-				return shippingPackage.shipping_rates.every( ( rate ) =>
-					isPackageRateCollectable( rate )
+	return hasShippingRate(shippingRates)
+		? shippingRates.every((shippingPackage) => {
+				return shippingPackage.shipping_rates.every((rate) =>
+					isPackageRateCollectable(rate)
 				);
-		  } )
+			})
 		: false;
 };

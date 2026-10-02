@@ -16,7 +16,7 @@ enum Locations {
 	OTHER = 'other',
 }
 const templateSlugToTemplateMap: {
-	[ key: string ]: Locations | undefined;
+	[key: string]: Locations | undefined;
 } = {
 	'single-product': Locations.SINGLE_PRODUCT,
 	'archive-product': Locations.PRODUCT_CATALOG,
@@ -29,33 +29,33 @@ const templateSlugToTemplateMap: {
 	'page-checkout': Locations.CHECKOUT,
 };
 
-export const useTracksLocation = ( templateSlug: string | undefined ) => {
-	const postType = useSelect( ( select ) => {
-		const editor = select( CORE_EDITOR_STORE );
+export const useTracksLocation = (templateSlug: string | undefined) => {
+	const postType = useSelect((select) => {
+		const editor = select(CORE_EDITOR_STORE);
 		return editor?.getCurrentPostType?.();
-	}, [] );
+	}, []);
 
-	if ( postType === Locations.PAGE || postType === Locations.POST ) {
+	if (postType === Locations.PAGE || postType === Locations.POST) {
 		return postType;
 	}
 
-	if ( ! templateSlug ) {
+	if (!templateSlug) {
 		return Locations.OTHER;
 	}
 
-	const template = templateSlugToTemplateMap[ templateSlug ];
+	const template = templateSlugToTemplateMap[templateSlug];
 
-	if ( template ) {
+	if (template) {
 		return template;
 	}
 
-	if ( templateSlug.includes( 'single-product' ) ) {
+	if (templateSlug.includes('single-product')) {
 		return Locations.SINGLE_PRODUCT;
 	}
 
 	if (
-		templateSlug.includes( 'taxonomy-product_cat' ) ||
-		templateSlug.includes( 'taxonomy-product_tag' )
+		templateSlug.includes('taxonomy-product_cat') ||
+		templateSlug.includes('taxonomy-product_tag')
 	) {
 		return Locations.PRODUCT_ARCHIVE;
 	}

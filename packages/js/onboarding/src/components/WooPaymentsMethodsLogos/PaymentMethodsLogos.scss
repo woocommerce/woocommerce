@@ -25,7 +25,7 @@
 		// Carries the same 2px as the bordered logos so the badge matches their
 		// 40x26 footprint, and gives the hover border something to paint on.
 		border: 1px solid transparent;
-		background-color: rgba($gray-700, 0.10);
+		background-color: rgba($gray-700, 0.1);
 		color: $gray-900;
 		text-align: center;
 		line-height: 24px;
@@ -40,7 +40,10 @@
 		// derived from that same colour, so theming both drops the pair under 4.5:1 on
 		// the lighter schemes (2.48:1 on Sunrise). Only the tint and border follow the theme.
 		color: $gray-900;
-		background-color: rgba(var(--wp-admin-theme-color--rgb, 56, 88, 233), 0.15);
+		background-color: rgba(
+			var(--wp-admin-theme-color--rgb, 56, 88, 233),
+			0.15
+		);
 		border-color: var(--wp-admin-theme-color, #3858e9);
 	}
 
@@ -59,7 +62,8 @@
 	}
 }
 
-.wc_payment_gateways_wrapper [data-gateway_id="pre_install_woocommerce_payments_promotion"] {
+.wc_payment_gateways_wrapper
+	[data-gateway_id="pre_install_woocommerce_payments_promotion"] {
 	.woocommerce-woopayments-payment-methods-logos {
 		padding: 0;
 	}

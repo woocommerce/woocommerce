@@ -55,12 +55,16 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 
 		$termsRow = {
 			addClass: jest.fn( ( cls ) => {
-				cls.split( ' ' ).forEach( ( c ) => formInvalidElements.add( 'terms-row' ) );
+				cls.split( ' ' ).forEach( ( c ) =>
+					formInvalidElements.add( 'terms-row' )
+				);
 				cls.split( ' ' ).forEach( ( c ) => termsRowClasses.add( c ) );
 				return $termsRow;
 			} ),
 			removeClass: jest.fn( ( cls ) => {
-				cls.split( ' ' ).forEach( ( c ) => termsRowClasses.delete( c ) );
+				cls.split( ' ' ).forEach( ( c ) =>
+					termsRowClasses.delete( c )
+				);
 				if ( cls.includes( 'woocommerce-invalid' ) ) {
 					formInvalidElements.delete( 'terms-row' );
 				}
@@ -169,7 +173,9 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 		} );
 		triggerFormEvent = ( event ) => {
 			if ( ! formEventHandlers[ event ] ) {
-				throw new Error( 'No direct ' + event + ' handler on form.checkout' );
+				throw new Error(
+					'No direct ' + event + ' handler on form.checkout'
+				);
 			}
 			return formEventHandlers[ event ].call( $form );
 		};
@@ -250,7 +256,9 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			trigger: jest.fn( ( event, args ) => {
 				( bodyEventHandlers[ event ] || [] )
 					.filter( ( entry ) => entry.selector === null )
-					.forEach( ( entry ) => entry.handler( {}, ...( args || [] ) ) );
+					.forEach( ( entry ) =>
+						entry.handler( {}, ...( args || [] ) )
+					);
 				return mockBody;
 			} ),
 			hasClass: jest.fn( () => false ),
@@ -337,9 +345,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			) {
 				return $updateOrderReviewNotices;
 			}
-			if (
-				selectorOrCallback === '.woocommerce-NoticeGroup-checkout'
-			) {
+			if ( selectorOrCallback === '.woocommerce-NoticeGroup-checkout' ) {
 				return $checkoutNotices;
 			}
 			if (
@@ -352,7 +358,12 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 				return $removeCouponLink;
 			}
 			if ( selectorOrCallback === '#order_review' ) {
-				return { length: 0, on: jest.fn(), attr: jest.fn(), find: jest.fn( () => ( { length: 0, val: jest.fn() } ) ) };
+				return {
+					length: 0,
+					on: jest.fn(),
+					attr: jest.fn(),
+					find: jest.fn( () => ( { length: 0, val: jest.fn() } ) ),
+				};
 			}
 			if ( selectorOrCallback === 'html, body' ) {
 				return { animate: jest.fn() };
@@ -439,7 +450,9 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 
 		// Trigger the event to capture the API via __maybeShow
 		// This simulates a gateway registering after page load
-		mockBody.trigger( 'wc_custom_place_order_button_registered', [ 'test-gateway' ] );
+		mockBody.trigger( 'wc_custom_place_order_button_registered', [
+			'test-gateway',
+		] );
 	} );
 
 	afterEach( () => {
@@ -453,7 +466,9 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			const result = await capturedApi.validate();
 
 			expect( result.hasError ).toBe( true );
-			expect( $termsRow.addClass ).toHaveBeenCalledWith( 'woocommerce-invalid' );
+			expect( $termsRow.addClass ).toHaveBeenCalledWith(
+				'woocommerce-invalid'
+			);
 		} );
 
 		test( 'should return hasError: false when terms checkbox is checked', async () => {
@@ -469,7 +484,9 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			$termsCheckbox.setChecked( false );
 			await capturedApi.validate();
 
-			expect( $termsRow.addClass ).toHaveBeenCalledWith( 'woocommerce-invalid' );
+			expect( $termsRow.addClass ).toHaveBeenCalledWith(
+				'woocommerce-invalid'
+			);
 
 			// clearing the mock history so the expectations are clearer.
 			$termsRow.removeClass.mockClear();
@@ -480,9 +497,13 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			const result = await capturedApi.validate();
 
 			// Should have cleared the invalid state first
-			expect( $termsRow.removeClass ).toHaveBeenCalledWith( 'woocommerce-invalid' );
+			expect( $termsRow.removeClass ).toHaveBeenCalledWith(
+				'woocommerce-invalid'
+			);
 			// Should NOT have re-added the invalid class
-			expect( $termsRow.addClass ).not.toHaveBeenCalledWith( 'woocommerce-invalid' );
+			expect( $termsRow.addClass ).not.toHaveBeenCalledWith(
+				'woocommerce-invalid'
+			);
 			// Should pass validation
 			expect( result.hasError ).toBe( false );
 		} );
@@ -526,7 +547,9 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			expect( $form.find ).toHaveBeenCalledWith(
 				'.woocommerce-invalid:visible'
 			);
-			expect( $form.find ).not.toHaveBeenCalledWith( '.woocommerce-invalid' );
+			expect( $form.find ).not.toHaveBeenCalledWith(
+				'.woocommerce-invalid'
+			);
 		} );
 	} );
 
@@ -674,7 +697,9 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			expect( $form.prepend ).toHaveBeenCalledWith(
 				expect.stringContaining( 'Coupon applied.' )
 			);
-			expect( $updateOrderReviewNotices.remove ).toHaveBeenCalledTimes( 1 );
+			expect( $updateOrderReviewNotices.remove ).toHaveBeenCalledTimes(
+				1
+			);
 			expect( $allNotices.remove ).not.toHaveBeenCalled();
 			expect( $checkoutFields.trigger ).not.toHaveBeenCalled();
 			expect( jQueryMock.scroll_to_notices ).not.toHaveBeenCalled();

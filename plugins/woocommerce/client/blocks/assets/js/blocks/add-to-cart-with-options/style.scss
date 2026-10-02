@@ -14,7 +14,10 @@
 // Set the height to 100% so when the quantity selector is inside a flex
 // container with `verticalAlignment: stretch` (that's the default in WC core
 // templates), the quantity selector will stretch to the height of the container.
-:where(.wc-block-add-to-cart-with-options__quantity-selector .wc-block-components-quantity-selector) {
+:where(
+	.wc-block-add-to-cart-with-options__quantity-selector
+		.wc-block-components-quantity-selector
+) {
 	height: 100%;
 }
 
@@ -25,7 +28,10 @@
 	border-radius: $universal-border-radius;
 }
 
-.wc-block-add-to-cart-with-options__quantity-selector .wc-block-components-quantity-selector:where(:has(input:not([type="hidden"]))) {
+.wc-block-add-to-cart-with-options__quantity-selector
+	.wc-block-components-quantity-selector:where(
+		:has(input:not([type="hidden"]))
+	) {
 	border-width: 0;
 	border-radius: inherit;
 }
@@ -81,7 +87,9 @@
 
 // `cursor` needs to override some styles from WordPress core, that's why we
 // need extra specificity.
-:where(.wc-block-add-to-cart-with-options.is-invalid) .wp-block-woocommerce-product-button .wc-block-components-product-button__button {
+:where(.wc-block-add-to-cart-with-options.is-invalid)
+	.wp-block-woocommerce-product-button
+	.wc-block-components-product-button__button {
 	cursor: not-allowed;
 	opacity: 0.5;
 }

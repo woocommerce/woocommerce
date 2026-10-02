@@ -9,16 +9,16 @@ import type { ProductResponseItem } from '@woocommerce/types';
 import type { ProductsStore } from '../products';
 
 let mockRegisteredStore: {
-	state: ProductsStore[ 'state' ];
+	state: ProductsStore['state'];
 } | null = null;
 
-let mockStoreState: ProductsStore[ 'state' ];
+let mockStoreState: ProductsStore['state'];
 
 let mockContext: { productId?: number; variationId?: number | null } | null =
 	null;
 
-const getMockStoreState = (): ProductsStore[ 'state' ] => {
-	if ( mockRegisteredStore === null ) {
+const getMockStoreState = (): ProductsStore['state'] => {
+	if (mockRegisteredStore === null) {
 		throw new Error(
 			'Expected woocommerce/products store to be registered.'
 		);
@@ -38,15 +38,15 @@ const mockVariation = {
 
 jest.mock(
 	'@wordpress/interactivity',
-	() => ( {
-		store: jest.fn( ( namespace, definition ) => {
-			if ( namespace === 'woocommerce/products' ) {
+	() => ({
+		store: jest.fn((namespace, definition) => {
+			if (namespace === 'woocommerce/products') {
 				// Simulate server-hydrated state merged with client definition.
 				// Getters from definition.state are preserved, and productId /
 				// variationId are added as plain values (simulating
 				// wp_interactivity_state hydration).
 				const stateBase = {
-					products: {} as Record< number, ProductResponseItem >,
+					products: {} as Record<number, ProductResponseItem>,
 					productVariations: {} as Record<
 						number,
 						ProductResponseItem
@@ -57,143 +57,143 @@ jest.mock(
 				const descriptors = Object.getOwnPropertyDescriptors(
 					definition.state
 				);
-				Object.defineProperties( stateBase, descriptors );
+				Object.defineProperties(stateBase, descriptors);
 
 				mockRegisteredStore = {
-					state: stateBase as ProductsStore[ 'state' ],
+					state: stateBase as ProductsStore['state'],
 				};
 				return mockRegisteredStore;
 			}
 			return {};
-		} ),
-		getContext: jest.fn( () => mockContext ),
-	} ),
+		}),
+		getContext: jest.fn(() => mockContext),
+	}),
 	{ virtual: true }
 );
 
-describe( 'woocommerce/products store – product context derived state', () => {
-	beforeEach( () => {
+describe('woocommerce/products store – product context derived state', () => {
+	beforeEach(() => {
 		mockRegisteredStore = null;
 		mockContext = null;
 
-		jest.isolateModules( () => require( '../products' ) );
+		jest.isolateModules(() => require('../products'));
 		mockStoreState = getMockStoreState();
 
 		// Hydrate products and variations after store is created.
 		mockStoreState.products = { 42: mockProduct };
 		mockStoreState.productVariations = { 99: mockVariation };
-	} );
+	});
 
-	it( 'has writable productId and variationId state', () => {
+	it('has writable productId and variationId state', () => {
 		mockStoreState.productId = 42;
 		mockStoreState.variationId = 99;
 
-		expect( mockStoreState.productId ).toBe( 42 );
-		expect( mockStoreState.variationId ).toBe( 99 );
-	} );
+		expect(mockStoreState.productId).toBe(42);
+		expect(mockStoreState.variationId).toBe(99);
+	});
 
-	describe( 'mainProductInContext', () => {
-		it( 'returns the product when variationId is null', () => {
+	describe('mainProductInContext', () => {
+		it('returns the product when variationId is null', () => {
 			mockStoreState.productId = 42;
 			mockStoreState.variationId = null;
 
-			expect( mockStoreState.mainProductInContext ).toBe( mockProduct );
-		} );
+			expect(mockStoreState.mainProductInContext).toBe(mockProduct);
+		});
 
-		it( 'returns the product even when variationId is set', () => {
+		it('returns the product even when variationId is set', () => {
 			mockStoreState.productId = 42;
 			mockStoreState.variationId = 99;
 
 			// product always returns the main product, never the variation.
-			expect( mockStoreState.mainProductInContext ).toBe( mockProduct );
-		} );
+			expect(mockStoreState.mainProductInContext).toBe(mockProduct);
+		});
 
-		it( 'returns null when product is not in the store', () => {
+		it('returns null when product is not in the store', () => {
 			mockStoreState.productId = 999;
 			mockStoreState.variationId = null;
 
-			expect( mockStoreState.mainProductInContext ).toBeNull();
-		} );
+			expect(mockStoreState.mainProductInContext).toBeNull();
+		});
 
-		it( 'returns null when productId is 0', () => {
-			expect( mockStoreState.mainProductInContext ).toBeNull();
-		} );
+		it('returns null when productId is 0', () => {
+			expect(mockStoreState.mainProductInContext).toBeNull();
+		});
 
-		it( 'reads from block context when available', () => {
+		it('reads from block context when available', () => {
 			mockStoreState.productId = 1;
 			mockContext = { productId: 42 };
 
-			expect( mockStoreState.mainProductInContext ).toBe( mockProduct );
-		} );
-	} );
+			expect(mockStoreState.mainProductInContext).toBe(mockProduct);
+		});
+	});
 
-	describe( 'productVariationInContext', () => {
-		it( 'returns null when variationId is null (simple product)', () => {
+	describe('productVariationInContext', () => {
+		it('returns null when variationId is null (simple product)', () => {
 			mockStoreState.productId = 42;
 			mockStoreState.variationId = null;
 
-			expect( mockStoreState.productVariationInContext ).toBeNull();
-		} );
+			expect(mockStoreState.productVariationInContext).toBeNull();
+		});
 
-		it( 'returns null when variationId is null (variable product, no selection)', () => {
-			mockStoreState.products[ 10 ] = {
+		it('returns null when variationId is null (variable product, no selection)', () => {
+			mockStoreState.products[10] = {
 				id: 10,
 				type: 'variable',
 			} as ProductResponseItem;
 			mockStoreState.productId = 10;
 			mockStoreState.variationId = null;
 
-			expect( mockStoreState.productVariationInContext ).toBeNull();
-		} );
+			expect(mockStoreState.productVariationInContext).toBeNull();
+		});
 
-		it( 'returns the variation when variationId is set', () => {
+		it('returns the variation when variationId is set', () => {
 			mockStoreState.productId = 42;
 			mockStoreState.variationId = 99;
 
-			expect( mockStoreState.productVariationInContext ).toBe(
+			expect(mockStoreState.productVariationInContext).toBe(
 				mockVariation
 			);
-		} );
+		});
 
-		it( 'returns null when variation is not in the store', () => {
+		it('returns null when variation is not in the store', () => {
 			mockStoreState.productId = 42;
 			mockStoreState.variationId = 999;
 
-			expect( mockStoreState.productVariationInContext ).toBeNull();
-		} );
-	} );
+			expect(mockStoreState.productVariationInContext).toBeNull();
+		});
+	});
 
-	describe( 'findProduct', () => {
-		it( 'returns null when product is not in the store', () => {
-			const result = mockStoreState.findProduct( {
+	describe('findProduct', () => {
+		it('returns null when product is not in the store', () => {
+			const result = mockStoreState.findProduct({
 				id: 999,
-			} );
+			});
 
-			expect( result ).toBeNull();
-		} );
+			expect(result).toBeNull();
+		});
 
-		it( 'returns the product itself for a simple product', () => {
+		it('returns the product itself for a simple product', () => {
 			const simpleProduct = {
 				id: 1,
 				type: 'simple',
 			} as ProductResponseItem;
-			mockStoreState.products[ 1 ] = simpleProduct;
+			mockStoreState.products[1] = simpleProduct;
 
-			const result = mockStoreState.findProduct( {
+			const result = mockStoreState.findProduct({
 				id: 1,
-			} );
+			});
 
-			expect( result ).toBe( simpleProduct );
-		} );
+			expect(result).toBe(simpleProduct);
+		});
 
-		it( 'returns the matched variation when selectedAttributes match and the variation is populated', () => {
+		it('returns the matched variation when selectedAttributes match and the variation is populated', () => {
 			const variableProduct = {
 				id: 1,
 				type: 'variable',
 				variations: [
 					{
 						id: 10,
-						attributes: [ { name: 'Color', value: 'red' } ],
+						attributes: [{ name: 'Color', value: 'red' }],
 					},
 				],
 			} as unknown as ProductResponseItem;
@@ -201,117 +201,115 @@ describe( 'woocommerce/products store – product context derived state', () => 
 				id: 10,
 				name: 'Red Variation',
 			} as ProductResponseItem;
-			mockStoreState.products[ 1 ] = variableProduct;
-			mockStoreState.productVariations[ 10 ] = populatedVariation;
+			mockStoreState.products[1] = variableProduct;
+			mockStoreState.productVariations[10] = populatedVariation;
 
-			const result = mockStoreState.findProduct( {
+			const result = mockStoreState.findProduct({
 				id: 1,
-				selectedAttributes: [ { attribute: 'Color', value: 'red' } ],
-			} );
+				selectedAttributes: [{ attribute: 'Color', value: 'red' }],
+			});
 
-			expect( result ).toBe( populatedVariation );
-		} );
+			expect(result).toBe(populatedVariation);
+		});
 
-		it( 'returns null when attributes match but the variation is not populated', () => {
+		it('returns null when attributes match but the variation is not populated', () => {
 			const variableProduct = {
 				id: 1,
 				type: 'variable',
 				variations: [
 					{
 						id: 10,
-						attributes: [ { name: 'Color', value: 'red' } ],
+						attributes: [{ name: 'Color', value: 'red' }],
 					},
 				],
 			} as unknown as ProductResponseItem;
-			mockStoreState.products[ 1 ] = variableProduct;
+			mockStoreState.products[1] = variableProduct;
 			// productVariations intentionally empty.
 
-			const result = mockStoreState.findProduct( {
+			const result = mockStoreState.findProduct({
 				id: 1,
-				selectedAttributes: [ { attribute: 'Color', value: 'red' } ],
-			} );
+				selectedAttributes: [{ attribute: 'Color', value: 'red' }],
+			});
 
-			expect( result ).toBeNull();
-		} );
+			expect(result).toBeNull();
+		});
 
-		it( 'returns the parent product when the product is variable and no attributes are selected', () => {
+		it('returns the parent product when the product is variable and no attributes are selected', () => {
 			const variableProduct = {
 				id: 1,
 				type: 'variable',
 				variations: [
 					{
 						id: 10,
-						attributes: [ { name: 'Color', value: 'red' } ],
+						attributes: [{ name: 'Color', value: 'red' }],
 					},
 				],
 			} as unknown as ProductResponseItem;
-			mockStoreState.products[ 1 ] = variableProduct;
+			mockStoreState.products[1] = variableProduct;
 
-			expect( mockStoreState.findProduct( { id: 1 } ) ).toBe(
-				variableProduct
-			);
+			expect(mockStoreState.findProduct({ id: 1 })).toBe(variableProduct);
 			expect(
-				mockStoreState.findProduct( {
+				mockStoreState.findProduct({
 					id: 1,
 					selectedAttributes: [],
-				} )
-			).toBe( variableProduct );
-		} );
+				})
+			).toBe(variableProduct);
+		});
 
-		it( 'returns null when attributes do not match any variation', () => {
+		it('returns null when attributes do not match any variation', () => {
 			const variableProduct = {
 				id: 1,
 				type: 'variable',
 				variations: [
 					{
 						id: 10,
-						attributes: [ { name: 'Color', value: 'red' } ],
+						attributes: [{ name: 'Color', value: 'red' }],
 					},
 				],
 			} as unknown as ProductResponseItem;
-			mockStoreState.products[ 1 ] = variableProduct;
-			mockStoreState.productVariations[ 10 ] = {
+			mockStoreState.products[1] = variableProduct;
+			mockStoreState.productVariations[10] = {
 				id: 10,
 			} as ProductResponseItem;
 
-			const result = mockStoreState.findProduct( {
+			const result = mockStoreState.findProduct({
 				id: 1,
-				selectedAttributes: [ { attribute: 'Color', value: 'blue' } ],
-			} );
+				selectedAttributes: [{ attribute: 'Color', value: 'blue' }],
+			});
 
-			expect( result ).toBeNull();
-		} );
+			expect(result).toBeNull();
+		});
 
-		it( 'returns the variation directly when given a variation ID', () => {
+		it('returns the variation directly when given a variation ID', () => {
 			const variation = {
 				id: 50,
 				name: 'Direct Variation',
 			} as ProductResponseItem;
-			mockStoreState.productVariations[ 50 ] = variation;
+			mockStoreState.productVariations[50] = variation;
 
-			const result = mockStoreState.findProduct( {
+			const result = mockStoreState.findProduct({
 				id: 50,
-			} );
+			});
 
-			expect( result ).toBe( variation );
-		} );
+			expect(result).toBe(variation);
+		});
 
-		it( 'returns the variation directly and ignores selectedAttributes when given a variation ID', () => {
+		it('returns the variation directly and ignores selectedAttributes when given a variation ID', () => {
 			const variation = {
 				id: 50,
 				name: 'Direct Variation',
 			} as ProductResponseItem;
-			mockStoreState.productVariations[ 50 ] = variation;
+			mockStoreState.productVariations[50] = variation;
 
-			const result = mockStoreState.findProduct( {
+			const result = mockStoreState.findProduct({
 				id: 50,
-				selectedAttributes: [ { attribute: 'Color', value: 'blue' } ],
-			} );
+				selectedAttributes: [{ attribute: 'Color', value: 'blue' }],
+			});
 
-			expect( result ).toBe( variation );
-		} );
+			expect(result).toBe(variation);
+		});
 
-		it( 'prefers variation lookup over product lookup when ID exists in both', () => {
+		it('prefers variation lookup over product lookup when ID exists in both', () => {
 			const product = {
 				id: 50,
 				type: 'simple',
@@ -321,18 +319,18 @@ describe( 'woocommerce/products store – product context derived state', () => 
 				id: 50,
 				name: 'Variation 50',
 			} as ProductResponseItem;
-			mockStoreState.products[ 50 ] = product;
-			mockStoreState.productVariations[ 50 ] = variation;
+			mockStoreState.products[50] = product;
+			mockStoreState.productVariations[50] = variation;
 
-			const result = mockStoreState.findProduct( {
+			const result = mockStoreState.findProduct({
 				id: 50,
-			} );
+			});
 
-			expect( result ).toBe( variation );
-		} );
+			expect(result).toBe(variation);
+		});
 
-		describe( 'attribute matching (variable products)', () => {
-			it( 'matches with attribute prefix in selected attributes', () => {
+		describe('attribute matching (variable products)', () => {
+			it('matches with attribute prefix in selected attributes', () => {
 				const variableProduct = {
 					id: 3,
 					type: 'variable',
@@ -361,23 +359,23 @@ describe( 'woocommerce/products store – product context derived state', () => 
 					id: 302,
 					name: 'Blue Large',
 				} as ProductResponseItem;
-				mockStoreState.products[ 3 ] = variableProduct;
-				mockStoreState.productVariations[ 301 ] = populatedVariation301;
-				mockStoreState.productVariations[ 302 ] = populatedVariation302;
+				mockStoreState.products[3] = variableProduct;
+				mockStoreState.productVariations[301] = populatedVariation301;
+				mockStoreState.productVariations[302] = populatedVariation302;
 
-				const result = mockStoreState.findProduct( {
+				const result = mockStoreState.findProduct({
 					id: 3,
 					selectedAttributes: [
 						{ attribute: 'attribute_pa_color', value: 'Blue' },
 						{ attribute: 'attribute_pa_size', value: 'Small' },
 					],
-				} );
+				});
 
-				expect( result ).toBe( populatedVariation301 );
-			} );
+				expect(result).toBe(populatedVariation301);
+			});
 
-			describe( 'multi-word attribute names', () => {
-				it( 'matches when selected attributes use hyphenated slugs', () => {
+			describe('multi-word attribute names', () => {
+				it('matches when selected attributes use hyphenated slugs', () => {
 					const variableProduct = {
 						id: 3,
 						type: 'variable',
@@ -402,11 +400,10 @@ describe( 'woocommerce/products store – product context derived state', () => 
 						id: 301,
 						name: 'Blue 42',
 					} as ProductResponseItem;
-					mockStoreState.products[ 3 ] = variableProduct;
-					mockStoreState.productVariations[ 301 ] =
-						populatedVariation;
+					mockStoreState.products[3] = variableProduct;
+					mockStoreState.productVariations[301] = populatedVariation;
 
-					const result = mockStoreState.findProduct( {
+					const result = mockStoreState.findProduct({
 						id: 3,
 						selectedAttributes: [
 							{
@@ -418,14 +415,14 @@ describe( 'woocommerce/products store – product context derived state', () => 
 								value: '42',
 							},
 						],
-					} );
+					});
 
-					expect( result ).toBe( populatedVariation );
-				} );
-			} );
+					expect(result).toBe(populatedVariation);
+				});
+			});
 
-			describe( 'Any attribute handling', () => {
-				it( 'matches variation with "Any" attribute when value is selected', () => {
+			describe('Any attribute handling', () => {
+				it('matches variation with "Any" attribute when value is selected', () => {
 					const variableProduct = {
 						id: 2,
 						type: 'variable',
@@ -450,22 +447,21 @@ describe( 'woocommerce/products store – product context derived state', () => 
 						id: 201,
 						name: 'Any Color Small',
 					} as ProductResponseItem;
-					mockStoreState.products[ 2 ] = variableProduct;
-					mockStoreState.productVariations[ 201 ] =
-						populatedVariation;
+					mockStoreState.products[2] = variableProduct;
+					mockStoreState.productVariations[201] = populatedVariation;
 
-					const result = mockStoreState.findProduct( {
+					const result = mockStoreState.findProduct({
 						id: 2,
 						selectedAttributes: [
 							{ attribute: 'Color', value: 'Red' },
 							{ attribute: 'Size', value: 'Small' },
 						],
-					} );
+					});
 
-					expect( result ).toBe( populatedVariation );
-				} );
+					expect(result).toBe(populatedVariation);
+				});
 
-				it( 'does not match "Any" attribute when selected value is null', () => {
+				it('does not match "Any" attribute when selected value is null', () => {
 					const variableProduct = {
 						id: 2,
 						type: 'variable',
@@ -479,9 +475,9 @@ describe( 'woocommerce/products store – product context derived state', () => 
 							},
 						],
 					} as unknown as ProductResponseItem;
-					mockStoreState.products[ 2 ] = variableProduct;
+					mockStoreState.products[2] = variableProduct;
 
-					const result = mockStoreState.findProduct( {
+					const result = mockStoreState.findProduct({
 						id: 2,
 						selectedAttributes: [
 							{
@@ -490,12 +486,12 @@ describe( 'woocommerce/products store – product context derived state', () => 
 							},
 							{ attribute: 'Size', value: 'Small' },
 						],
-					} );
+					});
 
-					expect( result ).toBeNull();
-				} );
+					expect(result).toBeNull();
+				});
 
-				it( 'does not match "Any" attribute when attribute is not selected', () => {
+				it('does not match "Any" attribute when attribute is not selected', () => {
 					const variableProduct = {
 						id: 2,
 						type: 'variable',
@@ -509,104 +505,104 @@ describe( 'woocommerce/products store – product context derived state', () => 
 							},
 						],
 					} as unknown as ProductResponseItem;
-					mockStoreState.products[ 2 ] = variableProduct;
+					mockStoreState.products[2] = variableProduct;
 
-					const result = mockStoreState.findProduct( {
+					const result = mockStoreState.findProduct({
 						id: 2,
 						selectedAttributes: [
 							{ attribute: 'Size', value: 'Small' },
 						],
-					} );
+					});
 
-					expect( result ).toBeNull();
-				} );
-			} );
-		} );
-	} );
+					expect(result).toBeNull();
+				});
+			});
+		});
+	});
 
-	describe( 'productInContext', () => {
-		it( 'returns product when variationId is null (simple product path)', () => {
+	describe('productInContext', () => {
+		it('returns product when variationId is null (simple product path)', () => {
 			mockStoreState.productId = 42;
 			mockStoreState.variationId = null;
 
-			expect( mockStoreState.productInContext ).toBe( mockProduct );
-		} );
+			expect(mockStoreState.productInContext).toBe(mockProduct);
+		});
 
-		it( 'returns productVariationInContext when variationId is set and populated', () => {
+		it('returns productVariationInContext when variationId is set and populated', () => {
 			mockStoreState.productId = 42;
 			mockStoreState.variationId = 99;
 
-			expect( mockStoreState.productInContext ).toBe( mockVariation );
-		} );
+			expect(mockStoreState.productInContext).toBe(mockVariation);
+		});
 
-		it( 'falls back to product when variation is missing from productVariations', () => {
+		it('falls back to product when variation is missing from productVariations', () => {
 			mockStoreState.productId = 42;
 			mockStoreState.variationId = 123;
 
-			expect( mockStoreState.productInContext ).toBe( mockProduct );
-		} );
+			expect(mockStoreState.productInContext).toBe(mockProduct);
+		});
 
-		it( 'returns null when neither product nor variation resolves', () => {
+		it('returns null when neither product nor variation resolves', () => {
 			mockStoreState.productId = 0;
 			mockStoreState.variationId = null;
 
-			expect( mockStoreState.productInContext ).toBeNull();
-		} );
+			expect(mockStoreState.productInContext).toBeNull();
+		});
 
-		it( 'honors local context over state IDs', () => {
+		it('honors local context over state IDs', () => {
 			mockStoreState.productId = 1;
 			mockStoreState.variationId = null;
 			mockContext = { productId: 42, variationId: 99 };
 
-			expect( mockStoreState.productInContext ).toBe( mockVariation );
-		} );
-	} );
+			expect(mockStoreState.productInContext).toBe(mockVariation);
+		});
+	});
 
-	describe( 'Product block path (context without variationId)', () => {
-		it( 'mainProductInContext reads productId from context', () => {
+	describe('Product block path (context without variationId)', () => {
+		it('mainProductInContext reads productId from context', () => {
 			mockContext = { productId: 42 };
 			mockStoreState.variationId = null;
 
-			expect( mockStoreState.mainProductInContext ).toBe( mockProduct );
-		} );
+			expect(mockStoreState.mainProductInContext).toBe(mockProduct);
+		});
 
-		it( 'productVariationInContext reads variationId from context when available', () => {
+		it('productVariationInContext reads variationId from context when available', () => {
 			mockContext = { productId: 42, variationId: 99 };
 			mockStoreState.variationId = null;
 
-			expect( mockStoreState.productVariationInContext ).toBe(
+			expect(mockStoreState.productVariationInContext).toBe(
 				mockVariation
 			);
-		} );
+		});
 
-		it( 'productVariationInContext falls back to state when context exists but does not define variationId', () => {
+		it('productVariationInContext falls back to state when context exists but does not define variationId', () => {
 			mockContext = { productId: 42 };
 			mockStoreState.variationId = 99;
 
-			expect( mockStoreState.productVariationInContext ).toBe(
+			expect(mockStoreState.productVariationInContext).toBe(
 				mockVariation
 			);
-		} );
+		});
 
-		it( 'productVariationInContext does not fall back to state when context explicitly sets variationId to null', () => {
+		it('productVariationInContext does not fall back to state when context explicitly sets variationId to null', () => {
 			mockContext = { productId: 42, variationId: null };
 			mockStoreState.variationId = 99;
 
-			expect( mockStoreState.productVariationInContext ).toBe( null );
-		} );
+			expect(mockStoreState.productVariationInContext).toBe(null);
+		});
 
-		it( 'productVariationInContext falls back to state when context does not exist', () => {
+		it('productVariationInContext falls back to state when context does not exist', () => {
 			mockStoreState.variationId = 99;
 
-			expect( mockStoreState.productVariationInContext ).toBe(
+			expect(mockStoreState.productVariationInContext).toBe(
 				mockVariation
 			);
-		} );
+		});
 
-		it( 'productVariationInContext returns null when both context and state variationId are null', () => {
+		it('productVariationInContext returns null when both context and state variationId are null', () => {
 			mockStoreState.variationId = null;
 
-			expect( mockStoreState.productVariationInContext ).toBeNull();
-		} );
-	} );
-} );
+			expect(mockStoreState.productVariationInContext).toBeNull();
+		});
+	});
+});

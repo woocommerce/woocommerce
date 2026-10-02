@@ -12,18 +12,18 @@ import './footer.scss';
 import useIsScrolled from '~/hooks/useIsScrolled';
 
 export const Footer = () => {
-	const slot = useSlot( WC_FOOTER_SLOT_NAME );
-	const hasFills = Boolean( slot?.fills?.length );
+	const slot = useSlot(WC_FOOTER_SLOT_NAME);
+	const hasFills = Boolean(slot?.fills?.length);
 	const { atBottom } = useIsScrolled();
 
-	if ( ! hasFills ) {
+	if (!hasFills) {
 		return null;
 	}
 	return (
 		<div
-			className={ clsx( 'woocommerce-layout__footer', {
+			className={clsx('woocommerce-layout__footer', {
 				'at-bottom': atBottom,
-			} ) }
+			})}
 		>
 			<WooFooterItem.Slot />
 		</div>

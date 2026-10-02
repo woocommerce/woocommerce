@@ -22,56 +22,55 @@ import strings from './strings';
  * Provides a modal requesting customer feedback.
  *
  */
-function ExitSurveyModal( {}: {
+function ExitSurveyModal({}: {
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type, @typescript-eslint/no-empty-object-type
 	setExitSurveyModalOpen: Function;
-} ): JSX.Element | null {
-	const incentive = getAdminSetting( 'wcpayWelcomePageIncentive' );
-	const [ isOpen, setOpen ] = useState( true );
-	const [ isHappyChecked, setHappyChecked ] = useState( false );
-	const [ isInstallChecked, setInstallChecked ] = useState( false );
-	const [ isMoreInfoChecked, setMoreInfoChecked ] = useState( false );
-	const [ isAnotherTimeChecked, setAnotherTimeChecked ] = useState( false );
-	const [ isSomethingElseChecked, setSomethingElseChecked ] =
-		useState( false );
-	const [ comments, setComments ] = useState( '' );
-	const { updateOptions } = useDispatch( optionsStore );
+}): JSX.Element | null {
+	const incentive = getAdminSetting('wcpayWelcomePageIncentive');
+	const [isOpen, setOpen] = useState(true);
+	const [isHappyChecked, setHappyChecked] = useState(false);
+	const [isInstallChecked, setInstallChecked] = useState(false);
+	const [isMoreInfoChecked, setMoreInfoChecked] = useState(false);
+	const [isAnotherTimeChecked, setAnotherTimeChecked] = useState(false);
+	const [isSomethingElseChecked, setSomethingElseChecked] = useState(false);
+	const [comments, setComments] = useState('');
+	const { updateOptions } = useDispatch(optionsStore);
 
-	const dismissedIncentives = useSelect( ( select ) => {
-		const { getOption } = select( optionsStore );
+	const dismissedIncentives = useSelect((select) => {
+		const { getOption } = select(optionsStore);
 		return (
-			( getOption(
+			(getOption(
 				'wcpay_welcome_page_incentives_dismissed'
-			) as string[] ) || []
+			) as string[]) || []
 		);
-	}, [] );
+	}, []);
 
 	const closeModal = async () => {
-		setOpen( false );
+		setOpen(false);
 
 		// Record that the modal was dismissed.
-		await updateOptions( {
+		await updateOptions({
 			wcpay_welcome_page_incentives_dismissed: [
 				...dismissedIncentives,
 				incentive.id,
 			],
-		} );
+		});
 
 		// Redirect back to the admin page.
 		window.location.href = 'admin.php?page=wc-admin';
 	};
 
 	const exitSurvey = () => {
-		recordEvent( 'wcpay_exit_survey', {
+		recordEvent('wcpay_exit_survey', {
 			just_remove: true,
 			incentive_id: incentive.id,
-		} );
+		});
 
 		void closeModal();
 	};
 
 	const sendFeedback = () => {
-		recordEvent( 'wcpay_exit_survey', {
+		recordEvent('wcpay_exit_survey', {
 			happy: isHappyChecked ? 'Yes' : 'No',
 			install: isInstallChecked ? 'Yes' : 'No',
 			more_info: isMoreInfoChecked ? 'Yes' : 'No',
@@ -79,71 +78,71 @@ function ExitSurveyModal( {}: {
 			something_else: isSomethingElseChecked ? 'Yes' : 'No',
 			comments,
 			incentive_id: incentive.id,
-		} );
+		});
 
-		if ( isMoreInfoChecked ) {
+		if (isMoreInfoChecked) {
 			// Record that the user would possibly consider installing WCPay with more information in the future.
-			void updateOptions( {
+			void updateOptions({
 				wcpay_welcome_page_exit_survey_more_info_needed_timestamp:
-					Math.floor( Date.now() / 1000 ),
-			} );
+					Math.floor(Date.now() / 1000),
+			});
 		}
 		void closeModal();
 	};
 
-	if ( ! isOpen ) {
+	if (!isOpen) {
 		return null;
 	}
 
 	return (
 		<Modal
 			className="woopayments-welcome-page__survey"
-			title={ strings.survey.title }
-			onRequestClose={ closeModal }
-			shouldCloseOnClickOutside={ false }
+			title={strings.survey.title}
+			onRequestClose={closeModal}
+			shouldCloseOnClickOutside={false}
 		>
 			<p className="woopayments-welcome-page__survey-intro">
-				{ strings.survey.intro }
+				{strings.survey.intro}
 			</p>
 
 			<p className="woopayments-welcome-page__survey-question">
-				{ strings.survey.question }
+				{strings.survey.question}
 			</p>
 
 			<div className="woopayments-welcome-page__survey-selection">
 				<CheckboxControl
-					label={ strings.survey.happyLabel }
-					checked={ isHappyChecked }
-					onChange={ setHappyChecked }
+					label={strings.survey.happyLabel}
+					checked={isHappyChecked}
+					onChange={setHappyChecked}
 				/>
 				<CheckboxControl
-					label={ strings.survey.installLabel }
-					checked={ isInstallChecked }
-					onChange={ setInstallChecked }
+					label={strings.survey.installLabel}
+					checked={isInstallChecked}
+					onChange={setInstallChecked}
 				/>
 				<CheckboxControl
-					label={ strings.survey.moreInfoLabel }
-					checked={ isMoreInfoChecked }
-					onChange={ setMoreInfoChecked }
+					label={strings.survey.moreInfoLabel}
+					checked={isMoreInfoChecked}
+					onChange={setMoreInfoChecked}
 				/>
 				<CheckboxControl
-					label={ strings.survey.anotherTimeLabel }
-					checked={ isAnotherTimeChecked }
-					onChange={ setAnotherTimeChecked }
+					label={strings.survey.anotherTimeLabel}
+					checked={isAnotherTimeChecked}
+					onChange={setAnotherTimeChecked}
 				/>
 				<CheckboxControl
-					label={ strings.survey.somethingElseLabel }
-					checked={ isSomethingElseChecked }
-					onChange={ setSomethingElseChecked }
+					label={strings.survey.somethingElseLabel}
+					checked={isSomethingElseChecked}
+					onChange={setSomethingElseChecked}
 				/>
 			</div>
 
 			<div className="woopayments-welcome-page__survey-comments">
 				<TextareaControl
-					label={ strings.survey.commentsLabel }
-					value={ comments }
-					onChange={ ( value: string ) => setComments( value ) }
-					rows={ 3 }
+					label={strings.survey.commentsLabel}
+					value={comments}
+					onChange={(value: string) => setComments(value)}
+					rows={3}
 				/>
 			</div>
 
@@ -151,13 +150,13 @@ function ExitSurveyModal( {}: {
 				<Button
 					isTertiary
 					isDestructive
-					onClick={ exitSurvey }
+					onClick={exitSurvey}
 					name="cancel"
 				>
-					{ strings.survey.cancelButton }
+					{strings.survey.cancelButton}
 				</Button>
-				<Button isSecondary onClick={ sendFeedback } name="send">
-					{ strings.survey.submitButton }
+				<Button isSecondary onClick={sendFeedback} name="send">
+					{strings.survey.submitButton}
 				</Button>
 			</div>
 		</Modal>

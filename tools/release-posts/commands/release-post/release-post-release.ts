@@ -211,7 +211,7 @@ const program = new Command()
 							'contributors.ejs',
 							postVariables
 						),
-				  } )
+					} )
 				: await renderTemplate( 'release.ejs', postVariables );
 
 		Logger.endTask();
@@ -236,14 +236,14 @@ const program = new Command()
 								options.editPostId,
 								html,
 								authToken
-						  )
+							)
 						: await createWpComDraftPost(
 								siteId,
 								title,
 								html,
 								tags,
 								authToken
-						  );
+							);
 
 				Logger.notice( `Published draft release post at ${ URL }` );
 				Logger.endTask();

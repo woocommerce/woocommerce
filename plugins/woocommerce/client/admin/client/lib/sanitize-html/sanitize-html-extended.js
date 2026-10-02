@@ -81,15 +81,15 @@ export const EXTENDED_ALLOWED_ATTR = [
  * @param {string[]} config.attr Array of allowed HTML attributes.
  * @return {Object} Object with sanitized HTML in __html property.
  */
-export default function sanitizeHtmlExtended( html, config = {} ) {
-	if ( ! html ) {
+export default function sanitizeHtmlExtended(html, config = {}) {
+	if (!html) {
 		return '';
 	}
 
 	return {
-		__html: sanitizeHTML( html, {
+		__html: sanitizeHTML(html, {
 			tags: config.tags || EXTENDED_ALLOWED_TAGS,
 			attr: config.attr || EXTENDED_ALLOWED_ATTR,
-		} ),
+		}),
 	};
 }

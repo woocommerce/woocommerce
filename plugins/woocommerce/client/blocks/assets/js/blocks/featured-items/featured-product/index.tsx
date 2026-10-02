@@ -14,14 +14,14 @@ import { example } from './example';
 import deprecated from './deprecated';
 import metadata from './block.json';
 
-register( Block, example, metadata, {
+register(Block, example, metadata, {
 	deprecated,
 	icon: {
 		src: (
 			<Icon
-				icon={ starEmpty }
+				icon={starEmpty}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
 	},
-} );
+});

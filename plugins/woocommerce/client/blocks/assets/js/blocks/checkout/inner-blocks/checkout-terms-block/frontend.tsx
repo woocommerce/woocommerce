@@ -18,7 +18,7 @@ import { validationStore } from '@woocommerce/block-data';
  */
 import { termsConsentDefaultText, termsCheckboxDefaultText } from './constants';
 
-const FrontendBlock = ( {
+const FrontendBlock = ({
 	text,
 	checkbox,
 	instanceId,
@@ -30,49 +30,49 @@ const FrontendBlock = ( {
 	showSeparator: string | boolean;
 	instanceId: string;
 	className?: string;
-} ): JSX.Element => {
-	const [ checked, setChecked ] = useState( false );
+}): JSX.Element => {
+	const [checked, setChecked] = useState(false);
 
 	const { isDisabled } = useCheckoutSubmit();
 
 	const validationErrorId = 'terms-and-conditions-' + instanceId;
 	const { setValidationErrors, clearValidationError } =
-		useDispatch( validationStore );
+		useDispatch(validationStore);
 
 	const { error, validationErrorHtmlId } = useSelect(
-		( select ) => {
-			const store = select( validationStore );
+		(select) => {
+			const store = select(validationStore);
 
 			return {
-				error: store.getValidationError( validationErrorId ),
+				error: store.getValidationError(validationErrorId),
 				validationErrorHtmlId:
-					store.getValidationErrorId( validationErrorId ),
+					store.getValidationErrorId(validationErrorId),
 			};
 		},
-		[ validationErrorId ]
+		[validationErrorId]
 	);
-	const hasError = !! ( error?.message && ! error?.hidden );
+	const hasError = !!(error?.message && !error?.hidden);
 
 	// Track validation errors for this input.
-	useEffect( () => {
-		if ( ! checkbox ) {
+	useEffect(() => {
+		if (!checkbox) {
 			return;
 		}
-		if ( checked ) {
-			void clearValidationError( validationErrorId );
+		if (checked) {
+			void clearValidationError(validationErrorId);
 		} else {
-			void setValidationErrors( {
-				[ validationErrorId ]: {
+			void setValidationErrors({
+				[validationErrorId]: {
 					message: __(
 						'Please read and accept the terms and conditions.',
 						'woocommerce'
 					),
 					hidden: true,
 				},
-			} );
+			});
 		}
 		return () => {
-			void clearValidationError( validationErrorId );
+			void clearValidationError(validationErrorId);
 		};
 	}, [
 		checkbox,
@@ -80,12 +80,12 @@ const FrontendBlock = ( {
 		validationErrorId,
 		clearValidationError,
 		setValidationErrors,
-	] );
+	]);
 
 	return (
 		<>
 			<div
-				className={ clsx(
+				className={clsx(
 					'wc-block-checkout__terms',
 					{
 						'wc-block-checkout__terms--disabled': isDisabled,
@@ -94,45 +94,43 @@ const FrontendBlock = ( {
 							showSeparator !== false,
 					},
 					className
-				) }
+				)}
 			>
-				{ checkbox ? (
+				{checkbox ? (
 					<>
 						<CheckboxControl
 							id="terms-and-conditions"
-							checked={ checked }
-							onChange={ () =>
-								setChecked( ( value ) => ! value )
-							}
-							hasError={ hasError }
+							checked={checked}
+							onChange={() => setChecked((value) => !value)}
+							hasError={hasError}
 							aria-describedby={
 								hasError ? validationErrorHtmlId : undefined
 							}
-							disabled={ isDisabled }
+							disabled={isDisabled}
 						>
 							<span
 								className="wc-block-components-checkbox__label"
-								dangerouslySetInnerHTML={ {
+								dangerouslySetInnerHTML={{
 									__html: text || termsCheckboxDefaultText,
-								} }
+								}}
 							/>
 						</CheckboxControl>
 						<ValidationInputError
-							propertyName={ validationErrorId }
-							elementId={ validationErrorId }
+							propertyName={validationErrorId}
+							elementId={validationErrorId}
 						/>
 					</>
 				) : (
 					<span
 						className="wc-block-components-checkbox__label"
-						dangerouslySetInnerHTML={ {
+						dangerouslySetInnerHTML={{
 							__html: text || termsConsentDefaultText,
-						} }
+						}}
 					/>
-				) }
+				)}
 			</div>
 		</>
 	);
 };
 
-export default withInstanceId( FrontendBlock );
+export default withInstanceId(FrontendBlock);

@@ -20,66 +20,66 @@ interface EmailCesFeedbackProps {
 	showOnLoad?: boolean;
 }
 
-export const EmailCesFeedback = ( {
+export const EmailCesFeedback = ({
 	action,
 	description,
 	question,
 	showOnLoad = false,
-}: EmailCesFeedbackProps ) => {
-	const { showCesModal } = useDispatch( CES_STORE_KEY );
-	const hasShownModalRef = useRef( false );
+}: EmailCesFeedbackProps) => {
+	const { showCesModal } = useDispatch(CES_STORE_KEY);
+	const hasShownModalRef = useRef(false);
 
-	const handleFeedbackClick = useCallback( () => {
-		showCesModal( {
+	const handleFeedbackClick = useCallback(() => {
+		showCesModal({
 			action,
-			title: __( 'Share your experience', 'woocommerce' ),
-			showDescription: !! description,
+			title: __('Share your experience', 'woocommerce'),
+			showDescription: !!description,
 			description,
 			firstQuestion: question,
 			getExtraFieldsToBeShown: (
-				extraFieldsValues: { [ key: string ]: string },
-				setExtraFieldsValues: ( values: {
-					[ key: string ]: string;
-				} ) => void,
-				errors: Record< string, string > | undefined
+				extraFieldsValues: { [key: string]: string },
+				setExtraFieldsValues: (values: {
+					[key: string]: string;
+				}) => void,
+				errors: Record<string, string> | undefined
 			) => {
 				return (
 					<div>
 						<br />
 						<TextareaControl
-							label={ __(
+							label={__(
 								'How can we improve the email customizer for you? (Optional)',
 								'woocommerce'
-							) }
-							value={ extraFieldsValues.feedback_comment || '' }
-							onChange={ ( value ) =>
-								setExtraFieldsValues( {
+							)}
+							value={extraFieldsValues.feedback_comment || ''}
+							onChange={(value) =>
+								setExtraFieldsValues({
 									...extraFieldsValues,
 									feedback_comment: value,
-								} )
+								})
 							}
-							placeholder={ __(
+							placeholder={__(
 								"What did you try to achieve with the customizer? What did and didn't work?",
 								'woocommerce'
-							) }
+							)}
 						/>
 						<TextControl
-							label={ __(
+							label={__(
 								'Email address (Optional)',
 								'woocommerce'
-							) }
+							)}
 							type="email"
-							value={ extraFieldsValues.email || '' }
-							onChange={ ( value ) =>
-								setExtraFieldsValues( {
+							value={extraFieldsValues.email || ''}
+							onChange={(value) =>
+								setExtraFieldsValues({
 									...extraFieldsValues,
 									email: value,
-								} )
+								})
 							}
 							help={
 								errors?.email ? (
 									<span className="woocommerce-customer-effort-score__errors">
-										{ errors.email }
+										{errors.email}
 									</span>
 								) : (
 									__(
@@ -92,9 +92,9 @@ export const EmailCesFeedback = ( {
 					</div>
 				);
 			},
-			validateExtraFields: ( { email = '' }: { email?: string } ) => {
-				const errors: Record< string, string > | undefined = {};
-				if ( email.length > 0 && ! isEmail( email ) ) {
+			validateExtraFields: ({ email = '' }: { email?: string }) => {
+				const errors: Record<string, string> | undefined = {};
+				if (email.length > 0 && !isEmail(email)) {
 					errors.email = __(
 						'Please enter a valid email address.',
 						'woocommerce'
@@ -102,30 +102,30 @@ export const EmailCesFeedback = ( {
 				}
 				return errors;
 			},
-		} );
-	}, [ action, description, question, showCesModal ] );
+		});
+	}, [action, description, question, showCesModal]);
 
-	useEffect( () => {
+	useEffect(() => {
 		if (
 			window.wcTracks?.isEnabled &&
 			showOnLoad &&
-			! hasShownModalRef.current
+			!hasShownModalRef.current
 		) {
 			hasShownModalRef.current = true;
 			handleFeedbackClick();
 		}
-	}, [ handleFeedbackClick, showOnLoad ] );
+	}, [handleFeedbackClick, showOnLoad]);
 
 	return (
 		window.wcTracks?.isEnabled &&
-		! showOnLoad && (
+		!showOnLoad && (
 			<Button
 				variant="tertiary"
-				icon={ <FeedbackIcon /> }
-				iconSize={ 12 }
-				onClick={ handleFeedbackClick }
+				icon={<FeedbackIcon />}
+				iconSize={12}
+				onClick={handleFeedbackClick}
 			>
-				{ __( 'Help us improve', 'woocommerce' ) }
+				{__('Help us improve', 'woocommerce')}
 			</Button>
 		)
 	);

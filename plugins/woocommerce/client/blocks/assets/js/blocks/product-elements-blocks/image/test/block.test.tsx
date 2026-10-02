@@ -12,30 +12,30 @@ import { ProductResponseItem } from '@woocommerce/types';
 import { Block } from '../block';
 import { ImageSizing } from '../types';
 
-jest.mock( '@woocommerce/base-hooks', () => ( {
+jest.mock('@woocommerce/base-hooks', () => ({
 	__esModule: true,
-	useStyleProps: jest.fn( () => ( {
+	useStyleProps: jest.fn(() => ({
 		className: '',
 		style: {},
-	} ) ),
-} ) );
+	})),
+}));
 
-jest.mock( '@woocommerce/settings', () => {
-	const originalModule = jest.requireActual( '@woocommerce/settings' );
+jest.mock('@woocommerce/settings', () => {
+	const originalModule = jest.requireActual('@woocommerce/settings');
 	return {
 		...originalModule,
-		getSetting: jest.fn( ( key, defaultValue ) => {
-			if ( key === 'placeholderImgSrcFullSize' ) {
+		getSetting: jest.fn((key, defaultValue) => {
+			if (key === 'placeholderImgSrcFullSize') {
 				return 'placeholder-full-size.jpg';
 			}
-			if ( key === 'thumbnailAspectRatio' ) {
+			if (key === 'thumbnailAspectRatio') {
 				return '1/1';
 			}
 			// Use the original getSetting for other keys
-			return originalModule.getSetting( key, defaultValue );
-		} ),
+			return originalModule.getSetting(key, defaultValue);
+		}),
 	};
-} );
+});
 
 const productWithoutImages: ProductResponseItem = {
 	name: 'Test product',
@@ -152,235 +152,231 @@ const productWithImages: ProductResponseItem = {
 	},
 };
 
-describe( 'Product Image Block', () => {
-	describe( 'with product link', () => {
-		test( 'should render an anchor with the product image', () => {
+describe('Product Image Block', () => {
+	describe('with product link', () => {
+		test('should render an anchor with the product image', () => {
 			const component = render(
 				<ProductDataContextProvider
-					product={ productWithImages }
-					isLoading={ false }
+					product={productWithImages}
+					isLoading={false}
 				>
 					<Block
-						showProductLink={ true }
-						productId={ productWithImages.id }
-						showSaleBadge={ false }
-						saleBadgeAlign={ 'left' }
-						imageSizing={ ImageSizing.SINGLE }
+						showProductLink={true}
+						productId={productWithImages.id}
+						showSaleBadge={false}
+						saleBadgeAlign={'left'}
+						imageSizing={ImageSizing.SINGLE}
 					/>
 				</ProductDataContextProvider>
 			);
 
 			// use testId as alt is added after image is loaded
-			const image = component.getByTestId( 'product-image' );
-			fireEvent.load( image );
+			const image = component.getByTestId('product-image');
+			fireEvent.load(image);
 
-			const productImage = component.getByAltText(
-				productWithImages.name
-			);
-			expect( productImage.getAttribute( 'src' ) ).toBe(
-				productWithImages.images[ 0 ].src
+			const productImage = component.getByAltText(productWithImages.name);
+			expect(productImage.getAttribute('src')).toBe(
+				productWithImages.images[0].src
 			);
 
-			const anchor = productImage.closest( 'a' );
-			expect( anchor?.getAttribute( 'href' ) ).toBe(
+			const anchor = productImage.closest('a');
+			expect(anchor?.getAttribute('href')).toBe(
 				productWithImages.permalink
 			);
-		} );
+		});
 
-		test( 'should render an anchor with the placeholder image', () => {
+		test('should render an anchor with the placeholder image', () => {
 			const component = render(
 				<ProductDataContextProvider
-					product={ productWithoutImages }
-					isLoading={ false }
+					product={productWithoutImages}
+					isLoading={false}
 				>
 					<Block
-						showProductLink={ true }
-						productId={ productWithoutImages.id }
-						showSaleBadge={ false }
-						saleBadgeAlign={ 'left' }
-						imageSizing={ ImageSizing.SINGLE }
+						showProductLink={true}
+						productId={productWithoutImages.id}
+						showSaleBadge={false}
+						saleBadgeAlign={'left'}
+						imageSizing={ImageSizing.SINGLE}
 					/>
 				</ProductDataContextProvider>
 			);
 
-			const placeholderImage = component.getByRole( 'presentation' );
-			expect( placeholderImage.getAttribute( 'src' ) ).toBe(
+			const placeholderImage = component.getByRole('presentation');
+			expect(placeholderImage.getAttribute('src')).toBe(
 				'placeholder-full-size.jpg'
 			);
 
-			const anchor = placeholderImage.closest( 'a' );
-			expect( anchor?.getAttribute( 'href' ) ).toBe(
+			const anchor = placeholderImage.closest('a');
+			expect(anchor?.getAttribute('href')).toBe(
 				productWithoutImages.permalink
 			);
-			expect( anchor?.getAttribute( 'aria-label' ) ).toBe(
-				`Link to ${ productWithoutImages.name }`
+			expect(anchor?.getAttribute('aria-label')).toBe(
+				`Link to ${productWithoutImages.name}`
 			);
-		} );
-	} );
+		});
+	});
 
-	describe( 'without product link', () => {
-		test( 'should render the product image without an anchor wrapper', () => {
+	describe('without product link', () => {
+		test('should render the product image without an anchor wrapper', () => {
 			const component = render(
 				<ProductDataContextProvider
-					product={ productWithImages }
-					isLoading={ false }
+					product={productWithImages}
+					isLoading={false}
 				>
 					<Block
-						showProductLink={ false }
-						productId={ productWithImages.id }
-						showSaleBadge={ false }
-						saleBadgeAlign={ 'left' }
-						imageSizing={ ImageSizing.SINGLE }
+						showProductLink={false}
+						productId={productWithImages.id}
+						showSaleBadge={false}
+						saleBadgeAlign={'left'}
+						imageSizing={ImageSizing.SINGLE}
 					/>
 				</ProductDataContextProvider>
 			);
-			const image = component.getByTestId( 'product-image' );
-			fireEvent.load( image );
+			const image = component.getByTestId('product-image');
+			fireEvent.load(image);
 
-			const productImage = component.getByAltText(
-				productWithImages.name
-			);
-			expect( productImage.getAttribute( 'src' ) ).toBe(
-				productWithImages.images[ 0 ].src
+			const productImage = component.getByAltText(productWithImages.name);
+			expect(productImage.getAttribute('src')).toBe(
+				productWithImages.images[0].src
 			);
 
-			const anchor = productImage.closest( 'a' );
-			expect( anchor ).toBe( null );
-		} );
+			const anchor = productImage.closest('a');
+			expect(anchor).toBe(null);
+		});
 
-		test( 'should render the placeholder image without an anchor wrapper', () => {
+		test('should render the placeholder image without an anchor wrapper', () => {
 			const component = render(
 				<ProductDataContextProvider
-					product={ productWithoutImages }
-					isLoading={ false }
+					product={productWithoutImages}
+					isLoading={false}
 				>
 					<Block
-						showProductLink={ false }
-						productId={ productWithoutImages.id }
-						showSaleBadge={ false }
-						saleBadgeAlign={ 'left' }
-						imageSizing={ ImageSizing.SINGLE }
+						showProductLink={false}
+						productId={productWithoutImages.id}
+						showSaleBadge={false}
+						saleBadgeAlign={'left'}
+						imageSizing={ImageSizing.SINGLE}
 					/>
 				</ProductDataContextProvider>
 			);
 
-			const placeholderImage = component.getByRole( 'presentation' );
-			expect( placeholderImage.getAttribute( 'src' ) ).toBe(
+			const placeholderImage = component.getByRole('presentation');
+			expect(placeholderImage.getAttribute('src')).toBe(
 				'placeholder-full-size.jpg'
 			);
 
-			const anchor = placeholderImage.closest( 'a' );
-			expect( anchor ).toBe( null );
-		} );
-	} );
+			const anchor = placeholderImage.closest('a');
+			expect(anchor).toBe(null);
+		});
+	});
 
-	describe( 'without image', () => {
-		test( 'should render the placeholder with no inline width or height attributes', () => {
+	describe('without image', () => {
+		test('should render the placeholder with no inline width or height attributes', () => {
 			const component = render(
 				<ProductDataContextProvider
-					product={ productWithoutImages }
-					isLoading={ false }
+					product={productWithoutImages}
+					isLoading={false}
 				>
 					<Block
-						showProductLink={ true }
-						productId={ productWithoutImages.id }
-						showSaleBadge={ false }
-						saleBadgeAlign={ 'left' }
-						imageSizing={ ImageSizing.SINGLE }
+						showProductLink={true}
+						productId={productWithoutImages.id}
+						showSaleBadge={false}
+						saleBadgeAlign={'left'}
+						imageSizing={ImageSizing.SINGLE}
 					/>
 				</ProductDataContextProvider>
 			);
 
-			const placeholderImage = component.getByRole( 'presentation' );
-			expect( placeholderImage.getAttribute( 'src' ) ).toBe(
+			const placeholderImage = component.getByRole('presentation');
+			expect(placeholderImage.getAttribute('src')).toBe(
 				'placeholder-full-size.jpg'
 			);
-			expect( placeholderImage.getAttribute( 'width' ) ).toBe( null );
-			expect( placeholderImage.getAttribute( 'height' ) ).toBe( null );
-		} );
-	} );
+			expect(placeholderImage.getAttribute('width')).toBe(null);
+			expect(placeholderImage.getAttribute('height')).toBe(null);
+		});
+	});
 
-	describe( 'aspect ratio', () => {
-		test( 'uses full-size image src even when imageSizing is thumbnail', () => {
+	describe('aspect ratio', () => {
+		test('uses full-size image src even when imageSizing is thumbnail', () => {
 			const component = render(
 				<ProductDataContextProvider
-					product={ productWithImages }
-					isLoading={ false }
+					product={productWithImages}
+					isLoading={false}
 				>
 					<Block
-						showProductLink={ true }
-						productId={ productWithImages.id }
-						showSaleBadge={ false }
-						saleBadgeAlign={ 'left' }
-						imageSizing={ ImageSizing.THUMBNAIL }
+						showProductLink={true}
+						productId={productWithImages.id}
+						showSaleBadge={false}
+						saleBadgeAlign={'left'}
+						imageSizing={ImageSizing.THUMBNAIL}
 					/>
 				</ProductDataContextProvider>
 			);
 
-			const image = component.getByTestId( 'product-image' );
-			fireEvent.load( image );
+			const image = component.getByTestId('product-image');
+			fireEvent.load(image);
 
-			expect( image.getAttribute( 'src' ) ).toBe(
-				productWithImages.images[ 0 ].src
+			expect(image.getAttribute('src')).toBe(
+				productWithImages.images[0].src
 			);
-			expect( image.getAttribute( 'src' ) ).not.toBe(
-				productWithImages.images[ 0 ].thumbnail
+			expect(image.getAttribute('src')).not.toBe(
+				productWithImages.images[0].thumbnail
 			);
-		} );
+		});
 
-		test( 'applies store thumbnail aspect ratio when imageSizing is thumbnail', () => {
+		test('applies store thumbnail aspect ratio when imageSizing is thumbnail', () => {
 			const component = render(
 				<ProductDataContextProvider
-					product={ productWithImages }
-					isLoading={ false }
+					product={productWithImages}
+					isLoading={false}
 				>
 					<Block
-						showProductLink={ true }
-						productId={ productWithImages.id }
-						showSaleBadge={ false }
-						saleBadgeAlign={ 'left' }
-						imageSizing={ ImageSizing.THUMBNAIL }
+						showProductLink={true}
+						productId={productWithImages.id}
+						showSaleBadge={false}
+						saleBadgeAlign={'left'}
+						imageSizing={ImageSizing.THUMBNAIL}
 					/>
 				</ProductDataContextProvider>
 			);
 
-			const image = component.getByTestId( 'product-image' );
-			expect( image.style.aspectRatio ).toBe( '1/1' );
+			const image = component.getByTestId('product-image');
+			expect(image.style.aspectRatio).toBe('1/1');
 			expect(
 				component.container.querySelector(
 					'.wc-block-components-product-image--aspect-ratio-1-1'
 				)
 			).not.toBeNull();
-		} );
+		});
 
-		test( 'block aspect ratio overrides store thumbnail aspect ratio', () => {
+		test('block aspect ratio overrides store thumbnail aspect ratio', () => {
 			const component = render(
 				<ProductDataContextProvider
-					product={ productWithImages }
-					isLoading={ false }
+					product={productWithImages}
+					isLoading={false}
 				>
 					<Block
-						showProductLink={ true }
-						productId={ productWithImages.id }
-						showSaleBadge={ false }
-						saleBadgeAlign={ 'left' }
-						imageSizing={ ImageSizing.THUMBNAIL }
+						showProductLink={true}
+						productId={productWithImages.id}
+						showSaleBadge={false}
+						saleBadgeAlign={'left'}
+						imageSizing={ImageSizing.THUMBNAIL}
 						aspectRatio="3/5"
 					/>
 				</ProductDataContextProvider>
 			);
 
-			const image = component.getByTestId( 'product-image' );
-			expect( image.style.aspectRatio ).toBe( '3/5' );
-		} );
+			const image = component.getByTestId('product-image');
+			expect(image.style.aspectRatio).toBe('3/5');
+		});
 
-		test( 'uses auto aspect ratio class when store cropping is uncropped', () => {
-			( getSetting as jest.Mock ).mockImplementation(
-				( key, defaultValue ) => {
-					if ( key === 'placeholderImgSrcFullSize' ) {
+		test('uses auto aspect ratio class when store cropping is uncropped', () => {
+			(getSetting as jest.Mock).mockImplementation(
+				(key, defaultValue) => {
+					if (key === 'placeholderImgSrcFullSize') {
 						return 'placeholder-full-size.jpg';
 					}
-					if ( key === 'thumbnailAspectRatio' ) {
+					if (key === 'thumbnailAspectRatio') {
 						return null;
 					}
 					return defaultValue;
@@ -389,26 +385,26 @@ describe( 'Product Image Block', () => {
 
 			const component = render(
 				<ProductDataContextProvider
-					product={ productWithImages }
-					isLoading={ false }
+					product={productWithImages}
+					isLoading={false}
 				>
 					<Block
-						showProductLink={ true }
-						productId={ productWithImages.id }
-						showSaleBadge={ false }
-						saleBadgeAlign={ 'left' }
-						imageSizing={ ImageSizing.THUMBNAIL }
+						showProductLink={true}
+						productId={productWithImages.id}
+						showSaleBadge={false}
+						saleBadgeAlign={'left'}
+						imageSizing={ImageSizing.THUMBNAIL}
 					/>
 				</ProductDataContextProvider>
 			);
 
-			const image = component.getByTestId( 'product-image' );
-			expect( image.style.aspectRatio ).toBe( '' );
+			const image = component.getByTestId('product-image');
+			expect(image.style.aspectRatio).toBe('');
 			expect(
 				component.container.querySelector(
 					'.wc-block-components-product-image--aspect-ratio-auto'
 				)
 			).not.toBeNull();
-		} );
-	} );
-} );
+		});
+	});
+});

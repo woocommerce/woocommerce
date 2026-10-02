@@ -8,17 +8,17 @@ import {
 	useOrderSummaryLoadingState,
 } from '@woocommerce/base-context/hooks';
 
-const Block = ( { className = '' }: { className?: string } ): JSX.Element => {
+const Block = ({ className = '' }: { className?: string }): JSX.Element => {
 	const { cartTotals } = useStoreCart();
 	const { isLoading } = useOrderSummaryLoadingState();
-	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
+	const totalsCurrency = getCurrencyFromPriceResponse(cartTotals);
 
 	return (
-		<TotalsWrapper className={ className }>
+		<TotalsWrapper className={className}>
 			<Subtotal
-				currency={ totalsCurrency }
-				values={ cartTotals }
-				showSkeleton={ isLoading }
+				currency={totalsCurrency}
+				values={cartTotals}
+				showSkeleton={isLoading}
 			/>
 		</TotalsWrapper>
 	);

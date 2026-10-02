@@ -3,8 +3,8 @@
  */
 import { sanitizeHTML } from '@woocommerce/sanitize';
 
-export default ( html ) => {
+export default (html) => {
 	return {
-		__html: sanitizeHTML( html ),
+		__html: sanitizeHTML(html),
 	};
 };

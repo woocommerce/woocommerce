@@ -11,20 +11,20 @@ import {
 	registerSettingsEntity as registerSettingsEntityInternal,
 } from '../../public-api/entity-registration/register-entities';
 
-const deprecationNoticesShown = new Set< string >();
+const deprecationNoticesShown = new Set<string>();
 
-const showDeprecationNotice = ( functionName: string ) => {
-	if ( deprecationNoticesShown.has( functionName ) ) {
+const showDeprecationNotice = (functionName: string) => {
+	if (deprecationNoticesShown.has(functionName)) {
 		return;
 	}
 
-	deprecated( `${ functionName }()`, {
+	deprecated(`${functionName}()`, {
 		since: '11.1.0',
 		alternative: 'automatic entity registration',
 		plugin: 'WooCommerce',
 		hint: 'Entities are registered automatically by the wc-entities script. Remove this call.',
-	} );
-	deprecationNoticesShown.add( functionName );
+	});
+	deprecationNoticesShown.add(functionName);
 };
 
 /**
@@ -32,7 +32,7 @@ const showDeprecationNotice = ( functionName: string ) => {
  * by the wc-entities script.
  */
 export const registerProductEntity = () => {
-	showDeprecationNotice( 'registerProductEntity' );
+	showDeprecationNotice('registerProductEntity');
 	return registerProductEntityInternal();
 };
 
@@ -41,6 +41,6 @@ export const registerProductEntity = () => {
  * by the wc-entities script.
  */
 export const registerSettingsEntity = () => {
-	showDeprecationNotice( 'registerSettingsEntity' );
+	showDeprecationNotice('registerSettingsEntity');
 	return registerSettingsEntityInternal();
 };

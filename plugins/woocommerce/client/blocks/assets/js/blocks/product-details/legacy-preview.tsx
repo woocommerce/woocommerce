@@ -11,46 +11,46 @@ interface SingleProductTab {
 	content: React.JSX.Element | undefined;
 }
 
-const ProductTabTitle = ( {
+const ProductTabTitle = ({
 	id,
 	title,
 	active,
-}: Pick< SingleProductTab, 'id' | 'title' | 'active' > ) => {
+}: Pick<SingleProductTab, 'id' | 'title' | 'active'>) => {
 	return (
 		<li
-			className={ clsx( `${ id }_tab`, {
+			className={clsx(`${id}_tab`, {
 				active,
-			} ) }
-			id={ `tab-title-${ id }` }
+			})}
+			id={`tab-title-${id}`}
 			role="tab"
-			aria-controls={ `tab-${ id }` }
+			aria-controls={`tab-${id}`}
 		>
-			<a href={ `#tab-${ id }` }>{ title }</a>
+			<a href={`#tab-${id}`}>{title}</a>
 		</li>
 	);
 };
 
-const ProductTabContent = ( {
+const ProductTabContent = ({
 	id,
 	content,
-}: Pick< SingleProductTab, 'id' | 'content' > ) => {
+}: Pick<SingleProductTab, 'id' | 'content'>) => {
 	return (
 		<div
-			className={ `${ id }_tab` }
-			id={ `tab-title-${ id }` }
+			className={`${id}_tab`}
+			id={`tab-title-${id}`}
 			role="tab"
-			aria-controls={ `tab-${ id }` }
+			aria-controls={`tab-${id}`}
 		>
-			{ content }
+			{content}
 		</div>
 	);
 };
 
-export const LegacyProductDetailsPreview = ( {
+export const LegacyProductDetailsPreview = ({
 	hideTabTitle,
 }: {
 	hideTabTitle: boolean;
-} ) => {
+}) => {
 	const productTabs = [
 		{
 			id: 'description',
@@ -58,14 +58,14 @@ export const LegacyProductDetailsPreview = ( {
 			active: true,
 			content: (
 				<>
-					{ ! hideTabTitle && (
-						<h2>{ __( 'Description', 'woocommerce' ) }</h2>
-					) }
+					{!hideTabTitle && (
+						<h2>{__('Description', 'woocommerce')}</h2>
+					)}
 					<p>
-						{ __(
+						{__(
 							'This block lists description, attributes and reviews for a single product.',
 							'woocommerce'
-						) }
+						)}
 					</p>
 				</>
 			),
@@ -77,24 +77,19 @@ export const LegacyProductDetailsPreview = ( {
 		},
 		{ id: 'reviews', title: 'Reviews', active: false },
 	];
-	const tabsTitle = productTabs.map( ( { id, title, active } ) => (
-		<ProductTabTitle
-			key={ id }
-			id={ id }
-			title={ title }
-			active={ active }
-		/>
-	) );
-	const tabsContent = productTabs.map( ( { id, content } ) => (
-		<ProductTabContent key={ id } id={ id } content={ content } />
-	) );
+	const tabsTitle = productTabs.map(({ id, title, active }) => (
+		<ProductTabTitle key={id} id={id} title={title} active={active} />
+	));
+	const tabsContent = productTabs.map(({ id, content }) => (
+		<ProductTabContent key={id} id={id} content={content} />
+	));
 
 	return (
 		<>
 			<ul className="wc-tabs tabs" role="tablist">
-				{ tabsTitle }
+				{tabsTitle}
 			</ul>
-			{ tabsContent }
+			{tabsContent}
 		</>
 	);
 };

@@ -45,8 +45,8 @@ import {
  * @param value The stored setting value.
  * @return The ISO 3166-1 alpha-2 country code, or an empty string if there is none.
  */
-const toCountryCode = ( value: unknown ): string =>
-	typeof value === 'string' ? value.split( ':' )[ 0 ] : '';
+const toCountryCode = (value: unknown): string =>
+	typeof value === 'string' ? value.split(':')[0] : '';
 
 /**
  * This page is used to manage the settings for the BACS (Direct bank transfer) payment gateway.
@@ -68,88 +68,84 @@ export const SettingsPaymentsBacs = () => {
 		'US';
 
 	const { createSuccessNotice, createErrorNotice } =
-		useDispatch( 'core/notices' );
+		useDispatch('core/notices');
 
 	const { bacsSettings, isLoading } = useSelect(
-		( select ) => ( {
+		(select) => ({
 			bacsSettings:
-				select( paymentGatewaysStore ).getPaymentGateway( 'bacs' ),
-			isLoading: ! select( paymentGatewaysStore ).hasFinishedResolution(
+				select(paymentGatewaysStore).getPaymentGateway('bacs'),
+			isLoading: !select(paymentGatewaysStore).hasFinishedResolution(
 				'getPaymentGateway',
-				[ 'bacs' ]
+				['bacs']
 			),
-		} ),
+		}),
 		[]
 	);
 
 	const { invalidateResolution, invalidateResolutionForStoreSelector } =
-		useDispatch( paymentSettingsStore );
+		useDispatch(paymentSettingsStore);
 
-	const { accountsOption, isLoadingAccounts } = useSelect( ( select ) => {
-		const selectors = select( optionsStore );
+	const { accountsOption, isLoadingAccounts } = useSelect((select) => {
+		const selectors = select(optionsStore);
 
 		return {
-			accountsOption: selectors.getOption(
-				'woocommerce_bacs_accounts'
-			) as BankAccount[] | undefined,
-			isLoadingAccounts: ! selectors.hasFinishedResolution( 'getOption', [
+			accountsOption: selectors.getOption('woocommerce_bacs_accounts') as
+				BankAccount[] | undefined,
+			isLoadingAccounts: !selectors.hasFinishedResolution('getOption', [
 				'woocommerce_bacs_accounts',
-			] ),
+			]),
 		};
-	}, [] );
+	}, []);
 
-	const [ formValues, setFormValues ] = useState< OfflineFormValues >( {} );
+	const [formValues, setFormValues] = useState<OfflineFormValues>({});
 
-	const [ isSaving, setIsSaving ] = useState( false );
-	const [ hasChanges, setHasChanges ] = useState( false );
+	const [isSaving, setIsSaving] = useState(false);
+	const [hasChanges, setHasChanges] = useState(false);
 
-	useEffect( () => {
-		if ( bacsSettings ) {
-			setFormValues( {
+	useEffect(() => {
+		if (bacsSettings) {
+			setFormValues({
 				enabled: bacsSettings.enabled,
 				title: bacsSettings.settings.title.value,
 				description: bacsSettings.description,
 				instructions: bacsSettings.settings.instructions.value,
-				...getShippingRestrictionValues( bacsSettings ),
-			} );
-			setHasChanges( false );
+				...getShippingRestrictionValues(bacsSettings),
+			});
+			setHasChanges(false);
 		}
-	}, [ bacsSettings ] );
+	}, [bacsSettings]);
 
-	const [ accounts, setAccounts ] = useState< BankAccount[] >( [] );
+	const [accounts, setAccounts] = useState<BankAccount[]>([]);
 
-	useEffect( () => {
-		if ( accountsOption ) {
-			setAccounts( accountsOption );
+	useEffect(() => {
+		if (accountsOption) {
+			setAccounts(accountsOption);
 		}
-	}, [ accountsOption ] );
+	}, [accountsOption]);
 
-	const { updateOptions } = useDispatch( optionsStore );
-	const { updatePaymentGateway } = useDispatch( paymentGatewaysStore );
+	const { updateOptions } = useDispatch(optionsStore);
+	const { updatePaymentGateway } = useDispatch(paymentGatewaysStore);
 
-	const fields: Field< OfflineFormValues >[] = useMemo(
+	const fields: Field<OfflineFormValues>[] = useMemo(
 		() => [
 			{
 				id: 'enabled',
-				label: __( 'Enable direct bank transfers', 'woocommerce' ),
+				label: __('Enable direct bank transfers', 'woocommerce'),
 				Edit: CheckboxEdit,
 			},
 			{
 				id: 'title',
-				label: __( 'Title', 'woocommerce' ),
+				label: __('Title', 'woocommerce'),
 				description: __(
 					'Payment method name that the customer will see during checkout.',
 					'woocommerce'
 				),
-				placeholder: __(
-					'Direct bank transfer payments',
-					'woocommerce'
-				),
+				placeholder: __('Direct bank transfer payments', 'woocommerce'),
 				Edit: TextEdit,
 			},
 			{
 				id: 'description',
-				label: __( 'Description', 'woocommerce' ),
+				label: __('Description', 'woocommerce'),
 				description: __(
 					'Payment method description that the customer will see during checkout.',
 					'woocommerce'
@@ -158,7 +154,7 @@ export const SettingsPaymentsBacs = () => {
 			},
 			{
 				id: 'instructions',
-				label: __( 'Instructions', 'woocommerce' ),
+				label: __('Instructions', 'woocommerce'),
 				description: __(
 					'Instructions that will be added to the thank you page and emails.',
 					'woocommerce'
@@ -167,29 +163,29 @@ export const SettingsPaymentsBacs = () => {
 			},
 			...getShippingRestrictionFields(
 				bacsSettings,
-				__( 'direct bank transfer', 'woocommerce' )
+				__('direct bank transfer', 'woocommerce')
 			),
 		],
-		[ bacsSettings ]
+		[bacsSettings]
 	);
 
 	const saveSettings = async () => {
-		if ( ! bacsSettings ) {
+		if (!bacsSettings) {
 			return;
 		}
 
-		setIsSaving( true );
-		const settings: Record< string, string | string[] > = {
-			title: String( formValues.title ),
-			instructions: String( formValues.instructions ),
-			...getShippingRestrictionSettings( formValues ),
+		setIsSaving(true);
+		const settings: Record<string, string | string[]> = {
+			title: String(formValues.title),
+			instructions: String(formValues.instructions),
+			...getShippingRestrictionSettings(formValues),
 		};
 
 		try {
-			await Promise.all( [
-				updateOptions( {
+			await Promise.all([
+				updateOptions({
 					woocommerce_bacs_accounts: accounts.map(
-						( {
+						({
 							account_name,
 							account_number,
 							bank_name,
@@ -197,7 +193,7 @@ export const SettingsPaymentsBacs = () => {
 							iban,
 							bic,
 							country_code,
-						} ) => ( {
+						}) => ({
 							account_name,
 							account_number,
 							bank_name,
@@ -205,26 +201,24 @@ export const SettingsPaymentsBacs = () => {
 							iban,
 							bic,
 							country_code,
-						} )
+						})
 					),
-				} ),
-				updatePaymentGateway( 'bacs', {
-					enabled: Boolean( formValues.enabled ),
-					description: String( formValues.description ),
+				}),
+				updatePaymentGateway('bacs', {
+					enabled: Boolean(formValues.enabled),
+					description: String(formValues.description),
 					settings,
-				} ),
-			] );
-			setHasChanges( false );
+				}),
+			]);
+			setHasChanges(false);
 			createSuccessNotice(
-				__( 'Settings updated successfully', 'woocommerce' )
+				__('Settings updated successfully', 'woocommerce')
 			);
-		} catch ( error ) {
-			createErrorNotice(
-				__( 'Failed to update settings', 'woocommerce' )
-			);
+		} catch (error) {
+			createErrorNotice(__('Failed to update settings', 'woocommerce'));
 		} finally {
-			setIsSaving( false );
-			void invalidateResolution( 'getPaymentProviders', [] );
+			setIsSaving(false);
+			void invalidateResolution('getPaymentProviders', []);
 			void invalidateResolutionForStoreSelector(
 				'getOfflinePaymentGateways'
 			);
@@ -235,19 +229,19 @@ export const SettingsPaymentsBacs = () => {
 		<Settings>
 			<Settings.Layout>
 				<Settings.Form
-					onSubmit={ ( e ) => {
+					onSubmit={(e) => {
 						e.preventDefault();
 						void saveSettings();
-					} }
+					}}
 				>
 					<Settings.Section
-						title={ __( 'Enable and customise', 'woocommerce' ) }
-						description={ __(
+						title={__('Enable and customise', 'woocommerce')}
+						description={__(
 							'Choose how you want to present bank transfer to your customers during checkout.',
 							'woocommerce'
-						) }
+						)}
 					>
-						{ isLoading ? (
+						{isLoading ? (
 							<>
 								<FieldPlaceholder size="small" />
 								<FieldPlaceholder size="medium" />
@@ -258,9 +252,9 @@ export const SettingsPaymentsBacs = () => {
 							</>
 						) : (
 							<DataForm
-								data={ formValues }
-								fields={ fields }
-								form={ {
+								data={formValues}
+								fields={fields}
+								form={{
 									layout: { type: 'regular' },
 									fields: [
 										'enabled',
@@ -270,47 +264,47 @@ export const SettingsPaymentsBacs = () => {
 										'enable_for_methods',
 										'enable_for_virtual',
 									],
-								} }
-								onChange={ ( edits: OfflineFormValues ) => {
-									setFormValues( ( values ) => ( {
+								}}
+								onChange={(edits: OfflineFormValues) => {
+									setFormValues((values) => ({
 										...values,
 										...edits,
-									} ) );
-									setHasChanges( true );
-								} }
+									}));
+									setHasChanges(true);
+								}}
 							/>
-						) }
+						)}
 					</Settings.Section>
 
 					<Settings.Section
-						title={ __( 'Account details', 'woocommerce' ) }
-						description={ __(
+						title={__('Account details', 'woocommerce')}
+						description={__(
 							'Configure your bank account details.',
 							'woocommerce'
-						) }
+						)}
 					>
-						{ isLoadingAccounts ? (
+						{isLoadingAccounts ? (
 							<FieldPlaceholder size="large" />
 						) : (
 							<BankAccountsList
-								accounts={ accounts }
-								onChange={ ( bankAccounts ) => {
-									setAccounts( bankAccounts );
-									setHasChanges( true );
-								} }
-								defaultCountry={ defaultAccountCountry }
+								accounts={accounts}
+								onChange={(bankAccounts) => {
+									setAccounts(bankAccounts);
+									setHasChanges(true);
+								}}
+								defaultCountry={defaultAccountCountry}
 							/>
-						) }
+						)}
 					</Settings.Section>
 
 					<Settings.Actions>
 						<Button
 							variant="primary"
 							type="submit"
-							isBusy={ isSaving }
-							disabled={ isSaving || ! hasChanges }
+							isBusy={isSaving}
+							disabled={isSaving || !hasChanges}
 						>
-							{ __( 'Save changes', 'woocommerce' ) }
+							{__('Save changes', 'woocommerce')}
 						</Button>
 					</Settings.Actions>
 				</Settings.Form>

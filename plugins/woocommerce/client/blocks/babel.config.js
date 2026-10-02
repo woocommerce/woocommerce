@@ -6,7 +6,7 @@ module.exports = {
 					'react-docgen',
 					{ DOC_GEN_COLLECTION_NAME: 'STORYBOOK_REACT_CLASSES' },
 				],
-				[ '@babel/plugin-syntax-jsx' ],
+				['@babel/plugin-syntax-jsx'],
 			],
 		},
 	},
@@ -19,6 +19,6 @@ module.exports = {
 				},
 			},
 		],
-		[ '@babel/preset-typescript' ],
+		['@babel/preset-typescript'],
 	],
 };

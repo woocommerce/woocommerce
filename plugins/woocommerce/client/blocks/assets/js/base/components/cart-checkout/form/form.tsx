@@ -54,7 +54,7 @@ import { validateState } from './validate-state';
  */
 const Form = <
 	T extends AddressFormValues | ContactFormValues | OrderFormValues,
->( {
+>({
 	id = '',
 	fields,
 	onChange,
@@ -63,13 +63,13 @@ const Form = <
 	children,
 	isEditing,
 	ariaDescribedBy = '',
-}: FormProps< T > ): JSX.Element => {
-	const instanceId = useInstanceId( Form );
-	const isFirstRender = useRef( true );
+}: FormProps<T>): JSX.Element => {
+	const instanceId = useInstanceId(Form);
+	const isFirstRender = useRef(true);
 	const { defaultFields } = useCheckoutAddress(); // We read from here because `useCheckoutAddress` can adapt to being in the editor or frontend.
 	// Track incoming props.
-	const currentFields = useShallowEqual( fields );
-	const currentCountry = useShallowEqual< string >(
+	const currentFields = useShallowEqual(fields);
+	const currentCountry = useShallowEqual<string>(
 		'country' in values ? values.country : ''
 	);
 
@@ -82,271 +82,254 @@ const Form = <
 	);
 
 	// Store previous fields to track changes.
-	const previousFormFields = usePrevious( formFields );
-	const previousIsEditing = usePrevious( isEditing );
-	const previousValues = usePrevious( values );
+	const previousFormFields = usePrevious(formFields);
+	const previousIsEditing = usePrevious(isEditing);
+	const previousValues = usePrevious(values);
 
 	// Stores refs for rendered inputs so we can access them later.
-	const inputsRef = useRef<
-		Record< string, ValidatedTextInputHandle | null >
-	>( {} );
+	const inputsRef = useRef<Record<string, ValidatedTextInputHandle | null>>(
+		{}
+	);
 
 	const { errors, previousErrors } = useFormValidation(
 		formFields,
 		addressType,
 		// Temporary override for shipping calculator address form.
-		addressType === 'shipping' ? ( values as AddressFormValues ) : undefined
+		addressType === 'shipping' ? (values as AddressFormValues) : undefined
 	);
 
-	useEffect( () => {
-		Object.entries( errors ).forEach( ( [ key, error ] ) => {
-			const inputRef = inputsRef.current[ key ];
-			if ( ! error ) {
+	useEffect(() => {
+		Object.entries(errors).forEach(([key, error]) => {
+			const inputRef = inputsRef.current[key];
+			if (!error) {
 				return;
 			}
-			inputRef?.setErrorMessage( error );
+			inputRef?.setErrorMessage(error);
 			const hasValidationError = select(
 				validationStore
-			).getValidationError( `${ addressType }_${ key }` );
+			).getValidationError(`${addressType}_${key}`);
 
 			// Check if this field already has a validation error, prevents up from surfacing already hidden errors.
-			if ( hasValidationError ) {
+			if (hasValidationError) {
 				return;
 			}
-			void dispatch( validationStore ).setValidationErrors( {
-				[ `${ addressType }_${ key }` ]: {
+			void dispatch(validationStore).setValidationErrors({
+				[`${addressType}_${key}`]: {
 					message: error,
-					hidden: !! inputRef?.isFocused(),
+					hidden: !!inputRef?.isFocused(),
 				},
-			} );
-		} );
+			});
+		});
 
 		// Previous errors are cleared when they're no longer present.
-		if ( previousErrors ) {
+		if (previousErrors) {
 			const errorsToClear: string[] = [];
-			Object.entries( previousErrors ).forEach( ( [ key ] ) => {
-				const inputRef = inputsRef.current[ key ];
+			Object.entries(previousErrors).forEach(([key]) => {
+				const inputRef = inputsRef.current[key];
 
 				// If error was previously set but no longer exists, clear it.
-				if ( ! ( key in errors ) ) {
-					errorsToClear.push( `${ addressType }_${ key }` );
-					inputRef?.setErrorMessage( '' );
+				if (!(key in errors)) {
+					errorsToClear.push(`${addressType}_${key}`);
+					inputRef?.setErrorMessage('');
 				}
-			} );
-			if ( errorsToClear.length ) {
-				void dispatch( validationStore ).clearValidationErrors(
+			});
+			if (errorsToClear.length) {
+				void dispatch(validationStore).clearValidationErrors(
 					errorsToClear
 				);
 			}
 		}
-	}, [ errors, previousErrors, addressType, values ] );
+	}, [errors, previousErrors, addressType, values]);
 
 	// Changing country may change format for postcodes.
-	useEffect( () => {
+	useEffect(() => {
 		inputsRef.current?.postcode?.revalidate();
-	}, [ currentCountry ] );
+	}, [currentCountry]);
 
 	// Focus the first input when opening the form.
-	useEffect( () => {
-		let timeoutId: ReturnType< typeof setTimeout >;
+	useEffect(() => {
+		let timeoutId: ReturnType<typeof setTimeout>;
 
 		if (
-			! isFirstRender.current &&
+			!isFirstRender.current &&
 			isEditing &&
 			inputsRef.current &&
 			previousIsEditing !== isEditing
 		) {
 			const firstField = formFields.find(
-				( field ) => field.hidden === false
+				(field) => field.hidden === false
 			);
 
-			if ( ! firstField ) {
+			if (!firstField) {
 				return;
 			}
 
 			const { id: firstFieldId } = createFieldProps(
 				firstField,
-				id || `${ instanceId }`,
+				id || `${instanceId}`,
 				addressType
 			);
-			const firstFieldEl = document.getElementById( firstFieldId );
+			const firstFieldEl = document.getElementById(firstFieldId);
 
-			if ( firstFieldEl ) {
+			if (firstFieldEl) {
 				// Focus the first field after a short delay to ensure the form is rendered.
-				timeoutId = setTimeout( () => {
+				timeoutId = setTimeout(() => {
 					firstFieldEl.focus();
-				}, 300 );
+				}, 300);
 			}
 		}
 
 		isFirstRender.current = false;
 
 		return () => {
-			clearTimeout( timeoutId );
+			clearTimeout(timeoutId);
 		};
-	}, [
-		isEditing,
-		formFields,
-		id,
-		instanceId,
-		addressType,
-		previousIsEditing,
-	] );
+	}, [isEditing, formFields, id, instanceId, addressType, previousIsEditing]);
 
 	// Clear values for hidden fields when fields change.
-	useEffect( () => {
-		if ( fastDeepEqual( previousFormFields, formFields ) ) {
+	useEffect(() => {
+		if (fastDeepEqual(previousFormFields, formFields)) {
 			return;
 		}
 		const newValues = {
 			...values,
 			...Object.fromEntries(
 				formFields
-					.filter( ( field ) => field.hidden )
-					.map( ( field ) => [ field.key, '' ] )
+					.filter((field) => field.hidden)
+					.map((field) => [field.key, ''])
 			),
 		};
-		if ( ! isShallowEqual( values, newValues ) ) {
-			onChange( newValues );
+		if (!isShallowEqual(values, newValues)) {
+			onChange(newValues);
 		}
-	}, [ onChange, formFields, previousFormFields, values ] );
+	}, [onChange, formFields, previousFormFields, values]);
 
 	// Maybe validate country and state when other fields change so user is notified that they're required.
-	useEffect( () => {
+	useEffect(() => {
 		if (
-			fastDeepEqual( previousFormFields, formFields ) &&
-			fastDeepEqual( previousValues, values )
+			fastDeepEqual(previousFormFields, formFields) &&
+			fastDeepEqual(previousValues, values)
 		) {
 			return;
 		}
-		if ( 'country' in values ) {
-			validateCountry( addressType, values );
+		if ('country' in values) {
+			validateCountry(addressType, values);
 		}
-		if ( 'state' in values ) {
-			const stateField = formFields.find( ( f ) => f.key === 'state' );
+		if ('state' in values) {
+			const stateField = formFields.find((f) => f.key === 'state');
 
-			if ( stateField ) {
-				validateState( addressType, values, stateField );
+			if (stateField) {
+				validateState(addressType, values, stateField);
 			}
 		}
-	}, [
-		values,
-		previousValues,
-		addressType,
-		formFields,
-		previousFormFields,
-	] );
+	}, [values, previousValues, addressType, formFields, previousFormFields]);
 
-	id = id || `${ instanceId }`;
+	id = id || `${instanceId}`;
 
 	return (
-		<div id={ id } className="wc-block-components-address-form">
-			{ formFields.map( ( field ) => {
-				if ( !! field.hidden ) {
+		<div id={id} className="wc-block-components-address-form">
+			{formFields.map((field) => {
+				if (!!field.hidden) {
 					return null;
 				}
 
-				const fieldProps = createFieldProps( field, id, addressType );
-				const checkboxFieldProps =
-					createCheckboxFieldProps( fieldProps );
+				const fieldProps = createFieldProps(field, id, addressType);
+				const checkboxFieldProps = createCheckboxFieldProps(fieldProps);
 
-				if ( field.key === 'email' ) {
+				if (field.key === 'email') {
 					fieldProps.id = 'email';
 					fieldProps.errorId = 'billing_email';
 				}
 
-				if ( field.type === 'checkbox' ) {
+				if (field.type === 'checkbox') {
 					const value =
 						field.key in values
-							? values[ field.key as keyof T ]
+							? values[field.key as keyof T]
 							: false;
 					const checkboxProps = {
-						checked: Boolean( value ),
-						onChange: ( checked: boolean ) => {
-							onChange( {
+						checked: Boolean(value),
+						onChange: (checked: boolean) => {
+							onChange({
 								...values,
-								[ field.key ]: checked,
-							} );
+								[field.key]: checked,
+							});
 						},
 						...checkboxFieldProps,
 					};
-					if ( field.required ) {
+					if (field.required) {
 						return (
 							<ValidatedCheckboxControl
-								key={ field.key }
-								{ ...( field.errorMessage
+								key={field.key}
+								{...(field.errorMessage
 									? { errorMessage: field.errorMessage }
-									: {} ) }
-								{ ...checkboxProps }
+									: {})}
+								{...checkboxProps}
 							/>
 						);
 					}
 
 					return (
-						<CheckboxControl
-							key={ field.key }
-							{ ...checkboxProps }
-						/>
+						<CheckboxControl key={field.key} {...checkboxProps} />
 					);
 				}
 
 				// If the current field is 'address_1', we handle both 'address_1' and 'address_2' fields together.
-				if ( field.key === 'address_1' && 'address_1' in values ) {
-					const address1 = getFieldData< 'address_1' >(
+				if (field.key === 'address_1' && 'address_1' in values) {
+					const address1 = getFieldData<'address_1'>(
 						'address_1',
 						formFields,
 						values
 					);
-					const address2 = getFieldData< 'address_2' >(
+					const address2 = getFieldData<'address_2'>(
 						'address_2',
 						formFields,
 						values
 					);
 
-					if ( isNull( address1 ) || isNull( address2 ) ) {
+					if (isNull(address1) || isNull(address2)) {
 						return null;
 					}
 
 					return (
 						<AddressLineFields
-							address1={ address1 }
-							address2={ address2 }
-							addressType={ addressType }
-							formId={ id }
-							key={ field.key }
-							onChange={ ( key, value ) => {
-								onChange( {
+							address1={address1}
+							address2={address2}
+							addressType={addressType}
+							formId={id}
+							key={field.key}
+							onChange={(key, value) => {
+								onChange({
 									...values,
-									[ key ]: value,
-								} );
-							} }
+									[key]: value,
+								});
+							}}
 						/>
 					);
 				}
 
 				// If the current field is 'address_2', we skip it because it's already handled above.
-				if ( field.key === 'address_2' ) {
+				if (field.key === 'address_2') {
 					return null;
 				}
 
-				if ( field.key === 'country' && 'country' in values ) {
+				if (field.key === 'country' && 'country' in values) {
 					const Tag =
 						addressType === 'shipping'
 							? ShippingCountryInput
 							: BillingCountryInput;
 					return (
 						<Tag
-							key={ field.key }
-							{ ...fieldProps }
-							value={ values.country }
-							onChange={ ( newCountry ) => {
-								onChange( {
+							key={field.key}
+							{...fieldProps}
+							value={values.country}
+							onChange={(newCountry) => {
+								onChange({
 									...values,
 									country: newCountry,
 									state: '',
 									postcode: '',
-								} );
-							} }
+								});
+							}}
 						/>
 					);
 				}
@@ -362,105 +345,96 @@ const Form = <
 							: BillingStateInput;
 					return (
 						<Tag
-							key={ field.key }
-							{ ...fieldProps }
-							country={ values.country }
-							value={ values.state }
-							onChange={ ( newValue ) =>
-								onChange( {
+							key={field.key}
+							{...fieldProps}
+							country={values.country}
+							value={values.state}
+							onChange={(newValue) =>
+								onChange({
 									...values,
 									state: newValue,
-								} )
+								})
 							}
 						/>
 					);
 				}
 
-				if ( field.type === 'select' && 'options' in field ) {
-					if ( typeof field.options === 'undefined' ) {
+				if (field.type === 'select' && 'options' in field) {
+					if (typeof field.options === 'undefined') {
 						return null;
 					}
 
 					return (
 						<Select
-							key={ field.key }
-							{ ...fieldProps }
-							label={ fieldProps.label || '' }
-							className={ clsx(
+							key={field.key}
+							{...fieldProps}
+							label={fieldProps.label || ''}
+							className={clsx(
 								'wc-block-components-select-input',
-								`wc-block-components-select-input-${ field.key }`.replaceAll(
+								`wc-block-components-select-input-${field.key}`.replaceAll(
 									'/',
 									'-'
 								)
-							) }
+							)}
 							value={
 								field.key in values
-									? ( values[
-											field.key as keyof T
-									  ] as string )
+									? (values[field.key as keyof T] as string)
 									: ''
 							}
-							onChange={ ( newValue: string ) => {
-								onChange( {
+							onChange={(newValue: string) => {
+								onChange({
 									...values,
-									[ field.key ]: newValue,
-								} );
-							} }
-							options={ field.options }
-							required={ field.required }
-							errorMessage={
-								fieldProps.errorMessage || undefined
-							}
+									[field.key]: newValue,
+								});
+							}}
+							options={field.options}
+							required={field.required}
+							errorMessage={fieldProps.errorMessage || undefined}
 						/>
 					);
 				}
 
 				return (
 					<ValidatedTextInput
-						key={ field.key }
-						ref={ ( el ) =>
-							( inputsRef.current[ field.key ] = el )
-						}
-						{ ...fieldProps }
-						type={ field.type }
-						{ ...( field.type === 'date'
+						key={field.key}
+						ref={(el) => (inputsRef.current[field.key] = el)}
+						{...fieldProps}
+						type={field.type}
+						{...(field.type === 'date'
 							? {
-									...resolveDateConstraints( field ),
+									...resolveDateConstraints(field),
 									icon: (
 										<span
 											className="wc-block-components-text-input__date-icon"
 											aria-hidden="true"
 										>
-											<Icon
-												icon={ calendar }
-												size={ 24 }
-											/>
+											<Icon icon={calendar} size={24} />
 										</span>
 									),
-							  }
-							: {} ) }
-						ariaDescribedBy={ ariaDescribedBy }
+								}
+							: {})}
+						ariaDescribedBy={ariaDescribedBy}
 						value={
 							decodeEntities(
-								values[ field.key as keyof T ] as string
+								values[field.key as keyof T] as string
 							) ?? ''
 						}
-						onChange={ ( newValue: string ) =>
-							onChange( {
+						onChange={(newValue: string) =>
+							onChange({
 								...values,
-								[ field.key ]: newValue,
-							} )
+								[field.key]: newValue,
+							})
 						}
-						customFormatter={ ( value: string ) => {
-							if ( field.key === 'postcode' ) {
+						customFormatter={(value: string) => {
+							if (field.key === 'postcode') {
 								return value.trimStart().toUpperCase();
 							}
 							return value;
-						} }
+						}}
 					/>
 				);
-			} ) }
-			{ children }
+			})}
+			{children}
 		</div>
 	);
 };

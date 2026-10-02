@@ -10,8 +10,8 @@ const DEFAULT_STATE = {
 	},
 };
 
-const reducer = ( state = DEFAULT_STATE, action ) => {
-	switch ( action.type ) {
+const reducer = (state = DEFAULT_STATE, action) => {
+	switch (action.type) {
 		case TYPES.SET_MESSAGE:
 			return {
 				...state,

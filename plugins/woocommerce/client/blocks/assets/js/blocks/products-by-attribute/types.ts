@@ -5,7 +5,7 @@ import type { BlockAlignment } from '@wordpress/blocks';
 
 export interface Attributes {
 	align?: BlockAlignment;
-	attributes: Array< string >;
+	attributes: Array<string>;
 	attrOperator: 'all' | 'any';
 	columns: number;
 	contentVisibility: {
@@ -26,7 +26,7 @@ export interface Attributes {
 	rows: number;
 	alignButtons: boolean;
 	isPreview: boolean;
-	stockStatus: Array< string >;
+	stockStatus: Array<string>;
 }
 
 export interface Props {
@@ -41,7 +41,7 @@ export interface Props {
 	/**
 	 * A callback to update attributes
 	 */
-	setAttributes: ( attributes: Partial< Attributes > ) => void;
+	setAttributes: (attributes: Partial<Attributes>) => void;
 	// from withSpokenMessages
-	debouncedSpeak: ( message: string ) => void;
+	debouncedSpeak: (message: string) => void;
 }

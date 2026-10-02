@@ -23,23 +23,23 @@ import BlockErrorBoundary from '../components/error-boundary';
  * @param {Array} fills The list of fills to check for a valid one in.
  * @return {boolean} True if this slot contains any valid fills.
  */
-export const hasValidFills = ( fills: [] ) =>
-	Array.isArray( fills ) && fills.filter( Boolean ).length > 0;
+export const hasValidFills = (fills: []) =>
+	Array.isArray(fills) && fills.filter(Boolean).length > 0;
 
 export { useSlot, useSlotFills };
 
 type SlotFill = {
 	Fill: (
-		props: Partial< {
+		props: Partial<{
 			bubblesVirtually: boolean;
 			children: React.ReactNode;
-		} >
+		}>
 	) => JSX.Element;
 	Slot: (
-		props: Partial< {
+		props: Partial<{
 			bubblesVirtually: boolean;
 			children: React.ReactNode;
-		} >
+		}>
 	) => JSX.Element;
 };
 
@@ -51,7 +51,7 @@ type SlotFill = {
  *
  * @return {Object} Returns a newly wrapped Fill and Slot.
  */
-export const createSlotFill = ( slotName: string, onError = null ) => {
+export const createSlotFill = (slotName: string, onError = null) => {
 	const { Fill: BaseFill, Slot: BaseSlot } = baseCreateSlotFill(
 		slotName
 	) as SlotFill;
@@ -64,10 +64,10 @@ export const createSlotFill = ( slotName: string, onError = null ) => {
 	 * @param {Object} props          Items props.
 	 * @param {Array}  props.children Children to be rendered.
 	 */
-	const Fill = ( { children }: { children: React.ReactNode } ) => (
+	const Fill = ({ children }: { children: React.ReactNode }) => (
 		<BaseFill>
-			{ ( fillProps: unknown ) =>
-				Children.map( children, ( fill ) => (
+			{(fillProps: unknown) =>
+				Children.map(children, (fill) => (
 					<BlockErrorBoundary
 						/* Returning null would trigger the default error display.
 						 * Returning () => null would render nothing.
@@ -76,10 +76,10 @@ export const createSlotFill = ( slotName: string, onError = null ) => {
 							CURRENT_USER_IS_ADMIN ? onError : () => null
 						}
 					>
-						{ /* @ts-expect-error It's not clear how to accurately type `fill`. */ }
-						{ cloneElement( fill, fillProps ) }
+						{/* @ts-expect-error It's not clear how to accurately type `fill`. */}
+						{cloneElement(fill, fillProps)}
 					</BlockErrorBoundary>
-				) )
+				))
 			}
 		</BaseFill>
 	);
@@ -94,9 +94,7 @@ export const createSlotFill = ( slotName: string, onError = null ) => {
 	 * @param {Element|string} props.as        Element used to render the slot, defaults to div.
 	 *
 	 */
-	const Slot = ( props: object ) => (
-		<BaseSlot { ...props } bubblesVirtually />
-	);
+	const Slot = (props: object) => <BaseSlot {...props} bubblesVirtually />;
 
 	return {
 		Fill,

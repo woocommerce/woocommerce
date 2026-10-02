@@ -41,19 +41,19 @@ const {
 	currency,
 	placeholderImgSrc,
 	nonOptimisticProperties = [],
-} = getConfig( 'woocommerce' ) as WooCommerceConfig;
+} = getConfig('woocommerce') as WooCommerceConfig;
 const {
 	onCartClickBehaviour,
 	checkoutUrl,
 	displayCartPriceIncludingTax,
 	buttonAriaLabelTemplate,
-} = getConfig( 'woocommerce/mini-cart' );
+} = getConfig('woocommerce/mini-cart');
 const {
 	reduceQuantityLabel,
 	increaseQuantityLabel,
 	quantityDescriptionLabel,
 	removeFromCartLabel,
-} = getConfig( 'woocommerce/mini-cart-products-table-block' );
+} = getConfig('woocommerce/mini-cart-products-table-block');
 const { itemsInCartTextTemplate } = getConfig(
 	'woocommerce/mini-cart-title-items-counter-block'
 );
@@ -64,14 +64,14 @@ type ScalePriceArgs = {
 	outputDecimals?: number;
 };
 
-const scalePrice = ( {
+const scalePrice = ({
 	price,
 	inputDecimals,
 	outputDecimals = 0,
-}: ScalePriceArgs ) => {
-	const scaledPrice = price * Math.pow( 10, outputDecimals - inputDecimals );
+}: ScalePriceArgs) => {
+	const scaledPrice = price * Math.pow(10, outputDecimals - inputDecimals);
 	// Remove extra decimals.
-	return Math.round( scaledPrice );
+	return Math.round(scaledPrice);
 };
 
 /**
@@ -85,19 +85,19 @@ function getClosestColor(
 	element: Element | null,
 	colorType: 'color' | 'backgroundColor'
 ): string | null {
-	if ( ! element ) {
+	if (!element) {
 		return null;
 	}
-	const color = window.getComputedStyle( element )[ colorType ];
-	if ( color !== 'rgba(0, 0, 0, 0)' && color !== 'transparent' ) {
-		const matches = color.match( /\d+/g );
-		if ( ! matches || matches.length < 3 ) {
+	const color = window.getComputedStyle(element)[colorType];
+	if (color !== 'rgba(0, 0, 0, 0)' && color !== 'transparent') {
+		const matches = color.match(/\d+/g);
+		if (!matches || matches.length < 3) {
 			return null;
 		}
-		const [ r, g, b ] = matches.slice( 0, 3 );
-		return `rgb(${ r }, ${ g }, ${ b })`;
+		const [r, g, b] = matches.slice(0, 3);
+		return `rgb(${r}, ${g}, ${b})`;
 	}
-	return getClosestColor( element.parentElement, colorType );
+	return getClosestColor(element.parentElement, colorType);
 }
 
 type MiniCart = {
@@ -121,8 +121,8 @@ type MiniCart = {
 	actions: {
 		openDrawer: () => void;
 		closeDrawer: () => void;
-		overlayCloseDrawer: ( e: MouseEvent ) => void;
-		handleOverlayKeydown: ( e: KeyboardEvent ) => void;
+		overlayCloseDrawer: (e: MouseEvent) => void;
+		handleOverlayKeydown: (e: KeyboardEvent) => void;
 	};
 	callbacks: {
 		markAsHydrated: () => void;
@@ -142,12 +142,12 @@ type CartItemContext = {
 
 type DataProperty = 'item_data' | 'variation';
 
-const trimWords = ( html: string, maxWords = 15 ): string => {
-	const words = html.trim().split( /\s+/ );
-	if ( words.length <= maxWords ) {
+const trimWords = (html: string, maxWords = 15): string => {
+	const words = html.trim().split(/\s+/);
+	if (words.length <= maxWords) {
 		return html;
 	}
-	return words.slice( 0, maxWords ).join( ' ' ) + '…';
+	return words.slice(0, maxWords).join(' ') + '…';
 };
 
 const focusableSelectors = `
@@ -160,20 +160,20 @@ const focusableSelectors = `
 	[tabindex]:not([tabindex^="-"])
 `;
 
-const getFocusableElements = ( container: HTMLElement | null ) =>
+const getFocusableElements = (container: HTMLElement | null) =>
 	container
 		? Array.from(
-				container.querySelectorAll< HTMLElement >( focusableSelectors )
-		  ).filter( ( el ) => el.offsetParent !== null )
+				container.querySelectorAll<HTMLElement>(focusableSelectors)
+			).filter((el) => el.offsetParent !== null)
 		: [];
 
-const { state: woocommerceState, actions } = store< WooCommerce >(
+const { state: woocommerceState, actions } = store<WooCommerce>(
 	'woocommerce',
 	{},
 	{ lock: universalLock }
 );
 
-const { state: miniCartState, actions: miniCartActions } = store< MiniCart >(
+const { state: miniCartState, actions: miniCartActions } = store<MiniCart>(
 	'woocommerce/mini-cart',
 	{},
 	{ lock: true }
@@ -181,46 +181,46 @@ const { state: miniCartState, actions: miniCartActions } = store< MiniCart >(
 
 // Getters cannot access `state` during hydration if it is not declared
 // beforehand. This will be removed once the iAPI allows this case.
-const { state } = store< MiniCart >(
+const { state } = store<MiniCart>(
 	'woocommerce/mini-cart',
 	{},
 	{ lock: universalLock }
 );
 
-store< MiniCart >(
+store<MiniCart>(
 	'woocommerce/mini-cart',
 	{
 		state: {
 			isHydrated: false,
 			get totalItemsInCart() {
-				if ( nonOptimisticProperties.includes( 'cart.items_count' ) ) {
+				if (nonOptimisticProperties.includes('cart.items_count')) {
 					return woocommerceState.cart.items_count as number;
 				}
-				return woocommerceState.cart.items.reduce< number >(
-					( total, { quantity } ) => total + quantity,
+				return woocommerceState.cart.items.reduce<number>(
+					(total, { quantity }) => total + quantity,
 					0
 				);
 			},
 
 			get formattedSubtotal(): string {
-				if ( ! currency ) {
+				if (!currency) {
 					return '';
 				}
 
 				const subtotal = displayCartPriceIncludingTax
-					? parseInt( woocommerceState.cart.totals.total_items, 10 ) +
-					  parseInt(
+					? parseInt(woocommerceState.cart.totals.total_items, 10) +
+						parseInt(
 							woocommerceState.cart.totals.total_items_tax,
 							10
-					  )
-					: parseInt( woocommerceState.cart.totals.total_items, 10 );
+						)
+					: parseInt(woocommerceState.cart.totals.total_items, 10);
 
 				const normalizedCurrency = normalizeCurrencyResponse(
 					woocommerceState.cart.totals,
 					currency
 				);
 
-				return formatPriceWithCurrency( subtotal, normalizedCurrency );
+				return formatPriceWithCurrency(subtotal, normalizedCurrency);
 			},
 
 			get drawerRole() {
@@ -234,12 +234,12 @@ store< MiniCart >(
 			get badgeIsVisible(): boolean {
 				const cartHasItems = miniCartState.totalItemsInCart > 0;
 				const { productCountVisibility } =
-					getContext< MiniCartContext >();
+					getContext<MiniCartContext>();
 
 				return (
 					productCountVisibility === 'always' ||
-					( productCountVisibility === 'greater_than_zero' &&
-						cartHasItems )
+					(productCountVisibility === 'greater_than_zero' &&
+						cartHasItems)
 				);
 			},
 
@@ -249,47 +249,45 @@ store< MiniCart >(
 
 			get buttonAriaLabel(): string {
 				return buttonAriaLabelTemplate
-					.replace( '%d', state.totalItemsInCart )
-					.replace( '%1$d', state.totalItemsInCart )
-					.replace( '%2$s', state.formattedSubtotal );
+					.replace('%d', state.totalItemsInCart)
+					.replace('%1$d', state.totalItemsInCart)
+					.replace('%2$s', state.formattedSubtotal);
 			},
 
 			get shouldShowTaxLabel(): boolean {
 				return (
-					parseInt(
-						woocommerceState.cart.totals.total_items_tax,
-						10
-					) > 0
+					parseInt(woocommerceState.cart.totals.total_items_tax, 10) >
+					0
 				);
 			},
 
 			get contentsBackgroundColor(): string {
 				return (
-					getComputedStyle( document.body ).backgroundColor || '#fff'
+					getComputedStyle(document.body).backgroundColor || '#fff'
 				);
 			},
 
 			get badgeBackgroundColor(): string | undefined {
-				if ( state.isHydrated ) {
-					if ( state.productCountColor ) {
+				if (state.isHydrated) {
+					if (state.productCountColor) {
 						return state.productCountColor;
 					}
 					const { ref } = getElement();
-					return getClosestColor( ref, 'color' ) || '#000';
+					return getClosestColor(ref, 'color') || '#000';
 				}
 			},
 
 			get badgeTextColor(): string | undefined {
-				if ( state.isHydrated ) {
+				if (state.isHydrated) {
 					const { ref } = getElement();
-					return getClosestColor( ref, 'backgroundColor' ) || '#fff';
+					return getClosestColor(ref, 'backgroundColor') || '#fff';
 				}
 			},
 		},
 
 		actions: {
 			openDrawer() {
-				if ( onCartClickBehaviour === 'navigate_to_checkout' ) {
+				if (onCartClickBehaviour === 'navigate_to_checkout') {
 					window.location.href = checkoutUrl;
 					return;
 				}
@@ -303,28 +301,28 @@ store< MiniCart >(
 				state.miniCartButtonRef?.focus();
 			},
 
-			overlayCloseDrawer( e: MouseEvent ) {
+			overlayCloseDrawer(e: MouseEvent) {
 				// Only close the drawer if the overlay itself was clicked.
-				if ( e.target === e.currentTarget ) {
+				if (e.target === e.currentTarget) {
 					miniCartActions.closeDrawer();
 				}
 			},
 
-			handleOverlayKeydown: withSyncEvent( ( e: KeyboardEvent ) => {
-				if ( state.isOpen ) {
-					if ( e.key === 'Escape' ) {
+			handleOverlayKeydown: withSyncEvent((e: KeyboardEvent) => {
+				if (state.isOpen) {
+					if (e.key === 'Escape') {
 						miniCartActions.closeDrawer();
 					}
 
 					// Trap focus if it is an overlay (main menu).
-					if ( e.key === 'Tab' ) {
+					if (e.key === 'Tab') {
 						const { ref } = getElement();
-						const focusableElements = getFocusableElements( ref );
+						const focusableElements = getFocusableElements(ref);
 						const activeElement = ref?.ownerDocument.activeElement;
 
 						if (
 							e.shiftKey &&
-							activeElement === focusableElements?.[ 0 ]
+							activeElement === focusableElements?.[0]
 						) {
 							// Focus last element when shift+tab in the first one.
 							e.preventDefault();
@@ -332,7 +330,7 @@ store< MiniCart >(
 								focusableElements.length - 1
 							]?.focus();
 						} else if (
-							! e.shiftKey &&
+							!e.shiftKey &&
 							activeElement ===
 								focusableElements?.[
 									focusableElements.length - 1
@@ -340,16 +338,16 @@ store< MiniCart >(
 						) {
 							// Focus first element when tab in the last one.
 							e.preventDefault();
-							focusableElements?.[ 0 ]?.focus();
+							focusableElements?.[0]?.focus();
 						}
 					}
 				}
-			} ),
+			}),
 		},
 
 		callbacks: {
 			*setupJQueryEventBridge() {
-				if ( ! ( 'jQuery' in window ) ) {
+				if (!('jQuery' in window)) {
 					return;
 				}
 
@@ -374,27 +372,27 @@ store< MiniCart >(
 			},
 
 			disableScrollingOnBody() {
-				if ( state.isOpen ) {
-					Object.assign( document.body.style, {
+				if (state.isOpen) {
+					Object.assign(document.body.style, {
 						overflow: 'hidden',
 						paddingRight:
 							window.innerWidth -
 							document.documentElement.clientWidth +
 							'px',
-					} );
+					});
 				} else {
-					Object.assign( document.body.style, {
+					Object.assign(document.body.style, {
 						overflow: '',
 						paddingRight: 0,
-					} );
+					});
 				}
 			},
 
 			focusFirstElement() {
-				if ( state.isOpen ) {
+				if (state.isOpen) {
 					const { ref } = getElement();
 					// Focus first element when the minicart is opened.
-					getFocusableElements( ref )[ 0 ]?.focus();
+					getFocusableElements(ref)[0]?.focus();
 				}
 			},
 			markAsHydrated() {
@@ -411,15 +409,15 @@ store< MiniCart >(
  * per-iteration context is set.
  */
 function resolveDataItemAttr(): ItemData | undefined {
-	const { itemData, dataProperty } = getContext< {
+	const { itemData, dataProperty } = getContext<{
 		itemData: ItemData;
 		dataProperty: DataProperty;
-	} >();
+	}>();
 
 	return (
 		itemData ||
 		// eslint-disable-next-line @typescript-eslint/no-use-before-define
-		cartItemState.cartItem[ dataProperty ]?.[ 0 ]
+		cartItemState.cartItem[dataProperty]?.[0]
 	);
 }
 
@@ -427,8 +425,8 @@ function resolveDataItemAttr(): ItemData | undefined {
  * Returns the raw API value for an item_data field. Used by both innerHTML
  * callbacks and the cartItemDataAttr getter.
  */
-function getItemDataRaw( field: 'name' | 'value' ): string {
-	return getEntryFieldRaw( resolveDataItemAttr(), field );
+function getItemDataRaw(field: 'name' | 'value'): string {
+	return getEntryFieldRaw(resolveDataItemAttr(), field);
 }
 
 const { state: cartItemState } = store(
@@ -441,13 +439,13 @@ const { state: cartItemState } = store(
 			get cartItem() {
 				const {
 					cartItem: { id, key, variation },
-				} = getContext< CartItemContext >( 'woocommerce' );
+				} = getContext<CartItemContext>('woocommerce');
 
-				const cartItem = ( woocommerceState.findItemInCart( {
+				const cartItem = (woocommerceState.findItemInCart({
 					id,
 					key,
 					variation,
-				} ) || {} ) as CartItem;
+				}) || {}) as CartItem;
 
 				cartItem.variation = cartItem.variation || [];
 				cartItem.item_data = cartItem.item_data || [];
@@ -466,8 +464,8 @@ const { state: cartItemState } = store(
 				const { quantity, extensions } = cartItemState.cartItem;
 
 				const totalLineItemDiscount =
-					( cartItemState.regularAmountSingle -
-						cartItemState.purchaseAmountSingle ) *
+					(cartItemState.regularAmountSingle -
+						cartItemState.purchaseAmountSingle) *
 					quantity;
 
 				const price = formatPriceWithCurrency(
@@ -479,24 +477,22 @@ const { state: cartItemState } = store(
 				// `data-wp-text` directive or an alternative solution.
 				if (
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					( window.wc as any )?.blocksCheckout?.applyCheckoutFilter
+					(window.wc as any)?.blocksCheckout?.applyCheckoutFilter
 				) {
 					const priceText =
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
-						( window.wc as any ).blocksCheckout.applyCheckoutFilter(
-							{
-								filterName: 'saleBadgePriceFormat',
-								defaultValue: '<price/>',
-								extensions,
-								arg: {
-									context: 'cart',
-									cartItem: cartItemState.cartItem,
-									cart: woocommerceState.cart,
-								},
-							}
-						);
+						(window.wc as any).blocksCheckout.applyCheckoutFilter({
+							filterName: 'saleBadgePriceFormat',
+							defaultValue: '<price/>',
+							extensions,
+							arg: {
+								context: 'cart',
+								cartItem: cartItemState.cartItem,
+								cart: woocommerceState.cart,
+							},
+						});
 
-					return priceText.replace( '<price/>', price );
+					return priceText.replace('<price/>', price);
 				}
 
 				return price;
@@ -505,8 +501,8 @@ const { state: cartItemState } = store(
 			get cartItemHasDiscount(): boolean {
 				const { raw_prices: rawPrices } = cartItemState.cartItem.prices;
 				return (
-					parseInt( rawPrices.regular_price, 10 ) >
-					parseInt( rawPrices.price, 10 )
+					parseInt(rawPrices.regular_price, 10) >
+					parseInt(rawPrices.price, 10)
 				);
 			},
 
@@ -556,26 +552,24 @@ const { state: cartItemState } = store(
 			},
 
 			get cartItemName(): string {
-				const txt = document.createElement( 'textarea' );
+				const txt = document.createElement('textarea');
 				let { name } = cartItemState.cartItem;
 				if (
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					( window.wc as any )?.blocksCheckout?.applyCheckoutFilter
+					(window.wc as any)?.blocksCheckout?.applyCheckoutFilter
 				) {
 					name =
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
-						( window.wc as any ).blocksCheckout.applyCheckoutFilter(
-							{
-								filterName: 'itemName',
-								defaultValue: name,
-								extensions: cartItemState.cartItem.extensions,
-								arg: {
-									context: 'cart',
-									cartItem: cartItemState.cartItem,
-									cart: woocommerceState.cart,
-								},
-							}
-						);
+						(window.wc as any).blocksCheckout.applyCheckoutFilter({
+							filterName: 'itemName',
+							defaultValue: name,
+							extensions: cartItemState.cartItem.extensions,
+							arg: {
+								context: 'cart',
+								cartItem: cartItemState.cartItem,
+								cart: woocommerceState.cart,
+							},
+						});
 				}
 				txt.innerHTML = name;
 				return txt.value;
@@ -583,31 +577,29 @@ const { state: cartItemState } = store(
 
 			get itemThumbnail(): string {
 				return (
-					cartItemState.cartItem.images[ 0 ]?.thumbnail ||
+					cartItemState.cartItem.images[0]?.thumbnail ||
 					placeholderImgSrc ||
 					''
 				);
 			},
 
 			get itemSrcset(): string {
-				return (
-					cartItemState.cartItem.images[ 0 ]?.thumbnail_srcset || ''
-				);
+				return cartItemState.cartItem.images[0]?.thumbnail_srcset || '';
 			},
 
 			get itemSizes(): string {
-				return cartItemState.cartItem.images[ 0 ]?.thumbnail_srcset
+				return cartItemState.cartItem.images[0]?.thumbnail_srcset
 					? '64px'
 					: '';
 			},
 
 			get priceWithoutDiscount(): string {
 				const { raw_prices: rawPrices } = cartItemState.cartItem.prices;
-				const priceWithoutDiscount = scalePrice( {
-					price: parseInt( rawPrices.regular_price, 10 ),
+				const priceWithoutDiscount = scalePrice({
+					price: parseInt(rawPrices.regular_price, 10),
 					inputDecimals: rawPrices.precision,
 					outputDecimals: cartItemState.currency.minorUnit,
-				} );
+				});
 
 				return formatPriceWithCurrency(
 					priceWithoutDiscount,
@@ -618,21 +610,21 @@ const { state: cartItemState } = store(
 			get regularAmountSingle(): number {
 				const { prices } = cartItemState.cartItem;
 
-				return scalePrice( {
-					price: parseInt( prices.raw_prices.regular_price, 10 ),
+				return scalePrice({
+					price: parseInt(prices.raw_prices.regular_price, 10),
 					inputDecimals: prices.raw_prices.precision,
 					outputDecimals: cartItemState.currency.minorUnit,
-				} );
+				});
 			},
 
 			get purchaseAmountSingle(): number {
 				const { prices } = cartItemState.cartItem;
 
-				return scalePrice( {
-					price: parseInt( prices.raw_prices.price, 10 ),
+				return scalePrice({
+					price: parseInt(prices.raw_prices.price, 10),
 					inputDecimals: prices.raw_prices.precision,
 					outputDecimals: cartItemState.currency.minorUnit,
-				} );
+				});
 			},
 
 			get beforeItemPrice(): string | null {
@@ -640,23 +632,21 @@ const { state: cartItemState } = store(
 				// `data-wp-text` directive or an alternative solution.
 				if (
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					( window.wc as any )?.blocksCheckout?.applyCheckoutFilter
+					(window.wc as any)?.blocksCheckout?.applyCheckoutFilter
 				) {
 					const priceText =
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
-						( window.wc as any ).blocksCheckout.applyCheckoutFilter(
-							{
-								filterName: 'subtotalPriceFormat',
-								defaultValue: '<price/>',
-								extensions: cartItemState.cartItem.extensions,
-								arg: {
-									context: 'cart',
-									cartItem: cartItemState.cartItem,
-									cart: woocommerceState.cart,
-								},
-							}
-						);
-					return priceText.split( '<price/>' )[ 0 ];
+						(window.wc as any).blocksCheckout.applyCheckoutFilter({
+							filterName: 'subtotalPriceFormat',
+							defaultValue: '<price/>',
+							extensions: cartItemState.cartItem.extensions,
+							arg: {
+								context: 'cart',
+								cartItem: cartItemState.cartItem,
+								cart: woocommerceState.cart,
+							},
+						});
+					return priceText.split('<price/>')[0];
 				}
 				return null;
 			},
@@ -666,34 +656,32 @@ const { state: cartItemState } = store(
 				// `data-wp-text` directive or an alternative solution.
 				if (
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					( window.wc as any )?.blocksCheckout?.applyCheckoutFilter
+					(window.wc as any)?.blocksCheckout?.applyCheckoutFilter
 				) {
 					const priceText =
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
-						( window.wc as any ).blocksCheckout.applyCheckoutFilter(
-							{
-								filterName: 'subtotalPriceFormat',
-								defaultValue: '<price/>',
-								extensions: cartItemState.cartItem.extensions,
-								arg: {
-									context: 'cart',
-									cartItem: cartItemState.cartItem,
-									cart: woocommerceState.cart,
-								},
-							}
-						);
-					return priceText.split( '<price/>' )[ 1 ];
+						(window.wc as any).blocksCheckout.applyCheckoutFilter({
+							filterName: 'subtotalPriceFormat',
+							defaultValue: '<price/>',
+							extensions: cartItemState.cartItem.extensions,
+							arg: {
+								context: 'cart',
+								cartItem: cartItemState.cartItem,
+								cart: woocommerceState.cart,
+							},
+						});
+					return priceText.split('<price/>')[1];
 				}
 				return null;
 			},
 
 			get itemPrice(): string {
 				const { raw_prices: rawPrices } = cartItemState.cartItem.prices;
-				const itemPrice = scalePrice( {
-					price: parseInt( rawPrices.price, 10 ),
+				const itemPrice = scalePrice({
+					price: parseInt(rawPrices.price, 10),
 					inputDecimals: rawPrices.precision,
 					outputDecimals: cartItemState.currency.minorUnit,
-				} );
+				});
 
 				return formatPriceWithCurrency(
 					itemPrice,
@@ -706,9 +694,9 @@ const { state: cartItemState } = store(
 				const itemCurrency = cartItemState.currency;
 
 				const totalLinePrice = displayCartPriceIncludingTax
-					? parseInt( totals.line_subtotal, 10 ) +
-					  parseInt( totals.line_subtotal_tax, 10 )
-					: parseInt( totals.line_subtotal, 10 );
+					? parseInt(totals.line_subtotal, 10) +
+						parseInt(totals.line_subtotal_tax, 10)
+					: parseInt(totals.line_subtotal, 10);
 
 				const price = formatPriceWithCurrency(
 					totalLinePrice,
@@ -719,45 +707,43 @@ const { state: cartItemState } = store(
 				// `data-wp-text` directive or an alternative solution.
 				if (
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					( window.wc as any )?.blocksCheckout?.applyCheckoutFilter
+					(window.wc as any)?.blocksCheckout?.applyCheckoutFilter
 				) {
 					const priceText =
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
-						( window.wc as any ).blocksCheckout.applyCheckoutFilter(
-							{
-								filterName: 'cartItemPrice',
-								defaultValue: '<price/>',
-								extensions: cartItemState.cartItem.extensions,
-								arg: {
-									context: 'cart',
-									cartItem: cartItemState.cartItem,
-									cart: woocommerceState.cart,
-								},
-							}
-						);
+						(window.wc as any).blocksCheckout.applyCheckoutFilter({
+							filterName: 'cartItemPrice',
+							defaultValue: '<price/>',
+							extensions: cartItemState.cartItem.extensions,
+							arg: {
+								context: 'cart',
+								cartItem: cartItemState.cartItem,
+								cart: woocommerceState.cart,
+							},
+						});
 
-					return priceText.replace( '<price/>', price );
+					return priceText.replace('<price/>', price);
 				}
 
 				return price;
 			},
 
 			get isProductHiddenFromCatalog(): boolean {
-				const context = getContext< { isImageHidden: boolean } >();
+				const context = getContext<{ isImageHidden: boolean }>();
 				const { catalog_visibility: catalogVisibility } =
 					cartItemState.cartItem;
 				return (
-					( catalogVisibility === 'hidden' ||
-						catalogVisibility === 'search' ) &&
-					! context.isImageHidden
+					(catalogVisibility === 'hidden' ||
+						catalogVisibility === 'search') &&
+					!context.isImageHidden
 				);
 			},
 
 			get itemShowRemoveItemLink(): boolean {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				return ( window.wc as any )?.blocksCheckout?.applyCheckoutFilter
+				return (window.wc as any)?.blocksCheckout?.applyCheckoutFilter
 					? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-					  ( window.wc as any ).blocksCheckout.applyCheckoutFilter( {
+						(window.wc as any).blocksCheckout.applyCheckoutFilter({
 							filterName: 'showRemoveItemLink',
 							defaultValue: true,
 							extensions: cartItemState.cartItem.extensions,
@@ -766,36 +752,36 @@ const { state: cartItemState } = store(
 								cartItem: cartItemState.cartItem,
 								cart: woocommerceState.cart,
 							},
-					  } )
+						})
 					: true;
 			},
 
 			get cartItemDataAttr(): CartItemDataAttr {
-				return buildCartItemDataAttr( resolveDataItemAttr() );
+				return buildCartItemDataAttr(resolveDataItemAttr());
 			},
 
 			get cartItemDataAttrHidden(): boolean {
-				return ! isItemDataEntryVisible( resolveDataItemAttr() );
+				return !isItemDataEntryVisible(resolveDataItemAttr());
 			},
 
 			// Used to index cart item data attributes for wp-each-key.
 			get cartItemDataKey(): string {
-				const { itemData, dataProperty } = getContext< {
+				const { itemData, dataProperty } = getContext<{
 					itemData: ItemData;
 					dataProperty: DataProperty;
-				} >();
+				}>();
 
 				const dataItemAttr =
-					itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
+					itemData || cartItemState.cartItem[dataProperty]?.[0];
 
-				if ( ! dataItemAttr ) {
+				if (!dataItemAttr) {
 					return '';
 				}
 
 				let name = '';
 				let value = '';
 
-				if ( dataProperty === 'variation' ) {
+				if (dataProperty === 'variation') {
 					// For variations use raw_attribute as name and value as value
 					name = dataItemAttr.raw_attribute || '';
 					value = dataItemAttr.value || '';
@@ -805,21 +791,21 @@ const { state: cartItemState } = store(
 					value = dataItemAttr.display || dataItemAttr.value || '';
 				}
 
-				return `${ name }:${ value }`;
+				return `${name}:${value}`;
 			},
 
 			get shouldHideProductDetails(): boolean {
-				const { dataProperty } = getContext< {
+				const { dataProperty } = getContext<{
 					dataProperty: DataProperty;
-				} >();
-				return cartItemState.cartItem[ dataProperty ].length === 0;
+				}>();
+				return cartItemState.cartItem[dataProperty].length === 0;
 			},
 
 			get isLastCartItemDataAttr(): boolean {
-				const { itemData, dataProperty } = getContext< {
+				const { itemData, dataProperty } = getContext<{
 					itemData: ItemData;
 					dataProperty: DataProperty;
-				} >();
+				}>();
 
 				// The cart item's `item_data`/`variation` array elements are
 				// structurally compatible with `ItemData` for every field
@@ -829,94 +815,94 @@ const { state: cartItemState } = store(
 					dataProperty
 				] as ItemData[];
 
-				return isLastVisibleEntry( items, itemData );
+				return isLastVisibleEntry(items, itemData);
 			},
 		},
 
 		actions: {
-			overrideInvalidQuantity( e: InputEvent ) {
+			overrideInvalidQuantity(e: InputEvent) {
 				const input = e.target as HTMLInputElement;
 				const qty = input.value;
 
 				const { minimum, maximum } =
 					cartItemState.cartItem.quantity_limits;
 
-				const quantity = parseInt( qty, 10 );
+				const quantity = parseInt(qty, 10);
 
-				if ( Number.isNaN( quantity ) ) {
+				if (Number.isNaN(quantity)) {
 					input.value = cartItemState.cartItem.quantity.toString();
 					return;
 				}
 
 				let finalQuantity = quantity;
 
-				if ( quantity < minimum ) {
+				if (quantity < minimum) {
 					finalQuantity = minimum;
-				} else if ( quantity > maximum ) {
+				} else if (quantity > maximum) {
 					finalQuantity = maximum;
 				}
 
 				cartItemState.cartItem.quantity = finalQuantity;
 			},
 
-			*changeQuantity(): Generator< unknown, void > {
+			*changeQuantity(): Generator<unknown, void> {
 				const variation = cartItemState.cartItem.variation.map(
-					( { raw_attribute: rawAttribute, ...rest } ) => ( {
+					({ raw_attribute: rawAttribute, ...rest }) => ({
 						...rest,
 						attribute: rawAttribute,
-					} )
+					})
 				);
-				yield actions.addCartItem( {
+				yield actions.addCartItem({
 					id: cartItemState.cartItem.id,
 					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity,
 					variation,
 					type: cartItemState.cartItem.type,
-				} );
+				});
 			},
 
-			*removeItemFromCart(): Generator< unknown, void > {
-				yield actions.removeCartItem( cartItemState.cartItem.key );
+			*removeItemFromCart(): Generator<unknown, void> {
+				yield actions.removeCartItem(cartItemState.cartItem.key);
 			},
 
-			*incrementQuantity(): Generator< unknown, void > {
+			*incrementQuantity(): Generator<unknown, void> {
 				const { multiple_of: multipleOf = 1 } =
 					cartItemState.cartItem.quantity_limits;
 				const variation = cartItemState.cartItem.variation.map(
-					( { raw_attribute: rawAttribute, ...rest } ) => ( {
+					({ raw_attribute: rawAttribute, ...rest }) => ({
 						...rest,
 						attribute: rawAttribute,
-					} )
+					})
 				);
-				yield actions.addCartItem( {
+				yield actions.addCartItem({
 					id: cartItemState.cartItem.id,
 					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity + multipleOf,
 					variation,
 					type: cartItemState.cartItem.type,
-				} );
+				});
 			},
 
-			*decrementQuantity(): Generator< unknown, void > {
+			*decrementQuantity(): Generator<unknown, void> {
 				const { multiple_of: multipleOf = 1 } =
 					cartItemState.cartItem.quantity_limits;
 				const variation = cartItemState.cartItem.variation.map(
-					( { raw_attribute: rawAttribute, ...rest } ) => ( {
+					({ raw_attribute: rawAttribute, ...rest }) => ({
 						...rest,
 						attribute: rawAttribute,
-					} )
+					})
 				);
-				yield actions.addCartItem( {
+				yield actions.addCartItem({
 					id: cartItemState.cartItem.id,
 					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity - multipleOf,
 					variation,
 					type: cartItemState.cartItem.type,
-				} );
+				});
 			},
 
 			hideImage() {
-				const context = getContext< { isImageHidden: boolean } >();
+				const context = getContext<{ isImageHidden: boolean }>();
 				context.isImageHidden = true;
 			},
 		},
@@ -925,14 +911,14 @@ const { state: cartItemState } = store(
 			itemShortDescription() {
 				const { ref } = getElement();
 
-				if ( ref ) {
+				if (ref) {
 					const innerEl = ref.querySelector(
 						'.wc-block-components-product-metadata__description'
 					);
 					const { short_description: shortDescription, description } =
 						cartItemState.cartItem;
 
-					if ( innerEl && ( shortDescription || description ) ) {
+					if (innerEl && (shortDescription || description)) {
 						innerEl.innerHTML = trimWords(
 							shortDescription || description
 						);
@@ -942,43 +928,43 @@ const { state: cartItemState } = store(
 
 			itemDataNameInnerHTML() {
 				const { ref } = getElement();
-				const raw = getItemDataRaw( 'name' );
-				if ( ref && raw ) {
-					ref.innerHTML = trimWords( raw + ':' );
+				const raw = getItemDataRaw('name');
+				if (ref && raw) {
+					ref.innerHTML = trimWords(raw + ':');
 				}
 			},
 
 			itemDataValueInnerHTML() {
 				const { ref } = getElement();
-				const raw = getItemDataRaw( 'value' );
-				if ( ref && raw ) {
-					ref.innerHTML = trimWords( raw );
+				const raw = getItemDataRaw('value');
+				if (ref && raw) {
+					ref.innerHTML = trimWords(raw);
 				}
 			},
 
 			filterCartItemClass() {
 				// TODO: Add deprecation notice urging to replace with a `data-wp-class` directive.
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				const applyCheckoutFilter = ( window.wc as any )?.blocksCheckout
+				const applyCheckoutFilter = (window.wc as any)?.blocksCheckout
 					?.applyCheckoutFilter;
 				// eslint-disable-next-line react-hooks/rules-of-hooks
-				const previouslyAppliedClasses = useRef< string[] >( [] );
+				const previouslyAppliedClasses = useRef<string[]>([]);
 
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore -- It must run on every render.
 				// eslint-disable-next-line react-hooks/rules-of-hooks
-				useLayoutEffect( () => {
-					if ( applyCheckoutFilter ) {
+				useLayoutEffect(() => {
+					if (applyCheckoutFilter) {
 						const { ref } = getElement();
 
 						// Remove previously applied classes.
-						if ( ref ) {
+						if (ref) {
 							ref.classList.remove(
 								...previouslyAppliedClasses.current
 							);
 						}
 
-						const newClassesString = applyCheckoutFilter( {
+						const newClassesString = applyCheckoutFilter({
 							filterName: 'cartItemClass',
 							defaultValue: '',
 							extensions: cartItemState.cartItem.extensions,
@@ -987,19 +973,19 @@ const { state: cartItemState } = store(
 								cartItem: cartItemState.cartItem,
 								cart: woocommerceState.cart,
 							},
-						} );
+						});
 
 						// Apply new classes.
 						previouslyAppliedClasses.current = newClassesString
-							.split( ' ' )
-							.filter( Boolean );
-						if ( ref ) {
+							.split(' ')
+							.filter(Boolean);
+						if (ref) {
 							ref.classList.add(
 								...previouslyAppliedClasses.current
 							);
 						}
 					}
-				} );
+				});
 			},
 		},
 	},

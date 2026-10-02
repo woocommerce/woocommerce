@@ -17,39 +17,39 @@ export default {
 		itemName: 'widgets',
 		quantity: 1,
 	},
-} as Meta< QuantitySelectorProps >;
+} as Meta<QuantitySelectorProps>;
 
-const Template: StoryFn< QuantitySelectorProps > = ( args ) => {
-	const [ {}, setArgs ] = useArgs();
+const Template: StoryFn<QuantitySelectorProps> = (args) => {
+	const [{}, setArgs] = useArgs();
 
-	const onChange = ( newVal: number ) => {
-		args.onChange?.( newVal );
-		setArgs( { quantity: newVal } );
+	const onChange = (newVal: number) => {
+		args.onChange?.(newVal);
+		setArgs({ quantity: newVal });
 	};
 
-	return <QuantitySelector { ...args } onChange={ onChange } />;
+	return <QuantitySelector {...args} onChange={onChange} />;
 };
 
-export const Default = Template.bind( {} );
+export const Default = Template.bind({});
 Default.args = {};
 
-export const NonEditable = Template.bind( {} );
+export const NonEditable = Template.bind({});
 NonEditable.args = {
 	editable: false,
 };
 
-export const Disabled = Template.bind( {} );
+export const Disabled = Template.bind({});
 Disabled.args = {
 	disabled: true,
 };
 
-export const WithMinimum = Template.bind( {} );
+export const WithMinimum = Template.bind({});
 WithMinimum.args = {
 	minimum: 2,
 	quantity: 2,
 };
 
-export const WithMaximum = Template.bind( {} );
+export const WithMaximum = Template.bind({});
 WithMaximum.args = {
 	maximum: 5,
 	quantity: 3,

@@ -13,14 +13,14 @@ export const Edit = () => {
 		}
 	);
 
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className:
 			'wc-block-product-gallery-large-image wc-block-editor-product-gallery-large-image',
-	} );
+	});
 
 	return (
-		<div { ...blockProps }>
-			<div { ...innerBlocksProps } />
+		<div {...blockProps}>
+			<div {...innerBlocksProps} />
 		</div>
 	);
 };

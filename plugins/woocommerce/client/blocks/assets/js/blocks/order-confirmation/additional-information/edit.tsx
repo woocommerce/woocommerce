@@ -10,14 +10,14 @@ import { __ } from '@wordpress/i18n';
 import './style.scss';
 
 const Edit = (): JSX.Element => {
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className: 'wc-block-order-confirmation-additional-information',
-	} );
+	});
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<div className="wc-block-order-confirmation-additional-information-placeholder">
-				{ __( 'Additional Information for your order', 'woocommerce' ) }
+				{__('Additional Information for your order', 'woocommerce')}
 			</div>
 		</div>
 	);

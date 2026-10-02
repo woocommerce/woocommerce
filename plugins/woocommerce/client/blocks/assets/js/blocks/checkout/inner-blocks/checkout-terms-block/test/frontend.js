@@ -20,26 +20,26 @@ import { validationStore } from '@woocommerce/block-data';
 import * as actionCreators from '@woocommerce/block-data/validation/actions';
 import FrontendBlock from '../frontend';
 
-jest.mock( '@woocommerce/block-data/validation/actions', () => {
+jest.mock('@woocommerce/block-data/validation/actions', () => {
 	const actions = jest.requireActual(
 		'@woocommerce/block-data/validation/actions'
 	);
 	return {
 		...actions,
-		clearValidationError: jest.fn().mockImplementation( ( errorId ) => {
-			return actions.clearValidationError( errorId );
-		} ),
+		clearValidationError: jest.fn().mockImplementation((errorId) => {
+			return actions.clearValidationError(errorId);
+		}),
 	};
-} );
+});
 
-describe( 'FrontendBlock', () => {
-	it( 'Renders a checkbox if the checkbox prop is true', async () => {
+describe('FrontendBlock', () => {
+	it('Renders a checkbox if the checkbox prop is true', async () => {
 		const { container } = render(
 			<SlotFillProvider>
 				<FrontendBlock
-					checkbox={ true }
-					text={ 'I agree to the terms and conditions' }
-					showSeparator={ false }
+					checkbox={true}
+					text={'I agree to the terms and conditions'}
+					showSeparator={false}
 				/>
 			</SlotFillProvider>
 		);
@@ -49,16 +49,16 @@ describe( 'FrontendBlock', () => {
 			'I agree to the terms and conditions'
 		);
 
-		expect( checkbox ).toBeInTheDocument();
-	} );
+		expect(checkbox).toBeInTheDocument();
+	});
 
-	it( 'Does not render a checkbox if the checkbox prop is false', async () => {
+	it('Does not render a checkbox if the checkbox prop is false', async () => {
 		const { container } = render(
 			<SlotFillProvider>
 				<FrontendBlock
-					checkbox={ false }
-					text={ 'I agree to the terms and conditions' }
-					showSeparator={ false }
+					checkbox={false}
+					text={'I agree to the terms and conditions'}
+					showSeparator={false}
 				/>
 			</SlotFillProvider>
 		);
@@ -68,17 +68,17 @@ describe( 'FrontendBlock', () => {
 			'I agree to the terms and conditions'
 		);
 
-		expect( checkbox ).not.toBeInTheDocument();
-	} );
+		expect(checkbox).not.toBeInTheDocument();
+	});
 
-	it( 'Clears any validation errors when the checkbox is checked', async () => {
+	it('Clears any validation errors when the checkbox is checked', async () => {
 		const user = userEvent.setup();
 		const { container } = render(
 			<SlotFillProvider>
 				<FrontendBlock
-					checkbox={ true }
-					text={ 'I agree to the terms and conditions' }
-					showSeparator={ false }
+					checkbox={true}
+					text={'I agree to the terms and conditions'}
+					showSeparator={false}
 				/>
 			</SlotFillProvider>
 		);
@@ -86,21 +86,21 @@ describe( 'FrontendBlock', () => {
 			container,
 			'I agree to the terms and conditions'
 		);
-		await act( async () => {
-			await user.click( checkbox );
-		} );
-		expect( actionCreators.clearValidationError ).toHaveBeenLastCalledWith(
-			expect.stringMatching( /terms-and-conditions-\d/ )
+		await act(async () => {
+			await user.click(checkbox);
+		});
+		expect(actionCreators.clearValidationError).toHaveBeenLastCalledWith(
+			expect.stringMatching(/terms-and-conditions-\d/)
 		);
-	} );
+	});
 
-	it( 'Renders and describes the validation error when the checkbox is required and unchecked', async () => {
+	it('Renders and describes the validation error when the checkbox is required and unchecked', async () => {
 		const { container } = render(
 			<SlotFillProvider>
 				<FrontendBlock
-					checkbox={ true }
-					text={ 'I agree to the terms and conditions' }
-					showSeparator={ false }
+					checkbox={true}
+					text={'I agree to the terms and conditions'}
+					showSeparator={false}
 				/>
 			</SlotFillProvider>
 		);
@@ -109,19 +109,19 @@ describe( 'FrontendBlock', () => {
 			'I agree to the terms and conditions'
 		);
 
-		await act( async () => {
-			dispatch( validationStore ).showAllValidationErrors();
-		} );
+		await act(async () => {
+			dispatch(validationStore).showAllValidationErrors();
+		});
 
 		const errorMessage = await screen.findByText(
 			'Please read and accept the terms and conditions.'
 		);
 
-		await waitFor( () => {
-			expect( checkbox ).toHaveAttribute(
+		await waitFor(() => {
+			expect(checkbox).toHaveAttribute(
 				'aria-describedby',
-				errorMessage.closest( 'p' ).id
+				errorMessage.closest('p').id
 			);
-		} );
-	} );
-} );
+		});
+	});
+});

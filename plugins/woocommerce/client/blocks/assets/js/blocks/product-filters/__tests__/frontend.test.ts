@@ -12,47 +12,47 @@ const mockGetServerContext = jest.fn();
 const mockGetConfig = jest.fn();
 const mockReload = jest.fn();
 
-jest.mock( '../../../utils/navigation', () => ( {
+jest.mock('../../../utils/navigation', () => ({
 	reload: mockReload,
-} ) );
+}));
 
 let mockRegisteredStore: {
-	state: ProductFiltersStore[ 'state' ];
-	actions: ProductFiltersStore[ 'actions' ];
+	state: ProductFiltersStore['state'];
+	actions: ProductFiltersStore['actions'];
 } | null = null;
 
 jest.mock(
 	'@wordpress/interactivity',
-	() => ( {
+	() => ({
 		getContext: mockGetContext,
 		getServerContext: mockGetServerContext,
 		getConfig: mockGetConfig,
-		store: jest.fn( ( _name, definition ) => {
+		store: jest.fn((_name, definition) => {
 			mockRegisteredStore = {
 				state: definition.state,
 				actions: definition.actions,
 			};
 			return mockRegisteredStore;
-		} ),
-	} ),
+		}),
+	}),
 	{ virtual: true }
 );
 
 jest.mock(
 	'@wordpress/interactivity-router',
-	() => ( {
+	() => ({
 		actions: {
 			navigate: jest.fn(),
 		},
-	} ),
+	}),
 	{ virtual: true }
 );
 
 // Captured before any test navigates, so each test starts from the env URL.
 const initialUrl = window.location.href;
 
-describe( 'product filters interactivity store', () => {
-	beforeEach( () => {
+describe('product filters interactivity store', () => {
+	beforeEach(() => {
 		jest.resetModules();
 		mockGetContext.mockReset();
 		mockGetServerContext.mockReset();
@@ -60,18 +60,18 @@ describe( 'product filters interactivity store', () => {
 		mockReload.mockReset();
 		mockRegisteredStore = null;
 
-		jest.isolateModules( () => {
-			require( '../frontend' );
-		} );
-	} );
+		jest.isolateModules(() => {
+			require('../frontend');
+		});
+	});
 
-	afterEach( () => {
-		window.history.replaceState( {}, '', initialUrl );
-	} );
+	afterEach(() => {
+		window.history.replaceState({}, '', initialUrl);
+	});
 
-	it( 'ignores invalid selectable item payloads', () => {
-		if ( ! mockRegisteredStore ) {
-			throw new Error( 'Product filters store was not registered.' );
+	it('ignores invalid selectable item payloads', () => {
+		if (!mockRegisteredStore) {
+			throw new Error('Product filters store was not registered.');
 		}
 
 		const context = {
@@ -88,16 +88,16 @@ describe( 'product filters interactivity store', () => {
 			filterType: 'attribute/color',
 		};
 
-		mockGetContext.mockReturnValue( context );
+		mockGetContext.mockReturnValue(context);
 
 		mockRegisteredStore.actions.toggle();
 
-		expect( context.activeFilters ).toEqual( [] );
-	} );
+		expect(context.activeFilters).toEqual([]);
+	});
 
-	it( 'uses value as active filter label fallback', () => {
-		if ( ! mockRegisteredStore ) {
-			throw new Error( 'Product filters store was not registered.' );
+	it('uses value as active filter label fallback', () => {
+		if (!mockRegisteredStore) {
+			throw new Error('Product filters store was not registered.');
 		}
 
 		const context = {
@@ -114,22 +114,22 @@ describe( 'product filters interactivity store', () => {
 			filterType: 'attribute/color',
 		};
 
-		mockGetContext.mockReturnValue( context );
+		mockGetContext.mockReturnValue(context);
 
 		mockRegisteredStore.actions.toggle();
 
-		expect( context.activeFilters ).toEqual( [
+		expect(context.activeFilters).toEqual([
 			{
 				value: 'blue',
 				type: 'attribute/color',
 				activeLabel: 'Color: blue',
 			},
-		] );
-	} );
+		]);
+	});
 
-	it( 'toggles an attribute and removes its query parameters when deselected', () => {
-		if ( ! mockRegisteredStore ) {
-			throw new Error( 'Product filters store was not registered.' );
+	it('toggles an attribute and removes its query parameters when deselected', () => {
+		if (!mockRegisteredStore) {
+			throw new Error('Product filters store was not registered.');
 		}
 
 		const context = {
@@ -148,70 +148,70 @@ describe( 'product filters interactivity store', () => {
 			filterType: 'attribute/color',
 		};
 
-		mockGetContext.mockReturnValue( context );
+		mockGetContext.mockReturnValue(context);
 
 		mockRegisteredStore.actions.toggle();
 
-		expect( context.activeFilters ).toEqual( [
+		expect(context.activeFilters).toEqual([
 			{
 				value: 'gray',
 				type: 'attribute/color',
 				activeLabel: 'Color: Gray',
 				attributeQueryType: 'or',
 			},
-		] );
-		expect( mockRegisteredStore.state.params ).toEqual( {
+		]);
+		expect(mockRegisteredStore.state.params).toEqual({
 			filter_color: 'gray',
 			query_type_color: 'or',
-		} );
+		});
 
 		mockRegisteredStore.actions.toggle();
 
-		expect( context.activeFilters ).toEqual( [] );
-		expect( mockRegisteredStore.state.params ).toEqual( {} );
-	} );
+		expect(context.activeFilters).toEqual([]);
+		expect(mockRegisteredStore.state.params).toEqual({});
+	});
 
-	it( 'returns no selectable items when server context items are not an array', () => {
-		if ( ! mockRegisteredStore ) {
-			throw new Error( 'Product filters store was not registered.' );
+	it('returns no selectable items when server context items are not an array', () => {
+		if (!mockRegisteredStore) {
+			throw new Error('Product filters store was not registered.');
 		}
 
-		mockGetServerContext.mockReturnValue( {
+		mockGetServerContext.mockReturnValue({
 			items: 'invalid',
 			activeFilters: [],
-		} );
+		});
 
-		expect( mockRegisteredStore.state.selectableItems ).toEqual( [] );
-	} );
+		expect(mockRegisteredStore.state.selectableItems).toEqual([]);
+	});
 
-	it( 'closes from the backdrop but not the dialog', () => {
-		if ( ! mockRegisteredStore ) {
-			throw new Error( 'Product filters store was not registered.' );
+	it('closes from the backdrop but not the dialog', () => {
+		if (!mockRegisteredStore) {
+			throw new Error('Product filters store was not registered.');
 		}
 		const context = { isOverlayOpened: true };
-		const wrapper = document.createElement( 'div' );
-		const dialog = document.createElement( 'div' );
-		mockGetContext.mockReturnValue( context );
+		const wrapper = document.createElement('div');
+		const dialog = document.createElement('div');
+		mockGetContext.mockReturnValue(context);
 
-		mockRegisteredStore.actions.closeOverlayOnBackdrop( {
+		mockRegisteredStore.actions.closeOverlayOnBackdrop({
 			target: dialog,
 			currentTarget: wrapper,
-		} as unknown as MouseEvent );
-		expect( context.isOverlayOpened ).toBe( true );
+		} as unknown as MouseEvent);
+		expect(context.isOverlayOpened).toBe(true);
 
-		mockRegisteredStore.actions.closeOverlayOnBackdrop( {
+		mockRegisteredStore.actions.closeOverlayOnBackdrop({
 			target: wrapper,
 			currentTarget: wrapper,
-		} as unknown as MouseEvent );
-		expect( context.isOverlayOpened ).toBe( false );
-	} );
+		} as unknown as MouseEvent);
+		expect(context.isOverlayOpened).toBe(false);
+	});
 
-	it( 'does not add child-owned index metadata to selectable items', () => {
-		if ( ! mockRegisteredStore ) {
-			throw new Error( 'Product filters store was not registered.' );
+	it('does not add child-owned index metadata to selectable items', () => {
+		if (!mockRegisteredStore) {
+			throw new Error('Product filters store was not registered.');
 		}
 
-		mockGetServerContext.mockReturnValue( {
+		mockGetServerContext.mockReturnValue({
 			items: [
 				{
 					id: 'attribute-blue',
@@ -221,12 +221,12 @@ describe( 'product filters interactivity store', () => {
 				},
 			],
 			activeFilters: [],
-		} );
-		mockGetContext.mockReturnValue( {
+		});
+		mockGetContext.mockReturnValue({
 			activeFilters: [],
-		} );
+		});
 
-		expect( mockRegisteredStore.state.selectableItems ).toEqual( [
+		expect(mockRegisteredStore.state.selectableItems).toEqual([
 			{
 				id: 'attribute-blue',
 				label: 'Blue',
@@ -234,8 +234,8 @@ describe( 'product filters interactivity store', () => {
 				type: 'attribute/color',
 				selected: false,
 			},
-		] );
-	} );
+		]);
+	});
 
 	[
 		{
@@ -263,15 +263,15 @@ describe( 'product filters interactivity store', () => {
 			expectConsoleWarn: true,
 		},
 	].forEach(
-		( {
+		({
 			description,
 			label,
 			value,
 			expectedUrl,
 			expectConsoleWarn = false,
-		} ) => {
-			it( `Test URL encoding before navigation: ${ description }`, () => {
-				if ( ! mockRegisteredStore ) {
+		}) => {
+			it(`Test URL encoding before navigation: ${description}`, () => {
+				if (!mockRegisteredStore) {
 					throw new Error(
 						'Product filters store was not registered.'
 					);
@@ -303,63 +303,63 @@ describe( 'product filters interactivity store', () => {
 					filterType: 'attribute/color',
 				};
 
-				mockGetContext.mockReturnValue( context );
-				mockGetServerContext.mockReturnValue( context );
+				mockGetContext.mockReturnValue(context);
+				mockGetServerContext.mockReturnValue(context);
 
-				mockGetConfig.mockImplementation( ( key: string ) => {
-					if ( key === 'woocommerce/product-filters' ) {
+				mockGetConfig.mockImplementation((key: string) => {
+					if (key === 'woocommerce/product-filters') {
 						return {
 							canonicalUrl,
 						};
 					}
 					return {};
-				} );
+				});
 
-				Object.defineProperty( mockRegisteredStore.state, 'params', {
-					get: () => ( {
+				Object.defineProperty(mockRegisteredStore.state, 'params', {
+					get: () => ({
 						color: value,
-					} ),
-				} );
+					}),
+				});
 
 				const routerNavigate = jest.fn();
 				const consoleWarnSpy = jest
-					.spyOn( console, 'warn' )
-					.mockImplementation( () => {} );
+					.spyOn(console, 'warn')
+					.mockImplementation(() => {});
 
 				try {
 					const iterator = mockRegisteredStore.actions.navigate();
 
 					const firstYield = iterator.next();
-					expect( firstYield.done ).toBe( false );
+					expect(firstYield.done).toBe(false);
 
-					iterator.next( {
+					iterator.next({
 						actions: {
 							navigate: routerNavigate,
 						},
-					} as unknown as typeof import('@wordpress/interactivity-router') );
+					} as unknown as typeof import('@wordpress/interactivity-router'));
 
-					expect( routerNavigate ).toHaveBeenCalledTimes( 1 );
-					const [ navigatedUrl ] = routerNavigate.mock.calls[ 0 ];
-					const result = new URL( navigatedUrl );
+					expect(routerNavigate).toHaveBeenCalledTimes(1);
+					const [navigatedUrl] = routerNavigate.mock.calls[0];
+					const result = new URL(navigatedUrl);
 
-					expect( result.toString() ).toBe( expectedUrl );
+					expect(result.toString()).toBe(expectedUrl);
 
-					expect( consoleWarnSpy ).toHaveBeenCalledTimes(
+					expect(consoleWarnSpy).toHaveBeenCalledTimes(
 						expectConsoleWarn ? 1 : 0
 					);
 				} finally {
 					consoleWarnSpy.mockRestore();
 				}
-			} );
+			});
 		}
 	);
 
-	it( 'triggers a full-page reload instead of router when forcePageReload is true', () => {
-		if ( ! mockRegisteredStore ) {
-			throw new Error( 'Product filters store was not registered.' );
+	it('triggers a full-page reload instead of router when forcePageReload is true', () => {
+		if (!mockRegisteredStore) {
+			throw new Error('Product filters store was not registered.');
 		}
 
-		window.history.replaceState( {}, '', 'https://example.com/shop/' );
+		window.history.replaceState({}, '', 'https://example.com/shop/');
 
 		const canonicalUrl = 'https://example.com/shop/';
 
@@ -379,45 +379,45 @@ describe( 'product filters interactivity store', () => {
 			filterType: 'attribute/color',
 		};
 
-		mockGetContext.mockReturnValue( context );
-		mockGetServerContext.mockReturnValue( context );
+		mockGetContext.mockReturnValue(context);
+		mockGetServerContext.mockReturnValue(context);
 
-		mockGetConfig.mockImplementation( ( key: string ) => {
-			if ( key === 'woocommerce/product-filters' ) {
+		mockGetConfig.mockImplementation((key: string) => {
+			if (key === 'woocommerce/product-filters') {
 				return { canonicalUrl, forcePageReload: true };
 			}
 			return {};
-		} );
+		});
 
-		Object.defineProperty( mockRegisteredStore.state, 'params', {
-			get: () => ( { color: 'blue' } ),
-		} );
+		Object.defineProperty(mockRegisteredStore.state, 'params', {
+			get: () => ({ color: 'blue' }),
+		});
 
 		const iterator = mockRegisteredStore.actions.navigate();
 
 		// forcePageReload exits early before yielding the router import
 		const result = iterator.next();
-		expect( result.done ).toBe( true );
+		expect(result.done).toBe(true);
 
-		expect( mockReload ).toHaveBeenCalledTimes( 1 );
-		expect( mockReload ).toHaveBeenCalledWith(
+		expect(mockReload).toHaveBeenCalledTimes(1);
+		expect(mockReload).toHaveBeenCalledWith(
 			'https://example.com/shop/?color=blue'
 		);
-	} );
+	});
 
-	describe( 'forcePageReload context resolution', () => {
-		const setupNavigate = ( {
+	describe('forcePageReload context resolution', () => {
+		const setupNavigate = ({
 			contextForcePageReload,
 			configForcePageReload,
 		}: {
 			contextForcePageReload: boolean | null | undefined;
 			configForcePageReload: boolean | undefined;
-		} ) => {
-			if ( ! mockRegisteredStore ) {
-				throw new Error( 'Product filters store was not registered.' );
+		}) => {
+			if (!mockRegisteredStore) {
+				throw new Error('Product filters store was not registered.');
 			}
 
-			window.history.replaceState( {}, '', 'https://example.com/shop/' );
+			window.history.replaceState({}, '', 'https://example.com/shop/');
 
 			const context = {
 				isOverlayOpened: false,
@@ -436,74 +436,74 @@ describe( 'product filters interactivity store', () => {
 				forcePageReload: contextForcePageReload,
 			};
 
-			mockGetContext.mockReturnValue( context );
-			mockGetServerContext.mockReturnValue( context );
+			mockGetContext.mockReturnValue(context);
+			mockGetServerContext.mockReturnValue(context);
 
-			mockGetConfig.mockImplementation( ( key: string ) => {
-				if ( key === 'woocommerce/product-filters' ) {
+			mockGetConfig.mockImplementation((key: string) => {
+				if (key === 'woocommerce/product-filters') {
 					return {
 						canonicalUrl: 'https://example.com/shop/',
 						forcePageReload: configForcePageReload,
 					};
 				}
 				return {};
-			} );
+			});
 
-			Object.defineProperty( mockRegisteredStore.state, 'params', {
-				get: () => ( { color: 'blue' } ),
-			} );
+			Object.defineProperty(mockRegisteredStore.state, 'params', {
+				get: () => ({ color: 'blue' }),
+			});
 
 			return {
 				store: mockRegisteredStore,
 			};
 		};
 
-		it( 'reloads when context.forcePageReload is true (descendant case, no config)', () => {
-			const { store: registeredStore } = setupNavigate( {
+		it('reloads when context.forcePageReload is true (descendant case, no config)', () => {
+			const { store: registeredStore } = setupNavigate({
 				contextForcePageReload: true,
 				configForcePageReload: undefined,
-			} );
+			});
 
 			const iterator = registeredStore.actions.navigate();
 			const result = iterator.next();
 
-			expect( result.done ).toBe( true );
-			expect( mockReload ).toHaveBeenCalledWith(
+			expect(result.done).toBe(true);
+			expect(mockReload).toHaveBeenCalledWith(
 				'https://example.com/shop/?color=blue'
 			);
-		} );
+		});
 
-		it( 'context.forcePageReload=true overrides config.forcePageReload=false', () => {
-			const { store: registeredStore } = setupNavigate( {
+		it('context.forcePageReload=true overrides config.forcePageReload=false', () => {
+			const { store: registeredStore } = setupNavigate({
 				contextForcePageReload: true,
 				configForcePageReload: false,
-			} );
+			});
 
 			const iterator = registeredStore.actions.navigate();
 			const result = iterator.next();
 
-			expect( result.done ).toBe( true );
-			expect( mockReload ).toHaveBeenCalledTimes( 1 );
-		} );
+			expect(result.done).toBe(true);
+			expect(mockReload).toHaveBeenCalledTimes(1);
+		});
 
-		it( 'context.forcePageReload=false overrides config.forcePageReload=true (uses router)', () => {
-			const { store: registeredStore } = setupNavigate( {
+		it('context.forcePageReload=false overrides config.forcePageReload=true (uses router)', () => {
+			const { store: registeredStore } = setupNavigate({
 				contextForcePageReload: false,
 				configForcePageReload: true,
-			} );
+			});
 
 			const routerNavigate = jest.fn();
 
 			const iterator = registeredStore.actions.navigate();
 			const firstYield = iterator.next();
 
-			expect( firstYield.done ).toBe( false );
-			iterator.next( {
+			expect(firstYield.done).toBe(false);
+			iterator.next({
 				actions: { navigate: routerNavigate },
-			} as unknown as typeof import('@wordpress/interactivity-router') );
+			} as unknown as typeof import('@wordpress/interactivity-router'));
 
-			expect( mockReload ).not.toHaveBeenCalled();
-			expect( routerNavigate ).toHaveBeenCalledTimes( 1 );
-		} );
-	} );
-} );
+			expect(mockReload).not.toHaveBeenCalled();
+			expect(routerNavigate).toHaveBeenCalledTimes(1);
+		});
+	});
+});

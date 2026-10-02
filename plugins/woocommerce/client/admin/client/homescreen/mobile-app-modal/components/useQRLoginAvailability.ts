@@ -17,7 +17,7 @@ export const QRLoginUnavailableReasons = {
 } as const;
 
 export type QRLoginUnavailableReason =
-	( typeof QRLoginUnavailableReasons )[ keyof typeof QRLoginUnavailableReasons ];
+	(typeof QRLoginUnavailableReasons)[keyof typeof QRLoginUnavailableReasons];
 
 type QRLoginAvailabilityResponse = {
 	available: boolean;
@@ -37,47 +37,45 @@ export const useQRLoginAvailability = () => {
 	// `null` means "still probing"; `true`/`false` are the resolved states.
 	// Three states (not just `available: boolean`) so the UI can render an
 	// initial spinner instead of flashing a wrong state.
-	const [ available, setAvailable ] = useState< boolean | null >( null );
-	const [ reason, setReason ] = useState< QRLoginUnavailableReason | null >(
-		null
-	);
+	const [available, setAvailable] = useState<boolean | null>(null);
+	const [reason, setReason] = useState<QRLoginUnavailableReason | null>(null);
 
-	useEffect( () => {
+	useEffect(() => {
 		let cancelled = false;
 
-		apiFetch< QRLoginAvailabilityResponse >( {
-			path: `${ WC_ADMIN_NAMESPACE }/mobile-app/qr-login-availability`,
+		apiFetch<QRLoginAvailabilityResponse>({
+			path: `${WC_ADMIN_NAMESPACE}/mobile-app/qr-login-availability`,
 			method: 'GET',
-		} )
-			.then( ( response ) => {
-				if ( cancelled ) {
+		})
+			.then((response) => {
+				if (cancelled) {
 					return;
 				}
-				if ( ! response || typeof response.available !== 'boolean' ) {
+				if (!response || typeof response.available !== 'boolean') {
 					// Defensive: if the response shape is unexpected, treat
 					// the feature as available so the existing token-fetch
 					// path still runs and surfaces the real error.
-					setAvailable( true );
-					setReason( null );
+					setAvailable(true);
+					setReason(null);
 					return;
 				}
-				setAvailable( response.available );
-				setReason( response.reason ?? null );
-			} )
-			.catch( () => {
-				if ( cancelled ) {
+				setAvailable(response.available);
+				setReason(response.reason ?? null);
+			})
+			.catch(() => {
+				if (cancelled) {
 					return;
 				}
 				// Network / 5xx — fall through to the optimistic path so the
 				// existing error handling in <QRDirectLoginCode /> takes over.
-				setAvailable( true );
-				setReason( null );
-			} );
+				setAvailable(true);
+				setReason(null);
+			});
 
 		return () => {
 			cancelled = true;
 		};
-	}, [] );
+	}, []);
 
 	return {
 		isLoading: available === null,

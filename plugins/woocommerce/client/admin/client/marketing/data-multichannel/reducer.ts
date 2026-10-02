@@ -32,11 +32,11 @@ const initialState = {
 	},
 };
 
-export const reducer: Reducer< State, Action > = (
+export const reducer: Reducer<State, Action> = (
 	state = initialState,
 	action
 ) => {
-	switch ( action.type ) {
+	switch (action.type) {
 		case TYPES.RECEIVE_REGISTERED_CHANNELS_SUCCESS:
 			return {
 				...state,
@@ -68,20 +68,20 @@ export const reducer: Reducer< State, Action > = (
 
 		case TYPES.RECEIVE_CAMPAIGNS:
 			const { meta } = action;
-			const key = `${ meta.page }-${ meta.perPage }`;
+			const key = `${meta.page}-${meta.perPage}`;
 
 			return {
 				...state,
 				campaigns: {
 					pages: {
 						...state.campaigns.pages,
-						[ key ]: action.error
+						[key]: action.error
 							? {
 									error: action.payload,
-							  }
+								}
 							: {
 									data: action.payload,
-							  },
+								},
 					},
 					meta: {
 						total: meta.total,
@@ -95,10 +95,10 @@ export const reducer: Reducer< State, Action > = (
 				campaignTypes: action.error
 					? {
 							error: action.payload,
-					  }
+						}
 					: {
 							data: action.payload,
-					  },
+						},
 			};
 
 		default:

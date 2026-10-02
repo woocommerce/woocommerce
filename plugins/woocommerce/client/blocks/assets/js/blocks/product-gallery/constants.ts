@@ -15,12 +15,12 @@ export const SELECTORS = {
 	thumbnailsScrollable: '.wc-block-product-gallery-thumbnails__scrollable',
 	legacyVariationIdInput: 'input[name="variation_id"]',
 	legacyResetVariations: '.reset_variations',
-	imgByImageId: ( imageId: number | string ): string =>
-		`img[data-image-id="${ imageId }"]`,
-	elementByImageId: ( imageId: number | string ): string =>
-		`[data-image-id="${ imageId }"]`,
-	cartFormForProduct: ( productId: number | string ): string =>
-		`form[data-product_id="${ productId }"]`,
+	imgByImageId: (imageId: number | string): string =>
+		`img[data-image-id="${imageId}"]`,
+	elementByImageId: (imageId: number | string): string =>
+		`[data-image-id="${imageId}"]`,
+	cartFormForProduct: (productId: number | string): string =>
+		`form[data-product_id="${productId}"]`,
 } as const;
 
 export const CLASSES = {

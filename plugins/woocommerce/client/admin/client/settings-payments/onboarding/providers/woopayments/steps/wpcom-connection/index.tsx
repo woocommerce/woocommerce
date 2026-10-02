@@ -18,61 +18,60 @@ import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 export const JetpackStep: React.FC = () => {
 	const { currentStep, closeModal, sessionEntryPoint } =
 		useOnboardingContext();
-	const [ isConnectButtonLoading, setIsConnectButtonLoading ] =
-		useState( false );
+	const [isConnectButtonLoading, setIsConnectButtonLoading] = useState(false);
 
 	return (
 		<>
-			<WooPaymentsStepHeader onClose={ closeModal } />
-			{ currentStep?.errors && currentStep.errors.length > 0 && (
+			<WooPaymentsStepHeader onClose={closeModal} />
+			{currentStep?.errors && currentStep.errors.length > 0 && (
 				<Notice
 					status="error"
-					isDismissible={ false }
+					isDismissible={false}
 					className="settings-payments-onboarding-modal__step-jetpack-error"
 					// Adding role="alert" for explicit screen reader announcement.
 					// While @wordpress/components Notice uses speak() internally,
 					// role="alert" provides better backwards compatibility with older AT.
-					{ ...{ role: 'alert' } }
+					{...{ role: 'alert' }}
 				>
 					<p>
-						{ currentStep.errors[ 0 ]?.message ||
+						{currentStep.errors[0]?.message ||
 							__(
 								'Something went wrong. Please try again.',
 								'woocommerce'
-							) }
+							)}
 					</p>
 				</Notice>
-			) }
+			)}
 			<div className="settings-payments-onboarding-modal__step--content">
 				<div className="settings-payments-onboarding-modal__step--content-jetpack">
 					<h1 className="settings-payments-onboarding-modal__step--content-jetpack-title">
-						{ __( 'Connect to WordPress.com', 'woocommerce' ) }
+						{__('Connect to WordPress.com', 'woocommerce')}
 					</h1>
 					<p className="settings-payments-onboarding-modal__step--content-jetpack-description">
-						{ __(
+						{__(
 							'You’ll be briefly redirected to connect your store to your WordPress.com account and unlock the full features and functionality of WooPayments',
 							'woocommerce'
-						) }
+						)}
 					</p>
 					<Button
 						variant="primary"
 						className="settings-payments-onboarding-modal__step--content-jetpack-button"
-						isBusy={ isConnectButtonLoading }
-						disabled={ isConnectButtonLoading }
-						onClick={ () => {
-							setIsConnectButtonLoading( true );
+						isBusy={isConnectButtonLoading}
+						disabled={isConnectButtonLoading}
+						onClick={() => {
+							setIsConnectButtonLoading(true);
 
 							// Mark the step as started.
 							const startUrl = currentStep?.actions?.start?.href;
-							if ( startUrl ) {
+							if (startUrl) {
 								// No need to wait for the response.
-								void apiFetch( {
+								void apiFetch({
 									url: startUrl,
 									method: 'POST',
 									data: {
 										source: sessionEntryPoint,
 									},
-								} );
+								});
 							}
 
 							// Track the connection button click event.
@@ -88,9 +87,9 @@ export const JetpackStep: React.FC = () => {
 							// Redirect to the WordPress.com connection authorization URL.
 							window.location.href =
 								currentStep?.actions?.auth?.href ?? '';
-						} }
+						}}
 					>
-						{ __( 'Connect', 'woocommerce' ) }
+						{__('Connect', 'woocommerce')}
 					</Button>
 				</div>
 			</div>

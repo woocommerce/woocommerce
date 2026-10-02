@@ -21,7 +21,7 @@ import {
 	getIndicatorValues,
 } from '../../dashboard/store-performance/utils';
 
-export const StatsList = ( {
+export const StatsList = ({
 	stats,
 	primaryData,
 	secondaryData,
@@ -30,23 +30,23 @@ export const StatsList = ( {
 	primaryError,
 	secondaryError,
 	query,
-} ) => {
-	const { formatAmount, getCurrencyConfig } = useContext( CurrencyContext );
-	if ( primaryError || secondaryError ) {
+}) => {
+	const { formatAmount, getCurrencyConfig } = useContext(CurrencyContext);
+	if (primaryError || secondaryError) {
 		return null;
 	}
-	const persistedQuery = getPersistedQuery( query );
+	const persistedQuery = getPersistedQuery(query);
 	const currency = getCurrencyConfig();
 
 	return (
 		<ul
-			className={ clsx( 'woocommerce-stats-overview__stats', {
+			className={clsx('woocommerce-stats-overview__stats', {
 				'is-even': stats.length % 2 === 0,
-			} ) }
+			})}
 		>
-			{ stats.map( ( item ) => {
-				if ( primaryRequesting || secondaryRequesting ) {
-					return <SummaryNumberPlaceholder key={ item.stat } />;
+			{stats.map((item) => {
+				if (primaryRequesting || secondaryRequesting) {
+					return <SummaryNumberPlaceholder key={item.stat} />;
 				}
 
 				const {
@@ -55,38 +55,38 @@ export const StatsList = ( {
 					delta,
 					reportUrl,
 					reportUrlType,
-				} = getIndicatorValues( {
+				} = getIndicatorValues({
 					indicator: item,
 					primaryData,
 					secondaryData,
 					currency,
 					formatAmount,
 					persistedQuery,
-				} );
+				});
 
 				return (
 					<SummaryNumber
 						isHomescreen
-						key={ item.stat }
-						href={ reportUrl }
-						hrefType={ reportUrlType }
-						label={ item.label }
-						value={ primaryValue }
-						prevLabel={ __( 'Previous period:', 'woocommerce' ) }
-						prevValue={ secondaryValue }
-						delta={ delta }
-						onLinkClickCallback={ () => {
-							recordEvent( 'statsoverview_indicators_click', {
+						key={item.stat}
+						href={reportUrl}
+						hrefType={reportUrlType}
+						label={item.label}
+						value={primaryValue}
+						prevLabel={__('Previous period:', 'woocommerce')}
+						prevValue={secondaryValue}
+						delta={delta}
+						onLinkClickCallback={() => {
+							recordEvent('statsoverview_indicators_click', {
 								key: item.stat,
-							} );
-						} }
+							});
+						}}
 					/>
 				);
-			} ) }
+			})}
 		</ul>
 	);
 };
 
-export default withSelect( ( select, { stats, query } ) => {
-	return getIndicatorData( select, stats, query );
-} )( StatsList );
+export default withSelect((select, { stats, query }) => {
+	return getIndicatorData(select, stats, query);
+})(StatsList);

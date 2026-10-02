@@ -29,139 +29,139 @@ interface NoticeState {
 }
 
 function RemoteLogging() {
-	const [ isRemoteLoggingEnabled, setIsRemoteLoggingEnabled ] = useState<
+	const [isRemoteLoggingEnabled, setIsRemoteLoggingEnabled] = useState<
 		boolean | null
-	>( null );
-	const [ wpEnvironment, setWpEnvironment ] = useState< string >( '' );
-	const [ notice, setNotice ] = useState< NoticeState | null >( null );
+	>(null);
+	const [wpEnvironment, setWpEnvironment] = useState<string>('');
+	const [notice, setNotice] = useState<NoticeState | null>(null);
 
-	useEffect( () => {
+	useEffect(() => {
 		const fetchRemoteLoggingStatus = async () => {
 			try {
-				const response: RemoteLoggingStatus = await apiFetch( {
-					path: `${ API_NAMESPACE }/remote-logging/status`,
-				} );
-				setIsRemoteLoggingEnabled( response.isEnabled );
-				setWpEnvironment( response.wpEnvironment );
-			} catch ( error ) {
-				setNotice( {
+				const response: RemoteLoggingStatus = await apiFetch({
+					path: `${API_NAMESPACE}/remote-logging/status`,
+				});
+				setIsRemoteLoggingEnabled(response.isEnabled);
+				setWpEnvironment(response.wpEnvironment);
+			} catch (error) {
+				setNotice({
 					status: 'error',
 					message: 'Failed to fetch remote logging status.',
-				} );
+				});
 			}
 		};
 
 		void fetchRemoteLoggingStatus();
-	}, [] );
+	}, []);
 
 	const toggleRemoteLogging = async () => {
 		try {
-			const response: RemoteLoggingStatus = await apiFetch( {
-				path: `${ API_NAMESPACE }/remote-logging/toggle`,
+			const response: RemoteLoggingStatus = await apiFetch({
+				path: `${API_NAMESPACE}/remote-logging/toggle`,
 				method: 'POST',
-				data: { enable: ! isRemoteLoggingEnabled },
-			} );
-			setIsRemoteLoggingEnabled( response.isEnabled );
+				data: { enable: !isRemoteLoggingEnabled },
+			});
+			setIsRemoteLoggingEnabled(response.isEnabled);
 
 			window.wcSettings.isRemoteLoggingEnabled = response.isEnabled;
-		} catch ( error ) {
-			setNotice( {
+		} catch (error) {
+			setNotice({
 				status: 'error',
-				message: `Failed to update remote logging status. ${ JSON.stringify(
+				message: `Failed to update remote logging status. ${JSON.stringify(
 					error
-				) }`,
-			} );
+				)}`,
+			});
 		}
 
-		if ( window.wcSettings.isRemoteLoggingEnabled ) {
-			initRemoteLogging( {
+		if (window.wcSettings.isRemoteLoggingEnabled) {
+			initRemoteLogging({
 				errorRateLimitMs: 60000, // 1 minute
-			} );
+			});
 		}
 	};
 
-	const simulatePhpException = async ( context: 'core' | 'beta-tester' ) => {
+	const simulatePhpException = async (context: 'core' | 'beta-tester') => {
 		try {
-			await dispatch( optionsStore ).saveOption(
+			await dispatch(optionsStore).saveOption(
 				'wc_beta_tester_simulate_woocommerce_php_error',
 				context
 			);
-			setNotice( {
+			setNotice({
 				status: 'success',
-				message: `Please refresh your browser to trigger the PHP exception in ${ context } context.`,
-			} );
-		} catch ( error ) {
-			setNotice( {
+				message: `Please refresh your browser to trigger the PHP exception in ${context} context.`,
+			});
+		} catch (error) {
+			setNotice({
 				status: 'error',
-				message: `Failed to trigger PHP exception test in ${ context } context. ${ JSON.stringify(
+				message: `Failed to trigger PHP exception test in ${context} context. ${JSON.stringify(
 					error
-				) }`,
-			} );
+				)}`,
+			});
 		}
 	};
 
 	const logPhpEvent = async () => {
 		try {
-			await apiFetch( {
-				path: `${ API_NAMESPACE }/remote-logging/log-event`,
+			await apiFetch({
+				path: `${API_NAMESPACE}/remote-logging/log-event`,
 				method: 'POST',
-			} );
-			setNotice( {
+			});
+			setNotice({
 				status: 'success',
 				message: 'Remote event logged successfully.',
-			} );
-		} catch ( error ) {
-			setNotice( {
+			});
+		} catch (error) {
+			setNotice({
 				status: 'error',
 				message: `Failed to log remote event.`,
-			} );
+			});
 		}
 	};
 
 	const resetPhpRateLimit = async () => {
 		try {
-			await apiFetch( {
-				path: `${ API_NAMESPACE }/remote-logging/reset-rate-limit`,
+			await apiFetch({
+				path: `${API_NAMESPACE}/remote-logging/reset-rate-limit`,
 				method: 'POST',
-			} );
-			setNotice( {
+			});
+			setNotice({
 				status: 'success',
 				message: 'PHP rate limit reset successfully.',
-			} );
-		} catch ( error ) {
-			setNotice( {
+			});
+		} catch (error) {
+			setNotice({
 				status: 'error',
-				message: `Failed to reset PHP rate limit. ${ JSON.stringify(
+				message: `Failed to reset PHP rate limit. ${JSON.stringify(
 					error
-				) }`,
-			} );
+				)}`,
+			});
 		}
 	};
 
-	const simulateException = async ( context: 'core' | 'beta-tester' ) => {
+	const simulateException = async (context: 'core' | 'beta-tester') => {
 		try {
-			await dispatch( optionsStore ).saveOption(
+			await dispatch(optionsStore).saveOption(
 				'wc_beta_tester_simulate_woocommerce_js_error',
 				context
 			);
 
-			if ( context === 'core' ) {
-				setNotice( {
+			if (context === 'core') {
+				setNotice({
 					status: 'success',
 					message: `Please go to WooCommerce pages to trigger the JS exception in woocommerce context.`,
-				} );
+				});
 			} else {
-				setNotice( {
+				setNotice({
 					status: 'success',
 					message:
 						'Please refresh your browser to trigger the JS exception in woocommerce beta tester context.',
-				} );
+				});
 			}
-		} catch ( error ) {
-			setNotice( {
+		} catch (error) {
+			setNotice({
 				status: 'error',
 				message: `Failed to set up JS exception test`,
-			} );
+			});
 		}
 	};
 
@@ -177,20 +177,20 @@ function RemoteLogging() {
 				}
 			);
 
-			if ( ! result ) {
+			if (!result) {
 				throw new Error();
 			}
 
-			setNotice( {
+			setNotice({
 				status: 'success',
 				message: 'JS event logged successfully.',
-			} );
-		} catch ( error ) {
-			setNotice( {
+			});
+		} catch (error) {
+			setNotice({
 				status: 'error',
 				message:
 					'Failed to log JS event. Try enabling debug mode `window.localStorage.setItem( "debug", "wc:remote-logging" )` to see the details.',
-			} );
+			});
 		}
 	};
 
@@ -198,121 +198,120 @@ function RemoteLogging() {
 		window.localStorage.removeItem(
 			'wc_remote_logging_last_error_sent_time'
 		);
-		setNotice( {
+		setNotice({
 			status: 'success',
 			message: 'JS rate limit reset successfully.',
-		} );
+		});
 	};
 
-	if ( isRemoteLoggingEnabled === null ) {
+	if (isRemoteLoggingEnabled === null) {
 		return <Spinner />;
 	}
 
 	return (
 		<div id="wc-admin-test-helper-remote-logging">
 			<h2>Remote Logging</h2>
-			{ notice && (
-				<div style={ { marginBottom: '12px' } }>
+			{notice && (
+				<div style={{ marginBottom: '12px' }}>
 					<Notice
-						status={ notice.status }
-						onRemove={ () => setNotice( null ) }
+						status={notice.status}
+						onRemove={() => setNotice(null)}
 					>
-						{ notice.message }
+						{notice.message}
 					</Notice>
 				</div>
-			) }
+			)}
 
-			{ ! isRemoteLoggingEnabled && (
-				<p className="helper-text" style={ { marginBottom: '12px' } }>
+			{!isRemoteLoggingEnabled && (
+				<p className="helper-text" style={{ marginBottom: '12px' }}>
 					Enable remote logging to test log event functionality.
 				</p>
-			) }
+			)}
 
-			{ ( wpEnvironment === 'local' ||
-				wpEnvironment === 'development' ) && (
-				<div style={ { marginBottom: '12px' } }>
-					<Notice status="warning" isDismissible={ false }>
-						Warning: You are in a { wpEnvironment } environment.
+			{(wpEnvironment === 'local' || wpEnvironment === 'development') && (
+				<div style={{ marginBottom: '12px' }}>
+					<Notice status="warning" isDismissible={false}>
+						Warning: You are in a {wpEnvironment} environment.
 						Remote logging may not work as expected. Please set
-						<code>WP_ENVIRONMENT_TYPE</code> to{ ' ' }
+						<code>WP_ENVIRONMENT_TYPE</code> to{' '}
 						<code>production</code>
 						in your wp-config.php file to test remote logging.
 					</Notice>
 				</div>
-			) }
+			)}
 
 			<ToggleControl
 				label="Enable Remote Logging"
-				checked={ isRemoteLoggingEnabled }
-				onChange={ toggleRemoteLogging }
+				checked={isRemoteLoggingEnabled}
+				onChange={toggleRemoteLogging}
 			/>
 
 			<hr />
 			<h3>PHP Integration</h3>
 			<p>Test PHP remote logging functionality:</p>
-			<div className="button-group" style={ { marginBottom: '20px' } }>
+			<div className="button-group" style={{ marginBottom: '20px' }}>
 				<Button
 					variant="secondary"
-					onClick={ () => simulatePhpException( 'core' ) }
-					style={ { marginRight: '10px' } }
+					onClick={() => simulatePhpException('core')}
+					style={{ marginRight: '10px' }}
 				>
 					Simulate Core Exception
 				</Button>
 				<Button
 					variant="secondary"
-					onClick={ () => simulatePhpException( 'beta-tester' ) }
-					style={ { marginRight: '10px' } }
+					onClick={() => simulatePhpException('beta-tester')}
+					style={{ marginRight: '10px' }}
 				>
 					Simulate Beta Tester Exception
 				</Button>
 				<Button
 					variant="secondary"
-					onClick={ logPhpEvent }
-					disabled={ ! isRemoteLoggingEnabled }
-					style={ { marginRight: '10px' } }
+					onClick={logPhpEvent}
+					disabled={!isRemoteLoggingEnabled}
+					style={{ marginRight: '10px' }}
 				>
 					Log PHP Event
 				</Button>
 				<Button
 					variant="secondary"
-					onClick={ resetPhpRateLimit }
-					disabled={ ! isRemoteLoggingEnabled }
+					onClick={resetPhpRateLimit}
+					disabled={!isRemoteLoggingEnabled}
 				>
 					Reset Rate Limit
 				</Button>
 			</div>
 
-			<hr className="section-divider" style={ { margin: '20px 0' } } />
+			<hr className="section-divider" style={{ margin: '20px 0' }} />
 
 			<h3>JavaScript Integration</h3>
 			<p>Test JavaScript remote logging functionality:</p>
-			<div className="button-group" style={ { marginBottom: '20px' } }>
+			<div className="button-group" style={{ marginBottom: '20px' }}>
 				<Button
 					variant="secondary"
-					onClick={ () => simulateException( 'core' ) }
-					style={ { marginRight: '10px' } }
+					onClick={() => simulateException('core')}
+					style={{ marginRight: '10px' }}
 				>
 					Simulate Core Exception
 				</Button>
 				<Button
 					variant="secondary"
-					onClick={ () => simulateException( 'beta-tester' ) }
-					style={ { marginRight: '10px' } }
+					onClick={() => simulateException('beta-tester')}
+					style={{ marginRight: '10px' }}
 				>
 					Simulate Beta Tester Exception
 				</Button>
 				<Button
 					variant="secondary"
-					onClick={ logJsEvent }
-					disabled={ ! isRemoteLoggingEnabled }
-					style={ { marginRight: '10px' } }
+					onClick={logJsEvent}
+					disabled={!isRemoteLoggingEnabled}
+					style={{ marginRight: '10px' }}
 				>
 					Log Event
 				</Button>
 				<Button
 					variant="secondary"
-					onClick={ resetJsRateLimit }
-					disabled={ ! isRemoteLoggingEnabled }
+					onClick={resetJsRateLimit}
+					disabled={!isRemoteLoggingEnabled}
 				>
 					Reset Rate Limit
 				</Button>

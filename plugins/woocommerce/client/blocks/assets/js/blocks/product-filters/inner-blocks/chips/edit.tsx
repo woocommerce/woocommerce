@@ -36,18 +36,9 @@ import {
 	isVisualAttributeTermEmpty,
 } from '../../../../base/utils/visual-attribute-terms';
 
-const LOADING_WIDTHS = [
-	'42%',
-	'67%',
-	'31%',
-	'55%',
-	'73%',
-	'28%',
-	'48%',
-	'61%',
-];
+const LOADING_WIDTHS = ['42%', '67%', '31%', '55%', '73%', '28%', '48%', '61%'];
 
-const Edit = ( props: EditProps ): JSX.Element => {
+const Edit = (props: EditProps): JSX.Element => {
 	const colorGradientSettings = useMultipleOriginColorsAndGradients();
 	const {
 		context,
@@ -76,41 +67,41 @@ const Edit = ( props: EditProps ): JSX.Element => {
 		customSelectedChipBorder,
 	} = attributes;
 	const { isLoading = false, items = [] } =
-		context?.[ 'woocommerce/selectableItems' ] ?? {};
+		context?.['woocommerce/selectableItems'] ?? {};
 
-	const hasVisualSwatches = items.some( ( item ) => 'visual' in item );
+	const hasVisualSwatches = items.some((item) => 'visual' in item);
 
-	const globalColors = getSetting< { background?: string; text?: string } >(
+	const globalColors = getSetting<{ background?: string; text?: string }>(
 		'globalStylesColors',
 		{}
 	);
-	const colorVars = getColorVars( attributes );
-	const borderProps = useBorderProps( attributes );
-	const spacingProps = useSpacingProps( attributes );
+	const colorVars = getColorVars(attributes);
+	const borderProps = useBorderProps(attributes);
+	const spacingProps = useSpacingProps(attributes);
 
-	const blockProps = useBlockProps( {
-		className: clsx( 'wc-block-product-filter-chips', {
+	const blockProps = useBlockProps({
+		className: clsx('wc-block-product-filter-chips', {
 			'is-loading': isLoading,
 			'is-style-swatch': hasVisualSwatches,
-			...getColorClasses( attributes ),
-		} ),
+			...getColorClasses(attributes),
+		}),
 		style: {
 			...colorVars,
 			'--wc-product-filter-chips-text':
-				colorVars[ '--wc-product-filter-chips-text' ] ||
+				colorVars['--wc-product-filter-chips-text'] ||
 				globalColors.text ||
 				undefined,
 			'--wc-product-filter-chips-background':
-				colorVars[ '--wc-product-filter-chips-background' ] ||
+				colorVars['--wc-product-filter-chips-background'] ||
 				globalColors.background ||
 				undefined,
 		},
-	} );
-	const innerBlocksProps = useInnerBlocksProps( blockProps, {
+	});
+	const innerBlocksProps = useInnerBlocksProps(blockProps, {
 		templateLock: 'all',
-	} );
+	});
 
-	if ( ! items ) {
+	if (!items) {
 		return <></>;
 	}
 
@@ -119,46 +110,46 @@ const Edit = ( props: EditProps ): JSX.Element => {
 
 	const chipItemClassName = clsx(
 		'wc-block-product-filter-chips__item',
-		! hasVisualSwatches && borderProps.className,
-		! hasVisualSwatches && spacingProps.className
+		!hasVisualSwatches && borderProps.className,
+		!hasVisualSwatches && spacingProps.className
 	);
 	const chipItemStyle = hasVisualSwatches
 		? undefined
 		: { ...borderProps.style, ...spacingProps.style };
-	const loadingState = LOADING_WIDTHS.map( ( width, i ) => (
+	const loadingState = LOADING_WIDTHS.map((width, i) => (
 		<div
-			className={ chipItemClassName }
-			key={ i }
-			style={ {
+			className={chipItemClassName}
+			key={i}
+			style={{
 				...chipItemStyle,
 				/* stylelint-disable */
 				width,
-			} }
+			}}
 		>
 			&nbsp;
 		</div>
-	) );
+	));
 
 	return (
 		<>
-			<div { ...innerBlocksProps }>
+			<div {...innerBlocksProps}>
 				<Disabled>
 					<div className="wc-block-product-filter-chips__items">
-						{ isLoading && loadingState }
-						{ ! isLoading &&
-							( isLongList
-								? items.slice( 0, threshold )
+						{isLoading && loadingState}
+						{!isLoading &&
+							(isLongList
+								? items.slice(0, threshold)
 								: items
-							).map( ( item, index ) => (
+							).map((item, index) => (
 								<div
-									key={ index }
-									className={ chipItemClassName }
-									style={ chipItemStyle }
-									aria-checked={ !! item.selected }
+									key={index}
+									className={chipItemClassName}
+									style={chipItemStyle}
+									aria-checked={!!item.selected}
 								>
 									<span className="wc-block-product-filter-chips__label">
 										<span
-											className={ clsx(
+											className={clsx(
 												'wc-block-product-filter-chips__swatch',
 												{
 													'wc-block-product-filter-chips__swatch--no-color':
@@ -166,41 +157,39 @@ const Edit = ( props: EditProps ): JSX.Element => {
 															item.visual
 														),
 												}
-											) }
-											style={ getVisualAttributeTermStyle(
+											)}
+											style={getVisualAttributeTermStyle(
 												item.visual
-											) }
+											)}
 											aria-hidden="true"
 										/>
 										<span className="wc-block-product-filter-chips__text">
-											{ typeof item.label === 'string'
-												? decodeHtmlEntities(
-														item.label
-												  )
-												: item.label }
+											{typeof item.label === 'string'
+												? decodeHtmlEntities(item.label)
+												: item.label}
 										</span>
-										{ item.count !== undefined && (
+										{item.count !== undefined && (
 											<span className="wc-block-product-filter-chips__count">
-												{ ` (${ item.count })` }
+												{` (${item.count})`}
 											</span>
-										) }
+										)}
 									</span>
 								</div>
-							) ) }
+							))}
 					</div>
-					{ ! isLoading && isLongList && (
+					{!isLoading && isLongList && (
 						<button className="wc-block-product-filter-chips__show-more">
-							{ __( 'Show more…', 'woocommerce' ) }
+							{__('Show more…', 'woocommerce')}
 						</button>
-					) }
+					)}
 				</Disabled>
 			</div>
 			<InspectorControls group="color">
-				{ colorGradientSettings.hasColorsOrGradients && (
+				{colorGradientSettings.hasColorsOrGradients && (
 					<ColorGradientSettingsDropdown
 						__experimentalIsRenderedInSidebar
-						settings={ [
-							...( ! hasVisualSwatches
+						settings={[
+							...(!hasVisualSwatches
 								? [
 										{
 											label: __(
@@ -213,20 +202,20 @@ const Edit = ( props: EditProps ): JSX.Element => {
 											onColorChange: (
 												colorValue: string
 											) => {
-												setChipText( colorValue );
-												setAttributes( {
+												setChipText(colorValue);
+												setAttributes({
 													customChipText: colorValue,
-												} );
+												});
 											},
 											resetAllFilter: () => {
-												setChipText( '' );
-												setAttributes( {
+												setChipText('');
+												setAttributes({
 													customChipText: '',
-												} );
+												});
 											},
 										},
-								  ]
-								: [] ),
+									]
+								: []),
 							{
 								label: __(
 									'Unselected Chip Border',
@@ -234,20 +223,20 @@ const Edit = ( props: EditProps ): JSX.Element => {
 								),
 								colorValue:
 									chipBorder.color || customChipBorder,
-								onColorChange: ( colorValue: string ) => {
-									setChipBorder( colorValue );
-									setAttributes( {
+								onColorChange: (colorValue: string) => {
+									setChipBorder(colorValue);
+									setAttributes({
 										customChipBorder: colorValue,
-									} );
+									});
 								},
 								resetAllFilter: () => {
-									setChipBorder( '' );
-									setAttributes( {
+									setChipBorder('');
+									setAttributes({
 										customChipBorder: '',
-									} );
+									});
 								},
 							},
-							...( ! hasVisualSwatches
+							...(!hasVisualSwatches
 								? [
 										{
 											label: __(
@@ -260,17 +249,17 @@ const Edit = ( props: EditProps ): JSX.Element => {
 											onColorChange: (
 												colorValue: string
 											) => {
-												setChipBackground( colorValue );
-												setAttributes( {
+												setChipBackground(colorValue);
+												setAttributes({
 													customChipBackground:
 														colorValue,
-												} );
+												});
 											},
 											resetAllFilter: () => {
-												setChipBackground( '' );
-												setAttributes( {
+												setChipBackground('');
+												setAttributes({
 													customChipBackground: '',
-												} );
+												});
 											},
 										},
 										{
@@ -284,23 +273,21 @@ const Edit = ( props: EditProps ): JSX.Element => {
 											onColorChange: (
 												colorValue: string
 											) => {
-												setSelectedChipText(
-													colorValue
-												);
-												setAttributes( {
+												setSelectedChipText(colorValue);
+												setAttributes({
 													customSelectedChipText:
 														colorValue,
-												} );
+												});
 											},
 											resetAllFilter: () => {
-												setSelectedChipText( '' );
-												setAttributes( {
+												setSelectedChipText('');
+												setAttributes({
 													customSelectedChipText: '',
-												} );
+												});
 											},
 										},
-								  ]
-								: [] ),
+									]
+								: []),
 							{
 								label: __(
 									'Selected Chip Border',
@@ -309,20 +296,20 @@ const Edit = ( props: EditProps ): JSX.Element => {
 								colorValue:
 									selectedChipBorder.color ||
 									customSelectedChipBorder,
-								onColorChange: ( colorValue: string ) => {
-									setSelectedChipBorder( colorValue );
-									setAttributes( {
+								onColorChange: (colorValue: string) => {
+									setSelectedChipBorder(colorValue);
+									setAttributes({
 										customSelectedChipBorder: colorValue,
-									} );
+									});
 								},
 								resetAllFilter: () => {
-									setSelectedChipBorder( '' );
-									setAttributes( {
+									setSelectedChipBorder('');
+									setAttributes({
 										customSelectedChipBorder: '',
-									} );
+									});
 								},
 							},
-							...( ! hasVisualSwatches
+							...(!hasVisualSwatches
 								? [
 										{
 											label: __(
@@ -338,36 +325,36 @@ const Edit = ( props: EditProps ): JSX.Element => {
 												setSelectedChipBackground(
 													colorValue
 												);
-												setAttributes( {
+												setAttributes({
 													customSelectedChipBackground:
 														colorValue,
-												} );
+												});
 											},
 											resetAllFilter: () => {
-												setSelectedChipBackground( '' );
-												setAttributes( {
+												setSelectedChipBackground('');
+												setAttributes({
 													customSelectedChipBackground:
 														'',
-												} );
+												});
 											},
 										},
-								  ]
-								: [] ),
-						] }
-						panelId={ clientId }
-						{ ...colorGradientSettings }
+									]
+								: []),
+						]}
+						panelId={clientId}
+						{...colorGradientSettings}
 					/>
-				) }
+				)}
 			</InspectorControls>
 		</>
 	);
 };
 
-export default withColors( {
+export default withColors({
 	chipText: 'chip-text',
 	chipBorder: 'chip-border',
 	chipBackground: 'chip-background',
 	selectedChipText: 'selected-chip-text',
 	selectedChipBorder: 'selected-chip-border',
 	selectedChipBackground: 'selected-chip-background',
-} )( Edit );
+})(Edit);

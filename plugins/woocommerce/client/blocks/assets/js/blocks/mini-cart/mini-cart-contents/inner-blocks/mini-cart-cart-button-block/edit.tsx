@@ -10,37 +10,37 @@ import EditableButton from '@woocommerce/editor-components/editable-button';
 import { defaultCartButtonLabel } from './constants';
 import { getVariant } from '../utils';
 
-export const Edit = ( {
+export const Edit = ({
 	attributes,
 	setAttributes,
 }: {
 	attributes: {
 		cartButtonLabel: string;
 	};
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ): JSX.Element => {
-	const blockProps = useBlockProps( {
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}): JSX.Element => {
+	const blockProps = useBlockProps({
 		className: 'wc-block-mini-cart__footer-cart',
-	} );
+	});
 	const { cartButtonLabel } = attributes;
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<EditableButton
-				variant={ getVariant( blockProps.className, 'outlined' ) }
-				value={ cartButtonLabel }
-				placeholder={ defaultCartButtonLabel }
-				onChange={ ( content ) => {
-					setAttributes( {
+				variant={getVariant(blockProps.className, 'outlined')}
+				value={cartButtonLabel}
+				placeholder={defaultCartButtonLabel}
+				onChange={(content) => {
+					setAttributes({
 						cartButtonLabel: content,
-					} );
-				} }
-				style={ blockProps.style }
+					});
+				}}
+				style={blockProps.style}
 			/>
 		</div>
 	);
 };
 
 export const Save = (): JSX.Element => {
-	return <div { ...useBlockProps.save() }></div>;
+	return <div {...useBlockProps.save()}></div>;
 };

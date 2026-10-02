@@ -9,14 +9,14 @@ export type Page = {
 	path?: string;
 	breadcrumbs:
 		| string[]
-		| ( ( {
+		| (({
 				match,
 		  }: {
 				match: {
 					params: Params;
 					url?: string;
 				};
-		  } ) => string[] );
+		  }) => string[]);
 	wpOpenMenu?: string;
 	navArgs?: {
 		id: string;
@@ -31,40 +31,37 @@ export type Page = {
 	};
 };
 
-export function usePageClasses( page: Page ) {
-	function convertCamelCaseToKebabCase( str: string ) {
-		return str.replace(
-			/[A-Z]/g,
-			( letter ) => `-${ letter.toLowerCase() }`
-		);
+export function usePageClasses(page: Page) {
+	function convertCamelCaseToKebabCase(str: string) {
+		return str.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
 	}
 
-	function getPathClassName( path: string ) {
+	function getPathClassName(path: string) {
 		const suffix =
 			path === '/'
 				? '_home'
 				: path
-						.replace( /:[a-zA-Z?]+/g, function ( match ) {
-							return convertCamelCaseToKebabCase( match ).replace(
+						.replace(/:[a-zA-Z?]+/g, function (match) {
+							return convertCamelCaseToKebabCase(match).replace(
 								':',
 								''
 							);
-						} )
-						.replace( /\//g, '_' );
+						})
+						.replace(/\//g, '_');
 
-		return `woocommerce-admin-page_${ suffix }`;
+		return `woocommerce-admin-page_${suffix}`;
 	}
 
-	useEffect( () => {
-		if ( ! page.path ) {
+	useEffect(() => {
+		if (!page.path) {
 			return;
 		}
 
-		const classes = getPathClassName( page.path );
+		const classes = getPathClassName(page.path);
 
-		document.body.classList.add( classes );
+		document.body.classList.add(classes);
 		return () => {
-			document.body.classList.remove( classes );
+			document.body.classList.remove(classes);
 		};
-	}, [ page.path ] );
+	}, [page.path]);
 }

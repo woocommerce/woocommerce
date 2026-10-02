@@ -39,31 +39,31 @@ import {
 	BlueprintImportStepResponse,
 } from './types';
 
-const parseBlueprintSteps = async ( file: File ) => {
+const parseBlueprintSteps = async (file: File) => {
 	// Create a FileReader instance
 	const reader = new FileReader();
 
 	// Create a promise to handle async file reading
-	const fileContent: string = await new Promise( ( resolve, reject ) => {
-		reader.onload = () => resolve( reader.result as string );
-		reader.onerror = () => reject( reader.error );
-		reader.readAsText( file );
-	} );
+	const fileContent: string = await new Promise((resolve, reject) => {
+		reader.onload = () => resolve(reader.result as string);
+		reader.onerror = () => reject(reader.error);
+		reader.readAsText(file);
+	});
 
 	// Parse the file content as JSON
-	const steps = JSON.parse( fileContent ).steps;
+	const steps = JSON.parse(fileContent).steps;
 
 	// Ensure the parsed data is an array
-	if ( ! Array.isArray( steps ) ) {
+	if (!Array.isArray(steps)) {
 		throw new Error(
-			__( 'Invalid JSON format: Expected an array.', 'woocommerce' )
+			__('Invalid JSON format: Expected an array.', 'woocommerce')
 		);
 	}
 
 	return steps;
 };
 
-const importBlueprint = async ( steps: BlueprintStep[] ) => {
+const importBlueprint = async (steps: BlueprintStep[]) => {
 	const errors = [] as {
 		step: string;
 		messages: {
@@ -75,9 +75,9 @@ const importBlueprint = async ( steps: BlueprintStep[] ) => {
 
 	try {
 		// Ensure the parsed data is an array
-		if ( ! Array.isArray( steps ) ) {
+		if (!Array.isArray(steps)) {
 			throw new Error(
-				__( 'Invalid JSON format: Expected an array.', 'woocommerce' )
+				__('Invalid JSON format: Expected an array.', 'woocommerce')
 			);
 		}
 
@@ -87,19 +87,19 @@ const importBlueprint = async ( steps: BlueprintStep[] ) => {
 
 		let sessionToken = '';
 		// Loop through each step and send it to the endpoint
-		for ( const step of steps ) {
+		for (const step of steps) {
 			// Skip steps that set the Site Visibility to Live.
 			// Admins should have a chance to review their store before it is set to Live.
-			if ( step?.options?.woocommerce_coming_soon === 'no' ) {
+			if (step?.options?.woocommerce_coming_soon === 'no') {
 				continue;
 			}
 
-			const stepJson = JSON.stringify( {
+			const stepJson = JSON.stringify({
 				step_definition: step,
-			} );
-			const stepSize = new Blob( [ stepJson ] ).size;
-			if ( stepSize > MAX_STEP_SIZE_BYTES ) {
-				errors.push( {
+			});
+			const stepSize = new Blob([stepJson]).size;
+			if (stepSize > MAX_STEP_SIZE_BYTES) {
+				errors.push({
 					step: step.step,
 					messages: [
 						{
@@ -113,19 +113,17 @@ const importBlueprint = async ( steps: BlueprintStep[] ) => {
 								Number(
 									(
 										MAX_STEP_SIZE_BYTES /
-										( 1024 * 1024 )
-									).toFixed( 2 )
+										(1024 * 1024)
+									).toFixed(2)
 								),
-								Number(
-									( stepSize / ( 1024 * 1024 ) ).toFixed( 2 )
-								)
+								Number((stepSize / (1024 * 1024)).toFixed(2))
 							),
 						},
 					],
-				} );
+				});
 				continue; // Skip this step
 			}
-			const response = await apiFetch< Response, false >( {
+			const response = await apiFetch<Response, false>({
 				path: 'wc-admin/blueprint/import-step',
 				method: 'POST',
 				headers: {
@@ -134,65 +132,61 @@ const importBlueprint = async ( steps: BlueprintStep[] ) => {
 				},
 				body: stepJson,
 				parse: false,
-			} );
+			});
 
 			const data: BlueprintImportStepResponse = await response.json();
 
-			if ( ! data.success ) {
-				errors.push( {
+			if (!data.success) {
+				errors.push({
 					step: step.step,
 					messages: data.messages,
-				} );
+				});
 			}
 
-			if ( ! sessionToken ) {
+			if (!sessionToken) {
 				sessionToken =
-					response.headers.get( 'X-Blueprint-Import-Session' ) ?? '';
+					response.headers.get('X-Blueprint-Import-Session') ?? '';
 			}
 		}
 
-		if ( errors.length > 0 ) {
-			dispatch( 'core/notices' ).createWarningNotice(
-				`${ __(
+		if (errors.length > 0) {
+			dispatch('core/notices').createWarningNotice(
+				`${__(
 					'Your Blueprint has been imported, but there were some errors. Please check the messages.',
 					'woocommerce'
-				) }`,
+				)}`,
 				{
 					icon: (
-						<Icon
-							icon={ cautionFilled }
-							size={ 24 }
-							fill="#d63638"
-						/>
+						<Icon icon={cautionFilled} size={24} fill="#d63638" />
 					),
 					explicitDismiss: true,
 				}
 			);
 		} else {
-			dispatch( 'core/notices' ).createSuccessNotice(
-				`${ __( 'Your Blueprint has been imported!', 'woocommerce' ) }`,
+			dispatch('core/notices').createSuccessNotice(
+				`${__('Your Blueprint has been imported!', 'woocommerce')}`,
 				{
-					icon: <Icon icon={ check } size={ 24 } fill="#1ed15A" />,
+					icon: <Icon icon={check} size={24} fill="#1ed15A" />,
 					explicitDismiss: true,
 				}
 			);
 		}
 		return errors;
-	} catch ( e ) {
+	} catch (e) {
 		throw e;
 	}
 };
 
-const checkImportAllowed = async (): Promise< boolean > => {
+const checkImportAllowed = async (): Promise<boolean> => {
 	try {
-		const response = await apiFetch< { import_allowed: boolean } >( {
+		const response = await apiFetch<{ import_allowed: boolean }>({
 			path: 'wc-admin/blueprint/import-allowed',
 			method: 'GET',
-		} );
+		});
 		return response.import_allowed;
 	} catch {
 		throw new Error(
-			__( 'Failed to check if imports are allowed.', 'woocommerce' )
+			__('Failed to check if imports are allowed.', 'woocommerce')
 		);
 	}
 };
@@ -233,20 +227,20 @@ type FileUploadEvents =
 			output: Error;
 	  };
 
-export const fileUploadMachine = setup( {
+export const fileUploadMachine = setup({
 	types: {} as {
 		context: FileUploadContext;
 		events: FileUploadEvents;
 	},
 	actions: {
-		reportSuccess: enqueueActions( ( { event, enqueue } ) => {
-			assertEvent( event, 'xstate.done.actor.0.fileUpload.uploading' );
-			enqueue.assign( {
+		reportSuccess: enqueueActions(({ event, enqueue }) => {
+			assertEvent(event, 'xstate.done.actor.0.fileUpload.uploading');
+			enqueue.assign({
 				settings_to_overwrite: event.output.settings_to_overwrite,
-			} );
-		} ),
-		reportError: assign( ( { event } ) => {
-			recordEvent( 'blueprint_import_error' );
+			});
+		}),
+		reportError: assign(({ event }) => {
+			recordEvent('blueprint_import_error');
 
 			const error = new Error(
 				// default error message if no error is provided
@@ -256,54 +250,54 @@ export const fileUploadMachine = setup( {
 				)
 			);
 
-			if ( 'error' in event ) {
+			if ('error' in event) {
 				error.message = event.error.message;
-			} else if ( 'output' in event && 'message' in event.output ) {
+			} else if ('output' in event && 'message' in event.output) {
 				error.message = event.output.message;
 			}
 
 			return {
 				error,
 			};
-		} ),
+		}),
 	},
 	actors: {
 		importer: fromPromise(
-			( { input }: { input: { steps: BlueprintStep[] } } ) =>
-				importBlueprint( input.steps )
+			({ input }: { input: { steps: BlueprintStep[] } }) =>
+				importBlueprint(input.steps)
 		),
-		stepsParser: fromPromise( ( { input }: { input: { file: File } } ) =>
-			parseBlueprintSteps( input.file )
+		stepsParser: fromPromise(({ input }: { input: { file: File } }) =>
+			parseBlueprintSteps(input.file)
 		),
-		importAllowedChecker: fromPromise( () => checkImportAllowed() ),
+		importAllowedChecker: fromPromise(() => checkImportAllowed()),
 	},
 	guards: {
-		hasSettingsToOverwrite: ( { context } ) =>
+		hasSettingsToOverwrite: ({ context }) =>
 			Boolean(
 				context.settings_to_overwrite &&
-					context.settings_to_overwrite.length > 0
+				context.settings_to_overwrite.length > 0
 			),
 	},
-} ).createMachine( {
+}).createMachine({
 	id: 'fileUpload',
 	initial: 'checkingImportAllowed',
-	context: () => ( {} ),
+	context: () => ({}),
 	states: {
 		checkingImportAllowed: {
 			invoke: {
 				src: 'importAllowedChecker',
 				onDone: {
 					target: 'idle',
-					actions: assign( {
-						import_allowed: ( { event } ) => event.output,
+					actions: assign({
+						import_allowed: ({ event }) => event.output,
 						error: () => undefined,
-					} ),
+					}),
 				},
 				onError: {
 					target: 'error',
-					actions: assign( {
-						error: ( { event } ) => event.error as Error,
-					} ),
+					actions: assign({
+						error: ({ event }) => event.error as Error,
+					}),
 				},
 			},
 		},
@@ -311,17 +305,17 @@ export const fileUploadMachine = setup( {
 			on: {
 				UPLOAD: {
 					target: 'parsingSteps',
-					guard: ( { context } ) => context.import_allowed === true,
-					actions: assign( {
-						file: ( { event } ) => event.file,
+					guard: ({ context }) => context.import_allowed === true,
+					actions: assign({
+						file: ({ event }) => event.file,
 						error: () => undefined,
-					} ),
+					}),
 				},
 				ERROR: {
 					target: 'error',
-					actions: assign( {
-						error: ( { event } ) => event?.error as Error,
-					} ),
+					actions: assign({
+						error: ({ event }) => event?.error as Error,
+					}),
 				},
 			},
 		},
@@ -334,28 +328,28 @@ export const fileUploadMachine = setup( {
 		parsingSteps: {
 			invoke: {
 				src: 'stepsParser',
-				input: ( { context } ) => {
+				input: ({ context }) => {
 					return {
 						file: context.file!,
 					};
 				},
 				onDone: {
 					target: 'success',
-					actions: assign( {
+					actions: assign({
 						error: () => undefined,
-						steps: ( { event } ) => event.output,
-						settings_to_overwrite: ( { event } ) => {
+						steps: ({ event }) => event.output,
+						settings_to_overwrite: ({ event }) => {
 							return getOptionGroupsFromSteps(
 								event.output
 							) as string[];
 						},
-						step_actions: ( { event } ) =>
-							getStepActions( event.output ),
-					} ),
+						step_actions: ({ event }) =>
+							getStepActions(event.output),
+					}),
 				},
 				onError: {
 					target: 'error',
-					actions: assign( {
+					actions: assign({
 						error: new Error(
 							/* translators: Error message when the file is not a valid Blueprint. */
 							__(
@@ -363,7 +357,7 @@ export const fileUploadMachine = setup( {
 								'woocommerce'
 							)
 						),
-					} ),
+					}),
 				},
 			},
 		},
@@ -389,33 +383,33 @@ export const fileUploadMachine = setup( {
 		importing: {
 			invoke: {
 				src: 'importer',
-				input: ( { context } ) => {
+				input: ({ context }) => {
 					return {
 						steps: context.steps!,
 					};
 				},
 				onDone: {
 					target: 'importSuccess',
-					actions: assign( {
-						error: ( { event } ) => {
+					actions: assign({
+						error: ({ event }) => {
 							if (
-								Array.isArray( event.output ) &&
+								Array.isArray(event.output) &&
 								event.output.length
 							) {
 								return {
 									name: 'BlueprintImportError',
 									message: event.output
-										.map( ( item ) => {
+										.map((item) => {
 											const errors = item.messages
 												.filter(
-													( msg ) =>
+													(msg) =>
 														msg.type === 'error'
 												) // Filter messages with type 'error'
 												.map(
-													( msg ) =>
-														`  ${ msg.message.trim() }.`
+													(msg) =>
+														`  ${msg.message.trim()}.`
 												) // Trim and append a period
-												.join( '\n' ); // Join messages with newlines
+												.join('\n'); // Join messages with newlines
 
 											return sprintf(
 												/* translators: 1: Step name 2: Error messages */
@@ -426,12 +420,12 @@ export const fileUploadMachine = setup( {
 												item.step,
 												errors
 											);
-										} )
-										.join( '\n\n' ),
+										})
+										.join('\n\n'),
 								};
 							}
 						},
-					} ),
+					}),
 				},
 				onError: {
 					target: 'error',
@@ -439,184 +433,172 @@ export const fileUploadMachine = setup( {
 			},
 		},
 		importSuccess: {
-			entry: ( { context } ) => {
-				recordEvent( 'blueprint_import_success', {
+			entry: ({ context }) => {
+				recordEvent('blueprint_import_success', {
 					has_partial_errors: Boolean(
 						context.error?.name === 'BlueprintImportError'
 					),
 					steps_count: context.steps?.length || 0,
-				} );
+				});
 			},
 			always: 'idle',
 		},
 	},
 	on: {
 		DISMISS_FILE_UPLOAD: {
-			actions: assign( {
+			actions: assign({
 				error: () => undefined,
 				file: () => undefined,
 				steps: () => undefined,
-			} ),
+			}),
 			target: '.idle',
 		},
 	},
-} );
+});
 
 export const BlueprintUploadDropzone = () => {
-	const [ state, send ] = useMachine( fileUploadMachine );
+	const [state, send] = useMachine(fileUploadMachine);
 
 	return (
 		<>
-			{ state.matches( 'checkingImportAllowed' ) && (
+			{state.matches('checkingImportAllowed') && (
 				<div className="blueprint-upload-form">
 					<div className="blueprint-upload-dropzone-uploading">
 						<Spinner />
 					</div>
 				</div>
-			) }
-			{ state.context.import_allowed === false &&
-				! state.context.error && (
-					<Notice
-						status="warning"
-						isDismissible={ false }
-						className="blueprint-upload-dropzone-notice"
-					>
-						{ createInterpolateElement(
-							__(
-								'Blueprint imports are disabled by default for live sites. <br/>Enable <link>Coming Soon mode</link> or define "ALLOW_BLUEPRINT_IMPORT_IN_LIVE_MODE" as true.',
-								'woocommerce'
+			)}
+			{state.context.import_allowed === false && !state.context.error && (
+				<Notice
+					status="warning"
+					isDismissible={false}
+					className="blueprint-upload-dropzone-notice"
+				>
+					{createInterpolateElement(
+						__(
+							'Blueprint imports are disabled by default for live sites. <br/>Enable <link>Coming Soon mode</link> or define "ALLOW_BLUEPRINT_IMPORT_IN_LIVE_MODE" as true.',
+							'woocommerce'
+						),
+						{
+							br: <br />,
+							link: (
+								// eslint-disable-next-line jsx-a11y/anchor-has-content
+								<a
+									href={getAdminLink(
+										'admin.php?page=wc-settings&tab=site-visibility'
+									)}
+								/>
 							),
-							{
-								br: <br />,
-								link: (
-									// eslint-disable-next-line jsx-a11y/anchor-has-content
-									<a
-										href={ getAdminLink(
-											'admin.php?page=wc-settings&tab=site-visibility'
-										) }
-									/>
-								),
-							}
-						) }
-					</Notice>
-				) }
-			{ state.context.error && (
+						}
+					)}
+				</Notice>
+			)}
+			{state.context.error && (
 				<div className="blueprint-upload-dropzone-error">
 					<Notice
 						status="error"
-						onDismiss={ () =>
-							send( { type: 'DISMISS_FILE_UPLOAD' } )
-						}
+						onDismiss={() => send({ type: 'DISMISS_FILE_UPLOAD' })}
 					>
-						<pre>{ state.context.error.message }</pre>
+						<pre>{state.context.error.message}</pre>
 					</Notice>
 				</div>
-			) }
-			{ state.context.import_allowed &&
-				( state.matches( 'idle' ) ||
-					state.matches( 'error' ) ||
-					state.matches( 'parsingSteps' ) ) && (
+			)}
+			{state.context.import_allowed &&
+				(state.matches('idle') ||
+					state.matches('error') ||
+					state.matches('parsingSteps')) && (
 					<div className="blueprint-upload-form wc-settings-prevent-change-event">
 						<FormFileUpload
 							className="blueprint-upload-field"
 							accept="application/json, application/zip"
-							multiple={ false }
-							onChange={ ( evt ) => {
-								const file = evt.target.files?.[ 0 ]; // since multiple is disabled it has to be in 0
-								if ( file ) {
-									send( { type: 'UPLOAD', file } );
+							multiple={false}
+							onChange={(evt) => {
+								const file = evt.target.files?.[0]; // since multiple is disabled it has to be in 0
+								if (file) {
+									send({ type: 'UPLOAD', file });
 								}
-							} }
+							}}
 						>
 							<div className="blueprint-upload-dropzone">
-								<Icon icon={ upload } />
+								<Icon icon={upload} />
 								<p className="blueprint-upload-dropzone-text">
-									{ __( 'Drag and drop or', 'woocommerce' ) }{ ' ' }
+									{__('Drag and drop or', 'woocommerce')}{' '}
 									<span>
-										{ __( 'choose a file', 'woocommerce' ) }
+										{__('choose a file', 'woocommerce')}
 									</span>
 								</p>
 								<p className="blueprint-upload-max-size">
-									{ __(
-										'Maximum size: 50 MB',
-										'woocommerce'
-									) }
+									{__('Maximum size: 50 MB', 'woocommerce')}
 								</p>
 								<DropZone
-									onFilesDrop={ ( files ) => {
-										if ( files.length > 1 ) {
-											send( {
+									onFilesDrop={(files) => {
+										if (files.length > 1) {
+											send({
 												type: 'ERROR',
 												error: new Error(
 													'Only one file can be uploaded at a time'
 												),
-											} );
+											});
 										}
-										send( {
+										send({
 											type: 'UPLOAD',
-											file: files[ 0 ],
-										} );
-									} }
+											file: files[0],
+										});
+									}}
 								></DropZone>
 							</div>
 						</FormFileUpload>
 					</div>
-				) }
-			{ state.matches( 'importing' ) && (
+				)}
+			{state.matches('importing') && (
 				<div className="blueprint-upload-form">
 					<div className="blueprint-upload-dropzone-uploading">
 						<Spinner className="blueprint-upload-dropzone-spinner" />
 						<p className="blueprint-upload-dropzone-text">
-							{ __( 'Importing your file…', 'woocommerce' ) }
+							{__('Importing your file…', 'woocommerce')}
 						</p>
 					</div>
 				</div>
-			) }
-			{ ( state.matches( 'success' ) ||
-				state.matches( 'importSuccess' ) ||
-				state.matches( 'overrideModal' ) ) && (
+			)}
+			{(state.matches('success') ||
+				state.matches('importSuccess') ||
+				state.matches('overrideModal')) && (
 				<div className="blueprint-upload-dropzone-success">
 					<p className="blueprint-upload-dropzone-text">
 						<span className="blueprint-upload-dropzone-text-file-name">
-							{ state.context.file?.name }
+							{state.context.file?.name}
 						</span>
 						<Button
-							icon={ <Icon icon={ closeSmall } /> }
-							onClick={ () => {
-								send( { type: 'DISMISS_FILE_UPLOAD' } );
-							} }
+							icon={<Icon icon={closeSmall} />}
+							onClick={() => {
+								send({ type: 'DISMISS_FILE_UPLOAD' });
+							}}
 						/>
 					</p>
 				</div>
-			) }
-			{ ( state.matches( 'success' ) ||
-				state.matches( 'overrideModal' ) ) && (
+			)}
+			{(state.matches('success') || state.matches('overrideModal')) && (
 				<Button
 					className="woocommerce-blueprint-import-button"
 					variant="primary"
-					disabled={ ! state.context.import_allowed }
-					onClick={ () => {
-						send( { type: 'IMPORT' } );
-					} }
+					disabled={!state.context.import_allowed}
+					onClick={() => {
+						send({ type: 'IMPORT' });
+					}}
 				>
-					{ __( 'Import', 'woocommerce' ) }
+					{__('Import', 'woocommerce')}
 				</Button>
-			) }
-			{ ( state.matches( 'importing' ) ||
-				state.matches( 'overrideModal' ) ) && (
+			)}
+			{(state.matches('importing') || state.matches('overrideModal')) && (
 				<OverwriteConfirmationModal
-					isOpen={ true }
-					isImporting={ state.matches( 'importing' ) }
-					onClose={ () =>
-						send( { type: 'DISMISS_OVERWRITE_MODAL' } )
-					}
-					onConfirm={ () => send( { type: 'CONFIRM_IMPORT' } ) }
-					overwrittenItems={
-						state.context.settings_to_overwrite || []
-					}
-					additionalActions={ state.context.step_actions || [] }
+					isOpen={true}
+					isImporting={state.matches('importing')}
+					onClose={() => send({ type: 'DISMISS_OVERWRITE_MODAL' })}
+					onConfirm={() => send({ type: 'CONFIRM_IMPORT' })}
+					overwrittenItems={state.context.settings_to_overwrite || []}
+					additionalActions={state.context.step_actions || []}
 				/>
-			) }
+			)}
 		</>
 	);
 };

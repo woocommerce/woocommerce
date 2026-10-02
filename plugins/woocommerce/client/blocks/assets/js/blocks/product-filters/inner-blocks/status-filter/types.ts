@@ -23,4 +23,4 @@ export type Current = {
 	name: string;
 };
 
-export type EditProps = BlockEditProps< BlockAttributes >;
+export type EditProps = BlockEditProps<BlockAttributes>;

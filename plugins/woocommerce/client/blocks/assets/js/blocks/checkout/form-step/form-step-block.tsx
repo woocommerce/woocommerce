@@ -13,7 +13,7 @@ import FormStepHeading from './form-step-heading';
 
 export interface FormStepBlockProps {
 	attributes: { title: string; description: string };
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
+	setAttributes: (attributes: Record<string, unknown>) => void;
 	className?: string;
 	children?: React.ReactNode;
 	lock?: { move: boolean; remove: boolean };
@@ -22,57 +22,55 @@ export interface FormStepBlockProps {
 /**
  * Form Step Block for use in the editor.
  */
-export const FormStepBlock = ( {
+export const FormStepBlock = ({
 	attributes,
 	setAttributes,
 	className = '',
 	children,
-}: FormStepBlockProps ): JSX.Element => {
+}: FormStepBlockProps): JSX.Element => {
 	const { showFormStepNumbers } = useCheckoutBlockContext();
 
 	const { title = '', description = '' } = attributes;
-	const blockProps = useBlockProps( {
-		className: clsx( 'wc-block-components-checkout-step', className, {
+	const blockProps = useBlockProps({
+		className: clsx('wc-block-components-checkout-step', className, {
 			'wc-block-components-checkout-step--with-step-number':
 				showFormStepNumbers,
-		} ),
-	} );
+		}),
+	});
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<div className="wc-block-components-checkout-step__heading-container">
 				<FormStepHeading>
 					<PlainText
-						className={ '' }
-						value={ title }
-						onChange={ ( value ) =>
-							setAttributes( { title: value } )
-						}
-						style={ { backgroundColor: 'transparent' } }
+						className={''}
+						value={title}
+						onChange={(value) => setAttributes({ title: value })}
+						style={{ backgroundColor: 'transparent' }}
 					/>
 				</FormStepHeading>
 				<p className="wc-block-components-checkout-step__description">
 					<PlainText
 						className={
-							! description
+							!description
 								? 'wc-block-components-checkout-step__description-placeholder'
 								: ''
 						}
-						value={ description }
-						placeholder={ __(
+						value={description}
+						placeholder={__(
 							'Optional text for this form step.',
 							'woocommerce'
-						) }
-						onChange={ ( value ) =>
-							setAttributes( {
+						)}
+						onChange={(value) =>
+							setAttributes({
 								description: value,
-							} )
+							})
 						}
-						style={ { backgroundColor: 'transparent' } }
+						style={{ backgroundColor: 'transparent' }}
 					/>
 				</p>
 			</div>
 			<div className="wc-block-components-checkout-step__content">
-				{ children }
+				{children}
 			</div>
 		</div>
 	);

@@ -9,10 +9,10 @@ import { getBlockTypes } from '@wordpress/blocks';
  * @param excludedBlocks Array of block names to exclude from the list.
  * @return Array of allowed block names.
  */
-export const getAllowedBlocks = ( excludedBlocks: string[] = [] ) => {
+export const getAllowedBlocks = (excludedBlocks: string[] = []) => {
 	const allBlocks = getBlockTypes();
 
 	return allBlocks
-		.map( ( block ) => block.name )
-		.filter( ( name ) => ! excludedBlocks.includes( name ) );
+		.map((block) => block.name)
+		.filter((name) => !excludedBlocks.includes(name));
 };

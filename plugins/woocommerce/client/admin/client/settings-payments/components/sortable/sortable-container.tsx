@@ -45,7 +45,7 @@ import './sortable.scss';
  *     ))}
  * </SortableContainer>
  */
-export const SortableContainer = < T extends { id: string } >( {
+export const SortableContainer = <T extends { id: string }>({
 	items,
 	setItems,
 	children,
@@ -55,39 +55,37 @@ export const SortableContainer = < T extends { id: string } >( {
 	className = '',
 }: {
 	items: T[];
-	setItems: ( items: T[] ) => void;
+	setItems: (items: T[]) => void;
 	children: React.ReactNode;
 	sorting?: 'vertical' | 'horizontal';
-	onDragStart?: ( event: DragStartEvent ) => void;
-	onDragEnd?: ( event: DragEndEvent ) => void;
+	onDragStart?: (event: DragStartEvent) => void;
+	onDragEnd?: (event: DragEndEvent) => void;
 	className?: string;
-} ) => {
+}) => {
 	const sensors = useSensors(
-		useSensor( MouseSensor, {} ),
-		useSensor( TouchSensor, {} ),
-		useSensor( KeyboardSensor, {} )
+		useSensor(MouseSensor, {}),
+		useSensor(TouchSensor, {}),
+		useSensor(KeyboardSensor, {})
 	);
 
-	const [ isDragging, setIsDragging ] = useState( false );
+	const [isDragging, setIsDragging] = useState(false);
 
-	const handleDragStart = ( event: DragStartEvent ) => {
-		setIsDragging( true );
-		onDragStart( event );
+	const handleDragStart = (event: DragStartEvent) => {
+		setIsDragging(true);
+		onDragStart(event);
 	};
 
-	const handleDragEnd = ( event: DragEndEvent ) => {
-		setIsDragging( false );
-		onDragEnd( event );
+	const handleDragEnd = (event: DragEndEvent) => {
+		setIsDragging(false);
+		onDragEnd(event);
 		const { active, over } = event;
 
-		if ( active && over && active.id !== over.id ) {
-			const oldIndex = items.findIndex(
-				( item ) => item.id === active.id
-			);
-			const newIndex = items.findIndex( ( item ) => item.id === over.id );
+		if (active && over && active.id !== over.id) {
+			const oldIndex = items.findIndex((item) => item.id === active.id);
+			const newIndex = items.findIndex((item) => item.id === over.id);
 
-			const newItems = arrayMove( items, oldIndex, newIndex );
-			setItems( newItems );
+			const newItems = arrayMove(items, oldIndex, newIndex);
+			setItems(newItems);
 		}
 	};
 
@@ -98,27 +96,27 @@ export const SortableContainer = < T extends { id: string } >( {
 
 	const modifiers =
 		sorting === 'vertical'
-			? [ restrictToVerticalAxis ]
-			: [ restrictToHorizontalAxis ];
+			? [restrictToVerticalAxis]
+			: [restrictToHorizontalAxis];
 
-	const containerClassName = clsx( 'sortable-container', className, {
+	const containerClassName = clsx('sortable-container', className, {
 		'has-dragging-item': isDragging,
-	} );
+	});
 
 	return (
-		<div className={ containerClassName }>
+		<div className={containerClassName}>
 			<DndContext
-				sensors={ sensors }
-				onDragStart={ handleDragStart }
-				onDragEnd={ handleDragEnd }
-				collisionDetection={ closestCenter }
-				modifiers={ modifiers }
+				sensors={sensors}
+				onDragStart={handleDragStart}
+				onDragEnd={handleDragEnd}
+				collisionDetection={closestCenter}
+				modifiers={modifiers}
 			>
 				<SortableContext
-					items={ items.map( ( item ) => item.id ) }
-					strategy={ strategy }
+					items={items.map((item) => item.id)}
+					strategy={strategy}
 				>
-					{ children }
+					{children}
 				</SortableContext>
 			</DndContext>
 		</div>

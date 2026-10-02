@@ -22,43 +22,43 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 const getSupportedCoreLocaleProps = (
 	localeField: FieldLocaleOverrides
-): Partial< Field > => {
-	const fields: Partial< Field > = {};
+): Partial<Field> => {
+	const fields: Partial<Field> = {};
 
-	if ( localeField.label !== undefined ) {
+	if (localeField.label !== undefined) {
 		fields.label = localeField.label;
 	}
 
-	if ( localeField.required !== undefined ) {
+	if (localeField.required !== undefined) {
 		fields.required = localeField.required;
 	}
 
-	if ( localeField.hidden !== undefined ) {
+	if (localeField.hidden !== undefined) {
 		fields.hidden = localeField.hidden;
 	}
 
-	if ( localeField.label !== undefined && ! localeField.optionalLabel ) {
+	if (localeField.label !== undefined && !localeField.optionalLabel) {
 		fields.optionalLabel = sprintf(
 			/* translators: %s Field label. */
-			__( '%s (optional)', 'woocommerce' ),
+			__('%s (optional)', 'woocommerce'),
 			localeField.label
 		);
 	}
 
-	if ( localeField.optionalLabel !== undefined ) {
+	if (localeField.optionalLabel !== undefined) {
 		fields.optionalLabel = localeField.optionalLabel;
 	}
 
-	if ( localeField.index ) {
-		if ( isNumber( localeField.index ) ) {
+	if (localeField.index) {
+		if (isNumber(localeField.index)) {
 			fields.index = localeField.index;
 		}
-		if ( isString( localeField.index ) ) {
-			fields.index = parseInt( localeField.index, 10 );
+		if (isString(localeField.index)) {
+			fields.index = parseInt(localeField.index, 10);
 		}
 	}
 
-	if ( localeField.hidden ) {
+	if (localeField.hidden) {
 		fields.required = false;
 	}
 
@@ -73,43 +73,42 @@ const getSupportedCoreLocaleProps = (
  */
 const countryAddressFields: CountryAddressFields = Object.entries(
 	COUNTRY_LOCALE
-).reduce( ( acc, [ country, countryLocale ] ) => {
-	acc[ country ] = Object.entries( countryLocale ).reduce(
-		( fields, [ localeFieldKey, localeField ] ) => {
-			fields[ localeFieldKey ] =
-				getSupportedCoreLocaleProps( localeField );
+).reduce((acc, [country, countryLocale]) => {
+	acc[country] = Object.entries(countryLocale).reduce(
+		(fields, [localeFieldKey, localeField]) => {
+			fields[localeFieldKey] = getSupportedCoreLocaleProps(localeField);
 			return fields;
 		},
 		{}
 	);
 	return acc;
-}, {} );
+}, {});
 
 /**
  * Combines address fields, including fields from the locale, and sorts them by index.
  */
 const prepareFormFields = (
 	// ist of field keys--only address fields matching these will be returned
-	fieldKeys: ( keyof FormFields )[],
+	fieldKeys: (keyof FormFields)[],
 	// Default fields from settings.
 	defaultFields: FormFields,
 	// Address country code. If unknown, locale fields will not be merged.
 	addressCountry = ''
 ): KeyedFormFields => {
 	const localeConfigs =
-		addressCountry && countryAddressFields[ addressCountry ] !== undefined
-			? countryAddressFields[ addressCountry ]
+		addressCountry && countryAddressFields[addressCountry] !== undefined
+			? countryAddressFields[addressCountry]
 			: {};
 
 	return fieldKeys
-		.map( ( field ) => {
+		.map((field) => {
 			const defaultConfig =
 				defaultFields && field in defaultFields
-					? defaultFields[ field ]
+					? defaultFields[field]
 					: {};
 			const localeConfig =
 				localeConfigs && field in localeConfigs
-					? localeConfigs[ field ]
+					? localeConfigs[field]
 					: {};
 
 			return {
@@ -117,8 +116,8 @@ const prepareFormFields = (
 				...defaultConfig,
 				...localeConfig,
 			};
-		} )
-		.sort( ( a, b ) => a.index - b.index );
+		})
+		.sort((a, b) => a.index - b.index);
 };
 
 export default prepareFormFields;

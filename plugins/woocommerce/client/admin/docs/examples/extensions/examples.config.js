@@ -1,36 +1,35 @@
 /**
  * External dependencies
  */
-const path = require( 'path' );
-const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
-const fs = require( 'fs' );
-const woocommerceAdminConfig = require( path.resolve(
-	__dirname,
-	'../../../webpack.config.js'
-) );
-const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
+const path = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const fs = require('fs');
+const woocommerceAdminConfig = require(
+	path.resolve(__dirname, '../../../webpack.config.js')
+);
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-if ( ! process.env.WC_EXT ) {
-	throw new Error( 'Please provide an extension.' );
+if (!process.env.WC_EXT) {
+	throw new Error('Please provide an extension.');
 }
 
 const extension = process.env.WC_EXT;
-const extensionPath = path.join( __dirname, `${ extension }/js/index.js` );
+const extensionPath = path.join(__dirname, `${extension}/js/index.js`);
 
-if ( ! fs.existsSync( extensionPath ) ) {
-	throw new Error( 'Extension example does not exist.' );
+if (!fs.existsSync(extensionPath)) {
+	throw new Error('Extension example does not exist.');
 }
 
-const WooCommerceDependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin' );
+const WooCommerceDependencyExtractionWebpackPlugin = require('@woocommerce/dependency-extraction-webpack-plugin');
 
 const webpackConfig = {
 	mode: 'development',
 	entry: {
-		[ extension ]: extensionPath,
+		[extension]: extensionPath,
 	},
 	output: {
 		filename: 'index.js',
-		path: path.resolve( __dirname, `../../../../${ extension }/dist` ),
+		path: path.resolve(__dirname, `../../../../${extension}/dist`),
 		libraryTarget: 'window',
 	},
 	externals: woocommerceAdminConfig.externals,
@@ -57,7 +56,7 @@ const webpackConfig = {
 								{ loose: true, modules: 'commonjs' },
 							],
 						],
-						plugins: [ 'transform-es2015-template-literals' ],
+						plugins: ['transform-es2015-template-literals'],
 					},
 				},
 				include: new RegExp(
@@ -72,13 +71,13 @@ const webpackConfig = {
 			},
 			{
 				test: /\.s?css$/,
-				use: [ MiniCssExtractPlugin.loader, 'css-loader' ],
+				use: [MiniCssExtractPlugin.loader, 'css-loader'],
 			},
 		],
 	},
 	resolve: {
-		extensions: [ '.json', '.js', '.jsx' ],
-		modules: [ 'node_modules' ],
+		extensions: ['.json', '.js', '.jsx'],
+		modules: ['node_modules'],
 		alias: {
 			'gutenberg-components': path.resolve(
 				__dirname,
@@ -87,24 +86,21 @@ const webpackConfig = {
 		},
 	},
 	plugins: [
-		new CopyWebpackPlugin( {
+		new CopyWebpackPlugin({
 			patterns: [
 				{
-					from: path.join( __dirname, `${ extension }/` ),
-					to: path.resolve(
-						__dirname,
-						`../../../../${ extension }/`
-					),
+					from: path.join(__dirname, `${extension}/`),
+					to: path.resolve(__dirname, `../../../../${extension}/`),
 				},
 			],
-		} ),
-		new MiniCssExtractPlugin( {
+		}),
+		new MiniCssExtractPlugin({
 			filename: '[name]/dist/style.css',
-		} ),
+		}),
 		new WooCommerceDependencyExtractionWebpackPlugin(),
 	],
 	watchOptions: {
-		ignored: [ '**/dist', '**/node_modules' ],
+		ignored: ['**/dist', '**/node_modules'],
 	},
 };
 

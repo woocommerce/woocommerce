@@ -34,7 +34,7 @@ export type UserProfileEvent =
 	| {
 			type: 'USER_PROFILE_COMPLETED';
 			payload: {
-				userProfile: CoreProfilerStateMachineContext[ 'userProfile' ];
+				userProfile: CoreProfilerStateMachineContext['userProfile'];
 			};
 	  }
 	| {
@@ -48,7 +48,7 @@ export type BusinessInfoEvent =
 			payload: {
 				storeName?: string;
 				industry?: IndustryChoice;
-				storeLocation: CountryStateOption[ 'key' ];
+				storeLocation: CountryStateOption['key'];
 				geolocationOverruled: boolean;
 				isOptInMarketing: boolean;
 				storeEmailAddress: string;
@@ -65,7 +65,7 @@ export type BusinessLocationEvent =
 	| {
 			type: 'BUSINESS_LOCATION_COMPLETED';
 			payload: {
-				storeLocation: CountryStateOption[ 'key' ];
+				storeLocation: CountryStateOption['key'];
 			};
 	  }
 	| {

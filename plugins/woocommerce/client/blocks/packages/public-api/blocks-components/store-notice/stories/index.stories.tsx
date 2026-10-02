@@ -13,7 +13,7 @@ export default {
 	argTypes: {
 		status: {
 			control: 'radio',
-			options: [ 'default', 'success', 'error', 'warning', 'info' ],
+			options: ['default', 'success', 'error', 'warning', 'info'],
 			description:
 				'Status determines the color of the notice and the icon.',
 		},
@@ -38,7 +38,7 @@ export default {
 		},
 		politeness: {
 			control: 'radio',
-			options: [ 'polite', 'assertive' ],
+			options: ['polite', 'assertive'],
 			description:
 				'Determines the level of politeness for the notice for assistive technology. This will be `polite` for all `status` values except `error` when it will be `assertive`.',
 		},
@@ -54,13 +54,13 @@ export default {
 		},
 	},
 	component: StoreNotice,
-} as Meta< NoticeBannerProps >;
+} as Meta<NoticeBannerProps>;
 
-const Template: StoryFn< NoticeBannerProps > = ( { children, ...args } ) => {
-	return <StoreNotice { ...args }>{ children }</StoreNotice>;
+const Template: StoryFn<NoticeBannerProps> = ({ children, ...args }) => {
+	return <StoreNotice {...args}>{children}</StoreNotice>;
 };
 
-export const Default: StoryFn< NoticeBannerProps > = Template.bind( {} );
+export const Default: StoryFn<NoticeBannerProps> = Template.bind({});
 Default.args = {
 	children: 'This is a default notice',
 	status: 'default',
@@ -68,35 +68,35 @@ Default.args = {
 	politeness: 'polite',
 };
 
-export const Error: StoryFn< NoticeBannerProps > = Template.bind( {} );
+export const Error: StoryFn<NoticeBannerProps> = Template.bind({});
 Error.args = {
 	children: 'This is an error notice',
 	status: 'error',
 	politeness: 'assertive',
 };
 
-export const Warning: StoryFn< NoticeBannerProps > = Template.bind( {} );
+export const Warning: StoryFn<NoticeBannerProps> = Template.bind({});
 Warning.args = {
 	children: 'This is a warning notice',
 	status: 'warning',
 	politeness: 'polite',
 };
 
-export const Info: StoryFn< NoticeBannerProps > = Template.bind( {} );
+export const Info: StoryFn<NoticeBannerProps> = Template.bind({});
 Info.args = {
 	children: 'This is an informational notice',
 	status: 'info',
 	politeness: 'polite',
 };
 
-export const Success: StoryFn< NoticeBannerProps > = Template.bind( {} );
+export const Success: StoryFn<NoticeBannerProps> = Template.bind({});
 Success.args = {
 	children: 'This is a success notice',
 	status: 'success',
 	politeness: 'polite',
 };
 
-export const ErrorSummary: StoryFn< NoticeBannerProps > = Template.bind( {} );
+export const ErrorSummary: StoryFn<NoticeBannerProps> = Template.bind({});
 ErrorSummary.args = {
 	summary: 'Please fix the following errors',
 	children: (

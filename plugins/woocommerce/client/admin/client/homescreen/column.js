@@ -8,53 +8,53 @@ import {
 	useLayoutEffect,
 } from '@wordpress/element';
 
-export const Column = ( { children, shouldStick = false } ) => {
-	const [ isContentStuck, setIsContentStuck ] = useState( false );
-	const content = useRef( null );
-	const initialTop = useRef( null );
+export const Column = ({ children, shouldStick = false }) => {
+	const [isContentStuck, setIsContentStuck] = useState(false);
+	const content = useRef(null);
+	const initialTop = useRef(null);
 
-	const maybeStickContent = useCallback( () => {
-		if ( ! content.current ) {
+	const maybeStickContent = useCallback(() => {
+		if (!content.current) {
 			return;
 		}
 
 		const { bottom, top } = content.current.getBoundingClientRect();
 
-		if ( initialTop.current === null ) {
+		if (initialTop.current === null) {
 			initialTop.current = top;
 		}
 
 		const shouldBeSticky = bottom < window.innerHeight;
 
-		if ( top === initialTop.current ) {
-			setIsContentStuck( shouldBeSticky );
+		if (top === initialTop.current) {
+			setIsContentStuck(shouldBeSticky);
 		}
-	}, [] );
+	}, []);
 
-	useLayoutEffect( () => {
-		if ( ! shouldStick ) {
+	useLayoutEffect(() => {
+		if (!shouldStick) {
 			return;
 		}
 
 		maybeStickContent();
-		window.addEventListener( 'resize', maybeStickContent );
-		window.addEventListener( 'scroll', maybeStickContent );
+		window.addEventListener('resize', maybeStickContent);
+		window.addEventListener('scroll', maybeStickContent);
 
 		return () => {
-			window.removeEventListener( 'resize', maybeStickContent );
-			window.removeEventListener( 'scroll', maybeStickContent );
+			window.removeEventListener('resize', maybeStickContent);
+			window.removeEventListener('scroll', maybeStickContent);
 		};
-	}, [ maybeStickContent, shouldStick ] );
+	}, [maybeStickContent, shouldStick]);
 
 	return (
 		<div
 			className="woocommerce-homescreen-column"
-			ref={ content }
-			style={ {
+			ref={content}
+			style={{
 				position: shouldStick && isContentStuck ? 'sticky' : 'static',
-			} }
+			}}
 		>
-			{ children }
+			{children}
 		</div>
 	);
 };

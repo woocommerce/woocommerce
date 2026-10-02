@@ -5,7 +5,7 @@
 	background: $studio-white;
 	border-bottom: 1px solid $gray-200;
 	color: $gray-text;
-	@include font-size( 13 );
+	@include font-size(13);
 
 	&:not(.woocommerce-empty-activity-card) {
 		display: grid;
@@ -52,7 +52,7 @@
 
 	.woocommerce-activity-card__title {
 		margin: 0;
-		@include font-size( 14 );
+		@include font-size(14);
 		order: 2;
 
 		.woocommerce-empty-activity-card & {
@@ -73,7 +73,7 @@
 
 	.woocommerce-activity-card__date {
 		color: $gray-700;
-		@include font-size( 12 );
+		@include font-size(12);
 		margin-bottom: $gap-small;
 		order: 1;
 	}
@@ -85,7 +85,7 @@
 		}
 	}
 
-	@include breakpoint( ">782px" ) {
+	@include breakpoint(">782px") {
 		grid-area: header;
 		display: grid;
 		grid-template:
@@ -124,7 +124,7 @@
 		color: $gray-700;
 		font-style: normal;
 		font-weight: normal;
-		@include font-size( 13 );
+		@include font-size(13);
 		line-height: 20px;
 	}
 }
@@ -141,7 +141,7 @@
 	.components-button {
 		height: 24px;
 		padding: 4px 10px;
-		@include font-size( 11 );
+		@include font-size(11);
 		&.is-destructive {
 			&:not(:hover) {
 				box-shadow: none;
@@ -169,7 +169,7 @@
 		width: 100%;
 		margin-bottom: $gap;
 
-		@include breakpoint( ">782px" ) {
+		@include breakpoint(">782px") {
 			text-align: right;
 			margin-bottom: 0;
 		}
@@ -209,7 +209,8 @@
 }
 
 // Needs the double-class for specificity
-.woocommerce-activity-panel .woocommerce-activity-card.woocommerce-order-activity-card {
+.woocommerce-activity-panel
+	.woocommerce-activity-card.woocommerce-order-activity-card {
 	grid-template-columns: 1fr;
 	grid-template-areas:
 		"header"
@@ -232,18 +233,22 @@
 }
 
 // Needs the double-class for specificity
-.woocommerce-activity-panel .woocommerce-activity-card.woocommerce-inbox-activity-card {
+.woocommerce-activity-panel
+	.woocommerce-activity-card.woocommerce-inbox-activity-card {
 	grid-template-columns: 72px 1fr;
 	height: 100%;
 	opacity: 1;
 	padding: $fallback-gutter;
 	padding: $gutter;
 
-	@media screen and ( prefers-reduced-motion: no-preference ) {
-		transition: opacity 0.3s, height 0s, padding 0s;
+	@media screen and (prefers-reduced-motion: no-preference) {
+		transition:
+			opacity 0.3s,
+			height 0s,
+			padding 0s;
 	}
 
-	@include breakpoint( "<782px" ) {
+	@include breakpoint("<782px") {
 		grid-template-columns: 64px 1fr;
 	}
 
@@ -255,8 +260,11 @@
 		height: 0;
 		opacity: 0;
 		padding: 0;
-		@media screen and ( prefers-reduced-motion: no-preference ) {
-			transition: opacity 0.3s, height 0s 0.3s, padding 0s 0.3s;
+		@media screen and (prefers-reduced-motion: no-preference) {
+			transition:
+				opacity 0.3s,
+				height 0s 0.3s,
+				padding 0s 0.3s;
 		}
 	}
 }
@@ -286,7 +294,7 @@
 }
 
 .woocommerce-stock-activity-card {
-	@media screen and ( prefers-reduced-motion: no-preference ) {
+	@media screen and (prefers-reduced-motion: no-preference) {
 		transition: opacity 0.3s;
 	}
 
@@ -328,7 +336,7 @@
 
 	.woocommerce-activity-card__subtitle {
 		color: $gray-700;
-		@include font-size( 12 );
+		@include font-size(12);
 	}
 }
 

@@ -15,8 +15,11 @@ import {
 import './style.scss';
 import { ScheduledUpdatesPromotionNotice } from '~/analytics/components';
 
-const CustomizableDashboard = lazy( () =>
-	import( /* webpackChunkName: "customizable-dashboard" */ './customizable' )
+const CustomizableDashboard = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "customizable-dashboard" */ './customizable'
+		)
 );
 
 class Dashboard extends Component {
@@ -24,23 +27,20 @@ class Dashboard extends Component {
 		const { path, query } = this.props;
 
 		return (
-			<Suspense fallback={ <Spinner /> }>
+			<Suspense fallback={<Spinner />}>
 				<OrderAttributionInstallBanner
-					title={ __(
-						'Discover what drives your sales',
-						'woocommerce'
-					) }
-					description={ __(
+					title={__('Discover what drives your sales', 'woocommerce')}
+					description={__(
 						'Understand what truly drives revenue with our powerful order attribution extension. Use it to track your sales journey, identify your most effective marketing channels, and optimize your sales strategy.',
 						'woocommerce'
-					) }
-					buttonText={ __( 'Try it now', 'woocommerce' ) }
-					badgeText={ __( 'New', 'woocommerce' ) }
-					bannerImage={ <OrderAttributionInstallBannerImage /> }
+					)}
+					buttonText={__('Try it now', 'woocommerce')}
+					badgeText={__('New', 'woocommerce')}
+					bannerImage={<OrderAttributionInstallBannerImage />}
 					dismissable
 				/>
 				<ScheduledUpdatesPromotionNotice />
-				<CustomizableDashboard query={ query } path={ path } />
+				<CustomizableDashboard query={query} path={path} />
 			</Suspense>
 		);
 	}

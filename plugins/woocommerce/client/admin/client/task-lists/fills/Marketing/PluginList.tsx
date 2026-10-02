@@ -12,29 +12,29 @@ import './PluginList.scss';
 export type PluginListProps = {
 	currentPlugin?: string | null;
 	key?: string;
-	installAndActivate?: ( slug: string ) => void;
-	onManage?: ( slug: string ) => void;
+	installAndActivate?: (slug: string) => void;
+	onManage?: (slug: string) => void;
 	plugins?: PluginProps[];
 	title?: string;
 };
 
-export const PluginList = ( {
+export const PluginList = ({
 	currentPlugin,
 	installAndActivate = () => {},
 	onManage = () => {},
 	plugins = [],
 	title,
-}: PluginListProps ) => {
+}: PluginListProps) => {
 	return (
 		<div className="woocommerce-plugin-list">
-			{ title && (
+			{title && (
 				<div className="woocommerce-plugin-list__title">
 					<Text variant="sectionheading" as="h3">
-						{ title }
+						{title}
 					</Text>
 				</div>
-			) }
-			{ plugins.map( ( plugin ) => {
+			)}
+			{plugins.map((plugin) => {
 				const {
 					description,
 					imageUrl,
@@ -50,25 +50,25 @@ export const PluginList = ( {
 				} = plugin;
 				return (
 					<Plugin
-						key={ slug }
-						description={ description }
-						manageUrl={ manageUrl }
-						name={ name }
-						imageUrl={ imageUrl }
-						installAndActivate={ installAndActivate }
-						onManage={ onManage }
-						isActive={ isActive }
-						isBuiltByWC={ isBuiltByWC }
-						isBusy={ currentPlugin === slug }
-						isDisabled={ !! currentPlugin }
-						isInstalled={ isInstalled }
-						slug={ slug }
-						tags={ tags }
-						learnMoreLink={ learnMoreLink }
-						installExternal={ installExternal }
+						key={slug}
+						description={description}
+						manageUrl={manageUrl}
+						name={name}
+						imageUrl={imageUrl}
+						installAndActivate={installAndActivate}
+						onManage={onManage}
+						isActive={isActive}
+						isBuiltByWC={isBuiltByWC}
+						isBusy={currentPlugin === slug}
+						isDisabled={!!currentPlugin}
+						isInstalled={isInstalled}
+						slug={slug}
+						tags={tags}
+						learnMoreLink={learnMoreLink}
+						installExternal={installExternal}
 					/>
 				);
-			} ) }
+			})}
 		</div>
 	);
 };

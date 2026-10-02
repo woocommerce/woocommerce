@@ -15,7 +15,7 @@ import QuantityStepper from '../../components/quantity-stepper';
 const CTA = () => {
 	const { isLoading, product } = useProductDataContext();
 
-	if ( isLoading || ! isProductResponseItem( product ) ) {
+	if (isLoading || !isProductResponseItem(product)) {
 		return <Spinner />;
 	}
 
@@ -28,8 +28,8 @@ const CTA = () => {
 		sold_individually: soldIndividually,
 	} = product;
 
-	if ( ! hasOptions && isPurchasable && isInStock ) {
-		if ( soldIndividually ) {
+	if (!hasOptions && isPurchasable && isInStock) {
+		if (soldIndividually) {
 			return (
 				<input
 					type="checkbox"
@@ -43,23 +43,23 @@ const CTA = () => {
 
 	return (
 		<a
-			aria-label={ productCartDetails?.description || '' }
+			aria-label={productCartDetails?.description || ''}
 			className="button wp-element-button add_to_cart_button wc-block-components-product-button__button"
-			href={ permalink }
+			href={permalink}
 		>
-			{ productCartDetails?.text || __( 'Add to Cart', 'woocommerce' ) }
+			{productCartDetails?.text || __('Add to Cart', 'woocommerce')}
 		</a>
 	);
 };
 
 export default function ProductItemCTAEdit() {
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className:
 			'wc-block-add-to-cart-with-options-grouped-product-item-selector',
-	} );
+	});
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<Disabled>
 				<CTA />
 			</Disabled>

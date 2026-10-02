@@ -14,29 +14,29 @@ import { previewCart as mockPreviewCart } from '@woocommerce/resource-previews';
 import TotalsFooterItem from '../index';
 import { textContentMatcher } from '../../../../../../../../tests/utils/find-by-text';
 
-jest.mock( '@wordpress/data', () => ( {
+jest.mock('@wordpress/data', () => ({
 	__esModule: true,
-	...jest.requireActual( '@wordpress/data' ),
+	...jest.requireActual('@wordpress/data'),
 	useSelect: jest.fn(),
-} ) );
+}));
 
 // Mock use select so we can override it when wc/store/checkout is accessed, but return the original select function if any other store is accessed.
 wpData.useSelect.mockImplementation(
-	jest.fn().mockImplementation( ( passedMapSelect ) => {
-		const mockedSelect = jest.fn().mockImplementation( ( storeName ) => {
-			if ( storeName === 'wc/store/checkout' ) {
+	jest.fn().mockImplementation((passedMapSelect) => {
+		const mockedSelect = jest.fn().mockImplementation((storeName) => {
+			if (storeName === 'wc/store/checkout') {
 				return {
 					prefersCollection() {
 						return false;
 					},
 				};
 			}
-			return jest.requireActual( '@wordpress/data' ).select( storeName );
-		} );
-		passedMapSelect( mockedSelect, {
-			dispatch: jest.requireActual( '@wordpress/data' ).dispatch,
-		} );
-	} )
+			return jest.requireActual('@wordpress/data').select(storeName);
+		});
+		passedMapSelect(mockedSelect, {
+			dispatch: jest.requireActual('@wordpress/data').dispatch,
+		});
+	})
 );
 
 const shippingAddress = {
@@ -101,27 +101,27 @@ const shippingRates = [
 	},
 ] as CartShippingRate[];
 
-jest.mock( '@woocommerce/base-context/hooks', () => {
+jest.mock('@woocommerce/base-context/hooks', () => {
 	return {
 		__esModule: true,
-		...jest.requireActual( '@woocommerce/base-context/hooks' ),
+		...jest.requireActual('@woocommerce/base-context/hooks'),
 		useShippingData: jest.fn(),
 		useStoreCart: jest.fn(),
-		useOrderSummaryLoadingState: jest.fn( () => {
+		useOrderSummaryLoadingState: jest.fn(() => {
 			return {
 				isLoading: false,
 			};
-		} ),
+		}),
 	};
-} );
+});
 
-baseContextHooks.useShippingData.mockReturnValue( {
+baseContextHooks.useShippingData.mockReturnValue({
 	needsShipping: true,
 	selectShippingRate: jest.fn(),
 	shippingRates,
-} );
+});
 
-baseContextHooks.useStoreCart.mockReturnValue( {
+baseContextHooks.useStoreCart.mockReturnValue({
 	cartItems: mockPreviewCart.items,
 	cartTotals: mockPreviewCart.totals,
 	cartCoupons: mockPreviewCart.coupons,
@@ -132,13 +132,13 @@ baseContextHooks.useStoreCart.mockReturnValue( {
 	billingAddress: mockPreviewCart.billing_address,
 	cartHasCalculatedShipping: mockPreviewCart.has_calculated_shipping,
 	isLoadingRates: false,
-} );
+});
 
-describe( 'TotalsFooterItem', () => {
-	beforeEach( () => {
+describe('TotalsFooterItem', () => {
+	beforeEach(() => {
 		allSettings.taxesEnabled = true;
 		allSettings.displayCartPricesIncludingTax = true;
-	} );
+	});
 
 	const currency = {
 		code: 'GBP' as CurrencyCode,
@@ -171,21 +171,19 @@ describe( 'TotalsFooterItem', () => {
 		total_tax: '0',
 	};
 
-	it( 'Does not show the "including %s of tax" line if tax is 0', async () => {
-		render( <TotalsFooterItem currency={ currency } values={ values } /> );
+	it('Does not show the "including %s of tax" line if tax is 0', async () => {
+		render(<TotalsFooterItem currency={currency} values={values} />);
 
 		// Check that the total price is displayed
 		expect(
-			screen.getByText( textContentMatcher( '£85.00' ) )
+			screen.getByText(textContentMatcher('£85.00'))
 		).toBeInTheDocument();
 
 		// Check that no tax information is displayed
-		expect(
-			screen.queryByText( /including.*tax/i )
-		).not.toBeInTheDocument();
-	} );
+		expect(screen.queryByText(/including.*tax/i)).not.toBeInTheDocument();
+	});
 
-	it( 'Does not show the "including %s of tax" line if tax is disabled', async () => {
+	it('Does not show the "including %s of tax" line if tax is disabled', async () => {
 		allSettings.taxesEnabled = false;
 		/* This shouldn't ever happen if taxes are disabled, but this is to test whether the taxesEnabled setting works */
 		const valuesWithTax = {
@@ -193,69 +191,61 @@ describe( 'TotalsFooterItem', () => {
 			total_tax: '100',
 			total_items_tax: '100',
 		};
-		render(
-			<TotalsFooterItem currency={ currency } values={ valuesWithTax } />
-		);
+		render(<TotalsFooterItem currency={currency} values={valuesWithTax} />);
 
 		// Check that the total price is displayed
 		expect(
-			screen.getByText( textContentMatcher( '£85.00' ) )
+			screen.getByText(textContentMatcher('£85.00'))
 		).toBeInTheDocument();
 
 		// Check that no tax information is displayed when taxes are disabled
-		expect(
-			screen.queryByText( /including.*tax/i )
-		).not.toBeInTheDocument();
-	} );
+		expect(screen.queryByText(/including.*tax/i)).not.toBeInTheDocument();
+	});
 
-	it( 'Shows the "including %s of tax" line if tax is greater than 0', async () => {
+	it('Shows the "including %s of tax" line if tax is greater than 0', async () => {
 		const valuesWithTax = {
 			...values,
 			total_tax: '100',
 			total_items_tax: '100',
 		};
-		render(
-			<TotalsFooterItem currency={ currency } values={ valuesWithTax } />
-		);
+		render(<TotalsFooterItem currency={currency} values={valuesWithTax} />);
 
 		// Check that the total price is displayed
 		expect(
-			screen.getByText( textContentMatcher( '£85.00' ) )
+			screen.getByText(textContentMatcher('£85.00'))
 		).toBeInTheDocument();
 
 		// Check that tax information is displayed
-		const taxInfo = screen.getByText( /including.*tax/i );
-		expect( taxInfo ).toBeInTheDocument();
-		expect( taxInfo ).toHaveClass(
+		const taxInfo = screen.getByText(/including.*tax/i);
+		expect(taxInfo).toBeInTheDocument();
+		expect(taxInfo).toHaveClass(
 			'wc-block-components-totals-footer-item-tax'
 		);
-	} );
+	});
 
-	it( 'Shows the "including %s TAX LABEL" line with single tax label', async () => {
+	it('Shows the "including %s TAX LABEL" line with single tax label', async () => {
 		const valuesWithTax = {
 			...values,
 			total_tax: '100',
 			total_items_tax: '100',
-			tax_lines: [ { name: '10% VAT', price: '100', rate: '10.000' } ],
+			tax_lines: [{ name: '10% VAT', price: '100', rate: '10.000' }],
 		};
-		render(
-			<TotalsFooterItem currency={ currency } values={ valuesWithTax } />
-		);
+		render(<TotalsFooterItem currency={currency} values={valuesWithTax} />);
 
 		// Check that the total price is displayed
 		expect(
-			screen.getByText( textContentMatcher( '£85.00' ) )
+			screen.getByText(textContentMatcher('£85.00'))
 		).toBeInTheDocument();
 
 		// Check that tax information with label is displayed
-		const taxInfo = screen.getByText( /including.*10% VAT/i );
-		expect( taxInfo ).toBeInTheDocument();
-		expect( taxInfo ).toHaveClass(
+		const taxInfo = screen.getByText(/including.*10% VAT/i);
+		expect(taxInfo).toBeInTheDocument();
+		expect(taxInfo).toHaveClass(
 			'wc-block-components-totals-footer-item-tax'
 		);
-	} );
+	});
 
-	it( 'Shows the "including %s TAX LABELS" line with multiple tax labels', async () => {
+	it('Shows the "including %s TAX LABELS" line with multiple tax labels', async () => {
 		const valuesWithTax = {
 			...values,
 			total_tax: '100',
@@ -265,24 +255,22 @@ describe( 'TotalsFooterItem', () => {
 				{ name: '5% VAT', price: '50', rate: '5.000' },
 			],
 		};
-		render(
-			<TotalsFooterItem currency={ currency } values={ valuesWithTax } />
-		);
+		render(<TotalsFooterItem currency={currency} values={valuesWithTax} />);
 
 		// Check that the total price is displayed
 		expect(
-			screen.getByText( textContentMatcher( '£85.00' ) )
+			screen.getByText(textContentMatcher('£85.00'))
 		).toBeInTheDocument();
 
 		// Check that tax information with multiple labels is displayed
-		const taxInfo = screen.getByText( /including.*10% VAT.*5% VAT/i );
-		expect( taxInfo ).toBeInTheDocument();
-		expect( taxInfo ).toHaveClass(
+		const taxInfo = screen.getByText(/including.*10% VAT.*5% VAT/i);
+		expect(taxInfo).toBeInTheDocument();
+		expect(taxInfo).toHaveClass(
 			'wc-block-components-totals-footer-item-tax'
 		);
-	} );
+	});
 
-	it( 'Renders each itemised tax amount as its own price element', async () => {
+	it('Renders each itemised tax amount as its own price element', async () => {
 		const valuesWithTax = {
 			...values,
 			total_tax: '100',
@@ -292,22 +280,20 @@ describe( 'TotalsFooterItem', () => {
 				{ name: '5% VAT', price: '50', rate: '5.000' },
 			],
 		};
-		render(
-			<TotalsFooterItem currency={ currency } values={ valuesWithTax } />
-		);
+		render(<TotalsFooterItem currency={currency} values={valuesWithTax} />);
 
 		// The line reads the same as it did when it was one flat string.
 		const taxInfo = screen.getByText(
-			textContentMatcher( 'Including £0.50 10% VAT, £0.50 5% VAT' )
+			textContentMatcher('Including £0.50 10% VAT, £0.50 5% VAT')
 		);
-		expect( taxInfo ).toHaveClass(
+		expect(taxInfo).toHaveClass(
 			'wc-block-components-totals-footer-item-tax'
 		);
 
 		// Each amount is its own price element rather than part of the flat
 		// string, so the currency symbol keeps its isolation.
 		expect(
-			within( taxInfo ).getAllByText( textContentMatcher( '£0.50' ) )
-		).toHaveLength( 2 );
-	} );
-} );
+			within(taxInfo).getAllByText(textContentMatcher('£0.50'))
+		).toHaveLength(2);
+	});
+});

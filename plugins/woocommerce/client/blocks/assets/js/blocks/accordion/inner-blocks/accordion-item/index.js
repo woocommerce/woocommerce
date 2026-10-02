@@ -53,4 +53,4 @@ export const settings = {
 	save,
 };
 
-registerBlockType( metadata, settings );
+registerBlockType(metadata, settings);

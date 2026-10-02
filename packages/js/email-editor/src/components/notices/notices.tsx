@@ -15,51 +15,51 @@ import { NoticesSlot } from '../../hacks/notices-slot';
 
 // See: https://github.com/WordPress/gutenberg/blob/5be0ec4153c3adf9f0f2513239f4f7a358ba7948/packages/editor/src/components/editor-notices/index.js
 
-type NoticeListNotices = ComponentProps< typeof NoticeList >[ 'notices' ];
+type NoticeListNotices = ComponentProps<typeof NoticeList>['notices'];
 
 interface EditorNoticesProps {
 	disableSnackbarNotices?: boolean;
 }
 
-export function EditorNotices( {
+export function EditorNotices({
 	disableSnackbarNotices = false,
-}: EditorNoticesProps = {} ) {
+}: EditorNoticesProps = {}) {
 	const { notices } = useSelect(
-		( select ) => ( {
-			notices: select( noticesStore ).getNotices( 'email-editor' ),
-		} ),
+		(select) => ({
+			notices: select(noticesStore).getNotices('email-editor'),
+		}),
 		[]
 	);
 
-	const { removeNotice } = useDispatch( noticesStore );
+	const { removeNotice } = useDispatch(noticesStore);
 
 	// `WPNotice.status: string` and `actions[].onClick: Function` come in
 	// looser than `<NoticeList>`'s prop types. At runtime the notices store
 	// always emits values inside the narrower union; cast the filtered
 	// results once so both `<NoticeList>` renders stay fully typed.
 	const dismissibleNotices = notices.filter(
-		( { isDismissible, type } ) => isDismissible && type === 'default'
+		({ isDismissible, type }) => isDismissible && type === 'default'
 	) as unknown as NoticeListNotices;
 
 	const nonDismissibleNotices = notices.filter(
-		( { isDismissible, type } ) => ! isDismissible && type === 'default'
+		({ isDismissible, type }) => !isDismissible && type === 'default'
 	) as unknown as NoticeListNotices;
 
 	return (
 		<>
 			<NoticesSlot>
 				<NoticeList
-					notices={ nonDismissibleNotices }
+					notices={nonDismissibleNotices}
 					className="components-editor-notices__pinned"
 				/>
 				<NoticeList
-					notices={ dismissibleNotices }
+					notices={dismissibleNotices}
 					className="components-editor-notices__dismissible"
-					onRemove={ ( id ) => removeNotice( id, 'email-editor' ) }
+					onRemove={(id) => removeNotice(id, 'email-editor')}
 				/>
 				<ValidationNotices />
 			</NoticesSlot>
-			{ ! disableSnackbarNotices && <EditorSnackbars /> }
+			{!disableSnackbarNotices && <EditorSnackbars />}
 		</>
 	);
 }

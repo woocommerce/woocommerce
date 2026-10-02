@@ -34,7 +34,7 @@ import './bank-account-modal.scss';
 interface Props {
 	account: BankAccount | null;
 	onClose: () => void;
-	onSave: ( account: BankAccount ) => void;
+	onSave: (account: BankAccount) => void;
 	defaultCountry: string;
 }
 
@@ -45,14 +45,14 @@ interface Props {
  * @param {Props} props - Component props.
  * @return {Element} The rendered modal component.
  */
-export const BankAccountModal = ( {
+export const BankAccountModal = ({
 	account,
 	onClose,
 	onSave,
 	defaultCountry,
-}: Props ) => {
+}: Props) => {
 	const countries = window.wcSettings.countries;
-	const [ formData, setFormData ] = useState< BankAccount >(
+	const [formData, setFormData] = useState<BankAccount>(
 		account || {
 			account_name: '',
 			account_number: '',
@@ -63,12 +63,12 @@ export const BankAccountModal = ( {
 			country_code: defaultCountry,
 		}
 	);
-	const [ selectedCountry, setSelectedCountry ] = useState(
+	const [selectedCountry, setSelectedCountry] = useState(
 		account?.country_code || defaultCountry
 	);
-	const [ errors, setErrors ] = useState<
-		Partial< Record< keyof BankAccount, string > >
-	>( {} );
+	const [errors, setErrors] = useState<
+		Partial<Record<keyof BankAccount, string>>
+	>({});
 
 	/**
 	 * Validates the form fields and sets error messages accordingly.
@@ -76,20 +76,20 @@ export const BankAccountModal = ( {
 	 * @return {boolean} True if the form is valid, false otherwise.
 	 */
 	const validate = () => {
-		const newErrors: Partial< Record< keyof BankAccount, string > > = {};
+		const newErrors: Partial<Record<keyof BankAccount, string>> = {};
 
-		newErrors.account_name = validateRequiredField( formData.account_name );
+		newErrors.account_name = validateRequiredField(formData.account_name);
 
-		if ( shouldDisplaySortCode( selectedCountry ) ) {
-			newErrors.sort_code = validateRequiredField( formData.sort_code );
+		if (shouldDisplaySortCode(selectedCountry)) {
+			newErrors.sort_code = validateRequiredField(formData.sort_code);
 		}
 
 		const filteredErrors = Object.fromEntries(
-			Object.entries( newErrors ).filter( ( [ , v ] ) => v )
+			Object.entries(newErrors).filter(([, v]) => v)
 		);
-		setErrors( filteredErrors );
+		setErrors(filteredErrors);
 
-		return Object.keys( filteredErrors ).length === 0;
+		return Object.keys(filteredErrors).length === 0;
 	};
 
 	/**
@@ -98,8 +98,8 @@ export const BankAccountModal = ( {
 	 * @param {keyof BankAccount} field - The field name to update.
 	 * @param {string}            value - The new value for the field.
 	 */
-	const updateField = ( field: keyof BankAccount, value: string ) => {
-		setFormData( ( prev ) => ( { ...prev, [ field ]: value } ) );
+	const updateField = (field: keyof BankAccount, value: string) => {
+		setFormData((prev) => ({ ...prev, [field]: value }));
 	};
 
 	return (
@@ -107,157 +107,148 @@ export const BankAccountModal = ( {
 			className="bank-account-modal"
 			title={
 				account
-					? __( 'Edit bank account', 'woocommerce' )
-					: __( 'Add a bank account', 'woocommerce' )
+					? __('Edit bank account', 'woocommerce')
+					: __('Add a bank account', 'woocommerce')
 			}
-			onRequestClose={ onClose }
-			shouldCloseOnClickOutside={ false }
+			onRequestClose={onClose}
+			shouldCloseOnClickOutside={false}
 		>
-			<div className={ 'bank-account-modal__content' }>
-				<p className={ 'bank-account-modal__description' }>
-					{ account
-						? __( 'Edit your bank account details.', 'woocommerce' )
-						: __(
-								'Add your bank account details.',
-								'woocommerce'
-						  ) }
+			<div className={'bank-account-modal__content'}>
+				<p className={'bank-account-modal__description'}>
+					{account
+						? __('Edit your bank account details.', 'woocommerce')
+						: __('Add your bank account details.', 'woocommerce')}
 				</p>
 
 				<SelectControl
 					className="bank-account-modal__field is-required"
-					label={ __( 'Country', 'woocommerce' ) }
+					label={__('Country', 'woocommerce')}
 					required
-					value={ selectedCountry }
-					options={ Object.entries( countries ).map(
-						( [ code, name ] ) => ( {
-							label: decodeEntities( name ),
-							value: code,
-						} )
-					) }
-					onChange={ ( value ) => {
-						setSelectedCountry( value );
-						updateField( 'country_code', value );
+					value={selectedCountry}
+					options={Object.entries(countries).map(([code, name]) => ({
+						label: decodeEntities(name),
+						value: code,
+					}))}
+					onChange={(value) => {
+						setSelectedCountry(value);
+						updateField('country_code', value);
 						// Clear the because sort codes have different formats in different countries.
-						updateField( 'sort_code', '' );
-					} }
+						updateField('sort_code', '');
+					}}
 				/>
 
 				<TextControl
-					className={ 'bank-account-modal__field is-required' }
-					label={ __( 'Account Name', 'woocommerce' ) }
+					className={'bank-account-modal__field is-required'}
+					label={__('Account Name', 'woocommerce')}
 					required
-					value={ formData.account_name }
-					onChange={ ( value ) =>
-						updateField( 'account_name', value )
-					}
+					value={formData.account_name}
+					onChange={(value) => updateField('account_name', value)}
 					help={
 						errors.account_name ? (
 							<span className="bank-account-modal__error">
-								{ errors.account_name }
+								{errors.account_name}
 							</span>
 						) : undefined
 					}
 				/>
 
 				<TextControl
-					className={ 'bank-account-modal__field' }
-					label={ __( 'Bank Name', 'woocommerce' ) }
-					value={ formData.bank_name }
-					onChange={ ( value ) => updateField( 'bank_name', value ) }
+					className={'bank-account-modal__field'}
+					label={__('Bank Name', 'woocommerce')}
+					value={formData.bank_name}
+					onChange={(value) => updateField('bank_name', value)}
 				/>
 
 				<TextControl
-					className={ 'bank-account-modal__field' }
-					label={ __( 'Account Number', 'woocommerce' ) }
-					value={ formData.account_number }
-					onChange={ ( value ) =>
-						updateField( 'account_number', value )
-					}
+					className={'bank-account-modal__field'}
+					label={__('Account Number', 'woocommerce')}
+					value={formData.account_number}
+					onChange={(value) => updateField('account_number', value)}
 					help={
 						errors.account_number ? (
 							<span className="bank-account-modal__error">
-								{ errors.account_number }
+								{errors.account_number}
 							</span>
 						) : undefined
 					}
 				/>
 
-				{ shouldDisplaySortCode( selectedCountry ) && (
+				{shouldDisplaySortCode(selectedCountry) && (
 					<TextControl
-						className={ 'bank-account-modal__field is-required' }
-						label={ getSortCodeLabel( selectedCountry ) }
+						className={'bank-account-modal__field is-required'}
+						label={getSortCodeLabel(selectedCountry)}
 						required
-						value={ formatSortCode(
+						value={formatSortCode(
 							formData.sort_code || '',
 							selectedCountry
-						) }
-						onChange={ ( value ) => {
+						)}
+						onChange={(value) => {
 							// Strip all non-digit characters to get the raw value
 							if (
 								selectedCountry === 'GB' ||
 								selectedCountry === 'IE'
 							) {
 								value = value
-									.replace( /\D/g, '' )
-									.substring( 0, 6 );
+									.replace(/\D/g, '')
+									.substring(0, 6);
 							}
 
 							// Store or pass the raw value:
-							updateField( 'sort_code', value );
-						} }
+							updateField('sort_code', value);
+						}}
 						help={
 							errors.sort_code ? (
 								<span className="bank-account-modal__error">
-									{ errors.sort_code }
+									{errors.sort_code}
 								</span>
 							) : undefined
 						}
 					/>
-				) }
+				)}
 
 				<TextControl
-					className={ 'bank-account-modal__field' }
-					label={ __( 'IBAN', 'woocommerce' ) }
-					value={ formData.iban }
-					onChange={ ( value ) => updateField( 'iban', value ) }
+					className={'bank-account-modal__field'}
+					label={__('IBAN', 'woocommerce')}
+					value={formData.iban}
+					onChange={(value) => updateField('iban', value)}
 					help={
 						errors.iban ? (
 							<span className="bank-account-modal__error">
-								{ errors.iban }
+								{errors.iban}
 							</span>
 						) : undefined
 					}
 				/>
 
 				<TextControl
-					className={ 'bank-account-modal__field' }
-					label={ __( 'BIC / SWIFT', 'woocommerce' ) }
-					value={ formData.bic }
-					onChange={ ( value ) => updateField( 'bic', value ) }
+					className={'bank-account-modal__field'}
+					label={__('BIC / SWIFT', 'woocommerce')}
+					value={formData.bic}
+					onChange={(value) => updateField('bic', value)}
 					help={
 						errors.bic ? (
 							<span className="bank-account-modal__error">
-								{ errors.bic }
+								{errors.bic}
 							</span>
 						) : undefined
 					}
 				/>
 			</div>
 
-			<div className={ 'bank-account-modal__actions' }>
-				<Button variant={ 'tertiary' } onClick={ onClose }>
-					{ __( 'Cancel', 'woocommerce' ) }
+			<div className={'bank-account-modal__actions'}>
+				<Button variant={'tertiary'} onClick={onClose}>
+					{__('Cancel', 'woocommerce')}
 				</Button>
 				<Button
-					className={ 'bank-account-modal__save' }
-					variant={ 'primary' }
-					onClick={ () => {
-						if ( validate() ) {
-							onSave( formData );
+					className={'bank-account-modal__save'}
+					variant={'primary'}
+					onClick={() => {
+						if (validate()) {
+							onSave(formData);
 						}
-					} }
+					}}
 				>
-					{ __( 'Save', 'woocommerce' ) }
+					{__('Save', 'woocommerce')}
 				</Button>
 			</div>
 		</Modal>

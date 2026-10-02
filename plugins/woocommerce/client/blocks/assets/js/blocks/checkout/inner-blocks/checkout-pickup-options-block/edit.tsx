@@ -20,7 +20,7 @@ import {
 } from '../../form-step';
 import Block from './block';
 
-export const Edit = ( {
+export const Edit = ({
 	attributes,
 	setAttributes,
 }: {
@@ -30,40 +30,37 @@ export const Edit = ( {
 		showStepNumber: boolean;
 		className: string;
 	};
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ): JSX.Element | null => {
-	const { prefersCollection } = useSelect( ( select ) => {
-		const checkoutStore = select( checkoutStoreDescriptor );
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}): JSX.Element | null => {
+	const { prefersCollection } = useSelect((select) => {
+		const checkoutStore = select(checkoutStoreDescriptor);
 		return {
 			prefersCollection: checkoutStore.prefersCollection(),
 		};
-	} );
+	});
 	const { className } = attributes;
 
-	if ( ! prefersCollection || ! LOCAL_PICKUP_ENABLED ) {
+	if (!prefersCollection || !LOCAL_PICKUP_ENABLED) {
 		return null;
 	}
 
 	return (
 		<FormStepBlock
-			attributes={ attributes }
-			setAttributes={ setAttributes }
-			className={ clsx(
-				'wc-block-checkout__shipping-method',
-				className
-			) }
+			attributes={attributes}
+			setAttributes={setAttributes}
+			className={clsx('wc-block-checkout__shipping-method', className)}
 		>
 			<Disabled>
 				<Block />
 			</Disabled>
-			<AdditionalFields block={ innerBlockAreas.PICKUP_LOCATION } />
+			<AdditionalFields block={innerBlockAreas.PICKUP_LOCATION} />
 		</FormStepBlock>
 	);
 };
 
 export const Save = (): JSX.Element => {
 	return (
-		<div { ...useBlockProps.save() }>
+		<div {...useBlockProps.save()}>
 			<AdditionalFieldsContent />
 		</div>
 	);

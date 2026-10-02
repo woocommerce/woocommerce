@@ -30,34 +30,34 @@ interface ProductsProps {
 }
 
 const LABELS = {
-	[ ProductType.extension ]: {
-		label: __( 'extensions', 'woocommerce' ),
-		singularLabel: __( 'extension', 'woocommerce' ),
+	[ProductType.extension]: {
+		label: __('extensions', 'woocommerce'),
+		singularLabel: __('extension', 'woocommerce'),
 	},
-	[ ProductType.theme ]: {
-		label: __( 'themes', 'woocommerce' ),
-		singularLabel: __( 'theme', 'woocommerce' ),
+	[ProductType.theme]: {
+		label: __('themes', 'woocommerce'),
+		singularLabel: __('theme', 'woocommerce'),
 	},
-	[ ProductType.businessService ]: {
-		label: __( 'business services', 'woocommerce' ),
-		singularLabel: __( 'business service', 'woocommerce' ),
+	[ProductType.businessService]: {
+		label: __('business services', 'woocommerce'),
+		singularLabel: __('business service', 'woocommerce'),
 	},
 };
 
-export default function Products( props: ProductsProps ) {
-	const marketplaceContextValue = useContext( MarketplaceContext );
+export default function Products(props: ProductsProps) {
+	const marketplaceContextValue = useContext(MarketplaceContext);
 	const { isLoading } = marketplaceContextValue;
-	const label = LABELS[ props.type ].label;
+	const label = LABELS[props.type].label;
 	const query = useQuery();
 	const category = query?.category;
 
 	// Only show the "View all" button when on search but not showing a specific section of results.
 	const showAllButton = props.showAllButton ?? false;
 
-	function showSection( section: ProductType ) {
-		navigateTo( {
-			url: getNewPath( { section } ),
-		} );
+	function showSection(section: ProductType) {
+		navigateTo({
+			url: getNewPath({ section }),
+		});
 	}
 
 	// Store the total number of products before we slice it later.
@@ -68,7 +68,7 @@ export default function Products( props: ProductsProps ) {
 
 	const baseContainerClass = 'woocommerce-marketplace__search-';
 
-	const containerClassName = clsx( baseContainerClass + labelForClassName );
+	const containerClassName = clsx(baseContainerClass + labelForClassName);
 	const viewAllButtonClassName = clsx(
 		'woocommerce-marketplace__view-all-button',
 		baseContainerClass + 'button-' + labelForClassName
@@ -77,26 +77,24 @@ export default function Products( props: ProductsProps ) {
 	// The quality badge filter only applies to extensions; the component also
 	// renders nothing unless the WooCommerce.com API has the badge enabled.
 	const showQualityBadgeFilter = props.type === ProductType.extension;
-	const hasNoResults = ! isLoading && products.length === 0;
-	const showCategorySelector = Boolean( props.categorySelector );
+	const hasNoResults = !isLoading && products.length === 0;
+	const showCategorySelector = Boolean(props.categorySelector);
 	const searchTerm = props.searchTerm?.trim() ?? '';
 
 	// The sub-header stays mounted across the loading/empty/loaded states so
 	// the filter toggle keeps keyboard focus while toggling triggers a refetch.
-	const subHeader = ( showQualityBadgeFilter || showCategorySelector ) && (
+	const subHeader = (showQualityBadgeFilter || showCategorySelector) && (
 		<nav className="woocommerce-marketplace__sub-header">
-			{ showQualityBadgeFilter && <QualityBadgeFilter /> }
+			{showQualityBadgeFilter && <QualityBadgeFilter />}
 			<div className="woocommerce-marketplace__sub-header__categories">
-				{ showCategorySelector && (
-					<CategorySelector type={ props.type } />
-				) }
+				{showCategorySelector && <CategorySelector type={props.type} />}
 			</div>
 		</nav>
 	);
 
 	let noResultsType = SearchResultType.all;
 
-	switch ( props.type ) {
+	switch (props.type) {
 		case ProductType.extension:
 			noResultsType = SearchResultType.extension;
 			break;
@@ -115,47 +113,45 @@ export default function Products( props: ProductsProps ) {
 	);
 
 	return (
-		<div className={ containerClassName }>
-			{ searchTerm && (
+		<div className={containerClassName}>
+			{searchTerm && (
 				<h2 className="woocommerce-marketplace__search-results-heading">
-					{ sprintf(
+					{sprintf(
 						/* translators: %s: the search term the merchant entered. */
-						__( 'Results for “%s”', 'woocommerce' ),
+						__('Results for “%s”', 'woocommerce'),
 						searchTerm
-					) }
+					)}
 				</h2>
-			) }
-			{ subHeader }
-			{ isLoading && (
-				<ProductLoader hasTitle={ false } type={ props.type } />
-			) }
-			{ hasNoResults && (
+			)}
+			{subHeader}
+			{isLoading && <ProductLoader hasTitle={false} type={props.type} />}
+			{hasNoResults && (
 				<NoResults
-					type={ noResultsType }
-					showHeading={ false }
-					showCategorySelector={ ! showCategorySelector }
+					type={noResultsType}
+					showHeading={false}
+					showCategorySelector={!showCategorySelector}
 				/>
-			) }
-			{ ! isLoading && ! hasNoResults && (
+			)}
+			{!isLoading && !hasNoResults && (
 				<ProductListContent
-					products={ products }
-					type={ props.type }
-					className={ productListClass }
-					searchTerm={ props.searchTerm }
-					category={ category }
+					products={products}
+					type={props.type}
+					className={productListClass}
+					searchTerm={props.searchTerm}
+					category={category}
 				/>
-			) }
-			{ ! isLoading && ! hasNoResults && props.type === 'theme' && (
+			)}
+			{!isLoading && !hasNoResults && props.type === 'theme' && (
 				<div
 					className={
 						'woocommerce-marketplace__browse-wp-theme-directory'
 					}
 				>
 					<b key="wp-theme-directory-heading">
-						{ __( 'Didn’t find a theme you like?', 'woocommerce' ) }
-					</b>{ ' ' }
+						{__('Didn’t find a theme you like?', 'woocommerce')}
+					</b>{' '}
 					<span key="wp-theme-directory-copy">
-						{ createInterpolateElement(
+						{createInterpolateElement(
 							__(
 								'Browse the <a>WordPress.org theme directory</a> to discover more.',
 								'woocommerce'
@@ -172,18 +168,18 @@ export default function Products( props: ProductsProps ) {
 									/>
 								),
 							}
-						) }
+						)}
 					</span>
 				</div>
-			) }
-			{ ! isLoading && ! hasNoResults && showAllButton && (
+			)}
+			{!isLoading && !hasNoResults && showAllButton && (
 				<Button
-					className={ viewAllButtonClassName }
+					className={viewAllButtonClassName}
 					variant="secondary"
-					text={ __( 'View all', 'woocommerce' ) }
-					onClick={ () => showSection( props.type ) }
+					text={__('View all', 'woocommerce')}
+					onClick={() => showSection(props.type)}
 				/>
-			) }
+			)}
 		</div>
 	);
 }

@@ -42,8 +42,8 @@ interface LinkProps extends ButtonProps {
  * Component that visually renders a button but semantically might be `<button>` or `<a>` depending
  * on the props.
  */
-const Button = forwardRef< HTMLButtonElement, ButtonProps | LinkProps >(
-	( props, ref ) => {
+const Button = forwardRef<HTMLButtonElement, ButtonProps | LinkProps>(
+	(props, ref) => {
 		const {
 			className,
 			children,
@@ -61,21 +61,21 @@ const Button = forwardRef< HTMLButtonElement, ButtonProps | LinkProps >(
 			variant
 		);
 
-		if ( 'href' in props ) {
+		if ('href' in props) {
 			return (
 				<AriakitButton
 					render={
 						<a
-							ref={ ref as ForwardedRef< HTMLAnchorElement > }
-							href={ props.href }
+							ref={ref as ForwardedRef<HTMLAnchorElement>}
+							href={props.href}
 						>
 							<div className="wc-block-components-button__text">
-								{ children }
+								{children}
 							</div>
 						</a>
 					}
-					className={ buttonClassName }
-					{ ...rest }
+					className={buttonClassName}
+					{...rest}
 				/>
 			);
 		}
@@ -84,17 +84,13 @@ const Button = forwardRef< HTMLButtonElement, ButtonProps | LinkProps >(
 			props.children
 		) : (
 			<div className="wc-block-components-button__text">
-				{ props.children }
+				{props.children}
 			</div>
 		);
 
 		return (
-			<AriakitButton
-				ref={ ref }
-				className={ buttonClassName }
-				{ ...rest }
-			>
-				{ buttonChildren }
+			<AriakitButton ref={ref} className={buttonClassName} {...rest}>
+				{buttonChildren}
 			</AriakitButton>
 		);
 	}

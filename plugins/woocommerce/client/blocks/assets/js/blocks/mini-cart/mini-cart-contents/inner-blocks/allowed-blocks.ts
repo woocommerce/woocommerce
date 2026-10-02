@@ -24,21 +24,20 @@ const EXCLUDED_BLOCKS: readonly string[] = [
 
 export const getMiniCartAllowedBlocks = (): string[] =>
 	getBlockTypes()
-		.filter( ( block ) => {
-			if ( EXCLUDED_BLOCKS.includes( block.name ) ) {
+		.filter((block) => {
+			if (EXCLUDED_BLOCKS.includes(block.name)) {
 				return false;
 			}
 
 			// Exclude child blocks of EXCLUDED_BLOCKS.
 			if (
 				block.parent &&
-				block.parent.filter( ( value ) =>
-					EXCLUDED_BLOCKS.includes( value )
-				).length > 0
+				block.parent.filter((value) => EXCLUDED_BLOCKS.includes(value))
+					.length > 0
 			) {
 				return false;
 			}
 
 			return true;
-		} )
-		.map( ( { name } ) => name );
+		})
+		.map(({ name }) => name);

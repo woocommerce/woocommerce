@@ -16,328 +16,318 @@ import { getAdminLink } from '@woocommerce/settings';
 import ScheduledUpdatesPromotionNotice from '../index';
 
 // Mock dependencies
-jest.mock( '@woocommerce/tracks', () => ( {
+jest.mock('@woocommerce/tracks', () => ({
 	recordEvent: jest.fn(),
-} ) );
+}));
 
-jest.mock( '@woocommerce/data', () => {
-	const originalModule = jest.requireActual( '@woocommerce/data' );
+jest.mock('@woocommerce/data', () => {
+	const originalModule = jest.requireActual('@woocommerce/data');
 	return {
 		...originalModule,
 		useSettings: jest.fn(),
 		useUserPreferences: jest.fn(),
 	};
-} );
+});
 
-jest.mock( '@woocommerce/settings', () => ( {
-	getAdminLink: jest.fn( ( path: string ) => `http://example.com/${ path }` ),
-} ) );
+jest.mock('@woocommerce/settings', () => ({
+	getAdminLink: jest.fn((path: string) => `http://example.com/${path}`),
+}));
 
-const mockUseSettings = useSettings as jest.MockedFunction<
-	typeof useSettings
->;
+const mockUseSettings = useSettings as jest.MockedFunction<typeof useSettings>;
 const mockUseUserPreferences = useUserPreferences as jest.MockedFunction<
 	typeof useUserPreferences
 >;
-const mockRecordEvent = recordEvent as jest.MockedFunction<
-	typeof recordEvent
->;
+const mockRecordEvent = recordEvent as jest.MockedFunction<typeof recordEvent>;
 const mockGetAdminLink = getAdminLink as jest.MockedFunction<
 	typeof getAdminLink
 >;
 
-describe( 'ScheduledUpdatesPromotionNotice', () => {
-	beforeEach( () => {
+describe('ScheduledUpdatesPromotionNotice', () => {
+	beforeEach(() => {
 		jest.clearAllMocks();
 
 		// Set up default mocks
-		mockUseSettings.mockReturnValue( {
+		mockUseSettings.mockReturnValue({
 			wcAdminSettings: {},
-		} as unknown as ReturnType< typeof useSettings > );
+		} as unknown as ReturnType<typeof useSettings>);
 
-		mockUseUserPreferences.mockReturnValue( {
+		mockUseUserPreferences.mockReturnValue({
 			updateUserPreferences: jest.fn(),
 			scheduled_updates_promotion_notice_dismissed: undefined,
 			isRequesting: false,
-		} as unknown as ReturnType< typeof useUserPreferences > );
+		} as unknown as ReturnType<typeof useUserPreferences>);
 
 		mockGetAdminLink.mockReturnValue(
 			'http://example.com/admin.php?page=wc-admin&path=/analytics/settings'
 		);
-	} );
+	});
 
-	describe( 'Option value check', () => {
-		test( 'should not render when option is set to "no"', () => {
-			mockUseSettings.mockReturnValue( {
+	describe('Option value check', () => {
+		test('should not render when option is set to "no"', () => {
+			mockUseSettings.mockReturnValue({
 				wcAdminSettings: {
 					woocommerce_analytics_scheduled_import: 'no',
 				},
-			} as unknown as ReturnType< typeof useSettings > );
+			} as unknown as ReturnType<typeof useSettings>);
 
-			const { container } = render( <ScheduledUpdatesPromotionNotice /> );
+			const { container } = render(<ScheduledUpdatesPromotionNotice />);
 
-			expect( container.firstChild ).toBeNull();
-		} );
+			expect(container.firstChild).toBeNull();
+		});
 
-		test( 'should not render when option is set to "yes"', () => {
-			mockUseSettings.mockReturnValue( {
+		test('should not render when option is set to "yes"', () => {
+			mockUseSettings.mockReturnValue({
 				wcAdminSettings: {
 					woocommerce_analytics_scheduled_import: 'yes',
 				},
-			} as unknown as ReturnType< typeof useSettings > );
+			} as unknown as ReturnType<typeof useSettings>);
 
-			const { container } = render( <ScheduledUpdatesPromotionNotice /> );
+			const { container } = render(<ScheduledUpdatesPromotionNotice />);
 
-			expect( container.firstChild ).toBeNull();
-		} );
+			expect(container.firstChild).toBeNull();
+		});
 
-		test( 'should render when option is undefined', () => {
-			mockUseSettings.mockReturnValue( {
+		test('should render when option is undefined', () => {
+			mockUseSettings.mockReturnValue({
 				wcAdminSettings: {},
-			} as unknown as ReturnType< typeof useSettings > );
+			} as unknown as ReturnType<typeof useSettings>);
 
-			render( <ScheduledUpdatesPromotionNotice /> );
+			render(<ScheduledUpdatesPromotionNotice />);
 
 			expect(
-				screen.getByText( ( content, element ) => {
+				screen.getByText((content, element) => {
 					const textContent = element?.textContent || '';
 					return (
 						element?.tagName.toLowerCase() === 'p' &&
 						textContent.includes(
 							'Analytics now supports scheduled updates, providing improved performance. Enable it in'
 						) &&
-						textContent.includes( 'Settings' )
+						textContent.includes('Settings')
 					);
-				} )
+				})
 			).toBeInTheDocument();
-		} );
+		});
 
-		test( 'should render when option is null', () => {
-			mockUseSettings.mockReturnValue( {
+		test('should render when option is null', () => {
+			mockUseSettings.mockReturnValue({
 				wcAdminSettings: {
 					woocommerce_analytics_scheduled_import: null,
 				},
-			} as unknown as ReturnType< typeof useSettings > );
+			} as unknown as ReturnType<typeof useSettings>);
 
-			render( <ScheduledUpdatesPromotionNotice /> );
+			render(<ScheduledUpdatesPromotionNotice />);
 
 			expect(
-				screen.getByText( ( content, element ) => {
+				screen.getByText((content, element) => {
 					const textContent = element?.textContent || '';
 					return (
 						element?.tagName.toLowerCase() === 'p' &&
 						textContent.includes(
 							'Analytics now supports scheduled updates, providing improved performance. Enable it in'
 						) &&
-						textContent.includes( 'Settings' )
+						textContent.includes('Settings')
 					);
-				} )
+				})
 			).toBeInTheDocument();
-		} );
-	} );
+		});
+	});
 
-	describe( 'Dismissal check', () => {
-		test( 'should not render when notice is dismissed', () => {
-			mockUseUserPreferences.mockReturnValue( {
+	describe('Dismissal check', () => {
+		test('should not render when notice is dismissed', () => {
+			mockUseUserPreferences.mockReturnValue({
 				updateUserPreferences: jest.fn(),
 				scheduled_updates_promotion_notice_dismissed: 'yes',
 				isRequesting: false,
-			} as unknown as ReturnType< typeof useUserPreferences > );
+			} as unknown as ReturnType<typeof useUserPreferences>);
 
-			const { container } = render( <ScheduledUpdatesPromotionNotice /> );
+			const { container } = render(<ScheduledUpdatesPromotionNotice />);
 
-			expect( container.firstChild ).toBeNull();
-		} );
+			expect(container.firstChild).toBeNull();
+		});
 
-		test( 'should render when notice is not dismissed', () => {
-			mockUseUserPreferences.mockReturnValue( {
+		test('should render when notice is not dismissed', () => {
+			mockUseUserPreferences.mockReturnValue({
 				updateUserPreferences: jest.fn(),
 				scheduled_updates_promotion_notice_dismissed: undefined,
 				isRequesting: false,
-			} as unknown as ReturnType< typeof useUserPreferences > );
+			} as unknown as ReturnType<typeof useUserPreferences>);
 
-			render( <ScheduledUpdatesPromotionNotice /> );
+			render(<ScheduledUpdatesPromotionNotice />);
 
 			expect(
-				screen.getByText( ( content, element ) => {
+				screen.getByText((content, element) => {
 					const textContent = element?.textContent || '';
 					return (
 						element?.tagName.toLowerCase() === 'p' &&
 						textContent.includes(
 							'Analytics now supports scheduled updates, providing improved performance. Enable it in'
 						) &&
-						textContent.includes( 'Settings' )
+						textContent.includes('Settings')
 					);
-				} )
+				})
 			).toBeInTheDocument();
-		} );
-	} );
+		});
+	});
 
-	describe( 'Dismissal functionality', () => {
-		test( 'should call updateUserPreferences when dismiss button is clicked', async () => {
+	describe('Dismissal functionality', () => {
+		test('should call updateUserPreferences when dismiss button is clicked', async () => {
 			const mockUpdateUserPreferences = jest.fn();
-			mockUseUserPreferences.mockReturnValue( {
+			mockUseUserPreferences.mockReturnValue({
 				updateUserPreferences: mockUpdateUserPreferences,
 				scheduled_updates_promotion_notice_dismissed: undefined,
 				isRequesting: false,
-			} as unknown as ReturnType< typeof useUserPreferences > );
+			} as unknown as ReturnType<typeof useUserPreferences>);
 
-			render( <ScheduledUpdatesPromotionNotice /> );
+			render(<ScheduledUpdatesPromotionNotice />);
 
-			const dismissButton = screen.getByLabelText(
-				'Dismiss this notice.'
-			);
-			await userEvent.click( dismissButton );
+			const dismissButton = screen.getByLabelText('Dismiss this notice.');
+			await userEvent.click(dismissButton);
 
-			expect( mockUpdateUserPreferences ).toHaveBeenCalledWith( {
+			expect(mockUpdateUserPreferences).toHaveBeenCalledWith({
 				scheduled_updates_promotion_notice_dismissed: 'yes',
-			} );
-		} );
+			});
+		});
 
-		test( 'should fire tracking event when dismiss button is clicked', async () => {
-			mockUseUserPreferences.mockReturnValue( {
+		test('should fire tracking event when dismiss button is clicked', async () => {
+			mockUseUserPreferences.mockReturnValue({
 				updateUserPreferences: jest.fn(),
 				scheduled_updates_promotion_notice_dismissed: undefined,
 				isRequesting: false,
-			} as unknown as ReturnType< typeof useUserPreferences > );
+			} as unknown as ReturnType<typeof useUserPreferences>);
 
-			render( <ScheduledUpdatesPromotionNotice /> );
+			render(<ScheduledUpdatesPromotionNotice />);
 
-			const dismissButton = screen.getByLabelText(
-				'Dismiss this notice.'
-			);
-			await userEvent.click( dismissButton );
+			const dismissButton = screen.getByLabelText('Dismiss this notice.');
+			await userEvent.click(dismissButton);
 
-			expect( mockRecordEvent ).toHaveBeenCalledWith(
+			expect(mockRecordEvent).toHaveBeenCalledWith(
 				'scheduled_updates_promotion_notice_dismissed'
 			);
-		} );
-	} );
+		});
+	});
 
-	describe( 'Link generation', () => {
-		test( 'should generate correct settings link', () => {
-			render( <ScheduledUpdatesPromotionNotice /> );
+	describe('Link generation', () => {
+		test('should generate correct settings link', () => {
+			render(<ScheduledUpdatesPromotionNotice />);
 
-			const settingsLink = screen.getByLabelText( 'Analytics settings' );
+			const settingsLink = screen.getByLabelText('Analytics settings');
 
-			expect( settingsLink ).toBeInTheDocument();
-			expect( settingsLink ).toHaveAttribute(
+			expect(settingsLink).toBeInTheDocument();
+			expect(settingsLink).toHaveAttribute(
 				'href',
 				'http://example.com/admin.php?page=wc-admin&path=/analytics/settings'
 			);
-		} );
+		});
 
-		test( 'should call getAdminLink with correct path', () => {
-			render( <ScheduledUpdatesPromotionNotice /> );
+		test('should call getAdminLink with correct path', () => {
+			render(<ScheduledUpdatesPromotionNotice />);
 
-			expect( mockGetAdminLink ).toHaveBeenCalledWith(
+			expect(mockGetAdminLink).toHaveBeenCalledWith(
 				'admin.php?page=wc-admin&path=/analytics/settings'
 			);
-		} );
-	} );
+		});
+	});
 
-	describe( 'Notice content', () => {
-		test( 'should display correct notice message', () => {
-			render( <ScheduledUpdatesPromotionNotice /> );
+	describe('Notice content', () => {
+		test('should display correct notice message', () => {
+			render(<ScheduledUpdatesPromotionNotice />);
 
 			expect(
-				screen.getByText( ( content, element ) => {
+				screen.getByText((content, element) => {
 					const textContent = element?.textContent || '';
 					return (
 						element?.tagName.toLowerCase() === 'p' &&
 						textContent.includes(
 							'Analytics now supports scheduled updates, providing improved performance. Enable it in'
 						) &&
-						textContent.includes( 'Settings' )
+						textContent.includes('Settings')
 					);
-				} )
+				})
 			).toBeInTheDocument();
-		} );
+		});
 
-		test( 'should have correct CSS classes', () => {
-			const { container } = render( <ScheduledUpdatesPromotionNotice /> );
+		test('should have correct CSS classes', () => {
+			const { container } = render(<ScheduledUpdatesPromotionNotice />);
 
 			const notice = container.querySelector(
 				'.notice.notice-info.is-dismissible'
 			);
-			expect( notice ).toBeInTheDocument();
-		} );
+			expect(notice).toBeInTheDocument();
+		});
 
-		test( 'should render dismiss button with correct attributes', () => {
-			render( <ScheduledUpdatesPromotionNotice /> );
+		test('should render dismiss button with correct attributes', () => {
+			render(<ScheduledUpdatesPromotionNotice />);
 
-			const dismissButton = screen.getByLabelText(
-				'Dismiss this notice.'
-			);
+			const dismissButton = screen.getByLabelText('Dismiss this notice.');
 
-			expect( dismissButton ).toBeInTheDocument();
-			expect( dismissButton ).toHaveClass(
+			expect(dismissButton).toBeInTheDocument();
+			expect(dismissButton).toHaveClass(
 				'woocommerce-message-close',
 				'notice-dismiss'
 			);
-		} );
-	} );
+		});
+	});
 
-	describe( 'Combined conditions', () => {
-		test( 'should render when all conditions are met', () => {
-			mockUseSettings.mockReturnValue( {
+	describe('Combined conditions', () => {
+		test('should render when all conditions are met', () => {
+			mockUseSettings.mockReturnValue({
 				wcAdminSettings: {},
-			} as unknown as ReturnType< typeof useSettings > );
+			} as unknown as ReturnType<typeof useSettings>);
 
-			mockUseUserPreferences.mockReturnValue( {
+			mockUseUserPreferences.mockReturnValue({
 				updateUserPreferences: jest.fn(),
 				scheduled_updates_promotion_notice_dismissed: undefined,
 				isRequesting: false,
-			} as unknown as ReturnType< typeof useUserPreferences > );
+			} as unknown as ReturnType<typeof useUserPreferences>);
 
-			render( <ScheduledUpdatesPromotionNotice /> );
+			render(<ScheduledUpdatesPromotionNotice />);
 
 			expect(
-				screen.getByText( ( content, element ) => {
+				screen.getByText((content, element) => {
 					const textContent = element?.textContent || '';
 					return (
 						element?.tagName.toLowerCase() === 'p' &&
 						textContent.includes(
 							'Analytics now supports scheduled updates, providing improved performance. Enable it in'
 						) &&
-						textContent.includes( 'Settings' )
+						textContent.includes('Settings')
 					);
-				} )
+				})
 			).toBeInTheDocument();
-		} );
+		});
 
-		test( 'should not render when option is set', () => {
-			mockUseSettings.mockReturnValue( {
+		test('should not render when option is set', () => {
+			mockUseSettings.mockReturnValue({
 				wcAdminSettings: {
 					woocommerce_analytics_scheduled_import: 'no',
 				},
-			} as unknown as ReturnType< typeof useSettings > );
+			} as unknown as ReturnType<typeof useSettings>);
 
-			mockUseUserPreferences.mockReturnValue( {
+			mockUseUserPreferences.mockReturnValue({
 				updateUserPreferences: jest.fn(),
 				scheduled_updates_promotion_notice_dismissed: undefined,
 				isRequesting: false,
-			} as unknown as ReturnType< typeof useUserPreferences > );
+			} as unknown as ReturnType<typeof useUserPreferences>);
 
-			const { container } = render( <ScheduledUpdatesPromotionNotice /> );
+			const { container } = render(<ScheduledUpdatesPromotionNotice />);
 
-			expect( container.firstChild ).toBeNull();
-		} );
+			expect(container.firstChild).toBeNull();
+		});
 
-		test( 'should not render when dismissed and option is not set', () => {
-			mockUseSettings.mockReturnValue( {
+		test('should not render when dismissed and option is not set', () => {
+			mockUseSettings.mockReturnValue({
 				wcAdminSettings: {},
-			} as unknown as ReturnType< typeof useSettings > );
+			} as unknown as ReturnType<typeof useSettings>);
 
-			mockUseUserPreferences.mockReturnValue( {
+			mockUseUserPreferences.mockReturnValue({
 				updateUserPreferences: jest.fn(),
 				scheduled_updates_promotion_notice_dismissed: 'yes',
 				isRequesting: false,
-			} as unknown as ReturnType< typeof useUserPreferences > );
+			} as unknown as ReturnType<typeof useUserPreferences>);
 
-			const { container } = render( <ScheduledUpdatesPromotionNotice /> );
+			const { container } = render(<ScheduledUpdatesPromotionNotice />);
 
-			expect( container.firstChild ).toBeNull();
-		} );
-	} );
-} );
+			expect(container.firstChild).toBeNull();
+		});
+	});
+});

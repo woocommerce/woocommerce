@@ -16,7 +16,7 @@ export type RecommendedPlugin = {
 	icon: string;
 	product: string;
 	plugin: string;
-	categories: Array< string >;
-	subcategories: Array< Subcategory >;
-	tags: Array< Tag >;
+	categories: Array<string>;
+	subcategories: Array<Subcategory>;
+	tags: Array<Tag>;
 };

@@ -57,13 +57,9 @@ const PrivateSelectedItems = < ItemType, >(
 
 	const lastRemoveButtonRef = useRef< HTMLButtonElement >( null );
 
-	useImperativeHandle(
-		ref,
-		() => {
-			return () => lastRemoveButtonRef.current?.focus();
-		},
-		[]
-	);
+	useImperativeHandle( ref, () => {
+		return () => lastRemoveButtonRef.current?.focus();
+	}, [] );
 
 	if ( isReadOnly ) {
 		return (

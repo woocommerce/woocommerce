@@ -35,17 +35,16 @@ interface MySubscriptionsAccountProps {
 	onDismiss?: () => void;
 }
 
-export default function MySubscriptionsAccount( {
+export default function MySubscriptionsAccount({
 	onDismiss,
-}: MySubscriptionsAccountProps ): React.JSX.Element | null {
-	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+}: MySubscriptionsAccountProps): React.JSX.Element | null {
+	const wccomSettings = getAdminSetting('wccomHelper', {});
 	const isConnected = wccomSettings?.isConnected ?? false;
-	const [ isDismissed, setIsDismissed ] = useState( dismissedThisPageLoad );
-	const [ isDisconnectModalOpen, setIsDisconnectModalOpen ] =
-		useState( false );
+	const [isDismissed, setIsDismissed] = useState(dismissedThisPageLoad);
+	const [isDisconnectModalOpen, setIsDisconnectModalOpen] = useState(false);
 
 	if (
-		! isConnected ||
+		!isConnected ||
 		isDismissed ||
 		wccomSettings?.show_connected_account_notice === false
 	) {
@@ -56,17 +55,17 @@ export default function MySubscriptionsAccount( {
 
 	const handleDismiss = () => {
 		dismissedThisPageLoad = true;
-		setIsDismissed( true );
-		void apiFetch( {
+		setIsDismissed(true);
+		void apiFetch({
 			path: '/wc-admin/notice/dismiss',
 			method: 'POST',
 			data: {
 				notice_id: NOTICE_ID,
 				dismiss_notice_nonce: wccomSettings?.dismissNoticeNonce || '',
 			},
-		} );
+		});
 		speak(
-			__( 'Connected account notice dismissed.', 'woocommerce' ),
+			__('Connected account notice dismissed.', 'woocommerce'),
 			'polite'
 		);
 		onDismiss?.();
@@ -75,23 +74,23 @@ export default function MySubscriptionsAccount( {
 	return (
 		<>
 			<section className="woocommerce-marketplace__my-subscriptions__account">
-				{ /* Rendered first so it is first in the tab order, matching where it sits visually. */ }
+				{/* Rendered first so it is first in the tab order, matching where it sits visually. */}
 				<Button
 					className="woocommerce-marketplace__my-subscriptions__account-dismiss"
-					icon={ closeSmall }
-					label={ __( 'Dismiss this notice', 'woocommerce' ) }
-					onClick={ handleDismiss }
+					icon={closeSmall}
+					label={__('Dismiss this notice', 'woocommerce')}
+					onClick={handleDismiss}
 				/>
 				<h2 className="woocommerce-marketplace__my-subscriptions__account-header">
-					<Icon icon={ link } size={ 24 } />
-					{ sprintf(
+					<Icon icon={link} size={24} />
+					{sprintf(
 						// translators: %s is user email
-						__( 'Connected to %s', 'woocommerce' ),
+						__('Connected to %s', 'woocommerce'),
 						userEmail
-					) }
+					)}
 				</h2>
 				<p className="woocommerce-marketplace__my-subscriptions__account-content">
-					{ createInterpolateElement(
+					{createInterpolateElement(
 						sprintf(
 							// translators: %s is user email
 							__(
@@ -105,30 +104,30 @@ export default function MySubscriptionsAccount( {
 							disconnect: (
 								<Button
 									variant="link"
-									onClick={ () =>
-										setIsDisconnectModalOpen( true )
+									onClick={() =>
+										setIsDisconnectModalOpen(true)
 									}
 								/>
 							),
 						}
-					) }
+					)}
 				</p>
 				<div className="woocommerce-marketplace__my-subscriptions__account-actions">
 					<Button
 						variant="secondary"
-						href={ MARKETPLACE_MY_ACCOUNT_PATH }
+						href={MARKETPLACE_MY_ACCOUNT_PATH}
 						target="_blank"
 					>
-						{ __( 'View account', 'woocommerce' ) }
+						{__('View account', 'woocommerce')}
 					</Button>
 				</div>
 			</section>
-			{ isDisconnectModalOpen && (
+			{isDisconnectModalOpen && (
 				<HeaderAccountModal
-					setIsModalOpen={ setIsDisconnectModalOpen }
-					disconnectURL={ connectUrl( 'wc-addons' ) }
+					setIsModalOpen={setIsDisconnectModalOpen}
+					disconnectURL={connectUrl('wc-addons')}
 				/>
-			) }
+			)}
 		</>
 	);
 }

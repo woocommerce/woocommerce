@@ -38,19 +38,39 @@
 	padding: 1em;
 }
 
-.branch-5-4 .hide-privacy-policy-tutorial ul:not(.privacy-policy-tutorial):not(.wp-policy-help),
-.branch-5-4 .hide-privacy-policy-tutorial ol:not(.privacy-policy-tutorial):not(.wp-policy-help) {
+.branch-5-4
+	.hide-privacy-policy-tutorial
+	ul:not(.privacy-policy-tutorial):not(.wp-policy-help),
+.branch-5-4
+	.hide-privacy-policy-tutorial
+	ol:not(.privacy-policy-tutorial):not(.wp-policy-help) {
 	margin: 1em 0;
 	padding: 0;
 }
 
-.policy-text p:not(.privacy-policy-tutorial):not(.wp-policy-help) + ul:not(.privacy-policy-tutorial):not(.wp-policy-help),
-.policy-text p:not(.privacy-policy-tutorial):not(.wp-policy-help) + ol:not(.privacy-policy-tutorial):not(.wp-policy-help),
-.policy-text ul:not(.privacy-policy-tutorial):not(.wp-policy-help) + p:not(.privacy-policy-tutorial):not(.wp-policy-help),
-.policy-text ul:not(.privacy-policy-tutorial):not(.wp-policy-help) + ul:not(.privacy-policy-tutorial):not(.wp-policy-help),
-.policy-text ul:not(.privacy-policy-tutorial):not(.wp-policy-help) + ol:not(.privacy-policy-tutorial):not(.wp-policy-help),
-.policy-text ol:not(.privacy-policy-tutorial):not(.wp-policy-help) + p:not(.privacy-policy-tutorial):not(.wp-policy-help),
-.policy-text ol:not(.privacy-policy-tutorial):not(.wp-policy-help) + ul:not(.privacy-policy-tutorial):not(.wp-policy-help),
-.policy-text ol:not(.privacy-policy-tutorial):not(.wp-policy-help) + ol:not(.privacy-policy-tutorial):not(.wp-policy-help) {
+.policy-text
+	p:not(.privacy-policy-tutorial):not(.wp-policy-help)
+	+ ul:not(.privacy-policy-tutorial):not(.wp-policy-help),
+.policy-text
+	p:not(.privacy-policy-tutorial):not(.wp-policy-help)
+	+ ol:not(.privacy-policy-tutorial):not(.wp-policy-help),
+.policy-text
+	ul:not(.privacy-policy-tutorial):not(.wp-policy-help)
+	+ p:not(.privacy-policy-tutorial):not(.wp-policy-help),
+.policy-text
+	ul:not(.privacy-policy-tutorial):not(.wp-policy-help)
+	+ ul:not(.privacy-policy-tutorial):not(.wp-policy-help),
+.policy-text
+	ul:not(.privacy-policy-tutorial):not(.wp-policy-help)
+	+ ol:not(.privacy-policy-tutorial):not(.wp-policy-help),
+.policy-text
+	ol:not(.privacy-policy-tutorial):not(.wp-policy-help)
+	+ p:not(.privacy-policy-tutorial):not(.wp-policy-help),
+.policy-text
+	ol:not(.privacy-policy-tutorial):not(.wp-policy-help)
+	+ ul:not(.privacy-policy-tutorial):not(.wp-policy-help),
+.policy-text
+	ol:not(.privacy-policy-tutorial):not(.wp-policy-help)
+	+ ol:not(.privacy-policy-tutorial):not(.wp-policy-help) {
 	padding-top: 0;
 }

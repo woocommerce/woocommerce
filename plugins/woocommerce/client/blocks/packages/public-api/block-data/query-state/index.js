@@ -16,8 +16,8 @@ const config = {
 	actions,
 	selectors,
 };
-export const store = createReduxStore( STORE_KEY, config );
+export const store = createReduxStore(STORE_KEY, config);
 
-register( store );
+register(store);
 
 export const QUERY_STATE_STORE_KEY = STORE_KEY;

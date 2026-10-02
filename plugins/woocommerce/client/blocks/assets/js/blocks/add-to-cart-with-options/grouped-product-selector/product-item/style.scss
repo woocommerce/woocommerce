@@ -1,3 +1,6 @@
-:where(.wp-block-woocommerce-add-to-cart-with-options-grouped-product-item .is-layout-grid) {
+:where(
+	.wp-block-woocommerce-add-to-cart-with-options-grouped-product-item
+		.is-layout-grid
+) {
 	align-items: center;
 }

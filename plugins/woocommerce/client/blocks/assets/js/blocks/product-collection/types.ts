@@ -93,7 +93,7 @@ export interface ProductCollectionQuery {
 	perPage: number;
 	postType: string;
 	search: string;
-	taxQuery: Record< string, number[] >;
+	taxQuery: Record<string, number[]>;
 	/**
 	 * If true, show only featured products.
 	 */
@@ -129,7 +129,7 @@ export type RelatedBy = {
 };
 
 export type ProductCollectionEditComponentProps =
-	BlockEditProps< ProductCollectionAttributes > & {
+	BlockEditProps<ProductCollectionAttributes> & {
 		name: string;
 		preview?: {
 			initialPreviewState?: PreviewState;
@@ -151,17 +151,13 @@ export type ProductCollectionContentProps =
 
 export type TProductCollectionOrder = 'asc' | 'desc';
 export type TProductCollectionOrderBy =
-	| 'date'
-	| 'title'
-	| 'popularity'
-	| 'price'
-	| 'rating';
+	'date' | 'title' | 'popularity' | 'price' | 'rating';
 
 export type ProductCollectionSetAttributes = (
-	attrs: Partial< ProductCollectionAttributes >
+	attrs: Partial<ProductCollectionAttributes>
 ) => void;
 
-export type TrackInteraction = ( filter: CoreFilterNames | string ) => void;
+export type TrackInteraction = (filter: CoreFilterNames | string) => void;
 
 export type DisplayLayoutControlProps = {
 	displayLayout: ProductCollectionDisplayLayout;
@@ -176,7 +172,7 @@ export type DimensionsControlProps = {
 export type QueryControlProps = {
 	query: ProductCollectionQuery;
 	trackInteraction: TrackInteraction;
-	setQueryAttribute: ( attrs: Partial< ProductCollectionQuery > ) => void;
+	setQueryAttribute: (attrs: Partial<ProductCollectionQuery>) => void;
 };
 
 export enum CoreCollectionNames {
@@ -224,8 +220,8 @@ export interface PreviewState {
 	previewMessage: string;
 }
 
-export type SetPreviewState = ( args: {
-	setState: ( previewState: PreviewState ) => void;
+export type SetPreviewState = (args: {
+	setState: (previewState: PreviewState) => void;
 	location: WooCommerceBlockLocation;
 	attributes: ProductCollectionAttributes;
-} ) => void | ( () => void );
+}) => void | (() => void);

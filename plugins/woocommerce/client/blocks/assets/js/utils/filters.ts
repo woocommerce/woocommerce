@@ -20,11 +20,11 @@ const filteringForPhpTemplate = getSettingWithCoercion(
 export const PREFIX_QUERY_ARG_QUERY_TYPE = 'query_type_';
 export const PREFIX_QUERY_ARG_FILTER_TYPE = 'filter_';
 
-export function getUrlParameter( name: string ) {
-	if ( ! window ) {
+export function getUrlParameter(name: string) {
+	if (!window) {
 		return null;
 	}
-	return getQueryArg( window.location.href, name );
+	return getQueryArg(window.location.href, name);
 }
 
 /**
@@ -32,8 +32,8 @@ export function getUrlParameter( name: string ) {
  *
  * @param {string} newUrl New URL to be set.
  */
-export function changeUrl( newUrl: string ) {
-	if ( filteringForPhpTemplate ) {
+export function changeUrl(newUrl: string) {
+	if (filteringForPhpTemplate) {
 		/**
 		 * We may need to reset the current page when changing filters.
 		 * This is because the current page may not exist for this set
@@ -42,22 +42,22 @@ export function changeUrl( newUrl: string ) {
 		 * There are different pagination formats to consider, as documented here:
 		 * https://github.com/WordPress/gutenberg/blob/317eb8f14c8e1b81bf56972cca2694be250580e3/packages/block-library/src/query-pagination-numbers/index.php#L22-L85
 		 */
-		const url = new URL( newUrl );
+		const url = new URL(newUrl);
 		// When pretty permalinks are enabled, the page number may be in the path name.
-		url.pathname = url.pathname.replace( /\/page\/[0-9]+/i, '' );
+		url.pathname = url.pathname.replace(/\/page\/[0-9]+/i, '');
 		// When plain permalinks are enabled, the page number may be in the "paged" query parameter.
-		url.searchParams.delete( 'paged' );
+		url.searchParams.delete('paged');
 		// On posts and pages the page number will be in a query parameter that
 		// identifies which block we are paginating.
-		url.searchParams.forEach( ( _, key ) => {
-			if ( key.match( /^query(?:-[0-9]+)?-page$/ ) ) {
-				url.searchParams.delete( key );
+		url.searchParams.forEach((_, key) => {
+			if (key.match(/^query(?:-[0-9]+)?-page$/)) {
+				url.searchParams.delete(key);
 			}
-		} );
+		});
 
 		window.location.href = url.href;
 	} else {
-		window.history.replaceState( {}, '', newUrl );
+		window.history.replaceState({}, '', newUrl);
 	}
 }
 
@@ -66,7 +66,7 @@ export function changeUrl( newUrl: string ) {
  *
  * @param {string} url URL to encode the search param from.
  */
-export const normalizeQueryParams = ( url: string ) => {
-	const queryArgs = getQueryArgs( url );
-	return addQueryArgs( url, queryArgs );
+export const normalizeQueryParams = (url: string) => {
+	const queryArgs = getQueryArgs(url);
+	return addQueryArgs(url, queryArgs);
 };

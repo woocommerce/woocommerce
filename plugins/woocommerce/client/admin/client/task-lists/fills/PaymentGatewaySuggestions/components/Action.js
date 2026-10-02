@@ -11,7 +11,7 @@ import { useState } from '@wordpress/element';
  */
 import { getPluginTrackKey } from '~/utils';
 
-export const Action = ( {
+export const Action = ({
 	hasSetup = false,
 	needsSetup = true,
 	id,
@@ -24,84 +24,84 @@ export const Action = ( {
 	markConfigured = () => {},
 	onSetUp = () => {},
 	onSetupCallback,
-	setupButtonText = __( 'Get started', 'woocommerce' ),
+	setupButtonText = __('Get started', 'woocommerce'),
 	externalLink = null,
-} ) => {
-	const [ isBusy, setIsBusy ] = useState( false );
+}) => {
+	const [isBusy, setIsBusy] = useState(false);
 
 	const classes = 'woocommerce-task-payment__action';
 
-	if ( isLoading ) {
+	if (isLoading) {
 		return <Spinner />;
 	}
 
 	const handleClick = async () => {
-		onSetUp( id );
+		onSetUp(id);
 
-		recordEvent( 'tasklist_payment_setup', {
-			selected: getPluginTrackKey( id ),
-		} );
+		recordEvent('tasklist_payment_setup', {
+			selected: getPluginTrackKey(id),
+		});
 
-		if ( ! hasPlugins && externalLink ) {
+		if (!hasPlugins && externalLink) {
 			window.location.href = externalLink;
 			return;
 		}
 
-		if ( onSetupCallback ) {
-			setIsBusy( true );
-			await new Promise( onSetupCallback )
-				.then( () => {
-					setIsBusy( false );
-				} )
-				.catch( () => {
-					setIsBusy( false );
-				} );
+		if (onSetupCallback) {
+			setIsBusy(true);
+			await new Promise(onSetupCallback)
+				.then(() => {
+					setIsBusy(false);
+				})
+				.catch(() => {
+					setIsBusy(false);
+				});
 
 			return;
 		}
 
-		updateQueryString( {
+		updateQueryString({
 			id,
-		} );
+		});
 	};
 
 	const ManageButton = () => (
 		<Button
-			className={ classes }
+			className={classes}
 			isSecondary
 			role="button"
-			href={ manageUrl }
-			onClick={ () => recordEvent( 'tasklist_payment_manage', { id } ) }
+			href={manageUrl}
+			onClick={() => recordEvent('tasklist_payment_manage', { id })}
 		>
-			{ __( 'Manage', 'woocommerce' ) }
+			{__('Manage', 'woocommerce')}
 		</Button>
 	);
 
 	const SetupButton = () => (
 		<Button
-			className={ classes }
-			isPrimary={ isRecommended }
-			isSecondary={ ! isRecommended }
-			isBusy={ isBusy }
-			disabled={ isBusy }
-			onClick={ () => handleClick() }
+			className={classes}
+			isPrimary={isRecommended}
+			isSecondary={!isRecommended}
+			isBusy={isBusy}
+			disabled={isBusy}
+			onClick={() => handleClick()}
 		>
-			{ setupButtonText }
+			{setupButtonText}
 		</Button>
 	);
 
 	const EnableButton = () => (
 		<Button
-			className={ classes }
+			className={classes}
 			isSecondary
-			onClick={ () => markConfigured( id ) }
+			onClick={() => markConfigured(id)}
 		>
-			{ __( 'Enable', 'woocommerce' ) }
+			{__('Enable', 'woocommerce')}
 		</Button>
 	);
 
-	if ( ! hasSetup ) {
-		if ( ! isEnabled ) {
+	if (!hasSetup) {
+		if (!isEnabled) {
 			return <EnableButton />;
 		}
 
@@ -109,33 +109,33 @@ export const Action = ( {
 	}
 
 	// This isolates core gateways that include setup
-	if ( ! hasPlugins ) {
-		if ( isEnabled ) {
+	if (!hasPlugins) {
+		if (isEnabled) {
 			return <ManageButton />;
 		}
 
 		return <SetupButton />;
 	}
 
-	if ( ! needsSetup ) {
-		if ( ! isEnabled ) {
+	if (!needsSetup) {
+		if (!isEnabled) {
 			return <EnableButton />;
 		}
 
 		return <ManageButton />;
 	}
 
-	if ( isInstalled && hasPlugins ) {
+	if (isInstalled && hasPlugins) {
 		return (
 			<Button
-				className={ classes }
-				isPrimary={ isRecommended }
-				isSecondary={ ! isRecommended }
-				isBusy={ isBusy }
-				disabled={ isBusy }
-				onClick={ () => handleClick() }
+				className={classes}
+				isPrimary={isRecommended}
+				isSecondary={!isRecommended}
+				isBusy={isBusy}
+				disabled={isBusy}
+				onClick={() => handleClick()}
 			>
-				{ __( 'Finish setup', 'woocommerce' ) }
+				{__('Finish setup', 'woocommerce')}
 			</Button>
 		);
 	}

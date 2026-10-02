@@ -15,7 +15,7 @@ import LaunchYourStoreHeader from './launch-your-store';
 
 export { default as DefaultTaskHeader } from './default';
 
-export const taskHeaders: Record< string, React.ElementType > = {
+export const taskHeaders: Record<string, React.ElementType> = {
 	store_details: StoreDetailsHeader,
 	'customize-store': CustomizeStoreHeader,
 	tax: TaxHeader,

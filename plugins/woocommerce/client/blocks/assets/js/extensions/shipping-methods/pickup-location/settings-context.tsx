@@ -30,7 +30,7 @@ import {
 	getInitialPickupLocations,
 } from './utils';
 
-const SettingsContext = createContext< SettingsContextType >( {
+const SettingsContext = createContext<SettingsContextType>({
 	settings: defaultSettings,
 	readOnlySettings: defaultReadyOnlySettings,
 	setSettingField: () => () => void null,
@@ -41,108 +41,106 @@ const SettingsContext = createContext< SettingsContextType >( {
 	isSaving: false,
 	save: () => void null,
 	isDirty: false,
-} );
+});
 
 export const useSettingsContext = (): SettingsContextType => {
-	return useContext( SettingsContext );
+	return useContext(SettingsContext);
 };
 
-export const SettingsProvider = ( {
+export const SettingsProvider = ({
 	children,
 }: {
 	children: JSX.Element[] | JSX.Element;
-} ): JSX.Element => {
-	const [ isSaving, setIsSaving ] = useState( false );
-	const [ isDirty, setIsDirty ] = useState( false );
-	const [ pickupLocations, setPickupLocations ] = useState<
+}): JSX.Element => {
+	const [isSaving, setIsSaving] = useState(false);
+	const [isDirty, setIsDirty] = useState(false);
+	const [pickupLocations, setPickupLocations] = useState<
 		SortablePickupLocation[]
-	>( getInitialPickupLocations );
-	const [ settings, setSettings ] =
-		useState< ShippingMethodSettings >( getInitialSettings );
+	>(getInitialPickupLocations);
+	const [settings, setSettings] =
+		useState<ShippingMethodSettings>(getInitialSettings);
 
 	const setSettingField = useCallback(
-		( field: keyof ShippingMethodSettings ) => ( newValue: unknown ) => {
-			setIsDirty( true );
-			setSettings( ( prevValue ) => ( {
+		(field: keyof ShippingMethodSettings) => (newValue: unknown) => {
+			setIsDirty(true);
+			setSettings((prevValue) => ({
 				...prevValue,
-				[ field ]: newValue,
-			} ) );
+				[field]: newValue,
+			}));
 		},
 		[]
 	);
 
 	const setPickupLocationsState = useCallback(
-		( newLocations: SortablePickupLocation[] ) => {
-			setIsDirty( true );
-			setPickupLocations( newLocations );
+		(newLocations: SortablePickupLocation[]) => {
+			setIsDirty(true);
+			setPickupLocations(newLocations);
 		},
 		[]
 	);
 
-	const toggleLocation = useCallback( ( rowId: UniqueIdentifier ) => {
-		setIsDirty( true );
-		setPickupLocations( ( previousLocations: SortablePickupLocation[] ) => {
+	const toggleLocation = useCallback((rowId: UniqueIdentifier) => {
+		setIsDirty(true);
+		setPickupLocations((previousLocations: SortablePickupLocation[]) => {
 			const locationIndex = previousLocations.findIndex(
-				( { id } ) => id === rowId
+				({ id }) => id === rowId
 			);
-			const updated = [ ...previousLocations ];
-			updated[ locationIndex ].enabled =
-				! previousLocations[ locationIndex ].enabled;
+			const updated = [...previousLocations];
+			updated[locationIndex].enabled =
+				!previousLocations[locationIndex].enabled;
 			return updated;
-		} );
-	}, [] );
+		});
+	}, []);
 
 	const updateLocation = (
 		rowId: UniqueIdentifier | 'new',
 		locationData: SortablePickupLocation
 	) => {
-		setPickupLocations( ( prevData ) => {
-			setIsDirty( true );
-			if ( rowId === 'new' ) {
+		setPickupLocations((prevData) => {
+			setIsDirty(true);
+			if (rowId === 'new') {
 				return [
 					...prevData,
 					{
 						...locationData,
 						id:
-							cleanForSlug( locationData.name ) +
+							cleanForSlug(locationData.name) +
 							'-' +
 							prevData.length,
 					},
 				];
 			}
 			return prevData
-				.map( ( location ): SortablePickupLocation => {
-					if ( location.id === rowId ) {
+				.map((location): SortablePickupLocation => {
+					if (location.id === rowId) {
 						return locationData;
 					}
 					return location;
-				} )
-				.filter( Boolean );
-		} );
+				})
+				.filter(Boolean);
+		});
 	};
 
-	const save = useCallback( () => {
+	const save = useCallback(() => {
 		const data = {
 			pickup_location_settings: {
 				enabled: settings.enabled ? 'yes' : 'no',
 				title: settings.title,
-				tax_status: [ 'taxable', 'none' ].includes(
-					settings.tax_status
-				)
+				tax_status: ['taxable', 'none'].includes(settings.tax_status)
 					? settings.tax_status
 					: 'taxable',
 				cost: settings.cost,
 			},
-			pickup_locations: pickupLocations.map( ( location ) => ( {
+			pickup_locations: pickupLocations.map((location) => ({
 				name: location.name,
 				address: location.address,
 				details: location.details,
 				enabled: location.enabled,
-			} ) ),
+			})),
 		};
 
-		setIsSaving( true );
-		setIsDirty( false );
+		setIsSaving(true);
+		setIsDirty(false);
 
 		// A resolved apiFetch means the request succeeded (2xx); the server
 		// sanitizes the payload before echoing it back, so the response will not
@@ -150,32 +148,29 @@ export const SettingsProvider = ( {
 		// response matching the payload, otherwise sanitized values (e.g. "&"
 		// normalized to "&amp;") would suppress the confirmation on a save that
 		// actually persisted.
-		apiFetch( {
+		apiFetch({
 			path: '/wc/v3/pickup-locations',
 			method: 'POST',
 			data,
-		} )
-			.then( () => {
-				void dispatch( noticesStore ).createSuccessNotice(
-					__(
-						'Local Pickup settings have been saved.',
-						'woocommerce'
-					)
+		})
+			.then(() => {
+				void dispatch(noticesStore).createSuccessNotice(
+					__('Local Pickup settings have been saved.', 'woocommerce')
 				);
-			} )
-			.catch( () => {
-				setIsDirty( true );
-				void dispatch( noticesStore ).createErrorNotice(
+			})
+			.catch(() => {
+				setIsDirty(true);
+				void dispatch(noticesStore).createErrorNotice(
 					__(
 						'There was an error saving your Local Pickup settings. Please try again.',
 						'woocommerce'
 					)
 				);
-			} )
-			.finally( () => {
-				setIsSaving( false );
-			} );
-	}, [ settings, pickupLocations ] );
+			})
+			.finally(() => {
+				setIsSaving(false);
+			});
+	}, [settings, pickupLocations]);
 
 	const settingsData = {
 		settings,
@@ -191,8 +186,8 @@ export const SettingsProvider = ( {
 	};
 
 	return (
-		<SettingsContext.Provider value={ settingsData }>
-			{ children }
+		<SettingsContext.Provider value={settingsData}>
+			{children}
 		</SettingsContext.Provider>
 	);
 };

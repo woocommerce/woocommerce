@@ -2,8 +2,8 @@
 /**
  * External dependencies
  */
-const path = require( 'path' );
-const chalk = require( 'chalk' );
+const path = require('path');
+const chalk = require('chalk');
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const CHECK_CIRCULAR_DEPS = process.env.CHECK_CIRCULAR_DEPS || false;
 const ASSET_CHECK = process.env.ASSET_CHECK === 'true';
@@ -16,19 +16,19 @@ const ASSET_CHECK = process.env.ASSET_CHECK === 'true';
 // filesystem cache.
 const wcDepMap = {
 	'@woocommerce/tracks': false, // Bundle; do not externalize
-	'@woocommerce/blocks-registry': [ 'wc', 'wcBlocksRegistry' ],
-	'@woocommerce/blocks-checkout-events': [ 'wc', 'blocksCheckoutEvents' ],
-	'@woocommerce/settings': [ 'wc', 'wcSettings' ],
-	'@woocommerce/block-data': [ 'wc', 'wcBlocksData' ],
-	'@woocommerce/data': [ 'wc', 'data' ],
-	'@woocommerce/shared-context': [ 'wc', 'wcBlocksSharedContext' ],
-	'@woocommerce/shared-hocs': [ 'wc', 'wcBlocksSharedHocs' ],
-	'@woocommerce/price-format': [ 'wc', 'priceFormat' ],
-	'@woocommerce/blocks-checkout': [ 'wc', 'blocksCheckout' ],
-	'@woocommerce/blocks-components': [ 'wc', 'blocksComponents' ],
-	'@woocommerce/types': [ 'wc', 'wcTypes' ],
-	'@woocommerce/sanitize': [ 'wc', 'sanitize' ],
-	'@woocommerce/entities': [ 'wc', 'wcEntities' ],
+	'@woocommerce/blocks-registry': ['wc', 'wcBlocksRegistry'],
+	'@woocommerce/blocks-checkout-events': ['wc', 'blocksCheckoutEvents'],
+	'@woocommerce/settings': ['wc', 'wcSettings'],
+	'@woocommerce/block-data': ['wc', 'wcBlocksData'],
+	'@woocommerce/data': ['wc', 'data'],
+	'@woocommerce/shared-context': ['wc', 'wcBlocksSharedContext'],
+	'@woocommerce/shared-hocs': ['wc', 'wcBlocksSharedHocs'],
+	'@woocommerce/price-format': ['wc', 'priceFormat'],
+	'@woocommerce/blocks-checkout': ['wc', 'blocksCheckout'],
+	'@woocommerce/blocks-components': ['wc', 'blocksComponents'],
+	'@woocommerce/types': ['wc', 'wcTypes'],
+	'@woocommerce/sanitize': ['wc', 'sanitize'],
+	'@woocommerce/entities': ['wc', 'wcEntities'],
 };
 const wcHandleMap = {
 	'@woocommerce/tracks': false, // Bundle; no PHP handle needed
@@ -47,33 +47,33 @@ const wcHandleMap = {
 	'@woocommerce/entities': 'wc-entities',
 };
 
-const getAlias = ( options = {} ) => {
+const getAlias = (options = {}) => {
 	let { pathPart } = options;
-	pathPart = pathPart ? `${ pathPart }/` : '';
+	pathPart = pathPart ? `${pathPart}/` : '';
 	return {
 		'@woocommerce/product-elements': path.resolve(
 			__dirname,
-			`../assets/js/${ pathPart }blocks/product-elements-blocks`
+			`../assets/js/${pathPart}blocks/product-elements-blocks`
 		),
 		'@woocommerce/base-components': path.resolve(
 			__dirname,
-			`../assets/js/${ pathPart }base/components/`
+			`../assets/js/${pathPart}base/components/`
 		),
 		'@woocommerce/base-context': path.resolve(
 			__dirname,
-			`../assets/js/${ pathPart }base/context/`
+			`../assets/js/${pathPart}base/context/`
 		),
 		'@woocommerce/base-hocs': path.resolve(
 			__dirname,
-			`../assets/js/${ pathPart }base/hocs/`
+			`../assets/js/${pathPart}base/hocs/`
 		),
 		'@woocommerce/base-hooks': path.resolve(
 			__dirname,
-			`../assets/js/${ pathPart }base/hooks/`
+			`../assets/js/${pathPart}base/hooks/`
 		),
 		'@woocommerce/base-utils': path.resolve(
 			__dirname,
-			`../assets/js/${ pathPart }base/utils/`
+			`../assets/js/${pathPart}base/utils/`
 		),
 		'@woocommerce/block-data': path.resolve(
 			__dirname,
@@ -97,24 +97,24 @@ const getAlias = ( options = {} ) => {
 		),
 		'@woocommerce/blocks': path.resolve(
 			__dirname,
-			`../assets/js/${ pathPart }/blocks`
+			`../assets/js/${pathPart}/blocks`
 		),
 		'@woocommerce/editor-components': path.resolve(
 			__dirname,
-			`../assets/js/${ pathPart }editor-components/`
+			`../assets/js/${pathPart}editor-components/`
 		),
 		'@woocommerce/block-hocs': path.resolve(
 			__dirname,
-			`../assets/js/${ pathPart }hocs`
+			`../assets/js/${pathPart}hocs`
 		),
 		'@woocommerce/block-settings': path.resolve(
 			__dirname,
 			'../assets/js/settings/blocks'
 		),
-		'@woocommerce/icons': path.resolve( __dirname, `../assets/js/icons` ),
+		'@woocommerce/icons': path.resolve(__dirname, `../assets/js/icons`),
 		'@woocommerce/resource-previews': path.resolve(
 			__dirname,
-			`../assets/js/${ pathPart }previews/`
+			`../assets/js/${pathPart}previews/`
 		),
 		'@woocommerce/price-format': path.resolve(
 			__dirname,
@@ -136,13 +136,13 @@ const getAlias = ( options = {} ) => {
 			__dirname,
 			`../packages/public-api/types/`
 		),
-		'@woocommerce/utils': path.resolve( __dirname, `../assets/js/utils/` ),
+		'@woocommerce/utils': path.resolve(__dirname, `../assets/js/utils/`),
 		'@woocommerce/entities': path.resolve(
 			__dirname,
 			`../packages/internal/entities/`
 		),
-		'react/jsx-dev-runtime': require.resolve( 'react/jsx-dev-runtime' ),
-		'react/jsx-runtime': require.resolve( 'react/jsx-runtime' ),
+		'react/jsx-dev-runtime': require.resolve('react/jsx-dev-runtime'),
+		'react/jsx-runtime': require.resolve('react/jsx-runtime'),
 	};
 };
 
@@ -153,17 +153,17 @@ const getAlias = ( options = {} ) => {
 // `wcDepMap`). The condition is namespaced (`wc-` prefix) so it never collides
 // with third-party packages that publish their own `"source"` conditional
 // export. `'...'` extends the default webpack condition list.
-const getResolve = ( { alias, resolvePlugins = [] } = {} ) => ( {
-	conditionNames: [ 'wc-source', '...' ],
+const getResolve = ({ alias, resolvePlugins = [] } = {}) => ({
+	conditionNames: ['wc-source', '...'],
 	plugins: resolvePlugins,
-	...( alias ? { alias } : {} ),
-} );
+	...(alias ? { alias } : {}),
+});
 
-const requestToExternal = ( request ) => {
-	if ( request in wcDepMap ) {
-		return wcDepMap[ request ];
+const requestToExternal = (request) => {
+	if (request in wcDepMap) {
+		return wcDepMap[request];
 	}
-	if ( request === 'react-dom/client' ) {
+	if (request === 'react-dom/client') {
 		// React 18 split createRoot/hydrateRoot into react-dom/client.
 		// WordPress's wp-react-dom UMD aggregates both entrypoints onto the
 		// same window.ReactDOM global. DEWP's default mapper doesn't know
@@ -174,87 +174,77 @@ const requestToExternal = ( request ) => {
 	}
 };
 
-const requestToHandle = ( request ) => {
-	if ( request in wcHandleMap ) {
-		return wcHandleMap[ request ];
+const requestToHandle = (request) => {
+	if (request in wcHandleMap) {
+		return wcHandleMap[request];
 	}
-	if ( request === 'react-dom/client' ) {
+	if (request === 'react-dom/client') {
 		return 'react-dom';
 	}
 };
 
-const getProgressBarPluginConfig = ( name ) => {
+const getProgressBarPluginConfig = (name) => {
 	return {
 		format:
-			chalk.blue( `Building ${ name }` ) +
+			chalk.blue(`Building ${name}`) +
 			' [:bar] ' +
-			chalk.green( ':percent' ) +
+			chalk.green(':percent') +
 			' :msg (:elapsed seconds)',
 		summary: false,
-		customSummary: ( time ) => {
+		customSummary: (time) => {
 			console.log(
-				chalk.green.bold(
-					`${ name } assets build completed (${ time })`
-				)
+				chalk.green.bold(`${name} assets build completed (${time})`)
 			);
 		},
 	};
 };
 
-const getCacheGroups = () => ( {
+const getCacheGroups = () => ({
 	'base-components': {
 		test: /\/assets\/js\/base\/components\//,
-		name( module, chunks, cacheGroupKey ) {
+		name(module, chunks, cacheGroupKey) {
 			const moduleFileName = module
 				.identifier()
-				.split( '/' )
-				.reduceRight( ( item ) => item );
-			const allChunksNames = chunks
-				.map( ( item ) => item.name )
-				.join( '~' );
-			return `${ cacheGroupKey }-${ allChunksNames }-${ moduleFileName }`;
+				.split('/')
+				.reduceRight((item) => item);
+			const allChunksNames = chunks.map((item) => item.name).join('~');
+			return `${cacheGroupKey}-${allChunksNames}-${moduleFileName}`;
 		},
 	},
 	'base-context': {
 		test: /\/assets\/js\/base\/context\//,
-		name( module, chunks, cacheGroupKey ) {
+		name(module, chunks, cacheGroupKey) {
 			const moduleFileName = module
 				.identifier()
-				.split( '/' )
-				.reduceRight( ( item ) => item );
-			const allChunksNames = chunks
-				.map( ( item ) => item.name )
-				.join( '~' );
-			return `${ cacheGroupKey }-${ allChunksNames }-${ moduleFileName }`;
+				.split('/')
+				.reduceRight((item) => item);
+			const allChunksNames = chunks.map((item) => item.name).join('~');
+			return `${cacheGroupKey}-${allChunksNames}-${moduleFileName}`;
 		},
 	},
 	'base-hooks': {
 		test: /\/assets\/js\/base\/hooks\//,
-		name( module, chunks, cacheGroupKey ) {
+		name(module, chunks, cacheGroupKey) {
 			const moduleFileName = module
 				.identifier()
-				.split( '/' )
-				.reduceRight( ( item ) => item );
-			const allChunksNames = chunks
-				.map( ( item ) => item.name )
-				.join( '~' );
-			return `${ cacheGroupKey }-${ allChunksNames }-${ moduleFileName }`;
+				.split('/')
+				.reduceRight((item) => item);
+			const allChunksNames = chunks.map((item) => item.name).join('~');
+			return `${cacheGroupKey}-${allChunksNames}-${moduleFileName}`;
 		},
 	},
 	'base-utils': {
 		test: /\/assets\/js\/base\/utils\//,
-		name( module, chunks, cacheGroupKey ) {
+		name(module, chunks, cacheGroupKey) {
 			const moduleFileName = module
 				.identifier()
-				.split( '/' )
-				.reduceRight( ( item ) => item );
-			const allChunksNames = chunks
-				.map( ( item ) => item.name )
-				.join( '~' );
-			return `${ cacheGroupKey }-${ allChunksNames }-${ moduleFileName }`;
+				.split('/')
+				.reduceRight((item) => item);
+			const allChunksNames = chunks.map((item) => item.name).join('~');
+			return `${cacheGroupKey}-${allChunksNames}-${moduleFileName}`;
 		},
 	},
-} );
+});
 
 module.exports = {
 	NODE_ENV,

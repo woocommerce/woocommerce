@@ -15,7 +15,7 @@ import Block from './block';
 import attributes from './attributes';
 import LoginPrompt from './login-prompt';
 
-const FrontendBlock = ( {
+const FrontendBlock = ({
 	title,
 	description,
 	children,
@@ -26,9 +26,9 @@ const FrontendBlock = ( {
 	showStepNumber: boolean;
 	children: JSX.Element;
 	className?: string;
-} ) => {
-	const checkoutIsProcessing = useSelect( ( select ) =>
-		select( checkoutStore ).isProcessing()
+}) => {
+	const checkoutIsProcessing = useSelect((select) =>
+		select(checkoutStore).isProcessing()
 	);
 
 	const { showFormStepNumbers } = useCheckoutBlockContext();
@@ -36,17 +36,17 @@ const FrontendBlock = ( {
 	return (
 		<FormStep
 			id="contact-fields"
-			disabled={ checkoutIsProcessing }
-			className={ clsx( 'wc-block-checkout__contact-fields', className ) }
-			title={ title }
-			description={ description }
-			showStepNumber={ showFormStepNumbers }
-			stepHeadingContent={ () => <LoginPrompt /> }
+			disabled={checkoutIsProcessing}
+			className={clsx('wc-block-checkout__contact-fields', className)}
+			title={title}
+			description={description}
+			showStepNumber={showFormStepNumbers}
+			stepHeadingContent={() => <LoginPrompt />}
 		>
 			<Block />
-			{ children }
+			{children}
 		</FormStep>
 	);
 };
 
-export default withFilteredAttributes( attributes )( FrontendBlock );
+export default withFilteredAttributes(attributes)(FrontendBlock);

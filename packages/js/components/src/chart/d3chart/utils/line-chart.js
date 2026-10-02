@@ -43,7 +43,7 @@ export const getDateSpaces = (
 				? xScale( moment( uniqueDates[ i + 1 ] ).toDate() )
 				: xScale(
 						moment( uniqueDates[ uniqueDates.length - 1 ] ).toDate()
-				  );
+					);
 		let xWidth = i === 0 ? xNext - xNow : xNow - xPrev;
 		const xStart = i === 0 ? 0 : xNow - xWidth / 2;
 		xWidth = i === 0 || i === uniqueDates.length - 1 ? xWidth / 2 : xWidth;

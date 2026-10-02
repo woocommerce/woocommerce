@@ -41,24 +41,22 @@ export default {
 			description: 'Options for the radio control.',
 		},
 	},
-} as Meta< RadioControlAccordionProps >;
+} as Meta<RadioControlAccordionProps>;
 
-const Template: StoryFn< RadioControlAccordionProps > = ( args ) => {
-	const [ { selected }, updateArgs ] = useArgs();
+const Template: StoryFn<RadioControlAccordionProps> = (args) => {
+	const [{ selected }, updateArgs] = useArgs();
 	return (
 		<RadioControlAccordion
-			{ ...args }
-			selected={ selected }
-			onChange={ ( value ) => {
-				updateArgs( { selected: value } );
-			} }
+			{...args}
+			selected={selected}
+			onChange={(value) => {
+				updateArgs({ selected: value });
+			}}
 		/>
 	);
 };
 
-export const Default: StoryFn< RadioControlAccordionProps > = Template.bind(
-	{}
-);
+export const Default: StoryFn<RadioControlAccordionProps> = Template.bind({});
 Default.args = {
 	options: [
 		{

@@ -24,10 +24,10 @@ export const truncateHtml = (
 	length: number,
 	ellipsis = '...'
 ): string => {
-	const trimmed = trimHtml( html, {
+	const trimmed = trimHtml(html, {
 		suffix: ellipsis,
 		limit: length,
-	} );
+	});
 
 	return trimmed.html;
 };
@@ -44,7 +44,7 @@ const moveMarkers = (
 	currentHeight: number,
 	maxHeight: number
 ): Markers => {
-	if ( currentHeight <= maxHeight ) {
+	if (currentHeight <= maxHeight) {
 		markers.start = markers.middle + 1;
 	} else {
 		markers.end = markers.middle - 1;
@@ -71,16 +71,13 @@ const calculateLength = (
 		end: originalContent.length,
 	};
 
-	while ( markers.start <= markers.end ) {
-		markers.middle = Math.floor( ( markers.start + markers.end ) / 2 );
+	while (markers.start <= markers.end) {
+		markers.middle = Math.floor((markers.start + markers.end) / 2);
 
 		// We set the innerHTML directly in the DOM here so we can reliably check the clientHeight later in moveMarkers.
-		targetElement.innerHTML = truncateHtml(
-			originalContent,
-			markers.middle
-		);
+		targetElement.innerHTML = truncateHtml(originalContent, markers.middle);
 
-		markers = moveMarkers( markers, targetElement.clientHeight, maxHeight );
+		markers = moveMarkers(markers, targetElement.clientHeight, maxHeight);
 	}
 
 	return markers.middle;
@@ -102,7 +99,7 @@ export const clampLines = (
 	maxHeight: number,
 	ellipsis: string
 ): string => {
-	const length = calculateLength( originalContent, targetElement, maxHeight );
+	const length = calculateLength(originalContent, targetElement, maxHeight);
 
-	return truncateHtml( originalContent, length - ellipsis.length, ellipsis );
+	return truncateHtml(originalContent, length - ellipsis.length, ellipsis);
 };

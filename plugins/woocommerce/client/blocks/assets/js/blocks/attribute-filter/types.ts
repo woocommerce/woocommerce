@@ -17,8 +17,8 @@ export interface BlockAttributes {
 	isPreview?: boolean;
 }
 
-export interface EditProps extends BlockEditProps< BlockAttributes > {
-	debouncedSpeak: ( label: string ) => void;
+export interface EditProps extends BlockEditProps<BlockAttributes> {
+	debouncedSpeak: (label: string) => void;
 }
 
 export interface DisplayOption {
@@ -30,4 +30,4 @@ export interface DisplayOption {
 }
 
 export type Notices = 'noAttributes' | 'noProducts';
-export type GetNotice = ( type: Notices ) => ReactElement | null;
+export type GetNotice = (type: Notices) => ReactElement | null;

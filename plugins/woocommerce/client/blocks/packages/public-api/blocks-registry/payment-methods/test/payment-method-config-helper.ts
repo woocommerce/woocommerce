@@ -64,16 +64,16 @@ const canMakePaymentArgument = {
 	selectedShippingMethods: {
 		'0': 'free_shipping:1',
 	},
-	paymentRequirements: [ 'products' ],
+	paymentRequirements: ['products'],
 };
-describe( 'payment-method-config-helper', () => {
-	const trueCallback = jest.fn().mockReturnValue( true );
-	const falseCallback = jest.fn().mockReturnValue( false );
-	const bacsCallback = jest.fn().mockReturnValue( false );
-	const throwsCallback = jest.fn().mockImplementation( () => {
+describe('payment-method-config-helper', () => {
+	const trueCallback = jest.fn().mockReturnValue(true);
+	const falseCallback = jest.fn().mockReturnValue(false);
+	const bacsCallback = jest.fn().mockReturnValue(false);
+	const throwsCallback = jest.fn().mockImplementation(() => {
 		throw new Error();
-	} );
-	beforeAll( () => {
+	});
+	beforeAll(() => {
 		// Register extension callbacks for two payment methods.
 		registerPaymentMethodExtensionCallbacks(
 			'woocommerce-marketplace-extension',
@@ -81,7 +81,7 @@ describe( 'payment-method-config-helper', () => {
 				// cod: one extension returns true, the other returns false.
 				cod: trueCallback,
 				// cheque: returns true only if arg.billingAddress.postcode is 12345.
-				cheque: ( arg ) => arg.billingAddress.postcode === '12345',
+				cheque: (arg) => arg.billingAddress.postcode === '12345',
 				// bacs: both extensions return false.
 				bacs: bacsCallback,
 				// woopay: both extensions return true.
@@ -102,20 +102,20 @@ describe( 'payment-method-config-helper', () => {
 				bacs: bacsCallback,
 			}
 		);
-	} );
+	});
 
-	beforeEach( () => {
+	beforeEach(() => {
 		trueCallback.mockClear();
 		throwsCallback.mockClear();
 		falseCallback.mockClear();
 		bacsCallback.mockClear();
-	} );
-	describe( 'getCanMakePayment', () => {
-		it( 'returns callback canMakePaymentWithFeaturesCheck if no extension callback is detected', () => {
+	});
+	describe('getCanMakePayment', () => {
+		it('returns callback canMakePaymentWithFeaturesCheck if no extension callback is detected', () => {
 			// Define arguments from a payment method ('missing-payment-method') with no registered extension callbacks.
 			const args = {
-				canMakePayment: jest.fn().mockImplementation( () => true ),
-				features: [ 'products' ],
+				canMakePayment: jest.fn().mockImplementation(() => true),
+				features: ['products'],
 				paymentMethodName: 'missing-payment-method',
 			};
 
@@ -123,20 +123,20 @@ describe( 'payment-method-config-helper', () => {
 				args.canMakePayment,
 				args.features,
 				args.paymentMethodName
-			)( canMakePaymentArgument );
+			)(canMakePaymentArgument);
 
 			// Expect that the result of getCanMakePayment is the result of
 			// the payment method's own canMakePayment, as no extension callbacks are called.
-			expect( canMakePayment ).toEqual( args.canMakePayment() );
-		} );
+			expect(canMakePayment).toEqual(args.canMakePayment());
+		});
 
-		it( 'returns callbacks from the extensions when they are defined', () => {
+		it('returns callbacks from the extensions when they are defined', () => {
 			// Define arguments from a payment method (bacs) with registered extension callbacks.
 			const args = {
 				canMakePaymentConfiguration: jest
 					.fn()
-					.mockImplementation( () => true ),
-				features: [ 'products' ],
+					.mockImplementation(() => true),
+				features: ['products'],
 				paymentMethodName: 'bacs',
 			};
 
@@ -144,75 +144,73 @@ describe( 'payment-method-config-helper', () => {
 				args.canMakePaymentConfiguration,
 				args.features,
 				args.paymentMethodName
-			)( canMakePaymentArgument );
+			)(canMakePaymentArgument);
 
 			// Expect that the result of getCanMakePayment is not the result of
 			// the payment method's own canMakePayment (args.canMakePaymentConfiguration),
 			// but of the registered bacsCallback.
-			expect( canMakePayment ).toBe( bacsCallback() );
-		} );
-	} );
+			expect(canMakePayment).toBe(bacsCallback());
+		});
+	});
 
-	describe( 'canMakePaymentWithExtensions', () => {
-		it( "Returns false without executing the registered callbacks, if the payment method's canMakePayment callback returns false.", () => {
+	describe('canMakePaymentWithExtensions', () => {
+		it("Returns false without executing the registered callbacks, if the payment method's canMakePayment callback returns false.", () => {
 			const canMakePayment = () => false;
 			const canMakePaymentWithExtensionsResult =
 				helpers.canMakePaymentWithExtensions(
 					canMakePayment,
 					canMakePaymentExtensionsCallbacks,
 					'cod'
-				)( canMakePaymentArgument );
-			expect( canMakePaymentWithExtensionsResult ).toBe( false );
-			expect( trueCallback ).not.toHaveBeenCalled();
-		} );
+				)(canMakePaymentArgument);
+			expect(canMakePaymentWithExtensionsResult).toBe(false);
+			expect(trueCallback).not.toHaveBeenCalled();
+		});
 
-		it( 'Returns early when a registered callback returns false, without executing all the registered callbacks', () => {
+		it('Returns early when a registered callback returns false, without executing all the registered callbacks', () => {
 			helpers.canMakePaymentWithExtensions(
 				() => true,
 				canMakePaymentExtensionsCallbacks,
 				'bacs'
-			)( canMakePaymentArgument );
-			expect( bacsCallback ).toHaveBeenCalledTimes( 1 );
-		} );
+			)(canMakePaymentArgument);
+			expect(bacsCallback).toHaveBeenCalledTimes(1);
+		});
 
-		it( 'Returns true if all extension callbacks return true', () => {
+		it('Returns true if all extension callbacks return true', () => {
 			const result = helpers.canMakePaymentWithExtensions(
 				() => true,
 				canMakePaymentExtensionsCallbacks,
 				'woopay'
-			)( canMakePaymentArgument );
-			expect( result ).toBe( true );
-		} );
+			)(canMakePaymentArgument);
+			expect(result).toBe(true);
+		});
 
-		it( 'Passes canPayArg to the callback', () => {
+		it('Passes canPayArg to the callback', () => {
 			helpers.canMakePaymentWithExtensions(
 				() => true,
 				canMakePaymentExtensionsCallbacks,
 				'woopay'
-			)( canMakePaymentArgument );
-			expect( trueCallback ).toHaveBeenCalledWith(
-				canMakePaymentArgument
-			);
-		} );
+			)(canMakePaymentArgument);
+			expect(trueCallback).toHaveBeenCalledWith(canMakePaymentArgument);
+		});
 
-		it( 'Allows all valid callbacks to run, even if one causes an error', () => {
+		it('Allows all valid callbacks to run, even if one causes an error', () => {
 			helpers.canMakePaymentWithExtensions(
 				() => true,
 				canMakePaymentExtensionsCallbacks,
 				'testpay'
-			)( canMakePaymentArgument );
-			expect( console ).toHaveErrored();
-			expect( throwsCallback ).toHaveBeenCalledTimes( 1 );
-			expect( trueCallback ).toHaveBeenCalledTimes( 1 );
-		} );
+			)(canMakePaymentArgument);
+			expect(console).toHaveErrored();
+			expect(throwsCallback).toHaveBeenCalledTimes(1);
+			expect(trueCallback).toHaveBeenCalledTimes(1);
+		});
 
-		it( 'Does not error when a callback for a payment method is in one namespace but not another', () => {
+		it('Does not error when a callback for a payment method is in one namespace but not another', () => {
 			helpers.canMakePaymentWithExtensions(
 				() => true,
 				canMakePaymentExtensionsCallbacks,
 				'blocks_pay'
-			)( canMakePaymentArgument );
-			expect( console ).not.toHaveErrored();
-		} );
-	} );
-} );
+			)(canMakePaymentArgument);
+			expect(console).not.toHaveErrored();
+		});
+	});
+});

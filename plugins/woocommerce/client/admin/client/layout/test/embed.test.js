@@ -9,17 +9,17 @@ import { recordPageView } from '@woocommerce/tracks';
  */
 import { _EmbedLayout as EmbedLayout } from '../embed';
 
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn().mockReturnValue( {} ),
-} ) );
+jest.mock('@wordpress/data', () => ({
+	...jest.requireActual('@wordpress/data'),
+	useSelect: jest.fn().mockReturnValue({}),
+}));
 
-describe( 'EmbedLayout', () => {
-	it( 'should call recordPageView with correct parameters', () => {
-		window.history.pushState( {}, 'Page Title', '/url?search' );
-		render( <EmbedLayout /> );
-		expect( recordPageView ).toHaveBeenCalledWith( '/url?search', {
+describe('EmbedLayout', () => {
+	it('should call recordPageView with correct parameters', () => {
+		window.history.pushState({}, 'Page Title', '/url?search');
+		render(<EmbedLayout />);
+		expect(recordPageView).toHaveBeenCalledWith('/url?search', {
 			is_embedded: true,
-		} );
-	} );
-} );
+		});
+	});
+});

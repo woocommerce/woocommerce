@@ -23,8 +23,7 @@ export type AppliedFrom =
 	| typeof APPLIED_FROM_SELECTIVE_REST;
 
 export type ViewedFrom =
-	| typeof VIEWED_FROM_EDITOR_BANNER
-	| typeof VIEWED_FROM_EMAIL_LIST;
+	typeof VIEWED_FROM_EDITOR_BANNER | typeof VIEWED_FROM_EMAIL_LIST;
 
 /**
  * Shape of the base payload shared by every block-email update Tracks event
@@ -45,13 +44,13 @@ export interface SharedTracksPayload {
 	was_backfilled: boolean;
 	// `recordEvent` types its payload as `{ [k: string]: unknown }`; the index
 	// signature lets callers spread `SharedTracksPayload` directly.
-	[ key: string ]: unknown;
+	[key: string]: unknown;
 }
 
 export interface SharedPayloadInputs {
 	record: {
 		slug?: unknown;
-		meta?: Record< string, unknown >;
+		meta?: Record<string, unknown>;
 	} | null;
 	summary: ChangeSummary | null;
 }
@@ -67,18 +66,18 @@ export interface SharedPayloadInputs {
  * so server- and client-emitted events for the same logical transition land
  * on identical keys.
  */
-export function buildSharedTracksPayload( {
+export function buildSharedTracksPayload({
 	record,
 	summary,
-}: SharedPayloadInputs ): SharedTracksPayload | null {
+}: SharedPayloadInputs): SharedTracksPayload | null {
 	const meta = record?.meta;
-	if ( ! meta ) {
+	if (!meta) {
 		return null;
 	}
 	const slug = typeof record?.slug === 'string' ? record.slug : '';
 	const versionFrom =
 		typeof meta._wc_email_template_version === 'string'
-			? ( meta._wc_email_template_version as string )
+			? (meta._wc_email_template_version as string)
 			: '';
 	const wasBackfilled =
 		meta._wc_email_backfilled === true ||
@@ -86,7 +85,7 @@ export function buildSharedTracksPayload( {
 		meta._wc_email_backfilled === 1;
 	const classification =
 		typeof meta._wc_email_template_status === 'string'
-			? ( meta._wc_email_template_status as string )
+			? (meta._wc_email_template_status as string)
 			: '';
 
 	return {

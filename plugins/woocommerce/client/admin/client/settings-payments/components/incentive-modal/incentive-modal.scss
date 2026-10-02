@@ -16,7 +16,7 @@
 		display: flex;
 		align-items: center;
 
-		@media screen and ( max-width: $break-large ) {
+		@media screen and (max-width: $break-large) {
 			width: 100%;
 			max-height: 200px;
 		}
@@ -25,7 +25,7 @@
 			width: 360px;
 			padding: 0 $grid-unit-50;
 
-			@media screen and ( max-width: $break-large ) {
+			@media screen and (max-width: $break-large) {
 				padding: 0;
 				margin: 0 auto;
 				width: 240px;
@@ -41,7 +41,7 @@
 		display: flex;
 		align-items: center;
 
-		@media screen and ( max-width: $break-large ) {
+		@media screen and (max-width: $break-large) {
 			flex-direction: column;
 		}
 	}
@@ -50,11 +50,11 @@
 		flex: 1;
 		padding: $grid-unit-80 $grid-unit-40 $grid-unit-40;
 
-		@media screen and ( max-width: $break-large ) {
+		@media screen and (max-width: $break-large) {
 			padding-top: $grid-unit-30;
 		}
 
-		@media screen and ( max-width: $break-small ) {
+		@media screen and (max-width: $break-small) {
 			padding: $grid-unit-30;
 		}
 
@@ -65,11 +65,11 @@
 			margin-top: $grid-unit-20;
 			margin-bottom: $grid-unit-20;
 
-			@media screen and ( max-width: $break-large ) {
+			@media screen and (max-width: $break-large) {
 				font-size: 20px;
 			}
 
-			@media screen and ( max-width: $break-medium ) {
+			@media screen and (max-width: $break-medium) {
 				font-size: 17px;
 			}
 		}
@@ -77,11 +77,11 @@
 			font-size: 16px;
 			line-height: 24px;
 
-			@media screen and ( max-width: $break-large ) {
+			@media screen and (max-width: $break-large) {
 				font-size: 15px;
 			}
 
-			@media screen and ( max-width: $break-medium ) {
+			@media screen and (max-width: $break-medium) {
 				font-size: 13px;
 				line-height: 20px;
 			}
@@ -100,19 +100,19 @@
 				padding: $grid-unit-05 $grid-unit-10;
 			}
 
-			@media screen and ( max-width: $break-large ) {
+			@media screen and (max-width: $break-large) {
 				text-align: right;
 				margin-top: $grid-unit-30;
 			}
 		}
 	}
 
-	@media screen and ( max-width: $break-large ) {
+	@media screen and (max-width: $break-large) {
 		margin: auto;
 		max-width: 500px;
 	}
 
-	@media screen and ( max-width: $break-small ) {
+	@media screen and (max-width: $break-small) {
 		margin: auto $grid-unit-20;
 		max-width: 100%;
 	}

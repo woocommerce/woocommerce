@@ -16,24 +16,24 @@ export const getIndexes = (
 	currentPage: number,
 	totalPages: number
 ): minMaxIndex => {
-	if ( totalPages <= 2 ) {
+	if (totalPages <= 2) {
 		return { minIndex: null, maxIndex: null };
 	}
 	const extraPagesToDisplay = pagesToDisplay - 1;
 	const tentativeMinIndex = Math.max(
-		Math.floor( currentPage - extraPagesToDisplay / 2 ),
+		Math.floor(currentPage - extraPagesToDisplay / 2),
 		2
 	);
 	const maxIndex = Math.min(
 		Math.ceil(
 			currentPage +
-				( extraPagesToDisplay - ( currentPage - tentativeMinIndex ) )
+				(extraPagesToDisplay - (currentPage - tentativeMinIndex))
 		),
 		totalPages - 1
 	);
 	const minIndex = Math.max(
 		Math.floor(
-			currentPage - ( extraPagesToDisplay - ( maxIndex - currentPage ) )
+			currentPage - (extraPagesToDisplay - (maxIndex - currentPage))
 		),
 		2
 	);

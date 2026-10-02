@@ -16,11 +16,11 @@ import { registeredBlockComponents } from './registered-block-components-init';
  * @param {string} optionName   Name of the option to validate.
  * @param {string} expectedType Type expected for the option.
  */
-const assertOption = ( options, optionName, expectedType ) => {
-	const actualType = typeof options[ optionName ];
-	if ( actualType !== expectedType ) {
+const assertOption = (options, optionName, expectedType) => {
+	const actualType = typeof options[optionName];
+	if (actualType !== expectedType) {
 		throw new Error(
-			`Incorrect value for the ${ optionName } argument when registering a block component. It was a ${ actualType }, but must be a ${ expectedType }.`
+			`Incorrect value for the ${optionName} argument when registering a block component. It was a ${actualType}, but must be a ${expectedType}.`
 		);
 	}
 };
@@ -32,20 +32,20 @@ const assertOption = ( options, optionName, expectedType ) => {
  * @param {Object} options    Object containing the option to validate.
  * @param {string} optionName Name of the option to validate.
  */
-const assertBlockComponent = ( options, optionName ) => {
-	if ( options[ optionName ] ) {
-		if ( typeof options[ optionName ] === 'function' ) {
+const assertBlockComponent = (options, optionName) => {
+	if (options[optionName]) {
+		if (typeof options[optionName] === 'function') {
 			return;
 		}
 		if (
-			options[ optionName ].$$typeof &&
-			options[ optionName ].$$typeof === Symbol.for( 'react.lazy' )
+			options[optionName].$$typeof &&
+			options[optionName].$$typeof === Symbol.for('react.lazy')
 		) {
 			return;
 		}
 	}
 	throw new Error(
-		`Incorrect value for the ${ optionName } argument when registering a block component. Component must be a valid React Element or Lazy callback.`
+		`Incorrect value for the ${optionName} argument when registering a block component. Component must be a valid React Element or Lazy callback.`
 	);
 };
 
@@ -66,21 +66,21 @@ const assertBlockComponent = ( options, optionName ) => {
  *                                     (named parent Block) define it here. If left blank, the
  *                                     Component will be available for all contexts.
  */
-export function registerBlockComponent( options ) {
-	if ( ! options.context ) {
+export function registerBlockComponent(options) {
+	if (!options.context) {
 		options.context = 'any';
 	}
-	assertOption( options, 'context', 'string' );
-	assertOption( options, 'blockName', 'string' );
-	assertBlockComponent( options, 'component' );
+	assertOption(options, 'context', 'string');
+	assertOption(options, 'blockName', 'string');
+	assertBlockComponent(options, 'component');
 
 	const { context, blockName, component } = options;
 
-	if ( ! registeredBlockComponents[ context ] ) {
-		registeredBlockComponents[ context ] = {};
+	if (!registeredBlockComponents[context]) {
+		registeredBlockComponents[context] = {};
 	}
 
-	registeredBlockComponents[ context ][ blockName ] = component;
+	registeredBlockComponents[context][blockName] = component;
 }
 
 /**
@@ -91,15 +91,15 @@ export function registerBlockComponent( options ) {
  * @param {string}   options.blockName Name of the child block being registered.
  * @param {Function} options.component React component used to render the child block.
  */
-export function registerInnerBlock( options ) {
-	deprecated( 'registerInnerBlock', {
+export function registerInnerBlock(options) {
+	deprecated('registerInnerBlock', {
 		version: '4.4.0',
 		alternative: 'registerBlockComponent',
 		hint: '"main" has been replaced with "context" and is now optional.',
-	} );
-	assertOption( options, 'main', 'string' );
-	registerBlockComponent( {
+	});
+	assertOption(options, 'main', 'string');
+	registerBlockComponent({
 		...options,
 		context: options.main,
-	} );
+	});
 }

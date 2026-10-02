@@ -32,31 +32,31 @@ import { focus } from '@wordpress/dom';
  * }
  * ```
  */
-export default function useFocusOnMount( focusOnMount = 'firstElement' ) {
-	const focusOnMountRef = useRef( focusOnMount );
-	useEffect( () => {
+export default function useFocusOnMount(focusOnMount = 'firstElement') {
+	const focusOnMountRef = useRef(focusOnMount);
+	useEffect(() => {
 		focusOnMountRef.current = focusOnMount;
-	}, [ focusOnMount ] );
+	}, [focusOnMount]);
 
-	return useCallback( ( node ) => {
-		if ( ! node || focusOnMountRef.current === false ) {
+	return useCallback((node) => {
+		if (!node || focusOnMountRef.current === false) {
 			return;
 		}
 
-		if ( node.contains( node.ownerDocument.activeElement ) ) {
+		if (node.contains(node.ownerDocument.activeElement)) {
 			return;
 		}
 
 		let target = node;
 
-		if ( focusOnMountRef.current === 'firstElement' ) {
-			const firstTabbable = focus.tabbable.find( node )[ 0 ];
+		if (focusOnMountRef.current === 'firstElement') {
+			const firstTabbable = focus.tabbable.find(node)[0];
 
-			if ( firstTabbable ) {
+			if (firstTabbable) {
 				target = firstTabbable;
 			}
 		}
 
 		target.focus();
-	}, [] );
+	}, []);
 }

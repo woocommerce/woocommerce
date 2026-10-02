@@ -9,8 +9,7 @@ interface ReviewByProductAttributes {
 	productId: number;
 }
 
-export interface ReviewsByProductEditorProps
-	extends BlockEditProps< ReviewByProductAttributes > {
+export interface ReviewsByProductEditorProps extends BlockEditProps<ReviewByProductAttributes> {
 	attributes: ReviewByProductAttributes;
-	debouncedSpeak: ( message: string ) => void;
+	debouncedSpeak: (message: string) => void;
 }

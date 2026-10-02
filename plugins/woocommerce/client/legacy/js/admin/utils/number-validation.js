@@ -12,22 +12,22 @@
  * @returns {boolean} Whether the value is a valid formatted number or formula
  */
 function isValidFormattedNumber( value, config ) {
-    // Ensure we are dealing with a string; non-strings are invalid.
-    if ( typeof value !== 'string' ) {
-        return false;
-    }
+	// Ensure we are dealing with a string; non-strings are invalid.
+	if ( typeof value !== 'string' ) {
+		return false;
+	}
 
-    // Treat empty input as valid so optional fields (e.g. Flat rate main cost)
-    // can be saved as blank to rely on class-only costs.
-    // This preserves 10.0.x behavior where blank values were allowed.
-    if ( value.trim() === '' ) {
-        return true;
-    }
+	// Treat empty input as valid so optional fields (e.g. Flat rate main cost)
+	// can be saved as blank to rely on class-only costs.
+	// This preserves 10.0.x behavior where blank values were allowed.
+	if ( value.trim() === '' ) {
+		return true;
+	}
 
-    // For non-empty values, require a config object.
-    if ( ! config || typeof config !== 'object' ) {
-        return false;
-    }
+	// For non-empty values, require a config object.
+	if ( ! config || typeof config !== 'object' ) {
+		return false;
+	}
 
 	// Whitespace or "]" must follow "weight", excluding names such as [weight-foo].
 	// Attributes stop at the first closing bracket; the server validates their dot-decimal limits on save.
@@ -89,14 +89,18 @@ function isValidFormattedNumber( value, config ) {
 
 		if ( usedDecimalSeparator.trim() !== decimalSeparator.trim() ) {
 			// If the last separator is not the decimal separator, it must be the thousand separator
-            if ( usedDecimalSeparator.trim() !== thousandSeparator.trim() ) {
-                return false; // Invalid separator used
-            }
-            // Check if the last group has exactly 3 digits for thousand separator
-            const lastGroup = num.split( usedDecimalSeparator ).pop();
-            if ( ! lastGroup || lastGroup.length !== 3 || ! /^\d{3}$/.test( lastGroup ) ) {
-                return false; // Invalid thousand separator format
-            }
+			if ( usedDecimalSeparator.trim() !== thousandSeparator.trim() ) {
+				return false; // Invalid separator used
+			}
+			// Check if the last group has exactly 3 digits for thousand separator
+			const lastGroup = num.split( usedDecimalSeparator ).pop();
+			if (
+				! lastGroup ||
+				lastGroup.length !== 3 ||
+				! /^\d{3}$/.test( lastGroup )
+			) {
+				return false; // Invalid thousand separator format
+			}
 		}
 
 		return true; // Valid decimal.
@@ -118,18 +122,27 @@ function isValidFormattedNumber( value, config ) {
  */
 function getDecimalCount( value, config ) {
 	if (
-		typeof value !== 'string'
-		|| ! config
-		|| typeof config !== 'object'
-		|| typeof config.decimalSeparator !== 'string'
-		|| ! config.decimalSeparator
+		typeof value !== 'string' ||
+		! config ||
+		typeof config !== 'object' ||
+		typeof config.decimalSeparator !== 'string' ||
+		! config.decimalSeparator
 	) {
 		return 0;
 	}
 
-	const thousandSeparator = typeof config.thousandSeparator === 'string' ? config.thousandSeparator : '';
-	const escapeForRegExp = ( text ) => text.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
-	const plainNumber = new RegExp( '^[\\d' + escapeForRegExp( config.decimalSeparator ) + escapeForRegExp( thousandSeparator ) + ']+$' );
+	const thousandSeparator =
+		typeof config.thousandSeparator === 'string'
+			? config.thousandSeparator
+			: '';
+	const escapeForRegExp = ( text ) =>
+		text.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
+	const plainNumber = new RegExp(
+		'^[\\d' +
+			escapeForRegExp( config.decimalSeparator ) +
+			escapeForRegExp( thousandSeparator ) +
+			']+$'
+	);
 	const trimmed = value.trim();
 	if ( ! plainNumber.test( trimmed ) ) {
 		return 0;

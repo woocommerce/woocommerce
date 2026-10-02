@@ -6,22 +6,22 @@ import { useState } from '@wordpress/element';
 import { ResizableBox } from '@wordpress/components';
 import { useThrottledCallback } from 'use-debounce';
 
-type ResizeCallback = Exclude< ResizableBox.Props[ 'onResize' ], undefined >;
+type ResizeCallback = Exclude<ResizableBox.Props['onResize'], undefined>;
 
-export const ConstrainedResizable = ( {
+export const ConstrainedResizable = ({
 	className = '',
 	onResize,
 	...props
-}: ResizableBox.Props ): JSX.Element => {
-	const [ isResizing, setIsResizing ] = useState( false );
+}: ResizableBox.Props): JSX.Element => {
+	const [isResizing, setIsResizing] = useState(false);
 
-	const classNames = clsx( className, {
+	const classNames = clsx(className, {
 		'is-resizing': isResizing,
-	} );
-	const throttledResize = useThrottledCallback< ResizeCallback >(
-		( event, direction, elt, _delta ) => {
-			if ( ! isResizing ) setIsResizing( true );
-			onResize?.( event, direction, elt, _delta );
+	});
+	const throttledResize = useThrottledCallback<ResizeCallback>(
+		(event, direction, elt, _delta) => {
+			if (!isResizing) setIsResizing(true);
+			onResize?.(event, direction, elt, _delta);
 		},
 		50,
 		{ leading: true }
@@ -29,14 +29,14 @@ export const ConstrainedResizable = ( {
 
 	return (
 		<ResizableBox
-			className={ classNames }
-			enable={ { bottom: true } }
-			onResize={ throttledResize }
-			onResizeStop={ ( ...args ) => {
-				onResize?.( ...args );
-				setIsResizing( false );
-			} }
-			{ ...props }
+			className={classNames}
+			enable={{ bottom: true }}
+			onResize={throttledResize}
+			onResizeStop={(...args) => {
+				onResize?.(...args);
+				setIsResizing(false);
+			}}
+			{...props}
 		/>
 	);
 };

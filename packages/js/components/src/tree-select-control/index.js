@@ -121,7 +121,7 @@ const TreeSelectControl = ( {
 					label: selectAllLabel,
 					value: ROOT_VALUE,
 					children: options,
-			  }
+				}
 			: null;
 
 	const treeOptions = useIsEqualRefValue( root ? [ root ] : options );

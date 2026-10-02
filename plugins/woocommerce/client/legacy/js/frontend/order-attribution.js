@@ -5,9 +5,11 @@
 
 	// Helper functions.
 	const $ = document.querySelector.bind( document );
-	const propertyAccessor = ( obj, path ) => path.split( '.' ).reduce( ( acc, part ) => acc && acc[ part ], obj );
+	const propertyAccessor = ( obj, path ) =>
+		path.split( '.' ).reduce( ( acc, part ) => acc && acc[ part ], obj );
 	const returnNull = () => null;
-	const stringifyFalsyInputValue = ( value ) => value === null || value === undefined ? '' : value;
+	const stringifyFalsyInputValue = ( value ) =>
+		value === null || value === undefined ? '' : value;
 
 	// Hardcode Checkout store key (`wc.wcBlocksData.CHECKOUT_STORE_KEY`), as we no longer have `wc-blocks-checkout` as a dependency.
 	const CHECKOUT_STORE_KEY = 'wc/store/checkout';
@@ -19,13 +21,17 @@
 	 *
 	 * @returns {Object} Schema compatible object.
 	 */
-	wc_order_attribution.getAttributionData = function() {
-		const accessor = params.allowTracking && isSbjsAvailable() ? propertyAccessor : returnNull;
-		const getter  = isSbjsAvailable() ? sbjs.get : {};
-		const entries = Object.entries( wc_order_attribution.fields )
-			.map( ( [ key, property ] ) => [ key, accessor( getter, property ) ] );
+	wc_order_attribution.getAttributionData = function () {
+		const accessor =
+			params.allowTracking && isSbjsAvailable()
+				? propertyAccessor
+				: returnNull;
+		const getter = isSbjsAvailable() ? sbjs.get : {};
+		const entries = Object.entries( wc_order_attribution.fields ).map(
+			( [ key, property ] ) => [ key, accessor( getter, property ) ]
+		);
 		return Object.fromEntries( entries );
-	}
+	};
 
 	/**
 	 * Remove duplicate `<wc-order-attribution-inputs>` elements within each owning form to prevent
@@ -34,15 +40,17 @@
 	function removeDuplicateInputGroups() {
 		const owners = new Set();
 
-		document.querySelectorAll( 'wc-order-attribution-inputs' ).forEach( ( group ) => {
-			const owner = group.closest( 'form' ) || document;
+		document
+			.querySelectorAll( 'wc-order-attribution-inputs' )
+			.forEach( ( group ) => {
+				const owner = group.closest( 'form' ) || document;
 
-			if ( owners.has( owner ) ) {
-				group.remove();
-			} else {
-				owners.add( owner );
-			}
-		} );
+				if ( owners.has( owner ) ) {
+					group.remove();
+				} else {
+					owners.add( owner );
+				}
+			} );
 	}
 
 	/**
@@ -54,11 +62,12 @@
 		// Remove duplicates before updating to ensure only one set of elements exists.
 		removeDuplicateInputGroups();
 		// Update `<wc-order-attribution-inputs>` elements if any exist.
-		for( const element of document.querySelectorAll( 'wc-order-attribution-inputs' ) ) {
+		for ( const element of document.querySelectorAll(
+			'wc-order-attribution-inputs'
+		) ) {
 			element.values = values;
 		}
-
-	};
+	}
 
 	/**
 	 * Update Checkout extension data.
@@ -98,7 +107,7 @@
 	 *
 	 * @param {boolean} allow Whether to allow tracking or disable it.
 	 */
-	wc_order_attribution.setOrderTracking = function( allow ) {
+	wc_order_attribution.setOrderTracking = function ( allow ) {
 		params.allowTracking = allow;
 		if ( ! allow ) {
 			// Reset cookies, and clear form data.
@@ -117,7 +126,7 @@
 		const values = wc_order_attribution.getAttributionData();
 		updateFormValues( values );
 		updateCheckoutBlockData( values );
-	}
+	};
 
 	/**
 	 * Remove sourcebuster.js cookies.
@@ -133,12 +142,12 @@
 			'sbjs_session',
 			'sbjs_udata',
 			'sbjs_migrations',
-			'sbjs_promo'
+			'sbjs_promo',
 		];
 
 		// Remove cookies
 		sbCookies.forEach( ( name ) => {
-			document.cookie = `${name}=; path=/; max-age=-999; domain=.${domain};`;
+			document.cookie = `${ name }=; path=/; max-age=-999; domain=.${ domain };`;
 		} );
 	}
 
@@ -151,18 +160,25 @@
 	// Wait for (async) block checkout initialization and set source values once loaded.
 	function eventuallyInitializeCheckoutBlock() {
 		if (
-			window.wp && window.wp.data && typeof window.wp.data.subscribe === 'function'
+			window.wp &&
+			window.wp.data &&
+			typeof window.wp.data.subscribe === 'function'
 		) {
 			// Update checkout block data once more if the checkout store was loaded after this script.
 			const unsubscribe = window.wp.data.subscribe( function () {
 				unsubscribe();
-				updateCheckoutBlockData( wc_order_attribution.getAttributionData() );
+				updateCheckoutBlockData(
+					wc_order_attribution.getAttributionData()
+				);
 			}, CHECKOUT_STORE_KEY );
 		}
-	};
+	}
 	// Wait for DOMContentLoaded to make sure wp.data is in place, if applicable for the page.
-	if (document.readyState === "loading") {
-		document.addEventListener("DOMContentLoaded", eventuallyInitializeCheckoutBlock);
+	if ( document.readyState === 'loading' ) {
+		document.addEventListener(
+			'DOMContentLoaded',
+			eventuallyInitializeCheckoutBlock
+		);
 	} else {
 		eventuallyInitializeCheckoutBlock();
 	}
@@ -171,64 +187,71 @@
 	 * Define an element to contribute order attribute values to the enclosing form.
 	 * To be used with the classic checkout.
 	 */
-	window.customElements.define( 'wc-order-attribution-inputs', class extends HTMLElement {
-		// Our bundler version does not support private class members, so we use a convention of `_` prefix.
-		// #values
-		// #fieldNames
-		constructor(){
-			super();
-			// Cache fieldNames available at the construction time, to avoid malformed behavior if they change in runtime.
-			this._fieldNames = Object.keys( wc_order_attribution.fields );
-			// Allow values to be lazily set before CE upgrade.
-			if ( this.hasOwnProperty( '_values' ) ) {
-				let values = this.values;
-				// Restore the setter.
-				delete this.values;
-				this.values = values || {};
+	window.customElements.define(
+		'wc-order-attribution-inputs',
+		class extends HTMLElement {
+			// Our bundler version does not support private class members, so we use a convention of `_` prefix.
+			// #values
+			// #fieldNames
+			constructor() {
+				super();
+				// Cache fieldNames available at the construction time, to avoid malformed behavior if they change in runtime.
+				this._fieldNames = Object.keys( wc_order_attribution.fields );
+				// Allow values to be lazily set before CE upgrade.
+				if ( this.hasOwnProperty( '_values' ) ) {
+					let values = this.values;
+					// Restore the setter.
+					delete this.values;
+					this.values = values || {};
+				}
 			}
-		}
-		/**
-		 * Stamp input elements to the element's light DOM.
-		 *
-		 * We could use `.elementInternals.setFromValue` and avoid sprouting `<input>` elements,
-		 * but it's not yet supported in Safari.
-		 */
-		connectedCallback() {
-			this.innerHTML = '';
-			const inputs = new DocumentFragment();
-			for( const fieldName of this._fieldNames ) {
-				const input = document.createElement( 'input' );
-				input.type = 'hidden';
-				input.name = `${params.prefix}${fieldName}`;
-				input.value = stringifyFalsyInputValue( ( this.values && this.values[ fieldName ] ) || '' );
-				inputs.appendChild( input );
+			/**
+			 * Stamp input elements to the element's light DOM.
+			 *
+			 * We could use `.elementInternals.setFromValue` and avoid sprouting `<input>` elements,
+			 * but it's not yet supported in Safari.
+			 */
+			connectedCallback() {
+				this.innerHTML = '';
+				const inputs = new DocumentFragment();
+				for ( const fieldName of this._fieldNames ) {
+					const input = document.createElement( 'input' );
+					input.type = 'hidden';
+					input.name = `${ params.prefix }${ fieldName }`;
+					input.value = stringifyFalsyInputValue(
+						( this.values && this.values[ fieldName ] ) || ''
+					);
+					inputs.appendChild( input );
+				}
+				this.appendChild( inputs );
 			}
-			this.appendChild( inputs );
-		}
 
-		/**
-		 * Update form values.
-		 */
-		set values( values ) {
-			this._values = values;
-			if( this.isConnected ) {
-				for( const fieldName of this._fieldNames ) {
-					const input = this.querySelector( `input[name="${params.prefix}${fieldName}"]` );
-					if( input ) {
-						input.value = stringifyFalsyInputValue( this.values[ fieldName ] );
-					} else {
-						console.warn(
-							`Field "${fieldName}" not found. ` +
-							`Most likely, the '<wc-order-attribution-inputs>' element was manipulated.`
+			/**
+			 * Update form values.
+			 */
+			set values( values ) {
+				this._values = values;
+				if ( this.isConnected ) {
+					for ( const fieldName of this._fieldNames ) {
+						const input = this.querySelector(
+							`input[name="${ params.prefix }${ fieldName }"]`
 						);
+						if ( input ) {
+							input.value = stringifyFalsyInputValue(
+								this.values[ fieldName ]
+							);
+						} else {
+							console.warn(
+								`Field "${ fieldName }" not found. ` +
+									`Most likely, the '<wc-order-attribution-inputs>' element was manipulated.`
+							);
+						}
 					}
 				}
 			}
+			get values() {
+				return this._values;
+			}
 		}
-		get values() {
-			return this._values;
-		}
-	} );
-
-
-}( window.wc_order_attribution ) );
+	);
+} )( window.wc_order_attribution );

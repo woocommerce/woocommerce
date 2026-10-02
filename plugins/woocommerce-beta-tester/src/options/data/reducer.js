@@ -16,8 +16,8 @@ const DEFAULT_STATE = {
 	},
 };
 
-const reducer = ( state = DEFAULT_STATE, action ) => {
-	switch ( action.type ) {
+const reducer = (state = DEFAULT_STATE, action) => {
+	switch (action.type) {
 		case TYPES.SET_OPTION_FOR_EDITING:
 			return {
 				...state,
@@ -49,7 +49,7 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 			return {
 				...state,
 				options: state.options.filter(
-					( item ) => item.option_name !== action.optionName
+					(item) => item.option_name !== action.optionName
 				),
 			};
 		default:

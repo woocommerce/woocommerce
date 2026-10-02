@@ -6,8 +6,8 @@ import { __ } from '@wordpress/i18n';
 
 const Edit = () => {
 	const blockProps = useBlockProps();
-	const innerBlocksProps = useInnerBlocksProps( blockProps, {
-		allowedBlocks: [ 'core/buttons', 'core/button' ],
+	const innerBlocksProps = useInnerBlocksProps(blockProps, {
+		allowedBlocks: ['core/buttons', 'core/button'],
 		template: [
 			[
 				'core/buttons',
@@ -21,7 +21,7 @@ const Edit = () => {
 					[
 						'core/button',
 						{
-							text: __( 'Clear filters', 'woocommerce' ),
+							text: __('Clear filters', 'woocommerce'),
 							className:
 								'wc-block-product-filter-clear-button is-style-outline',
 							style: {
@@ -49,9 +49,9 @@ const Edit = () => {
 				],
 			],
 		],
-	} );
+	});
 
-	return <div { ...innerBlocksProps } />;
+	return <div {...innerBlocksProps} />;
 };
 
 export default Edit;

@@ -28,90 +28,90 @@ const POLL_INTERVAL = 5000;
  * @return {UseImportStatusReturn} Import status state and actions
  */
 export function useImportStatus(): UseImportStatusReturn {
-	const [ status, setStatus ] = useState< ImportStatus | null >( null );
-	const [ isLoading, setIsLoading ] = useState( true );
-	const [ error, setError ] = useState< string | null >( null );
-	const [ isTriggeringImport, setIsTriggeringImport ] = useState( false );
-	const intervalRef = useRef< number | null >( null );
+	const [status, setStatus] = useState<ImportStatus | null>(null);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+	const [isTriggeringImport, setIsTriggeringImport] = useState(false);
+	const intervalRef = useRef<number | null>(null);
 
 	/**
 	 * Fetch import status from API
 	 */
-	const fetchStatus = useCallback( async () => {
+	const fetchStatus = useCallback(async () => {
 		try {
-			const data = await apiFetch< ImportStatus >( {
+			const data = await apiFetch<ImportStatus>({
 				path: '/wc-analytics/imports/status',
 				method: 'GET',
-			} );
-			setStatus( data );
-			setError( null );
-		} catch ( err ) {
+			});
+			setStatus(data);
+			setError(null);
+		} catch (err) {
 			setError(
 				err instanceof Error
 					? err.message
-					: __( 'Failed to fetch status', 'woocommerce' )
+					: __('Failed to fetch status', 'woocommerce')
 			);
 		} finally {
-			setIsLoading( false );
+			setIsLoading(false);
 		}
-	}, [] );
+	}, []);
 
 	/**
 	 * Trigger a manual import
 	 */
-	const triggerImport = useCallback( async () => {
-		setIsTriggeringImport( true );
+	const triggerImport = useCallback(async () => {
+		setIsTriggeringImport(true);
 		try {
-			await apiFetch( {
+			await apiFetch({
 				path: '/wc-analytics/imports/trigger',
 				method: 'POST',
-			} );
+			});
 			// Immediately refetch to get updated status
 			await fetchStatus();
-		} catch ( err ) {
+		} catch (err) {
 			setError(
 				err instanceof Error
 					? err.message
-					: __( 'Failed to trigger import', 'woocommerce' )
+					: __('Failed to trigger import', 'woocommerce')
 			);
 			throw err; // Re-throw so component can handle it
 		} finally {
-			setIsTriggeringImport( false );
+			setIsTriggeringImport(false);
 		}
-	}, [ fetchStatus ] );
+	}, [fetchStatus]);
 
 	/**
 	 * Initial fetch on mount
 	 */
-	useEffect( () => {
+	useEffect(() => {
 		void fetchStatus();
-	}, [ fetchStatus ] );
+	}, [fetchStatus]);
 
 	/**
 	 * Polling lifecycle management
 	 * Start polling when import_in_progress_or_due is true
 	 * Stop polling when it becomes false
 	 */
-	useEffect( () => {
-		if ( status?.import_in_progress_or_due ) {
+	useEffect(() => {
+		if (status?.import_in_progress_or_due) {
 			// Start polling
 			intervalRef.current = window.setInterval(
 				fetchStatus,
 				POLL_INTERVAL
 			);
-		} else if ( intervalRef.current ) {
-			clearInterval( intervalRef.current );
+		} else if (intervalRef.current) {
+			clearInterval(intervalRef.current);
 			intervalRef.current = null;
 		}
 
 		// Cleanup on unmount or when dependencies change
 		return () => {
-			if ( intervalRef.current ) {
-				clearInterval( intervalRef.current );
+			if (intervalRef.current) {
+				clearInterval(intervalRef.current);
 				intervalRef.current = null;
 			}
 		};
-	}, [ status?.import_in_progress_or_due, fetchStatus ] );
+	}, [status?.import_in_progress_or_due, fetchStatus]);
 
 	return {
 		status,

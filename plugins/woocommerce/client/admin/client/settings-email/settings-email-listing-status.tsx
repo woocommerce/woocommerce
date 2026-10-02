@@ -13,22 +13,19 @@ import { __experimentalHStack as HStack, Icon } from '@wordpress/components';
 export const EMAIL_STATUSES = [
 	{
 		value: 'enabled',
-		label: __( 'Active', 'woocommerce' ),
+		label: __('Active', 'woocommerce'),
 		icon: published,
-		description: __(
-			'Email would be sent if trigger is met',
-			'woocommerce'
-		),
+		description: __('Email would be sent if trigger is met', 'woocommerce'),
 	},
 	{
 		value: 'disabled',
-		label: __( 'Inactive', 'woocommerce' ),
+		label: __('Inactive', 'woocommerce'),
 		icon: cancelCircleFilled,
-		description: __( 'Email would not be sent', 'woocommerce' ),
+		description: __('Email would not be sent', 'woocommerce'),
 	},
 	{
 		value: 'manual',
-		label: __( 'Manually sent', 'woocommerce' ),
+		label: __('Manually sent', 'woocommerce'),
 		icon: scheduled,
 		description: __(
 			'Email can only be sent manually from the order screen',
@@ -37,22 +34,22 @@ export const EMAIL_STATUSES = [
 	},
 ];
 
-export const Status = ( { slug }: { slug: string | undefined } ) => {
+export const Status = ({ slug }: { slug: string | undefined }) => {
 	const status = slug
-		? EMAIL_STATUSES.find( ( s ) => s.value === slug )
+		? EMAIL_STATUSES.find((s) => s.value === slug)
 		: undefined;
-	if ( ! status ) {
+	if (!status) {
 		return slug;
 	}
 	return (
 		<HStack
 			alignment="left"
-			spacing={ 0 }
+			spacing={0}
 			className="woocommerce-email-listing-status"
 		>
-			<Icon icon={ status.icon } size={ 24 } />
+			<Icon icon={status.icon} size={24} />
 			<span className="woocommerce-email-listing-status-label">
-				{ status.label }
+				{status.label}
 			</span>
 		</HStack>
 	);

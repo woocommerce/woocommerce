@@ -5,7 +5,9 @@
 	z-index: 1000;
 	opacity: 0;
 	transform: translateY(20px);
-	transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+	transition:
+		opacity 0.3s ease-in-out,
+		transform 0.3s ease-in-out;
 
 	&.is-visible {
 		opacity: 1;

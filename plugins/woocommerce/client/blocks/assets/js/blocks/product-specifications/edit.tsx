@@ -26,27 +26,27 @@ const DEFAULT_ATTRIBUTES = {
 };
 
 const getFormattedDimensions = (
-	dimensions: Product[ 'dimensions' ],
+	dimensions: Product['dimensions'],
 	dimensionUnit: string
 ) => {
-	if ( ! dimensions ) return '';
+	if (!dimensions) return '';
 
 	const dimensionKeys = [
 		'length',
 		'width',
 		'height',
-	] as ( keyof Product[ 'dimensions' ] )[];
+	] as (keyof Product['dimensions'])[];
 
 	const validDimensions = dimensionKeys
-		.map( ( key ) => dimensions[ key ] )
+		.map((key) => dimensions[key])
 		.filter(
-			( value ): value is string =>
+			(value): value is string =>
 				typeof value === 'string' && value.length > 0
 		);
 
-	if ( validDimensions.length === 0 ) return '';
+	if (validDimensions.length === 0) return '';
 
-	return `${ validDimensions.join( ' × ' ) } ${ dimensionUnit }`;
+	return `${validDimensions.join(' × ')} ${dimensionUnit}`;
 };
 
 const EMPTY_PRODUCT_RESULT = {
@@ -54,75 +54,74 @@ const EMPTY_PRODUCT_RESULT = {
 	isLoadingProduct: false,
 };
 
-const Edit = ( {
+const Edit = ({
 	context: { postId, postType },
 	clientId,
 	attributes,
 	setAttributes,
-}: ProductSpecificationsEditProps ) => {
+}: ProductSpecificationsEditProps) => {
 	const { showWeight, showDimensions, showAttributes } = attributes;
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className: 'wp-block-table',
-	} );
-	const isSpecificProductContext = !! ( postId && postType === 'product' );
+	});
+	const isSpecificProductContext = !!(postId && postType === 'product');
 
 	const { dimensionUnit, weightUnit, isLoadingUnits } = useSelect(
-		( select ) => {
-			const { getOption } = select( optionsStore );
+		(select) => {
+			const { getOption } = select(optionsStore);
 			return {
 				dimensionUnit: getOption(
 					'woocommerce_dimension_unit'
 				) as string,
-				weightUnit: getOption( 'woocommerce_weight_unit' ) as string,
+				weightUnit: getOption('woocommerce_weight_unit') as string,
 				isLoadingUnits:
-					! select( optionsStore ).hasFinishedResolution(
-						'getOption',
-						[ 'woocommerce_dimension_unit' ]
-					) ||
-					! select( optionsStore ).hasFinishedResolution(
-						'getOption',
-						[ 'woocommerce_weight_unit' ]
-					),
+					!select(optionsStore).hasFinishedResolution('getOption', [
+						'woocommerce_dimension_unit',
+					]) ||
+					!select(optionsStore).hasFinishedResolution('getOption', [
+						'woocommerce_weight_unit',
+					]),
 			};
 		},
 		[]
 	);
 
 	const { product, isLoadingProduct } = useSelect(
-		( select ) => {
-			if ( ! postId ) return EMPTY_PRODUCT_RESULT;
-			const { getProduct } = select( productsStore );
+		(select) => {
+			if (!postId) return EMPTY_PRODUCT_RESULT;
+			const { getProduct } = select(productsStore);
 			return {
-				product: getProduct( Number( postId ) ),
-				isLoadingProduct: ! select(
-					productsStore
-				).hasFinishedResolution( 'getProduct', [ Number( postId ) ] ),
+				product: getProduct(Number(postId)),
+				isLoadingProduct: !select(productsStore).hasFinishedResolution(
+					'getProduct',
+					[Number(postId)]
+				),
 			};
 		},
-		[ postId ]
+		[postId]
 	);
 
 	/**
 	 * Validate Query Loop block context
 	 */
 	const { hasInvalidContext, warningElement } =
-		useQueryLoopProductContextValidation( {
+		useQueryLoopProductContextValidation({
 			clientId,
 			postType,
-			blockName: __( 'Product Specifications', 'woocommerce' ),
-		} );
-	if ( hasInvalidContext ) {
+			blockName: __('Product Specifications', 'woocommerce'),
+		});
+	if (hasInvalidContext) {
 		return warningElement;
 	}
 
 	/**
 	 * Display loading state
 	 */
-	if ( isLoadingUnits || ( isLoadingProduct && isSpecificProductContext ) ) {
+	if (isLoadingUnits || (isLoadingProduct && isSpecificProductContext)) {
 		return (
-			<div { ...blockProps }>
+			<div {...blockProps}>
 				<span className="wc-product-specifications__loading">
-					{ __( 'Loading…', 'woocommerce' ) }
+					{__('Loading…', 'woocommerce')}
 				</span>
 			</div>
 		);
@@ -131,60 +130,60 @@ const Edit = ( {
 	/**
 	 * Display no product found message
 	 */
-	if ( postId && ! product ) {
+	if (postId && !product) {
 		return (
-			<div { ...blockProps }>
-				<p>{ __( 'No product found', 'woocommerce' ) }</p>
+			<div {...blockProps}>
+				<p>{__('No product found', 'woocommerce')}</p>
 			</div>
 		);
 	}
 
-	const productData: Record< string, { label: string; value: string } > = {};
+	const productData: Record<string, { label: string; value: string }> = {};
 
-	if ( showWeight ) {
+	if (showWeight) {
 		productData.weight = {
-			label: __( 'Weight', 'woocommerce' ),
+			label: __('Weight', 'woocommerce'),
 			value: '',
 		};
 
-		if ( isSpecificProductContext ) {
+		if (isSpecificProductContext) {
 			productData.weight.value = product?.weight
-				? `${ product.weight } ${ weightUnit }`
+				? `${product.weight} ${weightUnit}`
 				: '';
 		} else {
-			productData.weight.value = `10 ${ weightUnit }`;
+			productData.weight.value = `10 ${weightUnit}`;
 		}
 	}
 
-	if ( showDimensions ) {
+	if (showDimensions) {
 		productData.dimensions = {
-			label: __( 'Dimensions', 'woocommerce' ),
+			label: __('Dimensions', 'woocommerce'),
 			value: '',
 		};
 
-		if ( isSpecificProductContext ) {
+		if (isSpecificProductContext) {
 			productData.dimensions.value = product?.dimensions
-				? getFormattedDimensions( product.dimensions, dimensionUnit )
+				? getFormattedDimensions(product.dimensions, dimensionUnit)
 				: '';
 		} else {
-			productData.dimensions.value = `10 × 10 × 10 ${ dimensionUnit }`;
+			productData.dimensions.value = `10 × 10 × 10 ${dimensionUnit}`;
 		}
 	}
 
-	if ( showAttributes ) {
-		if ( isSpecificProductContext ) {
-			if ( product?.attributes ) {
-				product.attributes.forEach( ( attribute ) => {
-					productData[ attribute.name.toLowerCase() ] = {
+	if (showAttributes) {
+		if (isSpecificProductContext) {
+			if (product?.attributes) {
+				product.attributes.forEach((attribute) => {
+					productData[attribute.name.toLowerCase()] = {
 						label: attribute.name,
-						value: attribute.options.join( ', ' ),
+						value: attribute.options.join(', '),
 					};
-				} );
+				});
 			}
 		} else {
 			productData.test_attribute = {
-				label: __( 'Test Attribute', 'woocommerce' ),
-				value: __( 'First, Second, Third', 'woocommerce' ),
+				label: __('Test Attribute', 'woocommerce'),
+				value: __('First, Second, Third', 'woocommerce'),
 			};
 		}
 	}
@@ -193,107 +192,107 @@ const Edit = ( {
 		<>
 			<InspectorControls>
 				<ToolsPanel
-					label={ __( 'Display Settings', 'woocommerce' ) }
-					resetAll={ () => {
-						setAttributes( DEFAULT_ATTRIBUTES );
-					} }
+					label={__('Display Settings', 'woocommerce')}
+					resetAll={() => {
+						setAttributes(DEFAULT_ATTRIBUTES);
+					}}
 				>
 					<ToolsPanelItem
-						label={ __( 'Show Weight', 'woocommerce' ) }
-						hasValue={ () =>
+						label={__('Show Weight', 'woocommerce')}
+						hasValue={() =>
 							showWeight !== DEFAULT_ATTRIBUTES.showWeight
 						}
-						onDeselect={ () =>
-							setAttributes( {
+						onDeselect={() =>
+							setAttributes({
 								showWeight: DEFAULT_ATTRIBUTES.showWeight,
-							} )
+							})
 						}
 						isShownByDefault
 					>
 						<ToggleControl
-							label={ __( 'Show Weight', 'woocommerce' ) }
-							checked={ showWeight }
-							onChange={ () =>
-								setAttributes( { showWeight: ! showWeight } )
+							label={__('Show Weight', 'woocommerce')}
+							checked={showWeight}
+							onChange={() =>
+								setAttributes({ showWeight: !showWeight })
 							}
 						/>
 					</ToolsPanelItem>
 					<ToolsPanelItem
-						label={ __( 'Show Dimensions', 'woocommerce' ) }
-						hasValue={ () =>
+						label={__('Show Dimensions', 'woocommerce')}
+						hasValue={() =>
 							showDimensions !== DEFAULT_ATTRIBUTES.showDimensions
 						}
-						onDeselect={ () =>
-							setAttributes( {
+						onDeselect={() =>
+							setAttributes({
 								showDimensions:
 									DEFAULT_ATTRIBUTES.showDimensions,
-							} )
+							})
 						}
 						isShownByDefault
 					>
 						<ToggleControl
-							label={ __( 'Show Dimensions', 'woocommerce' ) }
-							checked={ showDimensions }
-							onChange={ () =>
-								setAttributes( {
-									showDimensions: ! showDimensions,
-								} )
+							label={__('Show Dimensions', 'woocommerce')}
+							checked={showDimensions}
+							onChange={() =>
+								setAttributes({
+									showDimensions: !showDimensions,
+								})
 							}
 						/>
 					</ToolsPanelItem>
 					<ToolsPanelItem
-						label={ __( 'Show Attributes', 'woocommerce' ) }
-						hasValue={ () =>
+						label={__('Show Attributes', 'woocommerce')}
+						hasValue={() =>
 							showAttributes !== DEFAULT_ATTRIBUTES.showAttributes
 						}
-						onDeselect={ () =>
-							setAttributes( {
+						onDeselect={() =>
+							setAttributes({
 								showAttributes:
 									DEFAULT_ATTRIBUTES.showAttributes,
-							} )
+							})
 						}
 						isShownByDefault
 					>
 						<ToggleControl
-							label={ __( 'Show Attributes', 'woocommerce' ) }
-							checked={ showAttributes }
-							onChange={ () =>
-								setAttributes( {
-									showAttributes: ! showAttributes,
-								} )
+							label={__('Show Attributes', 'woocommerce')}
+							checked={showAttributes}
+							onChange={() =>
+								setAttributes({
+									showAttributes: !showAttributes,
+								})
 							}
 						/>
 					</ToolsPanelItem>
 				</ToolsPanel>
 			</InspectorControls>
-			<figure { ...blockProps }>
+			<figure {...blockProps}>
 				<table>
 					<thead className="screen-reader-text">
 						<tr>
-							<th>{ __( 'Attributes', 'woocommerce' ) }</th>
-							<th>{ __( 'Value', 'woocommerce' ) }</th>
+							<th>{__('Attributes', 'woocommerce')}</th>
+							<th>{__('Value', 'woocommerce')}</th>
 						</tr>
 					</thead>
 					<tbody>
-						{ Object.entries( productData ).map(
-							( [ key, data ] ) =>
+						{Object.entries(productData).map(
+							([key, data]) =>
 								data.value && (
 									<tr
-										key={ key }
-										className={ `wp-block-product-specifications-item wc-block-product-specifications-item-${ key }` }
+										key={key}
+										className={`wp-block-product-specifications-item wc-block-product-specifications-item-${key}`}
 									>
 										<th
 											scope="row"
 											className="wp-block-product-specifications-item__label"
 										>
-											{ data.label }
+											{data.label}
 										</th>
 										<td className="wp-block-product-specifications-item__value">
-											{ data.value }
+											{data.value}
 										</td>
 									</tr>
 								)
-						) }
+						)}
 					</tbody>
 				</table>
 			</figure>

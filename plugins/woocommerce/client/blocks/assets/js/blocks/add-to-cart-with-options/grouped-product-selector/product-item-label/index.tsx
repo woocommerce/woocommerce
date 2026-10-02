@@ -14,23 +14,23 @@ import { isProductResponseItem } from '@woocommerce/entities';
  */
 import metadata from './block.json';
 
-registerBlockType( metadata.name, {
+registerBlockType(metadata.name, {
 	...metadata,
 	edit: function Edit() {
 		const blockProps = useBlockProps();
 		const { isLoading, product } = useProductDataContext();
 
-		if ( isLoading || ! isProductResponseItem( product ) ) {
+		if (isLoading || !isProductResponseItem(product)) {
 			return <Spinner />;
 		}
 		return (
-			<div { ...blockProps }>
+			<div {...blockProps}>
 				<div className="wp-block-woocommerce-add-to-cart-with-options-grouped-product-item-label">
-					{ product.name }
+					{product.name}
 				</div>
 			</div>
 		);
 	},
 	icon: heading,
 	save: () => null,
-} as unknown as BlockConfiguration );
+} as unknown as BlockConfiguration);

@@ -9,7 +9,7 @@ import {
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
 
-const OrderByControl = ( {
+const OrderByControl = ({
 	hasValue = () => true,
 	orderOptions,
 	onChange,
@@ -20,28 +20,28 @@ const OrderByControl = ( {
 }: {
 	hasValue?: () => boolean;
 	orderOptions: { value: string; label: string }[];
-	onChange: ( value: string ) => void;
+	onChange: (value: string) => void;
 	onDeselect?: () => void;
 	selectedValue: string;
 	label?: string;
 	help?: string;
-} ) => {
+}) => {
 	return (
 		<ToolsPanelItem
-			label={ label || __( 'Order by', 'woocommerce' ) }
-			hasValue={ hasValue }
+			label={label || __('Order by', 'woocommerce')}
+			hasValue={hasValue}
 			isShownByDefault
-			onDeselect={ onDeselect }
-			resetAllFilter={ onDeselect }
+			onDeselect={onDeselect}
+			resetAllFilter={onDeselect}
 		>
 			<SelectControl
 				__next40pxDefaultSize
 				__nextHasNoMarginBottom
-				value={ selectedValue }
-				options={ orderOptions }
-				label={ label || __( 'Order by', 'woocommerce' ) }
-				onChange={ onChange }
-				help={ help }
+				value={selectedValue}
+				options={orderOptions}
+				label={label || __('Order by', 'woocommerce')}
+				onChange={onChange}
+				help={help}
 			/>
 		</ToolsPanelItem>
 	);

@@ -24,7 +24,7 @@ export const config = {
 	__experimentalUseThunks: true,
 };
 
-export const store = createReduxStore( STORE_KEY, config );
+export const store = createReduxStore(STORE_KEY, config);
 export type PaymentStoreDescriptor = typeof store;
-register( store );
-subscribe( pushChanges, store );
+register(store);
+subscribe(pushChanges, store);

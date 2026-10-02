@@ -19,10 +19,10 @@ export const isShippingAddress = (
 		'country',
 		'phone',
 	];
-	return keys.every( ( key ) => objectHasProp( address, key ) );
+	return keys.every((key) => objectHasProp(address, key));
 };
 export const isBillingAddress = (
 	address: unknown
 ): address is BillingAddress => {
-	return isShippingAddress( address ) && objectHasProp( address, 'email' );
+	return isShippingAddress(address) && objectHasProp(address, 'email');
 };

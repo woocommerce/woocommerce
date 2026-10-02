@@ -37,85 +37,85 @@ interface OfficialBadgeProps {
  * // Render an official badge with just the icon.
  * <OfficialBadge variant="compact" suggestionId="some_id" />
  */
-export const OfficialBadge = ( {
+export const OfficialBadge = ({
 	variant,
 	suggestionId,
-}: OfficialBadgeProps ) => {
-	const [ isPopoverVisible, setPopoverVisible ] = useState( false );
-	const buttonRef = useRef< HTMLButtonElement >( null );
+}: OfficialBadgeProps) => {
+	const [isPopoverVisible, setPopoverVisible] = useState(false);
+	const buttonRef = useRef<HTMLButtonElement>(null);
 
-	const handleClick = ( event: React.MouseEvent | React.KeyboardEvent ) => {
+	const handleClick = (event: React.MouseEvent | React.KeyboardEvent) => {
 		const clickedElement = event.target as HTMLElement;
 		const parentSpan = clickedElement.closest(
 			'.woocommerce-official-extension-badge__container'
 		);
 
-		if ( buttonRef.current && parentSpan !== buttonRef.current ) {
+		if (buttonRef.current && parentSpan !== buttonRef.current) {
 			return;
 		}
 
-		setPopoverVisible( ( prev ) => ! prev );
+		setPopoverVisible((prev) => !prev);
 
 		// Record the event when the user clicks on the badge.
-		recordPaymentsEvent( 'official_badge_click', {
+		recordPaymentsEvent('official_badge_click', {
 			suggestion_id: suggestionId,
-		} );
+		});
 	};
 
 	const handleFocusOutside = () => {
-		setPopoverVisible( false );
+		setPopoverVisible(false);
 	};
 
-	const handleKeyDown = ( event: React.KeyboardEvent ) => {
-		if ( event.key === 'Escape' && isPopoverVisible ) {
+	const handleKeyDown = (event: React.KeyboardEvent) => {
+		if (event.key === 'Escape' && isPopoverVisible) {
 			event.stopPropagation();
-			setPopoverVisible( false );
+			setPopoverVisible(false);
 			buttonRef.current?.focus();
-		} else if ( event.key === 'Enter' || event.key === ' ' ) {
+		} else if (event.key === 'Enter' || event.key === ' ') {
 			event.preventDefault();
-			handleClick( event );
+			handleClick(event);
 		}
 	};
 
 	return (
-		<Pill className={ `woocommerce-official-extension-badge` }>
+		<Pill className={`woocommerce-official-extension-badge`}>
 			<span
 				className="woocommerce-official-extension-badge__container"
-				tabIndex={ 0 }
+				tabIndex={0}
 				role="button"
-				ref={ buttonRef }
-				onClick={ handleClick }
-				onKeyDown={ handleKeyDown }
+				ref={buttonRef}
+				onClick={handleClick}
+				onKeyDown={handleKeyDown}
 			>
 				<img
-					src={ WC_ASSET_URL + 'images/icons/official-extension.svg' }
-					alt={ __(
+					src={WC_ASSET_URL + 'images/icons/official-extension.svg'}
+					alt={__(
 						'Official WooCommerce extension badge',
 						'woocommerce'
-					) }
+					)}
 				/>
-				{ variant === 'expanded' && (
-					<span>{ __( 'Official', 'woocommerce' ) }</span>
-				) }
-				{ isPopoverVisible && (
+				{variant === 'expanded' && (
+					<span>{__('Official', 'woocommerce')}</span>
+				)}
+				{isPopoverVisible && (
 					<Popover
 						className="woocommerce-official-extension-badge-popover"
 						placement="top-start"
-						offset={ 4 }
+						offset={4}
 						variant="unstyled"
-						focusOnMount={ true }
-						noArrow={ true }
-						shift={ true }
-						onFocusOutside={ handleFocusOutside }
-						onKeyDown={ handleKeyDown }
+						focusOnMount={true}
+						noArrow={true}
+						shift={true}
+						onFocusOutside={handleFocusOutside}
+						onKeyDown={handleKeyDown}
 					>
-						{ /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */ }
+						{/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
 						<div
 							className="components-popover__content-container"
-							onKeyDown={ handleKeyDown }
+							onKeyDown={handleKeyDown}
 						>
 							<p>
-								{ createInterpolateElement(
+								{createInterpolateElement(
 									__(
 										'This is an Official WooCommerce payment extension. <learnMoreLink />',
 										'woocommerce'
@@ -127,7 +127,7 @@ export const OfficialBadge = ( {
 												target="_blank"
 												rel="noreferrer"
 												type="external"
-												onClick={ () => {
+												onClick={() => {
 													// Record the event when the user clicks on the learn more link.
 													recordPaymentsEvent(
 														'official_badge_learn_more_click',
@@ -136,20 +136,20 @@ export const OfficialBadge = ( {
 																suggestionId,
 														}
 													);
-												} }
+												}}
 											>
-												{ __(
+												{__(
 													'Learn more',
 													'woocommerce'
-												) }
+												)}
 											</Link>
 										),
 									}
-								) }
+								)}
 							</p>
 						</div>
 					</Popover>
-				) }
+				)}
 			</span>
 		</Pill>
 	);

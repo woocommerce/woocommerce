@@ -8,9 +8,9 @@ import domReady from '@wordpress/dom-ready';
  */
 import { trackPluginNoticeLinks } from '~/utils/plugin-notice-tracking';
 
-domReady( () => {
+domReady(() => {
 	trackPluginNoticeLinks(
 		'.woocommerce-connect-your-store',
 		'woo_connect_notice_in_plugins'
 	);
-} );
+});

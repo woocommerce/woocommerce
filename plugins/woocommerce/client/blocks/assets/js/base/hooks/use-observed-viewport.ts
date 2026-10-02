@@ -18,69 +18,67 @@ import { useState, useRef, useEffect } from '@wordpress/element';
  * };
  * ```
  */
-export function useObservedViewport< T extends HTMLElement >(): [
-	React.Ref< T >,
+export function useObservedViewport<T extends HTMLElement>(): [
+	React.Ref<T>,
 	{ height: number; width: number },
 	{ height: number; width: number },
 ] {
-	const [ observedElement, setObservedElement ] = useState( {
+	const [observedElement, setObservedElement] = useState({
 		height: 0,
 		width: 0,
-	} );
+	});
 
-	const [ viewWindow, setViewWindow ] = useState( {
+	const [viewWindow, setViewWindow] = useState({
 		height: 0,
 		width: 0,
-	} );
+	});
 
-	const observedRef = useRef< T >( null );
+	const observedRef = useRef<T>(null);
 
-	useEffect( () => {
-		if ( ! observedRef.current ) {
+	useEffect(() => {
+		if (!observedRef.current) {
 			return;
 		}
 		const element = observedRef.current;
-		const resizeObserver = new ResizeObserver( ( entries ) => {
-			entries.forEach( ( entry ) => {
-				if ( entry.target === element ) {
+		const resizeObserver = new ResizeObserver((entries) => {
+			entries.forEach((entry) => {
+				if (entry.target === element) {
 					let elementTop = '0';
 
-					if ( element.computedStyleMap ) {
+					if (element.computedStyleMap) {
 						elementTop =
-							element
-								.computedStyleMap()
-								.get( 'top' )
-								?.toString() || elementTop;
+							element.computedStyleMap().get('top')?.toString() ||
+							elementTop;
 					} else {
 						// Firefox support
 						elementTop =
-							getComputedStyle( element ).top || elementTop;
+							getComputedStyle(element).top || elementTop;
 					}
 
 					const { height, width } = entry.contentRect;
 
-					setObservedElement( {
-						height: height + parseInt( elementTop, 10 ),
+					setObservedElement({
+						height: height + parseInt(elementTop, 10),
 						width,
-					} );
+					});
 				}
-			} );
-		} );
+			});
+		});
 
 		const intersectionObserver = new IntersectionObserver(
-			( entries ) => {
-				entries.forEach( ( entry ) => {
+			(entries) => {
+				entries.forEach((entry) => {
 					const { height, width } = entry.boundingClientRect;
-					setObservedElement( { height, width } );
-					if ( entry.target.ownerDocument.defaultView ) {
-						setViewWindow( {
+					setObservedElement({ height, width });
+					if (entry.target.ownerDocument.defaultView) {
+						setViewWindow({
 							height: entry.target.ownerDocument.defaultView
 								?.innerHeight,
 							width: entry.target.ownerDocument.defaultView
 								?.innerWidth,
-						} );
+						});
 					}
-				} );
+				});
 			},
 			{
 				root: null,
@@ -89,17 +87,17 @@ export function useObservedViewport< T extends HTMLElement >(): [
 			}
 		);
 
-		resizeObserver.observe( element );
-		intersectionObserver.observe( element );
+		resizeObserver.observe(element);
+		intersectionObserver.observe(element);
 
 		return () => {
-			if ( ! element ) {
+			if (!element) {
 				return;
 			}
 
-			resizeObserver.unobserve( element );
-			intersectionObserver.unobserve( element );
+			resizeObserver.unobserve(element);
+			intersectionObserver.unobserve(element);
 		};
-	}, [] );
-	return [ observedRef, observedElement, viewWindow ];
+	}, []);
+	return [observedRef, observedElement, viewWindow];
 }

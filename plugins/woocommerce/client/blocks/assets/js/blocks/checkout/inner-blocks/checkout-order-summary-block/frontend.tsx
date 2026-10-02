@@ -15,94 +15,94 @@ import { OrderMetaSlotFill, CheckoutOrderSummaryFill } from './slotfills';
 import { FormStepHeading } from '../../form-step';
 import { useOrderSummaryToggle } from './use-order-summary-toggle';
 
-const FrontendBlock = ( {
+const FrontendBlock = ({
 	children,
 	className = '',
 }: {
 	children: JSX.Element | JSX.Element[];
 	className?: string;
-} ): JSX.Element | null => {
+}): JSX.Element | null => {
 	const { cartTotals } = useStoreCart();
 	const { isOpen, isLarge, ariaControlsId, toggleProps } =
 		useOrderSummaryToggle();
 
-	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
-	const totalPrice = parseInt( cartTotals.total_price, 10 );
+	const totalsCurrency = getCurrencyFromPriceResponse(cartTotals);
+	const totalPrice = parseInt(cartTotals.total_price, 10);
 
 	// Render the summary once here in the block and once in the fill, so the
 	// fill can be slotted elsewhere. Below the large breakpoint both render and
 	// the CSS decides which one is visible.
 	return (
 		<>
-			<div className={ className }>
+			<div className={className}>
 				<div
-					className={ clsx(
+					className={clsx(
 						'wc-block-components-checkout-order-summary__title',
 						{
 							'is-open': isOpen,
 						}
-					) }
-					{ ...toggleProps }
+					)}
+					{...toggleProps}
 				>
 					<p
 						className="wc-block-components-checkout-order-summary__title-text"
 						role="heading"
-						aria-level={ 2 }
+						aria-level={2}
 					>
-						{ __( 'Order summary', 'woocommerce' ) }
+						{__('Order summary', 'woocommerce')}
 					</p>
 					<FormattedMonetaryAmount
-						currency={ totalsCurrency }
-						value={ totalPrice }
+						currency={totalsCurrency}
+						value={totalPrice}
 						className="wc-block-components-checkout-order-summary__title-price"
 					/>
 					<span className="wc-block-components-checkout-order-summary__title-icon">
-						<Icon icon={ isOpen ? chevronUp : chevronDown } />
+						<Icon icon={isOpen ? chevronUp : chevronDown} />
 					</span>
 				</div>
 				<div
-					className={ clsx(
+					className={clsx(
 						'wc-block-components-checkout-order-summary__content',
 						{
 							'is-open': isOpen,
 						}
-					) }
-					id={ ariaControlsId }
+					)}
+					id={ariaControlsId}
 				>
-					{ children }
+					{children}
 					<div className="wc-block-components-totals-wrapper">
 						<TotalsFooterItem
-							currency={ totalsCurrency }
-							values={ cartTotals }
+							currency={totalsCurrency}
+							values={cartTotals}
 						/>
 					</div>
 					<OrderMetaSlotFill />
 				</div>
 			</div>
-			{ /* Render a second instance of the order summary in a different location for smaller screens.
+			{/* Render a second instance of the order summary in a different location for smaller screens.
 			On large containers the CSS hides this fill, so rendering it while the
-			width is still unknown is safe. */ }
-			{ ! isLarge && (
+			width is still unknown is safe. */}
+			{!isLarge && (
 				<CheckoutOrderSummaryFill>
 					<div
-						className={ `${ className } checkout-order-summary-block-fill-wrapper` }
+						className={`${className} checkout-order-summary-block-fill-wrapper`}
 					>
 						<FormStepHeading>
-							<>{ __( 'Order summary', 'woocommerce' ) }</>
+							<>{__('Order summary', 'woocommerce')}</>
 						</FormStepHeading>
 						<div className="checkout-order-summary-block-fill">
-							{ children }
+							{children}
 							<div className="wc-block-components-totals-wrapper">
 								<TotalsFooterItem
-									currency={ totalsCurrency }
-									values={ cartTotals }
+									currency={totalsCurrency}
+									values={cartTotals}
 								/>
 							</div>
 							<OrderMetaSlotFill />
 						</div>
 					</div>
 				</CheckoutOrderSummaryFill>
-			) }
+			)}
 		</>
 	);
 };

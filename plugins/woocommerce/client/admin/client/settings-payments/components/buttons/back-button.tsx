@@ -44,47 +44,44 @@ interface BackButtonProps {
  * A button component that navigates to the specified URL or route when clicked.
  * It supports navigation using either `window.location.href` or browser history based on the `isRoute` prop.
  */
-export const BackButton = ( {
+export const BackButton = ({
 	href,
-	tooltipText = __( 'WooCommerce Settings', 'woocommerce' ),
+	tooltipText = __('WooCommerce Settings', 'woocommerce'),
 	isRoute = false,
 	from = '',
 	children,
-}: BackButtonProps ) => {
+}: BackButtonProps) => {
 	const onGoBack = () => {
 		// Record the event when the user clicks the button.
-		recordPaymentsEvent( 'back_button_click', {
+		recordPaymentsEvent('back_button_click', {
 			from,
-		} );
+		});
 
-		if ( isRoute ) {
+		if (isRoute) {
 			const history = getHistory();
-			history.push( href );
+			history.push(href);
 		} else {
 			window.location.href = href;
 		}
 	};
 
 	return (
-		<Tooltip text={ tooltipText }>
+		<Tooltip text={tooltipText}>
 			<Button
 				// Button only sets its own has-text when the children are a
 				// plain string, so carry the distinction explicitly.
-				className={ clsx(
-					'woocommerce-settings-payments__back-button',
-					{
-						'woocommerce-settings-payments__back-button--with-label':
-							!! children,
-					}
-				) }
-				icon={ isRTL() ? chevronRight : chevronLeft }
-				onClick={ onGoBack }
+				className={clsx('woocommerce-settings-payments__back-button', {
+					'woocommerce-settings-payments__back-button--with-label':
+						!!children,
+				})}
+				icon={isRTL() ? chevronRight : chevronLeft}
+				onClick={onGoBack}
 				// Without a visible label the chevron alone carries no name, so
 				// the tooltip text has to supply one. With a label, overriding
 				// the name would hide the on-screen text from it.
-				aria-label={ children ? undefined : tooltipText }
+				aria-label={children ? undefined : tooltipText}
 			>
-				{ children }
+				{children}
 			</Button>
 		</Tooltip>
 	);

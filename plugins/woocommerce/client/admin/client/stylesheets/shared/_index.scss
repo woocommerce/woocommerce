@@ -17,7 +17,7 @@
 		top: 0;
 		margin-top: 10px;
 
-		@include breakpoint( "<960px" ) {
+		@include breakpoint("<960px") {
 			border-width: 4px;
 			margin-top: 14px;
 		}

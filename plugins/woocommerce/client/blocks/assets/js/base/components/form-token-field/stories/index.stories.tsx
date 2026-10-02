@@ -13,28 +13,28 @@ export default {
 	title: 'Base Components/FormTokenField',
 	argTypes: {},
 	component: FormTokenField,
-} as Meta< Props >;
+} as Meta<Props>;
 
-const Template: StoryFn< Props > = ( args ) => {
-	const [ selected, setSelected ] = useState< string[] >( [] );
+const Template: StoryFn<Props> = (args) => {
+	const [selected, setSelected] = useState<string[]>([]);
 
 	return (
 		<FormTokenField
-			{ ...args }
-			value={ selected }
-			onChange={ ( tokens ) => setSelected( tokens ) }
+			{...args}
+			value={selected}
+			onChange={(tokens) => setSelected(tokens)}
 		/>
 	);
 };
 
-const suggestions = [ 'foo', 'bar', 'baz' ];
+const suggestions = ['foo', 'bar', 'baz'];
 
-export const Default = Template.bind( {} );
+export const Default = Template.bind({});
 Default.args = {
 	suggestions,
 };
 
-export const Disabled = Template.bind( {} );
+export const Disabled = Template.bind({});
 Disabled.args = {
 	...Default.args,
 	disabled: true,

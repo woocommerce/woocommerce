@@ -13,7 +13,7 @@ import { Props } from './types';
 
 export interface EditModeProps extends Props {
 	isEditing: boolean;
-	setIsEditing: ( isEditing: boolean ) => void;
+	setIsEditing: (isEditing: boolean) => void;
 }
 
 export const ProductsByAttributeEditMode = (
@@ -28,41 +28,41 @@ export const ProductsByAttributeEditMode = (
 	} = props;
 
 	const onDone = () => {
-		setIsEditing( ! isEditing );
+		setIsEditing(!isEditing);
 		debouncedSpeak(
-			__( 'Showing Products by Attribute block preview.', 'woocommerce' )
+			__('Showing Products by Attribute block preview.', 'woocommerce')
 		);
 	};
 
 	return (
 		<Placeholder
-			icon={ <Icon icon={ category } /> }
-			label={ __( 'Products by Attribute', 'woocommerce' ) }
+			icon={<Icon icon={category} />}
+			label={__('Products by Attribute', 'woocommerce')}
 			className="wc-block-products-grid wc-block-products-by-attribute"
 		>
-			{ __(
+			{__(
 				'Display a grid of products from your selected attributes.',
 				'woocommerce'
-			) }
+			)}
 			<div className="wc-block-products-by-attribute__selection">
 				<ProductAttributeTermControl
-					selected={ blockAttributes.attributes }
-					onChange={ ( value = [] ) => {
+					selected={blockAttributes.attributes}
+					onChange={(value = []) => {
 						const result = value.map(
-							( { id, value: attributeSlug } ) => ( {
+							({ id, value: attributeSlug }) => ({
 								id,
 								attr_slug: attributeSlug,
-							} )
+							})
 						);
-						setAttributes( { attributes: result } );
-					} }
-					operator={ blockAttributes.attrOperator }
-					onOperatorChange={ ( value = 'any' ) =>
-						setAttributes( { attrOperator: value } )
+						setAttributes({ attributes: result });
+					}}
+					operator={blockAttributes.attrOperator}
+					onOperatorChange={(value = 'any') =>
+						setAttributes({ attrOperator: value })
 					}
 				/>
-				<Button variant="primary" onClick={ onDone }>
-					{ __( 'Done', 'woocommerce' ) }
+				<Button variant="primary" onClick={onDone}>
+					{__('Done', 'woocommerce')}
 				</Button>
 			</div>
 		</Placeholder>

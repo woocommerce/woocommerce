@@ -17,11 +17,11 @@ import { Edit } from './edit';
 /**
  * Register and run the "Products by Category" block.
  */
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	icon: {
 		src: (
 			<Icon
-				icon={ file }
+				icon={file}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -36,13 +36,13 @@ registerBlockType( metadata, {
 			{
 				type: 'block',
 				blocks: sharedAttributeBlockTypes.filter(
-					( value ) => value !== 'woocommerce/product-category'
+					(value) => value !== 'woocommerce/product-category'
 				),
-				transform: ( attributes ) =>
-					createBlock( 'woocommerce/product-category', {
+				transform: (attributes) =>
+					createBlock('woocommerce/product-category', {
 						...attributes,
 						editMode: false,
-					} ),
+					}),
 			},
 		],
 	},
@@ -52,4 +52,4 @@ registerBlockType( metadata, {
 	save: () => {
 		return null;
 	},
-} );
+});

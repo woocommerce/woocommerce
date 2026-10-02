@@ -25,22 +25,22 @@ import {
 } from './types';
 
 export const PRODUCT_COLLECTION_BLOCK_NAME = blockJson.name;
-const PRODUCT_TITLE_NAME = `${ PRODUCT_COLLECTION_BLOCK_NAME }/product-title`;
+const PRODUCT_TITLE_NAME = `${PRODUCT_COLLECTION_BLOCK_NAME}/product-title`;
 
-export const STOCK_STATUS_OPTIONS = getSetting< Record< string, string > >(
+export const STOCK_STATUS_OPTIONS = getSetting<Record<string, string>>(
 	'stockStatusOptions',
 	[]
 );
 
-const GLOBAL_HIDE_OUT_OF_STOCK = getSetting< boolean >(
+const GLOBAL_HIDE_OUT_OF_STOCK = getSetting<boolean>(
 	'hideOutOfStockItems',
 	false
 );
 
 export const getDefaultStockStatuses = () => {
 	return GLOBAL_HIDE_OUT_OF_STOCK
-		? Object.keys( objectOmit( STOCK_STATUS_OPTIONS, 'outofstock' ) )
-		: Object.keys( STOCK_STATUS_OPTIONS );
+		? Object.keys(objectOmit(STOCK_STATUS_OPTIONS, 'outofstock'))
+		: Object.keys(STOCK_STATUS_OPTIONS);
 };
 
 export const DEFAULT_QUERY: ProductCollectionQuery = {
@@ -88,7 +88,7 @@ export const DEFAULT_ATTRIBUTES: Pick<
 	dimensions: {
 		widthType: WidthOptions.FILL,
 	},
-	queryContextIncludes: [ 'collection' ],
+	queryContextIncludes: ['collection'],
 	forcePageReload: false,
 };
 

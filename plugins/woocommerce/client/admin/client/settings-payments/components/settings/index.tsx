@@ -16,22 +16,22 @@ type SettingsProps = {
 /**
  * Wraps the full form layout area.
  */
-const Layout = ( { children }: SettingsProps ) => {
+const Layout = ({ children }: SettingsProps) => {
 	// Add a class to the body element when the settings element is mounted.
-	useEffect( () => {
-		const el = document.getElementById( 'wpbody' );
-		if ( el && el.querySelector( '.settings-layout' ) ) {
-			el.classList.add( 'has-settings-layout' );
+	useEffect(() => {
+		const el = document.getElementById('wpbody');
+		if (el && el.querySelector('.settings-layout')) {
+			el.classList.add('has-settings-layout');
 		}
-	}, [] );
+	}, []);
 
-	return <div className="settings-layout">{ children }</div>;
+	return <div className="settings-layout">{children}</div>;
 };
 
 /**
  * Defines a labeled section with a heading, description, and content.
  */
-const Section = ( {
+const Section = ({
 	title,
 	description,
 	children,
@@ -41,37 +41,37 @@ const Section = ( {
 	description: string;
 	children?: React.ReactNode;
 	id?: string;
-} ) => (
-	<div className="settings-section" id={ id }>
+}) => (
+	<div className="settings-section" id={id}>
 		<div className="settings-section__details">
-			<h2>{ title }</h2>
-			<p>{ description }</p>
+			<h2>{title}</h2>
+			<p>{description}</p>
 		</div>
-		<div className="settings-section__controls">{ children }</div>
+		<div className="settings-section__controls">{children}</div>
 	</div>
 );
 
 /**
  * Displays action buttons (e.g. Save).
  */
-const Actions = ( { children }: SettingsProps ) => (
-	<Card className={ 'settings-card__wrapper ' }>
-		<CardBody className={ 'form__actions' }>{ children }</CardBody>
+const Actions = ({ children }: SettingsProps) => (
+	<Card className={'settings-card__wrapper '}>
+		<CardBody className={'form__actions'}>{children}</CardBody>
 	</Card>
 );
 
 /**
  * Wraps form fields and handles form submission.
  */
-const Form = ( {
+const Form = ({
 	children,
 	onSubmit,
 }: {
 	children: React.ReactNode;
-	onSubmit?: React.FormEventHandler< HTMLFormElement >;
-} ) => (
-	<form onSubmit={ onSubmit } className="settings-form">
-		{ children }
+	onSubmit?: React.FormEventHandler<HTMLFormElement>;
+}) => (
+	<form onSubmit={onSubmit} className="settings-form">
+		{children}
 	</form>
 );
 
@@ -105,7 +105,7 @@ const Form = ( {
  * </Settings>
  * ```
  */
-export const Settings = ( { children }: SettingsProps ) => <>{ children }</>;
+export const Settings = ({ children }: SettingsProps) => <>{children}</>;
 
 Settings.Layout = Layout;
 Settings.Section = Section;

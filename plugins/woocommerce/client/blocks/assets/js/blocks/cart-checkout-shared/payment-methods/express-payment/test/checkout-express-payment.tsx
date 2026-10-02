@@ -10,75 +10,75 @@ import { useEditorContext } from '@woocommerce/base-context';
  */
 import CheckoutExpressPayment from '../checkout-express-payment';
 
-jest.mock( '@woocommerce/block-data', () => ( {
+jest.mock('@woocommerce/block-data', () => ({
 	checkoutStore: 'wc/store/checkout',
 	paymentStore: 'wc/store/payment',
-} ) );
+}));
 
-jest.mock( '@woocommerce/base-context', () => ( {
+jest.mock('@woocommerce/base-context', () => ({
 	useEditorContext: jest.fn(),
 	noticeContexts: {
 		EXPRESS_PAYMENTS: 'wc/express-payment',
 	},
-} ) );
+}));
 
-jest.mock( '@woocommerce/blocks-components', () => {
+jest.mock('@woocommerce/blocks-components', () => {
 	return {
-		...jest.requireActual( '@woocommerce/blocks-components' ),
-		StoreNoticesContainer: jest.fn( ( { context } ) => (
-			<div data-testid="notices" data-context={ context }>
+		...jest.requireActual('@woocommerce/blocks-components'),
+		StoreNoticesContainer: jest.fn(({ context }) => (
+			<div data-testid="notices" data-context={context}>
 				Store Notices
 			</div>
-		) ),
+		)),
 	};
-} );
+});
 
-jest.mock( '@woocommerce/base-components/skeleton', () => ( {
-	Skeleton: jest.fn( ( { width, height, ariaMessage } ) => (
+jest.mock('@woocommerce/base-components/skeleton', () => ({
+	Skeleton: jest.fn(({ width, height, ariaMessage }) => (
 		<div
 			data-testid="skeleton"
-			data-width={ width }
-			data-height={ height }
-			{ ...( ariaMessage ? { 'aria-label': ariaMessage } : {} ) }
+			data-width={width}
+			data-height={height}
+			{...(ariaMessage ? { 'aria-label': ariaMessage } : {})}
 		>
-			{ ariaMessage || 'Loading...' }
+			{ariaMessage || 'Loading...'}
 		</div>
-	) ),
-} ) );
+	)),
+}));
 
-jest.mock( '../../express-payment-methods', () =>
-	jest.fn( () => (
+jest.mock('../../express-payment-methods', () =>
+	jest.fn(() => (
 		<div data-testid="express-payment-methods">Express Payment Methods</div>
-	) )
+	))
 );
 
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
+jest.mock('@wordpress/data', () => ({
+	...jest.requireActual('@wordpress/data'),
 	useSelect: jest.fn(),
 	dispatch: jest.fn(),
-} ) );
+}));
 
-jest.mock( '@woocommerce/settings', () => {
+jest.mock('@woocommerce/settings', () => {
 	return {
-		...jest.requireActual( '@woocommerce/settings' ),
+		...jest.requireActual('@woocommerce/settings'),
 		CURRENT_USER_IS_ADMIN: false,
 	};
-} );
+});
 
-jest.mock( '@wordpress/editor', () => ( {
+jest.mock('@wordpress/editor', () => ({
 	store: {},
-} ) );
+}));
 
-const mockUseSelect = useSelect as jest.MockedFunction< typeof useSelect >;
+const mockUseSelect = useSelect as jest.MockedFunction<typeof useSelect>;
 
-describe( 'CheckoutExpressPayment', () => {
-	describe( 'No registered express payment methods', () => {
-		beforeEach( () => {
-			( useEditorContext as jest.Mock ).mockReturnValue( {
+describe('CheckoutExpressPayment', () => {
+	describe('No registered express payment methods', () => {
+		beforeEach(() => {
+			(useEditorContext as jest.Mock).mockReturnValue({
 				isEditor: false,
-			} );
+			});
 
-			mockUseSelect.mockReturnValueOnce( {
+			mockUseSelect.mockReturnValueOnce({
 				isCalculating: false,
 				isProcessing: false,
 				isAfterProcessing: false,
@@ -89,37 +89,37 @@ describe( 'CheckoutExpressPayment', () => {
 				expressPaymentMethodsInitialized: true,
 				isExpressPaymentMethodActive: false,
 				registeredExpressPaymentMethods: {},
-			} );
-		} );
+			});
+		});
 
-		it( 'should render null when not in editor and user is not admin', () => {
-			const { container } = render( <CheckoutExpressPayment /> );
+		it('should render null when not in editor and user is not admin', () => {
+			const { container } = render(<CheckoutExpressPayment />);
 
-			expect( container ).toBeEmptyDOMElement();
-		} );
+			expect(container).toBeEmptyDOMElement();
+		});
 
-		it( 'should render StoreNoticesContainer when in editor and user is not admin', () => {
-			( useEditorContext as jest.Mock ).mockReturnValue( {
+		it('should render StoreNoticesContainer when in editor and user is not admin', () => {
+			(useEditorContext as jest.Mock).mockReturnValue({
 				isEditor: true,
-			} );
+			});
 
-			render( <CheckoutExpressPayment /> );
+			render(<CheckoutExpressPayment />);
 
-			expect( screen.getByTestId( 'notices' ) ).toBeInTheDocument();
-			expect( screen.getByTestId( 'notices' ) ).toHaveAttribute(
+			expect(screen.getByTestId('notices')).toBeInTheDocument();
+			expect(screen.getByTestId('notices')).toHaveAttribute(
 				'data-context',
 				'wc/express-payment'
 			);
-		} );
-	} );
+		});
+	});
 
-	describe( 'Registered but no valid express payment methods', () => {
-		beforeEach( () => {
-			( useEditorContext as jest.Mock ).mockReturnValue( {
+	describe('Registered but no valid express payment methods', () => {
+		beforeEach(() => {
+			(useEditorContext as jest.Mock).mockReturnValue({
 				isEditor: false,
-			} );
+			});
 
-			mockUseSelect.mockReturnValueOnce( {
+			mockUseSelect.mockReturnValueOnce({
 				isCalculating: false,
 				isProcessing: false,
 				isAfterProcessing: false,
@@ -133,32 +133,32 @@ describe( 'CheckoutExpressPayment', () => {
 					stripe: { name: 'stripe' }, // Has registered methods
 					paypal: { name: 'paypal' },
 				},
-			} );
-		} );
+			});
+		});
 
-		it( 'should render null when not in editor and user is not admin', () => {
-			const { container } = render( <CheckoutExpressPayment /> );
-			expect( container ).toBeEmptyDOMElement();
-		} );
+		it('should render null when not in editor and user is not admin', () => {
+			const { container } = render(<CheckoutExpressPayment />);
+			expect(container).toBeEmptyDOMElement();
+		});
 
-		it( 'should render StoreNoticesContainer when in editor', () => {
-			( useEditorContext as jest.Mock ).mockReturnValue( {
+		it('should render StoreNoticesContainer when in editor', () => {
+			(useEditorContext as jest.Mock).mockReturnValue({
 				isEditor: true,
-			} );
+			});
 
-			render( <CheckoutExpressPayment /> );
+			render(<CheckoutExpressPayment />);
 
-			expect( screen.getByTestId( 'notices' ) ).toBeInTheDocument();
-			expect( screen.getByTestId( 'notices' ) ).toHaveAttribute(
+			expect(screen.getByTestId('notices')).toBeInTheDocument();
+			expect(screen.getByTestId('notices')).toHaveAttribute(
 				'data-context',
 				'wc/express-payment'
 			);
-		} );
-	} );
+		});
+	});
 
-	describe( 'Express payment methods available and initialized', () => {
-		beforeEach( () => {
-			mockUseSelect.mockReturnValueOnce( {
+	describe('Express payment methods available and initialized', () => {
+		beforeEach(() => {
+			mockUseSelect.mockReturnValueOnce({
 				isCalculating: false,
 				isProcessing: false,
 				isAfterProcessing: false,
@@ -175,47 +175,43 @@ describe( 'CheckoutExpressPayment', () => {
 					stripe: { name: 'stripe' },
 					paypal: { name: 'paypal' },
 				},
-			} );
-		} );
+			});
+		});
 
-		it( 'should render Express Checkout title', () => {
-			render( <CheckoutExpressPayment /> );
+		it('should render Express Checkout title', () => {
+			render(<CheckoutExpressPayment />);
 
-			expect(
-				screen.getByText( /Express Checkout/ )
-			).toBeInTheDocument();
-		} );
+			expect(screen.getByText(/Express Checkout/)).toBeInTheDocument();
+		});
 
-		it( 'should render ExpressPaymentMethods component', () => {
-			render( <CheckoutExpressPayment /> );
+		it('should render ExpressPaymentMethods component', () => {
+			render(<CheckoutExpressPayment />);
 
 			expect(
-				screen.getByTestId( 'express-payment-methods' )
+				screen.getByTestId('express-payment-methods')
 			).toBeInTheDocument();
-		} );
+		});
 
-		it( 'should render continue rule', () => {
-			render( <CheckoutExpressPayment /> );
+		it('should render continue rule', () => {
+			render(<CheckoutExpressPayment />);
 
-			expect(
-				screen.getByText( 'Or continue below' )
-			).toBeInTheDocument();
-		} );
+			expect(screen.getByText('Or continue below')).toBeInTheDocument();
+		});
 
-		it( 'should render StoreNoticesContainer for express payments', () => {
-			render( <CheckoutExpressPayment /> );
+		it('should render StoreNoticesContainer for express payments', () => {
+			render(<CheckoutExpressPayment />);
 
-			expect( screen.getByTestId( 'notices' ) ).toBeInTheDocument();
-			expect( screen.getByTestId( 'notices' ) ).toHaveAttribute(
+			expect(screen.getByTestId('notices')).toBeInTheDocument();
+			expect(screen.getByTestId('notices')).toHaveAttribute(
 				'data-context',
 				'wc/express-payment'
 			);
-		} );
-	} );
+		});
+	});
 
-	describe( 'Processing states', () => {
-		it( 'should add conditional accessibility attributes when isProcessing', () => {
-			mockUseSelect.mockReturnValueOnce( {
+	describe('Processing states', () => {
+		it('should add conditional accessibility attributes when isProcessing', () => {
+			mockUseSelect.mockReturnValueOnce({
 				isCalculating: false,
 				isProcessing: true,
 				isAfterProcessing: false,
@@ -230,36 +226,36 @@ describe( 'CheckoutExpressPayment', () => {
 				registeredExpressPaymentMethods: {
 					stripe: { name: 'stripe' },
 				},
-			} );
-			render( <CheckoutExpressPayment /> );
+			});
+			render(<CheckoutExpressPayment />);
 
 			const expressPaymentContainer = document.querySelector(
 				'.wc-block-components-express-payment--checkout'
 			);
 
 			// Always present attributes
-			expect( expressPaymentContainer ).toHaveAttribute(
+			expect(expressPaymentContainer).toHaveAttribute(
 				'aria-disabled',
 				'true'
 			);
-			expect( expressPaymentContainer ).toHaveAttribute(
+			expect(expressPaymentContainer).toHaveAttribute(
 				'aria-live',
 				'polite'
 			);
 
 			// Conditional attributes (only present when processing)
-			expect( expressPaymentContainer ).toHaveAttribute(
+			expect(expressPaymentContainer).toHaveAttribute(
 				'aria-busy',
 				'true'
 			);
-			expect( expressPaymentContainer ).toHaveAttribute(
+			expect(expressPaymentContainer).toHaveAttribute(
 				'aria-label',
-				expect.stringContaining( 'Processing express checkout' )
+				expect.stringContaining('Processing express checkout')
 			);
-		} );
+		});
 
-		it( 'should add conditional accessibility attributes when express payment method is active', () => {
-			mockUseSelect.mockReturnValueOnce( {
+		it('should add conditional accessibility attributes when express payment method is active', () => {
+			mockUseSelect.mockReturnValueOnce({
 				isCalculating: false,
 				isProcessing: false,
 				isAfterProcessing: false,
@@ -274,42 +270,42 @@ describe( 'CheckoutExpressPayment', () => {
 				registeredExpressPaymentMethods: {
 					stripe: { name: 'stripe' },
 				},
-			} );
+			});
 
-			render( <CheckoutExpressPayment /> );
+			render(<CheckoutExpressPayment />);
 
 			const expressPaymentContainer = document.querySelector(
 				'.wc-block-components-express-payment--checkout'
 			);
 
 			// Always present attributes
-			expect( expressPaymentContainer ).toHaveAttribute(
+			expect(expressPaymentContainer).toHaveAttribute(
 				'aria-disabled',
 				'true'
 			);
-			expect( expressPaymentContainer ).toHaveAttribute(
+			expect(expressPaymentContainer).toHaveAttribute(
 				'aria-live',
 				'polite'
 			);
 
 			// Conditional attributes (only present when express payment method is active)
-			expect( expressPaymentContainer ).toHaveAttribute(
+			expect(expressPaymentContainer).toHaveAttribute(
 				'aria-busy',
 				'true'
 			);
-			expect( expressPaymentContainer ).toHaveAttribute(
+			expect(expressPaymentContainer).toHaveAttribute(
 				'aria-label',
-				expect.stringContaining( 'Processing express checkout' )
+				expect.stringContaining('Processing express checkout')
 			);
 
 			// Should have disabled class
-			expect( expressPaymentContainer ).toHaveClass(
+			expect(expressPaymentContainer).toHaveClass(
 				'wc-block-components-express-payment--disabled'
 			);
-		} );
+		});
 
-		it( 'should not have conditional accessibility attributes when not processing', () => {
-			mockUseSelect.mockReturnValueOnce( {
+		it('should not have conditional accessibility attributes when not processing', () => {
+			mockUseSelect.mockReturnValueOnce({
 				isCalculating: false,
 				isProcessing: false,
 				isAfterProcessing: false,
@@ -324,42 +320,38 @@ describe( 'CheckoutExpressPayment', () => {
 				registeredExpressPaymentMethods: {
 					stripe: { name: 'stripe' },
 				},
-			} );
+			});
 
-			render( <CheckoutExpressPayment /> );
+			render(<CheckoutExpressPayment />);
 
 			const expressPaymentContainer = document.querySelector(
 				'.wc-block-components-express-payment--checkout'
 			);
 
 			// Always present attributes
-			expect( expressPaymentContainer ).toHaveAttribute(
+			expect(expressPaymentContainer).toHaveAttribute(
 				'aria-disabled',
 				'false'
 			);
-			expect( expressPaymentContainer ).toHaveAttribute(
+			expect(expressPaymentContainer).toHaveAttribute(
 				'aria-live',
 				'polite'
 			);
 
 			// Conditional attributes should NOT be present when not processing
-			expect( expressPaymentContainer ).not.toHaveAttribute(
-				'aria-busy'
-			);
-			expect( expressPaymentContainer ).not.toHaveAttribute(
-				'aria-label'
-			);
+			expect(expressPaymentContainer).not.toHaveAttribute('aria-busy');
+			expect(expressPaymentContainer).not.toHaveAttribute('aria-label');
 
 			// Should not have disabled class
-			expect( expressPaymentContainer ).not.toHaveClass(
+			expect(expressPaymentContainer).not.toHaveClass(
 				'wc-block-components-express-payment--disabled'
 			);
-		} );
-	} );
+		});
+	});
 
-	describe( 'Loading states', () => {
-		it( 'should render skeleton loading state for title when not initialized', () => {
-			mockUseSelect.mockReturnValueOnce( {
+	describe('Loading states', () => {
+		it('should render skeleton loading state for title when not initialized', () => {
+			mockUseSelect.mockReturnValueOnce({
 				isCalculating: false,
 				isProcessing: false,
 				isAfterProcessing: false,
@@ -373,17 +365,17 @@ describe( 'CheckoutExpressPayment', () => {
 					stripe: { name: 'stripe' },
 					paypal: { name: 'paypal' },
 				},
-			} );
+			});
 
-			render( <CheckoutExpressPayment /> );
+			render(<CheckoutExpressPayment />);
 
 			expect(
-				screen.getByLabelText( 'Loading express payment area…' )
+				screen.getByLabelText('Loading express payment area…')
 			).toBeInTheDocument();
-		} );
+		});
 
-		it( 'should render 1 skeleton button when calculating a partial update if express payment method is not active', () => {
-			mockUseSelect.mockReturnValueOnce( {
+		it('should render 1 skeleton button when calculating a partial update if express payment method is not active', () => {
+			mockUseSelect.mockReturnValueOnce({
 				isCalculating: true,
 				isProcessing: false,
 				isAfterProcessing: false,
@@ -398,22 +390,22 @@ describe( 'CheckoutExpressPayment', () => {
 				registeredExpressPaymentMethods: {
 					stripe: { name: 'stripe' },
 				},
-			} );
+			});
 
-			render( <CheckoutExpressPayment /> );
+			render(<CheckoutExpressPayment />);
 
 			const buttonSkeletons = screen.getAllByLabelText(
 				'Loading express payment method…'
 			);
 
-			expect( buttonSkeletons ).toHaveLength( 1 ); // 1 skeleton buttons
+			expect(buttonSkeletons).toHaveLength(1); // 1 skeleton buttons
 			expect(
-				screen.queryByTestId( 'express-payment-methods' )
+				screen.queryByTestId('express-payment-methods')
 			).not.toBeInTheDocument();
-		} );
+		});
 
-		it( 'should not render skeleton buttons when calculating a partial update and express payment method is active', () => {
-			mockUseSelect.mockReturnValueOnce( {
+		it('should not render skeleton buttons when calculating a partial update and express payment method is active', () => {
+			mockUseSelect.mockReturnValueOnce({
 				isCalculating: true,
 				isProcessing: false,
 				isAfterProcessing: false,
@@ -428,22 +420,22 @@ describe( 'CheckoutExpressPayment', () => {
 				registeredExpressPaymentMethods: {
 					stripe: { name: 'stripe' },
 				},
-			} );
+			});
 
-			render( <CheckoutExpressPayment /> );
+			render(<CheckoutExpressPayment />);
 
 			const buttonSkeletons = screen.queryAllByLabelText(
 				'Loading express payment method…'
 			);
 
-			expect( buttonSkeletons ).toHaveLength( 0 ); // No skeleton buttons should be rendered when express payment method is active
+			expect(buttonSkeletons).toHaveLength(0); // No skeleton buttons should be rendered when express payment method is active
 			expect(
-				screen.queryByTestId( 'express-payment-methods' )
+				screen.queryByTestId('express-payment-methods')
 			).toBeInTheDocument();
-		} );
+		});
 
-		it( 'should render 3 skeleton buttons when 3 buttons are available', () => {
-			mockUseSelect.mockReturnValueOnce( {
+		it('should render 3 skeleton buttons when 3 buttons are available', () => {
+			mockUseSelect.mockReturnValueOnce({
 				isCalculating: true,
 				isProcessing: false,
 				isAfterProcessing: false,
@@ -462,15 +454,15 @@ describe( 'CheckoutExpressPayment', () => {
 					paypal: { name: 'paypal' },
 					applepay: { name: 'applepay' },
 				},
-			} );
+			});
 
-			render( <CheckoutExpressPayment /> );
+			render(<CheckoutExpressPayment />);
 
 			const buttonSkeletons = screen.getAllByLabelText(
 				'Loading express payment method…'
 			);
 
-			expect( buttonSkeletons ).toHaveLength( 3 ); // 3 skeleton buttons
-		} );
-	} );
-} );
+			expect(buttonSkeletons).toHaveLength(3); // 3 skeleton buttons
+		});
+	});
+});

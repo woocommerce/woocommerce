@@ -21,7 +21,7 @@ const settings = {
 	icon: {
 		src: (
 			<Icon
-				icon={ grid }
+				icon={grid}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -33,4 +33,4 @@ const settings = {
 	defaults,
 };
 
-registerBlockType( name, settings );
+registerBlockType(name, settings);

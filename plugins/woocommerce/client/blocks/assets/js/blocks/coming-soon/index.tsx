@@ -14,10 +14,10 @@ import deprecated from './deprecated';
 import './store-only.scss';
 import './entire-site.scss';
 
-registerBlockType( metadata, {
-	title: __( 'Coming Soon', 'woocommerce' ),
+registerBlockType(metadata, {
+	title: __('Coming Soon', 'woocommerce'),
 	edit: Edit,
 	save: Save,
 	apiVersion: 3,
 	deprecated,
-} );
+});

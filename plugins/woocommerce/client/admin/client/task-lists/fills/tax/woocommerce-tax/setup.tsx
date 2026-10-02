@@ -34,47 +34,40 @@ export type SetupStepProps = {
 	pluginsToActivate: string[];
 };
 
-export const Setup = ( {
+export const Setup = ({
 	isPending,
 	onDisable,
 	onAutomate,
 	onManual,
-}: SetupProps ) => {
-	const [ pluginsToActivate, setPluginsToActivate ] = useState< string[] >(
-		[]
-	);
-	const { activePlugins, isResolving } = useSelect( ( select ) => {
-		const { getSettings } = select( settingsStore );
-		const { hasFinishedResolution } = select( optionsStore );
-		const { getActivePlugins } = select( pluginsStore );
+}: SetupProps) => {
+	const [pluginsToActivate, setPluginsToActivate] = useState<string[]>([]);
+	const { activePlugins, isResolving } = useSelect((select) => {
+		const { getSettings } = select(settingsStore);
+		const { hasFinishedResolution } = select(optionsStore);
+		const { getActivePlugins } = select(pluginsStore);
 
 		return {
 			activePlugins: getActivePlugins(),
-			generalSettings: getSettings( 'general' )?.general,
+			generalSettings: getSettings('general')?.general,
 			isResolving:
-				! hasFinishedResolution( 'getOption', [
+				!hasFinishedResolution('getOption', [
 					'woocommerce_setup_jetpack_opted_in',
-				] ) ||
-				! hasFinishedResolution( 'getOption', [
-					'wc_connect_options',
-				] ),
+				]) ||
+				!hasFinishedResolution('getOption', ['wc_connect_options']),
 		};
-	}, [] );
-	const [ stepIndex, setStepIndex ] = useState( 0 );
+	}, []);
+	const [stepIndex, setStepIndex] = useState(0);
 
-	useEffect( () => {
-		const remainingPlugins = difference(
-			AUTOMATION_PLUGINS,
-			activePlugins
-		);
-		if ( remainingPlugins.length <= pluginsToActivate.length ) {
+	useEffect(() => {
+		const remainingPlugins = difference(AUTOMATION_PLUGINS, activePlugins);
+		if (remainingPlugins.length <= pluginsToActivate.length) {
 			return;
 		}
-		setPluginsToActivate( remainingPlugins );
-	}, [ activePlugins, pluginsToActivate.length ] );
+		setPluginsToActivate(remainingPlugins);
+	}, [activePlugins, pluginsToActivate.length]);
 
 	const nextStep = () => {
-		setStepIndex( stepIndex + 1 );
+		setStepIndex(stepIndex + 1);
 	};
 
 	const stepProps = {
@@ -90,41 +83,41 @@ export const Setup = ( {
 	const steps = [
 		{
 			key: 'store_location',
-			label: __( 'Set store location', 'woocommerce' ),
+			label: __('Set store location', 'woocommerce'),
 			description: __(
 				'The address from which your business operates',
 				'woocommerce'
 			),
-			content: <StoreLocation { ...stepProps } />,
+			content: <StoreLocation {...stepProps} />,
 		},
 		{
 			key: 'plugins',
-			label: __( 'Install WooCommerce Tax', 'woocommerce' ),
+			label: __('Install WooCommerce Tax', 'woocommerce'),
 			description: __(
 				'WooCommerce Tax allows you to automate sales tax calculations',
 				'woocommerce'
 			),
-			content: <Plugins { ...stepProps } />,
+			content: <Plugins {...stepProps} />,
 		},
 		{
 			key: 'connect',
-			label: __( 'Connect your store', 'woocommerce' ),
+			label: __('Connect your store', 'woocommerce'),
 			description: __(
 				'Connect your store to WordPress.com to enable automated sales tax calculations',
 				'woocommerce'
 			),
-			content: <Connect { ...stepProps } />,
+			content: <Connect {...stepProps} />,
 		},
 	];
 
-	const step = steps[ stepIndex ];
+	const step = steps[stepIndex];
 
 	return (
 		<Stepper
-			isPending={ isResolving }
-			isVertical={ true }
-			currentStep={ step.key }
-			steps={ steps }
+			isPending={isResolving}
+			isVertical={true}
+			currentStep={step.key}
+			steps={steps}
 		/>
 	);
 };

@@ -17,61 +17,57 @@ import {
 import { CoreFilterNames, QueryControlProps } from '../../types';
 import { DEFAULT_FILTERS } from '../../constants';
 
-const EDIT_ATTRIBUTES_URL = `${ ADMIN_URL }edit.php?post_type=product&page=product_attributes`;
+const EDIT_ATTRIBUTES_URL = `${ADMIN_URL}edit.php?post_type=product&page=product_attributes`;
 
-const AttributesControl = ( {
+const AttributesControl = ({
 	query,
 	trackInteraction,
 	setQueryAttribute,
-}: QueryControlProps ) => {
+}: QueryControlProps) => {
 	const woocommerceAttributes = query.woocommerceAttributes || [];
-	const selectedAttributes = woocommerceAttributes?.map(
-		( { termId: id } ) => ( {
-			id,
-		} )
-	);
+	const selectedAttributes = woocommerceAttributes?.map(({ termId: id }) => ({
+		id,
+	}));
 
 	const deselectCallback = () => {
-		setQueryAttribute( {
+		setQueryAttribute({
 			woocommerceAttributes: DEFAULT_FILTERS.woocommerceAttributes,
-		} );
-		trackInteraction( CoreFilterNames.ATTRIBUTES );
+		});
+		trackInteraction(CoreFilterNames.ATTRIBUTES);
 	};
 
 	return (
 		<ToolsPanelItem
-			label={ __( 'Product Attributes', 'woocommerce' ) }
-			hasValue={ () => !! woocommerceAttributes?.length }
-			onDeselect={ deselectCallback }
-			resetAllFilter={ deselectCallback }
+			label={__('Product Attributes', 'woocommerce')}
+			hasValue={() => !!woocommerceAttributes?.length}
+			onDeselect={deselectCallback}
+			resetAllFilter={deselectCallback}
 		>
 			<ProductAttributeTermControl
-				messages={ {
-					search: __( 'Attributes', 'woocommerce' ),
-				} }
-				selected={ selectedAttributes || [] }
-				onChange={ ( searchListItems: SearchListItem[] ) => {
-					const newValue = searchListItems.map(
-						( { id, value } ) => ( {
-							termId: id as number,
-							taxonomy: value as string,
-						} )
-					);
+				messages={{
+					search: __('Attributes', 'woocommerce'),
+				}}
+				selected={selectedAttributes || []}
+				onChange={(searchListItems: SearchListItem[]) => {
+					const newValue = searchListItems.map(({ id, value }) => ({
+						termId: id as number,
+						taxonomy: value as string,
+					}));
 
-					setQueryAttribute( {
+					setQueryAttribute({
 						woocommerceAttributes: newValue,
-					} );
-					trackInteraction( CoreFilterNames.ATTRIBUTES );
-				} }
-				operator={ 'any' }
-				isCompact={ true }
-				type={ 'token' }
+					});
+					trackInteraction(CoreFilterNames.ATTRIBUTES);
+				}}
+				operator={'any'}
+				isCompact={true}
+				type={'token'}
 			/>
 			<ExternalLink
 				className="wc-block-editor-product-collection-panel__manage-attributes-link"
-				href={ EDIT_ATTRIBUTES_URL }
+				href={EDIT_ATTRIBUTES_URL}
 			>
-				{ __( 'Manage attributes', 'woocommerce' ) }
+				{__('Manage attributes', 'woocommerce')}
 			</ExternalLink>
 		</ToolsPanelItem>
 	);

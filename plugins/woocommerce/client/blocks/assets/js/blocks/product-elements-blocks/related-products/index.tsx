@@ -19,6 +19,6 @@ const blockConfig = {
 	isAvailableOnPostEditor: false,
 };
 
-registerProductBlockType( blockConfig, {
+registerProductBlockType(blockConfig, {
 	isAvailableOnPostEditor: false,
-} );
+});

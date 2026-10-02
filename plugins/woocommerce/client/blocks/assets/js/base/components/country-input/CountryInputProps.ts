@@ -4,7 +4,7 @@
 import { SelectProps } from '../select';
 import { countries } from './stories/countries-filler';
 
-export interface CountryInputProps extends Omit< SelectProps, 'options' > {
+export interface CountryInputProps extends Omit<SelectProps, 'options'> {
 	/**
 	 * Classes to assign to the wrapper component of the input
 	 */
@@ -23,5 +23,5 @@ export interface CountryInputWithCountriesProps extends CountryInputProps {
 	 *
 	 * Object shape should be: `{ [Alpha-2 Country Code]: 'Full country name' }`
 	 */
-	countries: Partial< typeof countries >;
+	countries: Partial<typeof countries>;
 }

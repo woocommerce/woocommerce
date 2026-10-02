@@ -39,14 +39,14 @@ export default {
 				'True if this `TotalsWrapper` is being used to wrap a Slot/Fill',
 		},
 	},
-} as Meta< TotalsWrapperProps >;
-const Template: StoryFn< TotalsWrapperProps > = ( args ) => {
+} as Meta<TotalsWrapperProps>;
+const Template: StoryFn<TotalsWrapperProps> = (args) => {
 	return (
-		<TotalsWrapper { ...args }>
+		<TotalsWrapper {...args}>
 			<div>Custom totals content</div>
 		</TotalsWrapper>
 	);
 };
 
-export const Default = Template.bind( {} );
+export const Default = Template.bind({});
 Default.args = {};

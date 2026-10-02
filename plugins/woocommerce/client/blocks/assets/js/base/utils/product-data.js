@@ -4,7 +4,7 @@
  * @param {Object} product Product object.
  * @return {boolean} True if purchasable.
  */
-export const productIsPurchasable = ( product ) => {
+export const productIsPurchasable = (product) => {
 	return product.is_purchasable || false;
 };
 
@@ -14,7 +14,7 @@ export const productIsPurchasable = ( product ) => {
  * @param {Object} product Product object.
  * @return {boolean} True if supported.
  */
-export const productSupportsAddToCartForm = ( product ) => {
+export const productSupportsAddToCartForm = (product) => {
 	/**
 	 * @todo Define supported product types for add to cart form.
 	 *
@@ -25,7 +25,7 @@ export const productSupportsAddToCartForm = ( product ) => {
 	 * a type to be registered along with it's default Block template. Registered types would then be
 	 * picked up here, as well as the core types which would be defined elsewhere.
 	 */
-	const supportedTypes = [ 'simple', 'variable' ];
+	const supportedTypes = ['simple', 'variable'];
 
-	return supportedTypes.includes( product.type || 'simple' );
+	return supportedTypes.includes(product.type || 'simple');
 };

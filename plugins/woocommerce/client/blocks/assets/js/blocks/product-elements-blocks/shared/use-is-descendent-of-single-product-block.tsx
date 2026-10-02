@@ -7,23 +7,22 @@ interface UseIsDescendentOfSingleProductBlockProps {
 	blockClientId: string;
 }
 
-export const useIsDescendentOfSingleProductBlock = ( {
+export const useIsDescendentOfSingleProductBlock = ({
 	blockClientId,
-}: UseIsDescendentOfSingleProductBlockProps ) => {
+}: UseIsDescendentOfSingleProductBlockProps) => {
 	const { isDescendentOfSingleProductBlock } = useSelect(
-		( select ) => {
-			const { getBlockParentsByBlockName } =
-				select( 'core/block-editor' );
+		(select) => {
+			const { getBlockParentsByBlockName } = select('core/block-editor');
 			const blockParentBlocksIds = getBlockParentsByBlockName(
-				blockClientId?.replace( 'block-', '' ),
-				[ 'woocommerce/single-product' ]
+				blockClientId?.replace('block-', ''),
+				['woocommerce/single-product']
 			);
 			return {
 				isDescendentOfSingleProductBlock:
 					blockParentBlocksIds.length > 0,
 			};
 		},
-		[ blockClientId ]
+		[blockClientId]
 	);
 
 	return { isDescendentOfSingleProductBlock };

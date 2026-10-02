@@ -8,5 +8,5 @@ import { snakeCase } from 'change-case';
  */
 import { mapKeys } from './map-keys';
 
-export const snakeCaseKeys = ( obj: object ) =>
-	mapKeys( obj, ( _, key ) => snakeCase( key ) );
+export const snakeCaseKeys = (obj: object) =>
+	mapKeys(obj, (_, key) => snakeCase(key));

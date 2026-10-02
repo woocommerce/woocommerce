@@ -5,7 +5,7 @@ import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import addErrors from 'ajv-errors';
 
-const ajv = new Ajv( {
+const ajv = new Ajv({
 	allErrors: true,
 	$data: true,
 	validateSchema: true,
@@ -13,7 +13,7 @@ const ajv = new Ajv( {
 	strictSchema: false,
 	strict: false,
 	messages: true,
-} );
+});
 
 // Override email format to match PHP's FILTER_VALIDATE_EMAIL.
 ajv.addFormat(
@@ -21,14 +21,14 @@ ajv.addFormat(
 	/^(?!.*[.]{2})[a-zA-Z0-9](?:[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]*[a-zA-Z0-9])?@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/i
 );
 
-addFormats( ajv, {
+addFormats(ajv, {
 	mode: 'fast',
-	formats: [ 'time', 'uri' ],
+	formats: ['time', 'uri'],
 	keywords: true,
-} );
+});
 // Date rules must reject impossible calendar dates as the server does.
-addFormats( ajv, { mode: 'full', formats: [ 'date' ], keywords: false } );
-addErrors( ajv );
+addFormats(ajv, { mode: 'full', formats: ['date'], keywords: false });
+addErrors(ajv);
 
 // Add type declaration for window.schemaParser
 declare global {

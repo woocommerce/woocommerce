@@ -42,62 +42,62 @@ class HistoricalDataLayout extends Component {
 		return (
 			<Fragment>
 				<SectionHeader
-					title={ __( 'Import historical data', 'woocommerce' ) }
+					title={__('Import historical data', 'woocommerce')}
 				/>
 				<div className="woocommerce-settings__wrapper">
 					<div className="woocommerce-setting">
 						<div className="woocommerce-setting__input">
 							<span className="woocommerce-setting__help">
-								{ __(
+								{__(
 									'This tool populates historical analytics data by processing customers ' +
 										'and orders created before Analytics started recording data.',
 									'woocommerce'
-								) }
+								)}
 							</span>
-							{ status !== 'finished' && (
+							{status !== 'finished' && (
 								<Fragment>
 									<HistoricalDataPeriodSelector
-										dateFormat={ dateFormat }
-										disabled={ inProgress }
-										value={ period }
+										dateFormat={dateFormat}
+										disabled={inProgress}
+										value={period}
 									/>
 									<HistoricalDataSkipCheckbox
-										disabled={ inProgress }
-										checked={ skipChecked }
+										disabled={inProgress}
+										checked={skipChecked}
 									/>
 									<HistoricalDataProgress
-										label={ __(
+										label={__(
 											'Registered Customers',
 											'woocommerce'
-										) }
-										progress={ customersProgress }
-										total={ customersTotal }
+										)}
+										progress={customersProgress}
+										total={customersTotal}
 									/>
 									<HistoricalDataProgress
-										label={ __(
+										label={__(
 											'Orders and Refunds',
 											'woocommerce'
-										) }
-										progress={ ordersProgress }
-										total={ ordersTotal }
+										)}
+										progress={ordersProgress}
+										total={ordersTotal}
 									/>
 								</Fragment>
-							) }
+							)}
 							<HistoricalDataStatus
-								importDate={ importDate }
-								status={ status }
+								importDate={importDate}
+								status={status}
 							/>
 							<FailedOrdersNotice />
 						</div>
 					</div>
 					<HistoricalDataActions
-						clearStatusAndTotalsCache={ clearStatusAndTotalsCache }
-						dateFormat={ dateFormat }
-						importDate={ importDate }
-						lastImportStartTimestamp={ lastImportStartTimestamp }
-						onImportStarted={ onImportStarted }
-						stopImport={ stopImport }
-						status={ status }
+						clearStatusAndTotalsCache={clearStatusAndTotalsCache}
+						dateFormat={dateFormat}
+						importDate={importDate}
+						lastImportStartTimestamp={lastImportStartTimestamp}
+						onImportStarted={onImportStarted}
+						stopImport={stopImport}
+						status={status}
 					/>
 				</div>
 			</Fragment>
@@ -105,9 +105,9 @@ class HistoricalDataLayout extends Component {
 	}
 }
 
-export default withSelect( ( select, props ) => {
+export default withSelect((select, props) => {
 	const { getImportError, getImportStatus, getImportTotals } =
-		select( importStore );
+		select(importStore);
 	const {
 		activeImport,
 		cacheNeedsClearing,
@@ -120,38 +120,38 @@ export default withSelect( ( select, props ) => {
 		skipChecked,
 	} = props;
 
-	const params = formatParams( dateFormat, period, skipChecked );
+	const params = formatParams(dateFormat, period, skipChecked);
 	const { customers, orders, lastImportStartTimestamp } =
-		getImportTotals( params );
+		getImportTotals(params);
 
 	const {
 		customers: customersStatus,
 		imported_from: importDate,
 		is_importing: isImporting,
 		orders: ordersStatus,
-	} = getImportStatus( lastImportStartTimestamp );
+	} = getImportStatus(lastImportStartTimestamp);
 	const { imported: customersProgress, total: customersTotal } =
 		customersStatus || {};
 	const { imported: ordersProgress, total: ordersTotal } = ordersStatus || {};
 
 	const isError = Boolean(
-		getImportError( lastImportStartTimestamp ) || getImportError( params )
+		getImportError(lastImportStartTimestamp) || getImportError(params)
 	);
 
 	const hasImportStarted = Boolean(
-		! lastImportStartTimestamp && ! inProgress && isImporting === true
+		!lastImportStartTimestamp && !inProgress && isImporting === true
 	);
-	if ( hasImportStarted ) {
+	if (hasImportStarted) {
 		onImportStarted();
 	}
 
 	const hasImportFinished = Boolean(
 		inProgress &&
-			! cacheNeedsClearing &&
-			isImporting === false &&
-			( customersTotal > 0 || ordersTotal > 0 ) &&
-			customersProgress === customersTotal &&
-			ordersProgress === ordersTotal
+		!cacheNeedsClearing &&
+		isImporting === false &&
+		(customersTotal > 0 || ordersTotal > 0) &&
+		customersProgress === customersTotal &&
+		ordersProgress === ordersTotal
 	);
 
 	let response = {
@@ -160,29 +160,27 @@ export default withSelect( ( select, props ) => {
 		ordersTotal: orders,
 	};
 
-	if ( activeImport ) {
+	if (activeImport) {
 		response = {
 			cacheNeedsClearing,
 			customersProgress,
-			customersTotal: isNil( customersTotal )
-				? customers
-				: customersTotal,
+			customersTotal: isNil(customersTotal) ? customers : customersTotal,
 			inProgress,
 			isError,
 			ordersProgress,
-			ordersTotal: isNil( ordersTotal ) ? orders : ordersTotal,
+			ordersTotal: isNil(ordersTotal) ? orders : ordersTotal,
 		};
 	}
 
-	const status = getStatus( response );
+	const status = getStatus(response);
 
-	if ( status === 'initializing' ) {
+	if (status === 'initializing') {
 		startStatusCheckInterval();
 	}
 
-	if ( hasImportFinished ) {
+	if (hasImportFinished) {
 		onImportFinished();
 	}
 
 	return { ...response, importDate, status };
-} )( HistoricalDataLayout );
+})(HistoricalDataLayout);

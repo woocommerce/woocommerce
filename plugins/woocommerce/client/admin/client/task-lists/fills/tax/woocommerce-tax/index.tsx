@@ -17,46 +17,45 @@ import {
 import { AutomatedTaxes } from './automated-taxes';
 import { Setup } from './setup';
 
-export const WooCommerceTax = ( {
+export const WooCommerceTax = ({
 	isPending,
 	onAutomate,
 	onManual,
 	onDisable,
-}: TaxChildProps ) => {
+}: TaxChildProps) => {
 	const {
 		generalSettings,
 		isJetpackConnected,
 		isResolving,
 		pluginsToActivate,
-	} = useSelect( ( select ) => {
-		const { getSettings } = select( settingsStore );
+	} = useSelect((select) => {
+		const { getSettings } = select(settingsStore);
 		const { getActivePlugins, hasFinishedResolution } =
-			select( pluginsStore );
+			select(pluginsStore);
 		const activePlugins = getActivePlugins();
 
 		return {
-			generalSettings: getSettings( 'general' ).general,
-			isJetpackConnected: select( pluginsStore ).isJetpackConnected(),
+			generalSettings: getSettings('general').general,
+			isJetpackConnected: select(pluginsStore).isJetpackConnected(),
 			isResolving:
-				! hasFinishedResolution( 'isJetpackConnected', undefined ) ||
-				! select( settingsStore ).hasFinishedResolution(
-					'getSettings',
-					[ 'general' ]
-				) ||
-				! hasFinishedResolution( 'getActivePlugins', undefined ),
-			pluginsToActivate: difference( AUTOMATION_PLUGINS, activePlugins ),
+				!hasFinishedResolution('isJetpackConnected', undefined) ||
+				!select(settingsStore).hasFinishedResolution('getSettings', [
+					'general',
+				]) ||
+				!hasFinishedResolution('getActivePlugins', undefined),
+			pluginsToActivate: difference(AUTOMATION_PLUGINS, activePlugins),
 		};
-	}, [] );
+	}, []);
 
 	const canAutomateTaxes = () => {
 		return (
-			hasCompleteAddress( generalSettings || {} ) &&
-			! pluginsToActivate.length &&
+			hasCompleteAddress(generalSettings || {}) &&
+			!pluginsToActivate.length &&
 			isJetpackConnected
 		);
 	};
 
-	if ( isResolving ) {
+	if (isResolving) {
 		return <Spinner />;
 	}
 
@@ -67,9 +66,9 @@ export const WooCommerceTax = ( {
 		onDisable,
 	};
 
-	if ( canAutomateTaxes() ) {
-		return <AutomatedTaxes { ...childProps } />;
+	if (canAutomateTaxes()) {
+		return <AutomatedTaxes {...childProps} />;
 	}
 
-	return <Setup { ...childProps } />;
+	return <Setup {...childProps} />;
 };

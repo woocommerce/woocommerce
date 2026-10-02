@@ -10,52 +10,50 @@ import { TaskType } from '@woocommerce/data';
  */
 import { SetupTaskList } from '../setup-task-list';
 
-jest.mock( '@woocommerce/tracks', () => ( {
+jest.mock('@woocommerce/tracks', () => ({
 	recordEvent: jest.fn(),
-} ) );
-jest.mock( '@woocommerce/experimental', () => ( {
-	TaskItem: ( props: { title: string } ) => <div>{ props.title }</div>,
+}));
+jest.mock('@woocommerce/experimental', () => ({
+	TaskItem: (props: { title: string }) => <div>{props.title}</div>,
 	useSlot: jest.fn(),
-	List: jest.fn().mockImplementation( ( { children } ) => children ),
-} ) );
-jest.mock( '@woocommerce/components', () => ( {
-	Card: jest.fn().mockImplementation( ( { children } ) => children ),
+	List: jest.fn().mockImplementation(({ children }) => children),
+}));
+jest.mock('@woocommerce/components', () => ({
+	Card: jest.fn().mockImplementation(({ children }) => children),
 	Badge: jest
 		.fn()
-		.mockImplementation( ( { count } ) => <div>Count:{ count }</div> ),
-	EllipsisMenu: jest
-		.fn()
-		.mockImplementation( () => <div>task_list_menu</div> ),
-} ) );
-jest.mock( '../components/task-headers', () => ( {
+		.mockImplementation(({ count }) => <div>Count:{count}</div>),
+	EllipsisMenu: jest.fn().mockImplementation(() => <div>task_list_menu</div>),
+}));
+jest.mock('../components/task-headers', () => ({
 	taskHeaders: {
 		optional: () => <div>optional_header</div>,
 		required: () => <div>required_header</div>,
 		completed: () => <div>completed_header</div>,
 	},
 	DefaultTaskHeader: () => <div>default_header</div>,
-} ) );
-jest.mock( '@woocommerce/data', () => ( {
-	...jest.requireActual( '@woocommerce/data' ),
-	useUserPreferences: jest.fn().mockReturnValue( {
+}));
+jest.mock('@woocommerce/data', () => ({
+	...jest.requireActual('@woocommerce/data'),
+	useUserPreferences: jest.fn().mockReturnValue({
 		updateUserPreferences: jest.fn(),
-	} ),
-} ) );
-jest.mock( '@woocommerce/admin-layout', () => {
+	}),
+}));
+jest.mock('@woocommerce/admin-layout', () => {
 	const mockContext = {
-		layoutPath: [ 'home' ],
+		layoutPath: ['home'],
 		layoutString: 'home',
 		extendLayout: () => {},
 		isDescendantOf: () => false,
 	};
 	return {
-		...jest.requireActual( '@woocommerce/admin-layout' ),
-		useLayoutContext: jest.fn().mockReturnValue( mockContext ),
-		useExtendLayout: jest.fn().mockReturnValue( mockContext ),
+		...jest.requireActual('@woocommerce/admin-layout'),
+		useLayoutContext: jest.fn().mockReturnValue(mockContext),
+		useExtendLayout: jest.fn().mockReturnValue(mockContext),
 	};
-} );
+});
 
-const tasks: { [ key: string ]: TaskType[] } = {
+const tasks: { [key: string]: TaskType[] } = {
 	setup: [
 		{
 			id: 'optional',
@@ -155,203 +153,201 @@ const tasks: { [ key: string ]: TaskType[] } = {
 	],
 };
 
-describe( 'TaskList', () => {
-	beforeEach( () => {
+describe('TaskList', () => {
+	beforeEach(() => {
 		jest.clearAllMocks();
-	} );
+	});
 
-	it( 'should trigger tasklist_view event on initial render for setup task list', () => {
+	it('should trigger tasklist_view event on initial render for setup task list', () => {
 		render(
 			<SetupTaskList
 				id="setup"
 				eventName="tasklist"
-				tasks={ [] }
+				tasks={[]}
 				title="List title"
-				query={ {} }
-				isComplete={ false }
-				isHidden={ false }
-				eventPrefix={ '' }
-				displayProgressHeader={ false }
+				query={{}}
+				isComplete={false}
+				isHidden={false}
+				eventPrefix={''}
+				displayProgressHeader={false}
 				keepCompletedTaskList="no"
-				isVisible={ true }
+				isVisible={true}
 			/>
 		);
-		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
-		expect( recordEvent ).toHaveBeenCalledWith( 'tasklist_view', {
+		expect(recordEvent).toHaveBeenCalledTimes(1);
+		expect(recordEvent).toHaveBeenCalledWith('tasklist_view', {
 			context: 'home',
 			number_tasks: 0,
 			store_connected: null,
-		} );
-	} );
+		});
+	});
 
-	it( 'should trigger tasklist_view event on initial render for setup task list with eventPrefix if eventName is undefined', () => {
+	it('should trigger tasklist_view event on initial render for setup task list with eventPrefix if eventName is undefined', () => {
 		render(
 			<SetupTaskList
 				id="setup"
-				tasks={ [] }
+				tasks={[]}
 				title="List title"
-				query={ {} }
-				isComplete={ false }
-				isHidden={ false }
-				eventPrefix={ 'tasklist_' }
-				displayProgressHeader={ false }
+				query={{}}
+				isComplete={false}
+				isHidden={false}
+				eventPrefix={'tasklist_'}
+				displayProgressHeader={false}
 				keepCompletedTaskList="no"
-				isVisible={ true }
+				isVisible={true}
 			/>
 		);
-		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
-		expect( recordEvent ).toHaveBeenCalledWith( 'tasklist_view', {
+		expect(recordEvent).toHaveBeenCalledTimes(1);
+		expect(recordEvent).toHaveBeenCalledWith('tasklist_view', {
 			context: 'home',
 			number_tasks: 0,
 			store_connected: null,
-		} );
-	} );
+		});
+	});
 
-	it( 'should trigger {id}_tasklist_view event on initial render for setup task list if id is not setup', () => {
+	it('should trigger {id}_tasklist_view event on initial render for setup task list if id is not setup', () => {
 		render(
 			<SetupTaskList
 				id="extended"
 				eventName="extended_tasklist"
-				tasks={ [] }
+				tasks={[]}
 				title="List title"
-				query={ {} }
-				isComplete={ false }
-				isHidden={ false }
-				eventPrefix={ '' }
-				displayProgressHeader={ false }
+				query={{}}
+				isComplete={false}
+				isHidden={false}
+				eventPrefix={''}
+				displayProgressHeader={false}
 				keepCompletedTaskList="no"
-				isVisible={ true }
+				isVisible={true}
 			/>
 		);
-		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
-		expect( recordEvent ).toHaveBeenCalledWith( 'extended_tasklist_view', {
+		expect(recordEvent).toHaveBeenCalledTimes(1);
+		expect(recordEvent).toHaveBeenCalledWith('extended_tasklist_view', {
 			context: 'home',
 			number_tasks: 0,
 			store_connected: null,
-		} );
-	} );
+		});
+	});
 
-	it( 'should render the task header of the first uncompleted task', () => {
+	it('should render the task header of the first uncompleted task', () => {
 		const { queryByText } = render(
 			<SetupTaskList
 				id="extended"
-				tasks={ [ ...tasks.setup ] }
+				tasks={[...tasks.setup]}
 				title="List title"
-				query={ {} }
-				isComplete={ false }
-				isHidden={ false }
-				eventPrefix={ '' }
-				displayProgressHeader={ false }
+				query={{}}
+				isComplete={false}
+				isHidden={false}
+				eventPrefix={''}
+				displayProgressHeader={false}
 				keepCompletedTaskList="no"
-				isVisible={ true }
+				isVisible={true}
 			/>
 		);
-		expect( queryByText( 'optional_header' ) ).toBeInTheDocument();
-	} );
+		expect(queryByText('optional_header')).toBeInTheDocument();
+	});
 
-	it( 'should render all tasks', () => {
+	it('should render all tasks', () => {
 		const { queryByText } = render(
 			<SetupTaskList
 				id="extended"
-				tasks={ [ ...tasks.setup ] }
+				tasks={[...tasks.setup]}
 				title="List title"
-				query={ {} }
-				isComplete={ false }
-				isHidden={ false }
-				eventPrefix={ '' }
-				displayProgressHeader={ false }
+				query={{}}
+				isComplete={false}
+				isHidden={false}
+				eventPrefix={''}
+				displayProgressHeader={false}
 				keepCompletedTaskList="no"
-				isVisible={ true }
+				isVisible={true}
 			/>
 		);
-		for ( const task of tasks.setup ) {
-			expect( queryByText( task.title ) ).toBeInTheDocument();
+		for (const task of tasks.setup) {
+			expect(queryByText(task.title)).toBeInTheDocument();
 		}
-	} );
+	});
 
-	it( 'should not display isDismissed tasks', () => {
-		const dismissedTask = [ { ...tasks.setup[ 0 ], isDismissed: true } ];
+	it('should not display isDismissed tasks', () => {
+		const dismissedTask = [{ ...tasks.setup[0], isDismissed: true }];
 		const { queryByText } = render(
 			<SetupTaskList
 				id="extended"
-				tasks={ dismissedTask }
+				tasks={dismissedTask}
 				title="List title"
-				query={ {} }
-				isComplete={ false }
-				isHidden={ false }
-				eventPrefix={ '' }
-				displayProgressHeader={ false }
+				query={{}}
+				isComplete={false}
+				isHidden={false}
+				eventPrefix={''}
+				displayProgressHeader={false}
 				keepCompletedTaskList="no"
-				isVisible={ true }
+				isVisible={true}
 			/>
 		);
-		expect(
-			queryByText( dismissedTask[ 0 ].title )
-		).not.toBeInTheDocument();
-	} );
+		expect(queryByText(dismissedTask[0].title)).not.toBeInTheDocument();
+	});
 
-	it( 'should fall back to the DefaultTaskHeader for a task that has an image but no dedicated header or slot fill', () => {
+	it('should fall back to the DefaultTaskHeader for a task that has an image but no dedicated header or slot fill', () => {
 		const thirdPartyTask = {
-			...tasks.extension[ 0 ],
+			...tasks.extension[0],
 			imageUrl: 'https://example.com/custom-illustration.png',
 			imageAlt: 'Custom illustration',
 		};
 		const { queryByText } = render(
 			<SetupTaskList
 				id="extended"
-				tasks={ [ thirdPartyTask ] }
+				tasks={[thirdPartyTask]}
 				title="List title"
-				query={ {} }
-				isComplete={ false }
-				isHidden={ false }
-				eventPrefix={ '' }
-				displayProgressHeader={ false }
+				query={{}}
+				isComplete={false}
+				isHidden={false}
+				eventPrefix={''}
+				displayProgressHeader={false}
 				keepCompletedTaskList="no"
-				isVisible={ true }
+				isVisible={true}
 			/>
 		);
-		expect( queryByText( 'default_header' ) ).toBeInTheDocument();
-	} );
+		expect(queryByText('default_header')).toBeInTheDocument();
+	});
 
-	it( 'should not render any task header for a task without an image, dedicated header, or slot fill', () => {
+	it('should not render any task header for a task without an image, dedicated header, or slot fill', () => {
 		const { queryByText } = render(
 			<SetupTaskList
 				id="extended"
-				tasks={ [ ...tasks.extension ] }
+				tasks={[...tasks.extension]}
 				title="List title"
-				query={ {} }
-				isComplete={ false }
-				isHidden={ false }
-				eventPrefix={ '' }
-				displayProgressHeader={ false }
+				query={{}}
+				isComplete={false}
+				isHidden={false}
+				eventPrefix={''}
+				displayProgressHeader={false}
 				keepCompletedTaskList="no"
-				isVisible={ true }
+				isVisible={true}
 			/>
 		);
-		expect( queryByText( 'default_header' ) ).not.toBeInTheDocument();
-	} );
+		expect(queryByText('default_header')).not.toBeInTheDocument();
+	});
 
-	it( 'should prefer a dedicated task header over the DefaultTaskHeader even when the task has an image', () => {
+	it('should prefer a dedicated task header over the DefaultTaskHeader even when the task has an image', () => {
 		const taskWithImage = {
-			...tasks.setup[ 0 ],
+			...tasks.setup[0],
 			imageUrl: 'https://example.com/custom-illustration.png',
 			imageAlt: 'Custom illustration',
 		};
 		const { queryByText } = render(
 			<SetupTaskList
 				id="extended"
-				tasks={ [ taskWithImage ] }
+				tasks={[taskWithImage]}
 				title="List title"
-				query={ {} }
-				isComplete={ false }
-				isHidden={ false }
-				eventPrefix={ '' }
-				displayProgressHeader={ false }
+				query={{}}
+				isComplete={false}
+				isHidden={false}
+				eventPrefix={''}
+				displayProgressHeader={false}
 				keepCompletedTaskList="no"
-				isVisible={ true }
+				isVisible={true}
 			/>
 		);
-		expect( queryByText( 'optional_header' ) ).toBeInTheDocument();
-		expect( queryByText( 'default_header' ) ).not.toBeInTheDocument();
-	} );
-} );
+		expect(queryByText('optional_header')).toBeInTheDocument();
+		expect(queryByText('default_header')).not.toBeInTheDocument();
+	});
+});

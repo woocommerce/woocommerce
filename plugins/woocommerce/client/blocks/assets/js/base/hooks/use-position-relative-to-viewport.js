@@ -43,42 +43,42 @@ const style = {
  * ```
  */
 export const usePositionRelativeToViewport = () => {
-	const [ positionRelativeToViewport, setPositionRelativeToViewport ] =
-		useState( '' );
-	const referenceElementRef = useRef( null );
+	const [positionRelativeToViewport, setPositionRelativeToViewport] =
+		useState('');
+	const referenceElementRef = useRef(null);
 	const intersectionObserver = useRef(
 		new IntersectionObserver(
-			( entries ) => {
-				if ( entries[ 0 ].isIntersecting ) {
-					setPositionRelativeToViewport( 'visible' );
+			(entries) => {
+				if (entries[0].isIntersecting) {
+					setPositionRelativeToViewport('visible');
 				} else {
 					setPositionRelativeToViewport(
-						entries[ 0 ].boundingClientRect.top > 0
+						entries[0].boundingClientRect.top > 0
 							? 'below'
 							: 'above'
 					);
 				}
 			},
-			{ threshold: [ 0, 0.5, 1 ] }
+			{ threshold: [0, 0.5, 1] }
 		)
 	);
 
-	useLayoutEffect( () => {
+	useLayoutEffect(() => {
 		const referenceElementNode = referenceElementRef.current;
 		const observer = intersectionObserver.current;
 
-		if ( referenceElementNode ) {
-			observer.observe( referenceElementNode );
+		if (referenceElementNode) {
+			observer.observe(referenceElementNode);
 		}
 
 		return () => {
-			observer.unobserve( referenceElementNode );
+			observer.unobserve(referenceElementNode);
 		};
-	}, [] );
+	}, []);
 
 	const referenceElement = (
-		<div aria-hidden={ true } ref={ referenceElementRef } style={ style } />
+		<div aria-hidden={true} ref={referenceElementRef} style={style} />
 	);
 
-	return [ referenceElement, positionRelativeToViewport ];
+	return [referenceElement, positionRelativeToViewport];
 };

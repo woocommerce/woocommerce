@@ -19,22 +19,22 @@ interface LoggingLevel {
 }
 
 export const UpdateBlockTemplateLoggingThreshold = () => {
-	const { loggingLevels, threshold, isLoading } = useSelect( ( select ) => {
+	const { loggingLevels, threshold, isLoading } = useSelect((select) => {
 		const { getLoggingLevels, getBlockTemplateLoggingThreshold } =
-			select( store );
+			select(store);
 
 		const retrievedLoggingLevels = getLoggingLevels();
 		const retrievedThreshold = getBlockTemplateLoggingThreshold();
 		return {
 			loggingLevels: retrievedLoggingLevels,
 			threshold: retrievedThreshold,
-			isLoading: ! retrievedLoggingLevels || ! retrievedThreshold,
+			isLoading: !retrievedLoggingLevels || !retrievedThreshold,
 		};
-	}, [] );
+	}, []);
 
-	const { updateCommandParams } = useDispatch( store );
+	const { updateCommandParams } = useDispatch(store);
 
-	function onThresholdChange( selectedThreshold: string ) {
+	function onThresholdChange(selectedThreshold: string) {
 		updateCommandParams(
 			UPDATE_BLOCK_TEMPLATE_LOGGING_THRESHOLD_ACTION_NAME,
 			{
@@ -44,29 +44,29 @@ export const UpdateBlockTemplateLoggingThreshold = () => {
 	}
 
 	function getOptions() {
-		return loggingLevels.map( ( loggingLevel: LoggingLevel ) => {
+		return loggingLevels.map((loggingLevel: LoggingLevel) => {
 			return {
 				label: loggingLevel.label,
 				value: loggingLevel.value,
 			};
-		} );
+		});
 	}
 
 	return (
 		<div className="select-description">
-			{ isLoading ? (
+			{isLoading ? (
 				<p>Loading...</p>
 			) : (
 				<SelectControl
 					label="Threshold"
-					onChange={ onThresholdChange }
+					onChange={onThresholdChange}
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 					// @ts-ignore labelPosition prop exists
 					labelPosition="side"
-					options={ getOptions() }
-					value={ threshold }
+					options={getOptions()}
+					value={threshold}
 				/>
-			) }
+			)}
 		</div>
 	);
 };

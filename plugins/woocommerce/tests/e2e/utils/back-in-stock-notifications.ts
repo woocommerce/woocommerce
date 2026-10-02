@@ -272,7 +272,7 @@ export async function createOutOfStockVariableProduct(
 						{ name: BIS_VARIATION_ATTRIBUTE, option: '' },
 					],
 				},
-		  ]
+			]
 		: [
 				{
 					regular_price: '9.99',
@@ -290,7 +290,7 @@ export async function createOutOfStockVariableProduct(
 						{ name: BIS_VARIATION_ATTRIBUTE, option: 'White' },
 					],
 				},
-		  ];
+			];
 
 	const { data: batch } = await restApi.post< {
 		create: Array< { id: number; stock_status: string } >;
@@ -325,7 +325,7 @@ export async function createOutOfStockVariableProduct(
 				id: created[ 0 ].id,
 				option: 'Blue',
 				notificationName: notificationName( 'Blue' ),
-		  };
+			};
 
 	return {
 		id: product.id,

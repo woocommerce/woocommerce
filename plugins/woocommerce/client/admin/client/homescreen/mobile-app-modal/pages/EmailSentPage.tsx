@@ -9,29 +9,29 @@ interface EmailSentProps {
 	returnToSendLinkPage: () => void;
 }
 
-export const EmailSentPage = ( {
+export const EmailSentPage = ({
 	returnToSendLinkPage: returnToSendLinkPage,
-}: EmailSentProps ) => {
+}: EmailSentProps) => {
 	return (
 		<div className="email-sent-modal-body">
 			<div className="email-sent-illustration"></div>
 			<div className="email-sent-title">
-				<h1>{ __( 'Check your email!', 'woocommerce' ) }</h1>
+				<h1>{__('Check your email!', 'woocommerce')}</h1>
 			</div>
 			<div className="email-sent-subheader-spacer">
 				<div className="email-sent-subheader">
-					{ __(
+					{__(
 						'We just sent you the magic link. Open it on your mobile device and follow the instructions.',
 						'woocommerce'
-					) }
+					)}
 				</div>
 			</div>
 			<div className="email-sent-footer">
 				<div className="email-sent-footer-prompt">
-					{ __( 'DIDN’T GET IT?', 'woocommerce' ) }
+					{__('DIDN’T GET IT?', 'woocommerce')}
 				</div>
 				<div className="email-sent-footer-text">
-					{ interpolateComponents( {
+					{interpolateComponents({
 						mixedString: __(
 							'Check your spam/junk email folder or {{ sendAnotherLink /}}.',
 							'woocommerce'
@@ -40,15 +40,15 @@ export const EmailSentPage = ( {
 							sendAnotherLink: (
 								<Button
 									className="email-sent-send-another-link"
-									onClick={ () => {
+									onClick={() => {
 										returnToSendLinkPage();
-									} }
+									}}
 								>
-									{ __( 'send another link', 'woocommerce' ) }
+									{__('send another link', 'woocommerce')}
 								</Button>
 							),
 						},
-					} ) }
+					})}
 				</div>
 			</div>
 		</div>

@@ -11,39 +11,39 @@ import { createElement } from '@wordpress/element';
  */
 import { QuickLink } from '../index';
 
-describe( 'QuickLink', () => {
-	it( 'renders an title and href based on props passed', () => {
+describe('QuickLink', () => {
+	it('renders an title and href based on props passed', () => {
 		const { queryByText, queryByRole } = render(
 			<QuickLink
 				linkType="external"
 				title="hello world"
-				icon={ brush }
+				icon={brush}
 				href="https://example.com"
 			/>
 		);
 
-		expect( queryByText( 'hello world' ) ).not.toBeEmptyDOMElement();
-		expect( queryByRole( 'link' ) ).toHaveAttribute(
+		expect(queryByText('hello world')).not.toBeEmptyDOMElement();
+		expect(queryByRole('link')).toHaveAttribute(
 			'href',
 			'https://example.com'
 		);
-	} );
+	});
 
-	it( 'attaches a click handler to the link if it is passed', () => {
+	it('attaches a click handler to the link if it is passed', () => {
 		const clickHandler = jest.fn();
 
 		const { queryByRole } = render(
 			<QuickLink
 				linkType="external"
 				title="hello world"
-				icon={ brush }
+				icon={brush}
 				href="https://example.com"
-				onClick={ clickHandler }
+				onClick={clickHandler}
 			/>
 		);
 
-		const link = queryByRole( 'link' );
-		userEvent.click( link );
-		expect( clickHandler ).toHaveBeenCalled();
-	} );
-} );
+		const link = queryByRole('link');
+		userEvent.click(link);
+		expect(clickHandler).toHaveBeenCalled();
+	});
+});

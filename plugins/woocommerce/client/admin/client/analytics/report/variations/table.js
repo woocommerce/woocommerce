@@ -24,37 +24,37 @@ const EXPERIMENTAL_VARIATIONS_REPORT_TABLE_TITLE_FILTER =
 const EXPERIMENTAL_VARIATIONS_REPORT_TABLE_SUMMARY_VARIATIONS_COUNT_LABEL_FILTER =
 	'experimental_woocommerce_admin_variations_report_table_summary_variations_count_label';
 
-const manageStock = getAdminSetting( 'manageStock', 'no' );
-const stockStatuses = getAdminSetting( 'stockStatuses', {} );
+const manageStock = getAdminSetting('manageStock', 'no');
+const stockStatuses = getAdminSetting('stockStatuses', {});
 
-const getFullVariationName = ( rowData ) =>
-	getVariationName( rowData.extended_info || {} );
+const getFullVariationName = (rowData) =>
+	getVariationName(rowData.extended_info || {});
 
 class VariationsReportTable extends Component {
 	constructor() {
 		super();
 
-		this.getHeadersContent = this.getHeadersContent.bind( this );
-		this.getRowsContent = this.getRowsContent.bind( this );
-		this.getSummary = this.getSummary.bind( this );
+		this.getHeadersContent = this.getHeadersContent.bind(this);
+		this.getRowsContent = this.getRowsContent.bind(this);
+		this.getSummary = this.getSummary.bind(this);
 	}
 
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Product / Variation title', 'woocommerce' ),
+				label: __('Product / Variation title', 'woocommerce'),
 				key: 'name',
 				required: true,
 				isLeftAligned: true,
 			},
 			{
-				label: __( 'SKU', 'woocommerce' ),
+				label: __('SKU', 'woocommerce'),
 				key: 'sku',
 				hiddenByDefault: true,
 				isSortable: true,
 			},
 			{
-				label: __( 'Items sold', 'woocommerce' ),
+				label: __('Items sold', 'woocommerce'),
 				key: 'items_sold',
 				required: true,
 				defaultSort: true,
@@ -62,45 +62,45 @@ class VariationsReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'Net sales', 'woocommerce' ),
-				screenReaderLabel: __( 'Net sales', 'woocommerce' ),
+				label: __('Net sales', 'woocommerce'),
+				screenReaderLabel: __('Net sales', 'woocommerce'),
 				key: 'net_revenue',
 				required: true,
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Orders', 'woocommerce' ),
+				label: __('Orders', 'woocommerce'),
 				key: 'orders_count',
 				isSortable: true,
 				isNumeric: true,
 			},
 			manageStock === 'yes'
 				? {
-						label: __( 'Status', 'woocommerce' ),
+						label: __('Status', 'woocommerce'),
 						key: 'stock_status',
-				  }
+					}
 				: null,
 			manageStock === 'yes'
 				? {
-						label: __( 'Stock', 'woocommerce' ),
+						label: __('Stock', 'woocommerce'),
 						key: 'stock',
 						isNumeric: true,
-				  }
+					}
 				: null,
-		].filter( Boolean );
+		].filter(Boolean);
 	}
 
-	getRowsContent( data = [] ) {
+	getRowsContent(data = []) {
 		const { query } = this.props;
-		const persistedQuery = getPersistedQuery( query );
+		const persistedQuery = getPersistedQuery(query);
 		const {
 			formatAmount,
 			formatDecimal: getCurrencyFormatDecimal,
 			getCurrencyConfig,
 		} = this.context;
 
-		return map( data, ( row ) => {
+		return map(data, (row) => {
 			const {
 				items_sold: itemsSold,
 				net_revenue: netRevenue,
@@ -116,26 +116,22 @@ class VariationsReportTable extends Component {
 				deleted,
 				sku,
 			} = extendedInfo;
-			const name = getFullVariationName( row );
-			const ordersLink = getNewPath(
-				persistedQuery,
-				'/analytics/orders',
-				{
-					filter: 'advanced',
-					variation_includes: variationId,
-				}
-			);
+			const name = getFullVariationName(row);
+			const ordersLink = getNewPath(persistedQuery, '/analytics/orders', {
+				filter: 'advanced',
+				variation_includes: variationId,
+			});
 			const editPostLink = getAdminLink(
-				`post.php?post=${ productId }&action=edit`
+				`post.php?post=${productId}&action=edit`
 			);
 
 			return [
 				{
 					display: deleted ? (
-						name + ' ' + __( '(Deleted)', 'woocommerce' )
+						name + ' ' + __('(Deleted)', 'woocommerce')
 					) : (
-						<Link href={ editPostLink } type="wp-admin">
-							{ name }
+						<Link href={editPostLink} type="wp-admin">
+							{name}
 						</Link>
 					),
 					value: name,
@@ -153,13 +149,13 @@ class VariationsReportTable extends Component {
 					value: itemsSold,
 				},
 				{
-					display: formatAmount( netRevenue ),
-					value: getCurrencyFormatDecimal( netRevenue ),
+					display: formatAmount(netRevenue),
+					value: getCurrencyFormatDecimal(netRevenue),
 				},
 				{
 					display: (
-						<Link href={ ordersLink } type="wc-admin">
-							{ ordersCount }
+						<Link href={ordersLink} type="wc-admin">
+							{ordersCount}
 						</Link>
 					),
 					value: ordersCount,
@@ -171,30 +167,30 @@ class VariationsReportTable extends Component {
 								stockQuantity,
 								lowStockAmount
 							) ? (
-								<Link href={ editPostLink } type="wp-admin">
-									{ _x(
+								<Link href={editPostLink} type="wp-admin">
+									{_x(
 										'Low',
 										'Indication of a low quantity',
 										'woocommerce'
-									) }
+									)}
 								</Link>
 							) : (
-								stockStatuses[ stockStatus ]
+								stockStatuses[stockStatus]
 							),
-							value: stockStatuses[ stockStatus ],
-					  }
+							value: stockStatuses[stockStatus],
+						}
 					: null,
 				manageStock === 'yes'
 					? {
 							display: stockQuantity,
 							value: stockQuantity,
-					  }
+						}
 					: null,
-			].filter( Boolean );
-		} );
+			].filter(Boolean);
+		});
 	}
 
-	getSummary( totals ) {
+	getSummary(totals) {
 		const { query } = this.props;
 		const {
 			variations_count: variationsCount = 0,
@@ -226,24 +222,19 @@ class VariationsReportTable extends Component {
 					variationsCount,
 					query
 				),
-				value: formatValue( currency, 'number', variationsCount ),
+				value: formatValue(currency, 'number', variationsCount),
 			},
 			{
-				label: _n(
-					'item sold',
-					'items sold',
-					itemsSold,
-					'woocommerce'
-				),
-				value: formatValue( currency, 'number', itemsSold ),
+				label: _n('item sold', 'items sold', itemsSold, 'woocommerce'),
+				value: formatValue(currency, 'number', itemsSold),
 			},
 			{
-				label: __( 'net sales', 'woocommerce' ),
-				value: formatAmount( netRevenue ),
+				label: __('net sales', 'woocommerce'),
+				value: formatAmount(netRevenue),
 			},
 			{
-				label: _n( 'order', 'orders', ordersCount, 'woocommerce' ),
-				value: formatValue( currency, 'number', ordersCount ),
+				label: _n('order', 'orders', ordersCount, 'woocommerce'),
+				value: formatValue(currency, 'number', ordersCount),
 			},
 		];
 	}
@@ -262,35 +253,35 @@ class VariationsReportTable extends Component {
 				'Check at least two variations below to compare',
 				'woocommerce'
 			),
-			placeholder: __( 'Search by variation name or SKU', 'woocommerce' ),
+			placeholder: __('Search by variation name or SKU', 'woocommerce'),
 		};
 
 		return (
 			<ReportTable
-				baseSearchQuery={ baseSearchQuery }
+				baseSearchQuery={baseSearchQuery}
 				compareBy="variations"
 				compareParam="filter-variations"
 				endpoint="variations"
-				getHeadersContent={ this.getHeadersContent }
-				getRowsContent={ this.getRowsContent }
-				isRequesting={ isRequesting }
+				getHeadersContent={this.getHeadersContent}
+				getRowsContent={this.getRowsContent}
+				isRequesting={isRequesting}
 				itemIdField="variation_id"
-				labels={ labels }
-				query={ query }
-				getSummary={ this.getSummary }
-				summaryFields={ [
+				labels={labels}
+				query={query}
+				getSummary={this.getSummary}
+				summaryFields={[
 					'variations_count',
 					'items_sold',
 					'net_revenue',
 					'orders_count',
-				] }
-				tableQuery={ {
+				]}
+				tableQuery={{
 					orderby: query.orderby || 'items_sold',
 					order: query.order || 'desc',
 					extended_info: true,
 					product_includes: query.product_includes,
 					variations: query.variations,
-				} }
+				}}
 				/**
 				 * Experimental: Filter the title used for the report table.
 				 *
@@ -299,14 +290,14 @@ class VariationsReportTable extends Component {
 				 * @param {string} title Title used for the report table.
 				 * @param {Array}  query Query parameters.
 				 */
-				title={ applyFilters(
+				title={applyFilters(
 					EXPERIMENTAL_VARIATIONS_REPORT_TABLE_TITLE_FILTER,
-					__( 'Variations', 'woocommerce' ),
+					__('Variations', 'woocommerce'),
 					query
-				) }
+				)}
 				columnPrefsKey="variations_report_columns"
-				filters={ filters }
-				advancedFilters={ advancedFilters }
+				filters={filters}
+				advancedFilters={advancedFilters}
 			/>
 		);
 	}

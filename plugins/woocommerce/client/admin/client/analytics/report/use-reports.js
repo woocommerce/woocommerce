@@ -12,49 +12,58 @@ import { getAdminSetting } from '~/utils/admin-settings';
 import { useFilterHook } from '~/utils/use-filter-hook';
 import { ScheduledUpdatesPromotionNotice } from '~/analytics/components';
 
-const RevenueReport = lazy( () =>
-	import( /* webpackChunkName: "analytics-report-revenue" */ './revenue' )
+const RevenueReport = lazy(
+	() => import(/* webpackChunkName: "analytics-report-revenue" */ './revenue')
 );
-const ProductsReport = lazy( () =>
-	import( /* webpackChunkName: "analytics-report-products" */ './products' )
+const ProductsReport = lazy(
+	() =>
+		import(/* webpackChunkName: "analytics-report-products" */ './products')
 );
-const VariationsReport = lazy( () =>
-	import(
-		/* webpackChunkName: "analytics-report-variations" */ './variations'
-	)
+const VariationsReport = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "analytics-report-variations" */ './variations'
+		)
 );
-const OrdersReport = lazy( () =>
-	import( /* webpackChunkName: "analytics-report-orders" */ './orders' )
+const OrdersReport = lazy(
+	() => import(/* webpackChunkName: "analytics-report-orders" */ './orders')
 );
-const CategoriesReport = lazy( () =>
-	import(
-		/* webpackChunkName: "analytics-report-categories" */ './categories'
-	)
+const CategoriesReport = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "analytics-report-categories" */ './categories'
+		)
 );
-const CouponsReport = lazy( () =>
-	import( /* webpackChunkName: "analytics-report-coupons" */ './coupons' )
+const CouponsReport = lazy(
+	() => import(/* webpackChunkName: "analytics-report-coupons" */ './coupons')
 );
-const TaxesReport = lazy( () =>
-	import( /* webpackChunkName: "analytics-report-taxes" */ './taxes' )
+const TaxesReport = lazy(
+	() => import(/* webpackChunkName: "analytics-report-taxes" */ './taxes')
 );
-const DownloadsReport = lazy( () =>
-	import( /* webpackChunkName: "analytics-report-downloads" */ './downloads' )
+const DownloadsReport = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "analytics-report-downloads" */ './downloads'
+		)
 );
-const StockReport = lazy( () =>
-	import( /* webpackChunkName: "analytics-report-stock" */ './stock' )
+const StockReport = lazy(
+	() => import(/* webpackChunkName: "analytics-report-stock" */ './stock')
 );
-const CustomersReport = lazy( () =>
-	import( /* webpackChunkName: "analytics-report-customers" */ './customers' )
+const CustomersReport = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "analytics-report-customers" */ './customers'
+		)
 );
 
-const manageStock = getAdminSetting( 'manageStock', 'no' );
+const manageStock = getAdminSetting('manageStock', 'no');
 const REPORTS_FILTER = 'woocommerce_admin_reports_list';
 
 const getReports = () => {
 	const reports = [
 		{
 			report: 'revenue',
-			title: __( 'Revenue', 'woocommerce' ),
+			title: __('Revenue', 'woocommerce'),
 			component: RevenueReport,
 			navArgs: {
 				id: 'woocommerce-analytics-revenue',
@@ -62,7 +71,7 @@ const getReports = () => {
 		},
 		{
 			report: 'products',
-			title: __( 'Products', 'woocommerce' ),
+			title: __('Products', 'woocommerce'),
 			component: ProductsReport,
 			navArgs: {
 				id: 'woocommerce-analytics-products',
@@ -70,7 +79,7 @@ const getReports = () => {
 		},
 		{
 			report: 'variations',
-			title: __( 'Variations', 'woocommerce' ),
+			title: __('Variations', 'woocommerce'),
 			component: VariationsReport,
 			navArgs: {
 				id: 'woocommerce-analytics-variations',
@@ -78,7 +87,7 @@ const getReports = () => {
 		},
 		{
 			report: 'orders',
-			title: __( 'Orders', 'woocommerce' ),
+			title: __('Orders', 'woocommerce'),
 			component: OrdersReport,
 			navArgs: {
 				id: 'woocommerce-analytics-orders',
@@ -86,7 +95,7 @@ const getReports = () => {
 		},
 		{
 			report: 'categories',
-			title: __( 'Categories', 'woocommerce' ),
+			title: __('Categories', 'woocommerce'),
 			component: CategoriesReport,
 			navArgs: {
 				id: 'woocommerce-analytics-categories',
@@ -94,7 +103,7 @@ const getReports = () => {
 		},
 		{
 			report: 'coupons',
-			title: __( 'Coupons', 'woocommerce' ),
+			title: __('Coupons', 'woocommerce'),
 			component: CouponsReport,
 			navArgs: {
 				id: 'woocommerce-analytics-coupons',
@@ -102,7 +111,7 @@ const getReports = () => {
 		},
 		{
 			report: 'taxes',
-			title: __( 'Taxes', 'woocommerce' ),
+			title: __('Taxes', 'woocommerce'),
 			component: TaxesReport,
 			navArgs: {
 				id: 'woocommerce-analytics-taxes',
@@ -111,39 +120,39 @@ const getReports = () => {
 		manageStock === 'yes'
 			? {
 					report: 'stock',
-					title: __( 'Stock', 'woocommerce' ),
+					title: __('Stock', 'woocommerce'),
 					component: StockReport,
 					navArgs: {
 						id: 'woocommerce-analytics-stock',
 					},
-			  }
+				}
 			: null,
 		{
 			report: 'customers',
-			title: __( 'Customers', 'woocommerce' ),
+			title: __('Customers', 'woocommerce'),
 			component: CustomersReport,
 		},
 		{
 			report: 'downloads',
-			title: __( 'Downloads', 'woocommerce' ),
+			title: __('Downloads', 'woocommerce'),
 			component: DownloadsReport,
 			navArgs: {
 				id: 'woocommerce-analytics-downloads',
 			},
 		},
-	].filter( Boolean );
+	].filter(Boolean);
 
 	// Wrap the report component with the scheduled updates promotion notice
 	// Create a new array to avoid mutating the original, which could lead to
 	// multiple wrappings if getReports() is called multiple times.
-	const wrappedReports = reports.map( ( report ) => {
+	const wrappedReports = reports.map((report) => {
 		const OriginalComponent = report.component;
 
-		function WrappedComponent( props ) {
+		function WrappedComponent(props) {
 			return (
 				<Fragment>
 					<ScheduledUpdatesPromotionNotice />
-					<OriginalComponent { ...props } />
+					<OriginalComponent {...props} />
 				</Fragment>
 			);
 		}
@@ -157,7 +166,7 @@ const getReports = () => {
 			...report,
 			component: WrappedComponent,
 		};
-	} );
+	});
 
 	/**
 	 * An object defining a report page.
@@ -175,9 +184,9 @@ const getReports = () => {
 	 * @filter woocommerce_admin_reports_list
 	 * @param {Array.<report>} reports Report pages list.
 	 */
-	return applyFilters( REPORTS_FILTER, wrappedReports );
+	return applyFilters(REPORTS_FILTER, wrappedReports);
 };
 
 export function useReports() {
-	return useFilterHook( REPORTS_FILTER, getReports );
+	return useFilterHook(REPORTS_FILTER, getReports);
 }

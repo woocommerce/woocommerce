@@ -27,10 +27,10 @@ class ProductsReport extends Component {
 		const isCompareView =
 			query.filter === 'compare-products' &&
 			query.products &&
-			query.products.split( ',' ).length > 1;
+			query.products.split(',').length > 1;
 
 		const mode =
-			isCompareView || ( isSingleProductView && isSingleProductVariable )
+			isCompareView || (isSingleProductView && isSingleProductVariable)
 				? 'item-comparison'
 				: 'time-comparison';
 		const compareObject =
@@ -40,9 +40,9 @@ class ProductsReport extends Component {
 		const label =
 			isSingleProductView && isSingleProductVariable
 				? /* translators: %d: number of variations */
-				  __( '%d variations', 'woocommerce' )
+					__('%d variations', 'woocommerce')
 				: /* translators: %d: number of products */
-				  __( '%d products', 'woocommerce' );
+					__('%d products', 'woocommerce');
 
 		return {
 			compareObject,
@@ -56,7 +56,7 @@ class ProductsReport extends Component {
 		const { path, query, isError, isRequesting, isSingleProductVariable } =
 			this.props;
 
-		if ( isError ) {
+		if (isError) {
 			return <AnalyticsError />;
 		}
 
@@ -64,7 +64,7 @@ class ProductsReport extends Component {
 			...query,
 		};
 
-		if ( mode === 'item-comparison' ) {
+		if (mode === 'item-comparison') {
 			chartQuery.segmentby =
 				compareObject === 'products' ? 'product' : 'variation';
 		}
@@ -72,52 +72,49 @@ class ProductsReport extends Component {
 		return (
 			<Fragment>
 				<ReportHeader
-					query={ query }
-					path={ path }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
+					query={query}
+					path={path}
+					filters={filters}
+					advancedFilters={advancedFilters}
 					report="products"
 				/>
 				<ReportSummary
-					mode={ mode }
-					charts={ charts }
+					mode={mode}
+					charts={charts}
 					endpoint="products"
-					query={ chartQuery }
-					selectedChart={ getSelectedChart( query.chart, charts ) }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
+					query={chartQuery}
+					selectedChart={getSelectedChart(query.chart, charts)}
+					filters={filters}
+					advancedFilters={advancedFilters}
 				/>
 				<ReportChart
-					charts={ charts }
-					mode={ mode }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
+					charts={charts}
+					mode={mode}
+					filters={filters}
+					advancedFilters={advancedFilters}
 					endpoint="products"
-					isRequesting={ isRequesting }
-					itemsLabel={ itemsLabel }
-					path={ path }
-					query={ chartQuery }
-					selectedChart={ getSelectedChart(
-						chartQuery.chart,
-						charts
-					) }
+					isRequesting={isRequesting}
+					itemsLabel={itemsLabel}
+					path={path}
+					query={chartQuery}
+					selectedChart={getSelectedChart(chartQuery.chart, charts)}
 				/>
-				{ isSingleProductVariable ? (
+				{isSingleProductVariable ? (
 					<VariationsReportTable
-						baseSearchQuery={ { filter: 'single_product' } }
-						isRequesting={ isRequesting }
-						query={ query }
-						filters={ filters }
-						advancedFilters={ advancedFilters }
+						baseSearchQuery={{ filter: 'single_product' }}
+						isRequesting={isRequesting}
+						query={query}
+						filters={filters}
+						advancedFilters={advancedFilters}
 					/>
 				) : (
 					<ProductsReportTable
-						isRequesting={ isRequesting }
-						query={ query }
-						filters={ filters }
-						advancedFilters={ advancedFilters }
+						isRequesting={isRequesting}
+						query={query}
+						filters={filters}
+						advancedFilters={advancedFilters}
 					/>
-				) }
+				)}
 			</Fragment>
 		);
 	}
@@ -129,14 +126,14 @@ ProductsReport.propTypes = {
 };
 
 export default compose(
-	withSelect( ( select, props ) => {
+	withSelect((select, props) => {
 		const { query, isRequesting } = props;
 		const isSingleProductView =
-			! query.search &&
+			!query.search &&
 			query.products &&
-			query.products.split( ',' ).length === 1;
+			query.products.split(',').length === 1;
 
-		if ( isRequesting ) {
+		if (isRequesting) {
 			return {
 				query: {
 					...query,
@@ -146,25 +143,24 @@ export default compose(
 			};
 		}
 
-		if ( isSingleProductView ) {
-			const { getItems, isResolving, getItemsError } =
-				select( itemsStore );
-			const productId = parseInt( query.products, 10 );
+		if (isSingleProductView) {
+			const { getItems, isResolving, getItemsError } = select(itemsStore);
+			const productId = parseInt(query.products, 10);
 			const includeArgs = { include: productId };
 			// TODO Look at similar usage to populate tags in the Search component.
-			const products = getItems( 'products', includeArgs );
-			const product = products?.get( productId );
+			const products = getItems('products', includeArgs);
+			const product = products?.get(productId);
 			const isVariable =
 				product &&
-				( product.type === 'variable' ||
-					( Array.isArray( product.variations ) &&
-						product.variations.length > 0 ) );
-			const isProductsRequesting = isResolving( 'getItems', [
+				(product.type === 'variable' ||
+					(Array.isArray(product.variations) &&
+						product.variations.length > 0));
+			const isProductsRequesting = isResolving('getItems', [
 				'products',
 				includeArgs,
-			] );
+			]);
 			const isProductsError = Boolean(
-				getItemsError( 'products', includeArgs )
+				getItemsError('products', includeArgs)
 			);
 			return {
 				query: {
@@ -182,5 +178,5 @@ export default compose(
 			query,
 			isSingleProductView,
 		};
-	} )
-)( ProductsReport );
+	})
+)(ProductsReport);

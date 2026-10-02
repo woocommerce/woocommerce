@@ -7,8 +7,8 @@ import {
 	formatShippingAddress,
 } from '@woocommerce/base-utils';
 
-describe( 'emptyHiddenAddressFields', () => {
-	it( "Removes state from an address where the country doesn't use states", () => {
+describe('emptyHiddenAddressFields', () => {
+	it("Removes state from an address where the country doesn't use states", () => {
 		const address = {
 			first_name: 'Jonny',
 			last_name: 'Awesome',
@@ -22,13 +22,13 @@ describe( 'emptyHiddenAddressFields', () => {
 			email: 'jonny.awesome@email.com',
 			phone: '',
 		};
-		const filteredAddress = emptyHiddenAddressFields( address );
-		expect( filteredAddress ).toHaveProperty( 'state', '' );
-	} );
-} );
+		const filteredAddress = emptyHiddenAddressFields(address);
+		expect(filteredAddress).toHaveProperty('state', '');
+	});
+});
 
-describe( 'hasAllFieldsForShippingRates', () => {
-	it( 'correctly checks empty addresses', () => {
+describe('hasAllFieldsForShippingRates', () => {
+	it('correctly checks empty addresses', () => {
 		const address = {
 			first_name: '',
 			last_name: '',
@@ -42,10 +42,10 @@ describe( 'hasAllFieldsForShippingRates', () => {
 			email: '',
 			phone: '',
 		};
-		expect( hasAllFieldsForShippingRates( address ) ).toBe( false );
-	} );
+		expect(hasAllFieldsForShippingRates(address)).toBe(false);
+	});
 
-	it( 'correctly checks incomplete addresses', () => {
+	it('correctly checks incomplete addresses', () => {
 		const address = {
 			first_name: 'John',
 			last_name: 'Doe',
@@ -59,20 +59,20 @@ describe( 'hasAllFieldsForShippingRates', () => {
 			email: 'john.doe@company',
 			phone: '+1234567890',
 		};
-		expect( hasAllFieldsForShippingRates( address ) ).toBe( false );
+		expect(hasAllFieldsForShippingRates(address)).toBe(false);
 
 		address.city = 'London';
-		expect( hasAllFieldsForShippingRates( address ) ).toBe( false );
+		expect(hasAllFieldsForShippingRates(address)).toBe(false);
 
 		address.postcode = 'W1T 4JG';
-		expect( hasAllFieldsForShippingRates( address ) ).toBe( false );
+		expect(hasAllFieldsForShippingRates(address)).toBe(false);
 
 		// UK does not require state.
 		address.country = 'GB';
-		expect( hasAllFieldsForShippingRates( address ) ).toBe( true );
-	} );
+		expect(hasAllFieldsForShippingRates(address)).toBe(true);
+	});
 
-	it( 'correctly checks complete addresses with optional fields', () => {
+	it('correctly checks complete addresses with optional fields', () => {
 		const address = {
 			first_name: 'John',
 			last_name: 'Doe',
@@ -87,10 +87,10 @@ describe( 'hasAllFieldsForShippingRates', () => {
 			phone: '+1234567890',
 		};
 		// UK does not require state.
-		expect( hasAllFieldsForShippingRates( address ) ).toBe( true );
-	} );
+		expect(hasAllFieldsForShippingRates(address)).toBe(true);
+	});
 
-	it( 'correctly checks complete addresses with required fields', () => {
+	it('correctly checks complete addresses with required fields', () => {
 		const address = {
 			first_name: 'John',
 			last_name: 'Doe',
@@ -105,21 +105,21 @@ describe( 'hasAllFieldsForShippingRates', () => {
 			phone: '+1234567890',
 		};
 		// US address requires state and all other fields are filled
-		expect( hasAllFieldsForShippingRates( address ) ).toBe( true );
+		expect(hasAllFieldsForShippingRates(address)).toBe(true);
 
 		address.state = '';
-		expect( hasAllFieldsForShippingRates( address ) ).toBe( false );
+		expect(hasAllFieldsForShippingRates(address)).toBe(false);
 
 		address.state = 'CA';
 		address.city = '';
-		expect( hasAllFieldsForShippingRates( address ) ).toBe( false );
+		expect(hasAllFieldsForShippingRates(address)).toBe(false);
 
 		address.city = 'Sacramento';
 		address.postcode = '';
-		expect( hasAllFieldsForShippingRates( address ) ).toBe( false );
-	} );
+		expect(hasAllFieldsForShippingRates(address)).toBe(false);
+	});
 
-	it( 'correctly checks addresses against country locale', () => {
+	it('correctly checks addresses against country locale', () => {
 		const address = {
 			first_name: 'John',
 			last_name: 'Doe',
@@ -134,15 +134,15 @@ describe( 'hasAllFieldsForShippingRates', () => {
 			phone: '+1234567890',
 		};
 		// US address requires state.
-		expect( hasAllFieldsForShippingRates( address ) ).toBe( false );
+		expect(hasAllFieldsForShippingRates(address)).toBe(false);
 
 		address.state = 'CA';
-		expect( hasAllFieldsForShippingRates( address ) ).toBe( true );
-	} );
-} );
+		expect(hasAllFieldsForShippingRates(address)).toBe(true);
+	});
+});
 
-describe( 'formatShippingAddress', () => {
-	it( 'returns null if address is empty', () => {
+describe('formatShippingAddress', () => {
+	it('returns null if address is empty', () => {
 		const address = {
 			first_name: '',
 			last_name: '',
@@ -156,10 +156,10 @@ describe( 'formatShippingAddress', () => {
 			email: '',
 			phone: '',
 		};
-		expect( formatShippingAddress( address ) ).toBe( null );
-	} );
+		expect(formatShippingAddress(address)).toBe(null);
+	});
 
-	it( 'correctly returns the formatted address', () => {
+	it('correctly returns the formatted address', () => {
 		const address = {
 			first_name: 'John',
 			last_name: 'Doe',
@@ -173,8 +173,8 @@ describe( 'formatShippingAddress', () => {
 			email: 'john.doe@company',
 			phone: '+1234567890',
 		};
-		expect( formatShippingAddress( address ) ).toBe(
+		expect(formatShippingAddress(address)).toBe(
 			'W1T 4JG, London, United Kingdom (UK)'
 		);
-	} );
-} );
+	});
+});

@@ -69,32 +69,32 @@ export default {
 			},
 		},
 	},
-} as Meta< PanelProps >;
+} as Meta<PanelProps>;
 
-const Template: StoryFn< PanelProps > = ( args ) => {
+const Template: StoryFn<PanelProps> = (args) => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	let [ { titleTag }, _ ] = useArgs();
+	let [{ titleTag }, _] = useArgs();
 
-	titleTag = ( titleTag || 'div' ).replace( /\n/g, '' );
+	titleTag = (titleTag || 'div').replace(/\n/g, '');
 	if (
-		document.createElement( titleTag.toUpperCase() ).toString() ===
+		document.createElement(titleTag.toUpperCase()).toString() ===
 		'[object HTMLUnknownElement]'
 	) {
 		titleTag = 'div';
 	}
 	return (
-		<Panel { ...args } titleTag={ titleTag }>
-			<div style={ { paddingBottom: '.750em' } }>
+		<Panel {...args} titleTag={titleTag}>
+			<div style={{ paddingBottom: '.750em' }}>
 				This is the content rendered inside the panel.
 			</div>
 		</Panel>
 	);
 };
 
-export const Default: StoryFn< PanelProps > = Template.bind( {} );
+export const Default: StoryFn<PanelProps> = Template.bind({});
 Default.args = {
 	title: (
-		<div style={ { paddingBottom: '.375em', marginBottom: '.375em' } }>
+		<div style={{ paddingBottom: '.375em', marginBottom: '.375em' }}>
 			Title
 		</div>
 	),
@@ -102,10 +102,10 @@ Default.args = {
 	initialOpen: false,
 };
 
-export const InitialOpen: StoryFn< PanelProps > = Template.bind( {} );
+export const InitialOpen: StoryFn<PanelProps> = Template.bind({});
 InitialOpen.args = {
 	title: (
-		<div style={ { paddingBottom: '.375em', marginBottom: '.375em' } }>
+		<div style={{ paddingBottom: '.375em', marginBottom: '.375em' }}>
 			Title
 		</div>
 	),

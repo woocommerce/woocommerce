@@ -17,11 +17,11 @@ import { setEmailEditorPreviewState } from '../utils';
 
 const collection = {
 	name: CoreCollectionNames.BEST_SELLERS,
-	title: __( 'Best Sellers', 'woocommerce' ),
-	icon: <Icon icon={ chartBar } />,
-	description: __( 'Recommend your best-selling products.', 'woocommerce' ),
-	keywords: [ 'best selling' ],
-	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
+	title: __('Best Sellers', 'woocommerce'),
+	icon: <Icon icon={chartBar} />,
+	description: __('Recommend your best-selling products.', 'woocommerce'),
+	keywords: ['best selling'],
+	scope: ['inserter', 'block'] as BlockVariationScope[],
 };
 
 const attributes = {
@@ -36,7 +36,7 @@ const attributes = {
 		perPage: 5,
 		pages: 1,
 	},
-	hideControls: [ CoreFilterNames.ORDER, CoreFilterNames.FILTERABLE ],
+	hideControls: [CoreFilterNames.ORDER, CoreFilterNames.FILTERABLE],
 };
 
 const heading: InnerBlockTemplate = [
@@ -44,7 +44,7 @@ const heading: InnerBlockTemplate = [
 	{
 		textAlign: 'center',
 		level: 2,
-		content: __( 'Best selling products', 'woocommerce' ),
+		content: __('Best selling products', 'woocommerce'),
 		style: { spacing: { margin: { bottom: '1rem' } } },
 	},
 ];

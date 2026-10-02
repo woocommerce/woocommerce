@@ -7,21 +7,21 @@ import {
 	getOptionGroupsFromSteps,
 } from '../get-option-groups';
 
-describe( 'getOptionGroups', () => {
-	it( 'should return nothing for unmatched options', () => {
-		const options = [ 'unknown-value' ];
-		const result = getOptionGroups( options );
-		expect( result ).toEqual( [] );
-	} );
-	it( 'should return option groups for matched options', () => {
-		const options = [ 'woocommerce_store_address' ];
-		const result = getOptionGroups( options );
-		expect( result ).toEqual( [ 'General' ] );
-	} );
-} );
+describe('getOptionGroups', () => {
+	it('should return nothing for unmatched options', () => {
+		const options = ['unknown-value'];
+		const result = getOptionGroups(options);
+		expect(result).toEqual([]);
+	});
+	it('should return option groups for matched options', () => {
+		const options = ['woocommerce_store_address'];
+		const result = getOptionGroups(options);
+		expect(result).toEqual(['General']);
+	});
+});
 
-describe( 'getOptionGroupsFromSteps', () => {
-	it( 'should return option groups from steps', () => {
+describe('getOptionGroupsFromSteps', () => {
+	it('should return option groups from steps', () => {
 		const steps = [
 			{
 				step: 'setSiteOptions',
@@ -31,7 +31,7 @@ describe( 'getOptionGroupsFromSteps', () => {
 			},
 		];
 
-		const result = getOptionGroupsFromSteps( steps );
-		expect( result ).toEqual( [ 'General' ] );
-	} );
-} );
+		const result = getOptionGroupsFromSteps(steps);
+		expect(result).toEqual(['General']);
+	});
+});

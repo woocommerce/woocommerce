@@ -17,31 +17,24 @@ import metadata from '../../block.json';
 const upgradeToBlockifiedAddToCartWithOptions = async (
 	blockClientId: string
 ) => {
-	const blocks = select( 'core/block-editor' ).getBlocks();
-	const foundBlock = findBlock( {
+	const blocks = select('core/block-editor').getBlocks();
+	const foundBlock = findBlock({
 		blocks,
-		findCondition: ( block ) =>
+		findCondition: (block) =>
 			block.name === metadata.name && block.clientId === blockClientId,
-	} );
+	});
 
-	if ( ! foundBlock ) {
+	if (!foundBlock) {
 		return false;
 	}
 
-	const newBlock = createBlock( 'woocommerce/add-to-cart-with-options' );
-	dispatch( 'core/block-editor' ).replaceBlock(
-		foundBlock.clientId,
-		newBlock
-	);
+	const newBlock = createBlock('woocommerce/add-to-cart-with-options');
+	dispatch('core/block-editor').replaceBlock(foundBlock.clientId, newBlock);
 
 	return true;
 };
 
-export const UpgradeNotice = ( {
-	blockClientId,
-}: {
-	blockClientId: string;
-} ) => {
+export const UpgradeNotice = ({ blockClientId }: { blockClientId: string }) => {
 	const notice = createInterpolateElement(
 		__(
 			'Upgrade to the <strongText /> for more flexibility. You can switch back anytime.',
@@ -50,7 +43,7 @@ export const UpgradeNotice = ( {
 		{
 			strongText: (
 				<strong>
-					{ __( `Add to Cart + Options block`, 'woocommerce' ) }
+					{__(`Add to Cart + Options block`, 'woocommerce')}
 				</strong>
 			),
 		}
@@ -63,21 +56,21 @@ export const UpgradeNotice = ( {
 
 	const handleClick = async () => {
 		const upgraded =
-			await upgradeToBlockifiedAddToCartWithOptions( blockClientId );
-		if ( upgraded ) {
-			recordEvent( 'blocks_add_to_cart_with_options_migration', {
+			await upgradeToBlockifiedAddToCartWithOptions(blockClientId);
+		if (upgraded) {
+			recordEvent('blocks_add_to_cart_with_options_migration', {
 				transform_to: 'blockified',
-			} );
+			});
 		}
 	};
 
 	return (
 		<UpgradeDowngradeNotice
-			isDismissible={ false }
-			actionLabel={ buttonLabel }
-			onActionClick={ handleClick }
+			isDismissible={false}
+			actionLabel={buttonLabel}
+			onActionClick={handleClick}
 		>
-			{ notice }
+			{notice}
 		</UpgradeDowngradeNotice>
 	);
 };

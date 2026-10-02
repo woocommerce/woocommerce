@@ -19,39 +19,39 @@ import { DEFAULT_QUERY } from '../../constants';
 const MIN_OFFSET = 0;
 const MAX_OFFSET = 100;
 
-const OffsetControl = ( {
+const OffsetControl = ({
 	query,
 	setQueryAttribute,
 	trackInteraction,
-}: QueryControlProps ) => {
+}: QueryControlProps) => {
 	const deselectCallback = () => {
-		setQueryAttribute( { offset: DEFAULT_QUERY.offset } );
-		trackInteraction( CoreFilterNames.OFFSET );
+		setQueryAttribute({ offset: DEFAULT_QUERY.offset });
+		trackInteraction(CoreFilterNames.OFFSET);
 	};
 
 	return (
 		<ToolsPanelItem
-			label={ __( 'Offset', 'woocommerce' ) }
-			hasValue={ () => query.offset !== DEFAULT_QUERY.offset }
-			onDeselect={ deselectCallback }
-			resetAllFilter={ deselectCallback }
+			label={__('Offset', 'woocommerce')}
+			hasValue={() => query.offset !== DEFAULT_QUERY.offset}
+			onDeselect={deselectCallback}
+			resetAllFilter={deselectCallback}
 		>
 			<NumberControl
 				__next40pxDefaultSize
-				label={ __( 'Offset', 'woocommerce' ) }
-				value={ query.offset }
-				min={ MIN_OFFSET }
-				onChange={ ( newOffset: number ) => {
+				label={__('Offset', 'woocommerce')}
+				value={query.offset}
+				min={MIN_OFFSET}
+				onChange={(newOffset: number) => {
 					if (
-						isNaN( newOffset ) ||
+						isNaN(newOffset) ||
 						newOffset < MIN_OFFSET ||
 						newOffset > MAX_OFFSET
 					) {
 						return;
 					}
-					setQueryAttribute( { offset: newOffset } );
-					trackInteraction( CoreFilterNames.OFFSET );
-				} }
+					setQueryAttribute({ offset: newOffset });
+					trackInteraction(CoreFilterNames.OFFSET);
+				}}
 			/>
 		</ToolsPanelItem>
 	);

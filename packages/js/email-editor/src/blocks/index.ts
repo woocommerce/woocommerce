@@ -37,7 +37,7 @@ export { getAllowedBlockNames } from './utils';
 export function initBlocks() {
 	// Check if core blocks are already registered by looking for a fundamental core block
 	// 'core/paragraph' is always included in core blocks
-	if ( ! getBlockType( 'core/paragraph' ) ) {
+	if (!getBlockType('core/paragraph')) {
 		registerCoreBlocks();
 	}
 	filterSetUrlAttribute();

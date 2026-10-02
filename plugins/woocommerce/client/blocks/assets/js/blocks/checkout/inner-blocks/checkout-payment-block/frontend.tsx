@@ -19,7 +19,7 @@ import { useCheckoutBlockContext } from '@woocommerce/blocks/checkout/context';
 import Block from './block';
 import attributes from './attributes';
 
-const FrontendBlock = ( {
+const FrontendBlock = ({
 	title,
 	description,
 	children,
@@ -29,30 +29,30 @@ const FrontendBlock = ( {
 	description: string;
 	children: JSX.Element;
 	className?: string;
-} ) => {
+}) => {
 	const { showFormStepNumbers } = useCheckoutBlockContext();
-	const checkoutIsProcessing = useSelect( ( select ) =>
-		select( checkoutStore ).isProcessing()
+	const checkoutIsProcessing = useSelect((select) =>
+		select(checkoutStore).isProcessing()
 	);
 	const { cartNeedsPayment } = useStoreCart();
 
-	if ( ! cartNeedsPayment ) {
+	if (!cartNeedsPayment) {
 		return null;
 	}
 	return (
 		<FormStep
 			id="payment-method"
-			disabled={ checkoutIsProcessing }
-			className={ clsx( 'wc-block-checkout__payment-method', className ) }
-			title={ title }
-			description={ description }
-			showStepNumber={ showFormStepNumbers }
+			disabled={checkoutIsProcessing}
+			className={clsx('wc-block-checkout__payment-method', className)}
+			title={title}
+			description={description}
+			showStepNumber={showFormStepNumbers}
 		>
-			<StoreNoticesContainer context={ noticeContexts.PAYMENTS } />
+			<StoreNoticesContainer context={noticeContexts.PAYMENTS} />
 			<Block />
-			{ children }
+			{children}
 		</FormStep>
 	);
 };
 
-export default withFilteredAttributes( attributes )( FrontendBlock );
+export default withFilteredAttributes(attributes)(FrontendBlock);

@@ -18,17 +18,17 @@ import apiFetch from '@wordpress/api-fetch';
 
 import type { PostWithPermissions } from '@woocommerce/email-editor';
 
-function getItemTitle( item: {
+function getItemTitle(item: {
 	title: string | { rendered: string } | { raw: string };
-} ) {
-	if ( typeof item.title === 'string' ) {
-		return decodeEntities( item.title );
+}) {
+	if (typeof item.title === 'string') {
+		return decodeEntities(item.title);
 	}
-	if ( item.title && 'rendered' in item.title ) {
-		return decodeEntities( item.title.rendered );
+	if (item.title && 'rendered' in item.title) {
+		return decodeEntities(item.title.rendered);
 	}
-	if ( item.title && 'raw' in item.title ) {
-		return decodeEntities( item.title.raw );
+	if (item.title && 'raw' in item.title) {
+		return decodeEntities(item.title.raw);
 	}
 	return '';
 }
@@ -40,10 +40,10 @@ const getResetNotificationEmailContentAction = () => {
 	 */
 	const resetNotificationEmailContent = {
 		id: 'reset-notification-email-content',
-		label: __( 'Reset', 'woocommerce' ),
+		label: __('Reset', 'woocommerce'),
 		supportsBulk: false,
 		icon: backup,
-		isEligible( item: PostWithPermissions ) {
+		isEligible(item: PostWithPermissions) {
 			if (
 				item.type === 'wp_template' ||
 				item.type === 'wp_template_part' ||
@@ -56,54 +56,54 @@ const getResetNotificationEmailContentAction = () => {
 		},
 		hideModalHeader: true,
 		modalFocusOnMount: 'firstContentElement',
-		RenderModal: ( {
+		RenderModal: ({
 			items,
 			closeModal,
 			onActionPerformed,
 		}: {
 			items: PostWithPermissions[];
 			closeModal?: () => void;
-			onActionPerformed?: ( items: PostWithPermissions[] ) => void;
-		} ) => {
-			const [ isBusy, setIsBusy ] = useState( false );
+			onActionPerformed?: (items: PostWithPermissions[]) => void;
+		}) => {
+			const [isBusy, setIsBusy] = useState(false);
 			const { createSuccessNotice, createErrorNotice } =
-				useDispatch( noticesStore );
-			const { receiveEntityRecords } = useDispatch( coreStore );
+				useDispatch(noticesStore);
+			const { receiveEntityRecords } = useDispatch(coreStore);
 
-			const item = items[ 0 ];
+			const item = items[0];
 			const modalTitle = sprintf(
 				// translators: %s: The email's title
 				__(
 					'Are you sure you want to reset "%s" content to the default?',
 					'woocommerce'
 				),
-				getItemTitle( item )
+				getItemTitle(item)
 			);
 
 			return (
 				<VStack spacing="5">
-					<Text>{ modalTitle }</Text>
+					<Text>{modalTitle}</Text>
 					<HStack justify="right">
 						<Button
 							variant="tertiary"
-							onClick={ () => {
+							onClick={() => {
 								closeModal?.();
-							} }
-							disabled={ isBusy }
+							}}
+							disabled={isBusy}
 							__next40pxDefaultSize
 						>
-							{ __( 'Cancel', 'woocommerce' ) }
+							{__('Cancel', 'woocommerce')}
 						</Button>
 						<Button
 							variant="primary"
-							onClick={ async () => {
-								setIsBusy( true );
+							onClick={async () => {
+								setIsBusy(true);
 
 								try {
-									const response = ( await apiFetch( {
-										path: `/woocommerce-email-editor/v1/emails/${ item.id }/reset`,
+									const response = (await apiFetch({
+										path: `/woocommerce-email-editor/v1/emails/${item.id}/reset`,
 										method: 'POST',
-									} ) ) as { content: string };
+									})) as { content: string };
 
 									// Server has already persisted post_content + sync
 									// meta. Push the new canonical content into core-data
@@ -120,7 +120,7 @@ const getResetNotificationEmailContentAction = () => {
 									) as
 										| { content?: { raw?: string } }
 										| undefined;
-									if ( current ) {
+									if (current) {
 										void receiveEntityRecords(
 											'postType',
 											item.type,
@@ -146,17 +146,17 @@ const getResetNotificationEmailContentAction = () => {
 											'"%s" content reset to default.',
 											'woocommerce'
 										),
-										getItemTitle( item )
+										getItemTitle(item)
 									);
 
-									void createSuccessNotice( successMessage, {
+									void createSuccessNotice(successMessage, {
 										type: 'snackbar',
 										id: 'reset-notification-email-content-action',
-									} );
+									});
 
-									onActionPerformed?.( items );
-								} catch ( error ) {
-									let errorMessage = __< string >(
+									onActionPerformed?.(items);
+								} catch (error) {
+									let errorMessage = __<string>(
 										'An error occurred while resetting the email content.',
 										'woocommerce'
 									);
@@ -167,22 +167,22 @@ const getResetNotificationEmailContentAction = () => {
 										'message' in error
 									) {
 										errorMessage =
-											error.message as TranslatableText< string >;
+											error.message as TranslatableText<string>;
 									}
 
-									void createErrorNotice( errorMessage, {
+									void createErrorNotice(errorMessage, {
 										type: 'snackbar',
-									} );
+									});
 								} finally {
-									setIsBusy( false );
+									setIsBusy(false);
 									closeModal?.();
 								}
-							} }
-							isBusy={ isBusy }
-							disabled={ isBusy }
+							}}
+							isBusy={isBusy}
+							disabled={isBusy}
 							__next40pxDefaultSize
 						>
-							{ __( 'Reset', 'woocommerce' ) }
+							{__('Reset', 'woocommerce')}
 						</Button>
 					</HStack>
 				</VStack>

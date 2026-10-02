@@ -23,14 +23,14 @@ export interface SearchResultsCountType {
 
 export type MarketplaceContextType = {
 	isLoading: boolean;
-	setIsLoading: ( isLoading: boolean ) => void;
+	setIsLoading: (isLoading: boolean) => void;
 	selectedTab: string;
-	setSelectedTab: ( tab: string ) => void;
-	isProductInstalled: ( slug: string ) => boolean;
-	addInstalledProduct: ( slug: string ) => void;
+	setSelectedTab: (tab: string) => void;
+	isProductInstalled: (slug: string) => boolean;
+	addInstalledProduct: (slug: string) => void;
 	searchResultsCount: SearchResultsCountType;
 	setSearchResultsCount: (
-		updatedCounts: Partial< SearchResultsCountType >
+		updatedCounts: Partial<SearchResultsCountType>
 	) => void;
 	iamSettings: {
 		product_previews?: 'modal' | 'none';
@@ -45,11 +45,11 @@ export type MarketplaceContextType = {
 
 export type SubscriptionsContextType = {
 	subscriptions: Subscription[];
-	setSubscriptions: ( subscriptions: Subscription[] ) => void;
-	loadSubscriptions: ( toggleLoading?: boolean ) => Promise< void >;
-	refreshSubscriptions: ( toggleLoading?: boolean ) => Promise< void >;
+	setSubscriptions: (subscriptions: Subscription[]) => void;
+	loadSubscriptions: (toggleLoading?: boolean) => Promise<void>;
+	refreshSubscriptions: (toggleLoading?: boolean) => Promise<void>;
 	isLoading: boolean;
-	setIsLoading: ( isLoading: boolean ) => void;
+	setIsLoading: (isLoading: boolean) => void;
 };
 
 export enum NoticeStatus {
@@ -61,12 +61,12 @@ export interface Notice {
 	productKey: string;
 	message: string;
 	status: NoticeStatus;
-	options?: Partial< NoticeOptions > | undefined;
+	options?: Partial<NoticeOptions> | undefined;
 }
 
 export interface NoticeState {
 	notices: {
-		[ key: string ]: Notice;
+		[key: string]: Notice;
 	};
 }
 

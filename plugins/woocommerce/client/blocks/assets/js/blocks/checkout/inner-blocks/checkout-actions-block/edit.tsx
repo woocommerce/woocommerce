@@ -24,13 +24,13 @@ import clsx from 'clsx';
 import { BlockAttributes } from './block';
 import { defaultReturnToCartButtonLabel } from './constants';
 
-export const Edit = ( {
+export const Edit = ({
 	attributes,
 	setAttributes,
 }: {
 	attributes: BlockAttributes;
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ): JSX.Element => {
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}): JSX.Element => {
 	const blockProps = useBlockProps();
 	const {
 		cartPageId = 0,
@@ -38,69 +38,69 @@ export const Edit = ( {
 		placeOrderButtonLabel,
 		returnToCartButtonLabel,
 	} = attributes;
-	const { current: savedCartPageId } = useRef( cartPageId );
+	const { current: savedCartPageId } = useRef(cartPageId);
 	const currentPostId = useSelect(
-		( select ) => {
-			if ( ! savedCartPageId ) {
-				const store = select( 'core/editor' );
+		(select) => {
+			if (!savedCartPageId) {
+				const store = select('core/editor');
 				return store.getCurrentPostId();
 			}
 			return savedCartPageId;
 		},
-		[ savedCartPageId ]
+		[savedCartPageId]
 	);
 
-	const showPrice = blockProps.className.includes( 'is-style-with-price' );
+	const showPrice = blockProps.className.includes('is-style-with-price');
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<InspectorControls>
-				<PanelBody title={ __( 'Options', 'woocommerce' ) }>
+				<PanelBody title={__('Options', 'woocommerce')}>
 					<ToggleControl
 						__nextHasNoMarginBottom
-						label={ __(
+						label={__(
 							'Show a "Return to Cart" link',
 							'woocommerce'
-						) }
-						help={ __(
+						)}
+						help={__(
 							'Recommended to enable only if there is no Cart link in the header.',
 							'woocommerce'
-						) }
-						checked={ showReturnToCart }
-						onChange={ () =>
-							setAttributes( {
-								showReturnToCart: ! showReturnToCart,
-							} )
+						)}
+						checked={showReturnToCart}
+						onChange={() =>
+							setAttributes({
+								showReturnToCart: !showReturnToCart,
+							})
 						}
 					/>
 
-					{ showPrice && (
+					{showPrice && (
 						<TextControl
 							__next40pxDefaultSize
 							__nextHasNoMarginBottom
-							label={ __( 'Price separator', 'woocommerce' ) }
+							label={__('Price separator', 'woocommerce')}
 							id="price-separator"
-							value={ attributes.priceSeparator }
-							onChange={ ( value ) => {
-								setAttributes( {
+							value={attributes.priceSeparator}
+							onChange={(value) => {
+								setAttributes({
 									priceSeparator: value,
-								} );
-							} }
+								});
+							}}
 						/>
-					) }
+					)}
 				</PanelBody>
 
-				{ showReturnToCart &&
-					! (
+				{showReturnToCart &&
+					!(
 						currentPostId === CHECKOUT_PAGE_ID &&
 						savedCartPageId === 0
 					) && (
 						<PageSelector
-							pageId={ cartPageId }
-							setPageId={ ( id: number ) =>
-								setAttributes( { cartPageId: id } )
+							pageId={cartPageId}
+							setPageId={(id: number) =>
+								setAttributes({ cartPageId: id })
 							}
-							labels={ {
+							labels={{
 								title: __(
 									'Return to Cart button',
 									'woocommerce'
@@ -109,48 +109,48 @@ export const Edit = ( {
 									'WooCommerce Cart Page',
 									'woocommerce'
 								),
-							} }
+							}}
 						/>
-					) }
+					)}
 			</InspectorControls>
 			<div className="wc-block-checkout__actions">
 				<div
-					className={ clsx( 'wc-block-checkout__actions_row', {
+					className={clsx('wc-block-checkout__actions_row', {
 						'wc-block-checkout__actions_row--justify-flex-end':
-							! showReturnToCart,
-					} ) }
+							!showReturnToCart,
+					})}
 				>
-					{ showReturnToCart && (
+					{showReturnToCart && (
 						<ReturnToCartButton element="span">
 							<RichText
-								multiline={ false }
-								allowedFormats={ [] }
-								value={ returnToCartButtonLabel }
-								placeholder={ defaultReturnToCartButtonLabel }
-								onChange={ ( content ) => {
-									setAttributes( {
+								multiline={false}
+								allowedFormats={[]}
+								value={returnToCartButtonLabel}
+								placeholder={defaultReturnToCartButtonLabel}
+								onChange={(content) => {
+									setAttributes({
 										returnToCartButtonLabel: content,
-									} );
-								} }
+									});
+								}}
 							/>
 						</ReturnToCartButton>
-					) }
+					)}
 					<PlaceOrderButton
 						label={
 							<RichText
-								multiline={ false }
-								allowedFormats={ [] }
-								value={ placeOrderButtonLabel }
-								onChange={ ( content ) => {
-									setAttributes( {
+								multiline={false}
+								allowedFormats={[]}
+								value={placeOrderButtonLabel}
+								onChange={(content) => {
+									setAttributes({
 										placeOrderButtonLabel: content,
-									} );
-								} }
+									});
+								}}
 							/>
 						}
-						fullWidth={ ! showReturnToCart }
-						showPrice={ showPrice }
-						priceSeparator={ attributes.priceSeparator }
+						fullWidth={!showReturnToCart}
+						showPrice={showPrice}
+						priceSeparator={attributes.priceSeparator}
 					/>
 				</div>
 			</div>
@@ -159,5 +159,5 @@ export const Edit = ( {
 };
 
 export const Save = () => {
-	return <div { ...useBlockProps.save() } />;
+	return <div {...useBlockProps.save()} />;
 };

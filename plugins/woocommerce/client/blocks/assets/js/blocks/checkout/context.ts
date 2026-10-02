@@ -31,11 +31,11 @@ const defaultCheckoutBlockContext = {
 };
 
 export const CheckoutBlockContext: React.Context<
-	Partial< CheckoutBlockContextProps >
-> = createContext< CheckoutBlockContextProps >( defaultCheckoutBlockContext );
+	Partial<CheckoutBlockContextProps>
+> = createContext<CheckoutBlockContextProps>(defaultCheckoutBlockContext);
 
 export const useCheckoutBlockContext = (): CheckoutBlockContextProps => {
-	const context = useContext( CheckoutBlockContext );
+	const context = useContext(CheckoutBlockContext);
 	return {
 		...defaultCheckoutBlockContext,
 		...context,

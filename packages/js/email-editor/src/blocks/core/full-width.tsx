@@ -13,50 +13,49 @@ import { addFilterForEmail } from '../../config-tools/filters';
 import { unwrapCompressedPresetStyleVariable } from '../../style-variables';
 
 type SpacingPadding =
-	| string
-	| { top?: string; right?: string; bottom?: string; left?: string };
+	string | { top?: string; right?: string; bottom?: string; left?: string };
 
 // Columns handle their own width, so don't let full-width blocks inside a
 // column break out (the renderer doesn't either).
-const COLUMN_BLOCKS = [ 'core/column', 'core/columns' ];
+const COLUMN_BLOCKS = ['core/column', 'core/columns'];
 
 // User blocks live inside these wrappers, which add no inset of their own. We
 // skip them so a full-width block breaks out of the padded template group above.
-const PASSTHROUGH_BLOCKS = [ 'core/post-content', 'woocommerce/email-content' ];
+const PASSTHROUGH_BLOCKS = ['core/post-content', 'woocommerce/email-content'];
 
 /**
  * Checks whether the value is zero (0, 0px, 0em, 0%, ...)
  */
-function isZeroValue( value?: string ): boolean {
-	if ( value === undefined || value === null ) {
+function isZeroValue(value?: string): boolean {
+	if (value === undefined || value === null) {
 		return false;
 	}
-	return parseFloat( String( value ) ) === 0;
+	return parseFloat(String(value)) === 0;
 }
 
 /**
  * Reads a block's left/right padding as CSS values (preset vars resolved).
  * Returns null for a side when it's missing or zero.
  */
-function getHorizontalPadding( padding?: SpacingPadding ): {
+function getHorizontalPadding(padding?: SpacingPadding): {
 	left: string | null;
 	right: string | null;
 } {
-	const toCss = ( value?: string ): string | null => {
-		if ( value === undefined || value === null || isZeroValue( value ) ) {
+	const toCss = (value?: string): string | null => {
+		if (value === undefined || value === null || isZeroValue(value)) {
 			return null;
 		}
-		return unwrapCompressedPresetStyleVariable( String( value ) );
+		return unwrapCompressedPresetStyleVariable(String(value));
 	};
 
-	if ( ! padding ) {
+	if (!padding) {
 		return { left: null, right: null };
 	}
-	if ( typeof padding === 'string' ) {
-		const value = toCss( padding );
+	if (typeof padding === 'string') {
+		const value = toCss(padding);
 		return { left: value, right: value };
 	}
-	return { left: toCss( padding.left ), right: toCss( padding.right ) };
+	return { left: toCss(padding.left), right: toCss(padding.right) };
 }
 
 type BreakoutInfo = {
@@ -81,76 +80,76 @@ function useBreakoutPadding(
 	enabled: boolean
 ): BreakoutInfo | false {
 	return useSelect(
-		( select ) => {
-			if ( ! enabled ) {
+		(select) => {
+			if (!enabled) {
 				return { left: null, right: null };
 			}
 			const { getBlockParents, getBlockName, getBlockAttributes } =
-				select( blockEditorStore );
+				select(blockEditorStore);
 			// getBlockParents lists ancestors root-first, so the last entry is
 			// the direct parent. Walk from there up to the root.
-			const parents = getBlockParents( clientId ) as string[];
+			const parents = getBlockParents(clientId) as string[];
 			let inTemplate = false;
 
-			for ( let i = parents.length - 1; i >= 0; i-- ) {
-				const parentId = parents[ i ];
-				const name = getBlockName( parentId ) as string;
+			for (let i = parents.length - 1; i >= 0; i--) {
+				const parentId = parents[i];
+				const name = getBlockName(parentId) as string;
 
-				if ( COLUMN_BLOCKS.includes( name ) ) {
+				if (COLUMN_BLOCKS.includes(name)) {
 					return false;
 				}
 				// Post content wrappers separate user blocks from the template.
 				// Once we pass one, we're climbing the template layout.
-				if ( PASSTHROUGH_BLOCKS.includes( name ) ) {
+				if (PASSTHROUGH_BLOCKS.includes(name)) {
 					inTemplate = true;
 					continue;
 				}
 
 				const padding = getHorizontalPadding(
-					getBlockAttributes( parentId )?.style?.spacing
+					getBlockAttributes(parentId)?.style?.spacing
 						?.padding as SpacingPadding
 				);
-				if ( padding.left || padding.right ) {
+				if (padding.left || padding.right) {
 					return padding;
 				}
 				// Parent has no padding. In user content, stop here - there's
 				// nothing to break out of. In the template, keep going up to
 				// find the padded group.
-				if ( ! inTemplate ) {
+				if (!inTemplate) {
 					return { left: null, right: null };
 				}
 			}
 
 			return { left: null, right: null };
 		},
-		[ clientId, enabled ]
+		[clientId, enabled]
 	);
 }
 
-function BlockWithFullWidth( { block: BlockListBlock, props } ) {
+function BlockWithFullWidth({ block: BlockListBlock, props }) {
 	const isFullWidth = props.attributes?.align === 'full';
-	const breakout = useBreakoutPadding( props.clientId, isFullWidth );
+	const breakout = useBreakoutPadding(props.clientId, isFullWidth);
 
 	// Not full width, or inside a column: render the block untouched.
-	if ( ! isFullWidth || breakout === false ) {
-		return <BlockListBlock { ...props } />;
+	if (!isFullWidth || breakout === false) {
+		return <BlockListBlock {...props} />;
 	}
 
-	const style: Record< string, string > = {
-		...( props.wrapperProps?.style || {} ),
+	const style: Record<string, string> = {
+		...(props.wrapperProps?.style || {}),
 	};
-	if ( breakout.left ) {
-		style.marginLeft = `calc(-1 * ${ breakout.left })`;
+	if (breakout.left) {
+		style.marginLeft = `calc(-1 * ${breakout.left})`;
 	}
-	if ( breakout.right ) {
-		style.marginRight = `calc(-1 * ${ breakout.right })`;
+	if (breakout.right) {
+		style.marginRight = `calc(-1 * ${breakout.right})`;
 	}
 
 	return (
 		<BlockListBlock
-			{ ...props }
-			className={ clsx( props.className, 'is-email-full-width' ) }
-			wrapperProps={ { ...props.wrapperProps, style } }
+			{...props}
+			className={clsx(props.className, 'is-email-full-width')}
+			wrapperProps={{ ...props.wrapperProps, style }}
 		/>
 	);
 }
@@ -161,11 +160,9 @@ function BlockWithFullWidth( { block: BlockListBlock, props } ) {
  * so toggling alignment doesn't remount the block.
  */
 const withFullWidthClassName = createHigherOrderComponent(
-	( BlockListBlock ) =>
-		function maybeAddFullWidthClassName( props ) {
-			return (
-				<BlockWithFullWidth block={ BlockListBlock } props={ props } />
-			);
+	(BlockListBlock) =>
+		function maybeAddFullWidthClassName(props) {
+			return <BlockWithFullWidth block={BlockListBlock} props={props} />;
 		},
 	'withFullWidthClassName'
 );

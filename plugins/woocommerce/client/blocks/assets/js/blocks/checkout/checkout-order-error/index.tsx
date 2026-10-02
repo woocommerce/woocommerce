@@ -40,8 +40,8 @@ const cartItemErrorCodes = [
 ];
 
 const preloadedCheckoutData = getSetting<
-	CheckoutResponse | Record< string, unknown >
->( 'checkoutData', {} );
+	CheckoutResponse | Record<string, unknown>
+>('checkoutData', {});
 
 /**
  * Get the error message to display.
@@ -49,16 +49,14 @@ const preloadedCheckoutData = getSetting<
  * @param {Object} props           Incoming props for the component.
  * @param {Object} props.errorData Object containing code and message.
  */
-const ErrorTitle = ( { errorData }: ErrorComponentProps ) => {
-	let heading = __( 'Checkout error', 'woocommerce' );
+const ErrorTitle = ({ errorData }: ErrorComponentProps) => {
+	let heading = __('Checkout error', 'woocommerce');
 
-	if ( cartItemErrorCodes.includes( errorData.code ) ) {
-		heading = __( 'There is a problem with your cart', 'woocommerce' );
+	if (cartItemErrorCodes.includes(errorData.code)) {
+		heading = __('There is a problem with your cart', 'woocommerce');
 	}
 
-	return (
-		<strong className="wc-block-checkout-error_title">{ heading }</strong>
-	);
+	return <strong className="wc-block-checkout-error_title">{heading}</strong>;
 };
 
 /**
@@ -67,21 +65,21 @@ const ErrorTitle = ( { errorData }: ErrorComponentProps ) => {
  * @param {Object} props           Incoming props for the component.
  * @param {Object} props.errorData Object containing code and message.
  */
-const ErrorMessage = ( { errorData }: ErrorComponentProps ) => {
+const ErrorMessage = ({ errorData }: ErrorComponentProps) => {
 	let message = errorData.message;
 
 	if (
 		cartItemErrorCodes.includes(
-			errorData.code as ( typeof cartItemErrorCodes )[ number ]
+			errorData.code as (typeof cartItemErrorCodes)[number]
 		)
 	) {
 		message =
 			message +
 			' ' +
-			__( 'Please edit your cart and try again.', 'woocommerce' );
+			__('Please edit your cart and try again.', 'woocommerce');
 	}
 
-	return <p className="wc-block-checkout-error__description">{ message }</p>;
+	return <p className="wc-block-checkout-error__description">{message}</p>;
 };
 
 /**
@@ -90,36 +88,33 @@ const ErrorMessage = ( { errorData }: ErrorComponentProps ) => {
  * @param {Object} props           Incoming props for the component.
  * @param {Object} props.errorData Object containing code and message.
  */
-const ErrorButton = ( { errorData }: ErrorComponentProps ) => {
-	let buttonText = __( 'Retry', 'woocommerce' );
+const ErrorButton = ({ errorData }: ErrorComponentProps) => {
+	let buttonText = __('Retry', 'woocommerce');
 
 	if (
 		cartItemErrorCodes.includes(
-			errorData.code as ( typeof cartItemErrorCodes )[ number ]
+			errorData.code as (typeof cartItemErrorCodes)[number]
 		)
 	) {
-		buttonText = __( 'Edit your cart', 'woocommerce' );
+		buttonText = __('Edit your cart', 'woocommerce');
 	}
 
 	const isLink =
 		cartItemErrorCodes.includes(
-			errorData.code as ( typeof cartItemErrorCodes )[ number ]
+			errorData.code as (typeof cartItemErrorCodes)[number]
 		) && CART_URL;
 
 	return (
 		<span className="wp-block-button">
-			{ isLink ? (
-				<a href={ CART_URL } className="wp-block-button__link">
-					{ buttonText }
+			{isLink ? (
+				<a href={CART_URL} className="wp-block-button__link">
+					{buttonText}
 				</a>
 			) : (
-				<button
-					className="wp-block-button__link"
-					onClick={ reloadPage }
-				>
-					{ buttonText }
+				<button className="wp-block-button__link" onClick={reloadPage}>
+					{buttonText}
 				</button>
-			) }
+			)}
 		</span>
 	);
 };
@@ -135,13 +130,13 @@ const CheckoutOrderError = () => {
 	const checkoutData: CheckoutResponse = {
 		code: '',
 		message: '',
-		...( preloadedCheckoutData || {} ),
+		...(preloadedCheckoutData || {}),
 	};
 
 	const errorData: ErrorData = {
 		code: checkoutData.code || 'unknown',
 		message:
-			decodeEntities( checkoutData.message ) ||
+			decodeEntities(checkoutData.message) ||
 			__(
 				'There was a problem checking out. Please try again. If the problem persists, please get in touch with us so we can assist.',
 				'woocommerce'
@@ -152,12 +147,12 @@ const CheckoutOrderError = () => {
 		<div className="wc-block-checkout-error">
 			<Icon
 				className="wc-block-checkout-error__image"
-				icon={ removeCart }
-				size={ 100 }
+				icon={removeCart}
+				size={100}
 			/>
-			<ErrorTitle errorData={ errorData } />
-			<ErrorMessage errorData={ errorData } />
-			<ErrorButton errorData={ errorData } />
+			<ErrorTitle errorData={errorData} />
+			<ErrorMessage errorData={errorData} />
+			<ErrorButton errorData={errorData} />
 		</div>
 	);
 };

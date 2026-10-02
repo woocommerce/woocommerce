@@ -30,9 +30,9 @@ import {
 	getDefaultValueOfFilterable,
 } from '../../utils';
 
-const label = __( 'Query type', 'woocommerce' );
-const defaultOptionLabel = __( 'Default', 'woocommerce' );
-const customOptionLabel = __( 'Custom', 'woocommerce' );
+const label = __('Query type', 'woocommerce');
+const defaultOptionLabel = __('Default', 'woocommerce');
+const customOptionLabel = __('Custom', 'woocommerce');
 
 const defaultInheritHelpText = __(
 	'Display products based on the current template and allow shoppers to filter.',
@@ -47,116 +47,116 @@ const customHelpText = __(
 	'woocommerce'
 );
 
-const InheritQueryControl = ( {
+const InheritQueryControl = ({
 	setQueryAttribute,
 	trackInteraction,
 	query,
-}: QueryControlProps ) => {
+}: QueryControlProps) => {
 	const inherit = query?.inherit;
 
 	const queryObjectBeforeInheritEnabled = usePrevious(
 		query,
-		( value?: ProductCollectionQuery ) => {
+		(value?: ProductCollectionQuery) => {
 			return value?.inherit === false;
 		}
 	);
 
-	const defaultValue = useMemo( () => getDefaultValueOfInherit(), [] );
+	const defaultValue = useMemo(() => getDefaultValueOfInherit(), []);
 
 	return (
 		<ToolsPanelItem
-			label={ label }
-			hasValue={ () => inherit !== defaultValue }
+			label={label}
+			hasValue={() => inherit !== defaultValue}
 			isShownByDefault
-			onDeselect={ () => {
-				setQueryAttribute( {
+			onDeselect={() => {
+				setQueryAttribute({
 					inherit: defaultValue,
-				} );
-				trackInteraction( CoreFilterNames.INHERIT );
-			} }
+				});
+				trackInteraction(CoreFilterNames.INHERIT);
+			}}
 		>
 			<ToggleGroupControl
 				__next40pxDefaultSize
 				__nextHasNoMarginBottom
 				className="wc-block-product-collection__inherit-query-control"
 				isBlock
-				label={ label }
-				help={ inherit ? defaultInheritHelpText : customHelpText }
-				value={ !! inherit ? 'default' : 'custom' }
-				onChange={ ( value: 'default' | 'custom' ) => {
-					if ( value === 'default' ) {
+				label={label}
+				help={inherit ? defaultInheritHelpText : customHelpText}
+				value={!!inherit ? 'default' : 'custom'}
+				onChange={(value: 'default' | 'custom') => {
+					if (value === 'default') {
 						// If the inherit is enabled, we want to reset the query to the default.
-						setQueryAttribute( {
+						setQueryAttribute({
 							...DEFAULT_QUERY,
 							inherit: true,
-						} );
+						});
 					} else {
 						// If the inherit is disabled, we want to reset the query to the previous query before the inherit was enabled.
-						setQueryAttribute( {
+						setQueryAttribute({
 							...DEFAULT_QUERY,
 							...queryObjectBeforeInheritEnabled,
 							inherit: false,
-						} );
+						});
 					}
-					trackInteraction( CoreFilterNames.INHERIT );
-				} }
+					trackInteraction(CoreFilterNames.INHERIT);
+				}}
 			>
 				<ToggleGroupControlOption
 					value="default"
-					label={ defaultOptionLabel }
+					label={defaultOptionLabel}
 				/>
 				<ToggleGroupControlOption
 					value="custom"
-					label={ customOptionLabel }
+					label={customOptionLabel}
 				/>
 			</ToggleGroupControl>
 		</ToolsPanelItem>
 	);
 };
 
-const FilterableControl = ( {
+const FilterableControl = ({
 	setQueryAttribute,
 	trackInteraction,
 	query,
-}: QueryControlProps ) => {
+}: QueryControlProps) => {
 	const filterable = query?.filterable;
 
-	const defaultValue = useMemo( () => getDefaultValueOfFilterable(), [] );
+	const defaultValue = useMemo(() => getDefaultValueOfFilterable(), []);
 
 	return (
 		<ToolsPanelItem
-			label={ label }
-			hasValue={ () => filterable !== defaultValue }
+			label={label}
+			hasValue={() => filterable !== defaultValue}
 			isShownByDefault
-			onDeselect={ () => {
-				setQueryAttribute( {
+			onDeselect={() => {
+				setQueryAttribute({
 					filterable: defaultValue,
-				} );
-				trackInteraction( CoreFilterNames.FILTERABLE );
-			} }
+				});
+				trackInteraction(CoreFilterNames.FILTERABLE);
+			}}
 		>
 			<ToggleGroupControl
 				__next40pxDefaultSize
 				__nextHasNoMarginBottom
 				className="wc-block-product-collection__inherit-query-control"
 				isBlock
-				label={ label }
-				help={ filterable ? defaultFilterableHelpText : customHelpText }
-				value={ !! filterable ? 'default' : 'custom' }
-				onChange={ ( value: 'default' | 'custom' ) => {
-					setQueryAttribute( {
+				label={label}
+				help={filterable ? defaultFilterableHelpText : customHelpText}
+				value={!!filterable ? 'default' : 'custom'}
+				onChange={(value: 'default' | 'custom') => {
+					setQueryAttribute({
 						filterable: value === 'default',
-					} );
-					trackInteraction( CoreFilterNames.FILTERABLE );
-				} }
+					});
+					trackInteraction(CoreFilterNames.FILTERABLE);
+				}}
 			>
 				<ToggleGroupControlOption
 					value="default"
-					label={ defaultOptionLabel }
+					label={defaultOptionLabel}
 				/>
 				<ToggleGroupControlOption
 					value="custom"
-					label={ customOptionLabel }
+					label={customOptionLabel}
 				/>
 			</ToggleGroupControl>
 		</ToolsPanelItem>

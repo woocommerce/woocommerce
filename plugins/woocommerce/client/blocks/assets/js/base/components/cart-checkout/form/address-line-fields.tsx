@@ -13,13 +13,13 @@ import { AddressLineFieldsProps } from './types';
 import { createFieldProps } from './utils';
 import { AddressAutocomplete } from '../address-autocomplete/address-autocomplete';
 
-const AddressLineFields = ( {
+const AddressLineFields = ({
 	formId,
 	address1,
 	address2,
 	addressType,
 	onChange,
-}: AddressLineFieldsProps ): JSX.Element => {
+}: AddressLineFieldsProps): JSX.Element => {
 	const address1FieldProps = createFieldProps(
 		address1.field,
 		formId,
@@ -36,18 +36,18 @@ const AddressLineFields = ( {
 	>(
 		'addressAutocompleteProviders',
 		[],
-		( type: unknown ): type is ServerAddressAutocompleteProvider[] => {
-			if ( ! Array.isArray( type ) ) {
+		(type: unknown): type is ServerAddressAutocompleteProvider[] => {
+			if (!Array.isArray(type)) {
 				return false;
 			}
 
-			return type.every( ( item ) => {
+			return type.every((item) => {
 				return (
 					typeof item.name === 'string' &&
 					typeof item.id === 'string' &&
 					typeof item.branding_html === 'string'
 				);
-			} );
+			});
 		}
 	);
 
@@ -62,28 +62,28 @@ const AddressLineFields = ( {
 
 	return (
 		<>
-			{ address1 && (
+			{address1 && (
 				<Address1Component
-					{ ...address1FieldProps }
-					type={ address1.field.type }
-					{ ...( useAutocomplete ? { addressType } : {} ) }
-					className={ `wc-block-components-address-form__address_1` }
-					value={ address1.value }
-					onChange={ ( newValue: string ) =>
-						onChange( 'address_1', newValue )
+					{...address1FieldProps}
+					type={address1.field.type}
+					{...(useAutocomplete ? { addressType } : {})}
+					className={`wc-block-components-address-form__address_1`}
+					value={address1.value}
+					onChange={(newValue: string) =>
+						onChange('address_1', newValue)
 					}
 				/>
-			) }
-			{ address2.field && ! address2.field.hidden && (
+			)}
+			{address2.field && !address2.field.hidden && (
 				<AddressLine2Field
-					field={ address2.field }
-					props={ address2FieldProps }
-					onChange={ ( newValue: string ) =>
-						onChange( 'address_2', newValue )
+					field={address2.field}
+					props={address2FieldProps}
+					onChange={(newValue: string) =>
+						onChange('address_2', newValue)
 					}
-					value={ address2.value }
+					value={address2.value}
 				/>
-			) }
+			)}
 		</>
 	);
 };

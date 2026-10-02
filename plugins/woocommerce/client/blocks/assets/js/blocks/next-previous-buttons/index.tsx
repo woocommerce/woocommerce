@@ -12,8 +12,8 @@ import { Save } from './save';
 import { Icon } from './icons';
 
 // @ts-expect-error: `metadata` currently does not have a type definition in WordPress core
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	icon: Icon,
 	edit: Edit,
 	save: Save,
-} );
+});

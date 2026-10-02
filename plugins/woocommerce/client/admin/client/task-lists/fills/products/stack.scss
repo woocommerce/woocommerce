@@ -2,7 +2,7 @@
 	width: 550px;
 	position: relative;
 
-	@media (max-width: 550px ) {
+	@media (max-width: 550px) {
 		& {
 			width: 100%;
 		}
@@ -58,7 +58,6 @@
 					align-items: center;
 					gap: 8px;
 				}
-
 			}
 
 			.woocommerce-label {
@@ -90,7 +89,6 @@
 		color: $gray-900;
 		line-height: 16px;
 		font-weight: 600;
-
 	}
 
 	.woocommerce-list__item-content {
@@ -129,5 +127,4 @@
 			position: relative;
 		}
 	}
-
 }

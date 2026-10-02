@@ -28,40 +28,40 @@ type CollapsibleCardProps = {
 	initialCollapsed?: boolean;
 };
 
-const CollapsibleCard = ( {
+const CollapsibleCard = ({
 	header,
 	children,
 	className,
 	footer,
 	initialCollapsed = false,
-}: CollapsibleCardProps ) => {
-	const [ collapsed, setCollapsed ] = useState( initialCollapsed );
+}: CollapsibleCardProps) => {
+	const [collapsed, setCollapsed] = useState(initialCollapsed);
 
 	const handleClick = () => {
-		setCollapsed( ! collapsed );
+		setCollapsed(!collapsed);
 	};
 
 	return (
-		<Card className={ clsx( 'woocommerce-collapsible-card', className ) }>
-			<CardHeader onClick={ handleClick }>
-				<CardHeaderTitle>{ header }</CardHeaderTitle>
+		<Card className={clsx('woocommerce-collapsible-card', className)}>
+			<CardHeader onClick={handleClick}>
+				<CardHeaderTitle>{header}</CardHeaderTitle>
 				<Button
 					isSmall
-					icon={ collapsed ? chevronDown : chevronUp }
+					icon={collapsed ? chevronDown : chevronUp}
 					label={
 						collapsed
-							? __( 'Expand', 'woocommerce' )
-							: __( 'Collapse', 'woocommerce' )
+							? __('Expand', 'woocommerce')
+							: __('Collapse', 'woocommerce')
 					}
-					onClick={ handleClick }
+					onClick={handleClick}
 				/>
 			</CardHeader>
-			{ ! collapsed && (
+			{!collapsed && (
 				<>
-					{ children }
-					{ !! footer && <CardFooter>{ footer }</CardFooter> }
+					{children}
+					{!!footer && <CardFooter>{footer}</CardFooter>}
 				</>
-			) }
+			)}
 		</Card>
 	);
 };

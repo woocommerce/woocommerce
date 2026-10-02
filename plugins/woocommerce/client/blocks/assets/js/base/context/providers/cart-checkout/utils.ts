@@ -10,21 +10,21 @@ import { checkoutStore } from '@woocommerce/block-data';
  */
 export const preparePaymentData = (
 	//Arbitrary payment data provided by the payment method.
-	paymentData: Record< string, unknown >,
+	paymentData: Record<string, unknown>,
 	//Whether to save the payment method info to user account.
 	shouldSave: boolean,
 	//The current active payment method.
 	activePaymentMethod: string
 ): { key: string; value: unknown }[] => {
-	const apiData = Object.keys( paymentData ).map( ( property ) => {
-		const value = paymentData[ property ];
+	const apiData = Object.keys(paymentData).map((property) => {
+		const value = paymentData[property];
 		return { key: property, value };
-	}, [] );
-	const savePaymentMethodKey = `wc-${ activePaymentMethod }-new-payment-method`;
-	apiData.push( {
+	}, []);
+	const savePaymentMethodKey = `wc-${activePaymentMethod}-new-payment-method`;
+	apiData.push({
 		key: savePaymentMethodKey,
 		value: shouldSave,
-	} );
+	});
 	return apiData;
 };
 
@@ -34,10 +34,10 @@ export const preparePaymentData = (
 export const processCheckoutResponseHeaders = (
 	headers: Headers | undefined
 ): void => {
-	if ( ! headers ) {
+	if (!headers) {
 		return;
 	}
-	const { __internalSetCustomerId } = dispatch( checkoutStore );
+	const { __internalSetCustomerId } = dispatch(checkoutStore);
 
 	if (
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -52,7 +52,7 @@ export const processCheckoutResponseHeaders = (
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore -- this does exist because it's monkey patched in
 		// middleware/store-api-nonce.
-		triggerFetch.setNonce( headers );
+		triggerFetch.setNonce(headers);
 	}
 
 	if (
@@ -68,13 +68,13 @@ export const processCheckoutResponseHeaders = (
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore -- this does exist because it's monkey patched in
 		// middleware/store-api-cart-hash.
-		triggerFetch.setCartHash( headers );
+		triggerFetch.setCartHash(headers);
 	}
 
 	// Update user using headers.
-	if ( headers?.get( 'User-ID' ) ) {
+	if (headers?.get('User-ID')) {
 		void __internalSetCustomerId(
-			parseInt( headers.get( 'User-ID' ) || '0', 10 )
+			parseInt(headers.get('User-ID') || '0', 10)
 		);
 	}
 };

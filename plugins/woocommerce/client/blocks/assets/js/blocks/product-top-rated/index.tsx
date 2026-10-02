@@ -15,17 +15,17 @@ import sharedAttributes, {
 } from '../../utils/shared-attributes';
 import { Edit } from './edit';
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	icon: {
 		src: (
 			<Icon
-				icon={ thumbUp }
+				icon={thumbUp}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
 	},
 	category: 'woocommerce',
-	keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
+	keywords: [__('WooCommerce', 'woocommerce')],
 	description: __(
 		'Display a grid of your top rated products.',
 		'woocommerce'
@@ -39,10 +39,10 @@ registerBlockType( metadata, {
 			{
 				type: 'block',
 				blocks: sharedAttributeBlockTypes.filter(
-					( value ) => value !== 'woocommerce/product-top-rated'
+					(value) => value !== 'woocommerce/product-top-rated'
 				),
-				transform: ( attributes ) =>
-					createBlock( 'woocommerce/product-top-rated', attributes ),
+				transform: (attributes) =>
+					createBlock('woocommerce/product-top-rated', attributes),
 			},
 		],
 	},
@@ -57,4 +57,4 @@ registerBlockType( metadata, {
 	save() {
 		return null;
 	},
-} );
+});

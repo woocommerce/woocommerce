@@ -125,7 +125,7 @@ export function createClient( baseURL: string, auth: Auth ): ApiClient {
 							typeof v === 'object'
 								? redact( v as Record< string, unknown >, keys )
 								: v,
-					  ]
+						]
 			)
 		);
 	}

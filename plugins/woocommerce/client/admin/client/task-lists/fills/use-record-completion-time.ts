@@ -9,14 +9,14 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { getTimeFrame } from '~/utils';
 
-const useRecordCompletionTime = ( taskName: string, startTime?: number ) => {
-	const _startTime = useRef( startTime || window.performance.now() );
+const useRecordCompletionTime = (taskName: string, startTime?: number) => {
+	const _startTime = useRef(startTime || window.performance.now());
 
 	const recordCompletionTime = () => {
-		recordEvent( 'task_completion_time', {
+		recordEvent('task_completion_time', {
 			task_name: taskName,
-			time: getTimeFrame( window.performance.now() - _startTime.current ),
-		} );
+			time: getTimeFrame(window.performance.now() - _startTime.current),
+		});
 	};
 
 	return {

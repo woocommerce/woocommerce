@@ -16,25 +16,25 @@ export interface ValidationInputErrorProps {
 	elementId?: string;
 }
 
-export const ValidationInputError = ( {
+export const ValidationInputError = ({
 	errorMessage = '',
 	propertyName = '',
 	elementId = '',
-}: ValidationInputErrorProps ): JSX.Element | null => {
+}: ValidationInputErrorProps): JSX.Element | null => {
 	const { validationError, validationErrorId } = useSelect(
-		( select ) => {
-			const store = select( validationStore );
+		(select) => {
+			const store = select(validationStore);
 
 			return {
-				validationError: store.getValidationError( propertyName ),
-				validationErrorId: store.getValidationErrorId( elementId ),
+				validationError: store.getValidationError(propertyName),
+				validationErrorId: store.getValidationErrorId(elementId),
 			};
 		},
-		[ propertyName, elementId ]
+		[propertyName, elementId]
 	);
 
-	if ( ! errorMessage || typeof errorMessage !== 'string' ) {
-		if ( validationError?.message && ! validationError?.hidden ) {
+	if (!errorMessage || typeof errorMessage !== 'string') {
+		if (validationError?.message && !validationError?.hidden) {
 			errorMessage = validationError.message;
 		} else {
 			return null;
@@ -43,9 +43,9 @@ export const ValidationInputError = ( {
 
 	return (
 		<div className="wc-block-components-validation-error" role="alert">
-			<p id={ validationErrorId }>
-				<Icon icon={ cautionFilled } />
-				<span>{ errorMessage }</span>
+			<p id={validationErrorId}>
+				<Icon icon={cautionFilled} />
+				<span>{errorMessage}</span>
 			</p>
 		</div>
 	);

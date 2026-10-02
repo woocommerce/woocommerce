@@ -9,49 +9,49 @@ import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
  */
 import type { BlockErrorProps } from './types';
 
-const BlockError = ( {
-	imageUrl = `${ WC_BLOCKS_IMAGE_URL }/block-error.svg`,
-	header = __( 'Oops!', 'woocommerce' ),
-	text = __( 'There was an error loading the content.', 'woocommerce' ),
+const BlockError = ({
+	imageUrl = `${WC_BLOCKS_IMAGE_URL}/block-error.svg`,
+	header = __('Oops!', 'woocommerce'),
+	text = __('There was an error loading the content.', 'woocommerce'),
 	errorMessage,
-	errorMessagePrefix = __( 'Error:', 'woocommerce' ),
+	errorMessagePrefix = __('Error:', 'woocommerce'),
 	button,
 	showErrorBlock = true,
-}: BlockErrorProps ): JSX.Element | null => {
+}: BlockErrorProps): JSX.Element | null => {
 	return showErrorBlock ? (
 		<div className="wc-block-error wc-block-components-error">
-			{ imageUrl && (
+			{imageUrl && (
 				// The alt text is left empty on purpose, as it's considered a decorative image.
 				// More can be found here: https://www.w3.org/WAI/tutorials/images/decorative/.
 				// Github discussion for a context: https://github.com/woocommerce/woocommerce-blocks/pull/7651#discussion_r1019560494.
 				<img
 					className="wc-block-error__image wc-block-components-error__image"
-					src={ imageUrl }
+					src={imageUrl}
 					alt=""
 				/>
-			) }
+			)}
 			<div className="wc-block-error__content wc-block-components-error__content">
-				{ header && (
+				{header && (
 					<p className="wc-block-error__header wc-block-components-error__header">
-						{ header }
+						{header}
 					</p>
-				) }
-				{ text && (
+				)}
+				{text && (
 					<p className="wc-block-error__text wc-block-components-error__text">
-						{ text }
+						{text}
 					</p>
-				) }
-				{ errorMessage && (
+				)}
+				{errorMessage && (
 					<p className="wc-block-error__message wc-block-components-error__message">
-						{ errorMessagePrefix ? errorMessagePrefix + ' ' : '' }
-						{ errorMessage }
+						{errorMessagePrefix ? errorMessagePrefix + ' ' : ''}
+						{errorMessage}
 					</p>
-				) }
-				{ button && (
+				)}
+				{button && (
 					<p className="wc-block-error__button wc-block-components-error__button">
-						{ button }
+						{button}
 					</p>
-				) }
+				)}
 			</div>
 		</div>
 	) : null;

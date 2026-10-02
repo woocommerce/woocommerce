@@ -41,7 +41,7 @@ interface IncentiveBannerProps {
 	 *
 	 * @param id Incentive ID.
 	 */
-	onAccept: ( id: string ) => void;
+	onAccept: (id: string) => void;
 	/**
 	 * Callback to handle dismiss action.
 	 *
@@ -75,29 +75,29 @@ interface IncentiveBannerProps {
  * - Accept the incentive, triggering setup actions.
  * - Dismiss the incentive, removing it from the current context.
  */
-export const IncentiveBanner = ( {
+export const IncentiveBanner = ({
 	incentive,
 	provider,
 	onboardingUrl,
 	onDismiss,
 	onAccept,
 	setUpPlugin,
-}: IncentiveBannerProps ) => {
-	const [ isSubmitted, setIsSubmitted ] = useState( false );
-	const [ isDismissed, setIsDismissed ] = useState( false );
-	const [ isBusy, setIsBusy ] = useState( false );
+}: IncentiveBannerProps) => {
+	const [isSubmitted, setIsSubmitted] = useState(false);
+	const [isDismissed, setIsDismissed] = useState(false);
+	const [isBusy, setIsBusy] = useState(false);
 
 	const context = 'wc_settings_payments__banner';
 
-	useEffect( () => {
+	useEffect(() => {
 		// Record the event when the incentive is shown.
-		recordPaymentsEvent( 'incentive_show', {
+		recordPaymentsEvent('incentive_show', {
 			incentive_id: incentive.promo_id,
 			provider_id: provider.id,
 			suggestion_id: provider._suggestion_id ?? 'unknown',
 			display_context: context,
-		} );
-	}, [ incentive, provider ] );
+		});
+	}, [incentive, provider]);
 
 	/**
 	 * Handles explicitly accepting the incentive via the banner CTA button.
@@ -106,29 +106,29 @@ export const IncentiveBanner = ( {
 	 */
 	const handleAccept = () => {
 		// Record the event when the user accepts the incentive.
-		recordPaymentsEvent( 'incentive_accept', {
+		recordPaymentsEvent('incentive_accept', {
 			incentive_id: incentive.promo_id,
 			provider_id: provider.id,
 			suggestion_id: provider._suggestion_id ?? 'unknown',
 			display_context: context,
-		} );
+		});
 
 		// Accept the incentive and set up the plugin.
-		setIsBusy( true );
-		onAccept( incentive.promo_id );
+		setIsBusy(true);
+		onAccept(incentive.promo_id);
 		// We also dismiss the incentive when it is accepted.
 		// But do not track this since it is not a true dismissal.
-		onDismiss( incentive._links.dismiss.href, context, true );
-		setIsSubmitted( true );
+		onDismiss(incentive._links.dismiss.href, context, true);
+		setIsSubmitted(true);
 		setUpPlugin(
 			provider,
 			onboardingUrl,
 			provider.plugin.status === 'not_installed'
-				? provider._links?.attach?.href ?? null
+				? (provider._links?.attach?.href ?? null)
 				: null,
 			'wc_settings_payments__incentive_banner'
 		);
-		setIsBusy( false );
+		setIsBusy(false);
 	};
 
 	/**
@@ -137,84 +137,81 @@ export const IncentiveBanner = ( {
 	 */
 	const handleDismiss = () => {
 		// Dismiss the incentive.
-		setIsBusy( true );
-		onDismiss( incentive._links.dismiss.href, context );
-		setIsBusy( false );
-		setIsDismissed( true );
+		setIsBusy(true);
+		onDismiss(incentive._links.dismiss.href, context);
+		setIsBusy(false);
+		setIsDismissed(true);
 	};
 
 	// Do not render the banner if it has been submitted, dismissed, or already dismissed in this context.
 	if (
 		isSubmitted ||
-		isIncentiveDismissedInContext( incentive, context ) ||
+		isIncentiveDismissedInContext(incentive, context) ||
 		isDismissed
 	) {
 		return null;
 	}
 
 	return (
-		<Card className="woocommerce-incentive-banner" isRounded={ true }>
+		<Card className="woocommerce-incentive-banner" isRounded={true}>
 			<div className="woocommerce-incentive-banner__content">
-				<div className={ 'woocommerce-incentive-banner__image' }>
+				<div className={'woocommerce-incentive-banner__image'}>
 					<img
 						src={
 							WC_ASSET_URL +
 							'images/settings-payments/incentives-illustration.svg'
 						}
-						alt={ __( 'Incentive illustration', 'woocommerce' ) }
+						alt={__('Incentive illustration', 'woocommerce')}
 					/>
 				</div>
 				<CardBody className="woocommerce-incentive-banner__body">
 					<StatusBadge
 						status="has_incentive"
-						message={ __( 'Limited time offer', 'woocommerce' ) }
+						message={__('Limited time offer', 'woocommerce')}
 					/>
 
-					<div className={ 'woocommerce-incentive-banner__copy' }>
-						<h2>{ incentive.title }</h2>
-						<p>{ incentive.description }</p>
+					<div className={'woocommerce-incentive-banner__copy'}>
+						<h2>{incentive.title}</h2>
+						<p>{incentive.description}</p>
 					</div>
 
-					<div className={ 'woocommerce-incentive-banner__terms' }>
-						{ createInterpolateElement(
-							__(
-								'See <termsLink /> for details.',
-								'woocommerce'
-							),
+					<div className={'woocommerce-incentive-banner__terms'}>
+						{createInterpolateElement(
+							__('See <termsLink /> for details.', 'woocommerce'),
 							{
 								termsLink: (
 									<Link
-										href={ incentive.tc_url }
+										href={incentive.tc_url}
 										target="_blank"
 										rel="noreferrer"
 										type="external"
 									>
-										{ __(
+										{__(
 											'Terms and Conditions',
 											'woocommerce'
-										) }
+										)}
 									</Link>
 								),
 							}
-						) }
+						)}
 					</div>
 
-					<div className={ 'woocommerce-incentive-banner__actions' }>
+					<div className={'woocommerce-incentive-banner__actions'}>
 						<Button
-							variant={ 'primary' }
-							isBusy={ isSubmitted }
-							disabled={ isSubmitted }
-							onClick={ handleAccept }
+							variant={'primary'}
+							isBusy={isSubmitted}
+							disabled={isSubmitted}
+							onClick={handleAccept}
 						>
-							{ incentive.cta_label }
+							{incentive.cta_label}
 						</Button>
 						<Button
-							variant={ 'tertiary' }
-							isBusy={ isBusy }
-							disabled={ isBusy }
-							onClick={ handleDismiss }
+							variant={'tertiary'}
+							isBusy={isBusy}
+							disabled={isBusy}
+							onClick={handleDismiss}
 						>
-							{ __( 'Dismiss', 'woocommerce' ) }
+							{__('Dismiss', 'woocommerce')}
 						</Button>
 					</div>
 				</CardBody>

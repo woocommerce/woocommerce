@@ -1,6 +1,6 @@
 export type InnerBlockTemplate = [
 	string,
-	Record< string, unknown >,
+	Record<string, unknown>,
 	InnerBlockTemplate[] | undefined,
 ];
 

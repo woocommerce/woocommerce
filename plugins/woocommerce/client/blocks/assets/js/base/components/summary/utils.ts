@@ -11,14 +11,14 @@ import { count, CountType } from '@wordpress/wordcount';
  * @param {string} source Source text.
  * @return {string} First paragraph found in string.
  */
-const getFirstParagraph = ( source: string ) => {
-	const pIndex = source.indexOf( '</p>' );
+const getFirstParagraph = (source: string) => {
+	const pIndex = source.indexOf('</p>');
 
-	if ( pIndex === -1 ) {
+	if (pIndex === -1) {
 		return source;
 	}
 
-	return source.substr( 0, pIndex + 4 );
+	return source.substr(0, pIndex + 4);
 };
 
 /**
@@ -37,22 +37,22 @@ export const generateSummary = (
 	maxLength = 15,
 	countType: CountType = 'words'
 ) => {
-	const sourceWithParagraphs = autop( source );
-	const sourceWordCount = count( sourceWithParagraphs, countType );
+	const sourceWithParagraphs = autop(source);
+	const sourceWordCount = count(sourceWithParagraphs, countType);
 
-	if ( sourceWordCount <= maxLength ) {
+	if (sourceWordCount <= maxLength) {
 		return sourceWithParagraphs;
 	}
 
-	const firstParagraph = getFirstParagraph( sourceWithParagraphs );
-	const firstParagraphWordCount = count( firstParagraph, countType );
+	const firstParagraph = getFirstParagraph(sourceWithParagraphs);
+	const firstParagraphWordCount = count(firstParagraph, countType);
 
-	if ( firstParagraphWordCount <= maxLength ) {
+	if (firstParagraphWordCount <= maxLength) {
 		return firstParagraph;
 	}
 
-	if ( countType === 'words' ) {
-		return trimWords( firstParagraph, maxLength );
+	if (countType === 'words') {
+		return trimWords(firstParagraph, maxLength);
 	}
 
 	return trimCharacters(

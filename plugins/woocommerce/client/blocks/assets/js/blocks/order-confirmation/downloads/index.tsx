@@ -11,11 +11,11 @@ import metadata from './block.json';
 import edit from './edit';
 import './style.scss';
 
-registerBlockType( metadata as BlockConfiguration, {
+registerBlockType(metadata as BlockConfiguration, {
 	icon: {
 		src: (
 			<Icon
-				icon={ download }
+				icon={download}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -27,4 +27,4 @@ registerBlockType( metadata as BlockConfiguration, {
 	save() {
 		return null;
 	},
-} );
+});

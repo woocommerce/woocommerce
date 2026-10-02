@@ -13,12 +13,12 @@ export const Placeholder = () => {
 	);
 
 	return (
-		<Card aria-hidden="true" className={ classes }>
+		<Card aria-hidden="true" className={classes}>
 			<CardBody>
 				<Stepper
 					isVertical
-					currentStep={ 'none' }
-					steps={ [
+					currentStep={'none'}
+					steps={[
 						{
 							key: 'first',
 							label: '',
@@ -27,7 +27,7 @@ export const Placeholder = () => {
 							key: 'second',
 							label: '',
 						},
-					] }
+					]}
 				/>
 			</CardBody>
 		</Card>

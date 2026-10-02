@@ -10,15 +10,15 @@ import { Icon, page } from '@wordpress/icons';
 import metadata from './block.json';
 import VariationDescriptionEdit from './edit';
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	edit: VariationDescriptionEdit,
 	icon: {
 		src: (
 			<Icon
-				icon={ page }
+				icon={page}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
 	},
 	save: () => null,
-} );
+});

@@ -25,7 +25,7 @@ import './style.scss';
 import { BlockAttributes, ProductImageContext } from './types';
 import { isTryingToDisplayLegacySaleBadge, resolveAspectRatio } from './utils';
 
-const buildStyles = ( props: Partial< ImageProps > ) => {
+const buildStyles = (props: Partial<ImageProps>) => {
 	const { aspectRatio, height, width, scale } = props;
 	return {
 		height,
@@ -35,35 +35,35 @@ const buildStyles = ( props: Partial< ImageProps > ) => {
 	};
 };
 
-const chooseImage = ( product: ProductResponseItem, imageId?: number ) => {
+const chooseImage = (product: ProductResponseItem, imageId?: number) => {
 	// Default to placeholder image if no product images are available.
-	if ( ! product.images.length ) {
+	if (!product.images.length) {
 		return null;
 	}
 
-	if ( imageId ) {
+	if (imageId) {
 		// If an image ID is provided, use that image or fallback to featured image.
-		const image = product.images.find( ( img ) => img.id === imageId );
-		return image || product.images[ 0 ];
+		const image = product.images.find((img) => img.id === imageId);
+		return image || product.images[0];
 	}
 
 	// If no image ID is provided, use the featured image.
-	return product.images[ 0 ];
+	return product.images[0];
 };
 
-const ImagePlaceholder = ( props: {
-	style?: Record< string, unknown >;
-} ): JSX.Element => {
-	const src = getSetting( 'placeholderImgSrcFullSize', PLACEHOLDER_IMG_SRC );
+const ImagePlaceholder = (props: {
+	style?: Record<string, unknown>;
+}): JSX.Element => {
+	const src = getSetting('placeholderImgSrcFullSize', PLACEHOLDER_IMG_SRC);
 
 	return (
 		<img
-			{ ...props }
-			src={ src }
+			{...props}
+			src={src}
 			// Decorative image with no value, so alt should be empty.
 			alt=""
-			width={ undefined }
-			height={ undefined }
+			width={undefined}
+			height={undefined}
 		/>
 	);
 };
@@ -86,7 +86,7 @@ interface ImageProps {
 	aspectRatio: string | undefined;
 }
 
-const Image = ( {
+const Image = ({
 	image,
 	loaded,
 	fallbackAlt,
@@ -94,40 +94,36 @@ const Image = ( {
 	scale,
 	height,
 	aspectRatio,
-}: ImageProps ): JSX.Element => {
+}: ImageProps): JSX.Element => {
 	const { src, srcset, sizes, alt } = image || {};
 	const imageProps = {
 		alt: alt || fallbackAlt,
-		hidden: ! loaded,
+		hidden: !loaded,
 		src,
 		srcSet: srcset,
 		sizes,
 	};
 
-	const imageStyles = buildStyles( {
+	const imageStyles = buildStyles({
 		height,
 		width,
 		scale,
 		aspectRatio,
-	} );
+	});
 
-	if ( ! image ) {
-		return <ImagePlaceholder style={ imageStyles } />;
+	if (!image) {
+		return <ImagePlaceholder style={imageStyles} />;
 	}
 
 	return (
 		/* eslint-disable-next-line jsx-a11y/alt-text */
-		<img
-			style={ imageStyles }
-			data-testid="product-image"
-			{ ...imageProps }
-		/>
+		<img style={imageStyles} data-testid="product-image" {...imageProps} />
 	);
 };
 
 type Props = BlockAttributes &
-	Pick< ProductImageContext, 'imageId' > &
-	Omit< HTMLAttributes< HTMLDivElement >, 'style' > & {
+	Pick<ProductImageContext, 'imageId'> &
+	Omit<HTMLAttributes<HTMLDivElement>, 'style'> & {
 		isAdmin?: boolean;
 		product?: ProductResponseItem | ProductEntityResponse;
 		isResolving?: boolean;
@@ -140,18 +136,18 @@ type LegacyProps = Props & {
 // props.product is not listed in the BlockAttributes explicitly,
 // but it is implicitly passed from the All Products block.
 // This is what distinguishes this block from the other usage of the Product Image component.
-const displayLegacySaleBadge = ( props: LegacyProps ) => {
+const displayLegacySaleBadge = (props: LegacyProps) => {
 	const { product } = props;
-	const isInAllProducts = ! isEmpty( product );
+	const isInAllProducts = !isEmpty(product);
 
-	if ( isInAllProducts ) {
-		return isTryingToDisplayLegacySaleBadge( props.showSaleBadge );
+	if (isInAllProducts) {
+		return isTryingToDisplayLegacySaleBadge(props.showSaleBadge);
 	}
 
 	return false;
 };
 
-export const Block = ( props: Props ): JSX.Element | null => {
+export const Block = (props: Props): JSX.Element | null => {
 	const {
 		aspectRatio,
 		children,
@@ -169,16 +165,16 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		...restProps
 	} = props;
 
-	const styleProps = useStyleProps( props );
+	const styleProps = useStyleProps(props);
 	const { parentClassName } = useInnerBlockLayoutContext();
-	const { product, isLoading } = useProductDataContext( {
+	const { product, isLoading } = useProductDataContext({
 		isAdmin,
 		product: productEntity,
 		isResolving,
-	} );
+	});
 	const { dispatchStoreEvent } = useStoreEvents();
 
-	const storeAspectRatio = getSetting< string | null >(
+	const storeAspectRatio = getSetting<string | null>(
 		'thumbnailAspectRatio',
 		null
 	);
@@ -189,101 +185,100 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		imageSizing
 	);
 	const aspectRatioClass = `wc-block-components-product-image--aspect-ratio-${
-		finalAspectRatio ? finalAspectRatio.replace( '/', '-' ) : 'auto'
+		finalAspectRatio ? finalAspectRatio.replace('/', '-') : 'auto'
 	}`;
 
-	if ( ! product?.id ) {
-		const imageStyles = buildStyles( {
+	if (!product?.id) {
+		const imageStyles = buildStyles({
 			height,
 			width,
 			scale,
 			aspectRatio: finalAspectRatio,
-		} );
+		});
 
 		return (
 			<>
 				<div
-					className={ clsx(
+					className={clsx(
 						className,
 						'wc-block-components-product-image',
 						aspectRatioClass,
 						{
-							[ `${ parentClassName }__product-image` ]:
+							[`${parentClassName}__product-image`]:
 								parentClassName,
 						},
 						styleProps.className
-					) }
-					style={ styleProps.style }
+					)}
+					style={styleProps.style}
 				>
-					<ImagePlaceholder style={ imageStyles } />
+					<ImagePlaceholder style={imageStyles} />
 				</div>
-				{ children }
+				{children}
 			</>
 		);
 	}
 
-	const image = chooseImage( product, imageId );
+	const image = chooseImage(product, imageId);
 
-	if ( image ) {
-		image.alt = image.alt || decodeEntities( product.name );
+	if (image) {
+		image.alt = image.alt || decodeEntities(product.name);
 	}
 
 	const ParentComponent = showProductLink ? 'a' : Fragment;
 	const anchorLabel = product?.name
 		? // translators: %s is the product name.
-		  sprintf( __( 'Link to %s', 'woocommerce' ), product.name )
+			sprintf(__('Link to %s', 'woocommerce'), product.name)
 		: '';
 	const anchorProps = {
 		href: showProductLink ? product?.permalink : undefined,
-		...( showProductLink && {
+		...(showProductLink && {
 			'aria-label': anchorLabel,
 			onClick: () => {
-				dispatchStoreEvent( 'product-view-link', {
+				dispatchStoreEvent('product-view-link', {
 					product,
-				} );
+				});
 			},
-		} ),
+		}),
 	};
 
 	return (
 		<>
 			<div
-				className={ clsx(
+				className={clsx(
 					className,
 					'wc-block-components-product-image',
 					aspectRatioClass,
 					{
-						[ `${ parentClassName }__product-image` ]:
-							parentClassName,
+						[`${parentClassName}__product-image`]: parentClassName,
 					},
 					styleProps.className
-				) }
-				style={ styleProps.style }
+				)}
+				style={styleProps.style}
 			>
-				{ /* For backwards compatibility in All Products blocks. */ }
-				{ displayLegacySaleBadge( props ) && (
+				{/* For backwards compatibility in All Products blocks. */}
+				{displayLegacySaleBadge(props) && (
 					<ProductSaleBadge
-						align={ props.saleBadgeAlign || 'right' }
-						{ ...restProps }
+						align={props.saleBadgeAlign || 'right'}
+						{...restProps}
 					/>
-				) }
+				)}
 				<ParentComponent
-					{ ...( ! isAdmin && showProductLink && anchorProps ) }
+					{...(!isAdmin && showProductLink && anchorProps)}
 				>
 					<Image
-						fallbackAlt={ decodeEntities( product.name ) }
-						image={ image }
-						loaded={ ! isLoading }
-						width={ width }
-						height={ height }
-						scale={ scale }
-						aspectRatio={ finalAspectRatio }
+						fallbackAlt={decodeEntities(product.name)}
+						image={image}
+						loaded={!isLoading}
+						width={width}
+						height={height}
+						scale={scale}
+						aspectRatio={finalAspectRatio}
 					/>
 				</ParentComponent>
 			</div>
-			{ children }
+			{children}
 		</>
 	);
 };
 
-export default withProductDataContext( Block );
+export default withProductDataContext(Block);

@@ -24,8 +24,8 @@ class FrontendContainerBlock extends Component<
 	FrontendContainerBlockProps,
 	{ orderby: string; reviewsToDisplay: number }
 > {
-	constructor( props: FrontendContainerBlockProps ) {
-		super( props );
+	constructor(props: FrontendContainerBlockProps) {
+		super(props);
 		const { attributes } = this.props;
 
 		this.state = {
@@ -33,8 +33,8 @@ class FrontendContainerBlock extends Component<
 			reviewsToDisplay: this.getReviewsOnPageLoad(),
 		};
 
-		this.onAppendReviews = this.onAppendReviews.bind( this );
-		this.onChangeOrderby = this.onChangeOrderby.bind( this );
+		this.onAppendReviews = this.onAppendReviews.bind(this);
+		this.onChangeOrderby = this.onChangeOrderby.bind(this);
 	}
 
 	getReviewsOnPageLoad() {
@@ -42,7 +42,7 @@ class FrontendContainerBlock extends Component<
 
 		return typeof attributes.reviewsOnPageLoad === 'number'
 			? attributes.reviewsOnPageLoad
-			: parseInt( attributes.reviewsOnPageLoad, 10 );
+			: parseInt(attributes.reviewsOnPageLoad, 10);
 	}
 
 	getReviewsOnLoadMore() {
@@ -50,32 +50,32 @@ class FrontendContainerBlock extends Component<
 
 		return typeof attributes.reviewsOnLoadMore === 'number'
 			? attributes.reviewsOnLoadMore
-			: parseInt( attributes.reviewsOnLoadMore, 10 );
+			: parseInt(attributes.reviewsOnLoadMore, 10);
 	}
 
 	getOffset() {
 		const { attributes } = this.props;
-		const offset = Number( attributes.offset ?? 0 );
+		const offset = Number(attributes.offset ?? 0);
 
-		return Number.isInteger( offset ) && offset >= 0 ? offset : 0;
+		return Number.isInteger(offset) && offset >= 0 ? offset : 0;
 	}
 
 	onAppendReviews() {
 		const { reviewsToDisplay } = this.state;
 
-		this.setState( {
+		this.setState({
 			reviewsToDisplay: reviewsToDisplay + this.getReviewsOnLoadMore(),
-		} );
+		});
 	}
 
-	onChangeOrderby( event: React.ChangeEvent< HTMLSelectElement > ) {
-		this.setState( {
+	onChangeOrderby(event: React.ChangeEvent<HTMLSelectElement>) {
+		this.setState({
 			orderby: event.target.value,
 			reviewsToDisplay: this.getReviewsOnPageLoad(),
-		} );
+		});
 	}
 
-	onReviewsAppended( { newReviews }: { newReviews: Review[] } ) {
+	onReviewsAppended({ newReviews }: { newReviews: Review[] }) {
 		speak(
 			sprintf(
 				/* translators: %d is the count of reviews loaded. */
@@ -91,39 +91,39 @@ class FrontendContainerBlock extends Component<
 	}
 
 	onReviewsReplaced() {
-		speak( __( 'Reviews list updated.', 'woocommerce' ) );
+		speak(__('Reviews list updated.', 'woocommerce'));
 	}
 
 	onReviewsLoadError() {
-		speak( __( 'There was an error loading the reviews.', 'woocommerce' ) );
+		speak(__('There was an error loading the reviews.', 'woocommerce'));
 	}
 
 	render() {
 		const { attributes } = this.props;
 		const { categoryIds, productId, isFilteredReviewsBlock } = attributes;
 		const { reviewsToDisplay } = this.state;
-		const { order, orderby } = getSortArgs( this.state.orderby );
+		const { order, orderby } = getSortArgs(this.state.orderby);
 
-		if ( isFilteredReviewsBlock && ! categoryIds && ! productId ) {
+		if (isFilteredReviewsBlock && !categoryIds && !productId) {
 			return null;
 		}
 
 		return (
 			// @ts-expect-error - TODO: Refactor WrappedComponent
 			<FrontendBlock
-				attributes={ attributes }
-				categoryIds={ categoryIds }
-				onAppendReviews={ this.onAppendReviews }
-				onChangeOrderby={ this.onChangeOrderby }
-				onReviewsAppended={ this.onReviewsAppended }
-				onReviewsLoadError={ this.onReviewsLoadError }
-				onReviewsReplaced={ this.onReviewsReplaced }
-				offset={ this.getOffset() }
-				order={ order }
-				orderby={ orderby }
-				productId={ productId }
-				reviewsToDisplay={ reviewsToDisplay }
-				sortSelectValue={ this.state.orderby }
+				attributes={attributes}
+				categoryIds={categoryIds}
+				onAppendReviews={this.onAppendReviews}
+				onChangeOrderby={this.onChangeOrderby}
+				onReviewsAppended={this.onReviewsAppended}
+				onReviewsLoadError={this.onReviewsLoadError}
+				onReviewsReplaced={this.onReviewsReplaced}
+				offset={this.getOffset()}
+				order={order}
+				orderby={orderby}
+				productId={productId}
+				reviewsToDisplay={reviewsToDisplay}
+				sortSelectValue={this.state.orderby}
 			/>
 		);
 	}

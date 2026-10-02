@@ -4,7 +4,7 @@
 import type { Block, BlockEditProps } from '@wordpress/blocks';
 import { isNumber } from '@woocommerce/types';
 
-export type EditorBlock< T > = Block< T > & BlockEditProps< T >;
+export type EditorBlock<T> = Block<T> & BlockEditProps<T>;
 
 export interface Coordinates {
 	x: number;
@@ -23,11 +23,11 @@ export interface ImageObject {
 	src: string;
 }
 
-export function isImageObject( obj: unknown ): obj is ImageObject {
-	if ( ! obj ) return false;
+export function isImageObject(obj: unknown): obj is ImageObject {
+	if (!obj) return false;
 
 	return (
-		isNumber( ( obj as ImageObject ).id ) &&
-		typeof ( obj as ImageObject ).src === 'string'
+		isNumber((obj as ImageObject).id) &&
+		typeof (obj as ImageObject).src === 'string'
 	);
 }

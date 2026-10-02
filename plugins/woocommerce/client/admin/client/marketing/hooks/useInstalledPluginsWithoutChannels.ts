@@ -15,8 +15,8 @@ import { useRegisteredChannels } from './useRegisteredChannels';
 export type UseInstalledPluginsWithoutChannels = {
 	data: InstalledPlugin[];
 	activatingPlugins: string[];
-	activateInstalledPlugin: ( slug: string ) => void;
-	loadInstalledPluginsAfterActivation: ( slug: string ) => void;
+	activateInstalledPlugin: (slug: string) => void;
+	loadInstalledPluginsAfterActivation: (slug: string) => void;
 };
 
 /**
@@ -25,18 +25,15 @@ export type UseInstalledPluginsWithoutChannels = {
  */
 export const useInstalledPluginsWithoutChannels =
 	(): UseInstalledPluginsWithoutChannels => {
-		const { installedPlugins, activatingPlugins } = useSelect(
-			( select ) => {
-				const { getInstalledPlugins, getActivatingPlugins } =
-					select( marketingStore );
+		const { installedPlugins, activatingPlugins } = useSelect((select) => {
+			const { getInstalledPlugins, getActivatingPlugins } =
+				select(marketingStore);
 
-				return {
-					installedPlugins: getInstalledPlugins(),
-					activatingPlugins: getActivatingPlugins(),
-				};
-			},
-			[]
-		);
+			return {
+				installedPlugins: getInstalledPlugins(),
+				activatingPlugins: getActivatingPlugins(),
+			};
+		}, []);
 
 		const {
 			loading: loadingRegisteredChannels,
@@ -48,17 +45,17 @@ export const useInstalledPluginsWithoutChannels =
 		} = useRecommendedChannels();
 
 		const { activateInstalledPlugin, loadInstalledPluginsAfterActivation } =
-			useDispatch( marketingStore );
+			useDispatch(marketingStore);
 
 		const loading = loadingRegisteredChannels || loadingRecommendedChannels;
-		const installedPluginsWithoutChannels = chain( installedPlugins )
+		const installedPluginsWithoutChannels = chain(installedPlugins)
 			.differenceWith(
 				dataRegisteredChannels || [],
-				( a, b ) => a.slug === b.slug
+				(a, b) => a.slug === b.slug
 			)
 			.differenceWith(
 				dataRecommendedChannels || [],
-				( a, b ) => a.slug === b.product
+				(a, b) => a.slug === b.product
 			)
 			.value();
 

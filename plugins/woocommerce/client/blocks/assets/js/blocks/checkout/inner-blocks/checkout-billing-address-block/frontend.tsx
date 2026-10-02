@@ -22,7 +22,7 @@ import {
 	getBillingAddressBlockDescription,
 } from './utils';
 
-const FrontendBlock = ( {
+const FrontendBlock = ({
 	title,
 	description,
 	children,
@@ -32,17 +32,17 @@ const FrontendBlock = ( {
 	description: string;
 	children: JSX.Element;
 	className?: string;
-} ): JSX.Element | null => {
+}): JSX.Element | null => {
 	const { showFormStepNumbers } = useCheckoutBlockContext();
-	const checkoutIsProcessing = useSelect( ( select ) =>
-		select( checkoutStore ).isProcessing()
+	const checkoutIsProcessing = useSelect((select) =>
+		select(checkoutStore).isProcessing()
 	);
 	const { showBillingFields, forcedBillingAddress, useBillingAsShipping } =
 		useCheckoutAddress();
 
 	const { hasSelectedLocalPickup } = useShippingData();
 
-	if ( ! showBillingFields && ! useBillingAsShipping ) {
+	if (!showBillingFields && !useBillingAsShipping) {
 		return null;
 	}
 
@@ -59,16 +59,16 @@ const FrontendBlock = ( {
 	return (
 		<FormStep
 			id="billing-fields"
-			disabled={ checkoutIsProcessing }
-			className={ clsx( 'wc-block-checkout__billing-fields', className ) }
-			title={ title }
-			description={ description }
-			showStepNumber={ showFormStepNumbers }
+			disabled={checkoutIsProcessing}
+			className={clsx('wc-block-checkout__billing-fields', className)}
+			title={title}
+			description={description}
+			showStepNumber={showFormStepNumbers}
 		>
 			<Block />
-			{ children }
+			{children}
 		</FormStep>
 	);
 };
 
-export default withFilteredAttributes( attributes )( FrontendBlock );
+export default withFilteredAttributes(attributes)(FrontendBlock);

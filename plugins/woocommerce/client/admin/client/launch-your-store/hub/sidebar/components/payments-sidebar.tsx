@@ -33,7 +33,7 @@ import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 import { wooPaymentsOnboardingSessionEntryLYS } from '~/settings-payments/constants';
 import { getPaymentsTaskFromLysTasklist } from '../tasklist';
 
-export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
+export const PaymentsSidebar = (props: SidebarComponentProps) => {
 	const { wooPaymentsRecentlyActivated, isWooPaymentsActive } =
 		useSetUpPaymentsContext();
 
@@ -45,11 +45,11 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 	} = useOnboardingContext();
 
 	// Fetch payments task using getPaymentsTaskFromLysTasklist helper
-	const [ payments_task, setPaymentsTask ] = useState< TaskType | undefined >(
+	const [payments_task, setPaymentsTask] = useState<TaskType | undefined>(
 		undefined
 	);
 
-	useEffect( () => {
+	useEffect(() => {
 		let isMounted = true;
 
 		const fetchPaymentsTask = async () => {
@@ -57,10 +57,10 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 				const task = await getPaymentsTaskFromLysTasklist();
 
 				// Only update state if component is still mounted.
-				if ( isMounted ) {
-					setPaymentsTask( task );
+				if (isMounted) {
+					setPaymentsTask(task);
 				}
-			} catch ( error ) {
+			} catch (error) {
 				// Log the error for debugging purposes.
 				// eslint-disable-next-line no-console
 				console.error(
@@ -79,10 +79,10 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 		return () => {
 			isMounted = false;
 		};
-	}, [ isWooPaymentsActive, wooPaymentsRecentlyActivated ] ); // Refresh when WooPayments state changes.
+	}, [isWooPaymentsActive, wooPaymentsRecentlyActivated]); // Refresh when WooPayments state changes.
 
 	const currentStepIndex = allSteps.findIndex(
-		( step ) => step.id === currentStep?.id
+		(step) => step.id === currentStep?.id
 	);
 
 	const isStepCompleted = (
@@ -96,20 +96,20 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 	};
 
 	// Sort steps to show completed ones first
-	const sortedSteps = allSteps.sort( ( a, b ) => {
-		const aCompleted = isStepCompleted( a );
-		const bCompleted = isStepCompleted( b );
+	const sortedSteps = allSteps.sort((a, b) => {
+		const aCompleted = isStepCompleted(a);
+		const bCompleted = isStepCompleted(b);
 
-		if ( aCompleted === bCompleted ) {
+		if (aCompleted === bCompleted) {
 			return 0;
 		}
 		return aCompleted ? -1 : 1;
-	} );
+	});
 
 	const sidebarTitle = (
 		<Button
-			onClick={ () => {
-				recordEvent( 'launch_your_store_payments_back_to_hub_click' );
+			onClick={() => {
+				recordEvent('launch_your_store_payments_back_to_hub_click');
 
 				// Record the "modal" being closed to keep consistency with the Payments Settings flow.
 				recordPaymentsOnboardingEvent(
@@ -122,104 +122,101 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 
 				// Clear session flag to prevent redirect back to payments setup
 				// after exiting the flow and returning to the WC Admin home.
-				window.sessionStorage.setItem( 'lysWaiting', 'no' );
+				window.sessionStorage.setItem('lysWaiting', 'no');
 
-				props.sendEventToSidebar( {
+				props.sendEventToSidebar({
 					type: 'RETURN_FROM_PAYMENTS',
-				} );
-			} }
+				});
+			}}
 		>
 			{
 				/* translators: %s: Payment provider name (e.g., WooPayments) */
-				sprintf( __( 'Set up %s', 'woocommerce' ), 'WooPayments' )
+				sprintf(__('Set up %s', 'woocommerce'), 'WooPayments')
 			}
 		</Button>
 	);
 
-	const InstallWooPaymentsStep = ( {
+	const InstallWooPaymentsStep = ({
 		isStepComplete,
 	}: {
 		isStepComplete: boolean;
-	} ) => (
+	}) => (
 		<SidebarNavigationItem
 			key="install-woopayments"
-			className={ clsx( 'install-woopayments', {
+			className={clsx('install-woopayments', {
 				active: isStepComplete,
 				'payment-step': true,
 				'payment-step--active': isStepComplete,
 				'payment-step--disabled': isStepComplete,
 				'is-complete': isStepComplete,
-			} ) }
+			})}
 			icon={
 				isStepComplete ? taskCompleteIcon : taskIcons.activePaymentStep
 			}
-			disabled={ true }
-			showChevron={ false }
+			disabled={true}
+			showChevron={false}
 		>
-			{ payments_task?.additionalData?.wooPaymentsIsInstalled
+			{payments_task?.additionalData?.wooPaymentsIsInstalled
 				? /* translators: %s: WooPayments */
-				  sprintf( __( 'Enable %s', 'woocommerce' ), 'WooPayments' )
+					sprintf(__('Enable %s', 'woocommerce'), 'WooPayments')
 				: /* translators: %s: WooPayments */
-				  sprintf( __( 'Install %s', 'woocommerce' ), 'WooPayments' ) }
+					sprintf(__('Install %s', 'woocommerce'), 'WooPayments')}
 		</SidebarNavigationItem>
 	);
 
 	return (
 		<div
-			className={ clsx(
-				'launch-store-sidebar__container',
-				props.className
-			) }
+			className={clsx('launch-store-sidebar__container', props.className)}
 		>
 			<motion.div
 				className="woocommerce-edit-site-layout__header-container"
-				animate={ 'view' }
+				animate={'view'}
 			>
 				<SiteHub
-					variants={ {
+					variants={{
 						view: { x: 0 },
-					} }
-					isTransparent={ false }
+					}}
+					isTransparent={false}
 					className="woocommerce-edit-site-layout__hub"
 				/>
 			</motion.div>
 			<SidebarContainer
-				title={ sidebarTitle }
-				onMobileClose={ props.onMobileClose }
+				title={sidebarTitle}
+				onMobileClose={props.onMobileClose}
 			>
-				{ /* We are using these classes to inherit the styles from the edit your store styling */ }
+				{/* We are using these classes to inherit the styles from the edit your store styling */}
 				<ItemGroup className="woocommerce-edit-site-sidebar-navigation-screen-essential-tasks__group">
-					{ ! isWooPaymentsActive && (
+					{!isWooPaymentsActive && (
 						<motion.div
-							initial={ { opacity: 0, y: 0 } }
-							animate={ { opacity: 1, y: 0 } }
-							transition={ { duration: 0.7, delay: 0.2 } }
+							initial={{ opacity: 0, y: 0 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ duration: 0.7, delay: 0.2 }}
 						>
-							<InstallWooPaymentsStep isStepComplete={ false } />
+							<InstallWooPaymentsStep isStepComplete={false} />
 						</motion.div>
-					) }
-					{ isWooPaymentsActive && isLoading && (
+					)}
+					{isWooPaymentsActive && isLoading && (
 						<motion.div
-							initial={ { opacity: 0 } }
-							animate={ { opacity: 1 } }
-							exit={ { opacity: 0 } }
-							transition={ { duration: 0.3 } }
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							exit={{ opacity: 0 }}
+							transition={{ duration: 0.3 }}
 						>
-							<StepPlaceholder rows={ 3 } />
+							<StepPlaceholder rows={3} />
 						</motion.div>
-					) }
-					{ isWooPaymentsActive && ! isLoading && (
+					)}
+					{isWooPaymentsActive && !isLoading && (
 						<motion.div
-							initial={ { opacity: 0, y: 0 } }
-							animate={ { opacity: 1, y: 0 } }
-							transition={ { duration: 0.7, delay: 0.2 } }
+							initial={{ opacity: 0, y: 0 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ duration: 0.7, delay: 0.2 }}
 						>
-							<InstallWooPaymentsStep isStepComplete={ true } />
-							{ sortedSteps.map( ( step ) => {
+							<InstallWooPaymentsStep isStepComplete={true} />
+							{sortedSteps.map((step) => {
 								return (
 									<SidebarNavigationItem
-										key={ step.id }
-										className={ clsx( step.id, {
+										key={step.id}
+										className={clsx(step.id, {
 											active: currentStep?.id === step.id,
 											'payment-step': true,
 											'payment-step--active':
@@ -227,22 +224,22 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 											'payment-step--disabled':
 												currentStep?.id !== step.id,
 											'is-complete':
-												isStepCompleted( step ),
-										} ) }
+												isStepCompleted(step),
+										})}
 										icon={
-											isStepCompleted( step )
+											isStepCompleted(step)
 												? taskCompleteIcon
 												: taskIcons.activePaymentStep
 										}
-										disabled={ true }
-										showChevron={ false }
+										disabled={true}
+										showChevron={false}
 									>
-										{ step.label }
+										{step.label}
 									</SidebarNavigationItem>
 								);
-							} ) }
+							})}
 						</motion.div>
-					) }
+					)}
 				</ItemGroup>
 			</SidebarContainer>
 		</div>

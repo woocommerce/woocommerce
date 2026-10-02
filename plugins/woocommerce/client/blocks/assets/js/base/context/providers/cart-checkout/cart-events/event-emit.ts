@@ -20,7 +20,7 @@ const EVENTS = {
 	PROCEED_TO_CHECKOUT: 'cart_proceed_to_checkout',
 };
 
-type EventEmittersType = Record< string, ReturnType< typeof emitterCallback > >;
+type EventEmittersType = Record<string, ReturnType<typeof emitterCallback>>;
 
 /**
  * Receives a reducer dispatcher and returns an object with the
@@ -34,16 +34,16 @@ type EventEmittersType = Record< string, ReturnType< typeof emitterCallback > >;
  * @return {Object} An object with the various payment event emitter registration functions
  */
 const useEventEmitters = (
-	observerDispatch: React.Dispatch< ActionType >
+	observerDispatch: React.Dispatch<ActionType>
 ): EventEmittersType => {
 	const eventEmitters = useMemo(
-		() => ( {
+		() => ({
 			onProceedToCheckout: emitterCallback(
 				EVENTS.PROCEED_TO_CHECKOUT,
 				observerDispatch
 			),
-		} ),
-		[ observerDispatch ]
+		}),
+		[observerDispatch]
 	);
 	return eventEmitters;
 };

@@ -11,13 +11,13 @@ import { Edit, Save } from './edit';
 import attributes from './attributes';
 import metadata from './block.json';
 
-registerBlockType( 'woocommerce/checkout-contact-information-block', {
+registerBlockType('woocommerce/checkout-contact-information-block', {
 	apiVersion: metadata.apiVersion,
 	title: metadata.title,
 	icon: {
 		src: (
 			<Icon
-				icon={ atSymbol }
+				icon={atSymbol}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -25,4 +25,4 @@ registerBlockType( 'woocommerce/checkout-contact-information-block', {
 	attributes,
 	edit: Edit,
 	save: Save,
-} );
+});

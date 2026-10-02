@@ -21,35 +21,32 @@ interface MobileAppLoginStepperPageProps {
 	sendMagicLinkStatus: SendMagicLinkStates;
 }
 
-export const MobileAppLoginStepperPage = ( {
+export const MobileAppLoginStepperPage = ({
 	appInstalledClicked,
 	isJetpackPluginInstalled,
 	wordpressAccountEmailAddress,
 	completeInstallationHandler,
 	sendMagicLinkHandler,
 	sendMagicLinkStatus,
-}: MobileAppLoginStepperPageProps ) => {
+}: MobileAppLoginStepperPageProps) => {
 	// Captured the moment the QR component reports a successful exchange.
 	// `signInResult` doubles as the trigger for advancing to step 3 — the
 	// stepper renders the new success step iff this is non-null.
-	const [ signInResult, setSignInResult ] =
-		useState< QRLoginConsumedSnapshot | null >( null );
+	const [signInResult, setSignInResult] =
+		useState<QRLoginConsumedSnapshot | null>(null);
 
-	const handleSignedIn = useCallback(
-		( snapshot: QRLoginConsumedSnapshot ) => {
-			// Only set on the first transition. The QR component's effect
-			// fires on every render while in the consumed state; ignoring
-			// subsequent calls keeps the success step from re-rendering with
-			// the same data.
-			setSignInResult( ( prev ) => prev ?? snapshot );
-		},
-		[]
-	);
+	const handleSignedIn = useCallback((snapshot: QRLoginConsumedSnapshot) => {
+		// Only set on the first transition. The QR component's effect
+		// fires on every render while in the consumed state; ignoring
+		// subsequent calls keeps the success step from re-rendering with
+		// the same data.
+		setSignInResult((prev) => prev ?? snapshot);
+	}, []);
 
 	let step: 'first' | 'second' | 'third';
-	if ( signInResult ) {
+	if (signInResult) {
 		step = 'third';
-	} else if ( appInstalledClicked ) {
+	} else if (appInstalledClicked) {
 		step = 'second';
 	} else {
 		step = 'first';
@@ -59,21 +56,21 @@ export const MobileAppLoginStepperPage = ( {
 		<ModalContentLayoutWithTitle>
 			<div className="modal-subheader">
 				<h3>
-					{ __(
+					{__(
 						'Run your store from anywhere with the Woo mobile app.',
 						'woocommerce'
-					) }
+					)}
 				</h3>
 			</div>
 			<MobileAppLoginStepper
-				step={ step }
-				isJetpackPluginInstalled={ isJetpackPluginInstalled }
-				wordpressAccountEmailAddress={ wordpressAccountEmailAddress }
-				signInResult={ signInResult }
-				completeInstallationStepHandler={ completeInstallationHandler }
-				sendMagicLinkHandler={ sendMagicLinkHandler }
-				sendMagicLinkStatus={ sendMagicLinkStatus }
-				onSignedIn={ handleSignedIn }
+				step={step}
+				isJetpackPluginInstalled={isJetpackPluginInstalled}
+				wordpressAccountEmailAddress={wordpressAccountEmailAddress}
+				signInResult={signInResult}
+				completeInstallationStepHandler={completeInstallationHandler}
+				sendMagicLinkHandler={sendMagicLinkHandler}
+				sendMagicLinkStatus={sendMagicLinkStatus}
+				onSignedIn={handleSignedIn}
 			/>
 		</ModalContentLayoutWithTitle>
 	);

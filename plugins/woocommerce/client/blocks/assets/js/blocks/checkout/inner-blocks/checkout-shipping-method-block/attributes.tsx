@@ -10,10 +10,10 @@ import formStepAttributes from '../../form-step/attributes';
 import { defaultShippingText, defaultLocalPickupText } from './constants';
 
 export default {
-	...formStepAttributes( {
-		defaultTitle: __( 'Delivery', 'woocommerce' ),
+	...formStepAttributes({
+		defaultTitle: __('Delivery', 'woocommerce'),
 		defaultDescription: '',
-	} ),
+	}),
 	className: {
 		type: 'string',
 		default: '',

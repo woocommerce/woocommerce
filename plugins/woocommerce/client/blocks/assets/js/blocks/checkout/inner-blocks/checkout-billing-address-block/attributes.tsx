@@ -10,10 +10,10 @@ import formStepAttributes from '../../form-step/attributes';
 import { DEFAULT_TITLE } from './constants';
 
 const attributes: BlockAttributes = {
-	...formStepAttributes( {
+	...formStepAttributes({
 		defaultTitle: DEFAULT_TITLE,
 		defaultDescription: '',
-	} ),
+	}),
 	className: {
 		type: 'string',
 		default: '',

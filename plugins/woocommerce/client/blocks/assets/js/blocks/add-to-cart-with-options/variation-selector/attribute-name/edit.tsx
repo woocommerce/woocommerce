@@ -17,30 +17,28 @@ interface Attributes {
 	className?: string;
 }
 
-export default function AttributeNameEdit(
-	props: BlockEditProps< Attributes >
-) {
+export default function AttributeNameEdit(props: BlockEditProps<Attributes>) {
 	const { attributes } = props;
 	const { className } = attributes;
 
-	const colorProps = useColorProps( attributes );
+	const colorProps = useColorProps(attributes);
 
-	const [ fluidTypographySettings, layout ] = useSettings(
+	const [fluidTypographySettings, layout] = useSettings(
 		'typography.fluid',
 		'layout'
 	);
-	const typographyProps = useTypographyProps( attributes, {
+	const typographyProps = useTypographyProps(attributes, {
 		typography: {
 			fluid: fluidTypographySettings,
 		},
 		layout: {
 			wideSize: layout?.wideSize,
 		},
-	} );
+	});
 
-	const spacingProps = useSpacingProps( attributes );
+	const spacingProps = useSpacingProps(attributes);
 
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className: clsx(
 			className,
 			colorProps.className,
@@ -52,16 +50,16 @@ export default function AttributeNameEdit(
 			...typographyProps.style,
 			...spacingProps.style,
 		},
-	} );
+	});
 
 	const { data: attribute } =
-		useCustomDataContext< ProductResponseAttributeItem >( 'attribute' );
+		useCustomDataContext<ProductResponseAttributeItem>('attribute');
 
-	if ( ! attribute ) return;
+	if (!attribute) return;
 
 	return (
-		<label { ...blockProps } htmlFor={ attribute.taxonomy }>
-			{ attribute.name }
+		<label {...blockProps} htmlFor={attribute.taxonomy}>
+			{attribute.name}
 		</label>
 	);
 }

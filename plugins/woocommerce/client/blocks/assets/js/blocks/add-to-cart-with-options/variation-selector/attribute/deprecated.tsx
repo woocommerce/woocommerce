@@ -20,10 +20,8 @@ interface MigratedAttributeSettings {
 	disabledAttributesAction: 'disable' | 'hide';
 }
 
-function containsLegacyAttributeOptionsBlock(
-	blocks: BlockInstance[]
-): boolean {
-	return blocks.some( ( block ) => {
+function containsLegacyAttributeOptionsBlock(blocks: BlockInstance[]): boolean {
+	return blocks.some((block) => {
 		if (
 			block.name === 'core/missing' &&
 			block.attributes.originalName === LEGACY_ATTRIBUTE_OPTIONS_BLOCK
@@ -31,24 +29,24 @@ function containsLegacyAttributeOptionsBlock(
 			return true;
 		}
 
-		if ( block.innerBlocks?.length ) {
-			return containsLegacyAttributeOptionsBlock( block.innerBlocks );
+		if (block.innerBlocks?.length) {
+			return containsLegacyAttributeOptionsBlock(block.innerBlocks);
 		}
 
 		return false;
-	} );
+	});
 }
 
 function migrateInnerBlocks(
 	innerBlocks: BlockInstance[],
 	settings: MigratedAttributeSettings
 ): BlockInstance[] {
-	return innerBlocks.flatMap( ( block ) => {
+	return innerBlocks.flatMap((block) => {
 		if (
 			block.name === 'core/missing' &&
 			block.attributes.originalName === LEGACY_ATTRIBUTE_OPTIONS_BLOCK
 		) {
-			if ( block.originalContent?.includes( '"autoselect":true' ) ) {
+			if (block.originalContent?.includes('"autoselect":true')) {
 				settings.autoselect = true;
 			}
 			if (
@@ -58,17 +56,15 @@ function migrateInnerBlocks(
 			) {
 				settings.disabledAttributesAction = 'hide';
 			}
-			if (
-				block.originalContent?.includes( '"optionStyle":"dropdown"' )
-			) {
+			if (block.originalContent?.includes('"optionStyle":"dropdown"')) {
 				settings.displayStyle = INNER_DROPDOWN;
-				return [ createBlock( INNER_DROPDOWN ) ];
+				return [createBlock(INNER_DROPDOWN)];
 			}
 			settings.displayStyle = INNER_CHIPS;
-			return [ createBlock( INNER_CHIPS ) ];
+			return [createBlock(INNER_CHIPS)];
 		}
 
-		if ( block.innerBlocks?.length ) {
+		if (block.innerBlocks?.length) {
 			return [
 				{
 					...block,
@@ -80,21 +76,21 @@ function migrateInnerBlocks(
 			];
 		}
 
-		return [ block ];
-	} );
+		return [block];
+	});
 }
 
 const deprecated = [
 	{
 		save,
 		isEligible(
-			_attributes: Record< string, unknown >,
+			_attributes: Record<string, unknown>,
 			innerBlocks: BlockInstance[]
 		) {
-			return containsLegacyAttributeOptionsBlock( innerBlocks );
+			return containsLegacyAttributeOptionsBlock(innerBlocks);
 		},
 		migrate(
-			attributes: Record< string, unknown >,
+			attributes: Record<string, unknown>,
 			innerBlocks: BlockInstance[]
 		) {
 			const settings: MigratedAttributeSettings = {

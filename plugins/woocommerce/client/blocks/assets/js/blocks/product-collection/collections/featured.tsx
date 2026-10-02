@@ -16,11 +16,11 @@ import { CoreCollectionNames, CoreFilterNames } from '../types';
 
 const collection = {
 	name: CoreCollectionNames.FEATURED,
-	title: __( 'Featured Products', 'woocommerce' ),
-	icon: <Icon icon={ starFilled } />,
-	description: __( 'Showcase your featured products.', 'woocommerce' ),
+	title: __('Featured Products', 'woocommerce'),
+	icon: <Icon icon={starFilled} />,
+	description: __('Showcase your featured products.', 'woocommerce'),
 	keywords: [],
-	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
+	scope: ['inserter', 'block'] as BlockVariationScope[],
 };
 
 const attributes = {
@@ -34,7 +34,7 @@ const attributes = {
 		perPage: 5,
 		pages: 1,
 	},
-	hideControls: [ CoreFilterNames.FEATURED, CoreFilterNames.FILTERABLE ],
+	hideControls: [CoreFilterNames.FEATURED, CoreFilterNames.FILTERABLE],
 };
 
 const heading: InnerBlockTemplate = [
@@ -42,7 +42,7 @@ const heading: InnerBlockTemplate = [
 	{
 		textAlign: 'center',
 		level: 2,
-		content: __( 'Featured products', 'woocommerce' ),
+		content: __('Featured products', 'woocommerce'),
 		style: { spacing: { margin: { bottom: '1rem' } } },
 	},
 ];

@@ -23,16 +23,16 @@ export default function IconWithText(
 		<div className="woocommerce-marketplace__icon-group">
 			<div className="woocommerce-marketplace__icon-group-headline">
 				<Icon
-					icon={ icon }
-					size={ 20 }
+					icon={icon}
+					size={20}
 					className="woocommerce-marketplace__icon-group-icon"
 				/>
 				<h3 className="woocommerce-marketplace__icon-group-title">
-					{ title }
+					{title}
 				</h3>
 			</div>
 			<p className="woocommerce-marketplace__icon-group-description">
-				{ description }
+				{description}
 			</p>
 		</div>
 	);

@@ -48,8 +48,8 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 		checkoutEvents;
 
 	const { isCalculating, isComplete, isIdle, isProcessing, customerId } =
-		useSelect( ( select ) => {
-			const store = select( checkoutStore );
+		useSelect((select) => {
+			const store = select(checkoutStore);
 			return {
 				isComplete: store.isComplete(),
 				isIdle: store.isIdle(),
@@ -57,7 +57,7 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 				customerId: store.getCustomerId(),
 				isCalculating: store.isCalculating(),
 			};
-		}, [] );
+		}, []);
 
 	const {
 		paymentIsIdle,
@@ -68,8 +68,8 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 		paymentIsDoingExpressPayment,
 		activePaymentMethod,
 		shouldSavePayment,
-	} = useSelect( ( select ) => {
-		const store = select( paymentStore );
+	} = useSelect((select) => {
+		const store = select(paymentStore);
 
 		return {
 			paymentIsIdle: store.isPaymentIdle(),
@@ -81,7 +81,7 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 			activePaymentMethod: store.getActivePaymentMethod(),
 			shouldSavePayment: store.getShouldSavePaymentMethod(),
 		};
-	}, [] );
+	}, []);
 
 	// The paymentStatus is exposed to third parties via the payment method interface so the API must not be changed.
 	const paymentStatus = {
@@ -92,37 +92,37 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 		isReady: paymentIsReady,
 		isDoingExpressPayment: paymentIsDoingExpressPayment,
 		get isPristine() {
-			deprecated( 'isPristine', {
+			deprecated('isPristine', {
 				since: '7.5.0',
 				alternative: 'isIdle',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
-			} );
+			});
 			return paymentIsIdle;
 		},
 		get isFinished() {
-			deprecated( 'isFinished', {
+			deprecated('isFinished', {
 				since: '7.5.0',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
-			} );
+			});
 			return paymentHasError || paymentIsReady;
 		},
 		get hasFailed() {
-			deprecated( 'hasFailed', {
+			deprecated('hasFailed', {
 				since: '7.5.0',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
-			} );
+			});
 			return paymentHasError;
 		},
 		get isSuccessful() {
-			deprecated( 'isSuccessful', {
+			deprecated('isSuccessful', {
 				since: '7.5.0',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8110',
-			} );
+			});
 			return paymentIsReady;
 		},
 	};
 
-	const { __internalSetExpressPaymentError } = useDispatch( paymentStore );
+	const { __internalSetExpressPaymentError } = useDispatch(paymentStore);
 
 	const { onPaymentProcessing, onPaymentSetup } = usePaymentEventsContext();
 	const {
@@ -143,33 +143,33 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 	} = useShippingData();
 
 	const { billingAddress, shippingAddress } = useSelect(
-		( select ) => select( cartStore ).getCustomerData(),
+		(select) => select(cartStore).getCustomerData(),
 		[]
 	);
-	const { setShippingAddress } = useDispatch( cartStore );
+	const { setShippingAddress } = useDispatch(cartStore);
 	const { cartItems, cartFees, cartTotals, extensions } = useStoreCart();
 	const { appliedCoupons } = useStoreCartCoupons();
 	const currentCartTotals = useRef(
-		prepareTotalItems( cartTotals, needsShipping )
+		prepareTotalItems(cartTotals, needsShipping)
 	);
-	const currentCartTotal = useRef( {
-		label: __( 'Total', 'woocommerce' ),
-		value: parseInt( cartTotals.total_price, 10 ),
-	} );
+	const currentCartTotal = useRef({
+		label: __('Total', 'woocommerce'),
+		value: parseInt(cartTotals.total_price, 10),
+	});
 
-	useEffect( () => {
+	useEffect(() => {
 		currentCartTotals.current = prepareTotalItems(
 			cartTotals,
 			needsShipping
 		);
 		currentCartTotal.current = {
-			label: __( 'Total', 'woocommerce' ),
-			value: parseInt( cartTotals.total_price, 10 ),
+			label: __('Total', 'woocommerce'),
+			value: parseInt(cartTotals.total_price, 10),
 		};
-	}, [ cartTotals, needsShipping ] );
+	}, [cartTotals, needsShipping]);
 
 	const deprecatedSetExpressPaymentError = useCallback(
-		( errorMessage = '' ) => {
+		(errorMessage = '') => {
 			deprecated(
 				'setExpressPaymentError should only be used by Express Payment Methods (using the provided onError handler).',
 				{
@@ -177,9 +177,9 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 					link: 'https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4228',
 				}
 			);
-			__internalSetExpressPaymentError( errorMessage );
+			__internalSetExpressPaymentError(errorMessage);
 		},
-		[ __internalSetExpressPaymentError ]
+		[__internalSetExpressPaymentError]
 	);
 
 	return {
@@ -190,7 +190,7 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 			billingData: billingAddress,
 			cartTotal: currentCartTotal.current,
 			cartTotalItems: currentCartTotals.current,
-			currency: getCurrencyFromPriceResponse( cartTotals ),
+			currency: getCurrencyFromPriceResponse(cartTotals),
 			customerId,
 			displayPricesIncludingTax: getSetting(
 				'displayCartPricesIncludingTax',

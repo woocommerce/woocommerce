@@ -27,33 +27,33 @@ const Block = (): JSX.Element => {
 	const { isEditor } = useEditorContext();
 
 	// Syncs shipping address with billing address if "Force shipping to the customer billing address" is enabled.
-	useEffectOnce( () => {
-		if ( useBillingAsShipping ) {
+	useEffectOnce(() => {
+		if (useBillingAsShipping) {
 			const { email, ...addressValues } = billingAddress;
-			const syncValues: Partial< ShippingAddress > = {
+			const syncValues: Partial<ShippingAddress> = {
 				...addressValues,
 			};
 
-			if ( defaultFields?.phone?.hidden ) {
+			if (defaultFields?.phone?.hidden) {
 				delete syncValues.phone;
 			}
 
-			if ( defaultFields?.company?.hidden ) {
+			if (defaultFields?.company?.hidden) {
 				delete syncValues.company;
 			}
 
-			setShippingAddress( syncValues );
+			setShippingAddress(syncValues);
 		}
-	} );
+	});
 
 	const WrapperComponent = isEditor ? Noninteractive : Fragment;
 	const noticeContext = useBillingAsShipping
-		? [ noticeContexts.BILLING_ADDRESS, noticeContexts.SHIPPING_ADDRESS ]
-		: [ noticeContexts.BILLING_ADDRESS ];
+		? [noticeContexts.BILLING_ADDRESS, noticeContexts.SHIPPING_ADDRESS]
+		: [noticeContexts.BILLING_ADDRESS];
 
 	return (
 		<>
-			<StoreNoticesContainer context={ noticeContext } />
+			<StoreNoticesContainer context={noticeContext} />
 			<WrapperComponent>
 				<CustomerAddress />
 			</WrapperComponent>

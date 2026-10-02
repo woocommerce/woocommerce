@@ -18,7 +18,7 @@ const EMIT_TYPES = {
 	PAYMENT_SETUP: 'payment_setup',
 };
 
-type EventEmittersType = Record< string, ReturnType< typeof emitterCallback > >;
+type EventEmittersType = Record<string, ReturnType<typeof emitterCallback>>;
 
 /**
  * Receives a reducer dispatcher and returns an object with the
@@ -32,16 +32,16 @@ type EventEmittersType = Record< string, ReturnType< typeof emitterCallback > >;
  * @return {Object} An object with the various payment event emitter registration functions
  */
 const useEventEmitters = (
-	observerDispatch: React.Dispatch< ActionType >
+	observerDispatch: React.Dispatch<ActionType>
 ): EventEmittersType => {
 	const eventEmitters = useMemo(
-		() => ( {
+		() => ({
 			onPaymentSetup: emitterCallback(
 				EMIT_TYPES.PAYMENT_SETUP,
 				observerDispatch
 			),
-		} ),
-		[ observerDispatch ]
+		}),
+		[observerDispatch]
 	);
 	return eventEmitters;
 };

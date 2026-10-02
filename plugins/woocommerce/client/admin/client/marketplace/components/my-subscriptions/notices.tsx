@@ -13,45 +13,45 @@ import { Notice as NoticeType } from '../../contexts/types';
 import { noticeStore } from '../../contexts/notice-store';
 import { removeNotice } from '../../utils/functions';
 
-type NoticeActions = ComponentProps< typeof Notice >[ 'actions' ];
+type NoticeActions = ComponentProps<typeof Notice>['actions'];
 
 export default function Notices() {
 	const notices: NoticeType[] = useSelect(
-		( select ) => select( noticeStore ).notices(),
+		(select) => select(noticeStore).notices(),
 		[]
 	);
 
-	const actions = ( notice: NoticeType ): NoticeActions => {
-		if ( ! notice.options?.actions ) {
+	const actions = (notice: NoticeType): NoticeActions => {
+		if (!notice.options?.actions) {
 			return [];
 		}
 		// Marketplace notice actions carry both `url` and `onClick`, which
 		// doesn't cleanly match either arm of @wordpress/components'
 		// `NoticeActionWithOnClick | NoticeActionWithURL` discriminated union.
 		// The underlying <Notice> picks `onClick` first, so the cast is safe.
-		return notice.options?.actions.map( ( action ) => {
+		return notice.options?.actions.map((action) => {
 			return {
 				...action,
 				variant: 'link',
 				className: 'is-link',
 			};
-		} ) as NoticeActions;
+		}) as NoticeActions;
 	};
 
 	const errorNotices = [];
-	for ( const notice of notices ) {
+	for (const notice of notices) {
 		errorNotices.push(
 			<Notice
 				className="woocommerce-marketplace__notice--error"
-				status={ notice.status }
-				onRemove={ () => removeNotice( notice.productKey ) }
-				key={ notice.productKey }
-				actions={ actions( notice ) }
+				status={notice.status}
+				onRemove={() => removeNotice(notice.productKey)}
+				key={notice.productKey}
+				actions={actions(notice)}
 			>
-				<img src={ Alert } alt="" width={ 24 } height={ 24 } />
-				{ notice.message }
+				<img src={Alert} alt="" width={24} height={24} />
+				{notice.message}
 			</Notice>
 		);
 	}
-	return <>{ errorNotices }</>;
+	return <>{errorNotices}</>;
 }

@@ -131,39 +131,39 @@ export const RETIRED_FEATURE_FLAGS = {
 		deprecatedSince: '11.1.0',
 		removedIn: null,
 	},
-} as const satisfies Record< string, RetiredFeatureFlagMetadata >;
+} as const satisfies Record<string, RetiredFeatureFlagMetadata>;
 
 type RetiredFeatureFlag = keyof typeof RETIRED_FEATURE_FLAGS;
 
 export const getRetiredFeatureFlagDeprecationVersion = (
 	featureId: string
 ): string | undefined =>
-	RETIRED_FEATURE_FLAGS[ featureId as RetiredFeatureFlag ]?.deprecatedSince;
+	RETIRED_FEATURE_FLAGS[featureId as RetiredFeatureFlag]?.deprecatedSince;
 
 export const getRetiredFeatureFlagRemovalVersion = (
 	featureId: string
 ): string | null | undefined =>
-	RETIRED_FEATURE_FLAGS[ featureId as RetiredFeatureFlag ]?.removedIn;
+	RETIRED_FEATURE_FLAGS[featureId as RetiredFeatureFlag]?.removedIn;
 
-export const isRetiredFeatureFlag = ( featureId: string ): boolean =>
-	Object.hasOwn( RETIRED_FEATURE_FLAGS, featureId );
+export const isRetiredFeatureFlag = (featureId: string): boolean =>
+	Object.hasOwn(RETIRED_FEATURE_FLAGS, featureId);
 
-export const warnRetiredFeatureFlag = ( featureId: string ): void => {
+export const warnRetiredFeatureFlag = (featureId: string): void => {
 	const deprecationVersion =
-		getRetiredFeatureFlagDeprecationVersion( featureId );
+		getRetiredFeatureFlagDeprecationVersion(featureId);
 
-	if ( ! deprecationVersion ) {
+	if (!deprecationVersion) {
 		return;
 	}
-	const removalVersion = getRetiredFeatureFlagRemovalVersion( featureId );
+	const removalVersion = getRetiredFeatureFlagRemovalVersion(featureId);
 
-	deprecated( `wcAdminFeatures.${ featureId }`, {
+	deprecated(`wcAdminFeatures.${featureId}`, {
 		since: deprecationVersion,
 		plugin: 'WooCommerce',
-		hint: `The ${ featureId } WC Admin feature flag shim will be removed in ${
+		hint: `The ${featureId} WC Admin feature flag shim will be removed in ${
 			removalVersion
-				? `WooCommerce ${ removalVersion }`
+				? `WooCommerce ${removalVersion}`
 				: 'a future version of WooCommerce'
 		}.`,
-	} );
+	});
 };

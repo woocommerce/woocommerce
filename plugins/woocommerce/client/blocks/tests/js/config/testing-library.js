@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-require( '@testing-library/jest-dom' );
+require('@testing-library/jest-dom');
 
 /**
  * Ignore messages that match the pattern `Store ".*" is already registered.`
@@ -10,22 +10,22 @@ require( '@testing-library/jest-dom' );
  * core/block-editor, etc.
  */
 const consoleErrorSpy = jest
-	.spyOn( console, 'error' )
-	.mockImplementation( ( message, ...args ) => {
+	.spyOn(console, 'error')
+	.mockImplementation((message, ...args) => {
 		if (
 			typeof message === 'string' &&
 			// The error was introduced since @wordpress/data@8.6.0.
-			message.match( /Store ".*" is already registered/ )
+			message.match(/Store ".*" is already registered/)
 		) {
 			return;
 		}
 		// Otherwise, call the original console.error
-		consoleErrorSpy.mock.calls.push( [ message, ...args ] );
-	} );
+		consoleErrorSpy.mock.calls.push([message, ...args]);
+	});
 
 const consoleWarnSpy = jest
-	.spyOn( console, 'warn' )
-	.mockImplementation( ( message, ...args ) => {
+	.spyOn(console, 'warn')
+	.mockImplementation((message, ...args) => {
 		if (
 			typeof message === 'string' &&
 			message.match(
@@ -35,5 +35,5 @@ const consoleWarnSpy = jest
 			return;
 		}
 		// Otherwise, call the original console.warn
-		consoleWarnSpy.mock.calls.push( [ message, ...args ] );
-	} );
+		consoleWarnSpy.mock.calls.push([message, ...args]);
+	});

@@ -13,11 +13,11 @@ import sharedAttributes, {
 	sharedAttributeBlockTypes,
 } from '../../utils/shared-attributes';
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	icon: {
 		src: (
 			<Icon
-				icon={ trendingUp }
+				icon={trendingUp}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -32,13 +32,10 @@ registerBlockType( metadata, {
 			{
 				type: 'block',
 				blocks: sharedAttributeBlockTypes.filter(
-					( value ) => value !== 'woocommerce/product-best-sellers'
+					(value) => value !== 'woocommerce/product-best-sellers'
 				),
-				transform: ( attributes ) =>
-					createBlock(
-						'woocommerce/product-best-sellers',
-						attributes
-					),
+				transform: (attributes) =>
+					createBlock('woocommerce/product-best-sellers', attributes),
 			},
 		],
 	},
@@ -53,4 +50,4 @@ registerBlockType( metadata, {
 	save: () => {
 		return null;
 	},
-} );
+});

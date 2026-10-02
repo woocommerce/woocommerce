@@ -9,49 +9,47 @@ import { __ } from '@wordpress/i18n';
  */
 import { useFulfillmentDrawerContext } from '../../../context/drawer-context';
 
-export default function FulfillmentsDrawerHeader( {
+export default function FulfillmentsDrawerHeader({
 	onClose,
 }: {
 	onClose: () => void;
-} ) {
+}) {
 	const { order, setIsEditing, setOpenSection } =
 		useFulfillmentDrawerContext();
-	if ( ! order ) {
+	if (!order) {
 		return null;
 	}
 
 	return (
 		order && (
 			<div
-				className={ 'woocommerce-fulfillment-drawer__header' }
-				tabIndex={ -1 }
+				className={'woocommerce-fulfillment-drawer__header'}
+				tabIndex={-1}
 			>
 				<div className="woocommerce-fulfillment-drawer__header__title">
 					<h2 id="fulfillment-drawer-header">
-						#{ order.id }{ ' ' }
-						{ order.billing.first_name +
+						#{order.id}{' '}
+						{order.billing.first_name +
 							' ' +
-							order.billing.last_name }
+							order.billing.last_name}
 					</h2>
 					<button
 						className="woocommerce-fulfillment-drawer__header__close-button"
-						onClick={ () => {
-							setIsEditing( false );
-							setOpenSection( 'order' );
+						onClick={() => {
+							setIsEditing(false);
+							setOpenSection('order');
 							onClose();
-						} }
-						aria-label={ __(
+						}}
+						aria-label={__(
 							'Close fulfillment drawer',
 							'woocommerce'
-						) }
+						)}
 					>
 						×
 					</button>
 				</div>
 				<p>
-					{ moment( order.date_created ).format(
-						'MMMM D, YYYY, H:mma'
-					) }
+					{moment(order.date_created).format('MMMM D, YYYY, H:mma')}
 				</p>
 			</div>
 		)

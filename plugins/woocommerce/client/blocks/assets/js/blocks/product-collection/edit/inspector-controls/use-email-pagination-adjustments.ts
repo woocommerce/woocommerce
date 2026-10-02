@@ -28,49 +28,49 @@ const useEmailPaginationAdjustments = (
 	attributes: ProductCollectionAttributes
 ) => {
 	const { displayLayout, collection } = attributes;
-	const actions = useDispatch( blockEditorStore );
+	const actions = useDispatch(blockEditorStore);
 	const isEmail = useIsEmailEditor();
 
 	const { productCollectionBlock } = useSelect(
-		( select ) => ( {
-			productCollectionBlock: select( blockEditorStore ).getBlock(
+		(select) => ({
+			productCollectionBlock: select(blockEditorStore).getBlock(
 				clientId
 			) as Block | null,
-		} ),
-		[ clientId ]
+		}),
+		[clientId]
 	);
 
-	useEffect( () => {
-		if ( ! clientId || ! productCollectionBlock || ! isEmail ) {
+	useEffect(() => {
+		if (!clientId || !productCollectionBlock || !isEmail) {
 			return;
 		}
 
 		// Ensure productCollectionBlock has innerBlocks before proceeding
 		if (
-			! productCollectionBlock.innerBlocks ||
-			! Array.isArray( productCollectionBlock.innerBlocks )
+			!productCollectionBlock.innerBlocks ||
+			!Array.isArray(productCollectionBlock.innerBlocks)
 		) {
 			return;
 		}
 
 		// Remove pagination blocks when in email editor, but only for grid layout
 		// to avoid interfering with carousel layout adjustments
-		if ( displayLayout.type === LayoutOptions.GRID ) {
+		if (displayLayout.type === LayoutOptions.GRID) {
 			const paginationBlocks = productCollectionBlock.innerBlocks.filter(
-				( block: Block ) =>
+				(block: Block) =>
 					block && block.name === 'core/query-pagination'
 			);
 
-			paginationBlocks.forEach( ( paginationBlock: Block ) => {
-				if ( paginationBlock && paginationBlock.clientId ) {
+			paginationBlocks.forEach((paginationBlock: Block) => {
+				if (paginationBlock && paginationBlock.clientId) {
 					try {
-						void actions.removeBlock( paginationBlock.clientId );
-					} catch ( error ) {
+						void actions.removeBlock(paginationBlock.clientId);
+					} catch (error) {
 						// Silently handle cases where block might already be removed
 						// or in an inconsistent state during block editor operations
 					}
 				}
-			} );
+			});
 		}
 	}, [
 		displayLayout.type,
@@ -79,7 +79,7 @@ const useEmailPaginationAdjustments = (
 		collection,
 		productCollectionBlock,
 		isEmail,
-	] );
+	]);
 };
 
 export default useEmailPaginationAdjustments;

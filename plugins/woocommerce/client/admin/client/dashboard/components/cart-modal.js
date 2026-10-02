@@ -21,8 +21,8 @@ import { getInAppPurchaseUrl } from '../../lib/in-app-purchase';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 class CartModal extends Component {
-	constructor( props ) {
-		super( props );
+	constructor(props) {
+		super(props);
 		this.state = {
 			purchaseNowButtonBusy: false,
 			purchaseLaterButtonBusy: false,
@@ -31,25 +31,25 @@ class CartModal extends Component {
 
 	onClickPurchaseNow() {
 		const { productIds, onClickPurchaseNow } = this.props;
-		this.setState( { purchaseNowButtonBusy: true } );
-		if ( ! productIds.length ) {
+		this.setState({ purchaseNowButtonBusy: true });
+		if (!productIds.length) {
 			return;
 		}
 
-		recordEvent( 'tasklist_modal_proceed_checkout', {
+		recordEvent('tasklist_modal_proceed_checkout', {
 			product_ids: productIds,
 			purchase_install: true,
-		} );
+		});
 
 		const url = getInAppPurchaseUrl(
 			'https://woocommerce.com/cart?utm_medium=product',
 			{
-				'wccom-replace-with': productIds.join( ',' ),
+				'wccom-replace-with': productIds.join(','),
 			}
 		);
 
-		if ( onClickPurchaseNow ) {
-			onClickPurchaseNow( url );
+		if (onClickPurchaseNow) {
+			onClickPurchaseNow(url);
 			return;
 		}
 
@@ -59,104 +59,104 @@ class CartModal extends Component {
 	onClickPurchaseLater() {
 		const { productIds } = this.props;
 
-		recordEvent( 'tasklist_modal_proceed_checkout', {
+		recordEvent('tasklist_modal_proceed_checkout', {
 			product_ids: productIds,
 			purchase_install: false,
-		} );
+		});
 
-		this.setState( { purchaseLaterButtonBusy: true } );
+		this.setState({ purchaseLaterButtonBusy: true });
 		this.props.onClickPurchaseLater();
 	}
 
 	onClose() {
 		const { onClose, productIds } = this.props;
 
-		recordEvent( 'tasklist_modal_proceed_checkout', {
+		recordEvent('tasklist_modal_proceed_checkout', {
 			product_ids: productIds,
 			purchase_install: false,
-		} );
+		});
 
 		onClose();
 	}
 
 	renderProducts() {
 		const { productIds, productTypes } = this.props;
-		const { themes = [] } = getAdminSetting( 'onboarding', {} );
+		const { themes = [] } = getAdminSetting('onboarding', {});
 		const listItems = [];
 
-		productIds.forEach( ( productId ) => {
-			const productInfo = find( productTypes, ( productType ) => {
+		productIds.forEach((productId) => {
+			const productInfo = find(productTypes, (productType) => {
 				return productType.product === productId;
-			} );
+			});
 
-			if ( productInfo ) {
-				listItems.push( {
+			if (productInfo) {
+				listItems.push({
 					title: productInfo.label,
 					content: productInfo.description,
-				} );
+				});
 			}
 
-			const themeInfo = find( themes, ( theme ) => {
+			const themeInfo = find(themes, (theme) => {
 				return theme.id === productId;
-			} );
+			});
 
-			if ( themeInfo ) {
-				listItems.push( {
+			if (themeInfo) {
+				listItems.push({
 					title: sprintf(
 						/* translators: 1: theme title, 2: theme price */
-						__( '%1$s — %2$s per year', 'woocommerce' ),
+						__('%1$s — %2$s per year', 'woocommerce'),
 						themeInfo.title,
-						decodeEntities( themeInfo.price )
+						decodeEntities(themeInfo.price)
 					),
 					content: (
 						<span
-							dangerouslySetInnerHTML={ sanitizeHTML(
+							dangerouslySetInnerHTML={sanitizeHTML(
 								themeInfo.excerpt
-							) }
+							)}
 						/>
 					),
-				} );
+				});
 			}
-		} );
+		});
 
-		return <List items={ listItems } />;
+		return <List items={listItems} />;
 	}
 
 	render() {
 		const { purchaseNowButtonBusy, purchaseLaterButtonBusy } = this.state;
 		return (
 			<Modal
-				title={ __(
+				title={__(
 					'Would you like to add the following paid features to your store now?',
 					'woocommerce'
-				) }
-				onRequestClose={ () => this.onClose() }
+				)}
+				onRequestClose={() => this.onClose()}
 				className="woocommerce-cart-modal"
 			>
-				{ this.renderProducts() }
+				{this.renderProducts()}
 
 				<p className="woocommerce-cart-modal__help-text">
-					{ __(
+					{__(
 						'You won’t have access to this functionality until the extensions have been purchased and installed.',
 						'woocommerce'
-					) }
+					)}
 				</p>
 
 				<div className="woocommerce-cart-modal__actions">
 					<Button
 						isLink
-						isBusy={ purchaseLaterButtonBusy }
-						onClick={ () => this.onClickPurchaseLater() }
+						isBusy={purchaseLaterButtonBusy}
+						onClick={() => this.onClickPurchaseLater()}
 					>
-						{ __( 'I’ll do it later', 'woocommerce' ) }
+						{__('I’ll do it later', 'woocommerce')}
 					</Button>
 
 					<Button
 						isPrimary
-						isBusy={ purchaseNowButtonBusy }
-						onClick={ () => this.onClickPurchaseNow() }
+						isBusy={purchaseNowButtonBusy}
+						onClick={() => this.onClickPurchaseNow()}
 					>
-						{ __( 'Buy now', 'woocommerce' ) }
+						{__('Buy now', 'woocommerce')}
 					</Button>
 				</div>
 			</Modal>
@@ -165,9 +165,9 @@ class CartModal extends Component {
 }
 
 export default compose(
-	withSelect( ( select ) => {
-		const { getInstalledPlugins } = select( pluginsStore );
-		const { getProductTypes, getProfileItems } = select( onboardingStore );
+	withSelect((select) => {
+		const { getInstalledPlugins } = select(pluginsStore);
+		const { getProductTypes, getProfileItems } = select(onboardingStore);
 		const profileItems = getProfileItems();
 		const installedPlugins = getInstalledPlugins();
 		const productTypes = getProductTypes();
@@ -179,5 +179,5 @@ export default compose(
 		);
 
 		return { profileItems, productIds, productTypes };
-	} )
-)( CartModal );
+	})
+)(CartModal);

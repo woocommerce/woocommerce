@@ -14,34 +14,34 @@ import { useSelect } from '@wordpress/data';
  */
 import { TaxChildProps } from '../utils';
 
-export const Configure = ( {
+export const Configure = ({
 	isPending,
 	onManual,
-}: Pick< TaxChildProps, 'isPending' | 'onManual' > ) => {
-	const { generalSettings } = useSelect( ( select ) => {
-		const { getSettings } = select( settingsStore );
+}: Pick<TaxChildProps, 'isPending' | 'onManual'>) => {
+	const { generalSettings } = useSelect((select) => {
+		const { getSettings } = select(settingsStore);
 
 		return {
-			generalSettings: getSettings( 'general' )?.general,
+			generalSettings: getSettings('general')?.general,
 		};
-	}, [] );
+	}, []);
 
 	return (
 		<>
 			<Button
 				isPrimary
-				disabled={ isPending }
-				isBusy={ isPending }
-				onClick={ () => {
-					recordEvent( 'tasklist_tax_config_rates', {} );
+				disabled={isPending}
+				isBusy={isPending}
+				onClick={() => {
+					recordEvent('tasklist_tax_config_rates', {});
 					onManual();
-				} }
+				}}
 			>
-				{ __( 'Configure', 'woocommerce' ) }
+				{__('Configure', 'woocommerce')}
 			</Button>
 			<p>
-				{ generalSettings?.woocommerce_calc_taxes !== 'yes' &&
-					interpolateComponents( {
+				{generalSettings?.woocommerce_calc_taxes !== 'yes' &&
+					interpolateComponents({
 						mixedString: __(
 							/*eslint-disable max-len*/
 							'By clicking "Configure" you\'re enabling tax rates and calculations. More info {{link}}here{{/link}}.',
@@ -58,7 +58,7 @@ export const Configure = ( {
 								</Link>
 							),
 						},
-					} ) }
+					})}
 			</p>
 		</>
 	);

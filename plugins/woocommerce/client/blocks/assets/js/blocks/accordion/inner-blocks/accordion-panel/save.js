@@ -11,35 +11,35 @@ import {
 } from '@wordpress/block-editor';
 import clsx from 'clsx';
 
-export default function save( { attributes } ) {
+export default function save({ attributes }) {
 	const blockProps = useBlockProps.save();
-	const borderProps = getBorderClassesAndStyles( attributes );
-	const colorProps = getColorClassesAndStyles( attributes );
-	const spacingProps = getSpacingClassesAndStyles( attributes );
-	const shadowProps = getShadowClassesAndStyles( attributes );
+	const borderProps = getBorderClassesAndStyles(attributes);
+	const colorProps = getColorClassesAndStyles(attributes);
+	const spacingProps = getSpacingClassesAndStyles(attributes);
+	const shadowProps = getShadowClassesAndStyles(attributes);
 
 	return (
 		<div
-			{ ...blockProps }
-			className={ clsx(
+			{...blockProps}
+			className={clsx(
 				blockProps.className,
 				colorProps.className,
 				borderProps.className,
 				{
-					[ `has-custom-font-size` ]: blockProps?.style?.fontSize,
+					[`has-custom-font-size`]: blockProps?.style?.fontSize,
 				}
-			) }
-			style={ {
+			)}
+			style={{
 				...borderProps.style,
 				...colorProps.style,
 				...shadowProps.style,
-			} }
+			}}
 		>
 			<div
 				className="accordion-content__wrapper"
-				style={ {
+				style={{
 					...spacingProps.style,
-				} }
+				}}
 			>
 				<InnerBlocks.Content />
 			</div>

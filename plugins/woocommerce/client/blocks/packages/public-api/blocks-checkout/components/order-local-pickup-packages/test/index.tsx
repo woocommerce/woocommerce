@@ -9,7 +9,7 @@ import { screen } from '@testing-library/react';
 import ExperimentalOrderLocalPickupPackages from '..';
 import { renderSlotFill, getFillProps } from '../../../slot/test-utils';
 
-describe( 'ExperimentalOrderLocalPickupPackages', () => {
+describe('ExperimentalOrderLocalPickupPackages', () => {
 	const defaultSlotProps = {
 		extensions: {},
 		cart: {},
@@ -17,40 +17,40 @@ describe( 'ExperimentalOrderLocalPickupPackages', () => {
 		renderPickupLocation: jest.fn(),
 	};
 
-	it( 'renders fill content inside the slot with expected classes', () => {
+	it('renders fill content inside the slot with expected classes', () => {
 		const { container } = renderSlotFill(
 			ExperimentalOrderLocalPickupPackages,
 			defaultSlotProps
 		);
 
-		expect( screen.getByTestId( 'fill-content' ) ).toBeInTheDocument();
+		expect(screen.getByTestId('fill-content')).toBeInTheDocument();
 		expect(
 			container.querySelector(
 				'.wc-block-components-local-pickup-rates-control'
 			)
 		).toBeInTheDocument();
-	} );
+	});
 
-	it( 'passes all expected fillProps', () => {
+	it('passes all expected fillProps', () => {
 		const extensions = { 'pickup-ext': { locations: [] } };
-		const cart = { items: [ { id: 1 } ] };
+		const cart = { items: [{ id: 1 }] };
 		const components = { PickupOption: () => null };
 		const renderPickupLocation = jest.fn();
 
-		const fillProps = getFillProps( ExperimentalOrderLocalPickupPackages, {
+		const fillProps = getFillProps(ExperimentalOrderLocalPickupPackages, {
 			extensions,
 			cart,
 			components,
 			renderPickupLocation,
-		} );
+		});
 
-		expect( fillProps ).toEqual(
-			expect.objectContaining( {
+		expect(fillProps).toEqual(
+			expect.objectContaining({
 				extensions,
 				cart,
 				components,
 				renderPickupLocation,
-			} )
+			})
 		);
-	} );
-} );
+	});
+});

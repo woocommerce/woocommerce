@@ -20,29 +20,29 @@ type SyncStatusPropsType = {
 
 const className = 'woocommerce-marketing-sync-status';
 
-export const SyncStatus = ( { status }: SyncStatusPropsType ) => {
-	if ( status === 'failed' ) {
+export const SyncStatus = ({ status }: SyncStatusPropsType) => {
+	if (status === 'failed') {
 		return (
-			<div className={ clsx( className, `${ className }__failed` ) }>
-				<GridiconNotice size={ iconSize } />
-				{ __( 'Sync failed', 'woocommerce' ) }
+			<div className={clsx(className, `${className}__failed`)}>
+				<GridiconNotice size={iconSize} />
+				{__('Sync failed', 'woocommerce')}
 			</div>
 		);
 	}
 
-	if ( status === 'syncing' ) {
+	if (status === 'syncing') {
 		return (
-			<div className={ clsx( className, `${ className }__syncing` ) }>
-				<GridiconSync size={ iconSize } />
-				{ __( 'Syncing', 'woocommerce' ) }
+			<div className={clsx(className, `${className}__syncing`)}>
+				<GridiconSync size={iconSize} />
+				{__('Syncing', 'woocommerce')}
 			</div>
 		);
 	}
 
 	return (
-		<div className={ clsx( className, `${ className }__synced` ) }>
-			<GridiconCheckmarkCircle size={ iconSize } />
-			{ __( 'Synced', 'woocommerce' ) }
+		<div className={clsx(className, `${className}__synced`)}>
+			<GridiconCheckmarkCircle size={iconSize} />
+			{__('Synced', 'woocommerce')}
 		</div>
 	);
 };

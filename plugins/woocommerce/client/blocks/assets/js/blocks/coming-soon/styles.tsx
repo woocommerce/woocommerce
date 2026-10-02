@@ -1,5 +1,5 @@
 // Deprecated styles since 9.2. Please use *.scss file instead.
-export const generateStyles = ( color = '#bea0f2' ) => {
+export const generateStyles = (color = '#bea0f2') => {
 	return `
     /* Reset */
     h1, p, a {
@@ -17,7 +17,7 @@ export const generateStyles = ( color = '#bea0f2' ) => {
     body,
     body.custom-background {
         margin: 0;
-        background-color: ${ color };
+        background-color: ${color};
         font-family: 'Inter', sans-serif;
         min-width: 320px;
         --wp--preset--color--contrast: #111111;
@@ -118,7 +118,7 @@ export const generateStyles = ( color = '#bea0f2' ) => {
         align-items: stretch;
     }
     .coming-soon-cover .wp-block-cover__background {
-        background-color: ${ color } !important;
+        background-color: ${color} !important;
     }
     .woocommerce-coming-soon-header {
         height: 40px;

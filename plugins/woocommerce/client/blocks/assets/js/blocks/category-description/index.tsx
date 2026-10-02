@@ -10,8 +10,8 @@ import { page as icon } from '@wordpress/icons';
 import metadata from './block.json';
 import edit from './edit';
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	edit,
 	icon,
 	save: () => null,
-} );
+});

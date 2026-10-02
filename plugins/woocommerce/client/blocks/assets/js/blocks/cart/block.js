@@ -23,32 +23,29 @@ import { CartBlockContext } from './context';
 import { IncompatibleExtensionsFrontendNotice } from '../cart-checkout-shared/incompatible-extensions-notice';
 import './style.scss';
 
-const Cart = ( { children, attributes = {} } ) => {
+const Cart = ({ children, attributes = {} }) => {
 	const { hasDarkControls } = attributes;
 
 	return (
 		<CartBlockContext.Provider
-			value={ {
+			value={{
 				hasDarkControls,
-			} }
+			}}
 		>
-			{ children }
+			{children}
 		</CartBlockContext.Provider>
 	);
 };
 
-const ScrollOnError = ( { scrollToTop } ) => {
-	useEffect( () => {
+const ScrollOnError = ({ scrollToTop }) => {
+	useEffect(() => {
 		// Make it so we can read jQuery events triggered by WC Core elements.
 		const removeJQueryAddedToCartEvent = translateJQueryEventToNative(
 			'added_to_cart',
 			'wc-blocks_added_to_cart'
 		);
 
-		document.body.addEventListener(
-			'wc-blocks_added_to_cart',
-			scrollToTop
-		);
+		document.body.addEventListener('wc-blocks_added_to_cart', scrollToTop);
 
 		return () => {
 			removeJQueryAddedToCartEvent();
@@ -58,37 +55,37 @@ const ScrollOnError = ( { scrollToTop } ) => {
 				scrollToTop
 			);
 		};
-	}, [ scrollToTop ] );
+	}, [scrollToTop]);
 
 	return null;
 };
-const Block = ( { attributes, children, scrollToTop } ) => (
+const Block = ({ attributes, children, scrollToTop }) => (
 	<BlockErrorBoundary
-		header={ __(
+		header={__(
 			'Something went wrong. Please contact us for assistance.',
 			'woocommerce'
-		) }
-		text={ __(
+		)}
+		text={__(
 			'The cart has encountered an unexpected error. If the error persists, please get in touch with us for help.',
 			'woocommerce'
-		) }
+		)}
 		button={
-			<button className="wc-block-button" onClick={ reloadPage }>
-				{ __( 'Reload the page', 'woocommerce' ) }
+			<button className="wc-block-button" onClick={reloadPage}>
+				{__('Reload the page', 'woocommerce')}
 			</button>
 		}
-		showErrorMessage={ CURRENT_USER_IS_ADMIN }
+		showErrorMessage={CURRENT_USER_IS_ADMIN}
 	>
-		<StoreNoticesContainer context={ noticeContexts.CART } />
+		<StoreNoticesContainer context={noticeContexts.CART} />
 		<IncompatibleExtensionsFrontendNotice block="woocommerce/cart" />
 		<SlotFillProvider>
 			<CartProvider>
 				<CartEventsProvider>
-					<Cart attributes={ attributes }>{ children }</Cart>
-					<ScrollOnError scrollToTop={ scrollToTop } />
+					<Cart attributes={attributes}>{children}</Cart>
+					<ScrollOnError scrollToTop={scrollToTop} />
 				</CartEventsProvider>
 			</CartProvider>
 		</SlotFillProvider>
 	</BlockErrorBoundary>
 );
-export default withScrollToTop( Block );
+export default withScrollToTop(Block);

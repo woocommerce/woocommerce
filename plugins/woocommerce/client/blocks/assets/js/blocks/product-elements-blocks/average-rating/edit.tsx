@@ -17,24 +17,24 @@ export interface BlockAttributes {
 	textAlign: string;
 }
 
-const Edit = ( props: BlockEditProps< BlockAttributes > ): JSX.Element => {
+const Edit = (props: BlockEditProps<BlockAttributes>): JSX.Element => {
 	const { attributes, setAttributes } = props;
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className: 'wp-block-woocommerce-product-average-rating',
-	} );
+	});
 
 	return (
 		<>
 			<BlockControls>
 				<AlignmentToolbar
-					value={ attributes.textAlign }
-					onChange={ ( newAlign ) => {
-						setAttributes( { textAlign: newAlign || '' } );
-					} }
+					value={attributes.textAlign}
+					onChange={(newAlign) => {
+						setAttributes({ textAlign: newAlign || '' });
+					}}
 				/>
 			</BlockControls>
-			<div { ...blockProps }>
-				<Block { ...attributes } />
+			<div {...blockProps}>
+				<Block {...attributes} />
 			</div>
 		</>
 	);

@@ -13,16 +13,16 @@ export const SETTINGS_ENTITY: Entity = {
 	name: 'settings',
 	kind: 'root',
 	baseURL: '/wc/v4/settings',
-	label: __( 'Settings', 'woocommerce' ),
-	getTitle: ( record ) => {
+	label: __('Settings', 'woocommerce'),
+	getTitle: (record) => {
 		const recordData = record as SettingsEntityRecord;
 		return (
-			recordData?.id.charAt( 0 ).toUpperCase() +
-			recordData?.id.slice( 1 ) +
+			recordData?.id.charAt(0).toUpperCase() +
+			recordData?.id.slice(1) +
 			' settings'
 		);
 	},
 	key: 'id',
 	supportsPagination: false,
-	plural: __( 'Settings', 'woocommerce' ),
+	plural: __('Settings', 'woocommerce'),
 };

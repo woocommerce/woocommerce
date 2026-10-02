@@ -28,16 +28,15 @@ export const prepareTotalItems = (
 ): CartTotalItem[] => {
 	const newTotals = [];
 
-	const factory = ( label: string, property: string ): CartTotalItem => {
+	const factory = (label: string, property: string): CartTotalItem => {
 		const taxProperty = property + '_tax';
 		const value =
-			objectHasProp( totals, property ) && isString( totals[ property ] )
-				? parseInt( totals[ property ] as string, 10 )
+			objectHasProp(totals, property) && isString(totals[property])
+				? parseInt(totals[property] as string, 10)
 				: 0;
 		const tax =
-			objectHasProp( totals, taxProperty ) &&
-			isString( totals[ taxProperty ] )
-				? parseInt( totals[ taxProperty ] as string, 10 )
+			objectHasProp(totals, taxProperty) && isString(totals[taxProperty])
+				? parseInt(totals[taxProperty] as string, 10)
 				: 0;
 		return {
 			key: property,
@@ -47,26 +46,22 @@ export const prepareTotalItems = (
 		};
 	};
 
-	newTotals.push(
-		factory( __( 'Subtotal:', 'woocommerce' ), 'total_items' )
-	);
+	newTotals.push(factory(__('Subtotal:', 'woocommerce'), 'total_items'));
 
-	newTotals.push( factory( __( 'Fees:', 'woocommerce' ), 'total_fees' ) );
+	newTotals.push(factory(__('Fees:', 'woocommerce'), 'total_fees'));
 
-	newTotals.push(
-		factory( __( 'Discount:', 'woocommerce' ), 'total_discount' )
-	);
+	newTotals.push(factory(__('Discount:', 'woocommerce'), 'total_discount'));
 
-	newTotals.push( {
+	newTotals.push({
 		key: 'total_tax',
-		label: __( 'Taxes:', 'woocommerce' ),
-		value: parseInt( totals.total_tax, 10 ),
-		valueWithTax: parseInt( totals.total_tax, 10 ),
-	} );
+		label: __('Taxes:', 'woocommerce'),
+		value: parseInt(totals.total_tax, 10),
+		valueWithTax: parseInt(totals.total_tax, 10),
+	});
 
-	if ( needsShipping ) {
+	if (needsShipping) {
 		newTotals.push(
-			factory( __( 'Shipping:', 'woocommerce' ), 'total_shipping' )
+			factory(__('Shipping:', 'woocommerce'), 'total_shipping')
 		);
 	}
 

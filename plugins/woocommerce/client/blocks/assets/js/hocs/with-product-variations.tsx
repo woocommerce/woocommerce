@@ -27,8 +27,8 @@ interface WithProductVariationsProps {
 interface State {
 	error: ErrorObject | null;
 	loading: boolean;
-	variations: { [ key: number ]: ProductResponseVariationsItem[] | null };
-	totalVariations: { [ key: number ]: number | null };
+	variations: { [key: number]: ProductResponseVariationsItem[] | null };
+	totalVariations: { [key: number]: number | null };
 }
 
 /**
@@ -39,7 +39,7 @@ interface State {
 const withProductVariations = createHigherOrderComponent(
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore ignoring this line because @wordpress/compose does not expose the correct type for createHigherOrderComponent
-	( OriginalComponent ) => {
+	(OriginalComponent) => {
 		class WrappedComponent extends Component<
 			WithProductVariationsProps,
 			State
@@ -56,165 +56,165 @@ const withProductVariations = createHigherOrderComponent(
 			componentDidMount() {
 				const { selected, showVariations } = this.props;
 
-				if ( selected && showVariations ) {
+				if (selected && showVariations) {
 					this.loadVariations();
 				}
 			}
 
-			componentDidUpdate( prevProps: WithProductVariationsProps ) {
+			componentDidUpdate(prevProps: WithProductVariationsProps) {
 				const { isLoading, selected, showVariations } = this.props;
 
 				if (
 					showVariations &&
-					( ! isShallowEqual( prevProps.selected, selected ) ||
-						( prevProps.isLoading && ! isLoading ) )
+					(!isShallowEqual(prevProps.selected, selected) ||
+						(prevProps.isLoading && !isLoading))
 				) {
 					this.loadVariations();
 				}
 			}
 
-			loadVariations = ( { offset = 0 }: { offset?: number } = {} ) => {
+			loadVariations = ({ offset = 0 }: { offset?: number } = {}) => {
 				const { products } = this.props;
 				const { loading, variations, totalVariations } = this.state;
 
-				if ( loading ) {
+				if (loading) {
 					return;
 				}
 
 				const expandedProduct = this.getExpandedProduct();
 
-				if ( ! expandedProduct ) {
+				if (!expandedProduct) {
 					return;
 				}
 
-				if ( ! offset && variations?.[ expandedProduct ] ) {
+				if (!offset && variations?.[expandedProduct]) {
 					return;
 				}
 
 				if (
-					variations?.[ expandedProduct ] &&
-					totalVariations?.[ expandedProduct ] &&
-					variations[ expandedProduct ].length >=
-						totalVariations[ expandedProduct ]
+					variations?.[expandedProduct] &&
+					totalVariations?.[expandedProduct] &&
+					variations[expandedProduct].length >=
+						totalVariations[expandedProduct]
 				) {
 					return;
 				}
 
 				const productDetails = products.find(
-					( findProduct ) => findProduct.id === expandedProduct
+					(findProduct) => findProduct.id === expandedProduct
 				);
 
 				if (
-					! productDetails?.variations ||
+					!productDetails?.variations ||
 					productDetails.variations.length === 0
 				) {
-					this.setState( {
+					this.setState({
 						variations: {
 							...this.state.variations,
-							[ expandedProduct ]: null,
+							[expandedProduct]: null,
 						},
 						loading: false,
 						error: null,
-					} );
+					});
 					return;
 				}
 
-				this.setState( { loading: true } );
+				this.setState({ loading: true });
 
 				const alreadyLoadedVariations =
-					this.state.variations[ expandedProduct ] || [];
+					this.state.variations[expandedProduct] || [];
 
 				(
-					getProductVariationsWithTotal( expandedProduct, {
+					getProductVariationsWithTotal(expandedProduct, {
 						offset,
-					} ) as Promise< {
+					}) as Promise<{
 						variations: ProductResponseVariationsItem[];
 						total: number;
-					} >
-				 )
-					.then( ( { variations: variationsData, total } ) => {
+					}>
+				)
+					.then(({ variations: variationsData, total }) => {
 						const newVariations = variationsData.map(
-							( variation ) => ( {
+							(variation) => ({
 								...variation,
 								parent: expandedProduct,
-							} )
+							})
 						);
-						this.setState( {
+						this.setState({
 							variations: {
 								...this.state.variations,
-								[ expandedProduct ]: [
+								[expandedProduct]: [
 									...alreadyLoadedVariations,
 									...newVariations,
 								],
 							},
 							totalVariations: {
 								...this.state.totalVariations,
-								[ expandedProduct ]: total,
+								[expandedProduct]: total,
 							},
 							loading: false,
 							error: null,
-						} );
-					} )
-					.catch( async ( e ) => {
-						const error = await formatError( e );
+						});
+					})
+					.catch(async (e) => {
+						const error = await formatError(e);
 
-						this.setState( {
+						this.setState({
 							variations: {
 								...this.state.variations,
-								[ expandedProduct ]: null,
+								[expandedProduct]: null,
 							},
 							totalVariations: {
 								...this.state.totalVariations,
-								[ expandedProduct ]: null,
+								[expandedProduct]: null,
 							},
 							loading: false,
 							error,
-						} );
-					} );
+						});
+					});
 			};
 
-			isProductId( itemId: number ) {
+			isProductId(itemId: number) {
 				const { products } = this.props;
-				return products.some( ( p ) => p.id === itemId );
+				return products.some((p) => p.id === itemId);
 			}
 
-			findParentProduct( variationId: number ) {
+			findParentProduct(variationId: number) {
 				const { products } = this.props;
 				const parentProduct = products.filter(
-					( p ) =>
+					(p) =>
 						p.variations &&
-						p.variations.find( ( { id } ) => id === variationId )
+						p.variations.find(({ id }) => id === variationId)
 				);
-				return parentProduct[ 0 ]?.id;
+				return parentProduct[0]?.id;
 			}
 
 			getExpandedProduct() {
 				const { isLoading, selected, showVariations } = this.props;
 
-				if ( ! showVariations ) {
+				if (!showVariations) {
 					return null;
 				}
 
 				let selectedItem =
-					selected && selected.length ? selected[ 0 ] : null;
+					selected && selected.length ? selected[0] : null;
 
 				// If there is no selected item, check if there was one in the past, so we
 				// can keep the same product expanded.
-				if ( selectedItem ) {
+				if (selectedItem) {
 					this.prevSelectedItem = selectedItem;
 				} else if (
 					this.prevSelectedItem &&
-					! isLoading &&
-					! this.isProductId( this.prevSelectedItem )
+					!isLoading &&
+					!this.isProductId(this.prevSelectedItem)
 				) {
 					// If previous selected item was a variation
 					selectedItem = this.prevSelectedItem;
 				}
 
-				if ( ! isLoading && selectedItem ) {
-					return this.isProductId( selectedItem )
+				if (!isLoading && selectedItem) {
+					return this.isProductId(selectedItem)
 						? selectedItem
-						: this.findParentProduct( selectedItem );
+						: this.findParentProduct(selectedItem);
 				}
 
 				return null;
@@ -226,25 +226,25 @@ const withProductVariations = createHigherOrderComponent(
 					this.state;
 				const expandedProduct = this.getExpandedProduct();
 				const offset = expandedProduct
-					? variations[ expandedProduct ]?.length || 0
+					? variations[expandedProduct]?.length || 0
 					: 0;
 
 				return (
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 					// @ts-ignore ignoring this line because @wordpress/compose does not expose the correct type for createHigherOrderComponent
 					<OriginalComponent
-						{ ...this.props }
-						error={ error || propsError }
-						onLoadMoreVariations={ () =>
-							this.loadVariations( {
+						{...this.props}
+						error={error || propsError}
+						onLoadMoreVariations={() =>
+							this.loadVariations({
 								offset,
-							} )
+							})
 						}
-						expandedProduct={ this.getExpandedProduct() }
-						isLoading={ isLoading }
-						totalVariations={ totalVariations }
-						variations={ variations }
-						variationsLoading={ loading }
+						expandedProduct={this.getExpandedProduct()}
+						isLoading={isLoading}
+						totalVariations={totalVariations}
+						variations={variations}
+						variationsLoading={loading}
 					/>
 				);
 			}

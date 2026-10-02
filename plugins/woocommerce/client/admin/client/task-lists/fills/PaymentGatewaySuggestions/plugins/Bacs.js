@@ -19,16 +19,16 @@ const initialFormValues = {
 };
 
 const BacsPaymentGatewaySetup = () => {
-	const isUpdating = useSelect( ( select ) => {
-		return select( optionsStore ).isOptionsUpdating();
-	} );
-	const { createNotice } = useDispatch( 'core/notices' );
-	const { updateOptions } = useDispatch( optionsStore );
+	const isUpdating = useSelect((select) => {
+		return select(optionsStore).isOptionsUpdating();
+	});
+	const { createNotice } = useDispatch('core/notices');
+	const { updateOptions } = useDispatch(optionsStore);
 
-	const validate = ( values ) => {
+	const validate = (values) => {
 		const errors = {};
 
-		if ( ! values.account_number && ! values.iban ) {
+		if (!values.account_number && !values.iban) {
 			errors.account_number = errors.iban = __(
 				'Please enter an account number or IBAN',
 				'woocommerce'
@@ -38,15 +38,15 @@ const BacsPaymentGatewaySetup = () => {
 		return errors;
 	};
 
-	const updateSettings = async ( values, markConfigured ) => {
-		const update = await updateOptions( {
+	const updateSettings = async (values, markConfigured) => {
+		const update = await updateOptions({
 			woocommerce_bacs_settings: {
 				enabled: 'yes',
 			},
-			woocommerce_bacs_accounts: [ values ],
-		} );
+			woocommerce_bacs_accounts: [values],
+		});
 
-		if ( update.success ) {
+		if (update.success) {
 			markConfigured();
 			createNotice(
 				'success',
@@ -70,113 +70,109 @@ const BacsPaymentGatewaySetup = () => {
 	return (
 		<>
 			<WooPaymentGatewaySetup id="bacs">
-				{ ( { markConfigured } ) => {
+				{({ markConfigured }) => {
 					return (
 						<Form
-							initialValues={ initialFormValues }
-							onSubmit={ ( values ) =>
-								updateSettings( values, markConfigured )
+							initialValues={initialFormValues}
+							onSubmit={(values) =>
+								updateSettings(values, markConfigured)
 							}
-							validate={ validate }
+							validate={validate}
 						>
-							{ ( { getInputProps, handleSubmit } ) => {
+							{({ getInputProps, handleSubmit }) => {
 								return (
 									<>
 										<H>
-											{ __(
+											{__(
 												'Add your bank details',
 												'woocommerce'
-											) }
+											)}
 										</H>
 										<p>
-											{ __(
+											{__(
 												'These details are required to receive payments via bank transfer',
 												'woocommerce'
-											) }
+											)}
 										</p>
 										<div className="woocommerce-task-payment-method__fields">
 											<TextControl
 												__nextHasNoMarginBottom
-												label={ __(
+												label={__(
 													'Account name',
 													'woocommerce'
-												) }
+												)}
 												required
-												{ ...getInputProps(
+												{...getInputProps(
 													'account_name'
-												) }
+												)}
 											/>
 											<TextControl
 												__nextHasNoMarginBottom
-												label={ __(
+												label={__(
 													'Account number',
 													'woocommerce'
-												) }
+												)}
 												required
-												{ ...getInputProps(
+												{...getInputProps(
 													'account_number'
-												) }
+												)}
 											/>
 											<TextControl
 												__nextHasNoMarginBottom
-												label={ __(
+												label={__(
 													'Bank name',
 													'woocommerce'
-												) }
+												)}
 												required
-												{ ...getInputProps(
-													'bank_name'
-												) }
+												{...getInputProps('bank_name')}
 											/>
 											<TextControl
 												__nextHasNoMarginBottom
-												label={ __(
+												label={__(
 													'Sort code',
 													'woocommerce'
-												) }
+												)}
 												required
-												{ ...getInputProps(
-													'sort_code'
-												) }
+												{...getInputProps('sort_code')}
 											/>
 											<TextControl
 												__nextHasNoMarginBottom
-												label={ __(
+												label={__(
 													'IBAN',
 													'woocommerce'
-												) }
+												)}
 												required
-												{ ...getInputProps( 'iban' ) }
+												{...getInputProps('iban')}
 											/>
 											<TextControl
 												__nextHasNoMarginBottom
-												label={ __(
+												label={__(
 													'BIC / Swift',
 													'woocommerce'
-												) }
+												)}
 												required
-												{ ...getInputProps( 'bic' ) }
+												{...getInputProps('bic')}
 											/>
 										</div>
 										<Button
 											variant="primary"
-											isBusy={ isUpdating }
-											onClick={ handleSubmit }
+											isBusy={isUpdating}
+											onClick={handleSubmit}
 										>
-											{ __( 'Save', 'woocommerce' ) }
+											{__('Save', 'woocommerce')}
 										</Button>
 									</>
 								);
-							} }
+							}}
 						</Form>
 					);
-				} }
+				}}
 			</WooPaymentGatewaySetup>
 		</>
 	);
 };
 
-registerPlugin( 'wc-admin-payment-gateway-setup-bacs', {
+registerPlugin('wc-admin-payment-gateway-setup-bacs', {
 	render: BacsPaymentGatewaySetup,
 	scope: 'woocommerce-tasks',
-} );
+});

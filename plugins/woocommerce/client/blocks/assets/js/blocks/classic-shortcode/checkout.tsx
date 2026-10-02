@@ -9,43 +9,42 @@ import { __ } from '@wordpress/i18n';
  */
 import type { OnClickCallbackParameter, InheritedAttributes } from './types';
 
-const getButtonLabel = () => __( 'Transform into blocks', 'woocommerce' );
+const getButtonLabel = () => __('Transform into blocks', 'woocommerce');
 
-const getBlockifiedTemplate = ( inheritedAttributes: InheritedAttributes ) =>
+const getBlockifiedTemplate = (inheritedAttributes: InheritedAttributes) =>
 	[
-		createBlock( 'woocommerce/checkout', {
+		createBlock('woocommerce/checkout', {
 			...inheritedAttributes,
 			className: 'wc-block-checkout',
-		} ),
-	].filter( Boolean ) as BlockInstance[];
+		}),
+	].filter(Boolean) as BlockInstance[];
 
-const onClickCallback = ( {
+const onClickCallback = ({
 	clientId,
 	attributes,
 	getBlocks,
 	replaceBlock,
 	selectBlock,
-}: OnClickCallbackParameter ) => {
-	replaceBlock( clientId, getBlockifiedTemplate( attributes ) );
+}: OnClickCallbackParameter) => {
+	replaceBlock(clientId, getBlockifiedTemplate(attributes));
 
 	const blocks = getBlocks();
 
 	const groupBlock = blocks.find(
-		( block ) =>
+		(block) =>
 			block.name === 'core/group' &&
 			block.innerBlocks.some(
-				( innerBlock ) =>
-					innerBlock.name === 'woocommerce/store-notices'
+				(innerBlock) => innerBlock.name === 'woocommerce/store-notices'
 			)
 	);
 
-	if ( groupBlock ) {
-		selectBlock( groupBlock.clientId );
+	if (groupBlock) {
+		selectBlock(groupBlock.clientId);
 	}
 };
 
 const getTitle = () => {
-	return __( 'Classic Checkout', 'woocommerce' );
+	return __('Classic Checkout', 'woocommerce');
 };
 
 const getDescription = () => {

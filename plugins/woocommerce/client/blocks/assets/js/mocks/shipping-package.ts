@@ -6,12 +6,12 @@ import {
 	CartShippingPackageShippingRate,
 } from '@woocommerce/type-defs/cart';
 
-export const generateShippingRate = ( {
+export const generateShippingRate = ({
 	rateId,
 	name,
 	price,
 	instanceID,
-	methodID = name.toLowerCase().split( ' ' ).join( '_' ),
+	methodID = name.toLowerCase().split(' ').join('_'),
 	selected = false,
 	// eslint-disable-next-line @typescript-eslint/naming-convention -- meta_data comes from the API response.
 	meta_data = [],
@@ -23,7 +23,7 @@ export const generateShippingRate = ( {
 	methodID?: string;
 	selected?: boolean;
 	meta_data?: { key: string; value: string }[];
-} ): CartShippingPackageShippingRate => {
+}): CartShippingPackageShippingRate => {
 	return {
 		rate_id: rateId,
 		name,
@@ -45,13 +45,13 @@ export const generateShippingRate = ( {
 	};
 };
 
-export const generateShippingPackage = ( {
+export const generateShippingPackage = ({
 	packageId,
 	shippingRates,
 }: {
 	packageId: number;
 	shippingRates: CartShippingPackageShippingRate[];
-} ): CartShippingRate => {
+}): CartShippingRate => {
 	return {
 		package_id: packageId,
 		name: 'Shipping',

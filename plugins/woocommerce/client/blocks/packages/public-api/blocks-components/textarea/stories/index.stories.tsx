@@ -52,22 +52,20 @@ export default {
 				'The placeholder text to show when no value has been entered.',
 		},
 	},
-} as Meta< TextareaProps >;
+} as Meta<TextareaProps>;
 
-const Template: StoryFn< TextareaProps > = ( args ) => {
-	const [ { value }, updateArgs ] = useArgs();
+const Template: StoryFn<TextareaProps> = (args) => {
+	const [{ value }, updateArgs] = useArgs();
 	return (
 		<Textarea
-			{ ...args }
-			value={ value }
-			onTextChange={ ( newValue: string ) =>
-				updateArgs( { value: newValue } )
-			}
+			{...args}
+			value={value}
+			onTextChange={(newValue: string) => updateArgs({ value: newValue })}
 		/>
 	);
 };
 
-export const Default: StoryFn< TextareaProps > = Template.bind( {} );
+export const Default: StoryFn<TextareaProps> = Template.bind({});
 
 Default.args = {
 	className: '',

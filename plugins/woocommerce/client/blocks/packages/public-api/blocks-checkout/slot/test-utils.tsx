@@ -5,8 +5,8 @@ import { render } from '@testing-library/react';
 import { Provider as SlotFillProvider } from 'wordpress-components-slotfill/build-module/slot-fill'; // eslint-disable-line @typescript-eslint/no-unused-vars -- Provider is used as JSX.
 
 type SlotFillComponent = {
-	( props: { children: React.ReactNode } ): JSX.Element;
-	Slot: ( props: Record< string, unknown > ) => JSX.Element;
+	(props: { children: React.ReactNode }): JSX.Element;
+	Slot: (props: Record<string, unknown>) => JSX.Element;
 };
 
 /**
@@ -22,14 +22,14 @@ type SlotFillComponent = {
  */
 export const renderSlotFill = (
 	Fill: SlotFillComponent,
-	slotProps: Record< string, unknown > = {}
+	slotProps: Record<string, unknown> = {}
 ) => {
 	const fillPropsSpy = jest.fn();
 
 	// A component that captures all props it receives (merged via cloneElement)
 	// and calls the spy with them for assertion.
-	const FillPropsSpy = ( props: Record< string, unknown > ) => {
-		fillPropsSpy( props );
+	const FillPropsSpy = (props: Record<string, unknown>) => {
+		fillPropsSpy(props);
 		return <div data-testid="fill-content" />;
 	};
 
@@ -38,7 +38,7 @@ export const renderSlotFill = (
 			<Fill>
 				<FillPropsSpy />
 			</Fill>
-			<Fill.Slot { ...slotProps } />
+			<Fill.Slot {...slotProps} />
 		</SlotFillProvider>
 	);
 
@@ -57,10 +57,10 @@ export const renderSlotFill = (
  */
 export const getFillProps = (
 	Fill: SlotFillComponent,
-	slotProps: Record< string, unknown > = {}
-): Record< string, unknown > => {
-	const { fillPropsSpy } = renderSlotFill( Fill, slotProps );
+	slotProps: Record<string, unknown> = {}
+): Record<string, unknown> => {
+	const { fillPropsSpy } = renderSlotFill(Fill, slotProps);
 
-	expect( fillPropsSpy ).toHaveBeenCalled();
-	return fillPropsSpy.mock.calls[ 0 ][ 0 ];
+	expect(fillPropsSpy).toHaveBeenCalled();
+	return fillPropsSpy.mock.calls[0][0];
 };

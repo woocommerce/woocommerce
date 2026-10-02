@@ -29,39 +29,39 @@ export const ProductBestSellersInspectorControls = (
 
 	return (
 		<InspectorControls key="inspector">
-			<PanelBody title={ __( 'Layout', 'woocommerce' ) } initialOpen>
+			<PanelBody title={__('Layout', 'woocommerce')} initialOpen>
 				<GridLayoutControl
-					columns={ columns }
-					rows={ rows }
-					alignButtons={ alignButtons }
-					setAttributes={ setAttributes }
-					minColumns={ getSetting( 'minColumns', 1 ) }
-					maxColumns={ getSetting( 'maxColumns', 6 ) }
-					minRows={ getSetting( 'minRows', 1 ) }
-					maxRows={ getSetting( 'maxRows', 6 ) }
+					columns={columns}
+					rows={rows}
+					alignButtons={alignButtons}
+					setAttributes={setAttributes}
+					minColumns={getSetting('minColumns', 1)}
+					maxColumns={getSetting('maxColumns', 6)}
+					minRows={getSetting('minRows', 1)}
+					maxRows={getSetting('maxRows', 6)}
 				/>
 			</PanelBody>
-			<PanelBody title={ __( 'Content', 'woocommerce' ) } initialOpen>
+			<PanelBody title={__('Content', 'woocommerce')} initialOpen>
 				<GridContentControl
-					settings={ contentVisibility }
-					onChange={ ( value ) =>
-						setAttributes( { contentVisibility: value } )
+					settings={contentVisibility}
+					onChange={(value) =>
+						setAttributes({ contentVisibility: value })
 					}
 				/>
 			</PanelBody>
 			<PanelBody
-				title={ __( 'Filter by Product Category', 'woocommerce' ) }
-				initialOpen={ false }
+				title={__('Filter by Product Category', 'woocommerce')}
+				initialOpen={false}
 			>
 				<ProductCategoryControl
-					selected={ categories }
-					onChange={ ( value = [] ) => {
-						const ids = value.map( ( { id } ) => id );
-						setAttributes( { categories: ids } );
-					} }
-					operator={ catOperator }
-					onOperatorChange={ ( value = 'any' ) =>
-						setAttributes( { catOperator: value } )
+					selected={categories}
+					onChange={(value = []) => {
+						const ids = value.map(({ id }) => id);
+						setAttributes({ categories: ids });
+					}}
+					operator={catOperator}
+					onOperatorChange={(value = 'any') =>
+						setAttributes({ catOperator: value })
 					}
 				/>
 			</PanelBody>

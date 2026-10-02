@@ -20,10 +20,10 @@ interface ImageSizeSettingProps {
 	scale: string;
 	width: string | undefined;
 	height: string | undefined;
-	setAttributes: ( attrs: BlockAttributes ) => void;
+	setAttributes: (attrs: BlockAttributes) => void;
 }
 
-const scaleHelp: Record< string, string > = {
+const scaleHelp: Record<string, string> = {
 	cover: __(
 		'Image is scaled and cropped to fill the entire space without being distorted.',
 		'woocommerce'
@@ -65,70 +65,70 @@ const sizeUnits: { value: string; label: string }[] = [
 	},
 ];
 
-export const ImageSizeSettings = ( {
+export const ImageSizeSettings = ({
 	scale,
 	width,
 	height,
 	setAttributes,
-}: ImageSizeSettingProps ) => {
+}: ImageSizeSettingProps) => {
 	return (
 		<ToolsPanel
 			className="wc-block-product-image__tools-panel"
-			label={ __( 'Image size', 'woocommerce' ) }
+			label={__('Image size', 'woocommerce')}
 		>
 			<UnitControl
 				__next40pxDefaultSize
-				label={ __( 'Height', 'woocommerce' ) }
-				onChange={ ( value: string ) => {
-					setAttributes( { height: value } );
-				} }
-				value={ height }
-				units={ sizeUnits }
+				label={__('Height', 'woocommerce')}
+				onChange={(value: string) => {
+					setAttributes({ height: value });
+				}}
+				value={height}
+				units={sizeUnits}
 			/>
 			<UnitControl
 				__next40pxDefaultSize
-				label={ __( 'Width', 'woocommerce' ) }
-				onChange={ ( value: string ) => {
-					setAttributes( { width: value } );
-				} }
-				value={ width }
-				units={ sizeUnits }
+				label={__('Width', 'woocommerce')}
+				onChange={(value: string) => {
+					setAttributes({ width: value });
+				}}
+				value={width}
+				units={sizeUnits}
 			/>
-			{ height && (
+			{height && (
 				<ToolsPanelItem
-					hasValue={ () => true }
-					label={ __( 'Scale', 'woocommerce' ) }
+					hasValue={() => true}
+					label={__('Scale', 'woocommerce')}
 				>
 					<ToggleGroupControl
 						__next40pxDefaultSize
 						__nextHasNoMarginBottom
-						label={ __( 'Scale', 'woocommerce' ) }
-						value={ scale }
-						help={ scaleHelp[ scale ] }
-						onChange={ ( value: string ) =>
-							setAttributes( {
+						label={__('Scale', 'woocommerce')}
+						value={scale}
+						help={scaleHelp[scale]}
+						onChange={(value: string) =>
+							setAttributes({
 								scale: value,
-							} )
+							})
 						}
 						isBlock
 					>
 						<>
 							<ToggleGroupControlOption
 								value="cover"
-								label={ __( 'Cover', 'woocommerce' ) }
+								label={__('Cover', 'woocommerce')}
 							/>
 							<ToggleGroupControlOption
 								value="contain"
-								label={ __( 'Contain', 'woocommerce' ) }
+								label={__('Contain', 'woocommerce')}
 							/>
 							<ToggleGroupControlOption
 								value="fill"
-								label={ __( 'Fill', 'woocommerce' ) }
+								label={__('Fill', 'woocommerce')}
 							/>
 						</>
 					</ToggleGroupControl>
 				</ToolsPanelItem>
-			) }
+			)}
 		</ToolsPanel>
 	);
 };

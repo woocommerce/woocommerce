@@ -64,23 +64,23 @@ const allowedAttributes = [
  * @param {CSSProperties} props.style     Style Object for rendered component.
  *
  */
-export const Summary = ( {
+export const Summary = ({
 	source,
 	maxLength = 15,
 	countType = 'words',
 	className = '',
 	style = {},
-}: SummaryProps ): JSX.Element => {
-	const summaryText = useMemo( () => {
-		return generateSummary( source, maxLength, countType );
-	}, [ source, maxLength, countType ] );
+}: SummaryProps): JSX.Element => {
+	const summaryText = useMemo(() => {
+		return generateSummary(source, maxLength, countType);
+	}, [source, maxLength, countType]);
 
 	return (
-		<RawHTML style={ style } className={ className }>
-			{ sanitizeHTML( summaryText, {
+		<RawHTML style={style} className={className}>
+			{sanitizeHTML(summaryText, {
 				tags: allowedTags,
 				attr: allowedAttributes,
-			} ) }
+			})}
 		</RawHTML>
 	);
 };

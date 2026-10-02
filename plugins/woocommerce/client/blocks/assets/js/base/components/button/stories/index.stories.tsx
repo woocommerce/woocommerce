@@ -7,7 +7,7 @@ import type { StoryFn, Meta } from '@storybook/react-webpack5';
  * Internal dependencies
  */
 import Button, { ButtonProps } from '..';
-const availableTypes = [ 'button', 'input', 'submit' ];
+const availableTypes = ['button', 'input', 'submit'];
 
 export default {
 	title: 'External Components/Button',
@@ -21,26 +21,26 @@ export default {
 		},
 	},
 	component: Button,
-} as Meta< ButtonProps >;
+} as Meta<ButtonProps>;
 
-const Template: StoryFn< ButtonProps > = ( args ) => {
-	return <Button { ...args } />;
+const Template: StoryFn<ButtonProps> = (args) => {
+	return <Button {...args} />;
 };
 
-export const Default = Template.bind( {} );
+export const Default = Template.bind({});
 Default.args = {
 	children: 'Buy Now',
 	disabled: false,
 	type: 'button',
 };
 
-export const Disabled = Template.bind( {} );
+export const Disabled = Template.bind({});
 Disabled.args = {
 	...Default.args,
 	disabled: true,
 };
 
-export const Loading = Template.bind( {} );
+export const Loading = Template.bind({});
 Loading.args = {
 	...Default.args,
 	disabled: true,

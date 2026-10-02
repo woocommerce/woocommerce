@@ -10,8 +10,8 @@ import { WC_ASSET_URL } from '~/utils/admin-settings';
 
 const jetpackCrm = (
 	<img
-		src={ `${ WC_ASSET_URL }images/marketing/jetpack-crm.svg` }
-		alt={ __( 'Jetpack CRM', 'woocommerce' ) }
+		src={`${WC_ASSET_URL}images/marketing/jetpack-crm.svg`}
+		alt={__('Jetpack CRM', 'woocommerce')}
 	/>
 );
 

@@ -18,47 +18,47 @@ import {
 	__experimentalDateFormatPicker as DateFormatPicker,
 } from '@wordpress/block-editor';
 
-export default function Edit( {
+export default function Edit({
 	attributes: { format, isLink },
 	context: { commentId },
 	setAttributes,
-}: BlockEditProps< {
+}: BlockEditProps<{
 	format: string;
 	isLink: boolean;
-} > & {
+}> & {
 	context: { commentId: number };
-} ) {
+}) {
 	const blockProps = useBlockProps();
 
-	let [ date ] = useEntityProp( 'root', 'comment', 'date', commentId );
-	const [ siteFormat = getDateSettings().formats.date ] = useEntityProp(
+	let [date] = useEntityProp('root', 'comment', 'date', commentId);
+	const [siteFormat = getDateSettings().formats.date] = useEntityProp(
 		'root',
 		'site',
 		'date_format'
 	);
 
-	if ( ! commentId || ! date ) {
-		date = _x( 'Review Date', 'block title', 'woocommerce' );
+	if (!commentId || !date) {
+		date = _x('Review Date', 'block title', 'woocommerce');
 	}
 
 	let reviewDate =
 		date instanceof Date ? (
-			<time dateTime={ dateI18n( 'c', date, true ) }>
-				{ format === 'human-diff'
-					? humanTimeDiff( date, new Date() )
-					: dateI18n( format || siteFormat, date, true ) }
+			<time dateTime={dateI18n('c', date, true)}>
+				{format === 'human-diff'
+					? humanTimeDiff(date, new Date())
+					: dateI18n(format || siteFormat, date, true)}
 			</time>
 		) : (
-			<time>{ date }</time>
+			<time>{date}</time>
 		);
 
-	if ( isLink ) {
+	if (isLink) {
 		reviewDate = (
 			<a
 				href="#review-date-pseudo-link"
-				onClick={ ( event ) => event.preventDefault() }
+				onClick={(event) => event.preventDefault()}
 			>
-				{ reviewDate }
+				{reviewDate}
 			</a>
 		);
 	}
@@ -66,23 +66,23 @@ export default function Edit( {
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
+				<PanelBody title={__('Settings', 'woocommerce')}>
 					<DateFormatPicker
-						format={ format }
-						defaultFormat={ siteFormat }
-						onChange={ ( nextFormat: string ) =>
-							setAttributes( { format: nextFormat } )
+						format={format}
+						defaultFormat={siteFormat}
+						onChange={(nextFormat: string) =>
+							setAttributes({ format: nextFormat })
 						}
 					/>
 					<ToggleControl
 						__nextHasNoMarginBottom
-						label={ __( 'Link to review', 'woocommerce' ) }
-						onChange={ () => setAttributes( { isLink: ! isLink } ) }
-						checked={ isLink }
+						label={__('Link to review', 'woocommerce')}
+						onChange={() => setAttributes({ isLink: !isLink })}
+						checked={isLink}
 					/>
 				</PanelBody>
 			</InspectorControls>
-			<div { ...blockProps }>{ reviewDate }</div>
+			<div {...blockProps}>{reviewDate}</div>
 		</>
 	);
 }

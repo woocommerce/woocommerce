@@ -1,0 +1,5 @@
+build
+vendor
+
+# Generated performance reports contain newline-delimited JSON.
+tests/e2e/utils/blocks/performance/reports

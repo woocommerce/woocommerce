@@ -1,5 +1,4 @@
 .woocommerce {
-
 	/**
 	 * Generic forms styles used in places such as my account and the shortcode based checkout.
 	 */
@@ -72,7 +71,8 @@
 			padding: 0.5em;
 			display: block;
 			background-color: var(--wc-form-color-background, #fff);
-			border: var(--wc-form-border-width) solid var(--wc-form-border-color);
+			border: var(--wc-form-border-width) solid
+				var(--wc-form-border-color);
 			border-radius: var(--wc-form-border-radius);
 			color: var(--wc-form-color-text, #000);
 			box-sizing: border-box;
@@ -130,7 +130,6 @@
 		}
 
 		&.woocommerce-invalid {
-
 			label {
 				color: var(--wc-red);
 			}
@@ -140,19 +139,20 @@
 				border-color: var(--wc-red);
 			}
 
-			.select2-container:not(.select2-container--open) .select2-selection {
+			.select2-container:not(.select2-container--open)
+				.select2-selection {
 				border-color: var(--wc-red);
 			}
 		}
 
 		&.woocommerce-validated {
-
 			input.input-text,
 			select {
 				border-color: var(--wc-green);
 			}
 
-			.select2-container:not(.select2-container--open) .select2-selection {
+			.select2-container:not(.select2-container--open)
+				.select2-selection {
 				border-color: var(--wc-green);
 			}
 		}
@@ -172,7 +172,6 @@
 }
 
 :where(.woocommerce) {
-
 	.select2-container {
 		width: 100%;
 
@@ -201,8 +200,7 @@
 				b {
 					border: none;
 					display: block;
-					background:
-						url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItY2hldnJvbi1kb3duIj48cG9seWxpbmUgcG9pbnRzPSI2IDkgMTIgMTUgMTggOSI+PC9wb2x5bGluZT48L3N2Zz4=")
+					background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItY2hldnJvbi1kb3duIj48cG9seWxpbmUgcG9pbnRzPSI2IDkgMTIgMTUgMTggOSI+PC9wb2x5bGluZT48L3N2Zz4=")
 						no-repeat;
 					background-size: 16px;
 					width: 16px;
@@ -218,7 +216,8 @@
 		.select2-selection,
 		.select2-dropdown {
 			background-color: var(--wc-form-color-background, #fff);
-			border: var(--wc-form-border-width, 1px) solid var(--wc-form-border-color, #aaa);
+			border: var(--wc-form-border-width, 1px) solid
+				var(--wc-form-border-color, #aaa);
 			border-radius: var(--wc-form-border-radius, 4px);
 		}
 

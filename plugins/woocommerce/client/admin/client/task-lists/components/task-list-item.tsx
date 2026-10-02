@@ -24,17 +24,17 @@ import './task-list.scss';
 export type TaskListItemProps = {
 	isExpandable: boolean;
 	isExpanded: boolean;
-	setExpandedTask: ( id: string ) => void;
+	setExpandedTask: (id: string) => void;
 	task: TaskType & {
 		onClick?: () => void;
 	};
 	isSkipDisabled?: boolean;
-	onTaskSkip?: ( task: TaskType ) => Promise< void >;
+	onTaskSkip?: (task: TaskType) => Promise<void>;
 	showSkipAction?: boolean;
 	trackClick?: () => void;
 };
 
-export const TaskListItem = ( {
+export const TaskListItem = ({
 	isExpandable = false,
 	isExpanded = false,
 	setExpandedTask,
@@ -43,8 +43,8 @@ export const TaskListItem = ( {
 	onTaskSkip,
 	showSkipAction = false,
 	trackClick: trackTaskListClick,
-}: TaskListItemProps ) => {
-	const { createNotice } = useDispatch( 'core/notices' );
+}: TaskListItemProps) => {
+	const { createNotice } = useDispatch('core/notices');
 	const { layoutString } = useLayoutContext();
 
 	const {
@@ -54,7 +54,7 @@ export const TaskListItem = ( {
 		undoSnoozeTask,
 		visitedTask,
 		invalidateResolutionForStoreSelector,
-	} = useDispatch( onboardingStore );
+	} = useDispatch(onboardingStore);
 	const userPreferences = useUserPreferences();
 
 	const {
@@ -73,72 +73,72 @@ export const TaskListItem = ( {
 		recordViewEvent,
 	} = task;
 
-	useEffect( () => {
-		if ( recordViewEvent ) {
-			recordEvent( 'tasklist_item_view', {
+	useEffect(() => {
+		if (recordViewEvent) {
+			recordEvent('tasklist_item_view', {
 				task_name: id,
 				is_complete: isComplete,
 				context: layoutString,
-			} );
+			});
 		}
 		// run the effect only when component mounts
 		// eslint-disable-next-line
-	}, [] );
+	}, []);
 
-	const slot = useSlot( `woocommerce_onboarding_task_list_item_${ id }` );
-	const hasFills = Boolean( slot?.fills?.length );
+	const slot = useSlot(`woocommerce_onboarding_task_list_item_${id}`);
+	const hasFills = Boolean(slot?.fills?.length);
 
-	const onDismiss = useCallback( () => {
-		void dismissTask( id );
-		createNotice( 'success', __( 'Task dismissed', 'woocommerce' ), {
+	const onDismiss = useCallback(() => {
+		void dismissTask(id);
+		createNotice('success', __('Task dismissed', 'woocommerce'), {
 			actions: [
 				{
-					label: __( 'Undo', 'woocommerce' ),
-					onClick: () => undoDismissTask( id ),
+					label: __('Undo', 'woocommerce'),
+					onClick: () => undoDismissTask(id),
 				},
 			],
-		} );
-	}, [ id ] );
+		});
+	}, [id]);
 
 	const onSkip = useCallback(
-		( event: React.MouseEvent | React.KeyboardEvent ) => {
+		(event: React.MouseEvent | React.KeyboardEvent) => {
 			event.preventDefault();
 			event.stopPropagation();
 
-			void onTaskSkip?.( task );
+			void onTaskSkip?.(task);
 		},
-		[ onTaskSkip, task ]
+		[onTaskSkip, task]
 	);
 
 	// The surrounding list item treats Enter as a click on the row, so the
 	// keydown has to stop here or skipping also navigates to the task.
-	const onSkipKeyDown = useCallback( ( event: React.KeyboardEvent ) => {
+	const onSkipKeyDown = useCallback((event: React.KeyboardEvent) => {
 		event.stopPropagation();
-	}, [] );
+	}, []);
 
-	const onSnooze = useCallback( () => {
-		void snoozeTask( id );
+	const onSnooze = useCallback(() => {
+		void snoozeTask(id);
 		createNotice(
 			'success',
-			__( 'Task postponed until tomorrow', 'woocommerce' ),
+			__('Task postponed until tomorrow', 'woocommerce'),
 			{
 				actions: [
 					{
-						label: __( 'Undo', 'woocommerce' ),
-						onClick: () => undoSnoozeTask( id ),
+						label: __('Undo', 'woocommerce'),
+						onClick: () => undoSnoozeTask(id),
 					},
 				],
 			}
 		);
-	}, [ id ] );
+	}, [id]);
 
 	const getTaskStartedCount = () => {
 		const trackedStartedTasks =
 			userPreferences.task_list_tracked_started_tasks;
-		if ( ! trackedStartedTasks || ! trackedStartedTasks[ id ] ) {
+		if (!trackedStartedTasks || !trackedStartedTasks[id]) {
 			return 0;
 		}
-		return trackedStartedTasks[ id ];
+		return trackedStartedTasks[id];
 	};
 
 	// @todo This would be better as a task endpoint that handles updating the count.
@@ -147,50 +147,50 @@ export const TaskListItem = ( {
 		const trackedStartedTasks =
 			userPreferences.task_list_tracked_started_tasks || {};
 
-		void visitedTask( id );
-		await userPreferences.updateUserPreferences( {
+		void visitedTask(id);
+		await userPreferences.updateUserPreferences({
 			task_list_tracked_started_tasks: {
-				...( trackedStartedTasks || {} ),
-				[ id ]: newCount,
+				...(trackedStartedTasks || {}),
+				[id]: newCount,
 			},
-		} );
+		});
 	};
 
 	const trackClick = async () => {
-		recordEvent( 'tasklist_click', {
+		recordEvent('tasklist_click', {
 			task_name: id,
 			context: layoutString,
-		} );
+		});
 
-		if ( ! isComplete ) {
+		if (!isComplete) {
 			await updateTrackStartedCount();
 		}
 	};
 
-	const onClickDefault = useCallback( () => {
-		if ( actionUrl ) {
-			navigateTo( {
+	const onClickDefault = useCallback(() => {
+		if (actionUrl) {
+			navigateTo({
 				url: actionUrl,
-			} );
+			});
 			return;
 		}
 
-		navigateTo( { url: getNewPath( { task: id }, '/', {} ) } );
-	}, [ id, isComplete, actionUrl ] );
+		navigateTo({ url: getNewPath({ task: id }, '/', {}) });
+	}, [id, isComplete, actionUrl]);
 
 	// Extended lists trade the ellipsis Dismiss for a row-level Skip. Keeping
 	// the skip action alongside the props it replaces means a fill that
 	// composes its own TaskItem receives it too, instead of losing both.
 	const skipAction =
-		showSkipAction && isDismissable && ! isComplete ? (
+		showSkipAction && isDismissable && !isComplete ? (
 			<Button
 				className="woocommerce-task-list__item-skip"
-				disabled={ isSkipDisabled }
+				disabled={isSkipDisabled}
 				variant="link"
-				onClick={ onSkip }
-				onKeyDown={ onSkipKeyDown }
+				onClick={onSkip}
+				onKeyDown={onSkipKeyDown}
 			>
-				{ __( 'Skip', 'woocommerce' ) }
+				{__('Skip', 'woocommerce')}
 			</Button>
 		) : undefined;
 
@@ -199,29 +199,29 @@ export const TaskListItem = ( {
 		expanded: isExpandable && isExpanded,
 		completed: isComplete,
 		onSnooze: isSnoozeable ? onSnooze : undefined,
-		onDismiss: isDismissable && ! showSkipAction ? onDismiss : undefined,
+		onDismiss: isDismissable && !showSkipAction ? onDismiss : undefined,
 		secondaryAction: skipAction,
 	};
 
 	const DefaultTaskItem = useCallback(
-		( props: Partial< React.ComponentProps< typeof TaskItem > > ) => {
+		(props: Partial<React.ComponentProps<typeof TaskItem>>) => {
 			const onClickActions = (
 				event?: React.MouseEvent | React.KeyboardEvent
 			) => {
 				trackTaskListClick?.();
-				void trackClick().then( () => {
-					if ( ! isComplete ) {
+				void trackClick().then(() => {
+					if (!isComplete) {
 						// Invalidate the task list selector cache to force a re-fetch.
 						// This ensures the task completion status is up-to-date after visiting a task.
 						void invalidateResolutionForStoreSelector(
 							'getTaskLists'
 						);
 					}
-				} );
+				});
 
-				if ( props.onClick ) {
+				if (props.onClick) {
 					return props.onClick(
-						event as React.MouseEvent< HTMLElement, MouseEvent >
+						event as React.MouseEvent<HTMLElement, MouseEvent>
 					);
 				}
 
@@ -229,26 +229,26 @@ export const TaskListItem = ( {
 			};
 			return (
 				<TaskItem
-					key={ id }
-					title={ title }
-					badge={ badge }
-					inProgress={ false } // In progress design is not supported for "Things to do next" task list.
-					inProgressLabel={ '' } // In progress design is not supported for "Things to do next" task list.
-					content={ content }
-					additionalInfo={ additionalInfo }
-					time={ time }
-					action={ onClickActions }
-					level={ level }
-					actionLabel={ actionLabel }
-					{ ...taskItemProps }
-					{ ...props }
+					key={id}
+					title={title}
+					badge={badge}
+					inProgress={false} // In progress design is not supported for "Things to do next" task list.
+					inProgressLabel={''} // In progress design is not supported for "Things to do next" task list.
+					content={content}
+					additionalInfo={additionalInfo}
+					time={time}
+					action={onClickActions}
+					level={level}
+					actionLabel={actionLabel}
+					{...taskItemProps}
+					{...props}
 					onClick={
-						! isExpandable || isComplete
+						!isExpandable || isComplete
 							? onClickActions
 							: () => {
 									trackTaskListClick?.();
-									setExpandedTask( id );
-							  }
+									setExpandedTask(id);
+								}
 					}
 				/>
 			);
@@ -268,14 +268,14 @@ export const TaskListItem = ( {
 
 	return hasFills ? (
 		<WooOnboardingTaskListItem.Slot
-			id={ id }
-			fillProps={ {
+			id={id}
+			fillProps={{
 				defaultTaskItem: DefaultTaskItem,
 				isComplete,
 				...taskItemProps,
-			} }
+			}}
 		/>
 	) : (
-		<DefaultTaskItem onClick={ task.onClick } />
+		<DefaultTaskItem onClick={task.onClick} />
 	);
 };

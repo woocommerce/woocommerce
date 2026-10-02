@@ -4,16 +4,16 @@
 import { Main } from '@woocommerce/base-components/sidebar-layout';
 import clsx from 'clsx';
 
-const FrontendBlock = ( {
+const FrontendBlock = ({
 	children,
 	className,
 }: {
 	children: JSX.Element;
 	className: string;
-} ): JSX.Element => {
+}): JSX.Element => {
 	return (
-		<Main className={ clsx( 'wc-block-cart__main', className ) }>
-			{ children }
+		<Main className={clsx('wc-block-cart__main', className)}>
+			{children}
 		</Main>
 	);
 };

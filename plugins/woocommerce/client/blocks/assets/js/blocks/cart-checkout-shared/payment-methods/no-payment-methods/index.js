@@ -15,14 +15,14 @@ import './style.scss';
 const NoPaymentMethods = () => {
 	return (
 		<NoticeBanner
-			isDismissible={ false }
+			isDismissible={false}
 			className="wc-block-checkout__no-payment-methods-notice"
 			status="error"
 		>
-			{ __(
+			{__(
 				'There are no payment methods available. Please contact us for help placing your order.',
 				'woocommerce'
-			) }
+			)}
 		</NoticeBanner>
 	);
 };

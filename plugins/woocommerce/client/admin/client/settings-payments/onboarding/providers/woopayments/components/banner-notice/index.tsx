@@ -35,16 +35,16 @@ type Status = keyof typeof statusIconMap;
  * Custom hook which announces the message with politeness based on status,
  * if a valid message is provided.
  */
-const useSpokenMessage = ( status?: string, message?: React.ReactNode ) => {
+const useSpokenMessage = (status?: string, message?: React.ReactNode) => {
 	const spokenMessage =
-		typeof message === 'string' ? message : renderToString( message );
+		typeof message === 'string' ? message : renderToString(message);
 	const politeness = status === 'error' ? 'assertive' : 'polite';
 
-	useEffect( () => {
-		if ( spokenMessage ) {
-			speak( spokenMessage, politeness );
+	useEffect(() => {
+		if (spokenMessage) {
+			speak(spokenMessage, politeness);
 		}
-	}, [ spokenMessage, politeness ] );
+	}, [spokenMessage, politeness]);
 };
 
 interface Props {
@@ -90,14 +90,14 @@ interface Props {
 	 *
 	 * @default []
 	 */
-	actions?: ReadonlyArray< {
+	actions?: ReadonlyArray<{
 		label: string;
 		className?: string;
-		variant?: ComponentProps< typeof Button >[ 'variant' ];
+		variant?: ComponentProps<typeof Button>['variant'];
 		url?: string;
 		urlTarget?: string;
-		onClick?: React.MouseEventHandler< HTMLAnchorElement >;
-	} >;
+		onClick?: React.MouseEventHandler<HTMLAnchorElement>;
+	}>;
 	/**
 	 * Function called when dismissing the notice
 	 *
@@ -106,15 +106,15 @@ interface Props {
 	onRemove?: () => void;
 }
 
-const BannerNotice: React.FC< Props > = ( {
+const BannerNotice: React.FC<Props> = ({
 	children,
 	actions = [],
 	className,
 	status = 'info',
 	isDismissible = true,
 	onRemove,
-} ) => {
-	useSpokenMessage( status, children );
+}) => {
+	useSpokenMessage(status, children);
 
 	const classes = clsx(
 		className,
@@ -125,12 +125,12 @@ const BannerNotice: React.FC< Props > = ( {
 	const handleRemove = () => onRemove?.();
 
 	return (
-		<div className={ classes }>
+		<div className={classes}>
 			<div className="woopayments-banner-notice__content">
-				{ children }
-				{ actions.length > 0 && (
+				{children}
+				{actions.length > 0 && (
 					<div className="woopayments-banner-notice__actions">
-						{ actions.map(
+						{actions.map(
 							(
 								{
 									className: buttonCustomClasses,
@@ -143,38 +143,38 @@ const BannerNotice: React.FC< Props > = ( {
 								index
 							) => {
 								let computedVariant = variant;
-								if ( variant !== 'primary' ) {
-									computedVariant = ! url
+								if (variant !== 'primary') {
+									computedVariant = !url
 										? 'secondary'
 										: 'link';
 								}
 
 								return (
 									<Button
-										key={ index }
-										href={ url as string }
-										variant={ computedVariant }
-										onClick={ url ? undefined : onClick }
-										className={ buttonCustomClasses }
-										target={ urlTarget }
+										key={index}
+										href={url as string}
+										variant={computedVariant}
+										onClick={url ? undefined : onClick}
+										className={buttonCustomClasses}
+										target={urlTarget}
 									>
-										{ label }
+										{label}
 									</Button>
 								);
 							}
-						) }
+						)}
 					</div>
-				) }
+				)}
 			</div>
-			{ isDismissible && (
+			{isDismissible && (
 				<Button
 					className="woopayments-banner-notice__dismiss"
-					icon={ <CloseIcon /> }
-					label={ __( 'Dismiss this notice', 'woocommerce' ) }
-					onClick={ handleRemove }
-					showTooltip={ false }
+					icon={<CloseIcon />}
+					label={__('Dismiss this notice', 'woocommerce')}
+					onClick={handleRemove}
+					showTooltip={false}
 				/>
-			) }
+			)}
 		</div>
 	);
 };

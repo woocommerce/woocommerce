@@ -19,30 +19,30 @@ const OPTIONS = [
 
 export const SetWccomRequestErrors = () => {
 	const errorsMode = useSelect(
-		( select ) => select( store ).getWccomRequestErrorsMode(),
+		(select) => select(store).getWccomRequestErrorsMode(),
 		[]
 	);
-	const { updateCommandParams } = useDispatch( store );
+	const { updateCommandParams } = useDispatch(store);
 
-	function onChange( mode ) {
-		updateCommandParams( UPDATE_WCCOM_REQUEST_ERRORS_MODE, {
+	function onChange(mode) {
+		updateCommandParams(UPDATE_WCCOM_REQUEST_ERRORS_MODE, {
 			mode,
-		} );
+		});
 	}
 
 	return (
 		<div className="select-description">
-			{ ! errorsMode ? (
+			{!errorsMode ? (
 				<p>Loading ...</p>
 			) : (
 				<SelectControl
 					label="Error Mode"
 					labelPosition="side"
-					value={ errorsMode }
-					onChange={ onChange }
-					options={ OPTIONS }
+					value={errorsMode}
+					onChange={onChange}
+					options={OPTIONS}
 				/>
-			) }
+			)}
 		</div>
 	);
 };

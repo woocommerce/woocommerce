@@ -6,23 +6,20 @@
  * @param {string} defaultKey if the key is not found in the object, it will use this value.
  * @return {Object} Object that contains the grouped elements.
  */
-export const groupListOfObjectsBy = (
-	array,
-	key,
-	defaultKey = 'undefined'
-) => {
-	if ( array && Array.isArray( array ) && array.length ) {
-		if ( ! key ) {
+export const groupListOfObjectsBy = (array, key, defaultKey = 'undefined') => {
+	if (array && Array.isArray(array) && array.length) {
+		if (!key) {
 			return array;
 		}
-		return array.reduce( ( result, currentValue ) => {
-			if ( ! currentValue[ key ] ) {
-				currentValue[ key ] = defaultKey;
+		return array.reduce((result, currentValue) => {
+			if (!currentValue[key]) {
+				currentValue[key] = defaultKey;
 			}
-			( result[ currentValue[ key ] ] =
-				result[ currentValue[ key ] ] || [] ).push( currentValue );
+			(result[currentValue[key]] = result[currentValue[key]] || []).push(
+				currentValue
+			);
 			return result;
-		}, {} );
+		}, {});
 	}
 	return {};
 };
@@ -33,11 +30,11 @@ export const groupListOfObjectsBy = (
  * @param {*} obj   the Object to copy.
  * @param {*} value the value to set all props on the object to.
  */
-export const setAllPropsToValue = ( obj, value ) => {
-	return Object.entries( obj ).reduce( ( acc, [ key ] ) => {
+export const setAllPropsToValue = (obj, value) => {
+	return Object.entries(obj).reduce((acc, [key]) => {
 		return {
 			...acc,
-			[ key ]: value,
+			[key]: value,
 		};
-	}, {} );
+	}, {});
 };

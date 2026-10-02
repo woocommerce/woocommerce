@@ -11,18 +11,18 @@ import { keyBy } from '@woocommerce/base-utils';
 import type { SearchListItem } from './types';
 
 export const defaultMessages = {
-	clear: __( 'Clear all selected items', 'woocommerce' ),
-	noItems: __( 'No items found.', 'woocommerce' ),
+	clear: __('Clear all selected items', 'woocommerce'),
+	noItems: __('No items found.', 'woocommerce'),
 	/* Translators: %s search term */
-	noResults: __( 'No results for %s', 'woocommerce' ),
-	search: __( 'Search for items', 'woocommerce' ),
-	selected: ( n: number ): string =>
+	noResults: __('No results for %s', 'woocommerce'),
+	search: __('Search for items', 'woocommerce'),
+	selected: (n: number): string =>
 		sprintf(
 			/* translators: Number of items selected from list. */
-			_n( '%d item selected', '%d items selected', n, 'woocommerce' ),
+			_n('%d item selected', '%d items selected', n, 'woocommerce'),
 			n
 		),
-	updated: __( 'Search results updated.', 'woocommerce' ),
+	updated: __('Search results updated.', 'woocommerce'),
 };
 
 /**
@@ -33,15 +33,15 @@ export const isExpandedOrDescendantIsExpanded = (
 	item: SearchListItem,
 	expandedPanelId: string | number | null
 ): boolean => {
-	if ( expandedPanelId === null ) {
+	if (expandedPanelId === null) {
 		return false;
 	}
-	if ( item.id === expandedPanelId ) {
+	if (item.id === expandedPanelId) {
 		return true;
 	}
-	if ( Array.isArray( item.children ) && item.children.length > 0 ) {
-		return item.children.some( ( child ) =>
-			isExpandedOrDescendantIsExpanded( child, expandedPanelId )
+	if (Array.isArray(item.children) && item.children.length > 0) {
+		return item.children.some((child) =>
+			isExpandedOrDescendantIsExpanded(child, expandedPanelId)
 		);
 	}
 	return false;
@@ -60,54 +60,54 @@ export const buildTermsTree = (
 	list = filteredList
 ): SearchListItem[] | [] => {
 	const termsByParent = filteredList.reduce(
-		( acc, currentValue ) => {
+		(acc, currentValue) => {
 			const key = currentValue.parent || 0;
 
-			if ( ! acc[ key ] ) {
-				acc[ key ] = [];
+			if (!acc[key]) {
+				acc[key] = [];
 			}
 
-			acc[ key ].push( currentValue );
+			acc[key].push(currentValue);
 			return acc;
 		},
-		{} as Record< string, SearchListItem[] >
+		{} as Record<string, SearchListItem[]>
 	);
 
-	const listById = keyBy( list, 'id' );
-	const builtParents = [ '0' ];
+	const listById = keyBy(list, 'id');
+	const builtParents = ['0'];
 
-	const getParentsName = ( term = {} as SearchListItem ): string[] => {
-		if ( ! term.parent ) {
-			return term.name ? [ term.name ] : [];
+	const getParentsName = (term = {} as SearchListItem): string[] => {
+		if (!term.parent) {
+			return term.name ? [term.name] : [];
 		}
 
-		const parentName = getParentsName( listById[ term.parent ] );
-		return [ ...parentName, term.name ];
+		const parentName = getParentsName(listById[term.parent]);
+		return [...parentName, term.name];
 	};
 
-	const fillWithChildren = ( terms: SearchListItem[] ): SearchListItem[] => {
-		return terms.map( ( term ) => {
-			const children = termsByParent[ term.id ];
-			builtParents.push( '' + term.id );
+	const fillWithChildren = (terms: SearchListItem[]): SearchListItem[] => {
+		return terms.map((term) => {
+			const children = termsByParent[term.id];
+			builtParents.push('' + term.id);
 			return {
 				...term,
-				breadcrumbs: getParentsName( listById[ term.parent ] ),
+				breadcrumbs: getParentsName(listById[term.parent]),
 				children:
 					children && children.length
-						? fillWithChildren( children )
+						? fillWithChildren(children)
 						: [],
 			};
-		} );
+		});
 	};
 
-	const tree = fillWithChildren( termsByParent[ '0' ] || [] );
+	const tree = fillWithChildren(termsByParent['0'] || []);
 
 	// Handle remaining items in termsByParent that have not been built (orphaned).
-	Object.entries( termsByParent ).forEach( ( [ termId, terms ] ) => {
-		if ( ! builtParents.includes( termId ) ) {
-			tree.push( ...fillWithChildren( terms || [] ) );
+	Object.entries(termsByParent).forEach(([termId, terms]) => {
+		if (!builtParents.includes(termId)) {
+			tree.push(...fillWithChildren(terms || []));
 		}
-	} );
+	});
 
 	return tree;
 };
@@ -117,57 +117,57 @@ export const getFilteredList = (
 	search: string,
 	isHierarchical?: boolean | undefined
 ) => {
-	if ( ! search ) {
-		return isHierarchical ? buildTermsTree( list ) : list;
+	if (!search) {
+		return isHierarchical ? buildTermsTree(list) : list;
 	}
 	const re = new RegExp(
-		search.replace( /[-\/\\^$*+?.()|[\]{}]/g, '\\$&' ),
+		search.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'),
 		'i'
 	);
 	const filteredList = list
-		.map( ( item ) => ( re.test( item.name ) ? item : false ) )
-		.filter( Boolean ) as SearchListItem[];
+		.map((item) => (re.test(item.name) ? item : false))
+		.filter(Boolean) as SearchListItem[];
 
-	return isHierarchical ? buildTermsTree( filteredList, list ) : filteredList;
+	return isHierarchical ? buildTermsTree(filteredList, list) : filteredList;
 };
 
 export const getHighlightedName = (
 	name: string,
 	search: string
-): ( JSX.Element | string )[] | string => {
-	if ( ! search ) {
+): (JSX.Element | string)[] | string => {
+	if (!search) {
 		return name;
 	}
 	const re = new RegExp(
 		// Escaping.
-		`(${ search.replace( /[-\/\\^$*+?.()|[\]{}]/g, '\\$&' ) })`,
+		`(${search.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`,
 		'ig'
 	);
-	const nameParts = name.split( re );
+	const nameParts = name.split(re);
 
-	return nameParts.map( ( part, i ) => {
-		return re.test( part ) ? (
-			<strong key={ i }>{ part }</strong>
+	return nameParts.map((part, i) => {
+		return re.test(part) ? (
+			<strong key={i}>{part}</strong>
 		) : (
-			<Fragment key={ i }>{ part }</Fragment>
+			<Fragment key={i}>{part}</Fragment>
 		);
-	} );
+	});
 };
 
-export const getBreadcrumbsForDisplay = ( breadcrumbs: string[] ): string => {
-	if ( breadcrumbs.length === 1 ) {
-		return breadcrumbs.slice( 0, 1 ).toString();
+export const getBreadcrumbsForDisplay = (breadcrumbs: string[]): string => {
+	if (breadcrumbs.length === 1) {
+		return breadcrumbs.slice(0, 1).toString();
 	}
-	if ( breadcrumbs.length === 2 ) {
+	if (breadcrumbs.length === 2) {
 		return (
-			breadcrumbs.slice( 0, 1 ).toString() +
+			breadcrumbs.slice(0, 1).toString() +
 			' › ' +
-			breadcrumbs.slice( -1 ).toString()
+			breadcrumbs.slice(-1).toString()
 		);
 	}
 	return (
-		breadcrumbs.slice( 0, 1 ).toString() +
+		breadcrumbs.slice(0, 1).toString() +
 		' … ' +
-		breadcrumbs.slice( -1 ).toString()
+		breadcrumbs.slice(-1).toString()
 	);
 };

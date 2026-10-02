@@ -50,39 +50,39 @@ const blockifiedFallbackConfig = {
 	onClickCallback: () => void 0,
 };
 
-const conversionConfig: { [ key: string ]: BlockifiedTemplateConfig } = {
-	[ TYPES.cart ]: blockifiedCart,
-	[ TYPES.checkout ]: blockifiedCheckout,
+const conversionConfig: { [key: string]: BlockifiedTemplateConfig } = {
+	[TYPES.cart]: blockifiedCart,
+	[TYPES.checkout]: blockifiedCheckout,
 	fallback: blockifiedFallbackConfig,
 };
 
-const ConvertTemplate = ( { blockifyConfig, clientId, attributes } ) => {
+const ConvertTemplate = ({ blockifyConfig, clientId, attributes }) => {
 	const { getButtonLabel, onClickCallback, getBlockifiedTemplate } =
 		blockifyConfig;
 
-	const [ isPopoverOpen, setIsPopoverOpen ] = useState( false );
+	const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-	const { replaceBlock, selectBlock } = useDispatch( blockEditorStore );
-	const { createInfoNotice } = useDispatch( noticesStore );
+	const { replaceBlock, selectBlock } = useDispatch(blockEditorStore);
+	const { createInfoNotice } = useDispatch(noticesStore);
 
-	const { getBlocks } = useSelect( ( sel ) => {
+	const { getBlocks } = useSelect((sel) => {
 		return {
-			getBlocks: sel( blockEditorStore ).getBlocks,
+			getBlocks: sel(blockEditorStore).getBlocks,
 		};
-	}, [] );
+	}, []);
 
 	return (
 		<TabbableContainer className="wp-block-woocommerce-classic-shortcode__placeholder-migration-button-container">
 			<Button
 				variant="primary"
-				onClick={ () => {
-					onClickCallback( {
+				onClick={() => {
+					onClickCallback({
 						clientId,
 						getBlocks,
 						attributes,
 						replaceBlock,
 						selectBlock,
-					} );
+					});
 					void createInfoNotice(
 						__(
 							'Classic shortcode transformed to blocks.',
@@ -91,13 +91,13 @@ const ConvertTemplate = ( { blockifyConfig, clientId, attributes } ) => {
 						{
 							actions: [
 								{
-									label: __( 'Undo', 'woocommerce' ),
+									label: __('Undo', 'woocommerce'),
 									onClick: () => {
 										const targetBlocks = [
 											'woocommerce/cart',
 											'woocommerce/checkout',
 										];
-										const cartCheckoutBlock = findBlock( {
+										const cartCheckoutBlock = findBlock({
 											blocks: getBlocks(),
 											findCondition: (
 												foundBlock: BlockInstance
@@ -105,8 +105,8 @@ const ConvertTemplate = ( { blockifyConfig, clientId, attributes } ) => {
 												targetBlocks.includes(
 													foundBlock.name
 												),
-										} );
-										if ( ! cartCheckoutBlock ) {
+										});
+										if (!cartCheckoutBlock) {
 											return;
 										}
 										void replaceBlock(
@@ -125,16 +125,16 @@ const ConvertTemplate = ( { blockifyConfig, clientId, attributes } ) => {
 							type: 'snackbar',
 						}
 					);
-				} }
-				onMouseEnter={ () => setIsPopoverOpen( true ) }
-				onMouseLeave={ () => setIsPopoverOpen( false ) }
-				text={ getButtonLabel ? getButtonLabel() : '' }
-				tabIndex={ 0 }
+				}}
+				onMouseEnter={() => setIsPopoverOpen(true)}
+				onMouseLeave={() => setIsPopoverOpen(false)}
+				text={getButtonLabel ? getButtonLabel() : ''}
+				tabIndex={0}
 			>
-				{ isPopoverOpen && (
-					<Popover resize={ false } placement="right-end">
+				{isPopoverOpen && (
+					<Popover resize={false} placement="right-end">
 						<div
-							style={ {
+							style={{
 								minWidth: '250px',
 								width: '250px',
 								maxWidth: '250px',
@@ -142,36 +142,36 @@ const ConvertTemplate = ( { blockifyConfig, clientId, attributes } ) => {
 								height: '300px',
 								maxHeight: '300px',
 								cursor: 'pointer',
-							} }
+							}}
 						>
 							<BlockPreview
-								blocks={ getBlockifiedTemplate( {
+								blocks={getBlockifiedTemplate({
 									...attributes,
 									isPreview: true,
-								} ) }
-								viewportWidth={ 1200 }
-								additionalStyles={ [
+								})}
+								viewportWidth={1200}
+								additionalStyles={[
 									{
 										css: 'body { padding: 20px !important; height: fit-content !important; overflow:hidden}',
 									},
-								] }
+								]}
 							/>
 						</div>
 					</Popover>
-				) }
+				)}
 			</Button>
 			<Button
 				variant="secondary"
 				href="https://woocommerce.com/document/woocommerce-store-editing/customizing-cart-and-checkout/"
 				target="_blank"
-				tabIndex={ 0 }
+				tabIndex={0}
 			>
-				{ __( 'Learn more', 'woocommerce' ) }
+				{__('Learn more', 'woocommerce')}
 			</Button>
 		</TabbableContainer>
 	);
 };
-const Edit = ( { clientId, attributes }: BlockEditProps< Attributes > ) => {
+const Edit = ({ clientId, attributes }: BlockEditProps<Attributes>) => {
 	const blockProps = useBlockProps();
 
 	const templateDetails = getTemplateDetailsBySlug(
@@ -183,13 +183,13 @@ const Edit = ( { clientId, attributes }: BlockEditProps< Attributes > ) => {
 	const templateType = templateDetails?.type ?? 'fallback';
 
 	const { getDescription, getTitle, blockifyConfig } =
-		conversionConfig[ templateType ];
+		conversionConfig[templateType];
 
-	const canConvert = !! templateDetails?.type;
+	const canConvert = !!templateDetails?.type;
 	const placeholderTitle = getTitle
 		? getTitle()
-		: __( 'Classic Shortcode Placeholder', 'woocommerce' );
-	const placeholderDescription = getDescription( templateTitle );
+		: __('Classic Shortcode Placeholder', 'woocommerce');
+	const placeholderDescription = getDescription(templateTitle);
 
 	const learnMoreContent = createInterpolateElement(
 		__(
@@ -206,29 +206,29 @@ const Edit = ( { clientId, attributes }: BlockEditProps< Attributes > ) => {
 	);
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<Placeholder className="wp-block-woocommerce-classic-shortcode__placeholder">
 				<div className="wp-block-woocommerce-classic-shortcode__placeholder-wireframe">
-					{ templatePlaceholder === 'cart' ? (
+					{templatePlaceholder === 'cart' ? (
 						<CartPlaceholder />
 					) : (
 						<CheckoutPlaceholder />
-					) }
+					)}
 				</div>
 				<div className="wp-block-woocommerce-classic-shortcode__placeholder-copy">
 					<div className="wp-block-woocommerce-classic-shortcode__placeholder-copy__icon-container">
-						<h1>{ __( 'WooCommerce', 'woocommerce' ) }</h1>
-						<span>{ placeholderTitle }</span>
+						<h1>{__('WooCommerce', 'woocommerce')}</h1>
+						<span>{placeholderTitle}</span>
 					</div>
-					{ canConvert && <p>{ placeholderDescription }</p> }
-					<p>{ learnMoreContent }</p>
-					{ canConvert && blockifyConfig && (
+					{canConvert && <p>{placeholderDescription}</p>}
+					<p>{learnMoreContent}</p>
+					{canConvert && blockifyConfig && (
 						<ConvertTemplate
-							clientId={ clientId }
-							blockifyConfig={ blockifyConfig }
-							attributes={ attributes }
+							clientId={clientId}
+							blockifyConfig={blockifyConfig}
+							attributes={attributes}
 						/>
-					) }
+					)}
 				</div>
 			</Placeholder>
 		</div>
@@ -238,20 +238,20 @@ const Edit = ( { clientId, attributes }: BlockEditProps< Attributes > ) => {
 const settings = {
 	icon: (
 		<Icon
-			icon={ shortcode }
+			icon={shortcode}
 			className="wc-block-editor-components-block-icon"
 		/>
 	),
-	edit: ( {
+	edit: ({
 		attributes,
 		clientId,
 		setAttributes,
-	}: BlockEditProps< Attributes > ) => {
+	}: BlockEditProps<Attributes>) => {
 		return (
 			<Edit
-				attributes={ attributes }
-				setAttributes={ setAttributes }
-				clientId={ clientId }
+				attributes={attributes}
+				setAttributes={setAttributes}
+				clientId={clientId}
 			/>
 		);
 	},
@@ -259,27 +259,27 @@ const settings = {
 	variations: [
 		{
 			name: 'checkout',
-			title: __( 'Classic Checkout', 'woocommerce' ),
+			title: __('Classic Checkout', 'woocommerce'),
 			attributes: {
 				shortcode: 'checkout',
 			},
-			isActive: ( blockAttributes, variationAttributes ) =>
+			isActive: (blockAttributes, variationAttributes) =>
 				blockAttributes.shortcode === variationAttributes.shortcode,
-			scope: [ 'inserter' ],
+			scope: ['inserter'],
 		},
 		{
 			name: 'cart',
-			title: __( 'Classic Cart', 'woocommerce' ),
+			title: __('Classic Cart', 'woocommerce'),
 			attributes: {
 				shortcode: 'cart',
 			},
-			isActive: ( blockAttributes, variationAttributes ) =>
+			isActive: (blockAttributes, variationAttributes) =>
 				blockAttributes.shortcode === variationAttributes.shortcode,
-			scope: [ 'inserter' ],
+			scope: ['inserter'],
 			isDefault: true,
 		},
 	],
 	apiVersion: 3,
 };
 
-registerBlockType( metadata, settings );
+registerBlockType(metadata, settings);

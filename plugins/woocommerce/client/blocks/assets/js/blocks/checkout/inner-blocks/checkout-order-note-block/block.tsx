@@ -13,11 +13,11 @@ import { checkoutStore } from '@woocommerce/block-data';
  */
 import CheckoutOrderNotes from '../../order-notes';
 
-const Block = ( { className }: { className?: string } ): JSX.Element => {
+const Block = ({ className }: { className?: string }): JSX.Element => {
 	const { needsShipping } = useShippingData();
 	const { isProcessing: checkoutIsProcessing, orderNotes } = useSelect(
-		( select ) => {
-			const store = select( checkoutStore );
+		(select) => {
+			const store = select(checkoutStore);
 			return {
 				isProcessing: store.isProcessing(),
 				orderNotes: store.getOrderNotes(),
@@ -25,27 +25,27 @@ const Block = ( { className }: { className?: string } ): JSX.Element => {
 		},
 		[]
 	);
-	const { __internalSetOrderNotes } = useDispatch( checkoutStore );
+	const { __internalSetOrderNotes } = useDispatch(checkoutStore);
 
 	return (
 		<FormStep
 			id="order-notes"
-			showStepNumber={ false }
-			className={ clsx( 'wc-block-checkout__order-notes', className ) }
-			disabled={ checkoutIsProcessing }
+			showStepNumber={false}
+			className={clsx('wc-block-checkout__order-notes', className)}
+			disabled={checkoutIsProcessing}
 		>
 			<CheckoutOrderNotes
-				disabled={ checkoutIsProcessing }
-				onChange={ __internalSetOrderNotes }
+				disabled={checkoutIsProcessing}
+				onChange={__internalSetOrderNotes}
 				placeholder={
 					needsShipping
 						? __(
 								'Notes about your order, e.g. special notes for delivery.',
 								'woocommerce'
-						  )
-						: __( 'Notes about your order.', 'woocommerce' )
+							)
+						: __('Notes about your order.', 'woocommerce')
 				}
-				value={ orderNotes }
+				value={orderNotes}
 			/>
 		</FormStep>
 	);

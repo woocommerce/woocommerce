@@ -11,7 +11,7 @@ import OrdersPanel from './orders';
 import StockPanel from './stock';
 import ReviewsPanel from './reviews';
 
-export function getAllPanels( {
+export function getAllPanels({
 	lowStockProductsCount,
 	unapprovedReviewsCount,
 	unreadOrdersCount,
@@ -21,8 +21,8 @@ export function getAllPanels( {
 	publishedProductCount,
 	reviewsEnabled,
 	totalOrderCount,
-} ) {
-	if ( ! isTaskListHidden ) {
+}) {
+	if (!isTaskListHidden) {
 		return [];
 	}
 
@@ -37,22 +37,22 @@ export function getAllPanels( {
 				<ErrorBoundary
 					errorMessage={
 						<>
-							{ __(
+							{__(
 								'There was an error getting your orders.',
 								'woocommerce'
-							) }
+							)}
 							<br />
-							{ __( 'Please try again.', 'woocommerce' ) }
+							{__('Please try again.', 'woocommerce')}
 						</>
 					}
 				>
 					<OrdersPanel
-						unreadOrdersCount={ unreadOrdersCount }
-						orderStatuses={ orderStatuses }
+						unreadOrdersCount={unreadOrdersCount}
+						orderStatuses={orderStatuses}
 					/>
 				</ErrorBoundary>
 			),
-			title: __( 'Orders', 'woocommerce' ),
+			title: __('Orders', 'woocommerce'),
 		},
 		totalOrderCount > 0 &&
 			publishedProductCount > 0 &&
@@ -66,21 +66,21 @@ export function getAllPanels( {
 					<ErrorBoundary
 						errorMessage={
 							<>
-								{ __(
+								{__(
 									'There was an error getting your low stock products.',
 									'woocommerce'
-								) }
+								)}
 								<br />
-								{ __( 'Please try again.', 'woocommerce' ) }
+								{__('Please try again.', 'woocommerce')}
 							</>
 						}
 					>
 						<StockPanel
-							lowStockProductsCount={ lowStockProductsCount }
+							lowStockProductsCount={lowStockProductsCount}
 						/>
 					</ErrorBoundary>
 				),
-				title: __( 'Stock', 'woocommerce' ),
+				title: __('Stock', 'woocommerce'),
 			},
 		publishedProductCount > 0 &&
 			unapprovedReviewsCount > 0 &&
@@ -94,22 +94,22 @@ export function getAllPanels( {
 					<ErrorBoundary
 						errorMessage={
 							<>
-								{ __(
+								{__(
 									'There was an error getting your reviews.',
 									'woocommerce'
-								) }
+								)}
 								<br />
-								{ __( 'Please try again.', 'woocommerce' ) }
+								{__('Please try again.', 'woocommerce')}
 							</>
 						}
 					>
 						<ReviewsPanel
-							hasUnapprovedReviews={ unapprovedReviewsCount > 0 }
+							hasUnapprovedReviews={unapprovedReviewsCount > 0}
 						/>
 					</ErrorBoundary>
 				),
-				title: __( 'Reviews', 'woocommerce' ),
+				title: __('Reviews', 'woocommerce'),
 			},
 		// Add another panel row here
-	].filter( Boolean );
+	].filter(Boolean);
 }

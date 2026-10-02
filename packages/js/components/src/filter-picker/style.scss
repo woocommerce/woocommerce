@@ -1,7 +1,7 @@
 .woocommerce-filters-filter__content {
 	&.is-mobile {
 		.components-popover__header-title {
-			@include font-size( 12 );
+			@include font-size(12);
 			font-weight: 100;
 			text-transform: uppercase;
 			text-align: center;
@@ -33,12 +33,14 @@
 		.woocommerce-filters-filter__button {
 			background-color: $studio-white;
 
-			&.components-button:not(:disabled):not([aria-disabled='true']):focus {
+			&.components-button:not(:disabled):not(
+					[aria-disabled="true"]
+				):focus {
 				background-color: $studio-white;
 			}
 
 			&::before {
-				content: '';
+				content: "";
 				width: 8px;
 				height: 8px;
 				background-color: $studio-woocommerce-purple;
@@ -68,7 +70,7 @@
 			color: $gray-700;
 		}
 
-		&.components-button:not(:disabled):not([aria-disabled='true']):focus {
+		&.components-button:not(:disabled):not([aria-disabled="true"]):focus {
 			background-color: $gray-100;
 		}
 

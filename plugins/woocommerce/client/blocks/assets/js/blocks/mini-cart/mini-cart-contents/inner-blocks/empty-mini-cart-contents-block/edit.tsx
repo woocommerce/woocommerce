@@ -15,14 +15,14 @@ export const Edit = (): JSX.Element => {
 
 	return (
 		<div
-			{ ...blockProps }
+			{...blockProps}
 			hidden={
 				currentView !== 'woocommerce/empty-mini-cart-contents-block'
 			}
 		>
 			<InnerBlocks
-				allowedBlocks={ getMiniCartAllowedBlocks() }
-				renderAppender={ InnerBlocks.ButtonBlockAppender }
+				allowedBlocks={getMiniCartAllowedBlocks()}
+				renderAppender={InnerBlocks.ButtonBlockAppender}
 			/>
 		</div>
 	);
@@ -30,7 +30,7 @@ export const Edit = (): JSX.Element => {
 
 export const Save = (): JSX.Element => {
 	return (
-		<div { ...useBlockProps.save() }>
+		<div {...useBlockProps.save()}>
 			<InnerBlocks.Content />
 		</div>
 	);

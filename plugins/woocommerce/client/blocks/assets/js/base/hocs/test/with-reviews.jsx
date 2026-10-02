@@ -10,17 +10,17 @@ import withReviews from '../with-reviews';
 import * as mockUtils from '../../../blocks/reviews/utils';
 import * as mockBaseUtils from '../../utils/errors';
 
-jest.mock( '../../../blocks/reviews/utils', () => ( {
-	getSortArgs: () => ( {
+jest.mock('../../../blocks/reviews/utils', () => ({
+	getSortArgs: () => ({
 		order: 'desc',
 		orderby: 'date_gmt',
-	} ),
+	}),
 	getReviews: jest.fn(),
-} ) );
+}));
 
-jest.mock( '../../utils/errors', () => ( {
+jest.mock('../../utils/errors', () => ({
 	formatError: jest.fn(),
-} ) );
+}));
 
 const mockReviews = [
 	{ reviewer: 'Alice', review: 'Lorem ipsum', rating: 2 },
@@ -37,96 +37,96 @@ const defaultArgs = {
 
 // Capture the props the HOC injects into the wrapped component.
 let lastProps;
-const CapturedComponent = jest.fn( ( props ) => {
+const CapturedComponent = jest.fn((props) => {
 	lastProps = props;
 	return null;
-} );
-const TestComponent = withReviews( CapturedComponent );
+});
+const TestComponent = withReviews(CapturedComponent);
 
 // Run an interaction and flush the async state updates it triggers inside
 // `act`, so React's async fetch-then-setState work does not leak past the test.
-const settle = async ( fn ) => {
-	await act( async () => {
+const settle = async (fn) => {
+	await act(async () => {
 		fn();
-		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
-	} );
+		await new Promise((resolve) => setTimeout(resolve, 0));
+	});
 };
 
-describe( 'withReviews Component', () => {
+describe('withReviews Component', () => {
 	let renderResult;
-	const renderComponent = ( props ) =>
-		settle( () => {
+	const renderComponent = (props) =>
+		settle(() => {
 			renderResult = render(
 				<TestComponent
-					attributes={ {} }
+					attributes={{}}
 					order="desc"
 					orderby="date_gmt"
-					productId={ 1 }
-					reviewsToDisplay={ 2 }
-					{ ...props }
+					productId={1}
+					reviewsToDisplay={2}
+					{...props}
 				/>
 			);
-		} );
+		});
 
-	afterEach( () => {
+	afterEach(() => {
 		renderResult?.unmount();
 		renderResult = undefined;
 		mockUtils.getReviews.mockReset();
 		CapturedComponent.mockClear();
 		lastProps = undefined;
-	} );
+	});
 
-	describe( 'lifecycle events', () => {
-		beforeEach( async () => {
+	describe('lifecycle events', () => {
+		beforeEach(async () => {
 			mockUtils.getReviews
-				.mockImplementationOnce( () =>
-					Promise.resolve( {
-						reviews: mockReviews.slice( 0, 2 ),
+				.mockImplementationOnce(() =>
+					Promise.resolve({
+						reviews: mockReviews.slice(0, 2),
 						totalReviews: mockReviews.length,
-					} )
+					})
 				)
-				.mockImplementationOnce( () =>
-					Promise.resolve( {
-						reviews: mockReviews.slice( 2, 3 ),
+				.mockImplementationOnce(() =>
+					Promise.resolve({
+						reviews: mockReviews.slice(2, 3),
 						totalReviews: mockReviews.length,
-					} )
+					})
 				);
 			await renderComponent();
-		} );
+		});
 
-		it( 'getReviews is called on mount with default args', () => {
+		it('getReviews is called on mount with default args', () => {
 			const { getReviews } = mockUtils;
 
-			expect( getReviews ).toHaveBeenCalledWith( defaultArgs );
-			expect( getReviews ).toHaveBeenCalledTimes( 1 );
-		} );
+			expect(getReviews).toHaveBeenCalledWith(defaultArgs);
+			expect(getReviews).toHaveBeenCalledTimes(1);
+		});
 
-		it( 'getReviews is called on component update', async () => {
+		it('getReviews is called on component update', async () => {
 			const { getReviews } = mockUtils;
-			await settle( () =>
+			await settle(() =>
 				renderResult.rerender(
 					<TestComponent
 						order="desc"
 						orderby="date_gmt"
-						productId={ 1 }
-						reviewsToDisplay={ 3 }
+						productId={1}
+						reviewsToDisplay={3}
 					/>
 				)
 			);
 
-			expect( getReviews ).toHaveBeenNthCalledWith( 2, {
+			expect(getReviews).toHaveBeenNthCalledWith(2, {
 				...defaultArgs,
 				offset: 2,
 				per_page: 1,
-			} );
-			expect( getReviews ).toHaveBeenCalledTimes( 2 );
-		} );
-	} );
+			});
+			expect(getReviews).toHaveBeenCalledTimes(2);
+		});
+	});
 
-	it.each( [
+	it.each([
 		[
 			'category array',
-			{ categoryIds: [ 4, 8 ], productId: undefined },
+			{ categoryIds: [4, 8], productId: undefined },
 			{
 				category_id: '4,8',
 				offset: 0,
@@ -146,135 +146,133 @@ describe( 'withReviews Component', () => {
 				product_id: 42,
 			},
 		],
-	] )( 'requests reviews for a %s filter', async ( _name, props, args ) => {
-		mockUtils.getReviews.mockResolvedValue( {
+	])('requests reviews for a %s filter', async (_name, props, args) => {
+		mockUtils.getReviews.mockResolvedValue({
 			reviews: [],
 			totalReviews: 0,
-		} );
+		});
 
-		await renderComponent( props );
+		await renderComponent(props);
 
-		expect( mockUtils.getReviews ).toHaveBeenCalledWith( args );
-	} );
+		expect(mockUtils.getReviews).toHaveBeenCalledWith(args);
+	});
 
-	it( 'combines configured offset with appended review count', async () => {
+	it('combines configured offset with appended review count', async () => {
 		mockUtils.getReviews
-			.mockResolvedValueOnce( {
-				reviews: mockReviews.slice( 0, 2 ),
+			.mockResolvedValueOnce({
+				reviews: mockReviews.slice(0, 2),
 				totalReviews: 10,
-			} )
-			.mockResolvedValueOnce( {
-				reviews: mockReviews.slice( 2 ),
+			})
+			.mockResolvedValueOnce({
+				reviews: mockReviews.slice(2),
 				totalReviews: 10,
-			} );
-		await renderComponent( { offset: 5, reviewsToDisplay: 2 } );
+			});
+		await renderComponent({ offset: 5, reviewsToDisplay: 2 });
 
-		await settle( () =>
+		await settle(() =>
 			renderResult.rerender(
 				<TestComponent
-					attributes={ {} }
-					offset={ 5 }
+					attributes={{}}
+					offset={5}
 					order="desc"
 					orderby="date_gmt"
-					productId={ 1 }
-					reviewsToDisplay={ 4 }
+					productId={1}
+					reviewsToDisplay={4}
 				/>
 			)
 		);
 
-		expect( mockUtils.getReviews ).toHaveBeenNthCalledWith( 2, {
+		expect(mockUtils.getReviews).toHaveBeenNthCalledWith(2, {
 			...defaultArgs,
 			offset: 7,
 			per_page: 2,
-		} );
-	} );
+		});
+	});
 
-	it( 'replaces reviews when the offset changes as the display count increases', async () => {
+	it('replaces reviews when the offset changes as the display count increases', async () => {
 		const { getReviews } = mockUtils;
-		getReviews.mockResolvedValue( {
+		getReviews.mockResolvedValue({
 			reviews: mockReviews,
 			totalReviews: 20,
-		} );
-		await renderComponent( { offset: 5, reviewsToDisplay: 5 } );
+		});
+		await renderComponent({ offset: 5, reviewsToDisplay: 5 });
 
-		await settle( () =>
+		await settle(() =>
 			renderResult.rerender(
 				<TestComponent
-					attributes={ {} }
-					offset={ 0 }
+					attributes={{}}
+					offset={0}
 					order="desc"
 					orderby="date_gmt"
-					productId={ 1 }
-					reviewsToDisplay={ 10 }
+					productId={1}
+					reviewsToDisplay={10}
 				/>
 			)
 		);
 
-		expect( getReviews ).toHaveBeenNthCalledWith( 2, {
+		expect(getReviews).toHaveBeenNthCalledWith(2, {
 			...defaultArgs,
 			offset: 0,
 			per_page: 10,
-		} );
-	} );
+		});
+	});
 
-	describe( 'when the API returns product data', () => {
-		beforeEach( async () => {
-			mockUtils.getReviews.mockImplementation( () =>
-				Promise.resolve( {
-					reviews: mockReviews.slice( 0, 2 ),
+	describe('when the API returns product data', () => {
+		beforeEach(async () => {
+			mockUtils.getReviews.mockImplementation(() =>
+				Promise.resolve({
+					reviews: mockReviews.slice(0, 2),
 					totalReviews: mockReviews.length,
-				} )
+				})
 			);
 			await renderComponent();
-		} );
+		});
 
-		it( 'sets reviews based on API response', () => {
-			expect( lastProps.error ).toBeNull();
-			expect( lastProps.hasReviewsHiddenByOffset ).toBe( false );
-			expect( lastProps.isLoading ).toBe( false );
-			expect( lastProps.reviews ).toEqual( mockReviews.slice( 0, 2 ) );
-			expect( lastProps.totalReviews ).toEqual( mockReviews.length );
-		} );
-	} );
+		it('sets reviews based on API response', () => {
+			expect(lastProps.error).toBeNull();
+			expect(lastProps.hasReviewsHiddenByOffset).toBe(false);
+			expect(lastProps.isLoading).toBe(false);
+			expect(lastProps.reviews).toEqual(mockReviews.slice(0, 2));
+			expect(lastProps.totalReviews).toEqual(mockReviews.length);
+		});
+	});
 
-	describe( 'when the offset hides all available reviews', () => {
-		beforeEach( async () => {
-			mockUtils.getReviews.mockResolvedValue( {
+	describe('when the offset hides all available reviews', () => {
+		beforeEach(async () => {
+			mockUtils.getReviews.mockResolvedValue({
 				reviews: [],
 				totalReviews: mockReviews.length,
-			} );
-			await renderComponent( { offset: mockReviews.length } );
-		} );
+			});
+			await renderComponent({ offset: mockReviews.length });
+		});
 
-		it( 'indicates that reviews are hidden by the offset', () => {
-			expect( lastProps.hasReviewsHiddenByOffset ).toBe( true );
-			expect( lastProps.reviews ).toEqual( [] );
-			expect( lastProps.totalReviews ).toEqual( 0 );
-		} );
-	} );
+		it('indicates that reviews are hidden by the offset', () => {
+			expect(lastProps.hasReviewsHiddenByOffset).toBe(true);
+			expect(lastProps.reviews).toEqual([]);
+			expect(lastProps.totalReviews).toEqual(0);
+		});
+	});
 
-	describe( 'when the API returns an error', () => {
+	describe('when the API returns an error', () => {
 		const error = { message: 'There was an error.' };
 		const formattedError = { message: 'There was an error.', type: 'api' };
 
-		beforeEach( async () => {
-			mockUtils.getReviews.mockImplementation( () =>
-				Promise.reject( error )
+		beforeEach(async () => {
+			mockUtils.getReviews.mockImplementation(() =>
+				Promise.reject(error)
 			);
-			mockBaseUtils.formatError.mockImplementation(
-				() => formattedError
-			);
+			mockBaseUtils.formatError.mockImplementation(() => formattedError);
 			await renderComponent();
-		} );
+		});
 
-		test( 'sets the error prop', () => {
+		test('sets the error prop', () => {
 			const { formatError } = mockBaseUtils;
 
-			expect( formatError ).toHaveBeenCalledWith( error );
-			expect( formatError ).toHaveBeenCalledTimes( 1 );
-			expect( lastProps.error ).toEqual( formattedError );
-			expect( lastProps.isLoading ).toBe( false );
-			expect( lastProps.reviews ).toEqual( [] );
-		} );
-	} );
-} );
+			expect(formatError).toHaveBeenCalledWith(error);
+			expect(formatError).toHaveBeenCalledTimes(1);
+			expect(lastProps.error).toEqual(formattedError);
+			expect(lastProps.isLoading).toBe(false);
+			expect(lastProps.reviews).toEqual([]);
+		});
+	});
+});

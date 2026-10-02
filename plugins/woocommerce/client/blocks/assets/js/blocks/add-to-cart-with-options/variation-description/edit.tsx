@@ -8,12 +8,12 @@ export default function VariationDescriptionEdit() {
 	const blockProps = useBlockProps();
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<p>
-				{ __(
+				{__(
 					'This block displays the variation description. When the shopper selects a variation, the description content will automatically appear here.',
 					'woocommerce'
-				) }
+				)}
 			</p>
 		</div>
 	);

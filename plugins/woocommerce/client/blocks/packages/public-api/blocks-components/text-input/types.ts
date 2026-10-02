@@ -3,11 +3,10 @@
  */
 import type { InputHTMLAttributes, ReactNode } from 'react';
 
-export interface ValidatedTextInputProps
-	extends Omit<
-		InputHTMLAttributes< HTMLInputElement >,
-		'onChange' | 'onBlur'
-	> {
+export interface ValidatedTextInputProps extends Omit<
+	InputHTMLAttributes<HTMLInputElement>,
+	'onChange' | 'onBlur'
+> {
 	// Unique instance ID. id will be used instead if provided.
 	instanceId?: string;
 	// aria-describedby attribute to add to the input.
@@ -19,7 +18,7 @@ export interface ValidatedTextInputProps
 	// if true, the input will be focused on mount.
 	focusOnMount?: boolean;
 	// Callback to run on change which is passed the updated value.
-	onChange: ( newValue: string ) => void;
+	onChange: (newValue: string) => void;
 	// Optional label for the field.
 	label?: string;
 	// If true, validation errors will be shown.
@@ -27,11 +26,11 @@ export interface ValidatedTextInputProps
 	// Error message to display alongside the field regardless of validation.
 	errorMessage?: string | undefined;
 	// Custom validation function that is run on change. Use setCustomValidity to set an error message.
-	customValidation?: ( inputObject: HTMLInputElement ) => boolean;
+	customValidation?: (inputObject: HTMLInputElement) => boolean;
 	// Custom validation message to display when validity is false. Given the input element. Expected to use inputObject.validity.
-	customValidityMessage?: ( validity: ValidityState ) => string;
+	customValidityMessage?: (validity: ValidityState) => string;
 	// Custom formatted to format values as they are typed.
-	customFormatter?: ( value: string ) => string;
+	customFormatter?: (value: string) => string;
 	// Whether validation should run when mounted - only has an effect when focusOnMount is also true.
 	validateOnMount?: boolean;
 	// An icon to display in the input field.

@@ -32,7 +32,7 @@ export function ScreenRoot(): JSX.Element {
 			variant="primary"
 		>
 			<CardBody>
-				<VStack spacing={ 4 }>
+				<VStack spacing={4}>
 					<Card>
 						<CardMedia>
 							<Preview />
@@ -41,47 +41,42 @@ export function ScreenRoot(): JSX.Element {
 					<ItemGroup>
 						<NavigatorButton
 							path="/typography"
-							onClick={ () =>
-								recordEvent(
-									'styles_sidebar_navigation_click',
-									{ path: 'typography' }
-								)
+							onClick={() =>
+								recordEvent('styles_sidebar_navigation_click', {
+									path: 'typography',
+								})
 							}
 						>
 							<Item>
 								<HStack justify="flex-start">
-									<Icon icon={ typography } size={ 24 } />
+									<Icon icon={typography} size={24} />
 									<FlexItem>
-										{ __(
-											'Typography',
-											__i18n_text_domain__
-										) }
+										{__('Typography', __i18n_text_domain__)}
 									</FlexItem>
 								</HStack>
 							</Item>
 						</NavigatorButton>
 						<NavigatorButton
 							path="/colors"
-							onClick={ () =>
-								recordEvent(
-									'styles_sidebar_navigation_click',
-									{ path: 'colors' }
-								)
+							onClick={() =>
+								recordEvent('styles_sidebar_navigation_click', {
+									path: 'colors',
+								})
 							}
 						>
 							<Item>
 								<HStack justify="flex-start">
-									<Icon icon={ color } size={ 24 } />
+									<Icon icon={color} size={24} />
 									<FlexItem>
-										{ __( 'Colors', __i18n_text_domain__ ) }
+										{__('Colors', __i18n_text_domain__)}
 									</FlexItem>
 								</HStack>
 							</Item>
 						</NavigatorButton>
-						{ hasBackgroundScreen && (
+						{hasBackgroundScreen && (
 							<NavigatorButton
 								path="/background"
-								onClick={ () =>
+								onClick={() =>
 									recordEvent(
 										'styles_sidebar_navigation_click',
 										{ path: 'background' }
@@ -90,31 +85,30 @@ export function ScreenRoot(): JSX.Element {
 							>
 								<Item>
 									<HStack justify="flex-start">
-										<Icon icon={ background } size={ 24 } />
+										<Icon icon={background} size={24} />
 										<FlexItem>
-											{ __(
+											{__(
 												'Background',
 												__i18n_text_domain__
-											) }
+											)}
 										</FlexItem>
 									</HStack>
 								</Item>
 							</NavigatorButton>
-						) }
+						)}
 						<NavigatorButton
 							path="/layout"
-							onClick={ () =>
-								recordEvent(
-									'styles_sidebar_navigation_click',
-									{ path: 'layout' }
-								)
+							onClick={() =>
+								recordEvent('styles_sidebar_navigation_click', {
+									path: 'layout',
+								})
 							}
 						>
 							<Item>
 								<HStack justify="flex-start">
-									<Icon icon={ layout } size={ 24 } />
+									<Icon icon={layout} size={24} />
 									<FlexItem>
-										{ __( 'Layout', __i18n_text_domain__ ) }
+										{__('Layout', __i18n_text_domain__)}
 									</FlexItem>
 								</HStack>
 							</Item>

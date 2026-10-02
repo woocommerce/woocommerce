@@ -23,18 +23,17 @@ type CreateOrderErrorResponse = {
 };
 
 type CreateOrderResponse =
-	| CreateOrderSuccessResponse
-	| CreateOrderErrorResponse;
+	CreateOrderSuccessResponse | CreateOrderErrorResponse;
 
-function createOrder( productId: number ): Promise< CreateOrderResponse > {
-	return apiFetch( {
+function createOrder(productId: number): Promise<CreateOrderResponse> {
+	return apiFetch({
 		path: '/wc/v3/marketplace/create-order',
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
 		},
-		body: JSON.stringify( { product_id: productId } ),
-	} );
+		body: JSON.stringify({ product_id: productId }),
+	});
 }
 
 export {

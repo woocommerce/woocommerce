@@ -19,32 +19,28 @@ type EmailPreviewSubjectResponse = {
 	subject: string;
 };
 
-export const EmailPreviewHeader = ( {
-	emailType,
-}: EmailPreviewHeaderProps ) => {
-	const [ fromName, setFromName ] = useState( '' );
-	const [ fromAddress, setFromAddress ] = useState( '' );
-	const [ subject, setSubject ] = useState( '' );
-	const subjectEl = useRef< Element | null >( null );
+export const EmailPreviewHeader = ({ emailType }: EmailPreviewHeaderProps) => {
+	const [fromName, setFromName] = useState('');
+	const [fromAddress, setFromAddress] = useState('');
+	const [subject, setSubject] = useState('');
+	const subjectEl = useRef<Element | null>(null);
 	const nonce = emailPreviewNonce();
 
-	const fetchSubject = useCallback( async () => {
+	const fetchSubject = useCallback(async () => {
 		try {
-			const response: EmailPreviewSubjectResponse = await apiFetch( {
-				path: `wc-admin-email/settings/email/preview-subject?type=${ emailType }&nonce=${ nonce }`,
-			} );
-			setSubject( response.subject );
-			if ( subjectEl.current ) {
-				subjectEl.current.dispatchEvent(
-					new Event( 'subject-updated' )
-				);
+			const response: EmailPreviewSubjectResponse = await apiFetch({
+				path: `wc-admin-email/settings/email/preview-subject?type=${emailType}&nonce=${nonce}`,
+			});
+			setSubject(response.subject);
+			if (subjectEl.current) {
+				subjectEl.current.dispatchEvent(new Event('subject-updated'));
 			}
-		} catch ( e ) {
-			setSubject( '' );
+		} catch (e) {
+			setSubject('');
 		}
-	}, [ emailType, nonce, subjectEl ] );
+	}, [emailType, nonce, subjectEl]);
 
-	useEffect( () => {
+	useEffect(() => {
 		const fromNameEl = document.getElementById(
 			'woocommerce_email_from_name'
 		) as HTMLInputElement;
@@ -52,55 +48,55 @@ export const EmailPreviewHeader = ( {
 			'woocommerce_email_from_address'
 		) as HTMLInputElement;
 
-		if ( ! fromNameEl || ! fromAddressEl ) {
+		if (!fromNameEl || !fromAddressEl) {
 			return;
 		}
 
 		// Set initial values
-		setFromName( fromNameEl.value || '' );
-		setFromAddress( fromAddressEl.value || '' );
+		setFromName(fromNameEl.value || '');
+		setFromAddress(fromAddressEl.value || '');
 
-		const handleFromNameChange = ( event: Event ) => {
+		const handleFromNameChange = (event: Event) => {
 			const target = event.target as HTMLInputElement;
-			setFromName( target.value || '' );
+			setFromName(target.value || '');
 		};
-		const handleFromAddressChange = ( event: Event ) => {
+		const handleFromAddressChange = (event: Event) => {
 			const target = event.target as HTMLInputElement;
-			setFromAddress( target.value || '' );
+			setFromAddress(target.value || '');
 		};
 
-		fromNameEl.addEventListener( 'change', handleFromNameChange );
-		fromAddressEl.addEventListener( 'change', handleFromAddressChange );
+		fromNameEl.addEventListener('change', handleFromNameChange);
+		fromAddressEl.addEventListener('change', handleFromAddressChange);
 
 		return () => {
-			if ( ! fromNameEl || ! fromAddressEl ) {
+			if (!fromNameEl || !fromAddressEl) {
 				return;
 			}
-			fromNameEl.removeEventListener( 'change', handleFromNameChange );
+			fromNameEl.removeEventListener('change', handleFromNameChange);
 			fromAddressEl.removeEventListener(
 				'change',
 				handleFromAddressChange
 			);
 		};
-	}, [] );
+	}, []);
 
-	useEffect( () => {
+	useEffect(() => {
 		void fetchSubject();
-	}, [ fetchSubject ] );
+	}, [fetchSubject]);
 
-	useEffect( () => {
+	useEffect(() => {
 		subjectEl.current = document.querySelector(
 			'[id^="woocommerce_"][id$="_subject"]'
 		);
 
-		if ( ! subjectEl.current ) {
+		if (!subjectEl.current) {
 			return;
 		}
 
-		subjectEl.current.addEventListener( 'transient-saved', fetchSubject );
+		subjectEl.current.addEventListener('transient-saved', fetchSubject);
 
 		return () => {
-			if ( ! subjectEl.current ) {
+			if (!subjectEl.current) {
 				return;
 			}
 			subjectEl.current.removeEventListener(
@@ -108,23 +104,23 @@ export const EmailPreviewHeader = ( {
 				fetchSubject
 			);
 		};
-	}, [ fetchSubject ] );
+	}, [fetchSubject]);
 
 	return (
 		<div className="wc-settings-email-preview-header">
 			<h3 className="wc-settings-email-preview-header-subject">
-				{ subject }
+				{subject}
 			</h3>
 			<div className="wc-settings-email-preview-header-data">
 				<div className="wc-settings-email-preview-header-icon">
 					<img
-						src={ avatarIcon }
-						alt={ __( 'Avatar icon', 'woocommerce' ) }
+						src={avatarIcon}
+						alt={__('Avatar icon', 'woocommerce')}
 					/>
 				</div>
 				<div className="wc-settings-email-preview-header-sender">
-					{ `${ fromName } ` }
-					<span>&lt;{ fromAddress }&gt;</span>
+					{`${fromName} `}
+					<span>&lt;{fromAddress}&gt;</span>
 				</div>
 			</div>
 		</div>

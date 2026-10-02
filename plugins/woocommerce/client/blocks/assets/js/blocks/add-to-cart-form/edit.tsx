@@ -16,7 +16,7 @@ import { QuantitySelectorStyle, AddToCartFormSettings } from './settings';
 import { UpgradeNotice } from './components/upgrade-notice';
 import type { Attributes } from './';
 
-const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
+const AddToCartFormEdit = (props: BlockEditProps<Attributes>) => {
 	const { setAttributes } = props;
 
 	const quantitySelectorStyleClass =
@@ -24,48 +24,48 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 			? 'wc-block-add-to-cart-form--input'
 			: 'wc-block-add-to-cart-form--stepper';
 
-	const blockProps = useBlockProps( {
-		className: `wc-block-add-to-cart-form ${ quantitySelectorStyleClass }`,
-	} );
+	const blockProps = useBlockProps({
+		className: `wc-block-add-to-cart-form ${quantitySelectorStyleClass}`,
+	});
 
 	const isSiteEditor = isSiteEditorPage();
 
-	const isBlockTheme = getSetting( 'isBlockTheme', false );
-	const buttonBlockClass = ! isBlockTheme ? 'wp-block-button' : '';
-	const buttonLinkClass = ! isBlockTheme
+	const isBlockTheme = getSetting('isBlockTheme', false);
+	const buttonBlockClass = !isBlockTheme ? 'wp-block-button' : '';
+	const buttonLinkClass = !isBlockTheme
 		? 'wp-block-button__link wc-block-components-button'
 		: '';
 
 	return (
 		<>
-			{ isBlockTheme && (
+			{isBlockTheme && (
 				<InspectorControls>
-					<UpgradeNotice blockClientId={ props.clientId } />
+					<UpgradeNotice blockClientId={props.clientId} />
 				</InspectorControls>
-			) }
+			)}
 			<AddToCartFormSettings
-				quantitySelectorStyle={ props.attributes.quantitySelectorStyle }
-				setAttributes={ setAttributes }
+				quantitySelectorStyle={props.attributes.quantitySelectorStyle}
+				setAttributes={setAttributes}
 			/>
-			<div { ...blockProps }>
+			<div {...blockProps}>
 				<Tooltip
-					text={ __(
+					text={__(
 						'Customer will see product add-to-cart options in this space, dependent on the product type.',
 						'woocommerce'
-					) }
+					)}
 					position="bottom right"
 				>
 					<div className="wc-block-editor-add-to-cart-form-container">
-						<MultiLineTextSkeleton isStatic={ true } />
+						<MultiLineTextSkeleton isStatic={true} />
 						<Disabled>
-							{ props.attributes.quantitySelectorStyle ===
+							{props.attributes.quantitySelectorStyle ===
 								QuantitySelectorStyle.Input && (
 								<>
 									<div className="quantity">
 										<input
 											style={
 												// In the post editor, the editor isn't in an iframe, so WordPress styles are applied. We need to remove them.
-												! isSiteEditor
+												!isSiteEditor
 													? {
 															backgroundColor:
 																'#ffffff',
@@ -75,7 +75,7 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 															boxSizing: 'unset',
 															borderRadius:
 																'unset',
-													  }
+														}
 													: {}
 											}
 											type="number"
@@ -84,19 +84,16 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 											readOnly
 										/>
 									</div>
-									<div className={ buttonBlockClass }>
+									<div className={buttonBlockClass}>
 										<button
-											className={ `single_add_to_cart_button alt wp-element-button ${ buttonLinkClass }` }
+											className={`single_add_to_cart_button alt wp-element-button ${buttonLinkClass}`}
 										>
-											{ __(
-												'Add to cart',
-												'woocommerce'
-											) }
+											{__('Add to cart', 'woocommerce')}
 										</button>
 									</div>
 								</>
-							) }
-							{ props.attributes.quantitySelectorStyle ===
+							)}
+							{props.attributes.quantitySelectorStyle ===
 								QuantitySelectorStyle.Stepper && (
 								<>
 									<div className="quantity wc-block-components-quantity-selector">
@@ -106,7 +103,7 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 										<input
 											style={
 												// In the post editor, the editor isn't in an iframe, so WordPress styles are applied. We need to remove them.
-												! isSiteEditor
+												!isSiteEditor
 													? {
 															backgroundColor:
 																'#ffffff',
@@ -116,7 +113,7 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 															boxSizing: 'unset',
 															borderRadius:
 																'unset',
-													  }
+														}
 													: {}
 											}
 											type="number"
@@ -128,18 +125,15 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 											+
 										</button>
 									</div>
-									<div className={ buttonBlockClass }>
+									<div className={buttonBlockClass}>
 										<button
-											className={ `single_add_to_cart_button alt wp-element-button ${ buttonLinkClass }` }
+											className={`single_add_to_cart_button alt wp-element-button ${buttonLinkClass}`}
 										>
-											{ __(
-												'Add to cart',
-												'woocommerce'
-											) }
+											{__('Add to cart', 'woocommerce')}
 										</button>
 									</div>
 								</>
-							) }
+							)}
 						</Disabled>
 					</div>
 				</Tooltip>

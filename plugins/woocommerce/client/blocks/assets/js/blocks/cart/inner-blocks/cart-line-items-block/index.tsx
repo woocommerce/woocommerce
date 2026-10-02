@@ -10,17 +10,17 @@ import { registerBlockType } from '@wordpress/blocks';
 import { Edit, Save } from './edit';
 import metadata from './block.json';
 
-registerBlockType( 'woocommerce/cart-line-items-block', {
+registerBlockType('woocommerce/cart-line-items-block', {
 	apiVersion: metadata.apiVersion,
 	title: metadata.title,
 	icon: {
 		src: (
 			<Icon
-				icon={ column }
+				icon={column}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
 	},
 	edit: Edit,
 	save: Save,
-} );
+});

@@ -23,42 +23,42 @@ import type { Attributes } from './types';
 import './editor.scss';
 import { UpgradeNotice } from '../filter-wrapper/upgrade';
 
-const Edit = ( {
+const Edit = ({
 	attributes,
 	setAttributes,
 	clientId,
-}: BlockEditProps< Attributes > ) => {
+}: BlockEditProps<Attributes>) => {
 	const { className, displayStyle, heading, headingLevel } = attributes;
 
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className,
-	} );
+	});
 
 	const getInspectorControls = () => {
 		return (
 			<InspectorControls key="inspector">
 				<PanelBody>
-					<UpgradeNotice clientId={ clientId } />
+					<UpgradeNotice clientId={clientId} />
 				</PanelBody>
-				<PanelBody title={ __( 'Display Settings', 'woocommerce' ) }>
+				<PanelBody title={__('Display Settings', 'woocommerce')}>
 					<ToggleGroupControl
-						label={ __( 'Display Style', 'woocommerce' ) }
+						label={__('Display Style', 'woocommerce')}
 						isBlock
-						value={ displayStyle }
-						onChange={ ( value: Attributes[ 'displayStyle' ] ) =>
-							setAttributes( {
+						value={displayStyle}
+						onChange={(value: Attributes['displayStyle']) =>
+							setAttributes({
 								displayStyle: value,
-							} )
+							})
 						}
 						className="wc-block-active-filter__style-toggle"
 					>
 						<ToggleGroupControlOption
 							value="list"
-							label={ __( 'List', 'woocommerce' ) }
+							label={__('List', 'woocommerce')}
 						/>
 						<ToggleGroupControlOption
 							value="chips"
-							label={ __( 'Chips', 'woocommerce' ) }
+							label={__('Chips', 'woocommerce')}
 						/>
 					</ToggleGroupControl>
 				</PanelBody>
@@ -67,23 +67,23 @@ const Edit = ( {
 	};
 
 	return (
-		<div { ...blockProps }>
-			{ getInspectorControls() }
-			{ heading && (
+		<div {...blockProps}>
+			{getInspectorControls()}
+			{heading && (
 				<BlockTitle
 					className="wc-block-active-filters__title"
-					headingLevel={ headingLevel }
-					heading={ heading }
-					onChange={ ( value: Attributes[ 'heading' ] ) =>
-						setAttributes( { heading: value } )
+					headingLevel={headingLevel}
+					heading={heading}
+					onChange={(value: Attributes['heading']) =>
+						setAttributes({ heading: value })
 					}
 				/>
-			) }
+			)}
 			<Disabled>
-				<Block attributes={ attributes } isEditor={ true } />
+				<Block attributes={attributes} isEditor={true} />
 			</Disabled>
 		</div>
 	);
 };
 
-export default withSpokenMessages( Edit );
+export default withSpokenMessages(Edit);

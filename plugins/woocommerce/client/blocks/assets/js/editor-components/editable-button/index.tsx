@@ -4,12 +4,14 @@
 import Button, { ButtonProps } from '@woocommerce/base-components/button';
 import { RichText } from '@wordpress/block-editor';
 
-export interface EditableButtonProps
-	extends Omit< ButtonProps, 'onChange' | 'placeholder' | 'value' > {
+export interface EditableButtonProps extends Omit<
+	ButtonProps,
+	'onChange' | 'placeholder' | 'value'
+> {
 	/**
 	 * On change callback.
 	 */
-	onChange: ( value: string ) => void;
+	onChange: (value: string) => void;
 	/**
 	 * The placeholder of the editable button.
 	 */
@@ -25,23 +27,23 @@ export interface EditableButtonProps
 	children?: React.ReactNode;
 }
 
-const EditableButton = ( {
+const EditableButton = ({
 	onChange,
 	placeholder,
 	value,
 	children,
 	...props
-}: EditableButtonProps ) => {
+}: EditableButtonProps) => {
 	return (
-		<Button { ...props }>
+		<Button {...props}>
 			<RichText
-				multiline={ false }
-				allowedFormats={ [] }
-				value={ value }
-				placeholder={ placeholder }
-				onChange={ onChange }
+				multiline={false}
+				allowedFormats={[]}
+				value={value}
+				placeholder={placeholder}
+				onChange={onChange}
 			/>
-			{ children }
+			{children}
 		</Button>
 	);
 };

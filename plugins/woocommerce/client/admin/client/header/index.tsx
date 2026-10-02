@@ -23,63 +23,63 @@ import { BaseHeader } from './shared';
 
 export const PAGE_TITLE_FILTER = 'woocommerce_admin_header_page_title';
 
-export const Header = ( {
+export const Header = ({
 	sections,
 	query,
 }: {
 	sections: string[];
-	query: Record< string, string >;
-} ) => {
-	const siteTitle = getSetting( 'siteTitle', '' );
+	query: Record<string, string>;
+}) => {
+	const siteTitle = getSetting('siteTitle', '');
 
-	useEffect( () => {
+	useEffect(() => {
 		const documentTitle = sections
-			.map( ( section: string | string[] ) => {
-				return Array.isArray( section ) ? section[ 1 ] : section;
-			} )
+			.map((section: string | string[]) => {
+				return Array.isArray(section) ? section[1] : section;
+			})
 			.reverse()
-			.join( ' &lsaquo; ' );
+			.join(' &lsaquo; ');
 
 		const decodedTitle = decodeEntities(
 			sprintf(
 				/* translators: 1: document title. 2: page title */
-				__( '%1$s &lsaquo; %2$s &#8212; WooCommerce', 'woocommerce' ),
+				__('%1$s &lsaquo; %2$s &#8212; WooCommerce', 'woocommerce'),
 				documentTitle,
 				siteTitle as string
 			)
 		);
 
-		if ( document.title !== decodedTitle ) {
+		if (document.title !== decodedTitle) {
 			document.title = decodedTitle;
 		}
-	}, [ sections, siteTitle ] );
+	}, [sections, siteTitle]);
 
 	const isHomescreen =
-		isWCAdmin() && getScreenFromPath() === 'homescreen' && ! query.task;
-	const { isLoading, launchYourStoreEnabled } = useLaunchYourStore( {
+		isWCAdmin() && getScreenFromPath() === 'homescreen' && !query.task;
+	const { isLoading, launchYourStoreEnabled } = useLaunchYourStore({
 		enabled: isHomescreen,
-	} );
+	});
 	const showLaunchYourStoreStatus =
-		isHomescreen && launchYourStoreEnabled && ! isLoading;
+		isHomescreen && launchYourStoreEnabled && !isLoading;
 
 	const isAnalyticsOverviewScreen =
 		isWCAdmin() && getPath() === '/analytics/overview';
 
 	return (
 		<BaseHeader
-			isEmbedded={ false }
-			sections={ sections }
-			query={ query }
-			leftAlign={ ! showLaunchYourStoreStatus }
+			isEmbedded={false}
+			sections={sections}
+			query={query}
+			leftAlign={!showLaunchYourStoreStatus}
 		>
-			{ showLaunchYourStoreStatus && <LaunchYourStoreStatus /> }
-			{ isAnalyticsOverviewScreen && (
+			{showLaunchYourStoreStatus && <LaunchYourStoreStatus />}
+			{isAnalyticsOverviewScreen && (
 				// @ts-expect-error OrderAttributionInstallBanner is not typed
 				<OrderAttributionInstallBanner
-					bannerType={ ORDER_ATTRIBUTION_INSTALL_BANNER_TYPE_HEADER }
+					bannerType={ORDER_ATTRIBUTION_INSTALL_BANNER_TYPE_HEADER}
 					eventContext="analytics-overview-header"
 				/>
-			) }
+			)}
 		</BaseHeader>
 	);
 };

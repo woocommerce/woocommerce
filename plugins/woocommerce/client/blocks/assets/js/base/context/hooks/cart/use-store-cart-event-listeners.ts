@@ -30,10 +30,10 @@ declare global {
 	}
 }
 
-const refreshData = ( event: CartDataCustomEvent ): void => {
+const refreshData = (event: CartDataCustomEvent): void => {
 	const eventDetail = event?.detail;
-	if ( ! eventDetail || ! eventDetail.preserveCartData ) {
-		dispatch( cartStore ).invalidateResolutionForStore();
+	if (!eventDetail || !eventDetail.preserveCartData) {
+		dispatch(cartStore).invalidateResolutionForStore();
 	}
 };
 
@@ -43,14 +43,14 @@ const refreshData = ( event: CartDataCustomEvent ): void => {
  * - In Chrome, `back_forward` will be returned by getNavigationType() when the browser history is used.
  * - In safari we instead need to use `event.persisted` which is true when page cache is used.
  */
-const refreshCachedCartData = ( event: PageTransitionEvent ): void => {
-	if ( event?.persisted || getNavigationType() === 'back_forward' ) {
-		dispatch( cartStore ).invalidateResolutionForStore();
+const refreshCachedCartData = (event: PageTransitionEvent): void => {
+	if (event?.persisted || getNavigationType() === 'back_forward') {
+		dispatch(cartStore).invalidateResolutionForStore();
 	}
 };
 
 const setUp = (): void => {
-	if ( ! window.wcBlocksStoreCartListeners ) {
+	if (!window.wcBlocksStoreCartListeners) {
 		window.wcBlocksStoreCartListeners = {
 			count: 0,
 			remove: () => void null,
@@ -67,16 +67,13 @@ const hasListeners = (): boolean => {
 const addListeners = (): void => {
 	setUp();
 
-	if ( hasListeners() ) {
+	if (hasListeners()) {
 		window.wcBlocksStoreCartListeners.count++;
 		return;
 	}
-	document.body.addEventListener( 'wc-blocks_added_to_cart', refreshData );
-	document.body.addEventListener(
-		'wc-blocks_removed_from_cart',
-		refreshData
-	);
-	window.addEventListener( 'pageshow', refreshCachedCartData );
+	document.body.addEventListener('wc-blocks_added_to_cart', refreshData);
+	document.body.addEventListener('wc-blocks_removed_from_cart', refreshData);
+	window.addEventListener('pageshow', refreshCachedCartData);
 
 	const removeJQueryAddedToCartEvent = translateJQueryEventToNative(
 		'added_to_cart',
@@ -97,14 +94,14 @@ const addListeners = (): void => {
 			'wc-blocks_removed_from_cart',
 			refreshData
 		);
-		window.removeEventListener( 'pageshow', refreshCachedCartData );
+		window.removeEventListener('pageshow', refreshCachedCartData);
 		removeJQueryAddedToCartEvent();
 		removeJQueryRemovedFromCartEvent();
 	};
 };
 
 const removeListeners = (): void => {
-	if ( window.wcBlocksStoreCartListeners.count === 1 ) {
+	if (window.wcBlocksStoreCartListeners.count === 1) {
 		window.wcBlocksStoreCartListeners.remove();
 	}
 	window.wcBlocksStoreCartListeners.count--;
@@ -114,8 +111,8 @@ const removeListeners = (): void => {
  * This will keep track of jQuery and DOM events that invalidate the store resolution.
  */
 export const useStoreCartEventListeners = (): void => {
-	useEffect( () => {
+	useEffect(() => {
 		addListeners();
 		return removeListeners;
-	}, [] );
+	}, []);
 };

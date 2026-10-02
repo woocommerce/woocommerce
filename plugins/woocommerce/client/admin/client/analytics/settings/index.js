@@ -18,13 +18,13 @@ import Setting from './setting';
 import HistoricalData from './historical-data';
 import { ImportModeConfirmationModal } from './import-mode-confirmation-modal';
 
-const Settings = ( { query } ) => {
-	const { createNotice } = useDispatch( 'core/notices' );
+const Settings = ({ query }) => {
+	const { createNotice } = useDispatch('core/notices');
 	const {
 		invalidateResolutionForStoreSelector: invalidateReportResolutions,
-	} = useDispatch( reportsStore );
+	} = useDispatch(reportsStore);
 	const { invalidateResolutionForStoreSelector: invalidateItemResolutions } =
-		useDispatch( itemsStore );
+		useDispatch(itemsStore);
 	const {
 		settingsError,
 		isRequesting,
@@ -33,16 +33,15 @@ const Settings = ( { query } ) => {
 		updateAndPersistSettings,
 		updateSettings,
 		wcAdminSettings,
-	} = useSettings( 'wc_admin', [ 'wcAdminSettings' ] );
-	const hasSaved = useRef( false );
-	const [ isImportModeModalOpen, setIsImportModeModalOpen ] =
-		useState( false );
-	const [ pendingImportModeChange, setPendingImportModeChange ] =
-		useState( null );
+	} = useSettings('wc_admin', ['wcAdminSettings']);
+	const hasSaved = useRef(false);
+	const [isImportModeModalOpen, setIsImportModeModalOpen] = useState(false);
+	const [pendingImportModeChange, setPendingImportModeChange] =
+		useState(null);
 
-	useEffect( () => {
-		function warnIfUnsavedChanges( event ) {
-			if ( isDirty ) {
+	useEffect(() => {
+		function warnIfUnsavedChanges(event) {
+			if (isDirty) {
 				event.returnValue = __(
 					'You have unsaved changes. If you proceed, they will be lost.',
 					'woocommerce'
@@ -50,21 +49,21 @@ const Settings = ( { query } ) => {
 				return event.returnValue;
 			}
 		}
-		window.addEventListener( 'beforeunload', warnIfUnsavedChanges );
+		window.addEventListener('beforeunload', warnIfUnsavedChanges);
 		return () =>
-			window.removeEventListener( 'beforeunload', warnIfUnsavedChanges );
-	}, [ isDirty ] );
+			window.removeEventListener('beforeunload', warnIfUnsavedChanges);
+	}, [isDirty]);
 
-	useEffect( () => {
-		if ( isRequesting ) {
+	useEffect(() => {
+		if (isRequesting) {
 			hasSaved.current = true;
 			return;
 		}
-		if ( ! isRequesting && hasSaved.current ) {
-			if ( ! settingsError ) {
-				invalidateReportResolutions( 'getReportItems' );
-				invalidateReportResolutions( 'getReportStats' );
-				invalidateItemResolutions( 'getItems' );
+		if (!isRequesting && hasSaved.current) {
+			if (!settingsError) {
+				invalidateReportResolutions('getReportItems');
+				invalidateReportResolutions('getReportStats');
+				invalidateItemResolutions('getItems');
 				createNotice(
 					'success',
 					__(
@@ -89,7 +88,7 @@ const Settings = ( { query } ) => {
 		createNotice,
 		invalidateReportResolutions,
 		invalidateItemResolutions,
-	] );
+	]);
 
 	const resetDefaults = () => {
 		if (
@@ -101,22 +100,22 @@ const Settings = ( { query } ) => {
 				)
 			)
 		) {
-			const resetSettings = Object.keys( config ).reduce(
-				( result, setting ) => {
-					result[ setting ] = config[ setting ].defaultValue;
+			const resetSettings = Object.keys(config).reduce(
+				(result, setting) => {
+					result[setting] = config[setting].defaultValue;
 					return result;
 				},
 				{}
 			);
 
-			updateAndPersistSettings( 'wcAdminSettings', resetSettings );
-			recordEvent( 'analytics_settings_reset_defaults' );
+			updateAndPersistSettings('wcAdminSettings', resetSettings);
+			recordEvent('analytics_settings_reset_defaults');
 		}
 	};
 
 	const saveChanges = () => {
 		persistSettings();
-		recordEvent( 'analytics_settings_save', wcAdminSettings );
+		recordEvent('analytics_settings_save', wcAdminSettings);
 
 		// On save, reset persisted query properties of Nav Menu links to default
 		query.period = undefined;
@@ -125,11 +124,11 @@ const Settings = ( { query } ) => {
 		query.after = undefined;
 		query.interval = undefined;
 		query.type = undefined;
-		window.wpNavMenuUrlUpdate( query );
+		window.wpNavMenuUrlUpdate(query);
 	};
 
-	const handleInputChange = ( e ) => {
-		if ( isImportModeModalOpen ) {
+	const handleInputChange = (e) => {
+		if (isImportModeModalOpen) {
 			return;
 		}
 
@@ -138,102 +137,100 @@ const Settings = ( { query } ) => {
 		// Intercept import mode change from scheduled to immediate
 		if (
 			name === SCHEDULED_IMPORT_SETTING_NAME &&
-			config[ SCHEDULED_IMPORT_SETTING_NAME ] &&
-			wcAdminSettings[ name ] === 'yes' &&
+			config[SCHEDULED_IMPORT_SETTING_NAME] &&
+			wcAdminSettings[name] === 'yes' &&
 			value === 'no'
 		) {
-			setPendingImportModeChange( { name, value } );
-			setIsImportModeModalOpen( true );
+			setPendingImportModeChange({ name, value });
+			setIsImportModeModalOpen(true);
 
 			return;
 		}
 
 		const nextSettings = { ...wcAdminSettings };
 
-		if ( type === 'checkbox' ) {
-			if ( checked ) {
-				nextSettings[ name ] = [ ...nextSettings[ name ], value ];
+		if (type === 'checkbox') {
+			if (checked) {
+				nextSettings[name] = [...nextSettings[name], value];
 			} else {
-				nextSettings[ name ] = nextSettings[ name ].filter(
-					( v ) => v !== value
+				nextSettings[name] = nextSettings[name].filter(
+					(v) => v !== value
 				);
 			}
 		} else {
-			nextSettings[ name ] = value;
+			nextSettings[name] = value;
 		}
-		updateSettings( 'wcAdminSettings', nextSettings );
+		updateSettings('wcAdminSettings', nextSettings);
 	};
 
 	const handleImportModeConfirm = () => {
-		if ( pendingImportModeChange ) {
+		if (pendingImportModeChange) {
 			const nextSettings = { ...wcAdminSettings };
-			nextSettings[ pendingImportModeChange.name ] =
+			nextSettings[pendingImportModeChange.name] =
 				pendingImportModeChange.value;
-			updateSettings( 'wcAdminSettings', nextSettings );
+			updateSettings('wcAdminSettings', nextSettings);
 		}
-		setIsImportModeModalOpen( false );
-		setPendingImportModeChange( null );
+		setIsImportModeModalOpen(false);
+		setPendingImportModeChange(null);
 	};
 
 	const handleImportModeCancel = () => {
-		setIsImportModeModalOpen( false );
-		setPendingImportModeChange( null );
+		setIsImportModeModalOpen(false);
+		setPendingImportModeChange(null);
 	};
 
-	const getSettingValue = ( setting ) => {
+	const getSettingValue = (setting) => {
 		if (
 			setting === SCHEDULED_IMPORT_SETTING_NAME &&
-			! wcAdminSettings[ setting ]
+			!wcAdminSettings[setting]
 		) {
 			// If scheduled import setting is not set, return 'no' to show the immediate import option by default
 			return 'no';
 		}
 
-		return wcAdminSettings[ setting ];
+		return wcAdminSettings[setting];
 	};
 
 	return (
 		<Fragment>
-			<SectionHeader
-				title={ __( 'Analytics settings', 'woocommerce' ) }
-			/>
+			<SectionHeader title={__('Analytics settings', 'woocommerce')} />
 			<div className="woocommerce-settings__wrapper">
-				{ Object.keys( config ).map( ( setting ) => (
+				{Object.keys(config).map((setting) => (
 					<Setting
-						handleChange={ handleInputChange }
-						value={ getSettingValue( setting ) }
-						key={ setting }
-						name={ setting }
-						{ ...config[ setting ] }
+						handleChange={handleInputChange}
+						value={getSettingValue(setting)}
+						key={setting}
+						name={setting}
+						{...config[setting]}
 					/>
-				) ) }
+				))}
 				<div className="woocommerce-settings__actions">
-					<Button variant="secondary" onClick={ resetDefaults }>
-						{ __( 'Reset defaults', 'woocommerce' ) }
+					<Button variant="secondary" onClick={resetDefaults}>
+						{__('Reset defaults', 'woocommerce')}
 					</Button>
 					<Button
 						variant="primary"
-						isBusy={ isRequesting }
-						onClick={ saveChanges }
+						isBusy={isRequesting}
+						onClick={saveChanges}
 					>
-						{ __( 'Save settings', 'woocommerce' ) }
+						{__('Save settings', 'woocommerce')}
 					</Button>
 				</div>
 			</div>
-			{ query.import === 'true' ? (
+			{query.import === 'true' ? (
 				<ScrollTo offset="-56">
-					<HistoricalData createNotice={ createNotice } />
+					<HistoricalData createNotice={createNotice} />
 				</ScrollTo>
 			) : (
-				<HistoricalData createNotice={ createNotice } />
-			) }
-			{ config[ SCHEDULED_IMPORT_SETTING_NAME ] && (
+				<HistoricalData createNotice={createNotice} />
+			)}
+			{config[SCHEDULED_IMPORT_SETTING_NAME] && (
 				<ImportModeConfirmationModal
-					isOpen={ isImportModeModalOpen }
-					onClose={ handleImportModeCancel }
-					onConfirm={ handleImportModeConfirm }
+					isOpen={isImportModeModalOpen}
+					onClose={handleImportModeCancel}
+					onConfirm={handleImportModeConfirm}
 				/>
-			) }
+			)}
 		</Fragment>
 	);
 };

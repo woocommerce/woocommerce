@@ -11,15 +11,15 @@ import metadata from './block.json';
 import ProductItemCTAEdit from './edit';
 import './style.scss';
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	edit: ProductItemCTAEdit,
 	icon: {
 		src: (
 			<Icon
-				icon={ button }
+				icon={button}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
 	},
 	save: () => null,
-} );
+});

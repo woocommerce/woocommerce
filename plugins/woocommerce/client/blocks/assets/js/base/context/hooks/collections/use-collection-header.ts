@@ -44,7 +44,7 @@ import { useCollectionOptions } from '.';
 
 export const useCollectionHeader = (
 	headerKey: string,
-	options: Omit< useCollectionOptions, 'shouldSelect' >
+	options: Omit<useCollectionOptions, 'shouldSelect'>
 ): {
 	value: unknown;
 	isLoading: boolean;
@@ -55,18 +55,18 @@ export const useCollectionHeader = (
 		resourceValues = [],
 		query = {},
 	} = options;
-	if ( ! namespace || ! resourceName ) {
+	if (!namespace || !resourceName) {
 		throw new Error(
 			'The options object must have valid values for the namespace and ' +
 				'the resource name properties.'
 		);
 	}
 	// ensure we feed the previous reference if it's equivalent
-	const currentQuery = useShallowEqual( query );
-	const currentResourceValues = useShallowEqual( resourceValues );
+	const currentQuery = useShallowEqual(query);
+	const currentResourceValues = useShallowEqual(resourceValues);
 	const { value, isLoading = true } = useSelect(
-		( select ) => {
-			const store = select( storeKey );
+		(select) => {
+			const store = select(storeKey);
 			// filter out query if it is undefined.
 			const args = [
 				headerKey,
@@ -76,7 +76,7 @@ export const useCollectionHeader = (
 				currentResourceValues,
 			];
 			return {
-				value: store.getCollectionHeader( ...args ),
+				value: store.getCollectionHeader(...args),
 				isLoading: store.hasFinishedResolution(
 					'getCollectionHeader',
 					args

@@ -93,7 +93,9 @@
 		position: absolute;
 		right: 4px;
 		top: 4px;
-		transition: background-color 120ms ease, color 120ms ease;
+		transition:
+			background-color 120ms ease,
+			color 120ms ease;
 		z-index: 10;
 
 		svg {

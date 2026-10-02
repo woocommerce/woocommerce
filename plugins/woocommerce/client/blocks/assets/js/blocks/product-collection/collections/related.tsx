@@ -16,12 +16,12 @@ import { CoreCollectionNames, LayoutOptions } from '../types';
 
 const collection = {
 	name: CoreCollectionNames.RELATED,
-	title: __( 'Related Products', 'woocommerce' ),
-	icon: <Icon icon={ loop } />,
-	description: __( 'Recommend products like this one.', 'woocommerce' ),
+	title: __('Related Products', 'woocommerce'),
+	icon: <Icon icon={loop} />,
+	description: __('Recommend products like this one.', 'woocommerce'),
 	keywords: [],
-	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
-	usesReference: [ 'product' ],
+	scope: ['inserter', 'block'] as BlockVariationScope[],
+	usesReference: ['product'],
 };
 
 const attributes = {
@@ -41,7 +41,7 @@ const heading: InnerBlockTemplate = [
 	{
 		textAlign: 'center',
 		level: 2,
-		content: __( 'Related Products', 'woocommerce' ),
+		content: __('Related Products', 'woocommerce'),
 		style: { spacing: { margin: { bottom: '1rem' } } },
 	},
 ];

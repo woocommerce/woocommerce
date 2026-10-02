@@ -51,7 +51,9 @@ function dtPackageName( packageName ) {
 }
 
 function resolvePackageConfigs() {
-	const pkgJson = JSON.parse( readFileSync( join( PKG_ROOT, 'package.json' ), 'utf8' ) );
+	const pkgJson = JSON.parse(
+		readFileSync( join( PKG_ROOT, 'package.json' ), 'utf8' )
+	);
 	const devDeps = pkgJson.devDependencies || {};
 
 	return PACKAGE_NAMES.map( ( name ) => {
@@ -83,7 +85,9 @@ function resolvePackageTypesDir( packageName, typesDir, dtPackage ) {
 	const require = createRequire( join( PKG_ROOT, 'index.js' ) );
 
 	if ( dtPackage ) {
-		const pkgJsonPath = require.resolve( `${ dtPackageName( packageName ) }/package.json` );
+		const pkgJsonPath = require.resolve(
+			`${ dtPackageName( packageName ) }/package.json`
+		);
 		return dirname( pkgJsonPath );
 	}
 
@@ -115,10 +119,7 @@ function resolveRelativeSpecifier( specifier, fromDir, allFiles ) {
 	);
 
 	// Try exact file match first.
-	const candidates = [
-		`${ resolved }.d.ts`,
-		`${ resolved }/index.d.ts`,
-	];
+	const candidates = [ `${ resolved }.d.ts`, `${ resolved }/index.d.ts` ];
 
 	for ( const raw of candidates ) {
 		const candidate = posix.normalize( raw );
@@ -142,7 +143,12 @@ function resolveRelativeSpecifier( specifier, fromDir, allFiles ) {
  * @param {string} entryPointFile - e.g. 'index.d.ts'
  * @return {string} Module specifier (e.g. '@wordpress/core-data/build-types/entity-types/helpers').
  */
-function computeModuleSpecifier( filePath, packageName, typesDir, entryPointFile ) {
+function computeModuleSpecifier(
+	filePath,
+	packageName,
+	typesDir,
+	entryPointFile
+) {
 	if ( filePath === entryPointFile ) {
 		// Entry point gets the bare package name.
 		return packageName;
@@ -181,7 +187,8 @@ function collectRelativeSpecifiers( sourceFile ) {
 		// ImportDeclaration: import { X } from './helpers'
 		// ExportDeclaration: export { X } from './helpers', export * from './helpers'
 		if (
-			( ts.isImportDeclaration( node ) || ts.isExportDeclaration( node ) ) &&
+			( ts.isImportDeclaration( node ) ||
+				ts.isExportDeclaration( node ) ) &&
 			node.moduleSpecifier &&
 			ts.isStringLiteral( node.moduleSpecifier )
 		) {
@@ -197,9 +204,15 @@ function collectRelativeSpecifiers( sourceFile ) {
 		}
 
 		// ImportTypeNode: import('./helpers').SomeType
-		if ( ts.isImportTypeNode( node ) && ts.isLiteralTypeNode( node.argument ) ) {
+		if (
+			ts.isImportTypeNode( node ) &&
+			ts.isLiteralTypeNode( node.argument )
+		) {
 			const literal = node.argument.literal;
-			if ( ts.isStringLiteral( literal ) && literal.text.startsWith( '.' ) ) {
+			if (
+				ts.isStringLiteral( literal ) &&
+				literal.text.startsWith( '.' )
+			) {
 				results.push( {
 					specifier: literal.text,
 					start: literal.getStart( sourceFile ) + 1,
@@ -249,8 +262,20 @@ function collectRelativeSpecifiers( sourceFile ) {
  * @param {Set<string>} params.allFiles  - All .d.ts file paths in the package.
  * @return {string} Transformed source text.
  */
-function transformFile( { sourceText, filePath, packageName, typesDir, entryPoint, allFiles } ) {
-	const moduleSpecifier = computeModuleSpecifier( filePath, packageName, typesDir, entryPoint );
+function transformFile( {
+	sourceText,
+	filePath,
+	packageName,
+	typesDir,
+	entryPoint,
+	allFiles,
+} ) {
+	const moduleSpecifier = computeModuleSpecifier(
+		filePath,
+		packageName,
+		typesDir,
+		entryPoint
+	);
 	const fileDir = posix.dirname( filePath );
 
 	// Parse the source for AST analysis.
@@ -272,7 +297,11 @@ function transformFile( { sourceText, filePath, packageName, typesDir, entryPoin
 	const replacements = [];
 
 	for ( const { specifier, start, end } of relativeSpecifiers ) {
-		const resolved = resolveRelativeSpecifier( specifier, fileDir, allFiles );
+		const resolved = resolveRelativeSpecifier(
+			specifier,
+			fileDir,
+			allFiles
+		);
 		if ( ! resolved ) {
 			// Not a same-package reference — leave it as-is.
 			continue;
@@ -293,7 +322,8 @@ function transformFile( { sourceText, filePath, packageName, typesDir, entryPoin
 	let modified = sourceText;
 	replacements.sort( ( a, b ) => b.start - a.start );
 	for ( const { start, end, replacement } of replacements ) {
-		modified = modified.slice( 0, start ) + replacement + modified.slice( end );
+		modified =
+			modified.slice( 0, start ) + replacement + modified.slice( end );
 	}
 
 	// Strip source map comments.
@@ -382,7 +412,11 @@ function generate( outputDir ) {
 	for ( const pkg of PACKAGES ) {
 		let sourceDir;
 		try {
-			sourceDir = resolvePackageTypesDir( pkg.name, pkg.typesDir, pkg.dtPackage );
+			sourceDir = resolvePackageTypesDir(
+				pkg.name,
+				pkg.typesDir,
+				pkg.dtPackage
+			);
 		} catch {
 			console.warn( `Skipping ${ pkg.name }: package not found` );
 			continue;
@@ -396,7 +430,10 @@ function generate( outputDir ) {
 		}
 
 		for ( const filePath of allFiles ) {
-			const sourceText = readFileSync( join( sourceDir, filePath ), 'utf8' );
+			const sourceText = readFileSync(
+				join( sourceDir, filePath ),
+				'utf8'
+			);
 
 			const transformed = transformFile( {
 				sourceText,
@@ -412,7 +449,9 @@ function generate( outputDir ) {
 			writeFileSync( outPath, transformed );
 		}
 
-		console.log( `Generated types for ${ pkg.name } (${ allFiles.size } files)` );
+		console.log(
+			`Generated types for ${ pkg.name } (${ allFiles.size } files)`
+		);
 	}
 }
 
@@ -478,7 +517,9 @@ function runUpdatePatch() {
 			const currentPkgDir = join( TYPES_DIR, pkg.name );
 
 			if ( ! existsSync( currentPkgDir ) ) {
-				console.log( `No current types for ${ pkg.name }, skipping patch update.` );
+				console.log(
+					`No current types for ${ pkg.name }, skipping patch update.`
+				);
 				continue;
 			}
 
@@ -490,20 +531,30 @@ function runUpdatePatch() {
 				// diff returns 0 when files are identical — no patch needed.
 				if ( existsSync( patchFile ) ) {
 					rmSync( patchFile );
-					console.log( `Removed empty patch: ${ relative( PKG_ROOT, patchFile ) }` );
+					console.log(
+						`Removed empty patch: ${ relative( PKG_ROOT, patchFile ) }`
+					);
 				}
 			} catch ( error ) {
 				if ( error.status === 1 && error.stdout ) {
 					// diff returns 1 when files differ — this is our patch content.
 					// Rewrite paths so the patch applies from the package root.
 					const patchContent = error.stdout
-						.replaceAll( cleanPkgDir, `a/type-overrides/${ pkg.name }` )
-						.replaceAll( currentPkgDir, `b/type-overrides/${ pkg.name }` )
+						.replaceAll(
+							cleanPkgDir,
+							`a/type-overrides/${ pkg.name }`
+						)
+						.replaceAll(
+							currentPkgDir,
+							`b/type-overrides/${ pkg.name }`
+						)
 						// Strip timestamps from diff headers to avoid noisy diffs.
 						.replace( /^(---\s+\S+)\t.+$/gm, '$1' )
 						.replace( /^(\+\+\+\s+\S+)\t.+$/gm, '$1' );
 					writeFileSync( patchFile, patchContent );
-					console.log( `Updated patch: ${ relative( PKG_ROOT, patchFile ) }` );
+					console.log(
+						`Updated patch: ${ relative( PKG_ROOT, patchFile ) }`
+					);
 				} else {
 					throw error;
 				}
@@ -524,7 +575,9 @@ const command = args[ 0 ];
 switch ( command ) {
 	case 'generate': {
 		const outputArg = args.find( ( a ) => a.startsWith( '--output=' ) );
-		const outputDir = outputArg ? resolve( outputArg.slice( '--output='.length ) ) : undefined;
+		const outputDir = outputArg
+			? resolve( outputArg.slice( '--output='.length ) )
+			: undefined;
 		runGenerate( outputDir );
 		break;
 	}
@@ -532,6 +585,8 @@ switch ( command ) {
 		runUpdatePatch();
 		break;
 	default:
-		console.error( 'Usage: generate-types.mjs <generate|update-patch> [--output=<dir>]' );
+		console.error(
+			'Usage: generate-types.mjs <generate|update-patch> [--output=<dir>]'
+		);
 		process.exit( 1 );
 }

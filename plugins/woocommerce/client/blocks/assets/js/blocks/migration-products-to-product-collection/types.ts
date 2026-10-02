@@ -3,8 +3,8 @@
  */
 import { type BlockInstance } from '@wordpress/blocks';
 
-export type GetBlocksClientIds = ( blocks: BlockInstance[] ) => string[];
-export type IsBlockType = ( block: BlockInstance ) => boolean;
+export type GetBlocksClientIds = (blocks: BlockInstance[]) => string[];
+export type IsBlockType = (block: BlockInstance) => boolean;
 export type TransformBlock = (
 	block: BlockInstance,
 	innerBlock: BlockInstance[]

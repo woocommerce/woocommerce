@@ -25,17 +25,17 @@ import { emitterCallback } from '../../../event-emit';
 
 type PaymentEventsContextType = {
 	// Event registration callback for registering observers for the payment processing event.
-	onPaymentProcessing: ReturnType< typeof emitterCallback >;
-	onPaymentSetup: ReturnType< typeof emitterCallback >;
+	onPaymentProcessing: ReturnType<typeof emitterCallback>;
+	onPaymentSetup: ReturnType<typeof emitterCallback>;
 };
 
-const PaymentEventsContext = createContext< PaymentEventsContextType >( {
+const PaymentEventsContext = createContext<PaymentEventsContextType>({
 	onPaymentProcessing: () => () => () => void null,
 	onPaymentSetup: () => () => () => void null,
-} );
+});
 
 export const usePaymentEventsContext = () => {
-	return useContext( PaymentEventsContext );
+	return useContext(PaymentEventsContext);
 };
 
 /**
@@ -46,27 +46,27 @@ export const usePaymentEventsContext = () => {
  * @param {Object} props          Incoming props for provider
  * @param {Object} props.children The wrapped components in this provider.
  */
-export const PaymentEventsProvider = ( {
+export const PaymentEventsProvider = ({
 	children,
 }: {
 	children: React.ReactNode;
-} ): JSX.Element => {
+}): JSX.Element => {
 	const {
 		isProcessing: checkoutIsProcessing,
 		isIdle: checkoutIsIdle,
 		isCalculating: checkoutIsCalculating,
 		hasError: checkoutHasError,
-	} = useSelect( ( select ) => {
-		const store = select( checkoutStore );
+	} = useSelect((select) => {
+		const store = select(checkoutStore);
 		return {
 			isProcessing: store.isProcessing(),
 			isIdle: store.isIdle(),
 			hasError: store.hasError(),
 			isCalculating: store.isCalculating(),
 		};
-	} );
-	const { isPaymentReady } = useSelect( ( select ) => {
-		const store = select( paymentStore );
+	});
+	const { isPaymentReady } = useSelect((select) => {
+		const store = select(paymentStore);
 		return {
 			// The PROCESSING status represents before the checkout runs the observers
 			// registered for the payment_setup event.
@@ -75,30 +75,30 @@ export const PaymentEventsProvider = ( {
 			// synced with the payment store, ready to be sent to the StoreApi
 			isPaymentReady: store.isPaymentReady(),
 		};
-	} );
+	});
 
-	const { setValidationErrors } = useDispatch( validationStore );
-	const [ observers, observerDispatch ] = useReducer( emitReducer, {} );
-	const { onPaymentSetup } = useEventEmitters( observerDispatch );
-	const currentObservers = useRef( observers );
+	const { setValidationErrors } = useDispatch(validationStore);
+	const [observers, observerDispatch] = useReducer(emitReducer, {});
+	const { onPaymentSetup } = useEventEmitters(observerDispatch);
+	const currentObservers = useRef(observers);
 
 	// ensure observers are always current.
-	useEffect( () => {
+	useEffect(() => {
 		currentObservers.current = observers;
-	}, [ observers ] );
+	}, [observers]);
 
 	const {
 		__internalSetPaymentProcessing,
 		__internalSetPaymentIdle,
 		__internalEmitPaymentProcessingEvent,
-	} = useDispatch( paymentStore );
+	} = useDispatch(paymentStore);
 
 	// flip payment to processing if checkout processing is complete and there are no errors
-	useEffect( () => {
+	useEffect(() => {
 		if (
 			checkoutIsProcessing &&
-			! checkoutHasError &&
-			! checkoutIsCalculating
+			!checkoutHasError &&
+			!checkoutIsCalculating
 		) {
 			void __internalSetPaymentProcessing();
 
@@ -118,33 +118,33 @@ export const PaymentEventsProvider = ( {
 		__internalSetPaymentProcessing,
 		__internalEmitPaymentProcessingEvent,
 		setValidationErrors,
-	] );
+	]);
 
 	// When checkout is returned to idle, and the payment setup has not completed, set payment status to idle
-	useEffect( () => {
-		if ( checkoutIsIdle && ! isPaymentReady ) {
+	useEffect(() => {
+		if (checkoutIsIdle && !isPaymentReady) {
 			void __internalSetPaymentIdle();
 		}
-	}, [ checkoutIsIdle, isPaymentReady, __internalSetPaymentIdle ] );
+	}, [checkoutIsIdle, isPaymentReady, __internalSetPaymentIdle]);
 
 	// if checkout has an error sync payment status back to idle.
-	useEffect( () => {
-		if ( checkoutHasError && isPaymentReady ) {
+	useEffect(() => {
+		if (checkoutHasError && isPaymentReady) {
 			void __internalSetPaymentIdle();
 		}
-	}, [ checkoutHasError, isPaymentReady, __internalSetPaymentIdle ] );
+	}, [checkoutHasError, isPaymentReady, __internalSetPaymentIdle]);
 
 	/**
 	 * @deprecated use onPaymentSetup instead
 	 */
-	const onPaymentProcessing = useMemo( () => {
-		return function ( ...args: Parameters< typeof onPaymentSetup > ) {
-			deprecated( 'onPaymentProcessing', {
+	const onPaymentProcessing = useMemo(() => {
+		return function (...args: Parameters<typeof onPaymentSetup>) {
+			deprecated('onPaymentProcessing', {
 				alternative: 'onPaymentSetup',
-			} );
-			return onPaymentSetup( ...args );
+			});
+			return onPaymentSetup(...args);
 		};
-	}, [ onPaymentSetup ] );
+	}, [onPaymentSetup]);
 
 	const paymentContextData = {
 		onPaymentProcessing,
@@ -152,8 +152,8 @@ export const PaymentEventsProvider = ( {
 	};
 
 	return (
-		<PaymentEventsContext.Provider value={ paymentContextData }>
-			{ children }
+		<PaymentEventsContext.Provider value={paymentContextData}>
+			{children}
 		</PaymentEventsContext.Provider>
 	);
 };

@@ -13,13 +13,13 @@ import deprecated from '@wordpress/deprecated';
 let deprecationNoticeShown = false;
 
 const showDeprecationNotice = () => {
-	if ( ! deprecationNoticeShown ) {
-		deprecated( 'useValidation()', {
+	if (!deprecationNoticeShown) {
+		deprecated('useValidation()', {
 			since: '10.0',
 			alternative: 'the validation data store',
 			plugin: 'WooCommerce',
 			hint: 'Access the validation store directly in your component. \nSee: https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/data-store/validation.md \nSee: https://developer.wordpress.org/block-editor/reference-guides/packages/packages-data/',
-		} );
+		});
 		deprecationNoticeShown = true;
 	}
 };
@@ -30,7 +30,7 @@ const showDeprecationNotice = () => {
  */
 export const useValidation = (): ValidationData => {
 	const { clearValidationError, hideValidationError, setValidationErrors } =
-		useDispatch( validationStore );
+		useDispatch(validationStore);
 
 	const prefix = 'extensions-errors';
 
@@ -43,44 +43,42 @@ export const useValidation = (): ValidationData => {
 			validationErrorId: string
 		) => ValidationContextError;
 	} = useSelect(
-		( select ) => {
-			const store = select( validationStore );
+		(select) => {
+			const store = select(validationStore);
 			return {
 				hasValidationErrors: store.hasValidationErrors(),
-				getValidationError: ( validationErrorId: string ) =>
-					store.getValidationError(
-						`${ prefix }-${ validationErrorId }`
-					),
+				getValidationError: (validationErrorId: string) =>
+					store.getValidationError(`${prefix}-${validationErrorId}`),
 			};
 		},
-		[ prefix ]
+		[prefix]
 	);
 
 	const clearValidationErrorCallback = useCallback(
-		( validationErrorId: string ) =>
-			clearValidationError( `${ prefix }-${ validationErrorId }` ),
-		[ clearValidationError, prefix ]
+		(validationErrorId: string) =>
+			clearValidationError(`${prefix}-${validationErrorId}`),
+		[clearValidationError, prefix]
 	);
 
 	const hideValidationErrorCallback = useCallback(
-		( validationErrorId: string ) =>
-			hideValidationError( `${ prefix }-${ validationErrorId }` ),
-		[ hideValidationError, prefix ]
+		(validationErrorId: string) =>
+			hideValidationError(`${prefix}-${validationErrorId}`),
+		[hideValidationError, prefix]
 	);
 
 	const setValidationErrorsCallback = useCallback(
-		( errorsObject: Record< string, ValidationContextError > ) =>
+		(errorsObject: Record<string, ValidationContextError>) =>
 			setValidationErrors(
 				Object.fromEntries(
-					Object.entries( errorsObject ).map(
-						( [ validationErrorId, error ] ) => [
-							`${ prefix }-${ validationErrorId }`,
+					Object.entries(errorsObject).map(
+						([validationErrorId, error]) => [
+							`${prefix}-${validationErrorId}`,
 							error,
 						]
 					)
 				)
 			),
-		[ setValidationErrors, prefix ]
+		[setValidationErrors, prefix]
 	);
 
 	return {

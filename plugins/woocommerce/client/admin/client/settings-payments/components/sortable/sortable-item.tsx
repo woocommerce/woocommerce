@@ -17,7 +17,7 @@ import { DragHandleContext } from './sortable-drag-handle';
  *     <div>Sortable Content</div>
  * </SortableItem>
  */
-export const SortableItem = ( {
+export const SortableItem = ({
 	id,
 	className = '',
 	children,
@@ -26,7 +26,7 @@ export const SortableItem = ( {
 	id: string;
 	className?: string;
 	children: React.ReactNode;
-} ) => {
+}) => {
 	const {
 		attributes,
 		listeners,
@@ -34,11 +34,11 @@ export const SortableItem = ( {
 		transform,
 		transition,
 		isDragging,
-	} = useSortable( { id } );
+	} = useSortable({ id });
 
 	const style = {
 		transform: transform
-			? `translate3d(${ transform.x }px, ${ transform.y }px, 0)`
+			? `translate3d(${transform.x}px, ${transform.y}px, 0)`
 			: undefined,
 		transition,
 	};
@@ -51,13 +51,13 @@ export const SortableItem = ( {
 
 	return (
 		<div
-			ref={ setNodeRef }
-			style={ style }
-			className={ sortableItemClassName }
-			{ ...props }
+			ref={setNodeRef}
+			style={style}
+			className={sortableItemClassName}
+			{...props}
 		>
-			<DragHandleContext.Provider value={ { attributes, listeners } }>
-				{ children }
+			<DragHandleContext.Provider value={{ attributes, listeners }}>
+				{children}
 			</DragHandleContext.Provider>
 		</div>
 	);

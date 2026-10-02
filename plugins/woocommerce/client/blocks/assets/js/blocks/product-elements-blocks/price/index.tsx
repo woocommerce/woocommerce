@@ -15,7 +15,7 @@ const blockConfig = {
 	...metadata,
 	icon: (
 		<Icon
-			icon={ currencyDollar }
+			icon={currencyDollar}
 			className="wc-block-editor-components-block-icon"
 		/>
 	),
@@ -24,6 +24,6 @@ const blockConfig = {
 	deprecated,
 };
 
-registerProductBlockType( blockConfig, {
+registerProductBlockType(blockConfig, {
 	isAvailableOnPostEditor: true,
-} );
+});

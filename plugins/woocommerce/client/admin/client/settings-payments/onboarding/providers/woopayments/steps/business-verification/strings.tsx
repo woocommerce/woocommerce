@@ -17,8 +17,8 @@ const documentationUrls = {
 export default {
 	steps: {
 		activate: {
-			heading: __( 'Start accepting real payments', 'woocommerce' ),
-			subheading: interpolateComponents( {
+			heading: __('Start accepting real payments', 'woocommerce'),
+			subheading: interpolateComponents({
 				mixedString: __(
 					'You are currently testing payments on your store. To activate real payments, you will need to provide some additional details about your business. {{link}}Learn more{{/link}}.',
 					'woocommerce'
@@ -29,12 +29,12 @@ export default {
 						<a
 							rel="external noopener noreferrer"
 							target="_blank"
-							href={ documentationUrls.signUpLink }
+							href={documentationUrls.signUpLink}
 						/>
 					),
 				},
-			} ),
-			cta: __( 'Activate payments', 'woocommerce' ),
+			}),
+			cta: __('Activate payments', 'woocommerce'),
 		},
 		business: {
 			heading: __(
@@ -47,7 +47,7 @@ export default {
 			),
 		},
 		store: {
-			heading: __( 'Please share a few more details', 'woocommerce' ),
+			heading: __('Please share a few more details', 'woocommerce'),
 			subheading: __(
 				'This info will help us speed up the set up process.',
 				'woocommerce'
@@ -62,21 +62,18 @@ export default {
 				'This will take place in a secure environment through our partner. Once your business details are verified, you’ll be redirected back to your store dashboard.',
 				'woocommerce'
 			),
-			cta: __( 'Finish your verification process', 'woocommerce' ),
+			cta: __('Finish your verification process', 'woocommerce'),
 		},
 		embedded: {
 			heading: __(
 				'One last step! Verify your identity with our partner',
 				'woocommerce'
 			),
-			subheading: __(
-				'This info will verify your account',
-				'woocommerce'
-			),
+			subheading: __('This info will verify your account', 'woocommerce'),
 		},
 	},
 	fields: {
-		country: __( 'Where is your business located?', 'woocommerce' ),
+		country: __('Where is your business located?', 'woocommerce'),
 		business_type: __(
 			'What type of legal entity is your business?',
 			'woocommerce'
@@ -91,16 +88,16 @@ export default {
 		),
 	},
 	errors: {
-		generic: __( 'Please provide a response', 'woocommerce' ),
-		country: __( 'Please provide a country', 'woocommerce' ),
-		business_type: __( 'Please provide a business type', 'woocommerce' ),
-		mcc: __( 'Please provide a type of goods or services', 'woocommerce' ),
+		generic: __('Please provide a response', 'woocommerce'),
+		country: __('Please provide a country', 'woocommerce'),
+		business_type: __('Please provide a business type', 'woocommerce'),
+		mcc: __('Please provide a type of goods or services', 'woocommerce'),
 	},
 	placeholders: {
-		generic: __( 'Select an option', 'woocommerce' ),
-		country: __( 'Select a country', 'woocommerce' ),
+		generic: __('Select an option', 'woocommerce'),
+		country: __('Select a country', 'woocommerce'),
 	},
-	tos: interpolateComponents( {
+	tos: interpolateComponents({
 		mixedString: sprintf(
 			/* translators: %1$s: WooPayments, %2$s: WooPay  */
 			__(
@@ -116,7 +113,7 @@ export default {
 				<a
 					rel="external noopener noreferrer"
 					target="_blank"
-					href={ documentationUrls.tos }
+					href={documentationUrls.tos}
 				/>
 			),
 			merchantTermsLink: (
@@ -124,7 +121,7 @@ export default {
 				<a
 					rel="external noopener noreferrer"
 					target="_blank"
-					href={ documentationUrls.merchantTerms }
+					href={documentationUrls.merchantTerms}
 				/>
 			),
 			privacyPolicyLink: (
@@ -132,12 +129,12 @@ export default {
 				<a
 					rel="external noopener noreferrer"
 					target="_blank"
-					href={ documentationUrls.privacyPolicy }
+					href={documentationUrls.privacyPolicy}
 				/>
 			),
 		},
-	} ),
-	continue: __( 'Continue', 'woocommerce' ),
-	back: __( 'Back', 'woocommerce' ),
-	cancel: __( 'Cancel', 'woocommerce' ),
+	}),
+	continue: __('Continue', 'woocommerce'),
+	back: __('Back', 'woocommerce'),
+	cancel: __('Cancel', 'woocommerce'),
 };

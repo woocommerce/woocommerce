@@ -30,40 +30,40 @@ type ProductRatingProps = {
 	isAdmin: boolean;
 };
 
-export const Block = ( props: ProductRatingProps ): JSX.Element | undefined => {
+export const Block = (props: ProductRatingProps): JSX.Element | undefined => {
 	const {
 		textAlign = '',
 		shouldDisplayMockedReviewsWhenProductHasNoReviews,
 		isDescendentOfQueryLoop,
 		product: productEntity,
 	} = props;
-	const styleProps = useStyleProps( props );
+	const styleProps = useStyleProps(props);
 	const { parentClassName } = useInnerBlockLayoutContext();
-	const { product } = useProductDataContext( {
+	const { product } = useProductDataContext({
 		product: productEntity,
 		isAdmin: props.isAdmin,
-	} );
-	const rating = product ? getAverageRating( product ) : 0;
-	const reviews = product ? getRatingCount( product ) : 0;
+	});
+	const rating = product ? getAverageRating(product) : 0;
+	const reviews = product ? getRatingCount(product) : 0;
 
 	const className = 'wc-block-components-product-rating';
 
-	if ( reviews || shouldDisplayMockedReviewsWhenProductHasNoReviews ) {
+	if (reviews || shouldDisplayMockedReviewsWhenProductHasNoReviews) {
 		return (
 			<ProductRating
-				className={ className }
-				showReviewCount={ ! isDescendentOfQueryLoop }
+				className={className}
+				showReviewCount={!isDescendentOfQueryLoop}
 				showMockedReviews={
 					shouldDisplayMockedReviewsWhenProductHasNoReviews
 				}
-				styleProps={ styleProps }
-				parentClassName={ parentClassName }
-				reviews={ reviews }
-				rating={ rating }
-				textAlign={ textAlign }
+				styleProps={styleProps}
+				parentClassName={parentClassName}
+				reviews={reviews}
+				rating={rating}
+				textAlign={textAlign}
 			/>
 		);
 	}
 };
 
-export default withProductDataContext( Block );
+export default withProductDataContext(Block);

@@ -20,7 +20,7 @@ import {
  */
 import './editor.scss';
 
-export function DefaultNotice( { block }: { block: string } ) {
+export function DefaultNotice({ block }: { block: string }) {
 	// To avoid having the same logic twice, we're going to handle both pages here.
 	const ORIGINAL_PAGE_ID =
 		block === 'checkout' ? CHECKOUT_PAGE_ID : CART_PAGE_ID;
@@ -30,67 +30,67 @@ export function DefaultNotice( { block }: { block: string } ) {
 			: 'woocommerce_cart_page_id';
 
 	// Everything below works the same for Cart/Checkout
-	const { saveEntityRecord } = useDispatch( coreStore );
-	const { editPost, savePost } = useDispatch( CORE_EDITOR_STORE );
+	const { saveEntityRecord } = useDispatch(coreStore);
+	const { editPost, savePost } = useDispatch(CORE_EDITOR_STORE);
 	const { slug, postPublished, currentPostId } = useSelect(
-		( select ) => {
-			const { getEntityRecord } = select( coreStore );
-			const editor = select( CORE_EDITOR_STORE );
+		(select) => {
+			const { getEntityRecord } = select(coreStore);
+			const editor = select(CORE_EDITOR_STORE);
 			return {
 				slug:
-					getEntityRecord( 'postType', 'page', ORIGINAL_PAGE_ID )
+					getEntityRecord('postType', 'page', ORIGINAL_PAGE_ID)
 						?.slug || block,
 				postPublished: editor?.isCurrentPostPublished?.() ?? false,
 				currentPostId: editor?.getCurrentPostId?.() ?? 0,
 			};
 		},
-		[ ORIGINAL_PAGE_ID, block ]
+		[ORIGINAL_PAGE_ID, block]
 	);
-	const [ settingStatus, setStatus ] = useState( 'pristine' );
-	const updatePage = useCallback( () => {
-		setStatus( 'updating' );
+	const [settingStatus, setStatus] = useState('pristine');
+	const updatePage = useCallback(() => {
+		setStatus('updating');
 		void Promise.resolve()
-			.then( () =>
-				triggerFetch( {
-					path: `/wc/v3/settings/advanced/${ settingName }`,
+			.then(() =>
+				triggerFetch({
+					path: `/wc/v3/settings/advanced/${settingName}`,
 					method: 'GET',
-				} )
+				})
 			)
-			.catch( ( error ) => {
-				if ( error.code === 'rest_setting_setting_invalid' ) {
-					setStatus( 'error' );
+			.catch((error) => {
+				if (error.code === 'rest_setting_setting_invalid') {
+					setStatus('error');
 				}
-			} )
-			.then( () => {
-				if ( ! postPublished ) {
-					void editPost( { status: 'publish' } );
+			})
+			.then(() => {
+				if (!postPublished) {
+					void editPost({ status: 'publish' });
 					return savePost();
 				}
-			} )
-			.then( () =>
+			})
+			.then(() =>
 				// Make this page ID the default cart/checkout.
-				triggerFetch( {
-					path: `/wc/v3/settings/advanced/${ settingName }`,
+				triggerFetch({
+					path: `/wc/v3/settings/advanced/${settingName}`,
 					method: 'POST',
 					data: {
 						value: currentPostId.toString(),
 					},
-				} )
+				})
 			)
 			// Append `-2` to the original link so we can use it here.
-			.then( () => {
-				if ( ORIGINAL_PAGE_ID !== 0 ) {
-					return saveEntityRecord( 'postType', 'page', {
+			.then(() => {
+				if (ORIGINAL_PAGE_ID !== 0) {
+					return saveEntityRecord('postType', 'page', {
 						id: ORIGINAL_PAGE_ID,
-						slug: `${ slug }-2`,
-					} );
+						slug: `${slug}-2`,
+					});
 				}
-			} )
+			})
 			// Use the original link for this page.
-			.then( () => editPost( { slug } ) )
+			.then(() => editPost({ slug }))
 			// Save page.
-			.then( () => savePost() )
-			.then( () => setStatus( 'updated' ) );
+			.then(() => savePost())
+			.then(() => setStatus('updated'));
 	}, [
 		postPublished,
 		editPost,
@@ -100,10 +100,10 @@ export function DefaultNotice( { block }: { block: string } ) {
 		ORIGINAL_PAGE_ID,
 		saveEntityRecord,
 		slug,
-	] );
+	]);
 
 	let noticeContent;
-	if ( block === 'checkout' ) {
+	if (block === 'checkout') {
 		noticeContent = createInterpolateElement(
 			__(
 				'If you would like to use this block as your default checkout, <a>update your page settings</a>.',
@@ -112,8 +112,8 @@ export function DefaultNotice( { block }: { block: string } ) {
 			{
 				a: (
 					// eslint-disable-next-line jsx-a11y/anchor-is-valid
-					<a href="#" onClick={ updatePage }>
-						{ __( 'update your page settings', 'woocommerce' ) }
+					<a href="#" onClick={updatePage}>
+						{__('update your page settings', 'woocommerce')}
 					</a>
 				),
 			}
@@ -127,8 +127,8 @@ export function DefaultNotice( { block }: { block: string } ) {
 			{
 				a: (
 					// eslint-disable-next-line jsx-a11y/anchor-is-valid
-					<a href="#" onClick={ updatePage }>
-						{ __( 'update your page settings', 'woocommerce' ) }
+					<a href="#" onClick={updatePage}>
+						{__('update your page settings', 'woocommerce')}
 					</a>
 				),
 			}
@@ -137,7 +137,7 @@ export function DefaultNotice( { block }: { block: string } ) {
 
 	// Avoid showing the notice on the site editor, if already set, or if dismissed earlier.
 	if (
-		( typeof pagenow === 'string' && pagenow === 'site-editor' ) ||
+		(typeof pagenow === 'string' && pagenow === 'site-editor') ||
 		currentPostId === ORIGINAL_PAGE_ID ||
 		settingStatus === 'dismissed'
 	) {
@@ -146,21 +146,21 @@ export function DefaultNotice( { block }: { block: string } ) {
 	return (
 		<Notice
 			className="wc-default-page-notice"
-			status={ settingStatus === 'updated' ? 'success' : 'info' }
-			onRemove={ () => setStatus( 'dismissed' ) }
+			status={settingStatus === 'updated' ? 'success' : 'info'}
+			onRemove={() => setStatus('dismissed')}
 			spokenMessage={
 				settingStatus === 'updated'
-					? __( 'Page settings updated', 'woocommerce' )
+					? __('Page settings updated', 'woocommerce')
 					: noticeContent
 			}
 		>
-			{ settingStatus === 'updated' ? (
-				__( 'Page settings updated', 'woocommerce' )
+			{settingStatus === 'updated' ? (
+				__('Page settings updated', 'woocommerce')
 			) : (
 				<>
-					<p>{ noticeContent }</p>
+					<p>{noticeContent}</p>
 				</>
-			) }
+			)}
 		</Notice>
 	);
 }

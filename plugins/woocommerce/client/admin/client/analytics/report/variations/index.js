@@ -16,25 +16,25 @@ import ReportSummary from '../../components/report-summary';
 import VariationsReportTable from './table';
 import { ReportHeader } from '../../components/report-header';
 
-const getChartMeta = ( { query } ) => {
+const getChartMeta = ({ query }) => {
 	const isCompareView =
-		query[ 'filter-variations' ] === 'compare-variations' &&
+		query['filter-variations'] === 'compare-variations' &&
 		query.variations &&
-		query.variations.split( ',' ).length > 1;
+		query.variations.split(',').length > 1;
 
 	return {
 		compareObject: 'variations',
 		/* translators: %d: number of variations */
-		itemsLabel: __( '%d variations', 'woocommerce' ),
+		itemsLabel: __('%d variations', 'woocommerce'),
 		mode: isCompareView ? 'item-comparison' : 'time-comparison',
 	};
 };
 
-const VariationsReport = ( props ) => {
-	const { itemsLabel, mode } = getChartMeta( props );
+const VariationsReport = (props) => {
+	const { itemsLabel, mode } = getChartMeta(props);
 	const { path, query, isError, isRequesting } = props;
 
-	if ( isError ) {
+	if (isError) {
 		return <AnalyticsError />;
 	}
 
@@ -42,45 +42,45 @@ const VariationsReport = ( props ) => {
 		...query,
 	};
 
-	if ( mode === 'item-comparison' ) {
+	if (mode === 'item-comparison') {
 		chartQuery.segmentby = 'variation';
 	}
 
 	return (
 		<Fragment>
 			<ReportHeader
-				query={ query }
-				path={ path }
-				filters={ filters }
-				advancedFilters={ advancedFilters }
+				query={query}
+				path={path}
+				filters={filters}
+				advancedFilters={advancedFilters}
 				report="variations"
 			/>
 			<ReportSummary
-				mode={ mode }
-				charts={ charts }
+				mode={mode}
+				charts={charts}
 				endpoint="variations"
-				query={ chartQuery }
-				selectedChart={ getSelectedChart( query.chart, charts ) }
-				filters={ filters }
-				advancedFilters={ advancedFilters }
+				query={chartQuery}
+				selectedChart={getSelectedChart(query.chart, charts)}
+				filters={filters}
+				advancedFilters={advancedFilters}
 			/>
 			<ReportChart
-				charts={ charts }
-				mode={ mode }
-				filters={ filters }
-				advancedFilters={ advancedFilters }
+				charts={charts}
+				mode={mode}
+				filters={filters}
+				advancedFilters={advancedFilters}
 				endpoint="variations"
-				isRequesting={ isRequesting }
-				itemsLabel={ itemsLabel }
-				path={ path }
-				query={ chartQuery }
-				selectedChart={ getSelectedChart( chartQuery.chart, charts ) }
+				isRequesting={isRequesting}
+				itemsLabel={itemsLabel}
+				path={path}
+				query={chartQuery}
+				selectedChart={getSelectedChart(chartQuery.chart, charts)}
 			/>
 			<VariationsReportTable
-				isRequesting={ isRequesting }
-				query={ query }
-				filters={ filters }
-				advancedFilters={ advancedFilters }
+				isRequesting={isRequesting}
+				query={query}
+				filters={filters}
+				advancedFilters={advancedFilters}
 			/>
 		</Fragment>
 	);

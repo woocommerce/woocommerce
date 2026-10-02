@@ -48,21 +48,21 @@ const plugins = [
 
 export const Basic = () => (
 	<Plugins
-		sendEvent={ () => {} }
-		navigationProgress={ 80 }
-		context={ {
+		sendEvent={() => {}}
+		navigationProgress={80}
+		context={{
 			pluginsAvailable: plugins,
 			pluginsSelected: [],
 			pluginsInstallationErrors: [],
-		} }
+		}}
 	/>
 );
 
 export const InstallationError = () => (
 	<Plugins
-		sendEvent={ () => {} }
-		navigationProgress={ 80 }
-		context={ {
+		sendEvent={() => {}}
+		navigationProgress={80}
+		context={{
 			pluginsAvailable: plugins,
 			pluginsSelected: [],
 			pluginsInstallationErrors: [
@@ -79,19 +79,19 @@ export const InstallationError = () => (
 					error: 'Installation failed',
 				},
 			],
-		} }
+		}}
 	/>
 );
 
 export const TermsOfService = () => (
-	<PluginsTermsOfService selectedPlugins={ plugins } />
+	<PluginsTermsOfService selectedPlugins={plugins} />
 );
 
 export const InstallationErrorBanner = () => (
 	<div className="woocommerce-profiler-plugins">
 		<PluginErrorBanner
-			pluginsInstallationPermissionsFailure={ false }
-			pluginsInstallationErrors={ [
+			pluginsInstallationPermissionsFailure={false}
+			pluginsInstallationErrors={[
 				{
 					plugin: 'Jetpack',
 					errorDetails: {
@@ -104,24 +104,24 @@ export const InstallationErrorBanner = () => (
 					},
 					error: 'Installation failed',
 				},
-			] }
-			onClick={ () => {} }
+			]}
+			onClick={() => {}}
 		/>
 	</div>
 );
 
 export const InstallationNoPermissionError = () => (
 	<NoPermissionsError
-		sendEvent={ () => {} }
-		navigationProgress={ 80 }
-		context={ {
+		sendEvent={() => {}}
+		navigationProgress={80}
+		context={{
 			pluginsAvailable: plugins,
-		} }
+		}}
 	/>
 );
 
 export default {
 	title: 'WooCommerce Admin/Core Profiler/Plugins',
 	component: Plugins,
-	decorators: [ WithSetupWizardLayout ],
+	decorators: [WithSetupWizardLayout],
 };

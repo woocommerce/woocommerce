@@ -16,10 +16,10 @@ export type Attributes = {
 	fontSize?: string;
 };
 
-const Edit = ( { attributes }: BlockEditProps< Attributes > ) => {
-	const blockProps = useBlockProps( {
+const Edit = ({ attributes }: BlockEditProps<Attributes>) => {
+	const blockProps = useBlockProps({
 		className: 'woocommerce wc-block-breadcrumbs',
-	} );
+	});
 
 	const themeFontSize = useBreadcrumbsThemeFontSize();
 
@@ -40,17 +40,17 @@ const Edit = ( { attributes }: BlockEditProps< Attributes > ) => {
 		themeFontSize !== 'var(--wp--preset--font-size--small)'
 	) {
 		blockProps.className = blockProps.className
-			.split( ' ' )
-			.filter( ( cls ) => cls && cls !== 'has-small-font-size' )
-			.join( ' ' );
+			.split(' ')
+			.filter((cls) => cls && cls !== 'has-small-font-size')
+			.join(' ');
 		blockProps.style.fontSize = themeFontSize;
 	}
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<Disabled>
-				<a href="/">{ __( 'Breadcrumbs', 'woocommerce' ) }</a>
-				{ __( ' / Navigation / Path', 'woocommerce' ) }
+				<a href="/">{__('Breadcrumbs', 'woocommerce')}</a>
+				{__(' / Navigation / Path', 'woocommerce')}
 			</Disabled>
 		</div>
 	);

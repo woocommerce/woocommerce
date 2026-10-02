@@ -20,7 +20,7 @@ import { Inspector } from './inspector';
 import type { EditProps } from './types';
 import type { FilterItemFields } from '../../types';
 
-const Edit = ( props: EditProps ) => {
+const Edit = (props: EditProps) => {
 	const { showCounts, hideEmpty } = props.attributes;
 	const { children, ...innerBlocksProps } = useInnerBlocksProps(
 		useBlockProps(),
@@ -30,7 +30,7 @@ const Edit = ( props: EditProps ) => {
 					'core/heading',
 					{
 						level: 3,
-						content: __( 'Availability', 'woocommerce' ),
+						content: __('Availability', 'woocommerce'),
 						style: {
 							spacing: {
 								margin: {
@@ -41,36 +41,36 @@ const Edit = ( props: EditProps ) => {
 						},
 					},
 				],
-				[ 'woocommerce/product-filter-checkbox-list' ],
+				['woocommerce/product-filter-checkbox-list'],
 			],
 		}
 	);
 
-	const stockStatusOptions: Record< string, string > = getSetting(
+	const stockStatusOptions: Record<string, string> = getSetting(
 		'stockStatusOptions',
 		{}
 	);
 
-	const { data: filteredCounts, isLoading } = useCollectionData( {
+	const { data: filteredCounts, isLoading } = useCollectionData({
 		queryStock: true,
 		queryState: {},
 		isEditor: true,
-	} );
+	});
 
-	const items = useMemo( () => {
-		return Object.entries( stockStatusOptions )
-			.filter( ( [ key ] ) => {
-				if ( ! hideEmpty ) return true;
+	const items = useMemo(() => {
+		return Object.entries(stockStatusOptions)
+			.filter(([key]) => {
+				if (!hideEmpty) return true;
 				const count =
 					filteredCounts?.stock_status_counts?.find(
-						( item ) => item.status === key
+						(item) => item.status === key
 					)?.count ?? 0;
 				return count > 0;
-			} )
-			.map( ( [ key, value ], index ) => {
+			})
+			.map(([key, value], index) => {
 				const count =
 					filteredCounts?.stock_status_counts?.find(
-						( item ) => item.status === key
+						(item) => item.status === key
 					)?.count ?? 0;
 
 				return {
@@ -78,27 +78,27 @@ const Edit = ( props: EditProps ) => {
 					ariaLabel: value,
 					value: key,
 					selected: index === 0,
-					...( showCounts && { count } ),
+					...(showCounts && { count }),
 					type: 'status',
 				};
-			} );
-	}, [ stockStatusOptions, filteredCounts, hideEmpty, showCounts ] );
+			});
+	}, [stockStatusOptions, filteredCounts, hideEmpty, showCounts]);
 
 	return (
-		<div { ...innerBlocksProps }>
-			<Inspector { ...props } />
+		<div {...innerBlocksProps}>
+			<Inspector {...props} />
 			<InitialDisabled>
 				<BlockContextProvider
-					value={ {
+					value={{
 						'woocommerce/selectableItems': {
 							items,
 							selectionMode: 'multiple' as const,
 							storeNamespace: 'woocommerce/product-filters',
 							isLoading,
-						} satisfies SelectableItemsContext< FilterItemFields >,
-					} }
+						} satisfies SelectableItemsContext<FilterItemFields>,
+					}}
 				>
-					{ children }
+					{children}
 				</BlockContextProvider>
 			</InitialDisabled>
 		</div>

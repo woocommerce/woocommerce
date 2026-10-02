@@ -11,7 +11,7 @@ import './style.scss';
 import { SETTINGS_SLOT_FILL_CONSTANT } from '~/settings/settings-slots';
 import { ResetStylesControl } from './settings-email-color-palette-control';
 
-const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
+const { Fill } = createSlotFill(SETTINGS_SLOT_FILL_CONSTANT);
 
 export type DefaultColors = {
 	baseColor: string;
@@ -28,19 +28,19 @@ type EmailColorPaletteFillProps = {
 	autoSyncInput: HTMLInputElement;
 };
 
-const EmailColorPaletteFill = ( {
+const EmailColorPaletteFill = ({
 	defaultColors,
 	hasThemeJson,
 	autoSync,
 	autoSyncInput,
-}: EmailColorPaletteFillProps ) => {
+}: EmailColorPaletteFillProps) => {
 	return (
 		<Fill>
 			<ResetStylesControl
-				autoSync={ autoSync }
-				autoSyncInput={ autoSyncInput }
-				defaultColors={ defaultColors }
-				hasThemeJson={ hasThemeJson }
+				autoSync={autoSync}
+				autoSyncInput={autoSyncInput}
+				defaultColors={defaultColors}
+				hasThemeJson={hasThemeJson}
 			/>
 		</Fill>
 	);
@@ -50,16 +50,14 @@ export const registerSettingsEmailColorPaletteFill = () => {
 	const autoSyncInput = document.getElementById(
 		'woocommerce_email_auto_sync_with_theme'
 	) as HTMLInputElement;
-	if ( ! autoSyncInput ) {
+	if (!autoSyncInput) {
 		return; // Don't register the plugin if the input doesn't exist
 	}
 	const autoSync = autoSyncInput.value === 'yes';
 	const slotElementId = 'wc_settings_email_color_palette_slotfill';
-	const slotElement = document.getElementById( slotElementId );
+	const slotElement = document.getElementById(slotElementId);
 
-	const defaultColorsData = slotElement?.getAttribute(
-		'data-default-colors'
-	);
+	const defaultColorsData = slotElement?.getAttribute('data-default-colors');
 	let defaultColors = {} as DefaultColors;
 	try {
 		const {
@@ -68,7 +66,7 @@ export const registerSettingsEmailColorPaletteFill = () => {
 			body_bg: bodyBgColor,
 			body_text: bodyTextColor,
 			footer_text: footerTextColor,
-		} = JSON.parse( defaultColorsData || '' );
+		} = JSON.parse(defaultColorsData || '');
 		defaultColors = {
 			baseColor,
 			bgColor,
@@ -76,20 +74,20 @@ export const registerSettingsEmailColorPaletteFill = () => {
 			bodyTextColor,
 			footerTextColor,
 		};
-	} catch ( e ) {}
+	} catch (e) {}
 
 	const hasThemeJson =
-		slotElement?.getAttribute( 'data-has-theme-json' ) !== null;
+		slotElement?.getAttribute('data-has-theme-json') !== null;
 
-	registerPlugin( 'woocommerce-admin-settings-email-color-palette', {
+	registerPlugin('woocommerce-admin-settings-email-color-palette', {
 		scope: 'woocommerce-email-color-palette-settings',
 		render: () => (
 			<EmailColorPaletteFill
-				autoSync={ autoSync }
-				autoSyncInput={ autoSyncInput }
-				defaultColors={ defaultColors }
-				hasThemeJson={ hasThemeJson }
+				autoSync={autoSync}
+				autoSyncInput={autoSyncInput}
+				defaultColors={defaultColors}
+				hasThemeJson={hasThemeJson}
 			/>
 		),
-	} );
+	});
 };

@@ -31,8 +31,17 @@
 
 	.woocommerce-marketing-introduction-banner-illustration {
 		flex: 0 0 270px;
-		background: linear-gradient(90deg, rgba(247, 237, 247, 0) 5.31%, rgba(196, 152, 217, 0.12) 77.75%),
-			linear-gradient(90deg, rgba(247, 237, 247, 0) 22%, rgba(196, 152, 217, 0.12) 84.6%);
+		background:
+			linear-gradient(
+				90deg,
+				rgba(247, 237, 247, 0) 5.31%,
+				rgba(196, 152, 217, 0.12) 77.75%
+			),
+			linear-gradient(
+				90deg,
+				rgba(247, 237, 247, 0) 22%,
+				rgba(196, 152, 217, 0.12) 84.6%
+			);
 
 		.woocommerce-marketing-introduction-banner-image-placeholder {
 			width: 100%;

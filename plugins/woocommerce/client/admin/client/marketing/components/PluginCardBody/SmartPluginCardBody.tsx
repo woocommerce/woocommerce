@@ -21,7 +21,7 @@ import './PluginCardBody.scss';
 
 type SmartPluginCardBodyProps = {
 	plugin: RecommendedPlugin;
-	onInstalledAndActivated?: ( pluginSlug: string ) => void;
+	onInstalledAndActivated?: (pluginSlug: string) => void;
 };
 
 /**
@@ -31,23 +31,21 @@ type SmartPluginCardBodyProps = {
  * and has the logic for installing and activating plugin.
  * This allows users to install and activate multiple plugins at the same time.
  */
-export const SmartPluginCardBody = ( {
+export const SmartPluginCardBody = ({
 	plugin,
 	onInstalledAndActivated = () => {},
-}: SmartPluginCardBodyProps ) => {
-	const [ currentPlugin, setCurrentPlugin ] = useState< string | null >(
-		null
-	);
-	const { installAndActivatePlugins } = useDispatch( pluginsStore );
+}: SmartPluginCardBodyProps) => {
+	const [currentPlugin, setCurrentPlugin] = useState<string | null>(null);
+	const { installAndActivatePlugins } = useDispatch(pluginsStore);
 	const { installState } = useSelect(
-		( select ) => {
-			const { getPluginInstallState } = select( pluginsStore );
+		(select) => {
+			const { getPluginInstallState } = select(pluginsStore);
 
 			return {
-				installState: getPluginInstallState( plugin.product ),
+				installState: getPluginInstallState(plugin.product),
 			};
 		},
-		[ plugin.product ]
+		[plugin.product]
 	);
 
 	/**
@@ -59,57 +57,55 @@ export const SmartPluginCardBody = ( {
 	 * When the process is not successful, an error notice will be displayed.
 	 */
 	const installAndActivate = async () => {
-		setCurrentPlugin( plugin.product );
+		setCurrentPlugin(plugin.product);
 
 		try {
-			recordEvent( 'marketing_recommended_extension', {
+			recordEvent('marketing_recommended_extension', {
 				name: plugin.title,
 				source: getRecommendationSource(),
-			} );
+			});
 
-			const response = await installAndActivatePlugins( [
-				plugin.product,
-			] );
+			const response = await installAndActivatePlugins([plugin.product]);
 
-			onInstalledAndActivated( plugin.product );
-			createNoticesFromResponse( response );
-		} catch ( error ) {
-			createNoticesFromResponse( error );
+			onInstalledAndActivated(plugin.product);
+			createNoticesFromResponse(response);
+		} catch (error) {
+			createNoticesFromResponse(error);
 		}
 
-		setCurrentPlugin( null );
+		setCurrentPlugin(null);
 	};
 
 	const renderButton = () => {
-		const buttonDisabled = !! currentPlugin;
+		const buttonDisabled = !!currentPlugin;
 
 		/**
 		 * When the plugin is installed but not activated yet.
 		 */
 		const isPluginInstalledNotActivated = installState === 'installed';
 
-		if ( isPluginInstalledNotActivated ) {
+		if (isPluginInstalledNotActivated) {
 			return (
 				<Button
 					variant="secondary"
-					isBusy={ currentPlugin === plugin.product }
-					disabled={ buttonDisabled }
-					onClick={ installAndActivate }
+					isBusy={currentPlugin === plugin.product}
+					disabled={buttonDisabled}
+					onClick={installAndActivate}
 				>
-					{ __( 'Activate', 'woocommerce' ) }
+					{__('Activate', 'woocommerce')}
 				</Button>
 			);
 		}
 
-		if ( plugin.direct_install ) {
+		if (plugin.direct_install) {
 			return (
 				<Button
 					variant="secondary"
-					isBusy={ currentPlugin === plugin.product }
-					disabled={ buttonDisabled }
-					onClick={ installAndActivate }
+					isBusy={currentPlugin === plugin.product}
+					disabled={buttonDisabled}
+					onClick={installAndActivate}
 				>
-					{ __( 'Install extension', 'woocommerce' ) }
+					{__('Install extension', 'woocommerce')}
 				</Button>
 			);
 		}
@@ -117,29 +113,29 @@ export const SmartPluginCardBody = ( {
 		return (
 			<Button
 				variant="secondary"
-				href={ getInAppPurchaseUrl( plugin.url ) }
-				disabled={ buttonDisabled }
-				onClick={ () => {
-					recordEvent( 'marketing_recommended_extension', {
+				href={getInAppPurchaseUrl(plugin.url)}
+				disabled={buttonDisabled}
+				onClick={() => {
+					recordEvent('marketing_recommended_extension', {
 						name: plugin.title,
 						source: getRecommendationSource(),
-					} );
-				} }
+					});
+				}}
 			>
-				{ __( 'View details', 'woocommerce' ) }
+				{__('View details', 'woocommerce')}
 			</Button>
 		);
 	};
 
 	return (
 		<PluginCardBody
-			icon={ <img src={ plugin.icon } alt={ plugin.title } /> }
-			name={ plugin.title }
-			pills={ plugin.tags.map( ( tag ) => (
-				<Pill key={ tag.slug }>{ tag.name }</Pill>
-			) ) }
-			description={ plugin.description }
-			button={ renderButton() }
+			icon={<img src={plugin.icon} alt={plugin.title} />}
+			name={plugin.title}
+			pills={plugin.tags.map((tag) => (
+				<Pill key={tag.slug}>{tag.name}</Pill>
+			))}
+			description={plugin.description}
+			button={renderButton()}
 		/>
 	);
 };

@@ -22,7 +22,7 @@ export * from './thunks';
  * Accepts a `Partial<Cart>` because the reducer merges the response into existing
  * cart state, supporting both full replacements and targeted updates.
  */
-export function setCartData( cart: Partial< Cart > ) {
+export function setCartData(cart: Partial<Cart>) {
 	return {
 		type: types.SET_CART_DATA,
 		response: cart,
@@ -32,7 +32,7 @@ export function setCartData( cart: Partial< Cart > ) {
 /**
  * An action creator that dispatches the plain action responsible for setting the cart error data in the store.
  */
-export function setErrorData( error: ApiErrorResponse | null ) {
+export function setErrorData(error: ApiErrorResponse | null) {
 	return {
 		type: types.SET_ERROR_DATA,
 		error,
@@ -42,7 +42,7 @@ export function setErrorData( error: ApiErrorResponse | null ) {
 /**
  * Returns an action object used to track when a coupon is applying.
  */
-export function receiveApplyingCoupon( couponCode: string ) {
+export function receiveApplyingCoupon(couponCode: string) {
 	return {
 		type: types.APPLYING_COUPON,
 		couponCode,
@@ -52,7 +52,7 @@ export function receiveApplyingCoupon( couponCode: string ) {
 /**
  * Returns an action object used to track when a coupon is removing.
  */
-export function receiveRemovingCoupon( couponCode: string ) {
+export function receiveRemovingCoupon(couponCode: string) {
 	return {
 		type: types.REMOVING_COUPON,
 		couponCode,
@@ -62,7 +62,7 @@ export function receiveRemovingCoupon( couponCode: string ) {
 /**
  * Returns an action object for updating a single cart item in the store.
  */
-export function receiveCartItem( response: CartResponseItem | null = null ) {
+export function receiveCartItem(response: CartResponseItem | null = null) {
 	return {
 		type: types.RECEIVE_CART_ITEM,
 		cartItem: response,
@@ -113,7 +113,7 @@ export function itemIsPendingDelete(
  *                                         lastCartUpdate timestamp is newer than the
  *                                         one in wcSettings.
  */
-export function setIsCartDataStale( isCartDataStale = true ) {
+export function setIsCartDataStale(isCartDataStale = true) {
 	return {
 		type: types.SET_IS_CART_DATA_STALE,
 		isCartDataStale,
@@ -124,7 +124,7 @@ export function setIsCartDataStale( isCartDataStale = true ) {
  * Returns an action object used to track when customer data is being updated
  * (billing and/or shipping).
  */
-export function updatingCustomerData( isResolving: boolean ) {
+export function updatingCustomerData(isResolving: boolean) {
 	return {
 		type: types.UPDATING_CUSTOMER_DATA,
 		isResolving,
@@ -134,7 +134,7 @@ export function updatingCustomerData( isResolving: boolean ) {
 /**
  * Returns an action object used to track when customer shipping data is being updated.
  */
-export function updatingAddressFieldsForShippingRates( isResolving: boolean ) {
+export function updatingAddressFieldsForShippingRates(isResolving: boolean) {
 	return {
 		type: types.UPDATING_ADDRESS_FIELDS_FOR_SHIPPING_RATES,
 		isResolving,
@@ -146,7 +146,7 @@ export function updatingAddressFieldsForShippingRates( isResolving: boolean ) {
  *
  * @param {boolean} isResolving True if shipping rate is being selected.
  */
-export function shippingRatesBeingSelected( isResolving: boolean ) {
+export function shippingRatesBeingSelected(isResolving: boolean) {
 	return {
 		type: types.UPDATING_SELECTED_SHIPPING_RATE,
 		isResolving,
@@ -156,22 +156,20 @@ export function shippingRatesBeingSelected( isResolving: boolean ) {
 /**
  * Sets billing address locally, as opposed to updateCustomerData which sends it to the server.
  */
-export function setBillingAddress( billingAddress: Partial< BillingAddress > ) {
+export function setBillingAddress(billingAddress: Partial<BillingAddress>) {
 	return { type: types.SET_BILLING_ADDRESS, billingAddress };
 }
 
 /**
  * Sets shipping address locally, as opposed to updateCustomerData which sends it to the server.
  */
-export function setShippingAddress(
-	shippingAddress: Partial< ShippingAddress >
-) {
+export function setShippingAddress(shippingAddress: Partial<ShippingAddress>) {
 	return { type: types.SET_SHIPPING_ADDRESS, shippingAddress };
 }
 
 /**
  * Sets the metadata to show product IDs pending being added to the cart.
  */
-export function setProductsPendingAdd( productId: number, isAdding: boolean ) {
+export function setProductsPendingAdd(productId: number, isAdding: boolean) {
 	return { type: types.PRODUCT_PENDING_ADD, productId, isAdding };
 }

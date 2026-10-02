@@ -15,7 +15,7 @@ const blockConfig = {
 	...metadata,
 	icon: (
 		<Icon
-			icon={ percent }
+			icon={percent}
 			className="wc-block-editor-components-block-icon"
 		/>
 	),
@@ -24,6 +24,6 @@ const blockConfig = {
 	deprecated,
 };
 
-registerProductBlockType( blockConfig, {
+registerProductBlockType(blockConfig, {
 	isAvailableOnPostEditor: true,
-} );
+});

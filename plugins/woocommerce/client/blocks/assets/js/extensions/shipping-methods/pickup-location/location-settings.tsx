@@ -23,15 +23,15 @@ import { getUserFriendlyAddress } from './utils';
 
 const LocationSettingsDescription = () => (
 	<>
-		<h2>{ __( 'Pickup locations', 'woocommerce' ) }</h2>
+		<h2>{__('Pickup locations', 'woocommerce')}</h2>
 		<p>
-			{ __(
+			{__(
 				'Define pickup locations for your customers to choose from during checkout.',
 				'woocommerce'
-			) }
+			)}
 		</p>
 		<ExternalLink href="https://woocommerce.com/document/woocommerce-blocks-local-pickup/">
-			{ __( 'Learn more', 'woocommerce' ) }
+			{__('Learn more', 'woocommerce')}
 		</ExternalLink>
 	</>
 );
@@ -51,31 +51,31 @@ const LocationSettings = () => {
 		updateLocation,
 		readOnlySettings,
 	} = useSettingsContext();
-	const [ editingLocation, setEditingLocation ] =
-		useState< UniqueIdentifier >( '' );
+	const [editingLocation, setEditingLocation] =
+		useState<UniqueIdentifier>('');
 
 	const tableColumns = [
 		{
 			name: 'name',
-			label: __( 'Pickup location', 'woocommerce' ),
+			label: __('Pickup location', 'woocommerce'),
 			width: '50%',
-			renderCallback: ( row: SortableData ): JSX.Element => (
+			renderCallback: (row: SortableData): JSX.Element => (
 				<>
-					{ row.name }
+					{row.name}
 					<StyledAddress>
-						{ getUserFriendlyAddress( row.address ) }
+						{getUserFriendlyAddress(row.address)}
 					</StyledAddress>
 				</>
 			),
 		},
 		{
 			name: 'enabled',
-			label: __( 'Enabled', 'woocommerce' ),
+			label: __('Enabled', 'woocommerce'),
 			align: 'right',
-			renderCallback: ( row: SortableData ): JSX.Element => (
+			renderCallback: (row: SortableData): JSX.Element => (
 				<ToggleControl
-					checked={ isBoolean( row.enabled ) ? row.enabled : false }
-					onChange={ () => toggleLocation( row.id ) }
+					checked={isBoolean(row.enabled) ? row.enabled : false}
+					onChange={() => toggleLocation(row.id)}
 				/>
 			),
 		},
@@ -84,15 +84,15 @@ const LocationSettings = () => {
 			label: '',
 			align: 'center',
 			width: '1%',
-			renderCallback: ( row: SortableData ): JSX.Element => (
+			renderCallback: (row: SortableData): JSX.Element => (
 				<button
 					type="button"
 					className="button-link-edit button-link"
-					onClick={ () => {
-						setEditingLocation( row.id );
-					} }
+					onClick={() => {
+						setEditingLocation(row.id);
+					}}
 				>
-					{ __( 'Edit', 'woocommerce' ) }
+					{__('Edit', 'woocommerce')}
 				</button>
 			),
 		},
@@ -101,30 +101,30 @@ const LocationSettings = () => {
 	const FooterContent = (): JSX.Element => (
 		<Button
 			variant="secondary"
-			onClick={ () => {
-				setEditingLocation( 'new' );
-			} }
+			onClick={() => {
+				setEditingLocation('new');
+			}}
 		>
-			{ __( 'Add pickup location', 'woocommerce' ) }
+			{__('Add pickup location', 'woocommerce')}
 		</Button>
 	);
 
 	return (
-		<SettingsSection Description={ LocationSettingsDescription }>
+		<SettingsSection Description={LocationSettingsDescription}>
 			<SortableTable
 				className="pickup-locations"
-				columns={ tableColumns }
-				data={ pickupLocations }
-				setData={ ( newData ) => {
-					setPickupLocations( newData as SortablePickupLocation[] );
-				} }
-				placeholder={ __(
+				columns={tableColumns}
+				data={pickupLocations}
+				setData={(newData) => {
+					setPickupLocations(newData as SortablePickupLocation[]);
+				}}
+				placeholder={__(
 					'When you add a pickup location, it will appear here.',
 					'woocommerce'
-				) }
-				footerContent={ FooterContent }
+				)}
+				footerContent={FooterContent}
 			/>
-			{ editingLocation && (
+			{editingLocation && (
 				<EditLocation
 					locationData={
 						editingLocation === 'new'
@@ -139,25 +139,25 @@ const LocationSettings = () => {
 										postcode: '',
 										country: readOnlySettings.storeCountry,
 									},
-							  }
-							: pickupLocations.find( ( { id } ) => {
+								}
+							: pickupLocations.find(({ id }) => {
 									return id === editingLocation;
-							  } ) || null
+								}) || null
 					}
-					editingLocation={ editingLocation }
-					onSave={ ( values ) => {
+					editingLocation={editingLocation}
+					onSave={(values) => {
 						updateLocation(
 							editingLocation,
 							values as SortablePickupLocation
 						);
-					} }
-					onClose={ () => setEditingLocation( '' ) }
-					onDelete={ () => {
-						updateLocation( editingLocation, null );
-						setEditingLocation( '' );
-					} }
+					}}
+					onClose={() => setEditingLocation('')}
+					onDelete={() => {
+						updateLocation(editingLocation, null);
+						setEditingLocation('');
+					}}
 				/>
-			) }
+			)}
 		</SettingsSection>
 	);
 };

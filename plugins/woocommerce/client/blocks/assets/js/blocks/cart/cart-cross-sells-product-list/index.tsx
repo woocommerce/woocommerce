@@ -14,24 +14,24 @@ interface CrossSellsProductListProps {
 	columns: number;
 }
 
-const CartCrossSellsProductList = ( {
+const CartCrossSellsProductList = ({
 	products,
 	columns,
-}: CrossSellsProductListProps ): JSX.Element => {
-	const crossSellsProducts = products.map( ( product, i ) => {
-		if ( i >= columns ) return null;
+}: CrossSellsProductListProps): JSX.Element => {
+	const crossSellsProducts = products.map((product, i) => {
+		if (i >= columns) return null;
 
 		return (
 			<CartCrossSellsProduct
 				// Setting isLoading to false, given this parameter is required.
-				isLoading={ false }
-				product={ product }
-				key={ product.id }
+				isLoading={false}
+				product={product}
+				key={product.id}
 			/>
 		);
-	} );
+	});
 
-	return <div>{ crossSellsProducts }</div>;
+	return <div>{crossSellsProducts}</div>;
 };
 
 export default CartCrossSellsProductList;

@@ -8,14 +8,14 @@ import { useStoreCart } from '@woocommerce/base-context/hooks';
  */
 import { CheckoutExpressPayment } from '../../../cart-checkout-shared/payment-methods';
 
-const Block = ( { className }: { className?: string } ): JSX.Element | null => {
+const Block = ({ className }: { className?: string }): JSX.Element | null => {
 	const { cartNeedsPayment } = useStoreCart();
-	if ( ! cartNeedsPayment ) {
+	if (!cartNeedsPayment) {
 		return null;
 	}
 
 	return (
-		<div className={ className }>
+		<div className={className}>
 			<CheckoutExpressPayment />
 		</div>
 	);

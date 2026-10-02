@@ -13,28 +13,28 @@ import { Text } from '@woocommerce/experimental';
 import { WooHeaderPageTitle } from '@woocommerce/admin-layout';
 
 const NoMatch = () => {
-	const [ isDelaying, setIsDelaying ] = useState( true );
+	const [isDelaying, setIsDelaying] = useState(true);
 
 	/*
 	 * Delay for 3 seconds to wait if there are routing pages added after the
 	 * initial routing pages to reduce the chance of flashing the error message
 	 * on this page.
 	 */
-	useEffect( () => {
-		const timerId = setTimeout( () => {
-			setIsDelaying( false );
-		}, 3000 );
+	useEffect(() => {
+		const timerId = setTimeout(() => {
+			setIsDelaying(false);
+		}, 3000);
 
 		return () => {
-			clearTimeout( timerId );
+			clearTimeout(timerId);
 		};
-	}, [] );
+	}, []);
 
-	if ( isDelaying ) {
+	if (isDelaying) {
 		return (
 			<>
 				<WooHeaderPageTitle>
-					{ __( 'Loading…', 'woocommerce' ) }
+					{__('Loading…', 'woocommerce')}
 				</WooHeaderPageTitle>
 				<div className="woocommerce-layout__loading">
 					<Spinner />
@@ -48,10 +48,10 @@ const NoMatch = () => {
 			<Card>
 				<CardBody>
 					<Text>
-						{ __(
+						{__(
 							'Sorry, you are not allowed to access this page.',
 							'woocommerce'
-						) }
+						)}
 					</Text>
 				</CardBody>
 			</Card>

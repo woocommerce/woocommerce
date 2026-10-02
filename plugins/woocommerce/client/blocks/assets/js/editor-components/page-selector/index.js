@@ -16,48 +16,41 @@ import {
  */
 import { formatTitle } from '../utils';
 
-const PageSelector = ( { setPageId, pageId, labels } ) => {
+const PageSelector = ({ setPageId, pageId, labels }) => {
 	const pages =
-		useSelect( ( select ) => {
-			return select( 'core' ).getEntityRecords( 'postType', 'page', {
+		useSelect((select) => {
+			return select('core').getEntityRecords('postType', 'page', {
 				status: 'publish',
 				orderby: 'title',
 				order: 'asc',
 				per_page: 100,
-			} );
-		}, [] ) || null;
-	if ( pages ) {
+			});
+		}, []) || null;
+	if (pages) {
 		return (
-			<ToolsPanel
-				label={ labels.title }
-				resetAll={ () => setPageId( 0 ) }
-			>
+			<ToolsPanel label={labels.title} resetAll={() => setPageId(0)}>
 				<ToolsPanelItem
-					label={ __( 'Link to', 'woocommerce' ) }
-					hasValue={ () =>
-						typeof pageId === 'number' && pageId !== 0
-					}
-					onDeselect={ () => setPageId( 0 ) }
+					label={__('Link to', 'woocommerce')}
+					hasValue={() => typeof pageId === 'number' && pageId !== 0}
+					onDeselect={() => setPageId(0)}
 					isShownByDefault
 				>
 					<SelectControl
-						label={ __( 'Link to', 'woocommerce' ) }
-						value={ pageId }
-						options={ [
+						label={__('Link to', 'woocommerce')}
+						value={pageId}
+						options={[
 							{
 								label: labels.default,
 								value: 0,
 							},
-							...pages.map( ( page ) => {
+							...pages.map((page) => {
 								return {
-									label: formatTitle( page, pages ),
-									value: parseInt( page.id, 10 ),
+									label: formatTitle(page, pages),
+									value: parseInt(page.id, 10),
 								};
-							} ),
-						] }
-						onChange={ ( value ) =>
-							setPageId( parseInt( value, 10 ) )
-						}
+							}),
+						]}
+						onChange={(value) => setPageId(parseInt(value, 10))}
 					/>
 				</ToolsPanelItem>
 			</ToolsPanel>

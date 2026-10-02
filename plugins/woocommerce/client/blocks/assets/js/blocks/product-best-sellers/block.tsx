@@ -11,18 +11,18 @@ import { gridBlockPreview } from '@woocommerce/resource-previews';
 import { Props } from './types';
 import { ProductBestSellersInspectorControls } from './inspector-controls';
 
-export const ProductBestSellersBlock = ( props: Props ): JSX.Element => {
+export const ProductBestSellersBlock = (props: Props): JSX.Element => {
 	const { attributes, name } = props;
 
-	if ( attributes.isPreview ) {
+	if (attributes.isPreview) {
 		return gridBlockPreview;
 	}
 
 	return (
 		<div className="wc-block-product-best-sellers">
-			<ProductBestSellersInspectorControls { ...props } />
+			<ProductBestSellersInspectorControls {...props} />
 			<Disabled>
-				<ServerSideRender block={ name } attributes={ attributes } />
+				<ServerSideRender block={name} attributes={attributes} />
 			</Disabled>
 		</div>
 	);

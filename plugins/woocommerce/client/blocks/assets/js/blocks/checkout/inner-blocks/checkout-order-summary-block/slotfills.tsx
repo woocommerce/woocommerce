@@ -18,7 +18,7 @@ export const OrderMetaSlotFill = (): JSX.Element => {
 		context: 'woocommerce/checkout',
 	};
 
-	return <ExperimentalOrderMeta.Slot { ...slotFillProps } />;
+	return <ExperimentalOrderMeta.Slot {...slotFillProps} />;
 };
 
 const checkoutOrderSummarySlotName = 'checkoutOrderSummaryActionArea';
@@ -26,4 +26,4 @@ const checkoutOrderSummarySlotName = 'checkoutOrderSummaryActionArea';
 export const {
 	Fill: CheckoutOrderSummaryFill,
 	Slot: CheckoutOrderSummarySlot,
-} = createSlotFill( checkoutOrderSummarySlotName );
+} = createSlotFill(checkoutOrderSummarySlotName);

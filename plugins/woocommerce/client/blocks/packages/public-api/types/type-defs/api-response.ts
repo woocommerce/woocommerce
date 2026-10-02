@@ -1,30 +1,30 @@
-export interface ApiResponse< T > {
-	body: Record< string, unknown >;
+export interface ApiResponse<T> {
+	body: Record<string, unknown>;
 	headers: Headers;
 	status: number;
 	ok: boolean;
-	json: () => Promise< T >;
+	json: () => Promise<T>;
 }
 
 export function assertBatchResponseIsValid(
 	response: unknown
 ): asserts response is {
-	responses: ApiResponse< unknown >[];
+	responses: ApiResponse<unknown>[];
 	headers: Headers;
 } {
 	if (
 		typeof response === 'object' &&
 		response !== null &&
-		response.hasOwnProperty( 'responses' )
+		response.hasOwnProperty('responses')
 	) {
 		return;
 	}
-	throw new Error( 'Response not valid' );
+	throw new Error('Response not valid');
 }
 
-export function assertResponseIsValid< T >(
+export function assertResponseIsValid<T>(
 	response: unknown
-): asserts response is ApiResponse< T > {
+): asserts response is ApiResponse<T> {
 	if (
 		typeof response === 'object' &&
 		response !== null &&
@@ -33,5 +33,5 @@ export function assertResponseIsValid< T >(
 	) {
 		return;
 	}
-	throw new Error( 'Response not valid' );
+	throw new Error('Response not valid');
 }

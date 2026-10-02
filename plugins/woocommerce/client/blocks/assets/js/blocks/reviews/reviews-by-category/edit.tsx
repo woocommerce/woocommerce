@@ -15,8 +15,8 @@ export const Edit = (
 	const blockProps = useBlockProps();
 
 	return (
-		<div { ...blockProps }>
-			<Block { ...props } />
+		<div {...blockProps}>
+			<Block {...props} />
 		</div>
 	);
 };

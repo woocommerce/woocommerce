@@ -4,13 +4,13 @@
  * Modified to support a custom `data-keep-visible` attribute,
  * which prevents elements from being hidden from screen readers.
  */
-const LIVE_REGION_ARIA_ROLES = new Set( [
+const LIVE_REGION_ARIA_ROLES = new Set([
 	'alert',
 	'status',
 	'log',
 	'marquee',
 	'timer',
-] );
+]);
 
 let hiddenElements: Element[] = [],
 	isHidden = false;
@@ -27,14 +27,14 @@ let hiddenElements: Element[] = [],
  *
  * @return {boolean} Whether the element should be hidden from screen-readers.
  */
-export function elementShouldBeHidden( element: Element ) {
-	const role = element.getAttribute( 'role' );
-	return ! (
+export function elementShouldBeHidden(element: Element) {
+	const role = element.getAttribute('role');
+	return !(
 		element.tagName === 'SCRIPT' ||
-		element.hasAttribute( 'aria-hidden' ) ||
-		element.hasAttribute( 'aria-live' ) ||
-		element.hasAttribute( 'data-keep-visible' ) ||
-		( role && LIVE_REGION_ARIA_ROLES.has( role ) )
+		element.hasAttribute('aria-hidden') ||
+		element.hasAttribute('aria-live') ||
+		element.hasAttribute('data-keep-visible') ||
+		(role && LIVE_REGION_ARIA_ROLES.has(role))
 	);
 }
 
@@ -50,20 +50,20 @@ export function elementShouldBeHidden( element: Element ) {
  *
  * @param {HTMLDivElement} unhiddenElement The element that should not be hidden.
  */
-export function hideApp( unhiddenElement?: HTMLDivElement ) {
-	if ( isHidden ) {
+export function hideApp(unhiddenElement?: HTMLDivElement) {
+	if (isHidden) {
 		return;
 	}
-	const elements = Array.from( document.body.children );
-	elements.forEach( ( element ) => {
-		if ( element === unhiddenElement ) {
+	const elements = Array.from(document.body.children);
+	elements.forEach((element) => {
+		if (element === unhiddenElement) {
 			return;
 		}
-		if ( elementShouldBeHidden( element ) ) {
-			element.setAttribute( 'aria-hidden', 'true' );
-			hiddenElements.push( element );
+		if (elementShouldBeHidden(element)) {
+			element.setAttribute('aria-hidden', 'true');
+			hiddenElements.push(element);
 		}
-	} );
+	});
 	isHidden = true;
 }
 
@@ -72,12 +72,12 @@ export function hideApp( unhiddenElement?: HTMLDivElement ) {
  * visible again to screen-readers.
  */
 export function showApp() {
-	if ( ! isHidden ) {
+	if (!isHidden) {
 		return;
 	}
-	hiddenElements.forEach( ( element ) => {
-		element.removeAttribute( 'aria-hidden' );
-	} );
+	hiddenElements.forEach((element) => {
+		element.removeAttribute('aria-hidden');
+	});
 	hiddenElements = [];
 	isHidden = false;
 }

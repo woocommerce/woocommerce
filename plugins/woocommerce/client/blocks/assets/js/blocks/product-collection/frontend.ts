@@ -18,7 +18,7 @@ import './style.scss';
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: productsState } = store< ProductsStore >(
+const { state: productsState } = store<ProductsStore>(
 	'woocommerce/products',
 	{},
 	{ lock: universalLock }
@@ -40,12 +40,12 @@ function isRTL(): boolean {
 	return document.documentElement?.dir === 'rtl';
 }
 
-function isValidLink( ref: HTMLElement | null ): ref is HTMLAnchorElement {
+function isValidLink(ref: HTMLElement | null): ref is HTMLAnchorElement {
 	return (
 		ref !== null &&
 		ref instanceof window.HTMLAnchorElement &&
-		!! ref.href &&
-		( ! ref.target || ref.target === '_self' ) &&
+		!!ref.href &&
+		(!ref.target || ref.target === '_self') &&
 		ref.origin === window.location.origin
 	);
 }
@@ -57,7 +57,7 @@ const checkIfButtonsDisabled = (
 	isDisabledPrevious: boolean;
 	isDisabledNext: boolean;
 } => {
-	if ( ! productTemplate ) {
+	if (!productTemplate) {
 		return {
 			isDisabledPrevious: true,
 			isDisabledNext: true,
@@ -67,7 +67,7 @@ const checkIfButtonsDisabled = (
 	const SCROLL_OFFSET = 5;
 	const { scrollWidth, clientWidth } = productTemplate;
 
-	if ( isRTL() ) {
+	if (isRTL()) {
 		return {
 			isDisabledPrevious: currentScroll > -SCROLL_OFFSET,
 			isDisabledNext:
@@ -88,7 +88,7 @@ const checkIfButtonsDisabled = (
  *
  * @param direction - The direction to scroll.
  */
-const scrollCarousel = ( direction: 'left' | 'right' ) => {
+const scrollCarousel = (direction: 'left' | 'right') => {
 	const { ref } = getElement();
 
 	const productCollection = ref?.closest(
@@ -98,7 +98,7 @@ const scrollCarousel = ( direction: 'left' | 'right' ) => {
 		'.wc-block-product-template'
 	) as HTMLElement;
 
-	if ( ! productTemplate ) {
+	if (!productTemplate) {
 		return;
 	}
 
@@ -110,12 +110,12 @@ const scrollCarousel = ( direction: 'left' | 'right' ) => {
 
 	const multiplier = isRTL() ? -1 : 1;
 
-	productTemplate?.scrollBy( {
-		left: multiplier * ( direction === 'left' ? -scrollBy : scrollBy ),
+	productTemplate?.scrollBy({
+		left: multiplier * (direction === 'left' ? -scrollBy : scrollBy),
 		behavior: 'smooth',
-	} );
+	});
 
-	const context = getContext< ProductCollectionStoreContext >();
+	const context = getContext<ProductCollectionStoreContext>();
 	const { scrollLeft } = productTemplate;
 	// scrollBy doesn't return the final position, so we need to calculate it.
 	const finalPosition =
@@ -132,61 +132,60 @@ const scrollCarousel = ( direction: 'left' | 'right' ) => {
 	context.isDisabledNext = isDisabledNext;
 };
 
-const onKeyDown = ( event: KeyboardEvent ) => {
-	if ( event.code === 'ArrowRight' ) {
+const onKeyDown = (event: KeyboardEvent) => {
+	if (event.code === 'ArrowRight') {
 		event.preventDefault();
-		scrollCarousel( 'right' );
+		scrollCarousel('right');
 	}
 
-	if ( event.code === 'ArrowLeft' ) {
+	if (event.code === 'ArrowLeft') {
 		event.preventDefault();
-		scrollCarousel( 'left' );
+		scrollCarousel('left');
 	}
 };
 
-function isValidEvent( event: MouseEvent ): boolean {
+function isValidEvent(event: MouseEvent): boolean {
 	return (
 		event.button === 0 && // Left clicks only.
-		! event.metaKey && // Open in new tab (Mac).
-		! event.ctrlKey && // Open in new tab (Windows).
-		! event.altKey && // Download.
-		! event.shiftKey &&
-		! event.defaultPrevented
+		!event.metaKey && // Open in new tab (Mac).
+		!event.ctrlKey && // Open in new tab (Windows).
+		!event.altKey && // Download.
+		!event.shiftKey &&
+		!event.defaultPrevented
 	);
 }
 
 const productCollectionStore = {
 	actions: {
-		*navigate( event: MouseEvent ) {
+		*navigate(event: MouseEvent) {
 			const { ref } = getElement();
 
-			if ( isValidLink( ref ) && isValidEvent( event ) ) {
+			if (isValidLink(ref) && isValidEvent(event)) {
 				event.preventDefault();
 
-				const ctx = getContext< ProductCollectionStoreContext >();
+				const ctx = getContext<ProductCollectionStoreContext>();
 
 				const routerRegionId = ref
-					.closest( '[data-wp-router-region]' )
-					?.getAttribute( 'data-wp-router-region' );
+					.closest('[data-wp-router-region]')
+					?.getAttribute('data-wp-router-region');
 
-				const { actions } = yield import(
-					'@wordpress/interactivity-router'
-				);
+				const { actions } =
+					yield import('@wordpress/interactivity-router');
 
-				yield actions.navigate( ref.href );
+				yield actions.navigate(ref.href);
 
 				ctx.isPrefetchNextOrPreviousLink = ref.href;
 
 				// Moves focus to the product link.
 				const product: HTMLAnchorElement | null =
 					document.querySelector(
-						`[data-wp-router-region=${ routerRegionId }] .wc-block-product-template .wc-block-product a`
+						`[data-wp-router-region=${routerRegionId}] .wc-block-product-template .wc-block-product a`
 					);
 				product?.focus();
 
-				triggerProductListRenderedEvent( {
+				triggerProductListRenderedEvent({
 					collection: ctx.collection,
-				} );
+				});
 			}
 		},
 		/**
@@ -196,43 +195,41 @@ const productCollectionStore = {
 		*prefetchOnHover() {
 			const { ref } = getElement();
 
-			if ( isValidLink( ref ) ) {
-				const { actions } = yield import(
-					'@wordpress/interactivity-router'
-				);
+			if (isValidLink(ref)) {
+				const { actions } =
+					yield import('@wordpress/interactivity-router');
 
-				yield actions.prefetch( ref.href );
+				yield actions.prefetch(ref.href);
 			}
 		},
 		*viewProduct() {
-			const { collection } =
-				getContext< ProductCollectionStoreContext >();
+			const { collection } = getContext<ProductCollectionStoreContext>();
 
 			const productId = productsState.productInContext?.id;
 
-			if ( productId ) {
-				triggerViewedProductEvent( { collection, productId } );
+			if (productId) {
+				triggerViewedProductEvent({ collection, productId });
 			}
 		},
 		// Next/Previous Buttons block actions
 		onClickPrevious: () => {
-			scrollCarousel( 'left' );
+			scrollCarousel('left');
 		},
 		onClickNext: () => {
-			scrollCarousel( 'right' );
+			scrollCarousel('right');
 		},
-		onKeyDownPrevious: ( event: KeyboardEvent ) => {
-			onKeyDown( event );
+		onKeyDownPrevious: (event: KeyboardEvent) => {
+			onKeyDown(event);
 		},
-		onKeyDownNext: ( event: KeyboardEvent ) => {
-			onKeyDown( event );
+		onKeyDownNext: (event: KeyboardEvent) => {
+			onKeyDown(event);
 		},
 		watchScroll: () => {
-			const context = getContext< ProductCollectionStoreContext >();
+			const context = getContext<ProductCollectionStoreContext>();
 			const { ref } = getElement();
-			if ( ref ) {
+			if (ref) {
 				const { isDisabledPrevious, isDisabledNext } =
-					checkIfButtonsDisabled( ref, ref.scrollLeft );
+					checkIfButtonsDisabled(ref, ref.scrollLeft);
 
 				context.isDisabledPrevious = isDisabledPrevious;
 				context.isDisabledNext = isDisabledNext;
@@ -246,41 +243,39 @@ const productCollectionStore = {
 		 */
 		*prefetch() {
 			const { ref } = getElement();
-			const context = getContext< ProductCollectionStoreContext >();
+			const context = getContext<ProductCollectionStoreContext>();
 
-			if ( isValidLink( ref ) && context.isPrefetchNextOrPreviousLink ) {
-				const { actions } = yield import(
-					'@wordpress/interactivity-router'
-				);
+			if (isValidLink(ref) && context.isPrefetchNextOrPreviousLink) {
+				const { actions } =
+					yield import('@wordpress/interactivity-router');
 
-				yield actions.prefetch( ref.href );
+				yield actions.prefetch(ref.href);
 			}
 		},
 		*onRender() {
-			const { collection } =
-				getContext< ProductCollectionStoreContext >();
+			const { collection } = getContext<ProductCollectionStoreContext>();
 
-			triggerProductListRenderedEvent( { collection } );
+			triggerProductListRenderedEvent({ collection });
 		},
 		initResizeObserver: () => {
 			const scrollableElement = getElement()?.ref;
-			if ( ! scrollableElement ) {
+			if (!scrollableElement) {
 				return;
 			}
 
-			const context = getContext< ProductCollectionStoreContext >();
-			const observer = new ResizeObserver( () => {
+			const context = getContext<ProductCollectionStoreContext>();
+			const observer = new ResizeObserver(() => {
 				const hasOverflowX =
 					scrollableElement.scrollWidth >
 					scrollableElement.clientWidth;
-				context.hideNextPreviousButtons = ! hasOverflowX;
-			} );
+				context.hideNextPreviousButtons = !hasOverflowX;
+			});
 
-			observer.observe( scrollableElement );
+			observer.observe(scrollableElement);
 		},
 	},
 };
 
-store( 'woocommerce/product-collection', productCollectionStore, {
+store('woocommerce/product-collection', productCollectionStore, {
 	lock: true,
-} );
+});

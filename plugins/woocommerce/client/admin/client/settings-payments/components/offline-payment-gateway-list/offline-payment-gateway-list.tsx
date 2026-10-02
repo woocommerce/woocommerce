@@ -31,70 +31,70 @@ type OfflinePaymentGatewayListItemProps = {
  * A component that renders an offline payment gateway as a sortable list item.
  * Displays gateway information including the title, description, icon, and actions to enable or manage the gateway.
  */
-export const OfflinePaymentGatewayListItem = ( {
+export const OfflinePaymentGatewayListItem = ({
 	gateway,
 	...props
-}: OfflinePaymentGatewayListItemProps ) => {
+}: OfflinePaymentGatewayListItemProps) => {
 	return (
 		<SortableItem
-			key={ gateway.id }
-			id={ gateway.id }
+			key={gateway.id}
+			id={gateway.id}
 			className={
 				'woocommerce-list__item woocommerce-list__item-enter-done' +
-				( props.className ? ` ${ props.className }` : '' )
+				(props.className ? ` ${props.className}` : '')
 			}
-			{ ...props }
+			{...props}
 		>
 			<div className="woocommerce-list__item-inner">
-				{ /* Left section with drag handle and icon */ }
+				{/* Left section with drag handle and icon */}
 				<div className="woocommerce-list__item-before">
 					<DefaultDragHandle />
-					{ gateway.icon && (
+					{gateway.icon && (
 						<img
-							className={ 'woocommerce-list__item-image' }
-							src={ gateway.icon }
-							alt={ gateway.title + ' logo' }
+							className={'woocommerce-list__item-image'}
+							src={gateway.icon}
+							alt={gateway.title + ' logo'}
 						/>
-					) }
+					)}
 				</div>
-				{ /* Middle section with title and description */ }
+				{/* Middle section with title and description */}
 				<div className="woocommerce-list__item-text">
 					<span className="woocommerce-list__item-title">
-						{ gateway.title }
+						{gateway.title}
 					</span>
 					<span
 						className="woocommerce-list__item-content"
 						// eslint-disable-next-line react/no-danger -- This string is sanitized by the PaymentGateway class.
-						dangerouslySetInnerHTML={ sanitizeHTML(
-							decodeEntities( gateway.description )
-						) }
+						dangerouslySetInnerHTML={sanitizeHTML(
+							decodeEntities(gateway.description)
+						)}
 					/>
 				</div>
-				{ /* Right section with action buttons */ }
+				{/* Right section with action buttons */}
 				<div className="woocommerce-list__item-after">
 					<div className="woocommerce-list__item-after__actions">
-						{ ! gateway.state.enabled ? (
+						{!gateway.state.enabled ? (
 							<EnableGatewayButton
-								installingPlugin={ null }
-								gatewayProvider={ gateway }
+								installingPlugin={null}
+								gatewayProvider={gateway}
 								settingsHref={
 									gateway.management._links.settings.href
 								}
 								onboardingHref={
 									gateway.onboarding._links.onboard.href
 								}
-								isOffline={ true }
-								gatewayHasRecommendedPaymentMethods={ false } // Offline gateway items don't have recommended PMs.
+								isOffline={true}
+								gatewayHasRecommendedPaymentMethods={false} // Offline gateway items don't have recommended PMs.
 							/>
 						) : (
 							<SettingsButton
-								gatewayProvider={ gateway }
+								gatewayProvider={gateway}
 								settingsHref={
 									gateway.management._links.settings.href
 								}
-								isInstallingPlugin={ false }
+								isInstallingPlugin={false}
 							/>
-						) }
+						)}
 					</div>
 				</div>
 			</div>
@@ -106,29 +106,29 @@ export const OfflinePaymentGatewayListItem = ( {
  * A component that renders a sortable list of offline payment gateways.
  * Each gateway is rendered as a `OfflinePaymentGatewayListItem` and the list supports reordering via drag-and-drop.
  */
-export const OfflinePaymentGatewayList = ( {
+export const OfflinePaymentGatewayList = ({
 	gateways,
 	setGateways,
 }: {
 	gateways: OfflinePaymentMethodProvider[];
-	setGateways: ( gateways: OfflinePaymentMethodProvider[] ) => void;
-} ) => {
+	setGateways: (gateways: OfflinePaymentMethodProvider[]) => void;
+}) => {
 	return (
-		<SortableContainer< OfflinePaymentMethodProvider >
+		<SortableContainer<OfflinePaymentMethodProvider>
 			className="woocommerce-list"
-			items={ gateways }
-			setItems={ setGateways }
+			items={gateways}
+			setItems={setGateways}
 		>
-			{ gateways.map( ( method, index ) => (
+			{gateways.map((method, index) => (
 				<OfflinePaymentGatewayListItem
-					gateway={ method }
-					key={ method.id }
+					gateway={method}
+					key={method.id}
 					className={
 						'woocommerce-list__item' +
-						( index === gateways.length - 1 ? ' is-last' : '' )
+						(index === gateways.length - 1 ? ' is-last' : '')
 					}
 				/>
-			) ) }
+			))}
 		</SortableContainer>
 	);
 };

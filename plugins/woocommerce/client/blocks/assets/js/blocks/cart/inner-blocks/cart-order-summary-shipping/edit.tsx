@@ -13,7 +13,7 @@ import { SHIPPING_ENABLED } from '@woocommerce/block-settings';
  */
 import Block from './block';
 
-export const Edit = ( {
+export const Edit = ({
 	attributes,
 }: {
 	attributes: {
@@ -23,38 +23,38 @@ export const Edit = ( {
 			remove: boolean;
 		};
 	};
-} ): JSX.Element => {
+}): JSX.Element => {
 	const { className } = attributes;
 	const blockProps = useBlockProps();
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<InspectorControls>
-				{ !! SHIPPING_ENABLED && (
+				{!!SHIPPING_ENABLED && (
 					<PanelBody
-						title={ __( 'Shipping Calculations', 'woocommerce' ) }
+						title={__('Shipping Calculations', 'woocommerce')}
 					>
 						<p className="wc-block-checkout__controls-text">
-							{ __(
+							{__(
 								'Options that control shipping can be managed in your store settings.',
 								'woocommerce'
-							) }
+							)}
 						</p>
 						<ExternalLink
-							href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping&section=options` }
+							href={`${ADMIN_URL}admin.php?page=wc-settings&tab=shipping&section=options`}
 						>
-							{ __( 'Manage shipping options', 'woocommerce' ) }
-						</ExternalLink>{ ' ' }
+							{__('Manage shipping options', 'woocommerce')}
+						</ExternalLink>{' '}
 					</PanelBody>
-				) }
+				)}
 			</InspectorControls>
 			<Noninteractive>
-				<Block className={ className } />
+				<Block className={className} />
 			</Noninteractive>
 		</div>
 	);
 };
 
 export const Save = (): JSX.Element => {
-	return <div { ...useBlockProps.save() } />;
+	return <div {...useBlockProps.save()} />;
 };

@@ -17,9 +17,9 @@ type NavigatorWithCompound = typeof WPNavigator & {
 	BackButton: typeof NavigatorBackButton;
 };
 
-const Navigator = ( WPNavigator || NavigatorProvider ) as NavigatorWithCompound;
+const Navigator = (WPNavigator || NavigatorProvider) as NavigatorWithCompound;
 
-if ( ! WPNavigator ) {
+if (!WPNavigator) {
 	Navigator.Screen = NavigatorScreen;
 	Navigator.BackButton = NavigatorBackButton;
 }

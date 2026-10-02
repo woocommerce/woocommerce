@@ -33,31 +33,31 @@ export const EXPERIMENTAL_WC_TASKLIST_FOOTER_SLOT_NAME =
  * @param {Array}  param0.children - Node children.
  * @param {Array}  param0.order    - Node order.
  */
-export const ExperimentalWooTaskListFooterItem = ( {
+export const ExperimentalWooTaskListFooterItem = ({
 	children,
 	order = 1,
 }: {
 	children: React.ReactNode;
 	order?: number;
-} ) => {
+}) => {
 	return (
-		<Fill name={ EXPERIMENTAL_WC_TASKLIST_FOOTER_SLOT_NAME }>
-			{ ( fillProps ) => {
-				return createOrderedChildren( children, order, fillProps );
-			} }
+		<Fill name={EXPERIMENTAL_WC_TASKLIST_FOOTER_SLOT_NAME}>
+			{(fillProps) => {
+				return createOrderedChildren(children, order, fillProps);
+			}}
 		</Fill>
 	);
 };
 
-ExperimentalWooTaskListFooterItem.Slot = ( {
+ExperimentalWooTaskListFooterItem.Slot = ({
 	fillProps,
 }: {
-	fillProps?: React.ComponentProps< typeof Slot >[ 'fillProps' ];
-} ) => (
+	fillProps?: React.ComponentProps<typeof Slot>['fillProps'];
+}) => (
 	<Slot
-		name={ EXPERIMENTAL_WC_TASKLIST_FOOTER_SLOT_NAME }
-		fillProps={ fillProps }
+		name={EXPERIMENTAL_WC_TASKLIST_FOOTER_SLOT_NAME}
+		fillProps={fillProps}
 	>
-		{ sortFillsByOrder }
+		{sortFillsByOrder}
 	</Slot>
 );

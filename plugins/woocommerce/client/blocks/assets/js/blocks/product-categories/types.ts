@@ -8,14 +8,14 @@ export interface ProductCategoriesBlockProps {
 		showChildrenOnly: boolean;
 	};
 	name: string;
-	setAttributes: ( attributes: {
+	setAttributes: (attributes: {
 		hasCount?: boolean;
 		hasImage?: boolean;
 		hasEmpty?: boolean;
 		isDropdown?: boolean;
 		isHierarchical?: boolean;
 		showChildrenOnly?: boolean;
-	} ) => void;
+	}) => void;
 }
 
 export interface ProductCategoriesIndexProps {

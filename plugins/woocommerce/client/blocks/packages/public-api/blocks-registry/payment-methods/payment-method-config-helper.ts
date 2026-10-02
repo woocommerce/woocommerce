@@ -22,12 +22,12 @@ export const canMakePaymentWithFeaturesCheck =
 		canMakePayment: CanMakePaymentCallback,
 		features: string[]
 	): CanMakePaymentCallback =>
-	( canPayArgument ) => {
+	(canPayArgument) => {
 		const requirements = canPayArgument?.paymentRequirements || [];
-		const featuresSupportRequirements = requirements.every(
-			( requirement ) => features.includes( requirement )
+		const featuresSupportRequirements = requirements.every((requirement) =>
+			features.includes(requirement)
 		);
-		return featuresSupportRequirements && canMakePayment( canPayArgument );
+		return featuresSupportRequirements && canMakePayment(canPayArgument);
 	};
 
 // Filter out payment methods by callbacks registered by extensions.
@@ -37,48 +37,44 @@ export const canMakePaymentWithExtensions =
 		extensionsCallbacks: NamespacedCanMakePaymentExtensionsCallbacks,
 		paymentMethodName: PaymentMethodName
 	): CanMakePaymentCallback =>
-	( canPayArgument ) => {
+	(canPayArgument) => {
 		// Validate whether the payment method is available based on its own criteria first.
-		let canPay = canMakePayment( canPayArgument );
+		let canPay = canMakePayment(canPayArgument);
 
-		if ( canPay ) {
+		if (canPay) {
 			// Gather all callbacks for paymentMethodName.
 			const namespacedCallbacks: Record<
 				ExtensionNamespace,
 				CanMakePaymentExtensionCallback
 			> = {};
 
-			Object.entries( extensionsCallbacks ).forEach(
-				( [ namespace, callbacks ] ) => {
+			Object.entries(extensionsCallbacks).forEach(
+				([namespace, callbacks]) => {
 					if (
-						! ( paymentMethodName in callbacks ) ||
-						typeof callbacks[ paymentMethodName ] !== 'function'
+						!(paymentMethodName in callbacks) ||
+						typeof callbacks[paymentMethodName] !== 'function'
 					) {
 						return;
 					}
-					namespacedCallbacks[ namespace ] =
-						callbacks[ paymentMethodName ];
+					namespacedCallbacks[namespace] =
+						callbacks[paymentMethodName];
 				}
 			);
 
-			canPay = Object.keys( namespacedCallbacks ).every(
-				( namespace ) => {
-					try {
-						return namespacedCallbacks[ namespace ](
-							canPayArgument
-						);
-					} catch ( err ) {
-						// eslint-disable-next-line no-console
-						console.error(
-							`Error when executing callback for ${ paymentMethodName } in ${ namespace }`,
-							err
-						);
-						// .every() expects a return value at the end of every arrow function and
-						// this ensures that the error is ignored when computing the whole result.
-						return true;
-					}
+			canPay = Object.keys(namespacedCallbacks).every((namespace) => {
+				try {
+					return namespacedCallbacks[namespace](canPayArgument);
+				} catch (err) {
+					// eslint-disable-next-line no-console
+					console.error(
+						`Error when executing callback for ${paymentMethodName} in ${namespace}`,
+						err
+					);
+					// .every() expects a return value at the end of every arrow function and
+					// this ensures that the error is ignored when computing the whole result.
+					return true;
 				}
-			);
+			});
 		}
 
 		return canPay;
@@ -89,18 +85,18 @@ export const getCanMakePayment = (
 	features: string[],
 	paymentMethodName: string
 ): CanMakePaymentCallback => {
-	const canPay = canMakePaymentWithFeaturesCheck( canMakePayment, features );
+	const canPay = canMakePaymentWithFeaturesCheck(canMakePayment, features);
 	// Loop through all callbacks to check if there are any registered for this payment method.
 	return (
-		Object.values( extensionsConfig.canMakePayment ) as Record<
+		Object.values(extensionsConfig.canMakePayment) as Record<
 			PaymentMethodName,
 			CanMakePaymentCallback
 		>[]
-	 ).some( ( callbacks ) => paymentMethodName in callbacks )
+	).some((callbacks) => paymentMethodName in callbacks)
 		? canMakePaymentWithExtensions(
 				canPay,
 				extensionsConfig.canMakePayment,
 				paymentMethodName
-		  )
+			)
 		: canPay;
 };

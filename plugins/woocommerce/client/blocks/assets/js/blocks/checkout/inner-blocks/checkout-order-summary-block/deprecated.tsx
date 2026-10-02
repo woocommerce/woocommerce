@@ -14,13 +14,13 @@ const deprecated = [
 		attributes: metadata.attributes,
 		save: () => {
 			return (
-				<div { ...useBlockProps.save() }>
+				<div {...useBlockProps.save()}>
 					<InnerBlocks.Content />
 				</div>
 			);
 		},
 		supports: metadata.supports,
-		migrate: ( { attributes } ) => {
+		migrate: ({ attributes }) => {
 			return [
 				attributes,
 				[
@@ -68,9 +68,9 @@ const deprecated = [
 				],
 			];
 		},
-		isEligible: ( attributes, innerBlocks ) => {
-			return ! innerBlocks.some(
-				( block ) =>
+		isEligible: (attributes, innerBlocks) => {
+			return !innerBlocks.some(
+				(block) =>
 					block.name ===
 					'woocommerce/checkout-order-summary-totals-block'
 			);

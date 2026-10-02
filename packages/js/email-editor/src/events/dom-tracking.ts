@@ -13,29 +13,29 @@ let EVENTS_TO_TRACK = [];
 /**
  * Filter events by selector and record the event.
  */
-function trackMatchingEvents( event: Event ) {
-	EVENTS_TO_TRACK.forEach( ( candidate ) => {
-		const matchedTarget = ( event.target as Element )?.matches?.(
+function trackMatchingEvents(event: Event) {
+	EVENTS_TO_TRACK.forEach((candidate) => {
+		const matchedTarget = (event.target as Element)?.matches?.(
 			candidate.selector
 		)
 			? event.target
-			: ( event.target as Element )?.closest?.( candidate.selector );
+			: (event.target as Element)?.closest?.(candidate.selector);
 
 		// Event doesn't match any of our watched selectors so we skip it
-		if ( ! matchedTarget ) {
+		if (!matchedTarget) {
 			return;
 		}
 
-		if ( typeof candidate.track === 'function' ) {
-			candidate.track( matchedTarget, event );
+		if (typeof candidate.track === 'function') {
+			candidate.track(matchedTarget, event);
 		} else {
-			recordEvent( candidate.track );
+			recordEvent(candidate.track);
 		}
-	} );
+	});
 }
 
 export function initDomTracking() {
-	if ( ! isEventTrackingEnabled() ) {
+	if (!isEventTrackingEnabled()) {
 		return;
 	}
 
@@ -62,36 +62,36 @@ export function initDomTracking() {
 				const isBlockToolsCollapsed = document.getElementsByClassName(
 					'is-collapsed editor-collapsible-block-toolbar'
 				).length;
-				recordEvent( 'header_blocks_tool_button_clicked', {
+				recordEvent('header_blocks_tool_button_clicked', {
 					isBlockToolsCollapsed,
-				} );
+				});
 			},
 			selector: '.editor-collapsible-block-toolbar__toggle',
 		},
 		// Header more menu toggle
 		{
-			track: ( target ) => {
-				const isOpened = target.classList.contains( 'is-opened' );
-				recordEvent( 'header_more_menu_dropdown_toggle', {
+			track: (target) => {
+				const isOpened = target.classList.contains('is-opened');
+				recordEvent('header_more_menu_dropdown_toggle', {
 					isOpened,
-				} );
+				});
 			},
 			// eslint-disable-next-line @wordpress/i18n-text-domain
-			selector: `.components-dropdown-menu__toggle[aria-label="${ __(
+			selector: `.components-dropdown-menu__toggle[aria-label="${__(
 				'Options'
-			) }"]`,
+			)}"]`,
 		},
 		// Header save button clicked
 		{
-			track: ( target ) => {
+			track: (target) => {
 				if (
 					// eslint-disable-next-line @wordpress/i18n-text-domain
-					( target.textContent === __( 'Save' ) &&
-						target.getAttribute( 'aria-disabled' ) === 'false' ) ||
+					(target.textContent === __('Save') &&
+						target.getAttribute('aria-disabled') === 'false') ||
 					// eslint-disable-next-line @wordpress/i18n-text-domain
-					target.textContent === __( 'Saving…' )
+					target.textContent === __('Saving…')
 				) {
-					recordEvent( 'header_save_button_clicked' );
+					recordEvent('header_save_button_clicked');
 				}
 			},
 			selector: '.editor-post-publish-button',
@@ -109,54 +109,54 @@ export function initDomTracking() {
 		},
 		// Preview dropdown toggle clicked
 		{
-			track: ( target ) => {
-				const isOpened = target.classList.contains( 'is-opened' );
-				recordEvent( 'header_preview_dropdown_clicked', {
+			track: (target) => {
+				const isOpened = target.classList.contains('is-opened');
+				recordEvent('header_preview_dropdown_clicked', {
 					isOpened,
-				} );
+				});
 			},
 			selector: '.editor-preview-dropdown__toggle',
 		},
 		// Email tab in the sidebar clicked
 		{
 			track: () => {
-				recordEvent( 'sidebar_tab_selected', { tab: 'document' } );
+				recordEvent('sidebar_tab_selected', { tab: 'document' });
 			},
 			selector: '[data-tab-id="edit-post/document"]',
 		},
 		// Block tab in the sidebar clicked
 		{
 			track: () => {
-				recordEvent( 'sidebar_tab_selected', { tab: 'block' } );
+				recordEvent('sidebar_tab_selected', { tab: 'block' });
 			},
 			selector: '[data-tab-id="edit-post/block"]',
 		},
 		// Header inserter sidebar toggle clicked
 		{
-			track: ( target ) => {
-				const isOpened = target.classList.contains( 'is-pressed' );
-				recordEvent( 'header_inserter_sidebar_clicked', { isOpened } );
+			track: (target) => {
+				const isOpened = target.classList.contains('is-pressed');
+				recordEvent('header_inserter_sidebar_clicked', { isOpened });
 			},
 			selector: '.editor-document-tools__inserter-toggle',
 		},
 		// Header listview sidebar toggle clicked
 		{
-			track: ( target ) => {
-				const isOpened = target.classList.contains( 'is-pressed' );
-				recordEvent( 'header_listview_sidebar_clicked', { isOpened } );
+			track: (target) => {
+				const isOpened = target.classList.contains('is-pressed');
+				recordEvent('header_listview_sidebar_clicked', { isOpened });
 			},
 			selector: '.editor-document-tools__document-overview-toggle',
 		},
 		// Command in command bar selected
 		{
-			track: ( target ) => {
-				recordEvent( 'command_bar_command_clicked', {
+			track: (target) => {
+				recordEvent('command_bar_command_clicked', {
 					command: target.dataset?.value,
-				} );
+				});
 			},
 			selector: '.commands-command-menu__container [role="option"]',
 		},
 	];
 
-	document.addEventListener( 'click', trackMatchingEvents );
+	document.addEventListener('click', trackMatchingEvents);
 }

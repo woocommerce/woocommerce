@@ -11,9 +11,9 @@ export default function FulfillmentsList() {
 	return (
 		fulfillments.length > 0 && (
 			<div className="woocommerce-fulfillment-stored-fulfillments-list">
-				{ fulfillments.map( ( fulfillment, index ) => (
+				{fulfillments.map((fulfillment, index) => (
 					<FulfillmentEditor
-						index={ index }
+						index={index}
 						disabled={
 							isEditing &&
 							openSection !== 'fulfillment-' + fulfillment.id
@@ -21,14 +21,14 @@ export default function FulfillmentsList() {
 						expanded={
 							openSection === 'fulfillment-' + fulfillment.id
 						}
-						onExpand={ () =>
-							setOpenSection( 'fulfillment-' + fulfillment.id )
+						onExpand={() =>
+							setOpenSection('fulfillment-' + fulfillment.id)
 						}
-						onCollapse={ () => setOpenSection( '' ) }
-						key={ fulfillment.id }
-						fulfillment={ fulfillment }
+						onCollapse={() => setOpenSection('')}
+						key={fulfillment.id}
+						fulfillment={fulfillment}
 					/>
-				) ) }
+				))}
 			</div>
 		)
 	);

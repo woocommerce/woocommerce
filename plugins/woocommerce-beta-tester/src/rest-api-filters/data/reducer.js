@@ -12,17 +12,17 @@ const DEFAULT_STATE = {
 	},
 };
 
-const reducer = ( state = DEFAULT_STATE, action ) => {
-	switch ( action.type ) {
+const reducer = (state = DEFAULT_STATE, action) => {
+	switch (action.type) {
 		case TYPES.TOGGLE_FILTER:
 			return {
 				...state,
-				filters: state.filters.map( ( filter, index ) => {
-					if ( index === action.index ) {
-						filter.enabled = ! filter.enabled;
+				filters: state.filters.map((filter, index) => {
+					if (index === action.index) {
+						filter.enabled = !filter.enabled;
 					}
 					return filter;
-				} ),
+				}),
 			};
 		case TYPES.SET_IS_LOADING:
 			return {
@@ -39,13 +39,13 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 			return {
 				...state,
 				filters: state.filters.filter(
-					( item, index ) => index !== action.index
+					(item, index) => index !== action.index
 				),
 			};
 		case TYPES.SAVE_FILTER:
 			return {
 				...state,
-				filters: [ ...state.filters, action.filter ],
+				filters: [...state.filters, action.filter],
 			};
 		default:
 			return state;

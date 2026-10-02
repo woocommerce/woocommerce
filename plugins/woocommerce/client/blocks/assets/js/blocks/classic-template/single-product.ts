@@ -22,8 +22,8 @@ import { OnClickCallbackParameter } from './types';
 
 const getBlockifiedTemplate = () =>
 	[
-		createBlock( 'woocommerce/breadcrumbs' ),
-		createBlock( 'woocommerce/store-notices' ),
+		createBlock('woocommerce/breadcrumbs'),
+		createBlock('woocommerce/store-notices'),
 		createBlock(
 			'core/columns',
 			{
@@ -37,37 +37,37 @@ const getBlockifiedTemplate = () =>
 						justifyContent: 'right',
 						width: '512px',
 					},
-					[ createBlock( 'woocommerce/product-gallery' ) ]
+					[createBlock('woocommerce/product-gallery')]
 				),
-				createBlock( 'core/column', {}, [
-					createBlock( 'core/post-title', {
+				createBlock('core/column', {}, [
+					createBlock('core/post-title', {
 						__woocommerceNamespace: PRODUCT_TITLE_VARIATION_NAME,
 						level: 1,
-					} ),
-					createBlock( 'woocommerce/product-rating' ),
-					createBlock( 'woocommerce/product-price', {
+					}),
+					createBlock('woocommerce/product-rating'),
+					createBlock('woocommerce/product-price', {
 						fontSize: 'large',
-					} ),
-					createBlock( 'woocommerce/product-summary' ),
+					}),
+					createBlock('woocommerce/product-summary'),
 					createBlock(
-						getSetting( 'isBlockTheme', false )
+						getSetting('isBlockTheme', false)
 							? 'woocommerce/add-to-cart-with-options'
 							: 'woocommerce/add-to-cart-form'
 					),
-					createBlock( 'woocommerce/product-meta' ),
-				] ),
+					createBlock('woocommerce/product-meta'),
+				]),
 			]
 		),
-		createBlock( 'woocommerce/product-details', {
+		createBlock('woocommerce/product-details', {
 			align: 'wide',
 			className: 'is-style-minimal',
-		} ),
-		createBlock( 'core/heading', {
+		}),
+		createBlock('core/heading', {
 			align: 'wide',
 			level: 2,
-			content: __( 'Related Products', 'woocommerce' ),
+			content: __('Related Products', 'woocommerce'),
 			style: { spacing: { margin: { bottom: '1rem' } } },
-		} ),
+		}),
 		createBlock(
 			'woocommerce/product-collection',
 			{
@@ -76,7 +76,7 @@ const getBlockifiedTemplate = () =>
 					...productCollectionDefaultQuery,
 					perPage: 5,
 					pages: 1,
-					woocommerceStockStatus: [ 'instock', 'onbackorder' ],
+					woocommerceStockStatus: ['instock', 'onbackorder'],
 					filterable: false,
 				},
 				displayLayout: {
@@ -85,16 +85,16 @@ const getBlockifiedTemplate = () =>
 					shrinkColumns: true,
 				},
 				collection: 'woocommerce/product-collection/related',
-				hideControls: [ 'inherit' ],
+				hideControls: ['inherit'],
 				align: 'wide',
 			},
-			createBlocksFromInnerBlocksTemplate( [
+			createBlocksFromInnerBlocksTemplate([
 				productCollectionInnerBlocksTemplate,
-			] )
+			])
 		),
-	].filter( Boolean ) as BlockInstance[];
+	].filter(Boolean) as BlockInstance[];
 
-const getDescription = ( templateTitle: string ) =>
+const getDescription = (templateTitle: string) =>
 	sprintf(
 		/* translators: %s is the template title */
 		__(
@@ -104,27 +104,27 @@ const getDescription = ( templateTitle: string ) =>
 		templateTitle
 	);
 
-const getButtonLabel = () => __( 'Transform into blocks', 'woocommerce' );
+const getButtonLabel = () => __('Transform into blocks', 'woocommerce');
 
-const onClickCallback = ( {
+const onClickCallback = ({
 	clientId,
 	getBlocks,
 	replaceBlock,
 	selectBlock,
-}: OnClickCallbackParameter ) => {
-	replaceBlock( clientId, getBlockifiedTemplate() );
+}: OnClickCallbackParameter) => {
+	replaceBlock(clientId, getBlockifiedTemplate());
 
 	const blocks = getBlocks();
 	const groupBlock = blocks.find(
-		( block ) =>
+		(block) =>
 			block.name === 'core/group' &&
 			block.innerBlocks.some(
-				( innerBlock ) => innerBlock.name === 'woocommerce/breadcrumbs'
+				(innerBlock) => innerBlock.name === 'woocommerce/breadcrumbs'
 			)
 	);
 
-	if ( groupBlock ) {
-		selectBlock( groupBlock.clientId );
+	if (groupBlock) {
+		selectBlock(groupBlock.clientId);
 	}
 };
 

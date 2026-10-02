@@ -17,7 +17,7 @@ import {
 
 type UseRegisteredChannels = {
 	loading: boolean;
-	data?: Array< RegisteredChannel >;
+	data?: Array<RegisteredChannel>;
 	error?: ApiFetchError;
 	refetch: () => void;
 };
@@ -27,22 +27,22 @@ type UseRegisteredChannels = {
  * plugins/woocommerce/src/Admin/Marketing/MarketingChannelInterface.php backend
  * to SyncStatusType frontend.
  */
-const statusMap: Record< string, SyncStatusType > = {
+const statusMap: Record<string, SyncStatusType> = {
 	'sync-in-progress': 'syncing',
 	'sync-failed': 'failed',
 	synced: 'synced',
 };
 
-const convert = ( data: APIRegisteredChannel ): RegisteredChannel => {
+const convert = (data: APIRegisteredChannel): RegisteredChannel => {
 	const issueType = data.errors_count >= 1 ? 'error' : 'none';
 	const issueText =
 		data.errors_count >= 1
 			? sprintf(
 					// translators: %d: The number of issues to resolve.
-					__( '%d issues to resolve', 'woocommerce' ),
+					__('%d issues to resolve', 'woocommerce'),
 					data.errors_count
-			  )
-			: __( 'No issues to resolve', 'woocommerce' );
+				)
+			: __('No issues to resolve', 'woocommerce');
 
 	return {
 		slug: data.slug,
@@ -52,32 +52,32 @@ const convert = ( data: APIRegisteredChannel ): RegisteredChannel => {
 		isSetupCompleted: data.is_setup_completed,
 		setupUrl: data.settings_url,
 		manageUrl: data.settings_url,
-		syncStatus: statusMap[ data.product_listings_status ],
+		syncStatus: statusMap[data.product_listings_status],
 		issueType,
 		issueText,
 	};
 };
 
 export const useRegisteredChannels = (): UseRegisteredChannels => {
-	const { invalidateResolution } = useDispatch( STORE_KEY );
+	const { invalidateResolution } = useDispatch(STORE_KEY);
 
-	const refetch = useCallback( () => {
-		void invalidateResolution( 'getRegisteredChannels', [] );
-	}, [ invalidateResolution ] );
+	const refetch = useCallback(() => {
+		void invalidateResolution('getRegisteredChannels', []);
+	}, [invalidateResolution]);
 
 	return useSelect(
-		( select ) => {
+		(select) => {
 			const { hasFinishedResolution, getRegisteredChannels } =
-				select( STORE_KEY );
+				select(STORE_KEY);
 			const state = getRegisteredChannels();
 
 			return {
-				loading: ! hasFinishedResolution( 'getRegisteredChannels', [] ),
-				data: state.data?.map( convert ),
+				loading: !hasFinishedResolution('getRegisteredChannels', []),
+				data: state.data?.map(convert),
 				error: state.error,
 				refetch,
 			};
 		},
-		[ refetch ]
+		[refetch]
 	);
 };

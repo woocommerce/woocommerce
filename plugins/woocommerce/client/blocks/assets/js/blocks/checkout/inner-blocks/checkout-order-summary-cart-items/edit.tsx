@@ -16,51 +16,51 @@ export type BlockAttributes = {
 	disableProductDescriptions?: boolean;
 };
 
-export const Edit = ( {
+export const Edit = ({
 	attributes,
 	setAttributes,
 }: {
 	attributes: BlockAttributes;
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ): JSX.Element => {
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}): JSX.Element => {
 	const { className = '', disableProductDescriptions = false } = attributes;
 	const blockProps = useBlockProps();
 
 	return (
-		<div { ...blockProps }>
-			{ /* For now this setting can only be enabled if you have experimental features enabled. */ }
-			{ isExperimentalBlocksEnabled() && (
+		<div {...blockProps}>
+			{/* For now this setting can only be enabled if you have experimental features enabled. */}
+			{isExperimentalBlocksEnabled() && (
 				<InspectorControls>
-					<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
+					<PanelBody title={__('Settings', 'woocommerce')}>
 						<ToggleControl
 							__nextHasNoMarginBottom
-							label={ __(
+							label={__(
 								'Disable product descriptions',
 								'woocommerce'
-							) }
-							help={ __(
+							)}
+							help={__(
 								'Disable display of product descriptions.',
 								'woocommerce'
-							) }
-							checked={ disableProductDescriptions }
-							onChange={ () =>
-								setAttributes( {
+							)}
+							checked={disableProductDescriptions}
+							onChange={() =>
+								setAttributes({
 									disableProductDescriptions:
-										! disableProductDescriptions,
-								} )
+										!disableProductDescriptions,
+								})
 							}
 						/>
 					</PanelBody>
 				</InspectorControls>
-			) }
+			)}
 			<Block
-				disableProductDescriptions={ disableProductDescriptions }
-				className={ className }
+				disableProductDescriptions={disableProductDescriptions}
+				className={className}
 			/>
 		</div>
 	);
 };
 
 export const Save = (): JSX.Element => {
-	return <div { ...useBlockProps.save() } />;
+	return <div {...useBlockProps.save()} />;
 };

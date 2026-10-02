@@ -9,7 +9,7 @@ import type { ElementType } from 'react';
  */
 import './editor.scss';
 
-const PaginationItem = ( {
+const PaginationItem = ({
 	content,
 	tag: Tag = 'a',
 	extraClass = '',
@@ -17,22 +17,22 @@ const PaginationItem = ( {
 	content: string;
 	tag?: ElementType;
 	extraClass?: string;
-} ) =>
+}) =>
 	Tag === 'a' ? (
 		<Tag
-			className={ `page-numbers ${ extraClass }` }
+			className={`page-numbers ${extraClass}`}
 			href="#comments-pagination-numbers-pseudo-link"
-			onClick={ ( event ) => event.preventDefault() }
+			onClick={(event) => event.preventDefault()}
 		>
-			{ content }
+			{content}
 		</Tag>
 	) : (
-		<Tag className={ `page-numbers ${ extraClass }` }>{ content }</Tag>
+		<Tag className={`page-numbers ${extraClass}`}>{content}</Tag>
 	);
 
 export default function Edit() {
 	return (
-		<div { ...useBlockProps() }>
+		<div {...useBlockProps()}>
 			<PaginationItem content="1" />
 			<PaginationItem content="2" />
 			<PaginationItem content="3" tag="span" extraClass="current" />

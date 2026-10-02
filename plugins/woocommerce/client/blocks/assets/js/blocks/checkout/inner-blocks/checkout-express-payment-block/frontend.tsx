@@ -11,7 +11,7 @@ import { ExpressPaymentContext } from '../../../cart-checkout-shared/payment-met
 import metadata from './block.json';
 import { ExpressCheckoutAttributes } from '../../../cart-checkout-shared/types';
 
-const FrontendBlock = ( attributes: ExpressCheckoutAttributes ) => {
+const FrontendBlock = (attributes: ExpressCheckoutAttributes) => {
 	const validAttributes = getValidBlockAttributes(
 		metadata.attributes,
 		attributes
@@ -22,7 +22,7 @@ const FrontendBlock = ( attributes: ExpressCheckoutAttributes ) => {
 
 	return (
 		<ExpressPaymentContext.Provider
-			value={ { showButtonStyles, buttonHeight, buttonBorderRadius } }
+			value={{ showButtonStyles, buttonHeight, buttonBorderRadius }}
 		>
 			<Block />
 		</ExpressPaymentContext.Provider>

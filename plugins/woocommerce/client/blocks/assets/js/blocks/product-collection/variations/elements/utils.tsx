@@ -24,11 +24,11 @@ export function registerElementVariation(
 		scope,
 	}: VariationDetails
 ) {
-	registerBlockVariation( coreName, {
+	registerBlockVariation(coreName, {
 		description: blockDescription,
 		name: variationName,
 		title: blockTitle,
-		isActive: ( blockAttributes ) =>
+		isActive: (blockAttributes) =>
 			blockAttributes.__woocommerceNamespace === variationName,
 		icon: {
 			src: blockIcon,
@@ -37,5 +37,5 @@ export function registerElementVariation(
 			__woocommerceNamespace: variationName,
 		},
 		scope,
-	} );
+	});
 }

@@ -24,11 +24,11 @@ import { registeredBlockComponents } from './registered-block-components-init';
  */
 export function getRegisteredBlockComponents(
 	context: string
-): Record< string, RegisteredBlockComponent > {
+): Record<string, RegisteredBlockComponent> {
 	const parentInnerBlocks =
-		typeof registeredBlockComponents[ context ] === 'object' &&
-		Object.keys( registeredBlockComponents[ context ] ).length > 0
-			? registeredBlockComponents[ context ]
+		typeof registeredBlockComponents[context] === 'object' &&
+		Object.keys(registeredBlockComponents[context]).length > 0
+			? registeredBlockComponents[context]
 			: {};
 
 	return {
@@ -45,10 +45,10 @@ export function getRegisteredBlockComponents(
  */
 export function getRegisteredInnerBlocks(
 	main: string
-): Record< string, RegisteredBlockComponent > {
-	deprecated( 'getRegisteredInnerBlocks', {
+): Record<string, RegisteredBlockComponent> {
+	deprecated('getRegisteredInnerBlocks', {
 		version: '4.4.0',
 		alternative: 'getRegisteredBlockComponents',
-	} );
-	return getRegisteredBlockComponents( main );
+	});
+	return getRegisteredBlockComponents(main);
 }

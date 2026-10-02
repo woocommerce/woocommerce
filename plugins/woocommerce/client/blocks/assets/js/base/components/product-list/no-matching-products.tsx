@@ -10,28 +10,28 @@ import { Icon, search } from '@wordpress/icons';
  */
 import { NoMatchingProductsProps } from './types';
 
-const NoMatchingProducts = ( {
+const NoMatchingProducts = ({
 	resetCallback = () => void 0,
-}: NoMatchingProductsProps ): JSX.Element => {
+}: NoMatchingProductsProps): JSX.Element => {
 	const { parentClassName } = useInnerBlockLayoutContext();
 	return (
-		<div className={ `${ parentClassName }__no-products` }>
+		<div className={`${parentClassName}__no-products`}>
 			<Icon
-				className={ `${ parentClassName }__no-products-image` }
-				icon={ search }
-				size={ 100 }
+				className={`${parentClassName}__no-products-image`}
+				icon={search}
+				size={100}
 			/>
-			<strong className={ `${ parentClassName }__no-products-title` }>
-				{ __( 'No products found', 'woocommerce' ) }
+			<strong className={`${parentClassName}__no-products-title`}>
+				{__('No products found', 'woocommerce')}
 			</strong>
-			<p className={ `${ parentClassName }__no-products-description` }>
-				{ __(
+			<p className={`${parentClassName}__no-products-description`}>
+				{__(
 					'We were unable to find any results based on your search.',
 					'woocommerce'
-				) }
+				)}
 			</p>
-			<button onClick={ resetCallback }>
-				{ __( 'Reset Search', 'woocommerce' ) }
+			<button onClick={resetCallback}>
+				{__('Reset Search', 'woocommerce')}
 			</button>
 		</div>
 	);

@@ -29,122 +29,117 @@ export type TaskListsProps = {
 	context?: string;
 };
 
-export const TaskLists = ( { query }: TaskListsProps ) => {
+export const TaskLists = ({ query }: TaskListsProps) => {
 	const { task } = query;
-	const { hideTaskList } = useDispatch( onboardingStore );
+	const { hideTaskList } = useDispatch(onboardingStore);
 
-	const { isResolving, taskLists } = useSelect( ( select ) => {
+	const { isResolving, taskLists } = useSelect((select) => {
 		return {
-			isResolving: ! select( onboardingStore ).hasFinishedResolution(
+			isResolving: !select(onboardingStore).hasFinishedResolution(
 				'getTaskLists',
 				[]
 			),
-			taskLists: select( onboardingStore ).getTaskLists(),
+			taskLists: select(onboardingStore).getTaskLists(),
 		};
-	}, [] );
+	}, []);
 
 	const getCurrentTask = () => {
-		if ( ! task ) {
+		if (!task) {
 			return null;
 		}
 
 		const tasks = taskLists.reduce(
-			( acc: TaskType[], taskList: TaskListType ) => [
+			(acc: TaskType[], taskList: TaskListType) => [
 				...acc,
 				...taskList.tasks,
 			],
 			[]
 		);
 
-		const currentTask = tasks.find( ( t: TaskType ) => t.id === task );
+		const currentTask = tasks.find((t: TaskType) => t.id === task);
 
-		if ( ! currentTask ) {
+		if (!currentTask) {
 			return null;
 		}
 
 		return currentTask;
 	};
 
-	const toggleTaskList = ( taskList: TaskListType ) => {
+	const toggleTaskList = (taskList: TaskListType) => {
 		const { id, eventPrefix, isHidden } = taskList;
-		const newValue = ! isHidden;
+		const newValue = !isHidden;
 
-		recordEvent(
-			newValue ? `${ eventPrefix }hide` : `${ eventPrefix }show`,
-			{}
-		);
+		recordEvent(newValue ? `${eventPrefix}hide` : `${eventPrefix}show`, {});
 
-		void hideTaskList( id );
+		void hideTaskList(id);
 	};
 
 	const currentTask = getCurrentTask();
 
-	if ( task && ! currentTask ) {
+	if (task && !currentTask) {
 		return null;
 	}
 
-	if ( currentTask ) {
+	if (currentTask) {
 		return (
 			<div className="woocommerce-task-dashboard__container">
-				<Task query={ query } task={ currentTask } />
+				<Task query={query} task={currentTask} />
 			</div>
 		);
 	}
 
-	const taskListIds = getAdminSetting( 'visibleTaskListIds', [] );
+	const taskListIds = getAdminSetting('visibleTaskListIds', []);
 	const TaskListPlaceholderComponent =
-		taskListIds[ 0 ] === 'setup'
+		taskListIds[0] === 'setup'
 			? SetupTaskListPlaceholder
 			: TasksPlaceholder;
 
-	if ( isResolving ) {
-		return <TaskListPlaceholderComponent query={ query } />;
+	if (isResolving) {
+		return <TaskListPlaceholderComponent query={query} />;
 	}
 
 	return (
 		<>
-			{ taskLists
-				.filter( ( { isVisible }: TaskListType ) => isVisible )
-				.map( ( taskList: TaskListType ) => {
+			{taskLists
+				.filter(({ isVisible }: TaskListType) => isVisible)
+				.map((taskList: TaskListType) => {
 					const { id, isHidden, isToggleable } = taskList;
 					const TaskListComponent =
 						id === 'setup' ? SetupTaskList : TaskList;
 
 					return (
-						<Fragment key={ id }>
+						<Fragment key={id}>
 							<TaskListComponent
-								isExpandable={ false }
-								query={ query }
-								{ ...taskList }
+								isExpandable={false}
+								query={query}
+								{...taskList}
 							/>
-							{ isToggleable && (
+							{isToggleable && (
 								<DisplayOption>
 									<MenuGroup
 										className="woocommerce-layout__homescreen-display-options"
-										label={ __( 'Display', 'woocommerce' ) }
+										label={__('Display', 'woocommerce')}
 									>
 										<MenuItem
 											className="woocommerce-layout__homescreen-extension-tasklist-toggle"
-											icon={
-												isHidden ? undefined : check
-											}
-											isSelected={ ! isHidden }
+											icon={isHidden ? undefined : check}
+											isSelected={!isHidden}
 											role="menuitemcheckbox"
-											onClick={ () =>
-												toggleTaskList( taskList )
+											onClick={() =>
+												toggleTaskList(taskList)
 											}
 										>
-											{ __(
+											{__(
 												'Show things to do next',
 												'woocommerce'
-											) }
+											)}
 										</MenuItem>
 									</MenuGroup>
 								</DisplayOption>
-							) }
+							)}
 						</Fragment>
 					);
-				} ) }
+				})}
 		</>
 	);
 };

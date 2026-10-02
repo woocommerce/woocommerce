@@ -94,21 +94,22 @@ describe( 'Custom Place Order Button API', () => {
 		test( 'should expose the API', () => {
 			expect( window.wc ).toBeDefined();
 			expect( window.wc.customPlaceOrderButton ).toBeDefined();
+			expect( typeof window.wc.customPlaceOrderButton.register ).toBe(
+				'function'
+			);
+			expect( typeof window.wc.customPlaceOrderButton.__maybeShow ).toBe(
+				'function'
+			);
 			expect(
-				typeof window.wc.customPlaceOrderButton.register
+				typeof window.wc.customPlaceOrderButton
+					.__maybeHideDefaultButtonOnInit
 			).toBe( 'function' );
-			expect(
-				typeof window.wc.customPlaceOrderButton.__maybeShow
-			).toBe( 'function' );
-			expect(
-				typeof window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit
-			).toBe( 'function' );
-			expect(
-				typeof window.wc.customPlaceOrderButton.__cleanup
-			).toBe( 'function' );
-			expect(
-				typeof window.wc.customPlaceOrderButton.__getForm
-			).toBe( 'function' );
+			expect( typeof window.wc.customPlaceOrderButton.__cleanup ).toBe(
+				'function'
+			);
+			expect( typeof window.wc.customPlaceOrderButton.__getForm ).toBe(
+				'function'
+			);
 		} );
 
 		test( 'should reject registration without proper configuration', () => {
@@ -156,13 +157,19 @@ describe( 'Custom Place Order Button API', () => {
 				'wc.customPlaceOrderButton.register: config must be an object'
 			);
 
-			window.wc.customPlaceOrderButton.register( 'test-gateway', undefined );
+			window.wc.customPlaceOrderButton.register(
+				'test-gateway',
+				undefined
+			);
 
 			expect( consoleSpy ).toHaveBeenLastCalledWith(
 				'wc.customPlaceOrderButton.register: config must be an object'
 			);
 
-			window.wc.customPlaceOrderButton.register( 'test-gateway', 'not-an-object' );
+			window.wc.customPlaceOrderButton.register(
+				'test-gateway',
+				'not-an-object'
+			);
 
 			expect( consoleSpy ).toHaveBeenLastCalledWith(
 				'wc.customPlaceOrderButton.register: config must be an object'
@@ -198,14 +205,20 @@ describe( 'Custom Place Order Button API', () => {
 		test( 'should hide default button for gateway in wc_checkout_params list', () => {
 			// Gateway 'test-gateway' is in the server list, so maybeHideDefaultButtonOnInit
 			// should add the class to hide the default button
-			window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit( 'test-gateway' );
+			window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit(
+				'test-gateway'
+			);
 
-			expect( $form.addClass ).toHaveBeenCalledWith( 'has-custom-place-order-button' );
+			expect( $form.addClass ).toHaveBeenCalledWith(
+				'has-custom-place-order-button'
+			);
 		} );
 
 		test( 'should not hide default button for gateway not in list', () => {
 			// Gateway 'unknown-gateway' is NOT in the server list
-			window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit( 'unknown-gateway' );
+			window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit(
+				'unknown-gateway'
+			);
 
 			expect( $form.addClass ).not.toHaveBeenCalled();
 		} );
@@ -217,7 +230,9 @@ describe( 'Custom Place Order Button API', () => {
 			jest.resetModules();
 			require( '../utils/custom-place-order-button' );
 
-			window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit( 'test-gateway' );
+			window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit(
+				'test-gateway'
+			);
 
 			expect( $form.addClass ).not.toHaveBeenCalled();
 		} );
@@ -225,15 +240,21 @@ describe( 'Custom Place Order Button API', () => {
 		test( 'should use wc_add_payment_method_params as fallback', () => {
 			delete global.window.wc_checkout_params;
 			global.window.wc_add_payment_method_params = {
-				gateways_with_custom_place_order_button: [ 'add-method-gateway' ],
+				gateways_with_custom_place_order_button: [
+					'add-method-gateway',
+				],
 			};
 
 			jest.resetModules();
 			require( '../utils/custom-place-order-button' );
 
-			window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit( 'add-method-gateway' );
+			window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit(
+				'add-method-gateway'
+			);
 
-			expect( $form.addClass ).toHaveBeenCalledWith( 'has-custom-place-order-button' );
+			expect( $form.addClass ).toHaveBeenCalledWith(
+				'has-custom-place-order-button'
+			);
 		} );
 
 		test( 'should prefer wc_checkout_params over wc_add_payment_method_params', () => {
@@ -241,18 +262,26 @@ describe( 'Custom Place Order Button API', () => {
 				gateways_with_custom_place_order_button: [ 'checkout-gateway' ],
 			};
 			global.window.wc_add_payment_method_params = {
-				gateways_with_custom_place_order_button: [ 'add-method-gateway' ],
+				gateways_with_custom_place_order_button: [
+					'add-method-gateway',
+				],
 			};
 
 			jest.resetModules();
 			require( '../utils/custom-place-order-button' );
 
-			window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit( 'checkout-gateway' );
-			expect( $form.addClass ).toHaveBeenCalledWith( 'has-custom-place-order-button' );
+			window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit(
+				'checkout-gateway'
+			);
+			expect( $form.addClass ).toHaveBeenCalledWith(
+				'has-custom-place-order-button'
+			);
 
 			$form.addClass.mockClear();
 
-			window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit( 'add-method-gateway' );
+			window.wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit(
+				'add-method-gateway'
+			);
 			expect( $form.addClass ).not.toHaveBeenCalled();
 		} );
 	} );
@@ -321,7 +350,10 @@ describe( 'Custom Place Order Button API', () => {
 				if ( selector === '#add_payment_method' ) {
 					return { length: 0 };
 				}
-				if ( typeof selector === 'string' && selector.includes( 'div' ) ) {
+				if (
+					typeof selector === 'string' &&
+					selector.includes( 'div' )
+				) {
 					return mockContainer;
 				}
 				return { length: 0 };
@@ -331,7 +363,10 @@ describe( 'Custom Place Order Button API', () => {
 			global.window.$ = global.window.jQuery;
 
 			global.window.wc_checkout_params = {
-				gateways_with_custom_place_order_button: [ 'gateway-a', 'gateway-b' ],
+				gateways_with_custom_place_order_button: [
+					'gateway-a',
+					'gateway-b',
+				],
 			};
 
 			jest.resetModules();
@@ -359,15 +394,23 @@ describe( 'Custom Place Order Button API', () => {
 
 			// Simulating to select `gateway-a`
 			selectedGateway = 'gateway-a';
-			window.wc.customPlaceOrderButton.__maybeShow( selectedGateway, mockApi );
+			window.wc.customPlaceOrderButton.__maybeShow(
+				selectedGateway,
+				mockApi
+			);
 
 			expect( renderA ).toHaveBeenCalledTimes( 1 );
 			expect( cleanupA ).not.toHaveBeenCalled();
-			expect( $form.addClass ).toHaveBeenCalledWith( 'has-custom-place-order-button' );
+			expect( $form.addClass ).toHaveBeenCalledWith(
+				'has-custom-place-order-button'
+			);
 
 			// Simulating to switch to `gateway-b`
 			selectedGateway = 'gateway-b';
-			window.wc.customPlaceOrderButton.__maybeShow( selectedGateway, mockApi );
+			window.wc.customPlaceOrderButton.__maybeShow(
+				selectedGateway,
+				mockApi
+			);
 
 			expect( cleanupA ).toHaveBeenCalledTimes( 1 );
 			expect( renderB ).toHaveBeenCalledTimes( 1 );
@@ -385,10 +428,15 @@ describe( 'Custom Place Order Button API', () => {
 
 			// Simulating to selecting `gateway-a` (which has a custom button)
 			selectedGateway = 'gateway-a';
-			window.wc.customPlaceOrderButton.__maybeShow( selectedGateway, mockApi );
+			window.wc.customPlaceOrderButton.__maybeShow(
+				selectedGateway,
+				mockApi
+			);
 
 			expect( renderA ).toHaveBeenCalledTimes( 1 );
-			expect( $form.addClass ).toHaveBeenCalledWith( 'has-custom-place-order-button' );
+			expect( $form.addClass ).toHaveBeenCalledWith(
+				'has-custom-place-order-button'
+			);
 
 			// Reset mocks to track new calls
 			$form.addClass.mockClear();
@@ -396,10 +444,15 @@ describe( 'Custom Place Order Button API', () => {
 
 			// Simulating to switch to `no-custom-button-gateway`
 			selectedGateway = 'no-custom-button-gateway';
-			window.wc.customPlaceOrderButton.__maybeShow( selectedGateway, mockApi );
+			window.wc.customPlaceOrderButton.__maybeShow(
+				selectedGateway,
+				mockApi
+			);
 
 			expect( cleanupA ).toHaveBeenCalledTimes( 1 );
-			expect( $form.removeClass ).toHaveBeenCalledWith( 'has-custom-place-order-button' );
+			expect( $form.removeClass ).toHaveBeenCalledWith(
+				'has-custom-place-order-button'
+			);
 		} );
 
 		test( 'should show custom button when switching from regular gateway to custom button gateway', () => {
@@ -413,20 +466,29 @@ describe( 'Custom Place Order Button API', () => {
 
 			// Starting with `no-custom-button-gateway`
 			selectedGateway = 'no-custom-button-gateway';
-			window.wc.customPlaceOrderButton.__maybeShow( selectedGateway, mockApi );
+			window.wc.customPlaceOrderButton.__maybeShow(
+				selectedGateway,
+				mockApi
+			);
 
 			expect( renderA ).not.toHaveBeenCalled();
-			expect( $form.addClass ).not.toHaveBeenCalledWith( 'has-custom-place-order-button' );
+			expect( $form.addClass ).not.toHaveBeenCalledWith(
+				'has-custom-place-order-button'
+			);
 
 			// Simulating to switch to `gateway-a` (which has custom button)
 			selectedGateway = 'gateway-a';
-			window.wc.customPlaceOrderButton.__maybeShow( selectedGateway, mockApi );
+			window.wc.customPlaceOrderButton.__maybeShow(
+				selectedGateway,
+				mockApi
+			);
 
 			expect( renderA ).toHaveBeenCalledTimes( 1 );
-			expect( $form.addClass ).toHaveBeenCalledWith( 'has-custom-place-order-button' );
+			expect( $form.addClass ).toHaveBeenCalledWith(
+				'has-custom-place-order-button'
+			);
 		} );
 	} );
-
 } );
 
 describe( 'getForm helper', () => {
@@ -434,7 +496,7 @@ describe( 'getForm helper', () => {
 		delete global.window.wc;
 
 		// Default mock - no forms found
-		global.window.jQuery = jest.fn( (  ) => {
+		global.window.jQuery = jest.fn( () => {
 			return { length: 0 };
 		} );
 
@@ -464,7 +526,10 @@ describe( 'getForm helper', () => {
 	} );
 
 	test( 'should return #order_review if form.checkout not present', () => {
-		const mockOrderReview = { length: 1, first: jest.fn( () => mockOrderReview ) };
+		const mockOrderReview = {
+			length: 1,
+			first: jest.fn( () => mockOrderReview ),
+		};
 
 		global.window.jQuery = jest.fn( ( selector ) => {
 			if ( selector === 'form.checkout' ) {

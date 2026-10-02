@@ -16,13 +16,13 @@ import { SendButton } from '../send-button';
 import { storeName } from '../../../store';
 import { recordEvent } from '../../../events';
 
-jest.mock( '@wordpress/components', () => ( {
-	Button: ( props ) => <button { ...props }>{ props.children }</button>,
-} ) );
+jest.mock('@wordpress/components', () => ({
+	Button: (props) => <button {...props}>{props.children}</button>,
+}));
 
-jest.mock( '../../../events', () => ( {
+jest.mock('../../../events', () => ({
 	recordEvent: jest.fn(),
-} ) );
+}));
 
 const useSelectMock = useSelect as jest.Mock;
 const useEntitiesSavedStatesIsDirtyMock =
@@ -35,49 +35,47 @@ const mockStoreValues = {
 	isEmailSent: false,
 };
 
-describe( 'SendButton', () => {
-	beforeEach( () => {
+describe('SendButton', () => {
+	beforeEach(() => {
 		jest.clearAllMocks();
 		mockStoreValues.hasEmptyContent = false;
 		mockStoreValues.isEmailSent = false;
 
-		useEntitiesSavedStatesIsDirtyMock.mockReturnValue( { isDirty: false } );
+		useEntitiesSavedStatesIsDirtyMock.mockReturnValue({ isDirty: false });
 
-		useSelectMock.mockImplementation( ( selector ) =>
-			selector( ( store ) => {
-				if ( store === storeName ) {
+		useSelectMock.mockImplementation((selector) =>
+			selector((store) => {
+				if (store === storeName) {
 					return {
 						hasEmptyContent: () => mockStoreValues.hasEmptyContent,
 						isEmailSent: () => mockStoreValues.isEmailSent,
-						getUrls: () => ( { send: 'https://example.com/send' } ),
+						getUrls: () => ({ send: 'https://example.com/send' }),
 					};
 				}
 				return {};
-			} )
+			})
 		);
-	} );
+	});
 
-	it( 'should render with the correct label', () => {
-		const { getByRole } = render( <SendButton /> );
-		expect( getByRole( 'button', { name: 'Send' } ) ).toBeInTheDocument();
-	} );
+	it('should render with the correct label', () => {
+		const { getByRole } = render(<SendButton />);
+		expect(getByRole('button', { name: 'Send' })).toBeInTheDocument();
+	});
 
-	it( 'should be disabled if isDirty is true', () => {
-		useEntitiesSavedStatesIsDirtyMock.mockReturnValue( { isDirty: true } );
-		const { getByRole } = render( <SendButton /> );
-		expect( getByRole( 'button' ) ).toBeDisabled();
-	} );
+	it('should be disabled if isDirty is true', () => {
+		useEntitiesSavedStatesIsDirtyMock.mockReturnValue({ isDirty: true });
+		const { getByRole } = render(<SendButton />);
+		expect(getByRole('button')).toBeDisabled();
+	});
 
-	it( 'should allow the disabled state to be overridden via filter', () => {
-		useEntitiesSavedStatesIsDirtyMock.mockReturnValue( { isDirty: true } );
+	it('should allow the disabled state to be overridden via filter', () => {
+		useEntitiesSavedStatesIsDirtyMock.mockReturnValue({ isDirty: true });
 
 		// Override applyFilters to simulate a filter that removes isDirty from disabled
 		applyFiltersMock.mockImplementationOnce(
-			( hook: string, value: unknown, ...args: unknown[] ) => {
-				if (
-					hook === 'woocommerce_email_editor_send_button_disabled'
-				) {
-					const flags = args[ 0 ] as {
+			(hook: string, value: unknown, ...args: unknown[]) => {
+				if (hook === 'woocommerce_email_editor_send_button_disabled') {
+					const flags = args[0] as {
 						hasEmptyContent: boolean;
 						isEmailSent: boolean;
 					};
@@ -87,9 +85,9 @@ describe( 'SendButton', () => {
 			}
 		);
 
-		const { getByRole } = render( <SendButton /> );
-		expect( getByRole( 'button' ) ).not.toBeDisabled();
-		expect( applyFiltersMock ).toHaveBeenCalledWith(
+		const { getByRole } = render(<SendButton />);
+		expect(getByRole('button')).not.toBeDisabled();
+		expect(applyFiltersMock).toHaveBeenCalledWith(
 			'woocommerce_email_editor_send_button_disabled',
 			true,
 			{
@@ -98,58 +96,56 @@ describe( 'SendButton', () => {
 				isDirty: true,
 			}
 		);
-	} );
+	});
 
-	it( 'should fall back to default when filter returns non-boolean', () => {
-		useEntitiesSavedStatesIsDirtyMock.mockReturnValue( { isDirty: true } );
+	it('should fall back to default when filter returns non-boolean', () => {
+		useEntitiesSavedStatesIsDirtyMock.mockReturnValue({ isDirty: true });
 
 		applyFiltersMock.mockImplementationOnce(
-			( hook: string, value: unknown ) => {
-				if (
-					hook === 'woocommerce_email_editor_send_button_disabled'
-				) {
+			(hook: string, value: unknown) => {
+				if (hook === 'woocommerce_email_editor_send_button_disabled') {
 					return 'not-a-boolean';
 				}
 				return value;
 			}
 		);
 
-		const { getByRole } = render( <SendButton /> );
-		expect( getByRole( 'button' ) ).toBeDisabled();
-	} );
+		const { getByRole } = render(<SendButton />);
+		expect(getByRole('button')).toBeDisabled();
+	});
 
-	it( 'should be disabled if hasEmptyContent is true', () => {
+	it('should be disabled if hasEmptyContent is true', () => {
 		mockStoreValues.hasEmptyContent = true;
 
-		const { getByRole } = render( <SendButton /> );
-		expect( getByRole( 'button' ) ).toBeDisabled();
-	} );
+		const { getByRole } = render(<SendButton />);
+		expect(getByRole('button')).toBeDisabled();
+	});
 
-	it( 'should be disabled if isEmailSent is true', () => {
+	it('should be disabled if isEmailSent is true', () => {
 		mockStoreValues.isEmailSent = true;
 
-		const { getByRole } = render( <SendButton /> );
-		expect( getByRole( 'button' ) ).toBeDisabled();
-	} );
+		const { getByRole } = render(<SendButton />);
+		expect(getByRole('button')).toBeDisabled();
+	});
 
-	it( 'should trigger sendAction and recordEvent on click', () => {
+	it('should trigger sendAction and recordEvent on click', () => {
 		mockStoreValues.hasEmptyContent = false;
 		mockStoreValues.isEmailSent = false;
 
 		const originalLocation = window.location;
-		Object.defineProperty( window, 'location', {
+		Object.defineProperty(window, 'location', {
 			value: { href: '' },
 			writable: true,
-		} );
+		});
 
-		const { getByRole } = render( <SendButton /> );
-		fireEvent.click( getByRole( 'button' ) );
+		const { getByRole } = render(<SendButton />);
+		fireEvent.click(getByRole('button'));
 
-		expect( recordEventMock ).toHaveBeenCalledWith(
+		expect(recordEventMock).toHaveBeenCalledWith(
 			'header_send_button_clicked'
 		);
-		expect( window.location.href ).toBe( 'https://example.com/send' );
+		expect(window.location.href).toBe('https://example.com/send');
 
 		window.location = originalLocation;
-	} );
-} );
+	});
+});

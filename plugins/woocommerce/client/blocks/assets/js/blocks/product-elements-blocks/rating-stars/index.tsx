@@ -10,15 +10,15 @@ import { Icon, starFilled } from '@wordpress/icons';
 import metadata from './block.json';
 import edit from './edit';
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	apiVersion: 3,
 	icon: {
 		src: (
 			<Icon
-				icon={ starFilled }
+				icon={starFilled}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
 	},
 	edit,
-} );
+});

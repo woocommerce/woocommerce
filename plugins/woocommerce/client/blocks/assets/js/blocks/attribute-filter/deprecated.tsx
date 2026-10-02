@@ -28,7 +28,7 @@ const v1 = {
 		},
 		...blockAttributes,
 	},
-	save: ( { attributes }: { attributes: BlockAttributes } ) => {
+	save: ({ attributes }: { attributes: BlockAttributes }) => {
 		const {
 			className,
 			showCounts,
@@ -40,28 +40,28 @@ const v1 = {
 			showFilterButton,
 			selectType,
 		} = attributes;
-		const data: Record< string, unknown > = {
+		const data: Record<string, unknown> = {
 			'data-attribute-id': attributeId,
 			'data-show-counts': showCounts,
 			'data-query-type': queryType,
 			'data-heading': heading,
 			'data-heading-level': headingLevel,
 		};
-		if ( displayStyle !== 'list' ) {
-			data[ 'data-display-style' ] = displayStyle;
+		if (displayStyle !== 'list') {
+			data['data-display-style'] = displayStyle;
 		}
-		if ( showFilterButton ) {
-			data[ 'data-show-filter-button' ] = showFilterButton;
+		if (showFilterButton) {
+			data['data-show-filter-button'] = showFilterButton;
 		}
-		if ( selectType === 'single' ) {
-			data[ 'data-select-type' ] = selectType;
+		if (selectType === 'single') {
+			data['data-select-type'] = selectType;
 		}
 		return (
 			<div
-				{ ...useBlockProps.save( {
-					className: clsx( 'is-loading', className ),
-				} ) }
-				{ ...data }
+				{...useBlockProps.save({
+					className: clsx('is-loading', className),
+				})}
+				{...data}
 			>
 				<span
 					aria-hidden
@@ -72,6 +72,6 @@ const v1 = {
 	},
 };
 
-const deprecated = [ v1 ];
+const deprecated = [v1];
 
 export default deprecated;

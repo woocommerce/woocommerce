@@ -25,8 +25,8 @@ export default function SubscriptionsExpiredExpiringNotice(
 	props: SubscriptionsExpiredExpiringNoticeProps
 ): React.JSX.Element | null {
 	const { type } = props;
-	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
-	const eventKeys: Record< string, TrackEvents > = {
+	const wccomSettings = getAdminSetting('wccomHelper', {});
+	const eventKeys: Record<string, TrackEvents> = {
 		'woo-subscription-expired-notice': {
 			shown: 'woo_subscription_expired_notice_in_marketplace_shown',
 			clicked: 'woo_subscription_expired_notice_in_marketplace_clicked',
@@ -51,56 +51,56 @@ export default function SubscriptionsExpiredExpiringNotice(
 	let notice_id = '';
 	const dismiss_notice_nonce = wccomSettings?.dismissNoticeNonce || '';
 
-	if ( type === 'expired' ) {
+	if (type === 'expired') {
 		notice = wccomSettings?.subscription_expired_notice || {};
 		notice_id = 'woo-subscription-expired-notice';
-	} else if ( type === 'expiring' ) {
+	} else if (type === 'expiring') {
 		notice = wccomSettings?.subscription_expiring_notice || {};
 		notice_id = 'woo-subscription-expiring-notice';
-	} else if ( type === 'missing' ) {
+	} else if (type === 'missing') {
 		notice = wccomSettings?.subscription_missing_notice || {};
 		notice_id = 'woo-subscription-missing-notice';
 	} else {
 		return null;
 	}
 
-	if ( ! wccomSettings.isConnected || ! notice?.description ) {
+	if (!wccomSettings.isConnected || !notice?.description) {
 		return null;
 	}
 
 	const handleClose = () => {
-		recordEvent( eventKeys[ notice_id ].dismissed );
+		recordEvent(eventKeys[notice_id].dismissed);
 		const data = { notice_id, dismiss_notice_nonce };
-		void apiFetch( {
+		void apiFetch({
 			path: `/wc-admin/notice/dismiss`,
 			method: 'POST',
 			data,
-		} );
+		});
 	};
 
 	function handleClick() {
-		recordEvent( eventKeys[ notice_id ].clicked );
+		recordEvent(eventKeys[notice_id].clicked);
 	}
 
 	function handleLoad() {
-		recordEvent( eventKeys[ notice_id ].shown );
+		recordEvent(eventKeys[notice_id].shown);
 	}
 
 	return (
 		<Notice
-			id={ notice_id }
-			description={ notice.description }
-			isDismissible={ true }
+			id={notice_id}
+			description={notice.description}
+			isDismissible={true}
 			variant="error"
-			onClose={ handleClose }
-			onLoad={ handleLoad }
+			onClose={handleClose}
+			onLoad={handleLoad}
 		>
 			<Button
-				href={ notice.button_link }
+				href={notice.button_link}
 				variant="secondary"
-				onClick={ handleClick }
+				onClick={handleClick}
 			>
-				{ notice.button_text }
+				{notice.button_text}
 			</Button>
 		</Notice>
 	);

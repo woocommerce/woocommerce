@@ -92,7 +92,10 @@
 	}
 }
 
-:where(.wc-block-components-quantity-selector .wc-block-components-quantity-selector__input) {
+:where(
+	.wc-block-components-quantity-selector
+		.wc-block-components-quantity-selector__input
+) {
 	padding: 0.4em 0;
 }
 

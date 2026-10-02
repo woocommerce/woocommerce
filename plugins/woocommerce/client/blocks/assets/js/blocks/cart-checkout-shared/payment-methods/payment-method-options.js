@@ -29,67 +29,63 @@ const PaymentMethodOptions = () => {
 		activePaymentMethod,
 		isExpressPaymentMethodActive,
 		availablePaymentMethods,
-	} = useSelect( ( select ) => {
-		const store = select( paymentStore );
+	} = useSelect((select) => {
+		const store = select(paymentStore);
 		return {
 			activeSavedToken: store.getActiveSavedToken(),
 			activePaymentMethod: store.getActivePaymentMethod(),
 			isExpressPaymentMethodActive: store.isExpressPaymentMethodActive(),
 			availablePaymentMethods: store.getAvailablePaymentMethods(),
 		};
-	} );
-	const { __internalSetActivePaymentMethod } = useDispatch( paymentStore );
+	});
+	const { __internalSetActivePaymentMethod } = useDispatch(paymentStore);
 	const paymentMethods = getPaymentMethods();
 	const { ...paymentMethodInterface } = usePaymentMethodInterface();
-	const { removeNotice } = useDispatch( 'core/notices' );
+	const { removeNotice } = useDispatch('core/notices');
 	const { dispatchCheckoutEvent } = useStoreEvents();
 	const { isEditor } = useEditorContext();
 
-	const options = Object.keys( availablePaymentMethods ).map( ( name ) => {
-		const { edit, content, label, supports } = paymentMethods[ name ];
+	const options = Object.keys(availablePaymentMethods).map((name) => {
+		const { edit, content, label, supports } = paymentMethods[name];
 		const component = isEditor ? edit : content;
 		return {
 			value: name,
 			label:
 				typeof label === 'string'
 					? label
-					: cloneElement( label, {
+					: cloneElement(label, {
 							components: paymentMethodInterface.components,
-					  } ),
-			name: `wc-saved-payment-method-token-${ name }`,
+						}),
+			name: `wc-saved-payment-method-token-${name}`,
 			content: (
-				<PaymentMethodCard showSaveOption={ supports.showSaveOption }>
-					{ cloneElement( component, {
+				<PaymentMethodCard showSaveOption={supports.showSaveOption}>
+					{cloneElement(component, {
 						__internalSetActivePaymentMethod,
 						...paymentMethodInterface,
-					} ) }
+					})}
 				</PaymentMethodCard>
 			),
 		};
-	} );
+	});
 
 	const onChange = useCallback(
-		( value ) => {
-			__internalSetActivePaymentMethod( value );
-			removeNotice( 'wc-payment-error', noticeContexts.PAYMENTS );
-			dispatchCheckoutEvent( 'set-active-payment-method', {
+		(value) => {
+			__internalSetActivePaymentMethod(value);
+			removeNotice('wc-payment-error', noticeContexts.PAYMENTS);
+			dispatchCheckoutEvent('set-active-payment-method', {
 				paymentMethodSlug: value,
-			} );
+			});
 		},
-		[
-			dispatchCheckoutEvent,
-			removeNotice,
-			__internalSetActivePaymentMethod,
-		]
+		[dispatchCheckoutEvent, removeNotice, __internalSetActivePaymentMethod]
 	);
 
 	return isExpressPaymentMethodActive ? null : (
 		<RadioControlAccordion
-			highlightChecked={ true }
-			id={ 'wc-payment-method-options' }
-			selected={ activeSavedToken ? null : activePaymentMethod }
-			onChange={ onChange }
-			options={ options }
+			highlightChecked={true}
+			id={'wc-payment-method-options'}
+			selected={activeSavedToken ? null : activePaymentMethod}
+			onChange={onChange}
+			options={options}
 		/>
 	);
 };

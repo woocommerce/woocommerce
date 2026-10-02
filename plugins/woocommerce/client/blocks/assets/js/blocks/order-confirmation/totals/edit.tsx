@@ -12,9 +12,9 @@ import { formatPrice } from '@woocommerce/price-format';
 import './style.scss';
 
 const Edit = (): JSX.Element => {
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className: 'wc-block-order-confirmation-totals',
-	} );
+	});
 
 	const {
 		borderBottomColor,
@@ -33,20 +33,20 @@ const Edit = (): JSX.Element => {
 	} as React.CSSProperties;
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<Disabled>
 				<table
-					style={ borderStyles }
+					style={borderStyles}
 					cellSpacing="0"
 					className="wc-block-order-confirmation-totals__table"
 				>
 					<thead>
 						<tr>
 							<th className="wc-block-order-confirmation-totals__product">
-								{ __( 'Product', 'woocommerce' ) }
+								{__('Product', 'woocommerce')}
 							</th>
 							<th className="wc-block-order-confirmation-totals__total">
-								{ __( 'Total', 'woocommerce' ) }
+								{__('Total', 'woocommerce')}
 							</th>
 						</tr>
 					</thead>
@@ -57,11 +57,11 @@ const Edit = (): JSX.Element => {
 								className="wc-block-order-confirmation-totals__product"
 							>
 								<a href="#link">
-									{ _x(
+									{_x(
 										'Test Product',
 										'sample product name',
 										'woocommerce'
-									) }
+									)}
 								</a>
 								&nbsp;
 								<strong className="product-quantity">
@@ -69,7 +69,7 @@ const Edit = (): JSX.Element => {
 								</strong>
 							</th>
 							<td className="wc-block-order-confirmation-totals__total">
-								{ formatPrice( 2000 ) }
+								{formatPrice(2000)}
 							</td>
 						</tr>
 						<tr className="woocommerce-table__line-item order_item">
@@ -78,11 +78,11 @@ const Edit = (): JSX.Element => {
 								className="wc-block-order-confirmation-totals__product"
 							>
 								<a href="#link">
-									{ _x(
+									{_x(
 										'Test Product',
 										'sample product name',
 										'woocommerce'
-									) }
+									)}
 								</a>
 								&nbsp;
 								<strong className="product-quantity">
@@ -90,7 +90,7 @@ const Edit = (): JSX.Element => {
 								</strong>
 							</th>
 							<td className="wc-block-order-confirmation-totals__total">
-								{ formatPrice( 2000 ) }
+								{formatPrice(2000)}
 							</td>
 						</tr>
 					</tbody>
@@ -100,10 +100,10 @@ const Edit = (): JSX.Element => {
 								className="wc-block-order-confirmation-totals__label"
 								scope="row"
 							>
-								{ __( 'Total', 'woocommerce' ) }
+								{__('Total', 'woocommerce')}
 							</th>
 							<td className="wc-block-order-confirmation-totals__total">
-								{ formatPrice( 4000 ) }
+								{formatPrice(4000)}
 							</td>
 						</tr>
 					</tfoot>

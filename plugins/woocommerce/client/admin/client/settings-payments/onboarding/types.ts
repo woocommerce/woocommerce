@@ -32,7 +32,7 @@ export interface OnboardingError {
  * Props for the Onboarding Modal component.
  */
 export interface OnboardingModalProps {
-	setIsOpen: ( isOpen: boolean ) => void;
+	setIsOpen: (isOpen: boolean) => void;
 	children?: ReactNode;
 }
 
@@ -50,7 +50,7 @@ export interface SidebarItemProps {
  */
 export interface WooPaymentsModalProps {
 	isOpen: boolean;
-	setIsOpen: ( isOpen: boolean ) => void;
+	setIsOpen: (isOpen: boolean) => void;
 	providerData: PaymentsProvider;
 }
 
@@ -120,16 +120,16 @@ export interface WooPaymentsProviderOnboardingStep {
 	content?: ReactNode;
 	context?: {
 		recommended_pms: RecommendedPaymentMethod[];
-		pms_state: Record< string, boolean >;
+		pms_state: Record<string, boolean>;
 		overview_page_url?: string;
 		fields: {
 			business_types: Country[];
-			industry_to_mcc: Record< string, string >;
+			industry_to_mcc: Record<string, string>;
 			mccs_display_tree: MccsDisplayTreeItem;
-			available_countries: Record< string, string >;
+			available_countries: Record<string, string>;
 			location: string;
 		};
-		self_assessment: Record< string, string >;
+		self_assessment: Record<string, string>;
 		sub_steps: Record<
 			string,
 			{
@@ -157,7 +157,7 @@ export interface OnboardingContextType {
 	isLoading: boolean;
 	currentStep: WooPaymentsProviderOnboardingStep | undefined;
 	currentTopLevelStep: WooPaymentsProviderOnboardingStep | undefined;
-	navigateToStep: ( stepKey: string ) => void;
+	navigateToStep: (stepKey: string) => void;
 	navigateToNextStep: () => void;
 	getStepByKey: (
 		stepKey: string
@@ -165,7 +165,7 @@ export interface OnboardingContextType {
 	refreshStoreData: () => void;
 	closeModal: () => void;
 	justCompletedStepId: string | null;
-	setJustCompletedStepId: ( stepId: string ) => void;
+	setJustCompletedStepId: (stepId: string) => void;
 	sessionEntryPoint: string;
 	snackbar: {
 		show: boolean;
@@ -173,10 +173,10 @@ export interface OnboardingContextType {
 		className?: string;
 		duration?: number;
 	};
-	setSnackbar: ( snackbar: {
+	setSnackbar: (snackbar: {
 		show: boolean;
 		message: string;
 		duration?: number;
 		className?: string;
-	} ) => void;
+	}) => void;
 }

@@ -23,23 +23,23 @@ interface NoReviewsPlaceholderProps {
 	reason: 'no-reviews' | 'offset';
 }
 
-const NoReviewsPlaceholder = ( {
+const NoReviewsPlaceholder = ({
 	error,
 	getProduct,
 	isLoading,
 	product,
 	reason,
-}: NoReviewsPlaceholderProps ) => {
+}: NoReviewsPlaceholderProps) => {
 	const renderApiError = () => (
 		<ErrorPlaceholder
 			className="wc-block-featured-product-error"
-			error={ error as ErrorObject }
-			isLoading={ isLoading }
-			onRetry={ getProduct }
+			error={error as ErrorObject}
+			isLoading={isLoading}
+			onRetry={getProduct}
 		/>
 	);
 
-	if ( error ) {
+	if (error) {
 		return renderApiError();
 	}
 
@@ -48,12 +48,12 @@ const NoReviewsPlaceholder = ( {
 			? __(
 					'No reviews are visible with the current offset. Reduce the offset to display reviews.',
 					'woocommerce'
-			  )
+				)
 			: undefined;
 
-	if ( ! content ) {
+	if (!content) {
 		content =
-			! product || isLoading ? (
+			!product || isLoading ? (
 				<Spinner />
 			) : (
 				sprintf(
@@ -62,7 +62,7 @@ const NoReviewsPlaceholder = ( {
 						"This block lists reviews for a selected product. %s doesn't have any reviews yet, but they will show up here when it does.",
 						'woocommerce'
 					),
-					decodeEntities( product.name )
+					decodeEntities(product.name)
 				)
 			);
 	}
@@ -72,15 +72,15 @@ const NoReviewsPlaceholder = ( {
 			className="wc-block-reviews-by-product"
 			icon={
 				<Icon
-					icon={ commentContent }
+					icon={commentContent}
 					className="block-editor-block-icon"
 				/>
 			}
-			label={ __( 'Reviews by Product', 'woocommerce' ) }
+			label={__('Reviews by Product', 'woocommerce')}
 		>
-			{ content }
+			{content}
 		</Placeholder>
 	);
 };
 
-export default withProduct( NoReviewsPlaceholder );
+export default withProduct(NoReviewsPlaceholder);

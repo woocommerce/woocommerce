@@ -23,32 +23,32 @@ import {
  */
 import { PrevIcon, NextIcon } from './icons';
 
-const getVerticalAlignmentClass = ( attributes: BlockAttributes ) => {
+const getVerticalAlignmentClass = (attributes: BlockAttributes) => {
 	const verticalAlignment = attributes?.layout?.verticalAlignment;
 
-	if ( verticalAlignment === 'top' ) {
+	if (verticalAlignment === 'top') {
 		return 'aligntop';
 	}
-	if ( verticalAlignment === 'bottom' ) {
+	if (verticalAlignment === 'bottom') {
 		return 'alignbottom';
 	}
 	// Default to center.
 	return '';
 };
 
-export const Edit = ( { attributes }: { attributes: BlockAttributes } ) => {
-	const verticalAlignmentClass = getVerticalAlignmentClass( attributes );
-	const { style, ...blockProps } = useBlockProps( {
+export const Edit = ({ attributes }: { attributes: BlockAttributes }) => {
+	const verticalAlignmentClass = getVerticalAlignmentClass(attributes);
+	const { style, ...blockProps } = useBlockProps({
 		className: clsx(
 			'wc-block-next-previous-buttons',
 			verticalAlignmentClass
 		),
-	} );
+	});
 
-	const borderProps = useBorderProps( attributes );
-	const colorProps = useColorProps( attributes );
-	const spacingProps = useSpacingProps( attributes );
-	const shadowProps = useShadowProps( attributes );
+	const borderProps = useBorderProps(attributes);
+	const colorProps = useColorProps(attributes);
+	const spacingProps = useSpacingProps(attributes);
+	const shadowProps = useShadowProps(attributes);
 
 	const buttonClassName = clsx(
 		'wc-block-next-previous-buttons__button',
@@ -71,16 +71,16 @@ export const Edit = ( { attributes }: { attributes: BlockAttributes } ) => {
 	const RightComponent = rtl ? PrevIcon : NextIcon;
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<button
-				className={ buttonClassName }
-				style={ buttonStyles }
+				className={buttonClassName}
+				style={buttonStyles}
 				disabled
 				aria-disabled="true"
 			>
 				<LeftComponent className="wc-block-next-previous-buttons__icon wc-block-next-previous-buttons__icon--left" />
 			</button>
-			<button className={ buttonClassName } style={ buttonStyles }>
+			<button className={buttonClassName} style={buttonStyles}>
 				<RightComponent className="wc-block-next-previous-buttons__icon wc-block-next-previous-buttons__icon--right" />
 			</button>
 		</div>

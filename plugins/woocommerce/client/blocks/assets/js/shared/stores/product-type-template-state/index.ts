@@ -40,34 +40,34 @@ const productTypeOptions = getProductTypeOptions();
 const DEFAULT_STATE = {
 	productTypes: {
 		list: productTypeOptions,
-		current: productTypeOptions[ 0 ]?.slug,
+		current: productTypeOptions[0]?.slug,
 	},
 	listeners: [],
 };
 
 const actions = {
-	switchProductType( slug: string ) {
+	switchProductType(slug: string) {
 		return {
 			type: ACTION_SWITCH_PRODUCT_TYPE,
 			current: slug,
 		};
 	},
 
-	setProductTypes( productTypes: ProductTypeProps[] ) {
+	setProductTypes(productTypes: ProductTypeProps[]) {
 		return {
 			type: ACTION_SET_PRODUCT_TYPES,
 			productTypes,
 		};
 	},
 
-	registerListener( listener: string ) {
+	registerListener(listener: string) {
 		return {
 			type: ACTION_REGISTER_LISTENER,
 			listener,
 		};
 	},
 
-	unregisterListener( listener: string ) {
+	unregisterListener(listener: string) {
 		return {
 			type: ACTION_UNREGISTER_LISTENER,
 			listener,
@@ -76,21 +76,21 @@ const actions = {
 };
 
 const selectors = {
-	getProductTypes( state: StoreState ) {
+	getProductTypes(state: StoreState) {
 		return state.productTypes.list;
 	},
-	getCurrentProductType( state: StoreState ) {
+	getCurrentProductType(state: StoreState) {
 		return state.productTypes.list.find(
-			( productType ) => productType.slug === state.productTypes.current
+			(productType) => productType.slug === state.productTypes.current
 		);
 	},
-	getRegisteredListeners( state: StoreState ) {
+	getRegisteredListeners(state: StoreState) {
 		return state.listeners;
 	},
 };
 
-const reducer = ( state: StoreState = DEFAULT_STATE, action: Actions ) => {
-	switch ( action.type ) {
+const reducer = (state: StoreState = DEFAULT_STATE, action: Actions) => {
+	switch (action.type) {
 		case ACTION_SET_PRODUCT_TYPES:
 			return {
 				...state,
@@ -112,14 +112,14 @@ const reducer = ( state: StoreState = DEFAULT_STATE, action: Actions ) => {
 		case ACTION_REGISTER_LISTENER:
 			return {
 				...state,
-				listeners: [ ...state.listeners, action.listener || '' ],
+				listeners: [...state.listeners, action.listener || ''],
 			};
 
 		case ACTION_UNREGISTER_LISTENER:
 			return {
 				...state,
 				listeners: state.listeners.filter(
-					( listener ) => listener !== action.listener
+					(listener) => listener !== action.listener
 				),
 			};
 
@@ -128,14 +128,14 @@ const reducer = ( state: StoreState = DEFAULT_STATE, action: Actions ) => {
 	}
 };
 
-export const store = createReduxStore( STORE_NAME, {
+export const store = createReduxStore(STORE_NAME, {
 	reducer,
 	actions,
 	selectors,
-} );
+});
 
-if ( ! select( STORE_NAME ) ) {
-	register( store );
+if (!select(STORE_NAME)) {
+	register(store);
 }
 
 export { default as useProductTypeSelector } from './use-product-type-selector';

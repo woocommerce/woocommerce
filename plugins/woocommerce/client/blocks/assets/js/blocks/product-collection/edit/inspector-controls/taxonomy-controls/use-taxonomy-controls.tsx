@@ -16,7 +16,7 @@ import {
 /**
  * Shared hook for taxonomy control logic - filters taxonomies based on context and provides common handlers.
  */
-function useTaxonomyControls( {
+function useTaxonomyControls({
 	setQueryAttribute,
 	trackInteraction,
 	query,
@@ -24,17 +24,17 @@ function useTaxonomyControls( {
 	isFiltersPanel,
 }: QueryControlProps & { collection: string | undefined } & {
 	isFiltersPanel?: boolean;
-} ) {
+}) {
 	const { taxQuery } = query;
 	const taxonomies = useTaxonomies();
 
-	const filteredTaxonomies = useMemo( () => {
-		if ( ! taxonomies || taxonomies.length === 0 ) {
+	const filteredTaxonomies = useMemo(() => {
+		if (!taxonomies || taxonomies.length === 0) {
 			return [];
 		}
 
-		if ( collection === CoreCollectionNames.BY_CATEGORY ) {
-			return taxonomies.filter( ( taxonomy ) =>
+		if (collection === CoreCollectionNames.BY_CATEGORY) {
+			return taxonomies.filter((taxonomy) =>
 				// If it's in filter panel, we want to show everything BUT the category control.
 				// Otherwise, it's a collection specific filter and we want to show ONLY the category control.
 				isFiltersPanel
@@ -42,8 +42,8 @@ function useTaxonomyControls( {
 					: taxonomy.slug === 'product_cat'
 			);
 		}
-		if ( collection === CoreCollectionNames.BY_TAG ) {
-			return taxonomies.filter( ( taxonomy ) =>
+		if (collection === CoreCollectionNames.BY_TAG) {
+			return taxonomies.filter((taxonomy) =>
 				// If it's in filter panel, we want to show everything BUT the tag control.
 				// Otherwise, it's a collection specific filter and we want to show ONLY the tag control.
 				isFiltersPanel
@@ -51,8 +51,8 @@ function useTaxonomyControls( {
 					: taxonomy.slug === 'product_tag'
 			);
 		}
-		if ( collection === CoreCollectionNames.BY_BRAND ) {
-			return taxonomies.filter( ( taxonomy ) =>
+		if (collection === CoreCollectionNames.BY_BRAND) {
+			return taxonomies.filter((taxonomy) =>
 				// If it's in filter panel, we want to show everything BUT the brand control.
 				// Otherwise, it's a collection specific filter and we want to show ONLY the brand control.
 				isFiltersPanel
@@ -62,15 +62,15 @@ function useTaxonomyControls( {
 		}
 
 		return isFiltersPanel ? taxonomies : [];
-	}, [ taxonomies, collection, isFiltersPanel ] );
+	}, [taxonomies, collection, isFiltersPanel]);
 
-	const createHandleChange = ( slug: string ) => ( newTermIds: number[] ) => {
-		setQueryAttribute( {
+	const createHandleChange = (slug: string) => (newTermIds: number[]) => {
+		setQueryAttribute({
 			taxQuery: {
-				[ slug ]: newTermIds,
+				[slug]: newTermIds,
 			},
-		} );
-		trackInteraction( `${ CoreFilterNames.TAXONOMY }__${ slug }` );
+		});
+		trackInteraction(`${CoreFilterNames.TAXONOMY}__${slug}`);
 	};
 
 	const shouldShowTaxonomyControl = filteredTaxonomies.length > 0;

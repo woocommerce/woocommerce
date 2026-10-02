@@ -17,7 +17,7 @@ const SettingsWrapper = styled.form`
 	display: flex;
 	flex-flow: column;
 
-	@media ( min-width: 960px ) {
+	@media (min-width: 960px) {
 		padding: 0 56px;
 	}
 `;

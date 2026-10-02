@@ -34,26 +34,26 @@ const mockParentStore = {
 
 jest.mock(
 	'@wordpress/interactivity',
-	() => ( {
+	() => ({
 		getContext: mockGetContext,
 		getElement: mockGetElement,
-		store: jest.fn( ( _name, definition ) => {
-			if ( definition ) {
+		store: jest.fn((_name, definition) => {
+			if (definition) {
 				mockRegisteredStore = definition;
 				return mockRegisteredStore;
 			}
 			return mockParentStore;
-		} ),
-	} ),
+		}),
+	}),
 	{ virtual: true }
 );
 
-jest.mock( '../../../utils/get-closest-color', () => ( {
-	getClosestColor: ( ...args: unknown[] ) => mockGetClosestColor( ...args ),
-} ) );
+jest.mock('../../../utils/get-closest-color', () => ({
+	getClosestColor: (...args: unknown[]) => mockGetClosestColor(...args),
+}));
 
-describe( 'product filter chips interactivity store', () => {
-	beforeEach( () => {
+describe('product filter chips interactivity store', () => {
+	beforeEach(() => {
 		jest.resetModules();
 		mockGetContext.mockReset();
 		mockGetElement.mockReset();
@@ -61,21 +61,21 @@ describe( 'product filter chips interactivity store', () => {
 		mockGetClosestColor.mockReset();
 		mockRegisteredStore = null;
 
-		jest.isolateModules( () => {
-			require( '../frontend' );
-		} );
-	} );
+		jest.isolateModules(() => {
+			require('../frontend');
+		});
+	});
 
-	it( 'mirrors parent selectable items with child-owned index metadata', () => {
-		if ( ! mockRegisteredStore ) {
-			throw new Error( 'Chips store was not registered.' );
+	it('mirrors parent selectable items with child-owned index metadata', () => {
+		if (!mockRegisteredStore) {
+			throw new Error('Chips store was not registered.');
 		}
 
-		mockGetContext.mockReturnValue( {
+		mockGetContext.mockReturnValue({
 			storeNamespace: 'woocommerce/product-filters',
-		} );
+		});
 
-		expect( mockRegisteredStore.state.items ).toEqual( [
+		expect(mockRegisteredStore.state.items).toEqual([
 			{
 				id: 'attribute-blue',
 				label: 'Blue',
@@ -92,26 +92,26 @@ describe( 'product filter chips interactivity store', () => {
 				index: 1,
 				hidden: false,
 			},
-		] );
-	} );
+		]);
+	});
 
-	it( 'uses the default display limit when context limit is invalid', () => {
-		if ( ! mockRegisteredStore ) {
-			throw new Error( 'Chips store was not registered.' );
+	it('uses the default display limit when context limit is invalid', () => {
+		if (!mockRegisteredStore) {
+			throw new Error('Chips store was not registered.');
 		}
 
-		mockGetContext.mockReturnValue( {
+		mockGetContext.mockReturnValue({
 			storeNamespace: 'woocommerce/product-filters',
 			displayLimit: -1,
 			isExpanded: false,
-		} );
+		});
 
-		expect( mockRegisteredStore.state.items[ 0 ].hidden ).toBe( false );
-	} );
+		expect(mockRegisteredStore.state.items[0].hidden).toBe(false);
+	});
 
-	it( 'forwards toggle to parent store with current item', () => {
-		if ( ! mockRegisteredStore ) {
-			throw new Error( 'Chips store was not registered.' );
+	it('forwards toggle to parent store with current item', () => {
+		if (!mockRegisteredStore) {
+			throw new Error('Chips store was not registered.');
 		}
 
 		const item = {
@@ -122,48 +122,48 @@ describe( 'product filter chips interactivity store', () => {
 			index: 0,
 		};
 
-		mockGetContext.mockReturnValue( {
+		mockGetContext.mockReturnValue({
 			storeNamespace: 'woocommerce/product-filters',
 			item,
-		} );
+		});
 
 		mockRegisteredStore.actions.toggle();
 
-		expect( mockParentToggle ).toHaveBeenCalledWith( item );
-	} );
+		expect(mockParentToggle).toHaveBeenCalledWith(item);
+	});
 
-	it( 'returns empty items when parent store data is missing', () => {
-		if ( ! mockRegisteredStore ) {
-			throw new Error( 'Chips store was not registered.' );
+	it('returns empty items when parent store data is missing', () => {
+		if (!mockRegisteredStore) {
+			throw new Error('Chips store was not registered.');
 		}
 
-		mockGetContext.mockReturnValue( {} );
+		mockGetContext.mockReturnValue({});
 
-		expect( mockRegisteredStore.state.items ).toEqual( [] );
-	} );
+		expect(mockRegisteredStore.state.items).toEqual([]);
+	});
 
-	it( 'does not forward toggle without current item', () => {
-		if ( ! mockRegisteredStore ) {
-			throw new Error( 'Chips store was not registered.' );
+	it('does not forward toggle without current item', () => {
+		if (!mockRegisteredStore) {
+			throw new Error('Chips store was not registered.');
 		}
 
-		mockGetContext.mockReturnValue( {
+		mockGetContext.mockReturnValue({
 			storeNamespace: 'woocommerce/product-filters',
-		} );
+		});
 
 		mockRegisteredStore.actions.toggle();
 
-		expect( mockParentToggle ).not.toHaveBeenCalled();
-	} );
+		expect(mockParentToggle).not.toHaveBeenCalled();
+	});
 
-	it( 'sets chip CSS variables when not already defined', () => {
-		if ( ! mockRegisteredStore ) {
-			throw new Error( 'Chips store was not registered.' );
+	it('sets chip CSS variables when not already defined', () => {
+		if (!mockRegisteredStore) {
+			throw new Error('Chips store was not registered.');
 		}
 
-		const element = document.createElement( 'div' );
+		const element = document.createElement('div');
 
-		mockGetElement.mockReturnValue( { ref: element } );
+		mockGetElement.mockReturnValue({ ref: element });
 		mockGetClosestColor.mockImplementation(
 			(
 				_el: Element,
@@ -181,18 +181,18 @@ describe( 'product filter chips interactivity store', () => {
 			element.style.getPropertyValue(
 				'--wc-product-filter-chips-background'
 			)
-		).toBe( 'rgb(255, 255, 255)' );
+		).toBe('rgb(255, 255, 255)');
 		expect(
-			element.style.getPropertyValue( '--wc-product-filter-chips-text' )
-		).toBe( 'rgb(0, 0, 0)' );
-	} );
+			element.style.getPropertyValue('--wc-product-filter-chips-text')
+		).toBe('rgb(0, 0, 0)');
+	});
 
-	it( 'does not calculate chip colors when already defined', () => {
-		if ( ! mockRegisteredStore ) {
-			throw new Error( 'Chips store was not registered.' );
+	it('does not calculate chip colors when already defined', () => {
+		if (!mockRegisteredStore) {
+			throw new Error('Chips store was not registered.');
 		}
 
-		const element = document.createElement( 'div' );
+		const element = document.createElement('div');
 		element.style.setProperty(
 			'--wc-product-filter-chips-text',
 			'var(--wp--preset--color--contrast)'
@@ -202,52 +202,52 @@ describe( 'product filter chips interactivity store', () => {
 			'var(--wp--preset--color--base)'
 		);
 
-		mockGetElement.mockReturnValue( { ref: element } );
+		mockGetElement.mockReturnValue({ ref: element });
 
 		mockRegisteredStore.callbacks.initColors();
 
-		expect( mockGetClosestColor ).not.toHaveBeenCalled();
+		expect(mockGetClosestColor).not.toHaveBeenCalled();
 		expect(
-			element.style.getPropertyValue( '--wc-product-filter-chips-text' )
-		).toBe( 'var(--wp--preset--color--contrast)' );
+			element.style.getPropertyValue('--wc-product-filter-chips-text')
+		).toBe('var(--wp--preset--color--contrast)');
 		expect(
 			element.style.getPropertyValue(
 				'--wc-product-filter-chips-background'
 			)
-		).toBe( 'var(--wp--preset--color--base)' );
-	} );
+		).toBe('var(--wp--preset--color--base)');
+	});
 
-	it( 'does not override theme contrast CSS variables from stylesheets', () => {
-		if ( ! mockRegisteredStore ) {
-			throw new Error( 'Chips store was not registered.' );
+	it('does not override theme contrast CSS variables from stylesheets', () => {
+		if (!mockRegisteredStore) {
+			throw new Error('Chips store was not registered.');
 		}
 
-		const style = document.createElement( 'style' );
+		const style = document.createElement('style');
 		style.textContent = `.has-theme-vars {
 			--wc-product-filter-chips-background: rgb(1, 2, 3);
 			--wc-product-filter-chips-text: rgb(4, 5, 6);
 		}`;
-		document.head.appendChild( style );
+		document.head.appendChild(style);
 
-		const element = document.createElement( 'div' );
+		const element = document.createElement('div');
 		element.className = 'has-theme-vars';
-		document.body.appendChild( element );
+		document.body.appendChild(element);
 
-		mockGetElement.mockReturnValue( { ref: element } );
+		mockGetElement.mockReturnValue({ ref: element });
 
 		mockRegisteredStore.callbacks.initColors();
 
-		expect( mockGetClosestColor ).not.toHaveBeenCalled();
+		expect(mockGetClosestColor).not.toHaveBeenCalled();
 		expect(
 			element.style.getPropertyValue(
 				'--wc-product-filter-chips-background'
 			)
-		).toBe( '' );
+		).toBe('');
 		expect(
-			element.style.getPropertyValue( '--wc-product-filter-chips-text' )
-		).toBe( '' );
+			element.style.getPropertyValue('--wc-product-filter-chips-text')
+		).toBe('');
 
 		element.remove();
 		style.remove();
-	} );
-} );
+	});
+});

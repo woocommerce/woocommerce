@@ -13,7 +13,7 @@ import { Props } from './types';
 
 export interface EditModeProps extends Props {
 	isEditing: boolean;
-	setIsEditing: ( isEditing: boolean ) => void;
+	setIsEditing: (isEditing: boolean) => void;
 }
 
 export const HandpickedProductsEditMode = (
@@ -27,7 +27,7 @@ export const HandpickedProductsEditMode = (
 		setIsEditing,
 	} = props;
 	const onDone = () => {
-		setIsEditing( ! isEditing );
+		setIsEditing(!isEditing);
 		debouncedSpeak(
 			__(
 				'Now displaying a preview of the Hand-picked Products block.',
@@ -38,24 +38,24 @@ export const HandpickedProductsEditMode = (
 
 	return (
 		<Placeholder
-			icon={ <Icon icon={ stack } /> }
-			label={ __( 'Hand-picked Products', 'woocommerce' ) }
+			icon={<Icon icon={stack} />}
+			label={__('Hand-picked Products', 'woocommerce')}
 			className="wc-block-products-grid wc-block-handpicked-products"
 		>
-			{ __(
+			{__(
 				'Display a selection of hand-picked products in a grid.',
 				'woocommerce'
-			) }
+			)}
 			<div className="wc-block-handpicked-products__selection">
 				<ProductsControl
-					selected={ attributes.products }
-					onChange={ ( value = [] ) => {
-						const ids = value.map( ( { id } ) => id );
-						setAttributes( { products: ids } );
-					} }
+					selected={attributes.products}
+					onChange={(value = []) => {
+						const ids = value.map(({ id }) => id);
+						setAttributes({ products: ids });
+					}}
 				/>
-				<Button variant="primary" onClick={ onDone }>
-					{ __( 'Done', 'woocommerce' ) }
+				<Button variant="primary" onClick={onDone}>
+					{__('Done', 'woocommerce')}
 				</Button>
 			</div>
 		</Placeholder>

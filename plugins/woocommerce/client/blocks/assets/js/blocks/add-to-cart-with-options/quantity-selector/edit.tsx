@@ -10,12 +10,12 @@ import { Disabled } from '@wordpress/components';
 import QuantityStepper from '../components/quantity-stepper';
 
 const AddToCartWithOptionsQuantitySelectorEdit = () => {
-	const blockProps = useBlockProps( {
+	const blockProps = useBlockProps({
 		className: 'wc-block-add-to-cart-with-options__quantity-selector',
-	} );
+	});
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<Disabled>
 				<QuantityStepper />
 			</Disabled>

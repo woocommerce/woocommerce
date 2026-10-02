@@ -1,6 +1,7 @@
 $ces-feedback-height: 64px;
 
-h1.woocommerce-task-progress-header__title + .woocommerce-task-dashboard__container.setup-task-list {
+h1.woocommerce-task-progress-header__title
+	+ .woocommerce-task-dashboard__container.setup-task-list {
 	margin-top: $gap-large;
 }
 
@@ -53,6 +54,7 @@ h1.woocommerce-task-progress-header__title + .woocommerce-task-dashboard__contai
 	padding-top: 9px; // align with header text
 }
 
-.woocommerce-task-header__contents-container.woocommerce-task-header__launch_your_store img.svg-background {
+.woocommerce-task-header__contents-container.woocommerce-task-header__launch_your_store
+	img.svg-background {
 	padding: 8px;
 }

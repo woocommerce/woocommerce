@@ -3,7 +3,7 @@ export const COLOR_INPUT_SELECTOR =
 export const IMAGE_INPUT_SELECTOR =
 	'input.wc-admin-visual-attribute-image-input';
 
-type InputValueChangeHandler = ( nextValue: string ) => void;
+type InputValueChangeHandler = (nextValue: string) => void;
 
 export const observeInputValueChanges = (
 	input: HTMLInputElement,
@@ -16,21 +16,21 @@ export const observeInputValueChanges = (
 	);
 	let hasValueOverride = false;
 
-	if ( valueDescriptor?.get && valueDescriptor.set ) {
-		Object.defineProperty( input, 'value', {
+	if (valueDescriptor?.get && valueDescriptor.set) {
+		Object.defineProperty(input, 'value', {
 			...valueDescriptor,
 			configurable: true,
-			set( nextValue: string ) {
-				valueDescriptor.set?.call( this, nextValue );
-				onValueChange( nextValue );
+			set(nextValue: string) {
+				valueDescriptor.set?.call(this, nextValue);
+				onValueChange(nextValue);
 			},
-		} );
+		});
 		hasValueOverride = true;
 	}
 
 	return () => {
-		if ( hasValueOverride ) {
-			delete ( input as { value?: string } ).value;
+		if (hasValueOverride) {
+			delete (input as { value?: string }).value;
 		}
 	};
 };
@@ -40,31 +40,31 @@ export const getSiblingVisualInput = (
 	selector: string
 ): HTMLInputElement | null => {
 	const container =
-		input.closest( 'form' ) ||
-		input.closest( '.wc-add-attribute-term-fields' ) ||
+		input.closest('form') ||
+		input.closest('.wc-add-attribute-term-fields') ||
 		document;
-	const sibling = container.querySelector( selector );
+	const sibling = container.querySelector(selector);
 
 	return sibling instanceof HTMLInputElement ? sibling : null;
 };
 
-export const clearVisualInput = ( input: HTMLInputElement ) => {
-	if ( ! input.value ) {
+export const clearVisualInput = (input: HTMLInputElement) => {
+	if (!input.value) {
 		return;
 	}
 
 	input.value = '';
-	input.dispatchEvent( new Event( 'input', { bubbles: true } ) );
-	input.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+	input.dispatchEvent(new Event('input', { bubbles: true }));
+	input.dispatchEvent(new Event('change', { bubbles: true }));
 };
 
 export const clearSiblingVisualInput = (
 	input: HTMLInputElement,
 	selector: string
 ) => {
-	const sibling = getSiblingVisualInput( input, selector );
+	const sibling = getSiblingVisualInput(input, selector);
 
-	if ( sibling ) {
-		clearVisualInput( sibling );
+	if (sibling) {
+		clearVisualInput(sibling);
 	}
 };

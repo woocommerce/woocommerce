@@ -11,28 +11,23 @@ import { withInstanceId } from '@wordpress/compose';
 import { renderProductLayout } from './utils';
 import { ProductListItemProps } from '../types';
 
-const ProductListItem = ( {
+const ProductListItem = ({
 	product = {},
 	attributes,
 	instanceId,
-}: ProductListItemProps ): JSX.Element => {
+}: ProductListItemProps): JSX.Element => {
 	const { layoutConfig } = attributes;
 	const { parentClassName, parentName } = useInnerBlockLayoutContext();
-	const isLoading = Object.keys( product ).length === 0;
-	const classes = clsx( `${ parentClassName }__product`, 'wc-block-layout', {
+	const isLoading = Object.keys(product).length === 0;
+	const classes = clsx(`${parentClassName}__product`, 'wc-block-layout', {
 		'is-loading': isLoading,
-	} );
+	});
 
 	return (
-		<li className={ classes } aria-hidden={ isLoading }>
-			{ renderProductLayout(
-				parentName,
-				product,
-				layoutConfig,
-				instanceId
-			) }
+		<li className={classes} aria-hidden={isLoading}>
+			{renderProductLayout(parentName, product, layoutConfig, instanceId)}
 		</li>
 	);
 };
 
-export default withInstanceId( ProductListItem );
+export default withInstanceId(ProductListItem);

@@ -9,20 +9,13 @@ type MiniCartProductsTableBlockProps = {
 	className: string;
 };
 
-const Block = ( {
-	className,
-}: MiniCartProductsTableBlockProps ): JSX.Element => {
+const Block = ({ className }: MiniCartProductsTableBlockProps): JSX.Element => {
 	const { cartItems, cartIsLoading } = useStoreCart();
 	return (
-		<div
-			className={ clsx(
-				className,
-				'wc-block-mini-cart__products-table'
-			) }
-		>
+		<div className={clsx(className, 'wc-block-mini-cart__products-table')}>
 			<CartLineItemsTable
-				lineItems={ cartItems }
-				isLoading={ cartIsLoading }
+				lineItems={cartItems}
+				isLoading={cartIsLoading}
 				className="wc-block-mini-cart-items"
 			/>
 		</div>

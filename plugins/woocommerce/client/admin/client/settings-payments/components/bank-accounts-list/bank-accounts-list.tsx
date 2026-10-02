@@ -29,7 +29,7 @@ interface BankAccountItem extends BankAccount {
  */
 interface Props {
 	accounts: BankAccount[];
-	onChange: ( accounts: BankAccount[] ) => void;
+	onChange: (accounts: BankAccount[]) => void;
 	defaultCountry: string;
 }
 
@@ -40,42 +40,40 @@ interface Props {
  * @param {Props} props Component props.
  * @return {Element} The rendered component.
  */
-export const BankAccountsList = ( {
+export const BankAccountsList = ({
 	accounts,
 	onChange,
 	defaultCountry,
-}: Props ) => {
-	const [ accountsWithIds, setAccountsWithIds ] = useState<
-		BankAccountItem[]
-	>( () =>
-		accounts.map( ( account ) => ( { ...account, id: generateId() } ) )
+}: Props) => {
+	const [accountsWithIds, setAccountsWithIds] = useState<BankAccountItem[]>(
+		() => accounts.map((account) => ({ ...account, id: generateId() }))
 	);
 
-	useEffect( () => {
-		if ( accounts.length && accountsWithIds.length === 0 ) {
+	useEffect(() => {
+		if (accounts.length && accountsWithIds.length === 0) {
 			setAccountsWithIds(
-				accounts.map( ( account ) => ( {
+				accounts.map((account) => ({
 					...account,
 					id: generateId(),
-				} ) )
+				}))
 			);
 		}
-	}, [ accounts, accountsWithIds.length ] );
+	}, [accounts, accountsWithIds.length]);
 
-	const [ selectedAccount, setSelectedAccount ] =
-		useState< BankAccountItem | null >( null );
-	const [ isModalOpen, setIsModalOpen ] = useState( false );
-	const [ accountToDelete, setAccountToDelete ] =
-		useState< BankAccountItem | null >( null );
+	const [selectedAccount, setSelectedAccount] =
+		useState<BankAccountItem | null>(null);
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [accountToDelete, setAccountToDelete] =
+		useState<BankAccountItem | null>(null);
 
 	/**
 	 * Opens the bank account modal for adding or editing an account.
 	 *
 	 * @param {BankAccountItem | null} account The account to edit, or null to add a new one.
 	 */
-	const openModal = ( account: BankAccountItem | null = null ) => {
-		setSelectedAccount( account );
-		setIsModalOpen( true );
+	const openModal = (account: BankAccountItem | null = null) => {
+		setSelectedAccount(account);
+		setIsModalOpen(true);
 	};
 
 	/**
@@ -83,16 +81,16 @@ export const BankAccountsList = ( {
 	 *
 	 * @param {BankAccount} updated The updated or new bank account.
 	 */
-	const handleSave = ( updated: BankAccount ) => {
+	const handleSave = (updated: BankAccount) => {
 		const existingIndex = accountsWithIds.findIndex(
-			( acc ) => acc.id === selectedAccount?.id
+			(acc) => acc.id === selectedAccount?.id
 		);
 
 		let newAccounts;
-		if ( existingIndex !== -1 ) {
+		if (existingIndex !== -1) {
 			// Update existing
-			newAccounts = [ ...accountsWithIds ];
-			newAccounts[ existingIndex ] = {
+			newAccounts = [...accountsWithIds];
+			newAccounts[existingIndex] = {
 				...updated,
 				id: selectedAccount?.id || generateId(),
 			};
@@ -104,22 +102,22 @@ export const BankAccountsList = ( {
 			];
 		}
 
-		setAccountsWithIds( newAccounts );
-		onChange( newAccounts.map( ( { id, ...rest } ) => rest ) );
-		setIsModalOpen( false );
+		setAccountsWithIds(newAccounts);
+		onChange(newAccounts.map(({ id, ...rest }) => rest));
+		setIsModalOpen(false);
 	};
 
 	/**
 	 * Confirms and deletes the selected bank account.
 	 */
 	const confirmDelete = () => {
-		if ( ! accountToDelete ) return;
+		if (!accountToDelete) return;
 		const newAccounts = accountsWithIds.filter(
-			( acc ) => acc.id !== accountToDelete.id
+			(acc) => acc.id !== accountToDelete.id
 		);
-		setAccountsWithIds( newAccounts );
-		onChange( newAccounts.map( ( { id, ...rest } ) => rest ) );
-		setAccountToDelete( null );
+		setAccountsWithIds(newAccounts);
+		onChange(newAccounts.map(({ id, ...rest }) => rest));
+		setAccountToDelete(null);
 	};
 
 	/**
@@ -127,17 +125,17 @@ export const BankAccountsList = ( {
 	 *
 	 * @param {BankAccountItem[]} newAccounts The reordered list of bank accounts.
 	 */
-	const handleUpdateOrdering = ( newAccounts: BankAccountItem[] ) => {
-		setAccountsWithIds( newAccounts );
-		onChange( newAccounts.map( ( { id, ...rest } ) => rest ) );
+	const handleUpdateOrdering = (newAccounts: BankAccountItem[]) => {
+		setAccountsWithIds(newAccounts);
+		onChange(newAccounts.map(({ id, ...rest }) => rest));
 	};
 
 	return (
 		<>
-			<SortableContainer< BankAccountItem >
-				items={ accountsWithIds }
-				className={ 'bank-accounts__list' }
-				setItems={ handleUpdateOrdering }
+			<SortableContainer<BankAccountItem>
+				items={accountsWithIds}
+				className={'bank-accounts__list'}
+				setItems={handleUpdateOrdering}
 			>
 				<div className="bank-accounts__list-header">
 					<div className="bank-accounts__list-item-inner">
@@ -150,125 +148,118 @@ export const BankAccountsList = ( {
 						<div className="bank-accounts__list-item-after" />
 					</div>
 				</div>
-				{ accountsWithIds.map( ( account, index ) => (
+				{accountsWithIds.map((account, index) => (
 					<SortableItem
-						key={ account.id }
-						id={ account.id }
-						className={ `bank-accounts__list-item${
+						key={account.id}
+						id={account.id}
+						className={`bank-accounts__list-item${
 							index === 0 ? ' first-item' : ''
-						}` }
+						}`}
 					>
 						<div className="bank-accounts__list-item-inner">
 							<div className="bank-accounts__list-item-before">
 								<DefaultDragHandle />
 							</div>
 							<div className="bank-accounts__list-item-text">
-								<div>{ account.account_name }</div>
+								<div>{account.account_name}</div>
 								<div>
-									{ account.account_number || account.iban }
+									{account.account_number || account.iban}
 								</div>
-								<div>{ account.bank_name }</div>
+								<div>{account.bank_name}</div>
 							</div>
 							<div className="bank-accounts__list-item-after">
 								<EllipsisMenu
-									label={ __( 'Options', 'woocommerce' ) }
-									placement={ 'bottom-right' }
-									renderContent={ ( {
-										onClose = () => {},
-									} ) => (
+									label={__('Options', 'woocommerce')}
+									placement={'bottom-right'}
+									renderContent={({ onClose = () => {} }) => (
 										<MenuGroup>
 											<MenuItem
 												role="menuitem"
-												onClick={ () => {
+												onClick={() => {
 													onClose();
-													openModal( account );
-												} }
+													openModal(account);
+												}}
 											>
-												{ __(
+												{__(
 													'View / edit',
 													'woocommerce'
-												) }
+												)}
 											</MenuItem>
 											<MenuItem
 												isDestructive
-												onClick={ () => {
+												onClick={() => {
 													onClose();
-													setAccountToDelete(
-														account
-													);
-												} }
+													setAccountToDelete(account);
+												}}
 											>
-												{ __(
-													'Delete',
-													'woocommerce'
-												) }
+												{__('Delete', 'woocommerce')}
 											</MenuItem>
 										</MenuGroup>
-									) }
+									)}
 								/>
 							</div>
 						</div>
 					</SortableItem>
-				) ) }
+				))}
 				<li
-					className={ `bank-accounts__list-item action${
+					className={`bank-accounts__list-item action${
 						accountsWithIds.length === 0 ? ' first-item' : ''
-					}` }
+					}`}
 				>
 					<Button
-						variant={ 'secondary' }
-						onClick={ () => openModal( null ) }
+						variant={'secondary'}
+						onClick={() => openModal(null)}
 					>
-						{ __( '+ Add account', 'woocommerce' ) }
+						{__('+ Add account', 'woocommerce')}
 					</Button>
 				</li>
 			</SortableContainer>
 
-			{ isModalOpen && (
+			{isModalOpen && (
 				<BankAccountModal
-					account={ selectedAccount }
-					onClose={ () => setIsModalOpen( false ) }
-					onSave={ handleSave }
-					defaultCountry={ defaultCountry }
+					account={selectedAccount}
+					onClose={() => setIsModalOpen(false)}
+					onSave={handleSave}
+					defaultCountry={defaultCountry}
 				/>
-			) }
+			)}
 
-			{ accountToDelete && (
+			{accountToDelete && (
 				<Modal
-					title={ __( 'Delete account', 'woocommerce' ) }
-					onRequestClose={ () => setAccountToDelete( null ) }
-					shouldCloseOnClickOutside={ false }
+					title={__('Delete account', 'woocommerce')}
+					onRequestClose={() => setAccountToDelete(null)}
+					shouldCloseOnClickOutside={false}
 				>
 					<p>
-						{ __(
+						{__(
 							'Are you sure you want to delete this bank account?',
 							'woocommerce'
-						) }
+						)}
 					</p>
 					<div
-						style={ {
+						style={{
 							display: 'flex',
 							justifyContent: 'flex-end',
 							gap: '8px',
 							marginTop: '16px',
-						} }
+						}}
 					>
 						<Button
 							variant="secondary"
-							onClick={ () => setAccountToDelete( null ) }
+							onClick={() => setAccountToDelete(null)}
 						>
-							{ __( 'Cancel', 'woocommerce' ) }
+							{__('Cancel', 'woocommerce')}
 						</Button>
 						<Button
 							variant="primary"
 							isDestructive
-							onClick={ confirmDelete }
+							onClick={confirmDelete}
 						>
-							{ __( 'Delete', 'woocommerce' ) }
+							{__('Delete', 'woocommerce')}
 						</Button>
 					</div>
 				</Modal>
-			) }
+			)}
 		</>
 	);
 };

@@ -21,36 +21,36 @@ import { withUpdateButtonAttributes } from '../with-update-button-attributes';
 
 const GENERIC_CONFIG = {
 	icon: starEmpty,
-	label: __( 'Featured Product', 'woocommerce' ),
+	label: __('Featured Product', 'woocommerce'),
 };
 
 const BLOCK_CONTROL_CONFIG = {
 	...GENERIC_CONFIG,
-	cropLabel: __( 'Edit product image', 'woocommerce' ),
-	editLabel: __( 'Edit selected product', 'woocommerce' ),
+	cropLabel: __('Edit product image', 'woocommerce'),
+	editLabel: __('Edit selected product', 'woocommerce'),
 };
 
 const CONTENT_CONFIG = {
 	...GENERIC_CONFIG,
-	emptyMessage: __( 'No product is selected.', 'woocommerce' ),
-	noSelectionButtonLabel: __( 'Select a product', 'woocommerce' ),
+	emptyMessage: __('No product is selected.', 'woocommerce'),
+	noSelectionButtonLabel: __('Select a product', 'woocommerce'),
 };
 
 const EDIT_MODE_CONFIG = {
 	...GENERIC_CONFIG,
-	description: __( 'Highlight a product or variation.', 'woocommerce' ),
-	editLabel: __( 'Showing Featured Product block preview.', 'woocommerce' ),
+	description: __('Highlight a product or variation.', 'woocommerce'),
+	editLabel: __('Showing Featured Product block preview.', 'woocommerce'),
 };
 
-export default compose( [
+export default compose([
 	withProduct,
 	withSpokenMessages,
 	withUpdateButtonAttributes,
 	withEditingImage,
-	withEditMode( EDIT_MODE_CONFIG ),
-	withFeaturedItem( CONTENT_CONFIG ),
+	withEditMode(EDIT_MODE_CONFIG),
+	withFeaturedItem(CONTENT_CONFIG),
 	withApiError,
 	withImageEditor,
 	withInspectorControls,
-	withBlockControls( BLOCK_CONTROL_CONFIG ),
-] )( () => <></> );
+	withBlockControls(BLOCK_CONTROL_CONFIG),
+])(() => <></>);

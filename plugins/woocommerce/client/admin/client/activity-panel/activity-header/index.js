@@ -18,17 +18,17 @@ class ActivityHeader extends Component {
 		const cardClassName = clsx(
 			{
 				'woocommerce-layout__inbox-panel-header': subtitle,
-				'woocommerce-layout__activity-panel-header': ! subtitle,
+				'woocommerce-layout__activity-panel-header': !subtitle,
 			},
 			className
 		);
 		const countUnread = unreadMessages ? unreadMessages : 0;
 
 		return (
-			<div className={ cardClassName }>
+			<div className={cardClassName}>
 				<div className="woocommerce-layout__inbox-title">
-					<Text size={ 16 } weight={ 600 } color="#23282d">
-						{ title }
+					<Text size={16} weight={600} color="#23282d">
+						{title}
 					</Text>
 					<Text
 						variant="button"
@@ -36,25 +36,25 @@ class ActivityHeader extends Component {
 						size="14"
 						lineHeight="20px"
 					>
-						{ countUnread > 0 && (
+						{countUnread > 0 && (
 							<span className="woocommerce-layout__inbox-badge">
-								{ unreadMessages }
+								{unreadMessages}
 							</span>
-						) }
+						)}
 					</Text>
 				</div>
 				<div className="woocommerce-layout__inbox-subtitle">
-					{ subtitle && (
+					{subtitle && (
 						<Text variant="body.small" size="14" lineHeight="20px">
-							{ subtitle }
+							{subtitle}
 						</Text>
-					) }
+					)}
 				</div>
-				{ menu && (
+				{menu && (
 					<div className="woocommerce-layout__activity-panel-header-menu">
-						{ menu }
+						{menu}
 					</div>
-				) }
+				)}
 			</div>
 		);
 	}
@@ -65,9 +65,9 @@ ActivityHeader.propTypes = {
 	unreadMessages: PropTypes.number,
 	title: PropTypes.string.isRequired,
 	subtitle: PropTypes.string,
-	menu: PropTypes.shape( {
-		type: PropTypes.oneOf( [ EllipsisMenu ] ),
-	} ),
+	menu: PropTypes.shape({
+		type: PropTypes.oneOf([EllipsisMenu]),
+	}),
 };
 
 export default ActivityHeader;

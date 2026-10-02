@@ -51,7 +51,7 @@ export interface UseImportStatusReturn {
 	 * Function to trigger a manual import
 	 * Calls POST /wc-analytics/imports/trigger
 	 */
-	triggerImport: () => Promise< void >;
+	triggerImport: () => Promise<void>;
 
 	/**
 	 * Whether a manual import trigger is in progress

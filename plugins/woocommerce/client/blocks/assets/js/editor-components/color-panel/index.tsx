@@ -33,15 +33,15 @@ const flattenColors = (
 	colorGradientOptions: ColorGradientOptionsItems
 ): ColorPaletteOption[] & GradientPaletteOption[] => {
 	const flattenedColors: ColorPaletteOption[] & GradientPaletteOption[] = [];
-	if ( colorGradientOptions.colors ) {
-		colorGradientOptions.colors.forEach( ( colorItem ) => {
-			flattenedColors.push( ...colorItem.colors );
-		} );
+	if (colorGradientOptions.colors) {
+		colorGradientOptions.colors.forEach((colorItem) => {
+			flattenedColors.push(...colorItem.colors);
+		});
 	}
-	if ( colorGradientOptions.gradients ) {
-		colorGradientOptions.gradients.forEach( ( gradientItem ) => {
-			flattenedColors.push( ...gradientItem.gradients );
-		} );
+	if (colorGradientOptions.gradients) {
+		colorGradientOptions.gradients.forEach((gradientItem) => {
+			flattenedColors.push(...gradientItem.gradients);
+		});
 	}
 	return flattenedColors;
 };
@@ -51,21 +51,21 @@ const getColorObject = (
 	colorValue: string | undefined,
 	context: string
 ) => {
-	if ( ! colorValue ) {
+	if (!colorValue) {
 		return;
 	}
 	const colorObject =
-		( colors?.find( ( color ) => {
+		(colors?.find((color) => {
 			return color.color === colorValue || color.slug === colorValue;
-		} ) as {
+		}) as {
 			color: string;
 			slug?: string | undefined;
 			class?: string | undefined;
-		} ) || {};
-	if ( ! colorObject?.color ) {
+		}) || {};
+	if (!colorObject?.color) {
 		colorObject.color = colorValue;
 	}
-	colorObject.class = getColorClassName( context, colorObject?.slug );
+	colorObject.class = getColorClassName(context, colorObject?.slug);
 	return colorObject;
 };
 
@@ -73,13 +73,13 @@ const createSetColor = (
 	colorName: string,
 	context: string,
 	colors: ColorPaletteOption[] & GradientPaletteOption[],
-	setAttributes: ( attributes: Record< string, unknown > ) => void
-): ( ( colorValue?: string ) => void ) => {
-	return ( colorValue?: string ) => {
-		const colorObject = getColorObject( colors, colorValue, context ) || {};
-		setAttributes( {
-			[ colorName ]: colorObject,
-		} );
+	setAttributes: (attributes: Record<string, unknown>) => void
+): ((colorValue?: string) => void) => {
+	return (colorValue?: string) => {
+		const colorObject = getColorObject(colors, colorValue, context) || {};
+		setAttributes({
+			[colorName]: colorObject,
+		});
 	};
 };
 
@@ -87,10 +87,10 @@ const createSettings = (
 	colorTypes: CustomColorsMap,
 	colors: ColorPaletteOption[] & GradientPaletteOption[],
 	attributes: ColorAttributes | undefined,
-	setAttributes: ( attributes: Record< string, unknown > ) => void
+	setAttributes: (attributes: Record<string, unknown>) => void
 ) => {
-	return Object.entries( colorTypes ).reduce(
-		( settingsAccumulator, [ colorAttributeName, colorAttribute ] ) => {
+	return Object.entries(colorTypes).reduce(
+		(settingsAccumulator, [colorAttributeName, colorAttribute]) => {
 			const colorSetter = createSetColor(
 				colorAttributeName,
 				colorAttribute.context,
@@ -99,45 +99,44 @@ const createSettings = (
 			);
 			const colorSetting = {
 				colorValue:
-					attributes?.[ colorAttributeName ]?.color ?? undefined,
+					attributes?.[colorAttributeName]?.color ?? undefined,
 				label: colorAttribute.label,
 				onColorChange: colorSetter,
 				resetAllFilter: () => colorSetter(),
 			};
-			settingsAccumulator.push( colorSetting );
+			settingsAccumulator.push(colorSetting);
 			return settingsAccumulator;
 		},
 		[] as ColorSetting[]
 	);
 };
 
-export const ColorPanel = ( {
+export const ColorPanel = ({
 	colorTypes,
 	miniCartButtonRef,
 }: {
 	colorTypes: CustomColorsMap;
-	miniCartButtonRef: RefObject< HTMLButtonElement >;
-} ) => {
+	miniCartButtonRef: RefObject<HTMLButtonElement>;
+}) => {
 	const colorGradientOptions = useMultipleOriginColorsAndGradients();
-	const flattenedColors = flattenColors( colorGradientOptions );
+	const flattenedColors = flattenColors(colorGradientOptions);
 	const { clientId } = useBlockEditContext();
 	const attributes = useSelect(
-		( select ) => {
+		(select) => {
 			// @ts-ignore @wordpress/block-editor/store types not provided
-			const { getBlockAttributes } = select( blockEditorStore );
-			return getBlockAttributes( clientId ) || {};
+			const { getBlockAttributes } = select(blockEditorStore);
+			return getBlockAttributes(clientId) || {};
 		},
-		[ clientId ]
+		[clientId]
 	);
 	// @ts-ignore @wordpress/block-editor/store types not provided
-	const { updateBlockAttributes } = useDispatch( blockEditorStore );
-	const settings = useMemo( () => {
+	const { updateBlockAttributes } = useDispatch(blockEditorStore);
+	const settings = useMemo(() => {
 		return createSettings(
 			colorTypes,
 			flattenedColors,
 			attributes,
-			( newAttributes ) =>
-				updateBlockAttributes( clientId, newAttributes )
+			(newAttributes) => updateBlockAttributes(clientId, newAttributes)
 		);
 	}, [
 		colorTypes,
@@ -145,40 +144,40 @@ export const ColorPanel = ( {
 		updateBlockAttributes,
 		attributes,
 		clientId,
-	] );
+	]);
 
-	const colorContrastWarnings = useMemo( () => {
-		if ( ! settings || settings.length === 0 ) {
+	const colorContrastWarnings = useMemo(() => {
+		if (!settings || settings.length === 0) {
 			return;
 		}
 
 		const contrastWarnings = [];
 
-		for ( let i = 0; i < settings.length; i++ ) {
-			const setting = settings[ i ];
+		for (let i = 0; i < settings.length; i++) {
+			const setting = settings[i];
 
-			if ( ! setting.colorValue || ! miniCartButtonRef.current ) {
+			if (!setting.colorValue || !miniCartButtonRef.current) {
 				continue;
 			}
 
 			const bgColor = getElementBackgroundColor(
 				miniCartButtonRef.current
 			);
-			const message = ContrastChecker( {
+			const message = ContrastChecker({
 				backgroundColor: bgColor,
 				textColor: setting.colorValue,
-			} );
+			});
 
-			if ( message ) {
+			if (message) {
 				contrastWarnings.push(
 					<div
-						style={ { gridColumnEnd: -1, gridColumnStart: 1 } }
-						key={ setting.label }
+						style={{ gridColumnEnd: -1, gridColumnStart: 1 }}
+						key={setting.label}
 					>
-						<p>{ setting.label }</p>
+						<p>{setting.label}</p>
 						<ContrastChecker
-							backgroundColor={ bgColor }
-							textColor={ setting.colorValue }
+							backgroundColor={bgColor}
+							textColor={setting.colorValue}
 						/>
 					</div>
 				);
@@ -186,7 +185,7 @@ export const ColorPanel = ( {
 		}
 
 		return contrastWarnings;
-	}, [ settings, miniCartButtonRef ] );
+	}, [settings, miniCartButtonRef]);
 
 	return (
 		colorGradientOptions.hasColorsOrGradients && (
@@ -194,11 +193,11 @@ export const ColorPanel = ( {
 			<InspectorControls group="color">
 				<ColorGradientSettingsDropdown
 					__experimentalIsRenderedInSidebar
-					settings={ settings }
-					panelId={ clientId }
-					{ ...colorGradientOptions }
+					settings={settings}
+					panelId={clientId}
+					{...colorGradientOptions}
 				/>
-				{ colorContrastWarnings?.map( ( warning ) => warning ) }
+				{colorContrastWarnings?.map((warning) => warning)}
 			</InspectorControls>
 		)
 	);

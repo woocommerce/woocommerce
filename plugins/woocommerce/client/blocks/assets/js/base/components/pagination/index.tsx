@@ -31,7 +31,7 @@ interface PaginationProps {
 	/**
 	 * Callback function called when the user triggers a page change.
 	 */
-	onPageChange: ( currentPage: number ) => void;
+	onPageChange: (currentPage: number) => void;
 	/**
 	 * Number of pages to display at the same time, including the active page
 	 * and the pages displayed before and after it. It doesn't include the first
@@ -40,71 +40,68 @@ interface PaginationProps {
 	pagesToDisplay?: number;
 }
 
-const Pagination = ( {
+const Pagination = ({
 	currentPage,
 	displayFirstAndLastPages = true,
 	displayNextAndPreviousArrows = true,
 	pagesToDisplay = 3,
 	onPageChange,
 	totalPages,
-}: PaginationProps ): JSX.Element => {
+}: PaginationProps): JSX.Element => {
 	let { minIndex, maxIndex } = getIndexes(
 		pagesToDisplay,
 		currentPage,
 		totalPages
 	);
 
-	const showFirstPage = displayFirstAndLastPages && Boolean( minIndex !== 1 );
+	const showFirstPage = displayFirstAndLastPages && Boolean(minIndex !== 1);
 	const showLastPage =
-		displayFirstAndLastPages && Boolean( maxIndex !== totalPages );
+		displayFirstAndLastPages && Boolean(maxIndex !== totalPages);
 	const showFirstPageEllipsis =
-		displayFirstAndLastPages && Boolean( minIndex && minIndex > 3 );
+		displayFirstAndLastPages && Boolean(minIndex && minIndex > 3);
 	const showLastPageEllipsis =
 		displayFirstAndLastPages &&
-		Boolean( maxIndex && maxIndex < totalPages - 2 );
+		Boolean(maxIndex && maxIndex < totalPages - 2);
 
 	// Handle the cases where there would be an ellipsis replacing one single page
-	if ( showFirstPage && minIndex === 3 ) {
+	if (showFirstPage && minIndex === 3) {
 		minIndex = minIndex - 1;
 	}
-	if ( showLastPage && maxIndex === totalPages - 2 ) {
+	if (showLastPage && maxIndex === totalPages - 2) {
 		maxIndex = maxIndex + 1;
 	}
 
 	const pages = [];
-	if ( minIndex && maxIndex ) {
-		for ( let i = minIndex; i <= maxIndex; i++ ) {
-			pages.push( i );
+	if (minIndex && maxIndex) {
+		for (let i = minIndex; i <= maxIndex; i++) {
+			pages.push(i);
 		}
 	}
 
 	return (
 		<div className="wc-block-pagination wc-block-components-pagination">
 			<Label
-				screenReaderLabel={ __(
+				screenReaderLabel={__(
 					'Navigate to another page',
 					'woocommerce'
-				) }
+				)}
 			/>
-			{ displayNextAndPreviousArrows && (
+			{displayNextAndPreviousArrows && (
 				<button
 					className="wc-block-pagination-page wc-block-components-pagination__page wc-block-components-pagination-page--arrow"
-					onClick={ () => onPageChange( currentPage - 1 ) }
-					title={ __( 'Previous page', 'woocommerce' ) }
-					disabled={ currentPage <= 1 }
+					onClick={() => onPageChange(currentPage - 1)}
+					title={__('Previous page', 'woocommerce')}
+					disabled={currentPage <= 1}
 				>
 					<Label
 						label="&larr;"
-						screenReaderLabel={ __(
-							'Previous page',
-							'woocommerce'
-						) }
+						screenReaderLabel={__('Previous page', 'woocommerce')}
 					/>
 				</button>
-			) }
-			{ showFirstPage && (
+			)}
+			{showFirstPage && (
 				<button
-					className={ clsx(
+					className={clsx(
 						'wc-block-pagination-page',
 						'wc-block-components-pagination__page',
 						{
@@ -113,33 +110,33 @@ const Pagination = ( {
 							'wc-block-components-pagination__page--active':
 								currentPage === 1,
 						}
-					) }
-					onClick={ () => onPageChange( 1 ) }
-					disabled={ currentPage === 1 }
+					)}
+					onClick={() => onPageChange(1)}
+					disabled={currentPage === 1}
 				>
 					<Label
-						label={ '1' }
-						screenReaderLabel={ sprintf(
+						label={'1'}
+						screenReaderLabel={sprintf(
 							/* translators: %d is the page number (1, 2, 3...). */
-							__( 'Page %d', 'woocommerce' ),
+							__('Page %d', 'woocommerce'),
 							1
-						) }
+						)}
 					/>
 				</button>
-			) }
-			{ showFirstPageEllipsis && (
+			)}
+			{showFirstPageEllipsis && (
 				<span
 					className="wc-block-pagination-ellipsis wc-block-components-pagination__ellipsis"
 					aria-hidden="true"
 				>
-					{ __( '…', 'woocommerce' ) }
+					{__('…', 'woocommerce')}
 				</span>
-			) }
-			{ pages.map( ( page ) => {
+			)}
+			{pages.map((page) => {
 				return (
 					<button
-						key={ page }
-						className={ clsx(
+						key={page}
+						className={clsx(
 							'wc-block-pagination-page',
 							'wc-block-components-pagination__page',
 							{
@@ -148,36 +145,36 @@ const Pagination = ( {
 								'wc-block-components-pagination__page--active':
 									currentPage === page,
 							}
-						) }
+						)}
 						onClick={
 							currentPage === page
 								? undefined
-								: () => onPageChange( page )
+								: () => onPageChange(page)
 						}
-						disabled={ currentPage === page }
+						disabled={currentPage === page}
 					>
 						<Label
-							label={ page.toString() }
-							screenReaderLabel={ sprintf(
+							label={page.toString()}
+							screenReaderLabel={sprintf(
 								/* translators: %d is the page number (1, 2, 3...). */
-								__( 'Page %d', 'woocommerce' ),
+								__('Page %d', 'woocommerce'),
 								page
-							) }
+							)}
 						/>
 					</button>
 				);
-			} ) }
-			{ showLastPageEllipsis && (
+			})}
+			{showLastPageEllipsis && (
 				<span
 					className="wc-block-pagination-ellipsis wc-block-components-pagination__ellipsis"
 					aria-hidden="true"
 				>
-					{ __( '…', 'woocommerce' ) }
+					{__('…', 'woocommerce')}
 				</span>
-			) }
-			{ showLastPage && (
+			)}
+			{showLastPage && (
 				<button
-					className={ clsx(
+					className={clsx(
 						'wc-block-pagination-page',
 						'wc-block-components-pagination__page',
 						{
@@ -186,33 +183,33 @@ const Pagination = ( {
 							'wc-block-components-pagination__page--active':
 								currentPage === totalPages,
 						}
-					) }
-					onClick={ () => onPageChange( totalPages ) }
-					disabled={ currentPage === totalPages }
+					)}
+					onClick={() => onPageChange(totalPages)}
+					disabled={currentPage === totalPages}
 				>
 					<Label
-						label={ totalPages.toString() }
-						screenReaderLabel={ sprintf(
+						label={totalPages.toString()}
+						screenReaderLabel={sprintf(
 							/* translators: %d is the page number (1, 2, 3...). */
-							__( 'Page %d', 'woocommerce' ),
+							__('Page %d', 'woocommerce'),
 							totalPages
-						) }
+						)}
 					/>
 				</button>
-			) }
-			{ displayNextAndPreviousArrows && (
+			)}
+			{displayNextAndPreviousArrows && (
 				<button
 					className="wc-block-pagination-page wc-block-components-pagination__page wc-block-components-pagination-page--arrow"
-					onClick={ () => onPageChange( currentPage + 1 ) }
-					title={ __( 'Next page', 'woocommerce' ) }
-					disabled={ currentPage >= totalPages }
+					onClick={() => onPageChange(currentPage + 1)}
+					title={__('Next page', 'woocommerce')}
+					disabled={currentPage >= totalPages}
 				>
 					<Label
 						label="&rarr;"
-						screenReaderLabel={ __( 'Next page', 'woocommerce' ) }
+						screenReaderLabel={__('Next page', 'woocommerce')}
 					/>
 				</button>
-			) }
+			)}
 		</div>
 	);
 };

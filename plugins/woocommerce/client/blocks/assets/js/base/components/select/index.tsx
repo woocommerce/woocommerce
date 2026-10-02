@@ -22,19 +22,19 @@ export type SelectOption = {
 };
 
 export type SelectProps = Omit<
-	React.SelectHTMLAttributes< HTMLSelectElement >,
+	React.SelectHTMLAttributes<HTMLSelectElement>,
 	'onChange'
 > & {
 	options: SelectOption[];
 	label: string;
-	onChange: ( newVal: string ) => void;
+	onChange: (newVal: string) => void;
 	errorId?: string;
 	required?: boolean | undefined;
 	errorMessage?: string | undefined;
 	placeholder?: string | undefined;
 };
 
-export const Select = ( props: SelectProps ) => {
+export const Select = (props: SelectProps) => {
 	const {
 		onChange,
 		options,
@@ -44,68 +44,68 @@ export const Select = ( props: SelectProps ) => {
 		size,
 		errorId: incomingErrorId,
 		required,
-		errorMessage = __( 'Please select a valid option', 'woocommerce' ),
+		errorMessage = __('Please select a valid option', 'woocommerce'),
 		placeholder,
 		...restOfProps
 	} = props;
 	const selectOnChange = useCallback(
-		( event: React.ChangeEvent< HTMLSelectElement > ) => {
-			onChange( event.target.value );
+		(event: React.ChangeEvent<HTMLSelectElement>) => {
+			onChange(event.target.value);
 		},
-		[ onChange ]
+		[onChange]
 	);
-	const fieldLabel = getFieldLabel( label );
+	const fieldLabel = getFieldLabel(label);
 	const emptyOption: SelectOption = useMemo(
-		() => ( {
+		() => ({
 			value: '',
 			label:
 				placeholder ??
 				sprintf(
 					// translators: %s will be label of the field. For example "country/region".
-					__( 'Select a %s', 'woocommerce' ),
+					__('Select a %s', 'woocommerce'),
 					fieldLabel
 				),
-			disabled: !! required,
-		} ),
-		[ placeholder, required, fieldLabel ]
+			disabled: !!required,
+		}),
+		[placeholder, required, fieldLabel]
 	);
 
 	const generatedId = useId();
 	const inputId =
-		restOfProps.id || `wc-blocks-components-select-${ generatedId }`;
+		restOfProps.id || `wc-blocks-components-select-${generatedId}`;
 	const errorId = incomingErrorId || inputId;
 
-	const optionsWithEmpty = useMemo< SelectOption[] >( () => {
-		return [ emptyOption ].concat( options );
-	}, [ emptyOption, options ] );
+	const optionsWithEmpty = useMemo<SelectOption[]>(() => {
+		return [emptyOption].concat(options);
+	}, [emptyOption, options]);
 
 	const { setValidationErrors, clearValidationError } =
-		useDispatch( validationStore );
+		useDispatch(validationStore);
 
 	const { error, validationErrorId } = useSelect(
-		( select ) => {
-			const store = select( validationStore );
+		(select) => {
+			const store = select(validationStore);
 			return {
-				error: store.getValidationError( errorId ),
-				validationErrorId: store.getValidationErrorId( errorId ),
+				error: store.getValidationError(errorId),
+				validationErrorId: store.getValidationErrorId(errorId),
 			};
 		},
-		[ errorId ]
+		[errorId]
 	);
 
-	useEffect( () => {
-		if ( ! required || value ) {
-			void clearValidationError( errorId );
+	useEffect(() => {
+		if (!required || value) {
+			void clearValidationError(errorId);
 		} else {
-			void setValidationErrors( {
-				[ errorId ]: {
+			void setValidationErrors({
+				[errorId]: {
 					message: errorMessage,
 					hidden: true,
 				},
-			} );
+			});
 		}
 		return () => {
-			void clearValidationError( errorId );
+			void clearValidationError(errorId);
 		};
 	}, [
 		clearValidationError,
@@ -114,68 +114,68 @@ export const Select = ( props: SelectProps ) => {
 		errorMessage,
 		required,
 		setValidationErrors,
-	] );
+	]);
 
 	const validationError = useSelect(
-		( select ) => {
-			const store = select( validationStore );
+		(select) => {
+			const store = select(validationStore);
 			return (
-				store.getValidationError( errorId || '' ) || {
+				store.getValidationError(errorId || '') || {
 					hidden: true,
 				}
 			);
 		},
-		[ errorId ]
+		[errorId]
 	);
 
 	return (
 		<div
-			className={ clsx( className, {
-				'has-error': ! validationError.hidden,
-			} ) }
+			className={clsx(className, {
+				'has-error': !validationError.hidden,
+			})}
 		>
 			<div className="wc-blocks-components-select">
 				<div className="wc-blocks-components-select__container">
 					<label
-						htmlFor={ inputId }
+						htmlFor={inputId}
 						className="wc-blocks-components-select__label"
 					>
-						{ label }
+						{label}
 					</label>
 					<select
 						className="wc-blocks-components-select__select"
-						id={ inputId }
-						size={ size !== undefined ? size : 1 }
-						onChange={ selectOnChange }
-						value={ value }
+						id={inputId}
+						size={size !== undefined ? size : 1}
+						onChange={selectOnChange}
+						value={value}
 						aria-invalid={
-							error?.message && ! error?.hidden ? true : false
+							error?.message && !error?.hidden ? true : false
 						}
-						aria-errormessage={ validationErrorId }
-						{ ...restOfProps }
+						aria-errormessage={validationErrorId}
+						{...restOfProps}
 					>
-						{ optionsWithEmpty.map( ( option ) => (
+						{optionsWithEmpty.map((option) => (
 							<option
-								key={ option.value }
-								value={ option.value }
-								data-alternate-values={ `[${ option.label }]` }
+								key={option.value}
+								value={option.value}
+								data-alternate-values={`[${option.label}]`}
 								disabled={
 									option.disabled !== undefined
 										? option.disabled
 										: false
 								}
 							>
-								{ option.label }
+								{option.label}
 							</option>
-						) ) }
+						))}
 					</select>
 					<Icon
 						className="wc-blocks-components-select__expand"
-						icon={ chevronDown }
+						icon={chevronDown}
 					/>
 				</div>
 			</div>
-			<ValidationInputError propertyName={ errorId } />
+			<ValidationInputError propertyName={errorId} />
 		</div>
 	);
 };

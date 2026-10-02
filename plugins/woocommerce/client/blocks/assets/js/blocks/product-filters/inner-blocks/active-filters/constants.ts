@@ -6,26 +6,26 @@ import { __ } from '@wordpress/i18n';
 export const filtersPreview = [
 	{
 		id: 'color_blue',
-		type: __( 'Color', 'woocommerce' ),
+		type: __('Color', 'woocommerce'),
 		value: 'blue',
-		label: __( 'Blue', 'woocommerce' ),
+		label: __('Blue', 'woocommerce'),
 	},
 	{
 		id: 'color_red',
-		type: __( 'Color', 'woocommerce' ),
+		type: __('Color', 'woocommerce'),
 		value: 'red',
-		label: __( 'Red', 'woocommerce' ),
+		label: __('Red', 'woocommerce'),
 	},
 	{
 		id: 'size_large',
-		type: __( 'Size', 'woocommerce' ),
+		type: __('Size', 'woocommerce'),
 		value: 'large',
-		label: __( 'Large', 'woocommerce' ),
+		label: __('Large', 'woocommerce'),
 	},
 	{
 		id: 'status_instock',
-		type: __( 'Availability', 'woocommerce' ),
+		type: __('Availability', 'woocommerce'),
 		value: 'instock',
-		label: __( 'In stock', 'woocommerce' ),
+		label: __('In stock', 'woocommerce'),
 	},
 ];

@@ -22,17 +22,17 @@ import { applyFilters } from '@wordpress/hooks';
 import { storeName, CoreDataError, PostWithPermissions } from '../../store';
 import { recordEvent } from '../../events';
 
-function getItemTitle( item: {
+function getItemTitle(item: {
 	title: string | { rendered: string } | { raw: string };
-} ) {
-	if ( typeof item.title === 'string' ) {
-		return decodeEntities( item.title );
+}) {
+	if (typeof item.title === 'string') {
+		return decodeEntities(item.title);
 	}
-	if ( item.title && 'rendered' in item.title ) {
-		return decodeEntities( item.title.rendered );
+	if (item.title && 'rendered' in item.title) {
+		return decodeEntities(item.title.rendered);
 	}
-	if ( item.title && 'raw' in item.title ) {
-		return decodeEntities( item.title.raw );
+	if (item.title && 'raw' in item.title) {
+		return decodeEntities(item.title.raw);
 	}
 	return '';
 }
@@ -41,7 +41,7 @@ function getModalTitle(
 	items: PostWithPermissions[],
 	shouldPermanentlyDelete: boolean
 ) {
-	if ( shouldPermanentlyDelete ) {
+	if (shouldPermanentlyDelete) {
 		return items.length > 1
 			? sprintf(
 					// translators: %d: number of items to delete.
@@ -52,15 +52,15 @@ function getModalTitle(
 						__i18n_text_domain__
 					),
 					items.length
-			  )
+				)
 			: sprintf(
 					// translators: %s: The post's title
 					__(
 						'Are you sure you want to permanently delete "%s"?',
 						__i18n_text_domain__
 					),
-					decodeEntities( getItemTitle( items[ 0 ] ) )
-			  );
+					decodeEntities(getItemTitle(items[0]))
+				);
 	}
 
 	return items.length > 1
@@ -73,15 +73,15 @@ function getModalTitle(
 					__i18n_text_domain__
 				),
 				items.length
-		  )
+			)
 		: sprintf(
 				// translators: %s: The item's title.
 				__(
 					'Are you sure you want to move "%s" to the trash?',
 					__i18n_text_domain__
 				),
-				getItemTitle( items[ 0 ] )
-		  );
+				getItemTitle(items[0])
+			);
 }
 
 const getTrashEmailPostAction = () => {
@@ -98,11 +98,11 @@ const getTrashEmailPostAction = () => {
 	const trashEmailPost = {
 		id: 'trash-email-post',
 		label: shouldPermanentlyDelete
-			? __( 'Permanently delete', __i18n_text_domain__ )
-			: __( 'Move to trash', __i18n_text_domain__ ),
+			? __('Permanently delete', __i18n_text_domain__)
+			: __('Move to trash', __i18n_text_domain__),
 		supportsBulk: true,
 		icon: trash,
-		isEligible( item: PostWithPermissions ) {
+		isEligible(item: PostWithPermissions) {
 			if (
 				item.type === 'wp_template' ||
 				item.type === 'wp_template_part' ||
@@ -115,53 +115,51 @@ const getTrashEmailPostAction = () => {
 		},
 		hideModalHeader: true,
 		modalFocusOnMount: 'firstContentElement',
-		RenderModal: ( { items, closeModal, onActionPerformed } ) => {
-			const [ isBusy, setIsBusy ] = useState( false );
+		RenderModal: ({ items, closeModal, onActionPerformed }) => {
+			const [isBusy, setIsBusy] = useState(false);
 			const { createSuccessNotice, createErrorNotice } =
-				useDispatch( noticesStore );
-			const { deleteEntityRecord } = useDispatch( coreStore );
+				useDispatch(noticesStore);
+			const { deleteEntityRecord } = useDispatch(coreStore);
 
 			const { urls } = useSelect(
-				( select ) => ( {
-					urls: select( storeName ).getUrls(),
-				} ),
+				(select) => ({
+					urls: select(storeName).getUrls(),
+				}),
 				[]
 			);
 
 			const goToListings = () => {
-				if ( urls?.listings ) {
+				if (urls?.listings) {
 					window.location.href = urls.listings;
 				}
 			};
 
 			return (
 				<VStack spacing="5">
-					<Text>
-						{ getModalTitle( items, shouldPermanentlyDelete ) }
-					</Text>
+					<Text>{getModalTitle(items, shouldPermanentlyDelete)}</Text>
 					<HStack justify="right">
 						<Button
 							variant="tertiary"
-							onClick={ () => {
+							onClick={() => {
 								closeModal?.();
 								recordEvent(
 									'trash_modal_cancel_button_clicked'
 								);
-							} }
-							disabled={ isBusy }
+							}}
+							disabled={isBusy}
 							__next40pxDefaultSize
 						>
-							{ __( 'Cancel', __i18n_text_domain__ ) }
+							{__('Cancel', __i18n_text_domain__)}
 						</Button>
 						<Button
 							variant="primary"
-							onClick={ async () => {
+							onClick={async () => {
 								recordEvent(
 									'trash_modal_move_to_trash_button_clicked'
 								);
-								setIsBusy( true );
+								setIsBusy(true);
 								const promiseResult = await Promise.allSettled(
-									items.map( ( post ) =>
+									items.map((post) =>
 										deleteEntityRecord(
 											'postType',
 											post.type,
@@ -175,11 +173,11 @@ const getTrashEmailPostAction = () => {
 								// If all the promises were fulfilled with success.
 								if (
 									promiseResult.every(
-										( { status } ) => status === 'fulfilled'
+										({ status }) => status === 'fulfilled'
 									)
 								) {
 									let successMessage;
-									if ( promiseResult.length === 1 ) {
+									if (promiseResult.length === 1) {
 										successMessage = shouldPermanentlyDelete
 											? sprintf(
 													/* translators: The posts's title. */
@@ -187,22 +185,22 @@ const getTrashEmailPostAction = () => {
 														'"%s" permanently deleted.',
 														__i18n_text_domain__
 													),
-													getItemTitle( items[ 0 ] )
-											  )
+													getItemTitle(items[0])
+												)
 											: sprintf(
 													/* translators: The item's title. */
 													__(
 														'"%s" moved to the trash.',
 														__i18n_text_domain__
 													),
-													getItemTitle( items[ 0 ] )
-											  );
+													getItemTitle(items[0])
+												);
 									} else {
 										successMessage = shouldPermanentlyDelete
 											? __(
 													'The items were permanently deleted.',
 													__i18n_text_domain__
-											  )
+												)
 											: sprintf(
 													/* translators: The number of items. */
 													_n(
@@ -212,24 +210,23 @@ const getTrashEmailPostAction = () => {
 														__i18n_text_domain__
 													),
 													items.length
-											  );
+												);
 									}
-									void createSuccessNotice( successMessage, {
+									void createSuccessNotice(successMessage, {
 										type: 'snackbar',
 										id: 'trash-email-post-action',
-									} );
-									onActionPerformed?.( items );
+									});
+									onActionPerformed?.(items);
 									goToListings();
 								} else {
 									// If there was at lease one failure.
 									let errorMessage;
 									// If we were trying to permanently delete a single post.
-									if ( promiseResult.length === 1 ) {
-										const typedError =
-											promiseResult[ 0 ] as {
-												reason?: CoreDataError;
-											};
-										if ( typedError.reason?.message ) {
+									if (promiseResult.length === 1) {
+										const typedError = promiseResult[0] as {
+											reason?: CoreDataError;
+										};
+										if (typedError.reason?.message) {
 											errorMessage =
 												typedError.reason.message;
 										} else {
@@ -240,37 +237,36 @@ const getTrashEmailPostAction = () => {
 										}
 										// If we were trying to permanently delete multiple posts
 									} else {
-										const errorMessages =
-											new Set< string >();
+										const errorMessages = new Set<string>();
 										const failedPromises =
 											promiseResult.filter(
-												( { status } ) =>
+												({ status }) =>
 													status === 'rejected'
 											);
-										for ( const failedPromise of failedPromises ) {
+										for (const failedPromise of failedPromises) {
 											const typedError =
 												failedPromise as {
 													reason?: CoreDataError;
 												};
-											if ( typedError.reason?.message ) {
+											if (typedError.reason?.message) {
 												errorMessages.add(
 													typedError.reason.message
 												);
 											}
 										}
-										if ( errorMessages.size === 0 ) {
+										if (errorMessages.size === 0) {
 											errorMessage = __(
 												'An error occurred while performing the action.',
 												__i18n_text_domain__
 											);
-										} else if ( errorMessages.size === 1 ) {
+										} else if (errorMessages.size === 1) {
 											errorMessage = sprintf(
 												/* translators: %s: an error message */
 												__(
 													'An error occurred while performing the action: %s',
 													__i18n_text_domain__
 												),
-												[ ...errorMessages ][ 0 ]
+												[...errorMessages][0]
 											);
 										} else {
 											errorMessage = sprintf(
@@ -279,7 +275,7 @@ const getTrashEmailPostAction = () => {
 													'Some errors occurred while performing the action: %s',
 													__i18n_text_domain__
 												),
-												[ ...errorMessages ].join( ',' )
+												[...errorMessages].join(',')
 											);
 										}
 									}
@@ -289,24 +285,21 @@ const getTrashEmailPostAction = () => {
 											errorMessage,
 										}
 									);
-									void createErrorNotice( errorMessage, {
+									void createErrorNotice(errorMessage, {
 										type: 'snackbar',
-									} );
+									});
 								}
 
-								setIsBusy( false );
+								setIsBusy(false);
 								closeModal?.();
-							} }
-							isBusy={ isBusy }
-							disabled={ isBusy }
+							}}
+							isBusy={isBusy}
+							disabled={isBusy}
 							__next40pxDefaultSize
 						>
-							{ shouldPermanentlyDelete
-								? __(
-										'Delete permanently',
-										__i18n_text_domain__
-								  )
-								: __( 'Move to trash', __i18n_text_domain__ ) }
+							{shouldPermanentlyDelete
+								? __('Delete permanently', __i18n_text_domain__)
+								: __('Move to trash', __i18n_text_domain__)}
 						</Button>
 					</HStack>
 				</VStack>

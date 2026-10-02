@@ -29,28 +29,25 @@ const CustomerAddress = () => {
 		setEditingShippingAddress,
 	} = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
-	const [ shouldAnimate, setShouldAnimate ] = useState( false );
+	const [shouldAnimate, setShouldAnimate] = useState(false);
 
 	const { isInitialized } = useCustomerData();
 
 	const { validationErrors } = useSelect(
-		( select ) => {
+		(select) => {
 			return {
-				validationErrors:
-					select( validationStore ).getValidationErrors(),
+				validationErrors: select(validationStore).getValidationErrors(),
 			};
 		},
-		[ shippingAddress ]
+		[shippingAddress]
 	);
 
-	useEffect( () => {
+	useEffect(() => {
 		// Check if any shipping field has validation errors
-		const hasValidationErrors = Object.keys( shippingAddress ).some(
-			( key ) => {
-				// Check if 'shipping_' + key exists in validationErrors
-				return validationErrors[ `shipping_${ key }` ] !== undefined;
-			}
-		);
+		const hasValidationErrors = Object.keys(shippingAddress).some((key) => {
+			// Check if 'shipping_' + key exists in validationErrors
+			return validationErrors[`shipping_${key}`] !== undefined;
+		});
 
 		// Forces editing state if store has errors,
 		// but not on initial render when all fields are empty.
@@ -59,7 +56,7 @@ const CustomerAddress = () => {
 			hasValidationErrors &&
 			editingShippingAddress === false
 		) {
-			setEditingShippingAddress( true );
+			setEditingShippingAddress(true);
 		}
 	}, [
 		editingShippingAddress,
@@ -67,16 +64,16 @@ const CustomerAddress = () => {
 		isInitialized,
 		setEditingShippingAddress,
 		validationErrors,
-	] );
+	]);
 
 	const onChangeAddress = useCallback(
-		( values: ShippingAddress ) => {
-			setShippingAddress( values );
-			if ( useShippingAsBilling ) {
-				setBillingAddress( values );
-				dispatchCheckoutEvent( 'set-billing-address' );
+		(values: ShippingAddress) => {
+			setShippingAddress(values);
+			if (useShippingAsBilling) {
+				setBillingAddress(values);
+				dispatchCheckoutEvent('set-billing-address');
 			}
-			dispatchCheckoutEvent( 'set-shipping-address' );
+			dispatchCheckoutEvent('set-shipping-address');
 		},
 		[
 			dispatchCheckoutEvent,
@@ -86,31 +83,31 @@ const CustomerAddress = () => {
 		]
 	);
 
-	const handleEditClick = useCallback( () => {
-		setShouldAnimate( true );
-		setEditingShippingAddress( true );
-	}, [ setEditingShippingAddress ] );
+	const handleEditClick = useCallback(() => {
+		setShouldAnimate(true);
+		setEditingShippingAddress(true);
+	}, [setEditingShippingAddress]);
 
 	return (
 		<AddressWrapper
-			isEditing={ editingShippingAddress }
-			shouldAnimate={ shouldAnimate }
+			isEditing={editingShippingAddress}
+			shouldAnimate={shouldAnimate}
 			addressCard={
 				<AddressCard
-					address={ shippingAddress }
+					address={shippingAddress}
 					target="shipping"
-					onEdit={ handleEditClick }
-					isExpanded={ editingShippingAddress }
+					onEdit={handleEditClick}
+					isExpanded={editingShippingAddress}
 				/>
 			}
 			addressForm={
-				<Form< ShippingAddress >
+				<Form<ShippingAddress>
 					id="shipping"
 					addressType="shipping"
-					onChange={ onChangeAddress }
-					values={ shippingAddress }
-					fields={ ADDRESS_FORM_KEYS }
-					isEditing={ editingShippingAddress }
+					onChange={onChangeAddress}
+					values={shippingAddress}
+					fields={ADDRESS_FORM_KEYS}
+					isEditing={editingShippingAddress}
 				/>
 			}
 		/>

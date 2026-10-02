@@ -8,13 +8,13 @@ import type { EmailType } from './settings-email-listing-slotfill';
  * if `a > b`. Lightweight on purpose — template versions don't carry
  * pre-release / build metadata so we don't need full semver semantics.
  */
-export function compareTemplateVersions( a: string, b: string ): number {
-	const partsA = a.split( '.' ).map( ( s ) => parseInt( s, 10 ) || 0 );
-	const partsB = b.split( '.' ).map( ( s ) => parseInt( s, 10 ) || 0 );
-	const len = Math.max( partsA.length, partsB.length );
-	for ( let i = 0; i < len; i++ ) {
-		const diff = ( partsA[ i ] ?? 0 ) - ( partsB[ i ] ?? 0 );
-		if ( diff !== 0 ) {
+export function compareTemplateVersions(a: string, b: string): number {
+	const partsA = a.split('.').map((s) => parseInt(s, 10) || 0);
+	const partsB = b.split('.').map((s) => parseInt(s, 10) || 0);
+	const len = Math.max(partsA.length, partsB.length);
+	for (let i = 0; i < len; i++) {
+		const diff = (partsA[i] ?? 0) - (partsB[i] ?? 0);
+		if (diff !== 0) {
 			return diff;
 		}
 	}
@@ -39,14 +39,14 @@ export function compareTemplateVersions( a: string, b: string ): number {
  * happens for legacy posts before the RSM-149 backfill, so we surface
  * the indicator rather than silently hide it.
  */
-export function shouldShowReviewUpdate( post: EmailType ): boolean {
-	if ( post.templateStatus !== 'core_updated_customized' ) {
+export function shouldShowReviewUpdate(post: EmailType): boolean {
+	if (post.templateStatus !== 'core_updated_customized') {
 		return false;
 	}
-	if ( ! post.templateVersion || ! post.currentVersion ) {
+	if (!post.templateVersion || !post.currentVersion) {
 		return true;
 	}
 	return (
-		compareTemplateVersions( post.templateVersion, post.currentVersion ) < 0
+		compareTemplateVersions(post.templateVersion, post.currentVersion) < 0
 	);
 }

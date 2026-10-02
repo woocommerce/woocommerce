@@ -18,17 +18,17 @@ import { queueRecordEvent } from '@woocommerce/tracks';
  */
 const saveStarted = () => {
 	if (
-		! document
-			.querySelector( '.editor-post-publish-button' )
-			.classList.contains( 'is-busy' )
+		!document
+			.querySelector('.editor-post-publish-button')
+			.classList.contains('is-busy')
 	) {
-		const promise = new Promise( ( resolve ) => {
-			window.requestAnimationFrame( resolve );
-		} );
-		return promise.then( () => saveStarted() );
+		const promise = new Promise((resolve) => {
+			window.requestAnimationFrame(resolve);
+		});
+		return promise.then(() => saveStarted());
 	}
 
-	return Promise.resolve( true );
+	return Promise.resolve(true);
 };
 
 /**
@@ -39,44 +39,44 @@ const saveStarted = () => {
 const saveCompleted = () => {
 	if (
 		document
-			.querySelector( '.editor-post-publish-button' )
-			.classList.contains( 'is-busy' )
+			.querySelector('.editor-post-publish-button')
+			.classList.contains('is-busy')
 	) {
-		const promise = new Promise( ( resolve ) => {
-			window.requestAnimationFrame( resolve );
-		} );
-		return promise.then( () => saveCompleted() );
+		const promise = new Promise((resolve) => {
+			window.requestAnimationFrame(resolve);
+		});
+		return promise.then(() => saveCompleted());
 	}
 
-	return Promise.resolve( true );
+	return Promise.resolve(true);
 };
 
 /**
  * Displays a notice on page save and updates the hompage options.
  */
 const onboardingHomepageNotice = () => {
-	const saveButton = document.querySelector( '.editor-post-publish-button' );
-	if ( saveButton.classList.contains( 'is-clicked' ) ) {
+	const saveButton = document.querySelector('.editor-post-publish-button');
+	if (saveButton.classList.contains('is-clicked')) {
 		return;
 	}
 
-	saveButton.classList.add( 'is-clicked' );
+	saveButton.classList.add('is-clicked');
 
-	saveCompleted().then( () => {
+	saveCompleted().then(() => {
 		const notificationType =
-			document.querySelector( '.components-snackbar__content' ) !== null
+			document.querySelector('.components-snackbar__content') !== null
 				? 'snackbar'
 				: 'default';
 
-		dispatch( 'core/notices' ).removeNotice( 'SAVE_POST_NOTICE_ID' );
-		dispatch( 'core/notices' ).createSuccessNotice(
-			__( '🏠 Nice work creating your store’s homepage!', 'woocommerce' ),
+		dispatch('core/notices').removeNotice('SAVE_POST_NOTICE_ID');
+		dispatch('core/notices').createSuccessNotice(
+			__('🏠 Nice work creating your store’s homepage!', 'woocommerce'),
 			{
 				id: 'WOOCOMMERCE_ONBOARDING_HOME_PAGE_NOTICE',
 				type: notificationType,
 				actions: [
 					{
-						label: __( 'Continue setup.', 'woocommerce' ),
+						label: __('Continue setup.', 'woocommerce'),
 						onClick: () => {
 							queueRecordEvent(
 								'tasklist_appearance_continue_setup',
@@ -90,17 +90,15 @@ const onboardingHomepageNotice = () => {
 				],
 			}
 		);
-	} );
+	});
 };
 
-domReady( () => {
-	const publishButton = document.querySelector(
-		'.editor-post-publish-button'
-	);
-	if ( publishButton ) {
+domReady(() => {
+	const publishButton = document.querySelector('.editor-post-publish-button');
+	if (publishButton) {
 		publishButton.addEventListener(
 			'click',
-			saveStarted().then( () => onboardingHomepageNotice() )
+			saveStarted().then(() => onboardingHomepageNotice())
 		);
 	}
-} );
+});

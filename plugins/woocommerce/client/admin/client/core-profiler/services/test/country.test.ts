@@ -3,13 +3,13 @@
  */
 import { getCountryStateOptions } from '../country';
 
-describe( 'getCountryStateOptions', () => {
-	it( 'should return an empty array when passed an empty array of countries', () => {
-		const result = getCountryStateOptions( [] );
-		expect( result ).toEqual( [] );
-	} );
+describe('getCountryStateOptions', () => {
+	it('should return an empty array when passed an empty array of countries', () => {
+		const result = getCountryStateOptions([]);
+		expect(result).toEqual([]);
+	});
 
-	it( 'should return an array of CountryStateOption objects when passed an array of countries with states', () => {
+	it('should return an array of CountryStateOption objects when passed an array of countries with states', () => {
 		const countries = [
 			{
 				code: 'US',
@@ -40,16 +40,16 @@ describe( 'getCountryStateOptions', () => {
 			{ key: 'AU:NSW', label: 'Australia — New South Wales' },
 			{ key: 'AU:VIC', label: 'Australia — Victoria' },
 		];
-		const result = getCountryStateOptions( countries );
-		expect( result ).toEqual( expected );
-	} );
+		const result = getCountryStateOptions(countries);
+		expect(result).toEqual(expected);
+	});
 
-	it( 'should return an array of CountryStateOption objects with correct key and label properties when passed an array of countries with and without states', () => {
+	it('should return an array of CountryStateOption objects with correct key and label properties when passed an array of countries with and without states', () => {
 		const countries = [
 			{
 				code: 'US',
 				name: 'United States',
-				states: [ { code: 'CA', name: 'California' } ],
+				states: [{ code: 'CA', name: 'California' }],
 			},
 			{
 				code: 'GB',
@@ -77,7 +77,7 @@ describe( 'getCountryStateOptions', () => {
 			{ key: 'AU:NSW', label: 'Australia — New South Wales' },
 			{ key: 'AU:VIC', label: 'Australia — Victoria' },
 		];
-		const result = getCountryStateOptions( countries );
-		expect( result ).toEqual( expected );
-	} );
-} );
+		const result = getCountryStateOptions(countries);
+		expect(result).toEqual(expected);
+	});
+});

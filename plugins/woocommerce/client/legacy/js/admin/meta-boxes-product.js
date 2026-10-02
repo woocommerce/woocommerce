@@ -104,8 +104,7 @@ jQuery( function ( $ ) {
 			const title = event.formData.get( 'post_title' );
 
 			if (
-				'auto-draft' ===
-					event.formData.get( 'original_post_status' ) &&
+				'auto-draft' === event.formData.get( 'original_post_status' ) &&
 				typeof title === 'string' &&
 				'' === title.trim()
 			) {
@@ -565,51 +564,51 @@ jQuery( function ( $ ) {
 	}
 
 	function update_attribute_row_indexes() {
-		$( '.product_attributes .woocommerce_attribute' ).each( function (
-			index,
-			el
-		) {
-			$( '.attribute_position', el ).val(
-				parseInt(
-					$( el ).index(
-						'.product_attributes .woocommerce_attribute'
-					),
-					10
-				)
-			);
-		} );
+		$( '.product_attributes .woocommerce_attribute' ).each(
+			function ( index, el ) {
+				$( '.attribute_position', el ).val(
+					parseInt(
+						$( el ).index(
+							'.product_attributes .woocommerce_attribute'
+						),
+						10
+					)
+				);
+			}
+		);
 	}
 
 	var selectedAttributes = [];
 	var currentAttributeTermCreationContext = null;
-	$( '.product_attributes .woocommerce_attribute' ).each( function (
-		index,
-		el
-	) {
-		if (
-			$( el ).css( 'display' ) !== 'none' &&
-			$( el ).is( '.taxonomy' )
-		) {
-			selectedAttributes.push( $( el ).data( 'taxonomy' ) );
-			$( 'select.attribute_taxonomy' )
-				.find( 'option[value="' + $( el ).data( 'taxonomy' ) + '"]' )
-				.attr( 'disabled', 'disabled' );
-		}
+	$( '.product_attributes .woocommerce_attribute' ).each(
+		function ( index, el ) {
+			if (
+				$( el ).css( 'display' ) !== 'none' &&
+				$( el ).is( '.taxonomy' )
+			) {
+				selectedAttributes.push( $( el ).data( 'taxonomy' ) );
+				$( 'select.attribute_taxonomy' )
+					.find(
+						'option[value="' + $( el ).data( 'taxonomy' ) + '"]'
+					)
+					.attr( 'disabled', 'disabled' );
+			}
 
-		if (
-			'undefined' === $( el ).attr( 'data-taxonomy' ) ||
-			false === $( el ).attr( 'data-taxonomy' ) ||
-			'' === $( el ).attr( 'data-taxonomy' )
-		) {
-			add_placeholder_to_attribute_values_field( $( el ) );
-
-			$(
-				'.woocommerce_attribute input.woocommerce_attribute_used_for_variations'
-			).on( 'change', function () {
+			if (
+				'undefined' === $( el ).attr( 'data-taxonomy' ) ||
+				false === $( el ).attr( 'data-taxonomy' ) ||
+				'' === $( el ).attr( 'data-taxonomy' )
+			) {
 				add_placeholder_to_attribute_values_field( $( el ) );
-			} );
+
+				$(
+					'.woocommerce_attribute input.woocommerce_attribute_used_for_variations'
+				).on( 'change', function () {
+					add_placeholder_to_attribute_values_field( $( el ) );
+				} );
+			}
 		}
-	} );
+	);
 	$( 'select.wc-attribute-search' ).data(
 		'disabled-items',
 		selectedAttributes

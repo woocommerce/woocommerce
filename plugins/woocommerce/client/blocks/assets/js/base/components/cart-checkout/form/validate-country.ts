@@ -16,21 +16,21 @@ const validateCountry = (
 	addressType: string,
 	values: ShippingAddress
 ): void => {
-	const validationErrorId = `${ addressType }_country`;
+	const validationErrorId = `${addressType}_country`;
 	const hasValidationError =
-		select( validationStore ).getValidationError( validationErrorId );
+		select(validationStore).getValidationError(validationErrorId);
 	const hasCityStateOrPostcode =
 		values.city || values.state || values.postcode;
 
 	try {
-		if ( ! values.country && hasCityStateOrPostcode ) {
-			throw __( 'Please select your country', 'woocommerce' );
+		if (!values.country && hasCityStateOrPostcode) {
+			throw __('Please select your country', 'woocommerce');
 		}
 
 		if (
 			addressType === 'billing' &&
 			values.country &&
-			! Object.keys( ALLOWED_COUNTRIES ).includes( values.country )
+			!Object.keys(ALLOWED_COUNTRIES).includes(values.country)
 		) {
 			throw __(
 				'Sorry, we do not allow orders from the selected country',
@@ -41,7 +41,7 @@ const validateCountry = (
 		if (
 			addressType === 'shipping' &&
 			values.country &&
-			! Object.keys( SHIPPING_COUNTRIES ).includes( values.country )
+			!Object.keys(SHIPPING_COUNTRIES).includes(values.country)
 		) {
 			throw __(
 				'Sorry, we do not ship orders to the selected country',
@@ -50,23 +50,23 @@ const validateCountry = (
 		}
 
 		// No errors, so clear from store if needed
-		if ( hasValidationError ) {
-			void dispatch( validationStore ).clearValidationError(
+		if (hasValidationError) {
+			void dispatch(validationStore).clearValidationError(
 				validationErrorId
 			);
 		}
-	} catch ( error ) {
-		if ( hasValidationError ) {
-			void dispatch( validationStore ).showValidationError(
+	} catch (error) {
+		if (hasValidationError) {
+			void dispatch(validationStore).showValidationError(
 				validationErrorId
 			);
 		} else {
-			void dispatch( validationStore ).setValidationErrors( {
-				[ validationErrorId ]: {
-					message: String( error ),
+			void dispatch(validationStore).setValidationErrors({
+				[validationErrorId]: {
+					message: String(error),
 					hidden: false,
 				},
-			} );
+			});
 		}
 	}
 };

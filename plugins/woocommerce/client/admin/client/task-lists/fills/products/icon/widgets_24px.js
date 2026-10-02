@@ -9,7 +9,7 @@ const Widget = () => {
 		>
 			<mask
 				id="mask0_1133_132667"
-				style={ { maskType: 'alpha' } }
+				style={{ maskType: 'alpha' }}
 				maskUnits="userSpaceOnUse"
 				x="2"
 				y="2"

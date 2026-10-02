@@ -43,40 +43,40 @@ import Shipping from '../inner-blocks/checkout-order-summary-shipping/frontend';
 import Taxes from '../inner-blocks/checkout-order-summary-taxes/frontend';
 import Checkout from '../block';
 
-jest.mock( '@wordpress/data', () =>
-	require( '@woocommerce/blocks-test-utils/mock-editor-store' ).mockWordPressDataWithEditorStore()
+jest.mock('@wordpress/data', () =>
+	require('@woocommerce/blocks-test-utils/mock-editor-store').mockWordPressDataWithEditorStore()
 );
 
-jest.mock( '@wordpress/compose', () => ( {
-	...jest.requireActual( '@wordpress/compose' ),
-	useResizeObserver: jest.fn().mockReturnValue( [ null, { width: 0 } ] ),
-} ) );
+jest.mock('@wordpress/compose', () => ({
+	...jest.requireActual('@wordpress/compose'),
+	useResizeObserver: jest.fn().mockReturnValue([null, { width: 0 }]),
+}));
 
-global.ResizeObserver = jest.fn().mockImplementation( () => ( {
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
 	observe: jest.fn(),
 	unobserve: jest.fn(),
 	disconnect: jest.fn(),
-} ) );
+}));
 
-global.IntersectionObserver = jest.fn().mockImplementation( () => ( {
+global.IntersectionObserver = jest.fn().mockImplementation(() => ({
 	observe: jest.fn(),
 	unobserve: jest.fn(),
 	disconnect: jest.fn(),
-} ) );
+}));
 
-jest.mock( '@wordpress/element', () => {
+jest.mock('@wordpress/element', () => {
 	return {
-		...jest.requireActual( '@wordpress/element' ),
+		...jest.requireActual('@wordpress/element'),
 		useId: () => {
 			return 'mock-id';
 		},
 	};
-} );
+});
 
-jest.mock( '../context', () => {
+jest.mock('../context', () => {
 	return {
-		...jest.requireActual( '../context' ),
-		useCheckoutBlockContext: jest.fn().mockReturnValue( {
+		...jest.requireActual('../context'),
+		useCheckoutBlockContext: jest.fn().mockReturnValue({
 			showFormStepNumbers: false,
 			cartPageId: 0,
 			requireCompanyField: false,
@@ -88,17 +88,17 @@ jest.mock( '../context', () => {
 			showPolicyLinks: false,
 			showRateAfterTaxName: false,
 			showReturnToCart: false,
-		} ),
+		}),
 	};
-} );
+});
 
 /** @type {jest.Mock} */
 const useCheckoutBlockContext =
-	jest.requireMock( '../context' ).useCheckoutBlockContext;
+	jest.requireMock('../context').useCheckoutBlockContext;
 
 const CheckoutBlock = () => {
 	return (
-		<Checkout attributes={ {} }>
+		<Checkout attributes={{}}>
 			<Fields>
 				<ExpressPayment />
 				<ContactInformation />
@@ -111,9 +111,9 @@ const CheckoutBlock = () => {
 				<Payment />
 				<OrderNote />
 				<Terms
-					checkbox={ true }
-					showSeparator={ false }
-					text={ termsCheckboxDefaultText }
+					checkbox={true}
+					showSeparator={false}
+					text={termsCheckboxDefaultText}
 				/>
 				<Actions />
 			</Fields>
@@ -132,23 +132,23 @@ const CheckoutBlock = () => {
 	);
 };
 
-describe( 'Testing Checkout', () => {
-	beforeEach( () => {
+describe('Testing Checkout', () => {
+	beforeEach(() => {
 		// Set up MSW handlers for cart API
 		server.use(
-			http.get( '/wc/store/v1/cart', () => {
-				return HttpResponse.json( previewCart );
-			} )
+			http.get('/wc/store/v1/cart', () => {
+				return HttpResponse.json(previewCart);
+			})
 		);
-		act( () => {
+		act(() => {
 			// need to clear the store resolution state between tests.
-			dispatch( cartStore ).invalidateResolutionForStore();
-			dispatch( cartStore ).receiveCart( defaultCartState.cartData );
-		} );
+			dispatch(cartStore).invalidateResolutionForStore();
+			dispatch(cartStore).receiveCart(defaultCartState.cartData);
+		});
 
-		act( () => {
+		act(() => {
 			const PaymentMethodContent = () => <div>A payment method</div>;
-			registerPaymentMethod( {
+			registerPaymentMethod({
 				name: 'test-payment-method',
 				label: 'Payment method with cards',
 				content: <PaymentMethodContent />,
@@ -158,100 +158,100 @@ describe( 'Testing Checkout', () => {
 				supports: {
 					showSavedCards: true,
 					showSaveOption: true,
-					features: [ 'products' ],
+					features: ['products'],
 				},
 				ariaLabel: 'Test Payment Method',
-			} );
-		} );
-	} );
+			});
+		});
+	});
 
-	afterEach( () => {
+	afterEach(() => {
 		// MSW handlers are reset automatically in the global setup
-	} );
+	});
 
-	it( 'Renders checkout if there are items in the cart', async () => {
-		render( <CheckoutBlock /> );
+	it('Renders checkout if there are items in the cart', async () => {
+		render(<CheckoutBlock />);
 
-		await waitFor( () =>
-			expect( screen.getByText( /Place Order/i ) ).toBeVisible()
+		await waitFor(() =>
+			expect(screen.getByText(/Place Order/i)).toBeVisible()
 		);
-	} );
+	});
 
-	it( 'Allows saving payment method if the customer is creating an account or has already logged in', async () => {
-		const { rerender } = render( <CheckoutBlock /> );
+	it('Allows saving payment method if the customer is creating an account or has already logged in', async () => {
+		const { rerender } = render(<CheckoutBlock />);
 
 		expect(
-			await screen.findByText( /Payment method with cards/i )
+			await screen.findByText(/Payment method with cards/i)
 		).toBeVisible();
 
 		expect(
-			screen.getByRole( 'checkbox', {
+			screen.getByRole('checkbox', {
 				name: 'Save payment information to my account for future purchases.',
-			} )
+			})
 		).toBeVisible();
 
-		act( () => {
-			dispatch( checkoutStore ).__internalSetCustomerId( 0 );
-		} );
+		act(() => {
+			dispatch(checkoutStore).__internalSetCustomerId(0);
+		});
 
-		rerender( <CheckoutBlock /> );
+		rerender(<CheckoutBlock />);
 
 		expect(
-			screen.queryByRole( 'checkbox', {
+			screen.queryByRole('checkbox', {
 				name: 'Save payment information to my account for future purchases.',
-			} )
+			})
 		).not.toBeInTheDocument();
 
-		act( () => {
+		act(() => {
 			allSettings.checkoutAllowsGuest = true;
 			allSettings.checkoutAllowsSignup = true;
-			dispatch( checkoutStore ).__internalSetCustomerId( 0 );
-			dispatch( checkoutStore ).__internalSetShouldCreateAccount( true );
-		} );
+			dispatch(checkoutStore).__internalSetCustomerId(0);
+			dispatch(checkoutStore).__internalSetShouldCreateAccount(true);
+		});
 
-		rerender( <CheckoutBlock /> );
+		rerender(<CheckoutBlock />);
 
 		expect(
-			screen.getByRole( 'checkbox', {
+			screen.getByRole('checkbox', {
 				name: 'Save payment information to my account for future purchases.',
-			} )
+			})
 		).toBeInTheDocument();
 
-		act( () => {
-			dispatch( checkoutStore ).__internalSetShouldCreateAccount( false );
-		} );
+		act(() => {
+			dispatch(checkoutStore).__internalSetShouldCreateAccount(false);
+		});
 
-		rerender( <CheckoutBlock /> );
+		rerender(<CheckoutBlock />);
 
 		expect(
-			screen.queryByRole( 'checkbox', {
+			screen.queryByRole('checkbox', {
 				name: 'Save payment information to my account for future purchases.',
-			} )
+			})
 		).not.toBeInTheDocument();
 
-		act( () => {
+		act(() => {
 			allSettings.checkoutAllowsGuest = false;
 			allSettings.checkoutAllowsSignup = true;
-		} );
+		});
 
-		rerender( <CheckoutBlock /> );
+		rerender(<CheckoutBlock />);
 
 		expect(
-			screen.getByRole( 'checkbox', {
+			screen.getByRole('checkbox', {
 				name: 'Save payment information to my account for future purchases.',
-			} )
+			})
 		).toBeVisible();
 
 		// cleanup
-		act( () => {
+		act(() => {
 			allSettings.checkoutAllowsGuest = undefined;
 			allSettings.checkoutAllowsSignup = undefined;
-			dispatch( checkoutStore ).__internalSetCustomerId( 1 );
-		} );
-	} );
+			dispatch(checkoutStore).__internalSetCustomerId(1);
+		});
+	});
 
-	it( 'Renders the shipping address card if the address is filled and the cart contains a shippable product', async () => {
-		act( () => {
+	it('Renders the shipping address card if the address is filled and the cart contains a shippable product', async () => {
+		act(() => {
 			const cartWithAddress = {
 				...previewCart,
 				shipping_address: {
@@ -282,25 +282,25 @@ describe( 'Testing Checkout', () => {
 			};
 			// Override the MSW handler with cart that has address
 			server.use(
-				http.get( '/wc/store/v1/cart', () => {
-					return HttpResponse.json( cartWithAddress );
-				} )
+				http.get('/wc/store/v1/cart', () => {
+					return HttpResponse.json(cartWithAddress);
+				})
 			);
-		} );
+		});
 
-		const { rerender } = render( <CheckoutBlock /> );
+		const { rerender } = render(<CheckoutBlock />);
 
-		await waitFor( () =>
+		await waitFor(() =>
 			expect(
-				screen.getByRole( 'button', { name: 'Edit shipping address' } )
+				screen.getByRole('button', { name: 'Edit shipping address' })
 			).toBeVisible()
 		);
 
-		expect( screen.getByText( /Toronto ON M4W 1A6/ ) ).toBeVisible();
+		expect(screen.getByText(/Toronto ON M4W 1A6/)).toBeVisible();
 
 		// Async is needed here despite the IDE warnings. Testing Library gives a warning if not awaited.
-		await act( () =>
-			dispatch( cartStore ).setShippingAddress( {
+		await act(() =>
+			dispatch(cartStore).setShippingAddress({
 				first_name: 'First Name JP',
 				last_name: 'Last Name JP',
 				company: '',
@@ -311,17 +311,15 @@ describe( 'Testing Checkout', () => {
 				postcode: '650-0000',
 				country: 'JP',
 				phone: '',
-			} )
+			})
 		);
-		rerender( <CheckoutBlock /> );
+		rerender(<CheckoutBlock />);
 
-		expect(
-			screen.getByText( /Hyogo Kobe Address 1 JP/ )
-		).toBeInTheDocument();
+		expect(screen.getByText(/Hyogo Kobe Address 1 JP/)).toBeInTheDocument();
 
 		// Testing the default address format
-		await act( () =>
-			dispatch( cartStore ).setShippingAddress( {
+		await act(() =>
+			dispatch(cartStore).setShippingAddress({
 				first_name: 'First Name GB',
 				last_name: 'Last Name GB',
 				company: '',
@@ -332,67 +330,67 @@ describe( 'Testing Checkout', () => {
 				postcode: 'L1 0BP',
 				country: 'GB',
 				phone: '',
-			} )
+			})
 		);
-		rerender( <CheckoutBlock /> );
+		rerender(<CheckoutBlock />);
 
-		expect( screen.getByText( /Liverpool/ ) ).toBeInTheDocument();
-		expect( screen.getByText( /Merseyside/ ) ).toBeInTheDocument();
-		expect( screen.getByText( /L1 0BP/ ) ).toBeInTheDocument();
-	} );
+		expect(screen.getByText(/Liverpool/)).toBeInTheDocument();
+		expect(screen.getByText(/Merseyside/)).toBeInTheDocument();
+		expect(screen.getByText(/L1 0BP/)).toBeInTheDocument();
+	});
 
-	it( 'Renders the billing address card if the address is filled and the cart contains a virtual product', async () => {
-		act( () => {
+	it('Renders the billing address card if the address is filled and the cart contains a virtual product', async () => {
+		act(() => {
 			const cartWithVirtualProduct = {
 				...previewCart,
 				needs_shipping: false,
 			};
 			// Override the MSW handler with virtual product cart
 			server.use(
-				http.get( '/wc/store/v1/cart', () => {
-					return HttpResponse.json( cartWithVirtualProduct );
-				} )
+				http.get('/wc/store/v1/cart', () => {
+					return HttpResponse.json(cartWithVirtualProduct);
+				})
 			);
-		} );
-		render( <CheckoutBlock /> );
+		});
+		render(<CheckoutBlock />);
 
-		await waitFor( () =>
+		await waitFor(() =>
 			expect(
-				screen.getByRole( 'button', { name: 'Edit billing address' } )
+				screen.getByRole('button', { name: 'Edit billing address' })
 			).toBeVisible()
 		);
-	} );
+	});
 
-	it( 'Ensures checkbox labels have unique IDs', async () => {
-		await act( async () => {
+	it('Ensures checkbox labels have unique IDs', async () => {
+		await act(async () => {
 			// Set required settings
 			allSettings.checkoutAllowsGuest = true;
 			allSettings.checkoutAllowsSignup = true;
-			dispatch( checkoutStore ).__internalSetCustomerId( 0 );
-		} );
+			dispatch(checkoutStore).__internalSetCustomerId(0);
+		});
 
 		// Render the CheckoutBlock
-		render( <CheckoutBlock /> );
+		render(<CheckoutBlock />);
 
 		// Query for all checkboxes
-		const checkboxes = screen.getAllByRole( 'checkbox' );
+		const checkboxes = screen.getAllByRole('checkbox');
 
 		// Extract IDs from checkboxes
-		const ids = checkboxes.map( ( checkbox ) => checkbox.id );
+		const ids = checkboxes.map((checkbox) => checkbox.id);
 
 		// Ensure all IDs are unique
-		const uniqueIds = new Set( ids );
-		expect( uniqueIds.size ).toBe( ids.length );
+		const uniqueIds = new Set(ids);
+		expect(uniqueIds.size).toBe(ids.length);
 
-		await act( async () => {
+		await act(async () => {
 			// Restore initial settings
 			allSettings.checkoutAllowsGuest = undefined;
 			allSettings.checkoutAllowsSignup = undefined;
-			dispatch( checkoutStore ).__internalSetCustomerId( 1 );
-		} );
-	} );
+			dispatch(checkoutStore).__internalSetCustomerId(1);
+		});
+	});
 
-	it( 'Ensures correct classes are applied to FormStep when step numbers are shown/hidden', async () => {
+	it('Ensures correct classes are applied to FormStep when step numbers are shown/hidden', async () => {
 		const mockReturnValue = {
 			showFormStepNumbers: false,
 			cartPageId: 0,
@@ -406,125 +404,121 @@ describe( 'Testing Checkout', () => {
 			showRateAfterTaxName: false,
 			showReturnToCart: false,
 		};
-		useCheckoutBlockContext.mockReturnValue( mockReturnValue );
+		useCheckoutBlockContext.mockReturnValue(mockReturnValue);
 		// Render the CheckoutBlock
-		const { container, rerender } = render( <CheckoutBlock /> );
+		const { container, rerender } = render(<CheckoutBlock />);
 
 		let formStepsWithNumber = container.querySelectorAll(
 			'.wc-block-components-checkout-step--with-step-number'
 		);
 
-		expect( formStepsWithNumber ).toHaveLength( 0 );
+		expect(formStepsWithNumber).toHaveLength(0);
 
-		useCheckoutBlockContext.mockReturnValue( {
+		useCheckoutBlockContext.mockReturnValue({
 			...mockReturnValue,
 			showFormStepNumbers: true,
-		} );
+		});
 
-		rerender( <CheckoutBlock /> );
+		rerender(<CheckoutBlock />);
 
 		formStepsWithNumber = container.querySelectorAll(
 			'.wc-block-components-checkout-step--with-step-number'
 		);
 
-		expect( formStepsWithNumber.length ).not.toBe( 0 );
-	} );
+		expect(formStepsWithNumber.length).not.toBe(0);
+	});
 
-	it( 'Shows guest checkout text', async () => {
-		act( () => {
+	it('Shows guest checkout text', async () => {
+		act(() => {
 			allSettings.checkoutAllowsGuest = true;
 			allSettings.checkoutAllowsSignup = true;
-			dispatch( checkoutStore ).__internalSetCustomerId( 0 );
-		} );
+			dispatch(checkoutStore).__internalSetCustomerId(0);
+		});
 
 		// Render the CheckoutBlock
-		const { rerender, queryByText } = render( <CheckoutBlock /> );
+		const { rerender, queryByText } = render(<CheckoutBlock />);
 
 		// Wait for the component to fully load
-		await waitFor( () =>
+		await waitFor(() =>
 			expect(
-				screen.getByText(
-					/You are currently checking out as a guest./i
-				)
+				screen.getByText(/You are currently checking out as a guest./i)
 			).toBeVisible()
 		);
 
-		act( () => {
+		act(() => {
 			allSettings.checkoutAllowsGuest = true;
 			allSettings.checkoutAllowsSignup = true;
-			dispatch( checkoutStore ).__internalSetCustomerId( 1 );
-		} );
+			dispatch(checkoutStore).__internalSetCustomerId(1);
+		});
 
-		rerender( <CheckoutBlock /> );
+		rerender(<CheckoutBlock />);
 
 		expect(
-			queryByText( /You are currently checking out as a guest./i )
+			queryByText(/You are currently checking out as a guest./i)
 		).not.toBeInTheDocument();
 
-		act( () => {
+		act(() => {
 			// Restore initial settings
 			allSettings.checkoutAllowsGuest = undefined;
 			allSettings.checkoutAllowsSignup = undefined;
-			dispatch( checkoutStore ).__internalSetCustomerId( 1 );
-		} );
-	} );
+			dispatch(checkoutStore).__internalSetCustomerId(1);
+		});
+	});
 
-	it( "Ensures hidden postcode fields don't block Checkout", async () => {
+	it("Ensures hidden postcode fields don't block Checkout", async () => {
 		const user = userEvent.setup();
-		render( <CheckoutBlock /> );
+		render(<CheckoutBlock />);
 
-		await waitFor( () =>
-			expect( screen.getByText( /Place Order/i ) ).toBeVisible()
+		await waitFor(() =>
+			expect(screen.getByText(/Place Order/i)).toBeVisible()
 		);
 
-		const shippingForm = screen.getByRole( 'group', {
+		const shippingForm = screen.getByRole('group', {
 			name: /shipping address/i,
-		} );
+		});
 		const countrySelect =
-			within( shippingForm ).getByLabelText( /Country\/Region/i );
+			within(shippingForm).getByLabelText(/Country\/Region/i);
 
-		await act( async () => {
-			await user.selectOptions( countrySelect, 'Austria' );
-		} );
+		await act(async () => {
+			await user.selectOptions(countrySelect, 'Austria');
+		});
 
 		expect(
-			await within( shippingForm ).findByLabelText( /Postal code/i )
+			await within(shippingForm).findByLabelText(/Postal code/i)
 		).toBeInTheDocument();
 
-		await act( async () => {
-			await user.selectOptions( countrySelect, 'Spain' );
-		} );
+		await act(async () => {
+			await user.selectOptions(countrySelect, 'Spain');
+		});
 
 		expect(
-			within( shippingForm ).queryByLabelText( /Postal code/i )
+			within(shippingForm).queryByLabelText(/Postal code/i)
 		).not.toBeInTheDocument();
 
 		// Currently visible fields
 		const fields = {
-			email: screen.getByLabelText(
-				/Email address/i
-			) as HTMLInputElement,
-			firstName: within( shippingForm ).getByLabelText(
+			email: screen.getByLabelText(/Email address/i) as HTMLInputElement,
+			firstName: within(shippingForm).getByLabelText(
 				/First name/i
 			) as HTMLInputElement,
-			lastName: within( shippingForm ).getByLabelText(
+			lastName: within(shippingForm).getByLabelText(
 				/Last name/i
 			) as HTMLInputElement,
-			address1: within( shippingForm ).getByLabelText(
+			address1: within(shippingForm).getByLabelText(
 				'Address'
 			) as HTMLInputElement,
-			city: within( shippingForm ).getByLabelText(
+			city: within(shippingForm).getByLabelText(
 				/City/i
 			) as HTMLInputElement,
-			state: within( shippingForm ).getByLabelText(
+			state: within(shippingForm).getByLabelText(
 				/Province/i
 			) as HTMLSelectElement,
-			terms: screen.getByRole( 'checkbox', {
+			terms: screen.getByRole('checkbox', {
 				name: /terms and conditions/i,
-			} ) as HTMLInputElement,
+			}) as HTMLInputElement,
 		};
 
-		const fieldValues: Record< keyof typeof fields, string | boolean > = {
+		const fieldValues: Record<keyof typeof fields, string | boolean> = {
 			email: 'test@test.com',
 			firstName: 'John',
 			lastName: 'Doe',
@@ -535,47 +529,44 @@ describe( 'Testing Checkout', () => {
 		};
 
 		// Fill the fields
-		await act( async () => {
-			for ( const [ key, value ] of Object.entries( fieldValues ) ) {
-				switch ( key ) {
+		await act(async () => {
+			for (const [key, value] of Object.entries(fieldValues)) {
+				switch (key) {
 					case 'terms':
-						if ( fields.terms.checked !== value ) {
-							await user.click( fields.terms );
+						if (fields.terms.checked !== value) {
+							await user.click(fields.terms);
 						}
 						break;
 					case 'state':
-						await user.selectOptions(
-							fields.state,
-							value as string
-						);
+						await user.selectOptions(fields.state, value as string);
 						break;
 					default:
 						await user.type(
-							fields[ key as keyof typeof fields ],
+							fields[key as keyof typeof fields],
 							value as string
 						);
 				}
 			}
-		} );
+		});
 
 		// Wait for the form to be ready. Changing the country recalculates the cart, which
 		// disables the button until the push settles, so allow for the 1.5s push debounce.
 		await waitFor(
 			() =>
 				expect(
-					screen.getByRole( 'button', { name: /Place order/i } )
+					screen.getByRole('button', { name: /Place order/i })
 				).toBeEnabled(),
 			{ timeout: 5000 }
 		);
 
 		// Submit the form
-		await act( async () => {
+		await act(async () => {
 			await user.click(
-				screen.getByRole( 'button', { name: /Place order/i } )
+				screen.getByRole('button', { name: /Place order/i })
 			);
-		} );
+		});
 
 		// Given we're checking for invisible errors here, reaching to the data store is a good option.
-		expect( select( validationStore ).hasValidationErrors() ).toBe( false );
-	} );
-} );
+		expect(select(validationStore).hasValidationErrors()).toBe(false);
+	});
+});

@@ -31,19 +31,19 @@ import { useResizeObserver } from '@wordpress/compose';
  * };
  * ```
  */
-export const useContainerQueries = (): [ React.ReactElement, string ] => {
-	const [ resizeListener, { width } ] = useResizeObserver();
+export const useContainerQueries = (): [React.ReactElement, string] => {
+	const [resizeListener, { width }] = useResizeObserver();
 
 	let className = '';
-	if ( width > 920 ) {
+	if (width > 920) {
 		className = 'is-large';
-	} else if ( width > 520 ) {
+	} else if (width > 520) {
 		className = 'is-medium';
-	} else if ( width > 400 ) {
+	} else if (width > 400) {
 		className = 'is-small';
-	} else if ( width ) {
+	} else if (width) {
 		className = 'is-mobile';
 	}
 
-	return [ resizeListener, className ];
+	return [resizeListener, className];
 };

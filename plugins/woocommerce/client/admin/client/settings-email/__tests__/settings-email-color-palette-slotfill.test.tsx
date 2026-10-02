@@ -8,9 +8,9 @@ import { registerPlugin } from '@wordpress/plugins';
  */
 import { registerSettingsEmailColorPaletteFill } from '../settings-email-color-palette-slotfill';
 
-jest.mock( '@wordpress/plugins', () => ( {
+jest.mock('@wordpress/plugins', () => ({
 	registerPlugin: jest.fn(),
-} ) );
+}));
 
 const registerPluginMock = registerPlugin as jest.Mock;
 
@@ -23,40 +23,40 @@ const phpDefaultColors = {
 	footer_text: '#787c82',
 };
 
-const renderMount = ( hasThemeJson: boolean, autoSync: string ) => {
+const renderMount = (hasThemeJson: boolean, autoSync: string) => {
 	document.body.innerHTML = `
 		<div
 			id="wc_settings_email_color_palette_slotfill"
-			data-default-colors='${ JSON.stringify( phpDefaultColors ) }'
-			${ hasThemeJson ? 'data-has-theme-json' : '' }
+			data-default-colors='${JSON.stringify(phpDefaultColors)}'
+			${hasThemeJson ? 'data-has-theme-json' : ''}
 		></div>
-		<input type="hidden" id="woocommerce_email_auto_sync_with_theme" value="${ autoSync }" />
+		<input type="hidden" id="woocommerce_email_auto_sync_with_theme" value="${autoSync}" />
 	`;
 };
 
 const renderedFillProps = () => {
-	expect( registerPluginMock ).toHaveBeenCalledTimes( 1 );
-	const [ , settings ] = registerPluginMock.mock.calls[ 0 ];
+	expect(registerPluginMock).toHaveBeenCalledTimes(1);
+	const [, settings] = registerPluginMock.mock.calls[0];
 	return settings.render().props;
 };
 
-describe( 'registerSettingsEmailColorPaletteFill', () => {
-	afterEach( () => {
+describe('registerSettingsEmailColorPaletteFill', () => {
+	afterEach(() => {
 		document.body.innerHTML = '';
 		registerPluginMock.mockClear();
-	} );
+	});
 
-	it.each( [
-		[ 'with', true, 'yes' ],
-		[ 'without', false, 'no' ],
-	] )(
+	it.each([
+		['with', true, 'yes'],
+		['without', false, 'no'],
+	])(
 		'reads the PHP mount attributes %s theme.json',
-		( _label, hasThemeJson, autoSync ) => {
-			renderMount( hasThemeJson, autoSync );
+		(_label, hasThemeJson, autoSync) => {
+			renderMount(hasThemeJson, autoSync);
 
 			registerSettingsEmailColorPaletteFill();
 
-			expect( renderedFillProps() ).toMatchObject( {
+			expect(renderedFillProps()).toMatchObject({
 				autoSync: autoSync === 'yes',
 				defaultColors: {
 					baseColor: '#720eec',
@@ -66,16 +66,16 @@ describe( 'registerSettingsEmailColorPaletteFill', () => {
 					footerTextColor: '#787c82',
 				},
 				hasThemeJson,
-			} );
+			});
 		}
 	);
 
-	it( 'does not register the fill without the auto-sync input', () => {
+	it('does not register the fill without the auto-sync input', () => {
 		document.body.innerHTML =
 			'<div id="wc_settings_email_color_palette_slotfill"></div>';
 
 		registerSettingsEmailColorPaletteFill();
 
-		expect( registerPluginMock ).not.toHaveBeenCalled();
-	} );
-} );
+		expect(registerPluginMock).not.toHaveBeenCalled();
+	});
+});

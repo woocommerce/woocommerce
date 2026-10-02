@@ -11,21 +11,14 @@ import '../../../cart-checkout/cart-line-items-table/style.scss';
 import '../../../../../blocks/cart/style.scss';
 import './style.scss';
 
-export const CartLineItemsCartSkeleton = ( {
-	rows = 2,
-}: {
-	rows?: number;
-} ) => {
+export const CartLineItemsCartSkeleton = ({ rows = 2 }: { rows?: number }) => {
 	return (
 		<>
-			{ Array.from( { length: rows } ).map( ( _, index ) => (
+			{Array.from({ length: rows }).map((_, index) => (
 				<tr
 					className="wc-block-cart-items__row"
-					key={ index }
-					aria-label={ __(
-						'Loading products in cart…',
-						'woocommerce'
-					) }
+					key={index}
+					aria-label={__('Loading products in cart…', 'woocommerce')}
 				>
 					<td className="wc-block-cart-item__image">
 						<Skeleton height="0" />
@@ -48,27 +41,27 @@ export const CartLineItemsCartSkeleton = ( {
 						<Skeleton height=".875em" maxWidth="45px" />
 					</td>
 				</tr>
-			) ) }
+			))}
 		</>
 	);
 };
 
-export const CartLineItemsCheckoutSkeleton = ( {
+export const CartLineItemsCheckoutSkeleton = ({
 	rows = 2,
 }: {
 	rows?: number;
-} ) => {
+}) => {
 	return (
 		<div
 			className="wc-block-components-order-summary"
 			aria-live="polite"
-			aria-label={ __( 'Loading products in cart…', 'woocommerce' ) }
+			aria-label={__('Loading products in cart…', 'woocommerce')}
 		>
 			<div className="wc-block-components-skeleton wc-block-components-skeleton--cart-line-items-checkout wc-block-components-order-summary__content">
-				{ Array.from( { length: rows } ).map( ( _, index ) => (
+				{Array.from({ length: rows }).map((_, index) => (
 					<div
 						className="wc-block-components-order-summary-item"
-						key={ index }
+						key={index}
 					>
 						<div className="wc-block-components-order-summary-item__image">
 							<Skeleton width="48px" height="48px" />
@@ -90,7 +83,7 @@ export const CartLineItemsCheckoutSkeleton = ( {
 							<Skeleton width="45px" height=".875em" />
 						</div>
 					</div>
-				) ) }
+				))}
 			</div>
 		</div>
 	);

@@ -17,7 +17,7 @@ import {
 import Block from './block';
 import { AddressFieldControls } from '../../address-field-controls';
 
-export const Edit = ( {
+export const Edit = ({
 	attributes,
 	setAttributes,
 }: {
@@ -27,11 +27,11 @@ export const Edit = ( {
 		showStepNumber: boolean;
 		className: string;
 	};
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ): JSX.Element | null => {
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}): JSX.Element | null => {
 	const { showShippingFields } = useCheckoutAddress();
 
-	if ( ! showShippingFields ) {
+	if (!showShippingFields) {
 		return null;
 	}
 
@@ -39,15 +39,15 @@ export const Edit = ( {
 		<>
 			<AddressFieldControls />
 			<FormStepBlock
-				setAttributes={ setAttributes }
-				attributes={ attributes }
-				className={ clsx(
+				setAttributes={setAttributes}
+				attributes={attributes}
+				className={clsx(
 					'wc-block-checkout__shipping-fields',
 					attributes?.className
-				) }
+				)}
 			>
 				<Block />
-				<AdditionalFields block={ innerBlockAreas.SHIPPING_ADDRESS } />
+				<AdditionalFields block={innerBlockAreas.SHIPPING_ADDRESS} />
 			</FormStepBlock>
 		</>
 	);
@@ -55,7 +55,7 @@ export const Edit = ( {
 
 export const Save = (): JSX.Element => {
 	return (
-		<div { ...useBlockProps.save() }>
+		<div {...useBlockProps.save()}>
 			<AdditionalFieldsContent />
 		</div>
 	);

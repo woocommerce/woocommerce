@@ -21,87 +21,87 @@ import {
 import { EditProps } from './types';
 import metadata from './block.json';
 
-export const Inspector = ( {
+export const Inspector = ({
 	attributes,
 	setAttributes,
 	clientId,
-}: EditProps ) => {
+}: EditProps) => {
 	const { displayStyle, showCounts, hideEmpty } = attributes;
 
 	return (
 		<InspectorControls>
 			<ToolsPanel
-				label={ __( 'Display Settings', 'woocommerce' ) }
-				resetAll={ () => {
-					setAttributes( {
+				label={__('Display Settings', 'woocommerce')}
+				resetAll={() => {
+					setAttributes({
 						displayStyle: metadata.attributes.displayStyle.default,
 						showCounts: metadata.attributes.showCounts.default,
 						hideEmpty: metadata.attributes.hideEmpty.default,
-					} );
+					});
 					resetDisplayStyleBlock(
 						clientId,
 						metadata.attributes.displayStyle.default
 					);
-				} }
+				}}
 			>
 				<ToolsPanelItem
-					label={ __( 'Display Style', 'woocommerce' ) }
-					hasValue={ () =>
+					label={__('Display Style', 'woocommerce')}
+					hasValue={() =>
 						displayStyle !==
 						'woocommerce/product-filter-checkbox-list'
 					}
-					isShownByDefault={ true }
-					onDeselect={ () => {
-						setAttributes( {
+					isShownByDefault={true}
+					onDeselect={() => {
+						setAttributes({
 							displayStyle:
 								metadata.attributes.displayStyle.default,
-						} );
+						});
 						resetDisplayStyleBlock(
 							clientId,
 							metadata.attributes.displayStyle.default
 						);
-					} }
+					}}
 				>
 					<DisplayStyleSwitcher
-						clientId={ clientId }
-						currentStyle={ displayStyle }
-						onChange={ ( value ) =>
-							setAttributes( { displayStyle: value } )
+						clientId={clientId}
+						currentStyle={displayStyle}
+						onChange={(value) =>
+							setAttributes({ displayStyle: value })
 						}
 					/>
 				</ToolsPanelItem>
 				<ToolsPanelItem
-					label={ __( 'Product counts', 'woocommerce' ) }
-					hasValue={ () => showCounts }
-					onDeselect={ () =>
-						setAttributes( {
+					label={__('Product counts', 'woocommerce')}
+					hasValue={() => showCounts}
+					onDeselect={() =>
+						setAttributes({
 							showCounts: metadata.attributes.showCounts.default,
-						} )
+						})
 					}
-					isShownByDefault={ true }
+					isShownByDefault={true}
 				>
 					<ToggleControl
-						label={ __( 'Product counts', 'woocommerce' ) }
-						checked={ showCounts }
-						onChange={ ( value: boolean ) =>
-							setAttributes( { showCounts: value } )
+						label={__('Product counts', 'woocommerce')}
+						checked={showCounts}
+						onChange={(value: boolean) =>
+							setAttributes({ showCounts: value })
 						}
 					/>
 				</ToolsPanelItem>
 				<ToolsPanelItem
-					label={ __( 'Empty filter options', 'woocommerce' ) }
-					hasValue={ () => ! hideEmpty }
-					onDeselect={ () =>
-						setAttributes( {
+					label={__('Empty filter options', 'woocommerce')}
+					hasValue={() => !hideEmpty}
+					onDeselect={() =>
+						setAttributes({
 							hideEmpty: metadata.attributes.hideEmpty.default,
-						} )
+						})
 					}
 				>
 					<ToggleControl
-						label={ __( 'Empty filter options', 'woocommerce' ) }
-						checked={ ! hideEmpty }
-						onChange={ ( value: boolean ) =>
-							setAttributes( { hideEmpty: ! value } )
+						label={__('Empty filter options', 'woocommerce')}
+						checked={!hideEmpty}
+						onChange={(value: boolean) =>
+							setAttributes({ hideEmpty: !value })
 						}
 					/>
 				</ToolsPanelItem>

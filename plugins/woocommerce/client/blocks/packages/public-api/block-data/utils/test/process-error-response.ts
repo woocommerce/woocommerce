@@ -12,14 +12,14 @@ import {
 	processErrorResponse,
 } from '../process-error-response';
 
-jest.mock( '@wordpress/notices', () => ( {
+jest.mock('@wordpress/notices', () => ({
 	createNotice: jest.fn(),
-} ) );
+}));
 
-jest.mock( '@woocommerce/base-utils', () => ( {
-	...jest.requireActual( '@woocommerce/base-utils' ),
+jest.mock('@woocommerce/base-utils', () => ({
+	...jest.requireActual('@woocommerce/base-utils'),
 	createNotice: jest.fn(),
-} ) );
+}));
 
 const errorResponse: ApiErrorResponse = {
 	code: 'rest_invalid_param',
@@ -49,11 +49,11 @@ const errorResponse: ApiErrorResponse = {
 	},
 };
 
-describe( 'getNoticeContextFromErrorResponse', () => {
-	it( 'should generate notice contexts and ids for the correct fields/errors', () => {
-		const result = getNoticeContextFromErrorResponse( errorResponse );
+describe('getNoticeContextFromErrorResponse', () => {
+	it('should generate notice contexts and ids for the correct fields/errors', () => {
+		const result = getNoticeContextFromErrorResponse(errorResponse);
 
-		expect( result ).toEqual( [
+		expect(result).toEqual([
 			{
 				context: 'wc/checkout/billing-address',
 				id: 'billing_address_gov_id_mismatch',
@@ -62,24 +62,24 @@ describe( 'getNoticeContextFromErrorResponse', () => {
 				context: 'wc/checkout/shipping-address',
 				id: 'shipping_address_gov_id_mismatch',
 			},
-		] );
-	} );
+		]);
+	});
 
-	it( 'should override the context if one is passed', () => {
+	it('should override the context if one is passed', () => {
 		const context = 'test_context';
 		const result = getNoticeContextFromErrorResponse(
 			errorResponse,
 			context
 		);
-		expect( result[ 0 ].context ).toEqual( 'test_context' );
-	} );
-} );
+		expect(result[0].context).toEqual('test_context');
+	});
+});
 
-describe( 'processErrorResponse', () => {
-	it( 'should dismiss old notices and create new ones', () => {
-		processErrorResponse( errorResponse );
-		expect( createNotice ).toHaveBeenCalledTimes( 2 );
-		expect( createNotice ).toHaveBeenCalledWith(
+describe('processErrorResponse', () => {
+	it('should dismiss old notices and create new ones', () => {
+		processErrorResponse(errorResponse);
+		expect(createNotice).toHaveBeenCalledTimes(2);
+		expect(createNotice).toHaveBeenCalledWith(
 			'error',
 			'Please ensure your government ID matches the confirmation.',
 			{
@@ -88,7 +88,7 @@ describe( 'processErrorResponse', () => {
 			}
 		);
 
-		expect( createNotice ).toHaveBeenCalledWith(
+		expect(createNotice).toHaveBeenCalledWith(
 			'error',
 			'Please ensure your government ID matches the confirmation.',
 			{
@@ -96,5 +96,5 @@ describe( 'processErrorResponse', () => {
 				context: 'wc/checkout/shipping-address',
 			}
 		);
-	} );
-} );
+	});
+});

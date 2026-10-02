@@ -15,9 +15,9 @@ import { WcBlocksConfig } from './constants';
  * @return {boolean} True if this experimental blocks are enabled.
  */
 export const isExperimentalBlocksEnabled = (): boolean => {
-	const { experimentalBlocksEnabled } = getSetting( 'wcBlocksConfig', {
+	const { experimentalBlocksEnabled } = getSetting('wcBlocksConfig', {
 		experimentalBlocksEnabled: false,
-	} ) as WcBlocksConfig;
+	}) as WcBlocksConfig;
 
 	return experimentalBlocksEnabled;
 };

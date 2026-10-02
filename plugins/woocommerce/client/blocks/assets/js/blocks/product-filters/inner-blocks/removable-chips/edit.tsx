@@ -27,7 +27,7 @@ import {
 import { EditProps } from './types';
 import { getColorClasses, getColorVars } from './utils';
 
-const Edit = ( props: EditProps ): JSX.Element => {
+const Edit = (props: EditProps): JSX.Element => {
 	const colorGradientSettings = useMultipleOriginColorsAndGradients();
 	const {
 		name,
@@ -44,157 +44,157 @@ const Edit = ( props: EditProps ): JSX.Element => {
 	} = props;
 	const { customChipText, customChipBackground, customChipBorder, layout } =
 		attributes;
-	const removableItemsContext = context[ 'woocommerce/removableItems' ];
+	const removableItemsContext = context['woocommerce/removableItems'];
 	const { items } = removableItemsContext ?? {};
 
 	// Extract attributes from block layout
-	const layoutBlockSupport = getBlockSupport( name, 'layout' );
+	const layoutBlockSupport = getBlockSupport(name, 'layout');
 	const defaultBlockLayout = layoutBlockSupport?.default;
 	const usedLayout = layout || defaultBlockLayout || {};
 
-	const blockProps = useBlockProps( {
-		className: clsx( 'wc-block-product-filter-removable-chips', {
-			...getColorClasses( attributes ),
-		} ),
-		style: getColorVars( attributes ),
-	} );
+	const blockProps = useBlockProps({
+		className: clsx('wc-block-product-filter-removable-chips', {
+			...getColorClasses(attributes),
+		}),
+		style: getColorVars(attributes),
+	});
 
-	const innerBlocksProps = useInnerBlocksProps( blockProps, {} );
-	const removeText = ( label: string ): string => {
+	const innerBlocksProps = useInnerBlocksProps(blockProps, {});
+	const removeText = (label: string): string => {
 		return sprintf(
 			/* translators: %s attribute value used in the filter. For example: yellow, green, small, large. */
-			__( 'Remove %s filter', 'woocommerce' ),
+			__('Remove %s filter', 'woocommerce'),
 			label
 		);
 	};
 
 	return (
-		<div { ...innerBlocksProps }>
+		<div {...innerBlocksProps}>
 			<BlockControls>
 				<ToolbarGroup>
 					<ToolbarButton
-						icon={ arrowRight }
-						label={ __( 'Horizontal', 'woocommerce' ) }
-						onClick={ () =>
-							setAttributes( {
+						icon={arrowRight}
+						label={__('Horizontal', 'woocommerce')}
+						onClick={() =>
+							setAttributes({
 								layout: {
 									...usedLayout,
 									orientation: 'horizontal',
 								},
-							} )
+							})
 						}
 						isPressed={
 							usedLayout.orientation === 'horizontal' ||
-							! usedLayout.orientation
+							!usedLayout.orientation
 						}
 					/>
 					<ToolbarButton
-						icon={ arrowDown }
-						label={ __( 'Vertical', 'woocommerce' ) }
-						onClick={ () =>
-							setAttributes( {
+						icon={arrowDown}
+						label={__('Vertical', 'woocommerce')}
+						onClick={() =>
+							setAttributes({
 								layout: {
 									...usedLayout,
 									orientation: 'vertical',
 								},
-							} )
+							})
 						}
-						isPressed={ usedLayout.orientation === 'vertical' }
+						isPressed={usedLayout.orientation === 'vertical'}
 					/>
 				</ToolbarGroup>
 			</BlockControls>
 			<ul className="wc-block-product-filter-removable-chips__items">
-				{ items?.map( ( item, index ) => (
+				{items?.map((item, index) => (
 					<li
-						key={ index }
+						key={index}
 						className="wc-block-product-filter-removable-chips__item"
 					>
 						<span className="wc-block-product-filter-removable-chips__label">
-							{ item.type + ': ' + item.label }
+							{item.type + ': ' + item.label}
 						</span>
 						<button className="wc-block-product-filter-removable-chips__remove">
 							<Icon
 								className="wc-block-product-filter-removable-chips__remove-icon"
-								icon={ closeSmall }
-								size={ 25 }
+								icon={closeSmall}
+								size={25}
 							/>
 							<Label
-								screenReaderLabel={ removeText(
+								screenReaderLabel={removeText(
 									item.type + ': ' + item.label
-								) }
+								)}
 							/>
 						</button>
 					</li>
-				) ) }
+				))}
 			</ul>
 			<InspectorControls group="color">
-				{ colorGradientSettings.hasColorsOrGradients && (
+				{colorGradientSettings.hasColorsOrGradients && (
 					<ColorGradientSettingsDropdown
 						__experimentalIsRenderedInSidebar
-						settings={ [
+						settings={[
 							{
-								label: __( 'Chip Text', 'woocommerce' ),
+								label: __('Chip Text', 'woocommerce'),
 								colorValue: chipText.color || customChipText,
-								onColorChange: ( colorValue: string ) => {
-									setChipText( colorValue );
-									setAttributes( {
+								onColorChange: (colorValue: string) => {
+									setChipText(colorValue);
+									setAttributes({
 										customChipText: colorValue,
-									} );
+									});
 								},
 								resetAllFilter: () => {
-									setChipText( '' );
-									setAttributes( {
+									setChipText('');
+									setAttributes({
 										customChipText: '',
-									} );
+									});
 								},
 							},
 							{
-								label: __( 'Chip Border', 'woocommerce' ),
+								label: __('Chip Border', 'woocommerce'),
 								colorValue:
 									chipBorder.color || customChipBorder,
-								onColorChange: ( colorValue: string ) => {
-									setChipBorder( colorValue );
-									setAttributes( {
+								onColorChange: (colorValue: string) => {
+									setChipBorder(colorValue);
+									setAttributes({
 										customChipBorder: colorValue,
-									} );
+									});
 								},
 								resetAllFilter: () => {
-									setChipBorder( '' );
-									setAttributes( {
+									setChipBorder('');
+									setAttributes({
 										customChipBorder: '',
-									} );
+									});
 								},
 							},
 							{
-								label: __( 'Chip Background', 'woocommerce' ),
+								label: __('Chip Background', 'woocommerce'),
 								colorValue:
 									chipBackground.color ||
 									customChipBackground,
-								onColorChange: ( colorValue: string ) => {
-									setChipBackground( colorValue );
-									setAttributes( {
+								onColorChange: (colorValue: string) => {
+									setChipBackground(colorValue);
+									setAttributes({
 										customChipBackground: colorValue,
-									} );
+									});
 								},
 								resetAllFilter: () => {
-									setChipBackground( '' );
-									setAttributes( {
+									setChipBackground('');
+									setAttributes({
 										customChipBackground: '',
-									} );
+									});
 								},
 							},
-						] }
-						panelId={ clientId }
-						{ ...colorGradientSettings }
+						]}
+						panelId={clientId}
+						{...colorGradientSettings}
 					/>
-				) }
+				)}
 			</InspectorControls>
 		</div>
 	);
 };
 
-export default withColors( {
+export default withColors({
 	chipText: 'chip-text',
 	chipBorder: 'chip-border',
 	chipBackground: 'chip-background',
-} )( Edit );
+})(Edit);

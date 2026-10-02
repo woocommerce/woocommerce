@@ -32,8 +32,8 @@ const usePaymentMethodState = (
 		expressPaymentMethodsInitialized,
 		availablePaymentMethods,
 		availableExpressPaymentMethods,
-	} = useSelect( ( select ) => {
-		const store = select( paymentStore );
+	} = useSelect((select) => {
+		const store = select(paymentStore);
 
 		return {
 			paymentMethodsInitialized: store.paymentMethodsInitialized(),
@@ -43,23 +43,23 @@ const usePaymentMethodState = (
 				store.getAvailableExpressPaymentMethods(),
 			availablePaymentMethods: store.getAvailablePaymentMethods(),
 		};
-	} );
+	});
 
 	const availablePaymentMethodNames = Object.values(
 		availablePaymentMethods
-	).map( ( { name } ) => name );
+	).map(({ name }) => name);
 	const availableExpressPaymentMethodNames = Object.values(
 		availableExpressPaymentMethods
-	).map( ( { name } ) => name );
+	).map(({ name }) => name);
 
 	const registeredPaymentMethods = getPaymentMethods();
 	const registeredExpressPaymentMethods = getExpressPaymentMethods();
 
 	// Remove everything from registeredPaymentMethods that is not in availablePaymentMethodNames.
-	const paymentMethods = Object.keys( registeredPaymentMethods ).reduce(
-		( acc: Record< string, PaymentMethodConfigInstance >, key ) => {
-			if ( availablePaymentMethodNames.includes( key ) ) {
-				acc[ key ] = registeredPaymentMethods[ key ];
+	const paymentMethods = Object.keys(registeredPaymentMethods).reduce(
+		(acc: Record<string, PaymentMethodConfigInstance>, key) => {
+			if (availablePaymentMethodNames.includes(key)) {
+				acc[key] = registeredPaymentMethods[key];
 			}
 			return acc;
 		},
@@ -68,20 +68,15 @@ const usePaymentMethodState = (
 	// Remove everything from registeredExpressPaymentMethods that is not in availableExpressPaymentMethodNames.
 	const expressPaymentMethods = Object.keys(
 		registeredExpressPaymentMethods
-	).reduce(
-		( acc: Record< string, ExpressPaymentMethodConfigInstance >, key ) => {
-			if ( availableExpressPaymentMethodNames.includes( key ) ) {
-				acc[ key ] = registeredExpressPaymentMethods[ key ];
-			}
-			return acc;
-		},
-		{}
-	);
+	).reduce((acc: Record<string, ExpressPaymentMethodConfigInstance>, key) => {
+		if (availableExpressPaymentMethodNames.includes(key)) {
+			acc[key] = registeredExpressPaymentMethods[key];
+		}
+		return acc;
+	}, {});
 
-	const currentPaymentMethods = useShallowEqual( paymentMethods );
-	const currentExpressPaymentMethods = useShallowEqual(
-		expressPaymentMethods
-	);
+	const currentPaymentMethods = useShallowEqual(paymentMethods);
+	const currentExpressPaymentMethods = useShallowEqual(expressPaymentMethods);
 
 	return {
 		paymentMethods: express
@@ -94,7 +89,7 @@ const usePaymentMethodState = (
 };
 
 export const usePaymentMethods = ():
-	| PaymentMethodState
-	| ExpressPaymentMethodState => usePaymentMethodState( false );
+	PaymentMethodState | ExpressPaymentMethodState =>
+	usePaymentMethodState(false);
 export const useExpressPaymentMethods = (): ExpressPaymentMethodState =>
-	usePaymentMethodState( true );
+	usePaymentMethodState(true);

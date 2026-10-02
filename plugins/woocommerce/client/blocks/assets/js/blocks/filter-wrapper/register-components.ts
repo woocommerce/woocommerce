@@ -9,7 +9,7 @@ import { WC_BLOCKS_BUILD_URL } from '@woocommerce/block-settings';
 // eslint-disable-next-line no-undef,camelcase
 __webpack_public_path__ = WC_BLOCKS_BUILD_URL;
 
-registerBlockComponent( {
+registerBlockComponent({
 	blockName: 'woocommerce/active-filters',
 	component: lazy(
 		() =>
@@ -18,9 +18,9 @@ registerBlockComponent( {
 				'../active-filters/block-wrapper'
 			)
 	),
-} );
+});
 
-registerBlockComponent( {
+registerBlockComponent({
 	blockName: 'woocommerce/price-filter',
 	component: lazy(
 		() =>
@@ -29,9 +29,9 @@ registerBlockComponent( {
 				'../price-filter/block-wrapper'
 			)
 	),
-} );
+});
 
-registerBlockComponent( {
+registerBlockComponent({
 	blockName: 'woocommerce/stock-filter',
 	component: lazy(
 		() =>
@@ -40,9 +40,9 @@ registerBlockComponent( {
 				'../stock-filter/block-wrapper'
 			)
 	),
-} );
+});
 
-registerBlockComponent( {
+registerBlockComponent({
 	blockName: 'woocommerce/attribute-filter',
 	component: lazy(
 		() =>
@@ -51,9 +51,9 @@ registerBlockComponent( {
 				'../attribute-filter/block-wrapper'
 			)
 	),
-} );
+});
 
-registerBlockComponent( {
+registerBlockComponent({
 	blockName: 'woocommerce/rating-filter',
 	component: lazy(
 		() =>
@@ -62,4 +62,4 @@ registerBlockComponent( {
 				'../rating-filter/block-wrapper'
 			)
 	),
-} );
+});

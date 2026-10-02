@@ -19,46 +19,46 @@ interface Block {
  *
  * @param {string} clientId - The client ID of the product collection block.
  */
-const useEmailHeadingAdjustments = ( clientId: string ) => {
-	const actions = useDispatch( blockEditorStore );
+const useEmailHeadingAdjustments = (clientId: string) => {
+	const actions = useDispatch(blockEditorStore);
 	const isEmail = useIsEmailEditor();
 
 	const { productCollectionBlock } = useSelect(
-		( select ) => ( {
-			productCollectionBlock: select( blockEditorStore ).getBlock(
+		(select) => ({
+			productCollectionBlock: select(blockEditorStore).getBlock(
 				clientId
 			) as Block | null,
-		} ),
-		[ clientId ]
+		}),
+		[clientId]
 	);
 
-	useEffect( () => {
-		if ( ! clientId || ! productCollectionBlock || ! isEmail ) {
+	useEffect(() => {
+		if (!clientId || !productCollectionBlock || !isEmail) {
 			return;
 		}
 
 		if (
-			! productCollectionBlock.innerBlocks ||
-			! Array.isArray( productCollectionBlock.innerBlocks )
+			!productCollectionBlock.innerBlocks ||
+			!Array.isArray(productCollectionBlock.innerBlocks)
 		) {
 			return;
 		}
 
 		const headingBlocks = productCollectionBlock.innerBlocks.filter(
-			( block: Block ) => block && block.name === 'core/heading'
+			(block: Block) => block && block.name === 'core/heading'
 		);
 
-		headingBlocks.forEach( ( headingBlock: Block ) => {
-			if ( headingBlock && headingBlock.clientId ) {
+		headingBlocks.forEach((headingBlock: Block) => {
+			if (headingBlock && headingBlock.clientId) {
 				try {
-					void actions.removeBlock( headingBlock.clientId );
-				} catch ( error ) {
+					void actions.removeBlock(headingBlock.clientId);
+				} catch (error) {
 					// Silently handle cases where block might already be removed
 					// or in an inconsistent state during block editor operations
 				}
 			}
-		} );
-	}, [ clientId, actions, productCollectionBlock, isEmail ] );
+		});
+	}, [clientId, actions, productCollectionBlock, isEmail]);
 };
 
 export default useEmailHeadingAdjustments;

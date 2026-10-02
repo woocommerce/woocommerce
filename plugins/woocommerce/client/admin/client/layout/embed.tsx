@@ -27,35 +27,35 @@ import { usePageClasses } from './hooks/use-page-classes';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { Footer } from './footer';
 
-const dataEndpoints = getAdminSetting( 'dataEndpoints' );
+const dataEndpoints = getAdminSetting('dataEndpoints');
 
 export const _EmbedLayout = () => {
-	const breadcrumbs = getAdminSetting( 'embedBreadcrumbs', [] );
+	const breadcrumbs = getAdminSetting('embedBreadcrumbs', []);
 
-	usePageClasses( {
+	usePageClasses({
 		breadcrumbs,
-	} );
+	});
 
-	useEffect( () => {
+	useEffect(() => {
 		const path = document.location.pathname + document.location.search;
-		recordPageView( path, {
+		recordPageView(path, {
 			is_embedded: true,
-		} );
-	}, [] );
+		});
+	}, []);
 
-	const query = getQuery() as Record< string, string >;
+	const query = getQuery() as Record<string, string>;
 
 	return (
-		<LayoutContextProvider value={ getLayoutContextValue( [ 'page' ] ) }>
+		<LayoutContextProvider value={getLayoutContextValue(['page'])}>
 			<SlotFillProvider>
 				<div className="woocommerce-layout">
 					<EmbedHeader
 						sections={
-							isFunction( breadcrumbs )
-								? breadcrumbs( {} )
+							isFunction(breadcrumbs)
+								? breadcrumbs({})
 								: breadcrumbs
 						}
-						query={ query }
+						query={query}
 					/>
 					<TransientNotices />
 					<Footer />
@@ -69,14 +69,13 @@ export const _EmbedLayout = () => {
 };
 
 export const EmbedLayout = compose(
-	getAdminSetting( 'preloadOptions' )
-		? withOptionsHydration( {
-				...getAdminSetting( 'preloadOptions' ),
-		  } )
+	getAdminSetting('preloadOptions')
+		? withOptionsHydration({
+				...getAdminSetting('preloadOptions'),
+			})
 		: identity,
-	withPluginsHydration( {
-		...getAdminSetting( 'plugins', {} ),
-		jetpackStatus:
-			( dataEndpoints && dataEndpoints.jetpackStatus ) || false,
-	} )
-)( _EmbedLayout ) as React.ComponentType< Record< string, unknown > >;
+	withPluginsHydration({
+		...getAdminSetting('plugins', {}),
+		jetpackStatus: (dataEndpoints && dataEndpoints.jetpackStatus) || false,
+	})
+)(_EmbedLayout) as React.ComponentType<Record<string, unknown>>;

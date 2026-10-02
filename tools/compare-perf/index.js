@@ -18,10 +18,7 @@ const catchException = ( command ) => {
 program
 	.command( 'compare-performance [branches...]' )
 	.alias( 'perf' )
-	.option(
-		'-c, --ci',
-		'Run in CI (non interactive)'
-	)
+	.option( '-c, --ci', 'Run in CI (non interactive)' )
 	.option(
 		'--skip-benchmarking',
 		'Skips benchmarking and gets straight to reporting phase (tests results already available)'

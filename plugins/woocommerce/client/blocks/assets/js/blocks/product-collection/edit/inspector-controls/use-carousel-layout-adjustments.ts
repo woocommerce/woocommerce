@@ -30,7 +30,7 @@ const productTemplateCarouselLayout = {
 	},
 };
 
-const createGroupSpaceBetween = ( innerBlocks: BlockInstance[] ) =>
+const createGroupSpaceBetween = (innerBlocks: BlockInstance[]) =>
 	createBlock(
 		'core/group',
 		// Row variation of the group block
@@ -46,7 +46,7 @@ const createGroupSpaceBetween = ( innerBlocks: BlockInstance[] ) =>
 		innerBlocks
 	);
 
-const createGroupRight = ( innerBlocks: BlockInstance[] ) =>
+const createGroupRight = (innerBlocks: BlockInstance[]) =>
 	createBlock(
 		'core/group',
 		// Row variation of the group block
@@ -74,7 +74,7 @@ const createGroupRight = ( innerBlocks: BlockInstance[] ) =>
  */
 const handleTransitionToCarouselLayout = (
 	productCollectionBlock: BlockInstance,
-	actions: ReturnType< typeof useDispatch >
+	actions: ReturnType<typeof useDispatch>
 ) => {
 	const { removeBlock, insertBlock, updateBlockAttributes } = actions;
 
@@ -101,23 +101,23 @@ const handleTransitionToCarouselLayout = (
 	);
 
 	// 2. Create and insert the next/previous buttons block
-	const nextPrevArrowsBlock = createBlock( nextPreviousButtonsBlockName, {
+	const nextPrevArrowsBlock = createBlock(nextPreviousButtonsBlockName, {
 		layout: { type: 'flex', flexWrap: 'nowrap' },
-	} );
+	});
 
-	if ( headingBlock ) {
-		const headingBlockIndex = selectData( blockEditorStore ).getBlockIndex(
+	if (headingBlock) {
+		const headingBlockIndex = selectData(blockEditorStore).getBlockIndex(
 			headingBlock.clientId
 		);
-		const groupBlock = createGroupSpaceBetween( [
+		const groupBlock = createGroupSpaceBetween([
 			headingBlock,
 			nextPrevArrowsBlock,
-		] );
+		]);
 
 		// We cannot use replaceBlock directly because it crashes the editor
 		// when replacing the product template block with the group block that
 		// contains the same product template block.
-		removeBlock( headingBlock.clientId, false );
+		removeBlock(headingBlock.clientId, false);
 		insertBlock(
 			groupBlock,
 			headingBlockIndex,
@@ -128,9 +128,9 @@ const handleTransitionToCarouselLayout = (
 		const productTemplateIndex = selectData(
 			blockEditorStore
 			// @ts-expect-error getBlockIndex is not typed.
-		).getBlockIndex( productTemplateClientId );
+		).getBlockIndex(productTemplateClientId);
 
-		const groupBlock = createGroupRight( [ nextPrevArrowsBlock ] );
+		const groupBlock = createGroupRight([nextPrevArrowsBlock]);
 
 		insertBlock(
 			groupBlock,
@@ -141,8 +141,8 @@ const handleTransitionToCarouselLayout = (
 	}
 
 	// 3. Remove the pagination block
-	if ( paginationBlock ) {
-		removeBlock( paginationBlock.clientId, false );
+	if (paginationBlock) {
+		removeBlock(paginationBlock.clientId, false);
 	}
 };
 
@@ -158,7 +158,7 @@ const handleTransitionToCarouselLayout = (
  */
 const handleTransitionFromCarouselLayout = (
 	productCollectionBlock: BlockInstance,
-	actions: ReturnType< typeof useDispatch >,
+	actions: ReturnType<typeof useDispatch>,
 	collection?: string
 ) => {
 	const { removeBlock, insertBlock, updateBlockAttributes } = actions;
@@ -176,19 +176,19 @@ const handleTransitionFromCarouselLayout = (
 
 	// 2. Remove the next/previous buttons block or group block
 	// Find the group block containing the next/previous buttons block
-	const groupBlock = getInnerBlockBy( productCollectionBlock, ( block ) => {
+	const groupBlock = getInnerBlockBy(productCollectionBlock, (block) => {
 		return (
 			block.name === 'core/group' &&
 			block.innerBlocks.some(
-				( innerBlock: BlockInstance ) =>
+				(innerBlock: BlockInstance) =>
 					innerBlock.name === nextPreviousButtonsBlockName
 			)
 		);
-	} );
-	if ( groupBlock ) {
+	});
+	if (groupBlock) {
 		// If next/previous buttons block is the only block in the group block, remove it
-		if ( groupBlock.innerBlocks.length === 1 ) {
-			removeBlock( groupBlock.clientId, false );
+		if (groupBlock.innerBlocks.length === 1) {
+			removeBlock(groupBlock.clientId, false);
 		} else {
 			const headingBlock = getInnerBlockByName(
 				groupBlock,
@@ -196,11 +196,11 @@ const handleTransitionFromCarouselLayout = (
 			);
 
 			// If next/previous buttons and heading are the only blocks in the group block, bring back heading block
-			if ( headingBlock && groupBlock.innerBlocks.length === 2 ) {
+			if (headingBlock && groupBlock.innerBlocks.length === 2) {
 				const headingBlockIndex = selectData(
 					blockEditorStore
-				).getBlockIndex( headingBlock.clientId );
-				removeBlock( groupBlock.clientId, false );
+				).getBlockIndex(headingBlock.clientId);
+				removeBlock(groupBlock.clientId, false);
 				insertBlock(
 					headingBlock,
 					headingBlockIndex,
@@ -213,13 +213,13 @@ const handleTransitionFromCarouselLayout = (
 					productCollectionBlock,
 					nextPreviousButtonsBlockName
 				);
-				removeBlock( nextPrevButtonsBlock?.clientId, false );
+				removeBlock(nextPrevButtonsBlock?.clientId, false);
 			}
 		}
 	}
 
 	// 3. Add the pagination block for default collection (it has collection attribute undefined).
-	if ( ! collection ) {
+	if (!collection) {
 		insertBlock(
 			createBlock(
 				coreQueryPaginationBlockName,
@@ -243,19 +243,18 @@ const useCarouselLayoutAdjustments = (
 	attributes: ProductCollectionAttributes
 ) => {
 	const { displayLayout, collection } = attributes;
-	const previousLayoutType = useRef< LayoutOptions >( displayLayout.type );
-	const actions = useDispatch( blockEditorStore );
+	const previousLayoutType = useRef<LayoutOptions>(displayLayout.type);
+	const actions = useDispatch(blockEditorStore);
 
 	const { productCollectionBlock } = useSelect(
-		( select ) => ( {
-			productCollectionBlock:
-				select( blockEditorStore ).getBlock( clientId ),
-		} ),
-		[ clientId ]
+		(select) => ({
+			productCollectionBlock: select(blockEditorStore).getBlock(clientId),
+		}),
+		[clientId]
 	);
 
-	useEffect( () => {
-		if ( ! clientId || ! productCollectionBlock ) {
+	useEffect(() => {
+		if (!clientId || !productCollectionBlock) {
 			return;
 		}
 
@@ -264,7 +263,7 @@ const useCarouselLayoutAdjustments = (
 			displayLayout?.type === LayoutOptions.CAROUSEL &&
 			previousLayoutType.current !== LayoutOptions.CAROUSEL
 		) {
-			handleTransitionToCarouselLayout( productCollectionBlock, actions );
+			handleTransitionToCarouselLayout(productCollectionBlock, actions);
 		}
 
 		// When switching FROM carousel layout, remove Next Previous Buttons block and add pagination block (if needed).
@@ -286,7 +285,7 @@ const useCarouselLayoutAdjustments = (
 		actions,
 		collection,
 		productCollectionBlock,
-	] );
+	]);
 };
 
 export default useCarouselLayoutAdjustments;

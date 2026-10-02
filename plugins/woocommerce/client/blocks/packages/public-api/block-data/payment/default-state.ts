@@ -20,20 +20,20 @@ import { isEditor } from '../utils';
 import { STATUS as PAYMENT_STATUS } from './constants';
 import { checkoutData } from '../checkout/constants';
 
-const globalPaymentMethods = getSetting< GlobalPaymentMethod[] >(
+const globalPaymentMethods = getSetting<GlobalPaymentMethod[]>(
 	'globalPaymentMethods'
 );
 
 const savedPaymentMethods = getSetting<
-	Record< string, SavedPaymentMethod[] > | EmptyObjectType
->( 'customerPaymentMethods', {} );
+	Record<string, SavedPaymentMethod[]> | EmptyObjectType
+>('customerPaymentMethods', {});
 
 const defaultPaymentMethod = isEditor()
-	? globalPaymentMethods[ 0 ]?.id || ''
+	? globalPaymentMethods[0]?.id || ''
 	: checkoutData?.payment_method;
 
 function getDefaultPaymentMethod() {
-	if ( ! defaultPaymentMethod ) {
+	if (!defaultPaymentMethod) {
 		return '';
 	}
 
@@ -46,25 +46,25 @@ function getDefaultPaymentMethod() {
  * as a token stored in `wcSettings`.
  */
 function getDefaultPaymentMethodData() {
-	if ( ! defaultPaymentMethod ) {
+	if (!defaultPaymentMethod) {
 		return {};
 	}
 
 	// Check if default payment method exists in saved payment methods
-	const flatSavedPaymentMethods = Object.keys( savedPaymentMethods ).flatMap(
-		( type ) => savedPaymentMethods[ type ]
+	const flatSavedPaymentMethods = Object.keys(savedPaymentMethods).flatMap(
+		(type) => savedPaymentMethods[type]
 	);
 	const savedPaymentMethod = flatSavedPaymentMethods.find(
-		( method ) => method.method.gateway === defaultPaymentMethod
+		(method) => method.method.gateway === defaultPaymentMethod
 	);
 
 	// If a saved payment method is found that matches the default payment method,
 	// use it.
-	if ( savedPaymentMethod ) {
+	if (savedPaymentMethod) {
 		const token = savedPaymentMethod.tokenId.toString();
 		const slug = savedPaymentMethod.method.gateway;
-		const savedTokenKey = `wc-${ slug }-payment-token`;
-		return { token, payment_method: slug, [ savedTokenKey ]: token };
+		const savedTokenKey = `wc-${slug}-payment-token`;
+		return { token, payment_method: slug, [savedTokenKey]: token };
 	}
 
 	return {};
@@ -78,10 +78,8 @@ export interface PaymentState {
 	availableExpressPaymentMethods: PlainExpressPaymentMethods;
 	// Registered express payment methods are all express payment methods from the registry (before filtering).
 	registeredExpressPaymentMethods: PlainExpressPaymentMethods;
-	savedPaymentMethods:
-		| Record< string, SavedPaymentMethod[] >
-		| EmptyObjectType;
-	paymentMethodData: Record< string, unknown >;
+	savedPaymentMethods: Record<string, SavedPaymentMethod[]> | EmptyObjectType;
+	paymentMethodData: Record<string, unknown>;
 	paymentResult: PaymentResult | null;
 	paymentMethodsInitialized: boolean;
 	expressPaymentMethodsInitialized: boolean;
@@ -95,8 +93,8 @@ export const defaultPaymentState: PaymentState = {
 	availableExpressPaymentMethods: {},
 	registeredExpressPaymentMethods: {},
 	savedPaymentMethods: getSetting<
-		Record< string, SavedPaymentMethod[] > | EmptyObjectType
-	>( 'customerPaymentMethods', {} ),
+		Record<string, SavedPaymentMethod[]> | EmptyObjectType
+	>('customerPaymentMethods', {}),
 	paymentMethodData: getDefaultPaymentMethodData(),
 	paymentResult: null,
 	paymentMethodsInitialized: false,

@@ -11,23 +11,14 @@
 		"module": "esnext",
 		"baseUrl": "client",
 		"paths": {
-			"~/*": [
-				"*"
-			]
+			"~/*": ["*"]
 		},
 		"rootDir": "client",
-		"typeRoots": [
-			"./client/typings",
-			"./node_modules/@types"
-		],
+		"typeRoots": ["./client/typings", "./node_modules/@types"],
 		"composite": true
 	},
-	"include": [
-		"./client/**/*"
-	],
-	"exclude": [
-		"**/test/*"
-	],
+	"include": ["./client/**/*"],
+	"exclude": ["**/test/*"],
 	"references": [
 		{
 			"path": "../../../../packages/js/admin-layout"

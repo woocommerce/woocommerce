@@ -33,7 +33,7 @@ type UseRecommendedPluginsWithoutChannels = {
 	/**
 	 * Install and activate a plugin.
 	 */
-	installAndActivate: ( slug: string ) => void;
+	installAndActivate: (slug: string) => void;
 };
 
 const selector = 'getRecommendedPlugins';
@@ -48,15 +48,15 @@ export const useRecommendedPluginsWithoutChannels =
 		const {
 			loading: loadingRecommendedPlugins,
 			data: dataRecommendedPlugins,
-		} = useSelect( ( select ) => {
+		} = useSelect((select) => {
 			const { getRecommendedPlugins, hasFinishedResolution } =
-				select( marketingStore );
+				select(marketingStore);
 
 			return {
-				loading: ! hasFinishedResolution( selector, [ category ] ),
-				data: getRecommendedPlugins( category ) as RecommendedPlugin[],
+				loading: !hasFinishedResolution(selector, [category]),
+				data: getRecommendedPlugins(category) as RecommendedPlugin[],
 			};
-		}, [] );
+		}, []);
 
 		const {
 			loading: loadingRecommendedChannels,
@@ -64,23 +64,23 @@ export const useRecommendedPluginsWithoutChannels =
 		} = useRecommendedChannels();
 
 		const { invalidateResolution, installAndActivateRecommendedPlugin } =
-			useDispatch( marketingStore );
+			useDispatch(marketingStore);
 
 		const isInitializing =
-			( loadingRecommendedPlugins && ! dataRecommendedPlugins.length ) ||
-			( loadingRecommendedChannels && ! dataRecommendedChannels );
+			(loadingRecommendedPlugins && !dataRecommendedPlugins.length) ||
+			(loadingRecommendedChannels && !dataRecommendedChannels);
 
 		const loading = loadingRecommendedPlugins || loadingRecommendedChannels;
 
 		const recommendedPluginsWithoutChannels = differenceWith(
 			dataRecommendedPlugins,
 			dataRecommendedChannels || [],
-			( a, b ) => a.product === b.product
+			(a, b) => a.product === b.product
 		);
 
-		const installAndActivate = ( slug: string ) => {
-			void installAndActivateRecommendedPlugin( slug, category );
-			void invalidateResolution( selector, [ category ] );
+		const installAndActivate = (slug: string) => {
+			void installAndActivateRecommendedPlugin(slug, category);
+			void invalidateResolution(selector, [category]);
 		};
 
 		return {

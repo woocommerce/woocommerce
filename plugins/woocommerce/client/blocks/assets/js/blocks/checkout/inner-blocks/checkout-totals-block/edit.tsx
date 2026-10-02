@@ -16,7 +16,7 @@ import {
 	getAllowedBlocks,
 } from '../../../cart-checkout-shared';
 
-export const Edit = ( {
+export const Edit = ({
 	clientId,
 	attributes,
 }: {
@@ -24,29 +24,29 @@ export const Edit = ( {
 	attributes: {
 		className?: string;
 	};
-} ): JSX.Element => {
-	const blockProps = useBlockProps( {
-		className: clsx( 'wc-block-checkout__sidebar', attributes?.className ),
-	} );
-	const allowedBlocks = getAllowedBlocks( innerBlockAreas.CHECKOUT_TOTALS );
+}): JSX.Element => {
+	const blockProps = useBlockProps({
+		className: clsx('wc-block-checkout__sidebar', attributes?.className),
+	});
+	const allowedBlocks = getAllowedBlocks(innerBlockAreas.CHECKOUT_TOTALS);
 
 	const defaultTemplate = [
-		[ 'woocommerce/checkout-order-summary-block', {}, [] ],
+		['woocommerce/checkout-order-summary-block', {}, []],
 	] as TemplateArray;
 
-	useForcedLayout( {
+	useForcedLayout({
 		clientId,
 		registeredBlocks: allowedBlocks,
 		defaultTemplate,
-	} );
+	});
 
 	return (
-		<Sidebar { ...blockProps }>
+		<Sidebar {...blockProps}>
 			<InnerBlocks
-				allowedBlocks={ allowedBlocks }
-				templateLock={ false }
-				template={ defaultTemplate }
-				renderAppender={ InnerBlocks.ButtonBlockAppender }
+				allowedBlocks={allowedBlocks}
+				templateLock={false}
+				template={defaultTemplate}
+				renderAppender={InnerBlocks.ButtonBlockAppender}
 			/>
 		</Sidebar>
 	);
@@ -54,7 +54,7 @@ export const Edit = ( {
 
 export const Save = (): JSX.Element => {
 	return (
-		<div { ...useBlockProps.save() }>
+		<div {...useBlockProps.save()}>
 			<InnerBlocks.Content />
 		</div>
 	);

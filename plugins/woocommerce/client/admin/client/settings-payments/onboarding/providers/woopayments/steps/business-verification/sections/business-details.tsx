@@ -35,172 +35,172 @@ const BusinessDetails: React.FC = () => {
 		currentStep?.context?.fields?.business_types || []
 	);
 	const mccsFlatList = getMccsFlatList(
-		( currentStep?.context?.fields?.mccs_display_tree ??
-			[] ) as MccsDisplayTreeItem[]
+		(currentStep?.context?.fields?.mccs_display_tree ??
+			[]) as MccsDisplayTreeItem[]
 	);
 
-	const selectedCountry = businessTypes.find( ( country ) => {
+	const selectedCountry = businessTypes.find((country) => {
 		// Special case for Puerto Rico as it's considered a separate country in Core, but the business country should be US.
-		if ( data.country === 'PR' ) {
+		if (data.country === 'PR') {
 			return country.key === 'US';
 		}
 
 		return country.key === data.country;
-	} );
+	});
 
 	// Reorder the country business types so company is always first, if it exists.
-	const reorderedBusinessTypes = selectedCountry?.types.sort( ( a, b ) =>
+	const reorderedBusinessTypes = selectedCountry?.types.sort((a, b) =>
 		// eslint-disable-next-line no-nested-ternary
 		a.key === 'company' ? -1 : b.key === 'company' ? 1 : 0
 	);
 
 	const selectedBusinessType = reorderedBusinessTypes?.find(
-		( type ) => type.key === data.business_type
+		(type) => type.key === data.business_type
 	);
 
 	const selectedBusinessStructures = selectedBusinessType?.structures ?? [];
 	const shouldDisplayBusinessStructure =
 		selectedBusinessStructures.length > 0 &&
 		selectedBusinessType?.requires_structure !== false &&
-		! (
+		!(
 			selectedBusinessStructures.length === 1 &&
-			selectedBusinessStructures[ 0 ].key === 'nil'
+			selectedBusinessStructures[0].key === 'nil'
 		);
 	const selectedBusinessTypeKey = selectedBusinessType?.key;
-	const companyStructure = data[ 'company.structure' ];
-	const latestDataRef = React.useRef( data );
+	const companyStructure = data['company.structure'];
+	const latestDataRef = React.useRef(data);
 	latestDataRef.current = data;
 
 	const selectedBusinessStructure =
-		! shouldDisplayBusinessStructure ||
+		!shouldDisplayBusinessStructure ||
 		selectedBusinessStructures.find(
-			( structure ) => structure.key === companyStructure
+			(structure) => structure.key === companyStructure
 		);
 
 	const updateBusinessVerificationData = React.useCallback(
-		( selfAssessmentData: OnboardingFields ): Promise< void > => {
+		(selfAssessmentData: OnboardingFields): Promise<void> => {
 			// Update the local state with the new data.
-			setData( selfAssessmentData );
+			setData(selfAssessmentData);
 
 			const saveUrl = currentStep?.actions?.save?.href;
-			if ( saveUrl ) {
+			if (saveUrl) {
 				// Persist the data on the backend.
-				return apiFetch( {
+				return apiFetch({
 					url: saveUrl,
 					method: 'POST',
 					data: {
 						self_assessment: selfAssessmentData,
 						source: sessionEntryPoint,
 					},
-				} );
+				});
 			}
 
 			// Return a resolved promise to maintain consistency with the API.
 			return Promise.resolve();
 		},
-		[ currentStep?.actions?.save?.href, sessionEntryPoint, setData ]
+		[currentStep?.actions?.save?.href, sessionEntryPoint, setData]
 	);
 
-	React.useEffect( () => {
+	React.useEffect(() => {
 		if (
 			selectedBusinessTypeKey &&
-			! shouldDisplayBusinessStructure &&
+			!shouldDisplayBusinessStructure &&
 			companyStructure !== undefined
 		) {
-			void updateBusinessVerificationData( {
+			void updateBusinessVerificationData({
 				...latestDataRef.current,
 				'company.structure': undefined,
-			} );
+			});
 		}
 	}, [
 		companyStructure,
 		selectedBusinessTypeKey,
 		shouldDisplayBusinessStructure,
 		updateBusinessVerificationData,
-	] );
+	]);
 
 	const handleTiedChange = (
 		name: keyof OnboardingFields,
 		selectedItem?: Item | null
-	): Promise< void > => {
+	): Promise<void> => {
 		let newData: OnboardingFields = {
-			[ name ]: selectedItem?.key,
+			[name]: selectedItem?.key,
 		};
-		if ( name === 'business_type' ) {
+		if (name === 'business_type') {
 			newData = { ...newData, 'company.structure': undefined };
-		} else if ( name === 'country' ) {
+		} else if (name === 'country') {
 			newData = { ...newData, business_type: undefined };
 		}
 
-		return updateBusinessVerificationData( newData );
+		return updateBusinessVerificationData(newData);
 	};
 
 	const updateDataOnChange = (
 		name: keyof OnboardingFields,
 		selectedItem?: Item | null
-	): Promise< void > => {
+	): Promise<void> => {
 		const newData: OnboardingFields = {
 			...data,
-			[ name ]: selectedItem?.key,
+			[name]: selectedItem?.key,
 		};
 
-		return updateBusinessVerificationData( newData );
+		return updateBusinessVerificationData(newData);
 	};
 
 	return (
 		<>
-			<span data-testid={ 'country-select' }>
+			<span data-testid={'country-select'}>
 				<OnboardingSelectField
 					name="country"
-					options={ countries }
-					onChange={ handleTiedChange }
+					options={countries}
+					onChange={handleTiedChange}
 				/>
 			</span>
-			{ selectedCountry && selectedCountry.types.length > 0 && (
-				<span data-testid={ 'business-type-select' }>
+			{selectedCountry && selectedCountry.types.length > 0 && (
+				<span data-testid={'business-type-select'}>
 					<OnboardingSelectField
 						name="business_type"
-						options={ selectedCountry.types }
-						onChange={ handleTiedChange }
+						options={selectedCountry.types}
+						onChange={handleTiedChange}
 					>
-						{ ( item: Item & BusinessType ) => (
+						{(item: Item & BusinessType) => (
 							<div>
-								<div>{ item.name }</div>
+								<div>{item.name}</div>
 								<div className="complete-business-info-task__option-description">
-									{ item.description }
+									{item.description}
 								</div>
 							</div>
-						) }
+						)}
 					</OnboardingSelectField>
 				</span>
-			) }
-			{ selectedBusinessType && shouldDisplayBusinessStructure && (
-				<span data-testid={ 'business-structure-select' }>
+			)}
+			{selectedBusinessType && shouldDisplayBusinessStructure && (
+				<span data-testid={'business-structure-select'}>
 					<OnboardingSelectField
 						name="company.structure"
-						options={ selectedBusinessStructures }
-						onChange={ handleTiedChange }
+						options={selectedBusinessStructures}
+						onChange={handleTiedChange}
 					/>
 				</span>
-			) }
-			{ selectedCountry &&
+			)}
+			{selectedCountry &&
 				selectedBusinessType &&
 				selectedBusinessStructure && (
 					<>
-						<span data-testid={ 'mcc-select' }>
+						<span data-testid={'mcc-select'}>
 							<OnboardingGroupedSelectField
 								name="mcc"
-								options={ mccsFlatList }
-								onChange={ updateDataOnChange }
+								options={mccsFlatList}
+								onChange={updateDataOnChange}
 								searchable
 							/>
 						</span>
 
-						<span className={ 'woopayments-onboarding__tos' }>
-							{ strings.tos }
+						<span className={'woopayments-onboarding__tos'}>
+							{strings.tos}
 						</span>
 					</>
-				) }
+				)}
 		</>
 	);
 };

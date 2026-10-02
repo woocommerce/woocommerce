@@ -12,20 +12,20 @@ import { useState } from '@wordpress/element';
 import { STORE_KEY } from './data/constants';
 import './data';
 
-function NewExperimentForm( { addExperiment } ) {
-	const [ experimentName, setExperimentName ] = useState( null );
-	const [ variation, setVariation ] = useState( 'treatment' );
+function NewExperimentForm({ addExperiment }) {
+	const [experimentName, setExperimentName] = useState(null);
+	const [variation, setVariation] = useState('treatment');
 
-	const getInputValue = ( event ) => {
-		setExperimentName( event.target.value );
+	const getInputValue = (event) => {
+		setExperimentName(event.target.value);
 	};
 
-	const getVariationInput = ( event ) => {
-		setVariation( event.target.value );
+	const getVariationInput = (event) => {
+		setVariation(event.target.value);
 	};
 
 	const AddNewExperiment = () => {
-		addExperiment( experimentName, variation );
+		addExperiment(experimentName, variation);
 	};
 
 	return (
@@ -33,13 +33,13 @@ function NewExperimentForm( { addExperiment } ) {
 			<div className="description">
 				Don&apos;t see an experiment you want to test? Add it manually.
 			</div>
-			<input type="text" onChange={ getInputValue } />
-			<select value={ variation } onChange={ getVariationInput }>
+			<input type="text" onChange={getInputValue} />
+			<select value={variation} onChange={getVariationInput}>
 				<option value="treatment">treatment</option>
 				<option value="control">control</option>
 			</select>
 
-			<Button isPrimary onClick={ AddNewExperiment }>
+			<Button isPrimary onClick={AddNewExperiment}>
 				Add
 			</Button>
 		</div>
@@ -47,10 +47,10 @@ function NewExperimentForm( { addExperiment } ) {
 }
 
 export default compose(
-	withDispatch( ( dispatch ) => {
-		const { addExperiment } = dispatch( STORE_KEY );
+	withDispatch((dispatch) => {
+		const { addExperiment } = dispatch(STORE_KEY);
 		return {
 			addExperiment,
 		};
-	} )
-)( NewExperimentForm );
+	})
+)(NewExperimentForm);

@@ -29,11 +29,11 @@ import './editor.scss';
 import { Attributes } from './types';
 import { UpgradeNotice } from '../filter-wrapper/upgrade';
 
-const Edit = ( {
+const Edit = ({
 	clientId,
 	attributes,
 	setAttributes,
-}: BlockEditProps< Attributes > ) => {
+}: BlockEditProps<Attributes>) => {
 	const {
 		className,
 		heading,
@@ -44,145 +44,137 @@ const Edit = ( {
 		displayStyle,
 	} = attributes;
 
-	const blockProps = useBlockProps( {
-		className: clsx( 'wc-block-stock-filter', className ),
-	} );
+	const blockProps = useBlockProps({
+		className: clsx('wc-block-stock-filter', className),
+	});
 
 	const getInspectorControls = () => {
 		return (
 			<InspectorControls key="inspector">
 				<PanelBody>
-					<UpgradeNotice clientId={ clientId } />
+					<UpgradeNotice clientId={clientId} />
 				</PanelBody>
 				<ToolsPanel
-					label={ __( 'Display Settings', 'woocommerce' ) }
-					resetAll={ () =>
-						setAttributes( {
+					label={__('Display Settings', 'woocommerce')}
+					resetAll={() =>
+						setAttributes({
 							showCounts: false,
 							showFilterButton: false,
 							displayStyle: 'list',
 							selectType: 'multiple',
-						} )
+						})
 					}
 				>
 					<ToolsPanelItem
-						label={ __( 'Display product count', 'woocommerce' ) }
-						hasValue={ () => showCounts !== false }
-						onDeselect={ () =>
-							setAttributes( { showCounts: false } )
-						}
+						label={__('Display product count', 'woocommerce')}
+						hasValue={() => showCounts !== false}
+						onDeselect={() => setAttributes({ showCounts: false })}
 						isShownByDefault
 					>
 						<ToggleControl
-							label={ __(
-								'Display product count',
-								'woocommerce'
-							) }
-							checked={ showCounts }
-							onChange={ () =>
-								setAttributes( {
-									showCounts: ! showCounts,
-								} )
+							label={__('Display product count', 'woocommerce')}
+							checked={showCounts}
+							onChange={() =>
+								setAttributes({
+									showCounts: !showCounts,
+								})
 							}
 						/>
 					</ToolsPanelItem>
 					<ToolsPanelItem
-						label={ __(
+						label={__(
 							'Allow selecting multiple options?',
 							'woocommerce'
-						) }
-						hasValue={ () => selectType !== 'multiple' }
-						onDeselect={ () =>
-							setAttributes( { selectType: 'multiple' } )
+						)}
+						hasValue={() => selectType !== 'multiple'}
+						onDeselect={() =>
+							setAttributes({ selectType: 'multiple' })
 						}
 						isShownByDefault
 					>
 						<ToggleGroupControl
-							label={ __(
+							label={__(
 								'Allow selecting multiple options?',
 								'woocommerce'
-							) }
+							)}
 							isBlock
-							value={ selectType || 'multiple' }
-							onChange={ ( value: string ) =>
-								setAttributes( {
+							value={selectType || 'multiple'}
+							onChange={(value: string) =>
+								setAttributes({
 									selectType: value,
-								} )
+								})
 							}
 							className="wc-block-attribute-filter__multiple-toggle"
 						>
 							<ToggleGroupControlOption
 								value="multiple"
-								label={ _x(
+								label={_x(
 									'Multiple',
 									'Number of filters',
 									'woocommerce'
-								) }
+								)}
 							/>
 							<ToggleGroupControlOption
 								value="single"
-								label={ _x(
+								label={_x(
 									'Single',
 									'Number of filters',
 									'woocommerce'
-								) }
+								)}
 							/>
 						</ToggleGroupControl>
 					</ToolsPanelItem>
 					<ToolsPanelItem
-						label={ __( 'Display Style', 'woocommerce' ) }
-						hasValue={ () => displayStyle !== 'list' }
-						onDeselect={ () =>
-							setAttributes( { displayStyle: 'list' } )
+						label={__('Display Style', 'woocommerce')}
+						hasValue={() => displayStyle !== 'list'}
+						onDeselect={() =>
+							setAttributes({ displayStyle: 'list' })
 						}
 						isShownByDefault
 					>
 						<ToggleGroupControl
-							label={ __( 'Display Style', 'woocommerce' ) }
+							label={__('Display Style', 'woocommerce')}
 							isBlock
-							value={ displayStyle }
-							onChange={ ( value ) =>
-								setAttributes( {
+							value={displayStyle}
+							onChange={(value) =>
+								setAttributes({
 									displayStyle: value,
-								} )
+								})
 							}
 							className="wc-block-attribute-filter__display-toggle"
 						>
 							<ToggleGroupControlOption
 								value="list"
-								label={ __( 'List', 'woocommerce' ) }
+								label={__('List', 'woocommerce')}
 							/>
 							<ToggleGroupControlOption
 								value="dropdown"
-								label={ __( 'Dropdown', 'woocommerce' ) }
+								label={__('Dropdown', 'woocommerce')}
 							/>
 						</ToggleGroupControl>
 					</ToolsPanelItem>
 					<ToolsPanelItem
-						label={ __(
-							"Show 'Apply filters' button",
-							'woocommerce'
-						) }
-						hasValue={ () => showFilterButton !== false }
-						onDeselect={ () =>
-							setAttributes( { showFilterButton: false } )
+						label={__("Show 'Apply filters' button", 'woocommerce')}
+						hasValue={() => showFilterButton !== false}
+						onDeselect={() =>
+							setAttributes({ showFilterButton: false })
 						}
 						isShownByDefault
 					>
 						<ToggleControl
-							label={ __(
+							label={__(
 								"Show 'Apply filters' button",
 								'woocommerce'
-							) }
-							help={ __(
+							)}
+							help={__(
 								'Products will update when the button is clicked.',
 								'woocommerce'
-							) }
-							checked={ showFilterButton }
-							onChange={ ( value ) =>
-								setAttributes( {
+							)}
+							checked={showFilterButton}
+							onChange={(value) =>
+								setAttributes({
 									showFilterButton: value,
-								} )
+								})
 							}
 						/>
 					</ToolsPanelItem>
@@ -193,21 +185,21 @@ const Edit = ( {
 
 	return (
 		<>
-			{ getInspectorControls() }
+			{getInspectorControls()}
 			{
-				<div { ...blockProps }>
-					{ heading && (
+				<div {...blockProps}>
+					{heading && (
 						<BlockTitle
 							className="wc-block-stock-filter__title"
-							headingLevel={ headingLevel }
-							heading={ heading }
-							onChange={ ( value: string ) =>
-								setAttributes( { heading: value } )
+							headingLevel={headingLevel}
+							heading={heading}
+							onChange={(value: string) =>
+								setAttributes({ heading: value })
 							}
 						/>
-					) }
+					)}
 					<Disabled>
-						<Block attributes={ attributes } isEditor={ true } />
+						<Block attributes={attributes} isEditor={true} />
 					</Disabled>
 				</div>
 			}
@@ -215,4 +207,4 @@ const Edit = ( {
 	);
 };
 
-export default withSpokenMessages( Edit );
+export default withSpokenMessages(Edit);

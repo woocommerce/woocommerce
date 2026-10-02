@@ -26,31 +26,31 @@ interface ProductRatingStarsProps {
 	shouldDisplayMockedReviewsWhenProductHasNoReviews: boolean;
 }
 
-export const Block = ( props: ProductRatingStarsProps ): JSX.Element | null => {
+export const Block = (props: ProductRatingStarsProps): JSX.Element | null => {
 	const {
 		textAlign = '',
 		shouldDisplayMockedReviewsWhenProductHasNoReviews,
 	} = props;
-	const styleProps = useStyleProps( props );
+	const styleProps = useStyleProps(props);
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
-	const rating = getAverageRating( product );
-	const reviews = getRatingCount( product );
+	const rating = getAverageRating(product);
+	const reviews = getRatingCount(product);
 	const className = 'wc-block-components-product-rating-stars';
 
 	return (
 		<ProductRating
-			className={ className }
+			className={className}
 			showMockedReviews={
 				shouldDisplayMockedReviewsWhenProductHasNoReviews
 			}
-			styleProps={ styleProps }
-			parentClassName={ parentClassName }
-			reviews={ reviews }
-			rating={ rating }
-			textAlign={ textAlign }
+			styleProps={styleProps}
+			parentClassName={parentClassName}
+			reviews={reviews}
+			rating={rating}
+			textAlign={textAlign}
 		/>
 	);
 };
 
-export default withProductDataContext( Block );
+export default withProductDataContext(Block);

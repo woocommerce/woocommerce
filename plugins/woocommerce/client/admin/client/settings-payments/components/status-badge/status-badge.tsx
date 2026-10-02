@@ -54,39 +54,39 @@ interface StatusBadgeProps {
  * // Render a status badge which displays a popover.
  * <StatusBadge status="active" message="Active" popoverContent={ <p>This is an active status badge</p> } />
  */
-export const StatusBadge = ( {
+export const StatusBadge = ({
 	status,
 	message,
 	popoverContent,
-}: StatusBadgeProps ) => {
-	const [ isPopoverVisible, setPopoverVisible ] = useState( false );
-	const buttonRef = useRef< HTMLSpanElement >( null );
+}: StatusBadgeProps) => {
+	const [isPopoverVisible, setPopoverVisible] = useState(false);
+	const buttonRef = useRef<HTMLSpanElement>(null);
 
-	const handleClick = ( event: React.MouseEvent | React.KeyboardEvent ) => {
+	const handleClick = (event: React.MouseEvent | React.KeyboardEvent) => {
 		const clickedElement = event.target as HTMLElement;
 		const parentSpan = clickedElement.closest(
 			'.woocommerce-status-badge__icon-container'
 		);
 
-		if ( buttonRef.current && parentSpan !== buttonRef.current ) {
+		if (buttonRef.current && parentSpan !== buttonRef.current) {
 			return;
 		}
 
-		setPopoverVisible( ( prev ) => ! prev );
+		setPopoverVisible((prev) => !prev);
 	};
 
 	const handleFocusOutside = () => {
-		setPopoverVisible( false );
+		setPopoverVisible(false);
 	};
 
-	const handleKeyDown = ( event: React.KeyboardEvent ) => {
-		if ( event.key === 'Escape' && isPopoverVisible ) {
+	const handleKeyDown = (event: React.KeyboardEvent) => {
+		if (event.key === 'Escape' && isPopoverVisible) {
 			event.stopPropagation();
-			setPopoverVisible( false );
+			setPopoverVisible(false);
 			buttonRef.current?.focus();
-		} else if ( event.key === 'Enter' || event.key === ' ' ) {
+		} else if (event.key === 'Enter' || event.key === ' ') {
 			event.preventDefault();
-			handleClick( event );
+			handleClick(event);
 		}
 	};
 
@@ -94,7 +94,7 @@ export const StatusBadge = ( {
 	 * Get the appropriate CSS class for the badge based on the status.
 	 */
 	const getStatusClass = () => {
-		switch ( status ) {
+		switch (status) {
 			case 'active':
 			case 'has_incentive':
 				return 'woocommerce-status-badge--success';
@@ -115,69 +115,69 @@ export const StatusBadge = ( {
 	 * Get the default message for the badge based on the status.
 	 */
 	const getStatusMessage = () => {
-		switch ( status ) {
+		switch (status) {
 			case 'active':
-				return __( 'Active', 'woocommerce' );
+				return __('Active', 'woocommerce');
 			case 'inactive':
-				return __( 'Inactive', 'woocommerce' );
+				return __('Inactive', 'woocommerce');
 			case 'needs_setup':
-				return __( 'Action needed', 'woocommerce' );
+				return __('Action needed', 'woocommerce');
 			case 'test_mode':
-				return __( 'Test mode', 'woocommerce' );
+				return __('Test mode', 'woocommerce');
 			case 'test_account':
-				return __( 'Test account', 'woocommerce' );
+				return __('Test account', 'woocommerce');
 			case 'recommended':
-				return __( 'Recommended', 'woocommerce' );
+				return __('Recommended', 'woocommerce');
 			case 'not_supported':
-				return __( 'Not supported', 'woocommerce' );
+				return __('Not supported', 'woocommerce');
 			default:
 				return '';
 		}
 	};
 
 	return (
-		<Pill className={ `woocommerce-status-badge ${ getStatusClass() }` }>
-			{ message || getStatusMessage() }
-			{ popoverContent && (
+		<Pill className={`woocommerce-status-badge ${getStatusClass()}`}>
+			{message || getStatusMessage()}
+			{popoverContent && (
 				<span
 					className="woocommerce-status-badge__icon-container"
-					tabIndex={ 0 }
+					tabIndex={0}
 					role="button"
 					aria-haspopup="dialog"
-					aria-expanded={ isPopoverVisible }
-					aria-label={ __( 'More information', 'woocommerce' ) }
-					ref={ buttonRef }
-					onClick={ handleClick }
-					onKeyDown={ handleKeyDown }
+					aria-expanded={isPopoverVisible}
+					aria-label={__('More information', 'woocommerce')}
+					ref={buttonRef}
+					onClick={handleClick}
+					onKeyDown={handleKeyDown}
 				>
 					<Icon
 						className="woocommerce-status-badge-icon"
-						size={ 16 }
-						icon={ info }
+						size={16}
+						icon={info}
 					/>
-					{ isPopoverVisible && (
+					{isPopoverVisible && (
 						<Popover
 							className="woocommerce-status-badge-popover"
 							placement="top-start"
-							offset={ 4 }
+							offset={4}
 							variant="unstyled"
-							focusOnMount={ true }
-							noArrow={ true }
-							shift={ true }
-							onFocusOutside={ handleFocusOutside }
-							onKeyDown={ handleKeyDown }
+							focusOnMount={true}
+							noArrow={true}
+							shift={true}
+							onFocusOutside={handleFocusOutside}
+							onKeyDown={handleKeyDown}
 						>
-							{ /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */ }
+							{/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
 							<div
 								className="components-popover__content-container"
-								onKeyDown={ handleKeyDown }
+								onKeyDown={handleKeyDown}
 							>
-								{ popoverContent }
+								{popoverContent}
 							</div>
 						</Popover>
-					) }
+					)}
 				</span>
-			) }
+			)}
 		</Pill>
 	);
 };

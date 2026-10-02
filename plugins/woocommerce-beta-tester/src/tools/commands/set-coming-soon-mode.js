@@ -19,30 +19,30 @@ const OPTIONS = [
 
 export const SetComingSoonMode = () => {
 	const comingSoonMode = useSelect(
-		( select ) => select( store ).getComingSoonMode(),
+		(select) => select(store).getComingSoonMode(),
 		[]
 	);
-	const { updateCommandParams } = useDispatch( store );
+	const { updateCommandParams } = useDispatch(store);
 
-	function onChange( mode ) {
-		updateCommandParams( UPDATE_COMING_SOON_MODE_ACTION_NAME, {
+	function onChange(mode) {
+		updateCommandParams(UPDATE_COMING_SOON_MODE_ACTION_NAME, {
 			mode,
-		} );
+		});
 	}
 
 	return (
 		<div className="select-description">
-			{ ! comingSoonMode ? (
+			{!comingSoonMode ? (
 				<p>Loading ...</p>
 			) : (
 				<SelectControl
 					label="Mode"
 					labelPosition="side"
-					value={ comingSoonMode }
-					onChange={ onChange }
-					options={ OPTIONS }
+					value={comingSoonMode}
+					onChange={onChange}
+					options={OPTIONS}
 				/>
-			) }
+			)}
 		</div>
 	);
 };

@@ -33,7 +33,7 @@ const popoverProps = {
  *
  * @see https://github.com/WordPress/gutenberg/blob/trunk/packages/block-editor/src/components/global-styles/color-gradient-dropdown-item.js
  */
-export function ColorDropdownItem( {
+export function ColorDropdownItem({
 	label,
 	hasValue,
 	resetValue,
@@ -49,80 +49,80 @@ export function ColorDropdownItem( {
 	isShownByDefault: boolean;
 	inheritedValue?: string;
 	userValue?: string;
-	setValue: ( newValue?: string ) => void;
-	colorGradientControlSettings: Record< string, unknown >;
-} ): JSX.Element {
-	const dropdownButtonRef = useRef< HTMLButtonElement | null >( null );
+	setValue: (newValue?: string) => void;
+	colorGradientControlSettings: Record<string, unknown>;
+}): JSX.Element {
+	const dropdownButtonRef = useRef<HTMLButtonElement | null>(null);
 	return (
 		<ToolsPanelItem
 			className="block-editor-color-gradient-item block-editor-tools-panel-color-gradient-settings__item"
-			hasValue={ hasValue }
-			label={ label }
-			onDeselect={ resetValue }
-			isShownByDefault={ isShownByDefault }
+			hasValue={hasValue}
+			label={label}
+			onDeselect={resetValue}
+			isShownByDefault={isShownByDefault}
 		>
 			<Dropdown
-				popoverProps={ popoverProps }
+				popoverProps={popoverProps}
 				className="block-editor-tools-panel-color-gradient-settings__dropdown"
-				renderToggle={ ( { onToggle, isOpen } ) => (
+				renderToggle={({ onToggle, isOpen }) => (
 					<>
 						<Button
-							onClick={ onToggle }
-							className={ clsx(
+							onClick={onToggle}
+							className={clsx(
 								'block-editor-panel-color-gradient-settings__dropdown',
 								{ 'is-open': isOpen }
-							) }
-							aria-expanded={ isOpen }
-							ref={ dropdownButtonRef }
+							)}
+							aria-expanded={isOpen}
+							ref={dropdownButtonRef}
 							__next40pxDefaultSize
 						>
 							<HStack justify="flex-start">
 								<ColorIndicator
 									className="block-editor-panel-color-gradient-settings__color-indicator"
-									colorValue={ inheritedValue }
+									colorValue={inheritedValue}
 								/>
 								<FlexItem
 									className="block-editor-panel-color-gradient-settings__color-name"
-									title={ label }
+									title={label}
 								>
-									{ label }
+									{label}
 								</FlexItem>
 							</HStack>
 						</Button>
-						{ hasValue() && (
+						{hasValue() && (
 							<Button
 								__next40pxDefaultSize
-								label={ __( 'Reset', __i18n_text_domain__ ) }
+								label={__('Reset', __i18n_text_domain__)}
 								className="block-editor-panel-color-gradient-settings__reset"
 								size="small"
-								icon={ resetIcon }
-								onClick={ () => {
+								icon={resetIcon}
+								onClick={() => {
 									resetValue();
-									if ( isOpen ) {
+									if (isOpen) {
 										onToggle();
 									}
 									dropdownButtonRef.current?.focus();
-								} }
+								}}
 							/>
-						) }
+						)}
 					</>
-				) }
-				renderContent={ () => (
+				)}
+				renderContent={() => (
 					<DropdownContentWrapper paddingSize="none">
 						<div className="block-editor-panel-color-gradient-settings__dropdown-content">
 							<ColorGradientControl
-								{ ...colorGradientControlSettings }
-								showTitle={ false }
+								{...colorGradientControlSettings}
+								showTitle={false}
 								enableAlpha
 								__experimentalIsRenderedInSidebar
-								colorValue={ inheritedValue }
-								onColorChange={ setValue }
-								clearable={ inheritedValue === userValue }
-								headingLevel={ 3 }
+								colorValue={inheritedValue}
+								onColorChange={setValue}
+								clearable={inheritedValue === userValue}
+								headingLevel={3}
 							/>
 						</div>
 					</DropdownContentWrapper>
-				) }
+				)}
 			/>
 		</ToolsPanelItem>
 	);

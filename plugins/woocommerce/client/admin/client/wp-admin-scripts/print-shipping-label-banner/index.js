@@ -10,16 +10,13 @@ import { withPluginsHydration } from '@woocommerce/data';
 import ShippingBanner from './shipping-banner';
 import { getAdminSetting } from '~/utils/admin-settings';
 
-const metaBox = document.getElementById( 'wc-admin-shipping-banner-root' );
-const args =
-	( metaBox.dataset.args && JSON.parse( metaBox.dataset.args ) ) || {};
+const metaBox = document.getElementById('wc-admin-shipping-banner-root');
+const args = (metaBox.dataset.args && JSON.parse(metaBox.dataset.args)) || {};
 
 // Render the header.
-const HydratedShippingBanner = withPluginsHydration( {
-	...getAdminSetting( 'plugins' ),
-	jetpackStatus: getAdminSetting( 'dataEndpoints', {} ).jetpackStatus,
-} )( ShippingBanner );
+const HydratedShippingBanner = withPluginsHydration({
+	...getAdminSetting('plugins'),
+	jetpackStatus: getAdminSetting('dataEndpoints', {}).jetpackStatus,
+})(ShippingBanner);
 
-createRoot( metaBox ).render(
-	<HydratedShippingBanner itemsCount={ args.items } />
-);
+createRoot(metaBox).render(<HydratedShippingBanner itemsCount={args.items} />);

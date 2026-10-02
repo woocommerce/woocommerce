@@ -17,17 +17,17 @@ export default class StockReport extends Component {
 		return (
 			<Fragment>
 				<ReportHeader
-					query={ query }
-					path={ path }
-					showDatePicker={ showDatePicker }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
+					query={query}
+					path={path}
+					showDatePicker={showDatePicker}
+					filters={filters}
+					advancedFilters={advancedFilters}
 					report="stock"
 				/>
 				<StockReportTable
-					query={ query }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
+					query={query}
+					filters={filters}
+					advancedFilters={advancedFilters}
 				/>
 			</Fragment>
 		);

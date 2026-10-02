@@ -12,9 +12,9 @@ import './inner-blocks';
 import { metadata } from './metadata';
 import './style.scss';
 
-registerBlockType( blockName, {
+registerBlockType(blockName, {
 	...metadata,
 	attributes,
 	edit,
 	save,
-} );
+});

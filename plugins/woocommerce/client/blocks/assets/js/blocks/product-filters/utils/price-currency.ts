@@ -15,7 +15,7 @@ import {
 /**
  * Internal dependencies
  */
-const currencyConfig = getConfig( 'woocommerce' ).currency;
+const currencyConfig = getConfig('woocommerce').currency;
 
 const siteCurrency: Currency = {
 	...currencyConfig,
@@ -38,10 +38,10 @@ export const getCurrencyFromPriceResponse = (
 	// Currency data object, for example an API response containing currency formatting data.
 	currencyData?:
 		| CurrencyResponse
-		| Record< string, never >
+		| Record<string, never>
 		| CartShippingPackageShippingRate
 ): Currency => {
-	if ( ! currencyData?.currency_code ) {
+	if (!currencyData?.currency_code) {
 		return siteCurrency;
 	}
 
@@ -66,7 +66,7 @@ export const getCurrencyFromPriceResponse = (
 			typeof decimalSeparator === 'string'
 				? decimalSeparator
 				: siteCurrency.decimalSeparator,
-		minorUnit: Number.isFinite( minorUnit )
+		minorUnit: Number.isFinite(minorUnit)
 			? minorUnit
 			: siteCurrency.minorUnit,
 		prefix: typeof prefix === 'string' ? prefix : siteCurrency.prefix,
@@ -77,9 +77,7 @@ export const getCurrencyFromPriceResponse = (
 /**
  * Gets currency information in normalized format, allowing overrides.
  */
-export const getCurrency = (
-	currencyData: Partial< Currency > = {}
-): Currency => {
+export const getCurrency = (currencyData: Partial<Currency> = {}): Currency => {
 	return {
 		...siteCurrency,
 		...currencyData,
@@ -90,7 +88,7 @@ const applyThousandSeparator = (
 	numberString: string,
 	thousandSeparator: string
 ): string => {
-	return numberString.replace( /\B(?=(\d{3})+(?!\d))/g, thousandSeparator );
+	return numberString.replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator);
 };
 
 const splitDecimal = (
@@ -99,9 +97,9 @@ const splitDecimal = (
 	beforeDecimal: string;
 	afterDecimal: string;
 } => {
-	const parts = numberString.split( '.' );
-	const beforeDecimal = parts[ 0 ];
-	const afterDecimal = parts[ 1 ] || '';
+	const parts = numberString.split('.');
+	const beforeDecimal = parts[0];
+	const afterDecimal = parts[1] || '';
 	return {
 		beforeDecimal,
 		afterDecimal,
@@ -113,15 +111,12 @@ const applyDecimal = (
 	decimalSeparator: string,
 	minorUnit: number
 ): string => {
-	if ( afterDecimal ) {
-		return `${ decimalSeparator }${ afterDecimal.padEnd(
-			minorUnit,
-			'0'
-		) }`;
+	if (afterDecimal) {
+		return `${decimalSeparator}${afterDecimal.padEnd(minorUnit, '0')}`;
 	}
 
-	if ( minorUnit > 0 ) {
-		return `${ decimalSeparator }${ '0'.repeat( minorUnit ) }`;
+	if (minorUnit > 0) {
+		return `${decimalSeparator}${'0'.repeat(minorUnit)}`;
 	}
 
 	return '';
@@ -136,18 +131,18 @@ export const formatPrice = (
 	price: number | string,
 	currencyData?: Currency
 ): string => {
-	if ( price === '' || price === undefined ) {
+	if (price === '' || price === undefined) {
 		return '';
 	}
 
 	const priceInt: number =
-		typeof price === 'number' ? price : parseInt( price, 10 );
+		typeof price === 'number' ? price : parseInt(price, 10);
 
-	if ( ! Number.isFinite( priceInt ) ) {
+	if (!Number.isFinite(priceInt)) {
 		return '';
 	}
 
-	const currency: Currency = getCurrency( currencyData );
+	const currency: Currency = getCurrency(currencyData);
 
 	const { minorUnit, prefix, suffix, decimalSeparator, thousandSeparator } =
 		currency;
@@ -158,14 +153,10 @@ export const formatPrice = (
 		formattedPrice.toString()
 	);
 
-	const formattedValue = `${ prefix }${ applyThousandSeparator(
+	const formattedValue = `${prefix}${applyThousandSeparator(
 		beforeDecimal,
 		thousandSeparator
-	) }${ applyDecimal(
-		afterDecimal,
-		decimalSeparator,
-		minorUnit
-	) }${ suffix }`;
+	)}${applyDecimal(afterDecimal, decimalSeparator, minorUnit)}${suffix}`;
 
 	return formattedValue;
 };

@@ -11,16 +11,16 @@ import { RichTextFormatList } from '@wordpress/rich-text/build-types/types';
 import { PersonalizationTag } from '../../store';
 
 type Replacement = {
-	attributes: Record< string, string >;
+	attributes: Record<string, string>;
 	type: string;
 };
 
-function getChildElement( rootElement: HTMLElement ): HTMLElement | null {
+function getChildElement(rootElement: HTMLElement): HTMLElement | null {
 	let currentElement: HTMLElement | null = rootElement;
 
-	while ( currentElement && currentElement?.children?.length > 0 ) {
+	while (currentElement && currentElement?.children?.length > 0) {
 		// Traverse into the first child element
-		currentElement = currentElement.children[ 0 ] as HTMLElement;
+		currentElement = currentElement.children[0] as HTMLElement;
 	}
 
 	return currentElement;
@@ -28,19 +28,19 @@ function getChildElement( rootElement: HTMLElement ): HTMLElement | null {
 
 function findReplacementIndex(
 	element: HTMLElement,
-	replacements: ( null | Replacement )[]
+	replacements: (null | Replacement)[]
 ): number | null {
 	// Iterate over the replacements array
-	for ( const [ index, replacement ] of replacements.entries() ) {
-		if ( ! replacement ) {
+	for (const [index, replacement] of replacements.entries()) {
+		if (!replacement) {
 			continue;
 		}
 
 		const { attributes } = replacement;
 
 		if (
-			element.getAttribute( 'data-rich-text-comment' ) ===
-			attributes[ 'data-rich-text-comment' ]
+			element.getAttribute('data-rich-text-comment') ===
+			attributes['data-rich-text-comment']
 		) {
 			return index;
 		}
@@ -61,22 +61,22 @@ function findLatestFormatIndex(
 ): number | null {
 	let latestFormatIndex = null;
 
-	for ( const [ index, formatList ] of formats.entries() ) {
-		if ( ! formatList ) {
+	for (const [index, formatList] of formats.entries()) {
+		if (!formatList) {
 			continue;
 		}
 
 		// Check each format within the format list at the current index
-		for ( const format of formatList ) {
+		for (const format of formatList) {
 			if (
 				// @ts-expect-error attributes property is missing in build type for RichTextFormatList type
 				format?.attributes &&
 				element.tagName.toLowerCase() ===
 					// @ts-expect-error tagName property is missing in build type for RichTextFormatList type
 					format.tagName?.toLowerCase() &&
-				element.getAttribute( 'data-link-href' ) ===
+				element.getAttribute('data-link-href') ===
 					// @ts-expect-error attributes property is missing in build type for RichTextFormatList type
-					format?.attributes[ 'data-link-href' ]
+					format?.attributes['data-link-href']
 			) {
 				latestFormatIndex = index;
 			}
@@ -95,37 +95,37 @@ function findLatestFormatIndex(
  * @return {{ start: number, end: number } | null} - The cursor position as start and end offsets.
  */
 const getCursorPosition = (
-	richTextRef: React.RefObject< HTMLElement >,
+	richTextRef: React.RefObject<HTMLElement>,
 	content: string
 ): { start: number; end: number } => {
 	const selection =
 		richTextRef.current.ownerDocument.defaultView.getSelection();
 
-	if ( ! selection.rangeCount ) {
+	if (!selection.rangeCount) {
 		return {
 			start: 0,
 			end: 0,
 		};
 	}
 
-	const range = selection.getRangeAt( 0 );
+	const range = selection.getRangeAt(0);
 
-	if ( selection.anchorNode.previousSibling === null ) {
+	if (selection.anchorNode.previousSibling === null) {
 		return {
 			start: selection.anchorOffset,
 			end: selection.anchorOffset + range.toString().length,
 		};
 	}
 
-	const richTextValue = create( { html: content } );
+	const richTextValue = create({ html: content });
 	let previousSibling = selection.anchorNode.previousSibling as HTMLElement;
-	previousSibling = getChildElement( previousSibling );
+	previousSibling = getChildElement(previousSibling);
 
 	const formatIndex = findLatestFormatIndex(
 		previousSibling,
 		richTextValue.formats
 	);
-	if ( formatIndex !== null ) {
+	if (formatIndex !== null) {
 		return {
 			start: formatIndex + selection.anchorOffset + 1, // We need to add 1 for the format length
 			end: formatIndex + selection.anchorOffset + range.toString().length,
@@ -136,7 +136,7 @@ const getCursorPosition = (
 		previousSibling,
 		richTextValue.replacements as Replacement[]
 	);
-	if ( replacementIndex !== null ) {
+	if (replacementIndex !== null) {
 		return {
 			start: replacementIndex + selection.anchorOffset + 1, // We need to add 1 for the replacement length
 			end:
@@ -163,28 +163,26 @@ const replacePersonalizationTagsWithHTMLComments = (
 	content: string,
 	tags: PersonalizationTag[]
 ) => {
-	tags.forEach( ( tag ) => {
+	tags.forEach((tag) => {
 		// Skip if the token is not in the content
-		if (
-			! content.includes( tag.token.slice( 0, tag.token.length - 1 ) )
-		) {
+		if (!content.includes(tag.token.slice(0, tag.token.length - 1))) {
 			return;
 		}
 
 		// Match the token with optional attributes like [mailpoet/subscriber-firstname default="user"]
 		const baseToken = tag.token
-			.substring( 1, tag.token.length - 1 )
-			.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' ); // Escape base token and remove brackets
+			.substring(1, tag.token.length - 1)
+			.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape base token and remove brackets
 		const regex = new RegExp(
-			`(?<!<!--)(?<!["'])\\[(${ baseToken }(\\s[^\\]]*)?)\\](?!-->)`, // Match token not inside quotes (attributes)
+			`(?<!<!--)(?<!["'])\\[(${baseToken}(\\s[^\\]]*)?)\\](?!-->)`, // Match token not inside quotes (attributes)
 			'g'
 		);
 
-		content = content.replace( regex, ( match ) => {
+		content = content.replace(regex, (match) => {
 			// Use the exact text inside the brackets for the replacement
-			return `<!--${ match }-->`;
-		} );
-	} );
+			return `<!--${match}-->`;
+		});
+	});
 	return content;
 };
 

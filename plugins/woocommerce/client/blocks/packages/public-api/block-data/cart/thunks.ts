@@ -45,8 +45,8 @@ import { isEditor } from '../utils';
 import { store as checkoutStore } from '../checkout';
 
 interface CartThunkArgs {
-	select: CurriedSelectorsOf< typeof cartStore >;
-	dispatch: ActionCreatorsOf< ConfigOf< typeof cartStore > >;
+	select: CurriedSelectorsOf<typeof cartStore>;
+	dispatch: ActionCreatorsOf<ConfigOf<typeof cartStore>>;
 	registry?: { dispatch: DispatchFunction };
 }
 
@@ -57,44 +57,44 @@ interface CartThunkArgs {
  * @param {CartResponse} response The response from the API request.
  */
 export const receiveCart =
-	( response: Partial< CartResponse > ) =>
-	( { dispatch, select }: CartThunkArgs ) => {
-		const cartResponse = camelCaseKeys( response ) as unknown as Cart;
+	(response: Partial<CartResponse>) =>
+	({ dispatch, select }: CartThunkArgs) => {
+		const cartResponse = camelCaseKeys(response) as unknown as Cart;
 		const oldCart = select.getCartData();
-		const oldCartErrors = [ ...oldCart.errors, ...select.getCartErrors() ];
+		const oldCartErrors = [...oldCart.errors, ...select.getCartErrors()];
 
-		dispatch.setCartData( cartResponse );
+		dispatch.setCartData(cartResponse);
 
 		// Get the new cart data before showing updates.
 		const newCart = select.getCartData();
 
 		const cartItemsPendingDelete = select.getItemsPendingDelete();
 
-		notifyQuantityChanges( {
+		notifyQuantityChanges({
 			oldCart,
 			newCart,
 			cartItemsPendingQuantity: select.getItemsPendingQuantityUpdate(),
 			cartItemsPendingDelete,
 			productsPendingAdd: select.getProductsPendingAdd(),
-		} );
+		});
 
 		// Clear pending delete status for items no longer in the cart.
 		// This handles cases where removing one item causes dependent items
 		// to also be removed server-side (e.g., bundled product children
 		// removed when their parent bundle is deleted).
-		if ( cartItemsPendingDelete.length > 0 ) {
+		if (cartItemsPendingDelete.length > 0) {
 			const newCartItemKeys = new Set(
-				newCart.items.map( ( item ) => item.key )
+				newCart.items.map((item) => item.key)
 			);
-			cartItemsPendingDelete.forEach( ( key ) => {
-				if ( ! newCartItemKeys.has( key ) ) {
-					dispatch.itemIsPendingDelete( key, false );
+			cartItemsPendingDelete.forEach((key) => {
+				if (!newCartItemKeys.has(key)) {
+					dispatch.itemIsPendingDelete(key, false);
 				}
-			} );
+			});
 		}
 
-		updateCartErrorNotices( newCart.errors, oldCartErrors );
-		dispatch.setErrorData( null );
+		updateCartErrorNotices(newCart.errors, oldCartErrors);
+		dispatch.setErrorData(null);
 	};
 
 /**
@@ -105,28 +105,28 @@ export const receiveCart =
  * @param {CartResponse} response
  */
 export const receiveCartContents =
-	( response: Partial< CartResponse > ) =>
-	( { dispatch }: CartThunkArgs ) => {
+	(response: Partial<CartResponse>) =>
+	({ dispatch }: CartThunkArgs) => {
 		// eslint-disable-next-line @typescript-eslint/naming-convention
 		const { shipping_address, billing_address, ...cartWithoutAddress } =
 			response;
-		dispatch.receiveCart( cartWithoutAddress );
+		dispatch.receiveCart(cartWithoutAddress);
 	};
 
 /**
  * A thunk used in updating the store with cart errors retrieved from a request.
  */
 export const receiveError =
-	( response: ApiErrorResponse | null = null ) =>
-	( { dispatch }: CartThunkArgs ) => {
-		if ( ! isApiErrorResponse( response ) ) {
+	(response: ApiErrorResponse | null = null) =>
+	({ dispatch }: CartThunkArgs) => {
+		if (!isApiErrorResponse(response)) {
 			return;
 		}
-		if ( response.data?.cart ) {
-			dispatch.receiveCart( response?.data?.cart );
+		if (response.data?.cart) {
+			dispatch.receiveCart(response?.data?.cart);
 		}
 
-		dispatch.setErrorData( response );
+		dispatch.setErrorData(response);
 	};
 
 /**
@@ -138,21 +138,21 @@ export const receiveError =
  */
 const syncPrefersCollectionFromSelectedShippingRates = (
 	response: CartResponse,
-	registry?: CartThunkArgs[ 'registry' ]
+	registry?: CartThunkArgs['registry']
 ) => {
-	if ( ! registry ) {
+	if (!registry) {
 		return;
 	}
 
 	const selectedMethodIds = response.shipping_rates
-		?.flatMap( ( shippingPackage ) => shippingPackage.shipping_rates )
-		.filter( ( rate ) => rate.selected )
-		.map( ( rate ) => rate.method_id );
+		?.flatMap((shippingPackage) => shippingPackage.shipping_rates)
+		.filter((rate) => rate.selected)
+		.map((rate) => rate.method_id);
 
-	if ( selectedMethodIds?.length ) {
+	if (selectedMethodIds?.length) {
 		void registry
-			.dispatch( checkoutStore )
-			.setPrefersCollection( hasCollectableRate( selectedMethodIds ) );
+			.dispatch(checkoutStore)
+			.setPrefersCollection(hasCollectableRate(selectedMethodIds));
 	}
 };
 
@@ -162,69 +162,66 @@ const syncPrefersCollectionFromSelectedShippingRates = (
  * @param {Object} args The data to be posted to the endpoint
  */
 export const applyExtensionCartUpdate =
-	( args: ExtensionCartUpdateArgs ) =>
-	async ( { dispatch, registry }: CartThunkArgs ) => {
+	(args: ExtensionCartUpdateArgs) =>
+	async ({ dispatch, registry }: CartThunkArgs) => {
 		try {
-			const { response } = await apiFetchWithHeaders< {
+			const { response } = await apiFetchWithHeaders<{
 				response: CartResponse;
-			} >( {
+			}>({
 				path: '/wc/store/v1/cart/extensions',
 				method: 'POST',
 				data: { namespace: args.namespace, data: args.data },
 				cache: 'no-store',
-			} );
+			});
 			// Determine which addresses should be overwritten in the store.
 			const raw = args.overwriteDirtyCustomerData;
-			const overwrite = isObject( raw )
+			const overwrite = isObject(raw)
 				? {
 						shipping_address: raw.shipping_address === true,
 						billing_address: raw.billing_address === true,
-				  }
+					}
 				: {
 						shipping_address: raw === true,
 						billing_address: raw === true,
-				  };
+					};
 
 			const isDirty = getIsCustomerDataDirty();
 
 			// Decide per-address: include it unless it's dirty and not being overwritten.
-			const includeShipping = overwrite.shipping_address || ! isDirty;
-			const includeBilling = overwrite.billing_address || ! isDirty;
+			const includeShipping = overwrite.shipping_address || !isDirty;
+			const includeBilling = overwrite.billing_address || !isDirty;
 
-			if ( ! includeShipping || ! includeBilling ) {
+			if (!includeShipping || !includeBilling) {
 				const {
 					shipping_address: _shipping,
 					billing_address: _billing,
 					...responseWithoutAddresses
 				} = response;
 
-				const cartToReceive: Partial< CartResponse > = {
+				const cartToReceive: Partial<CartResponse> = {
 					...responseWithoutAddresses,
 				};
 
-				if ( includeShipping ) {
+				if (includeShipping) {
 					cartToReceive.shipping_address = response.shipping_address;
 				}
-				if ( includeBilling ) {
+				if (includeBilling) {
 					cartToReceive.billing_address = response.billing_address;
 				}
 
-				dispatch.receiveCart( cartToReceive );
+				dispatch.receiveCart(cartToReceive);
 				syncPrefersCollectionFromSelectedShippingRates(
 					response,
 					registry
 				);
 				return response;
 			}
-			dispatch.receiveCart( response );
-			syncPrefersCollectionFromSelectedShippingRates(
-				response,
-				registry
-			);
+			dispatch.receiveCart(response);
+			syncPrefersCollectionFromSelectedShippingRates(response, registry);
 			return response;
-		} catch ( error ) {
-			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
-			return Promise.reject( error );
+		} catch (error) {
+			dispatch.receiveError(isApiErrorResponse(error) ? error : null);
+			return Promise.reject(error);
 		}
 	};
 
@@ -236,21 +233,21 @@ export const applyExtensionCartUpdate =
  * @throws Will throw an error if there is an API problem.
  */
 export const syncCartWithIAPIStore =
-	( {
+	({
 		cartItemsPendingQuantity,
 		cartItemsPendingDelete,
 		productsPendingAdd,
-	}: QuantityChanges ) =>
-	async ( { dispatch, select }: CartThunkArgs ) => {
+	}: QuantityChanges) =>
+	async ({ dispatch, select }: CartThunkArgs) => {
 		try {
 			// Dispatch pending state actions to show loading indicators
 			// before fetching the updated cart data
 
 			// Set pending add states for new products
-			if ( productsPendingAdd && productsPendingAdd.length > 0 ) {
-				productsPendingAdd.forEach( ( productId ) => {
-					dispatch.setProductsPendingAdd( productId, true );
-				} );
+			if (productsPendingAdd && productsPendingAdd.length > 0) {
+				productsPendingAdd.forEach((productId) => {
+					dispatch.setProductsPendingAdd(productId, true);
+				});
 			}
 
 			// Set pending quantity states for items being updated
@@ -258,27 +255,27 @@ export const syncCartWithIAPIStore =
 				cartItemsPendingQuantity &&
 				cartItemsPendingQuantity.length > 0
 			) {
-				cartItemsPendingQuantity.forEach( ( cartItemKey ) => {
-					dispatch.itemIsPendingQuantity( cartItemKey, true );
-				} );
+				cartItemsPendingQuantity.forEach((cartItemKey) => {
+					dispatch.itemIsPendingQuantity(cartItemKey, true);
+				});
 			}
 
 			// Set pending delete states for items being removed
-			if ( cartItemsPendingDelete && cartItemsPendingDelete.length > 0 ) {
-				cartItemsPendingDelete.forEach( ( cartItemKey ) => {
-					dispatch.itemIsPendingDelete( cartItemKey, true );
-				} );
+			if (cartItemsPendingDelete && cartItemsPendingDelete.length > 0) {
+				cartItemsPendingDelete.forEach((cartItemKey) => {
+					dispatch.itemIsPendingDelete(cartItemKey, true);
+				});
 			}
 
-			const { response } = await apiFetchWithHeaders< {
+			const { response } = await apiFetchWithHeaders<{
 				response: CartResponse;
-			} >( {
+			}>({
 				path: '/wc/store/v1/cart',
 				method: 'GET',
 				cache: 'no-store',
-			} );
+			});
 
-			const cartResponse = camelCaseKeys( response ) as unknown as Cart;
+			const cartResponse = camelCaseKeys(response) as unknown as Cart;
 			const oldCart = select.getCartData();
 			const oldCartErrors = [
 				...oldCart.errors,
@@ -286,70 +283,70 @@ export const syncCartWithIAPIStore =
 			];
 
 			// Set data from the response.
-			setTriggerStoreSyncEvent( false );
-			dispatch.setCartData( cartResponse );
-			setTriggerStoreSyncEvent( true );
+			setTriggerStoreSyncEvent(false);
+			dispatch.setCartData(cartResponse);
+			setTriggerStoreSyncEvent(true);
 
 			// Clear pending states after updating cart data
-			if ( productsPendingAdd && productsPendingAdd.length > 0 ) {
-				productsPendingAdd.forEach( ( productId ) => {
-					dispatch.setProductsPendingAdd( productId, false );
-				} );
+			if (productsPendingAdd && productsPendingAdd.length > 0) {
+				productsPendingAdd.forEach((productId) => {
+					dispatch.setProductsPendingAdd(productId, false);
+				});
 			}
 
 			if (
 				cartItemsPendingQuantity &&
 				cartItemsPendingQuantity.length > 0
 			) {
-				cartItemsPendingQuantity.forEach( ( cartItemKey ) => {
-					dispatch.itemIsPendingQuantity( cartItemKey, false );
-				} );
+				cartItemsPendingQuantity.forEach((cartItemKey) => {
+					dispatch.itemIsPendingQuantity(cartItemKey, false);
+				});
 			}
 
-			if ( cartItemsPendingDelete && cartItemsPendingDelete.length > 0 ) {
-				cartItemsPendingDelete.forEach( ( cartItemKey ) => {
-					dispatch.itemIsPendingDelete( cartItemKey, false );
-				} );
+			if (cartItemsPendingDelete && cartItemsPendingDelete.length > 0) {
+				cartItemsPendingDelete.forEach((cartItemKey) => {
+					dispatch.itemIsPendingDelete(cartItemKey, false);
+				});
 			}
 
 			// Get the new cart data before showing updates.
 			const newCart = select.getCartData();
 
-			notifyQuantityChanges( {
+			notifyQuantityChanges({
 				oldCart,
 				newCart,
 				cartItemsPendingQuantity,
 				cartItemsPendingDelete,
 				productsPendingAdd,
-			} );
+			});
 
-			updateCartErrorNotices( newCart.errors, oldCartErrors );
-			dispatch.setErrorData( null );
-		} catch ( error ) {
+			updateCartErrorNotices(newCart.errors, oldCartErrors);
+			dispatch.setErrorData(null);
+		} catch (error) {
 			// Clear pending states on error as well
-			if ( productsPendingAdd && productsPendingAdd.length > 0 ) {
-				productsPendingAdd.forEach( ( productId ) => {
-					dispatch.setProductsPendingAdd( productId, false );
-				} );
+			if (productsPendingAdd && productsPendingAdd.length > 0) {
+				productsPendingAdd.forEach((productId) => {
+					dispatch.setProductsPendingAdd(productId, false);
+				});
 			}
 
 			if (
 				cartItemsPendingQuantity &&
 				cartItemsPendingQuantity.length > 0
 			) {
-				cartItemsPendingQuantity.forEach( ( cartItemKey ) => {
-					dispatch.itemIsPendingQuantity( cartItemKey, false );
-				} );
+				cartItemsPendingQuantity.forEach((cartItemKey) => {
+					dispatch.itemIsPendingQuantity(cartItemKey, false);
+				});
 			}
 
-			if ( cartItemsPendingDelete && cartItemsPendingDelete.length > 0 ) {
-				cartItemsPendingDelete.forEach( ( cartItemKey ) => {
-					dispatch.itemIsPendingDelete( cartItemKey, false );
-				} );
+			if (cartItemsPendingDelete && cartItemsPendingDelete.length > 0) {
+				cartItemsPendingDelete.forEach((cartItemKey) => {
+					dispatch.itemIsPendingDelete(cartItemKey, false);
+				});
 			}
 
-			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
-			return Promise.reject( error );
+			dispatch.receiveError(isApiErrorResponse(error) ? error : null);
+			return Promise.reject(error);
 		}
 	};
 
@@ -361,27 +358,27 @@ export const syncCartWithIAPIStore =
  * @throws            Will throw an error if there is an API problem.
  */
 export const applyCoupon =
-	( couponCode: string ) =>
-	async ( { dispatch }: CartThunkArgs ) => {
+	(couponCode: string) =>
+	async ({ dispatch }: CartThunkArgs) => {
 		try {
-			dispatch.receiveApplyingCoupon( couponCode );
-			const { response } = await apiFetchWithHeaders< {
+			dispatch.receiveApplyingCoupon(couponCode);
+			const { response } = await apiFetchWithHeaders<{
 				response: CartResponse;
-			} >( {
+			}>({
 				path: '/wc/store/v1/cart/apply-coupon',
 				method: 'POST',
 				data: {
 					code: couponCode,
 				},
 				cache: 'no-store',
-			} );
-			dispatch.receiveCartContents( response );
+			});
+			dispatch.receiveCartContents(response);
 			return response;
-		} catch ( error ) {
-			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
-			return Promise.reject( error );
+		} catch (error) {
+			dispatch.receiveError(isApiErrorResponse(error) ? error : null);
+			return Promise.reject(error);
 		} finally {
-			dispatch.receiveApplyingCoupon( '' );
+			dispatch.receiveApplyingCoupon('');
 		}
 	};
 
@@ -393,27 +390,27 @@ export const applyCoupon =
  * @throws            Will throw an error if there is an API problem.
  */
 export const removeCoupon =
-	( couponCode: string ) =>
-	async ( { dispatch }: CartThunkArgs ) => {
+	(couponCode: string) =>
+	async ({ dispatch }: CartThunkArgs) => {
 		try {
-			dispatch.receiveRemovingCoupon( couponCode );
-			const { response } = await apiFetchWithHeaders< {
+			dispatch.receiveRemovingCoupon(couponCode);
+			const { response } = await apiFetchWithHeaders<{
 				response: CartResponse;
-			} >( {
+			}>({
 				path: '/wc/store/v1/cart/remove-coupon',
 				method: 'POST',
 				data: {
 					code: couponCode,
 				},
 				cache: 'no-store',
-			} );
-			dispatch.receiveCartContents( response );
+			});
+			dispatch.receiveCartContents(response);
 			return response;
-		} catch ( error ) {
-			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
-			return Promise.reject( error );
+		} catch (error) {
+			dispatch.receiveError(isApiErrorResponse(error) ? error : null);
+			return Promise.reject(error);
 		} finally {
-			dispatch.receiveRemovingCoupon( '' );
+			dispatch.receiveRemovingCoupon('');
 		}
 	};
 
@@ -439,14 +436,14 @@ export const addItemToCart =
 		productId: number,
 		quantity = 1,
 		variation: Variation[],
-		additionalData: Record< string, unknown > = {}
+		additionalData: Record<string, unknown> = {}
 	) =>
-	async ( { dispatch }: CartThunkArgs ) => {
+	async ({ dispatch }: CartThunkArgs) => {
 		try {
-			dispatch.startAddingToCart( productId );
-			const { response } = await apiFetchWithHeaders< {
+			dispatch.startAddingToCart(productId);
+			const { response } = await apiFetchWithHeaders<{
 				response: CartResponse;
-			} >( {
+			}>({
 				path: `/wc/store/v1/cart/add-item`,
 				method: 'POST',
 				data: {
@@ -456,38 +453,38 @@ export const addItemToCart =
 					variation,
 				},
 				cache: 'no-store',
-			} );
-			dispatch.receiveCart( response );
-			dispatch.finishAddingToCart( productId );
+			});
+			dispatch.receiveCart(response);
+			dispatch.finishAddingToCart(productId);
 			return response;
-		} catch ( error ) {
-			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
+		} catch (error) {
+			dispatch.receiveError(isApiErrorResponse(error) ? error : null);
 
 			// Finish adding to cart, but don't dispatch the added to cart event.
-			dispatch.finishAddingToCart( productId, false );
-			return Promise.reject( error );
+			dispatch.finishAddingToCart(productId, false);
+			return Promise.reject(error);
 		}
 	};
 
 /**
  * Sets the metadata to show an item ID being added.
  */
-export function startAddingToCart( productId: number ) {
-	return async ( { dispatch }: CartThunkArgs ) => {
+export function startAddingToCart(productId: number) {
+	return async ({ dispatch }: CartThunkArgs) => {
 		triggerAddingToCartEvent();
-		dispatch.setProductsPendingAdd( productId, true );
+		dispatch.setProductsPendingAdd(productId, true);
 	};
 }
 
 /**
  * Removes the metadata of an item ID that was added.
  */
-export function finishAddingToCart( productId: number, dispatchEvent = true ) {
-	return async ( { dispatch }: CartThunkArgs ) => {
-		if ( dispatchEvent ) {
-			triggerAddedToCartEvent( { preserveCartData: true } );
+export function finishAddingToCart(productId: number, dispatchEvent = true) {
+	return async ({ dispatch }: CartThunkArgs) => {
+		if (dispatchEvent) {
+			triggerAddedToCartEvent({ preserveCartData: true });
 		}
-		dispatch.setProductsPendingAdd( productId, false );
+		dispatch.setProductsPendingAdd(productId, false);
 	};
 }
 
@@ -501,27 +498,27 @@ export function finishAddingToCart( productId: number, dispatchEvent = true ) {
  * @param {string} cartItemKey Cart item being updated.
  */
 export const removeItemFromCart =
-	( cartItemKey: string ) =>
-	async ( { dispatch }: CartThunkArgs ) => {
+	(cartItemKey: string) =>
+	async ({ dispatch }: CartThunkArgs) => {
 		try {
-			dispatch.itemIsPendingDelete( cartItemKey );
-			const { response } = await apiFetchWithHeaders< {
+			dispatch.itemIsPendingDelete(cartItemKey);
+			const { response } = await apiFetchWithHeaders<{
 				response: CartResponse;
-			} >( {
+			}>({
 				path: `/wc/store/v1/cart/remove-item`,
 				data: {
 					key: cartItemKey,
 				},
 				method: 'POST',
 				cache: 'no-store',
-			} );
-			dispatch.receiveCart( response );
+			});
+			dispatch.receiveCart(response);
 			return response;
-		} catch ( error ) {
-			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
-			return Promise.reject( error );
+		} catch (error) {
+			dispatch.receiveError(isApiErrorResponse(error) ? error : null);
+			return Promise.reject(error);
 		} finally {
-			dispatch.itemIsPendingDelete( cartItemKey, false );
+			dispatch.itemIsPendingDelete(cartItemKey, false);
 		}
 	};
 
@@ -543,7 +540,7 @@ export const removeItemFromCart =
  * @param {string} cartItemKey Cart item to save.
  */
 export const saveForLater =
-	( cartItemKey: string ) => async (): Promise< { key: string } > => {
+	(cartItemKey: string) => async (): Promise<{ key: string }> => {
 		if (
 			typeof cartItemKey !== 'string' ||
 			cartItemKey.trim().length === 0
@@ -555,23 +552,23 @@ export const saveForLater =
 				)
 			);
 		}
-		const { response } = await apiFetchWithHeaders< {
+		const { response } = await apiFetchWithHeaders<{
 			response: { key: string };
-		} >( {
+		}>({
 			path: '/wc/store/v1/shopper-lists/saved-for-later/items',
 			method: 'POST',
 			data: { cart_item_key: cartItemKey },
 			cache: 'no-store',
-		} );
+		});
 
 		window.dispatchEvent(
-			new CustomEvent( 'wc-blocks_store_sync_required', {
+			new CustomEvent('wc-blocks_store_sync_required', {
 				detail: {
 					type: 'shopper-list-item-added',
 					slug: 'saved-for-later',
 					item: response,
 				},
-			} )
+			})
 		);
 
 		return response;
@@ -580,7 +577,7 @@ export const saveForLater =
 /**
  * Tracks AbortControllers per cart item for cancelling in-flight quantity requests.
  */
-const quantityAbortControllers = new Map< string, AbortController >();
+const quantityAbortControllers = new Map<string, AbortController>();
 
 /**
  * Persists a quantity change for the specified cart item:
@@ -598,15 +595,15 @@ export const changeCartItemQuantity =
 		quantity: number
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- unclear how to represent multiple different yields as type
 	) =>
-	async ( { dispatch, select }: CartThunkArgs ) => {
-		const cartItem = select.getCartItem( cartItemKey );
-		if ( cartItem?.quantity === quantity ) {
+	async ({ dispatch, select }: CartThunkArgs) => {
+		const cartItem = select.getCartItem(cartItemKey);
+		if (cartItem?.quantity === quantity) {
 			return;
 		}
 
 		// Abort any existing in-flight request for this item.
-		const existingController = quantityAbortControllers.get( cartItemKey );
-		if ( existingController ) {
+		const existingController = quantityAbortControllers.get(cartItemKey);
+		if (existingController) {
 			existingController.abort();
 		}
 
@@ -615,15 +612,15 @@ export const changeCartItemQuantity =
 			typeof AbortController === 'undefined'
 				? null
 				: new AbortController();
-		if ( abortController ) {
-			quantityAbortControllers.set( cartItemKey, abortController );
+		if (abortController) {
+			quantityAbortControllers.set(cartItemKey, abortController);
 		}
 
 		try {
-			dispatch.itemIsPendingQuantity( cartItemKey );
-			const { response } = await apiFetchWithHeaders< {
+			dispatch.itemIsPendingQuantity(cartItemKey);
+			const { response } = await apiFetchWithHeaders<{
 				response: CartResponse;
-			} >( {
+			}>({
 				path: '/wc/store/v1/cart/update-item',
 				method: 'POST',
 				data: {
@@ -632,28 +629,23 @@ export const changeCartItemQuantity =
 				},
 				cache: 'no-store',
 				signal: abortController?.signal ?? null,
-			} );
+			});
 
-			dispatch.receiveCart( response );
+			dispatch.receiveCart(response);
 			return response;
-		} catch ( error ) {
+		} catch (error) {
 			// Don't treat aborted requests as errors - they were intentionally cancelled.
-			if (
-				error instanceof DOMException &&
-				error.name === 'AbortError'
-			) {
+			if (error instanceof DOMException && error.name === 'AbortError') {
 				return;
 			}
-			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
-			return Promise.reject( error );
+			dispatch.receiveError(isApiErrorResponse(error) ? error : null);
+			return Promise.reject(error);
 		} finally {
 			// Clean up controller if it's still the current one for this item.
-			if (
-				quantityAbortControllers.get( cartItemKey ) === abortController
-			) {
-				quantityAbortControllers.delete( cartItemKey );
+			if (quantityAbortControllers.get(cartItemKey) === abortController) {
+				quantityAbortControllers.delete(cartItemKey);
 			}
-			dispatch.itemIsPendingQuantity( cartItemKey, false );
+			dispatch.itemIsPendingQuantity(cartItemKey, false);
 		}
 	};
 
@@ -667,56 +659,56 @@ let abortController: AbortController | null = null;
  * @param {number | string} [packageId] The key of the packages that we will select within.
  */
 export const selectShippingRate =
-	( rateId: string, packageId: number | null = null ) =>
-	async ( { dispatch, select }: CartThunkArgs ) => {
+	(rateId: string, packageId: number | null = null) =>
+	async ({ dispatch, select }: CartThunkArgs) => {
 		const selectedShippingRate = select
 			.getShippingRates()
 			.find(
-				( shippingPackage: CartShippingRate ) =>
+				(shippingPackage: CartShippingRate) =>
 					shippingPackage.package_id === packageId
 			)
 			?.shipping_rates.find(
-				( rate: CartShippingPackageShippingRate ) =>
+				(rate: CartShippingPackageShippingRate) =>
 					rate.selected === true
 			);
 
-		if ( selectedShippingRate?.rate_id === rateId ) {
+		if (selectedShippingRate?.rate_id === rateId) {
 			// Early return here signifies that the rate is correctly selected.
 			// We might have some pending requests that will be trying to set it, so
 			// let's abort them just in case.
-			if ( abortController ) {
+			if (abortController) {
 				abortController.abort();
 			}
 			return;
 		}
 
-		if ( isEditor() ) {
+		if (isEditor()) {
 			return;
 		}
 
 		const previousRates: CartShippingRate[] = select.getShippingRates();
 
 		try {
-			dispatch.shippingRatesBeingSelected( true );
+			dispatch.shippingRatesBeingSelected(true);
 
 			// Optimistically update the selected flag so the UI (labels, totals)
 			// reflects the new rate immediately without waiting for the API.
-			dispatch.setCartData( {
-				shippingRates: previousRates.map( ( pkg ) => {
-					if ( packageId !== null && pkg.package_id !== packageId ) {
+			dispatch.setCartData({
+				shippingRates: previousRates.map((pkg) => {
+					if (packageId !== null && pkg.package_id !== packageId) {
 						return pkg;
 					}
 					return {
 						...pkg,
-						shipping_rates: pkg.shipping_rates.map( ( rate ) => ( {
+						shipping_rates: pkg.shipping_rates.map((rate) => ({
 							...rate,
 							selected: rate.rate_id === rateId,
-						} ) ),
+						})),
 					};
-				} ),
-			} );
+				}),
+			});
 
-			if ( abortController ) {
+			if (abortController) {
 				abortController.abort();
 			}
 			abortController =
@@ -724,9 +716,9 @@ export const selectShippingRate =
 					? null
 					: new AbortController();
 
-			const { response } = await apiFetchWithHeaders< {
+			const { response } = await apiFetchWithHeaders<{
 				response: CartResponse;
-			} >( {
+			}>({
 				path: `/wc/store/v1/cart/select-shipping-rate`,
 				method: 'POST',
 				data: {
@@ -735,7 +727,7 @@ export const selectShippingRate =
 				},
 				cache: 'no-store',
 				signal: abortController?.signal || null,
-			} );
+			});
 
 			// Remove shipping and billing address from the response, so we don't overwrite what the shopper is
 			// entering in the form if rates suddenly appear mid-edit.
@@ -745,15 +737,15 @@ export const selectShippingRate =
 				...rest
 			} = response;
 
-			dispatch.receiveCart( rest );
-			dispatch.shippingRatesBeingSelected( false );
+			dispatch.receiveCart(rest);
+			dispatch.shippingRatesBeingSelected(false);
 			return response;
-		} catch ( error ) {
+		} catch (error) {
 			// Roll back only this request's packages; other selections in the batch may have succeeded.
-			dispatch.setCartData( {
+			dispatch.setCartData({
 				shippingRates: select
 					.getShippingRates()
-					.map( ( pkg: CartShippingRate ) => {
+					.map((pkg: CartShippingRate) => {
 						if (
 							packageId !== null &&
 							pkg.package_id !== packageId
@@ -762,16 +754,16 @@ export const selectShippingRate =
 						}
 						return (
 							previousRates.find(
-								( previousPackage ) =>
+								(previousPackage) =>
 									previousPackage.package_id ===
 									pkg.package_id
 							) ?? pkg
 						);
-					} ),
-			} );
-			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
-			dispatch.shippingRatesBeingSelected( false );
-			return Promise.reject( error );
+					}),
+			});
+			dispatch.receiveError(isApiErrorResponse(error) ? error : null);
+			dispatch.shippingRatesBeingSelected(false);
+			return Promise.reject(error);
 		}
 	};
 
@@ -781,44 +773,44 @@ export const selectShippingRate =
 export const updateCustomerData =
 	(
 		// Address data to be updated; can contain both billing_address and shipping_address.
-		customerData: Partial< BillingAddressShippingAddress >,
+		customerData: Partial<BillingAddressShippingAddress>,
 		// If the address is being edited, we don't update the customer data in the store from the response.
 		editing = true,
 		haveAddressFieldsForShippingRatesChanged = false
 	) =>
-	async ( { dispatch }: CartThunkArgs ) => {
+	async ({ dispatch }: CartThunkArgs) => {
 		try {
-			dispatch.updatingCustomerData( true );
+			dispatch.updatingCustomerData(true);
 			// Signal that the fields needed for shipping rate calculations have changed
 			if (
 				'shipping_address' in customerData &&
 				haveAddressFieldsForShippingRatesChanged
 			) {
-				dispatch.updatingAddressFieldsForShippingRates( true );
+				dispatch.updatingAddressFieldsForShippingRates(true);
 			}
 
-			const { response } = await apiFetchWithHeaders< {
+			const { response } = await apiFetchWithHeaders<{
 				response: CartResponse;
-			} >( {
+			}>({
 				path: '/wc/store/v1/cart/update-customer',
 				method: 'POST',
 				data: customerData,
 				cache: 'no-store',
-			} );
-			if ( editing ) {
-				dispatch.receiveCartContents( response );
+			});
+			if (editing) {
+				dispatch.receiveCartContents(response);
 			} else {
-				dispatch.receiveCart( response );
+				dispatch.receiveCart(response);
 			}
-			setIsCustomerDataDirty( false );
+			setIsCustomerDataDirty(false);
 			return response;
-		} catch ( error ) {
-			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
-			setIsCustomerDataDirty( true );
-			return Promise.reject( error );
+		} catch (error) {
+			dispatch.receiveError(isApiErrorResponse(error) ? error : null);
+			setIsCustomerDataDirty(true);
+			return Promise.reject(error);
 		} finally {
-			dispatch.updatingCustomerData( false );
-			dispatch.updatingAddressFieldsForShippingRates( false );
+			dispatch.updatingCustomerData(false);
+			dispatch.updatingAddressFieldsForShippingRates(false);
 		}
 	};
 

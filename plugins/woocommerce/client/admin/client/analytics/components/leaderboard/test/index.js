@@ -25,7 +25,7 @@ const headers = [
 	},
 ];
 
-const rows = mockData.map( ( row ) => {
+const rows = mockData.map((row) => {
 	const {
 		name,
 		items_sold: itemsSold,
@@ -48,66 +48,66 @@ const rows = mockData.map( ( row ) => {
 			format: 'number',
 		},
 		{
-			display: `<span class="woocommerce-Price-currencySymbol">${ netRevenue }</span>`,
+			display: `<span class="woocommerce-Price-currencySymbol">${netRevenue}</span>`,
 			value: netRevenue,
 			format: 'currency',
 		},
 	];
-} );
+});
 
-describe( 'Leaderboard', () => {
-	test( 'should render empty message when there are no rows', () => {
+describe('Leaderboard', () => {
+	test('should render empty message when there are no rows', () => {
 		render(
 			<Leaderboard
 				id="products"
-				title={ '' }
-				headers={ [] }
-				rows={ [] }
-				totalRows={ 5 }
+				title={''}
+				headers={[]}
+				rows={[]}
+				totalRows={5}
 			/>
 		);
 
 		expect(
-			screen.getByText( 'No data recorded for the selected time period.' )
+			screen.getByText('No data recorded for the selected time period.')
 		).toBeInTheDocument();
-	} );
+	});
 
-	test( 'should render the headers', () => {
+	test('should render the headers', () => {
 		render(
 			<Leaderboard
 				id="products"
-				title={ '' }
-				headers={ headers }
-				rows={ rows }
-				totalRows={ 5 }
+				title={''}
+				headers={headers}
+				rows={rows}
+				totalRows={5}
 			/>
 		);
 
-		expect( screen.getByText( 'Name' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'Items sold' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'Orders' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'Net sales' ) ).toBeInTheDocument();
-	} );
+		expect(screen.getByText('Name')).toBeInTheDocument();
+		expect(screen.getByText('Items sold')).toBeInTheDocument();
+		expect(screen.getByText('Orders')).toBeInTheDocument();
+		expect(screen.getByText('Net sales')).toBeInTheDocument();
+	});
 
-	test( 'should render formatted data in the table', () => {
+	test('should render formatted data in the table', () => {
 		render(
 			<Leaderboard
 				id="products"
-				title={ '' }
-				headers={ headers }
-				rows={ rows }
-				totalRows={ 5 }
+				title={''}
+				headers={headers}
+				rows={rows}
+				totalRows={5}
 			/>
 		);
 
-		expect( screen.getAllByRole( 'row' ) ).toHaveLength( 6 );
-		expect( screen.getByText( 'awesome shirt' ) ).toBeInTheDocument();
-		expect( screen.getByText( '123,456,789' ) ).toBeInTheDocument();
-		expect( screen.getByText( '54' ) ).toBeInTheDocument();
-		expect( screen.getByText( '$9,876,543.22' ) ).toBeInTheDocument();
-	} );
+		expect(screen.getAllByRole('row')).toHaveLength(6);
+		expect(screen.getByText('awesome shirt')).toBeInTheDocument();
+		expect(screen.getByText('123,456,789')).toBeInTheDocument();
+		expect(screen.getByText('54')).toBeInTheDocument();
+		expect(screen.getByText('$9,876,543.22')).toBeInTheDocument();
+	});
 
-	test( 'should format data according to the currency context', () => {
+	test('should format data according to the currency context', () => {
 		const currencySetting = {
 			code: 'PLN',
 			decimalSeparator: ',',
@@ -119,25 +119,25 @@ describe( 'Leaderboard', () => {
 
 		render(
 			<CurrencyContext.Provider
-				value={ new CurrencyFactory( currencySetting ) }
+				value={new CurrencyFactory(currencySetting)}
 			>
 				<Leaderboard
 					id="products"
-					title={ '' }
-					headers={ headers }
-					rows={ rows }
-					totalRows={ 5 }
+					title={''}
+					headers={headers}
+					rows={rows}
+					totalRows={5}
 				/>
 			</CurrencyContext.Provider>
 		);
 
-		expect( screen.getByText( 'awesome shirt' ) ).toBeInTheDocument();
-		expect( screen.getByText( '123.456.789' ) ).toBeInTheDocument();
-		expect( screen.getByText( '54' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'zł 9.876.543,215' ) ).toBeInTheDocument();
-	} );
+		expect(screen.getByText('awesome shirt')).toBeInTheDocument();
+		expect(screen.getByText('123.456.789')).toBeInTheDocument();
+		expect(screen.getByText('54')).toBeInTheDocument();
+		expect(screen.getByText('zł 9.876.543,215')).toBeInTheDocument();
+	});
 
-	test( `should not format data that is not specified in a format or doesn't conform to a number value`, () => {
+	test(`should not format data that is not specified in a format or doesn't conform to a number value`, () => {
 		const columns = [
 			{
 				display: 'awesome shirt',
@@ -169,19 +169,19 @@ describe( 'Leaderboard', () => {
 		render(
 			<Leaderboard
 				id="products"
-				title={ '' }
-				headers={ columns.map( ( _, i ) => ( {
+				title={''}
+				headers={columns.map((_, i) => ({
 					label: i.toString(),
-				} ) ) }
-				rows={ [ columns ] }
-				totalRows={ 5 }
+				}))}
+				rows={[columns]}
+				totalRows={5}
 			/>
 		);
 
-		expect( screen.getByText( 'awesome shirt' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'awesome pants' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'awesome hat' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'awesome sticker' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'awesome button' ) ).toBeInTheDocument();
-	} );
-} );
+		expect(screen.getByText('awesome shirt')).toBeInTheDocument();
+		expect(screen.getByText('awesome pants')).toBeInTheDocument();
+		expect(screen.getByText('awesome hat')).toBeInTheDocument();
+		expect(screen.getByText('awesome sticker')).toBeInTheDocument();
+		expect(screen.getByText('awesome button')).toBeInTheDocument();
+	});
+});

@@ -40,83 +40,78 @@ const ICONS = {
 	caret,
 };
 
-export default function Edit( { attributes, setAttributes } ) {
+export default function Edit({ attributes, setAttributes }) {
 	const { level, title, textAlign, icon, iconPosition, levelOptions } =
 		attributes;
 	const TagName = 'h' + level;
 
 	const blockProps = useBlockProps();
-	const borderProps = useBorderProps( attributes );
-	const colorProps = useColorProps( attributes );
-	const spacingProps = useSpacingProps( attributes );
-	const shadowProps = useShadowProps( attributes );
+	const borderProps = useBorderProps(attributes);
+	const colorProps = useColorProps(attributes);
+	const spacingProps = useSpacingProps(attributes);
+	const shadowProps = useShadowProps(attributes);
 
-	const Icon = ICONS[ icon ];
+	const Icon = ICONS[icon];
 
 	return (
 		<>
 			<BlockControls>
 				<ToolbarGroup>
 					<HeadingLevelDropdown
-						value={ level }
-						options={ levelOptions }
-						onChange={ ( newLevel ) =>
-							setAttributes( { level: newLevel } )
+						value={level}
+						options={levelOptions}
+						onChange={(newLevel) =>
+							setAttributes({ level: newLevel })
 						}
 					/>
 				</ToolbarGroup>
 			</BlockControls>
 			<InspectorControls key="setting">
-				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
+				<PanelBody title={__('Settings', 'woocommerce')}>
 					<ToggleGroupControl
 						__nextHasNoMarginBottom
 						__next40pxDefaultSize
 						isBlock
-						label={ __( 'Icon', 'woocommerce' ) }
-						value={ icon }
-						onChange={ ( value ) =>
-							setAttributes( { icon: value } )
-						}
+						label={__('Icon', 'woocommerce')}
+						value={icon}
+						onChange={(value) => setAttributes({ icon: value })}
 					>
 						<ToggleGroupControlOptionIcon
 							label="Plus"
-							icon={ plus }
+							icon={plus}
 							value="plus"
 						/>
 						<ToggleGroupControlOptionIcon
 							label="Chevron"
-							icon={ chevron }
+							icon={chevron}
 							value="chevron"
 						/>
 						<ToggleGroupControlOptionIcon
 							label="Circle Plus"
-							icon={ circlePlus }
+							icon={circlePlus}
 							value="circlePlus"
 						/>
 						<ToggleGroupControlOptionIcon
 							label="Caret"
-							icon={ caret }
+							icon={caret}
 							value="caret"
 						/>
 						<ToggleGroupControlOptionIcon
 							label="Chevron Right"
-							icon={ chevronRight }
+							icon={chevronRight}
 							value="chevronRight"
 						/>
-						<ToggleGroupControlOption
-							label="None"
-							value={ false }
-						/>
+						<ToggleGroupControlOption label="None" value={false} />
 					</ToggleGroupControl>
 					<ToggleGroupControl
 						__nextHasNoMarginBottom
 						__next40pxDefaultSize
 						isBlock
-						label={ __( 'Icon Position', 'woocommerce' ) }
-						value={ iconPosition }
-						onChange={ ( value ) => {
-							setAttributes( { iconPosition: value } );
-						} }
+						label={__('Icon Position', 'woocommerce')}
+						value={iconPosition}
+						onChange={(value) => {
+							setAttributes({ iconPosition: value });
+						}}
 					>
 						<ToggleGroupControlOption label="Left" value="left" />
 						<ToggleGroupControlOption label="Right" value="right" />
@@ -124,56 +119,56 @@ export default function Edit( { attributes, setAttributes } ) {
 				</PanelBody>
 			</InspectorControls>
 			<TagName
-				{ ...blockProps }
-				className={ clsx(
+				{...blockProps}
+				className={clsx(
 					blockProps.className,
 					colorProps.className,
 					borderProps.className,
 					'accordion-item__heading',
 					{
-						[ `has-custom-font-size` ]: blockProps.style.fontSize,
-						[ `icon-position-left` ]: iconPosition === 'left',
-						[ `has-text-align-${ textAlign }` ]: textAlign,
+						[`has-custom-font-size`]: blockProps.style.fontSize,
+						[`icon-position-left`]: iconPosition === 'left',
+						[`has-text-align-${textAlign}`]: textAlign,
 					}
-				) }
-				style={ {
+				)}
+				style={{
 					...borderProps.style,
 					...colorProps.style,
 					...shadowProps.style,
-				} }
+				}}
 			>
 				<button
-					className={ clsx( 'accordion-item__toggle' ) }
-					style={ {
+					className={clsx('accordion-item__toggle')}
+					style={{
 						...spacingProps.style,
-					} }
+					}}
 				>
 					<RichText
-						allowedFormats={ [
+						allowedFormats={[
 							'core/bold',
 							'core/italic',
 							'core/image',
 							'core/strikethrough',
-						] }
+						]}
 						disableLineBreaks
 						tagName="span"
-						value={ title }
-						onChange={ ( newTitle ) =>
-							setAttributes( { title: newTitle } )
+						value={title}
+						onChange={(newTitle) =>
+							setAttributes({ title: newTitle })
 						}
-						placeholder={ __( 'Accordion title', 'woocommerce' ) }
+						placeholder={__('Accordion title', 'woocommerce')}
 					/>
 					<span
-						className={ clsx( `accordion-item__toggle-icon`, {
-							[ `has-icon-${ icon }` ]: icon,
-						} ) }
-						style={ {
+						className={clsx(`accordion-item__toggle-icon`, {
+							[`has-icon-${icon}`]: icon,
+						})}
+						style={{
 							// TO-DO: make this configurable
 							width: `1.2em`,
 							height: `1.2em`,
-						} }
+						}}
 					>
-						{ Icon && <Icon width="1.2em" height="1.2em" /> }
+						{Icon && <Icon width="1.2em" height="1.2em" />}
 					</span>
 				</button>
 			</TagName>

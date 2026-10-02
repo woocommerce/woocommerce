@@ -16,15 +16,15 @@ import { TermsOfService } from '~/task-lists/components/terms-of-service';
 export const Card = () => {
 	return (
 		<PartnerCard
-			name={ __( 'WooCommerce Tax', 'woocommerce' ) }
-			logo={ logo }
-			description={ __(
+			name={__('WooCommerce Tax', 'woocommerce')}
+			logo={logo}
+			description={__(
 				'WooCommerce Tax, recommended for new stores',
 				'woocommerce'
-			) }
-			benefits={ [
-				__( 'Real-time sales tax calculation', 'woocommerce' ),
-				interpolateComponents( {
+			)}
+			benefits={[
+				__('Real-time sales tax calculation', 'woocommerce'),
+				interpolateComponents({
 					mixedString: __(
 						'{{strong}}Single{{/strong}} economic nexus compliance',
 						'woocommerce'
@@ -32,24 +32,24 @@ export const Card = () => {
 					components: {
 						strong: <strong />,
 					},
-				} ),
+				}),
 				// eslint-disable-next-line @wordpress/i18n-translator-comments
-				__( '100% free', 'woocommerce' ),
-			] }
+				__('100% free', 'woocommerce'),
+			]}
 			terms={
 				<TermsOfService
-					buttonText={ __( 'Continue setup', 'woocommerce' ) }
+					buttonText={__('Continue setup', 'woocommerce')}
 				/>
 			}
-			actionText={ __( 'Continue setup', 'woocommerce' ) }
-			onClick={ () => {
-				recordEvent( 'tasklist_tax_select_option', {
+			actionText={__('Continue setup', 'woocommerce')}
+			onClick={() => {
+				recordEvent('tasklist_tax_select_option', {
 					selected_option: 'woocommerce-tax',
-				} );
-				updateQueryString( {
+				});
+				updateQueryString({
 					partner: 'woocommerce-tax',
-				} );
-			} }
+				});
+			}}
 		/>
 	);
 };

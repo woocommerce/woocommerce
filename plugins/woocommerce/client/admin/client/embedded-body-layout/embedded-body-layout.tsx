@@ -24,7 +24,7 @@ type QueryParams = EmbeddedBodyProps;
 function isWPPage(
 	params: QueryParams | QueryString.ParsedQs
 ): params is QueryParams {
-	return ( params as QueryParams ).page !== undefined;
+	return (params as QueryParams).page !== undefined;
 }
 
 const EMBEDDED_BODY_COMPONENT_LIST: React.ElementType[] = [
@@ -40,13 +40,13 @@ const EMBEDDED_BODY_COMPONENT_LIST: React.ElementType[] = [
  * Each Fill component receives QueryParams, consisting of a page, tab, and section string.
  */
 export const EmbeddedBodyLayout = () => {
-	useEffect( () => {
+	useEffect(() => {
 		triggerExitPageCesSurvey();
-	}, [] );
+	}, []);
 
-	const query = parse( location.search.substring( 1 ) );
+	const query = parse(location.search.substring(1));
 	let queryParams: QueryParams = { page: '', tab: '' };
-	if ( isWPPage( query ) ) {
+	if (isWPPage(query)) {
 		queryParams = query;
 	}
 	/**
@@ -60,17 +60,17 @@ export const EmbeddedBodyLayout = () => {
 		'woocommerce_admin_embedded_layout_components',
 		EMBEDDED_BODY_COMPONENT_LIST,
 		queryParams
-	) as React.ElementType< EmbeddedBodyProps >[];
+	) as React.ElementType<EmbeddedBodyProps>[];
 
 	return (
-		<LayoutContextProvider value={ getLayoutContextValue( [ 'page' ] ) }>
+		<LayoutContextProvider value={getLayoutContextValue(['page'])}>
 			<div
 				className="woocommerce-embedded-layout__primary"
 				id="woocommerce-embedded-layout__primary"
 			>
-				{ componentList.map( ( Comp, index ) => {
-					return <Comp key={ index } { ...queryParams } />;
-				} ) }
+				{componentList.map((Comp, index) => {
+					return <Comp key={index} {...queryParams} />;
+				})}
 			</div>
 		</LayoutContextProvider>
 	);

@@ -31,152 +31,150 @@ import { DisplayStyle, IconStyle } from './types';
 
 interface BlockSettingsProps {
 	attributes: BlockAttributes;
-	setAttributes: ( attrs: BlockAttributes ) => void;
+	setAttributes: (attrs: BlockAttributes) => void;
 }
 
 const AccountSettingsLink = () => {
-	const accountSettingsUrl = `${ getSetting(
+	const accountSettingsUrl = `${getSetting(
 		'adminUrl'
-	) }admin.php?page=wc-settings&tab=account`;
+	)}admin.php?page=wc-settings&tab=account`;
 
 	const linkText = createInterpolateElement(
-		`<a>${ __( 'Manage account settings', 'woocommerce' ) }</a>`,
+		`<a>${__('Manage account settings', 'woocommerce')}</a>`,
 		{
-			a: <ExternalLink href={ accountSettingsUrl } />,
+			a: <ExternalLink href={accountSettingsUrl} />,
 		}
 	);
 
 	return (
-		<div className="wc-block-editor-customer-account__link">
-			{ linkText }
-		</div>
+		<div className="wc-block-editor-customer-account__link">{linkText}</div>
 	);
 };
 
-export const BlockSettings = ( {
+export const BlockSettings = ({
 	attributes,
 	setAttributes,
-}: BlockSettingsProps ) => {
+}: BlockSettingsProps) => {
 	const { displayStyle, iconStyle } = attributes;
 	const displayIconStyleSelector = [
 		DisplayStyle.ICON_ONLY,
 		DisplayStyle.ICON_AND_TEXT,
-	].includes( displayStyle );
+	].includes(displayStyle);
 
 	return (
 		<InspectorControls key="inspector">
 			<PanelBody>
 				<AccountSettingsLink />
 			</PanelBody>
-			<PanelBody title={ __( 'Display settings', 'woocommerce' ) }>
+			<PanelBody title={__('Display settings', 'woocommerce')}>
 				<SelectControl
 					__next40pxDefaultSize
 					__nextHasNoMarginBottom
 					className="customer-account-display-style"
-					label={ __( 'Icon options', 'woocommerce' ) }
-					value={ displayStyle }
-					onChange={ ( value: DisplayStyle ) => {
-						setAttributes( { displayStyle: value } );
-					} }
-					help={ __(
+					label={__('Icon options', 'woocommerce')}
+					value={displayStyle}
+					onChange={(value: DisplayStyle) => {
+						setAttributes({ displayStyle: value });
+					}}
+					help={__(
 						'Choose if you want to include an icon with the customer account link.',
 						'woocommerce'
-					) }
-					options={ [
+					)}
+					options={[
 						{
 							value: DisplayStyle.ICON_AND_TEXT,
-							label: __( 'Icon and text', 'woocommerce' ),
+							label: __('Icon and text', 'woocommerce'),
 						},
 						{
 							value: DisplayStyle.TEXT_ONLY,
-							label: __( 'Text-only', 'woocommerce' ),
+							label: __('Text-only', 'woocommerce'),
 						},
 						{
 							value: DisplayStyle.ICON_ONLY,
-							label: __( 'Icon-only', 'woocommerce' ),
+							label: __('Icon-only', 'woocommerce'),
 						},
-					] }
+					]}
 				/>
-				{ displayIconStyleSelector ? (
+				{displayIconStyleSelector ? (
 					<ToggleGroupControl
 						__next40pxDefaultSize
 						__nextHasNoMarginBottom
-						label={ __( 'Display Style', 'woocommerce' ) }
+						label={__('Display Style', 'woocommerce')}
 						isBlock
-						value={ iconStyle }
-						onChange={ ( value: IconStyle ) =>
-							setAttributes( {
+						value={iconStyle}
+						onChange={(value: IconStyle) =>
+							setAttributes({
 								iconStyle: value,
-							} )
+							})
 						}
-						help={ __(
+						help={__(
 							'When a logged-in customer has a profile photo, it replaces the icon.',
 							'woocommerce'
-						) }
+						)}
 						className="wc-block-editor-customer-account__icon-style-toggle"
 					>
 						<ToggleGroupControlOption
-							value={ IconStyle.LINE }
+							value={IconStyle.LINE}
 							label={
 								<Icon
-									icon={ customerAccountStyleLine }
-									size={ 32 }
-									className={ clsx(
+									icon={customerAccountStyleLine}
+									size={32}
+									className={clsx(
 										'wc-block-editor-customer-account__icon-option',
 										{
 											active:
 												iconStyle === IconStyle.LINE,
 										}
-									) }
+									)}
 								/>
 							}
 						/>
 						<ToggleGroupControlOption
-							value={ IconStyle.DEFAULT }
+							value={IconStyle.DEFAULT}
 							label={
 								<Icon
-									icon={ customerAccountStyle }
-									size={ 32 }
-									className={ clsx(
+									icon={customerAccountStyle}
+									size={32}
+									className={clsx(
 										'wc-block-editor-customer-account__icon-option',
 										{
 											active:
 												iconStyle === IconStyle.DEFAULT,
 										}
-									) }
+									)}
 								/>
 							}
 						/>
 						<ToggleGroupControlOption
-							value={ IconStyle.ALT }
+							value={IconStyle.ALT}
 							label={
 								<Icon
-									icon={ customerAccountStyleAlt }
-									size={ 32 }
-									className={ clsx(
+									icon={customerAccountStyleAlt}
+									size={32}
+									className={clsx(
 										'wc-block-editor-customer-account__icon-option',
 										{
 											active: iconStyle === IconStyle.ALT,
 										}
-									) }
+									)}
 								/>
 							}
 						/>
 					</ToggleGroupControl>
-				) : null }
+				) : null}
 				<ToggleControl
 					__nextHasNoMarginBottom
-					label={ __( 'Show dropdown navigation', 'woocommerce' ) }
-					help={ __(
+					label={__('Show dropdown navigation', 'woocommerce')}
+					help={__(
 						'Display a dropdown menu with account navigation links when clicked.',
 						'woocommerce'
-					) }
-					checked={ attributes.hasDropdownNavigation ?? false }
-					onChange={ ( value: boolean ) => {
-						setAttributes( {
+					)}
+					checked={attributes.hasDropdownNavigation ?? false}
+					onChange={(value: boolean) => {
+						setAttributes({
 							hasDropdownNavigation: value,
-						} );
-					} }
+						});
+					}}
 				/>
 			</PanelBody>
 		</InspectorControls>

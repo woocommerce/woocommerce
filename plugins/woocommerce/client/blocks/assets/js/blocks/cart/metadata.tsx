@@ -7,21 +7,21 @@ import { cart } from '@woocommerce/icons';
 import { Icon } from '@wordpress/icons';
 
 export const metadata: BlockConfiguration = {
-	title: __( 'Cart', 'woocommerce' ),
+	title: __('Cart', 'woocommerce'),
 	apiVersion: 3,
 	icon: {
 		src: (
 			<Icon
-				icon={ cart }
+				icon={cart}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
 	},
 	category: 'woocommerce',
-	keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
-	description: __( 'Shopping cart.', 'woocommerce' ),
+	keywords: [__('WooCommerce', 'woocommerce')],
+	description: __('Shopping cart.', 'woocommerce'),
 	supports: {
-		align: [ 'wide' ],
+		align: ['wide'],
 		html: false,
 		multiple: false,
 	},

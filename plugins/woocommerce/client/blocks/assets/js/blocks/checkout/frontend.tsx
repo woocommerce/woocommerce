@@ -19,49 +19,49 @@ import Block from './block';
 import { blockName, blockAttributes } from './attributes';
 import metadata from './block.json';
 
-const getProps = ( el: Element ) => {
+const getProps = (el: Element) => {
 	return {
 		attributes: getValidBlockAttributes(
 			{ ...metadata.attributes, ...blockAttributes },
 			/* eslint-disable @typescript-eslint/no-explicit-any */
-			( el instanceof HTMLElement ? el.dataset : {} ) as any
+			(el instanceof HTMLElement ? el.dataset : {}) as any
 		),
 	};
 };
 
-const Wrapper = ( {
+const Wrapper = ({
 	children,
 }: {
 	children: React.ReactChildren;
-} ): React.ReactNode => {
+}): React.ReactNode => {
 	// we need to pluck out receiveCart.
 	// eslint-disable-next-line no-unused-vars
 	const { extensions, receiveCart, ...cart } = useStoreCart();
 	const checkoutExtensionData = useCheckoutExtensionData();
 	const validation = useValidation();
-	return Children.map( children, ( child ) => {
-		if ( isValidElement( child ) ) {
+	return Children.map(children, (child) => {
+		if (isValidElement(child)) {
 			const componentProps = {
 				extensions,
 				cart,
 				checkoutExtensionData,
 				validation,
 			};
-			return cloneElement( child, componentProps );
+			return cloneElement(child, componentProps);
 		}
 		return child;
-	} );
+	});
 };
 
-renderParentBlock( {
+renderParentBlock({
 	Block,
 	blockName,
 	selector:
 		'.wp-block-woocommerce-checkout[data-block-name="woocommerce/checkout"]',
 	getProps,
-	blockMap: getRegisteredBlockComponents( blockName ),
+	blockMap: getRegisteredBlockComponents(blockName),
 	blockWrapper: Wrapper,
 	options: {
 		multiple: metadata.supports.multiple,
 	},
-} );
+});

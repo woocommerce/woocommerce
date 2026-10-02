@@ -5,14 +5,14 @@
 $white: #fff;
 
 // Grays
-$gray:                   #87a6bc;
-$gray-light:             lighten($gray, 33%); //#f3f6f8
-$gray-dark:              darken($gray, 38%); //#2e4453
+$gray: #87a6bc;
+$gray-light: lighten($gray, 33%); //#f3f6f8
+$gray-dark: darken($gray, 38%); //#2e4453
 
 // $gray-text: ideal for standard, non placeholder text
 // $gray-text-min: minimum contrast needed for WCAG 2.0 AA on white background
-$gray-text:              $gray-dark;
-$gray-text-min:          darken($gray, 18%); //#537994
+$gray-text: $gray-dark;
+$gray-text-min: darken($gray, 18%); //#537994
 
 $admin-theme-color: var(--wp-admin-theme-color);
 
@@ -20,13 +20,11 @@ $admin-theme-color: var(--wp-admin-theme-color);
   Tab navigation
 ------------------------------------------------------------------------------*/
 .wc-helper {
-
 	.nav-tab-wrapper {
 		margin-bottom: 22px;
 	}
 
 	@media only screen and (max-width: 784px) {
-
 		.nav-tab {
 			max-width: 40%;
 			overflow: hidden;
@@ -35,13 +33,11 @@ $admin-theme-color: var(--wp-admin-theme-color);
 	}
 }
 
-
 /*------------------------------------------------------------------------------
   Buttons
 ------------------------------------------------------------------------------*/
 
 .wc-helper {
-
 	.button,
 	.button:hover,
 	.button:focus,
@@ -108,7 +104,6 @@ $admin-theme-color: var(--wp-admin-theme-color);
 		}
 
 		&:first-of-type {
-
 			&::before {
 				display: none;
 			}
@@ -164,7 +159,6 @@ $admin-theme-color: var(--wp-admin-theme-color);
 		}
 
 		li {
-
 			&::before {
 				display: none;
 			}
@@ -197,7 +191,6 @@ $admin-theme-color: var(--wp-admin-theme-color);
 			}
 		}
 	}
-
 }
 
 /*------------------------------------------------------------------------------
@@ -205,7 +198,6 @@ $admin-theme-color: var(--wp-admin-theme-color);
 ------------------------------------------------------------------------------*/
 
 .wc-helper {
-
 	.subscriptions-header {
 		margin: 3em 0 0;
 		position: relative;
@@ -216,7 +208,6 @@ $admin-theme-color: var(--wp-admin-theme-color);
 			line-height: 25px;
 			margin: 0 0 1.5em 0;
 		}
-
 	}
 
 	.button-update,
@@ -344,7 +335,6 @@ $admin-theme-color: var(--wp-admin-theme-color);
 	.user-info:hover,
 	.user-info:focus,
 	.user-info:active {
-
 		header .dashicons {
 			transform: rotateX(180deg);
 		}
@@ -360,7 +350,6 @@ $admin-theme-color: var(--wp-admin-theme-color);
 ------------------------------------------------------------------------------*/
 
 .wc-helper {
-
 	.striped > tbody > :nth-child(odd),
 	ul.striped > :nth-child(odd),
 	.alternate {
@@ -401,7 +390,6 @@ $admin-theme-color: var(--wp-admin-theme-color);
 	}
 
 	.button {
-
 		@media only screen and (max-width: 782px) {
 			font-size: 11px;
 		}
@@ -428,7 +416,6 @@ $admin-theme-color: var(--wp-admin-theme-color);
 		}
 
 		&.is-ext-header {
-
 			td {
 				border-top: 1px solid #e1e1e1;
 			}
@@ -570,7 +557,6 @@ $admin-theme-color: var(--wp-admin-theme-color);
 
 	.wp-list-table__ext-updates,
 	.wp-list-table__ext-licence {
-
 		td {
 			position: relative;
 
@@ -587,7 +573,6 @@ $admin-theme-color: var(--wp-admin-theme-color);
 
 		td.wp-list-table__ext-status,
 		td.wp-list-table__licence-container {
-
 			&::before {
 				left: 22px !important;
 				width: auto !important;
@@ -675,7 +660,6 @@ $admin-theme-color: var(--wp-admin-theme-color);
 	}
 
 	.wp-list-table__licence-label {
-
 		label {
 			color: #23282d;
 			font-weight: 600;
@@ -684,7 +668,6 @@ $admin-theme-color: var(--wp-admin-theme-color);
 	}
 
 	.wp-list-table__licence-field {
-
 		input {
 			height: 32px;
 
@@ -722,7 +705,6 @@ $admin-theme-color: var(--wp-admin-theme-color);
 ------------------------------------------------------------------------------*/
 
 .wc-helper {
-
 	td.color-bar {
 		border-left: solid 4px transparent;
 	}
@@ -749,7 +731,6 @@ $admin-theme-color: var(--wp-admin-theme-color);
 ------------------------------------------------------------------------------*/
 
 .wc-helper {
-
 	.connect-wrapper {
 		background-color: #fff;
 		border: 1px solid #e5e5e5;
@@ -832,7 +813,6 @@ $admin-theme-color: var(--wp-admin-theme-color);
 				&.active {
 					display: block;
 				}
-
 			}
 		}
 	}
@@ -843,7 +823,6 @@ $admin-theme-color: var(--wp-admin-theme-color);
 ------------------------------------------------------------------------------*/
 
 .wc-helper {
-
 	.start-container {
 		background-color: #fff;
 		border-left: 4px solid $admin-theme-color;
@@ -898,7 +877,6 @@ $admin-theme-color: var(--wp-admin-theme-color);
 	}
 }
 
-
 // ==========================================================================
 // FormToggle
 // ==========================================================================
@@ -943,7 +921,9 @@ $admin-theme-color: var(--wp-admin-theme-color);
 	position: relative;
 	width: 40px;
 	height: 24px;
-	transition: all 0.4s ease, box-shadow 0s;
+	transition:
+		all 0.4s ease,
+		box-shadow 0s;
 	vertical-align: middle;
 
 	&::before,
@@ -967,10 +947,9 @@ $admin-theme-color: var(--wp-admin-theme-color);
 	}
 
 	.accessible-focus &:focus {
-		box-shadow: 0 0 0 var(--wp-admin-border-width-focus, 2px) $admin-theme-color;
+		box-shadow: 0 0 0 var(--wp-admin-border-width-focus, 2px)
+			$admin-theme-color;
 	}
-
-
 }
 
 .form-toggle__label {
@@ -994,15 +973,15 @@ $admin-theme-color: var(--wp-admin-theme-color);
 }
 
 .form-toggle {
-
 	.accessible-focus &:focus {
-
 		+ .form-toggle__label .form-toggle__switch {
-			box-shadow: 0 0 0 var(--wp-admin-border-width-focus, 2px) $admin-theme-color;
+			box-shadow: 0 0 0 var(--wp-admin-border-width-focus, 2px)
+				$admin-theme-color;
 		}
 
 		&:checked + .form-toggle__label .form-toggle__switch {
-			box-shadow: 0 0 0 var(--wp-admin-border-width-focus, 2px) $admin-theme-color;
+			box-shadow: 0 0 0 var(--wp-admin-border-width-focus, 2px)
+				$admin-theme-color;
 		}
 	}
 
@@ -1011,14 +990,12 @@ $admin-theme-color: var(--wp-admin-theme-color);
 	}
 
 	&:not(:disabled) {
-
 		+ .form-toggle__label:hover .form-toggle__switch {
 			background: #999;
 		}
 	}
 
 	&.active {
-
 		+ .form-toggle__label .form-toggle__switch {
 			background: $admin-theme-color;
 
@@ -1033,7 +1010,6 @@ $admin-theme-color: var(--wp-admin-theme-color);
 	}
 
 	&.disabled {
-
 		+ label.form-toggle__label span.form-toggle__switch {
 			opacity: 0.25;
 		}
@@ -1042,13 +1018,11 @@ $admin-theme-color: var(--wp-admin-theme-color);
 
 // Classes for toggle state before action is complete (updating plugin or something)
 .form-toggle.is-toggling {
-
 	+ .form-toggle__label .form-toggle__switch {
 		background: $admin-theme-color;
 	}
 
 	&:checked {
-
 		+ .form-toggle__label .form-toggle__switch {
 			background: #999;
 		}
@@ -1056,7 +1030,6 @@ $admin-theme-color: var(--wp-admin-theme-color);
 }
 
 .form-toggle.is-compact {
-
 	+ .form-toggle__label .form-toggle__switch {
 		border-radius: 8px;
 		width: 24px;
@@ -1070,9 +1043,7 @@ $admin-theme-color: var(--wp-admin-theme-color);
 	}
 
 	&:checked {
-
 		+ .form-toggle__label .form-toggle__switch {
-
 			&::after {
 				left: 8px;
 			}

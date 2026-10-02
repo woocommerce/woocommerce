@@ -21,27 +21,27 @@ import './editor.scss';
 
 const Edit = () => {
 	const TEMPLATE: InnerBlockTemplate[] = [
-		[ 'core/query', BLOCK_ATTRIBUTES, INNER_BLOCKS_TEMPLATE ],
+		['core/query', BLOCK_ATTRIBUTES, INNER_BLOCKS_TEMPLATE],
 	];
 	const blockProps = useBlockProps();
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<InspectorControls>
 				<Notice
-					className={ 'wc-block-editor-related-products__notice' }
-					status={ 'warning' }
-					isDismissible={ false }
+					className={'wc-block-editor-related-products__notice'}
+					status={'warning'}
+					isDismissible={false}
 				>
 					<p>
-						{ __(
+						{__(
 							'These products will vary depending on the main product in the page',
 							'woocommerce'
-						) }
+						)}
 					</p>
 				</Notice>
 			</InspectorControls>
-			<InnerBlocks template={ TEMPLATE } />
+			<InnerBlocks template={TEMPLATE} />
 		</div>
 	);
 };

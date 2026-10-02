@@ -22,42 +22,41 @@ import { cartStore } from '@woocommerce/block-data';
  */
 export const useSaveForLater = (): {
 	isSaving: boolean;
-	saveForLater: ( cartItemKey: string ) => Promise< boolean >;
+	saveForLater: (cartItemKey: string) => Promise<boolean>;
 } => {
-	const [ isSaving, setIsSaving ] = useState( false );
-	const { saveForLater: dispatchSaveForLater } = useDispatch( cartStore );
+	const [isSaving, setIsSaving] = useState(false);
+	const { saveForLater: dispatchSaveForLater } = useDispatch(cartStore);
 
 	const saveForLater = useCallback(
-		async ( cartItemKey: string ): Promise< boolean > => {
-			if ( ! cartItemKey || isSaving ) {
+		async (cartItemKey: string): Promise<boolean> => {
+			if (!cartItemKey || isSaving) {
 				return false;
 			}
-			setIsSaving( true );
+			setIsSaving(true);
 			try {
-				await dispatchSaveForLater( cartItemKey );
+				await dispatchSaveForLater(cartItemKey);
 				return true;
-			} catch ( error ) {
+			} catch (error) {
 				const message =
 					error &&
 					typeof error === 'object' &&
 					'message' in error &&
-					typeof ( error as { message: unknown } ).message ===
-						'string'
-						? ( error as { message: string } ).message
+					typeof (error as { message: unknown }).message === 'string'
+						? (error as { message: string }).message
 						: __(
 								'There was a problem saving this item for later.',
 								'woocommerce'
-						  );
-				dispatch( noticesStore ).createNotice( 'error', message, {
+							);
+				dispatch(noticesStore).createNotice('error', message, {
 					context: 'wc/cart',
 					isDismissible: true,
-				} );
+				});
 				return false;
 			} finally {
-				setIsSaving( false );
+				setIsSaving(false);
 			}
 		},
-		[ isSaving, dispatchSaveForLater ]
+		[isSaving, dispatchSaveForLater]
 	);
 
 	return { isSaving, saveForLater };

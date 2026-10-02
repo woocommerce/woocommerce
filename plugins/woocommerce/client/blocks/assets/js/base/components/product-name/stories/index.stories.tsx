@@ -16,18 +16,16 @@ export default {
 		permalink: '#',
 	},
 	disabledTagName: 'span',
-} as Meta< ProductNameProps >;
+} as Meta<ProductNameProps>;
 
-const Template: StoryFn< ProductNameProps > = ( args ) => (
-	<ProductName { ...args } />
-);
+const Template: StoryFn<ProductNameProps> = (args) => <ProductName {...args} />;
 
-export const Default = Template.bind( {} );
+export const Default = Template.bind({});
 Default.args = {
 	disabled: false,
 };
 
-export const DisabledProduct = Template.bind( {} );
+export const DisabledProduct = Template.bind({});
 DisabledProduct.args = {
 	disabled: true,
 };

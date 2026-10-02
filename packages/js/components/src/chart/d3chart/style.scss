@@ -1,7 +1,7 @@
 /**
  * Internal Dependencies
  */
-@import './legend.scss';
+@import "./legend.scss";
 
 .woocommerce-chart__body-row .d3-chart__container {
 	width: calc(100% - 320px);
@@ -20,7 +20,7 @@
 		bottom: 0;
 		color: $gray-700;
 		display: flex;
-		@include font-size( 18 );
+		@include font-size(18);
 		font-weight: bold;
 		justify-content: center;
 		left: 0;
@@ -34,8 +34,8 @@
 		top: 0;
 		text-align: center;
 
-		@include breakpoint( '<782px' ) {
-			@include font-size( 13 );
+		@include breakpoint("<782px") {
+			@include font-size(13);
 		}
 	}
 
@@ -48,7 +48,8 @@
 		background-color: $studio-white;
 		text-align: left;
 		padding: 17px;
-		box-shadow: 0 3px 20px 0 rgba(18, 24, 30, 0.1),
+		box-shadow:
+			0 3px 20px 0 rgba(18, 24, 30, 0.1),
 			0 1px 3px 0 rgba(18, 24, 30, 0.1);
 		flex-direction: column;
 		flex-wrap: nowrap;
@@ -57,7 +58,7 @@
 		visibility: hidden;
 		z-index: 1;
 
-		@include breakpoint( '<600px' ) {
+		@include breakpoint("<600px") {
 			min-width: auto;
 			width: calc(100% - #{$gap-large * 2});
 		}

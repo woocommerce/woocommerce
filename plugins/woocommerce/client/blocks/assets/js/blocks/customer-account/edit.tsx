@@ -14,28 +14,25 @@ import { Attributes } from './types';
 import { BlockSettings } from './sidebar-settings';
 import './editor.scss';
 
-const Edit = ( {
-	attributes,
-	setAttributes,
-}: BlockEditProps< Attributes > ) => {
+const Edit = ({ attributes, setAttributes }: BlockEditProps<Attributes>) => {
 	const { className, hasDropdownNavigation } = attributes;
-	const blockProps = useBlockProps( {
-		className: clsx( 'wc-block-editor-customer-account', className, {
+	const blockProps = useBlockProps({
+		className: clsx('wc-block-editor-customer-account', className, {
 			'wc-block-customer-account--has-dropdown': hasDropdownNavigation,
-		} ),
-	} );
+		}),
+	});
 
 	return (
 		<>
-			<div { ...blockProps }>
+			<div {...blockProps}>
 				<InspectorControls>
 					<BlockSettings
-						attributes={ attributes }
-						setAttributes={ setAttributes }
+						attributes={attributes}
+						setAttributes={setAttributes}
 					/>
 				</InspectorControls>
 				<Disabled>
-					<Block attributes={ attributes } />
+					<Block attributes={attributes} />
 				</Disabled>
 			</div>
 		</>

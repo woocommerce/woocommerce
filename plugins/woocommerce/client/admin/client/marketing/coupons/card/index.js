@@ -11,13 +11,11 @@ import { Text } from '@woocommerce/experimental';
  */
 import './style.scss';
 
-const Card = ( props ) => {
+const Card = (props) => {
 	const { title, description, children, className } = props;
 
 	return (
-		<WPCard
-			className={ clsx( className, 'woocommerce-admin-marketing-card' ) }
-		>
+		<WPCard className={clsx(className, 'woocommerce-admin-marketing-card')}>
 			<CardHeader>
 				<div>
 					<Text
@@ -26,7 +24,7 @@ const Card = ( props ) => {
 						size="20"
 						lineHeight="28px"
 					>
-						{ title }
+						{title}
 					</Text>
 					<Text
 						variant="subtitle.small"
@@ -35,11 +33,11 @@ const Card = ( props ) => {
 						size="14"
 						lineHeight="20px"
 					>
-						{ description }
+						{description}
 					</Text>
 				</div>
 			</CardHeader>
-			<CardBody>{ children }</CardBody>
+			<CardBody>{children}</CardBody>
 		</WPCard>
 	);
 };

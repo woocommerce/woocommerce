@@ -4,8 +4,8 @@ $max-button-width: calc(100% / #{$max-button-columns});
 
 .wc-block-editor-product-collection-inspector-toolspanel__filters {
 	.wc-block-editor-product-collection-inspector__taxonomy-control:not(
-			:last-child
-		) {
+		:last-child
+	) {
 		margin-bottom: $grid-unit-30;
 	}
 }

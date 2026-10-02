@@ -14,11 +14,11 @@ import deprecatedAttributes from './attributes';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore -- TypeScript expects some required properties which we already
 // registered in PHP.
-registerBlockType( 'woocommerce/mini-cart-footer-block', {
+registerBlockType('woocommerce/mini-cart-footer-block', {
 	icon: {
 		src: (
 			<Icon
-				icon={ payment }
+				icon={payment}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -27,7 +27,7 @@ registerBlockType( 'woocommerce/mini-cart-footer-block', {
 		{
 			attributes: deprecatedAttributes,
 
-			migrate( attributes, innerBlocks ) {
+			migrate(attributes, innerBlocks) {
 				const {
 					cartButtonLabel,
 					checkoutButtonLabel,
@@ -37,12 +37,9 @@ registerBlockType( 'woocommerce/mini-cart-footer-block', {
 				return [
 					restAttributes,
 					[
-						createBlock(
-							'woocommerce/mini-cart-cart-button-block',
-							{
-								cartButtonLabel,
-							}
-						),
+						createBlock('woocommerce/mini-cart-cart-button-block', {
+							cartButtonLabel,
+						}),
 						createBlock(
 							'woocommerce/mini-cart-checkout-button-block',
 							{
@@ -53,14 +50,14 @@ registerBlockType( 'woocommerce/mini-cart-footer-block', {
 					],
 				];
 			},
-			isEligible: ( attributes, innerBlocks ) => {
-				return ! innerBlocks.length;
+			isEligible: (attributes, innerBlocks) => {
+				return !innerBlocks.length;
 			},
 			save: (): JSX.Element => {
-				return <div { ...useBlockProps.save() }></div>;
+				return <div {...useBlockProps.save()}></div>;
 			},
 		},
 	],
 	edit: Edit,
 	save: Save,
-} );
+});

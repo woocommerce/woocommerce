@@ -17,7 +17,7 @@ registerBlockType(
 		icon: {
 			src: (
 				<Icon
-					icon={ mapMarker }
+					icon={mapMarker}
 					className="wc-block-editor-components-block-icon"
 				/>
 			),
@@ -29,5 +29,5 @@ registerBlockType(
 		save() {
 			return null;
 		},
-	} as unknown as Partial< BlockConfiguration >
+	} as unknown as Partial<BlockConfiguration>
 );

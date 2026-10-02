@@ -15,12 +15,12 @@ import {
  */
 import { CompleteSetupButton } from '..';
 
-jest.mock( '@woocommerce/tracks', () => ( {
+jest.mock('@woocommerce/tracks', () => ({
 	recordEvent: jest.fn(),
-} ) );
+}));
 
-describe( 'CompleteSetupButton', () => {
-	it( 'should record settings_payments_provider_complete_setup_click event on click of the button', () => {
+describe('CompleteSetupButton', () => {
+	it('should record settings_payments_provider_complete_setup_click event on click of the button', () => {
 		const { getByRole } = render(
 			<CompleteSetupButton
 				gatewayProvider={
@@ -50,21 +50,21 @@ describe( 'CompleteSetupButton', () => {
 					} as PaymentGatewayProvider
 				}
 				settingsHref="/settings"
-				onboardingHref={ '' }
-				gatewayHasRecommendedPaymentMethods={ false }
-				installingPlugin={ null }
-				setOnboardingModalOpen={ jest.fn() }
+				onboardingHref={''}
+				gatewayHasRecommendedPaymentMethods={false}
+				installingPlugin={null}
+				setOnboardingModalOpen={jest.fn()}
 			/>
 		);
 
-		fireEvent.click( getByRole( 'button' ) );
+		fireEvent.click(getByRole('button'));
 
-		expect( recordEvent ).toHaveBeenCalledWith(
+		expect(recordEvent).toHaveBeenCalledWith(
 			'settings_payments_provider_complete_setup_click',
-			expect.objectContaining( {
+			expect.objectContaining({
 				provider_id: 'test-gateway',
 				suggestion_id: 'test-suggestion',
-			} )
+			})
 		);
-	} );
-} );
+	});
+});

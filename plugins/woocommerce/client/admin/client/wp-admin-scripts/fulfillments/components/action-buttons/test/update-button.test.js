@@ -14,26 +14,26 @@ import { useFulfillmentContext } from '../../../context/fulfillment-context';
 const setError = jest.fn();
 
 // Mock dependencies
-jest.mock( '@wordpress/data', () => {
-	const originalModule = jest.requireActual( '@wordpress/data' );
+jest.mock('@wordpress/data', () => {
+	const originalModule = jest.requireActual('@wordpress/data');
 	return {
 		...originalModule,
-		useDispatch: jest.fn( () => {} ),
+		useDispatch: jest.fn(() => {}),
 	};
-} );
+});
 
-jest.mock( '../../../context/fulfillment-context', () => ( {
+jest.mock('../../../context/fulfillment-context', () => ({
 	useFulfillmentContext: jest.fn(),
-} ) );
+}));
 
-describe( 'UpdateButton component', () => {
-	beforeEach( () => {
+describe('UpdateButton component', () => {
+	beforeEach(() => {
 		// Reset mocks
 		jest.clearAllMocks();
 
 		// Default mock implementations
-		useDispatch.mockReturnValue( { updateFulfillment: jest.fn() } );
-		useFulfillmentContext.mockReturnValue( {
+		useDispatch.mockReturnValue({ updateFulfillment: jest.fn() });
+		useFulfillmentContext.mockReturnValue({
 			order: { id: 123 },
 			fulfillment: {
 				id: 456,
@@ -60,19 +60,19 @@ describe( 'UpdateButton component', () => {
 			setNotifyCustomer: jest.fn(),
 			customerNote: '',
 			setCustomerNote: jest.fn(),
-		} );
-	} );
+		});
+	});
 
-	it( 'should render button with correct text', () => {
-		render( <UpdateButton setError={ setError } /> );
-		expect( screen.getByText( 'Update' ) ).toBeInTheDocument();
-	} );
+	it('should render button with correct text', () => {
+		render(<UpdateButton setError={setError} />);
+		expect(screen.getByText('Update')).toBeInTheDocument();
+	});
 
-	it( 'should call updateFulfillment when button is clicked', async () => {
-		const mockUpdateFulfillment = jest.fn( () => Promise.resolve() );
-		useDispatch.mockReturnValue( {
+	it('should call updateFulfillment when button is clicked', async () => {
+		const mockUpdateFulfillment = jest.fn(() => Promise.resolve());
+		useDispatch.mockReturnValue({
 			updateFulfillment: mockUpdateFulfillment,
-		} );
+		});
 
 		const mockFulfillment = {
 			id: 456,
@@ -95,32 +95,32 @@ describe( 'UpdateButton component', () => {
 				},
 			],
 		};
-		useFulfillmentContext.mockReturnValue( {
+		useFulfillmentContext.mockReturnValue({
 			order: { id: 123 },
 			fulfillment: mockFulfillment,
 			notifyCustomer: true,
 			customerNote: 'Test note',
 			setCustomerNote: jest.fn(),
-		} );
+		});
 
-		render( <UpdateButton setError={ setError } /> );
-		fireEvent.click( screen.getByText( 'Update' ) );
+		render(<UpdateButton setError={setError} />);
+		fireEvent.click(screen.getByText('Update'));
 
-		await waitFor( () => {
-			expect( mockUpdateFulfillment ).toHaveBeenCalledWith(
+		await waitFor(() => {
+			expect(mockUpdateFulfillment).toHaveBeenCalledWith(
 				123,
 				mockFulfillment,
 				true,
 				'Test note'
 			);
-		} );
-	} );
+		});
+	});
 
-	it( 'should pass empty customer note when notifyCustomer is false', async () => {
-		const mockUpdateFulfillment = jest.fn( () => Promise.resolve() );
-		useDispatch.mockReturnValue( {
+	it('should pass empty customer note when notifyCustomer is false', async () => {
+		const mockUpdateFulfillment = jest.fn(() => Promise.resolve());
+		useDispatch.mockReturnValue({
 			updateFulfillment: mockUpdateFulfillment,
-		} );
+		});
 
 		const mockFulfillment = {
 			id: 456,
@@ -138,100 +138,100 @@ describe( 'UpdateButton component', () => {
 				},
 			],
 		};
-		useFulfillmentContext.mockReturnValue( {
+		useFulfillmentContext.mockReturnValue({
 			order: { id: 123 },
 			fulfillment: mockFulfillment,
 			notifyCustomer: false,
 			customerNote: 'This note should not be sent',
 			setCustomerNote: jest.fn(),
-		} );
+		});
 
-		render( <UpdateButton setError={ setError } /> );
-		fireEvent.click( screen.getByText( 'Update' ) );
+		render(<UpdateButton setError={setError} />);
+		fireEvent.click(screen.getByText('Update'));
 
-		await waitFor( () => {
-			expect( mockUpdateFulfillment ).toHaveBeenCalledWith(
+		await waitFor(() => {
+			expect(mockUpdateFulfillment).toHaveBeenCalledWith(
 				123,
 				mockFulfillment,
 				false,
 				''
 			);
-		} );
-	} );
+		});
+	});
 
-	it( 'should not call updateFulfillment when fulfillment is undefined', () => {
+	it('should not call updateFulfillment when fulfillment is undefined', () => {
 		const mockUpdateFulfillment = jest.fn();
-		useDispatch.mockReturnValue( {
+		useDispatch.mockReturnValue({
 			updateFulfillment: mockUpdateFulfillment,
-		} );
+		});
 
-		useFulfillmentContext.mockReturnValue( {
+		useFulfillmentContext.mockReturnValue({
 			order: { id: 123 },
 			fulfillment: undefined,
 			customerNote: '',
 			setCustomerNote: jest.fn(),
-		} );
+		});
 
-		render( <UpdateButton setError={ setError } /> );
-		fireEvent.click( screen.getByText( 'Update' ) );
+		render(<UpdateButton setError={setError} />);
+		fireEvent.click(screen.getByText('Update'));
 
-		expect( mockUpdateFulfillment ).not.toHaveBeenCalled();
-	} );
+		expect(mockUpdateFulfillment).not.toHaveBeenCalled();
+	});
 
-	describe( 'Accessibility', () => {
-		it( 'should not have redundant aria-label overriding visible text', () => {
-			render( <UpdateButton setError={ setError } /> );
+	describe('Accessibility', () => {
+		it('should not have redundant aria-label overriding visible text', () => {
+			render(<UpdateButton setError={setError} />);
 
-			const button = screen.getByRole( 'button' );
-			expect( button ).not.toHaveAttribute( 'aria-label' );
-		} );
+			const button = screen.getByRole('button');
+			expect(button).not.toHaveAttribute('aria-label');
+		});
 
-		it( 'should have aria-describedby with unique prefix', () => {
-			render( <UpdateButton setError={ setError } /> );
+		it('should have aria-describedby with unique prefix', () => {
+			render(<UpdateButton setError={setError} />);
 
-			const button = screen.getByRole( 'button' );
-			expect( button.getAttribute( 'aria-describedby' ) ).toMatch(
+			const button = screen.getByRole('button');
+			expect(button.getAttribute('aria-describedby')).toMatch(
 				/^update-button-description/
 			);
-		} );
+		});
 
-		it( 'should have hidden description for screen readers', () => {
-			render( <UpdateButton setError={ setError } /> );
+		it('should have hidden description for screen readers', () => {
+			render(<UpdateButton setError={setError} />);
 
 			const description = screen.getByText(
 				'Applies changes to the existing fulfillment'
 			);
-			expect( description ).toBeInTheDocument();
-			expect( description.getAttribute( 'id' ) ).toMatch(
+			expect(description).toBeInTheDocument();
+			expect(description.getAttribute('id')).toMatch(
 				/^update-button-description/
 			);
-			expect( description ).toHaveClass( 'screen-reader-text' );
-		} );
+			expect(description).toHaveClass('screen-reader-text');
+		});
 
-		it( 'should update button text when executing', () => {
+		it('should update button text when executing', () => {
 			const mockUpdateFulfillment = jest.fn(
-				() => new Promise( ( resolve ) => setTimeout( resolve, 100 ) )
+				() => new Promise((resolve) => setTimeout(resolve, 100))
 			);
-			useDispatch.mockReturnValue( {
+			useDispatch.mockReturnValue({
 				updateFulfillment: mockUpdateFulfillment,
-			} );
+			});
 
-			render( <UpdateButton setError={ setError } /> );
-			const button = screen.getByRole( 'button' );
+			render(<UpdateButton setError={setError} />);
+			const button = screen.getByRole('button');
 
-			fireEvent.click( button );
+			fireEvent.click(button);
 
 			// Check that the button text updates during execution
-			expect( screen.getByText( 'Updating…' ) ).toBeInTheDocument();
-			expect( button ).toBeDisabled();
-		} );
+			expect(screen.getByText('Updating…')).toBeInTheDocument();
+			expect(button).toBeDisabled();
+		});
 
-		it( 'should be keyboard accessible', () => {
-			render( <UpdateButton setError={ setError } /> );
+		it('should be keyboard accessible', () => {
+			render(<UpdateButton setError={setError} />);
 
-			const button = screen.getByRole( 'button' );
+			const button = screen.getByRole('button');
 			button.focus();
-			expect( button.ownerDocument.activeElement ).toBe( button );
-		} );
-	} );
-} );
+			expect(button.ownerDocument.activeElement).toBe(button);
+		});
+	});
+});

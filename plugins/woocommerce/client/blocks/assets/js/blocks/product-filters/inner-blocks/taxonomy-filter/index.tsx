@@ -14,40 +14,37 @@ import metadata from './block.json';
 import Edit from './edit';
 import type { TaxonomyItem } from './types';
 
-const taxonomies = getSetting< TaxonomyItem[] >(
+const taxonomies = getSetting<TaxonomyItem[]>(
 	'filterableProductTaxonomies',
 	[]
 );
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	edit: Edit,
 	icon: productFilterAttribute,
 	save: () => {
 		return (
-			<div
-				{ ...useBlockProps.save() }
-				{ ...useInnerBlocksProps.save() }
-			/>
+			<div {...useBlockProps.save()} {...useInnerBlocksProps.save()} />
 		);
 	},
-	variations: taxonomies.map( ( item, index ) => {
+	variations: taxonomies.map((item, index) => {
 		return {
-			name: `product-filter-taxonomy-${ item.name }`,
+			name: `product-filter-taxonomy-${item.name}`,
 			title: sprintf(
 				// translators: %s is the taxonomy label.
-				__( '%s Filter', 'woocommerce' ),
+				__('%s Filter', 'woocommerce'),
 				item.label
 			),
 			description: sprintf(
 				// translators: %s is the taxonomy label.
-				__( 'Let shoppers filter products by %s.', 'woocommerce' ),
+				__('Let shoppers filter products by %s.', 'woocommerce'),
 				item.label.toLocaleLowerCase()
 			),
 			attributes: {
 				taxonomy: item.name,
 			},
-			isActive: [ 'taxonomy' ],
+			isActive: ['taxonomy'],
 			isDefault: index === 0,
 		};
-	} ),
-} );
+	}),
+});

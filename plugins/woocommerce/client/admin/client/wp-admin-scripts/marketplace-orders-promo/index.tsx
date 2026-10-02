@@ -39,19 +39,19 @@ const data = window.wcOrdersPromo;
 // (`#wc-orders-filter` on HPOS, `#posts-filter` on the legacy list) if the status links
 // are not rendered (e.g. a single status view).
 const anchor =
-	document.querySelector( '.subsubsub' ) ||
-	document.getElementById( 'wc-orders-filter' ) ||
-	document.getElementById( 'posts-filter' );
+	document.querySelector('.subsubsub') ||
+	document.getElementById('wc-orders-filter') ||
+	document.getElementById('posts-filter');
 
-if ( data && data.promotion && anchor && anchor.parentNode ) {
-	const root = document.createElement( 'div' );
+if (data && data.promotion && anchor && anchor.parentNode) {
+	const root = document.createElement('div');
 	root.className = 'woocommerce-marketplace-orders-promo';
-	anchor.parentNode.insertBefore( root, anchor );
+	anchor.parentNode.insertBefore(root, anchor);
 
 	const promoId = data.id;
 
-	const eventProperties: Record< string, unknown > = { surface: 'orders' };
-	if ( typeof data.order_count === 'number' ) {
+	const eventProperties: Record<string, unknown> = { surface: 'orders' };
+	if (typeof data.order_count === 'number') {
 		eventProperties.order_count = data.order_count;
 	}
 
@@ -65,23 +65,23 @@ if ( data && data.promotion && anchor && anchor.parentNode ) {
 	const onDismiss =
 		promoId && dismissUrl && dismissNonce
 			? () => {
-					fetch( dismissUrl, {
+					fetch(dismissUrl, {
 						method: 'POST',
 						credentials: 'same-origin',
 						headers: {
 							'Content-Type': 'application/json',
 							'X-WP-Nonce': dismissNonce,
 						},
-						body: JSON.stringify( { id: promoId } ),
-					} ).catch( () => {} );
-			  }
+						body: JSON.stringify({ id: promoId }),
+					}).catch(() => {});
+				}
 			: undefined;
 
-	createRoot( root ).render(
+	createRoot(root).render(
 		<PromoCard
-			promotion={ data.promotion }
-			eventProperties={ eventProperties }
-			onDismiss={ onDismiss }
+			promotion={data.promotion}
+			eventProperties={eventProperties}
+			onDismiss={onDismiss}
 		/>
 	);
 }

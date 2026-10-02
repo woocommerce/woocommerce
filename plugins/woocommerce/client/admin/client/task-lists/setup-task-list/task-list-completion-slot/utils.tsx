@@ -32,15 +32,15 @@ export const EXPERIMENTAL_WC_TASK_LIST_COMPLETION_SLOT_NAME =
  * @param {Array}  param0.children - Node children.
  * @param {Array}  param0.order    - Node order.
  */
-export const WooTaskListCompletion = ( {
+export const WooTaskListCompletion = ({
 	children,
 	order = 1,
-}: WooTaskListCompletionProps ) => {
+}: WooTaskListCompletionProps) => {
 	return (
-		<Fill name={ EXPERIMENTAL_WC_TASK_LIST_COMPLETION_SLOT_NAME }>
-			{ ( fillProps ) => {
-				return createOrderedChildren( children, order, fillProps );
-			} }
+		<Fill name={EXPERIMENTAL_WC_TASK_LIST_COMPLETION_SLOT_NAME}>
+			{(fillProps) => {
+				return createOrderedChildren(children, order, fillProps);
+			}}
 		</Fill>
 	);
 };
@@ -54,16 +54,16 @@ export type WooTaskListCompletionFillProps = {
 	customerEffortScore: boolean;
 };
 
-WooTaskListCompletion.Slot = ( {
+WooTaskListCompletion.Slot = ({
 	fillProps,
 }: {
-	fillProps: React.ComponentProps< typeof Slot >[ 'fillProps' ] &
+	fillProps: React.ComponentProps<typeof Slot>['fillProps'] &
 		WooTaskListCompletionFillProps;
-} ) => (
+}) => (
 	<Slot
-		name={ EXPERIMENTAL_WC_TASK_LIST_COMPLETION_SLOT_NAME }
-		fillProps={ fillProps }
+		name={EXPERIMENTAL_WC_TASK_LIST_COMPLETION_SLOT_NAME}
+		fillProps={fillProps}
 	>
-		{ sortFillsByOrder }
+		{sortFillsByOrder}
 	</Slot>
 );

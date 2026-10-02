@@ -14,28 +14,28 @@ import {
 	getCommonIconProps,
 } from '@woocommerce/blocks-checkout';
 
-describe( '@woocommerce/blocks-checkout payment icon exports', () => {
-	it( 'exports paymentMethodCommonIcons as a non-empty array', () => {
-		expect( Array.isArray( paymentMethodCommonIcons ) ).toBe( true );
-		expect( paymentMethodCommonIcons.length ).toBeGreaterThan( 0 );
-	} );
+describe('@woocommerce/blocks-checkout payment icon exports', () => {
+	it('exports paymentMethodCommonIcons as a non-empty array', () => {
+		expect(Array.isArray(paymentMethodCommonIcons)).toBe(true);
+		expect(paymentMethodCommonIcons.length).toBeGreaterThan(0);
+	});
 
-	it( 'exports getCommonIconProps as a function', () => {
-		expect( typeof getCommonIconProps ).toBe( 'function' );
-	} );
+	it('exports getCommonIconProps as a function', () => {
+		expect(typeof getCommonIconProps).toBe('function');
+	});
 
-	it( 'getCommonIconProps returns Visa icon props from the package export', () => {
-		const result = getCommonIconProps( 'visa' );
-		expect( result ).toEqual(
-			expect.objectContaining( {
+	it('getCommonIconProps returns Visa icon props from the package export', () => {
+		const result = getCommonIconProps('visa');
+		expect(result).toEqual(
+			expect.objectContaining({
 				id: 'visa',
 				alt: 'Visa',
-			} )
+			})
 		);
-	} );
+	});
 
-	it( 'getCommonIconProps returns empty object for unknown brand from the package export', () => {
-		const result = getCommonIconProps( 'nonexistent' );
-		expect( result ).toEqual( {} );
-	} );
-} );
+	it('getCommonIconProps returns empty object for unknown brand from the package export', () => {
+		const result = getCommonIconProps('nonexistent');
+		expect(result).toEqual({});
+	});
+});

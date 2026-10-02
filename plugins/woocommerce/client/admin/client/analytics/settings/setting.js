@@ -19,8 +19,8 @@ import { withDispatch } from '@wordpress/data';
 import './setting.scss';
 
 class Setting extends Component {
-	constructor( props ) {
-		super( props );
+	constructor(props) {
+		super(props);
 		this.state = {
 			disabled: false,
 		};
@@ -38,93 +38,93 @@ class Setting extends Component {
 		} = this.props;
 		const { disabled } = this.state;
 
-		switch ( inputType ) {
+		switch (inputType) {
 			case 'checkboxGroup':
 				return options.map(
-					( optionGroup ) =>
+					(optionGroup) =>
 						optionGroup.options.length > 0 && (
 							<div
 								className="woocommerce-setting__options-group"
-								key={ optionGroup.key }
-								aria-labelledby={ name + '-label' }
+								key={optionGroup.key}
+								aria-labelledby={name + '-label'}
 							>
-								{ optionGroup.label && (
+								{optionGroup.label && (
 									<span className="woocommerce-setting__options-group-label">
-										{ optionGroup.label }
+										{optionGroup.label}
 									</span>
-								) }
-								{ this.renderCheckboxOptions(
+								)}
+								{this.renderCheckboxOptions(
 									optionGroup.options
-								) }
+								)}
 							</div>
 						)
 				);
 			case 'checkbox':
-				return this.renderCheckboxOptions( options );
+				return this.renderCheckboxOptions(options);
 			case 'button':
 				return (
 					<Button
 						variant="secondary"
-						onClick={ this.handleInputCallback }
-						disabled={ disabled }
+						onClick={this.handleInputCallback}
+						disabled={disabled}
 					>
-						{ inputText }
+						{inputText}
 					</Button>
 				);
 			case 'component':
 				const SettingComponent = component;
 				return (
 					<SettingComponent
-						value={ value }
-						onChange={ handleChange }
-						{ ...this.props }
+						value={value}
+						onChange={handleChange}
+						{...this.props}
 					/>
 				);
 			case 'select':
 				return (
 					<SelectControl
 						__next40pxDefaultSize
-						options={ options }
-						value={ value }
-						onChange={ ( newValue ) =>
-							handleChange( {
+						options={options}
+						value={value}
+						onChange={(newValue) =>
+							handleChange({
 								target: {
 									name,
 									type: 'select',
 									value: newValue,
 								},
-							} )
+							})
 						}
 					/>
 				);
 			case 'radio':
 				return (
 					<RadioControl
-						selected={ value }
-						options={ options }
-						onChange={ ( newValue ) =>
-							handleChange( {
+						selected={value}
+						options={options}
+						onChange={(newValue) =>
+							handleChange({
 								target: {
 									name,
 									type: 'radio',
 									value: newValue,
 								},
-							} )
+							})
 						}
 					/>
 				);
 			case 'text':
 			default:
-				const id = uniqueId( name );
+				const id = uniqueId(name);
 				return (
 					<input
-						id={ id }
+						id={id}
 						type="text"
-						name={ name }
-						onChange={ handleChange }
-						value={ value }
-						placeholder={ inputText }
-						disabled={ disabled }
+						name={name}
+						onChange={handleChange}
+						value={value}
+						placeholder={inputText}
+						disabled={disabled}
 					/>
 				);
 		}
@@ -133,47 +133,47 @@ class Setting extends Component {
 	handleInputCallback = () => {
 		const { createNotice, callback } = this.props;
 
-		if ( typeof callback !== 'function' ) {
+		if (typeof callback !== 'function') {
 			return;
 		}
 
-		return new Promise( ( resolve, reject ) => {
-			this.setState( { disabled: true } );
-			callback( resolve, reject, createNotice );
-		} )
-			.then( () => {
-				this.setState( { disabled: false } );
-			} )
-			.catch( () => {
-				this.setState( { disabled: false } );
-			} );
+		return new Promise((resolve, reject) => {
+			this.setState({ disabled: true });
+			callback(resolve, reject, createNotice);
+		})
+			.then(() => {
+				this.setState({ disabled: false });
+			})
+			.catch(() => {
+				this.setState({ disabled: false });
+			});
 	};
 
-	renderCheckboxOptions( options ) {
+	renderCheckboxOptions(options) {
 		const { handleChange, name, value } = this.props;
 		const { disabled } = this.state;
 
-		return options.map( ( option ) => {
+		return options.map((option) => {
 			return (
 				<CheckboxControl
-					key={ name + '-' + option.value }
-					label={ option.label }
-					name={ name }
-					checked={ value && value.includes( option.value ) }
-					onChange={ ( checked ) =>
-						handleChange( {
+					key={name + '-' + option.value}
+					label={option.label}
+					name={name}
+					checked={value && value.includes(option.value)}
+					onChange={(checked) =>
+						handleChange({
 							target: {
 								checked,
 								name,
 								type: 'checkbox',
 								value: option.value,
 							},
-						} )
+						})
 					}
-					disabled={ disabled }
+					disabled={disabled}
 				/>
 			);
-		} );
+		});
 	}
 
 	render() {
@@ -183,17 +183,17 @@ class Setting extends Component {
 			<div className="woocommerce-setting">
 				<div
 					className="woocommerce-setting__label"
-					id={ name + '-label' }
+					id={name + '-label'}
 				>
-					{ label }
+					{label}
 				</div>
 				<div className="woocommerce-setting__input">
-					{ this.renderInput() }
-					{ helpText && (
+					{this.renderInput()}
+					{helpText && (
 						<span className="woocommerce-setting__help">
-							{ helpText }
+							{helpText}
 						</span>
-					) }
+					)}
 				</div>
 			</div>
 		);
@@ -212,7 +212,7 @@ Setting.propTypes = {
 	/**
 	 * Optional help text displayed underneath the setting.
 	 */
-	helpText: PropTypes.oneOfType( [ PropTypes.string, PropTypes.array ] ),
+	helpText: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
 	/**
 	 * Text used as placeholder or button text in the input area.
 	 */
@@ -220,7 +220,7 @@ Setting.propTypes = {
 	/**
 	 * Type of input to use; defaults to a text input.
 	 */
-	inputType: PropTypes.oneOf( [
+	inputType: PropTypes.oneOf([
 		'button',
 		'checkbox',
 		'checkboxGroup',
@@ -228,7 +228,7 @@ Setting.propTypes = {
 		'component',
 		'select',
 		'radio',
-	] ),
+	]),
 	/**
 	 * Label used for describing the setting.
 	 */
@@ -241,7 +241,7 @@ Setting.propTypes = {
 	 * Array of options used for when the `inputType` allows multiple selections.
 	 */
 	options: PropTypes.arrayOf(
-		PropTypes.shape( {
+		PropTypes.shape({
 			/**
 			 * Input value for this option.
 			 */
@@ -262,17 +262,17 @@ Setting.propTypes = {
 			 * Nested options for a group `inputType`.
 			 */
 			options: PropTypes.array,
-		} )
+		})
 	),
 	/**
 	 * The string value used for the input or array of items if the input allows multiselection.
 	 */
-	value: PropTypes.oneOfType( [ PropTypes.string, PropTypes.array ] ),
+	value: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
 };
 
 export default compose(
-	withDispatch( ( dispatch ) => {
-		const { createNotice } = dispatch( 'core/notices' );
+	withDispatch((dispatch) => {
+		const { createNotice } = dispatch('core/notices');
 		return { createNotice };
-	} )
-)( Setting );
+	})
+)(Setting);

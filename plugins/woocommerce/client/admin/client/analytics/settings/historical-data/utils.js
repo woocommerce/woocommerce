@@ -4,28 +4,28 @@
 import { isNil } from 'lodash';
 import moment from 'moment';
 
-export const formatParams = ( dateFormat, period, skipChecked ) => {
+export const formatParams = (dateFormat, period, skipChecked) => {
 	const params = {};
-	if ( skipChecked ) {
+	if (skipChecked) {
 		params.skip_existing = true;
 	}
-	if ( period.label !== 'all' ) {
-		if ( period.label === 'custom' ) {
+	if (period.label !== 'all') {
+		if (period.label === 'custom') {
 			const daysDifference = moment().diff(
-				moment( period.date, dateFormat ),
+				moment(period.date, dateFormat),
 				'days',
 				true
 			);
-			params.days = Math.floor( daysDifference );
+			params.days = Math.floor(daysDifference);
 		} else {
-			params.days = parseInt( period.label, 10 );
+			params.days = parseInt(period.label, 10);
 		}
 	}
 
 	return params;
 };
 
-export const getStatus = ( {
+export const getStatus = ({
 	cacheNeedsClearing,
 	customersProgress,
 	customersTotal,
@@ -33,29 +33,29 @@ export const getStatus = ( {
 	inProgress,
 	ordersProgress,
 	ordersTotal,
-} ) => {
-	if ( isError ) {
+}) => {
+	if (isError) {
 		return 'error';
 	}
-	if ( inProgress ) {
+	if (inProgress) {
 		if (
-			isNil( customersProgress ) ||
-			isNil( ordersProgress ) ||
-			isNil( customersTotal ) ||
-			isNil( ordersTotal ) ||
+			isNil(customersProgress) ||
+			isNil(ordersProgress) ||
+			isNil(customersTotal) ||
+			isNil(ordersTotal) ||
 			cacheNeedsClearing
 		) {
 			return 'initializing';
 		}
-		if ( customersProgress < customersTotal ) {
+		if (customersProgress < customersTotal) {
 			return 'customers';
 		}
-		if ( ordersProgress < ordersTotal ) {
+		if (ordersProgress < ordersTotal) {
 			return 'orders';
 		}
 		return 'finalizing';
 	}
-	if ( customersTotal > 0 || ordersTotal > 0 ) {
+	if (customersTotal > 0 || ordersTotal > 0) {
 		if (
 			customersProgress === customersTotal &&
 			ordersProgress === ordersTotal

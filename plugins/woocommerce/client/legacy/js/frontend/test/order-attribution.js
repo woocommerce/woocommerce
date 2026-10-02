@@ -43,9 +43,9 @@ describe( 'Order attribution input deduplication', () => {
 		expect( document.getElementById( 'outside-form' ) ).not.toBeNull();
 		expect( document.getElementById( 'checkout-second' ) ).toBeNull();
 		expect(
-			document.querySelector( 'form[name="checkout"]' ).elements.namedItem(
-				'wc_order_attribution_source_type'
-			)
+			document
+				.querySelector( 'form[name="checkout"]' )
+				.elements.namedItem( 'wc_order_attribution_source_type' )
 		).not.toBeNull();
 	} );
 
@@ -71,14 +71,14 @@ describe( 'Order attribution input deduplication', () => {
 		expect( document.getElementById( 'checkout-first' ) ).not.toBeNull();
 		expect( document.getElementById( 'checkout-second' ) ).toBeNull();
 		expect(
-			document.querySelector( 'form[name="register"]' ).elements.namedItem(
-				'wc_order_attribution_source_type'
-			)
+			document
+				.querySelector( 'form[name="register"]' )
+				.elements.namedItem( 'wc_order_attribution_source_type' )
 		).not.toBeNull();
 		expect(
-			document.querySelector( 'form[name="checkout"]' ).elements.namedItem(
-				'wc_order_attribution_source_type'
-			)
+			document
+				.querySelector( 'form[name="checkout"]' )
+				.elements.namedItem( 'wc_order_attribution_source_type' )
 		).not.toBeNull();
 	} );
 

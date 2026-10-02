@@ -16,14 +16,14 @@ import { CoreCollectionNames, CoreFilterNames } from '../types';
 
 const collection = {
 	name: CoreCollectionNames.TOP_RATED,
-	title: __( 'Top Rated Products', 'woocommerce' ),
-	icon: <Icon icon={ starEmpty } />,
+	title: __('Top Rated Products', 'woocommerce'),
+	icon: <Icon icon={starEmpty} />,
 	description: __(
 		'Recommend products with the highest review ratings.',
 		'woocommerce'
 	),
 	keywords: [],
-	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
+	scope: ['inserter', 'block'] as BlockVariationScope[],
 };
 
 const attributes = {
@@ -38,7 +38,7 @@ const attributes = {
 		perPage: 5,
 		pages: 1,
 	},
-	hideControls: [ CoreFilterNames.ORDER, CoreFilterNames.FILTERABLE ],
+	hideControls: [CoreFilterNames.ORDER, CoreFilterNames.FILTERABLE],
 };
 
 const heading: InnerBlockTemplate = [
@@ -46,7 +46,7 @@ const heading: InnerBlockTemplate = [
 	{
 		textAlign: 'center',
 		level: 2,
-		content: __( 'Top rated products', 'woocommerce' ),
+		content: __('Top rated products', 'woocommerce'),
 		style: { spacing: { margin: { bottom: '1rem' } } },
 	},
 ];

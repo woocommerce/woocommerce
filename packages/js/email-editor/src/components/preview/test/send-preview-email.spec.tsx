@@ -23,45 +23,45 @@ import { reducer } from '../../../store/reducer';
 import * as selectors from '../../../store/selectors';
 import { State } from '../../../store/types';
 
-jest.mock( '@wordpress/compose', () => ( {
+jest.mock('@wordpress/compose', () => ({
 	useViewportMatch: jest.fn(),
-} ) );
+}));
 
-jest.mock( '@wordpress/core-data', () => ( {
+jest.mock('@wordpress/core-data', () => ({
 	store: { name: 'core' },
-} ) );
+}));
 
-jest.mock( '@wordpress/editor', () => ( {
+jest.mock('@wordpress/editor', () => ({
 	store: { name: 'core/editor' },
-} ) );
+}));
 
-jest.mock( '@wordpress/preferences', () => ( {
+jest.mock('@wordpress/preferences', () => ({
 	store: { name: 'core/preferences' },
-} ) );
+}));
 
-jest.mock( '@wordpress/blocks', () => ( {
+jest.mock('@wordpress/blocks', () => ({
 	parse: jest.fn(),
 	serialize: jest.fn(),
-} ) );
+}));
 
-jest.mock( '@wordpress/hooks', () => ( {
-	applyFilters: jest.fn( ( _hook: string, value: unknown ) => value ),
-} ) );
+jest.mock('@wordpress/hooks', () => ({
+	applyFilters: jest.fn((_hook: string, value: unknown) => value),
+}));
 
-jest.mock( '@wordpress/i18n', () => ( {
-	__: ( value: string ) => value,
-	sprintf: ( format: string, value: string ) => format.replace( '%s', value ),
-} ) );
+jest.mock('@wordpress/i18n', () => ({
+	__: (value: string) => value,
+	sprintf: (format: string, value: string) => format.replace('%s', value),
+}));
 
-jest.mock( '@wordpress/components', () => {
+jest.mock('@wordpress/components', () => {
 	const TextControl = forwardRef<
 		HTMLInputElement,
-		React.InputHTMLAttributes< HTMLInputElement > & {
+		React.InputHTMLAttributes<HTMLInputElement> & {
 			__next40pxDefaultSize?: boolean;
 			__nextHasNoMarginBottom?: boolean;
-			onChange?: ( value: string ) => void; // eslint-disable-line @typescript-eslint/no-unused-vars
+			onChange?: (value: string) => void; // eslint-disable-line @typescript-eslint/no-unused-vars
 		}
-	>( ( props, ref ) => {
+	>((props, ref) => {
 		const {
 			__next40pxDefaultSize,
 			__nextHasNoMarginBottom,
@@ -72,50 +72,48 @@ jest.mock( '@wordpress/components', () => {
 		return (
 			<input
 				data-testid="text-control"
-				ref={ ref }
-				{ ...rest }
-				onChange={ ( e ) => onChange?.( e.target.value ) }
+				ref={ref}
+				{...rest}
+				onChange={(e) => onChange?.(e.target.value)}
 			/>
 		);
-	} );
+	});
 
 	return {
-		Modal: ( props: { children?: React.ReactNode } ) => (
-			<div data-testid="modal">{ props.children }</div>
+		Modal: (props: { children?: React.ReactNode }) => (
+			<div data-testid="modal">{props.children}</div>
 		),
 		TextControl,
-		Button: ( props: React.ComponentProps< 'button' > ) => (
-			<button onClick={ props.onClick } disabled={ props.disabled }>
-				{ props.children }
+		Button: (props: React.ComponentProps<'button'>) => (
+			<button onClick={props.onClick} disabled={props.disabled}>
+				{props.children}
 			</button>
 		),
 	};
-} );
+});
 
-jest.mock( '@wordpress/icons', () => ( {
-	Icon: ( props: React.HTMLAttributes< HTMLSpanElement > ) => (
-		<span data-testid="icon" { ...props } />
+jest.mock('@wordpress/icons', () => ({
+	Icon: (props: React.HTMLAttributes<HTMLSpanElement>) => (
+		<span data-testid="icon" {...props} />
 	),
 	check: 'check',
-} ) );
+}));
 
-jest.mock( '@wordpress/keycodes', () => ( {
+jest.mock('@wordpress/keycodes', () => ({
 	ENTER: 13,
-} ) );
+}));
 
-jest.mock( '../../../events', () => ( {
+jest.mock('../../../events', () => ({
 	recordEvent: jest.fn(),
 	recordEventOnce: jest.fn(),
-} ) );
+}));
 
-const renderWithPreviewState = (
-	overrides: Partial< State[ 'preview' ] > = {}
-) => {
-	const requestSendingNewsletterPreview = jest.fn( () => ( {
+const renderWithPreviewState = (overrides: Partial<State['preview']> = {}) => {
+	const requestSendingNewsletterPreview = jest.fn(() => ({
 		type: 'REQUEST_SENDING_NEWSLETTER_PREVIEW',
-	} ) );
+	}));
 	const initialState = getInitialState();
-	const store = createReduxStore( storeName, {
+	const store = createReduxStore(storeName, {
 		actions: {
 			...actions,
 			requestSendingNewsletterPreview,
@@ -131,124 +129,118 @@ const renderWithPreviewState = (
 				...overrides,
 			},
 		},
-	} );
+	});
 	const registry = createRegistry();
-	registry.register( store );
+	registry.register(store);
 
 	return {
 		registry,
 		requestSendingNewsletterPreview,
 		...render(
-			<RegistryProvider value={ registry }>
+			<RegistryProvider value={registry}>
 				<SendPreviewEmail />
 			</RegistryProvider>
 		),
 	};
 };
 
-describe( 'SendPreviewEmail', () => {
-	it( 'should render the modal with input and buttons', () => {
+describe('SendPreviewEmail', () => {
+	it('should render the modal with input and buttons', () => {
 		renderWithPreviewState();
-		expect( screen.getByTestId( 'modal' ) ).toBeInTheDocument();
-		expect( screen.getByTestId( 'text-control' ) ).toBeInTheDocument();
-	} );
+		expect(screen.getByTestId('modal')).toBeInTheDocument();
+		expect(screen.getByTestId('text-control')).toBeInTheDocument();
+	});
 
-	it( "carries the editor config's user email into the preview recipient", () => {
-		const { registry } = renderWithPreviewState( { toEmail: '' } );
+	it("carries the editor config's user email into the preview recipient", () => {
+		const { registry } = renderWithPreviewState({ toEmail: '' });
 
 		// Inside act(): the rendered modal is subscribed to this store, so the
 		// dispatch re-renders it.
-		act( () => {
-			registry.dispatch( storeName ).setEditorConfig( {
+		act(() => {
+			registry.dispatch(storeName).setEditorConfig({
 				editorSettings: {} as never,
 				theme: {} as never,
 				urls: {} as never,
 				userEmail: 'shopkeeper@example.com',
-			} );
-		} );
+			});
+		});
 
 		// This is the address PHP localises into the editor config, and it is what
 		// the modal is expected to open with.
-		expect( registry.select( storeName ).getPreviewState() ).toMatchObject(
-			{
-				toEmail: 'shopkeeper@example.com',
-			}
-		);
-	} );
+		expect(registry.select(storeName).getPreviewState()).toMatchObject({
+			toEmail: 'shopkeeper@example.com',
+		});
+	});
 
-	it( 'opens with that recipient already filled in and a usable send button', () => {
-		renderWithPreviewState( { toEmail: 'shopkeeper@example.com' } );
+	it('opens with that recipient already filled in and a usable send button', () => {
+		renderWithPreviewState({ toEmail: 'shopkeeper@example.com' });
 
-		expect( screen.getByTestId( 'text-control' ) ).toHaveValue(
+		expect(screen.getByTestId('text-control')).toHaveValue(
 			'shopkeeper@example.com'
 		);
 		expect(
-			screen.getByRole( 'button', { name: 'Send test email' } )
+			screen.getByRole('button', { name: 'Send test email' })
 		).toBeEnabled();
-	} );
+	});
 
-	it( 'requests a preview email sent to the address entered by the user', async () => {
+	it('requests a preview email sent to the address entered by the user', async () => {
 		const { registry, requestSendingNewsletterPreview } =
 			renderWithPreviewState();
 
 		await userEvent.type(
-			screen.getByTestId( 'text-control' ),
+			screen.getByTestId('text-control'),
 			'test@example.com'
 		);
-		expect( registry.select( storeName ).getPreviewState() ).toMatchObject(
-			{
-				toEmail: 'test@example.com',
-			}
-		);
+		expect(registry.select(storeName).getPreviewState()).toMatchObject({
+			toEmail: 'test@example.com',
+		});
 		await userEvent.click(
-			screen.getByRole( 'button', { name: 'Send test email' } )
+			screen.getByRole('button', { name: 'Send test email' })
 		);
 
-		expect( requestSendingNewsletterPreview ).toHaveBeenCalledTimes( 1 );
-		expect( requestSendingNewsletterPreview ).toHaveBeenCalledWith(
+		expect(requestSendingNewsletterPreview).toHaveBeenCalledTimes(1);
+		expect(requestSendingNewsletterPreview).toHaveBeenCalledWith(
 			'test@example.com'
 		);
-	} );
+	});
 
-	it( 'should show error message when status is ERROR', () => {
-		renderWithPreviewState( {
+	it('should show error message when status is ERROR', () => {
+		renderWithPreviewState({
 			sendingPreviewStatus: SendingPreviewStatus.ERROR,
 			errorMessage: 'Server failure',
-		} );
+		});
 		expect(
-			screen.getByText( /Sorry, we were unable to send this email/ )
+			screen.getByText(/Sorry, we were unable to send this email/)
 		).toBeInTheDocument();
-		expect(
-			screen.getByText( /Error: Server failure/ )
-		).toBeInTheDocument();
-	} );
+		expect(screen.getByText(/Error: Server failure/)).toBeInTheDocument();
+	});
 
-	it( 'should show success message when status is SUCCESS', () => {
-		renderWithPreviewState( {
+	it('should show success message when status is SUCCESS', () => {
+		renderWithPreviewState({
 			sendingPreviewStatus: SendingPreviewStatus.SUCCESS,
-		} );
+		});
 		expect(
-			screen.getByText( 'Test email sent successfully!' )
+			screen.getByText('Test email sent successfully!')
 		).toBeInTheDocument();
-		expect( screen.getByTestId( 'icon' ) ).toBeInTheDocument();
-	} );
+		expect(screen.getByTestId('icon')).toBeInTheDocument();
+	});
 
-	it( 'should render nothing when modal is closed', () => {
-		const { container } = renderWithPreviewState( {
+	it('should render nothing when modal is closed', () => {
+		const { container } = renderWithPreviewState({
 			isModalOpened: false,
-		} );
-		expect( container.firstChild ).toBeNull();
-	} );
+		});
+		expect(container.firstChild).toBeNull();
+	});
 
-	it( 'should disable send button and show "Sending…" text when sending', () => {
-		renderWithPreviewState( {
+	it('should disable send button and show "Sending…" text when sending', () => {
+		renderWithPreviewState({
 			isSendingPreviewEmail: true,
 			toEmail: 'test@example.com',
-		} );
-		const sendButton = screen.getByRole( 'button', {
+		});
+		const sendButton = screen.getByRole('button', {
 			name: /sending…/i,
-		} );
-		expect( sendButton ).toBeDisabled();
-		expect( sendButton ).toHaveTextContent( 'Sending…' );
-	} );
-} );
+		});
+		expect(sendButton).toBeDisabled();
+		expect(sendButton).toHaveTextContent('Sending…');
+	});
+});

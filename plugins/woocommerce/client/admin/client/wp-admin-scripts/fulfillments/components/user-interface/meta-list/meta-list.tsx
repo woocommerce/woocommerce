@@ -9,46 +9,46 @@ import { isEmpty } from 'lodash';
  */
 import './meta-list.scss';
 
-function MetaValue( { value, href }: { value: string; href?: string } ) {
-	if ( isEmpty( String( value ) ) ) {
-		return <>{ __( '(empty)', 'woocommerce' ) }</>;
+function MetaValue({ value, href }: { value: string; href?: string }) {
+	if (isEmpty(String(value))) {
+		return <>{__('(empty)', 'woocommerce')}</>;
 	}
 
-	if ( href ) {
+	if (href) {
 		return (
-			<a href={ href } target="_blank" rel="noopener noreferrer">
-				{ String( value ) }
+			<a href={href} target="_blank" rel="noopener noreferrer">
+				{String(value)}
 			</a>
 		);
 	}
 
-	return <>{ String( value ) }</>;
+	return <>{String(value)}</>;
 }
 
-export default function MetaList( {
+export default function MetaList({
 	metaList,
 }: {
-	metaList: Array< {
+	metaList: Array<{
 		label: string;
 		value: string;
 		href?: string;
-	} >;
-} ) {
+	}>;
+}) {
 	return (
 		<ul className="woocommerce-fulfillment-meta-list">
-			{ metaList.map( ( meta, index ) => (
+			{metaList.map((meta, index) => (
 				<li
-					key={ index }
+					key={index}
 					className="woocommerce-fulfillment-meta-list__item"
 				>
 					<div className="woocommerce-fulfillment-meta-list__item-label">
-						{ meta.label }
+						{meta.label}
 					</div>
 					<div className="woocommerce-fulfillment-meta-list__item-value">
-						<MetaValue value={ meta.value } href={ meta.href } />
+						<MetaValue value={meta.value} href={meta.href} />
 					</div>
 				</li>
-			) ) }
+			))}
 		</ul>
 	);
 }

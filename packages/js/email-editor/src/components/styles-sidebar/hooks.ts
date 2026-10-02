@@ -27,7 +27,7 @@ const TEXT_BACKGROUND_PROBE_SETTINGS = {
  * the Colors screen in the running WordPress version.
  */
 export function useHasTextColorInTypographyPanel(): boolean {
-	return ! useHasStylesColorPanel( TEXT_BACKGROUND_PROBE_SETTINGS );
+	return !useHasStylesColorPanel(TEXT_BACKGROUND_PROBE_SETTINGS);
 }
 
 /**
@@ -37,17 +37,17 @@ export function useHasTextColorInTypographyPanel(): boolean {
  * unaffected.
  */
 export function useBackgroundScreenSettings() {
-	const theme = useSelect( ( select ) => select( storeName ).getTheme(), [] );
+	const theme = useSelect((select) => select(storeName).getTheme(), []);
 	return useMemo(
-		() => ( {
+		() => ({
 			...theme?.settings,
 			background: {
 				backgroundImage: false,
 				backgroundSize: false,
 				gradient: false,
 			},
-		} ),
-		[ theme?.settings ]
+		}),
+		[theme?.settings]
 	);
 }
 
@@ -57,5 +57,5 @@ export function useBackgroundScreenSettings() {
  * (7.1+) — older versions keep background color in the Colors screen.
  */
 export function useHasBackgroundScreen(): boolean {
-	return useHasStylesBackgroundPanel( useBackgroundScreenSettings() );
+	return useHasStylesBackgroundPanel(useBackgroundScreenSettings());
 }

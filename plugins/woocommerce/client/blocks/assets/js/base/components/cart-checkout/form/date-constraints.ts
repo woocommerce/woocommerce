@@ -9,20 +9,20 @@ import * as PlainDateFns from 'temporal-polyfill/fns/PlainDate';
  * Resolves an ISO 8601-2 duration to a date relative to today.
  * We use the store timezone (from wp.date.date) so dates match between server and client.
  */
-const resolveDuration = ( duration: string, today: string ): string => {
-	const [ year, month, day ] = today.split( '-' ).map( Number );
+const resolveDuration = (duration: string, today: string): string => {
+	const [year, month, day] = today.split('-').map(Number);
 
 	return PlainDateFns.toString(
 		PlainDateFns.add(
-			PlainDateFns.create( year, month, day ),
-			DurationFns.fromString( duration )
+			PlainDateFns.create(year, month, day),
+			DurationFns.fromString(duration)
 		)
 	);
 };
 
 // Constraints are re-resolved on every checkout render, so results are memoized. Today's date is
 // part of the key so a session crossing midnight still follows the clock.
-const resolvedDurations = new Map< string, string | undefined >();
+const resolvedDurations = new Map<string, string | undefined>();
 
 /**
  * Resolves a date field's min/max constraint to a YYYY-MM-DD value for a date input.
@@ -36,33 +36,33 @@ const resolvedDurations = new Map< string, string | undefined >();
 export const resolveDateConstraint = (
 	constraint: string | undefined
 ): string | undefined => {
-	if ( ! constraint ) {
+	if (!constraint) {
 		return undefined;
 	}
 
 	const value = constraint.trim();
 
 	// If it's already a date, return it.
-	if ( /^\d{4}-\d{2}-\d{2}$/.test( value ) ) {
+	if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
 		return value;
 	}
 
-	const today = formatDate( 'Y-m-d', new Date() );
-	const cacheKey = `${ value }|${ today }`;
+	const today = formatDate('Y-m-d', new Date());
+	const cacheKey = `${value}|${today}`;
 
-	if ( ! resolvedDurations.has( cacheKey ) ) {
+	if (!resolvedDurations.has(cacheKey)) {
 		let resolved: string | undefined;
 
 		try {
-			resolved = resolveDuration( value, today );
+			resolved = resolveDuration(value, today);
 		} catch {
 			resolved = undefined;
 		}
 
-		resolvedDurations.set( cacheKey, resolved );
+		resolvedDurations.set(cacheKey, resolved);
 	}
 
-	return resolvedDurations.get( cacheKey );
+	return resolvedDurations.get(cacheKey);
 };
 
 /**
@@ -72,14 +72,14 @@ export const resolveDateConstraint = (
  * @param field.min The minimum date or duration.
  * @param field.max The maximum date or duration.
  */
-export const resolveDateConstraints = ( field: {
+export const resolveDateConstraints = (field: {
 	min?: string;
 	max?: string;
-} ): { min: string | undefined; max: string | undefined } => {
-	const min = resolveDateConstraint( field.min );
-	const max = resolveDateConstraint( field.max );
+}): { min: string | undefined; max: string | undefined } => {
+	const min = resolveDateConstraint(field.min);
+	const max = resolveDateConstraint(field.max);
 
-	if ( min && max && min > max ) {
+	if (min && max && min > max) {
 		return { min: undefined, max: undefined };
 	}
 

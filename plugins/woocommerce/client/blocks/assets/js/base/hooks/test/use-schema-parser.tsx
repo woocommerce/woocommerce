@@ -17,12 +17,12 @@ import { useSchemaParser, type DocumentObject } from '../use-schema-parser';
 import checkoutSchema from './checkout-document-schema.json';
 
 // Mock the stores
-jest.mock( '@woocommerce/block-data', () => ( {
+jest.mock('@woocommerce/block-data', () => ({
 	__esModule: true,
 	cartStore: 'wc/store/cart',
 	checkoutStore: 'wc/store/checkout',
 	paymentStore: 'wc/store/payment',
-} ) );
+}));
 
 // Mock window.schemaParser
 const mockSchemaParser = {
@@ -30,36 +30,36 @@ const mockSchemaParser = {
 	addSchema: jest.fn(),
 };
 
-type DeepPartial< T > = T extends object
+type DeepPartial<T> = T extends object
 	? {
-			[ P in keyof T ]?: DeepPartial< T[ P ] >;
-	  }
+			[P in keyof T]?: DeepPartial<T[P]>;
+		}
 	: T;
 
-const getCurrentData = < T extends FormType | 'global' >( result: {
-	current: { data: DocumentObject< T > | null };
-} ): DocumentObject< T > => {
+const getCurrentData = <T extends FormType | 'global'>(result: {
+	current: { data: DocumentObject<T> | null };
+}): DocumentObject<T> => {
 	const { data } = result.current;
-	if ( data === null ) {
-		throw new Error( 'Expected schema parser data to be available.' );
+	if (data === null) {
+		throw new Error('Expected schema parser data to be available.');
 	}
 	return data;
 };
 
-describe( 'useSchemaParser', () => {
+describe('useSchemaParser', () => {
 	let registry: WPDataRegistry;
-	let mockCartData: DeepPartial< CartState[ 'cartData' ] >;
-	let mockCheckoutData: DeepPartial< CheckoutState >;
-	let mockPaymentData: DeepPartial< PaymentState >;
+	let mockCartData: DeepPartial<CartState['cartData']>;
+	let mockCheckoutData: DeepPartial<CheckoutState>;
+	let mockPaymentData: DeepPartial<PaymentState>;
 
-	const wrapper = ( { children }: { children: React.ReactNode } ) => (
-		<RegistryProvider value={ registry }>{ children }</RegistryProvider>
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<RegistryProvider value={registry}>{children}</RegistryProvider>
 	);
 
 	const setupMocks = () => {
 		// Mock cart data
 		mockCartData = {
-			coupons: [ { code: 'SAVE10' }, { code: 'FREESHIP' } ],
+			coupons: [{ code: 'SAVE10' }, { code: 'FREESHIP' }],
 			shippingRates: [
 				{
 					shipping_rates: [
@@ -128,329 +128,327 @@ describe( 'useSchemaParser', () => {
 		};
 
 		// Register mock stores
-		registry.registerStore( 'wc/store/cart', {
-			reducer: () => ( {} ),
+		registry.registerStore('wc/store/cart', {
+			reducer: () => ({}),
 			selectors: {
-				getCartData: jest.fn().mockReturnValue( mockCartData ),
+				getCartData: jest.fn().mockReturnValue(mockCartData),
 			},
-		} );
+		});
 
-		registry.registerStore( 'wc/store/checkout', {
-			reducer: () => ( {} ),
+		registry.registerStore('wc/store/checkout', {
+			reducer: () => ({}),
 			selectors: {
 				prefersCollection: jest
 					.fn()
-					.mockReturnValue( mockCheckoutData.prefersCollection ),
+					.mockReturnValue(mockCheckoutData.prefersCollection),
 				getShouldCreateAccount: jest
 					.fn()
-					.mockReturnValue( mockCheckoutData.shouldCreateAccount ),
+					.mockReturnValue(mockCheckoutData.shouldCreateAccount),
 				getOrderNotes: jest
 					.fn()
-					.mockReturnValue( mockCheckoutData.orderNotes ),
+					.mockReturnValue(mockCheckoutData.orderNotes),
 				getAdditionalFields: jest
 					.fn()
-					.mockReturnValue( mockCheckoutData.additionalFields ),
+					.mockReturnValue(mockCheckoutData.additionalFields),
 				getCustomerId: jest
 					.fn()
-					.mockReturnValue( mockCheckoutData.customerId ),
+					.mockReturnValue(mockCheckoutData.customerId),
 			},
-		} );
+		});
 
-		registry.registerStore( 'wc/store/payment', {
-			reducer: () => ( {} ),
+		registry.registerStore('wc/store/payment', {
+			reducer: () => ({}),
 			selectors: {
 				getActivePaymentMethod: jest
 					.fn()
-					.mockReturnValue( mockPaymentData.activePaymentMethod ),
+					.mockReturnValue(mockPaymentData.activePaymentMethod),
 			},
-		} );
+		});
 	};
-	beforeEach( () => {
+	beforeEach(() => {
 		registry = createRegistry();
 		setupMocks();
 		// Reset window.schemaParser
-		Object.defineProperty( window, 'schemaParser', {
+		Object.defineProperty(window, 'schemaParser', {
 			value: undefined,
 			writable: true,
-		} );
-	} );
+		});
+	});
 
-	afterEach( () => {
+	afterEach(() => {
 		jest.clearAllMocks();
-	} );
+	});
 
-	describe( 'With validating against schema', () => {
-		it( 'should validate cart data correctly', async () => {
+	describe('With validating against schema', () => {
+		it('should validate cart data correctly', async () => {
 			const { result } = renderHook(
-				( { formType } ) => useSchemaParser( formType ),
+				({ formType }) => useSchemaParser(formType),
 				{
 					initialProps: { formType: 'billing' as FormType },
 					wrapper,
 				}
 			);
 
-			const ajv = new Ajv( {
+			const ajv = new Ajv({
 				validateSchema: true,
 				strictSchema: true,
 				strict: true,
-			} );
-			const validate = ajv.compile( checkoutSchema );
-			const valid = validate( result.current.data );
+			});
+			const validate = ajv.compile(checkoutSchema);
+			const valid = validate(result.current.data);
 
-			expect( validate.errors ).toBe( null );
-			expect( valid ).toBe( true );
-		} );
-	} );
+			expect(validate.errors).toBe(null);
+			expect(valid).toBe(true);
+		});
+	});
 
-	describe( 'when window.schemaParser is not available', () => {
-		it( 'should return null parser and document object data', () => {
+	describe('when window.schemaParser is not available', () => {
+		it('should return null parser and document object data', () => {
 			const { result } = renderHook(
-				( { formType } ) => useSchemaParser( formType ),
+				({ formType }) => useSchemaParser(formType),
 				{
 					initialProps: { formType: 'billing' as FormType },
 					wrapper,
 				}
 			);
 
-			expect( result.current.parser ).toBeNull();
-			expect( result.current.data ).toBeDefined();
-			expect( result.current.data ).toHaveProperty( 'cart' );
-			expect( result.current.data ).toHaveProperty( 'checkout' );
-			expect( result.current.data ).toHaveProperty( 'customer' );
-		} );
-	} );
+			expect(result.current.parser).toBeNull();
+			expect(result.current.data).toBeDefined();
+			expect(result.current.data).toHaveProperty('cart');
+			expect(result.current.data).toHaveProperty('checkout');
+			expect(result.current.data).toHaveProperty('customer');
+		});
+	});
 
-	describe( 'when window.schemaParser is available', () => {
-		beforeEach( () => {
-			Object.defineProperty( window, 'schemaParser', {
+	describe('when window.schemaParser is available', () => {
+		beforeEach(() => {
+			Object.defineProperty(window, 'schemaParser', {
 				value: mockSchemaParser,
 				writable: true,
-			} );
-		} );
+			});
+		});
 
-		it( 'should return schema parser and document object data', () => {
+		it('should return schema parser and document object data', () => {
 			const { result } = renderHook(
-				( { formType } ) => useSchemaParser( formType ),
+				({ formType }) => useSchemaParser(formType),
 				{
 					initialProps: { formType: 'billing' as FormType },
 					wrapper,
 				}
 			);
 
-			expect( result.current.parser ).toBe( mockSchemaParser );
-			expect( result.current.data ).toBeDefined();
-		} );
-	} );
+			expect(result.current.parser).toBe(mockSchemaParser);
+			expect(result.current.data).toBeDefined();
+		});
+	});
 
-	describe( 'document object data structure', () => {
-		it( 'should transform cart data correctly', () => {
+	describe('document object data structure', () => {
+		it('should transform cart data correctly', () => {
 			const { result } = renderHook(
-				( { formType } ) => useSchemaParser( formType ),
+				({ formType }) => useSchemaParser(formType),
 				{
 					initialProps: { formType: 'billing' as FormType },
 					wrapper,
 				}
 			);
 
-			const { cart } = getCurrentData( result );
-			expect( cart ).toHaveProperty( 'coupons' );
-			expect( cart.coupons ).toEqual( [ 'SAVE10', 'FREESHIP' ] );
+			const { cart } = getCurrentData(result);
+			expect(cart).toHaveProperty('coupons');
+			expect(cart.coupons).toEqual(['SAVE10', 'FREESHIP']);
 
-			expect( cart ).toHaveProperty( 'shipping_rates' );
-			expect( cart.shipping_rates ).toEqual( [
+			expect(cart).toHaveProperty('shipping_rates');
+			expect(cart.shipping_rates).toEqual([
 				'flat_rate:1',
 				'free_shipping:1',
-			] );
+			]);
 
-			expect( cart ).toHaveProperty( 'items' );
-			expect( cart.items ).toEqual( [ 1, 1, 2 ] );
+			expect(cart).toHaveProperty('items');
+			expect(cart.items).toEqual([1, 1, 2]);
 
-			expect( cart ).toHaveProperty( 'items_type' );
-			expect( cart.items_type ).toEqual( [ 'simple', 'variable' ] );
+			expect(cart).toHaveProperty('items_type');
+			expect(cart.items_type).toEqual(['simple', 'variable']);
 
-			expect( cart ).toHaveProperty( 'items_count' );
-			expect( cart.items_count ).toBe( 3 );
+			expect(cart).toHaveProperty('items_count');
+			expect(cart.items_count).toBe(3);
 
-			expect( cart ).toHaveProperty( 'items_weight' );
-			expect( cart.items_weight ).toBe( 2.5 );
+			expect(cart).toHaveProperty('items_weight');
+			expect(cart.items_weight).toBe(2.5);
 
-			expect( cart ).toHaveProperty( 'needs_shipping' );
-			expect( cart.needs_shipping ).toBe( true );
+			expect(cart).toHaveProperty('needs_shipping');
+			expect(cart.needs_shipping).toBe(true);
 
-			expect( cart ).toHaveProperty( 'prefers_collection' );
-			expect( cart.prefers_collection ).toBe( false );
+			expect(cart).toHaveProperty('prefers_collection');
+			expect(cart.prefers_collection).toBe(false);
 
-			expect( cart ).toHaveProperty( 'totals' );
-			expect( cart.totals ).toEqual( {
+			expect(cart).toHaveProperty('totals');
+			expect(cart.totals).toEqual({
 				total_price: 9999,
 				total_tax: 899,
-			} );
+			});
 
-			expect( cart ).toHaveProperty( 'extensions' );
-			expect( cart.extensions ).toEqual( {
+			expect(cart).toHaveProperty('extensions');
+			expect(cart.extensions).toEqual({
 				custom_extension: { data: 'test' },
-			} );
-		} );
+			});
+		});
 
-		it( 'should transform checkout data correctly', () => {
+		it('should transform checkout data correctly', () => {
 			const { result } = renderHook(
-				( { formType } ) => useSchemaParser( formType ),
+				({ formType }) => useSchemaParser(formType),
 				{
 					initialProps: { formType: 'billing' as FormType },
 					wrapper,
 				}
 			);
 
-			const { checkout } = getCurrentData( result );
+			const { checkout } = getCurrentData(result);
 
-			expect( checkout ).toHaveProperty( 'create_account' );
-			expect( checkout.create_account ).toBe( true );
+			expect(checkout).toHaveProperty('create_account');
+			expect(checkout.create_account).toBe(true);
 
-			expect( checkout ).toHaveProperty( 'customer_note' );
-			expect( checkout.customer_note ).toBe(
-				'Please deliver after 6 PM'
-			);
+			expect(checkout).toHaveProperty('customer_note');
+			expect(checkout.customer_note).toBe('Please deliver after 6 PM');
 
-			expect( checkout ).toHaveProperty( 'payment_method' );
-			expect( checkout.payment_method ).toBe( 'stripe' );
+			expect(checkout).toHaveProperty('payment_method');
+			expect(checkout.payment_method).toBe('stripe');
 
-			expect( checkout ).toHaveProperty( 'additional_fields' );
-			expect( checkout.additional_fields ).toEqual( {
+			expect(checkout).toHaveProperty('additional_fields');
+			expect(checkout.additional_fields).toEqual({
 				'namespace/order_field': 'value2',
-			} );
-		} );
+			});
+		});
 
-		it( 'should transform customer data correctly', () => {
+		it('should transform customer data correctly', () => {
 			const { result } = renderHook(
-				( { formType } ) => useSchemaParser( formType ),
+				({ formType }) => useSchemaParser(formType),
 				{
 					initialProps: { formType: 'billing' as FormType },
 					wrapper,
 				}
 			);
 
-			const { customer } = getCurrentData( result );
+			const { customer } = getCurrentData(result);
 
-			expect( customer ).toHaveProperty( 'id' );
-			expect( customer.id ).toBe( 123 );
+			expect(customer).toHaveProperty('id');
+			expect(customer.id).toBe(123);
 
-			expect( customer ).toHaveProperty( 'billing_address' );
-			expect( customer.billing_address ).toEqual(
+			expect(customer).toHaveProperty('billing_address');
+			expect(customer.billing_address).toEqual(
 				mockCartData.billingAddress
 			);
 
-			expect( customer ).toHaveProperty( 'shipping_address' );
-			expect( customer.shipping_address ).toEqual(
+			expect(customer).toHaveProperty('shipping_address');
+			expect(customer.shipping_address).toEqual(
 				mockCartData.shippingAddress
 			);
 
-			expect( customer ).toHaveProperty( 'address' );
-			expect( customer.address ).toEqual( mockCartData.billingAddress );
+			expect(customer).toHaveProperty('address');
+			expect(customer.address).toEqual(mockCartData.billingAddress);
 
-			expect( customer ).toHaveProperty( 'additional_fields' );
+			expect(customer).toHaveProperty('additional_fields');
 			// Additional fields should be filtered to only include contact form keys
-			expect( customer.additional_fields ).toEqual( {
+			expect(customer.additional_fields).toEqual({
 				'namespace/contact_field': 'value1',
-			} );
-		} );
-	} );
+			});
+		});
+	});
 
-	describe( 'form type specific behavior', () => {
-		it( 'should set address to billing address for billing form type', () => {
+	describe('form type specific behavior', () => {
+		it('should set address to billing address for billing form type', () => {
 			const { result } = renderHook(
-				( { formType } ) => useSchemaParser( formType ),
+				({ formType }) => useSchemaParser(formType),
 				{
 					initialProps: { formType: 'billing' as FormType },
 					wrapper,
 				}
 			);
 
-			const { customer } = getCurrentData( result );
-			expect( customer.address ).toEqual( mockCartData.billingAddress );
-		} );
+			const { customer } = getCurrentData(result);
+			expect(customer.address).toEqual(mockCartData.billingAddress);
+		});
 
-		it( 'should set address to shipping address for shipping form type', () => {
+		it('should set address to shipping address for shipping form type', () => {
 			const { result } = renderHook(
-				( { formType } ) => useSchemaParser( formType ),
+				({ formType }) => useSchemaParser(formType),
 				{
 					initialProps: { formType: 'shipping' as FormType },
 					wrapper,
 				}
 			);
 
-			const { customer } = getCurrentData( result );
-			expect( customer.address ).toEqual( mockCartData.shippingAddress );
-		} );
+			const { customer } = getCurrentData(result);
+			expect(customer.address).toEqual(mockCartData.shippingAddress);
+		});
 
-		it( 'should not set address for contact form type', () => {
+		it('should not set address for contact form type', () => {
 			const { result } = renderHook(
-				( { formType } ) => useSchemaParser( formType ),
+				({ formType }) => useSchemaParser(formType),
 				{
 					initialProps: { formType: 'contact' as FormType },
 					wrapper,
 				}
 			);
 
-			const { customer } = getCurrentData( result );
-			expect( customer.address ).toBeUndefined();
-		} );
+			const { customer } = getCurrentData(result);
+			expect(customer.address).toBeUndefined();
+		});
 
-		it( 'should not set address for order form type', () => {
+		it('should not set address for order form type', () => {
 			const { result } = renderHook(
-				( { formType } ) => useSchemaParser( formType ),
+				({ formType }) => useSchemaParser(formType),
 				{
 					initialProps: { formType: 'order' as FormType },
 					wrapper,
 				}
 			);
 
-			const { customer } = getCurrentData( result );
-			expect( customer.address ).toBeUndefined();
-		} );
+			const { customer } = getCurrentData(result);
+			expect(customer.address).toBeUndefined();
+		});
 
-		it( 'should not set address for global form type', () => {
+		it('should not set address for global form type', () => {
 			const { result } = renderHook(
-				( { formType } ) => useSchemaParser( formType ),
+				({ formType }) => useSchemaParser(formType),
 				{
 					initialProps: { formType: 'global' as FormType },
 					wrapper,
 				}
 			);
 
-			const { customer } = getCurrentData( result );
-			expect( customer.address ).toBeUndefined();
-		} );
-	} );
+			const { customer } = getCurrentData(result);
+			expect(customer.address).toBeUndefined();
+		});
+	});
 
-	describe( 'additional fields filtering', () => {
-		it( 'should filter additional fields for contact form keys', () => {
+	describe('additional fields filtering', () => {
+		it('should filter additional fields for contact form keys', () => {
 			const { result } = renderHook(
-				( { formType } ) => useSchemaParser( formType ),
+				({ formType }) => useSchemaParser(formType),
 				{
 					initialProps: { formType: 'contact' as FormType },
 					wrapper,
 				}
 			);
 
-			const { customer } = getCurrentData( result );
-			expect( customer.additional_fields ).toEqual( {
+			const { customer } = getCurrentData(result);
+			expect(customer.additional_fields).toEqual({
 				'namespace/contact_field': 'value1',
-			} );
-		} );
+			});
+		});
 
-		it( 'should filter additional fields for order form keys', () => {
+		it('should filter additional fields for order form keys', () => {
 			const { result } = renderHook(
-				( { formType } ) => useSchemaParser( formType ),
+				({ formType }) => useSchemaParser(formType),
 				{
 					initialProps: { formType: 'order' as FormType },
 					wrapper,
 				}
 			);
 
-			const { checkout } = getCurrentData( result );
-			expect( checkout.additional_fields ).toEqual( {
+			const { checkout } = getCurrentData(result);
+			expect(checkout.additional_fields).toEqual({
 				'namespace/order_field': 'value2',
-			} );
-		} );
-	} );
-} );
+			});
+		});
+	});
+});

@@ -6,24 +6,24 @@ import { dispatch } from '@wordpress/data';
 import { queueRecordEvent } from '@woocommerce/tracks';
 import { decodeEntities } from '@wordpress/html-entities';
 
-export const registerCommandWithTracking = ( {
+export const registerCommandWithTracking = ({
 	name,
 	label,
 	icon,
 	callback,
 	origin,
-} ) => {
-	dispatch( commandsStore ).registerCommand( {
+}) => {
+	dispatch(commandsStore).registerCommand({
 		name,
-		label: decodeEntities( label ),
+		label: decodeEntities(label),
 		icon,
-		callback: ( ...args ) => {
-			queueRecordEvent( 'woocommerce_command_palette_submit', {
+		callback: (...args) => {
+			queueRecordEvent('woocommerce_command_palette_submit', {
 				name,
 				origin,
-			} );
+			});
 
-			callback( ...args );
+			callback(...args);
 		},
-	} );
+	});
 };

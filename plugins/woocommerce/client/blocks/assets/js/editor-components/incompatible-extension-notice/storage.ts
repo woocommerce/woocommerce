@@ -31,14 +31,14 @@ export const UNSCOPED_STORAGE_KEY =
  *
  * `0` is the "site unknown" fallback, and not a blog ID any site can hold.
  */
-const scopeToSite = ( key: string ): string => `${ key }__${ CURRENT_SITE_ID }`;
+const scopeToSite = (key: string): string => `${key}__${CURRENT_SITE_ID}`;
 
 /**
  * The key the editor sidebar notice reads and writes. It holds an array of
  * `{ [blockName]: slugs }` records, one per block.
  */
 export const getEditorStorageKey = (): string =>
-	scopeToSite( UNSCOPED_STORAGE_KEY );
+	scopeToSite(UNSCOPED_STORAGE_KEY);
 
 /**
  * The key the storefront banner reads and writes. It holds a flat array of
@@ -46,7 +46,7 @@ export const getEditorStorageKey = (): string =>
  * overwrite each other's storage.
  */
 export const getFrontendStorageKey = (): string =>
-	scopeToSite( `${ UNSCOPED_STORAGE_KEY }_frontend` );
+	scopeToSite(`${UNSCOPED_STORAGE_KEY}_frontend`);
 
 /**
  * The dismissals stored before the keys were scoped to a site, when this site
@@ -59,17 +59,17 @@ export const getFrontendStorageKey = (): string =>
  * hiding a live warning behind another site's dismissal.
  */
 export const readDismissalsFromBeforeScoping = (): unknown[] => {
-	if ( IS_MULTISITE ) {
+	if (IS_MULTISITE) {
 		return [];
 	}
 
 	try {
-		const stored = window.localStorage.getItem( UNSCOPED_STORAGE_KEY );
-		if ( ! stored ) {
+		const stored = window.localStorage.getItem(UNSCOPED_STORAGE_KEY);
+		if (!stored) {
 			return [];
 		}
-		const parsed = JSON.parse( stored );
-		if ( Array.isArray( parsed ) ) {
+		const parsed = JSON.parse(stored);
+		if (Array.isArray(parsed)) {
 			return parsed;
 		}
 	} catch {
@@ -80,7 +80,7 @@ export const readDismissalsFromBeforeScoping = (): unknown[] => {
 	// merchant who reports the notice coming back something to point at.
 	// eslint-disable-next-line no-console
 	console.error(
-		`Value for key '${ UNSCOPED_STORAGE_KEY }' could not be carried over from localStorage because it can't be read as a list of dismissals.`
+		`Value for key '${UNSCOPED_STORAGE_KEY}' could not be carried over from localStorage because it can't be read as a list of dismissals.`
 	);
 	return [];
 };
@@ -94,14 +94,14 @@ export const readDismissalsFromBeforeScoping = (): unknown[] => {
  * data would revive a dismissal the merchant has since replaced and hide a
  * warning that is currently owed.
  */
-export const readInitialDismissals = < T >(
+export const readInitialDismissals = <T>(
 	key: string,
 	migrate: () => T[]
 ): T[] => {
 	try {
 		// Deliberately `=== null`: an empty string is stored data we failed to
 		// write, not an absent key, and must not open the migration path.
-		return window.localStorage.getItem( key ) === null ? migrate() : [];
+		return window.localStorage.getItem(key) === null ? migrate() : [];
 	} catch {
 		// Storage can be unavailable altogether (private browsing, blocked
 		// cookies). Nothing is stored, and nothing can be migrated into it.
@@ -115,5 +115,5 @@ export const readInitialDismissals = < T >(
  * The notices stay dismissed while everything currently incompatible has
  * already been acknowledged.
  */
-export const isSubsetOf = ( subset: string[], superset: string[] ): boolean =>
-	subset.every( ( item ) => superset.includes( item ) );
+export const isSubsetOf = (subset: string[], superset: string[]): boolean =>
+	subset.every((item) => superset.includes(item));

@@ -9,10 +9,10 @@ import { useSelect } from '@wordpress/data';
  */
 import { ProductEntityResponse } from './types';
 
-export const useProduct = ( postId: number | string | undefined ) => {
+export const useProduct = (postId: number | string | undefined) => {
 	return useSelect(
-		( select ) => {
-			if ( ! postId ) {
+		(select) => {
+			if (!postId) {
 				return {
 					product: undefined,
 					isResolving: false,
@@ -20,25 +20,25 @@ export const useProduct = ( postId: number | string | undefined ) => {
 			}
 
 			const parsedPostId =
-				typeof postId === 'string' ? parseInt( postId, 10 ) : postId;
+				typeof postId === 'string' ? parseInt(postId, 10) : postId;
 
-			const product = select( coreStore ).getEditedEntityRecord(
+			const product = select(coreStore).getEditedEntityRecord(
 				'root',
 				'product',
 				parsedPostId
 			) as unknown as ProductEntityResponse | undefined;
 
-			const isResolving = select( coreStore ).isResolving(
+			const isResolving = select(coreStore).isResolving(
 				'getEditedEntityRecord',
-				[ 'root', 'product', parsedPostId ]
+				['root', 'product', parsedPostId]
 			);
 			const isResolutionFinished = select(
 				coreStore
-			).hasFinishedResolution( 'getEditedEntityRecord', [
+			).hasFinishedResolution('getEditedEntityRecord', [
 				'root',
 				'product',
 				parsedPostId,
-			] );
+			]);
 
 			return {
 				product,
@@ -46,6 +46,6 @@ export const useProduct = ( postId: number | string | undefined ) => {
 				isResolutionFinished,
 			};
 		},
-		[ postId ]
+		[postId]
 	);
 };

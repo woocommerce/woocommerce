@@ -13,12 +13,12 @@ import { renderCustomerEffortScoreTracks } from './shared';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { renderEmbeddedLayout } from './embedded-body-layout';
 
-const embeddedRoot = document.getElementById( 'woocommerce-embedded-root' );
+const embeddedRoot = document.getElementById('woocommerce-embedded-root');
 
-if ( embeddedRoot ) {
+if (embeddedRoot) {
 	const settingsGroup = 'wc_admin';
-	const hydrateUser = getAdminSetting( 'currentUserData' );
+	const hydrateUser = getAdminSetting('currentUserData');
 
-	renderEmbeddedLayout( embeddedRoot, hydrateUser, settingsGroup );
-	renderCustomerEffortScoreTracks( embeddedRoot );
+	renderEmbeddedLayout(embeddedRoot, hydrateUser, settingsGroup);
+	renderCustomerEffortScoreTracks(embeddedRoot);
 }

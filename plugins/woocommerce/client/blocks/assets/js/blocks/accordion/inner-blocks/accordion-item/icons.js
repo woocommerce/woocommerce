@@ -3,11 +3,11 @@
  */
 import { SVG, Path } from '@wordpress/components';
 
-export const chevron = ( { width, height } ) => {
+export const chevron = ({ width, height }) => {
 	return (
 		<SVG
-			width={ width || 24 }
-			height={ height || 24 }
+			width={width || 24}
+			height={height || 24}
 			viewBox="0 0 24 24"
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
@@ -22,11 +22,11 @@ export const chevron = ( { width, height } ) => {
 	);
 };
 
-export const plus = ( { width, height } ) => {
+export const plus = ({ width, height }) => {
 	return (
 		<SVG
-			width={ width || 24 }
-			height={ height || 24 }
+			width={width || 24}
+			height={height || 24}
 			viewBox="0 0 24 24"
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
@@ -39,11 +39,11 @@ export const plus = ( { width, height } ) => {
 	);
 };
 
-export const circlePlus = ( { width, height } ) => {
+export const circlePlus = ({ width, height }) => {
 	return (
 		<SVG
-			width={ width || 24 }
-			height={ height || 24 }
+			width={width || 24}
+			height={height || 24}
 			viewBox="0 0 24 24"
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
@@ -64,11 +64,11 @@ export const circlePlus = ( { width, height } ) => {
 	);
 };
 
-export const circleMinus = ( { width, height } ) => {
+export const circleMinus = ({ width, height }) => {
 	return (
 		<SVG
-			width={ width || 24 }
-			height={ height || 24 }
+			width={width || 24}
+			height={height || 24}
 			viewBox="0 0 24 24"
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
@@ -87,11 +87,11 @@ export const circleMinus = ( { width, height } ) => {
 	);
 };
 
-export const caret = ( { width, height } ) => {
+export const caret = ({ width, height }) => {
 	return (
 		<SVG
-			width={ width || 24 }
-			height={ height || 24 }
+			width={width || 24}
+			height={height || 24}
 			viewBox="0 0 24 24"
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
@@ -101,11 +101,11 @@ export const caret = ( { width, height } ) => {
 	);
 };
 
-export const chevronRight = ( { width, height } ) => {
+export const chevronRight = ({ width, height }) => {
 	return (
 		<SVG
-			width={ width || 24 }
-			height={ height || 24 }
+			width={width || 24}
+			height={height || 24}
 			viewBox="0 0 24 24"
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"

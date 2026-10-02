@@ -3,8 +3,8 @@
  */
 import { isFormFields } from '../form-fields';
 
-describe( 'isFormFields', () => {
-	it( 'should return true for valid FormFields object with all core fields', () => {
+describe('isFormFields', () => {
+	it('should return true for valid FormFields object with all core fields', () => {
 		const validFormFields = {
 			email: {
 				label: 'Email address',
@@ -85,10 +85,10 @@ describe( 'isFormFields', () => {
 			},
 		};
 
-		expect( isFormFields( validFormFields ) ).toBe( true );
-	} );
+		expect(isFormFields(validFormFields)).toBe(true);
+	});
 
-	it( 'should return true for FormFields with additional optional properties', () => {
+	it('should return true for FormFields with additional optional properties', () => {
 		const formFieldsWithExtras = {
 			email: {
 				label: 'Email address',
@@ -175,10 +175,10 @@ describe( 'isFormFields', () => {
 			},
 		};
 
-		expect( isFormFields( formFieldsWithExtras ) ).toBe( true );
-	} );
+		expect(isFormFields(formFieldsWithExtras)).toBe(true);
+	});
 
-	it( 'should return true for FormFields with additional optional fields', () => {
+	it('should return true for FormFields with additional optional fields', () => {
 		const formFieldsWithExtras = {
 			email: {
 				label: 'Email address',
@@ -273,43 +273,43 @@ describe( 'isFormFields', () => {
 				required: false,
 				attributes: [],
 				show_in_order_confirmation: true,
-				sanitize_callback: [ {}, 'default_sanitize_callback' ],
-				validate_callback: [ {}, 'default_validate_callback' ],
+				sanitize_callback: [{}, 'default_sanitize_callback'],
+				validate_callback: [{}, 'default_validate_callback'],
 				validation: [],
 			},
 		};
 
-		expect( isFormFields( formFieldsWithExtras ) ).toBe( true );
-	} );
+		expect(isFormFields(formFieldsWithExtras)).toBe(true);
+	});
 
-	it( 'should return false for null', () => {
-		expect( isFormFields( null ) ).toBe( false );
-	} );
+	it('should return false for null', () => {
+		expect(isFormFields(null)).toBe(false);
+	});
 
-	it( 'should return false for undefined', () => {
-		expect( isFormFields( undefined ) ).toBe( false );
-	} );
+	it('should return false for undefined', () => {
+		expect(isFormFields(undefined)).toBe(false);
+	});
 
-	it( 'should return false for false', () => {
-		expect( isFormFields( false ) ).toBe( false );
-	} );
+	it('should return false for false', () => {
+		expect(isFormFields(false)).toBe(false);
+	});
 
-	it( 'should return false for arrays', () => {
-		expect( isFormFields( [] ) ).toBe( false );
-		expect( isFormFields( [ 'test' ] ) ).toBe( false );
-	} );
+	it('should return false for arrays', () => {
+		expect(isFormFields([])).toBe(false);
+		expect(isFormFields(['test'])).toBe(false);
+	});
 
-	it( 'should return false for primitives', () => {
-		expect( isFormFields( 'string' ) ).toBe( false );
-		expect( isFormFields( 123 ) ).toBe( false );
-		expect( isFormFields( true ) ).toBe( false );
-	} );
+	it('should return false for primitives', () => {
+		expect(isFormFields('string')).toBe(false);
+		expect(isFormFields(123)).toBe(false);
+		expect(isFormFields(true)).toBe(false);
+	});
 
-	it( 'should return false for empty object', () => {
-		expect( isFormFields( {} ) ).toBe( false );
-	} );
+	it('should return false for empty object', () => {
+		expect(isFormFields({})).toBe(false);
+	});
 
-	it( 'should return false when missing any required core fields', () => {
+	it('should return false when missing any required core fields', () => {
 		// Missing first_name (and other core fields)
 		const missingFirstName = {
 			email: {
@@ -383,7 +383,7 @@ describe( 'isFormFields', () => {
 				index: 100,
 			},
 		};
-		expect( isFormFields( missingFirstName ) ).toBe( false );
+		expect(isFormFields(missingFirstName)).toBe(false);
 
 		// Missing multiple core fields
 		const missingMultiple = {
@@ -409,10 +409,10 @@ describe( 'isFormFields', () => {
 				index: 20,
 			},
 		};
-		expect( isFormFields( missingMultiple ) ).toBe( false );
-	} );
+		expect(isFormFields(missingMultiple)).toBe(false);
+	});
 
-	it( 'should return false when field values are not objects', () => {
+	it('should return false when field values are not objects', () => {
 		const invalidFieldValue = {
 			email: 'invalid string instead of object',
 			country: {
@@ -486,10 +486,10 @@ describe( 'isFormFields', () => {
 				index: 100,
 			},
 		};
-		expect( isFormFields( invalidFieldValue ) ).toBe( false );
-	} );
+		expect(isFormFields(invalidFieldValue)).toBe(false);
+	});
 
-	it( 'should return false when field has invalid property types', () => {
+	it('should return false when field has invalid property types', () => {
 		// Invalid label type
 		const invalidLabel = {
 			email: {
@@ -570,7 +570,7 @@ describe( 'isFormFields', () => {
 				index: 100,
 			},
 		};
-		expect( isFormFields( invalidLabel ) ).toBe( false );
+		expect(isFormFields(invalidLabel)).toBe(false);
 
 		// Invalid required type
 		const invalidRequired = {
@@ -652,7 +652,7 @@ describe( 'isFormFields', () => {
 				index: 100,
 			},
 		};
-		expect( isFormFields( invalidRequired ) ).toBe( false );
+		expect(isFormFields(invalidRequired)).toBe(false);
 
 		// Invalid index type
 		const invalidIndex = {
@@ -734,10 +734,10 @@ describe( 'isFormFields', () => {
 				index: 100,
 			},
 		};
-		expect( isFormFields( invalidIndex ) ).toBe( false );
-	} );
+		expect(isFormFields(invalidIndex)).toBe(false);
+	});
 
-	it( 'should return false when field has null values', () => {
+	it('should return false when field has null values', () => {
 		const nullFieldValue = {
 			email: null,
 			country: {
@@ -811,10 +811,10 @@ describe( 'isFormFields', () => {
 				index: 100,
 			},
 		};
-		expect( isFormFields( nullFieldValue ) ).toBe( false );
-	} );
+		expect(isFormFields(nullFieldValue)).toBe(false);
+	});
 
-	it( 'should validate optional field properties when present', () => {
+	it('should validate optional field properties when present', () => {
 		const fieldsWithOptionalProps = {
 			email: {
 				label: 'Email address',
@@ -899,10 +899,10 @@ describe( 'isFormFields', () => {
 				index: 100,
 			},
 		};
-		expect( isFormFields( fieldsWithOptionalProps ) ).toBe( true );
-	} );
+		expect(isFormFields(fieldsWithOptionalProps)).toBe(true);
+	});
 
-	it( 'should accept complete core fields structure matching PHP', () => {
+	it('should accept complete core fields structure matching PHP', () => {
 		// This matches exactly what CheckoutFields::get_core_fields() returns
 		const completeCoreFields = {
 			email: {
@@ -1006,6 +1006,6 @@ describe( 'isFormFields', () => {
 				index: 100,
 			},
 		};
-		expect( isFormFields( completeCoreFields ) ).toBe( true );
-	} );
-} );
+		expect(isFormFields(completeCoreFields)).toBe(true);
+	});
+});

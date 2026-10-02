@@ -1005,9 +1005,13 @@ describe( 'Address Suggestions Component', () => {
 
 		test( 'should update value attribute of address fields when address is selected', async () => {
 			// Pre-populate fields with old values (simulating pre-filled checkout)
-			document.getElementById( 'billing_city' ).setAttribute( 'value', 'Old City' );
+			document
+				.getElementById( 'billing_city' )
+				.setAttribute( 'value', 'Old City' );
 			document.getElementById( 'billing_city' ).value = 'Old City';
-			document.getElementById( 'billing_postcode' ).setAttribute( 'value', '91210' );
+			document
+				.getElementById( 'billing_postcode' )
+				.setAttribute( 'value', '91210' );
 			document.getElementById( 'billing_postcode' ).value = '91210';
 
 			// Setup suggestions
@@ -1026,10 +1030,26 @@ describe( 'Address Suggestions Component', () => {
 			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
 
 			// Check that both the property and the HTML value attribute are updated
-			expect( document.getElementById( 'billing_city' ).getAttribute( 'value' ) ).toBe( 'City' );
-			expect( document.getElementById( 'billing_postcode' ).getAttribute( 'value' ) ).toBe( '12345' );
-			expect( document.getElementById( 'billing_address_1' ).getAttribute( 'value' ) ).toBe( '123 Main Street' );
-			expect( document.getElementById( 'billing_state' ).getAttribute( 'value' ) ).toBe( 'CA' );
+			expect(
+				document
+					.getElementById( 'billing_city' )
+					.getAttribute( 'value' )
+			).toBe( 'City' );
+			expect(
+				document
+					.getElementById( 'billing_postcode' )
+					.getAttribute( 'value' )
+			).toBe( '12345' );
+			expect(
+				document
+					.getElementById( 'billing_address_1' )
+					.getAttribute( 'value' )
+			).toBe( '123 Main Street' );
+			expect(
+				document
+					.getElementById( 'billing_state' )
+					.getAttribute( 'value' )
+			).toBe( 'CA' );
 		} );
 
 		test( 'should handle partial address data from provider', async () => {

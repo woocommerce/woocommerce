@@ -13,50 +13,48 @@ import { useBusinessVerificationContext } from '../data/business-verification-co
 import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 
 type MockEmbeddedAccountOnboardingProps = {
-	onLoaderStart?: ( value: { elementTagName: string } ) => void;
-	onLoadError?: ( value: {
+	onLoaderStart?: (value: { elementTagName: string }) => void;
+	onLoadError?: (value: {
 		error: { type: string; message?: string };
 		elementTagName: string;
-	} ) => void;
-	onInitializationError?: ( failure: {
+	}) => void;
+	onInitializationError?: (failure: {
 		reason: 'bad_session' | 'init_error';
 		message: string;
 		receivedKeys?: string[];
-	} ) => void;
-	[ key: string ]: unknown;
+	}) => void;
+	[key: string]: unknown;
 };
 
 let mockEmbeddedAccountOnboardingProps: MockEmbeddedAccountOnboardingProps;
 
-jest.mock( '../components/embedded', () => ( {
-	EmbeddedAccountOnboarding: (
-		props: MockEmbeddedAccountOnboardingProps
-	) => {
+jest.mock('../components/embedded', () => ({
+	EmbeddedAccountOnboarding: (props: MockEmbeddedAccountOnboardingProps) => {
 		mockEmbeddedAccountOnboardingProps = props;
 		return <div data-testid="embedded-account-onboarding" />;
 	},
-} ) );
+}));
 
-jest.mock( '../../../data/onboarding-context', () => ( {
+jest.mock('../../../data/onboarding-context', () => ({
 	useOnboardingContext: jest.fn(),
-} ) );
+}));
 
-jest.mock( '../data/business-verification-context', () => ( {
+jest.mock('../data/business-verification-context', () => ({
 	useBusinessVerificationContext: jest.fn(),
-} ) );
+}));
 
-jest.mock( '../../../components/stripe-spinner', () => ( {
+jest.mock('../../../components/stripe-spinner', () => ({
 	__esModule: true,
 	default: () => <div data-testid="stripe-spinner" />,
-} ) );
+}));
 
-jest.mock( '../utils/actions', () => ( {
+jest.mock('../utils/actions', () => ({
 	finalizeEmbeddedKycSession: jest.fn(),
-} ) );
+}));
 
-jest.mock( '~/settings-payments/utils', () => ( {
+jest.mock('~/settings-payments/utils', () => ({
 	recordPaymentsOnboardingEvent: jest.fn(),
-} ) );
+}));
 
 const mockUseOnboardingContext = useOnboardingContext as jest.Mock;
 const mockUseBusinessVerificationContext =
@@ -67,8 +65,8 @@ const mockRecordPaymentsOnboardingEvent =
 	>;
 
 const mockContexts = () => {
-	mockUseBusinessVerificationContext.mockReturnValue( { data: {} } );
-	mockUseOnboardingContext.mockReturnValue( {
+	mockUseBusinessVerificationContext.mockReturnValue({ data: {} });
+	mockUseOnboardingContext.mockReturnValue({
 		currentStep: {
 			actions: {
 				kyc_fallback: {
@@ -81,66 +79,66 @@ const mockContexts = () => {
 		},
 		navigateToNextStep: jest.fn(),
 		sessionEntryPoint: 'settings',
-	} );
+	});
 };
 
 const getFailureNotice = (): HTMLElement => {
 	const notice = screen
-		.getByRole( 'link', { name: 'Learn more' } )
-		.closest< HTMLElement >( '[tabindex="-1"]' );
+		.getByRole('link', { name: 'Learn more' })
+		.closest<HTMLElement>('[tabindex="-1"]');
 
-	if ( ! notice ) {
-		throw new Error( 'Expected focused failure notice.' );
+	if (!notice) {
+		throw new Error('Expected focused failure notice.');
 	}
 
 	return notice;
 };
 
-describe( 'EmbeddedKyc', () => {
-	beforeEach( () => {
+describe('EmbeddedKyc', () => {
+	beforeEach(() => {
 		jest.clearAllMocks();
 		jest.useRealTimers();
 		mockEmbeddedAccountOnboardingProps = {};
 		mockContexts();
-	} );
+	});
 
-	afterEach( () => {
+	afterEach(() => {
 		jest.useRealTimers();
-	} );
+	});
 
-	it( 'announces the loading state while waiting for the embedded loader', () => {
-		render( <EmbeddedKyc /> );
+	it('announces the loading state while waiting for the embedded loader', () => {
+		render(<EmbeddedKyc />);
 
-		expect( screen.getByRole( 'status' ) ).toHaveTextContent(
+		expect(screen.getByRole('status')).toHaveTextContent(
 			'Loading onboarding…'
 		);
-	} );
+	});
 
-	it( 'shows a unified error when the embedded loader does not start before the timeout', () => {
+	it('shows a unified error when the embedded loader does not start before the timeout', () => {
 		jest.useFakeTimers();
 
-		render( <EmbeddedKyc /> );
+		render(<EmbeddedKyc />);
 
-		act( () => {
-			jest.advanceTimersByTime( 20000 );
-		} );
+		act(() => {
+			jest.advanceTimersByTime(20000);
+		});
 
 		const notice = getFailureNotice();
 
-		expect( notice ).toHaveTextContent(
+		expect(notice).toHaveTextContent(
 			"We couldn't load this step. This can happen when your site's security or server settings block a required connection to Stripe. Check the setup requirements, or contact support if the error persists."
 		);
-		expect( notice ).toHaveFocus();
+		expect(notice).toHaveFocus();
 		expect(
-			screen.getByRole( 'link', { name: 'Learn more' } )
+			screen.getByRole('link', { name: 'Learn more' })
 		).toHaveAttribute(
 			'href',
 			'https://woocommerce.com/document/woopayments/testing-and-troubleshooting/#onboarding'
 		);
 		expect(
-			screen.queryByTestId( 'embedded-account-onboarding' )
+			screen.queryByTestId('embedded-account-onboarding')
 		).not.toBeInTheDocument();
-		expect( mockRecordPaymentsOnboardingEvent ).toHaveBeenCalledWith(
+		expect(mockRecordPaymentsOnboardingEvent).toHaveBeenCalledWith(
 			'woopayments_onboarding_modal_kyc_load_error',
 			{
 				reason: 'timeout',
@@ -148,58 +146,58 @@ describe( 'EmbeddedKyc', () => {
 				source: 'settings',
 			}
 		);
-	} );
+	});
 
-	it( 'clears the timeout when the embedded loader starts', () => {
+	it('clears the timeout when the embedded loader starts', () => {
 		jest.useFakeTimers();
 
-		render( <EmbeddedKyc collectPayoutRequirements /> );
+		render(<EmbeddedKyc collectPayoutRequirements />);
 
-		act( () => {
-			mockEmbeddedAccountOnboardingProps.onLoaderStart?.( {
+		act(() => {
+			mockEmbeddedAccountOnboardingProps.onLoaderStart?.({
 				elementTagName: 'connect-account-onboarding',
-			} );
-		} );
-		act( () => {
-			jest.advanceTimersByTime( 20000 );
-		} );
+			});
+		});
+		act(() => {
+			jest.advanceTimersByTime(20000);
+		});
 
 		expect(
-			screen.queryByRole( 'link', { name: 'Learn more' } )
+			screen.queryByRole('link', { name: 'Learn more' })
 		).not.toBeInTheDocument();
 		expect(
-			screen.getByTestId( 'embedded-account-onboarding' )
+			screen.getByTestId('embedded-account-onboarding')
 		).toBeInTheDocument();
-		expect( mockRecordPaymentsOnboardingEvent ).toHaveBeenCalledWith(
+		expect(mockRecordPaymentsOnboardingEvent).toHaveBeenCalledWith(
 			'woopayments_onboarding_modal_kyc_started_loading',
 			{
 				collect_payout_requirements: true,
 				source: 'settings',
 			}
 		);
-		expect( mockRecordPaymentsOnboardingEvent ).not.toHaveBeenCalledWith(
+		expect(mockRecordPaymentsOnboardingEvent).not.toHaveBeenCalledWith(
 			'woopayments_onboarding_modal_kyc_load_error',
 			expect.anything()
 		);
-	} );
+	});
 
-	it( 'shows a unified error when Stripe reports a load error', () => {
-		render( <EmbeddedKyc /> );
+	it('shows a unified error when Stripe reports a load error', () => {
+		render(<EmbeddedKyc />);
 
-		act( () => {
-			mockEmbeddedAccountOnboardingProps.onLoadError?.( {
+		act(() => {
+			mockEmbeddedAccountOnboardingProps.onLoadError?.({
 				error: {
 					type: 'api_connection_error',
 					message: 'Stripe failed to load.',
 				},
 				elementTagName: 'connect-account-onboarding',
-			} );
-		} );
+			});
+		});
 
 		expect(
-			screen.getByRole( 'link', { name: 'Learn more' } )
+			screen.getByRole('link', { name: 'Learn more' })
 		).toBeInTheDocument();
-		expect( mockRecordPaymentsOnboardingEvent ).toHaveBeenCalledWith(
+		expect(mockRecordPaymentsOnboardingEvent).toHaveBeenCalledWith(
 			'woopayments_onboarding_modal_kyc_load_error',
 			{
 				reason: 'load_error',
@@ -209,25 +207,25 @@ describe( 'EmbeddedKyc', () => {
 				source: 'settings',
 			}
 		);
-	} );
+	});
 
-	it( 'shows HTTPS-specific copy when Stripe reports an invalid request', () => {
-		render( <EmbeddedKyc /> );
+	it('shows HTTPS-specific copy when Stripe reports an invalid request', () => {
+		render(<EmbeddedKyc />);
 
-		act( () => {
-			mockEmbeddedAccountOnboardingProps.onLoadError?.( {
+		act(() => {
+			mockEmbeddedAccountOnboardingProps.onLoadError?.({
 				error: {
 					type: 'invalid_request_error',
 					message: 'This application requires HTTPS.',
 				},
 				elementTagName: 'connect-account-onboarding',
-			} );
-		} );
+			});
+		});
 
-		expect( getFailureNotice() ).toHaveTextContent(
+		expect(getFailureNotice()).toHaveTextContent(
 			'Payment activation through our financial partner requires HTTPS and cannot be completed.'
 		);
-		expect( mockRecordPaymentsOnboardingEvent ).toHaveBeenCalledWith(
+		expect(mockRecordPaymentsOnboardingEvent).toHaveBeenCalledWith(
 			'woopayments_onboarding_modal_kyc_load_error',
 			{
 				reason: 'load_error',
@@ -237,23 +235,23 @@ describe( 'EmbeddedKyc', () => {
 				source: 'settings',
 			}
 		);
-	} );
+	});
 
-	it( 'shows a unified error when initialization fails', () => {
-		render( <EmbeddedKyc /> );
+	it('shows a unified error when initialization fails', () => {
+		render(<EmbeddedKyc />);
 
-		act( () => {
-			mockEmbeddedAccountOnboardingProps.onInitializationError?.( {
+		act(() => {
+			mockEmbeddedAccountOnboardingProps.onInitializationError?.({
 				reason: 'bad_session',
 				message: 'Unable to start onboarding.',
-				receivedKeys: [ 'unexpected' ],
-			} );
-		} );
+				receivedKeys: ['unexpected'],
+			});
+		});
 
 		expect(
-			screen.getByRole( 'link', { name: 'Learn more' } )
+			screen.getByRole('link', { name: 'Learn more' })
 		).toBeInTheDocument();
-		expect( mockRecordPaymentsOnboardingEvent ).toHaveBeenCalledWith(
+		expect(mockRecordPaymentsOnboardingEvent).toHaveBeenCalledWith(
 			'woopayments_onboarding_modal_kyc_load_error',
 			{
 				reason: 'bad_session',
@@ -263,22 +261,22 @@ describe( 'EmbeddedKyc', () => {
 				source: 'settings',
 			}
 		);
-	} );
+	});
 
-	it( 'omits initialization error messages from analytics', () => {
-		render( <EmbeddedKyc /> );
+	it('omits initialization error messages from analytics', () => {
+		render(<EmbeddedKyc />);
 
-		act( () => {
-			mockEmbeddedAccountOnboardingProps.onInitializationError?.( {
+		act(() => {
+			mockEmbeddedAccountOnboardingProps.onInitializationError?.({
 				reason: 'init_error',
 				message: 'Network failed for https://internal.example/token.',
-			} );
-		} );
+			});
+		});
 
-		expect( getFailureNotice() ).toHaveTextContent(
+		expect(getFailureNotice()).toHaveTextContent(
 			"We couldn't load this step. This can happen when your site's security or server settings block a required connection to Stripe. Check the setup requirements, or contact support if the error persists."
 		);
-		expect( mockRecordPaymentsOnboardingEvent ).toHaveBeenCalledWith(
+		expect(mockRecordPaymentsOnboardingEvent).toHaveBeenCalledWith(
 			'woopayments_onboarding_modal_kyc_load_error',
 			{
 				reason: 'init_error',
@@ -286,31 +284,31 @@ describe( 'EmbeddedKyc', () => {
 				source: 'settings',
 			}
 		);
-	} );
+	});
 
-	it( 'keeps the unified error when the loader starts after the timeout', () => {
+	it('keeps the unified error when the loader starts after the timeout', () => {
 		jest.useFakeTimers();
 
-		render( <EmbeddedKyc /> );
+		render(<EmbeddedKyc />);
 		const onLoaderStart = mockEmbeddedAccountOnboardingProps.onLoaderStart;
 
-		act( () => {
-			jest.advanceTimersByTime( 20000 );
-			onLoaderStart?.( {
+		act(() => {
+			jest.advanceTimersByTime(20000);
+			onLoaderStart?.({
 				elementTagName: 'connect-account-onboarding',
-			} );
-		} );
+			});
+		});
 
 		expect(
-			screen.getByRole( 'link', { name: 'Learn more' } )
+			screen.getByRole('link', { name: 'Learn more' })
 		).toBeInTheDocument();
 		expect(
-			screen.queryByTestId( 'embedded-account-onboarding' )
+			screen.queryByTestId('embedded-account-onboarding')
 		).not.toBeInTheDocument();
-		expect( mockRecordPaymentsOnboardingEvent ).toHaveBeenCalledTimes( 1 );
-		expect( mockRecordPaymentsOnboardingEvent ).toHaveBeenCalledWith(
+		expect(mockRecordPaymentsOnboardingEvent).toHaveBeenCalledTimes(1);
+		expect(mockRecordPaymentsOnboardingEvent).toHaveBeenCalledWith(
 			'woopayments_onboarding_modal_kyc_load_error',
-			expect.objectContaining( { reason: 'timeout' } )
+			expect.objectContaining({ reason: 'timeout' })
 		);
-	} );
-} );
+	});
+});

@@ -21,20 +21,20 @@ const dispatcher = new EventTarget();
  * @param {string} name - event name, in format `this_is_an_event`
  * @param          data - extra properties - please use a valid JSON object
  */
-const recordEvent = ( name: string, data = {} ) => {
-	if ( ! isEventTrackingEnabled() ) {
+const recordEvent = (name: string, data = {}) => {
+	if (!isEventTrackingEnabled()) {
 		return;
 	}
 
 	const recordedData = typeof data !== 'object' ? { data } : data;
 
 	const eventData = {
-		name: `${ EMAIL_STRING }_${ name }`,
+		name: `${EMAIL_STRING}_${name}`,
 		...recordedData,
 	};
 
 	dispatcher.dispatchEvent(
-		new CustomEvent( EMAIL_STRING, { detail: eventData } )
+		new CustomEvent(EMAIL_STRING, { detail: eventData })
 	);
 };
 
@@ -43,23 +43,23 @@ const recordEvent = ( name: string, data = {} ) => {
  * e.g., on page render or something similar
  * Takes the exact same parameter as `recordEvent`
  */
-const recordEventOnce = ( function () {
+const recordEventOnce = (function () {
 	const cachedEventName = {};
-	return ( name: string, data = {} ) => {
-		if ( ! isEventTrackingEnabled() ) {
+	return (name: string, data = {}) => {
+		if (!isEventTrackingEnabled()) {
 			return;
 		}
 
-		const cacheKey = `${ name }_${ JSON.stringify( data ).length }`; // ensure each entry is unique by name and data
-		if ( cachedEventName[ cacheKey ] ) {
+		const cacheKey = `${name}_${JSON.stringify(data).length}`; // ensure each entry is unique by name and data
+		if (cachedEventName[cacheKey]) {
 			return; // do not execute again
 		}
-		recordEvent( name, data );
-		cachedEventName[ cacheKey ] = true;
+		recordEvent(name, data);
+		cachedEventName[cacheKey] = true;
 	};
-} )();
+})();
 
-const debouncedRecordEvent = debounce( recordEvent, 700 ); // wait 700 milliseconds. The average human reaction speed time is around 250 ms, added some delay for mouse move and keyboard press
+const debouncedRecordEvent = debounce(recordEvent, 700); // wait 700 milliseconds. The average human reaction speed time is around 250 ms, added some delay for mouse move and keyboard press
 
 export {
 	recordEvent,

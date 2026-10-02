@@ -36,7 +36,7 @@ interface Props {
 		rel: string;
 		textAlign?: string;
 	};
-	setAttributes: ( attrs: Partial< Props[ 'attributes' ] > ) => void;
+	setAttributes: (attrs: Partial<Props['attributes']>) => void;
 	context: {
 		termId?: number;
 		termTaxonomy?: string;
@@ -53,58 +53,58 @@ const DEFAULT_ATTRIBUTES = {
 // Helper component to handle dynamic tag names without TypeScript union type issues
 const ContainerElement = forwardRef<
 	HTMLElement,
-	React.HTMLAttributes< HTMLElement > & {
+	React.HTMLAttributes<HTMLElement> & {
 		tagName?: string;
 		children?: React.ReactNode;
 	}
->( ( { tagName, children, ...props }, ref ) => {
-	return createElement( tagName as string, { ...props, ref }, children );
-} );
+>(({ tagName, children, ...props }, ref) => {
+	return createElement(tagName as string, { ...props, ref }, children);
+});
 
-export default function Edit( { attributes, setAttributes, context }: Props ) {
+export default function Edit({ attributes, setAttributes, context }: Props) {
 	const { isLink, level, linkTarget, rel, textAlign } = attributes;
 	const TagName = (
-		level === 0 ? 'p' : `h${ level }`
+		level === 0 ? 'p' : `h${level}`
 	) as keyof JSX.IntrinsicElements;
 
 	const { termId, termTaxonomy, taxonomy } = context;
 	const effectiveTaxonomy = termTaxonomy || taxonomy || 'product_cat';
 
 	const userCanEdit = useSelect(
-		( select ) => {
-			if ( ! termId ) {
+		(select) => {
+			if (!termId) {
 				return false;
 			}
 			// This use actually reflects the use seen in `core/post-title` block.
-			return select( coreStore ).canUser( 'update', {
+			return select(coreStore).canUser('update', {
 				kind: 'taxonomy',
 				name: effectiveTaxonomy,
 				id: termId,
-			} );
+			});
 		},
-		[ termId, effectiveTaxonomy ]
+		[termId, effectiveTaxonomy]
 	);
 
-	const isPreviewMode = usePreviewMode() && ! termId;
-	const [ rawTitle = '', setTitle, fullTitle ] = useEntityProp(
+	const isPreviewMode = usePreviewMode() && !termId;
+	const [rawTitle = '', setTitle, fullTitle] = useEntityProp(
 		'taxonomy',
 		effectiveTaxonomy,
 		'name',
-		termId ? String( termId ) : undefined
+		termId ? String(termId) : undefined
 	);
 
 	let displayRawTitle = '';
-	if ( isPreviewMode ) {
-		displayRawTitle = previewCategories[ 0 ].name;
-	} else if ( typeof rawTitle === 'string' ) {
+	if (isPreviewMode) {
+		displayRawTitle = previewCategories[0].name;
+	} else if (typeof rawTitle === 'string') {
 		displayRawTitle = rawTitle;
 	}
 
 	let displayFullTitle = '';
-	if ( isPreviewMode ) {
-		displayFullTitle = escapeHTML( previewCategories[ 0 ].name );
-	} else if ( typeof fullTitle === 'string' ) {
-		displayFullTitle = escapeHTML( decodeEntities( fullTitle ) );
+	if (isPreviewMode) {
+		displayFullTitle = escapeHTML(previewCategories[0].name);
+	} else if (typeof fullTitle === 'string') {
+		displayFullTitle = escapeHTML(decodeEntities(fullTitle));
 	} else if (
 		typeof fullTitle === 'object' &&
 		fullTitle !== null &&
@@ -115,13 +115,13 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	}
 
 	const link = useSelect(
-		( select ) => {
-			if ( ! termId ) {
+		(select) => {
+			if (!termId) {
 				return undefined;
 			}
 			const record = select(
 				coreStore
-			).getEntityRecord< WP_REST_API_Category >(
+			).getEntityRecord<WP_REST_API_Category>(
 				'taxonomy',
 				effectiveTaxonomy,
 				termId
@@ -129,68 +129,68 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 
 			return record?.link;
 		},
-		[ termId, effectiveTaxonomy ]
+		[termId, effectiveTaxonomy]
 	);
 
-	const blockProps = useBlockProps( {
-		className: clsx( { [ `has-text-align-${ textAlign }` ]: textAlign } ),
-	} );
+	const blockProps = useBlockProps({
+		className: clsx({ [`has-text-align-${textAlign}`]: textAlign }),
+	});
 
 	let titleElement: JSX.Element = createElement(
 		TagName,
 		blockProps,
-		__( 'Category title', 'woocommerce' )
+		__('Category title', 'woocommerce')
 	) as JSX.Element;
 
-	if ( termId || isPreviewMode ) {
+	if (termId || isPreviewMode) {
 		titleElement = userCanEdit ? (
 			<PlainText
-				tagName={ TagName }
-				placeholder={ __( 'No title', 'woocommerce' ) }
-				value={ displayRawTitle }
-				onChange={ ( v ) => setTitle( v ) }
-				__experimentalVersion={ 2 }
-				{ ...blockProps }
+				tagName={TagName}
+				placeholder={__('No title', 'woocommerce')}
+				value={displayRawTitle}
+				onChange={(v) => setTitle(v)}
+				__experimentalVersion={2}
+				{...blockProps}
 			/>
 		) : (
 			<ContainerElement
-				tagName={ TagName }
-				{ ...blockProps }
-				dangerouslySetInnerHTML={ {
+				tagName={TagName}
+				{...blockProps}
+				dangerouslySetInnerHTML={{
 					__html: displayFullTitle,
-				} }
+				}}
 			/>
 		);
 	}
 
-	if ( isLink && termId ) {
+	if (isLink && termId) {
 		titleElement = userCanEdit ? (
-			<ContainerElement tagName={ TagName } { ...blockProps }>
+			<ContainerElement tagName={TagName} {...blockProps}>
 				<PlainText
 					tagName="a"
-					href={ link }
-					target={ linkTarget }
-					rel={ rel }
+					href={link}
+					target={linkTarget}
+					rel={rel}
 					placeholder={
-						! displayRawTitle?.length
-							? __( 'No title', 'woocommerce' )
+						!displayRawTitle?.length
+							? __('No title', 'woocommerce')
 							: undefined
 					}
-					value={ displayRawTitle }
-					onChange={ ( v ) => setTitle( v ) }
-					__experimentalVersion={ 2 }
+					value={displayRawTitle}
+					onChange={(v) => setTitle(v)}
+					__experimentalVersion={2}
 				/>
 			</ContainerElement>
 		) : (
-			<ContainerElement tagName={ TagName } { ...blockProps }>
+			<ContainerElement tagName={TagName} {...blockProps}>
 				<a
-					href={ link }
-					target={ linkTarget }
-					rel={ rel }
-					onClick={ ( event ) => event.preventDefault() }
-					dangerouslySetInnerHTML={ {
+					href={link}
+					target={linkTarget}
+					rel={rel}
+					onClick={(event) => event.preventDefault()}
+					dangerouslySetInnerHTML={{
 						__html: displayFullTitle,
-					} }
+					}}
 				/>
 			</ContainerElement>
 		);
@@ -200,100 +200,93 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		<>
 			<BlockControls group="block">
 				<HeadingLevelDropdown
-					value={ level }
-					onChange={ ( newLevel: number ) =>
-						setAttributes( { level: newLevel } )
+					value={level}
+					onChange={(newLevel: number) =>
+						setAttributes({ level: newLevel })
 					}
 				/>
 				<AlignmentControl
-					value={ textAlign }
-					onChange={ ( newTextAlign: string | undefined ) =>
-						setAttributes( { textAlign: newTextAlign || '' } )
+					value={textAlign}
+					onChange={(newTextAlign: string | undefined) =>
+						setAttributes({ textAlign: newTextAlign || '' })
 					}
 				/>
 			</BlockControls>
 			<InspectorControls>
 				<ToolsPanel
-					label={ __( 'Settings', 'woocommerce' ) }
-					resetAll={ () => {
-						setAttributes( DEFAULT_ATTRIBUTES );
-					} }
+					label={__('Settings', 'woocommerce')}
+					resetAll={() => {
+						setAttributes(DEFAULT_ATTRIBUTES);
+					}}
 				>
 					<ToolsPanelItem
-						label={ __( 'Make title a link', 'woocommerce' ) }
-						hasValue={ () => isLink !== DEFAULT_ATTRIBUTES.isLink }
-						onDeselect={ () =>
-							setAttributes( {
+						label={__('Make title a link', 'woocommerce')}
+						hasValue={() => isLink !== DEFAULT_ATTRIBUTES.isLink}
+						onDeselect={() =>
+							setAttributes({
 								isLink: DEFAULT_ATTRIBUTES.isLink,
-							} )
+							})
 						}
 						isShownByDefault
 					>
 						<ToggleControl
 							__nextHasNoMarginBottom
-							label={ __( 'Make title a link', 'woocommerce' ) }
-							onChange={ () =>
-								setAttributes( { isLink: ! isLink } )
-							}
-							checked={ isLink }
+							label={__('Make title a link', 'woocommerce')}
+							onChange={() => setAttributes({ isLink: !isLink })}
+							checked={isLink}
 						/>
 					</ToolsPanelItem>
-					{ isLink && (
+					{isLink && (
 						<>
 							<ToolsPanelItem
-								label={ __( 'Open in new tab', 'woocommerce' ) }
-								hasValue={ () =>
+								label={__('Open in new tab', 'woocommerce')}
+								hasValue={() =>
 									linkTarget !== DEFAULT_ATTRIBUTES.linkTarget
 								}
-								onDeselect={ () =>
-									setAttributes( {
+								onDeselect={() =>
+									setAttributes({
 										linkTarget:
 											DEFAULT_ATTRIBUTES.linkTarget,
-									} )
+									})
 								}
 								isShownByDefault
 							>
 								<ToggleControl
 									__nextHasNoMarginBottom
-									label={ __(
-										'Open in new tab',
-										'woocommerce'
-									) }
-									onChange={ ( v ) =>
-										setAttributes( {
+									label={__('Open in new tab', 'woocommerce')}
+									onChange={(v) =>
+										setAttributes({
 											linkTarget: v ? '_blank' : '_self',
-										} )
+										})
 									}
-									checked={ linkTarget === '_blank' }
+									checked={linkTarget === '_blank'}
 								/>
 							</ToolsPanelItem>
 							<ToolsPanelItem
-								label={ __( 'Link rel', 'woocommerce' ) }
-								hasValue={ () =>
-									rel !== DEFAULT_ATTRIBUTES.rel
-								}
-								onDeselect={ () =>
-									setAttributes( {
+								label={__('Link rel', 'woocommerce')}
+								hasValue={() => rel !== DEFAULT_ATTRIBUTES.rel}
+								onDeselect={() =>
+									setAttributes({
 										rel: DEFAULT_ATTRIBUTES.rel,
-									} )
+									})
 								}
 								isShownByDefault
 							>
 								<TextControl
 									__next40pxDefaultSize
 									__nextHasNoMarginBottom
-									label={ __( 'Link rel', 'woocommerce' ) }
-									value={ rel }
-									onChange={ ( newRel ) =>
-										setAttributes( { rel: newRel } )
+									label={__('Link rel', 'woocommerce')}
+									value={rel}
+									onChange={(newRel) =>
+										setAttributes({ rel: newRel })
 									}
 								/>
 							</ToolsPanelItem>
 						</>
-					) }
+					)}
 				</ToolsPanel>
 			</InspectorControls>
-			{ titleElement }
+			{titleElement}
 		</>
 	);
 }

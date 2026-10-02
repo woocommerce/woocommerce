@@ -9,23 +9,23 @@ import { BlockInstance } from '@wordpress/blocks';
  * @param { { blocks: BlockInstance[], findCondition: Function } } parameters Parameters containing an array of `BlockInstance` objects to search through and a function that takes a `BlockInstance` object as its argument and returns a boolean indicating whether the block matches the desired condition.
  * @return If a matching block is found, the function returns the `BlockInstance` object. If no matching block is found, the function returns `undefined`.
  */
-export const findBlock = ( {
+export const findBlock = ({
 	blocks,
 	findCondition,
 }: {
 	blocks: BlockInstance[];
-	findCondition: ( block: BlockInstance ) => boolean;
-} ): BlockInstance | undefined => {
-	for ( const block of blocks ) {
-		if ( findCondition( block ) ) {
+	findCondition: (block: BlockInstance) => boolean;
+}): BlockInstance | undefined => {
+	for (const block of blocks) {
+		if (findCondition(block)) {
 			return block;
 		}
-		if ( block.innerBlocks ) {
-			const foundChildBlock = findBlock( {
+		if (block.innerBlocks) {
+			const foundChildBlock = findBlock({
 				blocks: block.innerBlocks,
 				findCondition,
-			} );
-			if ( foundChildBlock ) {
+			});
+			if (foundChildBlock) {
 				return foundChildBlock;
 			}
 		}

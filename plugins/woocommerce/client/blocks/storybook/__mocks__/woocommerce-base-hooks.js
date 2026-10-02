@@ -7,7 +7,7 @@ import {
 } from '@woocommerce/resource-previews';
 
 export * from '../../assets/js/base/hooks/index.js';
-export const useStoreCart = () => ( {
+export const useStoreCart = () => ({
 	cartCoupons: previewCart.coupons,
 	cartItems: previewCart.items,
 	cartItemsCount: previewCart.items_count,
@@ -26,8 +26,8 @@ export const useStoreCart = () => ( {
 	isLoadingRates: false,
 	cartHasCalculatedShipping: previewCart.has_calculated_shipping,
 	receiveCart: () => void null,
-} );
-export const useShippingData = () => ( {
+});
+export const useShippingData = () => ({
 	selectShippingRate: () => void null,
 	selectedRates: [],
 	shippingRates: previewShippingRates,
@@ -36,4 +36,4 @@ export const useShippingData = () => ( {
 	hasCalculatedShipping: previewCart.has_calculated_shipping,
 	isLoadingRates: false,
 	isCollectable: false,
-} );
+});

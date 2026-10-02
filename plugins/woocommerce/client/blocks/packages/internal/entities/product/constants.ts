@@ -16,11 +16,11 @@ export const PRODUCT_ENTITY: Entity = {
 	baseURL: isExperimentalWcRestApiV4Enabled()
 		? '/wc/v4/products'
 		: '/wc/v3/products',
-	label: __( 'Product', 'woocommerce' ),
-	plural: __( 'Products', 'woocommerce' ),
+	label: __('Product', 'woocommerce'),
+	plural: __('Products', 'woocommerce'),
 	key: 'id',
 	supportsPagination: true,
-	getTitle: ( record ) => {
+	getTitle: (record) => {
 		const recordData = record as ProductEntityResponse;
 		return recordData.name;
 	},

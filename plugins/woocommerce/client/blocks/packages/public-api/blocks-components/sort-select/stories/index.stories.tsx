@@ -78,22 +78,22 @@ export default {
 				'The placeholder text to show when no value has been entered.',
 		},
 	},
-} as Meta< SortSelectProps >;
+} as Meta<SortSelectProps>;
 
-const Template: StoryFn< SortSelectProps > = ( args ) => {
-	const [ { value }, updateArgs ] = useArgs();
+const Template: StoryFn<SortSelectProps> = (args) => {
+	const [{ value }, updateArgs] = useArgs();
 	return (
 		<SortSelect
-			{ ...args }
-			value={ value }
-			onChange={ ( e ) => {
-				updateArgs( { value: e.target.value } );
-			} }
+			{...args}
+			value={value}
+			onChange={(e) => {
+				updateArgs({ value: e.target.value });
+			}}
 		/>
 	);
 };
 
-export const Default: StoryFn< SortSelectProps > = Template.bind( {} );
+export const Default: StoryFn<SortSelectProps> = Template.bind({});
 Default.args = {
 	label: 'Choose one of the options',
 	options: [

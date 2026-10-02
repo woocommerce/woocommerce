@@ -11,17 +11,17 @@ import { Edit, Save } from './edit';
 import metadata from './block.json';
 
 // Register the block
-registerBlockType( 'woocommerce/checkout-order-note-block', {
+registerBlockType('woocommerce/checkout-order-note-block', {
 	apiVersion: metadata.apiVersion,
 	title: metadata.title,
 	icon: {
 		src: (
 			<Icon
-				icon={ page }
+				icon={page}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
 	},
 	edit: Edit,
 	save: Save,
-} );
+});

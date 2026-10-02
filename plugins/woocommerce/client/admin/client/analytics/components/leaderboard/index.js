@@ -24,10 +24,10 @@ import { Text } from '@woocommerce/experimental';
 import sanitizeHTML from '../../../lib/sanitize-html';
 import './style.scss';
 
-const formattable = new Set( [ 'currency', 'number' ] );
+const formattable = new Set(['currency', 'number']);
 
 export class Leaderboard extends Component {
-	getFormattedColumn = ( column ) => {
+	getFormattedColumn = (column) => {
 		const { format } = column;
 
 		/*
@@ -37,15 +37,15 @@ export class Leaderboard extends Component {
 		 * actual type of numeric columns returned by WooCommerce's own API is
 		 * number, there is no guarantee the value will be a number.
 		 */
-		if ( formattable.has( column.format ) && isFinite( column.value ) ) {
-			const value = parseFloat( column.value );
+		if (formattable.has(column.format) && isFinite(column.value)) {
+			const value = parseFloat(column.value);
 
-			if ( ! Number.isNaN( value ) ) {
+			if (!Number.isNaN(value)) {
 				const { formatAmount, getCurrencyConfig } = this.context;
 				const display =
 					format === 'currency'
-						? formatAmount( value )
-						: formatValue( getCurrencyConfig(), format, value );
+						? formatAmount(value)
+						: formatValue(getCurrencyConfig(), format, value);
 
 				return {
 					display,
@@ -56,16 +56,14 @@ export class Leaderboard extends Component {
 
 		return {
 			display: (
-				<div
-					dangerouslySetInnerHTML={ sanitizeHTML( column.display ) }
-				/>
+				<div dangerouslySetInnerHTML={sanitizeHTML(column.display)} />
 			),
 			value: column.value,
 		};
 	};
 
 	getFormattedHeaders() {
-		return this.props.headers.map( ( header, i ) => {
+		return this.props.headers.map((header, i) => {
 			return {
 				isLeftAligned: i === 0,
 				hiddenByDefault: false,
@@ -73,44 +71,39 @@ export class Leaderboard extends Component {
 				key: header.label,
 				label: header.label,
 			};
-		} );
+		});
 	}
 
 	getFormattedRows() {
-		return this.props.rows.map( ( row ) => {
-			return row.map( this.getFormattedColumn );
-		} );
+		return this.props.rows.map((row) => {
+			return row.map(this.getFormattedColumn);
+		});
 	}
 
 	render() {
 		const { isRequesting, isError, totalRows, title } = this.props;
 		const classes = 'woocommerce-leaderboard';
 
-		if ( isError ) {
-			return <AnalyticsError className={ classes } />;
+		if (isError) {
+			return <AnalyticsError className={classes} />;
 		}
 
 		const rows = this.getFormattedRows();
 
-		if ( ! isRequesting && rows.length === 0 ) {
+		if (!isRequesting && rows.length === 0) {
 			return (
-				<Card className={ classes }>
+				<Card className={classes}>
 					<CardHeader>
-						<Text
-							size={ 16 }
-							weight={ 600 }
-							as="h3"
-							color="#23282d"
-						>
-							{ title }
+						<Text size={16} weight={600} as="h3" color="#23282d">
+							{title}
 						</Text>
 					</CardHeader>
 					<CardBody size="none">
 						<EmptyTable>
-							{ __(
+							{__(
 								'No data recorded for the selected time period.',
 								'woocommerce'
-							) }
+							)}
 						</EmptyTable>
 					</CardBody>
 				</Card>
@@ -119,14 +112,14 @@ export class Leaderboard extends Component {
 
 		return (
 			<TableCard
-				className={ classes }
-				headers={ this.getFormattedHeaders() }
-				isLoading={ isRequesting }
-				rows={ rows }
-				rowsPerPage={ totalRows }
-				showMenu={ false }
-				title={ title }
-				totalRows={ totalRows }
+				className={classes}
+				headers={this.getFormattedHeaders()}
+				isLoading={isRequesting}
+				rows={rows}
+				rowsPerPage={totalRows}
+				showMenu={false}
+				title={title}
+				totalRows={totalRows}
 			/>
 		);
 	}
@@ -137,9 +130,9 @@ Leaderboard.propTypes = {
 	 * An array of column headers.
 	 */
 	headers: PropTypes.arrayOf(
-		PropTypes.shape( {
+		PropTypes.shape({
 			label: PropTypes.string,
-		} )
+		})
 	),
 	/**
 	 * String of leaderboard ID to display.
@@ -154,14 +147,14 @@ Leaderboard.propTypes = {
 	 */
 	rows: PropTypes.arrayOf(
 		PropTypes.arrayOf(
-			PropTypes.shape( {
+			PropTypes.shape({
 				display: PropTypes.node,
-				value: PropTypes.oneOfType( [
+				value: PropTypes.oneOfType([
 					PropTypes.string,
 					PropTypes.number,
 					PropTypes.bool,
-				] ),
-			} )
+				]),
+			})
 		)
 	).isRequired,
 	/**
@@ -183,24 +176,24 @@ Leaderboard.defaultProps = {
 Leaderboard.contextType = CurrencyContext;
 
 export default compose(
-	withSelect( ( select, props ) => {
+	withSelect((select, props) => {
 		const { id, query, totalRows, filters } = props;
 		const { woocommerce_default_date_range: defaultDateRange } = select(
 			settingsStore
-		).getSetting( 'wc_admin', 'wcAdminSettings' );
-		const filterQuery = getFilterQuery( { filters, query } );
+		).getSetting('wc_admin', 'wcAdminSettings');
+		const filterQuery = getFilterQuery({ filters, query });
 
 		const leaderboardQuery = {
 			id,
 			per_page: totalRows,
-			persisted_query: getPersistedQuery( query ),
+			persisted_query: getPersistedQuery(query),
 			query,
 			select,
 			defaultDateRange,
 			filterQuery,
 		};
-		const leaderboardData = getLeaderboard( leaderboardQuery );
+		const leaderboardData = getLeaderboard(leaderboardQuery);
 
 		return leaderboardData;
-	} )
-)( Leaderboard );
+	})
+)(Leaderboard);

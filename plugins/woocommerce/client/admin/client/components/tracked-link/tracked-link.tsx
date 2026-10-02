@@ -37,7 +37,7 @@ interface TrackedLinkProps {
 /**
  * A component that renders a link with tracking capabilities.
  */
-export const TrackedLink = ( {
+export const TrackedLink = ({
 	textProps,
 	message,
 	eventName = '',
@@ -46,44 +46,44 @@ export const TrackedLink = ( {
 	linkType = 'wc-admin',
 	target,
 	onClickCallback,
-}: TrackedLinkProps ) => {
-	const linkTextMatch = message.match( /{{Link}}(.*?){{\/Link}}/ );
-	const linkText = linkTextMatch ? linkTextMatch[ 1 ] : '';
+}: TrackedLinkProps) => {
+	const linkTextMatch = message.match(/{{Link}}(.*?){{\/Link}}/);
+	const linkText = linkTextMatch ? linkTextMatch[1] : '';
 	const shouldOpenInNewTab = linkType === 'external' && target === '_blank';
 
 	return (
-		<Text { ...textProps }>
-			{ interpolateComponents( {
+		<Text {...textProps}>
+			{interpolateComponents({
 				mixedString: message,
 				components: {
 					Link: (
 						<Link
-							onClick={ () => {
-								if ( onClickCallback ) {
+							onClick={() => {
+								if (onClickCallback) {
 									onClickCallback();
 								} else {
-									recordEvent( eventName, eventProperties );
+									recordEvent(eventName, eventProperties);
 								}
-								if ( linkType !== 'external' ) {
+								if (linkType !== 'external') {
 									window.location.href = targetUrl;
 									return false;
 								}
-							} }
-							href={ targetUrl }
-							type={ linkType }
-							target={ shouldOpenInNewTab ? '_blank' : undefined }
+							}}
+							href={targetUrl}
+							type={linkType}
+							target={shouldOpenInNewTab ? '_blank' : undefined}
 							aria-label={
 								shouldOpenInNewTab
-									? `${ linkText } (${ __(
+									? `${linkText} (${__(
 											'opens in a new tab',
 											'woocommerce'
-									  ) })`
+										)})`
 									: undefined
 							}
 						/>
 					),
 				},
-			} ) }
+			})}
 		</Text>
 	);
 };

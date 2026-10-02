@@ -14,23 +14,23 @@ import { findBlock } from '@woocommerce/utils';
 import { upgradeToBlockifiedProductGallery } from '../../../product-elements-blocks/product-image-gallery/edit-utils';
 
 export const UpgradeProductImageGallery = () => {
-	const [ productImageGalleryBlock, setProductImageGalleryBlock ] =
-		useState< BlockInstance | null >( null );
+	const [productImageGalleryBlock, setProductImageGalleryBlock] =
+		useState<BlockInstance | null>(null);
 
-	useEffect( () => {
-		const foundBlock = findBlock( {
-			blocks: select( 'core/block-editor' ).getBlocks(),
-			findCondition: ( block ) =>
+	useEffect(() => {
+		const foundBlock = findBlock({
+			blocks: select('core/block-editor').getBlocks(),
+			findCondition: (block) =>
 				block.name === 'woocommerce/product-image-gallery',
-		} );
-		if ( foundBlock ) {
-			setProductImageGalleryBlock( foundBlock );
+		});
+		if (foundBlock) {
+			setProductImageGalleryBlock(foundBlock);
 		} else {
-			setProductImageGalleryBlock( null );
+			setProductImageGalleryBlock(null);
 		}
-	}, [ setProductImageGalleryBlock ] );
+	}, [setProductImageGalleryBlock]);
 
-	if ( ! productImageGalleryBlock ) {
+	if (!productImageGalleryBlock) {
 		return null;
 	}
 
@@ -46,20 +46,20 @@ export const UpgradeProductImageGallery = () => {
 
 	return (
 		<UpgradeDowngradeNotice
-			isDismissible={ false }
-			actionLabel={ buttonLabel }
-			onActionClick={ () => {
+			isDismissible={false}
+			actionLabel={buttonLabel}
+			onActionClick={() => {
 				if (
 					upgradeToBlockifiedProductGallery(
 						productImageGalleryBlock.clientId
 					)
 				) {
-					setProductImageGalleryBlock( null );
+					setProductImageGalleryBlock(null);
 				}
-			} }
+			}}
 			status="warning"
 		>
-			{ notice }
+			{notice}
 		</UpgradeDowngradeNotice>
 	);
 };

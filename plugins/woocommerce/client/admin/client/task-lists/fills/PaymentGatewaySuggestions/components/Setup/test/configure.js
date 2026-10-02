@@ -38,22 +38,22 @@ const defaultProps = {
 	paymentGateway: mockGateway,
 };
 
-describe( 'Configure', () => {
-	it( 'should show help text', () => {
-		const { queryByText } = render( <Configure { ...defaultProps } /> );
+describe('Configure', () => {
+	it('should show help text', () => {
+		const { queryByText } = render(<Configure {...defaultProps} />);
 
-		expect( queryByText( 'Help text' ) ).toBeInTheDocument();
-	} );
+		expect(queryByText('Help text')).toBeInTheDocument();
+	});
 
-	it( 'should render a button with the connection URL', () => {
-		const { container } = render( <Configure { ...defaultProps } /> );
+	it('should render a button with the connection URL', () => {
+		const { container } = render(<Configure {...defaultProps} />);
 
-		const button = container.querySelector( 'a' );
-		expect( button.textContent ).toBe( 'Connect' );
-		expect( button.href ).toBe( mockGateway.connectionUrl );
-	} );
+		const button = container.querySelector('a');
+		expect(button.textContent).toBe('Connect');
+		expect(button.href).toBe(mockGateway.connectionUrl);
+	});
 
-	it( 'should render fields when no connection URL exists', () => {
+	it('should render fields when no connection URL exists', () => {
 		const props = {
 			...defaultProps,
 			paymentGateway: {
@@ -61,15 +61,15 @@ describe( 'Configure', () => {
 				connectionUrl: null,
 			},
 		};
-		const { container } = render( <Configure { ...props } /> );
+		const { container } = render(<Configure {...props} />);
 
-		const inputs = container.querySelectorAll( 'input' );
-		expect( inputs.length ).toBe( 2 );
-		expect( inputs[ 0 ].placeholder ).toBe( 'API key' );
-		expect( inputs[ 1 ].placeholder ).toBe( 'API secret' );
-	} );
+		const inputs = container.querySelectorAll('input');
+		expect(inputs.length).toBe(2);
+		expect(inputs[0].placeholder).toBe('API key');
+		expect(inputs[1].placeholder).toBe('API secret');
+	});
 
-	it( 'should render the set up button when no connection URL or fields exist', () => {
+	it('should render the set up button when no connection URL or fields exist', () => {
 		const props = {
 			...defaultProps,
 			paymentGateway: {
@@ -78,34 +78,34 @@ describe( 'Configure', () => {
 				requiredSettings: [],
 			},
 		};
-		const { container } = render( <Configure { ...props } /> );
+		const { container } = render(<Configure {...props} />);
 
-		const button = container.querySelector( 'a' );
-		expect( button.textContent ).toBe( 'Get started' );
-		expect( button.href ).toBe( mockGateway.settingsUrl );
-	} );
-} );
+		const button = container.querySelector('a');
+		expect(button.textContent).toBe('Get started');
+		expect(button.href).toBe(mockGateway.settingsUrl);
+	});
+});
 
-describe( 'validateFields', () => {
-	it( 'should return an empty object when no errors exist', () => {
+describe('validateFields', () => {
+	it('should return an empty object when no errors exist', () => {
 		const values = {
 			api_key: '123',
 			api_secret: '123',
 		};
-		const errors = validateFields( values, mockGateway.requiredSettings );
+		const errors = validateFields(values, mockGateway.requiredSettings);
 
-		expect( errors ).toMatchObject( {} );
-	} );
+		expect(errors).toMatchObject({});
+	});
 
-	it( 'should return the errors using field labels when errors exist', () => {
+	it('should return the errors using field labels when errors exist', () => {
 		const values = {
 			api_key: '123',
 			api_secret: null,
 		};
-		const errors = validateFields( values, mockGateway.requiredSettings );
+		const errors = validateFields(values, mockGateway.requiredSettings);
 
-		expect( errors ).toMatchObject( {
+		expect(errors).toMatchObject({
 			api_secret: 'Please enter your API secret',
-		} );
-	} );
-} );
+		});
+	});
+});

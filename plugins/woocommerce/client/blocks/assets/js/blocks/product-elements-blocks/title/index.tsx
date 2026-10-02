@@ -12,10 +12,10 @@ import { Save } from './save';
 import { BLOCK_ICON } from './constants';
 import metadata from './block.json';
 
-registerBlockType( metadata, {
+registerBlockType(metadata, {
 	icon: {
 		src: BLOCK_ICON,
 	},
 	edit,
 	save: Save,
-} );
+});

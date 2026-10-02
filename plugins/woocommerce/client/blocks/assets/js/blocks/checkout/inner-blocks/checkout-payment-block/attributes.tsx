@@ -9,10 +9,10 @@ import { __ } from '@wordpress/i18n';
 import formStepAttributes from '../../form-step/attributes';
 
 export default {
-	...formStepAttributes( {
-		defaultTitle: __( 'Payment options', 'woocommerce' ),
+	...formStepAttributes({
+		defaultTitle: __('Payment options', 'woocommerce'),
 		defaultDescription: '',
-	} ),
+	}),
 	className: {
 		type: 'string',
 		default: '',

@@ -3,30 +3,30 @@
  */
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 
-const Edit = ( {
+const Edit = ({
 	attributes,
 	setAttributes,
 }: {
 	attributes: {
 		heading: string;
 	};
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ) => {
+	setAttributes: (attributes: Record<string, unknown>) => void;
+}) => {
 	const blockProps = useBlockProps();
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<InnerBlocks
-				allowedBlocks={ [ 'core/heading' ] }
-				template={ [
+				allowedBlocks={['core/heading']}
+				template={[
 					[
 						'core/heading',
 						{
 							level: 2,
 							style: { typography: { fontSize: '24px' } },
 							content: attributes.heading || '',
-							onChangeContent: ( value: string ) =>
-								setAttributes( { heading: value } ),
+							onChangeContent: (value: string) =>
+								setAttributes({ heading: value }),
 						},
 					],
 					[
@@ -37,7 +37,7 @@ const Edit = ( {
 							},
 						},
 					],
-				] }
+				]}
 			/>
 		</div>
 	);

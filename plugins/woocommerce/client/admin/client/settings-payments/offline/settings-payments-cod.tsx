@@ -32,65 +32,64 @@ import {
  */
 export const SettingsPaymentsCod = () => {
 	const { createSuccessNotice, createErrorNotice } =
-		useDispatch( 'core/notices' );
+		useDispatch('core/notices');
 	const { codSettings, isLoading } = useSelect(
-		( select ) => ( {
-			codSettings:
-				select( paymentGatewaysStore ).getPaymentGateway( 'cod' ),
-			isLoading: ! select( paymentGatewaysStore ).hasFinishedResolution(
+		(select) => ({
+			codSettings: select(paymentGatewaysStore).getPaymentGateway('cod'),
+			isLoading: !select(paymentGatewaysStore).hasFinishedResolution(
 				'getPaymentGateway',
-				[ 'cod' ]
+				['cod']
 			),
-		} ),
+		}),
 		[]
 	);
 
 	const { updatePaymentGateway, invalidateResolutionForStoreSelector } =
-		useDispatch( paymentGatewaysStore );
+		useDispatch(paymentGatewaysStore);
 
 	const {
 		invalidateResolution,
 		invalidateResolutionForStoreSelector:
 			invalidateResolutionForPaymentSettings,
-	} = useDispatch( paymentSettingsStore );
+	} = useDispatch(paymentSettingsStore);
 
-	const [ formValues, setFormValues ] = useState< OfflineFormValues >( {} );
-	const [ isSaving, setIsSaving ] = useState( false );
-	const [ hasChanges, setHasChanges ] = useState( false );
+	const [formValues, setFormValues] = useState<OfflineFormValues>({});
+	const [isSaving, setIsSaving] = useState(false);
+	const [hasChanges, setHasChanges] = useState(false);
 
-	useEffect( () => {
-		if ( codSettings ) {
-			setFormValues( {
+	useEffect(() => {
+		if (codSettings) {
+			setFormValues({
 				enabled: codSettings.enabled,
 				title: codSettings.settings.title.value,
 				description: codSettings.description,
 				instructions: codSettings.settings.instructions.value,
-				...getShippingRestrictionValues( codSettings ),
-			} );
-			setHasChanges( false );
+				...getShippingRestrictionValues(codSettings),
+			});
+			setHasChanges(false);
 		}
-	}, [ codSettings ] );
+	}, [codSettings]);
 
-	const fields: Field< OfflineFormValues >[] = useMemo(
+	const fields: Field<OfflineFormValues>[] = useMemo(
 		() => [
 			{
 				id: 'enabled',
-				label: __( 'Enable cash on delivery payments', 'woocommerce' ),
+				label: __('Enable cash on delivery payments', 'woocommerce'),
 				Edit: CheckboxEdit,
 			},
 			{
 				id: 'title',
-				label: __( 'Title', 'woocommerce' ),
+				label: __('Title', 'woocommerce'),
 				description: __(
 					'Payment method name that the customer will see during checkout.',
 					'woocommerce'
 				),
-				placeholder: __( 'Cash on delivery payments', 'woocommerce' ),
+				placeholder: __('Cash on delivery payments', 'woocommerce'),
 				Edit: TextEdit,
 			},
 			{
 				id: 'description',
-				label: __( 'Description', 'woocommerce' ),
+				label: __('Description', 'woocommerce'),
 				description: __(
 					'Payment method description that the customer will see during checkout.',
 					'woocommerce'
@@ -99,7 +98,7 @@ export const SettingsPaymentsCod = () => {
 			},
 			{
 				id: 'instructions',
-				label: __( 'Instructions', 'woocommerce' ),
+				label: __('Instructions', 'woocommerce'),
 				description: __(
 					'Instructions that will be added to the thank you page and emails.',
 					'woocommerce'
@@ -108,70 +107,68 @@ export const SettingsPaymentsCod = () => {
 			},
 			...getShippingRestrictionFields(
 				codSettings,
-				__( 'cash on delivery', 'woocommerce' )
+				__('cash on delivery', 'woocommerce')
 			),
 		],
-		[ codSettings ]
+		[codSettings]
 	);
 
 	const saveSettings = () => {
-		if ( ! codSettings ) {
+		if (!codSettings) {
 			return;
 		}
 
-		setIsSaving( true );
+		setIsSaving(true);
 
-		const settings: Record< string, string | string[] > = {
-			title: String( formValues.title ),
-			instructions: String( formValues.instructions ),
-			...getShippingRestrictionSettings( formValues ),
+		const settings: Record<string, string | string[]> = {
+			title: String(formValues.title),
+			instructions: String(formValues.instructions),
+			...getShippingRestrictionSettings(formValues),
 		};
 
-		updatePaymentGateway( 'cod', {
-			enabled: Boolean( formValues.enabled ),
-			description: String( formValues.description ),
+		updatePaymentGateway('cod', {
+			enabled: Boolean(formValues.enabled),
+			description: String(formValues.description),
 			settings,
-		} )
-			.then( () => {
-				setHasChanges( false );
-				void invalidateResolutionForStoreSelector(
-					'getPaymentGateway'
-				);
+		})
+			.then(() => {
+				setHasChanges(false);
+				void invalidateResolutionForStoreSelector('getPaymentGateway');
 				createSuccessNotice(
-					__( 'Settings updated successfully', 'woocommerce' )
+					__('Settings updated successfully', 'woocommerce')
 				);
-			} )
-			.catch( () => {
+			})
+			.catch(() => {
 				createErrorNotice(
-					__( 'Failed to update settings', 'woocommerce' )
+					__('Failed to update settings', 'woocommerce')
 				);
-			} )
-			.finally( () => {
-				setIsSaving( false );
-				void invalidateResolution( 'getPaymentProviders', [] );
+			})
+			.finally(() => {
+				setIsSaving(false);
+				void invalidateResolution('getPaymentProviders', []);
 				void invalidateResolutionForPaymentSettings(
 					'getOfflinePaymentGateways'
 				);
-			} );
+			});
 	};
 
 	return (
 		<Settings>
 			<Settings.Layout>
 				<Settings.Form
-					onSubmit={ ( e ) => {
+					onSubmit={(e) => {
 						e.preventDefault();
 						saveSettings();
-					} }
+					}}
 				>
 					<Settings.Section
-						title={ __( 'Enable and customise', 'woocommerce' ) }
-						description={ __(
+						title={__('Enable and customise', 'woocommerce')}
+						description={__(
 							'Choose how you want to present cash on delivery payments to your customers during checkout.',
 							'woocommerce'
-						) }
+						)}
 					>
-						{ isLoading ? (
+						{isLoading ? (
 							<>
 								<FieldPlaceholder size="small" />
 								<FieldPlaceholder size="medium" />
@@ -182,9 +179,9 @@ export const SettingsPaymentsCod = () => {
 							</>
 						) : (
 							<DataForm
-								data={ formValues }
-								fields={ fields }
-								form={ {
+								data={formValues}
+								fields={fields}
+								form={{
 									layout: { type: 'regular' },
 									fields: [
 										'enabled',
@@ -194,25 +191,25 @@ export const SettingsPaymentsCod = () => {
 										'enable_for_methods',
 										'enable_for_virtual',
 									],
-								} }
-								onChange={ ( edits: OfflineFormValues ) => {
-									setFormValues( ( values ) => ( {
+								}}
+								onChange={(edits: OfflineFormValues) => {
+									setFormValues((values) => ({
 										...values,
 										...edits,
-									} ) );
-									setHasChanges( true );
-								} }
+									}));
+									setHasChanges(true);
+								}}
 							/>
-						) }
+						)}
 					</Settings.Section>
 					<Settings.Actions>
 						<Button
 							variant="primary"
 							type="submit"
-							isBusy={ isSaving }
-							disabled={ isSaving || ! hasChanges }
+							isBusy={isSaving}
+							disabled={isSaving || !hasChanges}
 						>
-							{ __( 'Save changes', 'woocommerce' ) }
+							{__('Save changes', 'woocommerce')}
 						</Button>
 					</Settings.Actions>
 				</Settings.Form>

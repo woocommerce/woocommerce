@@ -26,43 +26,43 @@ import { useStoreCart } from './use-store-cart';
  * action for adding a coupon _to_ the cart.
  * See also: https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/trunk/src/RestApi/StoreApi
  */
-export const useStoreCartCoupons = ( context = '' ): StoreCartCoupon => {
+export const useStoreCartCoupons = (context = ''): StoreCartCoupon => {
 	const { cartCoupons, cartIsLoading } = useStoreCart();
-	const { applyCoupon, removeCoupon } = useDispatch( cartStore );
+	const { applyCoupon, removeCoupon } = useDispatch(cartStore);
 	const { isApplyingCoupon, isRemovingCoupon, orderId } = useSelect(
-		( select ) => ( {
-			isApplyingCoupon: select( cartStore ).isApplyingCoupon(),
-			isRemovingCoupon: select( cartStore ).isRemovingCoupon(),
-			orderId: select( checkoutStore ).getOrderId(),
-		} ),
+		(select) => ({
+			isApplyingCoupon: select(cartStore).isApplyingCoupon(),
+			isRemovingCoupon: select(cartStore).isRemovingCoupon(),
+			orderId: select(checkoutStore).getOrderId(),
+		}),
 		[]
 	);
 
 	// Return cart, checkout or generic error message.
 	const getCouponErrorMessage = useCallback(
-		( error: CouponApiErrorResponse ) => {
-			if ( orderId && orderId > 0 && error?.data?.details?.checkout ) {
+		(error: CouponApiErrorResponse) => {
+			if (orderId && orderId > 0 && error?.data?.details?.checkout) {
 				return error.data.details.checkout;
-			} else if ( error?.data?.details?.cart ) {
+			} else if (error?.data?.details?.cart) {
 				return error.data.details.cart;
 			}
 			return error.message;
 		},
-		[ orderId ]
+		[orderId]
 	);
 
 	const applyCouponWithNotices = useCallback(
-		( couponCode: string ) => {
-			return applyCoupon( couponCode )
-				.then( () => {
+		(couponCode: string) => {
+			return applyCoupon(couponCode)
+				.then(() => {
 					if (
-						applyCheckoutFilter( {
+						applyCheckoutFilter({
 							filterName: 'showApplyCouponNotice',
 							defaultValue: true,
 							arg: { couponCode, context },
-						} )
+						})
 					) {
-						dispatch( 'core/notices' ).createNotice(
+						dispatch('core/notices').createNotice(
 							'info',
 							sprintf(
 								/* translators: %s coupon code. */
@@ -79,34 +79,34 @@ export const useStoreCartCoupons = ( context = '' ): StoreCartCoupon => {
 							}
 						);
 					}
-					return Promise.resolve( true );
-				} )
-				.catch( ( error ) => {
-					const errorMessage = getCouponErrorMessage( error );
-					dispatch( validationStore ).setValidationErrors( {
+					return Promise.resolve(true);
+				})
+				.catch((error) => {
+					const errorMessage = getCouponErrorMessage(error);
+					dispatch(validationStore).setValidationErrors({
 						coupon: {
-							message: decodeEntities( errorMessage ),
+							message: decodeEntities(errorMessage),
 							hidden: false,
 						},
-					} );
-					return Promise.resolve( false );
-				} );
+					});
+					return Promise.resolve(false);
+				});
 		},
-		[ applyCoupon, getCouponErrorMessage, context ]
+		[applyCoupon, getCouponErrorMessage, context]
 	);
 
 	const removeCouponWithNotices = useCallback(
-		( couponCode: string ) => {
-			return removeCoupon( couponCode )
-				.then( () => {
+		(couponCode: string) => {
+			return removeCoupon(couponCode)
+				.then(() => {
 					if (
-						applyCheckoutFilter( {
+						applyCheckoutFilter({
 							filterName: 'showRemoveCouponNotice',
 							defaultValue: true,
 							arg: { couponCode, context },
-						} )
+						})
 					) {
-						dispatch( 'core/notices' ).createNotice(
+						dispatch('core/notices').createNotice(
 							'info',
 							sprintf(
 								/* translators: %s coupon code. */
@@ -114,7 +114,7 @@ export const useStoreCartCoupons = ( context = '' ): StoreCartCoupon => {
 									'Coupon code "%s" has been removed from your cart.',
 									'woocommerce'
 								),
-								decodeEntities( couponCode )
+								decodeEntities(couponCode)
 							),
 							{
 								id: 'coupon-form',
@@ -123,21 +123,18 @@ export const useStoreCartCoupons = ( context = '' ): StoreCartCoupon => {
 							}
 						);
 					}
-					return Promise.resolve( true );
-				} )
-				.catch( ( error ) => {
-					dispatch( 'core/notices' ).createErrorNotice(
-						error.message,
-						{
-							id: 'coupon-form',
-							type: 'snackbar',
-							context,
-						}
-					);
-					return Promise.resolve( false );
-				} );
+					return Promise.resolve(true);
+				})
+				.catch((error) => {
+					dispatch('core/notices').createErrorNotice(error.message, {
+						id: 'coupon-form',
+						type: 'snackbar',
+						context,
+					});
+					return Promise.resolve(false);
+				});
 		},
-		[ removeCoupon, context ]
+		[removeCoupon, context]
 	);
 
 	return {

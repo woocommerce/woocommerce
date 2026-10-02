@@ -18,13 +18,13 @@ import { Text } from '@woocommerce/experimental';
 import './List.scss';
 
 const PlaceholderItem = () => {
-	const classes = clsx( 'woocommerce-task-payment', 'woocommerce-task-card' );
+	const classes = clsx('woocommerce-task-payment', 'woocommerce-task-card');
 
 	return (
 		<Fragment>
 			<CardBody
-				style={ { paddingLeft: 0, marginBottom: 0 } }
-				className={ classes }
+				style={{ paddingLeft: 0, marginBottom: 0 }}
+				className={classes}
 			>
 				<CardMedia isBorderless>
 					<span className="is-placeholder" />
@@ -51,7 +51,7 @@ export const Placeholder = () => {
 		'is-loading woocommerce-payment-gateway-suggestions-list-placeholder';
 
 	return (
-		<Card aria-hidden="true" className={ classes }>
+		<Card aria-hidden="true" className={classes}>
 			<CardHeader as="h2">
 				<span className="is-placeholder" />
 			</CardHeader>

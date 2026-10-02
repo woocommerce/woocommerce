@@ -32,7 +32,7 @@ export interface CouponCodeAttributes {
 /**
  * Block edit props.
  */
-export type BlockEditProps = WPBlockEditProps< CouponCodeAttributes >;
+export type BlockEditProps = WPBlockEditProps<CouponCodeAttributes>;
 
 /**
  * Block save props.

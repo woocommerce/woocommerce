@@ -57,58 +57,58 @@ import { useReports } from './use-reports';
  * @param {string} args.path
  * @return {string} - report parameter
  */
-const getReportParam = ( { params, path } ) => {
-	return params.report || path.replace( /^\/+/, '' );
+const getReportParam = ({ params, path }) => {
+	return params.report || path.replace(/^\/+/, '');
 };
 
-function withReports( WrappedComponent ) {
-	return function ReportsProvider( props ) {
+function withReports(WrappedComponent) {
+	return function ReportsProvider(props) {
 		const reports = useReports();
-		return <WrappedComponent { ...props } reports={ reports } />;
+		return <WrappedComponent {...props} reports={reports} />;
 	};
 }
 
 class Report extends Component {
 	constructor() {
-		super( ...arguments );
+		super(...arguments);
 
 		this.state = {
 			hasError: false,
 		};
 	}
 
-	componentDidCatch( error ) {
-		this.setState( {
+	componentDidCatch(error) {
+		this.setState({
 			hasError: true,
-		} );
+		});
 		/* eslint-disable no-console */
-		console.warn( error );
+		console.warn(error);
 		/* eslint-enable no-console */
 	}
 
 	render() {
-		if ( this.state.hasError ) {
+		if (this.state.hasError) {
 			return null;
 		}
 
 		const { isError, reports } = this.props;
 
-		if ( isError ) {
+		if (isError) {
 			return <AnalyticsError />;
 		}
 
-		const reportParam = getReportParam( this.props );
+		const reportParam = getReportParam(this.props);
 
-		const report = find( reports, { report: reportParam } );
-		if ( ! report ) {
+		const report = find(reports, { report: reportParam });
+		if (!report) {
 			return <NoMatch />;
 		}
 		const Container = report.component;
 		return (
 			<CurrencyContext.Provider
-				value={ getFilteredCurrencyInstance( getQuery() ) }
+				value={getFilteredCurrencyInstance(getQuery())}
 			>
-				<Container { ...this.props } />
+				<Container {...this.props} />
 			</CurrencyContext.Provider>
 		);
 	}
@@ -121,15 +121,15 @@ Report.propTypes = {
 
 export default compose(
 	withReports,
-	withSelect( ( select, props ) => {
+	withSelect((select, props) => {
 		const query = getQuery();
 		const { search } = query;
 
-		if ( ! search ) {
+		if (!search) {
 			return {};
 		}
 
-		const report = getReportParam( props );
+		const report = getReportParam(props);
 
 		// Single category view in Categories Report uses the products endpoint, so search must also.
 		const mappedReport =
@@ -139,23 +139,23 @@ export default compose(
 
 		// Nothing to hydrate when the report endpoint resolves the search itself. The rest still
 		// need the term turned into a list of matching IDs, which is what caps them at 100.
-		if ( usesServerSideSearch( [ mappedReport ] ) ) {
+		if (usesServerSideSearch([mappedReport])) {
 			return {};
 		}
 
-		const itemsSelector = select( itemsStore );
+		const itemsSelector = select(itemsStore);
 
 		const itemsResult = searchItemsByString(
 			itemsSelector,
 			mappedReport,
-			getSearchWords( query ),
+			getSearchWords(query),
 			{
 				per_page: 100,
 			}
 		);
 		const { isError, isRequesting, items } = itemsResult;
-		const ids = Object.keys( items );
-		if ( ! ids.length ) {
+		const ids = Object.keys(items);
+		if (!ids.length) {
 			return {
 				isError,
 				isRequesting,
@@ -167,8 +167,8 @@ export default compose(
 			isRequesting,
 			query: {
 				...props.query,
-				[ mappedReport ]: ids.join( ',' ),
+				[mappedReport]: ids.join(','),
 			},
 		};
-	} )
-)( Report );
+	})
+)(Report);

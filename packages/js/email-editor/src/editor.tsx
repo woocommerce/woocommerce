@@ -39,7 +39,7 @@ import { cleanupConfigurationChanges } from './config-tools';
 import { getEditorConfigFromWindow } from './store/settings';
 import { EmailEditorConfig } from './store/types';
 
-function Editor( {
+function Editor({
 	postId,
 	postType,
 	isPreview = false,
@@ -50,15 +50,15 @@ function Editor( {
 	postId: number | string;
 	postType: string;
 	isPreview?: boolean;
-	contentRef?: React.Ref< HTMLDivElement > | null;
+	contentRef?: React.Ref<HTMLDivElement> | null;
 	customSavePanel?: React.ReactElement;
 	customSaveButton?: React.ReactElement;
-} ) {
-	const [ isInitialized, setIsInitialized ] = useState( false );
+}) {
+	const [isInitialized, setIsInitialized] = useState(false);
 	const { settings } = useSelect(
-		( sel ) => ( {
-			settings: sel( storeName ).getInitialEditorSettings(),
-		} ),
+		(sel) => ({
+			settings: sel(storeName).getInitialEditorSettings(),
+		}),
 		[]
 	);
 
@@ -66,41 +66,41 @@ function Editor( {
 	useRemoveSavingFailedNotices();
 	useNoticeOverrides();
 
-	const { setEmailPost } = useDispatch( storeName );
-	useEffect( () => {
-		void setEmailPost( postId, postType );
-		setIsInitialized( true );
-	}, [ postId, postType, setEmailPost ] );
+	const { setEmailPost } = useDispatch(storeName);
+	useEffect(() => {
+		void setEmailPost(postId, postType);
+		setIsInitialized(true);
+	}, [postId, postType, setEmailPost]);
 
 	const stylesContentRef = useFilterEditorContentStylesheets();
-	const mergedContentRef = useMergeRefs( [ stylesContentRef, contentRef ] );
+	const mergedContentRef = useMergeRefs([stylesContentRef, contentRef]);
 
 	// Set allowed blockTypes and isPreviewMode to the editor settings.
 	const editorSettings = useMemo(
-		() => ( {
+		() => ({
 			...settings,
 			allowedBlockTypes: getAllowedBlockNames(),
 			isPreviewMode: isPreview,
 			// WordPress 7.1 responsive styles produce media-query-based styles
 			// that the email renderer cannot inline, so keep the feature off.
 			responsiveEditingEnabled: false,
-		} ),
-		[ settings, isPreview ]
+		}),
+		[settings, isPreview]
 	);
 
-	if ( ! isInitialized ) {
+	if (!isInitialized) {
 		return null;
 	}
 
 	return (
 		<StrictMode>
 			<InnerEditor
-				postId={ postId }
-				postType={ postType }
-				settings={ editorSettings }
-				contentRef={ mergedContentRef }
-				customSavePanel={ customSavePanel }
-				customSaveButton={ customSaveButton }
+				postId={postId}
+				postType={postType}
+				settings={editorSettings}
+				contentRef={mergedContentRef}
+				customSavePanel={customSavePanel}
+				customSaveButton={customSaveButton}
 			/>
 		</StrictMode>
 	);
@@ -112,12 +112,12 @@ function Editor( {
  */
 function disableCollab() {
 	if (
-		hasFilter( 'sync.providers', 'woocommerce/email-editor/disable-collab' )
+		hasFilter('sync.providers', 'woocommerce/email-editor/disable-collab')
 	) {
 		return;
 	}
 
-	if ( window._wpCollaborationEnabled ) {
+	if (window._wpCollaborationEnabled) {
 		window._wpCollaborationEnabled = false;
 	}
 
@@ -142,20 +142,20 @@ function onInit() {
 	initializeLayout();
 }
 
-export function initialize( elementId: string ) {
-	const container = document.getElementById( elementId );
-	if ( ! container ) {
+export function initialize(elementId: string) {
+	const container = document.getElementById(elementId);
+	if (!container) {
 		return;
 	}
 	const { current_post_id, current_post_type } =
 		window.WooCommerceEmailEditor;
 
-	if ( current_post_id === undefined || current_post_id === null ) {
-		throw new Error( 'current_post_id is required but not provided.' );
+	if (current_post_id === undefined || current_post_id === null) {
+		throw new Error('current_post_id is required but not provided.');
 	}
 
-	if ( ! current_post_type ) {
-		throw new Error( 'current_post_type is required but not provided.' );
+	if (!current_post_type) {
+		throw new Error('current_post_type is required but not provided.');
 	}
 
 	const WrappedEditor = applyFilters(
@@ -167,18 +167,15 @@ export function initialize( elementId: string ) {
 
 	// Set configuration to store from window object for backward compatibility
 	const editorConfig = getEditorConfigFromWindow();
-	void dispatch( storeName ).setEditorConfig( editorConfig );
+	void dispatch(storeName).setEditorConfig(editorConfig);
 
-	const root = createRoot( container );
+	const root = createRoot(container);
 	root.render(
-		<WrappedEditor
-			postId={ current_post_id }
-			postType={ current_post_type }
-		/>
+		<WrappedEditor postId={current_post_id} postType={current_post_type} />
 	);
 }
 
-export function ExperimentalEmailEditor( {
+export function ExperimentalEmailEditor({
 	postId,
 	postType,
 	isPreview = false,
@@ -190,50 +187,50 @@ export function ExperimentalEmailEditor( {
 	postId: string;
 	postType: string;
 	isPreview?: boolean;
-	contentRef?: React.Ref< HTMLDivElement > | null;
+	contentRef?: React.Ref<HTMLDivElement> | null;
 	config?: EmailEditorConfig;
 	customSavePanel?: React.ReactElement;
 	customSaveButton?: React.ReactElement;
-} ) {
-	const [ isInitialized, setIsInitialized ] = useState( false );
+}) {
+	const [isInitialized, setIsInitialized] = useState(false);
 
-	useEffect( () => {
-		const backupEditorSettings = select( editorStore ).getEditorSettings();
+	useEffect(() => {
+		const backupEditorSettings = select(editorStore).getEditorSettings();
 		// Set configuration to store from window object for backward compatibility
 		const editorConfig = config || getEditorConfigFromWindow();
 		onInit();
 
-		void dispatch( storeName ).setEditorConfig( editorConfig );
-		setIsInitialized( true );
+		void dispatch(storeName).setEditorConfig(editorConfig);
+		setIsInitialized(true);
 		// Cleanup global editor settings
 		return () => {
 			try {
 				cleanupConfigurationChanges();
 			} finally {
-				void dispatch( editorStore ).updateEditorSettings(
+				void dispatch(editorStore).updateEditorSettings(
 					backupEditorSettings
 				);
 			}
 		};
-	}, [ config ] );
+	}, [config]);
 
 	const WrappedEditor = applyFilters(
 		'woocommerce_email_editor_wrap_editor_component',
 		Editor
 	) as typeof Editor;
 
-	if ( ! isInitialized ) {
+	if (!isInitialized) {
 		return null;
 	}
 
 	return (
 		<WrappedEditor
-			postId={ postId }
-			postType={ postType }
-			isPreview={ isPreview }
-			contentRef={ contentRef }
-			customSavePanel={ customSavePanel }
-			customSaveButton={ customSaveButton }
+			postId={postId}
+			postType={postType}
+			isPreview={isPreview}
+			contentRef={contentRef}
+			customSavePanel={customSavePanel}
+			customSaveButton={customSaveButton}
 		/>
 	);
 }

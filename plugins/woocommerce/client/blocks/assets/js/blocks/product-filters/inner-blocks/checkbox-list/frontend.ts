@@ -16,10 +16,10 @@ import {
 } from '../../../../base/utils/visual-attribute-terms';
 import type { VisualAttributeTerm } from '../../../../base/utils/visual-attribute-terms';
 
-type CheckboxListItem = SelectableItem< {
+type CheckboxListItem = SelectableItem<{
 	visual?: VisualAttributeTerm;
 	index?: number;
-} >;
+}>;
 
 const DEFAULT_DISPLAY_LIMIT = 15;
 
@@ -42,71 +42,71 @@ type CheckboxListStore = {
 	};
 };
 
-function getParentStore( storeNamespace?: string ) {
-	if ( ! storeNamespace ) return undefined;
-	return store<
-		SelectableItemsParentStore< { visual?: VisualAttributeTerm } >
-	>( storeNamespace );
+function getParentStore(storeNamespace?: string) {
+	if (!storeNamespace) return undefined;
+	return store<SelectableItemsParentStore<{ visual?: VisualAttributeTerm }>>(
+		storeNamespace
+	);
 }
 
-function normalizeDisplayLimit( displayLimit: number ): number {
-	const limit = Number( displayLimit );
-	if ( ! Number.isFinite( limit ) || limit < 0 ) {
+function normalizeDisplayLimit(displayLimit: number): number {
+	const limit = Number(displayLimit);
+	if (!Number.isFinite(limit) || limit < 0) {
 		return DEFAULT_DISPLAY_LIMIT;
 	}
-	return Math.floor( limit );
+	return Math.floor(limit);
 }
 
 function getCurrentItem(): CheckboxListItem | undefined {
-	const context = getContext< { item?: CheckboxListItem } >();
+	const context = getContext<{ item?: CheckboxListItem }>();
 	return context.item;
 }
 
-const { state }: CheckboxListStore = store< CheckboxListStore >(
+const { state }: CheckboxListStore = store<CheckboxListStore>(
 	'woocommerce/product-filter-checkbox-list',
 	{
 		state: {
 			get items(): CheckboxListItem[] {
 				const { storeNamespace, isExpanded, displayLimit } =
-					getContext< CheckboxListContext >();
+					getContext<CheckboxListContext>();
 				const parentItems =
-					getParentStore( storeNamespace )?.state?.selectableItems;
-				if ( ! Array.isArray( parentItems ) ) return [];
+					getParentStore(storeNamespace)?.state?.selectableItems;
+				if (!Array.isArray(parentItems)) return [];
 				const normalizedDisplayLimit =
-					normalizeDisplayLimit( displayLimit );
-				return parentItems.map( ( item, index ) => ( {
+					normalizeDisplayLimit(displayLimit);
+				return parentItems.map((item, index) => ({
 					...item,
 					index,
 					hidden:
 						item.hidden ||
-						( ! isExpanded &&
-							! item.selected &&
-							index >= normalizedDisplayLimit ),
-				} ) );
+						(!isExpanded &&
+							!item.selected &&
+							index >= normalizedDisplayLimit),
+				}));
 			},
 			get ratingStyle(): string {
 				const item = getCurrentItem();
-				if ( ! item ) return '';
-				return `width: ${ Number( item.value ) * 20 }%`;
+				if (!item) return '';
+				return `width: ${Number(item.value) * 20}%`;
 			},
 			get colorSwatchStyle(): string {
 				const item = getCurrentItem();
-				return getVisualAttributeTermStyleString( item?.visual );
+				return getVisualAttributeTermStyleString(item?.visual);
 			},
 			get isColorSwatchEmpty(): boolean {
 				const item = getCurrentItem();
-				return isVisualAttributeTermEmpty( item?.visual );
+				return isVisualAttributeTermEmpty(item?.visual);
 			},
 		},
 		actions: {
 			toggle() {
 				const item = getCurrentItem();
-				if ( ! item ) return;
-				const { storeNamespace } = getContext< CheckboxListContext >();
-				getParentStore( storeNamespace )?.actions?.toggle?.( item );
+				if (!item) return;
+				const { storeNamespace } = getContext<CheckboxListContext>();
+				getParentStore(storeNamespace)?.actions?.toggle?.(item);
 			},
 			showAll() {
-				const context = getContext< CheckboxListContext >();
+				const context = getContext<CheckboxListContext>();
 				context.isExpanded = true;
 			},
 		},

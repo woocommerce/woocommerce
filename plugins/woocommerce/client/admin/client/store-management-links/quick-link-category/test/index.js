@@ -9,15 +9,15 @@ import { createElement } from '@wordpress/element';
  */
 import { QuickLinkCategory } from '..';
 
-describe( 'QuickLinkCategory', () => {
-	it( 'displays the passed title and children', () => {
+describe('QuickLinkCategory', () => {
+	it('displays the passed title and children', () => {
 		const { queryByText } = render(
 			<QuickLinkCategory title="hello world">
 				<div>Test</div>
 			</QuickLinkCategory>
 		);
 
-		expect( queryByText( 'hello world' ) ).not.toBeEmptyDOMElement();
-		expect( queryByText( 'Test' ) ).not.toBeEmptyDOMElement();
-	} );
-} );
+		expect(queryByText('hello world')).not.toBeEmptyDOMElement();
+		expect(queryByText('Test')).not.toBeEmptyDOMElement();
+	});
+});

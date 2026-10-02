@@ -20,12 +20,12 @@ import {
 } from '../components/constants';
 
 // Create storage utils with 24h expiration
-const iamSettingsStorage = createStorageUtils< {
+const iamSettingsStorage = createStorageUtils<{
 	locale: string | null | undefined;
-	settings: MarketplaceContextType[ 'iamSettings' ];
-} >( 'wc_iam_settings', 24 * 60 * 60 );
+	settings: MarketplaceContextType['iamSettings'];
+}>('wc_iam_settings', 24 * 60 * 60);
 
-export const MarketplaceContext = createContext< MarketplaceContextType >( {
+export const MarketplaceContext = createContext<MarketplaceContextType>({
 	isLoading: false,
 	setIsLoading: () => {},
 	selectedTab: '',
@@ -39,30 +39,28 @@ export const MarketplaceContext = createContext< MarketplaceContextType >( {
 	},
 	setSearchResultsCount: () => {},
 	iamSettings: {},
-} );
+});
 
-export function MarketplaceContextProvider( props: {
+export function MarketplaceContextProvider(props: {
 	children: React.JSX.Element;
-} ): React.JSX.Element {
-	const [ isLoading, setIsLoading ] = useState( true );
-	const [ selectedTab, setSelectedTab ] = useState( '' );
-	const [ iamSettings, setIamSettings ] = useState( {} );
-	const [ installedPlugins, setInstalledPlugins ] = useState< string[] >(
-		[]
-	);
-	const [ searchResultsCount, setSearchResultsCountState ] =
-		useState< SearchResultsCountType >( {
+}): React.JSX.Element {
+	const [isLoading, setIsLoading] = useState(true);
+	const [selectedTab, setSelectedTab] = useState('');
+	const [iamSettings, setIamSettings] = useState({});
+	const [installedPlugins, setInstalledPlugins] = useState<string[]>([]);
+	const [searchResultsCount, setSearchResultsCountState] =
+		useState<SearchResultsCountType>({
 			extensions: 0,
 			themes: 0,
 			'business-services': 0,
-		} );
+		});
 
 	const setSearchResultsCount = useCallback(
-		( updatedCounts: Partial< SearchResultsCountType > ) => {
-			setSearchResultsCountState( ( prev ) => ( {
+		(updatedCounts: Partial<SearchResultsCountType>) => {
+			setSearchResultsCountState((prev) => ({
 				...prev,
 				...updatedCounts,
-			} ) );
+			}));
 		},
 		[]
 	);
@@ -72,58 +70,58 @@ export function MarketplaceContextProvider( props: {
 	 * translated copy (e.g. the quality badge tooltip), so the cache is keyed
 	 * to the locale it was fetched for.
 	 */
-	useEffect( () => {
+	useEffect(() => {
 		const cached = iamSettingsStorage.getWithExpiry();
-		if ( cached?.settings && cached.locale === LOCALE.userLocale ) {
-			setIamSettings( cached.settings );
+		if (cached?.settings && cached.locale === LOCALE.userLocale) {
+			setIamSettings(cached.settings);
 			return;
 		}
 
-		let url = `${ MARKETPLACE_HOST }${ MARKETPLACE_IAM_SETTINGS_API_PATH }`;
-		if ( LOCALE.userLocale ) {
-			url += `?locale=${ LOCALE.userLocale }`;
+		let url = `${MARKETPLACE_HOST}${MARKETPLACE_IAM_SETTINGS_API_PATH}`;
+		if (LOCALE.userLocale) {
+			url += `?locale=${LOCALE.userLocale}`;
 		}
-		fetch( url )
-			.then( ( response ) => {
-				if ( ! response.ok ) {
+		fetch(url)
+			.then((response) => {
+				if (!response.ok) {
 					throw new Error(
-						`Network response was not ok: ${ response.statusText }`
+						`Network response was not ok: ${response.statusText}`
 					);
 				}
 				return response.json();
-			} )
-			.then( ( data ) => {
-				setIamSettings( data );
-				iamSettingsStorage.setWithExpiry( {
+			})
+			.then((data) => {
+				setIamSettings(data);
+				iamSettingsStorage.setWithExpiry({
 					locale: LOCALE.userLocale,
 					settings: data,
-				} );
-			} )
-			.catch( ( error ) => {
+				});
+			})
+			.catch((error) => {
 				// eslint-disable-next-line no-console
-				console.error( 'Failed to fetch IAM settings:', error );
-				setIamSettings( {} ); // Fallback to an empty object
-			} );
-	}, [] );
+				console.error('Failed to fetch IAM settings:', error);
+				setIamSettings({}); // Fallback to an empty object
+			});
+	}, []);
 
 	/**
 	 * Knowing installed products will help us to determine which products
 	 * should have the "Add to Site" button enabled.
 	 */
-	useEffect( () => {
-		const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+	useEffect(() => {
+		const wccomSettings = getAdminSetting('wccomHelper', {});
 		const installedProductSlugs: string[] =
 			wccomSettings?.installedProducts;
 
-		setInstalledPlugins( installedProductSlugs );
-	}, [] );
+		setInstalledPlugins(installedProductSlugs);
+	}, []);
 
-	function isProductInstalled( slug: string ): boolean {
-		return installedPlugins.includes( slug );
+	function isProductInstalled(slug: string): boolean {
+		return installedPlugins.includes(slug);
 	}
 
-	function addInstalledProduct( slug: string ) {
-		setInstalledPlugins( [ ...installedPlugins, slug ] );
+	function addInstalledProduct(slug: string) {
+		setInstalledPlugins([...installedPlugins, slug]);
 	}
 
 	const contextValue = {
@@ -139,8 +137,8 @@ export function MarketplaceContextProvider( props: {
 	};
 
 	return (
-		<MarketplaceContext.Provider value={ contextValue }>
-			{ props.children }
+		<MarketplaceContext.Provider value={contextValue}>
+			{props.children}
 		</MarketplaceContext.Provider>
 	);
 }

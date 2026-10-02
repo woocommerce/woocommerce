@@ -7,6 +7,8 @@
 	z-index: 2;
 
 	&:focus {
-		box-shadow: inset -1px -1px 0 #757575, inset 1px 1px 0 #757575;
+		box-shadow:
+			inset -1px -1px 0 #757575,
+			inset 1px 1px 0 #757575;
 	}
 }

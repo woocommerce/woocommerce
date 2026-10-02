@@ -8,9 +8,9 @@ import { WithSetupWizardLayout } from './WithSetupWizardLayout';
 
 export const Basic = () => (
 	<BusinessLocation
-		sendEvent={ () => {} }
-		navigationProgress={ 80 }
-		context={ {
+		sendEvent={() => {}}
+		navigationProgress={80}
+		context={{
 			countries: [
 				{
 					key: 'US',
@@ -18,12 +18,12 @@ export const Basic = () => (
 				},
 			],
 			geolocatedLocation: undefined,
-		} }
+		}}
 	/>
 );
 
 export default {
 	title: 'WooCommerce Admin/Core Profiler/Business Location',
 	component: BusinessLocation,
-	decorators: [ WithSetupWizardLayout ],
+	decorators: [WithSetupWizardLayout],
 };

@@ -19,16 +19,16 @@ export function SendButton() {
 	};
 
 	const { hasEmptyContent, isEmailSent, urls } = useSelect(
-		( select ) => ( {
-			hasEmptyContent: select( storeName ).hasEmptyContent(),
-			isEmailSent: select( storeName ).isEmailSent(),
-			urls: select( storeName ).getUrls(),
-		} ),
+		(select) => ({
+			hasEmptyContent: select(storeName).hasEmptyContent(),
+			isEmailSent: select(storeName).isEmailSent(),
+			urls: select(storeName).getUrls(),
+		}),
 		[]
 	);
 
 	function sendAction() {
-		if ( urls.send ) {
+		if (urls.send) {
 			window.location.href = urls.send;
 		}
 	}
@@ -46,25 +46,25 @@ export function SendButton() {
 
 	const label = applyFilters(
 		'woocommerce_email_editor_send_button_label',
-		__( 'Send', __i18n_text_domain__ )
+		__('Send', __i18n_text_domain__)
 	) as string;
 
 	return (
 		<Button
 			variant="primary"
 			size="compact"
-			onClick={ () => {
-				recordEvent( 'header_send_button_clicked' );
+			onClick={() => {
+				recordEvent('header_send_button_clicked');
 				const action = applyFilters(
 					'woocommerce_email_editor_send_action_callback',
 					sendAction
 				) as () => void;
 				action();
-			} }
-			disabled={ isDisabled }
+			}}
+			disabled={isDisabled}
 			data-automation-id="email_editor_send_button"
 		>
-			{ label }
+			{label}
 		</Button>
 	);
 }

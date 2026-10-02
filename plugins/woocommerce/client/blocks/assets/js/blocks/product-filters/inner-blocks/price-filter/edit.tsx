@@ -19,31 +19,31 @@ import { InitialDisabled } from '../../components/initial-disabled';
 const Edit = () => {
 	const blockProps = useBlockProps();
 
-	const { data, isLoading } = useCollectionData( {
+	const { data, isLoading } = useCollectionData({
 		queryPrices: true,
 		queryState: {},
 		isEditor: true,
-	} );
+	});
 
 	return (
-		<div { ...blockProps }>
+		<div {...blockProps}>
 			<InitialDisabled>
 				<BlockContextProvider
-					value={ {
+					value={{
 						'woocommerce/rangeInput': {
-							...getPriceFilterData( data ),
+							...getPriceFilterData(data),
 							isLoading,
 						},
-					} }
+					}}
 				>
 					<InnerBlocks
-						allowedBlocks={ getAllowedBlocks() }
-						template={ [
+						allowedBlocks={getAllowedBlocks()}
+						template={[
 							[
 								'core/heading',
 								{
 									level: 3,
-									content: __( 'Price', 'woocommerce' ),
+									content: __('Price', 'woocommerce'),
 									style: {
 										spacing: {
 											margin: {
@@ -54,8 +54,8 @@ const Edit = () => {
 									},
 								},
 							],
-							[ 'woocommerce/product-filter-price-slider', {} ],
-						] }
+							['woocommerce/product-filter-price-slider', {}],
+						]}
 					/>
 				</BlockContextProvider>
 			</InitialDisabled>

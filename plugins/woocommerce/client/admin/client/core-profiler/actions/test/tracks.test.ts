@@ -10,18 +10,18 @@ import tracksActions, { resetShippingPartnerImpressionFlag } from '../tracks';
 import type { CoreProfilerStateMachineContext } from '../../index';
 import type { PluginInstallError } from '../../services/installAndActivatePlugins';
 
-jest.mock( '@woocommerce/tracks', () => ( {
+jest.mock('@woocommerce/tracks', () => ({
 	recordEvent: jest.fn(),
-} ) );
+}));
 
-jest.mock( '@woocommerce/settings', () => ( {
-	getSetting: jest.fn( () => '9.8.0' ),
-} ) );
+jest.mock('@woocommerce/settings', () => ({
+	getSetting: jest.fn(() => '9.8.0'),
+}));
 
 const makeContext = (
-	overrides: Partial< CoreProfilerStateMachineContext > = {}
+	overrides: Partial<CoreProfilerStateMachineContext> = {}
 ): CoreProfilerStateMachineContext =>
-	( {
+	({
 		optInDataSharing: false,
 		userProfile: {},
 		pluginsAvailable: [],
@@ -35,7 +35,7 @@ const makeContext = (
 		onboardingProfile: {},
 		currentUserEmail: undefined,
 		...overrides,
-	} ) as CoreProfilerStateMachineContext;
+	}) as CoreProfilerStateMachineContext;
 
 const shippingPlugins = [
 	{
@@ -77,21 +77,21 @@ const nonShippingPlugin = {
 	is_visible: true,
 };
 
-describe( 'Core Profiler shipping partner tracking', () => {
-	beforeEach( () => {
+describe('Core Profiler shipping partner tracking', () => {
+	beforeEach(() => {
 		jest.clearAllMocks();
 		resetShippingPartnerImpressionFlag();
-	} );
+	});
 
-	describe( 'recordShippingPartnerImpression', () => {
-		it( 'should fire shipping_partner_impression when shipping plugins are available', () => {
-			const context = makeContext( {
-				pluginsAvailable: [ ...shippingPlugins, nonShippingPlugin ],
-			} );
+	describe('recordShippingPartnerImpression', () => {
+		it('should fire shipping_partner_impression when shipping plugins are available', () => {
+			const context = makeContext({
+				pluginsAvailable: [...shippingPlugins, nonShippingPlugin],
+			});
 
-			tracksActions.recordShippingPartnerImpression( { context } );
+			tracksActions.recordShippingPartnerImpression({ context });
 
-			expect( recordEvent ).toHaveBeenCalledWith(
+			expect(recordEvent).toHaveBeenCalledWith(
 				'shipping_partner_impression',
 				{
 					context: 'core-profiler',
@@ -100,30 +100,30 @@ describe( 'Core Profiler shipping partner tracking', () => {
 						'woocommerce-shipping,woocommerce-shipstation-integration',
 				}
 			);
-		} );
+		});
 
-		it( 'should not fire shipping_partner_impression when no shipping plugins are available', () => {
-			const context = makeContext( {
-				pluginsAvailable: [ nonShippingPlugin ],
-			} );
+		it('should not fire shipping_partner_impression when no shipping plugins are available', () => {
+			const context = makeContext({
+				pluginsAvailable: [nonShippingPlugin],
+			});
 
-			tracksActions.recordShippingPartnerImpression( { context } );
+			tracksActions.recordShippingPartnerImpression({ context });
 
-			expect( recordEvent ).not.toHaveBeenCalledWith(
+			expect(recordEvent).not.toHaveBeenCalledWith(
 				'shipping_partner_impression',
 				expect.anything()
 			);
-		} );
+		});
 
-		it( 'should only fire shipping_partner_impression once even if called multiple times', () => {
-			const context = makeContext( {
-				pluginsAvailable: [ ...shippingPlugins, nonShippingPlugin ],
-			} );
+		it('should only fire shipping_partner_impression once even if called multiple times', () => {
+			const context = makeContext({
+				pluginsAvailable: [...shippingPlugins, nonShippingPlugin],
+			});
 
-			tracksActions.recordShippingPartnerImpression( { context } );
-			tracksActions.recordShippingPartnerImpression( { context } );
+			tracksActions.recordShippingPartnerImpression({ context });
+			tracksActions.recordShippingPartnerImpression({ context });
 
-			expect( recordEvent ).toHaveBeenCalledWith(
+			expect(recordEvent).toHaveBeenCalledWith(
 				'shipping_partner_impression',
 				{
 					context: 'core-profiler',
@@ -133,21 +133,20 @@ describe( 'Core Profiler shipping partner tracking', () => {
 				}
 			);
 			expect(
-				( recordEvent as jest.Mock ).mock.calls.filter(
-					( [ eventName ] ) =>
-						eventName === 'shipping_partner_impression'
+				(recordEvent as jest.Mock).mock.calls.filter(
+					([eventName]) => eventName === 'shipping_partner_impression'
 				)
-			).toHaveLength( 1 );
-		} );
-	} );
+			).toHaveLength(1);
+		});
+	});
 
-	describe( 'recordTracksPluginsInstallationRequest (shipping_partner_click)', () => {
-		it( 'should fire shipping_partner_click for each selected shipping plugin', () => {
-			const context = makeContext( {
-				pluginsAvailable: [ ...shippingPlugins, nonShippingPlugin ],
-			} );
+	describe('recordTracksPluginsInstallationRequest (shipping_partner_click)', () => {
+		it('should fire shipping_partner_click for each selected shipping plugin', () => {
+			const context = makeContext({
+				pluginsAvailable: [...shippingPlugins, nonShippingPlugin],
+			});
 
-			tracksActions.recordTracksPluginsInstallationRequest( {
+			tracksActions.recordTracksPluginsInstallationRequest({
 				context,
 				event: {
 					type: 'PLUGINS_INSTALLATION_REQUESTED',
@@ -165,36 +164,30 @@ describe( 'Core Profiler shipping partner tracking', () => {
 						pluginsUnselected: [],
 					},
 				},
-			} );
+			});
 
-			expect( recordEvent ).toHaveBeenCalledWith(
-				'shipping_partner_click',
-				{
-					context: 'core-profiler',
-					country: 'US',
-					plugins:
-						'woocommerce-shipping,woocommerce-shipstation-integration',
-					selected_plugin: 'woocommerce-shipping',
-				}
-			);
-			expect( recordEvent ).toHaveBeenCalledWith(
-				'shipping_partner_click',
-				{
-					context: 'core-profiler',
-					country: 'US',
-					plugins:
-						'woocommerce-shipping,woocommerce-shipstation-integration',
-					selected_plugin: 'woocommerce-shipstation-integration',
-				}
-			);
-		} );
+			expect(recordEvent).toHaveBeenCalledWith('shipping_partner_click', {
+				context: 'core-profiler',
+				country: 'US',
+				plugins:
+					'woocommerce-shipping,woocommerce-shipstation-integration',
+				selected_plugin: 'woocommerce-shipping',
+			});
+			expect(recordEvent).toHaveBeenCalledWith('shipping_partner_click', {
+				context: 'core-profiler',
+				country: 'US',
+				plugins:
+					'woocommerce-shipping,woocommerce-shipstation-integration',
+				selected_plugin: 'woocommerce-shipstation-integration',
+			});
+		});
 
-		it( 'should not fire shipping_partner_click when no shipping plugins are selected', () => {
-			const context = makeContext( {
-				pluginsAvailable: [ ...shippingPlugins, nonShippingPlugin ],
-			} );
+		it('should not fire shipping_partner_click when no shipping plugins are selected', () => {
+			const context = makeContext({
+				pluginsAvailable: [...shippingPlugins, nonShippingPlugin],
+			});
 
-			tracksActions.recordTracksPluginsInstallationRequest( {
+			tracksActions.recordTracksPluginsInstallationRequest({
 				context,
 				event: {
 					type: 'PLUGINS_INSTALLATION_REQUESTED',
@@ -203,26 +196,26 @@ describe( 'Core Profiler shipping partner tracking', () => {
 							'woocommerce-shipping',
 							'woocommerce-payments',
 						],
-						pluginsSelected: [ 'woocommerce-payments' ],
-						pluginsUnselected: [ 'woocommerce-shipping' ],
+						pluginsSelected: ['woocommerce-payments'],
+						pluginsUnselected: ['woocommerce-shipping'],
 					},
 				},
-			} );
+			});
 
-			expect( recordEvent ).not.toHaveBeenCalledWith(
+			expect(recordEvent).not.toHaveBeenCalledWith(
 				'shipping_partner_click',
 				expect.anything()
 			);
-		} );
-	} );
+		});
+	});
 
-	describe( 'recordSuccessfulPluginInstallation (shipping_partner_install + shipping_partner_activate)', () => {
-		it( 'should fire install and activate success for each shipping plugin', () => {
-			const context = makeContext( {
-				pluginsAvailable: [ ...shippingPlugins, nonShippingPlugin ],
-			} );
+	describe('recordSuccessfulPluginInstallation (shipping_partner_install + shipping_partner_activate)', () => {
+		it('should fire install and activate success for each shipping plugin', () => {
+			const context = makeContext({
+				pluginsAvailable: [...shippingPlugins, nonShippingPlugin],
+			});
 
-			tracksActions.recordSuccessfulPluginInstallation( {
+			tracksActions.recordSuccessfulPluginInstallation({
 				context,
 				event: {
 					type: 'PLUGINS_INSTALLATION_COMPLETED',
@@ -242,9 +235,9 @@ describe( 'Core Profiler shipping partner tracking', () => {
 						},
 					},
 				},
-			} );
+			});
 
-			expect( recordEvent ).toHaveBeenCalledWith(
+			expect(recordEvent).toHaveBeenCalledWith(
 				'shipping_partner_install',
 				{
 					context: 'core-profiler',
@@ -255,7 +248,7 @@ describe( 'Core Profiler shipping partner tracking', () => {
 					success: true,
 				}
 			);
-			expect( recordEvent ).toHaveBeenCalledWith(
+			expect(recordEvent).toHaveBeenCalledWith(
 				'shipping_partner_activate',
 				{
 					context: 'core-profiler',
@@ -266,14 +259,14 @@ describe( 'Core Profiler shipping partner tracking', () => {
 					success: true,
 				}
 			);
-		} );
+		});
 
-		it( 'should not fire shipping events for non-shipping plugins', () => {
-			const context = makeContext( {
-				pluginsAvailable: [ nonShippingPlugin ],
-			} );
+		it('should not fire shipping events for non-shipping plugins', () => {
+			const context = makeContext({
+				pluginsAvailable: [nonShippingPlugin],
+			});
 
-			tracksActions.recordSuccessfulPluginInstallation( {
+			tracksActions.recordSuccessfulPluginInstallation({
 				context,
 				event: {
 					type: 'PLUGINS_INSTALLATION_COMPLETED',
@@ -289,24 +282,24 @@ describe( 'Core Profiler shipping partner tracking', () => {
 						},
 					},
 				},
-			} );
+			});
 
-			expect( recordEvent ).not.toHaveBeenCalledWith(
+			expect(recordEvent).not.toHaveBeenCalledWith(
 				'shipping_partner_install',
 				expect.anything()
 			);
-			expect( recordEvent ).not.toHaveBeenCalledWith(
+			expect(recordEvent).not.toHaveBeenCalledWith(
 				'shipping_partner_activate',
 				expect.anything()
 			);
-		} );
-	} );
+		});
+	});
 
-	describe( 'recordFailedPluginInstallations (shipping_partner_install failure)', () => {
-		it( 'should fire shipping_partner_install with failure for failed shipping plugins', () => {
-			const context = makeContext( {
-				pluginsAvailable: [ ...shippingPlugins, nonShippingPlugin ],
-			} );
+	describe('recordFailedPluginInstallations (shipping_partner_install failure)', () => {
+		it('should fire shipping_partner_install with failure for failed shipping plugins', () => {
+			const context = makeContext({
+				pluginsAvailable: [...shippingPlugins, nonShippingPlugin],
+			});
 
 			const errors: PluginInstallError[] = [
 				{
@@ -321,15 +314,15 @@ describe( 'Core Profiler shipping partner tracking', () => {
 				},
 			];
 
-			tracksActions.recordFailedPluginInstallations( {
+			tracksActions.recordFailedPluginInstallations({
 				context,
 				event: {
 					type: 'PLUGINS_INSTALLATION_COMPLETED_WITH_ERRORS',
 					payload: { errors },
 				},
-			} );
+			});
 
-			expect( recordEvent ).toHaveBeenCalledWith(
+			expect(recordEvent).toHaveBeenCalledWith(
 				'shipping_partner_install',
 				{
 					context: 'core-profiler',
@@ -340,16 +333,16 @@ describe( 'Core Profiler shipping partner tracking', () => {
 					success: false,
 				}
 			);
-			expect( recordEvent ).not.toHaveBeenCalledWith(
+			expect(recordEvent).not.toHaveBeenCalledWith(
 				'shipping_partner_activate',
 				expect.anything()
 			);
-		} );
+		});
 
-		it( 'should not fire shipping_partner_install for failed non-shipping plugins', () => {
-			const context = makeContext( {
-				pluginsAvailable: [ ...shippingPlugins, nonShippingPlugin ],
-			} );
+		it('should not fire shipping_partner_install for failed non-shipping plugins', () => {
+			const context = makeContext({
+				pluginsAvailable: [...shippingPlugins, nonShippingPlugin],
+			});
 
 			const errors: PluginInstallError[] = [
 				{
@@ -364,48 +357,48 @@ describe( 'Core Profiler shipping partner tracking', () => {
 				},
 			];
 
-			tracksActions.recordFailedPluginInstallations( {
+			tracksActions.recordFailedPluginInstallations({
 				context,
 				event: {
 					type: 'PLUGINS_INSTALLATION_COMPLETED_WITH_ERRORS',
 					payload: { errors },
 				},
-			} );
+			});
 
-			expect( recordEvent ).not.toHaveBeenCalledWith(
+			expect(recordEvent).not.toHaveBeenCalledWith(
 				'shipping_partner_install',
 				expect.anything()
 			);
-		} );
-	} );
+		});
+	});
 
-	describe( 'country code extraction', () => {
-		it( 'should extract country code from location with state', () => {
-			const context = makeContext( {
-				pluginsAvailable: [ shippingPlugins[ 0 ] ],
+	describe('country code extraction', () => {
+		it('should extract country code from location with state', () => {
+			const context = makeContext({
+				pluginsAvailable: [shippingPlugins[0]],
 				businessInfo: { location: 'DE:BE' },
-			} );
+			});
 
-			tracksActions.recordShippingPartnerImpression( { context } );
+			tracksActions.recordShippingPartnerImpression({ context });
 
-			expect( recordEvent ).toHaveBeenCalledWith(
+			expect(recordEvent).toHaveBeenCalledWith(
 				'shipping_partner_impression',
-				expect.objectContaining( { country: 'DE' } )
+				expect.objectContaining({ country: 'DE' })
 			);
-		} );
+		});
 
-		it( 'should handle missing location gracefully', () => {
-			const context = makeContext( {
-				pluginsAvailable: [ shippingPlugins[ 0 ] ],
+		it('should handle missing location gracefully', () => {
+			const context = makeContext({
+				pluginsAvailable: [shippingPlugins[0]],
 				businessInfo: {},
-			} );
+			});
 
-			tracksActions.recordShippingPartnerImpression( { context } );
+			tracksActions.recordShippingPartnerImpression({ context });
 
-			expect( recordEvent ).toHaveBeenCalledWith(
+			expect(recordEvent).toHaveBeenCalledWith(
 				'shipping_partner_impression',
-				expect.objectContaining( { country: '' } )
+				expect.objectContaining({ country: '' })
 			);
-		} );
-	} );
-} );
+		});
+	});
+});

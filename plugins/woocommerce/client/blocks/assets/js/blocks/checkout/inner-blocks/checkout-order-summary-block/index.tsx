@@ -14,13 +14,13 @@ import deprecated from './deprecated';
 import './style.scss';
 import metadata from './block.json';
 
-registerBlockType( 'woocommerce/checkout-order-summary-block', {
+registerBlockType('woocommerce/checkout-order-summary-block', {
 	apiVersion: metadata.apiVersion,
 	title: metadata.title,
 	icon: {
 		src: (
 			<Icon
-				icon={ totals }
+				icon={totals}
 				className="wc-block-editor-components-block-icon"
 			/>
 		),
@@ -29,4 +29,4 @@ registerBlockType( 'woocommerce/checkout-order-summary-block', {
 	edit: Edit,
 	save: Save,
 	deprecated,
-} );
+});

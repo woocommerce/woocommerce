@@ -4,15 +4,15 @@ export const scrollPopperToVisibleAreaIfNeeded = (
 ) => {
 	// 8px is added for some extra spacing from the top admin bar
 	const adminBarHeight =
-		( document.getElementById( 'wpadminbar' )?.offsetHeight || 0 ) + 8;
+		(document.getElementById('wpadminbar')?.offsetHeight || 0) + 8;
 
 	// check if element is cut from the top
-	if ( popperBoundingRect.top < adminBarHeight ) {
-		window.scrollBy( 0, popperBoundingRect.top - adminBarHeight );
+	if (popperBoundingRect.top < adminBarHeight) {
+		window.scrollBy(0, popperBoundingRect.top - adminBarHeight);
 	} else if (
 		// check if element is cut from the bottom
 		popperBoundingRect.bottom > window.innerHeight
 	) {
-		window.scrollBy( 0, popperBoundingRect.bottom - window.innerHeight );
+		window.scrollBy(0, popperBoundingRect.bottom - window.innerHeight);
 	}
 };

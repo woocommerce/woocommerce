@@ -6,7 +6,7 @@ import { Link } from '@woocommerce/components';
 import interpolateComponents from '@automattic/interpolate-components';
 
 const ReadBlogMessage = () => {
-	return interpolateComponents( {
+	return interpolateComponents({
 		mixedString: __(
 			'Read {{link}}the WooCommerce blog{{/link}} for more tips on marketing your store',
 			'woocommerce'
@@ -20,7 +20,7 @@ const ReadBlogMessage = () => {
 				/>
 			),
 		},
-	} );
+	});
 };
 
 export default ReadBlogMessage;

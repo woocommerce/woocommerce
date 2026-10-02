@@ -4,48 +4,45 @@
 import type { InputHTMLAttributes, ReactNode } from 'react';
 import { Require } from '@woocommerce/types';
 
-interface ItemProps< T extends object = object > {
+interface ItemProps<T extends object = object> {
 	// Depth, non-zero if the list is hierarchical.
 	depth?: number;
 	// Text to display for the load more button.
 	loadMoreChildrenText?: string | undefined;
 	// Callback for loading more children.
-	onLoadMoreChildren?: ( () => void ) | undefined;
+	onLoadMoreChildren?: (() => void) | undefined;
 	// Map of parent item IDs to their total number of children.
 	// Value is null when total is unknown, and 0 when known to have no children.
-	totalChildren?: { [ key: string ]: number | null } | undefined;
+	totalChildren?: { [key: string]: number | null } | undefined;
 	// Callback for selecting the item.
-	onSelect: (
-		item: SearchListItem< T > | SearchListItem< T >[]
-	) => () => void;
+	onSelect: (item: SearchListItem<T> | SearchListItem<T>[]) => () => void;
 	// Search string, used to highlight the substring in the item name.
 	search: string;
 	useExpandedPanelId: [
 		string | number | null,
-		React.Dispatch< React.SetStateAction< string | number | null > >,
+		React.Dispatch<React.SetStateAction<string | number | null>>,
 	];
 }
 
-interface SearchListProps< T extends object = object > {
+interface SearchListProps<T extends object = object> {
 	//Restrict selections to one item.
 	isSingle: boolean;
 	// A complete list of item objects, each with id, name properties. This is displayed as a clickable/keyboard-able list, and possibly filtered by the search term (searches name).
-	list: SearchListItem< T >[];
+	list: SearchListItem<T>[];
 	// Callback to render each item in the selection list, allows any custom object-type rendering.
-	renderItem?: ( args: RenderItemArgs< T > ) => JSX.Element;
+	renderItem?: (args: RenderItemArgs<T>) => JSX.Element;
 	// The list of currently selected items.
-	selected: SearchListItem< T >[];
+	selected: SearchListItem<T>[];
 }
 
 export interface ListItemsProps
-	extends Require< SearchListProps, 'renderItem' >,
-		ItemProps {
+	extends Require<SearchListProps, 'renderItem'>, ItemProps {
 	instanceId: string | number;
 }
 
-export type SearchListItem< T extends object = object > = {
+export type SearchListItem<T extends object = object> = {
 	breadcrumbs: string[];
-	children?: SearchListItem< T >[];
+	children?: SearchListItem<T>[];
 	count?: number;
 	details?: T;
 	id: string | number;
@@ -54,11 +51,10 @@ export type SearchListItem< T extends object = object > = {
 	value: string;
 };
 
-export interface SearchListItemsContainerProps< T extends object = object >
-	extends SearchListControlProps,
-		ItemProps {
+export interface SearchListItemsContainerProps<T extends object = object>
+	extends SearchListControlProps, ItemProps {
 	instanceId: string | number;
-	filteredList: SearchListItem< T >[];
+	filteredList: SearchListItem<T>[];
 	messages: SearchListMessages;
 }
 
@@ -72,18 +68,16 @@ export interface SearchListMessages {
 	// Label for the search input
 	search: string;
 	// Label for the selected items. This is actually a function, so that we can pass through the count of currently selected items.
-	selected: ( n: number ) => string;
+	selected: (n: number) => string;
 	// Label indicating that search results have changed, read to screen reader users.
 	updated: string;
 }
 
-export interface RenderItemArgs< T extends object = object >
-	extends ItemProps,
+export interface RenderItemArgs<T extends object = object>
+	extends
+		ItemProps,
 		Partial<
-			Omit<
-				InputHTMLAttributes< HTMLInputElement >,
-				'onChange' | 'onSelect'
-			>
+			Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'onSelect'>
 		> {
 	// Additional CSS classes.
 	className?: string;
@@ -94,7 +88,7 @@ export interface RenderItemArgs< T extends object = object >
 	// Whether the item is disabled.
 	disabled?: boolean;
 	// Current item to display.
-	item: SearchListItem< T >;
+	item: SearchListItem<T>;
 	// Whether this item is selected.
 	isSelected: boolean;
 	// Whether this item is selectable.
@@ -102,7 +96,7 @@ export interface RenderItemArgs< T extends object = object >
 	// Whether this should only display a single item (controls radio vs checkbox icon).
 	isSingle: boolean;
 	// The list of currently selected items.
-	selected: SearchListItem< T >[];
+	selected: SearchListItem<T>[];
 	/**
 	 * Name of the inputs. Used to group input controls together. See:
 	 * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#attr-name
@@ -113,7 +107,7 @@ export interface RenderItemArgs< T extends object = object >
 	ariaLabel?: string;
 }
 
-export interface SearchListControlProps< T extends object = object > {
+export interface SearchListControlProps<T extends object = object> {
 	// Additional CSS classes.
 	className?: string;
 	// Whether it should be displayed in a compact way, so it occupies less space.
@@ -125,29 +119,27 @@ export interface SearchListControlProps< T extends object = object > {
 	// Restrict selections to one item.
 	isSingle: boolean;
 	// A complete list of item objects, each with id, name properties. This is displayed as a clickable/keyboard-able list, and possibly filtered by the search term (searches name).
-	list: SearchListItem< T >[];
+	list: SearchListItem<T>[];
 	// Messages displayed or read to the user. Configure these to reflect your object type.
-	messages?: Partial< SearchListMessages >;
+	messages?: Partial<SearchListMessages>;
 	// Text to display for the load more button.
 	loadMoreChildrenText?: string | undefined;
 	// Callback for loading more children.
-	onLoadMoreChildren?: ( () => void ) | undefined;
+	onLoadMoreChildren?: (() => void) | undefined;
 	// Map of parent item IDs to their total number of children.
 	// Value is null when total is unknown, and 0 when known to have no children.
-	totalChildren?: { [ key: string ]: number | null } | undefined;
+	totalChildren?: { [key: string]: number | null } | undefined;
 	// Callback fired when selected items change, whether added, cleared, or removed. Passed an array of item objects (as passed in via props.list).
-	onChange: ( search: SearchListItem< T >[] ) => void;
+	onChange: (search: SearchListItem<T>[]) => void;
 	// Callback fired when the search field is used.
-	onSearch?: ( ( search: string ) => void ) | undefined;
+	onSearch?: ((search: string) => void) | undefined;
 	// Callback to render each item in the selection list, allows any custom object-type rendering.
-	renderItem?:
-		| ( ( args: RenderItemArgs< T > ) => JSX.Element | null )
-		| undefined;
+	renderItem?: ((args: RenderItemArgs<T>) => JSX.Element | null) | undefined;
 	// The list of currently selected items.
-	selected: SearchListItem< T >[];
+	selected: SearchListItem<T>[];
 	// Whether to show a text field or a token field as search
 	// Defaults to `'text'`
 	type?: 'text' | 'token';
 	// from withSpokenMessages
-	debouncedSpeak?: ( message: string ) => void;
+	debouncedSpeak?: (message: string) => void;
 }

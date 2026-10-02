@@ -19,64 +19,64 @@ import {
 import type { NoticeOptions, NoticeStatus } from '~/lib/notices/types';
 
 type StoreLocationProps = {
-	onComplete: ( values: FormValues ) => void;
+	onComplete: (values: FormValues) => void;
 	createNotice: (
 		status: NoticeStatus | undefined,
 		content: string,
-		options?: Partial< NoticeOptions >
+		options?: Partial<NoticeOptions>
 	) => void;
 	isSettingsRequesting: boolean;
 	buttonText?: string;
 	updateAndPersistSettingsForGroup: (
 		group: string,
 		data: {
-			[ key: string ]: unknown;
+			[key: string]: unknown;
 		} & {
 			general?: {
-				[ key: string ]: string;
+				[key: string]: string;
 			};
 			tax?: {
-				[ key: string ]: string;
+				[key: string]: string;
 			};
 		}
 	) => void;
 	settings?: {
-		[ key: string ]: string;
+		[key: string]: string;
 	};
-	validate?: ( values: FormValues ) => { [ key: string ]: string };
+	validate?: (values: FormValues) => { [key: string]: string };
 };
 
-export const defaultValidate = ( values: FormValues ) => {
+export const defaultValidate = (values: FormValues) => {
 	const validator = getStoreAddressValidator();
-	return validator( values );
+	return validator(values);
 };
 
-const StoreLocation = ( {
+const StoreLocation = ({
 	onComplete,
 	createNotice,
 	isSettingsRequesting,
 	updateAndPersistSettingsForGroup,
 	settings,
-	buttonText = __( 'Continue', 'woocommerce' ),
+	buttonText = __('Continue', 'woocommerce'),
 	validate = defaultValidate,
-}: StoreLocationProps ) => {
-	const { hasFinishedResolution } = useSelect( ( select ) => {
-		const countryStore = select( countriesStore );
+}: StoreLocationProps) => {
+	const { hasFinishedResolution } = useSelect((select) => {
+		const countryStore = select(countriesStore);
 		countryStore.getCountries();
 
 		return {
 			getLocale: countryStore.getLocale,
 			locales: countryStore.getLocales(),
 			hasFinishedResolution:
-				countryStore.hasFinishedResolution( 'getLocales', undefined ) &&
-				countryStore.hasFinishedResolution( 'getCountries', undefined ),
+				countryStore.hasFinishedResolution('getLocales', undefined) &&
+				countryStore.hasFinishedResolution('getCountries', undefined),
 		};
-	}, [] );
-	const [ isSubmitting, setSubmitting ] = useState( false );
-	const onSubmit = async ( values: FormValues ) => {
-		setSubmitting( true );
+	}, []);
+	const [isSubmitting, setSubmitting] = useState(false);
+	const onSubmit = async (values: FormValues) => {
+		setSubmitting(true);
 		try {
-			await updateAndPersistSettingsForGroup( 'general', {
+			await updateAndPersistSettingsForGroup('general', {
 				general: {
 					...settings,
 					woocommerce_store_address: values.addressLine1,
@@ -85,12 +85,12 @@ const StoreLocation = ( {
 					woocommerce_store_city: values.city,
 					woocommerce_store_postcode: values.postCode,
 				},
-			} );
+			});
 
-			setSubmitting( false );
-			onComplete( values );
-		} catch ( e ) {
-			setSubmitting( false );
+			setSubmitting(false);
+			onComplete(values);
+		} catch (e) {
+			setSubmitting(false);
 
 			createNotice(
 				'error',
@@ -112,37 +112,37 @@ const StoreLocation = ( {
 		};
 	};
 
-	if ( isSettingsRequesting || ! hasFinishedResolution ) {
+	if (isSettingsRequesting || !hasFinishedResolution) {
 		return <Spinner />;
 	}
 
 	return (
 		<Form
-			initialValues={ getInitialValues() }
-			onSubmit={ onSubmit }
-			validate={ validate }
+			initialValues={getInitialValues()}
+			onSubmit={onSubmit}
+			validate={validate}
 		>
-			{ ( {
+			{({
 				getInputProps,
 				getSelectControlProps,
 				handleSubmit,
 				setValue,
-			}: FormContextType< FormValues > ) => (
+			}: FormContextType<FormValues>) => (
 				<Fragment>
 					<StoreAddress
-						getInputProps={ getInputProps }
-						getSelectControlProps={ getSelectControlProps }
-						setValue={ setValue }
+						getInputProps={getInputProps}
+						getSelectControlProps={getSelectControlProps}
+						setValue={setValue}
 					/>
 					<Button
 						variant="primary"
-						onClick={ handleSubmit }
-						isBusy={ isSubmitting }
+						onClick={handleSubmit}
+						isBusy={isSubmitting}
 					>
-						{ buttonText }
+						{buttonText}
 					</Button>
 				</Fragment>
-			) }
+			)}
 		</Form>
 	);
 };

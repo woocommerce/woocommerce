@@ -23,7 +23,7 @@ const getFulfillmentErrorMessage = (
 		'code' in error
 	) {
 		const apiError = error as { message: string; code: string };
-		if ( apiError.code === 'woocommerce_fulfillment_error' ) {
+		if (apiError.code === 'woocommerce_fulfillment_error') {
 			return apiError.message;
 		}
 	}
@@ -48,33 +48,33 @@ interface OrderState {
 	error: string | null;
 }
 
-const DEFAULT_STATE: { orderMap: Record< string, OrderState > } = {
+const DEFAULT_STATE: { orderMap: Record<string, OrderState> } = {
 	orderMap: {},
 };
 
-const getInitialOrderState = (): OrderState => ( {
+const getInitialOrderState = (): OrderState => ({
 	order: null,
 	refunds: [],
 	fulfillments: [],
 	loading: false,
 	error: null,
-} );
+});
 
 // --- Internal Action Creators
 const internalActions = {
-	setOrder( orderId: number, order: Order ) {
+	setOrder(orderId: number, order: Order) {
 		return { type: actionTypes.SET_ORDER, orderId, order };
 	},
-	setRefunds( orderId: number, refunds: Refund[] ) {
+	setRefunds(orderId: number, refunds: Refund[]) {
 		return { type: actionTypes.SET_REFUNDS, orderId, refunds };
 	},
-	setLoading( orderId: number, isLoading: boolean ) {
+	setLoading(orderId: number, isLoading: boolean) {
 		return { type: actionTypes.SET_LOADING, orderId, isLoading };
 	},
-	setError( orderId: number, error: string | null ) {
+	setError(orderId: number, error: string | null) {
 		return { type: actionTypes.SET_ERROR, orderId, error };
 	},
-	setFulfillments( orderId: number, fulfillments: Fulfillment[] ) {
+	setFulfillments(orderId: number, fulfillments: Fulfillment[]) {
 		return { type: actionTypes.SET_FULFILLMENTS, orderId, fulfillments };
 	},
 	setFulfillment(
@@ -89,7 +89,7 @@ const internalActions = {
 			fulfillment,
 		};
 	},
-	deleteFulfillmentRecord( orderId: number, fulfillmentId: number ) {
+	deleteFulfillmentRecord(orderId: number, fulfillmentId: number) {
 		return { type: actionTypes.DELETE_FULFILLMENT, orderId, fulfillmentId };
 	},
 };
@@ -97,18 +97,14 @@ const internalActions = {
 // --- Public Async Actions
 const publicActions = {
 	saveFulfillment:
-		(
-			orderId: number,
-			fulfillment: Fulfillment,
-			notifyCustomer: boolean
-		) =>
-		async ( { dispatch }: { dispatch: typeof actions } ) => {
-			dispatch.setLoading( orderId, true );
-			dispatch.setError( orderId, null );
+		(orderId: number, fulfillment: Fulfillment, notifyCustomer: boolean) =>
+		async ({ dispatch }: { dispatch: typeof actions }) => {
+			dispatch.setLoading(orderId, true);
+			dispatch.setError(orderId, null);
 			try {
-				const saved = await apiFetch< Fulfillment >( {
+				const saved = await apiFetch<Fulfillment>({
 					path: addQueryArgs(
-						`/wc/v3/orders/${ orderId }/fulfillments`,
+						`/wc/v3/orders/${orderId}/fulfillments`,
 						{ notify_customer: notifyCustomer }
 					),
 					method: 'POST',
@@ -117,12 +113,12 @@ const publicActions = {
 						'Content-Type': 'application/json',
 						'X-WC-Fulfillments-UI': 'true',
 					},
-				} );
-				if ( ! saved.id ) {
-					throw new Error( 'Fulfillment ID is missing in response' );
+				});
+				if (!saved.id) {
+					throw new Error('Fulfillment ID is missing in response');
 				}
-				dispatch.setFulfillment( orderId, saved.id, saved );
-			} catch ( error: unknown ) {
+				dispatch.setFulfillment(orderId, saved.id, saved);
+			} catch (error: unknown) {
 				dispatch.setError(
 					orderId,
 					getFulfillmentErrorMessage(
@@ -131,7 +127,7 @@ const publicActions = {
 					)
 				);
 			} finally {
-				dispatch.setLoading( orderId, false );
+				dispatch.setLoading(orderId, false);
 			}
 		},
 
@@ -142,18 +138,18 @@ const publicActions = {
 			notifyCustomer: boolean,
 			customerNote: string
 		) =>
-		async ( { dispatch }: { dispatch: typeof actions } ) => {
-			dispatch.setLoading( orderId, true );
-			dispatch.setError( orderId, null );
-			if ( ! fulfillment.id ) {
-				dispatch.setError( orderId, 'Fulfillment ID is required' );
-				dispatch.setLoading( orderId, false );
+		async ({ dispatch }: { dispatch: typeof actions }) => {
+			dispatch.setLoading(orderId, true);
+			dispatch.setError(orderId, null);
+			if (!fulfillment.id) {
+				dispatch.setError(orderId, 'Fulfillment ID is required');
+				dispatch.setLoading(orderId, false);
 				return;
 			}
 			try {
-				const updated = await apiFetch< Fulfillment >( {
+				const updated = await apiFetch<Fulfillment>({
 					path: addQueryArgs(
-						`/wc/v3/orders/${ orderId }/fulfillments/${ fulfillment.id }`,
+						`/wc/v3/orders/${orderId}/fulfillments/${fulfillment.id}`,
 						{ notify_customer: notifyCustomer }
 					),
 					method: 'PUT',
@@ -165,12 +161,12 @@ const publicActions = {
 						'Content-Type': 'application/json',
 						'X-WC-Fulfillments-UI': 'true',
 					},
-				} );
-				if ( ! updated.id ) {
-					throw new Error( 'Fulfillment ID is missing in response' );
+				});
+				if (!updated.id) {
+					throw new Error('Fulfillment ID is missing in response');
 				}
-				dispatch.setFulfillment( orderId, updated.id, updated );
-			} catch ( error: unknown ) {
+				dispatch.setFulfillment(orderId, updated.id, updated);
+			} catch (error: unknown) {
 				dispatch.setError(
 					orderId,
 					getFulfillmentErrorMessage(
@@ -179,19 +175,19 @@ const publicActions = {
 					)
 				);
 			} finally {
-				dispatch.setLoading( orderId, false );
+				dispatch.setLoading(orderId, false);
 			}
 		},
 
 	deleteFulfillment:
-		( orderId: number, fulfillmentId: number, notifyCustomer: boolean ) =>
-		async ( { dispatch }: { dispatch: typeof actions } ) => {
-			dispatch.setLoading( orderId, true );
-			dispatch.setError( orderId, null );
+		(orderId: number, fulfillmentId: number, notifyCustomer: boolean) =>
+		async ({ dispatch }: { dispatch: typeof actions }) => {
+			dispatch.setLoading(orderId, true);
+			dispatch.setError(orderId, null);
 			try {
-				await apiFetch( {
+				await apiFetch({
 					path: addQueryArgs(
-						`/wc/v3/orders/${ orderId }/fulfillments/${ fulfillmentId }`,
+						`/wc/v3/orders/${orderId}/fulfillments/${fulfillmentId}`,
 						{ notify_customer: notifyCustomer }
 					),
 					method: 'DELETE',
@@ -199,9 +195,9 @@ const publicActions = {
 						'Content-Type': 'application/json',
 						'X-WC-Fulfillments-UI': 'true',
 					},
-				} );
-				dispatch.deleteFulfillmentRecord( orderId, fulfillmentId );
-			} catch ( error: unknown ) {
+				});
+				dispatch.deleteFulfillmentRecord(orderId, fulfillmentId);
+			} catch (error: unknown) {
 				dispatch.setError(
 					orderId,
 					getFulfillmentErrorMessage(
@@ -210,7 +206,7 @@ const publicActions = {
 					)
 				);
 			} finally {
-				dispatch.setLoading( orderId, false );
+				dispatch.setLoading(orderId, false);
 			}
 		},
 };
@@ -221,20 +217,20 @@ const actions = {
 };
 
 type Action = ReturnType<
-	( typeof internalActions )[ keyof typeof internalActions ]
+	(typeof internalActions)[keyof typeof internalActions]
 >;
 
 // --- Reducer
-function reducer( state = DEFAULT_STATE, action: Action ) {
-	const prev = state.orderMap[ action.orderId ] || getInitialOrderState();
+function reducer(state = DEFAULT_STATE, action: Action) {
+	const prev = state.orderMap[action.orderId] || getInitialOrderState();
 
-	switch ( action.type ) {
+	switch (action.type) {
 		case actionTypes.SET_ORDER:
 			return {
 				...state,
 				orderMap: {
 					...state.orderMap,
-					[ action.orderId ]: { ...prev, order: action.order },
+					[action.orderId]: { ...prev, order: action.order },
 				},
 			};
 		case actionTypes.SET_REFUNDS:
@@ -242,7 +238,7 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 				...state,
 				orderMap: {
 					...state.orderMap,
-					[ action.orderId ]: {
+					[action.orderId]: {
 						...prev,
 						refunds: action.refunds,
 					},
@@ -253,7 +249,7 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 				...state,
 				orderMap: {
 					...state.orderMap,
-					[ action.orderId ]: { ...prev, loading: action.isLoading },
+					[action.orderId]: { ...prev, loading: action.isLoading },
 				},
 			};
 		case actionTypes.SET_ERROR:
@@ -261,7 +257,7 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 				...state,
 				orderMap: {
 					...state.orderMap,
-					[ action.orderId ]: { ...prev, error: action.error },
+					[action.orderId]: { ...prev, error: action.error },
 				},
 			};
 		case actionTypes.SET_FULFILLMENTS:
@@ -269,7 +265,7 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 				...state,
 				orderMap: {
 					...state.orderMap,
-					[ action.orderId ]: {
+					[action.orderId]: {
 						...prev,
 						fulfillments: action.fulfillments,
 					},
@@ -280,11 +276,11 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 				...state,
 				orderMap: {
 					...state.orderMap,
-					[ action.orderId ]: {
+					[action.orderId]: {
 						...prev,
 						fulfillments: [
 							...prev.fulfillments.filter(
-								( f ) => f.id !== action.fulfillmentId
+								(f) => f.id !== action.fulfillmentId
 							),
 							action.fulfillment,
 						],
@@ -296,10 +292,10 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 				...state,
 				orderMap: {
 					...state.orderMap,
-					[ action.orderId ]: {
+					[action.orderId]: {
 						...prev,
 						fulfillments: prev.fulfillments.filter(
-							( f ) => f.id !== action.fulfillmentId
+							(f) => f.id !== action.fulfillmentId
 						),
 					},
 				},
@@ -311,23 +307,23 @@ function reducer( state = DEFAULT_STATE, action: Action ) {
 
 // --- Selectors
 const selectors = {
-	getState( state: typeof DEFAULT_STATE ) {
+	getState(state: typeof DEFAULT_STATE) {
 		return state;
 	},
-	getOrder( state: typeof DEFAULT_STATE, orderId: number ) {
-		return state.orderMap[ orderId ]?.order;
+	getOrder(state: typeof DEFAULT_STATE, orderId: number) {
+		return state.orderMap[orderId]?.order;
 	},
-	getRefunds( state: typeof DEFAULT_STATE, orderId: number ) {
-		return state.orderMap[ orderId ]?.refunds || [];
+	getRefunds(state: typeof DEFAULT_STATE, orderId: number) {
+		return state.orderMap[orderId]?.refunds || [];
 	},
-	isLoading( state: typeof DEFAULT_STATE, orderId: number ) {
-		return !! state.orderMap[ orderId ]?.loading;
+	isLoading(state: typeof DEFAULT_STATE, orderId: number) {
+		return !!state.orderMap[orderId]?.loading;
 	},
-	getError( state: typeof DEFAULT_STATE, orderId: number ) {
-		return state.orderMap[ orderId ]?.error || null;
+	getError(state: typeof DEFAULT_STATE, orderId: number) {
+		return state.orderMap[orderId]?.error || null;
 	},
-	readFulfillments( state: typeof DEFAULT_STATE, orderId: number ) {
-		return state.orderMap[ orderId ]?.fulfillments || [];
+	readFulfillments(state: typeof DEFAULT_STATE, orderId: number) {
+		return state.orderMap[orderId]?.fulfillments || [];
 	},
 	readFulfillment(
 		state: typeof DEFAULT_STATE,
@@ -335,8 +331,8 @@ const selectors = {
 		fulfillmentId: number
 	) {
 		return (
-			state.orderMap[ orderId ]?.fulfillments?.find(
-				( f ) => f.id === fulfillmentId
+			state.orderMap[orderId]?.fulfillments?.find(
+				(f) => f.id === fulfillmentId
 			) || null
 		);
 	},
@@ -345,24 +341,24 @@ const selectors = {
 // --- Resolvers
 const resolvers = {
 	getOrder:
-		( orderId: number ) =>
-		async ( { dispatch }: { dispatch: typeof actions } ) => {
-			dispatch.setLoading( orderId, true );
-			dispatch.setError( orderId, null );
+		(orderId: number) =>
+		async ({ dispatch }: { dispatch: typeof actions }) => {
+			dispatch.setLoading(orderId, true);
+			dispatch.setError(orderId, null);
 			try {
-				const order: Order = await apiFetch( {
-					path: `/wc/v3/orders/${ orderId }`,
+				const order: Order = await apiFetch({
+					path: `/wc/v3/orders/${orderId}`,
 					method: 'GET',
-				} );
-				dispatch.setOrder( orderId, order );
-				if ( order.refunds.length > 0 ) {
-					const refunds: Refund[] = await apiFetch( {
-						path: `/wc/v3/orders/${ orderId }/refunds`,
+				});
+				dispatch.setOrder(orderId, order);
+				if (order.refunds.length > 0) {
+					const refunds: Refund[] = await apiFetch({
+						path: `/wc/v3/orders/${orderId}/refunds`,
 						method: 'GET',
-					} );
-					dispatch.setRefunds( orderId, refunds );
+					});
+					dispatch.setRefunds(orderId, refunds);
 				}
-			} catch ( error: unknown ) {
+			} catch (error: unknown) {
 				dispatch.setError(
 					orderId,
 					error instanceof Error
@@ -370,21 +366,21 @@ const resolvers = {
 						: 'Failed to load order'
 				);
 			} finally {
-				dispatch.setLoading( orderId, false );
+				dispatch.setLoading(orderId, false);
 			}
 		},
 	readFulfillments:
-		( orderId: number ) =>
-		async ( { dispatch }: { dispatch: typeof actions } ) => {
-			dispatch.setLoading( orderId, true );
-			dispatch.setError( orderId, null );
+		(orderId: number) =>
+		async ({ dispatch }: { dispatch: typeof actions }) => {
+			dispatch.setLoading(orderId, true);
+			dispatch.setError(orderId, null);
 			try {
-				const fulfillments = await apiFetch< Fulfillment[] >( {
-					path: `/wc/v3/orders/${ orderId }/fulfillments`,
+				const fulfillments = await apiFetch<Fulfillment[]>({
+					path: `/wc/v3/orders/${orderId}/fulfillments`,
 					method: 'GET',
-				} );
-				dispatch.setFulfillments( orderId, fulfillments );
-			} catch ( error: unknown ) {
+				});
+				dispatch.setFulfillments(orderId, fulfillments);
+			} catch (error: unknown) {
 				dispatch.setError(
 					orderId,
 					error instanceof Error
@@ -392,17 +388,17 @@ const resolvers = {
 						: 'Failed to load fulfillments'
 				);
 			} finally {
-				dispatch.setLoading( orderId, false );
+				dispatch.setLoading(orderId, false);
 			}
 		},
 };
 
 // --- Store Registration
-export const store = createReduxStore( STORE_NAME, {
+export const store = createReduxStore(STORE_NAME, {
 	reducer,
 	actions,
 	selectors,
 	resolvers,
-} );
+});
 
-register( store );
+register(store);

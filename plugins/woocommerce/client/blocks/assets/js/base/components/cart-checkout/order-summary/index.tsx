@@ -20,40 +20,38 @@ interface OrderSummaryProps {
 	disableProductDescriptions: boolean;
 }
 
-const OrderSummary = ( {
+const OrderSummary = ({
 	cartItems = [],
 	disableProductDescriptions = false,
-}: OrderSummaryProps ): null | JSX.Element => {
+}: OrderSummaryProps): null | JSX.Element => {
 	const { isLarge } = useContainerWidthContext();
 	const { cartIsLoading, hasPendingItemsOperations } = useStoreCart();
 	const showSkeleton = cartIsLoading || hasPendingItemsOperations;
 
 	return (
 		<DelayedContentWithSkeleton
-			isLoading={ showSkeleton }
+			isLoading={showSkeleton}
 			skeleton={
-				<CartLineItemsCheckoutSkeleton
-					rows={ cartItems?.length || 2 }
-				/>
+				<CartLineItemsCheckoutSkeleton rows={cartItems?.length || 2} />
 			}
 		>
 			<div
-				className={ clsx( 'wc-block-components-order-summary', {
+				className={clsx('wc-block-components-order-summary', {
 					'is-large': isLarge,
-				} ) }
+				})}
 			>
 				<div className="wc-block-components-order-summary__content">
-					{ cartItems.map( ( cartItem ) => {
+					{cartItems.map((cartItem) => {
 						return (
 							<OrderSummaryItem
 								disableProductDescriptions={
 									disableProductDescriptions
 								}
-								key={ cartItem.key }
-								cartItem={ cartItem }
+								key={cartItem.key}
+								cartItem={cartItem}
 							/>
 						);
-					} ) }
+					})}
 				</div>
 			</div>
 		</DelayedContentWithSkeleton>

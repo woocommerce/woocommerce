@@ -22,10 +22,10 @@ import '../';
 import '../../next-previous-buttons';
 import '../../product-template';
 
-jest.mock( '@woocommerce/block-settings', () => ( {
-	...jest.requireActual( '@woocommerce/block-settings' ),
+jest.mock('@woocommerce/block-settings', () => ({
+	...jest.requireActual('@woocommerce/block-settings'),
 	isExperimentalBlocksEnabled: () => true,
-} ) );
+}));
 
 type SetupAttributes = {
 	query?: {
@@ -34,13 +34,13 @@ type SetupAttributes = {
 	};
 };
 
-async function setup( {
+async function setup({
 	withHeading,
 	attributes,
 }: {
 	withHeading: boolean;
 	attributes: SetupAttributes;
-} ) {
+}) {
 	const productCollectionBlock = {
 		name: 'woocommerce/product-collection',
 		attributes: {
@@ -58,20 +58,20 @@ async function setup( {
 			? [
 					{ name: 'core/heading' },
 					{ name: 'woocommerce/product-template' },
-			  ]
-			: [ { name: 'woocommerce/product-template' } ],
+				]
+			: [{ name: 'woocommerce/product-template' }],
 	};
-	return initializeEditor( [ productCollectionBlock ] );
+	return initializeEditor([productCollectionBlock]);
 }
 
 // Skipped: wp-6.8's block-editor rendering pipeline no longer renders
 // inner blocks in Jest's jsdom environment. Gutenberg tests block
 // rendering via Playwright E2E; these should be migrated similarly.
-describe.skip( 'Product Collection Block - Carousel Layout Adjustments', () => {
-	describe( 'On Sale Collection with Heading', () => {
-		it( 'should handle transition to and from carousel layout correctly', async () => {
+describe.skip('Product Collection Block - Carousel Layout Adjustments', () => {
+	describe('On Sale Collection with Heading', () => {
+		it('should handle transition to and from carousel layout correctly', async () => {
 			// 1. Add Product Collection in editor with On Sale query
-			await setup( {
+			await setup({
 				withHeading: true,
 				attributes: {
 					query: {
@@ -79,130 +79,130 @@ describe.skip( 'Product Collection Block - Carousel Layout Adjustments', () => {
 						__woocommerceOnSale: true,
 					},
 				},
-			} );
+			});
 
-			await selectBlock( /Block: Product Collection/i );
+			await selectBlock(/Block: Product Collection/i);
 
 			// 3. Switch to Carousel mode
 			// Find and click the carousel layout option
-			await waitFor( () => {
+			await waitFor(() => {
 				expect(
-					screen.getByRole( 'radio', { name: /carousel/i } )
+					screen.getByRole('radio', { name: /carousel/i })
 				).toBeVisible();
-			} );
+			});
 
-			const carouselOption = screen.getByRole( 'radio', {
+			const carouselOption = screen.getByRole('radio', {
 				name: /carousel/i,
-			} );
-			await act( async () => {
-				fireEvent.click( carouselOption );
-			} );
+			});
+			await act(async () => {
+				fireEvent.click(carouselOption);
+			});
 
 			// 4. Verify there's ROW with HEADING AND NEXT PREV
-			const groupBlock = screen.getByRole( 'document', {
+			const groupBlock = screen.getByRole('document', {
 				name: /Block: Row/i,
-			} );
-			expect( groupBlock ).toBeInTheDocument();
+			});
+			expect(groupBlock).toBeInTheDocument();
 
 			// Check if the group has both heading and next/prev buttons
-			const groupContent = within( groupBlock );
+			const groupContent = within(groupBlock);
 			expect(
-				groupContent.getByRole( 'document', {
+				groupContent.getByRole('document', {
 					name: /Block: Heading/i,
-				} )
+				})
 			).toBeInTheDocument();
 			expect(
-				groupContent.getByRole( 'document', {
+				groupContent.getByRole('document', {
 					name: /Block: Next\/Previous Buttons/i,
-				} )
+				})
 			).toBeInTheDocument();
 
 			// 5. Switch back to GRID
-			const gridOption = screen.getByRole( 'radio', { name: /grid/i } );
-			await act( async () => {
-				fireEvent.click( gridOption );
-			} );
+			const gridOption = screen.getByRole('radio', { name: /grid/i });
+			await act(async () => {
+				fireEvent.click(gridOption);
+			});
 
 			// 6. Verify the HEADING is kept but in its original position
-			const headingAfterGrid = screen.getByRole( 'document', {
+			const headingAfterGrid = screen.getByRole('document', {
 				name: /Block: Heading/i,
-			} );
-			expect( headingAfterGrid ).toBeInTheDocument();
-			expect( headingAfterGrid.parentElement ).not.toBe( groupBlock );
+			});
+			expect(headingAfterGrid).toBeInTheDocument();
+			expect(headingAfterGrid.parentElement).not.toBe(groupBlock);
 
 			// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
 			// opt out of without changing the visual output.
-			expect( console ).toHaveWarned();
-		} );
-	} );
+			expect(console).toHaveWarned();
+		});
+	});
 
-	describe( 'Custom Collection without Heading', () => {
-		it( 'should handle transition to and from carousel layout correctly', async () => {
+	describe('Custom Collection without Heading', () => {
+		it('should handle transition to and from carousel layout correctly', async () => {
 			// 1. Add Product Collection in editor with custom query
-			await setup( {
+			await setup({
 				withHeading: false,
 				attributes: {
 					query: {
 						inherit: false,
 					},
 				},
-			} );
+			});
 
-			await selectBlock( /Block: Product Collection/i );
+			await selectBlock(/Block: Product Collection/i);
 
 			// 3. Switch to Carousel mode
-			await waitFor( () => {
+			await waitFor(() => {
 				expect(
-					screen.getByRole( 'radio', { name: /carousel/i } )
+					screen.getByRole('radio', { name: /carousel/i })
 				).toBeVisible();
-			} );
+			});
 
-			const carouselOption = screen.getByRole( 'radio', {
+			const carouselOption = screen.getByRole('radio', {
 				name: /carousel/i,
-			} );
+			});
 
-			await act( async () => {
-				fireEvent.click( carouselOption );
-			} );
+			await act(async () => {
+				fireEvent.click(carouselOption);
+			});
 
 			// 4. Verify there's ROW with NEXT PREV only and pagination removed
-			const groupBlock = screen.getByRole( 'document', {
+			const groupBlock = screen.getByRole('document', {
 				name: /Block: Row/i,
-			} );
-			expect( groupBlock ).toBeInTheDocument();
+			});
+			expect(groupBlock).toBeInTheDocument();
 
 			// Check if the group has next/prev buttons
-			const groupContent = within( groupBlock );
+			const groupContent = within(groupBlock);
 			expect(
-				groupContent.getByRole( 'document', {
+				groupContent.getByRole('document', {
 					name: /Block: Next\/Previous Buttons/i,
-				} )
+				})
 			).toBeInTheDocument();
 
 			// Verify pagination is removed
 			expect(
-				screen.queryByRole( 'document', {
+				screen.queryByRole('document', {
 					name: /Block: Pagination/i,
-				} )
+				})
 			).not.toBeInTheDocument();
 
 			// 5. Switch back to GRID
-			const gridOption = screen.getByRole( 'radio', { name: /grid/i } );
-			await act( async () => {
-				fireEvent.click( gridOption );
-			} );
+			const gridOption = screen.getByRole('radio', { name: /grid/i });
+			await act(async () => {
+				fireEvent.click(gridOption);
+			});
 
 			// 6. Verify there's no GROUP anymore
 			expect(
-				screen.queryByRole( 'document', { name: /Block: Row/i } )
+				screen.queryByRole('document', { name: /Block: Row/i })
 			).not.toBeInTheDocument();
 
 			// Verify pagination is restored
 			expect(
-				screen.getByRole( 'document', {
+				screen.getByRole('document', {
 					name: /Block: Pagination/i,
-				} )
+				})
 			).toBeInTheDocument();
-		} );
-	} );
-} );
+		});
+	});
+});

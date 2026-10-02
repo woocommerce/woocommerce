@@ -12,20 +12,20 @@ import TotalsWrapper from '../../../blocks-components/totals-wrapper';
 const slotName = '__experimentalOrderMeta';
 
 const { Fill: ExperimentalOrderMeta, Slot: OrderMetaSlot } =
-	createSlotFill( slotName );
+	createSlotFill(slotName);
 
-const Slot = ( { className, extensions, cart, context } ) => {
-	const fills = useSlotFills( slotName );
+const Slot = ({ className, extensions, cart, context }) => {
+	const fills = useSlotFills(slotName);
 
 	return (
-		hasValidFills( fills ) && (
-			<TotalsWrapper slotWrapper={ true }>
+		hasValidFills(fills) && (
+			<TotalsWrapper slotWrapper={true}>
 				<OrderMetaSlot
-					className={ clsx(
+					className={clsx(
 						className,
 						'wc-block-components-order-meta'
-					) }
-					fillProps={ { extensions, cart, context } }
+					)}
+					fillProps={{ extensions, cart, context }}
 				/>
 			</TotalsWrapper>
 		)

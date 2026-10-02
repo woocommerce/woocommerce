@@ -23,13 +23,13 @@ import { SendingPreviewStatus, storeName } from '../../store';
 import { recordEvent, recordEventOnce } from '../../events';
 
 function RawSendPreviewEmail() {
-	const sendToRef = useRef( null );
+	const sendToRef = useRef(null);
 
 	const {
 		requestSendingNewsletterPreview,
 		togglePreviewModal,
 		updateSendPreviewEmail,
-	} = useDispatch( storeName );
+	} = useDispatch(storeName);
 
 	const {
 		toEmail: previewToEmail,
@@ -39,71 +39,71 @@ function RawSendPreviewEmail() {
 		errorMessage,
 		postType,
 	} = useSelect(
-		( select ) => ( {
-			...select( storeName ).getPreviewState(),
-			postType: select( storeName ).getEmailPostType(),
-		} ),
+		(select) => ({
+			...select(storeName).getPreviewState(),
+			postType: select(storeName).getEmailPostType(),
+		}),
 		[]
 	);
 
 	const handleSendPreviewEmail = () => {
-		void requestSendingNewsletterPreview( previewToEmail );
+		void requestSendingNewsletterPreview(previewToEmail);
 	};
 
 	const sendingMethodConfigurationLink = useMemo(
 		() =>
 			applyFilters(
 				'woocommerce_email_editor_check_sending_method_configuration_link',
-				`https://www.mailpoet.com/blog/mailpoet-smtp-plugin/?utm_source=woocommerce_email_editor&utm_medium=plugin&utm_source_platform=${ postType }`
+				`https://www.mailpoet.com/blog/mailpoet-smtp-plugin/?utm_source=woocommerce_email_editor&utm_medium=plugin&utm_source_platform=${postType}`
 			) as string,
-		[ postType ]
+		[postType]
 	);
 
 	const closeCallback = () => {
-		recordEvent( 'send_preview_email_modal_closed' );
-		void togglePreviewModal( false );
+		recordEvent('send_preview_email_modal_closed');
+		void togglePreviewModal(false);
 	};
 
 	// We use this effect to focus on the input field when the modal is opened
-	useEffect( () => {
-		if ( isModalOpened ) {
+	useEffect(() => {
+		if (isModalOpened) {
 			sendToRef.current?.focus();
-			recordEvent( 'send_preview_email_modal_opened' );
+			recordEvent('send_preview_email_modal_opened');
 		}
-	}, [ isModalOpened ] );
+	}, [isModalOpened]);
 
-	if ( ! isModalOpened ) {
+	if (!isModalOpened) {
 		return null;
 	}
 
 	return (
 		<Modal
 			className="woocommerce-send-preview-email"
-			title={ __( 'Send a test email', __i18n_text_domain__ ) }
-			onRequestClose={ closeCallback }
-			focusOnMount={ false }
+			title={__('Send a test email', __i18n_text_domain__)}
+			onRequestClose={closeCallback}
+			focusOnMount={false}
 		>
-			{ sendingPreviewStatus === SendingPreviewStatus.ERROR ? (
+			{sendingPreviewStatus === SendingPreviewStatus.ERROR ? (
 				<div className="woocommerce-send-preview-modal-notice-error">
 					<p>
-						{ __(
+						{__(
 							'Sorry, we were unable to send this email.',
 							__i18n_text_domain__
-						) }
+						)}
 					</p>
 
 					<strong>
-						{ errorMessage &&
+						{errorMessage &&
 							sprintf(
 								// translators: %s is an error message.
-								__( 'Error: %s', __i18n_text_domain__ ),
+								__('Error: %s', __i18n_text_domain__),
 								errorMessage
-							) }
+							)}
 					</strong>
 
 					<ul>
 						<li>
-							{ sendingMethodConfigurationLink &&
+							{sendingMethodConfigurationLink &&
 								createInterpolateElement(
 									__(
 										'Please check your <link>sending method configuration</link> with your hosting provider.',
@@ -118,7 +118,7 @@ function RawSendPreviewEmail() {
 												}
 												target="_blank"
 												rel="noopener noreferrer"
-												onClick={ () =>
+												onClick={() =>
 													recordEvent(
 														'send_preview_email_modal_check_sending_method_configuration_link_clicked'
 													)
@@ -126,10 +126,10 @@ function RawSendPreviewEmail() {
 											/>
 										),
 									}
-								) }
+								)}
 						</li>
 						<li>
-							{ createInterpolateElement(
+							{createInterpolateElement(
 								__(
 									'Or, sign up for MailPoet Sending Service to easily send emails. <link>Sign up for free</link>',
 									__i18n_text_domain__
@@ -138,11 +138,11 @@ function RawSendPreviewEmail() {
 									link: (
 										// eslint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/control-has-associated-label
 										<a
-											href={ `https://account.mailpoet.com/?s=1&g=1&utm_source=woocommerce_email_editor&utm_medium=plugin&utm_source_platform=${ postType }` }
+											href={`https://account.mailpoet.com/?s=1&g=1&utm_source=woocommerce_email_editor&utm_medium=plugin&utm_source_platform=${postType}`}
 											key="sign-up-for-free"
 											target="_blank"
 											rel="noopener noreferrer"
-											onClick={ () =>
+											onClick={() =>
 												recordEvent(
 													'send_preview_email_modal_sign_up_for_mailpoet_sending_service_link_clicked'
 												)
@@ -150,83 +150,78 @@ function RawSendPreviewEmail() {
 										/>
 									),
 								}
-							) }
+							)}
 						</li>
 					</ul>
 				</div>
-			) : null }
+			) : null}
 			<p>
-				{ __(
+				{__(
 					'Send yourself a test email to test how your email would look like in different email apps.',
 					__i18n_text_domain__
-				) }
+				)}
 			</p>
 			<TextControl
-				label={ __( 'Send to', __i18n_text_domain__ ) }
-				onChange={ ( email ) => {
-					void updateSendPreviewEmail( email );
+				label={__('Send to', __i18n_text_domain__)}
+				onChange={(email) => {
+					void updateSendPreviewEmail(email);
 					recordEventOnce(
 						'send_preview_email_modal_send_to_field_updated'
 					);
-				} }
-				onKeyDown={ ( event ) => {
+				}}
+				onKeyDown={(event) => {
 					const { keyCode } = event;
-					if ( keyCode === ENTER ) {
+					if (keyCode === ENTER) {
 						event.preventDefault();
 						handleSendPreviewEmail();
 						recordEvent(
 							'send_preview_email_modal_send_to_field_key_code_enter'
 						);
 					}
-				} }
+				}}
 				className="woocommerce-send-preview-email__send-to-field"
-				value={ previewToEmail }
+				value={previewToEmail}
 				type="email"
-				ref={ sendToRef }
+				ref={sendToRef}
 				required
 				__next40pxDefaultSize
 				__nextHasNoMarginBottom
 			/>
-			{ sendingPreviewStatus === SendingPreviewStatus.SUCCESS ? (
+			{sendingPreviewStatus === SendingPreviewStatus.SUCCESS ? (
 				<p className="woocommerce-send-preview-modal-notice-success">
-					<Icon icon={ check } style={ { fill: '#4AB866' } } />
-					{ __(
-						'Test email sent successfully!',
-						__i18n_text_domain__
-					) }
+					<Icon icon={check} style={{ fill: '#4AB866' }} />
+					{__('Test email sent successfully!', __i18n_text_domain__)}
 				</p>
-			) : null }
+			) : null}
 			<div className="woocommerce-send-preview-modal-footer">
 				<Button
 					variant="tertiary"
-					onClick={ () => {
+					onClick={() => {
 						recordEvent(
 							'send_preview_email_modal_close_button_clicked'
 						);
 						closeCallback();
-					} }
+					}}
 				>
-					{ __( 'Cancel', __i18n_text_domain__ ) }
+					{__('Cancel', __i18n_text_domain__)}
 				</Button>
 				<Button
 					variant="primary"
-					onClick={ () => {
+					onClick={() => {
 						handleSendPreviewEmail();
 						recordEvent(
 							'send_preview_email_modal_send_test_email_button_clicked'
 						);
-					} }
-					disabled={
-						isSendingPreviewEmail || ! isEmail( previewToEmail )
-					}
+					}}
+					disabled={isSendingPreviewEmail || !isEmail(previewToEmail)}
 				>
-					{ isSendingPreviewEmail
-						? __( 'Sending…', __i18n_text_domain__ )
-						: __( 'Send test email', __i18n_text_domain__ ) }
+					{isSendingPreviewEmail
+						? __('Sending…', __i18n_text_domain__)
+						: __('Send test email', __i18n_text_domain__)}
 				</Button>
 			</div>
 		</Modal>
 	);
 }
 
-export const SendPreviewEmail = memo( RawSendPreviewEmail );
+export const SendPreviewEmail = memo(RawSendPreviewEmail);

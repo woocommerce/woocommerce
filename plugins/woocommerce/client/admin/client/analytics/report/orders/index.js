@@ -23,40 +23,40 @@ export default class OrdersReport extends Component {
 		return (
 			<Fragment>
 				<ReportHeader
-					query={ query }
-					path={ path }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
+					query={query}
+					path={path}
+					filters={filters}
+					advancedFilters={advancedFilters}
 					report="orders"
 				/>
 				<ReportSummary
-					charts={ charts }
+					charts={charts}
 					endpoint="orders"
-					query={ query }
-					selectedChart={ getSelectedChart( query.chart, charts ) }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
+					query={query}
+					selectedChart={getSelectedChart(query.chart, charts)}
+					filters={filters}
+					advancedFilters={advancedFilters}
 				/>
 				<ReportChart
-					charts={ charts }
+					charts={charts}
 					endpoint="orders"
-					path={ path }
-					query={ query }
-					selectedChart={ getSelectedChart( query.chart, charts ) }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
+					path={path}
+					query={query}
+					selectedChart={getSelectedChart(query.chart, charts)}
+					filters={filters}
+					advancedFilters={advancedFilters}
 				/>
 				<OrdersReportTable
-					query={ query }
-					filters={ filters }
-					advancedFilters={ advancedFilters }
+					query={query}
+					filters={filters}
+					advancedFilters={advancedFilters}
 				/>
 				<ReportDateTour
 					optionName="woocommerce_orders_report_date_tour_shown"
-					headingText={ __(
+					headingText={__(
 						'Orders are now reported based on the payment dates ✅',
 						'woocommerce'
-					) }
+					)}
 				/>
 			</Fragment>
 		);

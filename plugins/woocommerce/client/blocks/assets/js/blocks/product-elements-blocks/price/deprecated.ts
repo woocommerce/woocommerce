@@ -24,6 +24,6 @@ const v1 = {
 	apiVersion: 3,
 };
 
-const deprecated = [ v1 ];
+const deprecated = [v1];
 
 export default deprecated;

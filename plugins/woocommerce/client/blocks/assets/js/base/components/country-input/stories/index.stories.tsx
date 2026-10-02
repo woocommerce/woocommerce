@@ -29,37 +29,35 @@ export default {
 		options: { table: { disable: true } },
 		value: { control: false },
 	},
-	decorators: [ ( StoryComponent ) => <StoryComponent /> ],
-} as Meta< CountryInputWithCountriesProps >;
+	decorators: [(StoryComponent) => <StoryComponent />],
+} as Meta<CountryInputWithCountriesProps>;
 
-const Template: StoryFn< CountryInputWithCountriesProps > = ( args ) => {
-	const [ selectedCountry, selectCountry ] = useState< CountryCode | '' >(
-		''
-	);
+const Template: StoryFn<CountryInputWithCountriesProps> = (args) => {
+	const [selectedCountry, selectCountry] = useState<CountryCode | ''>('');
 	const { clearValidationError, showValidationError } =
-		useDispatch( validationStore );
+		useDispatch(validationStore);
 
-	useEffect( () => {
-		showValidationError( 'country' );
-	}, [ showValidationError ] );
+	useEffect(() => {
+		showValidationError('country');
+	}, [showValidationError]);
 
-	function updateCountry( country: CountryCode ) {
-		clearValidationError( 'country' );
-		selectCountry( country );
+	function updateCountry(country: CountryCode) {
+		clearValidationError('country');
+		selectCountry(country);
 	}
 
 	return (
 		<CountryInput
-			{ ...args }
-			onChange={ ( value ) => updateCountry( value as CountryCode ) }
-			value={ selectedCountry }
+			{...args}
+			onChange={(value) => updateCountry(value as CountryCode)}
+			value={selectedCountry}
 		/>
 	);
 };
 
-export const Default = Template.bind( {} );
+export const Default = Template.bind({});
 
-export const WithError = Template.bind( {} );
+export const WithError = Template.bind({});
 WithError.args = {
 	errorId: 'country',
 	errorMessage: 'Please select a country',

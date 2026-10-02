@@ -13,7 +13,7 @@ import { store as coreStore } from '@wordpress/core-data';
  */
 export interface ApplyChoice {
 	/** Path of a `copy_changes` entry from the change-summary. */
-	path: Array< number | string >;
+	path: Array<number | string>;
 	/** `keep_yours` (default) or `use_core`. */
 	decision: 'keep_yours' | 'use_core';
 }
@@ -53,7 +53,7 @@ interface UseApplyUpdateOptions {
 }
 
 interface UseApplyUpdateResult {
-	apply: ( choices: ApplyChoice[] ) => Promise< ApplyResponse | null >;
+	apply: (choices: ApplyChoice[]) => Promise<ApplyResponse | null>;
 	isApplying: boolean;
 }
 
@@ -78,24 +78,24 @@ export function useApplyUpdate(
 	options: UseApplyUpdateOptions = {}
 ): UseApplyUpdateResult {
 	const { createSuccessNotice, createErrorNotice } =
-		useDispatch( noticesStore );
-	const { receiveEntityRecords } = useDispatch( coreStore );
-	const [ isApplying, setIsApplying ] = useState< boolean >( false );
+		useDispatch(noticesStore);
+	const { receiveEntityRecords } = useDispatch(coreStore);
+	const [isApplying, setIsApplying] = useState<boolean>(false);
 
 	const syncEditorState = useCallback(
-		( content: string ) => {
-			if ( ! postId ) {
+		(content: string) => {
+			if (!postId) {
 				return;
 			}
 			// Read the current canonical record so the patched record we
 			// hand to `receiveEntityRecords` keeps every other field
 			// (title, status, meta, …) intact. Only `content.raw` changes.
-			const current = select( coreStore ).getEntityRecord(
+			const current = select(coreStore).getEntityRecord(
 				'postType',
 				'woo_email',
 				postId
 			) as { content?: { raw?: string } } | undefined;
-			if ( ! current ) {
+			if (!current) {
 				return;
 			}
 			void receiveEntityRecords(
@@ -113,54 +113,54 @@ export function useApplyUpdate(
 				undefined
 			);
 		},
-		[ postId, receiveEntityRecords ]
+		[postId, receiveEntityRecords]
 	);
 
 	const undo = useCallback(
-		async ( revisionId: string ) => {
-			if ( ! postId ) {
+		async (revisionId: string) => {
+			if (!postId) {
 				return;
 			}
 			try {
-				const res = ( await apiFetch( {
-					path: `/woocommerce-email-editor/v1/emails/${ postId }/undo`,
+				const res = (await apiFetch({
+					path: `/woocommerce-email-editor/v1/emails/${postId}/undo`,
 					method: 'POST',
 					data: { revision_id: revisionId },
-				} ) ) as UndoResponse;
+				})) as UndoResponse;
 
-				syncEditorState( res.restored_content );
+				syncEditorState(res.restored_content);
 
 				void createSuccessNotice(
-					__( 'Update reverted.', 'woocommerce' ),
+					__('Update reverted.', 'woocommerce'),
 					{
 						type: 'snackbar',
 					}
 				);
-			} catch ( err: unknown ) {
+			} catch (err: unknown) {
 				const message =
 					err && typeof err === 'object' && 'message' in err
-						? String( err.message )
-						: __( 'Could not revert the update.', 'woocommerce' );
-				void createErrorNotice( message, { type: 'snackbar' } );
+						? String(err.message)
+						: __('Could not revert the update.', 'woocommerce');
+				void createErrorNotice(message, { type: 'snackbar' });
 			}
 		},
-		[ postId, createSuccessNotice, createErrorNotice, syncEditorState ]
+		[postId, createSuccessNotice, createErrorNotice, syncEditorState]
 	);
 
 	const apply = useCallback(
-		async ( choices: ApplyChoice[] ): Promise< ApplyResponse | null > => {
-			if ( ! postId ) {
+		async (choices: ApplyChoice[]): Promise<ApplyResponse | null> => {
+			if (!postId) {
 				return null;
 			}
-			setIsApplying( true );
+			setIsApplying(true);
 			try {
-				const res = ( await apiFetch( {
-					path: `/woocommerce-email-editor/v1/emails/${ postId }/apply`,
+				const res = (await apiFetch({
+					path: `/woocommerce-email-editor/v1/emails/${postId}/apply`,
 					method: 'POST',
 					data: { choices },
-				} ) ) as ApplyResponse;
+				})) as ApplyResponse;
 
-				syncEditorState( res.merged_content );
+				syncEditorState(res.merged_content);
 
 				// Snackbar wording follows what the merchant actually chose.
 				// Smart Apply (`choices: []`) defaults every conflict to
@@ -169,37 +169,37 @@ export function useApplyUpdate(
 				// merchant explicitly chose to overwrite — say so plainly.
 				const allUseCore =
 					choices.length > 0 &&
-					choices.every( ( c ) => c.decision === 'use_core' );
+					choices.every((c) => c.decision === 'use_core');
 				const successMessage = allUseCore
-					? __( 'Update applied', 'woocommerce' )
+					? __('Update applied', 'woocommerce')
 					: __(
 							'Update applied · customizations preserved',
 							'woocommerce'
-					  );
-				void createSuccessNotice( successMessage, {
+						);
+				void createSuccessNotice(successMessage, {
 					type: 'snackbar',
 					actions: [
 						{
-							label: __( 'Undo', 'woocommerce' ),
+							label: __('Undo', 'woocommerce'),
 							onClick: () => {
-								void undo( res.revision_id );
+								void undo(res.revision_id);
 							},
 						},
 					],
-				} );
+				});
 
 				return res;
-			} catch ( err: unknown ) {
+			} catch (err: unknown) {
 				const message =
 					err && typeof err === 'object' && 'message' in err
-						? String( err.message )
-						: __( 'Could not apply the update.', 'woocommerce' );
-				if ( ! options.suppressSnackbarOnError ) {
-					void createErrorNotice( message, { type: 'snackbar' } );
+						? String(err.message)
+						: __('Could not apply the update.', 'woocommerce');
+				if (!options.suppressSnackbarOnError) {
+					void createErrorNotice(message, { type: 'snackbar' });
 				}
 				return null;
 			} finally {
-				setIsApplying( false );
+				setIsApplying(false);
 			}
 		},
 		[

@@ -40,69 +40,66 @@ interface FulfillmentEditorProps {
 	fulfillment: Fulfillment;
 	disabled?: boolean;
 }
-export default function FulfillmentEditor( {
+export default function FulfillmentEditor({
 	index,
 	expanded,
 	onExpand,
 	onCollapse,
 	fulfillment,
 	disabled = false,
-}: FulfillmentEditorProps ) {
+}: FulfillmentEditorProps) {
 	const { order, fulfillments, refunds } = useFulfillmentDrawerContext();
 	const { isEditing, setIsEditing } = useFulfillmentDrawerContext();
-	const [ error, setError ] = useState< string | null >( null );
-	const contentRef = useRef< HTMLDivElement >( null );
+	const [error, setError] = useState<string | null>(null);
+	const contentRef = useRef<HTMLDivElement>(null);
 	const itemsInFulfillment = order
-		? getItemsFromFulfillment( order, fulfillment )
+		? getItemsFromFulfillment(order, fulfillment)
 		: [];
 	const itemsNotInAnyFulfillment = order
-		? getItemsNotInAnyFulfillment( fulfillments, order, refunds )
+		? getItemsNotInAnyFulfillment(fulfillments, order, refunds)
 		: [];
 	const selectableItems = combineItems(
-		[ ...itemsInFulfillment ],
-		[ ...itemsNotInAnyFulfillment ]
+		[...itemsInFulfillment],
+		[...itemsNotInAnyFulfillment]
 	);
 
-	const fulfillmentLockState = getFulfillmentLockState( fulfillment );
+	const fulfillmentLockState = getFulfillmentLockState(fulfillment);
 
 	// Reset error when order changes
-	useEffect( () => {
-		setError( null );
-	}, [ order?.id ] );
+	useEffect(() => {
+		setError(null);
+	}, [order?.id]);
 
 	// Focus management when entering edit mode
-	useEffect( () => {
+	useEffect(() => {
 		let rafId1: number;
 		let rafId2: number;
-		if ( isEditing && expanded && contentRef.current ) {
+		if (isEditing && expanded && contentRef.current) {
 			const content = contentRef.current;
-			rafId1 = requestAnimationFrame( () => {
-				rafId2 = requestAnimationFrame( () => {
+			rafId1 = requestAnimationFrame(() => {
+				rafId2 = requestAnimationFrame(() => {
 					// Look for the first interactive element in edit mode
 					const firstEditable = content.querySelector(
 						'input:not([disabled]), button:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
 					) as HTMLElement;
 
-					if ( firstEditable ) {
+					if (firstEditable) {
 						firstEditable.focus();
 					}
-				} );
-			} );
+				});
+			});
 		}
 		return () => {
-			cancelAnimationFrame( rafId1 );
-			cancelAnimationFrame( rafId2 );
+			cancelAnimationFrame(rafId1);
+			cancelAnimationFrame(rafId2);
 		};
-	}, [ isEditing, expanded ] );
+	}, [isEditing, expanded]);
 
 	const handleChevronClick = () => {
-		if ( isEditing ) return;
-		if (
-			itemsNotInAnyFulfillment.length === 0 &&
-			fulfillments.length === 1
-		)
+		if (isEditing) return;
+		if (itemsNotInAnyFulfillment.length === 0 && fulfillments.length === 1)
 			return;
-		if ( ! expanded ) {
+		if (!expanded) {
 			onExpand();
 		} else {
 			onCollapse();
@@ -111,28 +108,28 @@ export default function FulfillmentEditor( {
 
 	return (
 		<div
-			className={ [
+			className={[
 				'woocommerce-fulfillment-stored-fulfillment-list-item',
 				disabled
 					? 'woocommerce-fulfillment-stored-fulfillment-list-item__disabled'
 					: '',
-			].join( ' ' ) }
+			].join(' ')}
 		>
 			<div
-				className={ [
+				className={[
 					'woocommerce-fulfillment-stored-fulfillment-list-item-header',
 					expanded ? 'is-open' : '',
-				].join( ' ' ) }
-				onClick={ handleChevronClick }
-				onKeyDown={ ( event ) => {
-					if ( event.key === 'Enter' || event.key === ' ' ) {
+				].join(' ')}
+				onClick={handleChevronClick}
+				onKeyDown={(event) => {
+					if (event.key === 'Enter' || event.key === ' ') {
 						event.preventDefault();
 						handleChevronClick();
 					}
-				} }
+				}}
 				role="button"
-				tabIndex={ 0 }
-				aria-expanded={ expanded }
+				tabIndex={0}
+				aria-expanded={expanded}
 			>
 				<h3>
 					{
@@ -140,104 +137,101 @@ export default function FulfillmentEditor( {
 						sprintf(
 							isEditing
 								? /* translators: %s: Fulfillment ID */
-								  __( 'Editing fulfillment #%s', 'woocommerce' )
+									__('Editing fulfillment #%s', 'woocommerce')
 								: /* translators: %s: Fulfillment ID */
-								  __( 'Fulfillment #%s', 'woocommerce' ),
-							( index + 1 ).toString()
+									__('Fulfillment #%s', 'woocommerce'),
+							(index + 1).toString()
 						)
 					}
 				</h3>
-				<FulfillmentStatusBadge fulfillment={ fulfillment } />
-				{ ( itemsNotInAnyFulfillment.length > 0 ||
-					fulfillments.length > 1 ) && (
+				<FulfillmentStatusBadge fulfillment={fulfillment} />
+				{(itemsNotInAnyFulfillment.length > 0 ||
+					fulfillments.length > 1) && (
 					<div aria-hidden="true">
 						<Icon
 							icon={
 								expanded ? 'arrow-up-alt2' : 'arrow-down-alt2'
 							}
-							size={ 16 }
-							color={ isEditing ? '#dddddd' : undefined }
+							size={16}
+							color={isEditing ? '#dddddd' : undefined}
 						/>
 					</div>
-				) }
+				)}
 			</div>
-			{ expanded && (
+			{expanded && (
 				<div
 					className="woocommerce-fulfillment-stored-fulfillment-list-item-content"
-					ref={ contentRef }
+					ref={contentRef}
 				>
-					{ error && <ErrorLabel error={ error } /> }
+					{error && <ErrorLabel error={error} />}
 
-					<ShipmentFormProvider fulfillment={ fulfillment }>
+					<ShipmentFormProvider fulfillment={fulfillment}>
 						<FulfillmentProvider
-							order={ order }
-							fulfillment={ fulfillment }
+							order={order}
+							fulfillment={fulfillment}
 							items={
 								isEditing ? selectableItems : itemsInFulfillment
 							}
 						>
-							<ItemSelector editMode={ isEditing } />
-							{ isEditing && <ShipmentForm /> }
-							{ ! isEditing && (
+							<ItemSelector editMode={isEditing} />
+							{isEditing && <ShipmentForm />}
+							{!isEditing && (
 								<>
 									<ShipmentViewer />
-									<MetadataViewer
-										fulfillment={ fulfillment }
-									/>
+									<MetadataViewer fulfillment={fulfillment} />
 								</>
-							) }
-							{ ( ( fulfillment.is_fulfilled && isEditing ) ||
-								( ! fulfillment.is_fulfilled &&
-									! isEditing ) ) && (
+							)}
+							{((fulfillment.is_fulfilled && isEditing) ||
+								(!fulfillment.is_fulfilled && !isEditing)) && (
 								<CustomerNotificationBox type="update" />
-							) }
-							{ fulfillmentLockState.isLocked ? (
+							)}
+							{fulfillmentLockState.isLocked ? (
 								<div className="woocommerce-fulfillment-item-lock-container">
 									<LockLabel
-										message={ fulfillmentLockState.reason }
+										message={fulfillmentLockState.reason}
 									/>
 								</div>
 							) : (
 								<div className="woocommerce-fulfillment-item-actions">
-									{ ! isEditing ? (
+									{!isEditing ? (
 										<>
 											<EditFulfillmentButton
-												onClick={ () => {
-													setIsEditing( true );
-												} }
+												onClick={() => {
+													setIsEditing(true);
+												}}
 											/>
-											{ ! fulfillment.is_fulfilled && (
+											{!fulfillment.is_fulfilled && (
 												<FulfillItemsButton
-													setError={ setError }
+													setError={setError}
 												/>
-											) }
+											)}
 										</>
 									) : (
 										<>
 											<CancelLink
-												onClick={ () => {
-													setError( null );
-													setIsEditing( false );
-												} }
+												onClick={() => {
+													setError(null);
+													setIsEditing(false);
+												}}
 											/>
 											<RemoveButton
-												setError={ ( message ) =>
-													setError( message )
+												setError={(message) =>
+													setError(message)
 												}
 											/>
 											<UpdateButton
-												setError={ ( message ) =>
-													setError( message )
+												setError={(message) =>
+													setError(message)
 												}
 											/>
 										</>
-									) }
+									)}
 								</div>
-							) }
+							)}
 						</FulfillmentProvider>
 					</ShipmentFormProvider>
 				</div>
-			) }
+			)}
 		</div>
 	);
 }

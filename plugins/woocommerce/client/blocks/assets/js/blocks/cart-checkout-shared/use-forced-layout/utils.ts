@@ -9,11 +9,11 @@ import type { MutableRefObject } from 'react';
  */
 import { LockableBlock } from './types';
 
-export const isBlockLocked = ( {
+export const isBlockLocked = ({
 	attributes,
 }: {
-	attributes: LockableBlock[ 'attributes' ];
-} ) => Boolean( attributes.lock?.remove || attributes.lock?.default?.remove );
+	attributes: LockableBlock['attributes'];
+}) => Boolean(attributes.lock?.remove || attributes.lock?.default?.remove);
 
 /**
  * This hook is used to determine which blocks are missing from a block. Given the list of inner blocks of a block, we
@@ -24,24 +24,24 @@ export const isBlockLocked = ( {
  */
 export const getMissingBlocks = (
 	innerBlocks: BlockInstance[],
-	registeredBlockTypes: ( LockableBlock | undefined )[]
+	registeredBlockTypes: (LockableBlock | undefined)[]
 ) => {
 	const lockedBlockTypes = registeredBlockTypes.filter(
-		( block: LockableBlock | undefined ) => block && isBlockLocked( block )
+		(block: LockableBlock | undefined) => block && isBlockLocked(block)
 	);
 	const missingBlocks: LockableBlock[] = [];
-	lockedBlockTypes.forEach( ( lockedBlock ) => {
-		if ( typeof lockedBlock === 'undefined' ) {
+	lockedBlockTypes.forEach((lockedBlock) => {
+		if (typeof lockedBlock === 'undefined') {
 			return;
 		}
 		const existingBlock = innerBlocks.find(
-			( block ) => block.name === lockedBlock.name
+			(block) => block.name === lockedBlock.name
 		);
 
-		if ( ! existingBlock ) {
-			missingBlocks.push( lockedBlock );
+		if (!existingBlock) {
+			missingBlocks.push(lockedBlock);
 		}
-	} );
+	});
 	return missingBlocks;
 };
 
@@ -50,16 +50,16 @@ export const getMissingBlocks = (
  *
  * @return The index to insert the missing block at.
  */
-export const findBlockPosition = ( {
+export const findBlockPosition = ({
 	defaultTemplatePosition,
 	innerBlocks,
 	currentDefaultTemplate,
 }: {
 	defaultTemplatePosition: number;
 	innerBlocks: BlockInstance[];
-	currentDefaultTemplate: MutableRefObject< TemplateArray >;
-} ) => {
-	switch ( defaultTemplatePosition ) {
+	currentDefaultTemplate: MutableRefObject<TemplateArray>;
+}) => {
+	switch (defaultTemplatePosition) {
 		case -1:
 			// The block is not part of the default template, so we append it to the current layout.
 			return innerBlocks.length;
@@ -71,9 +71,9 @@ export const findBlockPosition = ( {
 			// The new layout may have extra blocks compared to the default template, so rather than insert
 			// at the default position, we should append it after another default block.
 			const adjacentBlock =
-				currentDefaultTemplate.current[ defaultTemplatePosition - 1 ];
+				currentDefaultTemplate.current[defaultTemplatePosition - 1];
 			const position = innerBlocks.findIndex(
-				( { name: blockName } ) => blockName === adjacentBlock[ 0 ]
+				({ name: blockName }) => blockName === adjacentBlock[0]
 			);
 			return position === -1 ? defaultTemplatePosition : position + 1;
 	}
