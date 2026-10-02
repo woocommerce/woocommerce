@@ -304,14 +304,15 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 			array(
 				'cc' => array(
 					array(
-						'method'     => array(
+						'method'       => array(
 							'gateway' => WC_Gateway_BACS::ID,
 							'last4'   => '1234',
 							'brand'   => 'Mastercard',
 						),
-						'expires'    => '12/20',
-						'is_default' => true,
-						'actions'    => array(
+						'expires'      => '12/20',
+						'is_default'   => true,
+						'display_name' => 'Mastercard ending in 1234 (expires 12/20)',
+						'actions'      => array(
 							'delete' => array(
 								'url'  => $delete_url,
 								'name' => 'Delete',
