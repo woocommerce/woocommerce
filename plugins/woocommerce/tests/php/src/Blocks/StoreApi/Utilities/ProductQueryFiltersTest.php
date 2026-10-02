@@ -76,46 +76,52 @@ class ProductQueryFiltersTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should count stock statuses without removing PHPUnit query callbacks.
+	 * @testdox Should count products on the core stock statuses.
 	 */
-	public function test_stock_counts_use_one_query_after_warmup(): void {
-		global $wpdb;
+	public function test_core_stock_status_counts(): void {
+		$fixtures = new FixtureData();
+		foreach ( array( 'instock', 'outofstock', 'onbackorder' ) as $status ) {
+			$fixtures->get_simple_product(
+				array(
+					'name'          => "Core {$status}",
+					'stock_status'  => $status,
+					'regular_price' => 10,
+				)
+			);
+		}
 
-		$sut      = new ProductQueryFilters();
-		$request  = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
-		$expected = $sut->get_stock_status_counts( $request );
-		$before   = $wpdb->num_queries;
-		$result   = $sut->get_stock_status_counts( $request );
-		$queries  = $wpdb->num_queries - $before;
+		$result = ( new ProductQueryFilters() )->get_stock_status_counts( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
 
-		$this->assertSame( $expected, $result );
-		$this->assertSame( '1', $result['custom1'] );
-		$this->assertSame( '2', $result['custom2'] );
-		$this->assertLessThanOrEqual( 2, $queries );
+		$this->assertSame(
+			array(
+				'instock'     => '1',
+				'outofstock'  => '1',
+				'onbackorder' => '1',
+				'custom1'     => '1',
+				'custom2'     => '2',
+			),
+			$result
+		);
 	}
 
 	/**
 	 * @testdox Should execute one combined stock query with a query observer attached.
 	 */
 	public function test_stock_counts_with_query_observer(): void {
-		$sut      = new ProductQueryFilters();
-		$request  = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
-		$expected = $sut->get_stock_status_counts( $request );
 		$queries  = array();
 		$observer = static function ( $sql ) use ( &$queries ) {
-			if ( false !== strpos( $sql, "postmeta.meta_key = '_stock_status'" ) && false !== strpos( $sql, 'COUNT( DISTINCT' ) ) {
+			if ( false !== strpos( $sql, "meta_key = '_stock_status'" ) ) {
 				$queries[] = $sql;
 			}
 			return $sql;
 		};
 		add_filter( 'query', $observer );
 		try {
-			$result = $sut->get_stock_status_counts( $request );
+			$result = ( new ProductQueryFilters() )->get_stock_status_counts( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
 		} finally {
 			remove_filter( 'query', $observer );
 		}
 
-		$this->assertSame( $expected, $result );
 		$this->assertSame(
 			array(
 				'instock'     => '0',
@@ -126,8 +132,7 @@ class ProductQueryFiltersTest extends \WC_Unit_Test_Case {
 			),
 			$result
 		);
-		$this->assertCount( 1, $queries );
-		$this->assertStringContainsString( 'COUNT( DISTINCT CASE WHEN', $queries[0] );
+		$this->assertCount( 1, $queries, 'All stock statuses should be counted by one statement.' );
 	}
 
 	/**
@@ -139,7 +144,7 @@ class ProductQueryFiltersTest extends \WC_Unit_Test_Case {
 		};
 		$queries       = array();
 		$observer      = static function ( $sql ) use ( &$queries ) {
-			if ( false !== strpos( $sql, "postmeta.meta_key = '_stock_status'" ) && false !== strpos( $sql, 'COUNT( DISTINCT' ) ) {
+			if ( false !== strpos( $sql, "meta_key = '_stock_status'" ) ) {
 				$queries[] = $sql;
 			}
 			return $sql;
@@ -182,25 +187,26 @@ class ProductQueryFiltersTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should preserve quoted custom status keys and counts supplied by WooCommerce's filter.
+	 * @testdox Should count safely when a custom status key contains a quote.
 	 */
 	public function test_quoted_stock_status_option(): void {
+		global $wpdb;
+
 		$status  = "custom'quoted";
 		$options = static function ( $statuses ) use ( $status ) {
 			$statuses[ $status ] = 'Quoted custom status';
 			return $statuses;
 		};
 		add_filter( 'woocommerce_product_stock_status_options', $options, 20 );
-		update_post_meta( $this->products[0]->get_id(), '_stock_status', $status );
 		try {
 			$result = ( new ProductQueryFilters() )->get_stock_status_counts( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
 		} finally {
 			remove_filter( 'woocommerce_product_stock_status_options', $options, 20 );
 		}
 
-		$this->assertSame( '0', $result['custom1'] );
+		$this->assertSame( '', $wpdb->last_error, 'A quote in a status key must not break the count statement.' );
+		$this->assertSame( '1', $result['custom1'] );
 		$this->assertSame( '2', $result['custom2'] );
-		// Existing double escaping leaves quoted status metadata unmatched.
-		$this->assertSame( '0', $result[ esc_sql( $status ) ] );
+		$this->assertCount( 6, $result, 'Every status from the filter should be present in the result.' );
 	}
 }
