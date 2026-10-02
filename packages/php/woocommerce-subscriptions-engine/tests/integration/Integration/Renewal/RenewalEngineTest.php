@@ -834,6 +834,37 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox park leaves a contract that is no longer active untouched.
+	 *
+	 * A contract can stop being active between being selected and being parked; its next-due
+	 * moment then belongs to whoever changed the status, so the park is a no-op.
+	 */
+	public function test_park_leaves_a_non_active_contract_untouched(): void {
+		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
+		$contract_id = (int) $contract->get_id();
+		$this->force_status( $contract_id, ContractStatus::ON_HOLD );
+		$next_payment = $this->reload_contract( $contract_id )->get_next_payment_gmt();
+		$this->assertNotNull( $next_payment, 'Seeded with a due moment.' );
+
+		( new RenewalEngine() )->park( $contract_id );
+
+		$this->assertSame( $next_payment, $this->reload_contract( $contract_id )->get_next_payment_gmt() );
+	}
+
+	/**
+	 * @testdox park clears the next-due moment of an active contract.
+	 */
+	public function test_park_clears_the_next_payment_of_an_active_contract(): void {
+		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
+		$contract_id = (int) $contract->get_id();
+		$this->assertNotNull( $this->reload_contract( $contract_id )->get_next_payment_gmt(), 'Seeded with a due moment.' );
+
+		( new RenewalEngine() )->park( $contract_id );
+
+		$this->assertNull( $this->reload_contract( $contract_id )->get_next_payment_gmt() );
+	}
+
+	/**
 	 * Overwrite a contract's stored status directly, keeping every other column (a shape no
 	 * flow produces, e.g. an on-hold contract that still has a next-due moment).
 	 *
