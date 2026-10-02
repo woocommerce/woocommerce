@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Store a plan's pricing_policy as an opaque extension payload: remove the PricingPolicy value object, the plan price calculation methods and pricing type validation. Consumers own pricing semantics.

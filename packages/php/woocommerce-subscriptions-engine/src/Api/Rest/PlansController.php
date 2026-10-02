@@ -12,7 +12,6 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Api\Rest;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PricingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\RESTPermissions;
 use InvalidArgumentException;
@@ -427,8 +426,6 @@ final class PlansController extends WP_REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $item, $request ) {
-		$pricing = $item->get_pricing_policy();
-
 		$data = array(
 			'id'             => $item->get_id(),
 			'name'           => $item->get_name(),
@@ -438,7 +435,7 @@ final class PlansController extends WP_REST_Controller {
 			'sort_order'     => $item->get_sort_order(),
 			'extension_slug' => $item->get_extension_slug(),
 			'billing_policy' => $item->get_billing_policy()->to_array(),
-			'pricing_policy' => null !== $pricing ? $pricing->to_array() : null,
+			'pricing_policy' => $item->get_pricing_policy(),
 		);
 
 		$context = ScalarCoercion::coerce_string( $request->get_param( 'context' ), 'view' );
@@ -586,14 +583,15 @@ final class PlansController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Build a pricing policy from a request param, preserving omitted existing keys.
+	 * Build the pricing payload from a request param. Provided top-level keys
+	 * replace existing ones; omitted keys keep their stored value.
 	 *
-	 * @param mixed              $value    Request value.
-	 * @param PricingPolicy|null $existing Existing policy.
-	 * @return PricingPolicy|null
-	 * @throws InvalidArgumentException If the param shape is invalid.
+	 * @param mixed                     $value    Request value.
+	 * @param array<string, mixed>|null $existing Existing payload.
+	 * @return array<string, mixed>|null
+	 * @throws InvalidArgumentException If the param is not an object or null.
 	 */
-	private function pricing_policy_from_param( $value, ?PricingPolicy $existing ): ?PricingPolicy {
+	private function pricing_policy_from_param( $value, ?array $existing ): ?array {
 		if ( null === $value ) {
 			return null;
 		}
@@ -603,15 +601,8 @@ final class PlansController extends WP_REST_Controller {
 		}
 
 		$value = $this->associative_array( $value, 'pricing_policy must be an object or null.' );
-		$data  = null !== $existing ? $existing->to_array() : array();
-		if ( array_key_exists( 'policies', $value ) ) {
-			$data['policies'] = $value['policies'];
-		}
-		if ( array_key_exists( 'one_time_fees', $value ) ) {
-			$data['one_time_fees'] = $value['one_time_fees'];
-		}
 
-		return PricingPolicy::from_array( $data );
+		return array_merge( $existing ?? array(), $value );
 	}
 
 	/**
