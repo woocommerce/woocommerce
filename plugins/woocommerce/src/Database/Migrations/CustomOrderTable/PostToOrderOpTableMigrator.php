@@ -108,13 +108,17 @@ class PostToOrderOpTableMigrator extends MetaToCustomTableMigrator {
 				'type'        => 'bool',
 				'destination' => 'order_stock_reduced',
 			),
+			// Orders written before 3.0, or by code that still uses the old keys, only carry '_paid_date' and
+			// '_completed_date'. The posts data store reads those when the new keys are empty, so the migration does too.
 			'_date_paid'                    => array(
-				'type'        => 'date_epoch',
-				'destination' => 'date_paid_gmt',
+				'type'              => 'date_epoch',
+				'destination'       => 'date_paid_gmt',
+				'fallback_meta_key' => '_paid_date',
 			),
 			'_date_completed'               => array(
-				'type'        => 'date_epoch',
-				'destination' => 'date_completed_gmt',
+				'type'              => 'date_epoch',
+				'destination'       => 'date_completed_gmt',
+				'fallback_meta_key' => '_completed_date',
 			),
 			'_order_shipping_tax'           => array(
 				'type'        => 'decimal',
