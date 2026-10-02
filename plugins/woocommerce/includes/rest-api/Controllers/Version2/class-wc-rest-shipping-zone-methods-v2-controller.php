@@ -304,7 +304,14 @@ class WC_REST_Shipping_Zone_Methods_V2_Controller extends WC_REST_Shipping_Zones
 			$errors_found      = false;
 			foreach ( $method->get_instance_form_fields() as $key => $field ) {
 				if ( isset( $request['settings'][ $key ] ) ) {
-					if ( is_callable( array( $this, 'validate_setting_' . $field['type'] . '_field' ) ) ) {
+					// Use the method's own sanitizer when it has one, as the settings form does.
+					if ( isset( $field['sanitize_callback'] ) && is_callable( $field['sanitize_callback'] ) ) {
+						try {
+							$value = call_user_func( $field['sanitize_callback'], $request['settings'][ $key ] );
+						} catch ( Exception $e ) {
+							$value = new WP_Error( 'rest_setting_value_invalid', $e->getMessage() );
+						}
+					} elseif ( is_callable( array( $this, 'validate_setting_' . $field['type'] . '_field' ) ) ) {
 						$value = $this->{'validate_setting_' . $field['type'] . '_field'}( $request['settings'][ $key ], $field );
 					} else {
 						$value = $this->validate_setting_text_field( $request['settings'][ $key ], $field );

@@ -899,6 +899,35 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Updating method settings uses the method's own sanitizer for locale-formatted amounts.
+	 */
+	public function test_update_method_settings_uses_sanitize_callback() {
+		wp_set_current_user( $this->user );
+		update_option( 'woocommerce_price_decimal_sep', ',' );
+		update_option( 'woocommerce_price_thousand_sep', '.' );
+
+		$zone        = $this->create_shipping_zone( 'Zone 1' );
+		$instance_id = $zone->add_shipping_method( 'free_shipping' );
+		$route       = '/wc/v3/shipping/zones/' . $zone->get_id() . '/methods/' . $instance_id;
+
+		$request = new WP_REST_Request( 'POST', $route );
+		$request->set_body_params( array( 'settings' => array( 'min_amount' => '1.000,50' ) ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( '1000.50', $response->get_data()['settings']['min_amount']['value'] );
+
+		$request = new WP_REST_Request( 'POST', $route );
+		$request->set_body_params( array( 'settings' => array( 'min_amount' => 'abc' ) ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status() );
+
+		update_option( 'woocommerce_price_decimal_sep', '.' );
+		update_option( 'woocommerce_price_thousand_sep', ',' );
+	}
+
+	/**
 	 * Test creating a Shipping Zone Method.
 	 *
 	 * @since 3.5.0
