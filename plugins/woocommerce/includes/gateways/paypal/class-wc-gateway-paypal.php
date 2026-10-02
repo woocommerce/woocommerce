@@ -196,6 +196,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		add_action( 'woocommerce_order_status_completed', array( $this, 'capture_payment' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 
+		// Allow session-less payment completion for verified PayPal IPN/PDT requests.
+		add_filter( 'woocommerce_allow_sessionless_payment_complete', array( $this, 'allow_sessionless_payment_complete' ), 10, 2 );
+
 		if ( ! $this->is_valid_for_use() ) {
 			$this->enabled = 'no';
 		} else {
@@ -944,6 +947,24 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		);
 
 		return is_countable( $paypal_orders ) ? 1 === count( $paypal_orders ) : false;
+	}
+
+	/**
+	 * Allow session-less payment completion for PayPal orders.
+	 *
+	 * PayPal Standard's IPN and PDT handlers verify the transaction against
+	 * PayPal's servers before calling payment_complete(), but run without a
+	 * frontend session. Opt those orders into the session-less bypass.
+	 *
+	 * @param bool     $allow Whether session-less completion is allowed.
+	 * @param WC_Order $order The order being completed.
+	 * @return bool
+	 */
+	public function allow_sessionless_payment_complete( $allow, $order ) {
+		if ( $allow ) {
+			return $allow;
+		}
+		return $order && 'paypal' === $order->get_payment_method();
 	}
 
 	/**
