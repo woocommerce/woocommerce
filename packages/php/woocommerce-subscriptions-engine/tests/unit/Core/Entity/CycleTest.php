@@ -215,6 +215,47 @@ class CycleTest extends TestCase {
 		$this->assertSame( 'legacy-x', $cycle->to_storage()['status'] );
 	}
 
+	public function test_set_status_rejects_an_unregistered_status_and_leaves_the_status_unchanged(): void {
+		$cycle = $this->make_pending();
+
+		try {
+			$cycle->set_status( CycleStatus::stored( 'nope' ) );
+			$this->fail( 'Expected a DomainException for an unregistered status.' );
+		} catch ( DomainException $e ) {
+			$this->assertStringContainsString( 'nope', $e->getMessage() );
+		}
+
+		$this->assertSame( CycleStatus::PENDING, $cycle->get_status()->get_value() );
+	}
+
+	public function test_create_rejects_an_unregistered_status_instance(): void {
+		$this->expectException( DomainException::class );
+
+		$this->make_pending( array( 'status' => CycleStatus::stored( 'nope' ) ) );
+	}
+
+	public function test_a_hydrated_unregistered_status_can_be_kept_unchanged(): void {
+		$cycle = Cycle::from_storage(
+			array(
+				'id'             => 5,
+				'contract_id'    => 7,
+				'sequence_no'    => 1,
+				'count'          => 1,
+				'kind'           => Cycle::KIND_BILLING,
+				'status'         => 'legacy-x',
+				'starts_at_gmt'  => '2026-03-01 00:00:00',
+				'ends_at_gmt'    => '2026-04-01 00:00:00',
+				'expected_total' => '20.00',
+				'currency'       => 'USD',
+			)
+		);
+
+		$cycle->set_status( CycleStatus::stored( 'legacy-x' ) );
+		$cycle->set_reason( 'annotated' );
+
+		$this->assertSame( 'legacy-x', $cycle->to_storage()['status'] );
+	}
+
 	public function test_setting_the_same_status_is_a_no_op(): void {
 		$cycle = $this->make_pending();
 
