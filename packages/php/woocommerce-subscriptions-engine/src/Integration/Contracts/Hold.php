@@ -3,12 +3,12 @@
  * Hold - put an active subscription contract on hold (suspend billing).
  *
  * A focused contract-management operation (deliberately not a catch-all manager),
- * mirroring {@see Cancellation}: transition the contract ACTIVE -> ON_HOLD through the
- * Core state machine and announce it. No charge fires while held because the batch due
- * scan only bills active contracts, so there is no per-contract schedule to clear. The
- * contract keeps its `next_payment_gmt` so the held duration is recoverable on
- * {@see Reactivation}. Lives under `Integration\Contracts` so contract lifecycle stays
- * separate from the renewal money-path.
+ * mirroring {@see Cancellation}: move the contract ACTIVE -> ON_HOLD, disarm its
+ * next-due moment, and announce it. The batch due scan is status-blind (it keys on
+ * `next_payment_gmt` and a registered owner), so clearing the next-due moment is what
+ * stops billing; the cleared moment is kept in contract meta ({@see self::ANCHOR_META_KEY})
+ * so {@see Reactivation} can recompute the schedule forward from it. Interim engine
+ * flow: its preconditions are its own, not a rule of the status primitive.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts
  */
@@ -35,6 +35,13 @@ final class Hold {
 	public const CONTRACT_HELD_ACTION = 'woocommerce_subscriptions_engine_contract_held';
 
 	/**
+	 * Contract meta key holding the next-due moment cleared by a hold - the moment
+	 * {@see Reactivation} recomputes forward from. Interim: moves with the hold flow
+	 * when the flow leaves the engine.
+	 */
+	public const ANCHOR_META_KEY = '_hold_next_payment_gmt';
+
+	/**
 	 * Contract repository.
 	 *
 	 * @var ContractRepository
@@ -51,17 +58,15 @@ final class Hold {
 	}
 
 	/**
-	 * Hold `$contract`: transition it to on-hold.
+	 * Hold `$contract`: move it to on-hold and disarm its next-due moment.
 	 *
-	 * Status moves through the Core state machine ({@see Contract::set_status()}), which
-	 * raises a `DomainException` on an illegal transition (e.g. holding a terminal
-	 * contract). The current cycle is immutable and is NOT touched; only the live
-	 * contract status moves. No charge fires while held because the batch due scan only
-	 * bills active contracts - there is no per-contract schedule to clear. The
-	 * `next_payment_gmt` is preserved so {@see Reactivation} can recompute the schedule
-	 * forward.
+	 * Only an active contract can be held; holding an already on-hold contract is an
+	 * idempotent no-op that still succeeds and fires the action (nothing is rewritten,
+	 * so the stored anchor survives). Any other status - including one that is not
+	 * registered - raises a `DomainException`. The current cycle is immutable and is
+	 * NOT touched.
 	 *
-	 * @param Contract $contract Contract to hold. Must have an id, and be ACTIVE.
+	 * @param Contract $contract Contract to hold. Must have an id, and be ACTIVE (or already ON_HOLD).
 	 * @return bool True when the contract was held and persisted.
 	 * @throws RuntimeException If the contract has no id.
 	 * @throws \DomainException If the contract cannot be held from its current state, or its state changed concurrently.
@@ -73,7 +78,16 @@ final class Hold {
 		}
 
 		$previous = $contract->get_status();
-		$contract->set_status( ContractStatus::ON_HOLD );
+		if ( ContractStatus::ACTIVE !== $previous && ContractStatus::ON_HOLD !== $previous ) {
+			throw new \DomainException( 'Hold::hold(): only an active contract can be held.' );
+		}
+
+		if ( ContractStatus::ACTIVE === $previous ) {
+			// A contract with no next-due moment stores no anchor (null removes the key).
+			$contract->set_status( ContractStatus::ON_HOLD );
+			$contract->set_meta( self::ANCHOR_META_KEY, $contract->get_next_payment_gmt() );
+			$contract->set_next_payment_gmt( null );
+		}
 
 		// Compare-and-set on the status read above: a concurrent transition (another
 		// request, the renewal engine) makes this write miss loudly rather than be
