@@ -29,7 +29,7 @@ final class RegistrationArgs {
 	public const META = 'woocommerce';
 
 	/**
-	 * Derive the write meta, swap in the polyfilled ability class before
+	 * Derive the write meta, swap in DryRunAbility, which fires the 7.1 hooks before
 	 * WordPress 7.1 for an ability with this meta, and add `extensions` to the
 	 * schemas.
 	 *
@@ -45,11 +45,11 @@ final class RegistrationArgs {
 			);
 			$args['meta'][ self::META ]['in_memory_write']  = $args['meta'][ self::META ]['in_memory_write'] ?? array( 'object_type' => $class::object_type() );
 		}
-		if ( is_string( $class ) && PolyfilledAbility::has_dry_run( $class ) ) {
+		if ( is_string( $class ) && DryRunAbility::has_dry_run( $class ) ) {
 			$args['meta'][ self::META ]['dry_run'] = true;
 		}
-		if ( null === $class && isset( $args['meta'][ self::META ] ) && PolyfilledAbility::is_active() ) {
-			$args['ability_class'] = PolyfilledAbility::class;
+		if ( null === $class && isset( $args['meta'][ self::META ] ) && DryRunAbility::polyfill_active() ) {
+			$args['ability_class'] = DryRunAbility::class;
 		}
 
 		$fields = $args['meta'][ self::META ]['extension_fields'] ?? null;

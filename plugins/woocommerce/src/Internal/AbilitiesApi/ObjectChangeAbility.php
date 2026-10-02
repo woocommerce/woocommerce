@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * @since 11.3.0
  */
-abstract class ObjectChangeAbility extends PolyfilledAbility {
+abstract class ObjectChangeAbility extends DryRunAbility {
 
 	/**
 	 * Object type the ability changes. The fields and validators registered for it run on the changed object.

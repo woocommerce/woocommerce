@@ -7,12 +7,12 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Abilities;
 
-use Automattic\WooCommerce\Internal\AbilitiesApi\PolyfilledAbility;
+use Automattic\WooCommerce\Internal\AbilitiesApi\DryRunAbility;
 
 /**
  * An ability that emails the merchant, with a hand-written dry run.
  */
-class TestNotifyAbility extends PolyfilledAbility {
+class TestNotifyAbility extends DryRunAbility {
 
 	/**
 	 * Say what execute would do, without sending anything.

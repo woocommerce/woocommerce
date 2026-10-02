@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Abilities;
 use Automattic\WooCommerce\Abilities\AbilityContracts;
 use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityFields;
 use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityObjectValidators;
-use Automattic\WooCommerce\Internal\AbilitiesApi\PolyfilledAbility;
+use Automattic\WooCommerce\Internal\AbilitiesApi\DryRunAbility;
 
 /**
  * A plugin ability opts in to extension fields with `meta.woocommerce` and to
@@ -590,12 +590,12 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should swap in the polyfilled class only before WordPress 7.1 and only for an ability with WooCommerce meta, and keep an ability's own class.
+	 * @testdox Should swap in DryRunAbility only before WordPress 7.1 and only for an ability with WooCommerce meta, and keep an ability's own class.
 	 */
 	public function test_polyfill_class_swap(): void {
 		$this->register( true );
 
-		$this->assertSame( PolyfilledAbility::is_active() ? PolyfilledAbility::class : \WP_Ability::class, get_class( wp_get_ability( self::READ ) ) );
+		$this->assertSame( DryRunAbility::polyfill_active() ? DryRunAbility::class : \WP_Ability::class, get_class( wp_get_ability( self::READ ) ) );
 		$this->assertSame( \WP_Ability::class, get_class( wp_get_ability( self::PLAIN ) ) );
 		$this->assertInstanceOf( TestRecordWriteAbility::class, wp_get_ability( self::WRITE ) );
 	}
