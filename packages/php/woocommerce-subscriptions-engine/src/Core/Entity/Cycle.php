@@ -235,8 +235,12 @@ final class Cycle {
 	/**
 	 * Hydrate from a stored row.
 	 *
+	 * The stored status is kept verbatim, registered or not (it bypasses the
+	 * validating {@see CycleStatus::from()}), so a value written by a
+	 * since-deactivated extension round-trips unchanged.
+	 *
 	 * @param array<string, mixed> $row Cycle row.
-	 * @throws DomainException If the stored status, kind, or sequence_no is invalid.
+	 * @throws DomainException If the stored kind or sequence_no is invalid.
 	 */
 	public static function from_storage( array $row ): self {
 		$kind = ScalarCoercion::coerce_string( $row['kind'] ?? null, self::KIND_BILLING );
@@ -249,6 +253,10 @@ final class Cycle {
 		unset( $row['plan_snapshot'], $row['items_snapshot'] );
 
 		$row['count'] = array_key_exists( 'count', $row ) ? self::normalize_count( $row['count'] ) : null;
+
+		if ( isset( $row['status'] ) && ! $row['status'] instanceof CycleStatus ) {
+			$row['status'] = CycleStatus::stored( ScalarCoercion::coerce_string( $row['status'] ) );
+		}
 
 		return new self( $row );
 	}
@@ -327,17 +335,20 @@ final class Cycle {
 	}
 
 	/**
-	 * Transition the cycle to a new status.
+	 * Set the cycle status.
+	 *
+	 * Any status may follow any other: the engine enforces no transition table
+	 * (a {@see CycleStatus} built through {@see CycleStatus::from()} or a named
+	 * factory is registered by construction). Setting the current status is a no-op.
 	 *
 	 * @param CycleStatus $status Target status.
-	 * @throws DomainException If the transition is not allowed by CycleStatus.
 	 */
 	public function set_status( CycleStatus $status ): void {
 		if ( $this->status->equals( $status ) ) {
 			return;
 		}
 
-		$this->status = $this->status->transition_to( $status );
+		$this->status = $status;
 	}
 
 	/**
@@ -594,11 +605,12 @@ final class Cycle {
 	/**
 	 * Resolve a status input into a typed {@see CycleStatus}. A `CycleStatus` passes
 	 * through; null defaults to `pending`; a string is validated via
-	 * {@see CycleStatus::from()}.
+	 * {@see CycleStatus::from()} (the {@see self::create()} write path; storage
+	 * hydration converts its string first, so it bypasses the check).
 	 *
 	 * @param mixed $status Raw status value (a CycleStatus, null, or a status string).
 	 * @return CycleStatus
-	 * @throws DomainException If a status string is not a known status.
+	 * @throws DomainException If a status string is not a registered status.
 	 */
 	private static function coerce_status( $status ): CycleStatus {
 		if ( $status instanceof CycleStatus ) {
