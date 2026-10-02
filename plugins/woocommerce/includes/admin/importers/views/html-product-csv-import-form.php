@@ -66,8 +66,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</th>
 					<td>
 						<label for="woocommerce-importer-file-url" class="woocommerce-importer-file-url-field-wrapper">
-							<code><?php echo esc_html( ABSPATH ) . ' '; ?></code><input type="text" id="woocommerce-importer-file-url" name="file_url" />
+							<input type="text" id="woocommerce-importer-file-url" name="file_url" />
 						</label>
+						<small><?php esc_html_e( 'Enter the absolute path to the file, or a path relative to your WordPress directory.', 'woocommerce' ); ?></small>
 					</td>
 				</tr>
 				<tr class="woocommerce-importer-advanced hidden">
