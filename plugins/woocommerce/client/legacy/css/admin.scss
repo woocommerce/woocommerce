@@ -3924,7 +3924,6 @@ ul.order_notes {
 	#add_order_note {
 		width: 100%;
 		min-height: 60px;
-		// stylelint-disable-next-line property-no-unknown -- field-sizing is missing from Stylelint 14. See #69077.
 		field-sizing: content;
 	}
 
@@ -4831,10 +4830,8 @@ table.wc_shipping {
 		animation-fill-mode: none;
 		animation-play-state: running;
 		animation-name: components-button__busy-animation;
-		// stylelint-disable property-no-unknown -- scroll-driven animation properties, newer than stylelint 14's property list.
 		animation-timeline: auto;
 		animation-range-start: normal;
-		// stylelint-enable property-no-unknown
 		color: #757575;
 	}
 }
