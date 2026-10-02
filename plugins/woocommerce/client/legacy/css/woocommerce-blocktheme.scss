@@ -12,7 +12,9 @@
 .woocommerce-account,
 .woocommerce-checkout {
 
-	.wp-block-post-title,
+	// Wide and full aligned titles keep the width from their alignment.
+	// `:where()` keeps the specificity the same so theme overrides still apply.
+	.wp-block-post-title:not(:where(.alignwide, .alignfull)),
 	main .woocommerce {
 		// Allow Cart/Checkout/Account pages more space to breathe.
 		max-width: 1000px;
