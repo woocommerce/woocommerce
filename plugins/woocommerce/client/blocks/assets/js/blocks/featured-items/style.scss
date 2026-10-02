@@ -68,6 +68,10 @@
 	position: relative;
 	width: 100%;
 
+	&.alignfull {
+		width: auto;
+	}
+
 	&.has-left-content {
 		justify-content: flex-start;
 
