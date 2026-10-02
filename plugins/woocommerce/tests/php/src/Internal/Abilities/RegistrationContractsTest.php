@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Internal\AbilitiesApi\PolyfilledAbility;
 
 /**
  * A plugin ability opts in to extension fields with `meta.woocommerce` and to
- * in-memory writes with an InMemoryWriteAbility `ability_class`.
+ * in-memory writes with an ObjectChangeAbility `ability_class`.
  */
 class RegistrationContractsTest extends \WC_Unit_Test_Case {
 
@@ -221,7 +221,7 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return the step's error and save nothing when validate refuses, apply fails or the record is missing.
+	 * @testdox Should return the error and save nothing when change() rejects or throws, or the record is missing.
 	 *
 	 * @testWith [7, "", "test_empty_title", 400]
 	 *           [7, "throw", "woocommerce_in_memory_write_save_failed", 500]
@@ -275,7 +275,7 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should derive the write meta from the ability class as plain data, with no callables.
+	 * @testdox Should keep declared meta, derive the write meta from the ability class, and hold only plain data.
 	 */
 	public function test_meta_is_plain_data(): void {
 		$this->register( true );
@@ -300,6 +300,35 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 				$this->assertTrue( null === $value || is_scalar( $value ) );
 			}
 		);
+	}
+
+	/**
+	 * @testdox Should return the side effects and undo call the ability declares, and keep its annotations.
+	 */
+	public function test_side_effects_undo_and_annotations(): void {
+		$this->register( true );
+
+		$ability = wp_get_ability( self::WRITE );
+		$record  = TestRecord::load( 7 );
+		$input   = array(
+			'id'    => 7,
+			'title' => 'Renamed',
+		);
+
+		$this->assertSame( array( 'Renames the record.' ), $ability->side_effects( $record, $input ) );
+		$this->assertSame(
+			array(
+				'ability' => self::WRITE,
+				'input'   => array(
+					'id'    => 7,
+					'title' => 'Original',
+				),
+			),
+			$ability->undo( $record, $input )
+		);
+		$this->assertFalse( $ability->get_meta()['annotations']['destructive'] );
+		$this->assertTrue( $ability->get_meta()['annotations']['idempotent'] );
+		$this->assertSame( 0, TestRecord::$saves );
 	}
 
 	/**
@@ -364,7 +393,7 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 		$write = wp_get_ability( self::WRITE );
 		$read  = wp_get_ability( self::READ );
 
-		$this->assertArrayNotHasKey( 'woocommerce', $write->get_meta() );
+		$this->assertArrayNotHasKey( 'in_memory_write', $write->get_meta()['woocommerce'] );
 		$this->assertSame( \WP_Ability::class, get_class( $read ) );
 		$this->assertArrayNotHasKey( 'extensions', $write->get_input_schema()['properties'] );
 		$this->assertArrayNotHasKey( 'extensions', $write->get_output_schema()['properties']['record']['properties'] );
@@ -434,6 +463,18 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 					),
 					'ability_class'       => TestRecordWriteAbility::class,
 					'permission_callback' => '__return_true',
+					'meta'                => array(
+						'annotations' => array(
+							'destructive' => false,
+							'idempotent'  => true,
+						),
+						'woocommerce' => array(
+							'extension_fields' => array(
+								'object_type' => 'test_record',
+								'output'      => 'record',
+							),
+						),
+					),
 				)
 			);
 
