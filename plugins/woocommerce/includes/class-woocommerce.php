@@ -48,6 +48,7 @@ use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\OrdersVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\TaxRateVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\CustomerEmailVerification;
+use Automattic\WooCommerce\Internal\Tax\NonShippingCartTaxLocation;
 
 /**
  * Main WooCommerce Class.
@@ -411,6 +412,7 @@ final class WooCommerce {
 		$container->get( OrderMilestoneEasterEgg::class );
 		$container->get( CustomerEmailVerification::class );
 		$container->get( OrderLogsCleanupHelper::class );
+		$container->get( NonShippingCartTaxLocation::class );
 
 		/**
 		 * These classes have a register method for attaching hooks.
