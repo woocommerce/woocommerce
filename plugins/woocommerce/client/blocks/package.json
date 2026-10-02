@@ -148,7 +148,7 @@
 		"@wordpress/is-shallow-equal": "catalog:wp-min",
 		"@wordpress/jest-preset-default": "next",
 		"@wordpress/patterns": "catalog:wp-min",
-		"@wordpress/postcss-plugins-preset": "next",
+		"@wordpress/postcss-plugins-preset": "catalog:tooling",
 		"@wordpress/postcss-themes": "next",
 		"@wordpress/prettier-config": "catalog:tooling",
 		"@wordpress/private-apis": "catalog:wp-min",

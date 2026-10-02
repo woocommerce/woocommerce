@@ -169,7 +169,7 @@
 		"@wordpress/block-editor": "catalog:wp-min",
 		"@wordpress/browserslist-config": "next",
 		"@wordpress/jest-preset-default": "next",
-		"@wordpress/postcss-plugins-preset": "next",
+		"@wordpress/postcss-plugins-preset": "catalog:tooling",
 		"@wordpress/postcss-themes": "next",
 		"@wordpress/prettier-config": "catalog:tooling",
 		"@wordpress/stylelint-config": "^23.14.0",

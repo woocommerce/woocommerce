@@ -42,7 +42,6 @@ catalogs:
         '@wordpress/notices': 5.33.1
         '@wordpress/patterns': 2.33.9
         '@wordpress/plugins': 7.33.5
-        '@wordpress/postcss-plugins-preset': 5.33.1
         '@wordpress/preferences': 4.33.5
         '@wordpress/primitives': 4.33.1
         '@wordpress/priority-queue': 3.33.1
@@ -79,6 +78,7 @@ catalogs:
         '@babel/preset-typescript': 7.25.7
         '@babel/runtime': 7.25.7
         '@wordpress/prettier-config': 4.56.0
+        '@wordpress/postcss-plugins-preset': 5.56.0
         postcss: ^8.5.26
         webpack: 5.97.x
 
@@ -120,9 +120,9 @@ patchedDependencies:
     '@wordpress/env@11.9.0': bin/patches/@wordpress__env@11.9.0.patch
 
 # Quality of life tweaks (migrated from .npmrc)
-childConcurrency: 8        # 5 by default
+childConcurrency: 8 # 5 by default
 confirmModulesPurge: false
-modulesCacheMaxAge: 20160  # two weeks in minutes
+modulesCacheMaxAge: 20160 # two weeks in minutes
 updateNotifier: false
 virtualStoreDirMaxLength: 60
 
