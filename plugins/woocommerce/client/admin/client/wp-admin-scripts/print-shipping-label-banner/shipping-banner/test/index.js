@@ -199,7 +199,7 @@ describe( 'Create shipping label button', () => {
 			/>
 		);
 
-		userEvent.click(
+		await userEvent.click(
 			getByRole( 'button', {
 				name: actionButtonLabel,
 			} )
@@ -247,6 +247,7 @@ describe( 'Create shipping label button', () => {
 				)
 			).toBeInTheDocument()
 		);
+		expect( acceptWcsTos ).toHaveBeenCalledTimes( 1 );
 
 		expect(
 			queryByText( /By clicking "Create shipping label"/i )
@@ -259,6 +260,45 @@ describe( 'Create shipping label button', () => {
 		userEvent.click( reloadButton );
 
 		expect( window.location.reload ).toHaveBeenCalledWith( true );
+	} );
+
+	it( 'should show a setup error when accepting the TOS after activation fails', async () => {
+		acceptWcsTos.mockRejectedValueOnce( new Error( 'API Error' ) );
+		const actionButtonLabel = 'Create shipping label';
+		const { getByRole, getByText, queryByRole } = render(
+			<ShippingBanner
+				isJetpackConnected={ true }
+				activatePlugins={ activatePlugins }
+				activePlugins={ [] }
+				installPlugins={ installPlugins }
+				isRequesting={ false }
+				itemsCount={ 1 }
+				orderId={ 1 }
+				isWcstCompatible={ true }
+				actionButtonLabel={ actionButtonLabel }
+			/>
+		);
+
+		await userEvent.click(
+			getByRole( 'button', {
+				name: actionButtonLabel,
+			} )
+		);
+
+		await waitFor( () =>
+			expect(
+				getByText(
+					'Unable to set up the plugin. Refresh the page and try again.'
+				)
+			).toBeInTheDocument()
+		);
+
+		expect(
+			getByRole( 'button', { name: actionButtonLabel } )
+		).not.toHaveClass( 'is-busy' );
+		expect(
+			queryByRole( 'button', { name: 'Reload page' } )
+		).not.toBeInTheDocument();
 	} );
 
 	it( 'should perform a request to accept the TOS and get WCS assets to load', async () => {
