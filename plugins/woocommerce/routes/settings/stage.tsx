@@ -33,7 +33,7 @@ const screenPath = ( id: string, ...segments: string[] ) =>
  * Get the path of a link to one of this screen's own pages, such as a breadcrumb or an extension's link to a sub-page.
  */
 function getScreenLinkPath( event: MouseEvent, screenId: string ) {
-	const anchor = ( event.target as Element ).closest?.( 'a[href]' );
+	const anchor = ( event.target as Element ).closest( 'a[href]' );
 	if (
 		! anchor ||
 		event.button !== 0 ||
@@ -65,7 +65,7 @@ function SettingsForm( {
 }: {
 	screen: PaymentSettingsScreen;
 	definition: ScreenDefinition;
-	path?: string;
+	path?: string | undefined;
 } ) {
 	const location = useMemo(
 		() => resolveLocation( definition.form, path ),
@@ -109,7 +109,7 @@ function SettingsForm( {
 			return;
 		}
 		discard();
-		void navigate( { to: to as never } );
+		void navigate( { to } );
 	};
 	// The link fields are memoized, so they call the latest `goTo` to see the current unsaved edits.
 	const goToRef = useRef( goTo );
@@ -126,11 +126,11 @@ function SettingsForm( {
 						<Button
 							variant="secondary"
 							size="compact"
-							onClick={ () =>
+							onClick={ () => {
 								goToRef.current(
 									`${ currentPath }/${ link.id }`
-								)
-							}
+								);
+							} }
 						>
 							{ link.label }
 						</Button>
@@ -171,18 +171,14 @@ function SettingsForm( {
 		to: screen.paymentsUrl,
 	};
 	// Each sub-page crumb links to its own path, so a nested sub-page can go back one level.
-	const subPageCrumbs = trail.map( ( group, index ) => ( {
-		label: group.label ?? group.id,
-		to:
-			index < trail.length - 1
-				? screenPath(
-						screen.id,
-						...trail
-							.slice( 0, index + 1 )
-							.map( ( item ) => item.id )
-				  )
-				: undefined,
-	} ) );
+	const subPageCrumbs = trail.map( ( group, index ) => {
+		const label = group.label ?? group.id;
+		if ( index === trail.length - 1 ) {
+			return { label };
+		}
+		const ids = trail.slice( 0, index + 1 ).map( ( item ) => item.id );
+		return { label, to: screenPath( screen.id, ...ids ) };
+	} );
 
 	return (
 		// Links to the screen's own pages, such as breadcrumbs or an extension's link to a sub-page, stay in the page.
@@ -283,7 +279,7 @@ function ScreenContent( {
 	path,
 }: {
 	screen: PaymentSettingsScreen;
-	path?: string;
+	path?: string | undefined;
 } ) {
 	const { definition, error } = useScreenDefinition( screen );
 
@@ -311,19 +307,18 @@ function ScreenContent( {
 }
 
 // useParams() is untyped without a registered router, so narrow it here.
-function getPageParam( params: unknown ): string {
-	if ( typeof params === 'object' && params !== null && 'page' in params ) {
-		return typeof params.page === 'string' ? params.page : '';
+function getStringParam( params: unknown, key: string ): string | undefined {
+	if ( typeof params !== 'object' || params === null ) {
+		return undefined;
 	}
-	return '';
+	const value: unknown = ( params as Record< string, unknown > )[ key ];
+	return typeof value === 'string' ? value : undefined;
 }
 
 function SettingsStage() {
-	const { page, _splat: path } = useParams( { strict: false } ) as {
-		page?: string;
-		_splat?: string;
-	};
-	const screen = getScreen( page );
+	const params: unknown = useParams( { strict: false } );
+	const screen = getScreen( getStringParam( params, 'page' ) );
+	const path = getStringParam( params, '_splat' );
 
 	return screen ? <ScreenContent screen={ screen } path={ path } /> : null;
 }

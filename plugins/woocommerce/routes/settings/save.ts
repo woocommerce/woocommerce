@@ -46,16 +46,15 @@ export function useSettingsEntity(
 				data: core.getEditedEntityRecord( kind, name, NO_KEY ) as
 					| SettingsRecord
 					| undefined,
-				data: core.getEditedEntityRecord( kind, name, undefined ) as
-					| SettingsRecord
-					| undefined,
 				edits: core.getEntityRecordNonTransientEdits(
 					kind,
 					name,
-					undefined
+					NO_KEY
 				) as SettingsRecord | undefined,
-				isSaving: core.isSavingEntityRecord( kind, name, undefined ),
-				loadError: core.getResolutionError( 'getEntityRecord', [
+				isSaving: core.isSavingEntityRecord( kind, name, NO_KEY ),
+				loadError: (
+					core as unknown as ResolutionSelectors
+				 ).getResolutionError( 'getEntityRecord', [
 					kind,
 					name,
 					NO_KEY,
@@ -64,8 +63,10 @@ export function useSettingsEntity(
 		},
 		[ kind, name ]
 	);
-	const { editEntityRecord, saveEntityRecord, invalidateResolution } =
-		useDispatch( coreStore );
+	const { editEntityRecord, saveEntityRecord } = useDispatch( coreStore );
+	const { invalidateResolution } = useDispatch(
+		coreStore
+	) as unknown as ResolutionActions;
 	const pageEdits = pickEdits( edits ?? {}, [ ...fieldIds, ...editedKeys ] );
 	const isDirty = Object.keys( pageEdits ).length > 0;
 
@@ -77,7 +78,7 @@ export function useSettingsEntity(
 		setEditedKeys( ( keys ) => [
 			...new Set( [ ...keys, ...Object.keys( changes ) ] ),
 		] );
-		void editEntityRecord( kind, name, undefined, changes );
+		void editEntityRecord( kind, name, NO_KEY, changes );
 	};
 
 	const save = async () => {
@@ -109,7 +110,7 @@ export function useSettingsEntity(
 			void editEntityRecord(
 				kind,
 				name,
-				undefined,
+				NO_KEY,
 				pickEdits( record, Object.keys( pageEdits ) )
 			);
 		}

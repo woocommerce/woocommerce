@@ -63,9 +63,9 @@ describe( 'resolveLocation', () => {
 		expect( resolveLocation( form, 'advanced' )?.fieldIds ).toEqual( [
 			'descriptor',
 		] );
-		expect( resolveLocation( form, 'advanced/rules' )?.fieldIds ).toEqual(
-			[ 'suffix' ]
-		);
+		expect( resolveLocation( form, 'advanced/rules' )?.fieldIds ).toEqual( [
+			'suffix',
+		] );
 	} );
 
 	it( 'counts a field given with its own layout', () => {
@@ -86,7 +86,7 @@ describe( 'resolveLocation', () => {
 					],
 				},
 			],
-		} as Form );
+		} );
 
 		expect( location?.fieldIds ).toEqual( [
 			'support_description',

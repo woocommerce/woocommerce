@@ -6,15 +6,21 @@ import type { Form } from '@wordpress/dataviews';
 type FormEntry = NonNullable< Form[ 'fields' ] >[ number ];
 export type FormGroup = Exclude< FormEntry, string >;
 
-export type SubPageLink = { id: string; label: string };
+export interface SubPageLink {
+	id: string;
+	label: string;
+}
 
 /**
  * How a group opens as its own page, set in View Config as a `panel` layout with `openAs: { type: 'page' }`.
  * With `button: false`, the extension links to it itself.
  */
-type PageOpenAs = { type: 'page'; button?: boolean };
+interface PageOpenAs {
+	type: 'page';
+	button?: boolean;
+}
 
-export type ScreenLocation = {
+export interface ScreenLocation {
 	/** The sub-pages leading to this location, outermost first. Empty on the main page. */
 	subPages: FormGroup[];
 	/** The part of the form to render at this location, with sub-pages replaced by links. */
@@ -23,7 +29,7 @@ export type ScreenLocation = {
 	subPageLinks: SubPageLink[];
 	/** The fields edited at this location, which its Save and Discard cover. */
 	fieldIds: string[];
-};
+}
 
 /**
  * ID of the field that links to a sub-page, in place of the sub-page's group.
