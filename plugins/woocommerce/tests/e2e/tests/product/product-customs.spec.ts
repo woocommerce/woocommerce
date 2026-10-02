@@ -34,12 +34,19 @@ test.describe( 'Product customs fields', { tag: [ tags.GUTENBERG ] }, () => {
 			const country = page.locator( '#_customs_country_of_origin' );
 			const description = page.locator( '#_customs_description' );
 			// Each 𝐀 is one code point but two UTF-16 units, so this checks the limit counts like the backend.
-			await description.fill( '𝐀'.repeat( 36 ) );
-			await expect( description ).toHaveValue( '𝐀'.repeat( 35 ) );
+			await description.fill( '𝐀'.repeat( 35 ) );
 			await expect(
 				page.locator( '.wc_error_tip.i18n_customs_description_error' )
 			).toBeHidden();
+			await description.fill( '𝐀'.repeat( 36 ) );
+			await expect( description ).toHaveValue( '𝐀'.repeat( 36 ) );
+			await expect(
+				page.locator( '.wc_error_tip.i18n_customs_description_error' )
+			).toBeVisible();
 			await description.clear();
+			await expect(
+				page.locator( '.wc_error_tip.i18n_customs_description_error' )
+			).toBeHidden();
 			await code.pressSequentially( '12AB' );
 			await expect(
 				page.locator( '.wc_error_tip.i18n_commodity_code_error' )
@@ -56,7 +63,12 @@ test.describe( 'Product customs fields', { tag: [ tags.GUTENBERG ] }, () => {
 				page.locator( '.wc_error_tip.i18n_commodity_code_error' )
 			).toBeHidden();
 			await code.pressSequentially( '789012345' );
-			await expect( code ).toHaveValue( '12345678901234' );
+			await expect( code ).toHaveValue( '123456789012345' );
+			await expect(
+				page.locator( '.wc_error_tip.i18n_commodity_code_error' )
+			).toBeVisible();
+			await code.blur();
+			await expect( code ).toHaveValue( '123456789012345' );
 			await expect(
 				page.locator( '.wc_error_tip.i18n_commodity_code_error' )
 			).toBeVisible();
@@ -73,6 +85,11 @@ test.describe( 'Product customs fields', { tag: [ tags.GUTENBERG ] }, () => {
 
 			await description.pressSequentially( 'Cotton 👕' );
 			await expect( description ).toHaveValue( 'Cotton ' );
+			await expect(
+				page.locator( '.wc_error_tip.i18n_customs_description_error' )
+			).toBeVisible();
+			await description.fill( 'Size<M' );
+			await expect( description ).toHaveValue( 'SizeM' );
 			await expect(
 				page.locator( '.wc_error_tip.i18n_customs_description_error' )
 			).toBeVisible();

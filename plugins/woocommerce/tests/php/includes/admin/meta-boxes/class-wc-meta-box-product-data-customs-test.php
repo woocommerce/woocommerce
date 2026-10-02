@@ -66,7 +66,7 @@ class WC_Meta_Box_Product_Data_Customs_Test extends WC_Unit_Test_Case {
 			array(
 				'commodity_code'    => '0012.34',
 				'country_of_origin' => ' ro ',
-				'description'       => '<b>Cotton shirt</b>',
+				'description'       => ' Cotton  shirt ',
 			)
 		);
 		$saved = wc_get_product( $product->get_id() );

@@ -6202,12 +6202,6 @@ img.help_tip {
 
 	.panel-wrap {
 		overflow: hidden;
-
-		// Don't clip an error tip on the last field of a panel. flow-root still contains the floated tabs.
-		&:has(.wc_error_tip) {
-			display: flow-root;
-			overflow: visible;
-		}
 	}
 
 	ul.wc-tabs {
@@ -7163,6 +7157,11 @@ img.help_tip {
 
 	.woocommerce_options_panel & > h4 {
 		padding-inline: 12px;
+	}
+
+	// Leave room for the error tip under the description, the last field in the Shipping panel, which the panel wrapper would otherwise clip.
+	#shipping_product_data & {
+		padding-block-end: 4em;
 	}
 
 	.woocommerce_variation & {
@@ -9225,11 +9224,6 @@ table.bar_chart {
 		#postdivrich {
 			border-radius: var(--wc-card-border-radius, 8px);
 			overflow: hidden; // Clip internal elements (tab sidebar, action bars) to rounded corners.
-		}
-
-		// Don't clip an error tip on a field near the bottom of the box.
-		.postbox:has(.wc_error_tip) {
-			overflow: visible;
 		}
 
 		// Inner collapsible panels (attributes, variations) should stay square.
