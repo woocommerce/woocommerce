@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Split the legacy Orders Stats report test class into focused test classes under tests/php/src, with no change in coverage

@@ -7,7 +7,7 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentContext;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\DocumentObject;
-use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use WC_Customer;
 
 /**
@@ -62,6 +62,9 @@ trait CheckoutTrait {
 	/**
 	 * For orders which do not require payment, just update status.
 	 *
+	 * Deliberately no recovery of the kind process_payment() does: nothing was charged, so a
+	 * failure costs the shopper only a retry, and claiming success would be the worse outcome.
+	 *
 	 * @throws RouteException If the order is missing.
 	 *
 	 * @param \WP_REST_Request $request Request object.
@@ -81,6 +84,7 @@ trait CheckoutTrait {
 	 * Fires an action hook instructing active payment gateways to process the payment for an order and provide a result.
 	 *
 	 * @throws RouteException If the order is missing, or on payment error.
+	 * @throws \Throwable If a gateway raised an Error before payment was taken.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @param PaymentResult    $payment_result Payment result object.
@@ -94,6 +98,13 @@ trait CheckoutTrait {
 		if ( is_callable( array( $session, 'save_data' ) ) ) {
 			$session->save_data();
 		}
+
+		/*
+		 * The hook below takes the result by reference and can replace it, with anything at all.
+		 * The caller keeps this instance either way, and it is the one serialised into the
+		 * response, so recovery has to write onto it rather than onto whatever the hook left.
+		 */
+		$result_for_recovery = $payment_result;
 
 		try {
 			// Prepare the payment context object to pass through payment hooks.
@@ -117,7 +128,26 @@ trait CheckoutTrait {
 			if ( ! $payment_result instanceof PaymentResult ) {
 				throw new RouteException( 'woocommerce_rest_checkout_invalid_payment_result', __( 'Invalid payment result received from payment method.', 'woocommerce' ), 500 );
 			}
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
+			/*
+			 * The gateway may already have taken payment, for example when a post-payment
+			 * integration throws during the status transition. Reporting a failure would send the
+			 * shopper back to place the order again, and every retry pays for another order.
+			 *
+			 * Re-read first: a gateway that advanced the order may have done so on its own
+			 * instance, leaving the one held above reporting a stale status.
+			 */
+			$order = $this->refresh_order( $order );
+
+			if ( $this->order_moved_past_payment( $order ) ) {
+				$this->recover_order_that_took_payment( $order, $e, $result_for_recovery );
+				return;
+			}
+
+			if ( ! $e instanceof \Exception ) {
+				throw $e;
+			}
+
 			$additional_data = [];
 
 			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
@@ -133,6 +163,132 @@ trait CheckoutTrait {
 			}
 
 			throw new RouteException( 'woocommerce_rest_checkout_process_payment_error', esc_html( $e->getMessage() ), 400, array_map( 'esc_attr', $additional_data ) );
+		}
+	}
+
+	/**
+	 * Re-reads the order so its status reflects whatever the gateway persisted, falling back
+	 * to the in-memory order when it can no longer be read.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @return \WC_Order
+	 */
+	private function refresh_order( \WC_Order $order ): \WC_Order {
+		$refreshed_order = wc_get_order( $order->get_id() );
+
+		return $refreshed_order instanceof \WC_Order ? $refreshed_order : $order;
+	}
+
+	/**
+	 * Whether the order has moved beyond the point of awaiting payment.
+	 *
+	 * An order reaches a gateway awaiting payment or as a draft, so any other status means
+	 * something moved it on. This is about the status, not the money: an order parked on-hold
+	 * for review counts, because sending the shopper back to place it again would be wrong.
+	 *
+	 * The statuses a site declares payable count as awaiting payment, so a custom status an
+	 * extension parks the order in before the gateway runs is not mistaken for a paid one.
+	 * Not needs_payment(): that folds in the order total, and a fully discounted order that
+	 * failed would then keep its stock and coupon holds.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @return bool
+	 */
+	private function order_moved_past_payment( \WC_Order $order ): bool {
+		/**
+		 * Filter the valid order statuses for payment.
+		 *
+		 * The same filter WC_Order::needs_payment() applies. A status a site declares payable
+		 * counts as awaiting payment here too, so a failure while the order is in it is reported
+		 * rather than recovered as one that took payment.
+		 *
+		 * @since 11.2.0
+		 *
+		 * @param array     $valid_order_statuses Array of valid order statuses for payment.
+		 * @param \WC_Order $order                Order object.
+		 */
+		$payable_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( OrderStatus::PENDING, OrderStatus::FAILED ), $order );
+
+		return ! $order->has_status(
+			array_merge(
+				(array) $payable_statuses,
+				array(
+					OrderStatus::CHECKOUT_DRAFT,
+					OrderStatus::CANCELLED,
+					OrderStatus::REFUNDED,
+					OrderStatus::TRASH,
+				)
+			)
+		);
+	}
+
+	/**
+	 * Records a failure that happened after payment was taken and reports the checkout as
+	 * successful, so the shopper is sent to the order confirmation rather than back to retry.
+	 *
+	 * @param \WC_Order     $order          Order object.
+	 * @param \Throwable    $error          The failure raised after payment was taken.
+	 * @param PaymentResult $payment_result Payment result object.
+	 */
+	private function recover_order_that_took_payment( \WC_Order $order, \Throwable $error, PaymentResult $payment_result ): void {
+		/*
+		 * The failure goes in the message, not the context: the file handler renders context with
+		 * wp_json_encode(), and neither WC_Order nor Throwable exposes public properties, so the
+		 * objects alone would write an empty {}. This is now the only log of the error.
+		 */
+		wc_get_logger()->error(
+			sprintf(
+				'Checkout for order #%1$d failed after payment was taken: %2$s: %3$s in %4$s:%5$d',
+				$order->get_id(),
+				get_class( $error ),
+				$error->getMessage(),
+				$error->getFile(),
+				$error->getLine()
+			),
+			array( 'source' => 'store-api' )
+		);
+
+		$order->add_order_note(
+			sprintf(
+				/* translators: %s: the error that was raised after payment was taken. */
+				__( 'Checkout could not be completed after payment was taken: %s', 'woocommerce' ),
+				wp_strip_all_tags( $error->getMessage() )
+			)
+		);
+
+		$payment_result->set_status( 'success' );
+
+		/*
+		 * Keep a redirect the gateway set before it threw. An order can reach here still needing
+		 * the shopper to act, say one parked on-hold awaiting a 3DS challenge, and overwriting it
+		 * would walk them past that step. Order confirmation is the fallback.
+		 */
+		if ( '' === $payment_result->get_redirect_url() ) {
+			$payment_result->set_redirect_url( $order->get_checkout_order_received_url() );
+		}
+
+		/*
+		 * Keep both redirect fields in sync, as Legacy::process_legacy_payment does on the normal
+		 * path. Setting only one leaves a success result core would never otherwise emit, and
+		 * gateway client code reads the redirect from the payment details rather than from
+		 * redirect_url: WooPayments and WooCommerce Stripe both call String.match() on it
+		 * unguarded, stranding the shopper on the checkout of an order that was in fact paid.
+		 */
+		$payment_details = $payment_result->get_payment_details();
+
+		if ( ! isset( $payment_details['redirect'] ) ) {
+			$payment_details['redirect'] = $payment_result->get_redirect_url();
+			$payment_result->set_payment_details( $payment_details );
+		}
+
+		/*
+		 * The gateway never reached the point where it empties the cart, so do it here: otherwise
+		 * the shopper lands on the confirmation with the order still in their cart and can place
+		 * it again. Only when the cart still belongs to this order, since pay-for-order shares
+		 * this trait with an unrelated cart. Same guard as wc_clear_cart_after_payment().
+		 */
+		if ( WC()->cart && $order->has_cart_hash( WC()->cart->get_cart_hash() ) ) {
+			WC()->cart->empty_cart();
 		}
 	}
 
@@ -327,19 +483,12 @@ trait CheckoutTrait {
 	 * @param callable         $persist Callback invoked as `$persist( string $key, mixed $value )` for each field.
 	 */
 	private function resolve_and_persist_additional_fields( \WP_REST_Request $request, callable $persist ): void {
-		if ( Features::is_enabled( 'experimental-blocks' ) ) {
-			$document_object = $this->get_document_object_from_rest_request( $request );
-			$document_object->set_context( 'order' );
-			$additional_fields = array_merge(
-				$this->additional_fields_controller->get_contextual_fields_for_location( 'order', $document_object ),
-				$this->additional_fields_controller->get_contextual_fields_for_location( 'contact', $document_object )
-			);
-		} else {
-			$additional_fields = array_merge(
-				$this->additional_fields_controller->get_fields_for_location( 'order' ),
-				$this->additional_fields_controller->get_fields_for_location( 'contact' )
-			);
-		}
+		$document_object = $this->get_document_object_from_rest_request( $request );
+		$document_object->set_context( 'order' );
+		$additional_fields = array_merge(
+			$this->additional_fields_controller->get_contextual_fields_for_location( 'order', $document_object ),
+			$this->additional_fields_controller->get_contextual_fields_for_location( 'contact', $document_object )
+		);
 
 		$field_values = isset( $request['additional_fields'] ) ? (array) $request['additional_fields'] : array();
 
@@ -361,27 +510,47 @@ trait CheckoutTrait {
 	 * Returns a document object from a REST request.
 	 *
 	 * @param \WP_REST_Request $request The REST request.
-	 * @return DocumentObject The document object or null if experimental blocks are not enabled.
+	 * @return DocumentObject The document object.
 	 */
 	public function get_document_object_from_rest_request( \WP_REST_Request $request ) {
+		// Keep the order local so validation errors do not release its stock or coupon holds.
+		$order        = $this->order ?? $this->get_draft_order();
+		$saved_fields = wc()->customer instanceof WC_Customer
+			? $this->additional_fields_controller->get_all_fields_from_object( wc()->customer, 'other' )
+			: [];
+		if ( $order instanceof \WC_Order ) {
+			$saved_fields = wp_parse_args(
+				$this->additional_fields_controller->get_all_fields_from_object( $order, 'other' ),
+				$saved_fields
+			);
+		}
+
+		$field_values      = wp_parse_args( $request['additional_fields'] ?? [], $saved_fields );
+		$additional_fields = [];
+		$registered_fields = array_merge(
+			$this->additional_fields_controller->get_fields_for_location( 'contact' ),
+			$this->additional_fields_controller->get_fields_for_location( 'order' )
+		);
+
+		// Conditions need raw values and explicit empty values for missing fields.
+		foreach ( $registered_fields as $key => $field ) {
+			$additional_fields[ $key ] = 'checkbox' === $field['type']
+				? (bool) ( $field_values[ $key ] ?? false )
+				: ( $field_values[ $key ] ?? '' );
+		}
+
 		return new DocumentObject(
 			[
 				'customer' => [
 					'billing_address'   => $request['billing_address'],
 					'shipping_address'  => $request['shipping_address'],
-					'additional_fields' => array_intersect_key(
-						$request['additional_fields'] ?? [],
-						array_flip( $this->additional_fields_controller->get_contact_fields_keys() )
-					),
+					'additional_fields' => $this->additional_fields_controller->filter_fields_for_location( $additional_fields, 'contact' ),
 				],
 				'checkout' => [
 					'payment_method'    => $request['payment_method'],
 					'create_account'    => $request['create_account'],
 					'customer_note'     => $request['customer_note'],
-					'additional_fields' => array_intersect_key(
-						$request['additional_fields'] ?? [],
-						array_flip( $this->additional_fields_controller->get_order_fields_keys() )
-					),
+					'additional_fields' => $this->additional_fields_controller->filter_fields_for_location( $additional_fields, 'order' ),
 				],
 			]
 		);

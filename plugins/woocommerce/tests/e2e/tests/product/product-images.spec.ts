@@ -28,6 +28,10 @@ async function addImageFromLibrary(
 	const dataId = await imageLocator.getAttribute( 'data-id' );
 	await expect( imageLocator ).toBeChecked();
 	await page.getByRole( 'button', { name: actionButtonName } ).click();
+	await expect( page.locator( '.media-modal' ) ).toBeHidden();
+	if ( ! dataId ) {
+		throw new Error( `Media library item ${ imageName } has no data-id.` );
+	}
 	return dataId;
 }
 
@@ -96,23 +100,6 @@ const test = baseTest.extend( {
 
 		await use( productWithImage );
 	},
-	productWithGallery: async ( { restApi, product }, use ) => {
-		const imageIds = await Promise.all(
-			[ 'image-01', 'image-02', 'image-03' ].map(
-				async ( slug ) => ( await getMediaBySlug( slug ) ).id
-			)
-		);
-		let productWithGallery;
-		await restApi
-			.put( `${ WC_API_PATH }/products/${ product.id }`, {
-				images: imageIds.map( ( id ) => ( { id } ) ),
-			} )
-			.then( ( response ) => {
-				productWithGallery = response.data;
-			} );
-
-		await use( productWithGallery );
-	},
 } );
 
 test.describe( 'Products > Product Images', () => {
@@ -147,99 +134,72 @@ test.describe( 'Products > Product Images', () => {
 		).toHaveCount( 1 );
 	} );
 
-	test( 'can set product image', async ( { page, product } ) => {
-		await test.step( 'Navigate to product edit page', async () => {
+	test( 'can manage the product image through the classic editor', async ( {
+		page,
+		product,
+	} ) => {
+		await test.step( 'Set the featured image', async () => {
 			await page.goto(
 				`wp-admin/post.php?post=${ product.id }&action=edit`
 			);
-		} );
-
-		await test.step( 'Set product image', async () => {
-			// TODO: WP 7.0 compat - WP 7.0 changed the featured image metabox link
-			// to a button. Simplify when WP 7.0 is the minimum supported version.
 			await page
 				.getByRole( 'link', { name: 'Set product image' } )
 				.or( page.getByRole( 'button', { name: 'Set product image' } ) )
 				.click();
 			await addImageFromLibrary( page, 'image-01', 'Set product image' );
-
-			// Wait for the product image thumbnail to be updated.
-			// Clicking the "Update" button before this happens will not update the image.
-			// Use src* (contains) instead of src$ (ends with) to match duplicated images, like image-01-1.png
 			await expect(
 				page.locator( '#set-post-thumbnail img[src*="image-01"]' )
 			).toBeVisible();
-
 			await page
 				.locator( '#publishing-action' )
 				.getByRole( 'button', { name: 'Update' } )
 				.click();
-		} );
-
-		await test.step( 'Verify product image was set', async () => {
-			// Verify product was updated
 			await expect( page.getByText( 'Product updated.' ) ).toBeVisible();
 
-			// Verify image in store frontend
 			await page.goto( product.permalink );
 			await expect(
-				page.locator( `img.wp-post-image[src*="image-01"]` )
+				page.locator( 'img.wp-post-image[src*="image-01"]' )
 			).toBeVisible();
 		} );
-	} );
 
-	test( 'can update the product image', async ( {
-		page,
-		productWithImage,
-	} ) => {
-		await test.step( 'Navigate to product edit page', async () => {
+		await test.step( 'Replace the featured image', async () => {
 			await page.goto(
-				`wp-admin/post.php?post=${ productWithImage.id }&action=edit`
+				`wp-admin/post.php?post=${ product.id }&action=edit`
 			);
-		} );
-
-		await test.step( 'Update product image', async () => {
 			await page.locator( '#set-post-thumbnail' ).click();
 			await addImageFromLibrary( page, 'image-02', 'Set product image' );
-
-			// Wait for the product image thumbnail to be updated.
-			// Clicking the "Update" button before this happens will not update the image.
-			// Use src* (contains) instead of src$ (ends with) to match duplicated images, like image-01-1.png
 			await expect(
 				page.locator( '#set-post-thumbnail img[src*="image-02"]' )
 			).toBeVisible();
-
 			await page
 				.locator( '#publishing-action' )
 				.getByRole( 'button', { name: 'Update' } )
 				.click();
-		} );
-
-		await test.step( 'Verify product image was set', async () => {
-			// Verify product was updated
 			await expect( page.getByText( 'Product updated.' ) ).toBeVisible();
 
-			// Verify image in store frontend
-			await page.goto( productWithImage.permalink );
+			await page.goto( product.permalink );
 			await expect(
-				page.locator( `img.wp-post-image[src*="image-02"]` )
+				page.locator( 'img.wp-post-image[src*="image-02"]' )
 			).toBeVisible();
+			await expect(
+				page.locator(
+					'.woocommerce-product-gallery__wrapper img[src*="image-01"]'
+				)
+			).toHaveCount( 0 );
 		} );
-	} );
 
-	test( 'can delete the product image', async ( {
-		page,
-		productWithImage,
-	} ) => {
-		await test.step( 'Navigate to product edit page', async () => {
+		await test.step( 'Clear the featured image', async () => {
 			await page.goto(
-				`wp-admin/post.php?post=${ productWithImage.id }&action=edit`
+				`wp-admin/post.php?post=${ product.id }&action=edit`
 			);
-		} );
-
-		await test.step( 'Remove product image', async () => {
-			// TODO: WP 7.0 compat - WP 7.0 changed the featured image metabox link
-			// to a button. Simplify when WP 7.0 is the minimum supported version.
+			const setProductImage = page
+				.locator( '#postimagediv' )
+				.getByRole( 'link', { name: 'Set product image' } )
+				.or(
+					page
+						.locator( '#postimagediv' )
+						.getByRole( 'button', { name: 'Set product image' } )
+				);
 			await page
 				.getByRole( 'link', { name: 'Remove product image' } )
 				.or(
@@ -248,142 +208,155 @@ test.describe( 'Products > Product Images', () => {
 					} )
 				)
 				.click();
-			await expect(
-				page.getByRole( 'link', { name: 'Set product image' } ).or(
-					page.getByRole( 'button', {
-						name: 'Set product image',
-					} )
-				)
-			).toBeVisible();
-
+			await expect( setProductImage ).toBeVisible();
 			await page
 				.locator( '#publishing-action' )
 				.getByRole( 'button', { name: 'Update' } )
 				.click();
-		} );
-
-		await test.step( 'Verify product image was removed', async () => {
-			// Verify product was updated
 			await expect( page.getByText( 'Product updated.' ) ).toBeVisible();
 
-			// Verify image in store frontend
-			await page.goto( productWithImage.permalink );
+			await page.goto(
+				`wp-admin/post.php?post=${ product.id }&action=edit`
+			);
+			await expect( setProductImage ).toBeVisible();
+
+			await page.goto( product.permalink );
 			await expect(
-				page.getByAltText( 'Awaiting product image' )
-			).toBeVisible();
+				page.locator(
+					'.woocommerce-product-gallery__wrapper img[src*="image-"]'
+				)
+			).toHaveCount( 0 );
 		} );
 	} );
 
-	test( 'can create a product gallery', async ( {
+	test( 'can manage the product gallery through the classic editor', async ( {
 		page,
 		productWithImage,
 	} ) => {
-		const images = [ 'image-02', 'image-03' ];
+		let image02Id = '';
+		let image03Id = '';
 
-		await test.step( 'Navigate to product edit page', async () => {
+		await test.step( 'Create the ordered product gallery', async () => {
 			await page.goto(
 				`wp-admin/post.php?post=${ productWithImage.id }&action=edit`
 			);
-		} );
-
-		await test.step( 'Add product gallery images', async () => {
-			const imageSelector = '#product_images_container img';
-			let initialImagesCount = await page
-				.locator( imageSelector )
-				.count();
-
-			for ( const image of images ) {
-				await page
-					.getByRole( 'link', {
-						name: 'Add product gallery images',
-					} )
-					.click();
-				const dataId = await addImageFromLibrary(
-					page,
-					image,
-					'Add to gallery'
-				);
-
-				await expect(
-					page.locator( `li[data-attachment_id="${ dataId }"]` ),
-					'thumbnail should be visible'
-				).toBeVisible();
-				const currentImagesCount = await page
-					.locator( imageSelector )
-					.count();
-				await expect(
-					currentImagesCount,
-					'number of images should increase'
-				).toEqual( initialImagesCount + 1 );
-				initialImagesCount = currentImagesCount;
-			}
-
-			await page
-				.locator( '#publishing-action' )
-				.getByRole( 'button', { name: 'Update' } )
-				.click();
-		} );
-
-		await test.step( 'Verify product gallery', async () => {
-			// Verify gallery in store frontend
-			await page.goto( productWithImage.permalink );
-			await expect(
-				page
-					.locator( `.woocommerce-product-gallery ol img` )
-					.nth( images.length ),
-				'all gallery images should be visible'
-			).toBeVisible(); // +1 for the featured image
-		} );
-	} );
-
-	test( 'can update a product gallery', async ( {
-		page,
-		productWithGallery,
-	} ) => {
-		let imagesCount;
-
-		await test.step( 'Navigate to product edit page', async () => {
-			await page.goto(
-				`wp-admin/post.php?post=${ productWithGallery.id }&action=edit`
-			);
-		} );
-
-		await test.step( 'Remove images from product gallery', async () => {
-			const imageSelector = '#product_images_container img';
-			imagesCount = await page.locator( imageSelector ).count();
-
 			await page
 				.getByRole( 'link', {
 					name: 'Add product gallery images',
 				} )
-				.scrollIntoViewIfNeeded();
+				.click();
+			image02Id = await addImageFromLibrary(
+				page,
+				'image-02',
+				'Add to gallery'
+			);
+			await page
+				.getByRole( 'link', {
+					name: 'Add product gallery images',
+				} )
+				.click();
+			image03Id = await addImageFromLibrary(
+				page,
+				'image-03',
+				'Add to gallery'
+			);
 
-			await page.locator( imageSelector ).first().hover();
-			await page.getByRole( 'link', { name: ' Delete' } ).click();
-
-			await expect(
-				await page.locator( imageSelector ).count(),
-				'number of images should decrease'
-			).toEqual( imagesCount - 1 );
+			const galleryItems = page.locator(
+				'#product_images_container li[data-attachment_id]'
+			);
+			await expect( galleryItems ).toHaveCount( 2 );
+			await expect( galleryItems.nth( 0 ) ).toHaveAttribute(
+				'data-attachment_id',
+				image02Id
+			);
+			await expect( galleryItems.nth( 1 ) ).toHaveAttribute(
+				'data-attachment_id',
+				image03Id
+			);
 
 			await page
 				.locator( '#publishing-action' )
 				.getByRole( 'button', { name: 'Update' } )
 				.click();
+			await expect( page.getByText( 'Product updated.' ) ).toBeVisible();
+
+			await page.goto( productWithImage.permalink );
+			const frontendImages = page.locator(
+				'.woocommerce-product-gallery__wrapper a[href*="/uploads/"] > img'
+			);
+			await expect( frontendImages ).toHaveCount( 3 );
+			await expect( frontendImages.nth( 0 ) ).toHaveAttribute(
+				'src',
+				/image-01/
+			);
+			await expect( frontendImages.nth( 1 ) ).toHaveAttribute(
+				'src',
+				/image-02/
+			);
+			await expect( frontendImages.nth( 2 ) ).toHaveAttribute(
+				'src',
+				/image-03/
+			);
 		} );
 
-		await test.step( 'Verify product gallery', async () => {
-			// Verify gallery in store frontend
-			await page.goto( productWithGallery.permalink );
-			const selector = `.woocommerce-product-gallery ol img`;
+		await test.step( 'Remove one gallery image and preserve order', async () => {
+			await page.goto(
+				`wp-admin/post.php?post=${ productWithImage.id }&action=edit`
+			);
+			const image02Row = page.locator(
+				`#product_images_container li[data-attachment_id="${ image02Id }"]`
+			);
+			await image02Row.hover();
+			await image02Row.getByRole( 'link', { name: /Delete/ } ).click();
+			await expect( image02Row ).toHaveCount( 0 );
 			await expect(
-				page.locator( selector ).nth( imagesCount - 1 ),
-				'gallery images should be visible'
+				page.locator(
+					`#product_images_container li[data-attachment_id="${ image03Id }"]`
+				)
 			).toBeVisible();
-			await expect(
-				page.locator( selector ).nth( imagesCount ),
-				'one gallery image should not be visible'
-			).toBeHidden();
+			await page
+				.locator( '#publishing-action' )
+				.getByRole( 'button', { name: 'Update' } )
+				.click();
+			await expect( page.getByText( 'Product updated.' ) ).toBeVisible();
+
+			await page.goto( productWithImage.permalink );
+			const frontendImages = page.locator(
+				'.woocommerce-product-gallery__wrapper a[href*="/uploads/"] > img'
+			);
+			await expect( frontendImages ).toHaveCount( 2 );
+			await expect( frontendImages.nth( 0 ) ).toHaveAttribute(
+				'src',
+				/image-01/
+			);
+			await expect( frontendImages.nth( 1 ) ).toHaveAttribute(
+				'src',
+				/image-03/
+			);
+		} );
+
+		await test.step( 'Clear the remaining gallery image', async () => {
+			await page.goto(
+				`wp-admin/post.php?post=${ productWithImage.id }&action=edit`
+			);
+			const image03Row = page.locator(
+				`#product_images_container li[data-attachment_id="${ image03Id }"]`
+			);
+			await image03Row.hover();
+			await image03Row.getByRole( 'link', { name: /Delete/ } ).click();
+			await expect( image03Row ).toHaveCount( 0 );
+			await page
+				.locator( '#publishing-action' )
+				.getByRole( 'button', { name: 'Update' } )
+				.click();
+			await expect( page.getByText( 'Product updated.' ) ).toBeVisible();
+
+			await page.goto( productWithImage.permalink );
+			const frontendImages = page.locator(
+				'.woocommerce-product-gallery__wrapper a[href*="/uploads/"] > img'
+			);
+			await expect( frontendImages ).toHaveCount( 1 );
+			await expect( frontendImages ).toHaveAttribute( 'src', /image-01/ );
 		} );
 	} );
 } );

@@ -102,7 +102,8 @@ export class ReportChart extends Component {
 			secondary,
 			query.compare,
 			selectedChart.key,
-			currentInterval
+			currentInterval,
+			selectedChart.type
 		);
 	}
 

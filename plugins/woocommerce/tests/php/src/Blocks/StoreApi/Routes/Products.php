@@ -941,4 +941,44 @@ class Products extends ControllerTestCase {
 		$this->assertEquals( 404, $response->get_status() );
 		$this->assertFalse( get_transient( 'wc_related_' . $nonexistent_id ), 'No transient should be created for a non-existent product.' );
 	}
+
+	/**
+	 * @testdox Getting a product loaded before its global attribute is deleted returns 200 and the attribute without terms.
+	 */
+	public function test_get_item_for_product_loaded_before_its_global_attribute_is_deleted(): void {
+		update_option( 'woocommerce_feature_product_instance_caching_enabled', 'yes' );
+		$attribute = \WC_Helper_Product::create_product_attribute_object( 'Stale Finish', array( 'Matte' ) );
+		$product   = new \WC_Product_Simple();
+		$product->set_name( 'Stale attribute product' );
+		$product->set_status( ProductStatus::PUBLISH );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+		wc_get_product( $product->get_id() );
+
+		wc_delete_attribute( $attribute->get_id() );
+
+		$warnings = array();
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Capturing the warning is the assertion; PHPUnit would otherwise convert it to an exception.
+		set_error_handler(
+			static function ( int $errno, string $errstr ) use ( &$warnings ): bool {
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting -- Reads the level only, to skip warnings silenced with @.
+				if ( error_reporting() & $errno ) {
+					$warnings[] = $errstr;
+				}
+				return true;
+			}
+		);
+		try {
+			$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_id() ) );
+		} finally {
+			restore_error_handler();
+		}
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( array(), $warnings, 'Serializing the product should not raise warnings.' );
+		$attributes = $response->get_data()['attributes'];
+		$this->assertCount( 1, $attributes, 'The cached product still carries the deleted attribute for the rest of the request.' );
+		$this->assertSame( $attribute->get_name(), $attributes[0]->taxonomy );
+		$this->assertSame( array(), $attributes[0]->terms );
+	}
 }
