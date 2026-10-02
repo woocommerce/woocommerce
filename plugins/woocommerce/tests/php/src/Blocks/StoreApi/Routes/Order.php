@@ -189,6 +189,29 @@ class Order extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Pay for Order returns address fields as plain text without HTML encoding.
+	 */
+	public function test_pay_for_order_returns_plain_text_address_fields(): void {
+		$order = $this->create_guest_order();
+		$order->set_billing_company( 'AT&T' );
+		$order->set_shipping_company( "St John's" );
+		$order->save();
+
+		wp_set_current_user( 0 );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/order/' . $order->get_id() );
+		$request->set_param( 'key', $order->get_order_key() );
+		$request->set_param( 'billing_email', $order->get_billing_email() );
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertSame( 'AT&T', $data['billing_address']['company'] );
+		$this->assertSame( "St John's", $data['shipping_address']['company'] );
+	}
+
+	/**
 	 * Consumers read this as a list, the way the cart endpoint sends it.
 	 *
 	 * @testdox Order item_data serializes as a JSON list carrying the meta row ID.
