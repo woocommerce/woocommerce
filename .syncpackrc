@@ -109,19 +109,21 @@
 			]
 		},
 		{
-			"label": "Direct Babel build tooling shared across workspace packages",
+			"label": "Shared Babel, PostCSS, and webpack tooling",
 			"dependencyTypes": [
 				"prod",
 				"dev"
 			],
 			"dependencies": [
-				"@babel/core",
 				"@babel/cli",
+				"@babel/core",
 				"@babel/plugin-syntax-jsx",
 				"@babel/preset-env",
 				"@babel/preset-react",
 				"@babel/preset-typescript",
-				"@babel/runtime"
+				"@babel/runtime",
+				"postcss",
+				"webpack"
 			],
 			"packages": [
 				"**"
@@ -140,10 +142,6 @@
 		},
 		{
 			"label": "React-related dependencies: React 18",
-			"dependencyTypes": [
-				"prod",
-				"dev"
-			],
 			"dependencies": [
 				"react",
 				"react-dom",
@@ -213,19 +211,6 @@
 				"**"
 			],
 			"pinVersion": "^10.0.0"
-		},
-		{
-			"dependencyTypes": [
-				"prod",
-				"dev"
-			],
-			"dependencies": [
-				"webpack"
-			],
-			"packages": [
-				"**"
-			],
-			"policy": "catalog"
 		},
 		{
 			"dependencies": [
@@ -465,10 +450,6 @@
 		},
 		{
 			"label": "@wordpress/* build-dependencies (always ahead of runtime-dependencies)",
-			"dependencyTypes": [
-				"prod",
-				"dev"
-			],
 			"dependencies": [
 				"@wordpress/babel-plugin-import-jsx-pragma",
 				"@wordpress/babel-preset-default",
@@ -557,19 +538,6 @@
 				"**"
 			],
 			"pinVersion": "4.3.x"
-		},
-		{
-			"dependencyTypes": [
-				"prod",
-				"dev"
-			],
-			"dependencies": [
-				"postcss"
-			],
-			"packages": [
-				"**"
-			],
-			"policy": "catalog"
 		},
 		{
 			"dependencies": [
@@ -687,7 +655,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^3.4.14"
+			"pinVersion": "^3.2.6"
 		},
 		{
 			"dependencies": [
