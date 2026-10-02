@@ -2692,7 +2692,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 				'name'                      => 'Coffee',
 				'customs_commodity_code'    => '0901.21.0010',
 				'customs_country_of_origin' => ' br ',
-				'customs_description'       => '<b>Roasted coffee</b>',
+				'customs_description'       => ' Roasted  coffee ',
 			)
 		);
 
@@ -2702,7 +2702,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$data = $response->get_data();
 		$this->assertSame( '0901210010', $data['customs_commodity_code'], 'The commodity code should be stored without punctuation.' );
 		$this->assertSame( 'BR', $data['customs_country_of_origin'], 'The country of origin should be trimmed and uppercased.' );
-		$this->assertSame( 'Roasted coffee', $data['customs_description'], 'The customs description should be stripped of markup.' );
+		$this->assertSame( 'Roasted coffee', $data['customs_description'], 'The customs description should have its whitespace normalized.' );
 	}
 
 	/**
