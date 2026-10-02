@@ -40,6 +40,10 @@ class WC_Beta_Tester_Plugin_Upgrader extends Plugin_Upgrader {
 
 		$download_url = WC_Beta_Tester::instance()->get_download_url( $plugin_version );
 
+		if ( empty( $download_url ) ) {
+			return new WP_Error( 'no_download_url', __( 'Could not find download URL for version: ', 'woocommerce-beta-tester' ) . $plugin_version );
+		}
+
 		add_filter( 'upgrader_pre_install', array( $this, 'deactivate_plugin_before_upgrade' ), 10, 2 );
 		add_filter( 'upgrader_clear_destination', array( $this, 'delete_old_plugin' ), 10, 4 );
 
@@ -70,5 +74,4 @@ class WC_Beta_Tester_Plugin_Upgrader extends Plugin_Upgrader {
 
 		return true;
 	}
-
 }
