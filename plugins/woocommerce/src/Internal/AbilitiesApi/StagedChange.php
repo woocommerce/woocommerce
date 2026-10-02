@@ -166,8 +166,8 @@ final class StagedChange {
 	private static function diff( array $before, array $after, string $prefix = '' ): array {
 		$changes = array();
 		foreach ( array_keys( $before + $after ) as $key ) {
-			$old = $before[ $key ] ?? null;
-			$new = $after[ $key ] ?? null;
+			$old   = $before[ $key ] ?? null;
+			$new   = $after[ $key ] ?? null;
 			$maps  = ( self::is_map( $old ) || self::is_map( $new ) ) && ( null === $old || is_array( $old ) ) && ( null === $new || is_array( $new ) );
 			$lists = is_array( $old ) && is_array( $new ) && ! empty( $new ) && count( $old ) === count( $new ) && wp_is_numeric_array( $old ) && wp_is_numeric_array( $new );
 			if ( $maps || $lists ) {
