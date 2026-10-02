@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
 /**
  * Unit tests for the PatternRegistry class.
  */
-class ShippingControllerTest extends \WP_UnitTestCase {
+class ShippingControllerTest extends \WC_Unit_Test_Case {
 	/**
 	 * The registry instance.
 	 *
@@ -48,11 +48,18 @@ class ShippingControllerTest extends \WP_UnitTestCase {
 	private $backup_wc;
 
 	/**
+	 * Customer shipping address before the test, restored at teardown.
+	 *
+	 * @var array<string, string>
+	 */
+	private $previous_shipping_address = array();
+
+	/**
 	 * Initialize the registry instance.
 	 *
 	 * @return void
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
 		// Setup mock logger.
@@ -81,6 +88,8 @@ class ShippingControllerTest extends \WP_UnitTestCase {
 			Package::container()->get( Api::class ),
 			Package::container()->get( AssetDataRegistry::class )
 		);
+		// WC()->customer outlives the test, so keep its location to restore at teardown.
+		$this->previous_shipping_address = WC()->customer->get_shipping( 'edit' );
 		WC()->customer->set_shipping_postcode( '' );
 		WC()->customer->set_shipping_city( '' );
 		WC()->customer->set_shipping_state( '' );
@@ -92,13 +101,20 @@ class ShippingControllerTest extends \WP_UnitTestCase {
 	 *
 	 * @return void
 	 */
-	protected function tearDown(): void {
+	public function tearDown(): void {
 		global $woocommerce;
 
 		update_option( 'woocommerce_checkout_page_id', $this->original_checkout_page_id );
 		wp_delete_post( $this->block_checkout_page_id );
 		remove_filter( 'woocommerce_logging_class', array( $this, 'override_wc_logger' ) );
 		$woocommerce = $this->backup_wc;
+		foreach ( $this->previous_shipping_address as $key => $value ) {
+			WC()->customer->{"set_shipping_{$key}"}( $value );
+		}
+		// A test may null WC()->shipping, which leaves a dynamic property on the WC singleton,
+		// and register a lone pickup method on the shared WC_Shipping. Undo both.
+		unset( WC()->shipping );
+		WC()->shipping()->unregister_shipping_methods();
 		parent::tearDown();
 	}
 

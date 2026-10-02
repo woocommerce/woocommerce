@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
 use WC_Unit_Test_Case;
 
 /**
@@ -53,6 +54,9 @@ class ProductFilterTaxonomyTest extends WC_Unit_Test_Case {
 		$term = wp_insert_term( 'Indoor & Tropical Bonsai', 'product_cat' );
 
 		$this->assertNotWPError( $term );
+
+		// The container keeps the hierarchy map built by earlier tests, and nothing clears it on created_term here.
+		wc_get_container()->get( TaxonomyHierarchyData::class )->clear_cache( 'product_cat' );
 
 		$term_id                       = (int) $term['term_id'];
 		$this->term_ids[]              = $term_id;

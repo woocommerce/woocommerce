@@ -64,6 +64,11 @@ class Checkout extends \WP_UnitTestCase {
 	protected function tearDown(): void {
 		parent::tearDown();
 		remove_filter( 'woocommerce_logging_class', array( $this, 'override_wc_logger' ) );
+
+		// A test registers a CheckoutMock block type, and the block type registry outlives a test.
+		if ( \WP_Block_Type_Registry::get_instance()->is_registered( 'woocommerce/checkout-mock' ) ) {
+			\WP_Block_Type_Registry::get_instance()->unregister( 'woocommerce/checkout-mock' );
+		}
 	}
 
 	/**

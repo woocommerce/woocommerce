@@ -11,16 +11,15 @@ use ReflectionClass;
 use ReflectionException;
 use Spy_REST_Server;
 use WP_REST_Server;
-use WP_Test_REST_TestCase;
 
 /**
  * ControllerTests
  */
-class RateLimitsTests extends WP_Test_REST_TestCase {
+class RateLimitsTests extends \WC_Unit_Test_Case {
 	/**
 	 * Setup Rest API server.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
 		/** @var WP_REST_Server $wp_rest_server */

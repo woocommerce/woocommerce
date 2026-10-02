@@ -406,7 +406,8 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 	private function reset_scripts(): void {
 		$wp_scripts = wp_scripts();
 
-		$wp_scripts->queue     = array();
+		// dequeue() also clears the cached dependency list that wp_script_is( ..., 'enqueued' ) reads.
+		$wp_scripts->dequeue( $wp_scripts->queue );
 		$wp_scripts->to_do     = array();
 		$wp_scripts->done      = array();
 		$wp_scripts->groups    = array();
@@ -448,14 +449,19 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 	/**
 	 * Get the frontend page type expected for the current PHPUnit process.
 	 *
-	 * Some tests render cart flows that define WOOCOMMERCE_CART. Since PHP
-	 * constants cannot be undefined, this test must accept the inherited cart
-	 * page type when it runs later in the same process.
+	 * Some tests render cart or checkout flows that define WOOCOMMERCE_CART or
+	 * WOOCOMMERCE_CHECKOUT. Since PHP constants cannot be undefined, this test must
+	 * accept the inherited page type when it runs later in the same process. The
+	 * checks follow the tracker's own order: cart before checkout.
 	 *
 	 * @return string
 	 */
 	private function get_expected_frontend_page_type(): string {
-		return Constants::is_defined( 'WOOCOMMERCE_CART' ) ? 'cart' : 'other';
+		if ( Constants::is_defined( 'WOOCOMMERCE_CART' ) ) {
+			return 'cart';
+		}
+
+		return Constants::is_defined( 'WOOCOMMERCE_CHECKOUT' ) ? 'checkout' : 'other';
 	}
 
 	/**

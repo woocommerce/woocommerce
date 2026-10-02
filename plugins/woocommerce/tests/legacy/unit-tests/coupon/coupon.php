@@ -13,10 +13,20 @@
 class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 	/**
+	 * Customer shipping address before the test, restored at teardown.
+	 *
+	 * @var array<string, string>
+	 */
+	private $previous_shipping_address = array();
+
+	/**
 	 * Sets up the test class.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		// WC()->customer outlives a test, so keep its location to restore at teardown.
+		$this->previous_shipping_address = WC()->customer->get_shipping( 'edit' );
 
 		// Set a valid address for the customer so shipping rates will calculate.
 		WC()->customer->set_shipping_country( 'US' );
@@ -29,6 +39,10 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		WC()->cart->remove_coupons();
+		\Automattic\Jetpack\Constants::clear_single_constant( 'WOOCOMMERCE_CHECKOUT' );
+		foreach ( $this->previous_shipping_address as $key => $value ) {
+			WC()->customer->{"set_shipping_{$key}"}( $value );
+		}
 
 		parent::tearDown();
 	}
@@ -301,10 +315,9 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 			)
 		);
 
-		// We need this to have the calculate_totals() method calculate totals.
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-			define( 'WOOCOMMERCE_CHECKOUT', true );
-		}
+		// We need this to have the calculate_totals() method calculate totals. Set it through
+		// Constants rather than define(), which would stay defined for every later test.
+		\Automattic\Jetpack\Constants::set_constant( 'WOOCOMMERCE_CHECKOUT', true );
 
 		// Add 2 products and coupon to cart.
 		WC()->cart->add_to_cart( $product->get_id(), 2 );
