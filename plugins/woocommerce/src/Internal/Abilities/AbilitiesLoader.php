@@ -9,7 +9,6 @@ namespace Automattic\WooCommerce\Internal\Abilities;
 
 use Automattic\WooCommerce\Abilities\AbilityContracts;
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
-use Automattic\WooCommerce\Abilities\InMemoryWrite;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
@@ -18,7 +17,6 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductWriteAbility;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
-use Automattic\WooCommerce\Internal\AbilitiesApi\InMemoryWriteRunner;
 use Automattic\WooCommerce\Internal\AbilitiesApi\RegistrationArgs;
 
 defined( 'ABSPATH' ) || exit;
@@ -156,9 +154,8 @@ class AbilitiesLoader {
 	}
 
 	/**
-	 * Declare the extension fields of the products query, run Core's product
-	 * writes as in-memory writes, and run InMemoryWrite definitions through
-	 * the same runner.
+	 * Declare the extension fields of the products query and run Core's
+	 * product writes as object changes.
 	 *
 	 * @param array        $args         Registration arguments.
 	 * @param string       $ability_name Ability name.
@@ -175,26 +172,6 @@ class AbilitiesLoader {
 
 		if ( ( ProductWriteAbility::DEFINITIONS[ $ability_name ] ?? null ) === $class_name ) {
 			$args['ability_class'] = ProductWriteAbility::class;
-		} elseif ( is_a( $class_name, InMemoryWrite::class, true ) ) {
-			$steps = array(
-				'object_type'      => $class_name::subject_type(),
-				'load'             => array( $class_name, 'subject' ),
-				'change'           => static function ( $subject, array $input ) use ( $class_name ) {
-					$valid = $class_name::validate( $subject, $input );
-					if ( is_wp_error( $valid ) ) {
-						return $valid;
-					}
-					$class_name::apply( $subject, $input );
-					return null;
-				},
-				'prepare_response' => array( $class_name, 'respond' ),
-			);
-
-			$args['meta'][ RegistrationArgs::META ]['in_memory_write'] = array( 'object_type' => $steps['object_type'] );
-
-			$args['execute_callback'] = static function ( $input = null ) use ( $ability_name, $steps ) {
-				return InMemoryWriteRunner::run( $ability_name, $steps, is_array( $input ) ? $input : array() );
-			};
 		}
 
 		return $args;
