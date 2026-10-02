@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\DataStores\Orders;
 
+use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableRefundDataStore;
@@ -311,4 +312,79 @@ class OrdersTableRefundDataStoreTests extends \WC_Unit_Test_Case {
 		$this->assertEquals( 2, $hook_called_count['woocommerce_update_order_refund'] );
 	}
 
+	/**
+	 * @testdox Deleting a refund fires woocommerce_order_refund_deleted and updates the parent order modified date.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_on_or_off True to test with HPOS on, false to test with HPOS off.
+	 */
+	public function test_refund_deletion_fires_order_refund_deleted_and_updates_parent_modified_date( bool $hpos_on_or_off ): void {
+		$this->toggle_cot_authoritative( $hpos_on_or_off );
+		$order  = OrderHelper::create_order();
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 1,
+			)
+		);
+		$this->set_old_modified_date( $order->get_id() );
+
+		$hook_args = array();
+		$callback  = function ( ...$args ) use ( &$hook_args ) {
+			$hook_args[] = $args;
+		};
+		add_action( 'woocommerce_order_refund_deleted', $callback, 10, 2 );
+
+		$refund_id = $refund->get_id();
+		$refund->delete( true );
+
+		$this->assertSame( array( array( $order->get_id(), $refund_id ) ), $hook_args, 'The hook should fire once with the order and refund IDs.' );
+		$this->assertGreaterThan( strtotime( '2020-01-01 00:00:00' ), wc_get_order( $order->get_id() )->get_date_modified()->getTimestamp(), 'The parent order modified date should be updated.' );
+	}
+
+	/**
+	 * @testdox Deleting an order with HPOS does not fire woocommerce_order_refund_deleted for its refunds.
+	 */
+	public function test_order_deletion_does_not_fire_order_refund_deleted(): void {
+		$this->toggle_cot_authoritative( true );
+		$order = OrderHelper::create_order();
+		wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 1,
+			)
+		);
+
+		$refund_deleted_count = did_action( 'woocommerce_delete_order_refund' );
+		$order_refund_deleted = did_action( 'woocommerce_order_refund_deleted' );
+
+		$order->delete( true );
+
+		$this->assertSame( $refund_deleted_count + 1, did_action( 'woocommerce_delete_order_refund' ), 'The refund should be deleted along with the order.' );
+		$this->assertSame( $order_refund_deleted, did_action( 'woocommerce_order_refund_deleted' ), 'The hook should not fire for an order that is being deleted.' );
+	}
+
+	/**
+	 * Set the modified date of an order in both tables to 2020-01-01, where the rows exist.
+	 *
+	 * @param int $order_id The order ID.
+	 */
+	private function set_old_modified_date( int $order_id ): void {
+		global $wpdb;
+
+		$old_date = '2020-01-01 00:00:00';
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_modified'     => $old_date,
+				'post_modified_gmt' => $old_date,
+			),
+			array( 'ID' => $order_id )
+		);
+		$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'date_updated_gmt' => $old_date ), array( 'id' => $order_id ) );
+		clean_post_cache( $order_id );
+		$this->order_data_store->clear_cached_data( array( $order_id ) );
+		wc_get_container()->get( OrderCache::class )->remove( $order_id );
+	}
 }
