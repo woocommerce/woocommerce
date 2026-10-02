@@ -22,6 +22,8 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 
 	private const READ = 'test-plugin/records-query';
 
+	private const PLAIN = 'test-plugin/records-count';
+
 	/**
 	 * Original action counts restored in tearDown.
 	 *
@@ -343,12 +345,13 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should swap in the polyfilled class only before WordPress 7.1, and keep an ability's own class.
+	 * @testdox Should swap in the polyfilled class only before WordPress 7.1 and only for an ability with WooCommerce meta, and keep an ability's own class.
 	 */
 	public function test_polyfill_class_swap(): void {
 		$this->register( true );
 
 		$this->assertSame( PolyfilledAbility::is_active() ? PolyfilledAbility::class : \WP_Ability::class, get_class( wp_get_ability( self::READ ) ) );
+		$this->assertSame( \WP_Ability::class, get_class( wp_get_ability( self::PLAIN ) ) );
 		$this->assertInstanceOf( TestRecordWriteAbility::class, wp_get_ability( self::WRITE ) );
 	}
 
@@ -477,6 +480,19 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 					),
 				)
 			);
+
+			wp_register_ability(
+				self::PLAIN,
+				array(
+					'label'               => 'Count records',
+					'description'         => 'Count records.',
+					'category'            => 'test-plugin',
+					'execute_callback'    => static function (): int {
+						return 2;
+					},
+					'permission_callback' => '__return_true',
+				)
+			);
 		};
 
 		$this->unregister_abilities();
@@ -489,7 +505,7 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 	 * Unregister the plugin's abilities.
 	 */
 	private function unregister_abilities(): void {
-		foreach ( array( self::WRITE, self::READ ) as $ability_id ) {
+		foreach ( array( self::WRITE, self::READ, self::PLAIN ) as $ability_id ) {
 			if ( wp_has_ability( $ability_id ) ) {
 				wp_unregister_ability( $ability_id );
 			}

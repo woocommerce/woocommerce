@@ -27,23 +27,24 @@ final class RegistrationArgs {
 	public const META = 'woocommerce';
 
 	/**
-	 * Derive the write meta, add `extensions` to the schemas, and swap in the
-	 * polyfilled ability class before WordPress 7.1.
+	 * Derive the write meta, swap in the polyfilled ability class before
+	 * WordPress 7.1 for an ability with this meta, and add `extensions` to the
+	 * schemas.
 	 *
 	 * @param array $args Registration arguments.
 	 * @return array
 	 */
 	public static function apply( array $args ): array {
 		$class = $args['ability_class'] ?? null;
-		if ( null === $class && PolyfilledAbility::is_active() ) {
-			$args['ability_class'] = PolyfilledAbility::class;
-		}
 		if ( is_string( $class ) && is_a( $class, InMemoryWriteAbility::class, true ) ) {
 			$args['meta'][ self::META ]['extension_fields'] = $args['meta'][ self::META ]['extension_fields'] ?? array(
 				'object_type' => $class::object_type(),
 				'output'      => $class::output_key(),
 			);
 			$args['meta'][ self::META ]['in_memory_write']  = $args['meta'][ self::META ]['in_memory_write'] ?? array( 'object_type' => $class::object_type() );
+		}
+		if ( null === $class && isset( $args['meta'][ self::META ] ) && PolyfilledAbility::is_active() ) {
+			$args['ability_class'] = PolyfilledAbility::class;
 		}
 
 		$fields = $args['meta'][ self::META ]['extension_fields'] ?? null;
