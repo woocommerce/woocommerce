@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop auto-adding blank attribute row when attributes tab is shown in legacy product editor
