@@ -185,4 +185,25 @@ test.describe( 'WooCommerce Email Editor Settings Sidebar Integration', () => {
 		await expect( page.getByTestId( 'email_cc' ) ).toHaveValue( ccEmail );
 		await expect( page.getByTestId( 'email_bcc' ) ).toHaveValue( bccEmail );
 	} );
+
+	test( 'Does not show the core Content block list in the Email tab', async ( {
+		page,
+	} ) => {
+		await accessTheEmailEditor( page, 'Customer note' );
+
+		const emailTab = page.getByLabel( 'Email' );
+		await expect(
+			emailTab.getByRole( 'button', { name: 'Settings' } )
+		).toBeVisible();
+		await expect(
+			emailTab.getByRole( 'button', { name: 'Content', exact: true } )
+		).toHaveCount( 0 );
+
+		// The core panel still renders; it is only hidden.
+		const quickNavItem = emailTab
+			.locator( '.block-editor-block-quick-navigation__item' )
+			.first();
+		await expect( quickNavItem ).toBeAttached();
+		await expect( quickNavItem ).toBeHidden();
+	} );
 } );

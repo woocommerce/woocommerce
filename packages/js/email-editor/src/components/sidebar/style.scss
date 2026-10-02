@@ -8,3 +8,12 @@
 	// resetting margin fits the notice to the full column width
 	margin: 0;
 }
+
+// Hide core’s quick-navigation “Content” panels (template and template part)
+// shown in template-locked mode. In an email they only list the single block
+// that fills the canvas, and core has no opt-out that keeps the body editable.
+.editor-sidebar__panel [role="tabpanel"] {
+	> .components-panel__body:has(.block-editor-block-quick-navigation__item) {
+		display: none;
+	}
+}
