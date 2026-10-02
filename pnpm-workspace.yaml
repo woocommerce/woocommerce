@@ -86,7 +86,7 @@ packages:
     - 'packages/js/*'
     - 'packages/php/*'
     - 'plugins/*'
-	- 'plugins/woocommerce/routes/*'
+    - 'plugins/woocommerce/routes/*'
     - 'plugins/woocommerce/client/admin'
     - 'plugins/woocommerce/client/blocks'
     - 'plugins/woocommerce/client/legacy'
