@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve stored download URLs when filtered values are left unchanged in the product editor.
