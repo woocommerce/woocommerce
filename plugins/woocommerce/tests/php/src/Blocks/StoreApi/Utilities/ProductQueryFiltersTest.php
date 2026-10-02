@@ -136,7 +136,7 @@ class ProductQueryFiltersTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should honor an empty stock-status options filter without executing aggregate SQL.
+	 * @testdox Should return no counts and run no product or count SQL when no stock statuses are configured.
 	 */
 	public function test_empty_stock_status_options(): void {
 		$empty_options = static function () {
@@ -144,7 +144,8 @@ class ProductQueryFiltersTest extends \WC_Unit_Test_Case {
 		};
 		$queries       = array();
 		$observer      = static function ( $sql ) use ( &$queries ) {
-			if ( false !== strpos( $sql, "meta_key = '_stock_status'" ) ) {
+			global $wpdb;
+			if ( false !== strpos( $sql, $wpdb->posts ) || false !== strpos( $sql, "meta_key = '_stock_status'" ) ) {
 				$queries[] = $sql;
 			}
 			return $sql;
@@ -159,7 +160,7 @@ class ProductQueryFiltersTest extends \WC_Unit_Test_Case {
 		}
 
 		$this->assertSame( array(), $result );
-		$this->assertSame( array(), $queries );
+		$this->assertSame( array(), $queries, 'No product selection or count statement should run for an empty status list.' );
 	}
 
 	/**

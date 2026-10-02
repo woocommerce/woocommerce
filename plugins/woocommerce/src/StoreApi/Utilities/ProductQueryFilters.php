@@ -59,6 +59,9 @@ class ProductQueryFilters {
 		if ( 'yes' === $hide_outofstock_items ) {
 			unset( $stock_status_options[ ProductStockStatus::OUT_OF_STOCK ] );
 		}
+		if ( empty( $stock_status_options ) ) {
+			return array();
+		}
 
 		add_filter( 'posts_clauses', array( $product_query, 'add_query_clauses' ), 10, 2 );
 		add_filter( 'posts_pre_query', '__return_empty_array' );
@@ -75,12 +78,8 @@ class ProductQueryFilters {
 		remove_filter( 'posts_pre_query', '__return_empty_array' );
 
 		$stock_status_counts = array();
-		if ( empty( $stock_status_options ) ) {
-			return $stock_status_counts;
-		}
-
-		$selects  = array();
-		$statuses = array();
+		$selects             = array();
+		$statuses            = array();
 		foreach ( $stock_status_options as $index => $status ) {
 			$escaped_status = esc_sql( $status );
 			$selects[]      = "COUNT( DISTINCT CASE WHEN postmeta.meta_value = '{$escaped_status}' THEN posts.ID END ) as status_{$index}";
