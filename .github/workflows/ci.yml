@@ -711,10 +711,11 @@ jobs:
         run: npm install -g syncpack@15.3.3
 
       - name: 'Validate - mismatches'
+        id: syncpack
         run: syncpack lint
 
       - name: 'Validate - prompt mitigation on failed validation'
-        if: failure()
+        if: ${{ !cancelled() && steps.syncpack.outcome == 'failure' }}
         run: |
           echo "Dependency version mismatch detected. This can usually be fixed automatically by updating the dependency version in \`.syncpackrc\` or \`pnpm-workspace.yaml\`, then running: \`pnpm sync-dependencies\`"
           exit 1
