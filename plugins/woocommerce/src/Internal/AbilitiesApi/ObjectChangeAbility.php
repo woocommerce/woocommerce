@@ -36,7 +36,8 @@ abstract class ObjectChangeAbility extends PolyfilledAbility {
 	abstract public function load( array $input );
 
 	/**
-	 * Change the object in memory. Never saves.
+	 * Change the object in memory. It must not save, send email or make HTTP
+	 * requests. Nothing is saved until every step passes.
 	 *
 	 * @param object $subject Object.
 	 * @param array  $input   Ability input.
