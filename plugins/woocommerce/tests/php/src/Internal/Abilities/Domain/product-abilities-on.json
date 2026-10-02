@@ -76,8 +76,7 @@
                                 },
                                 "additionalProperties": false
                             }
-                        },
-                        "additionalProperties": false
+                        }
                     }
                 },
                 "required": [
@@ -158,8 +157,7 @@
                                 },
                                 "additionalProperties": false
                             }
-                        },
-                        "additionalProperties": false
+                        }
                     }
                 },
                 "required": [
@@ -241,8 +239,7 @@
                                 },
                                 "additionalProperties": false
                             }
-                        },
-                        "additionalProperties": false
+                        }
                     }
                 },
                 "required": [
@@ -303,6 +300,10 @@
                     "button_text": {
                         "type": "string",
                         "description": "Button text for affiliate products."
+                    },
+                    "extensions": {
+                        "type": "object",
+                        "description": "Fields added by extensions, grouped by extension."
                     }
                 },
                 "required": [
@@ -352,6 +353,10 @@
                             "type": "integer",
                             "minimum": 1
                         }
+                    },
+                    "extensions": {
+                        "type": "object",
+                        "description": "Fields added by extensions, grouped by extension."
                     }
                 },
                 "required": [
@@ -410,8 +415,7 @@
                                 },
                                 "additionalProperties": false
                             }
-                        },
-                        "additionalProperties": false
+                        }
                     }
                 },
                 "required": [
@@ -478,6 +482,10 @@
                             "outofstock",
                             "onbackorder"
                         ]
+                    },
+                    "extensions": {
+                        "type": "object",
+                        "description": "Fields added by extensions, grouped by extension."
                     }
                 },
                 "required": [
@@ -805,8 +813,7 @@
                                 },
                                 "additionalProperties": false
                             }
-                        },
-                        "additionalProperties": false
+                        }
                     }
                 },
                 "additionalProperties": false
@@ -884,8 +891,7 @@
                                 },
                                 "additionalProperties": false
                             }
-                        },
-                        "additionalProperties": false
+                        }
                     }
                 },
                 "required": [
@@ -970,8 +976,7 @@
                                 },
                                 "additionalProperties": false
                             }
-                        },
-                        "additionalProperties": false
+                        }
                     }
                 },
                 "required": [
@@ -1057,8 +1062,7 @@
                                 },
                                 "additionalProperties": false
                             }
-                        },
-                        "additionalProperties": false
+                        }
                     }
                 },
                 "required": [
@@ -1144,8 +1148,7 @@
                                 },
                                 "additionalProperties": false
                             }
-                        },
-                        "additionalProperties": false
+                        }
                     }
                 },
                 "required": [
@@ -1210,6 +1213,10 @@
                     "button_text": {
                         "type": "string",
                         "description": "Button text for affiliate products."
+                    },
+                    "extensions": {
+                        "type": "object",
+                        "description": "Fields added by extensions, grouped by extension."
                     }
                 },
                 "required": [
@@ -1263,6 +1270,10 @@
                             "type": "integer",
                             "minimum": 1
                         }
+                    },
+                    "extensions": {
+                        "type": "object",
+                        "description": "Fields added by extensions, grouped by extension."
                     }
                 },
                 "required": [
@@ -1333,6 +1344,10 @@
                             "outofstock",
                             "onbackorder"
                         ]
+                    },
+                    "extensions": {
+                        "type": "object",
+                        "description": "Fields added by extensions, grouped by extension."
                     }
                 },
                 "required": [
@@ -1660,8 +1675,7 @@
                                 },
                                 "additionalProperties": false
                             }
-                        },
-                        "additionalProperties": false
+                        }
                     }
                 },
                 "additionalProperties": false
@@ -2049,8 +2063,7 @@
                                     },
                                     "additionalProperties": false
                                 }
-                            },
-                            "additionalProperties": false
+                            }
                         }
                     },
                     "additionalProperties": false

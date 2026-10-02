@@ -53,9 +53,6 @@ final class RegistrationArgs {
 		}
 
 		$extensions = AbilityFields::schema( AbilityFields::get( (string) ( $fields['object_type'] ?? '' ) ) );
-		if ( null === $extensions ) {
-			return $args;
-		}
 
 		if ( isset( $args['meta'][ self::META ]['in_memory_write'], $args['input_schema']['properties'] ) && ! isset( $args['input_schema']['properties']['extensions'] ) ) {
 			$args['input_schema']['properties']['extensions'] = $extensions;

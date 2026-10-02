@@ -55,27 +55,27 @@ final class AbilityFields {
 	}
 
 	/**
-	 * JSON schema for `extensions`, or null when there are no fields.
+	 * JSON schema for `extensions`. It allows other attributes, because a field
+	 * can be registered after the ability. update() refuses an attribute that
+	 * has no field when the ability runs.
 	 *
 	 * @param array<string, array<string, mixed>> $fields Fields keyed by attribute.
-	 * @return array<string, mixed>|null
+	 * @return array<string, mixed>
 	 */
-	public static function schema( array $fields ): ?array {
-		if ( empty( $fields ) ) {
-			return null;
-		}
-
-		return array(
-			'type'                 => 'object',
-			'description'          => 'Fields added by extensions, grouped by extension.',
-			'properties'           => array_map(
+	public static function schema( array $fields ): array {
+		$schema = array(
+			'type'        => 'object',
+			'description' => 'Fields added by extensions, grouped by extension.',
+		);
+		if ( ! empty( $fields ) ) {
+			$schema['properties'] = array_map(
 				static function ( array $field ): array {
 					return $field['schema'];
 				},
 				$fields
-			),
-			'additionalProperties' => false,
-		);
+			);
+		}
+		return $schema;
 	}
 
 	/**

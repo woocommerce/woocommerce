@@ -237,6 +237,25 @@ class ProductAbilityContractsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse an extension attribute that has no field, in a dry run and on execute, and save nothing.
+	 */
+	public function test_unknown_extension_is_refused(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Original' ) );
+		$input   = array(
+			'id'         => $product->get_id(),
+			'name'       => 'Renamed',
+			'extensions' => array( 'test_missing' => 'x' ),
+		);
+
+		foreach ( array( 'dry_run', 'execute' ) as $method ) {
+			$result = wp_get_ability( 'woocommerce/product-update' )->$method( $input );
+			$this->assertWPError( $result );
+			$this->assertSame( 'woocommerce_in_memory_write_rejected', $result->get_error_code() );
+		}
+		$this->assertSame( 'Original', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
 	 * @testdox Should save extension field values on product create.
 	 */
 	public function test_product_create_saves_extension_fields(): void {
@@ -787,10 +806,10 @@ class ProductAbilityContractsTest extends \WC_Unit_Test_Case {
 		$this->assertSame( array( 'test_simple' ), $this->extension_namespaces_of_branch( $create, 'physical' ) );
 		$this->assertSame( array( 'test_simple' ), $this->extension_namespaces_of_branch( $create, 'digital' ) );
 		$this->assertSame( array( 'test_contract' ), $this->extension_namespaces_of_branch( $create, 'contract' ) );
-		$this->assertNull( $this->extension_namespaces_of_branch( $create, 'affiliate' ) );
+		$this->assertSame( array(), $this->extension_namespaces_of_branch( $create, 'affiliate' ) );
 
 		$this->assertSame( array( 'test_simple' ), $this->extension_namespaces_of_branch( $update, 'physical' ) );
-		$this->assertNull( $this->extension_namespaces_of_branch( $update, 'grouped' ) );
+		$this->assertSame( array(), $this->extension_namespaces_of_branch( $update, 'grouped' ) );
 	}
 
 	/**
@@ -1421,7 +1440,7 @@ class ProductAbilityContractsTest extends \WC_Unit_Test_Case {
 	private function extension_namespaces_of_branch( array $schema, string $product_type_alias ): ?array {
 		foreach ( $schema['oneOf'] as $branch ) {
 			if ( array( $product_type_alias ) === ( $branch['properties']['product_type_alias']['enum'] ?? null ) ) {
-				return isset( $branch['properties']['extensions'] ) ? array_keys( $branch['properties']['extensions']['properties'] ) : null;
+				return isset( $branch['properties']['extensions'] ) ? array_keys( $branch['properties']['extensions']['properties'] ?? array() ) : null;
 			}
 		}
 		$this->fail( "No {$product_type_alias} branch." );

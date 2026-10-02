@@ -169,9 +169,8 @@ trait ProductAbilityTrait {
 			$common_properties[ $field ] = $mutation_schemas[ $field ];
 		}
 
-		$extensions = AbilityContracts::is_enabled() ? AbilityFields::schema( AbilityFields::get( 'product' ) ) : null;
-		if ( null !== $extensions ) {
-			$common_properties['extensions'] = $extensions;
+		if ( AbilityContracts::is_enabled() ) {
+			$common_properties['extensions'] = AbilityFields::schema( AbilityFields::get( 'product' ) );
 		}
 
 		array_unshift(
