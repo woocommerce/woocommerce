@@ -71,6 +71,8 @@ class AbilitiesLoader {
 			return;
 		}
 
+		self::maybe_suppress_vendor_rest_routes();
+
 		/*
 		 * Register abilities when Abilities API is ready.
 		 * Support both old (pre-6.9) and new (6.9+) action names.
@@ -163,6 +165,34 @@ class AbilitiesLoader {
 				'definition_class' => $class_name,
 				'reserved_prefix'  => 'woocommerce/',
 			)
+		);
+	}
+
+	/**
+	 * Suppress the vendor abilities-api REST route registration on WordPress 6.9+.
+	 *
+	 * WordPress 6.9+ includes the abilities REST endpoints in core. The vendored
+	 * wordpress/abilities-api package registers the same routes at rest_api_init
+	 * priority 11. When PHP opcache serves stale v0.3.0 bytecode after an update,
+	 * that vendor init class requires a file renamed in v0.4.0 and causes a fatal
+	 * error. Removing only the vendor REST hook prevents the fatal while leaving
+	 * asset loading and ability registration intact.
+	 *
+	 * @internal
+	 *
+	 * @since 11.0.0
+	 */
+	private static function maybe_suppress_vendor_rest_routes(): void {
+		global $wp_version;
+
+		if ( ! isset( $wp_version ) || version_compare( $wp_version, '6.9', '<' ) ) {
+			return;
+		}
+
+		remove_action(
+			'rest_api_init',
+			array( 'WP_REST_Abilities_Init', 'register_routes' ),
+			11
 		);
 	}
 
