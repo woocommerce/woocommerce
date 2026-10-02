@@ -120,6 +120,7 @@
 				"@babel/preset-react",
 				"@babel/preset-typescript",
 				"@babel/runtime",
+				"@wordpress/prettier-config",
 				"@wordpress/postcss-plugins-preset",
 				"postcss",
 				"webpack"
@@ -395,20 +396,6 @@
 				"@woocommerce/experimental"
 			],
 			"isIgnored": true
-		},
-		{
-			"label": "Shared WordPress Prettier tooling",
-			"dependencyTypes": [
-				"prod",
-				"dev"
-			],
-			"dependencies": [
-				"@wordpress/prettier-config"
-			],
-			"packages": [
-				"**"
-			],
-			"policy": "catalog"
 		},
 		{
 			"dependencies": [
