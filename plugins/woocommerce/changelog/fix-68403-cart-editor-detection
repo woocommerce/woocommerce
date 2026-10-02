@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the Cart block displaying preview items on the frontend when a plugin loads wp-editor.
