@@ -79,6 +79,20 @@ class WC_Meta_Box_Coupon_Data_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox save() registers an error when the coupon code is empty.
+	 */
+	public function test_save_registers_empty_coupon_code_error(): void {
+		$post_id = $this->create_coupon_post( '' );
+		$post    = $this->get_coupon_post( $post_id );
+
+		$this->set_coupon_post_data();
+
+		WC_Meta_Box_Coupon_Data::save( $post_id, $post );
+
+		$this->assertContains( 'Coupon code is required.', WC_Admin_Meta_Boxes::$meta_box_errors );
+	}
+
+	/**
 	 * @testdox save() persists coupon fields from posted metabox data.
 	 */
 	public function test_save_persists_posted_coupon_fields(): void {
