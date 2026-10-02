@@ -69339,7 +69339,7 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$array of function implode expects array\<string\>, list\<array\|string\> given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: src/StoreApi/Utilities/ProductQuery.php
 
 		-
