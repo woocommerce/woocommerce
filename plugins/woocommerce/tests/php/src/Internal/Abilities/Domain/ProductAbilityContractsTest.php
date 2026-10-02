@@ -465,6 +465,134 @@ class ProductAbilityContractsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should summarize an order status change in a dry run with its email, and change and email nothing.
+	 */
+	public function test_order_status_dry_run(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'processing' );
+		$order->save();
+		$sent = $this->count_mail();
+
+		$summary = wp_get_ability( 'woocommerce/order-update-status' )->dry_run(
+			array(
+				'id'     => $order->get_id(),
+				'status' => 'completed',
+			)
+		);
+
+		$this->assertNotWPError( $summary );
+		$this->assertSame(
+			array(
+				'field'  => 'status',
+				'label'  => 'status',
+				'before' => 'processing',
+				'after'  => 'completed',
+			),
+			array_column( $summary['changes'], null, 'field' )['status']
+		);
+		$this->assertContains( 'Sends the "Completed order" email to the customer.', $summary['side_effects'] );
+		$this->assertSame( 'processing', wc_get_order( $order->get_id() )->get_status() );
+		$this->assertSame( 0, $sent() );
+	}
+
+	/**
+	 * @testdox Should change the order status once, send its email, and save an order extension field in the same change.
+	 */
+	public function test_order_status_execute_with_extension_field(): void {
+		$this->add_order_note_field();
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'processing' );
+		$order->save();
+		$sent    = $this->count_mail();
+		$changes = did_action( 'woocommerce_order_status_changed' );
+
+		$result = wp_get_ability( 'woocommerce/order-update-status' )->execute(
+			array(
+				'id'         => $order->get_id(),
+				'status'     => 'completed',
+				'extensions' => array( 'test_order_note' => 'Wrapped' ),
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'completed', $result['order']['status'] );
+		$this->assertSame( array( 'test_order_note' => 'Wrapped' ), $result['order']['extensions'] );
+		$stored = wc_get_order( $order->get_id() );
+		$this->assertSame( 'completed', $stored->get_status() );
+		$this->assertSame( 'Wrapped', $stored->get_meta( '_test_order_note' ) );
+		$this->assertSame( $changes + 1, did_action( 'woocommerce_order_status_changed' ) );
+		$this->assertGreaterThan( 0, $sent() );
+	}
+
+	/**
+	 * @testdox Should leave the order untouched when an order validator rejects the status change.
+	 */
+	public function test_order_status_validator_rejection(): void {
+		$this->add_order_note_field();
+		add_filter(
+			'woocommerce_ability_object_validators',
+			static function ( array $validators, string $object_type ): array {
+				if ( 'order' === $object_type ) {
+					$validators[] = static function () {
+						return new \WP_Error( 'test_order_blocked', 'Order blocked.' );
+					};
+				}
+				return $validators;
+			},
+			10,
+			2
+		);
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'processing' );
+		$order->save();
+		$sent = $this->count_mail();
+
+		$result = wp_get_ability( 'woocommerce/order-update-status' )->execute(
+			array(
+				'id'         => $order->get_id(),
+				'status'     => 'completed',
+				'extensions' => array( 'test_order_note' => 'Wrapped' ),
+			)
+		);
+
+		$this->assertSame( 'woocommerce_in_memory_write_rejected', $result->get_error_code() );
+		$stored = wc_get_order( $order->get_id() );
+		$this->assertSame( 'processing', $stored->get_status() );
+		$this->assertSame( '', $stored->get_meta( '_test_order_note' ) );
+		$this->assertSame( 0, $sent() );
+	}
+
+	/**
+	 * @testdox Should restore the previous order status with the undo call, and refuse an unchanged status as before.
+	 */
+	public function test_order_status_undo_and_unchanged(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'on-hold' );
+		$order->save();
+		$ability = wp_get_ability( 'woocommerce/order-update-status' );
+		$input   = array(
+			'id'     => $order->get_id(),
+			'status' => 'processing',
+		);
+
+		$undo = $ability->dry_run( $input )['undo'];
+		$this->assertSame( 'on-hold', $undo['input']['status'] );
+		$this->assertSame( 'processing', $undo['input']['expected']['status'] );
+		$this->assertNotWPError( $ability->execute( $input ) );
+		$this->assertNotWPError( wp_get_ability( $undo['ability'] )->execute( $undo['input'] ) );
+		$this->assertSame( 'on-hold', wc_get_order( $order->get_id() )->get_status() );
+
+		$unchanged = $ability->execute(
+			array(
+				'id'     => $order->get_id(),
+				'status' => 'on-hold',
+			)
+		);
+		$this->assertSame( 'woocommerce_order_status_unchanged', $unchanged->get_error_code() );
+		$this->assertSame( 400, $unchanged->get_error_data()['status'] );
+	}
+
+	/**
 	 * @testdox Should save extension field values on product create.
 	 */
 	public function test_product_create_saves_extension_fields(): void {
@@ -1637,6 +1765,56 @@ class ProductAbilityContractsTest extends \WC_Unit_Test_Case {
 			$reflection->setAccessible( true );
 			$reflection->setValue( null, null );
 		}
+	}
+
+	/**
+	 * Count wp_mail() calls from now on. The email hooks are registered again,
+	 * because the test case removes hooks after each test while WC_Emails keeps
+	 * its instance.
+	 *
+	 * @return callable Returns the count.
+	 */
+	private function count_mail(): callable {
+		\WC_Emails::init_transactional_emails();
+		WC()->mailer()->init();
+		$sent = 0;
+		add_filter(
+			'wp_mail',
+			static function ( $args ) use ( &$sent ) {
+				++$sent;
+				return $args;
+			}
+		);
+		return static function () use ( &$sent ): int {
+			return $sent;
+		};
+	}
+
+	/**
+	 * Register an order field stored in meta, then register the abilities again.
+	 */
+	private function add_order_note_field(): void {
+		add_filter(
+			'woocommerce_ability_fields',
+			static function ( array $fields, string $object_type ): array {
+				if ( 'order' === $object_type ) {
+					$fields['test_order_note'] = array(
+						'schema'          => array( 'type' => 'string' ),
+						'get_callback'    => static function ( \WC_Order $order ) {
+							$note = $order->get_meta( '_test_order_note' );
+							return '' === $note ? null : $note;
+						},
+						'update_callback' => static function ( $value, \WC_Order $order ) {
+							$order->update_meta_data( '_test_order_note', $value );
+						},
+					);
+				}
+				return $fields;
+			},
+			10,
+			2
+		);
+		$this->set_feature( true );
 	}
 
 	/**

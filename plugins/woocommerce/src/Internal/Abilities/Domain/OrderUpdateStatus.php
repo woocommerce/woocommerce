@@ -74,12 +74,134 @@ class OrderUpdateStatus extends AbstractDomainAbility implements AbilityDefiniti
 	 * @since 10.9.0
 	 */
 	public static function execute( array $input ) {
-		$order = self::get_order_from_input( $input );
-
+		$order = self::load( $input );
 		if ( is_wp_error( $order ) ) {
 			return $order;
 		}
 
+		$status = self::get_status_from_input( $order, $input );
+		if ( is_wp_error( $status ) ) {
+			return $status;
+		}
+
+		$updated = $order->update_status(
+			$status,
+			isset( $input['note'] ) ? wp_kses_post( $input['note'] ) : '',
+			true
+		);
+
+		if ( ! $updated ) {
+			return new \WP_Error(
+				'woocommerce_order_status_update_failed',
+				__( 'Failed to update order status.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		return self::respond( $order );
+	}
+
+	/**
+	 * Load the order. Never saves.
+	 *
+	 * @param array $input Ability input.
+	 * @return \WC_Order|\WP_Error
+	 */
+	public static function load( array $input ) {
+		return self::get_order_from_input( $input );
+	}
+
+	/**
+	 * Set the status in memory. The save runs the status transition: the note,
+	 * the status hooks and the emails.
+	 *
+	 * @param \WC_Order $order Order.
+	 * @param array     $input Ability input.
+	 * @return null|\WP_Error
+	 */
+	public static function change( \WC_Order $order, array $input ) {
+		$status = self::get_status_from_input( $order, $input );
+		if ( is_wp_error( $status ) ) {
+			return $status;
+		}
+
+		$order->set_status( $status, isset( $input['note'] ) ? wp_kses_post( $input['note'] ) : '', true );
+		return null;
+	}
+
+	/**
+	 * The enabled emails the status change sends.
+	 *
+	 * @param \WC_Order $order Order, before the change.
+	 * @param array     $input Ability input.
+	 * @return string[]
+	 */
+	public static function side_effects( \WC_Order $order, array $input ): array {
+		$to    = OrderUtil::remove_status_prefix( sanitize_key( (string) ( $input['status'] ?? '' ) ) );
+		$hooks = array(
+			"woocommerce_order_status_{$order->get_status()}_to_{$to}_notification",
+			"woocommerce_order_status_{$to}_notification",
+		);
+
+		$effects = array();
+		foreach ( WC()->mailer()->get_emails() as $email ) {
+			if ( ! $email->is_enabled() ) {
+				continue;
+			}
+			foreach ( $hooks as $hook ) {
+				if ( false !== has_action( $hook, array( $email, 'trigger' ) ) ) {
+					$effects[] = sprintf(
+						$email->is_customer_email()
+							/* translators: %s: email title, such as Completed order. */
+							? __( 'Sends the "%s" email to the customer.', 'woocommerce' )
+							/* translators: %s: email title, such as New order. */
+							: __( 'Sends the "%s" email to the store.', 'woocommerce' ),
+						$email->get_title()
+					);
+					break;
+				}
+			}
+		}
+		return $effects;
+	}
+
+	/**
+	 * The status update that puts the previous status back.
+	 *
+	 * @param \WC_Order $order Order, before the change.
+	 * @param array     $input Ability input.
+	 * @return array{ability: string, input: array}
+	 */
+	public static function undo( \WC_Order $order, array $input ): array {
+		return array(
+			'ability' => self::get_name(),
+			'input'   => array(
+				'id'     => $order->get_id(),
+				'status' => $order->get_status(),
+			),
+		);
+	}
+
+	/**
+	 * The response for the saved order.
+	 *
+	 * @param \WC_Order $order Saved order.
+	 * @return array
+	 */
+	public static function respond( \WC_Order $order ): array {
+		return array(
+			'order' => self::format_order_for_response( $order, false ),
+		);
+	}
+
+	/**
+	 * The status the input asks for, or why it cannot be set.
+	 *
+	 * @param \WC_Order $order Order.
+	 * @param array     $input Ability input.
+	 * @return string|\WP_Error
+	 */
+	private static function get_status_from_input( \WC_Order $order, array $input ) {
 		if ( empty( $input['status'] ) ) {
 			return new \WP_Error(
 				'woocommerce_order_status_required',
@@ -109,23 +231,7 @@ class OrderUpdateStatus extends AbstractDomainAbility implements AbilityDefiniti
 			);
 		}
 
-		$updated = $order->update_status(
-			$status,
-			isset( $input['note'] ) ? wp_kses_post( $input['note'] ) : '',
-			true
-		);
-
-		if ( ! $updated ) {
-			return new \WP_Error(
-				'woocommerce_order_status_update_failed',
-				__( 'Failed to update order status.', 'woocommerce' ),
-				array( 'status' => 500 )
-			);
-		}
-
-		return array(
-			'order' => self::format_order_for_response( $order, false ),
-		);
+		return $status;
 	}
 
 	/**
