@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add stock quantity ordering to the products REST API.
