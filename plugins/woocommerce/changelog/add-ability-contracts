@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add ability contracts behind an experimental feature: an in-memory write interface, an ability field registry and an object validator registry.

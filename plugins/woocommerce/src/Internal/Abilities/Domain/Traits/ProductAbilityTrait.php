@@ -7,6 +7,10 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain\Traits;
 
+use Automattic\WooCommerce\Abilities\AbilityContracts;
+use Automattic\WooCommerce\Abilities\AbilityFieldRegistry;
+use Automattic\WooCommerce\Abilities\ObjectValidatorRegistry;
+
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
@@ -24,10 +28,123 @@ trait ProductAbilityTrait {
 	 * @return array
 	 */
 	protected static function get_product_create_input_schema(): array {
+		$branches = self::get_product_alias_input_schema_branches( array( 'name' ), false );
+
+		foreach ( self::get_registered_product_type_aliases() as $product_type_alias => $definition ) {
+			$branches[] = self::get_registered_product_type_branch( $product_type_alias, $definition, array( 'name', 'product_type_alias' ) );
+		}
+
 		return array(
 			'type'  => 'object',
-			'oneOf' => self::get_product_alias_input_schema_branches( array( 'name' ), false ),
+			'oneOf' => $branches,
 		);
+	}
+
+	/**
+	 * Input schema branch for a product type extensions added to `product_type_alias`.
+	 *
+	 * @param string $product_type_alias Registered product type.
+	 * @param array  $definition         Enum value definition.
+	 * @param array  $required           Required fields.
+	 * @return array
+	 */
+	private static function get_registered_product_type_branch( string $product_type_alias, array $definition, array $required ): array {
+		$properties = array_merge(
+			in_array( 'id', $required, true ) ? array(
+				'id' => array(
+					'type'    => 'integer',
+					'minimum' => 1,
+				),
+			) : array(),
+			array(
+				'product_type_alias' => array(
+					'type'        => 'string',
+					'description' => $definition['description'] ?? '',
+					'enum'        => array( $product_type_alias ),
+				),
+			),
+			self::get_product_mutation_field_schemas_for_fields( self::get_registered_product_type_config( $product_type_alias )['fields'] ?? array() ),
+			array( 'extensions' => AbilityFieldRegistry::instance()->schema( 'product', $product_type_alias ) )
+		);
+
+		return array(
+			'type'                 => 'object',
+			'properties'           => array_filter( $properties ),
+			'required'             => $required,
+			'additionalProperties' => false,
+		);
+	}
+
+	/**
+	 * Product types extensions added to `product_type_alias`, keyed by type. Each
+	 * alias is the WooCommerce product type itself. Core aliases cannot be replaced.
+	 *
+	 * @return array<string, array<string, mixed>>
+	 */
+	private static function get_registered_product_type_aliases(): array {
+		if ( ! AbilityContracts::is_enabled() ) {
+			return array();
+		}
+
+		return array_diff_key(
+			AbilityFieldRegistry::instance()->enum_values( 'product', 'product_type_alias' ),
+			self::get_product_type_alias_configs()
+		);
+	}
+
+	/**
+	 * Registered product types that name a Core alias in `behaves_like`, keyed by type.
+	 *
+	 * @return array<string, array<string, mixed>>
+	 */
+	private static function get_behaves_like_product_type_aliases(): array {
+		$core = self::get_product_type_alias_configs();
+
+		return array_filter(
+			self::get_registered_product_type_aliases(),
+			static function ( array $definition ) use ( $core ): bool {
+				return is_string( $definition['behaves_like'] ?? null ) && isset( $core[ $definition['behaves_like'] ] );
+			}
+		);
+	}
+
+	/**
+	 * Product configuration for a registered product type, or null when the type
+	 * is not registered. A type that behaves like a Core alias gets that alias's
+	 * fields and props; any other type gets Core's shared fields only.
+	 *
+	 * @param string $product_type_alias Registered product type.
+	 * @return array|null
+	 */
+	private static function get_registered_product_type_config( string $product_type_alias ): ?array {
+		$registered = self::get_registered_product_type_aliases()[ $product_type_alias ] ?? null;
+
+		if ( null === $registered ) {
+			return null;
+		}
+
+		$behaves_like = self::get_behaves_like_product_type_aliases()[ $product_type_alias ]['behaves_like'] ?? null;
+		$config       = null === $behaves_like ? array(
+			'fields'        => self::get_common_product_mutation_fields(),
+			'product_props' => array(),
+		) : self::get_product_type_alias_configs()[ $behaves_like ];
+
+		unset( $config['query_props'] );
+		$config['wc_type']  = $product_type_alias;
+		$config['validate'] = $registered['validate'] ?? null;
+
+		return $config;
+	}
+
+	/**
+	 * Get product configuration for creating a product of a type alias, including
+	 * types extensions registered.
+	 *
+	 * @param string $product_type_alias Product type alias.
+	 * @return array|\WP_Error
+	 */
+	protected static function get_product_create_config( string $product_type_alias ) {
+		return self::get_registered_product_type_config( $product_type_alias ) ?? self::get_product_config_for_alias( $product_type_alias );
 	}
 
 	/**
@@ -52,6 +169,11 @@ trait ProductAbilityTrait {
 			$common_properties[ $field ] = $mutation_schemas[ $field ];
 		}
 
+		$extensions = AbilityContracts::is_enabled() ? AbilityFieldRegistry::instance()->schema( 'product' ) : null;
+		if ( null !== $extensions ) {
+			$common_properties['extensions'] = $extensions;
+		}
+
 		array_unshift(
 			$branches,
 			array(
@@ -61,6 +183,10 @@ trait ProductAbilityTrait {
 				'additionalProperties' => false,
 			)
 		);
+
+		foreach ( self::get_behaves_like_product_type_aliases() as $product_type_alias => $definition ) {
+			$branches[] = self::get_registered_product_type_branch( $product_type_alias, $definition, array( 'id', 'product_type_alias' ) );
+		}
 
 		return array(
 			'type'  => 'object',
@@ -104,6 +230,11 @@ trait ProductAbilityTrait {
 				$properties,
 				self::get_product_mutation_field_schemas_for_fields( $product_config['fields'] )
 			);
+
+			$extensions = AbilityContracts::is_enabled() ? AbilityFieldRegistry::instance()->schema( 'product', $product_config['wc_type'] ) : null;
+			if ( null !== $extensions ) {
+				$properties['extensions'] = $extensions;
+			}
 
 			$branches[] = array(
 				'type'                 => 'object',
@@ -222,6 +353,16 @@ trait ProductAbilityTrait {
 	}
 
 	/**
+	 * Product type aliases products-query filters by, including registered types
+	 * that behave like a Core alias.
+	 *
+	 * @return array<int, string>
+	 */
+	protected static function get_queryable_product_type_aliases(): array {
+		return array_merge( self::get_supported_product_type_aliases(), array_keys( self::get_behaves_like_product_type_aliases() ) );
+	}
+
+	/**
 	 * Get product configuration by agent-facing product type alias.
 	 *
 	 * @param string $product_type_alias Agent-facing product type alias.
@@ -232,7 +373,8 @@ trait ProductAbilityTrait {
 		$configs            = self::get_product_type_alias_configs();
 
 		if ( ! isset( $configs[ $product_type_alias ] ) ) {
-			return new \WP_Error(
+			$registered = isset( self::get_behaves_like_product_type_aliases()[ $product_type_alias ] ) ? self::get_registered_product_type_config( $product_type_alias ) : null;
+			return $registered ?? new \WP_Error(
 				'woocommerce_product_type_unsupported',
 				__( 'Product type is not supported by this ability.', 'woocommerce' ),
 				array( 'status' => 400 )
@@ -276,6 +418,22 @@ trait ProductAbilityTrait {
 	 */
 	protected static function get_product_config_for_product( \WC_Product $product ) {
 		$product_type_alias = self::get_product_type_alias_for_product( $product );
+
+		if ( is_wp_error( $product_type_alias ) && isset( self::get_behaves_like_product_type_aliases()[ $product->get_type() ] ) ) {
+			$registered = self::get_registered_product_type_config( $product->get_type() );
+			if ( null !== $registered ) {
+				return $registered;
+			}
+		}
+
+		if ( is_wp_error( $product_type_alias ) && AbilityContracts::is_enabled() && AbilityFieldRegistry::instance()->supports_product_type( $product->get_type() ) ) {
+			return array(
+				'wc_type'         => $product->get_type(),
+				'fields'          => array(),
+				'product_props'   => array(),
+				'extensions_only' => true,
+			);
+		}
 
 		if ( is_wp_error( $product_type_alias ) ) {
 			return $product_type_alias;
@@ -535,6 +693,25 @@ trait ProductAbilityTrait {
 	}
 
 	/**
+	 * Apply extension fields and run object validators before the save.
+	 *
+	 * @param \WC_Product $product    Product object, changed in memory.
+	 * @param array       $input      Ability input.
+	 * @param string      $error_code Error code for a rejection.
+	 * @return null|\WP_Error
+	 */
+	protected static function apply_ability_contracts( \WC_Product $product, array $input, string $error_code ) {
+		if ( ! AbilityContracts::is_enabled() ) {
+			return null;
+		}
+
+		$rejection = isset( $input['extensions'] ) ? AbilityFieldRegistry::instance()->apply( 'product', $product, $input['extensions'] ) : null;
+		$rejection = $rejection ?? ObjectValidatorRegistry::instance()->validate( $product );
+
+		return null === $rejection ? null : new \WP_Error( $error_code, $rejection, array( 'status' => 400 ) );
+	}
+
+	/**
 	 * Apply product type configuration to a product object.
 	 *
 	 * @param \WC_Product $product        Product object.
@@ -566,7 +743,7 @@ trait ProductAbilityTrait {
 	 * @return null|\WP_Error
 	 */
 	private static function validate_product_fields_for_config( array $input, array $product_config ) {
-		$shared_fields          = array( 'id', 'product_type_alias' );
+		$shared_fields          = empty( $product_config['extensions_only'] ) ? array( 'id', 'product_type_alias', 'extensions' ) : array( 'id', 'extensions' );
 		$supported_fields       = array_merge( $shared_fields, $product_config['fields'] );
 		$unsupported_field_keys = array_diff( array_keys( $input ), $supported_fields );
 
@@ -781,6 +958,23 @@ trait ProductAbilityTrait {
 	 * @return array
 	 */
 	protected static function format_product_for_response( \WC_Product $product ): array {
+		$response = self::format_core_product_for_response( $product );
+		if ( AbilityContracts::is_enabled() ) {
+			$extensions = AbilityFieldRegistry::instance()->read( 'product', $product );
+			if ( ! empty( $extensions ) ) {
+				$response['extensions'] = $extensions;
+			}
+		}
+		return $response;
+	}
+
+	/**
+	 * Core fields of a product response.
+	 *
+	 * @param \WC_Product $product Product.
+	 * @return array
+	 */
+	private static function format_core_product_for_response( \WC_Product $product ): array {
 		$stock_quantity = $product->get_stock_quantity();
 		$permalink      = $product->get_permalink();
 
@@ -821,6 +1015,30 @@ trait ProductAbilityTrait {
 	 * @return array
 	 */
 	protected static function get_product_output_schema(): array {
+		$schema     = self::get_core_product_output_schema();
+		$extensions = AbilityContracts::is_enabled() ? AbilityFieldRegistry::instance()->schema( 'product' ) : null;
+		if ( null !== $extensions ) {
+			$schema['properties']['extensions']   = $extensions;
+			$schema['properties']['type']['enum'] = array_values(
+				array_unique(
+					array_merge(
+						$schema['properties']['type']['enum'],
+						AbilityFieldRegistry::instance()->product_types(),
+						AbilityFieldRegistry::instance()->supports_product_type( ProductType::VARIATION ) ? array( ProductType::VARIATION ) : array(),
+						array_keys( self::get_registered_product_type_aliases() )
+					)
+				)
+			);
+		}
+		return $schema;
+	}
+
+	/**
+	 * Output schema for Core's product fields.
+	 *
+	 * @return array
+	 */
+	private static function get_core_product_output_schema(): array {
 		return array(
 			'type'                 => 'object',
 			'properties'           => array(

@@ -73,7 +73,8 @@ class ProductCreate extends AbstractDomainAbility implements AbilityDefinition {
 	 * @since 10.9.0
 	 */
 	public static function execute( array $input ) {
-		$product_config = self::get_product_config_for_alias( $input['product_type_alias'] ?? 'physical' );
+		$product_type_alias = $input['product_type_alias'] ?? 'physical';
+		$product_config     = self::get_product_create_config( $product_type_alias );
 
 		if ( is_wp_error( $product_config ) ) {
 			return $product_config;
@@ -81,7 +82,7 @@ class ProductCreate extends AbstractDomainAbility implements AbilityDefinition {
 
 		$product = wc_get_product_object( $product_config['wc_type'] );
 
-		if ( ! $product ) {
+		if ( ! $product || $product->get_type() !== $product_config['wc_type'] ) {
 			return new \WP_Error(
 				'woocommerce_invalid_product_type',
 				__( 'Invalid product type.', 'woocommerce' ),
@@ -95,6 +96,16 @@ class ProductCreate extends AbstractDomainAbility implements AbilityDefinition {
 			$validation_error = self::set_product_props_from_input( $product, $input, $product_config );
 			if ( is_wp_error( $validation_error ) ) {
 				return $validation_error;
+			}
+
+			$rejection = self::apply_ability_contracts( $product, $input, 'woocommerce_product_create_rejected' );
+			if ( is_wp_error( $rejection ) ) {
+				return $rejection;
+			}
+
+			$rejection = isset( $product_config['validate'] ) ? call_user_func( $product_config['validate'], $product_type_alias, $product ) : null;
+			if ( is_wp_error( $rejection ) ) {
+				return new \WP_Error( 'woocommerce_product_create_rejected', $rejection->get_error_message(), array( 'status' => 400 ) );
 			}
 		} catch ( \WC_Data_Exception $exception ) {
 			return self::get_product_data_exception_error( $exception );
