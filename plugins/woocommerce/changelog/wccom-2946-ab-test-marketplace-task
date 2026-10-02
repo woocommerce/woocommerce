@@ -1,3 +1,4 @@
 Significance: patch
-Type: dev
-Comment: Add an A/B test for the Marketplace task title and position; no change until the experiment starts in ExPlat.
+Type: tweak
+
+Test new wording and placement for the Marketplace task in "Things to do next", for stores in an A/B test.
