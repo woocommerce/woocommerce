@@ -119,8 +119,8 @@
 		"lodash": "^4.18.1"
 	},
 	"peerDependencies": {
-		"react": "^18.3.0",
-		"react-dom": "^18.3.0"
+		"react": "^18.3.x",
+		"react-dom": "^18.3.x"
 	},
 	"devDependencies": {
 		"@testing-library/dom": "^10.4.x",
