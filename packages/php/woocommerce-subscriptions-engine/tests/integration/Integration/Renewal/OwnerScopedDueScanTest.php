@@ -1,10 +1,11 @@
 <?php
 /**
- * Integration tests for the owner-scoped, status-blind due scan, end to end through the
- * batch dispatcher: a contract is due when its next-due moment has passed and its owner is
- * a registered consumer. Lifecycle flows stop renewals by disarming the next-due moment; a
- * selected contract that is not active is parked rather than charged; a contract whose
- * owner is null or unregistered waits untouched.
+ * Integration tests for the owner-scoped due scan, end to end through the batch
+ * dispatcher: a contract is due when its next-due moment has passed and its owner is a
+ * registered consumer. Lifecycle flows stop renewals by disarming the next-due moment; the
+ * interim renewal-flow status predicate leaves a contract in any other status (including an
+ * extension-registered one) unselected and untouched; a contract whose owner is null or
+ * unregistered waits untouched.
  *
  * Note: actually terminating a pending-cancellation contract at its end date (moving it
  * terminal) is a follow-up slice; today it simply has no next-due moment.
@@ -104,19 +105,22 @@ class OwnerScopedDueScanTest extends EngineIntegrationTestCase {
 		$this->assertSame( self::FIRST_DUE, $stored->get_end_gmt() );
 	}
 
-	public function test_a_due_contract_with_an_extension_registered_status_is_selected_and_parked(): void {
+	public function test_a_due_contract_with_an_extension_registered_status_is_not_selected_and_left_untouched(): void {
 		StatusRegistry::register( StatusRegistry::KIND_CONTRACT, 'paused-by-merchant' );
 		$id = $this->sign_up( self::OWNER );
 		$this->force_column( $id, 'status', 'paused-by-merchant' );
 
+		$at = new DateTimeImmutable( '2026-02-20 00:00:00', new DateTimeZone( 'UTC' ) );
+		$this->assertNotContains( $id, $this->due_ids( $at ), 'The scan does not select a non-active contract.' );
+
 		$this->run_batch_at( '2026-02-20 00:00:00' );
 
-		// Due-ness is status-blind: the contract is selected, but the engine charges only an
-		// active contract, so it is parked (next-due moment cleared, status untouched).
+		// The engine never clears the due moment of a status it did not set: the extension
+		// that set it decides what happens next.
 		$this->assertSame( 0, $this->renewal_order_count( $id ) );
-		$parked = $this->reload( $id );
-		$this->assertSame( 'paused-by-merchant', $parked->get_status() );
-		$this->assertNull( $parked->get_next_payment_gmt() );
+		$stored = $this->reload( $id );
+		$this->assertSame( 'paused-by-merchant', $stored->get_status() );
+		$this->assertSame( self::FIRST_DUE, $stored->get_next_payment_gmt() );
 	}
 
 	public function test_a_due_contract_with_an_unregistered_owner_waits_until_the_owner_registers(): void {
@@ -181,6 +185,21 @@ class OwnerScopedDueScanTest extends EngineIntegrationTestCase {
 	 */
 	private function run_batch_at( string $now ): void {
 		( new RenewalDispatcher() )->run_batch( new DateTimeImmutable( $now, new DateTimeZone( 'UTC' ) ), 50 );
+	}
+
+	/**
+	 * Contract ids the due scan selects at `$at`.
+	 *
+	 * @param DateTimeImmutable $at Scan moment.
+	 * @return array<int, int>
+	 */
+	private function due_ids( DateTimeImmutable $at ): array {
+		$ids = array();
+		foreach ( $this->contracts->find_due( $at, 50 ) as $candidate ) {
+			$ids[] = $candidate->get_contract_id();
+		}
+
+		return $ids;
 	}
 
 	/**

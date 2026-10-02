@@ -87,8 +87,8 @@ class CancellationTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_cancel_at_period_end_stamps_the_end_and_clears_the_next_payment(): void {
-		// The flow disarms the next-due moment itself: the status-blind due scan never
-		// selects the winding-down contract; its end_gmt is the date it terminates at.
+		// The flow disarms the next-due moment itself, so the due scan never selects the
+		// winding-down contract; its end_gmt is the date it terminates at.
 		$id = $this->seed_active();
 
 		$this->sut->cancel_at_period_end( $this->reload( $id ) );

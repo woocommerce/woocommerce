@@ -1096,9 +1096,9 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox find_due returns every contract whose next_payment has arrived, oldest first, regardless of status.
+	 * @testdox find_due returns only active contracts whose next_payment has arrived, oldest first.
 	 */
-	public function test_find_due_returns_due_contracts_oldest_first_regardless_of_status(): void {
+	public function test_find_due_returns_only_due_active_contracts_oldest_first(): void {
 		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
 
 		$due_old    = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
@@ -1108,16 +1108,17 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 
 		$ids = $this->due_ids( $now, 50 );
 
-		// Status is opaque to the scan: the past-due on-hold row is selected in due order
-		// (flows disarm the due moment instead); only the future row is excluded.
-		$this->assertSame( array( $on_hold, $due_old, $due_recent ), $ids );
+		// Only the two due+active contracts, oldest-due first; the future and the past-due
+		// on-hold row excluded (the interim renewal-flow status predicate).
+		$this->assertSame( array( $due_old, $due_recent ), $ids );
 		$this->assertNotContains( $not_yet, $ids );
+		$this->assertNotContains( $on_hold, $ids );
 	}
 
 	/**
-	 * @testdox find_due selects a due contract whose stored status is not registered.
+	 * @testdox find_due skips a due contract whose stored status is not registered.
 	 */
-	public function test_find_due_selects_a_contract_with_an_unregistered_stored_status(): void {
+	public function test_find_due_skips_a_contract_with_an_unregistered_stored_status(): void {
 		global $wpdb;
 
 		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
@@ -1125,7 +1126,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->update( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ), array( 'status' => 'legacy-paused' ), array( 'id' => $id ) );
 
-		$this->assertSame( array( $id ), $this->due_ids( $now, 50 ) );
+		$this->assertSame( array(), $this->due_ids( $now, 50 ) );
 	}
 
 	/**

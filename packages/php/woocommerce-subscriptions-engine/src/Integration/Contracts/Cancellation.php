@@ -8,7 +8,8 @@
  * announce it), while {@see self::cancel_at_period_end()} winds it down gracefully
  * (transition to pending-cancellation, stamp the end date, keep serving until the
  * period lapses). Both modes disarm the contract's next-due moment themselves: the batch
- * due scan is status-blind, so clearing `next_payment_gmt` is what stops renewals. Their
+ * due scan keys on `next_payment_gmt` and a registered owner, so the flow stops renewals by
+ * clearing its own due moment rather than relying on status. Their
  * preconditions are interim engine flow rules, not rules of the status primitive. Lives
  * under `Integration\Contracts` so contract lifecycle stays separate from the renewal
  * money-path.
