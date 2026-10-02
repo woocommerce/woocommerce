@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Mini Cart: fix loading placeholder styles so the quantity selector and sale badge render as clean, aligned placeholders.
