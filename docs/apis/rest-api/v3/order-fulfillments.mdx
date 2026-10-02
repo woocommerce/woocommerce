@@ -370,6 +370,13 @@ woocommerce.get("orders/723/fulfillments/2").parsed_response
 	"date_deleted": null,
 	"meta_data": [
 		{
+			"id": 3,
+			"key": "_items",
+			"value": [
+				{ "item_id": 456, "qty": 2 }
+			]
+		},
+		{
 			"id": 4,
 			"key": "_tracking_number",
 			"value": "1Z999AA1234567890"
@@ -686,6 +693,13 @@ woocommerce.get("orders/723/fulfillments/2/metadata").parsed_response
 ```json
 [
 	{
+		"id": 3,
+		"key": "_items",
+		"value": [
+			{ "item_id": 456, "qty": 2 }
+		]
+	},
+	{
 		"id": 4,
 		"key": "_tracking_number",
 		"value": "1Z999AA1234567890"
@@ -705,6 +719,8 @@ woocommerce.get("orders/723/fulfillments/2/metadata").parsed_response
 
 Like updating a fulfillment, this replaces the full metadata set: any existing meta keys not present in the request body are removed.
 
+The metadata must be wrapped in an object under the `meta_data` key. The endpoint requires the `meta_data` parameter, so sending a bare array returns a `400 rest_missing_callback_param` error. Because the request replaces the full set, keep `_items` in the payload (or the save fails with "The fulfillment should contain at least one item") unless you intend to remove the key.
+
 ```http
 PUT /wp-json/wc/v3/orders/<id>/fulfillments/<fulfillment_id>/metadata
 ```
@@ -716,26 +732,40 @@ PUT /wp-json/wc/v3/orders/<id>/fulfillments/<fulfillment_id>/metadata
 curl -X PUT https://example.com/wp-json/wc/v3/orders/723/fulfillments/2/metadata \
 	-u consumer_key:consumer_secret \
 	-H "Content-Type: application/json" \
-	-d '[
-  {
-    "key": "_tracking_number",
-    "value": "1Z999AA9876543210"
-  },
-  {
-    "key": "_shipment_provider",
-    "value": "fedex"
-  }
-]'
+	-d '{
+  "meta_data": [
+    {
+      "key": "_items",
+      "value": [
+        { "item_id": 456, "qty": 2 }
+      ]
+    },
+    {
+      "key": "_tracking_number",
+      "value": "1Z999AA9876543210"
+    },
+    {
+      "key": "_shipment_provider",
+      "value": "fedex"
+    }
+  ]
+}'
 ```
 
   </TabItem>
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-const data = [
-	{ key: '_tracking_number', value: '1Z999AA9876543210' },
-	{ key: '_shipment_provider', value: 'fedex' },
-];
+const data = {
+	meta_data: [
+		{
+			key: '_items',
+			value: [ { item_id: 456, qty: 2 } ],
+		},
+		{ key: '_tracking_number', value: '1Z999AA9876543210' },
+		{ key: '_shipment_provider', value: 'fedex' },
+	],
+};
 
 WooCommerce.put( 'orders/723/fulfillments/2/metadata', data )
 	.then( ( response ) => {
@@ -752,8 +782,11 @@ WooCommerce.put( 'orders/723/fulfillments/2/metadata', data )
 ```php
 <?php
 $data = [
-    [ 'key' => '_tracking_number', 'value' => '1Z999AA9876543210' ],
-    [ 'key' => '_shipment_provider', 'value' => 'fedex' ],
+    'meta_data' => [
+        [ 'key' => '_items', 'value' => [ [ 'item_id' => 456, 'qty' => 2 ] ] ],
+        [ 'key' => '_tracking_number', 'value' => '1Z999AA9876543210' ],
+        [ 'key' => '_shipment_provider', 'value' => 'fedex' ],
+    ],
 ];
 
 print_r($woocommerce->put('orders/723/fulfillments/2/metadata', $data));
@@ -764,10 +797,13 @@ print_r($woocommerce->put('orders/723/fulfillments/2/metadata', $data));
   <TabItem value="python" label="Python">
 
 ```python
-data = [
-    {"key": "_tracking_number", "value": "1Z999AA9876543210"},
-    {"key": "_shipment_provider", "value": "fedex"},
-]
+data = {
+    "meta_data": [
+        {"key": "_items", "value": [{"item_id": 456, "qty": 2}]},
+        {"key": "_tracking_number", "value": "1Z999AA9876543210"},
+        {"key": "_shipment_provider", "value": "fedex"},
+    ]
+}
 
 print(wcapi.put("orders/723/fulfillments/2/metadata", data).json())
 ```
@@ -776,10 +812,13 @@ print(wcapi.put("orders/723/fulfillments/2/metadata", data).json())
   <TabItem value="ruby" label="Ruby">
 
 ```ruby
-data = [
-  { key: "_tracking_number", value: "1Z999AA9876543210" },
-  { key: "_shipment_provider", value: "fedex" }
-]
+data = {
+  meta_data: [
+    { key: "_items", value: [ { item_id: 456, qty: 2 } ] },
+    { key: "_tracking_number", value: "1Z999AA9876543210" },
+    { key: "_shipment_provider", value: "fedex" }
+  ]
+}
 
 woocommerce.put("orders/723/fulfillments/2/metadata", data).parsed_response
 ```
@@ -789,6 +828,13 @@ woocommerce.put("orders/723/fulfillments/2/metadata", data).parsed_response
 
 ```json
 [
+	{
+		"id": 3,
+		"key": "_items",
+		"value": [
+			{ "item_id": 456, "qty": 2 }
+		]
+	},
 	{
 		"id": 4,
 		"key": "_tracking_number",
@@ -962,6 +1008,22 @@ When the format unambiguously matches a single carrier:
 }
 ```
 
+When no carrier can parse the tracking number, the response is an empty array with a `200` status:
+
+```json
+[]
+```
+
+When the tracking number is longer than 50 characters, the response returns the first 50 characters and empty `shipping_provider` and `tracking_url` values, with a `200` status:
+
+```json
+{
+	"tracking_number": "<first 50 characters>",
+	"shipping_provider": "",
+	"tracking_url": ""
+}
+```
+
   </TabItem>
 </Tabs>
 
@@ -970,6 +1032,8 @@ When the format unambiguously matches a single carrier:
 | Parameter          | Type    | Description                      |
 | ------------------ | ------- | --------------------------------- |
 | `tracking_number`  | string  | Required. The tracking number to look up. |
+
+An empty or missing `tracking_number` returns a `400` error with the code `woocommerce_rest_tracking_number_missing`.
 
 ## Error responses
 
