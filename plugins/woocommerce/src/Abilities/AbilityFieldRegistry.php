@@ -256,18 +256,19 @@ class AbilityFieldRegistry {
 		$fields = array();
 		foreach ( $this->registrations[ $resource_type ] ?? array() as $namespace => $definition ) {
 			$fields[ $namespace ] = array(
-				'schema'            => self::namespace_schema( $definition ),
-				'product_types'     => $definition['product_types'] ?? null,
-				'get_callback'      => function ( WC_Data $subject ) use ( $resource_type, $namespace ) {
+				'schema'          => self::namespace_schema( $definition ),
+				'product_types'   => $definition['product_types'] ?? null,
+				'get_callback'    => function ( WC_Data $subject ) use ( $resource_type, $namespace ) {
 					$values = $this->read_namespace( $resource_type, $namespace, $subject );
 					return empty( $values ) ? null : $values;
 				},
-				'update_callback'   => function ( $values, WC_Data $subject ) use ( $resource_type, $namespace ) {
-					$this->apply_namespace( $resource_type, $namespace, $subject, $values );
-				},
-				'validate_callback' => function ( $values, WC_Data $subject ) use ( $resource_type, $namespace ) {
+				'update_callback' => function ( $values, WC_Data $subject ) use ( $resource_type, $namespace ) {
 					$rejection = $this->validate_namespace( $resource_type, $namespace, $subject, $values );
-					return null === $rejection ? true : new \WP_Error( 'woocommerce_ability_field_invalid', $rejection );
+					if ( null !== $rejection ) {
+						return new \WP_Error( 'woocommerce_ability_field_invalid', $rejection );
+					}
+					$this->apply_namespace( $resource_type, $namespace, $subject, $values );
+					return null;
 				},
 			);
 		}

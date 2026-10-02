@@ -18,7 +18,7 @@ if ( ! function_exists( 'wc_register_ability_field' ) ) {
 	 *
 	 * @param string               $object_type Object type, such as `product`.
 	 * @param string               $attribute   Attribute under `extensions`.
-	 * @param array<string, mixed> $args        `schema`, `get_callback( $object )`, `update_callback( $value, $object )` (in memory, never saves) and optional `validate_callback( $value, $object )`.
+	 * @param array<string, mixed> $args        `schema`, `get_callback( $object )` and `update_callback( $value, $object )`, which changes the object in memory, never saves, and returns a WP_Error to reject the write.
 	 */
 	function wc_register_ability_field( string $object_type, string $attribute, array $args ): void {
 		if ( function_exists( 'wp_register_ability_field' ) ) {

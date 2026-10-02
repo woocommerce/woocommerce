@@ -76,19 +76,19 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 			'test_record',
 			'test_notes',
 			array(
-				'schema'            => array(
+				'schema'          => array(
 					'type'        => 'string',
 					'description' => 'Note the notes plugin keeps on a record.',
 				),
-				'get_callback'      => static function ( TestRecord $record ) {
+				'get_callback'    => static function ( TestRecord $record ) {
 					return $record->note;
 				},
-				'update_callback'   => function ( $value, TestRecord $record ) {
+				'update_callback' => function ( $value, TestRecord $record ) {
+					if ( 'reject' === $value ) {
+						return new \WP_Error( 'test_note_rejected', 'Note rejected.' );
+					}
 					$this->updated[] = $value;
 					$record->note    = $value;
-				},
-				'validate_callback' => static function ( $value ) {
-					return 'reject' === $value ? new \WP_Error( 'test_note_rejected', 'Note rejected.' ) : true;
 				},
 			)
 		);
@@ -200,7 +200,7 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should neither apply nor save when the extension field refuses its value.
+	 * @testdox Should save nothing when the extension field's update callback returns an error.
 	 */
 	public function test_field_rejection_applies_and_saves_nothing(): void {
 		$this->register( true );
