@@ -42,7 +42,7 @@ catalogs:
         '@wordpress/notices': 5.33.1
         '@wordpress/patterns': 2.33.9
         '@wordpress/plugins': 7.33.5
-        '@wordpress/postcss-plugins-preset': 5.33.1
+        '@wordpress/postcss-plugins-preset': 'catalog:wp-min'
         '@wordpress/preferences': 4.33.5
         '@wordpress/primitives': 4.33.1
         '@wordpress/priority-queue': 3.33.1
@@ -119,9 +119,9 @@ patchedDependencies:
     '@wordpress/env@11.9.0': bin/patches/@wordpress__env@11.9.0.patch
 
 # Quality of life tweaks (migrated from .npmrc)
-childConcurrency: 8        # 5 by default
+childConcurrency: 8 # 5 by default
 confirmModulesPurge: false
-modulesCacheMaxAge: 20160  # two weeks in minutes
+modulesCacheMaxAge: 20160 # two weeks in minutes
 updateNotifier: false
 virtualStoreDirMaxLength: 60
 

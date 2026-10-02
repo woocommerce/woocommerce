@@ -655,7 +655,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^3.2.6"
+			"pinVersion": "3.4.14"
 		},
 		{
 			"dependencies": [
