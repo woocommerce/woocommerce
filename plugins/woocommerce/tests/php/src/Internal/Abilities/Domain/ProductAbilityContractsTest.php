@@ -593,6 +593,32 @@ class ProductAbilityContractsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should leave an order in the same state with the feature off and on: $from to $to, with a note: $note.
+	 *
+	 * @testWith ["pending", "processing", false]
+	 *           ["pending", "processing", true]
+	 *           ["processing", "completed", false]
+	 *           ["processing", "completed", true]
+	 *           ["processing", "on-hold", false]
+	 *           ["processing", "on-hold", true]
+	 *
+	 * @param string $from Status before.
+	 * @param string $to   Status asked for.
+	 * @param bool   $note Whether the input carries a note.
+	 */
+	public function test_order_status_update_parity( string $from, string $to, bool $note ): void {
+		\WC_Emails::init_transactional_emails();
+		WC()->mailer()->init();
+		$off = $this->order_status_update_outcome( false, $from, $to, $note );
+		$on  = $this->order_status_update_outcome( true, $from, $to, $note );
+
+		$this->assertSame( $to, $off['status'] );
+		$this->assertSame( 1, $off['status_changed'] );
+		$this->assertSame( 'on-hold' !== $to, ! empty( $off['emails'] ) );
+		$this->assertSame( $off, $on );
+	}
+
+	/**
 	 * @testdox Should save extension field values on product create.
 	 */
 	public function test_product_create_saves_extension_fields(): void {
@@ -1765,6 +1791,70 @@ class ProductAbilityContractsTest extends \WC_Unit_Test_Case {
 			$reflection->setAccessible( true );
 			$reflection->setValue( null, null );
 		}
+	}
+
+	/**
+	 * Run the order status update on a fresh order and describe the end state
+	 * without IDs or timestamps. The caller registers the email hooks once.
+	 *
+	 * @param bool   $enabled Whether ability contracts are on.
+	 * @param string $from    Status before.
+	 * @param string $to      Status asked for.
+	 * @param bool   $note    Whether the input carries a note.
+	 * @return array
+	 */
+	private function order_status_update_outcome( bool $enabled, string $from, string $to, bool $note ): array {
+		$this->set_feature( $enabled );
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( $from );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$emails = array();
+		$track  = static function ( $args ) use ( &$emails, $order_id ) {
+			$emails[] = array(
+				'to'      => $args['to'],
+				'subject' => str_replace( (string) $order_id, '#', $args['subject'] ),
+			);
+			return $args;
+		};
+		add_filter( 'wp_mail', $track );
+		$changed = did_action( 'woocommerce_order_status_changed' );
+
+		$input = array(
+			'id'     => $order_id,
+			'status' => $to,
+		);
+		if ( $note ) {
+			$input['note'] = 'Checked by hand.';
+		}
+		$output = wp_get_ability( 'woocommerce/order-update-status' )->execute( $input );
+		remove_filter( 'wp_mail', $track );
+
+		$stored = wc_get_order( $order_id );
+		$notes  = array_map(
+			static function ( $note ) {
+				return array(
+					'content'       => $note->content,
+					'customer_note' => $note->customer_note,
+					'added_by'      => $note->added_by,
+				);
+			},
+			wc_get_order_notes( array( 'order_id' => $order_id ) )
+		);
+		if ( is_array( $output ) ) {
+			$output['order'] = array_diff_key( $output['order'], array_flip( array( 'id', 'customer_id', 'date_created', 'date_created_gmt', 'date_modified', 'date_modified_gmt' ) ) );
+		}
+
+		return array(
+			'status'         => $stored->get_status(),
+			'notes'          => $notes,
+			'date_paid'      => null !== $stored->get_date_paid(),
+			'date_completed' => null !== $stored->get_date_completed(),
+			'emails'         => $emails,
+			'status_changed' => did_action( 'woocommerce_order_status_changed' ) - $changed,
+			'output'         => is_wp_error( $output ) ? $output->get_error_code() : $output,
+		);
 	}
 
 	/**
