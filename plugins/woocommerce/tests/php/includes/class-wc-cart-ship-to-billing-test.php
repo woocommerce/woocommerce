@@ -19,46 +19,21 @@ declare( strict_types = 1 );
 class WC_Cart_Ship_To_Billing_Test extends WC_Unit_Test_Case {
 
 	/**
-	 * Product in the cart, since an empty cart needs no shipping at all.
-	 *
-	 * @var WC_Product
-	 */
-	private $product;
-
-	/**
-	 * Zone holding the one method that makes the cart need shipping.
-	 *
-	 * @var WC_Shipping_Zone
-	 */
-	private $zone;
-
-	/**
 	 * Put a shippable product in the cart and a shipping method on the store, so the cart needs
 	 * shipping at all.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->zone = new WC_Shipping_Zone();
-		$this->zone->set_zone_name( 'Ship to billing' );
-		$this->zone->save();
-		$this->zone->add_shipping_method( 'flat_rate' );
+		$zone = new WC_Shipping_Zone();
+		$zone->set_zone_name( 'Ship to billing' );
+		$zone->save();
+		$zone->add_shipping_method( 'flat_rate' );
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
 		delete_transient( 'wc_shipping_method_count' );
 
-		$this->product = WC_Helper_Product::create_simple_product();
-		WC()->cart->add_to_cart( $this->product->get_id(), 1 );
-	}
-
-	/**
-	 * Empty the cart and put the setting back.
-	 */
-	public function tearDown(): void {
-		WC()->cart->empty_cart();
-		$this->product->delete( true );
-		$this->zone->delete( true );
-		update_option( 'woocommerce_ship_to_destination', 'billing' );
-		parent::tearDown();
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
 	}
 
 	/**

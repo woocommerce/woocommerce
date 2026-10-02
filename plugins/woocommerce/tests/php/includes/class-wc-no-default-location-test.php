@@ -26,13 +26,6 @@ class WC_No_Default_Location_Test extends WC_Unit_Test_Case {
 	private $original_customer;
 
 	/**
-	 * Product in the cart, so there is something to tax.
-	 *
-	 * @var WC_Product
-	 */
-	private $product;
-
-	/**
 	 * Turn taxes on, put a US rate in place, and a cart with a taxable product, so "no tax quoted"
 	 * is a real outcome rather than the result of taxes being off or an empty cart.
 	 */
@@ -56,22 +49,24 @@ class WC_No_Default_Location_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->product = WC_Helper_Product::create_simple_product();
-		$this->product->set_regular_price( 100 );
-		$this->product->save();
-		WC()->cart->add_to_cart( $this->product->get_id(), 1 );
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->save();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
+		// new WC_Customer( 0, true ) in the tests reads the shared session, so an address a
+		// previous test left there would decide the result. Save the customer to restore it, and
+		// start from an empty session customer so the outcome is the setting's doing.
 		$this->original_customer = WC()->customer;
+		WC()->session->set( 'customer', null );
 	}
 
 	/**
-	 * Put the cart, customer and setting back.
+	 * Restore the session customer the tests replaced; the base teardown rolls back the rest.
 	 */
 	public function tearDown(): void {
+		WC()->session->set( 'customer', null );
 		WC()->customer = $this->original_customer;
-		WC()->cart->empty_cart();
-		$this->product->delete( true );
-		update_option( 'woocommerce_default_customer_address', DefaultCustomerAddress::BASE );
 		parent::tearDown();
 	}
 
