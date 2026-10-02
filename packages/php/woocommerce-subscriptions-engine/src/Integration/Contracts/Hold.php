@@ -93,6 +93,13 @@ final class Hold {
 		// Compare-and-set on the status read above: a concurrent transition (another
 		// request, the renewal engine) makes this write miss loudly rather than be
 		// clobbered.
+		//
+		// Not atomic: the status/date row write and the anchor meta write are separate
+		// statements, not one transaction. If the meta write fails after the row write,
+		// the contract is held without an anchor and reactivation leaves it unscheduled
+		// (it falls back to the cleared, null next payment). Accepted for this interim
+		// flow - the repository has no transaction wrapper today - and the consumer that
+		// takes over hold owns the durable shape.
 		if ( ! $this->contracts->update_if_status( $contract, $previous ) ) {
 			throw new \DomainException( 'Hold::hold(): the contract state changed concurrently; nothing was written.' );
 		}
