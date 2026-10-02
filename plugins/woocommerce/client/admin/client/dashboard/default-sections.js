@@ -11,6 +11,8 @@ import ListOrdered from 'gridicons/dist/list-ordered';
 /**
  * Internal dependencies
  */
+import { getAdminSetting } from '~/utils/admin-settings';
+
 const LazyDashboardCharts = lazy( () =>
 	import( /* webpackChunkName: "dashboard-charts" */ './dashboard-charts' )
 );
@@ -41,6 +43,28 @@ const StorePerformance = ( props ) => (
 
 export const DEFAULT_SECTIONS_FILTER = 'woocommerce_dashboard_default_sections';
 
+const PERFORMANCE_HIDDEN_BLOCKS = [
+	'coupons/amount',
+	'downloads/download_count',
+	'taxes/order_tax',
+	'taxes/total_tax',
+	'taxes/shipping_tax',
+];
+
+// Stores installed before the defaults above were introduced keep the
+// previous ones, so their Overview page does not change on update.
+const LEGACY_PERFORMANCE_HIDDEN_BLOCKS = [
+	...PERFORMANCE_HIDDEN_BLOCKS,
+	'coupons/orders_count',
+	'revenue/shipping',
+	'orders/avg_order_value',
+	'revenue/refunds',
+	'revenue/gross_sales',
+];
+
+const hasLegacyPerformanceDefaults =
+	getAdminSetting( 'usesLegacyPerformanceDefaults', true ) === true;
+
 /**
  * An object defining a dashboard section.
  *
@@ -66,18 +90,9 @@ export default applyFilters( DEFAULT_SECTIONS_FILTER, [
 		title: __( 'Performance', 'woocommerce' ),
 		isVisible: true,
 		icon: arrowRight,
-		hiddenBlocks: [
-			'coupons/amount',
-			'coupons/orders_count',
-			'downloads/download_count',
-			'taxes/order_tax',
-			'taxes/total_tax',
-			'taxes/shipping_tax',
-			'revenue/shipping',
-			'orders/avg_order_value',
-			'revenue/refunds',
-			'revenue/gross_sales',
-		],
+		hiddenBlocks: hasLegacyPerformanceDefaults
+			? LEGACY_PERFORMANCE_HIDDEN_BLOCKS
+			: PERFORMANCE_HIDDEN_BLOCKS,
 	},
 	{
 		key: 'charts',
