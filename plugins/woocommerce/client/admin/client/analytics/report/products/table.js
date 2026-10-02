@@ -8,8 +8,9 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { withSelect } from '@wordpress/data';
 import { map } from 'lodash';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
-import { Link, Tag } from '@woocommerce/components';
+import { Link, Tag, Date } from '@woocommerce/components';
 import { formatValue } from '@woocommerce/number';
+import { defaultTableDateFormat } from '@woocommerce/date';
 import { getAdminLink } from '@woocommerce/settings';
 import { itemsStore } from '@woocommerce/data';
 import { CurrencyContext } from '@woocommerce/currency';
@@ -74,6 +75,16 @@ class ProductsReportTable extends Component {
 				isNumeric: true,
 			},
 			{
+				label: __( 'Last sold', 'woocommerce' ),
+				key: 'last_sold',
+				isSortable: true,
+			},
+			{
+				label: __( 'Lifetime sales', 'woocommerce' ),
+				key: 'total_sales',
+				isNumeric: true,
+			},
+			{
 				label: __( 'Category', 'woocommerce' ),
 				key: 'product_cat',
 			},
@@ -107,6 +118,10 @@ class ProductsReportTable extends Component {
 			getCurrencyConfig,
 		} = this.context;
 		const currency = getCurrencyConfig();
+		const dateFormat = getAdminSetting(
+			'dateFormat',
+			defaultTableDateFormat
+		);
 
 		return map( data, ( row ) => {
 			const {
@@ -114,6 +129,7 @@ class ProductsReportTable extends Component {
 				items_sold: itemsSold,
 				net_revenue: netRevenue,
 				orders_count: ordersCount,
+				last_sold: lastSold,
 			} = row;
 			const extendedInfo = row.extended_info || {};
 			const {
@@ -123,6 +139,7 @@ class ProductsReportTable extends Component {
 				sku,
 				stock_status: extendedInfoStockStatus,
 				stock_quantity: stockQuantity,
+				total_sales: totalSales,
 				variations = [],
 			} = extendedInfo;
 
@@ -202,6 +219,18 @@ class ProductsReportTable extends Component {
 						</Link>
 					),
 					value: ordersCount,
+				},
+				{
+					display: lastSold ? (
+						<Date date={ lastSold } visibleFormat={ dateFormat } />
+					) : (
+						''
+					),
+					value: lastSold || '',
+				},
+				{
+					display: formatValue( currency, 'number', totalSales || 0 ),
+					value: totalSales || 0,
 				},
 				{
 					display: (
@@ -325,6 +354,10 @@ class ProductsReportTable extends Component {
 			query,
 		} = this.props;
 
+		// Every metric an unsold product reports is zero, so the table sorts by
+		// title unless the merchant picked another column.
+		const isUnsoldView = query.filter === 'unsold';
+
 		const labels = {
 			helpText: __(
 				'Check at least two products below to compare',
@@ -354,10 +387,13 @@ class ProductsReportTable extends Component {
 				limitProperties={ limitProperties }
 				baseSearchQuery={ baseSearchQuery }
 				tableQuery={ {
-					orderby: query.orderby || 'items_sold',
+					orderby:
+						query.orderby ||
+						( isUnsoldView ? 'product_name' : 'items_sold' ),
 					order: query.order || 'desc',
 					extended_info: true,
 					segmentby: query.segmentby,
+					...( isUnsoldView ? { unsold: true } : {} ),
 				} }
 				title={ __( 'Products', 'woocommerce' ) }
 				columnPrefsKey="products_report_columns"

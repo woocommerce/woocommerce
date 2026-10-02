@@ -53,6 +53,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		'items_sold'       => 'intval',
 		'net_revenue'      => 'floatval',
 		'orders_count'     => 'intval',
+		'last_sold'        => 'strval',
 		// Extended attributes.
 		'name'             => 'strval',
 		'price'            => 'floatval',
@@ -64,6 +65,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		'category_ids'     => 'array_values',
 		'variations'       => 'array_values',
 		'sku'              => 'strval',
+		'total_sales'      => 'intval',
 	);
 
 	/**
@@ -83,7 +85,15 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		'category_ids',
 		'variations',
 		'sku',
+		'total_sales',
 	);
+
+	/**
+	 * Whether the query currently being served carries an `unsold` argument.
+	 *
+	 * @var bool
+	 */
+	private $is_unsold = false;
 
 	/**
 	 * Data store context used to pass to filters.
@@ -120,6 +130,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'items_sold'   => 'SUM(product_qty) as items_sold',
 			'net_revenue'  => 'SUM(product_net_revenue) AS net_revenue',
 			'orders_count' => "COUNT( DISTINCT ( CASE WHEN product_gross_revenue >= 0 THEN {$table_name}.order_id END ) ) as orders_count",
+			'last_sold'    => "MAX(CASE WHEN {$table_name}.product_qty > 0 THEN {$table_name}.date_created END) AS last_sold",
 		);
 	}
 
@@ -282,6 +293,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	protected function get_cache_key( $params ) {
 		$this->is_search = ! empty( $params['search'] );
+		$this->is_unsold = ! empty( $params['unsold'] );
 
 		return parent::get_cache_key( $params );
 	}
@@ -302,7 +314,18 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		// A search is resolved against product titles and SKUs while the report runs, and nothing
 		// invalidates the report cache when one is renamed, so a cached response would keep
 		// answering with the old matches for up to a week.
-		return $this->is_search ? false : $use_cache;
+		if ( $this->is_search ) {
+			return false;
+		}
+
+		// The unsold list depends on which products exist, and nothing invalidates the report
+		// cache when a product is created or deleted, so a cached response would keep leaving
+		// new products out for up to a week.
+		if ( $this->is_unsold ) {
+			return false;
+		}
+
+		return $use_cache;
 	}
 
 	/**
@@ -429,6 +452,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$defaults['product_includes']  = array();
 		$defaults['search']            = array();
 		$defaults['extended_info']     = false;
+		$defaults['unsold']            = false;
 
 		return $defaults;
 	}
@@ -441,7 +465,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 *
 	 * @see get_data
 	 * @param array $query_args Query parameters.
-	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
+	 * @return \stdClass|\WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
 	 */
 	public function get_noncached_data( $query_args ) {
 		global $wpdb;
@@ -456,6 +480,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'pages'   => 0,
 			'page_no' => 0,
 		);
+
+		if ( ! empty( $query_args['unsold'] ) ) {
+			return $this->get_unsold_data( $query_args, $data );
+		}
 
 		$selections        = $this->selected_columns( $query_args );
 		$included_products = $this->get_included_products_array( $query_args );
@@ -542,7 +570,17 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		$product_data = array_map( array( $this, 'cast_numbers' ), $product_data );
-		$data         = (object) array(
+
+		// cast_numbers stringifies the null a padded row carries for its columns, but a product
+		// with no sales in the period has no last sale to report, so the field stays null as the
+		// schema declares it.
+		foreach ( $product_data as $key => $row ) {
+			if ( isset( $row['last_sold'] ) && '' === $row['last_sold'] ) {
+				$product_data[ $key ]['last_sold'] = null;
+			}
+		}
+
+		$data = (object) array(
 			'data'    => $product_data,
 			'total'   => $total_results,
 			'pages'   => $total_pages,
@@ -550,6 +588,146 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		);
 
 		return $data;
+	}
+
+	/**
+	 * Returns the report rows for products with no sales in the requested period.
+	 *
+	 * The report table is grouped by the sales lookup, so products that sold nothing in the period
+	 * are absent from it. This builds the opposite set: every published product LEFT JOINed to the
+	 * period's per-product sales, keeping only the products the join misses. All the metrics come
+	 * back as zero and `last_sold` as null, since the products have nothing to report for the period.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param array     $query_args Query parameters.
+	 * @param \stdClass $data       Empty report data object to fill in.
+	 * @return \stdClass Data object `{ data: array, total: int, pages: int, page_no: int }`.
+	 */
+	private function get_unsold_data( $query_args, $data ) {
+		global $wpdb;
+
+		$table_name = self::get_db_table_name();
+		$params     = $this->get_limit_params( $query_args );
+
+		// Products that sold in the period, aggregated per product. A product missing from this
+		// set is an unsold one. The order status and variation filters go in here: they decide
+		// whether a sale counts, not which products exist.
+		$sold_subquery = new SqlQuery( $this->context . '_subquery' );
+		$sold_subquery->add_sql_clause( 'select', 'product_id' );
+		$sold_subquery->add_sql_clause( 'from', $table_name );
+
+		foreach ( array(
+			'after'  => '>=',
+			'before' => '<=',
+		) as $bound => $comparator ) {
+			if ( empty( $query_args[ $bound ] ) || ! $query_args[ $bound ] instanceof \DateTimeInterface ) {
+				continue;
+			}
+			$datetime = $query_args[ $bound ];
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- matches add_time_period_sql_params; the value comes from a formatted datetime object.
+			$datetime_str = $datetime instanceof \WC_DateTime
+				? $datetime->date( TimeInterval::$sql_datetime_format )
+				: $datetime->format( TimeInterval::$sql_datetime_format );
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table_name is a table name and $datetime_str a formatted date.
+			$sold_subquery->add_sql_clause( 'where_time', "AND {$table_name}.date_created {$comparator} '{$datetime_str}'" );
+		}
+
+		$included_variations = $this->get_included_variations( $query_args );
+		if ( $included_variations ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table_name is a table name, $included_variations is prepared.
+			$sold_subquery->add_sql_clause( 'where', "AND {$table_name}.variation_id IN ({$included_variations})" );
+		}
+
+		$order_status_filter = $this->get_status_subquery( $query_args );
+		if ( $order_status_filter ) {
+			$sold_subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}wc_order_stats ON {$table_name}.order_id = {$wpdb->prefix}wc_order_stats.order_id" );
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_status_filter is built from escaped status slugs.
+			$sold_subquery->add_sql_clause( 'where', "AND ( {$order_status_filter} )" );
+		}
+
+		$sold_subquery->add_sql_clause( 'group_by', 'product_id' );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- built from prepared fragments above.
+		$sold_statement = $sold_subquery->get_query_statement();
+
+		$this->clear_sql_clause( 'select' );
+		$this->add_sql_clause( 'select', 'posts.ID AS product_id, 0 AS items_sold, 0 AS net_revenue, 0 AS orders_count, NULL AS last_sold' );
+		$this->add_sql_clause( 'from', "{$wpdb->posts} AS posts" );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $wpdb->posts is a table name, $sold_statement is built from prepared fragments.
+		$this->add_sql_clause( 'left_join', "LEFT JOIN ( {$sold_statement} ) AS sold ON sold.product_id = posts.ID" );
+		$this->add_sql_clause( 'where', "AND posts.post_type = 'product'" );
+		$this->add_sql_clause( 'where', "AND posts.post_status = 'publish'" );
+		$this->add_sql_clause( 'where', 'AND sold.product_id IS NULL' );
+
+		$included_products = $this->get_included_products_array( $query_args );
+		$search_subquery   = $this->get_search_subquery( $query_args, $included_products );
+		$product_id_filter = ProductSearchQuery::get_id_condition( 'posts.ID', $search_subquery, $included_products );
+		if ( $product_id_filter ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $product_id_filter is built from prepared fragments.
+			$this->add_sql_clause( 'where', "AND {$product_id_filter}" );
+		}
+
+		// A zero metric cannot be sorted on, so only the product attributes stay sortable, and
+		// anything else falls back to the title.
+		$this->clear_sql_clause( 'order_by' );
+		switch ( $query_args['orderby'] ?? '' ) {
+			case 'sku':
+				$this->add_from_sql_params( array( 'orderby' => 'sku' ), 'outer', 'posts.ID' );
+				$this->add_sql_clause( 'order_by', 'meta_value' );
+				break;
+			case 'variations':
+				$this->add_from_sql_params( array( 'orderby' => 'variations' ), 'outer', 'posts.ID' );
+				$this->add_sql_clause( 'order_by', 'variations' );
+				break;
+			case 'product_id':
+				$this->add_sql_clause( 'order_by', 'posts.ID' );
+				break;
+			default:
+				$this->add_sql_clause( 'order_by', 'posts.post_title' );
+		}
+		$this->add_orderby_order_clause( $query_args, $this );
+		// Without a tiebreak the database is free to resolve equal titles differently per page,
+		// so a product can come back on two of them while another is never reached.
+		$order_by = $this->get_sql_clause( 'order_by' );
+		$this->clear_sql_clause( 'order_by' );
+		$this->add_sql_clause( 'order_by', "{$order_by}, posts.ID" );
+
+		$count_query = "SELECT COUNT(*) FROM (
+				{$this->get_query_statement()}
+			) AS tt";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- built from prepared fragments.
+		$total_results = (int) $wpdb->get_var( $count_query );
+		$total_pages   = (int) ceil( $total_results / $params['per_page'] );
+
+		if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
+			return $data;
+		}
+
+		$this->get_limit_sql_params( $query_args );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- built from prepared fragments.
+		$product_data = $wpdb->get_results( $this->get_query_statement(), ARRAY_A );
+
+		if ( null === $product_data ) {
+			return $data;
+		}
+
+		$product_data = array_map( array( $this, 'cast_numbers' ), $product_data );
+
+		// cast_numbers stringifies the null the SQL returns, but an unsold product has no
+		// last sale to report, so the field stays null as the schema declares it.
+		foreach ( $product_data as $key => $row ) {
+			if ( isset( $row['last_sold'] ) && '' === $row['last_sold'] ) {
+				$product_data[ $key ]['last_sold'] = null;
+			}
+		}
+
+		return (object) array(
+			'data'    => $product_data,
+			'total'   => $total_results,
+			'pages'   => $total_pages,
+			'page_no' => (int) $query_args['page'],
+		);
 	}
 
 	/**
