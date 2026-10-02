@@ -3264,6 +3264,29 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Store API checkout remembers the order it hands to the gateway before the gateway runs.
+	 */
+	public function test_post_remembers_the_order_sent_to_gateway(): void {
+		$remembered_during_payment = null;
+		$payment_handler           = function ( $context, $payment_result ) use ( &$remembered_during_payment ) {
+			unset( $context );
+			$remembered_during_payment = WC()->session->get( 'order_sent_to_gateway' );
+			$payment_result->set_status( 'success' );
+		};
+
+		add_action( 'woocommerce_rest_checkout_process_payment_with_context', $payment_handler, 1, 2 );
+
+		try {
+			$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+		} finally {
+			remove_action( 'woocommerce_rest_checkout_process_payment_with_context', $payment_handler, 1 );
+		}
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( (int) $response->get_data()['order_id'], $remembered_during_payment, 'The gateway should run with its order already remembered, so a request that dies inside it can be traced back.' );
+	}
+
+	/**
 	 * Build a valid checkout POST request body for use by the sample-extension tests.
 	 *
 	 * @return \WP_REST_Request
@@ -3561,6 +3584,59 @@ class Checkout extends \WP_Test_REST_TestCase {
 			$order_ids_after_retry,
 			'Retrying after a post-payment failure must not create a second paid order.'
 		);
+	}
+
+	/**
+	 * @testdox Retrying after the request died between payment_complete() and the cart being emptied does not place a second paid order.
+	 */
+	public function test_retry_after_the_request_died_post_payment_does_not_duplicate_the_order() {
+		// PHPUnit cannot survive a real exit, so arrange the state one leaves behind: the first
+		// POST stops before payment, as an exit inside the transition would stop before the
+		// catch, and the gateway's payment_complete() is then run on the order directly.
+		$stop_before_payment = function () {
+			throw new \Automattic\WooCommerce\StoreApi\Exceptions\RouteException(
+				'woocommerce_rest_checkout_payment_failed',
+				'Stands in for the request dying after payment_complete()',
+				400
+			);
+		};
+		add_action( 'woocommerce_store_api_checkout_order_processed', $stop_before_payment, 999 );
+
+		try {
+			rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		} finally {
+			remove_action( 'woocommerce_store_api_checkout_order_processed', $stop_before_payment, 999 );
+		}
+
+		$paid_order_id = (int) WC()->session->get( 'store_api_draft_order' );
+		$this->assertGreaterThan( 0, $paid_order_id, 'The session should point at the order the first attempt created.' );
+
+		$paid_order = wc_get_order( $paid_order_id );
+		$paid_order->payment_complete( 'txn_died_after_payment' );
+
+		$this->assertFalse( wc_get_order( $paid_order_id )->needs_payment(), 'The gateway took payment before the request died.' );
+		$this->assertFalse( WC()->cart->is_empty(), 'The request died before anything emptied the cart.' );
+		$this->assertSame( $paid_order_id, (int) WC()->session->get( 'store_api_draft_order' ), 'payment_complete() leaves the Store API pointer in place.' );
+
+		$this->simulate_fresh_request();
+		$retry = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$order_ids_after_retry = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => 'any',
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame(
+			array( $paid_order_id ),
+			$order_ids_after_retry,
+			'Retrying after the request died post-payment must not create a second paid order. Retry answered: ' . print_r( $retry->get_data(), true )
+		);
+		$this->assertSame( $paid_order_id, $retry->get_data()['order_id'], 'The retry should answer with the order that was already paid.' );
+		$this->assertSame( 'success', $retry->get_data()['payment_result']['payment_status'] );
+		$this->assertSame( wc_get_order( $paid_order_id )->get_checkout_order_received_url(), $retry->get_data()['payment_result']['redirect_url'], 'The shopper should be sent to the order received page of the paid order.' );
 	}
 
 	/**

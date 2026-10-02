@@ -11,6 +11,7 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
@@ -33,6 +34,13 @@ class WC_Checkout {
 		'shipping_total',
 		'shipping_tax',
 	);
+
+	/**
+	 * Error code create_order() returns when the submit repeats one for an order that moved past payment.
+	 *
+	 * @var string
+	 */
+	private const ORDER_ALREADY_PLACED_ERROR = 'checkout-order-already-placed';
 
 	/**
 	 * The single instance of the class.
@@ -414,6 +422,20 @@ class WC_Checkout {
 			$cart_hash          = WC()->cart->get_cart_hash();
 			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 			$order              = $order_id ? wc_get_order( $order_id ) : null;
+
+			// The gateway moved this order on but something died before the cart was
+			// emptied, so this submit is a repeat: a new order would charge the shopper twice.
+			$session_order = PaymentRecovery::get_session_order_moved_past_payment( $order_id );
+			if ( $session_order ) {
+				return new WP_Error(
+					self::ORDER_ALREADY_PLACED_ERROR,
+					__( 'This order has already been placed.', 'woocommerce' ),
+					array(
+						'order_id' => $session_order->get_id(),
+						'redirect' => $session_order->get_checkout_order_received_url(),
+					)
+				);
+			}
 
 			/**
 			 * If there is an order pending payment, we can resume it here so
@@ -1161,6 +1183,7 @@ class WC_Checkout {
 
 		// Store Order ID in session, so it can be re-used after payment failure.
 		WC()->session->set( 'order_awaiting_payment', $order_id );
+		PaymentRecovery::remember_order_sent_to_gateway( (int) $order_id );
 
 		// We save the session early because if the payment gateway hangs
 		// the request will never finish, thus the session data will never be saved,
@@ -1228,6 +1251,77 @@ class WC_Checkout {
 			array(
 				'result'   => 'success',
 				'redirect' => apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $order->get_checkout_order_received_url(), $order ),
+			)
+		);
+	}
+
+	/**
+	 * Answer a repeat submit for an order that already moved past payment.
+	 *
+	 * The shopper is sent to the order received page, where wc_clear_cart_after_payment()
+	 * empties the cart the gateway left behind, instead of being charged for a second order.
+	 *
+	 * @since 11.3.0
+	 * @param WC_Order $order The order the session was awaiting payment for.
+	 */
+	protected function send_repeat_submit_response( WC_Order $order ): void {
+		PaymentRecovery::record_repeat_submit( $order );
+
+		wc_log_order_step(
+			'[Shortcode #6C] Repeat submit for an order that moved past payment, sending to the order received page',
+			array(
+				'order_object' => $order,
+				'redirected'   => ! wp_doing_ajax() ? 'yes' : 'no',
+			),
+			true
+		);
+
+		$this->send_order_received_response( $order );
+	}
+
+	/**
+	 * Record a failure raised after the gateway moved the order on and send the shopper to the order received page.
+	 *
+	 * Reporting a failure would send them back to place the order again, and every retry
+	 * pays for another order. PaymentRecovery empties the cart rather than leaving it to the
+	 * received page: after payment_complete() nothing in the session points at the order, so
+	 * if the shopper never lands there, a submit from the still-open form would build a new one.
+	 *
+	 * @since 11.3.0
+	 * @param WC_Order  $order The order, re-read after the failure.
+	 * @param Throwable $error The failure raised after the gateway ran.
+	 */
+	protected function recover_order_that_moved_past_payment( WC_Order $order, Throwable $error ): void {
+		PaymentRecovery::record_failure_after_payment( $order, $error, 'checkout' );
+
+		wc_log_order_step(
+			'[Shortcode #6D] Order moved past payment before a failure, sending to the order received page',
+			array(
+				'order_object' => $order,
+				'error'        => get_class( $error ) . ': ' . $error->getMessage(),
+				'redirected'   => ! wp_doing_ajax() ? 'yes' : 'no',
+			),
+			true
+		);
+
+		$this->send_order_received_response( $order );
+	}
+
+	/**
+	 * End the request by sending the shopper to the order received page: a redirect for the form post, JSON for the checkout JS.
+	 *
+	 * @param WC_Order $order Order object.
+	 */
+	private function send_order_received_response( WC_Order $order ): void {
+		if ( ! wp_doing_ajax() ) {
+			wp_safe_redirect( $order->get_checkout_order_received_url() );
+			exit;
+		}
+
+		wp_send_json(
+			array(
+				'result'   => 'success',
+				'redirect' => $order->get_checkout_order_received_url(),
 			)
 		);
 	}
@@ -1358,6 +1452,7 @@ class WC_Checkout {
 	 * Process the checkout after the confirm order button is pressed.
 	 *
 	 * @throws Exception When validation fails.
+	 * @throws Throwable When a gateway fails before it moved the order on; only an Error escapes, as before, since an Exception is caught below.
 	 */
 	public function process_checkout() {
 		try {
@@ -1406,6 +1501,13 @@ class WC_Checkout {
 
 			wc_log_order_step( '[Shortcode #2] Session updated with checkout data and totals calculated' );
 
+			// Answer a repeat submit before validation: the first order may have taken the last
+			// units, and the stock check would then turn the shopper away from an order they placed.
+			$session_order = PaymentRecovery::get_session_order_moved_past_payment( absint( WC()->session->get( 'order_awaiting_payment' ) ) );
+			if ( $session_order ) {
+				$this->send_repeat_submit_response( $session_order );
+			}
+
 			// Validate posted data and cart items before proceeding.
 			$this->validate_checkout( $posted_data, $errors );
 
@@ -1424,6 +1526,14 @@ class WC_Checkout {
 				$this->process_customer( $posted_data );
 				$order_id = $this->create_order( $posted_data );
 				$order    = wc_get_order( $order_id );
+
+				if ( is_wp_error( $order_id ) && self::ORDER_ALREADY_PLACED_ERROR === $order_id->get_error_code() ) {
+					$session_order = wc_get_order( $order_id->get_error_data()['order_id'] ?? 0 );
+
+					if ( $session_order instanceof WC_Order ) {
+						$this->send_repeat_submit_response( $session_order );
+					}
+				}
 
 				if ( is_wp_error( $order_id ) ) {
 					throw new Exception( $order_id->get_error_message() );
@@ -1468,7 +1578,20 @@ class WC_Checkout {
 				 */
 
 				if ( apply_filters( 'woocommerce_cart_needs_payment', $order->needs_payment(), WC()->cart ) ) {
-					$this->process_order_payment( $order_id, $posted_data['payment_method'] );
+					try {
+						$this->process_order_payment( $order_id, $posted_data['payment_method'] );
+					} catch ( Throwable $e ) {
+						// The gateway may have moved the order on already, say when a post-payment
+						// integration throws inside the status transition. Re-read it: the gateway
+						// changed the status on its own instance, so $order is stale.
+						$refreshed_order = wc_get_order( $order_id );
+
+						if ( ! $refreshed_order instanceof WC_Order || ! PaymentRecovery::order_moved_past_payment( $refreshed_order ) ) {
+							throw $e;
+						}
+
+						$this->recover_order_that_moved_past_payment( $refreshed_order, $e );
+					}
 				} else {
 					$this->process_order_without_payment( $order_id );
 				}
