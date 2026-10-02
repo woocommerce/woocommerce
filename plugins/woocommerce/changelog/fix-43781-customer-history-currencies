@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Customer history template overrides now receive per-currency totals, counts and averages. Overrides supplying only the original single-total arguments continue to render.
+
+Total the Customer History metabox separately per currency instead of adding amounts from different currencies together.

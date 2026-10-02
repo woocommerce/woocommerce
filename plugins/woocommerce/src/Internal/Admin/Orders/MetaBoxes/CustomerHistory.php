@@ -48,27 +48,31 @@ class CustomerHistory {
 	 *
 	 * @param WC_Order $order The order object.
 	 *
-	 * @return array{orders_count: int, total_spend: float, avg_order_value: float, tooltip: string} Order count, total spend, average order value, and tooltip text.
+	 * @return array{orders_count: int, currency_totals: array<string, float>, currency_counts: array<string, int>, currency_averages: array<string, float>, tooltip: string} Order count, plus spend, order count and average order value per currency.
 	 */
 	private function get_customer_history( WC_Order $order ): array {
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$customer_id   = $order->get_customer_id();
-			$billing_email = $order->get_billing_email();
-			$result        = $this->query_hpos( $customer_id, $billing_email );
+			$rows = $this->query_hpos( $order->get_customer_id(), $order->get_billing_email() );
 		} else {
 			$customer_report_id = $this->get_cpt_report_customer_id( $order );
-			if ( $customer_report_id > 0 ) {
-				$result = $this->query_cpt( $customer_report_id );
-			} else {
-				$result = (object) array(
-					'orders_count' => 0,
-					'total_spend'  => 0,
-				);
-			}
+			$rows               = $customer_report_id > 0 ? $this->query_cpt( $customer_report_id ) : array();
 		}
 
-		$orders_count = (int) ( $result->orders_count ?? 0 );
-		$total_spend  = (float) ( $result->total_spend ?? 0 );
+		$orders_count = 0;
+		$totals       = array();
+		$counts       = array();
+		foreach ( $rows as $row ) {
+			$currency = strtoupper( (string) ( $row->currency ?? '' ) );
+			$count    = (int) ( $row->orders_count ?? 0 );
+			if ( ! preg_match( '/^[A-Z]{3}$/D', $currency ) || $count < 1 ) {
+				continue;
+			}
+			$orders_count       += $count;
+			$counts[ $currency ] = $count;
+			$totals[ $currency ] = (float) ( $row->total_spend ?? 0 );
+		}
+		// Largest first, so the currency a merchant cares about leads.
+		arsort( $totals );
 
 		// Build a dynamic tooltip listing the excluded statuses by their translated labels.
 		// Internal statuses (auto-draft, trash) are naturally filtered out because they
@@ -97,29 +101,33 @@ class CustomerHistory {
 			$tooltip = __( 'Total number of orders for this customer, including the current one.', 'woocommerce' );
 		}
 
+		$averages = array();
+		foreach ( $totals as $currency => $total ) {
+			$averages[ $currency ] = $total / $counts[ $currency ];
+		}
+
 		return array(
-			'orders_count'    => $orders_count,
-			'total_spend'     => $total_spend,
-			'avg_order_value' => $orders_count > 0 ? $total_spend / $orders_count : 0,
-			'tooltip'         => $tooltip,
+			'orders_count'      => $orders_count,
+			'currency_totals'   => $totals,
+			'currency_counts'   => $counts,
+			'currency_averages' => $averages,
+			'tooltip'           => $tooltip,
 		);
 	}
 
 	/**
 	 * Query customer order stats from HPOS tables.
 	 *
+	 * Amounts are grouped by the order's own currency and never added across them:
+	 * a customer with a EUR order and a GBP order has two totals, not one.
+	 *
 	 * @param int    $customer_id   The customer user ID.
 	 * @param string $billing_email The billing email address.
 	 *
-	 * @return object Object with orders_count and total_spend properties.
+	 * @return array One row per currency, each with currency, orders_count and total_spend.
 	 */
-	private function query_hpos( int $customer_id, string $billing_email ): object {
+	private function query_hpos( int $customer_id, string $billing_email ): array {
 		global $wpdb;
-
-		$default = (object) array(
-			'orders_count' => 0,
-			'total_spend'  => 0,
-		);
 
 		$excluded_statuses_sql = $this->get_excluded_statuses_sql();
 		$orders_table          = OrdersTableDataStore::get_orders_table_name();
@@ -132,10 +140,11 @@ class CustomerHistory {
 			$co_status_filter = $excluded_statuses_sql ? "AND co.status NOT IN $excluded_statuses_sql" : '';
 
 			$sql = $wpdb->prepare(
-				"SELECT COUNT(*) AS orders_count,
+				"SELECT filtered.currency AS currency,
+					COUNT(*) AS orders_count,
 					COALESCE( SUM( filtered.total_amount ), 0 ) + COALESCE( SUM( r.refund_total ), 0 ) AS total_spend
 				FROM (
-					SELECT id, total_amount
+					SELECT id, total_amount, currency
 					FROM {$orders_table}
 					WHERE customer_id = %d AND type = 'shop_order' $status_filter
 				) AS filtered
@@ -146,7 +155,8 @@ class CustomerHistory {
 					WHERE rp.type = 'shop_order_refund'
 						AND co.customer_id = %d AND co.type = 'shop_order' $co_status_filter
 					GROUP BY rp.parent_order_id
-				) AS r ON filtered.id = r.parent_order_id",
+				) AS r ON filtered.id = r.parent_order_id
+				GROUP BY filtered.currency",
 				$customer_id,
 				$customer_id
 			);
@@ -156,10 +166,11 @@ class CustomerHistory {
 			$co_status_filter = $excluded_statuses_sql ? "AND co.status NOT IN $excluded_statuses_sql" : '';
 
 			$sql = $wpdb->prepare(
-				"SELECT COUNT(*) AS orders_count,
+				"SELECT filtered.currency AS currency,
+					COUNT(*) AS orders_count,
 					COALESCE( SUM( filtered.total_amount ), 0 ) + COALESCE( SUM( r.refund_total ), 0 ) AS total_spend
 				FROM (
-					SELECT o.id, o.total_amount
+					SELECT o.id, o.total_amount, o.currency
 					FROM {$orders_table} AS o
 					INNER JOIN {$addresses_table} AS a ON o.id = a.order_id AND a.address_type = 'billing'
 					WHERE o.customer_id = 0 AND a.email = %s AND o.type = 'shop_order' $o_status_filter
@@ -172,7 +183,8 @@ class CustomerHistory {
 					WHERE rp.type = 'shop_order_refund'
 						AND co.customer_id = 0 AND ca.email = %s AND co.type = 'shop_order' $co_status_filter
 					GROUP BY rp.parent_order_id
-				) AS r ON filtered.id = r.parent_order_id",
+				) AS r ON filtered.id = r.parent_order_id
+				GROUP BY filtered.currency",
 				$billing_email,
 				$billing_email
 			);
@@ -180,11 +192,11 @@ class CustomerHistory {
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		if ( null === $sql ) {
-			return $default;
+			return array();
 		}
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is prepared above.
-		$row = $wpdb->get_row( $sql );
+		$rows = $wpdb->get_results( $sql );
 
 		if ( $wpdb->last_error ) {
 			wc_get_logger()->error(
@@ -193,7 +205,7 @@ class CustomerHistory {
 			);
 		}
 
-		return $row ?? $default;
+		return is_array( $rows ) ? $rows : array();
 	}
 
 	/**
@@ -201,9 +213,9 @@ class CustomerHistory {
 	 *
 	 * @param int $customer_report_id The reports customer ID.
 	 *
-	 * @return object Object with orders_count and total_spend properties.
+	 * @return array Zero or one row, shaped like query_hpos.
 	 */
-	private function query_cpt( int $customer_report_id ): object {
+	private function query_cpt( int $customer_report_id ): array {
 		$args = array(
 			'customers'    => array( $customer_report_id ),
 			// If unset, these params have default values that affect the results.
@@ -215,9 +227,19 @@ class CustomerHistory {
 		$customer_data   = $customers_query->get_data();
 		$customer_row    = $customer_data->data[0] ?? null;
 
-		return (object) array(
-			'orders_count' => $customer_row['orders_count'] ?? 0,
-			'total_spend'  => $customer_row['total_spend'] ?? 0,
+		$orders_count = (int) ( $customer_row['orders_count'] ?? 0 );
+		if ( $orders_count < 1 ) {
+			return array();
+		}
+
+		// The Analytics report already reports in the store's currency, so legacy
+		// storage yields a single converted row rather than a per-currency split.
+		return array(
+			(object) array(
+				'currency'     => get_woocommerce_currency(),
+				'orders_count' => $orders_count,
+				'total_spend'  => $customer_row['total_spend'] ?? 0,
+			),
 		);
 	}
 
