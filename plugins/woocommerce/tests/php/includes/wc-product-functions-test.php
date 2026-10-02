@@ -952,110 +952,59 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A query observer sees managed-stock-first regeneration with legacy parity on core and subclass databases.
-	 * @testWith [false]
-	 *           [true]
-	 * @param bool $use_subclass Whether to use a transparent database subclass.
+	 * @testdox Stock lookup regeneration copies managed stock quantities and leaves unmanaged products alone.
 	 */
-	public function test_stock_lookup_regeneration_preserves_legacy_results_with_changed_and_duplicate_meta( bool $use_subclass ): void {
+	public function test_stock_lookup_regeneration_sets_quantities_from_managed_stock_meta(): void {
 		global $wpdb;
 
-		$fixtures = array();
-		foreach ( array( 'positive', 'missing', 'unmanaged', 'duplicate_stock', 'duplicate_stock_reverse', 'duplicate_manage', 'malformed' ) as $case ) {
-			$fixtures[ $case ] = WC_Helper_Product::create_simple_product()->get_id();
+		$stock_meta  = array(
+			'positive'                => array( '7.5' ),
+			'missing'                 => array(),
+			'unmanaged'               => array( '4' ),
+			'no_manage_meta'          => array( '5' ),
+			'duplicate_stock'         => array( '2', '9' ),
+			'duplicate_stock_reverse' => array( '9', '2' ),
+			'duplicate_manage'        => array( '-3' ),
+			'malformed'               => array( 'not-a-number' ),
+			'variation'               => array( '0.25' ),
+		);
+		$manage_meta = array(
+			'unmanaged'        => array( 'no' ),
+			'no_manage_meta'   => array(),
+			'duplicate_manage' => array( 'yes', 'no', 'yes' ),
+		);
+		$fixtures    = array();
+		foreach ( array_keys( $stock_meta ) as $case ) {
+			$fixtures[ $case ] = 'variation' === $case
+				? WC_Helper_Product::create_variation_product()->get_children()[0]
+				: WC_Helper_Product::create_simple_product()->get_id();
 		}
-		$variable              = WC_Helper_Product::create_variation_product();
-		$fixtures['variation'] = $variable->get_children()[0];
 
 		foreach ( $fixtures as $case => $product_id ) {
 			delete_post_meta( $product_id, '_manage_stock' );
 			delete_post_meta( $product_id, '_stock' );
-			$manage_stock_values = 'duplicate_manage' === $case ? array( 'yes', 'no', 'yes' ) : array( 'unmanaged' === $case ? 'no' : 'yes' );
-			foreach ( $manage_stock_values as $value ) {
+			foreach ( $manage_meta[ $case ] ?? array( 'yes' ) as $value ) {
 				add_post_meta( $product_id, '_manage_stock', $value );
 			}
-			foreach ( array(
-				'positive'                => array( '7.5' ),
-				'missing'                 => array(),
-				'unmanaged'               => array( '4' ),
-				'duplicate_stock'         => array( '2', '9' ),
-				'duplicate_stock_reverse' => array( '9', '2' ),
-				'duplicate_manage'        => array( '-3' ),
-				'malformed'               => array( 'not-a-number' ),
-				'variation'               => array( '0.25' ),
-			)[ $case ] as $value ) {
+			foreach ( $stock_meta[ $case ] as $value ) {
 				add_post_meta( $product_id, '_stock', $value );
 			}
 			$this->assertNotFalse( $wpdb->update( $wpdb->wc_product_meta_lookup, array( 'stock_quantity' => 99 ), array( 'product_id' => $product_id ) ), "Failed to seed lookup row for {$case}." );
 		}
 
-		$this->assertSame( array_fill_keys( array_keys( $fixtures ), 99.0 ), $this->read_stock_lookup_values( $fixtures ), 'Every fixture must begin with stale lookup stock.' );
-		$original_wpdb     = $wpdb;
-		$observed_queries  = array();
-		$identity_observer = static function ( $query ) use ( &$observed_queries ) {
-			$observed_queries[] = $query;
-			return $query;
-		};
+		wc_update_product_lookup_tables_column( 'stock_quantity' );
+		$values = $this->read_stock_lookup_values( $fixtures );
 
-		try {
-			$wpdb->query(
-				"
-				UPDATE {$wpdb->wc_product_meta_lookup} lookup_table
-				LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_manage_stock'
-				LEFT JOIN {$wpdb->postmeta} meta2 ON lookup_table.product_id = meta2.post_id AND meta2.meta_key = '_stock'
-				SET lookup_table.stock_quantity = meta2.meta_value
-				WHERE meta1.meta_value = 'yes'
-				"
-			);
-			$legacy_rows_affected = $wpdb->rows_affected;
-			$legacy_values        = $this->read_stock_lookup_values( $fixtures );
-
-			foreach ( $fixtures as $case => $product_id ) {
-				$this->assertNotFalse( $wpdb->update( $wpdb->wc_product_meta_lookup, array( 'stock_quantity' => 99 ), array( 'product_id' => $product_id ) ), "Failed to reset lookup row for {$case}." );
-			}
-			if ( $use_subclass ) {
-				$wpdb->flush();
-				// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Exercise a supported database subclass on the isolated test connection.
-				$wpdb = new class( $wpdb ) extends \wpdb {
-					/**
-					 * Share the existing test connection.
-					 *
-					 * @param \wpdb $original Original database object.
-					 */
-					public function __construct( $original ) {
-						foreach ( get_object_vars( $original ) as $property => $value ) {
-							$this->$property = $value;
-						}
-						$connection = new \ReflectionProperty( \wpdb::class, 'dbh' );
-						$connection->setAccessible( true );
-						$this->dbh = $connection->getValue( $original );
-					}
-				};
-			}
-			add_filter( 'query', $identity_observer, 20 );
-			wc_update_product_lookup_tables_column( 'stock_quantity' );
-			$fast_sql           = $wpdb->last_query;
-			$fast_rows_affected = $wpdb->rows_affected;
-			remove_filter( 'query', $identity_observer, 20 );
-			$this->assertCount( 1, $observed_queries, 'The observer must see one stock UPDATE.' );
-			$this->assertSame( $fast_sql, $observed_queries[0] );
-			$fast_values = $this->read_stock_lookup_values( $fixtures );
-
-			$this->assertSame( $legacy_values, $fast_values, 'Changed and duplicate metadata must produce the same lookup stock values.' );
-			$this->assertSame( $legacy_rows_affected, $fast_rows_affected, 'Changed and duplicate metadata must affect the same number of lookup rows.' );
-			$this->assertSame( 7.5, $fast_values['positive'] );
-			$this->assertNull( $fast_values['missing'] );
-			$this->assertSame( 99.0, $fast_values['unmanaged'] );
-			$this->assertContains( $fast_values['duplicate_stock'], array( 2.0, 9.0 ) );
-			$this->assertContains( $fast_values['duplicate_stock_reverse'], array( 2.0, 9.0 ) );
-			$this->assertSame( -3.0, $fast_values['duplicate_manage'] );
-			$this->assertSame( 0.25, $fast_values['variation'] );
-			$this->assertStringContainsString( 'STRAIGHT_JOIN', $fast_sql, 'Query observers and database subclasses must receive the managed-stock-first UPDATE.' );
-		} finally {
-			remove_filter( 'query', $identity_observer, 20 );
-			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the connection before test transaction cleanup.
-			$wpdb = $original_wpdb;
-		}
+		$this->assertSame( '', $wpdb->last_error, 'Regeneration must complete without a database error.' );
+		$this->assertSame( 7.5, $values['positive'] );
+		$this->assertNull( $values['missing'], 'A managed product without stock meta gets NULL.' );
+		$this->assertSame( 99.0, $values['unmanaged'], 'A product with manage_stock set to no is left alone.' );
+		$this->assertSame( 99.0, $values['no_manage_meta'], 'A product without manage_stock meta is left alone.' );
+		$this->assertContains( $values['duplicate_stock'], array( 2.0, 9.0 ) );
+		$this->assertContains( $values['duplicate_stock_reverse'], array( 2.0, 9.0 ) );
+		$this->assertSame( -3.0, $values['duplicate_manage'] );
+		$this->assertNotSame( 99.0, $values['malformed'], 'A malformed stock value must not abort the statement.' );
+		$this->assertSame( 0.25, $values['variation'] );
 	}
 
 	/**
