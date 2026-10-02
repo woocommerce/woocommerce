@@ -8,14 +8,17 @@ import { notFound } from '@wordpress/route';
 /**
  * Internal dependencies
  */
-import { getScreen } from './screen';
+import { getScreen, NO_KEY } from './screen';
 
-type RouteOptions = { params: { page?: string } };
+interface RouteOptions {
+	params: { page?: string };
+}
 
 export const route = {
 	beforeLoad: async ( { params }: RouteOptions ) => {
 		const screen = getScreen( params.page );
 		if ( ! screen ) {
+			// eslint-disable-next-line @typescript-eslint/only-throw-error -- The router expects notFound() to be thrown.
 			throw notFound();
 		}
 		const { kind, name } = screen.entity;
@@ -32,8 +35,18 @@ export const route = {
 		}
 		const { kind, name } = screen.entity;
 		// The stage shows load errors, so a failed request must not reject the route.
-		await resolveSelect( coreStore )
-			.getEntityRecord( kind, name, undefined )
+		// resolveSelect() is untyped in this version of @wordpress/data.
+		const resolver = (
+			resolveSelect as unknown as ( store: typeof coreStore ) => {
+				getEntityRecord: (
+					kind: string,
+					name: string,
+					key: string
+				) => Promise< unknown >;
+			}
+		 )( coreStore );
+		await resolver
+			.getEntityRecord( kind, name, NO_KEY )
 			.catch( () => undefined );
 	},
 };

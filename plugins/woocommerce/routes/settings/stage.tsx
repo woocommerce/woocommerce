@@ -12,13 +12,18 @@ import { useParams } from '@wordpress/route';
 /**
  * Internal dependencies
  */
-import { getScreen, useScreenDefinition } from './screen';
+import { getScreen, NO_KEY, useScreenDefinition } from './screen';
 import type {
 	PaymentSettingsScreen,
 	ScreenDefinition,
 	SettingsRecord,
 } from './screen';
 import './style.scss';
+
+// Every store has this metadata selector, but core-data's types leave it out.
+interface ResolutionSelectors {
+	getResolutionError: ( selector: string, args: unknown[] ) => unknown;
+}
 
 function SettingsForm( {
 	screen,
@@ -32,23 +37,21 @@ function SettingsForm( {
 		( select ) => {
 			const core = select( coreStore );
 			return {
-				record: core.getEntityRecord( kind, name, undefined ) as
+				record: core.getEntityRecord( kind, name, NO_KEY ),
+				data: core.getEditedEntityRecord( kind, name, NO_KEY ) as
 					| SettingsRecord
 					| undefined,
-				data: core.getEditedEntityRecord( kind, name, undefined ) as
-					| SettingsRecord
+				isDirty: core.hasEditsForEntityRecord( kind, name, NO_KEY ),
+				isSaving: core.isSavingEntityRecord( kind, name, NO_KEY ),
+				saveError: core.getLastEntitySaveError( kind, name, NO_KEY ) as
+					| Error
 					| undefined,
-				isDirty: core.hasEditsForEntityRecord( kind, name, undefined ),
-				isSaving: core.isSavingEntityRecord( kind, name, undefined ),
-				saveError: core.getLastEntitySaveError(
+				loadError: (
+					core as unknown as ResolutionSelectors
+				 ).getResolutionError( 'getEntityRecord', [
 					kind,
 					name,
-					undefined
-				) as Error | undefined,
-				loadError: core.getResolutionError( 'getEntityRecord', [
-					kind,
-					name,
-					undefined,
+					NO_KEY,
 				] ) as Error | undefined,
 			};
 		},
@@ -76,7 +79,7 @@ function SettingsForm( {
 
 	const onChange = ( edits: SettingsRecord ) => {
 		if ( ! isSaving ) {
-			void editEntityRecord( kind, name, undefined, edits );
+			void editEntityRecord( kind, name, NO_KEY, edits );
 		}
 	};
 	const onSave = async () => {
@@ -84,7 +87,7 @@ function SettingsForm( {
 			return;
 		}
 		try {
-			await saveEditedEntityRecord( kind, name, undefined, {
+			await saveEditedEntityRecord( kind, name, NO_KEY, {
 				throwOnError: true,
 			} );
 		} catch {
@@ -103,12 +106,7 @@ function SettingsForm( {
 						size="compact"
 						disabled={ isSaving || ! isDirty }
 						onClick={ () =>
-							void editEntityRecord(
-								kind,
-								name,
-								undefined,
-								record
-							)
+							void editEntityRecord( kind, name, NO_KEY, record )
 						}
 					>
 						{ __( 'Discard changes', 'woocommerce' ) }
@@ -171,9 +169,16 @@ function ScreenContent( { screen }: { screen: PaymentSettingsScreen } ) {
 	return <SettingsForm screen={ screen } definition={ definition } />;
 }
 
+// useParams() is untyped without a registered router, so narrow it here.
+function getPageParam( params: unknown ): string {
+	if ( typeof params === 'object' && params !== null && 'page' in params ) {
+		return typeof params.page === 'string' ? params.page : '';
+	}
+	return '';
+}
+
 function SettingsStage() {
-	const { page } = useParams( { strict: false } ) as { page?: string };
-	const screen = getScreen( page );
+	const screen = getScreen( getPageParam( useParams( { strict: false } ) ) );
 
 	return screen ? <ScreenContent screen={ screen } /> : null;
 }

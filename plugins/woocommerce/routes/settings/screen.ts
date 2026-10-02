@@ -9,17 +9,20 @@ import { addQueryArgs } from '@wordpress/url';
 
 export type SettingsRecord = Record< string, unknown >;
 
-export type PaymentSettingsScreen = {
+// Settings entities have no record key (`key: false`), but core-data's types require one.
+export const NO_KEY = undefined as unknown as string;
+
+export interface PaymentSettingsScreen {
 	id: string;
 	title: string;
 	entity: { kind: string; name: string; baseURL: string };
-};
+}
 
-export type ScreenDefinition = {
+export interface ScreenDefinition {
 	fields: Field< SettingsRecord >[];
 	form: Form;
 	errors: Error[];
-};
+}
 
 declare global {
 	interface Window {
@@ -27,10 +30,10 @@ declare global {
 	}
 }
 
-export type FieldsResponse = {
+export interface FieldsResponse {
 	fields: Field< SettingsRecord >[];
 	script_modules: { id: string; fields: string[] }[];
-};
+}
 
 /**
  * Get the screen that PHP passed to the page, when it matches the route.
@@ -69,7 +72,7 @@ export function applyFieldModules(
 			);
 			return;
 		}
-		const parts = result.value?.default ?? {};
+		const parts = result.value.default ?? {};
 		module.fields.forEach( ( id ) => {
 			const field = fields.find( ( item ) => item.id === id );
 			if ( field && parts[ id ] ) {
@@ -131,8 +134,21 @@ export function useScreenDefinition( screen: PaymentSettingsScreen ) {
 	useEffect( () => {
 		let current = true;
 		loadDefinition( screen ).then(
-			( definition ) => current && setState( { definition } ),
-			( error: Error ) => current && setState( { error } )
+			( definition ) => {
+				if ( current ) {
+					setState( { definition } );
+				}
+			},
+			( error: unknown ) => {
+				if ( current ) {
+					setState( {
+						error:
+							error instanceof Error
+								? error
+								: new Error( String( error ) ),
+					} );
+				}
+			}
 		);
 		return () => {
 			current = false;

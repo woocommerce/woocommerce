@@ -29,7 +29,7 @@ describe( 'applyFieldModules', () => {
 		] );
 
 		expect( errors ).toEqual( [] );
-		expect( fields[ 0 ].description ).toBe( 'Second' );
+		expect( fields[ 0 ]?.description ).toBe( 'Second' );
 	} );
 
 	it( 'reports a module that failed to load and keeps the other fields', () => {
@@ -42,12 +42,12 @@ describe( 'applyFieldModules', () => {
 		] );
 
 		expect( errors ).toHaveLength( 1 );
-		expect( errors[ 0 ].message ).toContain( 'first' );
+		expect( errors[ 0 ]?.message ).toContain( 'first' );
 		expect( fields.map( ( field ) => field.id ) ).toEqual( [
 			'title',
 			'email',
 		] );
-		expect( fields[ 1 ].description ).toBe( 'Help' );
+		expect( fields[ 1 ]?.description ).toBe( 'Help' );
 	} );
 
 	it( 'ignores parts for fields the module was not registered with', () => {
@@ -64,6 +64,6 @@ describe( 'applyFieldModules', () => {
 			]
 		);
 
-		expect( fields[ 1 ].description ).toBeUndefined();
+		expect( fields[ 1 ]?.description ).toBeUndefined();
 	} );
 } );
