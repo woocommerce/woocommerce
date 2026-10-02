@@ -40,7 +40,6 @@ class AbilitiesApiAdapter {
 		add_filter( 'woocommerce_ability_fields', array( __CLASS__, 'fields' ), 10, 2 );
 		add_filter( 'woocommerce_ability_object_validators', array( __CLASS__, 'validators' ), 10, 2 );
 		add_filter( 'woocommerce_in_memory_write_exception_error', array( __CLASS__, 'exception_error' ), 10, 3 );
-		add_action( 'woocommerce_ability_side_effect_blocked', array( __CLASS__, 'log_side_effect' ), 10, 2 );
 	}
 
 	/**
@@ -138,25 +137,6 @@ class AbilitiesApiAdapter {
 			};
 		}
 		return $validators;
-	}
-
-	/**
-	 * Log the side effects a step tried.
-	 *
-	 * @internal
-	 *
-	 * @param array  $attempts     Blocked attempts keyed by kind.
-	 * @param string $ability_name Ability name.
-	 */
-	public static function log_side_effect( $attempts, $ability_name ): void {
-		wc_get_logger()->error(
-			'A step that must not have side effects tried one. Nothing was saved.',
-			array(
-				'source'   => 'woocommerce-abilities',
-				'ability'  => $ability_name,
-				'attempts' => $attempts,
-			)
-		);
 	}
 
 	/**
