@@ -72,8 +72,7 @@
 				"@wordpress/core-data",
 				"@wordpress/data",
 				"@wordpress/editor",
-				"@wordpress/notices",
-				"@wordpress/postcss-plugins-preset"
+				"@wordpress/notices"
 			],
 			"packages": [
 				"@woocommerce/internal-build"
@@ -109,19 +108,22 @@
 			]
 		},
 		{
-			"label": "Direct Babel build tooling shared across workspace packages",
+			"label": "Shared build tooling",
 			"dependencyTypes": [
 				"prod",
 				"dev"
 			],
 			"dependencies": [
-				"@babel/core",
 				"@babel/cli",
+				"@babel/core",
 				"@babel/plugin-syntax-jsx",
 				"@babel/preset-env",
 				"@babel/preset-react",
 				"@babel/preset-typescript",
-				"@babel/runtime"
+				"@babel/runtime",
+				"@wordpress/postcss-plugins-preset",
+				"postcss",
+				"webpack"
 			],
 			"packages": [
 				"**"
@@ -209,19 +211,6 @@
 				"**"
 			],
 			"pinVersion": "^10.0.0"
-		},
-		{
-			"dependencyTypes": [
-				"prod",
-				"dev"
-			],
-			"dependencies": [
-				"webpack"
-			],
-			"packages": [
-				"**"
-			],
-			"policy": "catalog"
 		},
 		{
 			"dependencies": [
@@ -467,7 +456,6 @@
 				"@wordpress/browserslist-config",
 				"@wordpress/dependency-extraction-webpack-plugin",
 				"@wordpress/jest-preset-default",
-				"@wordpress/postcss-plugins-preset",
 				"@wordpress/postcss-themes"
 			],
 			"packages": [
@@ -549,19 +537,6 @@
 				"**"
 			],
 			"pinVersion": "4.3.x"
-		},
-		{
-			"dependencyTypes": [
-				"prod",
-				"dev"
-			],
-			"dependencies": [
-				"postcss"
-			],
-			"packages": [
-				"**"
-			],
-			"policy": "catalog"
 		},
 		{
 			"dependencies": [
@@ -679,7 +654,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^3.2.6"
+			"pinVersion": "3.4.14"
 		},
 		{
 			"dependencies": [
