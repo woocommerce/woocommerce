@@ -103,12 +103,17 @@ class ProductImage extends AbstractBlock {
 
 		$is_link = isset( $attributes['showProductLink'] ) ? $attributes['showProductLink'] : true;
 
-		$padding_classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'padding' ) );
+		$padding_styles = wp_style_engine_get_styles(
+			array(
+				'spacing' => array(
+					'padding' => $attributes['style']['spacing']['padding'] ?? null,
+				),
+			)
+		);
 
 		$inner_blocks_container = sprintf(
-			'<div class="wc-block-components-product-image__inner-container %1$s" style="%2$s">%3$s</div>',
-			esc_attr( $padding_classes_and_styles['classes'] ),
-			esc_attr( $padding_classes_and_styles['styles'] ),
+			'<div class="wc-block-components-product-image__inner-container" style="%1$s">%2$s</div>',
+			esc_attr( isset( $padding_styles['css'] ) ? $padding_styles['css'] : '' ),
 			$inner_blocks_content
 		);
 
