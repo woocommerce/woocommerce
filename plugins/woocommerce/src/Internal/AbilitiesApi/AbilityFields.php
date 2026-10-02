@@ -30,7 +30,7 @@ final class AbilityFields {
 	 *
 	 * @param string               $object_type Object type.
 	 * @param string               $attribute   Attribute under `extensions`.
-	 * @param array<string, mixed> $args        `schema`, `get_callback( $object )` and `update_callback( $value, $object )`, which changes the object in memory, never saves, and returns a WP_Error to reject the write.
+	 * @param array<string, mixed> $args        `schema`, `get_callback( $object )` and `update_callback( $value, $object )`, which changes the object in memory and returns a WP_Error to reject the write. It must not save, send email or make HTTP requests. Nothing is saved until every step passes.
 	 */
 	public static function register( string $object_type, string $attribute, array $args ): void {
 		self::$fields[ $object_type ][ $attribute ] = $args;
