@@ -833,6 +833,38 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
+	 * @testdox Without compute_totals a net refund plus tax exceeding the line gross is rejected.
+	 */
+	public function test_unflagged_net_plus_tax_exceeding_line_gross_is_rejected(): void {
+		$tax_rate_id = $this->create_tax_rate( 10.0 );
+		$order       = $this->create_order_with_product_and_tax( 100.00, 1, $tax_rate_id, 10.00 );
+		$item_id     = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'line_items' => array(
+					array(
+						'id'           => $item_id,
+						'quantity'     => 1,
+						'refund_total' => 105.00,
+						'refund_tax'   => array(
+							array(
+								'id'           => $tax_rate_id,
+								'refund_total' => 10.00,
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$this->assertSame( 422, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_refund_total_exceeds_line', $response->get_data()['code'] );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
 	 * @testdox The compute_totals parameter is declared in the create schema with a false default.
 	 */
 	public function test_compute_totals_declared_in_schema(): void {
