@@ -10,6 +10,7 @@ import { Spinner } from '@woocommerce/components';
  * Internal dependencies
  */
 import { fetchProductPreview } from '../../utils/functions';
+import { addVariationToPreviewLinks } from '../../utils/product-preview-experiment';
 import sanitizeHtmlExtended from '~/lib/sanitize-html/sanitize-html-extended.js';
 import sanitizeHtmlConfig from './product-preview-sanitize-html-config';
 import './product-preview-modal.scss';
@@ -20,6 +21,7 @@ interface ProductPreviewModalProps {
 	productIcon: string;
 	productId: number;
 	triggerRef: React.RefObject< HTMLAnchorElement | null >;
+	variation: string;
 	onOpen?: () => void;
 	onClose?: ( closeType?: string ) => void;
 }
@@ -30,6 +32,7 @@ export default function ProductPreviewModal( {
 	productIcon,
 	productId,
 	triggerRef,
+	variation,
 	onOpen,
 	onClose,
 }: ProductPreviewModalProps ) {
@@ -106,7 +109,10 @@ export default function ProductPreviewModal( {
 				const sanitizedHtml = sanitizedHtmlObj?.__html ?? '';
 
 				setPreviewContent( {
-					html: sanitizedHtml,
+					html: addVariationToPreviewLinks(
+						sanitizedHtml,
+						variation
+					),
 					css: previewData.css,
 				} );
 				setError( null );
@@ -123,7 +129,7 @@ export default function ProductPreviewModal( {
 		if ( onOpen ) {
 			onOpen();
 		}
-	}, [ onOpen, productId ] );
+	}, [ onOpen, productId, variation ] );
 
 	const productHeader = (
 		<div className="woocommerce-marketplace__product-preview-modal__header">
