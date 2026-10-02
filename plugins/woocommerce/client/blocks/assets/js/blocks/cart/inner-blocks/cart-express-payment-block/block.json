@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/cart-express-payment-block",
-	"version": "1.0.0",
 	"title": "Express Checkout",
 	"description": "Allow customers to breeze through with quick payment options.",
 	"category": "woocommerce",
