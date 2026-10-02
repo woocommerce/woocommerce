@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Speed up HPOS order searches when the first page contains all matches.
