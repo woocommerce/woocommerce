@@ -91,11 +91,11 @@ jQuery( function( $ ) {
 					field.data( 'priority', fieldLocale.priority );
 				}
 
-				// Hidden fields. State visibility (show) is managed by
-				// country-select.js, but locale can still hide it.
+				// Hidden fields. An empty state list keeps a hidden input and its
+				// row is managed by country-select.js, so leave it alone.
 				if ( true === fieldLocale.hidden ) {
 					field.hide().find( ':input' ).val( '' );
-				} else if ( 'state' !== key ) {
+				} else if ( 'state' !== key || ! field.find( 'input[type="hidden"]' ).length ) {
 					field.show();
 				}
 
