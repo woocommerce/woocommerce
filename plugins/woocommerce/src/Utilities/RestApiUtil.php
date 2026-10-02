@@ -84,8 +84,10 @@ class RestApiUtil {
 		if ( '' !== $rest_route ) {
 			$rest_route      = trailingslashit( ltrim( $rest_route, '/' ) );
 			$route_namespace = trailingslashit( $route_namespace );
-			if ( '/' === $rest_route || str_starts_with( $rest_route, $route_namespace ) ) {
-				// Load all namespaces for root requests (/wp-json/) to maintain API discovery functionality.
+			// Load all namespaces for root requests (/wp-json/, discovery) and batch requests
+			// (/batch/v1): batch subrequests are matched against the route table without going
+			// through dispatch(), so they cannot be lazy loaded at rest_pre_dispatch time.
+			if ( '/' === $rest_route || 'batch/v1/' === $rest_route || str_starts_with( $rest_route, $route_namespace ) ) {
 				if ( '' !== $callback_filter_id ) {
 					// Remove the current filter prior to the callback, to prevent recursive callback issues.
 					// This is crucial for APIs like wc-analytics that may callback to their own namespace when loading.
