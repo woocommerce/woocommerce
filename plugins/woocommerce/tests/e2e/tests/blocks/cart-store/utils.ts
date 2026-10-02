@@ -22,6 +22,13 @@ export const CART_LINE_IDENTITY_PLUGIN =
 export const CART_LINE_IDENTITY_FLAG = 'cart_line_identity_marker';
 
 /**
+ * Request flag the helper plugin reads to declare a seeded line's parent.
+ *
+ * Kept identical to `CART_LINE_PARENT_ITEM_KEY_FLAG` in the helper plugin.
+ */
+export const CART_LINE_PARENT_ITEM_KEY_FLAG = 'cart_line_parent_item_key';
+
+/**
  * Sample-data product used as "product X" throughout the simple-product flows.
  *
  * Beanie is a simple product present on the first shop page, so its
@@ -58,6 +65,28 @@ export const seedMetaLine = async (
 	const markerValue = marker ?? 'meta-line';
 	await page.goto(
 		`/?add-to-cart=${ productId }&${ CART_LINE_IDENTITY_FLAG }=${ markerValue }`
+	);
+};
+
+/**
+ * Seeds a product variation as a child line with a declared parent key.
+ *
+ * The parent key may intentionally refer to no cart line; it is the presence
+ * of the declaration that marks the line as a child.
+ *
+ * @param page          The Playwright page.
+ * @param variationId   The variation id to add.
+ * @param parentItemKey The parent key to declare for the line.
+ */
+export const seedDeclaredChildLine = async (
+	page: Page,
+	variationId: number,
+	parentItemKey: string
+) => {
+	await page.goto(
+		`/?add-to-cart=${ variationId }&${ CART_LINE_PARENT_ITEM_KEY_FLAG }=${ encodeURIComponent(
+			parentItemKey
+		) }`
 	);
 };
 

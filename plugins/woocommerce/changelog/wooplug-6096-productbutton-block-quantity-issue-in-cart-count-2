@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show accurate in-cart counts on interactive Add to cart buttons by excluding cart items extensions declare as children.

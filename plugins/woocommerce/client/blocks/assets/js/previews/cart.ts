@@ -42,6 +42,7 @@ export const previewCart: CartResponse = {
 	items: [
 		{
 			key: '1',
+			parent_item_key: null,
 			id: 1,
 			type: 'simple',
 			quantity: 2,
@@ -115,6 +116,7 @@ export const previewCart: CartResponse = {
 		},
 		{
 			key: '2',
+			parent_item_key: null,
 			id: 2,
 			type: 'simple',
 			quantity: 1,
