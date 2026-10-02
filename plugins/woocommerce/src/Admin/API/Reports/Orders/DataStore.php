@@ -155,6 +155,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			}
 		}
 
+		$free_orders_filter = $this->get_free_orders_subquery( $query_args );
+		if ( $free_orders_filter ) {
+			$this->subquery->add_sql_clause( 'where', "AND {$free_orders_filter}" );
+		}
+
 		$included_orders = $this->get_included_orders( $query_args );
 		if ( $included_orders ) {
 			$where_subquery[] = "{$order_stats_lookup_table}.order_id IN ({$included_orders})";

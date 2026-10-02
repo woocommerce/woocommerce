@@ -193,9 +193,15 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		$order_status_filter = $this->get_status_subquery( $query_args );
-		if ( $order_status_filter ) {
+		$free_orders_filter  = $this->get_free_orders_subquery( $query_args );
+		if ( $order_status_filter || $free_orders_filter ) {
 			$this->subquery->add_sql_clause( 'join', "JOIN {$order_stats_lookup_table} ON {$order_product_lookup_table}.order_id = {$order_stats_lookup_table}.order_id" );
+		}
+		if ( $order_status_filter ) {
 			$this->subquery->add_sql_clause( 'where', "AND ( {$order_status_filter} )" );
+		}
+		if ( $free_orders_filter ) {
+			$this->subquery->add_sql_clause( 'where', "AND ( {$free_orders_filter} )" );
 		}
 
 		$attribute_order_items_subquery = $this->get_order_item_by_attribute_subquery( $query_args );

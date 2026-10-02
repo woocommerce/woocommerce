@@ -62,6 +62,13 @@
 .woocommerce-setting__help {
 	font-style: italic;
 	color: $gray-700;
+	// The settings column is wide enough to run help text past 110 characters
+	// a line, which is well beyond a comfortable measure. This lands it around
+	// 73; ch overestimates here because the italic face is narrower than its
+	// zero.
+	max-width: 60ch;
+	// Keeps a single word off the last line where the browser supports it.
+	text-wrap: pretty;
 }
 
 .woocommerce-analytics-import-mode-confirmation-modal {

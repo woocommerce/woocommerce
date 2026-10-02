@@ -265,6 +265,9 @@ class Settings {
 			);
 		}
 
+		// Zero in the store currency, for the excluded orders setting label.
+		$settings['analyticsFreeOrderAmount'] = html_entity_decode( wp_strip_all_tags( wc_price( 0 ) ), ENT_QUOTES, 'UTF-8' );
+
 		//phpcs:ignore
 		$preload_data_endpoints = apply_filters( 'woocommerce_component_settings_preload_endpoints', array() );
 
@@ -458,6 +461,21 @@ class Settings {
 			'default'     => $default_excluded_statuses,
 			'type'        => 'multiselect',
 			'options'     => $all_statuses,
+		);
+		$settings[] = array(
+			'id'          => 'woocommerce_analytics_excluded_orders',
+			'option_key'  => 'woocommerce_analytics_excluded_orders',
+			'label'       => __( 'Excluded orders', 'woocommerce' ),
+			'description' => __( 'Orders that should not be included when calculating report totals.', 'woocommerce' ),
+			'default'     => array(),
+			'type'        => 'multiselect',
+			'options'     => array(
+				'zero_total' => sprintf(
+					/* translators: %s: zero formatted in the store currency, e.g. $0.00 */
+					__( 'Orders with a total of %s', 'woocommerce' ),
+					html_entity_decode( wp_strip_all_tags( wc_price( 0 ) ), ENT_QUOTES, 'UTF-8' )
+				),
+			),
 		);
 		$settings[] = array(
 			'id'          => 'woocommerce_actionable_order_statuses',

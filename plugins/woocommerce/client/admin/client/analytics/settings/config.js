@@ -118,6 +118,26 @@ const baseConfig = {
 		} ),
 		defaultValue: DEFAULT_EXCLUDED_STATUSES,
 	},
+	woocommerce_analytics_excluded_orders: {
+		label: __( 'Excluded orders:', 'woocommerce' ),
+		inputType: 'checkbox',
+		options: [
+			{
+				value: 'zero_total',
+				label: sprintf(
+					/* translators: %s: zero formatted in the store currency, e.g. $0.00 */
+					__( 'Orders with a total of %s', 'woocommerce' ),
+					getAdminSetting( 'analyticsFreeOrderAmount', '0' )
+				),
+			},
+		],
+		helpText: __(
+			'Orders that are completely free are excluded from the totals in your reports. ' +
+				'This mainly affects order counts and average order value.',
+			'woocommerce'
+		),
+		defaultValue: [],
+	},
 	woocommerce_actionable_order_statuses: {
 		label: __( 'Actionable statuses:', 'woocommerce' ),
 		inputType: 'checkboxGroup',
