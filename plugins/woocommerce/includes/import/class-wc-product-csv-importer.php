@@ -55,6 +55,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	private $original_id_map = array();
 
 	/**
+	 * Existing product IDs keyed by their new CSV SKUs.
+	 *
+	 * @var array<string, int>
+	 */
+	private $new_sku_id_map = array();
+
+	/**
 	 * Initialize importer.
 	 *
 	 * @param string $file   File to read.
@@ -304,6 +311,14 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		if ( $id ) {
 			return $id;
+		}
+
+		if ( $this->params['update_existing'] && isset( $this->new_sku_id_map[ $value ] ) ) {
+			$product = wc_get_product( $this->new_sku_id_map[ $value ] );
+
+			if ( $product && 'importing' !== $product->get_status() ) {
+				return $product->get_id();
+			}
 		}
 
 		try {
@@ -1151,6 +1166,22 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$parse_functions = $this->get_formatting_callback();
 		$mapped_keys     = $this->get_mapped_keys();
 		$use_mb          = function_exists( 'mb_convert_encoding' );
+
+		if ( $this->params['update_existing'] ) {
+			$id_column  = array_search( 'id', $mapped_keys, true );
+			$sku_column = array_search( 'sku', $mapped_keys, true );
+
+			if ( false !== $id_column && false !== $sku_column ) {
+				foreach ( $this->raw_data as $row ) {
+					$id  = absint( $row[ $id_column ] ?? 0 );
+					$sku = isset( $row[ $sku_column ] ) && is_string( $row[ $sku_column ] ) ? wc_clean( $row[ $sku_column ] ) : '';
+
+					if ( $id && is_string( $sku ) && '' !== $sku ) {
+						$this->new_sku_id_map[ $sku ] = $id;
+					}
+				}
+			}
+		}
 
 		// Parse the data.
 		foreach ( $this->raw_data as $row_index => $row ) {
