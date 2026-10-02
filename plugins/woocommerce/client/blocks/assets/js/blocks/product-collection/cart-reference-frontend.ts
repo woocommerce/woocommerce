@@ -37,11 +37,9 @@ const { state: miniCartState } = store< MiniCart >(
 );
 
 /**
- * Signature of the last cart contents a prefetch ran for. Comparing item
- * ids/quantities (instead of the items array identity) collapses the several
- * reference changes a single mutation produces (optimistic write, server
- * commit, reconciliation) into one prefetch per settled state. The keys are
- * sorted so a mere reordering of the same contents never reads as a change.
+ * Product IDs from the last cart state a prefetch ran for. Recommendations
+ * depend on which products are present, not their quantities or line order.
+ * Sorting and deduplicating IDs avoids refreshes when only those change.
  */
 let lastCartSignature: string | undefined;
 
@@ -62,8 +60,7 @@ let lastNavigatedUrl: string | undefined;
 const getCartSignature = (
 	items: WooCommerce[ 'state' ][ 'cart' ][ 'items' ] | undefined
 ): string =>
-	( items ?? [] )
-		.map( ( item ) => `${ item.id }x${ item.quantity }` )
+	[ ...new Set( ( items ?? [] ).map( ( item ) => item.id ) ) ]
 		.sort()
 		.join( '|' );
 
@@ -112,11 +109,9 @@ const cartReferenceStorePart = {
 					const previousSignature = lastCartSignature;
 					lastCartSignature = settledSignature;
 
-					// A unique query value bypasses server/edge caches (and
-					// the WP 6.9 router style cache) so the prefetched HTML
-					// always reflects the current cart. No `force`: the URL
-					// is unique, so there is never a stale entry to bypass,
-					// and a concurrent navigation to it shares one request.
+					// A unique query value avoids reusing cached HTML for an
+					// earlier cart state. No `force`: a concurrent navigation
+					// to the same URL can share the prefetch request.
 					const pageUrl =
 						window.location.href === pendingRefreshUrl
 							? pendingPageUrl ?? window.location.href

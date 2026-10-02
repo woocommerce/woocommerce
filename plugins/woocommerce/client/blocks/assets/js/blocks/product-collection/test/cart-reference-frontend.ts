@@ -117,6 +117,38 @@ describe( 'cart reference refresh', () => {
 		expect( mockPrefetch ).not.toHaveBeenCalled();
 	} );
 
+	it( 'does not refresh when quantities change or the same product gains another cart line', async () => {
+		mockCart.items = [ { id: 1, quantity: 1 } ];
+		mockMiniCart.isOpen = true;
+		await refresh();
+		mockCart.items = [ { id: 1, quantity: 2 } ];
+		await refresh();
+		mockCart.items = [
+			{ id: 1, quantity: 1 },
+			{ id: 1, quantity: 1 },
+		];
+		await refresh();
+		expect( mockPrefetch ).not.toHaveBeenCalled();
+		expect( mockNavigate ).not.toHaveBeenCalled();
+	} );
+
+	it( 'refreshes when a product is removed, including the last product', async () => {
+		mockCart.items = [
+			{ id: 1, quantity: 1 },
+			{ id: 2, quantity: 1 },
+		];
+		mockMiniCart.isOpen = true;
+		await refresh();
+		mockCart.items = [ { id: 2, quantity: 1 } ];
+		await refresh();
+		expect( mockPrefetch ).toHaveBeenCalledTimes( 1 );
+		expect( mockNavigate ).toHaveBeenCalledTimes( 1 );
+		mockCart.items = [];
+		await refresh();
+		expect( mockPrefetch ).toHaveBeenCalledTimes( 2 );
+		expect( mockNavigate ).toHaveBeenCalledTimes( 2 );
+	} );
+
 	it( 'does not overwrite a newer page navigation', async () => {
 		await refresh();
 		mockMiniCart.isOpen = true;
@@ -184,7 +216,10 @@ describe( 'cart reference refresh', () => {
 		} );
 		const older = refresh();
 		await started.promise;
-		mockCart.items = [ { id: 1, quantity: 2 } ];
+		mockCart.items = [
+			{ id: 1, quantity: 1 },
+			{ id: 2, quantity: 1 },
+		];
 		await refresh();
 		cancelled.resolve();
 		await older;

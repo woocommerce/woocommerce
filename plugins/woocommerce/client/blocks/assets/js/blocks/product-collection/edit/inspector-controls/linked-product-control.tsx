@@ -167,6 +167,8 @@ const LinkedProductControl = ( {
 		REFERENCE_TYPE_PRODUCT
 	);
 	const isCartLocation = location.type === REFERENCE_TYPE_CART;
+	const referenceType: ProductCollectionQuery[ 'productReferenceType' ] =
+		isCartLocation ? REFERENCE_TYPE_CART : null;
 	const hasCartReference = !! usesReference?.includes( REFERENCE_TYPE_CART );
 
 	const isOrderLocation = location.type === REFERENCE_TYPE_ORDER;
@@ -212,9 +214,7 @@ const LinkedProductControl = ( {
 		setAttributes( {
 			query: {
 				...query,
-				productReferenceType: isCartLocation
-					? REFERENCE_TYPE_CART
-					: null,
+				productReferenceType: referenceType,
 			},
 		} );
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -248,10 +248,6 @@ const LinkedProductControl = ( {
 		if ( newValue === PRODUCT_REFERENCE_TYPE.CURRENT_PRODUCT ) {
 			const { productReference: toSave, ...rest } = query;
 			prevReference.current = toSave;
-
-			// Only `cart` can't be inferred from location context.
-			const referenceType: ProductCollectionQuery[ 'productReferenceType' ] =
-				isCartLocation ? REFERENCE_TYPE_CART : null;
 
 			setAttributes( {
 				query: {

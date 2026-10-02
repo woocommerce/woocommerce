@@ -229,7 +229,7 @@ class HandlerRegistry {
 			function ( $collection_args, $query ) {
 				$product_references = isset( $query['productReference'] ) ? array( $query['productReference'] ) : null;
 
-				// Check for explicit user choice first.
+				// A cart reference applies on any page, regardless of location.
 				$reference_type = $query['productReferenceType'] ?? null;
 
 				if ( Renderer::REFERENCE_TYPE_CART === $reference_type && empty( $product_references ) ) {
@@ -323,9 +323,7 @@ class HandlerRegistry {
 			function ( $collection_args, $query ) {
 				$product_references = isset( $query['productReference'] ) ? array( $query['productReference'] ) : null;
 
-				// Check for explicit user choice first (productReferenceType).
-				// The cart is a session-wide reference, valid on any page, so
-				// it cannot rely on location detection alone.
+				// A cart reference applies on any page, regardless of location.
 				$reference_type = $query['productReferenceType'] ?? null;
 
 				if ( Renderer::REFERENCE_TYPE_CART === $reference_type && empty( $product_references ) ) {
