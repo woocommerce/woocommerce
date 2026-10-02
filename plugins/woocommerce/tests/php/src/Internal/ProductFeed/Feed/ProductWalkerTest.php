@@ -168,6 +168,8 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 						// Check pagination.
 						$this->assertEquals( ++$loaded_page, $args['page'] );
 						$this->assertEquals( $batch_size, $args['limit'] );
+						$this->assertSame( 'ID', $args['orderby'] );
+						$this->assertSame( 'ASC', $args['order'] );
 
 						// The argument coming from the factory method should be here.
 						$this->assertEquals( $parent_exclude, $args['parent_exclude'] );
@@ -353,5 +355,43 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 		$progress = $walker->walk_batches( null, 3, 2 );
 		$this->assertSame( 1, $progress->processed_batches );
 		$this->assertSame( 2, $progress->processed_items );
+	}
+
+	/**
+	 * @testdox Should export every product exactly once when products share a date and a newer one is created mid-walk.
+	 */
+	public function test_walk_pages_are_stable_for_products_with_the_same_date(): void {
+		$product_ids = array();
+		for ( $i = 0; $i < 3; $i++ ) {
+			$product_ids[] = \WC_Helper_Product::create_simple_product( true, array( 'date_created' => '2026-01-01 00:00:00' ) )->get_id();
+		}
+
+		$exported_ids = array();
+		$mock_feed    = $this->createMock( FeedInterface::class );
+		$mock_feed->method( 'add_entry' )->willReturnCallback(
+			function ( array $entry ) use ( &$exported_ids ) {
+				$exported_ids[] = $entry['id'];
+			}
+		);
+
+		$mock_mapper = $this->createMock( ProductMapperInterface::class );
+		$mock_mapper->method( 'map_product' )->willReturnCallback(
+			fn( WC_Product $product ) => array( 'id' => $product->get_id() )
+		);
+
+		$mock_integration = $this->createMock( IntegrationInterface::class );
+		$mock_integration->method( 'get_product_mapper' )->willReturn( $mock_mapper );
+		$mock_integration->method( 'get_feed_validator' )->willReturn( $this->createMock( FeedValidatorInterface::class ) );
+		$mock_integration->method( 'get_product_feed_query_args' )->willReturn( array() );
+
+		$sut = ProductWalker::from_integration( $mock_integration, $mock_feed );
+		$sut->set_batch_size( 1 );
+		$sut->walk_batches( null, 1, 2 );
+
+		$product_ids[] = \WC_Helper_Product::create_simple_product( true, array( 'date_created' => '2026-01-02 00:00:00' ) )->get_id();
+
+		$sut->walk_batches( null, 3 );
+
+		$this->assertSame( $product_ids, $exported_ids, 'Each product should be exported once, in ID order, with the new product last' );
 	}
 }
