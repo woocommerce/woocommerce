@@ -1813,14 +1813,14 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	 * @testdox CSV import creates products with normalized customs values.
 	 */
 	public function test_import_creates_customs_values(): void {
-		$result = $this->import_customs_csv( "Type,SKU,Name,commodity_code,country_of_origin,customs_description\nsimple,customs-create,Customs product,0901%210010,ro,\"Size < 10cm, 20%Acrylic\"\n" );
+		$result = $this->import_customs_csv( "Type,SKU,Name,commodity_code,country_of_origin,customs_description\nsimple,customs-create,Customs product,0901%210010,ro,\"Salt & pepper, 20%Acrylic\"\n" );
 
 		$this->assertEmpty( $result['failed'], 'Valid customs values should be imported.' );
 		$this->assertCount( 1, $result['imported'], 'The customs row should create one product.' );
 		$product = wc_get_product( $result['imported'][0] );
 		$this->assertSame( '0901210010', $product->get_customs_commodity_code( 'edit' ), 'Commodity codes should keep every digit and remove punctuation.' );
 		$this->assertSame( 'RO', $product->get_customs_country_of_origin( 'edit' ), 'Origin codes should be normalized.' );
-		$this->assertSame( 'Size < 10cm, 20%Acrylic', $product->get_customs_description( 'edit' ), 'The description should not be entity-encoded or lose percent sequences.' );
+		$this->assertSame( 'Salt & pepper, 20%Acrylic', $product->get_customs_description( 'edit' ), 'The description should not be entity-encoded or lose percent sequences.' );
 	}
 
 	/**
