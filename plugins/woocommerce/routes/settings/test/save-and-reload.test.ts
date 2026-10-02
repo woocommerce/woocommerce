@@ -8,8 +8,8 @@ describe( 'saveAndReload', () => {
 		const calls: string[] = [];
 
 		const notice = await saveAndReload( {
-			save: async () => calls.push( 'save' ),
-			reload: async () => calls.push( 'reload' ),
+			save: () => Promise.resolve( calls.push( 'save' ) ),
+			reload: () => Promise.resolve( calls.push( 'reload' ) ),
 		} );
 
 		expect( calls ).toEqual( [ 'save', 'reload' ] );
@@ -20,12 +20,13 @@ describe( 'saveAndReload', () => {
 	} );
 
 	it( 'reloads after a failed save and reports the server message', async () => {
-		const reload = jest.fn( async () => undefined );
+		const reload = jest.fn( () => Promise.resolve() );
 
 		const notice = await saveAndReload( {
-			save: async () => {
-				throw new Error( 'The support email is not valid.' );
-			},
+			save: () =>
+				Promise.reject(
+					new Error( 'The support email is not valid.' )
+				),
 			reload,
 		} );
 
@@ -38,10 +39,8 @@ describe( 'saveAndReload', () => {
 
 	it( 'still reports the save result when the reload fails', async () => {
 		const notice = await saveAndReload( {
-			save: async () => undefined,
-			reload: async () => {
-				throw new Error( 'Offline' );
-			},
+			save: () => Promise.resolve(),
+			reload: () => Promise.reject( new Error( 'Offline' ) ),
 		} );
 
 		expect( notice.status ).toBe( 'success' );

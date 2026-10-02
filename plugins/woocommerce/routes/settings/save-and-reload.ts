@@ -3,7 +3,10 @@
  */
 import { __ } from '@wordpress/i18n';
 
-export type SaveNotice = { status: 'success' | 'error'; message: string };
+export interface SaveNotice {
+	status: 'success' | 'error';
+	message: string;
+}
 
 /**
  * Save, then reload the record whether or not the save worked.
@@ -29,7 +32,7 @@ export async function saveAndReload( {
 		notice = {
 			status: 'error',
 			message:
-				( error as Error )?.message ||
+				( error instanceof Error && error.message ) ||
 				__( 'Unable to save settings.', 'woocommerce' ),
 		};
 	}
