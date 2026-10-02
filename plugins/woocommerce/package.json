@@ -148,7 +148,8 @@
 				"changes": [
 					"composer.lock",
 					"**/*.php",
-					"**/*.js"
+					"**/*.js",
+					"routes/**"
 				]
 			},
 			"tests": [
@@ -1319,6 +1320,17 @@
 						"resultsPath": "tests/e2e/test-results",
 						"allure": true
 					}
+				},
+				{
+					"name": "JavaScript - routes",
+					"command": "test:js:routes",
+					"changes": [
+						"routes/**"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
 				}
 			]
 		}
