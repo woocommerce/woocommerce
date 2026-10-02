@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Use ISO YYYY-MM-DD format for the analytics date range picker inputs.
