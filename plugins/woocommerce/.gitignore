@@ -37,3 +37,4 @@ i18n/languages/woocommerce.pot
 
 # phpcs-changed cache (written when lint-branch.sh runs with --cache; see WC_PHPCS_CHECKSTYLE_FILE)
 .phpcs-changed-cache
+/build
