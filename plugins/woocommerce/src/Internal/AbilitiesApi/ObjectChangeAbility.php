@@ -162,7 +162,7 @@ abstract class ObjectChangeAbility extends DryRunAbility {
 				array_filter(
 					$expected,
 					static function ( $value, $field ) use ( $before ) {
-						return StagedChange::value_at( $before, (string) $field ) !== $value;
+						return ! StagedChange::same( StagedChange::value_at( $before, (string) $field ), $value );
 					},
 					ARRAY_FILTER_USE_BOTH
 				)

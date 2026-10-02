@@ -159,6 +159,32 @@ final class StagedChange {
 	}
 
 	/**
+	 * Whether two values are the same once they go through JSON: an int and a
+	 * float compare by value, because JSON writes 5.0 as 5. A number and a
+	 * numeric string still differ.
+	 *
+	 * @param mixed $a Value.
+	 * @param mixed $b Value.
+	 */
+	public static function same( $a, $b ): bool {
+		if ( is_array( $a ) && is_array( $b ) ) {
+			if ( count( $a ) !== count( $b ) ) {
+				return false;
+			}
+			foreach ( $a as $key => $value ) {
+				if ( ! array_key_exists( $key, $b ) || ! self::same( $value, $b[ $key ] ) ) {
+					return false;
+				}
+			}
+			return true;
+		}
+		if ( ( is_int( $a ) || is_float( $a ) ) && ( is_int( $b ) || is_float( $b ) ) ) {
+			return (float) $a === (float) $b;
+		}
+		return $a === $b;
+	}
+
+	/**
 	 * The value at a dotted path, or null when the path is missing.
 	 *
 	 * @param array  $values Values.

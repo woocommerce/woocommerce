@@ -337,6 +337,46 @@ class ProductAbilityContractsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should accept expected values and an undo call that went through JSON, for a float field.
+	 */
+	public function test_expected_survives_json_for_float_field(): void {
+		add_filter(
+			'woocommerce_ability_fields',
+			static function ( array $fields, string $object_type ): array {
+				if ( 'product' === $object_type ) {
+					$fields['test_wrap_fee'] = array(
+						'schema'          => array( 'type' => 'number' ),
+						'get_callback'    => static function ( \WC_Product $product ) {
+							return (float) $product->get_meta( '_test_wrap_fee' );
+						},
+						'update_callback' => static function ( $value, \WC_Product $product ) {
+							$product->update_meta_data( '_test_wrap_fee', (float) $value );
+						},
+					);
+				}
+				return $fields;
+			},
+			10,
+			2
+		);
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Mug' ) );
+		$product->update_meta_data( '_test_wrap_fee', 5.0 );
+		$product->save();
+		$ability = wp_get_ability( 'woocommerce/product-update' );
+		$input   = array(
+			'id'         => $product->get_id(),
+			'extensions' => array( 'test_wrap_fee' => 7.0 ),
+		);
+
+		$summary = json_decode( wp_json_encode( $ability->dry_run( $input ) ), true );
+		$this->assertNotWPError( $ability->execute( array_merge( $input, array( 'expected' => $summary['expected'] ) ) ) );
+		$this->assertSame( 7.0, (float) wc_get_product( $product->get_id() )->get_meta( '_test_wrap_fee' ) );
+
+		$this->assertNotWPError( wp_get_ability( $summary['undo']['ability'] )->execute( $summary['undo']['input'] ) );
+		$this->assertSame( 5.0, (float) wc_get_product( $product->get_id() )->get_meta( '_test_wrap_fee' ) );
+	}
+
+	/**
 	 * @testdox Should undo a product update with the undo call its dry run returns.
 	 */
 	public function test_product_update_undo_round_trips(): void {
