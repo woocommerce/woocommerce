@@ -134,7 +134,8 @@ final class AbilityFields {
 
 	/**
 	 * Add `extensions` to the object, or each object of a list, at the output
-	 * key. Each object is loaded by the `id` its output carries.
+	 * key, or to the output itself when the key is ''. Each object is loaded by
+	 * the `id` its output carries.
 	 *
 	 * @param mixed                $output      Ability output.
 	 * @param array<string, mixed> $declaration `object_type` and `output` key.
@@ -143,7 +144,10 @@ final class AbilityFields {
 	public static function fill_output( $output, array $declaration ) {
 		$key         = $declaration['output'] ?? null;
 		$object_type = (string) ( $declaration['object_type'] ?? '' );
-		if ( ! is_string( $key ) || ! is_array( $output ) || ! isset( $output[ $key ] ) || ! is_array( $output[ $key ] ) ) {
+		if ( ! is_string( $key ) || ! is_array( $output ) ) {
+			return $output;
+		}
+		if ( '' !== $key && ( ! isset( $output[ $key ] ) || ! is_array( $output[ $key ] ) ) ) {
 			return $output;
 		}
 
@@ -173,12 +177,19 @@ final class AbilityFields {
 			return $item;
 		};
 
-		$output[ $key ] = wp_is_numeric_array( $output[ $key ] ) ? array_map( $fill, $output[ $key ] ) : $fill( $output[ $key ] );
+		$fill_all = static function ( array $value ) use ( $fill ) {
+			return wp_is_numeric_array( $value ) ? array_map( $fill, $value ) : $fill( $value );
+		};
+		if ( '' === $key ) {
+			return $fill_all( $output );
+		}
+		$output[ $key ] = $fill_all( $output[ $key ] );
 		return $output;
 	}
 
 	/**
-	 * Add the `extensions` schema to the object, or the items of a list, at the output key.
+	 * Add the `extensions` schema to the object, or the items of a list, at the
+	 * output key, or to the output schema itself when the key is ''.
 	 *
 	 * @param array<string, mixed> $schema     Output schema.
 	 * @param string               $key        Output key.
@@ -186,6 +197,14 @@ final class AbilityFields {
 	 * @return array<string, mixed>
 	 */
 	public static function add_to_output_schema( array $schema, string $key, array $extensions ): array {
+		if ( '' === $key ) {
+			if ( 'array' === ( $schema['type'] ?? null ) ) {
+				$schema['items']['properties']['extensions'] = $extensions;
+			} else {
+				$schema['properties']['extensions'] = $extensions;
+			}
+			return $schema;
+		}
 		if ( ! isset( $schema['properties'][ $key ] ) ) {
 			return $schema;
 		}

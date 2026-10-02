@@ -14,6 +14,7 @@ defined( 'ABSPATH' ) || exit;
  * `meta.woocommerce`:
  *
  * - `extension_fields`: `object_type` and the `output` key where the object, or list of objects, sits.
+ *   An `output` of '' means the whole output is the object, or the list of objects.
  * - `in_memory_write`: `object_type`.
  *
  * Both are derived from an ObjectChangeAbility `ability_class`, with the object type as the output key, unless the ability declares them.

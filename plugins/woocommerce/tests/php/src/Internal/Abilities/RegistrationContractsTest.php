@@ -24,6 +24,10 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 
 	private const PLAIN = 'test-plugin/records-count';
 
+	private const ROOT_OBJECT = 'test-plugin/record-get';
+
+	private const ROOT_LIST = 'test-plugin/records-list';
+
 	/**
 	 * Original action counts restored in tearDown.
 	 *
@@ -395,6 +399,68 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should add extensions to an object or a list of objects that is the whole output.
+	 */
+	public function test_root_output_gains_extensions(): void {
+		$this->register( true );
+		$record_schema = array(
+			'type'       => 'object',
+			'properties' => array(
+				'id'    => array( 'type' => 'integer' ),
+				'title' => array( 'type' => 'string' ),
+			),
+		);
+		$callback      = static function () use ( $record_schema ) {
+			foreach ( array(
+				self::ROOT_OBJECT => $record_schema,
+				self::ROOT_LIST   => array(
+					'type'  => 'array',
+					'items' => $record_schema,
+				),
+			) as $name => $output_schema ) {
+				wp_register_ability(
+					$name,
+					array(
+						'label'               => 'Records',
+						'description'         => 'Records at the root of the output.',
+						'category'            => 'test-plugin',
+						'output_schema'       => $output_schema,
+						'execute_callback'    => static function () use ( $name ) {
+							$record = array(
+								'id'    => 7,
+								'title' => 'Original',
+							);
+							return self::ROOT_LIST === $name ? array( $record ) : $record;
+						},
+						'permission_callback' => '__return_true',
+						'meta'                => array(
+							'woocommerce' => array(
+								'extension_fields' => array(
+									'object_type' => 'test_record',
+									'output'      => '',
+								),
+							),
+						),
+					)
+				);
+			}
+		};
+		add_action( 'wp_abilities_api_init', $callback );
+		do_action( 'wp_abilities_api_init' );
+		remove_action( 'wp_abilities_api_init', $callback );
+
+		$expected = array(
+			'id'         => 7,
+			'title'      => 'Original',
+			'extensions' => array( 'test_notes' => 'first' ),
+		);
+		$this->assertSame( $expected, wp_get_ability( self::ROOT_OBJECT )->execute() );
+		$this->assertSame( array( $expected ), wp_get_ability( self::ROOT_LIST )->execute() );
+		$this->assertSame( 'Notes', wp_get_ability( self::ROOT_OBJECT )->get_output_schema()['properties']['extensions']['properties']['test_notes']['title'] );
+		$this->assertSame( 'Notes', wp_get_ability( self::ROOT_LIST )->get_output_schema()['items']['properties']['extensions']['properties']['test_notes']['title'] );
+	}
+
+	/**
 	 * @testdox Should return the side effects and undo call the ability declares, and keep its annotations.
 	 */
 	public function test_side_effects_undo_and_annotations(): void {
@@ -638,7 +704,7 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 	 * Unregister the plugin's abilities.
 	 */
 	private function unregister_abilities(): void {
-		foreach ( array( self::WRITE, self::READ, self::PLAIN ) as $ability_id ) {
+		foreach ( array( self::WRITE, self::READ, self::PLAIN, self::ROOT_OBJECT, self::ROOT_LIST ) as $ability_id ) {
 			if ( wp_has_ability( $ability_id ) ) {
 				wp_unregister_ability( $ability_id );
 			}
