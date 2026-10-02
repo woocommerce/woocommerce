@@ -103,8 +103,12 @@ class ProductImage extends AbstractBlock {
 
 		$is_link = isset( $attributes['showProductLink'] ) ? $attributes['showProductLink'] : true;
 
+		$padding_classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'padding' ) );
+
 		$inner_blocks_container = sprintf(
-			'<div class="wc-block-components-product-image__inner-container">%s</div>',
+			'<div class="wc-block-components-product-image__inner-container %1$s" style="%2$s">%3$s</div>',
+			esc_attr( $padding_classes_and_styles['classes'] ),
+			esc_attr( $padding_classes_and_styles['styles'] ),
 			$inner_blocks_content
 		);
 
@@ -348,7 +352,7 @@ class ProductImage extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 		$parsed_attributes     = $this->parse_attributes( $attributes );
-		$classes_and_styles    = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
+		$classes_and_styles    = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes', 'padding' ) );
 		$post_id               = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
 		$image_id              = isset( $block->context['imageId'] ) ? (int) $block->context['imageId'] : null;
 		$product               = wc_get_product( $post_id );
