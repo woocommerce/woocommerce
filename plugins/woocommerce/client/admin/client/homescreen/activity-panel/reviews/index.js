@@ -19,7 +19,7 @@ import {
 } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { get, isNull } from 'lodash';
-import { reviewsStore } from '@woocommerce/data';
+import { activityPanelStore, reviewsStore } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { CurrencyContext } from '@woocommerce/currency';
 
@@ -365,6 +365,8 @@ export default compose( [
 	withDispatch( ( dispatch, props ) => {
 		const { deleteReview, updateReview, invalidateResolution } =
 			dispatch( reviewsStore );
+		const { invalidateResolution: invalidateActivityPanel } =
+			dispatch( activityPanelStore );
 		const { createNotice } = dispatch( 'core/notices' );
 
 		const clearReviewsCache = () => {
@@ -374,6 +376,7 @@ export default compose( [
 					unapprovedReviewsQuery,
 				] );
 			}
+			invalidateActivityPanel( 'getActivityPanelCounts', [] );
 		};
 
 		return {

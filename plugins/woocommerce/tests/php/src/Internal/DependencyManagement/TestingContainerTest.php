@@ -28,6 +28,8 @@ class TestingContainerTest extends \WC_Unit_Test_Case {
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
+		parent::setUp();
+
 		$base_container = new RuntimeContainer(
 			array( 'Foo\Bar' => $this )
 		);

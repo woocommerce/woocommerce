@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Generate the POS catalog feed in chunks across several Action Scheduler actions so large catalogs no longer exceed the host request timeout or Action Scheduler's failure period mid-generation, and detect and restart stuck generation jobs that would otherwise stay pinned in progress forever.

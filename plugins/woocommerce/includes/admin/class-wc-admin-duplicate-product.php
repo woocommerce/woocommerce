@@ -8,6 +8,7 @@
 
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -187,6 +188,10 @@ class WC_Admin_Duplicate_Product {
 
 		// Save parent product.
 		$duplicate->save();
+
+		if ( ProductMediaGallery::is_feature_enabled() ) {
+			ProductMediaGallery::copy_stored_video_gallery_items( $product, $duplicate );
+		}
 
 		/**
 		 * Duplicate children of a variable product.

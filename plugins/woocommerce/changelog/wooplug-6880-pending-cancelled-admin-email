@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Send cancelled order admin emails when pending orders are cancelled.

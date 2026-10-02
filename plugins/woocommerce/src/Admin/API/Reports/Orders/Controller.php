@@ -414,11 +414,14 @@ class Controller extends GenericController implements ExportableInterface {
 	/**
 	 * Get customer name column export value.
 	 *
+	 * Analytics rows can contain an empty customer array when the customer record is missing, and guest
+	 * orders may include only a first or last name, so neither key is guaranteed.
+	 *
 	 * @param array $customer Customer from report row.
 	 * @return string
 	 */
 	protected function get_customer_name( $customer ) {
-		return $customer['first_name'] . ' ' . $customer['last_name'];
+		return trim( ( $customer['first_name'] ?? '' ) . ' ' . ( $customer['last_name'] ?? '' ) );
 	}
 
 	/**

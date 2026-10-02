@@ -81,6 +81,35 @@ describe( 'createNoticesFromResponse', () => {
 		expect( call2 ).toEqual( [ 'error', response.errors.item2[ 0 ] ] );
 	} );
 
+	test( 'should create an error notice when the response is a thrown Error', () => {
+		// Mirrors the PluginError thrown by @woocommerce/data's plugin actions: an
+		// Error subclass carrying a message and data, but no code.
+		class PluginError extends Error {
+			constructor( message, data ) {
+				super( message );
+				this.data = data;
+			}
+		}
+		const response = new PluginError( 'Could not install foo. Reason.', {
+			foo: [ 'Reason.' ],
+		} );
+
+		createNoticesFromResponse( response );
+		expect( createNotice ).toHaveBeenCalledWith(
+			'error',
+			response.message
+		);
+		expect( createNotice ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	test( 'should not create an empty error notice when an Error has no message', () => {
+		// Pins the message guard inside the Error branch: an Error inherits an
+		// empty `message` from the prototype, so without the guard this would
+		// dispatch a notice with no text.
+		createNoticesFromResponse( new Error() );
+		expect( createNotice ).not.toHaveBeenCalled();
+	} );
+
 	test( 'should not call createNotice when no message or errors exist', () => {
 		const response = { data: {} };
 

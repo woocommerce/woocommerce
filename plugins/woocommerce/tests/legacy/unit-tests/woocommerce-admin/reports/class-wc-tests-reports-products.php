@@ -8,6 +8,7 @@
 
 use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 use Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Products\Stats\DataStore as ProductsStatsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\ReportCSVExporter;
 use Automattic\WooCommerce\Enums\OrderStatus;
@@ -776,6 +777,281 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$this->assertEquals( 100, $export->get_percent_complete() );
 		$this->assertEquals( 0, $export->get_total_exported() );
 		$this->assertEquals( $expected_csv, $actual_csv );
+	}
+
+	/**
+	 * @testdox Should report nothing when the category and product filters have no product in common.
+	 *
+	 * An empty intersection was indistinguishable from an absent product filter, so both filters
+	 * were dropped and the report covered every product instead of none.
+	 */
+	public function test_disjoint_category_and_product_filters() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$in_category = new WC_Product_Simple();
+		$in_category->set_name( 'In Category' );
+		$in_category->set_regular_price( 25 );
+		$in_category->save();
+
+		$outside = new WC_Product_Simple();
+		$outside->set_name( 'Outside Category' );
+		$outside->set_regular_price( 25 );
+		$outside->save();
+
+		$term = wp_insert_term( 'Filtered Category', 'product_cat' );
+		wp_set_object_terms( $in_category->get_id(), array( $term['term_id'] ), 'product_cat' );
+
+		foreach ( array( $in_category, $outside ) as $product ) {
+			$order = WC_Helper_Order::create_order( 1, $product );
+			$order->set_status( OrderStatus::COMPLETED );
+			$order->set_total( 100 );
+			$order->save();
+		}
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$data_store = new ProductsDataStore();
+		$args       = array(
+			'after'             => '2000-01-01 00:00:00',
+			'before'            => '2100-01-01 00:00:00',
+			'category_includes' => array( $term['term_id'] ),
+			'product_includes'  => array( $outside->get_id() ),
+		);
+
+		$data = $data_store->get_data( $args );
+
+		$this->assertEquals( 0, $data->total, 'A product filter that excludes every product in the category should report nothing' );
+		$this->assertSame( array(), $data->data );
+
+		$args['product_includes'] = array( $in_category->get_id() );
+
+		$data = $data_store->get_data( $args );
+
+		$this->assertEquals( 1, $data->total );
+		$this->assertEquals( $in_category->get_id(), $data->data[0]['product_id'] );
+	}
+
+	/**
+	 * @testdox Should report nothing when a product filter is combined with an empty category.
+	 */
+	public function test_product_filter_with_an_empty_category() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Uncategorized Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->set_total( 100 );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$term = wp_insert_term( 'Empty Category', 'product_cat' );
+
+		$data_store = new ProductsDataStore();
+		$data       = $data_store->get_data(
+			array(
+				'after'             => '2000-01-01 00:00:00',
+				'before'            => '2100-01-01 00:00:00',
+				'category_includes' => array( $term['term_id'] ),
+				'product_includes'  => array( $product->get_id() ),
+			)
+		);
+
+		$this->assertEquals( 0, $data->total, 'An empty category should keep forcing an empty set once a product filter is added' );
+		$this->assertSame( array(), $data->data );
+	}
+
+	/**
+	 * @testdox Should not answer a search from the report cache.
+	 *
+	 * Which products a term matches is resolved while the report runs, and nothing invalidates the
+	 * report cache when a product is renamed, so a cached response would keep the old matches.
+	 */
+	public function test_a_search_is_not_answered_from_the_report_cache() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$matching = new WC_Product_Simple();
+		$matching->set_name( 'Cached Widget' );
+		$matching->set_regular_price( 25 );
+		$matching->save();
+
+		$renamed = new WC_Product_Simple();
+		$renamed->set_name( 'Cached Gadget' );
+		$renamed->set_regular_price( 25 );
+		$renamed->save();
+
+		foreach ( array( $matching, $renamed ) as $product ) {
+			$order = WC_Helper_Order::create_order( 1, $product );
+			$order->set_status( OrderStatus::COMPLETED );
+			$order->set_total( 100 );
+			$order->save();
+		}
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$args = array(
+			'after'  => '2000-01-01 00:00:00',
+			'before' => '2100-01-01 00:00:00',
+			'search' => array( 'Widget' ),
+		);
+
+		$data = ( new ProductsDataStore() )->get_data( $args );
+
+		$this->assertEquals( 1, $data->total );
+		$this->assertEquals( $matching->get_id(), $data->data[0]['product_id'] );
+
+		$renamed->set_name( 'Renamed Widget' );
+		$renamed->save();
+
+		$data        = ( new ProductsDataStore() )->get_data( $args );
+		$product_ids = wp_list_pluck( $data->data, 'product_id' );
+
+		$this->assertEquals( 2, $data->total, 'A product renamed into the search term should show up right away' );
+		$this->assertContains( $renamed->get_id(), $product_ids );
+
+		$stats = ( new ProductsStatsDataStore() )->get_data( array_merge( $args, array( 'interval' => 'year' ) ) );
+
+		$this->assertEquals( 2, $stats->totals->products_count, 'The stats endpoint should see the same matches' );
+	}
+
+	/**
+	 * @testdox Should still run the cache opt out filter when the report carries a search.
+	 *
+	 * The parent implementation is what applies it, so returning before that runs would take the
+	 * report out of the cache without telling the plugins listening.
+	 */
+	public function test_the_cache_opt_out_filter_runs_for_a_searched_report() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Filtered Widget' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->set_total( 100 );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$cache_keys = array();
+		$record     = function ( $use_cache, $cache_key ) use ( &$cache_keys ) {
+			$cache_keys[] = $cache_key;
+
+			return $use_cache;
+		};
+
+		add_filter( 'woocommerce_analytics_report_should_use_cache', $record, 10, 2 );
+
+		( new ProductsDataStore() )->get_data(
+			array(
+				'after'  => '2000-01-01 00:00:00',
+				'before' => '2100-01-01 00:00:00',
+				'search' => array( 'Widget' ),
+			)
+		);
+
+		remove_filter( 'woocommerce_analytics_report_should_use_cache', $record, 10 );
+
+		$this->assertSame( array( 'products' ), array_unique( $cache_keys ), 'A searched report should reach the filter under its own cache key' );
+	}
+
+	/**
+	 * @testdox Should keep answering a report without a search from the cache.
+	 */
+	public function test_a_report_without_a_search_is_still_cached() {
+		global $wpdb;
+
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Cached Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->set_total( 100 );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$args = array(
+			'after'  => '2000-01-01 00:00:00',
+			'before' => '2100-01-01 00:00:00',
+		);
+
+		$data       = ( new ProductsDataStore() )->get_data( $args );
+		$items_sold = $data->data[0]['items_sold'];
+
+		// Change the report data behind the cache's back, so only a fresh query can see it.
+		$wpdb->query( "UPDATE {$wpdb->prefix}wc_order_product_lookup SET product_qty = product_qty + 10" );
+
+		$data = ( new ProductsDataStore() )->get_data( $args );
+
+		$this->assertEquals( $items_sold, $data->data[0]['items_sold'], 'A report without a search should still be answered from the cache' );
+	}
+
+	/**
+	 * @testdox Should not require a `search` argument from a caller that builds its own query arguments.
+	 *
+	 * `get_noncached_data()` is public, so an extension can call it with the arguments it put
+	 * together before the search argument existed. Reading a key that is not there would warn.
+	 */
+	public function test_get_noncached_data_without_a_search_argument() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Direct Caller Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->set_total( 100 );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		// The defaults as they stood before `search` was added to them.
+		$args = array(
+			'per_page'          => 10,
+			'page'              => 1,
+			'order'             => 'DESC',
+			'orderby'           => 'date',
+			'before'            => new WC_DateTime( '2100-01-01 00:00:00' ),
+			'after'             => new WC_DateTime( '2000-01-01 00:00:00' ),
+			'fields'            => '*',
+			'category_includes' => array(),
+			'product_includes'  => array(),
+			'extended_info'     => false,
+		);
+
+		$data = ( new ProductsDataStore() )->get_noncached_data( $args );
+
+		$this->assertEquals( 1, $data->total );
+		$this->assertEquals( $product->get_id(), $data->data[0]['product_id'] );
+
+		$stats_data = (object) array(
+			'totals'    => null,
+			'intervals' => array(),
+		);
+		$stats      = ( new ProductsStatsDataStore() )->get_noncached_stats_data(
+			array_merge( $args, array( 'interval' => 'year' ) ),
+			array(
+				'per_page' => 10,
+				'offset'   => 0,
+			),
+			$stats_data,
+			1
+		);
+
+		$this->assertEquals( 1, $stats->totals->products_count, 'The stats data store should take the same arguments' );
 	}
 
 	/**

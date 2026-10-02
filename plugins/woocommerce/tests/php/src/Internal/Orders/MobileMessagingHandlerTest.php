@@ -18,29 +18,93 @@ class MobileMessagingHandlerTest extends \WC_Unit_Test_Case {
 	const ORDER_ID = 5;
 	const DOMAIN   = 'sample-domain.com';
 
-	/**
-	 * @var string $initial_country that is set on site which is a platform for unit tests, before running tests in this test suite.
-	 */
-	private static $initial_country = '';
-	/**
-	 * @var string $initial_currency that is set on site which is a platform for unit tests, before running tests in this test suite.
-	 */
-	private static $initial_currency = '';
+	/** @var array{exists: bool, value: string|null, autoload: string|null} Initial raw country option state. */
+	private static array $initial_country = array();
+
+	/** @var array{exists: bool, value: string|null, autoload: string|null} Initial raw currency option state. */
+	private static array $initial_currency = array();
 
 	/**
 	 * Saves values of initial country and currency before running test suite.
 	 */
 	public static function wpSetUpBeforeClass(): void {
-		self::$initial_country  = WC()->countries->get_base_country();
-		self::$initial_currency = get_woocommerce_currency();
+		self::$initial_country  = self::get_raw_option_state( 'woocommerce_default_country' );
+		self::$initial_currency = self::get_raw_option_state( 'woocommerce_currency' );
 	}
 
 	/**
 	 * Restores initial values of country and currency after running test suite.
 	 */
 	public static function wpTearDownAfterClass(): void {
-		update_option( 'woocommerce_default_country', self::$initial_country );
-		update_option( 'woocommerce_currency', self::$initial_currency );
+		try {
+			self::restore_raw_option_state( 'woocommerce_default_country', self::$initial_country );
+		} finally {
+			self::restore_raw_option_state( 'woocommerce_currency', self::$initial_currency );
+		}
+	}
+
+	/**
+	 * Read an option without default-option filters or value coercion.
+	 *
+	 * @param string $option_name Option name.
+	 * @return array{exists: bool, value: string|null, autoload: string|null}
+	 */
+	private static function get_raw_option_state( string $option_name ): array {
+		global $wpdb;
+
+		$row = $wpdb->get_row(
+			$wpdb->prepare( "SELECT option_value, autoload FROM {$wpdb->options} WHERE option_name = %s", $option_name ),
+			ARRAY_A
+		);
+
+		return null === $row
+			? array(
+				'exists'   => false,
+				'value'    => null,
+				'autoload' => null,
+			)
+			: array(
+				'exists'   => true,
+				'value'    => $row['option_value'],
+				'autoload' => $row['autoload'],
+			);
+	}
+
+	/**
+	 * Restore an option without invoking setting sanitizers.
+	 *
+	 * @param string                                                         $option_name Option name.
+	 * @param array{exists: bool, value: string|null, autoload: string|null} $state Raw option state.
+	 */
+	private static function restore_raw_option_state( string $option_name, array $state ): void {
+		global $wpdb;
+
+		if ( ! $state['exists'] ) {
+			$result = $wpdb->delete( $wpdb->options, array( 'option_name' => $option_name ) );
+		} elseif ( self::get_raw_option_state( $option_name )['exists'] ) {
+			$result = $wpdb->update(
+				$wpdb->options,
+				array(
+					'option_value' => $state['value'],
+					'autoload'     => $state['autoload'],
+				),
+				array( 'option_name' => $option_name )
+			);
+		} else {
+			$result = $wpdb->insert(
+				$wpdb->options,
+				array(
+					'option_name'  => $option_name,
+					'option_value' => $state['value'],
+					'autoload'     => $state['autoload'],
+				)
+			);
+		}
+		\PHPUnit\Framework\Assert::assertNotFalse( $result, "Failed to restore option {$option_name}." );
+
+		wp_cache_delete( $option_name, 'options' );
+		wp_cache_delete( 'alloptions', 'options' );
+		wp_cache_delete( 'notoptions', 'options' );
 	}
 
 	/**

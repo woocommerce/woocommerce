@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add per-period `refunds` field to the legacy REST sales report so consumers can compute net sales per day or month (fixes #27552, #42694).

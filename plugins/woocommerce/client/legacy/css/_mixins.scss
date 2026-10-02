@@ -98,6 +98,7 @@
  */
 @mixin vertical_gradient($from: #000, $to: #fff) {
 	background-color: $from;
+	// stylelint-disable-next-line declaration-block-no-shorthand-property-overrides -- background-color is the fallback for browsers without gradient support.
 	background: -webkit-linear-gradient($from, $to);
 }
 
@@ -131,9 +132,7 @@
 	@if lightness($a) >= 65% {
 
 		@include text_shadow(0, -1px, 0, rgba(0, 0, 0, $opacity));
-	}
-
-	@else {
+	} @else {
 
 		@include text_shadow(0, 1px, 0, rgba(255, 255, 255, $opacity));
 	}
@@ -180,9 +179,9 @@
 }
 
 @mixin icon( $glyph: "\e001" ) {
-	font-family: "WooCommerce";
+	font-family: WooCommerce;
 	speak: never;
-	font-weight: normal;
+	font-weight: 400;
 	font-variant: normal;
 	text-transform: none;
 	line-height: 1;
@@ -198,9 +197,9 @@
 }
 
 @mixin icon_dashicons( $glyph: "\f333" ) {
-	font-family: "Dashicons";
+	font-family: Dashicons;
 	speak: never;
-	font-weight: normal;
+	font-weight: 400;
 	font-variant: normal;
 	text-transform: none;
 	line-height: 1;
@@ -217,9 +216,9 @@
 }
 
 @mixin iconbefore( $glyph: "\e001" ) {
-	font-family: "WooCommerce";
+	font-family: WooCommerce;
 	speak: never;
-	font-weight: normal;
+	font-weight: 400;
 	font-variant: normal;
 	text-transform: none;
 	line-height: 1;
@@ -230,9 +229,9 @@
 }
 
 @mixin iconbeforedashicons( $glyph: "\f333" ) {
-	font-family: "Dashicons";
+	font-family: Dashicons;
 	speak: never;
-	font-weight: normal;
+	font-weight: 400;
 	font-variant: normal;
 	text-transform: none;
 	line-height: 1;
@@ -242,9 +241,9 @@
 }
 
 @mixin iconafter( $glyph: "\e001" ) {
-	font-family: "WooCommerce";
+	font-family: WooCommerce;
 	speak: never;
-	font-weight: normal;
+	font-weight: 400;
 	font-variant: normal;
 	text-transform: none;
 	line-height: 1;
@@ -288,6 +287,7 @@
 }
 
 @mixin table-marks() {
+
 	mark {
 		background: transparent none;
 	}
@@ -371,7 +371,7 @@
 		width: 2px;
 	}
 
-	& span[aria-hidden="true"] {
+	span[aria-hidden="true"] {
 		border: 0;
 		clip-path: inset(50%);
 		height: 1px;

@@ -36,6 +36,90 @@ const getArrowsState = ( imageIndex: number, totalImages: number ) => ( {
 	isDisabledNext: imageIndex === totalImages - 1,
 } );
 
+const DIALOG_VIDEO_INTERSECTION_HEIGHT_RATIO = 0.25;
+const pendingViewerImages = new WeakMap< HTMLElement, number >();
+
+const getVerticalIntersectionRatio = ( rect: DOMRect, rootRect: DOMRect ) => {
+	const height =
+		Math.min( rect.bottom, rootRect.bottom ) -
+		Math.max( rect.top, rootRect.top );
+	const referenceHeight = Math.min( rect.height, rootRect.height );
+
+	return referenceHeight ? Math.max( 0, height ) / referenceHeight : 0;
+};
+
+const isDialogVideoInView = ( video: HTMLVideoElement ) => {
+	const scrollableContainer = video.closest( SELECTORS.dialogContent );
+
+	if ( ! scrollableContainer ) {
+		return false;
+	}
+
+	const videoRect = video.getBoundingClientRect();
+	const containerRect = scrollableContainer.getBoundingClientRect();
+
+	return (
+		getVerticalIntersectionRatio( videoRect, containerRect ) >=
+		DIALOG_VIDEO_INTERSECTION_HEIGHT_RATIO
+	);
+};
+
+const isDialogVideoIntersectionInView = (
+	entry: IntersectionObserverEntry
+) => {
+	if ( ! entry.rootBounds || ! entry.boundingClientRect.height ) {
+		return false;
+	}
+
+	return (
+		getVerticalIntersectionRatio(
+			entry.boundingClientRect,
+			entry.rootBounds
+		) >= DIALOG_VIDEO_INTERSECTION_HEIGHT_RATIO
+	);
+};
+
+const syncVideoPlaybackState = (
+	video: HTMLVideoElement,
+	shouldPlay: boolean
+) => {
+	if ( shouldPlay && video.paused ) {
+		void video.play().catch( () => undefined );
+	} else if ( ! shouldPlay && ! video.paused ) {
+		video.pause();
+	}
+};
+
+const syncVideoElementPlayback = (
+	video: HTMLVideoElement,
+	selectedImageId: number,
+	isDialogOpen: boolean,
+	videoLocation?: ProductGalleryContext[ 'videoLocation' ]
+) => {
+	const imageId = Number( video.getAttribute( 'data-image-id' ) ?? 0 );
+	const shouldPlayInDialog =
+		videoLocation === 'dialog' &&
+		isDialogOpen &&
+		isDialogVideoInView( video );
+	const shouldPlayInGallery =
+		videoLocation === 'gallery' &&
+		selectedImageId === imageId &&
+		! isDialogOpen;
+	const shouldPlay = shouldPlayInDialog || shouldPlayInGallery;
+
+	syncVideoPlaybackState( video, shouldPlay );
+};
+
+const syncScopedVideoElementPlayback = ( video: HTMLVideoElement ) => {
+	const { selectedImageId, isDialogOpen, videoLocation } = getContext();
+	syncVideoElementPlayback(
+		video,
+		selectedImageId,
+		isDialogOpen,
+		videoLocation
+	);
+};
+
 /** Read the `products` map from the WooCommerce iAPI config (or `{}`). */
 const getConfiguredProducts = () =>
 	( getConfig( 'woocommerce' ) as ProductGalleryConfig )?.products || {};
@@ -80,20 +164,74 @@ const computeArrowsState = ( imageData: number[], selectedImageId: number ) => {
 	return getArrowsState( index, imageData.length );
 };
 
-/** Scroll both the large viewer and the thumbnail strip to the given image. */
-const scrollImageEverywhereIntoView = (
-	imageId: number,
-	behavior: ScrollBehavior = 'smooth'
+/** Update the selected image and arrow states without scrolling. */
+const updateSelectedImage = ( imageId: number ) => {
+	const context = getContext();
+	Object.assign( context, {
+		selectedImageId: imageId,
+		...computeArrowsState( context.imageData, imageId ),
+	} );
+};
+
+/** Observe every slide and return a function to refresh their visibility. */
+const initSlidesObservers = (
+	container: HTMLElement,
+	observer: IntersectionObserver
 ) => {
-	scrollImageIntoView( imageId, behavior );
-	scrollThumbnailIntoView( imageId );
+	const slides = container.querySelectorAll( SELECTORS.largeImageWrapper );
+	const resetSlidesObservers = () => {
+		observer.disconnect();
+		slides.forEach( ( slide ) => observer.observe( slide ) );
+	};
+	resetSlidesObservers();
+	return resetSlidesObservers;
+};
+
+/** Resume visible-slide selection when user input interrupts navigation. */
+const initInterruptionEvents = (
+	container: HTMLElement,
+	resetSlidesObservers: () => void
+) => {
+	const onUserInput = () => {
+		if ( pendingViewerImages.delete( container ) ) {
+			// The visible slide may have crossed the threshold before the interruption.
+			resetSlidesObservers();
+		}
+	};
+	const events = [ 'pointerdown', 'wheel', 'keydown' ];
+	for ( const event of events ) {
+		container.addEventListener( event, onUserInput, {
+			capture: true,
+			passive: true,
+		} );
+	}
+	return () => {
+		for ( const event of events ) {
+			container.removeEventListener( event, onUserInput, true );
+		}
+	};
+};
+
+/** Reset viewer alignment when its width changes. */
+const initViewerResizeObserver = (
+	container: HTMLElement,
+	resetAlignment: () => void
+) => {
+	let width = container.clientWidth;
+	const observer = new ResizeObserver( () => {
+		if ( width !== container.clientWidth ) {
+			width = container.clientWidth;
+			resetAlignment();
+		}
+	} );
+	observer.observe( container );
+	return () => observer.disconnect();
 };
 
 /**
- * Mutate the gallery's reactive context to reflect a new visible image
- * set. Empty input restores the parent product's gallery from the iAPI
- * config. Also recomputes arrow states and scrolls the active slot into
- * view.
+ * Update the image set, selection, arrows and thumbnail position.
+ * Empty input restores the parent gallery from the iAPI config.
+ * The viewer watcher resets alignment after the slide layout updates.
  */
 const updateVisibleImageSet = (
 	imageIds: number[],
@@ -107,22 +245,16 @@ const updateVisibleImageSet = (
 		nextImageData,
 		selectedImageId
 	);
-	const arrowsState = computeArrowsState(
-		nextImageData,
-		nextSelectedImageId
-	);
-
-	context.imageData = nextImageData;
-	context.selectedImageId = nextSelectedImageId;
+	// A reset must rerun the viewer watcher even when the image list is unchanged.
+	context.imageData = [ ...nextImageData ];
 	context.hideNextPreviousButtons = nextImageData.length <= 1;
-	context.isDisabledPrevious = arrowsState.isDisabledPrevious;
-	context.isDisabledNext = arrowsState.isDisabledNext;
+	updateSelectedImage( nextSelectedImageId );
 
 	if ( nextSelectedImageId === -1 ) {
 		return;
 	}
 
-	scrollImageEverywhereIntoView( nextSelectedImageId, 'instant' );
+	scrollThumbnailIntoView( nextSelectedImageId );
 };
 
 /**
@@ -206,9 +338,21 @@ const scrollImageIntoView = (
 		return;
 	}
 
+	const direction =
+		getComputedStyle( scrollableContainer ).direction === 'rtl' ? -1 : 1;
+	const left = imageIndex * scrollableContainer.clientWidth * direction;
+	if ( Math.abs( scrollableContainer.scrollLeft - left ) > 1 ) {
+		pendingViewerImages.set( scrollableContainer, imageId );
+	} else {
+		pendingViewerImages.delete( scrollableContainer );
+	}
+
 	scrollableContainer.scrollTo( {
-		left: imageIndex * scrollableContainer.clientWidth,
-		behavior,
+		left,
+		behavior: window.matchMedia( '(prefers-reduced-motion: reduce)' )
+			.matches
+			? 'instant'
+			: behavior,
 	} );
 };
 
@@ -237,7 +381,7 @@ const scrollThumbnailIntoView = ( imageId: number ) => {
 	}
 
 	const thumbnailElement = galleryContainer.querySelector(
-		`${ SELECTORS.thumbnail } ${ SELECTORS.imgByImageId( imageId ) }`
+		`${ SELECTORS.thumbnail } ${ SELECTORS.elementByImageId( imageId ) }`
 	);
 
 	if ( ! thumbnailElement ) {
@@ -310,14 +454,7 @@ const productGallery = {
 			}
 
 			const imageId = imageData[ newImageIndex ];
-			const { isDisabledPrevious, isDisabledNext } = getArrowsState(
-				newImageIndex,
-				imageData.length
-			);
-
-			context.isDisabledPrevious = isDisabledPrevious;
-			context.isDisabledNext = isDisabledNext;
-			context.selectedImageId = imageId;
+			updateSelectedImage( imageId );
 
 			if ( imageId !== -1 ) {
 				scrollImageIntoView( imageId );
@@ -347,19 +484,7 @@ const productGallery = {
 			if ( Number.isNaN( imageId ) ) {
 				return;
 			}
-			const context = getContext();
-			const newImageIndex = context.imageData.indexOf( imageId );
-
-			context.selectedImageId = imageId;
-
-			if ( newImageIndex >= 0 ) {
-				const arrowsState = getArrowsState(
-					newImageIndex,
-					context.imageData.length
-				);
-				context.isDisabledPrevious = arrowsState.isDisabledPrevious;
-				context.isDisabledNext = arrowsState.isDisabledNext;
-			}
+			updateSelectedImage( imageId );
 
 			scrollImageIntoView( imageId );
 			scrollThumbnailIntoView( imageId );
@@ -389,7 +514,7 @@ const productGallery = {
 
 			actions.selectImage( newImageIndex );
 		},
-		onViewerImageKeyDown: ( event: KeyboardEvent ) => {
+		onViewerImageKeyDown: withSyncEvent( ( event: KeyboardEvent ) => {
 			if ( event.key === 'Enter' || event.key === ' ' ) {
 				if ( event.key === ' ' ) {
 					event.preventDefault();
@@ -398,13 +523,15 @@ const productGallery = {
 			}
 
 			if ( event.key === 'ArrowRight' ) {
+				event.preventDefault();
 				actions.selectNextImage();
 			}
 
 			if ( event.key === 'ArrowLeft' ) {
+				event.preventDefault();
 				actions.selectPreviousImage();
 			}
-		},
+		} ),
 		onDialogKeyDown: ( event: KeyboardEvent ) => {
 			if ( event.key === 'Escape' ) {
 				actions.closeDialog();
@@ -464,52 +591,6 @@ const productGallery = {
 			context.isDialogOpen = false;
 			document.body.classList.remove( CLASSES.dialogOpenBody );
 		},
-		onTouchStart: ( event: TouchEvent ) => {
-			const context = getContext();
-			const { clientX } = event.touches[ 0 ];
-			context.touchStartX = clientX;
-			context.touchCurrentX = clientX;
-			context.isDragging = true;
-		},
-		onTouchMove: ( event: TouchEvent ) => {
-			const context = getContext();
-			if ( ! context.isDragging ) {
-				return;
-			}
-			const { clientX } = event.touches[ 0 ];
-			context.touchCurrentX = clientX;
-
-			// Only prevent default if there's significant horizontal movement
-			const delta = clientX - context.touchStartX;
-			if ( Math.abs( delta ) > 10 ) {
-				event.preventDefault();
-			}
-		},
-		onTouchEnd: () => {
-			const context = getContext();
-			if ( ! context.isDragging ) {
-				return;
-			}
-
-			const SNAP_THRESHOLD = 0.2;
-			const delta = context.touchCurrentX - context.touchStartX;
-			const element = getElement()?.ref as HTMLElement;
-			const imageWidth = element?.offsetWidth || 0;
-
-			// Only trigger swipe actions if there was significant movement
-			if ( Math.abs( delta ) > imageWidth * SNAP_THRESHOLD ) {
-				if ( delta > 0 && ! context.isDisabledPrevious ) {
-					actions.selectPreviousImage();
-				} else if ( delta < 0 && ! context.isDisabledNext ) {
-					actions.selectNextImage();
-				}
-			}
-
-			// Reset touch state
-			context.isDragging = false;
-			context.touchStartX = 0;
-			context.touchCurrentX = 0;
-		},
 		onScroll: () => {
 			const scrollableElement = getElement()?.ref;
 			if ( ! scrollableElement ) {
@@ -544,7 +625,7 @@ const productGallery = {
 				);
 				if ( galleryContainer ) {
 					const selectedImage = galleryContainer.querySelector(
-						SELECTORS.imgByImageId( selectedImageId )
+						SELECTORS.elementByImageId( selectedImageId )
 					) as HTMLElement;
 					if ( selectedImage ) {
 						selectedImage.focus( { preventScroll: true } );
@@ -567,6 +648,92 @@ const productGallery = {
 		},
 	},
 	callbacks: {
+		/**
+		 * Keep thumbnails and arrows in sync with the visible slide:
+		 * - Update thumbnail selection during native swipes and trackpad scrolling.
+		 * - Keep the thumbnail clicked by the user selected unless interrupted by another user input.
+		 * - Reset the selected image's alignment after variation or gallery width changes.
+		 */
+		watchViewerScroll: () => {
+			const container = getElement()?.ref;
+			if ( ! ( container instanceof HTMLElement ) ) {
+				return;
+			}
+
+			// Reset alignment after variation changes, once slide visibility and order have updated.
+			const { imageData } = getContext();
+			let frame = 0;
+			const alignSelectedImage = withScope( () => {
+				scrollImageIntoView( getContext().selectedImageId, 'instant' );
+				frame = 0;
+			} );
+			const resetAlignment = () => {
+				cancelAnimationFrame( frame );
+				frame = requestAnimationFrame( alignSelectedImage );
+			};
+			// Avoid two slides qualifying when both are exactly half visible.
+			const visibilityThreshold = 0.51;
+			const observer = new IntersectionObserver(
+				withScope( ( entries: IntersectionObserverEntry[] ) => {
+					const context = getContext();
+					if ( frame || context.imageData !== imageData ) {
+						return;
+					}
+
+					const visibleSlide = entries.find(
+						( entry ) =>
+							entry.intersectionRatio >= visibilityThreshold
+					);
+					const image =
+						visibleSlide?.target.querySelector< HTMLElement >(
+							'[data-image-id]'
+						);
+					const imageId = Number( image?.dataset.imageId );
+					const index = imageData.indexOf( imageId );
+					if ( index < 0 ) {
+						return;
+					}
+
+					const pendingImage = pendingViewerImages.get( container );
+					// Keep the clicked thumbnail selected while scrolling past intermediate images.
+					if (
+						pendingImage !== undefined &&
+						imageId !== pendingImage
+					) {
+						return;
+					}
+					pendingViewerImages.delete( container );
+					if ( imageId === context.selectedImageId ) {
+						return;
+					}
+
+					updateSelectedImage( imageId );
+					scrollThumbnailIntoView( imageId );
+				} ),
+				{ root: container, threshold: visibilityThreshold }
+			);
+			const resetSlidesObservers = initSlidesObservers(
+				container,
+				observer
+			);
+			const removeInterruptionEvents = initInterruptionEvents(
+				container,
+				resetSlidesObservers
+			);
+			const disconnectResizeObserver = initViewerResizeObserver(
+				container,
+				resetAlignment
+			);
+			resetAlignment();
+
+			return () => {
+				observer.disconnect();
+				removeInterruptionEvents();
+				pendingViewerImages.delete( container );
+				disconnectResizeObserver();
+				cancelAnimationFrame( frame );
+			};
+		},
 		/**
 		 * Sync the gallery to the blockified Add to Cart + Options block's
 		 * variation state. Bound via `data-wp-watch`, so it re-runs whenever
@@ -635,53 +802,59 @@ const productGallery = {
 			}
 
 			const productImageSet = getProductImageSet( context.productId );
-			const syncFormVariationGallery = withScope( () => {
-				if ( ! productImageSet ) {
+			const syncFormVariationGallery = withScope(
+				( variationId?: number, featuredImageId?: number ) => {
+					if ( ! productImageSet ) {
+						actions.resetImageData();
+						return;
+					}
+
+					const $variationIdInput = $form.querySelector(
+						SELECTORS.legacyVariationIdInput
+					) as HTMLInputElement | null;
+					const hasVariationIdInput = !! $variationIdInput;
+					const currentVariationId =
+						variationId ??
+						Number.parseInt( $variationIdInput?.value || '0', 10 );
+
+					// When the form exposes a variation_id input but it's empty,
+					// the merchant cleared the variation — restore the parent
+					// gallery instead of guessing from `current-image`.
+					if ( hasVariationIdInput && ! currentVariationId ) {
+						actions.resetImageData();
+						return;
+					}
+
+					const currentImageId =
+						featuredImageId ??
+						Number.parseInt(
+							$form.getAttribute( 'current-image' ) || '0',
+							10
+						);
+					const variationImageSet = currentVariationId
+						? productImageSet.variations?.[ currentVariationId ]
+						: getVariationImageSetByCurrentImage(
+								productImageSet,
+								currentImageId
+						  );
+
+					if ( variationImageSet?.image_ids?.length ) {
+						actions.setImageData(
+							variationImageSet.image_ids,
+							currentImageId || variationImageSet.image_id
+						);
+						return;
+					}
+
 					actions.resetImageData();
-					return;
 				}
-
-				const $variationIdInput = $form.querySelector(
-					SELECTORS.legacyVariationIdInput
-				) as HTMLInputElement | null;
-				const hasVariationIdInput = !! $variationIdInput;
-				const currentVariationId = Number.parseInt(
-					$variationIdInput?.value || '0',
-					10
-				);
-
-				// When the form exposes a variation_id input but it's empty,
-				// the merchant cleared the variation — restore the parent
-				// gallery instead of guessing from `current-image`.
-				if ( hasVariationIdInput && ! currentVariationId ) {
-					actions.resetImageData();
-					return;
-				}
-
-				const currentImageId = Number.parseInt(
-					$form.getAttribute( 'current-image' ) || '0',
-					10
-				);
-				const variationImageSet = hasVariationIdInput
-					? productImageSet.variations?.[ currentVariationId ]
-					: getVariationImageSetByCurrentImage(
-							productImageSet,
-							currentImageId
-					  );
-
-				if ( variationImageSet?.image_ids?.length ) {
-					actions.setImageData(
-						variationImageSet.image_ids,
-						currentImageId || variationImageSet.image_id
-					);
-					return;
-				}
-
-				actions.resetImageData();
-			} );
+			);
 
 			const teardownJQuery = subscribeLegacyJQueryFormVariations( $form, {
-				onVariationFound: () => syncFormVariationGallery(),
+				// `found_variation` fires before the classic form updates its DOM.
+				// Pass its fresh IDs into the config-based gallery sync.
+				onVariationFound: ( variationId, featuredImageId ) =>
+					syncFormVariationGallery( variationId, featuredImageId ),
 				onVariationReset: () => actions.resetImageData(),
 			} );
 
@@ -723,7 +896,11 @@ const productGallery = {
 			const { selectedImageId, isDialogOpen } = getContext();
 			const { ref: dialogRef } = getElement() || {};
 
-			if ( isDialogOpen && dialogRef instanceof HTMLElement ) {
+			if ( ! ( dialogRef instanceof HTMLElement ) ) {
+				return;
+			}
+
+			if ( isDialogOpen ) {
 				dialogRef.focus();
 				const selectedImage = dialogRef.querySelector(
 					SELECTORS.elementByImageId( selectedImageId )
@@ -742,6 +919,61 @@ const productGallery = {
 						32; // Arbitrary value for the header height.
 				}
 			}
+		},
+		initDialogVideoPlayback: () => {
+			const element = getElement()?.ref;
+
+			if ( ! ( element instanceof HTMLVideoElement ) ) {
+				return;
+			}
+
+			const scrollableContainer = element.closest(
+				SELECTORS.dialogContent
+			);
+
+			if ( ! scrollableContainer || ! window.IntersectionObserver ) {
+				return () => element.pause();
+			}
+
+			const observer = new IntersectionObserver(
+				( entries: IntersectionObserverEntry[] ) => {
+					entries.forEach( ( entry ) => {
+						if ( entry.target !== element ) {
+							return;
+						}
+
+						const isDialogOpen = document.body.classList.contains(
+							CLASSES.dialogOpenBody
+						);
+						const shouldPlay =
+							isDialogOpen &&
+							isDialogVideoIntersectionInView( entry );
+
+						syncVideoPlaybackState( element, shouldPlay );
+					} );
+				},
+				{
+					root: scrollableContainer,
+					threshold: [ 0, DIALOG_VIDEO_INTERSECTION_HEIGHT_RATIO, 1 ],
+				}
+			);
+
+			observer.observe( element );
+
+			return () => {
+				observer.disconnect();
+				element.pause();
+			};
+		},
+		syncVideoPlayback: () => {
+			const element = getElement()?.ref;
+
+			if ( ! ( element instanceof HTMLVideoElement ) ) {
+				return;
+			}
+
+			toggleImageVisibility( element );
+			syncScopedVideoElementPlayback( element );
 		},
 		/** Per-image `data-wp-watch` callback that toggles visibility from `imageData`. */
 		toggleImageVisibility: () => {

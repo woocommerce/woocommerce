@@ -21,6 +21,8 @@ import './style.scss';
 const TEST_ACCOUNT_ERROR_CODES = {
 	ACCOUNT_ALREADY_EXISTS:
 		'woocommerce_woopayments_test_account_already_exists',
+	NON_RECOVERABLE_ERROR:
+		'woocommerce_woopayments_onboarding_test_account_non_recoverable_error',
 };
 
 interface StepCheckResponse {
@@ -95,6 +97,7 @@ const TestAccountStep = () => {
 		setJustCompletedStepId,
 		sessionEntryPoint,
 		setSnackbar,
+		navigateToNextStep,
 	} = useOnboardingContext();
 
 	// Component State.
@@ -254,6 +257,24 @@ const TestAccountStep = () => {
 						}
 					} )
 					.catch( ( error ) => {
+						if (
+							error?.code ===
+							TEST_ACCOUNT_ERROR_CODES.NON_RECOVERABLE_ERROR
+						) {
+							// The test account could not be created and retrying can't fix it.
+							// The backend already marked the step completed, so notify the
+							// merchant and move them forward to the next step.
+							setSnackbar( {
+								show: true,
+								message: __(
+									"We couldn't create a test account, so we're taking you to the next step.",
+									'woocommerce'
+								),
+							} );
+							navigateToNextStep();
+							return;
+						}
+
 						setErrorCode( error?.code || '' );
 						setErrorMessage( error.message );
 						setStatus( 'error' );
@@ -407,6 +428,8 @@ const TestAccountStep = () => {
 		retryCounter,
 		pollingPhase,
 		setJustCompletedStepId,
+		setSnackbar,
+		navigateToNextStep,
 	] );
 
 	const getPhaseMessage = ( phase: number ) => {

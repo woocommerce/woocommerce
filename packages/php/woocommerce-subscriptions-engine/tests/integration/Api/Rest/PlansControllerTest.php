@@ -96,6 +96,8 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'global', $created_data['scope'] );
 		$this->assertSame( Plan::STATUS_ACTIVE, $created_data['status'] );
 		$this->assertSame( self::EXTENSION_SLUG, $created_data['extension_slug'] );
+		$this->assertArrayNotHasKey( 'group', $created_data );
+		$this->assertArrayNotHasKey( 'merchant_code', $created_data );
 
 		$id = $this->int_value( $created_data, 'id' );
 
@@ -156,6 +158,146 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$this->assertSame( 200, $list->get_status() );
 		$this->assertSame( '1', $list->get_headers()['X-WP-Total'] );
 		$this->assertCount( 1, $this->response_data( $list ) );
+	}
+
+	public function test_create_round_trips_a_value_less_bogo_pricing_policy(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Bogo monthly',
+				'billing_policy' => array(
+					'period'   => 'month',
+					'interval' => 1,
+				),
+				'pricing_policy' => array(
+					'policies' => array(
+						array(
+							'type'            => 'bogo',
+							'duration_cycles' => 1,
+						),
+					),
+				),
+			)
+		);
+
+		$this->assertSame( 201, $created->get_status() );
+		$created_data   = $this->response_data( $created );
+		$created_policy = $this->first_pricing_policy( $created_data );
+		$this->assertSame( 'bogo', $created_policy['type'] );
+		$this->assertSame( 0.0, $created_policy['value'], 'A value-less bogo entry normalizes to 0.0.' );
+		$this->assertSame( 1, $created_policy['duration_cycles'] );
+
+		// A fresh read round-trips the stored shape through the database.
+		$id      = $this->int_value( $created_data, 'id' );
+		$fetched = $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$this->assertSame( 200, $fetched->get_status() );
+		$fetched_policy = $this->first_pricing_policy( $this->response_data( $fetched ) );
+		$this->assertSame( 'bogo', $fetched_policy['type'] );
+		$this->assertSame( 0.0, $fetched_policy['value'] );
+		$this->assertSame( 1, $fetched_policy['duration_cycles'] );
+	}
+
+	public function test_update_swaps_a_percentage_policy_to_bogo(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Discounted monthly',
+				'billing_policy' => array(
+					'period'   => 'month',
+					'interval' => 1,
+				),
+				'pricing_policy' => array(
+					'policies' => array(
+						array(
+							'type'  => 'percentage',
+							'value' => 10,
+						),
+					),
+				),
+			)
+		);
+		$this->assertSame( 201, $created->get_status() );
+		$id = $this->int_value( $this->response_data( $created ), 'id' );
+
+		$patched = $this->request(
+			'PATCH',
+			self::BASE . '/' . $id,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'pricing_policy' => array(
+					'policies' => array(
+						array(
+							'type'  => 'bogo',
+							'value' => 0,
+						),
+					),
+				),
+			)
+		);
+		$this->assertSame( 200, $patched->get_status() );
+
+		// The swap persisted: a fresh read shows the bogo entry, not the percentage.
+		$fetched = $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$this->assertSame( 200, $fetched->get_status() );
+		$fetched_data   = $this->response_data( $fetched );
+		$fetched_policy = $this->first_pricing_policy( $fetched_data );
+		$this->assertSame( 'bogo', $fetched_policy['type'] );
+		$this->assertSame( 0.0, $fetched_policy['value'] );
+		$this->assertCount( 1, $this->array_value( $this->array_value( $fetched_data, 'pricing_policy' ), 'policies' ) );
+	}
+
+	public function test_bogo_with_a_non_zero_value_is_rejected(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$invalid_pricing_policy = array(
+			'policies' => array(
+				array(
+					'type'  => 'bogo',
+					'value' => 5,
+				),
+			),
+		);
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Bad bogo',
+				'billing_policy' => array(
+					'period'   => 'month',
+					'interval' => 1,
+				),
+				'pricing_policy' => $invalid_pricing_policy,
+			)
+		);
+		$this->assertSame( 400, $created->get_status() );
+		$this->assertSame( 'woocommerce_subscriptions_engine_invalid_plan', $this->response_data( $created )['code'] );
+
+		$id      = $this->create_plan( 'Patch target' );
+		$patched = $this->request(
+			'PATCH',
+			self::BASE . '/' . $id,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'pricing_policy' => $invalid_pricing_policy,
+			)
+		);
+		$this->assertSame( 400, $patched->get_status() );
+		$this->assertSame( 'woocommerce_subscriptions_engine_invalid_plan', $this->response_data( $patched )['code'] );
+
+		// The rejected PATCH left the plan untouched.
+		$fetched = $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$this->assertSame( 200, $fetched->get_status() );
+		$this->assertNull( $this->response_data( $fetched )['pricing_policy'] );
 	}
 
 	public function test_list_with_multiple_extension_slugs_returns_all_plans(): void {
@@ -317,6 +459,42 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		}
 	}
 
+	public function test_update_surfaces_a_failed_write_as_an_error(): void {
+		global $wpdb;
+
+		wp_set_current_user( $this->admin_id );
+		$id = $this->create_plan( 'Doomed to fail' );
+
+		// Break UPDATEs against the plans table for this request so the write
+		// errors at the database and the repository reports failure.
+		$break_plan_updates = static function ( $query ) {
+			if ( is_string( $query ) && 0 === stripos( ltrim( $query ), 'UPDATE' ) && false !== strpos( $query, 'wc_selling_plans' ) ) {
+				return 'UPDATE nonexistent_table_for_this_test SET id = id';
+			}
+
+			return $query;
+		};
+		add_filter( 'query', $break_plan_updates );
+		$suppressed = $wpdb->suppress_errors( true );
+
+		try {
+			$response = $this->request(
+				'PATCH',
+				self::BASE . '/' . $id,
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'name'           => 'New name',
+				)
+			);
+		} finally {
+			$wpdb->suppress_errors( $suppressed );
+			remove_filter( 'query', $break_plan_updates );
+		}
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_subscriptions_engine_plan_update_failed', $this->response_data( $response )['code'] );
+	}
+
 	public function test_archive_restore_and_reorder(): void {
 		wp_set_current_user( $this->admin_id );
 
@@ -462,6 +640,16 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		}
 
 		return $ids;
+	}
+
+	/**
+	 * The first pricing-policy entry from a plan response.
+	 *
+	 * @param array<array-key, mixed> $data Plan response data.
+	 * @return array<array-key, mixed>
+	 */
+	private function first_pricing_policy( array $data ): array {
+		return $this->array_value( $this->array_value( $this->array_value( $data, 'pricing_policy' ), 'policies' ), 0 );
 	}
 
 	/**

@@ -44,9 +44,8 @@ export const milestoneCommand = new Command( 'milestone' )
 			const versionSpinner = ora(
 				'No milestone supplied, going off the latest release version'
 			).start();
-			const latestReleaseVersion = await getLatestGithubReleaseVersion(
-				options
-			);
+			const latestReleaseVersion =
+				await getLatestGithubReleaseVersion( options );
 			versionSpinner.succeed();
 
 			nextReleaseVersion = WPIncrement( latestReleaseVersion );

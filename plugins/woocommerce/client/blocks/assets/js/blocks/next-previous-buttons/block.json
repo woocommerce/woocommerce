@@ -34,8 +34,10 @@
 		"__experimentalBorder": {
 			"radius": true,
 			"__experimentalSkipSerialization": true
-		},
-		"__experimentalSelector": ".wc-block-next-previous-buttons__button"
+		}
+	},
+	"selectors": {
+		"root": ".wp-block-woocommerce-product-gallery-large-image-next-previous .wc-block-next-previous-buttons__button"
 	},
 	"ancestor": [
 		"woocommerce/product-gallery-large-image",

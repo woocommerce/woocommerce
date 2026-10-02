@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Move several WooCommerce admin status notices to Site Health and show regeneration progress in status tools; deprecate the related WC_Admin_Notices/WC_Regenerate_Images notice callbacks and stop honoring the woocommerce_hide_* notice dismissal filters

@@ -15,13 +15,18 @@
 			no-repeat right 0 top 55%;
 		position: absolute;
 		right: 14px;
-		width: 32px;
+		// Match the glyph width so the mask anchor can't skew the arrow's
+		// edge distance when rtlcss mirrors the box but not the mask.
+		width: 20px;
 		height: 48px;
 	}
 
 	&.is-open {
 		&::after {
-			transform: translateX(12px) translateY(2px) rotate(180deg);
+			// scaleY instead of rotate(180deg): the glyph is horizontally
+			// symmetric, and a purely vertical flip needs no translateX
+			// compensation, which rtlcss would flip the wrong way in RTL.
+			transform: translateY(2px) scaleY(-1);
 		}
 	}
 

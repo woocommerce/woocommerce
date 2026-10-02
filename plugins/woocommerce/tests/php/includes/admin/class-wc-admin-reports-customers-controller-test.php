@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 use Automattic\WooCommerce\Admin\API\Reports\Customers\Controller as CustomersController;
 use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Customers\Stats\DataStore as CustomersStatsDataStore;
 use Automattic\WooCommerce\Enums\OrderStatus;
 
 /**
@@ -10,7 +11,21 @@ use Automattic\WooCommerce\Enums\OrderStatus;
  *
  * @package WooCommerce\Admin\Tests\API
  */
-class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case {
+class WC_Admin_Reports_Customers_Controller_Test extends WC_Unit_Test_Case {
+	/**
+	 * REST server used to dispatch customer report requests.
+	 *
+	 * @var WP_REST_Server
+	 */
+	private $server;
+
+	/**
+	 * Customer reports controller registered on the test server.
+	 *
+	 * @var CustomersController
+	 */
+	private $controller;
+
 	/**
 	 * Endpoint.
 	 *
@@ -30,42 +45,48 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 	 *
 	 * @var WC_Product_Simple
 	 */
-	protected $product;
+	protected static $product;
 
 	/**
 	 * Registered customers.
 	 *
 	 * @var array
 	 */
-	protected $registered_customers = array();
+	protected static $registered_customers = array();
 
 	/**
 	 * Guest orders (no user_id).
 	 *
 	 * @var array
 	 */
-	protected $guest_orders = array();
+	protected static $guest_orders = array();
 
 	/**
-	 * Setup test reports customers data.
+	 * Report import action IDs created for the shared orders.
+	 *
+	 * @var int[]
 	 */
-	public function setUp(): void {
-		parent::setUp();
+	private static $import_action_ids = array();
 
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-
-		wp_set_current_user( $this->user );
+	/**
+	 * Set up shared report customer data.
+	 */
+	public static function wpSetUpBeforeClass() {
 		WC_Helper_Reports::reset_stats_dbs();
+		self::$registered_customers = array();
+		self::$guest_orders         = array();
+		self::$import_action_ids    = array();
 
 		// Create a test product.
-		$this->product = new WC_Product_Simple();
-		$this->product->set_name( 'Test Product' );
-		$this->product->set_regular_price( 25 );
-		$this->product->save();
+		self::$product = new WC_Product_Simple();
+		self::$product->set_name( 'Test Product' );
+		self::$product->set_regular_price( 25 );
+		self::enable_direct_product_attribute_lookup_updates();
+		try {
+			self::$product->save();
+		} finally {
+			self::disable_direct_product_attribute_lookup_updates();
+		}
 
 		// Create registered customers with different names for search testing.
 		$customer1 = WC_Helper_Customer::create_customer( 'customer1', 'password', 'customer1@example.com' );
@@ -74,7 +95,7 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 		$customer1->set_billing_state( 'CA' );
 		$customer1->set_billing_country( 'US' );
 		$customer1->save();
-		$this->registered_customers[] = $customer1;
+		self::$registered_customers[] = $customer1;
 
 		$customer2 = WC_Helper_Customer::create_customer( 'customer2', 'password', 'customer2@example.com' );
 		$customer2->set_first_name( 'Jane' );
@@ -82,7 +103,7 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 		$customer2->set_billing_state( 'NY' );
 		$customer2->set_billing_country( 'US' );
 		$customer2->save();
-		$this->registered_customers[] = $customer2;
+		self::$registered_customers[] = $customer2;
 
 		$customer3 = WC_Helper_Customer::create_customer( 'customer3', 'password', 'customer3@example.com' );
 		$customer3->set_first_name( 'Bob' );
@@ -90,20 +111,33 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 		$customer3->set_billing_state( 'CA' );
 		$customer3->set_billing_country( 'US' );
 		$customer3->save();
-		$this->registered_customers[] = $customer3;
+		self::$registered_customers[] = $customer3;
+
+		add_action( 'action_scheduler_stored_action', array( self::class, 'track_import_action' ) );
 
 		// Create orders for registered customers with location data.
-		foreach ( $this->registered_customers as $index => $customer ) {
-			$order = WC_Helper_Order::create_order( $customer->get_id(), $this->product );
+		foreach ( self::$registered_customers as $index => $customer ) {
+			$order = WC_Helper_Order::create_order( $customer->get_id(), self::$product );
 			$order->set_status( OrderStatus::COMPLETED );
 			$order->set_total( 100 + ( $index * 50 ) );
 			$order->set_billing_state( $customer->get_billing_state() );
 			$order->set_billing_country( $customer->get_billing_country() );
 			$order->save();
+
+			if ( 0 === $index ) {
+				$refund = wc_create_refund(
+					array(
+						'order_id'   => $order->get_id(),
+						'amount'     => 20,
+						'line_items' => array(),
+					)
+				);
+				self::assertInstanceOf( WC_Order_Refund::class, $refund );
+			}
 		}
 
 		// Create guest orders (no user_id) with different locations.
-		$guest_order1 = WC_Helper_Order::create_order( 0, $this->product );
+		$guest_order1 = WC_Helper_Order::create_order( 0, self::$product );
 		$guest_order1->set_billing_email( 'guest1@example.com' );
 		$guest_order1->set_billing_first_name( 'Guest' );
 		$guest_order1->set_billing_last_name( 'Customer' );
@@ -112,9 +146,9 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 		$guest_order1->set_status( OrderStatus::COMPLETED );
 		$guest_order1->set_total( 50 );
 		$guest_order1->save();
-		$this->guest_orders[] = $guest_order1;
+		self::$guest_orders[] = $guest_order1;
 
-		$guest_order2 = WC_Helper_Order::create_order( 0, $this->product );
+		$guest_order2 = WC_Helper_Order::create_order( 0, self::$product );
 		$guest_order2->set_billing_email( 'guest2@example.com' );
 		$guest_order2->set_billing_first_name( 'Guest' );
 		$guest_order2->set_billing_last_name( 'User' );
@@ -123,10 +157,118 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 		$guest_order2->set_status( OrderStatus::COMPLETED );
 		$guest_order2->set_total( 75 );
 		$guest_order2->save();
-		$this->guest_orders[] = $guest_order2;
+		self::$guest_orders[] = $guest_order2;
 
 		// Sync all data to lookup tables.
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+		remove_action( 'action_scheduler_stored_action', array( self::class, 'track_import_action' ) );
+	}
+
+	/**
+	 * Track report import actions created for shared order fixtures.
+	 *
+	 * @param int $action_id Action ID.
+	 */
+	public static function track_import_action( $action_id ): void {
+		$action = ActionScheduler_Store::instance()->fetch_action( $action_id );
+		if ( 'wc-admin_import_orders' === $action->get_hook() ) {
+			self::$import_action_ids[] = (int) $action_id;
+		}
+	}
+
+	/**
+	 * Clean up shared report customer data.
+	 */
+	public static function wpTearDownAfterClass() {
+		remove_action( 'action_scheduler_stored_action', array( self::class, 'track_import_action' ) );
+		WC_Helper_Reports::reset_stats_dbs();
+		$action_store = ActionScheduler_Store::instance();
+		foreach ( self::$import_action_ids as $action_id ) {
+			$action_store->delete_action( $action_id );
+		}
+		try {
+			foreach ( self::$registered_customers as $customer ) {
+				$customer->delete();
+			}
+		} finally {
+			self::enable_direct_product_attribute_lookup_updates();
+			try {
+				self::$product->delete( true );
+			} finally {
+				self::disable_direct_product_attribute_lookup_updates();
+			}
+		}
+		self::$product              = null;
+		self::$registered_customers = array();
+		self::$guest_orders         = array();
+		self::$import_action_ids    = array();
+	}
+
+	/**
+	 * Set up authentication for each test.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		$this->controller = new CustomersController();
+		$this->server     = $this->create_rest_server_with_routes(
+			array( array( $this->controller, 'register_routes' ) ),
+			true
+		);
+
+		$this->user = $this->factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+
+		wp_set_current_user( $this->user );
+	}
+
+	/**
+	 * Clear the scoped REST server.
+	 */
+	public function tearDown(): void {
+		$this->clear_rest_server();
+		unset( $this->server, $this->controller );
+		parent::tearDown();
+	}
+
+	/**
+	 * Create a parented order while preserving a stale non-null refund marker.
+	 *
+	 * @return int Analytics customer ID.
+	 */
+	private function create_parented_order_with_stale_refund_row(): int {
+		global $wpdb;
+
+		$customer     = self::$registered_customers[0];
+		$parent_order = wc_get_customer_last_order( $customer->get_id() );
+		$this->assertInstanceOf( WC_Order::class, $parent_order );
+
+		$refunds = $parent_order->get_refunds();
+		$this->assertCount( 1, $refunds );
+		$refund = reset( $refunds );
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund );
+
+		// Older first-order recalculations could overwrite the refund's NULL marker.
+		$updated = $wpdb->update(
+			$wpdb->prefix . 'wc_order_stats',
+			array( 'returning_customer' => 1 ),
+			array( 'order_id' => $refund->get_id() ),
+			array( '%d' ),
+			array( '%d' )
+		);
+		$this->assertSame( 1, $updated );
+
+		$child_order = WC_Helper_Order::create_order( $customer->get_id(), self::$product );
+		$child_order->set_parent_id( $parent_order->get_id() );
+		$child_order->set_status( OrderStatus::COMPLETED );
+		$child_order->set_total( 20 );
+		$child_order->save();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		return (int) CustomersDataStore::get_customer_id_by_user_id( $customer->get_id() );
 	}
 
 	/**
@@ -147,6 +289,108 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 		wp_set_current_user( 0 );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
 		$this->assertEquals( 401, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Partially refunded orders count once in numeric filters.
+	 */
+	public function test_partially_refunded_orders_count_once_in_numeric_filters(): void {
+		$customer_id = CustomersDataStore::get_customer_id_by_user_id( self::$registered_customers[0]->get_id() );
+		$request     = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'customers'        => array( $customer_id ),
+				'orders_count_min' => 1,
+				'orders_count_max' => 1,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports, 'A refund row should not count as another order.' );
+		$this->assertSame( 1, $reports[0]['orders_count'] );
+	}
+
+	/**
+	 * @testdox Partially refunded orders use the parent order count in average order value filters.
+	 */
+	public function test_partially_refunded_orders_use_parent_count_in_average_order_value_filters(): void {
+		$customer_id = CustomersDataStore::get_customer_id_by_user_id( self::$registered_customers[0]->get_id() );
+		$request     = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'customers'           => array( $customer_id ),
+				'avg_order_value_min' => 79,
+				'avg_order_value_max' => 81,
+				'total_spend_min'     => 79,
+				'total_spend_max'     => 81,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports, 'A refund row should not lower the average order value denominator.' );
+		$this->assertEqualsWithDelta( 80.0, $reports[0]['total_spend'], 0.001 );
+		$this->assertEqualsWithDelta( 80.0, $reports[0]['avg_order_value'], 0.001 );
+	}
+
+	/**
+	 * @testdox Parented non-refund orders count while stale refund rows remain excluded from customer aggregates.
+	 */
+	public function test_parented_orders_and_stale_refunds_use_authoritative_types(): void {
+		$customer_id = $this->create_parented_order_with_stale_refund_row();
+		$request     = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'customers'           => array( $customer_id ),
+				'orders_count_min'    => 2,
+				'orders_count_max'    => 2,
+				'total_spend_min'     => 100,
+				'total_spend_max'     => 100,
+				'avg_order_value_min' => 50,
+				'avg_order_value_max' => 50,
+				'force_cache_refresh' => true,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports );
+		$this->assertSame( 2, $reports[0]['orders_count'] );
+		$this->assertEqualsWithDelta( 100.0, $reports[0]['total_spend'], 0.001 );
+		$this->assertEqualsWithDelta( 50.0, $reports[0]['avg_order_value'], 0.001 );
+	}
+
+	/**
+	 * @testdox Customer stats count parented non-refund orders while excluding stale refund rows.
+	 */
+	public function test_customer_stats_use_authoritative_order_types(): void {
+		$customer_id = $this->create_parented_order_with_stale_refund_row();
+		$data_store  = new CustomersStatsDataStore();
+		$data        = $data_store->get_data(
+			array(
+				'customers'           => array( $customer_id ),
+				'orders_count_min'    => 2,
+				'orders_count_max'    => 2,
+				'total_spend_min'     => 100,
+				'total_spend_max'     => 100,
+				'avg_order_value_min' => 50,
+				'avg_order_value_max' => 50,
+				'force_cache_refresh' => true,
+			)
+		);
+
+		$this->assertInstanceOf( stdClass::class, $data );
+		$this->assertSame( 1, $data->customers_count );
+		$this->assertEqualsWithDelta( 2.0, $data->avg_orders_count, 0.001 );
+		$this->assertEqualsWithDelta( 100.0, $data->avg_total_spend, 0.001 );
+		$this->assertEqualsWithDelta( 50.0, $data->avg_avg_order_value, 0.001 );
 	}
 
 	/**
@@ -804,7 +1048,7 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 	 * @testdox Should consolidate numeric name_includes IDs into customers param.
 	 */
 	public function test_name_includes_with_customer_ids(): void {
-		$customer_id = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[0]->get_id() );
+		$customer_id = CustomersDataStore::get_customer_id_by_user_id( self::$registered_customers[0]->get_id() );
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
@@ -825,8 +1069,8 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 	 * @testdox Should consolidate numeric email_includes IDs into customers param.
 	 */
 	public function test_email_includes_with_customer_ids(): void {
-		$customer_id_1 = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[0]->get_id() );
-		$customer_id_2 = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[1]->get_id() );
+		$customer_id_1 = CustomersDataStore::get_customer_id_by_user_id( self::$registered_customers[0]->get_id() );
+		$customer_id_2 = CustomersDataStore::get_customer_id_by_user_id( self::$registered_customers[1]->get_id() );
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
@@ -846,8 +1090,8 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 	 * @testdox Should filter by customers_exclude param.
 	 */
 	public function test_customers_exclude(): void {
-		$customer_id_1 = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[0]->get_id() );
-		$customer_id_2 = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[1]->get_id() );
+		$customer_id_1 = CustomersDataStore::get_customer_id_by_user_id( self::$registered_customers[0]->get_id() );
+		$customer_id_2 = CustomersDataStore::get_customer_id_by_user_id( self::$registered_customers[1]->get_id() );
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
@@ -869,7 +1113,7 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 	 * @testdox Should consolidate numeric exclude IDs into customers_exclude param.
 	 */
 	public function test_email_excludes_with_customer_ids(): void {
-		$customer_id = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[0]->get_id() );
+		$customer_id = CustomersDataStore::get_customer_id_by_user_id( self::$registered_customers[0]->get_id() );
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
@@ -890,8 +1134,8 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 	 * @testdox Should intersect include sets when match=all.
 	 */
 	public function test_consolidation_match_all_intersection(): void {
-		$customer_id_1 = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[0]->get_id() );
-		$customer_id_2 = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[1]->get_id() );
+		$customer_id_1 = CustomersDataStore::get_customer_id_by_user_id( self::$registered_customers[0]->get_id() );
+		$customer_id_2 = CustomersDataStore::get_customer_id_by_user_id( self::$registered_customers[1]->get_id() );
 
 		$args = CustomersController::consolidate_customer_id_filters(
 			array(
@@ -914,8 +1158,8 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 	 * @testdox Should union include sets when match=any.
 	 */
 	public function test_consolidation_match_any_union(): void {
-		$customer_id_1 = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[0]->get_id() );
-		$customer_id_2 = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[1]->get_id() );
+		$customer_id_1 = CustomersDataStore::get_customer_id_by_user_id( self::$registered_customers[0]->get_id() );
+		$customer_id_2 = CustomersDataStore::get_customer_id_by_user_id( self::$registered_customers[1]->get_id() );
 
 		$args = CustomersController::consolidate_customer_id_filters(
 			array(

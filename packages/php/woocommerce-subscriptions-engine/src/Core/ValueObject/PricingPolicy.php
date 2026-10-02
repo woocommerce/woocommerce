@@ -6,7 +6,7 @@
  * Mirrors the `pricing_policy` JSON column shape. Shape:
  *   {
  *     policies: [
- *       { type: 'percentage'|'fixed_amount'|'price', value: float, starting_cycle?: int, duration_cycles?: int },
+ *       { type: 'percentage'|'fixed_amount'|'price'|'bogo', value: float, starting_cycle?: int, duration_cycles?: int },
  *       ...
  *     ],
  *     one_time_fees: [
@@ -19,6 +19,10 @@
  * (the implicit default), not "no class." `null` is reserved for a fee that is
  * genuinely untaxed. The two are not interchangeable - round-trip preserves
  * whichever was supplied.
+ *
+ * `bogo` entries are value-less: `value` is absent (normalized to `0.0`) or
+ * explicitly `0`. The benefit is an in-kind bonus unit of the same line item
+ * ({@see self::calculate_bonus_quantity()}), never a price change.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject
  */
@@ -153,6 +157,9 @@ final class PricingPolicy {
 	 *  - `type: 'percentage'`   -> `base_price * (100 - value) / 100`.
 	 *  - `type: 'fixed_amount'` -> `max(0, base_price - value)` (clamped at zero).
 	 *  - `type: 'price'`        -> `value` (replaces base price entirely).
+	 *  - `type: 'bogo'`         -> no price change (money-neutral; the benefit is an
+	 *    in-kind bonus unit granted at order materialization -
+	 *    {@see self::calculate_bonus_quantity()}).
 	 *  - `starting_cycle` gate: skip the entry when `$cycle < starting_cycle`.
 	 *    A missing `starting_cycle` means the entry applies to all cycles.
 	 *  - `duration_cycles` gate: skip the entry once the duration window ends.
@@ -184,6 +191,11 @@ final class PricingPolicy {
 				case 'price':
 					$price = $value;
 					break;
+				case 'bogo':
+					// Money-neutral by design: the benefit is an in-kind bonus unit
+					// of the same line item, applied at order materialization via
+					// calculate_bonus_quantity() - never a price change.
+					break;
 				default:
 					break;
 			}
@@ -204,6 +216,44 @@ final class PricingPolicy {
 	public function calculate_line_total( float $unit_price, float $quantity, int $cycle = 1 ): float {
 		$effective_unit_price = $this->calculate_price( $unit_price, $cycle );
 		return max( 0.0, $effective_unit_price * $quantity );
+	}
+
+	/**
+	 * The free units the chain's `bogo` entries grant for the given cycle.
+	 *
+	 * Each in-scope `bogo` entry grants one free unit per paid unit ("buy one, get
+	 * one" applied per unit), so a line of quantity q earns q bonus units per entry,
+	 * summed across entries. The same `starting_cycle`/`duration_cycles` gates as
+	 * the price chain apply ({@see self::policy_applies_to_cycle()}), so every-cycle
+	 * vs first-cycle BOGO is configured via scope, not a special case. Returns `0.0`
+	 * when no bogo entry is in scope or the paid quantity is not positive.
+	 *
+	 * The bonus is an in-kind benefit only: it never changes the price chain
+	 * ({@see self::calculate_price()} treats bogo as a no-op).
+	 *
+	 * @param float $paid_quantity Paid units on the line.
+	 * @param int   $cycle         1-indexed cycle number (1 = first billing cycle).
+	 */
+	public function calculate_bonus_quantity( float $paid_quantity, int $cycle = 1 ): float {
+		if ( $paid_quantity <= 0 ) {
+			return 0.0;
+		}
+
+		$bonus = 0.0;
+
+		foreach ( $this->policies as $policy ) {
+			if ( 'bogo' !== (string) ( $policy['type'] ?? '' ) ) {
+				continue;
+			}
+
+			if ( ! $this->policy_applies_to_cycle( $policy, $cycle ) ) {
+				continue;
+			}
+
+			$bonus += $paid_quantity;
+		}
+
+		return $bonus;
 	}
 
 	/**

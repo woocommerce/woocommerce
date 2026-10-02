@@ -25,7 +25,7 @@ final class Dropdown extends AbstractBlock {
 	 */
 	private function get_option_text( array $item ): string {
 		if ( isset( $item['label'] ) && is_string( $item['label'] ) ) {
-			return wp_strip_all_tags( $item['label'] );
+			return $item['label'];
 		}
 		if ( ! empty( $item['ariaLabel'] ) && is_string( $item['ariaLabel'] ) ) {
 			return $item['ariaLabel'];

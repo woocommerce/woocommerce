@@ -10,11 +10,9 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Api\Rest;
 
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanGroup;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PricingPolicy;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanGroupRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\RESTPermissions;
 use InvalidArgumentException;
@@ -48,13 +46,6 @@ final class PlansController extends WP_REST_Controller {
 	private $plan_repository;
 
 	/**
-	 * Plan groups repository.
-	 *
-	 * @var PlanGroupRepository
-	 */
-	private $plan_group_repository;
-
-	/**
 	 * REST permissions.
 	 *
 	 * @var RESTPermissions
@@ -64,16 +55,14 @@ final class PlansController extends WP_REST_Controller {
 	/**
 	 * Construct the controller.
 	 *
-	 * @param PlanRepository|null      $plan_repository       Plans repository.
-	 * @param PlanGroupRepository|null $plan_group_repository Plan groups repository.
-	 * @param RESTPermissions|null     $rest_permissions      REST permissions.
+	 * @param PlanRepository|null  $plan_repository  Plans repository.
+	 * @param RESTPermissions|null $rest_permissions REST permissions.
 	 */
-	public function __construct( ?PlanRepository $plan_repository = null, ?PlanGroupRepository $plan_group_repository = null, ?RESTPermissions $rest_permissions = null ) {
-		$this->namespace             = self::REST_NAMESPACE;
-		$this->rest_base             = self::REST_BASE;
-		$this->plan_repository       = $plan_repository ?? new PlanRepository();
-		$this->plan_group_repository = $plan_group_repository ?? new PlanGroupRepository();
-		$this->rest_permissions      = $rest_permissions ?? new RESTPermissions();
+	public function __construct( ?PlanRepository $plan_repository = null, ?RESTPermissions $rest_permissions = null ) {
+		$this->namespace        = self::REST_NAMESPACE;
+		$this->rest_base        = self::REST_BASE;
+		$this->plan_repository  = $plan_repository ?? new PlanRepository();
+		$this->rest_permissions = $rest_permissions ?? new RESTPermissions();
 	}
 
 	/**
@@ -293,31 +282,18 @@ final class PlansController extends WP_REST_Controller {
 
 		try {
 			$billing_policy = $this->associative_array( $billing_policy, 'billing_policy must be an object.' );
-			$plan_args      = array(
-				'name'           => $name,
-				'description'    => $this->nullable_string_param( $request, 'description' ),
-				'options'        => array(),
-				'billing_policy' => BillingPolicy::from_array( $billing_policy ),
-				'pricing_policy' => $this->pricing_policy_from_param( $request->get_param( 'pricing_policy' ), null ),
-				'category'       => $this->string_param( $request, 'category', Plan::DEFAULT_CATEGORY ),
-				'status'         => $this->string_param( $request, 'status', Plan::STATUS_ACTIVE ),
-				'sort_order'     => ScalarCoercion::coerce_int( $request->get_param( 'sort_order' ) ),
-				'extension_slug' => $extension_slug,
-			);
-			Plan::create( 0, $plan_args );
-
-			$group    = PlanGroup::create(
-				array(
-					'name'            => $name,
-					'options_display' => array(),
-					'extension_slug'  => $extension_slug,
-				)
-			);
-			$group_id = $this->plan_group_repository->insert( $group );
 
 			$plan = Plan::create(
-				$group_id,
-				$plan_args
+				array(
+					'name'           => $name,
+					'description'    => $this->nullable_string_param( $request, 'description' ),
+					'billing_policy' => BillingPolicy::from_array( $billing_policy ),
+					'pricing_policy' => $this->pricing_policy_from_param( $request->get_param( 'pricing_policy' ), null ),
+					'category'       => $this->string_param( $request, 'category', Plan::DEFAULT_CATEGORY ),
+					'status'         => $this->string_param( $request, 'status', Plan::STATUS_ACTIVE ),
+					'sort_order'     => ScalarCoercion::coerce_int( $request->get_param( 'sort_order' ) ),
+					'extension_slug' => $extension_slug,
+				)
 			);
 			$this->plan_repository->insert( $plan );
 		} catch ( Throwable $e ) {
@@ -348,14 +324,12 @@ final class PlansController extends WP_REST_Controller {
 		}
 
 		try {
-			$sync_group_name = null;
 			if ( $request->has_param( 'name' ) ) {
 				$name = $this->string_param( $request, 'name' );
 				if ( '' === $name ) {
 					return $this->invalid_error( __( 'Plan name is required.', 'woocommerce-subscriptions-engine' ) );
 				}
 				$plan->set_name( $name );
-				$sync_group_name = $name;
 			}
 
 			if ( $request->has_param( 'description' ) ) {
@@ -389,10 +363,13 @@ final class PlansController extends WP_REST_Controller {
 				$plan->set_sort_order( ScalarCoercion::coerce_int( $request->get_param( 'sort_order' ) ) );
 			}
 
-			if ( null !== $sync_group_name ) {
-				$this->sync_group_name( $plan, $sync_group_name );
+			if ( ! $this->plan_repository->update( $plan ) ) {
+				return new WP_Error(
+					'woocommerce_subscriptions_engine_plan_update_failed',
+					__( 'The plan could not be saved.', 'woocommerce-subscriptions-engine' ),
+					array( 'status' => 500 )
+				);
 			}
-			$this->plan_repository->update( $plan );
 		} catch ( Throwable $e ) {
 			return $this->invalid_error( $e->getMessage() );
 		}
@@ -451,7 +428,6 @@ final class PlansController extends WP_REST_Controller {
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		$pricing = $item->get_pricing_policy();
-		$group   = $this->plan_group_repository->find( $item->get_group_id() );
 
 		$data = array(
 			'id'             => $item->get_id(),
@@ -463,13 +439,6 @@ final class PlansController extends WP_REST_Controller {
 			'extension_slug' => $item->get_extension_slug(),
 			'billing_policy' => $item->get_billing_policy()->to_array(),
 			'pricing_policy' => null !== $pricing ? $pricing->to_array() : null,
-			'group'          => $group instanceof PlanGroup
-				? array(
-					'id'              => $group->get_id(),
-					'name'            => $group->get_name(),
-					'options_display' => $group->get_options_display(),
-				)
-				: null,
 		);
 
 		$context = ScalarCoercion::coerce_string( $request->get_param( 'context' ), 'view' );
@@ -596,12 +565,6 @@ final class PlansController extends WP_REST_Controller {
 					'type'        => array( 'object', 'null' ),
 					'context'     => array( 'view', 'edit' ),
 				),
-				'group'          => array(
-					'description' => __( 'Plan group.', 'woocommerce-subscriptions-engine' ),
-					'type'        => array( 'object', 'null' ),
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
 			),
 		);
 
@@ -649,22 +612,6 @@ final class PlansController extends WP_REST_Controller {
 		}
 
 		return PricingPolicy::from_array( $data );
-	}
-
-	/**
-	 * Sync a one-plan group's display name with the plan name.
-	 *
-	 * @param Plan   $plan Plan.
-	 * @param string $name New name.
-	 */
-	private function sync_group_name( Plan $plan, string $name ): void {
-		$group = $this->plan_group_repository->find( $plan->get_group_id() );
-		if ( ! $group instanceof PlanGroup ) {
-			return;
-		}
-
-		$group->set_name( $name );
-		$this->plan_group_repository->update( $group );
 	}
 
 	/**
