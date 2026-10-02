@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\StoreApi\Utilities\UnexpectedErrorResponse;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
@@ -106,30 +107,17 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	/**
 	 * Convert a failure during cart session loading into a client-safe error response.
 	 *
-	 * The original error is logged rather than returned, so nothing internal reaches the client.
+	 * Error details are returned only to managers when debug details are enabled.
 	 *
 	 * @param  \Throwable $error The error that occurred while loading the cart session.
 	 * @return \WP_REST_Response The error response to return to the client.
 	 */
 	protected function get_cart_session_error_response( \Throwable $error ) {
-		wc_get_logger()->error(
-			sprintf(
-				'Store API could not load the cart session: %1$s in %2$s:%3$d',
-				$error->getMessage(),
-				$error->getFile(),
-				$error->getLine()
-			),
-			array(
-				'source'    => 'store-api',
-				'exception' => $error,
-			)
-		);
-
 		return $this->error_to_response(
-			$this->get_route_error_response(
-				'woocommerce_rest_unknown_server_error',
-				__( 'The cart could not be loaded. Please try again.', 'woocommerce' ),
-				500
+			UnexpectedErrorResponse::create(
+				$error,
+				sprintf( '%s while loading the cart session', static::class ),
+				__( 'The cart could not be loaded. Please try again.', 'woocommerce' )
 			)
 		);
 	}
@@ -162,6 +150,8 @@ abstract class AbstractCartRoute extends AbstractRoute {
 				$response = $this->get_route_error_response( $error->getErrorCode(), $error->getMessage(), $error->getCode(), $error->getAdditionalData() );
 			} catch ( \Exception $error ) {
 				$response = $this->get_route_error_response( 'woocommerce_rest_unknown_server_error', $error->getMessage(), 500 );
+			} catch ( \Throwable $error ) {
+				return $this->add_response_headers( $this->error_to_response( UnexpectedErrorResponse::create( $error, static::class ) ) );
 			}
 		}
 
