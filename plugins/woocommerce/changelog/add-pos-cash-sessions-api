@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a POS cash sessions REST API to track opening float, cash sales, refunds, paid in/out and counted cash at close.
