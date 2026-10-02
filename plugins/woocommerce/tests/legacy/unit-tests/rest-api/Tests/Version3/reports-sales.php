@@ -28,11 +28,23 @@ class WC_Tests_API_Reports_Sales extends WC_REST_Unit_Test_Case {
 	private $original_hpos_usage;
 
 	/**
-	 * Whether the running test switched the store over to HPOS.
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
 	 *
-	 * @var bool
+	 * Creating them here keeps the DDL, and its implicit commit, outside the
+	 * transaction the parent opens for each test.
 	 */
-	private $switched_to_hpos = false;
+	public static function wpSetUpBeforeClass(): void {
+		$previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		try {
+			self::setup_cot_tables();
+			if ( OrderUtil::custom_orders_table_usage_is_enabled() !== $previous_hpos_state ) {
+				OrderHelper::toggle_cot_feature_and_usage( $previous_hpos_state );
+			}
+		} finally {
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
+	}
 
 	/**
 	 * Setup our test server, endpoints, and user info.
@@ -40,7 +52,12 @@ class WC_Tests_API_Reports_Sales extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->original_hpos_usage = OrderUtil::custom_orders_table_usage_is_enabled();
-		$this->user                = $this->factory->user->create(
+
+		// The HPOS title leaves orders only in the orders tables, so switching back
+		// counts as switching with orders out of sync. The parent rollback discards
+		// those rows straight after, so allow it.
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->user = $this->factory->user->create(
 			array(
 				'role' => 'administrator',
 			)
@@ -52,25 +69,9 @@ class WC_Tests_API_Reports_Sales extends WC_REST_Unit_Test_Case {
 	 * Restore HPOS state and clear report caches.
 	 */
 	public function tearDown(): void {
-		global $wpdb;
-
-		// Scoped to the test that switches to HPOS, the only one writing to these tables.
-		// A test that never switches keeps an intact transaction, and TRUNCATE is DDL
-		// whose implicit commit would leak its fixtures past the parent rollback.
-		if ( $this->switched_to_hpos ) {
-			// phpcs:disable WordPress.DB.DirectDatabaseQuery
-			$wpdb->query( "TRUNCATE {$wpdb->prefix}wc_orders" );
-			$wpdb->query( "TRUNCATE {$wpdb->prefix}wc_orders_meta" );
-			$wpdb->query( "TRUNCATE {$wpdb->prefix}wc_order_operational_data" );
-			$wpdb->query( "TRUNCATE {$wpdb->prefix}wc_order_addresses" );
-			// phpcs:enable WordPress.DB.DirectDatabaseQuery
-		}
-
 		remove_all_actions( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
 		OrderHelper::toggle_cot_feature_and_usage( $this->original_hpos_usage );
-
-		add_filter( 'query', array( $this, '_create_temporary_tables' ) );
-		add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 
 		$this->clear_sales_report_cache();
 		parent::tearDown();
@@ -208,8 +209,7 @@ class WC_Tests_API_Reports_Sales extends WC_REST_Unit_Test_Case {
 	 * @testdox Should return sales totals from HPOS data when sync is disabled.
 	 */
 	public function test_get_sales_report_with_hpos_enabled_and_sync_off(): void {
-		$this->setup_cot();
-		$this->switched_to_hpos = true;
+		$this->toggle_cot_feature_and_usage( true );
 		$this->disable_cot_sync();
 
 		wp_set_current_user( $this->user );
