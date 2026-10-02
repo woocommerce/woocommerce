@@ -76,6 +76,6 @@ class WC_Tests_Report_Taxes_By_Date extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( date_i18n( get_option( 'date_format' ), strtotime( '2026-09-02' ) ), $output );
 
 		// Refund tax amount (−5) must appear, confirming the refund row was processed.
-		$this->assertStringContainsString( '-5', $output );
+		$this->assertStringContainsString( wc_price( -5.0 ), $output );
 	}
 }
