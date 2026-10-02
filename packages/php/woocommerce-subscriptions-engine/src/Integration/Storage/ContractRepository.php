@@ -27,6 +27,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ConsumerRegistry;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -652,20 +653,27 @@ final class ContractRepository {
 
 	/**
 	 * Contracts actionable for renewal at `$now`, oldest-due first - the batch dispatcher's scan.
-	 * Active, primitive-scheduled contracts whose `next_payment_gmt` has arrived, joined to their
-	 * head cycle so the scan can filter to the ones actually chargeable now:
 	 *
-	 * - head `billed`/`cancelled` and its period has ended (`ends_at_gmt <= now`) -> advance-ready;
+	 * A contract is due when its next-due moment (`next_payment_gmt`) has passed AND its owner
+	 * (`extension_slug`) is a registered consumer ({@see ConsumerRegistry}). There is no status
+	 * predicate: status is opaque engine data, and a flow that pauses or ends a contract disarms
+	 * its next-due moment instead. A contract with a null or unregistered owner waits untouched
+	 * (its next-due moment is never rewritten) until its owner registers; with no consumer
+	 * registered the scan returns nothing. Gateway-scheduled contracts are excluded (the gateway
+	 * owns their renewal); a null `next_payment_gmt` never matches the `<=` comparison.
+	 *
+	 * The scan also joins each contract's head cycle and keeps only the ones chargeable now (a
+	 * renewal-flow condition that stays until the renewal flow leaves the engine):
+	 *
+	 * - head `billed` and its period has ended (`ends_at_gmt <= now`) -> advance-ready;
 	 * - head `pending` with an expired crash-recovery lease (`claimed_until <= now`) -> reclaim-ready.
 	 *
-	 * A head that is `failed` (awaits dunning), `processing` (awaits its gateway), or `pending`
-	 * with a live lease is deliberately excluded. Because that filter is in SQL, `LIMIT` counts
-	 * only actionable rows, so a cluster of non-actionable heads (a stuck gateway, a backlog of
-	 * declines) cannot occupy the batch and starve healthy renewals behind them. Gateway-scheduled
-	 * contracts are excluded (the gateway owns their renewal); a null `next_payment_gmt` never
-	 * matches the `<=` comparison. Driven by the `due_contract (status, next_payment_gmt)` index;
-	 * the head cycle is joined per candidate via the `chain_seq` UNIQUE index. Returns the head
-	 * fields selection needs, so the dispatcher does not re-load the head to decide what to bill.
+	 * Any other head (`failed` awaiting dunning, `processing` awaiting its gateway, `pending` with
+	 * a live lease) is excluded in SQL, so `LIMIT` counts only actionable rows and a cluster of
+	 * non-actionable heads cannot starve healthy renewals. Driven by the
+	 * `due_owner (extension_slug, next_payment_gmt)` index; the head cycle is joined per candidate
+	 * via the `chain_seq` UNIQUE index. Returns the head fields selection needs, so the dispatcher
+	 * does not re-load the head to decide what to bill.
 	 *
 	 * @param DateTimeImmutable $now   The cutoff moment; contracts due at or before it.
 	 * @param int               $limit Maximum rows to return (the batch size).
@@ -676,14 +684,35 @@ final class ContractRepository {
 			return array();
 		}
 
+		$owners = ConsumerRegistry::all();
+		if ( array() === $owners ) {
+			return array();
+		}
+
 		global $wpdb;
 
-		$contracts = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
-		$cycles    = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
-		$cutoff    = $now->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
+		$contracts          = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$cycles             = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		$cutoff             = $now->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
+		$owner_placeholders = implode( ', ', array_fill( 0, count( $owners ), '%s' ) );
+
+		$args = array_merge(
+			array( Cycle::KIND_BILLING, Cycle::KIND_BILLING ),
+			$owners,
+			array(
+				Contract::SCHEDULE_SOURCE_GATEWAY,
+				$cutoff,
+				CycleStatus::BILLED,
+				$cutoff,
+				CycleStatus::PENDING,
+				$cutoff,
+				$limit,
+			)
+		);
 
 		// Table names cannot be bound, so they are interpolated; every value is a placeholder.
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// The owner placeholder list is generated, one `%s` per registered owner in `$args`.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT c.id AS contract_id, cy.count AS head_count, cy.status AS head_status, cy.ends_at_gmt AS head_ends_at_gmt
@@ -691,27 +720,18 @@ final class ContractRepository {
 				JOIN {$cycles} cy
 				  ON cy.contract_id = c.id AND cy.kind = %s
 				 AND cy.sequence_no = ( SELECT MAX(s.sequence_no) FROM {$cycles} s WHERE s.contract_id = c.id AND s.kind = %s )
-				WHERE c.status = %s AND c.schedule_source <> %s AND c.next_payment_gmt IS NOT NULL AND c.next_payment_gmt <= %s
+				WHERE c.extension_slug IN ( {$owner_placeholders} ) AND c.schedule_source <> %s AND c.next_payment_gmt IS NOT NULL AND c.next_payment_gmt <= %s
 				  AND (
 				        ( cy.status = %s AND cy.ends_at_gmt <= %s )
 				     OR ( cy.status = %s AND cy.claimed_until IS NOT NULL AND cy.claimed_until <= %s )
 				      )
 				ORDER BY c.next_payment_gmt ASC, c.id ASC
 				LIMIT %d",
-				Cycle::KIND_BILLING,
-				Cycle::KIND_BILLING,
-				ContractStatus::ACTIVE,
-				Contract::SCHEDULE_SOURCE_GATEWAY,
-				$cutoff,
-				CycleStatus::BILLED,
-				$cutoff,
-				CycleStatus::PENDING,
-				$cutoff,
-				$limit
+				$args
 			),
 			ARRAY_A
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 
 		// A failed scan otherwise reads exactly like "nothing due" and renewals stall
 		// store-wide with no signal; the return stays empty either way.

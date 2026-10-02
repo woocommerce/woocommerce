@@ -169,6 +169,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 				'currency'         => 'USD',
 				'selling_plan_id'  => $plan_id,
 				'origin_order_id'  => $origin_order_id,
+				'extension_slug'   => 'engine-tests',
 				'payment_method'   => self::GATEWAY,
 				'start_gmt'        => '2026-01-15 00:00:00',
 				'next_payment_gmt' => '2026-02-15 00:00:00',
