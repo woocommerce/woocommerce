@@ -26,14 +26,15 @@ final class PaymentSettingsScreens {
 	 *
 	 * @since 11.4.0
 	 *
-	 * @return array<string, array{id: string, title: string, rest_path: string, scripts: string[]}>
+	 * @return array<string, array{id: string, title: string, rest_path: string, scripts: string[], classic_section: string|null}>
 	 */
 	public function get_screens(): array {
 		/**
 		 * Filters the payment settings screens. Experimental: the format can change in any release.
 		 *
 		 * Each screen is keyed by its ID and has a `title`, the `rest_path` of its settings entity,
-		 * and optional `scripts` (script handles to load on the screen).
+		 * optional `scripts` (script handles to load on the screen), and an optional `classic_section`
+		 * (the `section` of its classic settings page, which then redirects to the screen).
 		 *
 		 * @since 11.4.0
 		 *
@@ -61,10 +62,28 @@ final class PaymentSettingsScreens {
 	 * @since 11.4.0
 	 *
 	 * @param string $id The screen ID.
-	 * @return array{id: string, title: string, rest_path: string, scripts: string[]}|null
+	 * @return array{id: string, title: string, rest_path: string, scripts: string[], classic_section: string|null}|null
 	 */
 	public function get_screen( string $id ): ?array {
 		return $this->get_screens()[ $id ] ?? null;
+	}
+
+	/**
+	 * Get the screen that replaces a classic settings section.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string $section The classic `section` query argument.
+	 * @return array{id: string, title: string, rest_path: string, scripts: string[], classic_section: string|null}|null
+	 */
+	public function get_screen_for_classic_section( string $section ): ?array {
+		foreach ( $this->get_screens() as $screen ) {
+			if ( null !== $screen['classic_section'] && strtolower( $section ) === $screen['classic_section'] ) {
+				return $screen;
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -72,7 +91,7 @@ final class PaymentSettingsScreens {
 	 *
 	 * @param mixed $id     The screen ID.
 	 * @param mixed $screen The screen arguments.
-	 * @return array{id: string, title: string, rest_path: string, scripts: string[]}|null
+	 * @return array{id: string, title: string, rest_path: string, scripts: string[], classic_section: string|null}|null
 	 */
 	private static function normalize_screen( $id, $screen ): ?array {
 		if ( ! is_string( $id ) || sanitize_key( $id ) !== $id || '' === $id || ! is_array( $screen ) ) {
@@ -88,11 +107,15 @@ final class PaymentSettingsScreens {
 		$scripts = $screen['scripts'] ?? array();
 		$scripts = is_array( $scripts ) ? array_values( array_filter( $scripts, 'is_string' ) ) : array();
 
+		$classic_section = $screen['classic_section'] ?? null;
+		$classic_section = is_string( $classic_section ) && '' !== $classic_section ? strtolower( $classic_section ) : null;
+
 		return array(
-			'id'        => $id,
-			'title'     => $title,
-			'rest_path' => $rest_path,
-			'scripts'   => $scripts,
+			'id'              => $id,
+			'title'           => $title,
+			'rest_path'       => $rest_path,
+			'scripts'         => $scripts,
+			'classic_section' => $classic_section,
 		);
 	}
 }
