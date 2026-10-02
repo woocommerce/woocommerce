@@ -199,7 +199,7 @@ test.describe(
 					await page.reload();
 				} );
 
-				await test.step( 'Check the setting present only when Jetpack onboarding is complete', async () => {
+				await test.step( 'Check the Enable PayPal Buttons setting is present after saving', async () => {
 					const paypalButtonsSetting = page.getByText(
 						'Enable PayPal Buttons',
 						{ exact: true }
