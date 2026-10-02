@@ -142,9 +142,24 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 			),
 			$billing_policy['trial_duration']
 		);
-		$this->assertSame( 'fixed_amount', $first_policy['type'] );
-		$this->assertSame( 3, $first_policy['duration_cycles'] );
-		$this->assertSame( 'setup', $first_fee['kind'] );
+		// Stored as sent: the engine coerces nothing inside the payload.
+		$this->assertSame(
+			array(
+				'type'            => 'fixed_amount',
+				'value'           => 2,
+				'duration_cycles' => 3,
+			),
+			$first_policy
+		);
+		$this->assertSame(
+			array(
+				'kind'      => 'setup',
+				'amount'    => 5,
+				'taxable'   => true,
+				'tax_class' => '',
+			),
+			$first_fee
+		);
 
 		$list = $this->request(
 			'GET',
@@ -160,48 +175,46 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$this->assertCount( 1, $this->response_data( $list ) );
 	}
 
-	public function test_create_round_trips_a_value_less_bogo_pricing_policy(): void {
+	public function test_create_round_trips_the_pricing_payload_opaquely(): void {
 		wp_set_current_user( $this->admin_id );
+
+		$pricing_policy = array(
+			'policies'   => array(
+				array(
+					'type'            => 'tiered',
+					'duration_cycles' => 1,
+				),
+				array( 'type' => 'bogo' ),
+			),
+			'custom_key' => array( 'nested' => 'kept' ),
+		);
 
 		$created = $this->request(
 			'POST',
 			self::BASE,
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
-				'name'           => 'Bogo monthly',
+				'name'           => 'Opaque monthly',
 				'billing_policy' => array(
 					'period'   => 'month',
 					'interval' => 1,
 				),
-				'pricing_policy' => array(
-					'policies' => array(
-						array(
-							'type'            => 'bogo',
-							'duration_cycles' => 1,
-						),
-					),
-				),
+				'pricing_policy' => $pricing_policy,
 			)
 		);
 
 		$this->assertSame( 201, $created->get_status() );
-		$created_data   = $this->response_data( $created );
-		$created_policy = $this->first_pricing_policy( $created_data );
-		$this->assertSame( 'bogo', $created_policy['type'] );
-		$this->assertSame( 0.0, $created_policy['value'], 'A value-less bogo entry normalizes to 0.0.' );
-		$this->assertSame( 1, $created_policy['duration_cycles'] );
+		$created_data = $this->response_data( $created );
+		$this->assertSame( $pricing_policy, $created_data['pricing_policy'], 'Unknown types and keys come back unchanged; no value is added.' );
 
 		// A fresh read round-trips the stored shape through the database.
 		$id      = $this->int_value( $created_data, 'id' );
 		$fetched = $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
 		$this->assertSame( 200, $fetched->get_status() );
-		$fetched_policy = $this->first_pricing_policy( $this->response_data( $fetched ) );
-		$this->assertSame( 'bogo', $fetched_policy['type'] );
-		$this->assertSame( 0.0, $fetched_policy['value'] );
-		$this->assertSame( 1, $fetched_policy['duration_cycles'] );
+		$this->assertSame( $pricing_policy, $this->response_data( $fetched )['pricing_policy'] );
 	}
 
-	public function test_update_swaps_a_percentage_policy_to_bogo(): void {
+	public function test_update_replaces_provided_top_level_keys_and_keeps_omitted_ones(): void {
 		wp_set_current_user( $this->admin_id );
 
 		$created = $this->request(
@@ -215,12 +228,19 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 					'interval' => 1,
 				),
 				'pricing_policy' => array(
-					'policies' => array(
+					'policies'      => array(
 						array(
 							'type'  => 'percentage',
 							'value' => 10,
 						),
 					),
+					'one_time_fees' => array(
+						array(
+							'kind'   => 'setup',
+							'amount' => 5,
+						),
+					),
+					'custom_key'    => 'kept',
 				),
 			)
 		);
@@ -234,30 +254,36 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 				'extension_slug' => self::EXTENSION_SLUG,
 				'pricing_policy' => array(
 					'policies' => array(
-						array(
-							'type'  => 'bogo',
-							'value' => 0,
-						),
+						array( 'type' => 'bogo' ),
 					),
 				),
 			)
 		);
 		$this->assertSame( 200, $patched->get_status() );
 
-		// The swap persisted: a fresh read shows the bogo entry, not the percentage.
 		$fetched = $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
 		$this->assertSame( 200, $fetched->get_status() );
-		$fetched_data   = $this->response_data( $fetched );
-		$fetched_policy = $this->first_pricing_policy( $fetched_data );
-		$this->assertSame( 'bogo', $fetched_policy['type'] );
-		$this->assertSame( 0.0, $fetched_policy['value'] );
-		$this->assertCount( 1, $this->array_value( $this->array_value( $fetched_data, 'pricing_policy' ), 'policies' ) );
+		$this->assertSame(
+			array(
+				'policies'      => array(
+					array( 'type' => 'bogo' ),
+				),
+				'one_time_fees' => array(
+					array(
+						'kind'   => 'setup',
+						'amount' => 5,
+					),
+				),
+				'custom_key'    => 'kept',
+			),
+			$this->response_data( $fetched )['pricing_policy']
+		);
 	}
 
-	public function test_bogo_with_a_non_zero_value_is_rejected(): void {
+	public function test_bogo_with_a_non_zero_value_is_stored_as_given(): void {
 		wp_set_current_user( $this->admin_id );
 
-		$invalid_pricing_policy = array(
+		$pricing_policy = array(
 			'policies' => array(
 				array(
 					'type'  => 'bogo',
@@ -271,33 +297,75 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 			self::BASE,
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
-				'name'           => 'Bad bogo',
+				'name'           => 'Any bogo',
 				'billing_policy' => array(
 					'period'   => 'month',
 					'interval' => 1,
 				),
-				'pricing_policy' => $invalid_pricing_policy,
+				'pricing_policy' => $pricing_policy,
+			)
+		);
+
+		$this->assertSame( 201, $created->get_status(), 'Pricing semantics belong to the owning extension.' );
+		$this->assertSame( $pricing_policy, $this->response_data( $created )['pricing_policy'] );
+	}
+
+	/**
+	 * @dataProvider provide_non_object_pricing_policies
+	 *
+	 * @param mixed  $invalid     Non-object pricing payload.
+	 * @param string $create_code Create error code: core schema validation rejects a scalar first.
+	 * @param string $patch_code  PATCH error code: the route has no arg schema, so the controller rejects.
+	 */
+	public function test_non_object_pricing_policy_is_rejected( $invalid, string $create_code, string $patch_code ): void {
+		wp_set_current_user( $this->admin_id );
+
+		$id = $this->create_plan( 'Patch target' );
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Bad payload',
+				'billing_policy' => array(
+					'period'   => 'month',
+					'interval' => 1,
+				),
+				'pricing_policy' => $invalid,
 			)
 		);
 		$this->assertSame( 400, $created->get_status() );
-		$this->assertSame( 'woocommerce_subscriptions_engine_invalid_plan', $this->response_data( $created )['code'] );
+		$this->assertSame( $create_code, $this->response_data( $created )['code'] );
 
-		$id      = $this->create_plan( 'Patch target' );
 		$patched = $this->request(
 			'PATCH',
 			self::BASE . '/' . $id,
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
-				'pricing_policy' => $invalid_pricing_policy,
+				'pricing_policy' => $invalid,
 			)
 		);
 		$this->assertSame( 400, $patched->get_status() );
-		$this->assertSame( 'woocommerce_subscriptions_engine_invalid_plan', $this->response_data( $patched )['code'] );
+		$this->assertSame( $patch_code, $this->response_data( $patched )['code'] );
 
-		// The rejected PATCH left the plan untouched.
+		// The rejected writes left the plan untouched and created nothing.
 		$fetched = $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
 		$this->assertSame( 200, $fetched->get_status() );
 		$this->assertNull( $this->response_data( $fetched )['pricing_policy'] );
+
+		$list = $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$this->assertSame( '1', $list->get_headers()['X-WP-Total'] );
+	}
+
+	/**
+	 * @return array<string, array{0: mixed, 1: string, 2: string}>
+	 */
+	public function provide_non_object_pricing_policies(): array {
+		return array(
+			'list'   => array( array( array( 'type' => 'bogo' ) ), 'woocommerce_subscriptions_engine_invalid_plan', 'woocommerce_subscriptions_engine_invalid_plan' ),
+			'string' => array( 'bogo', 'rest_invalid_param', 'woocommerce_subscriptions_engine_invalid_plan' ),
+		);
 	}
 
 	public function test_list_with_multiple_extension_slugs_returns_all_plans(): void {
@@ -640,16 +708,6 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		}
 
 		return $ids;
-	}
-
-	/**
-	 * The first pricing-policy entry from a plan response.
-	 *
-	 * @param array<array-key, mixed> $data Plan response data.
-	 * @return array<array-key, mixed>
-	 */
-	private function first_pricing_policy( array $data ): array {
-		return $this->array_value( $this->array_value( $this->array_value( $data, 'pricing_policy' ), 'policies' ), 0 );
 	}
 
 	/**
