@@ -2540,9 +2540,6 @@ importers:
       '@wordpress/env':
         specifier: 11.9.0
         version: 11.9.0(patch_hash=4ba152352e5408eabc62f88b83637a382c45c03b267bf8abf8e58fb1663c8cf7)(@types/node@24.12.2)
-      '@wordpress/stylelint-config':
-        specifier: ^21.36.0
-        version: 21.41.0(postcss@8.5.26)(stylelint@14.16.1)
       allure-commandline:
         specifier: ^2.32.2
         version: 2.38.1
@@ -2594,9 +2591,6 @@ importers:
       rimraf:
         specifier: 5.0.5
         version: 5.0.5
-      stylelint:
-        specifier: ^14.16.1
-        version: 14.16.1
       typescript:
         specifier: 5.7.x
         version: 5.7.3
