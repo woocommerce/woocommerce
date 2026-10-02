@@ -7237,12 +7237,6 @@ parameters:
 			path: includes/admin/reports/class-wc-report-taxes-by-date.php
 
 		-
-			message: '#^Parameter \#1 \$time of function strtotime expects string, int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/admin/reports/class-wc-report-taxes-by-date.php
-
-		-
 			message: '#^Method WC_Settings_Accounts\:\:output\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
