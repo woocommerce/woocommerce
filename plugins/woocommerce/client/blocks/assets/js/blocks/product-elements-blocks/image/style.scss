@@ -50,6 +50,15 @@
 			margin: 0;
 		}
 	}
+
+	// The rules above position the legacy badge (`showSaleBadge`). An On-Sale
+	// Badge inner block follows the inner container's layout instead, as it
+	// does in the editor.
+	.wc-block-components-product-image__inner-container
+		.wc-block-components-product-sale-badge {
+		position: static;
+		transform: none;
+	}
 }
 
 .editor-styles-wrapper .wc-block-components-product-image__inner-container {
