@@ -131,6 +131,10 @@ test.describe( 'Product Reviews', () => {
 		// Spam and trash use different rows on purpose: once a review is spammed
 		// its actions become Not Spam and Delete Permanently, so Trash is only
 		// reachable from the main list.
+		//
+		// The list dims or hides the row before its AJAX request finishes, so each
+		// action waits for the response before loading the next view. Otherwise the
+		// navigation can cancel the request, or read the status before it changes.
 		test( 'can approve, spam and trash a product review', async ( {
 			page,
 			reviews,
@@ -141,21 +145,45 @@ test.describe( 'Product Reviews', () => {
 			const trashed = reviews[ 1 ];
 
 			const rowFor = ( id: number ) => page.locator( `#comment-${ id }` );
+			const moderate = async (
+				id: number,
+				action: 'Unapprove' | 'Approve' | 'Spam' | 'Trash'
+			) => {
+				const expectedFields = {
+					id: `${ id }`,
+					...{
+						Unapprove: { action: 'dim-comment', new: 'unapproved' },
+						Approve: { action: 'dim-comment', new: 'approved' },
+						Spam: { action: 'delete-comment', spam: '1' },
+						Trash: { action: 'delete-comment', trash: '1' },
+					}[ action ],
+				};
+				const response = page.waitForResponse( ( candidate ) => {
+					if ( ! candidate.url().includes( 'admin-ajax.php' ) ) {
+						return false;
+					}
+					const fields = new URLSearchParams(
+						candidate.request().postData() ?? ''
+					);
+					return Object.entries( expectedFields ).every(
+						( [ key, value ] ) => fields.get( key ) === value
+					);
+				} );
+				await rowFor( id ).hover();
+				await rowFor( id )
+					.getByRole( 'button', { name: action } )
+					.click();
+				expect( ( await response ).ok() ).toBe( true );
+			};
 
 			await test.step( 'unapprove, then approve again', async () => {
 				await page.goto( reviewsUrl );
-				await rowFor( moderated.id ).hover();
-				await rowFor( moderated.id )
-					.getByRole( 'button', { name: 'Unapprove' } )
-					.click();
+				await moderate( moderated.id, 'Unapprove' );
 
 				await page.goto( `${ reviewsUrl }&comment_status=moderated` );
 				await expect( rowFor( moderated.id ) ).toBeVisible();
 
-				await rowFor( moderated.id ).hover();
-				await rowFor( moderated.id )
-					.getByRole( 'button', { name: 'Approve' } )
-					.click();
+				await moderate( moderated.id, 'Approve' );
 
 				await page.goto( `${ reviewsUrl }&comment_status=approved` );
 				await expect( rowFor( moderated.id ) ).toBeVisible();
@@ -163,10 +191,7 @@ test.describe( 'Product Reviews', () => {
 
 			await test.step( 'mark as spam', async () => {
 				await page.goto( reviewsUrl );
-				await rowFor( moderated.id ).hover();
-				await rowFor( moderated.id )
-					.getByRole( 'button', { name: 'Spam' } )
-					.click();
+				await moderate( moderated.id, 'Spam' );
 				await expect( rowFor( moderated.id ) ).toBeHidden();
 
 				await page.goto( `${ reviewsUrl }&comment_status=spam` );
@@ -175,10 +200,7 @@ test.describe( 'Product Reviews', () => {
 
 			await test.step( 'trash', async () => {
 				await page.goto( reviewsUrl );
-				await rowFor( trashed.id ).hover();
-				await rowFor( trashed.id )
-					.getByRole( 'button', { name: 'Trash' } )
-					.click();
+				await moderate( trashed.id, 'Trash' );
 				await expect( rowFor( trashed.id ) ).toBeHidden();
 
 				await page.goto( `${ reviewsUrl }&comment_status=trash` );
