@@ -427,6 +427,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'_downloadable'           => 'downloadable',
 			'_sku'                    => 'sku',
 			'_global_unique_id'       => 'global_unique_id',
+			'_mpn'                    => 'mpn',
 			'_stock'                  => 'stock_quantity',
 			'_weight'                 => 'weight',
 			'_length'                 => 'length',

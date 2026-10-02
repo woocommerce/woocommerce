@@ -36,6 +36,58 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox CSV imports update MPNs and allow zero and explicit clearing.
+	 * @testWith ["simple", "PART-IMPORTED"]
+	 *           ["simple", "0"]
+	 *           ["simple", ""]
+	 *           ["variation", "PART-IMPORTED"]
+	 *           ["variation", "0"]
+	 *           ["variation", ""]
+	 *
+	 * @param string $type Product type.
+	 * @param string $mpn MPN to import.
+	 */
+	public function test_mpn_csv_import( string $type, string $mpn ): void {
+		$class   = WC_Product_Factory::get_product_classname( 0, $type );
+		$product = new $class();
+		$product->set_name( 'MPN test product' );
+		$product->set_status( ProductStatus::PUBLISH );
+		$product->set_regular_price( '10' );
+		if ( ProductType::VARIATION === $type ) {
+			$parent = new WC_Product_Variable();
+			$parent->save();
+			$product->set_parent_id( $parent->get_id() );
+		}
+		$product->set_mpn( 'ORIGINAL' );
+		$product->save();
+		$csv = "ID,MPN\n{$product->get_id()},{$mpn}\n";
+
+		$temporary_file = wp_tempnam( 'mpn' );
+		$file           = $temporary_file . '.csv';
+		rename( $temporary_file, $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- The importer requires a CSV extension on the temporary fixture.
+		try {
+			file_put_contents( $file, $csv ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Write an isolated temporary CSV fixture.
+			$sut    = new WC_Product_CSV_Importer(
+				$file,
+				array(
+					'mapping'         => array(
+						'ID'  => 'id',
+						'MPN' => 'mpn',
+					),
+					'update_existing' => true,
+					'parse'           => true,
+				)
+			);
+			$result = $sut->import();
+
+			$this->assertSame( array( $product->get_id() ), $result['updated'], wp_json_encode( $result ) );
+			$this->assertSame( $mpn, wc_get_product( $product->get_id() )->get_mpn() );
+		} finally {
+			wp_delete_file( $file );
+		}
+	}
+
+	/**
 	 * @testdox variations need to set the status back to published if parent product is a draft
 	 */
 	public function test_expand_data_with_draft_variable() {
