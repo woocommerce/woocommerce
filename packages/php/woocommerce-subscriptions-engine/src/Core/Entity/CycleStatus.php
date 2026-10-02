@@ -143,6 +143,21 @@ final class CycleStatus {
 	}
 
 	/**
+	 * The engine's default cycle statuses in lifecycle order (the registry seed).
+	 *
+	 * @return array<int, string>
+	 */
+	public static function defaults(): array {
+		return array(
+			self::PENDING,
+			self::PROCESSING,
+			self::BILLED,
+			self::FAILED,
+			self::CANCELLED,
+		);
+	}
+
+	/**
 	 * All known statuses, in lifecycle order.
 	 *
 	 * @return array<int, string>
