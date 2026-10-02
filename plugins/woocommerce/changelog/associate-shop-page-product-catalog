@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Associate the Shop page with the Product Catalog block template while keeping the template selector hidden.
