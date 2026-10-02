@@ -613,6 +613,11 @@ $payments-header-row-height: 38px;
 	}
 }
 
+// The incentive popover is only identifiable by its content.
+.woocommerce-status-badge-popover .components-popover__content-container:has(.woocommerce-incentive-popover__title) {
+	width: 236px;
+}
+
 .other-payment-gateways__content__title-popover {
 	.components-popover__content-container {
 		width: 256px;
