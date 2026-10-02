@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop the email template update review from saying structural changes were applied automatically, since they are never applied.

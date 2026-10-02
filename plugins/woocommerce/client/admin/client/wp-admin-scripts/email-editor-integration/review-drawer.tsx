@@ -313,16 +313,24 @@ const AutoResolvedGroup = ( {
 					tag="keep_yours"
 				/>
 			) ) }
+			{ /* The selective applier never applies structural changes, so every entry keeps the merchant's version. */ }
 			{ summary.structural_changes.map(
 				( change: ChangeSummaryStructuralChange, idx: number ) => (
 					<AutoResolvedItem
 						key={ `structural-${ idx }` }
 						title={ change.description }
-						sub={ __(
-							'Structural change applied automatically.',
-							'woocommerce'
-						) }
-						tag="apply_core"
+						sub={
+							change.kind === 'merchant_removed'
+								? __(
+										'Core still has this block. Your removal is kept.',
+										'woocommerce'
+								  )
+								: __(
+										'Core changed the block structure here. This update does not apply structural changes.',
+										'woocommerce'
+								  )
+						}
+						tag="keep_yours"
 					/>
 				)
 			) }

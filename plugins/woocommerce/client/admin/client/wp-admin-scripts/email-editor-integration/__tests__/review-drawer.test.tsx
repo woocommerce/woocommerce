@@ -169,4 +169,68 @@ describe( 'ReviewDrawer', () => {
 		await apply.mock.results[ 0 ].value;
 		expect( onOpenChange ).not.toHaveBeenCalled();
 	} );
+
+	it( 'does not claim structural changes were applied', () => {
+		mockUseChangeSummary.mockReturnValue( {
+			summary: {
+				...summary,
+				copy_changes: [],
+				structural_changes: [
+					{
+						kind: 'merchant_removed',
+						description:
+							'You removed Paragraph; core still has it.',
+						path: [ 1 ],
+					},
+					{
+						kind: 'nest',
+						description: 'Added Group wrapper',
+						path: [ 0 ],
+					},
+					{
+						kind: 'reorder',
+						description: 'Reordered Heading',
+					},
+				],
+			},
+			isLoading: false,
+			error: null,
+			refetch: jest.fn(),
+		} );
+		mockUseApplyUpdate.mockReturnValue( {
+			apply: jest.fn(),
+			isApplying: false,
+		} );
+
+		render(
+			<ReviewDrawer
+				postId={ 123 }
+				emailTitle="New order"
+				isOpen
+				onOpenChange={ jest.fn() }
+			/>
+		);
+
+		expect(
+			screen.queryByText( 'Structural change applied automatically.' )
+		).not.toBeInTheDocument();
+		expect( screen.queryByText( 'Apply core' ) ).not.toBeInTheDocument();
+		expect( screen.getAllByText( 'Keep yours' ) ).toHaveLength( 3 );
+
+		const getItem = ( title: string ) =>
+			screen
+				.getByText( title )
+				.closest( '.woocommerce-review-drawer__item' );
+
+		expect(
+			getItem( 'You removed Paragraph; core still has it.' )
+		).toHaveTextContent(
+			'Core still has this block. Your removal is kept.'
+		);
+		for ( const title of [ 'Added Group wrapper', 'Reordered Heading' ] ) {
+			expect( getItem( title ) ).toHaveTextContent(
+				'Core changed the block structure here. This update does not apply structural changes.'
+			);
+		}
+	} );
 } );
