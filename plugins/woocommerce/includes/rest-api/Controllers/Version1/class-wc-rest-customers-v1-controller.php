@@ -375,6 +375,16 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 			$prepared_args['role'] = $request['role'];
 		}
 
+		// Filter by registration date. user_registered is stored in GMT.
+		foreach ( array( 'before', 'after' ) as $param ) {
+			if ( isset( $request[ $param ] ) ) {
+				$prepared_args['date_query'][] = array(
+					'column' => 'user_registered',
+					$param   => $request['dates_are_gmt'] ? $request[ $param ] : get_gmt_from_date( $request[ $param ] ),
+				);
+			}
+		}
+
 		/**
 		 * Filter arguments, before passing to WP_User_Query, when querying users via the REST API.
 		 *
@@ -1042,6 +1052,24 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 			'default'            => 'customer',
 			'enum'               => array_merge( array( 'all' ), $this->get_role_names() ),
 			'validate_callback'  => 'rest_validate_request_arg',
+		);
+		$params['after']         = array(
+			'description'       => __( 'Limit response to customers registered after a given ISO8601 compliant date.', 'woocommerce' ),
+			'type'              => 'string',
+			'format'            => 'date-time',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['before']        = array(
+			'description'       => __( 'Limit response to customers registered before a given ISO8601 compliant date.', 'woocommerce' ),
+			'type'              => 'string',
+			'format'            => 'date-time',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['dates_are_gmt'] = array(
+			'description'       => __( 'Whether the before and after dates are in GMT rather than the site timezone.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'default'           => false,
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 		return $params;
 	}
