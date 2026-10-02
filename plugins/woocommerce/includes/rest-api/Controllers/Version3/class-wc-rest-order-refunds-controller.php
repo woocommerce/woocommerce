@@ -461,7 +461,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	 * Validate explicit refund amounts without changing quantity-only requests.
 	 *
 	 * This runs when compute_totals is false; the computed path uses
-	 * create_refund_with_computed_totals(). Compare refund_total with each line's
+	 * create_refund_with_computed_totals(). Compare each line's gross refund with its
 	 * refundable balance and with the requested order-level amount.
 	 *
 	 * @param WC_Order $order      Order being refunded.
@@ -486,9 +486,16 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 				return new WP_Error( 'woocommerce_rest_invalid_refund_total', __( 'refund_total must be a number.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
-			$refund_total = (float) $line['refund_total'];
-			$line_total  += $refund_total;
-			if ( 0.0 === $refund_total ) {
+			$gross_refund_total = (float) $line['refund_total'];
+			if ( is_array( $line['refund_tax'] ?? null ) ) {
+				foreach ( $line['refund_tax'] as $tax_total ) {
+					if ( is_numeric( $tax_total ) ) {
+						$gross_refund_total += (float) $tax_total;
+					}
+				}
+			}
+			$line_total += $gross_refund_total;
+			if ( 0.0 === $gross_refund_total ) {
 				continue;
 			}
 
@@ -500,7 +507,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 			if ( null === $refund_data ) {
 				$refund_data = $this->get_data_utils()->compute_refunded_quantities_and_totals( $order );
 			}
-			$validation_error = $this->get_data_utils()->validate_refund_line_total( $item, $refund_total, (float) ( $refund_data['totals'][ $item_id ] ?? 0 ) );
+			$validation_error = $this->get_data_utils()->validate_refund_line_total( $item, $gross_refund_total, (float) ( $refund_data['totals'][ $item_id ] ?? 0 ) );
 			if ( is_wp_error( $validation_error ) ) {
 				return $this->prefix_error_code( $validation_error );
 			}
