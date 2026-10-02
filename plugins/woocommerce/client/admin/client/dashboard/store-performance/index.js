@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { getPersistedQuery } from '@woocommerce/navigation';
@@ -15,7 +15,7 @@ import {
 	SummaryListPlaceholder,
 	SummaryNumber,
 } from '@woocommerce/components';
-import { getDateParamsFromQuery } from '@woocommerce/date';
+import { getCurrentDates } from '@woocommerce/date';
 import { recordEvent } from '@woocommerce/tracks';
 import { CurrencyContext } from '@woocommerce/currency';
 
@@ -124,11 +124,11 @@ class StorePerformance extends Component {
 
 		const persistedQuery = getPersistedQuery( query );
 
-		const { compare } = getDateParamsFromQuery( query, defaultDateRange );
-		const prevLabel =
-			compare === 'previous_period'
-				? __( 'Previous period:', 'woocommerce' )
-				: __( 'Previous year:', 'woocommerce' );
+		const prevLabel = sprintf(
+			/* translators: %s: name of the compared date range, e.g. "Same day last year" */
+			__( '%s:', 'woocommerce' ),
+			getCurrentDates( query, defaultDateRange ).secondary.label
+		);
 		const { formatAmount, getCurrencyConfig } = this.context;
 		const currency = getCurrencyConfig();
 		return (

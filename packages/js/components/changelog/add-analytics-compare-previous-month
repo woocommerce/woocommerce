@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Show only the compare options that fit the selected date range in DateRangeFilterPicker, and center SegmentedSelection labels in their cell so a one-line label lines up with a label that wraps.

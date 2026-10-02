@@ -7,6 +7,7 @@ import { Dropdown } from '@wordpress/components';
 import PropTypes from 'prop-types';
 import { withViewportMatch } from '@wordpress/viewport';
 import clsx from 'clsx';
+import { getValidCompare } from '@woocommerce/date';
 
 /**
  * Internal dependencies
@@ -68,9 +69,15 @@ class DateRangeFilterPicker extends Component {
 		const { isoDateFormat, onRangeSelect } = this.props;
 		return ( event ) => {
 			const { period, compare, after, before } = this.state;
+			const selectedPeriod = selectedTab === 'custom' ? 'custom' : period;
 			const data = {
-				period: selectedTab === 'custom' ? 'custom' : period,
-				compare,
+				period: selectedPeriod,
+				compare: getValidCompare(
+					selectedPeriod,
+					compare,
+					after,
+					before
+				),
 			};
 			if ( selectedTab === 'custom' ) {
 				data.after = this.formatDate( after, isoDateFormat );
