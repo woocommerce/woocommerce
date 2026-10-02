@@ -22,6 +22,18 @@ Install and activate WooCommerce before activating the theme.
 
 == Changelog ==
 
+= 1.0.1 =
+* Remove the unregistered is-style-default class from Purple (#457)
+* Document and warn about Purple’s WooCommerce requirements (#456)
+* Use Chips blockGap support instead of hardcoded CSS (#453)
+* Small CSS cleanup (#459)
+* Purple: show active filters on mobile and tablet (outside of popover) (#458)
+* Update Purple theme screenshot (#461)
+
+= 0.0.2 =
+* Unify link underline styles (#445)
+* Prevent checkbox form items in My Account from breaking into multiple lines (#451)
+
 = 0.0.1 =
 * Initial release
 
