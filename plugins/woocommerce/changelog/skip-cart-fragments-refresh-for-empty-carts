@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Skip the cart fragments AJAX request for visitors without a cart session by pre-rendering empty-cart fragments into the script parameters. Disable via the woocommerce_cart_fragments_skip_ajax_for_empty_carts filter.
