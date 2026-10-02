@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Cover the email settings preview, palette and font contracts and the editor update banner and preview link; remove unobserved email test-helper code and make the template applier tests load WC_Emails

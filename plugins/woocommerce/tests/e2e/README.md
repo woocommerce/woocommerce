@@ -208,14 +208,12 @@ How a helper is wired up depends on when it needs to be active:
 
 Powers the `tests/email-editor/update-propagation/` suite (RSM-146). Exposes:
 
-- Option-driven filter overrides for `woocommerce_email_block_template_html`, `woocommerce_email_template_sync_opted_in_emails`, and `woocommerce_transactional_emails_for_block_editor`.
-- A server-side Tracks event recorder, controlled by option `wc_test_tracks_enabled`.
-- A fake `WC_Email` subclass (`fake_thirdparty`) gated by option `wc_test_fake_third_party_email_enabled` for third-party-email scope tests.
-- REST endpoints under `/wp-json/wc-email-test-helper/v1/` for seeding posts, triggering sweeps and backfill synchronously, draining the Tracks log, and writing typed option values.
+- An option-driven filter override for `woocommerce_email_block_template_html`.
+- REST endpoints under `/wp-json/wc-email-test-helper/v1/` for seeding posts, triggering sweeps synchronously, reading post content and canonical hashes, and writing typed option values.
 
 The plugin is dormant when its driving options are empty. It has a `WP_DEBUG` plus `X-Playwright` header safety rail to prevent accidental activation outside test contexts.
 
-If a test fails with `404` on `/wp-json/wc-email-test-helper/v1/health`, the plugin isn't loaded — run `pnpm env:e2e:restart`.
+If a test fails with `404` on a `/wp-json/wc-email-test-helper/v1/` route, the plugin isn't loaded — run `pnpm env:e2e:restart`.
 
 The PR-tier subset of these tests can be run locally with:
 
