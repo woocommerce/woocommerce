@@ -31,11 +31,6 @@ class WC_Helper_Updater {
 	private const CAMPAIGN_PLUGIN_ROW = 'pu_plugin_row';
 
 	/**
-	 * Transient holding the last successful update check, kept longer than the main cache so a failed check has something to fall back on.
-	 */
-	private const LAST_GOOD_CACHE_KEY = '_woocommerce_helper_updates_last_good';
-
-	/**
 	 * Loads the class, runs on init.
 	 */
 	public static function load() {
@@ -1029,7 +1024,7 @@ class WC_Helper_Updater {
 	 * @return bool True if the data is valid and hash matches, false otherwise.
 	 */
 	private static function should_use_cached_update_data( $data, $hash ) {
-		if ( ! is_array( $data ) || ! empty( $data['expired'] ) ) {
+		if ( ! is_array( $data ) || ! empty( $data['expired'] ) || ! self::is_fresh_update_data( $data ) ) {
 			return false;
 		}
 
@@ -1045,31 +1040,21 @@ class WC_Helper_Updater {
 	}
 
 	/**
-	 * The update data to serve when a check is skipped or fails: the main cache while it holds
-	 * products, otherwise the longer-lived copy of the last successful check. The copy loses its
-	 * hash, so its forced auto-updates are dropped and only ever come from the 12-hour main cache.
+	 * Whether cached update data is recent enough to use without a new check. The cache is kept
+	 * for a week so a failed check has something to fall back on, but it's only fresh for 12 hours.
 	 *
-	 * @param mixed $data The data retrieved from the main transient, of any shape.
-	 * @return mixed
+	 * @param array $data The cached update data.
+	 * @return bool
 	 */
-	private static function get_fallback_update_data( $data ) {
-		if ( is_array( $data ) && isset( $data['products'] ) && is_array( $data['products'] ) ) {
-			return $data;
-		}
-
-		$last_good = get_transient( self::LAST_GOOD_CACHE_KEY );
-		if ( is_array( $last_good ) ) {
-			unset( $last_good['hash'] );
-		}
-
-		return $last_good;
+	private static function is_fresh_update_data( array $data ): bool {
+		return isset( $data['updated'] ) && is_numeric( $data['updated'] ) && (int) $data['updated'] > time() - 12 * HOUR_IN_SECONDS;
 	}
 
 	/**
 	 * Extract the products from a cached update-check payload.
 	 *
 	 * Used while backing off and when the update check fails. The server-side `autoupdate`
-	 * decisions are kept only when the cache was made for the current payload.
+	 * decisions are kept only when the cache is fresh and was made for the current payload.
 	 *
 	 * @param mixed  $data The data retrieved from the transient, of any shape.
 	 * @param string $hash The hash of the current payload.
@@ -1081,7 +1066,7 @@ class WC_Helper_Updater {
 		}
 
 		$products = $data['products'];
-		if ( isset( $data['hash'] ) && is_string( $data['hash'] ) && hash_equals( $hash, $data['hash'] ) ) {
+		if ( isset( $data['hash'] ) && is_string( $data['hash'] ) && hash_equals( $hash, $data['hash'] ) && self::is_fresh_update_data( $data ) ) {
 			return $products;
 		}
 
@@ -1144,7 +1129,7 @@ class WC_Helper_Updater {
 		 * button clears it. Return the last cached products, if any.
 		 */
 		if ( WC_Helper_API_Backoff::is_rate_limited( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK ) ) {
-			return self::get_cached_products( self::get_fallback_update_data( $data ), $hash );
+			return self::get_cached_products( $data, $hash );
 		}
 
 		$cached_data = $data;
@@ -1194,17 +1179,13 @@ class WC_Helper_Updater {
 					WC_Helper_API_Backoff::record( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK, 15 * MINUTE_IN_SECONDS );
 				}
 
-				return self::get_cached_products( self::get_fallback_update_data( $cached_data ), $hash );
+				return self::get_cached_products( $cached_data, $hash );
 			}
-
-			// The server refused the site, so its old updates must not come back as a fallback later.
-			delete_transient( self::LAST_GOOD_CACHE_KEY );
 		} else {
 			$data['products'] = $products;
-			set_transient( self::LAST_GOOD_CACHE_KEY, $data, WEEK_IN_SECONDS );
 		}
 
-		set_transient( $cache_key, $data, 12 * HOUR_IN_SECONDS );
+		set_transient( $cache_key, $data, WEEK_IN_SECONDS );
 		return $data['products'];
 	}
 
@@ -1220,7 +1201,7 @@ class WC_Helper_Updater {
 			return $count;
 		}
 
-		// This runs often, so it only counts from cached data; a cache expired by a refresh triggers one update check here.
+		// This runs often, so it only counts from cached data; a cache that's stale or expired by a refresh triggers one update check here.
 		if ( ! get_transient( '_woocommerce_helper_subscriptions' ) ) {
 			return 0;
 		}
@@ -1346,7 +1327,6 @@ class WC_Helper_Updater {
 	 */
 	public static function flush_updates_cache() {
 		delete_transient( '_woocommerce_helper_updates' );
-		delete_transient( self::LAST_GOOD_CACHE_KEY );
 		self::expire_updates_cache();
 	}
 
@@ -1359,7 +1339,7 @@ class WC_Helper_Updater {
 		$data = get_transient( '_woocommerce_helper_updates' );
 		if ( is_array( $data ) && isset( $data['hash'] ) ) {
 			$data['expired'] = true;
-			set_transient( '_woocommerce_helper_updates', $data, 12 * HOUR_IN_SECONDS );
+			set_transient( '_woocommerce_helper_updates', $data, WEEK_IN_SECONDS );
 		}
 
 		delete_transient( '_woocommerce_helper_updates_count' );

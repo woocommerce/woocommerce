@@ -99,7 +99,6 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	private function cleanup_transients() {
 		delete_transient( '_woocommerce_helper_updates' );
 		delete_transient( '_woocommerce_helper_updates_count' );
-		delete_transient( '_woocommerce_helper_updates_last_good' );
 		delete_transient( '_woocommerce_helper_subscriptions' );
 		delete_transient( WC_Helper_API_Backoff::TRANSIENT_PREFIX . WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK );
 	}
@@ -431,9 +430,9 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A failed update check after the main cache expired should fall back to the last successful check, without its forced auto-updates.
+	 * @testdox A failed update check after the cache went stale should keep serving it for a week, without its forced auto-updates.
 	 */
-	public function test_update_check_falls_back_to_last_successful_check_when_cache_expired(): void {
+	public function test_update_check_serves_stale_cache_when_request_fails(): void {
 		$payload  = array(
 			123 => array(
 				'product_id' => 123,
@@ -462,9 +461,11 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		add_filter( 'pre_http_request', $http_mock );
 
 		try {
-			$this->call_update_check( $payload );
-			$last_good = get_transient( '_woocommerce_helper_updates_last_good' );
-			delete_transient( '_woocommerce_helper_updates' );
+			$fresh             = $this->call_update_check( $payload );
+			$cache_ttl         = (int) get_option( '_transient_timeout__woocommerce_helper_updates' ) - time();
+			$stale             = get_transient( '_woocommerce_helper_updates' );
+			$stale['updated'] -= 13 * HOUR_IN_SECONDS;
+			set_transient( '_woocommerce_helper_updates', $stale, WEEK_IN_SECONDS );
 			$fail           = true;
 			$after_failure  = $this->call_update_check( $payload );
 			$inside_backoff = $this->call_update_check( $payload );
@@ -473,10 +474,11 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		}
 
 		$expected = array( 123 => array( 'version' => '1.2.3' ) );
-		$this->assertSame( $products, $last_good['products'], 'A successful check should keep a copy of its products' );
-		$this->assertSame( $expected, $after_failure, 'A failed check should serve the last successful check once the main cache is gone, without forcing auto-updates' );
-		$this->assertSame( $expected, $inside_backoff, 'A check inside the backoff should serve the last successful check too' );
-		$this->assertFalse( get_transient( '_woocommerce_helper_updates' ), 'A failed check should not write the main cache' );
+		$this->assertSame( $products, $fresh, 'A fresh check should keep the forced auto-update' );
+		$this->assertGreaterThan( DAY_IN_SECONDS, $cache_ttl, 'A successful check should be kept longer than it is fresh' );
+		$this->assertSame( $expected, $after_failure, 'A failed check should serve the stale cache, without forcing auto-updates' );
+		$this->assertSame( $expected, $inside_backoff, 'A check inside the backoff should serve the stale cache too' );
+		$this->assertSame( $stale, get_transient( '_woocommerce_helper_updates' ), 'A failed check should not write the cache' );
 	}
 
 	/**
@@ -489,14 +491,6 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 * @param int $status HTTP status of the response, or 0 for a WP_Error about missing local credentials.
 	 */
 	public function test_update_check_caches_empty_result_when_connection_is_rejected( int $status ): void {
-		set_transient(
-			'_woocommerce_helper_updates_last_good',
-			array(
-				'hash'     => 'a-stale-hash',
-				'products' => array( 123 => array( 'version' => '1.2.3' ) ),
-			),
-			HOUR_IN_SECONDS
-		);
 		set_transient(
 			'_woocommerce_helper_updates',
 			array(
@@ -542,7 +536,6 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 			WC_Helper_API_Backoff::is_rate_limited( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK ),
 			'A rejected check should not start the outage backoff'
 		);
-		$this->assertFalse( get_transient( '_woocommerce_helper_updates_last_good' ), 'A rejected check should drop the fallback copy so refused updates do not come back' );
 	}
 
 	/**
@@ -563,7 +556,6 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 				'autoupdate' => true,
 			),
 		);
-		set_transient( '_woocommerce_helper_updates_last_good', array( 'products' => $products ), HOUR_IN_SECONDS );
 		set_transient(
 			'_woocommerce_helper_updates',
 			array(
@@ -594,7 +586,6 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 1, $update_checks, 'A refresh should force a fresh update check' );
 		$this->assertSame( $products, $result, 'A failed check after a refresh should serve the cached products, keeping the forced auto-update made for this payload' );
 		$this->assertSame( $hash, get_transient( '_woocommerce_helper_updates' )['hash'], 'A refresh should keep the hash of the cached payload' );
-		$this->assertNotFalse( get_transient( '_woocommerce_helper_updates_last_good' ), 'A refresh should keep the copy of the last successful check' );
 	}
 
 	/**
@@ -733,7 +724,6 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		// Set up transients.
 		set_transient( '_woocommerce_helper_updates', array( 'test' => 'data' ), HOUR_IN_SECONDS );
 		set_transient( '_woocommerce_helper_updates_count', 5, HOUR_IN_SECONDS );
-		set_transient( '_woocommerce_helper_updates_last_good', array( 'test' => 'data' ), HOUR_IN_SECONDS );
 
 		// Verify transients are set.
 		$this->assertNotFalse( get_transient( '_woocommerce_helper_updates' ), 'Updates transient should be set' );
@@ -745,7 +735,6 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		// Verify transients are cleared.
 		$this->assertFalse( get_transient( '_woocommerce_helper_updates' ), 'Updates transient should be cleared' );
 		$this->assertFalse( get_transient( '_woocommerce_helper_updates_count' ), 'Count transient should be cleared' );
-		$this->assertFalse( get_transient( '_woocommerce_helper_updates_last_good' ), 'Fallback copy should be cleared' );
 	}
 
 	/**
