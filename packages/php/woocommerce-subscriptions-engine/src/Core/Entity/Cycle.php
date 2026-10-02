@@ -228,6 +228,7 @@ final class Cycle {
 
 		self::assert_valid_kind( $cycle->kind );
 		self::assert_valid_sequence_no( $cycle->sequence_no );
+		self::assert_registered_status( $cycle->status );
 
 		return $cycle;
 	}
@@ -337,16 +338,20 @@ final class Cycle {
 	/**
 	 * Set the cycle status.
 	 *
-	 * Any status may follow any other: the engine enforces no transition table
-	 * (a {@see CycleStatus} built through {@see CycleStatus::from()} or a named
-	 * factory is registered by construction). Setting the current status is a no-op.
+	 * Any status may follow any other: the engine enforces no transition table. A
+	 * changed status must be registered (an unregistered value, such as one built
+	 * through {@see CycleStatus::stored()}, is rejected); setting the current status
+	 * is a no-op, so a hydrated unregistered status can be saved unchanged.
 	 *
 	 * @param CycleStatus $status Target status.
+	 * @throws DomainException If the status changes to an unregistered value.
 	 */
 	public function set_status( CycleStatus $status ): void {
 		if ( $this->status->equals( $status ) ) {
 			return;
 		}
+
+		self::assert_registered_status( $status );
 
 		$this->status = $status;
 	}
@@ -603,10 +608,27 @@ final class Cycle {
 	}
 
 	/**
+	 * Reject a status value that is not registered. Write paths only
+	 * ({@see self::create()}, {@see self::set_status()}); storage hydration keeps an
+	 * unregistered stored value verbatim.
+	 *
+	 * @param CycleStatus $status Status to check.
+	 * @throws DomainException If the status is not registered.
+	 */
+	private static function assert_registered_status( CycleStatus $status ): void {
+		if ( ! CycleStatus::is_valid( $status->get_value() ) ) {
+			throw new DomainException(
+				sprintf( 'Cycle: status "%s" is not registered.', $status->get_value() )
+			);
+		}
+	}
+
+	/**
 	 * Resolve a status input into a typed {@see CycleStatus}. A `CycleStatus` passes
 	 * through; null defaults to `pending`; a string is validated via
-	 * {@see CycleStatus::from()} (the {@see self::create()} write path; storage
-	 * hydration converts its string first, so it bypasses the check).
+	 * {@see CycleStatus::from()}. A passed-through instance is checked by
+	 * {@see self::create()} (storage hydration converts its string first and is not
+	 * checked, so an unregistered stored value round-trips).
 	 *
 	 * @param mixed $status Raw status value (a CycleStatus, null, or a status string).
 	 * @return CycleStatus
