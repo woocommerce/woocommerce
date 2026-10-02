@@ -4,11 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { dispatch, useDispatch, useSelect } from '@wordpress/data';
 import { useCallback } from '@wordpress/element';
-import {
-	cartStore,
-	validationStore,
-	checkoutStore,
-} from '@woocommerce/block-data';
+import { cartStore, checkoutStore } from '@woocommerce/block-data';
 import { decodeEntities } from '@wordpress/html-entities';
 import type {
 	StoreCartCoupon,
@@ -24,6 +20,12 @@ import { useStoreCart } from './use-store-cart';
 /**
  * This is a custom hook for loading the Store API /cart/coupons endpoint and an
  * action for adding a coupon _to_ the cart.
+ *
+ * applyCoupon resolves true once the coupon is applied. When the Store API
+ * rejects the coupon it rejects with an Error whose message is ready to show to
+ * the shopper. The failure is feedback for the coupon form only, so it is never
+ * written to the validation store, which would block checkout.
+ *
  * See also: https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/trunk/src/RestApi/StoreApi
  */
 export const useStoreCartCoupons = ( context = '' ): StoreCartCoupon => {
@@ -82,14 +84,9 @@ export const useStoreCartCoupons = ( context = '' ): StoreCartCoupon => {
 					return Promise.resolve( true );
 				} )
 				.catch( ( error ) => {
-					const errorMessage = getCouponErrorMessage( error );
-					dispatch( validationStore ).setValidationErrors( {
-						coupon: {
-							message: decodeEntities( errorMessage ),
-							hidden: false,
-						},
-					} );
-					return Promise.resolve( false );
+					throw new Error(
+						decodeEntities( getCouponErrorMessage( error ) )
+					);
 				} );
 		},
 		[ applyCoupon, getCouponErrorMessage, context ]
