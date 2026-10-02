@@ -273,7 +273,7 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should derive the write meta as plain data, with no callables.
+	 * @testdox Should derive the write meta from the ability class as plain data, with no callables.
 	 */
 	public function test_meta_is_plain_data(): void {
 		$this->register( true );
@@ -361,7 +361,7 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 		$write = wp_get_ability( self::WRITE );
 		$read  = wp_get_ability( self::READ );
 
-		$this->assertArrayNotHasKey( 'in_memory_write', $write->get_meta()['woocommerce'] );
+		$this->assertArrayNotHasKey( 'woocommerce', $write->get_meta() );
 		$this->assertSame( \WP_Ability::class, get_class( $read ) );
 		$this->assertArrayNotHasKey( 'extensions', $write->get_input_schema()['properties'] );
 		$this->assertArrayNotHasKey( 'extensions', $write->get_output_schema()['properties']['record']['properties'] );
@@ -431,14 +431,6 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 					),
 					'ability_class'       => TestRecordWriteAbility::class,
 					'permission_callback' => '__return_true',
-					'meta'                => array(
-						'woocommerce' => array(
-							'extension_fields' => array(
-								'object_type' => 'test_record',
-								'output'      => 'record',
-							),
-						),
-					),
 				)
 			);
 

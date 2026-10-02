@@ -14,7 +14,9 @@ defined( 'ABSPATH' ) || exit;
  * `meta.woocommerce`:
  *
  * - `extension_fields`: `object_type` and the `output` key where the object, or list of objects, sits.
- * - `in_memory_write`: `object_type`, derived from an InMemoryWriteAbility `ability_class`.
+ * - `in_memory_write`: `object_type`.
+ *
+ * Both are derived from an InMemoryWriteAbility `ability_class` unless the ability declares them.
  *
  * Meta is listed in full by the REST API, so it holds plain data only.
  *
@@ -37,7 +39,11 @@ final class RegistrationArgs {
 			$args['ability_class'] = PolyfilledAbility::class;
 		}
 		if ( is_string( $class ) && is_a( $class, InMemoryWriteAbility::class, true ) ) {
-			$args['meta'][ self::META ]['in_memory_write'] = array( 'object_type' => $class::object_type() );
+			$args['meta'][ self::META ]['extension_fields'] = $args['meta'][ self::META ]['extension_fields'] ?? array(
+				'object_type' => $class::object_type(),
+				'output'      => $class::output_key(),
+			);
+			$args['meta'][ self::META ]['in_memory_write']  = $args['meta'][ self::META ]['in_memory_write'] ?? array( 'object_type' => $class::object_type() );
 		}
 
 		$fields = $args['meta'][ self::META ]['extension_fields'] ?? null;

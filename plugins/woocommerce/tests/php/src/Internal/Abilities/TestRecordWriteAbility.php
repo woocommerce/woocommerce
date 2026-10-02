@@ -22,6 +22,13 @@ class TestRecordWriteAbility extends InMemoryWriteAbility {
 	}
 
 	/**
+	 * Output key.
+	 */
+	public static function output_key(): string {
+		return 'record';
+	}
+
+	/**
 	 * Load the record.
 	 *
 	 * @param array $input Ability input.

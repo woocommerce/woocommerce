@@ -51,17 +51,6 @@ class AbilitiesLoader {
 	);
 
 	/**
-	 * Output key of the products each Core product ability returns.
-	 *
-	 * @var array<class-string, string>
-	 */
-	private const PRODUCT_OUTPUT_KEYS = array(
-		ProductsQuery::class => 'products',
-		ProductCreate::class => 'product',
-		ProductUpdate::class => 'product',
-	);
-
-	/**
 	 * Log source for ability registration notices.
 	 *
 	 * @var string
@@ -167,9 +156,9 @@ class AbilitiesLoader {
 	}
 
 	/**
-	 * Declare the extension fields of Core's product abilities, run Core's
-	 * product writes as in-memory writes, and run InMemoryWrite definitions
-	 * through the same runner.
+	 * Declare the extension fields of the products query, run Core's product
+	 * writes as in-memory writes, and run InMemoryWrite definitions through
+	 * the same runner.
 	 *
 	 * @param array        $args         Registration arguments.
 	 * @param string       $ability_name Ability name.
@@ -177,10 +166,10 @@ class AbilitiesLoader {
 	 * @return array
 	 */
 	private static function with_ability_contracts( array $args, string $ability_name, string $class_name ): array {
-		if ( isset( self::PRODUCT_OUTPUT_KEYS[ $class_name ] ) ) {
+		if ( ProductsQuery::class === $class_name ) {
 			$args['meta'][ RegistrationArgs::META ]['extension_fields'] = array(
 				'object_type' => 'product',
-				'output'      => self::PRODUCT_OUTPUT_KEYS[ $class_name ],
+				'output'      => 'products',
 			);
 		}
 

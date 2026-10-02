@@ -24,6 +24,13 @@ abstract class InMemoryWriteAbility extends PolyfilledAbility {
 	abstract public static function object_type(): string;
 
 	/**
+	 * Output key where the object sits, for its extension fields.
+	 */
+	public static function output_key(): string {
+		return static::object_type();
+	}
+
+	/**
 	 * Load the object to change. Never saves.
 	 *
 	 * @param array $input Ability input.
