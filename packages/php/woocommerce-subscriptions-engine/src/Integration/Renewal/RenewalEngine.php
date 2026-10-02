@@ -1167,19 +1167,22 @@ final class RenewalEngine {
 	 * vanished mid-park, a write error) must not stall the rest of the batch. On failure the
 	 * contract simply stays due and the park is re-attempted next tick.
 	 *
+	 * Only an active contract is parked: one that stopped being active since it was selected
+	 * already left the due set, and its next-due moment belongs to whoever changed its status.
+	 *
 	 * @param int $contract_id The contract to remove from the due set.
 	 */
 	public function park( int $contract_id ): void {
 		try {
 			$contract = $this->contracts->find( $contract_id );
-			if ( null === $contract ) {
+			if ( null === $contract || ContractStatus::ACTIVE !== $contract->get_status() ) {
 				return;
 			}
 
 			$contract->set_next_payment_gmt( null );
-			// Conditioned on the status just read: a lifecycle transition racing the
-			// park must not be clobbered - the contract is out of the due set either way.
-			$this->contracts->update_if_status( $contract, $contract->get_status() );
+			// Conditioned on active: a status change racing the park must not be
+			// clobbered, nor have its next-due moment cleared.
+			$this->contracts->update_if_status( $contract, ContractStatus::ACTIVE );
 		} catch ( Throwable $e ) {
 			wc_get_logger()->error(
 				sprintf( 'RenewalEngine::park(): failed to park contract %d - %s', $contract_id, $e->getMessage() ),
