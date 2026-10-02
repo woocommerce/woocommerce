@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a payments finance data provider contract (balances and payouts) for payment gateways, and an admin REST API under /wc-admin/payments/finance that exposes it behind the payments_finance feature flag.
