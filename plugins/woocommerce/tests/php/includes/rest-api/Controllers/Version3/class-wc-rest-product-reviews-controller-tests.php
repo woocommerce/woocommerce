@@ -594,6 +594,37 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Creating a review populates the verified-owner meta at creation time.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $include_verified Whether to include the verified parameter in the request.
+	 */
+	public function test_create_item_populates_verified_meta( bool $include_verified ): void {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+
+		$body = array(
+			'product_id'     => $product_id,
+			'review'         => $include_verified ? 'Verified by the caller.' : 'Great product, would buy again.',
+			'reviewer'       => 'Jane Smith',
+			'reviewer_email' => 'jane.smith@example.org',
+			'rating'         => 5,
+		);
+		if ( $include_verified ) {
+			$body['verified'] = true;
+		}
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/reviews' );
+		$request->set_body_params( $body );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status() );
+		$this->assertSame( $include_verified ? '1' : '0', get_comment_meta( $response->get_data()['id'], 'verified', true ), 'The verified meta is populated at creation time.' );
+	}
+
+	/**
 	 * Creates two products and a review that can be moved between them.
 	 *
 	 * @param int $rating Rating for the review.
