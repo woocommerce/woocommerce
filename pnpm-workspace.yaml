@@ -42,7 +42,6 @@ catalogs:
         '@wordpress/notices': 5.33.1
         '@wordpress/patterns': 2.33.9
         '@wordpress/plugins': 7.33.5
-        '@wordpress/postcss-plugins-preset': 'catalog:wp-min'
         '@wordpress/preferences': 4.33.5
         '@wordpress/primitives': 4.33.1
         '@wordpress/priority-queue': 3.33.1
@@ -78,6 +77,7 @@ catalogs:
         '@babel/preset-react': 7.25.7
         '@babel/preset-typescript': 7.25.7
         '@babel/runtime': 7.25.7
+        '@wordpress/postcss-plugins-preset': 5.56.0
         postcss: ^8.5.26
         webpack: 5.97.x
 
