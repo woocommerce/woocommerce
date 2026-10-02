@@ -2678,4 +2678,37 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$this->assertSame( 'Updated in batch', $data['update'][1]['name'] );
 		$this->assertSame( 'Updated in batch', wc_get_product( $product->get_id() )->get_name() );
 	}
+
+	/**
+	 * @testdox Products can be ordered by SKU in both directions.
+	 *
+	 * @testWith ["asc", ["sku-a", "sku-b", "sku-c"]]
+	 *           ["desc", ["sku-c", "sku-b", "sku-a"]]
+	 *
+	 * @param string $order         Sort direction.
+	 * @param array  $expected_skus Expected SKUs in response order.
+	 */
+	public function test_products_orderby_sku( string $order, array $expected_skus ): void {
+		$product_ids = array();
+		foreach ( array( 'sku-b', 'sku-c', 'sku-a' ) as $sku ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_sku( $sku );
+			$product->save();
+			$product_ids[] = $product->get_id();
+		}
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array(
+				'include' => $product_ids,
+				'orderby' => 'sku',
+				'order'   => $order,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $expected_skus, wp_list_pluck( $response->get_data(), 'sku' ) );
+		$this->assertFalse( has_filter( 'posts_clauses', array( $this->endpoint, 'order_by_sku_post_clauses' ) ), 'The SKU ordering filter should be removed after the query.' );
+	}
 }
