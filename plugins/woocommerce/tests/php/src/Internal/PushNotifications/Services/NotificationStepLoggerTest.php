@@ -87,6 +87,27 @@ class NotificationStepLoggerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A caller controls the value an exception names, so a message can hold any
+	 * bytes at all.
+	 *
+	 * @testdox Should still write a message whose bytes are not valid UTF-8.
+	 */
+	public function test_log_failure_keeps_a_message_with_invalid_utf8(): void {
+		$this->sut->log_failure(
+			$this->create_order_mock( 42 ),
+			'processing',
+			'exception',
+			'error',
+			"Unknown notification type: \x80\nforged line"
+		);
+
+		$message = $this->logger->log_calls[0]['message'];
+
+		$this->assertStringContainsString( 'Unknown notification type:', $message );
+		$this->assertStringNotContainsString( "\n", $message );
+	}
+
+	/**
 	 * @testdox Should cap a logged message rather than write whatever an exception carried.
 	 */
 	public function test_log_failure_caps_the_message_length(): void {

@@ -115,7 +115,7 @@ class NotificationStepLogger {
 	 * without those fields.
 	 *
 	 * @param Notification $notification The notification the failure belongs to.
-	 * @param string       $step         Machine-readable step name, e.g. `send`.
+	 * @param string       $step         Machine-readable step name, e.g. `dispatched`.
 	 * @param string       $outcome      Machine-readable outcome, e.g. `request_failed`.
 	 * @param string       $level        `error` or `warning`.
 	 * @param string       $message      Human-readable message for the error log.
@@ -175,7 +175,7 @@ class NotificationStepLogger {
 	 * Written under the module's own source only, since there is no journey to
 	 * attach it to; the read path includes that source for the days in range.
 	 *
-	 * @param string $step    Machine-readable step name, e.g. `received`.
+	 * @param string $step    Machine-readable step name, e.g. `loopback_started`.
 	 * @param string $outcome Machine-readable outcome, e.g. `auth_failed`.
 	 * @param string $level   `error` or `warning`.
 	 * @param string $message Human-readable message for the error log.
@@ -317,7 +317,9 @@ class NotificationStepLogger {
 	 * @return string
 	 */
 	private static function clean( string $value, int $limit ): string {
-		$value = (string) preg_replace( '/[\x00-\x1F\x7F]+/u', ' ', $value );
+		// Matched bytewise, because a caller controls these bytes and they need
+		// not be valid UTF-8.
+		$value = (string) preg_replace( '/[\x00-\x1F\x7F]+/', ' ', $value );
 
 		if ( mb_strlen( $value ) <= $limit ) {
 			return $value;

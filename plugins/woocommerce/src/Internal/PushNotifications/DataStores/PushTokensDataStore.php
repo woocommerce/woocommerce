@@ -36,8 +36,8 @@ class PushTokensDataStore {
 
 	/**
 	 * Memoized count_tokens() result for this request. The step log puts it on
-	 * every notification's recipients line, so a bulk stock update would
-	 * otherwise run one COUNT(*) over every token row per notification.
+	 * every notification's recipients line, and one request can carry thousands
+	 * of notifications.
 	 *
 	 * @var int|null
 	 */

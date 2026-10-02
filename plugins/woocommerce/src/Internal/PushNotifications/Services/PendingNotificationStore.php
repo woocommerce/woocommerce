@@ -118,9 +118,10 @@ class PendingNotificationStore {
 	/**
 	 * Adds a notification to the pending store.
 	 *
-	 * Duplicate notifications (same type and resource ID) within a single
-	 * request are silently ignored. The shutdown hook is registered on the
-	 * first call.
+	 * A duplicate (same type and resource ID) within a single request is not
+	 * added again, and is recorded as `triggered: duplicate_in_request` so a
+	 * reader can tell it apart from one that never arrived. The shutdown hook
+	 * is registered on the first call.
 	 *
 	 * Notifications are dropped when no push token is registered, so neither the safety net job nor the loopback request is created for a send that has no recipient.
 	 *

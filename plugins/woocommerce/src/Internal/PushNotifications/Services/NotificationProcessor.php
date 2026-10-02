@@ -295,10 +295,9 @@ class NotificationProcessor {
 	 * Writes the recipient decision to the step log: one line naming the
 	 * recipients, and one line naming the tokens that were excluded.
 	 *
-	 * Both lines carry token IDs in arrays rather than a line per token. A
-	 * store holding thousands of tokens would otherwise write megabytes for a
-	 * single notification, against a per-source daily ceiling that silently
-	 * overwrites whatever came first.
+	 * A store can hold thousands of tokens, and a log source has a daily size
+	 * ceiling past which its oldest lines are overwritten without a trace, so
+	 * both lines name their tokens in arrays.
 	 *
 	 * @param Notification       $notification        The notification being processed.
 	 * @param PushToken[]        $eligible_tokens     Tokens whose owner has a role that receives push notifications.
