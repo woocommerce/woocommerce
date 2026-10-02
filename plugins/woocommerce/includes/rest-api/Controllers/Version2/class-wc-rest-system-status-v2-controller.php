@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer as Order_
 use Automattic\WooCommerce\Utilities\{ LoggingUtil, OrderUtil, PluginUtil };
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
+use Automattic\WooCommerce\Queue\Scheduler;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
 /**
@@ -203,6 +204,24 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 						),
 						'wp_cron'                   => array(
 							'description' => __( 'Are WordPress cron jobs enabled?', 'woocommerce' ),
+							'type'        => 'boolean',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'queue_class'               => array(
+							'description' => __( 'The queue class WooCommerce schedules background work through.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'queue_unique_support'      => array(
+							'description' => __( 'Does the queue support unique scheduled actions natively?', 'woocommerce' ),
+							'type'        => 'boolean',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'queue_priority_support'    => array(
+							'description' => __( 'Does the queue support prioritized scheduled actions natively?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
@@ -1001,6 +1020,19 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		$database_version = wc_get_server_database_version();
 		$log_directory    = LoggingUtil::get_log_directory( false );
 
+		// Background scheduling: the queue class and what it supports natively.
+		$queue_class            = '';
+		$queue_unique_support   = false;
+		$queue_priority_support = false;
+		if ( did_action( 'plugins_loaded' ) ) {
+			$queue_class = get_class( WC()->queue() );
+			$scheduler   = wc_get_container()->get( Scheduler::class );
+			if ( $scheduler->is_ready() ) {
+				$queue_unique_support   = $scheduler->supports( \Automattic\WooCommerce\Enums\QueueCapability::UNIQUE );
+				$queue_priority_support = $scheduler->supports( \Automattic\WooCommerce\Enums\QueueCapability::PRIORITY );
+			}
+		}
+
 		// Return all environment info. Described by JSON Schema.
 		return array(
 			'home_url'                  => get_option( 'home' ),
@@ -1014,6 +1046,9 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'wp_memory_limit'           => $wp_memory_limit,
 			'wp_debug_mode'             => ( defined( 'WP_DEBUG' ) && WP_DEBUG ),
 			'wp_cron'                   => ! ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ),
+			'queue_class'               => $queue_class,
+			'queue_unique_support'      => $queue_unique_support,
+			'queue_priority_support'    => $queue_priority_support,
 			'wp_environment_type'       => wp_get_environment_type(),
 			'language'                  => get_locale(),
 			'external_object_cache'     => wp_using_ext_object_cache(),
