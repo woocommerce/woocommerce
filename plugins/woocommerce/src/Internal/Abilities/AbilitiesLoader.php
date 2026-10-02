@@ -177,11 +177,17 @@ class AbilitiesLoader {
 			$args['ability_class'] = ProductWriteAbility::class;
 		} elseif ( is_a( $class_name, InMemoryWrite::class, true ) ) {
 			$steps = array(
-				'object_type' => $class_name::subject_type(),
-				'subject'     => array( $class_name, 'subject' ),
-				'validate'    => array( $class_name, 'validate' ),
-				'apply'       => array( $class_name, 'apply' ),
-				'respond'     => array( $class_name, 'respond' ),
+				'object_type'      => $class_name::subject_type(),
+				'load'             => array( $class_name, 'subject' ),
+				'change'           => static function ( $subject, array $input ) use ( $class_name ) {
+					$valid = $class_name::validate( $subject, $input );
+					if ( is_wp_error( $valid ) ) {
+						return $valid;
+					}
+					$class_name::apply( $subject, $input );
+					return null;
+				},
+				'prepare_response' => array( $class_name, 'respond' ),
 			);
 
 			$args['meta'][ RegistrationArgs::META ]['in_memory_write'] = array( 'object_type' => $steps['object_type'] );
