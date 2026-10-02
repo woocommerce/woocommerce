@@ -54,7 +54,6 @@
 				"@testing-library/*",
 				"@typescript-eslint/*",
 				"@wordpress/autop",
-				"@wordpress/prettier-config",
 				"@wordpress/private-apis",
 				"@wordpress/scripts",
 				"@wordpress/style-engine",
@@ -409,13 +408,18 @@
 			"isIgnored": true
 		},
 		{
+			"label": "Shared WordPress Prettier tooling",
+			"dependencyTypes": [
+				"prod",
+				"dev"
+			],
 			"dependencies": [
 				"@wordpress/prettier-config"
 			],
 			"packages": [
 				"**"
 			],
-			"pinVersion": "4.49.0"
+			"policy": "catalog"
 		},
 		{
 			"dependencies": [

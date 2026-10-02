@@ -27,6 +27,9 @@ catalogs:
     '@babel/runtime':
       specifier: 7.25.7
       version: 7.25.7
+    '@wordpress/prettier-config':
+      specifier: 4.56.0
+      version: 4.56.0
     postcss:
       specifier: ^8.5.26
       version: 8.5.26
@@ -258,8 +261,8 @@ importers:
         specifier: workspace:*
         version: link:tools/monorepo-utils
       '@wordpress/prettier-config':
-        specifier: 4.49.0
-        version: 4.49.0(wp-prettier@3.0.3)
+        specifier: catalog:tooling
+        version: 4.56.0(wp-prettier@3.0.3)
       babel-loader:
         specifier: 9.2.x
         version: 9.2.1(@babel/core@7.25.7)(webpack@5.97.1(@swc/core@1.15.24))
@@ -1389,8 +1392,8 @@ importers:
         specifier: next
         version: 6.43.1-next.v.202604091042.0
       '@wordpress/prettier-config':
-        specifier: 4.49.0
-        version: 4.49.0(wp-prettier@3.0.3)
+        specifier: catalog:tooling
+        version: 4.56.0(wp-prettier@3.0.3)
       '@wordpress/stylelint-config':
         specifier: ^23.14.0
         version: 23.42.0(@types/react@18.3.28)(esbuild@0.24.2)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint-scss@6.14.0(stylelint@16.26.1(typescript@5.7.3)))(stylelint@16.26.1(typescript@5.7.3))
@@ -2683,8 +2686,8 @@ importers:
         specifier: 11.9.0
         version: 11.9.0(patch_hash=4ba152352e5408eabc62f88b83637a382c45c03b267bf8abf8e58fb1663c8cf7)(@types/node@24.12.2)
       '@wordpress/prettier-config':
-        specifier: 4.49.0
-        version: 4.49.0(wp-prettier@3.0.3)
+        specifier: catalog:tooling
+        version: 4.56.0(wp-prettier@3.0.3)
       '@wordpress/scripts':
         specifier: ^32.6.0
         version: 32.6.0(@playwright/test@1.63.0)(@swc/core@1.15.24)(@types/node@24.12.2)(@types/react@18.3.28)(@types/webpack@4.41.40)(@wordpress/env@11.9.0(patch_hash=4ba152352e5408eabc62f88b83637a382c45c03b267bf8abf8e58fb1663c8cf7)(@types/node@24.12.2))(babel-plugin-macros@3.1.0)(file-loader@6.2.0(webpack@5.97.1))(jiti@2.6.1)(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass-embedded@1.100.0)(stylelint-scss@6.14.0(stylelint@16.26.1(typescript@5.7.3)))(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))(type-fest@4.41.0)(typescript@5.7.3)(uglify-js@3.19.3)(webpack-hot-middleware@2.26.1)
@@ -3089,8 +3092,8 @@ importers:
         specifier: next
         version: 6.43.1-next.v.202604091042.0(postcss@8.5.26)
       '@wordpress/prettier-config':
-        specifier: 4.49.0
-        version: 4.49.0(wp-prettier@3.0.3)
+        specifier: catalog:tooling
+        version: 4.56.0(wp-prettier@3.0.3)
       '@wordpress/stylelint-config':
         specifier: ^23.14.0
         version: 23.42.0(@types/react@18.3.28)(esbuild@0.24.2)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint-scss@6.14.0(stylelint@16.26.1(typescript@5.7.3)))(stylelint@16.26.1(typescript@5.7.3))
@@ -3567,8 +3570,8 @@ importers:
         specifier: next
         version: 6.43.1-next.v.202604091042.0(postcss@8.5.26)
       '@wordpress/prettier-config':
-        specifier: 1.4.0
-        version: 1.4.0(wp-prettier@3.0.3)
+        specifier: catalog:tooling
+        version: 4.56.0(wp-prettier@3.0.3)
       '@wordpress/private-apis':
         specifier: ^1.33.1
         version: 1.48.1
@@ -9798,21 +9801,15 @@ packages:
       react: ^18.0.0
       react-dom: ^18.0.0
 
-  '@wordpress/prettier-config@1.4.0':
-    resolution: {integrity: sha512-uvrgUAhRnOvIysXjcXH9VDsrKLqH9r3BfdGoy+WFLSHFnTfdMhW7bdDQXl4F4UIUuefUwGi+ZvT/rChg9zoBkQ==}
-    engines: {node: '>=12'}
-    peerDependencies:
-      prettier: '>=2'
-
-  '@wordpress/prettier-config@4.49.0':
-    resolution: {integrity: sha512-yP4hm2m2Hxv3I7HI5lxbrCmh95Db4QWcGJGLq/fysepbLjTnqnMIHRs5p0/QoRMV/MhwFi8vMkNmmQYJt386ug==}
+  '@wordpress/prettier-config@4.51.0':
+    resolution: {integrity: sha512-V6bsx/WImZmxaiMG7DOA4z8G76eFxlmJ/ZqZRN7tAja7jHPfliuRtCZI2CJBx0c0fT3zGsq8xkC4bmDlMra65A==}
     engines: {node: '>=18.12.0', npm: '>=8.19.2'}
     peerDependencies:
       prettier: '>=3'
 
-  '@wordpress/prettier-config@4.51.0':
-    resolution: {integrity: sha512-V6bsx/WImZmxaiMG7DOA4z8G76eFxlmJ/ZqZRN7tAja7jHPfliuRtCZI2CJBx0c0fT3zGsq8xkC4bmDlMra65A==}
-    engines: {node: '>=18.12.0', npm: '>=8.19.2'}
+  '@wordpress/prettier-config@4.56.0':
+    resolution: {integrity: sha512-FTiY8VRrKVcB2FNxFsALoe8TC0ilpIzYdiRT+VaS87HlEF99L5UfZoGT7gL2VhdEhkNCS9FPtk9k2xGPok/WJg==}
+    engines: {node: '>=18.12.0'}
     peerDependencies:
       prettier: '>=3'
 
@@ -29270,15 +29267,11 @@ snapshots:
       - stylelint
       - supports-color
 
-  '@wordpress/prettier-config@1.4.0(wp-prettier@3.0.3)':
-    dependencies:
-      prettier: wp-prettier@3.0.3
-
-  '@wordpress/prettier-config@4.49.0(wp-prettier@3.0.3)':
-    dependencies:
-      prettier: wp-prettier@3.0.3
-
   '@wordpress/prettier-config@4.51.0(wp-prettier@3.0.3)':
+    dependencies:
+      prettier: wp-prettier@3.0.3
+
+  '@wordpress/prettier-config@4.56.0(wp-prettier@3.0.3)':
     dependencies:
       prettier: wp-prettier@3.0.3
 
