@@ -335,6 +335,37 @@ class ProductAbilityContractsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should undo a product update with the undo call its dry run returns.
+	 */
+	public function test_product_update_undo_round_trips(): void {
+		$product = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'          => 'Original',
+				'regular_price' => '10',
+			)
+		);
+		$ability = wp_get_ability( 'woocommerce/product-update' );
+		$input   = array(
+			'id'                 => $product->get_id(),
+			'product_type_alias' => 'physical',
+			'name'               => 'Renamed',
+			'regular_price'      => '20',
+			'extensions'         => array( 'test_simple' => array( 'code' => 'abc' ) ),
+		);
+
+		$undo = $ability->dry_run( $input )['undo'];
+		$this->assertNotWPError( $ability->execute( $input ) );
+		$this->assertSame( 'Renamed', wc_get_product( $product->get_id() )->get_name() );
+
+		$this->assertNotWPError( wp_get_ability( $undo['ability'] )->execute( $undo['input'] ) );
+		$restored = wc_get_product( $product->get_id() );
+		$this->assertSame( 'Original', $restored->get_name() );
+		$this->assertSame( '10', $restored->get_regular_price() );
+		$this->assertSame( '', $restored->get_meta( '_test_simple_code' ) );
+	}
+
+	/**
 	 * @testdox Should save extension field values on product create.
 	 */
 	public function test_product_create_saves_extension_fields(): void {

@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
+use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityFields;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -200,6 +201,40 @@ class ProductUpdate extends AbstractDomainAbility implements AbilityDefinition {
 	public static function respond( \WC_Product $product ): array {
 		return array(
 			'product' => self::format_product_for_response( $product ),
+		);
+	}
+
+	/**
+	 * The product update that puts back the values the input changes, read
+	 * from the product before the change.
+	 *
+	 * @param \WC_Product $product Product, before the change.
+	 * @param array       $input   Ability input.
+	 * @return array{ability: string, input: array}
+	 */
+	public static function undo( \WC_Product $product, array $input ): array {
+		$getters  = array(
+			'external_url'     => 'get_product_url',
+			'grouped_products' => 'get_children',
+		);
+		$previous = array( 'id' => $product->get_id() );
+
+		$alias = self::get_product_type_alias_for_product( $product );
+		if ( ! is_wp_error( $alias ) && ! empty( array_diff( array_keys( $input ), array( 'id', 'extensions' ), self::get_common_product_mutation_fields() ) ) ) {
+			$previous['product_type_alias'] = $alias;
+		}
+
+		foreach ( array_keys( array_intersect_key( $input, self::get_product_mutation_field_schemas() ) ) as $field ) {
+			$previous[ $field ] = $product->{ $getters[ $field ] ?? "get_{$field}" }( 'edit' );
+		}
+
+		if ( isset( $input['extensions'] ) && is_array( $input['extensions'] ) ) {
+			$previous['extensions'] = AbilityFields::read( array_intersect_key( AbilityFields::get( 'product' ), $input['extensions'] ), $product );
+		}
+
+		return array(
+			'ability' => self::get_name(),
+			'input'   => $previous,
 		);
 	}
 

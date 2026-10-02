@@ -63,6 +63,17 @@ final class ProductWriteAbility extends ObjectChangeAbility {
 	}
 
 	/**
+	 * For product update, the update that puts back the changed values.
+	 *
+	 * @param \WC_Product $subject Product, before the change.
+	 * @param array       $input   Ability input.
+	 * @return array{ability: string, input: array}|null
+	 */
+	public function undo( $subject, array $input ): ?array {
+		return ProductUpdate::class === $this->definition() ? ProductUpdate::undo( $subject, $input ) : null;
+	}
+
+	/**
 	 * The definition class of this ability.
 	 *
 	 * @return class-string<ProductCreate|ProductUpdate>
