@@ -75,6 +75,69 @@ class SelectedVariationNameTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Selected Any attributes are kept when their value also appears in the parent product name.
+	 *
+	 * @dataProvider parent_name_collision_provider
+	 *
+	 * @param array<string, string>             $variation_attributes Stored variation attributes.
+	 * @param array<string, array<int, string>> $attribute_terms Terms to create for each attribute.
+	 * @param array<string, string>             $selected_attributes Selected cart attributes.
+	 * @param string                            $expected_name Expected contextual name.
+	 */
+	public function test_get_product_name_keeps_attributes_matching_the_parent_name( array $variation_attributes, array $attribute_terms, array $selected_attributes, string $expected_name ): void {
+		// Every attribute is "Any", so the variation title is just the parent name and shows none of the
+		// selected values -- including the colour the parent name happens to end with.
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Vienna Black',
+			$variation_attributes,
+			$attribute_terms
+		);
+
+		try {
+			$this->assertSame( 'Vienna Black', $variation->get_name() );
+			$this->assertSame(
+				$expected_name,
+				$this->sut->get_product_name( $variation, $selected_attributes ),
+				'The selected value is listed even though the parent name ends with it.'
+			);
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * Provides variations whose parent name ends with a selected attribute value.
+	 *
+	 * @return array<string, array{0: array<string, string>, 1: array<string, array<int, string>>, 2: array<string, string>, 3: string}>
+	 */
+	public static function parent_name_collision_provider(): array {
+		return array(
+			'only attribute is Any'  => array(
+				array( 'pa_colour' => '' ),
+				array( 'colour' => array( 'black', 'white' ) ),
+				array( 'attribute_pa_colour' => 'black' ),
+				'Vienna Black - black',
+			),
+			'every attribute is Any' => array(
+				array(
+					'pa_colour' => '',
+					'pa_number' => '',
+				),
+				array(
+					'colour' => array( 'black', 'white' ),
+					'number' => array( '0', '1' ),
+				),
+				array(
+					'attribute_pa_colour' => 'black',
+					'attribute_pa_number' => '1',
+				),
+				'Vienna Black - black, 1',
+			),
+		);
+	}
+
+	/**
 	 * @testdox Data stores without the shared title policy keep the stored variation name.
 	 */
 	public function test_get_product_name_keeps_stored_name_without_data_store_title_policy(): void {
