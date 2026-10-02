@@ -98,6 +98,7 @@ class ShippingControllerTest extends \WP_UnitTestCase {
 		update_option( 'woocommerce_checkout_page_id', $this->original_checkout_page_id );
 		wp_delete_post( $this->block_checkout_page_id );
 		remove_filter( 'woocommerce_logging_class', array( $this, 'override_wc_logger' ) );
+		WC()->session->set( 'chosen_shipping_methods', null );
 		$woocommerce = $this->backup_wc;
 		parent::tearDown();
 	}
@@ -312,6 +313,91 @@ class ShippingControllerTest extends \WP_UnitTestCase {
 		$location = $this->shipping_controller->filter_order_tax_location( $default_location, $order );
 
 		$this->assertSame( $default_location, $location, 'Without a captured pickup address the location should be unchanged.' );
+	}
+
+	/**
+	 * @testdox filter_taxable_address does not tax a zone local_pickup rate at the pickup location sharing its instance id.
+	 */
+	public function test_filter_taxable_address_ignores_pickup_locations_for_zone_local_pickup(): void {
+		$this->save_pickup_locations();
+		WC()->session->set( 'chosen_shipping_methods', array( 'local_pickup:1' ) );
+
+		$address = array( 'US', 'CA', '90210', 'Beverly Hills' );
+
+		$this->assertSame( $address, $this->shipping_controller->filter_taxable_address( $address ), 'A zone local_pickup instance id is not a pickup location index.' );
+	}
+
+	/**
+	 * @testdox filter_taxable_address returns the chosen pickup location address for pickup_location rates.
+	 */
+	public function test_filter_taxable_address_returns_chosen_pickup_location_address(): void {
+		$this->save_pickup_locations();
+		WC()->session->set( 'chosen_shipping_methods', array( 'pickup_location:1' ) );
+
+		$this->assertSame(
+			array( 'US', 'NY', '10001', 'New York' ),
+			$this->shipping_controller->filter_taxable_address( array( 'US', 'CA', '90210', 'Beverly Hills' ) )
+		);
+	}
+
+	/**
+	 * @testdox filter_taxable_address tolerates a pickup location address without a state.
+	 */
+	public function test_filter_taxable_address_handles_pickup_location_without_state(): void {
+		update_option(
+			'pickup_location_pickup_locations',
+			array(
+				array(
+					'name'    => 'Paris',
+					'address' => array(
+						'country'  => 'FR',
+						'postcode' => '75001',
+						'city'     => 'Paris',
+					),
+					'details' => '',
+					'enabled' => true,
+				),
+			)
+		);
+		WC()->session->set( 'chosen_shipping_methods', array( 'pickup_location:0' ) );
+
+		$this->assertSame(
+			array( 'FR', '', '75001', 'Paris' ),
+			$this->shipping_controller->filter_taxable_address( array( 'US', 'CA', '90210', 'Beverly Hills' ) )
+		);
+	}
+
+	/**
+	 * Saves two pickup locations, Austin at index 0 and New York at index 1.
+	 */
+	private function save_pickup_locations(): void {
+		update_option(
+			'pickup_location_pickup_locations',
+			array(
+				array(
+					'name'    => 'Austin',
+					'address' => array(
+						'country'  => 'US',
+						'state'    => 'TX',
+						'postcode' => '73301',
+						'city'     => 'Austin',
+					),
+					'details' => '',
+					'enabled' => true,
+				),
+				array(
+					'name'    => 'New York',
+					'address' => array(
+						'country'  => 'US',
+						'state'    => 'NY',
+						'postcode' => '10001',
+						'city'     => 'New York',
+					),
+					'details' => '',
+					'enabled' => true,
+				),
+			)
+		);
 	}
 
 	/**

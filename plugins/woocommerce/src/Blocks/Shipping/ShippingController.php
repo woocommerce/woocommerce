@@ -450,17 +450,18 @@ class ShippingController {
 		$chosen_method_id       = explode( ':', $chosen_method )[0];
 		$chosen_method_instance = explode( ':', $chosen_method )[1] ?? 0;
 
+		// Only pickup_location rate ids end in a pickup location index; other pickup methods end in a zone instance id.
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in WC_Abstract_Order::get_tax_location().
-		if ( $chosen_method_id && true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) && in_array( $chosen_method_id, LocalPickupUtils::get_local_pickup_method_ids(), true ) ) {
+		if ( 'pickup_location' === $chosen_method_id && true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) ) {
 			$pickup_locations = get_option( 'pickup_location_pickup_locations', array() );
 			$pickup_location  = $pickup_locations[ $chosen_method_instance ] ?? array();
 
 			if ( isset( $pickup_location['address'], $pickup_location['address']['country'] ) && ! empty( $pickup_location['address']['country'] ) ) {
 				$address = array(
-					$pickup_locations[ $chosen_method_instance ]['address']['country'],
-					$pickup_locations[ $chosen_method_instance ]['address']['state'],
-					$pickup_locations[ $chosen_method_instance ]['address']['postcode'],
-					$pickup_locations[ $chosen_method_instance ]['address']['city'],
+					$pickup_location['address']['country'],
+					$pickup_location['address']['state'] ?? '',
+					$pickup_location['address']['postcode'] ?? '',
+					$pickup_location['address']['city'] ?? '',
 				);
 			}
 		}
