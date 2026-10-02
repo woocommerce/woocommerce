@@ -3,9 +3,10 @@
  * ContractStatus - the engine's default contract status slugs plus read helpers
  * over the {@see StatusRegistry}.
  *
- * Contract status is opaque engine data: the engine attaches no meaning to it
- * and enforces no transition table. The constants name the engine defaults;
- * extensions may register more through {@see StatusRegistry::register()}. The
+ * Contract status is opaque engine data. The constants name the engine defaults:
+ * the defaults are shared slugs and carry no engine meaning; the engine enforces
+ * no transitions. Extensions may register more through
+ * {@see StatusRegistry::register()}. The
  * {@see Contract} entity refuses to write a status that is not registered.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Core\Entity

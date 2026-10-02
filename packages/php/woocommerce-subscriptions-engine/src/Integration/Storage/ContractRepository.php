@@ -660,8 +660,8 @@ final class ContractRepository {
 	 * its owner registers; with no consumer registered the scan returns nothing. A null
 	 * `next_payment_gmt` never matches the `<=` comparison.
 	 *
-	 * Interim: the renewal-flow predicates below move out of the engine with the renewal flow,
-	 * leaving the scan owner-scoped only. Until then the scan's only caller is the engine renewal
+	 * Interim: moves out of the engine with the renewal flow (the predicates below; the scan
+	 * then stays owner-scoped only). Until then the scan's only caller is the engine renewal
 	 * flow, so it keeps just what that flow can charge now:
 	 *
 	 * - the contract is `active` (status is otherwise opaque engine data; a contract in any other

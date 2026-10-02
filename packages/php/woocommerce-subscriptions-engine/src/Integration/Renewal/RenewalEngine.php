@@ -257,7 +257,7 @@ final class RenewalEngine {
 			return null;
 		}
 
-		// Interim: this renewal-flow precondition moves out of the engine with the renewal flow.
+		// Interim: moves out of the engine with the renewal flow.
 		// The due scan already selects only active contracts; a manual or racing caller that
 		// reaches a non-active one is skipped without parking, so its next-due moment is left
 		// for whichever flow set its status.

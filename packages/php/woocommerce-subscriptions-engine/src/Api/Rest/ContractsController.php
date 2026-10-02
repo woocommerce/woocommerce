@@ -21,6 +21,9 @@
  * fields and must not assume the set is closed. A generic resource read API is a
  * planned follow-up alongside the read-model views, when a consumer needs it.
  *
+ * Interim: moves out of the engine with the lifecycle flows (hold / reactivate /
+ * cancel and their routes).
+ *
  * Every route requires a logged-in user, enforced through the shared
  * {@see RESTPermissions} floor (core's cookie auth has already verified the REST nonce
  * `wp_rest` by then). Per-route, ownership is enforced with the asymmetric not-found
