@@ -14,6 +14,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
@@ -36,6 +37,11 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut = new ContractRepository();
+	}
+
+	public function tearDown(): void {
+		StatusRegistry::reset();
+		parent::tearDown();
 	}
 
 	private function make_contract(): Contract {
@@ -1244,6 +1250,111 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertInstanceOf( Cycle::class, $after );
 		$this->assertSame( CycleStatus::BILLED, $after->get_status()->get_value(), 'The losing transition writes nothing.' );
 		$this->assertSame( 4242, $after->get_order_id() );
+	}
+
+	/**
+	 * @testdox transition_cycle_status rejects an unregistered target status and writes nothing.
+	 */
+	public function test_transition_cycle_status_rejects_an_unregistered_target(): void {
+		$contract_id = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_PRIMITIVE, CycleStatus::PENDING );
+
+		$head = $this->sut->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $head );
+
+		try {
+			$this->sut->transition_cycle_status( (int) $head->get_id(), CycleStatus::PENDING, 'never-registered', 4242 );
+			$this->fail( 'Expected a DomainException for an unregistered target status.' );
+		} catch ( \DomainException $e ) {
+			$after = $this->sut->find_chain_head( $contract_id );
+			$this->assertInstanceOf( Cycle::class, $after );
+			$this->assertSame( CycleStatus::PENDING, $after->get_status()->get_value() );
+		}
+	}
+
+	/**
+	 * @testdox transition_cycle_status accepts an extension-registered target status.
+	 */
+	public function test_transition_cycle_status_accepts_an_extension_registered_target(): void {
+		StatusRegistry::register( StatusRegistry::KIND_CYCLE, 'disputed' );
+		$contract_id = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_PRIMITIVE, CycleStatus::PENDING );
+
+		$head = $this->sut->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $head );
+
+		$this->assertTrue( $this->sut->transition_cycle_status( (int) $head->get_id(), CycleStatus::PENDING, 'disputed', 4242 ) );
+
+		$after = $this->sut->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $after );
+		$this->assertSame( 'disputed', $after->get_status()->get_value() );
+	}
+
+	/**
+	 * @testdox An unknown stored contract status hydrates and survives an unrelated update.
+	 */
+	public function test_an_unknown_stored_contract_status_round_trips(): void {
+		global $wpdb;
+
+		$id    = $this->sut->insert( $this->make_contract() );
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update( $table, array( 'status' => 'legacy-paused' ), array( 'id' => $id ) );
+
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$this->assertSame( 'legacy-paused', $contract->get_status() );
+
+		$contract->set_next_payment_gmt( '2026-09-15 00:00:00' );
+		$this->assertTrue( $this->sut->update( $contract ) );
+		$this->assertTrue( $this->sut->update_if_status( $contract, 'legacy-paused' ) );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$stored = $wpdb->get_row( $wpdb->prepare( "SELECT status, next_payment_gmt FROM {$table} WHERE id = %d", $id ), ARRAY_A );
+		$this->assertSame( 'legacy-paused', $stored['status'] );
+		$this->assertSame( '2026-09-15 00:00:00', $stored['next_payment_gmt'] );
+	}
+
+	/**
+	 * @testdox An unknown stored cycle status hydrates through every cycle read and survives an update.
+	 */
+	public function test_an_unknown_stored_cycle_status_hydrates_and_round_trips(): void {
+		global $wpdb;
+
+		$id    = $this->sut->insert( $this->make_contract() );
+		$cycle = $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', $this->sample_plan_snapshot(), $this->sample_items_snapshot() );
+		$this->sut->append_cycle( $cycle );
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update( $table, array( 'status' => 'legacy-x' ), array( 'id' => $cycle->get_id() ) );
+
+		$head = $this->sut->find_chain_head( $id );
+		$this->assertInstanceOf( Cycle::class, $head );
+		$this->assertSame( 'legacy-x', $head->get_status()->get_value() );
+
+		$history = $this->sut->find_cycle_history( $id );
+		$this->assertCount( 1, $history );
+		$this->assertSame( 'legacy-x', $history[0]->get_status()->get_value() );
+
+		$head->set_reason( 'annotated' );
+		$this->sut->update_cycle( $head );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$stored = $wpdb->get_row( $wpdb->prepare( "SELECT status, reason FROM {$table} WHERE id = %d", $cycle->get_id() ), ARRAY_A );
+		$this->assertSame( 'legacy-x', $stored['status'] );
+		$this->assertSame( 'annotated', $stored['reason'] );
+	}
+
+	/**
+	 * @testdox count_by_status keys include extension-registered contract statuses.
+	 */
+	public function test_count_by_status_includes_registered_extension_statuses(): void {
+		StatusRegistry::register( StatusRegistry::KIND_CONTRACT, 'paused-by-merchant' );
+		$this->insert_list_contract( 'paused-by-merchant' );
+
+		$counts = $this->sut->count_by_status();
+
+		$this->assertSame( ContractStatus::all(), array_keys( $counts ) );
+		$this->assertSame( 1, $counts['paused-by-merchant'] );
 	}
 
 	/**
