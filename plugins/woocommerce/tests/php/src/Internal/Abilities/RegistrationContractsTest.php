@@ -28,6 +28,8 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 
 	private const ROOT_LIST = 'test-plugin/records-list';
 
+	private const NOTIFY = 'test-plugin/notify-merchant';
+
 	/**
 	 * Original action counts restored in tearDown.
 	 *
@@ -386,6 +388,7 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 					'output'      => 'record',
 				),
 				'in_memory_write'  => array( 'object_type' => 'test_record' ),
+				'dry_run'          => true,
 			),
 			$write['woocommerce']
 		);
@@ -458,6 +461,61 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 		$this->assertSame( array( $expected ), wp_get_ability( self::ROOT_LIST )->execute() );
 		$this->assertSame( 'Notes', wp_get_ability( self::ROOT_OBJECT )->get_output_schema()['properties']['extensions']['properties']['test_notes']['title'] );
 		$this->assertSame( 'Notes', wp_get_ability( self::ROOT_LIST )->get_output_schema()['items']['properties']['extensions']['properties']['test_notes']['title'] );
+	}
+
+	/**
+	 * @testdox Should run a hand-written dry run that sends nothing, mark it in meta, and check permissions first.
+	 */
+	public function test_hand_written_dry_run(): void {
+		$this->register( true );
+		$callback = static function () {
+			wp_register_ability(
+				self::NOTIFY,
+				array(
+					'label'               => 'Notify merchant',
+					'description'         => 'Email the merchant a message.',
+					'category'            => 'test-plugin',
+					'ability_class'       => TestNotifyAbility::class,
+					'input_schema'        => array(
+						'type'       => 'object',
+						'properties' => array( 'message' => array( 'type' => 'string' ) ),
+						'required'   => array( 'message' ),
+					),
+					'execute_callback'    => static function ( array $input ): bool {
+						return wp_mail( 'merchant@example.com', 'Note', $input['message'] );
+					},
+					'permission_callback' => static function (): bool {
+						return current_user_can( 'manage_options' );
+					},
+				)
+			);
+		};
+		add_action( 'wp_abilities_api_init', $callback );
+		do_action( 'wp_abilities_api_init' );
+		remove_action( 'wp_abilities_api_init', $callback );
+		$sent = 0;
+		add_filter(
+			'wp_mail',
+			static function ( $args ) use ( &$sent ) {
+				++$sent;
+				return $args;
+			}
+		);
+		$ability = wp_get_ability( self::NOTIFY );
+		$input   = array( 'message' => 'Stock is low.' );
+
+		$this->assertSame( 'ability_invalid_permissions', $ability->dry_run( $input )->get_error_code() );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$this->assertSame( array( 'Emails the merchant: Stock is low.' ), $ability->dry_run( $input )['side_effects'] );
+		$this->assertSame( array(), $ability->dry_run( $input )['changes'] );
+		$this->assertSame( 'ability_invalid_input', $ability->dry_run( array() )->get_error_code() );
+		$this->assertSame( 0, $sent );
+		$this->assertTrue( $ability->get_meta()['woocommerce']['dry_run'] );
+		$this->assertArrayNotHasKey( 'dry_run', wp_get_ability( self::READ )->get_meta()['woocommerce'] );
+
+		$ability->execute( $input );
+		$this->assertSame( 1, $sent );
 	}
 
 	/**
@@ -704,7 +762,7 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 	 * Unregister the plugin's abilities.
 	 */
 	private function unregister_abilities(): void {
-		foreach ( array( self::WRITE, self::READ, self::PLAIN, self::ROOT_OBJECT, self::ROOT_LIST ) as $ability_id ) {
+		foreach ( array( self::WRITE, self::READ, self::PLAIN, self::ROOT_OBJECT, self::ROOT_LIST, self::NOTIFY ) as $ability_id ) {
 			if ( wp_has_ability( $ability_id ) ) {
 				wp_unregister_ability( $ability_id );
 			}

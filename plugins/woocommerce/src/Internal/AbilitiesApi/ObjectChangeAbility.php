@@ -81,29 +81,13 @@ abstract class ObjectChangeAbility extends PolyfilledAbility {
 	/**
 	 * What the change would do, without saving: the values that differ, the
 	 * side effects and the undo call. It runs every step of execute except the
-	 * save, and checks the input and permissions the same way.
+	 * save.
 	 *
 	 * @param array $input Ability input.
 	 * @return array|\WP_Error The change summary, or the error execute would return.
 	 */
-	public function dry_run( array $input ) {
-		$input = $this->normalize_input( $input );
-		if ( is_wp_error( $input ) ) {
-			return $input;
-		}
-		$valid = $this->validate_input( $input );
-		if ( is_wp_error( $valid ) ) {
-			return $valid;
-		}
-		if ( true !== $this->check_permissions( $input ) ) {
-			return new \WP_Error(
-				'ability_invalid_permissions',
-				/* translators: %s ability name. */
-				sprintf( __( 'Ability "%s" does not have necessary permission.', 'woocommerce' ), $this->get_name() )
-			);
-		}
-
-		$staged = $this->stage( is_array( $input ) ? $input : array() );
+	protected function do_dry_run( array $input ) {
+		$staged = $this->stage( $input );
 		return is_wp_error( $staged ) ? $staged : $staged->summary();
 	}
 

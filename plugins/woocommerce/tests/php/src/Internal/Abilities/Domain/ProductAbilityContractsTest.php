@@ -143,6 +143,7 @@ class ProductAbilityContractsTest extends \WC_Unit_Test_Case {
 					'output'      => 'product',
 				),
 				'in_memory_write'  => array( 'object_type' => 'product' ),
+				'dry_run'          => true,
 			),
 			'woocommerce/product-update' => array(
 				'extension_fields' => array(
@@ -150,6 +151,7 @@ class ProductAbilityContractsTest extends \WC_Unit_Test_Case {
 					'output'      => 'product',
 				),
 				'in_memory_write'  => array( 'object_type' => 'product' ),
+				'dry_run'          => true,
 			),
 		);
 		foreach ( $expected as $ability_id => $meta ) {

@@ -16,6 +16,7 @@ defined( 'ABSPATH' ) || exit;
  * - `extension_fields`: `object_type` and the `output` key where the object, or list of objects, sits.
  *   An `output` of '' means the whole output is the object, or the list of objects.
  * - `in_memory_write`: `object_type`.
+ * - `dry_run`: true when the ability class implements a dry run.
  *
  * Both are derived from an ObjectChangeAbility `ability_class`, with the object type as the output key, unless the ability declares them.
  *
@@ -43,6 +44,9 @@ final class RegistrationArgs {
 				'output'      => $class::object_type(),
 			);
 			$args['meta'][ self::META ]['in_memory_write']  = $args['meta'][ self::META ]['in_memory_write'] ?? array( 'object_type' => $class::object_type() );
+		}
+		if ( is_string( $class ) && PolyfilledAbility::has_dry_run( $class ) ) {
+			$args['meta'][ self::META ]['dry_run'] = true;
 		}
 		if ( null === $class && isset( $args['meta'][ self::META ] ) && PolyfilledAbility::is_active() ) {
 			$args['ability_class'] = PolyfilledAbility::class;

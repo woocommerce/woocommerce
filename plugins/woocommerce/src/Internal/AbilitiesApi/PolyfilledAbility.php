@@ -14,6 +14,9 @@ defined( 'ABSPATH' ) || exit;
  * same order and with the same arguments, on earlier versions. From 7.1 it
  * behaves exactly like WP_Ability.
  *
+ * Experimental: a subclass can implement do_dry_run() to say what execute
+ * would do without doing it. dry_run() checks the input and permissions first.
+ *
  * @since 11.3.0
  */
 class PolyfilledAbility extends \WP_Ability {
@@ -23,6 +26,61 @@ class PolyfilledAbility extends \WP_Ability {
 	 */
 	public static function is_active(): bool {
 		return version_compare( get_bloginfo( 'version' ), '7.1-alpha', '<' );
+	}
+
+	/**
+	 * Whether a class implements its own dry run.
+	 *
+	 * @param string $class_name Ability class.
+	 */
+	public static function has_dry_run( string $class_name ): bool {
+		return is_a( $class_name, self::class, true ) && self::class !== ( new \ReflectionMethod( $class_name, 'do_dry_run' ) )->getDeclaringClass()->getName();
+	}
+
+	/**
+	 * What execute would do, without doing it: the ability, object_type,
+	 * object_id, object_label, changes, side_effects and undo. It checks the
+	 * input and permissions the same way execute does.
+	 *
+	 * @param array $input Ability input.
+	 * @return array|\WP_Error The summary, or the error execute would return.
+	 */
+	public function dry_run( array $input ) {
+		if ( ! self::has_dry_run( static::class ) ) {
+			return new \WP_Error(
+				'ability_dry_run_unsupported',
+				/* translators: %s ability name. */
+				sprintf( __( 'Ability "%s" does not support a dry run.', 'woocommerce' ), $this->get_name() )
+			);
+		}
+
+		$input = $this->normalize_input( $input );
+		if ( is_wp_error( $input ) ) {
+			return $input;
+		}
+		$valid = $this->validate_input( $input );
+		if ( is_wp_error( $valid ) ) {
+			return $valid;
+		}
+		if ( true !== $this->check_permissions( $input ) ) {
+			return new \WP_Error(
+				'ability_invalid_permissions',
+				/* translators: %s ability name. */
+				sprintf( __( 'Ability "%s" does not have necessary permission.', 'woocommerce' ), $this->get_name() )
+			);
+		}
+
+		return $this->do_dry_run( is_array( $input ) ? $input : array() );
+	}
+
+	/**
+	 * The dry run a subclass implements. Never saves, sends email or makes HTTP requests.
+	 *
+	 * @param array $input Valid input the caller may use.
+	 * @return array|\WP_Error
+	 */
+	protected function do_dry_run( array $input ) {
+		return new \WP_Error( 'ability_dry_run_unsupported', __( 'This ability does not support a dry run.', 'woocommerce' ) );
 	}
 
 	/**
