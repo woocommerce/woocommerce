@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Calculate percentage-based order fees added in admin on the net order total instead of the tax-inclusive total.
