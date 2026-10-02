@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show accurate attribute filter counts for variable products with missing variations.

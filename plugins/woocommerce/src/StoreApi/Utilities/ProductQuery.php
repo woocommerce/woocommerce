@@ -7,7 +7,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
-use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
+use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\AttributeCountQueryGenerator;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use WC_Tax;
@@ -17,7 +17,20 @@ use WC_Tax;
  *
  * Helper class to handle product queries for the API.
  */
-class ProductQuery implements QueryClausesGenerator {
+class ProductQuery implements AttributeCountQueryGenerator {
+	/**
+	 * Keep attribute counts based on the parent taxonomies used by Store API filtering.
+	 *
+	 * @since 11.3.0
+	 * @param array  $query_vars  The WP_Query arguments.
+	 * @param string $taxonomy    Attribute taxonomy name.
+	 * @param string $product_ids_placeholder Trusted SQL placeholder for eligible product IDs; embed it unchanged.
+	 * @return string|null Null to use taxonomy counting.
+	 */
+	public function get_attribute_count_query( array $query_vars, string $taxonomy, string $product_ids_placeholder ): ?string {
+		return null;
+	}
+
 	/**
 	 * Prepare query args to pass to WP_Query for a REST API request.
 	 *

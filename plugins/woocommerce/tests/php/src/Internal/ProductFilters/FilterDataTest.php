@@ -3,6 +3,10 @@
 namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 
 use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
+use Automattic\WooCommerce\Internal\ProductFilters\FilterData;
+use Automattic\WooCommerce\Internal\ProductFilters\Params;
+use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\AttributeCountQueryGenerator;
+use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
 
@@ -52,6 +56,79 @@ class FilterDataTest extends AbstractProductFiltersTest {
 
 		$this->sut                     = $container->get( FilterDataProvider::class )->with( $container->get( QueryClauses::class ) );
 		$this->taxonomy_hierarchy_data = $container->get( TaxonomyHierarchyData::class );
+	}
+
+	/**
+	 * @testdox Custom count queries are executed and differing SQL receives separate cache entries.
+	 */
+	public function test_custom_attribute_count_query_and_cache_separation(): void {
+		global $wpdb;
+		$generator = $this->createMock( AttributeCountQueryGenerator::class );
+		$generator->expects( $this->once() )->method( 'add_query_clauses' )->willReturnArgument( 0 );
+		$limit = '';
+		$generator->expects( $this->exactly( 3 ) )->method( 'get_attribute_count_query' )->willReturnCallback(
+			function ( $query_vars, $taxonomy, $product_ids ) use ( $wpdb, &$limit ) {
+				$this->assertSame( 'pa_color', $taxonomy );
+				$this->assertSame( array( 'post_type' => 'product' ), $query_vars );
+				return "SELECT COUNT(ID) AS term_count, 123 AS term_count_id FROM {$wpdb->posts} WHERE ID IN ({$product_ids}) {$limit}";
+			}
+		);
+		$cache_keys = array();
+		add_action(
+			'set_transient',
+			static function ( $key, $value ) use ( &$cache_keys ) {
+				if ( 0 === strpos( $key, 'wc_filter_data_' ) && isset( $value['value'] ) ) {
+					$cache_keys[] = $key;
+				}
+			},
+			10,
+			2
+		);
+		$container = wc_get_container();
+		$sut       = new FilterData( $generator, $this->taxonomy_hierarchy_data, $container->get( Params::class ) );
+
+		$this->assertSame( array( 123 => count( $this->products ) ), $sut->get_attribute_counts( array( 'post_type' => 'product' ), 'pa_color' ) );
+		$limit = 'AND ID = ' . $this->products[0]->get_id();
+		$this->assertSame( array( 123 => 1 ), $sut->get_attribute_counts( array( 'post_type' => 'product' ), 'pa_color' ) );
+		wp_cache_flush();
+		$this->assertSame( array( 123 => 1 ), $sut->get_attribute_counts( array( 'post_type' => 'product' ), 'pa_color' ), 'Cached counts must not rerun the eligible-product query after the object cache is cleared.' );
+		$this->assertCount( 2, array_unique( $cache_keys ), 'Different count SQL must not overwrite the same cached count.' );
+	}
+
+	/**
+	 * @testdox Legacy generators retain taxonomy counts and cannot seed another generator's product-ID cache.
+	 */
+	public function test_legacy_generator_fallback_and_product_id_cache_separation(): void {
+		global $wpdb;
+		$legacy = $this->createMock( QueryClausesGenerator::class );
+		$legacy->method( 'add_query_clauses' )->willReturnCallback(
+			function ( $clauses ) use ( $wpdb ) {
+				$clauses['where'] .= ' AND ' . $wpdb->posts . '.ID = ' . $this->products[0]->get_id();
+				return $clauses;
+			}
+		);
+		$container  = wc_get_container();
+		$legacy_sut = new FilterData( $legacy, $this->taxonomy_hierarchy_data, $container->get( Params::class ) );
+		$term       = wp_insert_term( 'Capability color', 'pa_color' );
+		wp_set_object_terms( $this->products[0]->get_id(), (int) $term['term_id'], 'pa_color' );
+		$term_ids = wp_get_object_terms( $this->products[0]->get_id(), 'pa_color', array( 'fields' => 'ids' ) );
+		$this->assertNotEmpty( $term_ids );
+		$this->assertSame( array_fill_keys( $term_ids, 1 ), $legacy_sut->get_attribute_counts( array( 'post_type' => 'product' ), 'pa_color' ) );
+
+		$custom = $this->createMock( AttributeCountQueryGenerator::class );
+		$custom->method( 'add_query_clauses' )->willReturnCallback(
+			function ( $clauses ) use ( $wpdb ) {
+				$clauses['where'] .= ' AND ' . $wpdb->posts . '.ID = ' . $this->products[1]->get_id();
+				return $clauses;
+			}
+		);
+		$custom->expects( $this->once() )->method( 'get_attribute_count_query' )->willReturnCallback(
+			function ( $query_vars, $taxonomy, $product_ids ) use ( $wpdb ) {
+				return "SELECT COUNT(ID) AS term_count, ID AS term_count_id FROM {$wpdb->posts} WHERE ID IN ({$product_ids}) GROUP BY ID";
+			}
+		);
+		$custom_sut = new FilterData( $custom, $this->taxonomy_hierarchy_data, $container->get( Params::class ) );
+		$this->assertSame( array( $this->products[1]->get_id() => 1 ), $custom_sut->get_attribute_counts( array( 'post_type' => 'product' ), 'pa_color' ) );
 	}
 
 	/**
