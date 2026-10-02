@@ -357,10 +357,7 @@
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:core-serial",
-					"shardingArguments": [
-						"--shard=1/2",
-						"--shard=2/2"
-					],
+					"shardingArguments": [],
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.json",
@@ -399,10 +396,7 @@
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:core-serial",
-					"shardingArguments": [
-						"--shard=1/2",
-						"--shard=2/2"
-					],
+					"shardingArguments": [],
 					"changes": [],
 					"testEnv": {
 						"start": "env:e2e --debug",
@@ -513,10 +507,7 @@
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:core-serial",
-					"shardingArguments": [
-						"--shard=1/2",
-						"--shard=2/2"
-					],
+					"shardingArguments": [],
 					"changes": [
 						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
@@ -579,10 +570,7 @@
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:core-serial",
-					"shardingArguments": [
-						"--shard=1/2",
-						"--shard=2/2"
-					],
+					"shardingArguments": [],
 					"changes": [
 						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
@@ -648,10 +636,7 @@
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:core-serial",
-					"shardingArguments": [
-						"--shard=1/2",
-						"--shard=2/2"
-					],
+					"shardingArguments": [],
 					"changes": [
 						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
