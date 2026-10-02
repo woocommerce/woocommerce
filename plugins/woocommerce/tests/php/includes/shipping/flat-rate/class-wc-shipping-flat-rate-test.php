@@ -147,9 +147,19 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Percent fee calculation works as expected with comma as decimal separator. Value after the comma is ignored.
+	 * Percent fee calculation keeps the decimals when the store uses a comma as the decimal separator.
 	 */
 	public function test_evaluate_cost_percent_fee_comma() {
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			'[fee percent="10,1" min_fee="12,5"]',
+			array(
+				'qty'  => 1,
+				'cost' => 100,
+			)
+		);
+		$this->assertEquals( 12.5, $val, 'The minimum fee should apply, read with a comma decimal.' );
+
 		$val = $this->call_evaluate_cost->call(
 			$this->sut,
 			'[fee percent="10,1"]',
@@ -158,7 +168,7 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 				'cost' => 100,
 			)
 		);
-		$this->assertEquals( 10, $val );
+		$this->assertEquals( 10.1, $val, 'The percentage should keep its decimals.' );
 	}
 
 	/**
