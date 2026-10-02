@@ -357,6 +357,8 @@ class ProductAbilityContractsTest extends \WC_Unit_Test_Case {
 		);
 
 		$undo = $ability->dry_run( $input )['undo'];
+		$this->assertSame( 'Renamed', $undo['input']['expected']['name'] );
+		$this->assertSame( 'abc', $undo['input']['expected']['extensions.test_simple.code'] );
 		$this->assertNotWPError( $ability->execute( $input ) );
 		$this->assertSame( 'Renamed', wc_get_product( $product->get_id() )->get_name() );
 

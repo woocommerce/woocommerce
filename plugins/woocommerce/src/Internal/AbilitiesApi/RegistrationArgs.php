@@ -44,6 +44,7 @@ final class RegistrationArgs {
 				'output'      => $class::object_type(),
 			);
 			$args['meta'][ self::META ]['in_memory_write']  = $args['meta'][ self::META ]['in_memory_write'] ?? array( 'object_type' => $class::object_type() );
+			$args['input_schema']                           = self::with_expected( $args['input_schema'] ?? array() );
 		}
 		if ( is_string( $class ) && DryRunAbility::has_dry_run( $class ) ) {
 			$args['meta'][ self::META ]['dry_run'] = true;
@@ -66,6 +67,28 @@ final class RegistrationArgs {
 			$args['output_schema'] = AbilityFields::add_to_output_schema( $args['output_schema'], (string) $fields['output'], $extensions );
 		}
 		return $args;
+	}
+
+	/**
+	 * Accept the optional `expected` map in an input schema, and in each of its `oneOf` branches.
+	 *
+	 * @param array $schema Input schema.
+	 * @return array
+	 */
+	private static function with_expected( array $schema ): array {
+		$expected = array(
+			'type'        => 'object',
+			'description' => 'Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved.',
+		);
+		if ( isset( $schema['properties'] ) ) {
+			$schema['properties']['expected'] = $expected;
+		}
+		foreach ( $schema['oneOf'] ?? array() as $index => $branch ) {
+			if ( isset( $branch['properties'] ) ) {
+				$schema['oneOf'][ $index ]['properties']['expected'] = $expected;
+			}
+		}
+		return $schema;
 	}
 
 	/**

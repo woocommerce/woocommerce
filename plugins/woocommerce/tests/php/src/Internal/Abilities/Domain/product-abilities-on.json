@@ -77,6 +77,10 @@
                                 "additionalProperties": false
                             }
                         }
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -158,6 +162,10 @@
                                 "additionalProperties": false
                             }
                         }
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -240,6 +248,10 @@
                                 "additionalProperties": false
                             }
                         }
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -304,6 +316,10 @@
                     "extensions": {
                         "type": "object",
                         "description": "Fields added by extensions, grouped by extension."
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -357,6 +373,10 @@
                     "extensions": {
                         "type": "object",
                         "description": "Fields added by extensions, grouped by extension."
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -416,6 +436,10 @@
                                 "additionalProperties": false
                             }
                         }
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -486,6 +510,10 @@
                     "extensions": {
                         "type": "object",
                         "description": "Fields added by extensions, grouped by extension."
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -892,6 +920,10 @@
                                 "additionalProperties": false
                             }
                         }
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -977,6 +1009,10 @@
                                 "additionalProperties": false
                             }
                         }
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -1063,6 +1099,10 @@
                                 "additionalProperties": false
                             }
                         }
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -1149,6 +1189,10 @@
                                 "additionalProperties": false
                             }
                         }
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -1217,6 +1261,10 @@
                     "extensions": {
                         "type": "object",
                         "description": "Fields added by extensions, grouped by extension."
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -1274,6 +1322,10 @@
                     "extensions": {
                         "type": "object",
                         "description": "Fields added by extensions, grouped by extension."
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [
@@ -1348,6 +1400,10 @@
                     "extensions": {
                         "type": "object",
                         "description": "Fields added by extensions, grouped by extension."
+                    },
+                    "expected": {
+                        "type": "object",
+                        "description": "Optional. Values the object must still have, keyed by the field paths a dry run reports. When one differs, nothing is saved."
                     }
                 },
                 "required": [

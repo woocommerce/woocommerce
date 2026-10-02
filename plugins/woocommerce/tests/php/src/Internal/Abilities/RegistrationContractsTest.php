@@ -196,12 +196,22 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 						'after'  => 'second',
 					),
 				),
+				'expected'     => array(
+					'title'                 => 'Original',
+					'note'                  => 'first',
+					'extensions.test_notes' => 'first',
+				),
 				'side_effects' => array( 'Renames the record.' ),
 				'undo'         => array(
 					'ability' => self::WRITE,
 					'input'   => array(
-						'id'    => 7,
-						'title' => 'Original',
+						'id'       => 7,
+						'title'    => 'Original',
+						'expected' => array(
+							'title'                 => 'Renamed',
+							'note'                  => 'second',
+							'extensions.test_notes' => 'second',
+						),
 					),
 				),
 			),
@@ -215,6 +225,74 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 1, TestRecord::$saves );
 		$this->assertSame( $summary['changes'][0]['after'], TestRecord::load( 7 )->title );
 		$this->assertSame( $summary['changes'][2]['after'], TestRecord::load( 7 )->note );
+	}
+
+	/**
+	 * @testdox Should save when the expected values match, and refuse a stale change with a 409 in a dry run and on execute.
+	 */
+	public function test_expected_values_guard_the_change(): void {
+		$this->register( true );
+		$ability = wp_get_ability( self::WRITE );
+		$stale   = array(
+			'id'       => 7,
+			'title'    => 'Renamed',
+			'expected' => array(
+				'title'                 => 'Original',
+				'extensions.test_notes' => 'edited elsewhere',
+			),
+		);
+
+		foreach ( array( $ability->dry_run( $stale ), $ability->execute( $stale ) ) as $result ) {
+			$this->assertWPError( $result );
+			$this->assertSame( 'woocommerce_in_memory_write_stale', $result->get_error_code() );
+			$this->assertSame( 409, $result->get_error_data()['status'] );
+			$this->assertStringContainsString( 'extensions.test_notes', $result->get_error_message() );
+		}
+		$this->assertSame( 0, TestRecord::$saves );
+
+		$fresh = array(
+			'id'       => 7,
+			'title'    => 'Renamed',
+			'expected' => $ability->dry_run(
+				array(
+					'id'    => 7,
+					'title' => 'Renamed',
+				)
+			)['expected'],
+		);
+		$this->assertNotWPError( $ability->execute( $fresh ) );
+		$this->assertSame( 'Renamed', TestRecord::load( 7 )->title );
+	}
+
+	/**
+	 * @testdox Should refuse the undo call after an intervening edit, and restore without one.
+	 */
+	public function test_undo_is_refused_after_an_intervening_edit(): void {
+		$this->register( true );
+		$ability = wp_get_ability( self::WRITE );
+		$input   = array(
+			'id'    => 7,
+			'title' => 'Renamed',
+		);
+
+		$undo = $ability->dry_run( $input )['undo'];
+		$this->assertNotWPError( $ability->execute( $input ) );
+		$this->assertNotWPError(
+			$ability->execute(
+				array(
+					'id'    => 7,
+					'title' => 'Edited elsewhere',
+				)
+			)
+		);
+		$refused = wp_get_ability( $undo['ability'] )->execute( $undo['input'] );
+		$this->assertSame( 'woocommerce_in_memory_write_stale', $refused->get_error_code() );
+		$this->assertSame( 'Edited elsewhere', TestRecord::load( 7 )->title );
+
+		$undo = $ability->dry_run( $input )['undo'];
+		$this->assertNotWPError( $ability->execute( $input ) );
+		$this->assertNotWPError( wp_get_ability( $undo['ability'] )->execute( $undo['input'] ) );
+		$this->assertSame( 'Edited elsewhere', TestRecord::load( 7 )->title );
 	}
 
 	/**

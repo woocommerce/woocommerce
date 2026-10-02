@@ -122,6 +122,9 @@ abstract class ObjectChangeAbility extends DryRunAbility {
 	 * @return StagedChange|\WP_Error
 	 */
 	protected function stage( array $input ) {
+		$expected = isset( $input['expected'] ) && is_array( $input['expected'] ) ? $input['expected'] : array();
+		unset( $input['expected'] );
+
 		$target = $this->load( $input );
 		if ( is_wp_error( $target ) ) {
 			return self::with_status( $target );
@@ -154,7 +157,28 @@ abstract class ObjectChangeAbility extends DryRunAbility {
 		$object_type = static::object_type();
 		$fields      = AbilityFields::get( $object_type );
 		try {
-			$before       = self::read( $subject, $target, $fields );
+			$before = self::read( $subject, $target, $fields );
+			$stale  = array_keys(
+				array_filter(
+					$expected,
+					static function ( $value, $field ) use ( $before ) {
+						return StagedChange::value_at( $before, (string) $field ) !== $value;
+					},
+					ARRAY_FILTER_USE_BOTH
+				)
+			);
+			if ( ! empty( $stale ) ) {
+				return new \WP_Error(
+					'woocommerce_in_memory_write_stale',
+					/* translators: %s: comma-separated field paths. */
+					sprintf( __( 'The object changed since it was read: %s. Nothing was saved.', 'woocommerce' ), implode( ', ', $stale ) ),
+					array(
+						'status' => 409,
+						'fields' => $stale,
+					)
+				);
+			}
+
 			$label        = self::label( $target );
 			$undo         = $this->undo( $target, $input );
 			$side_effects = $this->side_effects( $target, $input );

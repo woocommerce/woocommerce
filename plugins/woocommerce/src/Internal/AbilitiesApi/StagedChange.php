@@ -149,9 +149,30 @@ final class StagedChange {
 			},
 			self::diff( $this->values['before'], $this->values['after'] )
 		);
+		$summary['expected']     = array_column( $summary['changes'], 'before', 'field' );
 		$summary['side_effects'] = $this->side_effects;
 		$summary['undo']         = $this->undo;
+		if ( null !== $this->undo && ! isset( $this->undo['input']['expected'] ) && wp_get_ability( (string) ( $this->undo['ability'] ?? '' ) ) instanceof ObjectChangeAbility ) {
+			$summary['undo']['input']['expected'] = array_column( $summary['changes'], 'after', 'field' );
+		}
 		return $summary;
+	}
+
+	/**
+	 * The value at a dotted path, or null when the path is missing.
+	 *
+	 * @param array  $values Values.
+	 * @param string $path   Dotted path, as in a change's `field`.
+	 * @return mixed
+	 */
+	public static function value_at( array $values, string $path ) {
+		foreach ( explode( '.', $path ) as $segment ) {
+			if ( ! is_array( $values ) || ! array_key_exists( $segment, $values ) ) {
+				return null;
+			}
+			$values = $values[ $segment ];
+		}
+		return $values;
 	}
 
 	/**
