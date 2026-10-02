@@ -246,6 +246,68 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A multilingual plugin can filter `locale` per request, which moves get_locale() and the
+	 * wc_switch_to_site_locale() window away from the configured site locale. The Default base is
+	 * initialized and compared in the configured site locale, so the screen must keep reporting
+	 * Default for the base wc_get_permalink_structure() persisted.
+	 *
+	 * @testdox Should keep "Default" checked when a locale filter changes the request locale.
+	 */
+	public function test_default_structure_stays_checked_when_a_locale_filter_changes_the_request_locale(): void {
+		$this->ensure_shop_page();
+		$this->activate_french_product_slug_translation();
+		add_filter( 'locale', static fn() => 'fr_FR' );
+		$this->assertSame( 'fr_FR', determine_locale(), 'The request locale should follow the locale filter.' );
+
+		delete_option( 'woocommerce_permalinks' );
+		wc_get_permalink_structure();
+		$html = $this->render_settings();
+
+		$this->assertSame( 'product', get_option( 'woocommerce_permalinks' )['product_base'], 'The Default base should be initialized in the site locale.' );
+		$this->assert_only_radio_checked( $html, 'default' );
+	}
+
+	/**
+	 * @testdox An unchanged save preserves a former filtered Default base and its product URLs.
+	 * @testWith ["/%postname%/"]
+	 *           ["/index.php/%postname%/"]
+	 *
+	 * @param string $structure WordPress permalink structure.
+	 */
+	public function test_unchanged_save_preserves_a_former_default_base( string $structure ): void {
+		$this->ensure_shop_page();
+		update_option( 'permalink_structure', $structure );
+		update_option( 'woocommerce_permalinks', array( 'product_base' => 'waren' ) );
+		add_filter(
+			'gettext_with_context',
+			static fn( $translation, $text, $context, $domain ) => 'woocommerce' === $domain && 'slug' === $context && 'product' === $text ? 'waren' : $translation,
+			10,
+			4
+		);
+
+		$xpath = $this->get_xpath( $this->render_settings() );
+		$this->save_and_render(
+			$xpath->query( '//input[@name="product_permalink"][@checked]' )->item( 0 )->getAttribute( 'value' ),
+			$xpath->query( '//input[@name="product_permalink_structure"]' )->item( 0 )->getAttribute( 'value' )
+		);
+		$base = get_option( 'woocommerce_permalinks' )['product_base'];
+		$this->assertSame( 'waren', $base );
+
+		$rewrite = new WP_Rewrite();
+		$rewrite->add_rewrite_tag( '%product%', '([^/]+)', 'product=' );
+		$rewrite->add_permastruct( 'product', $base . '/%product%', array( 'with_front' => false ) );
+		$rules   = $rewrite->generate_rewrite_rules( $rewrite->extra_permastructs['product']['struct'], EP_PERMALINK );
+		$matches = false;
+		foreach ( $rules as $regex => $query ) {
+			if ( preg_match( '~^' . $regex . '~', $rewrite->root . 'waren/example-product/' ) ) {
+				$matches = true;
+				break;
+			}
+		}
+		$this->assertTrue( $matches, 'The existing product URL should still match the generated rules.' );
+	}
+
+	/**
 	 * The Default radio keeps posting an empty value, so the payload stays byte-identical to what
 	 * every earlier version submitted; the resolved structure moves to a data attribute that only
 	 * the Custom-base field reads.
