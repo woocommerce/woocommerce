@@ -11,7 +11,8 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Runs a write's steps: load, change, the extension fields, the object
- * validators, one save, prepare_response. No step saves.
+ * validators, one save, prepare_response. No step saves. Change, the fields
+ * and the validators run inside SideEffectGuard.
  *
  * @since 11.3.0
  */
@@ -56,16 +57,22 @@ final class InMemoryWriteRunner {
 		}
 
 		try {
-			$changed = call_user_func( $steps['change'], $target, $input );
-			if ( is_wp_error( $changed ) ) {
-				return self::with_status( $changed );
-			}
+			$error = SideEffectGuard::run(
+				$ability_name,
+				static function () use ( $steps, $target, $input ) {
+					$changed = call_user_func( $steps['change'], $target, $input );
+					if ( is_wp_error( $changed ) ) {
+						return self::with_status( $changed );
+					}
 
-			$object_type = (string) ( $steps['object_type'] ?? '' );
-			$rejection   = isset( $input['extensions'] ) ? AbilityFields::update( AbilityFields::get( $object_type ), $target, $input['extensions'] ) : null;
-			$rejection   = $rejection ?? AbilityObjectValidators::validate( $target, $object_type );
-			if ( null !== $rejection ) {
-				return new \WP_Error( 'woocommerce_in_memory_write_rejected', $rejection->get_error_message(), array( 'status' => 400 ) );
+					$object_type = (string) ( $steps['object_type'] ?? '' );
+					$rejection   = isset( $input['extensions'] ) ? AbilityFields::update( AbilityFields::get( $object_type ), $target, $input['extensions'] ) : null;
+					$rejection   = $rejection ?? AbilityObjectValidators::validate( $target, $object_type );
+					return null === $rejection ? null : new \WP_Error( 'woocommerce_in_memory_write_rejected', $rejection->get_error_message(), array( 'status' => 400 ) );
+				}
+			);
+			if ( is_wp_error( $error ) ) {
+				return $error;
 			}
 
 			$saved = $subject->save();
