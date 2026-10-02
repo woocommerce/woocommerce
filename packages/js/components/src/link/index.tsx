@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { partial } from 'lodash';
+import { ExternalLink } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
 import { getHistory } from '@woocommerce/navigation';
 
@@ -76,6 +77,14 @@ export const Link = ( {
 
 	if ( type === 'wc-admin' ) {
 		passProps.onClick = partial( wcAdminLinkHandler, passProps.onClick );
+	}
+
+	if ( type === 'external' ) {
+		return (
+			<ExternalLink href={ href } { ...passProps }>
+				{ children }
+			</ExternalLink>
+		);
 	}
 
 	return (

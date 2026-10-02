@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Render `Link type="external"` with WordPress' `ExternalLink` component so WooCommerce external links use the standard external-link indicator.

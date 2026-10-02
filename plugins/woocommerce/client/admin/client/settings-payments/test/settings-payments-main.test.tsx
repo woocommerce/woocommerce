@@ -62,31 +62,37 @@ describe( 'SettingsPaymentsMain', () => {
 			</Router>
 		);
 
-		const morePaymentOptionsLink = screen.getByText(
-			'More payment options'
-		);
+		const morePaymentOptionsLink = screen
+			.getByText( 'More payment options' )
+			.closest( 'a' );
 
 		// Verify the link has the correct href attribute for external navigation
-		expect( morePaymentOptionsLink.closest( 'a' ) ).toHaveAttribute(
+		expect( morePaymentOptionsLink ).toHaveAttribute(
 			'href',
 			'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations'
 		);
 
 		// Verify the link opens in a new tab
-		expect( morePaymentOptionsLink.closest( 'a' ) ).toHaveAttribute(
-			'target',
-			'_blank'
-		);
+		expect( morePaymentOptionsLink ).toHaveAttribute( 'target', '_blank' );
 
 		// Verify security attributes are present for external links
-		expect( morePaymentOptionsLink.closest( 'a' ) ).toHaveAttribute(
+		expect( morePaymentOptionsLink ).toHaveAttribute(
 			'rel',
 			expect.stringContaining( 'noopener' )
 		);
 
-		expect( morePaymentOptionsLink.closest( 'a' ) ).toHaveAttribute(
+		expect( morePaymentOptionsLink ).toHaveAttribute(
 			'rel',
 			expect.stringContaining( 'noreferrer' )
 		);
+
+		expect( morePaymentOptionsLink ).toHaveClass(
+			'components-external-link'
+		);
+		expect(
+			morePaymentOptionsLink?.querySelector(
+				'.components-external-link__icon'
+			)
+		).not.toBeNull();
 	} );
 } );
