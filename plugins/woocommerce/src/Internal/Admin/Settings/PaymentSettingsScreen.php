@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * @internal
  */
-final class PaymentSettingsScreen {
+class PaymentSettingsScreen {
 
 	/**
 	 * Admin page slug. wp-build's generated code only loads its assets on this page.
@@ -37,10 +37,33 @@ final class PaymentSettingsScreen {
 	private const RENDER_FUNCTION = 'woocommerce_routes_wc_payment_settings_wp_admin_render_page';
 
 	/**
+	 * Handle of the script that passes the current screen to the route.
+	 */
+	private const DATA_SCRIPT_HANDLE = 'wc-payment-settings-screen';
+
+	/**
+	 * The registered screens.
+	 *
+	 * @var PaymentSettingsScreens
+	 */
+	private PaymentSettingsScreens $screens;
+
+	/**
 	 * Register hooks.
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'handle_init' ) );
+	}
+
+	/**
+	 * Initialize dependencies.
+	 *
+	 * @internal
+	 *
+	 * @param PaymentSettingsScreens $screens The registered screens.
+	 */
+	final public function init( PaymentSettingsScreens $screens ): void {
+		$this->screens = $screens;
 	}
 
 	/**
@@ -57,6 +80,59 @@ final class PaymentSettingsScreen {
 		add_action( 'admin_menu', array( $this, 'handle_admin_menu' ) );
 		add_action( 'admin_head', array( $this, 'handle_admin_head' ) );
 		add_filter( 'submenu_file', array( $this, 'handle_submenu_file' ) );
+		add_action( 'wc-payment-settings-wp-admin_init', array( $this, 'handle_page_init' ) );
+	}
+
+	/**
+	 * Load the requested screen's scripts and pass its settings to the route.
+	 *
+	 * @internal
+	 */
+	public function handle_page_init(): void {
+		$screen = $this->get_requested_screen();
+		if ( null === $screen ) {
+			return;
+		}
+
+		foreach ( $screen['scripts'] as $handle ) {
+			wp_enqueue_script( $handle );
+		}
+
+		$module_dependencies = array_map(
+			static fn( string $module_id ) => array(
+				'id'      => $module_id,
+				'dynamic' => true,
+			),
+			$this->get_field_module_ids( $screen['id'] )
+		);
+
+		// Registered without a source: it only carries the screen data and the field modules for the import map.
+		wp_register_script(
+			self::DATA_SCRIPT_HANDLE,
+			false,
+			array(),
+			WC_VERSION,
+			array(
+				'in_footer'           => true,
+				'module_dependencies' => $module_dependencies,
+			)
+		);
+		wp_add_inline_script(
+			self::DATA_SCRIPT_HANDLE,
+			'window.wcPaymentSettingsScreen = ' . wp_json_encode(
+				array(
+					'id'     => $screen['id'],
+					'title'  => $screen['title'],
+					'entity' => array(
+						'kind'    => PaymentSettingsScreens::ENTITY_KIND,
+						'name'    => $screen['id'],
+						'baseURL' => $screen['rest_path'],
+					),
+				)
+			) . ';',
+			'before'
+		);
+		wp_enqueue_script( self::DATA_SCRIPT_HANDLE );
 	}
 
 	/**
@@ -138,6 +214,39 @@ final class PaymentSettingsScreen {
 	private function is_current_page(): bool {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only compares the page slug.
 		return isset( $_GET['page'] ) && self::PAGE_SLUG === $_GET['page'];
+	}
+
+	/**
+	 * Get the screen named in the route, such as `p=/settings/woopayments`.
+	 *
+	 * @return array{id: string, title: string, rest_path: string, scripts: string[]}|null
+	 */
+	private function get_requested_screen(): ?array {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only selects which screen to load.
+		$route = isset( $_GET['p'] ) && is_string( $_GET['p'] ) ? sanitize_text_field( wp_unslash( $_GET['p'] ) ) : '';
+		if ( ! preg_match( '#^/settings/([a-z0-9_-]+)/?(?:\?.*)?$#', $route, $matches ) ) {
+			return null;
+		}
+
+		return $this->screens->get_screen( $matches[1] );
+	}
+
+	/**
+	 * Get the script modules registered with the Fields API for a screen's entity.
+	 *
+	 * @param string $screen_id The screen ID.
+	 * @return string[]
+	 */
+	private function get_field_module_ids( string $screen_id ): array {
+		if ( function_exists( 'wp_get_registered_field_modules' ) ) {
+			$modules = wp_get_registered_field_modules( PaymentSettingsScreens::ENTITY_KIND, $screen_id );
+		} elseif ( function_exists( 'gutenberg_get_registered_field_modules' ) ) {
+			$modules = gutenberg_get_registered_field_modules( PaymentSettingsScreens::ENTITY_KIND, $screen_id );
+		} else {
+			return array();
+		}
+
+		return is_array( $modules ) ? array_values( array_filter( array_keys( $modules ), 'is_string' ) ) : array();
 	}
 
 	/**
