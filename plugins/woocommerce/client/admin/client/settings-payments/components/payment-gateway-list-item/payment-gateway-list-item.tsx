@@ -7,7 +7,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { PaymentGatewayProvider } from '@woocommerce/data';
 import { Tooltip } from '@wordpress/components';
 import { createInterpolateElement } from '@wordpress/element';
-import { Link } from '@wordpress/ui';
+import { Link } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -180,8 +180,9 @@ export const PaymentGatewayListItem = ( {
 												a: (
 													<Link
 														href="https://woocommerce.com/document/woocommerce-store-editing/customizing-cart-and-checkout/#incompatible-extensions"
-														rel="noopener noreferrer"
-														openInNewTab
+														target="_blank"
+														rel="noreferrer"
+														type="external"
 													>
 														{ null }
 													</Link>

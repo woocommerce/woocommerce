@@ -105,6 +105,7 @@ jest.mock( '~/settings-payments/components/official-badge', () => ( {
 } ) );
 
 jest.mock( '@wordpress/components', () => ( {
+	...jest.requireActual( '@wordpress/components' ),
 	Tooltip: ( { children }: { children: React.ReactNode } ) => (
 		<div>{ children }</div>
 	),
