@@ -169,6 +169,7 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 				'ability'      => self::WRITE,
 				'object_type'  => 'test_record',
 				'object_id'    => 7,
+				'object_label' => null,
 				'changes'      => array(
 					array(
 						'field'  => 'title',

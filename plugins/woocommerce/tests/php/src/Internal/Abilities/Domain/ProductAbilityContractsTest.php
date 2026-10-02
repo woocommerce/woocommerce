@@ -231,9 +231,88 @@ class ProductAbilityContractsTest extends \WC_Unit_Test_Case {
 			),
 			$changes['extensions.test_simple.code']
 		);
+		$this->assertSame( 'Original', $summary['object_label'] );
+		$this->assertStringNotContainsString( 'meta_data', wp_json_encode( $summary ) );
+		$this->assertStringNotContainsString( '_test_simple_code', wp_json_encode( $summary ) );
 		$stored = wc_get_product( $product->get_id() );
 		$this->assertSame( 'Original', $stored->get_name() );
 		$this->assertSame( '', $stored->get_meta( '_test_simple_code' ) );
+	}
+
+	/**
+	 * @testdox Should accept a field registered after the abilities, and diff one list entry with the nearest title as its label.
+	 */
+	public function test_late_field_list_change_dry_run_and_execute(): void {
+		add_filter(
+			'woocommerce_ability_fields',
+			static function ( array $fields, string $object_type ): array {
+				if ( 'product' !== $object_type ) {
+					return $fields;
+				}
+				$fields['test_addons'] = array(
+					'schema'          => array(
+						'type'  => 'array',
+						'title' => 'Add-ons',
+						'items' => array(
+							'type'       => 'object',
+							'properties' => array(
+								'name'  => array( 'type' => 'string' ),
+								'price' => array( 'type' => 'number' ),
+							),
+						),
+					),
+					'get_callback'    => static function ( \WC_Product $product ) {
+						$addons = $product->get_meta( '_test_addons' );
+						return is_array( $addons ) ? $addons : null;
+					},
+					'update_callback' => static function ( $value, \WC_Product $product ) {
+						$product->update_meta_data( '_test_addons', $value );
+					},
+				);
+				return $fields;
+			},
+			10,
+			2
+		);
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Mug' ) );
+		$product->update_meta_data(
+			'_test_addons',
+			array(
+				array(
+					'name'  => 'Gift wrap',
+					'price' => 5,
+				),
+			)
+		);
+		$product->save();
+		$input = array(
+			'id'         => $product->get_id(),
+			'extensions' => array(
+				'test_addons' => array(
+					array(
+						'name'  => 'Gift wrap',
+						'price' => 7,
+					),
+				),
+			),
+		);
+
+		$summary = wp_get_ability( 'woocommerce/product-update' )->dry_run( $input );
+
+		$this->assertNotWPError( $summary );
+		$this->assertSame(
+			array(
+				array(
+					'field'  => 'extensions.test_addons.0.price',
+					'label'  => 'Add-ons: price',
+					'before' => 5,
+					'after'  => 7,
+				),
+			),
+			$summary['changes']
+		);
+		$this->assertNotWPError( wp_get_ability( 'woocommerce/product-update' )->execute( $input ) );
+		$this->assertSame( 7, wc_get_product( $product->get_id() )->get_meta( '_test_addons' )[0]['price'] );
 	}
 
 	/**

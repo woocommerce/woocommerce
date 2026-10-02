@@ -171,6 +171,7 @@ abstract class ObjectChangeAbility extends PolyfilledAbility {
 		$fields      = AbilityFields::get( $object_type );
 		try {
 			$before       = self::read( $subject, $target, $fields );
+			$label        = self::label( $target );
 			$undo         = $this->undo( $target, $input );
 			$side_effects = $this->side_effects( $target, $input );
 
@@ -185,7 +186,7 @@ abstract class ObjectChangeAbility extends PolyfilledAbility {
 				return new \WP_Error( 'woocommerce_in_memory_write_rejected', $rejection->get_error_message(), array( 'status' => 400 ) );
 			}
 
-			return new StagedChange( $this->get_name(), $object_type, $target, $subject, $before, self::read( $subject, $target, $fields ), $side_effects, $undo );
+			return new StagedChange( $this->get_name(), $object_type, $target, $subject, $label ?? self::label( $target ), $before, self::read( $subject, $target, $fields ), $side_effects, $undo );
 		} catch ( \Exception $exception ) {
 			return $this->exception_error( $exception );
 		}
@@ -203,7 +204,19 @@ abstract class ObjectChangeAbility extends PolyfilledAbility {
 	}
 
 	/**
-	 * The object's data, with objects that print as text as text, and its extension field values.
+	 * The object's display name, from its get_name() method when it has one.
+	 *
+	 * @param object $target Object.
+	 */
+	private static function label( $target ): ?string {
+		$name = is_callable( array( $target, 'get_name' ) ) ? $target->get_name() : null;
+		return is_string( $name ) && '' !== $name ? $name : null;
+	}
+
+	/**
+	 * The object's data without its raw meta, with objects that print as text
+	 * as text, and its extension field values. Raw meta can hold private keys;
+	 * meta reaches the summary only through registered extension fields.
 	 *
 	 * @param InMemorySubject                     $subject Subject.
 	 * @param object                              $target  Object.
@@ -211,6 +224,7 @@ abstract class ObjectChangeAbility extends PolyfilledAbility {
 	 */
 	private static function read( InMemorySubject $subject, $target, array $fields ): array {
 		$values = $subject->snapshot();
+		unset( $values['meta_data'] );
 		array_walk_recursive(
 			$values,
 			static function ( &$value ) {

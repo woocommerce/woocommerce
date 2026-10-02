@@ -38,6 +38,13 @@ final class StagedChange {
 	private $target;
 
 	/**
+	 * The object's display name.
+	 *
+	 * @var string|null
+	 */
+	private $label;
+
+	/**
 	 * Subject that saves the object.
 	 *
 	 * @var InMemorySubject
@@ -72,16 +79,18 @@ final class StagedChange {
 	 * @param string          $object_type  Object type.
 	 * @param object          $target       Changed object.
 	 * @param InMemorySubject $subject      Subject that saves the object.
+	 * @param string|null     $label        The object's display name.
 	 * @param array           $before       Data and extension field values before the change.
 	 * @param array           $after        Data and extension field values after the change.
 	 * @param string[]        $side_effects Effects of the call.
 	 * @param array|null      $undo         The ability call that undoes the change.
 	 */
-	public function __construct( string $ability_name, string $object_type, $target, InMemorySubject $subject, array $before, array $after, array $side_effects, ?array $undo ) {
+	public function __construct( string $ability_name, string $object_type, $target, InMemorySubject $subject, ?string $label, array $before, array $after, array $side_effects, ?array $undo ) {
 		$this->ability_name = $ability_name;
 		$this->object_type  = $object_type;
 		$this->target       = $target;
 		$this->subject      = $subject;
+		$this->label        = $label;
 		$this->values       = array(
 			'before' => $before,
 			'after'  => $after,
@@ -126,6 +135,7 @@ final class StagedChange {
 		if ( ! empty( $this->values['after']['id'] ) ) {
 			$summary['object_id'] = $this->values['after']['id'];
 		}
+		$summary['object_label'] = $this->label;
 
 		$fields                  = AbilityFields::get( $this->object_type );
 		$summary['changes']      = array_map(
@@ -145,7 +155,8 @@ final class StagedChange {
 	}
 
 	/**
-	 * Each leaf value that differs, with its dotted path.
+	 * Each leaf value that differs, with its dotted path. Lists of the same
+	 * length are compared entry by entry; other lists as one value.
 	 *
 	 * @param array  $before Values before.
 	 * @param array  $after  Values after.
@@ -157,7 +168,9 @@ final class StagedChange {
 		foreach ( array_keys( $before + $after ) as $key ) {
 			$old = $before[ $key ] ?? null;
 			$new = $after[ $key ] ?? null;
-			if ( ( self::is_map( $old ) || self::is_map( $new ) ) && ( null === $old || is_array( $old ) ) && ( null === $new || is_array( $new ) ) ) {
+			$maps  = ( self::is_map( $old ) || self::is_map( $new ) ) && ( null === $old || is_array( $old ) ) && ( null === $new || is_array( $new ) );
+			$lists = is_array( $old ) && is_array( $new ) && ! empty( $new ) && count( $old ) === count( $new ) && wp_is_numeric_array( $old ) && wp_is_numeric_array( $new );
+			if ( $maps || $lists ) {
 				$changes = array_merge( $changes, self::diff( (array) $old, (array) $new, $prefix . $key . '.' ) );
 			} elseif ( $old !== $new ) {
 				$changes[] = array(
@@ -180,8 +193,9 @@ final class StagedChange {
 	}
 
 	/**
-	 * The label of a changed value: the deepest schema `title` on an extension
-	 * field's path, else the attribute, or the path for the object's own data.
+	 * The label of a changed value. For an extension field: the leaf's schema
+	 * `title`, else the nearest ancestor `title` and the leaf key, else the
+	 * attribute. For the object's own data: the path.
 	 *
 	 * @param string                              $field  Dotted path.
 	 * @param array<string, array<string, mixed>> $fields Extension fields keyed by attribute.
@@ -193,11 +207,24 @@ final class StagedChange {
 		}
 
 		$schema = $fields[ $path[1] ]['schema'] ?? array();
-		$label  = (string) ( $schema['title'] ?? $path[1] );
+		$title  = $schema['title'] ?? null;
+		$leaf   = null;
 		foreach ( array_slice( $path, 2 ) as $segment ) {
+			if ( is_numeric( $segment ) ) {
+				$schema = $schema['items'] ?? array();
+				continue;
+			}
 			$schema = $schema['properties'][ $segment ] ?? array();
-			$label  = isset( $schema['title'] ) ? (string) $schema['title'] : $label;
+			$leaf   = $segment;
+			if ( isset( $schema['title'] ) ) {
+				$title = $schema['title'];
+				$leaf  = null;
+			}
 		}
-		return $label;
+
+		if ( null === $title ) {
+			return $path[1];
+		}
+		return null === $leaf ? (string) $title : $title . ': ' . $leaf;
 	}
 }
