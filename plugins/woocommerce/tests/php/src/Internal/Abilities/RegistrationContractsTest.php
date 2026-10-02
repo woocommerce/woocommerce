@@ -78,6 +78,7 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 			array(
 				'schema'          => array(
 					'type'        => 'string',
+					'title'       => 'Notes',
 					'description' => 'Note the notes plugin keeps on a record.',
 				),
 				'get_callback'    => static function ( TestRecord $record ) {
@@ -137,6 +138,7 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 
 		$field = array(
 			'type'        => 'string',
+			'title'       => 'Notes',
 			'description' => 'Note the notes plugin keeps on a record.',
 		);
 		$write = wp_get_ability( self::WRITE );
@@ -146,6 +148,39 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 		$this->assertSame( $field, $write->get_output_schema()['properties']['record']['properties']['extensions']['properties']['test_notes'] );
 		$this->assertSame( $field, $read->get_output_schema()['properties']['records']['items']['properties']['extensions']['properties']['test_notes'] );
 		$this->assertArrayNotHasKey( 'extensions', $read->get_input_schema()['properties'] );
+		$this->assertSame( $field, wc_get_ability_fields_schema( 'test_record' )['properties']['test_notes'] );
+	}
+
+	/**
+	 * @testdox Should let a client preview a change with the ability and the field functions, without saving.
+	 */
+	public function test_client_preview_saves_nothing(): void {
+		$this->register( true );
+		$ability = wp_get_ability( self::WRITE );
+		$input   = array(
+			'id'    => 7,
+			'title' => 'Renamed',
+		);
+
+		$record = $ability->load( $input );
+		$before = wc_get_ability_field_values( $record, 'test_record' );
+		$ability->change( $record, $input );
+		$this->assertNull( wc_update_ability_fields( $record, 'test_record', array( 'test_notes' => 'second' ) ) );
+		$this->assertNull( wc_validate_ability_object( $record, 'test_record' ) );
+		$after = wc_get_ability_field_values( $record, 'test_record' );
+
+		$this->assertSame( array( 'test_notes' => 'first' ), $before );
+		$this->assertSame( array( 'test_notes' => 'second' ), $after );
+		$this->assertSame( 'Renamed', $record->title );
+
+		$blocked = $ability->load( $input );
+		$ability->change( $blocked, array_merge( $input, array( 'title' => 'Blocked' ) ) );
+		$this->assertSame( 'Blocked by validator.', wc_validate_ability_object( $blocked, 'test_record' )->get_error_message() );
+		$this->assertSame( 'Note rejected.', wc_update_ability_fields( $blocked, 'test_record', array( 'test_notes' => 'reject' ) )->get_error_message() );
+
+		$this->assertSame( 0, TestRecord::$saves );
+		$this->assertSame( 'Original', TestRecord::load( 7 )->title );
+		$this->assertSame( 'first', TestRecord::load( 7 )->note );
 	}
 
 	/**
