@@ -46,8 +46,8 @@
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
-		"lint:fix:lang:js": "eslint src --fix",
-		"lint:lang:js": "eslint src",
+		"lint:fix:lang:js": "eslint src lib jest-preset.js --fix",
+		"lint:lang:js": "eslint src lib jest-preset.js",
 		"lint:lang:types": "tsc --build --emitDeclarationOnly",
 		"prepack": "pnpm build:publish:project",
 		"test:js": "jest --config ./jest.config.json",
@@ -110,7 +110,11 @@
 		"ci": {
 			"lint": {
 				"command": "lint",
-				"changes": "src/**/*.{js,jsx,ts,tsx}"
+				"changes": [
+					"src/**/*.{js,jsx,ts,tsx}",
+					"lib/**/*.js",
+					"jest-preset.js"
+				]
 			},
 			"tests": [
 				{
