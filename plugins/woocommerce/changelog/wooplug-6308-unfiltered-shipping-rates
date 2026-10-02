@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add original shipping rates as a third argument to the woocommerce_package_rates filter so extensions can opt into restoring hidden rates.
