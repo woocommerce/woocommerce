@@ -108,13 +108,6 @@ jest.mock( '@wordpress/components', () => ( {
 	Tooltip: ( { children }: { children: React.ReactNode } ) => (
 		<div>{ children }</div>
 	),
-	ExternalLink: ( {
-		href,
-		children,
-	}: {
-		href: string;
-		children: React.ReactNode;
-	} ) => <a href={ href }>{ children }</a>,
 } ) );
 
 jest.mock( '~/utils/admin-settings', () => ( {

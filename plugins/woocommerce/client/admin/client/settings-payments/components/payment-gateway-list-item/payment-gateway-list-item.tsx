@@ -5,8 +5,9 @@ import { WooPaymentsMethodsLogos } from '@woocommerce/onboarding';
 import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import { PaymentGatewayProvider } from '@woocommerce/data';
-import { ExternalLink, Tooltip } from '@wordpress/components';
+import { Tooltip } from '@wordpress/components';
 import { createInterpolateElement } from '@wordpress/element';
+import { Link } from '@wordpress/ui';
 
 /**
  * Internal dependencies
@@ -177,9 +178,13 @@ export const PaymentGatewayListItem = ( {
 											),
 											{
 												a: (
-													<ExternalLink href="https://woocommerce.com/document/woocommerce-store-editing/customizing-cart-and-checkout/#incompatible-extensions">
+													<Link
+														href="https://woocommerce.com/document/woocommerce-store-editing/customizing-cart-and-checkout/#incompatible-extensions"
+														rel="noopener noreferrer"
+														openInNewTab
+													>
 														{ null }
-													</ExternalLink>
+													</Link>
 												),
 											}
 										) }
