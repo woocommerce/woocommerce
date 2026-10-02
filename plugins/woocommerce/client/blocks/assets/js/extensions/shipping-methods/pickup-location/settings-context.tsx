@@ -131,6 +131,11 @@ export const SettingsProvider = ( {
 				)
 					? settings.tax_status
 					: 'taxable',
+				prices_include_tax: [ 'yes', 'no' ].includes(
+					settings.prices_include_tax
+				)
+					? settings.prices_include_tax
+					: 'no',
 				cost: settings.cost,
 			},
 			pickup_locations: pickupLocations.map( ( location ) => ( {

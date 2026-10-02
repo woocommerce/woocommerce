@@ -275,4 +275,40 @@ class LocalPickupUtilsTest extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'details', $result[0] );
 		$this->assertStringContainsString( 'Test Local Pickup', $result[0]['details'] );
 	}
+
+	/**
+	 * @testdox Should read costs entered with tax as off when the stored settings predate the option.
+	 * @testWith ["view"]
+	 *           ["edit"]
+	 *
+	 * @param string $context Context to read the settings in.
+	 */
+	public function test_get_local_pickup_settings_defaults_prices_include_tax( string $context ): void {
+		update_option( 'woocommerce_pickup_location_settings', array( 'enabled' => 'yes' ) );
+
+		$settings = LocalPickupUtils::get_local_pickup_settings( $context );
+
+		$this->assertSame( 'no', $settings['prices_include_tax'], 'Hydrated settings should never leave the option undefined.' );
+	}
+
+	/**
+	 * @testdox Should default costs entered with tax to yes only when pickup has not been set up yet on a store that enters prices with tax.
+	 * @testWith [null, "yes"]
+	 *           [{"enabled": "yes"}, "no"]
+	 *
+	 * @param array|null $stored_settings Stored pickup settings, null when pickup has not been set up yet.
+	 * @param string     $expected        Expected costs entered with tax setting.
+	 */
+	public function test_get_local_pickup_settings_follows_store_prices_include_tax_for_new_settings( ?array $stored_settings, string $expected ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		delete_option( 'woocommerce_pickup_location_settings' );
+		if ( null !== $stored_settings ) {
+			update_option( 'woocommerce_pickup_location_settings', $stored_settings );
+		}
+
+		$settings = LocalPickupUtils::get_local_pickup_settings( 'edit' );
+
+		$this->assertSame( $expected, $settings['prices_include_tax'] );
+	}
 }

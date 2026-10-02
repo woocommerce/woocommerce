@@ -378,4 +378,30 @@ class PickupLocationsRestControllerTest extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'alert(1)', $saved['cost'], 'Inline script payload must not survive cost sanitization.' );
 		$this->assertStringContainsString( '5 + 1.50', $saved['cost'], 'Math formula syntax must be preserved in cost — must not be coerced to float.' );
 	}
+
+	/**
+	 * @testdox Should sanitize the costs entered with tax setting down to a yes/no value.
+	 * @testWith ["yes", "yes"]
+	 *           ["no", "no"]
+	 *           ["<script>alert(1)</script>", "no"]
+	 *
+	 * @param string $sent     Value sent in the request.
+	 * @param string $expected Value expected to be persisted.
+	 */
+	public function test_update_settings_sanitizes_prices_include_tax( string $sent, string $expected ): void {
+		wp_set_current_user( $this->shop_manager_id );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/v3/pickup-locations' );
+		$request->set_param(
+			'pickup_location_settings',
+			array(
+				'enabled'            => 'yes',
+				'prices_include_tax' => $sent,
+			)
+		);
+
+		$this->sut->update_settings( $request );
+
+		$this->assertSame( $expected, get_option( 'woocommerce_pickup_location_settings' )['prices_include_tax'], 'Only yes and no should survive sanitization.' );
+	}
 }

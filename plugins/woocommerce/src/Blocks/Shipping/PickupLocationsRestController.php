@@ -127,6 +127,7 @@ class PickupLocationsRestController extends \WP_REST_Controller {
 				'price'                    => '' === $cost,
 				'cost'                     => '' === $cost ? 0 : $cost,
 				'taxes'                    => $settings['tax_status'] ?? '',
+				'prices_include_tax'       => $settings['prices_include_tax'] ?? 'no',
 				'total_pickup_locations'   => count( $locations ),
 				'pickup_locations_enabled' => count(
 					array_filter(
@@ -167,6 +168,12 @@ class PickupLocationsRestController extends \WP_REST_Controller {
 			$sanitized['tax_status'] = in_array( $settings['tax_status'], array( 'taxable', 'none' ), true )
 				? $settings['tax_status']
 				: 'none';
+		}
+
+		if ( isset( $settings['prices_include_tax'] ) ) {
+			$sanitized['prices_include_tax'] = in_array( $settings['prices_include_tax'], array( 'yes', 'no' ), true )
+				? $settings['prices_include_tax']
+				: 'no';
 		}
 
 		if ( isset( $settings['cost'] ) ) {

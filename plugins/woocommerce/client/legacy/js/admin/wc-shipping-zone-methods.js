@@ -684,6 +684,21 @@
 						} );
 					}
 				},
+				// The "costs entered with tax" option only changes anything while the method is taxable.
+				possiblyHidePricesIncludeTax: function() {
+					const taxStatus = $( '#woocommerce_flat_rate_tax_status' );
+					const pricesIncludeTax = $( '#woocommerce_flat_rate_prices_include_tax' );
+
+					if ( taxStatus.length === 0 || pricesIncludeTax.length === 0 ) {
+						return;
+					}
+
+					// replaceHTMLTables() removes the table rows, so the field is a label followed by a fieldset.
+					pricesIncludeTax
+						.closest( 'fieldset' )
+						.add( 'label[for="woocommerce_flat_rate_prices_include_tax"]' )
+						.toggle( taxStatus.val() === 'taxable' );
+				},
 				onModalLoaded: function( event, target ) {
 					if ( target === 'wc-modal-shipping-method-settings' ) {
 						const select = $( '#woocommerce_free_shipping_requires' );
@@ -692,6 +707,10 @@
 						}
 
 						event.data.view.possiblyAddShippingClassLink( event );
+
+						event.data.view.possiblyHidePricesIncludeTax();
+						$( '#woocommerce_flat_rate_tax_status' ).on( 'change', event.data.view.possiblyHidePricesIncludeTax );
+
 						if ( window.wc.wcSettings.CURRENCY && window.wc.currency.localiseMonetaryValue ) {
 							const config = window.wc.wcSettings.CURRENCY;
 							$('.wc-shipping-modal-price').on( 'input', function() {

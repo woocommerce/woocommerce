@@ -12,7 +12,7 @@ use Automattic\WooCommerce\Utilities\I18nUtil;
 
 // This description is shown as a tooltip, and wc_sanitize_tooltip() strips <code> tags, so the placeholders are
 // listed as `placeholder = meaning` pairs rather than relying on markup to delimit them.
-$cost_desc = __( 'Enter a cost (excl. tax) or sum, e.g. 10.00 * [qty].', 'woocommerce' ) . '<br/><br/>' . sprintf(
+$cost_desc = __( 'Enter a cost or sum, e.g. 10.00 * [qty].', 'woocommerce' ) . '<br/><br/>' . sprintf(
 	/* translators: %s: store weight unit label, e.g. kg */
 	__( 'Supports the following placeholders: [qty] = number of items, [cost] = total cost of items, [weight] = total weight of items in %s, [fee percent="10" min_fee="20" max_fee=""] = percentage based fee.', 'woocommerce' ),
 	I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', 'kg' ) )
@@ -20,7 +20,7 @@ $cost_desc = __( 'Enter a cost (excl. tax) or sum, e.g. 10.00 * [qty].', 'woocom
 $cost_link = sprintf( '<span id="wc-shipping-advanced-costs-help-text">%s <a target="_blank" href="https://woocommerce.com/document/flat-rate-shipping/#advanced-costs">%s</a>.</span>', __( 'Charge a flat rate per item, or enter a cost formula to charge a percentage based cost or a minimum fee. Learn more about', 'woocommerce' ), __( 'advanced costs', 'woocommerce' ) );
 
 $settings = array(
-	'title'      => array(
+	'title'              => array(
 		'title'       => __( 'Name', 'woocommerce' ),
 		'type'        => 'text',
 		'description' => __( 'Your customers will see the name of this shipping method during checkout.', 'woocommerce' ),
@@ -28,7 +28,7 @@ $settings = array(
 		'placeholder' => __( 'e.g. Standard national', 'woocommerce' ),
 		'desc_tip'    => true,
 	),
-	'tax_status' => array(
+	'tax_status'         => array(
 		'title'   => __( 'Tax status', 'woocommerce' ),
 		'type'    => 'select',
 		'class'   => 'wc-enhanced-select',
@@ -38,7 +38,19 @@ $settings = array(
 			ProductTaxStatus::NONE    => _x( 'None', 'Tax status', 'woocommerce' ),
 		),
 	),
-	'cost'       => array(
+	'prices_include_tax' => array(
+		'title'       => __( 'Costs entered with tax', 'woocommerce' ),
+		'type'        => 'select',
+		'class'       => 'wc-enhanced-select',
+		'default'     => 'no',
+		'options'     => array(
+			'no'  => __( 'No, I will enter costs exclusive of tax', 'woocommerce' ),
+			'yes' => __( 'Yes, I will enter costs inclusive of tax', 'woocommerce' ),
+		),
+		'description' => __( 'Select "Yes" if the cost you enter already includes tax. Customers pay that cost, and any tax is worked out from it. Only applies when the tax status is taxable. Formulas are evaluated first and the result is treated as including tax.', 'woocommerce' ),
+		'desc_tip'    => true,
+	),
+	'cost'               => array(
 		'title'             => __( 'Cost', 'woocommerce' ),
 		'type'              => 'text',
 		'class'             => 'wc-shipping-modal-price',
@@ -49,6 +61,11 @@ $settings = array(
 		'sanitize_callback' => array( $this, 'sanitize_cost' ),
 	),
 );
+
+// Costs entered with tax only change anything while taxes are enabled.
+if ( ! wc_tax_enabled() ) {
+	unset( $settings['prices_include_tax'] );
+}
 
 $shipping_classes = WC()->shipping()->get_shipping_classes();
 

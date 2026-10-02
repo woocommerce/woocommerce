@@ -50,6 +50,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			'shipping-zones',
 			'instance-settings',
 			'instance-settings-modal',
+			'costs-entered-with-tax',
 		);
 		$this->init();
 
@@ -61,10 +62,16 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 */
 	public function init() {
 		$this->instance_form_fields = include __DIR__ . '/includes/settings-flat-rate.php';
-		$this->title                = $this->get_option( 'title' );
-		$this->tax_status           = $this->get_option( 'tax_status' );
-		$this->cost                 = $this->get_option( 'cost' );
-		$this->type                 = $this->get_option( 'type', 'class' );
+
+		// New instances follow the store's prices entered with tax setting; instances saved before this option existed keep 'no'.
+		if ( wc_prices_include_tax() && ! is_array( get_option( $this->get_instance_option_key() ) ) ) {
+			$this->instance_form_fields['prices_include_tax']['default'] = 'yes';
+		}
+
+		$this->title      = $this->get_option( 'title' );
+		$this->tax_status = $this->get_option( 'tax_status' );
+		$this->cost       = $this->get_option( 'cost' );
+		$this->type       = $this->get_option( 'type', 'class' );
 	}
 
 	/**

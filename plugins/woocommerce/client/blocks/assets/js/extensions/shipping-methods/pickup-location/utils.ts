@@ -29,6 +29,7 @@ export const defaultSettings = {
 	enabled: false,
 	title: __( 'Pickup', 'woocommerce' ),
 	tax_status: 'taxable',
+	prices_include_tax: 'no',
 	cost: '',
 };
 
@@ -36,6 +37,8 @@ export const defaultReadyOnlySettings = {
 	hasLegacyPickup: false,
 	storeCountry: '',
 	storeState: '',
+	taxesEnabled: true,
+	storePricesIncludeTax: false,
 };
 declare global {
 	const hydratedScreenSettings: {
@@ -43,6 +46,7 @@ declare global {
 			enabled: boolean;
 			title: string;
 			tax_status: string;
+			prices_include_tax: string;
 			cost: string;
 		};
 		pickupLocations: PickupLocation[];
@@ -60,6 +64,8 @@ export const getInitialSettings = (): ShippingMethodSettings => {
 				: defaultSettings.enabled,
 		title: settings?.title || defaultSettings.title,
 		tax_status: settings?.tax_status || defaultSettings.tax_status,
+		prices_include_tax:
+			settings?.prices_include_tax || defaultSettings.prices_include_tax,
 		cost: settings?.cost || defaultSettings.cost,
 	};
 };

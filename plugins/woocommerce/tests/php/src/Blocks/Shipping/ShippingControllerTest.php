@@ -315,6 +315,39 @@ class ShippingControllerTest extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should tell the local pickup settings screen whether taxes are enabled and whether the store enters prices with tax.
+	 * @testWith ["yes", "yes", true, true]
+	 *           ["yes", "no", true, false]
+	 *           ["no", "yes", false, false]
+	 *
+	 * @param string $calc_taxes                        Value of the woocommerce_calc_taxes option.
+	 * @param string $prices_include_tax                Value of the woocommerce_prices_include_tax option.
+	 * @param bool   $expected_taxes_enabled            Expected taxesEnabled flag.
+	 * @param bool   $expected_store_prices_include_tax Expected storePricesIncludeTax flag.
+	 */
+	public function test_hydrate_client_settings_includes_tax_settings( string $calc_taxes, string $prices_include_tax, bool $expected_taxes_enabled, bool $expected_store_prices_include_tax ): void {
+		$handle = 'wc-shipping-method-pickup-location';
+		update_option( 'woocommerce_calc_taxes', $calc_taxes );
+		update_option( 'woocommerce_prices_include_tax', $prices_include_tax );
+		wp_register_script( $handle, false, array(), '1.0', true );
+		wp_enqueue_script( $handle );
+
+		try {
+			$this->shipping_controller->hydrate_client_settings();
+			$inline_scripts = wp_scripts()->get_data( $handle, 'before' );
+		} finally {
+			wp_dequeue_script( $handle );
+			wp_deregister_script( $handle );
+		}
+
+		$this->assertIsArray( $inline_scripts );
+		$this->assertSame( 1, preg_match( '/var hydratedScreenSettings = (.*);/s', implode( '', $inline_scripts ), $matches ) );
+		$readonly_settings = json_decode( $matches[1], true )['readonlySettings'];
+		$this->assertSame( $expected_taxes_enabled, $readonly_settings['taxesEnabled'] );
+		$this->assertSame( $expected_store_prices_include_tax, $readonly_settings['storePricesIncludeTax'] );
+	}
+
+	/**
 	 * Overrides the WC logger.
 	 *
 	 * @return mixed

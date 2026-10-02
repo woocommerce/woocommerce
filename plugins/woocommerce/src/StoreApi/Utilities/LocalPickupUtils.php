@@ -16,10 +16,12 @@ class LocalPickupUtils {
 		$pickup_location_settings = get_option(
 			'woocommerce_pickup_location_settings',
 			[
-				'enabled'    => 'no',
-				'title'      => __( 'Pickup', 'woocommerce' ),
-				'cost'       => '',
-				'tax_status' => 'taxable',
+				'enabled'            => 'no',
+				'title'              => __( 'Pickup', 'woocommerce' ),
+				'cost'               => '',
+				'tax_status'         => 'taxable',
+				// A store setting up pickup follows its prices entered with tax setting; settings saved before this option existed keep 'no' below.
+				'prices_include_tax' => wc_prices_include_tax() ? 'yes' : 'no',
 			]
 		);
 
@@ -33,6 +35,10 @@ class LocalPickupUtils {
 
 		if ( ! isset( $pickup_location_settings['cost'] ) ) {
 			$pickup_location_settings['cost'] = '';
+		}
+
+		if ( ! isset( $pickup_location_settings['prices_include_tax'] ) ) {
+			$pickup_location_settings['prices_include_tax'] = 'no';
 		}
 
 		// Return settings as is if we're editing them.
