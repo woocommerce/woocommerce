@@ -40,6 +40,13 @@ class WC_Cart extends WC_Legacy_Cart {
 	public $cart_context = 'shortcode';
 
 	/**
+	 * How many show_shipping() calls are reading the shipping address fields, so a field filter that recalculates the totals cannot nest the reads without limit.
+	 *
+	 * @var int
+	 */
+	private $shipping_address_field_reads = 0;
+
+	/**
 	 * Contains an array of cart items.
 	 *
 	 * @var array
@@ -1645,14 +1652,14 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return array
 	 */
 	public function calculate_shipping() {
-		// Reset totals.
-		$this->set_shipping_total( 0 );
-		$this->set_shipping_tax( 0 );
-		$this->set_shipping_taxes( array() );
-		$this->shipping_methods        = array();
-		$this->has_calculated_shipping = false;
+		$this->clear_shipping_totals();
 
-		if ( ! $this->needs_shipping() || ! $this->show_shipping() ) {
+		$ready = $this->needs_shipping() && $this->show_shipping();
+
+		// A filter run by show_shipping() can calculate the totals again and leave that nested run's shipping behind.
+		$this->clear_shipping_totals();
+
+		if ( ! $ready ) {
 			return $this->shipping_methods;
 		}
 
@@ -1673,6 +1680,17 @@ class WC_Cart extends WC_Legacy_Cart {
 		$this->set_shipping_taxes( $merged_taxes );
 
 		return $this->shipping_methods;
+	}
+
+	/**
+	 * Reset the shipping totals, taxes and methods to none calculated.
+	 */
+	private function clear_shipping_totals(): void {
+		$this->set_shipping_total( 0 );
+		$this->set_shipping_tax( 0 );
+		$this->set_shipping_taxes( array() );
+		$this->shipping_methods        = array();
+		$this->has_calculated_shipping = false;
 	}
 
 	/**
@@ -1872,13 +1890,20 @@ class WC_Cart extends WC_Legacy_Cart {
 				return apply_filters( 'woocommerce_cart_ready_to_calc_shipping', true );
 			}
 
-			if ( 'shortcode' === $this->cart_context ) {
+			// A field filter that recalculates the totals checks shipping again. That nested call reads the fields too, so it gives the same answer;
+			// a call nested inside it uses the country locale check below instead, which guards its own re-entry, so the reads stop there.
+			if ( 'shortcode' === $this->cart_context && $this->shipping_address_field_reads < 2 ) {
 				$country = $this->get_customer()->get_shipping_country();
 				if ( ! $country ) {
 					return false;
 				}
-				$country_fields  = WC()->countries->get_address_fields( $country, 'shipping_' );
-				$checkout_fields = WC()->checkout()->get_checkout_fields();
+				++$this->shipping_address_field_reads;
+				try {
+					$country_fields  = WC()->countries->get_address_fields( $country, 'shipping_' );
+					$checkout_fields = WC()->checkout()->get_checkout_fields();
+				} finally {
+					--$this->shipping_address_field_reads;
+				}
 
 				/**
 				 * Filter to not require shipping state for shipping calculation, even if it is required at checkout.
