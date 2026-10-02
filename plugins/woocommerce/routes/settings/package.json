@@ -19,7 +19,7 @@
 		"@types/react": "18.3.x"
 	},
 	"route": {
-		"path": "/settings/$page",
+		"path": "/settings/$page/$",
 		"page": "wc-payment-settings"
 	}
 }

@@ -41,6 +41,26 @@ add_filter(
 	}
 );
 
+// Opens old links such as `section=payment_settings_example&panel=rules` at the matching sub-page.
+add_filter(
+	'woocommerce_experimental_payment_settings_classic_location',
+	static function ( $location, $screen_id ) {
+		$paths = array(
+			'advanced' => 'advanced',
+			'rules'    => 'advanced/rules',
+		);
+		$panel = $location['args']['panel'] ?? null;
+		if ( 'example' !== $screen_id || ! isset( $paths[ $panel ] ) ) {
+			return $location;
+		}
+		unset( $location['args']['panel'] );
+		$location['path'] = $paths[ $panel ];
+		return $location;
+	},
+	10,
+	2
+);
+
 add_action(
 	'rest_api_init',
 	static function () {
@@ -52,10 +72,12 @@ add_action(
 				'permission_callback' => static fn() => current_user_can( 'manage_woocommerce' ),
 				'callback'            => static function ( WP_REST_Request $request ) {
 					$defaults = array(
-						'enabled' => false,
-						'title'   => 'Example payments',
-						'mode'    => 'live',
-						'email'   => '',
+						'enabled'    => false,
+						'title'      => 'Example payments',
+						'mode'       => 'live',
+						'email'      => '',
+						'descriptor' => '',
+						'suffix'     => '',
 					);
 					$settings = array_merge( $defaults, (array) get_option( 'payment_settings_example', array() ) );
 					if ( 'GET' === $request->get_method() ) {
@@ -80,7 +102,7 @@ add_action(
 	}
 );
 
-// A script module that adds to the `title` field's definition.
+// A script module that adds to the `title` field's definition and renders the support card's description.
 add_action(
 	'init',
 	static function () {
@@ -128,6 +150,23 @@ add_action(
 					'type'  => 'email',
 					'label' => 'Support email',
 				),
+				// Not a setting: shows the support card's description, with a link, from `fields.js`.
+				array(
+					'id'       => 'support_description',
+					'type'     => 'text',
+					'label'    => 'Customer support description',
+					'readOnly' => true,
+				),
+				array(
+					'id'    => 'descriptor',
+					'type'  => 'text',
+					'label' => 'Statement descriptor',
+				),
+				array(
+					'id'    => 'suffix',
+					'type'  => 'text',
+					'label' => 'Descriptor suffix',
+				),
 			),
 			'payment-settings-example/fields'
 		);
@@ -149,6 +188,16 @@ add_filter(
 			),
 			'children' => $children,
 		);
+		// A panel that opens as a page is a sub-page, reached from a button where it sits.
+		$page = static fn( string $id, string $label, array $children ) => array(
+			'id'       => $id,
+			'label'    => $label,
+			'layout'   => array(
+				'type'   => 'panel',
+				'openAs' => array( 'type' => 'page' ),
+			),
+			'children' => $children,
+		);
 		return $config->merge(
 			array(
 				'form' => array(
@@ -158,7 +207,26 @@ add_filter(
 					),
 					'fields' => array(
 						$card( 'general', 'General', array( 'enabled', 'title', 'mode' ) ),
-						$card( 'support', 'Customer support', array( 'email' ) ),
+						$card(
+							'support',
+							'Customer support',
+							array(
+								array(
+									'id'     => 'support_description',
+									'layout' => array(
+										'type'          => 'regular',
+										'labelPosition' => 'none',
+									),
+								),
+								'email',
+							)
+						),
+						// `rules` is a sub-page inside the `advanced` sub-page.
+						$card(
+							'statement',
+							'Bank statement',
+							array( $page( 'advanced', 'Advanced settings', array( 'descriptor', $page( 'rules', 'Descriptor rules', array( 'suffix' ) ) ) ) )
+						),
 					),
 				),
 			),
