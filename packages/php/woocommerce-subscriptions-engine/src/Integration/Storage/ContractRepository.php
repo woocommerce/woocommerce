@@ -655,23 +655,29 @@ final class ContractRepository {
 	 * Contracts actionable for renewal at `$now`, oldest-due first - the batch dispatcher's scan.
 	 *
 	 * A contract is due when its next-due moment (`next_payment_gmt`) has passed AND its owner
-	 * (`extension_slug`) is a registered consumer ({@see ConsumerRegistry}). There is no status
-	 * predicate: status is opaque engine data, and a flow that pauses or ends a contract disarms
-	 * its next-due moment instead. A contract with a null or unregistered owner waits untouched
-	 * (its next-due moment is never rewritten) until its owner registers; with no consumer
-	 * registered the scan returns nothing. Gateway-scheduled contracts are excluded (the gateway
-	 * owns their renewal); a null `next_payment_gmt` never matches the `<=` comparison.
+	 * (`extension_slug`) is a registered consumer ({@see ConsumerRegistry}). A contract with a
+	 * null or unregistered owner waits untouched (its next-due moment is never rewritten) until
+	 * its owner registers; with no consumer registered the scan returns nothing. A null
+	 * `next_payment_gmt` never matches the `<=` comparison.
 	 *
-	 * The scan also joins each contract's head cycle and keeps only the ones chargeable now (a
-	 * renewal-flow condition that stays until the renewal flow leaves the engine):
+	 * Interim: the renewal-flow predicates below move out of the engine with the renewal flow,
+	 * leaving the scan owner-scoped only. Until then the scan's only caller is the engine renewal
+	 * flow, so it keeps just what that flow can charge now:
 	 *
-	 * - head `billed` and its period has ended (`ends_at_gmt <= now`) -> advance-ready;
-	 * - head `pending` with an expired crash-recovery lease (`claimed_until <= now`) -> reclaim-ready.
+	 * - the contract is `active` (status is otherwise opaque engine data; a contract in any other
+	 *   status, including an extension-registered one, is simply not selected and its next-due
+	 *   moment is left as is);
+	 * - the contract is not gateway-scheduled (the gateway owns its renewal);
+	 * - its head cycle is chargeable now:
+	 *
+	 *   - head `billed` and its period has ended (`ends_at_gmt <= now`) -> advance-ready;
+	 *   - head `pending` with an expired crash-recovery lease (`claimed_until <= now`) -> reclaim-ready.
 	 *
 	 * Any other head (`failed` awaiting dunning, `processing` awaiting its gateway, `pending` with
 	 * a live lease) is excluded in SQL, so `LIMIT` counts only actionable rows and a cluster of
 	 * non-actionable heads cannot starve healthy renewals. Driven by the
-	 * `due_owner (extension_slug, next_payment_gmt)` index; the head cycle is joined per candidate
+	 * `due_owner (extension_slug, next_payment_gmt)` index (status and `schedule_source` are
+	 * residual filters); the head cycle is joined per candidate
 	 * via the `chain_seq` UNIQUE index. Returns the head fields selection needs, so the dispatcher
 	 * does not re-load the head to decide what to bill.
 	 *
@@ -700,6 +706,7 @@ final class ContractRepository {
 			array( Cycle::KIND_BILLING, Cycle::KIND_BILLING ),
 			$owners,
 			array(
+				ContractStatus::ACTIVE,
 				Contract::SCHEDULE_SOURCE_GATEWAY,
 				$cutoff,
 				CycleStatus::BILLED,
@@ -720,7 +727,7 @@ final class ContractRepository {
 				JOIN {$cycles} cy
 				  ON cy.contract_id = c.id AND cy.kind = %s
 				 AND cy.sequence_no = ( SELECT MAX(s.sequence_no) FROM {$cycles} s WHERE s.contract_id = c.id AND s.kind = %s )
-				WHERE c.extension_slug IN ( {$owner_placeholders} ) AND c.schedule_source <> %s AND c.next_payment_gmt IS NOT NULL AND c.next_payment_gmt <= %s
+				WHERE c.extension_slug IN ( {$owner_placeholders} ) AND c.status = %s AND c.schedule_source <> %s AND c.next_payment_gmt IS NOT NULL AND c.next_payment_gmt <= %s
 				  AND (
 				        ( cy.status = %s AND cy.ends_at_gmt <= %s )
 				     OR ( cy.status = %s AND cy.claimed_until IS NOT NULL AND cy.claimed_until <= %s )

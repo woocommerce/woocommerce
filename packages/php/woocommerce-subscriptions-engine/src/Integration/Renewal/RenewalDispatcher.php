@@ -3,10 +3,11 @@
  * RenewalDispatcher - the autonomous batch renewal scanner.
  *
  * One recurring Action Scheduler job drives every scheduled renewal: each tick runs
- * {@see self::run_batch()} over the cycle-aware due-index. Due-ness is owner-scoped and
- * status-blind: a contract is due when its next-due moment has passed and its owner is a
- * registered consumer, so an empty consumer registry selects nothing. A selected contract
- * that is not active is parked rather than charged. The class owns the recurring action's
+ * {@see self::run_batch()} over the cycle-aware due-index. Due-ness is owner-scoped: a
+ * contract is due when its next-due moment has passed and its owner is a registered
+ * consumer, so an empty consumer registry selects nothing (the scan's interim renewal-flow
+ * predicates, active status among them, are described on
+ * {@see ContractRepository::find_due()}). The class owns the recurring action's
  * registration, scheduling, and hook callback.
  *
  * The create-as-claim ({@see RenewalEngine}) plus the cycle crash-recovery lease keep
@@ -211,9 +212,8 @@ final class RenewalDispatcher {
 	 * empty-registry check up front just skips the query). The scan returns the actionable
 	 * contracts due at `$now`; each is run through read-only selection and, when a cycle is due,
 	 * billed via {@see RenewalEngine::process()}. A pre-flight impossibility
-	 * ({@see RenewalNotProcessable}, including a selected contract that is not active) parks the
-	 * contract; any other throw is logged - so one bad contract cannot stall the batch. A backlog
-	 * larger than `$limit` drains over successive ticks.
+	 * ({@see RenewalNotProcessable}) parks the contract; any other throw is logged - so one bad
+	 * contract cannot stall the batch. A backlog larger than `$limit` drains over successive ticks.
 	 *
 	 * @param DateTimeImmutable|null $now   The scan moment; defaults to now (UTC). Injectable for tests.
 	 * @param int                    $limit Maximum due contracts to process this tick; defaults to

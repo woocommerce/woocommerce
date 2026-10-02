@@ -4,9 +4,10 @@
  *
  * A focused contract-management operation (deliberately not a catch-all manager),
  * mirroring {@see Cancellation}: move the contract ACTIVE -> ON_HOLD, disarm its
- * next-due moment, and announce it. The batch due scan is status-blind (it keys on
- * `next_payment_gmt` and a registered owner), so clearing the next-due moment is what
- * stops billing; the cleared moment is kept in contract meta ({@see self::ANCHOR_META_KEY})
+ * next-due moment, and announce it. The batch due scan keys on `next_payment_gmt` and a
+ * registered owner (its active-status predicate is a renewal-flow condition, see
+ * {@see ContractRepository::find_due()}), so the flow disarms its own due moment rather
+ * than relying on status to stop billing; the cleared moment is kept in contract meta ({@see self::ANCHOR_META_KEY})
  * so {@see Reactivation} can recompute the schedule forward from it. Interim engine
  * flow: its preconditions are its own, not a rule of the status primitive.
  *
