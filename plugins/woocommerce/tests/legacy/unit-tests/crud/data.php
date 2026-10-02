@@ -592,6 +592,40 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that applying changes to a list (numeric-keyed) property replaces
+	 * it wholesale, so removed elements are dropped instead of lingering.
+	 *
+	 * Regression test for https://github.com/woocommerce/woocommerce/issues/25406.
+	 */
+	public function test_apply_changes_removes_array_elements() {
+		$data = array(
+			'upsell_ids' => array( 170, 8 ),
+		);
+
+		$object = new WC_Mock_WC_Data();
+		$object->set_data( $data );
+		$object->set_changes(
+			array(
+				'upsell_ids' => array( 170 ),
+			)
+		);
+		$object->apply_changes();
+
+		$this->assertEquals( array( 170 ), $object->get_data()['upsell_ids'] );
+
+		// Clearing the list entirely should take effect, not retain stale keys.
+		$object->set_data( $object->get_data() );
+		$object->set_changes(
+			array(
+				'upsell_ids' => array(),
+			)
+		);
+		$object->apply_changes();
+
+		$this->assertEquals( array(), $object->get_data()['upsell_ids'] );
+	}
+
+	/**
 	 * Test that __clone() properly clones meta_data objects in duplicate mode (default).
 	 */
 	public function test_clone_meta_data_objects_duplicate_mode() {
