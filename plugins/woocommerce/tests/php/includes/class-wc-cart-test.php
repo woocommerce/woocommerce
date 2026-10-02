@@ -1060,6 +1060,50 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The classic cart asks for the fields the shopper's own country requires, and GB asks for no
+	 * state. Away from it the question is `has_full_shipping_address()`, which also wants a town,
+	 * so the same half-typed address reads differently on the two sides.
+	 *
+	 * @testdox show_shipping() away from the classic cart wants the whole address, not the fields the country requires.
+	 */
+	public function test_show_shipping_away_from_the_classic_cart_wants_the_whole_address(): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$customer                        = WC()->cart->get_customer();
+		$this->original_shipping_address = array(
+			'shipping_country'  => $customer->get_shipping_country(),
+			'shipping_state'    => $customer->get_shipping_state(),
+			'shipping_city'     => $customer->get_shipping_city(),
+			'shipping_postcode' => $customer->get_shipping_postcode(),
+		);
+		$customer->set_shipping_country( 'GB' );
+		$customer->set_shipping_state( '' );
+		$customer->set_shipping_city( '' );
+		$customer->set_shipping_postcode( 'PR1 4SS' );
+
+		$this->assertFalse(
+			$customer->has_full_shipping_address(),
+			'The fixture turns on GB requiring a town, so this should be an incomplete address.'
+		);
+
+		WC()->cart->cart_context = 'shortcode';
+
+		$this->assertTrue(
+			WC()->cart->show_shipping(),
+			'Field by field this is enough for GB, which requires no state and does not ask about the town.'
+		);
+
+		WC()->cart->cart_context = 'store-api';
+
+		$this->assertFalse(
+			WC()->cart->show_shipping(),
+			'Asked as a whole, the same address is still missing a town.'
+		);
+	}
+
+	/**
 	 * Hide a US address field in the country locale while leaving it required.
 	 *
 	 * @param string $field  Address field key, without the type prefix.
