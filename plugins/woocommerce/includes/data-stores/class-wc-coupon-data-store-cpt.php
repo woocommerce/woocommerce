@@ -5,6 +5,7 @@
  * @package WooCommerce\DataStores
  */
 
+use Automattic\WooCommerce\Internal\Caches\AutoApplyCouponCache;
 use Automattic\WooCommerce\Internal\Caches\CouponCodeLookupInvalidator;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -51,6 +52,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		'minimum_amount',
 		'maximum_amount',
 		'customer_email',
+		'auto_apply',
 		'_used_by',
 		'_edit_lock',
 		'_edit_last',
@@ -105,6 +107,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			$coupon->save_meta_data();
 			$coupon->apply_changes();
 			delete_transient( 'rest_api_coupons_type_count' );
+			delete_transient( AutoApplyCouponCache::TRANSIENT_KEY );
 			do_action( 'woocommerce_new_coupon', $coupon_id, $coupon );
 		}
 	}
@@ -153,6 +156,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				'minimum_amount'              => get_post_meta( $coupon_id, 'minimum_amount', true ),
 				'maximum_amount'              => get_post_meta( $coupon_id, 'maximum_amount', true ),
 				'email_restrictions'          => array_filter( (array) get_post_meta( $coupon_id, 'customer_email', true ) ),
+				'auto_apply'                  => 'yes' === get_post_meta( $coupon_id, 'auto_apply', true ),
 			)
 		);
 		$coupon->read_meta_data();
@@ -218,6 +222,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		$this->update_post_meta( $coupon );
 		$coupon->apply_changes();
 		delete_transient( 'rest_api_coupons_type_count' );
+		delete_transient( AutoApplyCouponCache::TRANSIENT_KEY );
 
 		/*
 		 * The `coupon_id_from_code` entry in the object cache must not exist when the coupon is not
@@ -276,12 +281,14 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			 * `woocommerce_coupon_get_code` filter and could point the delete at another key.
 			 */
 			wc_get_container()->get( CouponCodeLookupInvalidator::class )->invalidate( (string) $coupon->get_code( 'edit' ) );
+			delete_transient( AutoApplyCouponCache::TRANSIENT_KEY );
 
 			$coupon->set_id( 0 );
 			do_action( 'woocommerce_delete_coupon', $id );
 		} else {
 			wp_trash_post( $id );
 			$coupon->set_status( 'trash' );
+			delete_transient( AutoApplyCouponCache::TRANSIENT_KEY );
 			do_action( 'woocommerce_trash_coupon', $id );
 		}
 	}
@@ -313,6 +320,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			'minimum_amount'             => 'minimum_amount',
 			'maximum_amount'             => 'maximum_amount',
 			'customer_email'             => 'email_restrictions',
+			'auto_apply'                 => 'auto_apply',
 		);
 
 		$props_to_update = $this->get_props_to_update( $coupon, $meta_key_to_props );
@@ -323,6 +331,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				case 'individual_use':
 				case 'free_shipping':
 				case 'exclude_sale_items':
+				case 'auto_apply':
 					$value = wc_bool_to_string( $value );
 					break;
 				case 'product_ids':

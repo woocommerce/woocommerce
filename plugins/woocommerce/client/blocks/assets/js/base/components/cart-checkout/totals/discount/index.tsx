@@ -3,7 +3,11 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
-import { RemovableChip, TotalsItem } from '@woocommerce/blocks-components';
+import {
+	Chip,
+	RemovableChip,
+	TotalsItem,
+} from '@woocommerce/blocks-components';
 import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import { getSetting } from '@woocommerce/settings';
 import {
@@ -85,6 +89,28 @@ const TotalsDiscount = ( {
 					>
 						<ul className="wc-block-components-totals-discount__coupon-list">
 							{ filteredCartCoupons.map( ( cartCoupon ) => {
+								// Coupons applied automatically are not removable: showing a
+								// remove button would be misleading, since removing one just
+								// gets it re-added on the next totals recalculation.
+								if ( cartCoupon.is_removable === false ) {
+									return (
+										<Chip
+											key={ 'coupon-' + cartCoupon.code }
+											className="wc-block-components-totals-discount__coupon-list-item"
+											text={ cartCoupon.label }
+											screenReaderText={ sprintf(
+												/* translators: %s Coupon code. */
+												__(
+													'Coupon: %s',
+													'woocommerce'
+												),
+												cartCoupon.label
+											) }
+											radius="large"
+										/>
+									);
+								}
+
 								return (
 									<RemovableChip
 										key={ 'coupon-' + cartCoupon.code }

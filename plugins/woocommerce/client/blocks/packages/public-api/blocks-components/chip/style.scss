@@ -28,7 +28,13 @@
 	&.wc-block-components-chip--radius-large {
 		border-radius: 2em;
 		padding-left: 0.75em;
-		padding-right: 0.25em;
+		padding-right: 0.75em;
+
+		// The remove button supplies its own visual right-margin, so a plain (non-removable)
+		// chip needs the full padding on both sides to avoid crowding the pill's curve.
+		&.is-removable {
+			padding-right: 0.25em;
+		}
 	}
 	.wc-block-components-chip__text {
 		flex-grow: 1;

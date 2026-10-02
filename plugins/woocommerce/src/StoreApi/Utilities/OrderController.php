@@ -284,7 +284,11 @@ class OrderController {
 				$error_code = 'woocommerce_rest_cart_coupon_errors';
 
 				foreach ( $coupon_errors as $coupon_code => $message ) {
-					wc()->cart->remove_coupon( $coupon_code );
+					// Same as elsewhere: a coupon dropped by validation goes even when the store
+					// applied it, or checkout reports it removed while it still discounts.
+					if ( ! wc()->cart->remove_auto_applied_coupon( $coupon_code ) ) {
+						wc()->cart->remove_coupon( $coupon_code );
+					}
 				}
 
 				// Recalculate totals.
