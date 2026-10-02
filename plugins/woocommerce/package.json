@@ -22,6 +22,7 @@
 		"build:project:packages": "XDEBUG_MODE=off composer install --quiet",
 		"build:project:actualize-translation-domains": "node ./bin/package-update-textdomain.js",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"format": "wp-scripts format '*.{js,jsx,mjs,cjs,json,ts,tsx,yml,yaml,css,scss}' '{bin,blocks-bin,tests}/**/*.{js,jsx,mjs,cjs,json,ts,tsx,yml,yaml,css,scss}'",
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"env:destroy": "pnpm env:dev:destroy",
 		"env:dev": "pnpm env:dev:start",
@@ -1333,6 +1334,7 @@
 		"@wordpress/browserslist-config": "next",
 		"@wordpress/e2e-test-utils-playwright": "catalog:wp-min",
 		"@wordpress/env": "11.9.0",
+		"@wordpress/scripts": "catalog:tooling",
 		"allure-commandline": "^2.32.2",
 		"allure-playwright": "^3.1.0",
 		"autoprefixer": "9.8.6",
@@ -1348,7 +1350,6 @@
 		"handlebars": "^4.7.9",
 		"jest": "29.5.x",
 		"playwright-ctrf-json-reporter": "0.0.27",
-		"prettier": "npm:wp-prettier@3.0.3",
 		"rimraf": "5.0.5",
 		"typescript": "5.7.x",
 		"wp-textdomain": "1.0.1"

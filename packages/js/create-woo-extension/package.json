@@ -17,7 +17,11 @@
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
 	"scripts": {
-		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger"
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"format": "wp-scripts format '*.{js,jsx,mjs,cjs,json,ts,tsx,yml,yaml,css,scss}'"
 	},
-	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/create-woo-extension#readme"
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/create-woo-extension#readme",
+	"devDependencies": {
+		"@wordpress/scripts": "catalog:tooling"
+	}
 }

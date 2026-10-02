@@ -80,6 +80,7 @@ catalogs:
         '@babel/runtime': 7.25.7
         postcss: ^8.5.26
         webpack: 5.97.x
+        '@wordpress/scripts': 36.0.0
 
 packages:
     - 'packages/js/*'
@@ -184,3 +185,5 @@ trustPolicyExclude:
     # Release automations broke (https://github.com/nodejs/undici/issues/4666)
     - 'undici@5.29.0'
     - 'undici-types@6.21.0'
+    # Backported without provenance: https://github.com/webpack/webpack-dev-middleware/issues/2407
+    - 'webpack-dev-middleware@7.4.6'

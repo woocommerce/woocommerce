@@ -13,6 +13,7 @@
 	"scripts": {
 		"build": "pnpm --filter='@woocommerce/block-library' build:storybook && pnpm build:storybook",
 		"build:storybook": "./import-wp-css-storybook.sh && STORYBOOK=true BABEL_ENV=storybook storybook build -c ./.storybook --quiet && pnpm run copy-blocks-storybook-iframe",
+		"format": "wp-scripts format '*.{js,jsx,mjs,cjs,json,ts,tsx,yml,yaml,css,scss}' '{.storybook,stories}/**/*.{js,jsx,mjs,cjs,json,ts,tsx,yml,yaml,css,scss}'",
 		"watch:build": "pnpm watch:build:storybook",
 		"watch:build:storybook": "./import-wp-css-storybook.sh && STORYBOOK=true BABEL_ENV=storybook storybook dev -c ./.storybook -p 6007 --ci",
 		"copy-blocks-storybook-iframe": "cp ../../plugins/woocommerce/client/blocks/storybook/dist/iframe.html ./storybook-static/assets/woocommerce-blocks",
@@ -39,6 +40,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@wordpress/base-styles": "catalog:wp-bundled",
+		"@wordpress/scripts": "catalog:tooling",
 		"react": "18.3.x",
 		"react-dom": "18.3.x",
 		"storybook": "10.5.10",

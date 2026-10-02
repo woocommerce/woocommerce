@@ -34,6 +34,7 @@
 		"@babel/core": "catalog:tooling",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"@wordpress/scripts": "catalog:tooling",
 		"eslint": "^10.0.0",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
@@ -45,6 +46,7 @@
 	},
 	"scripts": {
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"format": "wp-scripts format '*.{js,jsx,mjs,cjs,json,ts,tsx,yml,yaml,css,scss}' 'src/**/*.{js,jsx,mjs,cjs,json,ts,tsx,yml,yaml,css,scss}'",
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",

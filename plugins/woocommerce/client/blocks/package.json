@@ -67,7 +67,8 @@
 		"lint:js-fix": "eslint assets/js --fix",
 		"lint:md:docs": "wp-scripts lint-md-docs",
 		"pre-commit": "lint-staged",
-		"reformat-files": "prettier --write \"**/*.{js,jsx,ts,tsx,css,scss}\"",
+		"format": "wp-scripts format \"**/*.{js,jsx,ts,tsx,css,scss}\"",
+		"reformat-files": "pnpm format",
 		"rimraf": "./node_modules/rimraf/bin.js",
 		"start": "rimraf ../../assets/client/blocks/* && BABEL_ENV=default CHECK_CIRCULAR_DEPS=true webpack --watch",
 		"storybook": "pnpm watch:build:storybook",
@@ -153,7 +154,7 @@
 		"@wordpress/prettier-config": "1.4.0",
 		"@wordpress/private-apis": "catalog:wp-min",
 		"@wordpress/rich-text": "catalog:wp-min",
-		"@wordpress/scripts": "32.6.0",
+		"@wordpress/scripts": "catalog:tooling",
 		"@wordpress/stylelint-config": "^23.14.0",
 		"ajv-cli": "3.3.x",
 		"allure-playwright": "^2.9.2",
@@ -195,7 +196,6 @@
 		"postcss": "catalog:tooling",
 		"postcss-color-function": "4.1.0",
 		"postcss-loader": "4.3.x",
-		"prettier": "npm:wp-prettier@3.0.3",
 		"progress-bar-webpack-plugin": "2.1.x",
 		"react": "18.3.x",
 		"react-docgen": "5.4.3",
@@ -280,7 +280,7 @@
 			"pnpm run lint:css"
 		],
 		"*.{js,ts,tsx}": [
-			"prettier --write",
+			"wp-scripts format",
 			"pnpm run lint:js"
 		],
 		"*.md": [
