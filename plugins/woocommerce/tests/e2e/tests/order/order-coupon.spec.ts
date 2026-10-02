@@ -16,6 +16,8 @@ const productName = 'Apply Coupon Product';
 const couponCode = '5off';
 const couponAmount = '5';
 const discountedPrice = ( productPrice - couponAmount ).toString();
+// The minus sign is rendered inside the price markup, so match it with or without a following space.
+const discountCellName = new RegExp( `-\\s*\\$${ couponAmount }\\.00` );
 
 test.describe(
 	'WooCommerce Orders > Apply Coupon',
@@ -110,7 +112,7 @@ test.describe(
 				page.getByRole( 'cell', { name: 'Discount:', exact: true } )
 			).toBeVisible();
 			await expect(
-				page.getByRole( 'cell', { name: `- $${ couponAmount }.00` } )
+				page.getByRole( 'cell', { name: discountCellName } )
 			).toBeVisible();
 			await expect(
 				page.getByRole( 'cell', {
@@ -135,7 +137,7 @@ test.describe(
 			).toBeVisible();
 			await expect(
 				page.getByRole( 'cell', {
-					name: `- $${ couponAmount }.00`,
+					name: discountCellName,
 				} )
 			).toBeVisible();
 			await expect(
