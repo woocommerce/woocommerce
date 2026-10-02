@@ -9,7 +9,7 @@ import {
 /**
  * Internal dependencies
  */
-import { test, expect } from '../../fixtures/fixtures';
+import { test, expect, tags } from '../../fixtures/fixtures';
 import { getFakeProduct } from '../../utils/data';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
@@ -285,17 +285,23 @@ for ( const currentPage of wcPages ) {
 	} );
 }
 
-test( 'hides the legacy Reports menu item on a new store but keeps the page reachable', async ( {
-	page,
-} ) => {
-	await page.goto( 'wp-admin/admin.php?page=wc-settings' );
+// External sites were installed before the menu was hidden, so Reports stays visible there.
+test(
+	'hides the legacy Reports menu item on a new store',
+	{ tag: [ tags.SKIP_ON_EXTERNAL_ENV ] },
+	async ( { page } ) => {
+		await page.goto( 'wp-admin/admin.php?page=wc-settings' );
 
-	await expect(
-		page
-			.locator( 'li.wp-menu-open > ul.wp-submenu' )
-			.getByRole( 'link', { name: 'Reports', exact: true } )
-	).toBeHidden();
+		// Target by href: role locators skip hidden elements, so they would match nothing here.
+		const reportsLink = page.locator(
+			'li.wp-menu-open > ul.wp-submenu a[href="admin.php?page=wc-reports"]'
+		);
+		await expect( reportsLink ).toHaveCount( 1 );
+		await expect( reportsLink ).toBeHidden();
+	}
+);
 
+test( 'can load the legacy Reports page directly', async ( { page } ) => {
 	await page.goto( 'wp-admin/admin.php?page=wc-reports' );
 
 	await expect(
