@@ -27,6 +27,9 @@ catalogs:
     '@babel/runtime':
       specifier: 7.25.7
       version: 7.25.7
+    '@wordpress/postcss-plugins-preset':
+      specifier: 5.56.0
+      version: 5.56.0
     postcss:
       specifier: ^8.5.26
       version: 8.5.26
@@ -167,9 +170,6 @@ catalogs:
     '@wordpress/plugins':
       specifier: 7.33.5
       version: 7.33.5
-    '@wordpress/postcss-plugins-preset':
-      specifier: 5.33.1
-      version: 5.33.1
     '@wordpress/preferences':
       specifier: 4.33.5
       version: 4.33.5
@@ -1725,8 +1725,8 @@ importers:
         specifier: catalog:wp-bundled
         version: 6.9.1
       '@wordpress/postcss-plugins-preset':
-        specifier: catalog:wp-min
-        version: 5.33.1(postcss@8.5.26)
+        specifier: catalog:tooling
+        version: 5.56.0(postcss@8.5.26)
       chokidar:
         specifier: ^3.6.0
         version: 3.6.0
@@ -2239,7 +2239,7 @@ importers:
   packages/js/sanitize:
     dependencies:
       dompurify:
-        specifier: ^3.4.14
+        specifier: 3.4.14
         version: 3.4.14
     devDependencies:
       '@babel/core':
@@ -3083,8 +3083,8 @@ importers:
         specifier: next
         version: 12.43.1-next.v.202604091042.0(@babel/core@7.25.7)(jest@29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))
       '@wordpress/postcss-plugins-preset':
-        specifier: next
-        version: 5.43.1-next.v.202604091042.0(postcss@8.5.26)
+        specifier: catalog:tooling
+        version: 5.56.0(postcss@8.5.26)
       '@wordpress/postcss-themes':
         specifier: next
         version: 6.43.1-next.v.202604091042.0(postcss@8.5.26)
@@ -3561,8 +3561,8 @@ importers:
         specifier: catalog:wp-min
         version: 2.33.9(@date-fns/tz@1.4.1)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(date-fns@4.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
       '@wordpress/postcss-plugins-preset':
-        specifier: next
-        version: 5.43.1-next.v.202604091042.0(postcss@8.5.26)
+        specifier: catalog:tooling
+        version: 5.56.0(postcss@8.5.26)
       '@wordpress/postcss-themes':
         specifier: next
         version: 6.43.1-next.v.202604091042.0(postcss@8.5.26)
@@ -8957,6 +8957,10 @@ packages:
     resolution: {integrity: sha512-/siYL1d2O/evfWkXIDuhIVfHHBYE0T8hiD4JD8xm6JGe9Z2zHikveVT/AvJZrIzUBJknEIADyFE+cXimk97GkA==}
     engines: {node: '>=18.12.0', npm: '>=8.19.2'}
 
+  '@wordpress/browserslist-config@6.56.0':
+    resolution: {integrity: sha512-/gdTZapH6cV2iu+glSvM6IjYjS6kLtRlmjlNENqn03Isc8V1cSyWZWZ4vlq2i41uwqGoDObu4DdlmTBWS+g4Cg==}
+    engines: {node: '>=18.12.0'}
+
   '@wordpress/commands@0.29.0':
     resolution: {integrity: sha512-HqTrYfQw/5cdT2hPgmuKW6gugnt1Pqtg9zjRHUa+D4ME7mjR4dYQoHRgnFM+hm8OOuEZRVBsa1kYO3t3041Jew==}
     engines: {node: '>=12'}
@@ -9768,6 +9772,12 @@ packages:
   '@wordpress/postcss-plugins-preset@5.51.0':
     resolution: {integrity: sha512-+OhYELBraJdZE16ynT0HlQxuwwQTi+meKTWOa6VV/sFm2E3h9ZnwedbULphTPFTR5bTbTk462cXXQtnevO52oQ==}
     engines: {node: '>=18.12.0', npm: '>=8.19.2'}
+    peerDependencies:
+      postcss: ^8.0.0
+
+  '@wordpress/postcss-plugins-preset@5.56.0':
+    resolution: {integrity: sha512-v87zGeZhNchruNDFgjdX8MMZw5NLmLsKoNDCUTLgsSv+be3EY2MX5vlsJJc0IApZWCphMwU45ExIEbCTmusLMA==}
+    engines: {node: '>=18.12.0'}
     peerDependencies:
       postcss: ^8.0.0
 
@@ -26628,6 +26638,8 @@ snapshots:
 
   '@wordpress/browserslist-config@6.51.0': {}
 
+  '@wordpress/browserslist-config@6.56.0': {}
+
   '@wordpress/commands@0.29.0(@emotion/is-prop-valid@1.4.0)(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@babel/runtime': 7.29.2
@@ -29200,6 +29212,13 @@ snapshots:
     dependencies:
       '@wordpress/base-styles': 11.0.0
       '@wordpress/browserslist-config': 6.51.0
+      autoprefixer: 10.5.0(postcss@8.5.26)
+      postcss: 8.5.26
+      postcss-import: 16.1.1(postcss@8.5.26)
+
+  '@wordpress/postcss-plugins-preset@5.56.0(postcss@8.5.26)':
+    dependencies:
+      '@wordpress/browserslist-config': 6.56.0
       autoprefixer: 10.5.0(postcss@8.5.26)
       postcss: 8.5.26
       postcss-import: 16.1.1(postcss@8.5.26)
