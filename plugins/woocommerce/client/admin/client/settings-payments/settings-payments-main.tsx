@@ -18,7 +18,7 @@ import {
 import React, { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-import { ExternalLink } from '@wordpress/components';
+import { Link } from '@wordpress/ui';
 
 /**
  * Internal dependencies
@@ -495,13 +495,15 @@ export const SettingsPaymentsMain = () => {
 	};
 
 	const morePaymentOptionsLink = (
-		<ExternalLink
+		<Link
 			href="https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations"
 			className="more-payment-options-link"
 			onClick={ trackMorePaymentsOptionsClicked }
+			rel="noopener noreferrer"
+			openInNewTab
 		>
 			{ __( 'More payment options', 'woocommerce' ) }
-		</ExternalLink>
+		</Link>
 	);
 
 	return (

@@ -3,7 +3,7 @@
  */
 import { createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { ExternalLink } from '@wordpress/components';
+import { Link } from '@wordpress/ui';
 import { PaymentsProviderIncentive } from '@woocommerce/data';
 
 /**
@@ -47,12 +47,16 @@ export const IncentiveStatusBadge = ( {
 							),
 							{
 								termsLink: (
-									<ExternalLink href={ incentive.tc_url }>
+									<Link
+										href={ incentive.tc_url }
+										rel="noopener noreferrer"
+										openInNewTab
+									>
 										{ __(
 											'Terms and Conditions',
 											'woocommerce'
 										) }
-									</ExternalLink>
+									</Link>
 								),
 							}
 						) }
