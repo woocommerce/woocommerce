@@ -59,24 +59,12 @@
 				"@wordpress/scripts",
 				"@wordpress/style-engine",
 				"@wordpress/stylelint-config",
-				"eslint*",
-				"stylelint"
+				"eslint*"
 			],
 			"packages": [
 				"@woocommerce/block-library"
 			],
 			"isIgnored": true
-		},
-		{
-			"label": "Packages already moved to Stylelint 16",
-			"dependencies": [
-				"stylelint"
-			],
-			"packages": [
-				"@woocommerce/admin-library",
-				"@woocommerce/email-editor"
-			],
-			"pinVersion": "^16.9.0"
 		},
 		{
 			"label": "internal-build generates version-constrained vendored types for these dependencies",
@@ -618,7 +606,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^14.16.1"
+			"pinVersion": "^16.9.0"
 		},
 		{
 			"dependencies": [
