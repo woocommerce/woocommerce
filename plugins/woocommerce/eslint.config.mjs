@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { globalIgnores } from 'eslint/config';
+import { globalIgnores } from '@eslint/config-helpers';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import globals from 'globals';

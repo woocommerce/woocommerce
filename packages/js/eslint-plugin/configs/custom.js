@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-const { defineConfig } = require( 'eslint/config' );
+const { defineConfig } = require( '@eslint/config-helpers' );
 const wordpress = require( '@wordpress/eslint-plugin' );
 
 /**

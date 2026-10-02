@@ -19,7 +19,7 @@
 	"scripts": {
 		"build": "shx rm -rf dist && tsc --project tsconfig.json",
 		"format": "wp-scripts format '*.{js,jsx,mjs,cjs,json,ts,tsx,yml,yaml,css,scss}' '{src,bin}/**/*.{js,jsx,mjs,cjs,json,ts,tsx,yml,yaml,css,scss}'",
-		"lint": "eslint .",
+		"lint": "wp-scripts lint-js .",
 		"prepack": "pnpm build && oclif manifest",
 		"postpack": "shx rm -f oclif.manifest.json",
 		"posttest": "pnpm lint"
@@ -32,11 +32,11 @@
 		"semver": "^7.5.4"
 	},
 	"devDependencies": {
+		"@eslint/config-helpers": "0.6.0",
 		"@types/node": "^24.1.0",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/scripts": "catalog:tooling",
-		"eslint": "^10.0.0",
 		"oclif": "^4.23.30",
 		"shx": "^0.3.4",
 		"ts-node": "^10.9.2",

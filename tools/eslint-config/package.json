@@ -17,15 +17,14 @@
 		"format": "wp-scripts format '*.{js,jsx,mjs,cjs,json,ts,tsx,yml,yaml,css,scss}'",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
-		"lint:lang:js": "eslint ./index.js ./core-modules.js",
-		"lint:fix:lang:js": "eslint ./index.js ./core-modules.js --fix"
+		"lint:lang:js": "wp-scripts lint-js --config ../../eslint.config.mjs ./index.js ./core-modules.js",
+		"lint:fix:lang:js": "wp-scripts lint-js --config ../../eslint.config.mjs ./index.js ./core-modules.js --fix"
 	},
 	"dependencies": {
 		"@woocommerce/eslint-plugin": "workspace:*"
 	},
 	"devDependencies": {
-		"@wordpress/scripts": "catalog:tooling",
-		"eslint": "^10.0.0"
+		"@wordpress/scripts": "catalog:tooling"
 	},
 	"config": {
 		"ci": {
