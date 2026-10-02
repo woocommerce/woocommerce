@@ -88,9 +88,9 @@ catalogs:
 
 packages:
     - 'packages/js/*'
-    - 'plugins/woocommerce/routes/*'
     - 'packages/php/*'
     - 'plugins/*'
+	- 'plugins/woocommerce/routes/*'
     - 'plugins/woocommerce/client/admin'
     - 'plugins/woocommerce/client/blocks'
     - 'plugins/woocommerce/client/legacy'
