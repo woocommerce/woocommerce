@@ -27,6 +27,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ConsumerRegistry;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -498,13 +499,14 @@ final class ContractRepository {
 
 	/**
 	 * The contract count per status - the views bar's read. One `GROUP BY status` scan,
-	 * returned as a map keyed by EVERY {@see ContractStatus::all()} value (absent statuses
-	 * filled with 0) and in that order, so a consumer can render a fixed set of views
-	 * without knowing which statuses currently have rows. The `All` total is the caller's
-	 * `array_sum()`. Independent of any search / paging (WC-style: the views count the whole
-	 * store, not the current page).
+	 * returned as a map keyed by EVERY registered contract status ({@see ContractStatus::all()}:
+	 * the engine defaults plus extension registrations; absent statuses filled with 0) and in
+	 * that order, so a consumer can render a fixed set of views without knowing which statuses
+	 * currently have rows. A stored status that is not registered is not counted as a key. The
+	 * `All` total is the caller's `array_sum()`. Independent of any search / paging (WC-style:
+	 * the views count the whole store, not the current page).
 	 *
-	 * @return array<string, int> Status => count, every known status present.
+	 * @return array<string, int> Status => count, every registered status present.
 	 */
 	public function count_by_status(): array {
 		global $wpdb;
@@ -514,7 +516,7 @@ final class ContractRepository {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results( "SELECT status, COUNT(*) AS total FROM {$table} GROUP BY status", ARRAY_A );
 
-		// Seed every known status at 0 so the map is complete and stably ordered.
+		// Seed every registered status at 0 so the map is complete and stably ordered.
 		$counts = array();
 		foreach ( ContractStatus::all() as $status ) {
 			$counts[ $status ] = 0;
@@ -525,8 +527,8 @@ final class ContractRepository {
 				continue;
 			}
 			$status = ScalarCoercion::coerce_string( $row['status'] ?? '' );
-			// A row whose status has drifted outside the known set is ignored, not added
-			// as a stray key - the map stays exactly ContractStatus::all().
+			// A row whose stored status is not registered is ignored, not added as a
+			// stray key - the map stays exactly ContractStatus::all().
 			if ( array_key_exists( $status, $counts ) ) {
 				$counts[ $status ] = ScalarCoercion::coerce_int( $row['total'] ?? 0 );
 			}
@@ -651,20 +653,33 @@ final class ContractRepository {
 
 	/**
 	 * Contracts actionable for renewal at `$now`, oldest-due first - the batch dispatcher's scan.
-	 * Active, primitive-scheduled contracts whose `next_payment_gmt` has arrived, joined to their
-	 * head cycle so the scan can filter to the ones actually chargeable now:
 	 *
-	 * - head `billed`/`cancelled` and its period has ended (`ends_at_gmt <= now`) -> advance-ready;
-	 * - head `pending` with an expired crash-recovery lease (`claimed_until <= now`) -> reclaim-ready.
+	 * A contract is due when its next-due moment (`next_payment_gmt`) has passed AND its owner
+	 * (`extension_slug`) is a registered consumer ({@see ConsumerRegistry}). A contract with a
+	 * null or unregistered owner waits untouched (its next-due moment is never rewritten) until
+	 * its owner registers; with no consumer registered the scan returns nothing. A null
+	 * `next_payment_gmt` never matches the `<=` comparison.
 	 *
-	 * A head that is `failed` (awaits dunning), `processing` (awaits its gateway), or `pending`
-	 * with a live lease is deliberately excluded. Because that filter is in SQL, `LIMIT` counts
-	 * only actionable rows, so a cluster of non-actionable heads (a stuck gateway, a backlog of
-	 * declines) cannot occupy the batch and starve healthy renewals behind them. Gateway-scheduled
-	 * contracts are excluded (the gateway owns their renewal); a null `next_payment_gmt` never
-	 * matches the `<=` comparison. Driven by the `due_contract (status, next_payment_gmt)` index;
-	 * the head cycle is joined per candidate via the `chain_seq` UNIQUE index. Returns the head
-	 * fields selection needs, so the dispatcher does not re-load the head to decide what to bill.
+	 * Interim: moves out of the engine with the renewal flow (the predicates below; the scan
+	 * then stays owner-scoped only). Until then the scan's only caller is the engine renewal
+	 * flow, so it keeps just what that flow can charge now:
+	 *
+	 * - the contract is `active` (status is otherwise opaque engine data; a contract in any other
+	 *   status, including an extension-registered one, is simply not selected and its next-due
+	 *   moment is left as is);
+	 * - the contract is not gateway-scheduled (the gateway owns its renewal);
+	 * - its head cycle is chargeable now:
+	 *
+	 *   - head `billed` and its period has ended (`ends_at_gmt <= now`) -> advance-ready;
+	 *   - head `pending` with an expired crash-recovery lease (`claimed_until <= now`) -> reclaim-ready.
+	 *
+	 * Any other head (`failed` awaiting dunning, `processing` awaiting its gateway, `pending` with
+	 * a live lease) is excluded in SQL, so `LIMIT` counts only actionable rows and a cluster of
+	 * non-actionable heads cannot starve healthy renewals. Driven by the
+	 * `due_owner (extension_slug, next_payment_gmt)` index (status and `schedule_source` are
+	 * residual filters); the head cycle is joined per candidate
+	 * via the `chain_seq` UNIQUE index. Returns the head fields selection needs, so the dispatcher
+	 * does not re-load the head to decide what to bill.
 	 *
 	 * @param DateTimeImmutable $now   The cutoff moment; contracts due at or before it.
 	 * @param int               $limit Maximum rows to return (the batch size).
@@ -675,30 +690,22 @@ final class ContractRepository {
 			return array();
 		}
 
+		$owners = ConsumerRegistry::all();
+		if ( array() === $owners ) {
+			return array();
+		}
+
 		global $wpdb;
 
-		$contracts = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
-		$cycles    = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
-		$cutoff    = $now->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
+		$contracts          = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$cycles             = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		$cutoff             = $now->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
+		$owner_placeholders = implode( ', ', array_fill( 0, count( $owners ), '%s' ) );
 
-		// Table names cannot be bound, so they are interpolated; every value is a placeholder.
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$rows = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT c.id AS contract_id, cy.count AS head_count, cy.status AS head_status, cy.ends_at_gmt AS head_ends_at_gmt
-				FROM {$contracts} c
-				JOIN {$cycles} cy
-				  ON cy.contract_id = c.id AND cy.kind = %s
-				 AND cy.sequence_no = ( SELECT MAX(s.sequence_no) FROM {$cycles} s WHERE s.contract_id = c.id AND s.kind = %s )
-				WHERE c.status = %s AND c.schedule_source <> %s AND c.next_payment_gmt IS NOT NULL AND c.next_payment_gmt <= %s
-				  AND (
-				        ( cy.status = %s AND cy.ends_at_gmt <= %s )
-				     OR ( cy.status = %s AND cy.claimed_until IS NOT NULL AND cy.claimed_until <= %s )
-				      )
-				ORDER BY c.next_payment_gmt ASC, c.id ASC
-				LIMIT %d",
-				Cycle::KIND_BILLING,
-				Cycle::KIND_BILLING,
+		$args = array_merge(
+			array( Cycle::KIND_BILLING, Cycle::KIND_BILLING ),
+			$owners,
+			array(
 				ContractStatus::ACTIVE,
 				Contract::SCHEDULE_SOURCE_GATEWAY,
 				$cutoff,
@@ -706,11 +713,32 @@ final class ContractRepository {
 				$cutoff,
 				CycleStatus::PENDING,
 				$cutoff,
-				$limit
+				$limit,
+			)
+		);
+
+		// Table names cannot be bound, so they are interpolated; every value is a placeholder.
+		// The owner placeholder list is generated, one `%s` per registered owner in `$args`.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT c.id AS contract_id, cy.count AS head_count, cy.status AS head_status, cy.ends_at_gmt AS head_ends_at_gmt
+				FROM {$contracts} c
+				JOIN {$cycles} cy
+				  ON cy.contract_id = c.id AND cy.kind = %s
+				 AND cy.sequence_no = ( SELECT MAX(s.sequence_no) FROM {$cycles} s WHERE s.contract_id = c.id AND s.kind = %s )
+				WHERE c.extension_slug IN ( {$owner_placeholders} ) AND c.status = %s AND c.schedule_source <> %s AND c.next_payment_gmt IS NOT NULL AND c.next_payment_gmt <= %s
+				  AND (
+				        ( cy.status = %s AND cy.ends_at_gmt <= %s )
+				     OR ( cy.status = %s AND cy.claimed_until IS NOT NULL AND cy.claimed_until <= %s )
+				      )
+				ORDER BY c.next_payment_gmt ASC, c.id ASC
+				LIMIT %d",
+				$args
 			),
 			ARRAY_A
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 
 		// A failed scan otherwise reads exactly like "nothing due" and renewals stall
 		// store-wide with no signal; the return stays empty either way.
@@ -963,14 +991,23 @@ final class ContractRepository {
 	 * can race across workers), exactly one caller matches the row and wins; the rest match
 	 * zero rows, so status transitions - and the actions fired on them - happen exactly once.
 	 *
+	 * `$to_status` must be a registered cycle status (the write-path allowlist). `$from_status`
+	 * is only the CAS predicate and is not validated, so a cycle carrying an unknown stored
+	 * status can still be settled out of it.
+	 *
 	 * @param int         $cycle_id    The cycle to settle.
 	 * @param string      $from_status The status the caller read; the CAS predicate.
-	 * @param string      $to_status   The settled status to write.
+	 * @param string      $to_status   The settled status to write; must be registered.
 	 * @param int         $order_id    The renewal order carrying the outcome.
 	 * @param string|null $reason      Failure reason to record, or null to clear.
+	 * @throws \DomainException If `$to_status` is not a registered cycle status.
 	 */
 	public function transition_cycle_status( int $cycle_id, string $from_status, string $to_status, int $order_id, ?string $reason = null ): bool {
 		global $wpdb;
+
+		if ( ! CycleStatus::is_valid( $to_status ) ) {
+			throw new \DomainException( esc_html( sprintf( 'ContractRepository::transition_cycle_status(): cycle status "%s" is not registered.', $to_status ) ) );
+		}
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
 
@@ -1159,7 +1196,8 @@ final class ContractRepository {
 	/**
 	 * Hydrate a cycle row, attaching typed snapshot value objects only for an in-flight
 	 * (non-terminal) cycle. A settled record keeps its snapshot ids but skips the extra
-	 * reads to decode their payloads.
+	 * reads to decode their payloads. {@see CycleStatus::is_terminal()} is false for an
+	 * unknown or extension-registered status, so such a cycle's snapshots are decoded.
 	 *
 	 * @param array<string, mixed> $row Cycle row.
 	 * @return Cycle The hydrated cycle.

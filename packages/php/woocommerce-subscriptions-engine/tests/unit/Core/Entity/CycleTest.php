@@ -13,6 +13,7 @@ use DomainException;
 use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
 
@@ -20,6 +21,11 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle
  */
 class CycleTest extends TestCase {
+
+	protected function tearDown(): void {
+		StatusRegistry::reset();
+		parent::tearDown();
+	}
 
 	/**
 	 * Build a pending billing cycle with sensible defaults, overridable per test.
@@ -173,12 +179,81 @@ class CycleTest extends TestCase {
 		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::billed() ) );
 	}
 
-	public function test_status_change_rejects_an_illegal_transition(): void {
+	public function test_status_change_is_not_constrained_by_a_transition_table(): void {
 		$cycle = $this->make_pending( array( 'status' => CycleStatus::billed() ) );
 
-		// billed is terminal, so it cannot move to failed.
-		$this->expectException( DomainException::class );
 		$cycle->set_status( CycleStatus::failed() );
+
+		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::failed() ) );
+	}
+
+	public function test_create_accepts_an_extension_registered_status_string(): void {
+		StatusRegistry::register( StatusRegistry::KIND_CYCLE, 'disputed' );
+
+		$cycle = $this->make_pending( array( 'status' => 'disputed' ) );
+
+		$this->assertSame( 'disputed', $cycle->get_status()->get_value() );
+	}
+
+	public function test_from_storage_hydrates_an_unregistered_stored_status(): void {
+		$cycle = Cycle::from_storage(
+			array(
+				'id'             => 5,
+				'contract_id'    => 7,
+				'sequence_no'    => 1,
+				'count'          => 1,
+				'kind'           => Cycle::KIND_BILLING,
+				'status'         => 'legacy-x',
+				'starts_at_gmt'  => '2026-03-01 00:00:00',
+				'ends_at_gmt'    => '2026-04-01 00:00:00',
+				'expected_total' => '20.00',
+				'currency'       => 'USD',
+			)
+		);
+
+		$this->assertSame( 'legacy-x', $cycle->get_status()->get_value() );
+		$this->assertSame( 'legacy-x', $cycle->to_storage()['status'] );
+	}
+
+	public function test_set_status_rejects_an_unregistered_status_and_leaves_the_status_unchanged(): void {
+		$cycle = $this->make_pending();
+
+		try {
+			$cycle->set_status( CycleStatus::stored( 'nope' ) );
+			$this->fail( 'Expected a DomainException for an unregistered status.' );
+		} catch ( DomainException $e ) {
+			$this->assertStringContainsString( 'nope', $e->getMessage() );
+		}
+
+		$this->assertSame( CycleStatus::PENDING, $cycle->get_status()->get_value() );
+	}
+
+	public function test_create_rejects_an_unregistered_status_instance(): void {
+		$this->expectException( DomainException::class );
+
+		$this->make_pending( array( 'status' => CycleStatus::stored( 'nope' ) ) );
+	}
+
+	public function test_a_hydrated_unregistered_status_can_be_kept_unchanged(): void {
+		$cycle = Cycle::from_storage(
+			array(
+				'id'             => 5,
+				'contract_id'    => 7,
+				'sequence_no'    => 1,
+				'count'          => 1,
+				'kind'           => Cycle::KIND_BILLING,
+				'status'         => 'legacy-x',
+				'starts_at_gmt'  => '2026-03-01 00:00:00',
+				'ends_at_gmt'    => '2026-04-01 00:00:00',
+				'expected_total' => '20.00',
+				'currency'       => 'USD',
+			)
+		);
+
+		$cycle->set_status( CycleStatus::stored( 'legacy-x' ) );
+		$cycle->set_reason( 'annotated' );
+
+		$this->assertSame( 'legacy-x', $cycle->to_storage()['status'] );
 	}
 
 	public function test_setting_the_same_status_is_a_no_op(): void {

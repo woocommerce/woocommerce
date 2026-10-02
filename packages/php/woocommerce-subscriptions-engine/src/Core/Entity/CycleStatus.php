@@ -1,17 +1,13 @@
 <?php
 /**
- * CycleStatus - the cycle lifecycle state machine, as an immutable value object.
- * Owns the valid statuses and allowed transitions so an invalid state cannot be
- * represented. Mirrors {@see ContractStatus}.
+ * CycleStatus - a cycle status as an immutable value object, plus read helpers
+ * over the {@see StatusRegistry}. Mirrors {@see ContractStatus}.
  *
- * Lifecycle: a cycle is born `pending`; a charge submitted to a gateway that has not
- * yet returned a terminal outcome (an async method awaiting confirmation) is
- * `processing`; it settles to `billed` (terminal) or `failed`. A `failed` cycle can be
- * retried back to `pending` (an admin-triggered re-attempt), and any non-settled cycle
- * can be `cancelled` (terminal). The state is shared with the shipping chain, so
- * `processing` names "submitted, awaiting a terminal outcome" without payment-specific wording.
- * Instance methods serve the entity; the static string helpers operate on raw strings at
- * the storage boundary.
+ * Cycle status is opaque engine data. The constants name the engine defaults:
+ * the defaults are shared slugs and carry no engine meaning; the engine enforces
+ * no transitions. Extensions may register more through
+ * {@see StatusRegistry::register()}. The slugs are shared with the shipping chain,
+ * so `processing` avoids payment-specific wording.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Core\Entity
  */
@@ -28,7 +24,7 @@ defined( 'ABSPATH' ) || exit;
  * CycleStatus value object.
  *
  * Immutable. Construct via a named factory ({@see self::pending()} etc.) or
- * {@see self::from()}.
+ * {@see self::from()}; storage hydration uses {@see self::stored()}.
  */
 final class CycleStatus {
 
@@ -46,27 +42,42 @@ final class CycleStatus {
 	private $value;
 
 	/**
-	 * Use a named factory ({@see self::pending()} etc.) or {@see self::from()}.
+	 * Use a named factory ({@see self::pending()} etc.), {@see self::from()} or
+	 * {@see self::stored()}.
 	 *
-	 * @param string $value A known status string.
+	 * @param string $value Status string.
 	 */
 	private function __construct( string $value ) {
 		$this->value = $value;
 	}
 
 	/**
-	 * Build a status value from a known status string.
+	 * Build a status value from a registered status string.
 	 *
 	 * @param string $value Status string.
-	 * @throws DomainException If `$value` is not a known status.
+	 * @throws DomainException If `$value` is not a registered cycle status.
 	 */
 	public static function from( string $value ): self {
 		if ( ! self::is_valid( $value ) ) {
 			throw new DomainException(
-				sprintf( 'CycleStatus: "%s" is not a known status.', $value )
+				sprintf( 'CycleStatus: "%s" is not a registered status.', $value )
 			);
 		}
 
+		return new self( $value );
+	}
+
+	/**
+	 * Build a status value from a persisted string without validation.
+	 *
+	 * Storage hydration only: a value written by a since-deactivated extension
+	 * must round-trip unchanged rather than fail the read.
+	 *
+	 * @internal Not part of the consumer API; writes go through {@see self::from()}.
+	 *
+	 * @param string $value Stored status string.
+	 */
+	public static function stored( string $value ): self {
 		return new self( $value );
 	}
 
@@ -122,32 +133,11 @@ final class CycleStatus {
 	}
 
 	/**
-	 * Whether this status may move to `$target`.
-	 *
-	 * @param CycleStatus $target Target status.
-	 */
-	public function can_transition_to( CycleStatus $target ): bool {
-		return self::is_transition_allowed( $this->value, $target->value );
-	}
-
-	/**
-	 * Move to `$target`, returning the new status value.
-	 *
-	 * @param CycleStatus $target Target status.
-	 * @throws DomainException If the transition is not allowed.
-	 */
-	public function transition_to( CycleStatus $target ): self {
-		self::assert_transition_allowed( $this->value, $target->value );
-
-		return $target;
-	}
-
-	/**
-	 * All known statuses, in lifecycle order.
+	 * The engine's default cycle statuses (the registry seed).
 	 *
 	 * @return array<int, string>
 	 */
-	public static function all(): array {
+	public static function defaults(): array {
 		return array(
 			self::PENDING,
 			self::PROCESSING,
@@ -158,79 +148,34 @@ final class CycleStatus {
 	}
 
 	/**
-	 * Whether `$status` is a known status.
+	 * Every registered cycle status: the engine defaults, then extension
+	 * registrations.
+	 *
+	 * @return array<int, string>
+	 */
+	public static function all(): array {
+		return StatusRegistry::all( StatusRegistry::KIND_CYCLE );
+	}
+
+	/**
+	 * Whether `$status` is a registered cycle status.
 	 *
 	 * @param string $status Status to check.
 	 */
 	public static function is_valid( string $status ): bool {
-		return in_array( $status, self::all(), true );
+		return StatusRegistry::is_registered( StatusRegistry::KIND_CYCLE, $status );
 	}
 
 	/**
-	 * Whether `$status` is terminal (no transitions out).
+	 * Whether `$status` is `billed` or `cancelled`.
+	 *
+	 * Interim: moves out of the engine with the renewal flow (only the repository's
+	 * snapshot skip in `hydrate_cycle()` reads this). Unknown and
+	 * extension-registered statuses report false.
 	 *
 	 * @param string $status Status to check.
 	 */
 	public static function is_terminal( string $status ): bool {
-		return self::is_valid( $status ) && array() === self::transitions()[ $status ];
-	}
-
-	/**
-	 * Whether a cycle may move from `$from` to `$to`. Unknown statuses report false.
-	 * Same-status calls also report false; {@see Cycle::set_status()} short-circuits
-	 * no-ops before consulting this table.
-	 *
-	 * @param string $from Current status.
-	 * @param string $to   Target status.
-	 */
-	public static function is_transition_allowed( string $from, string $to ): bool {
-		if ( ! self::is_valid( $from ) || ! self::is_valid( $to ) ) {
-			return false;
-		}
-
-		return in_array( $to, self::transitions()[ $from ], true );
-	}
-
-	/**
-	 * Whether a cycle may move from `$from` to `$to`.
-	 *
-	 * Alias of {@see self::is_transition_allowed()}.
-	 *
-	 * @param string $from Current status.
-	 * @param string $to   Target status.
-	 */
-	public static function can_transition( string $from, string $to ): bool {
-		return self::is_transition_allowed( $from, $to );
-	}
-
-	/**
-	 * Throw if `$from` -> `$to` is not an allowed transition. The canonical
-	 * enforcement entry point every status change flows through.
-	 *
-	 * @param string $from Current status.
-	 * @param string $to   Target status.
-	 * @throws DomainException When the transition is rejected by {@see self::is_transition_allowed()}.
-	 */
-	public static function assert_transition_allowed( string $from, string $to ): void {
-		if ( ! self::is_transition_allowed( $from, $to ) ) {
-			throw new DomainException(
-				sprintf( 'CycleStatus: illegal status transition from "%s" to "%s".', $from, $to )
-			);
-		}
-	}
-
-	/**
-	 * Allowed transitions: current status => list of reachable statuses.
-	 *
-	 * @return array<string, array<int, string>>
-	 */
-	private static function transitions(): array {
-		return array(
-			self::PENDING    => array( self::PROCESSING, self::BILLED, self::FAILED, self::CANCELLED ),
-			self::PROCESSING => array( self::BILLED, self::FAILED, self::CANCELLED ),
-			self::BILLED     => array(),
-			self::FAILED     => array( self::PENDING, self::CANCELLED ),
-			self::CANCELLED  => array(),
-		);
+		return in_array( $status, array( self::BILLED, self::CANCELLED ), true );
 	}
 }

@@ -210,8 +210,10 @@ final class RenewalEngine {
 	 *
 	 * The structural invariants it does enforce keep the money-path safe whatever the caller:
 	 * it skips (logging, never throwing - a scheduled action would retry a permanent condition
-	 * forever) when the contract is gone, gateway-scheduled, or inactive, and refuses a cycle
-	 * that is neither the head nor its immediate successor (no billing a gap). The claim is the
+	 * forever) when the contract is gone, gateway-scheduled, or not active, and refuses a cycle
+	 * that is neither the head nor its immediate successor (no billing a gap). The non-active
+	 * skip never parks: the engine does not clear the next-due moment of a contract whose
+	 * status it did not set. The claim is the
 	 * concurrency gate: appending the successor collides on `UNIQUE(contract_id, kind, count)`
 	 * and the head is reclaimed only through the lease compare-and-set, so a cycle is charged at
 	 * most once even under overlapping runs. Order reconciliation follows the claim, so the
@@ -219,8 +221,9 @@ final class RenewalEngine {
 	 *
 	 * Throws {@see RenewalNotProcessable} for a pre-flight impossibility (no chain, an
 	 * unresolvable plan, a non-adjacent count, a gateway that cannot charge renewals) so the
-	 * caller can park; returns null for an idempotent no-op (a live claim, an already-settled
-	 * cycle, an unbuildable order).
+	 * scheduled caller can park and a manual caller can return null; returns null for an
+	 * idempotent no-op (a non-active contract, a live claim, an already-settled cycle, an
+	 * unbuildable order).
 	 *
 	 * @param RenewalIntent     $intent The contract and cycle count to bill.
 	 * @param DateTimeImmutable $now    The processing moment (the lease clock for a claim).
@@ -254,6 +257,10 @@ final class RenewalEngine {
 			return null;
 		}
 
+		// Interim: moves out of the engine with the renewal flow.
+		// The due scan already selects only active contracts; a manual or racing caller that
+		// reaches a non-active one is skipped without parking, so its next-due moment is left
+		// for whichever flow set its status.
 		if ( ContractStatus::ACTIVE !== $contract->get_status() ) {
 			wc_get_logger()->info(
 				sprintf( 'RenewalEngine::process(): contract %d is %s, not active - skipping renewal. No order created.', $contract_id, $contract->get_status() ),
@@ -1160,19 +1167,22 @@ final class RenewalEngine {
 	 * vanished mid-park, a write error) must not stall the rest of the batch. On failure the
 	 * contract simply stays due and the park is re-attempted next tick.
 	 *
+	 * Only an active contract is parked: one that stopped being active since it was selected
+	 * already left the due set, and its next-due moment belongs to whoever changed its status.
+	 *
 	 * @param int $contract_id The contract to remove from the due set.
 	 */
 	public function park( int $contract_id ): void {
 		try {
 			$contract = $this->contracts->find( $contract_id );
-			if ( null === $contract ) {
+			if ( null === $contract || ContractStatus::ACTIVE !== $contract->get_status() ) {
 				return;
 			}
 
 			$contract->set_next_payment_gmt( null );
-			// Conditioned on the status just read: a lifecycle transition racing the
-			// park must not be clobbered - the contract is out of the due set either way.
-			$this->contracts->update_if_status( $contract, $contract->get_status() );
+			// Conditioned on active: a status change racing the park must not be
+			// clobbered, nor have its next-due moment cleared.
+			$this->contracts->update_if_status( $contract, ContractStatus::ACTIVE );
 		} catch ( Throwable $e ) {
 			wc_get_logger()->error(
 				sprintf( 'RenewalEngine::park(): failed to park contract %d - %s', $contract_id, $e->getMessage() ),

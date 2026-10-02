@@ -14,8 +14,10 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ConsumerRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\DuplicateCycleException;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\RenewalCandidate;
@@ -33,9 +35,22 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 */
 	private $sut;
 
+	/**
+	 * The owner the due-scan fixtures carry, registered as a consumer in setUp().
+	 */
+	private const OWNER = 'engine-tests';
+
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut = new ContractRepository();
+		ConsumerRegistry::reset();
+		ConsumerRegistry::register( self::OWNER );
+	}
+
+	public function tearDown(): void {
+		ConsumerRegistry::reset();
+		StatusRegistry::reset();
+		parent::tearDown();
 	}
 
 	private function make_contract(): Contract {
@@ -1093,10 +1108,68 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 
 		$ids = $this->due_ids( $now, 50 );
 
-		// Only the two due+active contracts, oldest-due first; the future and the non-active excluded.
+		// Only the two due+active contracts, oldest-due first; the future and the past-due
+		// on-hold row excluded (the interim renewal-flow status predicate).
 		$this->assertSame( array( $due_old, $due_recent ), $ids );
 		$this->assertNotContains( $not_yet, $ids );
 		$this->assertNotContains( $on_hold, $ids );
+	}
+
+	/**
+	 * @testdox find_due skips a due contract whose stored status is not registered.
+	 */
+	public function test_find_due_skips_a_contract_with_an_unregistered_stored_status(): void {
+		global $wpdb;
+
+		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+		$id  = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ), array( 'status' => 'legacy-paused' ), array( 'id' => $id ) );
+
+		$this->assertSame( array(), $this->due_ids( $now, 50 ) );
+	}
+
+	/**
+	 * @testdox find_due skips a due contract with no owner.
+	 */
+	public function test_find_due_skips_a_contract_with_no_owner(): void {
+		$now      = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+		$owned    = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+		$no_owner = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_PRIMITIVE, CycleStatus::BILLED, null, null, null );
+
+		$ids = $this->due_ids( $now, 50 );
+
+		$this->assertContains( $owned, $ids );
+		$this->assertNotContains( $no_owner, $ids );
+	}
+
+	/**
+	 * @testdox find_due skips a contract whose owner is not registered, and selects it untouched once it registers.
+	 */
+	public function test_find_due_skips_an_unregistered_owner_until_it_registers(): void {
+		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+		$id  = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_PRIMITIVE, CycleStatus::BILLED, null, null, 'other-ext' );
+
+		$this->assertNotContains( $id, $this->due_ids( $now, 50 ) );
+
+		ConsumerRegistry::register( 'other-ext' );
+
+		$this->assertContains( $id, $this->due_ids( $now, 50 ) );
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$this->assertSame( '2026-06-15 00:00:00', $contract->get_next_payment_gmt(), 'The waiting contract keeps its due moment.' );
+	}
+
+	/**
+	 * @testdox find_due returns nothing when no consumer is registered.
+	 */
+	public function test_find_due_returns_nothing_when_no_consumer_is_registered(): void {
+		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+		$this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+
+		ConsumerRegistry::reset();
+
+		$this->assertSame( array(), $this->sut->find_due( $now, 50 ) );
 	}
 
 	/**
@@ -1247,6 +1320,111 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox transition_cycle_status rejects an unregistered target status and writes nothing.
+	 */
+	public function test_transition_cycle_status_rejects_an_unregistered_target(): void {
+		$contract_id = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_PRIMITIVE, CycleStatus::PENDING );
+
+		$head = $this->sut->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $head );
+
+		try {
+			$this->sut->transition_cycle_status( (int) $head->get_id(), CycleStatus::PENDING, 'never-registered', 4242 );
+			$this->fail( 'Expected a DomainException for an unregistered target status.' );
+		} catch ( \DomainException $e ) {
+			$after = $this->sut->find_chain_head( $contract_id );
+			$this->assertInstanceOf( Cycle::class, $after );
+			$this->assertSame( CycleStatus::PENDING, $after->get_status()->get_value() );
+		}
+	}
+
+	/**
+	 * @testdox transition_cycle_status accepts an extension-registered target status.
+	 */
+	public function test_transition_cycle_status_accepts_an_extension_registered_target(): void {
+		StatusRegistry::register( StatusRegistry::KIND_CYCLE, 'disputed' );
+		$contract_id = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_PRIMITIVE, CycleStatus::PENDING );
+
+		$head = $this->sut->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $head );
+
+		$this->assertTrue( $this->sut->transition_cycle_status( (int) $head->get_id(), CycleStatus::PENDING, 'disputed', 4242 ) );
+
+		$after = $this->sut->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $after );
+		$this->assertSame( 'disputed', $after->get_status()->get_value() );
+	}
+
+	/**
+	 * @testdox An unknown stored contract status hydrates and survives an unrelated update.
+	 */
+	public function test_an_unknown_stored_contract_status_round_trips(): void {
+		global $wpdb;
+
+		$id    = $this->sut->insert( $this->make_contract() );
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update( $table, array( 'status' => 'legacy-paused' ), array( 'id' => $id ) );
+
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$this->assertSame( 'legacy-paused', $contract->get_status() );
+
+		$contract->set_next_payment_gmt( '2026-09-15 00:00:00' );
+		$this->assertTrue( $this->sut->update( $contract ) );
+		$this->assertTrue( $this->sut->update_if_status( $contract, 'legacy-paused' ) );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$stored = $wpdb->get_row( $wpdb->prepare( "SELECT status, next_payment_gmt FROM {$table} WHERE id = %d", $id ), ARRAY_A );
+		$this->assertSame( 'legacy-paused', $stored['status'] );
+		$this->assertSame( '2026-09-15 00:00:00', $stored['next_payment_gmt'] );
+	}
+
+	/**
+	 * @testdox An unknown stored cycle status hydrates through every cycle read and survives an update.
+	 */
+	public function test_an_unknown_stored_cycle_status_hydrates_and_round_trips(): void {
+		global $wpdb;
+
+		$id    = $this->sut->insert( $this->make_contract() );
+		$cycle = $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', $this->sample_plan_snapshot(), $this->sample_items_snapshot() );
+		$this->sut->append_cycle( $cycle );
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update( $table, array( 'status' => 'legacy-x' ), array( 'id' => $cycle->get_id() ) );
+
+		$head = $this->sut->find_chain_head( $id );
+		$this->assertInstanceOf( Cycle::class, $head );
+		$this->assertSame( 'legacy-x', $head->get_status()->get_value() );
+
+		$history = $this->sut->find_cycle_history( $id );
+		$this->assertCount( 1, $history );
+		$this->assertSame( 'legacy-x', $history[0]->get_status()->get_value() );
+
+		$head->set_reason( 'annotated' );
+		$this->sut->update_cycle( $head );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$stored = $wpdb->get_row( $wpdb->prepare( "SELECT status, reason FROM {$table} WHERE id = %d", $cycle->get_id() ), ARRAY_A );
+		$this->assertSame( 'legacy-x', $stored['status'] );
+		$this->assertSame( 'annotated', $stored['reason'] );
+	}
+
+	/**
+	 * @testdox count_by_status keys include extension-registered contract statuses.
+	 */
+	public function test_count_by_status_includes_registered_extension_statuses(): void {
+		StatusRegistry::register( StatusRegistry::KIND_CONTRACT, 'paused-by-merchant' );
+		$this->insert_list_contract( 'paused-by-merchant' );
+
+		$counts = $this->sut->count_by_status();
+
+		$this->assertSame( ContractStatus::all(), array_keys( $counts ) );
+		$this->assertSame( 1, $counts['paused-by-merchant'] );
+	}
+
+	/**
 	 * The contract ids of the due scan at `$now`, in scan order.
 	 *
 	 * @param \DateTimeImmutable $now   The cutoff moment.
@@ -1273,6 +1451,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @param string      $head_status      The head cycle status (a CycleStatus value).
 	 * @param string|null $claimed_until    The head cycle lease expiry, or null for none.
 	 * @param string|null $head_ends_at     The head period end; defaults to `$next_payment_gmt`.
+	 * @param string|null $owner            The owning extension slug; defaults to the registered test owner.
 	 */
 	private function insert_contract_due_at(
 		?string $next_payment_gmt,
@@ -1280,7 +1459,8 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		string $schedule_source = Contract::SCHEDULE_SOURCE_PRIMITIVE,
 		string $head_status = CycleStatus::BILLED,
 		?string $claimed_until = null,
-		?string $head_ends_at = null
+		?string $head_ends_at = null,
+		?string $owner = self::OWNER
 	): int {
 		$contract = Contract::create(
 			array(
@@ -1292,6 +1472,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 				'next_payment_gmt' => $next_payment_gmt,
 				'status'           => $status,
 				'schedule_source'  => $schedule_source,
+				'extension_slug'   => $owner,
 			)
 		);
 		$id       = $this->sut->insert( $contract );

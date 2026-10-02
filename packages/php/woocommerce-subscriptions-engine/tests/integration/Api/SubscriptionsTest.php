@@ -468,15 +468,19 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 		$held = Subscriptions::get( $contract_id );
 		$this->assertInstanceOf( Contract::class, $held );
 		$this->assertSame( ContractStatus::ON_HOLD, $held->get_status() );
+		$this->assertNull( $held->get_next_payment_gmt(), 'Hold disarms the next-due moment.' );
 
 		$this->assertTrue( Subscriptions::reactivate( $contract_id ) );
 		$active = Subscriptions::get( $contract_id );
 		$this->assertInstanceOf( Contract::class, $active );
 		$this->assertSame( ContractStatus::ACTIVE, $active->get_status() );
+		$this->assertNotNull( $active->get_next_payment_gmt(), 'Reactivate re-arms the next-due moment.' );
 
 		$this->assertTrue( Subscriptions::cancel_at_period_end( $contract_id ) );
 		$pending = Subscriptions::get( $contract_id );
 		$this->assertInstanceOf( Contract::class, $pending );
 		$this->assertSame( ContractStatus::PENDING_CANCELLATION, $pending->get_status() );
+		$this->assertNull( $pending->get_next_payment_gmt(), 'Cancel at period end disarms the next-due moment.' );
+		$this->assertNotNull( $pending->get_end_gmt(), 'The former next-due moment becomes the end date.' );
 	}
 }

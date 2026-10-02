@@ -21,6 +21,9 @@
  * fields and must not assume the set is closed. A generic resource read API is a
  * planned follow-up alongside the read-model views, when a consumer needs it.
  *
+ * Interim: moves out of the engine with the lifecycle flows (hold / reactivate /
+ * cancel and their routes).
+ *
  * Every route requires a logged-in user, enforced through the shared
  * {@see RESTPermissions} floor (core's cookie auth has already verified the REST nonce
  * `wp_rest` by then). Per-route, ownership is enforced with the asymmetric not-found
@@ -274,7 +277,7 @@ final class ContractsController extends WP_REST_Controller {
 	 * Run a lifecycle action behind the ownership guard, then return the domain
 	 * summary with the resulting status.
 	 *
-	 * A `DomainException` (an illegal transition for the contract's current state) maps to
+	 * A `DomainException` (an action whose preconditions the contract's current state does not meet) maps to
 	 * a 409 Conflict; any other failure maps to a 500. The ownership guard keeps the
 	 * asymmetric 404 for not-owned / unknown.
 	 *
