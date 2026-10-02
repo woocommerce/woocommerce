@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed CSV import failing for files containing non-printable control characters (0x1F) that were incorrectly detected as `application/octet-stream` instead of `text/csv`.
