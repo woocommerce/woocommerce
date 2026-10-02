@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the Analytics default order status filters applying after "Reset defaults" or a save that leaves a status list unchanged.
