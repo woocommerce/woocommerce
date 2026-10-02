@@ -498,13 +498,14 @@ final class ContractRepository {
 
 	/**
 	 * The contract count per status - the views bar's read. One `GROUP BY status` scan,
-	 * returned as a map keyed by EVERY {@see ContractStatus::all()} value (absent statuses
-	 * filled with 0) and in that order, so a consumer can render a fixed set of views
-	 * without knowing which statuses currently have rows. The `All` total is the caller's
-	 * `array_sum()`. Independent of any search / paging (WC-style: the views count the whole
-	 * store, not the current page).
+	 * returned as a map keyed by EVERY registered contract status ({@see ContractStatus::all()}:
+	 * the engine defaults plus extension registrations; absent statuses filled with 0) and in
+	 * that order, so a consumer can render a fixed set of views without knowing which statuses
+	 * currently have rows. A stored status that is not registered is not counted as a key. The
+	 * `All` total is the caller's `array_sum()`. Independent of any search / paging (WC-style:
+	 * the views count the whole store, not the current page).
 	 *
-	 * @return array<string, int> Status => count, every known status present.
+	 * @return array<string, int> Status => count, every registered status present.
 	 */
 	public function count_by_status(): array {
 		global $wpdb;
@@ -514,7 +515,7 @@ final class ContractRepository {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results( "SELECT status, COUNT(*) AS total FROM {$table} GROUP BY status", ARRAY_A );
 
-		// Seed every known status at 0 so the map is complete and stably ordered.
+		// Seed every registered status at 0 so the map is complete and stably ordered.
 		$counts = array();
 		foreach ( ContractStatus::all() as $status ) {
 			$counts[ $status ] = 0;
@@ -525,8 +526,8 @@ final class ContractRepository {
 				continue;
 			}
 			$status = ScalarCoercion::coerce_string( $row['status'] ?? '' );
-			// A row whose status has drifted outside the known set is ignored, not added
-			// as a stray key - the map stays exactly ContractStatus::all().
+			// A row whose stored status is not registered is ignored, not added as a
+			// stray key - the map stays exactly ContractStatus::all().
 			if ( array_key_exists( $status, $counts ) ) {
 				$counts[ $status ] = ScalarCoercion::coerce_int( $row['total'] ?? 0 );
 			}
@@ -963,14 +964,23 @@ final class ContractRepository {
 	 * can race across workers), exactly one caller matches the row and wins; the rest match
 	 * zero rows, so status transitions - and the actions fired on them - happen exactly once.
 	 *
+	 * `$to_status` must be a registered cycle status (the write-path allowlist). `$from_status`
+	 * is only the CAS predicate and is not validated, so a cycle carrying an unknown stored
+	 * status can still be settled out of it.
+	 *
 	 * @param int         $cycle_id    The cycle to settle.
 	 * @param string      $from_status The status the caller read; the CAS predicate.
-	 * @param string      $to_status   The settled status to write.
+	 * @param string      $to_status   The settled status to write; must be registered.
 	 * @param int         $order_id    The renewal order carrying the outcome.
 	 * @param string|null $reason      Failure reason to record, or null to clear.
+	 * @throws \DomainException If `$to_status` is not a registered cycle status.
 	 */
 	public function transition_cycle_status( int $cycle_id, string $from_status, string $to_status, int $order_id, ?string $reason = null ): bool {
 		global $wpdb;
+
+		if ( ! CycleStatus::is_valid( $to_status ) ) {
+			throw new \DomainException( esc_html( sprintf( 'ContractRepository::transition_cycle_status(): cycle status "%s" is not registered.', $to_status ) ) );
+		}
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
 
@@ -1159,7 +1169,8 @@ final class ContractRepository {
 	/**
 	 * Hydrate a cycle row, attaching typed snapshot value objects only for an in-flight
 	 * (non-terminal) cycle. A settled record keeps its snapshot ids but skips the extra
-	 * reads to decode their payloads.
+	 * reads to decode their payloads. {@see CycleStatus::is_terminal()} is false for an
+	 * unknown or extension-registered status, so such a cycle's snapshots are decoded.
 	 *
 	 * @param array<string, mixed> $row Cycle row.
 	 * @return Cycle The hydrated cycle.
