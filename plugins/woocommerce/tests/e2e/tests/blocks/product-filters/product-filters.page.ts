@@ -43,20 +43,4 @@ export class ProductFiltersPage {
 		}
 		return this.editor.getBlockByName( blockName );
 	}
-
-	async getProductFiltersOverlayNavigationBlock( {
-		page,
-	}: {
-		page: 'frontend' | 'editor';
-	} ) {
-		const blockName = 'woocommerce/product-filters-overlay-navigation';
-		if ( page === 'frontend' ) {
-			return (
-				await this.frontendUtils.getBlockByName( blockName )
-			).filter( {
-				has: this.page.locator( ':visible' ),
-			} );
-		}
-		return this.editor.canvas.getByLabel( 'Block: Overlay Navigation' );
-	}
 }
