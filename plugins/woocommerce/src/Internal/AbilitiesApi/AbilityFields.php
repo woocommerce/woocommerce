@@ -30,7 +30,7 @@ final class AbilityFields {
 	 *
 	 * @param string               $object_type Object type.
 	 * @param string               $attribute   Attribute under `extensions`.
-	 * @param array<string, mixed> $args        `schema`, `get_callback( $object )` and `update_callback( $value, $object )`, which changes the object in memory and returns a WP_Error to reject the write. It must not save, send email or make HTTP requests. Nothing is saved until every step passes.
+	 * @param array<string, mixed> $args        `schema`, `get_callback( $object )`, `update_callback( $value, $object )` (in memory, never saves) and optional `validate_callback( $value, $object )`.
 	 */
 	public static function register( string $object_type, string $attribute, array $args ): void {
 		self::$fields[ $object_type ][ $attribute ] = $args;
@@ -98,17 +98,16 @@ final class AbilityFields {
 				/* translators: %s: extension field attribute. */
 				return new \WP_Error( 'woocommerce_ability_field_invalid', sprintf( __( 'Unknown extension "%s".', 'woocommerce' ), $attribute ) );
 			}
-			$valid = rest_validate_value_from_schema( $value, $field['schema'], "extensions.$attribute" );
+			$valid = isset( $field['validate_callback'] )
+				? call_user_func( $field['validate_callback'], $value, $subject )
+				: rest_validate_value_from_schema( $value, $field['schema'], "extensions.$attribute" );
 			if ( is_wp_error( $valid ) ) {
 				return $valid;
 			}
 		}
 
 		foreach ( $values as $attribute => $value ) {
-			$updated = call_user_func( $fields[ $attribute ]['update_callback'], $value, $subject );
-			if ( is_wp_error( $updated ) ) {
-				return $updated;
-			}
+			call_user_func( $fields[ $attribute ]['update_callback'], $value, $subject );
 		}
 		return null;
 	}

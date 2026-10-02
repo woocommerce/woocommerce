@@ -7,17 +7,17 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
-use Automattic\WooCommerce\Internal\AbilitiesApi\ObjectChangeAbility;
+use Automattic\WooCommerce\Internal\AbilitiesApi\InMemoryWriteAbility;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Runs the product create and update abilities as object changes, with the
+ * Runs the product create and update abilities as in-memory writes, with the
  * steps their definitions provide.
  *
  * @since 11.3.0
  */
-final class ProductWriteAbility extends ObjectChangeAbility {
+final class ProductWriteAbility extends InMemoryWriteAbility {
 
 	public const DEFINITIONS = array(
 		'woocommerce/product-create' => ProductCreate::class,
@@ -37,7 +37,7 @@ final class ProductWriteAbility extends ObjectChangeAbility {
 	 * @param array $input Ability input.
 	 * @return \WC_Product|\WP_Error
 	 */
-	public function load( array $input ) {
+	public function subject( array $input ) {
 		return $this->definition()::subject( $input );
 	}
 
@@ -48,7 +48,7 @@ final class ProductWriteAbility extends ObjectChangeAbility {
 	 * @param array       $input   Ability input.
 	 * @return null|\WP_Error
 	 */
-	public function change( $subject, array $input ) {
+	public function apply( $subject, array $input ) {
 		return $this->definition()::apply( $subject, $input );
 	}
 
@@ -58,7 +58,7 @@ final class ProductWriteAbility extends ObjectChangeAbility {
 	 * @param \WC_Product $subject Saved product.
 	 * @return array
 	 */
-	public function prepare_response( $subject ) {
+	public function respond( $subject ) {
 		return $this->definition()::respond( $subject );
 	}
 

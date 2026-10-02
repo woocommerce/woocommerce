@@ -10,8 +10,8 @@ namespace Automattic\WooCommerce\Internal\AbilitiesApi;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Runs a write's steps: load, change, the extension fields, the object
- * validators, one save, prepare_response. No step saves.
+ * Runs a write's steps: subject, validate, apply, the extension fields, the
+ * object validators, one save, respond. No step saves.
  *
  * @since 11.3.0
  */
@@ -21,12 +21,12 @@ final class InMemoryWriteRunner {
 	 * Run the write.
 	 *
 	 * @param string               $ability_name Ability name.
-	 * @param array<string, mixed> $steps        `object_type` and the `load`, `change` and optional `prepare_response` callables.
+	 * @param array<string, mixed> $steps        `object_type` and the `subject`, `validate`, `apply` and optional `respond` callables.
 	 * @param array                $input        Ability input.
-	 * @return mixed The prepare_response step's output, or a WP_Error when nothing was saved.
+	 * @return mixed The respond step's output, or a WP_Error when nothing was saved.
 	 */
 	public static function run( string $ability_name, array $steps, array $input ) {
-		$target = call_user_func( $steps['load'], $input );
+		$target = call_user_func( $steps['subject'], $input );
 		if ( is_wp_error( $target ) ) {
 			return self::with_status( $target );
 		}
@@ -44,7 +44,7 @@ final class InMemoryWriteRunner {
 		 * @since 11.3.0
 		 *
 		 * @param InMemorySubject|null $subject Subject, or null when nothing can save the object.
-		 * @param object               $target  Object returned by the load step.
+		 * @param object               $target  Object returned by the subject step.
 		 */
 		$subject = $target instanceof InMemorySubject ? $target : apply_filters( 'woocommerce_ability_in_memory_subject', null, $target );
 		if ( ! $subject instanceof InMemorySubject ) {
@@ -56,9 +56,14 @@ final class InMemoryWriteRunner {
 		}
 
 		try {
-			$changed = call_user_func( $steps['change'], $target, $input );
-			if ( is_wp_error( $changed ) ) {
-				return self::with_status( $changed );
+			$valid = call_user_func( $steps['validate'], $target, $input );
+			if ( is_wp_error( $valid ) ) {
+				return self::with_status( $valid );
+			}
+
+			$applied = call_user_func( $steps['apply'], $target, $input );
+			if ( is_wp_error( $applied ) ) {
+				return self::with_status( $applied );
 			}
 
 			$object_type = (string) ( $steps['object_type'] ?? '' );
@@ -90,7 +95,7 @@ final class InMemoryWriteRunner {
 			);
 		}
 
-		$response = isset( $steps['prepare_response'] ) ? call_user_func( $steps['prepare_response'], $target ) : null;
+		$response = isset( $steps['respond'] ) ? call_user_func( $steps['respond'], $target ) : null;
 		return $response ?? $subject->snapshot();
 	}
 

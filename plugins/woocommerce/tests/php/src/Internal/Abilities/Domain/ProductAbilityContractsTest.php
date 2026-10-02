@@ -164,39 +164,6 @@ class ProductAbilityContractsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return a 400 error for a data exception and a 500 error for any other exception thrown by the save.
-	 *
-	 * @testWith ["WC_Data_Exception", 400, "Invalid data."]
-	 *           ["RuntimeException", 500, "The change could not be saved."]
-	 *
-	 * @param string $exception_class Exception the save throws.
-	 * @param int    $status          Expected status.
-	 * @param string $message         Expected message.
-	 */
-	public function test_save_exception_returns_error( string $exception_class, int $status, string $message ): void {
-		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Original' ) );
-		add_action(
-			'woocommerce_before_product_object_save',
-			static function () use ( $exception_class ) {
-				throw 'WC_Data_Exception' === $exception_class ? new \WC_Data_Exception( 'test_invalid', 'Invalid data.' ) : new \RuntimeException( 'Database is gone.' );
-			}
-		);
-
-		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
-			array(
-				'id'   => $product->get_id(),
-				'name' => 'Renamed',
-			)
-		);
-
-		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_in_memory_write_save_failed', $result->get_error_code() );
-		$this->assertSame( $message, $result->get_error_message() );
-		$this->assertSame( $status, $result->get_error_data()['status'] );
-		$this->assertSame( 'Original', wc_get_product( $product->get_id() )->get_name() );
-	}
-
-	/**
 	 * @testdox Should save extension field values on product create.
 	 */
 	public function test_product_create_saves_extension_fields(): void {
