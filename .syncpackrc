@@ -108,19 +108,22 @@
 			]
 		},
 		{
-			"label": "Direct Babel build tooling shared across workspace packages",
+			"label": "Shared build tooling from the tooling catalog",
 			"dependencyTypes": [
 				"prod",
 				"dev"
 			],
 			"dependencies": [
-				"@babel/core",
 				"@babel/cli",
+				"@babel/core",
 				"@babel/plugin-syntax-jsx",
 				"@babel/preset-env",
 				"@babel/preset-react",
 				"@babel/preset-typescript",
-				"@babel/runtime"
+				"@babel/runtime",
+				"@wordpress/prettier-config",
+				"postcss",
+				"webpack"
 			],
 			"packages": [
 				"**"
@@ -208,19 +211,6 @@
 				"**"
 			],
 			"pinVersion": "^10.0.0"
-		},
-		{
-			"dependencyTypes": [
-				"prod",
-				"dev"
-			],
-			"dependencies": [
-				"webpack"
-			],
-			"packages": [
-				"**"
-			],
-			"policy": "catalog"
 		},
 		{
 			"dependencies": [
@@ -408,20 +398,6 @@
 			"isIgnored": true
 		},
 		{
-			"label": "Shared WordPress Prettier tooling",
-			"dependencyTypes": [
-				"prod",
-				"dev"
-			],
-			"dependencies": [
-				"@wordpress/prettier-config"
-			],
-			"packages": [
-				"**"
-			],
-			"policy": "catalog"
-		},
-		{
 			"dependencies": [
 				"@wordpress/eslint-plugin"
 			],
@@ -553,19 +529,6 @@
 				"**"
 			],
 			"pinVersion": "4.3.x"
-		},
-		{
-			"dependencyTypes": [
-				"prod",
-				"dev"
-			],
-			"dependencies": [
-				"postcss"
-			],
-			"packages": [
-				"**"
-			],
-			"policy": "catalog"
 		},
 		{
 			"dependencies": [
