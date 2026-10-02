@@ -28,6 +28,21 @@ final class ContractStatus {
 	public const EXPIRED              = 'expired';
 
 	/**
+	 * The engine's default contract statuses (the registry seed).
+	 *
+	 * @return array<int, string>
+	 */
+	public static function defaults(): array {
+		return array(
+			self::ACTIVE,
+			self::ON_HOLD,
+			self::PENDING_CANCELLATION,
+			self::CANCELLED,
+			self::EXPIRED,
+		);
+	}
+
+	/**
 	 * All known statuses.
 	 *
 	 * @return array<int, string>
