@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep enforcing a coupon's minimum spend when its saved maximum spend is lower, as earlier versions did.
