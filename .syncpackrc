@@ -140,6 +140,10 @@
 		},
 		{
 			"label": "React-related dependencies: React 18",
+			"dependencyTypes": [
+				"prod",
+				"dev"
+			],
 			"dependencies": [
 				"react",
 				"react-dom",
@@ -461,6 +465,10 @@
 		},
 		{
 			"label": "@wordpress/* build-dependencies (always ahead of runtime-dependencies)",
+			"dependencyTypes": [
+				"prod",
+				"dev"
+			],
 			"dependencies": [
 				"@wordpress/babel-plugin-import-jsx-pragma",
 				"@wordpress/babel-preset-default",
@@ -679,7 +687,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^3.2.6"
+			"pinVersion": "^3.4.14"
 		},
 		{
 			"dependencies": [
