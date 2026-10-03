@@ -278,6 +278,8 @@ class MiniCart extends AbstractBlock {
 			return $content . $this->get_markup( MiniCartUtils::migrate_attributes_to_color_panel( $attributes ) );
 		}
 
+		// The view script module is deliberately not declared in block.json, so it is only
+		// enqueued here and never on the cart and checkout pages handled above.
 		wp_enqueue_script_module( $this->get_full_block_name() );
 
 		// Enqueue all integration scripts registered for this block.
