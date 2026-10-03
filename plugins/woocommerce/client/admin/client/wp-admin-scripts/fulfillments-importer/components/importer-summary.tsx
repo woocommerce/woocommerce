@@ -42,6 +42,21 @@ const TABLE_HEADERS = [
 ];
 
 /**
+ * Only link to an edit URL on this site; anything else falls back to the admin link.
+ */
+function sameOriginUrl( href: string | undefined ): string | null {
+	if ( ! href ) {
+		return null;
+	}
+	try {
+		const url = new URL( href, window.location.origin );
+		return url.origin === window.location.origin ? href : null;
+	} catch {
+		return null;
+	}
+}
+
+/**
  * The order cell always shows the number the CSV referred to, even when the
  * order was not found; rows that resolved an order link to its edit screen
  * in a new tab so the summary stays put.
@@ -55,7 +70,7 @@ function orderCell( row: ImporterRowResult ) {
 	}
 	// The server sends the HPOS-aware URL; the fallback covers older rows.
 	const href =
-		row.order_edit_url ||
+		sameOriginUrl( row.order_edit_url ) ||
 		getAdminLink( `post.php?post=${ row.order_id }&action=edit` );
 	return {
 		display: (

@@ -20,7 +20,8 @@ export function downloadCsv( filename: string, content: string ): void {
 	document.body.appendChild( link );
 	link.click();
 	document.body.removeChild( link );
-	URL.revokeObjectURL( url );
+	// Revoking in the same tick can cancel the download in Safari and Firefox.
+	setTimeout( () => URL.revokeObjectURL( url ), 1000 );
 }
 
 /**

@@ -13,7 +13,7 @@ describe( 'Stepper', () => {
 	it( 'renders the four steps in an ordered list with the active one marked aria-current', () => {
 		render( <Stepper currentStep="mapping" /> );
 
-		const list = screen.getByRole( 'list', { name: /import progress/i } );
+		const list = screen.getByRole( 'list', { name: /import steps/i } );
 		const items = list.querySelectorAll( 'li' );
 		expect( items ).toHaveLength( STEPS.length );
 

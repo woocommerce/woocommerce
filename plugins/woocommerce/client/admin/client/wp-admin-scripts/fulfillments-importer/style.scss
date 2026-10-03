@@ -1,7 +1,7 @@
 @import "@wordpress/base-styles/_colors.scss";
 
-// WP admin chrome dimensions used for the full-screen overlay (mirrored from
-// woocommerce-shipping/client/components/label-purchase/style.scss).
+// Admin bar height and sidebar width, so the full-screen overlay sits beside
+// the menu and below the bar instead of covering them.
 $wp-admin-bar-height: 32px;
 $wp-admin-bar-height-mobile: 46px;
 $wp-admin-sidebar-width: 160px;

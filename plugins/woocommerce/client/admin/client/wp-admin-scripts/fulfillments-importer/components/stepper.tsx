@@ -44,7 +44,7 @@ function statusFor(
 const Stepper: React.FC< StepperProps > = ( { currentStep } ) => (
 	<ol
 		className="woocommerce-fulfillment-importer-stepper"
-		aria-label={ __( 'Import progress', 'woocommerce' ) }
+		aria-label={ __( 'Import steps', 'woocommerce' ) }
 	>
 		{ STEPS.map( ( step, index ) => {
 			const status = statusFor( step.id, currentStep );

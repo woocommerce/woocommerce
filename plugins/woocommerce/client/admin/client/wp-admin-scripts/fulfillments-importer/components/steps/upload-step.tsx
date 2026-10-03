@@ -25,6 +25,7 @@ import { errorMessage } from '../../hooks/use-chunked-import';
 import { downloadCsv } from '../../utils/csv';
 import type { StepComponentProps } from './types';
 
+// The server value arrives through the localized settings once the import endpoints land.
 const FALLBACK_MAX_ROWS = 5000;
 
 const SAMPLE_CSV = [
@@ -79,21 +80,19 @@ const UploadStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 		[ dispatch ]
 	);
 
-	const onFileChosen = useCallback(
-		( event: React.ChangeEvent< HTMLInputElement > ) => {
-			setFile( event.target.files?.[ 0 ] ?? null );
-		},
-		[ setFile ]
-	);
-
-	const onFilesDrop = useCallback(
-		( files: File[] ) => {
-			const next = files[ 0 ] ?? null;
+	// Both the picker and the drop zone go through the same check.
+	const acceptFile = useCallback(
+		( next: File | null ) => {
 			if ( ! next ) {
 				return;
 			}
 			if ( ! isCsvLikeFile( next ) ) {
-				setLocalError( __( 'Please drop a CSV file.', 'woocommerce' ) );
+				setLocalError(
+					__(
+						'Invalid file type. The importer supports CSV and TXT file formats.',
+						'woocommerce'
+					)
+				);
 				return;
 			}
 			setFile( next );
@@ -101,10 +100,22 @@ const UploadStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 		[ setFile ]
 	);
 
+	const onFileChosen = useCallback(
+		( event: React.ChangeEvent< HTMLInputElement > ) => {
+			acceptFile( event.target.files?.[ 0 ] ?? null );
+		},
+		[ acceptFile ]
+	);
+
+	const onFilesDrop = useCallback(
+		( files: File[] ) => acceptFile( files[ 0 ] ?? null ),
+		[ acceptFile ]
+	);
+
 	const onContinue = useCallback( async () => {
 		if ( ! state.file ) {
 			setLocalError(
-				__( 'Please choose a CSV file to upload.', 'woocommerce' )
+				__( 'Choose a CSV file to upload.', 'woocommerce' )
 			);
 			return;
 		}
@@ -148,7 +159,12 @@ const UploadStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 	] );
 
 	const fileLabel = state.file
-		? `${ state.file.name } · ${ formatBytes( state.file.size ) }`
+		? sprintf(
+				/* translators: 1: file name, 2: file size */
+				__( '%1$s (%2$s)', 'woocommerce' ),
+				state.file.name,
+				formatBytes( state.file.size )
+		  )
 		: __( 'No file selected.', 'woocommerce' );
 
 	return (
@@ -176,11 +192,11 @@ const UploadStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 						</Notice>
 					) : null }
 
-					<BaseControl
-						__nextHasNoMarginBottom
-						id="wc-fulfillments-importer-file"
-						label={ __( 'CSV file', 'woocommerce' ) }
-					>
+					{ /* The file input is hidden, so the label is visual only. */ }
+					<BaseControl __nextHasNoMarginBottom>
+						<BaseControl.VisualLabel>
+							{ __( 'CSV file', 'woocommerce' ) }
+						</BaseControl.VisualLabel>
 						<div className="woocommerce-fulfillment-importer-dropzone">
 							<DropZone
 								label={ __(
