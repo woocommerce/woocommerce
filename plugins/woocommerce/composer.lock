@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7bbfec722f64c9ba34e6a6f79e91daa1",
+    "content-hash": "95bb4cc8ab42f56f4a447e351ad416cd",
     "packages": [
         {
             "name": "automattic/block-delimiter",
@@ -1070,16 +1070,16 @@
         },
         {
             "name": "woocommerce/action-scheduler",
-            "version": "4.1.0",
+            "version": "4.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/action-scheduler.git",
-                "reference": "40a3df93a251590c58717b91b1049a13410e2ac4"
+                "reference": "9e2c6b02e89652bade4445ea2ca5fb12e0fa7242"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/40a3df93a251590c58717b91b1049a13410e2ac4",
-                "reference": "40a3df93a251590c58717b91b1049a13410e2ac4",
+                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/9e2c6b02e89652bade4445ea2ca5fb12e0fa7242",
+                "reference": "9e2c6b02e89652bade4445ea2ca5fb12e0fa7242",
                 "shasum": ""
             },
             "require": {
@@ -1111,9 +1111,9 @@
             "homepage": "https://actionscheduler.org/",
             "support": {
                 "issues": "https://github.com/woocommerce/action-scheduler/issues",
-                "source": "https://github.com/woocommerce/action-scheduler/tree/4.1.0"
+                "source": "https://github.com/woocommerce/action-scheduler/tree/4.2.0"
             },
-            "time": "2026-08-05T21:19:48+00:00"
+            "time": "2026-09-16T21:40:40+00:00"
         },
         {
             "name": "woocommerce/blueprint",
