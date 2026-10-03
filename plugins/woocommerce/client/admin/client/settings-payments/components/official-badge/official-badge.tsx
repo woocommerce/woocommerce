@@ -3,7 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Popover } from '@wordpress/components';
-import { Link, Pill } from '@woocommerce/components';
+import { Pill } from '@woocommerce/components';
+import { Link } from '@wordpress/ui';
 import { createInterpolateElement, useRef, useState } from '@wordpress/element';
 
 /**
@@ -124,9 +125,8 @@ export const OfficialBadge = ( {
 										learnMoreLink: (
 											<Link
 												href="https://woocommerce.com/learn-more-about-official-partner-badging/"
-												target="_blank"
-												rel="noreferrer"
-												type="external"
+												rel="noopener noreferrer"
+												openInNewTab
 												onClick={ () => {
 													// Record the event when the user clicks on the learn more link.
 													recordPaymentsEvent(
