@@ -185,6 +185,31 @@ function notify_fulfillment_cancellation( $order_id, $fulfillment, $order ) {
 }
 ```
 
+### CSV Importer Actions
+
+#### `woocommerce_fulfillments_import_session_cleanup`
+
+Fired through Action Scheduler after a CSV import session's lifetime (one hour plus a five-minute grace period) to remove the staged CSV when the import wizard never finished. The default handler, `ImportSession::handle_cleanup_hook()`, leaves the file alone and schedules the action again while the session is still active, and deletes the file and its attachment post once the session has expired. The action is only scheduled, and the handler only attached, while the `fulfillments` feature is enabled.
+
+**File:** `src/Admin/Features/Fulfillments/Importer/ImportSession.php`
+
+**Parameters:**
+
+-   `$user_id` (int) - User who owned the import session
+-   `$token` (string) - Import session token
+-   `$file` (string) - Absolute path of the staged CSV
+-   `$attachment_id` (int) - Attachment post created for the staged CSV, or `0`
+
+**Purpose:** Allows plugins to react when an abandoned import upload is cleaned up, for example to log it or to remove data they stored alongside the session.
+
+```php
+add_action( 'woocommerce_fulfillments_import_session_cleanup', 'log_abandoned_import', 10, 4 );
+
+function log_abandoned_import( $user_id, $token, $file, $attachment_id ) {
+    error_log( sprintf( 'Import session %s of user %d was abandoned', $token, $user_id ) );
+}
+```
+
 ### Email Template Actions
 
 #### `woocommerce_email_fulfillment_details`
@@ -657,6 +682,32 @@ function custom_auto_fulfill_logic( $product_ids, $order ) {
     }, $products );
 
     return $product_ids;
+}
+```
+
+### CSV Importer Filters
+
+#### `woocommerce_fulfillments_csv_importer_column_aliases`
+
+Filters the header names the fulfillments CSV importer recognizes for each column when it auto-detects the column mapping.
+
+**File:** `src/Admin/Features/Fulfillments/Importer/FulfillmentsCsvImporter.php`
+
+**Parameters:**
+
+-   `$aliases` (array) - Accepted header names keyed by canonical column: `order_number`, `tracking_number`, `shipment_provider`, `tracking_url` and `items`
+
+**Return Value:** Modified array of accepted header names per canonical column.
+
+**Purpose:** Lets stores accept the header names used by their warehouse or 3PL exports. Aliases are normalized before matching (lowercase, with runs of non-alphanumeric characters replaced by `_`), so `PO Number` and `po_number` are the same alias. Keys that are not one of the five canonical columns are ignored, non-string aliases are dropped, and if nothing usable is left the default aliases are used.
+
+```php
+add_filter( 'woocommerce_fulfillments_csv_importer_column_aliases', 'add_wms_header_aliases' );
+
+function add_wms_header_aliases( $aliases ) {
+    $aliases['order_number'][]      = 'PO Number';
+    $aliases['shipment_provider'][] = 'Ship Via';
+    return $aliases;
 }
 ```
 

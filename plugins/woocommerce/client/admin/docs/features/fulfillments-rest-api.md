@@ -598,6 +598,78 @@ Authorization: Basic <base64_encoded_credentials>
 
 ---
 
+### 10. Prepare Fulfillments Import
+
+Upload a CSV of tracking data, read its header row and open an import session for the column-mapping step of the import wizard. Requires the `fulfillments` feature to be enabled and the `manage_woocommerce` capability. Each user has one import session at a time; a successful call replaces the caller's previous session and removes its staged file, while a rejected upload leaves the previous session untouched.
+
+**Endpoint:** `POST /wp-json/wc/v3/fulfillments/import/prepare`
+
+The request body is `multipart/form-data`.
+
+#### Parameters
+
+| Parameter         | Type    | Required | Description                                                                                                      |
+| ----------------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
+| `file`            | file    | Yes      | The CSV (`.csv` or `.txt`) to import. The size limit is the `import_upload_size_limit` value, at most 5,000 data rows |
+| `delimiter`       | string  | No       | Single-character column delimiter, or `tab`. Defaults to `,`                                                     |
+| `notify_customer` | boolean | No       | Whether the import should send customer notifications. Defaults to `false`                                       |
+| `update_existing` | boolean | No       | Whether a fulfillment with the same tracking number is updated instead of skipped. Defaults to `true`            |
+
+#### Example Request
+
+```http
+POST /wp-json/wc/v3/fulfillments/import/prepare
+Authorization: Basic <base64_encoded_credentials>
+Content-Type: multipart/form-data; boundary=----boundary
+
+------boundary
+Content-Disposition: form-data; name="file"; filename="shipments.csv"
+Content-Type: text/csv
+
+order_id,tracking_number,shipment_provider,tracking_url
+101,1Z999AA10123456784,ups,https://www.ups.com/track?tracknum=1Z999AA10123456784
+------boundary--
+```
+
+#### Example Response
+
+```json
+{
+    "token": "6b4c90a944064f5ba32938f140d453d5",
+    "headers": ["order_id", "tracking_number", "shipment_provider", "tracking_url"],
+    "sample": ["101", "1Z999AA10123456784", "ups", "https://www.ups.com/track?tracknum=1Z999AA10123456784"],
+    "total": 1,
+    "detected_mapping": {
+        "0": "order_number",
+        "1": "tracking_number",
+        "2": "shipment_provider",
+        "3": "tracking_url"
+    },
+    "delimiter": ","
+}
+```
+
+| Field              | Type    | Description                                                                                   |
+| ------------------ | ------- | --------------------------------------------------------------------------------------------- |
+| `token`            | string  | Import session token to pass to the next step                                                 |
+| `headers`          | array   | Header row of the staged CSV                                                                  |
+| `sample`           | array   | First non-blank data row, for the mapping preview                                             |
+| `total`            | integer | Number of non-blank data rows                                                                 |
+| `detected_mapping` | object  | Auto-detected canonical column for each CSV column index; columns that were not detected are omitted |
+| `delimiter`        | string  | Delimiter used to read the file                                                               |
+
+#### Error Codes
+
+-   `woocommerce_fulfillments_import_no_file` (400) - No file was uploaded
+-   `woocommerce_fulfillments_import_file_too_large` (413) - The file exceeds the upload size limit
+-   `woocommerce_fulfillments_import_upload_failed` (400 or 500) - The file could not be staged or is not a CSV
+-   `woocommerce_fulfillments_csv_parse_error` (400) - The file is empty, unreadable or has no data rows
+-   `woocommerce_fulfillments_import_too_many_rows` (413) - The file has more than 5,000 data rows
+-   `woocommerce_fulfillments_import_session_failed` (500) - The import session could not be stored
+-   `rest_invalid_param` (400) - The `delimiter` is longer than one character and not `tab`
+
+---
+
 ## Error Responses
 
 All endpoints may return error responses in the following format:
@@ -627,6 +699,7 @@ All endpoints may return error responses in the following format:
 -   `400` - Bad Request
 -   `401` - Unauthorized
 -   `404` - Not Found
+-   `413` - Payload Too Large (import file over the size or row limit)
 
 ## Metadata Structure
 
