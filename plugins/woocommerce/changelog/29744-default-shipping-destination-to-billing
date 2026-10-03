@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Respect the "Default to customer billing address" shipping destination setting in the cart, Cart block and Checkout block, and keep the shipping address chosen in the cart when moving to the shortcode checkout.

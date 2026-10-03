@@ -77,6 +77,9 @@ class WC_Checkout {
 			add_action( 'woocommerce_checkout_billing', array( self::$instance, 'checkout_form_billing' ) );
 			add_action( 'woocommerce_checkout_shipping', array( self::$instance, 'checkout_form_shipping' ) );
 
+			// Priority 0 so callbacks added by themes and extensions still run after this one.
+			add_filter( 'woocommerce_ship_to_different_address_checked', array( self::$instance, 'handle_woocommerce_ship_to_different_address_checked' ), 0 );
+
 			/**
 			 * Runs once when the WC_Checkout class is first instantiated.
 			 *
@@ -378,6 +381,97 @@ class WC_Checkout {
 	 */
 	public function checkout_form_shipping() {
 		wc_get_template( 'checkout/form-shipping.php', array( 'checkout' => $this ) );
+	}
+
+	/**
+	 * Handle the woocommerce_ship_to_different_address_checked filter.
+	 *
+	 * Checks "Ship to a different address?" when the shopper chose a shipping destination during the session that differs
+	 * from the billing address, such as one entered in the cart's shipping calculator, so the checkout keeps the address
+	 * and rates the cart showed instead of switching to the billing address.
+	 *
+	 * @internal
+	 *
+	 * @since 11.3.0
+	 * @param mixed $checked Whether the checkbox is checked, 1 or 0 by default.
+	 * @return mixed
+	 */
+	public function handle_woocommerce_ship_to_different_address_checked( $checked ) {
+		if ( $checked || ! WC()->customer instanceof WC_Customer ) {
+			return $checked;
+		}
+
+		$customer = WC()->customer;
+
+		if ( ! $this->customer_has_different_shipping_destination( $customer ) || $this->customer_shipping_matches_saved_address( $customer ) ) {
+			return $checked;
+		}
+
+		return 1;
+	}
+
+	/**
+	 * Checks whether the customer's shipping destination differs from their billing address.
+	 *
+	 * Names and company are ignored since they don't affect where the order ships. A shipping address with no street, like
+	 * the one the cart's shipping calculator sets, is a location: it only differs through the fields it holds, so an
+	 * unchanged calculator update or a calculator with hidden fields doesn't check the box.
+	 *
+	 * @param WC_Customer $customer Customer object.
+	 * @return bool
+	 */
+	private function customer_has_different_shipping_destination( WC_Customer $customer ): bool {
+		if ( $customer->get_shipping_country() !== $customer->get_billing_country() || $customer->get_shipping_state() !== $customer->get_billing_state() ) {
+			return true;
+		}
+
+		$is_location_only = '' === trim( (string) $customer->get_shipping_address_1() );
+		$fields           = $is_location_only ? array( 'city', 'postcode' ) : array( 'address_1', 'address_2', 'city', 'postcode' );
+
+		foreach ( $fields as $field ) {
+			$shipping_value = trim( (string) $customer->{"get_shipping_{$field}"}() );
+			$billing_value  = trim( (string) $customer->{"get_billing_{$field}"}() );
+
+			if ( $is_location_only && '' === $shipping_value ) {
+				continue;
+			}
+
+			if ( 'postcode' === $field ) {
+				$shipping_value = wc_normalize_postcode( $shipping_value );
+				$billing_value  = wc_normalize_postcode( $billing_value );
+			}
+
+			if ( $shipping_value !== $billing_value ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Checks whether a logged-in customer's session shipping address is still the one saved on their account.
+	 *
+	 * That address wasn't chosen during this session, for example because the session default to the billing address
+	 * was turned off, so it shouldn't override the "Shipping destination" setting.
+	 *
+	 * @param WC_Customer $customer Customer object.
+	 * @return bool
+	 */
+	private function customer_shipping_matches_saved_address( WC_Customer $customer ): bool {
+		if ( ! $customer->get_id() ) {
+			return false;
+		}
+
+		foreach ( array( 'address_1', 'address_2', 'city', 'state', 'postcode', 'country' ) as $field ) {
+			$saved_value = (string) get_user_meta( $customer->get_id(), "shipping_{$field}", true );
+
+			if ( (string) $customer->{"get_shipping_{$field}"}() !== $saved_value ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
