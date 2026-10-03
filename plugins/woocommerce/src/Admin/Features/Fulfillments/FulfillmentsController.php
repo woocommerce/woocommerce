@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Admin\Features\Fulfillments;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\FulfillmentsImporterRestController;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\ImportSession;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
@@ -29,11 +30,16 @@ class FulfillmentsController {
 	/**
 	 * Initialize the controller.
 	 *
+	 * The import session cleanup listener is attached regardless of the feature flag, so a
+	 * staged CSV left behind when the flag is turned off is still removed when its
+	 * scheduled cleanup fires.
+	 *
 	 * @return void
 	 */
 	public function register() {
 		add_filter( 'woocommerce_data_stores', array( $this, 'register_data_stores' ) );
 		add_action( 'init', array( $this, 'initialize_fulfillments' ), 10, 0 );
+		add_action( ImportSession::CLEANUP_HOOK, array( ImportSession::class, 'handle_cleanup_hook' ), 10, 4 );
 	}
 
 	/**

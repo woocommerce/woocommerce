@@ -189,7 +189,7 @@ function notify_fulfillment_cancellation( $order_id, $fulfillment, $order ) {
 
 #### `woocommerce_fulfillments_import_session_cleanup`
 
-Fired through Action Scheduler after a CSV import session's lifetime (one hour plus a five-minute grace period) to remove the staged CSV when the import wizard never finished. The default handler, `ImportSession::handle_cleanup_hook()`, leaves the file alone and schedules the action again while the session is still active, and deletes the file and its attachment post once the session has expired. The action is only scheduled, and the handler only attached, while the `fulfillments` feature is enabled.
+Fired through Action Scheduler after a CSV import session's lifetime (one hour plus a five-minute grace period) to remove the staged CSV when the import wizard never finished. The default handler, `ImportSession::handle_cleanup_hook()`, leaves the file alone and schedules the action again while the session is still active, and deletes the file and its attachment post once the session has expired. The action is only scheduled while the `fulfillments` feature is enabled, but the handler is attached regardless of the flag so a pending cleanup still runs after the feature is turned off.
 
 **File:** `src/Admin/Features/Fulfillments/Importer/ImportSession.php`
 
