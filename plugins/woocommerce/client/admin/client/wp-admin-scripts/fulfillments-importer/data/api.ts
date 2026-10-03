@@ -25,6 +25,7 @@ export interface PrepareArgs {
 	delimiter: string;
 	notifyCustomer: boolean;
 	updateExisting: boolean;
+	signal?: AbortSignal;
 }
 
 export interface RunArgs {
@@ -51,6 +52,7 @@ export async function prepare( args: PrepareArgs ): Promise< PrepareResponse > {
 		path: `${ getBase() }/prepare`,
 		method: 'POST',
 		body,
+		signal: args.signal,
 	} );
 }
 

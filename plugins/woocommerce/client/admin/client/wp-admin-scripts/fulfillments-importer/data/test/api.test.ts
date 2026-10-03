@@ -8,7 +8,7 @@ jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 /**
  * Internal dependencies
  */
-import { runChunk } from '../api';
+import { prepare, runChunk } from '../api';
 
 const mockedApiFetch = apiFetch as jest.MockedFunction< typeof apiFetch >;
 
@@ -63,5 +63,34 @@ describe( 'runChunk', () => {
 			notify_customer: true,
 			update_existing: false,
 		} );
+	} );
+} );
+
+describe( 'prepare', () => {
+	beforeEach( () => {
+		mockedApiFetch.mockReset();
+		mockedApiFetch.mockResolvedValue( {} );
+	} );
+
+	it( 'passes the abort signal through to apiFetch', async () => {
+		const controller = new AbortController();
+
+		await prepare( {
+			file: new File( [ 'a,b' ], 'a.csv', { type: 'text/csv' } ),
+			delimiter: ',',
+			notifyCustomer: false,
+			updateExisting: true,
+			signal: controller.signal,
+		} );
+
+		expect( mockedApiFetch ).toHaveBeenCalledTimes( 1 );
+		const request = mockedApiFetch.mock.calls[ 0 ][ 0 ] as {
+			path: string;
+			method: string;
+			signal?: AbortSignal;
+		};
+		expect( request.path ).toBe( '/wc/v3/fulfillments/import/prepare' );
+		expect( request.method ).toBe( 'POST' );
+		expect( request.signal ).toBe( controller.signal );
 	} );
 } );

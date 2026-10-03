@@ -52,6 +52,9 @@ export interface ImporterState {
 	// True when the error ended the server-side session, so retrying cannot succeed.
 	sessionEnded: boolean;
 	isBusy: boolean;
+	// Bumped whenever the wizard restarts, so an async result started under an
+	// earlier session can tell it no longer belongs to the current state.
+	generation: number;
 }
 
 export type ImporterAction =
@@ -122,6 +125,7 @@ export function createInitialState(): ImporterState {
 		error: null,
 		sessionEnded: false,
 		isBusy: false,
+		generation: 0,
 	};
 }
 
@@ -194,7 +198,14 @@ export function importerReducer(
 ): ImporterState {
 	switch ( action.type ) {
 		case 'SET_FILE':
-			return { ...state, file: action.file, fileText: null, error: null };
+			// Picking a file aborts any preparation in flight, so busy ends here.
+			return {
+				...state,
+				file: action.file,
+				fileText: null,
+				error: null,
+				isBusy: false,
+			};
 		case 'SET_FILE_TEXT':
 			return { ...state, fileText: action.text };
 		case 'SET_DELIMITER':
@@ -259,6 +270,7 @@ export function importerReducer(
 				step: 'upload',
 				error: null,
 				sessionEnded: false,
+				generation: state.generation + 1,
 			};
 		case 'GO_IMPORT':
 			if ( ! hasAllRequiredColumns( state.mapping ) ) {
@@ -313,7 +325,10 @@ export function importerReducer(
 		case 'CLEAR_ERROR':
 			return { ...state, error: null, sessionEnded: false };
 		case 'RESET':
-			return createInitialState();
+			return {
+				...createInitialState(),
+				generation: state.generation + 1,
+			};
 		default:
 			return state;
 	}

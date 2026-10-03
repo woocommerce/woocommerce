@@ -219,6 +219,10 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 		const controller = new AbortController();
 		abortRef.current = controller;
 		const { signal } = controller;
+		// After cancel() a newer run() may own the refs; a response that lands
+		// late must not advance the offset or reach the callbacks.
+		const ownsLoop = () =>
+			! signal.aborted && abortRef.current === controller;
 
 		try {
 			// Loop until the server reports done OR we exceed the total (defensive).
@@ -259,12 +263,18 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 						}
 						const backoff = RETRY_BACKOFFS_MS[ attempt ] ?? 0;
 						await delay( backoff, signal );
+						if ( ! ownsLoop() ) {
+							return;
+						}
 						attempt++;
 					}
 				}
 
 				if ( ! response ) {
 					throw lastError ?? new Error( 'Chunk request failed' );
+				}
+				if ( ! ownsLoop() ) {
+					return;
 				}
 
 				callbacksRef.current.onChunk?.( response );
@@ -317,7 +327,10 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 				}
 			}
 		} catch ( error ) {
-			if ( ( error as DOMException )?.name === 'AbortError' ) {
+			if (
+				( error as DOMException )?.name === 'AbortError' ||
+				! ownsLoop()
+			) {
 				return;
 			}
 			callbacksRef.current.onError?.(
@@ -325,7 +338,6 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 				isSessionEnded( error )
 			);
 		} finally {
-			// After cancel() a newer run() may own the refs; only the owner clears them.
 			if ( abortRef.current === controller ) {
 				abortRef.current = null;
 				runningRef.current = false;

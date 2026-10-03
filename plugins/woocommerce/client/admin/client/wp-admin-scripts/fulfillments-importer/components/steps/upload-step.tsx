@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 import {
 	BaseControl,
@@ -67,6 +67,23 @@ const UploadStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 	const [ localError, setLocalError ] = useState< string | null >( null );
 	const [ showAdvanced, setShowAdvanced ] = useState( false );
 
+	// The prepare request in flight, if any. It is aborted when the file
+	// changes, when a new prepare starts and when the step unmounts, so a
+	// late response cannot attach its token to a newer wizard session.
+	const prepareRef = useRef< AbortController | null >( null );
+	useEffect( () => {
+		return () => {
+			prepareRef.current?.abort();
+		};
+	}, [] );
+
+	// Latest generation, read when a response arrives rather than when the
+	// request was sent, so a RESET while this step stays mounted is seen too.
+	const generationRef = useRef( state.generation );
+	useEffect( () => {
+		generationRef.current = state.generation;
+	}, [ state.generation ] );
+
 	// wp_localize_script casts scalars to strings, so coerce before formatting.
 	const maxRows =
 		Number( window.wcFulfillmentsImporterSettings?.maxRows ) ||
@@ -74,6 +91,8 @@ const UploadStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 
 	const setFile = useCallback(
 		( next: File | null ) => {
+			prepareRef.current?.abort();
+			prepareRef.current = null;
 			setLocalError( null );
 			dispatch( { type: 'SET_FILE', file: next } );
 		},
@@ -120,41 +139,64 @@ const UploadStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 			return;
 		}
 		setLocalError( null );
+
+		prepareRef.current?.abort();
+		const controller = new AbortController();
+		prepareRef.current = controller;
+		const generation = state.generation;
+		// True once this attempt was aborted or the wizard restarted; nothing
+		// from it may reach the reducer after that.
+		const isStale = () =>
+			controller.signal.aborted || generationRef.current !== generation;
+
 		dispatch( { type: 'SET_BUSY', value: true } );
 		// Keep a copy of the content: the File handle references the on-disk
 		// file, so a later read fails if it was moved or edited, and the
 		// summary's failed-rows export needs the bytes that were uploaded.
+		let text: string | null = null;
 		try {
-			dispatch( {
-				type: 'SET_FILE_TEXT',
-				text: await state.file.text(),
-			} );
+			text = await state.file.text();
 		} catch ( error ) {
 			// Breadcrumb for a later export failure.
 			window.console?.warn?.(
 				'Fulfillments importer: could not cache the file content.',
 				error
 			);
-			dispatch( { type: 'SET_FILE_TEXT', text: null } );
 		}
+		if ( isStale() ) {
+			return;
+		}
+		dispatch( { type: 'SET_FILE_TEXT', text } );
 		try {
 			const response = await prepare( {
 				file: state.file,
 				delimiter: state.delimiter,
 				notifyCustomer: state.notifyCustomer,
 				updateExisting: state.updateExisting,
+				signal: controller.signal,
 			} );
+			if ( isStale() ) {
+				return;
+			}
 			dispatch( { type: 'PREPARE_OK', payload: response } );
 		} catch ( error ) {
+			if ( isStale() ) {
+				return;
+			}
 			// apiFetch rejects with a plain object, so extract the server's
 			// actionable message instead of collapsing to a generic one.
 			dispatch( { type: 'ERROR', message: errorMessage( error ) } );
+		} finally {
+			if ( prepareRef.current === controller ) {
+				prepareRef.current = null;
+			}
 		}
 	}, [
 		state.file,
 		state.delimiter,
 		state.notifyCustomer,
 		state.updateExisting,
+		state.generation,
 		dispatch,
 	] );
 

@@ -35,8 +35,11 @@ import { prepare } from '../../../data/api';
 import UploadStep, { isCsvLikeFile } from '../upload-step';
 import {
 	createInitialState,
+	importerReducer,
 	type ImporterAction,
+	type ImporterState,
 } from '../../../hooks/use-importer-state';
+import type { PrepareResponse } from '../../../data/types';
 
 const mockedPrepare = prepare as jest.MockedFunction< typeof prepare >;
 
@@ -56,14 +59,75 @@ function renderStep( state = createInitialState() ) {
 	const dispatch = jest.fn( ( action: ImporterAction ) =>
 		dispatched.push( action )
 	);
-	render(
+	const step = ( next: ImporterState ) => (
 		<UploadStep
-			state={ state }
+			state={ next }
 			dispatch={ dispatch }
 			onClose={ jest.fn() }
 		/>
 	);
-	return { dispatch, dispatched };
+	const { rerender, unmount } = render( step( state ) );
+	return {
+		dispatch,
+		dispatched,
+		unmount,
+		rerender: ( next: ImporterState ) => rerender( step( next ) ),
+	};
+}
+
+// jsdom's File lacks text(), so stub the parts the step uses.
+function stateWithFile(): ImporterState {
+	const state = createInitialState();
+	state.file = {
+		name: 'a.csv',
+		size: 11,
+		text: () => Promise.resolve( 'a,b,c\n1,2,3' ),
+	} as unknown as File;
+	return state;
+}
+
+const PREPARED: PrepareResponse = {
+	token: 'tok',
+	headers: [ 'a', 'b', 'c' ],
+	sample: [ '1', '2', '3' ],
+	total: 1,
+	detected_mapping: { '0': 'order_number' },
+	delimiter: ',',
+};
+
+/**
+ * Queue a prepare call that stays pending until resolved here. With
+ * rejectOnAbort it rejects with an AbortError when its signal is aborted,
+ * like apiFetch does.
+ */
+function deferredPrepare( rejectOnAbort = false ) {
+	let resolve!: ( response: PrepareResponse ) => void;
+	const seen: { signal?: AbortSignal } = {};
+	const promise = new Promise< PrepareResponse >( ( res, rej ) => {
+		resolve = res;
+		mockedPrepare.mockImplementationOnce( ( args ) => {
+			seen.signal = args.signal;
+			if ( rejectOnAbort ) {
+				args.signal?.addEventListener( 'abort', () =>
+					rej( new DOMException( 'Aborted', 'AbortError' ) )
+				);
+			}
+			return promise;
+		} );
+	} );
+	return { resolve, seen };
+}
+
+// Let the step's awaited promise chain settle inside act().
+async function flush() {
+	await act( async () => {
+		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
+	} );
+}
+
+async function clickContinue() {
+	fireEvent.click( screen.getByRole( 'button', { name: /continue/i } ) );
+	await waitFor( () => expect( mockedPrepare ).toHaveBeenCalledTimes( 1 ) );
 }
 
 function pickFile( file: File ) {
@@ -140,24 +204,9 @@ describe( 'UploadStep', () => {
 	} );
 
 	it( 'calls prepare and dispatches PREPARE_OK on success', async () => {
-		const state = createInitialState();
-		// jsdom's File lacks text(), so stub the parts the step uses.
-		state.file = {
-			name: 'a.csv',
-			size: 11,
-			text: () => Promise.resolve( 'a,b,c\n1,2,3' ),
-		} as unknown as File;
+		mockedPrepare.mockResolvedValue( PREPARED );
 
-		mockedPrepare.mockResolvedValue( {
-			token: 'tok',
-			headers: [ 'a', 'b', 'c' ],
-			sample: [ '1', '2', '3' ],
-			total: 1,
-			detected_mapping: { '0': 'order_number' },
-			delimiter: ',',
-		} );
-
-		const { dispatched } = renderStep( state );
+		const { dispatched } = renderStep( stateWithFile() );
 
 		expect( screen.getByText( 'a.csv (11 B)' ) ).toBeInTheDocument();
 
@@ -175,6 +224,74 @@ describe( 'UploadStep', () => {
 			( a ) => a.type === 'SET_FILE_TEXT'
 		) as Extract< ImporterAction, { type: 'SET_FILE_TEXT' } > | undefined;
 		expect( fileText?.text ).toBe( 'a,b,c\n1,2,3' );
+	} );
+
+	it( 'ignores a prepare response that arrives after the step unmounted', async () => {
+		const pending = deferredPrepare();
+		const { dispatched, unmount } = renderStep( stateWithFile() );
+
+		await clickContinue();
+		expect( pending.seen.signal?.aborted ).toBe( false );
+
+		unmount();
+		expect( pending.seen.signal?.aborted ).toBe( true );
+
+		pending.resolve( PREPARED );
+		await flush();
+
+		expect(
+			dispatched.find( ( a ) => a.type === 'PREPARE_OK' )
+		).toBeUndefined();
+	} );
+
+	it( 'ignores a prepare response that arrives after the wizard was reset', async () => {
+		const pending = deferredPrepare();
+		const state = stateWithFile();
+		const { dispatched, rerender } = renderStep( state );
+
+		await clickContinue();
+
+		// The modal dispatched RESET while this step stayed mounted.
+		rerender( importerReducer( state, { type: 'RESET' } ) );
+
+		pending.resolve( PREPARED );
+		await flush();
+
+		expect(
+			dispatched.find( ( a ) => a.type === 'PREPARE_OK' )
+		).toBeUndefined();
+	} );
+
+	it( 'does not surface an error for an aborted prepare', async () => {
+		deferredPrepare( true );
+		const { dispatched, unmount } = renderStep( stateWithFile() );
+
+		await clickContinue();
+
+		unmount();
+		await flush();
+
+		expect(
+			dispatched.find( ( a ) => a.type === 'ERROR' )
+		).toBeUndefined();
+	} );
+
+	it( 'aborts the pending prepare when a different file is picked', async () => {
+		const pending = deferredPrepare();
+		const { dispatched } = renderStep( stateWithFile() );
+
+		await clickContinue();
+
+		pickFile( CSV );
+		expect( pending.seen.signal?.aborted ).toBe( true );
+		expect( dispatched ).toContainEqual( { type: 'SET_FILE', file: CSV } );
+
+		pending.resolve( PREPARED );
+		await flush();
+
+		expect(
+			dispatched.find( ( a ) => a.type === 'PREPARE_OK' )
+		).toBeUndefined();
 	} );
 
 	it( 'accepts the file types the core CSV importers accept and rejects others', () => {

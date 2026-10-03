@@ -107,7 +107,35 @@ describe( 'importerReducer', () => {
 		expect( state.error ).toBe( 'Upload failed' );
 
 		state = importerReducer( state, { type: 'RESET' } );
-		expect( state ).toEqual( createInitialState() );
+		expect( state ).toEqual( { ...createInitialState(), generation: 1 } );
+	} );
+
+	it( 'RESET and BACK_TO_UPLOAD start a new generation', () => {
+		let state = createInitialState();
+		expect( state.generation ).toBe( 0 );
+
+		state = importerReducer( state, { type: 'RESET' } );
+		expect( state.generation ).toBe( 1 );
+
+		state = importerReducer( state, {
+			type: 'PREPARE_OK',
+			payload: prepareResponse,
+		} );
+		expect( state.generation ).toBe( 1 );
+
+		state = importerReducer( state, { type: 'BACK_TO_UPLOAD' } );
+		expect( state.generation ).toBe( 2 );
+	} );
+
+	it( 'SET_FILE ends the busy state of a preparation in flight', () => {
+		let state = createInitialState();
+		state = importerReducer( state, { type: 'SET_BUSY', value: true } );
+		state = importerReducer( state, {
+			type: 'SET_FILE',
+			file: new File( [ '' ], 'b.csv', { type: 'text/csv' } ),
+		} );
+
+		expect( state.isBusy ).toBe( false );
 	} );
 
 	it( 'SET_MAPPING_FOR_COL clears any other column mapped to the same field', () => {

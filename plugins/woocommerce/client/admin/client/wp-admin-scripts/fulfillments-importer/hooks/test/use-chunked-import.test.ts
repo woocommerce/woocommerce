@@ -366,6 +366,44 @@ describe( 'useChunkedImport', () => {
 		expect( result.current.isRunning ).toBe( false );
 	} );
 
+	it( 'ignores a chunk response that lands after cancel()', async () => {
+		// Unlike deferredChunk this does not reject on abort: the request has
+		// already left and its response arrives after the loop was cancelled.
+		let resolve!: ( response: RunChunkResponse ) => void;
+		mockedRunChunk.mockImplementationOnce(
+			() =>
+				new Promise< RunChunkResponse >( ( res ) => {
+					resolve = res;
+				} )
+		);
+		mockedRunChunk.mockResolvedValueOnce( buildResponse( 4, 4, true ) );
+		const { result, onChunk, onFinish, onError } = renderImport();
+
+		let running!: Promise< void >;
+		act( () => {
+			running = result.current.run();
+		} );
+		act( () => {
+			result.current.cancel();
+		} );
+		await act( async () => {
+			resolve( buildResponse( 3, 4, false ) );
+			await running;
+		} );
+
+		expect( onChunk ).not.toHaveBeenCalled();
+		expect( onFinish ).not.toHaveBeenCalled();
+		expect( onError ).not.toHaveBeenCalled();
+
+		// The offset was not advanced by the ignored response.
+		await act( async () => {
+			await result.current.run();
+		} );
+		expect( mockedRunChunk ).toHaveBeenCalledTimes( 2 );
+		expect( mockedRunChunk.mock.calls[ 1 ][ 0 ].offset ).toBe( 0 );
+		expect( onFinish ).toHaveBeenCalledTimes( 1 );
+	} );
+
 	it( 'keeps a run started after cancel alive when the cancelled loop exits', async () => {
 		deferredChunk();
 		const second = deferredChunk();
