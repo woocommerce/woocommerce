@@ -14,11 +14,14 @@ use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Wraps the per-user transient that keeps state across the chunked CSV import workflow.
+ * Per-user import session stored in a transient.
  *
- * One session is in flight per user at a time: creating a new session deletes any
- * prior one for the same user via a user-scoped index transient.
+ * The prepare endpoint creates it with the staged file path, attachment ID, delimiter,
+ * headers and row total, and schedules the cleanup of the staged file. The progress
+ * fields (processed, byte_offset, mapping, counts, seen_tracking_pairs) are stored here
+ * for the import run that lands next. One session is active per user at a time.
  *
+ * @internal
  * @since 11.3.0
  */
 final class ImportSession {
@@ -72,8 +75,7 @@ final class ImportSession {
 	/**
 	 * Payload as it was last read from or written to the transient.
 	 *
-	 * Lets persist() skip a no-op write without re-reading the transient, which would move
-	 * the whole dedupe set across the object cache on every chunk.
+	 * Lets persist() skip a no-op write without re-reading the transient.
 	 *
 	 * @var array<string, mixed>|null
 	 */
@@ -102,6 +104,10 @@ final class ImportSession {
 	/**
 	 * Create a fresh import session for a user, replacing any existing one.
 	 *
+	 * The prior session's transient and cleanup action are dropped here. Its staged file
+	 * and attachment are not: the caller owns them and deletes them once the new session
+	 * is stored.
+	 *
 	 * @since 11.3.0
 	 *
 	 * @param int                $user_id       User ID.
@@ -109,16 +115,15 @@ final class ImportSession {
 	 * @param string             $delimiter     Effective delimiter (resolved by parse_headers()).
 	 * @param array<int, string> $headers       Header row.
 	 * @param int                $total         Total number of CSV records after the header.
-	 * @param bool               $notify        Whether to fire customer notifications when running chunks.
+	 * @param bool               $notify        Whether to fire customer notifications during the import run.
 	 * @param bool               $update        Whether to update existing fulfillments on tracking-number match.
 	 * @param int                $attachment_id Attachment post created for the staged CSV by the upload handler.
 	 * @return self
 	 */
 	public static function create( int $user_id, string $file, string $delimiter, array $headers, int $total, bool $notify, bool $update, int $attachment_id = 0 ): self {
-		// Drop any prior session this user had open so only one import is in flight per admin.
-		$existing_token = get_transient( self::INDEX_PREFIX . $user_id );
-		if ( is_string( $existing_token ) && '' !== $existing_token ) {
-			delete_transient( self::PREFIX . $user_id . '_' . $existing_token );
+		$prior = self::active_for_user( $user_id );
+		if ( $prior instanceof self ) {
+			$prior->delete();
 		}
 
 		$token = self::generate_token();
@@ -148,13 +153,13 @@ final class ImportSession {
 		$session = new self( $user_id, $token, $data );
 		$session->persist();
 
-		self::schedule_cleanup( $user_id, $token, $file, max( 0, $attachment_id ) );
+		self::schedule_cleanup( $user_id, $token, $file, max( 0, $attachment_id ), self::TTL );
 
 		return $session;
 	}
 
 	/**
-	 * Whether the session payload is stored, so chunk progress can be recorded against it.
+	 * Whether the session payload is stored.
 	 *
 	 * @since 11.3.0
 	 *
@@ -165,16 +170,25 @@ final class ImportSession {
 	}
 
 	/**
-	 * Schedule a deferred cleanup action that will remove the staged file if the session is
+	 * Schedule the Action Scheduler action that removes the staged file if the session is
 	 * abandoned (transient expires without the wizard ever completing the import).
 	 *
 	 * @param int    $user_id       User ID.
 	 * @param string $token         Session token.
 	 * @param string $file          Absolute path to the staged CSV.
 	 * @param int    $attachment_id Attachment post created for the staged CSV.
+	 * @param int    $ttl           Seconds the session transient can still live; the action
+	 *                              fires after that plus the grace period.
 	 */
-	private static function schedule_cleanup( int $user_id, string $token, string $file, int $attachment_id ): void {
-		if ( '' === $file || ! function_exists( 'as_schedule_single_action' ) ) {
+	private static function schedule_cleanup( int $user_id, string $token, string $file, int $attachment_id, int $ttl ): void {
+		if ( '' === $file ) {
+			return;
+		}
+		if ( ! function_exists( 'as_schedule_single_action' ) ) {
+			wc_get_logger()->warning(
+				sprintf( 'Action Scheduler is unavailable; the staged fulfillments import file %s will not be cleaned up automatically.', $file ),
+				array( 'source' => 'fulfillments-importer' )
+			);
 			return;
 		}
 
@@ -194,12 +208,19 @@ final class ImportSession {
 		 * @param string $file          Absolute path to the staged CSV.
 		 * @param int    $attachment_id Attachment post created for the staged CSV.
 		 */
-		as_schedule_single_action(
-			time() + self::TTL + self::CLEANUP_GRACE,
+		$action_id = as_schedule_single_action(
+			time() + max( 0, $ttl ) + self::CLEANUP_GRACE,
 			self::CLEANUP_HOOK,
 			array( $user_id, $token, $file, $attachment_id ),
 			'woocommerce-fulfillments-importer'
 		);
+
+		if ( 0 === $action_id ) {
+			wc_get_logger()->warning(
+				sprintf( 'Could not schedule the cleanup of the staged fulfillments import file %s.', $file ),
+				array( 'source' => 'fulfillments-importer' )
+			);
+		}
 	}
 
 	/**
@@ -207,6 +228,8 @@ final class ImportSession {
 	 *
 	 * The arguments arrive from a persisted Action Scheduler payload and from anything else
 	 * that fires the hook, so they are coerced before reaching the typed method below.
+	 *
+	 * @see ImportSession::schedule_cleanup() for the hook docblock.
 	 *
 	 * @since 11.3.0
 	 *
@@ -230,8 +253,9 @@ final class ImportSession {
 	/**
 	 * Delete the staged CSV of a session that was never finished.
 	 *
-	 * Only deletes the file when the matching session transient has expired; if the user is
-	 * still mid-import this is a no-op.
+	 * Only deletes the file when the matching session transient has expired. While the
+	 * session is still live (persist() slides its TTL), the cleanup is scheduled again for
+	 * the remaining TTL plus the grace period.
 	 *
 	 * @since 11.3.0
 	 *
@@ -244,7 +268,9 @@ final class ImportSession {
 		if ( '' === $file ) {
 			return;
 		}
-		if ( false !== get_transient( self::PREFIX . $user_id . '_' . $token ) ) {
+		$payload_key = self::PREFIX . $user_id . '_' . $token;
+		if ( false !== get_transient( $payload_key ) ) {
+			self::schedule_cleanup( $user_id, $token, $file, $attachment_id, self::remaining_ttl( $payload_key ) );
 			return;
 		}
 
@@ -258,7 +284,7 @@ final class ImportSession {
 		if ( $file_exists && ! self::is_staged_path( $file ) ) {
 			wc_get_logger()->warning(
 				sprintf( 'Refusing to clean up staged fulfillments import file outside the uploads directory: %s', $file ),
-				array( 'source' => 'fulfillments-csv-importer' )
+				array( 'source' => 'fulfillments-importer' )
 			);
 			return;
 		}
@@ -271,6 +297,26 @@ final class ImportSession {
 		if ( file_exists( $file ) ) {
 			wp_delete_file( $file );
 		}
+	}
+
+	/**
+	 * Seconds left before a live session transient expires.
+	 *
+	 * The timeout option only exists without a persistent object cache; otherwise the
+	 * full TTL is assumed, which is the latest the transient can expire.
+	 *
+	 * @param string $payload_key Session payload transient key.
+	 * @return int
+	 */
+	private static function remaining_ttl( string $payload_key ): int {
+		if ( wp_using_ext_object_cache() ) {
+			return self::TTL;
+		}
+		$timeout = (int) get_option( '_transient_timeout_' . $payload_key, 0 );
+		if ( $timeout <= 0 ) {
+			return self::TTL;
+		}
+		return max( 0, min( self::TTL, $timeout - time() ) );
 	}
 
 	/**
@@ -348,7 +394,9 @@ final class ImportSession {
 	}
 
 	/**
-	 * Delete the session and its index pointer.
+	 * Delete the session, its index pointer and its pending cleanup action.
+	 *
+	 * The staged file is left in place; the caller decides whether it is still needed.
 	 *
 	 * @since 11.3.0
 	 */
@@ -507,7 +555,7 @@ final class ImportSession {
 	}
 
 	/**
-	 * Whether customer notifications should fire for chunks of this session.
+	 * Whether customer notifications should fire during the import run.
 	 *
 	 * @since 11.3.0
 	 *
@@ -529,7 +577,7 @@ final class ImportSession {
 	}
 
 	/**
-	 * Column mapping frozen by the first processed chunk, or null when not frozen yet.
+	 * Column mapping stored by the import run, or null until it stores one.
 	 *
 	 * @since 11.3.0
 	 *
@@ -548,7 +596,7 @@ final class ImportSession {
 	}
 
 	/**
-	 * Byte offset in the CSV reached by the most recent chunk.
+	 * Byte offset in the CSV reached by the import run.
 	 *
 	 * @since 11.3.0
 	 *
@@ -559,7 +607,7 @@ final class ImportSession {
 	}
 
 	/**
-	 * Cumulative counts across processed chunks.
+	 * Cumulative result counts recorded by the import run.
 	 *
 	 * @since 11.3.0
 	 *
@@ -577,23 +625,20 @@ final class ImportSession {
 	}
 
 	/**
-	 * Final ImporterSummary-shaped payload for the wizard's "Done" step.
+	 * The stored counts plus an empty rows list, in the shape the import run reports.
 	 *
-	 * Rows are not part of the persisted session; the wizard accumulates them from each chunk's
-	 * REST response and rebuilds the summary client-side.
+	 * Per-row results are not persisted, so rows is always empty here.
 	 *
 	 * @since 11.3.0
 	 *
 	 * @return array<string, mixed>
 	 */
 	public function summary(): array {
-		// The rows key is part of the wizard's summary shape; the client fills it from the
-		// per-chunk responses, so the server side of it is always empty.
 		return array_merge( $this->counts(), array( 'rows' => array() ) );
 	}
 
 	/**
-	 * Cross-chunk dedupe state.
+	 * Tracking-number pairs already seen by the import run, used for deduplication.
 	 *
 	 * @since 11.3.0
 	 *
@@ -640,10 +685,10 @@ final class ImportSession {
 		if ( ! $stored ) {
 			wc_get_logger()->error(
 				sprintf(
-					'Fulfillments import session %s could not be persisted; progress for this chunk may be lost.',
+					'Fulfillments import session %s could not be persisted.',
 					$this->token
 				),
-				array( 'source' => 'fulfillments-csv-importer' )
+				array( 'source' => 'fulfillments-importer' )
 			);
 		}
 
