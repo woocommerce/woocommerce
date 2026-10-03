@@ -561,21 +561,47 @@ class DataSynchronizer implements BatchProcessorInterface {
 			return $count;
 		}
 
-		if ( $this->custom_orders_table_is_authoritative() ) {
-			$missing_orders_count_sql = $wpdb->prepare(
-				"
+		if ( $full_count ) {
+			if ( $this->custom_orders_table_is_authoritative() ) {
+				$sql = $wpdb->prepare(
+					"
+SELECT
+ COALESCE(SUM(CASE WHEN (posts.post_type IS NULL OR posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "')
+  AND orders.status NOT IN ('auto-draft') AND orders.type IN ($order_post_type_placeholder) THEN 1 ELSE 0 END), 0)
+ + COALESCE(SUM(CASE WHEN posts.post_type IN ($order_post_type_placeholder)
+  AND orders.date_updated_gmt > posts.post_modified_gmt THEN 1 ELSE 0 END), 0) AS count
+FROM $orders_table orders
+LEFT JOIN $wpdb->posts posts ON posts.ID = orders.id",
+					array_merge( $order_post_types, $order_post_types )
+				);
+			} else {
+				$sql = $wpdb->prepare(
+					"
+SELECT
+ COALESCE(SUM(CASE WHEN posts.post_status != 'auto-draft' AND orders.id IS NULL THEN 1 ELSE 0 END), 0)
+ + COALESCE(SUM(CASE WHEN orders.date_updated_gmt < posts.post_modified_gmt THEN 1 ELSE 0 END), 0) AS count
+FROM $wpdb->posts posts
+LEFT JOIN $orders_table orders ON posts.ID = orders.id
+WHERE posts.post_type IN ($order_post_type_placeholder)",
+					$order_post_types
+				);
+			}
+		} else {
+			if ( $this->custom_orders_table_is_authoritative() ) {
+				$missing_orders_count_sql = $wpdb->prepare(
+					"
 SELECT $count_clause FROM $wpdb->posts posts
 RIGHT JOIN $orders_table orders ON posts.ID=orders.id
 WHERE (posts.post_type IS NULL OR posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "')
  AND orders.status NOT IN ( 'auto-draft' )
  AND orders.type IN ($order_post_type_placeholder)
 $limit_clause",
-				$order_post_types
-			);
-			$operator                 = '>';
-		} else {
-			$missing_orders_count_sql = $wpdb->prepare(
-				"
+					$order_post_types
+				);
+				$operator                 = '>';
+			} else {
+				$missing_orders_count_sql = $wpdb->prepare(
+					"
 SELECT $count_clause FROM $wpdb->posts posts
 LEFT JOIN $orders_table orders ON posts.ID=orders.id
 WHERE
@@ -583,14 +609,14 @@ WHERE
   AND posts.post_status != 'auto-draft'
   AND orders.id IS NULL
 $limit_clause",
-				$order_post_types
-			);
+					$order_post_types
+				);
 
-			$operator = '<';
-		}
+				$operator = '<';
+			}
 
-		$sql = $wpdb->prepare(
-			"
+			$sql = $wpdb->prepare(
+				"
 SELECT(
 	COALESCE(($missing_orders_count_sql), 0)
 	+
@@ -602,8 +628,9 @@ SELECT(
 		  AND orders.date_updated_gmt $operator posts.post_modified_gmt
 	) x)
 ) count",
-			$order_post_types
-		);
+				$order_post_types
+			);
+		}
 		// phpcs:enable
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
