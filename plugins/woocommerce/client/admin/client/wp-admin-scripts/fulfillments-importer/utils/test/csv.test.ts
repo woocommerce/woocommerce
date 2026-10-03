@@ -12,6 +12,17 @@ describe( 'parseCsvRecords', () => {
 		] );
 	} );
 
+	it( 'returns no records for empty input', () => {
+		expect( parseCsvRecords( '', ',' ) ).toEqual( [] );
+	} );
+
+	it( 'does not emit an empty record for a trailing newline', () => {
+		expect( parseCsvRecords( 'a,b\n1,2\n', ',' ) ).toEqual( [
+			[ 'a', 'b' ],
+			[ '1', '2' ],
+		] );
+	} );
+
 	it( 'honors quoted fields with embedded delimiters, quotes and newlines', () => {
 		const text = 'a,b\n"1,5","he said ""hi""\nsecond line"';
 		expect( parseCsvRecords( text, ',' ) ).toEqual( [
@@ -20,10 +31,25 @@ describe( 'parseCsvRecords', () => {
 		] );
 	} );
 
+	it( 'falls back to a comma when the delimiter is the quote character', () => {
+		expect( parseCsvRecords( 'a,b\n"x,y",2', '"' ) ).toEqual( [
+			[ 'a', 'b' ],
+			[ 'x,y', '2' ],
+		] );
+	} );
+
 	it( 'strips a UTF-8 BOM and handles CRLF line endings', () => {
 		expect( parseCsvRecords( '﻿a;b\r\n1;2\r\n', ';' ) ).toEqual( [
 			[ 'a', 'b' ],
 			[ '1', '2' ],
+		] );
+	} );
+
+	it( 'treats a lone CR as a line ending', () => {
+		expect( parseCsvRecords( 'a,b\r1,2\r3,4', ',' ) ).toEqual( [
+			[ 'a', 'b' ],
+			[ '1', '2' ],
+			[ '3', '4' ],
 		] );
 	} );
 } );
@@ -50,6 +76,28 @@ describe( 'buildFailedRowsCsv', () => {
 			'9,T-2,"Order not found for order number ""9""."'
 		);
 		expect( lines ).toHaveLength( 2 );
+	} );
+
+	it( 'quotes a reason that contains the semicolon delimiter', () => {
+		const semicolonFailed: ImporterRowResult[] = [
+			{
+				row: 3,
+				status: 'failed',
+				code: 'order_not_found',
+				message: 'Order not found; check the number.',
+				order_number: '9',
+			},
+		];
+		const csv = buildFailedRowsCsv(
+			'order;tracking\n1;T-1\n9;T-2\n',
+			';',
+			semicolonFailed
+		);
+
+		expect( csv.split( '\r\n' ) ).toEqual( [
+			'order;tracking;Import error',
+			'9;T-2;"Order not found; check the number."',
+		] );
 	} );
 
 	it( 'neutralizes spreadsheet formula triggers but not plain numbers', () => {
