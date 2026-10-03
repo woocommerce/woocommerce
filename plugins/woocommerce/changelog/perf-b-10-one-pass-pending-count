@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Show the number of orders awaiting synchronization faster on large stores.
