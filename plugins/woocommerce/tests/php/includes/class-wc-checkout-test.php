@@ -23,6 +23,16 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	private $extra_field_filters = array();
 
 	/**
+	 * @var WC_Checkout|null The checkout singleton replaced by reinstantiate_checkout(), restored on tear down.
+	 */
+	private $original_checkout_instance;
+
+	/**
+	 * @var bool Whether reinstantiate_checkout() replaced the checkout singleton in this test.
+	 */
+	private $original_checkout_instance_saved = false;
+
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
@@ -58,6 +68,15 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		}
 
 		$this->extra_field_filters = array();
+
+		if ( $this->original_checkout_instance_saved ) {
+			$instance = new ReflectionProperty( WC_Checkout::class, 'instance' );
+			$instance->setAccessible( true );
+			$instance->setValue( null, $this->original_checkout_instance );
+
+			$this->original_checkout_instance       = null;
+			$this->original_checkout_instance_saved = false;
+		}
 
 		parent::tearDown();
 	}
@@ -1026,6 +1045,26 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 				),
 				0,
 			),
+			'calculator updated unchanged'       => array(
+				array(
+					'address_1' => '',
+				),
+				0,
+			),
+			'calculator without a city field'    => array(
+				array(
+					'address_1' => '',
+					'city'      => '',
+				),
+				0,
+			),
+			'postcode formatted differently'     => array(
+				array(
+					'address_1' => '',
+					'postcode'  => ' 94110 ',
+				),
+				0,
+			),
 		);
 	}
 
@@ -1054,11 +1093,49 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'woocommerce_ship_to_different_address_checked' is left unchecked when the session still holds the account's saved shipping address.
+	 */
+	public function test_ship_to_different_address_checked_ignores_saved_shipping_address(): void {
+		$customer = WC_Helper_Customer::create_customer();
+		$customer->set_billing_address_1( '60 29th Street #343' );
+		$customer->set_billing_city( 'San Francisco' );
+		$customer->set_billing_postcode( '94110' );
+		$customer->set_shipping_address_1( '500 Castro Street' );
+		$customer->set_shipping_city( 'Mountain View' );
+		$customer->set_shipping_postcode( '94041' );
+		$customer->save();
+
+		$this->reinstantiate_checkout();
+
+		$original_customer = WC()->customer;
+		WC()->customer     = new WC_Customer( $customer->get_id() );
+
+		try {
+			$saved_checked = apply_filters( 'woocommerce_ship_to_different_address_checked', 0 );
+
+			WC()->customer->set_shipping_location( 'US', WC()->customer->get_shipping_state(), '92101', 'San Diego' );
+			$session_checked = apply_filters( 'woocommerce_ship_to_different_address_checked', 0 );
+		} finally {
+			WC()->customer = $original_customer;
+		}
+
+		$this->assertSame( 0, $saved_checked, 'The saved shipping address should not check the box.' );
+		$this->assertSame( 1, $session_checked, 'A shipping destination chosen during the session should check the box.' );
+	}
+
+	/**
 	 * Creates a fresh checkout singleton, so the hooks it registers on first instantiation are in place for this test.
+	 * The original singleton is restored on tear down.
 	 */
 	private function reinstantiate_checkout(): void {
 		$instance = new ReflectionProperty( WC_Checkout::class, 'instance' );
 		$instance->setAccessible( true );
+
+		if ( ! $this->original_checkout_instance_saved ) {
+			$this->original_checkout_instance       = $instance->getValue();
+			$this->original_checkout_instance_saved = true;
+		}
+
 		$instance->setValue( null, null );
 
 		WC_Checkout::instance();
