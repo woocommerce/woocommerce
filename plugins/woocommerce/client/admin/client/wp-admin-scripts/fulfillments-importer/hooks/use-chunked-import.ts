@@ -27,7 +27,7 @@ export interface UseChunkedImportArgs {
 }
 
 const FALLBACK_CHUNK_SIZE = 200;
-// Mirrors FulfillmentsCsvImporter::MAX_CHUNK_SIZE; the /run route rejects larger limits.
+// The /run route enforces the same cap and rejects larger limits.
 const MAX_CHUNK_SIZE = 1000;
 const RETRY_BACKOFFS_MS = [ 250, 1000 ];
 
@@ -269,6 +269,7 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 
 				callbacksRef.current.onChunk?.( response );
 
+				const previousOffset = offsetRef.current;
 				// Always track server-reported progress so we never over-advance past unread rows.
 				if (
 					typeof response.processed === 'number' &&
@@ -293,6 +294,17 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 					return;
 				}
 
+				// A chunk that reports no progress would loop forever.
+				if ( offsetRef.current <= previousOffset ) {
+					callbacksRef.current.onError?.(
+						__(
+							'The import stopped making progress. Try again.',
+							'woocommerce'
+						)
+					);
+					return;
+				}
+
 				if ( offsetRef.current >= total && total > 0 ) {
 					// Server should have set done=true; surface so the UI can recover.
 					callbacksRef.current.onError?.(
@@ -313,9 +325,12 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 				isSessionEnded( error )
 			);
 		} finally {
-			abortRef.current = null;
-			runningRef.current = false;
-			setIsRunning( false );
+			// After cancel() a newer run() may own the refs; only the owner clears them.
+			if ( abortRef.current === controller ) {
+				abortRef.current = null;
+				runningRef.current = false;
+				setIsRunning( false );
+			}
 		}
 	}, [ token, total, mapping, notifyCustomer, updateExisting, chunkSize ] );
 
