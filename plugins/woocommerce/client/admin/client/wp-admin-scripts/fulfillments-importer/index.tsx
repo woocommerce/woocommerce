@@ -13,12 +13,38 @@ import './style.scss';
 
 const TRIGGER_CLASS = 'wc-fulfillment-import-trigger';
 const TRIGGER_SLOT_ID = 'wc-fulfillments-importer-trigger-slot';
+const OPEN_QUERY_ARG = 'fulfillments_importer';
+
+/**
+ * Tools > Import redirects to the orders list with `fulfillments_importer=open`.
+ * PHP localizes that as `autoOpen` because core strips the arg from the URL in
+ * admin_head (it is a removable query arg); the URL check covers direct loads.
+ */
+function shouldAutoOpen(): boolean {
+	const flag = window.wcFulfillmentsImporterSettings?.autoOpen;
+	// wp_localize_script casts booleans to '1' or ''.
+	if ( flag === true || flag === '1' ) {
+		return true;
+	}
+	const params = new URLSearchParams( window.location.search );
+	return params.get( OPEN_QUERY_ARG ) === 'open';
+}
+
+/**
+ * Drop the auto-open arg so a refresh or a list-table link does not reopen the wizard.
+ */
+function stripAutoOpenArg(): void {
+	const url = new URL( window.location.href );
+	if ( ! url.searchParams.has( OPEN_QUERY_ARG ) ) {
+		return;
+	}
+	url.searchParams.delete( OPEN_QUERY_ARG );
+	window.history.replaceState( window.history.state, '', url.toString() );
+}
 
 /**
  * Create (or return the existing) host element next to the "Add order"
- * page-title-action, into which the React trigger is portaled. Mirrors the
- * placement pattern WooCommerce core uses for the products list Import/Export
- * buttons (see `client/legacy/js/admin/woocommerce_admin.js`).
+ * page-title-action, into which the React trigger is portaled.
  */
 function getOrCreateTriggerSlot(): HTMLElement | null {
 	const existing = document.getElementById( TRIGGER_SLOT_ID );
@@ -76,12 +102,11 @@ function FulfillmentsImporterController() {
 		setTriggerSlot( getOrCreateTriggerSlot() );
 	}, [] );
 
-	// Tools > Import redirects here with this flag so the wizard opens directly.
 	useEffect( () => {
-		const params = new URLSearchParams( window.location.search );
-		if ( params.get( 'fulfillments_importer' ) === 'open' ) {
+		if ( shouldAutoOpen() ) {
 			setIsOpen( true );
 		}
+		stripAutoOpenArg();
 	}, [] );
 
 	return (

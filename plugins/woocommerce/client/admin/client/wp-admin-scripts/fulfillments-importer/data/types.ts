@@ -35,6 +35,7 @@ export interface ImporterSettings {
 	importRoute: string;
 	chunkSize?: number | string;
 	maxRows?: number | string;
+	autoOpen?: boolean | string;
 	providers: Array< { key: string; label: string } >;
 }
 
