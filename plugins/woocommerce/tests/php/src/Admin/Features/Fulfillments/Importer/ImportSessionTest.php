@@ -329,6 +329,50 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox create() reports the session it replaced, so overlapping prepares each learn which session they retired.
+	 */
+	public function test_create_reports_replaced_session(): void {
+		$first = $this->make_session( 46, $this->make_staged_file() );
+		$this->assertNull( $first->replaced(), 'The first session of a user replaces nothing' );
+
+		$second = $this->make_session( 46, $this->make_staged_file() );
+		$third  = $this->make_session( 46, $this->make_staged_file() );
+
+		$this->assertNotNull( $second->replaced() );
+		$this->assertSame( $first->token(), $second->replaced()->token() );
+		$this->assertSame( $first->file(), $second->replaced()->file() );
+		$this->assertNotNull( $third->replaced() );
+		$this->assertSame( $second->token(), $third->replaced()->token(), 'The replaced session is the one active at create() time, not an earlier read' );
+		$this->assertNull( ImportSession::load( 46, $second->token() ), 'The replaced session record must be gone' );
+	}
+
+	/**
+	 * @testdox create() drops the session and reports it as not persisted when the cleanup cannot be scheduled.
+	 */
+	public function test_create_drops_session_when_cleanup_cannot_be_scheduled(): void {
+		$file  = $this->make_staged_file();
+		$prior = $this->make_session( 47, $this->make_staged_file() );
+
+		$fail_schedule = static function () {
+			return 0;
+		};
+		add_filter( 'pre_as_schedule_single_action', $fail_schedule );
+		try {
+			$session = $this->make_session( 47, $file );
+		} finally {
+			remove_filter( 'pre_as_schedule_single_action', $fail_schedule );
+		}
+
+		$this->assertFalse( $session->persisted() );
+		$this->assertNull( ImportSession::load( 47, $session->token() ), 'A session without a cleanup owner must not be stored' );
+		$this->assertNull( ImportSession::active_for_user( 47 ) );
+		$this->assertFalse( as_next_scheduled_action( ImportSession::CLEANUP_HOOK, $this->cleanup_args( $session ), self::CLEANUP_GROUP ) );
+		$this->assertNotNull( $session->replaced() );
+		$this->assertSame( $prior->token(), $session->replaced()->token(), 'The prior session was retired before the schedule failed, so the caller must still clean its file up' );
+		$this->assertFileExists( $file, 'The session API leaves file deletion to the caller' );
+	}
+
+	/**
 	 * @testdox Creating a second session for the same user unschedules the first session's cleanup action.
 	 */
 	public function test_create_unschedules_prior_session_cleanup_action(): void {

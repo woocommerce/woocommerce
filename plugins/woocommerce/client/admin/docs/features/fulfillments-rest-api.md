@@ -665,7 +665,7 @@ order_id,tracking_number,shipment_provider,tracking_url
 -   `woocommerce_fulfillments_import_upload_failed` (400 or 500) - The file could not be staged or is not a CSV
 -   `woocommerce_fulfillments_csv_parse_error` (400) - The file is empty, unreadable or has no data rows
 -   `woocommerce_fulfillments_import_too_many_rows` (413) - The file has more than 5,000 data rows
--   `woocommerce_fulfillments_import_session_failed` (500) - The import session could not be stored
+-   `woocommerce_fulfillments_import_session_failed` (500) - The import session could not be stored, or the cleanup of its staged file could not be scheduled; the staged file is removed
 -   `rest_invalid_param` (400) - The `delimiter` is longer than one character and not `tab`
 
 ---

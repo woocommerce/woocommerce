@@ -89,6 +89,13 @@ final class ImportSession {
 	private bool $persisted = true;
 
 	/**
+	 * Session this one replaced when it was created, if any.
+	 *
+	 * @var self|null
+	 */
+	private ?self $replaced = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param int                  $user_id User who owns the session.
@@ -104,9 +111,11 @@ final class ImportSession {
 	/**
 	 * Create a fresh import session for a user, replacing any existing one.
 	 *
-	 * The prior session's transient and cleanup action are dropped here. Its staged file
-	 * and attachment are not: the caller owns them and deletes them once the new session
-	 * is stored.
+	 * The session active at this moment is retired here (transient and cleanup action
+	 * dropped) and exposed through replaced(), so the caller deletes the staged file and
+	 * attachment of exactly that session. When the new session cannot be stored, or its
+	 * cleanup cannot be scheduled, it is dropped again and persisted() reports false; the
+	 * caller then removes the new staged file as well.
 	 *
 	 * @since 11.3.0
 	 *
@@ -121,9 +130,9 @@ final class ImportSession {
 	 * @return self
 	 */
 	public static function create( int $user_id, string $file, string $delimiter, array $headers, int $total, bool $notify, bool $update, int $attachment_id = 0 ): self {
-		$prior = self::active_for_user( $user_id );
-		if ( $prior instanceof self ) {
-			$prior->delete();
+		$replaced = self::active_for_user( $user_id );
+		if ( $replaced instanceof self ) {
+			$replaced->delete();
 		}
 
 		$token = self::generate_token();
@@ -150,16 +159,21 @@ final class ImportSession {
 			),
 		);
 
-		$session = new self( $user_id, $token, $data );
-		$session->persist();
+		$session           = new self( $user_id, $token, $data );
+		$session->replaced = $replaced;
 
-		self::schedule_cleanup( $user_id, $token, $file, max( 0, $attachment_id ), self::TTL );
+		// A staged file without a scheduled cleanup would stay behind forever, so a session
+		// whose cleanup cannot be scheduled is not kept.
+		if ( $session->persist() && ! self::schedule_cleanup( $user_id, $token, $file, max( 0, $attachment_id ), self::TTL ) ) {
+			$session->delete();
+			$session->persisted = false;
+		}
 
 		return $session;
 	}
 
 	/**
-	 * Whether the session payload is stored.
+	 * Whether the session is stored and its cleanup is scheduled.
 	 *
 	 * @since 11.3.0
 	 *
@@ -167,6 +181,20 @@ final class ImportSession {
 	 */
 	public function persisted(): bool {
 		return $this->persisted;
+	}
+
+	/**
+	 * Session that was active for the user when this one was created.
+	 *
+	 * Its record and cleanup action are already gone; its staged file and attachment are
+	 * left for the caller to delete.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return self|null Null when the user had no active session.
+	 */
+	public function replaced(): ?self {
+		return $this->replaced;
 	}
 
 	/**
@@ -179,17 +207,18 @@ final class ImportSession {
 	 * @param int    $attachment_id Attachment post created for the staged CSV.
 	 * @param int    $ttl           Seconds the session transient can still live; the action
 	 *                              fires after that plus the grace period.
+	 * @return bool Whether the action is scheduled. True for an empty path, which has nothing to clean up.
 	 */
-	private static function schedule_cleanup( int $user_id, string $token, string $file, int $attachment_id, int $ttl ): void {
+	private static function schedule_cleanup( int $user_id, string $token, string $file, int $attachment_id, int $ttl ): bool {
 		if ( '' === $file ) {
-			return;
+			return true;
 		}
 		if ( ! function_exists( 'as_schedule_single_action' ) ) {
-			wc_get_logger()->warning(
-				sprintf( 'Action Scheduler is unavailable; the staged fulfillments import file %s will not be cleaned up automatically.', $file ),
+			wc_get_logger()->error(
+				sprintf( 'Action Scheduler is unavailable; the cleanup of the staged fulfillments import file %s cannot be scheduled.', $file ),
 				array( 'source' => 'fulfillments-importer' )
 			);
-			return;
+			return false;
 		}
 
 		/**
@@ -216,11 +245,14 @@ final class ImportSession {
 		);
 
 		if ( 0 === $action_id ) {
-			wc_get_logger()->warning(
+			wc_get_logger()->error(
 				sprintf( 'Could not schedule the cleanup of the staged fulfillments import file %s.', $file ),
 				array( 'source' => 'fulfillments-importer' )
 			);
+			return false;
 		}
+
+		return true;
 	}
 
 	/**

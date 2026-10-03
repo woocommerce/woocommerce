@@ -101,7 +101,7 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 	 *
 	 * The hook snapshot the WP test case restores after every test predates this class, so
 	 * hooks added in setUpBeforeClass() only survive the first test. Registering here keeps
-	 * the namespace filter and the cleanup action in place for each test.
+	 * the namespace filter in place for each test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
@@ -199,11 +199,12 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * is_uploaded_file() can never pass for files created inside a test process, so this
 	 * stubs the staging seam and exercises everything handle_prepare does after it.
 	 *
-	 * @param string $file          Path to return as the staged file.
-	 * @param int    $attachment_id Attachment ID to return with it.
+	 * @param string        $file          Path to return as the staged file.
+	 * @param int           $attachment_id Attachment ID to return with it.
+	 * @param callable|null $on_stage      Runs while the upload is being staged, to simulate another request landing in between.
 	 * @return FulfillmentsImporterRestController
 	 */
-	private function make_controller_with_staged_file( string $file, int $attachment_id = 0 ): FulfillmentsImporterRestController {
+	private function make_controller_with_staged_file( string $file, int $attachment_id = 0, ?callable $on_stage = null ): FulfillmentsImporterRestController {
 		$sut = new class() extends FulfillmentsImporterRestController {
 			/**
 			 * Path returned instead of staging a real upload.
@@ -220,6 +221,13 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 			public int $staged_attachment = 0;
 
 			/**
+			 * Callback run while staging, before the canned path is returned.
+			 *
+			 * @var callable|null
+			 */
+			public $on_stage = null;
+
+			/**
 			 * Return the canned staged path.
 			 *
 			 * @param WP_REST_Request $request Unused.
@@ -227,6 +235,9 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 			 */
 			protected function stage_uploaded_csv( WP_REST_Request $request ) {
 				unset( $request );
+				if ( is_callable( $this->on_stage ) ) {
+					call_user_func( $this->on_stage );
+				}
 				return array(
 					'file' => $this->staged,
 					'id'   => $this->staged_attachment,
@@ -236,6 +247,7 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$sut->staged            = $file;
 		$sut->staged_attachment = $attachment_id;
+		$sut->on_stage          = $on_stage;
 		return $sut;
 	}
 
@@ -271,12 +283,13 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 	/**
 	 * Run handle_prepare against a staged file and return the handler result.
 	 *
-	 * @param string $file          Staged file path.
-	 * @param int    $attachment_id Attachment ID for the staged file.
+	 * @param string        $file          Staged file path.
+	 * @param int           $attachment_id Attachment ID for the staged file.
+	 * @param callable|null $on_stage      Runs while the upload is being staged.
 	 * @return mixed
 	 */
-	private function prepare_with_staged_file( string $file, int $attachment_id = 0 ) {
-		$sut      = $this->make_controller_with_staged_file( $file, $attachment_id );
+	private function prepare_with_staged_file( string $file, int $attachment_id = 0, ?callable $on_stage = null ) {
+		$sut      = $this->make_controller_with_staged_file( $file, $attachment_id, $on_stage );
 		$response = $this->invoke( 'handle_prepare', $this->make_prepare_request(), $sut );
 		if ( is_array( $response ) && isset( $response['token'] ) ) {
 			$session = ImportSession::load( get_current_user_id(), (string) $response['token'] );
@@ -307,18 +320,6 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_register_exposes_prepare_route(): void {
 		$this->assertSame( 10, has_filter( 'woocommerce_rest_api_get_rest_namespaces', array( $this->sut, 'handle_woocommerce_rest_api_get_rest_namespaces' ) ) );
 		$this->assertArrayHasKey( '/wc/v3/fulfillments/import/prepare', rest_get_server()->get_routes( 'wc/v3' ) );
-	}
-
-	/**
-	 * @testdox register() attaches the session cleanup handler to the Action Scheduler hook.
-	 */
-	public function test_register_attaches_cleanup_handler(): void {
-		remove_action( ImportSession::CLEANUP_HOOK, array( ImportSession::class, 'handle_cleanup_hook' ), 10 );
-		$this->assertFalse( has_action( ImportSession::CLEANUP_HOOK, array( ImportSession::class, 'handle_cleanup_hook' ) ) );
-
-		$this->sut->register();
-
-		$this->assertSame( 10, has_action( ImportSession::CLEANUP_HOOK, array( ImportSession::class, 'handle_cleanup_hook' ) ) );
 	}
 
 	/**
@@ -428,6 +429,63 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertFileDoesNotExist( $prior_file, 'The prior staged file must be removed' );
 		$this->assertNull( get_post( $prior_attachment ), 'The prior attachment post must be removed' );
 		$this->assertFileExists( $new_file );
+	}
+
+	/**
+	 * @testdox Two overlapping prepares by the same user each remove the staged file of the session they replaced.
+	 */
+	public function test_prepare_deletes_file_of_session_replaced_at_create_time(): void {
+		$prior_file = $this->make_staged_file( "order_number,tracking_number,shipment_provider\n1,OLD-1,ups\n" );
+		$prior      = $this->make_session( $prior_file );
+		$a_file     = $this->make_staged_file( "order_number,tracking_number,shipment_provider\n2,A-1,ups\n" );
+		$a_attach   = $this->make_attachment( $a_file );
+		$b_file     = $this->make_staged_file( "order_number,tracking_number,shipment_provider\n3,B-1,ups\n" );
+		$a_session  = null;
+
+		// Request A finishes while request B is still staging its upload: it replaces the
+		// prior session and removes the prior staged file, as handle_prepare would.
+		$request_a = function () use ( $a_file, $a_attach, $prior_file, &$a_session ) {
+			$a_session = $this->make_session( $a_file, $a_attach );
+			wp_delete_file( $prior_file );
+		};
+
+		$response = $this->prepare_with_staged_file( $b_file, 0, $request_a );
+
+		$this->assertIsArray( $response );
+		$this->assertInstanceOf( ImportSession::class, $a_session );
+		$this->assertNull( ImportSession::load( get_current_user_id(), $prior->token() ) );
+		$this->assertNull( ImportSession::load( get_current_user_id(), $a_session->token() ), 'Request B retired request A\'s session' );
+		$this->assertFileDoesNotExist( $a_file, 'Request B must remove the staged file of the session it retired' );
+		$this->assertNull( get_post( $a_attach ), 'Request B must remove the attachment of the session it retired' );
+		$this->assertFileExists( $b_file );
+		$active = ImportSession::active_for_user( get_current_user_id() );
+		$this->assertNotNull( $active );
+		$this->assertSame( $response['token'], $active->token() );
+	}
+
+	/**
+	 * @testdox handle_prepare fails with a 500 and removes the staged file when the cleanup cannot be scheduled.
+	 */
+	public function test_prepare_fails_when_cleanup_cannot_be_scheduled(): void {
+		$file          = $this->make_staged_file( "order_number,tracking_number,shipment_provider\n1001,TRK-1,ups\n" );
+		$attachment_id = $this->make_attachment( $file );
+
+		$fail_schedule = static function () {
+			return 0;
+		};
+		add_filter( 'pre_as_schedule_single_action', $fail_schedule );
+		try {
+			$response = $this->prepare_with_staged_file( $file, $attachment_id );
+		} finally {
+			remove_filter( 'pre_as_schedule_single_action', $fail_schedule );
+		}
+
+		$this->assertInstanceOf( \WP_Error::class, $response );
+		$this->assertSame( 'woocommerce_fulfillments_import_session_failed', $response->get_error_code() );
+		$this->assertSame( 500, $response->get_error_data()['status'] );
+		$this->assertFileDoesNotExist( $file, 'A staged file with no cleanup owner must not be left behind' );
+		$this->assertNull( get_post( $attachment_id ) );
+		$this->assertNull( ImportSession::active_for_user( get_current_user_id() ) );
 	}
 
 	/**

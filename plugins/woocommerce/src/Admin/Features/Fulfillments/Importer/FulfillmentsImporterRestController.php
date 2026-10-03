@@ -38,17 +38,6 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	protected string $rest_base = '/fulfillments/import';
 
 	/**
-	 * Register the REST routes through the base class, plus the Action Scheduler
-	 * callback that removes the staged CSV of an abandoned import session.
-	 *
-	 * @since 11.3.0
-	 */
-	public function register(): void {
-		parent::register();
-		add_action( ImportSession::CLEANUP_HOOK, array( ImportSession::class, 'handle_cleanup_hook' ), 10, 4 );
-	}
-
-	/**
 	 * Get the WooCommerce REST API namespace key for this controller.
 	 *
 	 * @since 11.3.0
@@ -176,8 +165,10 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	/**
 	 * Prepare step: validate and stage the upload, parse the headers, open a session.
 	 *
-	 * The prior session of the user is kept until the new upload is stored, so a rejected
-	 * upload leaves it intact.
+	 * The prior session of the user is kept until the new upload is stored and parsed, so
+	 * a rejected upload leaves it intact. ImportSession::create() decides which session is
+	 * replaced, so two overlapping prepares by the same user each delete the staged file
+	 * of the session they retired.
 	 *
 	 * @since 11.3.0
 	 *
@@ -190,7 +181,6 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		$notify          = (bool) $request->get_param( 'notify_customer' );
 		$update          = (bool) $request->get_param( 'update_existing' );
 		$user_id         = get_current_user_id();
-		$prior           = ImportSession::active_for_user( $user_id );
 
 		$staged = $this->stage_uploaded_csv( $request );
 		if ( $staged instanceof WP_Error ) {
@@ -250,12 +240,15 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			$attachment_id
 		);
 
-		// ImportSession::create() has dropped the prior session record and its cleanup action,
-		// so the prior staged file goes too, whether or not the new session could be stored.
-		if ( $prior instanceof ImportSession ) {
-			$this->delete_staged_file( $prior->file(), $prior->attachment_id() );
+		// The replaced session's record and cleanup action are already gone, so its staged
+		// file goes too, whether or not the new session could be stored.
+		$replaced = $session->replaced();
+		if ( $replaced instanceof ImportSession ) {
+			$this->delete_staged_file( $replaced->file(), $replaced->attachment_id() );
 		}
 
+		// Not stored, or stored without a scheduled cleanup: either way the new staged file
+		// would have no owner, so the prepare fails and the file is removed now.
 		if ( ! $session->persisted() ) {
 			$session->delete();
 			$this->delete_staged_file( $file_path, $attachment_id );
