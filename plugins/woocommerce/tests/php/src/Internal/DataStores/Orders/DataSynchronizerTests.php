@@ -100,6 +100,95 @@ class DataSynchronizerTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testdox Should preserve exact full pending counts and their cache under either authority.
+	 * @dataProvider provider_full_pending_count
+	 * @param bool   $hpos Whether HPOS is authoritative.
+	 * @param string $shape The pending-order fixture.
+	 * @param int    $expected The exact pending count.
+	 */
+	public function test_full_pending_count( bool $hpos, string $shape, int $expected ): void {
+		global $wpdb;
+
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, $hpos ? 'yes' : 'no' );
+		update_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
+		$this->assertSame( 0, $this->sut->get_current_orders_pending_sync_count(), 'The fixture should start without pending orders.' );
+
+		if ( 'deletion' === $shape ) {
+			$meta_table = OrdersTableDataStore::get_meta_table_name();
+			$authority  = $hpos ? DataSynchronizer::DELETED_FROM_ORDERS_META_VALUE : DataSynchronizer::DELETED_FROM_POSTS_META_VALUE;
+			foreach ( array( $authority, $authority, $hpos ? DataSynchronizer::DELETED_FROM_POSTS_META_VALUE : DataSynchronizer::DELETED_FROM_ORDERS_META_VALUE ) as $deleted_from ) {
+				$wpdb->query(
+					$wpdb->prepare(
+						// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Trusted table name from the order data store.
+						"INSERT INTO $meta_table (order_id, meta_key, meta_value) VALUES (%d, %s, %s)",
+						987654,
+						DataSynchronizer::DELETED_RECORD_META_KEY,
+						$deleted_from
+					)
+				);
+			}
+		} elseif ( 'empty' !== $shape ) {
+			$post_type = 'overlap' === $shape || ( $hpos && 'missing' === $shape ) ? DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE : 'shop_order';
+			if ( 'custom' === $shape || 'overlap' === $shape ) {
+				$post_type = 'custom' === $shape ? 'custom_order' : $post_type;
+				add_filter(
+					'wc_order_types',
+					static function ( $types, $context ) use ( $post_type ) {
+						if ( 'cot-migration' === $context ) {
+							$types[] = $post_type;
+						}
+						return $types;
+					},
+					10,
+					2
+				);
+			}
+			$post_id = $this->factory->post->create(
+				array(
+					'post_type'   => $post_type,
+					'post_status' => OrderInternalStatus::COMPLETED,
+				)
+			);
+			$wpdb->update( $wpdb->posts, array( 'post_modified_gmt' => $hpos ? '2024-01-01 00:00:00' : '2024-01-02 00:00:00' ), array( 'ID' => $post_id ) );
+			if ( $hpos || 'changed' === $shape ) {
+				$wpdb->insert(
+					OrdersTableDataStore::get_orders_table_name(),
+					array(
+						'id'               => $post_id,
+						'type'             => 'custom' === $shape ? $post_type : 'shop_order',
+						'status'           => 'changed' === $shape ? 'auto-draft' : OrderInternalStatus::COMPLETED,
+						'date_updated_gmt' => $hpos ? '2024-01-02 00:00:00' : '2024-01-01 00:00:00',
+					)
+				);
+			}
+		}
+
+		$this->assertSame( $expected, $this->sut->get_current_orders_pending_sync_count(), $shape . ' should have the exact pending count.' );
+		$this->assertSame( $expected, wp_cache_get( 'woocommerce_hpos_pending_sync_count', 'counts' ), 'The counts cache should hold the exact integer.' );
+	}
+
+	/**
+	 * Provide full-count fixtures for each authority and overlapping predicates.
+	 *
+	 * @return array
+	 */
+	public function provider_full_pending_count(): array {
+		return array(
+			'hpos missing'   => array( true, 'missing', 1 ),
+			'posts missing'  => array( false, 'missing', 1 ),
+			'hpos changed'   => array( true, 'changed', 1 ),
+			'posts changed'  => array( false, 'changed', 1 ),
+			'hpos deletion'  => array( true, 'deletion', 2 ),
+			'posts deletion' => array( false, 'deletion', 2 ),
+			'overlap'        => array( true, 'overlap', 2 ),
+			'hpos custom'    => array( true, 'custom', 1 ),
+			'posts custom'   => array( false, 'custom', 1 ),
+			'hpos empty'     => array( true, 'empty', 0 ),
+			'posts empty'    => array( false, 'empty', 0 ),
+		);
+	}
+
+	/**
 	 * Test that orders are synced properly where there are orders to migrate from posts table.
 	 */
 	public function test_get_ids_orders_pending_sync_migration() {
