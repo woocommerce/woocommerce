@@ -94,7 +94,6 @@ describe( 'SettingsPaymentsMain', () => {
 		window.wcSettings.admin.woocommerce_payments_nox_profile = {
 			business_country_code: 'BR',
 		};
-		window.wcSettings.countries = { BR: 'Brazil' };
 
 		render(
 			<Router>
@@ -106,10 +105,9 @@ describe( 'SettingsPaymentsMain', () => {
 			screen.getByRole( 'link', { name: 'More payment options' } )
 		).toHaveAttribute(
 			'href',
-			'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations&country=Brazil'
+			'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations&country=BR'
 		);
 
 		delete window.wcSettings.admin.woocommerce_payments_nox_profile;
-		window.wcSettings.countries = {};
 	} );
 } );
