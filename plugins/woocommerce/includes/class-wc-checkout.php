@@ -77,6 +77,9 @@ class WC_Checkout {
 			add_action( 'woocommerce_checkout_billing', array( self::$instance, 'checkout_form_billing' ) );
 			add_action( 'woocommerce_checkout_shipping', array( self::$instance, 'checkout_form_shipping' ) );
 
+			// Priority 0 so callbacks added by themes and extensions still run after this one.
+			add_filter( 'woocommerce_ship_to_different_address_checked', array( self::$instance, 'handle_woocommerce_ship_to_different_address_checked' ), 0 );
+
 			/**
 			 * Runs once when the WC_Checkout class is first instantiated.
 			 *
@@ -378,6 +381,55 @@ class WC_Checkout {
 	 */
 	public function checkout_form_shipping() {
 		wc_get_template( 'checkout/form-shipping.php', array( 'checkout' => $this ) );
+	}
+
+	/**
+	 * Handle the woocommerce_ship_to_different_address_checked filter.
+	 *
+	 * Checks "Ship to a different address?" when the session already holds a shipping destination that differs from the
+	 * billing address, such as one entered in the cart's shipping calculator, so the checkout keeps the address and rates
+	 * the cart showed instead of switching to the billing address.
+	 *
+	 * @internal
+	 *
+	 * @since 11.3.0
+	 * @param mixed $checked Whether the checkbox is checked, 1 or 0 by default.
+	 * @return mixed
+	 */
+	public function handle_woocommerce_ship_to_different_address_checked( $checked ) {
+		if ( $checked || ! WC()->customer instanceof WC_Customer ) {
+			return $checked;
+		}
+
+		return $this->customer_has_different_shipping_destination( WC()->customer ) ? 1 : $checked;
+	}
+
+	/**
+	 * Checks whether the customer's shipping destination differs from their billing address.
+	 *
+	 * Names and company are ignored since they don't affect where the order ships. A shipping address with no street, city
+	 * or postcode only counts as different when its country or state differs, so a shipping address that was never
+	 * entered doesn't check the box.
+	 *
+	 * @param WC_Customer $customer Customer object.
+	 * @return bool
+	 */
+	private function customer_has_different_shipping_destination( WC_Customer $customer ): bool {
+		if ( $customer->get_shipping_country() !== $customer->get_billing_country() || $customer->get_shipping_state() !== $customer->get_billing_state() ) {
+			return true;
+		}
+
+		$has_shipping_destination = false;
+		$differs_from_billing     = false;
+
+		foreach ( array( 'address_1', 'address_2', 'city', 'postcode' ) as $field ) {
+			$shipping_value = (string) $customer->{"get_shipping_{$field}"}();
+
+			$has_shipping_destination = $has_shipping_destination || '' !== trim( $shipping_value );
+			$differs_from_billing     = $differs_from_billing || $shipping_value !== (string) $customer->{"get_billing_{$field}"}();
+		}
+
+		return $has_shipping_destination && $differs_from_billing;
 	}
 
 	/**
