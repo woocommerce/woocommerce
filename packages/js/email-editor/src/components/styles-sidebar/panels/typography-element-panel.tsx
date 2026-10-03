@@ -70,6 +70,7 @@ export function TypographyElementPanel( {
 		'typography.fontSizes',
 		'typography.fontFamilies'
 	);
+	const [ availableUnits ] = useSettings( 'spacing.units' ) as [ string[] ];
 
 	// Ref: https://github.com/WordPress/gutenberg/issues/59778
 	const fontFamilies = blockLevelFontFamilies?.default || [];
@@ -338,6 +339,7 @@ export function TypographyElementPanel( {
 						value={ fontSize }
 						onChange={ setFontSize }
 						fontSizes={ fontSizes }
+						units={ availableUnits }
 						disableCustomFontSizes={ false }
 						withReset={ false }
 						withSlider

@@ -832,31 +832,6 @@ class ProductCollectionPage {
 		}
 	}
 
-	async getProductPermalinkPaths(): Promise< string[] > {
-		return this.productTitles
-			.getByRole( 'link' )
-			.evaluateAll( ( links ) =>
-				links.map(
-					( link ) =>
-						new URL( ( link as HTMLAnchorElement ).href ).pathname
-				)
-			);
-	}
-
-	async getProductCollectionQuery() {
-		return this.page.evaluate( () => {
-			const block = window.wp.data
-				.select( 'core/block-editor' )
-				.getBlocks()
-				.find(
-					( candidate: { name: string } ) =>
-						candidate.name === 'woocommerce/product-collection'
-				);
-
-			return block?.attributes.query ?? {};
-		} );
-	}
-
 	private async initializeLocatorsForEditor() {
 		this.productTemplate = this.editor.canvas.locator(
 			SELECTORS.productTemplate
