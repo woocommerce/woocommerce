@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove the view-post link from the notice shown after saving an email in the email editor

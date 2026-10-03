@@ -28,6 +28,18 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Rebuild the gateway registry so a read goes through gateway construction, as the next request would.
+	 *
+	 * Clearing first matters: init() writes each gateway into a slot keyed by its order, so on its own it
+	 * leaves stale gateways behind in the slots the new order no longer uses.
+	 */
+	private function rebuild_payment_gateways() {
+		$gateways                   = WC_Payment_Gateways::instance();
+		$gateways->payment_gateways = array();
+		$gateways->init();
+	}
+
+	/**
 	 * Test route registration.
 	 *
 	 * @since 3.5.0
@@ -50,6 +62,21 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$gateways = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
+
+		// COD covers several distinct form field types, so use it to check how each one is surfaced.
+		$gateways_by_id = array_column( $gateways, null, 'id' );
+		$this->assertArrayHasKey( WC_Gateway_COD::ID, $gateways_by_id );
+		$this->assertArraySubset(
+			array(
+				'settings' => array(
+					'title'              => array( 'type' => 'safe_text' ),
+					'instructions'       => array( 'type' => 'textarea' ),
+					'enable_for_methods' => array( 'type' => 'multiselect' ),
+					'enable_for_virtual' => array( 'type' => 'checkbox' ),
+				),
+			),
+			$gateways_by_id[ WC_Gateway_COD::ID ]
+		);
 
 		$matching_gateway_data = current(
 			array_filter(
@@ -270,6 +297,77 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$paypal   = $response->get_data();
 		$this->assertEquals( 'authorization', $paypal['settings']['paymentaction']['value'] );
+	}
+
+	/**
+	 * @testdox A gateway update reaches storage, so a later request reads the new state.
+	 */
+	public function test_update_payment_gateway_persists_to_storage() {
+		wp_set_current_user( $this->user );
+
+		// No settings payload here, so the write has to happen for the top level fields on their own.
+		$request = new WP_REST_Request( 'POST', '/wc/v3/payment_gateways/cheque' );
+		$request->set_body_params(
+			array(
+				'enabled' => true,
+				'title'   => 'Pay by check',
+			)
+		);
+		$this->assertSame( 200, $this->server->dispatch( $request )->get_status() );
+
+		$this->rebuild_payment_gateways();
+
+		$data = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payment_gateways/cheque' ) )->get_data();
+		$this->assertTrue( $data['enabled'] );
+		$this->assertSame( 'Pay by check', $data['title'] );
+
+		// Settings values take a different route through update_item, so post one on its own too.
+		$request = new WP_REST_Request( 'POST', '/wc/v3/payment_gateways/cheque' );
+		$request->set_body_params(
+			array(
+				'settings' => array(
+					'instructions' => 'Post the check to our office.',
+				),
+			)
+		);
+		$this->assertSame( 200, $this->server->dispatch( $request )->get_status() );
+
+		$this->rebuild_payment_gateways();
+
+		$data = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payment_gateways/cheque' ) )->get_data();
+		$this->assertSame( 'Post the check to our office.', $data['settings']['instructions']['value'] );
+		$this->assertTrue( $data['enabled'] );
+	}
+
+	/**
+	 * @testdox Gateway order persists and decides where a gateway sits in the collection.
+	 */
+	public function test_update_payment_gateway_order_persists_to_storage() {
+		wp_set_current_user( $this->user );
+
+		// BACS loads before cheque, so putting cheque first means the registry has to reorder them.
+		foreach ( array(
+			WC_Gateway_Cheque::ID => 0,
+			WC_Gateway_BACS::ID   => 1,
+		) as $gateway_id => $order ) {
+			$request = new WP_REST_Request( 'POST', '/wc/v3/payment_gateways/' . $gateway_id );
+			$request->set_body_params( array( 'order' => $order ) );
+			$this->assertSame( 200, $this->server->dispatch( $request )->get_status() );
+		}
+
+		// Order lives in its own option, and the registry reads it to sort gateways.
+		$this->rebuild_payment_gateways();
+
+		$gateways = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payment_gateways' ) )->get_data();
+		$by_id    = array_column( $gateways, null, 'id' );
+		$this->assertSame( 0, $by_id[ WC_Gateway_Cheque::ID ]['order'] );
+		$this->assertSame( 1, $by_id[ WC_Gateway_BACS::ID ]['order'] );
+
+		$ids = array_column( $gateways, 'id' );
+		$this->assertLessThan(
+			array_search( WC_Gateway_BACS::ID, $ids, true ),
+			array_search( WC_Gateway_Cheque::ID, $ids, true )
+		);
 	}
 
 	/**

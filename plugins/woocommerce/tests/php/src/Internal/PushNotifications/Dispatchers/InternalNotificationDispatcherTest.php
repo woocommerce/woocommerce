@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Dispatchers;
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewReviewNotification;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationStepLogger;
 use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
 use WC_Unit_Test_Case;
 
@@ -37,12 +38,21 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 	private $captured_url;
 
 	/**
+	 * Mock step logger.
+	 *
+	 * @var NotificationStepLogger|\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private $step_logger;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->sut              = new InternalNotificationDispatcher();
+		$this->step_logger = $this->createMock( NotificationStepLogger::class );
+		$this->sut         = new InternalNotificationDispatcher();
+		$this->sut->init( $this->step_logger );
 		$this->captured_request = null;
 		$this->captured_url     = null;
 
@@ -80,6 +90,11 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The URL is decoded before asserting on it: on sites without pretty
+	 * permalinks rest_url() returns the `?rest_route=/...` form, and appending
+	 * the token with add_query_arg() re-encodes that existing query string, so
+	 * the raw URL carries `%2F` in place of the endpoint's slashes.
+	 *
 	 * @testdox Should fire a non-blocking POST to the send endpoint URL.
 	 */
 	public function test_dispatch_fires_non_blocking_post_to_send_endpoint(): void {
@@ -89,7 +104,7 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString(
 			InternalNotificationDispatcher::SEND_ENDPOINT,
-			$this->captured_url,
+			urldecode( (string) $this->captured_url ),
 			'Request URL should contain the send endpoint'
 		);
 		$this->assertFalse(
@@ -137,6 +152,30 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The receiver prefers the Authorization header and falls back to the query
+	 * parameter on hosts that strip it, so the two credentials have to be the
+	 * same token - otherwise the fallback would validate against a different
+	 * body hash than the request it arrived with.
+	 *
+	 * @testdox Should repeat the Authorization header token in the URL query string.
+	 */
+	public function test_dispatch_repeats_token_in_url_query_string(): void {
+		$notifications = array( $this->create_order_mock( 1 ) );
+
+		$this->sut->dispatch( $notifications );
+
+		$header_token = str_replace( 'Bearer ', '', $this->captured_request['headers']['Authorization'] );
+		$query        = array();
+		wp_parse_str( (string) wp_parse_url( (string) $this->captured_url, PHP_URL_QUERY ), $query );
+
+		$this->assertSame(
+			$header_token,
+			$query[ InternalNotificationDispatcher::TOKEN_QUERY_PARAM ] ?? null,
+			'URL token should be the same token sent in the Authorization header'
+		);
+	}
+
+	/**
 	 * @testdox Should include encoded notifications in the request body.
 	 */
 	public function test_dispatch_body_contains_encoded_notifications(): void {
@@ -164,6 +203,46 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 		$this->sut->dispatch( array() );
 
 		$this->assertNull( $this->captured_url, 'No HTTP request should be made for empty notifications' );
+	}
+
+	/**
+	 * @testdox Should log one line for the batch, naming every notification it carried.
+	 */
+	public function test_dispatch_logs_one_line_for_the_batch(): void {
+		$this->step_logger->expects( $this->once() )
+			->method( 'log_batch_step' )
+			->with(
+				'loopback_requested',
+				'ok',
+				$this->callback(
+					fn( array $context ) => 2 === $context['batch_size']
+						&& array( 'store_order', 'store_order' ) === array_column( $context['notifications'], 'type' )
+						&& array( 1, 2 ) === array_column( $context['notifications'], 'resource_id' )
+						&& 2 === count( array_filter( array_column( $context['notifications'], 'identifier' ) ) )
+				)
+			);
+
+		$this->sut->dispatch( array( $this->create_order_mock( 1 ), $this->create_order_mock( 2 ) ) );
+	}
+
+	/**
+	 * @testdox Should log one failure for the batch when the loopback request cannot be made.
+	 */
+	public function test_dispatch_logs_request_failure(): void {
+		remove_filter( 'pre_http_request', array( $this, 'intercept_http_request' ), 10 );
+		add_filter( 'pre_http_request', fn() => new \WP_Error( 'http_request_failed', 'cURL error 7' ) );
+
+		$this->step_logger->expects( $this->once() )
+			->method( 'log_unattributed_failure' )
+			->with(
+				'loopback_requested',
+				'request_failed',
+				'warning',
+				'Loopback request failed: cURL error 7',
+				$this->callback( fn( array $context ) => 1 === $context['batch_size'] )
+			);
+
+		$this->sut->dispatch( array( $this->create_order_mock( 1 ) ) );
 	}
 
 	/**

@@ -370,7 +370,7 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 		/**
 		 * Used to add/overwrite report data endpoint.
 		 *
-		 * @since x.x.x
+		 * @since 9.8.0
 		 *
 		 * @param string $endpoint The report's data endpoint.
 		 * @param string $type     The report's type.

@@ -106,7 +106,6 @@ type MiniCart = {
 		isOpen: boolean;
 		totalItemsInCart: number;
 		formattedSubtotal: string;
-		drawerOverlayClass: string;
 		badgeIsVisible: boolean;
 		cartIsEmpty: boolean;
 		drawerRole: string | null;
@@ -230,14 +229,6 @@ store< MiniCart >(
 
 			get drawerTabIndex() {
 				return state.isOpen ? '-1' : null;
-			},
-
-			get drawerOverlayClass() {
-				const baseClasses =
-					'wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out';
-				return state.isOpen
-					? `${ baseClasses } wc-block-components-drawer__screen-overlay--with-slide-in`
-					: `${ baseClasses } wc-block-components-drawer__screen-overlay--is-hidden`;
 			},
 
 			get badgeIsVisible(): boolean {
