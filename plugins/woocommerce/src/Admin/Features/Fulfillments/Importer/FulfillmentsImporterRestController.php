@@ -25,6 +25,7 @@ defined( 'ABSPATH' ) || exit;
  * Exposes `POST /wc/v3/fulfillments/import/prepare`, which uploads the CSV, parses the
  * headers and opens an ImportSession for the wizard's column-mapping step.
  *
+ * @internal
  * @since 11.3.0
  */
 class FulfillmentsImporterRestController extends RestApiControllerBase {
@@ -76,7 +77,8 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 						'delimiter'       => array(
 							'type'              => 'string',
 							'default'           => ',',
-							'description'       => __( 'Single-character CSV delimiter. Defaults to comma.', 'woocommerce' ),
+							'description'       => __( 'Single-character CSV delimiter, or "tab". Defaults to comma.', 'woocommerce' ),
+							'validate_callback' => fn( $value ) => $this->validate_delimiter( $value ),
 							'sanitize_callback' => array( FulfillmentsCsvImporter::class, 'normalize_delimiter' ),
 						),
 						'notify_customer' => array(
@@ -148,7 +150,34 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Prepare step: validate + stage the upload, parse headers, open a session.
+	 * Validate the delimiter argument: a string of at most one byte, or a tab spelling.
+	 *
+	 * @param mixed $value Raw request value.
+	 * @return true|WP_Error
+	 */
+	protected function validate_delimiter( $value ) {
+		if ( ! is_string( $value ) ) {
+			return new WP_Error(
+				'woocommerce_fulfillments_import_invalid_delimiter',
+				__( 'The delimiter must be a string.', 'woocommerce' ),
+				array( 'status' => WP_Http::BAD_REQUEST )
+			);
+		}
+		if ( strlen( $value ) > 1 && ! FulfillmentsCsvImporter::is_tab_spelling( $value ) ) {
+			return new WP_Error(
+				'woocommerce_fulfillments_import_invalid_delimiter',
+				__( 'The delimiter must be a single character or "tab".', 'woocommerce' ),
+				array( 'status' => WP_Http::BAD_REQUEST )
+			);
+		}
+		return true;
+	}
+
+	/**
+	 * Prepare step: validate and stage the upload, parse the headers, open a session.
+	 *
+	 * The prior session of the user is kept until the new upload is stored, so a rejected
+	 * upload leaves it intact.
 	 *
 	 * @since 11.3.0
 	 *
@@ -161,13 +190,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		$notify          = (bool) $request->get_param( 'notify_customer' );
 		$update          = (bool) $request->get_param( 'update_existing' );
 		$user_id         = get_current_user_id();
-
-		// Replace any prior session (and its staged file) for this user before staging the new upload.
-		$prior = ImportSession::active_for_user( $user_id );
-		if ( $prior instanceof ImportSession ) {
-			$this->delete_staged_file( $prior->file(), $prior->attachment_id() );
-			$prior->delete();
-		}
+		$prior           = ImportSession::active_for_user( $user_id );
 
 		$staged = $this->stage_uploaded_csv( $request );
 		if ( $staged instanceof WP_Error ) {
@@ -195,6 +218,14 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		}
 
 		$total = (int) ( $parsed['total'] ?? 0 );
+		if ( 0 === $total ) {
+			$this->delete_staged_file( $file_path, $attachment_id );
+			return new WP_Error(
+				'woocommerce_fulfillments_csv_parse_error',
+				__( 'The CSV file has no data rows.', 'woocommerce' ),
+				array( 'status' => WP_Http::BAD_REQUEST )
+			);
+		}
 		if ( $total > FulfillmentsCsvImporter::MAX_IMPORT_ROWS ) {
 			$this->delete_staged_file( $file_path, $attachment_id );
 			return new WP_Error(
@@ -218,6 +249,12 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			$update,
 			$attachment_id
 		);
+
+		// ImportSession::create() has dropped the prior session record and its cleanup action,
+		// so the prior staged file goes too, whether or not the new session could be stored.
+		if ( $prior instanceof ImportSession ) {
+			$this->delete_staged_file( $prior->file(), $prior->attachment_id() );
+		}
 
 		if ( ! $session->persisted() ) {
 			$session->delete();
@@ -245,8 +282,6 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 * @param WP_REST_Request $request Incoming request carrying the multipart upload.
 	 * @return array{file:string, id:int}|WP_Error Staged absolute path and the attachment post ID created for it.
-	 *
-	 * @throws \Exception When staged-file validation fails; caught internally and returned as a WP_Error.
 	 */
 	protected function stage_uploaded_csv( WP_REST_Request $request ) {
 		$files = $request->get_file_params();
@@ -258,12 +293,8 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			);
 		}
 
-		/**
-		 * This filter is documented in wp-admin/includes/import.php.
-		 *
-		 * @since 2.3.0
-		 */
-		$upload_limit = (int) apply_filters( 'import_upload_size_limit', wp_max_upload_size() );
+		/** This filter is documented in wp-admin/includes/import.php. */
+		$upload_limit = (int) apply_filters( 'import_upload_size_limit', wp_max_upload_size() ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 		$file_size    = isset( $files['file']['size'] ) ? (int) $files['file']['size'] : 0;
 		if ( $upload_limit > 0 && $file_size > $upload_limit ) {
 			return new WP_Error(
@@ -304,22 +335,23 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 				$attachment_id = (int) ( $upload['id'] ?? 0 );
 
 				FilesystemUtil::validate_upload_file_path( $file_path );
-
-				if ( ! wc_is_file_valid_csv( $file_path ) ) {
-					throw new \Exception( __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
-				}
 			} catch ( \Exception $e ) {
+				// The upload handler's message can carry server paths, so it is logged, not returned.
 				$this->discard_failed_upload( $file_path, $attachment_id );
+				wc_get_logger()->warning(
+					'Fulfillments importer upload rejected: ' . html_entity_decode( $e->getMessage(), ENT_QUOTES, 'UTF-8' ),
+					array( 'source' => 'fulfillments-importer' )
+				);
 				return new WP_Error(
 					'woocommerce_fulfillments_import_upload_failed',
-					$e->getMessage(),
+					__( 'The file could not be uploaded.', 'woocommerce' ),
 					array( 'status' => WP_Http::BAD_REQUEST )
 				);
 			} catch ( \Throwable $e ) {
 				$this->discard_failed_upload( $file_path, $attachment_id );
 				wc_get_logger()->error(
-					'Fulfillments importer upload failed: ' . $e->getMessage(),
-					array( 'source' => 'fulfillments-csv-importer' )
+					'Fulfillments importer upload failed: ' . html_entity_decode( $e->getMessage(), ENT_QUOTES, 'UTF-8' ),
+					array( 'source' => 'fulfillments-importer' )
 				);
 				return new WP_Error(
 					'woocommerce_fulfillments_import_upload_failed',
@@ -329,6 +361,15 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			}
 		} finally {
 			unset( $_FILES['fulfillment_import_file'] );
+		}
+
+		if ( ! wc_is_file_valid_csv( $file_path ) ) {
+			$this->discard_failed_upload( $file_path, $attachment_id );
+			return new WP_Error(
+				'woocommerce_fulfillments_import_upload_failed',
+				__( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ),
+				array( 'status' => WP_Http::BAD_REQUEST )
+			);
 		}
 
 		return array(
@@ -367,7 +408,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		if ( '' === $file ) {
 			return;
 		}
-		if ( file_exists( $file ) && ! $this->is_valid_staged_path( $file ) ) {
+		if ( file_exists( $file ) && ! ImportSession::is_staged_path( $file ) ) {
 			return;
 		}
 		if ( $attachment_id > 0 && get_attached_file( $attachment_id ) === $file ) {
@@ -376,16 +417,6 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		if ( file_exists( $file ) ) {
 			wp_delete_file( $file );
 		}
-	}
-
-	/**
-	 * Whether a persisted staged-file path resolves inside the uploads directory.
-	 *
-	 * @param string $path Absolute path from session state.
-	 * @return bool
-	 */
-	private function is_valid_staged_path( string $path ): bool {
-		return ImportSession::is_staged_path( $path );
 	}
 
 	/**
