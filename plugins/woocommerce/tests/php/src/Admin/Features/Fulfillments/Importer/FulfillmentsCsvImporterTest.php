@@ -227,6 +227,203 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The spelled-out tab forms map to a tab character.
+	 *
+	 * @testWith ["\\t"]
+	 *           ["\\\\t"]
+	 *           ["tab"]
+	 *           ["TAB"]
+	 *
+	 * @param string $spelling Delimiter input.
+	 */
+	public function test_tab_spellings_map_to_tab( string $spelling ): void {
+		$this->assertSame( "\t", FulfillmentsCsvImporter::normalize_delimiter( $spelling ) );
+		$this->assertTrue( FulfillmentsCsvImporter::is_tab_spelling( $spelling ) );
+	}
+
+	/**
+	 * @testdox Line breaks and the enclosure character fall back to comma.
+	 *
+	 * @testWith ["\n"]
+	 *           ["\r"]
+	 *           ["\""]
+	 *
+	 * @param string $delimiter Delimiter input.
+	 */
+	public function test_unusable_delimiters_fall_back_to_comma( string $delimiter ): void {
+		$this->assertSame( ',', FulfillmentsCsvImporter::normalize_delimiter( $delimiter ) );
+		$this->assertFalse( FulfillmentsCsvImporter::is_tab_spelling( $delimiter ) );
+	}
+
+	/**
+	 * @testdox parse_headers reads a tab-separated file when the delimiter is spelled out.
+	 */
+	public function test_parse_headers_honors_spelled_out_tab_delimiter(): void {
+		$file = $this->make_csv( "order_number\ttracking_number\tshipment_provider\n1\tTAB-1\tups\n" );
+
+		$parsed = ( new FulfillmentsCsvImporter( $file ) )->parse_headers( 'tab' );
+
+		$this->assertArrayNotHasKey( 'error', $parsed );
+		$this->assertSame( "\t", $parsed['delimiter'] );
+		$this->assertSame( array( 'order_number', 'tracking_number', 'shipment_provider' ), $parsed['headers'] );
+		$this->assertSame( array( '1', 'TAB-1', 'ups' ), $parsed['sample'] );
+	}
+
+	/**
+	 * @testdox parse_headers strips a UTF-8 BOM from the first header cell.
+	 */
+	public function test_parse_headers_strips_bom(): void {
+		$file = $this->make_csv( "\xEF\xBB\xBForder_number,tracking_number,shipment_provider\n1,BOM-1,ups\n" );
+
+		$parsed = ( new FulfillmentsCsvImporter( $file ) )->parse_headers();
+
+		$this->assertArrayNotHasKey( 'error', $parsed );
+		$this->assertSame( 'order_number', $parsed['headers'][0] );
+		$this->assertSame( FulfillmentsCsvImporter::COL_ORDER_NUMBER, $parsed['detected_mapping'][0] );
+	}
+
+	/**
+	 * @testdox parse_headers reports zero rows and no sample for a header-only file.
+	 */
+	public function test_parse_headers_reports_zero_rows_for_header_only_file(): void {
+		$file = $this->make_csv( "order_number,tracking_number,shipment_provider\n" );
+
+		$parsed = ( new FulfillmentsCsvImporter( $file ) )->parse_headers();
+
+		$this->assertArrayNotHasKey( 'error', $parsed );
+		$this->assertSame( 0, $parsed['total'] );
+		$this->assertSame( array(), $parsed['sample'] );
+		$this->assertSame( array( 'order_number', 'tracking_number', 'shipment_provider' ), $parsed['headers'] );
+	}
+
+	/**
+	 * @testdox parse_headers skips blank lines before the header.
+	 */
+	public function test_parse_headers_skips_leading_blank_lines(): void {
+		$file = $this->make_csv( "\n\norder_number,tracking_number,shipment_provider\n1,BLANK-1,ups\n" );
+
+		$parsed = ( new FulfillmentsCsvImporter( $file ) )->parse_headers();
+
+		$this->assertArrayNotHasKey( 'error', $parsed );
+		$this->assertSame( array( 'order_number', 'tracking_number', 'shipment_provider' ), $parsed['headers'] );
+		$this->assertSame( 1, $parsed['total'] );
+		$this->assertSame( array( '1', 'BLANK-1', 'ups' ), $parsed['sample'] );
+	}
+
+	/**
+	 * @testdox parse_headers reports an empty CSV when the file holds only blank lines.
+	 */
+	public function test_parse_headers_reports_empty_csv_for_blank_lines_only(): void {
+		$file = $this->make_csv( "\n\n,,\n" );
+
+		$parsed = ( new FulfillmentsCsvImporter( $file ) )->parse_headers();
+
+		$this->assertArrayHasKey( 'error', $parsed );
+		$this->assertSame( 'empty_csv', $parsed['error']['code'] );
+	}
+
+	/**
+	 * @testdox parse_headers does not count blank data lines towards the total.
+	 */
+	public function test_parse_headers_ignores_blank_data_lines(): void {
+		$file = $this->make_csv( "order_number,tracking_number,shipment_provider\n\n1,ROW-1,ups\n,,\n   \n2,ROW-2,ups\n\n" );
+
+		$parsed = ( new FulfillmentsCsvImporter( $file ) )->parse_headers();
+
+		$this->assertArrayNotHasKey( 'error', $parsed );
+		$this->assertSame( 2, $parsed['total'] );
+		$this->assertSame( array( '1', 'ROW-1', 'ups' ), $parsed['sample'] );
+	}
+
+	/**
+	 * @testdox parse_headers counts rows past the cap by one so the caller can reject the file.
+	 */
+	public function test_parse_headers_counts_one_row_past_the_cap(): void {
+		$csv = "order_number,tracking_number,shipment_provider\n";
+		for ( $i = 1; $i <= FulfillmentsCsvImporter::MAX_IMPORT_ROWS + 50; $i++ ) {
+			$csv .= "1,CAP-{$i},ups\n";
+		}
+		$file = $this->make_csv( $csv );
+
+		$parsed = ( new FulfillmentsCsvImporter( $file ) )->parse_headers();
+
+		$this->assertSame( FulfillmentsCsvImporter::MAX_IMPORT_ROWS + 1, $parsed['total'] );
+	}
+
+	/**
+	 * @testdox The first of two headers mapping to the same canonical column wins.
+	 */
+	public function test_parse_headers_first_duplicate_header_wins(): void {
+		$file = $this->make_csv( "tracking_number,tracking,order_number,shipment_provider\nT-1,T-2,1,ups\n" );
+
+		$parsed = ( new FulfillmentsCsvImporter( $file ) )->parse_headers();
+
+		$this->assertSame( FulfillmentsCsvImporter::COL_TRACKING_NUMBER, $parsed['detected_mapping'][0] );
+		$this->assertArrayNotHasKey( 1, $parsed['detected_mapping'] );
+		$this->assertSame( FulfillmentsCsvImporter::COL_ORDER_NUMBER, $parsed['detected_mapping'][2] );
+	}
+
+	/**
+	 * @testdox parse_headers handles CRLF line endings without leaking the carriage return into cells.
+	 */
+	public function test_parse_headers_handles_crlf_line_endings(): void {
+		$file = $this->make_csv( "order_number,tracking_number,shipment_provider\r\n1,CRLF-1,ups\r\n2,CRLF-2,ups\r\n" );
+
+		$parsed = ( new FulfillmentsCsvImporter( $file ) )->parse_headers();
+
+		$this->assertArrayNotHasKey( 'error', $parsed );
+		$this->assertSame( array( 'order_number', 'tracking_number', 'shipment_provider' ), $parsed['headers'] );
+		$this->assertSame( array( '1', 'CRLF-1', 'ups' ), $parsed['sample'] );
+		$this->assertSame( 2, $parsed['total'] );
+	}
+
+	/**
+	 * @testdox An alias added through the filter is matched regardless of its casing and punctuation.
+	 */
+	public function test_alias_filter_entries_are_normalized(): void {
+		$filter = function ( $aliases ) {
+			$aliases[ FulfillmentsCsvImporter::COL_ORDER_NUMBER ][] = 'PO Number';
+			return $aliases;
+		};
+		add_filter( 'woocommerce_fulfillments_csv_importer_column_aliases', $filter );
+
+		try {
+			$file   = $this->make_csv( "po_number,tracking_number,shipment_provider\n1,PO-1,ups\n" );
+			$parsed = ( new FulfillmentsCsvImporter( $file ) )->parse_headers();
+		} finally {
+			remove_filter( 'woocommerce_fulfillments_csv_importer_column_aliases', $filter );
+		}
+
+		$this->assertSame( FulfillmentsCsvImporter::COL_ORDER_NUMBER, $parsed['detected_mapping'][0] );
+	}
+
+	/**
+	 * @testdox The default aliases are used when the filter leaves nothing usable.
+	 */
+	public function test_alias_filter_without_usable_entries_falls_back_to_defaults(): void {
+		$filter = function () {
+			return array( FulfillmentsCsvImporter::COL_ORDER_NUMBER => array( 42, '', '  ' ) );
+		};
+		add_filter( 'woocommerce_fulfillments_csv_importer_column_aliases', $filter );
+
+		try {
+			$file   = $this->make_csv( "order_number,tracking_number,shipment_provider\n1,DEF-1,ups\n" );
+			$parsed = ( new FulfillmentsCsvImporter( $file ) )->parse_headers();
+		} finally {
+			remove_filter( 'woocommerce_fulfillments_csv_importer_column_aliases', $filter );
+		}
+
+		$this->assertSame(
+			array(
+				0 => FulfillmentsCsvImporter::COL_ORDER_NUMBER,
+				1 => FulfillmentsCsvImporter::COL_TRACKING_NUMBER,
+				2 => FulfillmentsCsvImporter::COL_PROVIDER,
+			),
+			$parsed['detected_mapping']
+		);
+	}
+
+	/**
 	 * @testdox parse_headers reports an error when the file is empty.
 	 */
 	public function test_parse_headers_reports_empty_csv(): void {
