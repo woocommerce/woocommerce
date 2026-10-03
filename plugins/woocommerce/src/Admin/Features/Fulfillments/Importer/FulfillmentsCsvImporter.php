@@ -15,6 +15,7 @@ defined( 'ABSPATH' ) || exit;
  * Reads the header row of a fulfillments CSV, detects the column mapping and counts
  * the data rows so the import wizard can present its column-mapping step.
  *
+ * @internal
  * @since 11.3.0
  */
 class FulfillmentsCsvImporter {
@@ -58,13 +59,18 @@ class FulfillmentsCsvImporter {
 	private array $options;
 
 	/**
-	 * Maximum number of CSV records accepted per import.
+	 * Maximum number of data rows accepted per file.
 	 *
-	 * The cross-chunk dedupe set is serialized into the session transient and
-	 * rewritten on every chunk, so the row count must stay bounded. Larger files
-	 * should be split and imported in parts.
+	 * The cap bounds the time the prepare request spends counting rows and the
+	 * size of the session transient. Larger files must be split and imported in parts.
 	 */
 	public const MAX_IMPORT_ROWS = 5000;
+
+	/**
+	 * Spellings accepted for a tab delimiter, since multipart and JSON clients
+	 * cannot always send a raw tab character.
+	 */
+	private const TAB_SPELLINGS = array( '\t', '\\\\t', 'tab' );
 
 	/**
 	 * Constructor.
@@ -72,7 +78,8 @@ class FulfillmentsCsvImporter {
 	 * @since 11.3.0
 	 *
 	 * @param string               $file    Absolute path to the CSV file.
-	 * @param array<string, mixed> $options Importer options:
+	 * @param array<string, mixed> $options Importer options. parse_headers() reads only delimiter and
+	 *                                      enclosure; the other two are kept for the import run.
 	 *                                      - notify_customer (bool): Whether to fire customer notifications. Default false.
 	 *                                      - delimiter (string): Single-character CSV delimiter. Default ','.
 	 *                                      - enclosure (string): CSV enclosure. Default '"'.
@@ -90,7 +97,11 @@ class FulfillmentsCsvImporter {
 	}
 
 	/**
-	 * Normalize a delimiter input, falling back to ',' when empty or non-string.
+	 * Normalize a delimiter input to the single ASCII byte fgetcsv() needs.
+	 *
+	 * The spellings "\t", "\\t" and "tab" map to a tab character. Longer strings are
+	 * clamped to their first byte. Empty, non-string, non-ASCII, line-break and
+	 * double-quote inputs fall back to a comma.
 	 *
 	 * @since 11.3.0
 	 *
@@ -101,19 +112,38 @@ class FulfillmentsCsvImporter {
 		if ( ! is_string( $delimiter ) || '' === $delimiter ) {
 			return ',';
 		}
+		if ( self::is_tab_spelling( $delimiter ) ) {
+			return "\t";
+		}
 		// substr() slices by byte; the first byte of a multibyte character is a
 		// malformed fragment that would make fgetcsv() silently mis-parse the file,
 		// so anything outside the ASCII range falls back to the default.
 		$first = substr( $delimiter, 0, 1 );
-		return ord( $first ) < 0x80 ? $first : ',';
+		if ( ord( $first ) >= 0x80 || in_array( $first, array( "\r", "\n", '"' ), true ) ) {
+			return ',';
+		}
+		return $first;
+	}
+
+	/**
+	 * Whether a delimiter input is one of the accepted spellings of a tab character.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $delimiter Raw delimiter input.
+	 * @return bool
+	 */
+	public static function is_tab_spelling( string $delimiter ): bool {
+		return in_array( strtolower( $delimiter ), self::TAB_SPELLINGS, true );
 	}
 
 	/**
 	 * Parse the CSV header row and return metadata sufficient to drive the column-mapping UI.
 	 *
-	 * Streams through the file once to count remaining rows and capture a single sample row.
-	 * Does not fail when required canonical columns cannot be auto-detected; the caller can
-	 * present the mapping UI so the user resolves it manually.
+	 * Streams through the file once to count the non-blank data rows and capture the first
+	 * one as a sample. Blank lines before the header are skipped. Does not fail when required
+	 * canonical columns cannot be auto-detected; the caller can present the mapping UI so
+	 * the user resolves it manually.
 	 *
 	 * @since 11.3.0
 	 *
@@ -153,8 +183,12 @@ class FulfillmentsCsvImporter {
 
 			$effective_delimiter = '' === $delimiter ? $this->options['delimiter'] : self::normalize_delimiter( $delimiter );
 
-			$header_raw = fgetcsv( $handle, 0, $effective_delimiter, $this->options['enclosure'], '' );
-			if ( false === $header_raw || null === $header_raw ) {
+			// fgetcsv() returns array( null ) for a blank line, so skip those until the header.
+			do {
+				$header_raw = fgetcsv( $handle, 0, $effective_delimiter, $this->options['enclosure'], '' );
+			} while ( is_array( $header_raw ) && $this->is_blank_row( $header_raw ) );
+
+			if ( ! is_array( $header_raw ) ) {
 				return array(
 					'error' => array(
 						'code'    => 'empty_csv',
@@ -178,11 +212,14 @@ class FulfillmentsCsvImporter {
 			$total  = 0;
 			while ( true ) {
 				$row = fgetcsv( $handle, 0, $effective_delimiter, $this->options['enclosure'], '' );
-				if ( false === $row || null === $row ) {
+				if ( ! is_array( $row ) ) {
 					break;
 				}
+				if ( $this->is_blank_row( $row ) ) {
+					continue;
+				}
 				++$total;
-				if ( empty( $sample ) && ! $this->is_blank_row( $row ) ) {
+				if ( empty( $sample ) ) {
 					foreach ( $row as $value ) {
 						$sample[] = is_scalar( $value ) ? (string) $value : '';
 					}
@@ -323,10 +360,11 @@ class FulfillmentsCsvImporter {
 		 * Filter the header aliases recognized by the fulfillments CSV importer.
 		 *
 		 * Lets stores accept additional header names from third-party WMS/3PL exports.
-		 * Keys are canonical column identifiers; values are arrays of accepted (lowercase,
-		 * snake-cased) aliases. Only the importer's own canonical keys are honoured: the
-		 * wizard works from that fixed set, so a new key here would be detected and then
-		 * rejected.
+		 * Keys are canonical column identifiers; values are arrays of accepted aliases.
+		 * Aliases are normalized the same way as header cells (lowercase, non-alphanumeric
+		 * runs collapsed to "_"), so "Order No." and "order_no" are the same alias. Only the
+		 * importer's own canonical keys are honored: the wizard works from that fixed set,
+		 * so a new key here would be detected and then rejected.
 		 *
 		 * @since 11.3.0
 		 *
@@ -348,14 +386,18 @@ class FulfillmentsCsvImporter {
 			}
 			$clean = array();
 			foreach ( $alias_list as $alias ) {
-				if ( is_string( $alias ) && '' !== $alias ) {
-					$clean[] = $alias;
+				$normalized = is_string( $alias ) ? $this->normalize_header( $alias ) : '';
+				if ( '' !== $normalized ) {
+					$clean[] = $normalized;
 				}
 			}
-			$sanitized[ $canonical ] = $clean;
+			if ( array() !== $clean ) {
+				$sanitized[ $canonical ] = $clean;
+			}
 		}
 
-		return $sanitized;
+		// A filter that leaves nothing usable would make every header undetectable.
+		return array() === $sanitized ? $defaults : $sanitized;
 	}
 
 	/**
