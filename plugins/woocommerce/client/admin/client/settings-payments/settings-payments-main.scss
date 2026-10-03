@@ -580,14 +580,6 @@ $payments-header-row-height: 38px;
 		border: 1px solid $gray-100;
 		box-shadow: none;
 		border-radius: 3px;
-
-		// External links style themselves via the `components-external-link`
-		// component (underlined text, un-underlined trailing icon), so exclude
-		// them here to avoid underlining the icon.
-		a:not(.components-external-link) {
-			outline: none;
-			text-decoration: underline;
-		}
 	}
 
 	.components-popover__content-container {
