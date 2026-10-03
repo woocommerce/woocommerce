@@ -1,0 +1,743 @@
+<?php
+/**
+ * Per-user import session backed by a WordPress transient.
+ *
+ * @package Automattic\WooCommerce\Admin\Features\Fulfillments\Importer
+ */
+
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\Admin\Features\Fulfillments\Importer;
+
+use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Per-user import session stored in a transient.
+ *
+ * The prepare endpoint creates it with the staged file path, attachment ID, delimiter,
+ * headers and row total, and schedules the cleanup of the staged file. The progress
+ * fields (processed, byte_offset, mapping, counts, seen_tracking_pairs) are stored here
+ * for the import run that lands next. One session is active per user at a time.
+ *
+ * @internal
+ * @since 11.3.0
+ */
+final class ImportSession {
+
+	/**
+	 * Transient TTL for an in-flight import session.
+	 */
+	private const TTL = HOUR_IN_SECONDS;
+
+	/**
+	 * Action Scheduler hook fired to clean up an abandoned staged CSV file.
+	 */
+	public const CLEANUP_HOOK = 'woocommerce_fulfillments_import_session_cleanup';
+
+	/**
+	 * Grace period (in seconds) added to TTL before the cleanup action fires.
+	 */
+	private const CLEANUP_GRACE = 5 * MINUTE_IN_SECONDS;
+
+	/**
+	 * Prefix for session payload transients.
+	 */
+	private const PREFIX = 'wc_fulfillment_import_';
+
+	/**
+	 * Prefix for the per-user active-token pointer transient.
+	 */
+	private const INDEX_PREFIX = 'wc_fulfillment_import_active_';
+
+	/**
+	 * Owning user ID.
+	 *
+	 * @var int
+	 */
+	private int $user_id;
+
+	/**
+	 * Session token (also embedded in the transient key).
+	 *
+	 * @var string
+	 */
+	private string $token;
+
+	/**
+	 * Stored payload.
+	 *
+	 * @var array<string, mixed>
+	 */
+	private array $data;
+
+	/**
+	 * Payload as it was last read from or written to the transient.
+	 *
+	 * Lets persist() skip a no-op write without re-reading the transient.
+	 *
+	 * @var array<string, mixed>|null
+	 */
+	private ?array $stored_data = null;
+
+	/**
+	 * Whether the last write of the payload transient succeeded.
+	 *
+	 * @var bool
+	 */
+	private bool $persisted = true;
+
+	/**
+	 * Session this one replaced when it was created, if any.
+	 *
+	 * @var self|null
+	 */
+	private ?self $replaced = null;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param int                  $user_id User who owns the session.
+	 * @param string               $token   Opaque session token.
+	 * @param array<string, mixed> $data    Stored payload (see ::create()).
+	 */
+	private function __construct( int $user_id, string $token, array $data ) {
+		$this->user_id = $user_id;
+		$this->token   = $token;
+		$this->data    = $data;
+	}
+
+	/**
+	 * Create a fresh import session for a user, replacing any existing one.
+	 *
+	 * The session active at this moment is retired here (transient and cleanup action
+	 * dropped) and exposed through replaced(), so the caller deletes the staged file and
+	 * attachment of exactly that session. When the new session cannot be stored, or its
+	 * cleanup cannot be scheduled, it is dropped again and persisted() reports false; the
+	 * caller then removes the new staged file as well.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param int                $user_id       User ID.
+	 * @param string             $file          Absolute path to the staged CSV file.
+	 * @param string             $delimiter     Effective delimiter (resolved by parse_headers()).
+	 * @param array<int, string> $headers       Header row.
+	 * @param int                $total         Total number of CSV records after the header.
+	 * @param bool               $notify        Whether to fire customer notifications during the import run.
+	 * @param bool               $update        Whether to update existing fulfillments on tracking-number match.
+	 * @param int                $attachment_id Attachment post created for the staged CSV by the upload handler.
+	 * @return self
+	 */
+	public static function create( int $user_id, string $file, string $delimiter, array $headers, int $total, bool $notify, bool $update, int $attachment_id = 0 ): self {
+		$replaced = self::active_for_user( $user_id );
+		if ( $replaced instanceof self ) {
+			$replaced->delete();
+		}
+
+		$token = self::generate_token();
+		$data  = array(
+			'file'                => $file,
+			'attachment_id'       => max( 0, $attachment_id ),
+			'file_size'           => file_exists( $file ) ? (int) filesize( $file ) : 0,
+			'file_mtime'          => file_exists( $file ) ? (int) filemtime( $file ) : 0,
+			'file_head_hash'      => self::hash_file_head( $file ),
+			'delimiter'           => $delimiter,
+			'headers'             => array_values( array_map( 'strval', $headers ) ),
+			'total'               => max( 0, $total ),
+			'processed'           => 0,
+			'byte_offset'         => 0,
+			'notify_customer'     => $notify,
+			'update_existing'     => $update,
+			'seen_tracking_pairs' => array(),
+			'counts'              => array(
+				'created'  => 0,
+				'updated'  => 0,
+				'skipped'  => 0,
+				'failed'   => 0,
+				'notified' => 0,
+			),
+		);
+
+		$session           = new self( $user_id, $token, $data );
+		$session->replaced = $replaced;
+
+		// A staged file without a scheduled cleanup would stay behind forever, so a session
+		// whose cleanup cannot be scheduled is not kept.
+		if ( $session->persist() && ! self::schedule_cleanup( $user_id, $token, $file, max( 0, $attachment_id ), self::TTL ) ) {
+			$session->delete();
+			$session->persisted = false;
+		}
+
+		return $session;
+	}
+
+	/**
+	 * Whether the session is stored and its cleanup is scheduled.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return bool
+	 */
+	public function persisted(): bool {
+		return $this->persisted;
+	}
+
+	/**
+	 * Session that was active for the user when this one was created.
+	 *
+	 * Its record and cleanup action are already gone; its staged file and attachment are
+	 * left for the caller to delete.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return self|null Null when the user had no active session.
+	 */
+	public function replaced(): ?self {
+		return $this->replaced;
+	}
+
+	/**
+	 * Schedule the Action Scheduler action that removes the staged file if the session is
+	 * abandoned (transient expires without the wizard ever completing the import).
+	 *
+	 * @param int    $user_id       User ID.
+	 * @param string $token         Session token.
+	 * @param string $file          Absolute path to the staged CSV.
+	 * @param int    $attachment_id Attachment post created for the staged CSV.
+	 * @param int    $ttl           Seconds the session transient can still live; the action
+	 *                              fires after that plus the grace period.
+	 * @return bool Whether the action is scheduled. True for an empty path, which has nothing to clean up.
+	 */
+	private static function schedule_cleanup( int $user_id, string $token, string $file, int $attachment_id, int $ttl ): bool {
+		if ( '' === $file ) {
+			return true;
+		}
+		if ( ! function_exists( 'as_schedule_single_action' ) ) {
+			wc_get_logger()->error(
+				sprintf( 'Action Scheduler is unavailable; the cleanup of the staged fulfillments import file %s cannot be scheduled.', $file ),
+				array( 'source' => 'fulfillments-importer' )
+			);
+			return false;
+		}
+
+		/**
+		 * Fires (via Action Scheduler) after a fulfillments import session's TTL plus a small grace
+		 * window to clean up the staged CSV when the wizard never finishes the import.
+		 *
+		 * Listeners receive the session metadata and can bail out early by checking whether
+		 * the matching session transient still exists. The default handler is
+		 * {@see ImportSession::handle_cleanup_hook()}. Action Scheduler fires the hook, so this
+		 * docblock sits on the scheduling call rather than on a do_action().
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param int    $user_id       User who owned the session.
+		 * @param string $token         Session token.
+		 * @param string $file          Absolute path to the staged CSV.
+		 * @param int    $attachment_id Attachment post created for the staged CSV.
+		 */
+		$action_id = as_schedule_single_action(
+			time() + max( 0, $ttl ) + self::CLEANUP_GRACE,
+			self::CLEANUP_HOOK,
+			array( $user_id, $token, $file, $attachment_id ),
+			'woocommerce-fulfillments-importer'
+		);
+
+		if ( 0 === $action_id ) {
+			wc_get_logger()->error(
+				sprintf( 'Could not schedule the cleanup of the staged fulfillments import file %s.', $file ),
+				array( 'source' => 'fulfillments-importer' )
+			);
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Hook callback for the cleanup action.
+	 *
+	 * The arguments arrive from a persisted Action Scheduler payload and from anything else
+	 * that fires the hook, so they are coerced before reaching the typed method below.
+	 *
+	 * @see ImportSession::schedule_cleanup() for the hook docblock.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param mixed $user_id       User the session belongs to.
+	 * @param mixed $token         Session token.
+	 * @param mixed $file          Absolute path to the staged CSV.
+	 * @param mixed $attachment_id Attachment post created for the staged CSV.
+	 */
+	public static function handle_cleanup_hook( $user_id = 0, $token = '', $file = '', $attachment_id = 0 ): void {
+		if ( ! is_scalar( $token ) || ! is_scalar( $file ) ) {
+			return;
+		}
+		self::cleanup_abandoned_file(
+			is_numeric( $user_id ) ? (int) $user_id : 0,
+			(string) $token,
+			(string) $file,
+			is_numeric( $attachment_id ) ? (int) $attachment_id : 0
+		);
+	}
+
+	/**
+	 * Delete the staged CSV of a session that was never finished.
+	 *
+	 * Only deletes the file when the matching session transient has expired. While the
+	 * session is still live (persist() slides its TTL), the cleanup is scheduled again for
+	 * the remaining TTL plus the grace period.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param int    $user_id       User the session belongs to.
+	 * @param string $token         Session token.
+	 * @param string $file          Absolute path to the staged CSV.
+	 * @param int    $attachment_id Attachment post created for the staged CSV.
+	 */
+	public static function cleanup_abandoned_file( int $user_id, string $token, string $file, int $attachment_id = 0 ): void {
+		if ( '' === $file ) {
+			return;
+		}
+		$payload_key = self::PREFIX . $user_id . '_' . $token;
+		if ( false !== get_transient( $payload_key ) ) {
+			self::schedule_cleanup( $user_id, $token, $file, $attachment_id, self::remaining_ttl( $payload_key ) );
+			return;
+		}
+
+		$file_exists = file_exists( $file );
+		if ( ! $file_exists && $attachment_id <= 0 ) {
+			return;
+		}
+
+		// The Action Scheduler payload is persisted, so refuse to delete anything that does not
+		// resolve inside the uploads directory even if the args were tampered with.
+		if ( $file_exists && ! self::is_staged_path( $file ) ) {
+			wc_get_logger()->warning(
+				sprintf( 'Refusing to clean up staged fulfillments import file outside the uploads directory: %s', $file ),
+				array( 'source' => 'fulfillments-importer' )
+			);
+			return;
+		}
+
+		// Deleting the attachment also removes its file; only honor IDs that still
+		// point at the staged path so a tampered ID cannot delete unrelated media.
+		if ( $attachment_id > 0 && get_attached_file( $attachment_id ) === $file ) {
+			wp_delete_attachment( $attachment_id, true );
+		}
+		if ( file_exists( $file ) ) {
+			wp_delete_file( $file );
+		}
+	}
+
+	/**
+	 * Seconds left before a live session transient expires.
+	 *
+	 * The timeout option only exists without a persistent object cache; otherwise the
+	 * full TTL is assumed, which is the latest the transient can expire.
+	 *
+	 * @param string $payload_key Session payload transient key.
+	 * @return int
+	 */
+	private static function remaining_ttl( string $payload_key ): int {
+		if ( wp_using_ext_object_cache() ) {
+			return self::TTL;
+		}
+		$timeout = (int) get_option( '_transient_timeout_' . $payload_key, 0 );
+		if ( $timeout <= 0 ) {
+			return self::TTL;
+		}
+		return max( 0, min( self::TTL, $timeout - time() ) );
+	}
+
+	/**
+	 * Whether a path resolves inside the uploads directory the importer stages files in.
+	 *
+	 * FilesystemUtil::validate_upload_file_path() also accepts anything readable under
+	 * ABSPATH, which is far wider than anything this importer ever writes.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $path Absolute path to check.
+	 * @return bool
+	 */
+	public static function is_staged_path( string $path ): bool {
+		if ( '' === $path ) {
+			return false;
+		}
+
+		try {
+			FilesystemUtil::validate_upload_file_path( $path );
+		} catch ( \Exception $e ) {
+			return false;
+		}
+
+		$upload_dir = wp_get_upload_dir();
+		if ( ! empty( $upload_dir['error'] ) ) {
+			return false;
+		}
+
+		$resolved = realpath( $path );
+		$basedir  = realpath( $upload_dir['basedir'] );
+		if ( false === $resolved || false === $basedir ) {
+			return false;
+		}
+
+		return 0 === strpos( wp_normalize_path( $resolved ), trailingslashit( wp_normalize_path( $basedir ) ) );
+	}
+
+	/**
+	 * Load whichever session is currently active for a user, if any.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param int $user_id User ID.
+	 * @return self|null
+	 */
+	public static function active_for_user( int $user_id ): ?self {
+		$token = get_transient( self::INDEX_PREFIX . $user_id );
+		if ( ! is_string( $token ) || '' === $token ) {
+			return null;
+		}
+		return self::load( $user_id, $token );
+	}
+
+	/**
+	 * Load an existing session belonging to a user.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param int    $user_id User ID.
+	 * @param string $token   Token previously returned by ::create()->token().
+	 * @return self|null Null when the token is missing, expired, or owned by a different user.
+	 */
+	public static function load( int $user_id, string $token ): ?self {
+		if ( '' === $token ) {
+			return null;
+		}
+		$payload = get_transient( self::PREFIX . $user_id . '_' . $token );
+		if ( ! is_array( $payload ) ) {
+			return null;
+		}
+		$session              = new self( $user_id, $token, $payload );
+		$session->stored_data = $payload;
+		return $session;
+	}
+
+	/**
+	 * Delete the session, its index pointer and its pending cleanup action.
+	 *
+	 * The staged file is left in place; the caller decides whether it is still needed.
+	 *
+	 * @since 11.3.0
+	 */
+	public function delete(): void {
+		delete_transient( self::PREFIX . $this->user_id . '_' . $this->token );
+
+		// Only clear the index pointer if it still points at this session; a newer session may have replaced it.
+		$current = get_transient( self::INDEX_PREFIX . $this->user_id );
+		if ( $current === $this->token ) {
+			delete_transient( self::INDEX_PREFIX . $this->user_id );
+		}
+
+		if ( function_exists( 'as_unschedule_action' ) ) {
+			as_unschedule_action(
+				self::CLEANUP_HOOK,
+				array( $this->user_id, $this->token, $this->file(), $this->attachment_id() ),
+				'woocommerce-fulfillments-importer'
+			);
+		}
+	}
+
+	/**
+	 * Session token.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return string
+	 */
+	public function token(): string {
+		return $this->token;
+	}
+
+	/**
+	 * Absolute path to the staged CSV file.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return string
+	 */
+	public function file(): string {
+		return (string) ( $this->data['file'] ?? '' );
+	}
+
+	/**
+	 * Attachment post created for the staged CSV by the upload handler.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return int Attachment ID; 0 when the file was staged without one.
+	 */
+	public function attachment_id(): int {
+		return max( 0, (int) ( $this->data['attachment_id'] ?? 0 ) );
+	}
+
+	/**
+	 * Size of the staged CSV when the session was created, in bytes.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return int
+	 */
+	public function file_size(): int {
+		return (int) ( $this->data['file_size'] ?? 0 );
+	}
+
+	/**
+	 * Modification time of the staged CSV when the session was created.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return int Unix timestamp; 0 when unknown.
+	 */
+	public function file_mtime(): int {
+		return (int) ( $this->data['file_mtime'] ?? 0 );
+	}
+
+	/**
+	 * Hash of the first bytes of the staged CSV when the session was created.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return string Hash string; empty when the file could not be read.
+	 */
+	public function file_head_hash(): string {
+		return (string) ( $this->data['file_head_hash'] ?? '' );
+	}
+
+	/**
+	 * Hash the first 4 KB of a file, closing the size and mtime blind spot in
+	 * the staged-file integrity check.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $file Absolute file path.
+	 * @return string Hash string; empty when the file could not be read.
+	 */
+	public static function hash_file_head( string $file ): string {
+		if ( '' === $file || ! is_readable( $file ) ) {
+			return '';
+		}
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Reading a staged local file head for integrity hashing.
+		$handle = fopen( $file, 'rb' );
+		if ( false === $handle ) {
+			return '';
+		}
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread -- See above.
+		$head = fread( $handle, 4096 );
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- See above.
+		fclose( $handle );
+		return false === $head ? '' : md5( $head );
+	}
+
+	/**
+	 * Effective CSV delimiter for this session.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return string
+	 */
+	public function delimiter(): string {
+		$delimiter = (string) ( $this->data['delimiter'] ?? ',' );
+		return '' === $delimiter ? ',' : $delimiter;
+	}
+
+	/**
+	 * Header row as parsed at prepare time.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return array<int, string>
+	 */
+	public function headers(): array {
+		return array_values( array_map( 'strval', (array) ( $this->data['headers'] ?? array() ) ) );
+	}
+
+	/**
+	 * Total number of CSV records after the header.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return int
+	 */
+	public function total(): int {
+		return (int) ( $this->data['total'] ?? 0 );
+	}
+
+	/**
+	 * Cumulative processed-row count.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return int
+	 */
+	public function processed(): int {
+		return (int) ( $this->data['processed'] ?? 0 );
+	}
+
+	/**
+	 * Whether customer notifications should fire during the import run.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return bool
+	 */
+	public function notify_customer(): bool {
+		return ! empty( $this->data['notify_customer'] );
+	}
+
+	/**
+	 * Whether existing fulfillments should be updated on tracking-number match.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return bool
+	 */
+	public function update_existing(): bool {
+		return ! empty( $this->data['update_existing'] );
+	}
+
+	/**
+	 * Column mapping stored by the import run, or null until it stores one.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return array<int, string>|null CSV column index => canonical column key.
+	 */
+	public function frozen_mapping(): ?array {
+		$mapping = $this->data['mapping'] ?? null;
+		if ( ! is_array( $mapping ) ) {
+			return null;
+		}
+		$out = array();
+		foreach ( $mapping as $col => $canonical ) {
+			$out[ (int) $col ] = (string) $canonical;
+		}
+		return $out;
+	}
+
+	/**
+	 * Byte offset in the CSV reached by the import run.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return int
+	 */
+	public function byte_offset(): int {
+		return (int) ( $this->data['byte_offset'] ?? 0 );
+	}
+
+	/**
+	 * Cumulative result counts recorded by the import run.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return array{created:int, updated:int, skipped:int, failed:int, notified:int}
+	 */
+	public function counts(): array {
+		$counts = is_array( $this->data['counts'] ?? null ) ? $this->data['counts'] : array();
+		return array(
+			'created'  => (int) ( $counts['created'] ?? 0 ),
+			'updated'  => (int) ( $counts['updated'] ?? 0 ),
+			'skipped'  => (int) ( $counts['skipped'] ?? 0 ),
+			'failed'   => (int) ( $counts['failed'] ?? 0 ),
+			'notified' => (int) ( $counts['notified'] ?? 0 ),
+		);
+	}
+
+	/**
+	 * The stored counts plus an empty rows list, in the shape the import run reports.
+	 *
+	 * Per-row results are not persisted, so rows is always empty here.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function summary(): array {
+		return array_merge( $this->counts(), array( 'rows' => array() ) );
+	}
+
+	/**
+	 * Tracking-number pairs already seen by the import run, used for deduplication.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return array<string, true>
+	 */
+	public function seen_tracking_pairs(): array {
+		$seen = $this->data['seen_tracking_pairs'] ?? array();
+		return is_array( $seen ) ? $seen : array();
+	}
+
+	/**
+	 * Owning user ID.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return int
+	 */
+	public function user_id(): int {
+		return $this->user_id;
+	}
+
+	/**
+	 * Persist the current payload back to its transient.
+	 *
+	 * The set_transient() call returns false when the stored value is unchanged, so an
+	 * unchanged payload is treated as already stored rather than as a lost write. The index
+	 * pointer is rewritten every time so its TTL slides with the payload's.
+	 *
+	 * @return bool Whether the payload is stored.
+	 */
+	private function persist(): bool {
+		$payload_key = self::PREFIX . $this->user_id . '_' . $this->token;
+
+		$stored = $this->data === $this->stored_data;
+		if ( ! $stored ) {
+			$stored = set_transient( $payload_key, $this->data, self::TTL );
+			if ( $stored ) {
+				$this->stored_data = $this->data;
+			}
+		}
+
+		set_transient( self::INDEX_PREFIX . $this->user_id, $this->token, self::TTL );
+
+		if ( ! $stored ) {
+			wc_get_logger()->error(
+				sprintf(
+					'Fulfillments import session %s could not be persisted.',
+					$this->token
+				),
+				array( 'source' => 'fulfillments-importer' )
+			);
+		}
+
+		$this->persisted = (bool) $stored;
+		return $this->persisted;
+	}
+
+	/**
+	 * Generate an opaque session token.
+	 *
+	 * @return string
+	 */
+	private static function generate_token(): string {
+		try {
+			return bin2hex( random_bytes( 16 ) );
+		} catch ( \Throwable $e ) {
+			return (string) wp_generate_uuid4();
+		}
+	}
+}
