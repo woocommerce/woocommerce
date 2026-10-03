@@ -1,0 +1,19 @@
+.woocommerce-task-payment-method.is-loading {
+	.woocommerce-stepper__step-label {
+		@include placeholder();
+		display: inline-block;
+		width: 60%;
+	}
+
+	.woocommerce-stepper__step-icon {
+		@include placeholder();
+	}
+
+	.woocommerce-stepper__step:nth-child(1) .woocommerce-stepper__step-label {
+		width: 30%;
+	}
+
+	.woocommerce-stepper__step-number {
+		display: none;
+	}
+}

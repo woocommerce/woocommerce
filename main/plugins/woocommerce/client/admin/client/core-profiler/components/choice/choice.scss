@@ -1,0 +1,86 @@
+.woocommerce-profiler-choice-container {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	padding: $gap-large $gap;
+	border: 1px solid $gray-200;
+	border-radius: 2px;
+	width: 100%;
+	cursor: pointer;
+
+	&[data-selected],
+	&:focus-visible {
+		border-color: var(--wp-admin-theme-color);
+		box-shadow: 0 0 0 1px var(--wp-admin-theme-color);
+	}
+
+	&:focus-visible {
+		padding: $gap-large $gap;
+	}
+}
+
+.woocommerce-profiler-choice {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+
+	.woocommerce-profiler-choice-input {
+		opacity: 0;
+		position: absolute;
+	}
+
+	label {
+		font-weight: 500;
+		font-size: 14px;
+		line-height: 20px;
+		color: $gray-900;
+		display: flex;
+		position: relative;
+	}
+
+	input + label::before {
+		content: "";
+		width: 20px;
+		height: 20px;
+		border: 1px solid $gray-600;
+		border-radius: 16px;
+		margin-right: $gap;
+		display: inline-block;
+	}
+
+	input[data-selected] + label::before {
+		border-color: var(--wp-admin-theme-color);
+	}
+
+	input[data-selected] + label::after {
+		background-color: var(--wp-admin-theme-color);
+		align-self: center;
+		border-radius: 50%;
+		content: "";
+		position: absolute;
+		width: 14px;
+		height: 14px;
+		left: 4px;
+	}
+}
+
+body.rtl .woocommerce-profiler-choice {
+	input + label::before {
+		margin-left: $gap;
+		margin-right: 0;
+	}
+
+	input[data-selected] + label::after {
+		left: auto;
+		right: 4px;
+	}
+}
+
+.woocommerce-profiler-choice-sub-options {
+	margin-top: $gap-large;
+	width: 100%;
+
+	> div {
+		width: 100%;
+	}
+}
