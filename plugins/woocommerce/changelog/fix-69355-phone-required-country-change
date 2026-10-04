@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the checkout phone field optional when a filter sets it to not required.
