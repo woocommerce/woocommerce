@@ -2086,7 +2086,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		 */
 		$post_statuses = apply_filters(
 			'woocommerce_search_products_post_statuses',
-			current_user_can( 'edit_private_products' ) ? array( 'private', 'publish' ) : array( 'publish' )
+			current_user_can( 'read_private_products' ) ? array( 'private', 'publish' ) : array( 'publish' )
 		);
 
 		// See if search term contains OR keywords.
