@@ -177,6 +177,27 @@ Still, here's a few tips to get you started:
 Playwright's Best Practices guide is a good
 read: [Playwright Best Practices](https://playwright.dev/docs/best-practices).
 
+### Parallel, locked, and serial specs
+
+Core specs run on one shared site, in two Playwright projects: `core-parallel` runs specs in several workers at the same time, and `core-serial` runs them one at a time. Put each spec in one of three groups:
+
+1. **Parallel.** The spec does not change site-wide state. It makes its own products, orders, customers, and pages, and does not change shared settings. This is the default: every spec runs in `core-parallel` unless something else is set.
+2. **Parallel with a lock.** The spec changes a site-wide option, but only specs that change the same option read it. Give all those specs the same [test lock](https://playwright.dev/docs/test-parallel#test-locks) from `locks` in `fixtures/fixtures.ts`. Specs that share a lock never run at the same time, in any worker or project. Add a new entry to `locks` if none fits.
+
+    ```ts
+    import { test, locks } from '../../fixtures/fixtures';
+
+    test.describe( 'Email settings', { lock: locks.EMAIL_FEATURE_FLAGS }, () => {
+    	// ...
+    } );
+    ```
+
+    The core projects do not use `fullyParallel`, so one worker runs a whole spec file. A lock on one test holds for the whole file, including `beforeAll` and `afterAll`.
+
+3. **Serial.** The spec changes a setting that many other specs read, such as tax, store address, or permalinks. A lock cannot help here, because the specs that read the setting do not take the lock. Add the spec to `serialRunSpecs` in `playwright.config.ts`, so it runs in `core-serial`.
+
+Prefer the first group. A spec that changes a setting only for itself can often use its own data instead, for example its own tax class or customer.
+
 ### Gotchas
 
 - **Never run two wp-env commands at once.** Await each `wpCLI` call (or any other helper that shells out to `wp-env`, such as `getInstalledWordPressVersion`) before starting the next, and keep them out of `Promise.all`. Every wp-env command rewrites `wp-env-cache.json` in the environment's work directory without locking, so two overlapping commands can drop its `runtime` key. From then on every wp-env command, `run` and `destroy` included, fails with "Environment not initialized. Run `wp-env start` first." until the environment starts again, so one overlap breaks every later spec in the CI job. Overlapping a single `wpCLI` call with browser work such as `page.goto` is fine, since that doesn't start wp-env.
