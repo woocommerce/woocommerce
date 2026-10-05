@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show the State field again on the classic checkout after switching from a country that hides it.
