@@ -110,7 +110,6 @@ describe( 'Cart block editor integration', () => {
 		);
 
 		// Open the block inserter for Order Summary.
-		// eslint-disable-next-line testing-library/no-unnecessary-act -- Gutenberg schedules asynchronous updates after these interactions.
 		await act( async () => {
 			await userEvent.click( orderSummaryAddButton );
 		} );
@@ -133,7 +132,6 @@ describe( 'Cart block editor integration', () => {
 
 		// Test Filled Cart block - should only have Table option (no block-specific Audio filter).
 		const filledCartBlock = screen.getByLabelText( /Block: Filled Cart/i );
-		// eslint-disable-next-line testing-library/no-unnecessary-act -- Gutenberg schedules asynchronous updates after these interactions.
 		await act( async () => {
 			await userEvent.click( filledCartBlock );
 		} );
@@ -152,7 +150,6 @@ describe( 'Cart block editor integration', () => {
 		);
 
 		// Open the block inserter for Filled Cart.
-		// eslint-disable-next-line testing-library/no-unnecessary-act -- Gutenberg schedules asynchronous updates after these interactions.
 		await act( async () => {
 			await userEvent.click( filledCartAddButtons[ 0 ] );
 		} );
@@ -245,7 +242,6 @@ describe( 'Cart block editor integration', () => {
 			name: /Select parent block: Cart/i,
 		} );
 
-		// eslint-disable-next-line testing-library/no-unnecessary-act -- Gutenberg schedules asynchronous updates after these interactions.
 		await act( async () => {
 			await userEvent.click( selectParentBlockButton );
 		} );
@@ -254,7 +250,6 @@ describe( 'Cart block editor integration', () => {
 			name: /Switch view/i,
 		} );
 
-		// eslint-disable-next-line testing-library/no-unnecessary-act -- Gutenberg schedules asynchronous updates after these interactions.
 		await act( async () => {
 			await userEvent.click( switchViewButton );
 		} );
@@ -265,7 +260,6 @@ describe( 'Cart block editor integration', () => {
 			name: /Empty Cart/i,
 		} );
 
-		// eslint-disable-next-line testing-library/no-unnecessary-act -- Gutenberg schedules asynchronous updates after these interactions.
 		await act( async () => {
 			await userEvent.click( emptyCartButton );
 		} );
@@ -280,7 +274,6 @@ describe( 'Cart block editor integration', () => {
 		switchViewButton = screen.getByRole( 'button', {
 			name: /Switch view/i,
 		} );
-		// eslint-disable-next-line testing-library/no-unnecessary-act -- Gutenberg schedules asynchronous updates after these interactions.
 		await act( async () => {
 			await userEvent.click( switchViewButton );
 		} );
@@ -291,7 +284,6 @@ describe( 'Cart block editor integration', () => {
 			name: /Filled Cart/i,
 		} );
 
-		// eslint-disable-next-line testing-library/no-unnecessary-act -- Gutenberg schedules asynchronous updates after these interactions.
 		await act( async () => {
 			await userEvent.click( filledCartButton );
 		} );
