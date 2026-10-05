@@ -67,36 +67,47 @@ class WC_Beta_Tester_Version_Picker {
 			$result   = $upgrader->switch_version( $plugin );
 
 			require_once __DIR__ . '/class-wc-beta-tester-live-branches-installer.php';
-			$live_branch_plugins = array_filter(
-				(array) get_option( 'active_plugins', array() ),
-				function ( $active_plugin ) {
-					return str_contains( $active_plugin, LIVE_BRANCH_PLUGIN_PREFIX );
-				}
-			);
+			$is_live_branch              = function ( $active_plugin ) {
+				return str_contains( $active_plugin, LIVE_BRANCH_PLUGIN_PREFIX );
+			};
+			$live_branch_plugins         = array_filter( (array) get_option( 'active_plugins', array() ), $is_live_branch );
+			$network_live_branch_plugins = is_multisite()
+				? array_filter( array_keys( (array) get_site_option( 'active_sitewide_plugins', array() ) ), $is_live_branch )
+				: array();
+			$has_live_branch             = ! empty( $live_branch_plugins ) || ! empty( $network_live_branch_plugins );
 
-			if ( empty( $live_branch_plugins ) ) {
+			if ( ! $has_live_branch ) {
 				// Try to reactivate.
 				activate_plugin( $plugin, '', is_network_admin(), true );
-			} else {
+			} elseif ( true === $result && ! is_wp_error( $skin->result ) ) {
 				// An active Live Branch build is already loaded in this request, so activating WooCommerce
 				// here would declare it twice. Deactivate the build and activate WooCommerce in a new request.
-				deactivate_plugins( $live_branch_plugins );
+				// Only after a successful switch, so a failed one leaves the Live Branch build active.
+				if ( ! empty( $live_branch_plugins ) ) {
+					deactivate_plugins( $live_branch_plugins );
+				}
+				if ( ! empty( $network_live_branch_plugins ) ) {
+					deactivate_plugins( $network_live_branch_plugins, false, true );
+				}
 			}
 
 			if ( is_wp_error( $skin->result ) ) {
 				throw new Exception( $skin->result->get_error_message() );
-			} elseif ( false === $result ) {
+			} elseif ( is_wp_error( $result ) ) {
+				throw new Exception( $result->get_error_message() );
+			} elseif ( true !== $result ) {
 				throw new Exception( __( 'Update failed', 'woocommerce-beta-tester' ) );
 			}
 
-			if ( ! empty( $live_branch_plugins ) ) {
+			if ( $has_live_branch ) {
+				// Activate network-wide when the Live Branch build was network-active.
 				$activate_url = add_query_arg(
 					array(
 						'action'   => 'activate',
 						'plugin'   => rawurlencode( $plugin ),
 						'_wpnonce' => wp_create_nonce( 'activate-plugin_' . $plugin ),
 					),
-					self_admin_url( 'plugins.php' )
+					empty( $network_live_branch_plugins ) ? self_admin_url( 'plugins.php' ) : network_admin_url( 'plugins.php' )
 				);
 				wp_safe_redirect( $activate_url );
 				exit;
