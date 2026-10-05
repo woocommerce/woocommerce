@@ -83,6 +83,37 @@ check( 'the shipped configs still parse and name reviewers', () => {
 	}
 } );
 
+check( 'order fulfillment files route to Escargot, not SomewhereWarm', () => {
+	const community = path.join( __dirname, '../../project-community-pr-assigner.json' );
+	const config = JSON.parse( fs.readFileSync( community, 'utf8' ) );
+	const owners = ( file ) =>
+		Object.keys( config )
+			.filter( ( pattern ) => matches( pattern, file ) )
+			.flatMap( ( pattern ) => [].concat( config[ pattern ] ) );
+
+	// Fulfillments, in source and tests, routes to Escargot and never SomewhereWarm.
+	for ( const file of [
+		'plugins/woocommerce/src/Admin/Features/Fulfillments/FulfillmentsController.php',
+		'plugins/woocommerce/src/Admin/Features/Fulfillments/deep/Nested.php',
+		'plugins/woocommerce/tests/php/src/Admin/Features/Fulfillments/SomeTest.php',
+	] ) {
+		const matched = owners( file );
+		assert.ok( matched.includes( 'escargot' ), `${ file } should route to escargot` );
+		assert.ok( ! matched.includes( 'somewherewarm' ), `${ file } should not route to somewherewarm` );
+	}
+
+	// The sibling Features that SomewhereWarm still owns are untouched.
+	for ( const file of [
+		'plugins/woocommerce/src/Admin/Features/OnboardingTasks/Task.php',
+		'plugins/woocommerce/src/Admin/Features/Onboarding.php',
+		'plugins/woocommerce/tests/php/src/Admin/Features/OnboardingTasks/OnboardingTasksTest.php',
+	] ) {
+		const matched = owners( file );
+		assert.ok( matched.includes( 'somewherewarm' ), `${ file } should still route to somewherewarm` );
+		assert.ok( ! matched.includes( 'escargot' ), `${ file } should not route to escargot` );
+	}
+} );
+
 /* Requesting the reviews. */
 
 const run = async ( { config, mode = 'changed-files', changed = [], requestReviewers, membership = {} } ) => {
