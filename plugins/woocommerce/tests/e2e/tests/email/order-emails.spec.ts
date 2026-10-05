@@ -34,6 +34,10 @@ test.beforeEach( async ( { baseURL } ) => {
 	await setFeatureEmailImprovementsFlag( baseURL, 'no' );
 } );
 
+test.afterAll( async ( { baseURL } ) => {
+	await setFeatureEmailImprovementsFlag( baseURL, 'no' );
+} );
+
 [
 	{
 		status: 'processing',
