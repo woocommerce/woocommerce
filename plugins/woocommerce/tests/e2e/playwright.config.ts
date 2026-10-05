@@ -216,6 +216,7 @@ const blocksSerialSpecs = [
 	'**/tests/blocks/checkout/checkout-block.merchant.block_theme.spec.ts',
 	'**/tests/blocks/classic-template/classic-template.block_theme.spec.ts',
 	'**/tests/blocks/mini-cart/mini-cart-block.shopper.block_theme.spec.ts',
+	'**/tests/blocks/mini-cart/mini-cart.block_theme.spec.ts',
 	'**/tests/blocks/on-sale-badge/on-sale-badge-single-product-template.block_theme.spec.ts',
 	'**/tests/blocks/page-content-wrapper/page-content-wrapper.block_theme.spec.ts',
 	'**/tests/blocks/price-filter/price-filter.block_theme.spec.ts',
@@ -228,26 +229,18 @@ const blocksSerialSpecs = [
 	'**/tests/blocks/product-gallery/product-gallery.block_theme.spec.ts',
 	'**/tests/blocks/products/products.block_theme.spec.ts',
 	'**/tests/blocks/rating-filter/rating-filter.block_theme.spec.ts',
+	'**/tests/blocks/single-product-template/single-product-template-compatibility-layer.spec.ts',
 	'**/tests/blocks/stock-filter/stock-filter.block_theme.spec.ts',
 	'**/tests/blocks/templates/legacy-templates.block_theme.spec.ts',
 
 	// Activate test plugins that change every cart, checkout or product page, or
 	// race other specs on the `active_plugins` option.
-	'**/tests/blocks/cart/cart-block.shopper.block_theme.spec.ts',
 	'**/tests/blocks/cart/cart-checkout-block-extension-callbacks.shopper.block_theme.spec.ts',
-	'**/tests/blocks/cart/cart-store.block_theme.spec.ts',
-	'**/tests/blocks/checkout/additional-fields.guest-shopper.block_theme.spec.ts',
-	'**/tests/blocks/checkout/additional-fields.merchant.block_theme.spec.ts',
-	'**/tests/blocks/checkout/additional-fields.shopper.block_theme.spec.ts',
 	'**/tests/blocks/checkout/checkout-block-custom-place-order-button.block_theme.spec.ts',
 	'**/tests/blocks/checkout/checkout-block-extensibility.shopper.block_theme.spec.ts',
-	'**/tests/blocks/checkout/checkout-block-locale-hide-country.block_theme.spec.ts',
-	'**/tests/blocks/mini-cart/mini-cart.block_theme.spec.ts',
 	'**/tests/blocks/product-button/product-button.block_theme.spec.ts',
-	'**/tests/blocks/product-collection/compatibility-layer.block_theme.spec.ts',
 	'**/tests/blocks/product-collection/product-picker.block_theme.spec.ts',
 	'**/tests/blocks/product-collection/register-product-collection.block_theme.spec.ts',
-	'**/tests/blocks/single-product-template/single-product-template-compatibility-layer.spec.ts',
 
 	// Change global settings that cart, checkout and storefront specs read:
 	// shipping, taxes, local pickup, account creation, site language, the shop
@@ -262,9 +255,13 @@ const blocksSerialSpecs = [
 	'**/tests/blocks/single-product-template/single-product-template.product-rating.spec.ts',
 	'**/tests/blocks/templates/shop-page.block_theme.spec.ts',
 
-	// Add to the cart as the admin user, whose cart all workers share, and
-	// place orders, which change the Best Sellers ranking.
+	// Place orders, which change the Best Sellers ranking. Some also add to the
+	// cart as the admin user, whose cart all workers share.
 	'**/tests/blocks/cart/cart-checkout-block-coupons.shopper.block_theme.spec.ts',
+	'**/tests/blocks/checkout/additional-fields.guest-shopper.block_theme.spec.ts',
+	'**/tests/blocks/checkout/additional-fields.merchant.block_theme.spec.ts',
+	'**/tests/blocks/checkout/additional-fields.shopper.block_theme.spec.ts',
+	'**/tests/blocks/checkout/checkout-block-locale-hide-country.block_theme.spec.ts',
 
 	// Create or edit products and categories that catalog specs count.
 	'**/tests/blocks/product-collection/product-collection-errors.block_theme.spec.ts',

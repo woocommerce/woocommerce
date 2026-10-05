@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { expect, test as base, guestFile } from '@woocommerce/e2e-utils';
+import {
+	expect,
+	test as base,
+	enableTestPlugin,
+	guestFile,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -23,10 +28,8 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 	test.describe( 'Guest shopper', () => {
 		test.use( { storageState: guestFile } );
 
-		test.beforeEach( async ( { requestUtils } ) => {
-			await requestUtils.activatePlugin(
-				'woocommerce-blocks-test-additional-checkout-fields'
-			);
+		test.beforeEach( async ( { context } ) => {
+			await enableTestPlugin( context, 'additional-checkout-fields' );
 		} );
 
 		test( 'Shopper can see an error message when a required field is not filled in the checkout form', async ( {

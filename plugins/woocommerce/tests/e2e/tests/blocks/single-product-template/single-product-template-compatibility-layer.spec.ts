@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { test, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
+import {
+	test,
+	expect,
+	BLOCK_THEME_SLUG,
+	enableTestPlugin,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -149,9 +154,10 @@ const variableProductAddToCartWithOptionsBlockHooks: Scenario[] = [
 ];
 
 test.describe( 'Compatibility Layer in Single Product template', () => {
-	test.beforeEach( async ( { requestUtils } ) => {
-		await requestUtils.activatePlugin(
-			'woocommerce-blocks-test-single-product-template-compatibility-layer'
+	test.beforeEach( async ( { context } ) => {
+		await enableTestPlugin(
+			context,
+			'single-product-template-compatibility-layer'
 		);
 	} );
 
