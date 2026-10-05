@@ -1,3 +1,5 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -79,7 +81,7 @@ describe( 'dataform adapter', () => {
 			mountedRoots.pop()?.();
 		}
 		__resetRegistry();
-		jest.restoreAllMocks();
+		vi.restoreAllMocks();
 	} );
 
 	describe( 'field type mapping', () => {
@@ -347,7 +349,7 @@ describe( 'dataform adapter', () => {
 		} );
 
 		it( 'fails closed when a declared component is not registered', () => {
-			jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
+			vi.spyOn( console, 'warn' ).mockImplementation( () => undefined );
 
 			const field = buildDataFormField(
 				{ ...textField, component: 'test/missing-component' },
@@ -414,7 +416,7 @@ describe( 'dataform adapter', () => {
 		} );
 
 		it( 'fails open and logs an error when a predicate throws', () => {
-			const errorSpy = jest
+			const errorSpy = vi
 				.spyOn( console, 'error' )
 				.mockImplementation( () => undefined );
 			registerSettingsExtension( {
@@ -618,7 +620,7 @@ describe( 'dataform adapter', () => {
 		} );
 
 		it( 'fails open and logs an error when a group predicate throws', () => {
-			const errorSpy = jest
+			const errorSpy = vi
 				.spyOn( console, 'error' )
 				.mockImplementation( () => undefined );
 			const adapter = createDataFormAdapter( {
@@ -849,6 +851,9 @@ describe( 'dataform adapter', () => {
 		};
 
 		it( 'keeps a hidden field with an unregistered component off the page', () => {
+			const warnSpy = vi
+				.spyOn( console, 'warn' )
+				.mockImplementation( () => undefined );
 			const options = createOptions( [ toggleField, brokenHiddenField ] );
 			const adapter = createDataFormAdapter( options );
 			const data = { toggle: 'off', hidden_field: '' };
@@ -863,12 +868,19 @@ describe( 'dataform adapter', () => {
 			);
 
 			expect( container.querySelectorAll( 'input' ) ).toHaveLength( 1 );
+			expect( warnSpy ).toHaveBeenCalledWith(
+				expect.stringContaining(
+					'Component "test/missing-component" is not registered.'
+				),
+				expect.any( Object )
+			);
 		} );
 
 		it( 'fails closed once a field with an unregistered component is visible', () => {
-			jest.spyOn( console, 'error' ).mockImplementation(
-				() => undefined
-			);
+			const warnSpy = vi
+				.spyOn( console, 'warn' )
+				.mockImplementation( () => undefined );
+			vi.spyOn( console, 'error' ).mockImplementation( () => undefined );
 			const options = createOptions( [ toggleField, brokenHiddenField ] );
 			const adapter = createDataFormAdapter( options );
 			const data = { toggle: 'on', hidden_field: '' };
@@ -890,6 +902,12 @@ describe( 'dataform adapter', () => {
 					} )
 				).toThrow(
 					'Component "test/missing-component" is not registered.'
+				);
+				expect( warnSpy ).toHaveBeenCalledWith(
+					expect.stringContaining(
+						'Component "test/missing-component" is not registered.'
+					),
+					expect.any( Object )
 				);
 			} finally {
 				act( () => root.unmount() );
