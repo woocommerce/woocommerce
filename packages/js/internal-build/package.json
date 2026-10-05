@@ -29,6 +29,7 @@
 			"require": "./src/style-build/index.cjs"
 		},
 		"./configs/tsconfig.json": "./configs/tsconfig.json",
+		"./configs/stylelint.config.cjs": "./configs/stylelint.config.cjs",
 		"./type-overrides/*": "./type-overrides/*",
 		"./styles/*": "./styles/*"
 	},
@@ -51,18 +52,22 @@
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
-		"lint:lang:js": "eslint src"
+		"lint:fix:lang:style": "stylelint 'styles/**/*.scss' --fix",
+		"lint:lang:js": "eslint src",
+		"lint:lang:style": "stylelint 'styles/**/*.scss'"
 	},
 	"dependencies": {
 		"@automattic/color-studio": "^4.0.0",
 		"@wordpress/base-styles": "catalog:wp-bundled",
 		"@wordpress/postcss-plugins-preset": "catalog:wp-min",
+		"@wordpress/stylelint-config": "^23.14.0",
 		"chokidar": "^3.6.0",
 		"css-loader": "6.11.x",
 		"esbuild": "^0.24.0",
 		"glob": "^10.3.10",
 		"json2php": "^0.0.7",
 		"mini-css-extract-plugin": "2.9.x",
+		"postcss-scss": "^4.0.9",
 		"postcss-loader": "4.3.x",
 		"rtlcss": "4.3.x",
 		"sass-loader": "10.5.x",
@@ -77,13 +82,14 @@
 		"@wordpress/editor": "14.33.11",
 		"@wordpress/notices": "5.33.1",
 		"eslint": "^10.0.0",
+		"stylelint": "^16.9.0",
 		"typescript": "5.7.x"
 	},
 	"config": {
 		"ci": {
 			"lint": {
 				"command": "lint",
-				"changes": "src/**/*.{js,jsx,ts,tsx,cjs}"
+				"changes": "{src/**/*.{js,jsx,ts,tsx,cjs},styles/**/*.scss}"
 			}
 		}
 	}

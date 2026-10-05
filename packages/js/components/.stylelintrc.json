@@ -1,0 +1,3 @@
+{
+	"extends": "@woocommerce/internal-build/configs/stylelint.config.cjs"
+}

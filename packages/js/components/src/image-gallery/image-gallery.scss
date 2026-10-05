@@ -3,7 +3,8 @@
         display: block;
     }
 
-    .woocommerce-sortable, &__wrapper {
+    .woocommerce-sortable,
+ &__wrapper {
         display: grid;
         grid-template-columns: inherit;
         grid-gap: $gap;
@@ -19,11 +20,11 @@
             position: absolute;
         }
 
-        &.is-dragging-over-before:before {
+        &.is-dragging-over-before::before {
             left: calc( $gap / -2 - 1px );
         }
 
-        &.is-dragging-over-after:after {
+        &.is-dragging-over-after::after {
             right: calc( $gap / -2 - 1px );
         }
     }

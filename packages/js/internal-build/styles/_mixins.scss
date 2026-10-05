@@ -8,7 +8,7 @@
 }
 
 @function url-friendly-colour( $color ) {
-	@return '%23' + str-slice( '#{ $color }', 2, -1 );
+	@return "%23" + str-slice( "#{ $color }", 2, -1 );
 }
 
 @mixin hover-state {
@@ -26,7 +26,7 @@
 	color: transparent;
 
 	&::after {
-		content: '\00a0';
+		content: "\00a0";
 	}
 
 	@media screen and ( prefers-reduced-motion: reduce ) {
@@ -113,16 +113,18 @@
 }
 
 /* stylelint-disable block-closing-brace-newline-after */
-@mixin reduce-motion( $property: '' ) {
-	@if $property == 'transition' {
+@mixin reduce-motion( $property: "" ) {
+	@if $property == "transition" {
 		@media ( prefers-reduced-motion: reduce ) {
 			transition-duration: 0s;
 		}
-	} @else if $property == 'animation' {
+	}
+ @else if $property == "animation" {
 		@media ( prefers-reduced-motion: reduce ) {
 			animation-duration: 1ms;
 		}
-	} @else {
+	}
+ @else {
 		@media ( prefers-reduced-motion: reduce ) {
 			transition-duration: 0s;
 			animation-duration: 1ms;
@@ -203,9 +205,9 @@
 // Create a string-repeat function
 @function str-repeat( $character, $n ) {
 	@if $n == 0 {
-		@return '';
+		@return "";
 	}
-	$c: '';
+	$c: "";
 	@for $i from 1 through $n {
 		$c: $c + $character;
 	}
