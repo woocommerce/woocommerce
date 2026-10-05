@@ -266,6 +266,172 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
+	 * @testdox refund_tax combined with an auto-computed refund_total returns 400, not 500.
+	 */
+	public function test_refund_tax_with_auto_computed_total_returns_400(): void {
+		$tax_rate_id = $this->create_tax_rate( 10.0 );
+		$order       = $this->create_order_with_product_and_tax( 100.00, 1, $tax_rate_id, 10.00 );
+		$item_id     = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'compute_totals' => true,
+				'line_items'     => array(
+					array(
+						'id'         => $item_id,
+						'quantity'   => 1,
+						'refund_tax' => array(
+							array(
+								'id'           => $tax_rate_id,
+								'refund_total' => 5.00,
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_invalid_line_item', $response->get_data()['code'] );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox A refund_tax entry referencing a tax id not on the line returns 400, not 500.
+	 */
+	public function test_refund_tax_unknown_tax_id_returns_400(): void {
+		$tax_rate_id = $this->create_tax_rate( 10.0 );
+		$order       = $this->create_order_with_product_and_tax( 100.00, 1, $tax_rate_id, 10.00 );
+		$item_id     = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'compute_totals' => true,
+				'line_items'     => array(
+					array(
+						'id'           => $item_id,
+						'refund_total' => 50.00,
+						'refund_tax'   => array(
+							array(
+								'id'           => $tax_rate_id + 999,
+								'refund_total' => 5.00,
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_invalid_line_item', $response->get_data()['code'] );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox A refund_tax entry missing id or refund_total returns 400, not 500.
+	 */
+	public function test_refund_tax_missing_fields_returns_400(): void {
+		$tax_rate_id = $this->create_tax_rate( 10.0 );
+		$order       = $this->create_order_with_product_and_tax( 100.00, 1, $tax_rate_id, 10.00 );
+		$item_id     = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'compute_totals' => true,
+				'line_items'     => array(
+					array(
+						'id'           => $item_id,
+						'refund_total' => 50.00,
+						'refund_tax'   => array(
+							array( 'id' => $tax_rate_id ),
+						),
+					),
+				),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_invalid_line_item', $response->get_data()['code'] );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox A refund_tax total exceeding the remaining refundable tax returns 400, not 500.
+	 */
+	public function test_refund_tax_exceeding_remaining_tax_returns_400(): void {
+		$tax_rate_id = $this->create_tax_rate( 10.0 );
+		$order       = $this->create_order_with_product_and_tax( 100.00, 1, $tax_rate_id, 10.00 );
+		$item_id     = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'compute_totals' => true,
+				'line_items'     => array(
+					array(
+						'id'           => $item_id,
+						'refund_total' => 50.00,
+						'refund_tax'   => array(
+							array(
+								'id'           => $tax_rate_id,
+								'refund_total' => 50.00,
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_invalid_refund_amount', $response->get_data()['code'] );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox Auto-computing a refund against a line whose source quantity is zero returns 400, not 500.
+	 */
+	public function test_zero_source_quantity_auto_compute_returns_400(): void {
+		// create_order_with_product() cannot build a zero-quantity line, so the order
+		// is assembled here. The order total is non-zero so the order is not treated
+		// as already fully refunded, which would fail earlier with a different error.
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'quantity' => 0,
+				'subtotal' => 0,
+				'total'    => 0,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->set_total( 10.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'compute_totals' => true,
+				'line_items'     => array(
+					array(
+						'id'       => $item->get_id(),
+						'quantity' => 1,
+					),
+				),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_invalid_line_item', $response->get_data()['code'] );
+		$this->assertStringContainsString( 'source quantity is zero', $response->get_data()['message'] );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
 	 * @testdox A quantity-form refund after a partial amount refund is clamped to the line's remaining refundable amount.
 	 */
 	public function test_quantity_refund_clamped_to_remaining(): void {

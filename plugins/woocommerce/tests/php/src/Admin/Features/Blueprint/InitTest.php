@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Admin\Features\Blueprint;
 
+use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCPaymentGateways;
 use Automattic\WooCommerce\Admin\Features\Blueprint\Init;
 use Automattic\WooCommerce\Tests\Admin\Features\Blueprint\Stubs\DummyExporter;
 use Automattic\WooCommerce\Tests\Admin\Features\Blueprint\Stubs\ThemeStub;
@@ -204,7 +205,7 @@ class InitTest extends MockeryTestCase {
 		$expected = array(
 			array(
 				'id'          => 'settings',
-				'description' => 'Includes all the items featured in WooCommerce | Settings.',
+				'description' => 'Includes WooCommerce settings except payment settings, which must be configured manually after import.',
 				'label'       => 'WooCommerce Settings',
 				'icon'        => 'settings',
 				'items'       => array(
@@ -233,6 +234,15 @@ class InitTest extends MockeryTestCase {
 		);
 
 		$this->assertSame( $expected, $result );
+	}
+
+	/**
+	 * @testdox Should not register payment settings for Blueprint export.
+	 */
+	public function test_get_woo_exporters_excludes_payment_settings(): void {
+		$exporter_classes = array_map( 'get_class', $this->init->get_woo_exporters() );
+
+		$this->assertNotContains( ExportWCPaymentGateways::class, $exporter_classes, 'Payment settings must not be available as a Blueprint export step.' );
 	}
 
 	/**

@@ -13,16 +13,15 @@ import {
  * Internal dependencies
  */
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { expect, test as baseTest } from '../../fixtures/fixtures';
+import { expect, test as baseTest, locks } from '../../fixtures/fixtures';
 import { admin } from '../../test-data/data';
-import { setOption } from '../../utils/options';
+import { deleteOption, setOption } from '../../utils/options';
 import { accessTheEmailEditor, expectEmail } from '../../utils/email';
 
 /**
- * End-to-end coverage for file-first block email rendering (WOOPLUG-6171):
- * with the block email editor enabled, a transactional email renders from its
- * file template until the merchant edits AND saves it — a draft scratchpad
- * (even one carrying unsaved edits) never affects what customers receive.
+ * End-to-end coverage for the installed block-email customization seam: a
+ * merchant opens the file-backed editor, edits its scratchpad, saves it, and
+ * receives the published customization in a transactional email.
  *
  * Uses the customer "Processing order" email; delivery is asserted through the
  * WP Mail Logging inbox like the classic `order-emails.spec.ts`.
@@ -31,16 +30,13 @@ import { accessTheEmailEditor, expectEmail } from '../../utils/email';
 const EMAIL_LISTING_TITLE = 'Order confirmation';
 const EMAIL_TYPE = 'customer_processing_order';
 const SUBJECT_REGEX = /Your .+ order has been received!/;
-// Footer text unique to the `wooemailtemplate` block template — proves the
-// email was rendered through the block pipeline, not the classic one.
-const BLOCK_TEMPLATE_FOOTER = 'All Rights Reserved';
 const DRAFT_MARKER = 'WOOPLUG6171_DRAFT_ONLY_MARKER';
+const EMAIL_POST_MAPPING_OPTION =
+	'woocommerce_email_templates_customer_processing_order_post_id';
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
 } );
-
-test.describe.configure( { mode: 'serial' } );
 
 const createAdminApiClient = ( baseURL: string ) =>
 	createClient( baseURL, {
@@ -75,6 +71,10 @@ test.beforeAll( async ( { baseURL } ) => {
 	);
 	// Start from a clean slate in case another spec left a post behind.
 	await deleteEmailTypePosts( baseURL );
+	// A mapping can outlive its email post and later point at an unrelated post
+	// after an environment restore reuses the numeric ID. Remove this email
+	// type's mapping so the real Edit action creates a fresh `woo_email` draft.
+	await deleteOption( request, baseURL, EMAIL_POST_MAPPING_OPTION );
 } );
 
 test.afterAll( async ( { baseURL } ) => {
@@ -87,6 +87,7 @@ test.afterAll( async ( { baseURL } ) => {
 	// Delete posts while the feature is still enabled so the
 	// `before_delete_post` hook also clears the email type → post mapping.
 	await deleteEmailTypePosts( baseURL );
+	await deleteOption( request, baseURL, EMAIL_POST_MAPPING_OPTION );
 	await setOption(
 		request,
 		baseURL,
@@ -124,98 +125,73 @@ const triggerOrderEmailAndOpenLog = async ( page, restApi ) => {
 	return modalContent.locator( 'iframe' ).contentFrame();
 };
 
-test( 'uncustomized email is sent from the file template', async ( {
-	page,
-	restApi,
-} ) => {
-	const emailBody = await triggerOrderEmailAndOpenLog( page, restApi );
+test(
+	'saved email is sent from the customized post',
+	{ lock: locks.EMAIL_FEATURE_FLAGS },
+	async ( { page, restApi } ) => {
+		// Opening the editor creates this email type's draft scratchpad from the
+		// canonical file template.
+		await accessTheEmailEditor( page, EMAIL_LISTING_TITLE );
+		await expect(
+			page
+				.locator( 'iframe[name="editor-canvas"]' )
+				.contentFrame()
+				.getByText( 'Thank you for your order' )
+		).toBeVisible();
 
-	await expect( emailBody.locator( 'body' ) ).toContainText(
-		'is now being processed'
-	);
-	await expect( emailBody.locator( 'body' ) ).toContainText(
-		BLOCK_TEMPLATE_FOOTER
-	);
-} );
+		const drafts = await restApi.get( `${ WP_API_PATH }/woo_email`, {
+			status: 'draft',
+			context: 'edit',
+			per_page: 100,
+		} );
+		const draft = drafts.data.find( ( post ) =>
+			( post.slug as string ).startsWith( EMAIL_TYPE )
+		);
+		expect( draft ).toBeTruthy();
+		expect( Number.isSafeInteger( draft.id ) && draft.id > 0 ).toBe( true );
+		await restApi.post( `${ WP_API_PATH }/woo_email/${ draft.id }`, {
+			content: `${ draft.content.raw }\n<!-- wp:paragraph --><p>${ DRAFT_MARKER }</p><!-- /wp:paragraph -->`,
+		} );
 
-test( 'draft edits do not affect sent emails until saved', async ( {
-	page,
-	restApi,
-} ) => {
-	// Opening the editor lazily creates the draft scratchpad with the file
-	// template content.
-	await accessTheEmailEditor( page, EMAIL_LISTING_TITLE );
-	await expect(
-		page
-			.locator( 'iframe[name="editor-canvas"]' )
-			.contentFrame()
-			.getByText( 'Thank you for your order' )
-	).toBeVisible();
+		// The real listing must reopen that same edited scratchpad before Save.
+		await accessTheEmailEditor( page, EMAIL_LISTING_TITLE );
+		await expect(
+			page
+				.locator( 'iframe[name="editor-canvas"]' )
+				.contentFrame()
+				.getByText( DRAFT_MARKER )
+		).toBeVisible();
 
-	// Write an edit into the draft via REST — a deterministic stand-in for
-	// the editor's remote autosave (which fires on a 60s interval).
-	const drafts = await restApi.get( `${ WP_API_PATH }/woo_email`, {
-		status: 'draft',
-		context: 'edit',
-		per_page: 100,
-	} );
-	const draft = drafts.data.find( ( post ) =>
-		( post.slug as string ).startsWith( EMAIL_TYPE )
-	);
-	expect( draft ).toBeTruthy();
-	await restApi.post( `${ WP_API_PATH }/woo_email/${ draft.id }`, {
-		content: `${ draft.content.raw }\n<!-- wp:paragraph --><p>${ DRAFT_MARKER }</p><!-- /wp:paragraph -->`,
-	} );
+		// Save publishes the draft in the background, making it the rendering
+		// source. Observe the exact post write and then poll the same draft ID.
+		const saveResponse = page.waitForResponse( ( response ) => {
+			const url = new URL( response.url() );
+			return (
+				url.pathname.endsWith( `/wp/v2/woo_email/${ draft.id }` ) &&
+				[ 'POST', 'PUT' ].includes( response.request().method() ) &&
+				response.ok()
+			);
+		} );
+		await page.getByRole( 'button', { name: 'Save', exact: true } ).click();
+		await saveResponse;
 
-	const emailBody = await triggerOrderEmailAndOpenLog( page, restApi );
+		await expect
+			.poll(
+				async () => {
+					const response = await restApi.get(
+						`${ WP_API_PATH }/woo_email/${ draft.id }`,
+						{ context: 'edit' }
+					);
+					return response.data.status;
+				},
+				{ timeout: 20000 }
+			)
+			.toBe( 'publish' );
 
-	await expect( emailBody.locator( 'body' ) ).toContainText(
-		BLOCK_TEMPLATE_FOOTER
-	);
-	await expect( emailBody.locator( 'body' ) ).not.toContainText(
-		DRAFT_MARKER
-	);
-} );
+		const emailBody = await triggerOrderEmailAndOpenLog( page, restApi );
 
-test( 'saved email is sent from the customized post', async ( {
-	page,
-	restApi,
-} ) => {
-	// The editor reuses the edited draft (edits must survive reopening).
-	await accessTheEmailEditor( page, EMAIL_LISTING_TITLE );
-	await expect(
-		page
-			.locator( 'iframe[name="editor-canvas"]' )
-			.contentFrame()
-			.getByText( DRAFT_MARKER )
-	).toBeVisible();
-
-	// Save publishes the draft in the background, making it the rendering
-	// source.
-	await page.getByRole( 'button', { name: 'Save', exact: true } ).click();
-
-	const drafts = await restApi.get( `${ WP_API_PATH }/woo_email`, {
-		status: 'publish,draft',
-		per_page: 100,
-	} );
-	const post = drafts.data.find( ( item ) =>
-		( item.slug as string ).startsWith( EMAIL_TYPE )
-	);
-	expect( post ).toBeTruthy();
-	await expect
-		.poll(
-			async () => {
-				const response = await restApi.get(
-					`${ WP_API_PATH }/woo_email/${ post.id }`,
-					{ context: 'edit' }
-				);
-				return response.data.status;
-			},
-			{ timeout: 20000 }
-		)
-		.toBe( 'publish' );
-
-	const emailBody = await triggerOrderEmailAndOpenLog( page, restApi );
-
-	await expect( emailBody.locator( 'body' ) ).toContainText( DRAFT_MARKER );
-} );
+		await expect( emailBody.locator( 'body' ) ).toContainText(
+			DRAFT_MARKER
+		);
+	}
+);

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Enhanced product search multi-selects (e.g. Linked Products) no longer list products that are already selected, so re-clicking a product in the results can no longer silently remove it from the selection.

@@ -145,7 +145,7 @@ class WC_Tracks {
 	 * Track when the user attempts to toggle
 	 * woocommerce_allow_tracking option.
 	 *
-	 * @since x.x.x
+	 * @since 9.5.2
 	 *
 	 * @param string $prev_value The previous value for the setting. 'yes' or 'no'.
 	 * @param string $new_value The new value for the setting. 'yes' or 'no'.

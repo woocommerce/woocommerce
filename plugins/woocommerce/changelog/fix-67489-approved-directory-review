@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Restore and harden the Site Health prompt after approved download directory synchronization.

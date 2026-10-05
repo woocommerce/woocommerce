@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Correct the NoticeHandler::convert_notices_to_wp_errors() docblock, which claimed it discards notices when it does not.

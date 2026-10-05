@@ -22,35 +22,39 @@ interface Props {
 	context: {
 		termId?: number;
 		termTaxonomy?: string;
+		taxonomy?: string;
 	};
 }
 
 export default function Edit( { attributes, setAttributes, context }: Props ) {
 	const { textAlign } = attributes;
-	const { termId, termTaxonomy } = context;
+	const { termId, termTaxonomy, taxonomy } = context;
+	const effectiveTaxonomy = termTaxonomy || taxonomy || 'product_cat';
 
 	const userCanEdit = useSelect(
 		( select ) => {
-			if ( ! termId ) return false;
+			if ( ! termId ) {
+				return false;
+			}
 			// This use actually reflects the use seen in `core/post-title` block.
 			return select( coreStore ).canUser( 'update', {
 				kind: 'taxonomy',
-				name: termTaxonomy || 'product_cat',
+				name: effectiveTaxonomy,
 				id: termId,
 			} );
 		},
-		[ termId, termTaxonomy ]
+		[ termId, effectiveTaxonomy ]
 	);
 
 	const [ rawDescription = '', setDescription, fullDescription ] =
 		useEntityProp(
 			'taxonomy',
-			termTaxonomy || 'product_cat',
+			effectiveTaxonomy,
 			'description',
-			String( termId )
+			termId ? String( termId ) : undefined
 		);
 
-	const isPreviewMode = usePreviewMode();
+	const isPreviewMode = usePreviewMode() && ! termId;
 
 	let displayRawDescription = '';
 	if ( isPreviewMode ) {
@@ -62,6 +66,8 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	let displayFullDescription = '';
 	if ( isPreviewMode ) {
 		displayFullDescription = previewCategories[ 0 ].description;
+	} else if ( typeof fullDescription === 'string' ) {
+		displayFullDescription = fullDescription;
 	} else if (
 		typeof fullDescription === 'object' &&
 		fullDescription !== null &&
@@ -79,7 +85,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		<p { ...blockProps }>{ __( 'Category description', 'woocommerce' ) }</p>
 	);
 
-	if ( termId ) {
+	if ( termId || isPreviewMode ) {
 		descriptionElement = userCanEdit ? (
 			<PlainText
 				tagName="p"

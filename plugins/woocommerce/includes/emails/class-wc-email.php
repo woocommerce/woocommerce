@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
+use Automattic\WooCommerce\Internal\Email\EmailHeaders;
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
 use Automattic\WooCommerce\Internal\EmailEditor\TransactionalEmailPersonalizer;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -687,8 +688,13 @@ class WC_Email extends WC_Settings_API {
 
 		// For order notification emails sent to admin, always use customer's billing email as reply-to.
 		if ( in_array( $this->id, array( 'new_order', 'cancelled_order', 'failed_order' ), true ) ) {
-			if ( $this->object && $this->object->get_billing_email() && ( $this->object->get_billing_first_name() || $this->object->get_billing_last_name() ) ) {
-				$header .= 'Reply-to: ' . $this->object->get_billing_first_name() . ' ' . $this->object->get_billing_last_name() . ' <' . $this->object->get_billing_email() . ">\r\n";
+			if ( $this->object instanceof WC_Order ) {
+				$reply_to_name  = EmailHeaders::sanitize_reply_to_name( $this->object->get_billing_first_name() . ' ' . $this->object->get_billing_last_name() );
+				$reply_to_email = sanitize_email( $this->object->get_billing_email() );
+
+				if ( '' !== $reply_to_name && is_email( $reply_to_email ) ) {
+					$header .= 'Reply-to: ' . $reply_to_name . ' <' . $reply_to_email . ">\r\n";
+				}
 			}
 		} else {
 			// Check if custom reply-to is enabled and configured for non-admin notification emails.
@@ -697,10 +703,20 @@ class WC_Email extends WC_Settings_API {
 			$reply_to_name    = $this->get_reply_to_name();
 
 			if ( $reply_to_enabled && ! empty( $reply_to_address ) && is_email( $reply_to_address ) ) {
-				$reply_to_name = ! empty( $reply_to_name ) ? $reply_to_name : $this->get_from_name();
-				$header       .= 'Reply-to: ' . $reply_to_name . ' <' . $reply_to_address . ">\r\n";
-			} elseif ( $this->get_from_address() && $this->get_from_name() ) {
-				$header .= 'Reply-to: ' . $this->get_from_name() . ' <' . $this->get_from_address() . ">\r\n";
+				$reply_to_name = EmailHeaders::sanitize_reply_to_name( $reply_to_name );
+
+				if ( '' === $reply_to_name ) {
+					$reply_to_name = EmailHeaders::sanitize_reply_to_name( $this->get_from_name() );
+				}
+
+				$header .= 'Reply-to: ' . $reply_to_name . ' <' . $reply_to_address . ">\r\n";
+			} else {
+				$from_address = $this->get_from_address();
+				$from_name    = EmailHeaders::sanitize_reply_to_name( $this->get_from_name() );
+
+				if ( $from_address && '' !== $from_name ) {
+					$header .= 'Reply-to: ' . $from_name . ' <' . $from_address . ">\r\n";
+				}
 			}
 		}
 
@@ -1586,7 +1602,7 @@ class WC_Email extends WC_Settings_API {
 		?>
 		<?php wc_back_header( $this->get_title(), __( 'Return to emails', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=email' ) ); ?>
 
-		<?php echo wpautop( wp_kses_post( $this->get_description() ) ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
+		<?php echo wpautop( wp_kses_post( $this->get_description() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_kses_post() sanitizes the description before wpautop() formats it. ?>
 
 		<?php
 		/**

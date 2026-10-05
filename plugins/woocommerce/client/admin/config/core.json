@@ -1,12 +1,10 @@
 {
 	"features": {
-		"product-data-views": false,
 		"experimental-blocks": false,
 		"minified-js": false,
 		"settings-ui": false,
 		"store-alerts": true,
 		"rest-api-v4": false,
-		"order-detail-redesign": false,
-		"product-variations-classic-redesign": false
+		"order-detail-redesign": false
 	}
 }

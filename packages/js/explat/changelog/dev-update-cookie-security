@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update cookie and its type definitions to fix a security issue.

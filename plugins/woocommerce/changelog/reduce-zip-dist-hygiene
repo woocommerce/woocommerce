@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Keep dev-only files out of the release zip: stop copying legacy JS test directories into built assets, and exclude lint configs and other development files from the package.

@@ -378,7 +378,7 @@ class WC_Admin_Post_Types {
 		// Get the product and save.
 		$product = wc_get_product( $post );
 
-		if ( ! empty( $request_data['woocommerce_quick_edit'] ) ) { // WPCS: input var ok.
+		if ( ! empty( $request_data['woocommerce_quick_edit'] ) ) {
 			$this->quick_edit_save( $post_id, $product );
 		} else {
 			$this->bulk_edit_save( $post_id, $product );
@@ -895,6 +895,10 @@ class WC_Admin_Post_Types {
 
 		if ( wc_get_page_id( 'terms' ) === $post->ID ) {
 			$post_states['wc_page_for_terms'] = __( 'Terms and Conditions Page', 'woocommerce' );
+		}
+
+		if ( wc_get_page_id( 'refund_returns' ) === $post->ID ) {
+			$post_states['wc_page_for_refund_returns'] = __( 'Refund and Returns Policy Page', 'woocommerce' );
 		}
 
 		return $post_states;

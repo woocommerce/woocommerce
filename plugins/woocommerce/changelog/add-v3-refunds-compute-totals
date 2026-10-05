@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add an opt-in compute_totals mode to POST /wc/v3/orders/{id}/refunds that computes per-line refund amounts server-side from quantities, validated against the order's refund history.

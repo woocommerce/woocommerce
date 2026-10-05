@@ -746,7 +746,6 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		try {
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			do_action( 'woocommerce_expired_transient_files_cleanup' );
 		} finally {
 			remove_all_filters( 'woocommerce_expired_transient_files_cleanup' );
@@ -776,7 +775,6 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 		add_filter( 'woocommerce_delete_expired_transient_files_interval', fn( $interval ) => HOUR_IN_SECONDS );
 
 		try {
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			do_action( 'woocommerce_expired_transient_files_cleanup' );
 		} finally {
 			remove_all_filters( 'woocommerce_expired_transient_files_cleanup' );
@@ -819,7 +817,6 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 		$today = '2023-12-03';
 
 		try {
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			do_action( 'woocommerce_expired_transient_files_cleanup' );
 		} finally {
 			remove_all_filters( 'woocommerce_expired_transient_files_cleanup' );
@@ -893,7 +890,6 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 		$_GET['wc-transient-file-name'] = $file_name;
 		$_SERVER['REQUEST_METHOD']      = 'GET';
 		try {
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			do_action( 'parse_request' );
 		} catch ( \LogicException $ex ) {
 			$response_body = ob_get_clean();
@@ -946,7 +942,6 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 		$_GET['wc-transient-file-name'] = 'NOT_EXISTING';
 		$_SERVER['REQUEST_METHOD']      = 'GET';
 		try {
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			do_action( 'parse_request' );
 		} catch ( \LogicException $ex ) {
 			$response_body = ob_get_clean();
@@ -1001,7 +996,6 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 		$_GET['wc-transient-file-name'] = $file_name;
 		$_SERVER['REQUEST_METHOD']      = 'GET';
 		try {
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			do_action( 'parse_request' );
 		} catch ( \LogicException $ex ) {
 			$response_body = ob_get_clean();

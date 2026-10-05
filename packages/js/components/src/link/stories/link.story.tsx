@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { withConsole } from '@storybook/addon-console';
 import { createElement } from '@wordpress/element';
 
 /**
@@ -23,7 +22,6 @@ function logLinkClick( event ) {
 export default {
 	title: 'Components/Link',
 	component: Link,
-	decorators: [ ( storyFn, context ) => withConsole()( storyFn )( context ) ],
 };
 
 export const External = () => {

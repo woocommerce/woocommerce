@@ -586,6 +586,8 @@ woocommerce.put("coupons/719", data).parsed_response
 
 This API helps you delete a coupon.
 
+To remove an applied coupon from an order without deleting the coupon itself, [update the order's coupon lines](../orders#remove-a-coupon-from-an-order).
+
 ```http
 DELETE /wp-json/wc/v3/coupons/<id>
 ```

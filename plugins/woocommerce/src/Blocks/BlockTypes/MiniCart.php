@@ -278,6 +278,8 @@ class MiniCart extends AbstractBlock {
 			return $content . $this->get_markup( MiniCartUtils::migrate_attributes_to_color_panel( $attributes ) );
 		}
 
+		// The view script module is deliberately not declared in block.json, so it is only
+		// enqueued here and never on the cart and checkout pages handled above.
 		wp_enqueue_script_module( $this->get_full_block_name() );
 
 		// Enqueue all integration scripts registered for this block.
@@ -304,7 +306,7 @@ class MiniCart extends AbstractBlock {
 			$wrapper_styles           = $classes_styles['styles'];
 			// Pre-render the template part so nested blocks enqueue their assets before the overlay is printed in wp_footer.
 			$template_part_contents           = $this->get_template_part_contents( false );
-			$template_part_contents           = do_blocks( $this->process_template_contents( $template_part_contents ) );
+			$template_part_contents           = $this->render_template_part_contents( $template_part_contents );
 			$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
 			$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === TaxDisplayMode::INCLUSIVE;
 			$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
@@ -338,7 +340,6 @@ class MiniCart extends AbstractBlock {
 					'shouldShowTaxLabel' => $cart->get_cart_contents_tax() > 0,
 					'badgeIsVisible'     => $badge_is_visible,
 					'formattedSubtotal'  => $formatted_subtotal,
-					'drawerOverlayClass' => 'wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden',
 					'buttonAriaLabel'    => function () use ( $button_aria_label_template ) {
 						$state = wp_interactivity_state();
 						return isset( $attributes['hasHiddenPrice'] ) && false !== $attributes['hasHiddenPrice']
@@ -445,7 +446,7 @@ class MiniCart extends AbstractBlock {
 	 */
 	public function render_mini_cart_overlay() {
 		$template_part_contents = $this->get_template_part_contents( false );
-		$template_part_contents = do_blocks( $this->process_template_contents( $template_part_contents ) );
+		$template_part_contents = $this->render_template_part_contents( $template_part_contents );
 		ob_start();
 		?>
 		<div
@@ -455,7 +456,9 @@ class MiniCart extends AbstractBlock {
 			data-wp-on--click="actions.overlayCloseDrawer"
 			data-wp-on--keydown="actions.handleOverlayKeydown"
 			data-wp-watch="callbacks.focusFirstElement"
-			data-wp-bind--class="state.drawerOverlayClass"
+			data-wp-class--wc-block-components-drawer__screen-overlay--with-slide-in="state.isOpen"
+			data-wp-class--wc-block-components-drawer__screen-overlay--is-hidden="!state.isOpen"
+			class="wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out"
 		>
 			<div
 				data-wp-bind--role="state.drawerRole"
@@ -477,6 +480,34 @@ class MiniCart extends AbstractBlock {
 		<?php
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo wp_interactivity_process_directives( ob_get_clean() );
+	}
+
+	/**
+	 * Render Mini-Cart template contents while removing legacy saved wrappers.
+	 *
+	 * @param string $template_contents The template contents to render.
+	 * @return string The rendered template contents.
+	 */
+	private function render_template_part_contents( $template_contents ) {
+		$process_legacy_wrappers = function ( $parsed_block ) {
+			if ( 'woocommerce/mini-cart-contents' !== ( $parsed_block['blockName'] ?? null ) ) {
+				return $parsed_block;
+			}
+
+			$processed_blocks = parse_blocks(
+				$this->process_template_contents( serialize_block( $parsed_block ) )
+			);
+
+			return $processed_blocks[0] ?? $parsed_block;
+		};
+
+		add_filter( 'render_block_data', $process_legacy_wrappers, 10, 1 );
+
+		try {
+			return do_blocks( $template_contents );
+		} finally {
+			remove_filter( 'render_block_data', $process_legacy_wrappers, 10 );
+		}
 	}
 
 	/**
@@ -702,7 +733,7 @@ class MiniCart extends AbstractBlock {
 			array(
 				'title'    => __( 'Empty Mini-Cart Message', 'woocommerce' ),
 				'inserter' => false,
-				'content'  => '<!-- wp:paragraph {"align":"center"} --><p class="has-text-align-center"><strong>' . __( 'Your cart is currently empty!', 'woocommerce' ) . '</strong></p><!-- /wp:paragraph -->',
+				'content'  => '<!-- wp:heading {"textAlign":"center"} --><h2 class="wp-block-heading has-text-align-center">' . __( 'Your cart is empty', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
 	}

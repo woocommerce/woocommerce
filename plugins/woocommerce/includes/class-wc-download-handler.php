@@ -21,11 +21,20 @@ class WC_Download_Handler {
 	 */
 	public const TRACK_DOWNLOAD_CALLBACK = 'track_partial_download';
 
+	/** Successful completion of a streamed file read. */
+	private const READ_RESULT_SUCCESS = 'success';
+
+	/** A streamed file read failed before emitting any file data. */
+	private const READ_RESULT_FAILURE_BEFORE_OUTPUT = 'failure_before_output';
+
+	/** A streamed file read failed after emitting file data. */
+	private const READ_RESULT_FAILURE_AFTER_OUTPUT = 'failure_after_output';
+
 	/**
 	 * Hook in methods.
 	 */
 	public static function init() {
-		if ( isset( $_GET['download_file'], $_GET['order'] ) && ( isset( $_GET['email'] ) || isset( $_GET['uid'] ) ) ) { // WPCS: input var ok, CSRF ok.
+		if ( isset( $_GET['download_file'], $_GET['order'] ) && ( isset( $_GET['email'] ) || isset( $_GET['uid'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Emailed download links are bearer URLs; download_product() verifies the order key and email hash.
 			add_action( 'init', array( __CLASS__, 'download_product' ) );
 		}
 		add_action( 'woocommerce_download_file_redirect', array( __CLASS__, 'download_file_redirect' ), 10, 2 );
@@ -38,7 +47,15 @@ class WC_Download_Handler {
 	 * Check if we need to download a file and check validity.
 	 */
 	public static function download_product() {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Emailed download links are bearer URLs: authorization is the order key plus the billing email or its hash, both verified below, so no nonce can be issued for them.
+
+		// Download links only ever carry scalar values, so reject array input instead of passing it to the string handling below.
+		foreach ( array( 'download_file', 'order', 'key', 'email', 'uid' ) as $download_arg ) {
+			if ( isset( $_GET[ $download_arg ] ) && ! is_scalar( $_GET[ $download_arg ] ) ) {
+				self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
+			}
+		}
+
 		$product_id = absint( $_GET['download_file'] ); // phpcs:ignore WordPress.VIP.SuperGlobalInputUsage.AccessDetected, WordPress.VIP.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 		$product    = wc_get_product( $product_id );
 		$downloads  = $product ? $product->get_downloads() : array();
@@ -57,16 +74,15 @@ class WC_Download_Handler {
 		}
 
 		// Fallback, accept email address if it's passed.
-		if ( empty( $_GET['email'] ) && empty( $_GET['uid'] ) ) { // WPCS: input var ok, CSRF ok.
+		if ( empty( $_GET['email'] ) && empty( $_GET['uid'] ) ) {
 			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
 		}
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
-		$order_id = wc_get_order_id_by_order_key( wc_clean( wp_unslash( $_GET['order'] ) ) ); // WPCS: input var ok, CSRF ok.
+		$order_id = wc_get_order_id_by_order_key( wc_clean( wp_unslash( $_GET['order'] ) ) );
 		$order    = wc_get_order( $order_id );
 
-		if ( isset( $_GET['email'] ) ) { // WPCS: input var ok, CSRF ok.
-			$email_address = wp_unslash( $_GET['email'] ); // WPCS: input var ok, CSRF ok, sanitization ok.
+		if ( isset( $_GET['email'] ) ) {
+			$email_address = wp_unslash( $_GET['email'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The raw value is needed so spaces can be restored to "+" below; sanitize_email() is applied before the lookup.
 		} else {
 			// Get email address from order to verify hash.
 			$email_address = is_a( $order, 'WC_Order' ) ? $order->get_billing_email() : null;
@@ -74,7 +90,7 @@ class WC_Download_Handler {
 			// Prepare email address hash.
 			$email_hash = function_exists( 'hash' ) ? hash( 'sha256', $email_address ) : sha1( $email_address );
 
-			if ( is_null( $email_address ) || ! hash_equals( wp_unslash( $_GET['uid'] ), $email_hash ) ) { // WPCS: input var ok, CSRF ok, sanitization ok.
+			if ( is_null( $email_address ) || ! hash_equals( wp_unslash( $_GET['uid'] ), $email_hash ) ) {
 				self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
 			}
 		}
@@ -82,15 +98,16 @@ class WC_Download_Handler {
 		$download_ids = $data_store->get_downloads(
 			array(
 				'user_email'  => sanitize_email( str_replace( ' ', '+', $email_address ) ),
-				'order_key'   => wc_clean( wp_unslash( $_GET['order'] ) ), // WPCS: input var ok, CSRF ok.
+				'order_key'   => wc_clean( wp_unslash( $_GET['order'] ) ),
 				'product_id'  => $product_id,
-				'download_id' => wc_clean( preg_replace( '/\s+/', ' ', wp_unslash( $_GET['key'] ) ) ), // WPCS: input var ok, CSRF ok, sanitization ok.
+				'download_id' => wc_clean( preg_replace( '/\s+/', ' ', wp_unslash( $_GET['key'] ) ) ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The key is matched against the product's download list above and wc_clean() normalizes it before the lookup.
 				'orderby'     => 'downloads_remaining',
 				'order'       => 'DESC',
 				'limit'       => 1,
 				'return'      => 'ids',
 			)
 		);
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		if ( empty( $download_ids ) ) {
 			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
@@ -301,17 +318,18 @@ class WC_Download_Handler {
 		 * via filters we can still do the string replacement on a HTTP file.
 		 */
 		$replacements = array(
-			$wp_uploads_url                                                   => $wp_uploads_dir,
-			network_site_url( '/', 'https' )                                  => ABSPATH,
+			$wp_uploads_url                  => $wp_uploads_dir,
+			network_site_url( '/', 'https' ) => ABSPATH,
 			str_replace( 'https:', 'http:', network_site_url( '/', 'http' ) ) => ABSPATH,
-			site_url( '/', 'https' )                                          => ABSPATH,
-			str_replace( 'https:', 'http:', site_url( '/', 'http' ) )         => ABSPATH,
+			site_url( '/', 'https' )         => ABSPATH,
+			str_replace( 'https:', 'http:', site_url( '/', 'http' ) ) => ABSPATH,
 		);
 
-		$count            = 0;
-		$file_path        = str_replace( array_keys( $replacements ), array_values( $replacements ), $file_path, $count );
-		$parsed_file_path = wp_parse_url( $file_path );
-		$remote_file      = null === $count || 0 === $count; // Remote file only if there were no replacements.
+		$count             = 0;
+		$file_path         = str_replace( array_keys( $replacements ), array_values( $replacements ), $file_path, $count );
+		$parsed_file_path  = wp_parse_url( $file_path );
+		$remote_file       = null === $count || 0 === $count; // Remote file only if there were no replacements.
+		$decoded_file_path = str_replace( '%20', ' ', $file_path );
 
 		// Paths that begin with '//' are always remote URLs.
 		if ( '//' === substr( $file_path, 0, 2 ) ) {
@@ -339,6 +357,10 @@ class WC_Download_Handler {
 		} elseif ( 0 === strpos( $file_path, $wp_content_dirname ) ) {
 			$remote_file = false;
 			$file_path   = realpath( WP_CONTENT_DIR . substr( $file_path, strlen( $wp_content_dirname ) ) );
+
+			// A mapped local URL may encode spaces as "%20". Use the decoded path only when the literal path does not exist.
+		} elseif ( ! $remote_file && $decoded_file_path !== $file_path && ! file_exists( $file_path ) && file_exists( $decoded_file_path ) ) {
+			$file_path = $decoded_file_path;
 
 			// Check if we have an absolute path.
 		} elseif ( ( ! isset( $parsed_file_path['scheme'] ) || ! in_array( $parsed_file_path['scheme'], array( 'http', 'https', 'ftp' ), true ) ) && isset( $parsed_file_path['path'] ) ) {
@@ -438,7 +460,7 @@ class WC_Download_Handler {
 		$download_range['length'] = $file_size;
 
 		if ( isset( $_SERVER['HTTP_RANGE'] ) ) { // @codingStandardsIgnoreLine.
-			$http_range                         = sanitize_text_field( wp_unslash( $_SERVER['HTTP_RANGE'] ) ); // WPCS: input var ok.
+			$http_range                         = sanitize_text_field( wp_unslash( $_SERVER['HTTP_RANGE'] ) );
 			$download_range['is_range_request'] = true;
 
 			$c_start = $start;
@@ -506,7 +528,7 @@ class WC_Download_Handler {
 			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Streaming a remote file needs fopen (WP_Filesystem cannot stream); a false return is handled below.
 			$handle = @fopen( $parsed_file_path['file_path'], 'r' );
 
-			$served = false;
+			$read_result = self::READ_RESULT_FAILURE_BEFORE_OUTPUT;
 			if ( false !== $handle ) {
 				$response_headers = stream_get_meta_data( $handle )['wrapper_data'] ?? array();
 				$filename         = self::resolve_filename_from_response_headers(
@@ -518,15 +540,20 @@ class WC_Download_Handler {
 				);
 
 				self::download_headers( $parsed_file_path['file_path'], $filename, $download_range, true );
-				$served = self::readfile_from_handle( $handle, $start, $length );
+				$read_result = self::readfile_from_handle( $handle, $start, $length );
 			}
 		} else {
 			self::download_headers( $parsed_file_path['file_path'], $filename, $download_range );
-			$served = self::readfile_chunked( $parsed_file_path['file_path'], $start, $length );
+			$read_result = self::readfile_chunked_with_result( $parsed_file_path['file_path'], $start, $length );
 		}
 
-		if ( ! $served ) {
-			if ( $parsed_file_path['remote_file'] && 'yes' === get_option( 'woocommerce_downloads_redirect_fallback_allowed' ) ) {
+		if ( self::READ_RESULT_SUCCESS !== $read_result ) {
+			if ( self::READ_RESULT_FAILURE_AFTER_OUTPUT === $read_result ) {
+				wc_get_logger()->warning(
+					__( 'A file could not be completely served using the Force Download method because the response had already started.', 'woocommerce' )
+				);
+			} elseif ( $parsed_file_path['remote_file'] && 'yes' === get_option( 'woocommerce_downloads_redirect_fallback_allowed' ) ) {
+				self::remove_download_headers();
 				wc_get_logger()->warning(
 					sprintf(
 						/* translators: %1$s contains the filepath of the digital asset. */
@@ -798,7 +825,7 @@ class WC_Download_Handler {
 	 *
 	 * @return string Content disposition value.
 	 */
-	private static function get_content_disposition() : string {
+	private static function get_content_disposition(): string {
 		$disposition = 'attachment';
 		if ( 'yes' === get_option( 'woocommerce_downloads_deliver_inline' ) ) {
 			$disposition = 'inline';
@@ -817,6 +844,18 @@ class WC_Download_Handler {
 	 * @return bool Success or fail
 	 */
 	public static function readfile_chunked( $file, $start = 0, $length = 0 ) {
+		return self::READ_RESULT_SUCCESS === self::readfile_chunked_with_result( $file, $start, $length );
+	}
+
+	/**
+	 * Read a file in chunks and report when a failure follows partial output.
+	 *
+	 * @param string $file   File.
+	 * @param int    $start  Byte offset/position of the beginning from which to read from the file.
+	 * @param int    $length Length of the chunk to be read from the file in bytes, 0 means full file.
+	 * @return string One of the READ_RESULT_* constants.
+	 */
+	private static function readfile_chunked_with_result( $file, $start, $length ) {
 		// Define before attempting to open the file: the constant has always been defined even
 		// when the open fails, and external code may rely on that side effect.
 		if ( ! defined( 'WC_CHUNK_SIZE' ) ) {
@@ -826,7 +865,7 @@ class WC_Download_Handler {
 		$handle = @fopen( $file, 'r' ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
 
 		if ( false === $handle ) {
-			return false;
+			return self::READ_RESULT_FAILURE_BEFORE_OUTPUT;
 		}
 
 		if ( ! $length ) {
@@ -842,7 +881,7 @@ class WC_Download_Handler {
 	 * @param resource $handle Open file handle, e.g. from `fopen()`.
 	 * @param int      $start  Byte offset/position of the beginning from which to read from the file.
 	 * @param int      $length Length of the chunk to be read from the file in bytes, 0 means until the end of file.
-	 * @return bool Success or fail
+	 * @return string One of the READ_RESULT_* constants.
 	 */
 	private static function readfile_from_handle( $handle, $start = 0, $length = 0 ) {
 		if ( ! defined( 'WC_CHUNK_SIZE' ) ) {
@@ -850,6 +889,7 @@ class WC_Download_Handler {
 		}
 
 		$read_length = (int) WC_CHUNK_SIZE;
+		$output_sent = false;
 
 		if ( $length ) {
 			$end = $start + $length - 1;
@@ -863,8 +903,16 @@ class WC_Download_Handler {
 					$read_length = $end - $p + 1;
 				}
 
-				echo @fread( $handle, $read_length ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.XSS.EscapeOutput.OutputNotEscaped, WordPress.WP.AlternativeFunctions.file_system_read_fread
-				$p = @ftell( $handle ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+				$chunk = @fread( $handle, $read_length ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_fread -- Streamed downloads require fread(); suppress warnings so they do not corrupt the binary response, and handle false below.
+
+				if ( false === $chunk ) {
+					@fclose( $handle ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- The read has already failed; suppress close warnings and report failure below.
+					return $output_sent ? self::READ_RESULT_FAILURE_AFTER_OUTPUT : self::READ_RESULT_FAILURE_BEFORE_OUTPUT;
+				}
+
+				echo $chunk; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Download chunks are raw binary data and must not be HTML-escaped.
+				$output_sent = $output_sent || '' !== $chunk;
+				$p           = @ftell( $handle ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged,WordPress.PHP.NoSilencedErrors.Discouraged
 
 				if ( ob_get_length() ) {
 					ob_flush();
@@ -873,7 +921,15 @@ class WC_Download_Handler {
 			}
 		} else {
 			while ( ! @feof( $handle ) ) { // @codingStandardsIgnoreLine.
-				echo @fread( $handle, $read_length ); // @codingStandardsIgnoreLine.
+				$chunk = @fread( $handle, $read_length ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_fread -- Streamed downloads require fread(); suppress warnings so they do not corrupt the binary response, and handle false below.
+
+				if ( false === $chunk ) {
+					@fclose( $handle ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- The read has already failed; suppress close warnings and report failure below.
+					return $output_sent ? self::READ_RESULT_FAILURE_AFTER_OUTPUT : self::READ_RESULT_FAILURE_BEFORE_OUTPUT;
+				}
+
+				echo $chunk; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Download chunks are raw binary data and must not be HTML-escaped.
+				$output_sent = $output_sent || '' !== $chunk;
 				if ( ob_get_length() ) {
 					ob_flush();
 					flush();
@@ -881,7 +937,12 @@ class WC_Download_Handler {
 			}
 		}
 
-		return @fclose( $handle ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fclose
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Suppress close warnings so they do not corrupt the binary response, and report failure below.
+		if ( @fclose( $handle ) ) {
+			return self::READ_RESULT_SUCCESS;
+		}
+
+		return $output_sent ? self::READ_RESULT_FAILURE_AFTER_OUTPUT : self::READ_RESULT_FAILURE_BEFORE_OUTPUT;
 	}
 
 	/**
@@ -901,6 +962,15 @@ class WC_Download_Handler {
 	}
 
 	/**
+	 * Remove headers that describe a streamed download before sending another response type.
+	 */
+	private static function remove_download_headers(): void {
+		foreach ( array( 'Content-Type', 'Content-Description', 'Content-Disposition', 'Content-Transfer-Encoding', 'Content-Length', 'Content-Range', 'Accept-Ranges' ) as $header ) {
+			header_remove( $header );
+		}
+	}
+
+	/**
 	 * Die with an error message if the download fails.
 	 *
 	 * @param string  $message Error message.
@@ -915,16 +985,14 @@ class WC_Download_Handler {
 		if ( headers_sent() ) {
 			wc_get_logger()->log( 'warning', __( 'Headers already sent when generating download error message.', 'woocommerce' ) );
 		} else {
+			self::remove_download_headers();
 			header( 'Content-Type: ' . get_option( 'html_type' ) . '; charset=' . get_option( 'blog_charset' ) );
-			header_remove( 'Content-Description;' );
-			header_remove( 'Content-Disposition' );
-			header_remove( 'Content-Transfer-Encoding' );
 		}
 
 		if ( ! strstr( $message, '<a ' ) ) {
 			$message .= ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-forward">' . esc_html__( 'Go to shop', 'woocommerce' ) . '</a>';
 		}
-		wp_die( $message, $title, array( 'response' => $status ) ); // WPCS: XSS ok.
+		wp_die( $message, $title, array( 'response' => $status ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_die() accepts HTML; callers pass fixed messages with explicitly escaped links.
 	}
 
 	/**

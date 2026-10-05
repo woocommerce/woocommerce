@@ -38,10 +38,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
 
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
-		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
-
-		$this->assertEquals( $expected_single_product_template_without_whitespace, $result_without_whitespace, '' );
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace( $result )
+		);
 	}
 
 	/**
@@ -73,10 +73,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
 
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
-		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
-
-		$this->assertEquals( $expected_single_product_template_without_whitespace, $result_without_whitespace, '' );
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace( $result )
+		);
 	}
 
 	/**
@@ -96,10 +96,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 		   <!-- wp:query {"queryId":2,"query":{"perPage":9,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","author":"","search":"","exclude":[],"sticky":"","inherit":false,"__woocommerceAttributes":[],"__woocommerceStockStatus":["instock","outofstock","onbackorder"]},"displayLayout":{"type":"flex","columns":3},"namespace":"woocommerce/product-query"} -->
 		   <div class="wp-block-query">
 			  <!-- wp:post-template {"__woocommerceNamespace":"woocommerce/product-query/product-template"} -->
-			  <!-- wp:woocommerce/product-image {"isDescendentOfQueryLoop":true} /-->
+			  <!-- wp:woocommerce/product-image /-->
 			  <!-- wp:post-title {"textAlign":"center","level":3,"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-query/product-title"} /-->
-			  <!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /-->
-			  <!-- wp:woocommerce/product-button {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /-->
+			  <!-- wp:woocommerce/product-price {"textAlign":"center","fontSize":"small","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /-->
+			  <!-- wp:woocommerce/product-button {"textAlign":"center","fontSize":"small","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /-->
 			  <!-- /wp:post-template -->
 			  <!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"center"}} -->
 			  <!-- wp:query-pagination-previous /-->
@@ -131,10 +131,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 			<!-- wp:query {"queryId":2,"query":{"perPage":9,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","author":"","search":"","exclude":[],"sticky":"","inherit":false,"__woocommerceAttributes":[],"__woocommerceStockStatus":["instock","outofstock","onbackorder"]},"displayLayout":{"type":"flex","columns":3},"namespace":"woocommerce/product-query"} -->
 			<div class="wp-block-query">
 				<!-- wp:post-template {"__woocommerceNamespace":"woocommerce/product-query/product-template"} -->
-				<!-- wp:woocommerce/product-image {"isDescendentOfQueryLoop":true} /-->
+				<!-- wp:woocommerce/product-image /-->
 				<!-- wp:post-title {"textAlign":"center","level":3,"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-query/product-title"} /-->
-				<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /-->
-				<!-- wp:woocommerce/product-button {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /-->
+				<!-- wp:woocommerce/product-price {"textAlign":"center","fontSize":"small","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /-->
+				<!-- wp:woocommerce/product-button {"textAlign":"center","fontSize":"small","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /-->
 				<!-- /wp:post-template -->
 				<!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"center"}} -->
 				<!-- wp:query-pagination-previous /-->
@@ -156,10 +156,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
 
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
-		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
-
-		$this->assertEquals( $expected_single_product_template_without_whitespace, $result_without_whitespace, '' );
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace( $result )
+		);
 	}
 
 	/**
@@ -191,10 +191,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
 
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
-		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
-
-		$this->assertEquals( $expected_single_product_template_without_whitespace, $result_without_whitespace, '' );
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace( $result )
+		);
 	}
 
 	/**
@@ -226,10 +226,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
 
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
-		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
-
-		$this->assertEquals( $expected_single_product_template_without_whitespace, $result_without_whitespace, '' );
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace( $result )
+		);
 	}
 
 	/**
@@ -243,10 +243,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 		<!-- wp:query {"queryId":2,"query":{"perPage":9,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","author":"","search":"","exclude":[],"sticky":"","inherit":false,"__woocommerceAttributes":[],"__woocommerceStockStatus":["instock","outofstock","onbackorder"]},"displayLayout":{"type":"flex","columns":3},"namespace":"woocommerce/product-query"} -->
 		<div class="wp-block-query">
 		   <!-- wp:post-template {"__woocommerceNamespace":"woocommerce/product-query/product-template"} -->
-		   <!-- wp:woocommerce/product-image {"isDescendentOfQueryLoop":true} /-->
+		   <!-- wp:woocommerce/product-image /-->
 		   <!-- wp:post-title {"textAlign":"center","level":3,"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-query/product-title"} /-->
-		   <!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /-->
-		   <!-- wp:woocommerce/product-button {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /-->
+		   <!-- wp:woocommerce/product-price {"textAlign":"center","fontSize":"small","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /-->
+		   <!-- wp:woocommerce/product-button {"textAlign":"center","fontSize":"small","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /-->
 		   <!-- /wp:post-template -->
 		   <!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"center"}} -->
 		   <!-- wp:query-pagination-previous /-->
@@ -270,10 +270,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 		   <!-- wp:query {"queryId":2,"query":{"perPage":9,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","author":"","search":"","exclude":[],"sticky":"","inherit":false,"__woocommerceAttributes":[],"__woocommerceStockStatus":["instock","outofstock","onbackorder"]},"displayLayout":{"type":"flex","columns":3},"namespace":"woocommerce/product-query"} -->
 		   <div class="wp-block-query">
 			  <!-- wp:post-template {"__woocommerceNamespace":"woocommerce/product-query/product-template"} -->
-			  <!-- wp:woocommerce/product-image {"isDescendentOfQueryLoop":true} /-->
+			  <!-- wp:woocommerce/product-image /-->
 			  <!-- wp:post-title {"textAlign":"center","level":3,"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-query/product-title"} /-->
-			  <!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /-->
-			  <!-- wp:woocommerce/product-button {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /-->
+			  <!-- wp:woocommerce/product-price {"textAlign":"center","fontSize":"small","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /-->
+			  <!-- wp:woocommerce/product-button {"textAlign":"center","fontSize":"small","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /-->
 			  <!-- /wp:post-template -->
 			  <!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"center"}} -->
 			  <!-- wp:query-pagination-previous /-->
@@ -293,10 +293,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
 
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
-		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
-
-		$this->assertEquals( $expected_single_product_template_without_whitespace, $result_without_whitespace, '' );
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace( $result )
+		);
 	}
 
 	/**
@@ -322,10 +322,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
 
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
-		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
-
-		$this->assertEquals( $expected_single_product_template_without_whitespace, $result_without_whitespace, '' );
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace( $result )
+		);
 	}
 
 
@@ -352,10 +352,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
 
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
-		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
-
-		$this->assertEquals( $expected_single_product_template_without_whitespace, $result_without_whitespace, '' );
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace( $result )
+		);
 	}
 
 	/**
@@ -393,10 +393,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
 
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
-		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
-
-		$this->assertEquals( $expected_single_product_template_without_whitespace, $result_without_whitespace, '' );
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace( $result )
+		);
 	}
 
 	/**
@@ -430,10 +430,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
 
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
-		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
-
-		$this->assertEquals( $expected_single_product_template_without_whitespace, $result_without_whitespace, '' );
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace( $result )
+		);
 	}
 
 	/**
@@ -468,10 +468,10 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
 
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
-		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
-
-		$this->assertEquals( $expected_single_product_template_without_whitespace, $result_without_whitespace, '' );
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace( $result )
+		);
 	}
 
 	/**
@@ -504,9 +504,9 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
 		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $result );
 
-		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
-		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
-
-		$this->assertEquals( $expected_single_product_template_without_whitespace, $result_without_whitespace, '' );
+		$this->assertEquals(
+			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
+			TemplateContentUtils::strip_whitespace( $result )
+		);
 	}
 }
