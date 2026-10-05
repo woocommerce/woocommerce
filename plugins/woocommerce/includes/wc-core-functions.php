@@ -1883,7 +1883,7 @@ function wc_get_tax_rounding_mode() {
 	$constant = WC_TAX_ROUNDING_MODE;
 
 	if ( 'auto' === $constant ) {
-		return wc_prices_include_tax() ? PHP_ROUND_HALF_DOWN : PHP_ROUND_HALF_UP;
+		return 'yes' === get_option( 'woocommerce_prices_include_tax', 'no' ) ? PHP_ROUND_HALF_DOWN : PHP_ROUND_HALF_UP;
 	}
 
 	return intval( $constant );

@@ -389,7 +389,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		}
 
 		// Check if prices are entered with tax.
-		if ( ! wc_prices_include_tax() ) {
+		if ( 'yes' !== get_option( 'woocommerce_prices_include_tax' ) ) {
 			return;
 		}
 
