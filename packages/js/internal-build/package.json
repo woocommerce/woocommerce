@@ -29,6 +29,7 @@
 			"require": "./src/style-build/index.cjs"
 		},
 		"./configs/tsconfig.json": "./configs/tsconfig.json",
+		"./configs/stylelint-base.cjs": "./configs/stylelint-base.cjs",
 		"./configs/stylelint.config.cjs": "./configs/stylelint.config.cjs",
 		"./type-overrides/*": "./type-overrides/*",
 		"./styles/*": "./styles/*"

@@ -1,26 +1,34 @@
 /**
- * Shared stylelint config for the `packages/js/*` packages.
+ * Shared stylelint config for the monorepo's SCSS: the base config plus the
+ * relaxations that the existing code relies on.
  *
  * Usage, from a package's `.stylelintrc.json`:
  *   { "extends": "@woocommerce/internal-build/configs/stylelint.config.cjs" }
  */
 module.exports = {
-	extends: '@wordpress/stylelint-config/stylistic',
-	customSyntax: 'postcss-scss',
+	extends: require.resolve( './stylelint-base.cjs' ),
 	rules: {
-		'selector-class-pattern': null,
 		'at-rule-empty-line-before': null,
 		'at-rule-no-unknown': null,
 		'comment-empty-line-before': null,
-		'@stylistic/declaration-colon-newline-after': null,
 		'font-weight-notation': null,
+		'rule-empty-line-before': null,
+		'value-keyword-case': null,
+		'@stylistic/declaration-colon-newline-after': null,
 		'@stylistic/function-parentheses-space-inside': null,
 		'@stylistic/function-comma-space-after': null,
 		'@stylistic/indentation': null,
 		'@stylistic/max-line-length': null,
-		'no-descending-specificity': null,
-		'no-duplicate-selectors': null,
-		'rule-empty-line-before': null,
-		'value-keyword-case': null,
+		// TODO: fix these rules. They were added to the preset after most of
+		// the existing SCSS was written.
+		'scss/load-partial-extension': null,
+		'scss/load-no-partial-leading-underscore': null,
+		'scss/no-global-function-names': null,
+		'scss/operator-no-unspaced': null,
+		'scss/at-extend-no-missing-placeholder': null,
+		'scss/selector-no-redundant-nesting-selector': null,
+		'selector-id-pattern': null,
+		'no-invalid-position-at-import-rule': null,
+		'length-zero-no-unit': [ true, { ignoreFunctions: [ 'calc', 'var' ] } ],
 	},
 };

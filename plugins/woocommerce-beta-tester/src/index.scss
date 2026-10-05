@@ -46,7 +46,7 @@
 	}
 
 	.components-notice {
-		margin: 0px 0px 10px 0px;
+		margin: 0 0 10px 0;
 	}
 }
 
@@ -58,7 +58,8 @@
 		margin-bottom: 5px;
 	}
 
-	output, textarea {
+	output,
+ textarea {
 		margin-bottom: 10px;
 	}
 
@@ -101,11 +102,12 @@
 		}
 	}
 	.components-notice {
-		margin: 0px 0px 10px 0px;
+		margin: 0 0 10px 0;
 	}
 	.tracking-disabled {
 		border: 1px solid #cc99c2;
 		border-left: 4px solid #cc99c2;
+		/* stylelint-disable-next-line declaration-property-unit-allowed-list */
 		line-height: 1.5em;
 		background: #fff;
 		padding: 10px;
@@ -154,14 +156,14 @@ form.rest-api-filter-new-form {
 		display: grid;
 		grid-template-columns: max-content max-content;
 		grid-gap: 5px;
-		input[type='text'] {
+		input[type="text"] {
 			width: 350px;
 		}
 		label {
 			text-align: right;
 		}
-		label:after {
-			content: ':';
+		label::after {
+			content: ":";
 		}
 	}
 
@@ -199,14 +201,14 @@ form.rest-api-filter-new-form {
 		.btn-danger {
 			margin-right: auto;
 		}
-	}	
+	}
 	.notification-actions {
 		display: flex;
 		gap: 5px;
 		justify-content: end;
 	}
 	.components-notice {
-		margin: 0px 0px 10px 0px;
+		margin: 0 0 10px 0;
 	}
 
 	.button.staging {
