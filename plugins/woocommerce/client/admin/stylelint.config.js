@@ -3,7 +3,6 @@ module.exports = {
 	reportNeedlessDisables: true,
 	ignoreFiles: [ './vendor/**/*.scss' ],
 	rules: {
-		'declaration-block-no-duplicate-properties': null,
 		'declaration-property-unit-allowed-list': null,
 		'@stylistic/value-list-comma-newline-after': null,
 		'scss/load-partial-extension': 'always',
