@@ -20,7 +20,8 @@
 		"lint:fix:lang:js": "eslint ./index.js ./core-modules.js --fix"
 	},
 	"dependencies": {
-		"@woocommerce/eslint-plugin": "workspace:*"
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"@vitest/eslint-plugin": "catalog:tooling"
 	},
 	"devDependencies": {
 		"eslint": "^10.0.0"
