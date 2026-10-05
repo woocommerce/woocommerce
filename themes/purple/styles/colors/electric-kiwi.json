@@ -4,37 +4,37 @@
 			"palette": [
 				{
 					"color": "#262623",
-					"name": "Color 1",
+					"name": "Base",
 					"slug": "theme-1"
 				},
 				{
 					"color": "#f8f9f7",
-					"name": "Color 2",
+					"name": "Contrast",
 					"slug": "theme-2"
 				},
 				{
 					"color": "#1a1b19",
-					"name": "Color 3",
+					"name": "Primary",
 					"slug": "theme-3"
 				},
 				{
 					"color": "#969795",
-					"name": "Color 4",
+					"name": "Contrast Alt",
 					"slug": "theme-4"
 				},
 				{
 					"color": "#314a0d",
-					"name": "Color 5",
+					"name": "Base Alt",
 					"slug": "theme-5"
 				},
 				{
 					"color": "rgba(248, 249, 247, 0.2)",
-					"name": "Color 6",
+					"name": "Border",
 					"slug": "theme-6"
 				},
 				{
 					"color": "#a3f107",
-					"name": "Color 7",
+					"name": "Accent",
 					"slug": "theme-7"
 				}
 			],
