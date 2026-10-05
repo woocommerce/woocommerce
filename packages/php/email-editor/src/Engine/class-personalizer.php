@@ -72,6 +72,14 @@ class Personalizer {
 	private array $context;
 
 	/**
+	 * Optional callback intercepting each resolved personalization tag value before
+	 * it is written into the content.
+	 *
+	 * @var (callable(string, string, string): string)|null
+	 */
+	private $value_interceptor = null;
+
+	/**
 	 * Class constructor with required dependencies.
 	 *
 	 * @param Personalization_Tags_Registry $tags_registry Personalization tags registry.
@@ -113,6 +121,53 @@ class Personalizer {
 	}
 
 	/**
+	 * Set a callback intercepting each resolved personalization tag value before it is written.
+	 *
+	 * The interceptor receives the resolved value (after any context-driven escaping),
+	 * the raw source text being replaced (the trimmed tag token including arguments,
+	 * the raw data-link-href attribute value, or the tag token found inside a plain href),
+	 * and the rendering context of the replacement site — one of the RENDERING_CONTEXT_HTML,
+	 * RENDERING_CONTEXT_TEXT, or RENDERING_CONTEXT_HREF constants. Its return value is
+	 * written instead of the resolved value — verbatim in the html and text rendering
+	 * contexts. In the href rendering context the return value ends up in the href
+	 * attribute, which WordPress escapes with esc_url(): characters not allowed in URLs
+	 * (such as curly braces) are stripped and a missing scheme is prepended, so a
+	 * "{{placeholder}}" return comes out as "http://placeholder". An empty return value
+	 * in the href rendering context means no replacement — the link is left untouched,
+	 * just like an empty resolved value. This allows consumers (e.g. bulk-sending integrations)
+	 * to substitute placeholders for values while recording the values externally.
+	 *
+	 * The interceptor persists until cleared by passing null, and the Personalizer
+	 * instance may be shared with other consumers, so clear or restore the interceptor
+	 * (e.g. in a finally block) as soon as the work it was registered for is done.
+	 * The previously registered interceptor is returned to support restoring it.
+	 *
+	 * @param callable|null $interceptor The interceptor callback or null to clear. The callback receives
+	 *                                    the resolved value, the raw source token, and a RENDERING_CONTEXT_* constant.
+	 * @return callable|null The previously registered interceptor, or null when none was set.
+	 */
+	public function set_value_interceptor( ?callable $interceptor ): ?callable {
+		$previous                = $this->value_interceptor;
+		$this->value_interceptor = $interceptor;
+		return $previous;
+	}
+
+	/**
+	 * Run a resolved value through the registered interceptor, if any.
+	 *
+	 * @param string $value The resolved personalization tag value about to be written.
+	 * @param string $source The raw source text being replaced.
+	 * @param string $rendering_context One of the RENDERING_CONTEXT_* constants.
+	 * @return string The value to write.
+	 */
+	private function intercept_value( string $value, string $source, string $rendering_context ): string {
+		if ( null === $this->value_interceptor ) {
+			return $value;
+		}
+		return ( $this->value_interceptor )( $value, $source, $rendering_context );
+	}
+
+	/**
 	 * Personalize the content by replacing the personalization tags with their values.
 	 *
 	 * @param string $content The content to personalize.
@@ -139,6 +194,7 @@ class Personalizer {
 				if ( self::RENDERING_CONTEXT_HTML === $rendering_context && Personalization_Tag::VALUE_TYPE_TEXT === $tag->get_value_type() ) {
 					$value = esc_html( $value );
 				}
+				$value = $this->intercept_value( (string) $value, trim( $modifiable_text ), $rendering_context );
 				$content_processor->replace_token( $value );
 
 			} elseif ( $content_processor->get_token_type() === '#tag' && $content_processor->get_tag() === 'TITLE' ) {
@@ -159,6 +215,7 @@ class Personalizer {
 
 				$value = $tag->execute_callback( $this->get_callback_context( self::RENDERING_CONTEXT_HREF ), $token['arguments'] );
 				$value = $this->replace_link_href( $href, $tag->get_token(), $value );
+				$value = $this->intercept_value( $value, $href, self::RENDERING_CONTEXT_HREF );
 				if ( '' !== $value ) {
 					$content_processor->set_attribute( 'href', $value );
 					$content_processor->remove_attribute( 'data-link-href' );
@@ -204,6 +261,7 @@ class Personalizer {
 			}
 
 			$value = $tag->execute_callback( $this->get_callback_context( self::RENDERING_CONTEXT_HREF ), $token['arguments'] );
+			$value = $this->intercept_value( $value, $token_string, self::RENDERING_CONTEXT_HREF );
 			if ( '' !== $value ) {
 				$replacements[ $token_string ] = $value;
 			}

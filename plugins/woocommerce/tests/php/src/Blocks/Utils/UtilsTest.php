@@ -154,22 +154,25 @@ class UtilsTest extends WC_Unit_Test_Case {
 	/**
 	 * Get the current page URL after temporarily setting request state.
 	 *
-	 * @param string      $request_path         The request path relative to home.
-	 * @param string|null $query_string         The raw query string, or null to omit it.
-	 * @param bool        $use_trailing_slashes Whether permalinks should use trailing slashes.
+	 * @param string      $request_path            The request path relative to home.
+	 * @param string|null $query_string            The raw query string, or null to omit it.
+	 * @param bool        $use_trailing_slashes    Whether permalinks should use trailing slashes.
+	 * @param bool        $using_index_permalinks  Whether PATHINFO (index.php) permalinks are enabled.
 	 * @return string
 	 */
-	private function get_current_page_url_with_request_state( string $request_path, ?string $query_string, bool $use_trailing_slashes ): string {
+	private function get_current_page_url_with_request_state( string $request_path, ?string $query_string, bool $use_trailing_slashes, bool $using_index_permalinks = false ): string {
 		global $wp, $wp_rewrite;
 
 		$original_request              = $wp->request;
 		$original_query_string_exists  = array_key_exists( 'QUERY_STRING', $_SERVER ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$original_query_string         = $_SERVER['QUERY_STRING'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 		$original_use_trailing_slashes = $wp_rewrite->use_trailing_slashes;
+		$original_permalink_structure  = $wp_rewrite->permalink_structure;
 
 		try {
 			$wp->request                      = $request_path;
 			$wp_rewrite->use_trailing_slashes = $use_trailing_slashes;
+			$wp_rewrite->permalink_structure  = $using_index_permalinks ? '/index.php/%postname%/' : '/%postname%/';
 
 			if ( null === $query_string ) {
 				unset( $_SERVER['QUERY_STRING'] );
@@ -181,6 +184,7 @@ class UtilsTest extends WC_Unit_Test_Case {
 		} finally {
 			$wp->request                      = $original_request;
 			$wp_rewrite->use_trailing_slashes = $original_use_trailing_slashes;
+			$wp_rewrite->permalink_structure  = $original_permalink_structure;
 
 			if ( $original_query_string_exists ) {
 				$_SERVER['QUERY_STRING'] = $original_query_string;
@@ -194,13 +198,14 @@ class UtilsTest extends WC_Unit_Test_Case {
 	 * @testdox get_current_page_url() preserves request URL components exactly.
 	 * @dataProvider provider_current_page_url_cases
 	 *
-	 * @param string      $request_path         The request path relative to home.
-	 * @param string|null $query_string         The raw query string, or null to omit it.
-	 * @param string      $expected_path        The expected path relative to home.
-	 * @param bool        $use_trailing_slashes Whether permalinks should use trailing slashes.
+	 * @param string      $request_path            The request path relative to home.
+	 * @param string|null $query_string            The raw query string, or null to omit it.
+	 * @param string      $expected_path           The expected path relative to home.
+	 * @param bool        $use_trailing_slashes    Whether permalinks should use trailing slashes.
+	 * @param bool        $using_index_permalinks  Whether PATHINFO (index.php) permalinks are enabled.
 	 */
-	public function test_get_current_page_url( string $request_path, ?string $query_string, string $expected_path, bool $use_trailing_slashes ): void {
-		$url = $this->get_current_page_url_with_request_state( $request_path, $query_string, $use_trailing_slashes );
+	public function test_get_current_page_url( string $request_path, ?string $query_string, string $expected_path, bool $use_trailing_slashes, bool $using_index_permalinks ): void {
+		$url = $this->get_current_page_url_with_request_state( $request_path, $query_string, $use_trailing_slashes, $using_index_permalinks );
 
 		$this->assertSame(
 			untrailingslashit( home_url() ) . $expected_path,
@@ -212,33 +217,58 @@ class UtilsTest extends WC_Unit_Test_Case {
 	/**
 	 * Current page URL inputs and their exact expected paths.
 	 *
-	 * @return array<string, array{string, string|null, string, bool}>
+	 * @return array<string, array{string, string|null, string, bool, bool}>
 	 */
 	public function provider_current_page_url_cases(): array {
 		return array(
-			'encoded label query'                   => array(
+			'encoded label query'                          => array(
 				'product/hoodie',
 				'label=Black%20%26%20White',
 				'/product/hoodie/?label=Black%20%26%20White',
 				true,
+				false,
 			),
-			'question mark query value'             => array(
+			'question mark query value'                    => array(
 				'search-results',
 				'search=?',
 				'/search-results/?search=?',
 				true,
+				false,
 			),
-			'lone zero query string'                => array(
+			'lone zero query string'                       => array(
 				'product/hoodie',
 				'0',
 				'/product/hoodie/?0',
 				true,
+				false,
 			),
-			'encoded label query no trailing slash' => array(
+			'encoded label query no trailing slash'        => array(
 				'product/hoodie',
 				'label=Black%20%26%20White',
 				'/product/hoodie?label=Black%20%26%20White',
 				false,
+				false,
+			),
+			'index permalinks product path with query'     => array(
+				'product/hoodie',
+				'label=Black%20%26%20White',
+				'/index.php/product/hoodie/?label=Black%20%26%20White',
+				true,
+				true,
+			),
+			'index permalinks already prefixed request is not doubled' => array(
+				'index.php/product/hoodie',
+				null,
+				'/index.php/product/hoodie/',
+				true,
+				true,
+			),
+			'index permalinks empty request stays at home' => array(
+				'',
+				null,
+				'/',
+				true,
+				true,
 			),
 		);
 	}

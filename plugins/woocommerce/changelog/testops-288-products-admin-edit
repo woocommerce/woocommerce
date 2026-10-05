@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Cut the classic Products-admin E2E specs from 15 titles to 7; simple product field persistence and bulk price editing now covered by WC_Meta_Box_Product_Data_Test and WC_Admin_Post_Types_Test.
+

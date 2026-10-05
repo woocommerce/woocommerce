@@ -71,7 +71,7 @@
 		}
 	},
 	"devDependencies": {
-		"@playwright/test": "^1.61.1",
+		"@playwright/test": "^1.63.0",
 		"@types/jest": "29.5.x",
 		"@types/node": "^24.1.0",
 		"@woocommerce/eslint-config": "workspace:*",
@@ -85,7 +85,7 @@
 		"typescript": "5.7.x"
 	},
 	"dependencies": {
-		"axios": "^1.6.0",
+		"axios": "^1.18.0",
 		"oauth-1.0a": "^2.2.6"
 	},
 	"publishConfig": {

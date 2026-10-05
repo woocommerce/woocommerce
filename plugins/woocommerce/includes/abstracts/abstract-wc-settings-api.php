@@ -84,7 +84,7 @@ abstract class WC_Settings_API {
 	 * Output the admin options table.
 	 */
 	public function admin_options() {
-		echo '<table class="form-table">' . $this->generate_settings_html( $this->get_form_fields(), false ) . '</table>'; // WPCS: XSS ok.
+		echo '<table class="form-table">' . $this->generate_settings_html( $this->get_form_fields(), false ) . '</table>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- generate_settings_html() returns built-in or extension-filtered settings field markup.
 	}
 
 	/**
@@ -137,7 +137,7 @@ abstract class WC_Settings_API {
 	public function get_field_value( $key, $field, $post_data = array() ) {
 		$type      = $this->get_field_type( $field );
 		$field_key = $this->get_field_key( $key );
-		$post_data = empty( $post_data ) ? $_POST : $post_data; // WPCS: CSRF ok, input var ok.
+		$post_data = empty( $post_data ) ? $_POST : $post_data; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Raw settings values are passed to field-specific validators; authorization belongs to the caller.
 		$value     = isset( $post_data[ $field_key ] ) ? $post_data[ $field_key ] : null;
 
 		if ( isset( $field['sanitize_callback'] ) && is_callable( $field['sanitize_callback'] ) ) {
@@ -176,7 +176,7 @@ abstract class WC_Settings_API {
 		if ( ! empty( $this->data ) && is_array( $this->data ) ) {
 			return $this->data;
 		}
-		return $_POST; // WPCS: CSRF ok, input var ok.
+		return $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Raw settings values are returned for field-specific validation; authorization belongs to the caller.
 	}
 
 	/**
@@ -368,7 +368,7 @@ abstract class WC_Settings_API {
 		}
 
 		if ( $echo ) {
-			echo $html; // WPCS: XSS ok.
+			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $html contains built-in renderer output and extension-filtered custom field markup.
 		} else {
 			return $html;
 		}
@@ -458,7 +458,7 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></label>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_tooltip_html() returns sanitized, filterable help-tip markup. ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -515,7 +515,7 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></label>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_tooltip_html() returns sanitized, filterable help-tip markup. ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -558,7 +558,7 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></label>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_tooltip_html() returns sanitized, filterable help-tip markup. ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -613,7 +613,7 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></label>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_tooltip_html() returns sanitized, filterable help-tip markup. ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -658,7 +658,7 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></label>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_tooltip_html() returns sanitized, filterable help-tip markup. ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -705,7 +705,7 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></label>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_tooltip_html() returns sanitized, filterable help-tip markup. ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -751,7 +751,7 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></label>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_tooltip_html() returns sanitized, filterable help-tip markup. ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -809,7 +809,7 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></label>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_tooltip_html() returns sanitized, filterable help-tip markup. ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>

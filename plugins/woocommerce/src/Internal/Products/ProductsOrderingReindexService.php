@@ -23,16 +23,6 @@ final class ProductsOrderingReindexService {
 		// Performance note: prefetch product ids; enables deterministic behaviour and faster queries below.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$product_ids = array_map( 'intval', $wpdb->get_col( "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'product' ORDER BY menu_order ASC, post_title ASC, ID ASC" ) );
-		/**
-		 * Whether to fire the clean_post_cache action per product after reordering or apply targeted cache invalidation.
-		 * Default strategy is clean_post_cache is suboptimal, but applied for backward compatibility reasons.
-		 *
-		 * @since 11.2.0
-		 *
-		 * @param bool $clean_post_cache Whether to fire clean_post_cache per product.
-		 * @returns bool
-		 */
-		$clean_post_cache = (bool) apply_filters( 'woocommerce_single_product_ordering_clean_post_cache', true );
 
 		$result           = array();
 		$current_position = 1;
@@ -50,14 +40,9 @@ final class ProductsOrderingReindexService {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$updated = (int) $wpdb->query( "UPDATE {$wpdb->posts} SET menu_order = CASE ID {$batch_branches} END WHERE ID IN ( {$in_values} )" );
 			if ( $updated > 0 ) {
-				if ( $clean_post_cache ) {
-					// Performance note: fires clean_post_cache action per product for cache plugins compatibility (WooCommerce v11.2).
-					array_walk( $batch_ids, 'clean_post_cache' );
-				} else {
-					// Performance note: clear only the posts cache — menu_order lives in wp_posts, not in meta or term caches.
-					wp_cache_delete_multiple( $batch_ids, 'posts' );
-					wp_cache_set_posts_last_changed();
-				}
+				// Performance note: fires `clean_post_cache` action per product for extensions compatibility (WooCommerce v11.2).
+				// Targeted wp_cache_delete_multiple + wp_cache_set_posts_last_changed is fast, but insufficient for extensibility surface.
+				array_walk( $batch_ids, 'clean_post_cache' );
 
 				// Update the result entries only if update is confirmed.
 				foreach ( $batch_positions as $id => $position ) {

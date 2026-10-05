@@ -182,6 +182,30 @@ class WC_Helper_API_Backoff {
 	}
 
 	/**
+	 * Seconds remaining in a request type's backoff window.
+	 *
+	 * Lets callers align a user-facing message with the window the site is
+	 * actually observing, so a rate-limit notice stays visible for exactly as
+	 * long as requests are being suppressed.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $request_type The Helper API request type (e.g. 'update-check').
+	 * @return int|null Seconds until the window expires, or null when not rate limited.
+	 */
+	public static function get_retry_after( string $request_type ): ?int {
+		$expires_at = get_transient( self::get_transient_key( $request_type ) );
+
+		if ( ! is_numeric( $expires_at ) ) {
+			return null;
+		}
+
+		$remaining = (int) $expires_at - time();
+
+		return $remaining > 0 ? $remaining : null;
+	}
+
+	/**
 	 * Clear any recorded backoff for a request type.
 	 *
 	 * @param string $request_type The Helper API request type (e.g. 'update-check').

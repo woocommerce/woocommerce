@@ -4,10 +4,9 @@
 import { __ } from '@wordpress/i18n';
 import { MenuGroup, MenuItem } from '@wordpress/components';
 import { check } from '@wordpress/icons';
-import { Fragment, useEffect } from '@wordpress/element';
+import { Fragment } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { onboardingStore, TaskListType, TaskType } from '@woocommerce/data';
-import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -79,12 +78,6 @@ export const TaskLists = ( { query }: TaskListsProps ) => {
 	};
 
 	const currentTask = getCurrentTask();
-
-	useEffect( () => {
-		if ( task && ! currentTask && ! isResolving ) {
-			getHistory().replace( getNewPath( {}, '/', {} ) );
-		}
-	}, [ currentTask, isResolving, task ] );
 
 	if ( task && ! currentTask ) {
 		return null;

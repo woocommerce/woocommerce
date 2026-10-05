@@ -86,7 +86,7 @@ class WC_Payment_Gateway_CC extends WC_Payment_Gateway {
 			<?php do_action( 'woocommerce_credit_card_form_start', $this->id ); ?>
 			<?php
 			foreach ( $fields as $field ) {
-				echo $field; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+				echo $field; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The public gateway field filter intentionally returns HTML; default fields escape dynamic data.
 			}
 			?>
 			<?php do_action( 'woocommerce_credit_card_form_end', $this->id ); ?>

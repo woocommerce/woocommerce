@@ -99,24 +99,9 @@ final class ProductsOrderingMoveService {
 		);
 		$updated_count += (int) $wpdb->update( $wpdb->posts, array( 'menu_order' => $map->new_position ), array( 'ID' => $map->product_id ) );
 		if ( $updated_count > 0 ) {
-			/**
-			 * Whether to fire the clean_post_cache action per product after reordering or apply targeted cache invalidation.
-			 * Default strategy is clean_post_cache is suboptimal, but applied for backward compatibility reasons.
-			 *
-			 * @since 11.2.0
-			 *
-			 * @param bool $clean_post_cache Whether to fire clean_post_cache per product.
-			 * @returns bool
-			 */
-			$clean_post_cache = (bool) apply_filters( 'woocommerce_single_product_ordering_clean_post_cache', true );
-			if ( $clean_post_cache ) {
-				// Performance note: fires clean_post_cache action per product for cache plugins compatibility (WooCommerce v11.2).
-				array_walk( $range_ids, 'clean_post_cache' );
-			} else {
-				// Performance note: clear only the posts cache — menu_order lives in wp_posts, not in meta or term caches.
-				wp_cache_delete_multiple( $range_ids, 'posts' );
-				wp_cache_set_posts_last_changed();
-			}
+			// Performance note: fires `clean_post_cache` action per product for extensions compatibility (WooCommerce v11.2).
+			// Targeted wp_cache_delete_multiple + wp_cache_set_posts_last_changed is fast, but insufficient for extensibility surface.
+			array_walk( $range_ids, 'clean_post_cache' );
 		}
 
 		// Fetch updated positions for cache invalidation, hooks, and response; fetch by PK is nearly instant.

@@ -278,6 +278,8 @@ class MiniCart extends AbstractBlock {
 			return $content . $this->get_markup( MiniCartUtils::migrate_attributes_to_color_panel( $attributes ) );
 		}
 
+		// The view script module is deliberately not declared in block.json, so it is only
+		// enqueued here and never on the cart and checkout pages handled above.
 		wp_enqueue_script_module( $this->get_full_block_name() );
 
 		// Enqueue all integration scripts registered for this block.
@@ -338,7 +340,6 @@ class MiniCart extends AbstractBlock {
 					'shouldShowTaxLabel' => $cart->get_cart_contents_tax() > 0,
 					'badgeIsVisible'     => $badge_is_visible,
 					'formattedSubtotal'  => $formatted_subtotal,
-					'drawerOverlayClass' => 'wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden',
 					'buttonAriaLabel'    => function () use ( $button_aria_label_template ) {
 						$state = wp_interactivity_state();
 						return isset( $attributes['hasHiddenPrice'] ) && false !== $attributes['hasHiddenPrice']
@@ -455,7 +456,9 @@ class MiniCart extends AbstractBlock {
 			data-wp-on--click="actions.overlayCloseDrawer"
 			data-wp-on--keydown="actions.handleOverlayKeydown"
 			data-wp-watch="callbacks.focusFirstElement"
-			data-wp-bind--class="state.drawerOverlayClass"
+			data-wp-class--wc-block-components-drawer__screen-overlay--with-slide-in="state.isOpen"
+			data-wp-class--wc-block-components-drawer__screen-overlay--is-hidden="!state.isOpen"
+			class="wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out"
 		>
 			<div
 				data-wp-bind--role="state.drawerRole"
@@ -730,7 +733,7 @@ class MiniCart extends AbstractBlock {
 			array(
 				'title'    => __( 'Empty Mini-Cart Message', 'woocommerce' ),
 				'inserter' => false,
-				'content'  => '<!-- wp:paragraph {"align":"center"} --><p class="has-text-align-center"><strong>' . __( 'Your cart is currently empty!', 'woocommerce' ) . '</strong></p><!-- /wp:paragraph -->',
+				'content'  => '<!-- wp:heading {"textAlign":"center"} --><h2 class="wp-block-heading has-text-align-center">' . __( 'Your cart is empty', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
 	}
