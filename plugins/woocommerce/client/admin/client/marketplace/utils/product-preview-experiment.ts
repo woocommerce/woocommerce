@@ -31,7 +31,10 @@ export function addVariationToPreviewLinks(
 		.forEach( ( link ) => {
 			let url: URL;
 			try {
-				url = new URL( link.getAttribute( 'href' ) ?? '' );
+				url = new URL(
+					link.getAttribute( 'href' ) ?? '',
+					document.baseURI
+				);
 			} catch {
 				return;
 			}

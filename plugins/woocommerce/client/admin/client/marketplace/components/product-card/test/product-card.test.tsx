@@ -32,7 +32,7 @@ jest.mock( '@woocommerce/data', () => ( {
 /**
  * Internal dependencies
  */
-import ProductCard from '../product-card';
+import ProductCard, { ProductCardProps } from '../product-card';
 import { MarketplaceContext } from '../../../contexts/marketplace-context';
 import { MarketplaceContextType } from '../../../contexts/types';
 import {
@@ -77,7 +77,8 @@ const product: Product = {
 function renderCard(
 	cardType: ProductCardType,
 	productOverrides: Partial< Product > = {},
-	contextOverrides: Partial< MarketplaceContextType > = {}
+	contextOverrides: Partial< MarketplaceContextType > = {},
+	cardProps: Partial< ProductCardProps > = {}
 ) {
 	return render(
 		<MarketplaceContext.Provider
@@ -88,6 +89,7 @@ function renderCard(
 				product={ { ...product, ...productOverrides } }
 				cardType={ cardType }
 				tracksData={ { position: 1 } }
+				{ ...cardProps }
 			/>
 		</MarketplaceContext.Provider>
 	);
@@ -324,9 +326,37 @@ describe( 'ProductCard product preview experiment', () => {
 			tag: undefined,
 		},
 		{
+			name: 'follows the WooCommerce.com setting when the store has no assignment',
+			variation: null,
+			productPreviews: 'modal' as const,
+			opensProductPage: false,
+			tag: undefined,
+		},
+		{
+			name: 'ignores the WooCommerce.com setting in the control arm',
+			variation: 'control',
+			productPreviews: 'modal' as const,
+			opensProductPage: true,
+			tag: 'control',
+		},
+		{
 			name: 'keeps business service cards out of the experiment',
 			variation: 'treatment',
 			type: ProductType.businessService,
+			opensProductPage: true,
+			tag: undefined,
+		},
+		{
+			name: 'keeps theme cards out of the experiment',
+			variation: 'treatment',
+			cardProps: { type: ProductType.theme },
+			opensProductPage: true,
+			tag: undefined,
+		},
+		{
+			name: 'keeps the small cards in install modals out of the experiment',
+			variation: 'treatment',
+			cardProps: { small: true },
 			opensProductPage: true,
 			tag: undefined,
 		},
@@ -334,14 +364,23 @@ describe( 'ProductCard product preview experiment', () => {
 		'$name',
 		( {
 			variation,
+			productPreviews,
 			type = ProductType.extension,
+			cardProps = {},
 			opensProductPage,
 			tag,
 		} ) => {
 			const view = renderCard(
 				ProductCardType.regular,
 				{ url: productUrl, type },
-				{ productPreviewVariation: variation }
+				{
+					productPreviewVariation: variation,
+					iamSettings: {
+						...context.iamSettings,
+						product_previews: productPreviews,
+					},
+				},
+				cardProps
 			);
 			const link = view.getByRole( 'link' );
 

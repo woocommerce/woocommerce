@@ -28,6 +28,17 @@ describe( 'addVariationToPreviewLinks', () => {
 		expect( html ).toContain( 'data-iam-tracks="buy_now"' );
 	} );
 
+	it( 'adds the variation to protocol-relative WooCommerce.com links', () => {
+		const html = addVariationToPreviewLinks(
+			'<a href="//woocommerce.com/cart/">Buy now</a>',
+			'treatment'
+		);
+
+		expect( hrefs( html ) ).toEqual( [
+			`${ window.location.protocol }//woocommerce.com/cart/?utm_term=treatment`,
+		] );
+	} );
+
 	it( 'leaves links to other sites and relative links unchanged', () => {
 		const html = addVariationToPreviewLinks(
 			'<a href="https://example.com/docs/">Docs</a><a href="#details">Details</a>',

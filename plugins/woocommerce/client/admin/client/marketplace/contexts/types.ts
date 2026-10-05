@@ -33,6 +33,7 @@ export type MarketplaceContextType = {
 		updatedCounts: Partial< SearchResultsCountType >
 	) => void;
 	iamSettings: {
+		product_previews?: 'modal' | 'none';
 		quality_badge?: {
 			enabled?: boolean;
 			label?: string;

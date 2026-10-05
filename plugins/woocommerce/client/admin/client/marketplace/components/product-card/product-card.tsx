@@ -85,10 +85,15 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 	const isBusinessService = type === ProductType.businessService;
 	const { iamSettings, productPreviewVariation } =
 		useContext( MarketplaceContext );
-	// Themes and business services never show the preview, so their clicks stay out of the experiment.
-	const previewVariation =
-		! isTheme && ! isBusinessService ? productPreviewVariation : null;
-	const shouldShowPreview = previewVariation === PRODUCT_PREVIEW_TREATMENT;
+	// Themes, business services and the small cards in install modals never show the preview, so their clicks stay out of the experiment.
+	const canShowPreview = ! isTheme && ! isBusinessService && ! props.small;
+	const previewVariation = canShowPreview ? productPreviewVariation : null;
+	// Stores outside the experiment follow the WooCommerce.com setting.
+	const shouldShowPreview =
+		canShowPreview &&
+		( previewVariation
+			? previewVariation === PRODUCT_PREVIEW_TREATMENT
+			: iamSettings?.product_previews === 'modal' );
 	// Business service cards use a layout with no slot for the badge.
 	const showsQualityBadge =
 		! isLoading &&
@@ -444,7 +449,7 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 					onClose={ handleModalClose }
 					productId={ product.id as number }
 					triggerRef={ linkRef }
-					variation={ PRODUCT_PREVIEW_TREATMENT }
+					variation={ previewVariation }
 				/>
 			) }
 		</>

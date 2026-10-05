@@ -21,7 +21,7 @@ interface ProductPreviewModalProps {
 	productIcon: string;
 	productId: number;
 	triggerRef: React.RefObject< HTMLAnchorElement | null >;
-	variation: string;
+	variation?: string | null;
 	onOpen?: () => void;
 	onClose?: ( closeType?: string ) => void;
 }
@@ -102,17 +102,17 @@ export default function ProductPreviewModal( {
 					throw new Error( 'Invalid preview data structure' );
 				}
 
+				const previewHtml = variation
+					? addVariationToPreviewLinks( previewData.html, variation )
+					: previewData.html;
 				const sanitizedHtmlObj = sanitizeHtmlExtended(
-					previewData.html,
+					previewHtml,
 					sanitizeHtmlConfig
 				) as { __html?: string };
 				const sanitizedHtml = sanitizedHtmlObj?.__html ?? '';
 
 				setPreviewContent( {
-					html: addVariationToPreviewLinks(
-						sanitizedHtml,
-						variation
-					),
+					html: sanitizedHtml,
 					css: previewData.css,
 				} );
 				setError( null );
