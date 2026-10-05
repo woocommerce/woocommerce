@@ -220,19 +220,18 @@ class CheckoutOrder extends AbstractCartRoute {
 		$billing = $request['billing_address'];
 
 		// Shipping is optional. Keep the address the order already holds so a billing-only request does not
-		// re-address it, and fall back to billing when it never had one (set_shipping_address() takes an array).
-		$fallback_shipping = '' !== $order->get_shipping_country() ? $order->get_address( 'shipping' ) : $billing;
-		$shipping          = $request['shipping_address'] ?? $fallback_shipping;
+		// re-address it, unless the store ships to billing only. Fall back to billing when it never had one.
+		$keep_shipping = ! wc_ship_to_billing_address_only() && '' !== $order->get_shipping_country();
+		$shipping      = $request['shipping_address'] ?? ( $keep_shipping ? $order->get_address( 'shipping' ) : $billing );
 
 		// Captured before the request is applied so the guard below compares against the order as priced.
-		$priced_destination      = $this->get_shipping_destination();
-		$priced_tax_location     = $order->get_taxable_location();
-		$was_priced_with_address = '' !== $order->get_billing_country() || '' !== $priced_destination['country'];
+		$priced_destination  = $this->get_shipping_destination( $order );
+		$priced_tax_location = $order->get_taxable_location();
 
 		$order->set_billing_address( $billing );
 		$order->set_shipping_address( $shipping );
 		$this->order_controller->validate_existing_order_before_update( $order );
-		$this->validate_order_is_still_priced( $priced_destination, $priced_tax_location, $was_priced_with_address );
+		$this->validate_order_is_still_priced( $order, $priced_destination, $priced_tax_location );
 
 		// Update customer object with validated order addresses.
 		foreach ( $billing as $key => $value ) {
@@ -265,15 +264,14 @@ class CheckoutOrder extends AbstractCartRoute {
 	/**
 	 * Reads the destination the order is priced to ship to.
 	 *
+	 * An order with no shipping address ships to its billing address, e.g. one created in the admin, so fall
+	 * back to billing the same way WC_Abstract_Order::get_tax_location() does.
+	 *
+	 * @param \WC_Order $order Order to read.
 	 * @return array
 	 */
-	private function get_shipping_destination(): array {
-		return [
-			'country'  => $this->order->get_shipping_country(),
-			'state'    => $this->order->get_shipping_state(),
-			'postcode' => $this->order->get_shipping_postcode(),
-			'city'     => $this->order->get_shipping_city(),
-		];
+	private function get_shipping_destination( \WC_Order $order ): array {
+		return $order->get_address( '' !== $order->get_shipping_country() ? 'shipping' : 'billing' );
 	}
 
 	/**
@@ -281,21 +279,19 @@ class CheckoutOrder extends AbstractCartRoute {
 	 *
 	 * @throws RouteException When the order would have to be re-priced.
 	 *
-	 * @param array $priced_destination  Shipping destination the order is priced against.
-	 * @param array $priced_tax_location Tax location the order is priced against.
-	 * @param bool  $was_priced_with_address Whether the order held an address before the request was applied.
+	 * @param \WC_Order $order               Order with the request's addresses applied.
+	 * @param array     $priced_destination  Shipping destination the order is priced against.
+	 * @param array     $priced_tax_location Tax location the order is priced against.
 	 */
-	private function validate_order_is_still_priced( array $priced_destination, array $priced_tax_location, bool $was_priced_with_address ): void {
+	private function validate_order_is_still_priced( \WC_Order $order, array $priced_destination, array $priced_tax_location ): void {
 		// An order with no address was never priced against one, e.g. a merchant-created order the shopper
 		// is addressing for the first time, so there is nothing to protect.
-		if ( ! $was_priced_with_address ) {
+		if ( empty( $priced_destination['country'] ) ) {
 			return;
 		}
 
-		// needs_shipping() hydrates a product per line item, so let the free comparisons short-circuit it.
-		if ( '' !== $priced_destination['country']
-			&& $this->pricing_fields_differ( self::PRICING_ADDRESS_FIELDS, $priced_destination, $this->get_shipping_destination() )
-			&& $this->order->needs_shipping() ) {
+		// needs_shipping() hydrates a product per line item, so let the free comparison short-circuit it.
+		if ( $this->pricing_fields_differ( $priced_destination, $this->get_shipping_destination( $order ) ) && $order->needs_shipping() ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_order_address_change_not_allowed',
 				esc_html__( 'Sorry, the shipping address on this order cannot be changed because the shipping cost was calculated for the original address. Please use the original address, or contact us to have the order updated.', 'woocommerce' ),
@@ -306,7 +302,7 @@ class CheckoutOrder extends AbstractCartRoute {
 		// Resolved through the order so this follows whichever address actually prices it, including the
 		// shop base for local pickup and anything woocommerce_order_get_tax_location redirects it to.
 		// A store that collects no tax has no tax location to protect.
-		if ( wc_tax_enabled() && $this->pricing_fields_differ( self::PRICING_ADDRESS_FIELDS, $priced_tax_location, $this->order->get_taxable_location() ) ) {
+		if ( wc_tax_enabled() && $this->pricing_fields_differ( $priced_tax_location, $order->get_taxable_location() ) ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_order_address_change_not_allowed',
 				esc_html__( 'Sorry, the address on this order cannot be changed because the tax was calculated for the original address. Please use the original address, or contact us to have the order updated.', 'woocommerce' ),
@@ -321,13 +317,12 @@ class CheckoutOrder extends AbstractCartRoute {
 	 * Values are normalized the way WooCommerce keys pricing on them, so a value that differs only in case,
 	 * postcode spacing, or state spelling resolves to the same zone and tax rate and is not a difference.
 	 *
-	 * @param string[] $fields  Fields to compare.
-	 * @param array    $priced  Values the order is priced against.
-	 * @param array    $updated Values the request would leave on the order.
+	 * @param array $priced  Values the order is priced against.
+	 * @param array $updated Values the request would leave on the order.
 	 * @return bool
 	 */
-	private function pricing_fields_differ( array $fields, array $priced, array $updated ): bool {
-		foreach ( $fields as $field ) {
+	private function pricing_fields_differ( array $priced, array $updated ): bool {
+		foreach ( self::PRICING_ADDRESS_FIELDS as $field ) {
 			$priced_value = $this->normalize_pricing_address_field( $field, $priced );
 
 			if ( $priced_value !== $this->normalize_pricing_address_field( $field, $updated ) ) {

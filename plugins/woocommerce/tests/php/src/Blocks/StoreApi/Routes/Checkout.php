@@ -282,6 +282,8 @@ class Checkout extends \WP_Test_REST_TestCase {
 			'woocommerce_pickup_location_settings',
 			'pickup_location_pickup_locations',
 			'woocommerce_calc_taxes',
+			'woocommerce_tax_based_on',
+			'woocommerce_ship_to_destination',
 		);
 
 		foreach ( $option_names as $option_name ) {
@@ -2452,12 +2454,12 @@ class Checkout extends \WP_Test_REST_TestCase {
 	 * Both addresses default to the one the order already carries and the payment method to one the guard
 	 * accepts, so a test states only the fields it changes.
 	 *
-	 * @param \WC_Order $order    Order being paid for.
-	 * @param array     $billing  Billing fields to override.
-	 * @param array     $shipping Shipping fields to override.
+	 * @param \WC_Order  $order    Order being paid for.
+	 * @param array      $billing  Billing fields to override.
+	 * @param array|null $shipping Shipping fields to override, or null to leave the shipping address out.
 	 * @return \WP_REST_Response
 	 */
-	private function dispatch_pay_for_order_request( \WC_Order $order, array $billing = array(), array $shipping = array() ) {
+	private function dispatch_pay_for_order_request( \WC_Order $order, array $billing = array(), ?array $shipping = array() ) {
 		$address = $order->get_address( 'billing' );
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout/' . $order->get_id() );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
@@ -2467,13 +2469,14 @@ class Checkout extends \WP_Test_REST_TestCase {
 				'billing_email' => $order->get_billing_email(),
 			)
 		);
-		$request->set_body_params(
-			array(
-				'billing_address'  => array_merge( $address, $billing ),
-				'shipping_address' => array_merge( $address, $shipping ),
-				'payment_method'   => WC_Gateway_BACS::ID,
-			)
+		$body = array(
+			'billing_address' => array_merge( $address, $billing ),
+			'payment_method'  => WC_Gateway_BACS::ID,
 		);
+		if ( null !== $shipping ) {
+			$body['shipping_address'] = array_merge( $address, $shipping );
+		}
+		$request->set_body_params( $body );
 
 		return rest_get_server()->dispatch( $request );
 	}
@@ -2515,7 +2518,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$this->assertEquals( 400, $response->get_status() );
 		$this->assertEquals( 'woocommerce_rest_checkout_order_address_change_not_allowed', $response->get_data()['code'] );
 		// The message is what distinguishes the shipping zone check from the tax check below it.
-		$this->assertStringContainsString( 'would change the shipping cost', $response->get_data()['message'] );
+		$this->assertStringContainsString( 'the shipping cost was calculated', $response->get_data()['message'] );
 
 		$stored_order = wc_get_order( $order->get_id() );
 		$this->assertEquals( 'US', $stored_order->get_shipping_country(), 'A rejected request must not persist the address' );
@@ -2566,12 +2569,12 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * @testdox Existing order payment should reject a first shipping address that moves the tax location.
+	 * @testdox Existing order payment should reject a first shipping address away from the billing address the order ships to.
 	 */
-	public function test_checkout_order_rejects_first_shipping_address_that_moves_the_tax_location() {
+	public function test_checkout_order_rejects_first_shipping_address_away_from_billing() {
 		$this->set_taxes_based_on( 'shipping' );
 
-		// With no shipping country the order is taxed on billing, so a shipping address relocates the tax.
+		// With no shipping country the order ships to its billing address, e.g. one created in the admin.
 		$order = \WC_Helper_Order::create_order( 0 );
 		$this->assertEquals( '', $order->get_shipping_country() );
 
@@ -2579,9 +2582,62 @@ class Checkout extends \WP_Test_REST_TestCase {
 
 		$this->assertEquals( 400, $response->get_status() );
 		$this->assertEquals( 'woocommerce_rest_checkout_order_address_change_not_allowed', $response->get_data()['code'] );
-		// The shipping zone check is skipped here, so only the tax check can reject this.
-		$this->assertStringContainsString( 'would change the tax charged', $response->get_data()['message'] );
+		$this->assertStringContainsString( 'the shipping cost was calculated', $response->get_data()['message'] );
 		$this->assertEquals( '', wc_get_order( $order->get_id() )->get_shipping_country() );
+	}
+
+	/**
+	 * @testdox Existing order payment should reject a first shipping address that moves the tax location.
+	 */
+	public function test_checkout_order_rejects_first_shipping_address_that_moves_the_tax_location() {
+		$this->set_taxes_based_on( 'shipping' );
+
+		// With no shipping country the order is taxed on billing, so a shipping address relocates the tax.
+		$virtual_product = \WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
+		$order           = \WC_Helper_Order::create_order( 0, $virtual_product );
+
+		$response = $this->dispatch_pay_for_order_request( $order, array(), $this->get_different_destination() );
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_checkout_order_address_change_not_allowed', $response->get_data()['code'] );
+		// A virtual order skips the shipping zone check, so only the tax check can reject this.
+		$this->assertStringContainsString( 'the tax was calculated', $response->get_data()['message'] );
+		$this->assertEquals( '', wc_get_order( $order->get_id() )->get_shipping_country() );
+	}
+
+	/**
+	 * @testdox Existing order payment should keep the order's shipping address when the request leaves it out.
+	 */
+	public function test_checkout_order_keeps_shipping_address_when_request_omits_it() {
+		$this->set_taxes_based_on( 'shipping' );
+
+		$order = $this->create_pay_for_order_with_shipping_address();
+
+		$response = $this->dispatch_pay_for_order_request( $order, $this->get_different_destination(), null );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 'GB', $stored_order->get_billing_country() );
+		$this->assertEquals( 'US', $stored_order->get_shipping_country(), 'A billing-only request must not re-address the order' );
+	}
+
+	/**
+	 * @testdox Existing order payment should reject a billing change when the store ships to the billing address only.
+	 */
+	public function test_checkout_order_rejects_billing_change_when_store_ships_to_billing_only() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		update_option( 'woocommerce_ship_to_destination', 'billing_only' );
+
+		$order = $this->create_pay_for_order_with_shipping_address();
+
+		// Shipping follows billing on this store, so a new billing address is a new destination.
+		$response = $this->dispatch_pay_for_order_request( $order, $this->get_different_destination(), null );
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_checkout_order_address_change_not_allowed', $response->get_data()['code'] );
+		$this->assertStringContainsString( 'the shipping cost was calculated', $response->get_data()['message'] );
+		$this->assertEquals( 'US', wc_get_order( $order->get_id() )->get_shipping_country() );
 	}
 
 	/**
@@ -2597,7 +2653,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 
 		$this->assertEquals( 400, $response->get_status() );
 		$this->assertEquals( 'woocommerce_rest_checkout_order_address_change_not_allowed', $response->get_data()['code'] );
-		$this->assertStringContainsString( 'would change the shipping cost', $response->get_data()['message'] );
+		$this->assertStringContainsString( 'the shipping cost was calculated', $response->get_data()['message'] );
 	}
 
 	/**
@@ -2654,22 +2710,39 @@ class Checkout extends \WP_Test_REST_TestCase {
 	public function test_checkout_order_allows_pricing_fields_that_normalize_to_the_same_value() {
 		$this->set_taxes_based_on( 'billing' );
 
-		// Orders created outside the Store API (admin, import) can hold the state name rather than its code.
 		$order = $this->create_pay_for_order_with_shipping_address();
-		$order->set_billing_state( 'New York' );
-		$order->save();
 
 		$response = $this->dispatch_pay_for_order_request(
 			$order,
-			// The zone and tax lookups uppercase the city and key the state on its code, so both of these
-			// resolve to what the order is already priced on.
+			// The zone and tax lookups uppercase the city and state, so both of these resolve to what the
+			// order is already priced on.
 			array(
 				'city'  => 'woocity',
-				'state' => 'NY',
+				'state' => 'ny',
 			)
 		);
 
 		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+	}
+
+	/**
+	 * @testdox Existing order payment should reject an order that holds a state name, as the request would re-price it.
+	 */
+	public function test_checkout_order_rejects_order_that_holds_a_state_name() {
+		$this->set_taxes_based_on( 'billing' );
+
+		// Orders created outside the Store API (REST API, import) can hold the state name, which matches no tax
+		// rate. The Store API always sends the code, which does, so applying it would re-price the order.
+		$order = $this->create_pay_for_order_with_shipping_address();
+		$order->set_billing_state( 'New York' );
+		$order->save();
+
+		$response = $this->dispatch_pay_for_order_request( $order, array( 'state' => 'New York' ) );
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_checkout_order_address_change_not_allowed', $response->get_data()['code'] );
+		$this->assertStringContainsString( 'the tax was calculated', $response->get_data()['message'] );
+		$this->assertEquals( 'New York', wc_get_order( $order->get_id() )->get_billing_state() );
 	}
 
 	/**
@@ -2685,7 +2758,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$this->assertEquals( 400, $response->get_status() );
 		$this->assertEquals( 'woocommerce_rest_checkout_order_address_change_not_allowed', $response->get_data()['code'] );
 		// Shipping is untouched, so only the tax check can reject this.
-		$this->assertStringContainsString( 'would change the tax charged', $response->get_data()['message'] );
+		$this->assertStringContainsString( 'the tax was calculated', $response->get_data()['message'] );
 		$this->assertEquals( 'US', wc_get_order( $order->get_id() )->get_billing_country() );
 	}
 
