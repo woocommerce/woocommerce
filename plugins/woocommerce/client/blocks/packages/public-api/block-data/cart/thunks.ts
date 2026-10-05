@@ -694,7 +694,7 @@ export const selectShippingRate =
 			return;
 		}
 
-		const previousRates = select.getShippingRates();
+		const previousRates: CartShippingRate[] = select.getShippingRates();
 
 		try {
 			dispatch.shippingRatesBeingSelected( true );
@@ -749,10 +749,25 @@ export const selectShippingRate =
 			dispatch.shippingRatesBeingSelected( false );
 			return response;
 		} catch ( error ) {
-			// Roll back the optimistic update so the UI reflects the server's
-			// actual selection rather than a rate the server never committed.
+			// Roll back only this request's packages; other selections in the batch may have succeeded.
 			dispatch.setCartData( {
-				shippingRates: previousRates,
+				shippingRates: select
+					.getShippingRates()
+					.map( ( pkg: CartShippingRate ) => {
+						if (
+							packageId !== null &&
+							pkg.package_id !== packageId
+						) {
+							return pkg;
+						}
+						return (
+							previousRates.find(
+								( previousPackage ) =>
+									previousPackage.package_id ===
+									pkg.package_id
+							) ?? pkg
+						);
+					} ),
 			} );
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
 			dispatch.shippingRatesBeingSelected( false );

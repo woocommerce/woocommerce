@@ -1,11 +1,11 @@
-## Extending
+# Extending WC Admin helper
 
 There are two client-side filters available if you want to extend the test
 helper with your own plugin's test setup code.
 
 This example adds a new tab:
 
-```
+```jsx
 import { addFilter } from '@wordpress/hooks';
 
 const SuperSekret = () => (
@@ -17,7 +17,7 @@ const SuperSekret = () => (
 );
 addFilter(
 	'woocommerce_admin_test_helper_tabs',
-	'wath',
+	'watch',
 	( tabs ) => [
 		...tabs,
 		{
@@ -31,7 +31,7 @@ addFilter(
 
 This example adds a new tool to the existing Options tab:
 
-```
+```jsx
 import { addFilter } from '@wordpress/hooks';
 
 const NewTool = () => (
@@ -43,7 +43,7 @@ const NewTool = () => (
 );
 addFilter(
 	'woocommerce_admin_test_helper_tab_options',
-	'wath',
+	'watch',
 	( entries ) => [
 		...entries,
 		<NewTool/>
@@ -53,7 +53,7 @@ addFilter(
 
 Register a REST API endpoint to perform server-side actions in the usual way:
 
-```
+```php
 add_action( 'rest_api_init', function() {
     register_rest_route(
         'your-plugin/v1',
@@ -81,7 +81,7 @@ function your_plugin_area_action() {
 
 This would be used on the client like this:
 
-```
+```js
 import apiFetch from '@wordpress/api-fetch';
 ...
 const response = await apiFetch( {

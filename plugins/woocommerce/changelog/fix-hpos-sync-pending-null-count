@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix has_orders_pending_sync() incorrectly returning false when an order changes after a full HPOS backfill

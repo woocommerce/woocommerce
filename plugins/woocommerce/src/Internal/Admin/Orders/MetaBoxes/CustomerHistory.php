@@ -3,8 +3,10 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes;
 
+use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Customers\Query as CustomersQuery;
 use Automattic\WooCommerce\Admin\Overrides\Order as AdminOrder;
+use Automattic\WooCommerce\Internal\Admin\Settings;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
@@ -230,9 +232,7 @@ class CustomerHistory {
 			return 0;
 		}
 
-		$report_order = $order instanceof AdminOrder ? $order : new AdminOrder( $order->get_id() );
-
-		return (int) $report_order->get_report_customer_id();
+		return (int) CustomersDataStore::get_existing_customer_id_from_order( $order );
 	}
 
 	/**
@@ -245,11 +245,14 @@ class CustomerHistory {
 			return $this->excluded_statuses;
 		}
 
-		$excluded_statuses = get_option( 'woocommerce_excluded_report_order_statuses', array( 'pending', 'failed', 'cancelled' ) );
-		if ( ! is_array( $excluded_statuses ) ) {
-			$excluded_statuses = array( 'pending', 'failed', 'cancelled' );
-		}
-		$excluded_statuses = array_merge( array( 'auto-draft', 'trash' ), $excluded_statuses );
+		$default_excluded_statuses = Settings::get_default_excluded_order_statuses();
+		$excluded_statuses         = get_option( 'woocommerce_excluded_report_order_statuses', $default_excluded_statuses );
+		$excluded_statuses         = Settings::get_valid_order_statuses_or_default( $excluded_statuses, $default_excluded_statuses );
+		$excluded_statuses         = array_merge( array( 'auto-draft', 'trash' ), $excluded_statuses );
+
+		// Keep the value a broken filter would otherwise replace, so the merchant's saved
+		// selection survives it. Mirrors Reports\DataStore::get_excluded_report_order_statuses().
+		$pre_filter_statuses = $excluded_statuses;
 
 		/**
 		 * Filter the list of excluded order statuses for customer history and analytics reports.
@@ -259,7 +262,8 @@ class CustomerHistory {
 		 */
 		$excluded_statuses = apply_filters( 'woocommerce_analytics_excluded_order_statuses', $excluded_statuses );
 		if ( ! is_array( $excluded_statuses ) ) {
-			$excluded_statuses = array( 'auto-draft', 'trash', 'pending', 'failed', 'cancelled' );
+			wc_doing_it_wrong( __METHOD__, 'The woocommerce_analytics_excluded_order_statuses filter must return an array.', '11.2.0' );
+			$excluded_statuses = $pre_filter_statuses;
 		}
 
 		$this->excluded_statuses = $excluded_statuses;

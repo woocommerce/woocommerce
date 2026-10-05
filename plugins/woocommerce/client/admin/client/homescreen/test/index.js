@@ -151,7 +151,7 @@ describe( 'Homescreen Layout', () => {
 		).toHaveLength( 1 );
 	} );
 
-	it( 'should falback to single column layout', () => {
+	it( 'should fallback to single column layout', () => {
 		useUserPreferences.mockReturnValue( {
 			homepage_layout: '',
 		} );

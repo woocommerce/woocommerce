@@ -43,9 +43,18 @@ class ReportCSVEmail extends \WC_Email {
 	protected $download_url;
 
 	/**
+	 * Date range the report covers, formatted for display. Empty when the report has no range.
+	 *
+	 * @var string
+	 */
+	protected $report_date_range = '';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
+		$this->placeholders['{report_date_range}'] = '';
+
 		$this->id             = 'admin_report_export_download';
 		$this->template_base  = WC()->plugin_path() . '/includes/react-admin/emails/';
 		$this->template_html  = 'html-admin-report-export-download.php';
@@ -111,9 +120,16 @@ class ReportCSVEmail extends \WC_Email {
 	/**
 	 * Get email subject.
 	 *
+	 * Says which period the report covers when it has one, so a merchant running the same report
+	 * over several date ranges can tell the emails apart without opening them.
+	 *
 	 * @return string
 	 */
 	public function get_default_subject() {
+		if ( '' !== $this->report_date_range ) {
+			return __( '[{site_title}]: Your {report_name} Report for {report_date_range} is ready', 'woocommerce' );
+		}
+
 		return __( '[{site_title}]: Your {report_name} Report download is ready', 'woocommerce' );
 	}
 
@@ -127,11 +143,13 @@ class ReportCSVEmail extends \WC_Email {
 			$this->template_html,
 			array(
 				'report_name'   => $this->report_type,
+				'date_range'    => $this->report_date_range,
 				'download_url'  => $this->download_url,
 				'email_heading' => $this->get_heading(),
 				'sent_to_admin' => true,
 				'plain_text'    => false,
 				'email'         => $this,
+				'retention'     => $this->get_retention_period(),
 			),
 			'',
 			$this->template_base
@@ -148,15 +166,42 @@ class ReportCSVEmail extends \WC_Email {
 			$this->template_plain,
 			array(
 				'report_name'   => $this->report_type,
+				'date_range'    => $this->report_date_range,
 				'download_url'  => $this->download_url,
 				'email_heading' => $this->get_heading(),
 				'sent_to_admin' => true,
 				'plain_text'    => true,
 				'email'         => $this,
+				'retention'     => $this->get_retention_period(),
 			),
 			'',
 			$this->template_base
 		);
+	}
+
+	/**
+	 * Get how long the emailed download link stays valid, for display.
+	 *
+	 * @since 11.2.0
+	 * @return string Human readable length of time, e.g. "1 week".
+	 */
+	protected function get_retention_period() {
+		return human_time_diff( 0, ReportExporter::EXPORT_RETENTION_PERIOD );
+	}
+
+	/**
+	 * Set the date range the report covers, so the email can say which period it is for.
+	 *
+	 * Call before trigger(). Reports that are not limited to a period, such as Stock, leave it unset.
+	 *
+	 * @since 11.2.0
+	 * @param string $date_range The date range the report covers, formatted for display.
+	 * @return void
+	 */
+	public function set_report_date_range( $date_range ) {
+		$this->report_date_range = is_string( $date_range ) ? $date_range : '';
+
+		$this->placeholders['{report_date_range}'] = $this->report_date_range;
 	}
 
 	/**

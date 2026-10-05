@@ -5,6 +5,11 @@ import { get } from 'lodash';
 import { event as d3Event } from 'd3-selection';
 import moment from 'moment';
 
+/**
+ * Internal dependencies
+ */
+import { getDateLabel } from './index';
+
 export const drawBars = ( node, data, params, scales, formats, tooltip ) => {
 	const height = scales.yScale.range()[ 0 ];
 	const barGroup = node
@@ -78,8 +83,10 @@ export const drawBars = ( node, data, params, scales, formats, tooltip ) => {
 			let label = d.label || d.key;
 			if ( params.mode === 'time-comparison' ) {
 				const dayData = data.find( ( e ) => e.date === d.date );
-				label = formats.screenReaderFormat(
-					moment( dayData[ d.key ].labelDate ).toDate()
+				label = getDateLabel(
+					formats.screenReaderFormat,
+					dayData[ d.key ].labelDate,
+					dayData[ d.key ].labelDateEnd
 				);
 			}
 			return `${ label } ${ tooltip.valueFormat( d.value ) }`;

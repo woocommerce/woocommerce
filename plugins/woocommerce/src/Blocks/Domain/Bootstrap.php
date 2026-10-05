@@ -22,7 +22,6 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsAdmin;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsFrontend;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutLink;
-use Automattic\WooCommerce\Blocks\InboxNotifications;
 use Automattic\WooCommerce\Blocks\Installer;
 use Automattic\WooCommerce\Blocks\Payments\Api as PaymentsApi;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\BankTransfer;
@@ -93,17 +92,6 @@ class Bootstrap {
 		$this->register_dependencies();
 		$this->register_payment_methods();
 
-		add_action(
-			'admin_init',
-			function () {
-				// Delete this notification because the blocks are included in WC Core now. This will handle any sites
-				// with lingering notices.
-				InboxNotifications::delete_surface_cart_checkout_blocks_notification();
-			},
-			10,
-			0
-		);
-
 		// We need to initialize BlockTemplatesController and BlockTemplatesRegistry at the end of `after_setup_theme`
 		// so themes had the opportunity to declare support for template parts.
 		add_action(
@@ -147,11 +135,12 @@ class Bootstrap {
 
 		// Register block types on demand (priority 8, before do_blocks at 9) so blocks in a description are not empty.
 		add_filter( 'woocommerce_short_description', array( $this, 'maybe_register_blocks_from_content' ), 8 );
+		add_action( 'woocommerce_email_editor_render_start', array( $this, 'handle_woocommerce_email_editor_render_start' ) );
 
 		// Load assets unless this is a request specifically for the store API.
 		if ( ! $is_store_api_request ) {
 			// Skip eager block/pattern/asset registration on non-rendering requests; the block types needed for
-			// a description block are still registered on demand (see the hook above). See BlockRegistrationContext.
+			// a description or an email are still registered on demand (see the hooks above). See BlockRegistrationContext.
 			if ( ( new BlockRegistrationContext() )->should_register() ) {
 				$this->container->get( BlockPatterns::class );
 				$this->container->get( BlockTypesController::class );
@@ -194,6 +183,18 @@ class Bootstrap {
 		}
 
 		return $content;
+	}
+
+	/**
+	 * Register WooCommerce block types on demand before an email is rendered by the email editor package.
+	 *
+	 * Emails are often sent from requests where eager block registration is skipped (cron, AJAX, Store API),
+	 * and unregistered WooCommerce blocks, such as Product Collection, would render empty in the email.
+	 *
+	 * @internal
+	 */
+	public function handle_woocommerce_email_editor_render_start(): void {
+		$this->container->get( BlockTypesController::class )->register_blocks_for_email();
 	}
 
 	/**

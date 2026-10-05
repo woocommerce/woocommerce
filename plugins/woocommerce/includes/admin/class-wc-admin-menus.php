@@ -6,6 +6,7 @@
  * @version 2.5.0
  */
 
+use Automattic\WooCommerce\Internal\Admin\LegacyReportsMenu;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Internal\Admin\Orders\COTRedirectionController;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController as Custom_Orders_PageController;
@@ -112,6 +113,8 @@ class WC_Admin_Menus {
 		} else {
 			add_menu_page( __( 'Sales reports', 'woocommerce' ), __( 'Sales reports', 'woocommerce' ), 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ), 'dashicons-chart-bar', '55.6' );
 		}
+
+		add_action( 'admin_head', array( wc_get_container()->get( LegacyReportsMenu::class ), 'handle_admin_head' ), PHP_INT_MAX );
 	}
 
 	/**
@@ -186,9 +189,31 @@ class WC_Admin_Menus {
 		$current_section = empty( $_REQUEST['section'] ) ? '' : sanitize_title( wp_unslash( $_REQUEST['section'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only selector; settings mutations verify capability and nonce.
 
 		// Save settings if data has been posted.
-		if ( '' !== $current_section && apply_filters( "woocommerce_save_settings_{$current_tab}_{$current_section}", ! empty( $_POST['save'] ) ) ) { // WPCS: input var okay, CSRF ok.
+		/**
+		 * Filters whether the posted data for a settings section should be saved.
+		 *
+		 * The dynamic portions of the hook name, `$current_tab` and `$current_section`, are the
+		 * sanitized `tab` and `section` request values of the settings screen being viewed.
+		 *
+		 * @since 3.3.0
+		 * @param bool $save Whether to save. Defaults to true when the settings form was submitted.
+		 */
+		if ( '' !== $current_section && apply_filters( "woocommerce_save_settings_{$current_tab}_{$current_section}", ! empty( $_POST['save'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Presence check only; WC_Admin_Settings::save() verifies the manage_woocommerce capability and the woocommerce-settings nonce before anything is written.
 			WC_Admin_Settings::save();
-		} elseif ( '' === $current_section && apply_filters( "woocommerce_save_settings_{$current_tab}", ! empty( $_POST['save'] ) ) ) { // WPCS: input var okay, CSRF ok.
+		} elseif (
+			'' === $current_section
+			/**
+			 * Filters whether the posted data for a settings tab should be saved.
+			 *
+			 * The dynamic portion of the hook name, `$current_tab`, is the sanitized `tab` request
+			 * value of the settings screen being viewed. This variant fires only when no section is
+			 * selected.
+			 *
+			 * @since 3.3.0
+			 * @param bool $save Whether to save. Defaults to true when the settings form was submitted.
+			 */
+			&& apply_filters( "woocommerce_save_settings_{$current_tab}", ! empty( $_POST['save'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Presence check only; WC_Admin_Settings::save() verifies the manage_woocommerce capability and the woocommerce-settings nonce before anything is written.
+		) {
 			WC_Admin_Settings::save();
 		}
 	}

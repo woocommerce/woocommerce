@@ -79,6 +79,18 @@ setup( 'setup site', async ( { baseURL, restApi } ) => {
 		);
 	} );
 
+	await setup.step( 'dismiss email improvements modal', async () => {
+		// Email specs leave `email_improvements` disabled, so the next visit to the
+		// WooCommerce home redirects once to a "Store emails have had an upgrade!"
+		// modal that covers whatever page the next spec expects.
+		await setOption(
+			request,
+			baseURL,
+			'woocommerce_admin_dismissed_try_email_improvements_modal',
+			'yes'
+		);
+	} );
+
 	await setup.step( 'disable coming soon', async () => {
 		await setComingSoon( { baseURL, enabled: 'no' } );
 	} );

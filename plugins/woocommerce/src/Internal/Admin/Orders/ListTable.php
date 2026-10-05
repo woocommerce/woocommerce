@@ -1041,7 +1041,7 @@ class ListTable extends WP_List_Table {
 				'cb'               => '<input type="checkbox" />',
 				'order_number'     => esc_html__( 'Order', 'woocommerce' ),
 				'order_date'       => esc_html__( 'Date', 'woocommerce' ),
-				'order_status'     => esc_html__( 'Status', 'woocommerce' ),
+				'order_status'     => esc_html_x( 'Status', 'Order status', 'woocommerce' ),
 				'billing_address'  => esc_html__( 'Billing', 'woocommerce' ),
 				'shipping_address' => esc_html__( 'Ship to', 'woocommerce' ),
 				'order_total'      => esc_html__( 'Total', 'woocommerce' ),

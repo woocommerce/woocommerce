@@ -49,13 +49,25 @@ const mockUrls = {
 	send: 'https://example.com/send',
 };
 
-// Renders the component inside the editor header's back button slot with the
-// given width. jsdom has no layout, so getBoundingClientRect is stubbed.
-const renderInSlot = ( slotWidth: number ) => {
+// jsdom does not do layout, so we fake the slot width the way each WordPress
+// version sizes that column.
+type SizeSlot = ( slot: HTMLElement ) => number;
+
+const fixedColumn: SizeSlot = () => 64;
+
+const contentSizedColumn: SizeSlot = ( slot ) =>
+	slot.querySelector( 'button' ) ? 74 : 0;
+
+const renderInSlot = ( sizeSlot: SizeSlot ) => {
 	jest.spyOn(
 		HTMLElement.prototype,
 		'getBoundingClientRect'
-	).mockReturnValue( { width: slotWidth } as DOMRect );
+	).mockImplementation( function ( this: HTMLElement ) {
+		const width = this.classList.contains( 'editor-header__back-button' )
+			? sizeSlot( this )
+			: 0;
+		return { width } as DOMRect;
+	} );
 
 	return render(
 		<div className="editor-header__back-button">
@@ -114,8 +126,8 @@ describe( 'BackButtonContent', () => {
 		expect( button.onclick ).not.toBeNull();
 	} );
 
-	it( 'should render the fullscreen-style button in a wide slot (WordPress ≤ 7.0 header)', () => {
-		const { container } = renderInSlot( 64 );
+	it( 'should render the fullscreen-style button in a fixed 64px slot (WordPress ≤ 7.0 header)', () => {
+		const { container } = renderInSlot( fixedColumn );
 		expect(
 			container.querySelector(
 				'.woocommerce-email-editor__view-mode-toggle'
@@ -123,8 +135,8 @@ describe( 'BackButtonContent', () => {
 		).toBeInTheDocument();
 	} );
 
-	it( 'should render the compact button in a narrow slot (WordPress 7.1+ header)', () => {
-		const { container, getByRole } = renderInSlot( 32 );
+	it( 'should render the compact button in a content-sized slot (WordPress 7.1+ header)', () => {
+		const { container, getByRole } = renderInSlot( contentSizedColumn );
 		expect(
 			container.querySelector(
 				'.woocommerce-email-editor__view-mode-toggle'
@@ -135,12 +147,21 @@ describe( 'BackButtonContent', () => {
 		).toHaveAttribute( 'data-icon', 'chevronLeft' );
 	} );
 
-	it( 'should render the right chevron in a narrow slot in RTL', () => {
+	it( 'should render the right chevron in a content-sized slot in RTL', () => {
 		( isRTL as jest.Mock ).mockReturnValueOnce( true );
-		const { getByRole } = renderInSlot( 32 );
+		const { getByRole } = renderInSlot( contentSizedColumn );
 		expect(
 			getByRole( 'button', { name: 'Close editor' } )
 		).toHaveAttribute( 'data-icon', 'chevronRight' );
+	} );
+
+	it( 'should fall back to the fullscreen-style button when there is no header slot', () => {
+		const { container } = render( <BackButtonContent /> );
+		expect(
+			container.querySelector(
+				'.woocommerce-email-editor__view-mode-toggle'
+			)
+		).toBeInTheDocument();
 	} );
 
 	it( 'should apply woocommerce_email_editor_close_content filter to render custom component', () => {

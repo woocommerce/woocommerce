@@ -27,6 +27,43 @@ describe( 'pluginInstallerMachine', () => {
 		jest.resetAllMocks();
 	} );
 
+	it.each( [
+		[ 'mailpoet:alt', 'mailpoet', 4000 ],
+		[ 'woocommerce-services:tax', 'woocommerce-services', 0 ],
+	] )(
+		'preserves trunk installation timing for %s',
+		async ( plugin, slug, installTime ) => {
+			const machineUnderTest = pluginInstallerMachine.provide( {
+				...mockConfig,
+				actors: {
+					installPlugin: fromPromise( async () => ( {
+						data: {
+							install_time: { [ slug ]: 4000 },
+						},
+					} ) ),
+				},
+			} );
+			const service = createActor( machineUnderTest, {
+				input: {
+					selectedPlugins: [ plugin ],
+					pluginsAvailable: [],
+				},
+			} ).start();
+
+			try {
+				const snapshot = await waitFor( service, ( snap ) =>
+					snap.matches( 'reportSuccess' )
+				);
+
+				expect( snapshot.context.installedPlugins ).toEqual( [
+					{ plugin, installTime },
+				] );
+			} finally {
+				service.stop();
+			}
+		}
+	);
+
 	it( 'when given one plugin it should call the installPlugin service once', async () => {
 		const mockInstallPlugin = jest.fn();
 		mockInstallPlugin.mockResolvedValueOnce( {

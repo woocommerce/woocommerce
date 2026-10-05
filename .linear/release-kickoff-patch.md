@@ -18,7 +18,7 @@ For scheduled stable releases, hold this 24-48 hours before the release date wit
 - [ ] No new blocking findings since the readiness review (check `#woo-core-releases` threads and the [newest issues]({repository_url}/issues?q=is%3Aissue%20state%3Aopen%20sort%3Acreated-desc)).
 - [ ] Decision recorded as a comment on this issue - **go**, **no-go**, or **go with conditions** - with the names behind it.
 
-For scheduled releases, the readiness review is the one in the RC sub-issue. Point releases have no RC: run the [readiness criteria](https://developer.woocommerce.com/docs/contribution/releases/readiness/) over the changes being shipped as part of this go/no-go. For unscheduled point releases shipping an urgent fix, a quick go/no-go with `@woo-core-release` in `#woo-core-releases` is enough - record the outcome here all the same.
+For scheduled releases, the readiness review is the one in the RC sub-issue. Point releases have no RC: run the [readiness criteria](https://developer.woocommerce.com/docs/contribution/releases/readiness/) over the changes being shipped as part of this go/no-go, with verdicts per the [release decision matrix](https://developer.woocommerce.com/docs/contribution/releases/decision-matrix/). For unscheduled point releases shipping an urgent fix, a quick go/no-go with `@woo-core-release` in `#woo-core-releases` is enough - record the outcome here all the same.
 
 
 ### 2. Pre-build checks
@@ -62,7 +62,6 @@ For scheduled releases, the readiness review is the one in the RC sub-issue. Poi
 
 - [ ] Run workflow **[Release: Update stable tag]({repository_url}/actions/workflows/release-update-stable-tag.yml)**: enter `{release_version}` as _Version_ and make sure to check 'I confirm that I want to update the stable tag (this will update the SVN and GitHub stable tags).'
 - [ ] Publish the `{release_version}` [release draft]({repository_url}/releases) that was previously created, as well as any other `{release_main_version}` drafts that might exist from previous attempts. **Ensure** that "Set as the latest release" is checked for `{release_version}`.
-- [ ] If this is the stable release of a new major version: move the supported-version floor forward in the [security support policy](https://developer.woocommerce.com/docs/contribution/releases/security-support/) page (last 21 major versions).
 
 
 ### 7. Post-release tasks

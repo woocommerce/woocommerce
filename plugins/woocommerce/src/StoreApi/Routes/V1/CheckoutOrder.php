@@ -43,7 +43,7 @@ class CheckoutOrder extends AbstractCartRoute {
 	/**
 	 * Holds the current order being processed.
 	 *
-	 * @var \WC_Order
+	 * @var \WC_Order|null
 	 */
 	private $order = null;
 
@@ -118,15 +118,16 @@ class CheckoutOrder extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		$order_id    = absint( $request['id'] );
-		$this->order = wc_get_order( $order_id );
+		$order_id = absint( $request['id'] );
+		$order    = wc_get_order( $order_id );
 
-		if ( ! $this->order instanceof \WC_Order || ! $this->order->needs_payment() ) {
+		if ( ! $order instanceof \WC_Order || ! $order->needs_payment() ) {
 			return new \WP_Error(
 				'invalid_order_update_status',
 				__( 'This order cannot be paid for.', 'woocommerce' )
 			);
 		}
+		$this->order = $order;
 
 		/**
 		 * Process request data.
@@ -152,9 +153,12 @@ class CheckoutOrder extends AbstractCartRoute {
 		$this->order_controller->validate_existing_order_before_payment( $this->order );
 
 		/**
-		 * Fires before an order is processed by the Checkout Block/Store API.
+		 * Fires after the Checkout Block/Store API request has populated and validated the order.
 		 *
-		 * This hook informs extensions that $order has completed processing and is ready for payment.
+		 * The action runs before payment is processed, so callbacks can still act on the order
+		 * on its way to the gateway. Do not use this action for payment-completion logic or to
+		 * call WC_Order::payment_complete(). Use woocommerce_payment_complete or
+		 * woocommerce_order_status_completed instead.
 		 *
 		 * This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action:
 		 * - To keep the interface focused (only pass $order, not passing request data).
@@ -163,8 +167,8 @@ class CheckoutOrder extends AbstractCartRoute {
 		 * @since 7.2.0
 		 *
 		 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238
-		 * @example See docs/examples/checkout-order-processed.md
-
+		 * @example docs/examples/checkout-order-processed.md
+		 *
 		 * @param \WC_Order $order Order object.
 		 */
 		do_action( 'woocommerce_store_api_checkout_order_processed', $this->order );
@@ -209,6 +213,7 @@ class CheckoutOrder extends AbstractCartRoute {
 	 * @param \WP_REST_Request $request Full details about the request.
 	 */
 	private function update_billing_address( \WP_REST_Request $request ) {
+		$order    = $this->get_order_or_throw();
 		$customer = wc()->customer;
 
 		// Billing address is a required field.
@@ -216,17 +221,17 @@ class CheckoutOrder extends AbstractCartRoute {
 
 		// Shipping is optional. Keep the address the order already holds so a billing-only request does not
 		// re-address it, and fall back to billing when it never had one (set_shipping_address() takes an array).
-		$fallback_shipping = '' !== $this->order->get_shipping_country() ? $this->order->get_address( 'shipping' ) : $billing;
+		$fallback_shipping = '' !== $order->get_shipping_country() ? $order->get_address( 'shipping' ) : $billing;
 		$shipping          = $request['shipping_address'] ?? $fallback_shipping;
 
 		// Captured before the request is applied so the guard below compares against the order as priced.
 		$priced_destination      = $this->get_shipping_destination();
-		$priced_tax_location     = $this->order->get_taxable_location();
-		$was_priced_with_address = '' !== $this->order->get_billing_country() || '' !== $priced_destination['country'];
+		$priced_tax_location     = $order->get_taxable_location();
+		$was_priced_with_address = '' !== $order->get_billing_country() || '' !== $priced_destination['country'];
 
-		$this->order->set_billing_address( $billing );
-		$this->order->set_shipping_address( $shipping );
-		$this->order_controller->validate_existing_order_before_update( $this->order );
+		$order->set_billing_address( $billing );
+		$order->set_shipping_address( $shipping );
+		$this->order_controller->validate_existing_order_before_update( $order );
 		$this->validate_order_is_still_priced( $priced_destination, $priced_tax_location, $was_priced_with_address );
 
 		// Update customer object with validated order addresses.
@@ -253,8 +258,8 @@ class CheckoutOrder extends AbstractCartRoute {
 		do_action( 'woocommerce_store_api_checkout_update_customer_from_request', $customer, $request );
 
 		$customer->save();
-		$this->order->save();
-		$this->order->calculate_totals();
+		$order->save();
+		$order->calculate_totals();
 	}
 
 	/**
@@ -375,7 +380,7 @@ class CheckoutOrder extends AbstractCartRoute {
 		$request_payment_method = wc_clean( wp_unslash( $request['payment_method'] ?? '' ) );
 
 		if ( empty( $request_payment_method ) ) {
-			if ( $this->order->needs_payment() ) {
+			if ( $this->get_order_or_throw()->needs_payment() ) {
 				throw new RouteException(
 					'woocommerce_rest_checkout_missing_payment_method',
 					__( 'No payment method provided.', 'woocommerce' ),
@@ -409,6 +414,6 @@ class CheckoutOrder extends AbstractCartRoute {
 	 * @param \WP_REST_Request $request Request object.
 	 */
 	private function process_customer( \WP_REST_Request $request ) {
-		$this->order_controller->sync_customer_data_with_order( $this->order );
+		$this->order_controller->sync_customer_data_with_order( $this->get_order_or_throw() );
 	}
 }

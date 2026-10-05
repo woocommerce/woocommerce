@@ -126,6 +126,99 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Resolved original IDs are reused consistently without repeated lookups
+	 */
+	public function test_original_id_mapping_is_reused_within_an_import() {
+		$original_id      = 987654321;
+		$importer         = new WC_Product_CSV_Importer( __DIR__ . '/sample.csv' );
+		$existing_product = WC_Helper_Product::create_simple_product();
+		$query_count      = 0;
+		$count_query      = static function ( $query ) use ( &$query_count ) {
+			if ( false !== strpos( $query, 'SELECT post_id' ) && false !== strpos( $query, "meta_key = '_original_id'" ) ) {
+				++$query_count;
+			}
+
+			return $query;
+		};
+
+		$referenced_product_id = 0;
+
+		add_filter( 'query', $count_query );
+
+		try {
+			$referenced_product_id = $importer->parse_relative_field( 'id:' . $original_id );
+			$row_product_id        = $importer->parse_id_field( (string) $original_id );
+			$duplicate_product_id  = $importer->parse_id_field( (string) $original_id );
+
+			$first_existing_product_id = $importer->parse_relative_field( 'id:' . $existing_product->get_id() );
+			$next_existing_product_id  = $importer->parse_relative_field( 'id:' . $existing_product->get_id() );
+
+			$this->assertGreaterThan( 0, $referenced_product_id );
+			$this->assertSame( $referenced_product_id, $row_product_id );
+			$this->assertSame( $referenced_product_id, $duplicate_product_id );
+			$this->assertSame( $existing_product->get_id(), $first_existing_product_id );
+			$this->assertSame( $existing_product->get_id(), $next_existing_product_id );
+			$this->assertSame( 3, $query_count, 'Only mappings backed by _original_id meta are cached; references to existing products still query.' );
+		} finally {
+			remove_filter( 'query', $count_query );
+			WC_Helper_Product::delete_product( $existing_product->get_id() );
+			if ( $referenced_product_id ) {
+				WC_Helper_Product::delete_product( $referenced_product_id );
+			}
+		}
+	}
+
+	/**
+	 * @testdox A reference to an existing product does not map a later row with the same ID onto that product
+	 */
+	public function test_reference_to_existing_product_does_not_map_later_row_with_same_id() {
+		$existing_product = WC_Helper_Product::create_simple_product();
+		$existing_id      = $existing_product->get_id();
+		$importer         = new WC_Product_CSV_Importer( __DIR__ . '/sample.csv', array( 'update_existing' => false ) );
+		$placeholder_id   = 0;
+
+		try {
+			$this->assertSame( $existing_id, $importer->parse_relative_field( 'id:' . $existing_id ) );
+
+			$placeholder_id = $importer->parse_id_field( (string) $existing_id );
+			$placeholder    = wc_get_product( $placeholder_id );
+
+			$this->assertNotSame( $existing_id, $placeholder_id );
+			$this->assertSame( 'importing', $placeholder->get_status() );
+			$this->assertEquals( $existing_id, $placeholder->get_meta( '_original_id' ) );
+			$this->assertSame( $placeholder_id, $importer->parse_relative_field( 'id:' . $existing_id ) );
+		} finally {
+			WC_Helper_Product::delete_product( $existing_id );
+			if ( $placeholder_id ) {
+				WC_Helper_Product::delete_product( $placeholder_id );
+			}
+		}
+	}
+
+	/**
+	 * @testdox An original-ID lookup that initially misses can resolve a mapping created later in the import
+	 */
+	public function test_original_id_lookup_does_not_cache_misses() {
+		$original_id = 987654322;
+		$importer    = new WC_Product_CSV_Importer(
+			__DIR__ . '/sample.csv',
+			array( 'update_existing' => true )
+		);
+
+		$this->assertSame( $original_id, $importer->parse_relative_field( 'id:' . $original_id ) );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->add_meta_data( '_original_id', $original_id, true );
+		$product->save();
+
+		try {
+			$this->assertSame( $product->get_id(), $importer->parse_id_field( (string) $original_id ) );
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+		}
+	}
+
+	/**
 	 * @testdox Test that the importer skips updating products with the same SKU.
 	 */
 	public function test_import_skipping_existing_product_sku_46505() {
@@ -152,6 +245,317 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$error = $data['skipped'][0];
 		$this->assertInstanceOf( WP_Error::class, $error );
 		$this->assertEquals( 'A product with this SKU already exists.', $error->get_error_message() );
+	}
+
+	/**
+	 * @testdox Existing products and variations can be updated by Global Unique ID when no ID or SKU is provided.
+	 */
+	public function test_import_updates_existing_products_by_global_unique_id() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Original product name' );
+		$product->set_global_unique_id( '1234567890123' );
+		$product->save();
+
+		$parent        = WC_Helper_Product::create_variation_product();
+		$variation_ids = $parent->get_children();
+		$variation     = wc_get_product( reset( $variation_ids ) );
+		$variation->set_name( 'Original variation name' );
+		$variation->set_regular_price( '10' );
+		$variation->set_global_unique_id( '9781234567890' );
+		$variation->save();
+
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-products-by-global-unique-id.csv';
+		file_put_contents( $csv_file, "Type,GTIN,Name,Regular price\nsimple,123 456 789 0123,Updated product name,15\nvariation,978 123 456 7890,Updated variation name,25\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'           => true,
+				'update_existing' => true,
+				'mapping'         => array(
+					'Type'          => 'type',
+					'GTIN'          => 'global_unique_id',
+					'Name'          => 'name',
+					'Regular price' => 'regular_price',
+				),
+			)
+		);
+		$data     = $importer->import();
+
+		wp_delete_file( $csv_file );
+
+		$this->assertSame( array( $product->get_id(), $variation->get_id() ), $data['updated'] );
+		$this->assertEmpty( $data['imported'] );
+		$this->assertEmpty( $data['imported_variations'] );
+		$this->assertEmpty( $data['failed'] );
+		$this->assertEmpty( $data['skipped'] );
+		$this->assertSame( 'Updated product name', wc_get_product( $product->get_id() )->get_name() );
+		$this->assertSame( '25', wc_get_product( $variation->get_id() )->get_regular_price() );
+
+		WC_Helper_Product::delete_product( $parent->get_id() );
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox An unmatched Global Unique ID is skipped when updating existing products.
+	 */
+	public function test_import_skips_unmatched_global_unique_id_when_updating_existing_products() {
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-unmatched-global-unique-id.csv';
+		file_put_contents( $csv_file, "GTIN,Name\n3210987654321,Product that should not be created\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'           => true,
+				'update_existing' => true,
+				'mapping'         => array(
+					'GTIN' => 'global_unique_id',
+					'Name' => 'name',
+				),
+			)
+		);
+		$data     = $importer->import();
+
+		wp_delete_file( $csv_file );
+
+		$this->assertEmpty( $data['updated'] );
+		$this->assertEmpty( $data['imported'] );
+		$this->assertEmpty( $data['imported_variations'] );
+		$this->assertEmpty( $data['failed'] );
+		$this->assertCount( 1, $data['skipped'] );
+		$this->assertSame( 'No matching product exists to update.', $data['skipped'][0]->get_error_message() );
+		$this->assertStringContainsString( '3210987654321', $data['skipped'][0]->get_error_data()['row'] );
+		$this->assertSame( 0, wc_get_product_id_by_global_unique_id( '3210987654321' ) );
+	}
+
+	/**
+	 * @testdox A blank Global Unique ID cell creates a product while a matching one updates it when updating existing products.
+	 */
+	public function test_import_creates_products_with_blank_global_unique_id_when_updating_existing_products() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Original product name' );
+		$product->set_global_unique_id( '2223334445556' );
+		$product->save();
+
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-blank-global-unique-id.csv';
+		file_put_contents( $csv_file, "GTIN,Name\n2223334445556,Updated product name\n,Product without an identifier\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'           => true,
+				'update_existing' => true,
+				'mapping'         => array(
+					'GTIN' => 'global_unique_id',
+					'Name' => 'name',
+				),
+			)
+		);
+		$data     = $importer->import();
+
+		wp_delete_file( $csv_file );
+
+		$this->assertSame( array( $product->get_id() ), $data['updated'] );
+		$this->assertCount( 1, $data['imported'] );
+		$this->assertEmpty( $data['failed'] );
+		$this->assertEmpty( $data['skipped'] );
+		$this->assertSame( 'Updated product name', wc_get_product( $product->get_id() )->get_name() );
+		$this->assertSame( 'Product without an identifier', wc_get_product( $data['imported'][0] )->get_name() );
+		$this->assertSame( '', wc_get_product( $data['imported'][0] )->get_global_unique_id() );
+
+		WC_Helper_Product::delete_product( $data['imported'][0] );
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox A Global Unique ID that strips to nothing creates a product, like a blank cell, when updating existing products.
+	 */
+	public function test_import_creates_products_whose_global_unique_id_strips_to_nothing() {
+		// "ABC" is saved as a blank Global Unique ID, so the row supplies no match key at all.
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-invalid-global-unique-id.csv';
+		file_put_contents( $csv_file, "GTIN,Name\nABC,Product without a usable identifier\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'           => true,
+				'update_existing' => true,
+				'mapping'         => array(
+					'GTIN' => 'global_unique_id',
+					'Name' => 'name',
+				),
+			)
+		);
+		$data     = $importer->import();
+
+		wp_delete_file( $csv_file );
+
+		$this->assertEmpty( $data['updated'] );
+		$this->assertCount( 1, $data['imported'] );
+		$this->assertEmpty( $data['failed'] );
+		$this->assertEmpty( $data['skipped'] );
+		$this->assertSame( 'Product without a usable identifier', wc_get_product( $data['imported'][0] )->get_name() );
+		$this->assertSame( '', wc_get_product( $data['imported'][0] )->get_global_unique_id() );
+
+		WC_Helper_Product::delete_product( $data['imported'][0] );
+	}
+
+	/**
+	 * @testdox A Global Unique ID that matches a product of a different type fails the row instead of converting the product.
+	 */
+	public function test_import_fails_global_unique_id_rows_that_match_a_different_product_type() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Original product name' );
+		$product->set_global_unique_id( '5556667778889' );
+		$product->save();
+		$category_ids = wp_set_object_terms( $product->get_id(), 'GTIN category', 'product_cat' );
+
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-global-unique-id-type-mismatch.csv';
+		file_put_contents( $csv_file, "Type,GTIN,Name\nvariation,5556667778889,Updated product name\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'           => true,
+				'update_existing' => true,
+				'mapping'         => array(
+					'Type' => 'type',
+					'GTIN' => 'global_unique_id',
+					'Name' => 'name',
+				),
+			)
+		);
+		$data     = $importer->import();
+
+		wp_delete_file( $csv_file );
+
+		$this->assertEmpty( $data['updated'] );
+		$this->assertEmpty( $data['imported'] );
+		$this->assertEmpty( $data['imported_variations'] );
+		$this->assertEmpty( $data['skipped'] );
+		$this->assertCount( 1, $data['failed'] );
+		$this->assertSame( 'The Global Unique ID matches a product of a different type.', $data['failed'][0]->get_error_message() );
+		$this->assertSame( 'product', get_post_type( $product->get_id() ) );
+		$this->assertSame( 'Original product name', wc_get_product( $product->get_id() )->get_name() );
+		$this->assertSame( $category_ids, wp_get_object_terms( $product->get_id(), 'product_cat', array( 'fields' => 'ids' ) ) );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox A Global Unique ID that matches a variable product fails a row whose blank Type defaults to simple.
+	 */
+	public function test_import_fails_global_unique_id_rows_that_would_change_the_product_type() {
+		$product = WC_Helper_Product::create_variation_product();
+		$product->set_name( 'Original variable product name' );
+		$product->set_global_unique_id( '6667778889990' );
+		$product->save();
+
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-global-unique-id-blank-type.csv';
+		file_put_contents( $csv_file, "Type,GTIN,Name\n,6667778889990,Updated product name\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'           => true,
+				'update_existing' => true,
+				'mapping'         => array(
+					'Type' => 'type',
+					'GTIN' => 'global_unique_id',
+					'Name' => 'name',
+				),
+			)
+		);
+		$data     = $importer->import();
+
+		wp_delete_file( $csv_file );
+
+		$this->assertEmpty( $data['updated'] );
+		$this->assertEmpty( $data['imported'] );
+		$this->assertEmpty( $data['skipped'] );
+		$this->assertCount( 1, $data['failed'] );
+		$this->assertSame( 'The Global Unique ID matches a product of a different type.', $data['failed'][0]->get_error_message() );
+		$this->assertSame( ProductType::VARIABLE, WC_Product_Factory::get_product_type( $product->get_id() ) );
+		$this->assertSame( 'Original variable product name', wc_get_product( $product->get_id() )->get_name() );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox An unmatched SKU is not matched by Global Unique ID when updating existing products.
+	 */
+	public function test_import_does_not_fall_back_to_global_unique_id_when_the_sku_is_unmatched() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Original product name' );
+		$product->set_global_unique_id( '4443332221110' );
+		$product->save();
+
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-unmatched-sku-with-global-unique-id.csv';
+		file_put_contents( $csv_file, "SKU,GTIN,Name\nNEW-SKU-4443332221110,4443332221110,Updated product name\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'           => true,
+				'update_existing' => true,
+				'mapping'         => array(
+					'SKU'  => 'sku',
+					'GTIN' => 'global_unique_id',
+					'Name' => 'name',
+				),
+			)
+		);
+		$data     = $importer->import();
+
+		wp_delete_file( $csv_file );
+
+		$this->assertEmpty( $data['updated'] );
+		$this->assertEmpty( $data['imported'] );
+		$this->assertEmpty( $data['failed'] );
+		$this->assertCount( 1, $data['skipped'] );
+		$this->assertSame( 'No matching product exists to update.', $data['skipped'][0]->get_error_message() );
+		$this->assertSame( 'Original product name', wc_get_product( $product->get_id() )->get_name() );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Without update existing, an unmatched Global Unique ID creates a product and a match does not update one.
+	 */
+	public function test_import_does_not_update_by_global_unique_id_when_updates_are_disabled() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Original product name' );
+		$product->set_global_unique_id( '7654321098765' );
+		$product->save();
+
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-existing-global-unique-id-with-updates-disabled.csv';
+		file_put_contents( $csv_file, "GTIN,Name\n7654321098765,Updated product name\n1112223334445,New product name\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'   => true,
+				'mapping' => array(
+					'GTIN' => 'global_unique_id',
+					'Name' => 'name',
+				),
+			)
+		);
+		$data     = $importer->import();
+
+		wp_delete_file( $csv_file );
+
+		$this->assertEmpty( $data['updated'] );
+		$this->assertCount( 1, $data['imported'] );
+		$this->assertEmpty( $data['imported_variations'] );
+		$this->assertCount( 1, $data['failed'] );
+		$this->assertEmpty( $data['skipped'] );
+		$this->assertSame( 'Original product name', wc_get_product( $product->get_id() )->get_name() );
+		$this->assertSame( 'New product name', wc_get_product( $data['imported'][0] )->get_name() );
+		$this->assertSame( '1112223334445', wc_get_product( $data['imported'][0] )->get_global_unique_id() );
+
+		WC_Helper_Product::delete_product( $data['imported'][0] );
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -372,6 +776,126 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test that a variation row with a Global Unique ID but no SKU is created and then matched again on re-import.
+	 */
+	public function test_import_creates_new_variations_identified_only_by_a_global_unique_id() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S', 'M' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import GTIN Tee' );
+		$product->set_sku( 'IMPORT-GTIN-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-variation-by-global-unique-id.csv';
+		file_put_contents( $csv_file, "Type,GTIN,Name,Parent,Attribute 1 name,Attribute 1 value(s),Regular price\nvariation,4001234567890,Import GTIN Tee - S,IMPORT-GTIN-PARENT,Size,S,10\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$args = array(
+			'parse'           => true,
+			'update_existing' => true,
+			'mapping'         => array(
+				'Type'                 => 'type',
+				'GTIN'                 => 'global_unique_id',
+				'Name'                 => 'name',
+				'Parent'               => 'parent_id',
+				'Attribute 1 name'     => 'attributes:name1',
+				'Attribute 1 value(s)' => 'attributes:value1',
+				'Regular price'        => 'regular_price',
+			),
+		);
+
+		$importer = new WC_Product_CSV_Importer( $csv_file, $args );
+		$data     = $importer->import();
+
+		$this->assertCount( 1, $data['imported_variations'], 'Expected 1 imported variation, got ' . count( $data['imported_variations'] ) );
+		$this->assertEmpty( $data['skipped'], 'Expected 0 skipped rows, got ' . count( $data['skipped'] ) );
+		$this->assertEmpty( $data['failed'], 'Expected 0 failed rows, got ' . count( $data['failed'] ) );
+
+		$variation_id = $data['imported_variations'][0];
+		$variation    = wc_get_product( $variation_id );
+		$this->assertSame( '4001234567890', $variation->get_global_unique_id(), 'Expected the new variation to keep the Global Unique ID it was created with' );
+		$this->assertSame( '', $variation->get_sku( 'edit' ), 'Expected the new variation to have no SKU of its own' );
+
+		// The same file again: the row must now match the variation it created rather than duplicate it.
+		file_put_contents( $csv_file, "Type,GTIN,Name,Parent,Attribute 1 name,Attribute 1 value(s),Regular price\nvariation,4001234567890,Import GTIN Tee - S,IMPORT-GTIN-PARENT,Size,S,25\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$reimporter = new WC_Product_CSV_Importer( $csv_file, $args );
+		$reimported = $reimporter->import();
+		wp_delete_file( $csv_file );
+
+		$this->assertSame( array( $variation_id ), $reimported['updated'], 'Expected the re-imported row to update the variation it created' );
+		$this->assertEmpty( $reimported['imported_variations'], 'Expected the re-import to create no further variations' );
+		$this->assertSame( '25', wc_get_product( $variation_id )->get_regular_price(), 'Expected the re-import to update the variation price' );
+
+		$variations = wc_get_products(
+			array(
+				'type'   => ProductType::VARIATION,
+				'parent' => $product->get_id(),
+			)
+		);
+		$this->assertCount( 1, $variations, 'Expected the two imports to leave a single variation' );
+
+		WC_Helper_Product::delete_product( $variation_id );
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Test that a variation row with a blank SKU is skipped when its Global Unique ID strips to nothing.
+	 */
+	public function test_import_skips_new_variations_whose_global_unique_id_strips_to_nothing() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S', 'M' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import GTIN Tee' );
+		$product->set_sku( 'IMPORT-GTIN-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		// "n/a" is saved as a blank Global Unique ID, so it is no more of a re-import key than the blank SKU is.
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-variation-unusable-global-unique-id.csv';
+		file_put_contents( $csv_file, "Type,SKU,GTIN,Name,Parent,Attribute 1 name,Attribute 1 value(s)\nvariation,,n/a,Import GTIN Tee - S,IMPORT-GTIN-PARENT,Size,S\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'           => true,
+				'update_existing' => true,
+				'mapping'         => array(
+					'Type'                 => 'type',
+					'SKU'                  => 'sku',
+					'GTIN'                 => 'global_unique_id',
+					'Name'                 => 'name',
+					'Parent'               => 'parent_id',
+					'Attribute 1 name'     => 'attributes:name1',
+					'Attribute 1 value(s)' => 'attributes:value1',
+				),
+			)
+		);
+		$data     = $importer->import();
+		wp_delete_file( $csv_file );
+
+		$this->assertEmpty( $data['imported_variations'], 'Expected 0 imported variations, got ' . count( $data['imported_variations'] ) );
+		$this->assertCount( 1, $data['skipped'], 'Expected 1 skipped row, got ' . count( $data['skipped'] ) );
+		$this->assertSame( 'A new variation cannot be created without a SKU or a GTIN, UPC, EAN, or ISBN.', $data['skipped'][0]->get_error_message() );
+
+		$variations = wc_get_products(
+			array(
+				'type'   => ProductType::VARIATION,
+				'parent' => $product->get_id(),
+			)
+		);
+		$this->assertCount( 0, $variations, 'Expected no variation to be created for a row with no usable key' );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
 	 * @testdox Test that a variation row whose ID belongs to an existing post of another type is skipped when updating existing products, even if the filter tries to force it.
 	 */
 	public function test_import_skips_new_variations_with_a_foreign_post_id_26256() {
@@ -512,6 +1036,389 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $data['skipped'], 'Expected the non-variation row to be skipped despite the filter' );
 
 		WC_Helper_Product::delete_product( $data['imported_variations'][0] );
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * Run an import with "update existing products" against an already existing parent.
+	 *
+	 * @param string $csv_body  CSV contents, header row included. Usually a lone variation row, but a
+	 *                          parent row can be included to cover ordering between the two.
+	 * @param string $file_name Temp file name to write the CSV to.
+	 * @return array Import results.
+	 */
+	private function import_with_update_existing( $csv_body, $file_name ) {
+		$csv_file = trailingslashit( get_temp_dir() ) . $file_name;
+		file_put_contents( $csv_file, $csv_body ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$args = array(
+			'parse'           => true,
+			'update_existing' => true,
+			'mapping'         => array(
+				'Type'                 => 'type',
+				'SKU'                  => 'sku',
+				'Name'                 => 'name',
+				'Parent'               => 'parent_id',
+				'Attribute 1 name'     => 'attributes:name1',
+				'Attribute 1 value(s)' => 'attributes:value1',
+				'Attribute 1 global'   => 'attributes:taxonomy1',
+				'Regular price'        => 'regular_price',
+			),
+		);
+
+		$importer = new WC_Product_CSV_Importer( $csv_file, $args );
+		$data     = $importer->import();
+		wp_delete_file( $csv_file );
+
+		return $data;
+	}
+
+	/**
+	 * @testdox Test that a variation row carrying an attribute value the parent does not offer is skipped, since the storefront could never select it.
+	 */
+	public function test_import_skips_new_variations_with_a_value_the_parent_does_not_offer() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S', 'M' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Tee' );
+		$product->set_sku( 'IMPORT-VALUE-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$data = $this->import_with_update_existing(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-VALUE-L,Import Tee - L,IMPORT-VALUE-PARENT,Size,L,0,12\n",
+			'import-unknown-value.csv'
+		);
+
+		$this->assertEmpty( $data['imported_variations'], 'Expected 0 imported variations, got ' . count( $data['imported_variations'] ) );
+		$this->assertCount( 1, $data['skipped'], 'Expected 1 skipped product, got ' . count( $data['skipped'] ) );
+		$this->assertSame(
+			'A new variation cannot be created because "L" is not an option of the parent product\'s "Size" attribute.',
+			html_entity_decode( $data['skipped'][0]->get_error_message(), ENT_QUOTES ),
+			'Expected the skip message to name the unavailable value and its attribute'
+		);
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'IMPORT-VALUE-L' ), 'Expected no variation to be created for a value the parent does not offer' );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Test that a variation row carrying a global attribute term the parent does not offer is skipped.
+	 */
+	public function test_import_skips_new_variations_with_a_taxonomy_value_the_parent_does_not_offer() {
+		$attribute_data = WC_Helper_Product::create_attribute( 'size-airr19', array( 'S', 'M', 'L' ) );
+		$taxonomy       = $attribute_data['attribute_taxonomy'];
+		$small          = get_term_by( 'name', 'S', $taxonomy );
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_id( $attribute_data['attribute_id'] );
+		$attribute->set_name( $taxonomy );
+		$attribute->set_options( array( $small->term_id ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Global Tee' );
+		$product->set_sku( 'IMPORT-TAX-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$data = $this->import_with_update_existing(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-TAX-L,Import Global Tee - L,IMPORT-TAX-PARENT,size-airr19,L,1,12\n",
+			'import-unknown-taxonomy-value.csv'
+		);
+
+		$this->assertEmpty( $data['imported_variations'], 'Expected 0 imported variations, got ' . count( $data['imported_variations'] ) );
+		$this->assertCount( 1, $data['skipped'], 'Expected 1 skipped product, got ' . count( $data['skipped'] ) );
+		// Asserted in full so this cannot pass because the global attribute failed to resolve at all,
+		// which would report the "parent has no such attribute" refusal instead.
+		$this->assertSame(
+			sprintf(
+				'A new variation cannot be created because "L" is not an option of the parent product\'s "%s" attribute.',
+				wc_attribute_label( $taxonomy )
+			),
+			html_entity_decode( $data['skipped'][0]->get_error_message(), ENT_QUOTES ),
+			'Expected the refusal to name the term and the global attribute, not an unresolved attribute'
+		);
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'IMPORT-TAX-L' ), 'Expected no variation to be created for a term the parent does not offer' );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+		WC_Helper_Product::delete_attribute( $attribute_data['attribute_id'] );
+	}
+
+	/**
+	 * @testdox Test that a variation row using a global attribute term the parent already offers is still created.
+	 */
+	public function test_import_creates_new_variations_with_a_taxonomy_value_the_parent_offers() {
+		$attribute_data = WC_Helper_Product::create_attribute( 'size-airr19-ok', array( 'S', 'L' ) );
+		$taxonomy       = $attribute_data['attribute_taxonomy'];
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_id( $attribute_data['attribute_id'] );
+		$attribute->set_name( $taxonomy );
+		$attribute->set_options( $attribute_data['term_ids'] );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Global Tee' );
+		$product->set_sku( 'IMPORT-TAX-OK-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$data = $this->import_with_update_existing(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-TAX-OK-L,Import Global Tee - L,IMPORT-TAX-OK-PARENT,size-airr19-ok,L,1,12\n",
+			'import-known-taxonomy-value.csv'
+		);
+
+		$this->assertCount( 1, $data['imported_variations'], 'Expected 1 imported variation, got ' . count( $data['imported_variations'] ) );
+		$this->assertEmpty( $data['skipped'], 'Expected 0 skipped products, got ' . count( $data['skipped'] ) );
+
+		$variation = wc_get_product( $data['imported_variations'][0] );
+		$this->assertEquals( array( $taxonomy => 'l' ), $variation->get_attributes() );
+
+		WC_Helper_Product::delete_product( $variation->get_id() );
+		WC_Helper_Product::delete_product( $product->get_id() );
+		WC_Helper_Product::delete_attribute( $attribute_data['attribute_id'] );
+	}
+
+	/**
+	 * @testdox Test that a variation row is created when an earlier parent row in the same CSV adds the global attribute term it uses.
+	 */
+	public function test_import_creates_new_variations_when_an_earlier_parent_row_adds_the_taxonomy_value() {
+		$attribute_data = WC_Helper_Product::create_attribute( 'size-airr19-widen', array( 'S', 'L' ) );
+		$taxonomy       = $attribute_data['attribute_taxonomy'];
+		$small          = get_term_by( 'name', 'S', $taxonomy );
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_id( $attribute_data['attribute_id'] );
+		$attribute->set_name( $taxonomy );
+		$attribute->set_options( array( $small->term_id ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Widen Tee' );
+		$product->set_sku( 'IMPORT-WIDEN-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		// Parent row first, as WooCommerce exports it: the variation must see the widened term list.
+		$data = $this->import_with_update_existing(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\n"
+			. "variable,IMPORT-WIDEN-PARENT,Import Widen Tee,,size-airr19-widen,\"S, L\",1,\n"
+			. "variation,IMPORT-WIDEN-L,Import Widen Tee - L,IMPORT-WIDEN-PARENT,size-airr19-widen,L,1,12\n",
+			'import-parent-widens-taxonomy.csv'
+		);
+
+		$this->assertCount( 1, $data['imported_variations'], 'Expected the variation to be created after the parent row added the term' );
+		$this->assertEmpty( $data['skipped'], 'Expected 0 skipped products, got ' . count( $data['skipped'] ) );
+
+		WC_Helper_Product::delete_product( $data['imported_variations'][0] );
+		WC_Helper_Product::delete_product( $product->get_id() );
+		WC_Helper_Product::delete_attribute( $attribute_data['attribute_id'] );
+	}
+
+	/**
+	 * @testdox Test that a variation row naming an attribute the parent does not have is skipped, instead of being saved as an "any" variation.
+	 */
+	public function test_import_skips_new_variations_with_an_attribute_the_parent_does_not_have() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S', 'M' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Tee' );
+		$product->set_sku( 'IMPORT-ATTR-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$data = $this->import_with_update_existing(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-ATTR-RED,Import Tee - Red,IMPORT-ATTR-PARENT,Colour,Red,0,12\n",
+			'import-unknown-attribute.csv'
+		);
+
+		$this->assertEmpty( $data['imported_variations'], 'Expected 0 imported variations, got ' . count( $data['imported_variations'] ) );
+		$this->assertCount( 1, $data['skipped'], 'Expected 1 skipped product, got ' . count( $data['skipped'] ) );
+		$this->assertSame(
+			'A new variation cannot be created because the parent product has no "Colour" attribute.',
+			html_entity_decode( $data['skipped'][0]->get_error_message(), ENT_QUOTES ),
+			'Expected the skip message to name the missing attribute'
+		);
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'IMPORT-ATTR-RED' ), 'Expected no variation to be created for an attribute the parent does not have' );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Test that a variation row is still created when the parent has the attribute but does not yet use it for variations.
+	 */
+	public function test_import_creates_new_variations_when_the_parent_attribute_is_not_yet_used_for_variations() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S', 'M', 'L' ) );
+		$attribute->set_variation( false );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Tee' );
+		$product->set_sku( 'IMPORT-PROMOTE-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$data = $this->import_with_update_existing(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-PROMOTE-L,Import Tee - L,IMPORT-PROMOTE-PARENT,Size,L,0,12\n",
+			'import-promoted-attribute.csv'
+		);
+
+		$this->assertCount( 1, $data['imported_variations'], 'Expected the row to be created once the parent attribute is promoted for variations' );
+		$this->assertEmpty( $data['skipped'], 'Expected 0 skipped products, got ' . count( $data['skipped'] ) );
+
+		WC_Helper_Product::delete_product( $data['imported_variations'][0] );
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Test that a global-flagged variation row whose global attribute does not exist resolves to the parent's same-named custom attribute, instead of being saved as an "any" variation alongside a stray global attribute.
+	 */
+	public function test_import_creates_new_variations_when_a_global_flagged_row_matches_a_custom_parent_attribute() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S', 'M' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Tee' );
+		$product->set_sku( 'IMPORT-GLBFLAG-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$data = $this->import_with_update_existing(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-GLBFLAG-S,Import Tee - S,IMPORT-GLBFLAG-PARENT,Size,S,1,12\n",
+			'import-global-flagged-custom-attribute.csv'
+		);
+
+		$this->assertCount( 1, $data['imported_variations'], 'Expected the row to be created against the parent\'s custom attribute' );
+		$this->assertEmpty( $data['skipped'], 'Expected 0 skipped products, got ' . count( $data['skipped'] ) );
+
+		$variation = wc_get_product( $data['imported_variations'][0] );
+		$this->assertSame( array( 'size' => 'S' ), $variation->get_attributes(), 'Expected the variation to store the custom attribute value instead of matching any value' );
+		$this->assertSame( 0, (int) wc_attribute_taxonomy_id_by_name( 'size' ), 'Expected no global "size" attribute to be created by the import' );
+
+		WC_Helper_Product::delete_product( $variation->get_id() );
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Test that a global-flagged variation row whose global attribute does not exist still promotes the parent's same-named custom attribute for variations.
+	 */
+	public function test_import_promotes_a_custom_parent_attribute_matched_by_a_global_flagged_row() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S', 'M' ) );
+		$attribute->set_variation( false );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Tee' );
+		$product->set_sku( 'IMPORT-GLBPROMOTE-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$data = $this->import_with_update_existing(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-GLBPROMOTE-S,Import Tee - S,IMPORT-GLBPROMOTE-PARENT,Size,S,1,12\n",
+			'import-global-flagged-promoted-attribute.csv'
+		);
+
+		$this->assertCount( 1, $data['imported_variations'], 'Expected the row to be created once the parent attribute is promoted for variations' );
+		$this->assertEmpty( $data['skipped'], 'Expected 0 skipped products, got ' . count( $data['skipped'] ) );
+
+		$variation         = wc_get_product( $data['imported_variations'][0] );
+		$parent_attributes = wc_get_product( $product->get_id() )->get_attributes();
+		$this->assertSame( array( 'size' => 'S' ), $variation->get_attributes(), 'Expected the variation to store the custom attribute value instead of matching any value' );
+		$this->assertTrue( $parent_attributes['size']->get_variation(), 'Expected the parent\'s custom attribute to be promoted for variations' );
+		$this->assertSame( 0, (int) wc_attribute_taxonomy_id_by_name( 'size' ), 'Expected no global "size" attribute to be created by the import' );
+
+		WC_Helper_Product::delete_product( $variation->get_id() );
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Test that re-importing an existing variation with a global-flagged row whose global attribute does not exist keeps the stored custom attribute, instead of wiping it into an "any" variation.
+	 */
+	public function test_import_updates_an_existing_variation_from_a_global_flagged_row_without_wiping_its_attribute() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S', 'M' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Tee' );
+		$product->set_sku( 'IMPORT-GLBUPDATE-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_sku( 'IMPORT-GLBUPDATE-S' );
+		$variation->set_attributes( array( 'size' => 'S' ) );
+		$variation->save();
+
+		$data = $this->import_with_update_existing(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\nvariation,IMPORT-GLBUPDATE-S,Import Tee - M,IMPORT-GLBUPDATE-PARENT,Size,M,1,15\n",
+			'import-global-flagged-update-existing.csv'
+		);
+
+		$this->assertContains( $variation->get_id(), $data['updated'], 'Expected the existing variation to be updated' );
+		$this->assertEmpty( $data['skipped'], 'Expected 0 skipped products, got ' . count( $data['skipped'] ) );
+		$this->assertSame( array( 'size' => 'M' ), wc_get_product( $variation->get_id() )->get_attributes(), 'Expected the row\'s value to be stored instead of the attribute being wiped into matching any value' );
+		$this->assertSame( 0, (int) wc_attribute_taxonomy_id_by_name( 'size' ), 'Expected no global "size" attribute to be created by the import' );
+
+		WC_Helper_Product::delete_product( $variation->get_id() );
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Test that a variation row listed before the parent row that would widen the attribute is skipped, since rows are validated against the parent as it stands when the row is reached.
+	 */
+	public function test_import_skips_new_variations_listed_before_the_parent_row_that_adds_their_value() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S', 'M' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import Tee' );
+		$product->set_sku( 'IMPORT-ORDER-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		// The variation row comes first, so the parent still offers only S and M when it is validated.
+		$data = $this->import_with_update_existing(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\n"
+			. "variation,IMPORT-ORDER-L,Import Tee - L,IMPORT-ORDER-PARENT,Size,L,0,12\n"
+			. "variable,IMPORT-ORDER-PARENT,Import Tee,,Size,\"S, M, L\",0,\n",
+			'import-variation-before-parent.csv'
+		);
+
+		$this->assertEmpty( $data['imported_variations'], 'Expected the variation row to be skipped, got ' . count( $data['imported_variations'] ) );
+		$this->assertCount( 1, $data['skipped'], 'Expected 1 skipped product, got ' . count( $data['skipped'] ) );
+		$this->assertCount( 1, $data['updated'], 'Expected the parent row to still be updated' );
+
+		// The parent row widened the options, so the same import creates the variation on a second run.
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( array( 'S', 'M', 'L' ), $product->get_attributes()['size']->get_options() );
+
+		$rerun = $this->import_with_update_existing(
+			"Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price\n"
+			. "variation,IMPORT-ORDER-L,Import Tee - L,IMPORT-ORDER-PARENT,Size,L,0,12\n"
+			. "variable,IMPORT-ORDER-PARENT,Import Tee,,Size,\"S, M, L\",0,\n",
+			'import-variation-before-parent-rerun.csv'
+		);
+
+		$this->assertCount( 1, $rerun['imported_variations'], 'Expected the variation to be created on the second run' );
+		$this->assertEmpty( $rerun['skipped'], 'Expected 0 skipped products on the second run, got ' . count( $rerun['skipped'] ) );
+
+		WC_Helper_Product::delete_product( $rerun['imported_variations'][0] );
 		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 

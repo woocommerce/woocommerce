@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Add the `woocommerce_customer_email_is_verified` filter to `EmailVerificationService::is_verified()`, allowing extensions that manage their own email-verification state to mark a customer's email as verified or unverified.

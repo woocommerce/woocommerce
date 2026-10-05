@@ -15,7 +15,7 @@ export const MARKETPLACE_IAM_SETTINGS_API_PATH =
 export const MARKETPLACE_ITEMS_PER_PAGE = 60; // This should match the number of results returned by the API
 export const MARKETPLACE_SEARCH_RESULTS_PER_PAGE = 8;
 export const MARKETPLACE_CART_PATH = MARKETPLACE_HOST + '/cart/';
-export const MARKETPLACE_RENEW_SUBSCRIPTON_PATH =
+export const MARKETPLACE_RENEW_SUBSCRIPTION_PATH =
 	MARKETPLACE_HOST + '/my-account/my-subscriptions/';
 export const MARKETPLACE_SUPPORT_PATH =
 	MARKETPLACE_HOST + '/my-account/contact-support/';
@@ -26,6 +26,9 @@ export const MARKETPLACE_COLLABORATION_PATH =
 export const MARKETPLACE_SHARING_PATH =
 	MARKETPLACE_HOST +
 	'/document/managing-woocommerce-com-subscriptions/#share-a-subscription';
+export const MARKETPLACE_CONNECT_DOCS_PATH =
+	MARKETPLACE_HOST +
+	'/document/managing-woocommerce-com-subscriptions/connect-your-site-to-woocommerce-com/';
 export const WP_ADMIN_PLUGIN_LIST_URL = ADMIN_URL + 'plugins.php';
 export const WOO_CONNECT_PLUGIN_DOWNLOAD_URL =
 	MARKETPLACE_HOST + '/product-download/woo-update-manager';
