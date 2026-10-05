@@ -302,5 +302,4 @@ class WC_Admin_Tests_NoteTraits extends WC_Unit_Test_Case {
 			),
 		);
 	}
-
 }

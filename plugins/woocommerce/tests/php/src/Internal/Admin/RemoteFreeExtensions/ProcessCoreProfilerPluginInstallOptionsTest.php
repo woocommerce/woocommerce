@@ -139,7 +139,7 @@ class ProcessCoreProfilerPluginInstallOptionsTest extends WC_Unit_Test_Case {
 	 */
 	public function test_disallowed_option_is_not_added_and_logs_error() {
 		$disallowed_option = 'siteurl';
-		$option_value = 'should-not-be-added';
+		$option_value      = 'should-not-be-added';
 
 		$logger = Mockery::mock( \WC_Logger_Interface::class );
 		$logger->shouldReceive( 'error' )

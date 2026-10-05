@@ -2,9 +2,9 @@
 
 namespace Automattic\WooCommerce\Utilities;
 
-use \DateTime;
-use \DateTimeZone;
-use \Exception;
+use DateTime;
+use DateTimeZone;
+use Exception;
 
 /**
  * Class with date and time utilities.

@@ -10,7 +10,7 @@
 defined( 'ABSPATH' ) || exit;
 
 if ( ! class_exists( 'WC_Background_Process', false ) ) {
-	include_once dirname( __FILE__ ) . '/abstracts/class-wc-background-process.php';
+	include_once __DIR__ . '/abstracts/class-wc-background-process.php';
 }
 
 /**

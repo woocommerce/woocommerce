@@ -51,6 +51,4 @@ class WC_Admin_Tests_Reports extends WC_Unit_Test_Case {
 		$this->assertFileExists( $this->directory . 'index.html' );
 		$this->assertFileExists( $this->directory . '.htaccess' );
 	}
-
-
 }

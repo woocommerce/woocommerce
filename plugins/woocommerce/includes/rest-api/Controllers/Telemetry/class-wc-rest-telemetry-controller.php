@@ -134,7 +134,7 @@ class WC_REST_Telemetry_Controller extends WC_REST_Controller {
 				'last_used'         => gmdate( 'c' ),
 				'installation_date' => isset( $installation_date ) ? get_gmt_from_date( $installation_date, 'c' ) : null,
 			),
-			function( $value ) {
+			function ( $value ) {
 				return null !== $value;
 			}
 		);

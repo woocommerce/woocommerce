@@ -24,5 +24,4 @@ class InvalidObjectCacheClass extends ObjectCache {
 	protected function get_from_datastore( $id ) {
 	}
 	// phpcs:enable Squiz.Commenting
-
 }

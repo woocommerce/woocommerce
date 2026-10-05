@@ -456,7 +456,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 
 		$wpdb_mock->register_method_replacement(
 			'get_results',
-			function( ...$args ) {
+			function ( ...$args ) {
 				$wpdb_mock = $args[0];
 				$query     = $args[1];
 
@@ -471,7 +471,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$actual_errors = $fake_logger->errors;
 		usort(
 			$actual_errors,
-			function( $a, $b ) {
+			function ( $a, $b ) {
 				return strcmp( $a['message'], $b['message'] );
 			}
 		);
@@ -496,7 +496,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 
 		$wpdb_mock->register_method_replacement(
 			'get_results',
-			function( ...$args ) use ( $exception ) {
+			function ( ...$args ) use ( $exception ) {
 				$query = $args[1];
 
 				if ( StringUtil::contains( $query, 'posts' ) ) {
@@ -510,7 +510,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$actual_errors = $fake_logger->errors;
 		usort(
 			$actual_errors,
-			function( $a, $b ) {
+			function ( $a, $b ) {
 				return strcmp( $a['message'], $b['message'] );
 			}
 		);
@@ -541,7 +541,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wc_get_logger' => function() use ( $fake_logger ) {
+				'wc_get_logger' => function () use ( $fake_logger ) {
 					return $fake_logger;
 				},
 			)
@@ -572,7 +572,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$wpdb_mock = $this->use_wpdb_mock();
 		$wpdb_mock->register_method_replacement(
 			'get_results',
-			function( ...$args ) {
+			function ( ...$args ) {
 				$wpdb_decorator                               = $args[0];
 				$wpdb_decorator->decorated_object->last_error = 'Something failed!';
 				return false;
@@ -593,7 +593,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$wpdb_mock = $this->use_wpdb_mock();
 		$wpdb_mock->register_method_replacement(
 			'get_results',
-			function( ...$args ) {
+			function ( ...$args ) {
 				throw new \Exception( 'Something failed!' );
 			}
 		);
@@ -649,7 +649,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$wpdb_mock = $this->use_wpdb_mock();
 		$wpdb_mock->register_method_replacement(
 			'query',
-			function( $wpdb_decorator, $query ) {
+			function ( $wpdb_decorator, $query ) {
 				$result = $this->fake_query_transaction_logger( $wpdb_decorator, $query, false );
 				if ( str_contains( $query, 'INSERT INTO ' . OrdersTableDataStore::get_orders_table_name() ) ) {
 					$wpdb_decorator->decorated_object->last_error = 'Something failed!';
@@ -683,7 +683,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$wpdb_mock = $this->use_wpdb_mock();
 		$wpdb_mock->register_method_replacement(
 			'query',
-			function( $wpdb_decorator, $query ) {
+			function ( $wpdb_decorator, $query ) {
 				if ( str_contains( $query, 'INSERT INTO ' . OrdersTableDataStore::get_orders_table_name() ) ) {
 					throw new \Exception( 'Something failed!' );
 				}
@@ -769,7 +769,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 
 		$wpdb_mock->register_method_replacement(
 			'query',
-			function( ...$args ) use ( $transaction_fails ) {
+			function ( ...$args ) use ( $transaction_fails ) {
 				$wpdb_decorator = $args[0];
 				$query          = $args[1];
 

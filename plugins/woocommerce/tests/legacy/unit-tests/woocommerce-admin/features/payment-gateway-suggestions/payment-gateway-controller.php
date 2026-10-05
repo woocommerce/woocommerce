@@ -33,7 +33,7 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_PaymentGatewaysController extends
 
 		add_filter(
 			'woocommerce_payment_gateways',
-			function( $gateways ) {
+			function ( $gateways ) {
 				$gateways[] = 'WC_Mock_Payment_Gateway';
 				$gateways[] = 'WC_Mock_Enhanced_Payment_Gateway';
 
@@ -140,6 +140,4 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_PaymentGatewaysController extends
 		$this->assertCount( 1, $response['required_settings_keys'] );
 		$this->assertEquals( 'api_key', $response['required_settings_keys'][0] );
 	}
-
 }
-

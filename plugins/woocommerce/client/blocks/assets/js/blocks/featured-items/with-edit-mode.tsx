@@ -90,9 +90,8 @@ export const withEditMode =
 		);
 
 		// Only show edit mode for newly inserted blocks without existing selection
-		const [ editMode, setEditMode ] = useState< boolean >(
-			! hasFeaturedItemId
-		);
+		const [ editMode, setEditMode ] =
+			useState< boolean >( ! hasFeaturedItemId );
 
 		const onDone = () => {
 			if ( selectedOptions ) {

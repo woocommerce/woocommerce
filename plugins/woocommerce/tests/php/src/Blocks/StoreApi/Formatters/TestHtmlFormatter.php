@@ -27,6 +27,6 @@ class TestHtmlFormatter extends \WP_UnitTestCase {
 	 * Test formatting.
 	 */
 	public function test_format() {
-		$this->assertEquals( "&#8220;Quotes&#8221;", $this->mock_formatter->format( '"Quotes"' ) );
+		$this->assertEquals( '&#8220;Quotes&#8221;', $this->mock_formatter->format( '"Quotes"' ) );
 	}
 }

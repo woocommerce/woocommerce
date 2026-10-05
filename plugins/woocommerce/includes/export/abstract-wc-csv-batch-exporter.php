@@ -196,7 +196,6 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 			// We need to use a temporary file to store headers, this will make our life so much easier.
 			@file_put_contents( $this->get_headers_row_file_path(), $header ); //phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_file_put_contents, Generic.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
 		}
-
 	}
 
 	/**

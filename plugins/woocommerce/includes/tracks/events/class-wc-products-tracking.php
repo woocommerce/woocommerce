@@ -539,7 +539,6 @@ class WC_Products_Tracking {
 		}
 
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'product-import-tracking', false );
-
 	}
 
 	/**

@@ -373,7 +373,7 @@ export const ShippingTour = ( {
 				heading: __( 'WooCommerce Shipping', 'woocommerce' ),
 				descriptions: {
 					desktop: __(
-						'If you’d like to speed up your process and print your shipping label straight from your Woo dashboard, WooCommerce Shipping may be for you! ',
+						'If you’d like to speed up your process and print your shipping label straight from your Woo dashboard, WooCommerce Shipping may be for you!',
 						'woocommerce'
 					),
 				},

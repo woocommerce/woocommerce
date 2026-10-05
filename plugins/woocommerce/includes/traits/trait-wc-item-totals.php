@@ -87,5 +87,4 @@ trait WC_Item_Totals {
 		}
 		return $value;
 	}
-
 }

@@ -33,7 +33,7 @@ class SegmentedSelection extends Component {
 								className="woocommerce-segmented-selection__item"
 								key={ value }
 							>
-								{ /* eslint-disable jsx-a11y/label-has-for */ }
+								{  }
 								<input
 									className="woocommerce-segmented-selection__input"
 									type="radio"
@@ -49,7 +49,7 @@ class SegmentedSelection extends Component {
 										{ label }
 									</span>
 								</label>
-								{ /* eslint-enable jsx-a11y/label-has-for */ }
+								{  }
 							</div>
 						);
 					} ) }

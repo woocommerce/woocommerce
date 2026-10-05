@@ -83,7 +83,7 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 		$downloads_served = 0;
 
 		$download_counter = function () use ( &$downloads_served ) {
-			$downloads_served++;
+			++$downloads_served;
 		};
 
 		// Track downloads served.

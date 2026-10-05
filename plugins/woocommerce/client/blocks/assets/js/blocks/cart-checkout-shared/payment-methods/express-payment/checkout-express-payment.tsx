@@ -128,7 +128,7 @@ const CheckoutExpressPayment = () => {
 								) }
 							/>
 						) : (
-							__( ' Express Checkout', 'woocommerce' )
+							__( 'Express Checkout', 'woocommerce' )
 						) }
 					</h2>
 				</div>

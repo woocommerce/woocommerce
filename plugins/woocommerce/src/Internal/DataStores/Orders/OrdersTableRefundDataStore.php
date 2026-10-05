@@ -6,8 +6,8 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
-use \WC_Cache_Helper;
-use \WC_Meta_Data;
+use WC_Cache_Helper;
+use WC_Meta_Data;
 
 /**
  * Class OrdersTableRefundDataStore.
@@ -225,5 +225,4 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 	protected function get_post_data_store_for_backfill() {
 		return new \WC_Order_Refund_Data_Store_CPT();
 	}
-
 }

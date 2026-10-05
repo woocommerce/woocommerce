@@ -79,7 +79,7 @@ class WC_CLI_Update_Command {
 			do {
 				$needs_another_run = (bool) call_user_func( $update_callback );
 			} while ( $needs_another_run );
-			$update_count ++;
+			++$update_count;
 			$progress->tick();
 		}
 

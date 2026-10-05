@@ -1408,7 +1408,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$manual_cart_id = md5( implode( '_', $id_parts ) );
 
 		$this->assertEquals( $manual_cart_id, WC()->cart->generate_cart_id( $product_id, $variation_id, array( 'Testing' => 'yup' ), $cart_item_data ) );
-
 	}
 
 	/**
@@ -1603,7 +1602,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$this->assertEquals( 67.18, WC()->cart->get_taxes_total() );
 
 		$checkout = WC_Checkout::instance();
-		$order = new WC_Order();
+		$order    = new WC_Order();
 		$checkout->set_data_from_cart( $order );
 		$this->assertEquals( 67.18, $order->get_total_tax() );
 		$this->assertEquals( 335.88, $order->get_total() );
@@ -2164,7 +2163,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$variation  = current(
 			array_filter(
 				$variations,
-				function( $variation ) {
+				function ( $variation ) {
 					return 'DUMMY SKU VARIABLE HUGE RED 2' === $variation['sku'];
 				}
 			)

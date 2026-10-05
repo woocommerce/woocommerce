@@ -127,5 +127,4 @@ class MarketingOverview extends \WC_REST_Data_Controller {
 	public function get_installed_plugins( $request ) {
 		return rest_ensure_response( InstalledExtensions::get_data() );
 	}
-
 }

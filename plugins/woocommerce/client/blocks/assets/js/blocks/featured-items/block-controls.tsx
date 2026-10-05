@@ -31,14 +31,16 @@ interface WithBlockControlsRequiredProps< T > {
 	canEditItem: boolean;
 }
 
-interface WithBlockControlsCategoryProps< T >
-	extends WithBlockControlsRequiredProps< T > {
+interface WithBlockControlsCategoryProps<
+	T,
+> extends WithBlockControlsRequiredProps< T > {
 	category: WP_REST_API_Category;
 	product: never;
 }
 
-interface WithBlockControlsProductProps< T >
-	extends WithBlockControlsRequiredProps< T > {
+interface WithBlockControlsProductProps<
+	T,
+> extends WithBlockControlsRequiredProps< T > {
 	category: never;
 	product: ProductResponseItem;
 }

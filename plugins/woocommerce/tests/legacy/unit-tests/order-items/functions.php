@@ -60,5 +60,4 @@ class WC_Tests_Order_Item_Functions extends WC_Unit_Test_Case {
 		$this->assertEmpty( $item->get_meta( '_test_key' ) );
 		$this->assertEmpty( wc_get_order_item_meta( $item_id, '_test_key' ) );
 	}
-
 }

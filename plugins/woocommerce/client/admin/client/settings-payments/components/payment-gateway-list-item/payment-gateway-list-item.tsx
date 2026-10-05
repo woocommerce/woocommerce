@@ -54,7 +54,7 @@ export const PaymentGatewayListItem = ( {
 
 	// Default to onboarding supported to avoid blocking the user, but only when onboarding exists.
 	const isOnboardingSupported = gateway.onboarding
-		? gateway.onboarding.state?.supported ?? true
+		? ( gateway.onboarding.state?.supported ?? true )
 		: true;
 
 	// If the account is not connected or the onboarding is not started, or not completed then the gateway needs onboarding.
@@ -185,7 +185,7 @@ export const PaymentGatewayListItem = ( {
 					</span>
 					<span
 						className="woocommerce-list__item-content"
-						// eslint-disable-next-line react/no-danger -- This string is sanitized by the PaymentGateway class.
+
 						dangerouslySetInnerHTML={ sanitizeHTML(
 							decodeEntities( gateway.description )
 						) }

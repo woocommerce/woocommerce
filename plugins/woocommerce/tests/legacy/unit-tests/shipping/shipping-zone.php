@@ -300,5 +300,4 @@ class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 'Test 2', $zone->get_zone_name() );
 	}
-
 }

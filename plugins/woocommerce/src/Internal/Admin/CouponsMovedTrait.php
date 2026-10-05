@@ -32,7 +32,7 @@ trait CouponsMovedTrait {
 	 * @return string The unescaped URL for the legacy coupon management page.
 	 */
 	protected static function get_legacy_coupon_url() {
-		return self::get_coupon_url( [ self::$query_key => true ] );
+		return self::get_coupon_url( array( self::$query_key => true ) );
 	}
 
 	/**
@@ -42,11 +42,11 @@ trait CouponsMovedTrait {
 	 *
 	 * @return string
 	 */
-	protected static function get_coupon_url( $args = [] ) {
+	protected static function get_coupon_url( $args = array() ) {
 		$args = array_merge(
-			[
+			array(
 				'post_type' => 'shop_coupon',
-			],
+			),
 			$args
 		);
 

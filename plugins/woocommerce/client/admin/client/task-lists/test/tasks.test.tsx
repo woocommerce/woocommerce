@@ -80,13 +80,13 @@ describe( 'Task', () => {
 		cleanup();
 	} );
 
-	it( 'should render if no current task and finished resolving', () => {
+	it( 'should render if no current task and finished resolving', async () => {
 		const { queryByText } = render(
 			<div>
 				<TaskLists query={ {} } />
 			</div>
 		);
-		waitFor( () => {
+		await waitFor( () => {
 			expect( queryByText( 'task-list:main' ) ).toBeInTheDocument();
 			expect( queryByText( 'task-list:extended' ) ).toBeInTheDocument();
 			expect(
@@ -170,8 +170,8 @@ describe( 'Task', () => {
 					<TaskLists query={ {} } />
 				</div>
 			);
-			act( () => {
-				userEvent.click( getByText( 'Show things to do next' ) );
+			act( async () => {
+				await userEvent.click( getByText( 'Show things to do next' ) );
 			} );
 			expect( recordEvent ).toHaveBeenCalledWith(
 				'main_tasklist_hide',
@@ -199,8 +199,8 @@ describe( 'Task', () => {
 					<TaskLists query={ {} } />
 				</div>
 			);
-			act( () => {
-				userEvent.click( getByText( 'Show things to do next' ) );
+			act( async () => {
+				await userEvent.click( getByText( 'Show things to do next' ) );
 			} );
 			expect( recordEvent ).toHaveBeenCalledWith(
 				'main_tasklist_show',

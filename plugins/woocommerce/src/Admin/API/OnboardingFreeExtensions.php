@@ -90,7 +90,7 @@ class OnboardingFreeExtensions extends WC_REST_Data_Controller {
 			foreach ( $extensions as &$extension ) {
 				$extension['plugins'] = array_filter(
 					$extension['plugins'],
-					function( $plugin ) {
+					function ( $plugin ) {
 						return 'jetpack' !== $plugin->key;
 					}
 				);

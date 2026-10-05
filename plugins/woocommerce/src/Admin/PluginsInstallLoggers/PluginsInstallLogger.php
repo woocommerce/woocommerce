@@ -22,7 +22,7 @@ interface PluginsInstallLogger {
 	 * @param int    $duration # of seconds it took to install $plugin_name.
 	 * @return mixed
 	 */
-	public function installed( string $plugin_name, int $duration);
+	public function installed( string $plugin_name, int $duration );
 
 	/**
 	 * Called when a plugin activated successfully.
@@ -39,7 +39,7 @@ interface PluginsInstallLogger {
 	 * @param string|null $error_message error message.
 	 * @return mixed
 	 */
-	public function add_error( string $plugin_name, ?string $error_message = null);
+	public function add_error( string $plugin_name, ?string $error_message = null );
 
 	/**
 	 * Called when all plugins are processed.
@@ -49,4 +49,3 @@ interface PluginsInstallLogger {
 	 */
 	public function complete( $data = array() );
 }
-

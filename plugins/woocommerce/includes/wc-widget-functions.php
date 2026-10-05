@@ -13,19 +13,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Include widget classes.
-require_once dirname( __FILE__ ) . '/abstracts/abstract-wc-widget.php';
-require_once dirname( __FILE__ ) . '/widgets/class-wc-widget-cart.php';
-require_once dirname( __FILE__ ) . '/widgets/class-wc-widget-layered-nav-filters.php';
-require_once dirname( __FILE__ ) . '/widgets/class-wc-widget-layered-nav.php';
-require_once dirname( __FILE__ ) . '/widgets/class-wc-widget-price-filter.php';
-require_once dirname( __FILE__ ) . '/widgets/class-wc-widget-product-categories.php';
-require_once dirname( __FILE__ ) . '/widgets/class-wc-widget-product-search.php';
-require_once dirname( __FILE__ ) . '/widgets/class-wc-widget-product-tag-cloud.php';
-require_once dirname( __FILE__ ) . '/widgets/class-wc-widget-products.php';
-require_once dirname( __FILE__ ) . '/widgets/class-wc-widget-rating-filter.php';
-require_once dirname( __FILE__ ) . '/widgets/class-wc-widget-recent-reviews.php';
-require_once dirname( __FILE__ ) . '/widgets/class-wc-widget-recently-viewed.php';
-require_once dirname( __FILE__ ) . '/widgets/class-wc-widget-top-rated-products.php';
+require_once __DIR__ . '/abstracts/abstract-wc-widget.php';
+require_once __DIR__ . '/widgets/class-wc-widget-cart.php';
+require_once __DIR__ . '/widgets/class-wc-widget-layered-nav-filters.php';
+require_once __DIR__ . '/widgets/class-wc-widget-layered-nav.php';
+require_once __DIR__ . '/widgets/class-wc-widget-price-filter.php';
+require_once __DIR__ . '/widgets/class-wc-widget-product-categories.php';
+require_once __DIR__ . '/widgets/class-wc-widget-product-search.php';
+require_once __DIR__ . '/widgets/class-wc-widget-product-tag-cloud.php';
+require_once __DIR__ . '/widgets/class-wc-widget-products.php';
+require_once __DIR__ . '/widgets/class-wc-widget-rating-filter.php';
+require_once __DIR__ . '/widgets/class-wc-widget-recent-reviews.php';
+require_once __DIR__ . '/widgets/class-wc-widget-recently-viewed.php';
+require_once __DIR__ . '/widgets/class-wc-widget-top-rated-products.php';
 
 /**
  * Register Widgets.

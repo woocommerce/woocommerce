@@ -125,7 +125,7 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 		$handler->handle( $time, 'emergency', 'emergency', array() );
 
 		$log_content = $this->read_content( 'log' );
-		$this->assertStringMatchesFormatFile( dirname( __FILE__ ) . '/test_log_expected.txt', $log_content );
+		$this->assertStringMatchesFormatFile( __DIR__ . '/test_log_expected.txt', $log_content );
 	}
 
 	/**
@@ -148,7 +148,7 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 		$handler->handle( $time, 'emergency', 'emergency', $context_source );
 
 		$log_content = $this->read_content( 'unit-tests' );
-		$this->assertStringMatchesFormatFile( dirname( __FILE__ ) . '/test_log_expected.txt', $log_content );
+		$this->assertStringMatchesFormatFile( __DIR__ . '/test_log_expected.txt', $log_content );
 	}
 
 	/**
@@ -173,7 +173,7 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 		$handler_b->handle( $time, 'emergency', 'emergency', $context_source );
 
 		$log_content = $this->read_content( 'unit-tests' );
-		$this->assertStringMatchesFormatFile( dirname( __FILE__ ) . '/test_log_expected.txt', $log_content );
+		$this->assertStringMatchesFormatFile( __DIR__ . '/test_log_expected.txt', $log_content );
 	}
 
 	/**
@@ -231,5 +231,4 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 		$hash_name   = sanitize_file_name( wp_hash( 'unit-tests' ) );
 		$this->assertEquals( $log_dir . 'unit-tests-' . $date_suffix . '-' . $hash_name . '.log', WC_Log_Handler_File::get_log_file_path( 'unit-tests' ) );
 	}
-
 }

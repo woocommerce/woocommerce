@@ -245,7 +245,7 @@ class Edit {
 			'woocommerce-order-source-data',
 			/* Translators: %s order type name. */
 			sprintf( __( '%s attribution', 'woocommerce' ), $title ),
-			function( $post_or_order ) use ( $order_attribution_meta_box ) {
+			function ( $post_or_order ) use ( $order_attribution_meta_box ) {
 				$order = $post_or_order instanceof WC_Order ? $post_or_order : wc_get_order( $post_or_order );
 				if ( $order instanceof WC_Order ) {
 					$order_attribution_meta_box->output( $order );
@@ -317,7 +317,7 @@ class Edit {
 		 */
 		do_action( 'woocommerce_process_shop_order_meta', $this->order->get_id(), $this->order );
 
-		$this->custom_meta_box->handle_metadata_changes($this->order);
+		$this->custom_meta_box->handle_metadata_changes( $this->order );
 
 		// Order updated message.
 		$this->message = 1;

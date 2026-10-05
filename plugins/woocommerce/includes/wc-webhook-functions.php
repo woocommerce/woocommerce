@@ -218,7 +218,7 @@ function wc_load_webhooks( $status = '', $limit = null ) {
 
 		$webhook = new WC_Webhook( $webhook_id );
 		$webhook->enqueue();
-		$loaded ++;
+		++$loaded;
 	}
 
 	return 0 < $loaded;

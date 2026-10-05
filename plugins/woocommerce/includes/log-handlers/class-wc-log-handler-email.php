@@ -222,5 +222,4 @@ class WC_Log_Handler_Email extends WC_Log_Handler {
 	protected function clear_logs() {
 		$this->logs = array();
 	}
-
 }

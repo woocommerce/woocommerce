@@ -24,7 +24,6 @@ class WC_Admin_Tests_Category_Lookup extends WP_UnitTestCase {
 	/**
 	 * Setup
 	 */
-
 	public function setUp(): void {
 		delete_transient( 'wc_installing' );
 		delete_option( 'wc_installing' );

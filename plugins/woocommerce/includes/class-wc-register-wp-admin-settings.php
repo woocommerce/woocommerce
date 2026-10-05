@@ -149,7 +149,7 @@ class WC_Register_WP_Admin_Settings {
 		$sections = $this->object->get_sections();
 		if ( empty( $sections ) ) {
 			// Default section is just an empty string, per admin page classes.
-			$sections = array( ''  => '' );
+			$sections = array( '' => '' );
 		}
 
 		/**
@@ -216,5 +216,4 @@ class WC_Register_WP_Admin_Settings {
 
 		return $new_setting;
 	}
-
 }

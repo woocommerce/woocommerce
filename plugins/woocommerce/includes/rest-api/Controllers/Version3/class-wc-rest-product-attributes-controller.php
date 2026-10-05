@@ -26,7 +26,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Product_Attributes_V
 	protected $namespace = 'wc/v3';
 
 	/**
-	 * Generates a unique slug for a given attribute name. We do this so that we can 
+	 * Generates a unique slug for a given attribute name. We do this so that we can
 	 * create more than one attribute with the same name.
 	 *
 	 * @param string $attribute_name The attribute name to generate a slug for.
@@ -47,7 +47,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Product_Attributes_V
 		}
 
 		$last_created_slug = $results[0]->attribute_name;
-		$suffix = intval( substr( $last_created_slug, strrpos( $last_created_slug, '-' ) + 1 ) );
+		$suffix            = intval( substr( $last_created_slug, strrpos( $last_created_slug, '-' ) + 1 ) );
 
 		return $root_slug . '-' . ( $suffix + 1 );
 	}

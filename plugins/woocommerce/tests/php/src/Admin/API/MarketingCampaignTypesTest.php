@@ -68,7 +68,7 @@ class MarketingCampaignTypesTest extends WC_REST_Unit_Test_Case {
 		$test_campaign_type_1->expects( $this->any() )->method( 'get_id' )->willReturn( 'test-campaign-type-1' );
 		$test_campaign_type_1->expects( $this->any() )->method( 'get_channel' )->willReturn( $test_channel_1 );
 		// Return the sample campaign type by the mock marketing channel.
-		$test_channel_1->expects( $this->any() )->method( 'get_supported_campaign_types' )->willReturn( [ $test_campaign_type_1 ] );
+		$test_channel_1->expects( $this->any() )->method( 'get_supported_campaign_types' )->willReturn( array( $test_campaign_type_1 ) );
 		// Register the marketing channel.
 		$this->marketing_channels_service->register( $test_channel_1 );
 
@@ -80,7 +80,7 @@ class MarketingCampaignTypesTest extends WC_REST_Unit_Test_Case {
 		$test_campaign_type_2->expects( $this->any() )->method( 'get_id' )->willReturn( 'test-campaign-type-2' );
 		$test_campaign_type_2->expects( $this->any() )->method( 'get_channel' )->willReturn( $test_channel_2 );
 		// Return the sample campaign by the second mock marketing channel.
-		$test_channel_2->expects( $this->any() )->method( 'get_supported_campaign_types' )->willReturn( [ $test_campaign_type_2 ] );
+		$test_channel_2->expects( $this->any() )->method( 'get_supported_campaign_types' )->willReturn( array( $test_campaign_type_2 ) );
 		// Register the second marketing channel.
 		$this->marketing_channels_service->register( $test_channel_2 );
 
@@ -90,12 +90,11 @@ class MarketingCampaignTypesTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertCount( 2, $data );
 		$this->assertEquals(
-			[
+			array(
 				'test-campaign-type-1',
 				'test-campaign-type-2',
-			],
+			),
 			array_column( $data, 'id' )
 		);
 	}
-
 }

@@ -37,7 +37,7 @@
 		<p class="has-text-align-center">
 			<?php
 				/* translators: 1: WordPress link, 2: WooCommerce link */
-				echo sprintf( esc_html__( 'Powered by %1$s with %2$s', 'woocommerce' ), '<a href="https://wordpress.org" target="_blank" rel="noreferrer nofollow">WordPress</a>', '<a href="https://woocommerce.com" target="_blank" rel="noreferrer nofollow">WooCommerce</a>' );
+				printf( esc_html__( 'Powered by %1$s with %2$s', 'woocommerce' ), '<a href="https://wordpress.org" target="_blank" rel="noreferrer nofollow">WordPress</a>', '<a href="https://woocommerce.com" target="_blank" rel="noreferrer nofollow">WooCommerce</a>' );
 			?>
 		</p>
 		<!-- /wp:paragraph -->

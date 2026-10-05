@@ -15,10 +15,10 @@ class ReviewsUtilTest extends WC_Unit_Test_Case {
 	/**
 	 * Sets the global vars before each test.
 	 */
-	public function setUp() : void {
+	public function setUp(): void {
 		global $wpdb, $current_screen;
 
-		$this->old_wpdb = $wpdb;
+		$this->old_wpdb           = $wpdb;
 		$this->old_current_screen = $current_screen;
 
 		parent::setUp();
@@ -27,10 +27,10 @@ class ReviewsUtilTest extends WC_Unit_Test_Case {
 	/**
 	 * Restores the global vars after each test.
 	 */
-	public function tearDown() : void {
+	public function tearDown(): void {
 		global $wpdb, $current_screen;
 
-		$wpdb = $this->old_wpdb; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wpdb           = $this->old_wpdb; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$current_screen = $this->old_current_screen; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		parent::tearDown();

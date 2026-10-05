@@ -84,5 +84,4 @@ class UnsecuredReportFiles {
 		$note_ids   = $data_store->get_notes_with_name( self::NOTE_NAME );
 		return ! empty( $note_ids );
 	}
-
 }

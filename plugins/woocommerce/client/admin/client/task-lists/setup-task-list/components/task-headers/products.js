@@ -30,7 +30,7 @@ const ProductsHeader = ( { task, goToTask } ) => {
 				</h1>
 				<p>
 					{ __(
-						'Start selling by adding products or services to your store. Choose to list products manually, or import them from a different store. ',
+						'Start selling by adding products or services to your store. Choose to list products manually, or import them from a different store.',
 						'woocommerce'
 					) }
 				</p>

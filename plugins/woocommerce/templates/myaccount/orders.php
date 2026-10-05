@@ -39,9 +39,10 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 				$item_count = $order->get_item_count() - $order->get_item_count_refunded();
 				?>
 				<tr class="woocommerce-orders-table__row woocommerce-orders-table__row--status-<?php echo esc_attr( $order->get_status() ); ?> order">
-					<?php foreach ( wc_get_account_orders_columns() as $column_id => $column_name ) :
+					<?php
+					foreach ( wc_get_account_orders_columns() as $column_id => $column_name ) :
 						$is_order_number = 'order-number' === $column_id;
-					?>
+						?>
 						<?php if ( $is_order_number ) : ?>
 							<th class="woocommerce-orders-table__cell woocommerce-orders-table__cell-<?php echo esc_attr( $column_id ); ?>" data-title="<?php echo esc_attr( $column_name ); ?>" scope="row">
 						<?php else : ?>

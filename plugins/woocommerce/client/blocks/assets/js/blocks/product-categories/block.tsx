@@ -111,11 +111,11 @@ const ProductCategoriesBlock = ( {
 									? __(
 											'Category images are visible.',
 											'woocommerce'
-									  )
+										)
 									: __(
 											'Category images are hidden.',
 											'woocommerce'
-									  )
+										)
 							}
 							checked={ hasImage }
 							onChange={ () =>

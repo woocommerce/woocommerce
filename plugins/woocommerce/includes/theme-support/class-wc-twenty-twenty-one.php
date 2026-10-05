@@ -44,7 +44,6 @@ class WC_Twenty_Twenty_One {
 				'single_image_width'    => 600,
 			)
 		);
-
 	}
 
 	/**
@@ -79,8 +78,6 @@ class WC_Twenty_Twenty_One {
 			'all'
 		);
 	}
-
-
 }
 
 WC_Twenty_Twenty_One::init();

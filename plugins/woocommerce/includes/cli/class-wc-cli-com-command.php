@@ -71,7 +71,7 @@ class WC_CLI_COM_Command {
 		);
 
 		$data = array_map(
-			function( $item ) {
+			function ( $item ) {
 				$product_slug      = '';
 				$product_url_parts = explode( '/', $item['product_url'] );
 				if ( count( $product_url_parts ) > 2 ) {

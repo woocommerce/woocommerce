@@ -92,7 +92,7 @@ export const Campaigns = () => {
 					</div>
 					<div className="woocommerce-marketing-campaigns-card-body__content-description">
 						{ __(
-							'Please try again later. Check the logs if the problem persists. ',
+							'Please try again later. Check the logs if the problem persists.',
 							'woocommerce'
 						) }
 					</div>

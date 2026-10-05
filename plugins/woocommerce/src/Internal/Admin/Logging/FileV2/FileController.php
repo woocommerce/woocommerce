@@ -164,7 +164,7 @@ class FileController {
 
 		$results = array();
 		// Rotate starting with oldest first and working backwards.
-		for ( $i = $max_rotation_marker; $i >= 0; $i -- ) {
+		for ( $i = $max_rotation_marker; $i >= 0; $i-- ) {
 			if ( isset( $rotations[ $i ] ) ) {
 				$results[] = $rotations[ $i ]->rotate();
 			}
@@ -251,7 +251,7 @@ class FileController {
 			return count( $files );
 		}
 
-		$multi_sorter = function( $sort_sets, $order_sets ) {
+		$multi_sorter = function ( $sort_sets, $order_sets ) {
 			$comparison = 0;
 
 			while ( ! empty( $sort_sets ) ) {
@@ -274,7 +274,7 @@ class FileController {
 
 		switch ( $args['orderby'] ) {
 			case 'created':
-				$sort_callback = function( $a, $b ) use ( $args, $multi_sorter ) {
+				$sort_callback = function ( $a, $b ) use ( $args, $multi_sorter ) {
 					$sort_sets  = array(
 						array( $a->get_created_timestamp(), $b->get_created_timestamp() ),
 						array( $a->get_source(), $b->get_source() ),
@@ -285,7 +285,7 @@ class FileController {
 				};
 				break;
 			case 'modified':
-				$sort_callback = function( $a, $b ) use ( $args, $multi_sorter ) {
+				$sort_callback = function ( $a, $b ) use ( $args, $multi_sorter ) {
 					$sort_sets  = array(
 						array( $a->get_modified_timestamp(), $b->get_modified_timestamp() ),
 						array( $a->get_source(), $b->get_source() ),
@@ -296,7 +296,7 @@ class FileController {
 				};
 				break;
 			case 'source':
-				$sort_callback = function( $a, $b ) use ( $args, $multi_sorter ) {
+				$sort_callback = function ( $a, $b ) use ( $args, $multi_sorter ) {
 					$sort_sets  = array(
 						array( $a->get_source(), $b->get_source() ),
 						array( $a->get_created_timestamp(), $b->get_created_timestamp() ),
@@ -307,7 +307,7 @@ class FileController {
 				};
 				break;
 			case 'size':
-				$sort_callback = function( $a, $b ) use ( $args, $multi_sorter ) {
+				$sort_callback = function ( $a, $b ) use ( $args, $multi_sorter ) {
 					$sort_sets  = array(
 						array( $a->get_file_size(), $b->get_file_size() ),
 						array( $a->get_source(), $b->get_source() ),
@@ -467,7 +467,7 @@ class FileController {
 	 */
 	private function convert_paths_to_objects( array $paths ): array {
 		$files = array_map(
-			function( $path ) {
+			function ( $path ) {
 				$file = new File( $path );
 				return $file->is_readable() ? $file : null;
 			},
@@ -492,7 +492,7 @@ class FileController {
 		}
 
 		$all_sources = array_map(
-			function( $path ) {
+			function ( $path ) {
 				$file = new File( $path );
 				return $file->is_readable() ? $file->get_source() : null;
 			},
@@ -517,7 +517,7 @@ class FileController {
 			$result = $file->delete();
 
 			if ( true === $result ) {
-				$deleted ++;
+				++$deleted;
 			}
 		}
 
@@ -729,7 +729,7 @@ class FileController {
 					}
 
 					if ( false !== strstr( $line, PHP_EOL ) ) {
-						$line_number ++;
+						++$line_number;
 					}
 				}
 

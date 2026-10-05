@@ -38,7 +38,7 @@ export type SearchProps = {
 	/**
 	 * Function called when selected results change, passed result list.
 	 */
-	onChange?( value: Option | OptionCompletionValue[] ): unknown;
+	onChange?: ( value: Option | OptionCompletionValue[] ) => unknown;
 	/**
 	 * The object type to be used in searching.
 	 */

@@ -3,9 +3,9 @@
 namespace Automattic\WooCommerce\Internal\TransientFiles;
 
 use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
-use \DateTime;
-use \Exception;
-use \InvalidArgumentException;
+use DateTime;
+use Exception;
+use InvalidArgumentException;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -230,7 +230,7 @@ class TransientFilesEngine implements RegisterHooksInterface {
 	 * @param string $filename The name of the transient file to get the expiration date for.
 	 * @return string|null Expiration date formatted as Y-m-d, null if the file name isn't encoding a proper date.
 	 */
-	public static function get_expiration_date( string $filename ) : ?string {
+	public static function get_expiration_date( string $filename ): ?string {
 		if ( strlen( $filename ) < 7 || ! ctype_xdigit( $filename ) ) {
 			return null;
 		}

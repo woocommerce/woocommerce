@@ -67,7 +67,7 @@ class WC_Tests_API_Coupons_V2 extends WC_REST_Unit_Test_Case {
 		$matching_coupon_data = current(
 			array_filter(
 				$coupons,
-				function( $coupon ) use ( $coupon_1 ) {
+				function ( $coupon ) use ( $coupon_1 ) {
 					return $coupon['id'] === $coupon_1->get_id();
 				}
 			)

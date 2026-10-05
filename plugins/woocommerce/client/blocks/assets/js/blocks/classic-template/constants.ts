@@ -34,10 +34,7 @@ export const TEMPLATES: TemplateDetails = {
 	'archive-product': {
 		type: TYPES.productCatalog,
 		title: __( 'Product Grid (Classic)', 'woocommerce' ),
-		description: __(
-			'Displays the PHP product grid page. ',
-			'woocommerce'
-		),
+		description: __( 'Displays the PHP product grid page.', 'woocommerce' ),
 		placeholder: PLACEHOLDERS.archiveProduct,
 	},
 	'taxonomy-product_cat': {

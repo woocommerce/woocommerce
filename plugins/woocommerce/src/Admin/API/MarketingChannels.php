@@ -89,7 +89,7 @@ class MarketingChannels extends WC_REST_Controller {
 
 		$channels = $marketing_channels_service->get_registered_channels();
 
-		$responses = [];
+		$responses = array();
 		foreach ( $channels as $item ) {
 			$response    = $this->prepare_item_for_response( $item, $request );
 			$responses[] = $this->prepare_response_for_collection( $response );
@@ -107,7 +107,7 @@ class MarketingChannels extends WC_REST_Controller {
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
-		$data = [
+		$data = array(
 			'slug'                    => $item->get_slug(),
 			'is_setup_completed'      => $item->is_setup_completed(),
 			'settings_url'            => $item->get_setup_url(),
@@ -116,7 +116,7 @@ class MarketingChannels extends WC_REST_Controller {
 			'product_listings_status' => $item->get_product_listings_status(),
 			'errors_count'            => $item->get_errors_count(),
 			'icon'                    => $item->get_icon_url(),
-		];
+		);
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
@@ -131,61 +131,61 @@ class MarketingChannels extends WC_REST_Controller {
 	 * @return array Item schema data.
 	 */
 	public function get_item_schema() {
-		$schema = [
+		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => 'marketing_channel',
 			'type'       => 'object',
-			'properties' => [
-				'slug'                    => [
+			'properties' => array(
+				'slug'                    => array(
 					'description' => __( 'Unique identifier string for the marketing channel extension, also known as the plugin slug.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => [ 'view' ],
+					'context'     => array( 'view' ),
 					'readonly'    => true,
-				],
-				'name'                    => [
+				),
+				'name'                    => array(
 					'description' => __( 'Name of the marketing channel.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => [ 'view' ],
+					'context'     => array( 'view' ),
 					'readonly'    => true,
-				],
-				'description'             => [
+				),
+				'description'             => array(
 					'description' => __( 'Description of the marketing channel.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => [ 'view' ],
+					'context'     => array( 'view' ),
 					'readonly'    => true,
-				],
-				'icon'                    => [
+				),
+				'icon'                    => array(
 					'description' => __( 'Path to the channel icon.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => [ 'view' ],
+					'context'     => array( 'view' ),
 					'readonly'    => true,
-				],
-				'is_setup_completed'      => [
+				),
+				'is_setup_completed'      => array(
 					'type'        => 'boolean',
 					'description' => __( 'Whether or not the marketing channel is set up.', 'woocommerce' ),
-					'context'     => [ 'view' ],
+					'context'     => array( 'view' ),
 					'readonly'    => true,
-				],
-				'settings_url'            => [
+				),
+				'settings_url'            => array(
 					'description' => __( 'URL to the settings page, or the link to complete the setup/onboarding if the channel has not been set up yet.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => [ 'view' ],
+					'context'     => array( 'view' ),
 					'readonly'    => true,
-				],
-				'product_listings_status' => [
+				),
+				'product_listings_status' => array(
 					'description' => __( 'Status of the marketing channel\'s product listings.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => [ 'view' ],
+					'context'     => array( 'view' ),
 					'readonly'    => true,
-				],
-				'errors_count'            => [
+				),
+				'errors_count'            => array(
 					'description' => __( 'Number of channel issues/errors (e.g. account-related errors, product synchronization issues, etc.).', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => [ 'view' ],
+					'context'     => array( 'view' ),
 					'readonly'    => true,
-				],
-			],
-		];
+				),
+			),
+		);
 
 		return $this->add_additional_fields_schema( $schema );
 	}

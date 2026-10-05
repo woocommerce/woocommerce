@@ -46,7 +46,7 @@ class WC_REST_Product_Tags_V1_Controller extends WC_REST_Terms_Controller {
 	/**
 	 * Prepare a single product tag output for response.
 	 *
-	 * @param obj $item Term object.
+	 * @param obj             $item Term object.
 	 * @param WP_REST_Request $request
 	 * @return WP_REST_Response $response
 	 */
@@ -86,17 +86,17 @@ class WC_REST_Product_Tags_V1_Controller extends WC_REST_Terms_Controller {
 	 */
 	public function get_item_schema() {
 		$schema = array(
-			'$schema'              => 'http://json-schema.org/draft-04/schema#',
-			'title'                => $this->taxonomy,
-			'type'                 => 'object',
-			'properties'           => array(
-				'id' => array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => $this->taxonomy,
+			'type'       => 'object',
+			'properties' => array(
+				'id'          => array(
 					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'name' => array(
+				'name'        => array(
 					'description' => __( 'Tag name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -104,7 +104,7 @@ class WC_REST_Product_Tags_V1_Controller extends WC_REST_Terms_Controller {
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
-				'slug' => array(
+				'slug'        => array(
 					'description' => __( 'An alphanumeric identifier for the resource unique to its type.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -120,7 +120,7 @@ class WC_REST_Product_Tags_V1_Controller extends WC_REST_Terms_Controller {
 						'sanitize_callback' => 'wp_filter_post_kses',
 					),
 				),
-				'count' => array(
+				'count'       => array(
 					'description' => __( 'Number of published products for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),

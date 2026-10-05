@@ -227,7 +227,7 @@ class WC_Admin_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 		// Suppress deliberately caused errors.
 		$log_file = ini_set( 'error_log', '/dev/null' );  // phpcs:ignore WordPress.PHP.IniSet.Risky
 
-		$filter_datastore = function() use ( $mock_datastore ) {
+		$filter_datastore = function () use ( $mock_datastore ) {
 			return $mock_datastore;
 		};
 
@@ -371,8 +371,8 @@ class WC_Admin_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 
 		// Add filter for 'woocommerce_note_where_clauses' that should be called only once.
 		$filter_hit_count = 0;
-		$filter_callback  = function( $arg ) use ( &$filter_hit_count ) {
-			$filter_hit_count++;
+		$filter_callback  = function ( $arg ) use ( &$filter_hit_count ) {
+			++$filter_hit_count;
 			return $arg;
 		};
 		add_filter( 'woocommerce_note_where_clauses', $filter_callback, 1 );
@@ -442,9 +442,9 @@ class WC_Admin_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 
 		// Add filter for 'woocommerce_note_where_clauses' that applies only in context.
 		$context_filter_hit_count = 0;
-		$context_filter_callback  = function( $where_clauses, $args, $context ) use ( $test_context, $global_context, $context_name, &$context_filter_hit_count ) {
+		$context_filter_callback  = function ( $where_clauses, $args, $context ) use ( $test_context, $global_context, $context_name, &$context_filter_hit_count ) {
 			if ( $context === $test_context ) {
-				$context_filter_hit_count++;
+				++$context_filter_hit_count;
 				$where_clauses .= ' AND name = "' . $context_name . '"';
 			}
 			return $where_clauses;
@@ -454,14 +454,14 @@ class WC_Admin_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 		// Add filter for 'woocommerce_note_where_clauses' that applies in any context.
 		$no_context_filter_hit_count = 0;
 		$global_context_received     = null;
-		$no_context_filter_callback  = function( $where_clauses, $args, $context ) use ( $test_context, &$global_context_received, &$no_context_filter_hit_count ) {
+		$no_context_filter_callback  = function ( $where_clauses, $args, $context ) use ( $test_context, &$global_context_received, &$no_context_filter_hit_count ) {
 			// Record the context we get passed in.
 			if ( $test_context !== $context ) {
 				$global_context_received = $context;
 			}
 
 			// Record that we're here.
-			$no_context_filter_hit_count++;
+			++$no_context_filter_hit_count;
 			$where_clauses .= ' AND source = "PHPUNIT_TEST"';
 			return $where_clauses;
 		};

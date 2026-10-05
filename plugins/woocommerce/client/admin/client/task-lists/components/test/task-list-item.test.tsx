@@ -197,8 +197,8 @@ describe( 'TaskListItem', () => {
 				setExpandedTask={ () => {} }
 			/>
 		);
-		act( () => {
-			userEvent.click( getByRole( 'button', { name: 'Dismiss' } ) );
+		act( async () => {
+			await userEvent.click( getByRole( 'button', { name: 'Dismiss' } ) );
 		} );
 		expect( mockDispatch.dismissTask ).toHaveBeenCalledWith( task.id );
 		expect( mockDispatch.createNotice ).toHaveBeenCalled();
@@ -219,8 +219,8 @@ describe( 'TaskListItem', () => {
 				setExpandedTask={ () => {} }
 			/>
 		);
-		act( () => {
-			userEvent.click( screen.getByText( task.title ) );
+		act( async () => {
+			await userEvent.click( screen.getByText( task.title ) );
 		} );
 
 		expect( recordEvent ).toHaveBeenCalledWith( 'tasklist_click', {
@@ -241,8 +241,8 @@ describe( 'TaskListItem', () => {
 			/>
 		);
 
-		act( () => {
-			userEvent.click( screen.getByText( task.title ) );
+		act( async () => {
+			await userEvent.click( screen.getByText( task.title ) );
 		} );
 
 		expect( trackClick ).toHaveBeenCalledTimes( 1 );
@@ -261,8 +261,8 @@ describe( 'TaskListItem', () => {
 			/>
 		);
 
-		act( () => {
-			userEvent.click( screen.getByText( task.title ) );
+		act( async () => {
+			await userEvent.click( screen.getByText( task.title ) );
 		} );
 
 		expect( trackClick ).toHaveBeenCalledTimes( 1 );
@@ -355,8 +355,8 @@ describe( 'TaskListItem', () => {
 				setExpandedTask={ () => {} }
 			/>
 		);
-		act( () => {
-			userEvent.click( getByRole( 'button', { name: 'Snooze' } ) );
+		act( async () => {
+			await userEvent.click( getByRole( 'button', { name: 'Snooze' } ) );
 		} );
 		expect( mockDispatch.snoozeTask ).toHaveBeenCalledWith( task.id );
 		expect( mockDispatch.createNotice ).toHaveBeenCalled();

@@ -310,5 +310,4 @@ class OrdersTableRefundDataStoreTests extends \WC_Unit_Test_Case {
 		$this->assertEquals( 1, $hook_called_count['woocommerce_create_refund'] );
 		$this->assertEquals( 2, $hook_called_count['woocommerce_update_order_refund'] );
 	}
-
 }

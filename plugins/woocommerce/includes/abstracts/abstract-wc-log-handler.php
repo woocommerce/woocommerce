@@ -71,7 +71,7 @@ abstract class WC_Log_Handler implements WC_Log_Handler_Interface {
 	protected static function get_backtrace() {
 		// Get the filenames of the logging-related classes so we can ignore them.
 		$ignore_files = array_map(
-			function( $class ) {
+			function ( $class ) {
 				try {
 					$reflector = new \ReflectionClass( $class );
 					return $reflector->getFileName();
@@ -86,7 +86,7 @@ abstract class WC_Log_Handler implements WC_Log_Handler_Interface {
 
 		$filtered_backtrace = array_filter(
 			$backtrace,
-			function( $frame ) use ( $ignore_files ) {
+			function ( $frame ) use ( $ignore_files ) {
 				$ignore = isset( $frame['file'] ) && in_array( $frame['file'], $ignore_files, true );
 
 				return ! $ignore;

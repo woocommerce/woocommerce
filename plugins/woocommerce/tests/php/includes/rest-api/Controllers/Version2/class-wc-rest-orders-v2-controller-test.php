@@ -176,7 +176,7 @@ class WC_REST_Order_V2_Controller_Test extends WC_REST_Unit_Test_case {
 	 */
 	public function test_collection_param_include_meta() {
 		// Create 3 orders.
-		for ( $i = 1; $i <= 3; $i ++ ) {
+		for ( $i = 1; $i <= 3; $i++ ) {
 			$order = new \WC_Order();
 			$order->add_meta_data( 'test1', 'test1', true );
 			$order->add_meta_data( 'test2', 'test2', true );
@@ -195,7 +195,7 @@ class WC_REST_Order_V2_Controller_Test extends WC_REST_Unit_Test_case {
 			$this->assertArrayHasKey( 'meta_data', $order );
 			$this->assertEquals( 1, count( $order['meta_data'] ) );
 			$meta_keys = array_map(
-				function( $meta_item ) {
+				function ( $meta_item ) {
 					return $meta_item->get_data()['key'];
 				},
 				$order['meta_data']
@@ -209,7 +209,7 @@ class WC_REST_Order_V2_Controller_Test extends WC_REST_Unit_Test_case {
 	 */
 	public function test_collection_param_include_meta_empty() {
 		// Create 3 orders.
-		for ( $i = 1; $i <= 3; $i ++ ) {
+		for ( $i = 1; $i <= 3; $i++ ) {
 			$order = new \WC_Order();
 			$order->add_meta_data( 'test1', 'test1', true );
 			$order->add_meta_data( 'test2', 'test2', true );
@@ -227,7 +227,7 @@ class WC_REST_Order_V2_Controller_Test extends WC_REST_Unit_Test_case {
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
 			$meta_keys = array_map(
-				function( $meta_item ) {
+				function ( $meta_item ) {
 					return $meta_item->get_data()['key'];
 				},
 				$order['meta_data']
@@ -242,7 +242,7 @@ class WC_REST_Order_V2_Controller_Test extends WC_REST_Unit_Test_case {
 	 */
 	public function test_collection_param_exclude_meta() {
 		// Create 3 orders.
-		for ( $i = 1; $i <= 3; $i ++ ) {
+		for ( $i = 1; $i <= 3; $i++ ) {
 			$order = new \WC_Order();
 			$order->add_meta_data( 'test1', 'test1', true );
 			$order->add_meta_data( 'test2', 'test2', true );
@@ -260,7 +260,7 @@ class WC_REST_Order_V2_Controller_Test extends WC_REST_Unit_Test_case {
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
 			$meta_keys = array_map(
-				function( $meta_item ) {
+				function ( $meta_item ) {
 					return $meta_item->get_data()['key'];
 				},
 				$order['meta_data']
@@ -275,7 +275,7 @@ class WC_REST_Order_V2_Controller_Test extends WC_REST_Unit_Test_case {
 	 */
 	public function test_collection_param_include_meta_override() {
 		// Create 3 orders.
-		for ( $i = 1; $i <= 3; $i ++ ) {
+		for ( $i = 1; $i <= 3; $i++ ) {
 			$order = new \WC_Order();
 			$order->add_meta_data( 'test1', 'test1', true );
 			$order->add_meta_data( 'test2', 'test2', true );
@@ -295,7 +295,7 @@ class WC_REST_Order_V2_Controller_Test extends WC_REST_Unit_Test_case {
 			$this->assertArrayHasKey( 'meta_data', $order );
 			$this->assertEquals( 1, count( $order['meta_data'] ) );
 			$meta_keys = array_map(
-				function( $meta_item ) {
+				function ( $meta_item ) {
 					return $meta_item->get_data()['key'];
 				},
 				$order['meta_data']

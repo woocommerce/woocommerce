@@ -92,5 +92,4 @@ class WC_Tests_Helper_API extends WC_Unit_Test_Case {
 
 		return $mocked_response;
 	}
-
 }

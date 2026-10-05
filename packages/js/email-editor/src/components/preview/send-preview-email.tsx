@@ -111,7 +111,7 @@ function RawSendPreviewEmail() {
 									),
 									{
 										link: (
-											// eslint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/control-has-associated-label
+											// eslint-disable-next-line jsx-a11y/anchor-has-content
 											<a
 												href={
 													sendingMethodConfigurationLink
@@ -136,7 +136,7 @@ function RawSendPreviewEmail() {
 								),
 								{
 									link: (
-										// eslint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/control-has-associated-label
+										// eslint-disable-next-line jsx-a11y/anchor-has-content
 										<a
 											href={ `https://account.mailpoet.com/?s=1&g=1&utm_source=woocommerce_email_editor&utm_medium=plugin&utm_source_platform=${ postType }` }
 											key="sign-up-for-free"

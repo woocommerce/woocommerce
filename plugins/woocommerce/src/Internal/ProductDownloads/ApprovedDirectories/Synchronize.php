@@ -73,7 +73,6 @@ class Synchronize {
 	final public function init( Register $register ) {
 		$this->queue    = WC()->get_instance_of( WC_Queue_Interface::class );
 		$this->register = $register;
-
 	}
 
 	/**

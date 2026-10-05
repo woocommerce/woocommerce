@@ -72,10 +72,10 @@ class DeleteDraftOrders extends \WC_Unit_Test_Case {
 			$wpdb->posts,
 			array(
 				'post_modified'     => date( 'Y-m-d H:i:s', strtotime( '-1 DAY', current_time( 'timestamp' ) ) ),
-				'post_modified_gmt' => gmdate( 'Y-m-d H:i:s', strtotime( '-1 DAY' ) )
+				'post_modified_gmt' => gmdate( 'Y-m-d H:i:s', strtotime( '-1 DAY' ) ),
 			),
 			array(
-				'ID' => $order->get_id()
+				'ID' => $order->get_id(),
 			)
 		);
 
@@ -86,10 +86,10 @@ class DeleteDraftOrders extends \WC_Unit_Test_Case {
 			$wpdb->posts,
 			array(
 				'post_modified'     => date( 'Y-m-d H:i:s', strtotime( '-2 DAY', current_time( 'timestamp' ) ) ),
-				'post_modified_gmt' => gmdate( 'Y-m-d H:i:s', strtotime( '-2 DAY' ) )
+				'post_modified_gmt' => gmdate( 'Y-m-d H:i:s', strtotime( '-2 DAY' ) ),
 			),
 			array(
-				'ID' => $order->get_id()
+				'ID' => $order->get_id(),
 			)
 		);
 
@@ -101,10 +101,10 @@ class DeleteDraftOrders extends \WC_Unit_Test_Case {
 			$wpdb->posts,
 			array(
 				'post_modified'     => date( 'Y-m-d H:i:s', strtotime( '-2 DAY', current_time( 'timestamp' ) ) ),
-				'post_modified_gmt' => gmdate( 'Y-m-d H:i:s', strtotime( '-2 DAY' ) )
+				'post_modified_gmt' => gmdate( 'Y-m-d H:i:s', strtotime( '-2 DAY' ) ),
 			),
 			array(
-				'ID' => $order->get_id()
+				'ID' => $order->get_id(),
 			)
 		);
 
@@ -112,8 +112,8 @@ class DeleteDraftOrders extends \WC_Unit_Test_Case {
 		add_action( 'woocommerce_caught_exception', array( $this, 'capture_exception' ) );
 
 		// temporarily hide error logging we don't care about (and keeps from polluting stdout)
-		$this->original_logging_destination = ini_get('error_log');
-		ini_set('error_log', '/dev/null');
+		$this->original_logging_destination = ini_get( 'error_log' );
+		ini_set( 'error_log', '/dev/null' );
 	}
 
 	/**
@@ -122,8 +122,8 @@ class DeleteDraftOrders extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		$this->draft_orders_instance = null;
 		remove_action( 'woocommerce_caught_exception', array( $this, 'capture_exception' ) );
-		//restore original logging destination
-		ini_set('error_log', $this->original_logging_destination);
+		// restore original logging destination
+		ini_set( 'error_log', $this->original_logging_destination );
 		OrderHelper::toggle_cot_feature_and_usage( $this->previous_hpos_state );
 		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		parent::tearDown();
@@ -192,21 +192,21 @@ class DeleteDraftOrders extends \WC_Unit_Test_Case {
 	}
 
 	public function test_greater_than_batch_results_error() {
-		$sample_results = function( $results, $args ) {
-			if ( isset( $args[ 'status' ] ) && DraftOrders::DB_STATUS === $args[ 'status' ] ) {
-				return array_fill( 0, 21, ( new WC_Order ) );
+		$sample_results = function ( $results, $args ) {
+			if ( isset( $args['status'] ) && DraftOrders::DB_STATUS === $args['status'] ) {
+				return array_fill( 0, 21, ( new WC_Order() ) );
 			}
 			return $results;
 		};
-		$this->mock_results_for_wc_query($sample_results);
+		$this->mock_results_for_wc_query( $sample_results );
 		$this->draft_orders_instance->delete_expired_draft_orders();
 		$this->assertStringContainsString( 'unexpected number of results', $this->caught_exception->getMessage() );
 		$this->unset_mock_results_for_wc_query( $sample_results );
 	}
 
 	public function test_order_not_instance_of_wc_order_error() {
-		$sample_results = function( $results, $args ) {
-			if ( isset( $args[ 'status' ] ) && DraftOrders::DB_STATUS === $args[ 'status' ] ) {
+		$sample_results = function ( $results, $args ) {
+			if ( isset( $args['status'] ) && DraftOrders::DB_STATUS === $args['status'] ) {
 				return [ 10 ];
 			}
 			return $results;
@@ -218,8 +218,8 @@ class DeleteDraftOrders extends \WC_Unit_Test_Case {
 	}
 
 	public function test_order_incorrect_status_error() {
-		$sample_results = function( $results, $args ) {
-			if ( isset( $args[ 'status' ] ) && DraftOrders::DB_STATUS === $args[ 'status' ] ) {
+		$sample_results = function ( $results, $args ) {
+			if ( isset( $args['status'] ) && DraftOrders::DB_STATUS === $args['status'] ) {
 				$test_order = new WC_Order();
 				$test_order->set_status( OrderStatus::ON_HOLD );
 				return [ $test_order ];
@@ -236,7 +236,7 @@ class DeleteDraftOrders extends \WC_Unit_Test_Case {
 		global $wp_post_statuses, $wpdb;
 		$original_statuses = $wp_post_statuses;
 		// simulate registered draft status getting clobbered
-		foreach( $wp_post_statuses as $index => $status ) {
+		foreach ( $wp_post_statuses as $index => $status ) {
 			if ( DraftOrders::DB_STATUS === $status->name ) {
 				unset( $wp_post_statuses[ $index ] );
 				break;
