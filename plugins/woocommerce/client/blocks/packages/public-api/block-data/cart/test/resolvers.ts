@@ -3,6 +3,7 @@
  */
 import { dispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
+import { previewCart } from '@woocommerce/resource-previews';
 
 /**
  * Internal dependencies
@@ -12,9 +13,33 @@ import { store as cartStore } from '..';
 
 jest.mock( '@wordpress/data-controls' );
 jest.mock( '@wordpress/api-fetch' );
+jest.unmock( '@woocommerce/block-data/utils/is-editor' );
 
 describe( 'getCartData', () => {
-	it( 'when apiFetch returns a valid response, receives the cart correctly', async () => {
+	it.each( [ 'post.php?post=1&action=edit', 'site-editor.php' ] )(
+		'uses the preview cart on %s without fetching the shopper cart',
+		async ( path ) => {
+			const originalUrl = window.location.href;
+			const mockDispatch = {
+				...dispatch( cartStore ),
+				receiveCart: jest.fn(),
+				receiveError: jest.fn(),
+			};
+			jest.clearAllMocks();
+			window.history.replaceState( {}, '', `/wp-admin/${ path }` );
+			try {
+				await getCartData()( { dispatch: mockDispatch } );
+				expect( mockDispatch.receiveCart ).toHaveBeenCalledWith(
+					previewCart
+				);
+				expect( apiFetch ).not.toHaveBeenCalled();
+			} finally {
+				window.history.replaceState( {}, '', originalUrl );
+			}
+		}
+	);
+
+	it( 'receives the real cart on the frontend', async () => {
 		const mockDispatch = {
 			...dispatch( cartStore ),
 			receiveCart: jest.fn(),
@@ -36,6 +61,12 @@ describe( 'getCartData', () => {
 			} )
 		);
 		await getCartData()( { dispatch: mockDispatch } );
+		expect( apiFetch ).toHaveBeenCalledWith( {
+			path: '/wc/store/v1/cart',
+			method: 'GET',
+			cache: 'no-store',
+			parse: false,
+		} );
 		expect( mockDispatch.receiveCart ).toHaveBeenCalledWith( {
 			coupons: [],
 			items: [],
