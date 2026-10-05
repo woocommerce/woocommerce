@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Admin\API\Reports\Orders\Stats;
 
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Caches\OrderCache;
+use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Helper_Order;
@@ -623,5 +624,94 @@ class DataStoreTest extends WC_Unit_Test_Case {
 
 		remove_filter( 'wc_order_statuses', $add_status );
 		unset( $GLOBALS['wp_post_statuses'][ 'wc-' . $long_status ] );
+	}
+
+	/**
+	 * @testdox get_order_stats_row_data() returns the same row that update() writes for an order and its refund.
+	 */
+	public function test_get_order_stats_row_data_matches_stored_row(): void {
+		global $wpdb;
+
+		$order = WC_Helper_Order::create_order();
+		$order->update_status( 'completed' );
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10,
+			)
+		);
+
+		foreach ( array( $order, $refund ) as $object ) {
+			$data = OrdersStatsDataStore::get_order_stats_row_data( $object );
+			$this->assertIsArray( $data, 'A saved, non-test order should produce a row.' );
+
+			OrdersStatsDataStore::update( $object );
+			$row = $wpdb->get_row(
+				$wpdb->prepare( "SELECT * FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $object->get_id() ),
+				ARRAY_A
+			);
+
+			foreach ( $data as $column => $value ) {
+				if ( is_numeric( $value ) ) {
+					$value          = (float) $value;
+					$row[ $column ] = (float) $row[ $column ];
+				}
+				$this->assertEquals( $value, $row[ $column ], "Column {$column} should match the stored row for #{$object->get_id()}." );
+			}
+		}
+
+		$refund_data = OrdersStatsDataStore::get_order_stats_row_data( $refund );
+		$this->assertSame( $order->get_id(), $refund_data['parent_id'], 'A refund row should point at its parent order.' );
+		$this->assertSame( OrderInternalStatus::COMPLETED, $refund_data['status'], 'A refund row should carry the parent order status.' );
+	}
+
+	/**
+	 * @testdox get_order_stats_row_data() does not write to the stats table.
+	 */
+	public function test_get_order_stats_row_data_does_not_write(): void {
+		global $wpdb;
+
+		$order = WC_Helper_Order::create_order();
+		$wpdb->delete( "{$wpdb->prefix}wc_order_stats", array( 'order_id' => $order->get_id() ) );
+
+		OrdersStatsDataStore::get_order_stats_row_data( $order );
+
+		$count = (int) $wpdb->get_var(
+			$wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $order->get_id() )
+		);
+		$this->assertSame( 0, $count, 'Building the row should not store it.' );
+	}
+
+	/**
+	 * @testdox get_order_stats_row_data() applies the woocommerce_analytics_update_order_stats_data filter.
+	 */
+	public function test_get_order_stats_row_data_applies_filter(): void {
+		$order = WC_Helper_Order::create_order();
+		add_filter(
+			'woocommerce_analytics_update_order_stats_data',
+			static function ( $data ) {
+				$data['num_items_sold'] = 99;
+				return $data;
+			}
+		);
+
+		$data = OrdersStatsDataStore::get_order_stats_row_data( $order );
+
+		$this->assertSame( 99, $data['num_items_sold'], 'The filtered value should be returned.' );
+	}
+
+	/**
+	 * @testdox get_order_stats_row_data() returns false for unsaved and test orders, and update() then skips them.
+	 */
+	public function test_get_order_stats_row_data_returns_false_for_untracked_orders(): void {
+		$this->assertFalse( OrdersStatsDataStore::get_order_stats_row_data( new \WC_Order() ), 'An unsaved order has no row.' );
+		$this->assertSame( -1, OrdersStatsDataStore::update( new \WC_Order() ), 'update() should skip an unsaved order.' );
+
+		$order = WC_Helper_Order::create_order();
+		$order->update_meta_data( '_wcpay_mode', 'test' );
+		$order->save();
+
+		$this->assertFalse( OrdersStatsDataStore::get_order_stats_row_data( $order ), 'A test order has no row.' );
+		$this->assertSame( -1, OrdersStatsDataStore::update( $order ), 'update() should skip a test order.' );
 	}
 }

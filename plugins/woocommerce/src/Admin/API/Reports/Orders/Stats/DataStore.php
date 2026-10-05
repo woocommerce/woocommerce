@@ -532,16 +532,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	public static function update( $order ) {
 		global $wpdb;
-		$table_name = self::get_db_table_name();
 
-		if ( ! $order->get_id() || ! $order->get_date_created() ) {
-			return -1;
-		}
-
-		// Exclude test orders (e.g., WCPay test mode) from analytics stats.
-		// Defense-in-depth: also checked in OrdersScheduler::import(), but
-		// update() can be called directly outside of the import flow.
-		if ( OrdersScheduler::is_test_order( $order ) ) {
+		$data = self::get_order_stats_row_data( $order );
+		if ( false === $data ) {
 			return -1;
 		}
 
@@ -562,6 +555,50 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'%d',
 		);
 
+		if ( self::stores_fulfillment_status( $order ) ) {
+			$format[] = '%s';
+		}
+
+		// Update or add the information to the DB.
+		$result = $wpdb->replace( self::get_db_table_name(), $data, $format );
+
+		/**
+		 * Fires when order's stats reports are updated.
+		 *
+		 * @param int $order_id Order ID.
+		 *
+		 * @since 4.0.0.
+		 */
+		do_action( 'woocommerce_analytics_update_order_stats', $order->get_id() );
+
+		// Check the rows affected for success. Using REPLACE can affect 2 rows if the row already exists.
+		return ( 1 === $result || 2 === $result );
+	}
+
+	/**
+	 * Get the wc_order_stats row for an order or refund, as update() writes it.
+	 *
+	 * Includes the `woocommerce_analytics_update_order_stats_data` filter and the refund adjustments.
+	 * Like update(), it adds the order's customer to the customer lookup table if missing.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param WC_Order|WC_Order_Refund $order Order or refund to build the row for.
+	 * @return array|false Row data keyed by column name, or false when the order is not tracked in analytics.
+	 */
+	public static function get_order_stats_row_data( $order ) {
+		$order = self::get_analytics_order( $order );
+		if ( ! $order || ! $order->get_date_created() ) {
+			return false;
+		}
+
+		// Exclude test orders (e.g., WCPay test mode) from analytics stats.
+		// Defense-in-depth: also checked in OrdersScheduler::import(), but
+		// this can be called directly outside of the import flow.
+		if ( OrdersScheduler::is_test_order( $order ) ) {
+			return false;
+		}
+
 		$data = array(
 			'order_id'           => $order->get_id(),
 			'parent_id'          => $order->get_parent_id(),
@@ -579,11 +616,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'returning_customer' => $order->is_returning_customer(),
 		);
 
-		$order_fulfillment_status = '';
-		if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) && true === self::has_fulfillment_status_column() && $order instanceof WC_Order ) {
+		if ( self::stores_fulfillment_status( $order ) ) {
 			$order_fulfillment_status   = FulfillmentUtils::get_order_fulfillment_status( $order );
 			$data['fulfillment_status'] = ( 'no_fulfillments' !== $order_fulfillment_status ) ? $order_fulfillment_status : null;
-			$format[]                   = '%s';
 		}
 
 		/**
@@ -645,20 +680,43 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$data['date_paid']      = $parent_is_order && ! $parent_order->get_date_paid() ? null : $data['date_created'];
 		}
 
-		// Update or add the information to the DB.
-		$result = $wpdb->replace( $table_name, $data, $format );
+		return $data;
+	}
 
-		/**
-		 * Fires when order's stats reports are updated.
-		 *
-		 * @param int $order_id Order ID.
-		 *
-		 * @since 4.0.0.
-		 */
-		do_action( 'woocommerce_analytics_update_order_stats', $order->get_id() );
+	/**
+	 * Get the order as the Analytics order class, which the stats row needs.
+	 *
+	 * Callers outside the analytics sync may pass plain orders, since wc_get_order() only returns these classes once OrdersScheduler is set up.
+	 *
+	 * @param mixed $order Order or refund.
+	 * @return Order|OrderRefund|null Null when the order is not a saved order or refund.
+	 */
+	private static function get_analytics_order( $order ) {
+		if ( $order instanceof Order || $order instanceof OrderRefund ) {
+			return $order->get_id() ? $order : null;
+		}
 
-		// Check the rows affected for success. Using REPLACE can affect 2 rows if the row already exists.
-		return ( 1 === $result || 2 === $result );
+		if ( ! ( $order instanceof WC_Order || $order instanceof WC_Order_Refund ) || ! $order->get_id() ) {
+			return null;
+		}
+
+		try {
+			return $order instanceof WC_Order_Refund ? new OrderRefund( $order->get_id() ) : new Order( $order->get_id() );
+		} catch ( \Exception $e ) {
+			return null;
+		}
+	}
+
+	/**
+	 * Whether the order's row includes the fulfillment_status column.
+	 *
+	 * @param WC_Order|WC_Order_Refund $order Order or refund.
+	 * @return bool
+	 *
+	 * @phpstan-assert-if-true WC_Order $order
+	 */
+	private static function stores_fulfillment_status( $order ): bool {
+		return FeaturesUtil::feature_is_enabled( 'fulfillments' ) && true === self::has_fulfillment_status_column() && $order instanceof WC_Order;
 	}
 
 	/**
