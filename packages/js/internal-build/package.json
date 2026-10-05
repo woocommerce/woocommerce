@@ -67,7 +67,6 @@
 		"glob": "^10.3.10",
 		"json2php": "^0.0.7",
 		"mini-css-extract-plugin": "2.9.x",
-		"postcss-scss": "^4.0.9",
 		"postcss-loader": "4.3.x",
 		"rtlcss": "4.3.x",
 		"sass-loader": "10.5.x",

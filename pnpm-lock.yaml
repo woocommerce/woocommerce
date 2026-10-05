@@ -1760,9 +1760,6 @@ importers:
       postcss-loader:
         specifier: 4.3.x
         version: 4.3.0(postcss@8.5.26)(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.24.2))
-      postcss-scss:
-        specifier: ^4.0.9
-        version: 4.0.9(postcss@8.5.26)
       rtlcss:
         specifier: 4.3.x
         version: 4.3.0
