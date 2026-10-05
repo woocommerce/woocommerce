@@ -6,9 +6,6 @@
 		},
 		{
 			"path": "client/blocks"
-		},
-		{
-			"path": "client/legacy"
 		}
 	],
 	"files": [],
