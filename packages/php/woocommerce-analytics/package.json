@@ -18,14 +18,15 @@
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"build-production": "NODE_ENV=production BABEL_ENV=production pnpm run build",
 		"clean": "rm -rf build/",
-		"test": "jest --passWithNoTests",
+		"test": "wp-scripts test-unit-js --passWithNoTests",
 		"test-coverage": "pnpm run test --coverage",
 		"test:php": "composer test-php",
 		"test:php:ci": "pnpm test:php",
 		"build:ci": "pnpm run typecheck && pnpm run build-production",
 		"typecheck": "tsc --noEmit",
 		"postinstall": "XDEBUG_MODE=off composer install --quiet",
-		"watch": "pnpm build --watch"
+		"watch": "pnpm build --watch",
+		"test:js": "wp-scripts test-unit-js --passWithNoTests"
 	},
 	"dependencies": {
 		"debug": "4.4.3"

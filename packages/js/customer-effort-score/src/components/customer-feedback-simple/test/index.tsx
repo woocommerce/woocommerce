@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -9,7 +11,7 @@ import { createElement } from '@wordpress/element';
  */
 import { CustomerFeedbackSimple } from '../index';
 
-const mockOnSelectCallback = jest.fn();
+const mockOnSelectCallback = vi.fn();
 
 describe( 'CustomerFeedbackSimple', () => {
 	it( 'should trigger recordScoreCallback when item is selected', () => {

@@ -1,3 +1,5 @@
+import { describe, expect, it, vi, type Mock } from 'vitest';
+
 /* eslint-disable jest/no-mocks-import */
 /**
  * External dependencies
@@ -15,30 +17,46 @@ import {
 import mockCSVData from './__mocks__/mock-csv-data';
 import mockHeaders from './__mocks__/mock-headers';
 import mockRows from './__mocks__/mock-rows';
-
-jest.mock( 'browser-filesaver', () => ( {
-	saveAs: jest.fn(),
-} ) );
-
+vi.mock( 'browser-filesaver', () => {
+	const mock = {
+		saveAs: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'generateCSVDataFromTable', () => {
 	it( 'should not crash when parameters are not arrays', () => {
 		// @ts-expect-error generateCSVDataFromTable() should only accept arrays.
 		expect( generateCSVDataFromTable( null, null ) ).toBe( '' );
 	} );
-
 	it( 'should generate a CSV string from table contents', () => {
 		expect( generateCSVDataFromTable( mockHeaders, mockRows ) ).toBe(
 			mockCSVData
 		);
 	} );
-
 	it( 'should prefix single quote character when the cell value starts with one of =, +, -, @, tab, and carriage return', () => {
 		const testValues = [
 			// The values below should be escaped to prevent CSV formula injection.
-			{ input: '=danger', expected: `"'=danger"` },
-			{ input: '+danger', expected: `"'+danger"` },
-			{ input: '-danger', expected: `"'-danger"` },
-			{ input: '@danger', expected: `"'@danger"` },
+			{
+				input: '=danger',
+				expected: `"'=danger"`,
+			},
+			{
+				input: '+danger',
+				expected: `"'+danger"`,
+			},
+			{
+				input: '-danger',
+				expected: `"'-danger"`,
+			},
+			{
+				input: '@danger',
+				expected: `"'@danger"`,
+			},
 			{
 				input: String.fromCharCode( 0x09 ) + 'danger',
 				expected: `"'${ String.fromCharCode( 0x09 ) }danger"`,
@@ -47,18 +65,28 @@ describe( 'generateCSVDataFromTable', () => {
 				input: String.fromCharCode( 0x0d ) + 'danger',
 				expected: `"'${ String.fromCharCode( 0x0d ) }danger"`,
 			},
-
 			// The values below should not be escaped since they are pure numeric values.
-			{ input: 12, expected: '12' },
-			{ input: 12.34, expected: '12.34' },
-			{ input: -12, expected: '-12' },
-			{ input: -12.34, expected: '-12.34' },
+			{
+				input: 12,
+				expected: '12',
+			},
+			{
+				input: 12.34,
+				expected: '12.34',
+			},
+			{
+				input: -12,
+				expected: '-12',
+			},
+			{
+				input: -12.34,
+				expected: '-12.34',
+			},
 			{
 				input: Number.MIN_SAFE_INTEGER,
 				expected: '-9007199254740991',
 			},
 		];
-
 		testValues.forEach( ( { input, expected } ) => {
 			const result = generateCSVDataFromTable(
 				[
@@ -80,20 +108,16 @@ describe( 'generateCSVDataFromTable', () => {
 		} );
 	} );
 } );
-
 describe( 'generateCSVFileName', () => {
-	jest.useFakeTimers().setSystemTime( new Date( '2024-12-23' ) );
-
+	vi.useFakeTimers().setSystemTime( new Date( '2024-12-23' ) );
 	it( 'should generate a file name with the date when no params are provided', () => {
 		const fileName = generateCSVFileName();
 		expect( fileName ).toBe( '2024-12-23.csv' );
 	} );
-
 	it( 'should generate a file name with the `name` and the date', () => {
 		const fileName = generateCSVFileName( 'Revenue table' );
 		expect( fileName ).toBe( 'revenue-table_2024-12-23.csv' );
 	} );
-
 	it( 'should generate a file name with the `name` and `params`', () => {
 		const fileName = generateCSVFileName( 'Revenue table', {
 			orderby: 'revenue',
@@ -104,14 +128,13 @@ describe( 'generateCSVFileName', () => {
 		);
 	} );
 } );
-
 describe( 'downloadCSVFile', () => {
 	it( "should download a CSV file name to users' browser", () => {
 		const fileName = 'test.csv';
 		downloadCSVFile( fileName, mockCSVData );
 
 		// Get the Blob that was passed to saveAs
-		const [ blob ] = ( saveAs as jest.Mock ).mock.calls[ 0 ];
+		const [ blob ] = ( saveAs as Mock ).mock.calls[ 0 ];
 
 		// Verify it's a Blob with the correct content
 		expect( blob ).toBeInstanceOf( Blob );
@@ -123,7 +146,6 @@ describe( 'downloadCSVFile', () => {
 		reader.onload = () => {
 			expect( reader.result ).toBe( mockCSVData );
 		};
-
 		expect( saveAs ).toHaveBeenCalledWith( expect.any( Blob ), fileName );
 	} );
 } );

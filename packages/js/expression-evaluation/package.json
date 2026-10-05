@@ -70,7 +70,8 @@
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"watch:build": "pnpm watch:build:project",
 		"watch:build:project": "pnpm --stream '/^watch:build:project:.*$/'",
-		"watch:build:project:esm": "node build.mjs --watch"
+		"watch:build:project:esm": "node build.mjs --watch",
+		"test:js": "wp-scripts test-unit-js"
 	},
 	"devDependencies": {
 		"@babel/core": "catalog:tooling",
@@ -97,7 +98,22 @@
 			"lint": {
 				"command": "lint",
 				"changes": "src/**/*.{js,jsx,ts,tsx}"
-			}
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test:js",
+					"changes": [
+						"vitest.config.mjs",
+						"tsconfig.json",
+						"src/**/*.{js,jsx,ts,tsx}"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
+				}
+			]
 		}
 	}
 }

@@ -1,12 +1,11 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
-import { describe, it } from 'node:test';
+import { describe, it } from 'vitest';
 
-import mergeModule from '../dist/commands/merge/index.js';
+import Merge from '../dist/commands/merge/index.js';
 import constants from '../dist/const.js';
 
-const { default: Merge } = mergeModule;
 const { MONOREPO_ROOT } = constants;
 
 const SOURCE = 'woocommerce/example';

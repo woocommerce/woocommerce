@@ -22,7 +22,8 @@
 		"prepack": "pnpm build && oclif manifest",
 		"postpack": "shx rm -f oclif.manifest.json",
 		"posttest": "pnpm lint",
-		"test": "pnpm build && node --test test/merge.test.mjs"
+		"test": "pnpm test:js",
+		"test:js": "pnpm build && wp-scripts test-unit-js"
 	},
 	"dependencies": {
 		"@inquirer/confirm": "^6.1.1",
