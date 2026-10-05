@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -25,7 +27,7 @@ describe( 'EllipsisMenu', () => {
 	} );
 
 	it( 'should call onToggle when clicking on the ellipsis', () => {
-		const onClickMock = jest.fn();
+		const onClickMock = vi.fn();
 		const { getByTitle } = render(
 			<EllipsisMenu
 				label={ 'foo' }

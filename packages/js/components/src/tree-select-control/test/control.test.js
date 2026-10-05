@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -11,10 +13,10 @@ import { createElement } from '@wordpress/element';
 import Control from '../control';
 
 describe( 'TreeSelectControl - Control Component', () => {
-	const onTagsChange = jest.fn().mockName( 'onTagsChange' );
+	const onTagsChange = vi.fn().mockName( 'onTagsChange' );
 	const ref = {
 		current: {
-			focus: jest.fn(),
+			focus: vi.fn(),
 		},
 	};
 
@@ -47,7 +49,7 @@ describe( 'TreeSelectControl - Control Component', () => {
 	} );
 
 	it( 'Calls onInputChange when typing', () => {
-		const onInputChange = jest
+		const onInputChange = vi
 			.fn()
 			.mockName( 'onInputChange' )
 			.mockImplementation( ( e ) => e.target.value );
@@ -67,7 +69,7 @@ describe( 'TreeSelectControl - Control Component', () => {
 	} );
 
 	it( 'Allows disabled input', () => {
-		const onInputChange = jest.fn().mockName( 'onInputChange' );
+		const onInputChange = vi.fn().mockName( 'onInputChange' );
 		const { queryByRole } = render(
 			<Control disabled={ true } onInputChange={ onInputChange } />
 		);
@@ -80,7 +82,7 @@ describe( 'TreeSelectControl - Control Component', () => {
 	} );
 
 	it( 'Calls onFocus callback when it is focused', () => {
-		const onFocus = jest.fn().mockName( 'onFocus' );
+		const onFocus = vi.fn().mockName( 'onFocus' );
 		const { queryByRole } = render(
 			<Control ref={ ref } onFocus={ onFocus } />
 		);

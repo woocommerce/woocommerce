@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -107,7 +109,7 @@ describe( 'Link', () => {
 
 	it( 'should support `onClick`', () => {
 		// Prevent jsdom "Error: Not implemented: navigation" in test output
-		const clickHandler = jest.fn( ( event ) => {
+		const clickHandler = vi.fn( ( event ) => {
 			event.preventDefault();
 			return false;
 		} );

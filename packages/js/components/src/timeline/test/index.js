@@ -1,3 +1,5 @@
+import { afterEach, describe, expect, test, vi } from 'vitest';
+
 /* eslint-disable jest/no-mocks-import */
 /**
  * External dependencies
@@ -12,46 +14,43 @@ import { createElement } from '@wordpress/element';
 import Timeline from '..';
 import mockData from './__mocks__/timeline-mock-data';
 import { groupItemsUsing, sortByDateUsing } from '../util.js';
-
-jest.mock( '@wordpress/date', () => {
-	const actualDateModule = jest.requireActual( '@wordpress/date' );
-
-	return {
+const _actual = await vi.importActual( '@wordpress/date' );
+vi.mock( '@wordpress/date', async () => {
+	const actualDateModule = await vi.importActual( '@wordpress/date' );
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		...actualDateModule,
-		date: jest.fn( actualDateModule.date ),
-		dateI18n: jest.fn( actualDateModule.dateI18n ),
-		format: jest.fn( actualDateModule.format ),
-	};
+		date: vi.fn( actualDateModule.date ),
+		dateI18n: vi.fn( actualDateModule.dateI18n ),
+		format: vi.fn( actualDateModule.format ),
+	} );
 } );
-
 describe( 'Timeline', () => {
-	const actualDateModule = jest.requireActual( '@wordpress/date' );
+	const actualDateModule = _actual;
 	const originalDateSettings = actualDateModule.getSettings();
 	const originalIntl = global.Intl;
 	const timezoneTestItem = {
 		...mockData[ 1 ],
 		date: new Date( Date.UTC( 2020, 0, 20, 23, 45 ) ),
 	};
-
 	afterEach( () => {
 		actualDateModule.setSettings( originalDateSettings );
 		global.Intl = originalIntl;
 		formatSiteDate.mockImplementation( actualDateModule.date );
 		dateI18n.mockImplementation( actualDateModule.dateI18n );
 		format.mockImplementation( actualDateModule.format );
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	} );
-
 	test( 'Empty snapshot', () => {
 		const { container } = render( <Timeline /> );
 		expect( container ).toMatchSnapshot();
 	} );
-
 	test( 'With data snapshot', () => {
 		const { container } = render( <Timeline items={ mockData } /> );
 		expect( container ).toMatchSnapshot();
 	} );
-
 	test( 'uses browser timezone date formatting by default', () => {
 		global.Intl = {
 			DateTimeFormat: () => ( {
@@ -68,7 +67,6 @@ describe( 'Timeline', () => {
 			( dateFormat, date, timezone ) =>
 				`localized:${ timezone }:${ dateFormat }:${ date.toISOString() }`
 		);
-
 		const { container } = render(
 			<Timeline
 				items={ [ timezoneTestItem ] }
@@ -76,7 +74,6 @@ describe( 'Timeline', () => {
 				clockFormat="g:ia"
 			/>
 		);
-
 		expect(
 			container.querySelector( '.woocommerce-timeline-group__title' )
 				.textContent
@@ -86,7 +83,6 @@ describe( 'Timeline', () => {
 				.textContent
 		).toBe( 'localized:Europe/London:g:ia:2020-01-20T23:45:00.000Z' );
 	} );
-
 	test( 'uses site timezone date formatting when requested', () => {
 		format.mockImplementation(
 			( dateFormat, date ) =>
@@ -96,7 +92,6 @@ describe( 'Timeline', () => {
 			( dateFormat, date ) =>
 				`site:${ dateFormat }:${ date.toISOString() }`
 		);
-
 		const { container } = render(
 			<Timeline
 				items={ [ timezoneTestItem ] }
@@ -105,7 +100,6 @@ describe( 'Timeline', () => {
 				timezone="site"
 			/>
 		);
-
 		expect(
 			container.querySelector( '.woocommerce-timeline-group__title' )
 				.textContent
@@ -115,7 +109,6 @@ describe( 'Timeline', () => {
 				.textContent
 		).toBe( 'site:g:ia:2020-01-20T23:45:00.000Z' );
 	} );
-
 	test( 'falls back to browser timezone formatting when browser timezone is unavailable', () => {
 		global.Intl = {
 			DateTimeFormat: () => ( {
@@ -130,7 +123,6 @@ describe( 'Timeline', () => {
 			( dateFormat, date, timezone ) =>
 				`localized:${ timezone }:${ dateFormat }:${ date.toISOString() }`
 		);
-
 		const { container } = render(
 			<Timeline
 				items={ [ timezoneTestItem ] }
@@ -138,7 +130,6 @@ describe( 'Timeline', () => {
 				clockFormat="g:ia"
 			/>
 		);
-
 		expect(
 			container.querySelector( '.woocommerce-timeline-group__title' )
 				.textContent
@@ -148,7 +139,6 @@ describe( 'Timeline', () => {
 				.textContent
 		).toBe( 'browser:g:ia:2020-01-20T23:45:00.000Z' );
 	} );
-
 	test( 'falls back to browser timezone formatting when browser timezone lookup throws', () => {
 		global.Intl = {
 			DateTimeFormat: () => {
@@ -163,7 +153,6 @@ describe( 'Timeline', () => {
 			( dateFormat, date, timezone ) =>
 				`localized:${ timezone }:${ dateFormat }:${ date.toISOString() }`
 		);
-
 		const { container } = render(
 			<Timeline
 				items={ [ timezoneTestItem ] }
@@ -171,7 +160,6 @@ describe( 'Timeline', () => {
 				clockFormat="g:ia"
 			/>
 		);
-
 		expect(
 			container.querySelector( '.woocommerce-timeline-group__title' )
 				.textContent
@@ -181,7 +169,6 @@ describe( 'Timeline', () => {
 				.textContent
 		).toBe( 'browser:g:ia:2020-01-20T23:45:00.000Z' );
 	} );
-
 	test( 'falls back to browser timezone formatting when browser timezone is empty', () => {
 		global.Intl = {
 			DateTimeFormat: () => ( {
@@ -198,7 +185,6 @@ describe( 'Timeline', () => {
 			( dateFormat, date, timezone ) =>
 				`localized:${ timezone }:${ dateFormat }:${ date.toISOString() }`
 		);
-
 		const { container } = render(
 			<Timeline
 				items={ [ timezoneTestItem ] }
@@ -206,7 +192,6 @@ describe( 'Timeline', () => {
 				clockFormat="g:ia"
 			/>
 		);
-
 		expect(
 			container.querySelector( '.woocommerce-timeline-group__title' )
 				.textContent
@@ -216,7 +201,6 @@ describe( 'Timeline', () => {
 				.textContent
 		).toBe( 'browser:g:ia:2020-01-20T23:45:00.000Z' );
 	} );
-
 	test( 'groups items using site timezone when requested', () => {
 		const timezoneBoundaryItems = [
 			{
@@ -228,7 +212,6 @@ describe( 'Timeline', () => {
 				date: new Date( Date.UTC( 2020, 0, 21, 1, 0 ) ),
 			},
 		];
-
 		actualDateModule.setSettings( {
 			...originalDateSettings,
 			timezone: {
@@ -242,10 +225,8 @@ describe( 'Timeline', () => {
 			if ( dateFormat === 'F j, Y' ) {
 				return 'January 21, 2020';
 			}
-
 			return `site:${ dateFormat }:${ date.toISOString() }`;
 		} );
-
 		const { container } = render(
 			<Timeline
 				items={ timezoneBoundaryItems }
@@ -254,37 +235,59 @@ describe( 'Timeline', () => {
 				timezone="site"
 			/>
 		);
-
 		const groupTitles = container.querySelectorAll(
 			'.woocommerce-timeline-group__title'
 		);
-
 		expect( groupTitles ).toHaveLength( 1 );
 		expect( groupTitles[ 0 ].textContent ).toBe( 'January 21, 2020' );
 	} );
-
 	describe( 'Timeline utilities', () => {
 		test( 'Sorts correctly', () => {
 			const jan21 = new Date( 2020, 0, 21 );
 			const jan22 = new Date( 2020, 0, 22 );
 			const jan23 = new Date( 2020, 0, 23 );
-
 			const data = [
-				{ id: 0, date: jan22 },
-				{ id: 1, date: jan21 },
-				{ id: 2, date: jan23 },
+				{
+					id: 0,
+					date: jan22,
+				},
+				{
+					id: 1,
+					date: jan21,
+				},
+				{
+					id: 2,
+					date: jan23,
+				},
 			];
 			const expectedAsc = [
-				{ id: 1, date: jan21 },
-				{ id: 0, date: jan22 },
-				{ id: 2, date: jan23 },
+				{
+					id: 1,
+					date: jan21,
+				},
+				{
+					id: 0,
+					date: jan22,
+				},
+				{
+					id: 2,
+					date: jan23,
+				},
 			];
 			const expectedDesc = [
-				{ id: 2, date: jan23 },
-				{ id: 0, date: jan22 },
-				{ id: 1, date: jan21 },
+				{
+					id: 2,
+					date: jan23,
+				},
+				{
+					id: 0,
+					date: jan22,
+				},
+				{
+					id: 1,
+					date: jan21,
+				},
 			];
-
 			expect( data.sort( sortByDateUsing( 'asc' ) ) ).toStrictEqual(
 				expectedAsc
 			);
@@ -292,56 +295,84 @@ describe( 'Timeline', () => {
 				expectedDesc
 			);
 		} );
-
 		test( "Empty item list doesn't break sort", () => {
 			expect( [].sort( sortByDateUsing( 'asc' ) ) ).toStrictEqual( [] );
 		} );
-
 		test( "Single item doesn't change on sort", () => {
-			const items = [ { date: new Date( 2020, 0, 1 ) } ];
+			const items = [
+				{
+					date: new Date( 2020, 0, 1 ),
+				},
+			];
 			expect( items.sort( sortByDateUsing( 'asc' ) ) ).toBe( items );
 		} );
-
 		test( 'Groups correctly', () => {
 			const jan22 = new Date( 2020, 0, 22 );
 			const jan23 = new Date( 2020, 0, 23 );
 			const items = [
-				{ id: 0, date: jan22 },
-				{ id: 1, date: jan23 },
-				{ id: 2, date: jan22 },
+				{
+					id: 0,
+					date: jan22,
+				},
+				{
+					id: 1,
+					date: jan23,
+				},
+				{
+					id: 2,
+					date: jan22,
+				},
 			];
 			const expected = [
 				{
 					date: jan22,
 					items: [
-						{ id: 0, date: jan22 },
-						{ id: 2, date: jan22 },
+						{
+							id: 0,
+							date: jan22,
+						},
+						{
+							id: 2,
+							date: jan22,
+						},
 					],
 				},
 				{
 					date: jan23,
-					items: [ { id: 1, date: jan23 } ],
+					items: [
+						{
+							id: 1,
+							date: jan23,
+						},
+					],
 				},
 			];
-
 			expect(
 				items.reduce( groupItemsUsing( 'days' ), [] )
 			).toStrictEqual( expected );
 		} );
-
 		test( "Empty item list doesn't break grouping", () => {
 			expect( [].reduce( groupItemsUsing( 'days' ), [] ) ).toStrictEqual(
 				[]
 			);
 		} );
-
 		test( 'Single item grouped correctly', () => {
 			const jan22 = new Date( 2020, 0, 22 );
-			const items = [ { id: 0, date: jan22 } ];
+			const items = [
+				{
+					id: 0,
+					date: jan22,
+				},
+			];
 			const expected = [
 				{
 					date: jan22,
-					items: [ { id: 0, date: jan22 } ],
+					items: [
+						{
+							id: 0,
+							date: jan22,
+						},
+					],
 				},
 			];
 			expect(

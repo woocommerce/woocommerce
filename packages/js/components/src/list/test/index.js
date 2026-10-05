@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -13,7 +15,7 @@ import List from '../index';
 describe( 'List', () => {
 	describe( 'Legacy List', () => {
 		it( 'should have aria roles for items', () => {
-			const clickHandler = jest.fn();
+			const clickHandler = vi.fn();
 			const listItems = [
 				{
 					title: 'WooCommerce.com',
@@ -31,7 +33,7 @@ describe( 'List', () => {
 		} );
 
 		it( 'should support `onClick` for items', () => {
-			const clickHandler = jest.fn();
+			const clickHandler = vi.fn();
 			const listItems = [
 				{
 					title: 'WooCommerce.com',

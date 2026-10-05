@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -61,6 +63,13 @@ describe( 'DateRange', () => {
 			seedLongDateFormat( phpDateFormat );
 
 			const { container } = renderDateRange();
+			if ( console.error.mock.calls.length ) {
+				expect( console.error ).toHaveBeenCalledWith(
+					expect.stringContaining( 'Support for defaultProps' ),
+					expect.stringMatching( /^(LeftArrow|RightArrow)$/ ),
+					expect.any( String )
+				);
+			}
 			const labels = getDayLabels( container );
 
 			expect( labels ).toContain( 'Selected. Saturday, August 1, 2026' );
@@ -76,6 +85,13 @@ describe( 'DateRange', () => {
 			seedLongDateFormat( phpDateFormat );
 
 			const { container } = renderDateRange();
+			if ( console.error.mock.calls.length ) {
+				expect( console.error ).toHaveBeenCalledWith(
+					expect.stringContaining( 'Support for defaultProps' ),
+					expect.stringMatching( /^(LeftArrow|RightArrow)$/ ),
+					expect.any( String )
+				);
+			}
 			const labels = getDayLabels( container );
 
 			expect( labels.length ).toBeGreaterThan( 0 );
@@ -94,6 +110,13 @@ describe( 'DateRange', () => {
 		);
 
 		const { container } = renderDateRange();
+		if ( console.error.mock.calls.length ) {
+			expect( console.error ).toHaveBeenCalledWith(
+				expect.stringContaining( 'Support for defaultProps' ),
+				expect.stringMatching( /^(LeftArrow|RightArrow)$/ ),
+				expect.any( String )
+			);
+		}
 		const labels = getDayLabels( container );
 
 		expect( labels ).toContain( 'Selected. Saturday, 1. August 2026' );

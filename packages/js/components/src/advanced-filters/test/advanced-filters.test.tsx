@@ -1,5 +1,7 @@
+import { describe, expect, test } from 'vitest';
+
 /**
- * @jest-environment jsdom
+ * @vitest-environment jsdom
  */
 /**
  * External dependencies

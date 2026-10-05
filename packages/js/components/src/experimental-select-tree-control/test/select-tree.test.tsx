@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { fireEvent, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { act, useState } from 'react';
@@ -68,7 +70,7 @@ const TestComponent = ( { multiple }: { multiple?: boolean } ) => {
 
 describe( 'SelectTree', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	} );
 
 	it( 'should show the popover only when focused', async () => {
@@ -146,7 +148,7 @@ describe( 'SelectTree', () => {
 		expect( queryByText( 'Create "new item"' ) ).toBeInTheDocument();
 	} );
 	it( 'should call onCreateNew when Create "<createValue>" button is clicked', async () => {
-		const mockFn = jest.fn();
+		const mockFn = vi.fn();
 		const { queryByRole, queryByText } = render(
 			<SelectTree
 				{ ...DEFAULT_PROPS }

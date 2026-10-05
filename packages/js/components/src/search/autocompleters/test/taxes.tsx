@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, test, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -9,9 +11,12 @@ import { getQueryArg } from '@wordpress/url';
  */
 import taxes from '../taxes';
 
-jest.mock( '@wordpress/api-fetch', () => jest.fn() );
+vi.mock( '@wordpress/api-fetch', () => {
+	const mock = vi.fn();
+	return { default: mock, ...mock };
+} );
 
-const mockedApiFetch = apiFetch as unknown as jest.Mock;
+const mockedApiFetch = apiFetch as unknown as Mock;
 
 describe( 'taxes autocompleter', () => {
 	beforeEach( () => {

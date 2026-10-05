@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -176,6 +178,7 @@ describe( 'TableCard', () => {
 	it( 'should render the default "No data to display" when there are no data and emptyMessage is unset', () => {
 		render(
 			<TableCard
+				totalRows={ 0 }
 				title="My table"
 				headers={ mockHeaders }
 				isLoading={ false }
@@ -194,6 +197,7 @@ describe( 'TableCard', () => {
 
 		render(
 			<TableCard
+				totalRows={ 0 }
 				title="My table"
 				headers={ mockHeaders }
 				isLoading={ false }
@@ -211,6 +215,7 @@ describe( 'TableCard', () => {
 
 		render(
 			<TableCard
+				totalRows={ mockData.length }
 				title="My table"
 				headers={ mockHeaders }
 				isLoading={ false }

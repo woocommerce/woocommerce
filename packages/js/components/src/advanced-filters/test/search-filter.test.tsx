@@ -1,5 +1,7 @@
+import { describe, expect, test, vi } from 'vitest';
+
 /**
- * @jest-environment jsdom
+ * @vitest-environment jsdom
  */
 /**
  * External dependencies
@@ -32,10 +34,10 @@ const getConfig = ( getLabels: FilterInput[ 'getLabels' ] ): FilterConfig => ( {
 
 describe( 'SearchFilter', () => {
 	test( 'normalizes string identifiers when an external change reloads labels', async () => {
-		const getLabels = jest
+		const getLabels = vi
 			.fn()
 			.mockResolvedValue( [ { id: '::1', label: '::1' } ] );
-		const onFilterChange = jest.fn();
+		const onFilterChange = vi.fn();
 		const ref = createRef< SearchFilter >();
 		const props = {
 			config: getConfig( getLabels ),
@@ -83,10 +85,10 @@ describe( 'SearchFilter', () => {
 	} );
 
 	test( 'does not reload a current string identifier with stale label data', async () => {
-		const getLabels = jest
+		const getLabels = vi
 			.fn()
 			.mockResolvedValue( [ { id: '::1', label: '::1' } ] );
-		const onFilterChange = jest.fn();
+		const onFilterChange = vi.fn();
 		const ref = createRef< SearchFilter >();
 		const props = {
 			config: getConfig( getLabels ),
@@ -125,14 +127,14 @@ describe( 'SearchFilter', () => {
 	} );
 
 	test( 'keeps numeric identifiers without reloading their labels', () => {
-		const getLabels = jest
+		const getLabels = vi
 			.fn()
 			.mockResolvedValue( [ { id: 60, label: '#60' } ] );
 		const ref = createRef< SearchFilter >();
 		const props = {
 			config: getConfig( getLabels ),
 			filter: { key: 'order', rule: 'includes', value: '' },
-			onFilterChange: jest.fn(),
+			onFilterChange: vi.fn(),
 			query: {},
 		};
 		const { rerender } = render(
@@ -157,12 +159,12 @@ describe( 'SearchFilter', () => {
 	} );
 
 	test( 'does not reload labels when an array filter value matches the selection', () => {
-		const getLabels = jest.fn();
+		const getLabels = vi.fn();
 		const ref = createRef< SearchFilter >();
 		const props = {
 			config: getConfig( getLabels ),
 			filter: { key: 'order', rule: 'includes', value: '' },
-			onFilterChange: jest.fn(),
+			onFilterChange: vi.fn(),
 			query: {},
 		};
 		const { rerender } = render(
@@ -184,11 +186,11 @@ describe( 'SearchFilter', () => {
 	} );
 
 	test( 'handles null filter values', () => {
-		const getLabels = jest.fn();
+		const getLabels = vi.fn();
 		const props = {
 			config: getConfig( getLabels ),
 			filter: { key: 'order', rule: 'includes', value: null },
-			onFilterChange: jest.fn(),
+			onFilterChange: vi.fn(),
 			query: {},
 		};
 		const { rerender } = render( <SearchFilter { ...props } /> );
@@ -205,14 +207,14 @@ describe( 'SearchFilter', () => {
 	} );
 
 	test( 'passes changed array filter values to getLabels as strings', async () => {
-		const getLabels = jest
+		const getLabels = vi
 			.fn()
 			.mockResolvedValue( [ { id: 60, label: '#60' } ] );
 		const ref = createRef< SearchFilter >();
 		const props = {
 			config: getConfig( getLabels ),
 			filter: { key: 'order', rule: 'includes', value: '' },
-			onFilterChange: jest.fn(),
+			onFilterChange: vi.fn(),
 			query: {},
 		};
 		const { rerender } = render(
@@ -241,7 +243,7 @@ describe( 'SearchFilter', () => {
 		const secondRequest = new Promise< SearchLabel[] >( ( resolve ) => {
 			resolveSecondRequest = resolve;
 		} );
-		const getLabels = jest
+		const getLabels = vi
 			.fn()
 			.mockReturnValueOnce( firstRequest )
 			.mockReturnValueOnce( secondRequest );
@@ -249,7 +251,7 @@ describe( 'SearchFilter', () => {
 		const props = {
 			config: getConfig( getLabels ),
 			filter: { key: 'ip_address', rule: 'includes', value: '' },
-			onFilterChange: jest.fn(),
+			onFilterChange: vi.fn(),
 			query: {},
 		};
 		const { rerender } = render(

@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -32,8 +34,8 @@ const TestInputWithContext = () => {
 
 describe( 'Form', () => {
 	it( 'should default to call the deprecated onSubmitCallback if it is provided.', async () => {
-		const onSubmitCallback = jest.fn().mockName( 'onSubmitCallback' );
-		const onSubmit = jest.fn().mockName( 'onSubmit' );
+		const onSubmitCallback = vi.fn().mockName( 'onSubmitCallback' );
+		const onSubmit = vi.fn().mockName( 'onSubmit' );
 
 		const { queryByText } = render(
 			<Form< Record< string, string > >
@@ -59,8 +61,8 @@ describe( 'Form', () => {
 	} );
 
 	it( 'should default to call the deprecated onChangeCallback prop if it is provided.', async () => {
-		const mockOnChangeCallback = jest.fn();
-		const mockOnChange = jest.fn();
+		const mockOnChangeCallback = vi.fn();
+		const mockOnChange = vi.fn();
 
 		const { queryByText } = render(
 			<Form
@@ -94,7 +96,7 @@ describe( 'Form', () => {
 	} );
 
 	it( 'should call onSubmit if it is the only prop provided', async () => {
-		const mockOnSubmit = jest.fn();
+		const mockOnSubmit = vi.fn();
 
 		const { queryByText } = render(
 			<Form onSubmit={ mockOnSubmit } validate={ () => ( {} ) }>
@@ -115,7 +117,7 @@ describe( 'Form', () => {
 	} );
 
 	it( 'should call onChange if it is the only prop provided', async () => {
-		const mockOnChange = jest.fn();
+		const mockOnChange = vi.fn();
 
 		const { queryByText } = render(
 			<Form onChange={ mockOnChange } validate={ () => ( {} ) }>
@@ -144,10 +146,14 @@ describe( 'Form', () => {
 	} );
 
 	it( 'should call onChange with latest changed values', () => {
-		const mockOnChange = jest.fn();
+		const mockOnChange = vi.fn();
 
 		const { queryByLabelText } = render(
-			<Form onChange={ mockOnChange } validate={ () => ( {} ) }>
+			<Form
+				initialValues={ { firstName: '' } }
+				onChange={ mockOnChange }
+				validate={ () => ( {} ) }
+			>
 				{ ( { setValue, getInputProps } ) => {
 					return (
 						<TextControl
@@ -178,7 +184,7 @@ describe( 'Form', () => {
 	} );
 
 	it( 'should call onChange with latest hasErrors', () => {
-		const mockOnChange = jest.fn();
+		const mockOnChange = vi.fn();
 
 		type TestData = {
 			firstName: string;
@@ -194,7 +200,11 @@ describe( 'Form', () => {
 		};
 
 		const { queryByLabelText } = render(
-			<Form< TestData > onChange={ mockOnChange } validate={ validate }>
+			<Form< TestData >
+				initialValues={ { firstName: '' } }
+				onChange={ mockOnChange }
+				validate={ validate }
+			>
 				{ ( { setValue, getInputProps } ) => {
 					return (
 						<TextControl
@@ -225,10 +235,14 @@ describe( 'Form', () => {
 	} );
 
 	it( 'should call onChanges with latest changed values with one change', () => {
-		const mockOnChanges = jest.fn();
+		const mockOnChanges = vi.fn();
 
 		const { queryByLabelText } = render(
-			<Form onChanges={ mockOnChanges } validate={ () => ( {} ) }>
+			<Form
+				initialValues={ { firstName: '' } }
+				onChanges={ mockOnChanges }
+				validate={ () => ( {} ) }
+			>
 				{ ( { setValue, getInputProps } ) => {
 					return (
 						<TextControl
@@ -259,7 +273,7 @@ describe( 'Form', () => {
 	} );
 
 	it( 'should call onChanges with latest hasErrors with one change', () => {
-		const mockOnChanges = jest.fn();
+		const mockOnChanges = vi.fn();
 
 		type TestData = {
 			firstName: string;
@@ -275,7 +289,11 @@ describe( 'Form', () => {
 		};
 
 		const { queryByLabelText } = render(
-			<Form< TestData > onChanges={ mockOnChanges } validate={ validate }>
+			<Form< TestData >
+				initialValues={ { firstName: '' } }
+				onChanges={ mockOnChanges }
+				validate={ validate }
+			>
 				{ ( { setValue, getInputProps } ) => {
 					return (
 						<TextControl
@@ -306,7 +324,7 @@ describe( 'Form', () => {
 	} );
 
 	it( 'should call onChanges with latest changed values with multiple changes', () => {
-		const mockOnChanges = jest.fn();
+		const mockOnChanges = vi.fn();
 
 		const { queryByText } = render(
 			<Form onChanges={ mockOnChanges } validate={ () => ( {} ) }>
@@ -340,7 +358,7 @@ describe( 'Form', () => {
 	} );
 
 	it( 'should call onChanges with latest hasErrors with multiple changes', () => {
-		const mockOnChanges = jest.fn();
+		const mockOnChanges = vi.fn();
 
 		type TestData = {
 			foo: string;
@@ -399,7 +417,7 @@ describe( 'Form', () => {
 
 		type TestData = { date: string };
 
-		const mockOnChange = jest.fn();
+		const mockOnChange = vi.fn();
 
 		function validate(): Record< string, string > {
 			return { date: 'This is a bad date' };
@@ -451,7 +469,7 @@ describe( 'Form', () => {
 
 	describe( 'FormContext', () => {
 		it( 'should allow nested field to use useFormContext to set field value', async () => {
-			const mockOnChange = jest.fn();
+			const mockOnChange = vi.fn();
 
 			const { queryByText } = render(
 				<Form onChange={ mockOnChange } validate={ () => ( {} ) }>

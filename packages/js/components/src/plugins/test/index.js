@@ -1,3 +1,5 @@
+import { afterAll, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -11,32 +13,35 @@ import { useDispatch } from '@wordpress/data';
  */
 
 import { Plugins } from '../index';
-
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	__esModule: true,
-	useDispatch: jest
-		.fn()
-		.mockReturnValue( { installAndActivatePlugins: jest.fn() } ),
-	useSelect: jest.fn().mockReturnValue( false ),
-} ) );
-
+vi.mock( '@wordpress/data', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/data' ) ),
+		__esModule: true,
+		useDispatch: vi.fn().mockReturnValue( {
+			installAndActivatePlugins: vi.fn(),
+		} ),
+		useSelect: vi.fn().mockReturnValue( false ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'Rendering', () => {
 	afterAll( () => {
-		jest.restoreAllMocks();
+		vi.restoreAllMocks();
 	} );
-
 	it( 'should render nothing when autoInstalling', async () => {
 		const { installAndActivatePlugins } = useDispatch();
-
 		installAndActivatePlugins.mockResolvedValue( {
 			success: true,
 			data: {
 				activated: [ 'jetpack' ],
 			},
 		} );
-		const onComplete = jest.fn();
-
+		const onComplete = vi.fn();
 		const { queryByRole } = render(
 			<Plugins
 				autoInstall
@@ -44,20 +49,18 @@ describe( 'Rendering', () => {
 				onComplete={ onComplete }
 			/>
 		);
-
 		expect( queryByRole( 'button' ) ).toBeNull();
 	} );
-
 	it( 'should render a continue button when no pluginSlugs are given', async () => {
 		const { getByRole } = render(
 			<Plugins pluginSlugs={ [] } onComplete={ () => {} } />
 		);
-
 		expect(
-			getByRole( 'button', { name: 'Continue' } )
+			getByRole( 'button', {
+				name: 'Continue',
+			} )
 		).toBeInTheDocument();
 	} );
-
 	it( 'should render install and no thanks buttons', async () => {
 		const { getByRole } = render(
 			<Plugins
@@ -66,26 +69,28 @@ describe( 'Rendering', () => {
 				onSkip={ () => {} }
 			/>
 		);
-
 		expect(
-			getByRole( 'button', { name: 'Install & enable' } )
+			getByRole( 'button', {
+				name: 'Install & enable',
+			} )
 		).toBeInTheDocument();
 		expect(
-			getByRole( 'button', { name: 'No thanks' } )
+			getByRole( 'button', {
+				name: 'No thanks',
+			} )
 		).toBeInTheDocument();
 	} );
-
 	it( 'should not render no thanks when onSkip handler is not provided', async () => {
 		const { getByRole, queryByText } = render(
 			<Plugins pluginSlugs={ [ 'jetpack' ] } onComplete={ () => {} } />
 		);
-
 		expect(
-			getByRole( 'button', { name: 'Install & enable' } )
+			getByRole( 'button', {
+				name: 'Install & enable',
+			} )
 		).toBeInTheDocument();
 		expect( queryByText( 'No thanks' ) ).not.toBeInTheDocument();
 	} );
-
 	it( 'should render an abort button when the abort handler is provided', async () => {
 		const { getByRole, getAllByRole } = render(
 			<Plugins
@@ -94,12 +99,14 @@ describe( 'Rendering', () => {
 				onAbort={ () => {} }
 			/>
 		);
-
 		expect( getAllByRole( 'button' ) ).toHaveLength( 2 );
-		expect( getByRole( 'button', { name: 'Abort' } ) ).toBeInTheDocument();
+		expect(
+			getByRole( 'button', {
+				name: 'Abort',
+			} )
+		).toBeInTheDocument();
 	} );
 } );
-
 describe( 'Installing and activating', () => {
 	it( 'should call installAndActivatePlugins and onComplete', async () => {
 		const response = {
@@ -108,28 +115,27 @@ describe( 'Installing and activating', () => {
 				activated: [ 'jetpack' ],
 			},
 		};
-		const onComplete = jest.fn();
-
+		const onComplete = vi.fn();
 		const { getByRole } = render(
 			<Plugins pluginSlugs={ [ 'jetpack' ] } onComplete={ onComplete } />
 		);
-
-		userEvent.click( getByRole( 'button', { name: 'Install & enable' } ) );
+		userEvent.click(
+			getByRole( 'button', {
+				name: 'Install & enable',
+			} )
+		);
 
 		// Get the mocked installAndActivatePlugins function.
 		const { installAndActivatePlugins } = useDispatch();
 		installAndActivatePlugins.mockResolvedValue( response );
-
 		expect( installAndActivatePlugins ).toHaveBeenCalledWith( [
 			'jetpack',
 		] );
-
 		await waitFor( () =>
 			expect( onComplete ).toHaveBeenCalledWith( [ 'jetpack' ], response )
 		);
 	} );
 } );
-
 describe( 'Installing and activating errors', () => {
 	it( 'should call installAndActivatePlugins and onError', async () => {
 		const response = {
@@ -141,10 +147,8 @@ describe( 'Installing and activating errors', () => {
 		// Get the mocked installAndActivatePlugins function.
 		const { installAndActivatePlugins } = useDispatch();
 		installAndActivatePlugins.mockRejectedValue( response );
-
-		const onComplete = jest.fn();
-		const onError = jest.fn();
-
+		const onComplete = vi.fn();
+		const onError = vi.fn();
 		const { getByRole } = render(
 			<Plugins
 				pluginSlugs={ [ 'jetpack' ] }
@@ -152,11 +156,12 @@ describe( 'Installing and activating errors', () => {
 				onError={ onError }
 			/>
 		);
-
-		userEvent.click( getByRole( 'button', { name: 'Install & enable' } ) );
-
+		userEvent.click(
+			getByRole( 'button', {
+				name: 'Install & enable',
+			} )
+		);
 		expect( onComplete ).not.toHaveBeenCalled();
-
 		await waitFor( () =>
 			expect( onError ).toHaveBeenCalledWith( response.errors, response )
 		);

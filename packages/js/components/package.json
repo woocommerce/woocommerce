@@ -58,7 +58,7 @@
 		"lint:lang:js": "eslint src",
 		"lint:lang:types": "tsc --build --emitDeclarationOnly",
 		"prepack": "pnpm build:publish:project",
-		"test:js": "jest --config ./jest.config.json --passWithNoTests",
+		"test:js": "wp-scripts test-unit-js --passWithNoTests",
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"watch:build": "pnpm watch:build:project",
 		"watch:build:project": "pnpm --stream '/^watch:build:project:.*$/'",
@@ -199,7 +199,7 @@
 					"name": "JavaScript",
 					"command": "test:js",
 					"changes": [
-						"jest.config.js",
+						"vitest.config.mjs",
 						"babel.config.js",
 						"webpack.config.js",
 						"tsconfig.json",

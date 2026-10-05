@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -64,9 +66,7 @@ describe( 'Search', () => {
 			} );
 
 			it( 'being a function that for the given query returns an array', async () => {
-				const optionsSpy = jest
-					.fn()
-					.mockName( 'autocompleter.options' );
+				const optionsSpy = vi.fn().mockName( 'autocompleter.options' );
 
 				const customAutocompleter = {
 					...sampleAutocompleter,
@@ -95,9 +95,7 @@ describe( 'Search', () => {
 			} );
 
 			it( 'being a function that for the given query returns a promise for an array', async () => {
-				const optionsSpy = jest
-					.fn()
-					.mockName( 'autocompleter.options' );
+				const optionsSpy = vi.fn().mockName( 'autocompleter.options' );
 
 				const customAutocompleter = {
 					...sampleAutocompleter,

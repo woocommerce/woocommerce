@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Tag <Tag label="foo" /> should render a tag with the label foo 1`] = `
+exports[`Tag > <Tag label="foo" /> should render a tag with the label foo 1`] = `
 {
   "asFragment": [Function],
   "baseElement": <body>
@@ -125,7 +125,7 @@ exports[`Tag <Tag label="foo" /> should render a tag with the label foo 1`] = `
 }
 `;
 
-exports[`Tag <Tag label="foo" popoverContents={ <p>This is a popover</p> } /> should render a tag with a popover 1`] = `
+exports[`Tag > <Tag label="foo" popoverContents={ <p>This is a popover</p> } /> should render a tag with a popover 1`] = `
 {
   "asFragment": [Function],
   "baseElement": <body>
@@ -252,7 +252,7 @@ exports[`Tag <Tag label="foo" popoverContents={ <p>This is a popover</p> } /> sh
 }
 `;
 
-exports[`Tag <Tag label="foo" remove={ noop } /> should render a tag with a close button 1`] = `
+exports[`Tag > <Tag label="foo" remove={ noop } /> should render a tag with a close button 1`] = `
 {
   "asFragment": [Function],
   "baseElement": <body>
@@ -417,7 +417,7 @@ exports[`Tag <Tag label="foo" remove={ noop } /> should render a tag with a clos
 }
 `;
 
-exports[`Tag <Tag label="foo" screenReaderLabel="FooBar" /> should render a tag with a screen reader label 1`] = `
+exports[`Tag > <Tag label="foo" screenReaderLabel="FooBar" /> should render a tag with a screen reader label 1`] = `
 {
   "asFragment": [Function],
   "baseElement": <body>

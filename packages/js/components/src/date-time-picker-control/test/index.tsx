@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -274,7 +276,7 @@ describe( 'DateTimePickerControl', () => {
 	} );
 
 	it( 'should call onBlur when losing focus', async () => {
-		const onBlurHandler = jest.fn();
+		const onBlurHandler = vi.fn();
 
 		const { container } = render(
 			<DateTimePickerControl onBlur={ onBlurHandler } />
@@ -301,7 +303,7 @@ describe( 'DateTimePickerControl', () => {
 		const dateTimeFormat = 'm-d-Y, H:i';
 		const newDateTimeInputString = '06-08-2010, 02:04';
 		const newDateTime = moment( newDateTimeInputString );
-		const onChangeHandler = jest.fn();
+		const onChangeHandler = vi.fn();
 
 		const { container } = render(
 			<DateTimePickerControl
@@ -339,7 +341,7 @@ describe( 'DateTimePickerControl', () => {
 		const originalDateTime = moment( '09-15-2022' );
 		const newDateTimeInputString = '06-08-2010';
 		const newDateTime = moment( newDateTimeInputString ).startOf( 'day' );
-		const onChangeHandler = jest.fn();
+		const onChangeHandler = vi.fn();
 
 		const { container } = render(
 			<DateTimePickerControl
@@ -378,7 +380,7 @@ describe( 'DateTimePickerControl', () => {
 		const originalDateTime = moment( '09-15-2022' );
 		const newDateTimeInputString = '06-08-2010';
 		const newDateTime = moment( newDateTimeInputString ).endOf( 'day' );
-		const onChangeHandler = jest.fn();
+		const onChangeHandler = vi.fn();
 
 		const { container } = render(
 			<DateTimePickerControl
@@ -417,7 +419,7 @@ describe( 'DateTimePickerControl', () => {
 		const originalDateTime = moment( '09-15-2022' );
 		const newDateTimeInputString = '06-08-2010 7:00';
 		const newDateTime = moment( newDateTimeInputString );
-		const onChangeHandler = jest.fn();
+		const onChangeHandler = vi.fn();
 
 		const { container } = render(
 			<DateTimePickerControl
@@ -453,7 +455,7 @@ describe( 'DateTimePickerControl', () => {
 	//       TypeError: Cannot read properties of null (reading 'createEvent')
 	it( 'should call onChange with isValid false when the input is invalid', async () => {
 		const originalDateTime = moment( '2022-09-15 02:30:40' );
-		const onChangeHandler = jest.fn();
+		const onChangeHandler = vi.fn();
 		const invalidDateTime = 'I am not a valid date time';
 
 		const { container } = render(
@@ -489,8 +491,8 @@ describe( 'DateTimePickerControl', () => {
 		const dateTimeFormat = 'm-d-Y, H:i';
 		const newDateTimeInputString = '06-08-2010, 02:04';
 		const newDateTime = moment( newDateTimeInputString );
-		const originalOnChangeHandler = jest.fn();
-		const newOnChangeHandler = jest.fn();
+		const originalOnChangeHandler = vi.fn();
+		const newOnChangeHandler = vi.fn();
 
 		let count = 0;
 
@@ -578,7 +580,7 @@ describe( 'DateTimePickerControl', () => {
 	// Skipping this test for now because it does not work with Jest's fake timers
 	it.skip( 'should call onChange once when multiple changes are made rapidly', async () => {
 		const originalDateTime = moment( '2022-09-15 02:30:40' );
-		const onChangeHandler = jest.fn();
+		const onChangeHandler = vi.fn();
 
 		const { container } = render(
 			<DateTimePickerControl
@@ -596,7 +598,7 @@ describe( 'DateTimePickerControl', () => {
 		// @testing-library/user-event@13.5 userEvent.type does not work with Jest's fake timers
 		// see: https://github.com/testing-library/user-event/issues/565
 		// upgrading to @testing-library/user-event@14 is necessary
-		jest.useRealTimers();
+		vi.useRealTimers();
 
 		await userEvent.type( input!, '{selectall}{backspace}abc', {
 			delay: 10,
@@ -610,7 +612,7 @@ describe( 'DateTimePickerControl', () => {
 	// Skipping this test for now because it does not work with Jest's fake timers
 	it.skip( 'should call onChange multiple times when multiple changes are made slowly', async () => {
 		const originalDateTime = moment( '2022-09-15 02:30:40' );
-		const onChangeHandler = jest.fn();
+		const onChangeHandler = vi.fn();
 		const inputToType = 'abc';
 
 		const { container } = render(
@@ -629,7 +631,7 @@ describe( 'DateTimePickerControl', () => {
 		// @testing-library/user-event@13.5 userEvent.type does not work with Jest's fake timers
 		// see: https://github.com/testing-library/user-event/issues/565
 		// upgrading to @testing-library/user-event@14 is necessary
-		jest.useRealTimers();
+		vi.useRealTimers();
 
 		await userEvent.type( input!, '{selectall}{backspace}' + inputToType, {
 			delay: 100,
@@ -644,7 +646,7 @@ describe( 'DateTimePickerControl', () => {
 
 	it( 'should not call onChange if no changes are made', async () => {
 		const originalDateTime = moment( '2022-09-15 02:30:40' );
-		const onChangeHandler = jest.fn();
+		const onChangeHandler = vi.fn();
 
 		const { container } = render(
 			<DateTimePickerControl
@@ -660,7 +662,7 @@ describe( 'DateTimePickerControl', () => {
 	it( 'should not call onChange if currentDate is set to an equivalent UTC date without Zulu offset specifier', async () => {
 		const originalDateTime = '2023-01-01T00:00:00Z';
 		const equivalentDateTimeWithoutZulu = '2023-01-01T00:00:00';
-		const onChangeHandler = jest.fn();
+		const onChangeHandler = vi.fn();
 
 		const { rerender } = render(
 			<DateTimePickerControl
@@ -683,7 +685,7 @@ describe( 'DateTimePickerControl', () => {
 	it( 'should not call onChange if currentDate is set to an equivalent UTC date without time', async () => {
 		const originalDateTime = '2023-01-01T00:00:00Z';
 		const equivalentDateTimeWithoutTime = '2023-01-01';
-		const onChangeHandler = jest.fn();
+		const onChangeHandler = vi.fn();
 
 		const { rerender } = render(
 			<DateTimePickerControl
@@ -711,7 +713,7 @@ describe( 'DateTimePickerControl', () => {
 		const originalDateTime = moment( '2022-11-15 02:30:40' );
 		const originalDateTimeFormat = 'm-d-Y, H:i';
 		const newDateTimeFormat = 'Y-m-d H:i';
-		const onChangeHandler = jest.fn();
+		const onChangeHandler = vi.fn();
 
 		const { rerender } = render(
 			<DateTimePickerControl
@@ -743,7 +745,7 @@ describe( 'DateTimePickerControl', () => {
 	it( 'should not call onChange when the input is changed to an equivalent date', async () => {
 		const originalDateTime = moment( '2022-09-15' );
 		const newDateTimeInputString = 'September 9, 2022';
-		const onChangeHandler = jest.fn();
+		const onChangeHandler = vi.fn();
 
 		const { container } = render(
 			<DateTimePickerControl
