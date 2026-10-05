@@ -584,7 +584,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 *
 	 * Includes the `woocommerce_analytics_update_order_stats_data` filter and the refund adjustments.
 	 * Like update(), it adds the order's customer to the customer lookup table if missing, but it
-	 * leaves the stats rows of the customer's other orders unchanged.
+	 * leaves the stats rows of the customer's other orders unchanged. Customer fields use the saved order.
 	 *
 	 * @since 11.3.0
 	 *
@@ -682,6 +682,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		 * @since 4.0.0
 		 */
 		$data = apply_filters( 'woocommerce_analytics_update_order_stats_data', $data, $order );
+
+		// update() has always passed a non-array result straight to $wpdb->replace(), so only the read path rejects it.
+		if ( ! $for_update && ! is_array( $data ) ) {
+			return false;
+		}
 
 		if ( 'shop_order_refund' === $order->get_type() ) {
 			$parent_order = wc_get_order( $order->get_parent_id() );

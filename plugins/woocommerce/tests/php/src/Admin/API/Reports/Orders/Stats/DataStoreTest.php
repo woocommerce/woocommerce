@@ -737,9 +737,17 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	 */
 	public function test_get_order_stats_row_data_returns_false_for_non_array_filter_result(): void {
 		$order = WC_Helper_Order::create_order();
+		$order->update_status( OrderStatus::COMPLETED );
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10,
+			)
+		);
 		add_filter( 'woocommerce_analytics_update_order_stats_data', '__return_null' );
 
-		$this->assertFalse( OrdersStatsDataStore::get_order_stats_row_data( $order ), 'A non-array row should be returned as false.' );
+		$this->assertFalse( OrdersStatsDataStore::get_order_stats_row_data( $order ), 'A non-array order row should be returned as false.' );
+		$this->assertFalse( OrdersStatsDataStore::get_order_stats_row_data( $refund ), 'A non-array refund row should be returned as false.' );
 	}
 
 	/**
