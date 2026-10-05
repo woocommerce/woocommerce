@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -10,7 +12,7 @@ import { WCUser } from '@woocommerce/data';
 import { NoPermissionsError } from '../NoPermissions';
 
 describe( 'NoPermissions', () => {
-	const mockSendEvent = jest.fn();
+	const mockSendEvent = vi.fn();
 	const defaultProps = {
 		context: {
 			pluginsAvailable: [
@@ -43,7 +45,7 @@ describe( 'NoPermissions', () => {
 	};
 
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	} );
 	it( 'should render the component with correct title and subtitle', () => {
 		render(

@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -15,11 +17,17 @@ import {
  * Internal dependencies
  */
 import { SettingsButton } from '..';
-
-jest.mock( '@woocommerce/tracks', () => ( {
-	recordEvent: jest.fn(),
-} ) );
-
+vi.mock( '@woocommerce/tracks', () => {
+	const mock = {
+		recordEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'SettingsButton', () => {
 	it( 'should record settings_payments_provider_manage_click event on click of the button', () => {
 		const { getByRole } = render(
@@ -55,7 +63,11 @@ describe( 'SettingsButton', () => {
 				/>
 			</Router>
 		);
-		fireEvent.click( getByRole( 'button', { name: 'Manage' } ) );
+		fireEvent.click(
+			getByRole( 'button', {
+				name: 'Manage',
+			} )
+		);
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_provider_manage_click',
 			expect.objectContaining( {

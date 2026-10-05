@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -32,7 +34,7 @@ describe( 'CustomSelectControl', () => {
 	} );
 
 	it( 'selects the highlighted option when navigating with keyboard commands', () => {
-		const onChange = jest.fn();
+		const onChange = vi.fn();
 
 		render(
 			<CustomSelectControl

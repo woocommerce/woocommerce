@@ -1,7 +1,9 @@
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
 /**
  * External dependencies
  */
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 /**
@@ -9,16 +11,13 @@ import userEvent from '@testing-library/user-event';
  */
 import { ResetStylesControl } from '../settings-email-color-palette-control';
 import type { DefaultColors } from '../settings-email-color-palette-slotfill';
-
 type JQueryAdapter = ( selector: string ) => {
 	length: number;
 	on: ( eventName: string, listener: () => void ) => void;
 	off: ( eventName: string, listener: () => void ) => void;
 };
-
 const jQueryAdapter: JQueryAdapter = ( selector ) => {
 	const elements = Array.from( document.querySelectorAll( selector ) );
-
 	return {
 		length: elements.length,
 		on: ( eventName, listener ) => {
@@ -33,7 +32,6 @@ const jQueryAdapter: JQueryAdapter = ( selector ) => {
 		},
 	};
 };
-
 const colorFields = [
 	{
 		id: 'woocommerce_email_base_color',
@@ -61,7 +59,6 @@ const colorFields = [
 		key: 'footerTextColor',
 	},
 ] as const;
-
 const initialColors: DefaultColors = {
 	baseColor: '#111111',
 	bgColor: '#222222',
@@ -69,7 +66,6 @@ const initialColors: DefaultColors = {
 	bodyTextColor: '#444444',
 	footerTextColor: '#555555',
 };
-
 const themeColors: DefaultColors = {
 	baseColor: '#a10000',
 	bgColor: '#b20000',
@@ -77,23 +73,21 @@ const themeColors: DefaultColors = {
 	bodyTextColor: '#d40000',
 	footerTextColor: '#e50000',
 };
-
 const changeAccent = () => {
 	fireEvent.change( screen.getByLabelText( 'Accent' ), {
-		target: { value: '#abcdef' },
+		target: {
+			value: '#abcdef',
+		},
 	} );
 };
-
 describe( 'ResetStylesControl', () => {
 	let settingsFixture = document.createElement( 'div' );
 	let autoSyncInput = document.createElement( 'input' );
 	let unmount: undefined | ( () => void );
-
 	const appendColorInputs = ( colors: DefaultColors ) => {
 		for ( const field of colorFields ) {
 			const label = document.createElement( 'label' );
 			const input = document.createElement( 'input' );
-
 			label.htmlFor = field.id;
 			label.textContent = field.label;
 			input.id = field.id;
@@ -101,7 +95,6 @@ describe( 'ResetStylesControl', () => {
 			settingsFixture?.append( label, input );
 		}
 	};
-
 	const expectColors = ( colors: DefaultColors ) => {
 		for ( const field of colorFields ) {
 			expect( screen.getByLabelText( field.label ) ).toHaveValue(
@@ -109,7 +102,6 @@ describe( 'ResetStylesControl', () => {
 			);
 		}
 	};
-
 	const renderWithThemeDefaults = () => {
 		const renderResult = render(
 			<ResetStylesControl
@@ -120,7 +112,6 @@ describe( 'ResetStylesControl', () => {
 			/>
 		);
 		unmount = renderResult.unmount;
-
 		renderResult.rerender(
 			<ResetStylesControl
 				defaultColors={ themeColors }
@@ -130,70 +121,75 @@ describe( 'ResetStylesControl', () => {
 			/>
 		);
 	};
-
 	beforeEach( () => {
 		unmount = undefined;
 		settingsFixture = document.createElement( 'div' );
 		settingsFixture.setAttribute( 'aria-label', 'Email color settings' );
 		document.body.appendChild( settingsFixture );
 		appendColorInputs( initialColors );
-
 		autoSyncInput = document.createElement( 'input' );
 		autoSyncInput.type = 'hidden';
 		autoSyncInput.id = 'woocommerce_email_auto_sync_with_theme';
 		autoSyncInput.value = 'yes';
 		settingsFixture.appendChild( autoSyncInput );
-
 		Object.defineProperty( globalThis, 'jQuery', {
 			configurable: true,
 			value: jQueryAdapter,
 		} );
 	} );
-
 	afterEach( () => {
 		unmount?.();
 		settingsFixture.remove();
-		delete ( globalThis as typeof globalThis & { jQuery?: JQueryAdapter } )
-			.jQuery;
+		delete (
+			globalThis as typeof globalThis & {
+				jQuery?: JQueryAdapter;
+			}
+		 ).jQuery;
 	} );
-
 	it( 'shows sync and undo controls after a color change', () => {
 		renderWithThemeDefaults();
 		changeAccent();
-
 		expect( autoSyncInput ).toHaveValue( 'no' );
 		expect(
-			screen.getByRole( 'button', { name: 'Sync with theme' } )
+			screen.getByRole( 'button', {
+				name: 'Sync with theme',
+			} )
 		).toBeVisible();
 		expect(
-			screen.getByRole( 'button', { name: 'Undo changes' } )
+			screen.getByRole( 'button', {
+				name: 'Undo changes',
+			} )
 		).toBeVisible();
 	} );
-
 	it( 'syncs theme defaults and re-enables auto-sync', async () => {
 		renderWithThemeDefaults();
 		changeAccent();
-
-		await userEvent.click(
-			screen.getByRole( 'button', { name: 'Sync with theme' } )
-		);
-
+		await act( async () => {
+			await userEvent.click(
+				screen.getByRole( 'button', {
+					name: 'Sync with theme',
+				} )
+			);
+		} );
 		expectColors( themeColors );
 		expect( autoSyncInput ).toHaveValue( 'yes' );
 	} );
-
 	it( 'restores the initial colors and auto-sync setting with Undo', async () => {
 		renderWithThemeDefaults();
 		changeAccent();
-
-		await userEvent.click(
-			screen.getByRole( 'button', { name: 'Undo changes' } )
-		);
-
+		await act( async () => {
+			await userEvent.click(
+				screen.getByRole( 'button', {
+					name: 'Undo changes',
+				} )
+			);
+		} );
 		expectColors( initialColors );
 		expect( autoSyncInput ).toHaveValue( 'yes' );
 		expect(
-			screen.queryByRole( 'button', { name: 'Undo changes' } )
+			screen.queryByRole( 'button', {
+				name: 'Undo changes',
+			} )
 		).not.toBeInTheDocument();
 	} );
 } );

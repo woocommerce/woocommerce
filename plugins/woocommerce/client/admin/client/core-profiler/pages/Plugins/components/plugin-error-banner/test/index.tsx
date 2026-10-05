@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -106,7 +108,7 @@ describe( 'PluginErrorBanner', () => {
 	} );
 
 	it( 'should call onClick when "Please try again" link is clicked', () => {
-		const mockOnClick = jest.fn();
+		const mockOnClick = vi.fn();
 		const errors = [
 			{
 				plugin: 'test-plugin',

@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -15,7 +17,7 @@ describe( 'CancelLink component', () => {
 	} );
 
 	it( 'should call onClick handler when clicked', () => {
-		const mockOnClick = jest.fn();
+		const mockOnClick = vi.fn();
 		render( <CancelLink onClick={ mockOnClick } /> );
 
 		fireEvent.click( screen.getByText( 'Cancel' ) );
@@ -53,7 +55,7 @@ describe( 'CancelLink component', () => {
 		} );
 
 		it( 'should be keyboard accessible', () => {
-			const mockOnClick = jest.fn();
+			const mockOnClick = vi.fn();
 			render( <CancelLink onClick={ mockOnClick } /> );
 
 			const button = screen.getByRole( 'button' );

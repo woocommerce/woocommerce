@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, it, test, vi } from 'vitest';
+
 /**
  * Internal dependencies
  */
@@ -62,7 +64,7 @@ describe( 'createDeprecatedPropertiesProxy', () => {
 	let proxiedSettings;
 
 	beforeEach( () => {
-		consoleWarnSpy = jest
+		consoleWarnSpy = vi
 			.spyOn( console, 'warn' )
 			.mockImplementation( () => {} );
 

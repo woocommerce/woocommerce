@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -12,7 +14,7 @@ import { createElement } from '@wordpress/element';
 import { RecommendedExtensions } from '../index.js';
 import RecommendedExtensionsItem from '../item.js';
 
-jest.mock( '@woocommerce/tracks' );
+vi.mock( '@woocommerce/tracks' );
 
 const mockExtensions = [
 	{

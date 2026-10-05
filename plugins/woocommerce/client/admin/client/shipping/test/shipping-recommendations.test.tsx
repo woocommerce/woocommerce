@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -11,25 +13,48 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import ShippingRecommendations from '../shipping-recommendations';
 import { SHIPPING_RECOMMENDATIONS_DISMISS_OPTION } from '../shipping-recommendations-utils';
-
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn(),
-	useDispatch: jest.fn(),
-} ) );
-jest.mock( '~/components/tracked-link/tracked-link', () => ( {
-	TrackedLink: ( { textProps }: { textProps?: { className?: string } } ) => (
-		<span className={ textProps?.className }>
-			the WooCommerce Marketplace
-		</span>
-	),
-} ) );
-jest.mock( '../../settings-recommendations/dismissable-list', () => {
-	const { DismissableList } = jest.requireActual(
+vi.mock( '@wordpress/data', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/data' ) ),
+		useSelect: vi.fn(),
+		useDispatch: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '~/components/tracked-link/tracked-link', () => {
+	const mock = {
+		TrackedLink: ( {
+			textProps,
+		}: {
+			textProps?: {
+				className?: string;
+			};
+		} ) => (
+			<span className={ textProps?.className }>
+				the WooCommerce Marketplace
+			</span>
+		),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../settings-recommendations/dismissable-list', async () => {
+	const { DismissableList } = await vi.importActual(
 		'../../settings-recommendations/dismissable-list'
 	);
-
-	return {
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		DismissableList: ( {
 			children,
 			isDismissed,
@@ -51,37 +76,84 @@ jest.mock( '../../settings-recommendations/dismissable-list', () => {
 		}: {
 			children: React.ReactNode;
 		} ) => children,
+	} );
+} );
+vi.mock( '~/guided-tours/shipping-tour', () => {
+	const mock = {
+		ShippingTour: ( {
+			showShippingRecommendationsStep,
+		}: {
+			showShippingRecommendationsStep: boolean;
+		} ) => (
+			<div
+				data-show-recommendations-step={ String(
+					showShippingRecommendationsStep
+				) }
+				data-testid="shipping-tour"
+			/>
+		),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../woocommerce-shipping-item', () => {
+	const mock = () => <div>WooCommerce Shipping</div>;
+	return {
+		default: mock,
+		...mock,
 	};
 } );
-jest.mock( '~/guided-tours/shipping-tour', () => ( {
-	ShippingTour: ( {
-		showShippingRecommendationsStep,
-	}: {
-		showShippingRecommendationsStep: boolean;
-	} ) => (
-		<div
-			data-show-recommendations-step={ String(
-				showShippingRecommendationsStep
-			) }
-			data-testid="shipping-tour"
-		/>
-	),
-} ) );
-jest.mock( '../woocommerce-shipping-item', () => () => (
-	<div>WooCommerce Shipping</div>
-) );
-jest.mock( '../shipstation-item', () => () => <div>ShipStation</div> );
-jest.mock( '../packlink-item', () => () => <div>Packlink PRO</div> );
-jest.mock( '../../lib/notices', () => ( {
-	createNoticesFromResponse: () => null,
-} ) );
-jest.mock( '@woocommerce/tracks', () => ( {
-	recordEvent: jest.fn(),
-} ) );
-jest.mock( '@wordpress/a11y', () => ( {
-	speak: jest.fn(),
-} ) );
-
+vi.mock( '../shipstation-item', () => {
+	const mock = () => <div>ShipStation</div>;
+	return {
+		default: mock,
+		...mock,
+	};
+} );
+vi.mock( '../packlink-item', () => {
+	const mock = () => <div>Packlink PRO</div>;
+	return {
+		default: mock,
+		...mock,
+	};
+} );
+vi.mock( '../../lib/notices', () => {
+	const mock = {
+		createNoticesFromResponse: () => null,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/tracks', () => {
+	const mock = {
+		recordEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/a11y', () => {
+	const mock = {
+		speak: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const defaultSelectReturn = {
 	getActivePlugins: () => [],
 	getInstalledPlugins: () => [],
@@ -91,33 +163,29 @@ const defaultSelectReturn = {
 		},
 	} ),
 	getProfileItems: () => ( {} ),
-	getOption: jest.fn().mockReturnValue( 'no' ),
-	hasFinishedResolution: jest.fn().mockReturnValue( true ),
+	getOption: vi.fn().mockReturnValue( 'no' ),
+	hasFinishedResolution: vi.fn().mockReturnValue( true ),
 };
-
 const mockSelect = ( overrides: Record< string, unknown > = {} ) => {
-	( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
+	( useSelect as Mock ).mockImplementation( ( fn ) =>
 		fn( () => ( {
 			...defaultSelectReturn,
 			...overrides,
 		} ) )
 	);
 };
-
 describe( 'ShippingRecommendations', () => {
 	beforeEach( () => {
 		mockSelect();
-		( useDispatch as jest.Mock ).mockReturnValue( {
+		( useDispatch as Mock ).mockReturnValue( {
 			installPlugins: () => Promise.resolve(),
 			activatePlugins: () => Promise.resolve(),
 		} );
-		( recordEvent as jest.Mock ).mockClear();
-		( speak as jest.Mock ).mockClear();
+		( recordEvent as Mock ).mockClear();
+		( speak as Mock ).mockClear();
 	} );
-
 	it( 'renders recommendations and the shipping tour recommendations step', () => {
 		render( <ShippingRecommendations /> );
-
 		expect(
 			screen.queryByText( 'WooCommerce Shipping' )
 		).toBeInTheDocument();
@@ -136,17 +204,14 @@ describe( 'ShippingRecommendations', () => {
 			}
 		);
 	} );
-
 	it( 'waits for the dismissal option without remounting the shipping tour', () => {
 		let hasDismissResolved = false;
 		mockSelect( {
 			hasFinishedResolution: ( selector: string ) =>
 				selector === 'getOption' ? hasDismissResolved : true,
 		} );
-
 		const { rerender } = render( <ShippingRecommendations /> );
 		const initialShippingTour = screen.getByTestId( 'shipping-tour' );
-
 		expect(
 			screen.queryByText( 'the WooCommerce Marketplace' )
 		).not.toBeInTheDocument();
@@ -161,10 +226,8 @@ describe( 'ShippingRecommendations', () => {
 			'shipping_partner_impression',
 			expect.anything()
 		);
-
 		hasDismissResolved = true;
 		rerender( <ShippingRecommendations /> );
-
 		expect( screen.getByTestId( 'shipping-tour' ) ).toBe(
 			initialShippingTour
 		);
@@ -180,16 +243,15 @@ describe( 'ShippingRecommendations', () => {
 			}
 		);
 	} );
-
 	it( 'does not render recommendations before the country settings resolve', () => {
 		mockSelect( {
-			getSettings: () => ( { general: {} } ),
+			getSettings: () => ( {
+				general: {},
+			} ),
 			hasFinishedResolution: ( selector: string ) =>
 				selector !== 'getSettings',
 		} );
-
 		render( <ShippingRecommendations /> );
-
 		expect(
 			screen.queryByText( 'the WooCommerce Marketplace' )
 		).not.toBeInTheDocument();
@@ -205,7 +267,6 @@ describe( 'ShippingRecommendations', () => {
 			expect.anything()
 		);
 	} );
-
 	it( 'keeps the dismissal wrapper mounted to restore focus and announce the change', () => {
 		let dismissOption = 'no';
 		mockSelect( {
@@ -214,21 +275,17 @@ describe( 'ShippingRecommendations', () => {
 					? dismissOption
 					: undefined,
 		} );
-
 		const { rerender } = render( <ShippingRecommendations /> );
 		const dismissalWrapper = document.querySelector(
 			'.woocommerce-dismissable-list__wrapper'
 		);
-
 		expect( dismissalWrapper ).toBeInTheDocument();
 		expect( screen.getByTestId( 'dismissable-list' ) ).toHaveAttribute(
 			'data-dismissed',
 			'false'
 		);
-
 		dismissOption = 'yes';
 		rerender( <ShippingRecommendations /> );
-
 		expect(
 			document.querySelector( '.woocommerce-dismissable-list__wrapper' )
 		).toBe( dismissalWrapper );
@@ -245,15 +302,12 @@ describe( 'ShippingRecommendations', () => {
 			screen.getByText( 'the WooCommerce Marketplace' )
 		).toBeInTheDocument();
 	} );
-
 	it( 'does not render recommendations before the product profile resolves', () => {
 		mockSelect( {
 			hasFinishedResolution: ( selector: string ) =>
 				selector !== 'getProfileItems',
 		} );
-
 		render( <ShippingRecommendations /> );
-
 		expect(
 			screen.queryByText( 'the WooCommerce Marketplace' )
 		).not.toBeInTheDocument();
@@ -269,7 +323,6 @@ describe( 'ShippingRecommendations', () => {
 			expect.anything()
 		);
 	} );
-
 	it( 'renders the marketplace fallback when recommendations are dismissed', () => {
 		mockSelect( {
 			getOption: ( option: string ) =>
@@ -277,9 +330,7 @@ describe( 'ShippingRecommendations', () => {
 					? 'yes'
 					: undefined,
 		} );
-
 		render( <ShippingRecommendations /> );
-
 		expect(
 			screen.queryByText( 'WooCommerce Shipping' )
 		).not.toBeInTheDocument();
@@ -301,7 +352,6 @@ describe( 'ShippingRecommendations', () => {
 			expect.anything()
 		);
 	} );
-
 	it( 'renders the marketplace fallback when there are no country recommendations', () => {
 		mockSelect( {
 			getSettings: () => ( {
@@ -310,9 +360,7 @@ describe( 'ShippingRecommendations', () => {
 				},
 			} ),
 		} );
-
 		render( <ShippingRecommendations /> );
-
 		expect(
 			screen.queryByText( 'WooCommerce Shipping' )
 		).not.toBeInTheDocument();
@@ -324,16 +372,13 @@ describe( 'ShippingRecommendations', () => {
 			'false'
 		);
 	} );
-
 	it( 'renders the marketplace fallback for stores selling digital products only', () => {
 		mockSelect( {
 			getProfileItems: () => ( {
 				product_types: [ 'downloads' ],
 			} ),
 		} );
-
 		render( <ShippingRecommendations /> );
-
 		expect(
 			screen.queryByText( 'WooCommerce Shipping' )
 		).not.toBeInTheDocument();

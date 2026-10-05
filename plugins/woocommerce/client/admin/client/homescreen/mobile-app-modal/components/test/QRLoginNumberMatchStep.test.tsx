@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -17,17 +19,23 @@ import { QRLoginNumberMatchStep } from '../QRLoginNumberMatchStep';
 // Tracks is fire-and-forget here — we don't assert against it, just keep the
 // component's recordEvent calls from blowing up because no global window
 // shim is registered in jsdom.
-jest.mock( '@woocommerce/tracks', () => ( {
-	recordEvent: jest.fn(),
-} ) );
-
+vi.mock( '@woocommerce/tracks', () => {
+	const mock = {
+		recordEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const NOW_SECONDS = 1_700_000_000;
 const CHALLENGE_EXPIRES_AT = NOW_SECONDS + 90;
-
 const renderStep = (
 	overrides: Partial< Parameters< typeof QRLoginNumberMatchStep >[ 0 ] > = {}
 ) => {
-	const onChooseNumber = jest.fn();
+	const onChooseNumber = vi.fn();
 	render(
 		<QRLoginNumberMatchStep
 			numbers={ [ '317', '042', '589' ] }
@@ -42,23 +50,23 @@ const renderStep = (
 			{ ...overrides }
 		/>
 	);
-	return { onChooseNumber };
+	return {
+		onChooseNumber,
+	};
 };
-
 describe( 'QRLoginNumberMatchStep', () => {
 	beforeEach( () => {
-		jest.useFakeTimers();
-		jest.setSystemTime( NOW_SECONDS * 1000 );
+		vi.useFakeTimers( {
+			toFake: [ 'Date', 'setInterval', 'clearInterval' ],
+		} );
+		vi.setSystemTime( NOW_SECONDS * 1000 );
 	} );
-
 	afterEach( () => {
-		jest.clearAllTimers();
-		jest.useRealTimers();
+		vi.clearAllTimers();
+		vi.useRealTimers();
 	} );
-
 	it( 'renders the three candidate numbers in the order received from the server', () => {
 		renderStep();
-
 		const tiles = screen.getAllByRole( 'button', {
 			name: /Confirm with the number/i,
 		} );
@@ -67,32 +75,27 @@ describe( 'QRLoginNumberMatchStep', () => {
 		expect( tiles[ 1 ] ).toHaveTextContent( '042' );
 		expect( tiles[ 2 ] ).toHaveTextContent( '589' );
 	} );
-
 	it( 'surfaces device model + OS + app version in the headline', () => {
 		renderStep();
-
 		expect(
 			screen.getByText( /Pixel 10 · Android 16 · App version 24\.7\.0/ )
 		).toBeInTheDocument();
 	} );
-
 	it( 'falls back to "Mobile app" when no device info is provided', () => {
-		renderStep( { deviceInfo: null } );
-
+		renderStep( {
+			deviceInfo: null,
+		} );
 		expect(
 			screen.getByText( /Match this number on Mobile app/ )
 		).toBeInTheDocument();
 	} );
-
 	it( 'invokes onChooseNumber with the tapped value', async () => {
 		const { onChooseNumber } = renderStep();
-
 		fireEvent.click(
 			screen.getByRole( 'button', {
 				name: /Confirm with the number 042/i,
 			} )
 		);
-
 		expect( onChooseNumber ).toHaveBeenCalledWith( '042' );
 		await waitFor( () =>
 			expect(
@@ -110,7 +113,7 @@ describe( 'QRLoginNumberMatchStep', () => {
 	 */
 	it( 'disables all three tiles while a click is in flight', async () => {
 		let resolveChoice: () => void = () => undefined;
-		const onChooseNumber = jest.fn(
+		const onChooseNumber = vi.fn(
 			() =>
 				new Promise< void >( ( r ) => {
 					resolveChoice = r;
@@ -124,13 +127,11 @@ describe( 'QRLoginNumberMatchStep', () => {
 				onChooseNumber={ onChooseNumber }
 			/>
 		);
-
 		fireEvent.click(
 			screen.getByRole( 'button', {
 				name: /Confirm with the number 042/i,
 			} )
 		);
-
 		await waitFor( () => {
 			expect(
 				screen.getByRole( 'button', {
@@ -156,8 +157,9 @@ describe( 'QRLoginNumberMatchStep', () => {
 			} )
 		);
 		expect( onChooseNumber ).toHaveBeenCalledTimes( 1 );
-
-		resolveChoice();
+		await act( async () => {
+			resolveChoice();
+		} );
 		await waitFor( () =>
 			expect(
 				screen.getByRole( 'button', {
@@ -166,25 +168,24 @@ describe( 'QRLoginNumberMatchStep', () => {
 			).not.toBeDisabled()
 		);
 	} );
-
 	it( 'cancel-login button calls onChooseNumber with the empty-string sentinel', async () => {
 		const { onChooseNumber } = renderStep();
-
 		fireEvent.click(
-			screen.getByRole( 'button', { name: /cancel login/i } )
+			screen.getByRole( 'button', {
+				name: /cancel login/i,
+			} )
 		);
-
 		expect( onChooseNumber ).toHaveBeenCalledWith( '' );
 		await waitFor( () =>
 			expect(
-				screen.getByRole( 'button', { name: /cancel login/i } )
+				screen.getByRole( 'button', {
+					name: /cancel login/i,
+				} )
 			).not.toBeDisabled()
 		);
 	} );
-
 	it( 'shows a 90-second countdown that ticks down each second', () => {
 		renderStep();
-
 		const countdown = screen.getByText( /Expires in 90s/ );
 		expect( countdown ).toBeInTheDocument();
 		expect( countdown ).toHaveAttribute( 'aria-live', 'off' );
@@ -195,25 +196,22 @@ describe( 'QRLoginNumberMatchStep', () => {
 		// setSecondsRemaining update from the interval tick flushes before
 		// the next assertion runs.
 		act( () => {
-			jest.advanceTimersByTime( 1000 );
+			vi.advanceTimersByTime( 1000 );
 		} );
-
 		expect( screen.getByText( /Expires in 89s/ ) ).toBeInTheDocument();
 	} );
-
 	it( 'renders approval errors accessibly', () => {
-		renderStep( { errorMessage: 'Approval is already in progress.' } );
-
+		renderStep( {
+			errorMessage: 'Approval is already in progress.',
+		} );
 		expect( screen.getByRole( 'alert' ) ).toHaveTextContent(
 			'Approval is already in progress.'
 		);
 	} );
-
 	it( 'disables tiles and surfaces an expired message once the challenge window elapses', () => {
 		const { onChooseNumber } = renderStep( {
 			challengeExpiresAt: NOW_SECONDS,
 		} );
-
 		const expiredMessage = screen.getByText(
 			/This sign-in attempt has expired/
 		);
@@ -228,7 +226,6 @@ describe( 'QRLoginNumberMatchStep', () => {
 			name: /cancel login/i,
 		} );
 		expect( cancelButton ).toBeDisabled();
-
 		fireEvent.click( cancelButton );
 		expect( onChooseNumber ).not.toHaveBeenCalled();
 	} );

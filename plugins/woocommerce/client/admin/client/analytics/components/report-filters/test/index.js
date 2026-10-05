@@ -1,21 +1,22 @@
+import { describe, expect, test } from 'vitest';
+
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
+import { render, act } from '@testing-library/react';
 import { recordEvent } from '@woocommerce/tracks';
-
 import userEvent from '@testing-library/user-event';
 
 /**
  * Internal dependencies
  */
 import ReportFilters from '..';
-
 describe( 'ReportFilters', () => {
 	test( 'should record analytics_filter Tracks event when filter is changed', async () => {
 		const { getByText } = render(
 			<ReportFilters
 				report="test-report"
+				path="path"
 				query={ {
 					page: 'page',
 					path: 'path',
@@ -40,8 +41,12 @@ describe( 'ReportFilters', () => {
 				] }
 			/>
 		);
-		userEvent.click( getByText( 'All products' ) );
-		userEvent.click( getByText( 'Some products' ) );
+		await act( async () => {
+			userEvent.click( getByText( 'All products' ) );
+		} );
+		await act( async () => {
+			userEvent.click( getByText( 'Some products' ) );
+		} );
 		expect( recordEvent ).toHaveBeenCalledWith( 'analytics_filter', {
 			filter: 'some',
 			report: 'test-report',

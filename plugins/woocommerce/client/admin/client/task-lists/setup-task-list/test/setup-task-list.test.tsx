@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -9,53 +11,96 @@ import { TaskType } from '@woocommerce/data';
  * Internal dependencies
  */
 import { SetupTaskList } from '../setup-task-list';
-
-jest.mock( '@woocommerce/tracks', () => ( {
-	recordEvent: jest.fn(),
-} ) );
-jest.mock( '@woocommerce/experimental', () => ( {
-	TaskItem: ( props: { title: string } ) => <div>{ props.title }</div>,
-	useSlot: jest.fn(),
-	List: jest.fn().mockImplementation( ( { children } ) => children ),
-} ) );
-jest.mock( '@woocommerce/components', () => ( {
-	Card: jest.fn().mockImplementation( ( { children } ) => children ),
-	Badge: jest
-		.fn()
-		.mockImplementation( ( { count } ) => <div>Count:{ count }</div> ),
-	EllipsisMenu: jest
-		.fn()
-		.mockImplementation( () => <div>task_list_menu</div> ),
-} ) );
-jest.mock( '../components/task-headers', () => ( {
-	taskHeaders: {
-		optional: () => <div>optional_header</div>,
-		required: () => <div>required_header</div>,
-		completed: () => <div>completed_header</div>,
-	},
-	DefaultTaskHeader: () => <div>default_header</div>,
-} ) );
-jest.mock( '@woocommerce/data', () => ( {
-	...jest.requireActual( '@woocommerce/data' ),
-	useUserPreferences: jest.fn().mockReturnValue( {
-		updateUserPreferences: jest.fn(),
-	} ),
-} ) );
-jest.mock( '@woocommerce/admin-layout', () => {
+vi.mock( '@woocommerce/tracks', () => {
+	const mock = {
+		recordEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/experimental', () => {
+	const mock = {
+		TaskItem: ( props: { title: string } ) => <div>{ props.title }</div>,
+		useSlot: vi.fn(),
+		List: vi.fn().mockImplementation( ( { children } ) => children ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/components', () => {
+	const mock = {
+		Card: vi.fn().mockImplementation( ( { children } ) => children ),
+		Badge: vi
+			.fn()
+			.mockImplementation( ( { count } ) => <div>Count:{ count }</div> ),
+		EllipsisMenu: vi
+			.fn()
+			.mockImplementation( () => <div>task_list_menu</div> ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../components/task-headers', () => {
+	const mock = {
+		taskHeaders: {
+			optional: () => <div>optional_header</div>,
+			required: () => <div>required_header</div>,
+			completed: () => <div>completed_header</div>,
+		},
+		DefaultTaskHeader: () => <div>default_header</div>,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/data', async () => {
+	const mock = {
+		...( await vi.importActual( '@woocommerce/data' ) ),
+		useUserPreferences: vi.fn().mockReturnValue( {
+			updateUserPreferences: vi.fn(),
+		} ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/admin-layout', async () => {
 	const mockContext = {
 		layoutPath: [ 'home' ],
 		layoutString: 'home',
 		extendLayout: () => {},
 		isDescendantOf: () => false,
 	};
-	return {
-		...jest.requireActual( '@woocommerce/admin-layout' ),
-		useLayoutContext: jest.fn().mockReturnValue( mockContext ),
-		useExtendLayout: jest.fn().mockReturnValue( mockContext ),
-	};
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
+		...( await vi.importActual( '@woocommerce/admin-layout' ) ),
+		useLayoutContext: vi.fn().mockReturnValue( mockContext ),
+		useExtendLayout: vi.fn().mockReturnValue( mockContext ),
+	} );
 } );
-
-const tasks: { [ key: string ]: TaskType[] } = {
+const tasks: {
+	[ key: string ]: TaskType[];
+} = {
 	setup: [
 		{
 			id: 'optional',
@@ -154,12 +199,10 @@ const tasks: { [ key: string ]: TaskType[] } = {
 		},
 	],
 };
-
 describe( 'TaskList', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	} );
-
 	it( 'should trigger tasklist_view event on initial render for setup task list', () => {
 		render(
 			<SetupTaskList
@@ -183,7 +226,6 @@ describe( 'TaskList', () => {
 			store_connected: null,
 		} );
 	} );
-
 	it( 'should trigger tasklist_view event on initial render for setup task list with eventPrefix if eventName is undefined', () => {
 		render(
 			<SetupTaskList
@@ -206,7 +248,6 @@ describe( 'TaskList', () => {
 			store_connected: null,
 		} );
 	} );
-
 	it( 'should trigger {id}_tasklist_view event on initial render for setup task list if id is not setup', () => {
 		render(
 			<SetupTaskList
@@ -230,7 +271,6 @@ describe( 'TaskList', () => {
 			store_connected: null,
 		} );
 	} );
-
 	it( 'should render the task header of the first uncompleted task', () => {
 		const { queryByText } = render(
 			<SetupTaskList
@@ -248,7 +288,6 @@ describe( 'TaskList', () => {
 		);
 		expect( queryByText( 'optional_header' ) ).toBeInTheDocument();
 	} );
-
 	it( 'should render all tasks', () => {
 		const { queryByText } = render(
 			<SetupTaskList
@@ -268,9 +307,13 @@ describe( 'TaskList', () => {
 			expect( queryByText( task.title ) ).toBeInTheDocument();
 		}
 	} );
-
 	it( 'should not display isDismissed tasks', () => {
-		const dismissedTask = [ { ...tasks.setup[ 0 ], isDismissed: true } ];
+		const dismissedTask = [
+			{
+				...tasks.setup[ 0 ],
+				isDismissed: true,
+			},
+		];
 		const { queryByText } = render(
 			<SetupTaskList
 				id="extended"
@@ -289,7 +332,6 @@ describe( 'TaskList', () => {
 			queryByText( dismissedTask[ 0 ].title )
 		).not.toBeInTheDocument();
 	} );
-
 	it( 'should fall back to the DefaultTaskHeader for a task that has an image but no dedicated header or slot fill', () => {
 		const thirdPartyTask = {
 			...tasks.extension[ 0 ],
@@ -312,7 +354,6 @@ describe( 'TaskList', () => {
 		);
 		expect( queryByText( 'default_header' ) ).toBeInTheDocument();
 	} );
-
 	it( 'should not render any task header for a task without an image, dedicated header, or slot fill', () => {
 		const { queryByText } = render(
 			<SetupTaskList
@@ -330,7 +371,6 @@ describe( 'TaskList', () => {
 		);
 		expect( queryByText( 'default_header' ) ).not.toBeInTheDocument();
 	} );
-
 	it( 'should prefer a dedicated task header over the DefaultTaskHeader even when the task has an image', () => {
 		const taskWithImage = {
 			...tasks.setup[ 0 ],

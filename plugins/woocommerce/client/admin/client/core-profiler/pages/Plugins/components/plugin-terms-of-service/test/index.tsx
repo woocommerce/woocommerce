@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 // write tests for PluginTermsOfService
 
 /**

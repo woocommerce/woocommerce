@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -47,9 +49,10 @@ const REVIEW = {
 	},
 };
 
-jest.mock( '../checkmark-circle-icon', () =>
-	jest.fn().mockImplementation( () => '[checkmark-circle-icon]' )
-);
+vi.mock( '../checkmark-circle-icon', () => {
+	const mock = vi.fn().mockImplementation( () => '[checkmark-circle-icon]' );
+	return { default: mock, ...mock };
+} );
 
 describe( 'ReviewsPanel', () => {
 	it( 'should render an empty review card', () => {
@@ -110,7 +113,7 @@ describe( 'ReviewsPanel', () => {
 		} );
 
 		it( 'should trigger updateReview with status approved when Approve is clicked', () => {
-			const clickHandler = jest.fn( () => {
+			const clickHandler = vi.fn( () => {
 				return Promise.resolve();
 			} );
 			render(
@@ -120,7 +123,7 @@ describe( 'ReviewsPanel', () => {
 					isRequesting={ false }
 					reviews={ [ REVIEW ] }
 					updateReview={ clickHandler }
-					clearReviewsCache={ jest.fn() }
+					clearReviewsCache={ vi.fn() }
 					createNotice={ () => {} }
 				/>
 			);
@@ -131,7 +134,7 @@ describe( 'ReviewsPanel', () => {
 		} );
 
 		it( 'should trigger updateReview with status spam when Mark as spam is clicked', () => {
-			const clickHandler = jest.fn( () => {
+			const clickHandler = vi.fn( () => {
 				return Promise.resolve();
 			} );
 			render(
@@ -141,7 +144,7 @@ describe( 'ReviewsPanel', () => {
 					isRequesting={ false }
 					reviews={ [ REVIEW ] }
 					updateReview={ clickHandler }
-					clearReviewsCache={ jest.fn() }
+					clearReviewsCache={ vi.fn() }
 					createNotice={ () => {} }
 				/>
 			);
@@ -152,7 +155,7 @@ describe( 'ReviewsPanel', () => {
 		} );
 
 		it( 'should trigger deleteReview with review id when delete is clicked', () => {
-			const clickHandler = jest.fn( () => {
+			const clickHandler = vi.fn( () => {
 				return Promise.resolve();
 			} );
 			render(
@@ -162,7 +165,7 @@ describe( 'ReviewsPanel', () => {
 					isRequesting={ false }
 					reviews={ [ REVIEW ] }
 					deleteReview={ clickHandler }
-					clearReviewsCache={ jest.fn() }
+					clearReviewsCache={ vi.fn() }
 					createNotice={ () => {} }
 				/>
 			);

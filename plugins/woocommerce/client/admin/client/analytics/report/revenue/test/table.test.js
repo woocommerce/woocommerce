@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -65,8 +67,8 @@ const mockFiltered = {
 
 // table.js memoizes at module scope, so those caches outlive each test. Hand
 // the tests a way to reset them by tracking every function memoize() returns.
-jest.mock( 'lodash', () => {
-	const actual = jest.requireActual( 'lodash' );
+vi.mock( 'lodash', async () => {
+	const { default: actual } = await vi.importActual( 'lodash' );
 	const memoized = [];
 
 	const mockMemoize = ( ...args ) => {
@@ -76,27 +78,30 @@ jest.mock( 'lodash', () => {
 	};
 	mockMemoize.clearAll = () => memoized.forEach( ( fn ) => fn.cache.clear() );
 
-	return { ...actual, memoize: mockMemoize };
+	return ( ( mock ) => ( { default: mock, ...mock } ) )( {
+		...actual,
+		memoize: mockMemoize,
+	} );
 } );
 
-jest.mock( '@wordpress/data', () => {
-	const actual = jest.requireActual( '@wordpress/data' );
-	const { createElement } = jest.requireActual( '@wordpress/element' );
+vi.mock( '@wordpress/data', async () => {
+	const actual = await vi.importActual( '@wordpress/data' );
+	const { createElement } = await vi.importActual( '@wordpress/element' );
 
-	return {
+	return ( ( mock ) => ( { default: mock, ...mock } ) )( {
 		...actual,
 		withSelect: ( mapSelectToProps ) => ( Wrapped ) => ( props ) =>
 			createElement( Wrapped, {
 				...props,
 				...mapSelectToProps( global.mockSelect, props ),
 			} ),
-	};
+	} );
 } );
 
 // Stand-in for ReportTable rendering a row per interval, so the assertions can
 // read the dates and order counts back off the rendered table.
-jest.mock( '../../../components/report-table', () => {
-	const { createElement } = jest.requireActual( '@wordpress/element' );
+vi.mock( '../../../components/report-table', async () => {
+	const { createElement } = await vi.importActual( '@wordpress/element' );
 
 	return {
 		__esModule: true,

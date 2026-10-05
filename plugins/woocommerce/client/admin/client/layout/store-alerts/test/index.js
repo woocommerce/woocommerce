@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -9,7 +11,6 @@ import { useDispatch, useSelect } from '@wordpress/data';
  */
 import { StoreAlerts } from '../';
 import { setAdminSetting } from '~/utils/admin-settings';
-
 const alerts = [
 	{
 		title: 'Alert title 1',
@@ -31,32 +32,44 @@ const alerts = [
 		],
 	},
 ];
-
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useDispatch: jest.fn(),
-	useSelect: jest.fn(),
-} ) );
-
-jest.mock( '@woocommerce/data', () => ( {
-	notesStore: 'wc/admin/notes',
-	optionsStore: 'wc/admin/options',
-	QUERY_DEFAULTS: {
-		pageSize: 25,
-	},
-	useUserPreferences: jest.fn().mockReturnValue( {} ),
-} ) );
-
+vi.mock( '@wordpress/data', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/data' ) ),
+		useDispatch: vi.fn(),
+		useSelect: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/data', () => {
+	const mock = {
+		notesStore: 'wc/admin/notes',
+		optionsStore: 'wc/admin/options',
+		QUERY_DEFAULTS: {
+			pageSize: 25,
+		},
+		useUserPreferences: vi.fn().mockReturnValue( {} ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'StoreAlerts', () => {
 	beforeEach( () => {
 		useDispatch.mockReturnValue( {
-			createNotice: jest.fn(),
-			removeNote: jest.fn(),
-			triggerNoteAction: jest.fn(),
-			updateNote: jest.fn(),
+			createNotice: vi.fn(),
+			removeNote: vi.fn(),
+			triggerNoteAction: vi.fn(),
+			updateNote: vi.fn(),
 		} );
 	} );
-
 	it( 'should return null when no alerts exist', () => {
 		useSelect.mockImplementation( () => {
 			return {
@@ -65,10 +78,8 @@ describe( 'StoreAlerts', () => {
 			};
 		} );
 		const { container } = render( <StoreAlerts /> );
-
 		expect( container.firstChild ).toBeNull();
 	} );
-
 	it( 'should show the placeholder when loading and preloaded alerts exist', () => {
 		setAdminSetting( 'alertCount', 2 );
 		useSelect.mockImplementation( () => {
@@ -78,12 +89,10 @@ describe( 'StoreAlerts', () => {
 			};
 		} );
 		const { container } = render( <StoreAlerts /> );
-
 		expect(
 			container.querySelector( '.is-placeholder' )
 		).toBeInTheDocument();
 	} );
-
 	it( 'should show the alert title and content', () => {
 		useSelect.mockImplementation( () => {
 			return {
@@ -92,7 +101,6 @@ describe( 'StoreAlerts', () => {
 			};
 		} );
 		const { container } = render( <StoreAlerts /> );
-
 		expect(
 			container.querySelector( '.woocommerce-store-alerts__title' )
 				.textContent
@@ -102,7 +110,6 @@ describe( 'StoreAlerts', () => {
 				.textContent
 		).toBe( 'Alert content 1' );
 	} );
-
 	it( 'should not show the pagination for a single alert', () => {
 		useSelect.mockImplementation( () => {
 			return {
@@ -111,12 +118,10 @@ describe( 'StoreAlerts', () => {
 			};
 		} );
 		const { container } = render( <StoreAlerts /> );
-
 		expect(
 			container.querySelector( '.woocommerce-store-alerts__pagination' )
 		).toBeNull();
 	} );
-
 	it( 'should show the pagination for multiple alerts', () => {
 		useSelect.mockImplementation( () => {
 			return {
@@ -125,12 +130,10 @@ describe( 'StoreAlerts', () => {
 			};
 		} );
 		const { container } = render( <StoreAlerts /> );
-
 		expect(
 			container.querySelector( '.woocommerce-store-alerts__pagination' )
 		).toBeInTheDocument();
 	} );
-
 	it( 'should show the actions for an alert that contains actions', () => {
 		useSelect.mockImplementation( () => {
 			return {
@@ -139,7 +142,6 @@ describe( 'StoreAlerts', () => {
 			};
 		} );
 		const { container } = render( <StoreAlerts /> );
-
 		expect(
 			container.querySelector(
 				'.components-button:not(.woocommerce-store-alerts__close)'
@@ -156,16 +158,19 @@ describe( 'StoreAlerts', () => {
 			container.querySelector( '.woocommerce-store-alerts__snooze' )
 		).not.toBeInTheDocument();
 	} );
-
 	it( 'should show the actions and snooze actions for snoozable alerts', () => {
 		useSelect.mockImplementation( () => {
 			return {
-				alerts: [ { ...alerts[ 1 ], is_snoozable: true } ],
+				alerts: [
+					{
+						...alerts[ 1 ],
+						is_snoozable: true,
+					},
+				],
 				isLoading: false,
 			};
 		} );
 		const { container } = render( <StoreAlerts /> );
-
 		expect(
 			container.querySelector(
 				'.components-button:not(.woocommerce-store-alerts__close)'
@@ -182,33 +187,28 @@ describe( 'StoreAlerts', () => {
 			container.querySelector( '.woocommerce-store-alerts__snooze' )
 		).toBeInTheDocument();
 	} );
-
 	it( 'should show different alerts when clicking the pagination buttons', () => {
 		useSelect.mockImplementation( () => {
-			return { alerts, isLoading: false };
+			return {
+				alerts,
+				isLoading: false,
+			};
 		} );
 		const { container, getByLabelText, rerender } = render(
 			<StoreAlerts />
 		);
-
 		expect(
 			container.querySelector( '.woocommerce-store-alerts__title' )
 				.textContent
 		).toBe( 'Alert title 1' );
-
 		fireEvent.click( getByLabelText( 'Next Alert' ) );
-
 		rerender( <StoreAlerts /> );
-
 		expect(
 			container.querySelector( '.woocommerce-store-alerts__title' )
 				.textContent
 		).toBe( 'Alert title 2' );
-
 		fireEvent.click( getByLabelText( 'Previous Alert' ) );
-
 		rerender( <StoreAlerts /> );
-
 		expect(
 			container.querySelector( '.woocommerce-store-alerts__title' )
 				.textContent

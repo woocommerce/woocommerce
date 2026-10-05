@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -30,7 +32,7 @@ describe( 'QuickLink', () => {
 	} );
 
 	it( 'attaches a click handler to the link if it is passed', () => {
-		const clickHandler = jest.fn();
+		const clickHandler = vi.fn();
 
 		const { queryByRole } = render(
 			<QuickLink

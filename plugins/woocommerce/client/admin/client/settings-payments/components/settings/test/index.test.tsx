@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -39,7 +41,7 @@ describe( 'Settings component structure', () => {
 	} );
 
 	it( 'renders a form and triggers onSubmit', () => {
-		const onSubmit = jest.fn( ( e ) => e.preventDefault() );
+		const onSubmit = vi.fn( ( e ) => e.preventDefault() );
 		render(
 			<Settings.Form onSubmit={ onSubmit }>
 				<button type="submit">Save</button>

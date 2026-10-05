@@ -1,3 +1,5 @@
+import { describe, expect, test, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -14,28 +16,28 @@ import userEvent from '@testing-library/user-event';
 import { getUnreadNotesCount, hasValidNotes } from '../utils';
 import InboxPanel from '../';
 
-jest.mock( '@wordpress/data', () => {
+vi.mock( '@wordpress/data', async () => {
 	// Require the original module to not be mocked...
-	const originalModule = jest.requireActual( '@wordpress/data' );
+	const originalModule = await vi.importActual( '@wordpress/data' );
 
-	return {
+	return ( ( mock ) => ( { default: mock, ...mock } ) )( {
 		__esModule: true, // Use it when dealing with esModules
 		...originalModule,
-		useSelect: jest.fn().mockReturnValue( {} ),
-	};
+		useSelect: vi.fn().mockReturnValue( {} ),
+	} );
 } );
 
-jest.mock( '@woocommerce/experimental', () => {
+vi.mock( '@woocommerce/experimental', async () => {
 	// Require the original module to not be mocked...
-	const originalModule = jest.requireActual( '@woocommerce/experimental' );
+	const originalModule = await vi.importActual( '@woocommerce/experimental' );
 
-	return {
+	return ( ( mock ) => ( { default: mock, ...mock } ) )( {
 		__esModule: true, // Use it when dealing with esModules
 		...originalModule,
-		InboxNoteCard: jest.fn().mockImplementation( ( { note } ) => {
+		InboxNoteCard: vi.fn().mockImplementation( ( { note } ) => {
 			return <div>{ note.id }</div>;
 		} ),
-	};
+	} );
 } );
 
 const NOTES = [

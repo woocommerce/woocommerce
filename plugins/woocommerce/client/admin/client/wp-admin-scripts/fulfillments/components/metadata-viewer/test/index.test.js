@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -10,45 +12,77 @@ import { render, screen } from '@testing-library/react';
 import MetadataViewer from '../index';
 
 // Mock FulfillmentCard wrapper
-jest.mock( '../../user-interface/fulfillments-card/card', () => ( {
-	__esModule: true,
-	default: ( { header, children } ) => (
-		<div data-testid="fulfillment-card">
-			<div data-testid="card-header">{ header }</div>
-			<div data-testid="card-body">{ children }</div>
-		</div>
-	),
-} ) );
+vi.mock( '../../user-interface/fulfillments-card/card', () => {
+	const mock = {
+		__esModule: true,
+		default: ( { header, children } ) => (
+			<div data-testid="fulfillment-card">
+				<div data-testid="card-header">{ header }</div>
+				<div data-testid="card-body">{ children }</div>
+			</div>
+		),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 // Mock icon component
-jest.mock( '../../../utils/icons', () => ( {
-	__esModule: true,
-	PostListIcon: () => <span data-testid="post-list-icon" />,
-} ) );
+vi.mock( '../../../utils/icons', () => {
+	const mock = {
+		__esModule: true,
+		PostListIcon: () => <span data-testid="post-list-icon" />,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 // Mock MetaList component
-jest.mock( '../../user-interface/meta-list/meta-list', () => ( {
-	__esModule: true,
-	default: ( { metaList } ) => (
-		<ul data-testid="meta-list">
-			{ metaList.map( ( item, i ) => (
-				<li key={ i }>
-					{ item.label }: { item.value }
-				</li>
-			) ) }
-		</ul>
-	),
-} ) );
-
+vi.mock( '../../user-interface/meta-list/meta-list', () => {
+	const mock = {
+		__esModule: true,
+		default: ( { metaList } ) => (
+			<ul data-testid="meta-list">
+				{ metaList.map( ( item, i ) => (
+					<li key={ i }>
+						{ item.label }: { item.value }
+					</li>
+				) ) }
+			</ul>
+		),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'MetadataViewer component', () => {
 	it( 'renders header and icon', () => {
 		render(
 			<MetadataViewer
 				fulfillment={ {
 					meta_data: [
-						{ key: 'test_key', value: 'test_value' },
-						{ key: 'test_key_2', value: 'test_value_2' },
-						{ key: 'test_key_3', value: 'test_value_3' },
+						{
+							key: 'test_key',
+							value: 'test_value',
+						},
+						{
+							key: 'test_key_2',
+							value: 'test_value_2',
+						},
+						{
+							key: 'test_key_3',
+							value: 'test_value_3',
+						},
 					],
 				} }
 			/>
@@ -58,15 +92,23 @@ describe( 'MetadataViewer component', () => {
 		);
 		expect( screen.getByTestId( 'post-list-icon' ) ).toBeInTheDocument();
 	} );
-
 	it( 'renders list of metadata items', () => {
 		render(
 			<MetadataViewer
 				fulfillment={ {
 					meta_data: [
-						{ key: 'test_key', value: 'test_value' },
-						{ key: 'test_key_2', value: 'test_value_2' },
-						{ key: 'test_key_3', value: 'test_value_3' },
+						{
+							key: 'test_key',
+							value: 'test_value',
+						},
+						{
+							key: 'test_key_2',
+							value: 'test_value_2',
+						},
+						{
+							key: 'test_key_3',
+							value: 'test_value_3',
+						},
 					],
 				} }
 			/>
@@ -76,7 +118,13 @@ describe( 'MetadataViewer component', () => {
 		expect( screen.getAllByRole( 'listitem' ) ).toHaveLength( 3 );
 	} );
 	it( 'renders empty state when no metadata', () => {
-		render( <MetadataViewer fulfillment={ { meta_data: [] } } /> );
+		render(
+			<MetadataViewer
+				fulfillment={ {
+					meta_data: [],
+				} }
+			/>
+		);
 		expect(
 			screen.getByText( /No metadata available/ )
 		).toBeInTheDocument();

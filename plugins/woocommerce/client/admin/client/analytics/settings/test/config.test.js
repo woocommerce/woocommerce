@@ -1,18 +1,32 @@
-let mockPreloadedDefaults = {};
-
-jest.mock( '~/utils/admin-settings', () => ( {
-	...jest.requireActual( '~/utils/admin-settings' ),
-	getAdminSetting: ( name, fallback ) =>
-		name === 'wcAdminSettingsDefaults' ? mockPreloadedDefaults : fallback,
-} ) );
+import { describe, expect, it, vi } from 'vitest';
+let { mockPreloadedDefaults } = vi.hoisted( () => {
+	const mockPreloadedDefaults = {};
+	return {
+		mockPreloadedDefaults,
+	};
+} );
+vi.mock( '~/utils/admin-settings', async () => {
+	const mock = {
+		...( await vi.importActual( '~/utils/admin-settings' ) ),
+		getAdminSetting: ( name, fallback ) =>
+			name === 'wcAdminSettingsDefaults'
+				? mockPreloadedDefaults
+				: fallback,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 // config.js reads the preloaded defaults at module load, so each case needs a fresh import.
 const loadConfig = ( preloadedDefaults ) => {
 	mockPreloadedDefaults = preloadedDefaults;
-	jest.resetModules();
+	vi.resetModules();
 	return import( '../config' );
 };
-
 describe( 'Analytics settings config - order status defaults', () => {
 	it( 'uses the preloaded (filtered) defaults for the order status settings', async () => {
 		const config = await loadConfig( {
@@ -23,7 +37,6 @@ describe( 'Analytics settings config - order status defaults', () => {
 				'my-status',
 			],
 		} );
-
 		expect(
 			config.config.woocommerce_excluded_report_order_statuses
 				.defaultValue
@@ -37,10 +50,8 @@ describe( 'Analytics settings config - order status defaults', () => {
 			'my-status',
 		] );
 	} );
-
 	it( 'falls back to the built-in defaults when nothing was preloaded', async () => {
 		const config = await loadConfig( {} );
-
 		expect(
 			config.config.woocommerce_excluded_report_order_statuses
 				.defaultValue
@@ -49,20 +60,16 @@ describe( 'Analytics settings config - order status defaults', () => {
 			config.config.woocommerce_actionable_order_statuses.defaultValue
 		).toEqual( [ 'processing', 'on-hold' ] );
 	} );
-
 	it( 'falls back to the built-in defaults when the preload is null', async () => {
 		const config = await loadConfig( null );
-
 		expect(
 			config.config.woocommerce_actionable_order_statuses.defaultValue
 		).toEqual( [ 'processing', 'on-hold' ] );
 	} );
-
 	it( 'ignores a malformed preloaded default', async () => {
 		const config = await loadConfig( {
 			woocommerce_actionable_order_statuses: 'processing',
 		} );
-
 		expect(
 			config.config.woocommerce_actionable_order_statuses.defaultValue
 		).toEqual( [ 'processing', 'on-hold' ] );

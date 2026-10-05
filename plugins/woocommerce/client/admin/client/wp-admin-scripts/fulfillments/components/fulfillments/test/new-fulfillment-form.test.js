@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -9,80 +11,133 @@ import { render, screen } from '@testing-library/react';
 import '../../../test-helper/global-mock';
 import NewFulfillmentForm from '../new-fulfillment-form';
 import { useFulfillmentDrawerContext } from '../../../context/drawer-context';
-
-jest.mock( '../../../context/drawer-context', () => ( {
-	useFulfillmentDrawerContext: jest.fn(),
-} ) );
-jest.mock( '../../action-buttons/save-draft-button', () => () => (
-	<button data-testid="save-draft-button">Save as Draft</button>
-) );
-jest.mock( '../../action-buttons/fulfill-items-button', () => () => (
-	<button data-testid="fulfill-items-button">Fulfill Items</button>
-) );
-jest.mock( '../item-selector', () => () => (
-	<div data-testid="item-selector" />
-) );
-jest.mock( '../../customer-notification-form', () => () => (
-	<div data-testid="fulfillment-customer-notification-form" />
-) );
-
-jest.mock( '../../../context/fulfillment-context', () => ( {
-	FulfillmentProvider: ( { children } ) => (
-		<div data-testid="fulfillment-provider">{ children }</div>
-	),
-	useFulfillmentContext: jest.fn( () => ( {
-		order: { id: 1, currency: 'USD', line_items: [] },
-		fulfillment: null,
-		notifyCustomer: true,
-	} ) ),
-} ) );
-
-jest.mock( '../../../utils/order-utils', () => ( {
-	getItemsNotInAnyFulfillment: jest.fn( () => [] ),
-	spreadItems: jest.fn( () => [] ),
-} ) );
-
+vi.mock( '../../../context/drawer-context', () => {
+	const mock = {
+		useFulfillmentDrawerContext: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../action-buttons/save-draft-button', () => {
+	const mock = () => (
+		<button data-testid="save-draft-button">Save as Draft</button>
+	);
+	return {
+		default: mock,
+		...mock,
+	};
+} );
+vi.mock( '../../action-buttons/fulfill-items-button', () => {
+	const mock = () => (
+		<button data-testid="fulfill-items-button">Fulfill Items</button>
+	);
+	return {
+		default: mock,
+		...mock,
+	};
+} );
+vi.mock( '../item-selector', () => {
+	const mock = () => <div data-testid="item-selector" />;
+	return {
+		default: mock,
+		...mock,
+	};
+} );
+vi.mock( '../../customer-notification-form', () => {
+	const mock = () => (
+		<div data-testid="fulfillment-customer-notification-form" />
+	);
+	return {
+		default: mock,
+		...mock,
+	};
+} );
+vi.mock( '../../../context/fulfillment-context', () => {
+	const mock = {
+		FulfillmentProvider: ( { children } ) => (
+			<div data-testid="fulfillment-provider">{ children }</div>
+		),
+		useFulfillmentContext: vi.fn( () => ( {
+			order: {
+				id: 1,
+				currency: 'USD',
+				line_items: [],
+			},
+			fulfillment: null,
+			notifyCustomer: true,
+		} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../../utils/order-utils', () => {
+	const mock = {
+		getItemsNotInAnyFulfillment: vi.fn( () => [] ),
+		spreadItems: vi.fn( () => [] ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'NewFulfillmentForm', () => {
 	const mockContext = {
 		order: null,
 		fulfillments: [],
 		openSection: 'order',
 	};
-
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 		useFulfillmentDrawerContext.mockReturnValue( mockContext );
 	} );
-
 	it( 'renders nothing when order is null', () => {
 		mockContext.order = null;
 		const { container } = render( <NewFulfillmentForm /> );
 		expect( container.firstChild ).toBeNull();
 	} );
-
-	it( 'renders nothing when there are no remaining items', () => {
-		mockContext.order = { id: 1, currency: 'USD', line_items: [] };
-		require( '../../../utils/order-utils' ).getItemsNotInAnyFulfillment.mockReturnValue(
-			[]
-		);
+	it( 'renders nothing when there are no remaining items', async () => {
+		mockContext.order = {
+			id: 1,
+			currency: 'USD',
+			line_items: [],
+		};
+		(
+			await import( '../../../utils/order-utils' )
+		).getItemsNotInAnyFulfillment.mockReturnValue( [] );
 		const { container } = render( <NewFulfillmentForm /> );
 		expect( container.firstChild ).toBeNull();
 	} );
-
-	it( 'renders the form when there are remaining items', () => {
-		mockContext.order = { id: 1, currency: 'USD', line_items: [] };
-		require( '../../../utils/order-utils' ).getItemsNotInAnyFulfillment.mockReturnValue(
-			[
-				{
-					id: 1,
-					name: 'Item 1',
-					selection: [ { index: 0, checked: true } ],
-				},
-			]
-		);
-
+	it( 'renders the form when there are remaining items', async () => {
+		mockContext.order = {
+			id: 1,
+			currency: 'USD',
+			line_items: [],
+		};
+		(
+			await import( '../../../utils/order-utils' )
+		).getItemsNotInAnyFulfillment.mockReturnValue( [
+			{
+				id: 1,
+				name: 'Item 1',
+				selection: [
+					{
+						index: 0,
+						checked: true,
+					},
+				],
+			},
+		] );
 		render( <NewFulfillmentForm /> );
-
 		expect( screen.getByText( 'Order Items' ) ).toBeInTheDocument();
 		expect( screen.getByTestId( 'item-selector' ) ).toBeInTheDocument();
 		expect( screen.getByTestId( 'save-draft-button' ) ).toBeInTheDocument();

@@ -1,3 +1,5 @@
+import { describe, expect, it, test } from 'vitest';
+
 /**
  * External dependencies
  */

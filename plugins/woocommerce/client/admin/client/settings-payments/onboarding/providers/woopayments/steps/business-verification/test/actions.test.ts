@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -8,13 +10,16 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { createEmbeddedKycSession } from '../utils/actions';
 
-jest.mock( '@wordpress/api-fetch', () => jest.fn() );
+vi.mock( '@wordpress/api-fetch', () => {
+	const mock = vi.fn();
+	return { default: mock, ...mock };
+} );
 
-const mockApiFetch = apiFetch as jest.Mock;
+const mockApiFetch = apiFetch as Mock;
 
 describe( 'business verification actions', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 		mockApiFetch.mockResolvedValue( {
 			session: {
 				clientSecret: 'test-secret',

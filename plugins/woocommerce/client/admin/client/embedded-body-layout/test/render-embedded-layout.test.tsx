@@ -1,3 +1,5 @@
+import { beforeAll, describe, expect, test, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -9,41 +11,68 @@ import { WCUser } from '@woocommerce/data';
 import { renderEmbeddedLayout } from '../render-embedded-layout';
 
 // Mock dependencies
-jest.mock( '@wordpress/element', () => ( {
-	...jest.requireActual( '@wordpress/element' ),
-	createRoot: jest.fn( () => ( {
-		render: jest.fn(),
-	} ) ),
-} ) );
-
-jest.mock( '@woocommerce/data', () => ( {
-	...jest.requireActual( '@woocommerce/data' ),
-	/* eslint-disable @typescript-eslint/no-unused-vars */
-	withCurrentUserHydration: jest.fn(
-		( user ) => ( Component: React.ReactNode ) => Component
-	),
-	withSettingsHydration: jest.fn(
-		( group, settings ) => ( Component: React.ReactNode ) => Component
-	),
-	/* eslint-enable @typescript-eslint/no-unused-vars */
-} ) );
-
-jest.mock( '../../layout', () => ( {
-	EmbedLayout: jest.fn( () => null ),
-	PrimaryLayout: jest.fn( () => null ),
-} ) );
-
-jest.mock( '../', () => ( {
-	EmbeddedBodyLayout: jest.fn( () => null ),
-} ) );
-
+vi.mock( '@wordpress/element', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/element' ) ),
+		createRoot: vi.fn( () => ( {
+			render: vi.fn(),
+		} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/data', async () => {
+	const mock = {
+		...( await vi.importActual( '@woocommerce/data' ) ),
+		/* eslint-disable @typescript-eslint/no-unused-vars */
+		withCurrentUserHydration: vi.fn(
+			( user ) => ( Component: React.ReactNode ) => Component
+		),
+		withSettingsHydration: vi.fn(
+			( group, settings ) => ( Component: React.ReactNode ) => Component
+		),
+		/* eslint-enable @typescript-eslint/no-unused-vars */
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../layout', () => {
+	const mock = {
+		EmbedLayout: vi.fn( () => null ),
+		PrimaryLayout: vi.fn( () => null ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../', () => {
+	const mock = {
+		EmbeddedBodyLayout: vi.fn( () => null ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'embedded-layout', () => {
 	let mockEmbeddedRoot: HTMLDivElement;
 	const mockHydrateUser = {
 		woocommerce_meta: {},
 	} as WCUser;
 	const mockSettingsGroup = 'test-settings';
-
 	beforeAll( () => {
 		// Setup DOM elements
 		mockEmbeddedRoot = document.createElement( 'div' );
@@ -53,7 +82,6 @@ describe( 'embedded-layout', () => {
             </div>
         `;
 	} );
-
 	test( 'should initialize embedded layout successfully', () => {
 		const result = renderEmbeddedLayout(
 			mockEmbeddedRoot,
@@ -67,28 +95,22 @@ describe( 'embedded-layout', () => {
 		).toBeFalsy();
 		expect( result ).toBeTruthy();
 	} );
-
 	test( 'should handle missing wpbody-content', () => {
 		document.body.innerHTML = '';
-
 		const result = renderEmbeddedLayout(
 			mockEmbeddedRoot,
 			mockHydrateUser,
 			mockSettingsGroup
 		);
-
 		expect( result ).toBeFalsy();
 	} );
-
 	test( 'should handle missing wrap element', () => {
 		document.body.innerHTML = '<div id="wpbody-content"></div>';
-
 		const result = renderEmbeddedLayout(
 			mockEmbeddedRoot,
 			mockHydrateUser,
 			mockSettingsGroup
 		);
-
 		expect( result ).toBeFalsy();
 	} );
 } );

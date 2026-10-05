@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -9,69 +11,98 @@ import { useSettings } from '@woocommerce/data';
  */
 import Settings from '../index';
 import { config } from '../config';
-
-jest.mock( '@woocommerce/data', () => ( {
-	useSettings: jest.fn(),
-} ) );
-
-jest.mock( '@woocommerce/tracks', () => ( {
-	recordEvent: jest.fn(),
-} ) );
-
-jest.mock( '../historical-data', () => ( {
-	__esModule: true,
-	default: () => <div>Historical Data</div>,
-} ) );
-
-jest.mock( '../default-date', () => ( {
-	__esModule: true,
-	default: () => <div>Default Date</div>,
-} ) );
-
+vi.mock( '@woocommerce/data', async () => {
+	const mock = {
+		...( await vi.importActual( '@woocommerce/data' ) ),
+		useSettings: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/tracks', () => {
+	const mock = {
+		recordEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../historical-data', () => {
+	const mock = {
+		__esModule: true,
+		default: () => <div>Historical Data</div>,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../default-date', () => {
+	const mock = {
+		__esModule: true,
+		default: () => <div>Default Date</div>,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'Analytics settings - date type', () => {
-	const mockUpdateAndPersistSettings = jest.fn();
-
+	const mockUpdateAndPersistSettings = vi.fn();
 	beforeEach( () => {
-		jest.clearAllMocks();
-
+		vi.clearAllMocks();
 		useSettings.mockReturnValue( {
 			settingsError: false,
 			isRequesting: false,
 			isDirty: false,
-			persistSettings: jest.fn(),
+			persistSettings: vi.fn(),
 			updateAndPersistSettings: mockUpdateAndPersistSettings,
-			updateSettings: jest.fn(),
+			updateSettings: vi.fn(),
 			wcAdminSettings: {
 				woocommerce_date_type: 'date_completed',
 			},
 		} );
 	} );
-
 	afterEach( () => {
-		jest.restoreAllMocks();
+		vi.restoreAllMocks();
 	} );
-
 	it( 'defines date_paid as the default value, matching reports behavior', () => {
 		expect( config.woocommerce_date_type.defaultValue ).toBe( 'date_paid' );
 	} );
-
 	it( 'renders the date type selector with the saved value', () => {
-		render( <Settings createNotice={ jest.fn() } query={ {} } /> );
-
+		const errorSpy = vi
+			.spyOn( console, 'error' )
+			.mockImplementation( () => {} );
+		render( <Settings createNotice={ vi.fn() } query={ {} } /> );
 		expect( screen.getByRole( 'combobox' ) ).toHaveValue(
 			'date_completed'
 		);
-	} );
-
-	it( 'resets the date type to date_paid when resetting to defaults', () => {
-		jest.spyOn( window, 'confirm' ).mockReturnValue( true );
-
-		render( <Settings createNotice={ jest.fn() } query={ {} } /> );
-
-		fireEvent.click(
-			screen.getByRole( 'button', { name: /reset defaults/i } )
+		expect( errorSpy ).toHaveBeenCalledWith(
+			'Warning: Failed %s type: %s%s',
+			'prop',
+			expect.stringContaining( 'Invalid prop `helpText`' ),
+			expect.any( String )
 		);
-
+	} );
+	it( 'resets the date type to date_paid when resetting to defaults', () => {
+		vi.spyOn( window, 'confirm' ).mockReturnValue( true );
+		render( <Settings createNotice={ vi.fn() } query={ {} } /> );
+		fireEvent.click(
+			screen.getByRole( 'button', {
+				name: /reset defaults/i,
+			} )
+		);
 		expect( mockUpdateAndPersistSettings ).toHaveBeenCalledWith(
 			'wcAdminSettings',
 			expect.objectContaining( {

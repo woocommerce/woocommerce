@@ -1,3 +1,5 @@
+import { afterEach, describe, expect, test, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -604,7 +606,7 @@ describe( 'buildChartData across every date range shape', () => {
 	const originalSettings = global.window.wcSettings;
 
 	afterEach( () => {
-		jest.useRealTimers();
+		vi.useRealTimers();
 		global.window.wcSettings = originalSettings;
 	} );
 
@@ -614,7 +616,7 @@ describe( 'buildChartData across every date range shape', () => {
 		storeTimeZones.forEach( ( timeZone ) => {
 			global.window.wcSettings = { ...originalSettings, timeZone };
 			clocks.forEach( ( clock ) => {
-				jest.useFakeTimers().setSystemTime( new Date( clock ) );
+				vi.useFakeTimers().setSystemTime( new Date( clock ) );
 				Object.entries( builders ).forEach( ( [ preset, build ] ) => {
 					compares.forEach( ( compare ) => {
 						const range = build( compare );
@@ -644,7 +646,7 @@ describe( 'buildChartData across every date range shape', () => {
 	} );
 
 	test( 'pins a comparison value to a hardcoded calendar day', () => {
-		jest.useFakeTimers().setSystemTime( new Date( '2026-09-09T12:00:00' ) );
+		vi.useFakeTimers().setSystemTime( new Date( '2026-09-09T12:00:00' ) );
 		const range = builders.last_year( 'previous_period' );
 		const primary = pickerFor( range.primaryStart, range.primaryEnd );
 		const secondary = pickerFor(
@@ -726,7 +728,7 @@ describe( 'buildChartData across every date range shape', () => {
 		const problems = [];
 
 		clocks.forEach( ( clock ) => {
-			jest.useFakeTimers().setSystemTime( new Date( clock ) );
+			vi.useFakeTimers().setSystemTime( new Date( clock ) );
 			Object.entries( builders ).forEach( ( [ preset, build ] ) => {
 				compares.forEach( ( compare ) => {
 					const range = build( compare );

@@ -1,7 +1,23 @@
+import {
+	afterEach,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+	type Mock,
+} from 'vitest';
+
 /**
  * External dependencies
  */
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import {
+	render,
+	screen,
+	fireEvent,
+	waitFor,
+	act,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useSelect, useDispatch } from '@wordpress/data';
 
@@ -9,28 +25,49 @@ import { useSelect, useDispatch } from '@wordpress/data';
  * Internal dependencies
  */
 import { SettingsPaymentsBacs } from '../settings-payments-bacs';
-
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn(),
-	useDispatch: jest.fn(),
-} ) );
-
-jest.mock( '~/settings-payments/components/bank-accounts-list', () => ( {
-	BankAccountsList: ( { defaultCountry }: { defaultCountry: string } ) => (
-		<div
-			data-testid="bank-accounts-list"
-			data-default-country={ defaultCountry }
-		/>
-	),
-} ) );
-
+vi.mock( '@wordpress/data', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/data' ) ),
+		useSelect: vi.fn(),
+		useDispatch: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '~/settings-payments/components/bank-accounts-list', () => {
+	const mock = {
+		BankAccountsList: ( {
+			defaultCountry,
+		}: {
+			defaultCountry: string;
+		} ) => (
+			<div
+				data-testid="bank-accounts-list"
+				data-default-country={ defaultCountry }
+			/>
+		),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const bacsSettings = {
 	enabled: true,
 	description: 'Make your payment directly into our bank account.',
 	settings: {
-		title: { value: 'Direct bank transfer' },
-		instructions: { value: 'Use your order ID as the payment reference.' },
+		title: {
+			value: 'Direct bank transfer',
+		},
+		instructions: {
+			value: 'Use your order ID as the payment reference.',
+		},
 		enable_for_methods: {
 			value: [ 'flat_rate:1' ],
 			options: {
@@ -42,10 +79,11 @@ const bacsSettings = {
 				},
 			},
 		},
-		enable_for_virtual: { value: 'yes' },
+		enable_for_virtual: {
+			value: 'yes',
+		},
 	},
 };
-
 const accountsOption = [
 	{
 		id: 'extra-field-that-should-not-be-saved',
@@ -58,33 +96,29 @@ const accountsOption = [
 		country_code: 'GB',
 	},
 ];
-
 describe( 'SettingsPaymentsBacs', () => {
-	let updatePaymentGateway: jest.Mock;
-	let updateOptions: jest.Mock;
-
+	let updatePaymentGateway: Mock;
+	let updateOptions: Mock;
 	beforeEach( () => {
-		updatePaymentGateway = jest.fn().mockResolvedValue( {} );
-		updateOptions = jest.fn().mockResolvedValue( {} );
-		( useDispatch as jest.Mock ).mockReturnValue( {
-			createSuccessNotice: jest.fn(),
-			createErrorNotice: jest.fn(),
+		updatePaymentGateway = vi.fn().mockResolvedValue( {} );
+		updateOptions = vi.fn().mockResolvedValue( {} );
+		( useDispatch as Mock ).mockReturnValue( {
+			createSuccessNotice: vi.fn(),
+			createErrorNotice: vi.fn(),
 			updatePaymentGateway,
 			updateOptions,
-			invalidateResolution: jest.fn(),
-			invalidateResolutionForStoreSelector: jest.fn(),
+			invalidateResolution: vi.fn(),
+			invalidateResolutionForStoreSelector: vi.fn(),
 		} );
-		( useSelect as jest.Mock ).mockReturnValue( {
+		( useSelect as Mock ).mockReturnValue( {
 			bacsSettings,
 			isLoading: false,
 			accountsOption,
 			isLoadingAccounts: false,
 		} );
 	} );
-
 	it( 'renders all settings fields with stored values', () => {
 		render( <SettingsPaymentsBacs /> );
-
 		expect(
 			screen.getByLabelText( 'Enable direct bank transfers' )
 		).toBeChecked();
@@ -106,135 +140,126 @@ describe( 'SettingsPaymentsBacs', () => {
 			screen.getByLabelText( 'Accept for virtual orders' )
 		).toBeChecked();
 	} );
-
 	it( 'renders the bank accounts section', () => {
 		render( <SettingsPaymentsBacs /> );
-
 		expect(
 			screen.getByTestId( 'bank-accounts-list' )
 		).toBeInTheDocument();
 	} );
-
 	describe( 'country a new bank account starts in', () => {
 		const setWcSettings = ( admin: unknown ) => {
 			Object.defineProperty( window, 'wcSettings', {
-				value: { admin },
+				value: {
+					admin,
+				},
 				writable: true,
 			} );
 		};
-
 		afterEach( () => {
 			Object.defineProperty( window, 'wcSettings', {
 				value: undefined,
 				writable: true,
 			} );
 		} );
-
 		it( 'uses the business location set on the Payments settings screen', () => {
 			setWcSettings( {
 				woocommerce_payments_nox_profile: {
 					business_country_code: 'TN',
 				},
 				preloadSettings: {
-					general: { woocommerce_default_country: 'US:CA' },
+					general: {
+						woocommerce_default_country: 'US:CA',
+					},
 				},
 			} );
-
 			render( <SettingsPaymentsBacs /> );
-
 			expect(
 				screen.getByTestId( 'bank-accounts-list' )
 			).toHaveAttribute( 'data-default-country', 'TN' );
 		} );
-
 		it( "falls back to the store's base country, without its state suffix", () => {
 			setWcSettings( {
 				preloadSettings: {
-					general: { woocommerce_default_country: 'US:CA' },
+					general: {
+						woocommerce_default_country: 'US:CA',
+					},
 				},
 			} );
-
 			render( <SettingsPaymentsBacs /> );
-
 			expect(
 				screen.getByTestId( 'bank-accounts-list' )
 			).toHaveAttribute( 'data-default-country', 'US' );
 		} );
-
 		it( 'ignores locations that are stored empty', () => {
 			setWcSettings( {
 				woocommerce_payments_nox_profile: {
 					business_country_code: '',
 				},
 				preloadSettings: {
-					general: { woocommerce_default_country: '' },
+					general: {
+						woocommerce_default_country: '',
+					},
 				},
 			} );
-
 			render( <SettingsPaymentsBacs /> );
-
 			expect(
 				screen.getByTestId( 'bank-accounts-list' )
 			).toHaveAttribute( 'data-default-country', 'US' );
 		} );
-
 		it( 'ignores locations that are not strings', () => {
 			setWcSettings( {
 				woocommerce_payments_nox_profile: {
-					business_country_code: { country: 'TN' },
+					business_country_code: {
+						country: 'TN',
+					},
 				},
 				preloadSettings: {
-					general: { woocommerce_default_country: true },
+					general: {
+						woocommerce_default_country: true,
+					},
 				},
 			} );
-
 			render( <SettingsPaymentsBacs /> );
-
 			expect(
 				screen.getByTestId( 'bank-accounts-list' )
 			).toHaveAttribute( 'data-default-country', 'US' );
 		} );
-
 		it( 'falls through an unusable business location to the store', () => {
 			setWcSettings( {
 				woocommerce_payments_nox_profile: {
-					business_country_code: { country: 'TN' },
+					business_country_code: {
+						country: 'TN',
+					},
 				},
 				preloadSettings: {
 					// Deliberately not US, so this cannot be confused with
 					// the last-resort fallback at the end of the chain.
-					general: { woocommerce_default_country: 'GB' },
+					general: {
+						woocommerce_default_country: 'GB',
+					},
 				},
 			} );
-
 			render( <SettingsPaymentsBacs /> );
-
 			expect(
 				screen.getByTestId( 'bank-accounts-list' )
 			).toHaveAttribute( 'data-default-country', 'GB' );
 		} );
-
 		it( 'falls back to US when the store knows no location at all', () => {
 			setWcSettings( {} );
-
 			render( <SettingsPaymentsBacs /> );
-
 			expect(
 				screen.getByTestId( 'bank-accounts-list' )
 			).toHaveAttribute( 'data-default-country', 'US' );
 		} );
 	} );
-
 	it( 'renders placeholders while loading', () => {
-		( useSelect as jest.Mock ).mockReturnValue( {
+		( useSelect as Mock ).mockReturnValue( {
 			bacsSettings: null,
 			isLoading: true,
 			accountsOption: undefined,
 			isLoadingAccounts: true,
 		} );
-
 		const { container } = render( <SettingsPaymentsBacs /> );
-
 		expect(
 			container.querySelectorAll( '.woocommerce-field-placeholder' )
 				.length
@@ -244,37 +269,40 @@ describe( 'SettingsPaymentsBacs', () => {
 			screen.queryByTestId( 'bank-accounts-list' )
 		).not.toBeInTheDocument();
 	} );
-
 	it( 'disables save until a change is made', () => {
 		render( <SettingsPaymentsBacs /> );
-
 		expect(
-			screen.getByRole( 'button', { name: 'Save changes' } )
+			screen.getByRole( 'button', {
+				name: 'Save changes',
+			} )
 		).toBeDisabled();
-
 		fireEvent.change( screen.getByLabelText( 'Title' ), {
-			target: { value: 'Bank transfer payments' },
+			target: {
+				value: 'Bank transfer payments',
+			},
 		} );
-
 		expect(
-			screen.getByRole( 'button', { name: 'Save changes' } )
+			screen.getByRole( 'button', {
+				name: 'Save changes',
+			} )
 		).toBeEnabled();
 	} );
-
 	it( 'saves the edited values with the expected payload shape', async () => {
 		render( <SettingsPaymentsBacs /> );
-
 		fireEvent.change( screen.getByLabelText( 'Title' ), {
-			target: { value: 'Bank transfer payments' },
+			target: {
+				value: 'Bank transfer payments',
+			},
 		} );
 		fireEvent.click(
 			screen.getByLabelText( 'Enable direct bank transfers' )
 		);
 		fireEvent.click( screen.getByLabelText( 'Accept for virtual orders' ) );
 		fireEvent.click(
-			screen.getByRole( 'button', { name: 'Save changes' } )
+			screen.getByRole( 'button', {
+				name: 'Save changes',
+			} )
 		);
-
 		await waitFor( () => {
 			expect( updatePaymentGateway ).toHaveBeenCalledWith( 'bacs', {
 				enabled: false,
@@ -288,7 +316,6 @@ describe( 'SettingsPaymentsBacs', () => {
 				},
 			} );
 		} );
-
 		expect( updateOptions ).toHaveBeenCalledWith( {
 			woocommerce_bacs_accounts: [
 				{
@@ -303,41 +330,52 @@ describe( 'SettingsPaymentsBacs', () => {
 			],
 		} );
 	} );
-
 	it( 'disables save again after a successful save', async () => {
 		render( <SettingsPaymentsBacs /> );
-
 		fireEvent.change( screen.getByLabelText( 'Title' ), {
-			target: { value: 'Bank transfer payments' },
+			target: {
+				value: 'Bank transfer payments',
+			},
 		} );
 		fireEvent.click(
-			screen.getByRole( 'button', { name: 'Save changes' } )
+			screen.getByRole( 'button', {
+				name: 'Save changes',
+			} )
 		);
-
 		await waitFor( () => {
 			expect(
-				screen.getByRole( 'button', { name: 'Save changes' } )
+				screen.getByRole( 'button', {
+					name: 'Save changes',
+				} )
 			).toBeDisabled();
 		} );
 	} );
-
 	it( 'supports keyboard navigation through the form fields', async () => {
 		render( <SettingsPaymentsBacs /> );
 
 		// Make a change first so the Save button is enabled (and tabbable).
 		fireEvent.change( screen.getByLabelText( 'Title' ), {
-			target: { value: 'Edited title' },
+			target: {
+				value: 'Edited title',
+			},
 		} );
-
-		await userEvent.tab();
+		await act( async () => {
+			await userEvent.tab();
+		} );
 		expect(
 			screen.getByLabelText( 'Enable direct bank transfers' )
 		).toHaveFocus();
-		await userEvent.tab();
+		await act( async () => {
+			await userEvent.tab();
+		} );
 		expect( screen.getByLabelText( 'Title' ) ).toHaveFocus();
-		await userEvent.tab();
+		await act( async () => {
+			await userEvent.tab();
+		} );
 		expect( screen.getByLabelText( 'Description' ) ).toHaveFocus();
-		await userEvent.tab();
+		await act( async () => {
+			await userEvent.tab();
+		} );
 		expect( screen.getByLabelText( 'Instructions' ) ).toHaveFocus();
 		// The shipping methods tree select and the virtual orders checkbox
 		// sit between Instructions and Save; tab until Save receives focus.
@@ -349,34 +387,36 @@ describe( 'SettingsPaymentsBacs', () => {
 			i < 6 && saveButton.ownerDocument.activeElement !== saveButton;
 			i++
 		) {
-			await userEvent.tab();
+			await act( async () => {
+				await userEvent.tab();
+			} );
 		}
 		expect( saveButton ).toHaveFocus();
 	} );
-
 	it( 'shows an error notice when saving fails', async () => {
-		const createErrorNotice = jest.fn();
+		const createErrorNotice = vi.fn();
 		updatePaymentGateway.mockRejectedValueOnce(
 			new Error( 'save failed' )
 		);
-		( useDispatch as jest.Mock ).mockReturnValue( {
-			createSuccessNotice: jest.fn(),
+		( useDispatch as Mock ).mockReturnValue( {
+			createSuccessNotice: vi.fn(),
 			createErrorNotice,
 			updatePaymentGateway,
-			updateOptions: jest.fn().mockResolvedValue( {} ),
-			invalidateResolution: jest.fn(),
-			invalidateResolutionForStoreSelector: jest.fn(),
+			updateOptions: vi.fn().mockResolvedValue( {} ),
+			invalidateResolution: vi.fn(),
+			invalidateResolutionForStoreSelector: vi.fn(),
 		} );
-
 		render( <SettingsPaymentsBacs /> );
-
 		fireEvent.change( screen.getByLabelText( 'Title' ), {
-			target: { value: 'Edited title' },
+			target: {
+				value: 'Edited title',
+			},
 		} );
 		fireEvent.click(
-			screen.getByRole( 'button', { name: 'Save changes' } )
+			screen.getByRole( 'button', {
+				name: 'Save changes',
+			} )
 		);
-
 		await waitFor( () => {
 			expect( createErrorNotice ).toHaveBeenCalledWith(
 				'Failed to update settings'

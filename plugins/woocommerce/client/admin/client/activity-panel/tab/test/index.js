@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -112,7 +114,7 @@ describe( 'ActivityPanel Tab', () => {
 	} );
 
 	it( 'calls the onTabClick handler if a tab is clicked', () => {
-		const onTabClickSpy = jest.fn();
+		const onTabClickSpy = vi.fn();
 
 		const { getByRole } = render(
 			<Tab

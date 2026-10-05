@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -13,17 +15,15 @@ describe( 'staticFormDataToObject', () => {
 		render(
 			<form id="testform">
 				<div>
-					<input type="text" name="Name" value="John" />
-					<select name="Car">
+					<input type="text" name="Name" defaultValue="John" />
+					<select name="Car" defaultValue="audi">
 						<option value="volvo">Volvo</option>
 						<option value="saab">Saab</option>
 						<option value="mercedes">Mercedes</option>
-						<option value="audi" selected>
-							Audi
-						</option>
+						<option value="audi">Audi</option>
 					</select>
 				</div>
-				<textarea name="Description" value="Tall" />
+				<textarea name="Description" defaultValue="Tall" />
 			</form>
 		);
 		type FormElements = {
@@ -45,15 +45,15 @@ describe( 'staticFormDataToObject', () => {
 		render(
 			<form id="testform">
 				<div>
-					<select name="Car" multiple>
-						<option value="volvo" selected>
-							Volvo
-						</option>
+					<select
+						name="Car"
+						multiple
+						defaultValue={ [ 'volvo', 'audi' ] }
+					>
+						<option value="volvo">Volvo</option>
 						<option value="saab">Saab</option>
 						<option value="mercedes">Mercedes</option>
-						<option value="audi" selected>
-							Audi
-						</option>
+						<option value="audi">Audi</option>
 					</select>
 				</div>
 			</form>
@@ -75,7 +75,7 @@ describe( 'staticFormDataToObject', () => {
 		render(
 			<form id="testform">
 				<div>
-					<input type="text" name="Name" value="John" />
+					<input type="text" name="Name" defaultValue="John" />
 					<input type="button" value="Add to favorites"></input>
 					<input type="image" name="Image" alt="Image" />
 					<input type="submit" value="Submit" />

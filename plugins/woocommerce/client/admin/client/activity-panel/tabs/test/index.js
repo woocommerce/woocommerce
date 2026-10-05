@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -74,7 +76,7 @@ describe( 'Activity Panel Tabs', () => {
 	} );
 
 	it( 'forwards the clicked tab to onTabClick', () => {
-		const tabClickSpy = jest.fn();
+		const tabClickSpy = vi.fn();
 		const generatedTabs = generateTabs();
 
 		const { getAllByRole } = render(

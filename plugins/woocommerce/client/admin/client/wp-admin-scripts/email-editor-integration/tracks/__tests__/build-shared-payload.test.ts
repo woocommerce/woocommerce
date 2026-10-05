@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 /**
  * Unit tests for the shared Tracks payload helper (RSM-145 §5.2).
  *

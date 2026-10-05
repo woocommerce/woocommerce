@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -9,42 +11,43 @@ import { useSelect, useDispatch } from '@wordpress/data';
  */
 import { TransientNotices } from '..';
 
-jest.mock( '@wordpress/data', () => {
+vi.mock( '@wordpress/data', async () => {
 	// Require the original module to not be mocked...
-	const originalModule = jest.requireActual( '@wordpress/data' );
+	const originalModule = await vi.importActual( '@wordpress/data' );
 
-	return {
+	return ( ( mock ) => ( { default: mock, ...mock } ) )( {
 		__esModule: true, // Use it when dealing with esModules
 		...originalModule,
-		useDispatch: jest.fn(),
-		useSelect: jest.fn().mockReturnValue( {} ),
-	};
+		useDispatch: vi.fn(),
+		useSelect: vi.fn().mockReturnValue( {} ),
+	} );
 } );
 
 useDispatch.mockReturnValue( {
-	removeNotice: jest.fn(),
-	createNotice: jest.fn(),
+	removeNotice: vi.fn(),
+	createNotice: vi.fn(),
 } );
 
-jest.mock( '@woocommerce/admin-layout', () => {
-	const originalModule = jest.requireActual( '@woocommerce/admin-layout' );
+vi.mock( '@woocommerce/admin-layout', async () => {
+	const originalModule = await vi.importActual( '@woocommerce/admin-layout' );
 
-	return {
+	return ( ( mock ) => ( { default: mock, ...mock } ) )( {
 		__esModule: true, // Use it when dealing with esModules
 		...originalModule,
-		WooFooterItem: jest.fn( ( { children } ) => {
+		WooFooterItem: vi.fn( ( { children } ) => {
 			return <div>{ children }</div>;
 		} ),
-	};
+	} );
 } );
 
-jest.mock( '../snackbar/list', () =>
-	jest.fn( ( { notices } ) => {
+vi.mock( '../snackbar/list', () => {
+	const mock = vi.fn( ( { notices } ) => {
 		return notices.map( ( notice ) => (
 			<div key={ notice.title }>{ notice.title }</div>
 		) );
-	} )
-);
+	} );
+	return { default: mock, ...mock };
+} );
 
 describe( 'TransientNotices', () => {
 	it( 'combines both notices and notices2 together and passes them to snackbar list', () => {
@@ -77,7 +80,7 @@ describe( 'TransientNotices', () => {
 				},
 			],
 		} );
-		const createNotice = jest.fn();
+		const createNotice = vi.fn();
 		useDispatch.mockReturnValue( {
 			createNotice,
 		} );
@@ -110,7 +113,7 @@ describe( 'TransientNotices', () => {
 				},
 			],
 		} );
-		const createNotice = jest.fn();
+		const createNotice = vi.fn();
 		useDispatch.mockReturnValue( {
 			createNotice,
 		} );

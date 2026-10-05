@@ -1,3 +1,19 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+const {
+	mockCreateErrorNotice,
+	mockTogglePaymentGateway,
+	mockInvalidateResolutionForStoreSelector,
+} = vi.hoisted( () => {
+	const mockCreateErrorNotice = vi.fn();
+	const mockTogglePaymentGateway = vi.fn();
+	const mockInvalidateResolutionForStoreSelector = vi.fn();
+	return {
+		mockCreateErrorNotice,
+		mockTogglePaymentGateway,
+		mockInvalidateResolutionForStoreSelector,
+	};
+} );
+
 /**
  * External dependencies
  */
@@ -11,36 +27,59 @@ import type {
  * Internal dependencies
  */
 import { EnableGatewayButton } from '../enable-gateway-button';
-
-const mockCreateErrorNotice = jest.fn();
-const mockTogglePaymentGateway = jest.fn();
-const mockInvalidateResolutionForStoreSelector = jest.fn();
-
-jest.mock( '@woocommerce/data', () => ( {
-	paymentSettingsStore: {},
-} ) );
-
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	dispatch: jest.fn( () => ( {
-		createErrorNotice: mockCreateErrorNotice,
-	} ) ),
-	useDispatch: jest.fn( () => ( {
-		togglePaymentGateway: mockTogglePaymentGateway,
-		invalidateResolutionForStoreSelector:
-			mockInvalidateResolutionForStoreSelector,
-	} ) ),
-} ) );
-
-jest.mock( '~/settings-payments/utils', () => ( {
-	recordPaymentsOnboardingEvent: jest.fn(),
-	recordPaymentsProviderEvent: jest.fn(),
-} ) );
-
-jest.mock( '~/settings-payments/constants', () => ( {
-	wooPaymentsOnboardingSessionEntrySettings: 'settings',
-} ) );
-
+vi.mock( '@woocommerce/data', () => {
+	const mock = {
+		paymentSettingsStore: {},
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/data', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/data' ) ),
+		dispatch: vi.fn( () => ( {
+			createErrorNotice: mockCreateErrorNotice,
+		} ) ),
+		useDispatch: vi.fn( () => ( {
+			togglePaymentGateway: mockTogglePaymentGateway,
+			invalidateResolutionForStoreSelector:
+				mockInvalidateResolutionForStoreSelector,
+		} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '~/settings-payments/utils', () => {
+	const mock = {
+		recordPaymentsOnboardingEvent: vi.fn(),
+		recordPaymentsProviderEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '~/settings-payments/constants', () => {
+	const mock = {
+		wooPaymentsOnboardingSessionEntrySettings: 'settings',
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const gatewayProvider = {
 	id: 'test-gateway',
 	title: 'Test Gateway',
@@ -54,13 +93,11 @@ const gatewayProvider = {
 	_suggestion_id: 'test-suggestion',
 	_type: 'gateway',
 } as PaymentGatewayProvider;
-
 describe( 'EnableGatewayButton', () => {
 	beforeEach( () => {
 		mockTogglePaymentGateway.mockResolvedValue( {
 			data: 'needs_setup',
 		} );
-
 		Object.defineProperty( window, 'woocommerce_admin', {
 			value: {
 				ajax_url: '/wp-admin/admin-ajax.php',
@@ -71,11 +108,9 @@ describe( 'EnableGatewayButton', () => {
 			writable: true,
 		} );
 	} );
-
 	afterEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	} );
-
 	it( 'shows an actionable setup message when a connected gateway still needs setup', async () => {
 		const { getByRole } = render(
 			<EnableGatewayButton
@@ -87,9 +122,11 @@ describe( 'EnableGatewayButton', () => {
 				installingPlugin={ null }
 			/>
 		);
-
-		fireEvent.click( getByRole( 'link', { name: 'Enable' } ) );
-
+		fireEvent.click(
+			getByRole( 'link', {
+				name: 'Enable',
+			} )
+		);
 		await waitFor( () => {
 			expect( mockCreateErrorNotice ).toHaveBeenCalledWith(
 				expect.stringContaining( 'Test Gateway' ),
@@ -106,7 +143,6 @@ describe( 'EnableGatewayButton', () => {
 			);
 		} );
 	} );
-
 	it.each( [
 		[ 'empty', '' ],
 		[ 'null', null ],
@@ -117,7 +153,6 @@ describe( 'EnableGatewayButton', () => {
 				...gatewayProvider,
 				title,
 			} as unknown as PaymentGatewayProvider;
-
 			const { getByRole } = render(
 				<EnableGatewayButton
 					gatewayProvider={ gatewayProviderWithoutTitle }
@@ -128,9 +163,11 @@ describe( 'EnableGatewayButton', () => {
 					installingPlugin={ null }
 				/>
 			);
-
-			fireEvent.click( getByRole( 'link', { name: 'Enable' } ) );
-
+			fireEvent.click(
+				getByRole( 'link', {
+					name: 'Enable',
+				} )
+			);
 			await waitFor( () => {
 				expect( mockCreateErrorNotice ).toHaveBeenCalledWith(
 					expect.stringContaining( 'this payment method' ),

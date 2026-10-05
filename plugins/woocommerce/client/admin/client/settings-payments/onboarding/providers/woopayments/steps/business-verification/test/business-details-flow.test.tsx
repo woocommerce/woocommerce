@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -13,13 +15,20 @@ import { useStepperContext } from '../components/stepper';
 import { BusinessVerificationContextProvider } from '../data/business-verification-context';
 import { OnboardingForm } from '../components/form';
 import BusinessDetails from '../sections/business-details';
-
-jest.mock( '@wordpress/api-fetch', () => jest.fn() );
-
-jest.mock( '@wordpress/components', () => {
-	const ReactModule = jest.requireActual< typeof import('react') >( 'react' );
-
+vi.mock( '@wordpress/api-fetch', () => {
+	const mock = vi.fn();
 	return {
+		default: mock,
+		...mock,
+	};
+} );
+vi.mock( '@wordpress/components', async () => {
+	const ReactModule =
+		await vi.importActual< typeof import('react') >( 'react' );
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		Button: ReactModule.forwardRef(
 			(
 				{
@@ -70,26 +79,45 @@ jest.mock( '@wordpress/components', () => {
 				</>
 			)
 		),
-	};
+	} );
 } );
-
-jest.mock( '../../../data/onboarding-context', () => ( {
-	useOnboardingContext: jest.fn(),
-} ) );
-
-jest.mock( '../components/stepper', () => ( {
-	useStepperContext: jest.fn(),
-} ) );
-
-jest.mock( '~/settings-payments/utils', () => ( {
-	recordPaymentsOnboardingEvent: jest.fn(),
-} ) );
-
-const mockApiFetch = apiFetch as jest.Mock;
-const mockUseOnboardingContext = useOnboardingContext as jest.Mock;
-const mockUseStepperContext = useStepperContext as jest.Mock;
-const mockNextStep = jest.fn();
-
+vi.mock( '../../../data/onboarding-context', () => {
+	const mock = {
+		useOnboardingContext: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../components/stepper', () => {
+	const mock = {
+		useStepperContext: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '~/settings-payments/utils', () => {
+	const mock = {
+		recordPaymentsOnboardingEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+const mockApiFetch = apiFetch as Mock;
+const mockUseOnboardingContext = useOnboardingContext as Mock;
+const mockUseStepperContext = useStepperContext as Mock;
+const mockNextStep = vi.fn();
 const fields = {
 	available_countries: {
 		CA: 'Canada',
@@ -194,7 +222,6 @@ const fields = {
 	industry_to_mcc: {},
 	location: 'US',
 };
-
 const createCurrentStep = () => ( {
 	id: 'business_verification',
 	status: 'not_started',
@@ -207,12 +234,15 @@ const createCurrentStep = () => ( {
 		fields,
 		self_assessment: {},
 		sub_steps: {
-			business: { status: 'not_started' },
-			embedded: { status: 'not_started' },
+			business: {
+				status: 'not_started',
+			},
+			embedded: {
+				status: 'not_started',
+			},
 		},
 	},
 } );
-
 const renderBusinessDetailsForm = (
 	initialData: Record< string, string | undefined > = {}
 ) => {
@@ -229,10 +259,9 @@ const renderBusinessDetailsForm = (
 		</BusinessVerificationContextProvider>
 	);
 };
-
 describe( 'Business details onboarding flow', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 		mockApiFetch.mockResolvedValue( {} );
 		mockUseOnboardingContext.mockReturnValue( {
 			currentStep: createCurrentStep(),
@@ -242,29 +271,28 @@ describe( 'Business details onboarding flow', () => {
 			nextStep: mockNextStep,
 		} );
 	} );
-
 	it( 'opens the business type options using the real business details form', () => {
 		renderBusinessDetailsForm();
-
 		fireEvent.click(
 			screen.getByRole( 'combobox', {
 				name: 'What type of legal entity is your business?',
 			} )
 		);
-
 		expect(
-			screen.getByRole( 'option', { name: /Company/ } )
+			screen.getByRole( 'option', {
+				name: /Company/,
+			} )
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole( 'option', { name: /Individual/ } )
+			screen.getByRole( 'option', {
+				name: /Individual/,
+			} )
 		).toBeInTheDocument();
 	} );
-
 	it( 'selects a business type with keyboard commands and renders dependent fields', async () => {
 		renderBusinessDetailsForm( {
 			business_type: 'company',
 		} );
-
 		expect(
 			screen.getByRole( 'combobox', {
 				name: 'What category of legal entity identify your business?',
@@ -275,15 +303,18 @@ describe( 'Business details onboarding flow', () => {
 				name: /What type of goods or services does your business sell?/,
 			} )
 		).not.toBeInTheDocument();
-
 		const businessTypeSelect = screen.getByRole( 'combobox', {
 			name: 'What type of legal entity is your business?',
 		} );
-
-		fireEvent.keyDown( businessTypeSelect, { key: 'ArrowDown' } );
-		fireEvent.keyDown( businessTypeSelect, { key: 'ArrowDown' } );
-		fireEvent.keyDown( businessTypeSelect, { key: 'Enter' } );
-
+		fireEvent.keyDown( businessTypeSelect, {
+			key: 'ArrowDown',
+		} );
+		fireEvent.keyDown( businessTypeSelect, {
+			key: 'ArrowDown',
+		} );
+		fireEvent.keyDown( businessTypeSelect, {
+			key: 'Enter',
+		} );
 		await waitFor( () => {
 			expect(
 				screen.getByRole( 'combobox', {
@@ -291,16 +322,13 @@ describe( 'Business details onboarding flow', () => {
 				} )
 			).toBeInTheDocument();
 		} );
-
 		expect(
 			screen.queryByRole( 'combobox', {
 				name: 'What category of legal entity identify your business?',
 			} )
 		).not.toBeInTheDocument();
-
 		await waitFor( () => expect( mockApiFetch ).toHaveBeenCalled() );
 		const savePayload = mockApiFetch.mock.calls.at( -1 )?.[ 0 ].data;
-
 		expect( savePayload ).toEqual( {
 			self_assessment: {
 				business_type: 'individual',
@@ -309,7 +337,6 @@ describe( 'Business details onboarding flow', () => {
 			source: 'settings',
 		} );
 	} );
-
 	it( 'continues without showing optional business structure selection', async () => {
 		renderBusinessDetailsForm( {
 			country: 'JP',
@@ -317,7 +344,6 @@ describe( 'Business details onboarding flow', () => {
 			'company.structure': '',
 			mcc: '5812',
 		} );
-
 		expect(
 			screen.queryByRole( 'combobox', {
 				name: 'What category of legal entity identify your business?',
@@ -331,10 +357,8 @@ describe( 'Business details onboarding flow', () => {
 		expect(
 			screen.getByText( /By using WooPayments/ )
 		).toBeInTheDocument();
-
 		await waitFor( () => expect( mockApiFetch ).toHaveBeenCalled() );
 		const savePayload = mockApiFetch.mock.calls.at( -1 )?.[ 0 ].data;
-
 		expect( savePayload ).toEqual( {
 			self_assessment: {
 				country: 'JP',
@@ -345,7 +369,6 @@ describe( 'Business details onboarding flow', () => {
 			source: 'settings',
 		} );
 	} );
-
 	it( 'continues without showing business structure when nil is the only option', async () => {
 		renderBusinessDetailsForm( {
 			country: 'CA',
@@ -353,7 +376,6 @@ describe( 'Business details onboarding flow', () => {
 			'company.structure': 'nil',
 			mcc: '5812',
 		} );
-
 		expect(
 			screen.queryByRole( 'combobox', {
 				name: 'What category of legal entity identify your business?',
@@ -367,10 +389,8 @@ describe( 'Business details onboarding flow', () => {
 		expect(
 			screen.getByText( /By using WooPayments/ )
 		).toBeInTheDocument();
-
 		await waitFor( () => expect( mockApiFetch ).toHaveBeenCalled() );
 		const savePayload = mockApiFetch.mock.calls.at( -1 )?.[ 0 ].data;
-
 		expect( savePayload ).toEqual( {
 			self_assessment: {
 				country: 'CA',
@@ -381,28 +401,26 @@ describe( 'Business details onboarding flow', () => {
 			source: 'settings',
 		} );
 	} );
-
 	it( 'resets dependent business details when the country changes', async () => {
 		renderBusinessDetailsForm( {
 			business_type: 'company',
 			'company.structure': 'llc',
 		} );
-
 		expect(
 			screen.getByRole( 'combobox', {
 				name: 'What category of legal entity identify your business?',
 			} )
 		).toBeInTheDocument();
-
 		fireEvent.click(
 			screen.getByRole( 'combobox', {
 				name: 'Where is your business located?',
 			} )
 		);
 		fireEvent.click(
-			screen.getByRole( 'option', { name: 'United Kingdom (UK)' } )
+			screen.getByRole( 'option', {
+				name: 'United Kingdom (UK)',
+			} )
 		);
-
 		await waitFor( () => {
 			expect(
 				screen.getByRole( 'combobox', {
@@ -410,16 +428,13 @@ describe( 'Business details onboarding flow', () => {
 				} )
 			).toHaveTextContent( 'Select an option' );
 		} );
-
 		expect(
 			screen.queryByRole( 'combobox', {
 				name: 'What category of legal entity identify your business?',
 			} )
 		).not.toBeInTheDocument();
-
 		await waitFor( () => expect( mockApiFetch ).toHaveBeenCalled() );
 		const savePayload = mockApiFetch.mock.calls.at( -1 )?.[ 0 ].data;
-
 		expect( savePayload ).toEqual( {
 			self_assessment: {
 				country: 'GB',
@@ -428,24 +443,28 @@ describe( 'Business details onboarding flow', () => {
 			source: 'settings',
 		} );
 	} );
-
 	it( 'marks the business sub-step complete when required details are present', async () => {
 		renderBusinessDetailsForm( {
 			business_type: 'individual',
 			mcc: '5812',
 		} );
-
-		fireEvent.click( screen.getByRole( 'button', { name: 'Continue' } ) );
-
+		fireEvent.click(
+			screen.getByRole( 'button', {
+				name: 'Continue',
+			} )
+		);
 		await waitFor( () => expect( mockNextStep ).toHaveBeenCalled() );
-
 		expect( mockApiFetch ).toHaveBeenCalledWith( {
 			url: '/wc/v3/payments/onboarding/business-verification',
 			method: 'POST',
 			data: {
 				sub_steps: {
-					business: { status: 'completed' },
-					embedded: { status: 'not_started' },
+					business: {
+						status: 'completed',
+					},
+					embedded: {
+						status: 'not_started',
+					},
 				},
 			},
 		} );

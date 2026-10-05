@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -10,45 +12,58 @@ import { useDispatch } from '@wordpress/data';
 import '../../../test-helper/global-mock';
 import FulfillItemsButton from '../fulfill-items-button';
 import { useFulfillmentContext } from '../../../context/fulfillment-context';
-
-const setError = jest.fn();
+const setError = vi.fn();
 
 // Mock dependencies
-jest.mock( '@wordpress/data', () => {
-	const originalModule = jest.requireActual( '@wordpress/data' );
-	return {
+vi.mock( '@wordpress/data', async () => {
+	const originalModule = await vi.importActual( '@wordpress/data' );
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		...originalModule,
-		useDispatch: jest.fn( () => {} ),
-	};
+		useDispatch: vi.fn( () => {} ),
+	} );
 } );
-
-jest.mock( '../../../context/fulfillment-context', () => ( {
-	useFulfillmentContext: jest.fn(),
-} ) );
-
+vi.mock( '../../../context/fulfillment-context', () => {
+	const mock = {
+		useFulfillmentContext: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'FulfillItemsButton component', () => {
 	beforeEach( () => {
 		// Reset mocks
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 
 		// Default mock implementations
-		useDispatch.mockReturnValue( { saveFulfillment: jest.fn() } );
+		useDispatch.mockReturnValue( {
+			saveFulfillment: vi.fn(),
+		} );
 		useFulfillmentContext.mockReturnValue( {
-			order: { id: 123 },
-			fulfillment: { id: 456 },
+			order: {
+				id: 123,
+			},
+			fulfillment: {
+				id: 456,
+			},
 			notifyCustomer: true,
 		} );
 	} );
-
 	it( 'should render button with correct text', () => {
 		render( <FulfillItemsButton setError={ setError } /> );
 		expect( screen.getByText( 'Fulfill items' ) ).toBeInTheDocument();
 	} );
-
 	it( 'should call saveFulfillment when button is clicked', async () => {
-		const mockSaveFulfillment = jest.fn( () => Promise.resolve() );
-		useDispatch.mockReturnValue( { saveFulfillment: mockSaveFulfillment } );
-
+		const mockSaveFulfillment = vi.fn( () => Promise.resolve() );
+		useDispatch.mockReturnValue( {
+			saveFulfillment: mockSaveFulfillment,
+		} );
 		const mockFulfillment = {
 			id: 456,
 			meta_data: [
@@ -71,15 +86,14 @@ describe( 'FulfillItemsButton component', () => {
 			],
 		};
 		useFulfillmentContext.mockReturnValue( {
-			order: { id: 123 },
+			order: {
+				id: 123,
+			},
 			fulfillment: mockFulfillment,
 			notifyCustomer: true,
 		} );
-
 		render( <FulfillItemsButton setError={ setError } /> );
-
 		fireEvent.click( screen.getByText( 'Fulfill items' ) );
-
 		await waitFor( () => {
 			expect( mockSaveFulfillment ).toHaveBeenCalledWith(
 				123,
@@ -87,54 +101,45 @@ describe( 'FulfillItemsButton component', () => {
 				true
 			);
 		} );
-
 		expect( mockFulfillment.is_fulfilled ).toBe( true );
 		expect( mockFulfillment.status ).toBe( 'fulfilled' );
 	} );
-
 	it( 'should not call saveFulfillment when fulfillment is undefined', () => {
-		const mockSaveFulfillment = jest.fn();
-		useDispatch.mockReturnValue( { saveFulfillment: mockSaveFulfillment } );
-
+		const mockSaveFulfillment = vi.fn();
+		useDispatch.mockReturnValue( {
+			saveFulfillment: mockSaveFulfillment,
+		} );
 		useFulfillmentContext.mockReturnValue( {
-			order: { id: 123 },
+			order: {
+				id: 123,
+			},
 			fulfillment: undefined,
 			notifyCustomer: true,
 		} );
-
 		render( <FulfillItemsButton setError={ setError } /> );
 		fireEvent.click( screen.getByText( 'Fulfill items' ) );
-
 		expect( mockSaveFulfillment ).not.toHaveBeenCalled();
 	} );
-
 	describe( 'Accessibility', () => {
 		it( 'should not have redundant aria-label overriding visible text', () => {
 			render( <FulfillItemsButton setError={ setError } /> );
-
 			const button = screen.getByRole( 'button' );
 			expect( button ).not.toHaveAttribute( 'aria-label' );
 		} );
-
 		it( 'should have aria-describedby with unique prefix', () => {
 			render( <FulfillItemsButton setError={ setError } /> );
-
 			const button = screen.getByRole( 'button' );
 			expect( button.getAttribute( 'aria-describedby' ) ).toMatch(
 				/^fulfill-items-description/
 			);
 		} );
-
 		it( 'should not have redundant aria-live on button element', () => {
 			render( <FulfillItemsButton setError={ setError } /> );
-
 			const button = screen.getByRole( 'button' );
 			expect( button ).not.toHaveAttribute( 'aria-live' );
 		} );
-
 		it( 'should have hidden description for screen readers', () => {
 			render( <FulfillItemsButton setError={ setError } /> );
-
 			const description = screen.getByText(
 				'Marks the selected items as fulfilled and updates their status'
 			);
@@ -144,15 +149,13 @@ describe( 'FulfillItemsButton component', () => {
 			);
 			expect( description ).toHaveClass( 'screen-reader-text' );
 		} );
-
 		it( 'should update button text when executing', () => {
-			const mockSaveFulfillment = jest.fn(
+			const mockSaveFulfillment = vi.fn(
 				() => new Promise( ( resolve ) => setTimeout( resolve, 100 ) )
 			);
 			useDispatch.mockReturnValue( {
 				saveFulfillment: mockSaveFulfillment,
 			} );
-
 			const mockFulfillment = {
 				id: 456,
 				meta_data: [
@@ -170,24 +173,22 @@ describe( 'FulfillItemsButton component', () => {
 				],
 			};
 			useFulfillmentContext.mockReturnValue( {
-				order: { id: 123 },
+				order: {
+					id: 123,
+				},
 				fulfillment: mockFulfillment,
 				notifyCustomer: true,
 			} );
-
 			render( <FulfillItemsButton setError={ setError } /> );
 			const button = screen.getByRole( 'button' );
-
 			fireEvent.click( button );
 
 			// Check that the button text updates during execution
 			expect( screen.getByText( 'Fulfilling…' ) ).toBeInTheDocument();
 			expect( button ).toBeDisabled();
 		} );
-
 		it( 'should be keyboard accessible', () => {
 			render( <FulfillItemsButton setError={ setError } /> );
-
 			const button = screen.getByRole( 'button' );
 			button.focus();
 			expect( button.ownerDocument.activeElement ).toBe( button );

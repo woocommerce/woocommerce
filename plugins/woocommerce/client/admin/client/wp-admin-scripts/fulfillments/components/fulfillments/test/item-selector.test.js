@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -10,45 +12,75 @@ import { speak } from '@wordpress/a11y';
 import '../../../test-helper/global-mock';
 import ItemSelector from '../item-selector';
 import { useFulfillmentContext } from '../../../context/fulfillment-context';
-
-jest.mock( '@wordpress/a11y', () => ( {
-	speak: jest.fn(),
-} ) );
-
-jest.mock( '../../../context/fulfillment-context', () => ( {
-	useFulfillmentContext: jest.fn(),
-} ) );
-
+vi.mock( '@wordpress/a11y', () => {
+	const mock = {
+		speak: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../../context/fulfillment-context', () => {
+	const mock = {
+		useFulfillmentContext: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const createMockItems = ( items ) =>
 	items.map( ( item ) => ( {
 		item_id: item.id,
-		item: { id: item.id, name: item.name, quantity: item.qty },
-		selection: Array.from( { length: item.qty }, ( _, i ) => ( {
-			index: i,
-			checked: item.checked ?? false,
-		} ) ),
+		item: {
+			id: item.id,
+			name: item.name,
+			quantity: item.qty,
+		},
+		selection: Array.from(
+			{
+				length: item.qty,
+			},
+			( _, i ) => ( {
+				index: i,
+				checked: item.checked ?? false,
+			} )
+		),
 	} ) );
-
 describe( 'ItemSelector speak() announcements', () => {
 	let mockSetSelectedItems;
-
 	beforeEach( () => {
-		jest.clearAllMocks();
-		mockSetSelectedItems = jest.fn();
+		vi.clearAllMocks();
+		mockSetSelectedItems = vi.fn();
 	} );
-
 	it( 'should announce when all items are selected', () => {
 		const items = createMockItems( [
-			{ id: 1, name: 'Widget', qty: 2, checked: false },
-			{ id: 2, name: 'Gadget', qty: 1, checked: false },
+			{
+				id: 1,
+				name: 'Widget',
+				qty: 2,
+				checked: false,
+			},
+			{
+				id: 2,
+				name: 'Gadget',
+				qty: 1,
+				checked: false,
+			},
 		] );
-
 		useFulfillmentContext.mockReturnValue( {
-			order: { id: 1, currency: 'USD' },
+			order: {
+				id: 1,
+				currency: 'USD',
+			},
 			selectedItems: items,
 			setSelectedItems: mockSetSelectedItems,
 		} );
-
 		render( <ItemSelector editMode={ true } /> );
 
 		// Click the select-all checkbox
@@ -56,22 +88,31 @@ describe( 'ItemSelector speak() announcements', () => {
 			name: 'Select all items',
 		} );
 		fireEvent.click( selectAllCheckbox );
-
 		expect( speak ).toHaveBeenCalledWith( '3 items selected.', 'polite' );
 	} );
-
 	it( 'should announce when all items are deselected', () => {
 		const items = createMockItems( [
-			{ id: 1, name: 'Widget', qty: 2, checked: true },
-			{ id: 2, name: 'Gadget', qty: 1, checked: true },
+			{
+				id: 1,
+				name: 'Widget',
+				qty: 2,
+				checked: true,
+			},
+			{
+				id: 2,
+				name: 'Gadget',
+				qty: 1,
+				checked: true,
+			},
 		] );
-
 		useFulfillmentContext.mockReturnValue( {
-			order: { id: 1, currency: 'USD' },
+			order: {
+				id: 1,
+				currency: 'USD',
+			},
 			selectedItems: items,
 			setSelectedItems: mockSetSelectedItems,
 		} );
-
 		render( <ItemSelector editMode={ true } /> );
 
 		// Click the deselect-all checkbox (all items are already selected)
@@ -79,7 +120,6 @@ describe( 'ItemSelector speak() announcements', () => {
 			name: 'Deselect all items',
 		} );
 		fireEvent.click( deselectAllCheckbox );
-
 		expect( speak ).toHaveBeenCalledWith(
 			'All items deselected.',
 			'polite'

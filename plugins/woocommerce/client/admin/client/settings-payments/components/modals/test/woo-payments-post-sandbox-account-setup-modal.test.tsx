@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -8,26 +10,30 @@ import { render, fireEvent } from '@testing-library/react';
  * Internal dependencies
  */
 import { WooPaymentsPostSandboxAccountSetupModal } from '..';
-
-jest.mock( '@woocommerce/tracks', () => ( {
-	recordEvent: jest.fn(),
-} ) );
-
+vi.mock( '@woocommerce/tracks', () => {
+	const mock = {
+		recordEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'WooPaymentsPostSandboxAccountSetupModal', () => {
 	it( 'should record settings_payments_switch_to_live_account_click event when Activate Payments button is clicked', () => {
 		const { getByRole } = render(
 			<WooPaymentsPostSandboxAccountSetupModal
 				isOpen={ true }
 				devMode={ false }
-				onClose={ jest.fn() }
+				onClose={ vi.fn() }
 			/>
 		);
-
 		const activatePaymentsButton = getByRole( 'button', {
 			name: 'Activate payments',
 		} );
 		fireEvent.click( activatePaymentsButton );
-
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_switch_to_live_account_click',
 			expect.objectContaining( {
@@ -36,21 +42,18 @@ describe( 'WooPaymentsPostSandboxAccountSetupModal', () => {
 			} )
 		);
 	} );
-
 	it( 'should record settings_payments_continue_store_setup_click event when Continue Store Setup button is clicked', async () => {
 		const { getByRole } = render(
 			<WooPaymentsPostSandboxAccountSetupModal
 				isOpen={ true }
 				devMode={ false }
-				onClose={ jest.fn() }
+				onClose={ vi.fn() }
 			/>
 		);
-
 		const continueStoreSetupButton = getByRole( 'button', {
 			name: 'Continue store setup',
 		} );
 		fireEvent.click( continueStoreSetupButton );
-
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_continue_store_setup_click',
 			expect.objectContaining( {

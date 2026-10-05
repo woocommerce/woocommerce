@@ -1,3 +1,12 @@
+import {
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+	type MockedFunction,
+} from 'vitest';
+
 /**
  * External dependencies
  */
@@ -11,49 +20,63 @@ import { useSettings } from '@woocommerce/data';
 import { ImportStatusBar } from '../import-status-bar';
 import { useImportStatus } from '../use-import-status';
 import type { UseImportStatusReturn } from '../types';
-
-jest.mock( '../use-import-status' );
-
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useDispatch: jest.fn().mockImplementation( () => ( {
-		createNotice: jest.fn(),
-	} ) ),
-} ) );
-jest.mock( '@wordpress/date', () => ( {
-	...jest.requireActual( '@wordpress/date' ),
-	dateI18n: jest.fn( ( format, date ) => {
-		// Simple mock that returns a date-like string
-		if ( ! date ) return 'Never';
-		return 'Nov 21 00:00';
-	} ),
-} ) );
-jest.mock( '@woocommerce/data', () => ( {
-	...jest.requireActual( '@woocommerce/data' ),
-	useSettings: jest.fn().mockImplementation( () => ( {
-		wcAdminSettings: {
-			woocommerce_analytics_scheduled_import: 'yes',
+vi.mock( '../use-import-status' );
+vi.mock( '@wordpress/data', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/data' ) ),
+		useDispatch: vi.fn().mockImplementation( () => ( {
+			createNotice: vi.fn(),
+		} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
 		},
-	} ) ),
-} ) );
-
-const mockUseImportStatus = useImportStatus as jest.MockedFunction<
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/date', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/date' ) ),
+		dateI18n: vi.fn( ( format, date ) => {
+			// Simple mock that returns a date-like string
+			if ( ! date ) return 'Never';
+			return 'Nov 21 00:00';
+		} ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/data', async () => {
+	const mock = {
+		...( await vi.importActual( '@woocommerce/data' ) ),
+		useSettings: vi.fn().mockImplementation( () => ( {
+			wcAdminSettings: {
+				woocommerce_analytics_scheduled_import: 'yes',
+			},
+		} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+const mockUseImportStatus = useImportStatus as MockedFunction<
 	typeof useImportStatus
 >;
-const mockUseDispatch = useDispatch as jest.MockedFunction<
-	typeof useDispatch
->;
-
-const mockUseSettings = useSettings as jest.MockedFunction<
-	typeof useSettings
->;
-
+const mockUseDispatch = useDispatch as MockedFunction< typeof useDispatch >;
+const mockUseSettings = useSettings as MockedFunction< typeof useSettings >;
 describe( 'ImportStatusBar', () => {
-	const mockCreateNotice = jest.fn();
-	const mockTriggerImport = jest.fn();
-
+	const mockCreateNotice = vi.fn();
+	const mockTriggerImport = vi.fn();
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 		mockUseDispatch.mockReturnValue( {
 			createNotice: mockCreateNotice,
 		} );
@@ -63,7 +86,6 @@ describe( 'ImportStatusBar', () => {
 			},
 		} as unknown as ReturnType< typeof useSettings > );
 	} );
-
 	const createMockReturn = (
 		overrides: Partial< UseImportStatusReturn > = {}
 	): UseImportStatusReturn => ( {
@@ -79,7 +101,6 @@ describe( 'ImportStatusBar', () => {
 		isTriggeringImport: false,
 		...overrides,
 	} );
-
 	it( 'should not render when mode is immediate', () => {
 		mockUseSettings.mockReturnValue( {
 			wcAdminSettings: {
@@ -88,11 +109,9 @@ describe( 'ImportStatusBar', () => {
 		} as unknown as ReturnType< typeof useSettings > );
 		// Mock useImportStatus to avoid destructuring error even though component returns early
 		mockUseImportStatus.mockReturnValue( createMockReturn() );
-
 		const { container } = render( <ImportStatusBar /> );
 		expect( container ).toBeEmptyDOMElement();
 	} );
-
 	it( 'should show spinners when loading', () => {
 		mockUseImportStatus.mockReturnValue(
 			createMockReturn( {
@@ -100,7 +119,6 @@ describe( 'ImportStatusBar', () => {
 				isLoading: true,
 			} )
 		);
-
 		render( <ImportStatusBar /> );
 
 		// Component should render and show spinners when loading
@@ -110,12 +128,9 @@ describe( 'ImportStatusBar', () => {
 		const spinners = screen.getAllByRole( 'presentation' );
 		expect( spinners.length ).toBeGreaterThan( 0 );
 	} );
-
 	it( 'should render status when mode is scheduled', () => {
 		mockUseImportStatus.mockReturnValue( createMockReturn() );
-
 		render( <ImportStatusBar /> );
-
 		expect( screen.getByText( /Last updated$/i ) ).toBeInTheDocument();
 		expect( screen.getByText( /Next update$/i ) ).toBeInTheDocument();
 		expect(
@@ -124,7 +139,6 @@ describe( 'ImportStatusBar', () => {
 			} )
 		).toBeInTheDocument();
 	} );
-
 	it( 'should disable button when import_in_progress_or_due is true', () => {
 		mockUseImportStatus.mockReturnValue(
 			createMockReturn( {
@@ -136,7 +150,6 @@ describe( 'ImportStatusBar', () => {
 				},
 			} )
 		);
-
 		render( <ImportStatusBar /> );
 
 		// When busy, aria-label changes to "Analytics data import in progress"
@@ -146,14 +159,12 @@ describe( 'ImportStatusBar', () => {
 		expect( button ).toBeDisabled();
 		expect( button ).toHaveAttribute( 'aria-busy', 'true' );
 	} );
-
 	it( 'should disable button when isTriggeringImport is true', () => {
 		mockUseImportStatus.mockReturnValue(
 			createMockReturn( {
 				isTriggeringImport: true,
 			} )
 		);
-
 		render( <ImportStatusBar /> );
 
 		// When busy, aria-label changes to "Analytics data import in progress"
@@ -163,22 +174,17 @@ describe( 'ImportStatusBar', () => {
 		expect( button ).toBeDisabled();
 		expect( button ).toHaveAttribute( 'aria-busy', 'true' );
 	} );
-
 	it( 'should trigger import on button click', async () => {
 		mockTriggerImport.mockResolvedValue( undefined );
 		mockUseImportStatus.mockReturnValue( createMockReturn() );
-
 		render( <ImportStatusBar /> );
-
 		const button = screen.getByRole( 'button', {
 			name: /Manually trigger analytics data import/i,
 		} );
 		fireEvent.click( button );
-
 		await waitFor( () => {
 			expect( mockTriggerImport ).toHaveBeenCalled();
 		} );
-
 		expect( mockCreateNotice ).toHaveBeenCalledWith(
 			'success',
 			expect.stringContaining( 'Analytics import has started' ),
@@ -188,7 +194,6 @@ describe( 'ImportStatusBar', () => {
 			} )
 		);
 	} );
-
 	it( 'should show error notice when import fails', async () => {
 		const errorMessage = 'API Error';
 		mockTriggerImport.mockRejectedValue( new Error( errorMessage ) );
@@ -197,18 +202,14 @@ describe( 'ImportStatusBar', () => {
 				error: errorMessage,
 			} )
 		);
-
 		render( <ImportStatusBar /> );
-
 		const button = screen.getByRole( 'button', {
 			name: /Manually trigger analytics data import/i,
 		} );
 		fireEvent.click( button );
-
 		await waitFor( () => {
 			expect( mockTriggerImport ).toHaveBeenCalled();
 		} );
-
 		expect( mockCreateNotice ).toHaveBeenCalledWith(
 			'error',
 			expect.stringContaining( errorMessage ),
@@ -217,17 +218,14 @@ describe( 'ImportStatusBar', () => {
 			} )
 		);
 	} );
-
 	it( 'should format dates correctly', () => {
 		mockUseImportStatus.mockReturnValue( createMockReturn() );
-
 		render( <ImportStatusBar /> );
 
 		// dateI18n is mocked to return "Nov 21 00:00"
 		const dateTexts = screen.getAllByText( /Nov 21 00:00/i );
 		expect( dateTexts ).toHaveLength( 2 ); // Last updated and Next update
 	} );
-
 	it( 'should show "Never" when dates are null', () => {
 		mockUseImportStatus.mockReturnValue(
 			createMockReturn( {
@@ -239,22 +237,16 @@ describe( 'ImportStatusBar', () => {
 				},
 			} )
 		);
-
 		render( <ImportStatusBar /> );
-
 		const neverTexts = screen.getAllByText( /Never/i );
 		expect( neverTexts ).toHaveLength( 2 ); // Last updated: Never, Next update: Never
 	} );
-
 	it( 'should have accessible ARIA attributes', () => {
 		mockUseImportStatus.mockReturnValue( createMockReturn() );
-
 		render( <ImportStatusBar /> );
-
 		const container = screen.getByRole( 'status' );
 		expect( container ).toHaveAttribute( 'aria-live', 'polite' );
 		expect( container ).toHaveAttribute( 'aria-atomic', 'true' );
-
 		const button = screen.getByRole( 'button', {
 			name: /Manually trigger analytics data import/i,
 		} );
@@ -263,13 +255,10 @@ describe( 'ImportStatusBar', () => {
 			'Manually trigger analytics data import'
 		);
 	} );
-
 	it( 'should be keyboard accessible', () => {
 		mockTriggerImport.mockResolvedValue( undefined );
 		mockUseImportStatus.mockReturnValue( createMockReturn() );
-
 		render( <ImportStatusBar /> );
-
 		const button = screen.getByRole( 'button', {
 			name: /Manually trigger analytics data import/i,
 		} );
@@ -289,7 +278,6 @@ describe( 'ImportStatusBar', () => {
 		// In tests, we verify the button exists and is not disabled
 		expect( button ).not.toBeDisabled();
 	} );
-
 	it( 'should show fallback error message when error is null', async () => {
 		mockTriggerImport.mockRejectedValue( new Error( 'API Error' ) );
 		mockUseImportStatus.mockReturnValue(
@@ -297,18 +285,14 @@ describe( 'ImportStatusBar', () => {
 				error: null, // No error in state
 			} )
 		);
-
 		render( <ImportStatusBar /> );
-
 		const button = screen.getByRole( 'button', {
 			name: /Manually trigger analytics data import/i,
 		} );
 		fireEvent.click( button );
-
 		await waitFor( () => {
 			expect( mockTriggerImport ).toHaveBeenCalled();
 		} );
-
 		expect( mockCreateNotice ).toHaveBeenCalledWith(
 			'error',
 			expect.stringContaining( 'API Error' ),
@@ -317,7 +301,6 @@ describe( 'ImportStatusBar', () => {
 			} )
 		);
 	} );
-
 	it( 'should show "Never" when status is null', () => {
 		mockUseImportStatus.mockReturnValue(
 			createMockReturn( {
@@ -325,7 +308,6 @@ describe( 'ImportStatusBar', () => {
 				isLoading: false,
 			} )
 		);
-
 		render( <ImportStatusBar /> );
 
 		// Component should render and show "Never" for dates when status is null

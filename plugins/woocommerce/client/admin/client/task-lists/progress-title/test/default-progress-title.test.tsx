@@ -1,3 +1,5 @@
+import { describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -8,14 +10,20 @@ import { useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import { DefaultProgressTitle } from '../default-progress-title';
-
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn(),
-} ) );
-
+vi.mock( '@wordpress/data', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/data' ) ),
+		useSelect: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'default-progress-title', () => {
-	( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
+	( useSelect as Mock ).mockImplementation( ( fn ) =>
 		fn( () => ( {
 			getTaskList: () => ( {
 				tasks: [],
@@ -23,21 +31,25 @@ describe( 'default-progress-title', () => {
 			hasFinishedResolution: () => true,
 		} ) )
 	);
-
 	it( 'should render "Welcome to your store" when no tasks are completed and visited', () => {
 		render( <DefaultProgressTitle taskListId="1" /> );
 		expect(
 			screen.getByText( 'Welcome to your store' )
 		).toBeInTheDocument();
 	} );
-
 	it( 'should render "Welcome to your store" when all tasks are completed', () => {
-		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
+		( useSelect as Mock ).mockImplementation( ( fn ) =>
 			fn( () => ( {
 				getTaskList: () => ( {
 					tasks: [
-						{ isVisited: true, isComplete: true },
-						{ isVisited: true, isComplete: true },
+						{
+							isVisited: true,
+							isComplete: true,
+						},
+						{
+							isVisited: true,
+							isComplete: true,
+						},
 					],
 				} ),
 				hasFinishedResolution: () => true,
@@ -48,32 +60,52 @@ describe( 'default-progress-title', () => {
 			screen.getByText( 'Welcome to your store' )
 		).toBeInTheDocument();
 	} );
-
 	it( 'should render "Let’s get you started" when has task visited and task completed count <= 3', () => {
-		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
+		( useSelect as Mock ).mockImplementation( ( fn ) =>
 			fn( () => ( {
 				getTaskList: () => ( {
-					tasks: [ { isVisited: true, isComplete: false } ],
+					tasks: [
+						{
+							isVisited: true,
+							isComplete: false,
+						},
+					],
 				} ),
 				hasFinishedResolution: () => true,
 			} ) )
 		);
 		render( <DefaultProgressTitle taskListId="1" /> );
 		expect(
-			screen.getByText( 'Let’s get you started', { exact: false } )
+			screen.getByText( 'Let’s get you started', {
+				exact: false,
+			} )
 		).toBeInTheDocument();
 	} );
-
 	it( 'should render "You’re on the right track" when has task visited and task completed count > 3', () => {
-		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
+		( useSelect as Mock ).mockImplementation( ( fn ) =>
 			fn( () => ( {
 				getTaskList: () => ( {
 					tasks: [
-						{ isVisited: true, isComplete: true },
-						{ isVisited: true, isComplete: true },
-						{ isVisited: true, isComplete: true },
-						{ isVisited: true, isComplete: true },
-						{ isVisited: true, isComplete: false },
+						{
+							isVisited: true,
+							isComplete: true,
+						},
+						{
+							isVisited: true,
+							isComplete: true,
+						},
+						{
+							isVisited: true,
+							isComplete: true,
+						},
+						{
+							isVisited: true,
+							isComplete: true,
+						},
+						{
+							isVisited: true,
+							isComplete: false,
+						},
 					],
 				} ),
 				hasFinishedResolution: () => true,
@@ -81,22 +113,44 @@ describe( 'default-progress-title', () => {
 		);
 		render( <DefaultProgressTitle taskListId="1" /> );
 		expect(
-			screen.getByText( 'You’re on the right track', { exact: false } )
+			screen.getByText( 'You’re on the right track', {
+				exact: false,
+			} )
 		).toBeInTheDocument();
 	} );
-
 	it( 'should render "You’re almost there" when has task visited and task completed count > 5', () => {
-		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
+		( useSelect as Mock ).mockImplementation( ( fn ) =>
 			fn( () => ( {
 				getTaskList: () => ( {
 					tasks: [
-						{ isVisited: true, isComplete: true },
-						{ isVisited: true, isComplete: true },
-						{ isVisited: true, isComplete: true },
-						{ isVisited: true, isComplete: true },
-						{ isVisited: true, isComplete: true },
-						{ isVisited: true, isComplete: true },
-						{ isVisited: true, isComplete: false },
+						{
+							isVisited: true,
+							isComplete: true,
+						},
+						{
+							isVisited: true,
+							isComplete: true,
+						},
+						{
+							isVisited: true,
+							isComplete: true,
+						},
+						{
+							isVisited: true,
+							isComplete: true,
+						},
+						{
+							isVisited: true,
+							isComplete: true,
+						},
+						{
+							isVisited: true,
+							isComplete: true,
+						},
+						{
+							isVisited: true,
+							isComplete: false,
+						},
 					],
 				} ),
 				hasFinishedResolution: () => true,
@@ -104,7 +158,9 @@ describe( 'default-progress-title', () => {
 		);
 		render( <DefaultProgressTitle taskListId="1" /> );
 		expect(
-			screen.getByText( 'You’re almost there', { exact: false } )
+			screen.getByText( 'You’re almost there', {
+				exact: false,
+			} )
 		).toBeInTheDocument();
 	} );
 } );

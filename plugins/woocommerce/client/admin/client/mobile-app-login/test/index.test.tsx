@@ -1,3 +1,12 @@
+import {
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+	type MockedFunction,
+} from 'vitest';
+
 /**
  * External dependencies
  */
@@ -15,46 +24,61 @@ import {
 // Drive `<QRDirectLoginCode />` from the tests by mocking its shared token
 // hook. The real component is rendered so we exercise the integration
 // surface of this page against the component we claim to reuse.
-jest.mock( '~/homescreen/mobile-app-modal/components/useQRLoginToken', () => {
-	const actual = jest.requireActual(
-		'~/homescreen/mobile-app-modal/components/useQRLoginToken'
-	);
-	return {
-		...actual,
-		useQRLoginToken: jest.fn(),
-	};
-} );
+vi.mock(
+	'~/homescreen/mobile-app-modal/components/useQRLoginToken',
+	async () => {
+		const actual = await vi.importActual(
+			'~/homescreen/mobile-app-modal/components/useQRLoginToken'
+		);
+		return ( ( mock ) => ( {
+			default: mock,
+			...mock,
+		} ) )( {
+			...actual,
+			useQRLoginToken: vi.fn(),
+		} );
+	}
+);
 
 // Short-circuit the up-front /qr-login-availability probe so these tests
 // reach the QR / error / expired states the assertions care about,
 // rather than getting stuck on the availability spinner. The probe has
 // its own dedicated suite — `useQRLoginAvailability.test.ts`.
-jest.mock(
+vi.mock(
 	'~/homescreen/mobile-app-modal/components/useQRLoginAvailability',
-	() => {
-		const actual = jest.requireActual(
+	async () => {
+		const actual = await vi.importActual(
 			'~/homescreen/mobile-app-modal/components/useQRLoginAvailability'
 		);
-		return {
+		return ( ( mock ) => ( {
+			default: mock,
+			...mock,
+		} ) )( {
 			...actual,
 			useQRLoginAvailability: () => ( {
 				isLoading: false,
 				available: true,
 				reason: null,
 			} ),
-		};
+		} );
 	}
 );
 
 // Keep tests isolated from analytics side-effects.
-jest.mock( '@woocommerce/tracks', () => ( {
-	recordEvent: jest.fn(),
-} ) );
-
-const mockedUseQRLoginToken = useQRLoginToken as jest.MockedFunction<
+vi.mock( '@woocommerce/tracks', () => {
+	const mock = {
+		recordEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+const mockedUseQRLoginToken = useQRLoginToken as MockedFunction<
 	typeof useQRLoginToken
 >;
-
 const makeReadyState = () => ( {
 	state: QRLoginTokenStates.READY,
 	qrUrl: 'woocommerce://qr-login?token=abc&siteUrl=https%3A%2F%2Fexample.test',
@@ -65,21 +89,18 @@ const makeReadyState = () => ( {
 	apUuid: null,
 	candidateNumbers: null,
 	challengeExpiresAt: 0,
-	fetchToken: jest.fn(),
-	refreshToken: jest.fn(),
-	chooseNumber: jest.fn(),
-	revoke: jest.fn(),
+	fetchToken: vi.fn(),
+	refreshToken: vi.fn(),
+	chooseNumber: vi.fn(),
+	revoke: vi.fn(),
 } );
-
 describe( 'MobileAppLoginPage', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 		mockedUseQRLoginToken.mockReturnValue( makeReadyState() );
 	} );
-
 	it( 'renders the heading, scan-first intro, and the QR code', () => {
 		render( <MobileAppLoginPage /> );
-
 		expect(
 			screen.getByRole( 'heading', {
 				name: /Sign in to the Woo mobile app/i,
@@ -100,7 +121,6 @@ describe( 'MobileAppLoginPage', () => {
 		// because the SVG payload itself is not easily queryable.
 		expect( screen.getByText( /Code expires in/i ) ).toBeInTheDocument();
 	} );
-
 	it( 'renders the FAQ link pointing at the help doc', () => {
 		render( <MobileAppLoginPage /> );
 
@@ -114,27 +134,25 @@ describe( 'MobileAppLoginPage', () => {
 			'https://woocommerce.com/document/android-ios-apps-login-help-faq/'
 		);
 	} );
-
 	it( 'does not offer a manual refresh while a QR code is still valid', () => {
-		const fetchToken = jest.fn();
+		const fetchToken = vi.fn();
 		mockedUseQRLoginToken.mockReturnValue( {
 			...makeReadyState(),
 			fetchToken,
 		} );
-
 		render( <MobileAppLoginPage /> );
 
 		// First mount fires exactly one fetch (from QRDirectLoginCode's
 		// initial `useEffect`).
 		expect( fetchToken ).toHaveBeenCalledTimes( 1 );
-
 		expect(
-			screen.queryByRole( 'button', { name: /Refresh code/i } )
+			screen.queryByRole( 'button', {
+				name: /Refresh code/i,
+			} )
 		).not.toBeInTheDocument();
 	} );
-
 	it( 'lets the shared QR component generate a new code after expiry', () => {
-		const refreshToken = jest.fn();
+		const refreshToken = vi.fn();
 		mockedUseQRLoginToken.mockReturnValue( {
 			state: QRLoginTokenStates.EXPIRED,
 			qrUrl: null,
@@ -145,44 +163,39 @@ describe( 'MobileAppLoginPage', () => {
 			apUuid: null,
 			candidateNumbers: null,
 			challengeExpiresAt: 0,
-			fetchToken: jest.fn(),
+			fetchToken: vi.fn(),
 			refreshToken,
-			chooseNumber: jest.fn(),
-			revoke: jest.fn(),
+			chooseNumber: vi.fn(),
+			revoke: vi.fn(),
 		} );
-
 		render( <MobileAppLoginPage /> );
-
 		fireEvent.click(
-			screen.getByRole( 'button', { name: /Generate new code/i } )
+			screen.getByRole( 'button', {
+				name: /Generate new code/i,
+			} )
 		);
-
 		expect( refreshToken ).toHaveBeenCalledTimes( 1 );
 	} );
-
 	it( 'renders a recovery action when READY has no QR URL', () => {
-		const refreshToken = jest.fn();
+		const refreshToken = vi.fn();
 		mockedUseQRLoginToken.mockReturnValue( {
 			...makeReadyState(),
 			qrUrl: null,
 			refreshToken,
 		} );
-
 		render( <MobileAppLoginPage /> );
-
 		expect(
 			screen.getByText( /could not generate the login code/i )
 		).toBeInTheDocument();
-
 		fireEvent.click(
-			screen.getByRole( 'button', { name: /Renew code/i } )
+			screen.getByRole( 'button', {
+				name: /Renew code/i,
+			} )
 		);
-
 		expect( refreshToken ).toHaveBeenCalledTimes( 1 );
 	} );
-
 	it( 'renders a recovery action when SCANNED has no candidate numbers', () => {
-		const refreshToken = jest.fn();
+		const refreshToken = vi.fn();
 		mockedUseQRLoginToken.mockReturnValue( {
 			...makeReadyState(),
 			state: QRLoginTokenStates.SCANNED,
@@ -190,18 +203,17 @@ describe( 'MobileAppLoginPage', () => {
 			candidateNumbers: null,
 			refreshToken,
 		} );
-
 		render( <MobileAppLoginPage /> );
-
 		expect(
 			screen.getByText( /could not load the confirmation challenge/i )
 		).toBeInTheDocument();
-
-		fireEvent.click( screen.getByRole( 'button', { name: /Try again/i } ) );
-
+		fireEvent.click(
+			screen.getByRole( 'button', {
+				name: /Try again/i,
+			} )
+		);
 		expect( refreshToken ).toHaveBeenCalledTimes( 1 );
 	} );
-
 	it( 'does not render the magic-link button (regression guard — modal-only feature)', () => {
 		render( <MobileAppLoginPage /> );
 
@@ -220,7 +232,6 @@ describe( 'MobileAppLoginPage', () => {
 			)
 		).not.toBeInTheDocument();
 	} );
-
 	it( 'surfaces the QR error state from useQRLoginToken without breaking the page shell', () => {
 		mockedUseQRLoginToken.mockReturnValue( {
 			state: QRLoginTokenStates.ERROR,
@@ -232,12 +243,11 @@ describe( 'MobileAppLoginPage', () => {
 			apUuid: null,
 			candidateNumbers: null,
 			challengeExpiresAt: 0,
-			fetchToken: jest.fn(),
-			refreshToken: jest.fn(),
-			chooseNumber: jest.fn(),
-			revoke: jest.fn(),
+			fetchToken: vi.fn(),
+			refreshToken: vi.fn(),
+			chooseNumber: vi.fn(),
+			revoke: vi.fn(),
 		} );
-
 		render( <MobileAppLoginPage /> );
 
 		// The heading and FAQ link are static shell — they must still render
@@ -248,7 +258,9 @@ describe( 'MobileAppLoginPage', () => {
 			} )
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole( 'link', { name: /FAQ/i } )
+			screen.getByRole( 'link', {
+				name: /FAQ/i,
+			} )
 		).toBeInTheDocument();
 
 		// Error text from the hook leaks through the shared component.
@@ -256,7 +268,6 @@ describe( 'MobileAppLoginPage', () => {
 			screen.getByText( /QR login requires an HTTPS connection/i )
 		).toBeInTheDocument();
 	} );
-
 	it( 'renders consumed-state revoke errors on the standalone page', () => {
 		mockedUseQRLoginToken.mockReturnValue( {
 			state: QRLoginTokenStates.CONSUMED,
@@ -264,18 +275,18 @@ describe( 'MobileAppLoginPage', () => {
 			secondsRemaining: 0,
 			errorMessage: 'Failed to revoke access.',
 			errorCode: null,
-			deviceInfo: { model: 'iPhone 15' },
+			deviceInfo: {
+				model: 'iPhone 15',
+			},
 			apUuid: 'ap-uuid',
 			candidateNumbers: null,
 			challengeExpiresAt: 0,
-			fetchToken: jest.fn(),
-			refreshToken: jest.fn(),
-			chooseNumber: jest.fn(),
-			revoke: jest.fn(),
+			fetchToken: vi.fn(),
+			refreshToken: vi.fn(),
+			chooseNumber: vi.fn(),
+			revoke: vi.fn(),
 		} );
-
 		render( <MobileAppLoginPage /> );
-
 		expect(
 			screen.getByText( /Signed in successfully on iPhone 15/i )
 		).toBeInTheDocument();

@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -10,7 +12,7 @@ import { Extension } from '@woocommerce/data';
 import { computePluginsSelection, joinWithAnd, Plugins } from '../Plugins';
 
 describe( 'Plugins Component', () => {
-	const mockSendEvent = jest.fn();
+	const mockSendEvent = vi.fn();
 	const mockContext = {
 		pluginsAvailable: [
 			{
