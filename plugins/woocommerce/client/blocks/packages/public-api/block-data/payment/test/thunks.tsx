@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -36,8 +38,8 @@ const testPaymentMethodData = {
 };
 
 describe( 'wc/store/payment thunks', () => {
-	const testPaymentProcessingCallback = jest.fn();
-	const testPaymentProcessingCallback2 = jest.fn();
+	const testPaymentProcessingCallback = vi.fn();
+	const testPaymentProcessingCallback2 = vi.fn();
 	const currentObservers: EventObserversType = {
 		payment_setup: new Map(),
 	};
@@ -52,7 +54,7 @@ describe( 'wc/store/payment thunks', () => {
 
 	describe( '__internalEmitPaymentProcessingEvent', () => {
 		beforeEach( () => {
-			jest.resetAllMocks();
+			vi.resetAllMocks();
 		} );
 		it( 'calls all registered observers', async () => {
 			const {
@@ -61,14 +63,14 @@ describe( 'wc/store/payment thunks', () => {
 			} = wpDataFunctions.dispatch( paymentStore );
 			await __internalEmitPaymentProcessingEventFromStore(
 				currentObservers,
-				jest.fn()
+				vi.fn()
 			);
 			expect( testPaymentProcessingCallback ).toHaveBeenCalled();
 			expect( testPaymentProcessingCallback2 ).toHaveBeenCalled();
 		} );
 
 		it( 'sets metadata if successful observers return it', async () => {
-			const testSuccessCallbackWithMetadata = jest.fn().mockReturnValue( {
+			const testSuccessCallbackWithMetadata = vi.fn().mockReturnValue( {
 				type: 'success',
 				meta: {
 					billingAddress: testBillingAddress,
@@ -82,11 +84,11 @@ describe( 'wc/store/payment thunks', () => {
 				priority: 10,
 			} );
 
-			const setBillingAddressMock = jest.fn();
-			const setShippingAddressMock = jest.fn();
-			const setPaymentMethodDataMock = jest.fn();
+			const setBillingAddressMock = vi.fn();
+			const setShippingAddressMock = vi.fn();
+			const setPaymentMethodDataMock = vi.fn();
 			const registryMock = {
-				dispatch: jest
+				dispatch: vi
 					.fn()
 					.mockImplementation( ( store: typeof paymentStore ) => {
 						return {
@@ -101,7 +103,7 @@ describe( 'wc/store/payment thunks', () => {
 			// (a thunk) returns a Promise.
 			await __internalEmitPaymentProcessingEvent(
 				currentObservers,
-				jest.fn()
+				vi.fn()
 			)( {
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore - it would be too much work to mock the entire registry, so we only mock dispatch on it,
@@ -124,7 +126,7 @@ describe( 'wc/store/payment thunks', () => {
 			);
 		} );
 		it( 'sets metadata if failed observers return it', async () => {
-			const testFailingCallbackWithMetadata = jest.fn().mockReturnValue( {
+			const testFailingCallbackWithMetadata = vi.fn().mockReturnValue( {
 				type: 'failure',
 				meta: {
 					billingAddress: testBillingAddress,
@@ -137,10 +139,10 @@ describe( 'wc/store/payment thunks', () => {
 				priority: 10,
 			} );
 
-			const setBillingAddressMock = jest.fn();
-			const setPaymentMethodDataMock = jest.fn();
+			const setBillingAddressMock = vi.fn();
+			const setPaymentMethodDataMock = vi.fn();
 			const registryMock = {
-				dispatch: jest
+				dispatch: vi
 					.fn()
 					.mockImplementation( ( store: typeof paymentStore ) => {
 						return {
@@ -154,7 +156,7 @@ describe( 'wc/store/payment thunks', () => {
 			// (a thunk) returns a Promise.
 			await __internalEmitPaymentProcessingEvent(
 				currentObservers,
-				jest.fn()
+				vi.fn()
 			)( {
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore - it would be too much work to mock the entire registry, so we only mock dispatch on it,
@@ -174,7 +176,7 @@ describe( 'wc/store/payment thunks', () => {
 			);
 		} );
 		it( 'sets payment status to error if one observer is successful, but another errors', async () => {
-			const testErrorCallbackWithMetadata = jest
+			const testErrorCallbackWithMetadata = vi
 				.fn()
 				.mockImplementation( () => {
 					return {
@@ -182,7 +184,7 @@ describe( 'wc/store/payment thunks', () => {
 					};
 				} );
 
-			const testSuccessCallback = jest.fn().mockReturnValue( {
+			const testSuccessCallback = vi.fn().mockReturnValue( {
 				type: 'success',
 			} );
 
@@ -195,10 +197,10 @@ describe( 'wc/store/payment thunks', () => {
 				priority: 9,
 			} );
 
-			const setPaymentErrorMock = jest.fn();
-			const setPaymentReadyMock = jest.fn();
+			const setPaymentErrorMock = vi.fn();
+			const setPaymentReadyMock = vi.fn();
 			const registryMock = {
-				dispatch: jest
+				dispatch: vi
 					.fn()
 					.mockImplementation( wpDataFunctions.dispatch ),
 			};
@@ -207,7 +209,7 @@ describe( 'wc/store/payment thunks', () => {
 			// (a thunk) returns a Promise.
 			await __internalEmitPaymentProcessingEvent(
 				currentObservers,
-				jest.fn()
+				vi.fn()
 			)( {
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore - it would be too much work to mock the entire registry, so we only mock dispatch on it,

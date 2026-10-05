@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -31,16 +33,16 @@ import {
 	getIncompatiblePaymentMethods,
 } from '../selectors';
 
-jest.mock( '@wordpress/data', () => {
-	const originalModule = jest.requireActual( '@wordpress/data' );
-	return {
+vi.mock( '@wordpress/data', async () => {
+	const originalModule = await vi.importActual( '@wordpress/data' );
+	return ( ( mock ) => ( { default: mock, ...mock } ) )( {
 		...originalModule,
-		select: jest.fn( ( storeName ) => {
+		select: vi.fn( ( storeName ) => {
 			const originalStore = originalModule.select( storeName );
 			if ( storeName === 'wc/store/cart' ) {
 				return {
 					...originalStore,
-					hasFinishedResolution: jest.fn( ( selectorName ) => {
+					hasFinishedResolution: vi.fn( ( selectorName ) => {
 						if ( selectorName === 'getCartTotals' ) {
 							return true;
 						}
@@ -52,13 +54,13 @@ jest.mock( '@wordpress/data', () => {
 			}
 			return originalStore;
 		} ),
-	};
+	} );
 } );
 
-jest.mock( '@woocommerce/settings', () => {
-	const originalModule = jest.requireActual( '@woocommerce/settings' );
+vi.mock( '@woocommerce/settings', async () => {
+	const originalModule = await vi.importActual( '@woocommerce/settings' );
 
-	return {
+	return ( ( mock ) => ( { default: mock, ...mock } ) )( {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore We know @woocommerce/settings is an object.
 		...originalModule,
@@ -90,7 +92,7 @@ jest.mock( '@woocommerce/settings', () => {
 			}
 			return originalModule.getSetting( setting, ...rest );
 		},
-	};
+	} );
 } );
 
 const registerMockPaymentMethods = ( savedCards = true ) => {

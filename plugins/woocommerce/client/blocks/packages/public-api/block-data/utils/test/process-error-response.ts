@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -11,16 +13,29 @@ import {
 	getNoticeContextFromErrorResponse,
 	processErrorResponse,
 } from '../process-error-response';
-
-jest.mock( '@wordpress/notices', () => ( {
-	createNotice: jest.fn(),
-} ) );
-
-jest.mock( '@woocommerce/base-utils', () => ( {
-	...jest.requireActual( '@woocommerce/base-utils' ),
-	createNotice: jest.fn(),
-} ) );
-
+vi.mock( '@wordpress/notices', () => {
+	const mock = {
+		createNotice: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/base-utils', async () => {
+	const mock = {
+		...( await vi.importActual( '@woocommerce/base-utils' ) ),
+		createNotice: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const errorResponse: ApiErrorResponse = {
 	code: 'rest_invalid_param',
 	message: 'Invalid parameter(s): billing_address, shipping_address',
@@ -48,11 +63,9 @@ const errorResponse: ApiErrorResponse = {
 		},
 	},
 };
-
 describe( 'getNoticeContextFromErrorResponse', () => {
 	it( 'should generate notice contexts and ids for the correct fields/errors', () => {
 		const result = getNoticeContextFromErrorResponse( errorResponse );
-
 		expect( result ).toEqual( [
 			{
 				context: 'wc/checkout/billing-address',
@@ -64,7 +77,6 @@ describe( 'getNoticeContextFromErrorResponse', () => {
 			},
 		] );
 	} );
-
 	it( 'should override the context if one is passed', () => {
 		const context = 'test_context';
 		const result = getNoticeContextFromErrorResponse(
@@ -74,7 +86,6 @@ describe( 'getNoticeContextFromErrorResponse', () => {
 		expect( result[ 0 ].context ).toEqual( 'test_context' );
 	} );
 } );
-
 describe( 'processErrorResponse', () => {
 	it( 'should dismiss old notices and create new ones', () => {
 		processErrorResponse( errorResponse );
@@ -87,7 +98,6 @@ describe( 'processErrorResponse', () => {
 				context: 'wc/checkout/billing-address',
 			}
 		);
-
 		expect( createNotice ).toHaveBeenCalledWith(
 			'error',
 			'Please ensure your government ID matches the confirmation.',

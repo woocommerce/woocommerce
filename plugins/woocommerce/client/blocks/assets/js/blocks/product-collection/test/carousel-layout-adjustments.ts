@@ -1,7 +1,9 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import {
 	screen,
 	waitFor,
@@ -21,19 +23,24 @@ import { LayoutOptions } from '../types';
 import '../';
 import '../../next-previous-buttons';
 import '../../product-template';
-
-jest.mock( '@woocommerce/block-settings', () => ( {
-	...jest.requireActual( '@woocommerce/block-settings' ),
-	isExperimentalBlocksEnabled: () => true,
-} ) );
-
+vi.mock( '@woocommerce/block-settings', async () => {
+	const mock = {
+		...( await vi.importActual( '@woocommerce/block-settings' ) ),
+		isExperimentalBlocksEnabled: () => true,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 type SetupAttributes = {
 	query?: {
 		inherit?: boolean;
 		__woocommerceOnSale?: boolean;
 	};
 };
-
 async function setup( {
 	withHeading,
 	attributes,
@@ -56,10 +63,18 @@ async function setup( {
 		},
 		innerBlocks: withHeading
 			? [
-					{ name: 'core/heading' },
-					{ name: 'woocommerce/product-template' },
+					{
+						name: 'core/heading',
+					},
+					{
+						name: 'woocommerce/product-template',
+					},
 			  ]
-			: [ { name: 'woocommerce/product-template' } ],
+			: [
+					{
+						name: 'woocommerce/product-template',
+					},
+			  ],
 	};
 	return initializeEditor( [ productCollectionBlock ] );
 }
@@ -80,17 +95,17 @@ describe.skip( 'Product Collection Block - Carousel Layout Adjustments', () => {
 					},
 				},
 			} );
-
 			await selectBlock( /Block: Product Collection/i );
 
 			// 3. Switch to Carousel mode
 			// Find and click the carousel layout option
 			await waitFor( () => {
 				expect(
-					screen.getByRole( 'radio', { name: /carousel/i } )
+					screen.getByRole( 'radio', {
+						name: /carousel/i,
+					} )
 				).toBeVisible();
 			} );
-
 			const carouselOption = screen.getByRole( 'radio', {
 				name: /carousel/i,
 			} );
@@ -118,7 +133,9 @@ describe.skip( 'Product Collection Block - Carousel Layout Adjustments', () => {
 			).toBeInTheDocument();
 
 			// 5. Switch back to GRID
-			const gridOption = screen.getByRole( 'radio', { name: /grid/i } );
+			const gridOption = screen.getByRole( 'radio', {
+				name: /grid/i,
+			} );
 			await act( async () => {
 				fireEvent.click( gridOption );
 			} );
@@ -135,7 +152,6 @@ describe.skip( 'Product Collection Block - Carousel Layout Adjustments', () => {
 			expect( console ).toHaveWarned();
 		} );
 	} );
-
 	describe( 'Custom Collection without Heading', () => {
 		it( 'should handle transition to and from carousel layout correctly', async () => {
 			// 1. Add Product Collection in editor with custom query
@@ -147,20 +163,19 @@ describe.skip( 'Product Collection Block - Carousel Layout Adjustments', () => {
 					},
 				},
 			} );
-
 			await selectBlock( /Block: Product Collection/i );
 
 			// 3. Switch to Carousel mode
 			await waitFor( () => {
 				expect(
-					screen.getByRole( 'radio', { name: /carousel/i } )
+					screen.getByRole( 'radio', {
+						name: /carousel/i,
+					} )
 				).toBeVisible();
 			} );
-
 			const carouselOption = screen.getByRole( 'radio', {
 				name: /carousel/i,
 			} );
-
 			await act( async () => {
 				fireEvent.click( carouselOption );
 			} );
@@ -187,14 +202,18 @@ describe.skip( 'Product Collection Block - Carousel Layout Adjustments', () => {
 			).not.toBeInTheDocument();
 
 			// 5. Switch back to GRID
-			const gridOption = screen.getByRole( 'radio', { name: /grid/i } );
+			const gridOption = screen.getByRole( 'radio', {
+				name: /grid/i,
+			} );
 			await act( async () => {
 				fireEvent.click( gridOption );
 			} );
 
 			// 6. Verify there's no GROUP anymore
 			expect(
-				screen.queryByRole( 'document', { name: /Block: Row/i } )
+				screen.queryByRole( 'document', {
+					name: /Block: Row/i,
+				} )
 			).not.toBeInTheDocument();
 
 			// Verify pagination is restored

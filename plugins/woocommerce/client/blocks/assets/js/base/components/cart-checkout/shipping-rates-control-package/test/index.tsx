@@ -1,3 +1,5 @@
+import { expect, test, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -14,7 +16,7 @@ import {
 	generateShippingRate,
 } from '../../../../../mocks/shipping-package';
 
-jest.mock( '@woocommerce/base-context/hooks' );
+vi.mock( '@woocommerce/base-context/hooks' );
 
 const testPackageData = generateShippingPackage( {
 	packageId: 0,
@@ -35,8 +37,8 @@ const testPackageData = generateShippingPackage( {
 } );
 
 test( 'renders available shipping rates', async () => {
-	const selectShippingRate = jest.fn();
-	( useShippingData as jest.Mock ).mockImplementation( () => {
+	const selectShippingRate = vi.fn();
+	( useShippingData as Mock ).mockImplementation( () => {
 		return {
 			selectShippingRate,
 			isSelectingRate: false,
@@ -44,7 +46,7 @@ test( 'renders available shipping rates', async () => {
 		};
 	} );
 
-	( useStoreCart as jest.Mock ).mockImplementation( () => {
+	( useStoreCart as Mock ).mockImplementation( () => {
 		return {
 			cartItems: [],
 		};
@@ -64,7 +66,7 @@ test( 'renders available shipping rates', async () => {
 	// text across elements with a space when computing the accessible name.
 	// Real browsers report "Flat rate $10.00".
 	const firstRate = await screen.findByRole( 'radio', {
-		name: 'Flat rate $ 10.00',
+		name: 'Flat rate $10.00',
 	} );
 
 	expect( firstRate ).toBeInTheDocument();
@@ -73,7 +75,7 @@ test( 'renders available shipping rates', async () => {
 
 	expect(
 		screen.getByRole( 'radio', {
-			name: 'Flat rate (premium) $ 15.00',
+			name: 'Flat rate (premium) $15.00',
 		} )
 	).toBeInTheDocument();
 	expect( selectShippingRate ).toHaveBeenCalledTimes( 1 );
@@ -81,9 +83,9 @@ test( 'renders available shipping rates', async () => {
 } );
 
 test( 'skips mount selection when disabled but still handles user selection', async () => {
-	const selectShippingRate = jest.fn();
+	const selectShippingRate = vi.fn();
 
-	( useShippingData as jest.Mock ).mockImplementation( () => {
+	( useShippingData as Mock ).mockImplementation( () => {
 		return {
 			selectShippingRate,
 			isSelectingRate: false,
@@ -91,7 +93,7 @@ test( 'skips mount selection when disabled but still handles user selection', as
 		};
 	} );
 
-	( useStoreCart as jest.Mock ).mockImplementation( () => {
+	( useStoreCart as Mock ).mockImplementation( () => {
 		return {
 			cartItems: [],
 		};
@@ -115,7 +117,7 @@ test( 'skips mount selection when disabled but still handles user selection', as
 	await act( async () => {
 		await userEvent.click(
 			screen.getByRole( 'radio', {
-				name: 'Flat rate (premium) $ 15.00',
+				name: 'Flat rate (premium) $15.00',
 			} )
 		);
 	} );
@@ -125,9 +127,9 @@ test( 'skips mount selection when disabled but still handles user selection', as
 } );
 
 test( 'changes rate selection locally and informs API about it', async () => {
-	const selectShippingRate = jest.fn();
+	const selectShippingRate = vi.fn();
 
-	( useShippingData as jest.Mock ).mockImplementation( () => {
+	( useShippingData as Mock ).mockImplementation( () => {
 		return {
 			selectShippingRate,
 			isSelectingRate: false,
@@ -135,7 +137,7 @@ test( 'changes rate selection locally and informs API about it', async () => {
 		};
 	} );
 
-	( useStoreCart as jest.Mock ).mockImplementation( () => {
+	( useStoreCart as Mock ).mockImplementation( () => {
 		return {
 			cartItems: [],
 		};
@@ -152,10 +154,10 @@ test( 'changes rate selection locally and informs API about it', async () => {
 	);
 
 	const firstRate = await screen.findByRole( 'radio', {
-		name: 'Flat rate $ 10.00',
+		name: 'Flat rate $10.00',
 	} );
 	const secondRate = screen.getByRole( 'radio', {
-		name: 'Flat rate (premium) $ 15.00',
+		name: 'Flat rate (premium) $15.00',
 	} );
 
 	expect( firstRate ).toBeInTheDocument();
@@ -190,15 +192,15 @@ test( 'upstream rate selection updates are properly reflected in local state', a
 		],
 	} );
 
-	( useShippingData as jest.Mock ).mockImplementation( () => {
+	( useShippingData as Mock ).mockImplementation( () => {
 		return {
-			selectShippingRate: jest.fn(),
+			selectShippingRate: vi.fn(),
 			isSelectingRate: false,
 			shippingRates: [ packageData ],
 		};
 	} );
 
-	( useStoreCart as jest.Mock ).mockImplementation( () => {
+	( useStoreCart as Mock ).mockImplementation( () => {
 		return {
 			cartItems: [],
 		};
@@ -215,10 +217,10 @@ test( 'upstream rate selection updates are properly reflected in local state', a
 	);
 
 	const firstRate = await screen.findByRole( 'radio', {
-		name: 'Flat rate $ 10.00',
+		name: 'Flat rate $10.00',
 	} );
 	const secondRate = screen.getByRole( 'radio', {
-		name: 'Flat rate (premium) $ 15.00',
+		name: 'Flat rate (premium) $15.00',
 	} );
 
 	expect( firstRate ).toBeInTheDocument();
@@ -246,9 +248,9 @@ test( 'upstream rate selection updates are properly reflected in local state', a
 		],
 	} );
 
-	( useShippingData as jest.Mock ).mockImplementation( () => {
+	( useShippingData as Mock ).mockImplementation( () => {
 		return {
-			selectShippingRate: jest.fn(),
+			selectShippingRate: vi.fn(),
 			isSelectingRate: false,
 			shippingRates: packageDataWithFlippedSelection,
 		};
@@ -271,12 +273,12 @@ test( 'upstream rate selection updates are properly reflected in local state', a
 } );
 
 test( 'Core clears a rejected selection so the shopper can retry it', async () => {
-	const selectShippingRate = jest.fn();
-	( useShippingData as jest.Mock ).mockReturnValue( {
+	const selectShippingRate = vi.fn();
+	( useShippingData as Mock ).mockReturnValue( {
 		selectShippingRate,
 		shippingRates: [ testPackageData ],
 	} );
-	( useStoreCart as jest.Mock ).mockReturnValue( { cartItems: [] } );
+	( useStoreCart as Mock ).mockReturnValue( { cartItems: [] } );
 	const selectedPackage = {
 		...testPackageData,
 		shipping_rates: testPackageData.shipping_rates.map(
@@ -294,7 +296,7 @@ test( 'Core clears a rejected selection so the shopper can retry it', async () =
 			noResultsMessage={ <span>No rates</span> }
 		/>
 	);
-	const flatRate = screen.getByRole( 'radio', { name: 'Flat rate $ 10.00' } );
+	const flatRate = screen.getByRole( 'radio', { name: 'Flat rate $10.00' } );
 	expect( flatRate ).toBeChecked();
 
 	// Pickup is filtered out of Shipping, leaving no visible selected rate after rollback.

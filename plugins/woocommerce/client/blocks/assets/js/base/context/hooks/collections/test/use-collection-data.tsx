@@ -1,3 +1,5 @@
+import { afterEach, describe, expect, test, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -14,18 +16,18 @@ import { useQueryStateContext } from '../../../providers/query-state-context';
 import { useCollection } from '../use-collection';
 import { useCollectionData } from '../use-collection-data';
 
-jest.mock( '../../use-query-state' );
-jest.mock( '../../../providers/query-state-context' );
-jest.mock( '../use-collection' );
+vi.mock( '../../use-query-state' );
+vi.mock( '../../../providers/query-state-context' );
+vi.mock( '../use-collection' );
 
 describe( 'useCollectionData', () => {
 	afterEach( () => {
-		jest.useRealTimers();
-		jest.clearAllMocks();
+		vi.useRealTimers();
+		vi.clearAllMocks();
 	} );
 
 	test( 'passes active attribute and price filters to the collection-data request', () => {
-		jest.useFakeTimers();
+		vi.useFakeTimers();
 
 		const queryAttribute = {
 			taxonomy: 'pa_size',
@@ -44,16 +46,16 @@ describe( 'useCollectionData', () => {
 			max_price: '4000',
 		};
 		let collectionDataQueryState: Record< string, unknown > = {};
-		const setCalculateAttributeCounts = jest.fn();
-		const setCollectionDataQueryState = jest.fn();
-		const setOtherQueryState = jest.fn();
+		const setCalculateAttributeCounts = vi.fn();
+		const setCollectionDataQueryState = vi.fn();
+		const setOtherQueryState = vi.fn();
 
-		( useQueryStateContext as jest.Mock ).mockReturnValue( 'page' );
-		( useQueryStateByContext as jest.Mock ).mockImplementation( () => [
+		( useQueryStateContext as Mock ).mockReturnValue( 'page' );
+		( useQueryStateByContext as Mock ).mockImplementation( () => [
 			collectionDataQueryState,
 			setCollectionDataQueryState,
 		] );
-		( useQueryStateByKey as jest.Mock ).mockImplementation(
+		( useQueryStateByKey as Mock ).mockImplementation(
 			( queryKey, defaultValue ) => [
 				queryKey === 'calculate_attribute_counts'
 					? registeredAttributeCounts
@@ -63,7 +65,7 @@ describe( 'useCollectionData', () => {
 					: setOtherQueryState,
 			]
 		);
-		( useCollection as jest.Mock ).mockReturnValue( {
+		( useCollection as Mock ).mockReturnValue( {
 			results: { attribute_counts: [] },
 			isLoading: false,
 		} );
@@ -87,7 +89,7 @@ describe( 'useCollectionData', () => {
 		rerender();
 
 		act( () => {
-			jest.advanceTimersByTime( 200 );
+			vi.advanceTimersByTime( 200 );
 		} );
 
 		expect( useCollection ).toHaveBeenLastCalledWith( {

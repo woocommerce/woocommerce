@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, it, test, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -9,21 +11,38 @@ import * as mockUtils from '@woocommerce/editor-components/utils';
  */
 import withCategory from '../with-category';
 import * as mockBaseUtils from '../../base/utils/errors';
-
-jest.mock( '@woocommerce/editor-components/utils', () => ( {
-	getCategory: jest.fn(),
-} ) );
-
-jest.mock( '../../base/utils/errors', () => ( {
-	formatError: jest.fn(),
-} ) );
-
-const mockCategory = { name: 'Clothing' };
-const attributes = { categoryId: 1 };
+vi.mock( '@woocommerce/editor-components/utils', () => {
+	const mock = {
+		getCategory: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../base/utils/errors', () => {
+	const mock = {
+		formatError: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+const mockCategory = {
+	name: 'Clothing',
+};
+const attributes = {
+	categoryId: 1,
+};
 
 // Capture the props the HOC injects into the wrapped component.
 let lastProps;
-const CapturedComponent = jest.fn( ( props ) => {
+const CapturedComponent = vi.fn( ( props ) => {
 	lastProps = props;
 	return null;
 } );
@@ -37,66 +56,64 @@ const settle = async ( fn ) => {
 		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
 	} );
 };
-
 describe( 'withCategory Component', () => {
 	let renderResult;
-	const renderComponent = ( props = { attributes } ) =>
+	const renderComponent = (
+		props = {
+			attributes,
+		}
+	) =>
 		settle( () => {
 			renderResult = render( <TestComponent { ...props } /> );
 		} );
-
 	afterEach( () => {
 		mockUtils.getCategory.mockReset();
 		CapturedComponent.mockClear();
 		lastProps = undefined;
 	} );
-
 	describe( 'lifecycle events', () => {
 		beforeEach( async () => {
 			mockUtils.getCategory.mockImplementation( () => Promise.resolve() );
 			await renderComponent();
 		} );
-
 		it( 'getCategory is called on mount with passed in category id', () => {
 			const { getCategory } = mockUtils;
-
 			expect( getCategory ).toHaveBeenCalledWith( attributes.categoryId );
 			expect( getCategory ).toHaveBeenCalledTimes( 1 );
 		} );
-
 		it( 'getCategory is called on component update', async () => {
 			const { getCategory } = mockUtils;
-			const newAttributes = { ...attributes, categoryId: 2 };
+			const newAttributes = {
+				...attributes,
+				categoryId: 2,
+			};
 			await settle( () =>
 				renderResult.rerender(
 					<TestComponent attributes={ newAttributes } />
 				)
 			);
-
 			expect( getCategory ).toHaveBeenNthCalledWith(
 				2,
 				newAttributes.categoryId
 			);
 			expect( getCategory ).toHaveBeenCalledTimes( 2 );
 		} );
-
 		it( 'getCategory is hooked to the prop', async () => {
 			const { getCategory } = mockUtils;
-
 			await settle( () => lastProps.getCategory() );
-
 			expect( getCategory ).toHaveBeenCalledTimes( 2 );
 		} );
 	} );
-
 	describe( 'when the API returns category data', () => {
 		beforeEach( async () => {
 			mockUtils.getCategory.mockImplementation( ( categoryId ) =>
-				Promise.resolve( { ...mockCategory, id: categoryId } )
+				Promise.resolve( {
+					...mockCategory,
+					id: categoryId,
+				} )
 			);
 			await renderComponent();
 		} );
-
 		it( 'sets the category props', () => {
 			expect( lastProps.error ).toBeNull();
 			expect( typeof lastProps.getCategory ).toBe( 'function' );
@@ -107,20 +124,42 @@ describe( 'withCategory Component', () => {
 			} );
 		} );
 	} );
-
 	it.each( [
-		[ {}, { termId: 42, taxonomy: 'product_cat' }, [ [ 42 ] ] ],
 		[
 			{},
-			{ termId: 42, termTaxonomy: 'product_cat', taxonomy: 'category' },
+			{
+				termId: 42,
+				taxonomy: 'product_cat',
+			},
 			[ [ 42 ] ],
 		],
 		[
-			{ categoryId: 7 },
-			{ termId: 42, taxonomy: 'product_cat' },
+			{},
+			{
+				termId: 42,
+				termTaxonomy: 'product_cat',
+				taxonomy: 'category',
+			},
+			[ [ 42 ] ],
+		],
+		[
+			{
+				categoryId: 7,
+			},
+			{
+				termId: 42,
+				taxonomy: 'product_cat',
+			},
 			[ [ 7 ] ],
 		],
-		[ {}, { termId: 42, taxonomy: 'category' }, [] ],
+		[
+			{},
+			{
+				termId: 42,
+				taxonomy: 'category',
+			},
+			[],
+		],
 	] )(
 		'resolves category selection %j with context %j',
 		async ( selectedAttributes, context, expectedCalls ) => {
@@ -129,18 +168,20 @@ describe( 'withCategory Component', () => {
 				attributes: selectedAttributes,
 				context,
 			} );
-
 			expect( mockUtils.getCategory.mock.calls ).toEqual( expectedCalls );
 			expect( lastProps.effectiveCategoryId ).toBe(
 				expectedCalls[ 0 ]?.[ 0 ]
 			);
 		}
 	);
-
 	describe( 'when the API returns an error', () => {
-		const error = { message: 'There was an error.' };
-		const formattedError = { message: 'There was an error.', type: 'api' };
-
+		const error = {
+			message: 'There was an error.',
+		};
+		const formattedError = {
+			message: 'There was an error.',
+			type: 'api',
+		};
 		beforeEach( async () => {
 			mockUtils.getCategory.mockImplementation( () =>
 				Promise.reject( error )
@@ -150,10 +191,8 @@ describe( 'withCategory Component', () => {
 			);
 			await renderComponent();
 		} );
-
 		test( 'sets the error prop', () => {
 			const { formatError } = mockBaseUtils;
-
 			expect( formatError ).toHaveBeenCalledWith( error );
 			expect( formatError ).toHaveBeenCalledTimes( 1 );
 			expect( lastProps.error ).toEqual( formattedError );

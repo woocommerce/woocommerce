@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -14,7 +16,7 @@ describe( 'ExperimentalOrderLocalPickupPackages', () => {
 		extensions: {},
 		cart: {},
 		components: {},
-		renderPickupLocation: jest.fn(),
+		renderPickupLocation: vi.fn(),
 	};
 
 	it( 'renders fill content inside the slot with expected classes', () => {
@@ -35,7 +37,7 @@ describe( 'ExperimentalOrderLocalPickupPackages', () => {
 		const extensions = { 'pickup-ext': { locations: [] } };
 		const cart = { items: [ { id: 1 } ] };
 		const components = { PickupOption: () => null };
-		const renderPickupLocation = jest.fn();
+		const renderPickupLocation = vi.fn();
 
 		const fillProps = getFillProps( ExperimentalOrderLocalPickupPackages, {
 			extensions,

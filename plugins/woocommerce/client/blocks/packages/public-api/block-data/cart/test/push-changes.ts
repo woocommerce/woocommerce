@@ -1,3 +1,5 @@
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -8,10 +10,9 @@ import { cartStore, validationStore } from '@woocommerce/block-data';
  * Internal dependencies
  */
 import { flushChanges, pushChanges } from '../push-changes';
-
-let updateCustomerDataMock = jest.fn();
-const getValidationErrorMock = jest.fn().mockReturnValue( undefined );
-let getCustomerDataMock = jest.fn().mockReturnValue( {
+let updateCustomerDataMock = vi.fn();
+const getValidationErrorMock = vi.fn().mockReturnValue( undefined );
+let getCustomerDataMock = vi.fn().mockReturnValue( {
 	billingAddress: {
 		first_name: 'John',
 		last_name: 'Doe',
@@ -38,38 +39,67 @@ let getCustomerDataMock = jest.fn().mockReturnValue( {
 } );
 
 // Mocking select and dispatch here so we can control the actions/selectors used in pushChanges.
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	__esModule: true,
-	select: jest.fn(),
-	dispatch: jest.fn(),
-} ) );
-
-jest.mock( '@woocommerce/utils', () => ( {
-	isSiteEditorPage: jest.fn().mockReturnValue( true ),
-} ) );
+vi.mock( '@wordpress/data', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/data' ) ),
+		__esModule: true,
+		select: vi.fn(),
+		dispatch: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/utils', () => {
+	const mock = {
+		isSiteEditorPage: vi.fn().mockReturnValue( true ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 // Mocking processErrorResponse because we don't actually care about processing the error response, we just don't want
 // pushChanges to throw an error.
-jest.mock( '../../utils', () => ( {
-	...jest.requireActual( '../../utils' ),
-	__esModule: true,
-	processErrorResponse: jest.fn(),
-} ) );
+vi.mock( '../../utils', async () => {
+	const mock = {
+		...( await vi.importActual( '../../utils' ) ),
+		__esModule: true,
+		processErrorResponse: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 // Mocking updatePaymentMethods because this uses the mocked debounce earlier, and causes an error. Moreover, we don't
 // need to update payment methods, they are not relevant to the tests in this file.
-jest.mock( '../update-payment-methods', () => ( {
-	debouncedUpdatePaymentMethods: jest.fn(),
-	updatePaymentMethods: jest.fn(),
-} ) );
-
+vi.mock( '../update-payment-methods', () => {
+	const mock = {
+		debouncedUpdatePaymentMethods: vi.fn(),
+		updatePaymentMethods: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 async function resetToInitialAddressMock() {
 	pushChanges( false );
 	updateCustomerDataMock.mockReset();
-	updateCustomerDataMock.mockResolvedValue( jest.fn() );
-
-	getCustomerDataMock = jest.fn().mockReturnValue( {
+	updateCustomerDataMock.mockResolvedValue( vi.fn() );
+	getCustomerDataMock = vi.fn().mockReturnValue( {
 		billingAddress: {
 			first_name: 'John',
 			last_name: 'Doe',
@@ -112,7 +142,6 @@ const initialBillingAddress = {
 	email: 'john.doe@mail.com',
 	phone: '555-555-5555',
 };
-
 const initialShippingAddress = {
 	first_name: 'John',
 	last_name: 'Doe',
@@ -124,16 +153,14 @@ const initialShippingAddress = {
 	country: 'US',
 	phone: '555-555-5555',
 };
-
 describe( 'pushChanges', () => {
-	beforeAll( () => {
+	beforeAll( async () => {
+		const _actual = await vi.importActual( '@wordpress/data' );
 		wpDataFunctions.select.mockImplementation(
 			( storeNameOrDescriptor: unknown ) => {
 				if ( storeNameOrDescriptor === cartStore ) {
 					return {
-						...jest
-							.requireActual( '@wordpress/data' )
-							.select( storeNameOrDescriptor ),
+						..._actual.select( storeNameOrDescriptor ),
 						hasFinishedResolution: () => true,
 						getCustomerData: getCustomerDataMock,
 					};
@@ -143,30 +170,22 @@ describe( 'pushChanges', () => {
 					storeNameOrDescriptor === validationStore.name
 				) {
 					return {
-						...jest
-							.requireActual( '@wordpress/data' )
-							.select( storeNameOrDescriptor ),
+						..._actual.select( storeNameOrDescriptor ),
 						getValidationError: getValidationErrorMock,
 					};
 				}
-				return jest
-					.requireActual( '@wordpress/data' )
-					.select( storeNameOrDescriptor );
+				return _actual.select( storeNameOrDescriptor );
 			}
 		);
 		wpDataFunctions.dispatch.mockImplementation(
 			( storeNameOrDescriptor: unknown ) => {
 				if ( storeNameOrDescriptor === cartStore ) {
 					return {
-						...jest
-							.requireActual( '@wordpress/data' )
-							.dispatch( storeNameOrDescriptor ),
+						..._actual.dispatch( storeNameOrDescriptor ),
 						updateCustomerData: updateCustomerDataMock,
 					};
 				}
-				return jest
-					.requireActual( '@wordpress/data' )
-					.dispatch( storeNameOrDescriptor );
+				return _actual.dispatch( storeNameOrDescriptor );
 			}
 		);
 	} );
@@ -175,10 +194,9 @@ describe( 'pushChanges', () => {
 		getValidationErrorMock.mockReturnValue( undefined );
 		await resetToInitialAddressMock();
 	} );
-
 	it( 'Keeps props dirty if data did not persist due to an error', async () => {
 		// When first updating the customer data, we want to simulate a rejected update.
-		updateCustomerDataMock = jest.fn().mockRejectedValue( 'error' );
+		updateCustomerDataMock = vi.fn().mockRejectedValue( 'error' );
 
 		// Run this without changing anything because the first run does not push data (the first run is populating what was received on page load).
 		pushChanges( false );
@@ -237,7 +255,7 @@ describe( 'pushChanges', () => {
 
 		// Reset the mock so that it no longer rejects.
 		updateCustomerDataMock.mockReset();
-		updateCustomerDataMock.mockResolvedValue( jest.fn() );
+		updateCustomerDataMock.mockResolvedValue( vi.fn() );
 
 		// Simulate the user updating the postcode only.
 		getCustomerDataMock.mockReturnValue( {
@@ -269,7 +287,6 @@ describe( 'pushChanges', () => {
 		// Although only one property was updated between calls, we should expect City, State, and Postcode to be pushed
 		// to the server because the previous push failed when they were originally changed.
 		pushChanges( false );
-
 		await expect( updateCustomerDataMock ).toHaveBeenLastCalledWith(
 			{
 				shipping_address: {
@@ -288,7 +305,6 @@ describe( 'pushChanges', () => {
 			true // because the shipping rate impacting field was changed
 		);
 	} );
-
 	it( 'Does not push the shipping address if the billing address is changed', async () => {
 		// Simulate the user updating the billing postcode only.
 		getCustomerDataMock.mockReturnValue( {
@@ -316,9 +332,7 @@ describe( 'pushChanges', () => {
 				phone: '555-555-5555',
 			},
 		} );
-
 		pushChanges( false );
-
 		await expect( updateCustomerDataMock ).toHaveBeenLastCalledWith(
 			{
 				billing_address: {
@@ -338,7 +352,6 @@ describe( 'pushChanges', () => {
 			false // because no shipping rates impacting fields are changed
 		);
 	} );
-
 	it( 'Does not push the billing address if the shipping address is changed', async () => {
 		getCustomerDataMock.mockReturnValue( {
 			billingAddress: {
@@ -366,9 +379,7 @@ describe( 'pushChanges', () => {
 				phone: '555-555-5555',
 			},
 		} );
-
 		pushChanges( false );
-
 		await expect( updateCustomerDataMock ).toHaveBeenLastCalledWith(
 			{
 				shipping_address: {
@@ -387,7 +398,6 @@ describe( 'pushChanges', () => {
 			true // because the shipping rate impacting field was changed
 		);
 	} );
-
 	it( 'Pushes both the billing & shipping address if both are changed', async () => {
 		getCustomerDataMock.mockReturnValue( {
 			billingAddress: {
@@ -415,9 +425,7 @@ describe( 'pushChanges', () => {
 				phone: '555-555-5555',
 			},
 		} );
-
 		pushChanges( false );
-
 		await expect( updateCustomerDataMock ).toHaveBeenLastCalledWith(
 			{
 				billing_address: {
@@ -448,7 +456,6 @@ describe( 'pushChanges', () => {
 			true // because a shipping rate impacting field was changed
 		);
 	} );
-
 	it( 'Pushes the data when non-shipping impacting rates are changed without flagging haveAddressFieldsForShippingRatesChanged', async () => {
 		// Simulate the user updating all non-shipping impacting fields
 		getCustomerDataMock.mockReturnValue( {
@@ -477,9 +484,7 @@ describe( 'pushChanges', () => {
 				phone: '555-555-5555 - changed',
 			},
 		} );
-
 		pushChanges( false );
-
 		await expect( updateCustomerDataMock ).toHaveBeenLastCalledWith(
 			{
 				billing_address: {
@@ -510,11 +515,13 @@ describe( 'pushChanges', () => {
 			false // because no shipping rate impacting fields are changed
 		);
 	} );
-
 	it( 'Pushes the address when the country changes, even though the reset state and postcode are invalid', async () => {
 		getValidationErrorMock.mockImplementation( ( key: string ) =>
 			[ 'shipping_state', 'shipping_postcode' ].includes( key )
-				? { message: 'Please enter a valid postcode', hidden: true }
+				? {
+						message: 'Please enter a valid postcode',
+						hidden: true,
+				  }
 				: undefined
 		);
 
@@ -544,9 +551,7 @@ describe( 'pushChanges', () => {
 				phone: '555-555-5555',
 			},
 		} );
-
 		pushChanges( false );
-
 		await expect( updateCustomerDataMock ).toHaveBeenLastCalledWith(
 			{
 				shipping_address: {
@@ -565,15 +570,16 @@ describe( 'pushChanges', () => {
 			true // because the shipping rate impacting field was changed
 		);
 	} );
-
 	it( 'Does not push the address if the postcode entered after a country change is invalid', async () => {
 		updateCustomerDataMock.mockClear();
 		getValidationErrorMock.mockImplementation( ( key: string ) =>
 			key === 'shipping_postcode'
-				? { message: 'Please enter a valid postcode', hidden: true }
+				? {
+						message: 'Please enter a valid postcode',
+						hidden: true,
+				  }
 				: undefined
 		);
-
 		const billingAddress = {
 			first_name: 'John',
 			last_name: 'Doe',
@@ -596,32 +602,37 @@ describe( 'pushChanges', () => {
 			country: 'GB',
 			phone: '555-555-5555',
 		};
-
 		getCustomerDataMock.mockReturnValue( {
 			billingAddress,
-			shippingAddress: { ...shippingAddress, postcode: 'INVALID' },
+			shippingAddress: {
+				...shippingAddress,
+				postcode: 'INVALID',
+			},
 		} );
-
 		pushChanges( false );
-
 		expect( updateCustomerDataMock ).not.toHaveBeenCalled();
 
 		// Correcting the postcode unblocks the push, proving nothing else was holding it back.
 		getValidationErrorMock.mockReturnValue( undefined );
 		getCustomerDataMock.mockReturnValue( {
 			billingAddress,
-			shippingAddress: { ...shippingAddress, postcode: 'SW1A 2AA' },
+			shippingAddress: {
+				...shippingAddress,
+				postcode: 'SW1A 2AA',
+			},
 		} );
-
 		pushChanges( false );
-
 		await expect( updateCustomerDataMock ).toHaveBeenLastCalledWith(
-			{ shipping_address: { ...shippingAddress, postcode: 'SW1A 2AA' } },
+			{
+				shipping_address: {
+					...shippingAddress,
+					postcode: 'SW1A 2AA',
+				},
+			},
 			true,
 			true // because the shipping rate impacting field was changed
 		);
 	} );
-
 	it( 'Pushes a country change straight away instead of waiting out the debounce', () => {
 		updateCustomerDataMock.mockClear();
 		getCustomerDataMock.mockReturnValue( {
@@ -652,12 +663,10 @@ describe( 'pushChanges', () => {
 
 		// Debounced, but the shipping rates on screen are stale as soon as the country changes.
 		pushChanges();
-
 		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 1 );
 	} );
-
 	it( 'Waits for the debounce when a field other than the country changes', () => {
-		jest.useFakeTimers();
+		vi.useFakeTimers();
 		updateCustomerDataMock.mockClear();
 		getCustomerDataMock.mockReturnValue( {
 			billingAddress: {
@@ -684,23 +693,20 @@ describe( 'pushChanges', () => {
 				phone: '555-555-5555',
 			},
 		} );
-
 		pushChanges();
-
 		expect( updateCustomerDataMock ).not.toHaveBeenCalled();
-
-		jest.advanceTimersByTime( 1500 );
-
+		vi.advanceTimersByTime( 1500 );
 		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 1 );
-
-		jest.useRealTimers();
+		vi.useRealTimers();
 	} );
-
 	it( 'Pushes the address when the billing country changes, even though the reset state and postcode are invalid', async () => {
 		updateCustomerDataMock.mockClear();
 		getValidationErrorMock.mockImplementation( ( key: string ) =>
 			[ 'billing_state', 'billing_postcode' ].includes( key )
-				? { message: 'Please enter a valid postcode', hidden: true }
+				? {
+						message: 'Please enter a valid postcode',
+						hidden: true,
+				  }
 				: undefined
 		);
 
@@ -711,37 +717,46 @@ describe( 'pushChanges', () => {
 			postcode: '',
 			country: 'GB',
 		};
-
 		getCustomerDataMock.mockReturnValue( {
 			billingAddress,
-			shippingAddress: { ...initialShippingAddress },
+			shippingAddress: {
+				...initialShippingAddress,
+			},
 		} );
-
 		pushChanges( false );
-
 		await expect( updateCustomerDataMock ).toHaveBeenLastCalledWith(
-			{ billing_address: billingAddress },
+			{
+				billing_address: billingAddress,
+			},
 			true,
 			false // because no shipping rate impacting fields are changed
 		);
 	} );
-
 	it( 'Still waits for a valid postcode when it was emptied without the country changing', async () => {
 		updateCustomerDataMock.mockClear();
 		getValidationErrorMock.mockImplementation( ( key: string ) =>
 			key === 'shipping_postcode'
-				? { message: 'Please enter a valid postcode', hidden: true }
+				? {
+						message: 'Please enter a valid postcode',
+						hidden: true,
+				  }
 				: undefined
 		);
 
 		// Same country throughout: the customer cleared the postcode themselves.
-		const shippingAddress = { ...initialShippingAddress, city: 'Boston' };
-
+		const shippingAddress = {
+			...initialShippingAddress,
+			city: 'Boston',
+		};
 		getCustomerDataMock.mockReturnValue( {
-			billingAddress: { ...initialBillingAddress },
-			shippingAddress: { ...shippingAddress, postcode: '' },
+			billingAddress: {
+				...initialBillingAddress,
+			},
+			shippingAddress: {
+				...shippingAddress,
+				postcode: '',
+			},
 		} );
-
 		pushChanges( false );
 
 		// The country did not change, so an empty postcode is the customer's own doing and is
@@ -751,20 +766,28 @@ describe( 'pushChanges', () => {
 		// Filling it in unblocks the push, proving nothing else was holding it back.
 		getValidationErrorMock.mockReturnValue( undefined );
 		getCustomerDataMock.mockReturnValue( {
-			billingAddress: { ...initialBillingAddress },
-			shippingAddress: { ...shippingAddress, postcode: '02101' },
+			billingAddress: {
+				...initialBillingAddress,
+			},
+			shippingAddress: {
+				...shippingAddress,
+				postcode: '02101',
+			},
 		} );
-
 		pushChanges( false );
-
 		await expect( updateCustomerDataMock ).toHaveBeenLastCalledWith(
-			{ shipping_address: { ...shippingAddress, postcode: '02101' } },
+			{
+				shipping_address: {
+					...shippingAddress,
+					postcode: '02101',
+				},
+			},
 			true,
 			true // because the shipping rate impacting field was changed
 		);
 	} );
 	it( 'Does not lose a country change made while a push is already running', async () => {
-		jest.useFakeTimers();
+		vi.useFakeTimers();
 		updateCustomerDataMock.mockClear();
 
 		// Keep the first push running so the country changes while it is still in flight.
@@ -774,16 +797,17 @@ describe( 'pushChanges', () => {
 				resolveFirstPush = resolve;
 			} )
 		);
-
 		getCustomerDataMock.mockReturnValue( {
-			billingAddress: { ...initialBillingAddress },
-			shippingAddress: { ...initialShippingAddress, city: 'Houston' },
+			billingAddress: {
+				...initialBillingAddress,
+			},
+			shippingAddress: {
+				...initialShippingAddress,
+				city: 'Houston',
+			},
 		} );
-
 		pushChanges( false );
-
 		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 1 );
-
 		const countryChangedAddress = {
 			...initialShippingAddress,
 			city: 'Houston',
@@ -791,32 +815,35 @@ describe( 'pushChanges', () => {
 			state: '',
 			postcode: '',
 		};
-
 		getCustomerDataMock.mockReturnValue( {
-			billingAddress: { ...initialBillingAddress },
-			shippingAddress: { ...countryChangedAddress },
+			billingAddress: {
+				...initialBillingAddress,
+			},
+			shippingAddress: {
+				...countryChangedAddress,
+			},
 		} );
-
 		pushChanges();
 
 		// Pushes do not overlap, so the country change waits for the running one.
 		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 1 );
-
 		resolveFirstPush();
 		await Promise.resolve();
-		jest.advanceTimersByTime( 1500 );
-
+		vi.advanceTimersByTime( 1500 );
 		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 2 );
 		expect( updateCustomerDataMock ).toHaveBeenLastCalledWith(
-			{ shipping_address: { ...countryChangedAddress } },
+			{
+				shipping_address: {
+					...countryChangedAddress,
+				},
+			},
 			true,
 			true // because the shipping rate impacting field was changed
 		);
-
-		jest.useRealTimers();
+		vi.useRealTimers();
 	} );
 	it( 'Keeps a scheduled push when a field is blurred while a push is running', async () => {
-		jest.useFakeTimers();
+		vi.useFakeTimers();
 		updateCustomerDataMock.mockClear();
 
 		// Keep the first push running so the next change is made while it is in flight.
@@ -826,52 +853,50 @@ describe( 'pushChanges', () => {
 				resolveFirstPush = resolve;
 			} )
 		);
-
 		getCustomerDataMock.mockReturnValue( {
 			billingAddress: {
 				...initialBillingAddress,
 				email: 'jane.doe@mail.com',
 			},
-			shippingAddress: { ...initialShippingAddress },
+			shippingAddress: {
+				...initialShippingAddress,
+			},
 		} );
-
 		pushChanges( false );
-
 		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 1 );
-
 		const typedAddress = {
 			...initialShippingAddress,
 			city: 'Houston',
 			state: 'TX',
 			postcode: '77058',
 		};
-
 		getCustomerDataMock.mockReturnValue( {
 			billingAddress: {
 				...initialBillingAddress,
 				email: 'jane.doe@mail.com',
 			},
-			shippingAddress: { ...typedAddress },
+			shippingAddress: {
+				...typedAddress,
+			},
 		} );
-
 		pushChanges();
 
 		// Blurring the field flushes, which must not cancel the push scheduled above.
 		flushChanges();
-
 		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 1 );
-
 		resolveFirstPush();
 		await Promise.resolve();
-		jest.advanceTimersByTime( 1500 );
-
+		vi.advanceTimersByTime( 1500 );
 		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 2 );
 		expect( updateCustomerDataMock ).toHaveBeenLastCalledWith(
-			{ shipping_address: { ...typedAddress } },
+			{
+				shipping_address: {
+					...typedAddress,
+				},
+			},
 			true,
 			true // because the shipping rate impacting field was changed
 		);
-
-		jest.useRealTimers();
+		vi.useRealTimers();
 	} );
 } );

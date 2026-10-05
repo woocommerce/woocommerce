@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -66,7 +68,7 @@ describe( 'Checkout order notes', () => {
 
 	it( 'Retains the order note when toggling the textarea on and off', async () => {
 		const user = userEvent.setup();
-		const onChange = jest.fn();
+		const onChange = vi.fn();
 		const { container, rerender } = render(
 			<OrderNotes
 				disabled={ false }

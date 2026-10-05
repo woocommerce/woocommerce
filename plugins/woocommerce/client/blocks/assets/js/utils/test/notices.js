@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -8,16 +10,16 @@ import { select, dispatch } from '@wordpress/data';
  */
 import { hasNoticesOfType, removeNoticesByStatus } from '../notices';
 
-jest.mock( '@wordpress/data' );
+vi.mock( '@wordpress/data' );
 
 describe( 'Notice utils', () => {
 	beforeEach( () => {
-		jest.resetAllMocks();
+		vi.resetAllMocks();
 	} );
 	describe( 'hasNoticesOfType', () => {
 		it( 'Correctly returns if there are notices of a given type in the core data store', () => {
 			select.mockReturnValue( {
-				getNotices: jest.fn().mockReturnValue( [
+				getNotices: vi.fn().mockReturnValue( [
 					{
 						id: 'coupon-form',
 						status: 'error',
@@ -44,7 +46,7 @@ describe( 'Notice utils', () => {
 
 		it( 'Handles notices being empty', () => {
 			select.mockReturnValue( {
-				getNotices: jest.fn().mockReturnValue( [] ),
+				getNotices: vi.fn().mockReturnValue( [] ),
 			} );
 			const hasDefaultNotices = hasNoticesOfType( 'default', 'wc/cart' );
 			expect( hasDefaultNotices ).toBe( false );
@@ -53,7 +55,7 @@ describe( 'Notice utils', () => {
 	describe( 'removeNoticesByStatus', () => {
 		it( 'Correctly removes notices of a given status', () => {
 			select.mockReturnValue( {
-				getNotices: jest.fn().mockReturnValue( [
+				getNotices: vi.fn().mockReturnValue( [
 					{
 						id: 'coupon-form',
 						status: 'error',
@@ -92,7 +94,7 @@ describe( 'Notice utils', () => {
 				] ),
 			} );
 			dispatch.mockReturnValue( {
-				removeNotice: jest.fn(),
+				removeNotice: vi.fn(),
 			} );
 			removeNoticesByStatus( 'error' );
 			expect( dispatch().removeNotice ).toHaveBeenNthCalledWith(
@@ -109,11 +111,11 @@ describe( 'Notice utils', () => {
 
 		it( 'Handles notices being empty', () => {
 			select.mockReturnValue( {
-				getNotices: jest.fn().mockReturnValue( [] ),
+				getNotices: vi.fn().mockReturnValue( [] ),
 			} );
 
 			dispatch.mockReturnValue( {
-				removeNotice: jest.fn(),
+				removeNotice: vi.fn(),
 			} );
 			removeNoticesByStatus( 'empty' );
 			expect( dispatch().removeNotice ).not.toHaveBeenCalled();

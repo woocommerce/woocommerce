@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -10,119 +12,142 @@ import { getSetting } from '@woocommerce/settings';
  * Internal dependencies
  */
 import { Block } from '../block';
-
-jest.mock( '@wordpress/data', () => {
-	const originalModule = jest.requireActual( '@wordpress/data' );
-	return {
+vi.mock( '@wordpress/data', async () => {
+	const originalModule = await vi.importActual( '@wordpress/data' );
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		...originalModule,
-		useSelect: jest.fn( () => ( {
+		useSelect: vi.fn( () => ( {
 			selectedProductType: {
 				slug: 'simple',
 			},
 		} ) ),
-	};
+	} );
 } );
-
-jest.mock( '@woocommerce/settings', () => ( {
-	getSetting: jest.fn().mockImplementation( ( param ) => {
-		if ( param === 'wcBlocksConfig' ) {
-			return {
-				pluginUrl: '/mock-url/',
-				productCount: 0,
-				defaultAvatar: '',
-				restApiRoutes: {},
-				wordCountType: 'words',
-			};
-		}
-		if ( param === 'attributes' ) {
-			return [
-				{
-					attribute_id: '1',
-					attribute_name: 'test',
-					attribute_label: 'Test',
-					attribute_orderby: 'menu_order',
-					attribute_public: 1,
-					attribute_type: 'select',
-				},
-			];
-		}
-		if ( param === 'stockStatusOptions' ) {
-			return {
-				instock: 'In stock',
-				outofstock: 'Out of stock',
-				onbackorder: 'On backorder',
-			};
-		}
-		if ( param === 'productTypes' ) {
-			return {
-				simple: 'Simple product',
-			};
-		}
-		if ( param === 'globalPaymentMethods' ) {
-			return [];
-		}
-		return {};
-	} ),
-	getSettingWithCoercion: jest.fn().mockReturnValue( false ),
-	STORE_PAGES: {
-		shop: null,
-		cart: null,
-		checkout: null,
-		myaccount: null,
-		privacy: null,
-		terms: null,
-	},
-	SITE_CURRENCY: {
-		code: 'USD',
-		symbol: '$',
-		minorUnit: 2,
-	},
-	defaultFields: {
-		first_name: '',
-		last_name: '',
-		company: '',
-		address_1: '',
-		address_2: '',
-		city: '',
-		state: '',
-		postcode: '',
-		country: '',
-		phone: '',
-		email: '',
-	},
-} ) );
-
-jest.mock( '@woocommerce/base-hooks', () => ( {
-	__esModule: true,
-	useStyleProps: jest.fn( () => ( {
-		className: '',
-		style: {},
-	} ) ),
-} ) );
-
-jest.mock( '@woocommerce/block-settings', () => ( {
-	ADDRESS_FORM_KEYS: [
-		'first_name',
-		'last_name',
-		'company',
-		'address_1',
-		'address_2',
-		'city',
-		'state',
-		'postcode',
-		'country',
-		'phone',
-		'email',
-	],
-	COUNTRY_LOCALE: {
-		country: 'US',
-		locale: 'en_US',
-	},
-	blocksConfig: {
-		defaultAvatar: 'test-avatar-url',
-	},
-} ) );
-
+vi.mock( '@woocommerce/settings', () => {
+	const mock = {
+		getSetting: vi.fn().mockImplementation( ( param ) => {
+			if ( param === 'wcBlocksConfig' ) {
+				return {
+					pluginUrl: '/mock-url/',
+					productCount: 0,
+					defaultAvatar: '',
+					restApiRoutes: {},
+					wordCountType: 'words',
+				};
+			}
+			if ( param === 'attributes' ) {
+				return [
+					{
+						attribute_id: '1',
+						attribute_name: 'test',
+						attribute_label: 'Test',
+						attribute_orderby: 'menu_order',
+						attribute_public: 1,
+						attribute_type: 'select',
+					},
+				];
+			}
+			if ( param === 'stockStatusOptions' ) {
+				return {
+					instock: 'In stock',
+					outofstock: 'Out of stock',
+					onbackorder: 'On backorder',
+				};
+			}
+			if ( param === 'productTypes' ) {
+				return {
+					simple: 'Simple product',
+				};
+			}
+			if ( param === 'globalPaymentMethods' ) {
+				return [];
+			}
+			return {};
+		} ),
+		getSettingWithCoercion: vi.fn().mockReturnValue( false ),
+		STORE_PAGES: {
+			shop: null,
+			cart: null,
+			checkout: null,
+			myaccount: null,
+			privacy: null,
+			terms: null,
+		},
+		SITE_CURRENCY: {
+			code: 'USD',
+			symbol: '$',
+			minorUnit: 2,
+		},
+		defaultFields: {
+			first_name: '',
+			last_name: '',
+			company: '',
+			address_1: '',
+			address_2: '',
+			city: '',
+			state: '',
+			postcode: '',
+			country: '',
+			phone: '',
+			email: '',
+		},
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/base-hooks', () => {
+	const mock = {
+		__esModule: true,
+		useStyleProps: vi.fn( () => ( {
+			className: '',
+			style: {},
+		} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/block-settings', async () => {
+	const mock = {
+		...( await vi.importActual( '@woocommerce/block-settings' ) ),
+		ADDRESS_FORM_KEYS: [
+			'first_name',
+			'last_name',
+			'company',
+			'address_1',
+			'address_2',
+			'city',
+			'state',
+			'postcode',
+			'country',
+			'phone',
+			'email',
+		],
+		COUNTRY_LOCALE: {
+			country: 'US',
+			locale: 'en_US',
+		},
+		blocksConfig: {
+			defaultAvatar: 'test-avatar-url',
+		},
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const defaultProduct: ProductResponseItem = {
 	name: 'Test Product',
 	id: 1,
@@ -175,10 +200,9 @@ const defaultProduct: ProductResponseItem = {
 	},
 	slug: '',
 };
-
 describe( 'Stock Indicator Block', () => {
 	beforeEach( () => {
-		( getSetting as jest.Mock ).mockImplementation( ( setting ) => {
+		( getSetting as Mock ).mockImplementation( ( setting ) => {
 			if ( setting === 'productTypesWithoutStockIndicator' ) {
 				return [ 'external', 'grouped', 'variable' ];
 			}
@@ -189,16 +213,13 @@ describe( 'Stock Indicator Block', () => {
 		const product = {
 			...defaultProduct,
 		};
-
 		const { container } = render(
 			<ProductDataContextProvider product={ product } isLoading={ false }>
 				<Block isDescendantOfAllProducts={ false } />
 			</ProductDataContextProvider>
 		);
-
 		expect( container.firstChild ).toBeNull();
 	} );
-
 	it( 'should show stock indicator for out of stock products', () => {
 		const product = {
 			...defaultProduct,
@@ -208,17 +229,14 @@ describe( 'Stock Indicator Block', () => {
 				class: 'out-of-stock',
 			},
 		};
-
 		const { container } = render(
 			<ProductDataContextProvider product={ product } isLoading={ false }>
 				<Block isDescendantOfAllProducts={ false } />
 			</ProductDataContextProvider>
 		);
-
 		expect( container.firstChild ).not.toBeNull();
 		expect( container.firstChild ).toHaveTextContent( 'Out of stock' );
 	} );
-
 	it( 'should show stock indicator for in stock products', () => {
 		const product = {
 			...defaultProduct,
@@ -227,30 +245,25 @@ describe( 'Stock Indicator Block', () => {
 				class: 'in-stock',
 			},
 		};
-
 		const { container } = render(
 			<ProductDataContextProvider product={ product } isLoading={ false }>
 				<Block isDescendantOfAllProducts={ false } />
 			</ProductDataContextProvider>
 		);
-
 		expect( container.firstChild ).not.toBeNull();
 		expect( container.firstChild ).toHaveTextContent( 'In stock' );
 	} );
-
 	it( 'should show stock indicator when is descendent of single product template', () => {
 		const product = {
 			...defaultProduct,
 			id: 0,
 			type: 'simple',
 		};
-
 		const { container } = render(
 			<ProductDataContextProvider product={ product } isLoading={ false }>
 				<Block isDescendantOfAllProducts={ false } />
 			</ProductDataContextProvider>
 		);
-
 		expect( container.firstChild ).not.toBeNull();
 		expect( container.firstChild ).toHaveTextContent( 'In stock' );
 	} );

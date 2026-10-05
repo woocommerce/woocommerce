@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -11,34 +13,55 @@ import { useDebouncedCallback } from 'use-debounce';
 import withSearchedProducts from '../with-searched-products';
 
 // Add a mock implementation of debounce for testing so we can spy on the onSearch call.
-jest.mock( 'use-debounce', () => {
-	return {
-		useDebouncedCallback: jest
+vi.mock( 'use-debounce', () => {
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
+		useDebouncedCallback: vi
 			.fn()
 			.mockImplementation(
 				( search ) => () => mockUtils.getProducts( search )
 			),
+	} );
+} );
+vi.mock( '@woocommerce/block-settings', () => {
+	const mock = {
+		__esModule: true,
+		blocksConfig: {
+			productCount: 101,
+		},
 	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
 } );
 
-jest.mock( '@woocommerce/block-settings', () => ( {
-	__esModule: true,
-	blocksConfig: {
-		productCount: 101,
-	},
-} ) );
-
 // Mock the getProducts values for tests.
-mockUtils.getProducts = jest.fn().mockImplementation( () =>
-	Promise.resolve( [
-		{ id: 10, name: 'foo', parent: 0 },
-		{ id: 20, name: 'bar', parent: 0 },
-	] )
-);
+vi.mock( '@woocommerce/editor-components/utils', async () => ( {
+	...( await vi.importActual( '@woocommerce/editor-components/utils' ) ),
+	getProducts: vi.fn().mockImplementation( () =>
+		Promise.resolve( [
+			{
+				id: 10,
+				name: 'foo',
+				parent: 0,
+			},
+			{
+				id: 20,
+				name: 'bar',
+				parent: 0,
+			},
+		] )
+	),
+} ) );
 
 // Capture the props the HOC injects into the wrapped component.
 let lastProps;
-const CapturedComponent = jest.fn( ( props ) => {
+const CapturedComponent = vi.fn( ( props ) => {
 	lastProps = props;
 	return null;
 } );
@@ -52,7 +75,6 @@ const settle = async ( fn ) => {
 		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
 	} );
 };
-
 describe( 'withSearchedProducts Component', () => {
 	const { getProducts } = mockUtils;
 	afterEach( () => {
@@ -61,31 +83,33 @@ describe( 'withSearchedProducts Component', () => {
 		CapturedComponent.mockClear();
 		lastProps = undefined;
 	} );
-
 	describe( 'lifecycle tests', () => {
 		const selected = [ 10 ];
-
 		beforeEach( async () => {
 			await settle( () =>
 				render( <TestComponent selected={ selected } /> )
 			);
 		} );
-
 		it( 'has expected values for props', () => {
 			expect( lastProps.selected ).toEqual( selected );
 			expect( lastProps.products ).toEqual( [
-				{ id: 10, name: 'foo', parent: 0 },
-				{ id: 20, name: 'bar', parent: 0 },
+				{
+					id: 10,
+					name: 'foo',
+					parent: 0,
+				},
+				{
+					id: 20,
+					name: 'bar',
+					parent: 0,
+				},
 			] );
 		} );
-
 		it( 'debounce and getProducts is called on search event', async () => {
 			// Ignore the getProducts call triggered on mount so the assertion
 			// measures only the call made in response to the search event.
 			getProducts.mockClear();
-
 			await settle( () => lastProps.onSearch() );
-
 			expect( useDebouncedCallback ).toHaveBeenCalled();
 			expect( getProducts ).toHaveBeenCalledTimes( 1 );
 		} );

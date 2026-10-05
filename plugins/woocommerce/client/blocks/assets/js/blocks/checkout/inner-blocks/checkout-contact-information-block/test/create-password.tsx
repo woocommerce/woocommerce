@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -16,7 +18,7 @@ describe( 'CreatePassword', () => {
 
 	beforeEach( () => {
 		user = userEvent.setup();
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 		dispatch( checkoutStore ).__internalSetCustomerPassword( '' );
 	} );
 

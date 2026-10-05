@@ -1,3 +1,5 @@
+import { expect, test, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -13,46 +15,45 @@ import {
 	generateShippingPackage,
 	generateShippingRate,
 } from '../../../../../mocks/shipping-package';
-
-jest.mock( '@woocommerce/base-context/hooks' );
+const _actual = await vi.importActual( '@woocommerce/base-context/hooks' );
+vi.mock( '@woocommerce/base-context/hooks' );
 
 // getting rid of the slot fill
-jest.mock( '@woocommerce/blocks-checkout', () => {
+vi.mock( '@woocommerce/blocks-checkout', () => {
 	const PassthroughComponent = ( {
 		children,
 	}: {
 		children: React.ReactNode;
 	} ) => <>{ children }</>;
-
 	PassthroughComponent.Slot = PassthroughComponent;
-
-	return {
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		ExperimentalOrderLocalPickupPackages: PassthroughComponent,
-	};
+	} );
 } );
 
 // Setting needed to treat shipping rate as a local pickup.
 // Can't rely on setting it through allSettings.collectableMethodIds = [...]
 // as getSettings is used when the module is initialized (so before attempts
 // to overwrite setting in beforeEach/All)
-jest.mock( '@woocommerce/settings', () => {
-	const actualModule = jest.requireActual( '@woocommerce/settings' );
-	return {
+vi.mock( '@woocommerce/settings', async () => {
+	const actualModule = await vi.importActual( '@woocommerce/settings' );
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		...actualModule,
 		getSetting: ( name: string, ...rest: unknown[] ) => {
 			if ( name === 'collectableMethodIds' ) {
 				return [ 'pickup_nyc', 'pickup_la' ];
 			}
-
 			return actualModule.getSetting( name, ...rest );
 		},
-	};
+	} );
 } );
-
-( useStoreCart as jest.Mock ).mockImplementation( () =>
-	jest.requireActual( '@woocommerce/base-context/hooks' ).useStoreCart()
-);
-
+( useStoreCart as Mock ).mockImplementation( () => _actual.useStoreCart() );
 const testPackageData = generateShippingPackage( {
 	packageId: 0,
 	shippingRates: [
@@ -72,64 +73,53 @@ const testPackageData = generateShippingPackage( {
 		} ),
 	],
 } );
-
 test( 'renders available shipping rates', async () => {
-	( useShippingData as jest.Mock ).mockImplementation( () => {
+	( useShippingData as Mock ).mockImplementation( () => {
 		return {
-			selectShippingRate: jest.fn(),
+			selectShippingRate: vi.fn(),
 			isSelectingRate: false,
 			shippingRates: [ testPackageData ],
 		};
 	} );
-
 	render( <CheckoutPickupOptionsBlock /> );
-
 	const firstRate = await screen.findByRole( 'radio', {
-		name: 'Pickup New York City free',
+		name: /Pickup New York City\s*free/,
 	} );
-
 	expect( firstRate ).toBeInTheDocument();
 	// even though it's not selected we mark first one as checked by default
 	expect( firstRate ).toBeChecked();
-
 	expect(
-		screen.getByRole( 'radio', { name: 'Pickup Los Angeles free' } )
+		screen.getByRole( 'radio', {
+			name: /Pickup Los Angeles\s*free/,
+		} )
 	).toBeInTheDocument();
 } );
-
 test( 'changes rate selection locally and informs API about it', async () => {
-	const selectShippingRate = jest.fn();
-
-	( useShippingData as jest.Mock ).mockImplementation( () => {
+	const selectShippingRate = vi.fn();
+	( useShippingData as Mock ).mockImplementation( () => {
 		return {
 			selectShippingRate,
 			isSelectingRate: false,
 			shippingRates: [ testPackageData ],
 		};
 	} );
-
 	render( <CheckoutPickupOptionsBlock /> );
-
 	const firstRate = await screen.findByRole( 'radio', {
-		name: 'Pickup New York City free',
+		name: /Pickup New York City\s*free/,
 	} );
 	const secondRate = screen.getByRole( 'radio', {
-		name: 'Pickup Los Angeles free',
+		name: /Pickup Los Angeles\s*free/,
 	} );
-
 	expect( firstRate ).toBeInTheDocument();
 	expect( firstRate ).toBeChecked();
-
 	await act( async () => {
 		await userEvent.click( secondRate );
 	} );
-
 	expect( secondRate ).toBeChecked();
 	expect( selectShippingRate ).toHaveBeenLastCalledWith(
 		'pickup_location:2'
 	);
 } );
-
 test( 'upstream rate selection updates are properly reflected in local state', async () => {
 	const packageData = generateShippingPackage( {
 		packageId: 0,
@@ -152,29 +142,24 @@ test( 'upstream rate selection updates are properly reflected in local state', a
 			} ),
 		],
 	} );
-
-	( useShippingData as jest.Mock ).mockImplementation( () => {
+	( useShippingData as Mock ).mockImplementation( () => {
 		return {
-			selectShippingRate: jest.fn(),
+			selectShippingRate: vi.fn(),
 			isSelectingRate: false,
 			shippingRates: [ packageData ],
 		};
 	} );
-
 	const { rerender } = render( <CheckoutPickupOptionsBlock /> );
-
 	const firstRate = await screen.findByRole( 'radio', {
-		name: 'Pickup New York City free',
+		name: /Pickup New York City\s*free/,
 	} );
 	const secondRate = screen.getByRole( 'radio', {
-		name: 'Pickup Los Angeles free',
+		name: /Pickup Los Angeles\s*free/,
 	} );
-
 	expect( firstRate ).toBeInTheDocument();
 	expect( secondRate ).toBeInTheDocument();
 	expect( firstRate ).not.toBeChecked();
 	expect( secondRate ).toBeChecked();
-
 	const packageDataWithFlippedSelection = generateShippingPackage( {
 		packageId: 0,
 		shippingRates: [
@@ -196,23 +181,19 @@ test( 'upstream rate selection updates are properly reflected in local state', a
 			} ),
 		],
 	} );
-
-	( useShippingData as jest.Mock ).mockImplementation( () => {
+	( useShippingData as Mock ).mockImplementation( () => {
 		return {
-			selectShippingRate: jest.fn(),
+			selectShippingRate: vi.fn(),
 			isSelectingRate: false,
 			shippingRates: [ packageDataWithFlippedSelection ],
 		};
 	} );
-
 	rerender( <CheckoutPickupOptionsBlock /> );
-
 	expect( firstRate ).toBeInTheDocument();
 	expect( secondRate ).toBeInTheDocument();
 	expect( firstRate ).toBeChecked();
 	expect( secondRate ).not.toBeChecked();
 } );
-
 test( 'description is not shown if rate is not selected', async () => {
 	const packageData = generateShippingPackage( {
 		packageId: 0,
@@ -225,7 +206,10 @@ test( 'description is not shown if rate is not selected', async () => {
 				instanceID: 0,
 				selected: false,
 				meta_data: [
-					{ key: 'pickup_details', value: 'Store 1 details.' },
+					{
+						key: 'pickup_details',
+						value: 'Store 1 details.',
+					},
 				],
 			} ),
 			generateShippingRate( {
@@ -236,14 +220,17 @@ test( 'description is not shown if rate is not selected', async () => {
 				instanceID: 1,
 				selected: true,
 				meta_data: [
-					{ key: 'pickup_details', value: 'Store 2 details.' },
+					{
+						key: 'pickup_details',
+						value: 'Store 2 details.',
+					},
 				],
 			} ),
 		],
 	} );
-	( useShippingData as jest.Mock ).mockImplementation( () => {
+	( useShippingData as Mock ).mockImplementation( () => {
 		return {
-			selectShippingRate: jest.fn(),
+			selectShippingRate: vi.fn(),
 			isSelectingRate: false,
 			shippingRates: [ packageData ],
 		};

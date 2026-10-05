@@ -1,3 +1,11 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+const { mockSlotRender } = vi.hoisted( () => {
+	const mockSlotRender = vi.fn( () => <div data-testid="order-meta-slot" /> );
+	return {
+		mockSlotRender,
+	};
+} );
+
 /**
  * External dependencies
  */
@@ -8,41 +16,55 @@ import { useStoreCart } from '@woocommerce/base-context/hooks';
  * Internal dependencies
  */
 import { OrderMetaSlotFill } from '../slotfills';
-
-jest.mock( '@woocommerce/base-context/hooks', () => ( {
-	useStoreCart: jest.fn(),
-} ) );
-
-const mockSlotRender = jest.fn( () => <div data-testid="order-meta-slot" /> );
-jest.mock( '@woocommerce/blocks-checkout', () => {
+vi.mock( '@woocommerce/base-context/hooks', () => {
+	const mock = {
+		useStoreCart: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/blocks-checkout', () => {
 	const MockFill = ( { children }: { children: React.ReactNode } ) => (
 		<>{ children }</>
 	);
 	MockFill.Slot = ( props: Record< string, unknown > ) =>
 		mockSlotRender( props );
-	return { ExperimentalOrderMeta: MockFill };
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
+		ExperimentalOrderMeta: MockFill,
+	} );
 } );
-
 describe( 'Cart OrderMetaSlotFill', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	} );
-
 	it( 'always renders ExperimentalOrderMeta.Slot with cart context and correct props', () => {
-		( useStoreCart as jest.Mock ).mockReturnValue( {
-			extensions: { 'my-ext': true },
-			receiveCart: jest.fn(),
-			cartTotals: { total: '1000' },
+		( useStoreCart as Mock ).mockReturnValue( {
+			extensions: {
+				'my-ext': true,
+			},
+			receiveCart: vi.fn(),
+			cartTotals: {
+				total: '1000',
+			},
 		} );
-
 		render( <OrderMetaSlotFill /> );
-
 		expect( mockSlotRender ).toHaveBeenCalledWith(
 			expect.objectContaining( {
 				context: 'woocommerce/cart',
-				extensions: { 'my-ext': true },
+				extensions: {
+					'my-ext': true,
+				},
 				cart: expect.objectContaining( {
-					cartTotals: { total: '1000' },
+					cartTotals: {
+						total: '1000',
+					},
 				} ),
 			} )
 		);

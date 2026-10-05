@@ -1,3 +1,5 @@
+import { afterEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 /* eslint-disable no-unused-expressions */
 /**
  * External dependencies
@@ -12,27 +14,28 @@ import { PlainPaymentMethods } from '../../../types';
 import '../../checkout';
 import { store as paymentStore } from '..';
 
-const originalSelect = jest.requireActual( '@wordpress/data' ).select;
-const originalDispatch = jest.requireActual( '@wordpress/data' ).dispatch;
+const originalSelect = ( await vi.importActual( '@wordpress/data' ) ).select;
+const originalDispatch = ( await vi.importActual( '@wordpress/data' ) )
+	.dispatch;
 
-jest.mock( '@wordpress/data', () => {
-	return {
-		...jest.requireActual( '@wordpress/data' ),
-		select: jest.fn(),
-		dispatch: jest.fn(),
-	};
+vi.mock( '@wordpress/data', async () => {
+	return ( ( mock ) => ( { default: mock, ...mock } ) )( {
+		...( await vi.importActual( '@wordpress/data' ) ),
+		select: vi.fn(),
+		dispatch: vi.fn(),
+	} );
 } );
 
-jest.mock( '@woocommerce/utils', () => {
-	return {
-		isSiteEditorPage: jest.fn().mockReturnValue( true ),
-	};
+vi.mock( '@woocommerce/utils', () => {
+	return ( ( mock ) => ( { default: mock, ...mock } ) )( {
+		isSiteEditorPage: vi.fn().mockReturnValue( true ),
+	} );
 } );
 
 describe( 'setDefaultPaymentMethod', () => {
 	afterEach( () => {
-		jest.resetAllMocks();
-		jest.resetModules();
+		vi.resetAllMocks();
+		vi.resetModules();
 	} );
 
 	const paymentMethods: PlainPaymentMethods = {
@@ -45,8 +48,8 @@ describe( 'setDefaultPaymentMethod', () => {
 	};
 
 	it( 'correctly sets the first payment method in the list of available payment methods', async () => {
-		const setActivePaymentMethodMock = jest.fn();
-		( select as jest.Mock ).mockImplementation( ( storeName ) => {
+		const setActivePaymentMethodMock = vi.fn();
+		( select as Mock ).mockImplementation( ( storeName ) => {
 			const originalStore = originalSelect( storeName );
 			if ( storeName === paymentStore ) {
 				return {
@@ -61,7 +64,7 @@ describe( 'setDefaultPaymentMethod', () => {
 			}
 			return originalStore;
 		} );
-		( dispatch as jest.Mock ).mockImplementation( ( storeName ) => {
+		( dispatch as Mock ).mockImplementation( ( storeName ) => {
 			const originalStore = originalDispatch( storeName );
 			if ( storeName === paymentStore ) {
 				return {
@@ -79,7 +82,7 @@ describe( 'setDefaultPaymentMethod', () => {
 		);
 	} );
 	it( 'correctly sets the saved payment method if one is available', async () => {
-		( select as jest.Mock ).mockImplementation( ( storeName ) => {
+		( select as Mock ).mockImplementation( ( storeName ) => {
 			const originalStore = originalSelect( storeName );
 			if ( storeName === paymentStore ) {
 				return {
@@ -118,8 +121,8 @@ describe( 'setDefaultPaymentMethod', () => {
 			return originalStore;
 		} );
 
-		const setActivePaymentMethodMock = jest.fn();
-		( dispatch as jest.Mock ).mockImplementation( ( storeName ) => {
+		const setActivePaymentMethodMock = vi.fn();
+		( dispatch as Mock ).mockImplementation( ( storeName ) => {
 			const originalStore = originalDispatch( storeName );
 			if ( storeName === paymentStore ) {
 				return {

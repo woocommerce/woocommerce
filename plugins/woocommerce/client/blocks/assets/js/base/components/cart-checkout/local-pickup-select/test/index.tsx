@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -15,15 +17,15 @@ import {
 	generateShippingPackage,
 } from '../../../../../mocks/shipping-package';
 
-jest.mock( '@woocommerce/base-context/hooks' );
+vi.mock( '@woocommerce/base-context/hooks' );
 
 describe( 'LocalPickupSelect', () => {
-	const renderPickupLocationMock = jest.fn().mockImplementation(
+	const renderPickupLocationMock = vi.fn().mockImplementation(
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		( location, pickupLocationsCount, clientSelectedOption ) => {
 			return {
 				value: `${ location.rate_id }`,
-				onChange: jest.fn(),
+				onChange: vi.fn(),
 				label: `${ location.name }`,
 				description: `${ location.description }`,
 				clientSelectedOption,
@@ -37,7 +39,7 @@ describe( 'LocalPickupSelect', () => {
 	} );
 
 	const mockShippingData = ( packageData = defaultPackageData ) => {
-		( useShippingData as jest.Mock ).mockImplementation( () => ( {
+		( useShippingData as Mock ).mockImplementation( () => ( {
 			shippingRates: [ packageData ],
 		} ) );
 	};
@@ -46,7 +48,7 @@ describe( 'LocalPickupSelect', () => {
 		location: CartShippingPackageShippingRate
 	) => ( {
 		value: `${ location.rate_id }`,
-		onChange: jest.fn(),
+		onChange: vi.fn(),
 		label: `${ location.name }`,
 		description: `${ location.description }`,
 	} );
@@ -69,7 +71,7 @@ describe( 'LocalPickupSelect', () => {
 	beforeEach( () => {
 		mockShippingData();
 
-		( useStoreCart as jest.Mock ).mockImplementation( () => ( {
+		( useStoreCart as Mock ).mockImplementation( () => ( {
 			cartItems: [],
 		} ) );
 	} );
@@ -87,7 +89,7 @@ describe( 'LocalPickupSelect', () => {
 	} ) => (
 		<LocalPickupSelect
 			title="Package 1"
-			onChange={ onChange ?? jest.fn() }
+			onChange={ onChange ?? vi.fn() }
 			selectedOption=""
 			pickupLocations={ pickupLocations }
 			packageCount={ packageCount }
@@ -126,7 +128,7 @@ describe( 'LocalPickupSelect', () => {
 	} );
 	it( 'Calls the correct functions when changing selected option', async () => {
 		const user = userEvent.setup();
-		const onChange = jest.fn();
+		const onChange = vi.fn();
 		render( <TestComponent onChange={ onChange } /> );
 
 		await user.click( screen.getByText( 'Store 2' ) );
@@ -140,7 +142,7 @@ describe( 'LocalPickupSelect', () => {
 		render(
 			<LocalPickupSelect
 				title="Package 1"
-				onChange={ jest.fn() }
+				onChange={ vi.fn() }
 				selectedOption="store_2"
 				pickupLocations={ [
 					generateShippingRate( {
@@ -203,7 +205,7 @@ describe( 'LocalPickupSelect', () => {
 		const { rerender } = render(
 			<LocalPickupSelect
 				title="Package 1"
-				onChange={ jest.fn() }
+				onChange={ vi.fn() }
 				selectedOption="store_1"
 				pickupLocations={ pickupLocations }
 				packageCount={ 1 }
@@ -231,7 +233,7 @@ describe( 'LocalPickupSelect', () => {
 		rerender(
 			<LocalPickupSelect
 				title="Package 1"
-				onChange={ jest.fn() }
+				onChange={ vi.fn() }
 				selectedOption="store_2"
 				pickupLocations={ pickupLocations }
 				packageCount={ 1 }
@@ -281,7 +283,7 @@ describe( 'LocalPickupSelect', () => {
 					<LocalPickupSelect
 						title="Package 1"
 						packageData={ packageDataWithName }
-						onChange={ jest.fn() }
+						onChange={ vi.fn() }
 						selectedOption=""
 						pickupLocations={ [
 							generateShippingRate( {
@@ -305,7 +307,7 @@ describe( 'LocalPickupSelect', () => {
 					<LocalPickupSelect
 						title="Package 1"
 						packageData={ packageDataWithName }
-						onChange={ jest.fn() }
+						onChange={ vi.fn() }
 						selectedOption=""
 						pickupLocations={ defaultPickupLocations }
 						packageCount={ 2 }
@@ -335,7 +337,7 @@ describe( 'LocalPickupSelect', () => {
 					title="Package 1"
 					packageData={ packageDataWithItems }
 					showItems={ true }
-					onChange={ jest.fn() }
+					onChange={ vi.fn() }
 					selectedOption=""
 					pickupLocations={ defaultPickupLocations.slice( 0, 1 ) }
 					packageCount={ 1 }
@@ -366,7 +368,7 @@ describe( 'LocalPickupSelect', () => {
 					title="Package 1"
 					packageData={ packageDataWithItems }
 					showItems={ false }
-					onChange={ jest.fn() }
+					onChange={ vi.fn() }
 					selectedOption=""
 					pickupLocations={ defaultPickupLocations.slice( 0, 1 ) }
 					packageCount={ 1 }
@@ -406,7 +408,7 @@ describe( 'LocalPickupSelect', () => {
 					<LocalPickupSelect
 						title="Package 1"
 						packageData={ packageDataWithItems }
-						onChange={ jest.fn() }
+						onChange={ vi.fn() }
 						selectedOption=""
 						pickupLocations={ defaultPickupLocations }
 						packageCount={ 2 }
@@ -423,7 +425,7 @@ describe( 'LocalPickupSelect', () => {
 					<LocalPickupSelect
 						title="Package 1"
 						packageData={ packageDataWithItems }
-						onChange={ jest.fn() }
+						onChange={ vi.fn() }
 						selectedOption=""
 						pickupLocations={ defaultPickupLocations }
 						packageCount={ 2 }
@@ -475,7 +477,7 @@ describe( 'LocalPickupSelect', () => {
 					<LocalPickupSelect
 						title="Package 1"
 						packageData={ packageDataWithManyItems }
-						onChange={ jest.fn() }
+						onChange={ vi.fn() }
 						selectedOption=""
 						pickupLocations={ defaultPickupLocations }
 						packageCount={ 2 }
@@ -492,7 +494,7 @@ describe( 'LocalPickupSelect', () => {
 					<LocalPickupSelect
 						title="Package 1"
 						packageData={ packageDataWithManyItems }
-						onChange={ jest.fn() }
+						onChange={ vi.fn() }
 						selectedOption=""
 						pickupLocations={ defaultPickupLocations }
 						packageCount={ 2 }

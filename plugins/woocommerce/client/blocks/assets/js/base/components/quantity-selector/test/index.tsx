@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -47,7 +49,7 @@ describe( 'QuantitySelector', () => {
 
 	it( 'resets expected quantity type after successful prop update', async () => {
 		const user = userEvent.setup();
-		const onChange = jest.fn();
+		const onChange = vi.fn();
 
 		const { rerender } = render(
 			<QuantitySelector

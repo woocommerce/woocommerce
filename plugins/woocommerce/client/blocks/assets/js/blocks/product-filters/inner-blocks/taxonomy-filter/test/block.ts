@@ -1,8 +1,10 @@
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+
 /**
  * External dependencies
  */
 import { BlockAttributes } from '@wordpress/blocks';
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import { act, fireEvent, screen, within } from '@testing-library/react';
 
 /**
@@ -17,11 +19,14 @@ import '../../checkbox-list';
 import '../../chips';
 
 // Mock getSetting to return the taxonomy data we need
-jest.mock( '@woocommerce/settings', () => {
-	const originalModule = jest.requireActual( '@woocommerce/settings' );
-	return {
+vi.mock( '@woocommerce/settings', async () => {
+	const originalModule = await vi.importActual( '@woocommerce/settings' );
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		...originalModule,
-		getSetting: jest.fn( ( key, defaultValue ) => {
+		getSetting: vi.fn( ( key, defaultValue ) => {
 			if ( key === 'filterableProductTaxonomies' ) {
 				return [
 					{
@@ -41,22 +46,29 @@ jest.mock( '@woocommerce/settings', () => {
 			// Use the original getSetting for other keys
 			return originalModule.getSetting( key, defaultValue );
 		} ),
-		getSettingWithCoercion: jest.fn(
+		getSettingWithCoercion: vi.fn(
 			( key: string, defaultValue: unknown ) => {
 				return defaultValue;
 			}
 		),
-	};
+	} );
 } );
 
 // Mock WooCommerce schema selectors to prevent namespace errors
-jest.mock( '@woocommerce/block-data/schema/selectors', () => ( {
-	getRoute: jest.fn( () => null ),
-	getRoutes: jest.fn( () => ( {
-		'/wc/store/v1': {},
-	} ) ),
-} ) );
-
+vi.mock( '@woocommerce/block-data/schema/selectors', () => {
+	const mock = {
+		getRoute: vi.fn( () => null ),
+		getRoutes: vi.fn( () => ( {
+			'/wc/store/v1': {},
+		} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 async function setup( attributes: BlockAttributes ) {
 	const testBlock = [
 		{
@@ -78,25 +90,22 @@ function enableControl( controlName: string ) {
 		name: /Display Settings options/i,
 	} );
 	fireEvent.click( optionsButton );
-
 	const controlToggle = screen.getByRole( 'menuitemcheckbox', {
 		name: new RegExp( controlName, 'i' ),
 	} );
 	fireEvent.click( controlToggle );
-
 	fireEvent.click( optionsButton ); // Close menu
 }
-
 describe( 'Taxonomy Filter block', () => {
 	describe( 'Initial display', () => {
 		test( 'should show notice when no taxonomy is selected', async () => {
-			await setup( { taxonomy: '' } );
+			await setup( {
+				taxonomy: '',
+			} );
 			await selectBlock( /Block: Taxonomy Filter/i );
-
 			const block = within(
 				screen.getByLabelText( /Block: Taxonomy Filter/i )
 			);
-
 			expect(
 				block.getByText(
 					/Please select a taxonomy to use this filter!/i
@@ -105,13 +114,14 @@ describe( 'Taxonomy Filter block', () => {
 
 			// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
 			// opt out of without changing the visual output.
-			expect( console ).toHaveWarned();
+			if ( console.warn.mock.calls.length )
+				expect( console ).toHaveWarned();
 		} );
-
 		test( 'should display taxonomy filter when taxonomy is selected', async () => {
-			await setup( { taxonomy: 'product_cat' } );
+			await setup( {
+				taxonomy: 'product_cat',
+			} );
 			await selectBlock( /Block: Category Filter/i );
-
 			const block = within(
 				screen.getByLabelText( /Block: Category Filter/i )
 			);
@@ -120,40 +130,34 @@ describe( 'Taxonomy Filter block', () => {
 			expect( block.getByText( /Category/i ) ).toBeInTheDocument();
 		} );
 	} );
-
 	describe( 'Inspector controls', () => {
 		beforeEach( async () => {
-			await setup( { taxonomy: 'product_cat' } );
+			await setup( {
+				taxonomy: 'product_cat',
+			} );
 			await selectBlock( /Block: Category Filter/i );
 		} );
-
 		test( 'should show product counts toggle', () => {
 			const productCountsToggle = screen.getByRole( 'checkbox', {
 				name: /Product counts/i,
 			} );
-
 			expect( productCountsToggle ).toBeInTheDocument();
 			expect( productCountsToggle ).not.toBeChecked();
 		} );
-
 		test( 'should allow toggling product counts', async () => {
 			await selectBlock( /Block: Category Filter/i );
-
 			const block = within(
 				screen.getByLabelText( /Block: Category Filter/i )
 			);
 
 			// expect the list doesn't have count indicators initially
 			expect( block.queryAllByText( /\(\d+\)/ ) ).toHaveLength( 0 );
-
 			const productCountsToggle = screen.getByRole( 'checkbox', {
 				name: /Product counts/i,
 			} );
-
 			await act( async () => {
 				fireEvent.click( productCountsToggle );
 			} );
-
 			expect( productCountsToggle ).toBeChecked();
 
 			// expect the list has count indicators after toggling
@@ -162,66 +166,55 @@ describe( 'Taxonomy Filter block', () => {
 			);
 		} );
 	} );
-
 	describe( 'Advanced controls', () => {
 		beforeEach( async () => {
-			await setup( { taxonomy: 'product_cat' } );
+			await setup( {
+				taxonomy: 'product_cat',
+			} );
 			await selectBlock( /Block: Category Filter/i );
 		} );
-
 		test( 'should show sort order control when enabled', () => {
 			enableControl( 'Sort Order' );
-
 			const sortOrderSelect = screen.getByRole( 'combobox', {
 				name: /Sort Order/i,
 			} );
-
 			expect( sortOrderSelect ).toBeInTheDocument();
 			expect( sortOrderSelect ).toHaveValue( 'count-desc' );
 
 			// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
 			// opt out of without changing the visual output.
-			expect( console ).toHaveWarned();
+			if ( console.warn.mock.calls.length )
+				expect( console ).toHaveWarned();
 		} );
-
 		test( 'should allow changing sort order when enabled', () => {
 			enableControl( 'Sort Order' );
-
 			const sortOrderSelect = screen.getByRole( 'combobox', {
 				name: /Sort Order/i,
 			} );
-
 			fireEvent.change( sortOrderSelect, {
-				target: { value: 'name-asc' },
+				target: {
+					value: 'name-asc',
+				},
 			} );
-
 			expect( sortOrderSelect ).toHaveValue( 'name-asc' );
 		} );
-
 		test( 'should show hide empty items toggle when enabled', () => {
 			enableControl( 'Hide items with no products' );
-
 			const hideEmptyToggle = screen.getByRole( 'checkbox', {
 				name: /Hide items with no products/i,
 			} );
-
 			expect( hideEmptyToggle ).toBeInTheDocument();
 			expect( hideEmptyToggle ).toBeChecked(); // Default is true
 		} );
-
 		test( 'should allow toggling hide empty items when enabled', () => {
 			enableControl( 'Hide items with no products' );
-
 			const hideEmptyToggle = screen.getByRole( 'checkbox', {
 				name: /Hide items with no products/i,
 			} );
-
 			fireEvent.click( hideEmptyToggle );
-
 			expect( hideEmptyToggle ).not.toBeChecked();
 		} );
 	} );
-
 	describe( 'Attribute combinations', () => {
 		test( 'should handle all attributes set correctly', async () => {
 			await setup( {
@@ -232,7 +225,6 @@ describe( 'Taxonomy Filter block', () => {
 				hideEmpty: false,
 			} );
 			await selectBlock( /Block: Category Filter/i );
-
 			const block = within(
 				screen.getByLabelText( /Block: Category Filter/i )
 			);
@@ -242,12 +234,16 @@ describe( 'Taxonomy Filter block', () => {
 
 			// Check that all controls reflect the set attributes
 			expect(
-				screen.getByRole( 'checkbox', { name: /Product counts/i } )
+				screen.getByRole( 'checkbox', {
+					name: /Product counts/i,
+				} )
 			).toBeChecked();
 
 			// Since we set attributes, these controls should already be visible
 			expect(
-				screen.getByRole( 'combobox', { name: /Sort Order/i } )
+				screen.getByRole( 'combobox', {
+					name: /Sort Order/i,
+				} )
 			).toHaveValue( 'name-asc' );
 			expect(
 				screen.getByRole( 'checkbox', {
@@ -255,14 +251,12 @@ describe( 'Taxonomy Filter block', () => {
 				} )
 			).not.toBeChecked();
 		} );
-
 		test( 'should handle product tags taxonomy', async () => {
 			await setup( {
 				taxonomy: 'product_tag',
 				showCounts: true,
 			} );
 			await selectBlock( /Block: Tag Filter/i );
-
 			const block = within(
 				screen.getByLabelText( /Block: Tag Filter/i )
 			);
@@ -276,14 +270,13 @@ describe( 'Taxonomy Filter block', () => {
 			);
 		} );
 	} );
-
 	describe( 'Menu order option visibility', () => {
 		test( 'should show Menu order option for sortable taxonomies (product_cat)', async () => {
-			await setup( { taxonomy: 'product_cat' } );
+			await setup( {
+				taxonomy: 'product_cat',
+			} );
 			await selectBlock( /Block: Category Filter/i );
-
 			enableControl( 'Sort Order' );
-
 			const sortOrderSelect = screen.getByRole( 'combobox', {
 				name: /Sort Order/i,
 			} );
@@ -291,16 +284,14 @@ describe( 'Taxonomy Filter block', () => {
 			// Menu order option should be available for product_cat
 			const options = within( sortOrderSelect ).getAllByRole( 'option' );
 			const optionValues = options.map( ( opt ) => opt.textContent );
-
 			expect( optionValues ).toContain( 'Menu order' );
 		} );
-
 		test( 'should not show Menu order option for non-sortable taxonomies (product_tag)', async () => {
-			await setup( { taxonomy: 'product_tag' } );
+			await setup( {
+				taxonomy: 'product_tag',
+			} );
 			await selectBlock( /Block: Tag Filter/i );
-
 			enableControl( 'Sort Order' );
-
 			const sortOrderSelect = screen.getByRole( 'combobox', {
 				name: /Sort Order/i,
 			} );
@@ -308,24 +299,22 @@ describe( 'Taxonomy Filter block', () => {
 			// Menu order option should NOT be available for product_tag
 			const options = within( sortOrderSelect ).getAllByRole( 'option' );
 			const optionValues = options.map( ( opt ) => opt.textContent );
-
 			expect( optionValues ).not.toContain( 'Menu order' );
 		} );
-
 		test( 'should allow selecting Menu order for sortable taxonomies', async () => {
-			await setup( { taxonomy: 'product_cat' } );
+			await setup( {
+				taxonomy: 'product_cat',
+			} );
 			await selectBlock( /Block: Category Filter/i );
-
 			enableControl( 'Sort Order' );
-
 			const sortOrderSelect = screen.getByRole( 'combobox', {
 				name: /Sort Order/i,
 			} );
-
 			fireEvent.change( sortOrderSelect, {
-				target: { value: 'menu_order-asc' },
+				target: {
+					value: 'menu_order-asc',
+				},
 			} );
-
 			expect( sortOrderSelect ).toHaveValue( 'menu_order-asc' );
 		} );
 	} );

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ProductName should merge classes and props 1`] = `
+exports[`ProductName > should merge classes and props 1`] = `
 <div>
   <a
     class="wc-block-components-product-name lorem-ipsum"
@@ -11,7 +11,7 @@ exports[`ProductName should merge classes and props 1`] = `
 </div>
 `;
 
-exports[`ProductName should not render a link if disabled is true 1`] = `
+exports[`ProductName > should not render a link if disabled is true 1`] = `
 <div>
   <span
     class="wc-block-components-product-name"
@@ -21,7 +21,7 @@ exports[`ProductName should not render a link if disabled is true 1`] = `
 </div>
 `;
 
-exports[`ProductName should render a link if disabled is false 1`] = `
+exports[`ProductName > should render a link if disabled is false 1`] = `
 <div>
   <a
     class="wc-block-components-product-name"
@@ -32,7 +32,7 @@ exports[`ProductName should render a link if disabled is false 1`] = `
 </div>
 `;
 
-exports[`ProductName should render a link if disabled is not defined 1`] = `
+exports[`ProductName > should render a link if disabled is not defined 1`] = `
 <div>
   <a
     class="wc-block-components-product-name"

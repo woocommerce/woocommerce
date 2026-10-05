@@ -1,8 +1,10 @@
+import { afterAll, afterEach, beforeAll } from 'vitest';
+
 /**
  * External dependencies
  */
-const { setupServer } = require( 'msw/node' );
-const { http, HttpResponse } = require( 'msw' );
+import { setupServer } from 'msw/node';
+import { http, HttpResponse } from 'msw';
 
 // Create MSW server instance for testing
 const server = setupServer();
@@ -26,4 +28,4 @@ afterAll( () => {
 } );
 
 // Export utilities for use in tests
-module.exports = { server, http, HttpResponse };
+export { server, http, HttpResponse };

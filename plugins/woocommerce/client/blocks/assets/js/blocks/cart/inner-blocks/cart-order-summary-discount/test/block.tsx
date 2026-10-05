@@ -1,3 +1,11 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+const { mockSlotRender } = vi.hoisted( () => {
+	const mockSlotRender = vi.fn();
+	return {
+		mockSlotRender,
+	};
+} );
+
 /**
  * External dependencies
  */
@@ -14,21 +22,32 @@ import {
 import Block from '../block';
 
 // We only need to mock the hooks since we're using real components
-jest.mock( '@woocommerce/base-context/hooks', () => ( {
-	useStoreCart: jest.fn(),
-	useStoreCartCoupons: jest.fn(),
-	useOrderSummaryLoadingState: jest.fn( () => {
-		return {
-			isLoading: false,
-		};
-	} ),
-} ) );
+vi.mock( '@woocommerce/base-context/hooks', () => {
+	const mock = {
+		useStoreCart: vi.fn(),
+		useStoreCartCoupons: vi.fn(),
+		useOrderSummaryLoadingState: vi.fn( () => {
+			return {
+				isLoading: false,
+			};
+		} ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 // Mock the ExperimentalDiscountsMeta to track when slot is rendered
-const mockSlotRender = jest.fn();
-jest.mock( '@woocommerce/blocks-checkout', () => {
-	const actual = jest.requireActual( '@woocommerce/blocks-checkout' );
-	return {
+
+vi.mock( '@woocommerce/blocks-checkout', async () => {
+	const actual = await vi.importActual( '@woocommerce/blocks-checkout' );
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		...actual,
 		ExperimentalDiscountsMeta: {
 			...actual.ExperimentalDiscountsMeta,
@@ -38,9 +57,8 @@ jest.mock( '@woocommerce/blocks-checkout', () => {
 				return <div data-testid="discount-slot" />;
 			},
 		},
-	};
+	} );
 } );
-
 const mockCartTotals = {
 	currency_code: 'USD',
 	currency_symbol: '$',
@@ -52,31 +70,30 @@ const mockCartTotals = {
 	total_discount: '0',
 	total_discount_tax: '0',
 };
-
 const mockCartData = {
 	cartTotals: mockCartTotals,
 	cartCoupons: [],
-	extensions: { some: 'data' },
-	receiveCart: jest.fn(),
-	otherCartData: { test: 'value' },
+	extensions: {
+		some: 'data',
+	},
+	receiveCart: vi.fn(),
+	otherCartData: {
+		test: 'value',
+	},
 };
-
 const mockCouponHooks = {
-	removeCoupon: jest.fn(),
+	removeCoupon: vi.fn(),
 	isRemovingCoupon: false,
 };
-
 describe( 'Cart Order Summary Discount Block', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
-		( useStoreCart as jest.Mock ).mockReturnValue( mockCartData );
-		( useStoreCartCoupons as jest.Mock ).mockReturnValue( mockCouponHooks );
+		vi.clearAllMocks();
+		( useStoreCart as Mock ).mockReturnValue( mockCartData );
+		( useStoreCartCoupons as Mock ).mockReturnValue( mockCouponHooks );
 	} );
-
 	const renderWithProviders = ( ui: React.ReactElement ) => {
 		return render( <SlotFillProvider>{ ui }</SlotFillProvider> );
 	};
-
 	it( 'renders only the DiscountSlotFill when there are no coupons', () => {
 		renderWithProviders( <Block className="test-class" /> );
 
@@ -91,10 +108,14 @@ describe( 'Cart Order Summary Discount Block', () => {
 		expect( mockSlotRender ).toHaveBeenCalledWith(
 			expect.objectContaining( {
 				context: 'woocommerce/cart',
-				extensions: { some: 'data' },
+				extensions: {
+					some: 'data',
+				},
 				cart: expect.objectContaining( {
 					cartTotals: mockCartTotals,
-					otherCartData: { test: 'value' },
+					otherCartData: {
+						test: 'value',
+					},
 				} ),
 			} )
 		);
@@ -103,12 +124,12 @@ describe( 'Cart Order Summary Discount Block', () => {
 		const slotProps = mockSlotRender.mock.calls[ 0 ][ 0 ];
 		expect( slotProps.cart ).not.toHaveProperty( 'receiveCart' );
 	} );
-
 	it( 'renders both TotalsDiscount and DiscountSlotFill when there are coupons', () => {
 		const mockCoupons = [
 			{
 				code: 'TEST10',
-				label: 'TEST10', // The label is what gets displayed
+				label: 'TEST10',
+				// The label is what gets displayed
 				discount_type: 'percent',
 				amount: '10',
 				totals: {
@@ -117,8 +138,7 @@ describe( 'Cart Order Summary Discount Block', () => {
 				},
 			},
 		];
-
-		( useStoreCart as jest.Mock ).mockReturnValue( {
+		( useStoreCart as Mock ).mockReturnValue( {
 			...mockCartData,
 			cartCoupons: mockCoupons,
 			cartTotals: {
@@ -126,7 +146,6 @@ describe( 'Cart Order Summary Discount Block', () => {
 				total_discount: '1000',
 			},
 		} );
-
 		renderWithProviders( <Block className="test-class" /> );
 
 		// With real components, look for the discount text/coupon code
@@ -139,13 +158,10 @@ describe( 'Cart Order Summary Discount Block', () => {
 		const wrapper = screen.getByText( 'TEST10' ).closest( '.test-class' );
 		expect( wrapper ).toBeInTheDocument();
 	} );
-
 	it( 'calls useStoreCartCoupons with correct context', () => {
 		renderWithProviders( <Block className="test-class" /> );
-
 		expect( useStoreCartCoupons ).toHaveBeenCalledWith( 'wc/cart' );
 	} );
-
 	it( 'always renders the ExperimentalDiscountsMeta.Slot regardless of coupon state', () => {
 		// Test with no coupons
 		const { rerender } = renderWithProviders(
@@ -155,15 +171,16 @@ describe( 'Cart Order Summary Discount Block', () => {
 		expect( mockSlotRender ).toHaveBeenCalledTimes( 1 );
 
 		// Clean up
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 
 		// Test with coupons
-		( useStoreCart as jest.Mock ).mockReturnValue( {
+		( useStoreCart as Mock ).mockReturnValue( {
 			...mockCartData,
 			cartCoupons: [
 				{
 					code: 'TEST',
-					label: 'TEST', // Add label for display
+					label: 'TEST',
+					// Add label for display
 					totals: {
 						total_discount: '500',
 						total_discount_tax: '0',
@@ -171,7 +188,6 @@ describe( 'Cart Order Summary Discount Block', () => {
 				},
 			],
 		} );
-
 		rerender(
 			<SlotFillProvider>
 				<Block className="test-class" />
@@ -199,14 +215,14 @@ describe( 'Cart Order Summary Discount Block', () => {
 		const slotProps = mockSlotRender.mock.calls[ 0 ][ 0 ];
 		expect( slotProps.cart ).not.toHaveProperty( 'receiveCart' );
 	} );
-
 	it( 'handles missing className prop gracefully', () => {
-		( useStoreCart as jest.Mock ).mockReturnValue( {
+		( useStoreCart as Mock ).mockReturnValue( {
 			...mockCartData,
 			cartCoupons: [
 				{
 					code: 'TEST',
-					label: 'TEST', // Add label for display
+					label: 'TEST',
+					// Add label for display
 					totals: {
 						total_discount: '500',
 						total_discount_tax: '0',

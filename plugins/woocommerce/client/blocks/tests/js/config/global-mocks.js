@@ -1,9 +1,14 @@
-const { webcrypto } = require( 'node:crypto' );
-
-global.crypto = webcrypto;
-
-global.TextEncoder = require( 'util' ).TextEncoder;
-global.TextDecoder = require( 'util' ).TextDecoder;
+import apiFetch from '@wordpress/api-fetch';
+import ResizeObserver from 'resize-observer-polyfill';
+import { TextEncoder, TextDecoder } from 'node:util';
+import { vi } from 'vitest';
+import { webcrypto } from 'node:crypto';
+Object.defineProperty( globalThis, 'crypto', {
+	configurable: true,
+	value: webcrypto,
+} );
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
 
 // The @woocommerce/email-editor package reads `__i18n_text_domain__` as its
 // text domain. It is normally replaced by `webpack.DefinePlugin` at bundle
@@ -16,8 +21,6 @@ global.__i18n_text_domain__ = 'woocommerce';
  * likely run into this.
  */
 global.wp = {};
-
-require( '@wordpress/data' );
 
 /**
  * wcSettings is required by @woocommerce/* packages.
@@ -63,8 +66,13 @@ global.wcSettings = {
 			allowBilling: true,
 			allowShipping: true,
 			locale: {
-				postcode: { priority: 65 },
-				state: { required: false, hidden: true },
+				postcode: {
+					priority: 65,
+				},
+				state: {
+					required: false,
+					hidden: true,
+				},
 			},
 			format: '{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}',
 		},
@@ -75,8 +83,12 @@ global.wcSettings = {
 			allowBilling: true,
 			allowShipping: true,
 			locale: {
-				postcode: { label: 'Postal code' },
-				state: { label: 'Province' },
+				postcode: {
+					label: 'Postal code',
+				},
+				state: {
+					label: 'Province',
+				},
 			},
 			format: '{company}\n{name}\n{address_1}\n{address_2}\n{city} {state_code} {postcode}\n{country}',
 		},
@@ -87,8 +99,12 @@ global.wcSettings = {
 				JP28: 'Hyogo',
 			},
 			locale: {
-				last_name: { priority: 10 },
-				first_name: { priority: 20 },
+				last_name: {
+					priority: 10,
+				},
+				first_name: {
+					priority: 20,
+				},
 				postcode: {
 					priority: 65,
 				},
@@ -96,9 +112,15 @@ global.wcSettings = {
 					label: 'Prefecture',
 					priority: 66,
 				},
-				city: { priority: 67 },
-				address_1: { priority: 68 },
-				address_2: { priority: 69 },
+				city: {
+					priority: 67,
+				},
+				address_1: {
+					priority: 68,
+				},
+				address_2: {
+					priority: 69,
+				},
 			},
 			format: '{postcode}\n{state} {city} {address_1}\n{address_2}\n{company}\n{last_name} {first_name}\n{country}',
 		},
@@ -107,8 +129,13 @@ global.wcSettings = {
 			allowShipping: true,
 			states: {},
 			locale: {
-				postcode: { label: 'Postcode' },
-				state: { label: 'County', required: false },
+				postcode: {
+					label: 'Postcode',
+				},
+				state: {
+					label: 'County',
+					required: false,
+				},
 			},
 		},
 		ES: {
@@ -320,12 +347,10 @@ global.wcSettings = {
 		customer_id: 1,
 	},
 };
-
 global.jQuery = () => ( {
 	on: () => void null,
 	off: () => void null,
 } );
-
 global.IntersectionObserver = function () {
 	return {
 		root: null,
@@ -337,23 +362,22 @@ global.IntersectionObserver = function () {
 		takeRecords: () => [],
 	};
 };
-
-global.ResizeObserver = require( 'resize-observer-polyfill' );
-
+global.ResizeObserver = ResizeObserver;
 global.__webpack_public_path__ = '';
-
 Object.defineProperty( window, 'matchMedia', {
 	writable: true,
-	value: jest.fn().mockImplementation( ( query ) => ( {
+	value: vi.fn().mockImplementation( ( query ) => ( {
 		// Return true for prefers-reduced-motion queries to skip animations in tests
 		matches: /prefers-reduced-motion/.test( query ),
 		media: query,
 		onchange: null,
-		addListener: jest.fn(), // Deprecated
-		removeListener: jest.fn(), // Deprecated
-		addEventListener: jest.fn(),
-		removeEventListener: jest.fn(),
-		dispatchEvent: jest.fn(),
+		addListener: vi.fn(),
+		// Deprecated
+		removeListener: vi.fn(),
+		// Deprecated
+		addEventListener: vi.fn(),
+		removeEventListener: vi.fn(),
+		dispatchEvent: vi.fn(),
 	} ) ),
 } );
 
@@ -381,15 +405,35 @@ if ( ! window.DOMRectReadOnly ) {
  * ES6 module only, in order to use it in node environment, we need to mock it.
  * See: https://github.com/Touffy/client-zip/issues/28
  */
-jest.mock( 'client-zip', () => ( {
-	downloadZip: jest.fn(),
-} ) );
+vi.mock( 'client-zip', () => {
+	const mock = {
+		downloadZip: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 /**
  * Mock isEditor to return false by default in tests, since the core/editor
  * store may be registered in the test environment without an actual editor
  * context. Individual tests can override this mock if needed.
  */
-jest.mock( '@woocommerce/block-data/utils/is-editor', () => ( {
-	isEditor: jest.fn().mockReturnValue( false ),
-} ) );
+vi.mock( '@woocommerce/block-data/utils/is-editor', () => {
+	const mock = {
+		isEditor: vi.fn().mockReturnValue( false ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+
+apiFetch.use(
+	apiFetch.createRootURLMiddleware( window.location.origin + '/' )
+);

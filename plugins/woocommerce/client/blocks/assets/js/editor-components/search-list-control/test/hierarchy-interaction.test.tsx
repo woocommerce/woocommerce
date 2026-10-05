@@ -1,3 +1,5 @@
+import { describe, expect, test, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -27,7 +29,7 @@ const renderNonSelectableParentItem = ( args: RenderItemArgs ) => (
 
 const renderHierarchicalControl = ( {
 	selected = [] as SearchListItemType[],
-	onChange = jest.fn(),
+	onChange = vi.fn(),
 	renderItem = undefined as
 		| ( ( args: RenderItemArgs ) => JSX.Element )
 		| undefined,
@@ -69,7 +71,7 @@ describe( 'SearchListControl hierarchy interactions', () => {
 	} );
 
 	test( 'selects a leaf category at depth greater than one', () => {
-		const onChange = jest.fn();
+		const onChange = vi.fn();
 		const { container } = renderHierarchicalControl( { onChange } );
 
 		expandCategory( container, 'Apricots' );
@@ -84,7 +86,7 @@ describe( 'SearchListControl hierarchy interactions', () => {
 	} );
 
 	test( 'selects a parent category and all descendants when its checkbox is checked', () => {
-		const onChange = jest.fn();
+		const onChange = vi.fn();
 		const { container } = renderHierarchicalControl( { onChange } );
 
 		expandCategory( container, 'Apricots' );
@@ -112,7 +114,7 @@ describe( 'SearchListControl hierarchy interactions', () => {
 	} );
 
 	test( 'deselects a parent category and all descendants when its checkbox is unchecked', () => {
-		const onChange = jest.fn();
+		const onChange = vi.fn();
 		const selected = hierarchicalList.filter( ( { id } ) =>
 			[ 1, 2, 3, 4 ].includes( Number( id ) )
 		);
@@ -182,7 +184,7 @@ describe( 'SearchListControl hierarchy interactions', () => {
 		} );
 
 		test( 'selects only descendants when a non-selectable parent checkbox is checked', () => {
-			const onChange = jest.fn();
+			const onChange = vi.fn();
 			const { container } = renderHierarchicalControl( {
 				onChange,
 				renderItem: renderNonSelectableParentItem,
@@ -201,7 +203,7 @@ describe( 'SearchListControl hierarchy interactions', () => {
 		} );
 
 		test( 'deselects only descendants when a non-selectable parent checkbox is unchecked', () => {
-			const onChange = jest.fn();
+			const onChange = vi.fn();
 			const selected = hierarchicalList.filter( ( { id } ) =>
 				[ 2, 3, 4 ].includes( Number( id ) )
 			);
@@ -220,7 +222,7 @@ describe( 'SearchListControl hierarchy interactions', () => {
 		} );
 
 		test( 'selects remaining descendants when a partially selected non-selectable parent is checked', () => {
-			const onChange = jest.fn();
+			const onChange = vi.fn();
 			const selected = hierarchicalList.filter(
 				( { id } ) => Number( id ) === 4
 			);

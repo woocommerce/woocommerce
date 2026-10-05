@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -18,27 +20,36 @@ import {
 	getShippingPrices,
 } from '../../../blocks/checkout/inner-blocks/checkout-shipping-method-block/shared/helpers';
 import { generateShippingRate } from '../../../mocks/shipping-package';
-
-jest.mock( '@woocommerce/settings', () => {
-	return {
+vi.mock( '@woocommerce/settings', async () => {
+	const _actual = await vi.importActual( '@woocommerce/settings' );
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		__esModule: true,
-		...jest.requireActual( '@woocommerce/settings' ),
-		getSetting: jest.fn().mockImplementation( ( setting: string ) => {
+		...( await vi.importActual( '@woocommerce/settings' ) ),
+		getSetting: vi.fn().mockImplementation( ( setting: string ) => {
 			if ( setting === 'collectableMethodIds' ) {
 				return [ 'local_pickup' ];
 			}
-			return jest
-				.requireActual( '@woocommerce/settings' )
-				.getSetting( setting );
+			return _actual.getSetting( setting );
 		} ),
-	};
+	} );
 } );
-jest.mock( '@woocommerce/block-settings', () => ( {
-	__esModule: true,
-	...jest.requireActual( '@woocommerce/block-settings' ),
-	LOCAL_PICKUP_ENABLED: true,
-} ) );
-const blockSettingsMock = jest.requireMock( '@woocommerce/block-settings' );
+vi.mock( '@woocommerce/block-settings', async () => {
+	const mock = {
+		__esModule: true,
+		...( await vi.importActual( '@woocommerce/block-settings' ) ),
+		LOCAL_PICKUP_ENABLED: true,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+const blockSettingsMock = await import( '@woocommerce/block-settings' );
 
 // A test package with 5 shipping rates
 const testPackage: CartShippingRate = {
@@ -131,7 +142,6 @@ describe( 'Test Min and Max rates', () => {
 		} );
 	} );
 } );
-
 describe( 'isPackageRateCollectable', () => {
 	it( 'correctly identifies if a package rate is collectable or not', () => {
 		expect(

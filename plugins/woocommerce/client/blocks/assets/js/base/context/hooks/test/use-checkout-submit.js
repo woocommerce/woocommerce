@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -17,16 +19,16 @@ import {
 } from '@woocommerce/block-data/payment';
 import { useCheckoutSubmit } from '../use-checkout-submit';
 
-jest.mock( '../../providers/cart-checkout/checkout-events', () => {
-	const original = jest.requireActual(
+vi.mock( '../../providers/cart-checkout/checkout-events', async () => {
+	const original = await vi.importActual(
 		'../../providers/cart-checkout/checkout-events'
 	);
-	return {
+	return ( ( mock ) => ( { default: mock, ...mock } ) )( {
 		...original,
 		useCheckoutEventsContext: () => {
-			return { onSubmit: jest.fn() };
+			return { onSubmit: vi.fn() };
 		},
-	};
+	} );
 } );
 
 describe( 'useCheckoutSubmit', () => {

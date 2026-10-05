@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -42,41 +44,64 @@ import Discount from '../inner-blocks/checkout-order-summary-discount/frontend';
 import Shipping from '../inner-blocks/checkout-order-summary-shipping/frontend';
 import Taxes from '../inner-blocks/checkout-order-summary-taxes/frontend';
 import Checkout from '../block';
-
-jest.mock( '@wordpress/data', () =>
-	require( '@woocommerce/blocks-test-utils/mock-editor-store' ).mockWordPressDataWithEditorStore()
-);
-
-jest.mock( '@wordpress/compose', () => ( {
-	...jest.requireActual( '@wordpress/compose' ),
-	useResizeObserver: jest.fn().mockReturnValue( [ null, { width: 0 } ] ),
-} ) );
-
-global.ResizeObserver = jest.fn().mockImplementation( () => ( {
-	observe: jest.fn(),
-	unobserve: jest.fn(),
-	disconnect: jest.fn(),
-} ) );
-
-global.IntersectionObserver = jest.fn().mockImplementation( () => ( {
-	observe: jest.fn(),
-	unobserve: jest.fn(),
-	disconnect: jest.fn(),
-} ) );
-
-jest.mock( '@wordpress/element', () => {
+vi.mock( '@wordpress/data', async () => {
+	const mock = (
+		await import( '@woocommerce/blocks-test-utils/mock-editor-store' )
+	).mockWordPressDataWithEditorStore();
 	return {
-		...jest.requireActual( '@wordpress/element' ),
+		default: mock,
+		...mock,
+	};
+} );
+vi.mock( '@wordpress/compose', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/compose' ) ),
+		useResizeObserver: vi.fn().mockReturnValue( [
+			null,
+			{
+				width: 0,
+			},
+		] ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+global.ResizeObserver = vi.fn().mockImplementation( function () {
+	return {
+		observe: vi.fn(),
+		unobserve: vi.fn(),
+		disconnect: vi.fn(),
+	};
+} );
+global.IntersectionObserver = vi.fn().mockImplementation( function () {
+	return {
+		observe: vi.fn(),
+		unobserve: vi.fn(),
+		disconnect: vi.fn(),
+	};
+} );
+vi.mock( '@wordpress/element', async () => {
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
+		...( await vi.importActual( '@wordpress/element' ) ),
 		useId: () => {
 			return 'mock-id';
 		},
-	};
+	} );
 } );
-
-jest.mock( '../context', () => {
-	return {
-		...jest.requireActual( '../context' ),
-		useCheckoutBlockContext: jest.fn().mockReturnValue( {
+vi.mock( '../context', async () => {
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
+		...( await vi.importActual( '../context' ) ),
+		useCheckoutBlockContext: vi.fn().mockReturnValue( {
 			showFormStepNumbers: false,
 			cartPageId: 0,
 			requireCompanyField: false,
@@ -89,13 +114,12 @@ jest.mock( '../context', () => {
 			showRateAfterTaxName: false,
 			showReturnToCart: false,
 		} ),
-	};
+	} );
 } );
 
 /** @type {jest.Mock} */
-const useCheckoutBlockContext =
-	jest.requireMock( '../context' ).useCheckoutBlockContext;
-
+const useCheckoutBlockContext = ( await import( '../context' ) )
+	.useCheckoutBlockContext;
 const CheckoutBlock = () => {
 	return (
 		<Checkout attributes={ {} }>
@@ -131,7 +155,6 @@ const CheckoutBlock = () => {
 		</Checkout>
 	);
 };
-
 describe( 'Testing Checkout', () => {
 	beforeEach( () => {
 		// Set up MSW handlers for cart API
@@ -145,7 +168,6 @@ describe( 'Testing Checkout', () => {
 			dispatch( cartStore ).invalidateResolutionForStore();
 			dispatch( cartStore ).receiveCart( defaultCartState.cartData );
 		} );
-
 		act( () => {
 			const PaymentMethodContent = () => <div>A payment method</div>;
 			registerPaymentMethod( {
@@ -164,78 +186,60 @@ describe( 'Testing Checkout', () => {
 			} );
 		} );
 	} );
-
 	afterEach( () => {
 		// MSW handlers are reset automatically in the global setup
 	} );
-
 	it( 'Renders checkout if there are items in the cart', async () => {
 		render( <CheckoutBlock /> );
-
 		await waitFor( () =>
 			expect( screen.getByText( /Place Order/i ) ).toBeVisible()
 		);
 	} );
-
 	it( 'Allows saving payment method if the customer is creating an account or has already logged in', async () => {
 		const { rerender } = render( <CheckoutBlock /> );
-
 		expect(
 			await screen.findByText( /Payment method with cards/i )
 		).toBeVisible();
-
 		expect(
 			screen.getByRole( 'checkbox', {
 				name: 'Save payment information to my account for future purchases.',
 			} )
 		).toBeVisible();
-
 		act( () => {
 			dispatch( checkoutStore ).__internalSetCustomerId( 0 );
 		} );
-
 		rerender( <CheckoutBlock /> );
-
 		expect(
 			screen.queryByRole( 'checkbox', {
 				name: 'Save payment information to my account for future purchases.',
 			} )
 		).not.toBeInTheDocument();
-
 		act( () => {
 			allSettings.checkoutAllowsGuest = true;
 			allSettings.checkoutAllowsSignup = true;
 			dispatch( checkoutStore ).__internalSetCustomerId( 0 );
 			dispatch( checkoutStore ).__internalSetShouldCreateAccount( true );
 		} );
-
 		rerender( <CheckoutBlock /> );
-
 		expect(
 			screen.getByRole( 'checkbox', {
 				name: 'Save payment information to my account for future purchases.',
 			} )
 		).toBeInTheDocument();
-
 		act( () => {
 			dispatch( checkoutStore ).__internalSetShouldCreateAccount( false );
 		} );
-
 		rerender( <CheckoutBlock /> );
-
 		expect(
 			screen.queryByRole( 'checkbox', {
 				name: 'Save payment information to my account for future purchases.',
 			} )
 		).not.toBeInTheDocument();
-
 		act( () => {
 			allSettings.checkoutAllowsGuest = false;
 			allSettings.checkoutAllowsSignup = true;
 		} );
-
 		rerender( <CheckoutBlock /> );
-
 		expect(
 			screen.getByRole( 'checkbox', {
 				name: 'Save payment information to my account for future purchases.',
@@ -249,7 +253,6 @@ describe( 'Testing Checkout', () => {
 			dispatch( checkoutStore ).__internalSetCustomerId( 1 );
 		} );
 	} );
-
 	it( 'Renders the shipping address card if the address is filled and the cart contains a shippable product', async () => {
 		act( () => {
 			const cartWithAddress = {
@@ -287,15 +290,14 @@ describe( 'Testing Checkout', () => {
 				} )
 			);
 		} );
-
 		const { rerender } = render( <CheckoutBlock /> );
-
 		await waitFor( () =>
 			expect(
-				screen.getByRole( 'button', { name: 'Edit shipping address' } )
+				screen.getByRole( 'button', {
+					name: 'Edit shipping address',
+				} )
 			).toBeVisible()
 		);
-
 		expect( screen.getByText( /Toronto ON M4W 1A6/ ) ).toBeVisible();
 
 		// Async is needed here despite the IDE warnings. Testing Library gives a warning if not awaited.
@@ -314,7 +316,6 @@ describe( 'Testing Checkout', () => {
 			} )
 		);
 		rerender( <CheckoutBlock /> );
-
 		expect(
 			screen.getByText( /Hyogo Kobe Address 1 JP/ )
 		).toBeInTheDocument();
@@ -335,12 +336,10 @@ describe( 'Testing Checkout', () => {
 			} )
 		);
 		rerender( <CheckoutBlock /> );
-
 		expect( screen.getByText( /Liverpool/ ) ).toBeInTheDocument();
 		expect( screen.getByText( /Merseyside/ ) ).toBeInTheDocument();
 		expect( screen.getByText( /L1 0BP/ ) ).toBeInTheDocument();
 	} );
-
 	it( 'Renders the billing address card if the address is filled and the cart contains a virtual product', async () => {
 		act( () => {
 			const cartWithVirtualProduct = {
@@ -355,14 +354,14 @@ describe( 'Testing Checkout', () => {
 			);
 		} );
 		render( <CheckoutBlock /> );
-
 		await waitFor( () =>
 			expect(
-				screen.getByRole( 'button', { name: 'Edit billing address' } )
+				screen.getByRole( 'button', {
+					name: 'Edit billing address',
+				} )
 			).toBeVisible()
 		);
 	} );
-
 	it( 'Ensures checkbox labels have unique IDs', async () => {
 		await act( async () => {
 			// Set required settings
@@ -383,7 +382,6 @@ describe( 'Testing Checkout', () => {
 		// Ensure all IDs are unique
 		const uniqueIds = new Set( ids );
 		expect( uniqueIds.size ).toBe( ids.length );
-
 		await act( async () => {
 			// Restore initial settings
 			allSettings.checkoutAllowsGuest = undefined;
@@ -391,7 +389,6 @@ describe( 'Testing Checkout', () => {
 			dispatch( checkoutStore ).__internalSetCustomerId( 1 );
 		} );
 	} );
-
 	it( 'Ensures correct classes are applied to FormStep when step numbers are shown/hidden', async () => {
 		const mockReturnValue = {
 			showFormStepNumbers: false,
@@ -409,27 +406,20 @@ describe( 'Testing Checkout', () => {
 		useCheckoutBlockContext.mockReturnValue( mockReturnValue );
 		// Render the CheckoutBlock
 		const { container, rerender } = render( <CheckoutBlock /> );
-
 		let formStepsWithNumber = container.querySelectorAll(
 			'.wc-block-components-checkout-step--with-step-number'
 		);
-
 		expect( formStepsWithNumber ).toHaveLength( 0 );
-
 		useCheckoutBlockContext.mockReturnValue( {
 			...mockReturnValue,
 			showFormStepNumbers: true,
 		} );
-
 		rerender( <CheckoutBlock /> );
-
 		formStepsWithNumber = container.querySelectorAll(
 			'.wc-block-components-checkout-step--with-step-number'
 		);
-
 		expect( formStepsWithNumber.length ).not.toBe( 0 );
 	} );
-
 	it( 'Shows guest checkout text', async () => {
 		act( () => {
 			allSettings.checkoutAllowsGuest = true;
@@ -448,19 +438,15 @@ describe( 'Testing Checkout', () => {
 				)
 			).toBeVisible()
 		);
-
 		act( () => {
 			allSettings.checkoutAllowsGuest = true;
 			allSettings.checkoutAllowsSignup = true;
 			dispatch( checkoutStore ).__internalSetCustomerId( 1 );
 		} );
-
 		rerender( <CheckoutBlock /> );
-
 		expect(
 			queryByText( /You are currently checking out as a guest./i )
 		).not.toBeInTheDocument();
-
 		act( () => {
 			// Restore initial settings
 			allSettings.checkoutAllowsGuest = undefined;
@@ -468,33 +454,26 @@ describe( 'Testing Checkout', () => {
 			dispatch( checkoutStore ).__internalSetCustomerId( 1 );
 		} );
 	} );
-
 	it( "Ensures hidden postcode fields don't block Checkout", async () => {
 		const user = userEvent.setup();
 		render( <CheckoutBlock /> );
-
 		await waitFor( () =>
 			expect( screen.getByText( /Place Order/i ) ).toBeVisible()
 		);
-
 		const shippingForm = screen.getByRole( 'group', {
 			name: /shipping address/i,
 		} );
 		const countrySelect =
 			within( shippingForm ).getByLabelText( /Country\/Region/i );
-
 		await act( async () => {
 			await user.selectOptions( countrySelect, 'Austria' );
 		} );
-
 		expect(
 			await within( shippingForm ).findByLabelText( /Postal code/i )
 		).toBeInTheDocument();
-
 		await act( async () => {
 			await user.selectOptions( countrySelect, 'Spain' );
 		} );
-
 		expect(
 			within( shippingForm ).queryByLabelText( /Postal code/i )
 		).not.toBeInTheDocument();
@@ -523,7 +502,6 @@ describe( 'Testing Checkout', () => {
 				name: /terms and conditions/i,
 			} ) as HTMLInputElement,
 		};
-
 		const fieldValues: Record< keyof typeof fields, string | boolean > = {
 			email: 'test@test.com',
 			firstName: 'John',
@@ -563,15 +541,21 @@ describe( 'Testing Checkout', () => {
 		await waitFor(
 			() =>
 				expect(
-					screen.getByRole( 'button', { name: /Place order/i } )
+					screen.getByRole( 'button', {
+						name: /Place order/i,
+					} )
 				).toBeEnabled(),
-			{ timeout: 5000 }
+			{
+				timeout: 5000,
+			}
 		);
 
 		// Submit the form
 		await act( async () => {
 			await user.click(
-				screen.getByRole( 'button', { name: /Place order/i } )
+				screen.getByRole( 'button', {
+					name: /Place order/i,
+				} )
 			);
 		} );
 

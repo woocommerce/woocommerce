@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -68,7 +70,7 @@ const renderAddressLines = ( {
 			address1={ address1Field( autocomplete ) }
 			address2={ address2Field }
 			addressType={ addressType }
-			onChange={ jest.fn() }
+			onChange={ vi.fn() }
 		/>
 	);
 
@@ -126,7 +128,7 @@ describe( 'Checkout field autocomplete attribute', () => {
 				addressType="billing"
 				fields={ ADDRESS_FORM_KEYS }
 				values={ { country: 'GB' } as AddressFormValues }
-				onChange={ jest.fn() }
+				onChange={ vi.fn() }
 			/>
 		);
 
@@ -142,7 +144,7 @@ describe( 'Checkout field autocomplete attribute', () => {
 				addressType="contact"
 				fields={ CONTACT_FORM_KEYS }
 				values={ { email: '' } }
-				onChange={ jest.fn() }
+				onChange={ vi.fn() }
 			/>
 		);
 

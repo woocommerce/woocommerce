@@ -1,3 +1,11 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+const { mockUseCheckoutAddress } = vi.hoisted( () => {
+	const mockUseCheckoutAddress = vi.fn();
+	return {
+		mockUseCheckoutAddress,
+	};
+} );
+
 /**
  * External dependencies
  */
@@ -19,71 +27,97 @@ import {
 } from './utils/mock-provider';
 
 // --- Mocks (same pattern as integration.tsx) ---
-
-const mockUseCheckoutAddress = jest.fn();
-jest.mock( '@woocommerce/base-context', () => ( {
-	...jest.requireActual( '@woocommerce/base-context' ),
-	useCheckoutAddress: () => mockUseCheckoutAddress(),
-} ) );
-
-jest.mock( '@wordpress/data', () => ( {
-	__esModule: true,
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn(),
-	useDispatch: jest.fn(),
-} ) );
-
+const _actual = await vi.importActual( '@wordpress/data' );
+vi.mock( '@woocommerce/base-context', async () => {
+	const mock = {
+		...( await vi.importActual( '@woocommerce/base-context' ) ),
+		useCheckoutAddress: () => mockUseCheckoutAddress(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/data', async () => {
+	const mock = {
+		__esModule: true,
+		...( await vi.importActual( '@wordpress/data' ) ),
+		useSelect: vi.fn(),
+		useDispatch: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 wpData.useSelect.mockImplementation(
-	jest.fn().mockImplementation( ( passedMapSelect ) => {
-		const mockedSelect = jest.fn().mockImplementation( ( storeName ) => {
+	vi.fn().mockImplementation( ( passedMapSelect ) => {
+		const mockedSelect = vi.fn().mockImplementation( ( storeName ) => {
 			if ( storeName === 'wc/store/cart' || storeName === cartStore ) {
 				return {
 					getCartData() {
 						return {
-							shippingAddress: { country: 'DE' },
-							billingAddress: { country: 'DE' },
+							shippingAddress: {
+								country: 'DE',
+							},
+							billingAddress: {
+								country: 'DE',
+							},
 						};
 					},
 				};
 			}
-			return jest.requireActual( '@wordpress/data' ).select( storeName );
+			return _actual.select( storeName );
 		} );
 		return passedMapSelect( mockedSelect, {
-			dispatch: jest.requireActual( '@wordpress/data' ).dispatch,
+			dispatch: _actual.dispatch,
 		} );
 	} )
 );
-
 wpData.useDispatch.mockImplementation( ( store: StoreDescriptor | string ) => {
 	if ( store === cartStore || store === 'wc/store/cart' ) {
 		return {
-			...jest.requireActual( '@wordpress/data' ).useDispatch( store ),
-			setShippingAddress: jest.fn(),
-			setBillingAddress: jest.fn(),
+			..._actual.useDispatch( store ),
+			setShippingAddress: vi.fn(),
+			setBillingAddress: vi.fn(),
 		};
 	}
-	return jest.requireActual( '@wordpress/data' ).useDispatch( store );
+	return _actual.useDispatch( store );
 } );
-
-jest.mock( '@woocommerce/settings', () => ( {
-	...jest.requireActual( '@woocommerce/settings' ),
-	getSettingWithCoercion: jest
-		.fn()
-		.mockImplementation( ( value, fallback, typeguard ) => {
-			if ( value === 'addressAutocompleteProviders' ) {
-				return [
-					{
-						id: 'mock-test-provider',
-						name: 'Mock Test Provider',
-						branding_html: '<div>Mock Provider</div>',
-					},
-				];
-			}
-			return jest
-				.requireActual( '@woocommerce/settings' )
-				.getSettingWithCoercion( value, fallback, typeguard );
-		} ),
-} ) );
+vi.mock( '@woocommerce/settings', async () => {
+	const _actual2 = await vi.importActual( '@woocommerce/settings' );
+	const mock = {
+		...( await vi.importActual( '@woocommerce/settings' ) ),
+		getSettingWithCoercion: vi
+			.fn()
+			.mockImplementation( ( value, fallback, typeguard ) => {
+				if ( value === 'addressAutocompleteProviders' ) {
+					return [
+						{
+							id: 'mock-test-provider',
+							name: 'Mock Test Provider',
+							branding_html: '<div>Mock Provider</div>',
+						},
+					];
+				}
+				return _actual2.getSettingWithCoercion(
+					value,
+					fallback,
+					typeguard
+				);
+			} ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 // --- Helper ---
 
@@ -135,7 +169,6 @@ function fireNativeInputEvent(
 
 describe( 'Browser autofill vs user typing — WOOPLUG-6341', () => {
 	let mockProvider: MockProvider;
-
 	beforeEach( () => {
 		mockUseCheckoutAddress.mockReturnValue( {
 			useShippingAsBilling: false,
@@ -144,23 +177,21 @@ describe( 'Browser autofill vs user typing — WOOPLUG-6341', () => {
 		mockProvider = createMockProvider();
 		installMockProvider( mockProvider );
 	} );
-
 	it( 'triggers search when user types into the field', async () => {
 		render( <TestAddressField /> );
 		const input = screen.getByLabelText( 'Address 1' );
-
 		await act( async () => {
 			await userEvent.type( input, '123 Main' );
 		} );
-
 		await waitFor(
 			() => {
 				expect( mockProvider.search ).toHaveBeenCalled();
 			},
-			{ timeout: 3000 }
+			{
+				timeout: 3000,
+			}
 		);
 	} );
-
 	it( 'should NOT trigger search when browser autofill fires insertReplacementText', async () => {
 		render( <TestAddressField /> );
 		const input = screen.getByLabelText( 'Address 1' ) as HTMLInputElement;
@@ -180,10 +211,8 @@ describe( 'Browser autofill vs user typing — WOOPLUG-6341', () => {
 		await act( async () => {
 			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
 		} );
-
 		expect( mockProvider.search ).not.toHaveBeenCalled();
 	} );
-
 	it( 'should NOT trigger search when value changes without keyboard input (fallback detection)', async () => {
 		render( <TestAddressField /> );
 		const input = screen.getByLabelText( 'Address 1' ) as HTMLInputElement;
@@ -199,14 +228,11 @@ describe( 'Browser autofill vs user typing — WOOPLUG-6341', () => {
 				''
 			);
 		} );
-
 		await act( async () => {
 			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
 		} );
-
 		expect( mockProvider.search ).not.toHaveBeenCalled();
 	} );
-
 	it( 'should discard search results when :-webkit-autofill is detected (Safari Contacts)', async () => {
 		render( <TestAddressField /> );
 		const input = screen.getByLabelText( 'Address 1' ) as HTMLInputElement;
@@ -227,13 +253,14 @@ describe( 'Browser autofill vs user typing — WOOPLUG-6341', () => {
 		await act( async () => {
 			await userEvent.type( input, '742 Evergreen' );
 		} );
-
 		await waitFor(
 			() => {
 				// The search should have been called (characters looked like typing).
 				expect( mockProvider.search ).toHaveBeenCalled();
 			},
-			{ timeout: 3000 }
+			{
+				timeout: 3000,
+			}
 		);
 
 		// But because :-webkit-autofill matched when results came back,
@@ -247,7 +274,6 @@ describe( 'Browser autofill vs user typing — WOOPLUG-6341', () => {
 		// Restore original matches.
 		input.matches = originalMatches;
 	} );
-
 	it( 'resumes search normally after autofill if user starts typing again', async () => {
 		render( <TestAddressField /> );
 		const input = screen.getByLabelText( 'Address 1' );
@@ -260,11 +286,9 @@ describe( 'Browser autofill vs user typing — WOOPLUG-6341', () => {
 				'insertReplacementText'
 			);
 		} );
-
 		await act( async () => {
 			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
 		} );
-
 		mockProvider.search.mockClear();
 
 		// Then: user clears and types manually (SHOULD trigger search)
@@ -272,12 +296,13 @@ describe( 'Browser autofill vs user typing — WOOPLUG-6341', () => {
 			await userEvent.clear( input );
 			await userEvent.type( input, '456 Oak' );
 		} );
-
 		await waitFor(
 			() => {
 				expect( mockProvider.search ).toHaveBeenCalled();
 			},
-			{ timeout: 3000 }
+			{
+				timeout: 3000,
+			}
 		);
 	} );
 } );

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`SearchListControl should render a search box and list of hierarchical options 1`] = `
+exports[`SearchListControl > should render a search box and list of hierarchical options 1`] = `
 {
   "asFragment": [Function],
   "baseElement": <body>
@@ -397,7 +397,7 @@ exports[`SearchListControl should render a search box and list of hierarchical o
 }
 `;
 
-exports[`SearchListControl should render a search box and list of options 1`] = `
+exports[`SearchListControl > should render a search box and list of options 1`] = `
 {
   "asFragment": [Function],
   "baseElement": <body>
@@ -1014,7 +1014,7 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
 }
 `;
 
-exports[`SearchListControl should render a search box and list of options with a custom className 1`] = `
+exports[`SearchListControl > should render a search box and list of options with a custom className 1`] = `
 {
   "asFragment": [Function],
   "baseElement": <body>
@@ -1631,7 +1631,7 @@ exports[`SearchListControl should render a search box and list of options with a
 }
 `;
 
-exports[`SearchListControl should render a search box and list of options, with a custom render callback for each item 1`] = `
+exports[`SearchListControl > should render a search box and list of options, with a custom render callback for each item 1`] = `
 {
   "asFragment": [Function],
   "baseElement": <body>
@@ -1876,7 +1876,7 @@ exports[`SearchListControl should render a search box and list of options, with 
 }
 `;
 
-exports[`SearchListControl should render a search box and list of options, with a custom search input message 1`] = `
+exports[`SearchListControl > should render a search box and list of options, with a custom search input message 1`] = `
 {
   "asFragment": [Function],
   "baseElement": <body>
@@ -2493,7 +2493,7 @@ exports[`SearchListControl should render a search box and list of options, with 
 }
 `;
 
-exports[`SearchListControl should render a search box and no options 1`] = `
+exports[`SearchListControl > should render a search box and no options 1`] = `
 {
   "asFragment": [Function],
   "baseElement": <body>
@@ -2714,7 +2714,7 @@ exports[`SearchListControl should render a search box and no options 1`] = `
 }
 `;
 
-exports[`SearchListControl should render a search box with a search term, and no matching options 1`] = `
+exports[`SearchListControl > should render a search box with a search term, and no matching options 1`] = `
 {
   "asFragment": [Function],
   "baseElement": <body>
@@ -3331,7 +3331,7 @@ exports[`SearchListControl should render a search box with a search term, and no
 }
 `;
 
-exports[`SearchListControl should render a search box with a search term, and only matching options 1`] = `
+exports[`SearchListControl > should render a search box with a search term, and only matching options 1`] = `
 {
   "asFragment": [Function],
   "baseElement": <body>
@@ -3948,7 +3948,7 @@ exports[`SearchListControl should render a search box with a search term, and on
 }
 `;
 
-exports[`SearchListControl should render a search box with a search term, and only matching options, regardless of case sensitivity 1`] = `
+exports[`SearchListControl > should render a search box with a search term, and only matching options, regardless of case sensitivity 1`] = `
 {
   "asFragment": [Function],
   "baseElement": <body>
@@ -4281,7 +4281,7 @@ exports[`SearchListControl should render a search box with a search term, and on
 }
 `;
 
-exports[`SearchListControl should render a search box, a list of options, and 1 selected item 1`] = `
+exports[`SearchListControl > should render a search box, a list of options, and 1 selected item 1`] = `
 {
   "asFragment": [Function],
   "baseElement": <body>
@@ -5030,7 +5030,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
 }
 `;
 
-exports[`SearchListControl should render a search box, a list of options, and 2 selected item 1`] = `
+exports[`SearchListControl > should render a search box, a list of options, and 2 selected item 1`] = `
 {
   "asFragment": [Function],
   "baseElement": <body>

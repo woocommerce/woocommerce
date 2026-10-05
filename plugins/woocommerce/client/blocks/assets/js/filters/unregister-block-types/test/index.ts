@@ -1,19 +1,34 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
 import { getBlockTypes, unregisterBlockType } from '@wordpress/blocks';
-
-jest.mock( '@wordpress/blocks', () => ( {
-	getBlockTypes: jest.fn(),
-	unregisterBlockType: jest.fn(),
-} ) );
-
-jest.mock( '@wordpress/dom-ready', () => ( {
-	__esModule: true,
-	default: jest.fn( ( callback ) => callback() ),
-} ) );
-
-const loadFilter = (
+vi.mock( '@wordpress/blocks', () => {
+	const mock = {
+		getBlockTypes: vi.fn(),
+		unregisterBlockType: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/dom-ready', () => {
+	const mock = {
+		__esModule: true,
+		default: vi.fn( ( callback ) => callback() ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+const loadFilter = async (
 	adminPage: string | undefined,
 	blockTypes: string[],
 	pageNow?: string
@@ -24,24 +39,24 @@ const loadFilter = (
 	};
 	wordpressWindow.adminpage = adminPage;
 	wordpressWindow.pagenow = pageNow;
-	( getBlockTypes as jest.Mock ).mockReturnValue(
-		blockTypes.map( ( name ) => ( { name } ) )
+	( getBlockTypes as Mock ).mockReturnValue(
+		blockTypes.map( ( name ) => ( {
+			name,
+		} ) )
 	);
-
-	jest.isolateModules( () => {
-		require( '../index' );
-	} );
+	vi.resetModules(),
+		await ( async () => {
+			await import( '../index' );
+		} )();
 };
-
 describe( 'unregister block types', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	} );
-
 	it.each( [ 'post-php', 'post-new-php' ] )(
 		'unregisters only post-editor block types in the deny list in %s',
-		( adminPage ) => {
-			loadFilter( adminPage, [
+		async ( adminPage ) => {
+			await loadFilter( adminPage, [
 				'woocommerce/breadcrumbs',
 				'woocommerce/catalog-sorting',
 				'woocommerce/product-results-count',
@@ -49,7 +64,6 @@ describe( 'unregister block types', () => {
 				'woocommerce/product-search',
 				'myplugin/client-only',
 			] );
-
 			expect( unregisterBlockType ).toHaveBeenCalledTimes( 4 );
 			expect( unregisterBlockType ).toHaveBeenCalledWith(
 				'woocommerce/breadcrumbs'
@@ -71,14 +85,13 @@ describe( 'unregister block types', () => {
 			);
 		}
 	);
-
 	it.each( [
 		[ 'widgets.php', 'widgets-php', undefined ],
 		[ 'the Customizer', undefined, 'customize' ],
 	] )(
 		'unregisters WooCommerce blocks outside the widget-editor allow list in %s',
-		( _context, adminPage, pageNow ) => {
-			loadFilter(
+		async ( _context, adminPage, pageNow ) => {
+			await loadFilter(
 				adminPage,
 				[
 					'woocommerce/product-search',
@@ -91,7 +104,6 @@ describe( 'unregister block types', () => {
 				],
 				pageNow
 			);
-
 			expect( unregisterBlockType ).toHaveBeenCalledTimes( 4 );
 			expect( unregisterBlockType ).toHaveBeenCalledWith(
 				'woocommerce/cart'
@@ -116,18 +128,16 @@ describe( 'unregister block types', () => {
 			);
 		}
 	);
-
 	it.each( [ 'site-editor-php', undefined ] )(
 		'does not unregister blocks in unrestricted editor contexts (%s)',
-		( adminPage ) => {
-			loadFilter( adminPage, [
+		async ( adminPage ) => {
+			await loadFilter( adminPage, [
 				'woocommerce/breadcrumbs',
 				'woocommerce/catalog-sorting',
 				'woocommerce/checkout',
 				'woocommerce/product-results-count',
 				'myplugin/client-only',
 			] );
-
 			expect( unregisterBlockType ).not.toHaveBeenCalled();
 		}
 	);

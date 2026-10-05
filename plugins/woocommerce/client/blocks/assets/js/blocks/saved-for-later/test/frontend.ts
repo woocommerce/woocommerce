@@ -1,9 +1,18 @@
+import {
+	afterEach,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+	type Mock,
+} from 'vitest';
+
 /**
  * External dependencies
  */
 import type { AddCartItemOutcome } from '@woocommerce/stores/woocommerce/cart';
 import type { RawShopperListItem } from '@woocommerce/stores/woocommerce/shopper-lists';
-
 type BlockActions = {
 	onClickMoveToCart: () => Generator< unknown, void >;
 };
@@ -19,50 +28,107 @@ let mockContext: {
 };
 
 // Captured cart-store action spy; resolves an `AddCartItemOutcome` per test.
-let mockAddCartItem: jest.Mock< Promise< AddCartItemOutcome > >;
+let mockAddCartItem: Mock< Promise< AddCartItemOutcome > >;
 
 // Captured shopper-lists `removeItem` spy and the block store's registered
 // actions, populated when `frontend.ts` calls the mocked `store()`.
-let mockRemoveItem: jest.Mock;
+let mockRemoveItem: Mock;
 let mockBlockActions: BlockActions | null;
-
-jest.mock(
+vi.mock(
 	'@wordpress/interactivity',
-	() => ( {
-		getConfig: jest.fn(),
-		getContext: jest.fn( () => mockContext ),
-		getElement: jest.fn( () => ( { ref: null } ) ),
-		store: jest.fn( ( name: string, definition ) => {
-			if ( name === 'woocommerce/saved-for-later' ) {
-				mockBlockActions = definition?.actions ?? null;
+	() => {
+		const mock = {
+			getConfig: vi.fn(),
+			getContext: vi.fn( () => mockContext ),
+			getElement: vi.fn( () => ( {
+				ref: null,
+			} ) ),
+			store: vi.fn( ( name: string, definition ) => {
+				if ( name === 'woocommerce/saved-for-later' ) {
+					mockBlockActions = definition?.actions ?? null;
+					return {
+						state: definition?.state,
+						actions: definition?.actions,
+					};
+				}
+				if ( name === 'woocommerce' ) {
+					return {
+						actions: {
+							addCartItem: mockAddCartItem,
+						},
+					};
+				}
+				// woocommerce/shopper-lists
 				return {
-					state: definition?.state,
-					actions: definition?.actions,
+					state: {
+						lists: {},
+					},
+					actions: {
+						removeItem: mockRemoveItem,
+					},
 				};
-			}
-			if ( name === 'woocommerce' ) {
-				return { actions: { addCartItem: mockAddCartItem } };
-			}
-			// woocommerce/shopper-lists
-			return {
-				state: { lists: {} },
-				actions: { removeItem: mockRemoveItem },
-			};
-		} ),
-	} ),
-	{ virtual: true }
+			} ),
+		};
+		return Object.defineProperties(
+			{
+				default: mock,
+			},
+			Object.getOwnPropertyDescriptors( mock )
+		);
+	},
+	{
+		virtual: true,
+	}
 );
 
 // Side-effect store registrations `frontend.ts` imports for ordering only.
-jest.mock( '@woocommerce/stores/woocommerce/shopper-lists', () => ( {} ), {
-	virtual: true,
-} );
-jest.mock( '@woocommerce/stores/woocommerce/cart', () => ( {} ), {
-	virtual: true,
-} );
-jest.mock( '@woocommerce/sanitize', () => ( { sanitizeHTML: jest.fn() } ), {
-	virtual: true,
-} );
+vi.mock(
+	'@woocommerce/stores/woocommerce/shopper-lists',
+	() => {
+		const mock = {};
+		return Object.defineProperties(
+			{
+				default: mock,
+			},
+			Object.getOwnPropertyDescriptors( mock )
+		);
+	},
+	{
+		virtual: true,
+	}
+);
+vi.mock(
+	'@woocommerce/stores/woocommerce/cart',
+	() => {
+		const mock = {};
+		return Object.defineProperties(
+			{
+				default: mock,
+			},
+			Object.getOwnPropertyDescriptors( mock )
+		);
+	},
+	{
+		virtual: true,
+	}
+);
+vi.mock(
+	'@woocommerce/sanitize',
+	() => {
+		const mock = {
+			sanitizeHTML: vi.fn(),
+		};
+		return Object.defineProperties(
+			{
+				default: mock,
+			},
+			Object.getOwnPropertyDescriptors( mock )
+		);
+	},
+	{
+		virtual: true,
+	}
+);
 
 /**
  * Drives an Interactivity API async action generator to completion.
@@ -118,118 +184,117 @@ function makeListItem(
  *
  * @return The registered block-store actions.
  */
-function loadBlockStore(): BlockActions {
+async function loadBlockStore(): BlockActions {
 	mockBlockActions = null;
-	jest.isolateModules( () => require( '../frontend' ) );
+	vi.resetModules(), await ( async () => await import( '../frontend' ) )();
 	if ( ! mockBlockActions ) {
 		throw new Error( 'Saved-for-later store was not registered.' );
 	}
 	return mockBlockActions;
 }
-
 describe( 'Saved-for-later onClickMoveToCart', () => {
 	beforeEach( () => {
-		mockContext = { pendingKeys: {} };
-		mockRemoveItem = jest.fn( () => undefined );
-		mockAddCartItem = jest.fn( () => Promise.resolve( { success: true } ) );
+		mockContext = {
+			pendingKeys: {},
+		};
+		mockRemoveItem = vi.fn( () => undefined );
+		mockAddCartItem = vi.fn( () =>
+			Promise.resolve( {
+				success: true,
+			} )
+		);
 	} );
-
 	afterEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	} );
-
 	it( 'removes the entry when addCartItem resolves a successful outcome', async () => {
 		mockContext.listItem = makeListItem();
-
-		const actions = loadBlockStore();
+		const actions = await loadBlockStore();
 		await runAction( actions.onClickMoveToCart() );
-
 		expect( mockRemoveItem ).toHaveBeenCalledWith(
 			'saved-for-later',
 			'list-key-1'
 		);
 	} );
-
 	it( 'removes the entry when the add succeeds for a product already in the cart as a meta line', async () => {
 		// A meta line (e.g. a bundle child) resolves the add into a brand-new
 		// standalone cart line rather than bumping the existing one; the
 		// outcome the request itself settles with is what decides removal,
 		// not the shape the cart ends up in.
 		mockContext.listItem = makeListItem();
-		mockAddCartItem = jest.fn( () => Promise.resolve( { success: true } ) );
-
-		const actions = loadBlockStore();
+		mockAddCartItem = vi.fn( () =>
+			Promise.resolve( {
+				success: true,
+			} )
+		);
+		const actions = await loadBlockStore();
 		await runAction( actions.onClickMoveToCart() );
-
 		expect( mockRemoveItem ).toHaveBeenCalledWith(
 			'saved-for-later',
 			'list-key-1'
 		);
 	} );
-
 	it( 'removes the entry when the add succeeds with a server-normalized quantity', async () => {
 		// The server may resolve the requested quantity into a different
 		// final line quantity than requested; that is still a success and
 		// must not block removal.
-		mockContext.listItem = makeListItem( { quantity: 2 } );
-		mockAddCartItem = jest.fn( () => Promise.resolve( { success: true } ) );
-
-		const actions = loadBlockStore();
+		mockContext.listItem = makeListItem( {
+			quantity: 2,
+		} );
+		mockAddCartItem = vi.fn( () =>
+			Promise.resolve( {
+				success: true,
+			} )
+		);
+		const actions = await loadBlockStore();
 		await runAction( actions.onClickMoveToCart() );
-
 		expect( mockRemoveItem ).toHaveBeenCalledWith(
 			'saved-for-later',
 			'list-key-1'
 		);
 	} );
-
 	it( 'keeps the entry when addCartItem resolves a failed outcome', async () => {
 		mockContext.listItem = makeListItem();
-		mockAddCartItem = jest.fn( () =>
+		mockAddCartItem = vi.fn( () =>
 			Promise.resolve( {
 				success: false,
-				error: { message: 'Out of stock.' },
+				error: {
+					message: 'Out of stock.',
+				},
 			} )
 		);
-
-		const actions = loadBlockStore();
+		const actions = await loadBlockStore();
 		await runAction( actions.onClickMoveToCart() );
-
 		expect( mockRemoveItem ).not.toHaveBeenCalled();
 	} );
-
 	it( 'does not call addCartItem when the row is not purchasable', async () => {
-		mockContext.listItem = makeListItem( { is_purchasable: false } );
-
-		const actions = loadBlockStore();
+		mockContext.listItem = makeListItem( {
+			is_purchasable: false,
+		} );
+		const actions = await loadBlockStore();
 		await runAction( actions.onClickMoveToCart() );
-
 		expect( mockAddCartItem ).not.toHaveBeenCalled();
 		expect( mockRemoveItem ).not.toHaveBeenCalled();
 	} );
-
 	it( 'does not call addCartItem when the row is already pending', async () => {
 		mockContext.listItem = makeListItem();
 		mockContext.pendingKeys[ 'list-key-1' ] = true;
-
-		const actions = loadBlockStore();
+		const actions = await loadBlockStore();
 		await runAction( actions.onClickMoveToCart() );
-
 		expect( mockAddCartItem ).not.toHaveBeenCalled();
 	} );
-
 	it( 'clears the pending flag once the add settles, whether it succeeds or fails', async () => {
 		mockContext.listItem = makeListItem();
-		mockAddCartItem = jest.fn( () =>
+		mockAddCartItem = vi.fn( () =>
 			Promise.resolve( {
 				success: false,
-				error: { message: 'Out of stock.' },
+				error: {
+					message: 'Out of stock.',
+				},
 			} )
 		);
-
-		const actions = loadBlockStore();
+		const actions = await loadBlockStore();
 		await runAction( actions.onClickMoveToCart() );
-
 		expect( mockContext.pendingKeys[ 'list-key-1' ] ).toBeUndefined();
 	} );
 } );

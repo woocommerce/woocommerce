@@ -1,7 +1,19 @@
+import {
+	afterAll,
+	afterEach,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	test,
+	vi,
+	type Mock,
+} from 'vitest';
+
 /**
  * External dependencies
  */
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import { screen, waitFor, within } from '@testing-library/react';
 import { createBlock, getBlockType, serialize } from '@wordpress/blocks';
 import type { BlockAttributes } from '@wordpress/blocks';
@@ -21,13 +33,11 @@ import '../../product-description';
 import '../../product-reviews';
 import '../../product-specifications';
 import '../../single-product';
-
 import { initializeEditor } from '../../../../../tests/integration/helpers/integration-test-editor';
 import {
 	productWithoutSpecifications,
 	productWithSpecifications,
 } from '../fixture';
-
 async function setupWithSingleProduct(
 	attributes: BlockAttributes,
 	productId: number
@@ -36,7 +46,6 @@ async function setupWithSingleProduct(
 		'woocommerce/product-details',
 		attributes
 	);
-
 	const singleProductBlock = [
 		{
 			name: 'woocommerce/single-product',
@@ -46,29 +55,49 @@ async function setupWithSingleProduct(
 			innerBlocks: [ productDetailsBlock ],
 		},
 	];
-
 	return initializeEditor( singleProductBlock );
 }
-
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn(),
-} ) );
-
-jest.mock( '@woocommerce/settings', () => ( {
-	...jest.requireActual( '@woocommerce/settings' ),
-	isWpVersion: jest.fn().mockReturnValue( false ),
-} ) );
-
+vi.mock( '@wordpress/data', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/data' ) ),
+		useSelect: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/settings', async () => {
+	const mock = {
+		...( await vi.importActual( '@woocommerce/settings' ) ),
+		isWpVersion: vi.fn().mockReturnValue( false ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'Product Details block', () => {
 	test( 'registers only the approved style supports', () => {
 		expect(
 			getBlockType( 'woocommerce/product-details' )?.supports
 		).toEqual( {
-			interactivity: { clientNavigation: true },
+			interactivity: {
+				clientNavigation: true,
+			},
 			align: [ 'wide', 'full' ],
-			color: { background: true, text: false },
-			spacing: { margin: true, padding: true },
+			color: {
+				background: true,
+				text: false,
+			},
+			spacing: {
+				margin: true,
+				padding: true,
+			},
 			__experimentalBorder: {
 				color: true,
 				radius: true,
@@ -77,7 +106,6 @@ describe( 'Product Details block', () => {
 			},
 		} );
 	} );
-
 	test( 'preserves unstyled serialization', () => {
 		expect(
 			serialize( createBlock( 'woocommerce/product-details' ) )
@@ -85,22 +113,30 @@ describe( 'Product Details block', () => {
 			'<!-- wp:woocommerce/product-details -->\n<div class="wp-block-woocommerce-product-details alignwide"></div>\n<!-- /wp:woocommerce/product-details -->'
 		);
 	} );
-
 	test( 'serializes preset and custom styles without text color', () => {
 		const content = serialize(
 			createBlock( 'woocommerce/product-details', {
 				backgroundColor: 'contrast',
 				borderColor: 'accent-1',
 				style: {
-					border: { radius: '4px', style: 'solid', width: '2px' },
+					border: {
+						radius: '4px',
+						style: 'solid',
+						width: '2px',
+					},
 					spacing: {
-						margin: { top: 'var:preset|spacing|20', right: '0' },
-						padding: { bottom: '1rem', left: '1rem' },
+						margin: {
+							top: 'var:preset|spacing|20',
+							right: '0',
+						},
+						padding: {
+							bottom: '1rem',
+							left: '1rem',
+						},
 					},
 				},
 			} )
 		);
-
 		expect( content ).toContain(
 			'has-accent-1-border-color has-contrast-background-color has-background'
 		);
@@ -109,13 +145,22 @@ describe( 'Product Details block', () => {
 		);
 		expect( content ).not.toContain( 'has-text-color' );
 	} );
-
 	test( 'distinguishes explicit zero styles from reset styles', () => {
 		const zero = serialize(
 			createBlock( 'woocommerce/product-details', {
 				style: {
-					border: { radius: '0', width: '0' },
-					spacing: { margin: { top: '0' }, padding: { bottom: '0' } },
+					border: {
+						radius: '0',
+						width: '0',
+					},
+					spacing: {
+						margin: {
+							top: '0',
+						},
+						padding: {
+							bottom: '0',
+						},
+					},
 				},
 			} )
 		);
@@ -124,11 +169,12 @@ describe( 'Product Details block', () => {
 		);
 		expect(
 			serialize(
-				createBlock( 'woocommerce/product-details', { style: {} } )
+				createBlock( 'woocommerce/product-details', {
+					style: {},
+				} )
 			)
 		).not.toContain( 'style=' );
 	} );
-
 	describe( 'editor integration', () => {
 		const server = setupServer(
 			http.get( '/wc-admin/options', ( { request } ) => {
@@ -145,7 +191,12 @@ describe( 'Product Details block', () => {
 					} );
 				}
 				// Default response for other options requests
-				return HttpResponse.json( {}, { status: 200 } );
+				return HttpResponse.json(
+					{},
+					{
+						status: 200,
+					}
+				);
 			} ),
 			http.get( '/wc/store/v1/products/*', () =>
 				HttpResponse.json( productWithSpecifications )
@@ -156,65 +207,59 @@ describe( 'Product Details block', () => {
 			http.get( '*', () => HttpResponse.json( {} ) ),
 			http.options( '*', () => HttpResponse.json( {} ) )
 		);
-
 		beforeAll( () => server.listen() );
-
-		beforeEach( () => {
-			( useSelect as jest.Mock ).mockImplementation(
-				( callback, deps ) => {
-					const originalUseSelect =
-						jest.requireActual( '@wordpress/data' ).useSelect;
-					const originalResult = originalUseSelect( callback, deps );
-
-					if (
-						originalResult &&
-						typeof originalResult === 'object' &&
-						! Array.isArray( originalResult )
-					) {
-						const result = {
-							...originalResult,
-							wasBlockJustInserted: true,
-						};
-
-						return result;
-					}
-					return originalResult;
+		beforeEach( async () => {
+			const _actual = await vi.importActual( '@wordpress/data' );
+			( useSelect as Mock ).mockImplementation( ( callback, deps ) => {
+				const originalUseSelect = _actual.useSelect;
+				const originalResult = originalUseSelect( callback, deps );
+				if (
+					originalResult &&
+					typeof originalResult === 'object' &&
+					! Array.isArray( originalResult )
+				) {
+					const result = {
+						...originalResult,
+						wasBlockJustInserted: true,
+					};
+					return result;
 				}
-			);
+				return originalResult;
+			} );
 		} );
-
 		afterEach( () => {
-			( useSelect as jest.Mock ).mockClear();
+			( useSelect as Mock ).mockClear();
 		} );
-
 		afterAll( () => {
 			server.close();
-			jest.restoreAllMocks();
+			vi.restoreAllMocks();
 		} );
-
 		test( 'should populate a freshly inserted block with the Product Description placeholder', async () => {
 			await initializeEditor( {
 				name: 'woocommerce/product-details',
 				attributes: {},
 			} );
-
 			expect(
 				await screen.findByText(
 					'This block displays the product description. When viewing a product page, the description content will automatically appear here.',
-					{ exact: true }
+					{
+						exact: true,
+					}
 				)
 			).toBeVisible();
 		} );
-
 		test( 'should render product specifications when product is selected', async () => {
 			await setupWithSingleProduct( {}, 2 );
-
 			await waitFor( () => {
 				expect(
-					screen.getByRole( 'button', { name: /description/i } )
+					screen.getByRole( 'button', {
+						name: /description/i,
+					} )
 				).toBeVisible();
 				expect(
-					screen.getByRole( 'button', { name: /reviews/i } )
+					screen.getByRole( 'button', {
+						name: /reviews/i,
+					} )
 				).toBeVisible();
 				expect(
 					screen.getByRole( 'button', {
@@ -222,17 +267,15 @@ describe( 'Product Details block', () => {
 					} )
 				).toBeVisible();
 			} );
-
-			const table = await screen.findByRole( 'table', { hidden: true } );
-
+			const table = await screen.findByRole( 'table', {
+				hidden: true,
+			} );
 			expect( within( table ).getByText( /Weight/i ) ).toBeVisible();
 			expect( within( table ).getByText( /150 kg/i ) ).toBeVisible();
-
 			expect( within( table ).getByText( /Dimensions/i ) ).toBeVisible();
 			expect(
 				within( table ).getByText( /14 × 5.5 × 3.5 cm/i )
 			).toBeVisible();
-
 			expect( within( table ).getByText( /Material/i ) ).toBeVisible();
 			expect(
 				within( table ).getByText( /Acetate, Metal/i )
@@ -242,7 +285,6 @@ describe( 'Product Details block', () => {
 				within( table ).getByText( /Medium, Large/i )
 			).toBeVisible();
 		} );
-
 		test( 'should auto-remove block when product has no specifications', async () => {
 			server.resetHandlers();
 			server.use(
@@ -254,13 +296,16 @@ describe( 'Product Details block', () => {
 				)
 			);
 			await setupWithSingleProduct( {}, 1 );
-
 			await waitFor( () => {
 				expect(
-					screen.getByRole( 'button', { name: /description/i } )
+					screen.getByRole( 'button', {
+						name: /description/i,
+					} )
 				).toBeVisible();
 				expect(
-					screen.getByRole( 'button', { name: /reviews/i } )
+					screen.getByRole( 'button', {
+						name: /reviews/i,
+					} )
 				).toBeVisible();
 				expect(
 					screen.queryByRole( 'button', {
@@ -268,9 +313,10 @@ describe( 'Product Details block', () => {
 					} )
 				).not.toBeInTheDocument();
 			} );
-
 			expect(
-				screen.queryByRole( 'table', { hidden: true } )
+				screen.queryByRole( 'table', {
+					hidden: true,
+				} )
 			).not.toBeInTheDocument();
 		} );
 	} );

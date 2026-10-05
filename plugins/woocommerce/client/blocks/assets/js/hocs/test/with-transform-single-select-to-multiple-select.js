@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -8,7 +10,7 @@ import { render } from '@testing-library/react';
  */
 import withTransformSingleSelectToMultipleSelect from '../with-transform-single-select-to-multiple-select';
 
-const InnerComponent = jest.fn( () => null );
+const InnerComponent = vi.fn( () => null );
 const TestComponent =
 	withTransformSingleSelectToMultipleSelect( InnerComponent );
 

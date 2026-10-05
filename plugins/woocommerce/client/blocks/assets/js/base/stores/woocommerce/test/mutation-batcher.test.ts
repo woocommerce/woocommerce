@@ -1,29 +1,47 @@
+import {
+	afterEach,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+	type Mock,
+} from 'vitest';
+
 /**
  * Internal dependencies
  */
 import { createMutationQueue } from '../mutation-batcher';
 
 // Test state type
-type TestState = { value: number };
+type TestState = {
+	value: number;
+};
 
 // Helper to create a mock fetch that resolves with batch responses
 function createMockFetch(
-	responses: Array< { status: number; body: unknown } >
+	responses: Array< {
+		status: number;
+		body: unknown;
+	} >
 ) {
-	return jest.fn().mockResolvedValue( {
+	return vi.fn().mockResolvedValue( {
 		ok: true,
-		json: () => Promise.resolve( { responses } ),
+		json: () =>
+			Promise.resolve( {
+				responses,
+			} ),
 	} );
 }
 
 // Helper to create a mock fetch that fails at the network level
 function createFailingFetch( error: Error ) {
-	return jest.fn().mockRejectedValue( error );
+	return vi.fn().mockRejectedValue( error );
 }
 
 // Helper to create a mock fetch that returns non-200
 function createBadResponseFetch( status: number ) {
-	return jest.fn().mockResolvedValue( {
+	return vi.fn().mockResolvedValue( {
 		ok: false,
 		status,
 		json: () => Promise.resolve( {} ),
@@ -34,9 +52,10 @@ function createBadResponseFetch( status: number ) {
 function flushMicrotasks() {
 	return new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
 }
-
 function resolvePendingFetch(
-	fetchPromise: { resolve?: ( value: Response ) => void },
+	fetchPromise: {
+		resolve?: ( value: Response ) => void;
+	},
 	response: Response
 ) {
 	const { resolve } = fetchPromise;
@@ -45,8 +64,7 @@ function resolvePendingFetch(
 	}
 	resolve( response );
 }
-
-describe( 'createMutationQueue', () => {
+describe( 'createMutationQueue', async () => {
 	let originalFetch: typeof global.fetch;
 	let mockState: TestState;
 	let snapshot: TestState | null;
@@ -55,39 +73,57 @@ describe( 'createMutationQueue', () => {
 		rollback: ( snap: TestState ) => void;
 		commit: ( serverState: TestState ) => void;
 	};
-
 	beforeEach( () => {
 		originalFetch = global.fetch;
-		mockState = { value: 0 };
+		mockState = {
+			value: 0,
+		};
 		snapshot = null;
-
 		stateHandler = {
 			takeSnapshot: () => {
-				snapshot = { ...mockState };
+				snapshot = {
+					...mockState,
+				};
 				return snapshot;
 			},
 			rollback: ( snap ) => {
-				mockState = { ...snap };
+				mockState = {
+					...snap,
+				};
 			},
 			commit: ( serverState ) => {
-				mockState = { ...serverState };
+				mockState = {
+					...serverState,
+				};
 			},
 		};
 	} );
-
 	afterEach( () => {
 		global.fetch = originalFetch;
 	} );
-
 	describe( 'batching behavior', () => {
 		it( 'batches multiple requests submitted in the same tick', async () => {
 			const mockFetch = createMockFetch( [
-				{ status: 200, body: { value: 10 } },
-				{ status: 200, body: { value: 20 } },
-				{ status: 200, body: { value: 30 } },
+				{
+					status: 200,
+					body: {
+						value: 10,
+					},
+				},
+				{
+					status: 200,
+					body: {
+						value: 20,
+					},
+				},
+				{
+					status: 200,
+					body: {
+						value: 30,
+					},
+				},
 			] );
 			global.fetch = mockFetch;
-
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
@@ -95,10 +131,18 @@ describe( 'createMutationQueue', () => {
 			} );
 
 			// Submit 3 requests synchronously
-			const p1 = queue.submit( { path: '/a', method: 'POST' } );
-			const p2 = queue.submit( { path: '/b', method: 'POST' } );
-			const p3 = queue.submit( { path: '/c', method: 'POST' } );
-
+			const p1 = queue.submit( {
+				path: '/a',
+				method: 'POST',
+			} );
+			const p2 = queue.submit( {
+				path: '/b',
+				method: 'POST',
+			} );
+			const p3 = queue.submit( {
+				path: '/c',
+				method: 'POST',
+			} );
 			await Promise.all( [ p1, p2, p3 ] );
 
 			// Should have made exactly ONE fetch call with all 3 requests
@@ -112,38 +156,48 @@ describe( 'createMutationQueue', () => {
 				requestBody.requests.map( ( r: { path: string } ) => r.path )
 			).toEqual( [ '/a', '/b', '/c' ] );
 		} );
-
 		it( 'disables keepalive for oversized payloads', async () => {
 			const mockFetch = createMockFetch( [
-				{ status: 200, body: { value: 10 } },
+				{
+					status: 200,
+					body: {
+						value: 10,
+					},
+				},
 			] );
 			global.fetch = mockFetch;
-
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
 				...stateHandler,
 			} );
-
 			await queue.submit( {
 				path: '/a',
 				method: 'POST',
-				body: { description: '🚀'.repeat( 17_000 ) },
+				body: {
+					description: '🚀'.repeat( 17_000 ),
+				},
 			} );
-
 			expect( mockFetch ).toHaveBeenCalledTimes( 1 );
 			expect( mockFetch.mock.calls[ 0 ][ 1 ].keepalive ).toBe( false );
 		} );
-
 		it( 'takes snapshot once at start of cycle, not per request', async () => {
 			const mockFetch = createMockFetch( [
-				{ status: 200, body: { value: 100 } },
-				{ status: 200, body: { value: 100 } },
+				{
+					status: 200,
+					body: {
+						value: 100,
+					},
+				},
+				{
+					status: 200,
+					body: {
+						value: 100,
+					},
+				},
 			] );
 			global.fetch = mockFetch;
-
-			const takeSnapshotSpy = jest.spyOn( stateHandler, 'takeSnapshot' );
-
+			const takeSnapshotSpy = vi.spyOn( stateHandler, 'takeSnapshot' );
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
@@ -163,74 +217,108 @@ describe( 'createMutationQueue', () => {
 				method: 'POST',
 			} );
 			mockState.value = 75;
-
 			await flushMicrotasks();
 
 			// Snapshot should be taken exactly once, capturing state before optimistic updates
 			expect( takeSnapshotSpy ).toHaveBeenCalledTimes( 1 );
-			expect( snapshot ).toEqual( { value: 0 } );
+			expect( snapshot ).toEqual( {
+				value: 0,
+			} );
 		} );
 	} );
-
-	describe( 'response handling and reconciliation', () => {
+	describe( 'response handling and reconciliation', async () => {
 		it( 'applies server state from last successful response', async () => {
 			const mockFetch = createMockFetch( [
-				{ status: 200, body: { value: 10 } },
-				{ status: 200, body: { value: 20 } }, // This should win
+				{
+					status: 200,
+					body: {
+						value: 10,
+					},
+				},
+				{
+					status: 200,
+					body: {
+						value: 20,
+					},
+				}, // This should win
 			] );
 			global.fetch = mockFetch;
-
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
 				...stateHandler,
 			} );
-
 			await Promise.all( [
-				queue.submit( { path: '/a', method: 'POST' } ),
-				queue.submit( { path: '/b', method: 'POST' } ),
+				queue.submit( {
+					path: '/a',
+					method: 'POST',
+				} ),
+				queue.submit( {
+					path: '/b',
+					method: 'POST',
+				} ),
 			] );
 
 			// State should be from the last successful response
 			expect( mockState.value ).toBe( 20 );
 		} );
-
 		it( 'accumulates errors from failed items but still applies server state', async () => {
 			const mockFetch = createMockFetch( [
 				{
 					status: 400,
-					body: { message: 'Bad request', code: 'bad_request' },
+					body: {
+						message: 'Bad request',
+						code: 'bad_request',
+					},
 				},
-				{ status: 200, body: { value: 42 } },
+				{
+					status: 200,
+					body: {
+						value: 42,
+					},
+				},
 			] );
 			global.fetch = mockFetch;
-
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
 				...stateHandler,
 			} );
-
-			const p1 = queue.submit( { path: '/a', method: 'POST' } );
-			const p2 = queue.submit( { path: '/b', method: 'POST' } );
+			const p1 = queue.submit( {
+				path: '/a',
+				method: 'POST',
+			} );
+			const p2 = queue.submit( {
+				path: '/b',
+				method: 'POST',
+			} );
 
 			// First should reject, second should resolve
 			await expect( p1 ).rejects.toThrow( 'Bad request' );
-			await expect( p2 ).resolves.toMatchObject( { success: true } );
+			await expect( p2 ).resolves.toMatchObject( {
+				success: true,
+			} );
 
 			// Server state should still be applied (from the successful request)
 			expect( mockState.value ).toBe( 42 );
 		} );
-
 		it( 'rolls back to snapshot when ALL requests fail', async () => {
 			const mockFetch = createMockFetch( [
-				{ status: 400, body: { message: 'Error 1' } },
-				{ status: 500, body: { message: 'Error 2' } },
+				{
+					status: 400,
+					body: {
+						message: 'Error 1',
+					},
+				},
+				{
+					status: 500,
+					body: {
+						message: 'Error 2',
+					},
+				},
 			] );
 			global.fetch = mockFetch;
-
 			mockState.value = 100;
-
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
@@ -243,74 +331,69 @@ describe( 'createMutationQueue', () => {
 				method: 'POST',
 			} );
 			mockState.value = 200;
-
 			const p2 = queue.submit( {
 				path: '/b',
 				method: 'POST',
 			} );
 			mockState.value = 300;
-
 			await expect( p1 ).rejects.toThrow();
 			await expect( p2 ).rejects.toThrow();
 
 			// Should rollback to snapshot (value: 100)
 			expect( mockState.value ).toBe( 100 );
 		} );
-
 		it( 'rolls back on total network failure', async () => {
 			global.fetch = createFailingFetch( new Error( 'Network error' ) );
-
 			mockState.value = 50;
-
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
 				...stateHandler,
 			} );
-
 			const p1 = queue.submit( {
 				path: '/a',
 				method: 'POST',
 			} );
 			mockState.value = 999;
-
 			await expect( p1 ).rejects.toThrow( 'Network error' );
 			expect( mockState.value ).toBe( 50 );
 		} );
-
 		it( 'rolls back on batch endpoint returning error status', async () => {
 			global.fetch = createBadResponseFetch( 503 );
-
 			mockState.value = 25;
-
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
 				...stateHandler,
 			} );
-
 			const p1 = queue.submit( {
 				path: '/a',
 				method: 'POST',
 			} );
 			mockState.value = 888;
-
 			await expect( p1 ).rejects.toThrow( 'Request failed: 503' );
 			expect( mockState.value ).toBe( 25 );
 		} );
 	} );
-
-	describe( 'onCycleSettled callback', () => {
+	describe( 'onCycleSettled callback', async () => {
 		it( 'is invoked exactly once per cycle, synchronously while isProcessing is still true', async () => {
 			const mockFetch = createMockFetch( [
-				{ status: 200, body: { value: 1 } },
-				{ status: 200, body: { value: 2 } },
+				{
+					status: 200,
+					body: {
+						value: 1,
+					},
+				},
+				{
+					status: 200,
+					body: {
+						value: 2,
+					},
+				},
 			] );
 			global.fetch = mockFetch;
-
 			let isProcessingDuringCycleSettled: boolean | undefined;
-			const onCycleSettled = jest.fn();
-
+			const onCycleSettled = vi.fn();
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
@@ -321,152 +404,224 @@ describe( 'createMutationQueue', () => {
 					onCycleSettled( settled );
 				},
 			} );
-
 			await Promise.all( [
-				queue.submit( { path: '/a', method: 'POST' } ),
-				queue.submit( { path: '/b', method: 'POST' } ),
+				queue.submit( {
+					path: '/a',
+					method: 'POST',
+				} ),
+				queue.submit( {
+					path: '/b',
+					method: 'POST',
+				} ),
 			] );
-
 			expect( onCycleSettled ).toHaveBeenCalledTimes( 1 );
 			expect( isProcessingDuringCycleSettled ).toBe( true );
 			expect( queue.getStatus().isProcessing ).toBe( false );
 		} );
-
 		it( 'is invoked for a cycle in which every request failed, with all entries success: false', async () => {
 			const mockFetch = createMockFetch( [
-				{ status: 400, body: { message: 'Error 1' } },
-				{ status: 500, body: { message: 'Error 2' } },
+				{
+					status: 400,
+					body: {
+						message: 'Error 1',
+					},
+				},
+				{
+					status: 500,
+					body: {
+						message: 'Error 2',
+					},
+				},
 			] );
 			global.fetch = mockFetch;
-
-			const onCycleSettled = jest.fn();
-
+			const onCycleSettled = vi.fn();
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
 				...stateHandler,
 				onCycleSettled,
 			} );
-
-			const p1 = queue.submit( { path: '/a', method: 'POST' } );
-			const p2 = queue.submit( { path: '/b', method: 'POST' } );
-
-			await expect( p1 ).rejects.toThrow();
-			await expect( p2 ).rejects.toThrow();
-
-			expect( onCycleSettled ).toHaveBeenCalledTimes( 1 );
-			expect( onCycleSettled ).toHaveBeenCalledWith( [
-				{ success: false, meta: undefined },
-				{ success: false, meta: undefined },
-			] );
-		} );
-
-		it( 'provides one entry per submitted request, in submission order, with per-item success and meta', async () => {
-			const mockFetch = createMockFetch( [
-				{ status: 200, body: { value: 1 } },
-				{ status: 400, body: { message: 'Bad request' } },
-				{ status: 200, body: { value: 2 } },
-			] );
-			global.fetch = mockFetch;
-
-			const onCycleSettled = jest.fn();
-
-			const queue = createMutationQueue( {
-				endpoint: '/batch',
-				getHeaders: () => ( {} ),
-				...stateHandler,
-				onCycleSettled,
-			} );
-
 			const p1 = queue.submit( {
 				path: '/a',
 				method: 'POST',
-				meta: { origin: 'a' },
 			} );
 			const p2 = queue.submit( {
 				path: '/b',
 				method: 'POST',
-				meta: { origin: 'b' },
+			} );
+			await expect( p1 ).rejects.toThrow();
+			await expect( p2 ).rejects.toThrow();
+			expect( onCycleSettled ).toHaveBeenCalledTimes( 1 );
+			expect( onCycleSettled ).toHaveBeenCalledWith( [
+				{
+					success: false,
+					meta: undefined,
+				},
+				{
+					success: false,
+					meta: undefined,
+				},
+			] );
+		} );
+		it( 'provides one entry per submitted request, in submission order, with per-item success and meta', async () => {
+			const mockFetch = createMockFetch( [
+				{
+					status: 200,
+					body: {
+						value: 1,
+					},
+				},
+				{
+					status: 400,
+					body: {
+						message: 'Bad request',
+					},
+				},
+				{
+					status: 200,
+					body: {
+						value: 2,
+					},
+				},
+			] );
+			global.fetch = mockFetch;
+			const onCycleSettled = vi.fn();
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				...stateHandler,
+				onCycleSettled,
+			} );
+			const p1 = queue.submit( {
+				path: '/a',
+				method: 'POST',
+				meta: {
+					origin: 'a',
+				},
+			} );
+			const p2 = queue.submit( {
+				path: '/b',
+				method: 'POST',
+				meta: {
+					origin: 'b',
+				},
 			} );
 			const p3 = queue.submit( {
 				path: '/c',
 				method: 'POST',
-				meta: { origin: 'c' },
+				meta: {
+					origin: 'c',
+				},
 			} );
-
 			await Promise.allSettled( [ p1, p2, p3 ] );
-
 			expect( onCycleSettled ).toHaveBeenCalledWith( [
-				{ success: true, meta: { origin: 'a' } },
-				{ success: false, meta: { origin: 'b' } },
-				{ success: true, meta: { origin: 'c' } },
+				{
+					success: true,
+					meta: {
+						origin: 'a',
+					},
+				},
+				{
+					success: false,
+					meta: {
+						origin: 'b',
+					},
+				},
+				{
+					success: true,
+					meta: {
+						origin: 'c',
+					},
+				},
 			] );
 		} );
-
 		it( 'carries the exact meta value through to onCycleSettled without cloning', async () => {
 			const mockFetch = createMockFetch( [
-				{ status: 200, body: { value: 1 } },
+				{
+					status: 200,
+					body: {
+						value: 1,
+					},
+				},
 			] );
 			global.fetch = mockFetch;
-
 			let receivedMeta: unknown;
-			const onCycleSettled = jest.fn(
-				( settled: Array< { success: boolean; meta?: unknown } > ) => {
+			const onCycleSettled = vi.fn(
+				(
+					settled: Array< {
+						success: boolean;
+						meta?: unknown;
+					} >
+				) => {
 					receivedMeta = settled[ 0 ].meta;
 				}
 			);
-
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
 				...stateHandler,
 				onCycleSettled,
 			} );
-
-			const meta = { origin: 'cart-item-add', nested: { id: 1 } };
-
-			await queue.submit( { path: '/a', method: 'POST', meta } );
-
+			const meta = {
+				origin: 'cart-item-add',
+				nested: {
+					id: 1,
+				},
+			};
+			await queue.submit( {
+				path: '/a',
+				method: 'POST',
+				meta,
+			} );
 			expect( receivedMeta ).toBe( meta );
 		} );
-
 		it( 'catches and logs a throwing onCycleSettled without affecting reconciliation or request outcomes', async () => {
 			const mockFetch = createMockFetch( [
-				{ status: 200, body: { value: 1 } },
-				{ status: 400, body: { message: 'Bad request' } },
+				{
+					status: 200,
+					body: {
+						value: 1,
+					},
+				},
+				{
+					status: 400,
+					body: {
+						message: 'Bad request',
+					},
+				},
 			] );
 			global.fetch = mockFetch;
-
-			const consoleErrorSpy = jest
+			const consoleErrorSpy = vi
 				.spyOn( console, 'error' )
 				.mockImplementation( () => {} );
-
-			const onCycleSettled = jest.fn( () => {
+			const onCycleSettled = vi.fn( () => {
 				throw new Error( 'boom' );
 			} );
-
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
 				...stateHandler,
 				onCycleSettled,
 			} );
-
-			const p1 = queue.submit( { path: '/a', method: 'POST' } );
-			const p2 = queue.submit( { path: '/b', method: 'POST' } );
-
-			await expect( p1 ).resolves.toMatchObject( { success: true } );
+			const p1 = queue.submit( {
+				path: '/a',
+				method: 'POST',
+			} );
+			const p2 = queue.submit( {
+				path: '/b',
+				method: 'POST',
+			} );
+			await expect( p1 ).resolves.toMatchObject( {
+				success: true,
+			} );
 			await expect( p2 ).rejects.toThrow( 'Bad request' );
-
 			expect( onCycleSettled ).toHaveBeenCalledTimes( 1 );
 			expect( consoleErrorSpy ).toHaveBeenCalledTimes( 1 );
 			expect( mockFetch ).toHaveBeenCalledTimes( 1 );
 			expect( queue.getStatus().isProcessing ).toBe( false );
-
 			consoleErrorSpy.mockRestore();
 		} );
 	} );
-
 	describe( 'single batch in-flight', () => {
 		it( 'only allows one batch in-flight at a time to prevent server race conditions', async () => {
 			// This test verifies that we don't send multiple batches concurrently,
@@ -476,14 +631,14 @@ describe( 'createMutationQueue', () => {
 			const fetchPromises: Array< {
 				resolve: ( value: Response ) => void;
 			} > = [];
-
-			global.fetch = jest.fn( () => {
+			global.fetch = vi.fn( () => {
 				fetchCallCount++;
 				return new Promise< Response >( ( resolve ) => {
-					fetchPromises.push( { resolve } );
+					fetchPromises.push( {
+						resolve,
+					} );
 				} );
-			} ) as jest.Mock;
-
+			} ) as Mock;
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
@@ -491,12 +646,18 @@ describe( 'createMutationQueue', () => {
 			} );
 
 			// First batch - submit and let microtask fire
-			const p1 = queue.submit( { path: '/a', method: 'POST' } );
+			const p1 = queue.submit( {
+				path: '/a',
+				method: 'POST',
+			} );
 			await flushMicrotasks();
 			expect( fetchCallCount ).toBe( 1 );
 
 			// Second request - submit while first is in-flight
-			const p2 = queue.submit( { path: '/b', method: 'POST' } );
+			const p2 = queue.submit( {
+				path: '/b',
+				method: 'POST',
+			} );
 			await flushMicrotasks();
 
 			// Should NOT have sent a second batch yet - only one in-flight allowed
@@ -507,7 +668,14 @@ describe( 'createMutationQueue', () => {
 				ok: true,
 				json: () =>
 					Promise.resolve( {
-						responses: [ { status: 200, body: { value: 100 } } ],
+						responses: [
+							{
+								status: 200,
+								body: {
+									value: 100,
+								},
+							},
+						],
 					} ),
 			} as Response );
 
@@ -520,31 +688,36 @@ describe( 'createMutationQueue', () => {
 				ok: true,
 				json: () =>
 					Promise.resolve( {
-						responses: [ { status: 200, body: { value: 200 } } ],
+						responses: [
+							{
+								status: 200,
+								body: {
+									value: 200,
+								},
+							},
+						],
 					} ),
 			} as Response );
-
 			await Promise.all( [ p1, p2 ] );
 
 			// Should use value from the second (and last) batch
 			expect( mockState.value ).toBe( 200 );
 		} );
 	} );
-
 	describe( 'requests during in-flight processing', () => {
 		it( 'collects new requests while batch is in-flight and sends them after', async () => {
 			let fetchCallCount = 0;
 			const fetchPromises: Array< {
 				resolve: ( value: Response ) => void;
 			} > = [];
-
-			global.fetch = jest.fn( () => {
+			global.fetch = vi.fn( () => {
 				fetchCallCount++;
 				return new Promise< Response >( ( resolve ) => {
-					fetchPromises.push( { resolve } );
+					fetchPromises.push( {
+						resolve,
+					} );
 				} );
-			} ) as jest.Mock;
-
+			} ) as Mock;
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
@@ -572,10 +745,16 @@ describe( 'createMutationQueue', () => {
 				ok: true,
 				json: () =>
 					Promise.resolve( {
-						responses: [ { status: 200, body: { value: 1 } } ],
+						responses: [
+							{
+								status: 200,
+								body: {
+									value: 1,
+								},
+							},
+						],
 					} ),
 			} as Response );
-
 			await flushMicrotasks();
 
 			// Second batch should now be sent
@@ -586,27 +765,33 @@ describe( 'createMutationQueue', () => {
 				ok: true,
 				json: () =>
 					Promise.resolve( {
-						responses: [ { status: 200, body: { value: 2 } } ],
+						responses: [
+							{
+								status: 200,
+								body: {
+									value: 2,
+								},
+							},
+						],
 					} ),
 			} as Response );
-
 			await Promise.all( [ p1, p2 ] );
 
 			// Both should succeed, final state from second batch
 			expect( mockState.value ).toBe( 2 );
 		} );
 	} );
-
 	describe( 'getStatus', () => {
 		it( 'reports correct processing state and pending count', async () => {
-			const fetchPromise: { resolve?: ( value: Response ) => void } = {};
-			global.fetch = jest.fn(
+			const fetchPromise: {
+				resolve?: ( value: Response ) => void;
+			} = {};
+			global.fetch = vi.fn(
 				() =>
 					new Promise< Response >( ( resolve ) => {
 						fetchPromise.resolve = resolve;
 					} )
 			);
-
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
@@ -620,7 +805,10 @@ describe( 'createMutationQueue', () => {
 			} );
 
 			// Submit request
-			const p1 = queue.submit( { path: '/a', method: 'POST' } );
+			const p1 = queue.submit( {
+				path: '/a',
+				method: 'POST',
+			} );
 
 			// Now processing with 1 pending
 			expect( queue.getStatus().isProcessing ).toBe( true );
@@ -636,10 +824,14 @@ describe( 'createMutationQueue', () => {
 				ok: true,
 				json: () =>
 					Promise.resolve( {
-						responses: [ { status: 200, body: {} } ],
+						responses: [
+							{
+								status: 200,
+								body: {},
+							},
+						],
 					} ),
 			} as Response );
-
 			await p1;
 
 			// Back to idle
@@ -649,14 +841,12 @@ describe( 'createMutationQueue', () => {
 			} );
 		} );
 	} );
-
 	describe( 'body cloning', () => {
 		it( 'clones request body to prevent mutation corruption', async () => {
 			// This test verifies that mutating an object after submission
 			// does not affect the queued request body.
 			let capturedBody: unknown;
-
-			global.fetch = jest.fn( ( _url, options ) => {
+			global.fetch = vi.fn( ( _url, options ) => {
 				// Capture what was actually sent
 				const parsed = JSON.parse( options.body as string );
 				capturedBody = parsed.requests[ 0 ].body;
@@ -664,11 +854,17 @@ describe( 'createMutationQueue', () => {
 					ok: true,
 					json: () =>
 						Promise.resolve( {
-							responses: [ { status: 200, body: { value: 1 } } ],
+							responses: [
+								{
+									status: 200,
+									body: {
+										value: 1,
+									},
+								},
+							],
 						} ),
 				} );
-			} ) as jest.Mock;
-
+			} ) as Mock;
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
@@ -676,7 +872,10 @@ describe( 'createMutationQueue', () => {
 			} );
 
 			// Create a mutable body object
-			const body = { id: 1, quantity: 1 };
+			const body = {
+				id: 1,
+				quantity: 1,
+			};
 
 			// Submit the request
 			const promise = queue.submit( {
@@ -688,21 +887,21 @@ describe( 'createMutationQueue', () => {
 			// Mutate the body AFTER submission (simulating another click's
 			// optimistic update finding and mutating the same object)
 			body.quantity = 999;
-
 			await promise;
 
 			// The sent body should have the ORIGINAL value, not the mutated one
-			expect( capturedBody ).toEqual( { id: 1, quantity: 1 } );
+			expect( capturedBody ).toEqual( {
+				id: 1,
+				quantity: 1,
+			} );
 		} );
-
 		it( 'isolates bodies when rapid submits share a reference to the same object', async () => {
 			// Simulates rapid add-to-cart clicks on the same product.
 			// Both submits reference the same `item` object from state.
 			// The optimistic update between them mutates item.quantity,
 			// which would corrupt the first request's body without cloning.
 			const capturedBodies: unknown[] = [];
-
-			global.fetch = jest.fn( ( _url, options ) => {
+			global.fetch = vi.fn( ( _url, options ) => {
 				const parsed = JSON.parse( options.body as string );
 				for ( const req of parsed.requests ) {
 					capturedBodies.push( req.body );
@@ -713,12 +912,13 @@ describe( 'createMutationQueue', () => {
 						Promise.resolve( {
 							responses: parsed.requests.map( () => ( {
 								status: 200,
-								body: { value: 1 },
+								body: {
+									value: 1,
+								},
 							} ) ),
 						} ),
 				} );
-			} ) as jest.Mock;
-
+			} ) as Mock;
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
@@ -726,7 +926,10 @@ describe( 'createMutationQueue', () => {
 			} );
 
 			// Shared mutable object — like an item reference in state.cart.items
-			const item = { id: 1, quantity: 1 };
+			const item = {
+				id: 1,
+				quantity: 1,
+			};
 
 			// First click: submit with quantity 1, then optimistically set to 2
 			queue.submit( {
@@ -748,29 +951,35 @@ describe( 'createMutationQueue', () => {
 
 			// Each request should have the quantity at the time it was submitted
 			expect( capturedBodies ).toEqual( [
-				{ id: 1, quantity: 1 },
-				{ id: 1, quantity: 2 },
+				{
+					id: 1,
+					quantity: 1,
+				},
+				{
+					id: 1,
+					quantity: 2,
+				},
 			] );
 		} );
 	} );
-
-	describe( 'applyOptimistic and snapshot ordering', () => {
+	describe( 'applyOptimistic and snapshot ordering', async () => {
 		it( 'takes snapshot before running applyOptimistic', async () => {
 			const mockFetch = createMockFetch( [
-				{ status: 200, body: { value: 99 } },
+				{
+					status: 200,
+					body: {
+						value: 99,
+					},
+				},
 			] );
 			global.fetch = mockFetch;
-
-			const takeSnapshotSpy = jest.spyOn( stateHandler, 'takeSnapshot' );
-
+			const takeSnapshotSpy = vi.spyOn( stateHandler, 'takeSnapshot' );
 			mockState.value = 42;
-
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
 				...stateHandler,
 			} );
-
 			await queue.submit( {
 				path: '/a',
 				method: 'POST',
@@ -782,23 +991,26 @@ describe( 'createMutationQueue', () => {
 			// Snapshot should have captured the state BEFORE
 			// applyOptimistic mutated it.
 			expect( takeSnapshotSpy ).toHaveBeenCalledTimes( 1 );
-			expect( snapshot ).toEqual( { value: 42 } );
+			expect( snapshot ).toEqual( {
+				value: 42,
+			} );
 		} );
-
 		it( 'rolls back optimistic mutations when all requests fail', async () => {
 			const mockFetch = createMockFetch( [
-				{ status: 500, body: { message: 'Server error' } },
+				{
+					status: 500,
+					body: {
+						message: 'Server error',
+					},
+				},
 			] );
 			global.fetch = mockFetch;
-
 			mockState.value = 10;
-
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
 				...stateHandler,
 			} );
-
 			const p1 = queue.submit( {
 				path: '/a',
 				method: 'POST',
@@ -809,24 +1021,35 @@ describe( 'createMutationQueue', () => {
 
 			// Optimistic update should be applied immediately.
 			expect( mockState.value ).toBe( 20 );
-
 			await expect( p1 ).rejects.toThrow();
 
 			// After failure, state should be rolled back to
 			// pre-optimistic value.
 			expect( mockState.value ).toBe( 10 );
 		} );
-
 		it( 'rolls back all optimistic updates from multiple rapid submits', async () => {
 			const mockFetch = createMockFetch( [
-				{ status: 400, body: { message: 'Error 1' } },
-				{ status: 400, body: { message: 'Error 2' } },
-				{ status: 400, body: { message: 'Error 3' } },
+				{
+					status: 400,
+					body: {
+						message: 'Error 1',
+					},
+				},
+				{
+					status: 400,
+					body: {
+						message: 'Error 2',
+					},
+				},
+				{
+					status: 400,
+					body: {
+						message: 'Error 3',
+					},
+				},
 			] );
 			global.fetch = mockFetch;
-
 			mockState.value = 0;
-
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
@@ -858,7 +1081,6 @@ describe( 'createMutationQueue', () => {
 
 			// All three optimistic updates should have been applied.
 			expect( mockState.value ).toBe( 30 );
-
 			await expect( p1 ).rejects.toThrow();
 			await expect( p2 ).rejects.toThrow();
 			await expect( p3 ).rejects.toThrow();
@@ -867,22 +1089,26 @@ describe( 'createMutationQueue', () => {
 			// so rollback should undo ALL three updates.
 			expect( mockState.value ).toBe( 0 );
 		} );
-
 		it( 'clones body before applyOptimistic mutates shared references', async () => {
 			let capturedBody: unknown;
-
-			global.fetch = jest.fn( ( _url, options ) => {
+			global.fetch = vi.fn( ( _url, options ) => {
 				const parsed = JSON.parse( options.body as string );
 				capturedBody = parsed.requests[ 0 ].body;
 				return Promise.resolve( {
 					ok: true,
 					json: () =>
 						Promise.resolve( {
-							responses: [ { status: 200, body: { value: 1 } } ],
+							responses: [
+								{
+									status: 200,
+									body: {
+										value: 1,
+									},
+								},
+							],
 						} ),
 				} );
-			} ) as jest.Mock;
-
+			} ) as Mock;
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
@@ -890,8 +1116,10 @@ describe( 'createMutationQueue', () => {
 			} );
 
 			// Shared object — like an item reference in state.cart.items.
-			const item = { id: 1, quantity: 1 };
-
+			const item = {
+				id: 1,
+				quantity: 1,
+			};
 			await queue.submit( {
 				path: '/update-item',
 				method: 'POST',
@@ -904,20 +1132,19 @@ describe( 'createMutationQueue', () => {
 			} );
 
 			// Server should receive the pre-optimistic quantity.
-			expect( capturedBody ).toEqual( { id: 1, quantity: 1 } );
+			expect( capturedBody ).toEqual( {
+				id: 1,
+				quantity: 1,
+			} );
 		} );
-
 		it( 'rolls back on network failure even with applyOptimistic', async () => {
 			global.fetch = createFailingFetch( new Error( 'Network error' ) );
-
 			mockState.value = 50;
-
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
 				...stateHandler,
 			} );
-
 			const p1 = queue.submit( {
 				path: '/a',
 				method: 'POST',
@@ -925,19 +1152,15 @@ describe( 'createMutationQueue', () => {
 					mockState.value = 777;
 				},
 			} );
-
 			expect( mockState.value ).toBe( 777 );
-
 			await expect( p1 ).rejects.toThrow( 'Network error' );
 			expect( mockState.value ).toBe( 50 );
 		} );
 	} );
-
-	describe( 'waitForIdle', () => {
+	describe( 'waitForIdle', async () => {
 		it( 'resolves immediately when not processing', async () => {
 			const mockFetch = createMockFetch( [] );
 			global.fetch = mockFetch;
-
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
@@ -947,24 +1170,25 @@ describe( 'createMutationQueue', () => {
 			// Should resolve immediately: nothing in progress.
 			await expect( queue.waitForIdle() ).resolves.toBeUndefined();
 		} );
-
 		it( 'resolves after the processing cycle completes', async () => {
-			const fetchPromise: { resolve?: ( value: Response ) => void } = {};
-			global.fetch = jest.fn(
+			const fetchPromise: {
+				resolve?: ( value: Response ) => void;
+			} = {};
+			global.fetch = vi.fn(
 				() =>
 					new Promise< Response >( ( resolve ) => {
 						fetchPromise.resolve = resolve;
 					} )
 			);
-
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
 				...stateHandler,
 			} );
-
-			queue.submit( { path: '/a', method: 'POST' } );
-
+			queue.submit( {
+				path: '/a',
+				method: 'POST',
+			} );
 			let idleResolved = false;
 			queue.waitForIdle().then( () => {
 				idleResolved = true;
@@ -979,59 +1203,67 @@ describe( 'createMutationQueue', () => {
 				ok: true,
 				json: () =>
 					Promise.resolve( {
-						responses: [ { status: 200, body: { value: 42 } } ],
+						responses: [
+							{
+								status: 200,
+								body: {
+									value: 42,
+								},
+							},
+						],
 					} ),
 			} as Response );
-
 			await flushMicrotasks();
 			await flushMicrotasks();
-
 			expect( idleResolved ).toBe( true );
 			expect( queue.getStatus().isProcessing ).toBe( false );
 		} );
-
 		it( 'resolves multiple waiters when cycle completes', async () => {
-			const fetchPromise: { resolve?: ( value: Response ) => void } = {};
-			global.fetch = jest.fn(
+			const fetchPromise: {
+				resolve?: ( value: Response ) => void;
+			} = {};
+			global.fetch = vi.fn(
 				() =>
 					new Promise< Response >( ( resolve ) => {
 						fetchPromise.resolve = resolve;
 					} )
 			);
-
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
 				...stateHandler,
 			} );
-
-			queue.submit( { path: '/a', method: 'POST' } );
-
+			queue.submit( {
+				path: '/a',
+				method: 'POST',
+			} );
 			let waiter1Resolved = false;
 			let waiter2Resolved = false;
-
 			queue.waitForIdle().then( () => {
 				waiter1Resolved = true;
 			} );
 			queue.waitForIdle().then( () => {
 				waiter2Resolved = true;
 			} );
-
 			await flushMicrotasks();
 			expect( waiter1Resolved ).toBe( false );
 			expect( waiter2Resolved ).toBe( false );
-
 			resolvePendingFetch( fetchPromise, {
 				ok: true,
 				json: () =>
 					Promise.resolve( {
-						responses: [ { status: 200, body: { value: 1 } } ],
+						responses: [
+							{
+								status: 200,
+								body: {
+									value: 1,
+								},
+							},
+						],
 					} ),
 			} as Response );
-
 			await flushMicrotasks();
 			await flushMicrotasks();
-
 			expect( waiter1Resolved ).toBe( true );
 			expect( waiter2Resolved ).toBe( true );
 		} );

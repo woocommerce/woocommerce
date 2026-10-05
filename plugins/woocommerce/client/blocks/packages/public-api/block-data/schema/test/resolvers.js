@@ -1,3 +1,5 @@
+import { describe, expect, it, test, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -11,8 +13,8 @@ import { getRoute, getRoutes } from '../resolvers';
 import { receiveRoutes } from '../actions';
 import { STORE_KEY } from '../constants';
 
-jest.mock( '@wordpress/data-controls' );
-jest.mock( '@wordpress/data' );
+vi.mock( '@wordpress/data-controls' );
+vi.mock( '@wordpress/data' );
 
 describe( 'getRoute', () => {
 	it( 'yields select control response', () => {

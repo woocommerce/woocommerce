@@ -1,3 +1,5 @@
+import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -57,7 +59,7 @@ describe( 'TotalsCoupon', () => {
 	describe( 'API Response Scenarios', () => {
 		it( 'handles successful coupon application', async () => {
 			const user = userEvent.setup();
-			const mockOnSubmit = jest.fn().mockResolvedValue( true );
+			const mockOnSubmit = vi.fn().mockResolvedValue( true );
 
 			render(
 				<TotalsCoupon
@@ -95,7 +97,7 @@ describe( 'TotalsCoupon', () => {
 
 		it( 'handles coupon application failure with focus on input', async () => {
 			const user = userEvent.setup();
-			const mockOnSubmit = jest.fn().mockResolvedValue( false );
+			const mockOnSubmit = vi.fn().mockResolvedValue( false );
 
 			render(
 				<TotalsCoupon
@@ -135,7 +137,7 @@ describe( 'TotalsCoupon', () => {
 			const user = userEvent.setup();
 
 			// Create a proper promise-returning mock that catches the rejection
-			const mockOnSubmit = jest.fn().mockImplementation( () => {
+			const mockOnSubmit = vi.fn().mockImplementation( () => {
 				return Promise.reject( {
 					code: 'woocommerce_rest_cart_coupon_error',
 					message: 'Coupon "expired_coupon" has already expired.',
@@ -175,7 +177,7 @@ describe( 'TotalsCoupon', () => {
 
 		it( 'handles duplicate coupon application', async () => {
 			const user = userEvent.setup();
-			const mockOnSubmit = jest.fn().mockResolvedValue( false );
+			const mockOnSubmit = vi.fn().mockResolvedValue( false );
 
 			// Set up validation error as would happen from the API response
 			const { setValidationErrors } = dispatch( validationStore );
@@ -226,7 +228,7 @@ describe( 'TotalsCoupon', () => {
 		} );
 
 		it( 'handles usage limit exceeded error', async () => {
-			const mockOnSubmit = jest.fn().mockResolvedValue( false );
+			const mockOnSubmit = vi.fn().mockResolvedValue( false );
 
 			// Set up validation error for usage limit
 			const { setValidationErrors } = dispatch( validationStore );
@@ -257,7 +259,7 @@ describe( 'TotalsCoupon', () => {
 		} );
 
 		it( 'handles coupons disabled error', async () => {
-			const mockOnSubmit = jest.fn().mockResolvedValue( false );
+			const mockOnSubmit = vi.fn().mockResolvedValue( false );
 
 			// Set up validation error for disabled coupons
 			const { setValidationErrors } = dispatch( validationStore );
@@ -288,7 +290,7 @@ describe( 'TotalsCoupon', () => {
 	describe( 'Loading States', () => {
 		it( 'shows loading state while coupon is being applied', async () => {
 			const user = userEvent.setup();
-			const mockOnSubmit = jest.fn().mockResolvedValue( undefined );
+			const mockOnSubmit = vi.fn().mockResolvedValue( undefined );
 
 			render(
 				<TotalsCoupon
@@ -329,7 +331,7 @@ describe( 'TotalsCoupon', () => {
 
 		it( 'enables button when input has value and not loading', async () => {
 			const user = userEvent.setup();
-			const mockOnSubmit = jest.fn().mockResolvedValue( true );
+			const mockOnSubmit = vi.fn().mockResolvedValue( true );
 
 			render(
 				<TotalsCoupon
@@ -357,7 +359,7 @@ describe( 'TotalsCoupon', () => {
 
 		it( 'disables button when input is empty', async () => {
 			const user = userEvent.setup();
-			const mockOnSubmit = jest.fn().mockResolvedValue( true );
+			const mockOnSubmit = vi.fn().mockResolvedValue( true );
 
 			render(
 				<TotalsCoupon
@@ -390,7 +392,7 @@ describe( 'TotalsCoupon', () => {
 	describe( 'Multiple Coupon Scenarios', () => {
 		it( 'allows applying multiple different coupons sequentially', async () => {
 			const user = userEvent.setup();
-			const mockOnSubmit = jest.fn().mockResolvedValue( true );
+			const mockOnSubmit = vi.fn().mockResolvedValue( true );
 
 			const { rerender } = render(
 				<TotalsCoupon
@@ -495,7 +497,7 @@ describe( 'TotalsCoupon', () => {
 
 		it( 'handles form submission via enter key', async () => {
 			const user = userEvent.setup();
-			const mockOnSubmit = jest.fn().mockResolvedValue( true );
+			const mockOnSubmit = vi.fn().mockResolvedValue( true );
 
 			render(
 				<TotalsCoupon
@@ -518,7 +520,7 @@ describe( 'TotalsCoupon', () => {
 	describe( 'Edge Cases', () => {
 		it( 'handles onSubmit returning undefined', async () => {
 			const user = userEvent.setup();
-			const mockOnSubmit = jest.fn().mockReturnValue( undefined );
+			const mockOnSubmit = vi.fn().mockReturnValue( undefined );
 
 			render(
 				<TotalsCoupon
@@ -545,7 +547,7 @@ describe( 'TotalsCoupon', () => {
 
 		it( 'handles whitespace in coupon codes', async () => {
 			const user = userEvent.setup();
-			const mockOnSubmit = jest.fn().mockResolvedValue( true );
+			const mockOnSubmit = vi.fn().mockResolvedValue( true );
 
 			render(
 				<TotalsCoupon
@@ -572,7 +574,7 @@ describe( 'TotalsCoupon', () => {
 
 		it( 'handles special characters in coupon codes', async () => {
 			const user = userEvent.setup();
-			const mockOnSubmit = jest.fn().mockResolvedValue( true );
+			const mockOnSubmit = vi.fn().mockResolvedValue( true );
 
 			render(
 				<TotalsCoupon

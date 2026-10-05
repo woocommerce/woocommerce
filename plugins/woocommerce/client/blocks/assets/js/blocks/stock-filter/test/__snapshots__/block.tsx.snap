@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Filter by Stock block renders the stock filter block 1`] = `
+exports[`Filter by Stock block > renders the stock filter block 1`] = `
 <div>
   <div
     class="wc-block-stock-filter style-list"
@@ -109,7 +109,7 @@ exports[`Filter by Stock block renders the stock filter block 1`] = `
 </div>
 `;
 
-exports[`Filter by Stock block renders the stock filter block with the filter button 1`] = `
+exports[`Filter by Stock block > renders the stock filter block with the filter button 1`] = `
 <div>
   <div
     class="wc-block-stock-filter style-list"
@@ -234,7 +234,7 @@ exports[`Filter by Stock block renders the stock filter block with the filter bu
 </div>
 `;
 
-exports[`Filter by Stock block renders the stock filter block with the product counts 1`] = `
+exports[`Filter by Stock block > renders the stock filter block with the product counts 1`] = `
 <div>
   <div
     class="wc-block-stock-filter style-list"

@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -16,7 +18,7 @@ describe( 'ExperimentalOrderShippingPackages', () => {
 		components: {},
 		context: 'woocommerce/checkout',
 		noResultsMessage: 'No shipping options.',
-		renderOption: jest.fn(),
+		renderOption: vi.fn(),
 		collapsible: false,
 		showItems: false,
 	};
@@ -40,7 +42,7 @@ describe( 'ExperimentalOrderShippingPackages', () => {
 		const extensions = { 'shipping-ext': { zones: [] } };
 		const cart = { shippingRates: [ { rate: '5.00' } ] };
 		const components = { ShippingRate: () => null };
-		const renderOption = jest.fn();
+		const renderOption = vi.fn();
 
 		const fillProps = getFillProps( ExperimentalOrderShippingPackages, {
 			extensions,

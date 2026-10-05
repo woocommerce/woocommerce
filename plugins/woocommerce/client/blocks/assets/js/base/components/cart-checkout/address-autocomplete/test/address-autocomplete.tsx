@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -10,7 +12,7 @@ import { AddressAutocomplete } from '../address-autocomplete';
 
 describe( 'Address Autocomplete Component', () => {
 	it( 'should render a ValidatedTextInput with correct props', () => {
-		const mockOnChange = jest.fn();
+		const mockOnChange = vi.fn();
 		const { container } = render(
 			<AddressAutocomplete
 				addressType="billing"
@@ -35,7 +37,7 @@ describe( 'Address Autocomplete Component', () => {
 	} );
 
 	it( 'should render for shipping address type', () => {
-		const mockOnChange = jest.fn();
+		const mockOnChange = vi.fn();
 		const { container } = render(
 			<AddressAutocomplete
 				addressType="shipping"
@@ -53,7 +55,7 @@ describe( 'Address Autocomplete Component', () => {
 	} );
 
 	it( 'should pass through additional props to ValidatedTextInput', () => {
-		const mockOnChange = jest.fn();
+		const mockOnChange = vi.fn();
 		const { container } = render(
 			<AddressAutocomplete
 				addressType="billing"

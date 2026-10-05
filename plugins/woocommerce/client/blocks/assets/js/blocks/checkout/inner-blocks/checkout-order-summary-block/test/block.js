@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -11,8 +13,8 @@ import {
 	textContentMatcher,
 	textContentMatcherAcrossSiblings,
 } from '../../../../../../../tests/utils/find-by-text';
-const baseContextHooks = jest.requireMock( '@woocommerce/base-context/hooks' );
-const woocommerceSettings = jest.requireMock( '@woocommerce/settings' );
+const baseContextHooks = await import( '@woocommerce/base-context/hooks' );
+const woocommerceSettings = await import( '@woocommerce/settings' );
 import SummaryBlock from '../frontend';
 import SubtotalBlock from '../../checkout-order-summary-subtotal/frontend';
 import FeeBlock from '../../checkout-order-summary-fee/frontend';
@@ -21,7 +23,6 @@ import DiscountBlock from '../../checkout-order-summary-discount/frontend';
 import CouponsBlock from '../../checkout-order-summary-coupon-form/frontend';
 import ShippingBlock from '../../checkout-order-summary-shipping/frontend';
 import CartItemsBlock from '../../checkout-order-summary-cart-items/frontend';
-
 const Block = ( { showRateAfterTaxName = false } ) => (
 	<SummaryBlock>
 		<CartItemsBlock />
@@ -33,7 +34,6 @@ const Block = ( { showRateAfterTaxName = false } ) => (
 		<TaxesBlock showRateAfterTaxName={ showRateAfterTaxName } />
 	</SummaryBlock>
 );
-
 const defaultUseStoreCartValue = {
 	cartItems: mockPreviewCart.items,
 	cartTotals: mockPreviewCart.totals,
@@ -45,162 +45,185 @@ const defaultUseStoreCartValue = {
 	billingAddress: mockPreviewCart.billing_address,
 	cartHasCalculatedShipping: mockPreviewCart.has_calculated_shipping,
 };
-
-jest.mock( '@wordpress/data', () => {
-	return {
+vi.mock( '@wordpress/data', async () => {
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		__esModule: true,
-		...jest.requireActual( '@wordpress/data' ),
-	};
+		...( await vi.importActual( '@wordpress/data' ) ),
+	} );
 } );
-
-jest.mock( '@woocommerce/settings', () => ( {
-	...jest.requireActual( '@woocommerce/settings' ),
-	SITE_CURRENCY: {
-		code: 'USD',
-		symbol: '$',
-		thousandSeparator: ',',
-		decimalSeparator: '.',
-		minorUnit: 2,
-		prefix: '$',
-		suffix: '',
-	},
-} ) );
-
-jest.mock( '@woocommerce/base-context/hooks', () => ( {
-	...jest.requireActual( '@woocommerce/base-context/hooks' ),
-
-	/*
-	We need to redefine this here despite the defaultUseStoreCartValue above
-	because jest doesn't like to set up mocks with out of scope variables
-	*/
-	useStoreCart: jest.fn().mockReturnValue( {
-		cartItems: mockPreviewCart.items,
-		cartTotals: mockPreviewCart.totals,
-		cartCoupons: mockPreviewCart.coupons,
-		cartFees: mockPreviewCart.fees,
-		cartNeedsShipping: mockPreviewCart.needs_shipping,
-		shippingRates: mockPreviewCart.shipping_rates,
-		shippingAddress: mockPreviewCart.shipping_address,
-		billingAddress: mockPreviewCart.billing_address,
-		cartHasCalculatedShipping: mockPreviewCart.has_calculated_shipping,
-	} ),
-	useShippingData: jest.fn().mockReturnValue( {
-		needsShipping: true,
-		shippingRates: [
-			{
-				package_id: 0,
-				name: 'Shipping method',
-				destination: {
-					address_1: '',
-					address_2: '',
-					city: '',
-					state: '',
-					postcode: '',
-					country: '',
+vi.mock( '@woocommerce/settings', async () => {
+	const mock = {
+		...( await vi.importActual( '@woocommerce/settings' ) ),
+		SITE_CURRENCY: {
+			code: 'USD',
+			symbol: '$',
+			thousandSeparator: ',',
+			decimalSeparator: '.',
+			minorUnit: 2,
+			prefix: '$',
+			suffix: '',
+		},
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/base-context/hooks', async () => {
+	const mock = {
+		...( await vi.importActual( '@woocommerce/base-context/hooks' ) ),
+		/*
+      We need to redefine this here despite the defaultUseStoreCartValue above
+      because jest doesn't like to set up mocks with out of scope variables
+      */
+		useStoreCart: vi.fn().mockReturnValue( {
+			cartItems: mockPreviewCart.items,
+			cartTotals: mockPreviewCart.totals,
+			cartCoupons: mockPreviewCart.coupons,
+			cartFees: mockPreviewCart.fees,
+			cartNeedsShipping: mockPreviewCart.needs_shipping,
+			shippingRates: mockPreviewCart.shipping_rates,
+			shippingAddress: mockPreviewCart.shipping_address,
+			billingAddress: mockPreviewCart.billing_address,
+			cartHasCalculatedShipping: mockPreviewCart.has_calculated_shipping,
+		} ),
+		useShippingData: vi.fn().mockReturnValue( {
+			needsShipping: true,
+			shippingRates: [
+				{
+					package_id: 0,
+					name: 'Shipping method',
+					destination: {
+						address_1: '',
+						address_2: '',
+						city: '',
+						state: '',
+						postcode: '',
+						country: '',
+					},
+					items: [
+						{
+							key: 'fb0c0a746719a7596f296344b80cb2b6',
+							name: 'Hoodie - Blue, Yes',
+							quantity: 1,
+						},
+						{
+							key: '1f0e3dad99908345f7439f8ffabdffc4',
+							name: 'Beanie',
+							quantity: 1,
+						},
+					],
+					shipping_rates: [
+						{
+							rate_id: 'flat_rate:1',
+							name: 'Flat rate',
+							description: '',
+							delivery_time: '',
+							price: '500',
+							taxes: '0',
+							instance_id: 1,
+							method_id: 'flat_rate',
+							meta_data: [
+								{
+									key: 'Items',
+									value: 'Hoodie - Blue, Yes &times; 1, Beanie &times; 1',
+								},
+							],
+							selected: false,
+							currency_code: 'USD',
+							currency_symbol: '$',
+							currency_minor_unit: 2,
+							currency_decimal_separator: '.',
+							currency_thousand_separator: ',',
+							currency_prefix: '$',
+							currency_suffix: '',
+						},
+						{
+							rate_id: 'local_pickup:2',
+							name: 'Local pickup',
+							description: '',
+							delivery_time: '',
+							price: '0',
+							taxes: '0',
+							instance_id: 2,
+							method_id: 'local_pickup',
+							meta_data: [
+								{
+									key: 'Items',
+									value: 'Hoodie - Blue, Yes &times; 1, Beanie &times; 1',
+								},
+							],
+							selected: false,
+							currency_code: 'USD',
+							currency_symbol: '$',
+							currency_minor_unit: 2,
+							currency_decimal_separator: '.',
+							currency_thousand_separator: ',',
+							currency_prefix: '$',
+							currency_suffix: '',
+						},
+						{
+							rate_id: 'free_shipping:5',
+							name: 'Free shipping',
+							description: '',
+							delivery_time: '',
+							price: '0',
+							taxes: '0',
+							instance_id: 5,
+							method_id: 'free_shipping',
+							meta_data: [
+								{
+									key: 'Items',
+									value: 'Hoodie - Blue, Yes &times; 1, Beanie &times; 1',
+								},
+							],
+							selected: true,
+							currency_code: 'USD',
+							currency_symbol: '$',
+							currency_minor_unit: 2,
+							currency_decimal_separator: '.',
+							currency_thousand_separator: ',',
+							currency_prefix: '$',
+							currency_suffix: '',
+						},
+					],
 				},
-				items: [
-					{
-						key: 'fb0c0a746719a7596f296344b80cb2b6',
-						name: 'Hoodie - Blue, Yes',
-						quantity: 1,
-					},
-					{
-						key: '1f0e3dad99908345f7439f8ffabdffc4',
-						name: 'Beanie',
-						quantity: 1,
-					},
-				],
-				shipping_rates: [
-					{
-						rate_id: 'flat_rate:1',
-						name: 'Flat rate',
-						description: '',
-						delivery_time: '',
-						price: '500',
-						taxes: '0',
-						instance_id: 1,
-						method_id: 'flat_rate',
-						meta_data: [
-							{
-								key: 'Items',
-								value: 'Hoodie - Blue, Yes &times; 1, Beanie &times; 1',
-							},
-						],
-						selected: false,
-						currency_code: 'USD',
-						currency_symbol: '$',
-						currency_minor_unit: 2,
-						currency_decimal_separator: '.',
-						currency_thousand_separator: ',',
-						currency_prefix: '$',
-						currency_suffix: '',
-					},
-					{
-						rate_id: 'local_pickup:2',
-						name: 'Local pickup',
-						description: '',
-						delivery_time: '',
-						price: '0',
-						taxes: '0',
-						instance_id: 2,
-						method_id: 'local_pickup',
-						meta_data: [
-							{
-								key: 'Items',
-								value: 'Hoodie - Blue, Yes &times; 1, Beanie &times; 1',
-							},
-						],
-						selected: false,
-						currency_code: 'USD',
-						currency_symbol: '$',
-						currency_minor_unit: 2,
-						currency_decimal_separator: '.',
-						currency_thousand_separator: ',',
-						currency_prefix: '$',
-						currency_suffix: '',
-					},
-					{
-						rate_id: 'free_shipping:5',
-						name: 'Free shipping',
-						description: '',
-						delivery_time: '',
-						price: '0',
-						taxes: '0',
-						instance_id: 5,
-						method_id: 'free_shipping',
-						meta_data: [
-							{
-								key: 'Items',
-								value: 'Hoodie - Blue, Yes &times; 1, Beanie &times; 1',
-							},
-						],
-						selected: true,
-						currency_code: 'USD',
-						currency_symbol: '$',
-						currency_minor_unit: 2,
-						currency_decimal_separator: '.',
-						currency_thousand_separator: ',',
-						currency_prefix: '$',
-						currency_suffix: '',
-					},
-				],
-			},
-		],
-	} ),
-} ) );
-
-jest.mock( '@woocommerce/base-context', () => ( {
-	...jest.requireActual( '@woocommerce/base-context' ),
-	useContainerWidthContext: jest.fn().mockReturnValue( {
-		hasContainerWidth: true,
-		isLarge: true,
-	} ),
-} ) );
-
-jest.mock( '@woocommerce/settings', () => {
-	const originalModule = jest.requireActual( '@woocommerce/settings' );
-
-	return {
+			],
+		} ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/base-context', async () => {
+	const mock = {
+		...( await vi.importActual( '@woocommerce/base-context' ) ),
+		useContainerWidthContext: vi.fn().mockReturnValue( {
+			hasContainerWidth: true,
+			isLarge: true,
+		} ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/settings', async () => {
+	const originalModule = await vi.importActual( '@woocommerce/settings' );
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		...originalModule,
 		SITE_CURRENCY: {
 			code: 'USD',
@@ -211,32 +234,27 @@ jest.mock( '@woocommerce/settings', () => {
 			prefix: '$',
 			suffix: '',
 		},
-		getSetting: jest.fn().mockImplementation( ( setting, ...rest ) => {
+		getSetting: vi.fn().mockImplementation( ( setting, ...rest ) => {
 			if ( setting === 'couponsEnabled' ) {
 				return true;
 			}
 			return originalModule.getSetting( setting, ...rest );
 		} ),
-	};
+	} );
 } );
-
 const setUseStoreCartReturnValue = ( value = defaultUseStoreCartValue ) => {
 	baseContextHooks.useStoreCart.mockReturnValue( value );
 };
-
 const setGetSettingImplementation = ( implementation ) => {
 	woocommerceSettings.getSetting.mockImplementation( implementation );
 };
-
 const setUseShippingDataReturnValue = ( value ) => {
 	baseContextHooks.useShippingData.mockReturnValue( value );
 };
-
 describe( 'Checkout Order Summary', () => {
 	beforeEach( () => {
 		setUseStoreCartReturnValue();
 	} );
-
 	it( 'Renders the standard preview items in the sidebar', async () => {
 		const { container } = render( <Block showRateAfterTaxName={ true } /> );
 		expect(
@@ -254,10 +272,8 @@ describe( 'Checkout Order Summary', () => {
 			await findByText( container, textContentMatcher( 'Size: Small' ) )
 		).toBeInTheDocument();
 	} );
-
 	it( 'Renders the items subtotal correctly', async () => {
 		const { container } = render( <Block showRateAfterTaxName={ true } /> );
-
 		expect(
 			await findByText(
 				container,
@@ -284,7 +300,6 @@ describe( 'Checkout Order Summary', () => {
 			)
 		).toBeInTheDocument();
 	} );
-
 	it( 'If coupons are in the cart they are shown correctly', async () => {
 		setUseStoreCartReturnValue( {
 			...defaultUseStoreCartValue,
@@ -317,7 +332,6 @@ describe( 'Checkout Order Summary', () => {
 			await findByText( container, 'Coupon: 10off' )
 		).toBeInTheDocument();
 	} );
-
 	it( 'Shows fees if the cart_fees are set', async () => {
 		setUseStoreCartReturnValue( {
 			...defaultUseStoreCartValue,
@@ -345,7 +359,6 @@ describe( 'Checkout Order Summary', () => {
 			)
 		).toBeInTheDocument();
 	} );
-
 	it( 'Shows the coupon entry form when coupons are enabled', async () => {
 		setUseStoreCartReturnValue();
 		const { container } = render( <Block showRateAfterTaxName={ true } /> );
@@ -353,16 +366,14 @@ describe( 'Checkout Order Summary', () => {
 			await findByText( container, 'Add coupons' )
 		).toBeInTheDocument();
 	} );
-
-	it( 'Does not show the coupon entry if coupons are not enabled', () => {
+	it( 'Does not show the coupon entry if coupons are not enabled', async () => {
+		const _actual = await vi.importActual( '@woocommerce/settings' );
 		setUseStoreCartReturnValue();
 		setGetSettingImplementation( ( setting, ...rest ) => {
 			if ( setting === 'couponsEnabled' ) {
 				return false;
 			}
-			const originalModule = jest.requireActual(
-				'@woocommerce/settings'
-			);
+			const originalModule = _actual;
 			return originalModule.getSetting( setting, ...rest );
 		} );
 		const { container } = render( <Block showRateAfterTaxName={ true } /> );
@@ -370,24 +381,28 @@ describe( 'Checkout Order Summary', () => {
 			queryByText( container, 'Coupon code' )
 		).not.toBeInTheDocument();
 	} );
-
 	it( 'Does not show the shipping section if needsShipping is false on the cart', () => {
 		setUseStoreCartReturnValue( {
 			...defaultUseStoreCartValue,
 			cartNeedsShipping: false,
 		} );
-
 		const { container } = render( <Block showRateAfterTaxName={ true } /> );
 		expect( queryByText( container, 'Shipping' ) ).not.toBeInTheDocument();
 	} );
-
-	it( 'Does not show the taxes section if displayCartPricesIncludingTax is true', () => {
+	it( 'Does not show the taxes section if displayCartPricesIncludingTax is true', async () => {
+		const _actual2 = await vi.importActual( '@woocommerce/settings' );
 		setUseStoreCartReturnValue( {
 			...defaultUseStoreCartValue,
 			cartTotals: {
 				...mockPreviewCart.totals,
 				total_tax: '1000',
-				tax_lines: [ { name: 'Tax', price: '1000', rate: '5%' } ],
+				tax_lines: [
+					{
+						name: 'Tax',
+						price: '1000',
+						rate: '5%',
+					},
+				],
 			},
 		} );
 		setGetSettingImplementation( ( setting, ...rest ) => {
@@ -397,13 +412,10 @@ describe( 'Checkout Order Summary', () => {
 			if ( setting === 'taxesEnabled' ) {
 				return true;
 			}
-			const originalModule = jest.requireActual(
-				'@woocommerce/settings'
-			);
+			const originalModule = _actual2;
 			return originalModule.getSetting( setting, ...rest );
 		} );
 		const { container } = render( <Block showRateAfterTaxName={ true } /> );
-
 		expect(
 			queryByText(
 				container,
@@ -411,17 +423,25 @@ describe( 'Checkout Order Summary', () => {
 			)
 		).not.toBeInTheDocument();
 	} );
-
 	it( 'Shows the taxes section if displayCartPricesIncludingTax is false and a tax total is set', async () => {
+		const _actual3 = await vi.importActual( '@woocommerce/settings' );
 		setUseStoreCartReturnValue( {
 			...defaultUseStoreCartValue,
 			cartTotals: {
 				...mockPreviewCart.totals,
 				total_tax: '1000',
-				tax_lines: [ { name: 'Tax', price: '1000', rate: '5%' } ],
+				tax_lines: [
+					{
+						name: 'Tax',
+						price: '1000',
+						rate: '5%',
+					},
+				],
 			},
 		} );
-		setUseShippingDataReturnValue( { needsShipping: false } );
+		setUseShippingDataReturnValue( {
+			needsShipping: false,
+		} );
 		setGetSettingImplementation( ( setting, ...rest ) => {
 			if ( setting === 'displayCartPricesIncludingTax' ) {
 				return false;
@@ -429,9 +449,7 @@ describe( 'Checkout Order Summary', () => {
 			if ( setting === 'taxesEnabled' ) {
 				return true;
 			}
-			const originalModule = jest.requireActual(
-				'@woocommerce/settings'
-			);
+			const originalModule = _actual3;
 			return originalModule.getSetting( setting, ...rest );
 		} );
 		const { container } = render( <Block showRateAfterTaxName={ true } /> );
@@ -442,7 +460,6 @@ describe( 'Checkout Order Summary', () => {
 			)
 		).toBeInTheDocument();
 	} );
-
 	it( 'Shows the grand total correctly', async () => {
 		setUseStoreCartReturnValue( {
 			...defaultUseStoreCartValue,
@@ -459,7 +476,6 @@ describe( 'Checkout Order Summary', () => {
 			)
 		).toBeInTheDocument();
 	} );
-
 	it( 'Correctly shows the shipping section if the cart requires shipping', async () => {
 		setUseStoreCartReturnValue( {
 			...defaultUseStoreCartValue,
@@ -521,7 +537,6 @@ describe( 'Checkout Order Summary', () => {
 				},
 			],
 		} );
-
 		const { container } = render( <Block showRateAfterTaxName={ true } /> );
 		expect(
 			await findByText(

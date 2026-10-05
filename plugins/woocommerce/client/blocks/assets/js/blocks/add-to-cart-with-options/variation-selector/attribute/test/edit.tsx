@@ -1,3 +1,13 @@
+import {
+	afterEach,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+	type MockInstance,
+} from 'vitest';
+
 /**
  * External dependencies
  */
@@ -11,49 +21,80 @@ import type { ComponentProps, ReactNode } from 'react';
  */
 import AttributeItemTemplateEdit from '../edit';
 import { DEFAULT_ATTRIBUTES } from '../constants';
-
-jest.mock( '@woocommerce/base-context/hooks', () => ( {
-	__esModule: true,
-	...jest.requireActual( '@woocommerce/base-context/hooks' ),
-} ) );
+vi.mock( '@woocommerce/base-context/hooks', async () => {
+	const mock = {
+		__esModule: true,
+		...( await vi.importActual( '@woocommerce/base-context/hooks' ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 // A selected row renders the inner blocks; an unselected one renders a
 // clickable preview. Tagging each row, and both of those, lets the tests tell
 // them apart, since the component renders no attribute-identifying markup of
 // its own.
-jest.mock( '@wordpress/block-editor', () => ( {
-	...jest.requireActual( '@wordpress/block-editor' ),
-	BlockContextProvider: ( { children }: { children: ReactNode } ) => (
-		<div data-testid="attribute-row">{ children }</div>
-	),
-	InspectorControls: () => null,
-	useBlockProps: jest.fn( () => ( {} ) ),
-	useInnerBlocksProps: jest.fn( () => ( {
-		'data-testid': 'attribute-inner-blocks',
-	} ) ),
-	__experimentalUseBlockPreview: jest.fn( () => ( {
-		'data-testid': 'attribute-preview',
-	} ) ),
-} ) );
-
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	// Runs the selector against a stub store that only answers `getBlocks`. Any
-	// other `useSelect` consumer pulled into this tree then fails loudly instead
-	// of silently receiving this component's return value.
-	useSelect: jest.fn(
-		( mapSelect: ( select: ( store: unknown ) => unknown ) => unknown ) =>
-			mapSelect( () => ( { getBlocks: () => [] } ) )
-	),
-} ) );
-
-jest.mock( '@woocommerce/shared-context', () => ( {
-	...jest.requireActual( '@woocommerce/shared-context' ),
-	useProductDataContext: jest.fn(),
-} ) );
-
-const sharedContext = jest.requireMock( '@woocommerce/shared-context' );
-
+vi.mock( '@wordpress/block-editor', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/block-editor' ) ),
+		BlockContextProvider: ( { children }: { children: ReactNode } ) => (
+			<div data-testid="attribute-row">{ children }</div>
+		),
+		InspectorControls: () => null,
+		useBlockProps: vi.fn( () => ( {} ) ),
+		useInnerBlocksProps: vi.fn( () => ( {
+			'data-testid': 'attribute-inner-blocks',
+		} ) ),
+		__experimentalUseBlockPreview: vi.fn( () => ( {
+			'data-testid': 'attribute-preview',
+		} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/data', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/data' ) ),
+		// Runs the selector against a stub store that only answers `getBlocks`. Any
+		// other `useSelect` consumer pulled into this tree then fails loudly instead
+		// of silently receiving this component's return value.
+		useSelect: vi.fn(
+			(
+				mapSelect: ( select: ( store: unknown ) => unknown ) => unknown
+			) =>
+				mapSelect( () => ( {
+					getBlocks: () => [],
+				} ) )
+		),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/shared-context', async () => {
+	const mock = {
+		...( await vi.importActual( '@woocommerce/shared-context' ) ),
+		useProductDataContext: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+const sharedContext = await import( '@woocommerce/shared-context' );
 type EditProps = ComponentProps< typeof AttributeItemTemplateEdit >;
 
 // Checked against the props it actually supplies, so a typo inside
@@ -66,10 +107,9 @@ const editProps = {
 		autoselect: false,
 		disabledAttributesAction: 'disable',
 	},
-	setAttributes: jest.fn(),
+	setAttributes: vi.fn(),
 	clientId: 'test-client-id',
 } satisfies Pick< EditProps, 'attributes' | 'setAttributes' | 'clientId' >;
-
 const renderEdit = () =>
 	render(
 		<AttributeItemTemplateEdit
@@ -91,18 +131,29 @@ const attribute = ( name: string, taxonomy: string | null, id: number ) => ( {
 	name,
 	has_variations: true,
 	terms: [
-		{ id: taxonomy ? id * 10 + 1 : 0, slug: 'one', name: 'One' },
-		{ id: taxonomy ? id * 10 + 2 : 0, slug: 'two', name: 'Two' },
+		{
+			id: taxonomy ? id * 10 + 1 : 0,
+			slug: 'one',
+			name: 'One',
+		},
+		{
+			id: taxonomy ? id * 10 + 2 : 0,
+			slug: 'two',
+			name: 'Two',
+		},
 	],
 } );
-
 const renderWithAttributes = (
 	attributes: ReturnType< typeof attribute >[]
 ) => {
 	sharedContext.useProductDataContext.mockReturnValue( {
-		product: { id: 15, name: 'Hoodie', type: 'variable', attributes },
+		product: {
+			id: 15,
+			name: 'Hoodie',
+			type: 'variable',
+			attributes,
+		},
 	} );
-
 	return renderEdit();
 };
 
@@ -119,27 +170,23 @@ const selectedRowIndex = () =>
 			( row ) =>
 				!! within( row ).queryByTestId( 'attribute-inner-blocks' )
 		);
-
 describe( 'Variation Selector attribute template edit', () => {
-	let useCollectionSpy: jest.SpyInstance;
-
+	let useCollectionSpy: MockInstance;
 	beforeEach( () => {
-		useCollectionSpy = jest
-			.spyOn( hooks, 'useCollection' )
-			.mockReturnValue( { results: [], isLoading: false } );
+		useCollectionSpy = vi.spyOn( hooks, 'useCollection' ).mockReturnValue( {
+			results: [],
+			isLoading: false,
+		} );
 	} );
-
 	afterEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	} );
-
 	it( 'does not query the Store API while showing placeholder attributes', () => {
-		sharedContext.useProductDataContext.mockReturnValue( { product: {} } );
-
+		sharedContext.useProductDataContext.mockReturnValue( {
+			product: {},
+		} );
 		renderEdit();
-
 		const calls = useCollectionSpy.mock.calls.map( ( [ args ] ) => args );
-
 		calls.forEach( ( args ) => {
 			expect( args.shouldSelect ).toBe( false );
 		} );
@@ -149,7 +196,6 @@ describe( 'Variation Selector attribute template edit', () => {
 			new Set( calls.map( ( args ) => args.resourceValues[ 0 ] ) )
 		).toEqual( new Set( DEFAULT_ATTRIBUTES.map( ( attr ) => attr.id ) ) );
 	} );
-
 	it( 'queries the Store API for a real variable product attribute', () => {
 		sharedContext.useProductDataContext.mockReturnValue( {
 			product: {
@@ -163,16 +209,22 @@ describe( 'Variation Selector attribute template edit', () => {
 						name: 'Color',
 						has_variations: true,
 						terms: [
-							{ id: 27, slug: 'blue', name: 'Blue' },
-							{ id: 28, slug: 'red', name: 'Red' },
+							{
+								id: 27,
+								slug: 'blue',
+								name: 'Blue',
+							},
+							{
+								id: 28,
+								slug: 'red',
+								name: 'Red',
+							},
 						],
 					},
 				],
 			},
 		} );
-
 		renderEdit();
-
 		expect( useCollectionSpy ).toHaveBeenCalled();
 		useCollectionSpy.mock.calls.forEach( ( [ args ] ) => {
 			expect( args.shouldSelect ).toBe( true );
@@ -180,7 +232,6 @@ describe( 'Variation Selector attribute template edit', () => {
 			expect( args.query.include ).toEqual( [ 27, 28 ] );
 		} );
 	} );
-
 	it( 'selects a custom attribute row when it is clicked', async () => {
 		const user = userEvent.setup();
 		// A global attribute followed by a custom one, which the Store API
@@ -191,50 +242,38 @@ describe( 'Variation Selector attribute template edit', () => {
 			attribute( 'Color', 'pa_color', 1 ),
 			attribute( 'Fit', null, 0 ),
 		] );
-
 		expect( selectedRowIndex() ).toBe( 0 );
-
 		await user.click( screen.getByTestId( 'attribute-preview' ) );
-
 		expect( selectedRowIndex() ).toBe( 1 );
 	} );
-
 	it( 'keeps exactly one row editable when every attribute is custom', async () => {
 		const user = userEvent.setup();
 		renderWithAttributes( [
 			attribute( 'Size', null, 0 ),
 			attribute( 'Fit', null, 0 ),
 		] );
-
 		expect(
 			screen.getAllByTestId( 'attribute-inner-blocks' )
 		).toHaveLength( 1 );
 		expect( selectedRowIndex() ).toBe( 0 );
-
 		await user.click( screen.getByTestId( 'attribute-preview' ) );
-
 		expect(
 			screen.getAllByTestId( 'attribute-inner-blocks' )
 		).toHaveLength( 1 );
 		expect( selectedRowIndex() ).toBe( 1 );
 	} );
-
 	it( 'does not render duplicate React keys for custom attributes', () => {
-		const errorSpy = jest
+		const errorSpy = vi
 			.spyOn( console, 'error' )
 			.mockImplementation( () => undefined );
-
 		renderWithAttributes( [
 			attribute( 'Size', null, 0 ),
 			attribute( 'Fit', null, 0 ),
 		] );
-
 		const duplicateKeyWarnings = errorSpy.mock.calls.filter( ( call ) =>
 			String( call[ 0 ] ).includes( 'same key' )
 		);
-
 		expect( duplicateKeyWarnings ).toHaveLength( 0 );
-
 		errorSpy.mockRestore();
 	} );
 } );

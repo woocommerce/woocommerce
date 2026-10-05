@@ -1,3 +1,5 @@
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -67,10 +69,10 @@ const canMakePaymentArgument = {
 	paymentRequirements: [ 'products' ],
 };
 describe( 'payment-method-config-helper', () => {
-	const trueCallback = jest.fn().mockReturnValue( true );
-	const falseCallback = jest.fn().mockReturnValue( false );
-	const bacsCallback = jest.fn().mockReturnValue( false );
-	const throwsCallback = jest.fn().mockImplementation( () => {
+	const trueCallback = vi.fn().mockReturnValue( true );
+	const falseCallback = vi.fn().mockReturnValue( false );
+	const bacsCallback = vi.fn().mockReturnValue( false );
+	const throwsCallback = vi.fn().mockImplementation( () => {
 		throw new Error();
 	} );
 	beforeAll( () => {
@@ -114,7 +116,7 @@ describe( 'payment-method-config-helper', () => {
 		it( 'returns callback canMakePaymentWithFeaturesCheck if no extension callback is detected', () => {
 			// Define arguments from a payment method ('missing-payment-method') with no registered extension callbacks.
 			const args = {
-				canMakePayment: jest.fn().mockImplementation( () => true ),
+				canMakePayment: vi.fn().mockImplementation( () => true ),
 				features: [ 'products' ],
 				paymentMethodName: 'missing-payment-method',
 			};
@@ -133,7 +135,7 @@ describe( 'payment-method-config-helper', () => {
 		it( 'returns callbacks from the extensions when they are defined', () => {
 			// Define arguments from a payment method (bacs) with registered extension callbacks.
 			const args = {
-				canMakePaymentConfiguration: jest
+				canMakePaymentConfiguration: vi
 					.fn()
 					.mockImplementation( () => true ),
 				features: [ 'products' ],

@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -20,7 +22,7 @@ const defaultProps = {
 	id: 'shipping-country',
 	label: 'Country/Region',
 	countries: allowedCountries,
-	onChange: jest.fn(),
+	onChange: vi.fn(),
 };
 
 describe( 'CountryInput', () => {
@@ -33,7 +35,7 @@ describe( 'CountryInput', () => {
 
 	afterEach( () => {
 		allSettings.countries = [];
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	} );
 
 	it( 'renders the allowed countries as options', () => {
@@ -123,7 +125,7 @@ describe( 'CountryInput', () => {
 	} );
 
 	it( 'lets the user pick the only allowed country when the saved one is unavailable', async () => {
-		const onChange = jest.fn();
+		const onChange = vi.fn();
 		const ControlledCountryInput = () => {
 			const [ country, setCountry ] = useState( 'GB' );
 			return (

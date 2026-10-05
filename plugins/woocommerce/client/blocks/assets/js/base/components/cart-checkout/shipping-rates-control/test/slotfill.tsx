@@ -1,3 +1,21 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+const { mockShippingRatesControlPackage, mockSlotRender } = vi.hoisted( () => {
+	const mockShippingRatesControlPackage = vi.fn(
+		( props: Record< string, unknown > ) => {
+			void props;
+			return <div data-testid="shipping-package" />;
+		}
+	);
+	const mockSlotRender = vi.fn( ( props: Record< string, unknown > ) => {
+		void props;
+		return <div data-testid="shipping-slot" />;
+	} );
+	return {
+		mockShippingRatesControlPackage,
+		mockSlotRender,
+	};
+} );
+
 /**
  * External dependencies
  */
@@ -17,45 +35,61 @@ import {
 	generateShippingPackage,
 	generateShippingRate,
 } from '../../../../../mocks/shipping-package';
-
-jest.mock( '@woocommerce/base-context', () => ( {
-	useStoreCart: jest.fn(),
-	useEditorContext: jest.fn( () => ( { isEditor: false } ) ),
-	useShippingData: jest.fn( () => ( {
-		hasSelectedLocalPickup: false,
-		selectedRates: {},
-	} ) ),
-} ) );
-
-const mockShippingRatesControlPackage = jest.fn(
-	( props: Record< string, unknown > ) => {
-		void props;
-		return <div data-testid="shipping-package" />;
-	}
-);
-jest.mock( '../../shipping-rates-control-package', () => ( {
-	__esModule: true,
-	default: ( props: Record< string, unknown > ) =>
-		mockShippingRatesControlPackage( props ),
-} ) );
-
-jest.mock( '@woocommerce/base-hooks', () => ( {
-	usePrevious: jest.fn(),
-} ) );
-
-const mockSlotRender = jest.fn( ( props: Record< string, unknown > ) => {
-	void props;
-	return <div data-testid="shipping-slot" />;
+vi.mock( '@woocommerce/base-context', () => {
+	const mock = {
+		useStoreCart: vi.fn(),
+		useEditorContext: vi.fn( () => ( {
+			isEditor: false,
+		} ) ),
+		useShippingData: vi.fn( () => ( {
+			hasSelectedLocalPickup: false,
+			selectedRates: {},
+		} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
 } );
-jest.mock( '@woocommerce/blocks-checkout', () => {
+vi.mock( '../../shipping-rates-control-package', () => {
+	const mock = {
+		__esModule: true,
+		default: ( props: Record< string, unknown > ) =>
+			mockShippingRatesControlPackage( props ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/base-hooks', () => {
+	const mock = {
+		usePrevious: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/blocks-checkout', () => {
 	const MockFill = ( { children }: { children: React.ReactNode } ) => (
 		<>{ children }</>
 	);
 	MockFill.Slot = ( props: Record< string, unknown > ) =>
 		mockSlotRender( props );
-	return { ExperimentalOrderShippingPackages: MockFill };
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
+		ExperimentalOrderShippingPackages: MockFill,
+	} );
 } );
-
 const defaultProps: ShippingRatesControlProps = {
 	shippingRates: [],
 	isLoadingRates: false,
@@ -63,10 +97,9 @@ const defaultProps: ShippingRatesControlProps = {
 	collapsible: false,
 	showItems: false,
 	noResultsMessage: <span>No rates</span>,
-	renderOption: jest.fn(),
+	renderOption: vi.fn(),
 	context: 'woocommerce/checkout',
 };
-
 const createShippingPackage = (
 	packageId: string | number,
 	rateId: string
@@ -84,52 +117,48 @@ const createShippingPackage = (
 	} ),
 	package_id: packageId,
 } );
-
 describe( 'ShippingRatesControl slot rendering', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
-		( useStoreCart as jest.Mock ).mockReturnValue( {
-			extensions: { 'ship-ext': true },
-			receiveCart: jest.fn(),
+		vi.clearAllMocks();
+		( useStoreCart as Mock ).mockReturnValue( {
+			extensions: {
+				'ship-ext': true,
+			},
+			receiveCart: vi.fn(),
 			cartTotals: {},
 		} );
 	} );
-
 	it( 'renders ExperimentalOrderShippingPackages.Slot with correct props when not loading', () => {
 		render( <ShippingRatesControl { ...defaultProps } /> );
-
 		expect( screen.getByTestId( 'shipping-slot' ) ).toBeInTheDocument();
-
 		expect( mockSlotRender ).toHaveBeenCalledWith(
 			expect.objectContaining( {
 				context: 'woocommerce/checkout',
-				extensions: { 'ship-ext': true },
+				extensions: {
+					'ship-ext': true,
+				},
 				collapsible: false,
 				showItems: false,
 			} )
 		);
-
 		const slotProps = mockSlotRender.mock.calls[ 0 ][ 0 ];
 		expect( slotProps.cart ).not.toHaveProperty( 'receiveCart' );
 		expect( slotProps ).toHaveProperty( 'components' );
 		expect( slotProps ).toHaveProperty( 'renderOption' );
 		expect( slotProps ).toHaveProperty( 'noResultsMessage' );
 	} );
-
 	it( 'does not render the slot when rates are loading', () => {
 		render(
 			<ShippingRatesControl { ...defaultProps } isLoadingRates={ true } />
 		);
-
 		expect(
 			screen.queryByTestId( 'shipping-slot' )
 		).not.toBeInTheDocument();
 		expect( mockSlotRender ).not.toHaveBeenCalled();
 	} );
-
 	it( 'selects initial rates for all packages when rendering them', () => {
-		const selectShippingRate = jest.fn();
-		( useShippingData as jest.Mock ).mockReturnValue( {
+		const selectShippingRate = vi.fn();
+		( useShippingData as Mock ).mockReturnValue( {
 			hasSelectedLocalPickup: false,
 			selectedRates: {},
 			selectShippingRate,
@@ -180,14 +209,12 @@ describe( 'ShippingRatesControl slot rendering', () => {
 				shippingRates: [],
 			} ),
 		];
-
 		render(
 			<ShippingRatesControl
 				{ ...defaultProps }
 				shippingRates={ shippingRates }
 			/>
 		);
-
 		expect( selectShippingRate.mock.calls ).toEqual( [
 			[ 'flat_rate:1', 0 ],
 			[ 'flat_rate:3', 1 ],
@@ -197,14 +224,15 @@ describe( 'ShippingRatesControl slot rendering', () => {
 		expect( mockShippingRatesControlPackage ).toHaveBeenCalledTimes( 4 );
 		mockShippingRatesControlPackage.mock.calls.forEach( ( [ props ] ) => {
 			expect( props ).toEqual(
-				expect.objectContaining( { manageSelectionLocally: false } )
+				expect.objectContaining( {
+					manageSelectionLocally: false,
+				} )
 			);
 		} );
 	} );
-
 	it( 'selects initial rates when packages become available after an empty render', () => {
-		const selectShippingRate = jest.fn();
-		( useShippingData as jest.Mock ).mockReturnValue( {
+		const selectShippingRate = vi.fn();
+		( useShippingData as Mock ).mockReturnValue( {
 			hasSelectedLocalPickup: false,
 			selectedRates: {},
 			selectShippingRate,
@@ -217,23 +245,20 @@ describe( 'ShippingRatesControl slot rendering', () => {
 		const { rerender } = render(
 			<ShippingRatesControl { ...defaultProps } shippingRates={ [] } />
 		);
-
 		rerender(
 			<ShippingRatesControl
 				{ ...defaultProps }
 				shippingRates={ [ firstPackage, secondPackage ] }
 			/>
 		);
-
 		expect( selectShippingRate.mock.calls ).toEqual( [
 			[ 'flat_rate:1', 0 ],
 			[ 'flat_rate:2', 'subscription-package' ],
 		] );
 	} );
-
 	it( 'selects an initial rate when an existing empty package becomes populated', () => {
-		const selectShippingRate = jest.fn();
-		( useShippingData as jest.Mock ).mockReturnValue( {
+		const selectShippingRate = vi.fn();
+		( useShippingData as Mock ).mockReturnValue( {
 			hasSelectedLocalPickup: false,
 			selectedRates: {},
 			selectShippingRate,
@@ -249,33 +274,27 @@ describe( 'ShippingRatesControl slot rendering', () => {
 				shippingRates={ [ emptyPackage ] }
 			/>
 		);
-
 		expect( selectShippingRate ).not.toHaveBeenCalled();
-
 		rerender(
 			<ShippingRatesControl
 				{ ...defaultProps }
 				shippingRates={ [ populatedPackage ] }
 			/>
 		);
-
 		expect( selectShippingRate.mock.calls ).toEqual( [
 			[ 'flat_rate:1', 0 ],
 		] );
-
 		rerender(
 			<ShippingRatesControl
 				{ ...defaultProps }
 				shippingRates={ [ createShippingPackage( 0, 'flat_rate:1' ) ] }
 			/>
 		);
-
 		expect( selectShippingRate ).toHaveBeenCalledTimes( 1 );
 	} );
-
 	it( 'selects only newly added packages on subsequent renders', () => {
-		const selectShippingRate = jest.fn();
-		( useShippingData as jest.Mock ).mockReturnValue( {
+		const selectShippingRate = vi.fn();
+		( useShippingData as Mock ).mockReturnValue( {
 			hasSelectedLocalPickup: false,
 			selectedRates: {},
 			selectShippingRate,
@@ -289,31 +308,26 @@ describe( 'ShippingRatesControl slot rendering', () => {
 			/>
 		);
 		selectShippingRate.mockClear();
-
 		rerender(
 			<ShippingRatesControl
 				{ ...defaultProps }
 				shippingRates={ [ firstPackage, secondPackage ] }
 			/>
 		);
-
 		expect( selectShippingRate.mock.calls ).toEqual( [
 			[ 'flat_rate:2', 1 ],
 		] );
-
 		rerender(
 			<ShippingRatesControl
 				{ ...defaultProps }
 				shippingRates={ [ firstPackage, secondPackage ] }
 			/>
 		);
-
 		expect( selectShippingRate ).toHaveBeenCalledTimes( 1 );
 	} );
-
 	it( 'selects a package again after it is removed and re-added', () => {
-		const selectShippingRate = jest.fn();
-		( useShippingData as jest.Mock ).mockReturnValue( {
+		const selectShippingRate = vi.fn();
+		( useShippingData as Mock ).mockReturnValue( {
 			hasSelectedLocalPickup: false,
 			selectedRates: {},
 			selectShippingRate,
@@ -327,7 +341,6 @@ describe( 'ShippingRatesControl slot rendering', () => {
 			/>
 		);
 		selectShippingRate.mockClear();
-
 		rerender(
 			<ShippingRatesControl
 				{ ...defaultProps }
@@ -335,22 +348,19 @@ describe( 'ShippingRatesControl slot rendering', () => {
 			/>
 		);
 		expect( selectShippingRate ).not.toHaveBeenCalled();
-
 		rerender(
 			<ShippingRatesControl
 				{ ...defaultProps }
 				shippingRates={ [ firstPackage, secondPackage ] }
 			/>
 		);
-
 		expect( selectShippingRate.mock.calls ).toEqual( [
 			[ 'flat_rate:2', 1 ],
 		] );
 	} );
-
 	it( 'selects again for a package whose rates disappear and come back', () => {
-		const selectShippingRate = jest.fn();
-		( useShippingData as jest.Mock ).mockReturnValue( {
+		const selectShippingRate = vi.fn();
+		( useShippingData as Mock ).mockReturnValue( {
 			hasSelectedLocalPickup: false,
 			selectedRates: {},
 			selectShippingRate,
@@ -361,7 +371,6 @@ describe( 'ShippingRatesControl slot rendering', () => {
 				shippingRates={ [ createShippingPackage( 0, 'flat_rate:1' ) ] }
 			/>
 		);
-
 		expect( selectShippingRate.mock.calls ).toEqual( [
 			[ 'flat_rate:1', 0 ],
 		] );
@@ -386,30 +395,28 @@ describe( 'ShippingRatesControl slot rendering', () => {
 				shippingRates={ [ createShippingPackage( 0, 'flat_rate:9' ) ] }
 			/>
 		);
-
 		expect( selectShippingRate.mock.calls ).toEqual( [
 			[ 'flat_rate:1', 0 ],
 			[ 'flat_rate:9', 0 ],
 		] );
 	} );
-
 	it( 'lets the rate lists own their selection in the editor only', () => {
-		const selectShippingRate = jest.fn();
-		( useShippingData as jest.Mock ).mockReturnValue( {
+		const selectShippingRate = vi.fn();
+		( useShippingData as Mock ).mockReturnValue( {
 			hasSelectedLocalPickup: false,
 			selectedRates: {},
 			selectShippingRate,
 		} );
-
 		render(
 			<ShippingRatesControl
 				{ ...defaultProps }
 				shippingRates={ [ createShippingPackage( 0, 'flat_rate:1' ) ] }
 			/>
 		);
-
 		expect( mockShippingRatesControlPackage ).toHaveBeenCalledWith(
-			expect.objectContaining( { manageSelectionLocally: false } )
+			expect.objectContaining( {
+				manageSelectionLocally: false,
+			} )
 		);
 
 		// The cart store never changes in the editor, because the selectShippingRate
@@ -417,7 +424,9 @@ describe( 'ShippingRatesControl slot rendering', () => {
 		// clicking a rate in the block preview would do nothing.
 		mockShippingRatesControlPackage.mockClear();
 		selectShippingRate.mockClear();
-		( useEditorContext as jest.Mock ).mockReturnValue( { isEditor: true } );
+		( useEditorContext as Mock ).mockReturnValue( {
+			isEditor: true,
+		} );
 		try {
 			render(
 				<ShippingRatesControl
@@ -427,15 +436,16 @@ describe( 'ShippingRatesControl slot rendering', () => {
 					] }
 				/>
 			);
-
 			expect( mockShippingRatesControlPackage ).toHaveBeenCalledWith(
-				expect.objectContaining( { manageSelectionLocally: true } )
+				expect.objectContaining( {
+					manageSelectionLocally: true,
+				} )
 			);
 			// Selecting from here as well would fire set-selected-shipping-rate
 			// twice per package for anything listening in the editor.
 			expect( selectShippingRate ).not.toHaveBeenCalled();
 		} finally {
-			( useEditorContext as jest.Mock ).mockReturnValue( {
+			( useEditorContext as Mock ).mockReturnValue( {
 				isEditor: false,
 			} );
 		}

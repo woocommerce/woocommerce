@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -13,11 +15,18 @@ import {
 	useQueryStateByKey,
 	useSynchronizedQueryState,
 } from '../use-query-state';
-
-jest.mock( '@woocommerce/block-data', () => ( {
-	__esModule: true,
-	QUERY_STATE_STORE_KEY: 'test/store',
-} ) );
+vi.mock( '@woocommerce/block-data', () => {
+	const mock = {
+		__esModule: true,
+		QUERY_STATE_STORE_KEY: 'test/store',
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 /**
  * A helper for setting up the `mocks` object and the `registry` mock before
@@ -33,8 +42,12 @@ jest.mock( '@woocommerce/block-data', () => ( {
  *                                  using `mocks.selector`.
  */
 const setupMocks = ( registry, mocks, actionMockName, selectorMockName ) => {
-	mocks.action = jest.fn().mockReturnValue( { type: 'testAction' } );
-	mocks.selector = jest.fn().mockReturnValue( { foo: 'bar' } );
+	mocks.action = vi.fn().mockReturnValue( {
+		type: 'testAction',
+	} );
+	mocks.selector = vi.fn().mockReturnValue( {
+		foo: 'bar',
+	} );
 	registry.registerStore( storeKey, {
 		reducer: () => ( {} ),
 		actions: {
@@ -45,20 +58,16 @@ const setupMocks = ( registry, mocks, actionMockName, selectorMockName ) => {
 		},
 	} );
 };
-
 describe( 'Testing Query State Hooks', () => {
 	let registry;
 	let mocks;
-
 	const wrapper = ( { children } ) => (
 		<RegistryProvider value={ registry }>{ children }</RegistryProvider>
 	);
-
 	beforeEach( () => {
 		registry = createRegistry();
 		mocks = {};
 	} );
-
 	describe( 'useQueryStateByContext', () => {
 		beforeEach( () => {
 			setupMocks(
@@ -68,13 +77,14 @@ describe( 'Testing Query State Hooks', () => {
 				'getValueForQueryContext'
 			);
 		} );
-
 		it( 'calls useSelect with the provided context and returns expected values', () => {
 			const { action, selector } = mocks;
 			const { result } = renderHook(
 				( { context } ) => useQueryStateByContext( context ),
 				{
-					initialProps: { context: 'test-context' },
+					initialProps: {
+						context: 'test-context',
+					},
 					wrapper,
 				}
 			);
@@ -86,19 +96,22 @@ describe( 'Testing Query State Hooks', () => {
 				'test-context',
 				undefined
 			);
-			expect( queryState ).toEqual( { foo: 'bar' } );
+			expect( queryState ).toEqual( {
+				foo: 'bar',
+			} );
 			expect( action ).not.toHaveBeenCalled();
 
 			// execute dispatcher and make sure it's called.
 			act( () => {
-				setQueryState( { foo: 'bar' } );
+				setQueryState( {
+					foo: 'bar',
+				} );
 			} );
 			expect( action ).toHaveBeenCalledWith( 'test-context', {
 				foo: 'bar',
 			} );
 		} );
 	} );
-
 	describe( 'useQueryStateByKey', () => {
 		beforeEach( () => {
 			setupMocks(
@@ -108,7 +121,6 @@ describe( 'Testing Query State Hooks', () => {
 				'getValueForQueryKey'
 			);
 		} );
-
 		it( 'calls useSelect with the provided context and returns expected values', () => {
 			const { selector, action } = mocks;
 			const { result } = renderHook(
@@ -122,7 +134,6 @@ describe( 'Testing Query State Hooks', () => {
 					wrapper,
 				}
 			);
-
 			const [ queryState, setQueryState ] = result.current;
 			// the {} is because all selectors are called internally in the
 			// registry with the first argument being the state which is empty.
@@ -132,17 +143,23 @@ describe( 'Testing Query State Hooks', () => {
 				'someValue',
 				undefined
 			);
-			expect( queryState ).toEqual( { foo: 'bar' } );
+			expect( queryState ).toEqual( {
+				foo: 'bar',
+			} );
 			expect( action ).not.toHaveBeenCalled();
 
 			// execute dispatcher and make sure it's called.
 			act( () => {
-				setQueryState( { foo: 'bar' } );
+				setQueryState( {
+					foo: 'bar',
+				} );
 			} );
 			expect( action ).toHaveBeenCalledWith(
 				'test-context',
 				'someValue',
-				{ foo: 'bar' }
+				{
+					foo: 'bar',
+				}
 			);
 		} );
 	} );
@@ -150,8 +167,9 @@ describe( 'Testing Query State Hooks', () => {
 	// Note: these tests only add partial coverage because the state is not
 	// actually updated by the action dispatch via our mocks.
 	describe( 'useSynchronizedQueryState', () => {
-		const initialQuery = { a: 'b' };
-
+		const initialQuery = {
+			a: 'b',
+		};
 		beforeEach( () => {
 			setupMocks(
 				registry,
@@ -160,7 +178,6 @@ describe( 'Testing Query State Hooks', () => {
 				'getValueForQueryContext'
 			);
 		} );
-
 		it( 'returns provided query state on initial render and merges state', () => {
 			const { action, selector } = mocks;
 			const { result } = renderHook(
@@ -174,7 +191,6 @@ describe( 'Testing Query State Hooks', () => {
 					wrapper,
 				}
 			);
-
 			const [ queryState ] = result.current;
 			expect( queryState ).toBe( initialQuery );
 			expect( selector ).toHaveBeenLastCalledWith(
@@ -187,7 +203,6 @@ describe( 'Testing Query State Hooks', () => {
 				a: 'b',
 			} );
 		} );
-
 		it( 'returns merged queryState on subsequent render', () => {
 			const { result, rerender } = renderHook(
 				( { context, synchronizedQuery } ) =>
@@ -200,7 +215,6 @@ describe( 'Testing Query State Hooks', () => {
 					wrapper,
 				}
 			);
-
 			rerender( {
 				context: 'test-context',
 				synchronizedQuery: initialQuery,
@@ -212,7 +226,9 @@ describe( 'Testing Query State Hooks', () => {
 			// However we DO expect this to be a new object.
 			const [ queryState ] = result.current;
 			expect( queryState ).not.toBe( initialQuery );
-			expect( queryState ).toEqual( { foo: 'bar' } );
+			expect( queryState ).toEqual( {
+				foo: 'bar',
+			} );
 		} );
 	} );
 } );

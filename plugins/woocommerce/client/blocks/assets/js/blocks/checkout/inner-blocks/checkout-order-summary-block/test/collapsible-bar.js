@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -10,50 +12,70 @@ import { SlotFillProvider } from '@woocommerce/blocks-checkout';
 import { previewCart as mockPreviewCart } from '../../../../../previews/cart';
 import SummaryBlock from '../frontend';
 import { CheckoutOrderSummarySlot } from '../slotfills';
-
-const baseContext = jest.requireMock( '@woocommerce/base-context' );
-
-jest.mock( '@woocommerce/settings', () => ( {
-	...jest.requireActual( '@woocommerce/settings' ),
-	SITE_CURRENCY: {
-		code: 'USD',
-		symbol: '$',
-		thousandSeparator: ',',
-		decimalSeparator: '.',
-		minorUnit: 2,
-		prefix: '$',
-		suffix: '',
-	},
-} ) );
-
-jest.mock( '@woocommerce/base-context/hooks', () => ( {
-	...jest.requireActual( '@woocommerce/base-context/hooks' ),
-	useStoreCart: jest.fn().mockReturnValue( {
-		cartItems: [],
-		cartTotals: {
-			total_price: '4000',
-			currency_code: 'USD',
-			currency_symbol: '$',
-			currency_minor_unit: 2,
-			currency_decimal_separator: '.',
-			currency_thousand_separator: ',',
-			currency_prefix: '$',
-			currency_suffix: '',
+const baseContext = await import( '@woocommerce/base-context' );
+vi.mock( '@woocommerce/settings', async () => {
+	const mock = {
+		...( await vi.importActual( '@woocommerce/settings' ) ),
+		SITE_CURRENCY: {
+			code: 'USD',
+			symbol: '$',
+			thousandSeparator: ',',
+			decimalSeparator: '.',
+			minorUnit: 2,
+			prefix: '$',
+			suffix: '',
 		},
-		cartCoupons: [],
-		cartFees: [],
-		cartNeedsShipping: false,
-		shippingRates: [],
-		shippingAddress: mockPreviewCart.shipping_address,
-		billingAddress: mockPreviewCart.billing_address,
-		cartHasCalculatedShipping: true,
-	} ),
-} ) );
-
-jest.mock( '@woocommerce/base-context', () => ( {
-	...jest.requireActual( '@woocommerce/base-context' ),
-	useContainerWidthContext: jest.fn(),
-} ) );
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/base-context/hooks', async () => {
+	const mock = {
+		...( await vi.importActual( '@woocommerce/base-context/hooks' ) ),
+		useStoreCart: vi.fn().mockReturnValue( {
+			cartItems: [],
+			cartTotals: {
+				total_price: '4000',
+				currency_code: 'USD',
+				currency_symbol: '$',
+				currency_minor_unit: 2,
+				currency_decimal_separator: '.',
+				currency_thousand_separator: ',',
+				currency_prefix: '$',
+				currency_suffix: '',
+			},
+			cartCoupons: [],
+			cartFees: [],
+			cartNeedsShipping: false,
+			shippingRates: [],
+			shippingAddress: mockPreviewCart.shipping_address,
+			billingAddress: mockPreviewCart.billing_address,
+			cartHasCalculatedShipping: true,
+		} ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/base-context', async () => {
+	const mock = {
+		...( await vi.importActual( '@woocommerce/base-context' ) ),
+		useContainerWidthContext: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 /**
  * The values ContainerWidthContext produces for a given container class name.
@@ -85,14 +107,12 @@ const renderAt = ( containerClassName ) => {
 		</SummaryBlock>
 	);
 };
-
 describe( 'Checkout Order Summary collapsible bar', () => {
 	describe.each( [ '', 'is-mobile', 'is-small', 'is-medium' ] )(
 		'when the container reports %p',
 		( containerClassName ) => {
 			it( 'exposes the summary as an expandable button', () => {
 				renderAt( containerClassName );
-
 				const bar = screen.getByRole( 'button', {
 					name: /Order summary/,
 				} );
@@ -100,24 +120,22 @@ describe( 'Checkout Order Summary collapsible bar', () => {
 				expect( bar ).toHaveAttribute( 'aria-controls' );
 				expect( bar ).toHaveAttribute( 'tabindex', '0' );
 			} );
-
 			it( 'toggles on click', () => {
 				renderAt( containerClassName );
-
 				const bar = screen.getByRole( 'button', {
 					name: /Order summary/,
 				} );
 				fireEvent.click( bar );
 				expect( bar ).toHaveAttribute( 'aria-expanded', 'true' );
 			} );
-
 			it.each( [ 'Enter', ' ' ] )( 'toggles on %p', ( key ) => {
 				renderAt( containerClassName );
-
 				const bar = screen.getByRole( 'button', {
 					name: /Order summary/,
 				} );
-				fireEvent.keyDown( bar, { key } );
+				fireEvent.keyDown( bar, {
+					key,
+				} );
 				expect( bar ).toHaveAttribute( 'aria-expanded', 'true' );
 			} );
 
@@ -128,35 +146,30 @@ describe( 'Checkout Order Summary collapsible bar', () => {
 				'suppresses the browser default for %p',
 				( key ) => {
 					renderAt( containerClassName );
-
 					const bar = screen.getByRole( 'button', {
 						name: /Order summary/,
 					} );
-					const event = createEvent.keyDown( bar, { key } );
+					const event = createEvent.keyDown( bar, {
+						key,
+					} );
 					fireEvent( bar, event );
-
 					expect( event.defaultPrevented ).toBe( true );
 				}
 			);
-
 			it( 'collapses again when activated a second time', () => {
 				renderAt( containerClassName );
-
 				const bar = screen.getByRole( 'button', {
 					name: /Order summary/,
 				} );
 				fireEvent.click( bar );
 				expect( bar ).toHaveAttribute( 'aria-expanded', 'true' );
-
 				fireEvent.click( bar );
 				expect( bar ).toHaveAttribute( 'aria-expanded', 'false' );
 			} );
 		}
 	);
-
 	it( 'is not a button once the container is large enough for two columns', () => {
 		const { container } = renderAt( 'is-large' );
-
 		const bar = container.querySelector(
 			'.wc-block-components-checkout-order-summary__title'
 		);
@@ -165,7 +178,6 @@ describe( 'Checkout Order Summary collapsible bar', () => {
 		expect( bar ).not.toHaveAttribute( 'aria-expanded' );
 	} );
 } );
-
 describe( 'Checkout Order Summary fill', () => {
 	/**
 	 * Renders the block together with the slot the fill targets, so the second
@@ -196,21 +208,17 @@ describe( 'Checkout Order Summary fill', () => {
 		container.querySelectorAll(
 			'.checkout-order-summary-block-fill-wrapper'
 		);
-
 	describe.each( [ '', 'is-mobile', 'is-small', 'is-medium' ] )(
 		'when the container reports %p',
 		( containerClassName ) => {
 			it( 'renders the second summary into the slot', () => {
 				const { container } = renderWithSlot( containerClassName );
-
 				expect( fillsIn( container ) ).toHaveLength( 1 );
 			} );
 		}
 	);
-
 	it( 'renders no fill once the container is large enough for two columns', () => {
 		const { container } = renderWithSlot( 'is-large' );
-
 		expect( fillsIn( container ) ).toHaveLength( 0 );
 	} );
 } );

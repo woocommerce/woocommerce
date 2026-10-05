@@ -1,3 +1,5 @@
+import { describe, expect, it, test, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -58,7 +60,7 @@ describe( 'Checkout registry', () => {
 
 	test( 'should catch filter errors if user is not an admin', () => {
 		const spy = {};
-		spy.console = jest
+		spy.console = vi
 			.spyOn( console, 'error' )
 			.mockImplementation( () => {} );
 

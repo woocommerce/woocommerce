@@ -1,3 +1,5 @@
+import { expect, test, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -18,16 +20,22 @@ import {
 	generateShippingPackage,
 	generateShippingRate,
 } from '../../../../../mocks/shipping-package';
-
-jest.mock( '@wordpress/api-fetch', () => ( {
-	__esModule: true,
-	default: Object.assign( jest.fn(), {
-		use: jest.fn(),
-		setNonce: jest.fn(),
-		setCartHash: jest.fn(),
-	} ),
-} ) );
-
+vi.mock( '@wordpress/api-fetch', () => {
+	const mock = {
+		__esModule: true,
+		default: Object.assign( vi.fn(), {
+			use: vi.fn(),
+			setNonce: vi.fn(),
+			setCartHash: vi.fn(),
+		} ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const ShippingOptions = () => {
 	const { shippingRates } = useShippingData();
 	return (
@@ -43,7 +51,6 @@ const ShippingOptions = () => {
 		/>
 	);
 };
-
 const createPackage = ( selectedRate: string ) =>
 	generateShippingPackage( {
 		packageId: 0,
@@ -64,10 +71,11 @@ const createPackage = ( selectedRate: string ) =>
 			} ),
 		],
 	} );
-
 test( 'failed initialization stays retryable without automatically repeating rejected requests', async () => {
-	jest.useFakeTimers();
-	const user = userEvent.setup( { advanceTimers: jest.advanceTimersByTime } );
+	vi.useFakeTimers();
+	const user = userEvent.setup( {
+		advanceTimers: vi.advanceTimersByTime,
+	} );
 	const registry = createRegistry();
 	registry.register( cartStore );
 	const dispatch = registry.dispatch( cartStore );
@@ -76,7 +84,7 @@ test( 'failed initialization stays retryable without automatically repeating rej
 	dispatch.setCartData( {
 		shippingRates: [ createPackage( 'pickup_location:0' ) ],
 	} );
-	jest.mocked( apiFetch ).mockResolvedValue( {
+	vi.mocked( apiFetch ).mockResolvedValue( {
 		responses: [
 			{
 				status: 400,
@@ -84,12 +92,13 @@ test( 'failed initialization stays retryable without automatically repeating rej
 				body: {
 					code: 'woocommerce_rest_cart_shipping_rate_invalid',
 					message: 'Shipping rate rejected.',
-					data: { status: 400 },
+					data: {
+						status: 400,
+					},
 				},
 			},
 		],
 	} );
-
 	const { unmount } = render(
 		<RegistryProvider value={ registry }>
 			<SlotFillProvider>
@@ -99,17 +108,17 @@ test( 'failed initialization stays retryable without automatically repeating rej
 	);
 	try {
 		await act( async () => {
-			await jest.runOnlyPendingTimersAsync();
+			await vi.runOnlyPendingTimersAsync();
 		} );
 		const flatRate = screen.getByRole( 'radio', {
-			name: 'Flat rate $ 12.50',
+			name: 'Flat rate $12.50',
 		} );
 		expect( flatRate ).not.toBeChecked();
 		expect( apiFetch ).toHaveBeenCalledTimes( 1 );
 
 		// Give a render-driven retry loop enough time to reveal itself.
 		await act( async () => {
-			await jest.advanceTimersByTimeAsync( 3000 );
+			await vi.advanceTimersByTimeAsync( 3000 );
 		} );
 		expect( apiFetch ).toHaveBeenCalledTimes( 1 );
 
@@ -118,12 +127,11 @@ test( 'failed initialization stays retryable without automatically repeating rej
 		// eslint-disable-next-line testing-library/no-unnecessary-act
 		await act( async () => {
 			await user.click( flatRate );
-			await jest.runOnlyPendingTimersAsync();
+			await vi.runOnlyPendingTimersAsync();
 		} );
 		expect( flatRate ).not.toBeChecked();
 		expect( apiFetch ).toHaveBeenCalledTimes( 2 );
-
-		jest.mocked( apiFetch ).mockResolvedValueOnce( {
+		vi.mocked( apiFetch ).mockResolvedValueOnce( {
 			responses: [
 				{
 					status: 200,
@@ -139,7 +147,7 @@ test( 'failed initialization stays retryable without automatically repeating rej
 		// eslint-disable-next-line testing-library/no-unnecessary-act
 		await act( async () => {
 			await user.click( flatRate );
-			await jest.runOnlyPendingTimersAsync();
+			await vi.runOnlyPendingTimersAsync();
 		} );
 		expect( flatRate ).toBeChecked();
 		expect(
@@ -152,6 +160,6 @@ test( 'failed initialization stays retryable without automatically repeating rej
 		expect( apiFetch ).toHaveBeenCalledTimes( 3 );
 	} finally {
 		unmount();
-		jest.useRealTimers();
+		vi.useRealTimers();
 	}
 } );

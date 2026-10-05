@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+
 /**
  * Jest mock factory for @wordpress/data that registers a mock core/editor store.
  *
@@ -14,11 +16,12 @@
  * );
  * ```
  */
+const _actual = await vi.importActual( '@wordpress/data' );
 export const mockWordPressDataWithEditorStore = () => {
 	// `jest.requireActual` bypasses the mock and loads the real module,
 	// avoiding the circular dependency that would occur with a plain
 	// `require( '@wordpress/data' )` inside a jest.mock factory.
-	const wpData = jest.requireActual( '@wordpress/data' );
+	const wpData = _actual;
 	const mockEditorStore = wpData.createReduxStore( 'core/editor', {
 		reducer: () => ( {} ),
 		selectors: {

@@ -1,3 +1,5 @@
+import { beforeAll, describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -10,25 +12,29 @@ import { useState } from '@wordpress/element';
  * Internal dependencies
  */
 import ValidatedTextInput from '../validated-text-input';
-
-jest.mock( '@wordpress/data', () => ( {
-	__esModule: true,
-	...jest.requireActual( '@wordpress/data' ),
-	useDispatch: jest.fn(),
-} ) );
-
-const mockUseDispatch = useDispatch as jest.Mock;
-
+vi.mock( '@wordpress/data', async () => {
+	const mock = {
+		__esModule: true,
+		...( await vi.importActual( '@wordpress/data' ) ),
+		useDispatch: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+const mockUseDispatch = useDispatch as Mock;
 describe( 'ValidatedTextInput', () => {
-	beforeAll( () => {
+	beforeAll( async () => {
+		const _actual = await vi.importActual( '@wordpress/data' );
 		mockUseDispatch.mockImplementation( ( args ) => {
-			return jest.requireActual( '@wordpress/data' ).useDispatch( args );
+			return _actual.useDispatch( args );
 		} );
 	} );
-
 	it( 'Removes related validation error on change', async () => {
 		const user = userEvent.setup();
-
 		render(
 			<ValidatedTextInput
 				instanceId={ '0' }
@@ -39,7 +45,6 @@ describe( 'ValidatedTextInput', () => {
 				label={ 'Test Input' }
 			/>
 		);
-
 		await act( () =>
 			dispatch( validationStore ).setValidationErrors( {
 				'test-input': {
@@ -48,17 +53,13 @@ describe( 'ValidatedTextInput', () => {
 				},
 			} )
 		);
-
 		await expect(
 			select( validationStore ).getValidationError( 'test-input' )
 		).not.toBe( undefined );
-
 		const textInputElement = await screen.getByLabelText( 'Test Input' );
-
 		await act( async () => {
 			await user.type( textInputElement, 'New value' );
 		} );
-
 		expect(
 			select( validationStore ).getValidationError( 'test-input' )
 		).toBe( undefined );
@@ -73,7 +74,6 @@ describe( 'ValidatedTextInput', () => {
 				label={ 'Test Input' }
 			/>
 		);
-
 		await act( () =>
 			dispatch( validationStore ).setValidationErrors( {
 				'textinput-1': {
@@ -86,11 +86,9 @@ describe( 'ValidatedTextInput', () => {
 			select( validationStore ).getValidationError( 'textinput-1' )
 		).not.toBe( undefined );
 		const textInputElement = await screen.getByLabelText( 'Test Input' );
-
 		await act( async () => {
 			await userEvent.type( textInputElement, 'New value' );
 		} );
-
 		await expect(
 			select( validationStore ).getValidationError( 'textinput-1' )
 		).toBe( undefined );
@@ -173,7 +171,6 @@ describe( 'ValidatedTextInput', () => {
 				},
 			} )
 		);
-
 		expect( screen.getByRole( 'textbox' ) ).toHaveAccessibleErrorMessage(
 			'Completely separate error message'
 		);
@@ -202,12 +199,10 @@ describe( 'ValidatedTextInput', () => {
 			);
 		};
 		render( <TestComponent /> );
-
 		const textInputElement = await screen.getByLabelText( 'Test Input' );
 		await act( async () => {
 			await user.type( textInputElement, 'Invalid Value' );
 		} );
-
 		await expect(
 			select( validationStore ).getValidationError( 'test-input' )
 				?.message
@@ -216,7 +211,6 @@ describe( 'ValidatedTextInput', () => {
 			await user.clear( textInputElement );
 			await user.type( textInputElement, 'Valid Value' );
 		} );
-
 		await expect( textInputElement.value ).toBe( 'Valid Value' );
 		await expect(
 			select( validationStore ).getValidationError( 'test-input' )
@@ -239,7 +233,6 @@ describe( 'ValidatedTextInput', () => {
 		};
 		render( <TestComponent /> );
 		const textInputElement = await screen.getByLabelText( 'Test Input' );
-
 		await act( async () => {
 			await user.type( textInputElement, 'invalid-email' );
 			textInputElement.blur();
@@ -267,7 +260,6 @@ describe( 'ValidatedTextInput', () => {
 		};
 		render( <TestComponent /> );
 		const textInputElement = await screen.getByLabelText( 'Pattern Input' );
-
 		await act( async () => {
 			await user.type( textInputElement, '123456' );
 			textInputElement.blur();
@@ -296,7 +288,6 @@ describe( 'ValidatedTextInput', () => {
 		};
 		render( <TestComponent /> );
 		const textInputElement = await screen.getByLabelText( 'Test Input' );
-
 		await act( async () => {
 			await user.type( textInputElement, 'test' );
 			await user.clear( textInputElement );
@@ -324,7 +315,6 @@ describe( 'ValidatedTextInput', () => {
 		await act( () =>
 			dispatch( validationStore ).showAllValidationErrors()
 		);
-
 		expect(
 			screen.queryByText( 'Please enter a valid test input' )
 		).toBeInTheDocument();
@@ -334,31 +324,31 @@ describe( 'ValidatedTextInput', () => {
 			await user.click( textInputElement );
 			textInputElement.blur();
 		} );
-
 		expect(
 			screen.queryByText( 'Please enter a valid test input' )
 		).toBeInTheDocument();
 	} );
-
 	describe( 'correctly validates on mount', () => {
 		it( 'validates when focusOnMount is true and validateOnMount is not set', async () => {
-			const setValidationErrors = jest.fn();
+			const _actual2 = await vi.importActual( '@wordpress/data' );
+			const setValidationErrors = vi.fn();
 			mockUseDispatch.mockImplementation(
-				( store: string | { name: string } ) => {
+				(
+					store:
+						| string
+						| {
+								name: string;
+						  }
+				) => {
 					if ( store === validationStore ) {
 						return {
-							...jest
-								.requireActual( '@wordpress/data' )
-								.useDispatch( store ),
+							..._actual2.useDispatch( store ),
 							setValidationErrors,
 						};
 					}
-					return jest
-						.requireActual( '@wordpress/data' )
-						.useDispatch( store );
+					return _actual2.useDispatch( store );
 				}
 			);
-
 			const TestComponent = () => {
 				const [ inputValue, setInputValue ] = useState( '' );
 				return (
@@ -385,23 +375,25 @@ describe( 'ValidatedTextInput', () => {
 			} );
 		} );
 		it( 'validates when focusOnMount is false, regardless of validateOnMount value', async () => {
-			const setValidationErrors = jest.fn();
+			const _actual3 = await vi.importActual( '@wordpress/data' );
+			const setValidationErrors = vi.fn();
 			mockUseDispatch.mockImplementation(
-				( store: string | { name: string } ) => {
+				(
+					store:
+						| string
+						| {
+								name: string;
+						  }
+				) => {
 					if ( store === validationStore ) {
 						return {
-							...jest
-								.requireActual( '@wordpress/data' )
-								.useDispatch( store ),
+							..._actual3.useDispatch( store ),
 							setValidationErrors,
 						};
 					}
-					return jest
-						.requireActual( '@wordpress/data' )
-						.useDispatch( store );
+					return _actual3.useDispatch( store );
 				}
 			);
-
 			const TestComponent = ( { validateOnMount = false } ) => {
 				const [ inputValue, setInputValue ] = useState( '' );
 				return (
@@ -422,29 +414,30 @@ describe( 'ValidatedTextInput', () => {
 				await screen.getByLabelText( 'Test Input' );
 			await expect( textInputElement ).toHaveFocus();
 			await expect( setValidationErrors ).not.toHaveBeenCalled();
-
 			await rerender( <TestComponent validateOnMount={ true } /> );
 			await expect( textInputElement ).toHaveFocus();
 			await expect( setValidationErrors ).not.toHaveBeenCalled();
 		} );
 		it( 'does not validate when validateOnMount is false and focusOnMount is true', async () => {
-			const setValidationErrors = jest.fn();
+			const _actual4 = await vi.importActual( '@wordpress/data' );
+			const setValidationErrors = vi.fn();
 			mockUseDispatch.mockImplementation(
-				( store: string | { name: string } ) => {
+				(
+					store:
+						| string
+						| {
+								name: string;
+						  }
+				) => {
 					if ( store === validationStore ) {
 						return {
-							...jest
-								.requireActual( '@wordpress/data' )
-								.useDispatch( store ),
+							..._actual4.useDispatch( store ),
 							setValidationErrors,
 						};
 					}
-					return jest
-						.requireActual( '@wordpress/data' )
-						.useDispatch( store );
+					return _actual4.useDispatch( store );
 				}
 			);
-
 			const TestComponent = () => {
 				const [ inputValue, setInputValue ] = useState( '' );
 				return (

@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -8,8 +10,8 @@ import { render, screen } from '@testing-library/react';
  */
 import withScrollToTop from '../index';
 
-const focusedMock = jest.fn();
-const scrollIntoViewMock = jest.fn();
+const focusedMock = vi.fn();
+const scrollIntoViewMock = vi.fn();
 
 let scrollToTop;
 const TestComponent = withScrollToTop( ( props ) => {

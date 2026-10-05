@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -10,16 +12,19 @@ import * as mockUtils from '@woocommerce/editor-components/utils';
 import withSearchedCategories from '../with-searched-categories';
 
 // Mock the getCategories values for tests.
-mockUtils.getCategories = jest.fn().mockImplementation( () =>
-	Promise.resolve( [
-		{ id: 1, name: 'Clothing' },
-		{ id: 2, name: 'Food' },
-	] )
-);
+vi.mock( '@woocommerce/editor-components/utils', async () => ( {
+	...( await vi.importActual( '@woocommerce/editor-components/utils' ) ),
+	getCategories: vi.fn().mockImplementation( () =>
+		Promise.resolve( [
+			{ id: 1, name: 'Clothing' },
+			{ id: 2, name: 'Food' },
+		] )
+	),
+} ) );
 
 // Capture the props the HOC injects into the wrapped component.
 let lastProps;
-const CapturedComponent = jest.fn( ( props ) => {
+const CapturedComponent = vi.fn( ( props ) => {
 	lastProps = props;
 	return null;
 } );

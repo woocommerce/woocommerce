@@ -1,8 +1,10 @@
+import { beforeEach, describe, expect, test } from 'vitest';
+
 /**
  * External dependencies
  */
 import type { BlockAttributes } from '@wordpress/blocks';
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 
 /**

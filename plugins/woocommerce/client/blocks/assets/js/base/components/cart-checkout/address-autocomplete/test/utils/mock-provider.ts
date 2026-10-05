@@ -1,3 +1,5 @@
+import { vi, type Mock } from 'vitest';
+
 /**
  * A mock address autocomplete provider for testing.
  *
@@ -35,9 +37,9 @@ export const MOCK_SELECTED_ADDRESS = {
 };
 
 export interface MockProvider extends ClientAddressAutocompleteProvider {
-	search: jest.Mock;
-	select: jest.Mock;
-	canSearch: jest.Mock;
+	search: Mock;
+	select: Mock;
+	canSearch: Mock;
 }
 
 /**
@@ -47,9 +49,9 @@ export interface MockProvider extends ClientAddressAutocompleteProvider {
 export function createMockProvider(): MockProvider {
 	return {
 		id: MOCK_PROVIDER_ID,
-		canSearch: jest.fn().mockReturnValue( true ),
-		search: jest.fn().mockResolvedValue( MOCK_SEARCH_RESULTS ),
-		select: jest.fn().mockResolvedValue( MOCK_SELECTED_ADDRESS ),
+		canSearch: vi.fn().mockReturnValue( true ),
+		search: vi.fn().mockResolvedValue( MOCK_SEARCH_RESULTS ),
+		select: vi.fn().mockResolvedValue( MOCK_SELECTED_ADDRESS ),
 	};
 }
 

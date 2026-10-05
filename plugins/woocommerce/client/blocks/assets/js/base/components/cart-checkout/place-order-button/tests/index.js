@@ -1,3 +1,11 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+const { mockUseCheckoutSubmit } = vi.hoisted( () => {
+	const mockUseCheckoutSubmit = vi.fn();
+	return {
+		mockUseCheckoutSubmit,
+	};
+} );
+
 /**
  * External dependencies
  */
@@ -7,52 +15,58 @@ import { render, screen } from '@testing-library/react';
  * Internal dependencies
  */
 import PlaceOrderButton from '..';
-
-const mockUseCheckoutSubmit = jest.fn();
-jest.mock( '@woocommerce/base-context/hooks', () => ( {
-	useCheckoutSubmit: () => mockUseCheckoutSubmit(),
-	usePaymentMethodInterface: () => ( {
-		onSubmit: jest.fn(),
-		validate: jest.fn(),
-		activePaymentMethod: 'test-payment',
-	} ),
-	useStoreCart: () => ( {
-		cartIsLoading: false,
-	} ),
-} ) );
-
-jest.mock( '@woocommerce/blocks-components', () => ( {
-	FormattedMonetaryAmount: () => <span>$10.00</span>,
-	Spinner: () => <span>Loading...</span>,
-} ) );
-
-const CustomButtonMock = jest.fn( () => <button>Custom Button</button> );
-
+vi.mock( '@woocommerce/base-context/hooks', () => {
+	const mock = {
+		useCheckoutSubmit: () => mockUseCheckoutSubmit(),
+		usePaymentMethodInterface: () => ( {
+			onSubmit: vi.fn(),
+			validate: vi.fn(),
+			activePaymentMethod: 'test-payment',
+		} ),
+		useStoreCart: () => ( {
+			cartIsLoading: false,
+		} ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/blocks-components', () => {
+	const mock = {
+		FormattedMonetaryAmount: () => <span>$10.00</span>,
+		Spinner: () => <span>Loading...</span>,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+const CustomButtonMock = vi.fn( () => <button>Custom Button</button> );
 describe( 'PlaceOrderButton', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 		mockUseCheckoutSubmit.mockReturnValue( {
-			onSubmit: jest.fn(),
+			onSubmit: vi.fn(),
 			isCalculating: false,
 			isDisabled: false,
 			waitingForProcessing: false,
 			waitingForRedirect: false,
 		} );
 	} );
-
 	it( 'renders default button', () => {
 		render( <PlaceOrderButton label="Place Order" /> );
-
 		expect( screen.queryByText( 'Place Order' ) ).toBeInTheDocument();
 		expect( screen.queryByText( 'Custom Button' ) ).not.toBeInTheDocument();
 	} );
-
 	it( 'displays the provided label', () => {
 		render( <PlaceOrderButton label="Confirm Purchase" /> );
-
 		expect( screen.getByText( 'Confirm Purchase' ) ).toBeInTheDocument();
 	} );
-
 	it( 'renders CustomButtonComponent when provided', () => {
 		render(
 			<PlaceOrderButton
@@ -60,11 +74,9 @@ describe( 'PlaceOrderButton', () => {
 				CustomButtonComponent={ CustomButtonMock }
 			/>
 		);
-
 		expect( screen.queryByText( 'Custom Button' ) ).toBeInTheDocument();
 		expect( screen.queryByText( 'Place Order' ) ).not.toBeInTheDocument();
 	} );
-
 	it( 'spreads paymentMethodInterface props to the custom component', () => {
 		render(
 			<PlaceOrderButton
@@ -72,7 +84,6 @@ describe( 'PlaceOrderButton', () => {
 				CustomButtonComponent={ CustomButtonMock }
 			/>
 		);
-
 		expect( CustomButtonMock ).toHaveBeenCalledWith(
 			expect.objectContaining( {
 				onSubmit: expect.any( Function ),
