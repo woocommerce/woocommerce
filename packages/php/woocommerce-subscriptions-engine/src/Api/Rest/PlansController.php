@@ -37,6 +37,8 @@ final class PlansController extends WP_REST_Controller {
 
 	private const DEFAULT_PER_PAGE = 20;
 
+	private const LOG_SOURCE = 'woocommerce-subscriptions-engine';
+
 	/**
 	 * Plans repository.
 	 *
@@ -613,31 +615,49 @@ final class PlansController extends WP_REST_Controller {
 
 		$value = $this->associative_array( $value, 'pricing_policy must be an object or null.' );
 
-		return array_merge( $existing ?? array(), $value );
+		return array_replace( $existing ?? array(), $value );
 	}
 
 	/**
-	 * Let the owning extension validate the plan before it is stored.
+	 * Let the owning extension validate the plan before it is stored. A plan whose
+	 * owner registers no callback is stored without owner validation.
 	 *
 	 * @param Plan   $plan           Plan about to be written.
 	 * @param string $extension_slug Owning extension slug.
-	 * @return WP_Error|null Errors rejecting the write, or null when valid.
+	 * @return WP_Error|null Errors rejecting the write (500 if a callback threw), or null when valid.
 	 */
 	private function validate_with_owner( Plan $plan, string $extension_slug ): ?WP_Error {
 		$errors = new WP_Error();
 
-		/**
-		 * Fires before a plan is written so the owning extension can validate it.
-		 *
-		 * Add errors to $errors to reject the write; act only on your own $extension_slug.
-		 * The plan is a copy: changes to it are not stored. Runs on create and update
-		 * (including status-only updates), not on reorder.
-		 *
-		 * @param WP_Error $errors         Error collector.
-		 * @param Plan     $plan           Plan about to be written; its id is null on create.
-		 * @param string   $extension_slug Owning extension slug.
-		 */
-		do_action( 'woocommerce_subscriptions_engine_validate_plan', $errors, clone $plan, $extension_slug );
+		try {
+			/**
+			 * Fires before a plan is written so the owning extension can validate it.
+			 *
+			 * Add errors to $errors to reject the write; act only on your own $extension_slug.
+			 * The plan is a copy: changes to it are not stored. Runs on create and update
+			 * (including status-only updates), not on reorder.
+			 *
+			 * @param WP_Error $errors         Error collector.
+			 * @param Plan     $plan           Plan about to be written; its id is null on create.
+			 * @param string   $extension_slug Owning extension slug.
+			 */
+			do_action( 'woocommerce_subscriptions_engine_validate_plan', $errors, clone $plan, $extension_slug );
+		} catch ( Throwable $e ) {
+			wc_get_logger()->error(
+				sprintf( 'PlansController: plan validation for extension "%s" (plan %s) threw: %s', $extension_slug, null === $plan->get_id() ? 'new' : (string) $plan->get_id(), $e->getMessage() ),
+				array(
+					'source'         => self::LOG_SOURCE,
+					'extension_slug' => $extension_slug,
+					'plan_id'        => $plan->get_id(),
+				)
+			);
+
+			return new WP_Error(
+				'woocommerce_subscriptions_engine_plan_validation_failed',
+				__( 'The plan could not be validated.', 'woocommerce-subscriptions-engine' ),
+				array( 'status' => 500 )
+			);
+		}
 
 		return $errors->has_errors() ? $errors : null;
 	}

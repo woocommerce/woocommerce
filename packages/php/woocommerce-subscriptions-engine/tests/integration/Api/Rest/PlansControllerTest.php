@@ -12,6 +12,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Api\Rest;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Rest\PlansController;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use EngineIntegrationTestCase;
+use RuntimeException;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -283,7 +284,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		);
 	}
 
-	public function test_bogo_with_a_non_zero_value_is_stored_as_given(): void {
+	public function test_arbitrary_payload_values_are_stored_as_given(): void {
 		wp_set_current_user( $this->admin_id );
 
 		$pricing_policy = array(
@@ -300,7 +301,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 			self::BASE,
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
-				'name'           => 'Any bogo',
+				'name'           => 'Any payload',
 				'billing_policy' => array(
 					'period'   => 'month',
 					'interval' => 1,
@@ -309,7 +310,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 			)
 		);
 
-		$this->assertSame( 201, $created->get_status(), 'Pricing semantics belong to the owning extension.' );
+		$this->assertSame( 201, $created->get_status(), 'Payload semantics belong to the owning extension.' );
 		$this->assertSame( $pricing_policy, $this->response_data( $created )['pricing_policy'] );
 	}
 
@@ -607,6 +608,115 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$fetched = $this->response_data( $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) ) );
 		$this->assertSame( 'As sent again', $fetched['name'] );
 		$this->assertSame( array( 'policies' => array( array( 'type' => 'raw' ) ) ), $fetched['pricing_policy'] );
+	}
+
+	public function test_throwing_validate_callback_fails_the_write_without_storing(): void {
+		wp_set_current_user( $this->admin_id );
+		$id = $this->create_plan( 'Untouched' );
+
+		add_action(
+			'woocommerce_subscriptions_engine_validate_plan',
+			static function (): void {
+				throw new RuntimeException( 'Internal detail.' );
+			}
+		);
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Thrown',
+				'billing_policy' => array(
+					'period'   => 'month',
+					'interval' => 1,
+				),
+			)
+		);
+		$this->assertSame( 500, $created->get_status() );
+		$created_data = $this->response_data( $created );
+		$this->assertSame( 'woocommerce_subscriptions_engine_plan_validation_failed', $created_data['code'] );
+		$this->assertIsString( $created_data['message'] );
+		$this->assertStringNotContainsString( 'Internal detail.', $created_data['message'] );
+
+		$patched = $this->request(
+			'PATCH',
+			self::BASE . '/' . $id,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Changed',
+			)
+		);
+		$this->assertSame( 500, $patched->get_status() );
+		$this->assertSame( 'woocommerce_subscriptions_engine_plan_validation_failed', $this->response_data( $patched )['code'] );
+
+		remove_all_actions( 'woocommerce_subscriptions_engine_validate_plan' );
+
+		$fetched = $this->response_data( $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) ) );
+		$this->assertSame( 'Untouched', $fetched['name'] );
+
+		$list = $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$this->assertSame( '1', $list->get_headers()['X-WP-Total'] );
+	}
+
+	public function test_reorder_does_not_fire_the_validate_action(): void {
+		wp_set_current_user( $this->admin_id );
+		$first  = $this->create_plan( 'First' );
+		$second = $this->create_plan( 'Second' );
+
+		$calls = 0;
+		add_action(
+			'woocommerce_subscriptions_engine_validate_plan',
+			static function () use ( &$calls ): void {
+				++$calls;
+			}
+		);
+
+		$reordered = $this->request(
+			'POST',
+			self::BASE . '/reorder',
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'ids'            => array( $second, $first ),
+			)
+		);
+
+		$this->assertSame( 200, $reordered->get_status() );
+		$this->assertSame( 0, $calls );
+	}
+
+	public function test_patch_with_null_pricing_policy_clears_the_payload(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Priced',
+				'billing_policy' => array(
+					'period'   => 'month',
+					'interval' => 1,
+				),
+				'pricing_policy' => array( 'policies' => array( array( 'type' => 'raw' ) ) ),
+			)
+		);
+		$this->assertSame( 201, $created->get_status() );
+		$id = $this->int_value( $this->response_data( $created ), 'id' );
+
+		$patched = $this->request(
+			'PATCH',
+			self::BASE . '/' . $id,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'pricing_policy' => null,
+			)
+		);
+		$this->assertSame( 200, $patched->get_status() );
+		$this->assertNull( $this->response_data( $patched )['pricing_policy'] );
+
+		$fetched = $this->response_data( $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) ) );
+		$this->assertNull( $fetched['pricing_policy'] );
 	}
 
 	public function test_list_with_multiple_extension_slugs_returns_all_plans(): void {
