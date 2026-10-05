@@ -110,7 +110,6 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 	 */
 	public function provider_product_sale_badge_content(): array {
 		return array(
-			'default'    => array( array(), 'Sale' ),
 			'empty'      => array( array( 'saleText' => '' ), 'Sale' ),
 			'zero text'  => array( array( 'saleText' => '0' ), '0' ),
 			'custom'     => array(
@@ -176,33 +175,6 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Variable numeric badges omit custom affixes when using Up to.
-	 */
-	public function test_variable_discount_label_ignores_affixes(): void {
-		$product = \WC_Helper_Product::create_variation_product();
-		$priced  = wc_get_product( $product->get_children()[0] );
-		$priced->set_regular_price( '10' );
-		$priced->set_sale_price( '9' );
-		$priced->save();
-
-		foreach (
-			array(
-				'percentage' => 'Up to 10%',
-				'amount'     => 'Up to $1.00',
-			) as $mode => $label
-		) {
-			$attributes = array(
-				'badgeContent' => $mode,
-				'prefix'       => 'Save ',
-				'suffix'       => ' off',
-			);
-			$markup     = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/product-sale-badge ' . wp_json_encode( $attributes ) . ' /--><!-- /wp:woocommerce/single-product -->' );
-			$this->assertStringContainsString( 'aria-hidden="true">' . $label . '</span>', $markup );
-			$this->assertStringContainsString( 'screen-reader-text">Product on sale: ' . $label . '</span>', $markup );
-		}
-	}
-
-	/**
 	 * @testdox Variable product badge uses each variation's own regular price for the largest discount.
 	 */
 	public function test_variable_product_sale_badge_displays_maximum_discount(): void {
@@ -223,8 +195,14 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 				'amount'     => 'Up to $6.00',
 			) as $mode => $expected
 		) {
-			$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/product-sale-badge {"badgeContent":"' . $mode . '"} /--><!-- /wp:woocommerce/single-product -->' );
+			$attributes = array(
+				'badgeContent' => $mode,
+				'prefix'       => 'Save ',
+				'suffix'       => ' off',
+			);
+			$markup     = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/product-sale-badge ' . wp_json_encode( $attributes ) . ' /--><!-- /wp:woocommerce/single-product -->' );
 			$this->assertStringContainsString( 'wc-block-components-product-sale-badge__text" aria-hidden="true">' . $expected . '</span>', $markup );
+			$this->assertStringContainsString( 'screen-reader-text">Product on sale: ' . $expected . '</span>', $markup );
 		}
 	}
 

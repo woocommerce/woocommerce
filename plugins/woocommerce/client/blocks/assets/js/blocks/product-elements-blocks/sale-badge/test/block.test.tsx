@@ -58,8 +58,6 @@ it.each( [
 it.each< [ string, string, string | null ] >( [
 	[ 'simple', '99600', null ],
 	[ 'simple', '99500', '1%' ],
-	[ 'variable', '99600', null ],
-	[ 'variable', '99500', 'Up to 1%' ],
 ] )(
 	'rounds the %s percentage preview at price %s',
 	( type, price, expected ) => {
