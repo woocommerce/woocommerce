@@ -26,7 +26,8 @@
 			"width": true,
 			"radius": true
 		},
-		"listView": true
+		"listView": true,
+		"shadow": true
 	},
 	"attributes": {
 		"productId": {
