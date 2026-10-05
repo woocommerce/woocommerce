@@ -77,7 +77,7 @@ catalogs:
         '@babel/preset-react': 7.25.7
         '@babel/preset-typescript': 7.25.7
         '@babel/runtime': 7.25.7
-        '@wordpress/prettier-config': 4.56.0
+        '@wordpress/prettier-config': 4.49.0
         '@wordpress/postcss-plugins-preset': 5.56.0
         postcss: ^8.5.26
         webpack: 5.97.x

@@ -31,8 +31,8 @@ catalogs:
       specifier: 5.56.0
       version: 5.56.0
     '@wordpress/prettier-config':
-      specifier: 4.56.0
-      version: 4.56.0
+      specifier: 4.49.0
+      version: 4.49.0
     postcss:
       specifier: ^8.5.26
       version: 8.5.26
@@ -262,7 +262,7 @@ importers:
         version: link:tools/monorepo-utils
       '@wordpress/prettier-config':
         specifier: catalog:tooling
-        version: 4.56.0(wp-prettier@3.0.3)
+        version: 4.49.0(wp-prettier@3.0.3)
       babel-loader:
         specifier: 9.2.x
         version: 9.2.1(@babel/core@7.25.7)(webpack@5.97.1(@swc/core@1.15.24))
@@ -9702,9 +9702,9 @@ packages:
       react: ^18.0.0
       react-dom: ^18.0.0
 
-  '@wordpress/prettier-config@4.56.0':
-    resolution: {integrity: sha512-FTiY8VRrKVcB2FNxFsALoe8TC0ilpIzYdiRT+VaS87HlEF99L5UfZoGT7gL2VhdEhkNCS9FPtk9k2xGPok/WJg==}
-    engines: {node: '>=18.12.0'}
+  '@wordpress/prettier-config@4.49.0':
+    resolution: {integrity: sha512-yP4hm2m2Hxv3I7HI5lxbrCmh95Db4QWcGJGLq/fysepbLjTnqnMIHRs5p0/QoRMV/MhwFi8vMkNmmQYJt386ug==}
+    engines: {node: '>=18.12.0', npm: '>=8.19.2'}
     peerDependencies:
       prettier: '>=3'
 
@@ -29075,7 +29075,7 @@ snapshots:
       - stylelint
       - supports-color
 
-  '@wordpress/prettier-config@4.56.0(wp-prettier@3.0.3)':
+  '@wordpress/prettier-config@4.49.0(wp-prettier@3.0.3)':
     dependencies:
       prettier: wp-prettier@3.0.3
 
