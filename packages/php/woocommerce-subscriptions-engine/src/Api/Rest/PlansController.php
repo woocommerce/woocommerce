@@ -295,9 +295,9 @@ final class PlansController extends WP_REST_Controller {
 				)
 			);
 
-			$plan = $this->validate_with_owner( $plan, $extension_slug );
-			if ( $plan instanceof WP_Error ) {
-				return $plan;
+			$errors = $this->validate_with_owner( $plan, $extension_slug );
+			if ( is_wp_error( $errors ) ) {
+				return $this->as_bad_request( $errors );
 			}
 
 			$this->plan_repository->insert( $plan );
@@ -368,9 +368,9 @@ final class PlansController extends WP_REST_Controller {
 				$plan->set_sort_order( ScalarCoercion::coerce_int( $request->get_param( 'sort_order' ) ) );
 			}
 
-			$plan = $this->validate_with_owner( $plan, $extension_slug );
-			if ( $plan instanceof WP_Error ) {
-				return $plan;
+			$errors = $this->validate_with_owner( $plan, $extension_slug );
+			if ( is_wp_error( $errors ) ) {
+				return $this->as_bad_request( $errors );
 			}
 
 			if ( ! $this->plan_repository->update( $plan ) ) {
@@ -617,42 +617,45 @@ final class PlansController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Let the owning extension validate and normalize the plan before it is stored.
+	 * Let the owning extension validate the plan before it is stored.
 	 *
 	 * @param Plan   $plan           Plan about to be written.
 	 * @param string $extension_slug Owning extension slug.
-	 * @return Plan|WP_Error The plan to write, or an error rejecting the write.
+	 * @return WP_Error|null Errors rejecting the write, or null when valid.
 	 */
-	private function validate_with_owner( Plan $plan, string $extension_slug ) {
-		$id = $plan->get_id();
+	private function validate_with_owner( Plan $plan, string $extension_slug ): ?WP_Error {
+		$errors = new WP_Error();
 
 		/**
-		 * Filters the plan about to be written so the owning extension can validate and normalize it.
+		 * Fires before a plan is written so the owning extension can validate it.
 		 *
-		 * Runs on every plan create and update (not on reorder), after the request is applied.
-		 * Act only on your own `$extension_slug`; pass other owners' plans and an earlier
-		 * WP_Error through unchanged. Normalize through the plan's setters and return it, or
-		 * return a WP_Error to reject the write. The plan's id and owner must not change.
+		 * Add errors to $errors to reject the write; act only on your own $extension_slug.
+		 * The plan is a copy: changes to it are not stored. Runs on create and update
+		 * (including status-only updates), not on reorder.
 		 *
-		 * @param Plan|WP_Error $plan           Plan about to be written; its id is null on create.
-		 * @param string        $extension_slug Owning extension slug.
+		 * @param WP_Error $errors         Error collector.
+		 * @param Plan     $plan           Plan about to be written; its id is null on create.
+		 * @param string   $extension_slug Owning extension slug.
 		 */
-		$result = apply_filters( 'woocommerce_subscriptions_engine_validate_plan', $plan, $extension_slug );
+		do_action( 'woocommerce_subscriptions_engine_validate_plan', $errors, clone $plan, $extension_slug );
 
-		if ( $result instanceof WP_Error ) {
-			$data = $result->get_error_data();
+		return $errors->has_errors() ? $errors : null;
+	}
+
+	/**
+	 * Give each error code without a status a 400 status.
+	 *
+	 * @param WP_Error $errors Validation errors.
+	 */
+	private function as_bad_request( WP_Error $errors ): WP_Error {
+		foreach ( $errors->get_error_codes() as $code ) {
+			$data = $errors->get_error_data( $code );
 			if ( ! is_array( $data ) || ! isset( $data['status'] ) ) {
-				$result->add_data( array_merge( is_array( $data ) ? $data : array(), array( 'status' => 400 ) ) );
+				$errors->add_data( array_merge( is_array( $data ) ? $data : array(), array( 'status' => 400 ) ), $code );
 			}
-
-			return $result;
 		}
 
-		if ( ! $result instanceof Plan || $result->get_id() !== $id || $result->get_extension_slug() !== $extension_slug ) {
-			return $this->invalid_error( __( 'A woocommerce_subscriptions_engine_validate_plan callback returned an invalid value.', 'woocommerce-subscriptions-engine' ) );
-		}
-
-		return $result;
+		return $errors;
 	}
 
 	/**
