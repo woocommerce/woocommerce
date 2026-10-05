@@ -386,13 +386,11 @@ class WC_Checkout {
 	/**
 	 * Handle the woocommerce_ship_to_different_address_checked filter.
 	 *
-	 * Checks "Ship to a different address?" when the shopper chose a shipping destination during the session that differs
-	 * from the billing address, such as one entered in the cart's shipping calculator, so the checkout keeps the address
-	 * and rates the cart showed instead of switching to the billing address.
+	 * Checks "Ship to a different address?" when the shopper picked a shipping destination during the session, for example
+	 * in the cart's shipping calculator, so the checkout keeps the address and rates the cart showed.
 	 *
 	 * @internal
 	 *
-	 * @since 11.3.0
 	 * @param mixed $checked Whether the checkbox is checked, 1 or 0 by default.
 	 * @return mixed
 	 */
@@ -413,9 +411,8 @@ class WC_Checkout {
 	/**
 	 * Checks whether the customer's shipping destination differs from their billing address.
 	 *
-	 * Names and company are ignored since they don't affect where the order ships. A shipping address with no street, like
-	 * the one the cart's shipping calculator sets, is a location: it only differs through the fields it holds, so an
-	 * unchanged calculator update or a calculator with hidden fields doesn't check the box.
+	 * Names and company are ignored. When the shipping address has no street, as after using the cart's shipping
+	 * calculator, empty shipping fields are skipped, so fields the calculator hides don't count as a difference.
 	 *
 	 * @param WC_Customer $customer Customer object.
 	 * @return bool
@@ -452,8 +449,8 @@ class WC_Checkout {
 	/**
 	 * Checks whether a logged-in customer's session shipping address is still the one saved on their account.
 	 *
-	 * That address wasn't chosen during this session, for example because the session default to the billing address
-	 * was turned off, so it shouldn't override the "Shipping destination" setting.
+	 * That address wasn't chosen in this session, so it shouldn't override the "Shipping destination" setting. Reads the
+	 * stored user meta directly, since the session customer can't tell where its address came from.
 	 *
 	 * @param WC_Customer $customer Customer object.
 	 * @return bool
