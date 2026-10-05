@@ -83,34 +83,41 @@ check( 'the shipped configs still parse and name reviewers', () => {
 	}
 } );
 
-check( 'order fulfillment files route to Escargot, not SomewhereWarm', () => {
+check( 'Admin Features files route to their feature owners', () => {
 	const community = path.join( __dirname, '../../project-community-pr-assigner.json' );
 	const config = JSON.parse( fs.readFileSync( community, 'utf8' ) );
-	const owners = ( file ) =>
-		Object.keys( config )
+	const owners = ( file ) => {
+		const matched = Object.keys( config )
 			.filter( ( pattern ) => matches( pattern, file ) )
 			.flatMap( ( pattern ) => [].concat( config[ pattern ] ) );
+		return [ ...new Set( matched ) ];
+	};
 
-	// Fulfillments, in source and tests, routes to Escargot and never SomewhereWarm.
-	for ( const file of [
-		'plugins/woocommerce/src/Admin/Features/Fulfillments/FulfillmentsController.php',
-		'plugins/woocommerce/src/Admin/Features/Fulfillments/deep/Nested.php',
-		'plugins/woocommerce/tests/php/src/Admin/Features/Fulfillments/SomeTest.php',
-	] ) {
-		const matched = owners( file );
-		assert.ok( matched.includes( 'escargot' ), `${ file } should route to escargot` );
-		assert.ok( ! matched.includes( 'somewherewarm' ), `${ file } should not route to somewherewarm` );
-	}
+	const source = 'plugins/woocommerce/src/Admin/Features';
+	const tests = 'plugins/woocommerce/tests/php/src/Admin/Features';
+	const cases = [
+		[ `${ source }/Blueprint/Init.php`, 'somewherewarm' ],
+		[ `${ source }/MarketingRecommendations/Init.php`, 'ballade' ],
+		[ `${ source }/Navigation/RemovedDeprecated.php`, 'somewherewarm' ],
+		[ `${ source }/OnboardingTasks/Init.php`, 'rubik' ],
+		[ `${ source }/PaymentGatewaySuggestions/Init.php`, 'moltres' ],
+		[ `${ source }/ProductBlockEditor/ProductTemplates/SectionInterface.php`, 'kirigami' ],
+		[ `${ source }/ShippingPartnerSuggestions/ShippingPartnerSuggestions.php`, 'escargot' ],
+		[ `${ source }/Fulfillments/FulfillmentsController.php`, 'escargot' ],
+		[ `${ source }/Fulfillments/deep/Nested.php`, 'escargot' ],
+		[ `${ source }/Features.php`, 'rubik' ],
+		[ `${ source }/LaunchYourStore.php`, 'rubik' ],
+		[ `${ source }/Onboarding.php`, 'rubik' ],
+		[ `${ source }/TransientNotices.php`, 'somewherewarm' ],
+		[ `${ tests }/Analytics/FeatureEnabledTest.php`, 'ventures' ],
+		[ `${ tests }/Blueprint/InitTest.php`, 'somewherewarm' ],
+		[ `${ tests }/OnboardingTasks/DeprecatedExtendedTaskTest.php`, 'rubik' ],
+		[ `${ tests }/ShippingPartnerSuggestions/DefaultShippingPartnersTest.php`, 'escargot' ],
+		[ `${ tests }/Fulfillments/FulfillmentsControllerTest.php`, 'escargot' ],
+	];
 
-	// The sibling Features that SomewhereWarm still owns are untouched.
-	for ( const file of [
-		'plugins/woocommerce/src/Admin/Features/OnboardingTasks/Task.php',
-		'plugins/woocommerce/src/Admin/Features/Onboarding.php',
-		'plugins/woocommerce/tests/php/src/Admin/Features/OnboardingTasks/OnboardingTasksTest.php',
-	] ) {
-		const matched = owners( file );
-		assert.ok( matched.includes( 'somewherewarm' ), `${ file } should still route to somewherewarm` );
-		assert.ok( ! matched.includes( 'escargot' ), `${ file } should not route to escargot` );
+	for ( const [ file, owner ] of cases ) {
+		assert.deepStrictEqual( owners( file ), [ owner ], `${ file } should route only to ${ owner }` );
 	}
 } );
 
