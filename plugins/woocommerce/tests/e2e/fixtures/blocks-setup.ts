@@ -11,6 +11,7 @@ import {
 	customerFile,
 	BLOCK_THEME_SLUG,
 	DB_EXPORT_FILE,
+	COOKIE_GATED_TEST_PLUGINS,
 	// eslint-disable-next-line import/no-unresolved -- resolved via the @woocommerce/e2e-utils tsconfig alias.
 } from '@woocommerce/e2e-utils';
 
@@ -105,6 +106,13 @@ setup( 'blocks setup', async () => {
 		console.log( '├ Preparing product attributes…' );
 		await prepareAttributes();
 	}
+
+	console.log( '├ Activating cookie-gated test plugins…' );
+	await wpCLI(
+		`plugin activate ${ COOKIE_GATED_TEST_PLUGINS.map(
+			( plugin ) => `woocommerce-blocks-test-plugins/${ plugin }.php`
+		).join( ' ' ) }`
+	);
 
 	console.log( '├ Exporting database snapshot…' );
 	await wpCLI( `db export ${ DB_EXPORT_FILE }` );
