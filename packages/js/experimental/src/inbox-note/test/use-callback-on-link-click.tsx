@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -30,28 +32,26 @@ const TestComp = ( { callback }: { callback: ( link: string ) => void } ) => {
 
 describe( 'useCallbackOnLinkClick hook', () => {
 	it( 'should call callback with link when inner anchor element is clicked', () => {
-		const callback = jest.fn();
+		const callback = vi.fn();
 		const { getByText } = render( <TestComp callback={ callback } /> );
 		userEvent.click( getByText( 'Link' ) );
 		expect( callback ).toHaveBeenCalledWith( 'http://tosomewhere.com/' );
 	} );
 
 	it( 'should not call callback if click event target does not have an href', () => {
-		const callback = jest.fn();
+		const callback = vi.fn();
 		const { getByText } = render( <TestComp callback={ callback } /> );
 		userEvent.click( getByText( 'Button' ) );
 		expect( callback ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should remove listener on unmount', () => {
-		const listener = jest.fn();
+		const listener = vi.fn();
 		const { getByText, unmount } = render(
-			<TestComp callback={ jest.fn() } />
+			<TestComp callback={ vi.fn() } />
 		);
 		const span = getByText( 'Some Text' );
-		jest.spyOn( span, 'removeEventListener' ).mockImplementation(
-			listener
-		);
+		vi.spyOn( span, 'removeEventListener' ).mockImplementation( listener );
 		unmount();
 		expect( listener ).toHaveBeenCalledTimes( 1 );
 	} );
