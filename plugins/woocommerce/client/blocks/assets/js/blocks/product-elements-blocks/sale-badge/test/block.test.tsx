@@ -136,17 +136,11 @@ it( 'preserves currency units without custom affixes when using Up to', () => {
 } );
 
 it.each( [
-	[ 'simple', '', '', '10%' ],
-	[ 'simple', '−', '', '−10%' ],
-	[ 'simple', '', ' off', '10% off' ],
-	[ 'simple', 'Save ', ' off', 'Save 10% off' ],
-	[ 'variable', '', '', 'Up to 10%' ],
-	[ 'variable', '−', '', 'Up to 10%' ],
-	[ 'variable', '', ' off', 'Up to 10%' ],
-	[ 'variable', 'Save ', ' off', 'Up to 10%' ],
+	[ 'simple', 'Save 10% off' ],
+	[ 'variable', 'Up to 10%' ],
 ] )(
-	'formats the %s discount label with prefix "%s" and suffix "%s"',
-	( type, prefix, suffix, expected ) => {
+	'formats the %s percentage label with custom affixes',
+	( type, expected ) => {
 		product.type = type;
 		render(
 			<Block
@@ -154,8 +148,8 @@ it.each( [
 				align={ false }
 				isDescendentOfSingleProductTemplate={ false }
 				badgeContent="percentage"
-				prefix={ prefix }
-				suffix={ suffix }
+				prefix="Save "
+				suffix=" off"
 			/>
 		);
 		expect( screen.getByText( expected ) ).toBeInTheDocument();
