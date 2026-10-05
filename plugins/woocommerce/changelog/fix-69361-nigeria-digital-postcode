@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Accept Nigeria's 11-character digital postcode (NDAPS) at checkout, in PHP and in the Checkout block, alongside the six-digit code it replaces.

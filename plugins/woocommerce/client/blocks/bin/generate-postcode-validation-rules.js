@@ -43,6 +43,7 @@ const COUNTRY_CODES = [
 	'LI',
 	'LV',
 	'MN',
+	'NG',
 	'NI',
 	'NL',
 	'NO',
@@ -92,6 +93,13 @@ const COMPATIBILITY_OVERRIDES = {
 	LI: { pattern: '94[8-9][0-9]' },
 	LV: { pattern: '(?:LV[- ]?)?[1-9][0-9]{3}', flags: 'i' },
 	MN: { pattern: '[0-9]{5}(?:-[0-9]{4})?' },
+	// The 2026 digital postcode (NDAPS), alongside the six-digit code it replaces.
+	NG: {
+		pattern:
+			'[0-9]{6}|[A-Z]{2}(?:0[1-9]|[1-9][0-9])[A-Z0-9]{3}[A-Z]{2}(?:0[1-9]|[1-9][0-9])',
+		flags: 'i',
+		normalization: 'removeSpacesAndHyphens',
+	},
 	NI: { pattern: '[1-9][0-9]{4}' },
 	NL: {
 		pattern: '[1-9][0-9]{3}\\s?(?!SA|SD|SS)[A-Z]{2}',
