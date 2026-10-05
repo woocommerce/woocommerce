@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -174,7 +176,7 @@ describe( 'getHiddenInputs', () => {
 	it.each( unsupportedDefaultCases )(
 		'handles an unsupported $label gracefully by default',
 		( { field, message } ) => {
-			const consoleError = jest
+			const consoleError = vi
 				.spyOn( console, 'error' )
 				.mockImplementation( () => undefined );
 

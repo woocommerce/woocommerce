@@ -1,3 +1,5 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -7,21 +9,29 @@ import { createRoot } from 'react-dom/client';
 import type { ReactNode } from 'react';
 
 // Mirror the real admin-ui NavigableRegion, which wraps the shell in a labeled region.
-jest.mock( '@wordpress/admin-ui', () => ( {
-	NavigableRegion: ( {
-		children,
-		className,
-		ariaLabel,
-	}: {
-		children: ReactNode;
-		className?: string;
-		ariaLabel?: string;
-	} ) => (
-		<div className={ className } role="region" aria-label={ ariaLabel }>
-			{ children }
-		</div>
-	),
-} ) );
+vi.mock( '@wordpress/admin-ui', () => {
+	const mock = {
+		NavigableRegion: ( {
+			children,
+			className,
+			ariaLabel,
+		}: {
+			children: ReactNode;
+			className?: string;
+			ariaLabel?: string;
+		} ) => (
+			<div className={ className } role="region" aria-label={ ariaLabel }>
+				{ children }
+			</div>
+		),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 /**
  * Internal dependencies
@@ -29,28 +39,28 @@ jest.mock( '@wordpress/admin-ui', () => ( {
 import { SettingsUIPage } from '../settings-ui-page';
 import { __resetRegistry } from '../registry';
 import type { SettingsUISchema } from '../types';
-
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
-
 const renderElement = ( element: JSX.Element ) => {
 	const container = document.createElement( 'div' );
 	document.body.appendChild( container );
 	const root = createRoot( container );
-
 	act( () => {
 		root.render( element );
 	} );
-
-	return { container, root };
+	return {
+		container,
+		root,
+	};
 };
-
 const baseSchema = (
 	shell: SettingsUISchema[ 'shell' ],
 	saveAdapter: 'form_post' | 'none' = 'form_post'
 ): SettingsUISchema => ( {
 	id: 'test_page',
 	title: 'Test page',
-	save: { adapter: saveAdapter },
+	save: {
+		adapter: saveAdapter,
+	},
 	shell,
 	groups: {
 		main: {
@@ -62,19 +72,19 @@ const baseSchema = (
 					label: 'Field A',
 					type: 'text',
 					value: '',
-					save: { adapter: saveAdapter },
+					save: {
+						adapter: saveAdapter,
+					},
 				},
 			],
 		},
 	},
 } );
-
 describe( 'settings UI shell header visibility', () => {
 	afterEach( () => {
 		__resetRegistry();
 		document.body.innerHTML = '';
 	} );
-
 	it.each( [
 		[ 'navigation', 'Settings pages' ],
 		[ 'sectionNavigation', 'Settings sections' ],
@@ -85,7 +95,11 @@ describe( 'settings UI shell header visibility', () => {
 				<SettingsUIPage
 					schema={ baseSchema( {
 						[ navigation ]: [
-							{ id: 'first', label: 'First', href: '#first' },
+							{
+								id: 'first',
+								label: 'First',
+								href: '#first',
+							},
 							{
 								id: 'current',
 								label: 'Current',
@@ -103,7 +117,6 @@ describe( 'settings UI shell header visibility', () => {
 					page="test_page"
 				/>
 			);
-
 			const links = container.querySelectorAll(
 				`nav[aria-label="${ label }"] a`
 			);
@@ -112,39 +125,34 @@ describe( 'settings UI shell header visibility', () => {
 					link.getAttribute( 'aria-current' )
 				)
 			).toEqual( [ null, 'page', null ] );
-
 			act( () => root.unmount() );
 			container.remove();
 		}
 	);
-
 	it( 'labels the shell region with a fallback when the schema has no title', () => {
 		const schema = baseSchema( {} );
 		delete schema.title;
-
 		const { container, root } = renderElement(
 			<SettingsUIPage schema={ schema } page="test_page" />
 		);
-
 		expect(
 			container
 				.querySelector( '.wc-settings-ui-shell' )
 				?.getAttribute( 'aria-label' )
 		).toBe( 'Settings' );
-
 		act( () => {
 			root.unmount();
 		} );
 	} );
-
 	it( 'hides the header and saves from the page footer by default', () => {
 		const { container, root } = renderElement(
 			<SettingsUIPage
-				schema={ baseSchema( { title: 'Test page' } ) }
+				schema={ baseSchema( {
+					title: 'Test page',
+				} ) }
 				page="test_page"
 			/>
 		);
-
 		expect(
 			container.querySelector( '.wc-settings-ui-shell__header' )
 		).toBeNull();
@@ -154,16 +162,13 @@ describe( 'settings UI shell header visibility', () => {
 				.querySelector( '.wc-settings-ui-shell' )
 				?.getAttribute( 'aria-label' )
 		).toBe( 'Test page' );
-
 		const footerSaveButton = container.querySelector(
 			'.wc-settings-ui .wc-settings-ui__footer-actions .woocommerce-save-button'
 		);
 		expect( footerSaveButton ).not.toBeNull();
-
 		act( () => root.unmount() );
 		container.remove();
 	} );
-
 	it( 'shows the header with the top save button when the shell opts in', () => {
 		const { container, root } = renderElement(
 			<SettingsUIPage
@@ -174,7 +179,6 @@ describe( 'settings UI shell header visibility', () => {
 				page="test_page"
 			/>
 		);
-
 		const header = container.querySelector(
 			'.wc-settings-ui-shell__header'
 		);
@@ -186,26 +190,27 @@ describe( 'settings UI shell header visibility', () => {
 		expect(
 			container.querySelector( '.wc-settings-ui__footer-actions' )
 		).toBeNull();
-
 		act( () => root.unmount() );
 		container.remove();
 	} );
-
 	it( 'renders no save button anywhere when the save adapter is none', () => {
 		const { container, root } = renderElement(
 			<SettingsUIPage
-				schema={ baseSchema( { title: 'Test page' }, 'none' ) }
+				schema={ baseSchema(
+					{
+						title: 'Test page',
+					},
+					'none'
+				) }
 				page="test_page"
 			/>
 		);
-
 		expect(
 			container.querySelector( '.woocommerce-save-button' )
 		).toBeNull();
 		expect(
 			container.querySelector( '.wc-settings-ui__footer-actions' )
 		).toBeNull();
-
 		act( () => root.unmount() );
 		container.remove();
 	} );

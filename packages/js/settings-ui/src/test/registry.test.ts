@@ -1,3 +1,5 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * Internal dependencies
  */
@@ -21,7 +23,7 @@ import type {
 describe( 'settings extension registry', () => {
 	afterEach( () => {
 		__resetRegistry();
-		jest.restoreAllMocks();
+		vi.restoreAllMocks();
 	} );
 
 	it( 'resolves named field components within the matching scope', () => {
@@ -98,7 +100,7 @@ describe( 'settings extension registry', () => {
 		const visibility = () => false;
 		const saveHandler = () => undefined;
 		const scope = { page: 'products', section: 'inventory' };
-		const warnSpy = jest
+		const warnSpy = vi
 			.spyOn( console, 'warn' )
 			.mockImplementation( () => undefined );
 		registerSettingsExtension( {
@@ -142,7 +144,7 @@ describe( 'settings extension registry', () => {
 			shared: original,
 			other: original,
 		} );
-		jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
+		vi.spyOn( console, 'warn' ).mockImplementation( () => undefined );
 		registerSettingsExtension(
 			Object.freeze( {
 				scope: { page: 'products' },
@@ -181,8 +183,8 @@ describe( 'settings extension registry', () => {
 				return 'products';
 			},
 		};
-		const pageSpy = jest.spyOn( scope, 'page', 'get' );
-		jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
+		const pageSpy = vi.spyOn( scope, 'page', 'get' );
+		vi.spyOn( console, 'warn' ).mockImplementation( () => undefined );
 		registerSettingsExtension( {
 			scope,
 			fieldVisibility: { stock: () => false },
@@ -234,7 +236,7 @@ describe( 'settings extension registry', () => {
 	} );
 
 	it( 'ignores malformed registration payloads', () => {
-		const warnSpy = jest
+		const warnSpy = vi
 			.spyOn( console, 'warn' )
 			.mockImplementation( () => undefined );
 
@@ -353,7 +355,7 @@ describe( 'settings extension registry', () => {
 				{ page: 'registry-section-scope', section: 'advanced' }
 			)
 		).toBeUndefined();
-		const missingComponentWarnSpy = jest
+		const missingComponentWarnSpy = vi
 			.spyOn( console, 'warn' )
 			.mockImplementation( () => undefined );
 		expect(
