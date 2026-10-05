@@ -497,7 +497,6 @@ export const SettingsPaymentsMain = () => {
 	const morePaymentOptionsLink = (
 		<Link
 			href="https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations"
-			className="more-payment-options-link"
 			onClick={ trackMorePaymentsOptionsClicked }
 			rel="noopener noreferrer"
 			openInNewTab
