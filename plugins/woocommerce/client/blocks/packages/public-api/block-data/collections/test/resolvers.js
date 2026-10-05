@@ -1,3 +1,5 @@
+import { describe, expect, it, test, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -12,7 +14,7 @@ import { STORE_KEY as SCHEMA_STORE_KEY } from '../../schema/constants';
 import { STORE_KEY } from '../constants';
 import { apiFetchWithHeadersControl } from '../../shared-controls';
 
-jest.mock( '@wordpress/data' );
+vi.mock( '@wordpress/data' );
 
 describe( 'getCollection', () => {
 	describe( 'yields with expected responses', () => {

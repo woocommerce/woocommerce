@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -10,16 +12,18 @@ import { server, http, HttpResponse } from '@woocommerce/test-utils/msw';
 import { useStoreCartCoupons } from '../use-store-cart-coupons';
 
 // Mock the resolvers to avoid actual API calls on cart data store setup.
-jest.mock( '@woocommerce/block-data/cart/resolvers', () => {
-	return {
-		...jest.requireActual( '@woocommerce/block-data/cart/resolvers' ),
-		getCartData: jest
+vi.mock( '@woocommerce/block-data/cart/resolvers', async () => {
+	return ( ( mock ) => ( { default: mock, ...mock } ) )( {
+		...( await vi.importActual(
+			'@woocommerce/block-data/cart/resolvers'
+		) ),
+		getCartData: vi
 			.fn()
 			.mockResolvedValue(
-				jest.requireActual( '@woocommerce/resource-previews' )
+				( await vi.importActual( '@woocommerce/resource-previews' ) )
 					.previewCart
 			),
-	};
+	} );
 } );
 
 type CapturedRequest = {

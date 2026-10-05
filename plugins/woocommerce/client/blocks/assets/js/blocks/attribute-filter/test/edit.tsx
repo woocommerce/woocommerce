@@ -1,3 +1,5 @@
+import { afterEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -12,33 +14,43 @@ import { InnerBlocks } from '@wordpress/block-editor';
 import FilterWrapperEdit from '../../filter-wrapper/edit';
 import AttributeFilterBlock from '../block';
 import AttributeFilterEdit from '../edit';
-
-jest.mock( '@wordpress/block-editor', () => ( {
-	...jest.requireActual( '@wordpress/block-editor' ),
-	useBlockProps: jest.fn( ( props = {} ) => props ),
-	BlockControls: jest.fn( ( { children } ) => <div>{ children }</div> ),
-	InspectorControls: jest.fn( ( { children } ) => <div>{ children }</div> ),
-	InnerBlocks: jest.fn( ( { template } ) => (
-		<section>
-			<h3>{ template[ 0 ][ 1 ].content }</h3>
-			<div
-				data-testid="locked-filter-child"
-				data-block-name={ template[ 1 ][ 0 ] }
-				data-lock-remove={ String( template[ 1 ][ 1 ].lock.remove ) }
-			/>
-		</section>
-	) ),
-} ) );
-
-jest.mock( '@wordpress/components', () => {
-	const element = jest.requireActual( '@wordpress/element' );
-
-	return {
-		...jest.requireActual( '@wordpress/components' ),
-		Disabled: jest.fn( ( { children } ) => <div>{ children }</div> ),
-		Notice: jest.fn( ( { children } ) => <div>{ children }</div> ),
-		PanelBody: jest.fn( ( { children } ) => <div>{ children }</div> ),
-		ToggleControl: jest.fn( ( { label, checked, onChange } ) => (
+vi.mock( '@wordpress/block-editor', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/block-editor' ) ),
+		useBlockProps: vi.fn( ( props = {} ) => props ),
+		BlockControls: vi.fn( ( { children } ) => <div>{ children }</div> ),
+		InspectorControls: vi.fn( ( { children } ) => <div>{ children }</div> ),
+		InnerBlocks: vi.fn( ( { template } ) => (
+			<section>
+				<h3>{ template[ 0 ][ 1 ].content }</h3>
+				<div
+					data-testid="locked-filter-child"
+					data-block-name={ template[ 1 ][ 0 ] }
+					data-lock-remove={ String(
+						template[ 1 ][ 1 ].lock.remove
+					) }
+				/>
+			</section>
+		) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/components', async () => {
+	const element = await vi.importActual( '@wordpress/element' );
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
+		...( await vi.importActual( '@wordpress/components' ) ),
+		Disabled: vi.fn( ( { children } ) => <div>{ children }</div> ),
+		Notice: vi.fn( ( { children } ) => <div>{ children }</div> ),
+		PanelBody: vi.fn( ( { children } ) => <div>{ children }</div> ),
+		ToggleControl: vi.fn( ( { label, checked, onChange } ) => (
 			<label htmlFor={ String( label ) }>
 				<input
 					id={ String( label ) }
@@ -49,10 +61,10 @@ jest.mock( '@wordpress/components', () => {
 				{ label }
 			</label>
 		) ),
-		withSpokenMessages: jest.fn( ( Component ) => Component ),
+		withSpokenMessages: vi.fn( ( Component ) => Component ),
 		// The WordPress control scheduler is browser-owned; these adapters retain
 		// only the semantic radio/checkbox boundary for the real Edit callbacks.
-		__experimentalToggleGroupControl: jest.fn(
+		__experimentalToggleGroupControl: vi.fn(
 			( { children, label, onChange, value } ) => (
 				<fieldset>
 					<legend>{ label }</legend>
@@ -65,7 +77,7 @@ jest.mock( '@wordpress/components', () => {
 				</fieldset>
 			)
 		),
-		__experimentalToggleGroupControlOption: jest.fn(
+		__experimentalToggleGroupControlOption: vi.fn(
 			( { label, onSelect, selectedValue, value } ) => (
 				<label htmlFor={ value }>
 					<input
@@ -78,42 +90,63 @@ jest.mock( '@wordpress/components', () => {
 				</label>
 			)
 		),
-	};
+	} );
 } );
-
-jest.mock( '@woocommerce/base-context/hooks', () => {
+vi.mock( '@woocommerce/base-context/hooks', async () => {
 	const attributeTerms = [
-		{ id: 11, name: 'Small', slug: 'small' },
-		{ id: 12, name: 'Medium', slug: 'medium' },
-		{ id: 13, name: 'Large', slug: 'large' },
+		{
+			id: 11,
+			name: 'Small',
+			slug: 'small',
+		},
+		{
+			id: 12,
+			name: 'Medium',
+			slug: 'medium',
+		},
+		{
+			id: 13,
+			name: 'Large',
+			slug: 'large',
+		},
 	];
 	const collectionData = {
 		price_range: null,
 		attribute_counts: [
-			{ term: 11, count: 1 },
-			{ term: 12, count: 1 },
-			{ term: 13, count: 1 },
+			{
+				term: 11,
+				count: 1,
+			},
+			{
+				term: 12,
+				count: 1,
+			},
+			{
+				term: 13,
+				count: 1,
+			},
 		],
 		rating_counts: null,
 		stock_status_counts: null,
 	};
-
-	return {
-		...jest.requireActual( '@woocommerce/base-context/hooks' ),
-		useCollection: jest.fn( () => ( {
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
+		...( await vi.importActual( '@woocommerce/base-context/hooks' ) ),
+		useCollection: vi.fn( () => ( {
 			results: attributeTerms,
 			isLoading: false,
 		} ) ),
-		useCollectionData: jest.fn( () => ( {
+		useCollectionData: vi.fn( () => ( {
 			data: collectionData,
 			isLoading: false,
 		} ) ),
-		useQueryStateByContext: jest.fn( () => [ {} ] ),
-		useQueryStateByKey: jest.fn( () => [ [], jest.fn() ] ),
-	};
+		useQueryStateByContext: vi.fn( () => [ {} ] ),
+		useQueryStateByKey: vi.fn( () => [ [], vi.fn() ] ),
+	} );
 } );
-
-jest.mock( '@woocommerce/settings', () => {
+vi.mock( '@woocommerce/settings', async () => {
 	const attributes = [
 		{
 			attribute_id: '1',
@@ -122,34 +155,40 @@ jest.mock( '@woocommerce/settings', () => {
 			attribute_orderby: 'menu_order',
 		},
 	];
-
-	return {
-		...jest.requireActual( '@woocommerce/settings' ),
-		getSetting: jest.fn( ( key, defaultValue ) =>
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
+		...( await vi.importActual( '@woocommerce/settings' ) ),
+		getSetting: vi.fn( ( key, defaultValue ) =>
 			key === 'attributes' ? attributes : defaultValue
 		),
-		getSettingWithCoercion: jest.fn( ( key, defaultValue ) =>
+		getSettingWithCoercion: vi.fn( ( key, defaultValue ) =>
 			key === 'hasFilterableProducts' ? true : defaultValue
 		),
+	} );
+} );
+vi.mock( '@wordpress/a11y', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/a11y' ) ),
+		speak: vi.fn(),
 	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
 } );
-
-jest.mock( '@wordpress/a11y', () => ( {
-	...jest.requireActual( '@wordpress/a11y' ),
-	speak: jest.fn(),
-} ) );
-
 afterEach( () => {
-	jest.clearAllMocks();
-	jest.restoreAllMocks();
+	vi.clearAllMocks();
+	vi.restoreAllMocks();
 } );
-
 describe( 'Attribute Filter editor ownership', () => {
 	it( 'seeds the attribute-filter wrapper template', () => {
 		const WrapperEdit = FilterWrapperEdit as unknown as React.ComponentType<
 			Record< string, unknown >
 		>;
-
 		render(
 			<WrapperEdit
 				attributes={ {
@@ -159,7 +198,6 @@ describe( 'Attribute Filter editor ownership', () => {
 				clientId="wrapper-client-id"
 			/>
 		);
-
 		expect(
 			screen.getByRole( 'heading', {
 				level: 3,
@@ -174,22 +212,31 @@ describe( 'Attribute Filter editor ownership', () => {
 			'data-lock-remove',
 			'true'
 		);
-
-		const innerBlocksProps = ( InnerBlocks as unknown as jest.Mock ).mock
+		const innerBlocksProps = ( InnerBlocks as unknown as Mock ).mock
 			.calls[ 0 ][ 0 ];
 		expect( innerBlocksProps.allowedBlocks ).toEqual( [ 'core/heading' ] );
 		expect( innerBlocksProps.template ).toEqual( [
-			[ 'core/heading', { content: 'Filter by attribute', level: 3 } ],
+			[
+				'core/heading',
+				{
+					content: 'Filter by attribute',
+					level: 3,
+				},
+			],
 			[
 				'woocommerce/attribute-filter',
-				{ heading: '', lock: { remove: true } },
+				{
+					heading: '',
+					lock: {
+						remove: true,
+					},
+				},
 			],
 		] );
 	} );
-
 	it( 'maps Attribute display and Apply controls to preview behavior', async () => {
 		const user = userEvent.setup();
-		const setAttributes = jest.fn();
+		const setAttributes = vi.fn();
 		const initialAttributes: React.ComponentProps<
 			typeof AttributeFilterBlock
 		>[ 'attributes' ] = {
@@ -218,7 +265,6 @@ describe( 'Attribute Filter editor ownership', () => {
 					...updates,
 				} ) );
 			};
-
 			return (
 				<Edit
 					attributes={ attributes }
@@ -227,23 +273,27 @@ describe( 'Attribute Filter editor ownership', () => {
 				/>
 			);
 		};
-
 		render( <StatefulAttributeFilter /> );
-
 		for ( const name of [ 'Small', 'Medium', 'Large' ] ) {
 			expect(
-				await screen.findByRole( 'checkbox', { name } )
+				await screen.findByRole( 'checkbox', {
+					name,
+				} )
 			).toBeVisible();
 		}
 		expect(
-			screen.queryByRole( 'button', { name: /apply attribute filter/i } )
+			screen.queryByRole( 'button', {
+				name: /apply attribute filter/i,
+			} )
 		).not.toBeInTheDocument();
 
 		// The @wordpress/element state update falls outside userEvent's act boundary.
 		// eslint-disable-next-line testing-library/no-unnecessary-act
 		await act( async () => {
 			await user.click(
-				screen.getByRole( 'radio', { name: 'Dropdown' } )
+				screen.getByRole( 'radio', {
+					name: 'Dropdown',
+				} )
 			);
 		} );
 		expect( setAttributes ).toHaveBeenCalledTimes( 1 );
@@ -251,7 +301,6 @@ describe( 'Attribute Filter editor ownership', () => {
 			displayStyle: 'dropdown',
 		} );
 		expect( await screen.findByRole( 'combobox' ) ).toBeVisible();
-
 		setAttributes.mockClear();
 		// The @wordpress/element state update falls outside userEvent's act boundary.
 		// eslint-disable-next-line testing-library/no-unnecessary-act

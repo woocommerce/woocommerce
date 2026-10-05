@@ -1,3 +1,11 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+const { mockSlotRender } = vi.hoisted( () => {
+	const mockSlotRender = vi.fn( () => <div data-testid="discount-slot" /> );
+	return {
+		mockSlotRender,
+	};
+} );
+
 /**
  * External dependencies
  */
@@ -8,31 +16,40 @@ import { useStoreCart } from '@woocommerce/base-context/hooks';
  * Internal dependencies
  */
 import Block from '../block';
-
-jest.mock( '@woocommerce/base-context/hooks', () => ( {
-	useStoreCart: jest.fn(),
-	useStoreCartCoupons: jest.fn( () => ( {
-		removeCoupon: jest.fn(),
-		isRemovingCoupon: false,
-	} ) ),
-	useOrderSummaryLoadingState: jest.fn( () => ( { isLoading: false } ) ),
-} ) );
-
-const mockSlotRender = jest.fn( () => <div data-testid="discount-slot" /> );
-jest.mock( '@woocommerce/blocks-checkout', () => {
+vi.mock( '@woocommerce/base-context/hooks', () => {
+	const mock = {
+		useStoreCart: vi.fn(),
+		useStoreCartCoupons: vi.fn( () => ( {
+			removeCoupon: vi.fn(),
+			isRemovingCoupon: false,
+		} ) ),
+		useOrderSummaryLoadingState: vi.fn( () => ( {
+			isLoading: false,
+		} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/blocks-checkout', () => {
 	const MockFill = ( { children }: { children: React.ReactNode } ) => (
 		<>{ children }</>
 	);
 	MockFill.Slot = ( props: Record< string, unknown > ) =>
 		mockSlotRender( props );
-	return {
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		ExperimentalDiscountsMeta: MockFill,
-		applyCheckoutFilter: jest.fn(
+		applyCheckoutFilter: vi.fn(
 			( { defaultValue }: { defaultValue: unknown } ) => defaultValue
 		),
-	};
+	} );
 } );
-
 const mockCartData = {
 	cartTotals: {
 		currency_code: 'USD',
@@ -46,33 +63,32 @@ const mockCartData = {
 		total_discount_tax: '0',
 	},
 	cartCoupons: [],
-	extensions: { some: 'data' },
-	receiveCart: jest.fn(),
+	extensions: {
+		some: 'data',
+	},
+	receiveCart: vi.fn(),
 };
-
 describe( 'Checkout Order Summary Discount Block', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
-		( useStoreCart as jest.Mock ).mockReturnValue( mockCartData );
+		vi.clearAllMocks();
+		( useStoreCart as Mock ).mockReturnValue( mockCartData );
 	} );
-
 	it( 'renders the DiscountsMeta slot with checkout context when no coupons', () => {
 		render( <Block /> );
-
 		expect( screen.getByTestId( 'discount-slot' ) ).toBeInTheDocument();
 		expect( mockSlotRender ).toHaveBeenCalledWith(
 			expect.objectContaining( {
 				context: 'woocommerce/checkout',
-				extensions: { some: 'data' },
+				extensions: {
+					some: 'data',
+				},
 			} )
 		);
-
 		const slotProps = mockSlotRender.mock.calls[ 0 ][ 0 ];
 		expect( slotProps.cart ).not.toHaveProperty( 'receiveCart' );
 	} );
-
 	it( 'still renders the DiscountsMeta slot when coupons are present', () => {
-		( useStoreCart as jest.Mock ).mockReturnValue( {
+		( useStoreCart as Mock ).mockReturnValue( {
 			...mockCartData,
 			cartCoupons: [
 				{
@@ -89,9 +105,7 @@ describe( 'Checkout Order Summary Discount Block', () => {
 				total_discount: '1000',
 			},
 		} );
-
 		render( <Block className="test-class" /> );
-
 		expect( screen.getByTestId( 'discount-slot' ) ).toBeInTheDocument();
 	} );
 } );

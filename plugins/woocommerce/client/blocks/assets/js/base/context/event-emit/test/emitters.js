@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * Internal dependencies
  */
@@ -9,21 +11,21 @@ describe( 'Testing emitters', () => {
 	let observerB;
 	let observerPromiseWithResolvedValue;
 	beforeEach( () => {
-		observerA = jest.fn().mockReturnValue( true );
-		observerB = jest.fn().mockReturnValue( true );
-		observerPromiseWithResolvedValue = jest.fn().mockResolvedValue( 10 );
+		observerA = vi.fn().mockReturnValue( true );
+		observerB = vi.fn().mockReturnValue( true );
+		observerPromiseWithResolvedValue = vi.fn().mockResolvedValue( 10 );
 		observerMocks = new Map( [
 			[ 'observerA', { priority: 10, callback: observerA } ],
 			[ 'observerB', { priority: 10, callback: observerB } ],
 			[
 				'observerReturnValue',
-				{ priority: 10, callback: jest.fn().mockReturnValue( 10 ) },
+				{ priority: 10, callback: vi.fn().mockReturnValue( 10 ) },
 			],
 			[
 				'observerPromiseWithReject',
 				{
 					priority: 10,
-					callback: jest.fn().mockRejectedValue( 'an error' ),
+					callback: vi.fn().mockRejectedValue( 'an error' ),
 				},
 			],
 			[
@@ -34,7 +36,7 @@ describe( 'Testing emitters', () => {
 				'observerSuccessType',
 				{
 					priority: 10,
-					callback: jest.fn().mockReturnValue( { type: 'success' } ),
+					callback: vi.fn().mockReturnValue( { type: 'success' } ),
 				},
 			],
 		] );
@@ -64,7 +66,7 @@ describe( 'Testing emitters', () => {
 			expect( response ).toEqual( [ { type: 'success' } ] );
 		} );
 		it( 'Aborts on a return value with an object that has a a fail type property', async () => {
-			const validObjectResponse = jest
+			const validObjectResponse = vi
 				.fn()
 				.mockReturnValue( { type: 'failure' } );
 			observerMocks.set( 'observerValidObject', {
@@ -83,7 +85,7 @@ describe( 'Testing emitters', () => {
 			expect( response ).toEqual( [ { type: 'failure' } ] );
 		} );
 		it( 'throws an error on an object returned from observer without a type property', async () => {
-			const failingObjectResponse = jest.fn().mockReturnValue( {} );
+			const failingObjectResponse = vi.fn().mockReturnValue( {} );
 			observerMocks.set( 'observerInvalidObject', {
 				priority: 5,
 				callback: failingObjectResponse,
@@ -102,8 +104,8 @@ describe( 'Testing emitters', () => {
 	} );
 	describe( 'Test Priority', () => {
 		it( 'executes observers in expected order by priority', async () => {
-			const a = jest.fn();
-			const b = jest.fn().mockReturnValue( { type: 'error' } );
+			const a = vi.fn();
+			const b = vi.fn().mockReturnValue( { type: 'error' } );
 			const observers = {
 				test: new Map( [
 					[ 'observerA', { priority: 200, callback: a } ],

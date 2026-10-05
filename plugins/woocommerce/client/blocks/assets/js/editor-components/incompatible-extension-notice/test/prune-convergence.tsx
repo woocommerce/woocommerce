@@ -1,3 +1,11 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+let { mockIncompatibleExtensions } = vi.hoisted( () => {
+	const mockIncompatibleExtensions = [];
+	return {
+		mockIncompatibleExtensions,
+	};
+} );
+
 /**
  * The prune effect must keep converging when the incompatible set shrinks more
  * than once while the gate stays open.
@@ -22,62 +30,90 @@
 import { createElement } from '@wordpress/element';
 import { createReduxStore, register, dispatch } from '@wordpress/data';
 import { createRoot } from 'react-dom/client';
-
 const STORE = 'test/prune-convergence-payment';
-
-let mockIncompatibleExtensions: Array< { id: string; title: string } > = [];
-
-jest.mock( '@woocommerce/settings', () => ( {
-	...jest.requireActual( '@woocommerce/settings' ),
-	get CURRENT_SITE_ID() {
-		return 1;
-	},
-	get IS_MULTISITE() {
-		return false;
-	},
-	getSetting: jest.fn().mockImplementation( ( name: string, ...rest ) => {
-		if ( name === 'incompatibleExtensions' ) {
-			return mockIncompatibleExtensions;
-		}
-		return jest
-			.requireActual( '@woocommerce/settings' )
-			.getSetting( name, ...rest );
-	} ),
-} ) );
+vi.mock( '@woocommerce/settings', async () => {
+	const _actual = await vi.importActual( '@woocommerce/settings' );
+	const mock = {
+		...( await vi.importActual( '@woocommerce/settings' ) ),
+		get CURRENT_SITE_ID() {
+			return 1;
+		},
+		get IS_MULTISITE() {
+			return false;
+		},
+		getSetting: vi.fn().mockImplementation( ( name: string, ...rest ) => {
+			if ( name === 'incompatibleExtensions' ) {
+				return mockIncompatibleExtensions;
+			}
+			return _actual.getSetting( name, ...rest );
+		} ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 // Point the hook's payment store at a real registered store so the genuine
 // `useSelect` subscription drives re-renders.
-jest.mock( '@woocommerce/block-data', () => ( {
-	__esModule: true,
-	paymentStore: 'test/prune-convergence-payment',
-} ) );
+vi.mock( '@woocommerce/block-data', () => {
+	const mock = {
+		__esModule: true,
+		paymentStore: 'test/prune-convergence-payment',
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 /**
  * Internal dependencies
  */
 import { useCombinedIncompatibilityNotice } from '../use-combined-incompatibility-notice';
 import { getEditorStorageKey } from '../storage';
-
 type State = {
 	express: Record< string, string >;
 	regular: Record< string, string >;
 	initialized: boolean;
 };
-
 const store = createReduxStore( STORE, {
 	reducer: (
-		state: State = { express: {}, regular: {}, initialized: false },
-		action: { type: string; value?: Record< string, string > }
+		state: State = {
+			express: {},
+			regular: {},
+			initialized: false,
+		},
+		action: {
+			type: string;
+			value?: Record< string, string >;
+		}
 	): State => {
 		switch ( action.type ) {
 			case 'SET_EXPRESS':
-				return { ...state, express: action.value ?? {} };
+				return {
+					...state,
+					express: action.value ?? {},
+				};
 			case 'SET_REGULAR':
-				return { ...state, regular: action.value ?? {} };
+				return {
+					...state,
+					regular: action.value ?? {},
+				};
 			case 'INITIALIZE':
-				return { ...state, initialized: true };
+				return {
+					...state,
+					initialized: true,
+				};
 			case 'DEINITIALIZE':
-				return { ...state, initialized: false };
+				return {
+					...state,
+					initialized: false,
+				};
 			default:
 				return state;
 		}
@@ -91,8 +127,12 @@ const store = createReduxStore( STORE, {
 			type: 'SET_REGULAR',
 			value,
 		} ),
-		initialize: () => ( { type: 'INITIALIZE' } ),
-		deinitialize: () => ( { type: 'DEINITIALIZE' } ),
+		initialize: () => ( {
+			type: 'INITIALIZE',
+		} ),
+		deinitialize: () => ( {
+			type: 'DEINITIALIZE',
+		} ),
 	},
 	selectors: {
 		// Memoised on the same state slices production's `createSelector` uses,
@@ -109,7 +149,10 @@ const store = createReduxStore( STORE, {
 				) {
 					lastExpress = state.express;
 					lastRegular = state.regular;
-					lastResult = { ...state.express, ...state.regular };
+					lastResult = {
+						...state.express,
+						...state.regular,
+					};
 				}
 				return lastResult;
 			};
@@ -119,14 +162,11 @@ const store = createReduxStore( STORE, {
 	},
 } );
 register( store );
-
 const CHECKOUT = 'woocommerce/checkout';
-
 const Harness = () => {
 	useCombinedIncompatibilityNotice( CHECKOUT );
 	return null;
 };
-
 const acknowledgedSlugs = () =>
 	JSON.parse(
 		window.localStorage.getItem( getEditorStorageKey() ) || 'null'
@@ -140,29 +180,33 @@ const settle = async () => {
 		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
 	}
 };
-
 describe( 'prune convergence across consecutive shrinks', () => {
 	let container: HTMLDivElement;
 	let root: ReturnType< typeof createRoot >;
 	let wasActEnvironment: unknown;
-
 	beforeEach( () => {
 		wasActEnvironment = ( global as Record< string, unknown > )
 			.IS_REACT_ACT_ENVIRONMENT;
 		( global as Record< string, unknown > ).IS_REACT_ACT_ENVIRONMENT =
 			false;
-
 		window.localStorage.clear();
-		mockIncompatibleExtensions = [ { id: 'ext_x', title: 'Ext X' } ];
-		dispatch( STORE ).setExpress( { gw_express: 'Express Gateway' } );
-		dispatch( STORE ).setRegular( { gw_regular: 'Regular Gateway' } );
+		mockIncompatibleExtensions = [
+			{
+				id: 'ext_x',
+				title: 'Ext X',
+			},
+		];
+		dispatch( STORE ).setExpress( {
+			gw_express: 'Express Gateway',
+		} );
+		dispatch( STORE ).setRegular( {
+			gw_regular: 'Regular Gateway',
+		} );
 		dispatch( STORE ).initialize();
-
 		container = document.createElement( 'div' );
 		document.body.appendChild( container );
 		root = createRoot( container );
 	} );
-
 	afterEach( () => {
 		root.unmount();
 		container.remove();
@@ -177,10 +221,11 @@ describe( 'prune convergence across consecutive shrinks', () => {
 		window.localStorage.setItem(
 			getEditorStorageKey(),
 			JSON.stringify( [
-				{ [ CHECKOUT ]: [ 'ext_x', 'gw_express', 'gw_regular' ] },
+				{
+					[ CHECKOUT ]: [ 'ext_x', 'gw_express', 'gw_regular' ],
+				},
 			] )
 		);
-
 		root.render( createElement( Harness ) );
 		await settle();
 		expect( acknowledgedSlugs() ).toEqual( [

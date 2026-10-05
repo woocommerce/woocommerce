@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+
 /**
  * Set up fake timers for executing a function and restores them afterwards.
  *
@@ -6,7 +8,7 @@
  * @return The result of the function call.
  */
 export async function withFakeTimers< T >( fn: () => T ) {
-	const usingFakeTimers = jest.isMockFunction( setTimeout );
+	const usingFakeTimers = vi.isFakeTimers();
 
 	// Portions of the React Native Animation API rely upon these APIs. However,
 	// Jest's 'legacy' fake timers mutate these globals, which breaks the Animated
@@ -15,16 +17,16 @@ export async function withFakeTimers< T >( fn: () => T ) {
 	const cancelAnimationFrameCopy = global.cancelAnimationFrame;
 
 	if ( ! usingFakeTimers ) {
-		jest.useFakeTimers( {
+		vi.useFakeTimers( {
 			now: new Date(),
-			doNotFake: [ 'setTimeout' ],
+			toFake: [ 'Date', 'setInterval', 'clearInterval' ],
 		} );
 	}
 
 	const result = await fn();
 
 	if ( ! usingFakeTimers ) {
-		jest.useRealTimers();
+		vi.useRealTimers();
 
 		global.requestAnimationFrame = requestAnimationFrameCopy;
 		global.cancelAnimationFrame = cancelAnimationFrameCopy;

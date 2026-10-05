@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -12,52 +14,56 @@ import { checkoutEvents } from '@woocommerce/blocks-checkout-events';
 import { CheckoutEventsProvider } from '../index';
 
 // Mock the registry functions
-jest.mock( '@woocommerce/blocks-registry', () => ( {
-	getPaymentMethods: jest.fn( () => ( {} ) ),
-	getExpressPaymentMethods: jest.fn( () => ( {
-		stripe: {
-			name: 'stripe',
-			title: 'Stripe',
-			description: 'Pay with Stripe',
-			gatewayId: 'stripe',
-			supports: {
-				style: [ 'height', 'borderRadius' ],
+vi.mock( '@woocommerce/blocks-registry', () => {
+	const mock = {
+		getPaymentMethods: vi.fn( () => ( {} ) ),
+		getExpressPaymentMethods: vi.fn( () => ( {
+			stripe: {
+				name: 'stripe',
+				title: 'Stripe',
+				description: 'Pay with Stripe',
+				gatewayId: 'stripe',
+				supports: {
+					style: [ 'height', 'borderRadius' ],
+				},
 			},
-		},
-		paypal: {
-			name: 'paypal',
-			title: 'PayPal',
-			description: 'Pay with PayPal',
-			gatewayId: 'paypal',
-			supports: {
-				style: [],
+			paypal: {
+				name: 'paypal',
+				title: 'PayPal',
+				description: 'Pay with PayPal',
+				gatewayId: 'paypal',
+				supports: {
+					style: [],
+				},
 			},
+		} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
 		},
-	} ) ),
-} ) );
-
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'CheckoutEventsContext', () => {
-	let mockSetRegisteredExpressPaymentMethods: jest.Mock;
-
+	let mockSetRegisteredExpressPaymentMethods: Mock;
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 		dispatch( checkoutStore ).__internalSetIdle();
 
 		// Mock the payment store dispatch action
-		mockSetRegisteredExpressPaymentMethods = jest.fn();
-		jest.spyOn(
+		mockSetRegisteredExpressPaymentMethods = vi.fn();
+		vi.spyOn(
 			dispatch( paymentStore ),
 			'__internalSetRegisteredExpressPaymentMethods'
 		).mockImplementation( mockSetRegisteredExpressPaymentMethods );
 	} );
-
 	it( '__internalSetRegisteredExpressPaymentMethods is called when component renders', () => {
 		render(
 			<CheckoutEventsProvider redirectUrl="local">
 				<div />
 			</CheckoutEventsProvider>
 		);
-
 		expect( mockSetRegisteredExpressPaymentMethods ).toHaveBeenCalledWith( {
 			stripe: {
 				name: 'stripe',
@@ -75,10 +81,9 @@ describe( 'CheckoutEventsContext', () => {
 			},
 		} );
 	} );
-
 	it( 'onCheckoutValidation observers are called when the checkout is in the "beforeProcessing" state', async () => {
-		const callback = jest.fn();
-		const callback2 = jest.fn();
+		const callback = vi.fn();
+		const callback2 = vi.fn();
 		checkoutEvents.onCheckoutValidation( callback );
 		checkoutEvents.onCheckoutValidation( callback2 );
 		const { rerender } = render(
@@ -98,9 +103,9 @@ describe( 'CheckoutEventsContext', () => {
 		expect( callback2 ).toHaveBeenCalled();
 	} );
 	it( 'onCheckoutSuccess observers are called when the checkout is in the "afterProcessing" state and no error exists, onCheckoutFail observers are not called', async () => {
-		const successCallback = jest.fn();
-		const successCallback2 = jest.fn();
-		const failCallback = jest.fn();
+		const successCallback = vi.fn();
+		const successCallback2 = vi.fn();
+		const failCallback = vi.fn();
 		checkoutEvents.onCheckoutSuccess( successCallback );
 		checkoutEvents.onCheckoutSuccess( successCallback2 );
 		checkoutEvents.onCheckoutFail( failCallback );
@@ -122,9 +127,9 @@ describe( 'CheckoutEventsContext', () => {
 		expect( failCallback ).not.toHaveBeenCalled();
 	} );
 	it( 'onCheckoutSuccess observers are not called when the checkout is in the "afterProcessing" state and an error exists, onCheckoutFail observers are called', async () => {
-		const successCallback = jest.fn();
-		const successCallback2 = jest.fn();
-		const failCallback = jest.fn();
+		const successCallback = vi.fn();
+		const successCallback2 = vi.fn();
+		const failCallback = vi.fn();
 		checkoutEvents.onCheckoutSuccess( successCallback );
 		checkoutEvents.onCheckoutSuccess( successCallback2 );
 		checkoutEvents.onCheckoutFail( failCallback );

@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, it, test, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -9,23 +11,48 @@ import { render, act } from '@testing-library/react';
 import withReviews from '../with-reviews';
 import * as mockUtils from '../../../blocks/reviews/utils';
 import * as mockBaseUtils from '../../utils/errors';
-
-jest.mock( '../../../blocks/reviews/utils', () => ( {
-	getSortArgs: () => ( {
-		order: 'desc',
-		orderby: 'date_gmt',
-	} ),
-	getReviews: jest.fn(),
-} ) );
-
-jest.mock( '../../utils/errors', () => ( {
-	formatError: jest.fn(),
-} ) );
-
+vi.mock( '../../../blocks/reviews/utils', () => {
+	const mock = {
+		getSortArgs: () => ( {
+			order: 'desc',
+			orderby: 'date_gmt',
+		} ),
+		getReviews: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../utils/errors', () => {
+	const mock = {
+		formatError: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const mockReviews = [
-	{ reviewer: 'Alice', review: 'Lorem ipsum', rating: 2 },
-	{ reviewer: 'Bob', review: 'Dolor sit amet', rating: 3 },
-	{ reviewer: 'Carol', review: 'Consectetur adipiscing elit', rating: 5 },
+	{
+		reviewer: 'Alice',
+		review: 'Lorem ipsum',
+		rating: 2,
+	},
+	{
+		reviewer: 'Bob',
+		review: 'Dolor sit amet',
+		rating: 3,
+	},
+	{
+		reviewer: 'Carol',
+		review: 'Consectetur adipiscing elit',
+		rating: 5,
+	},
 ];
 const defaultArgs = {
 	offset: 0,
@@ -37,7 +64,7 @@ const defaultArgs = {
 
 // Capture the props the HOC injects into the wrapped component.
 let lastProps;
-const CapturedComponent = jest.fn( ( props ) => {
+const CapturedComponent = vi.fn( ( props ) => {
 	lastProps = props;
 	return null;
 } );
@@ -51,7 +78,6 @@ const settle = async ( fn ) => {
 		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
 	} );
 };
-
 describe( 'withReviews Component', () => {
 	let renderResult;
 	const renderComponent = ( props ) =>
@@ -67,7 +93,6 @@ describe( 'withReviews Component', () => {
 				/>
 			);
 		} );
-
 	afterEach( () => {
 		renderResult?.unmount();
 		renderResult = undefined;
@@ -75,7 +100,6 @@ describe( 'withReviews Component', () => {
 		CapturedComponent.mockClear();
 		lastProps = undefined;
 	} );
-
 	describe( 'lifecycle events', () => {
 		beforeEach( async () => {
 			mockUtils.getReviews
@@ -93,14 +117,11 @@ describe( 'withReviews Component', () => {
 				);
 			await renderComponent();
 		} );
-
 		it( 'getReviews is called on mount with default args', () => {
 			const { getReviews } = mockUtils;
-
 			expect( getReviews ).toHaveBeenCalledWith( defaultArgs );
 			expect( getReviews ).toHaveBeenCalledTimes( 1 );
 		} );
-
 		it( 'getReviews is called on component update', async () => {
 			const { getReviews } = mockUtils;
 			await settle( () =>
@@ -113,7 +134,6 @@ describe( 'withReviews Component', () => {
 					/>
 				)
 			);
-
 			expect( getReviews ).toHaveBeenNthCalledWith( 2, {
 				...defaultArgs,
 				offset: 2,
@@ -122,11 +142,13 @@ describe( 'withReviews Component', () => {
 			expect( getReviews ).toHaveBeenCalledTimes( 2 );
 		} );
 	} );
-
 	it.each( [
 		[
 			'category array',
-			{ categoryIds: [ 4, 8 ], productId: undefined },
+			{
+				categoryIds: [ 4, 8 ],
+				productId: undefined,
+			},
 			{
 				category_id: '4,8',
 				offset: 0,
@@ -137,7 +159,9 @@ describe( 'withReviews Component', () => {
 		],
 		[
 			'product',
-			{ productId: 42 },
+			{
+				productId: 42,
+			},
 			{
 				offset: 0,
 				order: 'desc',
@@ -151,12 +175,9 @@ describe( 'withReviews Component', () => {
 			reviews: [],
 			totalReviews: 0,
 		} );
-
 		await renderComponent( props );
-
 		expect( mockUtils.getReviews ).toHaveBeenCalledWith( args );
 	} );
-
 	it( 'combines configured offset with appended review count', async () => {
 		mockUtils.getReviews
 			.mockResolvedValueOnce( {
@@ -167,8 +188,10 @@ describe( 'withReviews Component', () => {
 				reviews: mockReviews.slice( 2 ),
 				totalReviews: 10,
 			} );
-		await renderComponent( { offset: 5, reviewsToDisplay: 2 } );
-
+		await renderComponent( {
+			offset: 5,
+			reviewsToDisplay: 2,
+		} );
 		await settle( () =>
 			renderResult.rerender(
 				<TestComponent
@@ -181,22 +204,22 @@ describe( 'withReviews Component', () => {
 				/>
 			)
 		);
-
 		expect( mockUtils.getReviews ).toHaveBeenNthCalledWith( 2, {
 			...defaultArgs,
 			offset: 7,
 			per_page: 2,
 		} );
 	} );
-
 	it( 'replaces reviews when the offset changes as the display count increases', async () => {
 		const { getReviews } = mockUtils;
 		getReviews.mockResolvedValue( {
 			reviews: mockReviews,
 			totalReviews: 20,
 		} );
-		await renderComponent( { offset: 5, reviewsToDisplay: 5 } );
-
+		await renderComponent( {
+			offset: 5,
+			reviewsToDisplay: 5,
+		} );
 		await settle( () =>
 			renderResult.rerender(
 				<TestComponent
@@ -209,14 +232,12 @@ describe( 'withReviews Component', () => {
 				/>
 			)
 		);
-
 		expect( getReviews ).toHaveBeenNthCalledWith( 2, {
 			...defaultArgs,
 			offset: 0,
 			per_page: 10,
 		} );
 	} );
-
 	describe( 'when the API returns product data', () => {
 		beforeEach( async () => {
 			mockUtils.getReviews.mockImplementation( () =>
@@ -227,7 +248,6 @@ describe( 'withReviews Component', () => {
 			);
 			await renderComponent();
 		} );
-
 		it( 'sets reviews based on API response', () => {
 			expect( lastProps.error ).toBeNull();
 			expect( lastProps.hasReviewsHiddenByOffset ).toBe( false );
@@ -236,27 +256,30 @@ describe( 'withReviews Component', () => {
 			expect( lastProps.totalReviews ).toEqual( mockReviews.length );
 		} );
 	} );
-
 	describe( 'when the offset hides all available reviews', () => {
 		beforeEach( async () => {
 			mockUtils.getReviews.mockResolvedValue( {
 				reviews: [],
 				totalReviews: mockReviews.length,
 			} );
-			await renderComponent( { offset: mockReviews.length } );
+			await renderComponent( {
+				offset: mockReviews.length,
+			} );
 		} );
-
 		it( 'indicates that reviews are hidden by the offset', () => {
 			expect( lastProps.hasReviewsHiddenByOffset ).toBe( true );
 			expect( lastProps.reviews ).toEqual( [] );
 			expect( lastProps.totalReviews ).toEqual( 0 );
 		} );
 	} );
-
 	describe( 'when the API returns an error', () => {
-		const error = { message: 'There was an error.' };
-		const formattedError = { message: 'There was an error.', type: 'api' };
-
+		const error = {
+			message: 'There was an error.',
+		};
+		const formattedError = {
+			message: 'There was an error.',
+			type: 'api',
+		};
 		beforeEach( async () => {
 			mockUtils.getReviews.mockImplementation( () =>
 				Promise.reject( error )
@@ -266,10 +289,8 @@ describe( 'withReviews Component', () => {
 			);
 			await renderComponent();
 		} );
-
 		test( 'sets the error prop', () => {
 			const { formatError } = mockBaseUtils;
-
 			expect( formatError ).toHaveBeenCalledWith( error );
 			expect( formatError ).toHaveBeenCalledTimes( 1 );
 			expect( lastProps.error ).toEqual( formattedError );

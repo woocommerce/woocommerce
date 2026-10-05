@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -16,11 +18,17 @@ import { CanMakePaymentArgument } from '@woocommerce/types';
  * Internal dependencies
  */
 import { checkPaymentMethodsCanPay } from '../utils/check-payment-methods';
-
-jest.mock( '@woocommerce/utils', () => ( {
-	isSiteEditorPage: jest.fn().mockReturnValue( true ),
-} ) );
-
+vi.mock( '@woocommerce/utils', () => {
+	const mock = {
+		isSiteEditorPage: vi.fn().mockReturnValue( true ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const requiredKeyCheck = ( args: CanMakePaymentArgument ) => {
 	const requiredKeys = [
 		'billingData',
@@ -34,7 +42,6 @@ const requiredKeyCheck = ( args: CanMakePaymentArgument ) => {
 		'shippingAddress',
 	];
 	const argKeys = Object.keys( args );
-
 	const requiredCartKeys = [
 		'cartCoupons',
 		'cartItems',
@@ -86,12 +93,10 @@ const requiredKeyCheck = ( args: CanMakePaymentArgument ) => {
 		requiredCartKeys.every( ( key ) => cartKeys.includes( key ) )
 	);
 };
-
-const mockedCanMakePayment = jest.fn().mockImplementation( requiredKeyCheck );
-const mockedExpressCanMakePayment = jest
+const mockedCanMakePayment = vi.fn().mockImplementation( requiredKeyCheck );
+const mockedExpressCanMakePayment = vi
 	.fn()
 	.mockImplementation( requiredKeyCheck );
-
 const registerMockPaymentMethods = ( savedCards = true ) => {
 	[ 'credit-card' ].forEach( ( name ) => {
 		registerPaymentMethod( {
@@ -147,7 +152,6 @@ const registerMockPaymentMethods = ( savedCards = true ) => {
 		payment_methods: [ 'cheque', 'bacs', 'credit-card' ],
 	} );
 };
-
 const resetMockPaymentMethods = () => {
 	[ 'cheque', 'bacs', 'credit-card' ].forEach( ( name ) => {
 		__experimentalDeRegisterPaymentMethod( name );
@@ -156,16 +160,13 @@ const resetMockPaymentMethods = () => {
 		__experimentalDeRegisterExpressPaymentMethod( name );
 	} );
 };
-
 describe( 'checkPaymentMethods', () => {
-	beforeEach( registerMockPaymentMethods );
+	beforeEach( () => registerMockPaymentMethods() );
 	afterEach( resetMockPaymentMethods );
-
 	it( `Sends correct arguments to regular payment methods' canMakePayment functions`, async () => {
 		await checkPaymentMethodsCanPay();
 		expect( mockedCanMakePayment ).toHaveReturnedWith( true );
 	} );
-
 	it( `Sends correct arguments to express payment methods' canMakePayment functions`, async () => {
 		await checkPaymentMethodsCanPay( true );
 		expect( mockedExpressCanMakePayment ).toHaveReturnedWith( true );

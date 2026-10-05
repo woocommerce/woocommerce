@@ -1,3 +1,5 @@
+import { expect } from 'vitest';
+
 // This is the shape of the API exposed to the express payment methods via props
 // Note that this is a public API!
 export const getExpectedExpressPaymentProps = ( name: string ) => ( {

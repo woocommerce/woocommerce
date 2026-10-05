@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -92,7 +94,7 @@ const makeBlockEditProps = (
 		context: {},
 		isSelected: true,
 		name: BLOCK_NAME,
-		setAttributes: jest.fn(),
+		setAttributes: vi.fn(),
 	} ) as ProductCollectionEditComponentProps;
 
 const StateProbe = ( { attributes, location, usesReference }: ProbeProps ) => {
@@ -320,7 +322,7 @@ describe( '__experimentalRegisterProductCollection', () => {
 
 	it( 'injects preview and reference props only into the matching collection edit', () => {
 		const name = `${ TEST_NAMESPACE }/wrapped`;
-		const setPreviewState = jest.fn();
+		const setPreviewState = vi.fn();
 		registerCollection( {
 			name,
 			title: 'Wrapped collection',

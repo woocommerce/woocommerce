@@ -1,98 +1,144 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+const {
+	mockStore,
+	mockGetConfig,
+	mockProductsState,
+	mockAddNotice,
+	mockRemoveNotice,
+	mockAddCartItem,
+	mockBatchAddCartItems,
+} = vi.hoisted( () => {
+	const mockBatchAddCartItems = vi.fn();
+	const mockAddCartItem = vi.fn();
+	const mockRemoveNotice = vi.fn();
+	const mockAddNotice = vi.fn();
+	const mockProductsState = {
+		productId: 0,
+		productInContext: null as Record< string, unknown > | null,
+		mainProductInContext: null as Record< string, unknown > | null,
+		findProduct: vi.fn(),
+	};
+	const mockStore = vi.fn( ( namespace, definition ) => {
+		if ( namespace === 'woocommerce/products' ) {
+			return {
+				state: mockProductsState,
+			};
+		}
+		if ( namespace === 'woocommerce/add-to-cart-with-options' ) {
+			if ( definition?.state ) {
+				Object.defineProperties(
+					mockAddToCartStore.state,
+					Object.getOwnPropertyDescriptors( definition.state )
+				);
+			}
+			if ( definition?.actions ) {
+				Object.assign( mockAddToCartStore.actions, definition.actions );
+			}
+			mockRegisteredStore = mockAddToCartStore;
+			return mockAddToCartStore;
+		}
+		if ( namespace === 'woocommerce/store-notices' ) {
+			return {
+				actions: {
+					addNotice: mockAddNotice,
+					removeNotice: mockRemoveNotice,
+				},
+			};
+		}
+		if ( namespace === 'woocommerce' ) {
+			return {
+				actions: {
+					addCartItem: mockAddCartItem,
+					batchAddCartItems: mockBatchAddCartItems,
+				},
+			};
+		}
+		return {};
+	} );
+	const mockGetConfig = vi.fn();
+	return {
+		mockStore,
+		mockGetConfig,
+		mockProductsState,
+		mockAddNotice,
+		mockRemoveNotice,
+		mockAddCartItem,
+		mockBatchAddCartItems,
+	};
+} );
+
 /**
  * Internal dependencies
  */
 import type { AddToCartWithOptionsStore, Context } from '../frontend';
-
 type RegisteredStore = {
 	state: AddToCartWithOptionsStore[ 'state' ];
 	actions: AddToCartWithOptionsStore[ 'actions' ];
 };
-
-const mockAddCartItem = jest.fn();
-const mockBatchAddCartItems = jest.fn();
-const mockAddNotice = jest.fn();
-const mockRemoveNotice = jest.fn();
-const mockGetConfig = jest.fn();
-
 let mockContext: Context;
-let mockQuantitySelectorContext: { inputElement?: HTMLInputElement };
+let mockQuantitySelectorContext: {
+	inputElement?: HTMLInputElement;
+};
 let mockRegisteredStore: RegisteredStore | null;
 let mockAddToCartStore: RegisteredStore;
-
-const mockProductsState = {
-	productId: 0,
-	productInContext: null as Record< string, unknown > | null,
-	mainProductInContext: null as Record< string, unknown > | null,
-	findProduct: jest.fn(),
-};
-
-const mockStore = jest.fn( ( namespace, definition ) => {
-	if ( namespace === 'woocommerce/products' ) {
-		return { state: mockProductsState };
-	}
-
-	if ( namespace === 'woocommerce/add-to-cart-with-options' ) {
-		if ( definition?.state ) {
-			Object.defineProperties(
-				mockAddToCartStore.state,
-				Object.getOwnPropertyDescriptors( definition.state )
-			);
-		}
-		if ( definition?.actions ) {
-			Object.assign( mockAddToCartStore.actions, definition.actions );
-		}
-		mockRegisteredStore = mockAddToCartStore;
-		return mockAddToCartStore;
-	}
-
-	if ( namespace === 'woocommerce/store-notices' ) {
-		return {
-			actions: {
-				addNotice: mockAddNotice,
-				removeNotice: mockRemoveNotice,
-			},
-		};
-	}
-
-	if ( namespace === 'woocommerce' ) {
-		return {
-			actions: {
-				addCartItem: mockAddCartItem,
-				batchAddCartItems: mockBatchAddCartItems,
-			},
-		};
-	}
-
-	return {};
-} );
-
-jest.mock(
+vi.mock(
 	'@wordpress/interactivity',
-	() => ( {
-		store: mockStore,
-		getContext: jest.fn( ( namespace?: string ) =>
-			namespace ===
-			'woocommerce/add-to-cart-with-options-quantity-selector'
-				? mockQuantitySelectorContext
-				: mockContext
-		),
-		getConfig: mockGetConfig,
-		withSyncEvent: ( action: unknown ) => action,
-	} ),
-	{ virtual: true }
+	() => {
+		const mock = {
+			store: mockStore,
+			getContext: vi.fn( ( namespace?: string ) =>
+				namespace ===
+				'woocommerce/add-to-cart-with-options-quantity-selector'
+					? mockQuantitySelectorContext
+					: mockContext
+			),
+			getConfig: mockGetConfig,
+			withSyncEvent: ( action: unknown ) => action,
+		};
+		return Object.defineProperties(
+			{
+				default: mock,
+			},
+			Object.getOwnPropertyDescriptors( mock )
+		);
+	},
+	{
+		virtual: true,
+	}
 );
-
-jest.mock( '@woocommerce/stores/woocommerce/cart', () => ( {} ) );
-jest.mock( '@woocommerce/stores/woocommerce/products', () => ( {} ) );
-jest.mock( '@woocommerce/stores/store-notices', () => ( {} ) );
-
+vi.mock( '@woocommerce/stores/woocommerce/cart', () => {
+	const mock = {};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/stores/woocommerce/products', () => {
+	const mock = {};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/stores/store-notices', () => {
+	const mock = {};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const getRegisteredStore = (): RegisteredStore => {
 	if ( ! mockRegisteredStore ) {
 		throw new Error( 'Add to Cart + Options store was not registered.' );
 	}
 	return mockRegisteredStore;
 };
-
 const runGenerator = async ( iterator: Generator ) => {
 	let result = iterator.next();
 	while ( ! result.done ) {
@@ -100,15 +146,15 @@ const runGenerator = async ( iterator: Generator ) => {
 		result = iterator.next();
 	}
 };
-
 describe( 'Add to Cart + Options interactivity store', () => {
-	beforeEach( () => {
-		jest.resetModules();
-		jest.clearAllMocks();
-
+	beforeEach( async () => {
+		vi.resetModules();
+		vi.clearAllMocks();
 		mockContext = {
 			selectedAttributes: [],
-			quantity: { 42: 2 },
+			quantity: {
+				42: 2,
+			},
 			validationErrors: [],
 			tempQuantity: 0,
 			groupedProductIds: [],
@@ -137,12 +183,11 @@ describe( 'Add to Cart + Options interactivity store', () => {
 				invalidQuantities: 'Choose a valid quantity.',
 			},
 		} );
-
-		jest.isolateModules( () => {
-			jest.requireActual( '../frontend' );
-		} );
+		vi.resetModules(),
+			await ( async () => {
+				await vi.importActual( '../frontend' );
+			} )();
 	} );
-
 	it( 'validates zero and out-of-range quantities with the configured message', () => {
 		const registeredStore = getRegisteredStore();
 		mockProductsState.productInContext = {
@@ -152,9 +197,7 @@ describe( 'Add to Cart + Options interactivity store', () => {
 				maximum: 5,
 			},
 		};
-
 		registeredStore.actions.validateQuantity( 42, 0 );
-
 		expect( registeredStore.state.validationErrors ).toEqual( [
 			{
 				code: 'invalidQuantities',
@@ -163,15 +206,12 @@ describe( 'Add to Cart + Options interactivity store', () => {
 			},
 		] );
 		expect( registeredStore.state.isFormValid ).toBe( false );
-
 		registeredStore.actions.validateQuantity( 42, 6 );
 		expect( registeredStore.state.validationErrors ).toHaveLength( 1 );
-
 		registeredStore.actions.validateQuantity( 42, 3 );
 		expect( registeredStore.state.validationErrors ).toEqual( [] );
 		expect( registeredStore.state.isFormValid ).toBe( true );
 	} );
-
 	it( 'rejects a positive quantity below the product minimum', () => {
 		mockProductsState.productInContext = {
 			...mockProductsState.productInContext,
@@ -180,9 +220,7 @@ describe( 'Add to Cart + Options interactivity store', () => {
 				maximum: 5,
 			},
 		};
-
 		getRegisteredStore().actions.validateQuantity( 42, 2 );
-
 		expect( getRegisteredStore().state.validationErrors ).toEqual( [
 			{
 				code: 'invalidQuantities',
@@ -191,7 +229,6 @@ describe( 'Add to Cart + Options interactivity store', () => {
 			},
 		] );
 	} );
-
 	it.each( [
 		{
 			title: 'simple product',
@@ -202,8 +239,14 @@ describe( 'Add to Cart + Options interactivity store', () => {
 			title: 'selected variation',
 			type: 'variation',
 			selectedAttributes: [
-				{ attribute: 'attribute_pa_color', value: 'blue' },
-				{ attribute: 'Logo', value: 'No' },
+				{
+					attribute: 'attribute_pa_color',
+					value: 'blue',
+				},
+				{
+					attribute: 'Logo',
+					value: 'No',
+				},
 			],
 		},
 	] )(
@@ -215,14 +258,12 @@ describe( 'Add to Cart + Options interactivity store', () => {
 				id: 42,
 				type,
 			};
-			const preventDefault = jest.fn();
-
+			const preventDefault = vi.fn();
 			await runGenerator(
 				getRegisteredStore().actions.addToCart( {
 					preventDefault,
 				} as unknown as SubmitEvent )
 			);
-
 			expect( preventDefault ).toHaveBeenCalledTimes( 1 );
 			expect( mockAddCartItem ).toHaveBeenCalledWith(
 				{
@@ -231,11 +272,12 @@ describe( 'Add to Cart + Options interactivity store', () => {
 					variation: selectedAttributes,
 					type,
 				},
-				{ showCartUpdatesNotices: false }
+				{
+					showCartUpdatesNotices: false,
+				}
 			);
 		}
 	);
-
 	it( 'surfaces validation errors without sending a cart request', async () => {
 		const registeredStore = getRegisteredStore();
 		registeredStore.actions.addError( {
@@ -244,13 +286,11 @@ describe( 'Add to Cart + Options interactivity store', () => {
 			message: 'Choose product options.',
 		} );
 		mockAddNotice.mockReturnValue( 'notice-1' );
-
 		await runGenerator(
 			registeredStore.actions.addToCart( {
-				preventDefault: jest.fn(),
+				preventDefault: vi.fn(),
 			} as unknown as SubmitEvent )
 		);
-
 		expect( mockAddNotice ).toHaveBeenCalledWith( {
 			notice: 'Choose product options.',
 			type: 'error',

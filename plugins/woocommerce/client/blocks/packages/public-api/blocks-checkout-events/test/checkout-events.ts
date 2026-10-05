@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -9,7 +11,7 @@ import { checkoutEvents, checkoutEventsEmitter } from '../checkout-events';
 
 describe( 'Checkout events emitter v2', () => {
 	it( 'allows callbacks to subscribe to events using helper functions', async () => {
-		const callback = jest.fn();
+		const callback = vi.fn();
 		checkoutEvents.onCheckoutValidation( callback );
 		checkoutEvents.onCheckoutSuccess( callback );
 		checkoutEvents.onCheckoutFail( callback );
@@ -22,11 +24,11 @@ describe( 'Checkout events emitter v2', () => {
 
 	it( 'allows callbacks to subscribe to events with different priorities', async () => {
 		const executionOrder: string[] = [];
-		const callback = jest.fn( () => {
+		const callback = vi.fn( () => {
 			executionOrder.push( 'callback1' );
 			return { type: responseTypes.SUCCESS };
 		} );
-		const callback2 = jest.fn( () => {
+		const callback2 = vi.fn( () => {
 			executionOrder.push( 'callback2' );
 			return { type: responseTypes.SUCCESS };
 		} );
@@ -37,7 +39,7 @@ describe( 'Checkout events emitter v2', () => {
 	} );
 
 	it( 'allows callbacks to be unsubscribed', async () => {
-		const callback = jest.fn();
+		const callback = vi.fn();
 		const unsubscribe = checkoutEvents.onCheckoutValidation( callback );
 		await checkoutEventsEmitter.emit( 'checkout_validation', 'test data' );
 		unsubscribe();

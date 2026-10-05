@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * Internal dependencies
  */
@@ -595,8 +597,8 @@ setTimeout handler*@https://store.local/wp-content/plugins/wc-dependency-test/ba
 			const proxy = createWcProxy(
 				target,
 				{} as WcGlobalExportsMap, // No tracked exports
-				jest.fn(),
-				jest.fn()
+				vi.fn(),
+				vi.fn()
 			);
 
 			expect( proxy.someProperty ).toBe( 'value' );
@@ -609,10 +611,10 @@ setTimeout handler*@https://store.local/wp-content/plugins/wc-dependency-test/ba
 			const wcGlobalExports = {
 				blocksCheckout: 'wc-blocks-checkout',
 			} as WcGlobalExportsMap;
-			const getCallerScriptUrl = jest
+			const getCallerScriptUrl = vi
 				.fn()
 				.mockReturnValue( 'https://example.com/script.js' );
-			const checkDependency = jest.fn();
+			const checkDependency = vi.fn();
 
 			const proxy = createWcProxy(
 				target,
@@ -651,10 +653,10 @@ setTimeout handler*@https://store.local/wp-content/plugins/wc-dependency-test/ba
 				blocksCheckout: 'wc-blocks-checkout',
 				wcSettings: 'wc-settings',
 			} as WcGlobalExportsMap;
-			const getCallerScriptUrl = jest
+			const getCallerScriptUrl = vi
 				.fn()
 				.mockReturnValue( 'https://example.com/script.js' );
-			const checkDependency = jest.fn();
+			const checkDependency = vi.fn();
 
 			const proxy = createWcProxy(
 				target,
@@ -686,12 +688,12 @@ setTimeout handler*@https://store.local/wp-content/plugins/wc-dependency-test/ba
 				blocksCheckout: 'wc-blocks-checkout',
 				wcSettings: 'wc-settings',
 			} as WcGlobalExportsMap;
-			const checkDependency = jest.fn();
+			const checkDependency = vi.fn();
 
 			const proxy = createWcProxy(
 				target,
 				wcGlobalExports,
-				jest.fn().mockReturnValue( 'https://example.com/script.js' ),
+				vi.fn().mockReturnValue( 'https://example.com/script.js' ),
 				checkDependency
 			);
 

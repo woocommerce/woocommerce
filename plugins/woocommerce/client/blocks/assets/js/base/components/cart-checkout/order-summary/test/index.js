@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -11,19 +13,27 @@ import OrderSummary from '../index';
 import { textContentMatcher } from '../../../../../../../tests/utils/find-by-text';
 
 // The screen reader label repeats the price, so only the visible one is queried.
-const visibleOnly = { ignore: 'script, style, .screen-reader-text' };
-
-jest.mock( '@woocommerce/base-context', () => ( {
-	...jest.requireActual( '@woocommerce/base-context' ),
-	useStoreCart: () => ( {
-		cartIsLoading: false,
-	} ),
-	useContainerWidthContext: () => ( {
-		isLarge: true,
-		hasContainerWidth: true,
-	} ),
-} ) );
-
+const visibleOnly = {
+	ignore: 'script, style, .screen-reader-text',
+};
+vi.mock( '@woocommerce/base-context', async () => {
+	const mock = {
+		...( await vi.importActual( '@woocommerce/base-context' ) ),
+		useStoreCart: () => ( {
+			cartIsLoading: false,
+		} ),
+		useContainerWidthContext: () => ( {
+			isLarge: true,
+			hasContainerWidth: true,
+		} ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'Order Summary', () => {
 	it( 'renders correct cart line subtotal when currency has 0 decimals', async () => {
 		render(
@@ -44,12 +54,10 @@ describe( 'Order Summary', () => {
 				] }
 			/>
 		);
-
 		expect(
 			screen.getByText( textContentMatcher( '16€' ), visibleOnly )
 		).toBeInTheDocument();
 	} );
-
 	it( 'renders correct cart line subtotal when product price is 0', async () => {
 		render(
 			<OrderSummary
@@ -73,7 +81,6 @@ describe( 'Order Summary', () => {
 				] }
 			/>
 		);
-
 		expect(
 			screen.getByText( textContentMatcher( '$0.00' ), visibleOnly )
 		).toBeInTheDocument();

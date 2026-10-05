@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -10,27 +12,41 @@ import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
  */
 import { defaultCartData, useStoreCart } from '../use-store-cart';
 import { useEditorContext } from '../../../providers/editor-context';
-
-jest.mock( '../../../providers/editor-context', () => ( {
-	useEditorContext: jest.fn(),
-} ) );
-
-jest.mock( '@woocommerce/block-data', () => {
-	const constants = jest.requireActual( '@woocommerce/block-data/constants' );
-	const cart = jest.requireActual( '@woocommerce/block-data/cart' );
-
-	return {
+vi.mock( '../../../providers/editor-context', () => {
+	const mock = {
+		useEditorContext: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/block-data', async () => {
+	const constants = await vi.importActual(
+		'@woocommerce/block-data/constants'
+	);
+	const cart = await vi.importActual( '@woocommerce/block-data/cart' );
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		__esModule: true,
 		...constants,
 		CART_STORE_KEY: cart.CART_STORE_KEY,
 		cartStore: cart.store,
-	};
+	} );
 } );
-
 describe( 'useStoreCart', () => {
 	let registry;
-
-	const mockCartItems = [ { key: '1', id: 1, name: 'Lorem Ipsum' } ];
+	const mockCartItems = [
+		{
+			key: '1',
+			id: 1,
+			name: 'Lorem Ipsum',
+		},
+	];
 	const mockShippingAddress = {
 		city: 'New York',
 	};
@@ -84,28 +100,27 @@ describe( 'useStoreCart', () => {
 		paymentRequirements: [],
 		hasPendingItemsOperations: false,
 	};
-
 	const wrapper = ( { children } ) => (
 		<RegistryProvider value={ registry }>{ children }</RegistryProvider>
 	);
-
 	const renderStoreCartHook = ( options ) =>
-		renderHook( () => useStoreCart( options ), { wrapper } );
-
+		renderHook( () => useStoreCart( options ), {
+			wrapper,
+		} );
 	const setUpMocks = () => {
 		const mocks = {
 			selectors: {
-				getCartData: jest.fn().mockReturnValue( mockCartData ),
-				getCartErrors: jest.fn().mockReturnValue( mockCartErrors ),
-				getCartTotals: jest.fn().mockReturnValue( mockCartTotals ),
-				hasFinishedResolution: jest
+				getCartData: vi.fn().mockReturnValue( mockCartData ),
+				getCartErrors: vi.fn().mockReturnValue( mockCartErrors ),
+				getCartTotals: vi.fn().mockReturnValue( mockCartTotals ),
+				hasFinishedResolution: vi
 					.fn()
 					.mockReturnValue( ! mockCartIsLoading ),
-				isCustomerDataUpdating: jest.fn().mockReturnValue( false ),
-				isAddressFieldsForShippingRatesUpdating: jest
+				isCustomerDataUpdating: vi.fn().mockReturnValue( false ),
+				isAddressFieldsForShippingRatesUpdating: vi
 					.fn()
 					.mockReturnValue( false ),
-				hasPendingItemsOperations: jest.fn().mockReturnValue( false ),
+				hasPendingItemsOperations: vi.fn().mockReturnValue( false ),
 			},
 		};
 		registry.registerStore( storeKey, {
@@ -113,31 +128,25 @@ describe( 'useStoreCart', () => {
 			selectors: mocks.selectors,
 		} );
 	};
-
 	beforeEach( () => {
 		registry = createRegistry();
 		setUpMocks();
 	} );
-
 	afterEach( () => {
 		useEditorContext.mockReset();
 	} );
-
 	describe( 'in frontend', () => {
 		beforeEach( () => {
 			useEditorContext.mockReturnValue( {
 				isEditor: false,
 			} );
 		} );
-
 		it( 'return default data when shouldSelect is false', () => {
 			const { result } = renderStoreCartHook( {
 				shouldSelect: false,
 			} );
-
 			const { receiveCart, receiveCartContents, ...results } =
 				result.current;
-
 			const {
 				receiveCart: defaultReceiveCart,
 				receiveCartContents: defaultReceiveCartContents,
@@ -147,15 +156,12 @@ describe( 'useStoreCart', () => {
 			expect( receiveCart ).toEqual( defaultReceiveCart );
 			expect( receiveCartContents ).toEqual( defaultReceiveCartContents );
 		} );
-
 		it( 'return store data when shouldSelect is true', () => {
 			const { result } = renderStoreCartHook( {
 				shouldSelect: true,
 			} );
-
 			const { receiveCart, receiveCartContents, ...results } =
 				result.current;
-
 			expect( results ).toEqual( mockStoreCartData );
 			expect( receiveCart ).toBeUndefined();
 			expect( receiveCartContents ).toBeUndefined();

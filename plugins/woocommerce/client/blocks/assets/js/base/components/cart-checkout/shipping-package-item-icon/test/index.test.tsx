@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -11,28 +13,30 @@ import ShippingPackageItemIcon from '../index';
 import type { PackageItem } from '../../shipping-rates-control-package/types';
 
 // Mock the ProductImage component
-jest.mock( '../../product-image', () => {
-	return function ProductImage( {
-		image,
-		fallbackAlt,
-		width,
-		height,
-	}: {
-		image: { alt?: string; thumbnail?: string };
-		fallbackAlt: string;
-		width?: number;
-		height?: number;
-	} ) {
-		return (
-			<img
-				data-testid="product-image"
-				src={ image.thumbnail || '' }
-				alt={ image.alt || fallbackAlt }
-				width={ width }
-				height={ height }
-			/>
-		);
-	};
+vi.mock( '../../product-image', () => {
+	return ( ( mock ) => ( { default: mock, ...mock } ) )(
+		function ProductImage( {
+			image,
+			fallbackAlt,
+			width,
+			height,
+		}: {
+			image: { alt?: string; thumbnail?: string };
+			fallbackAlt: string;
+			width?: number;
+			height?: number;
+		} ) {
+			return (
+				<img
+					data-testid="product-image"
+					src={ image.thumbnail || '' }
+					alt={ image.alt || fallbackAlt }
+					width={ width }
+					height={ height }
+				/>
+			);
+		}
+	);
 } );
 
 const mockPackageItem: PackageItem = {

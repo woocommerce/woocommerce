@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Chip should render children nodes 1`] = `
+exports[`Chip > should render children nodes 1`] = `
 <div>
   <li
     class="wc-block-components-chip wc-block-components-chip--radius-small"
@@ -16,7 +16,7 @@ exports[`Chip should render children nodes 1`] = `
 </div>
 `;
 
-exports[`Chip should render defined radius 1`] = `
+exports[`Chip > should render defined radius 1`] = `
 <div>
   <li
     class="wc-block-components-chip wc-block-components-chip--radius-large"
@@ -31,7 +31,7 @@ exports[`Chip should render defined radius 1`] = `
 </div>
 `;
 
-exports[`Chip should render nodes as the text 1`] = `
+exports[`Chip > should render nodes as the text 1`] = `
 <div>
   <li
     class="wc-block-components-chip wc-block-components-chip--radius-small"
@@ -48,7 +48,7 @@ exports[`Chip should render nodes as the text 1`] = `
 </div>
 `;
 
-exports[`Chip should render screen reader text 1`] = `
+exports[`Chip > should render screen reader text 1`] = `
 <div>
   <li
     class="wc-block-components-chip wc-block-components-chip--radius-small"
@@ -68,7 +68,7 @@ exports[`Chip should render screen reader text 1`] = `
 </div>
 `;
 
-exports[`Chip should render text 1`] = `
+exports[`Chip > should render text 1`] = `
 <div>
   <li
     class="wc-block-components-chip wc-block-components-chip--radius-small"
@@ -83,7 +83,7 @@ exports[`Chip should render text 1`] = `
 </div>
 `;
 
-exports[`Chip with custom wrapper should render a chip made up of a div instead of a li 1`] = `
+exports[`Chip > with custom wrapper > should render a chip made up of a div instead of a li 1`] = `
 <div>
   <div
     class="wc-block-components-chip wc-block-components-chip--radius-small"
@@ -98,7 +98,7 @@ exports[`Chip with custom wrapper should render a chip made up of a div instead 
 </div>
 `;
 
-exports[`RemovableChip should render custom aria label 1`] = `
+exports[`RemovableChip > should render custom aria label 1`] = `
 <div>
   <li
     class="is-removable wc-block-components-chip wc-block-components-chip--radius-small"
@@ -134,7 +134,7 @@ exports[`RemovableChip should render custom aria label 1`] = `
 </div>
 `;
 
-exports[`RemovableChip should render default aria label if text is a node 1`] = `
+exports[`RemovableChip > should render default aria label if text is a node 1`] = `
 <div>
   <li
     class="is-removable wc-block-components-chip wc-block-components-chip--radius-small"
@@ -175,7 +175,7 @@ exports[`RemovableChip should render default aria label if text is a node 1`] = 
 </div>
 `;
 
-exports[`RemovableChip should render screen reader text aria label 1`] = `
+exports[`RemovableChip > should render screen reader text aria label 1`] = `
 <div>
   <li
     class="is-removable wc-block-components-chip wc-block-components-chip--radius-small"
@@ -214,7 +214,7 @@ exports[`RemovableChip should render screen reader text aria label 1`] = `
 </div>
 `;
 
-exports[`RemovableChip should render text and the remove button 1`] = `
+exports[`RemovableChip > should render text and the remove button 1`] = `
 <div>
   <li
     class="is-removable wc-block-components-chip wc-block-components-chip--radius-small"
@@ -248,7 +248,7 @@ exports[`RemovableChip should render text and the remove button 1`] = `
 </div>
 `;
 
-exports[`RemovableChip should render with disabled remove button 1`] = `
+exports[`RemovableChip > should render with disabled remove button 1`] = `
 <div>
   <li
     class="is-removable wc-block-components-chip wc-block-components-chip--radius-small"
@@ -283,7 +283,7 @@ exports[`RemovableChip should render with disabled remove button 1`] = `
 </div>
 `;
 
-exports[`RemovableChip with removeOnAnyClick should be a button when removeOnAnyClick is set to true 1`] = `
+exports[`RemovableChip > with removeOnAnyClick > should be a button when removeOnAnyClick is set to true 1`] = `
 <div>
   <button
     aria-label="Remove "Test""

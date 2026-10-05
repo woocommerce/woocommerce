@@ -1,3 +1,13 @@
+import {
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+	type Mock,
+	type MockedFunction,
+} from 'vitest';
+
 /**
  * External dependencies
  */
@@ -18,71 +28,103 @@ import type {
 import CustomerAddress from '../customer-address';
 
 // Mock all the data dependencies
-jest.mock( '@wordpress/data', () => ( {
-	useSelect: jest.fn(),
-} ) );
-
-jest.mock( '@woocommerce/block-data', () => ( {
-	validationStore: 'wc/store/validation',
-} ) );
-
-jest.mock( '@woocommerce/base-context', () => ( {
-	useCheckoutAddress: jest.fn(),
-	useStoreEvents: jest.fn( () => ( {
-		dispatchCheckoutEvent: jest.fn(),
-	} ) ),
-	useCustomerData: jest.fn(),
-} ) );
-
-jest.mock( '@woocommerce/base-components/cart-checkout', () => ( {
-	Form: jest.fn( () => <div data-testid="shipping-form" /> ),
-} ) );
-
-jest.mock( '../../../address-wrapper', () =>
-	jest.fn( ( { isEditing, addressCard, addressForm } ) => (
+vi.mock( '@wordpress/data', () => {
+	const mock = {
+		useSelect: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/block-data', () => {
+	const mock = {
+		validationStore: 'wc/store/validation',
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/base-context', () => {
+	const mock = {
+		useCheckoutAddress: vi.fn(),
+		useStoreEvents: vi.fn( () => ( {
+			dispatchCheckoutEvent: vi.fn(),
+		} ) ),
+		useCustomerData: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/base-components/cart-checkout', () => {
+	const mock = {
+		Form: vi.fn( () => <div data-testid="shipping-form" /> ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../../address-wrapper', () => {
+	const mock = vi.fn( ( { isEditing, addressCard, addressForm } ) => (
 		<div data-testid="address-wrapper">
 			<div data-testid="is-editing">{ isEditing.toString() }</div>
 			{ addressCard }
 			{ addressForm }
 		</div>
-	) )
-);
-
-jest.mock( '../../../address-card', () =>
-	jest.fn( ( { isExpanded } ) => (
+	) );
+	return {
+		default: mock,
+		...mock,
+	};
+} );
+vi.mock( '../../../address-card', () => {
+	const mock = vi.fn( ( { isExpanded } ) => (
 		<div data-testid="address-card">
 			<div data-testid="is-expanded">{ isExpanded.toString() }</div>
 		</div>
-	) )
-);
-
-const mockUseCheckoutAddress = useCheckoutAddress as jest.MockedFunction<
+	) );
+	return {
+		default: mock,
+		...mock,
+	};
+} );
+const mockUseCheckoutAddress = useCheckoutAddress as MockedFunction<
 	typeof useCheckoutAddress
 >;
-
-const mockUseCustomerData = useCustomerData as jest.MockedFunction<
+const mockUseCustomerData = useCustomerData as MockedFunction<
 	typeof useCustomerData
 >;
-
 const baseMockCheckoutAddress = {
 	shippingAddress: previewCart.shipping_address as ShippingAddress,
 	editingShippingAddress: false,
-	setEditingShippingAddress: jest.fn(),
+	setEditingShippingAddress: vi.fn(),
 	billingAddress: previewCart.billing_address as BillingAddress,
-	setBillingAddress: jest.fn(),
-	setShippingAddress: jest.fn(),
-	setEmail: jest.fn(),
+	setBillingAddress: vi.fn(),
+	setShippingAddress: vi.fn(),
+	setEmail: vi.fn(),
 	useBillingAsShipping: false,
 	useShippingAsBilling: false,
 	editingBillingAddress: false,
-	setEditingBillingAddress: jest.fn(),
+	setEditingBillingAddress: vi.fn(),
 	customerData: {
 		billingAddress: previewCart.billing_address as BillingAddress,
 		shippingAddress: previewCart.shipping_address as ShippingAddress,
 	},
-	setCustomerData: jest.fn(),
+	setCustomerData: vi.fn(),
 	// Additional required properties from CheckoutAddress interface
-	setUseShippingAsBilling: jest.fn(),
+	setUseShippingAsBilling: vi.fn(),
 	defaultFields: {} as FormFields,
 	showShippingFields: true,
 	showBillingFields: false,
@@ -90,22 +132,19 @@ const baseMockCheckoutAddress = {
 	needsShipping: true,
 	showShippingMethods: true,
 };
-
 describe( 'CustomerAddress (Shipping)', () => {
 	let mockValidationErrors: Record<
 		string,
 		FieldValidationStatus | undefined
 	>;
-
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 		// Set default mock with base implementation
 		mockUseCheckoutAddress.mockReturnValue( baseMockCheckoutAddress );
-
 		mockUseCustomerData.mockReturnValue( {
 			isInitialized: true,
-			setBillingAddress: jest.fn(),
-			setShippingAddress: jest.fn(),
+			setBillingAddress: vi.fn(),
+			setShippingAddress: vi.fn(),
 			billingAddress: previewCart.billing_address as BillingAddress,
 			shippingAddress: previewCart.shipping_address as ShippingAddress,
 		} );
@@ -114,19 +153,16 @@ describe( 'CustomerAddress (Shipping)', () => {
 		mockValidationErrors = {};
 
 		// Set up useSelect mock with the validation store pattern
-		( useSelect as jest.Mock ).mockImplementation( ( callback ) => {
+		( useSelect as Mock ).mockImplementation( ( callback ) => {
 			return callback( () => ( {
 				getValidationErrors: () => mockValidationErrors,
 			} ) );
 		} );
 	} );
-
 	it( 'should not be in editing mode when there are no validation errors', () => {
 		// Mock the validation store to return no errors for any field
 		mockValidationErrors = {};
-
 		render( <CustomerAddress /> );
-
 		expect( screen.getByTestId( 'is-editing' ) ).toHaveTextContent(
 			'false'
 		);
@@ -134,14 +170,14 @@ describe( 'CustomerAddress (Shipping)', () => {
 			'false'
 		);
 	} );
-
 	it( 'should be in editing mode when there are visible validation errors', () => {
-		const mockSetEditing = jest.fn();
+		const mockSetEditing = vi.fn();
 
 		// Override only the properties we need for this test
 		mockUseCheckoutAddress.mockReturnValue( {
 			...baseMockCheckoutAddress,
-			editingShippingAddress: false, // Start not editing
+			editingShippingAddress: false,
+			// Start not editing
 			setEditingShippingAddress: mockSetEditing,
 			shippingAddress: {
 				...previewCart.shipping_address,
@@ -150,7 +186,8 @@ describe( 'CustomerAddress (Shipping)', () => {
 				company: 'Test Company',
 				address_1: '123 Test Street',
 				address_2: 'Apt 1',
-				city: '', // Empty city to trigger validation error
+				city: '',
+				// Empty city to trigger validation error
 				state: 'CA',
 				postcode: '12345',
 				country: 'US',
@@ -166,15 +203,13 @@ describe( 'CustomerAddress (Shipping)', () => {
 				hidden: false,
 			},
 		};
-
 		render( <CustomerAddress /> );
 
 		// The useEffect should trigger setEditing(true) due to hasValidationErrors being true
 		expect( mockSetEditing ).toHaveBeenCalledWith( true );
 	} );
-
 	it( 'should be in editing mode when there are hidden validation errors', () => {
-		const mockSetEditing = jest.fn();
+		const mockSetEditing = vi.fn();
 
 		// Override only the properties we need for this test
 		mockUseCheckoutAddress.mockReturnValue( {
@@ -188,7 +223,8 @@ describe( 'CustomerAddress (Shipping)', () => {
 				company: 'Test Company',
 				address_1: '123 Test Street',
 				address_2: 'Apt 1',
-				city: '', // Empty city to trigger validation error
+				city: '',
+				// Empty city to trigger validation error
 				state: 'CA',
 				postcode: '12345',
 				country: 'US',
@@ -204,14 +240,11 @@ describe( 'CustomerAddress (Shipping)', () => {
 				hidden: true,
 			},
 		};
-
 		render( <CustomerAddress /> );
-
 		expect( mockSetEditing ).toHaveBeenCalledWith( true );
 	} );
-
 	it( 'should handle mixed hidden and visible validation errors', () => {
-		const mockSetEditing = jest.fn();
+		const mockSetEditing = vi.fn();
 
 		// Override only the properties we need for this test
 		mockUseCheckoutAddress.mockReturnValue( {
@@ -225,9 +258,11 @@ describe( 'CustomerAddress (Shipping)', () => {
 				company: 'Test Company',
 				address_1: '123 Test Street',
 				address_2: 'Apt 1',
-				city: '', // Empty city to trigger validation error
+				city: '',
+				// Empty city to trigger validation error
 				state: 'CA',
-				postcode: '', // Empty postcode to trigger validation error
+				postcode: '',
+				// Empty postcode to trigger validation error
 				country: 'US',
 				phone: '555-123-4567',
 				email: 'john@example.com',
@@ -245,18 +280,13 @@ describe( 'CustomerAddress (Shipping)', () => {
 				hidden: false,
 			},
 		};
-
 		render( <CustomerAddress /> );
-
 		expect( mockSetEditing ).toHaveBeenCalledWith( true );
 	} );
-
 	it( 'should handle empty validation errors object', () => {
 		// Mock the validation store to return no errors for any field
 		mockValidationErrors = {};
-
 		render( <CustomerAddress /> );
-
 		expect( screen.getByTestId( 'is-editing' ) ).toHaveTextContent(
 			'false'
 		);
@@ -264,14 +294,14 @@ describe( 'CustomerAddress (Shipping)', () => {
 			'false'
 		);
 	} );
-
 	it( 'should not change editing state when already in editing mode', () => {
-		const mockSetEditing = jest.fn();
+		const mockSetEditing = vi.fn();
 
 		// Override only the properties we need for this test
 		mockUseCheckoutAddress.mockReturnValue( {
 			...baseMockCheckoutAddress,
-			editingShippingAddress: true, // Already editing
+			editingShippingAddress: true,
+			// Already editing
 			setEditingShippingAddress: mockSetEditing,
 		} );
 
@@ -282,7 +312,6 @@ describe( 'CustomerAddress (Shipping)', () => {
 				hidden: false,
 			},
 		};
-
 		render( <CustomerAddress /> );
 
 		// Should not call setEditing since already in editing mode
@@ -291,9 +320,8 @@ describe( 'CustomerAddress (Shipping)', () => {
 			'true'
 		);
 	} );
-
 	it( 'should not enter editing mode when there is only an email validation error', () => {
-		const mockSetEditing = jest.fn();
+		const mockSetEditing = vi.fn();
 
 		// Override only the properties we need for this test
 		mockUseCheckoutAddress.mockReturnValue( {
@@ -324,7 +352,6 @@ describe( 'CustomerAddress (Shipping)', () => {
 				hidden: false,
 			},
 		};
-
 		render( <CustomerAddress /> );
 
 		// Should not enter editing mode since email is not part of shipping address fields
@@ -333,9 +360,8 @@ describe( 'CustomerAddress (Shipping)', () => {
 			'false'
 		);
 	} );
-
 	it( 'should not enter editing mode when all shipping address fields are empty', () => {
-		const mockSetEditing = jest.fn();
+		const mockSetEditing = vi.fn();
 
 		// Override only the properties we need for this test
 		mockUseCheckoutAddress.mockReturnValue( {
@@ -357,11 +383,10 @@ describe( 'CustomerAddress (Shipping)', () => {
 				email: '',
 			} as ShippingAddress,
 		} );
-
 		mockUseCustomerData.mockReturnValue( {
 			isInitialized: false,
-			setBillingAddress: jest.fn(),
-			setShippingAddress: jest.fn(),
+			setBillingAddress: vi.fn(),
+			setShippingAddress: vi.fn(),
 			billingAddress: previewCart.billing_address as BillingAddress,
 			shippingAddress: previewCart.shipping_address as ShippingAddress,
 		} );
@@ -406,7 +431,6 @@ describe( 'CustomerAddress (Shipping)', () => {
 				hidden: false,
 			},
 		};
-
 		render( <CustomerAddress /> );
 
 		// Should not enter editing mode when all fields are empty, even with validation errors

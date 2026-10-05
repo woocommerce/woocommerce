@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -9,22 +11,28 @@ import { COLLECTIONS_STORE_KEY as storeKey } from '@woocommerce/block-data';
  * Internal dependencies
  */
 import { useCollection } from '../use-collection';
-
-jest.mock( '@woocommerce/block-data', () => ( {
-	__esModule: true,
-	COLLECTIONS_STORE_KEY: 'test/store',
-} ) );
-
+vi.mock( '@woocommerce/block-data', () => {
+	const mock = {
+		__esModule: true,
+		COLLECTIONS_STORE_KEY: 'test/store',
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'useCollection', () => {
 	let registry, mocks;
-
 	const wrapper = ( { children } ) => (
 		<RegistryProvider value={ registry }>{ children }</RegistryProvider>
 	);
-
 	const renderUseCollection = ( options ) =>
 		renderHook( ( props ) => useCollection( props.options ), {
-			initialProps: { options },
+			initialProps: {
+				options,
+			},
 			wrapper,
 		} );
 
@@ -39,7 +47,6 @@ describe( 'useCollection', () => {
 		}
 		return error;
 	};
-
 	const setUpMocks = () => {
 		// Memoize the fixture by selector args so wp-data's SCRIPT_DEBUG
 		// unstable-reference check (which double-invokes the selector with
@@ -48,18 +55,20 @@ describe( 'useCollection', () => {
 		// unchanged; a naive `() => ({ foo: 'bar' })` mock returns a fresh
 		// object every call, which wp-data correctly flags.
 		const collectionCache = new Map();
-		const getCollection = jest.fn().mockImplementation( ( ...args ) => {
+		const getCollection = vi.fn().mockImplementation( ( ...args ) => {
 			const key = JSON.stringify( args );
 			if ( ! collectionCache.has( key ) ) {
-				collectionCache.set( key, { foo: 'bar' } );
+				collectionCache.set( key, {
+					foo: 'bar',
+				} );
 			}
 			return collectionCache.get( key );
 		} );
 		mocks = {
 			selectors: {
-				getCollectionError: jest.fn().mockReturnValue( false ),
+				getCollectionError: vi.fn().mockReturnValue( false ),
 				getCollection,
-				hasFinishedResolution: jest.fn().mockReturnValue( true ),
+				hasFinishedResolution: vi.fn().mockReturnValue( true ),
 			},
 		};
 		registry.registerStore( storeKey, {
@@ -67,7 +76,6 @@ describe( 'useCollection', () => {
 			selectors: mocks.selectors,
 		} );
 	};
-
 	beforeEach( () => {
 		registry = createRegistry();
 		mocks = {};
@@ -79,7 +87,9 @@ describe( 'useCollection', () => {
 		() => {
 			const error = renderUseCollectionError( {
 				resourceName: 'products',
-				query: { bar: 'foo' },
+				query: {
+					bar: 'foo',
+				},
 			} );
 			expect( error.message ).toMatch( /options object/ );
 			expect( console ).toHaveErrored( /your React components:/ );
@@ -91,7 +101,9 @@ describe( 'useCollection', () => {
 		() => {
 			const error = renderUseCollectionError( {
 				namespace: 'test/store',
-				query: { bar: 'foo' },
+				query: {
+					bar: 'foo',
+				},
 			} );
 			expect( error.message ).toMatch( /options object/ );
 			expect( console ).toHaveErrored( /your React components:/ );
@@ -104,7 +116,9 @@ describe( 'useCollection', () => {
 			const { result, rerender } = renderUseCollection( {
 				namespace: 'test/store',
 				resourceName: 'products',
-				query: { bar: 'foo' },
+				query: {
+					bar: 'foo',
+				},
 			} );
 			const { results } = result.current;
 			// rerender
@@ -112,7 +126,9 @@ describe( 'useCollection', () => {
 				options: {
 					namespace: 'test/store',
 					resourceName: 'products',
-					query: { bar: 'foo' },
+					query: {
+						bar: 'foo',
+					},
 				},
 			} );
 			// re-render should result in same products object because although
@@ -128,7 +144,9 @@ describe( 'useCollection', () => {
 				options: {
 					namespace: 'test/store',
 					resourceName: 'products',
-					query: { foo: 'bar' },
+					query: {
+						foo: 'bar',
+					},
 				},
 			} );
 			const { results: resultsVerification } = result.current;
@@ -244,10 +262,11 @@ describe( 'useCollection', () => {
 		return renderUseCollectionError( {
 			namespace: 'test/store',
 			resourceName: 'products',
-			query: { bar: 'foo' },
+			query: {
+				bar: 'foo',
+			},
 		} );
 	};
-
 	it( 'should propagate an Error instance from the store via the error boundary', () => {
 		const error = new Error( 'A real error' );
 		const caught = renderWithStoreError( error );
@@ -256,14 +275,19 @@ describe( 'useCollection', () => {
 		expect( console ).toHaveErrored( /your React components:/ );
 	} );
 	it( 'should convert a non-Error object with a message into an Error instance', () => {
-		const error = { code: 'rest_no_route', message: 'No route found.' };
+		const error = {
+			code: 'rest_no_route',
+			message: 'No route found.',
+		};
 		const caught = renderWithStoreError( error );
 		expect( caught ).toBeInstanceOf( Error );
 		expect( caught.message ).toBe( 'No route found.' );
 		expect( console ).toHaveErrored( /your React components:/ );
 	} );
 	it( 'should use a fallback message when a non-Error object has no message', () => {
-		const caught = renderWithStoreError( { code: 500 } );
+		const caught = renderWithStoreError( {
+			code: 500,
+		} );
 		expect( caught ).toBeInstanceOf( Error );
 		expect( caught.message ).toBe(
 			'Something went wrong while loading data.'

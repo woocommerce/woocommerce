@@ -1,3 +1,23 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+const { mockPlaceOrderButton, mockUseCheckoutSubmit, mockUseSelect } =
+	vi.hoisted( () => {
+		const mockPlaceOrderButton = vi.fn(
+			( { label, CustomButtonComponent } ) => {
+				if ( CustomButtonComponent ) {
+					return <CustomButtonComponent />;
+				}
+				return <button>{ label }</button>;
+			}
+		);
+		const mockUseCheckoutSubmit = vi.fn();
+		const mockUseSelect = vi.fn();
+		return {
+			mockPlaceOrderButton,
+			mockUseCheckoutSubmit,
+			mockUseSelect,
+		};
+	} );
+
 /**
  * External dependencies
  */
@@ -7,62 +27,129 @@ import { render, screen } from '@testing-library/react';
  * Internal dependencies
  */
 import Block from '../block';
-
-const mockPlaceOrderButton = jest.fn( ( { label, CustomButtonComponent } ) => {
-	if ( CustomButtonComponent ) {
-		return <CustomButtonComponent />;
-	}
-	return <button>{ label }</button>;
+vi.mock( '@woocommerce/base-components/cart-checkout', () => {
+	const mock = {
+		PlaceOrderButton: ( props ) => mockPlaceOrderButton( props ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
 } );
-
-jest.mock( '@woocommerce/base-components/cart-checkout', () => ( {
-	PlaceOrderButton: ( props ) => mockPlaceOrderButton( props ),
-} ) );
-
-const mockUseCheckoutSubmit = jest.fn();
-jest.mock( '@woocommerce/base-context/hooks', () => ( {
-	useCheckoutSubmit: () => mockUseCheckoutSubmit(),
-} ) );
-
-const mockUseSelect = jest.fn();
-jest.mock( '@wordpress/data', () => ( {
-	useSelect: () => mockUseSelect(),
-} ) );
-
-jest.mock( '@woocommerce/block-data', () => ( {
-	paymentStore: 'wc/store/payment',
-} ) );
-
-jest.mock( '@woocommerce/settings', () => ( {
-	getSetting: jest.fn( () => '' ),
-} ) );
-
-jest.mock( '@woocommerce/base-context', () => ( {
-	noticeContexts: {
-		CHECKOUT_ACTIONS: 'wc/checkout/checkout-actions',
-	},
-} ) );
-
-jest.mock( '@woocommerce/blocks-components', () => ( {
-	StoreNoticesContainer: () => null,
-} ) );
-
-jest.mock( '@woocommerce/blocks-checkout', () => ( {
-	applyCheckoutFilter: ( { defaultValue } ) => defaultValue,
-} ) );
-
-jest.mock( '@woocommerce/block-settings', () => ( {
-	CART_URL: '/cart',
-} ) );
-
-jest.mock( '../../checkout-order-summary-block/slotfills', () => ( {
-	CheckoutOrderSummarySlot: () => null,
-} ) );
-
-jest.mock( '../../checkout-actions-block/constants', () => ( {
-	defaultPlaceOrderButtonLabel: 'Place Order',
-} ) );
-
+vi.mock( '@woocommerce/base-context/hooks', () => {
+	const mock = {
+		useCheckoutSubmit: () => mockUseCheckoutSubmit(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/data', () => {
+	const mock = {
+		useSelect: () => mockUseSelect(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/block-data', () => {
+	const mock = {
+		paymentStore: 'wc/store/payment',
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/settings', () => {
+	const mock = {
+		getSetting: vi.fn( () => '' ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/base-context', () => {
+	const mock = {
+		noticeContexts: {
+			CHECKOUT_ACTIONS: 'wc/checkout/checkout-actions',
+		},
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/blocks-components', () => {
+	const mock = {
+		StoreNoticesContainer: () => null,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/blocks-checkout', () => {
+	const mock = {
+		applyCheckoutFilter: ( { defaultValue } ) => defaultValue,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/block-settings', () => {
+	const mock = {
+		CART_URL: '/cart',
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../checkout-order-summary-block/slotfills', () => {
+	const mock = {
+		CheckoutOrderSummarySlot: () => null,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../checkout-actions-block/constants', () => {
+	const mock = {
+		defaultPlaceOrderButtonLabel: 'Place Order',
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const defaultProps = {
 	cartPageId: 1,
 	showReturnToCart: false,
@@ -70,24 +157,19 @@ const defaultProps = {
 	priceSeparator: '·',
 	returnToCartButtonLabel: 'Return to Cart',
 };
-
 const CustomPlaceOrderButton = () => <button>Custom Button</button>;
-
 describe( 'Checkout Actions Block', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 		mockPlaceOrderButton.mockClear();
 	} );
-
 	it( 'does not pass CustomButtonComponent to PlaceOrderButton when a saved token is active', () => {
 		mockUseCheckoutSubmit.mockReturnValue( {
 			paymentMethodButtonLabel: '',
 			paymentMethodPlaceOrderButton: CustomPlaceOrderButton,
 		} );
 		mockUseSelect.mockReturnValue( 'saved-token-123' );
-
 		render( <Block { ...defaultProps } /> );
-
 		expect( mockPlaceOrderButton ).toHaveBeenCalledWith(
 			expect.objectContaining( {
 				CustomButtonComponent: undefined,
@@ -96,16 +178,13 @@ describe( 'Checkout Actions Block', () => {
 		expect( screen.queryByText( 'Place Order' ) ).toBeInTheDocument();
 		expect( screen.queryByText( 'Custom Button' ) ).not.toBeInTheDocument();
 	} );
-
 	it( 'passes CustomButtonComponent to PlaceOrderButton when no saved token is active', () => {
 		mockUseCheckoutSubmit.mockReturnValue( {
 			paymentMethodButtonLabel: '',
 			paymentMethodPlaceOrderButton: CustomPlaceOrderButton,
 		} );
 		mockUseSelect.mockReturnValue( null );
-
 		render( <Block { ...defaultProps } /> );
-
 		expect( mockPlaceOrderButton ).toHaveBeenCalledWith(
 			expect.objectContaining( {
 				CustomButtonComponent: CustomPlaceOrderButton,
@@ -114,16 +193,13 @@ describe( 'Checkout Actions Block', () => {
 		expect( screen.queryByText( 'Place Order' ) ).not.toBeInTheDocument();
 		expect( screen.queryByText( 'Custom Button' ) ).toBeInTheDocument();
 	} );
-
 	it( 'passes undefined CustomButtonComponent when payment method does not provide one', () => {
 		mockUseCheckoutSubmit.mockReturnValue( {
 			paymentMethodButtonLabel: '',
 			paymentMethodPlaceOrderButton: undefined,
 		} );
 		mockUseSelect.mockReturnValue( null );
-
 		render( <Block { ...defaultProps } /> );
-
 		expect( mockPlaceOrderButton ).toHaveBeenCalledWith(
 			expect.objectContaining( {
 				CustomButtonComponent: undefined,
@@ -131,16 +207,13 @@ describe( 'Checkout Actions Block', () => {
 		);
 		expect( screen.queryByText( 'Place Order' ) ).toBeInTheDocument();
 	} );
-
 	it( 'uses payment method button label when provided', () => {
 		mockUseCheckoutSubmit.mockReturnValue( {
 			paymentMethodButtonLabel: 'Pay with Card',
 			paymentMethodPlaceOrderButton: undefined,
 		} );
 		mockUseSelect.mockReturnValue( null );
-
 		render( <Block { ...defaultProps } /> );
-
 		expect( mockPlaceOrderButton ).toHaveBeenCalledWith(
 			expect.objectContaining( {
 				label: 'Pay with Card',

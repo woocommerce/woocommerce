@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -20,16 +22,16 @@ import { validationStore } from '@woocommerce/block-data';
 import * as actionCreators from '@woocommerce/block-data/validation/actions';
 import FrontendBlock from '../frontend';
 
-jest.mock( '@woocommerce/block-data/validation/actions', () => {
-	const actions = jest.requireActual(
+vi.mock( '@woocommerce/block-data/validation/actions', async () => {
+	const actions = await vi.importActual(
 		'@woocommerce/block-data/validation/actions'
 	);
-	return {
+	return ( ( mock ) => ( { default: mock, ...mock } ) )( {
 		...actions,
-		clearValidationError: jest.fn().mockImplementation( ( errorId ) => {
+		clearValidationError: vi.fn().mockImplementation( ( errorId ) => {
 			return actions.clearValidationError( errorId );
 		} ),
-	};
+	} );
 } );
 
 describe( 'FrontendBlock', () => {

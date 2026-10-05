@@ -1,16 +1,18 @@
+import { describe, expect, test, vi } from 'vitest';
+
 /**
  * Internal dependencies
  */
 import { registerCheckoutFilters, applyCheckoutFilter } from '../';
 
-jest.mock( '@woocommerce/settings', () => {
-	const originalModule = jest.requireActual( '@woocommerce/settings' );
-	return {
+vi.mock( '@woocommerce/settings', async () => {
+	const originalModule = await vi.importActual( '@woocommerce/settings' );
+	return ( ( mock ) => ( { default: mock, ...mock } ) )( {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore We know @woocommerce/settings is an object.
 		...originalModule,
 		CURRENT_USER_IS_ADMIN: true,
-	};
+	} );
 } );
 
 describe( 'Checkout registry (as admin user)', () => {

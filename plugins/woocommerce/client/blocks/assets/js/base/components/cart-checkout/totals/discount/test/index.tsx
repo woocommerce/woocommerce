@@ -1,3 +1,13 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+const { mockRemovableChip, mockTotalsItem } = vi.hoisted( () => {
+	const mockRemovableChip = vi.fn();
+	const mockTotalsItem = vi.fn();
+	return {
+		mockRemovableChip,
+		mockTotalsItem,
+	};
+} );
+
 /**
  * External dependencies
  */
@@ -15,27 +25,39 @@ import type { TotalsItemProps } from '@woocommerce/blocks-components/totals/item
 import TotalsDiscount, { TotalsDiscountProps } from '..';
 
 // Mock external dependencies
-jest.mock( '@woocommerce/settings', () => ( {
-	getSetting: jest
-		.fn()
-		.mockImplementation( ( settingName, fallback ) => fallback ),
-	getSettingWithCoercion: jest
-		.fn()
-		.mockImplementation( ( settingName, fallback ) => fallback ),
-} ) );
-
-jest.mock( '@woocommerce/blocks-checkout', () => ( {
-	applyCheckoutFilter: jest.fn(),
-} ) );
+vi.mock( '@woocommerce/settings', () => {
+	const mock = {
+		getSetting: vi
+			.fn()
+			.mockImplementation( ( settingName, fallback ) => fallback ),
+		getSettingWithCoercion: vi
+			.fn()
+			.mockImplementation( ( settingName, fallback ) => fallback ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/blocks-checkout', () => {
+	const mock = {
+		applyCheckoutFilter: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 // Mock the core components to verify they're called with correct props
-const mockRemovableChip = jest.fn();
-const mockTotalsItem = jest.fn();
 
 // Mock LoadingMask component
-jest.mock(
-	'@woocommerce/base-components/loading-mask',
-	() => ( props: LoadingMaskProps ) => (
+vi.mock( '@woocommerce/base-components/loading-mask', () => {
+	const mock = ( props: LoadingMaskProps ) => (
 		<div
 			className="wc-block-components-loading-mask"
 			data-testid={ props.isLoading ? 'loading-mask' : 'not-loading' }
@@ -52,41 +74,51 @@ jest.mock(
 				{ props.children }
 			</div>
 		</div>
-	)
-);
-
-jest.mock( '@woocommerce/blocks-components', () => ( {
-	RemovableChip: ( props: RemovableChipProps ) => {
-		mockRemovableChip( props );
-		return (
-			<div data-testid="removable-chip">
-				<span>{ props.text }</span>
-				<button
-					onClick={ props.onRemove }
-					disabled={ props.disabled }
-					aria-label={ props.ariaLabel }
-				>
-					Remove
-				</button>
-			</div>
-		);
-	},
-	TotalsItem: ( props: TotalsItemProps ) => {
-		mockTotalsItem( props );
-		return (
-			<div data-testid="totals-item">
-				<span>{ props.label }</span>
-				{ props.showSkeleton ? (
-					<div data-testid="skeleton">Loading...</div>
-				) : (
-					<span>{ props.value }</span>
-				) }
-				{ props.description && <div>{ props.description }</div> }
-			</div>
-		);
-	},
-} ) );
-
+	);
+	return {
+		default: mock,
+		...mock,
+	};
+} );
+vi.mock( '@woocommerce/blocks-components', () => {
+	const mock = {
+		RemovableChip: ( props: RemovableChipProps ) => {
+			mockRemovableChip( props );
+			return (
+				<div data-testid="removable-chip">
+					<span>{ props.text }</span>
+					<button
+						onClick={ props.onRemove }
+						disabled={ props.disabled }
+						aria-label={ props.ariaLabel }
+					>
+						Remove
+					</button>
+				</div>
+			);
+		},
+		TotalsItem: ( props: TotalsItemProps ) => {
+			mockTotalsItem( props );
+			return (
+				<div data-testid="totals-item">
+					<span>{ props.label }</span>
+					{ props.showSkeleton ? (
+						<div data-testid="skeleton">Loading...</div>
+					) : (
+						<span>{ props.value }</span>
+					) }
+					{ props.description && <div>{ props.description }</div> }
+				</div>
+			);
+		},
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'TotalsDiscount', () => {
 	const defaultProps: TotalsDiscountProps = {
 		cartCoupons: [],
@@ -100,7 +132,7 @@ describe( 'TotalsDiscount', () => {
 			thousandSeparator: ',',
 		},
 		isRemovingCoupon: false,
-		removeCoupon: jest.fn(),
+		removeCoupon: vi.fn(),
 		values: {
 			total_discount: '0',
 			total_discount_tax: '0',
@@ -117,19 +149,17 @@ describe( 'TotalsDiscount', () => {
 		currency_prefix: '',
 		currency_suffix: '',
 	};
-
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 		// Clear component mocks
 		mockRemovableChip.mockClear();
 		mockTotalsItem.mockClear();
 		// Default mock implementations
-		( applyCheckoutFilter as jest.Mock ).mockImplementation(
+		( applyCheckoutFilter as Mock ).mockImplementation(
 			( { defaultValue } ) => defaultValue
 		);
-		( getSetting as jest.Mock ).mockReturnValue( false );
+		( getSetting as Mock ).mockReturnValue( false );
 	} );
-
 	describe( 'Component visibility', () => {
 		it( 'should return null when there are no discounts and no coupons', () => {
 			const { container } = render(
@@ -138,7 +168,6 @@ describe( 'TotalsDiscount', () => {
 			expect( container.firstChild ).toBeNull();
 			expect( mockTotalsItem ).not.toHaveBeenCalled();
 		} );
-
 		it( 'should render TotalsItem when there is a discount value', () => {
 			const props = {
 				...defaultProps,
@@ -148,7 +177,6 @@ describe( 'TotalsDiscount', () => {
 				},
 			};
 			render( <TotalsDiscount { ...props } /> );
-
 			expect( mockTotalsItem ).toHaveBeenCalledWith(
 				expect.objectContaining( {
 					className: 'wc-block-components-totals-discount',
@@ -158,7 +186,6 @@ describe( 'TotalsDiscount', () => {
 				} )
 			);
 		} );
-
 		it( 'should render with coupons when there are coupons but no discount', () => {
 			const props: TotalsDiscountProps = {
 				...defaultProps,
@@ -184,11 +211,12 @@ describe( 'TotalsDiscount', () => {
 
 			// Verify the checkout filter is called correctly
 			expect( applyCheckoutFilter ).toHaveBeenCalledWith( {
-				arg: { context: 'summary' },
+				arg: {
+					context: 'summary',
+				},
 				filterName: 'coupons',
 				defaultValue: props.cartCoupons,
 			} );
-
 			expect( mockTotalsItem ).toHaveBeenCalledWith(
 				expect.objectContaining( {
 					label: 'Coupons',
@@ -206,10 +234,9 @@ describe( 'TotalsDiscount', () => {
 			expect( screen.getByText( 'Test Coupon' ) ).toBeInTheDocument();
 		} );
 	} );
-
 	describe( 'Discount calculations', () => {
 		it( 'should pass correct value without tax when displayCartPricesIncludingTax is false', () => {
-			( getSetting as jest.Mock ).mockReturnValue( false );
+			( getSetting as Mock ).mockReturnValue( false );
 			const props = {
 				...defaultProps,
 				values: {
@@ -218,16 +245,14 @@ describe( 'TotalsDiscount', () => {
 				},
 			};
 			render( <TotalsDiscount { ...props } /> );
-
 			expect( mockTotalsItem ).toHaveBeenCalledWith(
 				expect.objectContaining( {
 					value: -1000, // Should use total_discount only
 				} )
 			);
 		} );
-
 		it( 'should pass correct value with tax when displayCartPricesIncludingTax is true', () => {
-			( getSetting as jest.Mock ).mockReturnValue( true );
+			( getSetting as Mock ).mockReturnValue( true );
 			const props = {
 				...defaultProps,
 				values: {
@@ -236,14 +261,12 @@ describe( 'TotalsDiscount', () => {
 				},
 			};
 			render( <TotalsDiscount { ...props } /> );
-
 			expect( mockTotalsItem ).toHaveBeenCalledWith(
 				expect.objectContaining( {
 					value: -1100, // Should use total_discount + total_discount_tax
 				} )
 			);
 		} );
-
 		it( 'should handle string values correctly', () => {
 			const props = {
 				...defaultProps,
@@ -253,7 +276,6 @@ describe( 'TotalsDiscount', () => {
 				},
 			};
 			render( <TotalsDiscount { ...props } /> );
-
 			expect( mockTotalsItem ).toHaveBeenCalledWith(
 				expect.objectContaining( {
 					value: -999,
@@ -261,7 +283,6 @@ describe( 'TotalsDiscount', () => {
 			);
 		} );
 	} );
-
 	describe( 'Coupon display', () => {
 		it( 'should render RemovableChip for each coupon', () => {
 			const props = {
@@ -306,19 +327,18 @@ describe( 'TotalsDiscount', () => {
 				} )
 			);
 		} );
-
 		it( 'should apply checkout filter to coupons', () => {
 			const filteredCoupons = [
 				{
 					code: 'FILTERED',
 					label: 'Filtered Coupon',
-					totals: { total_discount: '100', total_discount_tax: '0' },
+					totals: {
+						total_discount: '100',
+						total_discount_tax: '0',
+					},
 				},
 			];
-			( applyCheckoutFilter as jest.Mock ).mockReturnValue(
-				filteredCoupons
-			);
-
+			( applyCheckoutFilter as Mock ).mockReturnValue( filteredCoupons );
 			const props = {
 				...defaultProps,
 				cartCoupons: [
@@ -338,9 +358,10 @@ describe( 'TotalsDiscount', () => {
 				},
 			};
 			render( <TotalsDiscount { ...props } /> );
-
 			expect( applyCheckoutFilter ).toHaveBeenCalledWith( {
-				arg: { context: 'summary' },
+				arg: {
+					context: 'summary',
+				},
 				filterName: 'coupons',
 				defaultValue: props.cartCoupons,
 			} );
@@ -352,11 +373,10 @@ describe( 'TotalsDiscount', () => {
 			).not.toBeInTheDocument();
 		} );
 	} );
-
 	describe( 'Coupon removal', () => {
 		it( 'should call removeCoupon when remove button is clicked', async () => {
 			const user = userEvent.setup();
-			const mockRemoveCoupon = jest.fn();
+			const mockRemoveCoupon = vi.fn();
 			const props = {
 				...defaultProps,
 				cartCoupons: [
@@ -383,11 +403,9 @@ describe( 'TotalsDiscount', () => {
 				'Remove coupon "Removable Coupon"'
 			);
 			await user.click( removeButton );
-
 			expect( mockRemoveCoupon ).toHaveBeenCalledWith( 'REMOVE_ME' );
 			expect( mockRemoveCoupon ).toHaveBeenCalledTimes( 1 );
 		} );
-
 		it( 'should disable remove buttons when isRemovingCoupon is true', () => {
 			const props = {
 				...defaultProps,
@@ -409,16 +427,14 @@ describe( 'TotalsDiscount', () => {
 				isRemovingCoupon: true,
 			};
 			render( <TotalsDiscount { ...props } /> );
-
 			const removeButton = screen.getByLabelText(
 				'Remove coupon "Test Coupon"'
 			);
 			expect( removeButton ).toBeDisabled();
 		} );
-
 		it( 'should not call removeCoupon when button is disabled', async () => {
 			const user = userEvent.setup();
-			const mockRemoveCoupon = jest.fn();
+			const mockRemoveCoupon = vi.fn();
 			const props = {
 				...defaultProps,
 				cartCoupons: [
@@ -440,7 +456,6 @@ describe( 'TotalsDiscount', () => {
 				isRemovingCoupon: true,
 			};
 			render( <TotalsDiscount { ...props } /> );
-
 			const removeButton = screen.getByLabelText(
 				'Remove coupon "Test Coupon"'
 			);
@@ -450,7 +465,6 @@ describe( 'TotalsDiscount', () => {
 			expect( mockRemoveCoupon ).not.toHaveBeenCalled();
 		} );
 	} );
-
 	describe( 'Loading states', () => {
 		it( 'should show skeleton when isLoading is true', () => {
 			const props = {
@@ -466,7 +480,6 @@ describe( 'TotalsDiscount', () => {
 			// TotalsItem component should show skeleton
 			expect( screen.getByTestId( 'skeleton' ) ).toBeInTheDocument();
 		} );
-
 		it( 'should show loading mask when removing coupon', () => {
 			const props = {
 				...defaultProps,
@@ -496,7 +509,6 @@ describe( 'TotalsDiscount', () => {
 			).toBeInTheDocument();
 			expect( screen.getByText( 'Test Coupon' ) ).toBeInTheDocument();
 		} );
-
 		it( 'should not show loading mask when not removing coupon', () => {
 			const props = {
 				...defaultProps,
@@ -524,7 +536,6 @@ describe( 'TotalsDiscount', () => {
 			expect( screen.getByText( 'Test Coupon' ) ).toBeInTheDocument();
 		} );
 	} );
-
 	describe( 'Label text', () => {
 		it( 'should show "Discount" label when there is a discount value', () => {
 			const props = {
@@ -537,7 +548,6 @@ describe( 'TotalsDiscount', () => {
 			render( <TotalsDiscount { ...props } /> );
 			expect( screen.getByText( 'Discount' ) ).toBeInTheDocument();
 		} );
-
 		it( 'should show "Coupons" label when there is no discount value but coupons exist', () => {
 			const props = {
 				...defaultProps,
@@ -561,7 +571,6 @@ describe( 'TotalsDiscount', () => {
 			expect( screen.getByText( 'Coupons' ) ).toBeInTheDocument();
 		} );
 	} );
-
 	describe( 'Edge cases', () => {
 		it( 'should handle negative discount values gracefully', () => {
 			const props = {
@@ -579,7 +588,6 @@ describe( 'TotalsDiscount', () => {
 				} )
 			);
 		} );
-
 		it( 'should handle non-numeric discount values', () => {
 			const props = {
 				...defaultProps,
@@ -592,7 +600,6 @@ describe( 'TotalsDiscount', () => {
 			const { container } = render( <TotalsDiscount { ...props } /> );
 			expect( container.firstChild ).toBeNull();
 		} );
-
 		it( 'should handle coupons with special characters in labels', () => {
 			const props = {
 				...defaultProps,
@@ -617,9 +624,8 @@ describe( 'TotalsDiscount', () => {
 				screen.getByText( '50% off & $5 bonus!' )
 			).toBeInTheDocument();
 		} );
-
 		it( 'should handle empty arrays and filter results', () => {
-			( applyCheckoutFilter as jest.Mock ).mockReturnValue( [] );
+			( applyCheckoutFilter as Mock ).mockReturnValue( [] );
 			const props = {
 				...defaultProps,
 				cartCoupons: [

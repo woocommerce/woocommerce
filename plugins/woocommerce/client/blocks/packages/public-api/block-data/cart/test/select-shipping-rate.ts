@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -13,16 +15,22 @@ import {
 	generateShippingPackage,
 	generateShippingRate,
 } from '../../../../../assets/js/mocks/shipping-package';
-
-jest.mock( '@wordpress/api-fetch', () => ( {
-	__esModule: true,
-	default: Object.assign( jest.fn(), {
-		use: jest.fn(),
-		setNonce: jest.fn(),
-		setCartHash: jest.fn(),
-	} ),
-} ) );
-
+vi.mock( '@wordpress/api-fetch', () => {
+	const mock = {
+		__esModule: true,
+		default: Object.assign( vi.fn(), {
+			use: vi.fn(),
+			setNonce: vi.fn(),
+			setCartHash: vi.fn(),
+		} ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const createPackages = ( selectedRateIds: string[] ) =>
 	selectedRateIds.map( ( selectedRateId, packageId ) =>
 		generateShippingPackage( {
@@ -45,23 +53,21 @@ const createPackages = ( selectedRateIds: string[] ) =>
 			],
 		} )
 	);
-
 const rejectedSelection = {
 	code: 'woocommerce_rest_cart_shipping_rate_invalid',
 	message: 'Shipping rate rejected.',
-	data: { status: 400 },
+	data: {
+		status: 400,
+	},
 };
-
 describe( 'batched shipping rate selection', () => {
 	beforeEach( () => {
-		jest.useFakeTimers();
-		jest.mocked( apiFetch ).mockReset();
+		vi.useFakeTimers();
+		vi.mocked( apiFetch ).mockReset();
 	} );
-
 	afterEach( () => {
-		jest.useRealTimers();
+		vi.useRealTimers();
 	} );
-
 	it( 'preserves successful packages when the middle selection fails', async () => {
 		const registry = createRegistry();
 		registry.register( cartStore );
@@ -75,7 +81,7 @@ describe( 'batched shipping rate selection', () => {
 				'pickup_location:0',
 			] ),
 		} );
-		jest.mocked( apiFetch ).mockResolvedValueOnce( {
+		vi.mocked( apiFetch ).mockResolvedValueOnce( {
 			responses: [
 				{
 					status: 200,
@@ -88,7 +94,11 @@ describe( 'batched shipping rate selection', () => {
 						] ),
 					},
 				},
-				{ status: 400, headers: {}, body: rejectedSelection },
+				{
+					status: 400,
+					headers: {},
+					body: rejectedSelection,
+				},
 				{
 					status: 200,
 					headers: {},
@@ -98,20 +108,21 @@ describe( 'batched shipping rate selection', () => {
 							'pickup_location:0',
 							'flat_rate:1',
 						] ),
-						totals: { total_shipping: '2500', total_price: '5500' },
+						totals: {
+							total_shipping: '2500',
+							total_price: '5500',
+						},
 					},
 				},
 			],
 		} );
-
 		const selections = Promise.allSettled(
 			[ 0, 1, 2 ].map( ( packageId ) =>
 				dispatch.selectShippingRate( 'flat_rate:1', packageId )
 			)
 		);
-		await jest.runOnlyPendingTimersAsync();
+		await vi.runOnlyPendingTimersAsync();
 		const results = await selections;
-
 		expect( results.map( ( result ) => result.status ) ).toEqual( [
 			'fulfilled',
 			'rejected',
@@ -162,21 +173,28 @@ describe( 'batched shipping rate selection', () => {
 			'flat_rate:1',
 			'flat_rate:1',
 		] );
-		dispatch.setCartData( { shippingRates: originalRates } );
-		jest.mocked( apiFetch ).mockResolvedValueOnce( {
+		dispatch.setCartData( {
+			shippingRates: originalRates,
+		} );
+		vi.mocked( apiFetch ).mockResolvedValueOnce( {
 			responses: [
-				{ status: 400, headers: {}, body: rejectedSelection },
+				{
+					status: 400,
+					headers: {},
+					body: rejectedSelection,
+				},
 			],
 		} );
-
 		const selections = Promise.allSettled( [
 			dispatch.selectShippingRate( 'pickup_location:0', null ),
 		] );
-		await jest.runOnlyPendingTimersAsync();
+		await vi.runOnlyPendingTimersAsync();
 		expect( await selections ).toEqual( [
-			{ status: 'rejected', reason: rejectedSelection },
+			{
+				status: 'rejected',
+				reason: rejectedSelection,
+			},
 		] );
-
 		expect( select.getShippingRates() ).toEqual( originalRates );
 		expect( select.isShippingRateBeingSelected() ).toBe( false );
 	} );

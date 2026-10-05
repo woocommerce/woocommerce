@@ -1,3 +1,5 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * Internal dependencies
  */
@@ -8,13 +10,11 @@ import {
 
 describe( 'resolveDateConstraint', () => {
 	afterEach( () => {
-		jest.useRealTimers();
+		vi.useRealTimers();
 	} );
 
 	const onDate = ( today: string ) =>
-		jest
-			.useFakeTimers()
-			.setSystemTime( new Date( `${ today }T12:00:00Z` ) );
+		vi.useFakeTimers().setSystemTime( new Date( `${ today }T12:00:00Z` ) );
 
 	it( 'returns undefined when there is no constraint', () => {
 		expect( resolveDateConstraint( undefined ) ).toBeUndefined();
@@ -116,7 +116,7 @@ describe( 'resolveDateConstraint', () => {
 		onDate( '2026-08-26' );
 		expect( resolveDateConstraint( 'P0D' ) ).toBe( '2026-08-26' );
 
-		jest.setSystemTime( new Date( '2026-08-27T12:00:00Z' ) );
+		vi.setSystemTime( new Date( '2026-08-27T12:00:00Z' ) );
 		expect( resolveDateConstraint( 'P0D' ) ).toBe( '2026-08-27' );
 	} );
 } );

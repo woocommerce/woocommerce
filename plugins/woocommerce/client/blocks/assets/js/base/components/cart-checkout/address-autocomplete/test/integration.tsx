@@ -1,3 +1,20 @@
+import {
+	afterEach,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+	type Mock,
+} from 'vitest';
+const { mockUseCheckoutAddress } = vi.hoisted( () => {
+	const mockUseCheckoutAddress = vi.fn();
+	return {
+		mockUseCheckoutAddress,
+	};
+} );
+
 /**
  * External dependencies
  */
@@ -11,62 +28,85 @@ import { cartStore } from '@woocommerce/block-data';
  * Internal dependencies
  */
 import { AddressAutocomplete } from '../address-autocomplete';
-
-const mockUseCheckoutAddress = jest.fn();
-jest.mock( '@woocommerce/base-context', () => ( {
-	...jest.requireActual( '@woocommerce/base-context' ),
-	useCheckoutAddress: () => mockUseCheckoutAddress(),
-} ) );
-
-jest.mock( '@wordpress/data', () => ( {
-	__esModule: true,
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn(),
-	useDispatch: jest.fn(),
-} ) );
-
-const mockUseSelect = useSelect as jest.Mock;
-const mockUseDispatch = useDispatch as jest.Mock;
-
-jest.mock( '@woocommerce/settings', () => ( {
-	...jest.requireActual( '@woocommerce/settings' ),
-	getSettingWithCoercion: jest
-		.fn()
-		.mockImplementation( ( value, fallback, typeguard ) => {
-			if ( value === 'addressAutocompleteProviders' ) {
-				return [
-					{
-						id: 'generic-provider',
-						name: 'Generic Provider',
-						branding_html: '<div>Test Provider - Generic</div>',
-					},
-				];
-			}
-			return jest
-				.requireActual( '@woocommerce/settings' )
-				.getSettingWithCoercion( value, fallback, typeguard );
-		} ),
-} ) );
+const _actual8 = await vi.importActual( '@wordpress/data' );
+vi.mock( '@woocommerce/base-context', async () => {
+	const mock = {
+		...( await vi.importActual( '@woocommerce/base-context' ) ),
+		useCheckoutAddress: () => mockUseCheckoutAddress(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/data', async () => {
+	const mock = {
+		__esModule: true,
+		...( await vi.importActual( '@wordpress/data' ) ),
+		useSelect: vi.fn(),
+		useDispatch: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+const mockUseSelect = useSelect as Mock;
+const mockUseDispatch = useDispatch as Mock;
+vi.mock( '@woocommerce/settings', async () => {
+	const _actual = await vi.importActual( '@woocommerce/settings' );
+	const mock = {
+		...( await vi.importActual( '@woocommerce/settings' ) ),
+		getSettingWithCoercion: vi
+			.fn()
+			.mockImplementation( ( value, fallback, typeguard ) => {
+				if ( value === 'addressAutocompleteProviders' ) {
+					return [
+						{
+							id: 'generic-provider',
+							name: 'Generic Provider',
+							branding_html: '<div>Test Provider - Generic</div>',
+						},
+					];
+				}
+				return _actual.getSettingWithCoercion(
+					value,
+					fallback,
+					typeguard
+				);
+			} ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 // Skipped: AddressAutocomplete's autofill-detection logic (userIsTypingRef)
 // relies on native `input` events with `inputType` properties that
 // jsdom/userEvent don't fully replicate. The suggestion rendering path
 // never fires because the typing guard isn't tripped. These tests should
 // be migrated to Playwright E2E where real browser events are available.
 describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', () => {
-	beforeAll( () => {
+	beforeAll( async () => {
+		const _actual2 = await vi.importActual( '@wordpress/data' );
 		// Mock use select so we can override it when wc/store/cart or
 		// wc/store/checkout is accessed, but return the original select
 		// function if any other store is accessed.
 		mockUseSelect.mockImplementation(
-			jest.fn().mockImplementation( ( passedMapSelect ) => {
-				const mockedSelect = jest
+			vi.fn().mockImplementation( ( passedMapSelect ) => {
+				const mockedSelect = vi
 					.fn()
 					.mockImplementation( ( storeName ) => {
 						const name =
 							typeof storeName === 'string'
 								? storeName
 								: storeName?.name;
-
 						if (
 							name === 'wc/store/cart' ||
 							storeName === cartStore
@@ -97,29 +137,28 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 									'generic-provider',
 							};
 						}
-
-						return jest
-							.requireActual( '@wordpress/data' )
-							.select( storeName );
+						return _actual2.select( storeName );
 					} );
 				return passedMapSelect( mockedSelect, {
-					dispatch: jest.requireActual( '@wordpress/data' ).dispatch,
+					dispatch: _actual2.dispatch,
 				} );
 			} )
 		);
-
 		mockUseDispatch.mockImplementation(
-			( store: string | { name: string } ) => {
+			(
+				store:
+					| string
+					| {
+							name: string;
+					  }
+			) => {
 				const storeName =
 					typeof store === 'string' ? store : store?.name;
-
 				if ( storeName === 'wc/store/cart' || store === cartStore ) {
 					return {
-						...jest
-							.requireActual( '@wordpress/data' )
-							.useDispatch( store ),
-						setShippingAddress: jest.fn(),
-						setBillingAddress: jest.fn(),
+						..._actual2.useDispatch( store ),
+						setShippingAddress: vi.fn(),
+						setBillingAddress: vi.fn(),
 					};
 				}
 
@@ -130,21 +169,16 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 				// search callback in AddressAutocomplete never fires.
 				if ( storeName === 'wc/store/checkout' ) {
 					return {
-						setActiveAddressAutocompleteProvider: jest.fn(),
+						setActiveAddressAutocompleteProvider: vi.fn(),
 					};
 				}
-
-				return jest
-					.requireActual( '@wordpress/data' )
-					.useDispatch( store );
+				return _actual2.useDispatch( store );
 			}
 		);
-
 		mockUseCheckoutAddress.mockReturnValue( {
 			useShippingAsBilling: false,
 			useBillingAsShipping: false,
 		} );
-
 		const genericProvider = {
 			id: 'generic-provider',
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -158,12 +192,22 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 					{
 						label: '123 Example St, Berlin, Germany',
 						id: '1',
-						matchedSubstrings: [ { length: 3, offset: 0 } ],
+						matchedSubstrings: [
+							{
+								length: 3,
+								offset: 0,
+							},
+						],
 					},
 					{
 						label: '456 Sample Rd, Munich, Germany',
 						id: '2',
-						matchedSubstrings: [ { length: 3, offset: 0 } ],
+						matchedSubstrings: [
+							{
+								length: 3,
+								offset: 0,
+							},
+						],
 					},
 				];
 			},
@@ -179,26 +223,28 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 				};
 			},
 		};
-
 		window.wc = {
 			...( window.wc || {} ),
 			addressAutocomplete: {
-				providers: { 'generic-provider': genericProvider },
-				activeProvider: { billing: null, shipping: null },
+				providers: {
+					'generic-provider': genericProvider,
+				},
+				activeProvider: {
+					billing: null,
+					shipping: null,
+				},
 				registerAddressAutocompleteProvider( provider ) {
 					return !! provider;
 				},
 			},
 		};
 	} );
-
 	afterEach( () => {
 		mockUseCheckoutAddress.mockReturnValue( {
 			useShippingAsBilling: false,
 			useBillingAsShipping: false,
 		} );
 	} );
-
 	it( 'Shows suggestions when provider returns results', async () => {
 		const Component = () => {
 			const [ value, setValue ] = useState( '' );
@@ -223,14 +269,15 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 				'1234'
 			);
 		} );
-
 		await waitFor(
 			() => {
 				expect(
 					container.querySelectorAll( '.suggestions-list li' ).length
 				).toBe( 2 );
 			},
-			{ timeout: 3000 }
+			{
+				timeout: 3000,
+			}
 		);
 	} );
 	it( 'Shows branding element in results', async () => {
@@ -253,14 +300,15 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 				'1234'
 			);
 		} );
-
 		await waitFor(
 			() => {
 				expect(
 					screen.getByText( 'Test Provider - Generic' )
 				).toBeInTheDocument();
 			},
-			{ timeout: 3000 }
+			{
+				timeout: 3000,
+			}
 		);
 	} );
 	it( 'Using arrow keys navigates through suggestions', async () => {
@@ -289,7 +337,9 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 					screen.getByText( 'Test Provider - Generic' )
 				).toBeInTheDocument();
 			},
-			{ timeout: 3000 }
+			{
+				timeout: 3000,
+			}
 		);
 		const input = screen.getByLabelText( 'Address 1' );
 		// Press down arrow to select first item.
@@ -313,7 +363,6 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 		expect( firstSuggestion.closest( 'li' ) ).toHaveClass( 'active' );
 		expect( secondSuggestion.closest( 'li' ) ).not.toHaveClass( 'active' );
 	} );
-
 	describe( 'ARIA accessibility attributes', () => {
 		it( 'Sets correct ARIA roles and attributes on input when suggestions are shown', async () => {
 			const Component = () => {
@@ -342,12 +391,13 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 			await act( async () => {
 				await userEvent.type( input, '1234' );
 			} );
-
 			await waitFor(
 				() => {
 					expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
 				},
-				{ timeout: 3000 }
+				{
+					timeout: 3000,
+				}
 			);
 
 			// Check ARIA attributes when suggestions are shown
@@ -369,7 +419,6 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 				'Address suggestions'
 			);
 		} );
-
 		it( 'Updates aria-activedescendant when navigating with keyboard', async () => {
 			const Component = () => {
 				const [ value, setValue ] = useState( '' );
@@ -390,12 +439,13 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 			await act( async () => {
 				await userEvent.type( input, '1234' );
 			} );
-
 			await waitFor(
 				() => {
 					expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
 				},
-				{ timeout: 3000 }
+				{
+					timeout: 3000,
+				}
 			);
 
 			// Initially no active descendant
@@ -434,7 +484,6 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 				'suggestion-item-shipping-0'
 			);
 		} );
-
 		it( 'Sets correct ARIA attributes on suggestion items', async () => {
 			const Component = () => {
 				const [ value, setValue ] = useState( '' );
@@ -457,14 +506,14 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 					'1234'
 				);
 			} );
-
 			await waitFor(
 				() => {
 					expect( screen.getAllByRole( 'option' ) ).toHaveLength( 2 );
 				},
-				{ timeout: 3000 }
+				{
+					timeout: 3000,
+				}
 			);
-
 			const options = screen.getAllByRole( 'option' );
 
 			// Check all options have correct initial ARIA state
@@ -496,7 +545,6 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 			expect( options[ 0 ] ).toHaveAttribute( 'aria-selected', 'false' );
 			expect( options[ 1 ] ).toHaveAttribute( 'aria-selected', 'true' );
 		} );
-
 		it( 'Includes aria-live region for announcements', async () => {
 			const Component = () => {
 				const [ value, setValue ] = useState( '' );
@@ -519,12 +567,13 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 					'1234'
 				);
 			} );
-
 			await waitFor(
 				() => {
 					expect( screen.getByRole( 'region' ) ).toBeInTheDocument();
 				},
-				{ timeout: 3000 }
+				{
+					timeout: 3000,
+				}
 			);
 
 			// Check aria-live region exists
@@ -535,7 +584,6 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 			const listbox = screen.getByRole( 'listbox' );
 			expect( liveRegion ).toContainElement( listbox );
 		} );
-
 		it( 'Clears ARIA attributes when suggestions are hidden', async () => {
 			const Component = () => {
 				const [ value, setValue ] = useState( '' );
@@ -556,12 +604,13 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 			await act( async () => {
 				await userEvent.type( input, '1234' );
 			} );
-
 			await waitFor(
 				() => {
 					expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
 				},
-				{ timeout: 3000 }
+				{
+					timeout: 3000,
+				}
 			);
 
 			// Navigate to select an item
@@ -589,7 +638,6 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 			// Suggestions should be gone
 			expect( screen.queryByRole( 'listbox' ) ).not.toBeInTheDocument();
 		} );
-
 		it( 'Maintains focus on input during keyboard navigation', async () => {
 			const Component = () => {
 				const [ value, setValue ] = useState( '' );
@@ -616,12 +664,13 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 			await act( async () => {
 				await userEvent.type( input, '1234' );
 			} );
-
 			await waitFor(
 				() => {
 					expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
 				},
-				{ timeout: 3000 }
+				{
+					timeout: 3000,
+				}
 			);
 
 			// Navigate with arrow keys
@@ -631,14 +680,12 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 
 			// Focus should remain on input
 			expect( input ).toHaveFocus();
-
 			await act( async () => {
 				await userEvent.type( input, '{arrowdown}' );
 			} );
 
 			// Focus should still be on input
 			expect( input ).toHaveFocus();
-
 			await act( async () => {
 				await userEvent.type( input, '{arrowup}' );
 			} );
@@ -646,7 +693,6 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 			// Focus should still be on input
 			expect( input ).toHaveFocus();
 		} );
-
 		it( 'Pressing Escape key hides suggestions and resets all ARIA states', async () => {
 			const Component = () => {
 				const [ value, setValue ] = useState( '' );
@@ -667,12 +713,13 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 			await act( async () => {
 				await userEvent.type( input, '1234' );
 			} );
-
 			await waitFor(
 				() => {
 					expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
 				},
-				{ timeout: 3000 }
+				{
+					timeout: 3000,
+				}
 			);
 
 			// Navigate to select an item (to set aria-activedescendant)
@@ -724,7 +771,6 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 			// Verify input value is preserved
 			expect( input ).toHaveValue( '1234' );
 		} );
-
 		it( 'Escape key works at any point during navigation', async () => {
 			const Component = () => {
 				const [ value, setValue ] = useState( '' );
@@ -745,45 +791,41 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 			await act( async () => {
 				await userEvent.type( input, '123' );
 			} );
-
 			await waitFor(
 				() => {
 					expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
 				},
-				{ timeout: 3000 }
+				{
+					timeout: 3000,
+				}
 			);
-
 			await act( async () => {
 				await userEvent.type( input, '{Escape}' );
 			} );
-
 			expect( screen.queryByRole( 'listbox' ) ).not.toBeInTheDocument();
 
 			// Test 2: Escape after navigating to first item
 			await act( async () => {
 				await userEvent.type( input, '4' ); // Now "1234"
 			} );
-
 			await waitFor(
 				() => {
 					expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
 				},
-				{ timeout: 3000 }
+				{
+					timeout: 3000,
+				}
 			);
-
 			await act( async () => {
 				await userEvent.type( input, '{arrowdown}' );
 			} );
-
 			expect( input ).toHaveAttribute(
 				'aria-activedescendant',
 				'suggestion-item-shipping-0'
 			);
-
 			await act( async () => {
 				await userEvent.type( input, '{Escape}' );
 			} );
-
 			expect( screen.queryByRole( 'listbox' ) ).not.toBeInTheDocument();
 			expect( input ).not.toHaveAttribute( 'aria-activedescendant' );
 
@@ -792,41 +834,42 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 				await userEvent.clear( input );
 				await userEvent.type( input, 'test' );
 			} );
-
 			await waitFor(
 				() => {
 					expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
 				},
-				{ timeout: 3000 }
+				{
+					timeout: 3000,
+				}
 			);
-
 			expect(
 				container.querySelectorAll( '.suggestions-list li' ).length
 			).toBe( 2 );
 		} );
-
 		it( 'Pressing Enter key on selected suggestion calls correct dispatch function', async () => {
-			const mockSetBillingAddress = jest.fn();
-			const mockSetShippingAddress = jest.fn();
+			const _actual3 = await vi.importActual( '@wordpress/data' );
+			const mockSetBillingAddress = vi.fn();
+			const mockSetShippingAddress = vi.fn();
 
 			// Override the mock for this specific test
 			mockUseDispatch.mockImplementation(
-				( store: string | { name: string } ) => {
+				(
+					store:
+						| string
+						| {
+								name: string;
+						  }
+				) => {
 					if ( store === cartStore || store === 'wc/store/cart' ) {
 						return {
-							...jest
-								.requireActual( '@wordpress/data' )
-								.useDispatch( store ),
+							..._actual3.useDispatch( store ),
 							setShippingAddress: mockSetShippingAddress,
 							setBillingAddress: mockSetBillingAddress,
 						};
 					}
-					return jest
-						.requireActual( '@wordpress/data' )
-						.useDispatch( store );
+					return _actual3.useDispatch( store );
 				}
 			);
-
 			const Component = () => {
 				const [ value, setValue ] = useState( '' );
 				return (
@@ -846,12 +889,13 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 			await act( async () => {
 				await userEvent.type( input, '1234' );
 			} );
-
 			await waitFor(
 				() => {
 					expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
 				},
-				{ timeout: 3000 }
+				{
+					timeout: 3000,
+				}
 			);
 
 			// Navigate to first suggestion
@@ -875,7 +919,9 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 				() => {
 					expect( mockSetBillingAddress ).toHaveBeenCalled();
 				},
-				{ timeout: 3000 }
+				{
+					timeout: 3000,
+				}
 			);
 
 			// Verify setBillingAddress was called with the correct data
@@ -903,29 +949,30 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 			expect( input ).not.toHaveAttribute( 'aria-activedescendant' );
 			expect( input ).not.toHaveAttribute( 'aria-owns' );
 		} );
-
 		it( 'Pressing Enter on shipping address calls setShippingAddress', async () => {
-			const mockSetBillingAddress = jest.fn();
-			const mockSetShippingAddress = jest.fn();
+			const _actual4 = await vi.importActual( '@wordpress/data' );
+			const mockSetBillingAddress = vi.fn();
+			const mockSetShippingAddress = vi.fn();
 
 			// Override the mock for this specific test
 			mockUseDispatch.mockImplementation(
-				( store: string | { name: string } ) => {
+				(
+					store:
+						| string
+						| {
+								name: string;
+						  }
+				) => {
 					if ( store === cartStore || store === 'wc/store/cart' ) {
 						return {
-							...jest
-								.requireActual( '@wordpress/data' )
-								.useDispatch( store ),
+							..._actual4.useDispatch( store ),
 							setShippingAddress: mockSetShippingAddress,
 							setBillingAddress: mockSetBillingAddress,
 						};
 					}
-					return jest
-						.requireActual( '@wordpress/data' )
-						.useDispatch( store );
+					return _actual4.useDispatch( store );
 				}
 			);
-
 			const Component = () => {
 				const [ value, setValue ] = useState( '' );
 				return (
@@ -945,12 +992,13 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 			await act( async () => {
 				await userEvent.type( input, 'test' );
 			} );
-
 			await waitFor(
 				() => {
 					expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
 				},
-				{ timeout: 3000 }
+				{
+					timeout: 3000,
+				}
 			);
 
 			// Navigate to second suggestion
@@ -969,7 +1017,9 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 				() => {
 					expect( mockSetShippingAddress ).toHaveBeenCalled();
 				},
-				{ timeout: 3000 }
+				{
+					timeout: 3000,
+				}
 			);
 
 			// Verify setShippingAddress was called
@@ -985,29 +1035,30 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 			// Verify setBillingAddress was NOT called
 			expect( mockSetBillingAddress ).not.toHaveBeenCalled();
 		} );
-
 		it( 'Enter key does nothing when no suggestion is selected', async () => {
-			const mockSetBillingAddress = jest.fn();
-			const mockSetShippingAddress = jest.fn();
+			const _actual5 = await vi.importActual( '@wordpress/data' );
+			const mockSetBillingAddress = vi.fn();
+			const mockSetShippingAddress = vi.fn();
 
 			// Override the mock for this specific test
 			mockUseDispatch.mockImplementation(
-				( store: string | { name: string } ) => {
+				(
+					store:
+						| string
+						| {
+								name: string;
+						  }
+				) => {
 					if ( store === cartStore || store === 'wc/store/cart' ) {
 						return {
-							...jest
-								.requireActual( '@wordpress/data' )
-								.useDispatch( store ),
+							..._actual5.useDispatch( store ),
 							setShippingAddress: mockSetShippingAddress,
 							setBillingAddress: mockSetBillingAddress,
 						};
 					}
-					return jest
-						.requireActual( '@wordpress/data' )
-						.useDispatch( store );
+					return _actual5.useDispatch( store );
 				}
 			);
-
 			const Component = () => {
 				const [ value, setValue ] = useState( '' );
 				return (
@@ -1027,12 +1078,13 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 			await act( async () => {
 				await userEvent.type( input, '1234' );
 			} );
-
 			await waitFor(
 				() => {
 					expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
 				},
-				{ timeout: 3000 }
+				{
+					timeout: 3000,
+				}
 			);
 
 			// Press Enter without selecting any suggestion
@@ -1052,29 +1104,30 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 			// Suggestions should still be visible
 			expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
 		} );
-
 		it( 'Clicking on a suggestion calls correct dispatch function', async () => {
-			const mockSetBillingAddress = jest.fn();
-			const mockSetShippingAddress = jest.fn();
+			const _actual6 = await vi.importActual( '@wordpress/data' );
+			const mockSetBillingAddress = vi.fn();
+			const mockSetShippingAddress = vi.fn();
 
 			// Override the mock for this specific test
 			mockUseDispatch.mockImplementation(
-				( store: string | { name: string } ) => {
+				(
+					store:
+						| string
+						| {
+								name: string;
+						  }
+				) => {
 					if ( store === cartStore || store === 'wc/store/cart' ) {
 						return {
-							...jest
-								.requireActual( '@wordpress/data' )
-								.useDispatch( store ),
+							..._actual6.useDispatch( store ),
 							setShippingAddress: mockSetShippingAddress,
 							setBillingAddress: mockSetBillingAddress,
 						};
 					}
-					return jest
-						.requireActual( '@wordpress/data' )
-						.useDispatch( store );
+					return _actual6.useDispatch( store );
 				}
 			);
-
 			const Component = () => {
 				const [ value, setValue ] = useState( '' );
 				return (
@@ -1096,14 +1149,14 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 					'1234'
 				);
 			} );
-
 			await waitFor(
 				() => {
 					expect( screen.getAllByRole( 'option' ) ).toHaveLength( 2 );
 				},
-				{ timeout: 3000 }
+				{
+					timeout: 3000,
+				}
 			);
-
 			const options = screen.getAllByRole( 'option' );
 
 			// Click on the second suggestion
@@ -1116,7 +1169,9 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 				() => {
 					expect( mockSetBillingAddress ).toHaveBeenCalled();
 				},
-				{ timeout: 3000 }
+				{
+					timeout: 3000,
+				}
 			);
 
 			// Verify setBillingAddress was called with the correct data
@@ -1139,29 +1194,30 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 				).not.toBeInTheDocument();
 			} );
 		} );
-
 		it( 'Clicking on shipping address suggestion calls setShippingAddress', async () => {
-			const mockSetBillingAddress = jest.fn();
-			const mockSetShippingAddress = jest.fn();
+			const _actual7 = await vi.importActual( '@wordpress/data' );
+			const mockSetBillingAddress = vi.fn();
+			const mockSetShippingAddress = vi.fn();
 
 			// Override the mock for this specific test
 			mockUseDispatch.mockImplementation(
-				( store: string | { name: string } ) => {
+				(
+					store:
+						| string
+						| {
+								name: string;
+						  }
+				) => {
 					if ( store === cartStore || store === 'wc/store/cart' ) {
 						return {
-							...jest
-								.requireActual( '@wordpress/data' )
-								.useDispatch( store ),
+							..._actual7.useDispatch( store ),
 							setShippingAddress: mockSetShippingAddress,
 							setBillingAddress: mockSetBillingAddress,
 						};
 					}
-					return jest
-						.requireActual( '@wordpress/data' )
-						.useDispatch( store );
+					return _actual7.useDispatch( store );
 				}
 			);
-
 			const Component = () => {
 				const [ value, setValue ] = useState( '' );
 				return (
@@ -1183,14 +1239,14 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 					'test'
 				);
 			} );
-
 			await waitFor(
 				() => {
 					expect( screen.getAllByRole( 'option' ) ).toHaveLength( 2 );
 				},
-				{ timeout: 3000 }
+				{
+					timeout: 3000,
+				}
 			);
-
 			const options = screen.getAllByRole( 'option' );
 
 			// Click on the first suggestion
@@ -1203,7 +1259,9 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 				() => {
 					expect( mockSetShippingAddress ).toHaveBeenCalled();
 				},
-				{ timeout: 3000 }
+				{
+					timeout: 3000,
+				}
 			);
 
 			// Verify setShippingAddress was called
@@ -1219,7 +1277,6 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 			// Verify setBillingAddress was NOT called
 			expect( mockSetBillingAddress ).not.toHaveBeenCalled();
 		} );
-
 		it( 'Handles search function errors gracefully without breaking the input', async () => {
 			// Create a provider that throws an error during search
 			const errorProvider = {
@@ -1240,7 +1297,6 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 				errorProvider;
 			window.wc.addressAutocomplete.activeProvider.billing =
 				errorProvider;
-
 			const Component = () => {
 				const [ value, setValue ] = useState( '' );
 				return (
@@ -1290,14 +1346,12 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 				await userEvent.clear( input );
 				await userEvent.type( input, 'test address' );
 			} );
-
 			expect( input ).toHaveValue( 'test address' );
 
 			// Still no suggestions should appear
 			expect( screen.queryByRole( 'listbox' ) ).not.toBeInTheDocument();
 		} );
 	} );
-
 	describe( 'Address sync behavior', () => {
 		beforeEach( () => {
 			const genericProvider = {
@@ -1307,12 +1361,22 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 					{
 						label: '123 Example St, Berlin, Germany',
 						id: '1',
-						matchedSubstrings: [ { length: 3, offset: 0 } ],
+						matchedSubstrings: [
+							{
+								length: 3,
+								offset: 0,
+							},
+						],
 					},
 					{
 						label: '456 Sample Rd, Munich, Germany',
 						id: '2',
-						matchedSubstrings: [ { length: 3, offset: 0 } ],
+						matchedSubstrings: [
+							{
+								length: 3,
+								offset: 0,
+							},
+						],
 					},
 				],
 				select: async () => ( {
@@ -1324,7 +1388,6 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 					country: 'DE',
 				} ),
 			};
-
 			window.wc.addressAutocomplete.providers[ 'generic-provider' ] =
 				genericProvider;
 			window.wc.addressAutocomplete.activeProvider.shipping =
@@ -1332,38 +1395,36 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 			window.wc.addressAutocomplete.activeProvider.billing =
 				genericProvider;
 		} );
-
 		it.each( [ 'Enter key', 'click' ] )(
 			'Shipping autocomplete syncs to billing when useShippingAsBilling is true (%s)',
 			async ( interactionMethod ) => {
-				const mockSetBillingAddress = jest.fn();
-				const mockSetShippingAddress = jest.fn();
-
+				const mockSetBillingAddress = vi.fn();
+				const mockSetShippingAddress = vi.fn();
 				mockUseCheckoutAddress.mockReturnValue( {
 					useShippingAsBilling: true,
 					useBillingAsShipping: false,
 				} );
-
 				mockUseDispatch.mockImplementation(
-					( store: string | { name: string } ) => {
+					(
+						store:
+							| string
+							| {
+									name: string;
+							  }
+					) => {
 						if (
 							store === cartStore ||
 							store === 'wc/store/cart'
 						) {
 							return {
-								...jest
-									.requireActual( '@wordpress/data' )
-									.useDispatch( store ),
+								..._actual8.useDispatch( store ),
 								setShippingAddress: mockSetShippingAddress,
 								setBillingAddress: mockSetBillingAddress,
 							};
 						}
-						return jest
-							.requireActual( '@wordpress/data' )
-							.useDispatch( store );
+						return _actual8.useDispatch( store );
 					}
 				);
-
 				const Component = () => {
 					const [ value, setValue ] = useState( '' );
 					return (
@@ -1378,20 +1439,19 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 				};
 				render( <Component /> );
 				const input = screen.getByLabelText( 'Address 1' );
-
 				await act( async () => {
 					await userEvent.type( input, '1234' );
 				} );
-
 				await waitFor(
 					() => {
 						expect(
 							screen.getByRole( 'listbox' )
 						).toBeInTheDocument();
 					},
-					{ timeout: 3000 }
+					{
+						timeout: 3000,
+					}
 				);
-
 				if ( interactionMethod === 'Enter key' ) {
 					await act( async () => {
 						await userEvent.type( input, '{arrowdown}' );
@@ -1405,14 +1465,14 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 						await userEvent.click( options[ 0 ] );
 					} );
 				}
-
 				await waitFor(
 					() => {
 						expect( mockSetShippingAddress ).toHaveBeenCalled();
 					},
-					{ timeout: 3000 }
+					{
+						timeout: 3000,
+					}
 				);
-
 				const expectedAddress = {
 					address_1: '123 Example St',
 					address_2: 'Address 2',
@@ -1421,7 +1481,6 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 					postcode: '10115',
 					country: 'DE',
 				};
-
 				expect( mockSetShippingAddress ).toHaveBeenCalledWith(
 					expectedAddress
 				);
@@ -1430,38 +1489,36 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 				);
 			}
 		);
-
 		it.each( [ 'Enter key', 'click' ] )(
 			'Billing autocomplete syncs to shipping when useBillingAsShipping is true (%s)',
 			async ( interactionMethod ) => {
-				const mockSetBillingAddress = jest.fn();
-				const mockSetShippingAddress = jest.fn();
-
+				const mockSetBillingAddress = vi.fn();
+				const mockSetShippingAddress = vi.fn();
 				mockUseCheckoutAddress.mockReturnValue( {
 					useShippingAsBilling: false,
 					useBillingAsShipping: true,
 				} );
-
 				mockUseDispatch.mockImplementation(
-					( store: string | { name: string } ) => {
+					(
+						store:
+							| string
+							| {
+									name: string;
+							  }
+					) => {
 						if (
 							store === cartStore ||
 							store === 'wc/store/cart'
 						) {
 							return {
-								...jest
-									.requireActual( '@wordpress/data' )
-									.useDispatch( store ),
+								..._actual8.useDispatch( store ),
 								setShippingAddress: mockSetShippingAddress,
 								setBillingAddress: mockSetBillingAddress,
 							};
 						}
-						return jest
-							.requireActual( '@wordpress/data' )
-							.useDispatch( store );
+						return _actual8.useDispatch( store );
 					}
 				);
-
 				const Component = () => {
 					const [ value, setValue ] = useState( '' );
 					return (
@@ -1476,20 +1533,19 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 				};
 				render( <Component /> );
 				const input = screen.getByLabelText( 'Address 1' );
-
 				await act( async () => {
 					await userEvent.type( input, '1234' );
 				} );
-
 				await waitFor(
 					() => {
 						expect(
 							screen.getByRole( 'listbox' )
 						).toBeInTheDocument();
 					},
-					{ timeout: 3000 }
+					{
+						timeout: 3000,
+					}
 				);
-
 				if ( interactionMethod === 'Enter key' ) {
 					await act( async () => {
 						await userEvent.type( input, '{arrowdown}' );
@@ -1503,14 +1559,14 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 						await userEvent.click( options[ 0 ] );
 					} );
 				}
-
 				await waitFor(
 					() => {
 						expect( mockSetBillingAddress ).toHaveBeenCalled();
 					},
-					{ timeout: 3000 }
+					{
+						timeout: 3000,
+					}
 				);
-
 				const expectedAddress = {
 					address_1: '123 Example St',
 					address_2: 'Address 2',
@@ -1519,7 +1575,6 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 					postcode: '10115',
 					country: 'DE',
 				};
-
 				expect( mockSetBillingAddress ).toHaveBeenCalledWith(
 					expectedAddress
 				);

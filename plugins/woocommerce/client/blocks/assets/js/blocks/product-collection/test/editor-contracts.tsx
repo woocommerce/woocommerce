@@ -1,3 +1,13 @@
+import {
+	afterAll,
+	afterEach,
+	beforeAll,
+	describe,
+	expect,
+	it,
+	vi,
+} from 'vitest';
+
 /**
  * External dependencies
  */
@@ -46,30 +56,41 @@ import {
 } from '../types';
 import { LocationType } from '../../product-template/utils';
 
-jest.mock( '../edit/inspector-controls', () => () => null );
-jest.mock( '../edit/inspector-advanced-controls', () => () => null );
-jest.mock( '../edit/toolbar-controls', () => () => null );
-jest.mock(
+vi.mock( '../edit/inspector-controls', () => {
+	const mock = () => null;
+	return { default: mock, ...mock };
+} );
+vi.mock( '../edit/inspector-advanced-controls', () => {
+	const mock = () => null;
+	return { default: mock, ...mock };
+} );
+vi.mock( '../edit/toolbar-controls', () => {
+	const mock = () => null;
+	return { default: mock, ...mock };
+} );
+vi.mock(
 	'../edit/inspector-controls/order-by-control/order-by-control',
-	() => {
-		const React = jest.requireActual( 'react' );
+	async () => {
+		const React = await vi.importActual( 'react' );
 
-		return ( { label, onChange, orderOptions, selectedValue } ) =>
-			React.createElement(
-				'select',
-				{
-					'aria-label': label,
-					onChange: ( event ) => onChange( event.target.value ),
-					value: selectedValue,
-				},
-				orderOptions.map( ( option ) =>
-					React.createElement(
-						'option',
-						{ key: option.value, value: option.value },
-						option.label
+		return ( ( mock ) => ( { default: mock, ...mock } ) )(
+			( { label, onChange, orderOptions, selectedValue } ) =>
+				React.createElement(
+					'select',
+					{
+						'aria-label': label,
+						onChange: ( event ) => onChange( event.target.value ),
+						value: selectedValue,
+					},
+					orderOptions.map( ( option ) =>
+						React.createElement(
+							'option',
+							{ key: option.value, value: option.value },
+							option.label
+						)
 					)
 				)
-			);
+		);
 	}
 );
 
@@ -210,7 +231,7 @@ describe( 'Product Collection editor contracts', () => {
 describe( 'Product Collection page-context defaults', () => {
 	afterEach( () => {
 		dispatch( blockEditorStore ).resetBlocks( [] );
-		jest.restoreAllMocks();
+		vi.restoreAllMocks();
 	} );
 
 	it.each( [
@@ -277,7 +298,7 @@ describe( 'Product Collection page-context defaults', () => {
 	] as const )(
 		'allows only the first collection to own $caseName',
 		( { getDefault, property, templateSlug } ) => {
-			jest.spyOn(
+			vi.spyOn(
 				select( CORE_EDITOR_STORE ) as unknown as {
 					getEditedPostSlug: () => string;
 				},
@@ -401,15 +422,15 @@ describe( 'default catalog order control', () => {
 		const user = userEvent.setup();
 		const coreSelectors = select( coreStore );
 		const coreActions = dispatch( coreStore );
-		const getEditedEntityRecord = jest
+		const getEditedEntityRecord = vi
 			.spyOn( coreSelectors, 'getEditedEntityRecord' )
 			.mockReturnValue( {
 				woocommerce_default_catalog_orderby: 'menu_order',
 			} );
-		const editEntityRecord = jest
+		const editEntityRecord = vi
 			.spyOn( coreActions, 'editEntityRecord' )
 			.mockReturnValue( undefined );
-		const trackInteraction = jest.fn();
+		const trackInteraction = vi.fn();
 
 		try {
 			render(

@@ -1,3 +1,5 @@
+import { beforeAll, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -6,10 +8,17 @@ import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
 import { type BlockAttributes } from '@wordpress/blocks';
 import { getByLabelText, getByRole } from '@testing-library/dom';
 import { userEvent } from '@testing-library/user-event';
-
-jest.mock( '@wordpress/data', () =>
+vi.mock( '@wordpress/data', async () =>
 	// eslint-disable-next-line @typescript-eslint/no-var-requires -- Must use require due to Jest mock hoisting
-	require( '@woocommerce/blocks-test-utils/mock-editor-store' ).mockWordPressDataWithEditorStore()
+	{
+		const mock = (
+			await import( '@woocommerce/blocks-test-utils/mock-editor-store' )
+		).mockWordPressDataWithEditorStore();
+		return {
+			default: mock,
+			...mock,
+		};
+	}
 );
 
 /**
@@ -21,12 +30,15 @@ import {
 } from '../../../../../tests/integration/helpers/integration-test-editor';
 import '../index';
 import '../inner-blocks/index';
-
 async function setup( attributes: BlockAttributes ) {
-	const testBlock = [ { name: 'woocommerce/checkout', attributes } ];
+	const testBlock = [
+		{
+			name: 'woocommerce/checkout',
+			attributes,
+		},
+	];
 	return initializeEditor( testBlock );
 }
-
 describe( 'Checkout block editor integration', () => {
 	beforeAll( async () => {
 		// Register a checkout filter to allow `core/table` block in all Checkout inner blocks,
@@ -36,7 +48,11 @@ describe( 'Checkout block editor integration', () => {
 			additionalCartCheckoutInnerBlockTypes: (
 				value: string[],
 				extensions,
-				{ block }: { block: string }
+				{
+					block,
+				}: {
+					block: string;
+				}
 			) => {
 				value.push( 'core/table' );
 				if ( block === 'woocommerce/checkout-totals-block' ) {
@@ -55,13 +71,11 @@ describe( 'Checkout block editor integration', () => {
 
 		// Verify Checkout block is properly initialized in the editor.
 		expect( screen.getByLabelText( /^Block: Checkout$/i ) ).toBeVisible();
-
 		await waitFor( () => {
 			expect(
 				screen.getByLabelText( /^Block: Order Summary$/i )
 			).toBeVisible();
 		} );
-
 		const orderSummaryBlock = screen.getByLabelText(
 			/^Block: Order Summary$/i
 		);
@@ -70,7 +84,6 @@ describe( 'Checkout block editor integration', () => {
 		if ( ! orderSummaryBlock.parentElement ) {
 			throw new Error( 'Order Summary block parent element not found.' );
 		}
-
 		const orderSummaryAppendButton = getByLabelText(
 			orderSummaryBlock.parentElement,
 			'Add block'
@@ -80,7 +93,6 @@ describe( 'Checkout block editor integration', () => {
 		await act( async () => {
 			await userEvent.click( orderSummaryAppendButton );
 		} );
-
 		const options = screen.getAllByRole( 'option' );
 		const tableOption = options.find(
 			( element ) => element.textContent === 'Table'
@@ -88,7 +100,6 @@ describe( 'Checkout block editor integration', () => {
 		const audioOption = options.find(
 			( element ) => element.textContent === 'Audio'
 		);
-
 		await waitFor( () => {
 			// Verify Table option is available (should be available on all blocks).
 			expect( tableOption ).toBeInTheDocument();
@@ -96,14 +107,14 @@ describe( 'Checkout block editor integration', () => {
 			// Verify Audio option is available (added only for checkout totals block).
 			expect( audioOption ).toBeInTheDocument();
 		} );
-
 		await act( async () => {
 			await userEvent.click(
-				screen.getByRole( 'option', { name: /Table/i } )
+				screen.getByRole( 'option', {
+					name: /Table/i,
+				} )
 			);
 			await userEvent.click( orderSummaryBlock );
 		} );
-
 		await selectBlock( 'Block: Contact Information' );
 		const contactInfoBlock = screen.getByLabelText(
 			/^Block: Contact Information$/i

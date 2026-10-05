@@ -1,3 +1,5 @@
+import { afterEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -14,32 +16,42 @@ import PriceFilterEdit from '../../price-filter/edit';
 import RatingFilterEdit from '../../rating-filter/edit';
 import StockFilterEdit from '../../stock-filter/edit';
 import { textContentMatcher } from '../../../../../tests/utils/find-by-text';
-
-jest.mock( '@wordpress/block-editor', () => ( {
-	...jest.requireActual( '@wordpress/block-editor' ),
-	useBlockProps: jest.fn( ( props = {} ) => props ),
-	InspectorControls: jest.fn( ( { children } ) => <div>{ children }</div> ),
-	InnerBlocks: jest.fn( ( { template } ) => (
-		<section>
-			<h3>{ template[ 0 ][ 1 ].content }</h3>
-			<div
-				data-testid="locked-filter-child"
-				data-block-name={ template[ 1 ][ 0 ] }
-				data-lock-remove={ String( template[ 1 ][ 1 ].lock.remove ) }
-			/>
-		</section>
-	) ),
-} ) );
-
-jest.mock( '@wordpress/components', () => {
-	const element = jest.requireActual( '@wordpress/element' );
-
-	return {
-		...jest.requireActual( '@wordpress/components' ),
-		Disabled: jest.fn( ( { children } ) => <div>{ children }</div> ),
-		Notice: jest.fn( ( { children } ) => <div>{ children }</div> ),
-		PanelBody: jest.fn( ( { children } ) => <div>{ children }</div> ),
-		ToggleControl: jest.fn( ( { label, checked, onChange } ) => (
+vi.mock( '@wordpress/block-editor', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/block-editor' ) ),
+		useBlockProps: vi.fn( ( props = {} ) => props ),
+		InspectorControls: vi.fn( ( { children } ) => <div>{ children }</div> ),
+		InnerBlocks: vi.fn( ( { template } ) => (
+			<section>
+				<h3>{ template[ 0 ][ 1 ].content }</h3>
+				<div
+					data-testid="locked-filter-child"
+					data-block-name={ template[ 1 ][ 0 ] }
+					data-lock-remove={ String(
+						template[ 1 ][ 1 ].lock.remove
+					) }
+				/>
+			</section>
+		) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/components', async () => {
+	const element = await vi.importActual( '@wordpress/element' );
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
+		...( await vi.importActual( '@wordpress/components' ) ),
+		Disabled: vi.fn( ( { children } ) => <div>{ children }</div> ),
+		Notice: vi.fn( ( { children } ) => <div>{ children }</div> ),
+		PanelBody: vi.fn( ( { children } ) => <div>{ children }</div> ),
+		ToggleControl: vi.fn( ( { label, checked, onChange } ) => (
 			<span>
 				<input
 					type="checkbox"
@@ -50,8 +62,8 @@ jest.mock( '@wordpress/components', () => {
 				{ label }
 			</span>
 		) ),
-		withSpokenMessages: jest.fn( ( Component ) => Component ),
-		__experimentalToggleGroupControl: jest.fn(
+		withSpokenMessages: vi.fn( ( Component ) => Component ),
+		__experimentalToggleGroupControl: vi.fn(
 			( { children, label, onChange, value } ) => (
 				<fieldset>
 					<legend>{ label }</legend>
@@ -64,7 +76,7 @@ jest.mock( '@wordpress/components', () => {
 				</fieldset>
 			)
 		),
-		__experimentalToggleGroupControlOption: jest.fn(
+		__experimentalToggleGroupControlOption: vi.fn(
 			( { label, onSelect, selectedValue, value } ) => (
 				<span>
 					<input
@@ -77,48 +89,82 @@ jest.mock( '@wordpress/components', () => {
 				</span>
 			)
 		),
-		__experimentalToolsPanel: jest.fn( ( { children } ) => (
+		__experimentalToolsPanel: vi.fn( ( { children } ) => (
 			<div>{ children }</div>
 		) ),
-		__experimentalToolsPanelItem: jest.fn( ( { children } ) => (
+		__experimentalToolsPanelItem: vi.fn( ( { children } ) => (
+			<div>{ children }</div>
+		) ),
+	} );
+} );
+vi.mock( '@wordpress/data', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/data' ) ),
+		useDispatch: vi.fn( () => ( {
+			removeBlock: vi.fn(),
+			replaceBlock: vi.fn(),
+			selectBlock: vi.fn(),
+			updateBlockAttributes: vi.fn(),
+		} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/editor-components/upgrade-downgrade-notice', () => {
+	const mock = {
+		UpgradeDowngradeNotice: vi.fn( ( { children } ) => (
 			<div>{ children }</div>
 		) ),
 	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
 } );
-
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useDispatch: jest.fn( () => ( {
-		removeBlock: jest.fn(),
-		replaceBlock: jest.fn(),
-		selectBlock: jest.fn(),
-		updateBlockAttributes: jest.fn(),
-	} ) ),
-} ) );
-
-jest.mock( '@woocommerce/editor-components/upgrade-downgrade-notice', () => ( {
-	UpgradeDowngradeNotice: jest.fn( ( { children } ) => (
-		<div>{ children }</div>
-	) ),
-} ) );
-
-jest.mock( '@woocommerce/block-settings', () => ( {
-	...jest.requireActual( '@woocommerce/block-settings' ),
-	blocksConfig: { productCount: 1 },
-} ) );
-
-jest.mock( '@woocommerce/base-context/hooks', () => {
+vi.mock( '@woocommerce/block-settings', async () => {
+	const mock = {
+		...( await vi.importActual( '@woocommerce/block-settings' ) ),
+		blocksConfig: {
+			productCount: 1,
+		},
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/base-context/hooks', async () => {
 	const queryState = {};
 	const queryValues: string[] = [];
-	const setQueryState = jest.fn();
+	const setQueryState = vi.fn();
 	const collectionData = {
 		rating_counts: [
-			{ rating: 1, count: 1 },
-			{ rating: 5, count: 2 },
+			{
+				rating: 1,
+				count: 1,
+			},
+			{
+				rating: 5,
+				count: 2,
+			},
 		],
 		stock_status_counts: [
-			{ status: 'instock', count: 2 },
-			{ status: 'outofstock', count: 1 },
+			{
+				status: 'instock',
+				count: 2,
+			},
+			{
+				status: 'outofstock',
+				count: 1,
+			},
 		],
 		price_range: {
 			min_price: '100',
@@ -132,48 +178,56 @@ jest.mock( '@woocommerce/base-context/hooks', () => {
 			currency_suffix: '',
 		},
 	};
-
-	return {
-		...jest.requireActual( '@woocommerce/base-context/hooks' ),
-		useCollectionData: jest.fn( () => ( {
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
+		...( await vi.importActual( '@woocommerce/base-context/hooks' ) ),
+		useCollectionData: vi.fn( () => ( {
 			data: collectionData,
 			isLoading: false,
 		} ) ),
-		useQueryStateByContext: jest.fn( () => [ queryState ] ),
-		useQueryStateByKey: jest.fn( () => [ queryValues, setQueryState ] ),
-	};
+		useQueryStateByContext: vi.fn( () => [ queryState ] ),
+		useQueryStateByKey: vi.fn( () => [ queryValues, setQueryState ] ),
+	} );
 } );
-
-jest.mock( '@woocommerce/settings', () => {
+vi.mock( '@woocommerce/settings', async () => {
 	const stockStatusOptions = {
 		instock: 'In stock',
 		outofstock: 'Out of stock',
 	};
-
-	return {
-		...jest.requireActual( '@woocommerce/settings' ),
-		getSetting: jest.fn( ( key, defaultValue ) => {
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
+		...( await vi.importActual( '@woocommerce/settings' ) ),
+		getSetting: vi.fn( ( key, defaultValue ) => {
 			if ( key === 'stockStatusOptions' ) {
 				return stockStatusOptions;
 			}
 			return defaultValue;
 		} ),
-		getSettingWithCoercion: jest.fn( ( key, defaultValue ) =>
+		getSettingWithCoercion: vi.fn( ( key, defaultValue ) =>
 			key === 'hasFilterableProducts' ? true : defaultValue
 		),
+	} );
+} );
+vi.mock( '@wordpress/a11y', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/a11y' ) ),
+		speak: vi.fn(),
 	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
 } );
-
-jest.mock( '@wordpress/a11y', () => ( {
-	...jest.requireActual( '@wordpress/a11y' ),
-	speak: jest.fn(),
-} ) );
-
 afterEach( () => {
-	jest.clearAllMocks();
-	jest.restoreAllMocks();
+	vi.clearAllMocks();
+	vi.restoreAllMocks();
 } );
-
 describe( 'legacy filter editor ownership', () => {
 	it.each( [
 		{
@@ -192,7 +246,6 @@ describe( 'legacy filter editor ownership', () => {
 		const WrapperEdit = FilterWrapperEdit as unknown as React.ComponentType<
 			Record< string, unknown >
 		>;
-
 		render(
 			<WrapperEdit
 				attributes={ {
@@ -202,9 +255,11 @@ describe( 'legacy filter editor ownership', () => {
 				clientId="wrapper-client-id"
 			/>
 		);
-
 		expect(
-			screen.getByRole( 'heading', { level: 3, name: row.heading } )
+			screen.getByRole( 'heading', {
+				level: 3,
+				name: row.heading,
+			} )
 		).toBeInTheDocument();
 		expect( screen.getByTestId( 'locked-filter-child' ) ).toHaveAttribute(
 			'data-block-name',
@@ -214,22 +269,31 @@ describe( 'legacy filter editor ownership', () => {
 			'data-lock-remove',
 			'true'
 		);
-
-		const innerBlocksProps = ( InnerBlocks as unknown as jest.Mock ).mock
+		const innerBlocksProps = ( InnerBlocks as unknown as Mock ).mock
 			.calls[ 0 ][ 0 ];
 		expect( innerBlocksProps.allowedBlocks ).toEqual( [ 'core/heading' ] );
 		expect( innerBlocksProps.template ).toEqual( [
-			[ 'core/heading', { content: row.heading, level: 3 } ],
+			[
+				'core/heading',
+				{
+					content: row.heading,
+					level: 3,
+				},
+			],
 			[
 				`woocommerce/${ row.filterType }`,
-				{ heading: '', lock: { remove: true } },
+				{
+					heading: '',
+					lock: {
+						remove: true,
+					},
+				},
 			],
 		] );
 	} );
-
 	it( 'maps Price display and Apply controls to preview behavior', async () => {
 		const user = userEvent.setup();
-		const setAttributes = jest.fn();
+		const setAttributes = vi.fn();
 		const attributes = {
 			heading: '',
 			headingLevel: 3,
@@ -247,9 +311,7 @@ describe( 'legacy filter editor ownership', () => {
 				setAttributes={ setAttributes }
 			/>
 		);
-
 		const { rerender } = render( renderEdit( attributes ) );
-
 		expect(
 			await screen.findByRole( 'textbox', {
 				name: 'Filter products by minimum price',
@@ -261,16 +323,25 @@ describe( 'legacy filter editor ownership', () => {
 			} )
 		).toBeVisible();
 		expect(
-			screen.queryByRole( 'button', { name: 'Apply price filter' } )
+			screen.queryByRole( 'button', {
+				name: 'Apply price filter',
+			} )
 		).not.toBeInTheDocument();
-
-		await user.click( screen.getByRole( 'radio', { name: 'Text' } ) );
+		await user.click(
+			screen.getByRole( 'radio', {
+				name: 'Text',
+			} )
+		);
 		expect( setAttributes ).toHaveBeenCalledTimes( 1 );
 		expect( setAttributes ).toHaveBeenCalledWith( {
 			showInputFields: false,
 		} );
-
-		rerender( renderEdit( { ...attributes, showInputFields: false } ) );
+		rerender(
+			renderEdit( {
+				...attributes,
+				showInputFields: false,
+			} )
+		);
 		expect(
 			screen.queryByRole( 'textbox', {
 				name: 'Filter products by minimum price',
@@ -283,7 +354,6 @@ describe( 'legacy filter editor ownership', () => {
 		).not.toBeInTheDocument();
 		expect( screen.getByText( textContentMatcher( '$1' ) ) ).toBeVisible();
 		expect( screen.getByText( textContentMatcher( '$50' ) ) ).toBeVisible();
-
 		setAttributes.mockClear();
 		await user.click(
 			screen.getByRole( 'checkbox', {
@@ -294,7 +364,6 @@ describe( 'legacy filter editor ownership', () => {
 		expect( setAttributes ).toHaveBeenCalledWith( {
 			showFilterButton: true,
 		} );
-
 		rerender(
 			renderEdit( {
 				...attributes,
@@ -303,10 +372,11 @@ describe( 'legacy filter editor ownership', () => {
 			} )
 		);
 		expect(
-			await screen.findByRole( 'button', { name: 'Apply price filter' } )
+			await screen.findByRole( 'button', {
+				name: 'Apply price filter',
+			} )
 		).toBeVisible();
 	} );
-
 	it.each( [
 		{
 			Edit: RatingFilterEdit,
@@ -336,7 +406,7 @@ describe( 'legacy filter editor ownership', () => {
 		'maps $listOption display and Apply controls to preview behavior',
 		async ( row ) => {
 			const user = userEvent.setup();
-			const setAttributes = jest.fn();
+			const setAttributes = vi.fn();
 			const Edit = row.Edit as unknown as React.ComponentType<
 				Record< string, unknown >
 			>;
@@ -347,9 +417,7 @@ describe( 'legacy filter editor ownership', () => {
 					setAttributes={ setAttributes }
 				/>
 			);
-
 			const { rerender } = render( renderEdit( row.attributes ) );
-
 			expect(
 				await screen.findByRole( 'checkbox', {
 					name: row.listOption,
@@ -360,23 +428,27 @@ describe( 'legacy filter editor ownership', () => {
 					name: /^Apply (rating|stock) filter$/,
 				} )
 			).not.toBeInTheDocument();
-
 			await user.click(
-				screen.getByRole( 'radio', { name: 'Dropdown' } )
+				screen.getByRole( 'radio', {
+					name: 'Dropdown',
+				} )
 			);
 			expect( setAttributes ).toHaveBeenCalledTimes( 1 );
 			expect( setAttributes ).toHaveBeenCalledWith( {
 				displayStyle: 'dropdown',
 			} );
-
 			rerender(
-				renderEdit( { ...row.attributes, displayStyle: 'dropdown' } )
+				renderEdit( {
+					...row.attributes,
+					displayStyle: 'dropdown',
+				} )
 			);
 			expect(
-				screen.queryByRole( 'checkbox', { name: row.listOption } )
+				screen.queryByRole( 'checkbox', {
+					name: row.listOption,
+				} )
 			).not.toBeInTheDocument();
 			expect( await screen.findByRole( 'combobox' ) ).toBeVisible();
-
 			setAttributes.mockClear();
 			await user.click(
 				screen.getByRole( 'checkbox', {
@@ -387,7 +459,6 @@ describe( 'legacy filter editor ownership', () => {
 			expect( setAttributes ).toHaveBeenCalledWith( {
 				showFilterButton: true,
 			} );
-
 			rerender(
 				renderEdit( {
 					...row.attributes,

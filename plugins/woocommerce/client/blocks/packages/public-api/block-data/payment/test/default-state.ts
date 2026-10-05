@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -10,7 +12,7 @@ import type { PaymentState } from '../default-state';
 import { SavedPaymentMethod } from '../types';
 
 // Helper function to get a fresh instance of defaultPaymentState for each test
-const getDefaultPaymentStateWithMocks = ( {
+const getDefaultPaymentStateWithMocks = async ( {
 	isEditorMode = false,
 	checkoutData = {
 		payment_method: 'stripe',
@@ -19,54 +21,77 @@ const getDefaultPaymentStateWithMocks = ( {
 	globalPaymentMethods = [],
 }: {
 	isEditorMode?: boolean;
-	checkoutData?: { payment_method: string };
+	checkoutData?: {
+		payment_method: string;
+	};
 	customerPaymentMethods?: Record< string, SavedPaymentMethod[] >;
 	globalPaymentMethods?: GlobalPaymentMethod[];
 } = {} ): PaymentState => {
 	let state: PaymentState | undefined;
 
 	// IsolateModules is used to ensure that the module is not cached between tests
-	jest.isolateModules( () => {
-		// Set up mocks before requiring the module
-		// Using doMock as calls to `mock` are hoisted to the top of the file
-		jest.doMock( '../../utils', () => ( {
-			isEditor: () => isEditorMode,
-		} ) );
+	vi.resetModules(),
+		await ( async () => {
+			// Set up mocks before requiring the module
+			// Using doMock as calls to `mock` are hoisted to the top of the file
+			vi.doMock( '../../utils', () => {
+				const mock = {
+					isEditor: () => isEditorMode,
+				};
+				return Object.defineProperties(
+					{
+						default: mock,
+					},
+					Object.getOwnPropertyDescriptors( mock )
+				);
+			} );
+			vi.doMock( '../../checkout/constants', () => {
+				const mock = {
+					checkoutData,
+				};
+				return Object.defineProperties(
+					{
+						default: mock,
+					},
+					Object.getOwnPropertyDescriptors( mock )
+				);
+			} );
+			vi.doMock( '@woocommerce/settings', () => {
+				const mock = {
+					getSetting: ( setting: string ) => {
+						switch ( setting ) {
+							case 'globalPaymentMethods':
+								return globalPaymentMethods;
+							case 'customerPaymentMethods':
+								return customerPaymentMethods;
+							default:
+								return {};
+						}
+					},
+				};
+				return Object.defineProperties(
+					{
+						default: mock,
+					},
+					Object.getOwnPropertyDescriptors( mock )
+				);
+			} );
 
-		jest.doMock( '../../checkout/constants', () => ( {
-			checkoutData,
-		} ) );
-
-		jest.doMock( '@woocommerce/settings', () => ( {
-			getSetting: ( setting: string ) => {
-				switch ( setting ) {
-					case 'globalPaymentMethods':
-						return globalPaymentMethods;
-					case 'customerPaymentMethods':
-						return customerPaymentMethods;
-					default:
-						return {};
-				}
-			},
-		} ) );
-
-		// Get a fresh copy of the state
-		// eslint-disable-next-line @typescript-eslint/no-var-requires -- Cloning using structuredClone is not supported in jsdom and Object.assign won't work as the state contains objects that need to be reset too. This is a clean way to get a fresh copy of the state.
-		state = require( '../default-state' ).defaultPaymentState;
-	} );
+			// Get a fresh copy of the state
+			// eslint-disable-next-line @typescript-eslint/no-var-requires -- Cloning using structuredClone is not supported in jsdom and Object.assign won't work as the state contains objects that need to be reset too. This is a clean way to get a fresh copy of the state.
+			state = ( await import( '../default-state' ) ).defaultPaymentState;
+		} )();
 
 	// TypeScript needs this check, but isolateModules will always set the state
 	if ( ! state ) {
 		throw new Error( 'Failed to initialize state' );
 	}
-
 	return state;
 };
-
 describe( 'defaultPaymentState', () => {
 	describe( 'Initial state', () => {
-		it( 'should initialize with correct default values', () => {
-			const state = getDefaultPaymentStateWithMocks();
+		it( 'should initialize with correct default values', async () => {
+			const state = await getDefaultPaymentStateWithMocks();
 			expect( state ).toEqual( {
 				status: 'idle',
 				activePaymentMethod: 'stripe',
@@ -82,17 +107,15 @@ describe( 'defaultPaymentState', () => {
 			} );
 		} );
 	} );
-
 	describe( 'In editor mode, activePaymentMethod', () => {
-		it( 'should be an empty string when no global payment methods exist', () => {
-			const state = getDefaultPaymentStateWithMocks( {
+		it( 'should be an empty string when no global payment methods exist', async () => {
+			const state = await getDefaultPaymentStateWithMocks( {
 				isEditorMode: true,
 				globalPaymentMethods: [],
 			} );
 			expect( state.activePaymentMethod ).toBe( '' );
 		} );
-
-		it( 'should be equal to the first payment method id from globalPaymentMethods when payment methods exist', () => {
+		it( 'should be equal to the first payment method id from globalPaymentMethods when payment methods exist', async () => {
 			const mockGlobalPaymentMethods: GlobalPaymentMethod[] = [
 				{
 					id: 'stripe',
@@ -105,34 +128,34 @@ describe( 'defaultPaymentState', () => {
 					description: 'Pay with PayPal',
 				},
 			];
-
-			const state = getDefaultPaymentStateWithMocks( {
+			const state = await getDefaultPaymentStateWithMocks( {
 				isEditorMode: true,
 				globalPaymentMethods: mockGlobalPaymentMethods,
 			} );
 			expect( state.activePaymentMethod ).toBe( 'stripe' );
 		} );
 	} );
-
 	describe( 'Frontend', () => {
-		it( 'should set activePaymentMethod to value from checkoutData.payment_method', () => {
-			const state = getDefaultPaymentStateWithMocks( {
-				checkoutData: { payment_method: 'stripe' },
+		it( 'should set activePaymentMethod to value from checkoutData.payment_method', async () => {
+			const state = await getDefaultPaymentStateWithMocks( {
+				checkoutData: {
+					payment_method: 'stripe',
+				},
 			} );
 			expect( state.activePaymentMethod ).toBe( 'stripe' );
 		} );
-
 		describe( 'Payment method data', () => {
-			it( 'should be empty when no default payment method exists', () => {
-				const state = getDefaultPaymentStateWithMocks( {
-					checkoutData: { payment_method: '' },
+			it( 'should be empty when no default payment method exists', async () => {
+				const state = await getDefaultPaymentStateWithMocks( {
+					checkoutData: {
+						payment_method: '',
+					},
 					customerPaymentMethods: {},
 					globalPaymentMethods: [],
 				} );
 				expect( state.paymentMethodData ).toEqual( {} );
 			} );
-
-			it( 'should be empty when default payment method does not match saved methods', () => {
+			it( 'should be empty when default payment method does not match saved methods', async () => {
 				const mockSavedPaymentMethods: Record<
 					string,
 					SavedPaymentMethod[]
@@ -156,15 +179,15 @@ describe( 'defaultPaymentState', () => {
 						},
 					],
 				};
-
-				const state = getDefaultPaymentStateWithMocks( {
-					checkoutData: { payment_method: 'paypal' },
+				const state = await getDefaultPaymentStateWithMocks( {
+					checkoutData: {
+						payment_method: 'paypal',
+					},
 					customerPaymentMethods: mockSavedPaymentMethods,
 				} );
 				expect( state.paymentMethodData ).toEqual( {} );
 			} );
-
-			it( 'should be equal to the payment method data for the default payment method', () => {
+			it( 'should be equal to the payment method data for the default payment method', async () => {
 				const customerPaymentMethods: Record<
 					string,
 					SavedPaymentMethod[]
@@ -188,9 +211,10 @@ describe( 'defaultPaymentState', () => {
 						},
 					],
 				};
-
-				const state = getDefaultPaymentStateWithMocks( {
-					checkoutData: { payment_method: 'stripe' },
+				const state = await getDefaultPaymentStateWithMocks( {
+					checkoutData: {
+						payment_method: 'stripe',
+					},
 					customerPaymentMethods,
 				} );
 				expect( state.paymentMethodData ).toEqual( {
@@ -200,9 +224,8 @@ describe( 'defaultPaymentState', () => {
 				} );
 			} );
 		} );
-
 		describe( 'Saved payment methods', () => {
-			it( 'should handle saved payment methods correctly', () => {
+			it( 'should handle saved payment methods correctly', async () => {
 				const mockSavedPaymentMethods: Record<
 					string,
 					SavedPaymentMethod[]
@@ -226,8 +249,7 @@ describe( 'defaultPaymentState', () => {
 						},
 					],
 				};
-
-				const state = getDefaultPaymentStateWithMocks( {
+				const state = await getDefaultPaymentStateWithMocks( {
 					customerPaymentMethods: mockSavedPaymentMethods,
 				} );
 				expect( state.savedPaymentMethods ).toEqual(

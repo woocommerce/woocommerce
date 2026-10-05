@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -6,19 +8,25 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
 import { useCartEventsContext } from '@woocommerce/base-context';
 import { useEffect } from '@wordpress/element';
-
-jest.mock( '@woocommerce/base-context/hooks', () => ( {
-	useStoreCart: jest.fn( () => ( {
-		cartIsLoading: false,
-		isLoadingRates: false,
-	} ) ),
-} ) );
+vi.mock( '@woocommerce/base-context/hooks', () => {
+	const mock = {
+		useStoreCart: vi.fn( () => ( {
+			cartIsLoading: false,
+			isLoadingRates: false,
+		} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 /**
  * Internal dependencies
  */
 import Block from '../block';
 import { CartEventsProvider } from '../../../../../base/context/providers';
-
 describe( 'Proceed to checkout block', () => {
 	it( 'allows the text to be filtered', () => {
 		registerCheckoutFilters( 'test-extension', {
@@ -29,7 +37,6 @@ describe( 'Proceed to checkout block', () => {
 		render(
 			<Block checkoutPageId={ 0 } buttonLabel={ '' } className={ '' } />
 		);
-
 		expect( screen.getByText( 'Proceed to step two' ) ).toBeInTheDocument();
 	} );
 	it( 'allows the link to be filtered', () => {
@@ -61,7 +68,9 @@ describe( 'Proceed to checkout block', () => {
 		expect( console ).toHaveErrored();
 	} );
 	it( 'dispatches the onProceedToCheckout event when the button is clicked', async () => {
-		const mockObserver = jest.fn().mockReturnValue( { type: 'error' } );
+		const mockObserver = vi.fn().mockReturnValue( {
+			type: 'error',
+		} );
 		const MockObserverComponent = () => {
 			const { onProceedToCheckout } = useCartEventsContext();
 			useEffect( () => {
@@ -69,7 +78,6 @@ describe( 'Proceed to checkout block', () => {
 			}, [ onProceedToCheckout ] );
 			return <div>Mock observer</div>;
 		};
-
 		render(
 			<CartEventsProvider>
 				<div>
@@ -87,7 +95,6 @@ describe( 'Proceed to checkout block', () => {
 
 		// Forcibly set the button URL to # to prevent JSDOM error: `["Error: Not implemented: navigation (except hash changes)`
 		button.closest( 'a' )?.removeAttribute( 'href' );
-
 		button.click();
 		await waitFor( () => {
 			expect( mockObserver ).toHaveBeenCalled();

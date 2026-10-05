@@ -1,3 +1,5 @@
+import { describe, expect, test, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -51,7 +53,7 @@ describe( 'NoticeBanner', () => {
 	} );
 
 	test( 'can be dismissed when isDismissible prop is true', async () => {
-		const onRemoveMock = jest.fn();
+		const onRemoveMock = vi.fn();
 		const { getByRole } = render(
 			<NoticeBanner
 				status="success"
@@ -69,7 +71,7 @@ describe( 'NoticeBanner', () => {
 	} );
 
 	test( 'calls onRemove function when the notice is dismissed', async () => {
-		const onRemoveMock = jest.fn();
+		const onRemoveMock = vi.fn();
 		const { getByRole } = render(
 			<NoticeBanner status="info" isDismissible onRemove={ onRemoveMock }>
 				This is an informative message
@@ -94,7 +96,7 @@ describe( 'NoticeBanner', () => {
 	} );
 
 	test( 'does not throw any errors when all props are provided correctly', () => {
-		const spyError = jest.spyOn( console, 'error' );
+		const spyError = vi.spyOn( console, 'error' );
 		render(
 			<NoticeBanner status="default">This is a test message</NoticeBanner>
 		);

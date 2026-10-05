@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -25,7 +27,7 @@ export async function waitForStoreResolvers< T >( fn: () => T ) {
 		const result = fn();
 
 		// Advance all timers allowing store resolvers to resolve.
-		act( () => jest.runAllTimers() );
+		act( () => vi.runAllTimers() );
 
 		// The store resolvers perform several API fetches during editor
 		// initialization. The most straightforward approach to ensure all of them

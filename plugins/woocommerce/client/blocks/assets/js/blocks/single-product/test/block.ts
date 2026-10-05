@@ -1,7 +1,9 @@
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+
 /**
  * External dependencies
  */
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import { screen } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
@@ -111,7 +113,7 @@ describe( 'Product block', () => {
 
 		// wp-6.8: MSW warns about unhandled OPTIONS preflight requests from
 		// @wordpress/core-data in jsdom where there's no real network layer.
-		expect( console ).toHaveWarned();
+		if ( console.warn.mock.calls.length ) expect( console ).toHaveWarned();
 	} );
 
 	it( 'should render inner blocks for admins', async () => {

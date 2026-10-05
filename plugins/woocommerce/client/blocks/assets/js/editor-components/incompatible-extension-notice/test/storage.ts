@@ -1,3 +1,17 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+let { mockSiteId, mockIsMultisite, mockHomeUrl, SITE_A } = vi.hoisted( () => {
+	const SITE_A = 1;
+	const mockSiteId = SITE_A;
+	const mockIsMultisite = false;
+	const mockHomeUrl = 'http://example.com/';
+	return {
+		mockSiteId,
+		mockIsMultisite,
+		mockHomeUrl,
+		SITE_A,
+	};
+} );
+
 /**
  * The storage contract both incompatibility notices share.
  *
@@ -11,26 +25,31 @@
 
 // Two sites of one subdirectory multisite. Same origin, so they share the
 // browser's localStorage; different blog IDs, so they must not share a key.
-const SITE_A = 1;
+
 const SITE_B = 2;
 
-let mockSiteId = SITE_A;
-let mockIsMultisite = false;
 // Exposed only so the tests below can prove the keys ignore it.
-let mockHomeUrl = 'http://example.com/';
 
-jest.mock( '@woocommerce/settings', () => ( {
-	// Getters, not values: the site under test changes between calls.
-	get CURRENT_SITE_ID() {
-		return mockSiteId;
-	},
-	get IS_MULTISITE() {
-		return mockIsMultisite;
-	},
-	get HOME_URL() {
-		return mockHomeUrl;
-	},
-} ) );
+vi.mock( '@woocommerce/settings', () => {
+	const mock = {
+		// Getters, not values: the site under test changes between calls.
+		get CURRENT_SITE_ID() {
+			return mockSiteId;
+		},
+		get IS_MULTISITE() {
+			return mockIsMultisite;
+		},
+		get HOME_URL() {
+			return mockHomeUrl;
+		},
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 /**
  * Internal dependencies
@@ -43,7 +62,6 @@ import {
 	readInitialDismissals,
 	UNSCOPED_STORAGE_KEY,
 } from '../storage';
-
 describe( 'incompatible extension notice storage', () => {
 	beforeEach( () => {
 		window.localStorage.clear();
@@ -51,23 +69,18 @@ describe( 'incompatible extension notice storage', () => {
 		mockIsMultisite = false;
 		mockHomeUrl = 'http://example.com/';
 	} );
-
 	describe( 'storage keys', () => {
 		it( 'gives the two surfaces different keys', () => {
 			expect( getEditorStorageKey() ).not.toBe( getFrontendStorageKey() );
 		} );
-
 		it( 'keeps both keys off the value earlier versions wrote', () => {
 			expect( getEditorStorageKey() ).not.toBe( UNSCOPED_STORAGE_KEY );
 			expect( getFrontendStorageKey() ).not.toBe( UNSCOPED_STORAGE_KEY );
 		} );
-
 		it( 'scopes both keys to the site', () => {
 			const editorOnA = getEditorStorageKey();
 			const frontendOnA = getFrontendStorageKey();
-
 			mockSiteId = SITE_B;
-
 			expect( getEditorStorageKey() ).not.toBe( editorOnA );
 			expect( getFrontendStorageKey() ).not.toBe( frontendOnA );
 		} );
@@ -79,13 +92,10 @@ describe( 'incompatible extension notice storage', () => {
 		it( 'keeps the same keys when the home URL varies on one origin', () => {
 			const editorBefore = getEditorStorageKey();
 			const frontendBefore = getFrontendStorageKey();
-
 			mockHomeUrl = 'http://example.com/fr/';
-
 			expect( getEditorStorageKey() ).toBe( editorBefore );
 			expect( getFrontendStorageKey() ).toBe( frontendBefore );
 		} );
-
 		it( 'builds both keys from the blog ID', () => {
 			expect( getEditorStorageKey() ).toBe(
 				`${ UNSCOPED_STORAGE_KEY }__${ SITE_A }`
@@ -95,35 +105,39 @@ describe( 'incompatible extension notice storage', () => {
 			);
 		} );
 	} );
-
 	describe( 'readDismissalsFromBeforeScoping', () => {
 		it( 'returns the stored list', () => {
 			window.localStorage.setItem(
 				UNSCOPED_STORAGE_KEY,
 				JSON.stringify( [
 					'ext-one',
-					{ 'woocommerce/cart': [ 'gw' ] },
+					{
+						'woocommerce/cart': [ 'gw' ],
+					},
 				] )
 			);
-
 			expect( readDismissalsFromBeforeScoping() ).toEqual( [
 				'ext-one',
-				{ 'woocommerce/cart': [ 'gw' ] },
+				{
+					'woocommerce/cart': [ 'gw' ],
+				},
 			] );
 		} );
-
 		it( 'returns nothing, and stays quiet, when the key is absent', () => {
 			expect( readDismissalsFromBeforeScoping() ).toEqual( [] );
 		} );
-
 		it.each( [
 			[ 'unparsable', 'not json at all' ],
-			[ 'an object', JSON.stringify( { a: 1 } ) ],
+			[
+				'an object',
+				JSON.stringify( {
+					a: 1,
+				} ),
+			],
 			[ 'a bare string', JSON.stringify( 'ext-one' ) ],
 			[ 'null', JSON.stringify( null ) ],
 		] )( 'discards a value that is %s, and says so', ( _label, stored ) => {
 			window.localStorage.setItem( UNSCOPED_STORAGE_KEY, stored );
-
 			expect( readDismissalsFromBeforeScoping() ).toEqual( [] );
 			expect( console ).toHaveErrored();
 		} );
@@ -136,25 +150,19 @@ describe( 'incompatible extension notice storage', () => {
 				UNSCOPED_STORAGE_KEY,
 				JSON.stringify( [ 'ext-one' ] )
 			);
-
 			expect( readDismissalsFromBeforeScoping() ).toEqual( [] );
 		} );
-
 		it( 'does not even read the key on a multisite', () => {
 			mockIsMultisite = true;
-			const getItem = jest.spyOn( Storage.prototype, 'getItem' );
-
+			const getItem = vi.spyOn( Storage.prototype, 'getItem' );
 			readDismissalsFromBeforeScoping();
-
 			expect( getItem ).not.toHaveBeenCalled();
 			getItem.mockRestore();
 		} );
 	} );
-
 	describe( 'readInitialDismissals', () => {
 		const KEY = 'some-key';
 		const migrate = () => [ 'migrated' ];
-
 		it( 'migrates when the key has never been written', () => {
 			expect( readInitialDismissals( KEY, migrate ) ).toEqual( [
 				'migrated',
@@ -175,21 +183,19 @@ describe( 'incompatible extension notice storage', () => {
 			[ 'an empty string', '' ],
 		] )( 'starts empty when the key already holds %s', ( _l, stored ) => {
 			window.localStorage.setItem( KEY, stored );
-			const migrateSpy = jest.fn( migrate );
-
+			const migrateSpy = vi.fn( migrate );
 			expect( readInitialDismissals( KEY, migrateSpy ) ).toEqual( [] );
 			expect( migrateSpy ).not.toHaveBeenCalled();
 		} );
 
 		// Private browsing and blocked cookies can make storage throw outright.
 		it( 'starts empty when storage cannot be read at all', () => {
-			const getItem = jest
+			const getItem = vi
 				.spyOn( Storage.prototype, 'getItem' )
 				.mockImplementation( () => {
 					throw new Error( 'denied' );
 				} );
-			const migrateSpy = jest.fn( migrate );
-
+			const migrateSpy = vi.fn( migrate );
 			expect( readInitialDismissals( KEY, migrateSpy ) ).toEqual( [] );
 			expect( migrateSpy ).not.toHaveBeenCalled();
 			getItem.mockRestore();
@@ -245,11 +251,15 @@ describe( 'incompatible extension notice storage', () => {
 				sup: [ 'b' ],
 				is: false,
 			},
-			{ when: 'neither side has anything', sub: [], sup: [], is: true },
+			{
+				when: 'neither side has anything',
+				sub: [],
+				sup: [],
+				is: true,
+			},
 		] )( 'is $is when $when', ( { sub, sup, is } ) => {
 			expect( isSubsetOf( sub, sup ) ).toBe( is );
 		} );
-
 		it( 'does not consider the two sides interchangeable', () => {
 			expect( isSubsetOf( [ 'a' ], [ 'a', 'b' ] ) ).toBe( true );
 			expect( isSubsetOf( [ 'a', 'b' ], [ 'a' ] ) ).toBe( false );

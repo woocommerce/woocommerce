@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -10,15 +12,15 @@ import apiFetch from '@wordpress/api-fetch';
 import { getCartData } from '../resolvers';
 import { store as cartStore } from '..';
 
-jest.mock( '@wordpress/data-controls' );
-jest.mock( '@wordpress/api-fetch' );
+vi.mock( '@wordpress/data-controls' );
+vi.mock( '@wordpress/api-fetch' );
 
 describe( 'getCartData', () => {
 	it( 'when apiFetch returns a valid response, receives the cart correctly', async () => {
 		const mockDispatch = {
 			...dispatch( cartStore ),
-			receiveCart: jest.fn(),
-			receiveError: jest.fn(),
+			receiveCart: vi.fn(),
+			receiveError: vi.fn(),
 		};
 		apiFetch.mockReturnValue(
 			Promise.resolve( {
@@ -50,8 +52,8 @@ describe( 'getCartData', () => {
 	it( 'when apiFetch returns an invalid response, dispatches the correct error action', async () => {
 		const mockDispatch = {
 			...dispatch( cartStore ),
-			receiveCart: jest.fn(),
-			receiveError: jest.fn(),
+			receiveCart: vi.fn(),
+			receiveError: vi.fn(),
 		};
 		apiFetch.mockReturnValue(
 			Promise.resolve( {

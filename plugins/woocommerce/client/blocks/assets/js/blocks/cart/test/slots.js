@@ -1,3 +1,5 @@
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+
 /* eslint-disable jest/no-commented-out-tests */
 /**
  * External dependencies

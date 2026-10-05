@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -13,15 +15,11 @@ import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
  */
 import { defaultCartState } from '@woocommerce/block-data/cart/default-state';
 import { allSettings } from '@woocommerce/settings';
-
 import Cart from '../block';
-
 import FilledCart from '../inner-blocks/filled-cart-block/frontend';
 import EmptyCart from '../inner-blocks/empty-cart-block/frontend';
-
 import ItemsBlock from '../inner-blocks/cart-items-block/frontend';
 import TotalsBlock from '../inner-blocks/cart-totals-block/frontend';
-
 import LineItemsBlock from '../inner-blocks/cart-line-items-block/block';
 import OrderSummaryBlock from '../inner-blocks/cart-order-summary-block/frontend';
 import ExpressPaymentBlock from '../inner-blocks/cart-express-payment-block/block';
@@ -31,12 +29,23 @@ import OrderSummaryHeadingBlock from '../inner-blocks/cart-order-summary-heading
 import OrderSummarySubtotalBlock from '../inner-blocks/cart-order-summary-subtotal/frontend';
 import OrderSummaryShippingBlock from '../inner-blocks/cart-order-summary-shipping/frontend';
 import OrderSummaryTaxesBlock from '../inner-blocks/cart-order-summary-taxes/frontend';
-
-jest.mock( '@wordpress/compose', () => ( {
-	...jest.requireActual( '@wordpress/compose' ),
-	useResizeObserver: jest.fn().mockReturnValue( [ null, { width: 0 } ] ),
-} ) );
-
+vi.mock( '@wordpress/compose', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/compose' ) ),
+		useResizeObserver: vi.fn().mockReturnValue( [
+			null,
+			{
+				width: 0,
+			},
+		] ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const CartBlock = ( {
 	attributes = {
 		showRateAfterTaxName: false,
@@ -70,7 +79,6 @@ const CartBlock = ( {
 		</Cart>
 	);
 };
-
 describe( 'Testing cart', () => {
 	beforeEach( () => {
 		// Set up MSW handlers for cart requests
@@ -85,55 +93,44 @@ describe( 'Testing cart', () => {
 			dispatch( storeKey ).receiveCart( defaultCartState.cartData );
 		} );
 	} );
-
 	afterEach( () => {
 		server.resetHandlers();
 	} );
-
 	it( 'renders cart if there are items in the cart', async () => {
 		render( <CartBlock /> );
-
 		await waitFor( () =>
 			expect(
 				screen.getByText( /Proceed to Checkout/i )
 			).toBeInTheDocument()
 		);
-
 		expect(
 			screen.getByText( /Proceed to Checkout/i )
 		).toBeInTheDocument();
 	} );
-
 	it( 'Contains a Taxes section if Core options are set to show it', async () => {
 		allSettings.displayCartPricesIncludingTax = false;
 		// The criteria for showing the Taxes section is:
 		// Display prices during basket and checkout: 'Excluding tax'.
 		render( <CartBlock /> );
-
 		await waitFor( () =>
 			expect( screen.getByText( /Tax/i ) ).toBeInTheDocument()
 		);
 		expect( screen.getByText( /Tax/i ) ).toBeInTheDocument();
 	} );
-
 	it( 'Contains a Order summary header', async () => {
 		render( <CartBlock /> );
-
 		await waitFor( () =>
 			expect( screen.getByText( /Cart totals/i ) ).toBeInTheDocument()
 		);
 		expect( screen.getByText( /Cart totals/i ) ).toBeInTheDocument();
 	} );
-
 	it( 'Contains a Order summary Subtotal section', async () => {
 		render( <CartBlock /> );
-
 		await waitFor( () =>
 			expect( screen.getByText( /Subtotal/i ) ).toBeInTheDocument()
 		);
 		expect( screen.getByText( /Subtotal/i ) ).toBeInTheDocument();
 	} );
-
 	it( 'Shows individual tax lines if the store is set to do so', async () => {
 		allSettings.displayCartPricesIncludingTax = false;
 		allSettings.displayItemizedTaxes = true;
@@ -146,7 +143,6 @@ describe( 'Testing cart', () => {
 		);
 		expect( screen.getByText( /Sales tax/i ) ).toBeInTheDocument();
 	} );
-
 	it( 'Shows rate percentages after tax lines if the block is set to do so', async () => {
 		allSettings.displayCartPricesIncludingTax = false;
 		allSettings.displayItemizedTaxes = true;
@@ -166,7 +162,6 @@ describe( 'Testing cart', () => {
 		);
 		expect( screen.getByText( /Sales tax 20%/i ) ).toBeInTheDocument();
 	} );
-
 	it( 'renders empty cart if there are no items in the cart', async () => {
 		server.use(
 			http.get( '/wc/store/v1/cart', () => {
@@ -174,13 +169,11 @@ describe( 'Testing cart', () => {
 			} )
 		);
 		render( <CartBlock /> );
-
 		await waitFor( () =>
 			expect( screen.getByText( /Empty Cart/i ) ).toBeInTheDocument()
 		);
 		expect( screen.getByText( /Empty Cart/i ) ).toBeInTheDocument();
 	} );
-
 	it( 'renders correct cart line subtotal when currency has 0 decimals', async () => {
 		const cart = {
 			...previewCart,
@@ -201,25 +194,20 @@ describe( 'Testing cart', () => {
 			],
 			items_count: 2,
 		};
-
 		server.use(
 			http.get( '/wc/store/v1/cart', () => {
 				return HttpResponse.json( cart );
 			} )
 		);
-
 		render( <CartBlock /> );
-
 		await waitFor( () =>
 			expect(
 				document.querySelector( '.wc-block-cart-item__total' )
 			).toHaveTextContent( '16€' )
 		);
 	} );
-
 	it( 'updates quantity when changed in server', async () => {
 		render( <CartBlock /> );
-
 		await waitFor( () =>
 			expect(
 				screen.getByLabelText(
@@ -242,13 +230,11 @@ describe( 'Testing cart', () => {
 			],
 			items_count: 7,
 		};
-
 		server.use(
 			http.get( '/wc/store/v1/cart', () => {
 				return HttpResponse.json( cart );
 			} )
 		);
-
 		act( () => {
 			dispatch( storeKey ).receiveCart( cart );
 		} );
@@ -262,7 +248,6 @@ describe( 'Testing cart', () => {
 			).toHaveValue( 5 )
 		);
 	} );
-
 	it( 'does not show the remove item button when a filter prevents this', async () => {
 		act( () => {
 			// We're removing the link for the first previewCart item
@@ -273,7 +258,6 @@ describe( 'Testing cart', () => {
 			} );
 		} );
 		render( <CartBlock /> );
-
 		await waitFor( () => {
 			expect(
 				screen.queryAllByRole( 'button', {

@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -24,12 +26,12 @@ function createTestBlock( block: {
 	};
 }
 
-jest.mock( '@wordpress/blocks', () => {
-	const actual = jest.requireActual( '@wordpress/blocks' );
+vi.mock( '@wordpress/blocks', async () => {
+	const actual = await vi.importActual( '@wordpress/blocks' );
 
-	return {
+	return ( ( mock ) => ( { default: mock, ...mock } ) )( {
 		...actual,
-		createBlock: jest.fn(
+		createBlock: vi.fn(
 			(
 				name: string,
 				attributes = {},
@@ -42,7 +44,7 @@ jest.mock( '@wordpress/blocks', () => {
 				isValid: true,
 			} )
 		),
-	};
+	} );
 } );
 
 const LEGACY_ATTRIBUTE_OPTIONS_BLOCK =

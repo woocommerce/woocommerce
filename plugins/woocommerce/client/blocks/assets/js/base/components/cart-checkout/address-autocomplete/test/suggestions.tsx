@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -23,7 +25,7 @@ describe( 'Suggestions - standalone component', () => {
 				matchedSubstrings: [ { offset: 0, length: 3 } ],
 			},
 		];
-		const handleSelect = jest.fn();
+		const handleSelect = vi.fn();
 		render(
 			<Suggestions
 				suggestions={ suggestions }

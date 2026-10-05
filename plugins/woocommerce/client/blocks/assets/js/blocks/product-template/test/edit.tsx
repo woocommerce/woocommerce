@@ -1,3 +1,15 @@
+import {
+	afterAll,
+	afterEach,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+	type MockInstance,
+} from 'vitest';
+
 /**
  * External dependencies
  */
@@ -88,15 +100,15 @@ const createProps = ( {
 		postId,
 		templateSlug,
 	},
-	insertBlocksAfter: jest.fn(),
+	insertBlocksAfter: vi.fn(),
 	isSelected: false,
 	name: 'woocommerce/product-template',
-	onReplace: jest.fn(),
-	setAttributes: jest.fn(),
+	onReplace: vi.fn(),
+	setAttributes: vi.fn(),
 	__unstableLayoutClassNames: '',
 } );
 
-const getProductQuery = ( getEntityRecords: jest.SpyInstance ) => {
+const getProductQuery = ( getEntityRecords: MockInstance ) => {
 	const call = [ ...getEntityRecords.mock.calls ]
 		.reverse()
 		.find(
@@ -111,9 +123,9 @@ const getProductQuery = ( getEntityRecords: jest.SpyInstance ) => {
 };
 
 describe( 'ProductTemplateEdit request context', () => {
-	let getEntityRecords: jest.SpyInstance;
-	let getTaxonomies: jest.SpyInstance;
-	let getEditedEntityRecord: jest.SpyInstance;
+	let getEntityRecords: MockInstance;
+	let getTaxonomies: MockInstance;
+	let getEditedEntityRecord: MockInstance;
 
 	beforeEach( () => {
 		act( () => {
@@ -124,7 +136,7 @@ describe( 'ProductTemplateEdit request context', () => {
 		const selectEntityRecords =
 			coreSelectors.getEntityRecords.bind( coreSelectors );
 
-		getEntityRecords = jest
+		getEntityRecords = vi
 			.spyOn( coreSelectors, 'getEntityRecords' )
 			.mockImplementation( ( kind, name, query ) => {
 				if ( kind === 'taxonomy' ) {
@@ -147,10 +159,10 @@ describe( 'ProductTemplateEdit request context', () => {
 
 				return selectEntityRecords( kind, name, query );
 			} );
-		getTaxonomies = jest
+		getTaxonomies = vi
 			.spyOn( coreSelectors, 'getTaxonomies' )
 			.mockReturnValue( noTaxonomies );
-		getEditedEntityRecord = jest
+		getEditedEntityRecord = vi
 			.spyOn( coreSelectors, 'getEditedEntityRecord' )
 			.mockReturnValue( {
 				woocommerce_default_catalog_orderby: 'price-desc',

@@ -1,3 +1,5 @@
+import { describe, expect, test, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -11,20 +13,29 @@ import { ProductResponseItem } from '@woocommerce/types';
  */
 import { Block } from '../block';
 import { ImageSizing } from '../types';
-
-jest.mock( '@woocommerce/base-hooks', () => ( {
-	__esModule: true,
-	useStyleProps: jest.fn( () => ( {
-		className: '',
-		style: {},
-	} ) ),
-} ) );
-
-jest.mock( '@woocommerce/settings', () => {
-	const originalModule = jest.requireActual( '@woocommerce/settings' );
-	return {
+vi.mock( '@woocommerce/base-hooks', () => {
+	const mock = {
+		__esModule: true,
+		useStyleProps: vi.fn( () => ( {
+			className: '',
+			style: {},
+		} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/settings', async () => {
+	const originalModule = await vi.importActual( '@woocommerce/settings' );
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		...originalModule,
-		getSetting: jest.fn( ( key, defaultValue ) => {
+		getSetting: vi.fn( ( key, defaultValue ) => {
 			if ( key === 'placeholderImgSrcFullSize' ) {
 				return 'placeholder-full-size.jpg';
 			}
@@ -34,9 +45,8 @@ jest.mock( '@woocommerce/settings', () => {
 			// Use the original getSetting for other keys
 			return originalModule.getSetting( key, defaultValue );
 		} ),
-	};
+	} );
 } );
-
 const productWithoutImages: ProductResponseItem = {
 	name: 'Test product',
 	id: 1,
@@ -84,7 +94,6 @@ const productWithoutImages: ProductResponseItem = {
 		multiple_of: 0,
 	},
 };
-
 const productWithImages: ProductResponseItem = {
 	name: 'Test product',
 	id: 1,
@@ -151,7 +160,6 @@ const productWithImages: ProductResponseItem = {
 		multiple_of: 0,
 	},
 };
-
 describe( 'Product Image Block', () => {
 	describe( 'with product link', () => {
 		test( 'should render an anchor with the product image', () => {
@@ -173,20 +181,17 @@ describe( 'Product Image Block', () => {
 			// use testId as alt is added after image is loaded
 			const image = component.getByTestId( 'product-image' );
 			fireEvent.load( image );
-
 			const productImage = component.getByAltText(
 				productWithImages.name
 			);
 			expect( productImage.getAttribute( 'src' ) ).toBe(
 				productWithImages.images[ 0 ].src
 			);
-
 			const anchor = productImage.closest( 'a' );
 			expect( anchor?.getAttribute( 'href' ) ).toBe(
 				productWithImages.permalink
 			);
 		} );
-
 		test( 'should render an anchor with the placeholder image', () => {
 			const component = render(
 				<ProductDataContextProvider
@@ -202,12 +207,10 @@ describe( 'Product Image Block', () => {
 					/>
 				</ProductDataContextProvider>
 			);
-
 			const placeholderImage = component.getByRole( 'presentation' );
 			expect( placeholderImage.getAttribute( 'src' ) ).toBe(
 				'placeholder-full-size.jpg'
 			);
-
 			const anchor = placeholderImage.closest( 'a' );
 			expect( anchor?.getAttribute( 'href' ) ).toBe(
 				productWithoutImages.permalink
@@ -217,7 +220,6 @@ describe( 'Product Image Block', () => {
 			);
 		} );
 	} );
-
 	describe( 'without product link', () => {
 		test( 'should render the product image without an anchor wrapper', () => {
 			const component = render(
@@ -236,18 +238,15 @@ describe( 'Product Image Block', () => {
 			);
 			const image = component.getByTestId( 'product-image' );
 			fireEvent.load( image );
-
 			const productImage = component.getByAltText(
 				productWithImages.name
 			);
 			expect( productImage.getAttribute( 'src' ) ).toBe(
 				productWithImages.images[ 0 ].src
 			);
-
 			const anchor = productImage.closest( 'a' );
 			expect( anchor ).toBe( null );
 		} );
-
 		test( 'should render the placeholder image without an anchor wrapper', () => {
 			const component = render(
 				<ProductDataContextProvider
@@ -263,17 +262,14 @@ describe( 'Product Image Block', () => {
 					/>
 				</ProductDataContextProvider>
 			);
-
 			const placeholderImage = component.getByRole( 'presentation' );
 			expect( placeholderImage.getAttribute( 'src' ) ).toBe(
 				'placeholder-full-size.jpg'
 			);
-
 			const anchor = placeholderImage.closest( 'a' );
 			expect( anchor ).toBe( null );
 		} );
 	} );
-
 	describe( 'without image', () => {
 		test( 'should render the placeholder with no inline width or height attributes', () => {
 			const component = render(
@@ -290,7 +286,6 @@ describe( 'Product Image Block', () => {
 					/>
 				</ProductDataContextProvider>
 			);
-
 			const placeholderImage = component.getByRole( 'presentation' );
 			expect( placeholderImage.getAttribute( 'src' ) ).toBe(
 				'placeholder-full-size.jpg'
@@ -299,7 +294,6 @@ describe( 'Product Image Block', () => {
 			expect( placeholderImage.getAttribute( 'height' ) ).toBe( null );
 		} );
 	} );
-
 	describe( 'aspect ratio', () => {
 		test( 'uses full-size image src even when imageSizing is thumbnail', () => {
 			const component = render(
@@ -316,10 +310,8 @@ describe( 'Product Image Block', () => {
 					/>
 				</ProductDataContextProvider>
 			);
-
 			const image = component.getByTestId( 'product-image' );
 			fireEvent.load( image );
-
 			expect( image.getAttribute( 'src' ) ).toBe(
 				productWithImages.images[ 0 ].src
 			);
@@ -327,7 +319,6 @@ describe( 'Product Image Block', () => {
 				productWithImages.images[ 0 ].thumbnail
 			);
 		} );
-
 		test( 'applies store thumbnail aspect ratio when imageSizing is thumbnail', () => {
 			const component = render(
 				<ProductDataContextProvider
@@ -343,7 +334,6 @@ describe( 'Product Image Block', () => {
 					/>
 				</ProductDataContextProvider>
 			);
-
 			const image = component.getByTestId( 'product-image' );
 			expect( image.style.aspectRatio ).toBe( '1/1' );
 			expect(
@@ -352,7 +342,6 @@ describe( 'Product Image Block', () => {
 				)
 			).not.toBeNull();
 		} );
-
 		test( 'block aspect ratio overrides store thumbnail aspect ratio', () => {
 			const component = render(
 				<ProductDataContextProvider
@@ -369,13 +358,11 @@ describe( 'Product Image Block', () => {
 					/>
 				</ProductDataContextProvider>
 			);
-
 			const image = component.getByTestId( 'product-image' );
 			expect( image.style.aspectRatio ).toBe( '3/5' );
 		} );
-
 		test( 'uses auto aspect ratio class when store cropping is uncropped', () => {
-			( getSetting as jest.Mock ).mockImplementation(
+			( getSetting as Mock ).mockImplementation(
 				( key, defaultValue ) => {
 					if ( key === 'placeholderImgSrcFullSize' ) {
 						return 'placeholder-full-size.jpg';
@@ -386,7 +373,6 @@ describe( 'Product Image Block', () => {
 					return defaultValue;
 				}
 			);
-
 			const component = render(
 				<ProductDataContextProvider
 					product={ productWithImages }
@@ -401,7 +387,6 @@ describe( 'Product Image Block', () => {
 					/>
 				</ProductDataContextProvider>
 			);
-
 			const image = component.getByTestId( 'product-image' );
 			expect( image.style.aspectRatio ).toBe( '' );
 			expect(

@@ -1,3 +1,5 @@
+import { describe, expect, it, vi, type MockedFunction } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -12,19 +14,27 @@ import * as baseContextHooks from '@woocommerce/base-context/hooks';
  * Internal dependencies
  */
 import { TotalsShipping } from '../index';
-
-jest.mock( '@wordpress/data', () => ( {
-	__esModule: true,
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn(),
-} ) );
+const _actual = await vi.importActual( '@wordpress/data' );
+vi.mock( '@wordpress/data', async () => {
+	const mock = {
+		__esModule: true,
+		...( await vi.importActual( '@wordpress/data' ) ),
+		useSelect: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 // Mock use select so we can override it when wc/store/checkout is accessed, but return the original select function if any other store is accessed.
 (
-	wpData.useSelect as jest.MockedFunction< typeof wpData.useSelect >
+	wpData.useSelect as MockedFunction< typeof wpData.useSelect >
  ).mockImplementation(
-	jest.fn().mockImplementation( ( passedMapSelect ) => {
-		const mockedSelect = jest.fn().mockImplementation( ( storeName ) => {
+	vi.fn().mockImplementation( ( passedMapSelect ) => {
+		const mockedSelect = vi.fn().mockImplementation( ( storeName ) => {
 			if ( storeName === 'wc/store/checkout' ) {
 				return {
 					prefersCollection() {
@@ -32,14 +42,13 @@ jest.mock( '@wordpress/data', () => ( {
 					},
 				};
 			}
-			return jest.requireActual( '@wordpress/data' ).select( storeName );
+			return _actual.select( storeName );
 		} );
 		passedMapSelect( mockedSelect, {
-			dispatch: jest.requireActual( '@wordpress/data' ).dispatch,
+			dispatch: _actual.dispatch,
 		} );
 	} )
 );
-
 const shippingAddress = {
 	first_name: 'John',
 	last_name: 'Doe',
@@ -53,7 +62,6 @@ const shippingAddress = {
 	email: 'john.doe@company',
 	phone: '+1234567890',
 };
-
 const shippingRates = [
 	{
 		package_id: 0,
@@ -101,29 +109,29 @@ const shippingRates = [
 		],
 	},
 ] as CartShippingRate[];
-
-jest.mock( '@woocommerce/base-context/hooks', () => {
-	return {
+vi.mock( '@woocommerce/base-context/hooks', async () => {
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		__esModule: true,
-		...jest.requireActual( '@woocommerce/base-context/hooks' ),
-		useShippingData: jest.fn(),
-		useStoreCart: jest.fn(),
-		useOrderSummaryLoadingState: jest.fn(),
-	};
+		...( await vi.importActual( '@woocommerce/base-context/hooks' ) ),
+		useShippingData: vi.fn(),
+		useStoreCart: vi.fn(),
+		useOrderSummaryLoadingState: vi.fn(),
+	} );
 } );
-
 (
-	baseContextHooks.useShippingData as jest.MockedFunction<
+	baseContextHooks.useShippingData as MockedFunction<
 		typeof baseContextHooks.useShippingData
 	>
  ).mockReturnValue( {
 	needsShipping: true,
-	selectShippingRate: jest.fn(),
+	selectShippingRate: vi.fn(),
 	shippingRates,
 } );
-
 (
-	baseContextHooks.useStoreCart as jest.MockedFunction<
+	baseContextHooks.useStoreCart as MockedFunction<
 		typeof baseContextHooks.useStoreCart
 	>
  ).mockReturnValue( {
@@ -138,26 +146,23 @@ jest.mock( '@woocommerce/base-context/hooks', () => {
 	cartHasCalculatedShipping: mockPreviewCart.has_calculated_shipping,
 	isLoadingRates: false,
 } );
-
 (
-	baseContextHooks.useOrderSummaryLoadingState as jest.MockedFunction<
+	baseContextHooks.useOrderSummaryLoadingState as MockedFunction<
 		typeof baseContextHooks.useOrderSummaryLoadingState
 	>
  ).mockReturnValue( {
 	isLoading: false,
 } );
-
 describe( 'TotalsShipping', () => {
 	it( 'shows skeleton when loading', () => {
 		// Set loading state to true
 		(
-			baseContextHooks.useOrderSummaryLoadingState as jest.MockedFunction<
+			baseContextHooks.useOrderSummaryLoadingState as MockedFunction<
 				typeof baseContextHooks.useOrderSummaryLoadingState
 			>
 		 ).mockReturnValue( {
 			isLoading: true,
 		} );
-
 		render(
 			<SlotFillProvider>
 				<TotalsShipping />
@@ -166,25 +171,27 @@ describe( 'TotalsShipping', () => {
 		expect( screen.getByText( 'Shipping' ) ).toBeInTheDocument();
 		expect( screen.getByLabelText( 'Loading price…' ) ).toBeInTheDocument();
 	} );
-
 	it( 'shows FREE if shipping cost is 0', () => {
 		// Set loading state to false
 		(
-			baseContextHooks.useOrderSummaryLoadingState as jest.MockedFunction<
+			baseContextHooks.useOrderSummaryLoadingState as MockedFunction<
 				typeof baseContextHooks.useOrderSummaryLoadingState
 			>
 		 ).mockReturnValue( {
 			isLoading: false,
 		} );
 		(
-			baseContextHooks.useStoreCart as jest.MockedFunction<
+			baseContextHooks.useStoreCart as MockedFunction<
 				typeof baseContextHooks.useStoreCart
 			>
 		 ).mockReturnValue( {
 			...baseContextHooks.useStoreCart(),
 			shippingRates: [
 				...shippingRates,
-				{ ...shippingRates[ 0 ], price: '0' },
+				{
+					...shippingRates[ 0 ],
+					price: '0',
+				},
 			],
 			cartTotals: {
 				...mockPreviewCart.totals,
@@ -192,27 +199,29 @@ describe( 'TotalsShipping', () => {
 				total_shipping_tax: '0',
 			},
 		} );
-
 		const { rerender } = render(
 			<SlotFillProvider>
 				<TotalsShipping />
 			</SlotFillProvider>
 		);
-
 		expect(
-			screen.getByText( 'Free', { exact: true } )
+			screen.getByText( 'Free', {
+				exact: true,
+			} )
 		).toBeInTheDocument();
 		expect( screen.queryByText( '0.00' ) ).not.toBeInTheDocument();
-
 		(
-			baseContextHooks.useStoreCart as jest.MockedFunction<
+			baseContextHooks.useStoreCart as MockedFunction<
 				typeof baseContextHooks.useStoreCart
 			>
 		 ).mockReturnValue( {
 			...baseContextHooks.useStoreCart(),
 			shippingRates: [
 				...shippingRates,
-				{ ...shippingRates[ 0 ], price: '5678' },
+				{
+					...shippingRates[ 0 ],
+					price: '5678',
+				},
 			],
 			cartTotals: {
 				...mockPreviewCart.totals,
@@ -227,13 +236,11 @@ describe( 'TotalsShipping', () => {
 				currency_thousand_separator: ', ',
 			},
 		} );
-
 		rerender(
 			<SlotFillProvider>
 				<TotalsShipping />
 			</SlotFillProvider>
 		);
-
 		expect( screen.queryByText( 'Free' ) ).not.toBeInTheDocument();
 		expect( screen.getByText( '56.78' ) ).toBeInTheDocument();
 	} );

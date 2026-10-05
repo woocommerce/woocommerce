@@ -1,3 +1,11 @@
+import { beforeEach, describe, expect, it, test, vi } from 'vitest';
+const { mockHasFinishedResolution } = vi.hoisted( () => {
+	const mockHasFinishedResolution = vi.fn().mockReturnValue( false );
+	return {
+		mockHasFinishedResolution,
+	};
+} );
+
 /**
  * External dependencies
  */
@@ -7,16 +15,21 @@ import deepFreeze from 'deep-freeze';
  * Internal dependencies
  */
 import { getRoute, getRoutes } from '../selectors';
-
-const mockHasFinishedResolution = jest.fn().mockReturnValue( false );
-jest.mock( '@wordpress/data', () => ( {
-	__esModule: true,
-	createRegistrySelector: ( callback ) =>
-		callback( () => ( {
-			hasFinishedResolution: mockHasFinishedResolution,
-		} ) ),
-} ) );
-
+vi.mock( '@wordpress/data', () => {
+	const mock = {
+		__esModule: true,
+		createRegistrySelector: ( callback ) =>
+			callback( () => ( {
+				hasFinishedResolution: mockHasFinishedResolution,
+			} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const testState = deepFreeze( {
 	routes: {
 		'wc/blocks': {
@@ -32,7 +45,6 @@ const testState = deepFreeze( {
 		},
 	},
 } );
-
 describe( 'getRoute', () => {
 	const invokeTest =
 		( namespace, resourceName, ids = [] ) =>
@@ -89,7 +101,6 @@ describe( 'getRoute', () => {
 		} );
 	} );
 } );
-
 describe( 'getRoutes', () => {
 	const invokeTest = ( namespace ) => () => {
 		return getRoutes( testState, namespace );

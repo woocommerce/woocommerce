@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 /* eslint-disable @wordpress/no-unsafe-wp-apis */
 
 /**
@@ -14,41 +16,51 @@ import {
  * Internal dependencies
  */
 import { ImageEditor } from '../image-editor';
-
-jest.mock( '@wordpress/block-editor', () => ( {
-	...jest.requireActual( '@wordpress/block-editor' ),
-	__experimentalImageEditor: jest.fn( () => null ),
-	__experimentalImageEditingProvider: jest.fn(
-		( { children }: { children: ReactNode } ) => children
-	),
-} ) );
-
-const mockGutenbergImageEditor = GutenbergImageEditor as jest.Mock;
-const mockLegacyImageEditingProvider = LegacyImageEditingProvider as jest.Mock;
-
+vi.mock( '@wordpress/block-editor', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/block-editor' ) ),
+		__experimentalImageEditor: vi.fn( () => null ),
+		__experimentalImageEditingProvider: vi.fn(
+			( { children }: { children: ReactNode } ) => children
+		),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+const mockGutenbergImageEditor = GutenbergImageEditor as Mock;
+const mockLegacyImageEditingProvider = LegacyImageEditingProvider as Mock;
 describe( 'Featured Items image editor', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	} );
-
 	it( 'passes the complete editing contract to the merged image editor', () => {
-		const setAttributes = jest.fn();
-		const setIsEditingImage = jest.fn();
+		const setAttributes = vi.fn();
+		const setIsEditingImage = vi.fn();
 		const container = document.createElement( 'div' );
-
 		render(
 			<ImageEditor
 				align="center"
 				backgroundImageId={ 42 }
-				backgroundImageSize={ { height: 640, width: 960 } }
+				backgroundImageSize={ {
+					height: 640,
+					width: 960,
+				} }
 				backgroundImageSrc="https://example.com/product.jpg"
-				containerRef={ { current: container } }
-				originalImgDimension={ { height: 100, width: 200 } }
+				containerRef={ {
+					current: container,
+				} }
+				originalImgDimension={ {
+					height: 100,
+					width: 200,
+				} }
 				setAttributes={ setAttributes }
 				setIsEditingImage={ setIsEditingImage }
 			/>
 		);
-
 		expect( mockLegacyImageEditingProvider ).not.toHaveBeenCalled();
 		expect( mockGutenbergImageEditor ).toHaveBeenCalled();
 		const editorProps = mockGutenbergImageEditor.mock.lastCall?.[ 0 ];
@@ -64,13 +76,11 @@ describe( 'Featured Items image editor', () => {
 				onFinishEditing: expect.any( Function ),
 			} )
 		);
-
 		editorProps.onSaveImage( {
 			id: 84,
 			url: 'https://example.com/product-edited.jpg',
 		} );
 		editorProps.onFinishEditing();
-
 		expect( setAttributes ).toHaveBeenCalledWith( {
 			mediaId: 84,
 			mediaSrc: 'https://example.com/product-edited.jpg',
@@ -90,12 +100,14 @@ describe( 'Featured Items image editor', () => {
 				containerRef={ {
 					current: document.createElement( 'div' ),
 				} }
-				originalImgDimension={ { height: 640, width: 960 } }
-				setAttributes={ jest.fn() }
-				setIsEditingImage={ jest.fn() }
+				originalImgDimension={ {
+					height: 640,
+					width: 960,
+				} }
+				setAttributes={ vi.fn() }
+				setIsEditingImage={ vi.fn() }
 			/>
 		);
-
 		const editorProps = mockGutenbergImageEditor.mock.lastCall?.[ 0 ];
 		expect( editorProps ).toEqual(
 			expect.objectContaining( {
@@ -106,23 +118,27 @@ describe( 'Featured Items image editor', () => {
 			} )
 		);
 	} );
-
 	it( 'uses the editor default only when no size has been measured yet', () => {
 		render(
 			<ImageEditor
 				align="center"
 				backgroundImageId={ 42 }
-				backgroundImageSize={ { height: 0, width: 0 } }
+				backgroundImageSize={ {
+					height: 0,
+					width: 0,
+				} }
 				backgroundImageSrc="https://example.com/product.jpg"
 				containerRef={ {
 					current: document.createElement( 'div' ),
 				} }
-				originalImgDimension={ { height: 0, width: 0 } }
-				setAttributes={ jest.fn() }
-				setIsEditingImage={ jest.fn() }
+				originalImgDimension={ {
+					height: 0,
+					width: 0,
+				} }
+				setAttributes={ vi.fn() }
+				setIsEditingImage={ vi.fn() }
 			/>
 		);
-
 		const editorProps = mockGutenbergImageEditor.mock.lastCall?.[ 0 ];
 		expect( editorProps ).toEqual(
 			expect.objectContaining( {

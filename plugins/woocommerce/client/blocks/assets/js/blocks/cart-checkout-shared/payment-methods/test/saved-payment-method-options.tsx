@@ -1,3 +1,5 @@
+import { describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -9,29 +11,33 @@ import * as wpData from '@wordpress/data';
  * Internal dependencies
  */
 import SavedPaymentMethodOptions from '../saved-payment-method-options';
-
-jest.mock( '@wordpress/data', () => ( {
-	__esModule: true,
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn(),
-} ) );
-
-const mockedUseSelect = wpData.useSelect as jest.Mock;
+const _actual = await vi.importActual( '@woocommerce/block-data' );
+const _actual2 = await vi.importActual( '@wordpress/data' );
+vi.mock( '@wordpress/data', async () => {
+	const mock = {
+		__esModule: true,
+		...( await vi.importActual( '@wordpress/data' ) ),
+		useSelect: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+const mockedUseSelect = wpData.useSelect as Mock;
 // Mock use select so we can override it when wc/store/checkout is accessed, but return the original select function if any other store is accessed.
 mockedUseSelect.mockImplementation(
-	jest.fn().mockImplementation( ( passedMapSelect ) => {
-		const { paymentStore } = jest.requireActual(
-			'@woocommerce/block-data'
-		);
-		const mockedSelect = jest.fn().mockImplementation( ( storeName ) => {
+	vi.fn().mockImplementation( ( passedMapSelect ) => {
+		const { paymentStore } = _actual;
+		const mockedSelect = vi.fn().mockImplementation( ( storeName ) => {
 			if (
 				storeName === 'wc/store/payment' ||
 				storeName === paymentStore
 			) {
 				return {
-					...jest
-						.requireActual( '@wordpress/data' )
-						.select( storeName ),
+					..._actual2.select( storeName ),
 					getActiveSavedToken: () => 1,
 					getSavedPaymentMethods: () => {
 						return {
@@ -81,14 +87,13 @@ mockedUseSelect.mockImplementation(
 					},
 				};
 			}
-			return jest.requireActual( '@wordpress/data' ).select( storeName );
+			return _actual2.select( storeName );
 		} );
 		return passedMapSelect( mockedSelect, {
-			dispatch: jest.requireActual( '@wordpress/data' ).dispatch,
+			dispatch: _actual2.dispatch,
 		} );
 	} )
 );
-
 describe( 'SavedPaymentMethodOptions', () => {
 	it( 'renders saved methods when a registered method exists', () => {
 		registerPaymentMethod( {
@@ -135,7 +140,7 @@ describe( 'SavedPaymentMethodOptions', () => {
 			edit: <div>edit</div>,
 			ariaLabel: 'Can Pay True First False Second Test Payment Method',
 			// This mock will return true the first time it runs, then false on subsequent calls.
-			canMakePayment: jest
+			canMakePayment: vi
 				.fn()
 				.mockReturnValueOnce( true )
 				.mockReturnValue( false ),

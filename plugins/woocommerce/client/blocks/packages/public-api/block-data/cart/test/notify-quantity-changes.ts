@@ -1,3 +1,5 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -14,9 +16,9 @@ import { notifyQuantityChanges } from '../notify-quantity-changes';
 // Deep clone an object to avoid mutating it later.
 const cloneObject = ( obj ) => JSON.parse( JSON.stringify( obj ) );
 
-jest.mock( '@wordpress/data' );
+vi.mock( '@wordpress/data' );
 
-const mockedCreateInfoNotice = jest.fn();
+const mockedCreateInfoNotice = vi.fn();
 dispatch.mockImplementation( ( store ) => {
 	if ( store === 'core/notices' ) {
 		return {
@@ -44,7 +46,7 @@ const getFreshCarts = (): { oldCart: Cart; newCart: Cart } => {
 
 describe( 'notifyQuantityChanges', () => {
 	afterEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	} );
 	it( 'does not show notices if the quantity limit changes, and the quantity is within limits', () => {
 		const { oldCart, newCart } = getFreshCarts();

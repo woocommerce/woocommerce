@@ -1,3 +1,5 @@
+import { describe, expect, test, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -12,13 +14,13 @@ import { ADDRESS_FORM_KEYS } from '@woocommerce/block-settings';
  */
 import Form from '../form';
 
-jest.mock( '@wordpress/element', () => {
-	return {
-		...jest.requireActual( '@wordpress/element' ),
+vi.mock( '@wordpress/element', async () => {
+	return ( ( mock ) => ( { default: mock, ...mock } ) )( {
+		...( await vi.importActual( '@wordpress/element' ) ),
 		useId: () => {
 			return 'mock-id';
 		},
-	};
+	} );
 } );
 
 const renderInCheckoutProvider = ( ui ) => {

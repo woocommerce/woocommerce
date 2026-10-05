@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -20,21 +22,24 @@ import { dispatch } from '@wordpress/data';
  */
 import PaymentMethods from '../payment-methods';
 
-jest.mock( '../saved-payment-method-options', () => ( { onChange } ) => {
-	return (
-		<>
-			<span>Saved payment method options</span>
-			<button onClick={ () => onChange( '0' ) }>Select saved</button>
-		</>
-	);
+vi.mock( '../saved-payment-method-options', () => {
+	const mock = ( { onChange } ) => {
+		return (
+			<>
+				<span>Saved payment method options</span>
+				<button onClick={ () => onChange( '0' ) }>Select saved</button>
+			</>
+		);
+	};
+	return { default: mock, ...mock };
 } );
 
-jest.mock( '@woocommerce/blocks-components', () => {
-	const originalModule = jest.requireActual(
+vi.mock( '@woocommerce/blocks-components', async () => {
+	const originalModule = await vi.importActual(
 		'@woocommerce/blocks-components'
 	);
 
-	return {
+	return ( ( mock ) => ( { default: mock, ...mock } ) )( {
 		__esModule: true,
 		...originalModule,
 		RadioControlAccordion: ( { onChange, className = '' } ) => (
@@ -48,17 +53,17 @@ jest.mock( '@woocommerce/blocks-components', () => {
 				</button>
 			</>
 		),
-	};
+	} );
 } );
 
-jest.mock( '@wordpress/data', () => {
-	const originalModule = jest.requireActual( '@wordpress/data' );
-	const originalBlockDataModule = jest.requireActual(
+vi.mock( '@wordpress/data', async () => {
+	const originalModule = await vi.importActual( '@wordpress/data' );
+	const originalBlockDataModule = await vi.importActual(
 		'@woocommerce/block-data'
 	);
-	return {
+	return ( ( mock ) => ( { default: mock, ...mock } ) )( {
 		...originalModule,
-		select: jest.fn( ( storeDescriptor ) => {
+		select: vi.fn( ( storeDescriptor ) => {
 			const paymentStoreInMock = originalBlockDataModule.paymentStore;
 			const originalStore = originalModule.select( storeDescriptor );
 			if (
@@ -80,7 +85,7 @@ jest.mock( '@wordpress/data', () => {
 			}
 			return originalStore;
 		} ),
-	};
+	} );
 } );
 
 const registerMockPaymentMethodsByName = ( names ) => {

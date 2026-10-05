@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -13,17 +15,25 @@ import { previewCart as mockPreviewCart } from '@woocommerce/resource-previews';
  */
 import TotalsFooterItem from '../index';
 import { textContentMatcher } from '../../../../../../../../tests/utils/find-by-text';
-
-jest.mock( '@wordpress/data', () => ( {
-	__esModule: true,
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn(),
-} ) );
+const _actual = await vi.importActual( '@wordpress/data' );
+vi.mock( '@wordpress/data', async () => {
+	const mock = {
+		__esModule: true,
+		...( await vi.importActual( '@wordpress/data' ) ),
+		useSelect: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 // Mock use select so we can override it when wc/store/checkout is accessed, but return the original select function if any other store is accessed.
 wpData.useSelect.mockImplementation(
-	jest.fn().mockImplementation( ( passedMapSelect ) => {
-		const mockedSelect = jest.fn().mockImplementation( ( storeName ) => {
+	vi.fn().mockImplementation( ( passedMapSelect ) => {
+		const mockedSelect = vi.fn().mockImplementation( ( storeName ) => {
 			if ( storeName === 'wc/store/checkout' ) {
 				return {
 					prefersCollection() {
@@ -31,14 +41,13 @@ wpData.useSelect.mockImplementation(
 					},
 				};
 			}
-			return jest.requireActual( '@wordpress/data' ).select( storeName );
+			return _actual.select( storeName );
 		} );
 		passedMapSelect( mockedSelect, {
-			dispatch: jest.requireActual( '@wordpress/data' ).dispatch,
+			dispatch: _actual.dispatch,
 		} );
 	} )
 );
-
 const shippingAddress = {
 	first_name: 'John',
 	last_name: 'Doe',
@@ -52,7 +61,6 @@ const shippingAddress = {
 	email: 'john.doe@company',
 	phone: '+1234567890',
 };
-
 const shippingRates = [
 	{
 		package_id: 0,
@@ -100,27 +108,27 @@ const shippingRates = [
 		],
 	},
 ] as CartShippingRate[];
-
-jest.mock( '@woocommerce/base-context/hooks', () => {
-	return {
+vi.mock( '@woocommerce/base-context/hooks', async () => {
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		__esModule: true,
-		...jest.requireActual( '@woocommerce/base-context/hooks' ),
-		useShippingData: jest.fn(),
-		useStoreCart: jest.fn(),
-		useOrderSummaryLoadingState: jest.fn( () => {
+		...( await vi.importActual( '@woocommerce/base-context/hooks' ) ),
+		useShippingData: vi.fn(),
+		useStoreCart: vi.fn(),
+		useOrderSummaryLoadingState: vi.fn( () => {
 			return {
 				isLoading: false,
 			};
 		} ),
-	};
+	} );
 } );
-
 baseContextHooks.useShippingData.mockReturnValue( {
 	needsShipping: true,
-	selectShippingRate: jest.fn(),
+	selectShippingRate: vi.fn(),
 	shippingRates,
 } );
-
 baseContextHooks.useStoreCart.mockReturnValue( {
 	cartItems: mockPreviewCart.items,
 	cartTotals: mockPreviewCart.totals,
@@ -133,13 +141,11 @@ baseContextHooks.useStoreCart.mockReturnValue( {
 	cartHasCalculatedShipping: mockPreviewCart.has_calculated_shipping,
 	isLoadingRates: false,
 } );
-
 describe( 'TotalsFooterItem', () => {
 	beforeEach( () => {
 		allSettings.taxesEnabled = true;
 		allSettings.displayCartPricesIncludingTax = true;
 	} );
-
 	const currency = {
 		code: 'GBP' as CurrencyCode,
 		decimalSeparator: '.',
@@ -149,7 +155,6 @@ describe( 'TotalsFooterItem', () => {
 		symbol: '£',
 		thousandSeparator: ',',
 	};
-
 	const values = {
 		currency_code: 'GBP' as CurrencyCode,
 		currency_decimal_separator: '.',
@@ -170,7 +175,6 @@ describe( 'TotalsFooterItem', () => {
 		total_shipping_tax: '0',
 		total_tax: '0',
 	};
-
 	it( 'Does not show the "including %s of tax" line if tax is 0', async () => {
 		render( <TotalsFooterItem currency={ currency } values={ values } /> );
 
@@ -184,7 +188,6 @@ describe( 'TotalsFooterItem', () => {
 			screen.queryByText( /including.*tax/i )
 		).not.toBeInTheDocument();
 	} );
-
 	it( 'Does not show the "including %s of tax" line if tax is disabled', async () => {
 		allSettings.taxesEnabled = false;
 		/* This shouldn't ever happen if taxes are disabled, but this is to test whether the taxesEnabled setting works */
@@ -207,7 +210,6 @@ describe( 'TotalsFooterItem', () => {
 			screen.queryByText( /including.*tax/i )
 		).not.toBeInTheDocument();
 	} );
-
 	it( 'Shows the "including %s of tax" line if tax is greater than 0', async () => {
 		const valuesWithTax = {
 			...values,
@@ -230,13 +232,18 @@ describe( 'TotalsFooterItem', () => {
 			'wc-block-components-totals-footer-item-tax'
 		);
 	} );
-
 	it( 'Shows the "including %s TAX LABEL" line with single tax label', async () => {
 		const valuesWithTax = {
 			...values,
 			total_tax: '100',
 			total_items_tax: '100',
-			tax_lines: [ { name: '10% VAT', price: '100', rate: '10.000' } ],
+			tax_lines: [
+				{
+					name: '10% VAT',
+					price: '100',
+					rate: '10.000',
+				},
+			],
 		};
 		render(
 			<TotalsFooterItem currency={ currency } values={ valuesWithTax } />
@@ -254,15 +261,22 @@ describe( 'TotalsFooterItem', () => {
 			'wc-block-components-totals-footer-item-tax'
 		);
 	} );
-
 	it( 'Shows the "including %s TAX LABELS" line with multiple tax labels', async () => {
 		const valuesWithTax = {
 			...values,
 			total_tax: '100',
 			total_items_tax: '100',
 			tax_lines: [
-				{ name: '10% VAT', price: '50', rate: '10.000' },
-				{ name: '5% VAT', price: '50', rate: '5.000' },
+				{
+					name: '10% VAT',
+					price: '50',
+					rate: '10.000',
+				},
+				{
+					name: '5% VAT',
+					price: '50',
+					rate: '5.000',
+				},
 			],
 		};
 		render(
@@ -281,15 +295,22 @@ describe( 'TotalsFooterItem', () => {
 			'wc-block-components-totals-footer-item-tax'
 		);
 	} );
-
 	it( 'Renders each itemised tax amount as its own price element', async () => {
 		const valuesWithTax = {
 			...values,
 			total_tax: '100',
 			total_items_tax: '100',
 			tax_lines: [
-				{ name: '10% VAT', price: '50', rate: '10.000' },
-				{ name: '5% VAT', price: '50', rate: '5.000' },
+				{
+					name: '10% VAT',
+					price: '50',
+					rate: '10.000',
+				},
+				{
+					name: '5% VAT',
+					price: '50',
+					rate: '5.000',
+				},
 			],
 		};
 		render(

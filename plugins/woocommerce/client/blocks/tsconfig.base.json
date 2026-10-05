@@ -1,7 +1,5 @@
 {
-	"exclude": [
-		"node_modules"
-	],
+	"exclude": [ "node_modules" ],
 	"compilerOptions": {
 		"outDir": "./build",
 		"sourceMap": true,
@@ -15,10 +13,7 @@
 		"jsx": "preserve",
 		"allowJs": true,
 		"moduleResolution": "bundler",
-		"lib": [
-			"dom",
-			"esnext"
-		],
+		"lib": [ "dom", "esnext" ],
 		"checkJs": true,
 		"skipLibCheck": true,
 		"strict": true,
@@ -26,13 +21,8 @@
 		"allowSyntheticDefaultImports": true,
 		"composite": true,
 		"rootDir": ".",
-		"typeRoots": [
-			"./node_modules/@types"
-		],
-		"types": [
-			"jest",
-			"jquery"
-		],
+		"typeRoots": [ "./node_modules/@types" ],
+		"types": [ "vitest/globals", "jquery" ],
 		"paths": {
 			"@woocommerce/product-elements": [
 				"assets/js/blocks/product-elements-blocks"
@@ -40,54 +30,28 @@
 			"@woocommerce/product-elements/*": [
 				"assets/js/blocks/product-elements-blocks/*"
 			],
-			"@woocommerce/base-components/*": [
-				"assets/js/base/components/*"
-			],
-			"@woocommerce/base-context": [
-				"assets/js/base/context"
-			],
-			"@woocommerce/base-context/*": [
-				"assets/js/base/context/*"
-			],
+			"@woocommerce/base-components/*": [ "assets/js/base/components/*" ],
+			"@woocommerce/base-context": [ "assets/js/base/context" ],
+			"@woocommerce/base-context/*": [ "assets/js/base/context/*" ],
 			"@woocommerce/base-context/hooks": [
 				"assets/js/base/context/hooks"
 			],
 			"@woocommerce/base-context/components": [
 				"assets/js/base/context/components"
 			],
-			"@woocommerce/base-hocs/*": [
-				"assets/js/base/hocs/*"
-			],
-			"@woocommerce/base-hooks": [
-				"assets/js/base/hooks"
-			],
-			"@woocommerce/base-utils": [
-				"assets/js/base/utils"
-			],
-			"@woocommerce/base-utils/*": [
-				"assets/js/base/utils/*"
-			],
-			"@woocommerce/blocks/*": [
-				"assets/js/blocks/*"
-			],
-			"@woocommerce/blocks-test-utils": [
-				"tests/utils"
-			],
-			"@woocommerce/blocks-test-utils/*": [
-				"tests/utils/*"
-			],
+			"@woocommerce/base-hocs/*": [ "assets/js/base/hocs/*" ],
+			"@woocommerce/base-hooks": [ "assets/js/base/hooks" ],
+			"@woocommerce/base-utils": [ "assets/js/base/utils" ],
+			"@woocommerce/base-utils/*": [ "assets/js/base/utils/*" ],
+			"@woocommerce/blocks/*": [ "assets/js/blocks/*" ],
+			"@woocommerce/blocks-test-utils": [ "tests/utils" ],
+			"@woocommerce/blocks-test-utils/*": [ "tests/utils/*" ],
 			"@woocommerce/editor-components/*": [
 				"assets/js/editor-components/*"
 			],
-			"@woocommerce/block-data": [
-				"packages/public-api/block-data"
-			],
-			"@woocommerce/block-data/*": [
-				"packages/public-api/block-data/*"
-			],
-			"@woocommerce/block-hocs": [
-				"assets/js/hocs"
-			],
+			"@woocommerce/block-data": [ "packages/public-api/block-data" ],
+			"@woocommerce/block-data/*": [ "packages/public-api/block-data/*" ],
+			"@woocommerce/block-hocs": [ "assets/js/hocs" ],
 			"@woocommerce/blocks-registry": [
 				"packages/public-api/blocks-registry"
 			],
@@ -112,36 +76,22 @@
 			"@woocommerce/blocks-components/*": [
 				"packages/public-api/blocks-components/*"
 			],
-			"@woocommerce/price-format": [
-				"packages/public-api/price-format"
-			],
+			"@woocommerce/price-format": [ "packages/public-api/price-format" ],
 			"@woocommerce/price-format/*": [
 				"packages/public-api/price-format/*"
 			],
-			"@woocommerce/block-settings": [
-				"assets/js/settings/blocks"
-			],
-			"@woocommerce/icons": [
-				"assets/js/icons"
-			],
-			"@woocommerce/resource-previews": [
-				"assets/js/previews"
-			],
-			"@woocommerce/settings": [
-				"packages/public-api/settings"
-			],
-			"@woocommerce/settings/*": [
-				"packages/public-api/settings/*"
-			],
+			"@woocommerce/block-settings": [ "assets/js/settings/blocks" ],
+			"@woocommerce/icons": [ "assets/js/icons" ],
+			"@woocommerce/resource-previews": [ "assets/js/previews" ],
+			"@woocommerce/settings": [ "packages/public-api/settings" ],
+			"@woocommerce/settings/*": [ "packages/public-api/settings/*" ],
 			"@woocommerce/shared-context": [
 				"packages/public-api/shared-context"
 			],
 			"@woocommerce/shared-context/*": [
 				"packages/public-api/shared-context/*"
 			],
-			"@woocommerce/shared-hocs": [
-				"packages/public-api/shared-hocs"
-			],
+			"@woocommerce/shared-hocs": [ "packages/public-api/shared-hocs" ],
 			"@woocommerce/shared-hocs/*": [
 				"packages/public-api/shared-hocs/*"
 			],
@@ -160,33 +110,15 @@
 			"@woocommerce/type-defs/*": [
 				"packages/public-api/types/type-defs/*"
 			],
-			"@woocommerce/types": [
-				"packages/public-api/types"
-			],
-			"@woocommerce/types/*": [
-				"packages/public-api/types/*"
-			],
-			"@woocommerce/storybook-controls": [
-				"storybook/custom-controls"
-			],
-			"@woocommerce/utils": [
-				"assets/js/utils"
-			],
-			"@woocommerce/utils/*": [
-				"assets/js/utils/*"
-			],
-			"@woocommerce/e2e-utils": [
-				"../../tests/e2e/utils/blocks"
-			],
-			"@woocommerce/test-utils/msw": [
-				"tests/js/config/msw-setup"
-			],
-			"@woocommerce/entities": [
-				"packages/internal/entities"
-			],
-			"@woocommerce/entities/*": [
-				"packages/internal/entities/*"
-			],
+			"@woocommerce/types": [ "packages/public-api/types" ],
+			"@woocommerce/types/*": [ "packages/public-api/types/*" ],
+			"@woocommerce/storybook-controls": [ "storybook/custom-controls" ],
+			"@woocommerce/utils": [ "assets/js/utils" ],
+			"@woocommerce/utils/*": [ "assets/js/utils/*" ],
+			"@woocommerce/e2e-utils": [ "../../tests/e2e/utils/blocks" ],
+			"@woocommerce/test-utils/msw": [ "tests/js/config/msw-setup" ],
+			"@woocommerce/entities": [ "packages/internal/entities" ],
+			"@woocommerce/entities/*": [ "packages/internal/entities/*" ],
 			"@woocommerce/sanitize": [
 				"node_modules/@woocommerce/sanitize/src/index.ts"
 			],

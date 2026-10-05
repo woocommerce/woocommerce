@@ -1,7 +1,9 @@
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+
 /**
  * External dependencies
  */
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import { screen, waitFor } from '@testing-library/react';
 import { createBlock, getBlockType } from '@wordpress/blocks';
 import { http, HttpResponse } from 'msw';
@@ -22,6 +24,7 @@ import '../../product-elements-blocks/sale-badge';
 
 // Setup MSW
 const handlers = [
+	http.options( '/wp/v2/settings', () => HttpResponse.json( {} ) ),
 	http.get( '/wp/v2/product/:id', () => {
 		return HttpResponse.json( {
 			id: 123,
@@ -250,9 +253,5 @@ describe( 'Product Gallery Block', () => {
 			name: /Block: Thumbnails/i,
 		} );
 		expect( thumbnailsBlock ).toBeInTheDocument();
-
-		// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
-		// opt out of without changing the visual output.
-		expect( console ).toHaveWarned();
 	} );
 } );

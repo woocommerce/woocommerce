@@ -1,3 +1,5 @@
+import { afterEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -12,40 +14,62 @@ import type { ReviewBlockAttributes } from '../attributes';
 import FrontendContainerBlock from '../frontend-container-block';
 import { getSharedReviewListControls } from '../edit-utils';
 import { getDataAttrs, getReviews, getSortArgs } from '../utils';
-
 type FrontendRegistration = {
 	getProps: (
 		element: HTMLElement,
 		index: number
-	) => { attributes: Record< string, unknown > };
+	) => {
+		attributes: Record< string, unknown >;
+	};
 };
-
 let mockFrontendRegistration: FrontendRegistration | undefined;
-
-jest.mock( '@woocommerce/base-utils', () => ( {
-	...jest.requireActual( '@woocommerce/base-utils' ),
-	renderFrontend: jest.fn( ( registration ) => {
-		mockFrontendRegistration = registration;
-	} ),
-} ) );
-
-jest.mock( '@woocommerce/settings', () => ( {
-	...jest.requireActual( '@woocommerce/settings' ),
-	getSetting: jest
-		.fn()
-		.mockImplementation( ( setting, defaultValue ) => defaultValue ),
-} ) );
-
-jest.mock( '../utils', () => ( {
-	...jest.requireActual( '../utils' ),
-	getReviews: jest.fn(),
-} ) );
-
-jest.mock( '@wordpress/components', () => {
-	const actual = jest.requireActual( '@wordpress/components' );
-	const React = jest.requireActual( 'react' );
-
-	return {
+vi.mock( '@woocommerce/base-utils', async () => {
+	const mock = {
+		...( await vi.importActual( '@woocommerce/base-utils' ) ),
+		renderFrontend: vi.fn( ( registration ) => {
+			mockFrontendRegistration = registration;
+		} ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/settings', async () => {
+	const mock = {
+		...( await vi.importActual( '@woocommerce/settings' ) ),
+		getSetting: vi
+			.fn()
+			.mockImplementation( ( setting, defaultValue ) => defaultValue ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../utils', async () => {
+	const mock = {
+		...( await vi.importActual( '../utils' ) ),
+		getReviews: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/components', async () => {
+	const actual = await vi.importActual( '@wordpress/components' );
+	const React = await vi.importActual( 'react' );
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		...actual,
 		__experimentalInputControl: ( { label, onChange, value } ) =>
 			React.createElement( 'input', {
@@ -66,14 +90,22 @@ jest.mock( '@wordpress/components', () => {
 						? __unstableStateReducer( {
 								value: event.target.value,
 						  } )
-						: { value: event.target.value };
+						: {
+								value: event.target.value,
+						  };
 					onChange( state.value );
 				},
 				type: 'number',
 				value,
 			} ),
 		__experimentalToolsPanelItem: ( { children, label } ) =>
-			React.createElement( 'section', { 'aria-label': label }, children ),
+			React.createElement(
+				'section',
+				{
+					'aria-label': label,
+				},
+				children
+			),
 		SelectControl: ( { label, onChange, options, value } ) =>
 			React.createElement(
 				'select',
@@ -85,7 +117,10 @@ jest.mock( '@wordpress/components', () => {
 				options.map( ( option ) =>
 					React.createElement(
 						'option',
-						{ key: option.value, value: option.value },
+						{
+							key: option.value,
+							value: option.value,
+						},
 						option.label
 					)
 				)
@@ -97,15 +132,13 @@ jest.mock( '@wordpress/components', () => {
 				onChange,
 				type: 'checkbox',
 			} ),
-	};
+	} );
 } );
 
 // Importing the frontend entrypoint registers its selector and hydration mapper.
-jest.requireActual( '../frontend' );
-
-const mockGetReviews = getReviews as jest.Mock;
-const mockGetSetting = getSetting as jest.Mock;
-
+await vi.importActual( '../frontend' );
+const mockGetReviews = getReviews as Mock;
+const mockGetSetting = getSetting as Mock;
 const createAttributes = (
 	overrides: Partial< ReviewBlockAttributes > = {}
 ): ReviewBlockAttributes => ( {
@@ -124,7 +157,6 @@ const createAttributes = (
 	showReviewRating: false,
 	...overrides,
 } );
-
 const createFrontendElement = (
 	className: string,
 	dataAttributes: Record< string, unknown > = {}
@@ -138,33 +170,40 @@ const createFrontendElement = (
 	} );
 	return element;
 };
-
 const getHydratedAttributes = ( element: HTMLElement ) => {
 	if ( ! mockFrontendRegistration ) {
 		throw new Error( 'Reviews frontend was not registered.' );
 	}
-
 	return {
 		...element.dataset,
 		...mockFrontendRegistration.getProps( element, 0 ).attributes,
 	};
 };
-
 const reviews = [
-	{ id: 1, review: 'First review' },
-	{ id: 2, review: 'Second review' },
-	{ id: 3, review: 'Third review' },
-	{ id: 4, review: 'Fourth review' },
+	{
+		id: 1,
+		review: 'First review',
+	},
+	{
+		id: 2,
+		review: 'Second review',
+	},
+	{
+		id: 3,
+		review: 'Third review',
+	},
+	{
+		id: 4,
+		review: 'Fourth review',
+	},
 ];
-
 describe( 'Product Reviews contracts', () => {
 	afterEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 		mockGetSetting.mockImplementation(
 			( setting, defaultValue ) => defaultValue
 		);
 	} );
-
 	describe( 'sorting', () => {
 		it.each( [
 			[ 'most recent', 'most-recent', true, 'desc', 'date_gmt' ],
@@ -185,11 +224,12 @@ describe( 'Product Reviews contracts', () => {
 						? ratingsEnabled
 						: defaultValue
 				);
-
-				expect( getSortArgs( value ) ).toEqual( { order, orderby } );
+				expect( getSortArgs( value ) ).toEqual( {
+					order,
+					orderby,
+				} );
 			}
 		);
-
 		it( 'resets an appended list and requests the lowest ratings first', async () => {
 			const user = userEvent.setup();
 			mockGetReviews
@@ -205,13 +245,13 @@ describe( 'Product Reviews contracts', () => {
 					reviews: reviews.slice( 0, 2 ),
 					totalReviews: 4,
 				} );
-
 			render(
 				<FrontendContainerBlock
-					attributes={ createAttributes( { categoryIds: [ 7 ] } ) }
+					attributes={ createAttributes( {
+						categoryIds: [ 7 ],
+					} ) }
 				/>
 			);
-
 			await waitFor( () =>
 				expect( mockGetReviews ).toHaveBeenCalledTimes( 1 )
 			);
@@ -230,9 +270,10 @@ describe( 'Product Reviews contracts', () => {
 				orderby: 'date_gmt',
 				per_page: 2,
 			} );
-
 			await user.selectOptions(
-				screen.getByRole( 'combobox', { name: 'Order reviews by' } ),
+				screen.getByRole( 'combobox', {
+					name: 'Order reviews by',
+				} ),
 				'lowest-rating'
 			);
 			await waitFor( () =>
@@ -247,26 +288,40 @@ describe( 'Product Reviews contracts', () => {
 			} );
 		} );
 	} );
-
 	describe( 'serialization and hydration', () => {
 		it.each( [
 			[
 				'category IDs',
-				{ categoryIds: [ 12, 34 ] },
-				{ 'data-category-ids': '12,34' },
+				{
+					categoryIds: [ 12, 34 ],
+				},
+				{
+					'data-category-ids': '12,34',
+				},
 			],
-			[ 'product ID', { productId: 56 }, { 'data-product-id': 56 } ],
+			[
+				'product ID',
+				{
+					productId: 56,
+				},
+				{
+					'data-product-id': 56,
+				},
+			],
 			[
 				'empty category IDs',
-				{ categoryIds: [] },
-				{ 'data-category-ids': '' },
+				{
+					categoryIds: [],
+				},
+				{
+					'data-category-ids': '',
+				},
 			],
 		] )( 'serializes %s', ( _name, selection, expected ) => {
 			expect(
 				getDataAttrs( createAttributes( selection ) )
 			).toMatchObject( expected );
 		} );
-
 		it.each( [
 			[ 'positive integer', 4, 4 ],
 			[ 'numeric positive integer', '6', 6 ],
@@ -276,28 +331,50 @@ describe( 'Product Reviews contracts', () => {
 			[ 'non-numeric', 'invalid', undefined ],
 		] )( 'serializes a %s offset', ( _name, offset, expected ) => {
 			expect(
-				getDataAttrs( createAttributes( { offset } ) )[ 'data-offset' ]
+				getDataAttrs(
+					createAttributes( {
+						offset,
+					} )
+				)[ 'data-offset' ]
 			).toBe( expected );
 		} );
-
 		it.each( [
 			[
 				'category block',
 				'wp-block-woocommerce-reviews-by-category has-content',
-				{ 'data-category-ids': '7', 'data-offset': '3' },
-				{ categoryIds: '7', isFilteredReviewsBlock: true, offset: 3 },
+				{
+					'data-category-ids': '7',
+					'data-offset': '3',
+				},
+				{
+					categoryIds: '7',
+					isFilteredReviewsBlock: true,
+					offset: 3,
+				},
 			],
 			[
 				'product block',
 				'wp-block-woocommerce-reviews-by-product',
-				{ 'data-product-id': '9', 'data-offset': '-1' },
-				{ productId: '9', isFilteredReviewsBlock: true, offset: 0 },
+				{
+					'data-product-id': '9',
+					'data-offset': '-1',
+				},
+				{
+					productId: '9',
+					isFilteredReviewsBlock: true,
+					offset: 0,
+				},
 			],
 			[
 				'all reviews block',
 				'wp-block-woocommerce-all-reviews',
-				{ 'data-offset': '1.5' },
-				{ isFilteredReviewsBlock: false, offset: 0 },
+				{
+					'data-offset': '1.5',
+				},
+				{
+					isFilteredReviewsBlock: false,
+					offset: 0,
+				},
 			],
 		] )(
 			'hydrates the %s identity and offset',
@@ -306,13 +383,11 @@ describe( 'Product Reviews contracts', () => {
 					className,
 					dataAttributes
 				);
-
 				expect( getHydratedAttributes( element ) ).toMatchObject(
 					expected
 				);
 			}
 		);
-
 		it.each( [
 			'wp-block-woocommerce-reviews-by-category',
 			'wp-block-woocommerce-reviews-by-product',
@@ -331,17 +406,17 @@ describe( 'Product Reviews contracts', () => {
 					) }
 				/>
 			);
-
 			expect( container ).toBeEmptyDOMElement();
 			expect( mockGetReviews ).not.toHaveBeenCalled();
 		} );
-
 		it( 'does not request reviews for a saved empty category selection', () => {
 			mockGetReviews.mockResolvedValue( {
 				reviews: [],
 				totalReviews: 0,
 			} );
-			const attributes = createAttributes( { categoryIds: [] } );
+			const attributes = createAttributes( {
+				categoryIds: [],
+			} );
 			const element = createFrontendElement(
 				'wp-block-woocommerce-reviews-by-category',
 				getDataAttrs( attributes )
@@ -355,75 +430,108 @@ describe( 'Product Reviews contracts', () => {
 					) }
 				/>
 			);
-
 			expect( container ).toBeEmptyDOMElement();
 			expect( mockGetReviews ).not.toHaveBeenCalled();
 		} );
 	} );
-
 	describe( 'Offset control', () => {
 		it( 'renders a zero default offset', () => {
 			render(
 				<>
 					{ getSharedReviewListControls(
 						createAttributes(),
-						jest.fn(),
-						{ showOffset: true }
+						vi.fn(),
+						{
+							showOffset: true,
+						}
 					) }
 				</>
 			);
-
 			expect(
-				screen.getByRole( 'spinbutton', { name: 'Offset' } )
+				screen.getByRole( 'spinbutton', {
+					name: 'Offset',
+				} )
 			).toHaveValue( 0 );
 		} );
-
 		it.each( [
-			[ 'zero', '0', { offset: 0 } ],
-			[ 'a positive integer', '8', { offset: 8 } ],
-			[ 'negative zero', '-0', { offset: 0 } ],
+			[
+				'zero',
+				'0',
+				{
+					offset: 0,
+				},
+			],
+			[
+				'a positive integer',
+				'8',
+				{
+					offset: 8,
+				},
+			],
+			[
+				'negative zero',
+				'-0',
+				{
+					offset: 0,
+				},
+			],
 			[ 'an empty value', '', undefined ],
 			[ 'a fractional value', '1.5', undefined ],
 			[ 'a negative integer', '-2', undefined ],
 		] )( 'accepts or rejects %s', ( _name, value, expected ) => {
-			const setAttributes = jest.fn();
+			const setAttributes = vi.fn();
 			render(
 				<>
 					{ getSharedReviewListControls(
-						createAttributes( { offset: 1 } ),
+						createAttributes( {
+							offset: 1,
+						} ),
 						setAttributes,
-						{ showOffset: true }
+						{
+							showOffset: true,
+						}
 					) }
 				</>
 			);
-
 			fireEvent.change(
-				screen.getByRole( 'spinbutton', { name: 'Offset' } ),
-				{ target: { value } }
+				screen.getByRole( 'spinbutton', {
+					name: 'Offset',
+				} ),
+				{
+					target: {
+						value,
+					},
+				}
 			);
-
 			expect( setAttributes.mock.calls ).toEqual(
 				expected ? [ [ expected ] ] : []
 			);
 		} );
-
 		it.each( [
 			[
 				'category',
 				'wp-block-woocommerce-reviews-by-category',
-				{ categoryIds: [ 9 ] },
-				{ category_id: 9 },
+				{
+					categoryIds: [ 9 ],
+				},
+				{
+					category_id: 9,
+				},
 			],
 			[
 				'product',
 				'wp-block-woocommerce-reviews-by-product',
-				{ productId: 9 },
-				{ product_id: '9' },
+				{
+					productId: 9,
+				},
+				{
+					product_id: '9',
+				},
 			],
 		] )(
 			'flows a positive value through serialization, hydration, and the %s review request',
 			async ( _name, className, selection, filterArgs ) => {
-				const setAttributes = jest.fn();
+				const setAttributes = vi.fn();
 				const attributes = createAttributes( selection );
 				const controls = render(
 					<>
@@ -436,21 +544,29 @@ describe( 'Product Reviews contracts', () => {
 						) }
 					</>
 				);
-
 				fireEvent.change(
-					screen.getByRole( 'spinbutton', { name: 'Offset' } ),
-					{ target: { value: '5' } }
+					screen.getByRole( 'spinbutton', {
+						name: 'Offset',
+					} ),
+					{
+						target: {
+							value: '5',
+						},
+					}
 				);
-				expect( setAttributes ).toHaveBeenCalledWith( { offset: 5 } );
+				expect( setAttributes ).toHaveBeenCalledWith( {
+					offset: 5,
+				} );
 				controls.unmount();
-
-				const serialized = getDataAttrs( { ...attributes, offset: 5 } );
+				const serialized = getDataAttrs( {
+					...attributes,
+					offset: 5,
+				} );
 				const element = createFrontendElement( className, serialized );
 				mockGetReviews.mockResolvedValue( {
 					reviews: reviews.slice( 0, 2 ),
 					totalReviews: 4,
 				} );
-
 				render(
 					<FrontendContainerBlock
 						attributes={
@@ -460,7 +576,6 @@ describe( 'Product Reviews contracts', () => {
 						}
 					/>
 				);
-
 				await waitFor( () =>
 					expect( mockGetReviews ).toHaveBeenCalledWith( {
 						...filterArgs,

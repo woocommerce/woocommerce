@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -228,7 +230,7 @@ describe( 'decodeHtmlEntities', () => {
 
 	describe( 'Document creation behavior', () => {
 		it( 'creates a new document for each call', () => {
-			const spy = jest.spyOn(
+			const spy = vi.spyOn(
 				document.implementation,
 				'createHTMLDocument'
 			);

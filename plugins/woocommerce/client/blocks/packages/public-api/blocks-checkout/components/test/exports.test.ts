@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 /**
  * Smoke tests for @woocommerce/blocks-checkout public exports.
  *

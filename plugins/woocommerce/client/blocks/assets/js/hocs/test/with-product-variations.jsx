@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, it, test, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -9,27 +11,60 @@ import * as mockUtils from '@woocommerce/editor-components/utils';
  */
 import withProductVariations from '../with-product-variations';
 import * as mockBaseUtils from '../../base/utils/errors';
-
-jest.mock( '@woocommerce/editor-components/utils', () => ( {
-	getProductVariationsWithTotal: jest.fn(),
-} ) );
-
-jest.mock( '../../base/utils/errors', () => ( {
-	formatError: jest.fn(),
-} ) );
-
+vi.mock( '@woocommerce/editor-components/utils', () => {
+	const mock = {
+		getProductVariationsWithTotal: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../base/utils/errors', () => {
+	const mock = {
+		formatError: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const mockProducts = [
-	{ id: 1, name: 'Hoodie', variations: [ { id: 3 }, { id: 4 } ] },
-	{ id: 2, name: 'Backpack' },
+	{
+		id: 1,
+		name: 'Hoodie',
+		variations: [
+			{
+				id: 3,
+			},
+			{
+				id: 4,
+			},
+		],
+	},
+	{
+		id: 2,
+		name: 'Backpack',
+	},
 ];
 const mockVariations = [
-	{ id: 3, name: 'Blue' },
-	{ id: 4, name: 'Red' },
+	{
+		id: 3,
+		name: 'Blue',
+	},
+	{
+		id: 4,
+		name: 'Red',
+	},
 ];
 
 // Capture the props the HOC injects into the wrapped component.
 let lastProps;
-const CapturedComponent = jest.fn( ( props ) => {
+const CapturedComponent = vi.fn( ( props ) => {
 	lastProps = props;
 	return null;
 } );
@@ -43,7 +78,6 @@ const settle = async ( fn ) => {
 		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
 	} );
 };
-
 describe( 'withProductVariations Component', () => {
 	let renderResult;
 	const renderComponent = ( props ) =>
@@ -59,13 +93,11 @@ describe( 'withProductVariations Component', () => {
 				/>
 			);
 		} );
-
 	afterEach( () => {
 		mockUtils.getProductVariationsWithTotal.mockReset();
 		CapturedComponent.mockClear();
 		lastProps = undefined;
 	} );
-
 	describe( 'lifecycle events', () => {
 		beforeEach( () => {
 			mockUtils.getProductVariationsWithTotal.mockImplementation( () =>
@@ -75,26 +107,21 @@ describe( 'withProductVariations Component', () => {
 				} )
 			);
 		} );
-
 		it( 'getProductVariationsWithTotal is called on mount', async () => {
 			await renderComponent();
 			const { getProductVariationsWithTotal } = mockUtils;
-
 			expect( getProductVariationsWithTotal ).toHaveBeenCalledWith( 1, {
 				offset: 0,
 			} );
 			expect( getProductVariationsWithTotal ).toHaveBeenCalledTimes( 1 );
 		} );
-
 		it( 'getProductVariationsWithTotal is called on component update', async () => {
 			await renderComponent( {
 				selected: undefined,
 				showVariations: undefined,
 			} );
 			const { getProductVariationsWithTotal } = mockUtils;
-
 			expect( getProductVariationsWithTotal ).toHaveBeenCalledTimes( 0 );
-
 			await settle( () =>
 				renderResult.rerender(
 					<TestComponent
@@ -106,31 +133,29 @@ describe( 'withProductVariations Component', () => {
 					/>
 				)
 			);
-
 			expect( getProductVariationsWithTotal ).toHaveBeenCalledWith( 1, {
 				offset: 0,
 			} );
 			expect( getProductVariationsWithTotal ).toHaveBeenCalledTimes( 1 );
 		} );
-
 		it( 'getProductVariationsWithTotal is not called if selected product has no variations', async () => {
-			await renderComponent( { selected: [ 2 ] } );
+			await renderComponent( {
+				selected: [ 2 ],
+			} );
 			const { getProductVariationsWithTotal } = mockUtils;
-
 			expect( getProductVariationsWithTotal ).toHaveBeenCalledTimes( 0 );
 		} );
-
 		it( 'getProductVariationsWithTotal is called if selected product is a variation', async () => {
-			await renderComponent( { selected: [ 3 ] } );
+			await renderComponent( {
+				selected: [ 3 ],
+			} );
 			const { getProductVariationsWithTotal } = mockUtils;
-
 			expect( getProductVariationsWithTotal ).toHaveBeenCalledWith( 1, {
 				offset: 0,
 			} );
 			expect( getProductVariationsWithTotal ).toHaveBeenCalledTimes( 1 );
 		} );
 	} );
-
 	describe( 'when the API returns variations data', () => {
 		beforeEach( async () => {
 			mockUtils.getProductVariationsWithTotal.mockImplementation( () =>
@@ -141,25 +166,34 @@ describe( 'withProductVariations Component', () => {
 			);
 			await renderComponent();
 		} );
-
 		it( 'sets the variations props', () => {
 			const expectedVariations = {
 				1: [
-					{ id: 3, name: 'Blue', parent: 1 },
-					{ id: 4, name: 'Red', parent: 1 },
+					{
+						id: 3,
+						name: 'Blue',
+						parent: 1,
+					},
+					{
+						id: 4,
+						name: 'Red',
+						parent: 1,
+					},
 				],
 			};
-
 			expect( lastProps.error ).toBeNull();
 			expect( lastProps.isLoading ).toBe( false );
 			expect( lastProps.variations ).toEqual( expectedVariations );
 		} );
 	} );
-
 	describe( 'when the API returns an error', () => {
-		const error = { message: 'There was an error.' };
-		const formattedError = { message: 'There was an error.', type: 'api' };
-
+		const error = {
+			message: 'There was an error.',
+		};
+		const formattedError = {
+			message: 'There was an error.',
+			type: 'api',
+		};
 		beforeEach( async () => {
 			mockUtils.getProductVariationsWithTotal.mockImplementation( () =>
 				Promise.reject( error )
@@ -169,43 +203,43 @@ describe( 'withProductVariations Component', () => {
 			);
 			await renderComponent();
 		} );
-
 		test( 'sets the error prop', () => {
 			const { formatError } = mockBaseUtils;
-
 			expect( formatError ).toHaveBeenCalledWith( error );
 			expect( formatError ).toHaveBeenCalledTimes( 1 );
 			expect( lastProps.error ).toEqual( formattedError );
 			expect( lastProps.isLoading ).toBe( false );
-			expect( lastProps.variations ).toEqual( { 1: null } );
+			expect( lastProps.variations ).toEqual( {
+				1: null,
+			} );
 		} );
 	} );
-
 	describe( 'when a product has more than 25 variations', () => {
 		const totalVariations = 60;
 		const mockManyVariations = Array.from(
-			{ length: totalVariations },
+			{
+				length: totalVariations,
+			},
 			( _, i ) => ( {
 				id: i + 1,
 				name: `Variation ${ i + 1 }`,
 			} )
 		);
-
 		const productWithManyVariations = [
 			{
 				id: 1,
 				name: 'Hoodie',
-				variations: mockManyVariations.map( ( v ) => ( { id: v.id } ) ),
+				variations: mockManyVariations.map( ( v ) => ( {
+					id: v.id,
+				} ) ),
 			},
 		];
-
 		beforeEach( () => {
 			mockUtils.getProductVariationsWithTotal.mockImplementation(
 				( productId, { offset = 0 } ) => {
 					const start = offset;
 					const end = Math.min( start + 25, totalVariations );
 					const variations = mockManyVariations.slice( start, end );
-
 					return Promise.resolve( {
 						variations,
 						total: totalVariations,
@@ -213,10 +247,10 @@ describe( 'withProductVariations Component', () => {
 				}
 			);
 		} );
-
 		it( 'loads the first 25 variations by default and provides onLoadMoreVariations', async () => {
-			await renderComponent( { products: productWithManyVariations } );
-
+			await renderComponent( {
+				products: productWithManyVariations,
+			} );
 			const { getProductVariationsWithTotal } = mockUtils;
 
 			// Should have been called once with offset 0
@@ -244,16 +278,16 @@ describe( 'withProductVariations Component', () => {
 			// Should provide onLoadMoreVariations function
 			expect( typeof lastProps.onLoadMoreVariations ).toBe( 'function' );
 		} );
-
 		it( 'loads the next 25 variations when onLoadMoreVariations is called', async () => {
-			await renderComponent( { products: productWithManyVariations } );
+			await renderComponent( {
+				products: productWithManyVariations,
+			} );
 
 			// Verify initial 25 variations are loaded
 			expect( lastProps.variations[ 1 ] ).toHaveLength( 25 );
 
 			// Call onLoadMoreVariations to load next batch
 			await settle( () => lastProps.onLoadMoreVariations() );
-
 			const { getProductVariationsWithTotal } = mockUtils;
 
 			// Should have been called again with offset 25
@@ -275,16 +309,16 @@ describe( 'withProductVariations Component', () => {
 				parent: 1,
 			} );
 		} );
-
 		it( 'loads all variations when onLoadMoreVariations is called multiple times', async () => {
-			await renderComponent( { products: productWithManyVariations } );
+			await renderComponent( {
+				products: productWithManyVariations,
+			} );
 
 			// Load second batch
 			await settle( () => lastProps.onLoadMoreVariations() );
 
 			// Load third batch (final 10 variations)
 			await settle( () => lastProps.onLoadMoreVariations() );
-
 			const { getProductVariationsWithTotal } = mockUtils;
 
 			// Should have been called 3 times total

@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -8,31 +10,43 @@ import { blocksConfig } from '@woocommerce/block-settings';
  * Internal dependencies
  */
 import { getProducts } from '../';
-
-jest.mock( '@wordpress/api-fetch' );
-jest.mock( '@woocommerce/block-settings', () => ( {
-	blocksConfig: {
-		productCount: 0,
-	},
-} ) );
-
+vi.mock( '@wordpress/api-fetch' );
+vi.mock( '@woocommerce/block-settings', () => {
+	const mock = {
+		blocksConfig: {
+			productCount: 0,
+		},
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'getProducts', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 		// Reset productCount before each test
 		blocksConfig.productCount = 0;
 	} );
-
 	test( 'small catalog: should not load selected products separately', async () => {
 		blocksConfig.productCount = 50; // small catalog
 
 		apiFetch.mockResolvedValue( [
-			{ id: 1, name: 'shirt' },
-			{ id: 2, name: 'pants' },
+			{
+				id: 1,
+				name: 'shirt',
+			},
+			{
+				id: 2,
+				name: 'pants',
+			},
 		] );
-
-		await getProducts( { search: 'shirt', selected: [ 10, 20 ] } );
-
+		await getProducts( {
+			search: 'shirt',
+			selected: [ 10, 20 ],
+		} );
 		expect( apiFetch ).toHaveBeenCalledTimes( 1 );
 		expect( apiFetch ).toHaveBeenCalledWith(
 			expect.objectContaining( {
@@ -45,21 +59,34 @@ describe( 'getProducts', () => {
 			} )
 		);
 	} );
-
 	test( 'large catalog: should load selected products separately', async () => {
 		blocksConfig.productCount = 500; // large catalog
 
 		apiFetch
 			.mockResolvedValueOnce( [
-				{ id: 1, name: 'shirt' },
-				{ id: 2, name: 'pants' },
+				{
+					id: 1,
+					name: 'shirt',
+				},
+				{
+					id: 2,
+					name: 'pants',
+				},
 			] )
 			.mockResolvedValueOnce( [
-				{ id: 10, name: 'Special product' },
-				{ id: 20, name: 'Other product' },
+				{
+					id: 10,
+					name: 'Special product',
+				},
+				{
+					id: 20,
+					name: 'Other product',
+				},
 			] );
-
-		await getProducts( { search: 'shirt', selected: [ 10, 20 ] } );
+		await getProducts( {
+			search: 'shirt',
+			selected: [ 10, 20 ],
+		} );
 
 		// Two requests will have been made, one for the main search and one for the selected products.
 		expect( apiFetch ).toHaveBeenCalledTimes( 2 );
@@ -74,23 +101,38 @@ describe( 'getProducts', () => {
 			} )
 		);
 	} );
-
 	test( 'large catalog: should paginate selected products when necessary', async () => {
 		blocksConfig.productCount = 500; // large catalog
 
 		apiFetch
 			.mockResolvedValueOnce( [
-				{ id: 1, name: 'shirt' },
-				{ id: 2, name: 'pants' },
+				{
+					id: 1,
+					name: 'shirt',
+				},
+				{
+					id: 2,
+					name: 'pants',
+				},
 			] )
 			.mockResolvedValueOnce( [
-				{ id: 10, name: 'Special product' },
-				{ id: 11, name: 'Other product' },
+				{
+					id: 10,
+					name: 'Special product',
+				},
+				{
+					id: 11,
+					name: 'Other product',
+				},
 			] );
-
 		await getProducts( {
 			search: 'shirt',
-			selected: Array.from( { length: 101 }, ( _, i ) => i + 10 ),
+			selected: Array.from(
+				{
+					length: 101,
+				},
+				( _, i ) => i + 10
+			),
 		} );
 
 		// Three requests will have been made, one for the main search and two for each selected product page.

@@ -1,3 +1,5 @@
+import { expect, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -24,7 +26,7 @@ export const renderSlotFill = (
 	Fill: SlotFillComponent,
 	slotProps: Record< string, unknown > = {}
 ) => {
-	const fillPropsSpy = jest.fn();
+	const fillPropsSpy = vi.fn();
 
 	// A component that captures all props it receives (merged via cloneElement)
 	// and calls the spy with them for assertion.

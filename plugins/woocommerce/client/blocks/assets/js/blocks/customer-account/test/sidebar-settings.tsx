@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -9,20 +11,33 @@ import userEvent from '@testing-library/user-event';
  */
 import { BlockSettings } from '../sidebar-settings';
 import { DisplayStyle, IconStyle } from '../types';
-
-jest.mock( '@wordpress/block-editor', () => ( {
-	...jest.requireActual( '@wordpress/block-editor' ),
-	InspectorControls: jest.fn( ( { children } ) => <div>{ children }</div> ),
-} ) );
-
-jest.mock( '@wordpress/components', () => ( {
-	...jest.requireActual( '@wordpress/components' ),
-	__experimentalToggleGroupControl: jest.fn( ( { children } ) => (
-		<div>{ children }</div>
-	) ),
-	__experimentalToggleGroupControlOption: jest.fn( () => null ),
-} ) );
-
+vi.mock( '@wordpress/block-editor', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/block-editor' ) ),
+		InspectorControls: vi.fn( ( { children } ) => <div>{ children }</div> ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/components', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/components' ) ),
+		__experimentalToggleGroupControl: vi.fn( ( { children } ) => (
+			<div>{ children }</div>
+		) ),
+		__experimentalToggleGroupControlOption: vi.fn( () => null ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'Customer Account sidebar settings', () => {
 	it.each( [
 		{
@@ -44,8 +59,7 @@ describe( 'Customer Account sidebar settings', () => {
 		'maps "$option" to its serialized display style',
 		async ( { option, initialDisplayStyle, expectedDisplayStyle } ) => {
 			const user = userEvent.setup();
-			const setAttributes = jest.fn();
-
+			const setAttributes = vi.fn();
 			render(
 				<BlockSettings
 					attributes={ {
@@ -56,16 +70,13 @@ describe( 'Customer Account sidebar settings', () => {
 					setAttributes={ setAttributes }
 				/>
 			);
-
 			const displayStyleSelect = screen.getByRole( 'combobox', {
 				name: 'Icon options',
 			} );
 			const targetOption = screen.getByRole( 'option', {
 				name: option,
 			} );
-
 			await user.selectOptions( displayStyleSelect, targetOption );
-
 			expect( setAttributes ).toHaveBeenCalledTimes( 1 );
 			expect( setAttributes ).toHaveBeenCalledWith( {
 				displayStyle: expectedDisplayStyle,

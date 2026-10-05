@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -32,7 +34,7 @@ describe( 'registerPaymentMethodExtensionCallbacks', () => {
 	} );
 
 	it( 'Does not overwrite a namespace if a second extensions tries to register with the same name', () => {
-		const firstCodCallback = jest.fn().mockReturnValue( false );
+		const firstCodCallback = vi.fn().mockReturnValue( false );
 		registerPaymentMethodExtensionCallbacks(
 			'overwrite-marketplace-extension',
 			{
