@@ -39,6 +39,12 @@ final class LegacyReportsMenu {
 	private const CORE_CALLBACK = array( 'WC_Admin_Reports', 'get_report' );
 
 	/**
+	 * 'yes' once an extension report is found, so later requests skip WC_Admin_Reports::get_reports() until a
+	 * plugin is deactivated. 'no' is checked again on every request.
+	 */
+	private const EXTENSION_REPORTS_OPTION = 'woocommerce_store_has_legacy_reports_related_plugins';
+
+	/**
 	 * Which menus this class hid the Reports item in, keyed by 'menu' or 'submenu'.
 	 *
 	 * @var array<string, true>
@@ -146,6 +152,17 @@ final class LegacyReportsMenu {
 	}
 
 	/**
+	 * Check for extension reports again on the next request, since the deactivated plugin may have added them.
+	 *
+	 * @internal
+	 */
+	public function handle_deactivated_plugin(): void {
+		if ( 'yes' === get_option( self::EXTENSION_REPORTS_OPTION ) ) {
+			update_option( self::EXTENSION_REPORTS_OPTION, 'no', true );
+		}
+	}
+
+	/**
 	 * Whether the legacy Reports menu item should be shown.
 	 *
 	 * @return bool
@@ -213,8 +230,8 @@ final class LegacyReportsMenu {
 	/**
 	 * Look for legacy reports that an extension adds or changes.
 	 *
-	 * Analytics also applies woocommerce_admin_reports, so hooking it isn't enough on its own: the filtered
-	 * legacy reports must contain a report core doesn't define, or a core report with a different callback.
+	 * A positive get_reports() result is stored, since some extensions' report filters are expensive (e.g. Box
+	 * Office checks whether the HPOS tables are in sync).
 	 *
 	 * @return bool
 	 */
@@ -227,10 +244,29 @@ final class LegacyReportsMenu {
 			return false;
 		}
 
-		if ( ! class_exists( 'WC_Admin_Reports', false ) ) {
-			return false;
+		$stored = get_option( self::EXTENSION_REPORTS_OPTION );
+		if ( 'yes' === $stored ) {
+			return true;
 		}
 
+		$found = class_exists( 'WC_Admin_Reports', false ) && self::legacy_reports_include_extension_reports();
+
+		// Store 'no' too, so the option is autoloaded instead of queried on every request.
+		if ( $found || false === $stored ) {
+			update_option( self::EXTENSION_REPORTS_OPTION, $found ? 'yes' : 'no', true );
+		}
+
+		return $found;
+	}
+
+	/**
+	 * Whether the filtered legacy reports contain a report core doesn't define, or a core report with a different callback.
+	 *
+	 * Analytics also applies woocommerce_admin_reports, so hooking it isn't enough on its own.
+	 *
+	 * @return bool
+	 */
+	private static function legacy_reports_include_extension_reports(): bool {
 		foreach ( \WC_Admin_Reports::get_reports() as $group_key => $group ) {
 			if ( ! is_array( $group ) || ! is_array( $group['reports'] ?? null ) ) {
 				continue;

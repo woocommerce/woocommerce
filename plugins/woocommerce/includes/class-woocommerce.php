@@ -35,6 +35,7 @@ use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\Email\DeferredEmailQueue;
 use Automattic\WooCommerce\Internal\Email\EmailLogger;
+use Automattic\WooCommerce\Internal\Admin\LegacyReportsMenu;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Internal\Admin\OrderMilestoneEasterEgg;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -1337,6 +1338,8 @@ final class WooCommerce {
 		include_once __DIR__ . '/admin/helper/class-wc-helper.php';
 
 		WC_Helper::deactivated_plugin( $filename );
+
+		wc_get_container()->get( LegacyReportsMenu::class )->handle_deactivated_plugin();
 	}
 
 	/**
