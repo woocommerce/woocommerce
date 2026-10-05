@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -10,26 +12,54 @@ import { apiFetch } from '@wordpress/data-controls';
 import { requestSendingNewsletterPreview } from '../actions';
 import { storeName } from '../constants';
 import { SendingPreviewStatus } from '../types';
-
-jest.mock( '@wordpress/data', () => ( {
-	select: jest.fn(),
-} ) );
-
-jest.mock( '@wordpress/core-data', () => ( {
-	store: { name: 'core' },
-} ) );
-
-jest.mock( '@wordpress/data-controls', () => ( {
-	apiFetch: jest.fn(),
-} ) );
-
-jest.mock( '../../events', () => ( {
-	recordEvent: jest.fn(),
-} ) );
-
-const selectMock = select as jest.Mock;
-const apiFetchMock = apiFetch as jest.Mock;
-
+vi.mock( '@wordpress/data', () => {
+	const mock = {
+		select: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/core-data', () => {
+	const mock = {
+		store: {
+			name: 'core',
+		},
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/data-controls', () => {
+	const mock = {
+		apiFetch: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../events', () => {
+	const mock = {
+		recordEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+const selectMock = select as Mock;
+const apiFetchMock = apiFetch as Mock;
 const initialSendingState = {
 	type: 'CHANGE_PREVIEW_STATE',
 	state: {
@@ -37,10 +67,9 @@ const initialSendingState = {
 		isSendingPreviewEmail: true,
 	},
 };
-
 describe( 'requestSendingNewsletterPreview', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 		selectMock
 			.mockReturnValueOnce( {
 				getPreviewState: () => ( {
@@ -51,13 +80,12 @@ describe( 'requestSendingNewsletterPreview', () => {
 				getEmailPostId: () => 123,
 			} );
 	} );
-
 	it( 'transitions to sending, posts the preview request, then marks it successful', () => {
-		const request = { type: 'API_FETCH' };
+		const request = {
+			type: 'API_FETCH',
+		};
 		apiFetchMock.mockReturnValue( request );
-
 		const action = requestSendingNewsletterPreview( 'test@example.com' );
-
 		expect( action.next() ).toStrictEqual( {
 			value: initialSendingState,
 			done: false,
@@ -87,7 +115,6 @@ describe( 'requestSendingNewsletterPreview', () => {
 			done: false,
 		} );
 	} );
-
 	it( 'yields nothing when a preview send is already in flight', () => {
 		// Overwrite the queue beforeEach set up: this case needs the guard to see a
 		// send already running. Queue it the same way, so nothing outlives the case.
@@ -97,25 +124,26 @@ describe( 'requestSendingNewsletterPreview', () => {
 				isSendingPreviewEmail: true,
 			} ),
 		} );
-
 		const action = requestSendingNewsletterPreview( 'test@example.com' );
-
 		expect( action.next() ).toStrictEqual( {
 			value: undefined,
 			done: true,
 		} );
 		expect( apiFetchMock ).not.toHaveBeenCalled();
 	} );
-
 	it( 'transitions to the exact error state when the preview request is rejected', () => {
-		const request = { type: 'API_FETCH' };
+		const request = {
+			type: 'API_FETCH',
+		};
 		apiFetchMock.mockReturnValue( request );
 		const action = requestSendingNewsletterPreview( 'test@example.com' );
-
 		action.next();
 		action.next();
-
-		expect( action.throw( { error: 'Request failed' } ) ).toStrictEqual( {
+		expect(
+			action.throw( {
+				error: 'Request failed',
+			} )
+		).toStrictEqual( {
 			value: {
 				type: 'CHANGE_PREVIEW_STATE',
 				state: {

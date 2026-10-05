@@ -1,3 +1,5 @@
+import { afterEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -12,16 +14,57 @@ import { PersonalizationTag } from '../types';
 
 // Importing the selectors module pulls in the whole block editor, which Jest
 // cannot transform. Only the store descriptors are needed to route `select`.
-jest.mock( '@wordpress/core-data', () => ( { store: { name: 'core' } } ) );
-jest.mock( '@wordpress/editor', () => ( { store: { name: 'core/editor' } } ) );
-jest.mock( '@wordpress/preferences', () => ( {
-	store: { name: 'core/preferences' },
-} ) );
-jest.mock( '@wordpress/blocks', () => ( {
-	serialize: jest.fn(),
-	parse: jest.fn(),
-} ) );
-
+vi.mock( '@wordpress/core-data', () => {
+	const mock = {
+		store: {
+			name: 'core',
+		},
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/editor', () => {
+	const mock = {
+		store: {
+			name: 'core/editor',
+		},
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/preferences', () => {
+	const mock = {
+		store: {
+			name: 'core/preferences',
+		},
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/blocks', () => {
+	const mock = {
+		serialize: vi.fn(),
+		parse: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const makeTag = ( name: string, postTypes: string[] ): PersonalizationTag => ( {
 	name,
 	token: `[woocommerce/${ name }]`,
@@ -30,8 +73,9 @@ const makeTag = ( name: string, postTypes: string[] ): PersonalizationTag => ( {
 	valueToInsert: `[woocommerce/${ name }]`,
 	postTypes,
 } );
-
-type Registry = { select: jest.Mock };
+type Registry = {
+	select: Mock;
+};
 
 /**
  * `createRegistrySelector` resolves the selector once per registry, so a fresh
@@ -45,13 +89,14 @@ type Registry = { select: jest.Mock };
 function buildRegistry( options: {
 	tags: PersonalizationTag[] | null;
 	postType: string | undefined;
-	template?: { post_types: string[] } | null;
+	template?: {
+		post_types: string[];
+	} | null;
 } ) {
 	const { tags, postType, template = null } = options;
-	const getEntityRecords = jest.fn().mockReturnValue( tags );
-
+	const getEntityRecords = vi.fn().mockReturnValue( tags );
 	const registry: Registry = {
-		select: jest.fn( ( store ) => {
+		select: vi.fn( ( store ) => {
 			if ( store === storeName ) {
 				return {
 					getEmailPostId: () => 23,
@@ -60,30 +105,33 @@ function buildRegistry( options: {
 				};
 			}
 			if ( store === coreDataStore ) {
-				return { getEntityRecords };
+				return {
+					getEntityRecords,
+				};
 			}
 			throw new Error( `Unexpected store: ${ String( store ) }` );
 		} ),
 	};
-
 	(
-		getPersonalizationTagsList as unknown as { registry: Registry }
+		getPersonalizationTagsList as unknown as {
+			registry: Registry;
+		}
 	 ).registry = registry;
-
-	return { getEntityRecords };
+	return {
+		getEntityRecords,
+	};
 }
-
 const names = () => getPersonalizationTagsList().map( ( tag ) => tag.name );
-
 describe( 'getPersonalizationTagsList', () => {
 	// Without this, a test that forgot `buildRegistry` would silently reuse the
 	// previous registry along with its warm caches.
 	afterEach( () => {
 		delete (
-			getPersonalizationTagsList as unknown as { registry?: Registry }
+			getPersonalizationTagsList as unknown as {
+				registry?: Registry;
+			}
 		 ).registry;
 	} );
-
 	it( 'filters tags by the edited post type', () => {
 		buildRegistry( {
 			tags: [
@@ -93,10 +141,8 @@ describe( 'getPersonalizationTagsList', () => {
 			],
 			postType: 'woo_email',
 		} );
-
 		expect( names() ).toEqual( [ 'a', 'c' ] );
 	} );
-
 	it( 'filters tags by the template post types when editing a template', () => {
 		buildRegistry( {
 			tags: [
@@ -105,9 +151,10 @@ describe( 'getPersonalizationTagsList', () => {
 				makeTag( 'c', [] ),
 			],
 			postType: 'wp_template',
-			template: { post_types: [ 'other_type' ] },
+			template: {
+				post_types: [ 'other_type' ],
+			},
 		} );
-
 		expect( names() ).toEqual( [ 'b', 'c' ] );
 	} );
 
@@ -119,16 +166,13 @@ describe( 'getPersonalizationTagsList', () => {
 			postType: 'wp_template',
 			template: null,
 		} );
-
 		expect( names() ).toEqual( [ 'c' ] );
 	} );
-
 	it( 'returns a referentially stable list across repeated calls', () => {
 		buildRegistry( {
 			tags: [ makeTag( 'a', [ 'woo_email' ] ) ],
 			postType: 'woo_email',
 		} );
-
 		expect( getPersonalizationTagsList() ).toBe(
 			getPersonalizationTagsList()
 		);
@@ -142,12 +186,10 @@ describe( 'getPersonalizationTagsList', () => {
 			postType: 'woo_email',
 		} );
 		const before = getPersonalizationTagsList();
-
 		getEntityRecords.mockReturnValue( [
 			makeTag( 'a', [ 'woo_email' ] ),
 			makeTag( 'b', [ 'woo_email' ] ),
 		] );
-
 		expect( getPersonalizationTagsList() ).not.toBe( before );
 		expect( names() ).toEqual( [ 'a', 'b' ] );
 	} );
@@ -155,8 +197,10 @@ describe( 'getPersonalizationTagsList', () => {
 	// Records are null until the request resolves, which is every call during
 	// initial load — a fresh array each time would defeat the memoization.
 	it( 'returns a stable empty list while the records are unresolved', () => {
-		buildRegistry( { tags: null, postType: 'woo_email' } );
-
+		buildRegistry( {
+			tags: null,
+			postType: 'woo_email',
+		} );
 		expect( getPersonalizationTagsList() ).toStrictEqual( [] );
 		expect( getPersonalizationTagsList() ).toBe(
 			getPersonalizationTagsList()

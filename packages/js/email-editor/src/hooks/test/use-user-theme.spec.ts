@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -9,33 +11,55 @@ import { useSelect } from '@wordpress/data';
  */
 import { useUserTheme } from '../use-user-theme';
 import { storeName } from '../../store/constants';
-
-jest.mock( '@wordpress/data', () => {
+vi.mock( '@wordpress/data', async () => {
 	const actual =
-		jest.requireActual< typeof import('@wordpress/data') >(
+		await vi.importActual< typeof import('@wordpress/data') >(
 			'@wordpress/data'
 		);
-
 	return Object.create( actual, {
-		useSelect: { value: jest.fn() },
+		useSelect: {
+			value: vi.fn(),
+		},
 		dispatch: {
-			value: jest.fn( () => ( { editEntityRecord: jest.fn() } ) ),
+			value: vi.fn( () => ( {
+				editEntityRecord: vi.fn(),
+			} ) ),
 		},
 	} );
 } );
-
-jest.mock( '@wordpress/core-data', () => ( { store: { name: 'core' } } ) );
+vi.mock( '@wordpress/core-data', () => {
+	const mock = {
+		store: {
+			name: 'core',
+		},
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 // The store barrel pulls in `@wordpress/components` through the events module,
 // which Jest cannot transform. Re-export the real constant so the store name
 // stays linked to `src/store/constants.ts`.
-jest.mock( '../../store', () => ( {
-	storeName: jest.requireActual< typeof import('../../store/constants') >(
-		'../../store/constants'
-	).storeName,
-} ) );
-
-const mockedUseSelect = useSelect as unknown as jest.Mock;
+vi.mock( '../../store', async () => {
+	const mock = {
+		storeName: (
+			await vi.importActual< typeof import('../../store/constants') >(
+				'../../store/constants'
+			)
+		).storeName,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+const mockedUseSelect = useSelect as unknown as Mock;
 
 /**
  * Runs the hook's own `mapSelect` against a stub store, so the store it selects
@@ -50,14 +74,15 @@ function mockGlobalStylePost( post: unknown ) {
 				if ( store !== storeName ) {
 					throw new Error( `Unexpected store: ${ String( store ) }` );
 				}
-				return { getGlobalEmailStylesPost: () => post };
+				return {
+					getGlobalEmailStylesPost: () => post,
+				};
 			} )
 	);
 }
-
 describe( 'useUserTheme', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	} );
 
 	// Consumers use `userTheme` as a memo dependency for regenerating the global
@@ -65,15 +90,20 @@ describe( 'useUserTheme', () => {
 	it( 'keeps the same userTheme across re-renders when nothing changed', () => {
 		mockGlobalStylePost( {
 			id: 1,
-			styles: { color: { background: '#fff' } },
-			settings: { color: { palette: [] } },
+			styles: {
+				color: {
+					background: '#fff',
+				},
+			},
+			settings: {
+				color: {
+					palette: [],
+				},
+			},
 		} );
-
 		const { result, rerender } = renderHook( () => useUserTheme() );
 		const first = result.current.userTheme;
-
 		rerender();
-
 		expect( result.current.userTheme ).toBe( first );
 	} );
 
@@ -83,32 +113,51 @@ describe( 'useUserTheme', () => {
 	// it has styles *and* settings, so a stale `settings` drops the generated
 	// CSS entirely rather than just leaving it out of date.
 	it( 'returns a new userTheme when the styles or the settings change', () => {
-		const settings = { color: { palette: [] } };
+		const settings = {
+			color: {
+				palette: [],
+			},
+		};
 		mockGlobalStylePost( {
 			id: 1,
-			styles: { color: { background: '#fff' } },
+			styles: {
+				color: {
+					background: '#fff',
+				},
+			},
 			settings,
 		} );
-
 		const { result, rerender } = renderHook( () => useUserTheme() );
 		const first = result.current.userTheme;
-
-		const updatedStyles = { color: { background: '#000' } };
-		mockGlobalStylePost( { id: 1, styles: updatedStyles, settings } );
+		const updatedStyles = {
+			color: {
+				background: '#000',
+			},
+		};
+		mockGlobalStylePost( {
+			id: 1,
+			styles: updatedStyles,
+			settings,
+		} );
 		rerender();
-
 		expect( result.current.userTheme ).not.toBe( first );
 		expect( result.current.userTheme.styles ).toBe( updatedStyles );
-
 		const afterStyles = result.current.userTheme;
-		const updatedSettings = { color: { palette: [ { slug: 'accent' } ] } };
+		const updatedSettings = {
+			color: {
+				palette: [
+					{
+						slug: 'accent',
+					},
+				],
+			},
+		};
 		mockGlobalStylePost( {
 			id: 1,
 			styles: updatedStyles,
 			settings: updatedSettings,
 		} );
 		rerender();
-
 		expect( result.current.userTheme ).not.toBe( afterStyles );
 		expect( result.current.userTheme.settings ).toBe( updatedSettings );
 	} );
@@ -117,12 +166,9 @@ describe( 'useUserTheme', () => {
 	// mounts and the stylesheet is generated.
 	it( 'keeps the same userTheme when there is no global styles post', () => {
 		mockGlobalStylePost( null );
-
 		const { result, rerender } = renderHook( () => useUserTheme() );
 		const first = result.current.userTheme;
-
 		rerender();
-
 		expect( result.current.userTheme ).toBe( first );
 	} );
 } );
