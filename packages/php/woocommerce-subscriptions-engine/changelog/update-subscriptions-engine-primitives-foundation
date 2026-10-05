@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Make contract and cycle statuses registered engine data (engine defaults plus validated extension registration, no transition table; unknown stored statuses are preserved), scope the renewal due scan to registered owners, and have hold and cancellation clear and restore the next-due moment themselves.
