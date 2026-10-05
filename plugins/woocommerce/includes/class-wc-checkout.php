@@ -580,8 +580,8 @@ class WC_Checkout {
 				array(
 					'quantity'     => $values['quantity'],
 					'variation'    => $variation,
-					'subtotal'     => $values['line_subtotal'],
 					'total'        => $values['line_total'],
+					'subtotal'     => $values['line_subtotal'],
 					'subtotal_tax' => $values['line_subtotal_tax'],
 					'total_tax'    => $values['line_tax'],
 					'taxes'        => $values['line_tax_data'],
