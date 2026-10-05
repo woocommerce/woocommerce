@@ -19,12 +19,12 @@ class WC_Settings_Tax_Test extends WC_Settings_Unit_Test_Case {
 	 * @testDox 'get_sections' returns the predefined sections as well as one section per existing tax class.
 	 */
 	public function test_get_sections_returns_predefined_sections_and_one_section_per_tax_class() {
-		 $tax_classes = array( 'tax_class_1', 'tax_class_2' );
+		$tax_classes = array( 'tax_class_1', 'tax_class_2' );
 
 		StaticMockerHack::add_method_mocks(
 			array(
 				WC_Tax::class => array(
-					'get_tax_classes' => function() use ( $tax_classes ) {
+					'get_tax_classes' => function () use ( $tax_classes ) {
 						return $tax_classes;
 					},
 				),
@@ -87,7 +87,7 @@ class WC_Settings_Tax_Test extends WC_Settings_Unit_Test_Case {
 		StaticMockerHack::add_method_mocks(
 			array(
 				'WC_Tax' => array(
-					'get_tax_class_slugs' => function() {
+					'get_tax_class_slugs' => function () {
 						return array( 'tax_class_slug' );
 					},
 				),
@@ -100,7 +100,7 @@ class WC_Settings_Tax_Test extends WC_Settings_Unit_Test_Case {
 
 		$sut->method( 'output_tax_rates' )->will(
 			$this->returnCallback(
-				function() use ( &$output_tax_rates_invoked ) {
+				function () use ( &$output_tax_rates_invoked ) {
 					$output_tax_rates_invoked = true;
 				}
 			)
@@ -123,12 +123,12 @@ class WC_Settings_Tax_Test extends WC_Settings_Unit_Test_Case {
 		StaticMockerHack::add_method_mocks(
 			array(
 				'WC_Admin_Settings' => array(
-					'output_fields' => function( $settings ) use ( &$output_fields_in_admin_settings_invoked ) {
+					'output_fields' => function ( $settings ) use ( &$output_fields_in_admin_settings_invoked ) {
 						$output_fields_in_admin_settings_invoked = true;
 					},
 				),
 				'WC_Tax'            => array(
-					'get_tax_class_slugs' => function() {
+					'get_tax_class_slugs' => function () {
 						return array( 'tax_class_slug' );
 					},
 				),
@@ -152,13 +152,13 @@ class WC_Settings_Tax_Test extends WC_Settings_Unit_Test_Case {
 		StaticMockerHack::add_method_mocks(
 			array(
 				'WC_Tax' => array(
-					'get_tax_classes'     => function() {
+					'get_tax_classes'     => function () {
 						return array( 'tax_1', 'tax_2', 'tax_3' );
 					},
-					'delete_tax_class_by' => function( $field, $name ) use ( &$deleted ) {
+					'delete_tax_class_by' => function ( $field, $name ) use ( &$deleted ) {
 						$deleted[] = $name;
 					},
-					'create_tax_class'    => function( $name ) use ( &$created ) {
+					'create_tax_class'    => function ( $name ) use ( &$created ) {
 						$created[] = $name;
 					},
 				),

@@ -127,7 +127,7 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 		);
 
 		$anon_test = Closure::bind(
-			function( $order ) {
+			function ( $order ) {
 				$this->output_origin_column( $order );
 			},
 			$this->attribution_class,

@@ -64,7 +64,7 @@ class Customers_V2 extends WC_REST_Unit_Test_Case {
 		$matching_customer_data = current(
 			array_filter(
 				$customers,
-				function( $customer ) use ( $customer_1 ) {
+				function ( $customer ) use ( $customer_1 ) {
 					return $customer['id'] === $customer_1->get_id();
 				}
 			)

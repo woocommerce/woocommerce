@@ -8,8 +8,8 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 
 /**
-  * Class WC_Discounts_Tests.
-  */
+ * Class WC_Discounts_Tests.
+ */
 class WC_Discounts_Tests extends WC_Unit_Test_Case {
 
 	/**

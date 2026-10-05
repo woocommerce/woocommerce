@@ -39,7 +39,9 @@ class WC_REST_Product_Reviews_V2_Controller extends WC_REST_Product_Reviews_V1_C
 		parent::register_routes();
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/batch', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/batch',
+			array(
 				'args'   => array(
 					'product_id' => array(
 						'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),

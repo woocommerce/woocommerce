@@ -49,7 +49,7 @@ class MarketingRecommendationsTest extends WC_REST_Unit_Test_Case {
 		Init::delete_specs_transient();
 
 		// Mock the response from woocommerce.com API.
-		$this->response_mock_ref = function( $preempt, $parsed_args, $url ) {
+		$this->response_mock_ref = function ( $preempt, $parsed_args, $url ) {
 			if ( str_contains( $url, 'https://woocommerce.com/wp-json/wccom/marketing-tab/1.3/recommendations.json' ) ) {
 				return array(
 					'success' => true,

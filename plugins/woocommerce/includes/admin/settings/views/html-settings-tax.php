@@ -141,7 +141,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							'<input class="current-page" id="current-page-selector" type="text" name="paged" value="{{ data.current_page }}" size="<# print( data.qty_pages.toString().length ) #>" aria-describedby="table-paging">',
 							'<span class="total-pages">{{ data.qty_pages }}</span>'
 						);
-					?>
+						?>
 				</span>
 
 				<# if ( data.current_page === data.qty_pages ) { #>

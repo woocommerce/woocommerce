@@ -45,23 +45,23 @@ class MarketingRecommendations extends WC_REST_Controller {
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
-			[
-				[
+			array(
+				array(
 					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => [ $this, 'get_items' ],
-					'permission_callback' => [ $this, 'get_items_permissions_check' ],
-					'args'                => [
-						'category' => [
+					'callback'            => array( $this, 'get_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => array(
+						'category' => array(
 							'type'              => 'string',
 							'validate_callback' => 'rest_validate_request_arg',
 							'sanitize_callback' => 'sanitize_title_with_dashes',
-							'enum'              => [ 'channels', 'extensions' ],
+							'enum'              => array( 'channels', 'extensions' ),
 							'required'          => true,
-						],
-					],
-				],
-				'schema' => [ $this, 'get_public_item_schema' ],
-			]
+						),
+					),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
 		);
 	}
 
@@ -97,7 +97,7 @@ class MarketingRecommendations extends WC_REST_Controller {
 			return new WP_Error( 'woocommerce_rest_invalid_category', __( 'The specified category for recommendations is invalid. Allowed values: "channels", "extensions".', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
-		$responses = [];
+		$responses = array();
 		foreach ( $items as $item ) {
 			$response    = $this->prepare_item_for_response( $item, $request );
 			$responses[] = $this->prepare_response_for_collection( $response );
@@ -128,100 +128,100 @@ class MarketingRecommendations extends WC_REST_Controller {
 	 * @return array Item schema data.
 	 */
 	public function get_item_schema() {
-		$schema = [
+		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => 'marketing_recommendation',
 			'type'       => 'object',
-			'properties' => [
-				'title'          => [
+			'properties' => array(
+				'title'          => array(
 					'type'     => 'string',
-					'context'  => [ 'view' ],
+					'context'  => array( 'view' ),
 					'readonly' => true,
-				],
-				'description'    => [
+				),
+				'description'    => array(
 					'type'     => 'string',
-					'context'  => [ 'view' ],
+					'context'  => array( 'view' ),
 					'readonly' => true,
-				],
-				'url'            => [
+				),
+				'url'            => array(
 					'type'     => 'string',
-					'context'  => [ 'view' ],
+					'context'  => array( 'view' ),
 					'readonly' => true,
-				],
-				'direct_install' => [
+				),
+				'direct_install' => array(
 					'type'     => 'string',
-					'context'  => [ 'view' ],
+					'context'  => array( 'view' ),
 					'readonly' => true,
-				],
-				'icon'           => [
+				),
+				'icon'           => array(
 					'type'     => 'string',
-					'context'  => [ 'view' ],
+					'context'  => array( 'view' ),
 					'readonly' => true,
-				],
-				'product'        => [
+				),
+				'product'        => array(
 					'type'     => 'string',
-					'context'  => [ 'view' ],
+					'context'  => array( 'view' ),
 					'readonly' => true,
-				],
-				'plugin'         => [
+				),
+				'plugin'         => array(
 					'type'     => 'string',
-					'context'  => [ 'view' ],
+					'context'  => array( 'view' ),
 					'readonly' => true,
-				],
-				'categories'     => [
+				),
+				'categories'     => array(
 					'type'     => 'array',
-					'context'  => [ 'view' ],
+					'context'  => array( 'view' ),
 					'readonly' => true,
-					'items'    => [
+					'items'    => array(
 						'type' => 'string',
-					],
-				],
-				'subcategories'  => [
+					),
+				),
+				'subcategories'  => array(
 					'type'     => 'array',
-					'context'  => [ 'view' ],
+					'context'  => array( 'view' ),
 					'readonly' => true,
-					'items'    => [
+					'items'    => array(
 						'type'       => 'object',
-						'context'    => [ 'view' ],
+						'context'    => array( 'view' ),
 						'readonly'   => true,
-						'properties' => [
-							'slug' => [
+						'properties' => array(
+							'slug' => array(
 								'type'     => 'string',
-								'context'  => [ 'view' ],
+								'context'  => array( 'view' ),
 								'readonly' => true,
-							],
-							'name' => [
+							),
+							'name' => array(
 								'type'     => 'string',
-								'context'  => [ 'view' ],
+								'context'  => array( 'view' ),
 								'readonly' => true,
-							],
-						],
-					],
-				],
-				'tags'           => [
+							),
+						),
+					),
+				),
+				'tags'           => array(
 					'type'     => 'array',
-					'context'  => [ 'view' ],
+					'context'  => array( 'view' ),
 					'readonly' => true,
-					'items'    => [
+					'items'    => array(
 						'type'       => 'object',
-						'context'    => [ 'view' ],
+						'context'    => array( 'view' ),
 						'readonly'   => true,
-						'properties' => [
-							'slug' => [
+						'properties' => array(
+							'slug' => array(
 								'type'     => 'string',
-								'context'  => [ 'view' ],
+								'context'  => array( 'view' ),
 								'readonly' => true,
-							],
-							'name' => [
+							),
+							'name' => array(
 								'type'     => 'string',
-								'context'  => [ 'view' ],
+								'context'  => array( 'view' ),
 								'readonly' => true,
-							],
-						],
-					],
-				],
-			],
-		];
+							),
+						),
+					),
+				),
+			),
+		);
 
 		return $this->add_additional_fields_schema( $schema );
 	}

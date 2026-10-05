@@ -279,5 +279,4 @@ class LegacyDataHandlerTests extends \WC_Unit_Test_Case {
 		$this->assertEquals( $order_cpt->get_billing_address_1(), $order_hpos->get_billing_address_1() );
 		$this->assertEquals( $order_cpt->get_meta( 'other_meta', true, 'edit' ), $order_hpos->get_meta( 'other_meta', true, 'edit' ) );
 	}
-
 }

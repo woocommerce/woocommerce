@@ -118,7 +118,7 @@ class WC_CLI_Runner {
 			'slug'         => __( 'The slug for the resource.', 'woocommerce' ),
 		);
 		$rest_command->set_supported_ids( $supported_ids );
-		$positional_args = array_keys( $supported_ids );
+		$positional_args    = array_keys( $supported_ids );
 		$parent             = "wc {$route_data['schema']['title']}";
 		$supported_commands = array();
 
@@ -235,7 +235,7 @@ class WC_CLI_Runner {
 
 			$before_invoke = null;
 			if ( empty( $command_args['when'] ) && \WP_CLI::get_config( 'debug' ) ) {
-				$before_invoke = function() {
+				$before_invoke = function () {
 					wc_maybe_define_constant( 'SAVEQUERIES', true );
 				};
 			}

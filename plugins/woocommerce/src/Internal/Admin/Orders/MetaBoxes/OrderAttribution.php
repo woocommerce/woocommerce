@@ -51,7 +51,6 @@ class OrderAttribution {
 					break;
 			}
 		}
-
 	}
 
 	/**

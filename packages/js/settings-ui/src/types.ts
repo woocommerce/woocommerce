@@ -8,9 +8,7 @@ export type SettingsUIOption = {
 };
 
 export type SettingsUISaveAdapter =
-	| 'form_post'
-	| 'none'
-	| ( string & NonNullable< unknown > );
+	'form_post' | 'none' | ( string & NonNullable< unknown > );
 
 export type SettingsUISaveSchema = {
 	adapter: SettingsUISaveAdapter;
@@ -74,11 +72,7 @@ export type SettingsUIShellNavigationItem = {
  * screen-reader and color-blind users.
  */
 export type SettingsUIShellBadgeIntent =
-	| 'default'
-	| 'info'
-	| 'success'
-	| 'warning'
-	| 'error';
+	'default' | 'info' | 'success' | 'warning' | 'error';
 
 export type SettingsUIShellBadge = {
 	label: string;
@@ -127,7 +121,7 @@ export type SettingsEditControlField = {
 	getValue: ( args: { item: SettingsValues } ) => SettingsValue;
 	// Method syntax keeps this assignable from DataForm's signature, which
 	// also receives the normalized field.
-	isDisabled( args: { item: SettingsValues } ): boolean;
+	isDisabled: ( args: { item: SettingsValues } ) => boolean;
 };
 
 export type SettingsEditControlProps = {

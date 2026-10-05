@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			?>
 			<?php if ( $current_section === $section->slug ) : ?>
 				<li class="current">
-			<?php else: ?>
+			<?php else : ?>
 				<li>
 			<?php endif; ?>
 			<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons&section=' . esc_attr( $section->slug ) ) ); ?>">

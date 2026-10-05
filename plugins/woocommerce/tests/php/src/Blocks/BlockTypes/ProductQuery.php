@@ -327,7 +327,7 @@ class ProductQuery extends \WP_UnitTestCase {
 			$merged_query['tax_query']
 		);
 
-		$fn = function() {
+		$fn = function () {
 			return 'yes';
 		};
 

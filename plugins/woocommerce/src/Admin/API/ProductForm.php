@@ -84,7 +84,7 @@ class ProductForm extends \WC_REST_Data_Controller {
 	 */
 	public function get_fields( $request ) {
 		$json = array_map(
-			function( $field ) {
+			function ( $field ) {
 				return $field->get_json();
 			},
 			FormFactory::get_fields()
@@ -101,25 +101,25 @@ class ProductForm extends \WC_REST_Data_Controller {
 	 */
 	public function get_form_config( $request ) {
 		$fields      = array_map(
-			function( $field ) {
+			function ( $field ) {
 				return $field->get_json();
 			},
 			FormFactory::get_fields()
 		);
 		$subsections = array_map(
-			function( $subsection ) {
+			function ( $subsection ) {
 				return $subsection->get_json();
 			},
 			FormFactory::get_subsections()
 		);
 		$sections    = array_map(
-			function( $section ) {
+			function ( $section ) {
 				return $section->get_json();
 			},
 			FormFactory::get_sections()
 		);
 		$tabs        = array_map(
-			function( $tab ) {
+			function ( $tab ) {
 				return $tab->get_json();
 			},
 			FormFactory::get_tabs()

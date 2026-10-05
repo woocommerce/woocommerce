@@ -448,7 +448,7 @@ export class ShippingBanner extends Component {
 					<img
 						className="wc-admin-shipping-banner-illustration"
 						src={ wcAssetUrl + 'images/shippingillustration.svg' }
-						alt={ __( 'Shipping ', 'woocommerce' ) }
+						alt={ __( 'Shipping', 'woocommerce' ) }
 					/>
 					<div className="wc-admin-shipping-banner-blob">
 						<h3>{ headline }</h3>
@@ -549,11 +549,11 @@ export default compose(
 			? __(
 					'Print discounted shipping labels with a click, now with the dedicated plugin!',
 					'woocommerce'
-			  )
+				)
 			: __(
 					'Print discounted shipping labels with a click.',
 					'woocommerce'
-			  );
+				);
 		return {
 			isRequesting,
 			isJetpackConnected: isJetpackConnected(),

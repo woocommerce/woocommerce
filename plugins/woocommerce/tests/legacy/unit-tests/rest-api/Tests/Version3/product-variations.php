@@ -59,7 +59,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_variations_with_orderby() {
 		wp_set_current_user( $this->user );
-		$product    = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() . '/variations' );
 		$request->set_query_params( array( 'orderby' => 'menu_order' ) );
 		$response   = $this->server->dispatch( $request );
@@ -509,7 +509,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	public function test_generate_new_variations() {
 		wp_set_current_user( $this->user );
 
-		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$product              = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
 		$color_attribute_data = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_attribute( 'color', array( 'red', 'blue', 'yellow' ) );
 		$color_attribute      = new WC_Product_Attribute();
 		$color_attribute->set_id( $color_attribute_data['attribute_id'] );
@@ -545,8 +545,8 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	public function test_generate_new_variations_with_default_values() {
 		wp_set_current_user( $this->user );
 
-		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
-		$children  = $product->get_children();
+		$product             = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$children            = $product->get_children();
 		$existing_variations = array_map( 'wc_get_product', $product->get_children() );
 		foreach ( $existing_variations as $existing_variation ) {
 			$existing_variation->delete( true );
@@ -566,10 +566,14 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 
 		// Set stock to true.
 		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations/generate' );
-		$request->set_body_params( array( 'default_values' => array(
-			'regular_price' => '4.99'
-		) ) );
-		$response  = $this->server->dispatch( $request );
+		$request->set_body_params(
+			array(
+				'default_values' => array(
+					'regular_price' => '4.99',
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
 
 		$variation = $response->get_data();
 		$product   = wc_get_product( $product->get_id() );
@@ -593,7 +597,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	public function test_generate_new_variations_with_delete_set_to_true() {
 		wp_set_current_user( $this->user );
 
-		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$product              = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
 		$color_attribute_data = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_attribute( 'color', array( 'red', 'blue', 'yellow' ) );
 		$color_attribute      = new WC_Product_Attribute();
 		$color_attribute->set_id( $color_attribute_data['attribute_id'] );
@@ -631,7 +635,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	public function test_delete_unmatched_variations_when_removing_term() {
 		wp_set_current_user( $this->user );
 
-		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$product         = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
 		$color_attribute = new WC_Product_Attribute();
 		$color_attribute->set_name( 'color' );
 		$color_attribute->set_visible( true );
@@ -646,10 +650,10 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		// Set stock to true.
 		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations/generate' );
 		$request->set_body_params( array( 'delete' => true ) );
-		$response  = $this->server->dispatch( $request );
+		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
-		$product_attributes = get_post_meta( $product->get_id() , '_product_attributes' );
+		$product_attributes = get_post_meta( $product->get_id(), '_product_attributes' );
 
 		// Removing blue term from product.
 		$product    = wc_get_product( $product->get_id() );
@@ -661,14 +665,14 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 
 		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations/generate' );
 		$request->set_body_params( array( 'delete' => true ) );
-		$response  = $this->server->dispatch( $request );
+		$response = $this->server->dispatch( $request );
 
 		$variation = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 0, $variation['count'] );
 		$this->assertEquals( 2, $variation['deleted_count'] );
 
-		$product   = wc_get_product( $product->get_id() );
+		$product = wc_get_product( $product->get_id() );
 		// Removed two.
 		$this->assertEquals( 4, count( $product->get_children() ) );
 	}
@@ -681,7 +685,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	public function test_delete_unmatched_variations_when_removing_attribute() {
 		wp_set_current_user( $this->user );
 
-		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$product         = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
 		$color_attribute = new WC_Product_Attribute();
 		$color_attribute->set_name( 'color' );
 		$color_attribute->set_visible( true );
@@ -696,10 +700,10 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		// Set stock to true.
 		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations/generate' );
 		$request->set_body_params( array( 'delete' => true ) );
-		$response  = $this->server->dispatch( $request );
+		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
-		$product_attributes = get_post_meta( $product->get_id() , '_product_attributes' );
+		$product_attributes = get_post_meta( $product->get_id(), '_product_attributes' );
 
 		// Removing color attribute from product.
 		$product    = wc_get_product( $product->get_id() );
@@ -710,14 +714,14 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 
 		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations/generate' );
 		$request->set_body_params( array( 'delete' => true ) );
-		$response  = $this->server->dispatch( $request );
+		$response = $this->server->dispatch( $request );
 
 		$variation = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 0, $variation['count'] );
 		$this->assertEquals( 4, $variation['deleted_count'] );
 
-		$product   = wc_get_product( $product->get_id() );
+		$product = wc_get_product( $product->get_id() );
 		// Removed four.
 		$this->assertEquals( 2, count( $product->get_children() ) );
 	}
@@ -729,7 +733,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_variations_with_attributes_filter() {
 		wp_set_current_user( $this->user );
-		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$product              = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
 		$color_attribute_data = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_attribute( 'color', array( 'red', 'blue', 'yellow' ) );
 		$color_attribute      = new WC_Product_Attribute();
 		$color_attribute->set_id( $color_attribute_data['attribute_id'] );
@@ -738,7 +742,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$color_attribute->set_position( 1 );
 		$color_attribute->set_visible( true );
 		$color_attribute->set_variation( true );
-		$local_attribute      = new WC_Product_Attribute();
+		$local_attribute = new WC_Product_Attribute();
 		$local_attribute->set_id( 0 );
 		$local_attribute->set_name( 'Local' );
 		$local_attribute->set_options( array( 'Local1', 'Local2', 'Local3' ) );
@@ -751,13 +755,20 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$product->save();
 		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations/generate' );
 		$request->set_body_params( array( 'delete' => true ) );
-		$response   = $this->server->dispatch( $request );
+		$response = $this->server->dispatch( $request );
 
 		// Filter by single global attribute.
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() . '/variations' );
-		$request->set_query_params( array( 'attributes' => array(
-			array( 'attribute' => 'pa_color', 'term' => 'red' )
-		) ) );
+		$request->set_query_params(
+			array(
+				'attributes' => array(
+					array(
+						'attribute' => 'pa_color',
+						'term'      => 'red',
+					),
+				),
+			)
+		);
 		$response   = $this->server->dispatch( $request );
 		$variations = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
@@ -765,10 +776,20 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 
 		// Filter by global and local attribute.
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() . '/variations' );
-		$request->set_query_params( array( 'attributes' => array(
-			array( 'attribute' => 'pa_color', 'term' => 'red' ),
-			array( 'attribute' => 'local', 'term' => 'Local1' ),
-		) ) );
+		$request->set_query_params(
+			array(
+				'attributes' => array(
+					array(
+						'attribute' => 'pa_color',
+						'term'      => 'red',
+					),
+					array(
+						'attribute' => 'local',
+						'term'      => 'Local1',
+					),
+				),
+			)
+		);
 		$response   = $this->server->dispatch( $request );
 		$variations = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
@@ -776,9 +797,16 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 
 		// Filter local attribute.
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() . '/variations' );
-		$request->set_query_params( array( 'attributes' => array(
-			array( 'attribute' => 'local', 'term' => 'Local1' ),
-		) ) );
+		$request->set_query_params(
+			array(
+				'attributes' => array(
+					array(
+						'attribute' => 'local',
+						'term'      => 'Local1',
+					),
+				),
+			)
+		);
 		$response   = $this->server->dispatch( $request );
 		$variations = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );

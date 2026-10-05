@@ -40,7 +40,7 @@ class CartExtensions extends ControllerTestCase {
 				'callback'  => function () {
 					add_action(
 						'woocommerce_cart_calculate_fees',
-						function() {
+						function () {
 							wc()->cart->add_fee( 'Surcharge', 10, true, 'standard' );
 						}
 					);

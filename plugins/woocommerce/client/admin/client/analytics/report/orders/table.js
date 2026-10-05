@@ -274,8 +274,8 @@ class OrdersReportTable extends Component {
 			},
 			{
 				label: _n(
-					' Customer',
-					' Customers',
+					'Customer',
+					'Customers',
 					totalCustomers,
 					'woocommerce'
 				),

@@ -193,18 +193,20 @@ const LinkedProductControl = ( {
 		 * Linked control is only useful for collection which uses product, cart or order reference.
 		 */
 		( hasProductReference || hasCartReference || hasOrderReference );
-	if ( ! showLinkedProductControl ) return null;
+	if ( ! showLinkedProductControl ) {
+		return null;
+	}
 
 	const radioControlHelp =
 		radioControlState === PRODUCT_REFERENCE_TYPE.CURRENT_PRODUCT
 			? __(
 					'Linked products will be pulled from the product a shopper is currently viewing',
 					'woocommerce'
-			  )
+				)
 			: __(
 					'Select a product to pull the linked products from',
 					'woocommerce'
-			  );
+				);
 
 	const handleRadioControlChange = ( newValue: PRODUCT_REFERENCE_TYPE ) => {
 		if ( newValue === PRODUCT_REFERENCE_TYPE.CURRENT_PRODUCT ) {
@@ -217,7 +219,7 @@ const LinkedProductControl = ( {
 					? {
 							...query,
 							productReference: prevReference.current,
-					  }
+						}
 					: query,
 			} );
 		}

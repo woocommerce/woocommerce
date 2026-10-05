@@ -20,14 +20,14 @@ const Edit = () => {
 				[
 					'core/post-terms',
 					{
-						prefix: __( 'Category: ', 'woocommerce' ),
+						prefix: __( 'Category:', 'woocommerce' ),
 						term: 'product_cat',
 					},
 				],
 				[
 					'core/post-terms',
 					{
-						prefix: __( 'Tags: ', 'woocommerce' ),
+						prefix: __( 'Tags:', 'woocommerce' ),
 						term: 'product_tag',
 					},
 				],

@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 
-require_once dirname( __FILE__ ) . '/class-wc-gateway-paypal-response.php';
+require_once __DIR__ . '/class-wc-gateway-paypal-response.php';
 
 /**
  * Handle PDT Responses from PayPal.
@@ -177,13 +177,11 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 
 					$this->payment_complete( $order, $transaction, __( 'PDT payment completed', 'woocommerce' ) );
 				}
-			} else {
-				if ( 'authorization' === $transaction_result['pending_reason'] ) {
+			} elseif ( 'authorization' === $transaction_result['pending_reason'] ) {
 					$this->payment_on_hold( $order, __( 'Payment authorized. Change payment status to processing or complete to capture funds.', 'woocommerce' ) );
-				} else {
-					/* translators: 1: Pending reason */
-					$this->payment_on_hold( $order, sprintf( __( 'Payment pending (%s).', 'woocommerce' ), $transaction_result['pending_reason'] ) );
-				}
+			} else {
+				/* translators: 1: Pending reason */
+				$this->payment_on_hold( $order, sprintf( __( 'Payment pending (%s).', 'woocommerce' ), $transaction_result['pending_reason'] ) );
 			}
 		} else {
 			WC_Gateway_Paypal::log( 'Received invalid response from PayPal PDT' );

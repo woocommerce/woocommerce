@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Internal;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessorInterface;
 use Automattic\WooCommerce\Utilities\StringUtil;
-use \Exception;
+use Exception;
 
 /**
  * This class is intended to be used with BatchProcessingController and converts verbose

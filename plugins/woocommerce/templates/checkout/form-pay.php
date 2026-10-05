@@ -73,7 +73,7 @@ $totals = $order->get_order_item_totals(); // phpcs:ignore WordPress.WP.GlobalVa
 	 *
 	 * @since 8.2.0
 	 */
-	do_action( 'woocommerce_pay_order_before_payment' ); 
+	do_action( 'woocommerce_pay_order_before_payment' );
 	?>
 
 	<div id="payment">

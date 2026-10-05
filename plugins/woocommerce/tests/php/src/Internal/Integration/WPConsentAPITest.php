@@ -50,7 +50,7 @@ class WPConsentAPITest extends WP_UnitTestCase {
 	 */
 	private function get_closure_for_on_init_method() {
 		return Closure::bind(
-			function() {
+			function () {
 				$this->on_init();
 			},
 			$this->wp_consent_api_integration,

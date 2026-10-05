@@ -1833,7 +1833,6 @@ export const CoreProfilerController = ( {
 		inspect: xstateV5Inspector,
 	} );
 
-	// eslint-disable-next-line react-hooks/exhaustive-deps -- false positive due to function name match, this isn't from react std lib
 	const currentNodeMeta = useSelector( service, ( currentState ) =>
 		findComponentMeta< ComponentMeta >(
 			currentState?.getMeta() ?? undefined

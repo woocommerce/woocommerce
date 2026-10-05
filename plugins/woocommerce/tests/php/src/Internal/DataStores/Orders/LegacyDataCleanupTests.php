@@ -112,7 +112,7 @@ class LegacyDataCleanupTests extends \WC_Unit_Test_Case {
 	 * @param int $count Number of orders to generate.
 	 * @return int[] Order IDs.
 	 */
-	private function create_test_orders( $count = 10 ) : array {
+	private function create_test_orders( $count = 10 ): array {
 		$order_ids = array();
 
 		$this->toggle_cot_authoritative( true );
@@ -126,5 +126,4 @@ class LegacyDataCleanupTests extends \WC_Unit_Test_Case {
 
 		return $order_ids;
 	}
-
 }

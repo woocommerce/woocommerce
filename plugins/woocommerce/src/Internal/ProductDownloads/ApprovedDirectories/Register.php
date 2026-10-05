@@ -20,8 +20,8 @@ class Register {
 		self::MODE_ENABLED,
 	);
 
-	public const MODE_DISABLED  = 'disabled';
-	public const MODE_ENABLED   = 'enabled';
+	public const MODE_DISABLED = 'disabled';
+	public const MODE_ENABLED  = 'enabled';
 
 	/**
 	 * Name of the option used to store the current mode. See self::MODES for a
@@ -54,7 +54,7 @@ class Register {
 
 		add_action(
 			'before_woocommerce_init',
-			function() {
+			function () {
 				wc_get_container()->get( Synchronize::class )->init_hooks();
 			}
 		);

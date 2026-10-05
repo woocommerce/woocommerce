@@ -1332,7 +1332,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				continue;
 			}
 			$existing_variation->delete( true );
-			$deleted_count ++;
+			++$deleted_count;
 		}
 
 		return $deleted_count;

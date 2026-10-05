@@ -40,7 +40,7 @@ function wc_admin_url( $path = null, $query = array() ) {
 		$path         = $path ? '&path=' . $path . '&' . $query_string : '';
 	}
 
-	return admin_url( 'admin.php?page=wc-admin' . $path, dirname( __FILE__ ) );
+	return admin_url( 'admin.php?page=wc-admin' . $path, __DIR__ );
 }
 
 /**

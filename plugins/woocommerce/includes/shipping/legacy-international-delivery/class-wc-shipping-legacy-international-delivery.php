@@ -75,10 +75,8 @@ class WC_Shipping_Legacy_International_Delivery extends WC_Shipping_Legacy_Flat_
 			if ( is_array( $this->countries ) && ! in_array( $package['destination']['country'], $this->countries, true ) ) {
 				return false;
 			}
-		} else {
-			if ( is_array( $this->countries ) && ( in_array( $package['destination']['country'], $this->countries, true ) || ! $package['destination']['country'] ) ) {
+		} elseif ( is_array( $this->countries ) && ( in_array( $package['destination']['country'], $this->countries, true ) || ! $package['destination']['country'] ) ) {
 				return false;
-			}
 		}
 		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true, $package, $this );
 	}

@@ -4,11 +4,10 @@
 import { act, screen, waitFor } from '@testing-library/react';
 import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
 import { type BlockAttributes } from '@wordpress/blocks';
-import { getByLabelText, getByRole } from '@testing-library/dom';
+import { getByLabelText, getByRole } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 
 jest.mock( '@wordpress/data', () =>
-	// eslint-disable-next-line @typescript-eslint/no-var-requires -- Must use require due to Jest mock hoisting
 	require( '@woocommerce/blocks-test-utils/mock-editor-store' ).mockWordPressDataWithEditorStore()
 );
 

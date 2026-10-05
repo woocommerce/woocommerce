@@ -12,7 +12,7 @@ use Automattic\WooCommerce\Utilities\ArrayUtil as ArrayUtilAlias;
 use WC_Data_Store;
 
 if ( ! class_exists( 'WC_REST_Orders_Controller_Tests' ) ) {
-	require_once dirname( __FILE__, 5 ) . '/includes/rest-api/Controllers/Version3/class-wc-rest-orders-controller-tests.php';
+	require_once dirname( __DIR__, 4 ) . '/includes/rest-api/Controllers/Version3/class-wc-rest-orders-controller-tests.php';
 }
 
 /**
@@ -117,5 +117,4 @@ class OrdersTableDataStoreRestOrdersControllerTests extends \WC_REST_Orders_Cont
 		$wc_data_store = WC_Data_Store::load( 'order' );
 		assert( is_a( $wc_data_store->get_current_class_name(), OrdersTableDataStore::class, true ) === $enabled );
 	}
-
 }

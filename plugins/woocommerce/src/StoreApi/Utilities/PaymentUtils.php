@@ -110,8 +110,8 @@ class PaymentUtils {
 			return '';
 		}
 
-		$first_key                = array_key_first( $enabled_payment_gateways );
-		$first_payment_method     = $enabled_payment_gateways[ $first_key ];
+		$first_key            = array_key_first( $enabled_payment_gateways );
+		$first_payment_method = $enabled_payment_gateways[ $first_key ];
 		return $first_payment_method->id ?? '';
 	}
 }

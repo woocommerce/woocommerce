@@ -102,7 +102,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 				'highlight_series' => $index,
 			);
 
-			$index++;
+			++$index;
 		}
 
 		return $legend;
@@ -299,7 +299,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 				$product_ids         = $this->get_products_in_category( $category->term_id );
 				$category_chart_data = array();
 
-				for ( $i = 0; $i <= $this->chart_interval; $i ++ ) {
+				for ( $i = 0; $i <= $this->chart_interval; $i++ ) {
 
 					$interval_total = 0;
 
@@ -326,7 +326,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 				$chart_data[ $category->term_id ]['category'] = $category->name;
 				$chart_data[ $category->term_id ]['data']     = $category_chart_data;
 
-				$index++;
+				++$index;
 			}
 			?>
 			<div class="chart-container">
@@ -342,18 +342,18 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 							<?php
 								$index = 0;
 								foreach ( $chart_data as $data ) {
-									$color  = isset( $this->chart_colours[ $index ] ) ? $this->chart_colours[ $index ] : $this->chart_colours[0];
-									$width  = $this->barwidth / count( $chart_data );
-									$offset = ( $width * $index );
-									$series = $data['data'];
+								$color  = isset( $this->chart_colours[ $index ] ) ? $this->chart_colours[ $index ] : $this->chart_colours[0];
+								$width  = $this->barwidth / count( $chart_data );
+								$offset = ( $width * $index );
+								$series = $data['data'];
 
-									foreach ( $series as $key => $series_data ) {
-										$series[ $key ][0] = $series_data[0] + $offset;
+								foreach ( $series as $key => $series_data ) {
+									$series[ $key ][0] = $series_data[0] + $offset;
 									}
 
-									$series = wp_json_encode( $series );
+								$series = wp_json_encode( $series );
 
-									echo '{
+								echo '{
 											label: "' . esc_js( $data['category'] ) . '",
 											data: JSON.parse( decodeURIComponent( "' . rawurlencode( $series ) . '" ) ),
 											color: "' . $color . '",
@@ -370,7 +370,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 											enable_tooltip: true,
 											prepend_label: true
 										},';
-									$index++;
+								$index++;
 								}
 							?>
 						];

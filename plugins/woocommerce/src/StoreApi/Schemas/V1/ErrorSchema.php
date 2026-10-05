@@ -53,5 +53,4 @@ class ErrorSchema extends AbstractSchema {
 			'message' => $this->prepare_html_response( $error->get_error_message() ),
 		];
 	}
-
 }

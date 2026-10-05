@@ -163,7 +163,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 						'tax_rate_priority' => $priority,
 						'tax_rate_compound' => $compound ? 1 : 0,
 						'tax_rate_shipping' => $shipping ? 1 : 0,
-						'tax_rate_order'    => $loop ++,
+						'tax_rate_order'    => $loop++,
 						'tax_rate_class'    => $class,
 					);
 

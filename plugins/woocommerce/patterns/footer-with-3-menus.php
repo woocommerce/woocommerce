@@ -44,7 +44,7 @@
 
 				<!-- wp:paragraph {"align":"right"} --><p class="has-text-align-right">
 					<?php
-					echo sprintf(
+					printf(
 					/* translators: Footer powered by text. %1$s being WordPress, %2$s being WooCommerce */
 						esc_html__(
 							'Powered by %1$s with %2$s',

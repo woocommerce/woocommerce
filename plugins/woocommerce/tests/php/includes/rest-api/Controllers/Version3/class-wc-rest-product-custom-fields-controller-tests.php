@@ -17,7 +17,7 @@ class WC_REST_Product_Custom_Fields_Controller_Tests extends WC_REST_Unit_Test_C
 	 */
 	public static function wpSetUpBeforeClass() {
 		self::enable_direct_product_attribute_lookup_updates();
-		for ( $i = 1; $i <= 4; $i ++ ) {
+		for ( $i = 1; $i <= 4; $i++ ) {
 			self::$products[] = WC_Helper_Product::create_simple_product();
 		}
 

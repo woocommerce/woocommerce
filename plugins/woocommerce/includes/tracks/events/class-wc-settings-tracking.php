@@ -107,7 +107,6 @@ class WC_Settings_Tracking {
 			}
 			$this->updated_options[] = $option['id'];
 		}
-
 	}
 
 	/**

@@ -215,26 +215,24 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 				__( 'Note:', 'woocommerce' ),
 				__( 'Only available when HPOS is authoritative and compatibility mode is disabled.', 'woocommerce' )
 			);
-		} else {
-			if ( $this->is_flag_set() ) {
+		} elseif ( $this->is_flag_set() ) {
 				$entry['status_text'] = sprintf(
 					'%1$s %2$s',
 					'<span class="dashicons dashicons-update spin"></span>',
 					__( 'Clearing data...', 'woocommerce' )
 				);
 				$entry['button']      = __( 'Cancel', 'woocommerce' );
-				$entry['callback']    = function() {
+				$entry['callback']    = function () {
 					$this->toggle_flag( false );
 					return __( 'Order legacy data cleanup has been canceled.', 'woocommerce' );
 				};
-			} elseif ( ! $orders_for_cleanup_exist ) {
-				$entry['button'] = __( 'No orders in need of cleanup', 'woocommerce' );
-			} else {
-				$entry['callback'] = function() {
-					$this->toggle_flag( true );
-					return __( 'Order legacy data cleanup process has been started.', 'woocommerce' );
-				};
-			}
+		} elseif ( ! $orders_for_cleanup_exist ) {
+			$entry['button'] = __( 'No orders in need of cleanup', 'woocommerce' );
+		} else {
+			$entry['callback'] = function () {
+				$this->toggle_flag( true );
+				return __( 'Order legacy data cleanup process has been started.', 'woocommerce' );
+			};
 		}
 
 		return array( $entry_id => $entry );
@@ -248,5 +246,4 @@ class LegacyDataCleanup implements BatchProcessorInterface {
 	private function orders_pending() {
 		return ! empty( $this->get_next_batch_to_process( 1 ) );
 	}
-
 }

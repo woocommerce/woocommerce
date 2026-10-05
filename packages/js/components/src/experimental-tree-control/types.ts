@@ -24,7 +24,7 @@ type BaseTreeProps = {
 	 */
 	selected?: Item | Item[];
 
-	onExpand?( index: number, value: boolean ): void;
+	onExpand?: ( index: number, value: boolean ) => void;
 
 	highlightedIndex?: number;
 
@@ -48,7 +48,7 @@ type BaseTreeProps = {
 	/**
 	 * If passed, shows create button if return from callback is true
 	 */
-	shouldShowCreateButton?( value?: string ): boolean;
+	shouldShowCreateButton?: ( value?: string ) => boolean;
 	isExpanded?: boolean;
 	/**
 	 * When `multiple` is true and a child item is selected, all its
@@ -57,7 +57,7 @@ type BaseTreeProps = {
 	 *
 	 * @param value The selection
 	 */
-	onSelect?( value: Item | Item[] ): void;
+	onSelect?: ( value: Item | Item[] ) => void;
 	/**
 	 * When `multiple` is true and a child item is unselected, all its
 	 * ancestors (if no sibblings are selected) and its descendants
@@ -66,7 +66,7 @@ type BaseTreeProps = {
 	 *
 	 * @param value The unselection
 	 */
-	onRemove?( value: Item | Item[] ): void;
+	onRemove?: ( value: Item | Item[] ) => void;
 	/**
 	 * It provides a way to determine whether the current rendering
 	 * item is highlighted or not from outside the tree.
@@ -81,17 +81,17 @@ type BaseTreeProps = {
 	 *
 	 * @see {@link LinkedTree}
 	 */
-	shouldItemBeHighlighted?( item: LinkedTree ): boolean;
+	shouldItemBeHighlighted?: ( item: LinkedTree ) => boolean;
 	/**
 	 * Called when the create button is clicked to help closing any related popover.
 	 */
-	onTreeBlur?(): void;
+	onTreeBlur?: () => void;
 
-	onFirstItemLoop?( event: React.KeyboardEvent< HTMLDivElement > ): void;
+	onFirstItemLoop?: ( event: React.KeyboardEvent< HTMLDivElement > ) => void;
 	/**
 	 * Called when the escape key is pressed.
 	 */
-	onEscape?(): void;
+	onEscape?: () => void;
 };
 
 export type TreeProps = BaseTreeProps &
@@ -117,7 +117,7 @@ export type TreeProps = BaseTreeProps &
 		 *
 		 * @see {@link LinkedTree}
 		 */
-		getItemLabel?( item: LinkedTree ): JSX.Element;
+		getItemLabel?: ( item: LinkedTree ) => JSX.Element;
 		/**
 		 * Return if the tree item passed in should be expanded.
 		 *
@@ -132,7 +132,7 @@ export type TreeProps = BaseTreeProps &
 		 *
 		 * @see {@link LinkedTree}
 		 */
-		shouldItemBeExpanded?( item: LinkedTree ): boolean;
+		shouldItemBeExpanded?: ( item: LinkedTree ) => boolean;
 	};
 
 export type TreeItemProps = BaseTreeProps &
@@ -148,9 +148,11 @@ export type TreeItemProps = BaseTreeProps &
 		index: number;
 		isFocused?: boolean;
 		isHighlighted?: boolean;
-		getLabel?( item: LinkedTree ): JSX.Element;
-		shouldItemBeExpanded?( item: LinkedTree ): boolean;
-		onLastItemLoop?( event: React.KeyboardEvent< HTMLDivElement > ): void;
+		getLabel?: ( item: LinkedTree ) => JSX.Element;
+		shouldItemBeExpanded?: ( item: LinkedTree ) => boolean;
+		onLastItemLoop?: (
+			event: React.KeyboardEvent< HTMLDivElement >
+		) => void;
 	};
 
 export type TreeControlProps = Omit< TreeProps, 'items' | 'level' > & {

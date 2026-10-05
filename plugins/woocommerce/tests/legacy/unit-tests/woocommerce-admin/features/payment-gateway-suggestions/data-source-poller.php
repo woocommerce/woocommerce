@@ -20,7 +20,7 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_DataSourcePoller extends WC_Unit_
 
 		add_filter(
 			DataSourcePoller::FILTER_NAME,
-			function() {
+			function () {
 				return array(
 					'payment-gateway-suggestions-data-source.json',
 				);
@@ -29,7 +29,7 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_DataSourcePoller extends WC_Unit_
 
 		add_filter(
 			'pre_http_request',
-			function( $pre, $parsed_args, $url ) {
+			function ( $pre, $parsed_args, $url ) {
 				$locale = get_locale();
 
 				if ( $url === 'payment-gateway-suggestions-data-source.json?locale=' . $locale ) {
@@ -94,7 +94,7 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_DataSourcePoller extends WC_Unit_
 	public function test_read_invalid_data_source() {
 		add_filter(
 			DataSourcePoller::FILTER_NAME,
-			function() {
+			function () {
 				return array(
 					'bad-data-source.json',
 				);
@@ -113,7 +113,7 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_DataSourcePoller extends WC_Unit_
 	public function test_merge_specs() {
 		add_filter(
 			DataSourcePoller::FILTER_NAME,
-			function() {
+			function () {
 				return array(
 					'payment-gateway-suggestions-data-source.json',
 					'payment-gateway-suggestions-data-source2.json',
@@ -148,7 +148,7 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_DataSourcePoller extends WC_Unit_
 		$this->assertCount( 2, $data );
 		add_filter(
 			DataSourcePoller::FILTER_NAME,
-			function() {
+			function () {
 				return array(
 					'bad-data-source.json',
 				);
@@ -166,6 +166,5 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_DataSourcePoller extends WC_Unit_
 
 		$data = $data[ $locale ];
 		$this->assertCount( 2, $data );
-
 	}
 }

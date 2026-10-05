@@ -58,7 +58,7 @@ async function setup( {
 			? [
 					{ name: 'core/heading' },
 					{ name: 'woocommerce/product-template' },
-			  ]
+				]
 			: [ { name: 'woocommerce/product-template' } ],
 	};
 	return initializeEditor( [ productCollectionBlock ] );

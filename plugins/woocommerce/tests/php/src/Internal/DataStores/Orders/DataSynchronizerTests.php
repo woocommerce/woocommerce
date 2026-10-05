@@ -428,7 +428,7 @@ class DataSynchronizerTests extends \HposTestCase {
 		$this->reset_legacy_proxy_mocks();
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wc_get_logger' => function() use ( $logger ) {
+				'wc_get_logger' => function () use ( $logger ) {
 					return $logger;
 				},
 			)
@@ -700,7 +700,7 @@ class DataSynchronizerTests extends \HposTestCase {
 		// Time-travel into the future so that the time required to delete a trashed order has passed.
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'time' => function() {
+				'time' => function () {
 					return time() + DAY_IN_SECONDS * EMPTY_TRASH_DAYS + 1;
 				},
 			)
@@ -772,7 +772,7 @@ class DataSynchronizerTests extends \HposTestCase {
 
 		$cot_setting = array_filter(
 			$features,
-			function( $feature ) {
+			function ( $feature ) {
 				return CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION === $feature['id'];
 			}
 		);
@@ -782,13 +782,13 @@ class DataSynchronizerTests extends \HposTestCase {
 
 		$sync_setting = array_filter(
 			$features,
-			function( $feature ) {
+			function ( $feature ) {
 				return DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION === $feature['id'];
 			}
 		);
 		$sync_setting = array_values( $sync_setting )[0];
 		$this->assertEquals( $sync_setting['value'], 'no' );
-		$this->assertTrue( str_contains( $sync_setting['desc_tip'], $auth_table_change_allowed_with_sync_pending ? "There are orders pending sync" : "There are currently orders out of sync" ) );
+		$this->assertTrue( str_contains( $sync_setting['desc_tip'], $auth_table_change_allowed_with_sync_pending ? 'There are orders pending sync' : 'There are currently orders out of sync' ) );
 		$this->assertTrue(
 			str_contains(
 				$sync_setting['desc_tip'],

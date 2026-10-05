@@ -35,7 +35,7 @@ defined( 'ABSPATH' ) || exit;
 	<span class="reviewer">
 	<?php
 	/* translators: %s: Comment author. */
-	echo sprintf( esc_html__( 'by %s', 'woocommerce' ), get_comment_author( $comment->comment_ID ) );
+	printf( esc_html__( 'by %s', 'woocommerce' ), get_comment_author( $comment->comment_ID ) );
 	?>
 	</span>
 

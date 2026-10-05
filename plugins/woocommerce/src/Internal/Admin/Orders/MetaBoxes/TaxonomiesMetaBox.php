@@ -102,7 +102,7 @@ class TaxonomiesMetaBox {
 	 *
 	 * @return array Sanitized taxonomy input.
 	 */
-	private function sanitize_tax_input( $taxonomy_data ) : array {
+	private function sanitize_tax_input( $taxonomy_data ): array {
 		$sanitized_tax_input = array();
 		if ( ! is_array( $taxonomy_data ) ) {
 			return $sanitized_tax_input;

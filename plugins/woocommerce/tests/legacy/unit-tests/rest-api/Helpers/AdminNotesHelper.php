@@ -78,6 +78,5 @@ class AdminNotesHelper {
 		$note_3->set_date_reminder( time() - HOUR_IN_SECONDS );
 		// This note has no actions.
 		$note_3->save();
-
 	}
 }

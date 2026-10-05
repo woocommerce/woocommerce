@@ -151,13 +151,13 @@ class WC_Settings_Payment_Gateways_Test extends WC_Settings_Unit_Test_Case {
 		$gateway = WC_Payment_Gateways::instance()->payment_gateways()[ WC_Gateway_BACS::ID ];
 
 		$payment_gateways = $this->getMockBuilder( WC_Payment_Gateways::class )
-								 ->setMethods( array( 'process_admin_options', 'init', 'payment_gateways' ) )
-								 ->getMock();
+								->setMethods( array( 'process_admin_options', 'init', 'payment_gateways' ) )
+								->getMock();
 
 		$payment_gateways->method( 'process_admin_options' )
 						->will(
 							$this->returnCallback(
-								function() use ( &$process_admin_options_invoked ) {
+								function () use ( &$process_admin_options_invoked ) {
 									$process_admin_options_invoked = true;
 								}
 							)
@@ -166,19 +166,19 @@ class WC_Settings_Payment_Gateways_Test extends WC_Settings_Unit_Test_Case {
 		$payment_gateways->method( 'init' )
 						->will(
 							$this->returnCallback(
-								function() use ( &$init_invoked ) {
+								function () use ( &$init_invoked ) {
 									$init_invoked = true;
 								}
 							)
 						);
 
 		$payment_gateways->method( 'payment_gateways' )
-						 ->willReturn( array( $gateway ) );
+						->willReturn( array( $gateway ) );
 
 		StaticMockerHack::add_method_mocks(
 			array(
 				'WC_Payment_Gateways' => array(
-					'instance' => function() use ( $payment_gateways ) {
+					'instance' => function () use ( $payment_gateways ) {
 						return $payment_gateways;
 					},
 				),

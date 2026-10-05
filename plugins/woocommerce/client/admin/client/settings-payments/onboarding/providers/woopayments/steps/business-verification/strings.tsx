@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 /**
  * External dependencies
  */
@@ -86,7 +85,7 @@ export default {
 			'woocommerce'
 		),
 		mcc: __(
-			'What type of goods or services does your business sell? ',
+			'What type of goods or services does your business sell?',
 			'woocommerce'
 		),
 	},

@@ -25,18 +25,18 @@ class Package extends \WP_UnitTestCase {
 		// test without relative
 		$this->assertEquals( __DIR__ . '/', $package->get_path() );
 
-		//test with relative
+		// test with relative
 		$expect = __DIR__ . '/assets/client/blocks/test';
-		$this->assertEquals( $expect, $package->get_path( 'assets/client/blocks/test') );
+		$this->assertEquals( $expect, $package->get_path( 'assets/client/blocks/test' ) );
 	}
 
 	public function test_get_url() {
-		$package = $this->get_package();
+		$package  = $this->get_package();
 		$test_url = plugin_dir_url( __FILE__ );
 		// test without relative
 		$this->assertEquals( $test_url, $package->get_url() );
 
-		//test with relative
+		// test with relative
 		$this->assertEquals(
 			$test_url . 'assets/client/blocks',
 			$package->get_url( 'assets/client/blocks' )

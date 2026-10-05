@@ -1,7 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi;
 
-use \Exception;
+use Exception;
 use Automattic\WooCommerce\StoreApi\Formatters\DefaultFormatter;
 
 /**

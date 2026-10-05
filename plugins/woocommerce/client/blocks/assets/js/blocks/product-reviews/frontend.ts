@@ -23,18 +23,17 @@ const productReviewsStore = {
 				return;
 			}
 
-			const { actions } = yield import(
-				'@wordpress/interactivity-router'
-			);
+			const { actions } =
+				yield import( '@wordpress/interactivity-router' );
 
 			yield actions.navigate( ref.href );
 
-			ref
-				.closest( '.wp-block-woocommerce-product-details' )
-				?.scrollIntoView( {
-					behavior: 'smooth',
-					block: 'start',
-				} );
+			ref.closest(
+				'.wp-block-woocommerce-product-details'
+			)?.scrollIntoView( {
+				behavior: 'smooth',
+				block: 'start',
+			} );
 		},
 	},
 };

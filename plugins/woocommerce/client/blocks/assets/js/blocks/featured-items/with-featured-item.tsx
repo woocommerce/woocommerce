@@ -65,22 +65,19 @@ export interface FeaturedItemRequiredAttributes {
 	__woocommerceBlockVersion: number;
 }
 
-interface FeaturedCategoryRequiredAttributes
-	extends FeaturedItemRequiredAttributes {
+interface FeaturedCategoryRequiredAttributes extends FeaturedItemRequiredAttributes {
 	categoryId: number | 'preview';
 	productId: never;
 }
 
-interface FeaturedProductRequiredAttributes
-	extends FeaturedItemRequiredAttributes {
+interface FeaturedProductRequiredAttributes extends FeaturedItemRequiredAttributes {
 	categoryId: never;
 	productId: number | 'preview';
 }
 
 interface FeaturedItemRequiredProps< T > {
 	attributes: (
-		| FeaturedCategoryRequiredAttributes
-		| FeaturedProductRequiredAttributes
+		FeaturedCategoryRequiredAttributes | FeaturedProductRequiredAttributes
 	) &
 		EditorBlock< T >[ 'attributes' ] & {
 			// This is hardcoded because border and color are not yet included
@@ -109,8 +106,7 @@ interface FeaturedProductProps< T > extends FeaturedItemRequiredProps< T > {
 }
 
 type FeaturedItemProps< T extends EditorBlock< T > > =
-	| ( T & FeaturedCategoryProps< T > )
-	| ( T & FeaturedProductProps< T > );
+	( T & FeaturedCategoryProps< T > ) | ( T & FeaturedProductProps< T > );
 
 export const withFeaturedItem =
 	( {

@@ -11,7 +11,7 @@ use Automattic\Jetpack\Constants;
 defined( 'ABSPATH' ) || exit;
 
 if ( ! class_exists( 'WC_Background_Process', false ) ) {
-	include_once dirname( __FILE__ ) . '/abstracts/class-wc-background-process.php';
+	include_once __DIR__ . '/abstracts/class-wc-background-process.php';
 }
 
 /**
@@ -123,10 +123,12 @@ class WC_Background_Emailer extends WC_Background_Process {
 			if ( 'PHPSESSID' === $name ) {
 				continue;
 			}
-			$cookies[] = new WP_Http_Cookie( array(
-				'name'  => $name,
-				'value' => $value,
-			) );
+			$cookies[] = new WP_Http_Cookie(
+				array(
+					'name'  => $name,
+					'value' => $value,
+				)
+			);
 		}
 
 		return array(

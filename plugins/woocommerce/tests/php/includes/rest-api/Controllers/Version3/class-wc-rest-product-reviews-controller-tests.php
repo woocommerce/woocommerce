@@ -67,7 +67,7 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @testdox Ensure attempts to retrieve individual product reviews are subject to appropriate permission checks.
 	 */
 	public function test_permissions_for_retrieving_a_single_product_review() {
-		$api_request = new WP_REST_Request( 'GET', '/wc/v3/products/reviews'  . $this->review_id );
+		$api_request = new WP_REST_Request( 'GET', '/wc/v3/products/reviews' . $this->review_id );
 		$api_request->set_param( 'id', $this->review_id );
 
 		wp_set_current_user( $this->customer_id );
@@ -187,7 +187,7 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 			array(
 				'comment_post_ID' => ProductHelper::create_simple_product()->get_id(),
 				'comment_type'    => 'comment',
-				'comment_content' => 'I am a regular comment (typically left by an admin/shop manager as a response to product reviews.'
+				'comment_content' => 'I am a regular comment (typically left by an admin/shop manager as a response to product reviews.',
 			)
 		);
 

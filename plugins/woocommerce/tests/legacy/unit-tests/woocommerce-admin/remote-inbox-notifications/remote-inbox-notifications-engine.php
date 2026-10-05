@@ -22,7 +22,7 @@ class WC_Admin_Tests_RemoteInboxNotifications_RemoteInboxNotificationsEngine ext
 
 		add_filter(
 			'transient_woocommerce_admin_' . RemoteInboxNotificationsDataSourcePoller::ID . '_specs',
-			function( $value ) {
+			function ( $value ) {
 				if ( $value ) {
 					return $value;
 				}
@@ -107,7 +107,7 @@ class WC_Admin_Tests_RemoteInboxNotifications_RemoteInboxNotificationsEngine ext
 		);
 		add_filter(
 			'locale',
-			function( $locale ) {
+			function ( $locale ) {
 				return 'zh_TW';
 			}
 		);
@@ -117,6 +117,5 @@ class WC_Admin_Tests_RemoteInboxNotifications_RemoteInboxNotificationsEngine ext
 		$this->assertEquals( $note->get_content(), '內容' );
 		$this->assertEquals( $note->get_actions()[0]->label, '標籤' );
 		$this->assertEquals( $note->get_actions()[0]->id, 123 );
-
 	}
 }

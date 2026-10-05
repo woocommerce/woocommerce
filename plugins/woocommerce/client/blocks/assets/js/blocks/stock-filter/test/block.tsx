@@ -123,7 +123,7 @@ const setup = ( params: SetupParams = {} ) => {
 				? within( chipsContainer ).queryByText( value, {
 						exact: false,
 						ignore: '.components-visually-hidden',
-				  } )
+					} )
 				: false
 		);
 
@@ -286,8 +286,8 @@ describe( 'Filter by Stock block', () => {
 		} );
 
 		test( 'replaces chosen option when another one is clicked', async () => {
+			const user = userEvent.setup();
 			await waitFor( async () => {
-				const user = userEvent.setup();
 				const ratingParam = 'instock';
 				const {
 					getDropdown,
@@ -314,15 +314,14 @@ describe( 'Filter by Stock block', () => {
 						await user.click( outOfStockSuggestion );
 					} );
 				}
-
-				expect( getInStockChips() ).toBeNull();
-				expect( getOutOfStockChips() ).toBeInTheDocument();
 			} );
+			expect( getOutOfStockChips() ).toBeInTheDocument();
+			expect( getInStockChips() ).toBeNull();
 		} );
 
 		test( 'removes the option when the X button is clicked', async () => {
+			const user = userEvent.setup();
 			await waitFor( async () => {
-				const user = userEvent.setup();
 				const ratingParam = 'outofstock';
 				const {
 					getInStockChips,
@@ -335,20 +334,18 @@ describe( 'Filter by Stock block', () => {
 				expect( getOutOfStockChips() ).toBeInTheDocument();
 				expect( getOnBackorderChips() ).toBeNull();
 
-				const removeOutOfStockButton = getRemoveButtonFromChips(
-					getOutOfStockChips()
-				);
+				const removeOutOfStockButton =
+					getRemoveButtonFromChips( getOutOfStockChips() );
 
 				if ( removeOutOfStockButton ) {
 					await act( async () => {
 						await user.click( removeOutOfStockButton );
 					} );
 				}
-
-				expect( getInStockChips() ).toBeNull();
-				expect( getOutOfStockChips() ).toBeNull();
-				expect( getOnBackorderChips() ).toBeNull();
 			} );
+			expect( getOnBackorderChips() ).toBeNull();
+			expect( getOutOfStockChips() ).toBeNull();
+			expect( getInStockChips() ).toBeNull();
 		} );
 	} );
 
@@ -375,8 +372,8 @@ describe( 'Filter by Stock block', () => {
 		} );
 
 		test( 'adds chosen option to another one that is clicked', async () => {
+			const user = userEvent.setup();
 			await waitFor( async () => {
-				const user = userEvent.setup();
 				const ratingParam = 'onbackorder';
 				const {
 					getDropdown,
@@ -403,10 +400,6 @@ describe( 'Filter by Stock block', () => {
 					await user.click( inStockSuggestion );
 				}
 
-				expect( getInStockChips() ).toBeInTheDocument();
-				expect( getOutOfStockChips() ).toBeNull();
-				expect( getOnBackorderChips() ).toBeInTheDocument();
-
 				const freshDropdown = getDropdown();
 				if ( freshDropdown ) {
 					await user.click( freshDropdown );
@@ -417,16 +410,18 @@ describe( 'Filter by Stock block', () => {
 				if ( outOfStockSuggestion ) {
 					await userEvent.click( outOfStockSuggestion );
 				}
-
-				expect( getInStockChips() ).toBeInTheDocument();
-				expect( getOutOfStockChips() ).toBeInTheDocument();
-				expect( getOnBackorderChips() ).toBeInTheDocument();
 			} );
+			expect( getOnBackorderChips() ).toBeInTheDocument();
+			expect( getOutOfStockChips() ).toBeInTheDocument();
+			expect( getInStockChips() ).toBeInTheDocument();
+			expect( getOnBackorderChips() ).toBeInTheDocument();
+			expect( getOutOfStockChips() ).toBeNull();
+			expect( getInStockChips() ).toBeInTheDocument();
 		} );
 
 		test( 'removes the option when the X button is clicked', async () => {
+			const user = userEvent.setup();
 			await waitFor( async () => {
-				const user = userEvent.setup();
 				const ratingParam = 'instock,outofstock,onbackorder';
 				const {
 					getInStockChips,
@@ -439,20 +434,18 @@ describe( 'Filter by Stock block', () => {
 				expect( getOutOfStockChips() ).toBeInTheDocument();
 				expect( getOnBackorderChips() ).toBeInTheDocument();
 
-				const removeOutOfStockButton = getRemoveButtonFromChips(
-					getOutOfStockChips()
-				);
+				const removeOutOfStockButton =
+					getRemoveButtonFromChips( getOutOfStockChips() );
 
 				if ( removeOutOfStockButton ) {
 					await act( async () => {
 						await user.click( removeOutOfStockButton );
 					} );
 				}
-
-				expect( getInStockChips() ).toBeInTheDocument();
-				expect( getOutOfStockChips() ).toBeNull();
-				expect( getOnBackorderChips() ).toBeInTheDocument();
 			} );
+			expect( getOnBackorderChips() ).toBeInTheDocument();
+			expect( getOutOfStockChips() ).toBeNull();
+			expect( getInStockChips() ).toBeInTheDocument();
 		} );
 	} );
 
@@ -479,8 +472,8 @@ describe( 'Filter by Stock block', () => {
 		} );
 
 		test( 'replaces chosen option when another one is clicked', async () => {
+			const user = userEvent.setup();
 			await waitFor( async () => {
-				const user = userEvent.setup();
 				const ratingParam = 'outofstock';
 				const {
 					getInStockCheckbox,
@@ -499,11 +492,10 @@ describe( 'Filter by Stock block', () => {
 						await user.click( onBackorderCheckbox );
 					} );
 				}
-
-				expect( getInStockCheckbox()?.checked ).toBeFalsy();
-				expect( getOutOfStockCheckbox()?.checked ).toBeFalsy();
-				expect( getOnBackorderCheckbox()?.checked ).toBeTruthy();
 			} );
+			expect( getOnBackorderCheckbox()?.checked ).toBeTruthy();
+			expect( getOutOfStockCheckbox()?.checked ).toBeFalsy();
+			expect( getInStockCheckbox()?.checked ).toBeFalsy();
 		} );
 
 		test( 'removes the option when it is clicked again', async () => {
@@ -522,7 +514,7 @@ describe( 'Filter by Stock block', () => {
 				const onBackorderCheckbox = getOnBackorderCheckbox();
 
 				if ( onBackorderCheckbox ) {
-					userEvent.click( onBackorderCheckbox );
+					await userEvent.click( onBackorderCheckbox );
 				}
 
 				await waitFor( () => {
@@ -572,7 +564,7 @@ describe( 'Filter by Stock block', () => {
 				const inStockCheckbox = getInStockCheckbox();
 
 				if ( inStockCheckbox ) {
-					userEvent.click( inStockCheckbox );
+					await userEvent.click( inStockCheckbox );
 				}
 
 				await waitFor( () => {
@@ -599,7 +591,7 @@ describe( 'Filter by Stock block', () => {
 				const inStockCheckbox = getInStockCheckbox();
 
 				if ( inStockCheckbox ) {
-					userEvent.click( inStockCheckbox );
+					await userEvent.click( inStockCheckbox );
 				}
 
 				await waitFor( () => {

@@ -50,7 +50,7 @@ const Edit = ( { attributes }: BlockEditProps< Attributes > ) => {
 		<div { ...blockProps }>
 			<Disabled>
 				<a href="/">{ __( 'Breadcrumbs', 'woocommerce' ) }</a>
-				{ __( ' / Navigation / Path', 'woocommerce' ) }
+				{ __( '/ Navigation / Path', 'woocommerce' ) }
 			</Disabled>
 		</div>
 	);

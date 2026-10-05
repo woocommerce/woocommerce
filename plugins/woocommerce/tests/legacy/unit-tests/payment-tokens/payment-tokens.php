@@ -32,7 +32,6 @@ class WC_Tests_Payment_Tokens extends WC_Unit_Test_Case {
 		$order->add_payment_token( $token );
 
 		$this->assertCount( 1, WC_Payment_Tokens::get_order_tokens( $order->get_id() ) );
-
 	}
 
 	/**

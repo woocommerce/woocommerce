@@ -4,7 +4,7 @@
 import { act, screen, waitFor } from '@testing-library/react';
 import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
 import { type BlockAttributes } from '@wordpress/blocks';
-import { getAllByRole, getByLabelText } from '@testing-library/dom';
+import { getAllByRole, getByLabelText } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { previewCart } from '@woocommerce/resource-previews';
 import { dispatch } from '@wordpress/data';

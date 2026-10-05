@@ -234,7 +234,7 @@ class WC_Data_Store {
 	 *
 	 * @return bool Whether the passed method is callable.
 	 */
-	public function has_callable( string $method ) : bool {
+	public function has_callable( string $method ): bool {
 		return is_callable( array( $this->instance, $method ) );
 	}
 }

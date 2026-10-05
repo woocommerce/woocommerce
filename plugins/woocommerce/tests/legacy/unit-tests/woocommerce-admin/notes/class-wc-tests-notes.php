@@ -31,5 +31,4 @@ class WC_Admin_Tests_Notes extends WC_Unit_Test_Case {
 		Notes::load_data_store();
 		remove_filter( 'woocommerce_data_stores', '__return_empty_array' );
 	}
-
 }

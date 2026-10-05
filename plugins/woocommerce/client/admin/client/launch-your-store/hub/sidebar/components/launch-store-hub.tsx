@@ -169,7 +169,7 @@ export const LaunchYourStoreHubSidebar = ( props: SidebarComponentProps ) => {
 							/>
 							<p>
 								{ __(
-									'Remove test orders and associated data, including analytics and transactions, once your store goes live. ',
+									'Remove test orders and associated data, including analytics and transactions, once your store goes live.',
 									'woocommerce'
 								) }
 							</p>

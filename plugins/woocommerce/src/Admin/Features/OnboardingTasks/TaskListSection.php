@@ -110,7 +110,7 @@ class TaskListSection {
 			'description' => $this->description,
 			'image'       => $this->image,
 			'tasks'       => array_map(
-				function( $task_name ) {
+				function ( $task_name ) {
 					if ( null !== $this->task_list && isset( $this->task_list->task_class_id_map[ $task_name ] ) ) {
 						return $this->task_list->task_class_id_map[ $task_name ];
 					}

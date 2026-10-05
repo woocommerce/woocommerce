@@ -30,14 +30,18 @@ class WC_REST_Settings_Controller extends WC_REST_Settings_V2_Controller {
 	 */
 	public function register_routes() {
 		parent::register_routes();
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/batch', array(
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/batch',
 			array(
-				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'batch_items' ),
-				'permission_callback' => array( $this, 'update_items_permissions_check' ),
-			),
-			'schema' => array( $this, 'get_public_batch_schema' ),
-		) );
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'batch_items' ),
+					'permission_callback' => array( $this, 'update_items_permissions_check' ),
+				),
+				'schema' => array( $this, 'get_public_batch_schema' ),
+			)
+		);
 	}
 
 	/**

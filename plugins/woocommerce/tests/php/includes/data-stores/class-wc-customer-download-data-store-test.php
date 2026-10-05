@@ -147,7 +147,7 @@ class WC_Customer_Download_Data_Store_Test extends WC_Unit_Test_Case {
 	 */
 	private function create_download_logs( int $max_logs ) {
 		foreach ( $this->downloads as $download ) {
-			for ( $i = 0; $i < $max_logs; $i ++ ) {
+			for ( $i = 0; $i < $max_logs; $i++ ) {
 				$download_log = new WC_Customer_Download_Log();
 				$download_log->set_permission_id( $download->get_id() );
 				$download_log->set_user_id( $download->get_user_id() );
@@ -192,7 +192,7 @@ class WC_Customer_Download_Data_Store_Test extends WC_Unit_Test_Case {
 
 		// Clean up.
 		$count_download_ids = count( $download_ids );
-		for ( $i = 1; $i < $count_download_ids; $i ++ ) {
+		for ( $i = 1; $i < $count_download_ids; $i++ ) {
 			$data_store->delete( $downloads[ $i ] );
 			$this->assertEquals( 0, $downloads[ $i ]->get_id() );
 			$this->assertEmpty( $log_data_store->get_download_logs_for_permission( $download_ids[ $i ] ) );
@@ -233,7 +233,7 @@ class WC_Customer_Download_Data_Store_Test extends WC_Unit_Test_Case {
 
 		// Clean up.
 		$count_download_ids = count( $download_ids );
-		for ( $i = 1; $i < $count_download_ids; $i ++ ) {
+		for ( $i = 1; $i < $count_download_ids; $i++ ) {
 			$data_store->delete_by_id( $download_ids[ $i ] );
 			$this->assertEquals( 0, $downloads[ $i ]->get_id() );
 			$this->assertEmpty( $log_data_store->get_download_logs_for_permission( $download_ids[ $i ] ) );

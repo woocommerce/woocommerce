@@ -96,5 +96,4 @@ class WC_Order_Factory_Test extends WC_Unit_Test_Case {
 		$this->assertEquals( $order1->get_id(), $orders[0]->get_id() );
 		$this->assertEquals( $order2->get_id(), $orders[1]->get_id() );
 	}
-
 }

@@ -115,7 +115,7 @@ const setup = ( params: SetupParams ) => {
 			chipsContainer
 				? within( chipsContainer ).queryByLabelText(
 						`Rated ${ value } out of 5`
-				  )
+					)
 				: false
 		);
 
@@ -258,10 +258,9 @@ describe( 'Filter by Rating block', () => {
 				if ( rating4Suggestion ) {
 					await userEvent.click( rating4Suggestion );
 				}
-
-				expect( getRating2Chips() ).toBeNull();
-				expect( getRating4Chips() ).toBeInTheDocument();
 			} );
+			expect( getRating4Chips() ).toBeInTheDocument();
+			expect( getRating2Chips() ).toBeNull();
 		} );
 
 		test( 'removes the option when the X button is clicked', async () => {
@@ -278,19 +277,17 @@ describe( 'Filter by Rating block', () => {
 				expect( getRating4Chips() ).toBeInTheDocument();
 				expect( getRating5Chips() ).toBeNull();
 
-				const removeRating4Button = getRemoveButtonFromChips(
-					getRating4Chips()
-				);
+				const removeRating4Button =
+					getRemoveButtonFromChips( getRating4Chips() );
 
 				if ( removeRating4Button ) {
 					await userEvent.click( removeRating4Button );
 					acceptErrorWithDuplicatedKeys();
 				}
-
-				expect( getRating2Chips() ).toBeNull();
-				expect( getRating4Chips() ).toBeNull();
-				expect( getRating5Chips() ).toBeNull();
 			} );
+			expect( getRating5Chips() ).toBeNull();
+			expect( getRating4Chips() ).toBeNull();
+			expect( getRating2Chips() ).toBeNull();
 		} );
 	} );
 
@@ -342,20 +339,18 @@ describe( 'Filter by Rating block', () => {
 					await userEvent.click( rating4Suggestion );
 				}
 
-				expect( getRating2Chips() ).toBeInTheDocument();
-				expect( getRating4Chips() ).toBeInTheDocument();
-				expect( getRating5Chips() ).toBeNull();
-
 				const rating5Suggestion = getRating5Suggestion();
 
 				if ( rating5Suggestion ) {
 					await userEvent.click( rating5Suggestion );
 				}
-
-				expect( getRating2Chips() ).toBeInTheDocument();
-				expect( getRating4Chips() ).toBeInTheDocument();
-				expect( getRating5Chips() ).toBeInTheDocument();
 			} );
+			expect( getRating5Chips() ).toBeInTheDocument();
+			expect( getRating4Chips() ).toBeInTheDocument();
+			expect( getRating2Chips() ).toBeInTheDocument();
+			expect( getRating5Chips() ).toBeNull();
+			expect( getRating4Chips() ).toBeInTheDocument();
+			expect( getRating2Chips() ).toBeInTheDocument();
 		} );
 
 		test( 'removes the option when the X button is clicked', async () => {
@@ -372,18 +367,16 @@ describe( 'Filter by Rating block', () => {
 				expect( getRating4Chips() ).toBeInTheDocument();
 				expect( getRating5Chips() ).toBeInTheDocument();
 
-				const removeRating4Button = getRemoveButtonFromChips(
-					getRating4Chips()
-				);
+				const removeRating4Button =
+					getRemoveButtonFromChips( getRating4Chips() );
 
 				if ( removeRating4Button ) {
 					await userEvent.click( removeRating4Button );
 				}
-
-				expect( getRating2Chips() ).toBeInTheDocument();
-				expect( getRating4Chips() ).toBeNull();
-				expect( getRating5Chips() ).toBeInTheDocument();
 			} );
+			expect( getRating5Chips() ).toBeInTheDocument();
+			expect( getRating4Chips() ).toBeNull();
+			expect( getRating2Chips() ).toBeInTheDocument();
 		} );
 	} );
 
@@ -429,11 +422,10 @@ describe( 'Filter by Rating block', () => {
 						await userEvent.click( rating4checkbox );
 					} );
 				}
-
-				expect( getRating2Checkbox()?.checked ).toBeFalsy();
-				expect( getRating4Checkbox()?.checked ).toBeTruthy();
-				expect( getRating5Checkbox()?.checked ).toBeFalsy();
 			} );
+			expect( getRating5Checkbox()?.checked ).toBeFalsy();
+			expect( getRating4Checkbox()?.checked ).toBeTruthy();
+			expect( getRating2Checkbox()?.checked ).toBeFalsy();
 		} );
 
 		test( 'removes the option when it is clicked again', async () => {
@@ -454,11 +446,10 @@ describe( 'Filter by Rating block', () => {
 				if ( rating4checkbox ) {
 					await userEvent.click( rating4checkbox );
 				}
-
-				expect( getRating2Checkbox()?.checked ).toBeFalsy();
-				expect( getRating4Checkbox()?.checked ).toBeFalsy();
-				expect( getRating5Checkbox()?.checked ).toBeFalsy();
 			} );
+			expect( getRating5Checkbox()?.checked ).toBeFalsy();
+			expect( getRating4Checkbox()?.checked ).toBeFalsy();
+			expect( getRating2Checkbox()?.checked ).toBeFalsy();
 		} );
 	} );
 
@@ -502,11 +493,10 @@ describe( 'Filter by Rating block', () => {
 				if ( rating5checkbox ) {
 					await userEvent.click( rating5checkbox );
 				}
-
-				expect( getRating2Checkbox()?.checked ).toBeTruthy();
-				expect( getRating4Checkbox()?.checked ).toBeTruthy();
-				expect( getRating5Checkbox()?.checked ).toBeTruthy();
 			} );
+			expect( getRating5Checkbox()?.checked ).toBeTruthy();
+			expect( getRating4Checkbox()?.checked ).toBeTruthy();
+			expect( getRating2Checkbox()?.checked ).toBeTruthy();
 		} );
 
 		test( 'removes the option when it is clicked again', async () => {
@@ -527,11 +517,10 @@ describe( 'Filter by Rating block', () => {
 				if ( rating2checkbox ) {
 					await userEvent.click( rating2checkbox );
 				}
-
-				expect( getRating2Checkbox()?.checked ).toBeFalsy();
-				expect( getRating4Checkbox()?.checked ).toBeTruthy();
-				expect( getRating5Checkbox()?.checked ).toBeFalsy();
 			} );
+			expect( getRating5Checkbox()?.checked ).toBeFalsy();
+			expect( getRating4Checkbox()?.checked ).toBeTruthy();
+			expect( getRating2Checkbox()?.checked ).toBeFalsy();
 		} );
 	} );
 } );

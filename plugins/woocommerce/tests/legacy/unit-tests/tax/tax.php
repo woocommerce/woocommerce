@@ -704,5 +704,4 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$this->assertEquals( array( 'SOMEWHERE', 'SOMEWHERE_ELSE' ), $results );
 	}
-
 }
