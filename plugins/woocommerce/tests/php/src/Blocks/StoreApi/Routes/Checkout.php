@@ -2726,23 +2726,38 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * @testdox Existing order payment should reject an order that holds a state name, as the request would re-price it.
+	 * @testdox Existing order payment should keep a state name the order holds when the request sends its code.
 	 */
-	public function test_checkout_order_rejects_order_that_holds_a_state_name() {
+	public function test_checkout_order_keeps_state_name_the_order_holds() {
 		$this->set_taxes_based_on( 'billing' );
+		$this->inserted_tax_rate_ids[] = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'NY',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'NY Sales Tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '0',
+				'tax_rate_order'    => '1',
+			)
+		);
 
 		// Orders created outside the Store API (REST API, import) can hold the state name, which matches no tax
-		// rate. The Store API always sends the code, which does, so applying it would re-price the order.
+		// rate. The Store API always sends the code, which does, so writing it would re-price the order.
 		$order = $this->create_pay_for_order_with_shipping_address();
 		$order->set_billing_state( 'New York' );
+		$order->calculate_totals();
 		$order->save();
+		$original_total = $order->get_total();
 
-		$response = $this->dispatch_pay_for_order_request( $order, array( 'state' => 'New York' ) );
+		$response = $this->dispatch_pay_for_order_request( $order, array( 'state' => 'NY' ) );
 
-		$this->assertEquals( 400, $response->get_status() );
-		$this->assertEquals( 'woocommerce_rest_checkout_order_address_change_not_allowed', $response->get_data()['code'] );
-		$this->assertStringContainsString( 'the tax was calculated', $response->get_data()['message'] );
-		$this->assertEquals( 'New York', wc_get_order( $order->get_id() )->get_billing_state() );
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 'New York', $stored_order->get_billing_state() );
+		$this->assertEquals( $original_total, $stored_order->get_total(), 'An unchanged address must not re-price the order' );
 	}
 
 	/**

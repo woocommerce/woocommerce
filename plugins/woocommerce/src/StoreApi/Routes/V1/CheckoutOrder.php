@@ -227,9 +227,14 @@ class CheckoutOrder extends AbstractCartRoute {
 		// Captured before the request is applied so the guard below compares against the order as priced.
 		$priced_destination  = $this->get_shipping_destination( $order );
 		$priced_tax_location = $order->get_taxable_location();
+		$stored_states       = [
+			'billing'  => $order->get_billing_state(),
+			'shipping' => $order->get_shipping_state(),
+		];
 
 		$order->set_billing_address( $billing );
 		$order->set_shipping_address( $shipping );
+		$this->keep_stored_state_names( $order, $stored_states );
 		$this->order_controller->validate_existing_order_before_update( $order );
 		$this->validate_order_is_still_priced( $order, $priced_destination, $priced_tax_location );
 
@@ -259,6 +264,28 @@ class CheckoutOrder extends AbstractCartRoute {
 		$customer->save();
 		$order->save();
 		$order->calculate_totals();
+	}
+
+	/**
+	 * Puts back a state the order stores as a name when the request sends the code for the same state.
+	 *
+	 * Orders created outside the Store API (REST API, imports) can hold the name, which matches no shipping zone
+	 * or tax rate. The Store API always sends the code, so writing it would re-price an unchanged address.
+	 *
+	 * @param \WC_Order $order         Order with the request's addresses applied.
+	 * @param string[]  $stored_states State per address group before the request was applied.
+	 */
+	private function keep_stored_state_names( \WC_Order $order, array $stored_states ): void {
+		$validation_utils = new ValidationUtils();
+
+		foreach ( $stored_states as $group => $stored_state ) {
+			$address = $order->get_address( $group );
+			$state   = (string) ( $address['state'] ?? '' );
+
+			if ( $stored_state !== $state && $validation_utils->format_state( $stored_state, (string) ( $address['country'] ?? '' ) ) === $state ) {
+				$order->set_props( [ "{$group}_state" => $stored_state ] );
+			}
+		}
 	}
 
 	/**
@@ -314,8 +341,8 @@ class CheckoutOrder extends AbstractCartRoute {
 	/**
 	 * Compares two sets of pricing fields.
 	 *
-	 * Values are normalized the way WooCommerce keys pricing on them, so a value that differs only in case,
-	 * postcode spacing, or state spelling resolves to the same zone and tax rate and is not a difference.
+	 * Values are normalized the way WooCommerce keys pricing on them, so a value that differs only in case
+	 * or postcode spacing resolves to the same zone and tax rate and is not a difference.
 	 *
 	 * @param array $priced  Values the order is priced against.
 	 * @param array $updated Values the request would leave on the order.
@@ -323,15 +350,7 @@ class CheckoutOrder extends AbstractCartRoute {
 	 */
 	private function pricing_fields_differ( array $priced, array $updated ): bool {
 		foreach ( self::PRICING_ADDRESS_FIELDS as $field ) {
-			$priced_value = $this->normalize_pricing_address_field( $field, $priced );
-
-			if ( $priced_value !== $this->normalize_pricing_address_field( $field, $updated ) ) {
-				return true;
-			}
-
-			// State is the one field normalized past what the lookups do, so an order holding a state name was
-			// priced against a value that matched no rate. Its code would compare equal and hide the re-price.
-			if ( 'state' === $field && strtoupper( trim( (string) ( $priced[ $field ] ?? '' ) ) ) !== $priced_value ) {
+			if ( $this->normalize_pricing_address_field( $field, $priced ) !== $this->normalize_pricing_address_field( $field, $updated ) ) {
 				return true;
 			}
 		}
@@ -343,7 +362,7 @@ class CheckoutOrder extends AbstractCartRoute {
 	 * Normalizes an address field to the form shipping zones and tax rates are matched on.
 	 *
 	 * @param string $field   Field name.
-	 * @param array  $address Address the field belongs to, used to resolve a state against its country.
+	 * @param array  $address Address the field belongs to.
 	 * @return string
 	 */
 	private function normalize_pricing_address_field( string $field, array $address ): string {
@@ -351,12 +370,6 @@ class CheckoutOrder extends AbstractCartRoute {
 
 		if ( 'postcode' === $field ) {
 			return wc_normalize_postcode( $value );
-		}
-
-		// A state reaches the order as a name or a code depending on how it was created; the code is the form
-		// a rate is registered under, so compare on it and let pricing_fields_differ() handle a stored name.
-		if ( 'state' === $field ) {
-			$value = ( new ValidationUtils() )->format_state( $value, (string) ( $address['country'] ?? '' ) );
 		}
 
 		// Both lookups uppercase with strtoupper(), which leaves multibyte characters alone. Matching that
