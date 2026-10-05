@@ -1,3 +1,4 @@
+/* eslint-disable testing-library/no-unnecessary-act -- Gutenberg schedules asynchronous updates after these interactions. */
 /**
  * External dependencies
  */
@@ -10,6 +11,15 @@ import {
 	act,
 } from '@testing-library/react';
 
+// Use the editor's hook registry so WooCommerce's editor filters run.
+jest.mock( '@wordpress/hooks', () => {
+	const { createRequire } = jest.requireActual( 'module' );
+	const editorRequire = createRequire(
+		require.resolve( '@wordpress/block-editor' )
+	);
+	return jest.requireActual( editorRequire.resolve( '@wordpress/hooks' ) );
+} );
+
 /**
  * Internal dependencies
  */
@@ -17,6 +27,12 @@ import {
 	initializeEditor,
 	selectBlock,
 } from '../../../../../tests/integration/helpers/integration-test-editor';
+import {
+	DEFAULT_QUERY,
+	headingBlockName,
+	INNER_BLOCKS_PAGINATION_TEMPLATE,
+	productTemplateBlockName,
+} from '../constants';
 import { LayoutOptions } from '../types';
 import '../';
 import '../../next-previous-buttons';
@@ -30,7 +46,7 @@ jest.mock( '@woocommerce/block-settings', () => ( {
 type SetupAttributes = {
 	query?: {
 		inherit?: boolean;
-		__woocommerceOnSale?: boolean;
+		woocommerceOnSale?: boolean;
 	};
 };
 
@@ -45,29 +61,29 @@ async function setup( {
 		name: 'woocommerce/product-collection',
 		attributes: {
 			query: {
-				type: 'product',
+				...DEFAULT_QUERY,
 				...attributes.query,
 			},
 			displayLayout: {
 				type: LayoutOptions.GRID,
 				columns: 3,
 			},
-			...attributes,
 		},
 		innerBlocks: withHeading
 			? [
-					{ name: 'core/heading' },
-					{ name: 'woocommerce/product-template' },
+					[ headingBlockName ],
+					[ productTemplateBlockName ],
+					INNER_BLOCKS_PAGINATION_TEMPLATE,
 			  ]
-			: [ { name: 'woocommerce/product-template' } ],
+			: [
+					[ productTemplateBlockName ],
+					INNER_BLOCKS_PAGINATION_TEMPLATE,
+			  ],
 	};
 	return initializeEditor( [ productCollectionBlock ] );
 }
 
-// Skipped: wp-6.8's block-editor rendering pipeline no longer renders
-// inner blocks in Jest's jsdom environment. Gutenberg tests block
-// rendering via Playwright E2E; these should be migrated similarly.
-describe.skip( 'Product Collection Block - Carousel Layout Adjustments', () => {
+describe( 'Product Collection Block - Carousel Layout Adjustments', () => {
 	describe( 'On Sale Collection with Heading', () => {
 		it( 'should handle transition to and from carousel layout correctly', async () => {
 			// 1. Add Product Collection in editor with On Sale query
@@ -76,7 +92,7 @@ describe.skip( 'Product Collection Block - Carousel Layout Adjustments', () => {
 				attributes: {
 					query: {
 						inherit: false,
-						__woocommerceOnSale: true,
+						woocommerceOnSale: true,
 					},
 				},
 			} );
@@ -129,10 +145,6 @@ describe.skip( 'Product Collection Block - Carousel Layout Adjustments', () => {
 			} );
 			expect( headingAfterGrid ).toBeInTheDocument();
 			expect( headingAfterGrid.parentElement ).not.toBe( groupBlock );
-
-			// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
-			// opt out of without changing the visual output.
-			expect( console ).toHaveWarned();
 		} );
 	} );
 
@@ -197,7 +209,6 @@ describe.skip( 'Product Collection Block - Carousel Layout Adjustments', () => {
 				screen.queryByRole( 'document', { name: /Block: Row/i } )
 			).not.toBeInTheDocument();
 
-			// Verify pagination is restored
 			expect(
 				screen.getByRole( 'document', {
 					name: /Block: Pagination/i,

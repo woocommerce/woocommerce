@@ -1,14 +1,29 @@
+/* eslint-disable testing-library/no-unnecessary-act -- Gutenberg schedules asynchronous updates after these interactions. */
 /**
  * External dependencies
  */
-import { act, screen, waitFor } from '@testing-library/react';
+import {
+	act,
+	screen,
+	waitFor,
+	getAllByRole,
+	getByLabelText,
+} from '@testing-library/react';
 import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
 import { type BlockAttributes } from '@wordpress/blocks';
-import { getAllByRole, getByLabelText } from '@testing-library/dom';
 import { userEvent } from '@testing-library/user-event';
 import { previewCart } from '@woocommerce/resource-previews';
 import { dispatch } from '@wordpress/data';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
+
+// Use the editor's hook registry so WooCommerce's editor filters run.
+jest.mock( '@wordpress/hooks', () => {
+	const { createRequire } = jest.requireActual( 'module' );
+	const editorRequire = createRequire(
+		require.resolve( '@wordpress/block-editor' )
+	);
+	return jest.requireActual( editorRequire.resolve( '@wordpress/hooks' ) );
+} );
 
 /**
  * Internal dependencies
@@ -29,9 +44,12 @@ import '../../product-elements-blocks/title/index';
 import '../../product-template/index.tsx';
 import '../../product-collection/index.tsx';
 
-async function setup( attributes: BlockAttributes ) {
+async function setup(
+	attributes: BlockAttributes,
+	options: { useSubRegistry?: boolean } = {}
+) {
 	const testBlock = [ { name: 'woocommerce/cart', attributes } ];
-	return initializeEditor( testBlock );
+	return initializeEditor( testBlock, {}, options );
 }
 
 describe( 'Cart block editor integration', () => {
@@ -65,11 +83,9 @@ describe( 'Cart block editor integration', () => {
 		} );
 	} );
 
-	// Skipped: wp-6.8's block-editor rendering pipeline no longer renders
-	// inner blocks in Jest's jsdom environment. Gutenberg tests block
-	// rendering via Playwright E2E; these should be migrated similarly.
-	it.skip( 'inner blocks can be added/removed by filters', async () => {
+	it( 'inner blocks can be added/removed by filters', async () => {
 		await setup( {} );
+		await selectBlock( /^Block: Filled Cart$/i );
 
 		// Verify Cart block is properly initialized in the editor.
 		await waitFor( () => {
@@ -201,80 +217,42 @@ describe( 'Cart block editor integration', () => {
 		} );
 	} );
 
-	// Skipped: wp-6.8's block-editor rendering pipeline no longer renders
-	// inner blocks in Jest's jsdom environment. Gutenberg tests block
-	// rendering via Playwright E2E; these should be migrated similarly.
-	it.skip( 'can convert to Empty Cart block', async () => {
-		// Setup the cart block with default attributes (filled cart view)
-		await setup( {} );
+	it( 'can switch between filled and empty cart previews', async () => {
+		// The view switcher uses global data selectors and actions.
+		await setup( {}, { useSubRegistry: false } );
+		await selectBlock( /^Block: Filled Cart$/i );
 
-		// Verify Cart block is properly initialized in the editor
-		expect( screen.getByLabelText( /^Block: Cart$/i ) ).toBeVisible();
-
-		await selectBlock( /Block: Filled Cart/i );
-
-		const filledCartBlock = screen.getByLabelText( /Block: Filled Cart/i );
-		const emptyCartBlock = screen.getByLabelText( /Block: Empty Cart/i );
-
+		const filledCartBlock =
+			screen.getByLabelText( /^Block: Filled Cart$/i );
+		const emptyCartBlock = screen.getByLabelText( /^Block: Empty Cart$/i );
 		expect( filledCartBlock ).toBeVisible();
-		expect( filledCartBlock ).not.toHaveAttribute( 'hidden' );
-		expect( emptyCartBlock ).toBeInTheDocument();
-		expect( emptyCartBlock ).toHaveAttribute( 'hidden' );
+		expect( emptyCartBlock ).not.toBeVisible();
 
-		await waitFor( () => {
-			expect(
-				screen.getByLabelText( /Block: Filled Cart$/i )
-			).toBeVisible();
-		} );
+		await selectBlock( /^Block: Cart$/i );
+		await act( () =>
+			userEvent.click(
+				screen.getByRole( 'button', { name: /Switch view/i } )
+			)
+		);
+		await act( () =>
+			userEvent.click(
+				screen.getByRole( 'menuitem', { name: /Empty Cart/i } )
+			)
+		);
+		expect( emptyCartBlock ).toBeVisible();
+		expect( filledCartBlock ).not.toBeVisible();
 
-		const selectParentBlockButton = screen.getByRole( 'button', {
-			name: /Select parent block: Cart/i,
-		} );
-
-		await act( async () => {
-			await userEvent.click( selectParentBlockButton );
-		} );
-
-		const switchViewButton = screen.getByRole( 'button', {
-			name: /Switch view/i,
-		} );
-
-		await act( async () => {
-			await userEvent.click( switchViewButton );
-		} );
-
-		expect( switchViewButton ).toHaveAttribute( 'aria-expanded', 'true' );
-
-		const emptyCartButton = screen.getByRole( 'menuitem', {
-			name: /Empty Cart/i,
-		} );
-
-		await act( async () => {
-			await userEvent.click( emptyCartButton );
-		} );
-
-		expect(
-			screen.getByLabelText( /^Block: Empty Cart$/i )
-		).toBeInTheDocument();
-		expect( emptyCartBlock ).toHaveAttribute( 'hidden', '' );
-		expect( emptyCartBlock ).toHaveAttribute( 'hidden' );
-
-		// Go back to filled cart
-		await act( async () => {
-			await userEvent.click( switchViewButton );
-		} );
-
-		expect( switchViewButton ).toHaveAttribute( 'aria-expanded', 'true' );
-
-		const filledCartButton = screen.getByRole( 'menuitem', {
-			name: /Filled Cart/i,
-		} );
-
-		await act( async () => {
-			await userEvent.click( filledCartButton );
-		} );
-
-		expect( emptyCartBlock ).toHaveAttribute( 'hidden' );
-		expect( filledCartBlock ).not.toHaveAttribute( 'hidden' );
+		await act( () =>
+			userEvent.click(
+				screen.getByRole( 'button', { name: /Switch view/i } )
+			)
+		);
+		await act( () =>
+			userEvent.click(
+				screen.getByRole( 'menuitem', { name: /Filled Cart/i } )
+			)
+		);
+		expect( filledCartBlock ).toBeVisible();
+		expect( emptyCartBlock ).not.toBeVisible();
 	} );
 } );
