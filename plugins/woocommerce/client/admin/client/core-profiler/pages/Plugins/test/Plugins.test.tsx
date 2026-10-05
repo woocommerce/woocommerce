@@ -234,6 +234,20 @@ describe( 'computePluginsSelection', () => {
 		{ key: 'plugin3', is_activated: false },
 	];
 
+	it( 'preserves the Tax key while normalizing alternate selections', () => {
+		const plugins = [
+			{ key: 'woocommerce-services:tax', is_activated: false },
+			{ key: 'mailpoet:alt', is_activated: false },
+		] as Extension[];
+
+		const result = computePluginsSelection( plugins, new Set( plugins ) );
+
+		expect( result.selectedPluginSlugs ).toEqual( [
+			'woocommerce-services:tax',
+			'mailpoet',
+		] );
+	} );
+
 	it( 'correctly computes selection when no plugins are selected', () => {
 		const selectedPlugins = new Set< Extension >();
 		const result = computePluginsSelection(

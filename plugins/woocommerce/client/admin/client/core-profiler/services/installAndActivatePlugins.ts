@@ -238,6 +238,10 @@ export const pluginInstallerMachine = createMachine(
 			assignInstallationSuccessDetails: assign( {
 				installedPlugins: ( { context, event } ) => {
 					const plugin = context.pluginsInstallationQueue[ 0 ];
+					const timingKey =
+						plugin === 'woocommerce-services:tax'
+							? getPluginSlug( plugin )
+							: plugin;
 					return [
 						...context.installedPlugins,
 						{
@@ -245,7 +249,7 @@ export const pluginInstallerMachine = createMachine(
 							installTime:
 								(
 									event as DoneActorEvent< InstallAndActivateSuccessResponse >
-								 ).output.data.install_time[ plugin ] || 0,
+								 ).output.data.install_time[ timingKey ] || 0,
 						},
 					];
 				},

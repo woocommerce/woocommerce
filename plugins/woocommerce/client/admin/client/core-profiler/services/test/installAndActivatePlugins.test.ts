@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import type { PluginNames } from '@woocommerce/data';
 import { createActor, fromPromise, waitFor, SimulatedClock } from 'xstate5';
 
 /**
@@ -26,6 +27,38 @@ describe( 'pluginInstallerMachine', () => {
 	beforeEach( () => {
 		jest.resetAllMocks();
 	} );
+
+	it.each< [ PluginNames, string, number, number ] >( [
+		[ 'woocommerce-services:tax', 'woocommerce-services', 4000, 4000 ],
+		[ 'woocommerce-services', 'woocommerce-services', 4000, 4000 ],
+		[ 'mailpoet', 'mailpoet', 4000, 4000 ],
+		[ 'woocommerce-services:tax', 'unrelated-plugin', 4000, 0 ],
+		[ 'woocommerce-services:shipping', 'woocommerce-services', 4000, 0 ],
+	] )(
+		'records %s duration from %s without changing its key',
+		async ( plugin, slug, duration, expectedDuration ) => {
+			const machine = pluginInstallerMachine.provide( {
+				...mockConfig,
+				actors: {
+					installPlugin: fromPromise( async () => ( {
+						data: { install_time: { [ slug ]: duration } },
+					} ) ),
+				},
+			} );
+			const service = createActor( machine, {
+				input: { selectedPlugins: [ plugin ], pluginsAvailable: [] },
+			} ).start();
+
+			await waitFor( service, ( snapshot ) =>
+				snapshot.matches( 'reportSuccess' )
+			);
+
+			expect( service.getSnapshot().context.installedPlugins ).toEqual( [
+				{ plugin, installTime: expectedDuration },
+			] );
+			service.stop();
+		}
+	);
 
 	it( 'when given one plugin it should call the installPlugin service once', async () => {
 		const mockInstallPlugin = jest.fn();

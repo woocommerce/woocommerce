@@ -2,13 +2,17 @@
  * External dependencies
  */
 import { recordEvent } from '@woocommerce/tracks';
+import { createActor, fromPromise, waitFor } from 'xstate5';
 
 /**
  * Internal dependencies
  */
 import tracksActions, { resetShippingPartnerImpressionFlag } from '../tracks';
 import type { CoreProfilerStateMachineContext } from '../../index';
-import type { PluginInstallError } from '../../services/installAndActivatePlugins';
+import {
+	pluginInstallerMachine,
+	PluginInstallError,
+} from '../../services/installAndActivatePlugins';
 
 jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
@@ -408,4 +412,98 @@ describe( 'Core Profiler shipping partner tracking', () => {
 			);
 		} );
 	} );
+} );
+
+describe( 'Core Profiler installation timing', () => {
+	beforeEach( () => {
+		jest.clearAllMocks();
+	} );
+
+	it( 'records the server Tax duration in both completion events', async () => {
+		const machine = pluginInstallerMachine.provide( {
+			actors: {
+				installPlugin: fromPromise( async () => ( {
+					data: { install_time: { 'woocommerce-services': 4000 } },
+				} ) ),
+			},
+			actions: {
+				updateParentWithPluginProgress: jest.fn(),
+				updateParentWithInstallationSuccess: ( { context } ) => {
+					tracksActions.recordSuccessfulPluginInstallation( {
+						context: makeContext(),
+						event: {
+							type: 'PLUGINS_INSTALLATION_COMPLETED',
+							payload: {
+								installationCompletedResult: {
+									installedPlugins: context.installedPlugins,
+									totalTime: 12000,
+								},
+							},
+						},
+					} );
+				},
+			},
+		} );
+		const service = createActor( machine, {
+			input: {
+				selectedPlugins: [ 'woocommerce-services:tax' ],
+				pluginsAvailable: [],
+			},
+		} ).start();
+
+		await waitFor( service, ( snapshot ) =>
+			snapshot.matches( 'reportSuccess' )
+		);
+
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'coreprofiler_store_extension_installed_and_activated',
+			{
+				success: true,
+				extension: 'woocommerce_services',
+				install_time: '2-5s',
+			}
+		);
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'coreprofiler_store_extensions_installed_and_activated',
+			{
+				success: true,
+				installed_extensions: [ 'woocommerce_services' ],
+				total_time: '10-15s',
+				install_time_woocommerce_services: '2-5s',
+			}
+		);
+		expect( recordEvent ).toHaveBeenCalledTimes( 2 );
+		service.stop();
+	} );
+
+	it.each( [ 'mailpoet', 'mailpoet:alt' ] )(
+		'preserves the normalized identifier and duration for %s',
+		( plugin ) => {
+			tracksActions.recordSuccessfulPluginInstallation( {
+				context: makeContext(),
+				event: {
+					type: 'PLUGINS_INSTALLATION_COMPLETED',
+					payload: {
+						installationCompletedResult: {
+							installedPlugins: [ { plugin, installTime: 4000 } ],
+							totalTime: 12000,
+						},
+					},
+				},
+			} );
+			expect( recordEvent ).toHaveBeenCalledWith(
+				'coreprofiler_store_extension_installed_and_activated',
+				{ success: true, extension: 'mailpoet', install_time: '2-5s' }
+			);
+			expect( recordEvent ).toHaveBeenCalledWith(
+				'coreprofiler_store_extensions_installed_and_activated',
+				{
+					success: true,
+					installed_extensions: [ 'mailpoet' ],
+					total_time: '10-15s',
+					install_time_mailpoet: '2-5s',
+				}
+			);
+		}
+	);
 } );
