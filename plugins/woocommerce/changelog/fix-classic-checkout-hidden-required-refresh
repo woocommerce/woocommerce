@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Update the classic checkout totals after an address change when an extension hides a required address field.
