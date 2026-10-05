@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 /**
  * Class WC_Cart_Totals_Tests. Tests for WC_Cart_Total class.
@@ -27,7 +28,6 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-		WC()->cart->empty_cart();
 		WC()->shipping()->enabled = $this->shipping_was_enabled;
 	}
 
@@ -231,6 +231,284 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		$product->delete( true );
 		$coupon->delete( true );
+	}
+
+	/**
+	 * @testdox Coupon sorting should preserve priority and sequential application-order behavior.
+	 * @dataProvider data_provider_test_coupon_sorting_preserves_priority_contract
+	 *
+	 * @param string     $product_price      Product price.
+	 * @param string     $sequential_setting Sequential discount setting value.
+	 * @param array      $coupon_data         Coupon data keyed by fixture name.
+	 * @param array      $application_order   Coupon fixture names in application order.
+	 * @param array      $expected_discounts  Expected per-coupon discounts.
+	 * @param string     $expected_cart_total Expected cart total.
+	 * @param array|null $sort_priorities     Optional filtered priorities keyed by discount type.
+	 */
+	public function test_coupon_sorting_preserves_priority_contract(
+		string $product_price,
+		string $sequential_setting,
+		array $coupon_data,
+		array $application_order,
+		array $expected_discounts,
+		string $expected_cart_total,
+		?array $sort_priorities = null
+	): void {
+		$result = $this->calculate_cart_coupon_scenario( $product_price, $sequential_setting, $coupon_data, $application_order, $sort_priorities );
+
+		$this->assertSame( $expected_discounts, $result['discounts'], 'Each coupon should receive the discount implied by its effective calculation order.' );
+		$this->assertSame( $expected_cart_total, $result['cart_total'], 'The cart total should reflect the expected coupon calculation order.' );
+	}
+
+	/**
+	 * Data provider for coupon sorting priorities.
+	 *
+	 * @return array
+	 */
+	public function data_provider_test_coupon_sorting_preserves_priority_contract(): array {
+		return array(
+			'sequential 20% then 10%'          => array(
+				'100.00',
+				'yes',
+				array(
+					'high' => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '20',
+					),
+					'low'  => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '10',
+					),
+				),
+				array( 'high', 'low' ),
+				array(
+					'high' => '20.00',
+					'low'  => '8.00',
+				),
+				'72.00',
+			),
+			'sequential 10% then 20%'          => array(
+				'100.00',
+				'yes',
+				array(
+					'high' => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '20',
+					),
+					'low'  => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '10',
+					),
+				),
+				array( 'low', 'high' ),
+				array(
+					'high' => '18.00',
+					'low'  => '10.00',
+				),
+				'72.00',
+			),
+			// The 100.00 fixtures above hold the cart total steady in both orders, so these two prove
+			// the calculation order also moves the total once intermediate rounding is in play.
+			'sequential rounding 20% then 10%' => array(
+				'12.34',
+				'yes',
+				array(
+					'high' => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '20',
+					),
+					'low'  => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '10',
+					),
+				),
+				array( 'high', 'low' ),
+				array(
+					'high' => '2.47',
+					'low'  => '0.99',
+				),
+				'8.88',
+			),
+			'sequential rounding 10% then 20%' => array(
+				'12.34',
+				'yes',
+				array(
+					'high' => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '20',
+					),
+					'low'  => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '10',
+					),
+				),
+				array( 'low', 'high' ),
+				array(
+					'high' => '2.22',
+					'low'  => '1.23',
+				),
+				'8.89',
+			),
+			'non-sequential amount fallback'   => array(
+				'100.00',
+				'no',
+				array(
+					'large' => array(
+						'discount_type' => 'fixed_cart',
+						'coupon_amount' => '80',
+					),
+					'small' => array(
+						'discount_type' => 'fixed_cart',
+						'coupon_amount' => '30',
+					),
+				),
+				array( 'large', 'small' ),
+				array(
+					'large' => '70.00',
+					'small' => '30.00',
+				),
+				'0.00',
+			),
+			'standard coupon type priority'    => array(
+				'100.00',
+				'yes',
+				array(
+					'fixed'   => array(
+						'discount_type' => 'fixed_cart',
+						'coupon_amount' => '30',
+					),
+					'percent' => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '10',
+					),
+				),
+				array( 'fixed', 'percent' ),
+				array(
+					'fixed'   => '30.00',
+					'percent' => '10.00',
+				),
+				'60.00',
+			),
+			'usage-limit priority'             => array(
+				'100.00',
+				'yes',
+				array(
+					'broad'  => array(
+						'discount_type'          => 'percent',
+						'coupon_amount'          => '20',
+						'limit_usage_to_x_items' => 2,
+					),
+					'narrow' => array(
+						'discount_type'          => 'percent',
+						'coupon_amount'          => '10',
+						'limit_usage_to_x_items' => 1,
+					),
+				),
+				array( 'broad', 'narrow' ),
+				array(
+					'broad'  => '18.00',
+					'narrow' => '10.00',
+				),
+				'72.00',
+			),
+			'distinct filtered priorities'     => array(
+				'100.00',
+				'yes',
+				array(
+					'percent' => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '10',
+					),
+					'fixed'   => array(
+						'discount_type' => 'fixed_cart',
+						'coupon_amount' => '30',
+					),
+				),
+				array( 'percent', 'fixed' ),
+				array(
+					'percent' => '7.00',
+					'fixed'   => '30.00',
+				),
+				'63.00',
+				array(
+					'fixed_cart' => 1,
+					'percent'    => 2,
+				),
+			),
+			'equal filtered priorities'        => array(
+				'100.00',
+				'yes',
+				array(
+					'fixed'   => array(
+						'discount_type' => 'fixed_cart',
+						'coupon_amount' => '30',
+					),
+					'percent' => array(
+						'discount_type' => 'percent',
+						'coupon_amount' => '10',
+					),
+				),
+				array( 'fixed', 'percent' ),
+				array(
+					'fixed'   => '30.00',
+					'percent' => '7.00',
+				),
+				'63.00',
+				array(
+					'fixed_cart' => 5,
+					'percent'    => 5,
+				),
+			),
+		);
+	}
+
+	/**
+	 * Calculate normalized totals for a cart coupon scenario.
+	 *
+	 * @param string     $product_price      Product price.
+	 * @param string     $sequential_setting Sequential discount setting value.
+	 * @param array      $coupon_data         Coupon data keyed by fixture name.
+	 * @param array      $application_order   Coupon fixture names in application order.
+	 * @param array|null $sort_priorities     Optional filtered priorities keyed by discount type.
+	 * @return array
+	 */
+	private function calculate_cart_coupon_scenario( string $product_price, string $sequential_setting, array $coupon_data, array $application_order, ?array $sort_priorities ): array {
+		update_option( 'woocommerce_calc_discounts_sequentially', $sequential_setting );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => $product_price ) );
+		$coupons = array();
+		foreach ( $coupon_data as $coupon_key => $data ) {
+			$coupons[ $coupon_key ] = WC_Helper_Coupon::create_coupon( 'test-' . $coupon_key, $data );
+		}
+
+		$sort_filter = null;
+		if ( null !== $sort_priorities ) {
+			$sort_filter = static function ( $sort, $coupon ) use ( $sort_priorities ) {
+				return $sort_priorities[ $coupon->get_discount_type() ] ?? $sort;
+			};
+			add_filter( 'woocommerce_coupon_sort', $sort_filter, 10, 2 );
+		}
+
+		WC()->cart->add_to_cart( $product->get_id() );
+		foreach ( $application_order as $coupon_key ) {
+			WC()->cart->apply_coupon( $coupons[ $coupon_key ]->get_code() );
+		}
+		WC()->cart->calculate_totals();
+
+		if ( null !== $sort_filter ) {
+			remove_filter( 'woocommerce_coupon_sort', $sort_filter, 10 );
+		}
+
+		$discounts = array();
+		foreach ( $coupons as $coupon_key => $coupon ) {
+			$discounts[ $coupon_key ] = wc_format_decimal( WC()->cart->get_coupon_discount_amount( $coupon->get_code() ), 2 );
+		}
+
+		return array(
+			'discounts'  => $discounts,
+			'cart_total' => wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ),
+		);
 	}
 
 	/**

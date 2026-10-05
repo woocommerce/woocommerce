@@ -77,6 +77,38 @@ class Media_Text_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * The media & text wrapper table must not carry an `align="left"`/`align="right"` attribute: those
+	 * render as `float` in email clients, pulling the block out of normal flow so the block that follows
+	 * fails to clear it. A button placed after it then paints its background across the media & text
+	 * block above. Horizontal alignment must instead come from the `text-align` CSS declaration, which
+	 * keeps the block in normal flow.
+	 */
+	public function testItDoesNotFloatWrapperTableWithAlignAttribute(): void {
+		$rendered = $this->media_renderer->render( '', $this->parsed_media, $this->rendering_context );
+
+		// Locate the wrapper table by its class. Parsing the tag with WP_HTML_Tag_Processor is more
+		// robust than matching the raw HTML string, and matches the convention used elsewhere here.
+		$processor = new \WP_HTML_Tag_Processor( $rendered );
+		$this->assertTrue(
+			$processor->next_tag(
+				array(
+					'tag_name'   => 'table',
+					'class_name' => 'email-block-media-text',
+				)
+			),
+			'Expected a media & text wrapper table with the email-block-media-text class.'
+		);
+
+		// No float-triggering align attribute on the wrapper table ( get_attribute() is null when absent ).
+		$this->assertNull( $processor->get_attribute( 'align' ) );
+
+		// Alignment is preserved via the text-align CSS declaration instead, keeping the block in normal flow.
+		$style = $processor->get_attribute( 'style' );
+		$this->assertIsString( $style );
+		$this->assertStringContainsString( 'text-align', $style );
+	}
+
+	/**
 	 * Test it handles media positioning
 	 */
 	public function testItHandlesMediaPositioning(): void {

@@ -65,7 +65,8 @@ class ProductPrice extends AbstractBlock {
 		$product = wc_get_product( $post_id );
 
 		if ( $product ) {
-			$styles_and_classes = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
+			$wrapper_class      = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );
+			$styles_and_classes = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes', 'margin' ) );
 
 			$is_descendant_of_product_collection       = isset( $block->context['query']['isProductCollectionBlock'] );
 			$is_descendant_of_grouped_product_selector = isset( $block->context['isDescendantOfGroupedProductSelector'] );
@@ -83,8 +84,7 @@ class ProductPrice extends AbstractBlock {
 			}
 
 			$wrapper_attributes     = array(
-				'style' => $styles_and_classes['styles'] ?? '',
-				'class' => $styles_and_classes['classes'] ?? '',
+				'class' => $wrapper_class,
 			);
 			$interactive_attributes = '';
 			$context_directive      = '';
@@ -101,11 +101,13 @@ class ProductPrice extends AbstractBlock {
 			}
 
 			return sprintf(
-				'<div %1$s %2$s><div class="wc-block-components-product-price wc-block-grid__product-price" %3$s>
-					%4$s
+				'<div %1$s %2$s><div class="wc-block-components-product-price wc-block-grid__product-price %3$s" style="%4$s" %5$s>
+					%6$s
 				</div></div>',
 				get_block_wrapper_attributes( $wrapper_attributes ),
 				$context_directive,
+				esc_attr( $styles_and_classes['classes'] ?? '' ),
+				esc_attr( $styles_and_classes['styles'] ?? '' ),
 				$interactive_attributes,
 				$product->get_price_html()
 			);

@@ -15,7 +15,9 @@ Each cycle has two named owners, listed on the parent tracking issue:
 * **Release lead** (engineering) - runs the release process end to end: builds, publishes, monitors, and executes the run-books.
 * **Product DRI** - the product-side counterpart. Joins the readiness review at RC and the go/no-go before stable, and owns the product read on open findings: what blocks the release, what waits for a point release, and what ships with a known-issues note.
 
-The release lead is assigned by rotation via the [Release: Assignment workflow](/docs/contribution/releases/workflows). The Product DRI is confirmed per cycle on the tracking issue.
+The release lead is assigned by rotation via the [Release: Assignment workflow](/docs/contribution/releases/workflows). The Product DRI role is covered by two standing Product seats in Slack's `@woo-core-release` group. Their names are on the tracking issue. If you're unsure who to loop in, ping the handle.
+
+The handle also holds a standing set of engineering members and the current and previous release leads, who rotate at each feature freeze.
 
 ## Readiness review (at RC)
 
@@ -24,7 +26,7 @@ The RC is the last point where finding a problem is cheap: nothing has shipped, 
 The checklist covers four areas:
 
 * **Compatibility evidence.** The QIT compatibility regression sweep runs automatically against each prerelease and reports which extension versions the release would break. Introduced issues need a verdict, not just a look.
-* **Open findings.** Bug reports, testing threads, and monitoring alerts against the release each get a linked issue and a verdict: release-blocking, fix in a point release, or not a bug.
+* **Open findings.** Bug reports, testing threads, and monitoring alerts against the release each get a linked issue and a verdict per the [release decision matrix](/docs/contribution/releases/decision-matrix): release-blocking, fix in a point release, next release, or not a bug.
 * **Rollback path.** Who reverts, how, and what revert means for this version - answered before it's needed, not during an incident.
 * **Comms.** Changelog in shape, and a known-issues list when verdicts left something open.
 

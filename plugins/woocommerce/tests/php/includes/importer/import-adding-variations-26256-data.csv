@@ -1,0 +1,4 @@
+Type,SKU,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global,Regular price
+variable,IMPORT-26256-PARENT,Import 26256 Tee,,Size,"S, M, L",0,
+variation,IMPORT-26256-L,Import 26256 Tee - L,IMPORT-26256-PARENT,Size,L,0,12
+simple,IMPORT-26256-MISSING,Import 26256 Missing,,,,,

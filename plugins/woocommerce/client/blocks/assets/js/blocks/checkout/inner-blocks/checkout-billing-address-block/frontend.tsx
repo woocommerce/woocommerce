@@ -18,8 +18,8 @@ import Block from './block';
 import attributes from './attributes';
 import { useCheckoutBlockContext } from '../../context';
 import {
-	getBillingAddresssBlockTitle,
-	getBillingAddresssBlockDescription,
+	getBillingAddressBlockTitle,
+	getBillingAddressBlockDescription,
 } from './utils';
 
 const FrontendBlock = ( {
@@ -46,12 +46,12 @@ const FrontendBlock = ( {
 		return null;
 	}
 
-	title = getBillingAddresssBlockTitle(
+	title = getBillingAddressBlockTitle(
 		title,
 		forcedBillingAddress,
 		hasSelectedLocalPickup
 	);
-	description = getBillingAddresssBlockDescription(
+	description = getBillingAddressBlockDescription(
 		description,
 		forcedBillingAddress,
 		hasSelectedLocalPickup

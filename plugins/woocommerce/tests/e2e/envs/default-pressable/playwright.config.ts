@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import defaultConfig, {
-	setupProjects,
+	coreSetupProjects,
 	TESTS_ROOT_PATH,
 } from '../../playwright.config';
 import { tags } from '../../fixtures/fixtures';
@@ -17,7 +17,7 @@ const grepInvert = new RegExp(
 const config = {
 	...defaultConfig,
 	projects: [
-		...setupProjects,
+		...coreSetupProjects,
 		{
 			name: 'reset',
 			testDir: `${ TESTS_ROOT_PATH }/fixtures`,

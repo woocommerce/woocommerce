@@ -31,9 +31,18 @@ if [ ! -z ${CI+y} ]; then
     # Source from the e2e-test-bin directory mount; a single-file mount of this
     # script can surface as an empty file under Docker gRPC FUSE.
     $WP_ENV_CMD run --debug cli cp wp-content/plugins/e2e-test-bin/env-provision.sh env-provision-ci.sh
-    $WP_ENV_CMD run --debug cli env -u CI WP_CLI_PREFIX= "WC_E2E_REPROVISION=${WC_E2E_REPROVISION-}" bash env-provision-ci.sh
+    $WP_ENV_CMD run --debug cli env -u CI WP_CLI_PREFIX= "WC_E2E_REPROVISION=${WC_E2E_REPROVISION-}" ENABLE_TRACKING="${ENABLE_TRACKING:-0}" bash env-provision-ci.sh
     exit $?
 fi
+
+# Applied on top of the baseline on every start rather than baked into the
+# snapshot, so a tracking run neither reuses nor leaves behind a different baseline.
+enable_tracking_if_requested() {
+	if [ "${ENABLE_TRACKING:-0}" == 1 ]; then
+		echo -e 'Enable tracking\n'
+		$WP_CLI_PREFIX wp option update woocommerce_allow_tracking 'yes'
+	fi
+}
 
 # Restore the seeded baseline instead of re-provisioning, unless a rebuild was
 # requested or the provisioning recipe changed. This is what makes repeated
@@ -50,6 +59,7 @@ if [ -z "${WC_E2E_REPROVISION-}" ] &&
 		tar -C /var/www/html/wp-content -xf '$SNAPSHOT_DIR/uploads.tar'
 	"
 	echo -e 'Baseline restored \n'
+	enable_tracking_if_requested
 	exit 0
 fi
 
@@ -88,13 +98,6 @@ fi
 echo -e 'Update Blog Name \n'
 $WP_CLI_PREFIX wp option update blogname 'WooCommerce Core E2E Test Suite'
 
-ENABLE_TRACKING="${ENABLE_TRACKING:-0}"
-
-if [ $ENABLE_TRACKING == 1 ]; then
-	echo -e 'Enable tracking\n'
-	$WP_CLI_PREFIX wp option update woocommerce_allow_tracking 'yes'
-fi
-
 # Re-imported from scratch rather than skipped when present: this hook runs on
 # every start, and the database outlives the web root (wp-env's self-heal wipes
 # the bind mount but keeps the MySQL volume), so attachment rows can survive
@@ -124,3 +127,5 @@ $WP_CLI_PREFIX bash -c "
 	tar -C /var/www/html/wp-content -cf '$SNAPSHOT_DIR/uploads.tar' uploads
 	cp '$MOUNTED_SCRIPT' '$SNAPSHOT_DIR/provision.sh'
 "
+
+enable_tracking_if_requested

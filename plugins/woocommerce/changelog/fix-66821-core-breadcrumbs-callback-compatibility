@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Preserve Core Breadcrumbs callback compatibility for extensions.

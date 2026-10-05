@@ -56,6 +56,13 @@ export function setIsRequesting( group: string, isRequesting: boolean ) {
 	};
 }
 
+export function clearErrorForGroup( group: string ) {
+	return {
+		type: TYPES.CLEAR_ERROR_FOR_GROUP,
+		group,
+	};
+}
+
 export function clearIsDirty( group: string ) {
 	return {
 		type: TYPES.CLEAR_IS_DIRTY,
@@ -106,8 +113,6 @@ export function* persistSettingsForGroup( group: string ) {
 			data: { update },
 		} );
 
-		yield setIsRequesting( group, false );
-
 		if ( ! results ) {
 			throw new Error(
 				__(
@@ -117,8 +122,15 @@ export function* persistSettingsForGroup( group: string ) {
 			);
 		}
 
+		// Clear any error left over from a previous failed save, otherwise the
+		// stale error keeps being reported for every subsequent success.
+		yield clearErrorForGroup( group );
 		// remove dirtyKeys from map - note we're only doing this if there is no error.
 		yield clearIsDirty( group );
+		// Marked as finished last so that consumers watching `isRequesting`
+		// for the end of a save never see it flip while the stale error is
+		// still in state.
+		yield setIsRequesting( group, false );
 	} catch ( e ) {
 		yield updateErrorForGroup( group, null, e );
 		yield setIsRequesting( group, false );
@@ -148,6 +160,7 @@ export type Actions = ReturnType<
 	| typeof updateErrorForGroup
 	| typeof setIsRequesting
 	| typeof clearIsDirty
+	| typeof clearErrorForGroup
 	| typeof clearSettings
 >;
 

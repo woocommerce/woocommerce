@@ -12,10 +12,10 @@ Keep the _[Release Troubleshooting & Recovery](https://developer.woocommerce.com
 
 ### 1. Release readiness review
 
-Go through this with the Product DRI (named on the parent tracking issue) before starting the build. The goal is a deliberate "this RC is ready to go out" call, with the evidence in one place. See the [readiness guide](https://developer.woocommerce.com/docs/contribution/releases/readiness/) for details on each item.
+Go through this checklist together with the Product DRIs named on the parent tracking issue before starting the build - ping `@woo-core-release` in Slack if you need to reach them or aren't sure who's available. The goal is a deliberate "this RC is ready to go out" call, with the evidence in one place. See the [readiness guide](https://developer.woocommerce.com/docs/contribution/releases/readiness/) for details on each item.
 
-- [ ] Review the QIT compatibility regression sweep report for this prerelease. Every introduced issue has a verdict: blocking or not.
-- [ ] Every open finding against this release (bug reports, testing threads, monitoring alerts) has a linked issue and a verdict: release-blocking / fix in a point release / not a bug.
+- [ ] Review the QIT compatibility regression sweep report for this prerelease. Every introduced issue has a verdict: blocking or not; non-blocking findings get their full verdict in the next item.
+- [ ] Every open finding against this release (bug reports, testing threads, monitoring alerts, non-blocking QIT sweep findings) has a linked issue and a verdict per the [release decision matrix](https://developer.woocommerce.com/docs/contribution/releases/decision-matrix/): release-blocking / fix in a point release / next release / not a bug.
 - [ ] The rollback path for this release is known: who reverts, how, and what revert means for this version (see the [troubleshooting guide](https://developer.woocommerce.com/docs/contribution/releases/troubleshooting/)).
 - [ ] Comms are ready: the changelog is in shape and there's a known-issues list if the verdicts above left anything open.
 
@@ -25,7 +25,7 @@ If an item can't be checked, raise it in `#woo-core-releases` before continuing 
 ### 2. Pre-build checks
 
 - [ ] Confirm [GitHub services](https://www.githubstatus.com/) are operational.
-- [ ] Verify no open [issues]({repository_url}/issues?q=is:open+is:issue+milestone:{release_milestone}) or [pull requests]({repository_url}/pulls?q=is:open+is:pr+milestone:{release_milestone}) exist against the `{release_milestone}` milestone. Ping authors as needed to merge or close.
+- [ ] Verify no open [issues]({repository_url}/issues?q=is:open+is:issue+milestone:{release_milestone}) or [pull requests]({repository_url}/pulls?q=is:open+is:pr+draft:false+milestone:{release_milestone}) exist against the `{release_milestone}` milestone. Ping authors as needed to merge or close.
 - [ ] Ensure that there aren't any pull requests [with label "cherry pick failed"]({repository_url}/pulls?q=is:pr+label:%22cherry+pick+failed%22) that apply to this release that haven't been actioned.
 - [ ] Confirm the `Stable tag` value [in the readme.txt on the release branch]({repository_url}/blob/{release_branch}/plugins/woocommerce/readme.txt#L7) matches the one [on WordPress.org's `trunk`](https://plugins.trac.wordpress.org/browser/woocommerce/trunk/readme.txt#L7).
 
@@ -33,7 +33,7 @@ If an item can't be checked, raise it in `#woo-core-releases` before continuing 
 ### 3. Build the release package
 
 - [ ] Run workflow **[Release: Bump version number]({repository_url}/actions/workflows/release-bump-version.yml)**: enter `{release_main_version}` as _Release branch_ and `{release_type}` as _Type of version bump to perform_.
-- [ ] Review and merge the PR that was generated against the release branch. Check for remaining open [issues]({repository_url}/issues?q=is:open+is:issue+milestone:{release_milestone}) or [pull requests]({repository_url}/pulls?q=is:open+is:pr+milestone:{release_milestone}) in the `{release_milestone}` milestone.
+- [ ] Review and merge the PR that was generated against the release branch. Check for remaining open [issues]({repository_url}/issues?q=is:open+is:issue+milestone:{release_milestone}) or [pull requests]({repository_url}/pulls?q=is:open+is:pr+draft:false+milestone:{release_milestone}) in the `{release_milestone}` milestone.
 - [ ] Run workflow **[Release: Compile changelog]({repository_url}/actions/workflows/release-compile-changelog.yml)**: enter `{release_main_version}` as _Version_ and leave _Release date_ empty, except when building the package ahead of schedule.
 - [ ] Review and merge the PRs that were generated: one against `trunk` and another one against the release branch. Both are linked in the workflow run.
 - [ ] Run workflow **[Release: Build ZIP file]({repository_url}/actions/workflows/release-build-zip-file.yml)** to build the asset and create the GitHub release: enter `{release_main_version}` as _Release branch_ and check _Create GitHub release_.

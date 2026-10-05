@@ -39,6 +39,8 @@ class WC_REST_Report_Customers_Totals_Controller extends WC_REST_Reports_Control
 	 * @return array
 	 */
 	protected function get_reports() {
+		global $wpdb;
+
 		$users_count     = count_users();
 		$total_customers = 0;
 
@@ -50,23 +52,44 @@ class WC_REST_Report_Customers_Totals_Controller extends WC_REST_Reports_Control
 			$total_customers += (int) $total;
 		}
 
-		$customers_query = new WP_User_Query(
-			array(
-				'role__not_in' => array( 'administrator', 'shop_manager' ),
-				'number'       => 0,
-				'fields'       => 'ID',
-				'count_total'  => true,
-				'meta_query'   => array( // WPCS: slow query ok.
-					array(
-						'key'     => 'paying_customer',
-						'value'   => 1,
-						'compare' => '=',
-					),
-				),
-			)
-		);
+		// Same cache group and invalidation signal WP_User_Query used, so meta written outside WooCommerce still refreshes the total.
+		$cache_key    = 'wc_report_customers_totals_paying_' . get_current_blog_id() . '_' . wp_cache_get_last_changed( 'users' );
+		$total_paying = wp_cache_get( $cache_key, 'user-queries' );
 
-		$total_paying = (int) $customers_query->get_total();
+		if ( false === $total_paying ) {
+			/*
+			 * Let WP_User_Query build the role, capability and site scoping, then count with its
+			 * clauses. Running the query itself selects and sorts every matching user ID only to
+			 * throw them away: roughly 100KB of PHP memory per 1,000 paying customers.
+			 */
+			$customers_query = new WP_User_Query();
+			$customers_query->prepare_query(
+				array(
+					'role__not_in' => array( 'administrator', 'shop_manager' ),
+					'number'       => 0,
+					'fields'       => 'ID',
+					'count_total'  => true,
+					'meta_query'   => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- The paying_customer flag lives only in usermeta, so the usermeta join is the only way to read it; the clauses are counted rather than materialised.
+						array(
+							'key'     => 'paying_customer',
+							'value'   => 1,
+							'compare' => '=',
+						),
+					),
+				)
+			);
+
+			$total_paying = $wpdb->get_var( "SELECT COUNT(*) {$customers_query->query_from} {$customers_query->query_where}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Both clauses are built and escaped by WP_User_Query::prepare_query().
+
+			// Never cache a failed count; a zeroed total would stick until the next user or user meta changed.
+			if ( null !== $total_paying ) {
+				$total_paying = (int) $total_paying;
+
+				wp_cache_set( $cache_key, $total_paying, 'user-queries' );
+			}
+		}
+
+		$total_paying = (int) $total_paying;
 
 		$data = array(
 			array(

@@ -193,7 +193,16 @@ class Packages {
 		}
 
 		// Scroll through all of the active plugins and disable them if they're merged packages.
-		$active_plugins = get_option( 'active_plugins', array() );
+		$active_plugins = (array) get_option( 'active_plugins', array() );
+		if ( is_multisite() ) {
+			$active_plugins = array_unique(
+				array_merge(
+					$active_plugins,
+					array_keys( (array) get_site_option( 'active_sitewide_plugins', array() ) )
+				)
+			);
+		}
+
 		// Deactivate the plugin if possible so that there are no conflicts.
 		foreach ( $active_plugins as $active_plugin_path ) {
 			$plugin_file = basename( plugin_basename( $active_plugin_path ), '.php' );

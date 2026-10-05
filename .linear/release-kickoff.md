@@ -6,7 +6,7 @@ This issue provides visibility on the progress of the release process of WooComm
 - **Milestone:** [{release_milestone}]({repository_url}/issues?q=is:open+milestone:{release_milestone})
 - **Release branch:** [`{release_branch}`]({repository_url}/tree/{release_branch})
 - **Release lead:** {lead_user} ({lead_team})
-- **Product DRI:** _to be confirmed - see [release roles](https://developer.woocommerce.com/docs/contribution/releases/readiness/#release-roles)_
+- **Product DRI:** James Kemp, Warren Holmes (reachable via `@woo-core-release` in Slack)
 - **Relevant dates:** ([release calendar](https://developer.woocommerce.com/release-calendar/))
   - **Feature Freeze:** {date_feature_freeze}
   - **Beta 1:** {date_beta1}
@@ -16,11 +16,17 @@ This issue provides visibility on the progress of the release process of WooComm
 
 ---
 
-⚠ Dear release lead:
+⚠ Complete the setup steps below to get started, and keep the rest of this section handy as reference throughout the release cycle.
 
-- Please read this issue carefully and familiarize yourself with the [release process documentation](https://developer.woocommerce.com/docs/contribution/releases/).
-- Confirm the Product DRI for this cycle and edit the line above with their name. The readiness review (RC sub-issue) and the go/no-go (stable sub-issue) need both of you.
-- Join the release channels in Slack (`#woo-core-releases`, `#woo-core-releases-notifications`), where discussions happen and notifications are sent.
+##### Setup
+
+- [ ] Read this issue carefully and familiarize yourself with the [release process documentation](https://developer.woocommerce.com/docs/contribution/releases/).
+- [ ] On feature freeze ({date_feature_freeze}), update `@woo-core-release` membership in Slack: add yourself, give {previous_release_lead} a heads-up, then remove them. The previous cycle's lead stays for point releases. Leave everyone else alone.
+- [ ] Join the release channels in Slack (`#woo-core-releases`, `#woo-core-releases-notifications`), where discussions happen and notifications are sent.
+
+##### Good to know
+
+- When in doubt at any step, ping `@woo-core-release` in Slack. In particular, you'll need to loop in the Product DRIs listed above via the handle for the readiness review and the go/no-go during the RC and stable releases.
 - For every release in the cycle, there's a corresponding sub-issue. On the date of each release (see schedule above), open the relevant issue and follow the instructions in it.
 - Any additional point/patch releases after the first stable must be tracked as well. Run the **[Release: Create Tracking Issue]({repository_url}/actions/workflows/release-create-tracking-issue.yml)** workflow with the version (e.g., `{release_main_version}.1`) to create the sub-issue.
 

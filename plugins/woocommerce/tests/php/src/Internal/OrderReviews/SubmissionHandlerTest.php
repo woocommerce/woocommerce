@@ -32,6 +32,7 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		update_option( 'comment_moderation', '0' );
 		update_option( 'comment_max_links', 2 );
 		update_option( 'moderation_keys', '' );
+		update_option( 'disallowed_keys', '' );
 		remove_all_filters( 'woocommerce_review_order_submitted' );
 		remove_all_filters( 'woocommerce_review_order_eligible_statuses' );
 		remove_all_filters( 'woocommerce_review_order_eligible_items' );
@@ -445,36 +446,39 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A second submission after a moderator's spam/trash verdict cannot auto-approve.
+	 * A second submission after a moderator's spam/trash verdict cannot auto-approve, whether the
+	 * spammed review has a normal VARIATION_META_KEY value or predates that meta key entirely.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $with_variation_meta False simulates a review written before 10.9.0, with no VARIATION_META_KEY row.
 	 */
-	public function test_resubmit_after_spam_verdict_cannot_autoapprove(): void {
+	public function test_resubmit_after_spam_verdict_cannot_autoapprove( bool $with_variation_meta ): void {
 		$built      = $this->make_order( 1 );
 		$order      = $built['order'];
 		$product_id = $built['product_ids'][0];
 		$item_id    = $built['item_ids'][0];
 
-		$_POST      = array(
-			'order_id' => $order->get_id(),
-			'key'      => $order->get_order_key(),
-			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
-			'reviews'  => array(
-				array(
-					'product_id'    => $product_id,
-					'order_item_id' => $item_id,
-					'rating'        => 5,
-					'text'          => 'Original review text.',
-				),
-			),
+		$comment_id = wp_insert_comment(
+			array(
+				'comment_post_ID'      => $product_id,
+				'comment_author'       => 'Jane Doe',
+				'comment_author_email' => $order->get_billing_email(),
+				'comment_content'      => 'Original review text.',
+				'comment_type'         => 'review',
+				'comment_approved'     => 1,
+			)
 		);
-		$first      = $this->dispatch();
-		$comment_id = (int) reset( $first['data']['results'] )['comment_id'];
-
-		// A moderator marks the review as spam.
+		add_comment_meta( $comment_id, ItemEligibility::ORDER_META_KEY, (int) $order->get_id(), true );
+		if ( $with_variation_meta ) {
+			add_comment_meta( $comment_id, ItemEligibility::VARIATION_META_KEY, '0', true );
+		}
 		wp_spam_comment( $comment_id );
-		$this->assertSame( 'spam', wp_get_comment_status( $comment_id ) );
+		ItemEligibility::reset_cache();
 
 		// The customer resubmits the same row.
-		$_POST  = array(
+		$_POST    = array(
 			'order_id' => $order->get_id(),
 			'key'      => $order->get_order_key(),
 			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
@@ -487,11 +491,80 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 				),
 			),
 		);
-		$second = $this->dispatch();
-		$row    = reset( $second['data']['results'] );
+		$response = $this->dispatch();
+		$row      = reset( $response['data']['results'] );
 
 		$this->assertSame( 'error', $row['status'] );
 		$this->assertSame( 'spam', wp_get_comment_status( $comment_id ), 'Moderator decision must stick; a second submission must not auto-approve.' );
+	}
+
+	/**
+	 * A spam verdict recorded against one variation's explicit meta value is scoped to that variation and
+	 * doesn't block a sibling. A verdict on a review predating VARIATION_META_KEY (pre-10.9.0) has no
+	 * per-variation identity to scope to, so it blocks the whole product on that order instead.
+	 *
+	 * @testWith [true, "A", "error"]
+	 *           [true, "B", "ok"]
+	 *           [false, "A", "error"]
+	 *           [false, "B", "error"]
+	 *
+	 * @param bool   $with_variation_meta False simulates a review written before 10.9.0, with no VARIATION_META_KEY row.
+	 * @param string $resubmit Which variation, "A" or "B", resubmits a review.
+	 * @param string $expected_status Expected row status for that resubmission.
+	 */
+	public function test_resubmit_after_spam_verdict_is_scoped_to_its_variation( bool $with_variation_meta, string $resubmit, string $expected_status ): void {
+		$variable      = WC_Helper_Product::create_variation_product();
+		$variation_ids = $variable->get_children();
+		$variation_a   = wc_get_product( $variation_ids[0] );
+		$variation_b   = wc_get_product( $variation_ids[1] );
+
+		$order = $this->make_empty_order();
+		$order->add_product( $variation_a, 1 );
+		$order->add_product( $variation_b, 1 );
+		$order->save();
+
+		$items  = array_values( $order->get_items() );
+		$item_a = $items[0];
+		$item_b = $items[1];
+
+		// A moderator marks variation A's review as spam.
+		$comment_id = wp_insert_comment(
+			array(
+				'comment_post_ID'      => $variable->get_id(),
+				'comment_author'       => 'Jane Doe',
+				'comment_author_email' => $order->get_billing_email(),
+				'comment_content'      => 'Original review text.',
+				'comment_type'         => 'review',
+				'comment_approved'     => 1,
+			)
+		);
+		add_comment_meta( $comment_id, ItemEligibility::ORDER_META_KEY, (int) $order->get_id(), true );
+		if ( $with_variation_meta ) {
+			add_comment_meta( $comment_id, ItemEligibility::VARIATION_META_KEY, (int) $variation_a->get_id(), true );
+		}
+		wp_spam_comment( $comment_id );
+		ItemEligibility::reset_cache();
+
+		$target = 'A' === $resubmit ? $variation_a : $variation_b;
+		$item   = 'A' === $resubmit ? $item_a : $item_b;
+
+		$_POST    = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $target->get_id(),
+					'order_item_id' => $item->get_id(),
+					'rating'        => 5,
+					'text'          => 'Trying again.',
+				),
+			),
+		);
+		$response = $this->dispatch();
+		$row      = reset( $response['data']['results'] );
+
+		$this->assertSame( $expected_status, $row['status'] );
 	}
 
 	/**
@@ -1008,6 +1081,304 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Insert strips markup outside the comment allow-list.
+	 */
+	public function test_insert_strips_disallowed_markup(): void {
+		$built      = $this->make_order( 1 );
+		$order      = $built['order'];
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $product_id,
+					'order_item_id' => $item_id,
+					'rating'        => 5,
+					'text'          => '<a href="https://example.test" data-wp-bind--href="state.url" style="position:fixed;inset:0">Nice</a><strong>Good</strong><script>alert(1)</script>',
+				),
+			),
+		);
+
+		$response = $this->dispatch();
+		$row      = reset( $response['data']['results'] );
+		$comment  = get_comment( $row['comment_id'] );
+
+		$this->assertStringContainsString( '<strong>Good</strong>', $comment->comment_content );
+		$this->assertStringContainsString( 'href="https://example.test"', $comment->comment_content );
+		$this->assertStringNotContainsString( 'data-wp-bind', $comment->comment_content );
+		$this->assertStringNotContainsString( 'style=', $comment->comment_content );
+		$this->assertStringNotContainsString( '<script', $comment->comment_content );
+		$this->assertSame( '', $comment->comment_author_url );
+	}
+
+	/**
+	 * @testdox Insert strips disallowed markup even when the site has removed the kses filters.
+	 */
+	public function test_insert_strips_disallowed_markup_with_kses_filters_removed(): void {
+		kses_remove_filters();
+
+		try {
+			$built      = $this->make_order( 1 );
+			$order      = $built['order'];
+			$product_id = $built['product_ids'][0];
+			$item_id    = $built['item_ids'][0];
+
+			$_POST = array(
+				'order_id' => $order->get_id(),
+				'key'      => $order->get_order_key(),
+				'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+				'reviews'  => array(
+					array(
+						'product_id'    => $product_id,
+						'order_item_id' => $item_id,
+						'rating'        => 5,
+						'text'          => '<a href="https://example.test" data-wp-bind--href="state.url" style="position:fixed;inset:0">Nice</a><strong>Good</strong><script>alert(1)</script>',
+					),
+				),
+			);
+
+			$response = $this->dispatch();
+			$row      = reset( $response['data']['results'] );
+			$comment  = get_comment( $row['comment_id'] );
+
+			$this->assertStringNotContainsString( 'data-wp-bind', $comment->comment_content );
+			$this->assertStringNotContainsString( 'style=', $comment->comment_content );
+			$this->assertStringNotContainsString( '<script', $comment->comment_content );
+		} finally {
+			kses_init_filters();
+		}
+	}
+
+	/**
+	 * @testdox Guest billing name with markup is stripped from the stored comment author.
+	 */
+	public function test_insert_strips_markup_from_guest_billing_name(): void {
+		$order = new WC_Order();
+		$order->set_billing_first_name( '<img src=x onerror=alert(1)>Jane' );
+		$order->set_billing_last_name( '' );
+		$order->set_billing_email( 'jane@example.test' );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$product = WC_Helper_Product::create_simple_product();
+		$order->add_product( $product, 1 );
+		$order->save();
+
+		$items   = array_values( $order->get_items() );
+		$item_id = $items[0]->get_id();
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $product->get_id(),
+					'order_item_id' => $item_id,
+					'rating'        => 5,
+					'text'          => 'Nice.',
+				),
+			),
+		);
+
+		$response = $this->dispatch();
+		$row      = reset( $response['data']['results'] );
+		$comment  = get_comment( $row['comment_id'] );
+
+		$this->assertStringNotContainsString( '<img', $comment->comment_author );
+		$this->assertStringNotContainsString( 'onerror', $comment->comment_author );
+		$this->assertStringContainsString( 'Jane', $comment->comment_author );
+	}
+
+	/**
+	 * @testdox A guest billing name consisting only of markup falls back to the anonymous author label.
+	 */
+	public function test_insert_falls_back_to_anonymous_when_name_is_only_markup(): void {
+		$order = new WC_Order();
+		$order->set_billing_first_name( '<img src=x onerror=alert(1)>' );
+		$order->set_billing_last_name( '' );
+		$order->set_billing_email( 'jane@example.test' );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$product = WC_Helper_Product::create_simple_product();
+		$order->add_product( $product, 1 );
+		$order->save();
+
+		$items   = array_values( $order->get_items() );
+		$item_id = $items[0]->get_id();
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $product->get_id(),
+					'order_item_id' => $item_id,
+					'rating'        => 5,
+					'text'          => 'Nice.',
+				),
+			),
+		);
+
+		$response = $this->dispatch();
+		$row      = reset( $response['data']['results'] );
+		$comment  = get_comment( $row['comment_id'] );
+
+		$this->assertSame( __( 'Anonymous', 'woocommerce' ), $comment->comment_author );
+	}
+
+	/**
+	 * @testdox Billing email with an ampersand round-trips verbatim and a resubmit reuses the same comment.
+	 */
+	public function test_insert_preserves_ampersand_in_billing_email_and_resubmit_reuses_comment(): void {
+		$order = new WC_Order();
+		$order->set_billing_first_name( 'Jane' );
+		$order->set_billing_last_name( 'Doe' );
+		$order->set_billing_email( 'a&b@example.test' );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$product = WC_Helper_Product::create_simple_product();
+		$order->add_product( $product, 1 );
+		$order->save();
+
+		$items   = array_values( $order->get_items() );
+		$item_id = $items[0]->get_id();
+
+		$_POST      = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $product->get_id(),
+					'order_item_id' => $item_id,
+					'rating'        => 4,
+					'text'          => 'First take.',
+				),
+			),
+		);
+		$first      = $this->dispatch();
+		$first_row  = reset( $first['data']['results'] );
+		$comment_id = (int) $first_row['comment_id'];
+
+		$comment = get_comment( $comment_id );
+		$this->assertSame( 'a&b@example.test', $comment->comment_author_email );
+
+		$_POST      = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $product->get_id(),
+					'order_item_id' => $item_id,
+					'rating'        => 5,
+					'text'          => 'Second take.',
+				),
+			),
+		);
+		$second     = $this->dispatch();
+		$second_row = reset( $second['data']['results'] );
+
+		$this->assertSame( $comment_id, (int) $second_row['comment_id'], 'Resubmit must reuse the same comment.' );
+	}
+
+	/**
+	 * @testdox A logged-in admin who owns the order resubmitting disallowed markup gets it stripped on update too.
+	 */
+	public function test_resubmit_by_owning_admin_strips_disallowed_markup_on_update(): void {
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+
+		$built      = $this->make_order( 1 );
+		$order      = $built['order'];
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+		$order->set_customer_id( $admin_id );
+		$order->save();
+
+		$_POST      = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $product_id,
+					'order_item_id' => $item_id,
+					'rating'        => 3,
+					'text'          => 'Plain text first.',
+				),
+			),
+		);
+		$first      = $this->dispatch();
+		$first_row  = reset( $first['data']['results'] );
+		$comment_id = (int) $first_row['comment_id'];
+
+		$_POST      = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $product_id,
+					'order_item_id' => $item_id,
+					'rating'        => 5,
+					'text'          => '<span data-wp-bind--href="state.url" style="position:fixed">Updated</span>',
+				),
+			),
+		);
+		$second     = $this->dispatch();
+		$second_row = reset( $second['data']['results'] );
+
+		$this->assertSame( $comment_id, (int) $second_row['comment_id'] );
+
+		$comment = get_comment( $comment_id );
+		$this->assertStringNotContainsString( 'data-wp-bind', $comment->comment_content );
+		$this->assertStringNotContainsString( 'style=', $comment->comment_content );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Quotes and backslashes in review text round-trip verbatim.
+	 */
+	public function test_insert_preserves_quotes_and_backslashes(): void {
+		$built      = $this->make_order( 1 );
+		$order      = $built['order'];
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		// $_POST is normally already magic-quoted by wp_magic_quotes() before the
+		// handler unslashes it; simulate that here so a literal backslash survives.
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $product_id,
+					'order_item_id' => $item_id,
+					'rating'        => 5,
+					'text'          => wp_slash( 'It\'s "great" \o/' ),
+				),
+			),
+		);
+
+		$response = $this->dispatch();
+		$row      = reset( $response['data']['results'] );
+		$comment  = get_comment( $row['comment_id'] );
+
+		$this->assertSame( 'It\'s "great" \o/', $comment->comment_content );
+	}
+
+	/**
 	 * @testdox A row for a fully-refunded line item is rejected via the eligible-items filter.
 	 */
 	public function test_rejects_row_for_fully_refunded_item(): void {
@@ -1066,5 +1437,205 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertSame( 0, $total );
+	}
+
+	/**
+	 * Submit review rows for an order and return the per-row results.
+	 *
+	 * @param WC_Order $order The order being reviewed.
+	 * @param array    $rows  Rows with product_id, order_item_id, rating and text.
+	 * @return array Result rows, in submission order.
+	 */
+	private function submit_rows( WC_Order $order, array $rows ): array {
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => $rows,
+		);
+
+		$response = $this->dispatch();
+		$results  = array_values( (array) ( $response['data']['results'] ?? array() ) );
+		$this->assertCount( count( $rows ), $results, 'Each submitted row should produce a result.' );
+
+		return $results;
+	}
+
+	/**
+	 * Submit a single-row review for the given order item.
+	 *
+	 * @param WC_Order $order      The order being reviewed.
+	 * @param int      $product_id Product ID of the row.
+	 * @param int      $item_id    Order item ID of the row.
+	 * @param int      $rating     Star rating.
+	 * @param string   $text       Review text.
+	 * @return array Result row for the submitted review.
+	 */
+	private function submit_review( WC_Order $order, int $product_id, int $item_id, int $rating, string $text ): array {
+		$results = $this->submit_rows(
+			$order,
+			array(
+				array(
+					'product_id'    => $product_id,
+					'order_item_id' => $item_id,
+					'rating'        => $rating,
+					'text'          => $text,
+				),
+			)
+		);
+
+		return $results[0];
+	}
+
+	/**
+	 * @testdox An approved review is included in the product's average rating, rating counts and review count.
+	 */
+	public function test_approved_review_updates_product_rating_aggregates(): void {
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+
+		$row = $this->submit_review( $built['order'], $product_id, $built['item_ids'][0], 5, 'Great.' );
+		$this->assertSame( 'ok', $row['status'] );
+
+		$product = wc_get_product( $product_id );
+		$this->assertEquals( 5, (float) $product->get_average_rating() );
+		$this->assertSame( array( 5 => 1 ), $product->get_rating_counts() );
+		$this->assertSame( 1, $product->get_review_count() );
+	}
+
+	/**
+	 * @testdox Editing an approved review's rating updates the product aggregates to the new rating.
+	 * @testWith ["Great."]
+	 *           ["Changed my mind."]
+	 *
+	 * @param string $edited_text Text sent with the edit; the original text keeps the row's moderation state.
+	 */
+	public function test_editing_approved_review_updates_product_rating_aggregates( string $edited_text ): void {
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$first = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Great.' );
+		$edit  = $this->submit_review( $built['order'], $product_id, $item_id, 2, $edited_text );
+		$this->assertSame( 'ok', $edit['status'] );
+		$this->assertSame( $first['comment_id'], $edit['comment_id'] );
+
+		$product = wc_get_product( $product_id );
+		$this->assertEquals( 2, (float) $product->get_average_rating() );
+		$this->assertSame( array( 2 => 1 ), $product->get_rating_counts() );
+		$this->assertSame( 1, $product->get_review_count() );
+	}
+
+	/**
+	 * @testdox A review held for moderation is not counted until it is approved.
+	 */
+	public function test_held_review_is_counted_only_after_approval(): void {
+		update_option( 'comment_moderation', '1' );
+
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+
+		$row = $this->submit_review( $built['order'], $product_id, $built['item_ids'][0], 4, 'Pending.' );
+		$this->assertSame( 'pending_moderation', $row['status'] );
+		$this->assertSame( array(), wc_get_product( $product_id )->get_rating_counts() );
+
+		wp_set_comment_status( $row['comment_id'], 'approve' );
+
+		$product = wc_get_product( $product_id );
+		$this->assertEquals( 4, (float) $product->get_average_rating() );
+		$this->assertSame( array( 4 => 1 ), $product->get_rating_counts() );
+	}
+
+	/**
+	 * @testdox A held review is counted once an edit removes the text that held it.
+	 */
+	public function test_held_review_approved_by_edit_updates_product_rating_aggregates(): void {
+		update_option( 'moderation_keys', 'hold-this' );
+
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$held = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Please hold-this review.' );
+		$this->assertSame( 'pending_moderation', $held['status'] );
+
+		$edit = $this->submit_review( $built['order'], $product_id, $item_id, 3, 'Clean text now.' );
+		$this->assertSame( 'ok', $edit['status'] );
+		$this->assertSame( $held['comment_id'], $edit['comment_id'] );
+
+		$product = wc_get_product( $product_id );
+		$this->assertEquals( 3, (float) $product->get_average_rating() );
+		$this->assertSame( array( 3 => 1 ), $product->get_rating_counts() );
+		$this->assertSame( 1, $product->get_review_count() );
+	}
+
+	/**
+	 * @testdox Reviews for two variations in one submission are both included in the parent product's aggregates.
+	 */
+	public function test_variation_reviews_update_parent_aggregates(): void {
+		$variable      = WC_Helper_Product::create_variation_product();
+		$variation_ids = $variable->get_children();
+		$variation_a   = wc_get_product( $variation_ids[0] );
+		$variation_b   = wc_get_product( $variation_ids[1] );
+
+		$order = $this->make_empty_order();
+		$order->add_product( $variation_a, 1 );
+		$order->add_product( $variation_b, 1 );
+		$order->save();
+		$items = array_values( $order->get_items() );
+
+		$results = $this->submit_rows(
+			$order,
+			array(
+				array(
+					'product_id'    => $variation_a->get_id(),
+					'order_item_id' => $items[0]->get_id(),
+					'rating'        => 5,
+					'text'          => 'Loved variation A.',
+				),
+				array(
+					'product_id'    => $variation_b->get_id(),
+					'order_item_id' => $items[1]->get_id(),
+					'rating'        => 3,
+					'text'          => 'Variation B was just OK.',
+				),
+			)
+		);
+		$this->assertSame( array( 'ok', 'ok' ), array_column( $results, 'status' ) );
+
+		$parent = wc_get_product( $variable->get_id() );
+		$this->assertEquals( 4, (float) $parent->get_average_rating() );
+		$this->assertSame(
+			array(
+				3 => 1,
+				5 => 1,
+			),
+			$parent->get_rating_counts()
+		);
+		$this->assertSame( 2, $parent->get_review_count() );
+	}
+
+	/**
+	 * @testdox A review auto-rejected for a disallowed word is counted once a clean resubmission approves it.
+	 */
+	public function test_resubmission_after_auto_rejection_updates_product_rating_aggregates(): void {
+		update_option( 'disallowed_keys', 'casino-bonus' );
+
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$rejected = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Visit casino-bonus now.' );
+		$this->assertContains( wp_get_comment_status( $rejected['comment_id'] ), array( 'spam', 'trash' ) );
+		$this->assertSame( array(), wc_get_product( $product_id )->get_rating_counts() );
+
+		$resubmitted = $this->submit_review( $built['order'], $product_id, $item_id, 4, 'Clean text this time.' );
+		$this->assertSame( 'ok', $resubmitted['status'] );
+		$this->assertSame( $rejected['comment_id'], $resubmitted['comment_id'] );
+
+		$product = wc_get_product( $product_id );
+		$this->assertEquals( 4, (float) $product->get_average_rating() );
+		$this->assertSame( array( 4 => 1 ), $product->get_rating_counts() );
+		$this->assertSame( 1, $product->get_review_count() );
 	}
 }

@@ -12,7 +12,25 @@ import DefaultDate from './default-date';
 import { getAdminSetting, ORDER_STATUSES } from '~/utils/admin-settings';
 
 const SETTINGS_FILTER = 'woocommerce_admin_analytics_settings';
-export const DEFAULT_ACTIONABLE_STATUSES = [ 'processing', 'on-hold' ];
+
+// Defaults resolved by the server for the wc_admin settings group, including the
+// `woocommerce_analytics_settings_default_*_order_statuses` filters. Missing when the
+// page did not preload them, so every consumer keeps a built-in fallback.
+const settingsDefaults = getAdminSetting( 'wcAdminSettingsDefaults', {} ) || {};
+
+const getDefaultStatuses = ( setting, fallback ) => {
+	const statuses = settingsDefaults[ setting ];
+	return Array.isArray( statuses ) ? [ ...statuses ] : fallback;
+};
+
+export const DEFAULT_EXCLUDED_STATUSES = getDefaultStatuses(
+	'woocommerce_excluded_report_order_statuses',
+	[ 'pending', 'cancelled', 'failed' ]
+);
+export const DEFAULT_ACTIONABLE_STATUSES = getDefaultStatuses(
+	'woocommerce_actionable_order_statuses',
+	[ 'processing', 'on-hold' ]
+);
 export const DEFAULT_ORDER_STATUSES = [
 	'completed',
 	'processing',
@@ -23,6 +41,7 @@ export const DEFAULT_ORDER_STATUSES = [
 	'on-hold',
 ];
 export const DEFAULT_DATE_RANGE = 'period=month&compare=previous_year';
+export const DEFAULT_DATE_TYPE = 'date_paid';
 export const SCHEDULED_IMPORT_SETTING_NAME =
 	'woocommerce_analytics_scheduled_import';
 
@@ -97,7 +116,7 @@ const baseConfig = {
 				strong: <strong />,
 			},
 		} ),
-		defaultValue: [ 'pending', 'cancelled', 'failed' ],
+		defaultValue: DEFAULT_EXCLUDED_STATUSES,
 	},
 	woocommerce_actionable_order_statuses: {
 		label: __( 'Actionable statuses:', 'woocommerce' ),
@@ -152,6 +171,7 @@ const baseConfig = {
 			'Database date field considered for Revenue and Orders reports',
 			'woocommerce'
 		),
+		defaultValue: DEFAULT_DATE_TYPE,
 	},
 };
 

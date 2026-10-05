@@ -20,8 +20,8 @@ import { isNull } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
-import { getCanMakePaymentArg } from '../../../data/payment/utils/check-payment-methods';
-import { CustomerPaymentMethodConfiguration } from '../../../data/payment/types';
+import { getCanMakePaymentArg } from '@woocommerce/block-data/payment/utils/check-payment-methods';
+import { CustomerPaymentMethodConfiguration } from '@woocommerce/block-data/payment/types';
 
 /**
  * Returns the option object for a cc or echeck saved payment method token.
