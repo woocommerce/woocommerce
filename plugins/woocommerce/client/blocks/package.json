@@ -194,7 +194,7 @@
 		"postcss": "catalog:tooling",
 		"postcss-color-function": "4.1.0",
 		"postcss-loader": "4.3.x",
-		"prettier": "npm:wp-prettier@3.0.3",
+		"prettier": "npm:wp-prettier@3.9.6",
 		"progress-bar-webpack-plugin": "2.1.x",
 		"react": "18.3.x",
 		"react-docgen": "5.4.3",
