@@ -11,6 +11,7 @@ import {
  */
 import { expect, test as baseTest } from '../../fixtures/fixtures';
 import { getFakeProduct } from '../../utils/data';
+import { setFilterValue } from '../../utils/filters';
 import {
 	createClassicCheckoutPage,
 	CLASSIC_CHECKOUT_PAGE,
@@ -41,6 +42,9 @@ test( 'Shortcode checkout shows or hides the State field for the selected countr
 	await createClassicCheckoutPage();
 	await page.context().clearCookies();
 	await addAProductToCart( page, product.id, 1 );
+	// Give Andorra an empty state list, as an extension can. The filter replaces
+	// every list, which leaves Cyprus and Lithuania as they are: neither has one.
+	await setFilterValue( page, 'woocommerce_states', { AD: [] } );
 	await page.goto( CLASSIC_CHECKOUT_PAGE.slug );
 
 	const country = page.locator( '#billing_country' );
@@ -57,5 +61,9 @@ test( 'Shortcode checkout shows or hides the State field for the selected countr
 
 	// A locale that hides State still hides it.
 	await country.selectOption( 'CY' );
+	await expect( stateRow ).toBeHidden();
+
+	// An empty state list keeps State hidden even though the locale shows it.
+	await country.selectOption( 'AD' );
 	await expect( stateRow ).toBeHidden();
 } );
