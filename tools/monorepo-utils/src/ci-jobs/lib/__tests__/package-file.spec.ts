@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -8,12 +10,12 @@ import fs from 'node:fs';
  */
 import { loadPackage } from '../package-file';
 
-jest.mock( 'node:fs' );
+vi.mock( 'node:fs' );
 
 describe( 'Package File', () => {
 	describe( 'loadPackage', () => {
 		it( "should throw for file that doesn't exist", () => {
-			jest.mocked( fs.readFileSync ).mockImplementation( ( path ) => {
+			vi.mocked( fs.readFileSync ).mockImplementation( ( path ) => {
 				if ( path === 'foo' ) {
 					throw new Error( 'ENOENT' );
 				}
@@ -25,7 +27,7 @@ describe( 'Package File', () => {
 		} );
 
 		it( 'should load package.json', () => {
-			jest.mocked( fs.readFileSync ).mockImplementationOnce( ( path ) => {
+			vi.mocked( fs.readFileSync ).mockImplementationOnce( ( path ) => {
 				if ( path === __dirname + '/test-package.json' ) {
 					return JSON.stringify( {
 						name: 'foo',
@@ -43,7 +45,7 @@ describe( 'Package File', () => {
 		} );
 
 		it( 'should cache using normalized paths', () => {
-			jest.mocked( fs.readFileSync ).mockImplementationOnce( ( path ) => {
+			vi.mocked( fs.readFileSync ).mockImplementationOnce( ( path ) => {
 				if ( path === __dirname + '/test-package.json' ) {
 					return JSON.stringify( {
 						name: 'foo',
@@ -55,7 +57,7 @@ describe( 'Package File', () => {
 			loadPackage( __dirname + '/test-package.json' );
 
 			// Just throw if it's called again so that we can make sure we're using the cache.
-			jest.mocked( fs.readFileSync ).mockImplementationOnce( () => {
+			vi.mocked( fs.readFileSync ).mockImplementationOnce( () => {
 				throw new Error( 'ENOENT' );
 			} );
 

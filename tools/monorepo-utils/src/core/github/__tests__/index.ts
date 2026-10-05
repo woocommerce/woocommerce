@@ -1,12 +1,14 @@
+import { expect, it, vi } from 'vitest';
+
 /**
  * Internal dependencies
  */
 import { getLatestGithubReleaseVersion } from '../repo';
 
-jest.mock( '../api', () => {
-	return {
+vi.mock( '../api', () => {
+	return ( ( mock ) => ( { default: mock, ...mock } ) )( {
 		graphqlWithAuth: () =>
-			jest.fn().mockResolvedValue( {
+			vi.fn().mockResolvedValue( {
 				repository: {
 					releases: {
 						nodes: [
@@ -46,7 +48,7 @@ jest.mock( '../api', () => {
 					},
 				},
 			} ),
-	};
+	} );
 } );
 
 it( 'should return the latest release version', async () => {

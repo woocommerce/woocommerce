@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -7,36 +9,52 @@ import path from 'path';
  */
 import { Logger } from '../../core/logger';
 import { resolveChannels, sendFile, sendMessage } from '../slack-service';
-
-jest.mock( '../../core/logger', () => ( {
-	Logger: {
-		error: jest.fn(),
-		notice: jest.fn(),
-		startTask: jest.fn(),
-		endTask: jest.fn(),
-	},
-} ) );
-
-jest.mock( '@slack/web-api', () => ( {
-	WebClient: jest.fn().mockImplementation( () => ( {
-		chat: { postMessage: jest.fn() },
-		files: { uploadV2: jest.fn() },
-	} ) ),
-	ErrorCode: {},
-} ) );
-
+vi.mock( '../../core/logger', () => {
+	const mock = {
+		Logger: {
+			error: vi.fn(),
+			notice: vi.fn(),
+			startTask: vi.fn(),
+			endTask: vi.fn(),
+		},
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@slack/web-api', () => {
+	const mock = {
+		WebClient: vi.fn().mockImplementation( () => ( {
+			chat: {
+				postMessage: vi.fn(),
+			},
+			files: {
+				uploadV2: vi.fn(),
+			},
+		} ) ),
+		ErrorCode: {},
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'resolveChannels', () => {
 	const originalEnv = process.env;
-
 	beforeEach( () => {
-		process.env = { ...originalEnv };
+		process.env = {
+			...originalEnv,
+		};
 	} );
-
 	afterEach( () => {
 		process.env = originalEnv;
-		jest.restoreAllMocks();
+		vi.restoreAllMocks();
 	} );
-
 	it.each( [
 		{
 			env: '  C123 ,C456,,  C789  ',
@@ -53,7 +71,6 @@ describe( 'resolveChannels', () => {
 		const result = resolveChannels();
 		expect( result ).toEqual( expected );
 	} );
-
 	it.each( [
 		{
 			env: undefined,
@@ -76,18 +93,21 @@ describe( 'resolveChannels', () => {
 		);
 	} );
 } );
-
 describe( 'sendMessage', () => {
 	let client;
 	beforeEach( () => {
 		client = {
-			chat: { postMessage: jest.fn() },
+			chat: {
+				postMessage: vi.fn(),
+			},
 		};
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	} );
-
 	it( 'should send a message to all channels and log notice on success', async () => {
-		client.chat.postMessage.mockResolvedValue( { ok: true, ts: '123' } );
+		client.chat.postMessage.mockResolvedValue( {
+			ok: true,
+			ts: '123',
+		} );
 		const channels = [ 'C1', 'C2' ];
 		await sendMessage( client, 'Hello', channels, undefined );
 		expect( client.chat.postMessage ).toHaveBeenCalledTimes(
@@ -106,9 +126,11 @@ describe( 'sendMessage', () => {
 			unfurl_media: false,
 		} );
 	} );
-
 	it( 'should send a message as a reply when replyTs is set', async () => {
-		client.chat.postMessage.mockResolvedValue( { ok: true, ts: '123' } );
+		client.chat.postMessage.mockResolvedValue( {
+			ok: true,
+			ts: '123',
+		} );
 		const channels = [ 'C1' ];
 		await sendMessage( client, 'Hello in thread', channels, 'thread123' );
 		expect( client.chat.postMessage ).toHaveBeenCalledWith( {
@@ -119,7 +141,6 @@ describe( 'sendMessage', () => {
 			thread_ts: 'thread123',
 		} );
 	} );
-
 	it.each( [
 		{
 			desc: 'should error if Slack client returns an error',
@@ -128,7 +149,10 @@ describe( 'sendMessage', () => {
 					ok: false,
 					error: 'some_error',
 				} );
-				return { text: 'Hello', channels: [ 'C1' ] };
+				return {
+					text: 'Hello',
+					channels: [ 'C1' ],
+				};
 			},
 			expectedError:
 				'Slack client returned an error: some_error, message failed to send.',
@@ -136,7 +160,10 @@ describe( 'sendMessage', () => {
 		{
 			desc: 'should error if text is missing',
 			setup: () => {
-				return { text: '', channels: [ 'C1' ] };
+				return {
+					text: '',
+					channels: [ 'C1' ],
+				};
 			},
 			expectedError: 'The text argument is missing.',
 		},
@@ -146,7 +173,10 @@ describe( 'sendMessage', () => {
 				testClient.chat.postMessage.mockRejectedValue(
 					new Error( 'fail' )
 				);
-				return { text: 'Hello', channels: [ 'C1' ] };
+				return {
+					text: 'Hello',
+					channels: [ 'C1' ],
+				};
 			},
 			expectedError: expect.any( Error ),
 		},
@@ -156,23 +186,23 @@ describe( 'sendMessage', () => {
 		expect( Logger.error ).toHaveBeenCalledWith( expectedError );
 	} );
 } );
-
 describe( 'sendFile', () => {
 	let client;
 	const filePath = path.resolve( __dirname, 'file.txt' );
-
 	beforeEach( () => {
 		client = {
-			files: { uploadV2: jest.fn() },
+			files: {
+				uploadV2: vi.fn(),
+			},
 		};
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	} );
-
 	it( 'should upload a file to all channels and log notice on success', async () => {
-		client.files.uploadV2.mockResolvedValue( { ok: true } );
+		client.files.uploadV2.mockResolvedValue( {
+			ok: true,
+		} );
 		const channels = [ 'C1', 'C2' ];
 		await sendFile( client, 'A comment', filePath, channels, 'ts123' );
-
 		expect( client.files.uploadV2 ).toHaveBeenCalledTimes(
 			channels.length
 		);
@@ -187,7 +217,6 @@ describe( 'sendFile', () => {
 			);
 		}
 	} );
-
 	it( 'should error if file does not exist', async () => {
 		await sendFile(
 			client,
@@ -200,7 +229,6 @@ describe( 'sendFile', () => {
 			'Unable to open file with path: /not/a/real/file.txt'
 		);
 	} );
-
 	it.each( [
 		{
 			desc: 'should error if uploadV2 throws',
@@ -209,7 +237,10 @@ describe( 'sendFile', () => {
 		},
 		{
 			desc: 'should error with missing_scope message',
-			receivedError: { code: undefined, message: 'missing_scope' },
+			receivedError: {
+				code: undefined,
+				message: 'missing_scope',
+			},
 			expectedError:
 				'The provided token does not have the required scopes, please add files:write and chat:write to the token.',
 		},

@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -10,13 +12,13 @@ import fs from 'node:fs';
 import { loadPackage } from '../package-file';
 import { buildProjectGraph } from '../project-graph';
 
-jest.mock( 'node:child_process' );
-jest.mock( '../package-file' );
+vi.mock( 'node:child_process' );
+vi.mock( '../package-file' );
 
 describe( 'Project Graph', () => {
 	describe( 'buildProjectGraph', () => {
 		it( 'should build graph from pnpm list', () => {
-			jest.mocked( execSync ).mockImplementation( ( command ) => {
+			vi.mocked( execSync ).mockImplementation( ( command ) => {
 				if ( command === 'pnpm -w root' ) {
 					return '/test/monorepo/node_modules';
 				}
@@ -30,7 +32,7 @@ describe( 'Project Graph', () => {
 				throw new Error( 'Invalid command' );
 			} );
 
-			jest.mocked( loadPackage ).mockImplementation( ( path ) => {
+			vi.mocked( loadPackage ).mockImplementation( ( path ) => {
 				const matches = path.match( /project-([abcd])\/package.json$/ );
 				if ( ! matches ) {
 					throw new Error( `Invalid project path: ${ path }.` );

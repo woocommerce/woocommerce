@@ -1,14 +1,14 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * Internal dependencies
  */
 import { JobType, testTypes } from '../config';
 import { createJobsForChanges, getShardedJobs } from '../job-processing';
 import { parseTestEnvConfig } from '../test-environment';
-
-jest.mock( '../test-environment' );
-
-describe( 'Job Processing', () => {
-	describe( 'createJobsForChanges', () => {
+vi.mock( '../test-environment' );
+describe( 'Job Processing', async () => {
+	describe( 'createJobsForChanges', async () => {
 		it( 'should do nothing with no CI configs', async () => {
 			const jobs = await createJobsForChanges(
 				{
@@ -19,11 +19,9 @@ describe( 'Job Processing', () => {
 				{},
 				{}
 			);
-
 			expect( jobs.lint ).toHaveLength( 0 );
 			expect( jobs.test ).toHaveLength( 0 );
 		} );
-
 		it( 'should trigger lint job for single node', async () => {
 			const jobs = await createJobsForChanges(
 				{
@@ -46,7 +44,6 @@ describe( 'Job Processing', () => {
 				},
 				{}
 			);
-
 			expect( jobs.lint ).toHaveLength( 1 );
 			expect( jobs.lint ).toContainEqual( {
 				projectName: 'test',
@@ -55,7 +52,6 @@ describe( 'Job Processing', () => {
 			} );
 			expect( jobs.test ).toHaveLength( 0 );
 		} );
-
 		it( 'should replace vars in lint command', async () => {
 			const jobs = await createJobsForChanges(
 				{
@@ -83,7 +79,6 @@ describe( 'Job Processing', () => {
 					},
 				}
 			);
-
 			expect( jobs.lint ).toHaveLength( 1 );
 			expect( jobs.lint ).toContainEqual( {
 				projectName: 'test',
@@ -92,7 +87,6 @@ describe( 'Job Processing', () => {
 			} );
 			expect( jobs.test ).toHaveLength( 0 );
 		} );
-
 		it( 'should throw when invalid var to replace in lint command', async () => {
 			const promise = createJobsForChanges(
 				{
@@ -115,10 +109,8 @@ describe( 'Job Processing', () => {
 				},
 				{}
 			);
-
 			await expect( promise ).rejects.toThrow();
 		} );
-
 		it( 'should not trigger a lint job that has already been created', async () => {
 			const jobs = await createJobsForChanges(
 				{
@@ -142,11 +134,9 @@ describe( 'Job Processing', () => {
 				},
 				{}
 			);
-
 			expect( jobs.lint ).toHaveLength( 0 );
 			expect( jobs.test ).toHaveLength( 0 );
 		} );
-
 		it( 'should not trigger lint job for single node with no changes', async () => {
 			const jobs = await createJobsForChanges(
 				{
@@ -167,11 +157,9 @@ describe( 'Job Processing', () => {
 				{},
 				{}
 			);
-
 			expect( jobs.lint ).toHaveLength( 0 );
 			expect( jobs.test ).toHaveLength( 0 );
 		} );
-
 		it( 'should trigger lint job for project graph', async () => {
 			const jobs = await createJobsForChanges(
 				{
@@ -227,7 +215,6 @@ describe( 'Job Processing', () => {
 				},
 				{}
 			);
-
 			expect( jobs.lint ).toHaveLength( 2 );
 			expect( jobs.lint ).toContainEqual( {
 				projectName: 'test',
@@ -241,7 +228,6 @@ describe( 'Job Processing', () => {
 			} );
 			expect( jobs.test ).toHaveLength( 0 );
 		} );
-
 		it( 'should trigger lint job for project graph with empty config parent', async () => {
 			const jobs = await createJobsForChanges(
 				{
@@ -287,7 +273,6 @@ describe( 'Job Processing', () => {
 				},
 				{}
 			);
-
 			expect( jobs.lint ).toHaveLength( 2 );
 			expect( jobs.lint ).toContainEqual( {
 				projectName: 'test-a',
@@ -301,10 +286,8 @@ describe( 'Job Processing', () => {
 			} );
 			expect( jobs.test ).toHaveLength( 0 );
 		} );
-
 		it( 'should trigger test job for single node', async () => {
 			const testType = 'unit';
-
 			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
@@ -329,7 +312,6 @@ describe( 'Job Processing', () => {
 				},
 				{}
 			);
-
 			expect( jobs.lint ).toHaveLength( 0 );
 			expect( jobs.test ).toHaveLength( 1 );
 			expect( jobs.test ).toContainEqual( {
@@ -345,7 +327,6 @@ describe( 'Job Processing', () => {
 				testType,
 			} );
 		} );
-
 		it( 'should replace vars in test command', async () => {
 			const testType = 'unit';
 			const jobs = await createJobsForChanges(
@@ -377,7 +358,6 @@ describe( 'Job Processing', () => {
 					},
 				}
 			);
-
 			expect( jobs.lint ).toHaveLength( 0 );
 			expect( jobs.test ).toHaveLength( 1 );
 			expect( jobs.test ).toContainEqual( {
@@ -393,7 +373,6 @@ describe( 'Job Processing', () => {
 				testType,
 			} );
 		} );
-
 		it( 'should not trigger a test job that has already been created', async () => {
 			const testType = 'unit';
 			const jobs = await createJobsForChanges(
@@ -421,11 +400,9 @@ describe( 'Job Processing', () => {
 				},
 				{}
 			);
-
 			expect( jobs.lint ).toHaveLength( 0 );
 			expect( jobs.test ).toHaveLength( 0 );
 		} );
-
 		it( 'should not trigger test job for single node with no changes', async () => {
 			const testType = 'unit';
 			const jobs = await createJobsForChanges(
@@ -450,11 +427,9 @@ describe( 'Job Processing', () => {
 				{},
 				{}
 			);
-
 			expect( jobs.lint ).toHaveLength( 0 );
 			expect( jobs.test ).toHaveLength( 0 );
 		} );
-
 		it( 'should trigger test job for project graph', async () => {
 			const testType = 'unit';
 			const jobs = await createJobsForChanges(
@@ -520,7 +495,6 @@ describe( 'Job Processing', () => {
 				},
 				{}
 			);
-
 			expect( jobs.lint ).toHaveLength( 0 );
 			expect( jobs.test ).toHaveLength( 2 );
 			expect( jobs.test ).toContainEqual( {
@@ -548,7 +522,6 @@ describe( 'Job Processing', () => {
 				testType,
 			} );
 		} );
-
 		it.each( testTypes )(
 			'should trigger %s test job for single node',
 			async ( testType ) => {
@@ -576,7 +549,6 @@ describe( 'Job Processing', () => {
 					},
 					{}
 				);
-
 				expect( jobs.lint ).toHaveLength( 0 );
 				expect( jobs.test ).toHaveLength( 1 );
 				expect( jobs.test ).toContainEqual( {
@@ -593,7 +565,6 @@ describe( 'Job Processing', () => {
 				} );
 			}
 		);
-
 		it( 'should trigger test job for dependent without changes', async () => {
 			const testType = 'unit';
 			const jobs = await createJobsForChanges(
@@ -639,7 +610,6 @@ describe( 'Job Processing', () => {
 				},
 				{}
 			);
-
 			expect( jobs.lint ).toHaveLength( 0 );
 			expect( jobs.test ).toHaveLength( 2 );
 			expect( jobs.test ).toContainEqual( {
@@ -667,7 +637,6 @@ describe( 'Job Processing', () => {
 				testType,
 			} );
 		} );
-
 		it( 'should trigger test job for dependent of dependent without changes', async () => {
 			const testType = 'unit';
 			const jobs = await createJobsForChanges(
@@ -732,7 +701,6 @@ describe( 'Job Processing', () => {
 				},
 				{}
 			);
-
 			expect( jobs.lint ).toHaveLength( 0 );
 			expect( jobs.test ).toHaveLength( 3 );
 			expect( jobs.test ).toContainEqual( {
@@ -772,7 +740,6 @@ describe( 'Job Processing', () => {
 				testType,
 			} );
 		} );
-
 		it( 'should not trigger test job for ignored dependency', async () => {
 			const testType = 'unit';
 			const jobs = await createJobsForChanges(
@@ -837,7 +804,6 @@ describe( 'Job Processing', () => {
 				},
 				{}
 			);
-
 			expect( jobs.lint ).toHaveLength( 0 );
 			expect( jobs.test ).toHaveLength( 1 );
 			expect( jobs.test ).toContainEqual( {
@@ -853,7 +819,6 @@ describe( 'Job Processing', () => {
 				testType,
 			} );
 		} );
-
 		it( 'should not trigger test job if all dependencies are ignored', async () => {
 			const testType = 'unit';
 			const jobs = await createJobsForChanges(
@@ -918,7 +883,6 @@ describe( 'Job Processing', () => {
 				},
 				{}
 			);
-
 			expect( jobs.lint ).toHaveLength( 0 );
 			expect( jobs.test ).toHaveLength( 1 );
 			expect( jobs.test ).toContainEqual( {
@@ -934,7 +898,6 @@ describe( 'Job Processing', () => {
 				testType,
 			} );
 		} );
-
 		it( 'should trigger test job if the listed dependency is changed', async () => {
 			const testType = 'unit';
 			const jobs = await createJobsForChanges(
@@ -981,7 +944,6 @@ describe( 'Job Processing', () => {
 				},
 				{}
 			);
-
 			expect( jobs.lint ).toHaveLength( 0 );
 			expect( jobs.test ).toHaveLength( 2 );
 			expect( jobs.test ).toContainEqual( {
@@ -1009,7 +971,6 @@ describe( 'Job Processing', () => {
 				testType,
 			} );
 		} );
-
 		it( 'should not trigger job when all changes are ignored', async () => {
 			const jobs = await createJobsForChanges(
 				{
@@ -1033,11 +994,9 @@ describe( 'Job Processing', () => {
 				},
 				{}
 			);
-
 			expect( jobs.lint ).toHaveLength( 0 );
 			expect( jobs.test ).toHaveLength( 0 );
 		} );
-
 		it( 'should trigger job when changes remain after ignoring', async () => {
 			const jobs = await createJobsForChanges(
 				{
@@ -1061,7 +1020,6 @@ describe( 'Job Processing', () => {
 				},
 				{}
 			);
-
 			expect( jobs.lint ).toHaveLength( 1 );
 			expect( jobs.lint ).toContainEqual( {
 				projectName: 'test',
@@ -1069,7 +1027,6 @@ describe( 'Job Processing', () => {
 				command: 'test-lint',
 			} );
 		} );
-
 		it( 'should not force test job for dependency changes the job ignores', async () => {
 			const testType = 'unit';
 			const jobs = await createJobsForChanges(
@@ -1129,7 +1086,6 @@ describe( 'Job Processing', () => {
 				testType,
 			} );
 		} );
-
 		it( 'should force test job when an ignored change spawns dependency jobs', async () => {
 			const testType = 'unit';
 			const jobs = await createJobsForChanges(
@@ -1181,7 +1137,6 @@ describe( 'Job Processing', () => {
 			// retest regardless of what it ignores.
 			expect( jobs.test ).toHaveLength( 2 );
 		} );
-
 		it( 'should not trigger test job when the listed dependency only has ignored changes', async () => {
 			const testType = 'unit';
 			const jobs = await createJobsForChanges(
@@ -1216,10 +1171,8 @@ describe( 'Job Processing', () => {
 				},
 				{}
 			);
-
 			expect( jobs.test ).toHaveLength( 0 );
 		} );
-
 		it( 'should not force lint job for ignored shared ESLint project changes', async () => {
 			const jobs = await createJobsForChanges(
 				{
@@ -1249,10 +1202,8 @@ describe( 'Job Processing', () => {
 				},
 				{}
 			);
-
 			expect( jobs.lint ).toHaveLength( 0 );
 		} );
-
 		it( 'should trigger job with ignore when all changes are forced', async () => {
 			const jobs = await createJobsForChanges(
 				{
@@ -1274,16 +1225,13 @@ describe( 'Job Processing', () => {
 				true,
 				{}
 			);
-
 			expect( jobs.lint ).toHaveLength( 1 );
 		} );
-
 		it( 'should trigger test job for single node and parse test environment config', async () => {
 			const testType = 'unit';
-			jest.mocked( parseTestEnvConfig ).mockResolvedValue( {
+			vi.mocked( parseTestEnvConfig ).mockResolvedValue( {
 				WP_ENV_CORE: 'https://wordpress.org/latest.zip',
 			} );
-
 			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
@@ -1319,7 +1267,6 @@ describe( 'Job Processing', () => {
 					},
 				}
 			);
-
 			expect( jobs.lint ).toHaveLength( 0 );
 			expect( jobs.test ).toHaveLength( 1 );
 			expect( jobs.test ).toContainEqual( {
@@ -1338,10 +1285,8 @@ describe( 'Job Processing', () => {
 				testType: 'unit',
 			} );
 		} );
-
 		it( 'should mark jobs configured to use the shared plugin build', async () => {
-			jest.mocked( parseTestEnvConfig ).mockResolvedValue( {} );
-
+			vi.mocked( parseTestEnvConfig ).mockResolvedValue( {} );
 			const jobs = await createJobsForChanges(
 				{
 					name: '@woocommerce/plugin-woocommerce',
@@ -1371,14 +1316,11 @@ describe( 'Job Processing', () => {
 				},
 				{}
 			);
-
 			expect( jobs.test ).toHaveLength( 1 );
 			expect( jobs.test[ 0 ].usesSharedPluginBuild ).toBe( true );
 		} );
-
 		it( 'should not mark jobs without the shared plugin build flag', async () => {
-			jest.mocked( parseTestEnvConfig ).mockResolvedValue( {} );
-
+			vi.mocked( parseTestEnvConfig ).mockResolvedValue( {} );
 			const jobs = await createJobsForChanges(
 				{
 					name: '@woocommerce/plugin-woocommerce',
@@ -1407,11 +1349,9 @@ describe( 'Job Processing', () => {
 				},
 				{}
 			);
-
 			expect( jobs.test ).toHaveLength( 1 );
 			expect( jobs.test[ 0 ].usesSharedPluginBuild ).toBeUndefined();
 		} );
-
 		it( 'should trigger all jobs for a single node with changes set to "true"', async () => {
 			const testType = 'unit';
 			const jobs = await createJobsForChanges(
@@ -1442,7 +1382,6 @@ describe( 'Job Processing', () => {
 				true,
 				{}
 			);
-
 			expect( jobs.lint ).toHaveLength( 1 );
 			expect( jobs.lint ).toContainEqual( {
 				projectName: 'test',
@@ -1463,7 +1402,6 @@ describe( 'Job Processing', () => {
 				testType: 'unit',
 			} );
 		} );
-
 		it( 'should trigger sharded test jobs for single node', async () => {
 			const testType = 'unit';
 			const jobs = await createJobsForChanges(
@@ -1493,7 +1431,6 @@ describe( 'Job Processing', () => {
 				},
 				{}
 			);
-
 			expect( jobs.lint ).toHaveLength( 0 );
 			expect( jobs.test ).toHaveLength( 2 );
 			expect( jobs.test ).toEqual(
@@ -1525,7 +1462,6 @@ describe( 'Job Processing', () => {
 				] )
 			);
 		} );
-
 		it( 'should trigger job with event configured but no event cli argument', async () => {
 			const testType = 'unit';
 			const jobs = await createJobsForChanges(
@@ -1555,7 +1491,6 @@ describe( 'Job Processing', () => {
 				},
 				{}
 			);
-
 			expect( jobs.lint ).toHaveLength( 0 );
 			expect( jobs.test ).toHaveLength( 2 );
 			expect( jobs.test ).toEqual(
@@ -1587,7 +1522,6 @@ describe( 'Job Processing', () => {
 				] )
 			);
 		} );
-
 		it( 'should trigger job with event configured and matching event cli argument', async () => {
 			const testType = 'unit';
 			const jobs = await createJobsForChanges(
@@ -1615,9 +1549,13 @@ describe( 'Job Processing', () => {
 				{
 					test: [ 'test.js' ],
 				},
-				{ commandVars: { baseRef: 'test-base-ref', event: 'push' } }
+				{
+					commandVars: {
+						baseRef: 'test-base-ref',
+						event: 'push',
+					},
+				}
 			);
-
 			expect( jobs.lint ).toHaveLength( 0 );
 			expect( jobs.test ).toHaveLength( 2 );
 			expect( jobs.test ).toEqual(
@@ -1649,7 +1587,6 @@ describe( 'Job Processing', () => {
 				] )
 			);
 		} );
-
 		it( 'should not trigger job with event configured but not matching event cli argument', async () => {
 			const testType = 'unit';
 			const jobs = await createJobsForChanges(
@@ -1684,11 +1621,9 @@ describe( 'Job Processing', () => {
 					},
 				}
 			);
-
 			expect( jobs.lint ).toHaveLength( 0 );
 			expect( jobs.test ).toHaveLength( 0 );
 		} );
-
 		it( 'should create non-optional lint job', async () => {
 			const jobs = await createJobsForChanges(
 				{
@@ -1717,7 +1652,6 @@ describe( 'Job Processing', () => {
 					},
 				}
 			);
-
 			expect( jobs.lint ).toHaveLength( 1 );
 			expect( jobs.lint ).toContainEqual( {
 				projectName: 'test',
@@ -1728,7 +1662,6 @@ describe( 'Job Processing', () => {
 			} );
 			expect( jobs.test ).toHaveLength( 0 );
 		} );
-
 		it( 'should create optional test job', async () => {
 			const testType = 'unit';
 			const jobs = await createJobsForChanges(
@@ -1761,7 +1694,6 @@ describe( 'Job Processing', () => {
 					},
 				}
 			);
-
 			expect( jobs.lint ).toHaveLength( 0 );
 			expect( jobs.test ).toHaveLength( 1 );
 			expect( jobs.test ).toContainEqual( {
@@ -1780,7 +1712,6 @@ describe( 'Job Processing', () => {
 			} );
 		} );
 	} );
-
 	describe( 'getShardedJobs', () => {
 		it( 'should create sharded jobs', async () => {
 			const jobs = getShardedJobs(
@@ -1817,7 +1748,6 @@ describe( 'Job Processing', () => {
 					},
 				}
 			);
-
 			expect( jobs ).toHaveLength( 2 );
 			expect( jobs ).toEqual(
 				expect.arrayContaining( [
@@ -1860,7 +1790,6 @@ describe( 'Job Processing', () => {
 				] )
 			);
 		} );
-
 		it( 'should not create sharded jobs when there are no sharding arguments', async () => {
 			const jobs = getShardedJobs(
 				{
@@ -1896,7 +1825,6 @@ describe( 'Job Processing', () => {
 					},
 				}
 			);
-
 			expect( jobs ).toHaveLength( 1 );
 			expect( jobs ).toContainEqual( {
 				projectName: 'test',
@@ -1917,7 +1845,6 @@ describe( 'Job Processing', () => {
 				},
 			} );
 		} );
-
 		it( 'should apply a single sharding argument as one job without an N/M suffix', async () => {
 			const jobs = getShardedJobs(
 				{
@@ -1953,7 +1880,6 @@ describe( 'Job Processing', () => {
 					},
 				}
 			);
-
 			expect( jobs ).toHaveLength( 1 );
 			expect( jobs ).toContainEqual( {
 				projectName: 'test',

@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * Internal dependencies
  */
@@ -11,12 +13,12 @@ import {
 } from '../github';
 import { Logger } from '../../../core/logger';
 
-jest.mock( '../../../core/logger', () => {
-	return {
+vi.mock( '../../../core/logger', () => {
+	return ( ( mock ) => ( { default: mock, ...mock } ) )( {
 		Logger: {
-			error: jest.fn(),
+			error: vi.fn(),
 		},
-	};
+	} );
 } );
 
 describe( 'shouldAutomateChangelog', () => {
