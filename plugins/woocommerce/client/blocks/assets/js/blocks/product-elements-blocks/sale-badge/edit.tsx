@@ -3,7 +3,7 @@
  */
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { PanelBody, SelectControl, TextControl } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import type { BlockEditProps } from '@wordpress/blocks';
 import type { ReactElement } from 'react';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
@@ -71,6 +71,14 @@ const Edit = ( {
 							__next40pxDefaultSize
 							__nextHasNoMarginBottom
 							label={ __( 'Text', 'woocommerce' ) }
+							help={ sprintf(
+								/* translators: %s: default sale badge text. */
+								__(
+									'If left empty, the badge will display ‘%s’.',
+									'woocommerce'
+								),
+								__( 'Sale', 'woocommerce' )
+							) }
 							value={
 								attributes.saleText ??
 								__( 'Sale', 'woocommerce' )
