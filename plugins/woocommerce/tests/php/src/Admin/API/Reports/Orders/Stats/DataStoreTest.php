@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Admin\API\Reports\Orders\Stats;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Helper_Order;
@@ -680,6 +681,65 @@ class DataStoreTest extends WC_Unit_Test_Case {
 			$wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $order->get_id() )
 		);
 		$this->assertSame( 0, $count, 'Building the row should not store it.' );
+	}
+
+	/**
+	 * @testdox get_order_stats_row_data() does not change the returning-customer flags of the customer's other orders.
+	 */
+	public function test_get_order_stats_row_data_does_not_reassign_first_order(): void {
+		global $wpdb;
+
+		$customer_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		$first_order = WC_Helper_Order::create_order( $customer_id );
+		$first_order->set_date_created( '2024-01-10 10:00:00' );
+		$first_order->set_status( OrderStatus::PROCESSING );
+		$first_order->save();
+		OrdersStatsDataStore::sync_order( $first_order->get_id() );
+
+		// An older order that analytics has not imported yet.
+		$older_order = WC_Helper_Order::create_order( $customer_id );
+		$older_order->set_date_created( '2024-01-01 10:00:00' );
+		$older_order->set_status( OrderStatus::PROCESSING );
+		$older_order->save();
+		$wpdb->delete( "{$wpdb->prefix}wc_order_stats", array( 'order_id' => $older_order->get_id() ) );
+
+		$returning_flag = static function ( $id ) use ( $wpdb ) {
+			return $wpdb->get_var(
+				$wpdb->prepare( "SELECT returning_customer FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $id )
+			);
+		};
+		$this->assertSame( '0', $returning_flag( $first_order->get_id() ), 'The imported order should start as the first order.' );
+
+		$data = OrdersStatsDataStore::get_order_stats_row_data( $older_order );
+
+		$this->assertFalse( $data['returning_customer'], 'The older order should be reported as the first order.' );
+		$this->assertSame( '0', $returning_flag( $first_order->get_id() ), 'Building a row should not change other stats rows.' );
+
+		OrdersStatsDataStore::update( $older_order );
+
+		$this->assertSame( '1', $returning_flag( $first_order->get_id() ), 'update() should still mark the later order as returning.' );
+	}
+
+	/**
+	 * @testdox get_order_stats_row_data() uses unsaved changes on the order passed in.
+	 */
+	public function test_get_order_stats_row_data_uses_unsaved_changes(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->set_total( 123.45 );
+
+		$data = OrdersStatsDataStore::get_order_stats_row_data( $order );
+
+		$this->assertEquals( 123.45, $data['total_sales'], 'The row should use the in-memory total.' );
+	}
+
+	/**
+	 * @testdox get_order_stats_row_data() returns false when the order stats data filter returns a non-array.
+	 */
+	public function test_get_order_stats_row_data_returns_false_for_non_array_filter_result(): void {
+		$order = WC_Helper_Order::create_order();
+		add_filter( 'woocommerce_analytics_update_order_stats_data', '__return_null' );
+
+		$this->assertFalse( OrdersStatsDataStore::get_order_stats_row_data( $order ), 'A non-array row should be returned as false.' );
 	}
 
 	/**
