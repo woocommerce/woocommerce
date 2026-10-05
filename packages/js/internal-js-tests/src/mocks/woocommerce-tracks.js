@@ -1,7 +1,6 @@
-'use strict';
+import { vi } from 'vitest';
 
-module.exports = {
-	recordEvent: jest.fn(),
-	recordPageView: jest.fn(),
-	bumpStat: jest.fn(),
-};
+export const recordEvent = vi.fn();
+export const recordPageView = vi.fn();
+export const bumpStat = vi.fn();
+export const queueRecordEvent = vi.fn();

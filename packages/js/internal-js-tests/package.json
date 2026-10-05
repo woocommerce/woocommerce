@@ -32,7 +32,7 @@
 		"build",
 		"build-module",
 		"build-types",
-		"jest-preset.js"
+		"vitest.config.mjs"
 	],
 	"scripts": {
 		"build": "pnpm build:project",
