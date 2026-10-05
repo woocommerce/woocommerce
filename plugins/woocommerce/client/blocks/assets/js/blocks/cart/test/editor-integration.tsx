@@ -110,6 +110,7 @@ describe( 'Cart block editor integration', () => {
 		);
 
 		// Open the block inserter for Order Summary.
+		// eslint-disable-next-line testing-library/no-unnecessary-act -- Gutenberg schedules asynchronous updates after these interactions.
 		await act( async () => {
 			await userEvent.click( orderSummaryAddButton );
 		} );
@@ -132,6 +133,7 @@ describe( 'Cart block editor integration', () => {
 
 		// Test Filled Cart block - should only have Table option (no block-specific Audio filter).
 		const filledCartBlock = screen.getByLabelText( /Block: Filled Cart/i );
+		// eslint-disable-next-line testing-library/no-unnecessary-act -- Gutenberg schedules asynchronous updates after these interactions.
 		await act( async () => {
 			await userEvent.click( filledCartBlock );
 		} );
@@ -150,6 +152,7 @@ describe( 'Cart block editor integration', () => {
 		);
 
 		// Open the block inserter for Filled Cart.
+		// eslint-disable-next-line testing-library/no-unnecessary-act -- Gutenberg schedules asynchronous updates after these interactions.
 		await act( async () => {
 			await userEvent.click( filledCartAddButtons[ 0 ] );
 		} );
@@ -216,42 +219,84 @@ describe( 'Cart block editor integration', () => {
 		} );
 	} );
 
-	it( 'can switch between filled and empty cart previews', async () => {
+	it( 'can convert to Empty Cart block', async () => {
 		// The view switcher uses global data selectors and actions.
 		await setup( {}, { useSubRegistry: false } );
-		await selectBlock( /^Block: Filled Cart$/i );
 
-		const filledCartBlock =
-			screen.getByLabelText( /^Block: Filled Cart$/i );
-		const emptyCartBlock = screen.getByLabelText( /^Block: Empty Cart$/i );
+		// Verify Cart block is properly initialized in the editor
+		expect( screen.getByLabelText( /^Block: Cart$/i ) ).toBeVisible();
+
+		await selectBlock( /Block: Filled Cart/i );
+
+		const filledCartBlock = screen.getByLabelText( /Block: Filled Cart/i );
+		const emptyCartBlock = screen.getByLabelText( /Block: Empty Cart/i );
+
 		expect( filledCartBlock ).toBeVisible();
+		expect( emptyCartBlock ).toBeInTheDocument();
 		expect( emptyCartBlock ).not.toBeVisible();
 
-		await selectBlock( /^Block: Cart$/i );
-		await act( () =>
-			userEvent.click(
-				screen.getByRole( 'button', { name: /Switch view/i } )
-			)
-		);
-		await act( () =>
-			userEvent.click(
-				screen.getByRole( 'menuitem', { name: /Empty Cart/i } )
-			)
-		);
+		await waitFor( () => {
+			expect(
+				screen.getByLabelText( /Block: Filled Cart$/i )
+			).toBeVisible();
+		} );
+
+		const selectParentBlockButton = screen.getByRole( 'button', {
+			name: /Select parent block: Cart/i,
+		} );
+
+		// eslint-disable-next-line testing-library/no-unnecessary-act -- Gutenberg schedules asynchronous updates after these interactions.
+		await act( async () => {
+			await userEvent.click( selectParentBlockButton );
+		} );
+
+		let switchViewButton = screen.getByRole( 'button', {
+			name: /Switch view/i,
+		} );
+
+		// eslint-disable-next-line testing-library/no-unnecessary-act -- Gutenberg schedules asynchronous updates after these interactions.
+		await act( async () => {
+			await userEvent.click( switchViewButton );
+		} );
+
+		expect( switchViewButton ).toHaveAttribute( 'aria-expanded', 'true' );
+
+		const emptyCartButton = screen.getByRole( 'menuitem', {
+			name: /Empty Cart/i,
+		} );
+
+		// eslint-disable-next-line testing-library/no-unnecessary-act -- Gutenberg schedules asynchronous updates after these interactions.
+		await act( async () => {
+			await userEvent.click( emptyCartButton );
+		} );
+
+		expect(
+			screen.getByLabelText( /^Block: Empty Cart$/i )
+		).toBeInTheDocument();
 		expect( emptyCartBlock ).toBeVisible();
 		expect( filledCartBlock ).not.toBeVisible();
 
-		await act( () =>
-			userEvent.click(
-				screen.getByRole( 'button', { name: /Switch view/i } )
-			)
-		);
-		await act( () =>
-			userEvent.click(
-				screen.getByRole( 'menuitem', { name: /Filled Cart/i } )
-			)
-		);
-		expect( filledCartBlock ).toBeVisible();
+		// Go back to filled cart
+		switchViewButton = screen.getByRole( 'button', {
+			name: /Switch view/i,
+		} );
+		// eslint-disable-next-line testing-library/no-unnecessary-act -- Gutenberg schedules asynchronous updates after these interactions.
+		await act( async () => {
+			await userEvent.click( switchViewButton );
+		} );
+
+		expect( switchViewButton ).toHaveAttribute( 'aria-expanded', 'true' );
+
+		const filledCartButton = screen.getByRole( 'menuitem', {
+			name: /Filled Cart/i,
+		} );
+
+		// eslint-disable-next-line testing-library/no-unnecessary-act -- Gutenberg schedules asynchronous updates after these interactions.
+		await act( async () => {
+			await userEvent.click( filledCartButton );
+		} );
+
 		expect( emptyCartBlock ).not.toBeVisible();
+		expect( filledCartBlock ).toBeVisible();
 	} );
 } );
