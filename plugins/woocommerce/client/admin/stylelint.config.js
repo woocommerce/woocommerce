@@ -5,7 +5,6 @@ module.exports = {
 	rules: {
 		'declaration-block-no-duplicate-properties': null,
 		'declaration-property-unit-allowed-list': null,
-		'@stylistic/string-quotes': 'double',
 		'@stylistic/value-list-comma-newline-after': null,
 		'scss/load-partial-extension': 'always',
 		// Enabled by the preset since @wordpress/stylelint-config 23.x.
