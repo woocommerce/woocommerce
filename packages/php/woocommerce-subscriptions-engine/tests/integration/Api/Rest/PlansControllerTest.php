@@ -372,19 +372,20 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		);
 	}
 
-	public function test_validate_filter_receives_the_payload_slug_and_id(): void {
+	public function test_validate_filter_receives_the_plan_and_slug(): void {
 		wp_set_current_user( $this->admin_id );
 
 		$calls = array();
 		add_filter(
 			SellingPlans::VALIDATE_PLAN_FILTER,
-			static function ( $payload, $extension_slug, $plan_id ) use ( &$calls ) {
-				$calls[] = array( $payload, $extension_slug, $plan_id );
+			static function ( $plan, $extension_slug ) use ( &$calls ) {
+				self::assertInstanceOf( Plan::class, $plan );
+				$calls[] = array( $plan->get_id(), $plan->get_name(), $plan->get_pricing_policy(), $extension_slug );
 
-				return $payload;
+				return $plan;
 			},
 			10,
-			3
+			2
 		);
 
 		$created = $this->request(
@@ -411,6 +412,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 			self::BASE . '/' . $id,
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Filtered again',
 				'pricing_policy' => array( 'one_time_fees' => array( array( 'amount' => 5 ) ) ),
 			)
 		);
@@ -419,29 +421,27 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$this->assertSame(
 			array(
 				array(
+					null,
+					'Filtered',
 					array(
-						'pricing_policy' => array(
-							'policies'   => array( array( 'type' => 'bogo' ) ),
-							'custom_key' => 'kept',
-						),
+						'policies'   => array( array( 'type' => 'bogo' ) ),
+						'custom_key' => 'kept',
 					),
 					self::EXTENSION_SLUG,
-					null,
 				),
 				array(
+					$id,
+					'Filtered again',
 					array(
-						'pricing_policy' => array(
-							'policies'      => array( array( 'type' => 'bogo' ) ),
-							'custom_key'    => 'kept',
-							'one_time_fees' => array( array( 'amount' => 5 ) ),
-						),
+						'policies'      => array( array( 'type' => 'bogo' ) ),
+						'custom_key'    => 'kept',
+						'one_time_fees' => array( array( 'amount' => 5 ) ),
 					),
 					self::EXTENSION_SLUG,
-					$id,
 				),
 			),
 			$calls,
-			'Create passes a null id; update passes the id and the merged payload.'
+			'Create passes a plan with a null id; update passes the stored plan with the request merged in.'
 		);
 	}
 
@@ -452,13 +452,12 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$seen = array();
 		add_filter(
 			SellingPlans::VALIDATE_PLAN_FILTER,
-			static function ( $payload, $extension_slug, $plan_id ) use ( &$seen ) {
-				$seen[] = $plan_id;
+			static function ( $plan ) use ( &$seen ) {
+				self::assertInstanceOf( Plan::class, $plan );
+				$seen[] = array( $plan->get_id(), $plan->get_name() );
 
-				return $payload;
-			},
-			10,
-			3
+				return $plan;
+			}
 		);
 
 		$patched = $this->request(
@@ -471,7 +470,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		);
 
 		$this->assertSame( 200, $patched->get_status() );
-		$this->assertSame( array( $id ), $seen );
+		$this->assertSame( array( array( $id, 'Renamed again' ) ), $seen );
 	}
 
 	/**
@@ -539,15 +538,17 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		);
 	}
 
-	public function test_validate_filter_normalized_payload_is_stored(): void {
+	public function test_validate_filter_normalized_plan_is_stored(): void {
 		wp_set_current_user( $this->admin_id );
 
 		add_filter(
 			SellingPlans::VALIDATE_PLAN_FILTER,
-			static function ( $payload ) {
-				$payload['pricing_policy'] = array( 'policies' => array( array( 'type' => 'normalized' ) ) );
+			static function ( $plan ) {
+				self::assertInstanceOf( Plan::class, $plan );
+				$plan->set_pricing_policy( array( 'policies' => array( array( 'type' => 'normalized' ) ) ) );
+				$plan->set_name( trim( $plan->get_name() ) );
 
-				return $payload;
+				return $plan;
 			}
 		);
 
@@ -556,7 +557,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 			self::BASE,
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
-				'name'           => 'Normalized',
+				'name'           => '  Normalized  ',
 				'billing_policy' => array(
 					'period'   => 'month',
 					'interval' => 1,
@@ -567,27 +568,34 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$this->assertSame( 201, $created->get_status() );
 		$id = $this->int_value( $this->response_data( $created ), 'id' );
 
-		$fetched = $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
-		$this->assertSame(
-			array( 'policies' => array( array( 'type' => 'normalized' ) ) ),
-			$this->response_data( $fetched )['pricing_policy']
+		$patched = $this->request(
+			'PATCH',
+			self::BASE . '/' . $id,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => ' Normalized again ',
+				'pricing_policy' => array( 'policies' => array( array( 'type' => 'raw' ) ) ),
+			)
 		);
+		$this->assertSame( 200, $patched->get_status() );
+
+		remove_all_filters( SellingPlans::VALIDATE_PLAN_FILTER );
+
+		$fetched = $this->response_data( $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) ) );
+		$this->assertSame( 'Normalized again', $fetched['name'] );
+		$this->assertSame( array( 'policies' => array( array( 'type' => 'normalized' ) ) ), $fetched['pricing_policy'] );
 	}
 
 	/**
 	 * @dataProvider provide_invalid_filter_returns
 	 *
-	 * @param mixed $returned Value the owner returns.
+	 * @param callable $make_return Builds the owner's return from the plan it received.
 	 */
-	public function test_validate_filter_invalid_return_fails_closed( $returned ): void {
+	public function test_validate_filter_invalid_return_fails_closed( callable $make_return ): void {
 		wp_set_current_user( $this->admin_id );
+		$id = $this->create_plan( 'Untouched' );
 
-		add_filter(
-			SellingPlans::VALIDATE_PLAN_FILTER,
-			static function () use ( $returned ) {
-				return $returned;
-			}
-		);
+		add_filter( SellingPlans::VALIDATE_PLAN_FILTER, $make_return );
 
 		$created = $this->request(
 			'POST',
@@ -601,24 +609,62 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 				),
 			)
 		);
-
 		$this->assertSame( 400, $created->get_status() );
 		$this->assertSame( 'woocommerce_subscriptions_engine_invalid_plan', $this->response_data( $created )['code'] );
 
+		$patched = $this->request(
+			'PATCH',
+			self::BASE . '/' . $id,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Changed',
+			)
+		);
+		$this->assertSame( 400, $patched->get_status() );
+		$this->assertSame( 'woocommerce_subscriptions_engine_invalid_plan', $this->response_data( $patched )['code'] );
+
 		remove_all_filters( SellingPlans::VALIDATE_PLAN_FILTER );
+
+		$fetched = $this->response_data( $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) ) );
+		$this->assertSame( 'Untouched', $fetched['name'] );
+
 		$list = $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
-		$this->assertSame( '0', $list->get_headers()['X-WP-Total'] );
+		$this->assertSame( '1', $list->get_headers()['X-WP-Total'] );
 	}
 
 	/**
-	 * @return array<string, array{0: mixed}>
+	 * @return array<string, array{0: callable}>
 	 */
 	public function provide_invalid_filter_returns(): array {
 		return array(
-			'non-array'              => array( 'ok' ),
-			'missing pricing_policy' => array( array( 'other' => 1 ) ),
-			'list pricing_policy'    => array( array( 'pricing_policy' => array( 'a', 'b' ) ) ),
-			'scalar pricing_policy'  => array( array( 'pricing_policy' => 'bogo' ) ),
+			'non-plan'        => array(
+				static function () {
+					return array( 'pricing_policy' => null );
+				},
+			),
+			'different id'    => array(
+				static function ( Plan $plan ) {
+					$plan->set_id( ( $plan->get_id() ?? 0 ) + 1000 );
+
+					return $plan;
+				},
+			),
+			'different owner' => array(
+				static function ( Plan $plan ) {
+					$other = Plan::create(
+						array(
+							'name'           => $plan->get_name(),
+							'billing_policy' => $plan->get_billing_policy(),
+							'extension_slug' => 'someone-else',
+						)
+					);
+					if ( null !== $plan->get_id() ) {
+						$other->set_id( $plan->get_id() );
+					}
+
+					return $other;
+				},
+			),
 		);
 	}
 

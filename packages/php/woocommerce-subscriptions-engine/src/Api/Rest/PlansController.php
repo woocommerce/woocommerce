@@ -296,9 +296,9 @@ final class PlansController extends WP_REST_Controller {
 				)
 			);
 
-			$rejected = $this->validate_with_owner( $plan, $extension_slug );
-			if ( $rejected instanceof WP_Error ) {
-				return $rejected;
+			$plan = $this->validate_with_owner( $plan, $extension_slug );
+			if ( $plan instanceof WP_Error ) {
+				return $plan;
 			}
 
 			$this->plan_repository->insert( $plan );
@@ -369,9 +369,9 @@ final class PlansController extends WP_REST_Controller {
 				$plan->set_sort_order( ScalarCoercion::coerce_int( $request->get_param( 'sort_order' ) ) );
 			}
 
-			$rejected = $this->validate_with_owner( $plan, $extension_slug );
-			if ( $rejected instanceof WP_Error ) {
-				return $rejected;
+			$plan = $this->validate_with_owner( $plan, $extension_slug );
+			if ( $plan instanceof WP_Error ) {
+				return $plan;
 			}
 
 			if ( ! $this->plan_repository->update( $plan ) ) {
@@ -618,52 +618,42 @@ final class PlansController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Let the owning extension validate and normalize the plan's payload before it is stored.
+	 * Let the owning extension validate and normalize the plan before it is stored.
 	 *
 	 * @param Plan   $plan           Plan about to be written.
 	 * @param string $extension_slug Owning extension slug.
-	 * @return WP_Error|null Error rejecting the write, or null to proceed.
-	 * @throws InvalidArgumentException If the returned pricing_policy is not an object or null.
+	 * @return Plan|WP_Error The plan to write, or an error rejecting the write.
 	 */
-	private function validate_with_owner( Plan $plan, string $extension_slug ): ?WP_Error {
-		/**
-		 * Filters a plan's extension payload before the engine stores it.
-		 *
-		 * Runs on every plan create and update (including status-only updates; not on
-		 * reorder) with the full merged payload, so the owning extension can validate
-		 * and normalize it. Act only on your own `$extension_slug`; pass other owners'
-		 * payloads and an earlier WP_Error through unchanged. Return the array you
-		 * received with your changes - unknown keys must pass through - or a WP_Error
-		 * to reject the write. Only `pricing_policy` is required in the return; keys
-		 * added later that are missing from it keep their stored value.
-		 *
-		 * @param array<string, mixed>|WP_Error $payload        Plan payload: currently `pricing_policy` only; more keys may be added.
-		 * @param string                        $extension_slug Owning extension slug.
-		 * @param int|null                      $plan_id        Plan id, or null on create.
-		 */
-		$payload = apply_filters(
-			SellingPlans::VALIDATE_PLAN_FILTER,
-			array( 'pricing_policy' => $plan->get_pricing_policy() ),
-			$extension_slug,
-			$plan->get_id()
-		);
+	private function validate_with_owner( Plan $plan, string $extension_slug ) {
+		$id = $plan->get_id();
 
-		if ( $payload instanceof WP_Error ) {
-			$data = $payload->get_error_data();
+		/**
+		 * Filters the plan about to be written so the owning extension can validate and normalize it.
+		 *
+		 * Runs on every plan create and update (not on reorder), after the request is applied.
+		 * Act only on your own `$extension_slug`; pass other owners' plans and an earlier
+		 * WP_Error through unchanged. Normalize through the plan's setters and return it, or
+		 * return a WP_Error to reject the write. The plan's id and owner must not change.
+		 *
+		 * @param Plan|WP_Error $plan           Plan about to be written; its id is null on create.
+		 * @param string        $extension_slug Owning extension slug.
+		 */
+		$result = apply_filters( SellingPlans::VALIDATE_PLAN_FILTER, $plan, $extension_slug );
+
+		if ( $result instanceof WP_Error ) {
+			$data = $result->get_error_data();
 			if ( ! is_array( $data ) || ! isset( $data['status'] ) ) {
-				$payload->add_data( array_merge( is_array( $data ) ? $data : array(), array( 'status' => 400 ) ) );
+				$result->add_data( array_merge( is_array( $data ) ? $data : array(), array( 'status' => 400 ) ) );
 			}
 
-			return $payload;
+			return $result;
 		}
 
-		if ( ! is_array( $payload ) || ! array_key_exists( 'pricing_policy', $payload ) ) {
+		if ( ! $result instanceof Plan || $result->get_id() !== $id || $result->get_extension_slug() !== $extension_slug ) {
 			return $this->invalid_error( __( 'A woocommerce_subscriptions_engine_validate_plan callback returned an invalid value.', 'woocommerce-subscriptions-engine' ) );
 		}
 
-		$plan->set_pricing_policy( $this->pricing_policy_from_param( $payload['pricing_policy'], null ) );
-
-		return null;
+		return $result;
 	}
 
 	/**

@@ -34,9 +34,9 @@ defined( 'ABSPATH' ) || exit;
 final class SellingPlans {
 
 	/**
-	 * Filter fired on plan writes so the owning extension validates its payload:
-	 * `( array $payload, string $extension_slug, ?int $plan_id )`, returning the
-	 * payload or a WP_Error.
+	 * Filter fired on plan writes so the owning extension validates and normalizes
+	 * the plan: `( Plan $plan, string $extension_slug )`, returning the Plan or a
+	 * WP_Error. The plan's id and owner must not change.
 	 */
 	public const VALIDATE_PLAN_FILTER = 'woocommerce_subscriptions_engine_validate_plan';
 
