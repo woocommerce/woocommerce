@@ -9,8 +9,10 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Api\Rest;
 
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Rest\PlansController;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use EngineIntegrationTestCase;
+use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -41,6 +43,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 	}
 
 	public function tearDown(): void {
+		remove_all_filters( PlansController::VALIDATE_PLAN_FILTER );
 		wp_set_current_user( 0 );
 		parent::tearDown();
 	}
@@ -365,6 +368,256 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		return array(
 			'list'   => array( array( array( 'type' => 'bogo' ) ), 'woocommerce_subscriptions_engine_invalid_plan', 'woocommerce_subscriptions_engine_invalid_plan' ),
 			'string' => array( 'bogo', 'rest_invalid_param', 'woocommerce_subscriptions_engine_invalid_plan' ),
+		);
+	}
+
+	public function test_validate_filter_receives_the_payload_slug_and_id(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$calls = array();
+		add_filter(
+			PlansController::VALIDATE_PLAN_FILTER,
+			static function ( $payload, $extension_slug, $plan_id ) use ( &$calls ) {
+				$calls[] = array( $payload, $extension_slug, $plan_id );
+
+				return $payload;
+			},
+			10,
+			3
+		);
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Filtered',
+				'billing_policy' => array(
+					'period'   => 'month',
+					'interval' => 1,
+				),
+				'pricing_policy' => array(
+					'policies'   => array( array( 'type' => 'bogo' ) ),
+					'custom_key' => 'kept',
+				),
+			)
+		);
+		$this->assertSame( 201, $created->get_status() );
+		$id = $this->int_value( $this->response_data( $created ), 'id' );
+
+		$patched = $this->request(
+			'PATCH',
+			self::BASE . '/' . $id,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'pricing_policy' => array( 'one_time_fees' => array( array( 'amount' => 5 ) ) ),
+			)
+		);
+		$this->assertSame( 200, $patched->get_status() );
+
+		$this->assertSame(
+			array(
+				array(
+					array(
+						'pricing_policy' => array(
+							'policies'   => array( array( 'type' => 'bogo' ) ),
+							'custom_key' => 'kept',
+						),
+					),
+					self::EXTENSION_SLUG,
+					null,
+				),
+				array(
+					array(
+						'pricing_policy' => array(
+							'policies'      => array( array( 'type' => 'bogo' ) ),
+							'custom_key'    => 'kept',
+							'one_time_fees' => array( array( 'amount' => 5 ) ),
+						),
+					),
+					self::EXTENSION_SLUG,
+					$id,
+				),
+			),
+			$calls,
+			'Create passes a null id; update passes the id and the merged payload.'
+		);
+	}
+
+	public function test_validate_filter_runs_on_updates_without_pricing_policy(): void {
+		wp_set_current_user( $this->admin_id );
+		$id = $this->create_plan( 'Renamed' );
+
+		$seen = array();
+		add_filter(
+			PlansController::VALIDATE_PLAN_FILTER,
+			static function ( $payload, $extension_slug, $plan_id ) use ( &$seen ) {
+				$seen[] = $plan_id;
+
+				return $payload;
+			},
+			10,
+			3
+		);
+
+		$patched = $this->request(
+			'PATCH',
+			self::BASE . '/' . $id,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Renamed again',
+			)
+		);
+
+		$this->assertSame( 200, $patched->get_status() );
+		$this->assertSame( array( $id ), $seen );
+	}
+
+	/**
+	 * @dataProvider provide_rejecting_errors
+	 *
+	 * @param WP_Error $error           Error the owner returns.
+	 * @param int      $expected_status Expected response status.
+	 */
+	public function test_validate_filter_error_rejects_create_and_update( WP_Error $error, int $expected_status ): void {
+		wp_set_current_user( $this->admin_id );
+		$id = $this->create_plan( 'Untouched' );
+
+		add_filter(
+			PlansController::VALIDATE_PLAN_FILTER,
+			static function () use ( $error ) {
+				return $error;
+			}
+		);
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Rejected',
+				'billing_policy' => array(
+					'period'   => 'month',
+					'interval' => 1,
+				),
+				'pricing_policy' => array( 'policies' => array() ),
+			)
+		);
+		$this->assertSame( $expected_status, $created->get_status() );
+		$this->assertSame( 'owner_rejected', $this->response_data( $created )['code'] );
+
+		$patched = $this->request(
+			'PATCH',
+			self::BASE . '/' . $id,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Changed',
+				'pricing_policy' => array( 'policies' => array() ),
+			)
+		);
+		$this->assertSame( $expected_status, $patched->get_status() );
+		$this->assertSame( 'owner_rejected', $this->response_data( $patched )['code'] );
+
+		remove_all_filters( PlansController::VALIDATE_PLAN_FILTER );
+
+		$fetched = $this->response_data( $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) ) );
+		$this->assertSame( 'Untouched', $fetched['name'] );
+		$this->assertNull( $fetched['pricing_policy'] );
+
+		$list = $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$this->assertSame( '1', $list->get_headers()['X-WP-Total'] );
+	}
+
+	/**
+	 * @return array<string, array{0: WP_Error, 1: int}>
+	 */
+	public function provide_rejecting_errors(): array {
+		return array(
+			'without status' => array( new WP_Error( 'owner_rejected', 'No.' ), 400 ),
+			'with status'    => array( new WP_Error( 'owner_rejected', 'No.', array( 'status' => 422 ) ), 422 ),
+		);
+	}
+
+	public function test_validate_filter_normalized_payload_is_stored(): void {
+		wp_set_current_user( $this->admin_id );
+
+		add_filter(
+			PlansController::VALIDATE_PLAN_FILTER,
+			static function ( $payload ) {
+				$payload['pricing_policy'] = array( 'policies' => array( array( 'type' => 'normalized' ) ) );
+
+				return $payload;
+			}
+		);
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Normalized',
+				'billing_policy' => array(
+					'period'   => 'month',
+					'interval' => 1,
+				),
+				'pricing_policy' => array( 'policies' => array( array( 'type' => 'raw' ) ) ),
+			)
+		);
+		$this->assertSame( 201, $created->get_status() );
+		$id = $this->int_value( $this->response_data( $created ), 'id' );
+
+		$fetched = $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$this->assertSame(
+			array( 'policies' => array( array( 'type' => 'normalized' ) ) ),
+			$this->response_data( $fetched )['pricing_policy']
+		);
+	}
+
+	/**
+	 * @dataProvider provide_invalid_filter_returns
+	 *
+	 * @param mixed $returned Value the owner returns.
+	 */
+	public function test_validate_filter_invalid_return_fails_closed( $returned ): void {
+		wp_set_current_user( $this->admin_id );
+
+		add_filter(
+			PlansController::VALIDATE_PLAN_FILTER,
+			static function () use ( $returned ) {
+				return $returned;
+			}
+		);
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Fails closed',
+				'billing_policy' => array(
+					'period'   => 'month',
+					'interval' => 1,
+				),
+			)
+		);
+
+		$this->assertSame( 400, $created->get_status() );
+		$this->assertSame( 'woocommerce_subscriptions_engine_invalid_plan', $this->response_data( $created )['code'] );
+
+		remove_all_filters( PlansController::VALIDATE_PLAN_FILTER );
+		$list = $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$this->assertSame( '0', $list->get_headers()['X-WP-Total'] );
+	}
+
+	/**
+	 * @return array<string, array{0: mixed}>
+	 */
+	public function provide_invalid_filter_returns(): array {
+		return array(
+			'non-array'              => array( 'ok' ),
+			'missing pricing_policy' => array( array( 'other' => 1 ) ),
+			'list pricing_policy'    => array( array( 'pricing_policy' => array( 'a', 'b' ) ) ),
+			'scalar pricing_policy'  => array( array( 'pricing_policy' => 'bogo' ) ),
 		);
 	}
 

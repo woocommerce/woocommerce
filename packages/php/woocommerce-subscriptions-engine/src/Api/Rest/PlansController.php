@@ -29,6 +29,11 @@ defined( 'ABSPATH' ) || exit;
  */
 final class PlansController extends WP_REST_Controller {
 
+	/**
+	 * Filter asking a plan's owning extension to validate its payload before a write.
+	 */
+	public const VALIDATE_PLAN_FILTER = 'woocommerce_subscriptions_engine_validate_plan';
+
 	private const REST_NAMESPACE = 'wc/v3';
 
 	private const REST_BASE = 'subscriptions-engine/plans';
@@ -294,6 +299,12 @@ final class PlansController extends WP_REST_Controller {
 					'extension_slug' => $extension_slug,
 				)
 			);
+
+			$rejected = $this->validate_with_owner( $plan, $extension_slug );
+			if ( $rejected instanceof WP_Error ) {
+				return $rejected;
+			}
+
 			$this->plan_repository->insert( $plan );
 		} catch ( Throwable $e ) {
 			return $this->invalid_error( $e->getMessage() );
@@ -360,6 +371,11 @@ final class PlansController extends WP_REST_Controller {
 
 			if ( $request->has_param( 'sort_order' ) ) {
 				$plan->set_sort_order( ScalarCoercion::coerce_int( $request->get_param( 'sort_order' ) ) );
+			}
+
+			$rejected = $this->validate_with_owner( $plan, $extension_slug );
+			if ( $rejected instanceof WP_Error ) {
+				return $rejected;
 			}
 
 			if ( ! $this->plan_repository->update( $plan ) ) {
@@ -603,6 +619,51 @@ final class PlansController extends WP_REST_Controller {
 		$value = $this->associative_array( $value, 'pricing_policy must be an object or null.' );
 
 		return array_merge( $existing ?? array(), $value );
+	}
+
+	/**
+	 * Let the owning extension validate and normalize the plan's payload before it is stored.
+	 *
+	 * @param Plan   $plan           Plan about to be written.
+	 * @param string $extension_slug Owning extension slug.
+	 * @return WP_Error|null Error rejecting the write, or null to proceed.
+	 * @throws InvalidArgumentException If the returned pricing_policy is not an object or null.
+	 */
+	private function validate_with_owner( Plan $plan, string $extension_slug ): ?WP_Error {
+		/**
+		 * Filters a plan's extension payload before the engine stores it.
+		 *
+		 * Runs on every plan create and update with the full merged payload, so the
+		 * owning extension can validate and normalize it. Return the (possibly
+		 * normalized) payload array, or a WP_Error to reject the write.
+		 *
+		 * @param array<string, mixed>|WP_Error $payload        Plan payload: currently `pricing_policy` only; more keys may be added.
+		 * @param string                        $extension_slug Owning extension slug.
+		 * @param int|null                      $plan_id        Plan id, or null on create.
+		 */
+		$payload = apply_filters(
+			self::VALIDATE_PLAN_FILTER,
+			array( 'pricing_policy' => $plan->get_pricing_policy() ),
+			$extension_slug,
+			$plan->get_id()
+		);
+
+		if ( $payload instanceof WP_Error ) {
+			$data = $payload->get_error_data();
+			if ( ! is_array( $data ) || ! isset( $data['status'] ) ) {
+				$payload->add_data( array_merge( is_array( $data ) ? $data : array(), array( 'status' => 400 ) ) );
+			}
+
+			return $payload;
+		}
+
+		if ( ! is_array( $payload ) || ! array_key_exists( 'pricing_policy', $payload ) ) {
+			return $this->invalid_error( __( 'The plan owner returned an invalid payload.', 'woocommerce-subscriptions-engine' ) );
+		}
+
+		$plan->set_pricing_policy( $this->pricing_policy_from_param( $payload['pricing_policy'], null ) );
+
+		return null;
 	}
 
 	/**
