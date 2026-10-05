@@ -240,7 +240,7 @@ export const pluginInstallerMachine = createMachine(
 					const plugin = context.pluginsInstallationQueue[ 0 ];
 					const timingKey =
 						plugin === 'woocommerce-services:tax'
-							? getPluginSlug( plugin )
+							? 'woocommerce-services'
 							: plugin;
 					return [
 						...context.installedPlugins,
