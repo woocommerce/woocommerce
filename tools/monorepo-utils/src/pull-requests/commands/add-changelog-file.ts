@@ -53,7 +53,7 @@ const run = async (
 
 	let prData: any = await gql(
 		`
-query($pr_number: Int!) { 
+query($pr_number: Int!) {
 	repository(owner: "${ options.owner }", name: "${ options.name }") {
 		pullRequest(number: $pr_number) {
 			title
