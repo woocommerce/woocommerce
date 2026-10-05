@@ -185,8 +185,17 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 		$priced->set_sale_price( '9' );
 		$priced->save();
 
-		foreach ( array( 'percentage' => 'Up to 10%', 'amount' => 'Up to $1.00' ) as $mode => $label ) {
-			$attributes = array( 'badgeContent' => $mode, 'prefix' => 'Save ', 'suffix' => ' off' );
+		foreach (
+			array(
+				'percentage' => 'Up to 10%',
+				'amount'     => 'Up to $1.00',
+			) as $mode => $label
+		) {
+			$attributes = array(
+				'badgeContent' => $mode,
+				'prefix'       => 'Save ',
+				'suffix'       => ' off',
+			);
 			$markup     = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/product-sale-badge ' . wp_json_encode( $attributes ) . ' /--><!-- /wp:woocommerce/single-product -->' );
 			$this->assertStringContainsString( 'aria-hidden="true">' . $label . '</span>', $markup );
 			$this->assertStringContainsString( 'screen-reader-text">Product on sale: ' . $label . '</span>', $markup );

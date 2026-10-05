@@ -74,7 +74,9 @@ export const Block = ( props: Props ): ReactElement | null => {
 							__( 'Up to %s', 'woocommerce' ),
 							value
 					  )
-					: `${ props.prefix ?? '' }${ value }${ props.suffix ?? '' }`;
+					: `${ props.prefix ?? '' }${ value }${
+							props.suffix ?? ''
+					  }`;
 		}
 	}
 
