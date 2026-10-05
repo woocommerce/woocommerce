@@ -25,7 +25,6 @@ module.exports = {
 		'scss/load-partial-extension': null,
 		'scss/load-no-partial-leading-underscore': null,
 		'scss/no-global-function-names': null,
-		'scss/at-extend-no-missing-placeholder': null,
 		'scss/selector-no-redundant-nesting-selector': null,
 		'selector-id-pattern': null,
 		'no-invalid-position-at-import-rule': null,
