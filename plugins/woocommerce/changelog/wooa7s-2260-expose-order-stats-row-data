@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Add `get_order_stats_row_data()` to the Analytics Orders Stats data store, so integrations can build an order's stats row without saving it.
