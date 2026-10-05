@@ -137,7 +137,7 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should add the extension fields to the input and output schemas, including list outputs.
+	 * @testdox Should add the extension fields to the write schemas, and to a plain read's output schema only from WordPress 7.1.
 	 */
 	public function test_schemas_gain_extensions(): void {
 		$this->register( true );
@@ -152,8 +152,12 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( $field, $write->get_input_schema()['properties']['extensions']['properties']['test_notes'] );
 		$this->assertSame( $field, $write->get_output_schema()['properties']['record']['properties']['extensions']['properties']['test_notes'] );
-		$this->assertSame( $field, $read->get_output_schema()['properties']['records']['items']['properties']['extensions']['properties']['test_notes'] );
 		$this->assertArrayNotHasKey( 'extensions', $read->get_input_schema()['properties'] );
+		if ( self::execute_result_hook_available() ) {
+			$this->assertSame( $field, $read->get_output_schema()['properties']['records']['items']['properties']['extensions']['properties']['test_notes'] );
+		} else {
+			$this->assertArrayNotHasKey( 'extensions', $read->get_output_schema()['properties']['records']['items']['properties'] );
+		}
 	}
 
 	/**
@@ -426,28 +430,35 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should read the extension fields of every record a read ability lists.
+	 * @testdox Should read the extension fields of every record a plain read lists from WordPress 7.1, and none before.
 	 */
 	public function test_read_fills_extensions_for_each_item(): void {
 		$this->register( true );
 
 		$result = wp_get_ability( self::READ )->execute( array() );
 
-		$this->assertSame(
+		$expected = array(
 			array(
-				array(
-					'id'         => 7,
-					'title'      => 'Original',
-					'extensions' => array( 'test_notes' => 'first' ),
-				),
-				array(
-					'id'         => 8,
-					'title'      => 'Second',
-					'extensions' => array( 'test_notes' => '' ),
-				),
+				'id'         => 7,
+				'title'      => 'Original',
+				'extensions' => array( 'test_notes' => 'first' ),
 			),
-			$result['records']
+			array(
+				'id'         => 8,
+				'title'      => 'Second',
+				'extensions' => array( 'test_notes' => '' ),
+			),
 		);
+		if ( ! self::execute_result_hook_available() ) {
+			$expected = array_map(
+				static function ( array $record ): array {
+					unset( $record['extensions'] );
+					return $record;
+				},
+				$expected
+			);
+		}
+		$this->assertSame( $expected, $result['records'] );
 	}
 
 	/**
@@ -480,7 +491,7 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should add extensions to an object or a list of objects that is the whole output.
+	 * @testdox Should add extensions on every WordPress version to a DryRunAbility read whose whole output is an object or a list.
 	 */
 	public function test_root_output_gains_extensions(): void {
 		$this->register( true );
@@ -505,6 +516,7 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 						'label'               => 'Records',
 						'description'         => 'Records at the root of the output.',
 						'category'            => 'test-plugin',
+						'ability_class'       => DryRunAbility::class,
 						'output_schema'       => $output_schema,
 						'execute_callback'    => static function () use ( $name ) {
 							$record = array(
@@ -626,7 +638,7 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should fire each WordPress 7.1 ability hook once, in order, for a plain ability and a write ability.
+	 * @testdox Should leave the ability hooks to WordPress: all of them once, in order, from 7.1, and only the 6.9 actions before.
 	 */
 	public function test_ability_hooks_fire_once_in_order(): void {
 		$this->register( true );
@@ -653,8 +665,10 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 			);
 		}
 
+		$expected = self::execute_result_hook_available() ? $hooks : array( 'wp_before_execute_ability', 'wp_after_execute_ability' );
+
 		wp_get_ability( self::READ )->execute( array() );
-		$this->assertSame( $hooks, $fired );
+		$this->assertSame( $expected, $fired );
 
 		$fired  = array();
 		$result = wp_get_ability( self::WRITE )->execute(
@@ -664,16 +678,16 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 			)
 		);
 		$this->assertNotWPError( $result );
-		$this->assertSame( $hooks, $fired );
+		$this->assertSame( $expected, $fired );
 	}
 
 	/**
-	 * @testdox Should swap in DryRunAbility only before WordPress 7.1 and only for an ability with WooCommerce meta, and keep an ability's own class.
+	 * @testdox Should keep WordPress's class for a plain ability, with or without WooCommerce meta, and an ability's own class.
 	 */
-	public function test_polyfill_class_swap(): void {
+	public function test_ability_classes_are_kept(): void {
 		$this->register( true );
 
-		$this->assertSame( DryRunAbility::polyfill_active() ? DryRunAbility::class : \WP_Ability::class, get_class( wp_get_ability( self::READ ) ) );
+		$this->assertSame( \WP_Ability::class, get_class( wp_get_ability( self::READ ) ) );
 		$this->assertSame( \WP_Ability::class, get_class( wp_get_ability( self::PLAIN ) ) );
 		$this->assertInstanceOf( TestRecordWriteAbility::class, wp_get_ability( self::WRITE ) );
 	}
@@ -717,6 +731,13 @@ class RegistrationContractsTest extends \WC_Unit_Test_Case {
 	 */
 	public function load_record( $subject, $object_type, $id ) {
 		return 'test_record' === $object_type ? TestRecord::load( $id ) : $subject;
+	}
+
+	/**
+	 * Whether WordPress fires wp_ability_execute_result.
+	 */
+	private static function execute_result_hook_available(): bool {
+		return version_compare( get_bloginfo( 'version' ), '7.1-alpha', '>=' );
 	}
 
 	/**

@@ -18,6 +18,7 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductWriteAbility;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
+use Automattic\WooCommerce\Internal\AbilitiesApi\DryRunAbility;
 use Automattic\WooCommerce\Internal\AbilitiesApi\RegistrationArgs;
 
 defined( 'ABSPATH' ) || exit;
@@ -155,8 +156,9 @@ class AbilitiesLoader {
 	}
 
 	/**
-	 * Declare the extension fields of the read abilities, and run Core's
-	 * product writes and order status update as object changes.
+	 * Declare the extension fields of the read abilities and run them as
+	 * DryRunAbility, which fills the values on every WordPress version. Run
+	 * Core's product writes and order status update as object changes.
 	 *
 	 * @param array        $args         Registration arguments.
 	 * @param string       $ability_name Ability name.
@@ -170,6 +172,8 @@ class AbilitiesLoader {
 			OrderAddNote::class  => array( 'order', 'order' ),
 		);
 		if ( isset( $outputs[ $class_name ] ) ) {
+			$args['ability_class'] = DryRunAbility::class;
+
 			$args['meta'][ RegistrationArgs::META ]['extension_fields'] = array(
 				'object_type' => $outputs[ $class_name ][0],
 				'output'      => $outputs[ $class_name ][1],

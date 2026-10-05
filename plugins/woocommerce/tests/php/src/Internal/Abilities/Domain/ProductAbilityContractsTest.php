@@ -410,19 +410,21 @@ class ProductAbilityContractsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return an order extension field from the order abilities, with its title in the output schemas.
+	 * @testdox Should return an order extension field from the order abilities once, on every WordPress version, with its title in the output schemas.
 	 */
 	public function test_order_extension_field_in_order_abilities(): void {
+		$reads = 0;
 		add_filter(
 			'woocommerce_ability_fields',
-			static function ( array $fields, string $object_type ): array {
+			static function ( array $fields, string $object_type ) use ( &$reads ): array {
 				if ( 'order' === $object_type ) {
 					$fields['test_gift_message'] = array(
 						'schema'       => array(
 							'type'  => 'string',
 							'title' => 'Gift message',
 						),
-						'get_callback' => static function ( \WC_Order $order ) {
+						'get_callback' => static function ( \WC_Order $order ) use ( &$reads ) {
+							++$reads;
 							return (string) $order->get_meta( '_test_gift_message' );
 						},
 					);
@@ -438,9 +440,11 @@ class ProductAbilityContractsTest extends \WC_Unit_Test_Case {
 		$order->save();
 
 		$query  = wp_get_ability( 'woocommerce/orders-query' );
+		$reads  = 0;
 		$result = $query->execute( array( 'id' => $order->get_id() ) );
 		$this->assertNotWPError( $result );
 		$this->assertSame( array( 'test_gift_message' => 'Happy birthday' ), $result['orders'][0]['extensions'] );
+		$this->assertSame( 1, $reads );
 		$this->assertSame( 'Gift message', $query->get_output_schema()['properties']['orders']['items']['properties']['extensions']['properties']['test_gift_message']['title'] );
 
 		$update = wp_get_ability( 'woocommerce/order-update-status' );
@@ -616,6 +620,39 @@ class ProductAbilityContractsTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 1, $off['status_changed'] );
 		$this->assertSame( 'on-hold' !== $to, ! empty( $off['emails'] ) );
 		$this->assertSame( $off, $on );
+	}
+
+	/**
+	 * @testdox Should not fire WordPress 7.1 ability hooks from WooCommerce's abilities before 7.1.
+	 */
+	public function test_no_ability_hooks_before_wordpress_7_1(): void {
+		$fired = array();
+		foreach ( array( 'wp_ability_invoked', 'wp_pre_execute_ability', 'wp_ability_normalize_input', 'wp_ability_validate_input', 'wp_ability_permission_result', 'wp_ability_execute_result', 'wp_ability_validate_output' ) as $hook ) {
+			add_filter(
+				$hook,
+				static function ( $value ) use ( $hook, &$fired ) {
+					$fired[ $hook ] = true;
+					return $value;
+				}
+			);
+		}
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Original' ) );
+
+		$this->assertNotWPError( wp_get_ability( 'woocommerce/products-query' )->execute( array( 'id' => $product->get_id() ) ) );
+		$this->assertNotWPError(
+			wp_get_ability( 'woocommerce/product-update' )->execute(
+				array(
+					'id'   => $product->get_id(),
+					'name' => 'Renamed',
+				)
+			)
+		);
+
+		if ( version_compare( get_bloginfo( 'version' ), '7.1-alpha', '<' ) ) {
+			$this->assertSame( array(), $fired );
+		} else {
+			$this->assertCount( 7, $fired );
+		}
 	}
 
 	/**

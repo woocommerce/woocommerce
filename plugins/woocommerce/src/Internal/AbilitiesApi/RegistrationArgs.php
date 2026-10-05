@@ -29,9 +29,10 @@ final class RegistrationArgs {
 	public const META = 'woocommerce';
 
 	/**
-	 * Derive the write meta, swap in DryRunAbility, which fires the 7.1 hooks before
-	 * WordPress 7.1 for an ability with this meta, and add `extensions` to the
-	 * schemas.
+	 * Derive the write meta and add `extensions` to the schemas. A plain
+	 * WP_Ability gets extension values only through wp_ability_execute_result,
+	 * which WordPress fires from 7.1, so before 7.1 its output schema gets no
+	 * `extensions` either. A DryRunAbility fills them itself on every version.
 	 *
 	 * @param array $args Registration arguments.
 	 * @return array
@@ -49,9 +50,6 @@ final class RegistrationArgs {
 		if ( is_string( $class ) && DryRunAbility::has_dry_run( $class ) ) {
 			$args['meta'][ self::META ]['dry_run'] = true;
 		}
-		if ( null === $class && isset( $args['meta'][ self::META ] ) && DryRunAbility::polyfill_active() ) {
-			$args['ability_class'] = DryRunAbility::class;
-		}
 
 		$fields = $args['meta'][ self::META ]['extension_fields'] ?? null;
 		if ( ! is_array( $fields ) ) {
@@ -63,10 +61,18 @@ final class RegistrationArgs {
 		if ( isset( $args['meta'][ self::META ]['in_memory_write'], $args['input_schema']['properties'] ) && ! isset( $args['input_schema']['properties']['extensions'] ) ) {
 			$args['input_schema']['properties']['extensions'] = $extensions;
 		}
-		if ( isset( $fields['output'], $args['output_schema'] ) ) {
+		$fills = ( is_string( $class ) && is_a( $class, DryRunAbility::class, true ) ) || self::execute_result_hook_available();
+		if ( $fills && isset( $fields['output'], $args['output_schema'] ) ) {
 			$args['output_schema'] = AbilityFields::add_to_output_schema( $args['output_schema'], (string) $fields['output'], $extensions );
 		}
 		return $args;
+	}
+
+	/**
+	 * Whether WordPress fires wp_ability_execute_result, added in 7.1.
+	 */
+	public static function execute_result_hook_available(): bool {
+		return version_compare( get_bloginfo( 'version' ), '7.1-alpha', '>=' );
 	}
 
 	/**
