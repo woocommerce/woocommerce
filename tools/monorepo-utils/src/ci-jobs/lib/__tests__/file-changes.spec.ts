@@ -1,3 +1,5 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -9,16 +11,16 @@ import { execSync } from 'node:child_process';
 import { getFileChanges } from '../file-changes';
 import { JobType } from '../config';
 
-jest.mock( 'node:child_process' );
+vi.mock( 'node:child_process' );
 
 describe( 'File Changes', () => {
 	afterEach( () => {
-		jest.resetAllMocks();
+		vi.resetAllMocks();
 	} );
 
 	describe( 'getFileChanges', () => {
 		it( 'should associate git changes with projects', () => {
-			jest.mocked( execSync ).mockImplementation( ( command ) => {
+			vi.mocked( execSync ).mockImplementation( ( command ) => {
 				if ( command === 'git diff --name-only origin/trunk' ) {
 					return `test/project-a/package.json
 foo/project-b/foo.js
@@ -65,7 +67,7 @@ baz/project-d/baz.js`;
 	} );
 
 	it( 'should see pnpm-lock.yaml file changes as universal changes', () => {
-		jest.mocked( execSync ).mockImplementation( ( command ) => {
+		vi.mocked( execSync ).mockImplementation( ( command ) => {
 			if ( command === 'git diff --name-only origin/trunk' ) {
 				return `test/project-a/package.json
 foo/project-b/foo.js
@@ -108,7 +110,7 @@ baz/project-d/baz.js`;
 	} );
 
 	it( 'should assign files to projects based on CI config patterns', () => {
-		jest.mocked( execSync ).mockImplementation( ( command ) => {
+		vi.mocked( execSync ).mockImplementation( ( command ) => {
 			if ( command === 'git diff --name-only origin/trunk' ) {
 				return `plugins/woocommerce/changelog/fix-123
 plugins/woocommerce/tests/e2e/tests/blocks/test.spec.ts
@@ -163,7 +165,7 @@ plugins/woocommerce/client/blocks/src/block.tsx`;
 	} );
 
 	it( 'should not assign files to projects if CI config pattern does not match', () => {
-		jest.mocked( execSync ).mockImplementation( ( command ) => {
+		vi.mocked( execSync ).mockImplementation( ( command ) => {
 			if ( command === 'git diff --name-only origin/trunk' ) {
 				return `plugins/woocommerce/client/blocks/src/block.tsx
 plugins/woocommerce/client/blocks/assets/style.scss`;
@@ -217,7 +219,7 @@ plugins/woocommerce/client/blocks/assets/style.scss`;
 	} );
 
 	it( 'should handle multiple CI config patterns from different jobs', () => {
-		jest.mocked( execSync ).mockImplementation( ( command ) => {
+		vi.mocked( execSync ).mockImplementation( ( command ) => {
 			if ( command === 'git diff --name-only origin/trunk' ) {
 				return `plugins/woocommerce/tests/e2e/tests/blocks/test.spec.ts
 plugins/woocommerce/client/blocks/tests/unit/test.spec.ts

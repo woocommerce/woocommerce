@@ -1,6 +1,10 @@
-jest.spyOn( global.console, 'error' ).mockImplementation( () => {} );
-// @ts-expect-error -- We're mocking process exit, it has never return type!
-jest.spyOn( global.process, 'exit' ).mockImplementation( () => {} );
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+beforeEach( () => {
+	vi.spyOn( global.console, 'error' ).mockImplementation( () => {} );
+	// @ts-expect-error -- We're mocking process exit, it has never return type!
+	vi.spyOn( global.process, 'exit' ).mockImplementation( () => {} );
+} );
 
 /**
  * External dependencies
@@ -10,11 +14,15 @@ import chalk from 'chalk';
 /**
  * Internal dependencies
  */
-import { Logger } from '../logger';
+let Logger: typeof import('../logger').Logger;
+beforeEach( async () => {
+	vi.resetModules();
+	( { Logger } = await import( '../logger' ) );
+} );
 
 describe( 'Logger', () => {
 	afterEach( () => {
-		jest.resetAllMocks();
+		vi.resetAllMocks();
 	} );
 
 	describe( 'error', () => {
