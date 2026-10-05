@@ -18,29 +18,22 @@ use WP_HTML_Tag_Processor;
  */
 class FeaturedItemSupportsTest extends WC_Unit_Test_Case {
 	/**
-	 * @testdox Core supports must reach the visible wrapper and its actual content container.
+	 * @testdox Design supports and vertical alignment render without changing the inner flow layout.
 	 *
-	 * @testWith ["category", "top", "flex-start"]
-	 *           ["category", "center", "center"]
-	 *           ["category", "bottom", "flex-end"]
-	 *           ["product", "top", "flex-start"]
-	 *           ["product", "center", "center"]
-	 *           ["product", "bottom", "flex-end"]
+	 * @testWith ["category", "top"]
+	 *           ["category", "center"]
+	 *           ["category", "bottom"]
+	 *           ["product", "top"]
+	 *           ["product", "center"]
+	 *           ["product", "bottom"]
 	 * @param string $kind Featured item kind.
 	 * @param string $alignment Vertical content alignment.
-	 * @param string $justification Expected CSS justification.
 	 */
-	public function test_support_styles_and_layout_target( string $kind, string $alignment, string $justification ): void {
-		$attributes           = $this->get_item_attributes( $kind );
-		$attributes['anchor'] = 'featured-anchor';
-		$attributes['layout'] = array(
-			'type'              => 'flex',
-			'orientation'       => 'vertical',
-			'verticalAlignment' => $alignment,
-			'justifyContent'    => 'stretch',
-			'flexWrap'          => 'nowrap',
-		);
-		$attributes['style']  = array(
+	public function test_support_styles_and_layout_target( string $kind, string $alignment ): void {
+		$attributes                      = $this->get_item_attributes( $kind );
+		$attributes['anchor']            = 'featured-anchor';
+		$attributes['verticalAlignment'] = $alignment;
+		$attributes['style']             = array(
 			'color'      => array( 'text' => '#123456' ),
 			'border'     => array(
 				'style' => 'dashed',
@@ -57,23 +50,38 @@ class FeaturedItemSupportsTest extends WC_Unit_Test_Case {
 				'blockGap' => '12px',
 			),
 		);
-		$html                 = $this->render_item( $kind, $attributes );
-		$tags                 = new WP_HTML_Tag_Processor( $html );
+		$html                            = $this->render_item( $kind, $attributes );
+		$tags                            = new WP_HTML_Tag_Processor( $html );
 		$this->assertTrue( $tags->next_tag() );
 		$this->assertSame( 'featured-anchor', $tags->get_attribute( 'id' ) );
 		$this->assertFalse( $tags->has_class( 'is-layout-flex' ) );
+		$this->assertTrue( $tags->has_class( 'is-vertically-aligned-' . $alignment ) );
 		foreach ( array( 'color:#123456', 'border-style:dashed', 'text-transform:uppercase', 'text-decoration:underline', 'aspect-ratio:16/9', 'min-height:unset', 'box-shadow:2px 3px 4px #000000', 'margin-top:20px' ) as $style ) {
 			$this->assertStringContainsString( $style, $tags->get_attribute( 'style' ) );
 		}
 		$this->assertStringNotContainsString( 'gap:', $tags->get_attribute( 'style' ) );
 		$this->assertTrue( $tags->next_tag( array( 'class_name' => 'wc-block-featured-' . $kind . '__inner-blocks' ) ) );
-		$this->assertTrue( $tags->has_class( 'is-layout-flex' ) );
-		$this->assertTrue( $tags->has_class( 'is-vertical' ) );
-		$this->assertTrue( $tags->has_class( 'is-nowrap' ) );
-		$this->assertTrue( $tags->has_class( 'is-content-justification-stretch' ) );
-		$this->assertTrue( $tags->has_class( 'wp-block-woocommerce-featured-' . $kind . '-is-layout-flex' ) );
-		$this->assertStringContainsString( 'wp-container-woocommerce-featured-' . $kind . '-is-layout-', $tags->get_attribute( 'class' ) );
-		$this->assertStringContainsString( 'justify-content:' . $justification, wp_style_engine_get_stylesheet_from_context( 'block-supports' ) );
+		$this->assertFalse( $tags->has_class( 'is-layout-flex' ) );
+		$this->assertTrue( $tags->has_class( 'has-custom-gap' ) );
+		$this->assertStringContainsString( '--wc-featured-item-block-gap:12px', $tags->get_attribute( 'style' ) );
+	}
+
+	/**
+	 * @testdox Explicit zero spacing is distinguished from untouched inner-block margins.
+	 *
+	 * @testWith [null, false]
+	 *           ["0", true]
+	 *           [0, true]
+	 * @param mixed $gap Saved block spacing.
+	 * @param bool  $has_custom_gap Whether explicit spacing should be rendered.
+	 */
+	public function test_explicit_zero_spacing( $gap, bool $has_custom_gap ): void {
+		$attributes                                 = $this->get_item_attributes( 'category' );
+		$attributes['style']['spacing']['blockGap'] = $gap;
+		$tags                                       = new WP_HTML_Tag_Processor( $this->render_item( 'category', $attributes ) );
+		$this->assertTrue( $tags->next_tag( array( 'class_name' => 'wc-block-featured-category__inner-blocks' ) ) );
+		$this->assertSame( $has_custom_gap, $tags->has_class( 'has-custom-gap' ) );
+		$this->assertSame( $has_custom_gap ? '--wc-featured-item-block-gap:0' : null, $tags->get_attribute( 'style' ) );
 	}
 
 	/**

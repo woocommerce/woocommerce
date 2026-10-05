@@ -53,25 +53,13 @@
 			"aspectRatio": true,
 			"minHeight": true
 		},
-		"allowedBlocks": true,
-		"layout": {
-			"default": {
-				"type": "flex",
-				"orientation": "vertical",
-				"verticalAlignment": "center",
-				"justifyContent": "stretch",
-				"flexWrap": "nowrap"
-			},
-			"allowSwitching": false,
-			"allowInheriting": false,
-			"allowOrientation": false,
-			"allowJustification": false,
-			"allowSizingOnChildren": false,
-			"allowWrap": false,
-			"allowVerticalAlignment": true
-		}
+		"allowedBlocks": true
 	},
 	"attributes": {
+		"verticalAlignment": {
+			"type": "string",
+			"enum": [ "top", "center", "bottom" ]
+		},
 		"alt": {
 			"type": "string",
 			"default": ""

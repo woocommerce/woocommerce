@@ -29,56 +29,6 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 		parent::initialize();
 		add_filter( 'render_block_context', [ $this, 'update_context' ], 10, 3 );
 		add_filter( 'render_block_core/post-title', [ $this, 'restore_global_post' ], 10, 3 );
-		add_filter( 'render_block_woocommerce/' . $this->block_name, array( $this, 'move_layout_to_content' ), 10, 2 );
-	}
-
-	/**
-	 * Apply Core vertical flex layout classes to the dynamic inner-block container.
-	 *
-	 * @internal
-	 * @since 11.3.0
-	 *
-	 * @param string $content Rendered block markup.
-	 * @param array  $block Parsed block.
-	 * @return string
-	 */
-	public function move_layout_to_content( $content, $block ) {
-		if ( ! is_string( $content ) || ! is_array( $block ) ) {
-			return $content;
-		}
-
-		$processor = new \WP_HTML_Tag_Processor( $content );
-		if ( ! $processor->next_tag() ) {
-			return $content;
-		}
-
-		$layout_classes   = array(
-			'is-layout-flex',
-			'is-vertical',
-			'is-nowrap',
-			'is-content-justification-stretch',
-			'wp-block-woocommerce-' . $this->block_name . '-is-layout-flex',
-		);
-		$container_prefix = 'wp-container-woocommerce-' . $this->block_name . '-is-layout-';
-		$classes          = array();
-		foreach ( explode( ' ', (string) $processor->get_attribute( 'class' ) ) as $class ) {
-			if ( in_array( $class, $layout_classes, true ) || 0 === strpos( $class, $container_prefix ) ) {
-				$classes[] = $class;
-				$processor->remove_class( $class );
-			}
-		}
-
-		// Legacy blocks render their title and description outside the inner-block container.
-		// Leave Core layout classes removed for them so their existing CSS controls the layout;
-		// only modern blocks receive these classes on the inner-block container.
-		$is_legacy = isset( $block['attrs']['editMode'] ) && is_bool( $block['attrs']['editMode'] );
-		if ( ! $is_legacy && $processor->next_tag( array( 'class_name' => 'wc-block-' . $this->block_name . '__inner-blocks' ) ) ) {
-			foreach ( $classes as $class ) {
-				$processor->add_class( $class );
-			}
-		}
-
-		return $processor->get_updated_html();
 	}
 
 	/**
@@ -312,11 +262,15 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 		$output .= $this->render_attributes( $item, $attributes );
 
 		if ( ! empty( $content ) ) {
-			// Prevent adding default gap to existing blocks without custom spacing.
-			$output .= sprintf(
-				'<div class="wc-block-%1$s__inner-blocks"%2$s>%3$s</div>',
+			$block_gap  = $attributes['style']['spacing']['blockGap'] ?? null;
+			$block_gap  = is_array( $block_gap ) ? ( $block_gap['top'] ?? null ) : $block_gap;
+			$gap_styles = wp_style_engine_get_styles( array( 'spacing' => array( 'margin' => array( 'top' => null !== $block_gap ? (string) $block_gap : null ) ) ) );
+			$gap        = $gap_styles['declarations']['margin-top'] ?? null;
+			$output    .= sprintf(
+				'<div class="wc-block-%1$s__inner-blocks%2$s"%3$s>%4$s</div>',
 				$this->block_name,
-				empty( $attributes['style']['spacing']['blockGap'] ) ? ' style="gap:0"' : '',
+				null !== $gap ? ' has-custom-gap' : '',
+				null !== $gap ? ' style="' . esc_attr( '--wc-featured-item-block-gap:' . $gap ) . '"' : '',
 				$content
 			);
 		}
@@ -511,6 +465,10 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 
 		if ( isset( $attributes['contentAlign'] ) && 'center' !== $attributes['contentAlign'] ) {
 			$classes[] = "has-{$attributes['contentAlign']}-content";
+		}
+
+		if ( in_array( $attributes['verticalAlignment'] ?? '', array( 'top', 'center', 'bottom' ), true ) ) {
+			$classes[] = 'is-vertically-aligned-' . $attributes['verticalAlignment'];
 		}
 
 		return implode( ' ', $classes );
