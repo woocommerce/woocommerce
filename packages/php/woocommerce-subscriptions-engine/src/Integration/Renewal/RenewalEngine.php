@@ -866,8 +866,8 @@ final class RenewalEngine {
 				$line->set_product_id( self::item_int( $item, 'product_id' ) );
 				$line->set_variation_id( self::item_int( $item, 'variation_id' ) );
 				// Stored quantity as is (zero and fractional included); the woocommerce_stock_amount
-				// filter decides precision. set_props() because set_quantity() is typed int.
-				$line->set_props( array( 'quantity' => self::item_string( $item, 'quantity' ) ) );
+				// filter decides precision.
+				$line->set_quantity( self::item_string( $item, 'quantity' ) ); // @phpstan-ignore argument.type (docblock-only int; fractional quantities are valid)
 				$line->set_subtotal( self::item_string( $item, 'subtotal' ) );
 				$line->set_total( self::item_string( $item, 'total' ) );
 				$renewal_order->add_item( $line );

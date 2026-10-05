@@ -1654,7 +1654,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$line = new \WC_Order_Item_Product();
 		$line->set_name( 'Monthly Filters' );
 		$line->set_product_id( $product_id );
-		$line->set_props( array( 'quantity' => $quantity ) );
+		$line->set_quantity( $quantity ); // @phpstan-ignore argument.type (docblock-only int; fractional quantities are valid)
 		$line->set_subtotal( '39.98' );
 		$line->set_total( '39.98' );
 		$order->add_item( $line );
