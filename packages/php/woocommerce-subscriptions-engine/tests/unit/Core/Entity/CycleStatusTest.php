@@ -127,8 +127,8 @@ class CycleStatusTest extends TestCase {
 	}
 
 	public function test_equals_compares_by_value(): void {
-		$this->assertTrue( new CycleStatus( CycleStatus::PENDING )->equals( new CycleStatus( CycleStatus::PENDING ) ) );
-		$this->assertFalse( new CycleStatus( CycleStatus::PENDING )->equals( new CycleStatus( CycleStatus::BILLED ) ) );
+		$this->assertTrue( ( new CycleStatus( CycleStatus::PENDING ) )->equals( new CycleStatus( CycleStatus::PENDING ) ) );
+		$this->assertFalse( ( new CycleStatus( CycleStatus::PENDING ) )->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 	}
 
 	public function test_the_retired_transition_api_and_factories_are_gone(): void {
