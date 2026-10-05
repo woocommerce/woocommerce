@@ -1,3 +1,13 @@
+import {
+	afterEach,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+	type Mock,
+} from 'vitest';
+
 /**
  * External dependencies
  */
@@ -12,13 +22,19 @@ import {
 	useOptionsHydration,
 	withOptionsHydration,
 } from '../with-options-hydration';
-
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn(),
-	useDispatch: jest.fn(),
-} ) );
-
+vi.mock( '@wordpress/data', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/data' ) ),
+		useSelect: vi.fn(),
+		useDispatch: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const optionData = {
 	option: 'val',
 	option2: 'val2',
@@ -26,37 +42,32 @@ const optionData = {
 };
 const TestHookComponent = () => {
 	useOptionsHydration( optionData );
-
 	return <div></div>;
 };
-
 const TestHigherOrderComponent = withOptionsHydration( optionData )( () => (
 	<div></div>
 ) );
-
 describe( 'withOptionsHydration', () => {
-	const isResolvingMock = jest.fn();
-	const hasFinishedMock = jest.fn();
-	const startResolutionMock = jest.fn();
-	const receiveOptionsMock = jest.fn();
+	const isResolvingMock = vi.fn();
+	const hasFinishedMock = vi.fn();
+	const startResolutionMock = vi.fn();
+	const receiveOptionsMock = vi.fn();
 	beforeEach( () => {
-		( useSelect as jest.Mock ).mockImplementation( ( callback ) => {
+		( useSelect as Mock ).mockImplementation( ( callback ) => {
 			return callback( () => ( {
 				isResolving: isResolvingMock,
 				hasFinishedResolution: hasFinishedMock,
 			} ) );
 		} );
-		( useDispatch as jest.Mock ).mockImplementation( () => ( {
+		( useDispatch as Mock ).mockImplementation( () => ( {
 			startResolution: startResolutionMock,
-			finishResolution: jest.fn(),
+			finishResolution: vi.fn(),
 			receiveOptions: receiveOptionsMock,
 		} ) );
 	} );
-
 	afterEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	} );
-
 	it.each( [
 		[ 'useOptionsHydration', TestHookComponent ],
 		[ 'withOptionsHydration', TestHigherOrderComponent ],
@@ -73,7 +84,6 @@ describe( 'withOptionsHydration', () => {
 			expect( startResolutionMock ).toHaveBeenCalledTimes( 3 );
 		}
 	);
-
 	it.each( [
 		[ 'useOptionsHydration', TestHookComponent ],
 		[ 'withOptionsHydration', TestHigherOrderComponent ],

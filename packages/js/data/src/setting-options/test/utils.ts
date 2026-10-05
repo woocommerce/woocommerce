@@ -1,3 +1,5 @@
+import { test } from 'vitest';
+
 /**
  * External dependencies
  */
