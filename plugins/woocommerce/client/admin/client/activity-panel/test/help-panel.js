@@ -1,3 +1,5 @@
+import { afterEach, describe, expect, it } from 'vitest';
+
 /**
  * External dependencies
  */

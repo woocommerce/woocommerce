@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * Internal dependencies
  */
@@ -20,7 +22,7 @@ describe( 'getAdminSetting', () => {
 	beforeEach( () => {
 		originalNodeEnv = process.env.NODE_ENV; // Store original NODE_ENV
 		process.env.NODE_ENV = 'development'; // Set to development mode
-		consoleWarnSpy = jest
+		consoleWarnSpy = vi
 			.spyOn( console, 'warn' )
 			.mockImplementation( () => {} );
 	} );

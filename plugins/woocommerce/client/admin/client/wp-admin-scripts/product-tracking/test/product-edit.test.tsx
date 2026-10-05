@@ -1,36 +1,57 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
- * @jest-environment node
+ * @vitest-environment node
  */
 
 /**
  * External dependencies
  */
 import { recordEvent } from '@woocommerce/tracks';
-
-jest.mock( '@woocommerce/tracks', () => ( {
-	recordEvent: jest.fn(),
-} ) );
-jest.mock( '../shared', () => ( {
-	addExitPageListener: jest.fn().mockImplementation( () => {} ),
-	initProductScreenTracks: jest.fn().mockImplementation( () => {} ),
-	getProductData: jest.fn().mockImplementation( () => ( { product_id: 1 } ) ),
-} ) );
-
+vi.mock( '@woocommerce/tracks', () => {
+	const mock = {
+		recordEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../shared', () => {
+	const mock = {
+		addExitPageListener: vi.fn().mockImplementation( () => {} ),
+		initProductScreenTracks: vi.fn().mockImplementation( () => {} ),
+		getProductData: vi.fn().mockImplementation( () => ( {
+			product_id: 1,
+		} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'Product Screen Tracking', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	} );
-	it( 'should trigger product_edit_view event when productScreen.name is "edit"', () => {
-		global.productScreen = { name: 'edit' };
-		require( '../product-edit' );
+	it( 'should trigger product_edit_view event when productScreen.name is "edit"', async () => {
+		global.productScreen = {
+			name: 'edit',
+		};
+		await import( '../product-edit' );
 		expect( recordEvent ).toHaveBeenCalledWith( 'product_edit_view', {
 			product_id: 1,
 		} );
 	} );
-
-	it( 'should not trigger product_edit_view event when productScreen.name is not "edit"', () => {
-		global.productScreen = { name: '' };
-		require( '../product-edit' );
+	it( 'should not trigger product_edit_view event when productScreen.name is not "edit"', async () => {
+		global.productScreen = {
+			name: '',
+		};
+		await import( '../product-edit' );
 		expect( recordEvent ).not.toHaveBeenCalled();
 	} );
 } );

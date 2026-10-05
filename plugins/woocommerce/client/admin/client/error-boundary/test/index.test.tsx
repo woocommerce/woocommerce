@@ -1,3 +1,5 @@
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -26,7 +28,7 @@ describe( 'ErrorBoundary', () => {
 		// Opt Out of the jsdom error messages
 		window.addEventListener( 'error', onError );
 		delete window.location;
-		window.location = { reload: jest.fn() };
+		window.location = { reload: vi.fn() };
 	} );
 
 	afterAll( () => {
@@ -58,7 +60,7 @@ describe( 'ErrorBoundary', () => {
 	} );
 
 	it( 'refreshes the page when Refresh Page button is clicked', () => {
-		const reloadMock = jest.fn();
+		const reloadMock = vi.fn();
 		Object.defineProperty( window.location, 'reload', {
 			configurable: true,
 			value: reloadMock,
@@ -76,7 +78,7 @@ describe( 'ErrorBoundary', () => {
 	} );
 
 	it( 'opens a new issue when Report Issue button is clicked', () => {
-		const openSpy = jest
+		const openSpy = vi
 			.spyOn( window, 'open' )
 			.mockImplementation( () => null );
 

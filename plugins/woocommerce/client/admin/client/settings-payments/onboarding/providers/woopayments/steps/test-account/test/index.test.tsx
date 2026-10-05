@@ -1,3 +1,13 @@
+import {
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+	type Mock,
+	type MockedFunction,
+} from 'vitest';
+
 /**
  * External dependencies
  */
@@ -10,22 +20,40 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { useOnboardingContext } from '../../../data/onboarding-context';
 import TestAccountStep from '../index';
-
-jest.mock( '@wordpress/api-fetch', () => jest.fn() );
-
-jest.mock( '../../../data/onboarding-context', () => ( {
-	useOnboardingContext: jest.fn(),
-} ) );
-
-jest.mock( '../../../components/header', () => ( {
-	__esModule: true,
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- onClose is required by the component interface.
-	default: ( { onClose }: { onClose: () => void } ) => (
-		<div data-testid="step-header">Header</div>
-	),
-} ) );
-
-jest.mock( '@woocommerce/onboarding', () => {
+vi.mock( '@wordpress/api-fetch', () => {
+	const mock = vi.fn();
+	return {
+		default: mock,
+		...mock,
+	};
+} );
+vi.mock( '../../../data/onboarding-context', () => {
+	const mock = {
+		useOnboardingContext: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../../components/header', () => {
+	const mock = {
+		__esModule: true,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- onClose is required by the component interface.
+		default: ( { onClose }: { onClose: () => void } ) => (
+			<div data-testid="step-header">Header</div>
+		),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/onboarding', () => {
 	const MockLoader = ( { children }: { children: React.ReactNode } ) => (
 		<div data-testid="loader">{ children }</div>
 	);
@@ -47,51 +75,84 @@ jest.mock( '@woocommerce/onboarding', () => {
 	MockLoader.Sequence = ( { children }: { children: React.ReactNode } ) => (
 		<div>{ children }</div>
 	);
-	return { Loader: MockLoader };
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
+		Loader: MockLoader,
+	} );
 } );
-
-jest.mock( '@woocommerce/navigation', () => ( {
-	navigateTo: jest.fn(),
-	getNewPath: jest.fn( () => '' ),
-} ) );
-
-jest.mock( '~/settings-payments/utils', () => ( {
-	recordPaymentsOnboardingEvent: jest.fn(),
-} ) );
-
-jest.mock( '~/settings-payments/components/modals', () => ( {
-	WooPaymentsResetAccountModal: () => null,
-} ) );
-
-jest.mock( '~/utils/admin-settings', () => ( {
-	WC_ASSET_URL: '',
-} ) );
-
-const mockUseOnboardingContext = useOnboardingContext as jest.Mock;
-const mockApiFetch = apiFetch as jest.MockedFunction< typeof apiFetch >;
-
+vi.mock( '@woocommerce/navigation', () => {
+	const mock = {
+		navigateTo: vi.fn(),
+		getNewPath: vi.fn( () => '' ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '~/settings-payments/utils', () => {
+	const mock = {
+		recordPaymentsOnboardingEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '~/settings-payments/components/modals', () => {
+	const mock = {
+		WooPaymentsResetAccountModal: () => null,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '~/utils/admin-settings', () => {
+	const mock = {
+		WC_ASSET_URL: '',
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+const mockUseOnboardingContext = useOnboardingContext as Mock;
+const mockApiFetch = apiFetch as MockedFunction< typeof apiFetch >;
 const createMockContext = ( overrides: Record< string, unknown > = {} ) => ( {
 	currentStep: {
 		id: 'test_account',
 		status: 'not_started',
 		actions: {
-			init: { href: 'https://example.com/init' },
-			check: { href: 'https://example.com/check' },
+			init: {
+				href: 'https://example.com/init',
+			},
+			check: {
+				href: 'https://example.com/check',
+			},
 		},
 	},
-	closeModal: jest.fn(),
-	setJustCompletedStepId: jest.fn(),
+	closeModal: vi.fn(),
+	setJustCompletedStepId: vi.fn(),
 	sessionEntryPoint: 'settings',
-	setSnackbar: jest.fn(),
-	navigateToNextStep: jest.fn(),
+	setSnackbar: vi.fn(),
+	navigateToNextStep: vi.fn(),
 	...overrides,
 } );
-
 describe( 'TestAccountStep', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	} );
-
 	it( 'advances to the next step and shows a snackbar on a non-recoverable init error', async () => {
 		const context = createMockContext();
 		mockUseOnboardingContext.mockReturnValue( context );
@@ -100,20 +161,21 @@ describe( 'TestAccountStep', () => {
 			message:
 				'A test account could not be created, but onboarding can continue without it.',
 		} );
-
 		render( <TestAccountStep /> );
-
 		await waitFor( () => {
 			expect( context.navigateToNextStep ).toHaveBeenCalled();
 		} );
 		expect( context.setSnackbar ).toHaveBeenCalledWith(
-			expect.objectContaining( { show: true } )
+			expect.objectContaining( {
+				show: true,
+			} )
 		);
 		expect(
-			screen.queryByRole( 'button', { name: /try again/i } )
+			screen.queryByRole( 'button', {
+				name: /try again/i,
+			} )
 		).not.toBeInTheDocument();
 	} );
-
 	it( 'shows the error notice with a retry action for other init errors', async () => {
 		const context = createMockContext();
 		mockUseOnboardingContext.mockReturnValue( context );
@@ -121,16 +183,16 @@ describe( 'TestAccountStep', () => {
 			code: 'some_other_error',
 			message: 'Something went wrong.',
 		} );
-
 		render( <TestAccountStep /> );
-
 		expect(
 			await screen.findByText( 'Something went wrong.', {
 				selector: 'p',
 			} )
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole( 'button', { name: /try again/i } )
+			screen.getByRole( 'button', {
+				name: /try again/i,
+			} )
 		).toBeInTheDocument();
 		expect( context.navigateToNextStep ).not.toHaveBeenCalled();
 		expect( context.setSnackbar ).not.toHaveBeenCalled();

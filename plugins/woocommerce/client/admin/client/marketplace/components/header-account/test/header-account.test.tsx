@@ -1,33 +1,63 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+let { mockSettings } = vi.hoisted( () => {
+	const mockSettings = {};
+	return {
+		mockSettings,
+	};
+} );
+
 /**
  * External dependencies
  */
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-
-let mockSettings: Record< string, unknown > = {};
-
-jest.mock( '../../../../utils/admin-settings', () => ( {
-	getAdminSetting: jest.fn( () => mockSettings ),
-} ) );
-
-jest.mock( '@woocommerce/tracks', () => ( {
-	recordEvent: jest.fn(),
-} ) );
-
-jest.mock( '../../../utils/functions', () => ( {
-	connectUrl: jest.fn( () => 'http://example.test/connect' ),
-} ) );
+vi.mock( '../../../../utils/admin-settings', () => {
+	const mock = {
+		ADMIN_URL: '',
+		getAdminSetting: vi.fn( () => mockSettings ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/tracks', () => {
+	const mock = {
+		recordEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../../utils/functions', () => {
+	const mock = {
+		connectUrl: vi.fn( () => 'http://example.test/connect' ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 /**
  * Internal dependencies
  */
 import HeaderAccount from '../header-account';
-
 function openMenu( page: string ) {
 	render( <HeaderAccount page={ page } /> );
-	fireEvent.click( screen.getByRole( 'button', { name: 'User options' } ) );
+	fireEvent.click(
+		screen.getByRole( 'button', {
+			name: 'User options',
+		} )
+	);
 }
-
 describe( 'HeaderAccount menu', () => {
 	beforeEach( () => {
 		mockSettings = {
@@ -36,15 +66,15 @@ describe( 'HeaderAccount menu', () => {
 			userAvatar: '',
 		};
 	} );
-
 	it( 'offers connect and a link to the WooCommerce.com account when not connected in the marketplace', () => {
 		openMenu( 'wc-addons' );
-
 		expect(
-			screen.getByRole( 'menuitem', { name: /Connect account/ } )
+			screen.getByRole( 'menuitem', {
+				name: /Connect account/,
+			} )
 		).toHaveAttribute( 'href', 'http://example.test/connect' );
 		const accountItem = screen.getByRole( 'menuitem', {
-			name: 'Your WooCommerce.com account (opens in a new tab)',
+			name: /Your WooCommerce\.com account\s*\(opens in a new tab\)/,
 		} );
 		expect( accountItem ).toHaveAttribute(
 			'href',
@@ -53,13 +83,14 @@ describe( 'HeaderAccount menu', () => {
 		expect( accountItem ).toHaveAttribute( 'target', '_blank' );
 		expect( accountItem ).toHaveAttribute( 'rel', 'noopener noreferrer' );
 		expect(
-			screen.getByRole( 'menuitem', { name: /Connect account/ } )
+			screen.getByRole( 'menuitem', {
+				name: /Connect account/,
+			} )
 		).not.toHaveAttribute( 'target' );
 		expect(
 			document.querySelector( 'a[href*="my-dashboard"]' )
 		).toBeNull();
 	} );
-
 	it( 'links the connected email to the WooCommerce.com account and hides the extra item', () => {
 		mockSettings = {
 			isConnected: true,
@@ -67,9 +98,8 @@ describe( 'HeaderAccount menu', () => {
 			userAvatar: '',
 		};
 		openMenu( 'wc-addons' );
-
 		const emailItem = screen.getByRole( 'menuitem', {
-			name: 'merchant@example.com (opens in a new tab)',
+			name: /merchant@example\.com\s*\(opens in a new tab\)/,
 		} );
 		expect( emailItem ).toHaveAttribute(
 			'href',
@@ -83,15 +113,17 @@ describe( 'HeaderAccount menu', () => {
 			} )
 		).toBeNull();
 		expect(
-			screen.getByRole( 'menuitem', { name: 'Disconnect account' } )
+			screen.getByRole( 'menuitem', {
+				name: 'Disconnect account',
+			} )
 		).toBeInTheDocument();
 	} );
-
 	it( 'does not show the account link outside the marketplace when not connected', () => {
 		openMenu( 'wc-admin' );
-
 		expect(
-			screen.getByRole( 'menuitem', { name: /Connect account/ } )
+			screen.getByRole( 'menuitem', {
+				name: /Connect account/,
+			} )
 		).toBeInTheDocument();
 		expect(
 			screen.queryByRole( 'menuitem', {

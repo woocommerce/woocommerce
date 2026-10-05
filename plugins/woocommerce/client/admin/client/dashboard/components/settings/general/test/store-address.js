@@ -1,3 +1,5 @@
+import { describe, expect, it, test, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -64,7 +66,7 @@ describe( 'useGetCountryStateAutofill', () => {
 	} );
 
 	it( 'should set countryState value if a value is provided', () => {
-		const onChange = jest.fn();
+		const onChange = vi.fn();
 		render(
 			<AutofillWrapper
 				options={ [ ...DEFAULT_OPTIONS ] }
@@ -91,7 +93,7 @@ describe( 'useGetCountryStateAutofill', () => {
 	} );
 
 	it( 'should set countryState if auto complete fields are changed and abbreviation is used', () => {
-		const onChange = jest.fn();
+		const onChange = vi.fn();
 		const { queryAllByRole } = render(
 			<AutofillWrapper
 				options={ [ ...DEFAULT_OPTIONS ] }
@@ -107,7 +109,7 @@ describe( 'useGetCountryStateAutofill', () => {
 	} );
 
 	it( 'should set countryState if auto complete fields are changed and abbreviation is not used', () => {
-		const onChange = jest.fn();
+		const onChange = vi.fn();
 		const { queryAllByRole } = render(
 			<AutofillWrapper
 				options={ [ ...DEFAULT_OPTIONS ] }
@@ -123,7 +125,7 @@ describe( 'useGetCountryStateAutofill', () => {
 	} );
 
 	it( 'should update the countryState if the auto complete fields changed and countryState was already set', () => {
-		const onChange = jest.fn();
+		const onChange = vi.fn();
 		const { queryAllByRole } = render(
 			<AutofillWrapper
 				options={ [ ...DEFAULT_OPTIONS ] }
@@ -142,7 +144,7 @@ describe( 'useGetCountryStateAutofill', () => {
 	} );
 
 	it( 'should update the auto complete fields when countryState is changed and inputs already set', () => {
-		const onChange = jest.fn();
+		const onChange = vi.fn();
 		const options = [ ...DEFAULT_OPTIONS ];
 		const { rerender, queryAllByRole } = render(
 			<AutofillWrapper options={ options } onChange={ onChange } />
@@ -216,31 +218,31 @@ describe( 'getStateFilter', () => {
 	);
 } );
 
-jest.mock( '@wordpress/data', () => {
-	const originalModule = jest.requireActual( '@wordpress/data' );
+vi.mock( '@wordpress/data', async () => {
+	const originalModule = await vi.importActual( '@wordpress/data' );
 
-	return {
+	return ( ( mock ) => ( { default: mock, ...mock } ) )( {
 		__esModule: true,
 		...originalModule,
-		useSelect: jest.fn().mockReturnValue( {
+		useSelect: vi.fn().mockReturnValue( {
 			locale: 'en_US',
 			countries: [],
 			loadingCountries: false,
 			hasFinishedResolution: true,
 		} ),
-	};
+	} );
 } );
 
 describe( 'StoreAddress', () => {
-	const mockedGetInputProps = jest.fn().mockReturnValue( '' );
-	const mockedGetSelectControlProps = jest.fn().mockReturnValue( '' );
+	const mockedGetInputProps = vi.fn().mockReturnValue( '' );
+	const mockedGetSelectControlProps = vi.fn().mockReturnValue( '' );
 
 	it( 'should render should in the order of Country / Region, Address, Post / Zip Code, City, Email Address.', () => {
 		const { container } = render(
 			<StoreAddress
 				getInputProps={ mockedGetInputProps }
 				getSelectControlProps={ mockedGetSelectControlProps }
-				setValue={ jest.fn() }
+				setValue={ vi.fn() }
 			/>
 		);
 		const labels = container.querySelectorAll( 'label' );

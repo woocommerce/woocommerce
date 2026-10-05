@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -7,14 +9,20 @@ import { render, screen, fireEvent } from '@testing-library/react';
  * Internal dependencies
  */
 import FulfillmentCard from '../card';
-
-jest.mock( '@wordpress/components', () => ( {
-	Button: ( { children, ...props } ) => (
-		<button { ...props }>{ children }</button>
-	),
-	Icon: ( { icon } ) => <span data-testid="icon">{ icon }</span>,
-} ) );
-
+vi.mock( '@wordpress/components', () => {
+	const mock = {
+		Button: ( { children, __next40pxDefaultSize, ...props } ) => (
+			<button { ...props }>{ children }</button>
+		),
+		Icon: ( { icon } ) => <span data-testid="icon">{ icon }</span>,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'FulfillmentCard', () => {
 	it( 'renders the header and children', () => {
 		render(
@@ -22,7 +30,6 @@ describe( 'FulfillmentCard', () => {
 				<p>Child content</p>
 			</FulfillmentCard>
 		);
-
 		expect( screen.getByText( 'Header' ) ).toBeInTheDocument();
 		// Children should not be visible by default for collapsible
 		expect( screen.queryByText( 'Child content' ) ).not.toBeInTheDocument();
@@ -32,38 +39,31 @@ describe( 'FulfillmentCard', () => {
 		);
 		expect( screen.getByText( 'Child content' ) ).toBeInTheDocument();
 	} );
-
 	it( 'renders as collapsible and toggles visibility', () => {
 		render(
 			<FulfillmentCard header={ <h1>Header</h1> } isCollapsible>
 				<p>Child content</p>
 			</FulfillmentCard>
 		);
-
 		const header = screen
 			.getByText( 'Header' )
 			.closest( '[role="button"]' );
 		expect( screen.queryByText( 'Child content' ) ).not.toBeInTheDocument();
-
 		fireEvent.click( header );
 		expect( screen.getByText( 'Child content' ) ).toBeInTheDocument();
-
 		fireEvent.click( header );
 		expect( screen.queryByText( 'Child content' ) ).not.toBeInTheDocument();
 	} );
-
 	it( 'renders without clickable header when not collapsible', () => {
 		render(
 			<FulfillmentCard header={ <h1>Header</h1> } isCollapsible={ false }>
 				<p>Child content</p>
 			</FulfillmentCard>
 		);
-
 		expect( screen.queryByRole( 'button' ) ).not.toBeInTheDocument();
 		// Children should not be visible if not collapsible (matches component behavior)
 		expect( screen.queryByText( 'Child content' ) ).not.toBeInTheDocument();
 	} );
-
 	it( 'renders children if initialState is expanded (collapsible)', () => {
 		render(
 			<FulfillmentCard
@@ -78,7 +78,6 @@ describe( 'FulfillmentCard', () => {
 		// Children should be visible immediately when initialState is expanded
 		expect( screen.getByText( 'Child content' ) ).toBeInTheDocument();
 	} );
-
 	it( 'does not render children if initialState is closed (collapsible)', () => {
 		render(
 			<FulfillmentCard
@@ -89,29 +88,28 @@ describe( 'FulfillmentCard', () => {
 				<p>Child content</p>
 			</FulfillmentCard>
 		);
-
 		expect(
 			screen.getByText( 'Header' ).closest( '[role="button"]' )
 		).toBeInTheDocument();
 		expect( screen.queryByText( 'Child content' ) ).not.toBeInTheDocument();
 	} );
-
 	it( 'supports keyboard interaction on collapsible header', () => {
 		render(
 			<FulfillmentCard header={ <h1>Header</h1> } isCollapsible>
 				<p>Child content</p>
 			</FulfillmentCard>
 		);
-
 		const header = screen
 			.getByText( 'Header' )
 			.closest( '[role="button"]' );
 		expect( screen.queryByText( 'Child content' ) ).not.toBeInTheDocument();
-
-		fireEvent.keyUp( header, { key: 'Enter' } );
+		fireEvent.keyUp( header, {
+			key: 'Enter',
+		} );
 		expect( screen.getByText( 'Child content' ) ).toBeInTheDocument();
-
-		fireEvent.keyUp( header, { key: ' ' } );
+		fireEvent.keyUp( header, {
+			key: ' ',
+		} );
 		expect( screen.queryByText( 'Child content' ) ).not.toBeInTheDocument();
 	} );
 } );

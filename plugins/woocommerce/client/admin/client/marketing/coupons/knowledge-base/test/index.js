@@ -1,8 +1,10 @@
+import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
 import { recordEvent } from '@woocommerce/tracks';
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createElement } from '@wordpress/element';
 
@@ -10,9 +12,7 @@ import { createElement } from '@wordpress/element';
  * Internal dependencies
  */
 import { KnowledgeBase } from '../index.js';
-
-jest.mock( '@woocommerce/tracks' );
-
+vi.mock( '@woocommerce/tracks' );
 const mockPosts = [
 	{
 		title: 'WooCommerce Blog Post 1',
@@ -36,10 +36,8 @@ const mockPosts = [
 		author_avatar: 'https://avatar.domain/avatar3.png',
 	},
 ];
-
 describe( 'Posts and not loading', () => {
 	let knowledgeBaseWrapper;
-
 	beforeEach( () => {
 		knowledgeBaseWrapper = render(
 			<KnowledgeBase
@@ -49,26 +47,21 @@ describe( 'Posts and not loading', () => {
 			/>
 		);
 	} );
-
 	it( 'should not display the placeholder', () => {
 		const { container } = knowledgeBaseWrapper;
 		expect(
 			container.querySelector( '.is-loading, .is-placeholder' )
 		).toBeFalsy();
 	} );
-
 	it( 'should display default title and description', () => {
 		const { getByText } = knowledgeBaseWrapper;
-
 		expect( getByText( 'WooCommerce knowledge base' ) ).toBeInTheDocument();
-
 		expect(
 			getByText(
 				'Learn the ins and outs of successful marketing from the experts at WooCommerce.'
 			)
 		).toBeInTheDocument();
 	} );
-
 	it( 'should display posts wrapper', () => {
 		const { container } = knowledgeBaseWrapper;
 		expect(
@@ -77,14 +70,12 @@ describe( 'Posts and not loading', () => {
 			)
 		).toHaveLength( 1 );
 	} );
-
 	it( 'should display the slider', () => {
 		const { container } = knowledgeBaseWrapper;
 		expect(
 			container.getElementsByClassName( 'woocommerce-marketing-slider' )
 		).toHaveLength( 1 );
 	} );
-
 	it( 'should display correct number of posts', () => {
 		const { container } = knowledgeBaseWrapper;
 		expect(
@@ -92,17 +83,14 @@ describe( 'Posts and not loading', () => {
 				'woocommerce-marketing-knowledgebase-card__page'
 			)
 		).toHaveLength( 1 );
-
 		expect(
 			container.getElementsByClassName(
 				'woocommerce-marketing-knowledgebase-card__post'
 			)
 		).toHaveLength( 2 );
 	} );
-
 	it( 'should not display the empty content component', () => {
 		const { queryByText } = knowledgeBaseWrapper;
-
 		expect( queryByText( 'No posts yet' ) ).toBeNull();
 		expect( queryByText( /Read /i ) ).toBeNull();
 		expect( queryByText( 'the WooCommerce blog' ) ).toBeNull();
@@ -110,22 +98,22 @@ describe( 'Posts and not loading', () => {
 			queryByText( / for more tips on marketing your store/i )
 		).toBeNull();
 	} );
-
 	it( 'should display the pagination', () => {
 		const { getByLabelText } = knowledgeBaseWrapper;
-
 		expect(
-			getByLabelText( 'Previous Page', { selector: 'button' } )
+			getByLabelText( 'Previous Page', {
+				selector: 'button',
+			} )
 		).toBeInTheDocument();
 		expect(
-			getByLabelText( 'Next Page', { selector: 'button' } )
+			getByLabelText( 'Next Page', {
+				selector: 'button',
+			} )
 		).toBeInTheDocument();
 	} );
 } );
-
 describe( 'No posts and loading', () => {
 	let knowledgeBaseWrapper;
-
 	beforeEach( () => {
 		knowledgeBaseWrapper = render(
 			<KnowledgeBase
@@ -135,7 +123,6 @@ describe( 'No posts and loading', () => {
 			/>
 		);
 	} );
-
 	it( 'should display placeholder', () => {
 		const { container } = knowledgeBaseWrapper;
 		expect(
@@ -144,7 +131,6 @@ describe( 'No posts and loading', () => {
 			)
 		).toBeTruthy();
 	} );
-
 	it( 'should not display slider', () => {
 		const { container } = knowledgeBaseWrapper;
 		expect(
@@ -153,7 +139,6 @@ describe( 'No posts and loading', () => {
 			)
 		).toHaveLength( 0 );
 	} );
-
 	it( 'should display posts wrapper', () => {
 		const { container } = knowledgeBaseWrapper;
 		expect(
@@ -162,10 +147,8 @@ describe( 'No posts and loading', () => {
 			)
 		).toHaveLength( 1 );
 	} );
-
 	it( 'should not display the empty content component', () => {
 		const { queryByText } = knowledgeBaseWrapper;
-
 		expect( queryByText( 'No posts yet' ) ).toBeNull();
 		expect( queryByText( /Read /i ) ).toBeNull();
 		expect( queryByText( 'the WooCommerce blog' ) ).toBeNull();
@@ -173,22 +156,22 @@ describe( 'No posts and loading', () => {
 			queryByText( / for more tips on marketing your store/i )
 		).toBeNull();
 	} );
-
 	it( 'should not display the pagination', () => {
 		const { queryByLabelText } = knowledgeBaseWrapper;
-
 		expect(
-			queryByLabelText( 'Previous Page', { selector: 'button' } )
+			queryByLabelText( 'Previous Page', {
+				selector: 'button',
+			} )
 		).toBeNull();
 		expect(
-			queryByLabelText( 'Next Page', { selector: 'button' } )
+			queryByLabelText( 'Next Page', {
+				selector: 'button',
+			} )
 		).toBeNull();
 	} );
 } );
-
 describe( 'Error and not loading', () => {
 	let knowledgeBaseWrapper;
-
 	beforeEach( () => {
 		knowledgeBaseWrapper = render(
 			<KnowledgeBase
@@ -201,14 +184,12 @@ describe( 'Error and not loading', () => {
 			/>
 		);
 	} );
-
 	it( 'should not display the placeholder', () => {
 		const { container } = knowledgeBaseWrapper;
 		expect(
 			container.querySelector( '.is-loading, .is-placeholder' )
 		).toBeFalsy();
 	} );
-
 	it( 'should not display posts wrapper', () => {
 		const { container } = knowledgeBaseWrapper;
 		expect(
@@ -217,10 +198,8 @@ describe( 'Error and not loading', () => {
 			)
 		).toHaveLength( 0 );
 	} );
-
 	it( 'should display the error component', () => {
 		const { getByText } = knowledgeBaseWrapper;
-
 		expect(
 			getByText( "Oops, our posts aren't loading right now" )
 		).toBeInTheDocument();
@@ -230,22 +209,22 @@ describe( 'Error and not loading', () => {
 			getByText( / for more tips on marketing your store/i )
 		).toBeInTheDocument();
 	} );
-
 	it( 'should not display the pagination', () => {
 		const { queryByLabelText } = knowledgeBaseWrapper;
-
 		expect(
-			queryByLabelText( 'Previous Page', { selector: 'button' } )
+			queryByLabelText( 'Previous Page', {
+				selector: 'button',
+			} )
 		).toBeNull();
 		expect(
-			queryByLabelText( 'Next Page', { selector: 'button' } )
+			queryByLabelText( 'Next Page', {
+				selector: 'button',
+			} )
 		).toBeNull();
 	} );
 } );
-
 describe( 'No posts and not loading', () => {
 	let knowledgeBaseWrapper;
-
 	beforeEach( () => {
 		knowledgeBaseWrapper = render(
 			<KnowledgeBase
@@ -255,14 +234,12 @@ describe( 'No posts and not loading', () => {
 			/>
 		);
 	} );
-
 	it( 'should not display the placeholder', () => {
 		const { container } = knowledgeBaseWrapper;
 		expect(
 			container.querySelector( '.is-loading, .is-placeholder' )
 		).toBeFalsy();
 	} );
-
 	it( 'should not display posts wrapper', () => {
 		const { container } = knowledgeBaseWrapper;
 		expect(
@@ -271,10 +248,8 @@ describe( 'No posts and not loading', () => {
 			)
 		).toHaveLength( 0 );
 	} );
-
 	it( 'should display the empty content component', () => {
 		const { getByText } = knowledgeBaseWrapper;
-
 		expect( getByText( 'No posts yet' ) ).toBeInTheDocument();
 		expect( getByText( /Read /i ) ).toBeInTheDocument();
 		expect( getByText( 'the WooCommerce blog' ) ).toBeInTheDocument();
@@ -282,23 +257,23 @@ describe( 'No posts and not loading', () => {
 			getByText( / for more tips on marketing your store/i )
 		).toBeInTheDocument();
 	} );
-
 	it( 'should not display the pagination', () => {
 		const { queryByLabelText } = knowledgeBaseWrapper;
-
 		expect(
-			queryByLabelText( 'Previous Page', { selector: 'button' } )
+			queryByLabelText( 'Previous Page', {
+				selector: 'button',
+			} )
 		).toBeNull();
 		expect(
-			queryByLabelText( 'Next Page', { selector: 'button' } )
+			queryByLabelText( 'Next Page', {
+				selector: 'button',
+			} )
 		).toBeNull();
 	} );
 } );
-
 describe( 'Clicking on a post', () => {
-	afterAll( () => jest.clearAllMocks() );
-
-	it( 'should record an event when clicked', () => {
+	afterAll( () => vi.clearAllMocks() );
+	it( 'should record an event when clicked', async () => {
 		const { getByRole } = render(
 			<KnowledgeBase
 				posts={ mockPosts }
@@ -306,9 +281,13 @@ describe( 'Clicking on a post', () => {
 				category={ 'marketing' }
 			/>
 		);
-
-		userEvent.click( getByRole( 'link', { name: /Post 1/ } ) );
-
+		await act( async () => {
+			userEvent.click(
+				getByRole( 'link', {
+					name: /Post 1/,
+				} )
+			);
+		} );
 		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'marketing_knowledge_article',
@@ -316,9 +295,13 @@ describe( 'Clicking on a post', () => {
 				title: 'WooCommerce Blog Post 1',
 			}
 		);
-
-		userEvent.click( getByRole( 'link', { name: /Post 2/ } ) );
-
+		await act( async () => {
+			userEvent.click(
+				getByRole( 'link', {
+					name: /Post 2/,
+				} )
+			);
+		} );
 		expect( recordEvent ).toHaveBeenCalledTimes( 2 );
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'marketing_knowledge_article',
@@ -328,10 +311,8 @@ describe( 'Clicking on a post', () => {
 		);
 	} );
 } );
-
 describe( 'Pagination', () => {
-	afterAll( () => jest.clearAllMocks() );
-
+	afterAll( () => vi.clearAllMocks() );
 	it( 'should be able to click forward and back', async () => {
 		const { container, getByLabelText } = render(
 			<KnowledgeBase
@@ -340,11 +321,13 @@ describe( 'Pagination', () => {
 				category={ 'marketing' }
 			/>
 		);
-
-		userEvent.click(
-			getByLabelText( 'Next Page', { selector: 'button' } )
-		);
-
+		await act( async () => {
+			userEvent.click(
+				getByLabelText( 'Next Page', {
+					selector: 'button',
+				} )
+			);
+		} );
 		await waitFor( () =>
 			expect(
 				container.getElementsByClassName(
@@ -352,7 +335,6 @@ describe( 'Pagination', () => {
 				)
 			).toHaveLength( 1 )
 		);
-
 		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'marketing_knowledge_carousel',
@@ -361,11 +343,13 @@ describe( 'Pagination', () => {
 				page: 2,
 			}
 		);
-
-		userEvent.click(
-			getByLabelText( 'Previous Page', { selector: 'button' } )
-		);
-
+		await act( async () => {
+			userEvent.click(
+				getByLabelText( 'Previous Page', {
+					selector: 'button',
+				} )
+			);
+		} );
 		await waitFor( () =>
 			expect(
 				container.getElementsByClassName(
@@ -373,7 +357,6 @@ describe( 'Pagination', () => {
 				)
 			).toHaveLength( 1 )
 		);
-
 		expect( recordEvent ).toHaveBeenCalledTimes( 2 );
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'marketing_knowledge_carousel',
@@ -384,10 +367,8 @@ describe( 'Pagination', () => {
 		);
 	} );
 } );
-
 describe( 'Page with single post', () => {
 	let knowledgeBaseWrapper;
-
 	const mockPost = [
 		{
 			title: 'WooCommerce Blog Post 1',
@@ -397,7 +378,6 @@ describe( 'Page with single post', () => {
 			author_avatar: 'https://avatar.domain/avatar1.png',
 		},
 	];
-
 	beforeEach( () => {
 		knowledgeBaseWrapper = render(
 			<KnowledgeBase
@@ -407,14 +387,12 @@ describe( 'Page with single post', () => {
 			/>
 		);
 	} );
-
 	it( 'should display with correct class', () => {
 		const { container } = knowledgeBaseWrapper;
 		expect(
 			container.getElementsByClassName( 'page-with-single-post' )
 		).toHaveLength( 1 );
 	} );
-
 	it( 'should display a single post', () => {
 		const { container } = knowledgeBaseWrapper;
 		expect(
@@ -424,7 +402,6 @@ describe( 'Page with single post', () => {
 		).toHaveLength( 1 );
 	} );
 } );
-
 describe( 'Custom title and description', () => {
 	it( 'should override defaults', () => {
 		const { getByText } = render(
@@ -436,7 +413,6 @@ describe( 'Custom title and description', () => {
 				description={ 'Custom Description' }
 			/>
 		);
-
 		expect( getByText( 'Custom Title' ) ).toBeInTheDocument();
 		expect( getByText( 'Custom Description' ) ).toBeInTheDocument();
 	} );

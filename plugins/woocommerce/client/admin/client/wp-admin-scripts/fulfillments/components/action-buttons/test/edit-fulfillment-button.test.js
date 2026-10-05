@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -15,7 +17,7 @@ describe( 'EditFulfillmentButton component', () => {
 	} );
 
 	it( 'should call onClick handler when clicked', () => {
-		const mockOnClick = jest.fn();
+		const mockOnClick = vi.fn();
 		render( <EditFulfillmentButton onClick={ mockOnClick } /> );
 
 		fireEvent.click( screen.getByText( 'Edit fulfillment' ) );
@@ -53,7 +55,7 @@ describe( 'EditFulfillmentButton component', () => {
 		} );
 
 		it( 'should be keyboard accessible', () => {
-			const mockOnClick = jest.fn();
+			const mockOnClick = vi.fn();
 			render( <EditFulfillmentButton onClick={ mockOnClick } /> );
 
 			const button = screen.getByRole( 'button' );

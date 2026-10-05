@@ -1,33 +1,59 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { queueRecordEvent } from '@woocommerce/tracks';
-
-jest.mock( '@woocommerce/navigation', () => ( {
-	getNewPath: jest.fn( () => '/new-path' ),
-	navigateTo: jest.fn(),
-	useQuery: jest.fn( () => ( {} ) ),
-} ) );
-
-jest.mock( '@woocommerce/tracks', () => ( {
-	recordEvent: jest.fn(),
-	queueRecordEvent: jest.fn(),
-} ) );
+vi.mock( '@woocommerce/navigation', () => {
+	const mock = {
+		getNewPath: vi.fn( () => '/new-path' ),
+		navigateTo: vi.fn(),
+		useQuery: vi.fn( () => ( {} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/tracks', () => {
+	const mock = {
+		recordEvent: vi.fn(),
+		queueRecordEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 // The preview modal loads its own data; these tests only care about the card.
-jest.mock(
-	'../../product-preview-modal/product-preview-modal',
-	() => () => null
-);
-
-jest.mock( '@woocommerce/data', () => ( {
-	useUser: jest.fn( () => ( {
-		user: null,
-		currentUserCan: jest.fn( () => false ),
-	} ) ),
-} ) );
+vi.mock( '../../product-preview-modal/product-preview-modal', () => {
+	const mock = () => null;
+	return {
+		default: mock,
+		...mock,
+	};
+} );
+vi.mock( '@woocommerce/data', () => {
+	const mock = {
+		useUser: vi.fn( () => ( {
+			user: null,
+			currentUserCan: vi.fn( () => false ),
+		} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 /**
  * Internal dependencies
@@ -40,7 +66,6 @@ import {
 	ProductCardType,
 	ProductType,
 } from '../../product-list/types';
-
 const context = {
 	selectedTab: 'discover',
 	isProductInstalled: () => false,
@@ -52,7 +77,6 @@ const context = {
 		},
 	},
 } as unknown as MarketplaceContextType;
-
 const product: Product = {
 	id: 1,
 	title: 'Test extension',
@@ -62,7 +86,7 @@ const product: Product = {
 	vendorName: '',
 	vendorUrl: '',
 	icon: '',
-	url: '',
+	url: 'https://example.com/test-extension',
 	price: 0,
 	isInstallable: false,
 	currency: 'USD',
@@ -72,7 +96,6 @@ const product: Product = {
 	reviewsCount: 10,
 	hasQualityBadge: true,
 };
-
 function renderCard(
 	cardType: ProductCardType,
 	productOverrides: Partial< Product > = {},
@@ -80,22 +103,28 @@ function renderCard(
 ) {
 	return render(
 		<MarketplaceContext.Provider
-			value={ { ...context, ...contextOverrides } }
+			value={ {
+				...context,
+				...contextOverrides,
+			} }
 		>
 			<ProductCard
 				type={ ProductType.extension }
-				product={ { ...product, ...productOverrides } }
+				product={ {
+					...product,
+					...productOverrides,
+				} }
 				cardType={ cardType }
-				tracksData={ { position: 1 } }
+				tracksData={ {
+					position: 1,
+				} }
 			/>
 		</MarketplaceContext.Provider>
 	);
 }
-
 function getBadge( container: HTMLElement ) {
 	return container.querySelector( '.woocommerce-marketplace__quality-badge' );
 }
-
 describe( 'ProductCard quality badge placement', () => {
 	it( 'renders the badge between the title and the price on compact cards', () => {
 		const { container } = renderCard( ProductCardType.compact );
@@ -106,18 +135,15 @@ describe( 'ProductCard quality badge placement', () => {
 		const footer = container.querySelector(
 			'.woocommerce-marketplace__product-card__footer'
 		);
-
 		expect( badge ).not.toBeNull();
 		expect( badge?.parentElement ).toBe( meta );
 		expect( footer?.contains( badge ) ).toBe( false );
-
 		const title = container.querySelector(
 			'.woocommerce-marketplace__product-card__title'
 		);
 		expect( title?.nextElementSibling ).toBe( badge );
 		expect( badge?.nextElementSibling ).toBe( footer );
 	} );
-
 	it( 'renders the badge in the footer above the price on regular cards', () => {
 		const { container } = renderCard( ProductCardType.regular );
 		const badge = getBadge( container );
@@ -127,22 +153,18 @@ describe( 'ProductCard quality badge placement', () => {
 		const price = container.querySelector(
 			'.woocommerce-marketplace__product-card__price'
 		);
-
 		expect( badge ).not.toBeNull();
 		expect( badge?.parentElement ).toBe( footer );
 		expect( footer?.firstElementChild ).toBe( badge );
 		expect( badge?.nextElementSibling ).toBe( price );
 	} );
-
 	it( 'renders no badge when the product does not have one', () => {
 		const { container } = renderCard( ProductCardType.compact, {
 			hasQualityBadge: false,
 		} );
-
 		expect( getBadge( container ) ).toBeNull();
 	} );
 } );
-
 describe( 'ProductCard sponsored label', () => {
 	const sponsoredProduct: Product = {
 		...product,
@@ -151,14 +173,15 @@ describe( 'ProductCard sponsored label', () => {
 		label: 'promoted',
 		primary_color: '#720eec',
 	};
-
 	function renderSponsoredCard(
 		cardType: ProductCardType,
 		overrides: Partial< Product > = {}
 	) {
-		return renderCard( cardType, { ...sponsoredProduct, ...overrides } );
+		return renderCard( cardType, {
+			...sponsoredProduct,
+			...overrides,
+		} );
 	}
-
 	function getSponsoredLabel( view: ReturnType< typeof render > ) {
 		return view.queryByText( 'Sponsored' );
 	}
@@ -167,7 +190,6 @@ describe( 'ProductCard sponsored label', () => {
 	// vendor link carries screen-reader text of its own. Match the phrase at
 	// its shallowest element so ancestors and the link itself don't match.
 	const VENDOR_PHRASE = /^By Test vendor/;
-
 	function matchesVendorPhrase( content: string, element: Element | null ) {
 		return (
 			VENDOR_PHRASE.test( element?.textContent ?? '' ) &&
@@ -176,10 +198,8 @@ describe( 'ProductCard sponsored label', () => {
 			)
 		);
 	}
-
 	it( 'renders the label on compact cards, without the vendor', () => {
 		const view = renderSponsoredCard( ProductCardType.compact );
-
 		expect( view.getByText( 'Sponsored' ) ).toBeVisible();
 		expect( view.queryByText( matchesVendorPhrase ) ).toBeNull();
 		expect(
@@ -188,7 +208,6 @@ describe( 'ProductCard sponsored label', () => {
 			)
 		).toBeNull();
 	} );
-
 	it( 'renders the vendor, separator and label on regular cards', () => {
 		const view = renderSponsoredCard( ProductCardType.regular );
 
@@ -201,12 +220,10 @@ describe( 'ProductCard sponsored label', () => {
 		).not.toBeNull();
 		expect( view.getByText( 'Sponsored' ) ).toBeVisible();
 	} );
-
 	it( 'renders no label or vendor line on compact cards that are not sponsored', () => {
 		const view = renderSponsoredCard( ProductCardType.compact, {
 			label: undefined,
 		} );
-
 		expect( getSponsoredLabel( view ) ).toBeNull();
 		expect(
 			view.container.querySelector(
@@ -215,12 +232,10 @@ describe( 'ProductCard sponsored label', () => {
 		).toBeNull();
 	} );
 } );
-
 describe( 'ProductCard click tracking', () => {
 	beforeEach( () => {
-		jest.mocked( queueRecordEvent ).mockClear();
+		vi.mocked( queueRecordEvent ).mockClear();
 	} );
-
 	function clickCard(
 		productOverrides: Partial< Product > = {},
 		contextOverrides: Partial< MarketplaceContextType > = {}
@@ -230,18 +245,15 @@ describe( 'ProductCard click tracking', () => {
 			productOverrides,
 			contextOverrides
 		);
-
 		fireEvent.click( view.getByRole( 'link' ) );
 	}
 
 	// A click records exactly one event, and the mock is cleared before each test.
 	function cardClickEvents() {
-		return jest.mocked( queueRecordEvent ).mock.calls;
+		return vi.mocked( queueRecordEvent ).mock.calls;
 	}
-
 	it( 'reports the badge when the card shows one', () => {
 		clickCard();
-
 		expect( cardClickEvents() ).toEqual( [
 			[
 				'marketplace_product_card_clicked',
@@ -252,15 +264,14 @@ describe( 'ProductCard click tracking', () => {
 			],
 		] );
 	} );
-
 	it( 'reports no badge when the product does not have one', () => {
-		clickCard( { hasQualityBadge: false } );
-
+		clickCard( {
+			hasQualityBadge: false,
+		} );
 		expect( cardClickEvents()[ 0 ][ 1 ] ).toMatchObject( {
 			has_quality_badge: false,
 		} );
 	} );
-
 	it( 'reports no badge when the badge is disabled for the store', () => {
 		clickCard(
 			{},
@@ -274,21 +285,19 @@ describe( 'ProductCard click tracking', () => {
 				},
 			}
 		);
-
 		expect( cardClickEvents()[ 0 ][ 1 ] ).toMatchObject( {
 			has_quality_badge: false,
 		} );
 	} );
-
 	it( 'reports no badge on business service cards, which cannot show one', () => {
-		clickCard( { type: ProductType.businessService } );
-
+		clickCard( {
+			type: ProductType.businessService,
+		} );
 		expect( cardClickEvents()[ 0 ][ 1 ] ).toMatchObject( {
 			product_type: ProductType.businessService,
 			has_quality_badge: false,
 		} );
 	} );
-
 	it( 'records the click once when the card opens a preview modal', () => {
 		clickCard(
 			{},
@@ -299,7 +308,6 @@ describe( 'ProductCard click tracking', () => {
 				},
 			}
 		);
-
 		expect( cardClickEvents() ).toHaveLength( 1 );
 	} );
 } );

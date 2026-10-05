@@ -1,52 +1,69 @@
+import { describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 
 /**
  * Internal dependencies
  */
 import { useRecommendedPluginsWithoutChannels } from '../useRecommendedPluginsWithoutChannels';
 import { DiscoverTools } from '../DiscoverTools';
-
-jest.mock( '@woocommerce/components', () => {
-	const originalModule = jest.requireActual( '@woocommerce/components' );
-
-	return {
+vi.mock( '@woocommerce/components', async () => {
+	const originalModule = await vi.importActual( '@woocommerce/components' );
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		__esModule: true,
 		...originalModule,
 		Spinner: () => <div data-testid="spinner">Spinner</div>,
-	};
+	} );
 } );
-
-jest.mock( '../useRecommendedPluginsWithoutChannels', () => ( {
-	useRecommendedPluginsWithoutChannels: jest.fn(),
-} ) );
-
-jest.mock( '~/marketing/hooks', () => ( {
-	useInstalledPluginsWithoutChannels: jest.fn( () => ( {} ) ),
-} ) );
-
+vi.mock( '../useRecommendedPluginsWithoutChannels', () => {
+	const mock = {
+		useRecommendedPluginsWithoutChannels: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '~/marketing/hooks', () => {
+	const mock = {
+		useInstalledPluginsWithoutChannels: vi.fn( () => ( {} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'DiscoverTools component', () => {
-	it( 'should render a Spinner when loading is in progress', () => {
-		( useRecommendedPluginsWithoutChannels as jest.Mock ).mockReturnValue( {
+	it( 'should render a Spinner when loading is in progress', async () => {
+		( useRecommendedPluginsWithoutChannels as Mock ).mockReturnValue( {
 			isInitializing: true,
 			isLoading: true,
 			data: [],
 		} );
-		render( <DiscoverTools /> );
-
+		await act( async () => {
+			render( <DiscoverTools /> );
+		} );
 		expect( screen.getByTestId( 'spinner' ) ).toBeInTheDocument();
 	} );
-
-	it( 'should render message and link when loading is finish and there are no plugins', () => {
-		( useRecommendedPluginsWithoutChannels as jest.Mock ).mockReturnValue( {
+	it( 'should render message and link when loading is finish and there are no plugins', async () => {
+		( useRecommendedPluginsWithoutChannels as Mock ).mockReturnValue( {
 			isInitializing: false,
 			isLoading: false,
 			data: [],
 		} );
-		render( <DiscoverTools /> );
-
+		await act( async () => {
+			render( <DiscoverTools /> );
+		} );
 		expect(
 			screen.getByText(
 				'Continue to reach the right audiences and promote your products in ways that matter to them with our range of marketing solutions.'
@@ -56,12 +73,9 @@ describe( 'DiscoverTools component', () => {
 			screen.getByText( 'Explore more marketing extensions' )
 		).toBeInTheDocument();
 	} );
-
 	describe( 'With plugins loaded', () => {
-		it( 'should render `direct_install: true` plugins with "Install extension" button', () => {
-			(
-				useRecommendedPluginsWithoutChannels as jest.Mock
-			 ).mockReturnValue( {
+		it( 'should render `direct_install: true` plugins with "Install extension" button', async () => {
+			( useRecommendedPluginsWithoutChannels as Mock ).mockReturnValue( {
 				isInitializing: false,
 				isLoading: false,
 				data: [
@@ -90,9 +104,11 @@ describe( 'DiscoverTools component', () => {
 					},
 				],
 			} );
-			render( <DiscoverTools /> );
+			await act( async () => {
+				render( <DiscoverTools /> );
 
-			// Assert that we have the "Sales channels" tab, the plugin name, the "Built by WooCommerce" pill, and the "Install extension" button.
+				// Assert that we have the "Sales channels" tab, the plugin name, the "Built by WooCommerce" pill, and the "Install extension" button.
+			} ); // Assert that we have the "Sales channels" tab, the plugin name, the "Built by WooCommerce" pill, and the "Install extension" button.
 			expect( screen.getByText( 'Sales channels' ) ).toBeInTheDocument();
 			expect(
 				screen.getByText( 'Google for WooCommerce' )
@@ -104,11 +120,8 @@ describe( 'DiscoverTools component', () => {
 				screen.getByText( 'Install extension' )
 			).toBeInTheDocument();
 		} );
-
-		it( 'should render `direct_install: false` plugins with "View details" button', () => {
-			(
-				useRecommendedPluginsWithoutChannels as jest.Mock
-			 ).mockReturnValue( {
+		it( 'should render `direct_install: false` plugins with "View details" button', async () => {
+			( useRecommendedPluginsWithoutChannels as Mock ).mockReturnValue( {
 				isInitializing: false,
 				isLoading: false,
 				data: [
@@ -132,9 +145,11 @@ describe( 'DiscoverTools component', () => {
 					},
 				],
 			} );
-			render( <DiscoverTools /> );
+			await act( async () => {
+				render( <DiscoverTools /> );
 
-			// Assert that we have the CRM tab, plugin name, and "View details" button.
+				// Assert that we have the CRM tab, plugin name, and "View details" button.
+			} ); // Assert that we have the CRM tab, plugin name, and "View details" button.
 			expect( screen.getByText( 'CRM' ) ).toBeInTheDocument();
 			expect(
 				screen.getByText( 'WooCommerce Zapier' )

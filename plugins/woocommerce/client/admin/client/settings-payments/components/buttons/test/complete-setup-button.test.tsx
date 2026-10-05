@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -14,11 +16,17 @@ import {
  * Internal dependencies
  */
 import { CompleteSetupButton } from '..';
-
-jest.mock( '@woocommerce/tracks', () => ( {
-	recordEvent: jest.fn(),
-} ) );
-
+vi.mock( '@woocommerce/tracks', () => {
+	const mock = {
+		recordEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'CompleteSetupButton', () => {
 	it( 'should record settings_payments_provider_complete_setup_click event on click of the button', () => {
 		const { getByRole } = render(
@@ -53,12 +61,10 @@ describe( 'CompleteSetupButton', () => {
 				onboardingHref={ '' }
 				gatewayHasRecommendedPaymentMethods={ false }
 				installingPlugin={ null }
-				setOnboardingModalOpen={ jest.fn() }
+				setOnboardingModalOpen={ vi.fn() }
 			/>
 		);
-
 		fireEvent.click( getByRole( 'button' ) );
-
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_provider_complete_setup_click',
 			expect.objectContaining( {

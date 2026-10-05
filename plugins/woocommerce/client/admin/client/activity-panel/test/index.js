@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -17,121 +19,183 @@ import { useState } from '@wordpress/element';
  */
 import { ActivityPanel } from '../activity-panel';
 import { Panel } from '../panel';
-
-jest.mock( '@woocommerce/admin-layout', () => {
+vi.mock( '@woocommerce/admin-layout', async () => {
 	const mockContext = {
 		layoutPath: [ 'home' ],
 		layoutString: 'home',
 		extendLayout: () => {},
 		isDescendantOf: () => false,
 	};
-	return {
-		...jest.requireActual( '@woocommerce/admin-layout' ),
-		useLayoutContext: jest.fn().mockReturnValue( mockContext ),
-		useExtendLayout: jest.fn().mockReturnValue( mockContext ),
-	};
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
+		...( await vi.importActual( '@woocommerce/admin-layout' ) ),
+		useLayoutContext: vi.fn().mockReturnValue( mockContext ),
+		useExtendLayout: vi.fn().mockReturnValue( mockContext ),
+	} );
 } );
-
-jest.mock( '~/launch-your-store', () => ( {
-	useLaunchYourStore: jest.fn( () => ( {
-		comingSoon: 'yes',
-		launchYourStoreEnabled: true,
-		isLoading: true,
-	} ) ),
-} ) );
-
-jest.mock( '@woocommerce/data', () => ( {
-	...jest.requireActual( '@woocommerce/data' ),
-	useUser: jest.fn().mockReturnValue( { currentUserCan: () => true } ),
-	useUserPreferences: jest.fn().mockReturnValue( {
-		updateUserPreferences: () => {},
-	} ),
-} ) );
+vi.mock( '~/launch-your-store', () => {
+	const mock = {
+		useLaunchYourStore: vi.fn( () => ( {
+			comingSoon: 'yes',
+			launchYourStoreEnabled: true,
+			isLoading: true,
+		} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/data', async () => {
+	const mock = {
+		...( await vi.importActual( '@woocommerce/data' ) ),
+		useUser: vi.fn().mockReturnValue( {
+			currentUserCan: () => true,
+		} ),
+		useUserPreferences: vi.fn().mockReturnValue( {
+			updateUserPreferences: () => {},
+		} ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 // We aren't testing the <DisplayOptions /> component here.
-jest.mock( '../display-options', () => ( {
-	DisplayOptions: jest.fn().mockReturnValue( '[DisplayOptions]' ),
-} ) );
-
-jest.mock( '../highlight-tooltip', () => ( {
-	HighlightTooltip: jest.fn().mockReturnValue( '[HighlightTooltip]' ),
-} ) );
-
-jest.mock( '@wordpress/data', () => {
-	// Require the original module to not be mocked...
-	const originalModule = jest.requireActual( '@wordpress/data' );
-
-	return {
-		__esModule: true, // Use it when dealing with esModules
-		...originalModule,
-		useSelect: jest.fn().mockReturnValue( {} ),
+vi.mock( '../display-options', () => {
+	const mock = {
+		DisplayOptions: vi.fn().mockReturnValue( '[DisplayOptions]' ),
 	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
 } );
-
-jest.mock( '../panel', () => {
-	const originalModule = jest.requireActual( '../panel' );
-	return {
+vi.mock( '../highlight-tooltip', () => {
+	const mock = {
+		HighlightTooltip: vi.fn().mockReturnValue( '[HighlightTooltip]' ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/data', async () => {
+	// Require the original module to not be mocked...
+	const originalModule = await vi.importActual( '@wordpress/data' );
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
+		__esModule: true,
+		// Use it when dealing with esModules
+		...originalModule,
+		useSelect: vi.fn().mockReturnValue( {} ),
+	} );
+} );
+vi.mock( '../panel', async () => {
+	const originalModule = await vi.importActual( '../panel' );
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		__esModule: true,
 		...originalModule,
-		Panel: jest.fn(),
-	};
+		Panel: vi.fn(),
+	} );
 } );
-
 describe( 'Activity Panel', () => {
-	beforeEach( () => {
+	beforeEach( async () => {
 		useSelect.mockImplementation( () => ( {
 			requestingTaskListOptions: false,
 			setupTaskListComplete: false,
 			setupTaskListHidden: false,
 			trackedCompletedTasks: [],
 		} ) );
-		Panel.mockImplementation( jest.requireActual( '../panel' ).Panel );
+		Panel.mockImplementation(
+			( await vi.importActual( '../panel' ) ).Panel
+		);
 		useUser.mockImplementation( () => ( {
 			currentUserCan: () => true,
 		} ) );
 	} );
-
 	it.each( [
 		[ 'embedded pages', true, {} ],
-		[ 'WooCommerce Admin pages', false, { path: '/customers' } ],
-		[ 'the home screen', false, { page: 'wc-admin' } ],
+		[
+			'WooCommerce Admin pages',
+			false,
+			{
+				path: '/customers',
+			},
+		],
+		[
+			'the home screen',
+			false,
+			{
+				page: 'wc-admin',
+			},
+		],
 	] )(
 		'should not render the activity tab on %s',
 		( _, isEmbedded, query ) => {
 			render(
 				<ActivityPanel isEmbedded={ isEmbedded } query={ query } />
 			);
-
 			expect(
-				screen.queryByRole( 'tab', { name: 'Activity' } )
+				screen.queryByRole( 'tab', {
+					name: 'Activity',
+				} )
 			).not.toBeInTheDocument();
 		}
 	);
-
 	it( 'should render preview store tab on home screen', () => {
-		render( <ActivityPanel query={ { page: 'wc-admin' } } /> );
-
+		render(
+			<ActivityPanel
+				query={ {
+					page: 'wc-admin',
+				} }
+			/>
+		);
 		expect(
-			screen.getByRole( 'tab', { name: 'Preview store' } )
+			screen.getByRole( 'tab', {
+				name: 'Preview store',
+			} )
 		).toBeDefined();
 	} );
-
 	it( 'should not render help tab if not on home screen', () => {
 		render(
-			<ActivityPanel query={ { page: 'wc-admin', path: '/customers' } } />
+			<ActivityPanel
+				query={ {
+					page: 'wc-admin',
+					path: '/customers',
+				} }
+			/>
 		);
-
 		expect( screen.queryByTestId( 'activity-panel-tab-help' ) ).toBeNull();
 	} );
-
 	it( 'should render help tab if on home screen', () => {
-		render( <ActivityPanel query={ { page: 'wc-admin' } } /> );
-
+		render(
+			<ActivityPanel
+				query={ {
+					page: 'wc-admin',
+				} }
+			/>
+		);
 		expect(
 			screen.queryByTestId( 'activity-panel-tab-help' )
 		).toBeDefined();
 	} );
-
 	it( 'should render help tab before options load', async () => {
 		useSelect.mockImplementation( () => ( {
 			requestingTaskListOptions: true,
@@ -143,7 +207,6 @@ describe( 'Activity Panel', () => {
 				} }
 			/>
 		);
-
 		const tabs = await screen.findAllByRole( 'tab' );
 
 		// Expect that the only tab is "Help".
@@ -152,7 +215,6 @@ describe( 'Activity Panel', () => {
 			screen.queryByTestId( 'activity-panel-tab-help' )
 		).toBeDefined();
 	} );
-
 	it( 'should not render help tab when not on main route', () => {
 		render(
 			<ActivityPanel
@@ -165,9 +227,12 @@ describe( 'Activity Panel', () => {
 		);
 
 		// Expect that "Help" tab is absent.
-		expect( screen.queryByRole( 'tab', { name: 'Help' } ) ).toBeNull();
+		expect(
+			screen.queryByRole( 'tab', {
+				name: 'Help',
+			} )
+		).toBeNull();
 	} );
-
 	it( 'should render display options if on home screen', () => {
 		render(
 			<ActivityPanel
@@ -176,10 +241,8 @@ describe( 'Activity Panel', () => {
 				} }
 			/>
 		);
-
 		expect( screen.getByText( '[DisplayOptions]' ) ).toBeDefined();
 	} );
-
 	it( 'should only render the finish setup link when TaskList is not complete', () => {
 		const { queryByRole, rerender } = render(
 			<ActivityPanel
@@ -188,15 +251,16 @@ describe( 'Activity Panel', () => {
 				} }
 			/>
 		);
-
-		expect( queryByRole( 'tab', { name: 'Finish setup' } ) ).toBeDefined();
-
+		expect(
+			queryByRole( 'tab', {
+				name: 'Finish setup',
+			} )
+		).toBeDefined();
 		useSelect.mockImplementation( () => ( {
 			requestingTaskListOptions: false,
 			setupTaskListComplete: true,
 			setupTaskListHidden: false,
 		} ) );
-
 		rerender(
 			<ActivityPanel
 				query={ {
@@ -204,10 +268,12 @@ describe( 'Activity Panel', () => {
 				} }
 			/>
 		);
-
-		expect( queryByRole( 'tab', { name: 'Finish setup' } ) ).toBeNull();
+		expect(
+			queryByRole( 'tab', {
+				name: 'Finish setup',
+			} )
+		).toBeNull();
 	} );
-
 	it( 'should not render the finish setup link when on the home screen and TaskList is not complete', () => {
 		const { queryByRole } = render(
 			<ActivityPanel
@@ -217,25 +283,26 @@ describe( 'Activity Panel', () => {
 				} }
 			/>
 		);
-
-		expect( queryByRole( 'tab', { name: 'Finish setup' } ) ).toBeNull();
+		expect(
+			queryByRole( 'tab', {
+				name: 'Finish setup',
+			} )
+		).toBeNull();
 	} );
-
 	it( 'should render the finish setup link when on embedded pages and TaskList is not complete', () => {
 		const { getByRole } = render(
 			<ActivityPanel isEmbedded query={ {} } />
 		);
-
 		expect(
-			getByRole( 'tab', { name: 'Finish setup' } )
+			getByRole( 'tab', {
+				name: 'Finish setup',
+			} )
 		).toBeInTheDocument();
 	} );
-
 	it( 'should not render the finish setup link when a user does not have capabilities', () => {
 		useUser.mockImplementation( () => ( {
 			currentUserCan: () => false,
 		} ) );
-
 		const { queryByRole } = render(
 			<ActivityPanel
 				query={ {
@@ -243,10 +310,12 @@ describe( 'Activity Panel', () => {
 				} }
 			/>
 		);
-
-		expect( queryByRole( 'tab', { name: 'Finish setup' } ) ).toBeDefined();
+		expect(
+			queryByRole( 'tab', {
+				name: 'Finish setup',
+			} )
+		).toBeDefined();
 	} );
-
 	describe( 'panel', () => {
 		it( 'should set focus when panel opened/closed without removing element when onTransitionEnd is triggered', () => {
 			const content = 'test';
@@ -291,7 +360,6 @@ describe( 'Activity Panel', () => {
 			Object.defineProperty( event, 'propertyName', {
 				value: 'transform',
 			} );
-
 			fireEvent(
 				container.getElementsByClassName(
 					'woocommerce-layout__activity-panel-wrapper'
@@ -305,7 +373,6 @@ describe( 'Activity Panel', () => {
 			);
 		} );
 	} );
-
 	describe( 'panel open and closing', () => {
 		let clearPanel;
 		beforeEach( () => {
@@ -325,7 +392,6 @@ describe( 'Activity Panel', () => {
 				}
 			);
 		} );
-
 		it( 'should have panel open and panel switching as false by default', () => {
 			const { queryByText } = render(
 				<ActivityPanel
@@ -343,7 +409,6 @@ describe( 'Activity Panel', () => {
 				screen.queryByTestId( 'activity-panel-tab-help' )
 			);
 		} );
-
 		it( 'should allow user to toggle, an individual panel without setting panelSwitching to true', () => {
 			const { queryByText } = render(
 				<ActivityPanel
@@ -375,7 +440,6 @@ describe( 'Activity Panel', () => {
 				queryByText( '[panelSwitching=false]' )
 			).toBeInTheDocument();
 		} );
-
 		it( 'should remove panel element after clearPanel is triggered', () => {
 			const { queryByText } = render(
 				<ActivityPanel

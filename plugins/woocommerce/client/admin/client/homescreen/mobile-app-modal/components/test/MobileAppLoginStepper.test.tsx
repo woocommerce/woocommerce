@@ -1,3 +1,12 @@
+import {
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+	type MockedFunction,
+} from 'vitest';
+
 /**
  * External dependencies
  */
@@ -11,39 +20,51 @@ import { SendMagicLinkStates } from '../useSendMagicLink';
 import { QRLoginTokenStates, useQRLoginToken } from '../useQRLoginToken';
 
 // Mock the QR login token hook so we can drive each state from the tests.
-jest.mock( '../useQRLoginToken', () => {
-	const actual = jest.requireActual( '../useQRLoginToken' );
-	return {
+vi.mock( '../useQRLoginToken', async () => {
+	const actual = await vi.importActual( '../useQRLoginToken' );
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		...actual,
-		useQRLoginToken: jest.fn(),
-	};
+		useQRLoginToken: vi.fn(),
+	} );
 } );
 
 // Short-circuit the up-front availability probe — these tests focus on the
 // stepper's own gating + the underlying token state machine, not on the
 // availability gate (which is covered separately by useQRLoginAvailability's
 // own tests).
-jest.mock( '../useQRLoginAvailability', () => {
-	const actual = jest.requireActual( '../useQRLoginAvailability' );
-	return {
+vi.mock( '../useQRLoginAvailability', async () => {
+	const actual = await vi.importActual( '../useQRLoginAvailability' );
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		...actual,
 		useQRLoginAvailability: () => ( {
 			isLoading: false,
 			available: true,
 			reason: null,
 		} ),
-	};
+	} );
 } );
 
 // Mock tracks to keep tests isolated from analytics side-effects.
-jest.mock( '@woocommerce/tracks', () => ( {
-	recordEvent: jest.fn(),
-} ) );
-
-const mockedUseQRLoginToken = useQRLoginToken as jest.MockedFunction<
+vi.mock( '@woocommerce/tracks', () => {
+	const mock = {
+		recordEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+const mockedUseQRLoginToken = useQRLoginToken as MockedFunction<
 	typeof useQRLoginToken
 >;
-
 const readyTokenState = {
 	state: QRLoginTokenStates.READY,
 	qrUrl: 'woocommerce://qr-login?token=abc&siteUrl=https%3A%2F%2Fexample.test',
@@ -54,12 +75,11 @@ const readyTokenState = {
 	apUuid: null,
 	candidateNumbers: null,
 	challengeExpiresAt: 0,
-	chooseNumber: jest.fn(),
-	fetchToken: jest.fn(),
-	refreshToken: jest.fn(),
-	revoke: jest.fn(),
+	chooseNumber: vi.fn(),
+	fetchToken: vi.fn(),
+	refreshToken: vi.fn(),
+	revoke: vi.fn(),
 };
-
 const errorTokenState = {
 	state: QRLoginTokenStates.ERROR,
 	qrUrl: null,
@@ -70,27 +90,24 @@ const errorTokenState = {
 	apUuid: null,
 	candidateNumbers: null,
 	challengeExpiresAt: 0,
-	chooseNumber: jest.fn(),
-	fetchToken: jest.fn(),
-	refreshToken: jest.fn(),
-	revoke: jest.fn(),
+	chooseNumber: vi.fn(),
+	fetchToken: vi.fn(),
+	refreshToken: vi.fn(),
+	revoke: vi.fn(),
 };
-
 const baseProps = {
 	step: 'second' as const,
 	signInResult: null,
-	completeInstallationStepHandler: jest.fn(),
-	sendMagicLinkHandler: jest.fn(),
+	completeInstallationStepHandler: vi.fn(),
+	sendMagicLinkHandler: vi.fn(),
 	sendMagicLinkStatus: SendMagicLinkStates.INIT,
-	onSignedIn: jest.fn(),
+	onSignedIn: vi.fn(),
 };
-
 describe( 'MobileAppLoginStepper', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 		mockedUseQRLoginToken.mockReturnValue( readyTokenState );
 	} );
-
 	describe( 'step 2 (sign-in)', () => {
 		it( 'renders the QR direct login for an admin without Jetpack and hides the magic link button', () => {
 			render(
@@ -120,7 +137,6 @@ describe( 'MobileAppLoginStepper', () => {
 				} )
 			).not.toBeInTheDocument();
 		} );
-
 		it( 'renders both the QR and the magic link button when Jetpack is fully connected and the user has a linked WordPress.com account', () => {
 			render(
 				<MobileAppLoginStepper
@@ -129,7 +145,6 @@ describe( 'MobileAppLoginStepper', () => {
 					wordpressAccountEmailAddress="admin@example.test"
 				/>
 			);
-
 			expect(
 				screen.getByText( /Code expires in/i )
 			).toBeInTheDocument();
@@ -144,7 +159,6 @@ describe( 'MobileAppLoginStepper', () => {
 				} )
 			).toBeInTheDocument();
 		} );
-
 		it( 'hides the magic link button for a shop manager without a linked WordPress.com account even if Jetpack is installed', () => {
 			// Shop managers typically don't own the Jetpack connection and
 			// their currentUser.wpcomUser.email is undefined upstream, which
@@ -156,7 +170,6 @@ describe( 'MobileAppLoginStepper', () => {
 					wordpressAccountEmailAddress={ undefined }
 				/>
 			);
-
 			expect(
 				screen.getByText( /Code expires in/i )
 			).toBeInTheDocument();
@@ -166,9 +179,8 @@ describe( 'MobileAppLoginStepper', () => {
 				)
 			).not.toBeInTheDocument();
 		} );
-
 		it( 'invokes the magic link handler when the secondary button is clicked', () => {
-			const sendMagicLinkHandler = jest.fn();
+			const sendMagicLinkHandler = vi.fn();
 			render(
 				<MobileAppLoginStepper
 					{ ...baseProps }
@@ -177,19 +189,15 @@ describe( 'MobileAppLoginStepper', () => {
 					wordpressAccountEmailAddress="admin@example.test"
 				/>
 			);
-
 			fireEvent.click(
 				screen.getByRole( 'button', {
 					name: /Send the sign-in link/i,
 				} )
 			);
-
 			expect( sendMagicLinkHandler ).toHaveBeenCalledTimes( 1 );
 		} );
-
 		it( 'surfaces the QR error state from useQRLoginToken', () => {
 			mockedUseQRLoginToken.mockReturnValue( errorTokenState );
-
 			render(
 				<MobileAppLoginStepper
 					{ ...baseProps }
@@ -197,19 +205,19 @@ describe( 'MobileAppLoginStepper', () => {
 					wordpressAccountEmailAddress={ undefined }
 				/>
 			);
-
 			expect(
 				screen.getByText( /QR login requires an HTTPS connection/i )
 			).toBeInTheDocument();
 			expect(
-				screen.getByRole( 'button', { name: /Try again/i } )
+				screen.getByRole( 'button', {
+					name: /Try again/i,
+				} )
 			).toBeInTheDocument();
 			// Error state should never leak the happy-path timer copy.
 			expect(
 				screen.queryByText( /Code expires in/i )
 			).not.toBeInTheDocument();
 		} );
-
 		it( 'does not render the old username + site URL fallback when the user lacks a linked WordPress.com account', () => {
 			render(
 				<MobileAppLoginStepper
@@ -227,10 +235,9 @@ describe( 'MobileAppLoginStepper', () => {
 			).not.toBeInTheDocument();
 		} );
 	} );
-
 	describe( 'step 1 (install)', () => {
 		it( 'renders the install-app CTA and wires it up to the handler', () => {
-			const completeInstallationStepHandler = jest.fn();
+			const completeInstallationStepHandler = vi.fn();
 			render(
 				<MobileAppLoginStepper
 					{ ...baseProps }
@@ -242,7 +249,6 @@ describe( 'MobileAppLoginStepper', () => {
 					wordpressAccountEmailAddress={ undefined }
 				/>
 			);
-
 			const installButton = screen.getByRole( 'button', {
 				name: /App is installed/i,
 			} );

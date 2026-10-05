@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 /**
  * Unit tests for the wc_email_review_drawer URL helper. RSM-140.
  */

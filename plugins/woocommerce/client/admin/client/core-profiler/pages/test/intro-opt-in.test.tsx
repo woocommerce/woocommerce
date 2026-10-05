@@ -1,28 +1,28 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 
 /**
  * Internal dependencies
  */
 import { IntroOptIn } from '../IntroOptIn';
 import { CoreProfilerStateMachineContext } from '../../';
-
 describe( 'IntroOptIn', () => {
 	let props: {
-		sendEvent: jest.Mock;
+		sendEvent: Mock;
 		navigationProgress: number;
 		context: Pick<
 			CoreProfilerStateMachineContext,
 			'optInDataSharing' | 'userProfile' | 'coreProfilerCompletedSteps'
 		>;
 	};
-
 	beforeEach( () => {
 		props = {
-			sendEvent: jest.fn(),
+			sendEvent: vi.fn(),
 			navigationProgress: 0,
 			context: {
 				optInDataSharing: true,
@@ -32,9 +32,10 @@ describe( 'IntroOptIn', () => {
 			},
 		};
 	} );
-
-	it( 'should render intro-opt-in page', () => {
-		render( <IntroOptIn { ...props } /> );
+	it( 'should render intro-opt-in page', async () => {
+		await act( async () => {
+			render( <IntroOptIn { ...props } /> );
+		} );
 		expect( screen.getByText( /Welcome to Woo!/i ) ).toBeInTheDocument();
 		expect(
 			screen.getByRole( 'button', {
@@ -44,13 +45,13 @@ describe( 'IntroOptIn', () => {
 		// should render opt-in checkbox
 		expect( screen.getByRole( 'checkbox' ) ).toBeInTheDocument();
 	} );
-
-	it( 'checkbox should be checked when optInDataSharing is true', () => {
-		render( <IntroOptIn { ...props } /> );
+	it( 'checkbox should be checked when optInDataSharing is true', async () => {
+		await act( async () => {
+			render( <IntroOptIn { ...props } /> );
+		} );
 		expect( screen.getByRole( 'checkbox' ) ).toBeChecked();
 	} );
-
-	it( 'checkbox should be checked if user has completed profiler and opted in', () => {
+	it( 'checkbox should be checked if user has completed profiler and opted in', async () => {
 		const newProps = {
 			...props,
 			context: {
@@ -60,11 +61,12 @@ describe( 'IntroOptIn', () => {
 				},
 			},
 		};
-		render( <IntroOptIn { ...newProps } /> );
+		await act( async () => {
+			render( <IntroOptIn { ...newProps } /> );
+		} );
 		expect( screen.getByRole( 'checkbox' ) ).toBeChecked();
 	} );
-
-	it( 'checkbox should be unchecked when user has completed profiler and opted out', () => {
+	it( 'checkbox should be unchecked when user has completed profiler and opted out', async () => {
 		const newProps = {
 			...props,
 			context: {
@@ -74,11 +76,12 @@ describe( 'IntroOptIn', () => {
 				},
 			},
 		};
-		render( <IntroOptIn { ...newProps } /> );
+		await act( async () => {
+			render( <IntroOptIn { ...newProps } /> );
+		} );
 		expect( screen.getByRole( 'checkbox' ) ).not.toBeChecked();
 	} );
-
-	it( 'checkbox should be unchecked if user has completed intro opt in step previously and opted out', () => {
+	it( 'checkbox should be unchecked if user has completed intro opt in step previously and opted out', async () => {
 		const newProps = {
 			...props,
 			context: {
@@ -90,11 +93,12 @@ describe( 'IntroOptIn', () => {
 				},
 			},
 		};
-		render( <IntroOptIn { ...newProps } /> );
+		await act( async () => {
+			render( <IntroOptIn { ...newProps } /> );
+		} );
 		expect( screen.getByRole( 'checkbox' ) ).not.toBeChecked();
 	} );
-
-	it( 'checkbox should be checked if user has not completed profiler', () => {
+	it( 'checkbox should be checked if user has not completed profiler', async () => {
 		const newProps = {
 			...props,
 			context: {
@@ -105,18 +109,24 @@ describe( 'IntroOptIn', () => {
 				'optInDataSharing' | 'userProfile'
 			>,
 		};
-		render( <IntroOptIn { ...newProps } /> );
+		await act( async () => {
+			render( <IntroOptIn { ...newProps } /> );
+		} );
 		expect( screen.getByRole( 'checkbox' ) ).toBeChecked();
 	} );
-
-	it( 'should toggle checkbox when checkbox is clicked', () => {
-		render( <IntroOptIn { ...props } /> );
-		screen.getByRole( 'checkbox' ).click();
+	it( 'should toggle checkbox when checkbox is clicked', async () => {
+		await act( async () => {
+			render( <IntroOptIn { ...props } /> );
+		} );
+		await act( async () => {
+			screen.getByRole( 'checkbox' ).click();
+		} );
 		expect( screen.getByRole( 'checkbox' ) ).not.toBeChecked();
 	} );
-
-	it( 'should call sendEvent with INTRO_COMPLETED event when button is clicked', () => {
-		render( <IntroOptIn { ...props } /> );
+	it( 'should call sendEvent with INTRO_COMPLETED event when button is clicked', async () => {
+		await act( async () => {
+			render( <IntroOptIn { ...props } /> );
+		} );
 		screen
 			.getByRole( 'button', {
 				name: /Set up my store/i,
@@ -124,12 +134,15 @@ describe( 'IntroOptIn', () => {
 			.click();
 		expect( props.sendEvent ).toHaveBeenCalledWith( {
 			type: 'INTRO_COMPLETED',
-			payload: { optInDataSharing: true },
+			payload: {
+				optInDataSharing: true,
+			},
 		} );
 	} );
-
-	it( 'should call sendEvent with INTRO_SKIPPED event and optInDataSharing: true when skip button is clicked and the checkbox is checked', () => {
-		render( <IntroOptIn { ...props } /> );
+	it( 'should call sendEvent with INTRO_SKIPPED event and optInDataSharing: true when skip button is clicked and the checkbox is checked', async () => {
+		await act( async () => {
+			render( <IntroOptIn { ...props } /> );
+		} );
 		expect( screen.getByRole( 'checkbox' ) ).toBeChecked();
 		screen
 			.getByRole( 'button', {
@@ -138,13 +151,18 @@ describe( 'IntroOptIn', () => {
 			.click();
 		expect( props.sendEvent ).toHaveBeenCalledWith( {
 			type: 'INTRO_SKIPPED',
-			payload: { optInDataSharing: true },
+			payload: {
+				optInDataSharing: true,
+			},
 		} );
 	} );
-
-	it( 'should call sendEvent with INTRO_SKIPPED event and optInDataSharing: false when skip button is clicked and the checkbox is unchecked', () => {
-		render( <IntroOptIn { ...props } /> );
-		screen.getByRole( 'checkbox' ).click();
+	it( 'should call sendEvent with INTRO_SKIPPED event and optInDataSharing: false when skip button is clicked and the checkbox is unchecked', async () => {
+		await act( async () => {
+			render( <IntroOptIn { ...props } /> );
+		} );
+		await act( async () => {
+			screen.getByRole( 'checkbox' ).click();
+		} );
 		expect( screen.getByRole( 'checkbox' ) ).not.toBeChecked();
 		screen
 			.getByRole( 'button', {
@@ -153,7 +171,9 @@ describe( 'IntroOptIn', () => {
 			.click();
 		expect( props.sendEvent ).toHaveBeenCalledWith( {
 			type: 'INTRO_SKIPPED',
-			payload: { optInDataSharing: false },
+			payload: {
+				optInDataSharing: false,
+			},
 		} );
 	} );
 } );

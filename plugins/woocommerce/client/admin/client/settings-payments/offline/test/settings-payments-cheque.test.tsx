@@ -1,7 +1,15 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import {
+	render,
+	screen,
+	fireEvent,
+	waitFor,
+	act,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useSelect, useDispatch } from '@wordpress/data';
 
@@ -9,19 +17,29 @@ import { useSelect, useDispatch } from '@wordpress/data';
  * Internal dependencies
  */
 import { SettingsPaymentsCheque } from '../settings-payments-cheque';
-
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn(),
-	useDispatch: jest.fn(),
-} ) );
-
+vi.mock( '@wordpress/data', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/data' ) ),
+		useSelect: vi.fn(),
+		useDispatch: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const chequeSettings = {
 	enabled: true,
 	description: 'Take payments in person via checks.',
 	settings: {
-		title: { value: 'Check payments' },
-		instructions: { value: 'Send the check to our address.' },
+		title: {
+			value: 'Check payments',
+		},
+		instructions: {
+			value: 'Send the check to our address.',
+		},
 		enable_for_methods: {
 			value: [ 'flat_rate:1' ],
 			options: {
@@ -33,31 +51,29 @@ const chequeSettings = {
 				},
 			},
 		},
-		enable_for_virtual: { value: 'yes' },
+		enable_for_virtual: {
+			value: 'yes',
+		},
 	},
 };
-
 describe( 'SettingsPaymentsCheque', () => {
-	let updatePaymentGateway: jest.Mock;
-
+	let updatePaymentGateway: Mock;
 	beforeEach( () => {
-		updatePaymentGateway = jest.fn().mockResolvedValue( {} );
-		( useDispatch as jest.Mock ).mockReturnValue( {
-			createSuccessNotice: jest.fn(),
-			createErrorNotice: jest.fn(),
+		updatePaymentGateway = vi.fn().mockResolvedValue( {} );
+		( useDispatch as Mock ).mockReturnValue( {
+			createSuccessNotice: vi.fn(),
+			createErrorNotice: vi.fn(),
 			updatePaymentGateway,
-			invalidateResolution: jest.fn(),
-			invalidateResolutionForStoreSelector: jest.fn(),
+			invalidateResolution: vi.fn(),
+			invalidateResolutionForStoreSelector: vi.fn(),
 		} );
-		( useSelect as jest.Mock ).mockReturnValue( {
+		( useSelect as Mock ).mockReturnValue( {
 			chequeSettings,
 			isLoading: false,
 		} );
 	} );
-
 	it( 'renders all settings fields with stored values', () => {
 		render( <SettingsPaymentsCheque /> );
-
 		expect(
 			screen.getByLabelText( 'Enable check payments' )
 		).toBeChecked();
@@ -79,50 +95,50 @@ describe( 'SettingsPaymentsCheque', () => {
 			screen.getByLabelText( 'Accept for virtual orders' )
 		).toBeChecked();
 	} );
-
 	it( 'renders placeholders while loading', () => {
-		( useSelect as jest.Mock ).mockReturnValue( {
+		( useSelect as Mock ).mockReturnValue( {
 			chequeSettings: null,
 			isLoading: true,
 		} );
-
 		const { container } = render( <SettingsPaymentsCheque /> );
-
 		expect(
 			container.querySelectorAll( '.woocommerce-field-placeholder' )
 				.length
 		).toBeGreaterThan( 0 );
 		expect( screen.queryByLabelText( 'Title' ) ).not.toBeInTheDocument();
 	} );
-
 	it( 'disables save until a change is made', () => {
 		render( <SettingsPaymentsCheque /> );
-
 		expect(
-			screen.getByRole( 'button', { name: 'Save changes' } )
+			screen.getByRole( 'button', {
+				name: 'Save changes',
+			} )
 		).toBeDisabled();
-
 		fireEvent.change( screen.getByLabelText( 'Title' ), {
-			target: { value: 'Cheque payments' },
+			target: {
+				value: 'Cheque payments',
+			},
 		} );
-
 		expect(
-			screen.getByRole( 'button', { name: 'Save changes' } )
+			screen.getByRole( 'button', {
+				name: 'Save changes',
+			} )
 		).toBeEnabled();
 	} );
-
 	it( 'saves the edited values with the expected payload shape', async () => {
 		render( <SettingsPaymentsCheque /> );
-
 		fireEvent.change( screen.getByLabelText( 'Title' ), {
-			target: { value: 'Cheque payments' },
+			target: {
+				value: 'Cheque payments',
+			},
 		} );
 		fireEvent.click( screen.getByLabelText( 'Enable check payments' ) );
 		fireEvent.click( screen.getByLabelText( 'Accept for virtual orders' ) );
 		fireEvent.click(
-			screen.getByRole( 'button', { name: 'Save changes' } )
+			screen.getByRole( 'button', {
+				name: 'Save changes',
+			} )
 		);
-
 		await waitFor( () => {
 			expect( updatePaymentGateway ).toHaveBeenCalledWith( 'cheque', {
 				enabled: false,
@@ -136,41 +152,52 @@ describe( 'SettingsPaymentsCheque', () => {
 			} );
 		} );
 	} );
-
 	it( 'disables save again after a successful save', async () => {
 		render( <SettingsPaymentsCheque /> );
-
 		fireEvent.change( screen.getByLabelText( 'Title' ), {
-			target: { value: 'Cheque payments' },
+			target: {
+				value: 'Cheque payments',
+			},
 		} );
 		fireEvent.click(
-			screen.getByRole( 'button', { name: 'Save changes' } )
+			screen.getByRole( 'button', {
+				name: 'Save changes',
+			} )
 		);
-
 		await waitFor( () => {
 			expect(
-				screen.getByRole( 'button', { name: 'Save changes' } )
+				screen.getByRole( 'button', {
+					name: 'Save changes',
+				} )
 			).toBeDisabled();
 		} );
 	} );
-
-	it( 'supports keyboard navigation through the form fields', () => {
+	it( 'supports keyboard navigation through the form fields', async () => {
 		render( <SettingsPaymentsCheque /> );
 
 		// Make a change first so the Save button is enabled (and tabbable).
 		fireEvent.change( screen.getByLabelText( 'Title' ), {
-			target: { value: 'Edited title' },
+			target: {
+				value: 'Edited title',
+			},
 		} );
-
-		userEvent.tab();
+		await act( async () => {
+			userEvent.tab();
+		} );
 		expect(
 			screen.getByLabelText( 'Enable check payments' )
 		).toHaveFocus();
-		userEvent.tab();
+		await act( async () => {
+			userEvent.tab();
+		} );
 		expect( screen.getByLabelText( 'Title' ) ).toHaveFocus();
-		userEvent.tab();
+		await act( async () => {
+			userEvent.tab();
+		} );
 		expect( screen.getByLabelText( 'Description' ) ).toHaveFocus();
-		userEvent.tab();
+		await act( async () => {
+			userEvent.tab();
+		} );
 		expect( screen.getByLabelText( 'Instructions' ) ).toHaveFocus();
 		// The shipping methods tree select and the virtual orders checkbox
 		// sit between Instructions and Save; tab until Save receives focus.
@@ -182,33 +209,35 @@ describe( 'SettingsPaymentsCheque', () => {
 			i < 6 && saveButton.ownerDocument.activeElement !== saveButton;
 			i++
 		) {
-			userEvent.tab();
+			await act( async () => {
+				userEvent.tab();
+			} );
 		}
 		expect( saveButton ).toHaveFocus();
 	} );
-
 	it( 'shows an error notice when saving fails', async () => {
-		const createErrorNotice = jest.fn();
+		const createErrorNotice = vi.fn();
 		updatePaymentGateway.mockRejectedValueOnce(
 			new Error( 'save failed' )
 		);
-		( useDispatch as jest.Mock ).mockReturnValue( {
-			createSuccessNotice: jest.fn(),
+		( useDispatch as Mock ).mockReturnValue( {
+			createSuccessNotice: vi.fn(),
 			createErrorNotice,
 			updatePaymentGateway,
-			invalidateResolution: jest.fn(),
-			invalidateResolutionForStoreSelector: jest.fn(),
+			invalidateResolution: vi.fn(),
+			invalidateResolutionForStoreSelector: vi.fn(),
 		} );
-
 		render( <SettingsPaymentsCheque /> );
-
 		fireEvent.change( screen.getByLabelText( 'Title' ), {
-			target: { value: 'Edited title' },
+			target: {
+				value: 'Edited title',
+			},
 		} );
 		fireEvent.click(
-			screen.getByRole( 'button', { name: 'Save changes' } )
+			screen.getByRole( 'button', {
+				name: 'Save changes',
+			} )
 		);
-
 		await waitFor( () => {
 			expect( createErrorNotice ).toHaveBeenCalledWith(
 				'Failed to update settings'

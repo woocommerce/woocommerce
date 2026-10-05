@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ActivityCard should render a basic card 1`] = `
+exports[`ActivityCard > should render a basic card 1`] = `
 <div>
   <section
     class="woocommerce-activity-card"
@@ -41,7 +41,7 @@ exports[`ActivityCard should render a basic card 1`] = `
 </div>
 `;
 
-exports[`ActivityCard should render a custom icon on a card 1`] = `
+exports[`ActivityCard > should render a custom icon on a card 1`] = `
 <div>
   <section
     class="woocommerce-activity-card"
@@ -82,7 +82,7 @@ exports[`ActivityCard should render a custom icon on a card 1`] = `
 </div>
 `;
 
-exports[`ActivityCard should render a timestamp on a card 1`] = `
+exports[`ActivityCard > should render a timestamp on a card 1`] = `
 <div>
   <section
     class="woocommerce-activity-card"
@@ -128,7 +128,7 @@ exports[`ActivityCard should render a timestamp on a card 1`] = `
 </div>
 `;
 
-exports[`ActivityCard should render an action on a card 1`] = `
+exports[`ActivityCard > should render an action on a card 1`] = `
 <div>
   <section
     class="woocommerce-activity-card"
@@ -179,7 +179,7 @@ exports[`ActivityCard should render an action on a card 1`] = `
 </div>
 `;
 
-exports[`ActivityCard should render an unread bubble on a card 1`] = `
+exports[`ActivityCard > should render an unread bubble on a card 1`] = `
 <div>
   <section
     class="woocommerce-activity-card"
@@ -223,7 +223,7 @@ exports[`ActivityCard should render an unread bubble on a card 1`] = `
 </div>
 `;
 
-exports[`ActivityCard should render multiple actions on a card 1`] = `
+exports[`ActivityCard > should render multiple actions on a card 1`] = `
 <div>
   <section
     class="woocommerce-activity-card"
@@ -280,7 +280,7 @@ exports[`ActivityCard should render multiple actions on a card 1`] = `
 </div>
 `;
 
-exports[`ActivityCard supports a non-date "date" prop on a card 1`] = `
+exports[`ActivityCard > supports a non-date "date" prop on a card 1`] = `
 <div>
   <section
     class="woocommerce-activity-card"

@@ -1,17 +1,36 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-
-jest.mock( '@woocommerce/tracks', () => ( {
-	recordEvent: jest.fn(),
-	queueRecordEvent: jest.fn(),
-} ) );
-
-jest.mock( '../../../../../utils/admin-settings', () => ( {
-	getAdminSetting: jest.fn( () => ( { wooUpdateManagerActive: true } ) ),
-} ) );
+vi.mock( '@woocommerce/tracks', () => {
+	const mock = {
+		recordEvent: vi.fn(),
+		queueRecordEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../../../../utils/admin-settings', () => {
+	const mock = {
+		ADMIN_URL: '',
+		getAdminSetting: vi.fn( () => ( {
+			wooUpdateManagerActive: true,
+		} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 /**
  * Internal dependencies
@@ -22,7 +41,6 @@ import {
 	InstalledSubscriptionsTable,
 } from '../table';
 import { Subscription } from '../../types';
-
 const subscription = {
 	product_key: 'test-key',
 	product_id: 123,
@@ -50,7 +68,6 @@ const subscription = {
 		updates_from_wccom: true,
 	},
 } as unknown as Subscription;
-
 describe( 'subscriptionRow', () => {
 	it( 'gives installed rows one cell per header, including automatic updates', () => {
 		render(
@@ -59,18 +76,20 @@ describe( 'subscriptionRow', () => {
 				isLoading={ false }
 			/>
 		);
-
 		expect( screen.getAllByRole( 'cell' ) ).toHaveLength(
 			screen.getAllByRole( 'columnheader' ).length
 		);
 		expect(
-			screen.getByRole( 'columnheader', { name: 'Automatic updates' } )
+			screen.getByRole( 'columnheader', {
+				name: 'Automatic updates',
+			} )
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole( 'button', { name: 'Enable auto-updates' } )
+			screen.getByRole( 'button', {
+				name: 'Enable auto-updates',
+			} )
 		).toBeInTheDocument();
 	} );
-
 	it( 'gives available rows one cell per header, without automatic updates', () => {
 		render(
 			<AvailableSubscriptionsTable
@@ -78,15 +97,18 @@ describe( 'subscriptionRow', () => {
 				isLoading={ false }
 			/>
 		);
-
 		expect( screen.getAllByRole( 'cell' ) ).toHaveLength(
 			screen.getAllByRole( 'columnheader' ).length
 		);
 		expect(
-			screen.queryByRole( 'columnheader', { name: 'Automatic updates' } )
+			screen.queryByRole( 'columnheader', {
+				name: 'Automatic updates',
+			} )
 		).not.toBeInTheDocument();
 		expect(
-			screen.queryByRole( 'button', { name: 'Enable auto-updates' } )
+			screen.queryByRole( 'button', {
+				name: 'Enable auto-updates',
+			} )
 		).not.toBeInTheDocument();
 	} );
 } );

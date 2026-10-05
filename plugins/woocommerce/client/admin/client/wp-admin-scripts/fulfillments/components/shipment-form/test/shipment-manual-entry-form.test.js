@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -10,81 +12,97 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '../../../test-helper/global-mock';
 import ShipmentManualEntryForm from '../shipment-manual-entry-form';
 import { useShipmentFormContext } from '../../../context/shipment-form-context';
-
-jest.mock( '../../../context/shipment-form-context', () => ( {
-	useShipmentFormContext: jest.fn(),
-} ) );
-
-jest.mock( '../../../utils/icons', () => ( {
-	SearchIcon: () => <span data-testid="search-icon" />,
-	TruckIcon: () => <span data-testid="truck-icon" />,
-} ) );
+vi.mock( '../../../context/shipment-form-context', () => {
+	const mock = {
+		useShipmentFormContext: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../../utils/icons', () => {
+	const mock = {
+		SearchIcon: () => <span data-testid="search-icon" />,
+		TruckIcon: () => <span data-testid="truck-icon" />,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 // Provide explicit stubs for the @wordpress/components imports used by the
 // SUT. Spreading `jest.requireActual( '@wordpress/components' )` crashes
 // against wp-6.8's circular import between the barrel and
 // custom-select-control-v2.
-jest.mock( '@wordpress/components', () => ( {
-	ComboboxControl: ( { value, onChange, options } ) => (
-		<div data-testid="combobox-control">
-			<select
-				value={ value }
-				onChange={ ( e ) => onChange( e.target.value ) }
-			>
-				{ options.map( ( option ) => (
-					<option key={ option.value } value={ option.value }>
-						{ option.label }
-					</option>
-				) ) }
-			</select>
-		</div>
-	),
-	TextControl: React.forwardRef(
-		( { value, onChange, placeholder, onKeyDown }, ref ) => (
-			<input
-				ref={ ref }
-				type="text"
-				value={ value }
-				placeholder={ placeholder }
-				onChange={ ( e ) => onChange( e.target.value ) }
-				onKeyDown={ onKeyDown }
-			/>
-		)
-	),
-} ) );
-
+vi.mock( '@wordpress/components', () => {
+	const mock = {
+		ComboboxControl: ( { value, onChange, options } ) => (
+			<div data-testid="combobox-control">
+				<select
+					value={ value }
+					onChange={ ( e ) => onChange( e.target.value ) }
+				>
+					{ options.map( ( option ) => (
+						<option key={ option.value } value={ option.value }>
+							{ option.label }
+						</option>
+					) ) }
+				</select>
+			</div>
+		),
+		TextControl: React.forwardRef(
+			( { value, onChange, placeholder, onKeyDown }, ref ) => (
+				<input
+					ref={ ref }
+					type="text"
+					value={ value }
+					placeholder={ placeholder }
+					onChange={ ( e ) => onChange( e.target.value ) }
+					onKeyDown={ onKeyDown }
+				/>
+			)
+		),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const createMockContext = () => ( {
 	trackingNumber: '',
-	setTrackingNumber: jest.fn(),
+	setTrackingNumber: vi.fn(),
 	shipmentProvider: '',
-	setShipmentProvider: jest.fn(),
+	setShipmentProvider: vi.fn(),
 	providerName: '',
-	setProviderName: jest.fn(),
+	setProviderName: vi.fn(),
 	trackingUrl: '',
-	setTrackingUrl: jest.fn(),
+	setTrackingUrl: vi.fn(),
 } );
-
 describe( 'ShipmentManualEntryForm', () => {
 	let mockContext;
-
 	beforeEach( () => {
 		mockContext = createMockContext();
 		useShipmentFormContext.mockReturnValue( mockContext );
 	} );
-
 	it( 'renders tracking number input', () => {
 		render( <ShipmentManualEntryForm /> );
 		expect(
 			screen.getByPlaceholderText( 'Enter tracking number' )
 		).toBeInTheDocument();
 	} );
-
 	it( 'renders provider combobox and search icon', () => {
 		render( <ShipmentManualEntryForm /> );
 		expect( screen.getByRole( 'combobox' ) ).toBeInTheDocument();
 		expect( screen.getByTestId( 'search-icon' ) ).toBeInTheDocument();
 	} );
-
 	it( 'renders provider name input when provider is set to other', () => {
 		mockContext.shipmentProvider = 'other';
 		render( <ShipmentManualEntryForm /> );
@@ -92,97 +110,126 @@ describe( 'ShipmentManualEntryForm', () => {
 			screen.getByPlaceholderText( 'Enter provider name' )
 		).toBeInTheDocument();
 	} );
-
 	it( 'renders tracking URL input', () => {
 		render( <ShipmentManualEntryForm /> );
 		expect(
 			screen.getByPlaceholderText( 'Enter tracking URL' )
 		).toBeInTheDocument();
 	} );
-
 	it( 'calls setTrackingNumber on input change', () => {
 		render( <ShipmentManualEntryForm /> );
 		const input = screen.getByPlaceholderText( 'Enter tracking number' );
-		fireEvent.change( input, { target: { value: '12345' } } );
+		fireEvent.change( input, {
+			target: {
+				value: '12345',
+			},
+		} );
 		expect( mockContext.setTrackingNumber ).toHaveBeenCalledWith( '12345' );
 	} );
-
 	it( 'calls setShipmentProvider on combobox change', () => {
 		render( <ShipmentManualEntryForm /> );
 		const combobox = screen.getByRole( 'combobox' );
-		fireEvent.change( combobox, { target: { value: 'dhl' } } );
+		fireEvent.change( combobox, {
+			target: {
+				value: 'dhl',
+			},
+		} );
 		expect( mockContext.setShipmentProvider ).toHaveBeenCalledWith( 'dhl' );
 	} );
-
 	it( 'calls setProviderName on provider name input change', () => {
 		mockContext.shipmentProvider = 'other';
 		render( <ShipmentManualEntryForm /> );
 		const input = screen.getByPlaceholderText( 'Enter provider name' );
-		fireEvent.change( input, { target: { value: 'Custom Provider' } } );
+		fireEvent.change( input, {
+			target: {
+				value: 'Custom Provider',
+			},
+		} );
 		expect( mockContext.setProviderName ).toHaveBeenCalledWith(
 			'Custom Provider'
 		);
 	} );
-
 	it( 'calls setTrackingUrl on tracking URL input change', () => {
 		render( <ShipmentManualEntryForm /> );
 		const input = screen.getByPlaceholderText( 'Enter tracking URL' );
-		fireEvent.change( input, { target: { value: 'http://example.com' } } );
+		fireEvent.change( input, {
+			target: {
+				value: 'http://example.com',
+			},
+		} );
 		expect( mockContext.setTrackingUrl ).toHaveBeenCalledWith(
 			'http://example.com'
 		);
 	} );
-
 	it( 'updates tracking URL when provider changes without tracking number', () => {
 		render( <ShipmentManualEntryForm /> );
 		const combobox = screen.getByRole( 'combobox' );
-		fireEvent.change( combobox, { target: { value: 'ups' } } );
+		fireEvent.change( combobox, {
+			target: {
+				value: 'ups',
+			},
+		} );
 		expect( mockContext.setTrackingUrl ).toHaveBeenCalledWith(
 			'https://www.ups.com/track?loc=en_US&tracknum='
 		);
 	} );
-
 	it( 'updates tracking URL with tracking number when provider changes', () => {
 		mockContext.trackingNumber = '123456789';
 		render( <ShipmentManualEntryForm /> );
 		const combobox = screen.getByRole( 'combobox' );
-		fireEvent.change( combobox, { target: { value: 'dhl' } } );
+		fireEvent.change( combobox, {
+			target: {
+				value: 'dhl',
+			},
+		} );
 		expect( mockContext.setTrackingUrl ).toHaveBeenCalledWith(
 			'https://www.dhl.com/en/express/tracking.html?AWB=123456789'
 		);
 	} );
-
 	it( 'sets empty tracking URL when provider does not exist in settings', () => {
 		mockContext.trackingNumber = '123456789';
 		render( <ShipmentManualEntryForm /> );
 		const combobox = screen.getByRole( 'combobox' );
-		fireEvent.change( combobox, { target: { value: 'unknown-provider' } } );
+		fireEvent.change( combobox, {
+			target: {
+				value: 'unknown-provider',
+			},
+		} );
 		expect( mockContext.setTrackingUrl ).toHaveBeenCalledWith( '' );
 	} );
-
 	it( 'updates tracking URL when tracking number changes and provider is selected', () => {
 		mockContext.shipmentProvider = 'ups';
 		render( <ShipmentManualEntryForm /> );
 		const input = screen.getByPlaceholderText( 'Enter tracking number' );
-		fireEvent.change( input, { target: { value: 'NEWTRACK123' } } );
+		fireEvent.change( input, {
+			target: {
+				value: 'NEWTRACK123',
+			},
+		} );
 		expect( mockContext.setTrackingUrl ).toHaveBeenCalledWith(
 			'https://www.ups.com/track?loc=en_US&tracknum=NEWTRACK123'
 		);
 	} );
-
 	it( 'does not update tracking URL when tracking number changes and provider is "other"', () => {
 		mockContext.shipmentProvider = 'other';
 		render( <ShipmentManualEntryForm /> );
 		const input = screen.getByPlaceholderText( 'Enter tracking number' );
-		fireEvent.change( input, { target: { value: 'NEWTRACK123' } } );
+		fireEvent.change( input, {
+			target: {
+				value: 'NEWTRACK123',
+			},
+		} );
 		expect( mockContext.setTrackingUrl ).not.toHaveBeenCalled();
 	} );
-
 	it( 'does not update tracking URL when tracking number changes and no provider is selected', () => {
 		mockContext.shipmentProvider = '';
 		render( <ShipmentManualEntryForm /> );
 		const input = screen.getByPlaceholderText( 'Enter tracking number' );
-		fireEvent.change( input, { target: { value: 'NEWTRACK123' } } );
+		fireEvent.change( input, {
+			target: {
+				value: 'NEWTRACK123',
+			},
+		} );
 		expect( mockContext.setTrackingUrl ).not.toHaveBeenCalled();
 	} );
 } );

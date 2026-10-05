@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -14,11 +16,17 @@ import {
  * Internal dependencies
  */
 import { IncentiveBanner } from '..';
-
-jest.mock( '@woocommerce/tracks', () => ( {
-	recordEvent: jest.fn(),
-} ) );
-
+vi.mock( '@woocommerce/tracks', () => {
+	const mock = {
+		recordEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const testIncentive: PaymentsProviderIncentive = {
 	id: 'test-incentive',
 	description: 'Test Incentive',
@@ -35,11 +43,11 @@ const testIncentive: PaymentsProviderIncentive = {
 		},
 	},
 };
-
 const testProvider: PaymentsProvider = {
 	id: 'test-provider',
 	_order: 1,
-	_type: PaymentsProviderType.Gateway, // or any valid PaymentsProviderType
+	_type: PaymentsProviderType.Gateway,
+	// or any valid PaymentsProviderType
 	title: 'Test Title',
 	description: 'Test Description',
 	icon: 'test-icon',
@@ -55,7 +63,6 @@ const testProvider: PaymentsProvider = {
 	_links: {},
 	_suggestion_id: 'test-suggestion-id',
 };
-
 describe( 'IncentiveBanner', () => {
 	it( 'should record settings_payments_incentive_show event when the incentive is shown', () => {
 		render(
@@ -63,12 +70,11 @@ describe( 'IncentiveBanner', () => {
 				incentive={ testIncentive }
 				provider={ testProvider }
 				onboardingUrl="https://example.com"
-				onAccept={ jest.fn() }
-				onDismiss={ jest.fn() }
-				setUpPlugin={ jest.fn() }
+				onAccept={ vi.fn() }
+				onDismiss={ vi.fn() }
+				setUpPlugin={ vi.fn() }
 			/>
 		);
-
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_incentive_show',
 			expect.objectContaining( {
@@ -80,22 +86,23 @@ describe( 'IncentiveBanner', () => {
 			} )
 		);
 	} );
-
 	it( 'should record settings_payments_incentive_accept event when the accept button is clicked', () => {
-		const onAccept = jest.fn();
+		const onAccept = vi.fn();
 		const { getByRole } = render(
 			<IncentiveBanner
 				incentive={ testIncentive }
 				provider={ testProvider }
 				onboardingUrl="https://example.com"
 				onAccept={ onAccept }
-				onDismiss={ jest.fn() }
-				setUpPlugin={ jest.fn() }
+				onDismiss={ vi.fn() }
+				setUpPlugin={ vi.fn() }
 			/>
 		);
-
-		fireEvent.click( getByRole( 'button', { name: 'Test CTA Label' } ) );
-
+		fireEvent.click(
+			getByRole( 'button', {
+				name: 'Test CTA Label',
+			} )
+		);
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_incentive_accept',
 			expect.objectContaining( {

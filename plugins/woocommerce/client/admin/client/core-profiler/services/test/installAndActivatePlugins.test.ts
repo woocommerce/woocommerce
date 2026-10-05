@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -14,21 +16,21 @@ describe( 'pluginInstallerMachine', () => {
 			INSTALLATION_TIMEOUT: 1000,
 		},
 		actions: {
-			updateParentWithPluginProgress: jest.fn(),
-			updateParentWithInstallationErrors: jest.fn(),
-			updateParentWithInstallationSuccess: jest.fn(),
+			updateParentWithPluginProgress: vi.fn(),
+			updateParentWithInstallationErrors: vi.fn(),
+			updateParentWithInstallationSuccess: vi.fn(),
 		},
 		actors: {
-			queueRemainingPluginsAsync: fromPromise( jest.fn() ),
+			queueRemainingPluginsAsync: fromPromise( vi.fn() ),
 		},
 	};
 
 	beforeEach( () => {
-		jest.resetAllMocks();
+		vi.resetAllMocks();
 	} );
 
 	it( 'when given one plugin it should call the installPlugin service once', async () => {
-		const mockInstallPlugin = jest.fn();
+		const mockInstallPlugin = vi.fn();
 		mockInstallPlugin.mockResolvedValueOnce( {
 			data: {
 				install_time: {
@@ -74,7 +76,7 @@ describe( 'pluginInstallerMachine', () => {
 	} );
 
 	it( 'when given multiple plugins it should call the installPlugin service the equivalent number of times', async () => {
-		const mockInstallPlugin = jest.fn();
+		const mockInstallPlugin = vi.fn();
 		mockInstallPlugin
 			.mockResolvedValueOnce( {
 				data: {
@@ -133,7 +135,7 @@ describe( 'pluginInstallerMachine', () => {
 	} );
 
 	it( 'when a plugin install errors it should report it accordingly', async () => {
-		const mockInstallPlugin = jest.fn();
+		const mockInstallPlugin = vi.fn();
 		mockInstallPlugin
 			.mockResolvedValueOnce( {
 				data: {
@@ -192,7 +194,7 @@ describe( 'pluginInstallerMachine', () => {
 
 	it( 'when plugins take longer to install than the timeout, it should queue them async', async () => {
 		const clock = new SimulatedClock();
-		const mockInstallPlugin = jest.fn();
+		const mockInstallPlugin = vi.fn();
 		mockInstallPlugin
 			.mockResolvedValueOnce( {
 				data: {
@@ -212,7 +214,7 @@ describe( 'pluginInstallerMachine', () => {
 				};
 			} );
 
-		const mockInstallPluginAsync = jest.fn();
+		const mockInstallPluginAsync = vi.fn();
 		mockInstallPluginAsync.mockResolvedValueOnce( {
 			data: {
 				job_id: 'foo',

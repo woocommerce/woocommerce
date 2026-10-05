@@ -1,7 +1,9 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { __ } from '@wordpress/i18n';
@@ -19,12 +21,12 @@ describe( 'CountrySelector', () => {
 		{ key: 'FR', name: 'France' },
 	];
 
-	const scrollIntoViewMock = jest.fn();
+	const scrollIntoViewMock = vi.fn();
 	Object.defineProperty( HTMLElement.prototype, 'scrollIntoView', {
 		value: scrollIntoViewMock,
 		writable: true,
 	} );
-	const mockOnChange = jest.fn();
+	const mockOnChange = vi.fn();
 
 	const defaultProps = {
 		name: 'country-selector',
@@ -36,7 +38,7 @@ describe( 'CountrySelector', () => {
 	};
 
 	afterEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	} );
 
 	it( 'renders correctly with initial props', () => {

@@ -1,3 +1,5 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -19,104 +21,201 @@ import { PaymentGatewayListItem } from '../payment-gateway-list-item';
 const PaymentsProviderTypeGateway = 'gateway' as const;
 
 // Mock dependencies.
-jest.mock( '@woocommerce/onboarding', () => ( {
-	WooPaymentsMethodsLogos: () => <div>WooPaymentsMethodsLogos</div>,
-} ) );
-
-jest.mock( '~/lib/sanitize-html', () => ( {
-	__esModule: true,
-	default: jest.fn( ( html ) => ( { __html: html } ) ),
-} ) );
-
-jest.mock( '~/settings-payments/components/status-badge', () => ( {
-	StatusBadge: ( {
-		status,
-		popoverContent,
-	}: {
-		status: string;
-		popoverContent?: React.ReactNode;
-	} ) => (
-		<div data-testid="status-badge" data-status={ status }>
-			StatusBadge-{ status }
-			{ popoverContent && (
-				<div data-testid="status-badge-popover">{ popoverContent }</div>
-			) }
-		</div>
-	),
-} ) );
-
-jest.mock( '~/settings-payments/components/ellipsis-menu-content', () => ( {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
-	EllipsisMenuWrapper: ( { provider }: { provider: { id: string } } ) => (
-		<div data-testid="ellipsis-menu">EllipsisMenu-{ provider.id }</div>
-	),
-} ) );
-
-jest.mock( '~/settings-payments/components/sortable', () => ( {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
-	DefaultDragHandle: () => <div data-testid="drag-handle">DragHandle</div>,
-} ) );
-
-jest.mock( '~/settings-payments/components/buttons', () => ( {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
-	ActivatePaymentsButton: ( { incentive }: { incentive?: unknown } ) => (
-		<button data-testid="activate-payments-button">
-			ActivatePayments{ incentive ? '-with-incentive' : '' }
-		</button>
-	),
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
-	CompleteSetupButton: ( { disabled }: { disabled?: boolean } ) => (
-		<button data-testid="complete-setup-button" disabled={ disabled }>
-			CompleteSetup
-		</button>
-	),
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
-	EnableGatewayButton: ( { incentive }: { incentive?: unknown } ) => (
-		<button data-testid="enable-gateway-button">
-			Enable{ incentive ? '-with-incentive' : '' }
-		</button>
-	),
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
-	SettingsButton: () => (
-		<button data-testid="settings-button">Settings</button>
-	),
-} ) );
-
-jest.mock(
-	'~/settings-payments/components/buttons/reactivate-live-payments-button',
-	() => ( {
+vi.mock( '@woocommerce/onboarding', () => {
+	const mock = {
+		WooPaymentsMethodsLogos: () => <div>WooPaymentsMethodsLogos</div>,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '~/lib/sanitize-html', () => {
+	const mock = {
+		__esModule: true,
+		default: vi.fn( ( html ) => ( {
+			__html: html,
+		} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '~/settings-payments/components/status-badge', () => {
+	const mock = {
+		StatusBadge: ( {
+			status,
+			popoverContent,
+		}: {
+			status: string;
+			popoverContent?: React.ReactNode;
+		} ) => (
+			<div data-testid="status-badge" data-status={ status }>
+				StatusBadge-{ status }
+				{ popoverContent && (
+					<div data-testid="status-badge-popover">
+						{ popoverContent }
+					</div>
+				) }
+			</div>
+		),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '~/settings-payments/components/ellipsis-menu-content', () => {
+	const mock = {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
-		ReactivateLivePaymentsButton: () => (
-			<button data-testid="reactivate-live-payments-button">
-				ReactivateLivePayments
+		EllipsisMenuWrapper: ( {
+			provider,
+		}: {
+			provider: {
+				id: string;
+			};
+		} ) => (
+			<div data-testid="ellipsis-menu">EllipsisMenu-{ provider.id }</div>
+		),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '~/settings-payments/components/sortable', () => {
+	const mock = {
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
+		DefaultDragHandle: () => (
+			<div data-testid="drag-handle">DragHandle</div>
+		),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '~/settings-payments/components/buttons', () => {
+	const mock = {
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
+		ActivatePaymentsButton: ( { incentive }: { incentive?: unknown } ) => (
+			<button data-testid="activate-payments-button">
+				ActivatePayments{ incentive ? '-with-incentive' : '' }
 			</button>
 		),
-	} )
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
+		CompleteSetupButton: ( { disabled }: { disabled?: boolean } ) => (
+			<button data-testid="complete-setup-button" disabled={ disabled }>
+				CompleteSetup
+			</button>
+		),
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
+		EnableGatewayButton: ( { incentive }: { incentive?: unknown } ) => (
+			<button data-testid="enable-gateway-button">
+				Enable{ incentive ? '-with-incentive' : '' }
+			</button>
+		),
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
+		SettingsButton: () => (
+			<button data-testid="settings-button">Settings</button>
+		),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock(
+	'~/settings-payments/components/buttons/reactivate-live-payments-button',
+	() => {
+		const mock = {
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
+			ReactivateLivePaymentsButton: () => (
+				<button data-testid="reactivate-live-payments-button">
+					ReactivateLivePayments
+				</button>
+			),
+		};
+		return Object.defineProperties(
+			{
+				default: mock,
+			},
+			Object.getOwnPropertyDescriptors( mock )
+		);
+	}
 );
-
-jest.mock( '~/settings-payments/components/incentive-status-badge', () => ( {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
-	IncentiveStatusBadge: ( { incentive }: { incentive: { id: string } } ) => (
-		<div data-testid="incentive-badge">Incentive-{ incentive.id }</div>
-	),
-} ) );
-
-jest.mock( '~/settings-payments/components/official-badge', () => ( {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
-	OfficialBadge: ( { suggestionId }: { suggestionId: string } ) => (
-		<div data-testid="official-badge">Official-{ suggestionId }</div>
-	),
-} ) );
-
-jest.mock( '@wordpress/components', () => ( {
-	Tooltip: ( { children }: { children: React.ReactNode } ) => (
-		<div>{ children }</div>
-	),
-} ) );
-
-jest.mock( '~/utils/admin-settings', () => ( {
-	WC_ASSET_URL: 'https://localhost/wp-content/plugins/woocommerce/assets/',
-} ) );
+vi.mock( '~/settings-payments/components/incentive-status-badge', () => {
+	const mock = {
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
+		IncentiveStatusBadge: ( {
+			incentive,
+		}: {
+			incentive: {
+				id: string;
+			};
+		} ) => (
+			<div data-testid="incentive-badge">Incentive-{ incentive.id }</div>
+		),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '~/settings-payments/components/official-badge', () => {
+	const mock = {
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Mock is used by PaymentGatewayListItem component
+		OfficialBadge: ( { suggestionId }: { suggestionId: string } ) => (
+			<div data-testid="official-badge">Official-{ suggestionId }</div>
+		),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/components', () => {
+	const mock = {
+		Tooltip: ( { children }: { children: React.ReactNode } ) => (
+			<div>{ children }</div>
+		),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '~/utils/admin-settings', () => {
+	const mock = {
+		WC_ASSET_URL:
+			'https://localhost/wp-content/plugins/woocommerce/assets/',
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 // Helper function to create a mock gateway.
 const createMockGateway = (
@@ -172,19 +271,16 @@ const createMockGateway = (
 		...overrides,
 	};
 };
-
 describe( 'PaymentGatewayListItem', () => {
 	const defaultProps = {
 		installingPlugin: null,
-		acceptIncentive: jest.fn(),
+		acceptIncentive: vi.fn(),
 		shouldHighlightIncentive: false,
-		setIsOnboardingModalOpen: jest.fn(),
+		setIsOnboardingModalOpen: vi.fn(),
 	};
-
 	afterEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	} );
-
 	describe( 'Basic Rendering', () => {
 		it( 'renders the gateway title', () => {
 			const gateway = createMockGateway();
@@ -194,10 +290,8 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			expect( getByText( 'Test Gateway' ) ).toBeInTheDocument();
 		} );
-
 		it( 'renders the gateway description', () => {
 			const gateway = createMockGateway();
 			const { container } = render(
@@ -206,14 +300,12 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			const content = container.querySelector(
 				'.woocommerce-list__item-content'
 			);
 			expect( content ).toBeInTheDocument();
 			expect( content ).toHaveClass( 'woocommerce-list__item-content' );
 		} );
-
 		it( 'renders the gateway icon', () => {
 			const gateway = createMockGateway( {
 				icon: 'https://example.com/test-icon.png',
@@ -224,7 +316,6 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			const icon = container.querySelector(
 				'.woocommerce-list__item-image'
 			);
@@ -234,7 +325,6 @@ describe( 'PaymentGatewayListItem', () => {
 			);
 			expect( icon ).toHaveAttribute( 'alt', 'Test Gateway logo' );
 		} );
-
 		it( 'applies correct CSS classes for regular gateway', () => {
 			const gateway = createMockGateway();
 			const { container } = render(
@@ -243,7 +333,6 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			const item = container.querySelector(
 				'.woocommerce-item__payment-gateway'
 			);
@@ -252,7 +341,6 @@ describe( 'PaymentGatewayListItem', () => {
 				'woocommerce-item__woocommerce-payments'
 			);
 		} );
-
 		it( 'applies WooPayments CSS class for WooPayments gateway', () => {
 			const gateway = createMockGateway( {
 				id: 'woocommerce_payments',
@@ -263,7 +351,6 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			const item = container.querySelector(
 				'.woocommerce-item__payment-gateway'
 			);
@@ -271,7 +358,6 @@ describe( 'PaymentGatewayListItem', () => {
 				'woocommerce-item__woocommerce-payments'
 			);
 		} );
-
 		it( 'applies has-incentive CSS class when incentive exists and should highlight', () => {
 			const gateway = createMockGateway( {
 				_incentive: {
@@ -285,7 +371,9 @@ describe( 'PaymentGatewayListItem', () => {
 					badge: 'Save 50%',
 					_dismissals: [],
 					_links: {
-						dismiss: { href: '/dismiss' },
+						dismiss: {
+							href: '/dismiss',
+						},
 					},
 				},
 			} );
@@ -296,13 +384,11 @@ describe( 'PaymentGatewayListItem', () => {
 					shouldHighlightIncentive={ true }
 				/>
 			);
-
 			const item = container.querySelector(
 				'.woocommerce-item__payment-gateway'
 			);
 			expect( item ).toHaveClass( 'has-incentive' );
 		} );
-
 		it( 'renders drag handle', () => {
 			const gateway = createMockGateway();
 			const { getByTestId } = render(
@@ -311,10 +397,8 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			expect( getByTestId( 'drag-handle' ) ).toBeInTheDocument();
 		} );
-
 		it( 'renders ellipsis menu', () => {
 			const gateway = createMockGateway();
 			const { getByTestId } = render(
@@ -323,11 +407,9 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			expect( getByTestId( 'ellipsis-menu' ) ).toBeInTheDocument();
 		} );
 	} );
-
 	describe( 'Status Badge Rendering', () => {
 		it( 'shows StatusBadge when no incentive', () => {
 			const gateway = createMockGateway();
@@ -337,10 +419,8 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			expect( getByTestId( 'status-badge' ) ).toBeInTheDocument();
 		} );
-
 		it( 'shows IncentiveStatusBadge when incentive exists', () => {
 			const gateway = createMockGateway( {
 				_incentive: {
@@ -354,7 +434,9 @@ describe( 'PaymentGatewayListItem', () => {
 					badge: 'Save 50%',
 					_dismissals: [],
 					_links: {
-						dismiss: { href: '/dismiss' },
+						dismiss: {
+							href: '/dismiss',
+						},
 					},
 				},
 			} );
@@ -364,11 +446,9 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			expect( getByTestId( 'incentive-badge' ) ).toBeInTheDocument();
 			expect( queryByTestId( 'status-badge' ) ).not.toBeInTheDocument();
 		} );
-
 		it( 'determines not_supported status correctly', () => {
 			const gateway = createMockGateway( {
 				state: {
@@ -389,8 +469,12 @@ describe( 'PaymentGatewayListItem', () => {
 						not_supported: 'This gateway is not supported',
 					},
 					_links: {
-						onboard: { href: '/onboard' },
-						reset: { href: '/reset' },
+						onboard: {
+							href: '/onboard',
+						},
+						reset: {
+							href: '/reset',
+						},
 					},
 					recommended_payment_methods: [],
 					type: 'standard',
@@ -402,14 +486,12 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			const statusBadge = getByTestId( 'status-badge' );
 			expect( statusBadge ).toHaveAttribute(
 				'data-status',
 				'not_supported'
 			);
 		} );
-
 		it( 'shows popover content for not_supported status', () => {
 			const gateway = createMockGateway( {
 				state: {
@@ -430,8 +512,12 @@ describe( 'PaymentGatewayListItem', () => {
 						not_supported: 'Gateway not available in your country',
 					},
 					_links: {
-						onboard: { href: '/onboard' },
-						reset: { href: '/reset' },
+						onboard: {
+							href: '/onboard',
+						},
+						reset: {
+							href: '/reset',
+						},
 					},
 					recommended_payment_methods: [],
 					type: 'standard',
@@ -443,14 +529,12 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			const popover = getByTestId( 'status-badge-popover' );
 			expect( popover ).toBeInTheDocument();
 			expect( popover ).toHaveTextContent(
 				'Gateway not available in your country'
 			);
 		} );
-
 		it( 'determines needs_setup status correctly', () => {
 			const gateway = createMockGateway( {
 				state: {
@@ -467,14 +551,12 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			const statusBadge = getByTestId( 'status-badge' );
 			expect( statusBadge ).toHaveAttribute(
 				'data-status',
 				'needs_setup'
 			);
 		} );
-
 		it( 'determines test_account status correctly', () => {
 			const gateway = createMockGateway( {
 				state: {
@@ -493,8 +575,12 @@ describe( 'PaymentGatewayListItem', () => {
 					},
 					messages: {},
 					_links: {
-						onboard: { href: '/onboard' },
-						reset: { href: '/reset' },
+						onboard: {
+							href: '/onboard',
+						},
+						reset: {
+							href: '/reset',
+						},
 					},
 					recommended_payment_methods: [],
 					type: 'standard',
@@ -506,14 +592,12 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			const statusBadge = getByTestId( 'status-badge' );
 			expect( statusBadge ).toHaveAttribute(
 				'data-status',
 				'test_account'
 			);
 		} );
-
 		it( 'determines test_mode status correctly', () => {
 			const gateway = createMockGateway( {
 				state: {
@@ -532,8 +616,12 @@ describe( 'PaymentGatewayListItem', () => {
 					},
 					messages: {},
 					_links: {
-						onboard: { href: '/onboard' },
-						reset: { href: '/reset' },
+						onboard: {
+							href: '/onboard',
+						},
+						reset: {
+							href: '/reset',
+						},
 					},
 					recommended_payment_methods: [],
 					type: 'standard',
@@ -545,11 +633,9 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			const statusBadge = getByTestId( 'status-badge' );
 			expect( statusBadge ).toHaveAttribute( 'data-status', 'test_mode' );
 		} );
-
 		it( 'determines active status correctly', () => {
 			const gateway = createMockGateway( {
 				state: {
@@ -568,8 +654,12 @@ describe( 'PaymentGatewayListItem', () => {
 					},
 					messages: {},
 					_links: {
-						onboard: { href: '/onboard' },
-						reset: { href: '/reset' },
+						onboard: {
+							href: '/onboard',
+						},
+						reset: {
+							href: '/reset',
+						},
 					},
 					recommended_payment_methods: [],
 					type: 'standard',
@@ -581,11 +671,9 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			const statusBadge = getByTestId( 'status-badge' );
 			expect( statusBadge ).toHaveAttribute( 'data-status', 'active' );
 		} );
-
 		it( 'determines inactive status correctly', () => {
 			const gateway = createMockGateway( {
 				state: {
@@ -604,8 +692,12 @@ describe( 'PaymentGatewayListItem', () => {
 					},
 					messages: {},
 					_links: {
-						onboard: { href: '/onboard' },
-						reset: { href: '/reset' },
+						onboard: {
+							href: '/onboard',
+						},
+						reset: {
+							href: '/reset',
+						},
 					},
 					recommended_payment_methods: [],
 					type: 'standard',
@@ -617,12 +709,10 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			const statusBadge = getByTestId( 'status-badge' );
 			expect( statusBadge ).toHaveAttribute( 'data-status', 'inactive' );
 		} );
 	} );
-
 	describe( 'Badge Rendering', () => {
 		it( 'shows OfficialBadge when _suggestion_id exists', () => {
 			const gateway = createMockGateway( {
@@ -634,14 +724,12 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			const officialBadge = getByTestId( 'official-badge' );
 			expect( officialBadge ).toBeInTheDocument();
 			expect( officialBadge ).toHaveTextContent(
 				'Official-test-suggestion'
 			);
 		} );
-
 		it( 'does not show OfficialBadge when _suggestion_id does not exist', () => {
 			const gateway = createMockGateway();
 			const { queryByTestId } = render(
@@ -650,10 +738,8 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			expect( queryByTestId( 'official-badge' ) ).not.toBeInTheDocument();
 		} );
-
 		it( 'shows recurring payments icon when subscriptions support exists', () => {
 			const gateway = createMockGateway( {
 				supports: [ 'products', 'subscriptions' ],
@@ -664,7 +750,6 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			const recurringIcon = container.querySelector(
 				'.woocommerce-list__item-recurring-payments-icon'
 			);
@@ -674,7 +759,6 @@ describe( 'PaymentGatewayListItem', () => {
 				'https://localhost/wp-content/plugins/woocommerce/assets/images/icons/recurring-payments.svg'
 			);
 		} );
-
 		it( 'does not show recurring payments icon when subscriptions support does not exist', () => {
 			const gateway = createMockGateway( {
 				supports: [ 'products', 'refunds' ],
@@ -685,14 +769,12 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			const recurringIcon = container.querySelector(
 				'.woocommerce-list__item-recurring-payments-icon'
 			);
 			expect( recurringIcon ).not.toBeInTheDocument();
 		} );
 	} );
-
 	describe( 'WooPayments Specific Rendering', () => {
 		it( 'renders WooPaymentsMethodsLogos for WooPayments gateway', () => {
 			const gateway = createMockGateway( {
@@ -704,12 +786,10 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			expect(
 				getByText( 'WooPaymentsMethodsLogos' )
 			).toBeInTheDocument();
 		} );
-
 		it( 'does not render WooPaymentsMethodsLogos for non-WooPayments gateway', () => {
 			const gateway = createMockGateway( {
 				id: 'stripe',
@@ -720,13 +800,11 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			expect(
 				queryByText( 'WooPaymentsMethodsLogos' )
 			).not.toBeInTheDocument();
 		} );
 	} );
-
 	describe( 'Button Rendering', () => {
 		it( 'shows EnableGatewayButton when gateway is disabled and does not need onboarding', () => {
 			const gateway = createMockGateway( {
@@ -746,8 +824,12 @@ describe( 'PaymentGatewayListItem', () => {
 					},
 					messages: {},
 					_links: {
-						onboard: { href: '/onboard' },
-						reset: { href: '/reset' },
+						onboard: {
+							href: '/onboard',
+						},
+						reset: {
+							href: '/reset',
+						},
 					},
 					recommended_payment_methods: [],
 					type: 'standard',
@@ -759,12 +841,10 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			expect(
 				getByTestId( 'enable-gateway-button' )
 			).toBeInTheDocument();
 		} );
-
 		it( 'shows SettingsButton when gateway does not need onboarding', () => {
 			const gateway = createMockGateway( {
 				state: {
@@ -783,8 +863,12 @@ describe( 'PaymentGatewayListItem', () => {
 					},
 					messages: {},
 					_links: {
-						onboard: { href: '/onboard' },
-						reset: { href: '/reset' },
+						onboard: {
+							href: '/onboard',
+						},
+						reset: {
+							href: '/reset',
+						},
 					},
 					recommended_payment_methods: [],
 					type: 'standard',
@@ -796,10 +880,8 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			expect( getByTestId( 'settings-button' ) ).toBeInTheDocument();
 		} );
-
 		it( 'shows CompleteSetupButton (enabled) when onboarding is supported', () => {
 			const gateway = createMockGateway( {
 				state: {
@@ -818,8 +900,12 @@ describe( 'PaymentGatewayListItem', () => {
 					},
 					messages: {},
 					_links: {
-						onboard: { href: '/onboard' },
-						reset: { href: '/reset' },
+						onboard: {
+							href: '/onboard',
+						},
+						reset: {
+							href: '/reset',
+						},
 					},
 					recommended_payment_methods: [],
 					type: 'standard',
@@ -831,12 +917,10 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			const button = getByTestId( 'complete-setup-button' );
 			expect( button ).toBeInTheDocument();
 			expect( button ).not.toBeDisabled();
 		} );
-
 		it( 'shows CompleteSetupButton (disabled) when onboarding is not supported', () => {
 			const gateway = createMockGateway( {
 				state: {
@@ -857,8 +941,12 @@ describe( 'PaymentGatewayListItem', () => {
 						not_supported: 'Not supported message',
 					},
 					_links: {
-						onboard: { href: '/onboard' },
-						reset: { href: '/reset' },
+						onboard: {
+							href: '/onboard',
+						},
+						reset: {
+							href: '/reset',
+						},
 					},
 					recommended_payment_methods: [],
 					type: 'standard',
@@ -870,12 +958,10 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			const button = getByTestId( 'complete-setup-button' );
 			expect( button ).toBeInTheDocument();
 			expect( button ).toBeDisabled();
 		} );
-
 		it( 'shows ActivatePaymentsButton for WooPayments in test mode (not dev mode)', () => {
 			const gateway = createMockGateway( {
 				id: 'woocommerce_payments',
@@ -895,9 +981,15 @@ describe( 'PaymentGatewayListItem', () => {
 					},
 					messages: {},
 					_links: {
-						onboard: { href: '/onboard' },
-						reset: { href: '/reset' },
-						disable_test_account: { href: '/disable-test' },
+						onboard: {
+							href: '/onboard',
+						},
+						reset: {
+							href: '/reset',
+						},
+						disable_test_account: {
+							href: '/disable-test',
+						},
 					},
 					recommended_payment_methods: [],
 					type: 'standard',
@@ -909,12 +1001,10 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			expect(
 				getByTestId( 'activate-payments-button' )
 			).toBeInTheDocument();
 		} );
-
 		it( 'does not show ActivatePaymentsButton for WooPayments in dev mode', () => {
 			const gateway = createMockGateway( {
 				id: 'woocommerce_payments',
@@ -934,8 +1024,12 @@ describe( 'PaymentGatewayListItem', () => {
 					},
 					messages: {},
 					_links: {
-						onboard: { href: '/onboard' },
-						reset: { href: '/reset' },
+						onboard: {
+							href: '/onboard',
+						},
+						reset: {
+							href: '/reset',
+						},
 					},
 					recommended_payment_methods: [],
 					type: 'standard',
@@ -947,12 +1041,10 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			expect(
 				queryByTestId( 'activate-payments-button' )
 			).not.toBeInTheDocument();
 		} );
-
 		it( 'shows ReactivateLivePaymentsButton for WooPayments when test mode enabled after live account setup', () => {
 			const gateway = createMockGateway( {
 				id: 'woocommerce_payments',
@@ -972,8 +1064,12 @@ describe( 'PaymentGatewayListItem', () => {
 					},
 					messages: {},
 					_links: {
-						onboard: { href: '/onboard' },
-						reset: { href: '/reset' },
+						onboard: {
+							href: '/onboard',
+						},
+						reset: {
+							href: '/reset',
+						},
 					},
 					recommended_payment_methods: [],
 					type: 'standard',
@@ -985,12 +1081,10 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			expect(
 				getByTestId( 'reactivate-live-payments-button' )
 			).toBeInTheDocument();
 		} );
-
 		it( 'does not show ReactivateLivePaymentsButton in dev mode', () => {
 			const gateway = createMockGateway( {
 				id: 'woocommerce_payments',
@@ -1010,8 +1104,12 @@ describe( 'PaymentGatewayListItem', () => {
 					},
 					messages: {},
 					_links: {
-						onboard: { href: '/onboard' },
-						reset: { href: '/reset' },
+						onboard: {
+							href: '/onboard',
+						},
+						reset: {
+							href: '/reset',
+						},
 					},
 					recommended_payment_methods: [],
 					type: 'standard',
@@ -1023,13 +1121,11 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			expect(
 				queryByTestId( 'reactivate-live-payments-button' )
 			).not.toBeInTheDocument();
 		} );
 	} );
-
 	describe( 'Props Handling', () => {
 		it( 'renders without error when installingPlugin prop is provided', () => {
 			const gateway = createMockGateway( {
@@ -1054,9 +1150,8 @@ describe( 'PaymentGatewayListItem', () => {
 				getByTestId( 'complete-setup-button' )
 			).toBeInTheDocument();
 		} );
-
 		it( 'renders without error when acceptIncentive callback is provided', () => {
-			const acceptIncentive = jest.fn();
+			const acceptIncentive = vi.fn();
 			const gateway = createMockGateway( {
 				_incentive: {
 					id: 'test-incentive',
@@ -1069,11 +1164,12 @@ describe( 'PaymentGatewayListItem', () => {
 					badge: 'Save 50%',
 					_dismissals: [],
 					_links: {
-						dismiss: { href: '/dismiss' },
+						dismiss: {
+							href: '/dismiss',
+						},
 					},
 				},
 			} );
-
 			render(
 				<PaymentGatewayListItem
 					gateway={ gateway }
@@ -1085,11 +1181,9 @@ describe( 'PaymentGatewayListItem', () => {
 			// Verify component renders successfully and doesn't call callback during render.
 			expect( acceptIncentive ).not.toHaveBeenCalled();
 		} );
-
 		it( 'renders without error when setIsOnboardingModalOpen callback is provided', () => {
-			const setIsOnboardingModalOpen = jest.fn();
+			const setIsOnboardingModalOpen = vi.fn();
 			const gateway = createMockGateway();
-
 			render(
 				<PaymentGatewayListItem
 					gateway={ gateway }
@@ -1102,7 +1196,6 @@ describe( 'PaymentGatewayListItem', () => {
 			expect( setIsOnboardingModalOpen ).not.toHaveBeenCalled();
 		} );
 	} );
-
 	describe( 'Edge Cases and Error Conditions', () => {
 		it( 'handles missing gateway icon gracefully', () => {
 			const gateway = createMockGateway( {
@@ -1114,14 +1207,12 @@ describe( 'PaymentGatewayListItem', () => {
 					{ ...defaultProps }
 				/>
 			);
-
 			const icon = container.querySelector(
 				'.woocommerce-list__item-image'
 			);
 			// Component should handle missing icon without crashing.
 			expect( icon ).not.toBeInTheDocument();
 		} );
-
 		it( 'handles missing description gracefully', () => {
 			const gateway = createMockGateway( {
 				description: undefined,
@@ -1139,7 +1230,6 @@ describe( 'PaymentGatewayListItem', () => {
 			);
 			expect( item ).toBeInTheDocument();
 		} );
-
 		it( 'handles gateway without _suggestion_id', () => {
 			const gateway = createMockGateway( {
 				_suggestion_id: undefined,
@@ -1154,7 +1244,6 @@ describe( 'PaymentGatewayListItem', () => {
 			// Official badge should not be shown when _suggestion_id is undefined.
 			expect( queryByTestId( 'official-badge' ) ).not.toBeInTheDocument();
 		} );
-
 		it( 'handles gateway without incentive gracefully', () => {
 			const gateway = createMockGateway( {
 				_incentive: undefined,
@@ -1172,7 +1261,6 @@ describe( 'PaymentGatewayListItem', () => {
 				queryByTestId( 'incentive-badge' )
 			).not.toBeInTheDocument();
 		} );
-
 		it( 'handles null onboarding messages gracefully', () => {
 			const gateway = createMockGateway( {
 				onboarding: {
@@ -1184,8 +1272,12 @@ describe( 'PaymentGatewayListItem', () => {
 					},
 					messages: {},
 					_links: {
-						onboard: { href: '/onboard' },
-						reset: { href: '/reset' },
+						onboard: {
+							href: '/onboard',
+						},
+						reset: {
+							href: '/reset',
+						},
 					},
 					recommended_payment_methods: [],
 					type: 'standard',
@@ -1204,7 +1296,6 @@ describe( 'PaymentGatewayListItem', () => {
 			);
 			expect( item ).toBeInTheDocument();
 		} );
-
 		it( 'handles empty supports array', () => {
 			const gateway = createMockGateway( {
 				supports: [],
@@ -1222,7 +1313,6 @@ describe( 'PaymentGatewayListItem', () => {
 			);
 			expect( recurringIcon ).not.toBeInTheDocument();
 		} );
-
 		it( 'handles undefined supports array', () => {
 			const gateway = createMockGateway( {
 				supports: undefined,
@@ -1240,7 +1330,6 @@ describe( 'PaymentGatewayListItem', () => {
 			);
 			expect( item ).toBeInTheDocument();
 		} );
-
 		it( 'handles conflicting state flags gracefully', () => {
 			const gateway = createMockGateway( {
 				state: {
@@ -1264,7 +1353,6 @@ describe( 'PaymentGatewayListItem', () => {
 			);
 			expect( item ).toBeInTheDocument();
 		} );
-
 		it( 'handles undefined onboarding.state gracefully', () => {
 			const gateway = createMockGateway( {
 				onboarding: {
@@ -1292,7 +1380,6 @@ describe( 'PaymentGatewayListItem', () => {
 			);
 			expect( completeSetupButton ).toBeInTheDocument();
 		} );
-
 		it( 'handles completely undefined gateway.onboarding without crashing', () => {
 			const gateway = createMockGateway( {
 				state: {

@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -12,29 +14,41 @@ import SaveAsDraftButton from '../save-draft-button';
 import { useFulfillmentContext } from '../../../context/fulfillment-context';
 
 // Mock dependencies
-jest.mock( '@wordpress/data', () => {
-	const originalModule = jest.requireActual( '@wordpress/data' );
-	return {
+vi.mock( '@wordpress/data', async () => {
+	const originalModule = await vi.importActual( '@wordpress/data' );
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		...originalModule,
-		useDispatch: jest.fn( () => {} ),
-	};
+		useDispatch: vi.fn( () => {} ),
+	} );
 } );
-
-jest.mock( '../../../context/fulfillment-context', () => ( {
-	useFulfillmentContext: jest.fn(),
-} ) );
-
-const setError = jest.fn();
-
+vi.mock( '../../../context/fulfillment-context', () => {
+	const mock = {
+		useFulfillmentContext: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+const setError = vi.fn();
 describe( 'SaveAsDraftButton component', () => {
 	beforeEach( () => {
 		// Reset mocks
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 
 		// Default mock implementations
-		useDispatch.mockReturnValue( { saveFulfillment: jest.fn() } );
+		useDispatch.mockReturnValue( {
+			saveFulfillment: vi.fn(),
+		} );
 		useFulfillmentContext.mockReturnValue( {
-			order: { id: 123 },
+			order: {
+				id: 123,
+			},
 			fulfillment: {
 				id: 456,
 				meta_data: [
@@ -58,16 +72,15 @@ describe( 'SaveAsDraftButton component', () => {
 			},
 		} );
 	} );
-
 	it( 'should render button with correct text', () => {
 		render( <SaveAsDraftButton setError={ setError } /> );
 		expect( screen.getByText( 'Save as draft' ) ).toBeInTheDocument();
 	} );
-
 	it( 'should call saveFulfillment when button is clicked', async () => {
-		const mockSaveFulfillment = jest.fn( () => Promise.resolve() );
-		useDispatch.mockReturnValue( { saveFulfillment: mockSaveFulfillment } );
-
+		const mockSaveFulfillment = vi.fn( () => Promise.resolve() );
+		useDispatch.mockReturnValue( {
+			saveFulfillment: mockSaveFulfillment,
+		} );
 		const mockFulfillment = {
 			id: 456,
 			meta_data: [
@@ -90,14 +103,14 @@ describe( 'SaveAsDraftButton component', () => {
 			],
 		};
 		useFulfillmentContext.mockReturnValue( {
-			order: { id: 123 },
+			order: {
+				id: 123,
+			},
 			fulfillment: mockFulfillment,
 			notifyCustomer: true,
 		} );
-
 		render( <SaveAsDraftButton setError={ setError } /> );
 		fireEvent.click( screen.getByText( 'Save as draft' ) );
-
 		await waitFor( () => {
 			expect( mockSaveFulfillment ).toHaveBeenCalledWith(
 				123,
@@ -106,42 +119,36 @@ describe( 'SaveAsDraftButton component', () => {
 			);
 		} );
 	} );
-
 	it( 'should not call saveFulfillment when fulfillment is undefined', () => {
-		const mockSaveFulfillment = jest.fn();
-		useDispatch.mockReturnValue( { saveFulfillment: mockSaveFulfillment } );
-
+		const mockSaveFulfillment = vi.fn();
+		useDispatch.mockReturnValue( {
+			saveFulfillment: mockSaveFulfillment,
+		} );
 		useFulfillmentContext.mockReturnValue( {
-			order: { id: 123 },
+			order: {
+				id: 123,
+			},
 			fulfillment: undefined,
 		} );
-
 		render( <SaveAsDraftButton setError={ setError } /> );
 		fireEvent.click( screen.getByText( 'Save as draft' ) );
-
 		expect( mockSaveFulfillment ).not.toHaveBeenCalled();
 	} );
-
 	describe( 'Accessibility', () => {
 		it( 'should not have redundant aria-label overriding visible text', () => {
 			render( <SaveAsDraftButton setError={ setError } /> );
-
 			const button = screen.getByRole( 'button' );
 			expect( button ).not.toHaveAttribute( 'aria-label' );
 		} );
-
 		it( 'should have aria-describedby with unique prefix', () => {
 			render( <SaveAsDraftButton setError={ setError } /> );
-
 			const button = screen.getByRole( 'button' );
 			expect( button.getAttribute( 'aria-describedby' ) ).toMatch(
 				/^save-draft-description/
 			);
 		} );
-
 		it( 'should have hidden description for screen readers', () => {
 			render( <SaveAsDraftButton setError={ setError } /> );
-
 			const description = screen.getByText(
 				'Saves the fulfillment without marking items as fulfilled'
 			);
@@ -151,28 +158,23 @@ describe( 'SaveAsDraftButton component', () => {
 			);
 			expect( description ).toHaveClass( 'screen-reader-text' );
 		} );
-
 		it( 'should update button text when executing', () => {
-			const mockSaveFulfillment = jest.fn(
+			const mockSaveFulfillment = vi.fn(
 				() => new Promise( ( resolve ) => setTimeout( resolve, 100 ) )
 			);
 			useDispatch.mockReturnValue( {
 				saveFulfillment: mockSaveFulfillment,
 			} );
-
 			render( <SaveAsDraftButton setError={ setError } /> );
 			const button = screen.getByRole( 'button' );
-
 			fireEvent.click( button );
 
 			// Check that the button text updates during execution
 			expect( screen.getByText( 'Saving…' ) ).toBeInTheDocument();
 			expect( button ).toBeDisabled();
 		} );
-
 		it( 'should be keyboard accessible', () => {
 			render( <SaveAsDraftButton setError={ setError } /> );
-
 			const button = screen.getByRole( 'button' );
 			button.focus();
 			expect( button.ownerDocument.activeElement ).toBe( button );

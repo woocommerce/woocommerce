@@ -1,3 +1,11 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+const { useUpdateBannerMock } = vi.hoisted( () => {
+	const useUpdateBannerMock = vi.fn();
+	return {
+		useUpdateBannerMock,
+	};
+} );
+
 /**
  * External dependencies
  */
@@ -15,11 +23,18 @@ import { UpdateBannerPlugin } from '../update-banner-plugin';
 // shape it wants, then renders the plugin; the mock is consulted on
 // render and again after the rAF in the impl, so changing it
 // per-test is sufficient.
-const useUpdateBannerMock = jest.fn();
-jest.mock( '../hooks/use-update-banner', () => ( {
-	useUpdateBanner: () => useUpdateBannerMock(),
-} ) );
 
+vi.mock( '../hooks/use-update-banner', () => {
+	const mock = {
+		useUpdateBanner: () => useUpdateBannerMock(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const baseHookReturn = {
 	shouldRender: false,
 	summary: null,
@@ -31,13 +46,12 @@ const baseHookReturn = {
 	disabledReason: null,
 	hasConflicts: false,
 	expanded: false,
-	toggleExpanded: jest.fn(),
-	apply: jest.fn(),
-	openReview: jest.fn(),
-	dismiss: jest.fn(),
-	autoDismiss: jest.fn(),
+	toggleExpanded: vi.fn(),
+	apply: vi.fn(),
+	openReview: vi.fn(),
+	dismiss: vi.fn(),
+	autoDismiss: vi.fn(),
 };
-
 describe( 'UpdateBannerPlugin', () => {
 	beforeEach( () => {
 		// Reset the DOM between tests so the canvas selector / body
@@ -45,40 +59,31 @@ describe( 'UpdateBannerPlugin', () => {
 		document.body.innerHTML = '';
 		useUpdateBannerMock.mockReset();
 	} );
-
 	it( 'returns null when shouldRender is false', () => {
 		useUpdateBannerMock.mockReturnValue( {
 			...baseHookReturn,
 			shouldRender: false,
 		} );
-
 		const { container } = render( <UpdateBannerPlugin /> );
 		expect( container.firstChild ).toBeNull();
 	} );
-
 	it( 'portals the banner into the editor canvas target when present', () => {
 		const target = document.createElement( 'div' );
 		target.className = 'edit-post-visual-editor';
 		document.body.appendChild( target );
-
 		useUpdateBannerMock.mockReturnValue( {
 			...baseHookReturn,
 			shouldRender: true,
 		} );
-
 		render( <UpdateBannerPlugin /> );
-
 		expect( target.querySelector( '.wc-update-banner' ) ).not.toBeNull();
 	} );
-
 	it( 'falls back to document.body when no canvas target is present', () => {
 		useUpdateBannerMock.mockReturnValue( {
 			...baseHookReturn,
 			shouldRender: true,
 		} );
-
 		render( <UpdateBannerPlugin /> );
-
 		expect(
 			document.body.querySelector( '.wc-update-banner' )
 		).not.toBeNull();

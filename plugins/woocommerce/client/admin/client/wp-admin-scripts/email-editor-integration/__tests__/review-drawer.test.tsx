@@ -1,3 +1,13 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+const { mockUseChangeSummary, mockUseApplyUpdate } = vi.hoisted( () => {
+	const mockUseChangeSummary = vi.fn();
+	const mockUseApplyUpdate = vi.fn();
+	return {
+		mockUseChangeSummary,
+		mockUseApplyUpdate,
+	};
+} );
+
 /**
  * External dependencies
  */
@@ -9,18 +19,28 @@ import userEvent from '@testing-library/user-event';
  */
 import { ReviewDrawer } from '../review-drawer';
 import type { ChangeSummary } from '../hooks/use-change-summary';
-
-const mockUseChangeSummary = jest.fn();
-const mockUseApplyUpdate = jest.fn();
-
-jest.mock( '../hooks/use-change-summary', () => ( {
-	useChangeSummary: () => mockUseChangeSummary(),
-} ) );
-
-jest.mock( '../hooks/use-apply-update', () => ( {
-	useApplyUpdate: () => mockUseApplyUpdate(),
-} ) );
-
+vi.mock( '../hooks/use-change-summary', () => {
+	const mock = {
+		useChangeSummary: () => mockUseChangeSummary(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../hooks/use-apply-update', () => {
+	const mock = {
+		useApplyUpdate: () => mockUseApplyUpdate(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const summary: ChangeSummary = {
 	version_from: '1.0.0',
 	version_to: '1.1.0',
@@ -52,23 +72,25 @@ const summary: ChangeSummary = {
 	is_fallback: false,
 	cache_hit: false,
 };
-
 describe( 'ReviewDrawer', () => {
 	afterEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	} );
-
 	it( 'applies only an explicitly selected core conflict and closes after success', async () => {
-		const apply = jest.fn().mockResolvedValue( { status: 'applied' } );
-		const onOpenChange = jest.fn();
+		const apply = vi.fn().mockResolvedValue( {
+			status: 'applied',
+		} );
+		const onOpenChange = vi.fn();
 		mockUseChangeSummary.mockReturnValue( {
 			summary,
 			isLoading: false,
 			error: null,
-			refetch: jest.fn(),
+			refetch: vi.fn(),
 		} );
-		mockUseApplyUpdate.mockReturnValue( { apply, isApplying: false } );
-
+		mockUseApplyUpdate.mockReturnValue( {
+			apply,
+			isApplying: false,
+		} );
 		render(
 			<ReviewDrawer
 				postId={ 123 }
@@ -77,7 +99,6 @@ describe( 'ReviewDrawer', () => {
 				onOpenChange={ onOpenChange }
 			/>
 		);
-
 		const conflictGroups = screen.getAllByRole( 'radiogroup', {
 			name: 'Choose which version to apply',
 		} );
@@ -94,13 +115,11 @@ describe( 'ReviewDrawer', () => {
 				} )
 			).toHaveAttribute( 'aria-checked', 'false' );
 		}
-
 		await userEvent.click(
 			within( conflictGroups[ 0 ] ).getByRole( 'radio', {
 				name: /use core/i,
 			} )
 		);
-
 		expect(
 			within( conflictGroups[ 0 ] ).getByRole( 'radio', {
 				name: /use core/i,
@@ -121,14 +140,17 @@ describe( 'ReviewDrawer', () => {
 				name: /use core/i,
 			} )
 		).toHaveAttribute( 'aria-checked', 'false' );
-
 		await userEvent.click(
-			screen.getByRole( 'button', { name: 'Apply (2)' } )
+			screen.getByRole( 'button', {
+				name: 'Apply (2)',
+			} )
 		);
-
 		await waitFor( () =>
 			expect( apply ).toHaveBeenCalledWith( [
-				{ path: [ 0 ], decision: 'use_core' },
+				{
+					path: [ 0 ],
+					decision: 'use_core',
+				},
 			] )
 		);
 		expect( apply ).toHaveBeenCalledTimes( 1 );
@@ -137,20 +159,21 @@ describe( 'ReviewDrawer', () => {
 		);
 		expect( onOpenChange ).toHaveBeenCalledTimes( 1 );
 	} );
-
 	it( 'stays open when the apply does not succeed', async () => {
 		// useApplyUpdate resolves null when the request fails, and the drawer must
 		// keep the merchant's choices on screen rather than close on them.
-		const apply = jest.fn().mockResolvedValue( null );
-		const onOpenChange = jest.fn();
+		const apply = vi.fn().mockResolvedValue( null );
+		const onOpenChange = vi.fn();
 		mockUseChangeSummary.mockReturnValue( {
 			summary,
 			isLoading: false,
 			error: null,
-			refetch: jest.fn(),
+			refetch: vi.fn(),
 		} );
-		mockUseApplyUpdate.mockReturnValue( { apply, isApplying: false } );
-
+		mockUseApplyUpdate.mockReturnValue( {
+			apply,
+			isApplying: false,
+		} );
 		render(
 			<ReviewDrawer
 				postId={ 123 }
@@ -159,11 +182,11 @@ describe( 'ReviewDrawer', () => {
 				onOpenChange={ onOpenChange }
 			/>
 		);
-
 		await userEvent.click(
-			screen.getByRole( 'button', { name: 'Apply (2)' } )
+			screen.getByRole( 'button', {
+				name: 'Apply (2)',
+			} )
 		);
-
 		await waitFor( () => expect( apply ).toHaveBeenCalledTimes( 1 ) );
 		// Let the rejected-result branch settle before asserting it closed nothing.
 		await apply.mock.results[ 0 ].value;

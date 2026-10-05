@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -11,11 +13,11 @@ import { WooPaymentsUpdateRequiredModal } from '..';
 describe( 'WooPaymentsUpdateRequiredModal', () => {
 	const defaultProps = {
 		isOpen: true,
-		onClose: jest.fn(),
+		onClose: vi.fn(),
 	};
 
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	} );
 
 	it( 'should render modal when isOpen is true', () => {
@@ -73,7 +75,7 @@ describe( 'WooPaymentsUpdateRequiredModal', () => {
 	} );
 
 	it( 'should call onClose when "Not now" button is clicked', () => {
-		const onClose = jest.fn();
+		const onClose = vi.fn();
 		render(
 			<WooPaymentsUpdateRequiredModal
 				{ ...defaultProps }

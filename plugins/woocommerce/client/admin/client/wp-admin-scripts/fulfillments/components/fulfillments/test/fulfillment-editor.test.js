@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -8,54 +10,96 @@ import { render, screen, fireEvent } from '@testing-library/react';
  */
 import '../../../test-helper/global-mock';
 import FulfillmentEditor from '../fulfillment-editor';
-
-jest.mock( '@wordpress/components', () => ( {
-	Button: ( { onClick, children } ) => (
-		<button data-testid="button" onClick={ onClick }>
-			{ children }
-		</button>
-	),
-	Icon: ( { icon } ) => <span data-testid="icon">{ icon }</span>,
-} ) );
-jest.mock(
-	'../../action-buttons/edit-fulfillment-button',
-	() =>
-		( { onClick } ) => (
-			<button data-testid="edit-fulfillment-button" onClick={ onClick }>
-				Edit
+vi.mock( '@wordpress/components', () => {
+	const mock = {
+		Button: ( { onClick, children } ) => (
+			<button data-testid="button" onClick={ onClick }>
+				{ children }
 			</button>
-		)
-);
-jest.mock( '../../action-buttons/fulfill-items-button', () => () => (
-	<button data-testid="fulfill-items-button">Fulfill items</button>
-) );
-jest.mock( '../../action-buttons/cancel-link', () => ( { onClick } ) => (
-	<button data-testid="cancel-link" onClick={ onClick }>
-		Cancel
-	</button>
-) );
-jest.mock( '../../action-buttons/remove-button', () => () => (
-	<button data-testid="remove-button">Remove</button>
-) );
-jest.mock( '../../action-buttons/update-button', () => () => (
-	<button data-testid="update-button">Update</button>
-) );
-jest.mock( '../item-selector', () => () => (
-	<div data-testid="item-selector" />
-) );
-jest.mock( '../fulfillment-status-badge', () => () => (
-	<div data-testid="fulfillment-status-badge" />
-) );
-jest.mock( '../../customer-notification-form', () => () => (
-	<div data-testid="fulfillment-customer-notification-form" />
-) );
-
+		),
+		Icon: ( { icon } ) => <span data-testid="icon">{ icon }</span>,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../action-buttons/edit-fulfillment-button', () => {
+	const mock = ( { onClick } ) => (
+		<button data-testid="edit-fulfillment-button" onClick={ onClick }>
+			Edit
+		</button>
+	);
+	return {
+		default: mock,
+		...mock,
+	};
+} );
+vi.mock( '../../action-buttons/fulfill-items-button', () => {
+	const mock = () => (
+		<button data-testid="fulfill-items-button">Fulfill items</button>
+	);
+	return {
+		default: mock,
+		...mock,
+	};
+} );
+vi.mock( '../../action-buttons/cancel-link', () => {
+	const mock = ( { onClick } ) => (
+		<button data-testid="cancel-link" onClick={ onClick }>
+			Cancel
+		</button>
+	);
+	return {
+		default: mock,
+		...mock,
+	};
+} );
+vi.mock( '../../action-buttons/remove-button', () => {
+	const mock = () => <button data-testid="remove-button">Remove</button>;
+	return {
+		default: mock,
+		...mock,
+	};
+} );
+vi.mock( '../../action-buttons/update-button', () => {
+	const mock = () => <button data-testid="update-button">Update</button>;
+	return {
+		default: mock,
+		...mock,
+	};
+} );
+vi.mock( '../item-selector', () => {
+	const mock = () => <div data-testid="item-selector" />;
+	return {
+		default: mock,
+		...mock,
+	};
+} );
+vi.mock( '../fulfillment-status-badge', () => {
+	const mock = () => <div data-testid="fulfillment-status-badge" />;
+	return {
+		default: mock,
+		...mock,
+	};
+} );
+vi.mock( '../../customer-notification-form', () => {
+	const mock = () => (
+		<div data-testid="fulfillment-customer-notification-form" />
+	);
+	return {
+		default: mock,
+		...mock,
+	};
+} );
 describe( 'FulfillmentEditor', () => {
 	const mockProps = {
 		index: 0,
 		expanded: false,
-		onExpand: jest.fn(),
-		onCollapse: jest.fn(),
+		onExpand: vi.fn(),
+		onCollapse: vi.fn(),
 		fulfillment: {
 			id: 1,
 			status: 'unfulfilled',
@@ -129,18 +173,21 @@ describe( 'FulfillmentEditor', () => {
 					id: 1,
 					name: 'Item 1',
 					quantity: 2,
-					image: { src: 'example.png' },
+					image: {
+						src: 'example.png',
+					},
 				},
 				{
 					id: 2,
 					name: 'Item 2',
 					quantity: 1,
-					image: { src: 'example.png' },
+					image: {
+						src: 'example.png',
+					},
 				},
 			],
 		},
 	};
-
 	it( 'renders the header and status badge', () => {
 		render( <FulfillmentEditor { ...mockProps } /> );
 		expect( screen.getByText( 'Fulfillment #1' ) ).toBeInTheDocument();
@@ -148,7 +195,6 @@ describe( 'FulfillmentEditor', () => {
 			screen.getByTestId( 'fulfillment-status-badge' )
 		).toBeInTheDocument();
 	} );
-
 	it( 'calls onExpand when header is clicked and not expanded', () => {
 		const { container } = render( <FulfillmentEditor { ...mockProps } /> );
 		fireEvent.click(
@@ -158,7 +204,6 @@ describe( 'FulfillmentEditor', () => {
 		);
 		expect( mockProps.onExpand ).toHaveBeenCalled();
 	} );
-
 	it( 'calls onCollapse when header is clicked and expanded', () => {
 		const { container } = render(
 			<FulfillmentEditor { ...mockProps } expanded={ true } />
@@ -269,7 +314,6 @@ describe( 'FulfillmentEditor', () => {
 			screen.getByText( 'This fulfillment is locked.' )
 		).toBeInTheDocument();
 	} );
-
 	it( 'should render content when expanded', () => {
 		render( <FulfillmentEditor { ...mockProps } expanded={ true } /> );
 

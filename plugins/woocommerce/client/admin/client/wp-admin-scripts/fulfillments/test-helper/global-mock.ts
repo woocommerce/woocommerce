@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+
 /**
  * Internal dependencies
  */
@@ -5,7 +7,7 @@ import '../global.d.ts';
 
 // Mock scrollIntoView method for testing
 Object.defineProperty( HTMLElement.prototype, 'scrollIntoView', {
-	value: jest.fn(),
+	value: vi.fn(),
 	writable: true,
 } );
 

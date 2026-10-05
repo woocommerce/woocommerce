@@ -1,7 +1,9 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
-import { renderHook, act } from '@testing-library/react-hooks/dom';
+import { renderHook, act } from '@testing-library/react';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -9,39 +11,39 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { useEndpointDismiss } from '../use-endpoint-dismiss';
 import { createNoticesFromResponse } from '../../lib/notices';
-
-jest.mock( '@wordpress/api-fetch' );
-jest.mock( '../../lib/notices', () => ( {
-	createNoticesFromResponse: jest.fn(),
-} ) );
-
+vi.mock( '@wordpress/api-fetch' );
+vi.mock( '../../lib/notices', () => {
+	const mock = {
+		createNoticesFromResponse: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const PATH = '/wc-admin/tax/recommendations/dismiss';
-
-const mockApiFetch = apiFetch as unknown as jest.Mock;
-
+const mockApiFetch = apiFetch as unknown as Mock;
 describe( 'useEndpointDismiss', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	} );
-
 	it( 'honours the initial dismissal state', () => {
 		const { result } = renderHook( () => useEndpointDismiss( PATH, true ) );
-
 		expect( result.current.isDismissed ).toBe( true );
 		expect( result.current.hasResolved ).toBe( true );
 	} );
-
 	it( 'optimistically dismisses and POSTs to the endpoint', async () => {
-		mockApiFetch.mockResolvedValueOnce( { dismissed: true } );
-
+		mockApiFetch.mockResolvedValueOnce( {
+			dismissed: true,
+		} );
 		const { result } = renderHook( () =>
 			useEndpointDismiss( PATH, false )
 		);
-
 		await act( async () => {
 			result.current.onDismiss();
 		} );
-
 		expect( result.current.isDismissed ).toBe( true );
 		expect( mockApiFetch ).toHaveBeenCalledWith( {
 			path: PATH,
@@ -49,19 +51,18 @@ describe( 'useEndpointDismiss', () => {
 		} );
 		expect( createNoticesFromResponse ).not.toHaveBeenCalled();
 	} );
-
 	it( 'rolls back and surfaces a notice when the request fails', async () => {
-		const error = { code: 'fail', message: 'Nope' };
+		const error = {
+			code: 'fail',
+			message: 'Nope',
+		};
 		mockApiFetch.mockRejectedValueOnce( error );
-
 		const { result } = renderHook( () =>
 			useEndpointDismiss( PATH, false )
 		);
-
 		await act( async () => {
 			result.current.onDismiss();
 		} );
-
 		expect( result.current.isDismissed ).toBe( false );
 		expect( createNoticesFromResponse ).toHaveBeenCalledWith( error );
 	} );

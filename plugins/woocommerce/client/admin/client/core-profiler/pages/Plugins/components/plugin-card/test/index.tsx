@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -10,7 +12,7 @@ import { PluginCard } from '../plugin-card';
 
 describe( 'PluginCard', () => {
 	it( 'should trigger onChange when title and description is clicked', () => {
-		const onChange = jest.fn();
+		const onChange = vi.fn();
 		const { queryByText } = render(
 			<PluginCard
 				plugin={ {
@@ -34,7 +36,7 @@ describe( 'PluginCard', () => {
 	} );
 
 	it( 'should not trigger onChange and checkbox when it is disabled', () => {
-		const onChange = jest.fn();
+		const onChange = vi.fn();
 		const { queryByRole, queryByText } = render(
 			<PluginCard
 				plugin={ {

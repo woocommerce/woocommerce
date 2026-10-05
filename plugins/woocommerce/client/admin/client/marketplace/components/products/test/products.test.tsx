@@ -1,43 +1,94 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-
-jest.mock( '@woocommerce/navigation', () => ( {
-	getNewPath: jest.fn( () => '/new-path' ),
-	navigateTo: jest.fn(),
-	useQuery: jest.fn( () => ( {} ) ),
-} ) );
-
-jest.mock( '~/utils/admin-settings', () => ( {
-	ADMIN_URL: 'http://example.test/wp-admin/',
-} ) );
-
-jest.mock( '../../category-selector/category-selector', () => ( {
-	__esModule: true,
-	default: () => <div data-testid="category-selector" />,
-} ) );
-
-jest.mock( '../../quality-badge/quality-badge-filter', () => ( {
-	__esModule: true,
-	default: () => <div data-testid="quality-badge-filter" />,
-} ) );
-
-jest.mock( '../../product-list-content/product-list-content', () => ( {
-	__esModule: true,
-	default: () => <span>Product list content</span>,
-} ) );
-
-jest.mock( '../../product-list-content/no-results', () => ( {
-	__esModule: true,
-	default: () => <span>No results</span>,
-} ) );
-
-jest.mock( '../../product-loader/product-loader', () => ( {
-	__esModule: true,
-	default: () => <div data-testid="product-loader" />,
-} ) );
+vi.mock( '@woocommerce/navigation', () => {
+	const mock = {
+		getNewPath: vi.fn( () => '/new-path' ),
+		navigateTo: vi.fn(),
+		useQuery: vi.fn( () => ( {} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '~/utils/admin-settings', () => {
+	const mock = {
+		ADMIN_URL: 'http://example.test/wp-admin/',
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../category-selector/category-selector', () => {
+	const mock = {
+		__esModule: true,
+		default: () => <div data-testid="category-selector" />,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../quality-badge/quality-badge-filter', () => {
+	const mock = {
+		__esModule: true,
+		default: () => <div data-testid="quality-badge-filter" />,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../product-list-content/product-list-content', () => {
+	const mock = {
+		__esModule: true,
+		default: () => <span>Product list content</span>,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../product-list-content/no-results', () => {
+	const mock = {
+		__esModule: true,
+		default: () => <span>No results</span>,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../product-loader/product-loader', () => {
+	const mock = {
+		__esModule: true,
+		default: () => <div data-testid="product-loader" />,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 /**
  * Internal dependencies
@@ -46,11 +97,9 @@ import Products from '../products';
 import { MarketplaceContext } from '../../../contexts/marketplace-context';
 import { MarketplaceContextType } from '../../../contexts/types';
 import { Product, ProductType } from '../../product-list/types';
-
 const context = {
 	isLoading: false,
 } as unknown as MarketplaceContextType;
-
 const product: Product = {
 	id: 1,
 	title: 'Test extension',
@@ -69,7 +118,6 @@ const product: Product = {
 	averageRating: null,
 	reviewsCount: null,
 };
-
 function renderProducts( props: {
 	searchTerm?: string;
 	products?: Product[];
@@ -85,37 +133,40 @@ function renderProducts( props: {
 		</MarketplaceContext.Provider>
 	);
 }
-
 describe( 'Products search results heading', () => {
 	it( 'names the search term above the results', () => {
-		renderProducts( { searchTerm: 'shipping' } );
-
+		renderProducts( {
+			searchTerm: 'shipping',
+		} );
 		expect(
-			screen.getByRole( 'heading', { name: 'Results for “shipping”' } )
+			screen.getByRole( 'heading', {
+				name: 'Results for “shipping”',
+			} )
 		).toBeInTheDocument();
 		expect(
 			screen.getByText( 'Product list content' )
 		).toBeInTheDocument();
 	} );
-
 	it( 'keeps the heading when the search finds nothing', () => {
-		renderProducts( { searchTerm: 'zzzz', products: [] } );
-
+		renderProducts( {
+			searchTerm: 'zzzz',
+			products: [],
+		} );
 		expect(
-			screen.getByRole( 'heading', { name: 'Results for “zzzz”' } )
+			screen.getByRole( 'heading', {
+				name: 'Results for “zzzz”',
+			} )
 		).toBeInTheDocument();
 		expect( screen.getByText( 'No results' ) ).toBeInTheDocument();
 	} );
-
 	it( 'shows no heading when browsing without a search term', () => {
 		renderProducts( {} );
-
 		expect( screen.queryByRole( 'heading' ) ).toBeNull();
 	} );
-
 	it( 'shows no heading for a blank search term', () => {
-		renderProducts( { searchTerm: '   ' } );
-
+		renderProducts( {
+			searchTerm: '   ',
+		} );
 		expect( screen.queryByRole( 'heading' ) ).toBeNull();
 	} );
 } );

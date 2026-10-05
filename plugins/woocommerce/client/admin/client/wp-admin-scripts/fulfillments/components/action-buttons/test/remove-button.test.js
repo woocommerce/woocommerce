@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -13,136 +15,156 @@ import RemoveButton from '../remove-button';
 import { useFulfillmentContext } from '../../../context/fulfillment-context';
 
 // Mock dependencies
-jest.mock( '@wordpress/data', () => {
-	const originalModule = jest.requireActual( '@wordpress/data' );
-	return {
+vi.mock( '@wordpress/data', async () => {
+	const originalModule = await vi.importActual( '@wordpress/data' );
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		...originalModule,
-		useDispatch: jest.fn( () => {} ),
-	};
+		useDispatch: vi.fn( () => {} ),
+	} );
 } );
-
-jest.mock( '../../../context/fulfillment-context', () => ( {
-	useFulfillmentContext: jest.fn(),
-} ) );
-
-jest.mock( '../../../context/drawer-context', () => ( {
-	useFulfillmentDrawerContext: jest.fn( () => ( {
-		setIsEditing: jest.fn(),
-		setOpenSection: jest.fn(),
-	} ) ),
-} ) );
-
-jest.mock( '@wordpress/components', () => ( {
-	Button: ( { onClick, children, disabled, isBusy, ...props } ) => {
-		// Filter out custom WordPress props that shouldn't be on DOM elements
-		const { variant, __next40pxDefaultSize, ...domProps } = props;
-		return (
-			<button
-				onClick={ onClick }
-				disabled={ disabled || isBusy }
-				{ ...domProps }
-			>
+vi.mock( '../../../context/fulfillment-context', () => {
+	const mock = {
+		useFulfillmentContext: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../../context/drawer-context', () => {
+	const mock = {
+		useFulfillmentDrawerContext: vi.fn( () => ( {
+			setIsEditing: vi.fn(),
+			setOpenSection: vi.fn(),
+		} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/components', () => {
+	const mock = {
+		Button: ( { onClick, children, disabled, isBusy, ...props } ) => {
+			// Filter out custom WordPress props that shouldn't be on DOM elements
+			const { variant, __next40pxDefaultSize, ...domProps } = props;
+			return (
+				<button
+					onClick={ onClick }
+					disabled={ disabled || isBusy }
+					{ ...domProps }
+				>
+					{ children }
+				</button>
+			);
+		},
+		Modal: ( { title, onRequestClose, children } ) => (
+			<div role="dialog" aria-labelledby="modal-title">
+				<h1 id="modal-title">{ title }</h1>
 				{ children }
-			</button>
-		);
-	},
-	Modal: ( { title, onRequestClose, children } ) => (
-		<div role="dialog" aria-labelledby="modal-title">
-			<h1 id="modal-title">{ title }</h1>
-			{ children }
-			<button onClick={ onRequestClose }>Close</button>
-		</div>
-	),
-	ToggleControl: React.forwardRef( ( { checked, onChange }, ref ) => (
-		<input
-			ref={ ref }
-			type="checkbox"
-			checked={ checked }
-			onChange={ ( e ) => onChange( e.target.checked ) }
-		/>
-	) ),
-} ) );
-
-const setError = jest.fn();
-
+				<button onClick={ onRequestClose }>Close</button>
+			</div>
+		),
+		ToggleControl: React.forwardRef( ( { checked, onChange }, ref ) => (
+			<input
+				ref={ ref }
+				type="checkbox"
+				checked={ checked }
+				onChange={ ( e ) => onChange( e.target.checked ) }
+			/>
+		) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+const setError = vi.fn();
 describe( 'RemoveButton component', () => {
 	beforeEach( () => {
 		// Reset mocks
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 
 		// Default mock implementations
 		useDispatch.mockReturnValue( {
-			deleteFulfillment: jest.fn(),
+			deleteFulfillment: vi.fn(),
 		} );
-
 		useFulfillmentContext.mockReturnValue( {
-			order: { id: 123 },
-			fulfillment: { id: 456, is_fulfilled: false },
+			order: {
+				id: 123,
+			},
+			fulfillment: {
+				id: 456,
+				is_fulfilled: false,
+			},
 			notifyCustomer: true,
 		} );
 	} );
-
 	it( 'should render button with correct text', () => {
 		render( <RemoveButton setError={ setError } /> );
 		expect( screen.getByText( 'Remove' ) ).toBeInTheDocument();
 	} );
-
 	it( 'should not call deleteFulfillment when fulfillment is undefined', () => {
-		const mockDeleteFulfillment = jest.fn();
+		const mockDeleteFulfillment = vi.fn();
 		useDispatch.mockReturnValue( {
 			deleteFulfillment: mockDeleteFulfillment,
 		} );
-
 		useFulfillmentContext.mockReturnValue( {
-			order: { id: 123 },
+			order: {
+				id: 123,
+			},
 			fulfillment: undefined,
 			notifyCustomer: true,
 		} );
-
 		render( <RemoveButton setError={ setError } /> );
-
 		fireEvent.click( screen.getByText( 'Remove' ) );
-
 		expect( mockDeleteFulfillment ).not.toHaveBeenCalled();
 	} );
-
 	it( 'should not call deleteFulfillment when fulfillment has no id', () => {
-		const mockDeleteFulfillment = jest.fn();
+		const mockDeleteFulfillment = vi.fn();
 		useDispatch.mockReturnValue( {
 			deleteFulfillment: mockDeleteFulfillment,
 		} );
-
 		useFulfillmentContext.mockReturnValue( {
-			order: { id: 123 },
+			order: {
+				id: 123,
+			},
 			fulfillment: {
 				/* no id */
 				is_fulfilled: false,
 			},
 			notifyCustomer: true,
 		} );
-
 		render( <RemoveButton setError={ setError } /> );
 		fireEvent.click( screen.getByText( 'Remove' ) );
-
 		expect( mockDeleteFulfillment ).not.toHaveBeenCalled();
 	} );
-
 	it( 'should call deleteFulfillment when button is clicked on unfulfilled fulfillment', async () => {
-		const mockDeleteFulfillment = jest.fn( () => Promise.resolve() );
+		const mockDeleteFulfillment = vi.fn( () => Promise.resolve() );
 		useDispatch.mockReturnValue( {
 			deleteFulfillment: mockDeleteFulfillment,
 		} );
-
 		useFulfillmentContext.mockReturnValue( {
-			order: { id: 123 },
-			fulfillment: { id: 456, is_fulfilled: false },
+			order: {
+				id: 123,
+			},
+			fulfillment: {
+				id: 456,
+				is_fulfilled: false,
+			},
 			notifyCustomer: true,
 		} );
-
 		render( <RemoveButton setError={ setError } /> );
-
 		fireEvent.click( screen.getByText( 'Remove' ) );
-
 		await waitFor( () => {
 			expect( mockDeleteFulfillment ).toHaveBeenCalledWith(
 				123,
@@ -151,29 +173,28 @@ describe( 'RemoveButton component', () => {
 			);
 		} );
 	} );
-
 	it( 'should open confirmation modal when button is clicked on fulfilled fulfillment', async () => {
-		const mockDeleteFulfillment = jest.fn( () => Promise.resolve() );
+		const mockDeleteFulfillment = vi.fn( () => Promise.resolve() );
 		useDispatch.mockReturnValue( {
 			deleteFulfillment: mockDeleteFulfillment,
 		} );
-
 		useFulfillmentContext.mockReturnValue( {
-			order: { id: 123 },
-			fulfillment: { id: 456, is_fulfilled: true },
+			order: {
+				id: 123,
+			},
+			fulfillment: {
+				id: 456,
+				is_fulfilled: true,
+			},
 			notifyCustomer: true,
 		} );
-
 		render( <RemoveButton setError={ setError } /> );
-
 		fireEvent.click( screen.getByText( 'Remove' ) );
-
 		expect(
 			screen.getByText(
 				'Are you sure you want to remove this fulfillment?'
 			)
 		).toBeInTheDocument();
-
 		expect( mockDeleteFulfillment ).not.toHaveBeenCalled();
 
 		// Simulate confirmation
@@ -182,7 +203,6 @@ describe( 'RemoveButton component', () => {
 				name: 'Remove fulfillment',
 			} )
 		);
-
 		await waitFor( () => {
 			expect( mockDeleteFulfillment ).toHaveBeenCalledWith(
 				123,
@@ -191,27 +211,21 @@ describe( 'RemoveButton component', () => {
 			);
 		} );
 	} );
-
 	describe( 'Accessibility', () => {
 		it( 'should not have redundant aria-label overriding visible text', () => {
 			render( <RemoveButton setError={ setError } /> );
-
 			const button = screen.getByRole( 'button' );
 			expect( button ).not.toHaveAttribute( 'aria-label' );
 		} );
-
 		it( 'should have aria-describedby with unique prefix', () => {
 			render( <RemoveButton setError={ setError } /> );
-
 			const button = screen.getByRole( 'button' );
 			expect( button.getAttribute( 'aria-describedby' ) ).toMatch(
 				/^remove-button-description/
 			);
 		} );
-
 		it( 'should have hidden description for screen readers', () => {
 			render( <RemoveButton setError={ setError } /> );
-
 			const description = screen.getByText(
 				'Deletes this fulfillment permanently'
 			);
@@ -221,49 +235,46 @@ describe( 'RemoveButton component', () => {
 			);
 			expect( description ).toHaveClass( 'screen-reader-text' );
 		} );
-
 		it( 'should update button text when executing', () => {
-			const mockDeleteFulfillment = jest.fn(
+			const mockDeleteFulfillment = vi.fn(
 				() => new Promise( ( resolve ) => setTimeout( resolve, 100 ) )
 			);
 			useDispatch.mockReturnValue( {
 				deleteFulfillment: mockDeleteFulfillment,
 			} );
-
 			render( <RemoveButton setError={ setError } /> );
 			const button = screen.getByRole( 'button' );
-
 			fireEvent.click( button );
 
 			// Check that the button text updates during execution
 			expect( screen.getByText( 'Removing…' ) ).toBeInTheDocument();
 			expect( button ).toBeDisabled();
 		} );
-
 		describe( 'Modal Accessibility', () => {
 			beforeEach( () => {
 				useFulfillmentContext.mockReturnValue( {
-					order: { id: 123 },
-					fulfillment: { id: 456, is_fulfilled: true },
+					order: {
+						id: 123,
+					},
+					fulfillment: {
+						id: 456,
+						is_fulfilled: true,
+					},
 					notifyCustomer: true,
 				} );
 			} );
-
 			it( 'should have proper modal title', () => {
 				render( <RemoveButton setError={ setError } /> );
 				fireEvent.click( screen.getByText( 'Remove' ) );
-
 				expect(
 					screen.getByRole( 'heading', {
 						name: 'Remove fulfillment',
 					} )
 				).toBeInTheDocument();
 			} );
-
 			it( 'should have accessible cancel button in modal', () => {
 				render( <RemoveButton setError={ setError } /> );
 				fireEvent.click( screen.getByText( 'Remove' ) );
-
 				const cancelButton = screen.getByRole( 'button', {
 					name: 'Cancel removal and close dialog',
 				} );
@@ -273,44 +284,36 @@ describe( 'RemoveButton component', () => {
 					'Cancel removal and close dialog'
 				);
 			} );
-
 			it( 'should have accessible confirm button in modal with visible text', () => {
 				render( <RemoveButton setError={ setError } /> );
 				fireEvent.click( screen.getByText( 'Remove' ) );
-
 				const confirmButton = screen.getByRole( 'button', {
 					name: 'Remove fulfillment',
 				} );
 				expect( confirmButton ).toBeInTheDocument();
 				expect( confirmButton ).not.toHaveAttribute( 'aria-label' );
 			} );
-
 			it( 'should update modal button states when executing deletion', async () => {
-				const mockDeleteFulfillment = jest.fn(
+				const mockDeleteFulfillment = vi.fn(
 					() =>
 						new Promise( ( resolve ) => setTimeout( resolve, 100 ) )
 				);
 				useDispatch.mockReturnValue( {
 					deleteFulfillment: mockDeleteFulfillment,
 				} );
-
 				render( <RemoveButton setError={ setError } /> );
 				fireEvent.click( screen.getByText( 'Remove' ) );
-
 				const confirmButton = screen.getByRole( 'button', {
 					name: 'Remove fulfillment',
 				} );
-
 				fireEvent.click( confirmButton );
 
 				// The button text should update immediately
 				expect( screen.getByText( 'Removing…' ) ).toBeInTheDocument();
 			} );
 		} );
-
 		it( 'should be keyboard accessible', () => {
 			render( <RemoveButton setError={ setError } /> );
-
 			const button = screen.getByRole( 'button' );
 			button.focus();
 			expect( button.ownerDocument.activeElement ).toBe( button );

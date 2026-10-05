@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -9,7 +11,7 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { StatsList } from '../stats-list';
 
-jest.mock( '@woocommerce/tracks' );
+vi.mock( '@woocommerce/tracks' );
 
 const stats = [
 	{ stat: 'revenue/net_revenue', label: 'Net sales' },

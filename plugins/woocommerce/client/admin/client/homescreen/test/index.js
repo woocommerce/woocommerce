@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -9,55 +11,91 @@ import { useUserPreferences } from '@woocommerce/data';
  */
 import { Layout } from '../layout';
 import { isFeatureEnabled } from '~/utils/features';
-
-jest.mock( '../stats-overview', () =>
-	jest.fn().mockReturnValue( <div>[StatsOverview]</div> )
-);
-
-jest.mock( '../../inbox-panel', () =>
-	jest.fn().mockReturnValue( <div>[InboxPanel]</div> )
-);
-
-jest.mock( '../../store-management-links', () => ( {
-	StoreManagementLinks: jest
-		.fn()
-		.mockReturnValue( <div>[StoreManagementLinks]</div> ),
-} ) );
-
-jest.mock( '../activity-panel', () => ( {
-	ActivityPanel: jest.fn().mockReturnValue( <div>[ActivityPanel]</div> ),
-} ) );
-
-jest.mock( '@woocommerce/data', () => ( {
-	...jest.requireActual( '@woocommerce/data' ),
-	useUserPreferences: jest.fn().mockReturnValue( {} ),
-} ) );
-
-jest.mock( '~/utils/features', () => ( {
-	isFeatureEnabled: jest.fn().mockReturnValue( true ),
-} ) );
-
-jest.mock( '@wordpress/element', () => {
+vi.mock( '../stats-overview', () => {
+	const mock = vi.fn().mockReturnValue( <div>[StatsOverview]</div> );
 	return {
-		...jest.requireActual( '@wordpress/element' ),
+		default: mock,
+		...mock,
+	};
+} );
+vi.mock( '../../inbox-panel', () => {
+	const mock = vi.fn().mockReturnValue( <div>[InboxPanel]</div> );
+	return {
+		default: mock,
+		...mock,
+	};
+} );
+vi.mock( '../../store-management-links', () => {
+	const mock = {
+		StoreManagementLinks: vi
+			.fn()
+			.mockReturnValue( <div>[StoreManagementLinks]</div> ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../activity-panel', () => {
+	const mock = {
+		ActivityPanel: vi.fn().mockReturnValue( <div>[ActivityPanel]</div> ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/data', async () => {
+	const mock = {
+		...( await vi.importActual( '@woocommerce/data' ) ),
+		useUserPreferences: vi.fn().mockReturnValue( {} ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '~/utils/features', () => {
+	const mock = {
+		isFeatureEnabled: vi.fn().mockReturnValue( true ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/element', async () => {
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
+		...( await vi.importActual( '@wordpress/element' ) ),
 		Suspense: ( { children } ) => <div>{ children }</div>,
 		// It's not easy to mock a React.lazy component, since we only use one in this component, this mocks lazy to return a mocked <TaskList>
 		lazy: () => () => <div>[TaskList]</div>,
-	};
+	} );
 } );
-
 describe( 'Homescreen Layout', () => {
 	beforeEach( () => {
 		isFeatureEnabled.mockReturnValue( true );
 	} );
-
 	it( 'should show TaskList inline', () => {
 		const { container } = render(
 			<Layout
 				requestingTaskList={ false }
 				taskListComplete
 				hasTaskList={ true }
-				query={ { page: 'wc-admin' } }
+				query={ {
+					page: 'wc-admin',
+				} }
 				updateOptions={ () => {} }
 			/>
 		);
@@ -72,7 +110,6 @@ describe( 'Homescreen Layout', () => {
 		const taskList = screen.getByText( '[TaskList]' );
 		expect( taskList ).toBeInTheDocument();
 	} );
-
 	it( 'should render TaskList alone when on task', () => {
 		const { container } = render(
 			<Layout
@@ -95,38 +132,37 @@ describe( 'Homescreen Layout', () => {
 		const taskList = screen.queryByText( '[TaskList]' );
 		expect( taskList ).toBeInTheDocument();
 	} );
-
 	it( 'should not show TaskList when user has hidden', () => {
 		render(
 			<Layout
 				requestingTaskList={ false }
 				hasTaskList={ false }
-				query={ { page: 'wc-admin' } }
+				query={ {
+					page: 'wc-admin',
+				} }
 				updateOptions={ () => {} }
 			/>
 		);
-
 		const taskList = screen.queryByText( '[TaskList]' );
 		expect( taskList ).not.toBeInTheDocument();
 	} );
-
 	it( 'should show StoreManagementLinks when TaskList is complete, even if the task list is not hidden', () => {
 		render(
 			<Layout
 				requestingTaskList={ false }
 				hasTaskList={ true }
 				taskListComplete
-				query={ { page: 'wc-admin' } }
+				query={ {
+					page: 'wc-admin',
+				} }
 				updateOptions={ () => {} }
 			/>
 		);
-
 		const storeManagementLinks = screen.queryByText(
 			'[StoreManagementLinks]'
 		);
 		expect( storeManagementLinks ).toBeInTheDocument();
 	} );
-
 	it( 'should default to layout option value', () => {
 		useUserPreferences.mockReturnValue( {
 			homepage_layout: '',
@@ -150,7 +186,6 @@ describe( 'Homescreen Layout', () => {
 			)
 		).toHaveLength( 1 );
 	} );
-
 	it( 'should fallback to single column layout', () => {
 		useUserPreferences.mockReturnValue( {
 			homepage_layout: '',
@@ -170,10 +205,8 @@ describe( 'Homescreen Layout', () => {
 			'woocommerce-homescreen'
 		);
 		expect( homescreen ).toHaveLength( 1 );
-
 		expect( homescreen[ 0 ] ).not.toHaveClass( 'two-columns' );
 	} );
-
 	it( 'switches to two column layout based on user preference', () => {
 		useUserPreferences.mockReturnValue( {
 			homepage_layout: 'two_columns',
@@ -194,7 +227,6 @@ describe( 'Homescreen Layout', () => {
 			)
 		).toHaveLength( 1 );
 	} );
-
 	it( 'should display the correct blocks in each column', () => {
 		useUserPreferences.mockReturnValue( {
 			homepage_layout: 'two_columns',
@@ -204,18 +236,18 @@ describe( 'Homescreen Layout', () => {
 				requestingTaskList={ false }
 				taskListComplete
 				hasTaskList={ true }
-				query={ { page: 'wc-admin' } }
+				query={ {
+					page: 'wc-admin',
+				} }
 				updateOptions={ () => {} }
 			/>
 		);
-
 		const columns = container.getElementsByClassName(
 			'woocommerce-homescreen-column'
 		);
 		expect( columns ).toHaveLength( 2 );
 		const firstColumn = columns[ 0 ];
 		const secondColumn = columns[ 1 ];
-
 		expect(
 			within( firstColumn ).getByText( '[TaskList]' )
 		).toBeInTheDocument();
@@ -228,7 +260,6 @@ describe( 'Homescreen Layout', () => {
 		expect(
 			within( secondColumn ).queryByText( '[InboxPanel]' )
 		).not.toBeInTheDocument();
-
 		expect(
 			within( secondColumn ).getByText( '[StatsOverview]' )
 		).toBeInTheDocument();
@@ -236,7 +267,6 @@ describe( 'Homescreen Layout', () => {
 			within( firstColumn ).queryByText( '[StatsOverview]' )
 		).not.toBeInTheDocument();
 	} );
-
 	it( 'should display the correct blocks in each column when task list is hidden', () => {
 		useUserPreferences.mockReturnValue( {
 			homepage_layout: 'two_columns',
@@ -247,18 +277,18 @@ describe( 'Homescreen Layout', () => {
 				taskListComplete
 				hasTaskList={ true }
 				isTaskListHidden={ true }
-				query={ { page: 'wc-admin' } }
+				query={ {
+					page: 'wc-admin',
+				} }
 				updateOptions={ () => {} }
 			/>
 		);
-
 		const columns = container.getElementsByClassName(
 			'woocommerce-homescreen-column'
 		);
 		expect( columns ).toHaveLength( 2 );
 		const firstColumn = columns[ 0 ];
 		const secondColumn = columns[ 1 ];
-
 		expect(
 			within( firstColumn ).getByText( '[TaskList]' )
 		).toBeInTheDocument();
@@ -271,7 +301,6 @@ describe( 'Homescreen Layout', () => {
 		expect(
 			within( secondColumn ).queryByText( '[InboxPanel]' )
 		).not.toBeInTheDocument();
-
 		expect(
 			within( secondColumn ).getByText( '[StatsOverview]' )
 		).toBeInTheDocument();

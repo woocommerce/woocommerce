@@ -1,24 +1,47 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
 import { render } from '@testing-library/react';
 import React from 'react';
-
-jest.mock( '@woocommerce/navigation', () => ( {
-	getNewPath: jest.fn( () => '/new-path' ),
-	navigateTo: jest.fn(),
-} ) );
-
-jest.mock( '@woocommerce/tracks', () => ( {
-	recordEvent: jest.fn(),
-} ) );
-
-jest.mock( '@woocommerce/data', () => ( {
-	useUser: jest.fn( () => ( {
-		user: null,
-		currentUserCan: jest.fn( () => false ),
-	} ) ),
-} ) );
+vi.mock( '@woocommerce/navigation', () => {
+	const mock = {
+		getNewPath: vi.fn( () => '/new-path' ),
+		navigateTo: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/tracks', () => {
+	const mock = {
+		recordEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/data', () => {
+	const mock = {
+		useUser: vi.fn( () => ( {
+			user: null,
+			currentUserCan: vi.fn( () => false ),
+		} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 /**
  * Internal dependencies
@@ -27,12 +50,10 @@ import ProductCardFooter from '../product-card-footer';
 import { MarketplaceContext } from '../../../contexts/marketplace-context';
 import { MarketplaceContextType } from '../../../contexts/types';
 import { Product, ProductType } from '../../product-list/types';
-
 const context = {
 	selectedTab: 'extensions',
 	isProductInstalled: () => false,
 } as unknown as MarketplaceContextType;
-
 const product: Product = {
 	id: 1,
 	title: 'Test extension',
@@ -50,25 +71,25 @@ const product: Product = {
 	regularPrice: 0,
 	reviewsCount: 10,
 };
-
 function renderFooter( averageRating: number | null | undefined ) {
 	return render(
 		<MarketplaceContext.Provider value={ context }>
-			<ProductCardFooter product={ { ...product, averageRating } } />
+			<ProductCardFooter
+				product={ {
+					...product,
+					averageRating,
+				} }
+			/>
 		</MarketplaceContext.Provider>
 	);
 }
-
 describe( 'ProductCardFooter rating', () => {
 	it( 'renders the rating when the product has one', () => {
 		const { getByText } = renderFooter( 4.5 );
-
 		expect( getByText( '4.5' ) ).toBeInTheDocument();
 	} );
-
 	it( 'renders no rating when the product has none', () => {
 		const { container } = renderFooter( null );
-
 		expect(
 			container.querySelector(
 				'.woocommerce-marketplace__product-card__rating'
@@ -80,10 +101,8 @@ describe( 'ProductCardFooter rating', () => {
 			)
 		).toBeNull();
 	} );
-
 	it( 'renders no rating when the rating is zero', () => {
 		const { container } = renderFooter( 0 );
-
 		expect(
 			container.querySelector(
 				'.woocommerce-marketplace__product-card__rating'
@@ -95,10 +114,8 @@ describe( 'ProductCardFooter rating', () => {
 			)
 		).toBeNull();
 	} );
-
 	it( 'renders no rating when the API omits the rating', () => {
 		const { container } = renderFooter( undefined );
-
 		expect(
 			container.querySelector(
 				'.woocommerce-marketplace__product-card__rating'

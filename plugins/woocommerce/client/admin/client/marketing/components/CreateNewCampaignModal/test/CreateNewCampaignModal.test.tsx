@@ -1,7 +1,9 @@
+import { describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 /**
@@ -9,24 +11,31 @@ import userEvent from '@testing-library/user-event';
  */
 import { useCampaignTypes, useRecommendedChannels } from '~/marketing/hooks';
 import { CreateNewCampaignModal } from '../CreateNewCampaignModal';
-
-jest.mock( '@woocommerce/components', () => {
-	const originalModule = jest.requireActual( '@woocommerce/components' );
-
-	return {
+vi.mock( '@woocommerce/components', async () => {
+	const originalModule = await vi.importActual( '@woocommerce/components' );
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		__esModule: true,
 		...originalModule,
 		Spinner: () => <div data-testid="spinner">Spinner</div>,
-	};
+	} );
 } );
-
-jest.mock( '~/marketing/hooks', () => ( {
-	useCampaignTypes: jest.fn(),
-	useRecommendedChannels: jest.fn(),
-	useRegisteredChannels: jest.fn( () => ( {} ) ),
-	useInstalledPluginsWithoutChannels: jest.fn( () => ( {} ) ),
-} ) );
-
+vi.mock( '~/marketing/hooks', () => {
+	const mock = {
+		useCampaignTypes: vi.fn(),
+		useRecommendedChannels: vi.fn(),
+		useRegisteredChannels: vi.fn( () => ( {} ) ),
+		useInstalledPluginsWithoutChannels: vi.fn( () => ( {} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const google = {
 	id: 'google-ads',
 	icon: 'https://woocommerce.com/wp-content/uploads/2021/06/woo-GoogleListingsAds-jworee.png',
@@ -38,7 +47,6 @@ const google = {
 	channelName: 'Google for WooCommerce',
 	channelSlug: 'google-listings-and-ads',
 };
-
 const pinterest = {
 	title: 'Pinterest for WooCommerce',
 	description:
@@ -49,7 +57,12 @@ const pinterest = {
 	product: 'pinterest-for-woocommerce',
 	plugin: 'pinterest-for-woocommerce/pinterest-for-woocommerce.php',
 	categories: [ 'marketing' ],
-	subcategories: [ { slug: 'sales-channels', name: 'Sales channels' } ],
+	subcategories: [
+		{
+			slug: 'sales-channels',
+			name: 'Sales channels',
+		},
+	],
 	tags: [
 		{
 			slug: 'built-by-woocommerce',
@@ -58,17 +71,15 @@ const pinterest = {
 	],
 	show_extension_promotions: true,
 };
-
 describe( 'CreateNewCampaignModal component', () => {
 	it( 'renders new campaign types with recommended channels', async () => {
-		( useCampaignTypes as jest.Mock ).mockReturnValue( {
+		( useCampaignTypes as Mock ).mockReturnValue( {
 			data: [ google ],
 		} );
-		( useRecommendedChannels as jest.Mock ).mockReturnValue( {
+		( useRecommendedChannels as Mock ).mockReturnValue( {
 			data: [ pinterest ],
 		} );
 		render( <CreateNewCampaignModal onRequestClose={ () => {} } /> );
-
 		expect( screen.getByText( 'Google Ads' ) ).toBeInTheDocument();
 		expect(
 			screen.getByText(
@@ -77,22 +88,23 @@ describe( 'CreateNewCampaignModal component', () => {
 		).toBeInTheDocument();
 
 		// Click button to expand recommended channels section.
-		await userEvent.click(
-			screen.getByRole( 'button', {
-				name: 'Add channels for other campaign types',
-			} )
-		);
-
+		await act( async () => {
+			// Click button to expand recommended channels section.
+			await userEvent.click(
+				screen.getByRole( 'button', {
+					name: 'Add channels for other campaign types',
+				} )
+			);
+		} );
 		expect(
 			screen.getByText( 'Pinterest for WooCommerce' )
 		).toBeInTheDocument();
 	} );
-
 	it( 'does not render recommended channels section when there are no recommended channels', async () => {
-		( useCampaignTypes as jest.Mock ).mockReturnValue( {
+		( useCampaignTypes as Mock ).mockReturnValue( {
 			data: [ google ],
 		} );
-		( useRecommendedChannels as jest.Mock ).mockReturnValue( {
+		( useRecommendedChannels as Mock ).mockReturnValue( {
 			data: [],
 		} );
 		render( <CreateNewCampaignModal onRequestClose={ () => {} } /> );

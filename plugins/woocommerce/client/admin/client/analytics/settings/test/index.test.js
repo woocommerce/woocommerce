@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -12,61 +14,95 @@ import Settings from '../index';
 import { SCHEDULED_IMPORT_SETTING_NAME } from '../config';
 
 // Mock dependencies.
-jest.mock( '@woocommerce/data', () => ( {
-	...jest.requireActual( '@woocommerce/data' ),
-	useSettings: jest.fn(),
-} ) );
-
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useDispatch: jest.fn(),
-} ) );
-
-jest.mock( '@woocommerce/tracks', () => ( {
-	recordEvent: jest.fn(),
-} ) );
-
-jest.mock( '../config', () => ( {
-	config: {
-		woocommerce_analytics_scheduled_import: {
-			name: 'woocommerce_analytics_scheduled_import',
-			label: 'Updates:',
-			inputType: 'radio',
-			options: [
-				{
-					label: 'Scheduled (recommended)',
-					value: 'yes',
-					description: 'Updates automatically every 12 hours.',
-				},
-				{
-					label: 'Immediately',
-					value: 'no',
-					description: 'Updates as soon as new data is available.',
-				},
-			],
-			defaultValue: 'yes',
+vi.mock( '@woocommerce/data', async () => {
+	const mock = {
+		...( await vi.importActual( '@woocommerce/data' ) ),
+		useSettings: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
 		},
-	},
-	SCHEDULED_IMPORT_SETTING_NAME: 'woocommerce_analytics_scheduled_import',
-} ) );
-
-jest.mock( '../historical-data', () => ( {
-	__esModule: true,
-	default: () => <div>Historical Data</div>,
-} ) );
-
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/data', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/data' ) ),
+		useDispatch: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/tracks', () => {
+	const mock = {
+		recordEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../config', () => {
+	const mock = {
+		config: {
+			woocommerce_analytics_scheduled_import: {
+				name: 'woocommerce_analytics_scheduled_import',
+				label: 'Updates:',
+				inputType: 'radio',
+				options: [
+					{
+						label: 'Scheduled (recommended)',
+						value: 'yes',
+						description: 'Updates automatically every 12 hours.',
+					},
+					{
+						label: 'Immediately',
+						value: 'no',
+						description:
+							'Updates as soon as new data is available.',
+					},
+				],
+				defaultValue: 'yes',
+			},
+		},
+		SCHEDULED_IMPORT_SETTING_NAME: 'woocommerce_analytics_scheduled_import',
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../historical-data', () => {
+	const mock = {
+		__esModule: true,
+		default: () => <div>Historical Data</div>,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'Settings - Import Mode Modal', () => {
-	const mockUpdateSettings = jest.fn();
-	const mockPersistSettings = jest.fn();
-	const mockUpdateAndPersistSettings = jest.fn();
-	const mockInvalidateReportResolutions = jest.fn();
-	const mockInvalidateItemResolutions = jest.fn();
-	const mockCreateNotice = jest.fn();
+	const mockUpdateSettings = vi.fn();
+	const mockPersistSettings = vi.fn();
+	const mockUpdateAndPersistSettings = vi.fn();
+	const mockInvalidateReportResolutions = vi.fn();
+	const mockInvalidateItemResolutions = vi.fn();
+	const mockCreateNotice = vi.fn();
 	let settingsState;
-
 	beforeEach( () => {
-		jest.clearAllMocks();
-
+		vi.clearAllMocks();
 		settingsState = {
 			settingsError: false,
 			isRequesting: false,
@@ -81,7 +117,9 @@ describe( 'Settings - Import Mode Modal', () => {
 		useSettings.mockImplementation( () => settingsState );
 		useDispatch.mockImplementation( ( store ) => {
 			if ( store === 'core/notices' ) {
-				return { createNotice: mockCreateNotice };
+				return {
+					createNotice: mockCreateNotice,
+				};
 			}
 			return {
 				invalidateResolutionForStoreSelector:
@@ -90,33 +128,37 @@ describe( 'Settings - Import Mode Modal', () => {
 						: mockInvalidateItemResolutions,
 			};
 		} );
-		window.wpNavMenuUrlUpdate = jest.fn();
+		window.wpNavMenuUrlUpdate = vi.fn();
 	} );
-
 	afterEach( () => {
 		delete window.wcAdminFeatures;
 		delete window.wpNavMenuUrlUpdate;
-		jest.restoreAllMocks();
+		vi.restoreAllMocks();
 	} );
 	it( 'renders import mode radio control', () => {
-		render( <Settings createNotice={ jest.fn() } query={ {} } /> );
+		render( <Settings createNotice={ vi.fn() } query={ {} } /> );
 
 		// Verify radio buttons are rendered.
 		expect(
-			screen.getByRole( 'radio', { name: /scheduled/i } )
+			screen.getByRole( 'radio', {
+				name: /scheduled/i,
+			} )
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole( 'radio', { name: /immediately/i } )
+			screen.getByRole( 'radio', {
+				name: /immediately/i,
+			} )
 		).toBeInTheDocument();
 
 		// Verify scheduled is selected by default.
 		expect(
-			screen.getByRole( 'radio', { name: /scheduled/i } )
+			screen.getByRole( 'radio', {
+				name: /scheduled/i,
+			} )
 		).toBeChecked();
 	} );
-
 	it( 'shows modal when switching from scheduled to immediate mode', async () => {
-		render( <Settings createNotice={ jest.fn() } query={ {} } /> );
+		render( <Settings createNotice={ vi.fn() } query={ {} } /> );
 
 		// Find the "Immediately" radio button.
 		const immediatelyRadio = screen.getByRole( 'radio', {
@@ -128,18 +170,15 @@ describe( 'Settings - Import Mode Modal', () => {
 
 		// Modal should appear - WordPress Modal uses dialog role.
 		expect( await screen.findByRole( 'dialog' ) ).toBeInTheDocument();
-
 		expect( screen.getByText( /are you sure\?/i ) ).toBeInTheDocument();
-
 		expect(
 			screen.getByText(
 				/immediate updates to analytics can impact your performance/i
 			)
 		).toBeInTheDocument();
 	} );
-
 	it( 'does not update setting when modal is cancelled', async () => {
-		render( <Settings createNotice={ jest.fn() } query={ {} } /> );
+		render( <Settings createNotice={ vi.fn() } query={ {} } /> );
 
 		// Click "Immediately" radio button.
 		const immediatelyRadio = screen.getByRole( 'radio', {
@@ -160,12 +199,10 @@ describe( 'Settings - Import Mode Modal', () => {
 		await waitFor( () => {
 			expect( screen.queryByRole( 'dialog' ) ).not.toBeInTheDocument();
 		} );
-
 		expect( mockUpdateSettings ).not.toHaveBeenCalled();
 	} );
-
 	it( 'updates setting when modal is confirmed', async () => {
-		render( <Settings createNotice={ jest.fn() } query={ {} } /> );
+		render( <Settings createNotice={ vi.fn() } query={ {} } /> );
 
 		// Click "Immediately" radio button.
 		const immediatelyRadio = screen.getByRole( 'radio', {
@@ -187,7 +224,6 @@ describe( 'Settings - Import Mode Modal', () => {
 			woocommerce_analytics_scheduled_import: 'no',
 		} );
 	} );
-
 	it( 'does not show modal when switching from immediate to scheduled', async () => {
 		// Set initial state to immediate mode.
 		useSettings.mockReturnValue( {
@@ -195,14 +231,13 @@ describe( 'Settings - Import Mode Modal', () => {
 			isRequesting: false,
 			isDirty: false,
 			persistSettings: mockPersistSettings,
-			updateAndPersistSettings: jest.fn(),
+			updateAndPersistSettings: vi.fn(),
 			updateSettings: mockUpdateSettings,
 			wcAdminSettings: {
 				woocommerce_analytics_scheduled_import: 'no',
 			},
 		} );
-
-		render( <Settings createNotice={ jest.fn() } query={ {} } /> );
+		render( <Settings createNotice={ vi.fn() } query={ {} } /> );
 
 		// Click "Scheduled" radio button.
 		const scheduledRadio = screen.getByRole( 'radio', {
@@ -218,28 +253,30 @@ describe( 'Settings - Import Mode Modal', () => {
 			woocommerce_analytics_scheduled_import: 'yes',
 		} );
 	} );
-
 	it( 'invalidates report resolutions only after settings are saved', () => {
 		const { rerender } = render(
-			<Settings createNotice={ jest.fn() } query={ {} } />
+			<Settings createNotice={ vi.fn() } query={ {} } />
 		);
-
 		fireEvent.click(
-			screen.getByRole( 'button', { name: /save settings/i } )
+			screen.getByRole( 'button', {
+				name: /save settings/i,
+			} )
 		);
-
 		expect( mockPersistSettings ).toHaveBeenCalled();
 		expect( mockInvalidateReportResolutions ).not.toHaveBeenCalled();
 		expect( mockInvalidateItemResolutions ).not.toHaveBeenCalled();
-
-		settingsState = { ...settingsState, isRequesting: true };
-		rerender( <Settings createNotice={ jest.fn() } query={ {} } /> );
+		settingsState = {
+			...settingsState,
+			isRequesting: true,
+		};
+		rerender( <Settings createNotice={ vi.fn() } query={ {} } /> );
 		expect( mockInvalidateReportResolutions ).not.toHaveBeenCalled();
 		expect( mockInvalidateItemResolutions ).not.toHaveBeenCalled();
-
-		settingsState = { ...settingsState, isRequesting: false };
-		rerender( <Settings createNotice={ jest.fn() } query={ {} } /> );
-
+		settingsState = {
+			...settingsState,
+			isRequesting: false,
+		};
+		rerender( <Settings createNotice={ vi.fn() } query={ {} } /> );
 		expect( useDispatch ).toHaveBeenCalledWith( 'core/notices' );
 		expect( useDispatch ).toHaveBeenCalledWith( reportsStore );
 		expect( useDispatch ).toHaveBeenCalledWith( itemsStore );
@@ -255,21 +292,21 @@ describe( 'Settings - Import Mode Modal', () => {
 			'getItems'
 		);
 	} );
-
 	it( 'does not invalidate report resolutions when saving fails', () => {
 		const { rerender } = render(
-			<Settings createNotice={ jest.fn() } query={ {} } />
+			<Settings createNotice={ vi.fn() } query={ {} } />
 		);
-
-		settingsState = { ...settingsState, isRequesting: true };
-		rerender( <Settings createNotice={ jest.fn() } query={ {} } /> );
+		settingsState = {
+			...settingsState,
+			isRequesting: true,
+		};
+		rerender( <Settings createNotice={ vi.fn() } query={ {} } /> );
 		settingsState = {
 			...settingsState,
 			isRequesting: false,
 			settingsError: true,
 		};
-		rerender( <Settings createNotice={ jest.fn() } query={ {} } /> );
-
+		rerender( <Settings createNotice={ vi.fn() } query={ {} } /> );
 		expect( mockInvalidateReportResolutions ).not.toHaveBeenCalled();
 		expect( mockInvalidateItemResolutions ).not.toHaveBeenCalled();
 		expect( mockCreateNotice ).toHaveBeenCalledWith(
@@ -277,17 +314,16 @@ describe( 'Settings - Import Mode Modal', () => {
 			'There was an error saving your settings. Please try again.'
 		);
 	} );
-
 	it( 'invalidates report resolutions after resetting defaults', () => {
-		jest.spyOn( window, 'confirm' ).mockReturnValue( true );
+		vi.spyOn( window, 'confirm' ).mockReturnValue( true );
 		const { rerender } = render(
-			<Settings createNotice={ jest.fn() } query={ {} } />
+			<Settings createNotice={ vi.fn() } query={ {} } />
 		);
-
 		fireEvent.click(
-			screen.getByRole( 'button', { name: /reset defaults/i } )
+			screen.getByRole( 'button', {
+				name: /reset defaults/i,
+			} )
 		);
-
 		expect( mockUpdateAndPersistSettings ).toHaveBeenCalledWith(
 			'wcAdminSettings',
 			{
@@ -296,12 +332,16 @@ describe( 'Settings - Import Mode Modal', () => {
 		);
 		expect( mockInvalidateReportResolutions ).not.toHaveBeenCalled();
 		expect( mockInvalidateItemResolutions ).not.toHaveBeenCalled();
-
-		settingsState = { ...settingsState, isRequesting: true };
-		rerender( <Settings createNotice={ jest.fn() } query={ {} } /> );
-		settingsState = { ...settingsState, isRequesting: false };
-		rerender( <Settings createNotice={ jest.fn() } query={ {} } /> );
-
+		settingsState = {
+			...settingsState,
+			isRequesting: true,
+		};
+		rerender( <Settings createNotice={ vi.fn() } query={ {} } /> );
+		settingsState = {
+			...settingsState,
+			isRequesting: false,
+		};
+		rerender( <Settings createNotice={ vi.fn() } query={ {} } /> );
 		expect( mockInvalidateReportResolutions ).toHaveBeenCalledWith(
 			'getReportItems'
 		);

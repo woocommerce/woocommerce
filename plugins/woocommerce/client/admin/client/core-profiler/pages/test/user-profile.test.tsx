@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /**
  * External dependencies
@@ -14,19 +16,19 @@ describe( 'UserProfile', () => {
 	// jsdom does not implement scrollIntoView, which the select control menu
 	// calls when it opens.
 	Object.defineProperty( window.HTMLElement.prototype, 'scrollIntoView', {
-		value: jest.fn(),
+		value: vi.fn(),
 		writable: true,
 	} );
 
 	let props: {
-		sendEvent: jest.Mock;
+		sendEvent: Mock;
 		navigationProgress: number;
 		context: Pick< CoreProfilerStateMachineContext, 'userProfile' >;
 	};
 
 	beforeEach( () => {
 		props = {
-			sendEvent: jest.fn(),
+			sendEvent: vi.fn(),
 			navigationProgress: 0,
 			context: {
 				userProfile: {

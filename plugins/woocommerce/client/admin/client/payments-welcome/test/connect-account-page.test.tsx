@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -11,51 +13,93 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import ConnectAccountPage from '..';
 import { getAdminSetting } from '~/utils/admin-settings';
-
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useDispatch: jest.fn(),
-	useSelect: jest.fn(),
-} ) );
-jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
-jest.mock( '~/utils/admin-settings', () => ( { getAdminSetting: jest.fn() } ) );
-jest.mock( '@wordpress/element', () => ( {
-	...jest.requireActual( '@wordpress/element' ),
-	useState: jest.fn(),
-} ) );
-jest.mock( '../apms', () => jest.fn().mockReturnValue( null ) );
-jest.mock( '../banner', () =>
-	jest.fn().mockImplementation( ( { handleSetup } ) => (
+vi.mock( '@wordpress/data', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/data' ) ),
+		useDispatch: vi.fn(),
+		useSelect: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/tracks', () => {
+	const mock = {
+		recordEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '~/utils/admin-settings', () => {
+	const mock = {
+		getAdminSetting: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/element', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/element' ) ),
+		useState: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../apms', () => {
+	const mock = vi.fn().mockReturnValue( null );
+	return {
+		default: mock,
+		...mock,
+	};
+} );
+vi.mock( '../banner', () => {
+	const mock = vi.fn().mockImplementation( ( { handleSetup } ) => (
 		<div>
 			<button onClick={ handleSetup }>Handle Setup Button</button>
 		</div>
-	) )
-);
-
+	) );
+	return {
+		default: mock,
+		...mock,
+	};
+} );
 describe( 'Connect Account Page', () => {
 	const setupMocks = () => {
-		( useDispatch as jest.Mock ).mockReturnValue( {
-			updateOptions: jest.fn(),
-			installAndActivatePlugins: jest.fn(),
+		( useDispatch as Mock ).mockReturnValue( {
+			updateOptions: vi.fn(),
+			installAndActivatePlugins: vi.fn(),
 		} );
-		( useState as jest.Mock )
-			.mockImplementationOnce( () => [ false, jest.fn() ] ) // isSubmitted state
-			.mockImplementationOnce( () => [ '', jest.fn() ] ) // errorMessage state
-			.mockImplementationOnce( () => [ new Set(), jest.fn() ] ); // enabledApms state
-		( useSelect as jest.Mock ).mockReturnValue( {
+		( useState as Mock )
+			.mockImplementationOnce( () => [ false, vi.fn() ] ) // isSubmitted state
+			.mockImplementationOnce( () => [ '', vi.fn() ] ) // errorMessage state
+			.mockImplementationOnce( () => [ new Set(), vi.fn() ] ); // enabledApms state
+		( useSelect as Mock ).mockReturnValue( {
 			isJetpackConnected: true,
 			connectUrl: '',
 		} );
-		( getAdminSetting as jest.Mock ).mockReturnValue( {
+		( getAdminSetting as Mock ).mockReturnValue( {
 			id: 'incentiveId',
 		} );
 	};
-
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 		setupMocks();
 	} );
-
 	it( 'should fire custom page_view track when viewing', async () => {
 		render( <ConnectAccountPage /> );
 		expect( recordEvent ).toHaveBeenCalledWith( 'page_view', {
@@ -64,7 +108,6 @@ describe( 'Connect Account Page', () => {
 			source: 'wcadmin',
 		} );
 	} );
-
 	it( 'should trigger wcpay_connect_account_clicked event when clicking connect', async () => {
 		render( <ConnectAccountPage /> );
 		fireEvent.click( screen.getByText( 'Handle Setup Button' ) );

@@ -1,3 +1,5 @@
+import { afterEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -7,12 +9,18 @@ import { registerPlugin } from '@wordpress/plugins';
  * Internal dependencies
  */
 import { registerSettingsEmailColorPaletteFill } from '../settings-email-color-palette-slotfill';
-
-jest.mock( '@wordpress/plugins', () => ( {
-	registerPlugin: jest.fn(),
-} ) );
-
-const registerPluginMock = registerPlugin as jest.Mock;
+vi.mock( '@wordpress/plugins', () => {
+	const mock = {
+		registerPlugin: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+const registerPluginMock = registerPlugin as Mock;
 
 // The attribute shape WC_Settings_Emails::email_color_palette() prints.
 const phpDefaultColors = {
@@ -22,7 +30,6 @@ const phpDefaultColors = {
 	body_text: '#1e1e1e',
 	footer_text: '#787c82',
 };
-
 const renderMount = ( hasThemeJson: boolean, autoSync: string ) => {
 	document.body.innerHTML = `
 		<div
@@ -33,19 +40,16 @@ const renderMount = ( hasThemeJson: boolean, autoSync: string ) => {
 		<input type="hidden" id="woocommerce_email_auto_sync_with_theme" value="${ autoSync }" />
 	`;
 };
-
 const renderedFillProps = () => {
 	expect( registerPluginMock ).toHaveBeenCalledTimes( 1 );
 	const [ , settings ] = registerPluginMock.mock.calls[ 0 ];
 	return settings.render().props;
 };
-
 describe( 'registerSettingsEmailColorPaletteFill', () => {
 	afterEach( () => {
 		document.body.innerHTML = '';
 		registerPluginMock.mockClear();
 	} );
-
 	it.each( [
 		[ 'with', true, 'yes' ],
 		[ 'without', false, 'no' ],
@@ -53,9 +57,7 @@ describe( 'registerSettingsEmailColorPaletteFill', () => {
 		'reads the PHP mount attributes %s theme.json',
 		( _label, hasThemeJson, autoSync ) => {
 			renderMount( hasThemeJson, autoSync );
-
 			registerSettingsEmailColorPaletteFill();
-
 			expect( renderedFillProps() ).toMatchObject( {
 				autoSync: autoSync === 'yes',
 				defaultColors: {
@@ -69,13 +71,10 @@ describe( 'registerSettingsEmailColorPaletteFill', () => {
 			} );
 		}
 	);
-
 	it( 'does not register the fill without the auto-sync input', () => {
 		document.body.innerHTML =
 			'<div id="wc_settings_email_color_palette_slotfill"></div>';
-
 		registerSettingsEmailColorPaletteFill();
-
 		expect( registerPluginMock ).not.toHaveBeenCalled();
 	} );
 } );

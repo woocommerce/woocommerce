@@ -1,27 +1,57 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-
-jest.mock( '@woocommerce/tracks', () => ( {
-	recordEvent: jest.fn(),
-	queueRecordEvent: jest.fn(),
-} ) );
-
-jest.mock( '@wordpress/a11y', () => ( {
-	speak: jest.fn(),
-} ) );
-
-jest.mock( '../../../../../../utils/admin-settings', () => ( {
-	getAdminSetting: jest.fn(),
-} ) );
-
-jest.mock( '../../../../../utils/functions', () => ( {
-	setProductAutoUpdate: jest.fn( () => Promise.resolve() ),
-	addNotice: jest.fn(),
-	removeNotice: jest.fn(),
-} ) );
+vi.mock( '@woocommerce/tracks', () => {
+	const mock = {
+		recordEvent: vi.fn(),
+		queueRecordEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/a11y', () => {
+	const mock = {
+		speak: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../../../../../utils/admin-settings', () => {
+	const mock = {
+		getAdminSetting: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../../../../utils/functions', () => {
+	const mock = {
+		setProductAutoUpdate: vi.fn( () => Promise.resolve() ),
+		addNotice: vi.fn(),
+		removeNotice: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 /**
  * Internal dependencies
@@ -36,9 +66,7 @@ import AutoUpdateStatus from '../auto-update-status';
 import { SubscriptionsContext } from '../../../../../contexts/subscriptions-context';
 import { SubscriptionsContextType } from '../../../../../contexts/types';
 import { Subscription, SubscriptionLocal } from '../../../types';
-
-const loadSubscriptions = jest.fn( () => Promise.resolve() );
-
+const loadSubscriptions = vi.fn( () => Promise.resolve() );
 function subscriptionWith(
 	local: Partial< SubscriptionLocal >,
 	subscription: Partial< Subscription > = {}
@@ -67,12 +95,13 @@ function subscriptionWith(
 		},
 	} as Subscription;
 }
-
 function renderStatus( subscription: Subscription ) {
 	return render(
 		<SubscriptionsContext.Provider
 			value={
-				{ loadSubscriptions } as unknown as SubscriptionsContextType
+				{
+					loadSubscriptions,
+				} as unknown as SubscriptionsContextType
 			}
 		>
 			<AutoUpdateStatus subscription={ subscription } />
@@ -84,45 +113,49 @@ function renderStatus( subscription: Subscription ) {
  * Stand in the site-level settings, healthy unless a test says otherwise.
  */
 function setSiteSettings( settings: Record< string, boolean > = {} ) {
-	( getAdminSetting as jest.Mock ).mockReturnValue( {
+	( getAdminSetting as Mock ).mockReturnValue( {
 		wooUpdateManagerActive: true,
 		...settings,
 	} );
 }
-
 describe( 'AutoUpdateStatus', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 		setSiteSettings();
 	} );
-
 	it( 'renders nothing when the product is not installed', () => {
 		const { container } = renderStatus(
-			subscriptionWith( { installed: false } )
+			subscriptionWith( {
+				installed: false,
+			} )
 		);
-
 		expect( container ).toBeEmptyDOMElement();
 	} );
-
 	it( 'offers to enable auto-updates when they are off', () => {
 		renderStatus( subscriptionWith( {} ) );
-
 		expect(
-			screen.getByRole( 'button', { name: 'Enable auto-updates' } )
+			screen.getByRole( 'button', {
+				name: 'Enable auto-updates',
+			} )
 		).toBeInTheDocument();
 	} );
-
 	it( 'offers to disable auto-updates when they are on and nothing blocks them', () => {
-		renderStatus( subscriptionWith( { auto_update: true } ) );
-
+		renderStatus(
+			subscriptionWith( {
+				auto_update: true,
+			} )
+		);
 		expect(
-			screen.getByRole( 'button', { name: 'Disable auto-updates' } )
+			screen.getByRole( 'button', {
+				name: 'Disable auto-updates',
+			} )
 		).toBeInTheDocument();
 		expect(
-			screen.queryByRole( 'button', { name: 'Blocked' } )
+			screen.queryByRole( 'button', {
+				name: 'Blocked',
+			} )
 		).not.toBeInTheDocument();
 	} );
-
 	it( 'shows the setting as text when it cannot be changed from here', async () => {
 		renderStatus(
 			subscriptionWith( {
@@ -130,142 +163,202 @@ describe( 'AutoUpdateStatus', () => {
 				auto_update_manageable: false,
 			} )
 		);
-
 		expect(
-			screen.queryByRole( 'button', { name: /auto-updates/ } )
+			screen.queryByRole( 'button', {
+				name: /auto-updates/,
+			} )
 		).not.toBeInTheDocument();
-		fireEvent.click( screen.getByRole( 'button', { name: 'On' } ) );
-
+		fireEvent.click(
+			screen.getByRole( 'button', {
+				name: 'On',
+			} )
+		);
 		expect(
 			await screen.findByText(
 				'Auto-updates for this product are controlled outside this screen.'
 			)
 		).toBeInTheDocument();
 	} );
-
 	it( 'shows off as text when it cannot be changed from here', () => {
-		renderStatus( subscriptionWith( { auto_update_manageable: false } ) );
-
+		renderStatus(
+			subscriptionWith( {
+				auto_update_manageable: false,
+			} )
+		);
 		expect(
-			screen.getByRole( 'button', { name: 'Off' } )
+			screen.getByRole( 'button', {
+				name: 'Off',
+			} )
 		).toBeInTheDocument();
 	} );
-
 	it( 'does not offer to enable auto-updates without a subscription', async () => {
 		renderStatus(
 			subscriptionWith(
 				{},
-				{ product_key: '', expired: true, active: false }
+				{
+					product_key: '',
+					expired: true,
+					active: false,
+				}
 			)
 		);
-
 		expect(
-			screen.queryByRole( 'button', { name: /auto-updates/ } )
+			screen.queryByRole( 'button', {
+				name: /auto-updates/,
+			} )
 		).not.toBeInTheDocument();
-		fireEvent.click( screen.getByRole( 'button', { name: 'Off' } ) );
-
+		fireEvent.click(
+			screen.getByRole( 'button', {
+				name: 'Off',
+			} )
+		);
 		expect(
 			await screen.findByText(
 				'Subscribe to enable auto-updates for this product.'
 			)
 		).toBeInTheDocument();
 	} );
-
 	it( 'treats a theme like a plugin', () => {
 		renderStatus(
-			subscriptionWith( { type: 'theme', auto_update: true } )
+			subscriptionWith( {
+				type: 'theme',
+				auto_update: true,
+			} )
 		);
-
 		expect(
-			screen.getByRole( 'button', { name: 'Disable auto-updates' } )
+			screen.getByRole( 'button', {
+				name: 'Disable auto-updates',
+			} )
 		).toBeInTheDocument();
 	} );
-
 	it( 'never blocks a copy installed from WordPress.org', () => {
-		setSiteSettings( { wooUpdateManagerActive: false } );
+		setSiteSettings( {
+			wooUpdateManagerActive: false,
+		} );
 		renderStatus(
 			subscriptionWith(
-				{ auto_update: true, updates_from_wccom: false },
-				{ expired: true, active: false }
+				{
+					auto_update: true,
+					updates_from_wccom: false,
+				},
+				{
+					expired: true,
+					active: false,
+				}
 			)
 		);
-
 		expect(
-			screen.queryByRole( 'button', { name: 'Blocked' } )
+			screen.queryByRole( 'button', {
+				name: 'Blocked',
+			} )
 		).not.toBeInTheDocument();
 		expect(
-			screen.getByRole( 'button', { name: 'Disable auto-updates' } )
+			screen.getByRole( 'button', {
+				name: 'Disable auto-updates',
+			} )
 		).toBeInTheDocument();
 	} );
-
 	it( 'blocks a product without a subscription even when it does not update from WooCommerce.com', async () => {
 		renderStatus(
 			subscriptionWith(
-				{ auto_update: true, updates_from_wccom: false },
-				{ product_key: '' }
+				{
+					auto_update: true,
+					updates_from_wccom: false,
+				},
+				{
+					product_key: '',
+				}
 			)
 		);
-
 		expect(
-			screen.queryByRole( 'button', { name: 'Disable auto-updates' } )
+			screen.queryByRole( 'button', {
+				name: 'Disable auto-updates',
+			} )
 		).not.toBeInTheDocument();
-		fireEvent.click( screen.getByRole( 'button', { name: 'Blocked' } ) );
-
+		fireEvent.click(
+			screen.getByRole( 'button', {
+				name: 'Blocked',
+			} )
+		);
 		expect(
 			await screen.findByText( 'There is no subscription for it.' )
 		).toBeInTheDocument();
 	} );
-
 	it( 'shows blocked when the Update Manager is not active', async () => {
-		setSiteSettings( { wooUpdateManagerActive: false } );
-		renderStatus( subscriptionWith( { auto_update: true } ) );
-
-		fireEvent.click( screen.getByRole( 'button', { name: 'Blocked' } ) );
-
-		expect(
-			await screen.findByText(
-				'WooCommerce.com Update Manager is not active, and it delivers these updates.'
-			)
-		).toBeInTheDocument();
-	} );
-
-	it( 'shows blocked for a theme for the same reasons as a plugin', async () => {
-		setSiteSettings( { wooUpdateManagerActive: false } );
+		setSiteSettings( {
+			wooUpdateManagerActive: false,
+		} );
 		renderStatus(
-			subscriptionWith( { type: 'theme', auto_update: true } )
+			subscriptionWith( {
+				auto_update: true,
+			} )
 		);
-
-		fireEvent.click( screen.getByRole( 'button', { name: 'Blocked' } ) );
-
+		fireEvent.click(
+			screen.getByRole( 'button', {
+				name: 'Blocked',
+			} )
+		);
 		expect(
 			await screen.findByText(
 				'WooCommerce.com Update Manager is not active, and it delivers these updates.'
 			)
 		).toBeInTheDocument();
 	} );
-
-	it( 'does not show blocked when auto-updates are off', () => {
-		setSiteSettings( { wooUpdateManagerActive: false } );
-		renderStatus( subscriptionWith( {} ) );
-
+	it( 'shows blocked for a theme for the same reasons as a plugin', async () => {
+		setSiteSettings( {
+			wooUpdateManagerActive: false,
+		} );
+		renderStatus(
+			subscriptionWith( {
+				type: 'theme',
+				auto_update: true,
+			} )
+		);
+		fireEvent.click(
+			screen.getByRole( 'button', {
+				name: 'Blocked',
+			} )
+		);
 		expect(
-			screen.queryByRole( 'button', { name: 'Blocked' } )
+			await screen.findByText(
+				'WooCommerce.com Update Manager is not active, and it delivers these updates.'
+			)
+		).toBeInTheDocument();
+	} );
+	it( 'does not show blocked when auto-updates are off', () => {
+		setSiteSettings( {
+			wooUpdateManagerActive: false,
+		} );
+		renderStatus( subscriptionWith( {} ) );
+		expect(
+			screen.queryByRole( 'button', {
+				name: 'Blocked',
+			} )
 		).not.toBeInTheDocument();
 		expect(
-			screen.getByRole( 'button', { name: 'Enable auto-updates' } )
+			screen.getByRole( 'button', {
+				name: 'Enable auto-updates',
+			} )
 		).toBeInTheDocument();
 	} );
-
 	it( 'reports a missing subscription and stops there', async () => {
 		renderStatus(
 			subscriptionWith(
-				{ auto_update: true },
-				{ product_key: '', expired: true, active: false }
+				{
+					auto_update: true,
+				},
+				{
+					product_key: '',
+					expired: true,
+					active: false,
+				}
 			)
 		);
-
-		fireEvent.click( screen.getByRole( 'button', { name: 'Blocked' } ) );
-
+		fireEvent.click(
+			screen.getByRole( 'button', {
+				name: 'Blocked',
+			} )
+		);
 		expect(
 			await screen.findByText( 'There is no subscription for it.' )
 		).toBeInTheDocument();
@@ -273,17 +366,23 @@ describe( 'AutoUpdateStatus', () => {
 			screen.queryByText( 'The subscription has expired.' )
 		).not.toBeInTheDocument();
 	} );
-
 	it( 'lists an expired subscription and a disconnected one together', async () => {
 		renderStatus(
 			subscriptionWith(
-				{ auto_update: true },
-				{ expired: true, active: false }
+				{
+					auto_update: true,
+				},
+				{
+					expired: true,
+					active: false,
+				}
 			)
 		);
-
-		fireEvent.click( screen.getByRole( 'button', { name: 'Blocked' } ) );
-
+		fireEvent.click(
+			screen.getByRole( 'button', {
+				name: 'Blocked',
+			} )
+		);
 		expect(
 			await screen.findByText( 'The subscription has expired.' )
 		).toBeInTheDocument();
@@ -293,28 +392,32 @@ describe( 'AutoUpdateStatus', () => {
 			)
 		).toBeInTheDocument();
 	} );
-
 	it( 'does not treat a lifetime subscription as expired', () => {
 		renderStatus(
 			subscriptionWith(
-				{ auto_update: true },
-				{ expired: true, lifetime: true }
+				{
+					auto_update: true,
+				},
+				{
+					expired: true,
+					lifetime: true,
+				}
 			)
 		);
-
 		expect(
-			screen.queryByRole( 'button', { name: 'Blocked' } )
+			screen.queryByRole( 'button', {
+				name: 'Blocked',
+			} )
 		).not.toBeInTheDocument();
 	} );
-
 	it( 'enables auto-updates, refreshes the row and announces the change', async () => {
 		const subscription = subscriptionWith( {} );
 		renderStatus( subscription );
-
 		fireEvent.click(
-			screen.getByRole( 'button', { name: 'Enable auto-updates' } )
+			screen.getByRole( 'button', {
+				name: 'Enable auto-updates',
+			} )
 		);
-
 		await waitFor( () =>
 			expect( setProductAutoUpdate ).toHaveBeenCalledWith(
 				subscription,
@@ -330,15 +433,16 @@ describe( 'AutoUpdateStatus', () => {
 			)
 		);
 	} );
-
 	it( 'disables auto-updates and announces the change', async () => {
-		const subscription = subscriptionWith( { auto_update: true } );
+		const subscription = subscriptionWith( {
+			auto_update: true,
+		} );
 		renderStatus( subscription );
-
 		fireEvent.click(
-			screen.getByRole( 'button', { name: 'Disable auto-updates' } )
+			screen.getByRole( 'button', {
+				name: 'Disable auto-updates',
+			} )
 		);
-
 		await waitFor( () =>
 			expect( setProductAutoUpdate ).toHaveBeenCalledWith(
 				subscription,
@@ -351,15 +455,14 @@ describe( 'AutoUpdateStatus', () => {
 			)
 		);
 	} );
-
 	it( 'reports a failed refresh without calling the saved toggle a failure', async () => {
 		loadSubscriptions.mockRejectedValueOnce( new Error( 'offline' ) );
 		renderStatus( subscriptionWith( {} ) );
-
 		fireEvent.click(
-			screen.getByRole( 'button', { name: 'Enable auto-updates' } )
+			screen.getByRole( 'button', {
+				name: 'Enable auto-updates',
+			} )
 		);
-
 		await waitFor( () =>
 			expect( addNotice ).toHaveBeenCalledWith(
 				'test-key',
@@ -376,59 +479,67 @@ describe( 'AutoUpdateStatus', () => {
 			'error'
 		);
 	} );
-
 	it( 'shows a progress label while enabling', async () => {
 		let finish: () => void = () => {};
-		( setProductAutoUpdate as jest.Mock ).mockReturnValueOnce(
+		( setProductAutoUpdate as Mock ).mockReturnValueOnce(
 			new Promise< void >( ( resolve ) => {
 				finish = resolve;
 			} )
 		);
 		renderStatus( subscriptionWith( {} ) );
-
 		fireEvent.click(
-			screen.getByRole( 'button', { name: 'Enable auto-updates' } )
+			screen.getByRole( 'button', {
+				name: 'Enable auto-updates',
+			} )
 		);
 
 		// Disabled through aria-disabled, so focus stays on the control while it works.
 		expect(
-			await screen.findByRole( 'button', { name: 'Enabling…' } )
+			await screen.findByRole( 'button', {
+				name: 'Enabling…',
+			} )
 		).toHaveAttribute( 'aria-disabled', 'true' );
-
 		finish();
-
 		expect(
-			await screen.findByRole( 'button', { name: 'Enable auto-updates' } )
+			await screen.findByRole( 'button', {
+				name: 'Enable auto-updates',
+			} )
 		).not.toHaveAttribute( 'aria-disabled' );
 	} );
-
 	it( 'shows a progress label while disabling', async () => {
-		( setProductAutoUpdate as jest.Mock ).mockReturnValueOnce(
+		( setProductAutoUpdate as Mock ).mockReturnValueOnce(
 			new Promise( () => {} )
 		);
-		renderStatus( subscriptionWith( { auto_update: true } ) );
-
-		fireEvent.click(
-			screen.getByRole( 'button', { name: 'Disable auto-updates' } )
+		renderStatus(
+			subscriptionWith( {
+				auto_update: true,
+			} )
 		);
-
+		fireEvent.click(
+			screen.getByRole( 'button', {
+				name: 'Disable auto-updates',
+			} )
+		);
 		expect(
-			await screen.findByRole( 'button', { name: 'Disabling…' } )
+			await screen.findByRole( 'button', {
+				name: 'Disabling…',
+			} )
 		).toHaveAttribute( 'aria-disabled', 'true' );
 	} );
-
 	it( "surfaces the endpoint's reason when enabling fails", async () => {
 		// The shape wp_send_json_error() produces.
-		( setProductAutoUpdate as jest.Mock ).mockRejectedValueOnce( {
+		( setProductAutoUpdate as Mock ).mockRejectedValueOnce( {
 			success: false,
-			data: { message: 'There is no subscription for this product.' },
+			data: {
+				message: 'There is no subscription for this product.',
+			},
 		} );
 		renderStatus( subscriptionWith( {} ) );
-
 		fireEvent.click(
-			screen.getByRole( 'button', { name: 'Enable auto-updates' } )
+			screen.getByRole( 'button', {
+				name: 'Enable auto-updates',
+			} )
 		);
-
 		await waitFor( () =>
 			expect( addNotice ).toHaveBeenCalledWith(
 				'test-key',
@@ -437,17 +548,20 @@ describe( 'AutoUpdateStatus', () => {
 			)
 		);
 	} );
-
 	it( 'falls back to a generic notice when disabling fails without a reason', async () => {
-		( setProductAutoUpdate as jest.Mock ).mockRejectedValueOnce( {
+		( setProductAutoUpdate as Mock ).mockRejectedValueOnce( {
 			code: 'invalid_json',
 		} );
-		renderStatus( subscriptionWith( { auto_update: true } ) );
-
-		fireEvent.click(
-			screen.getByRole( 'button', { name: 'Disable auto-updates' } )
+		renderStatus(
+			subscriptionWith( {
+				auto_update: true,
+			} )
 		);
-
+		fireEvent.click(
+			screen.getByRole( 'button', {
+				name: 'Disable auto-updates',
+			} )
+		);
 		await waitFor( () =>
 			expect( addNotice ).toHaveBeenCalledWith(
 				'test-key',

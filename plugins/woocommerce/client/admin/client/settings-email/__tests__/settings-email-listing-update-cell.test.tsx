@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * Component tests for <UpdatesCell> — RSM-140 acceptance criteria.
  */
@@ -12,26 +14,40 @@ import { render, screen, fireEvent } from '@testing-library/react';
  */
 import type { EmailType } from '../settings-email-listing-slotfill';
 import { UpdatesCell } from '../settings-email-listing-update-cell';
-
-jest.mock( '@woocommerce/settings', () => ( {
-	getAdminLink: ( path: string ) => `https://example.test/wp-admin/${ path }`,
-} ) );
-
-jest.mock( '@wordpress/components', () => ( {
-	Button: ( {
-		children,
-		onClick,
-		...rest
-	}: {
-		children: React.ReactNode;
-		onClick?: () => void;
-	} & Record< string, unknown > ) => (
-		<button onClick={ onClick } { ...rest }>
-			{ children }
-		</button>
-	),
-} ) );
-
+vi.mock( '@woocommerce/settings', () => {
+	const mock = {
+		getAdminLink: ( path: string ) =>
+			`https://example.test/wp-admin/${ path }`,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/components', () => {
+	const mock = {
+		Button: ( {
+			children,
+			onClick,
+			...rest
+		}: {
+			children: React.ReactNode;
+			onClick?: () => void;
+		} & Record< string, unknown > ) => (
+			<button onClick={ onClick } { ...rest }>
+				{ children }
+			</button>
+		),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const baseEmail: EmailType = {
 	id: 'new-order',
 	post_id: '123',
@@ -41,7 +57,11 @@ const baseEmail: EmailType = {
 	manual: false,
 	email_key: 'new_order',
 	email_class_name: 'WC_Email_New_Order',
-	recipients: { to: '', cc: '', bcc: '' },
+	recipients: {
+		to: '',
+		cc: '',
+		bcc: '',
+	},
 	status: 'enabled',
 	templateStatus: null,
 	templateVersion: null,
@@ -49,10 +69,8 @@ const baseEmail: EmailType = {
 	wasBackfilled: false,
 	file_template_preview_url: null,
 };
-
 describe( '<UpdatesCell>', () => {
 	let originalLocation: Location;
-
 	beforeEach( () => {
 		originalLocation = window.location;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -61,15 +79,13 @@ describe( '<UpdatesCell>', () => {
 		( window as any ).location = {
 			...originalLocation,
 			href: '',
-			assign: jest.fn(),
+			assign: vi.fn(),
 		};
 	} );
-
 	afterEach( () => {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		( window as any ).location = originalLocation;
 	} );
-
 	it( 'renders a Review update button when status is core_updated_customized and merchant version is older than current', () => {
 		render(
 			<UpdatesCell
@@ -81,12 +97,12 @@ describe( '<UpdatesCell>', () => {
 				} }
 			/>
 		);
-
 		expect(
-			screen.getByRole( 'button', { name: /review update/i } )
+			screen.getByRole( 'button', {
+				name: /review update/i,
+			} )
 		).toBeInTheDocument();
 	} );
-
 	it( 'renders em-dash when status is core_updated_customized but merchant version equals current (already reviewed)', () => {
 		// Canonical detector check: status alone isn't enough — the merchant
 		// is "up to date" once they've reviewed this version, even if they
@@ -101,15 +117,15 @@ describe( '<UpdatesCell>', () => {
 				} }
 			/>
 		);
-
 		expect(
-			screen.queryByRole( 'button', { name: /review update/i } )
+			screen.queryByRole( 'button', {
+				name: /review update/i,
+			} )
 		).not.toBeInTheDocument();
 		expect( screen.getByLabelText( /up to date/i ) ).toHaveTextContent(
 			'—'
 		);
 	} );
-
 	it( 'falls back to status-only gating when version metadata is missing (legacy posts)', () => {
 		// Posts that haven't been backfilled yet won't have templateVersion;
 		// keep showing the indicator on status alone so legacy posts surface.
@@ -123,12 +139,12 @@ describe( '<UpdatesCell>', () => {
 				} }
 			/>
 		);
-
 		expect(
-			screen.getByRole( 'button', { name: /review update/i } )
+			screen.getByRole( 'button', {
+				name: /review update/i,
+			} )
 		).toBeInTheDocument();
 	} );
-
 	it.each( [ [ 'in_sync' ], [ 'core_updated_uncustomized' ], [ null ] ] )(
 		'renders an em-dash with Up to date label when status is %s',
 		( status ) => {
@@ -140,17 +156,16 @@ describe( '<UpdatesCell>', () => {
 					} }
 				/>
 			);
-
 			expect(
-				screen.queryByRole( 'button', { name: /review update/i } )
+				screen.queryByRole( 'button', {
+					name: /review update/i,
+				} )
 			).not.toBeInTheDocument();
-
 			expect( screen.getByLabelText( /up to date/i ) ).toHaveTextContent(
 				'—'
 			);
 		}
 	);
-
 	it( 'falls through to em-dash for an unexpected status string', () => {
 		render(
 			<UpdatesCell
@@ -162,13 +177,13 @@ describe( '<UpdatesCell>', () => {
 				} }
 			/>
 		);
-
 		expect(
-			screen.queryByRole( 'button', { name: /review update/i } )
+			screen.queryByRole( 'button', {
+				name: /review update/i,
+			} )
 		).not.toBeInTheDocument();
 		expect( screen.getByLabelText( /up to date/i ) ).toBeInTheDocument();
 	} );
-
 	it( 'navigates to the editor with wc_email_review_drawer=1 on click', () => {
 		render(
 			<UpdatesCell
@@ -178,16 +193,15 @@ describe( '<UpdatesCell>', () => {
 				} }
 			/>
 		);
-
 		fireEvent.click(
-			screen.getByRole( 'button', { name: /review update/i } )
+			screen.getByRole( 'button', {
+				name: /review update/i,
+			} )
 		);
-
 		expect( window.location.href ).toMatch(
 			/\/wp-admin\/post\.php\?post=123&action=edit&wc_email_review_drawer=1$/
 		);
 	} );
-
 	it( 'does nothing on click when post_id is empty', () => {
 		render(
 			<UpdatesCell
@@ -198,11 +212,11 @@ describe( '<UpdatesCell>', () => {
 				} }
 			/>
 		);
-
 		fireEvent.click(
-			screen.getByRole( 'button', { name: /review update/i } )
+			screen.getByRole( 'button', {
+				name: /review update/i,
+			} )
 		);
-
 		expect( window.location.href ).toBe( '' );
 	} );
 } );

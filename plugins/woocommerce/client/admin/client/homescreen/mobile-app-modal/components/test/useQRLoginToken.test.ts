@@ -1,7 +1,17 @@
+import {
+	afterEach,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+	type MockedFunction,
+} from 'vitest';
+
 /**
  * External dependencies
  */
-import { renderHook, act } from '@testing-library/react-hooks/dom';
+import { renderHook, act } from '@testing-library/react';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -9,9 +19,9 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { QRLoginTokenStates, useQRLoginToken } from '../useQRLoginToken';
 
-jest.mock( '@wordpress/api-fetch' );
+vi.mock( '@wordpress/api-fetch' );
 
-const mockApiFetch = apiFetch as unknown as jest.MockedFunction<
+const mockApiFetch = apiFetch as unknown as MockedFunction<
 	( options: { path: string; method: string } ) => Promise< unknown >
 >;
 
@@ -54,20 +64,20 @@ const expectedErrorMessages: Array< {
 
 describe( 'useQRLoginToken', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
-		jest.useFakeTimers();
+		vi.clearAllMocks();
+		vi.useFakeTimers();
 		// Pin Date.now so the countdown math is deterministic.
-		jest.setSystemTime( NOW_SECONDS * 1000 );
-		jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
+		vi.setSystemTime( NOW_SECONDS * 1000 );
+		vi.spyOn( console, 'warn' ).mockImplementation( () => undefined );
 	} );
 
 	afterEach( () => {
 		// Clear rather than run pending timers — otherwise the interval
 		// callback fires against (potentially unmounted) test hooks and
 		// React emits an "update not wrapped in act()" warning.
-		jest.clearAllTimers();
-		jest.useRealTimers();
-		jest.restoreAllMocks();
+		vi.clearAllTimers();
+		vi.useRealTimers();
+		vi.restoreAllMocks();
 	} );
 
 	it( 'starts IDLE with empty state', () => {
@@ -133,19 +143,19 @@ describe( 'useQRLoginToken', () => {
 		// interval callbacks whose due-time falls inside the advance
 		// window, so we don't need to call `setSystemTime` separately.
 		act( () => {
-			jest.advanceTimersByTime( 1000 );
+			vi.advanceTimersByTime( 1000 );
 		} );
 		expect( result.current.secondsRemaining ).toBe( 2 );
 		expect( result.current.state ).toBe( QRLoginTokenStates.READY );
 
 		act( () => {
-			jest.advanceTimersByTime( 1000 );
+			vi.advanceTimersByTime( 1000 );
 		} );
 		expect( result.current.secondsRemaining ).toBe( 1 );
 		expect( result.current.state ).toBe( QRLoginTokenStates.READY );
 
 		act( () => {
-			jest.advanceTimersByTime( 1000 );
+			vi.advanceTimersByTime( 1000 );
 		} );
 		expect( result.current.secondsRemaining ).toBe( 0 );
 		expect( result.current.state ).toBe( QRLoginTokenStates.EXPIRED );
@@ -272,7 +282,7 @@ describe( 'useQRLoginToken', () => {
 
 		// Expire the current token.
 		act( () => {
-			jest.advanceTimersByTime( 1000 );
+			vi.advanceTimersByTime( 1000 );
 		} );
 		expect( result.current.state ).toBe( QRLoginTokenStates.EXPIRED );
 
@@ -402,7 +412,7 @@ describe( 'useQRLoginToken', () => {
 		);
 
 		act( () => {
-			jest.advanceTimersByTime( 5000 );
+			vi.advanceTimersByTime( 5000 );
 		} );
 
 		expect( result.current.state ).toBe( QRLoginTokenStates.ERROR );
@@ -414,7 +424,7 @@ describe( 'useQRLoginToken', () => {
 			resolveFetch = resolve;
 		} );
 		mockApiFetch.mockReturnValueOnce( pendingResponse );
-		const setIntervalSpy = jest.spyOn( global, 'setInterval' );
+		const setIntervalSpy = vi.spyOn( global, 'setInterval' );
 
 		const { result, unmount } = renderHook( () => useQRLoginToken() );
 
@@ -441,7 +451,7 @@ describe( 'useQRLoginToken', () => {
 
 	it( 'cleans up the countdown interval on unmount', async () => {
 		mockApiFetch.mockResolvedValue( buildResponse( 5 ) );
-		const clearIntervalSpy = jest.spyOn( global, 'clearInterval' );
+		const clearIntervalSpy = vi.spyOn( global, 'clearInterval' );
 
 		const { result, unmount } = renderHook( () => useQRLoginToken() );
 
@@ -597,7 +607,7 @@ describe( 'useQRLoginToken', () => {
 		} );
 
 		await act( async () => {
-			jest.advanceTimersByTime( 2600 );
+			vi.advanceTimersByTime( 2600 );
 			await Promise.resolve();
 		} );
 		expect( result.current.state ).toBe( QRLoginTokenStates.SCANNED );
@@ -656,7 +666,7 @@ describe( 'useQRLoginToken', () => {
 		expect( result.current.state ).toBe( QRLoginTokenStates.SCANNED );
 
 		await act( async () => {
-			jest.advanceTimersByTime( 2600 );
+			vi.advanceTimersByTime( 2600 );
 			await Promise.resolve();
 		} );
 
@@ -700,12 +710,12 @@ describe( 'useQRLoginToken', () => {
 		expect( result.current.state ).toBe( QRLoginTokenStates.SCANNED );
 
 		await act( async () => {
-			jest.advanceTimersByTime( 2600 );
+			vi.advanceTimersByTime( 2600 );
 			await Promise.resolve();
 		} );
 
 		await act( async () => {
-			jest.advanceTimersByTime( 2600 );
+			vi.advanceTimersByTime( 2600 );
 			await Promise.resolve();
 		} );
 
@@ -737,7 +747,7 @@ describe( 'useQRLoginToken', () => {
 		expect( result.current.state ).toBe( QRLoginTokenStates.APPROVED );
 
 		await act( async () => {
-			jest.advanceTimersByTime( 2600 );
+			vi.advanceTimersByTime( 2600 );
 			await Promise.resolve();
 		} );
 
@@ -766,7 +776,7 @@ describe( 'useQRLoginToken', () => {
 			await result.current.fetchToken();
 		} );
 		await act( async () => {
-			jest.advanceTimersByTime( 2600 );
+			vi.advanceTimersByTime( 2600 );
 			await Promise.resolve();
 		} );
 
@@ -801,7 +811,7 @@ describe( 'useQRLoginToken', () => {
 			await result.current.fetchToken();
 		} );
 		await act( async () => {
-			jest.advanceTimersByTime( 2600 );
+			vi.advanceTimersByTime( 2600 );
 			await Promise.resolve();
 		} );
 
@@ -834,7 +844,7 @@ describe( 'useQRLoginToken', () => {
 			await result.current.fetchToken();
 		} );
 		await act( async () => {
-			jest.advanceTimersByTime( 2600 );
+			vi.advanceTimersByTime( 2600 );
 			await Promise.resolve();
 		} );
 

@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -7,7 +9,6 @@ import userEvent from '@testing-library/user-event';
 import { getHistory } from '@woocommerce/navigation';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
 import { TaskType } from '@woocommerce/data';
-
 const task: TaskType = {
 	id: 'optional',
 	title: 'Test',
@@ -36,47 +37,57 @@ const task: TaskType = {
  * Internal dependencies
  */
 import { Task } from '../task';
-
-jest.mock( '@wordpress/data', () => {
+vi.mock( '@wordpress/data', async () => {
 	// Require the original module to not be mocked...
-	const originalModule = jest.requireActual( '@wordpress/data' );
-
-	return {
-		__esModule: true, // Use it when dealing with esModules
+	const originalModule = await vi.importActual( '@wordpress/data' );
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
+		__esModule: true,
+		// Use it when dealing with esModules
 		...originalModule,
-		useDispatch: jest.fn(),
-		useSelect: jest.fn().mockReturnValue( {} ),
-	};
+		useDispatch: vi.fn(),
+		useSelect: vi.fn().mockReturnValue( {} ),
+	} );
 } );
-
-jest.mock( '@woocommerce/navigation', () => {
+vi.mock( '@woocommerce/navigation', async () => {
 	// Require the original module to not be mocked...
-	const originalModule = jest.requireActual( '@woocommerce/navigation' );
-
-	return {
-		__esModule: true, // Use it when dealing with esModules
+	const originalModule = await vi.importActual( '@woocommerce/navigation' );
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
+		__esModule: true,
+		// Use it when dealing with esModules
 		...originalModule,
-		getPersistedQuery: jest.fn().mockReturnValue( {} ),
-		getHistory: jest.fn(),
+		getPersistedQuery: vi.fn().mockReturnValue( {} ),
+		getHistory: vi.fn(),
 		getNewPath: () => 'new-path',
-	};
+	} );
 } );
-
-jest.mock( '@woocommerce/onboarding', () => ( {
-	WooOnboardingTask: {
-		Slot: jest.fn(),
-	},
-} ) );
-
+vi.mock( '@woocommerce/onboarding', () => {
+	const mock = {
+		WooOnboardingTask: {
+			Slot: vi.fn(),
+		},
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'Task', () => {
-	const invalidateResolutionForStoreSelector = jest.fn();
-	const optimisticallyCompleteTask = jest.fn();
+	const invalidateResolutionForStoreSelector = vi.fn();
+	const optimisticallyCompleteTask = vi.fn();
 	beforeEach( () => {
-		( useDispatch as jest.Mock ).mockImplementation( () => ( {
+		( useDispatch as Mock ).mockImplementation( () => ( {
 			invalidateResolutionForStoreSelector,
 			optimisticallyCompleteTask,
 		} ) );
-		( WooOnboardingTask.Slot as jest.Mock ).mockImplementation(
+		( WooOnboardingTask.Slot as Mock ).mockImplementation(
 			( { id, fillProps } ) => (
 				<div>
 					{ id }
@@ -87,30 +98,42 @@ describe( 'Task', () => {
 			)
 		);
 	} );
-
 	it( 'should pass the task name as id to the OnboardingTask.Slot', () => {
 		const { queryByText } = render(
 			<div>
-				<Task query={ { task: 'test' } } task={ task } />
+				<Task
+					query={ {
+						task: 'test',
+					} }
+					task={ task }
+				/>
 			</div>
 		);
 		expect( queryByText( 'test' ) ).toBeInTheDocument();
 	} );
-
 	it( 'should update history and invalidate store selector onComplete', () => {
-		const historyPushMock = jest.fn();
-		( getHistory as jest.Mock ).mockImplementation( () => {
+		const historyPushMock = vi.fn();
+		( getHistory as Mock ).mockImplementation( () => {
 			return {
 				push: historyPushMock,
 			};
 		} );
 		const { getByRole } = render(
 			<div>
-				<Task query={ { task: 'test' } } task={ task } />
+				<Task
+					query={ {
+						task: 'test',
+					} }
+					task={ task }
+				/>
 			</div>
 		);
 		act( () => {
-			userEvent.click( getByRole( 'button', { name: 'complete' } ) );
+			userEvent.click(
+				getByRole( 'button', {
+					name: 'complete',
+				} )
+			);
 		} );
 		expect( optimisticallyCompleteTask ).toHaveBeenCalledWith( 'test' );
 		expect( invalidateResolutionForStoreSelector ).toHaveBeenCalledWith(

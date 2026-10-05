@@ -1,3 +1,21 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+const { mockUseFulfillmentContext, setNotifyCustomer, setCustomerNote } =
+	vi.hoisted( () => {
+		const setCustomerNote = vi.fn();
+		const setNotifyCustomer = vi.fn();
+		const mockUseFulfillmentContext = vi.fn( () => ( {
+			notifyCustomer: true,
+			setNotifyCustomer,
+			customerNote: '',
+			setCustomerNote,
+		} ) );
+		return {
+			mockUseFulfillmentContext,
+			setNotifyCustomer,
+			setCustomerNote,
+		};
+	} );
+
 /**
  * External dependencies
  */
@@ -10,66 +28,86 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import CustomerNotificationBox from '../index';
 
 // Mock dependencies
-jest.mock( '../../user-interface/fulfillments-card/card', () => ( {
-	__esModule: true,
-	default: ( { children, header } ) => (
-		<div data-testid="fulfillment-card">
-			<div data-testid="card-header">{ header }</div>
-			<div data-testid="card-body">{ children }</div>
-		</div>
-	),
-} ) );
-
-jest.mock( '../../../utils/icons', () => ( {
-	EnvelopeIcon: () => <div data-testid="envelope-icon" />,
-} ) );
-
-const setNotifyCustomer = jest.fn();
-const setCustomerNote = jest.fn();
-
-const mockUseFulfillmentContext = jest.fn( () => ( {
-	notifyCustomer: true,
-	setNotifyCustomer,
-	customerNote: '',
-	setCustomerNote,
-} ) );
-
-jest.mock( '../../../context/fulfillment-context', () => ( {
-	useFulfillmentContext: ( ...args ) => mockUseFulfillmentContext( ...args ),
-} ) );
+vi.mock( '../../user-interface/fulfillments-card/card', () => {
+	const mock = {
+		__esModule: true,
+		default: ( { children, header } ) => (
+			<div data-testid="fulfillment-card">
+				<div data-testid="card-header">{ header }</div>
+				<div data-testid="card-body">{ children }</div>
+			</div>
+		),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../../utils/icons', () => {
+	const mock = {
+		EnvelopeIcon: () => <div data-testid="envelope-icon" />,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../../context/fulfillment-context', () => {
+	const mock = {
+		useFulfillmentContext: ( ...args ) =>
+			mockUseFulfillmentContext( ...args ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 // Mock ToggleControl and TextareaControl to make testing easier
-jest.mock( '@wordpress/components', () => ( {
-	ToggleControl: React.forwardRef( ( props, ref ) => (
-		<div data-testid="toggle-control">
-			<input
-				ref={ ref }
-				type="checkbox"
-				checked={ props.checked }
-				onChange={ () => props.onChange( ! props.checked ) }
-				data-testid="toggle-input"
-			/>
-		</div>
-	) ),
-	TextareaControl: ( props ) => (
-		<div data-testid="textarea-control">
-			{ /* eslint-disable-next-line jsx-a11y/label-has-associated-control */ }
-			<label htmlFor="customer-note">{ props.label }</label>
-			<textarea
-				id="customer-note"
-				data-testid="customer-note-input"
-				value={ props.value }
-				onChange={ ( e ) => props.onChange( e.target.value ) }
-				placeholder={ props.placeholder }
-				rows={ props.rows }
-			/>
-		</div>
-	),
-} ) );
-
+vi.mock( '@wordpress/components', () => {
+	const mock = {
+		ToggleControl: React.forwardRef( ( props, ref ) => (
+			<div data-testid="toggle-control">
+				<input
+					ref={ ref }
+					type="checkbox"
+					checked={ props.checked }
+					onChange={ () => props.onChange( ! props.checked ) }
+					data-testid="toggle-input"
+				/>
+			</div>
+		) ),
+		TextareaControl: ( props ) => (
+			<div data-testid="textarea-control">
+				{ /* eslint-disable-next-line jsx-a11y/label-has-associated-control */ }
+				<label htmlFor="customer-note">{ props.label }</label>
+				<textarea
+					id="customer-note"
+					data-testid="customer-note-input"
+					value={ props.value }
+					onChange={ ( e ) => props.onChange( e.target.value ) }
+					placeholder={ props.placeholder }
+					rows={ props.rows }
+				/>
+			</div>
+		),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'CustomerNotificationBox component', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 		mockUseFulfillmentContext.mockReturnValue( {
 			notifyCustomer: true,
 			setNotifyCustomer,
@@ -77,7 +115,6 @@ describe( 'CustomerNotificationBox component', () => {
 			setCustomerNote,
 		} );
 	} );
-
 	it( 'should render the component with proper title', () => {
 		render( <CustomerNotificationBox type="fulfill" /> );
 
@@ -87,7 +124,6 @@ describe( 'CustomerNotificationBox component', () => {
 		).toBeInTheDocument();
 		expect( screen.getByTestId( 'envelope-icon' ) ).toBeInTheDocument();
 	} );
-
 	it( 'should render the description text', () => {
 		render( <CustomerNotificationBox type="fulfill" /> );
 
@@ -98,7 +134,6 @@ describe( 'CustomerNotificationBox component', () => {
 			)
 		).toBeInTheDocument();
 	} );
-
 	it( 'should call setNotifyCustomer with the correct value when toggle is changed', () => {
 		render( <CustomerNotificationBox type="fulfill" /> );
 
@@ -109,7 +144,6 @@ describe( 'CustomerNotificationBox component', () => {
 		// Check that setNotifyCustomer was called with false (toggling from true -> false)
 		expect( setNotifyCustomer ).toHaveBeenCalledWith( false );
 	} );
-
 	it( 'should render with toggle in correct state based on value prop', () => {
 		render( <CustomerNotificationBox type="fulfill" /> );
 
@@ -117,23 +151,18 @@ describe( 'CustomerNotificationBox component', () => {
 		const toggleInput = screen.getByTestId( 'toggle-input' );
 		expect( toggleInput.checked ).toBe( true );
 	} );
-
 	it( 'should show textarea when type is update and notifyCustomer is true', () => {
 		render( <CustomerNotificationBox type="update" /> );
-
 		expect(
 			screen.getByTestId( 'customer-note-input' )
 		).toBeInTheDocument();
 	} );
-
 	it( 'should hide textarea when type is fulfill', () => {
 		render( <CustomerNotificationBox type="fulfill" /> );
-
 		expect(
 			screen.queryByTestId( 'customer-note-input' )
 		).not.toBeInTheDocument();
 	} );
-
 	it( 'should hide textarea when type is update but notifyCustomer is false', () => {
 		mockUseFulfillmentContext.mockReturnValue( {
 			notifyCustomer: false,
@@ -141,20 +170,19 @@ describe( 'CustomerNotificationBox component', () => {
 			customerNote: '',
 			setCustomerNote,
 		} );
-
 		render( <CustomerNotificationBox type="update" /> );
-
 		expect(
 			screen.queryByTestId( 'customer-note-input' )
 		).not.toBeInTheDocument();
 	} );
-
 	it( 'should call setCustomerNote when textarea value changes', () => {
 		render( <CustomerNotificationBox type="update" /> );
-
 		const textarea = screen.getByTestId( 'customer-note-input' );
-		fireEvent.change( textarea, { target: { value: 'Test note' } } );
-
+		fireEvent.change( textarea, {
+			target: {
+				value: 'Test note',
+			},
+		} );
 		expect( setCustomerNote ).toHaveBeenCalledWith( 'Test note' );
 	} );
 } );

@@ -1,7 +1,9 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 /**
@@ -9,7 +11,6 @@ import userEvent from '@testing-library/user-event';
  */
 import { BankAccountsList } from '../bank-accounts-list';
 import { BankAccount } from '../types';
-
 const mockAccounts: BankAccount[] = [
 	{
 		account_name: 'Example Bank',
@@ -20,36 +21,37 @@ const mockAccounts: BankAccount[] = [
 		bic: 'WESTGB22',
 	},
 ];
-
 describe( 'BankAccountsList', () => {
 	it( 'renders existing accounts', () => {
 		render(
 			<BankAccountsList
 				accounts={ mockAccounts }
-				onChange={ jest.fn() }
+				onChange={ vi.fn() }
 				defaultCountry="US"
 			/>
 		);
 		expect( screen.getByText( 'Example Bank' ) ).toBeInTheDocument();
 		expect( screen.getByText( '123456' ) ).toBeInTheDocument();
 	} );
-
 	it( 'opens modal to add new account', async () => {
 		render(
 			<BankAccountsList
 				accounts={ [] }
-				onChange={ jest.fn() }
+				onChange={ vi.fn() }
 				defaultCountry="US"
 			/>
 		);
-		await userEvent.click( screen.getByText( '+ Add account' ) );
+		await act( async () => {
+			await userEvent.click( screen.getByText( '+ Add account' ) );
+		} );
 		expect(
-			screen.getByRole( 'dialog', { name: /add/i } )
+			screen.getByRole( 'dialog', {
+				name: /add/i,
+			} )
 		).toBeInTheDocument();
 	} );
-
 	it( 'calls onChange when an account is deleted', async () => {
-		const onChange = jest.fn();
+		const onChange = vi.fn();
 		render(
 			<BankAccountsList
 				accounts={ mockAccounts }
@@ -59,13 +61,23 @@ describe( 'BankAccountsList', () => {
 		);
 
 		// Open menu and click delete.
-		await userEvent.click(
-			screen.getByRole( 'button', { name: 'Options' } )
-		);
-		await userEvent.click( screen.getByText( 'Delete' ) );
+		await act( async () => {
+			// Open menu and click delete.
+			await userEvent.click(
+				screen.getByRole( 'button', {
+					name: 'Options',
+				} )
+			);
+		} );
+		await act( async () => {
+			await userEvent.click( screen.getByText( 'Delete' ) );
 
-		// Confirm deletion
-		await userEvent.click( screen.getByText( 'Delete' ) );
+			// Confirm deletion
+		} ); // Confirm deletion
+		await act( async () => {
+			// Confirm deletion
+			await userEvent.click( screen.getByText( 'Delete' ) );
+		} );
 		expect( onChange ).toHaveBeenCalledWith( [] );
 	} );
 } );

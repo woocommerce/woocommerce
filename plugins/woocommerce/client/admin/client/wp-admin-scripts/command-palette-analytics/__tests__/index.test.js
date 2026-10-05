@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -8,23 +10,83 @@ import { dispatch } from '@wordpress/data';
 import domReady from '@wordpress/dom-ready';
 import { chartBar } from '@wordpress/icons';
 import { addQueryArgs } from '@wordpress/url';
-
-jest.mock( '@woocommerce/tracks', () => ( { queueRecordEvent: jest.fn() } ) );
-jest.mock( '@wordpress/commands', () => ( { store: 'commands-store' } ) );
-jest.mock( '@wordpress/data', () => ( { dispatch: jest.fn() } ) );
-jest.mock( '@wordpress/dom-ready', () => jest.fn() );
-jest.mock( '@wordpress/icons', () => ( { chartBar: 'chart-bar-icon' } ) );
-jest.mock( '@wordpress/i18n', () => ( {
-	__: ( value ) => value,
-	sprintf: ( format, value ) => format.replace( '%s', value ),
-} ) );
-jest.mock( '@wordpress/url', () => ( {
-	addQueryArgs: jest.fn(
-		( base, args ) => `#${ base }-${ JSON.stringify( args ) }`
-	),
-} ) );
-
-const registerWithReports = ( analytics ) => {
+vi.mock( '@woocommerce/tracks', () => {
+	const mock = {
+		queueRecordEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/commands', () => {
+	const mock = {
+		store: 'commands-store',
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/data', () => {
+	const mock = {
+		dispatch: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/dom-ready', () => {
+	const mock = vi.fn();
+	return {
+		default: mock,
+		...mock,
+	};
+} );
+vi.mock( '@wordpress/icons', () => {
+	const mock = {
+		chartBar: 'chart-bar-icon',
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/i18n', () => {
+	const mock = {
+		__: ( value ) => value,
+		sprintf: ( format, value ) => format.replace( '%s', value ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/url', () => {
+	const mock = {
+		addQueryArgs: vi.fn(
+			( base, args ) => `#${ base }-${ JSON.stringify( args ) }`
+		),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+const registerWithReports = async ( analytics ) => {
 	const commands = [];
 	dispatch.mockReturnValue( {
 		registerCommand: ( command ) => commands.push( command ),
@@ -34,41 +96,63 @@ const registerWithReports = ( analytics ) => {
 	} else {
 		window.wcCommandPaletteAnalytics = analytics;
 	}
-	jest.isolateModules( () => {
-		// eslint-disable-next-line @typescript-eslint/no-require-imports -- Load after each injected report state is installed.
-		require( '../index' );
-	} );
+	vi.resetModules(),
+		await ( async () => {
+			// eslint-disable-next-line @typescript-eslint/no-require-imports -- Load after each injected report state is installed.
+			await import( '../index' );
+		} )();
 	domReady.mock.calls[ 0 ][ 0 ]();
 	return commands;
 };
-
 describe( 'Analytics Command Palette', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	} );
-
 	it.each( [
-		{ caseName: 'missing global', analytics: undefined },
-		{ caseName: 'null global', analytics: null },
-		{ caseName: 'missing reports', analytics: {} },
-		{ caseName: 'non-array reports', analytics: { reports: {} } },
-		{ caseName: 'empty reports', analytics: { reports: [] } },
+		{
+			caseName: 'missing global',
+			analytics: undefined,
+		},
+		{
+			caseName: 'null global',
+			analytics: null,
+		},
+		{
+			caseName: 'missing reports',
+			analytics: {},
+		},
+		{
+			caseName: 'non-array reports',
+			analytics: {
+				reports: {},
+			},
+		},
+		{
+			caseName: 'empty reports',
+			analytics: {
+				reports: [],
+			},
+		},
 	] )(
 		'does not register commands for an invalid injected report state: $caseName',
-		( { analytics } ) => {
-			expect( registerWithReports( analytics ) ).toEqual( [] );
+		async ( { analytics } ) => {
+			expect( await registerWithReports( analytics ) ).toEqual( [] );
 			expect( dispatch ).not.toHaveBeenCalled();
 		}
 	);
-
-	it( 'registers injected Analytics reports with exact destinations and tracking', () => {
-		const commands = registerWithReports( {
+	it( 'registers injected Analytics reports with exact destinations and tracking', async () => {
+		const commands = await registerWithReports( {
 			reports: [
-				{ title: 'Revenue', path: '/analytics/revenue' },
-				{ title: 'Orders', path: '/analytics/orders' },
+				{
+					title: 'Revenue',
+					path: '/analytics/revenue',
+				},
+				{
+					title: 'Orders',
+					path: '/analytics/orders',
+				},
 			],
 		} );
-
 		expect( dispatch ).toHaveBeenCalledWith( commandsStore );
 		expect(
 			commands.map( ( command ) => ( {
@@ -88,7 +172,6 @@ describe( 'Analytics Command Palette', () => {
 				icon: chartBar,
 			},
 		] );
-
 		commands.forEach( ( command, index ) => {
 			command.callback();
 			expect( decodeURIComponent( window.location.hash ) ).toBe(
@@ -96,13 +179,28 @@ describe( 'Analytics Command Palette', () => {
 			);
 		} );
 		expect( addQueryArgs.mock.calls ).toEqual( [
-			[ 'admin.php', { page: 'wc-admin', path: '/analytics/revenue' } ],
-			[ 'admin.php', { page: 'wc-admin', path: '/analytics/orders' } ],
+			[
+				'admin.php',
+				{
+					page: 'wc-admin',
+					path: '/analytics/revenue',
+				},
+			],
+			[
+				'admin.php',
+				{
+					page: 'wc-admin',
+					path: '/analytics/orders',
+				},
+			],
 		] );
 		expect( queueRecordEvent.mock.calls ).toEqual(
 			commands.map( ( command ) => [
 				'woocommerce_command_palette_submit',
-				{ name: command.name, origin: undefined },
+				{
+					name: command.name,
+					origin: undefined,
+				},
 			] )
 		);
 	} );

@@ -1,10 +1,42 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+const {
+	mockEntitySubscribers,
+	mockEntityState,
+	mockEditEntityRecord,
+	mockSidebarFilters,
+	mockRegisteredPlugins,
+	mockEmailEditorRecordEvent,
+} = vi.hoisted( () => {
+	const mockEntitySubscribers = new Set< () => void >();
+	const mockEntityState = {
+		woocommerceData: {},
+		editedWooCommerceData: {},
+	};
+	const mockEditEntityRecord = vi.fn();
+	const mockSidebarFilters = [];
+	const mockRegisteredPlugins = new Map<
+		string,
+		{
+			render: () => JSX.Element;
+		}
+	>();
+	const mockEmailEditorRecordEvent = vi.fn();
+	return {
+		mockEntitySubscribers,
+		mockEntityState,
+		mockEditEntityRecord,
+		mockSidebarFilters,
+		mockRegisteredPlugins,
+		mockEmailEditorRecordEvent,
+	};
+} );
+
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ComponentType, JSX, ReactNode } from 'react';
-
 type WooCommerceData = Record< string, unknown >;
 type RichTextWithButtonProps = {
 	attributeName: string;
@@ -17,85 +49,111 @@ type RichTextWithButtonProps = {
 type SidebarFilter = (
 	RichTextWithButton: ComponentType< RichTextWithButtonProps >,
 	tracking: {
-		recordEvent: jest.Mock;
-		debouncedRecordEvent: jest.Mock;
+		recordEvent: Mock;
+		debouncedRecordEvent: Mock;
 	}
 ) => ComponentType;
-
-const mockRegisteredPlugins = new Map<
-	string,
-	{ render: () => JSX.Element }
->();
-const mockSidebarFilters: SidebarFilter[] = [];
-
-const mockEntityState: {
-	woocommerceData: WooCommerceData;
-	editedWooCommerceData: Record< string, unknown >;
-} = {
-	woocommerceData: {},
-	editedWooCommerceData: {},
-};
-const mockEditEntityRecord = jest.fn();
-const mockEmailEditorRecordEvent = jest.fn();
-const mockEntitySubscribers = new Set< () => void >();
-
-jest.mock( '@wordpress/core-data', () => ( {
-	store: { name: 'core' },
-	useEntityProp: () => {
-		const { useEffect, useReducer } =
-			jest.requireActual( '@wordpress/element' );
-		const [ , refresh ] = useReducer( ( count: number ) => count + 1, 0 );
-		useEffect( () => {
-			mockEntitySubscribers.add( refresh );
-			return () => mockEntitySubscribers.delete( refresh );
-		}, [ refresh ] );
-		return [ mockEntityState.woocommerceData ];
-	},
-} ) );
-
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	select: () => ( {
-		getEditedEntityRecord: () => ( {
-			woocommerce_data: mockEntityState.editedWooCommerceData,
+vi.mock( '@wordpress/core-data', async () => {
+	const { useEffect, useReducer } =
+		await vi.importActual( '@wordpress/element' );
+	const mock = {
+		store: {
+			name: 'core',
+		},
+		useEntityProp: () => {
+			const [ , refresh ] = useReducer(
+				( count: number ) => count + 1,
+				0
+			);
+			useEffect( () => {
+				mockEntitySubscribers.add( refresh );
+				return () => mockEntitySubscribers.delete( refresh );
+			}, [ refresh ] );
+			return [ mockEntityState.woocommerceData ];
+		},
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/data', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/data' ) ),
+		select: () => ( {
+			getEditedEntityRecord: () => ( {
+				woocommerce_data: mockEntityState.editedWooCommerceData,
+			} ),
 		} ),
-	} ),
-	dispatch: () => ( {
-		editEntityRecord: mockEditEntityRecord,
-	} ),
-} ) );
-
-jest.mock( '@wordpress/hooks', () => ( {
-	addFilter: (
-		filterName: string,
-		_namespace: string,
-		callback: SidebarFilter
-	) => {
-		if (
-			filterName ===
-			'woocommerce_email_editor_setting_sidebar_extension_component'
-		) {
-			mockSidebarFilters.push( callback );
-		}
-	},
-} ) );
-
-jest.mock( '@wordpress/plugins', () => ( {
-	registerPlugin: ( name: string, settings: { render: () => JSX.Element } ) =>
-		mockRegisteredPlugins.set( name, settings ),
-} ) );
-
-jest.mock( '@woocommerce/email-editor', () => ( {
-	EmailActionsFill: ( { children }: { children: ReactNode } ) => children,
-	TemplateSelection: () => null,
-	recordEvent: mockEmailEditorRecordEvent,
-} ) );
+		dispatch: () => ( {
+			editEntityRecord: mockEditEntityRecord,
+		} ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/hooks', () => {
+	const mock = {
+		addFilter: (
+			filterName: string,
+			_namespace: string,
+			callback: SidebarFilter
+		) => {
+			if (
+				filterName ===
+				'woocommerce_email_editor_setting_sidebar_extension_component'
+			) {
+				mockSidebarFilters.push( callback );
+			}
+		},
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/plugins', () => {
+	const mock = {
+		registerPlugin: (
+			name: string,
+			settings: {
+				render: () => JSX.Element;
+			}
+		) => mockRegisteredPlugins.set( name, settings ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/email-editor', () => {
+	const mock = {
+		EmailActionsFill: ( { children }: { children: ReactNode } ) => children,
+		TemplateSelection: () => null,
+		recordEvent: mockEmailEditorRecordEvent,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 /**
  * Internal dependencies
  */
 import { modifySidebar } from '../sidebar_settings';
-
 const defaultWooCommerceData: WooCommerceData = {
 	recipient: 'merchant@example.com',
 	cc: null,
@@ -109,7 +167,6 @@ const defaultWooCommerceData: WooCommerceData = {
 	is_manual: false,
 	enabled: true,
 };
-
 const RichTextWithButton = ( {
 	attributeName,
 	attributeValue,
@@ -132,16 +189,14 @@ const RichTextWithButton = ( {
 		/>
 	</label>
 );
-
 const renderSettings = ( {
-	recordEvent = jest.fn(),
-	debouncedRecordEvent = jest.fn(),
+	recordEvent = vi.fn(),
+	debouncedRecordEvent = vi.fn(),
 }: {
-	recordEvent?: jest.Mock;
-	debouncedRecordEvent?: jest.Mock;
+	recordEvent?: Mock;
+	debouncedRecordEvent?: Mock;
 } = {} ) => {
 	modifySidebar();
-
 	const SidebarSettings = mockSidebarFilters.at( -1 )!( RichTextWithButton, {
 		recordEvent,
 		debouncedRecordEvent,
@@ -149,7 +204,6 @@ const renderSettings = ( {
 	const EmailStatus = mockRegisteredPlugins.get(
 		'woocommerce-email-editor-email-status'
 	)!.render;
-
 	return {
 		...render(
 			<>
@@ -163,7 +217,6 @@ const renderSettings = ( {
 		EmailStatus,
 	};
 };
-
 describe( 'Email editor sidebar settings', () => {
 	beforeEach( () => {
 		mockRegisteredPlugins.clear();
@@ -175,7 +228,11 @@ describe( 'Email editor sidebar settings', () => {
 				_kind: string,
 				_name: string,
 				_id: string,
-				{ woocommerce_data }: { woocommerce_data: WooCommerceData }
+				{
+					woocommerce_data,
+				}: {
+					woocommerce_data: WooCommerceData;
+				}
 			) => {
 				mockEntityState.woocommerceData = woocommerce_data;
 				mockEntityState.editedWooCommerceData = woocommerce_data;
@@ -183,7 +240,9 @@ describe( 'Email editor sidebar settings', () => {
 			}
 		);
 		mockEmailEditorRecordEvent.mockClear();
-		mockEntityState.woocommerceData = { ...defaultWooCommerceData };
+		mockEntityState.woocommerceData = {
+			...defaultWooCommerceData,
+		};
 		mockEntityState.editedWooCommerceData = {
 			...defaultWooCommerceData,
 			unrelated_setting: 'preserved',
@@ -192,27 +251,36 @@ describe( 'Email editor sidebar settings', () => {
 			current_post_id: '42',
 			current_post_type: 'woo_email',
 			email_types: [],
-			sender_settings: { from_name: '', from_address: '' },
+			sender_settings: {
+				from_name: '',
+				from_address: '',
+			},
 		};
 	} );
-
 	it( 'updates email status and tracks it', async () => {
 		const { rerender } = renderSettings();
 		const initialEditedWooCommerceData = {
 			...mockEntityState.editedWooCommerceData,
 		};
-
 		expect(
-			screen.getByRole( 'button', { name: 'Change status: Active' } )
+			screen.getByRole( 'button', {
+				name: 'Change status: Active',
+			} )
 		).toBeEnabled();
-
-		await userEvent.click(
-			screen.getByRole( 'button', { name: 'Change status: Active' } )
-		);
-		await userEvent.click(
-			screen.getByRole( 'radio', { name: 'Inactive' } )
-		);
-
+		await act( async () => {
+			await userEvent.click(
+				screen.getByRole( 'button', {
+					name: 'Change status: Active',
+				} )
+			);
+		} );
+		await act( async () => {
+			await userEvent.click(
+				screen.getByRole( 'radio', {
+					name: 'Inactive',
+				} )
+			);
+		} );
 		expect( mockEditEntityRecord ).toHaveBeenLastCalledWith(
 			'postType',
 			'woo_email',
@@ -227,7 +295,9 @@ describe( 'Email editor sidebar settings', () => {
 		);
 		expect( mockEmailEditorRecordEvent ).toHaveBeenLastCalledWith(
 			'email_status_changed',
-			{ status: 'inactive' }
+			{
+				status: 'inactive',
+			}
 		);
 
 		// The edit goes through `editEntityRecord`, which is mocked, so the saved
@@ -243,11 +313,11 @@ describe( 'Email editor sidebar settings', () => {
 					.render() }
 			</>
 		);
-
 		expect(
-			screen.getByRole( 'button', { name: 'Change status: Inactive' } )
+			screen.getByRole( 'button', {
+				name: 'Change status: Inactive',
+			} )
 		).toBeEnabled();
-
 		mockEntityState.woocommerceData = {
 			...defaultWooCommerceData,
 			is_manual: true,
@@ -259,29 +329,35 @@ describe( 'Email editor sidebar settings', () => {
 					.render() }
 			</>
 		);
-
 		expect(
 			screen.getByRole( 'button', {
 				name: 'Change status: Manually sent',
 			} )
 		).toBeDisabled();
 	} );
-
 	it( 'passes subject and preheader values through the sidebar data owner', async () => {
 		renderSettings();
 		const initialEditedWooCommerceData = {
 			...mockEntityState.editedWooCommerceData,
 		};
-
-		const subject = screen.getByRole( 'textbox', { name: 'Subject' } );
+		const subject = screen.getByRole( 'textbox', {
+			name: 'Subject',
+		} );
 		const preheader = screen.getByRole( 'textbox', {
 			name: 'Preview text',
 		} );
-		await userEvent.clear( subject );
-		await userEvent.type( subject, 'Your order is on its way' );
-		await userEvent.clear( preheader );
-		await userEvent.type( preheader, 'Track it from your account' );
-
+		await act( async () => {
+			await userEvent.clear( subject );
+		} );
+		await act( async () => {
+			await userEvent.type( subject, 'Your order is on its way' );
+		} );
+		await act( async () => {
+			await userEvent.clear( preheader );
+		} );
+		await act( async () => {
+			await userEvent.type( preheader, 'Track it from your account' );
+		} );
 		expect( mockEditEntityRecord ).toHaveBeenNthCalledWith(
 			1,
 			'postType',
@@ -307,10 +383,9 @@ describe( 'Email editor sidebar settings', () => {
 			}
 		);
 	} );
-
 	it( 'updates and clears CC and BCC recipients', async () => {
-		const recordEvent = jest.fn();
-		const debouncedRecordEvent = jest.fn();
+		const recordEvent = vi.fn();
+		const debouncedRecordEvent = vi.fn();
 		mockEntityState.woocommerceData = {
 			...defaultWooCommerceData,
 			recipient: null,
@@ -331,37 +406,46 @@ describe( 'Email editor sidebar settings', () => {
 		const initialEditedWooCommerceData = {
 			...mockEntityState.editedWooCommerceData,
 		};
-
 		expect(
 			screen.getByText( 'This email is sent to Customer.' )
 		).toBeInTheDocument();
-
-		await userEvent.click(
-			screen.getByRole( 'checkbox', { name: 'Add CC' } )
-		);
+		await act( async () => {
+			await userEvent.click(
+				screen.getByRole( 'checkbox', {
+					name: 'Add CC',
+				} )
+			);
+		} );
 		expect( screen.getByTestId( 'email_cc' ) ).toBeInTheDocument();
 		expect( recordEvent ).toHaveBeenCalledWith( 'email_cc_toggle_clicked', {
 			isEnabled: true,
 		} );
-
-		await userEvent.click(
-			screen.getByRole( 'checkbox', { name: 'Add BCC' } )
-		);
+		await act( async () => {
+			await userEvent.click(
+				screen.getByRole( 'checkbox', {
+					name: 'Add BCC',
+				} )
+			);
+		} );
 		expect( screen.getByTestId( 'email_bcc' ) ).toBeInTheDocument();
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'email_bcc_toggle_clicked',
-			{ isEnabled: true }
+			{
+				isEnabled: true,
+			}
 		);
-
-		await userEvent.type(
-			screen.getByTestId( 'email_cc' ),
-			'copy@example.com'
-		);
-		await userEvent.type(
-			screen.getByTestId( 'email_bcc' ),
-			'hidden@example.com'
-		);
-
+		await act( async () => {
+			await userEvent.type(
+				screen.getByTestId( 'email_cc' ),
+				'copy@example.com'
+			);
+		} );
+		await act( async () => {
+			await userEvent.type(
+				screen.getByTestId( 'email_bcc' ),
+				'hidden@example.com'
+			);
+		} );
 		expect( mockEditEntityRecord ).toHaveBeenLastCalledWith(
 			'postType',
 			'woo_email',
@@ -376,20 +460,30 @@ describe( 'Email editor sidebar settings', () => {
 		);
 		expect( debouncedRecordEvent ).toHaveBeenCalledWith(
 			'email_cc_input_updated',
-			{ value: 'copy@example.com' }
+			{
+				value: 'copy@example.com',
+			}
 		);
 		expect( debouncedRecordEvent ).toHaveBeenLastCalledWith(
 			'email_bcc_input_updated',
-			{ value: 'hidden@example.com' }
+			{
+				value: 'hidden@example.com',
+			}
 		);
-
-		await userEvent.click(
-			screen.getByRole( 'checkbox', { name: 'Add CC' } )
-		);
-		await userEvent.click(
-			screen.getByRole( 'checkbox', { name: 'Add BCC' } )
-		);
-
+		await act( async () => {
+			await userEvent.click(
+				screen.getByRole( 'checkbox', {
+					name: 'Add CC',
+				} )
+			);
+		} );
+		await act( async () => {
+			await userEvent.click(
+				screen.getByRole( 'checkbox', {
+					name: 'Add BCC',
+				} )
+			);
+		} );
 		expect( mockEditEntityRecord ).toHaveBeenLastCalledWith(
 			'postType',
 			'woo_email',
@@ -407,9 +501,10 @@ describe( 'Email editor sidebar settings', () => {
 		} );
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'email_bcc_toggle_clicked',
-			{ isEnabled: false }
+			{
+				isEnabled: false,
+			}
 		);
-
 		mockEntityState.woocommerceData = {
 			...defaultWooCommerceData,
 			recipient: 'team@example.com',

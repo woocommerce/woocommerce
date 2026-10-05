@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -9,28 +11,40 @@ import { useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import RecommendationsEligibilityWrapper from '../recommendations-eligibility-wrapper';
-
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn(),
-} ) );
-jest.mock( '@woocommerce/data', () => ( {
-	...jest.requireActual( '@woocommerce/data' ),
-	useUser: jest.fn(),
-} ) );
-
+vi.mock( '@wordpress/data', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/data' ) ),
+		useSelect: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/data', async () => {
+	const mock = {
+		...( await vi.importActual( '@woocommerce/data' ) ),
+		useUser: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const RecommendationsEligibilityMock = () => (
 	<RecommendationsEligibilityWrapper>
 		<span>mocked children</span>
 	</RecommendationsEligibilityWrapper>
 );
-
 describe( 'RecommendationsEligibilityWrapper', () => {
 	beforeEach( () => {
 		useUser.mockReturnValue( {
 			currentUserCan: () => true,
 		} );
-
 		useSelect.mockImplementation( ( fn ) =>
 			fn( () => ( {
 				getOption: () => 'yes',
@@ -38,15 +52,12 @@ describe( 'RecommendationsEligibilityWrapper', () => {
 			} ) )
 		);
 	} );
-
 	it( 'should not render its children when the user cannot install plugins', () => {
-		const currentUserCanMock = jest.fn().mockReturnValue( false );
+		const currentUserCanMock = vi.fn().mockReturnValue( false );
 		useUser.mockReturnValue( {
 			currentUserCan: currentUserCanMock,
 		} );
-
 		const { rerender } = render( <RecommendationsEligibilityMock /> );
-
 		expect(
 			screen.queryByText( 'mocked children' )
 		).not.toBeInTheDocument();
@@ -57,7 +68,6 @@ describe( 'RecommendationsEligibilityWrapper', () => {
 		rerender( <RecommendationsEligibilityMock /> );
 		expect( screen.queryByText( 'mocked children' ) ).toBeInTheDocument();
 	} );
-
 	it( 'should not render its children when the marketplace suggestions are being loaded', () => {
 		useSelect.mockImplementation( ( fn ) =>
 			fn( () => ( {
@@ -65,9 +75,7 @@ describe( 'RecommendationsEligibilityWrapper', () => {
 				hasFinishedResolution: () => false,
 			} ) )
 		);
-
 		const { rerender } = render( <RecommendationsEligibilityMock /> );
-
 		expect(
 			screen.queryByText( 'mocked children' )
 		).not.toBeInTheDocument();
@@ -82,7 +90,6 @@ describe( 'RecommendationsEligibilityWrapper', () => {
 		rerender( <RecommendationsEligibilityMock /> );
 		expect( screen.queryByText( 'mocked children' ) ).toBeInTheDocument();
 	} );
-
 	it( 'should render its children', () => {
 		useSelect.mockImplementation( ( fn ) =>
 			fn( () => ( {
@@ -93,9 +100,7 @@ describe( 'RecommendationsEligibilityWrapper', () => {
 		useUser.mockReturnValue( {
 			currentUserCan: () => true,
 		} );
-
 		render( <RecommendationsEligibilityMock /> );
-
 		expect( screen.queryByText( 'mocked children' ) ).toBeInTheDocument();
 	} );
 } );

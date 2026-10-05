@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -12,11 +14,17 @@ import {
  * Internal dependencies
  */
 import { PaymentExtensionSuggestionListItem } from '..';
-
-jest.mock( '@woocommerce/tracks', () => ( {
-	recordEvent: jest.fn(),
-} ) );
-
+vi.mock( '@woocommerce/tracks', () => {
+	const mock = {
+		recordEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'PaymentExtensionSuggestionListItem', () => {
 	it( 'should record settings_payments_provider_enable_click event on click of the Enable button', () => {
 		const { getByRole } = render(
@@ -47,8 +55,11 @@ describe( 'PaymentExtensionSuggestionListItem', () => {
 				shouldHighlightIncentive={ false }
 			/>
 		);
-
-		fireEvent.click( getByRole( 'button', { name: 'Enable' } ) );
+		fireEvent.click(
+			getByRole( 'button', {
+				name: 'Enable',
+			} )
+		);
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_provider_enable_click',
 			expect.objectContaining( {

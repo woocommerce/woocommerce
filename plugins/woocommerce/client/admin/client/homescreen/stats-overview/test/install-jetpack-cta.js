@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -8,11 +10,17 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { JetpackCTA } from '../install-jetpack-cta';
-
-jest.mock( '@woocommerce/tracks', () => ( {
-	recordEvent: jest.fn(),
-} ) );
-
+vi.mock( '@woocommerce/tracks', () => {
+	const mock = {
+		recordEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'JetpackCTA', () => {
 	it( 'shows buttons as busy and disabled when isBusy is true', () => {
 		const { queryAllByRole } = render(
@@ -23,15 +31,12 @@ describe( 'JetpackCTA', () => {
 				jetpackInstallState={ '' }
 			/>
 		);
-
 		const buttons = queryAllByRole( 'button' );
-
 		expect( buttons[ 0 ] ).toHaveClass( 'is-busy' );
 		expect( buttons[ 1 ] ).toHaveClass( 'is-busy' );
 		expect( buttons[ 0 ] ).toHaveAttribute( 'disabled' );
 		expect( buttons[ 1 ] ).toHaveAttribute( 'disabled' );
 	} );
-
 	it( 'shows buttons as not busy and enabled when isBusy is false', () => {
 		const { queryAllByRole } = render(
 			<JetpackCTA
@@ -41,17 +46,14 @@ describe( 'JetpackCTA', () => {
 				jetpackInstallState={ '' }
 			/>
 		);
-
 		const buttons = queryAllByRole( 'button' );
-
 		expect( buttons[ 0 ] ).not.toHaveClass( 'is-busy' );
 		expect( buttons[ 1 ] ).not.toHaveClass( 'is-busy' );
 		expect( buttons[ 0 ] ).not.toHaveAttribute( 'disabled' );
 		expect( buttons[ 1 ] ).not.toHaveAttribute( 'disabled' );
 	} );
-
 	it( 'calls the onClickInstall handler and records a track when the install button is clicked', () => {
-		const onClickInstallSpy = jest.fn();
+		const onClickInstallSpy = vi.fn();
 		const { queryAllByRole } = render(
 			<JetpackCTA
 				onClickInstall={ onClickInstallSpy }
@@ -60,20 +62,15 @@ describe( 'JetpackCTA', () => {
 				jetpackInstallState={ '' }
 			/>
 		);
-
 		const installButton = queryAllByRole( 'button' )[ 0 ];
-
 		fireEvent.click( installButton );
-
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'statsoverview_install_jetpack'
 		);
-
 		expect( onClickInstallSpy ).toHaveBeenCalledTimes( 1 );
 	} );
-
 	it( 'calls the onClickDismiss handler and records a track when the dismiss button is clicked', () => {
-		const onClickDismissSpy = jest.fn();
+		const onClickDismissSpy = vi.fn();
 		const { queryAllByRole } = render(
 			<JetpackCTA
 				onClickInstall={ () => {} }
@@ -82,18 +79,13 @@ describe( 'JetpackCTA', () => {
 				jetpackInstallState={ '' }
 			/>
 		);
-
 		const dismissButton = queryAllByRole( 'button' )[ 1 ];
-
 		fireEvent.click( dismissButton );
-
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'statsoverview_dismiss_install_jetpack'
 		);
-
 		expect( onClickDismissSpy ).toHaveBeenCalledTimes( 1 );
 	} );
-
 	it( 'displays text based on the install status of Jetpack', () => {
 		const { queryByText, rerender } = render(
 			<JetpackCTA
@@ -103,9 +95,7 @@ describe( 'JetpackCTA', () => {
 				jetpackInstallState={ 'unavailable' }
 			/>
 		);
-
 		expect( queryByText( 'Get Jetpack' ) ).toBeInTheDocument();
-
 		rerender(
 			<JetpackCTA
 				onClickInstall={ () => {} }
@@ -114,9 +104,7 @@ describe( 'JetpackCTA', () => {
 				jetpackInstallState={ 'installed' }
 			/>
 		);
-
 		expect( queryByText( 'Activate Jetpack' ) ).toBeInTheDocument();
-
 		rerender(
 			<JetpackCTA
 				onClickInstall={ () => {} }
@@ -125,7 +113,6 @@ describe( 'JetpackCTA', () => {
 				jetpackInstallState={ 'activated' }
 			/>
 		);
-
 		expect( queryByText( 'Connect Jetpack' ) ).toBeInTheDocument();
 	} );
 } );

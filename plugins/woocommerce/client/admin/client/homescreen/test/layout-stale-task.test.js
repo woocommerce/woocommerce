@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -11,64 +13,117 @@ import { getHistory, getNewPath } from '@woocommerce/navigation';
  */
 import ConnectedLayout from '../layout';
 import { getAdminSetting } from '~/utils/admin-settings';
-
-jest.mock( '@woocommerce/navigation', () => ( {
-	...jest.requireActual( '@woocommerce/navigation' ),
-	getHistory: jest.fn(),
-	getNewPath: jest.fn().mockReturnValue( 'home-path' ),
-} ) );
-
-jest.mock( '~/utils/admin-settings', () => ( {
-	...jest.requireActual( '~/utils/admin-settings' ),
-	getAdminSetting: jest.fn(),
-} ) );
-
-jest.mock( '../stats-overview', () =>
-	jest.fn().mockReturnValue( <div>[StatsOverview]</div> )
-);
-
-jest.mock( '../../inbox-panel', () =>
-	jest.fn().mockReturnValue( <div>[InboxPanel]</div> )
-);
-
-jest.mock( '../../store-management-links', () => ( {
-	StoreManagementLinks: jest
-		.fn()
-		.mockReturnValue( <div>[StoreManagementLinks]</div> ),
-} ) );
-
-jest.mock( '../activity-panel', () => ( {
-	ActivityPanel: jest.fn().mockReturnValue( <div>[ActivityPanel]</div> ),
-} ) );
-
-jest.mock( '@wordpress/element', () => {
+vi.mock( '@woocommerce/navigation', async () => {
+	const mock = {
+		...( await vi.importActual( '@woocommerce/navigation' ) ),
+		getHistory: vi.fn(),
+		getNewPath: vi.fn().mockReturnValue( 'home-path' ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '~/utils/admin-settings', async () => {
+	const mock = {
+		...( await vi.importActual( '~/utils/admin-settings' ) ),
+		getAdminSetting: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../stats-overview', () => {
+	const mock = vi.fn().mockReturnValue( <div>[StatsOverview]</div> );
 	return {
-		...jest.requireActual( '@wordpress/element' ),
-		Suspense: ( { children } ) => <div>{ children }</div>,
-		lazy: () => () => <div>[TaskList]</div>,
+		default: mock,
+		...mock,
 	};
 } );
-
+vi.mock( '../../inbox-panel', () => {
+	const mock = vi.fn().mockReturnValue( <div>[InboxPanel]</div> );
+	return {
+		default: mock,
+		...mock,
+	};
+} );
+vi.mock( '../../store-management-links', () => {
+	const mock = {
+		StoreManagementLinks: vi
+			.fn()
+			.mockReturnValue( <div>[StoreManagementLinks]</div> ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../activity-panel', () => {
+	const mock = {
+		ActivityPanel: vi.fn().mockReturnValue( <div>[ActivityPanel]</div> ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/element', async () => {
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
+		...( await vi.importActual( '@wordpress/element' ) ),
+		Suspense: ( { children } ) => <div>{ children }</div>,
+		lazy: () => () => <div>[TaskList]</div>,
+	} );
+} );
 const TASK_LISTS = [
 	{
 		id: 'setup',
 		isVisible: true,
-		tasks: [ { id: 'products' }, { id: 'payments' } ],
+		tasks: [
+			{
+				id: 'products',
+			},
+			{
+				id: 'payments',
+			},
+		],
 	},
-	{ id: 'extended', isVisible: true, tasks: [] },
+	{
+		id: 'extended',
+		isVisible: true,
+		tasks: [],
+	},
 ];
 
 // What /onboarding/tasks returns when every list is hidden: the lists are
 // still present, but their tasks are stripped server-side.
 const HIDDEN_TASK_LISTS = [
-	{ id: 'setup', isVisible: false, tasks: [] },
-	{ id: 'extended', isVisible: false, tasks: [] },
+	{
+		id: 'setup',
+		isVisible: false,
+		tasks: [],
+	},
+	{
+		id: 'extended',
+		isVisible: false,
+		tasks: [],
+	},
 ];
 
 // The onboarding resolvers reach the network through their own copy of
 // @wordpress/api-fetch, so mock the fetch layer underneath instead of the module.
-global.fetch = jest.fn();
-
+global.fetch = vi.fn();
 const jsonResponse = ( data ) => ( {
 	status: 200,
 	ok: true,
@@ -91,13 +146,16 @@ const mockRequests = ( tasks ) => {
 		}
 		if ( url.includes( 'users/me' ) ) {
 			return Promise.resolve(
-				jsonResponse( { capabilities: { manage_woocommerce: true } } )
+				jsonResponse( {
+					capabilities: {
+						manage_woocommerce: true,
+					},
+				} )
 			);
 		}
 		return Promise.resolve( jsonResponse( {} ) );
 	} );
 };
-
 const waitForTaskListsResolution = async () => {
 	await waitFor( () =>
 		expect(
@@ -105,12 +163,10 @@ const waitForTaskListsResolution = async () => {
 		).toBe( true )
 	);
 };
-
 describe( 'Homescreen Layout stale task redirect (connected)', () => {
-	const historyReplace = jest.fn();
-
+	const historyReplace = vi.fn();
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 		getHistory.mockReturnValue( {
 			replace: historyReplace,
 		} );
@@ -125,37 +181,54 @@ describe( 'Homescreen Layout stale task redirect (connected)', () => {
 	// before any successful fetch has populated the task lists.
 	it( 'does not redirect and keeps the task URL when the fetch fails', async () => {
 		mockRequests( 'fail' );
-		render( <ConnectedLayout query={ { task: 'payments' } } /> );
-
+		render(
+			<ConnectedLayout
+				query={ {
+					task: 'payments',
+				} }
+			/>
+		);
 		await waitForTaskListsResolution();
 		expect( historyReplace ).not.toHaveBeenCalled();
 	} );
-
 	it( 'redirects home when the task matches no fetched task', async () => {
 		mockRequests( TASK_LISTS );
-		render( <ConnectedLayout query={ { task: 'shipping' } } /> );
-
+		render(
+			<ConnectedLayout
+				query={ {
+					task: 'shipping',
+				} }
+			/>
+		);
 		await waitFor( () =>
 			expect( historyReplace ).toHaveBeenCalledWith( 'home-path' )
 		);
 		expect( getNewPath ).toHaveBeenCalledWith( {}, '/', {} );
 	} );
-
 	it( 'does not redirect when the task exists', async () => {
 		mockRequests( TASK_LISTS );
-		render( <ConnectedLayout query={ { task: 'payments' } } /> );
-
+		render(
+			<ConnectedLayout
+				query={ {
+					task: 'payments',
+				} }
+			/>
+		);
 		await waitForTaskListsResolution();
 		expect( historyReplace ).not.toHaveBeenCalled();
 	} );
-
 	it( 'redirects home for a stale task when no task list is visible', async () => {
 		getAdminSetting.mockImplementation( ( name, fallback ) =>
 			name === 'visibleTaskListIds' ? [] : fallback
 		);
 		mockRequests( HIDDEN_TASK_LISTS );
-		render( <ConnectedLayout query={ { task: 'payments' } } /> );
-
+		render(
+			<ConnectedLayout
+				query={ {
+					task: 'payments',
+				} }
+			/>
+		);
 		await waitFor( () =>
 			expect( historyReplace ).toHaveBeenCalledWith( 'home-path' )
 		);

@@ -1,7 +1,9 @@
+import { describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 /**
@@ -9,14 +11,20 @@ import userEvent from '@testing-library/user-event';
  */
 import { useBlogPosts } from '../useBlogPosts';
 import { LearnMarketing } from '../LearnMarketing';
-
-jest.mock( '../useBlogPosts', () => ( {
-	useBlogPosts: jest.fn(),
-} ) );
-
+vi.mock( '../useBlogPosts', () => {
+	const mock = {
+		useBlogPosts: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'LearnMarketing component', () => {
 	it( 'should render placeholders when loading is in progress', async () => {
-		( useBlogPosts as jest.Mock ).mockReturnValue( {
+		( useBlogPosts as Mock ).mockReturnValue( {
 			isLoading: true,
 			error: undefined,
 			posts: [],
@@ -24,17 +32,22 @@ describe( 'LearnMarketing component', () => {
 		render( <LearnMarketing /> );
 
 		// Click on expand button to expand the card.
-		await userEvent.click(
-			screen.getByRole( 'button', { name: 'Expand' } )
-		);
+		await act( async () => {
+			// Click on expand button to expand the card.
+			await userEvent.click(
+				screen.getByRole( 'button', {
+					name: 'Expand',
+				} )
+			);
 
-		// should render three elements with the "progressbar" role:
+			// should render three elements with the "progressbar" role:
+			// two from the PlaceholderPostTile, and one in the card footer.
+		} ); // should render three elements with the "progressbar" role:
 		// two from the PlaceholderPostTile, and one in the card footer.
 		expect( screen.getAllByRole( 'progressbar' ) ).toHaveLength( 3 );
 	} );
-
 	it( 'should render an error message when there is an error', async () => {
-		( useBlogPosts as jest.Mock ).mockReturnValue( {
+		( useBlogPosts as Mock ).mockReturnValue( {
 			isLoading: false,
 			error: new Error(),
 			posts: [],
@@ -42,17 +55,20 @@ describe( 'LearnMarketing component', () => {
 		render( <LearnMarketing /> );
 
 		// Click on expand button to expand the card.
-		await userEvent.click(
-			screen.getByRole( 'button', { name: 'Expand' } )
-		);
-
+		await act( async () => {
+			// Click on expand button to expand the card.
+			await userEvent.click(
+				screen.getByRole( 'button', {
+					name: 'Expand',
+				} )
+			);
+		} );
 		expect(
 			screen.getByText( "Oops, our posts aren't loading right now" )
 		).toBeInTheDocument();
 	} );
-
 	it( 'should render "No posts yet" when loading is done and there are no posts', async () => {
-		( useBlogPosts as jest.Mock ).mockReturnValue( {
+		( useBlogPosts as Mock ).mockReturnValue( {
 			isLoading: false,
 			error: undefined,
 			posts: [],
@@ -60,15 +76,18 @@ describe( 'LearnMarketing component', () => {
 		render( <LearnMarketing /> );
 
 		// Click on expand button to expand the card.
-		await userEvent.click(
-			screen.getByRole( 'button', { name: 'Expand' } )
-		);
-
+		await act( async () => {
+			// Click on expand button to expand the card.
+			await userEvent.click(
+				screen.getByRole( 'button', {
+					name: 'Expand',
+				} )
+			);
+		} );
 		expect( screen.getByText( 'No posts yet' ) ).toBeInTheDocument();
 	} );
-
 	it( 'should render two posts in one page with pagination when loading is done and there are posts', async () => {
-		( useBlogPosts as jest.Mock ).mockReturnValue( {
+		( useBlogPosts as Mock ).mockReturnValue( {
 			isLoading: false,
 			error: undefined,
 			posts: [
@@ -112,11 +131,16 @@ describe( 'LearnMarketing component', () => {
 		render( <LearnMarketing /> );
 
 		// Click on expand button to expand the card.
-		await userEvent.click(
-			screen.getByRole( 'button', { name: 'Expand' } )
-		);
+		await act( async () => {
+			// Click on expand button to expand the card.
+			await userEvent.click(
+				screen.getByRole( 'button', {
+					name: 'Expand',
+				} )
+			);
 
-		// Assert that the first and second post title are in the page.
+			// Assert that the first and second post title are in the page.
+		} ); // Assert that the first and second post title are in the page.
 		expect(
 			screen.getByText( 'Grow Your Store with an Omnichannel Presence' )
 		).toBeInTheDocument();
@@ -127,11 +151,16 @@ describe( 'LearnMarketing component', () => {
 		).toBeInTheDocument();
 
 		// Click on the next page button in card footer.
-		await userEvent.click(
-			screen.getByRole( 'button', { name: 'Next Page' } )
-		);
+		await act( async () => {
+			// Click on the next page button in card footer.
+			await userEvent.click(
+				screen.getByRole( 'button', {
+					name: 'Next Page',
+				} )
+			);
 
-		// Assert that the third and fourth post title are in the page.
+			// Assert that the third and fourth post title are in the page.
+		} ); // Assert that the third and fourth post title are in the page.
 		expect(
 			screen.getByText(
 				'Ten Customer Retention Strategies to Boost Revenue for eCommerce Stores'

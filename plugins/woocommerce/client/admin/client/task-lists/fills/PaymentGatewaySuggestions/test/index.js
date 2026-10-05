@@ -1,3 +1,5 @@
+import { describe, expect, test, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -9,21 +11,43 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 
 import { PaymentGatewaySuggestions } from '../index';
-
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn(),
-	useDispatch: jest.fn().mockImplementation( () => ( {
-		updatePaymentGateway: jest.fn(),
-	} ) ),
-} ) );
-
-jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
-
-jest.mock( '~/utils/features', () => ( {
-	isFeatureEnabled: jest.fn(),
-} ) );
-
+vi.mock( '@wordpress/data', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/data' ) ),
+		useSelect: vi.fn(),
+		useDispatch: vi.fn().mockImplementation( () => ( {
+			updatePaymentGateway: vi.fn(),
+		} ) ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/tracks', () => {
+	const mock = {
+		recordEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '~/utils/features', () => {
+	const mock = {
+		isFeatureEnabled: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const paymentGatewaySuggestions = [
 	{
 		id: 'stripe',
@@ -98,38 +122,32 @@ const paymentGatewaySuggestions = [
 		category_additional: [ 'US' ],
 	},
 ];
-
 const paymentGatewaySuggestionsWithoutWCPay = paymentGatewaySuggestions.filter(
 	( p ) => ! p.id.startsWith( 'woocommerce_payments' )
 );
-
 describe( 'PaymentGatewaySuggestions', () => {
 	test( 'should render all payment gateways, including WCPay', () => {
-		const onComplete = jest.fn();
+		const onComplete = vi.fn();
 		const query = {};
 		useSelect.mockImplementation( () => ( {
 			isResolving: false,
-			getPaymentGateway: jest.fn(),
+			getPaymentGateway: vi.fn(),
 			paymentGatewaySuggestions,
 			countryCode: 'US',
 			installedPaymentGateways: [],
 		} ) );
-
 		const { container } = render(
 			<PaymentGatewaySuggestions
 				onComplete={ onComplete }
 				query={ query }
 			/>
 		);
-
 		const paymentTitleElements = container.querySelectorAll(
 			'.woocommerce-task-payment__title'
 		);
-
 		const paymentTitles = Array.from( paymentTitleElements ).map(
 			( e ) => e.textContent
 		);
-
 		expect( paymentTitles ).toEqual( [
 			'Stripe',
 			'PayPal Payments',
@@ -137,7 +155,6 @@ describe( 'PaymentGatewaySuggestions', () => {
 			'Cash on delivery',
 			'Direct bank transfer',
 		] );
-
 		expect(
 			container
 				.querySelector(
@@ -151,37 +168,31 @@ describe( 'PaymentGatewaySuggestions', () => {
 			container.querySelector( '.woocommerce-wcpay-bnpl-suggestion' )
 		).toBeFalsy();
 	} );
-
 	test( 'should render all payment gateways except WCPay', () => {
-		const onComplete = jest.fn();
+		const onComplete = vi.fn();
 		const query = {};
 		useSelect.mockImplementation( () => ( {
 			isResolving: false,
-			getPaymentGateway: jest.fn(),
+			getPaymentGateway: vi.fn(),
 			paymentGatewaySuggestions: paymentGatewaySuggestionsWithoutWCPay,
 			countryCode: 'US',
 			installedPaymentGateways: [],
 		} ) );
-
 		const { container } = render(
 			<PaymentGatewaySuggestions
 				onComplete={ onComplete }
 				query={ query }
 			/>
 		);
-
 		expect(
 			screen.getByText( 'Choose a payment provider' )
 		).toBeInTheDocument();
-
 		const paymentTitleElements = container.querySelectorAll(
 			'.woocommerce-task-payment__title > span:first-child'
 		);
-
 		const paymentTitles = Array.from( paymentTitleElements ).map(
 			( e ) => e.textContent
 		);
-
 		expect( paymentTitles ).toEqual( [
 			'Stripe',
 			'PayPal Payments',
@@ -190,39 +201,34 @@ describe( 'PaymentGatewaySuggestions', () => {
 			'Direct bank transfer',
 		] );
 	} );
-
 	test( 'should render the payment gateway offline options at the bottom', () => {
-		const onComplete = jest.fn();
+		const onComplete = vi.fn();
 		const query = {};
 		useSelect.mockImplementation( () => ( {
 			isResolving: false,
-			getPaymentGateway: jest.fn(),
+			getPaymentGateway: vi.fn(),
 			paymentGatewaySuggestions: paymentGatewaySuggestionsWithoutWCPay,
 			installedPaymentGateways: [],
 		} ) );
-
 		const { container } = render(
 			<PaymentGatewaySuggestions
 				onComplete={ onComplete }
 				query={ query }
 			/>
 		);
-
 		const paymentTitles = container.querySelectorAll(
 			'.woocommerce-task-payment__title'
 		);
-
 		expect( paymentTitles[ paymentTitles.length - 1 ].textContent ).toBe(
 			'Direct bank transfer'
 		);
 	} );
-
 	test( 'should have finish setup button for installed payment gateways', () => {
-		const onComplete = jest.fn();
+		const onComplete = vi.fn();
 		const query = {};
 		useSelect.mockImplementation( () => ( {
 			isResolving: false,
-			getPaymentGateway: jest.fn(),
+			getPaymentGateway: vi.fn(),
 			paymentGatewaySuggestions: paymentGatewaySuggestionsWithoutWCPay,
 			countryCode: 'US',
 			installedPaymentGateways: [
@@ -238,23 +244,20 @@ describe( 'PaymentGatewaySuggestions', () => {
 				},
 			],
 		} ) );
-
 		const { getByText } = render(
 			<PaymentGatewaySuggestions
 				onComplete={ onComplete }
 				query={ query }
 			/>
 		);
-
 		expect( getByText( 'Finish setup' ) ).toBeInTheDocument();
 	} );
-
 	test( 'should show "category_additional" gateways and WCPay BNPL after WCPay is set up', () => {
-		const onComplete = jest.fn();
+		const onComplete = vi.fn();
 		const query = {};
 		useSelect.mockImplementation( () => ( {
 			isResolving: false,
-			getPaymentGateway: jest.fn(),
+			getPaymentGateway: vi.fn(),
 			paymentGatewaySuggestions,
 			installedPaymentGateways: [
 				{
@@ -268,26 +271,21 @@ describe( 'PaymentGatewaySuggestions', () => {
 			],
 			countryCode: 'US', // Country with WCPay BNPL.
 		} ) );
-
 		const { container } = render(
 			<PaymentGatewaySuggestions
 				onComplete={ onComplete }
 				query={ query }
 			/>
 		);
-
 		expect(
 			screen.getByText( 'Additional payment options' )
 		).toBeInTheDocument();
-
 		const paymentTitleElements = container.querySelectorAll(
 			'.woocommerce-task-payment__title'
 		);
-
 		const paymentTitles = Array.from( paymentTitleElements ).map(
 			( e ) => e.textContent
 		);
-
 		expect( paymentTitles ).toEqual( [
 			'PayPal Payments',
 			'Eway',
@@ -300,13 +298,12 @@ describe( 'PaymentGatewaySuggestions', () => {
 			container.querySelector( '.woocommerce-wcpay-bnpl-suggestion' )
 		).toBeInTheDocument();
 	} );
-
 	test( 'should show "category_additional" gateways after a primary gateway (other than WCPay) is set up', () => {
-		const onComplete = jest.fn();
+		const onComplete = vi.fn();
 		const query = {};
 		useSelect.mockImplementation( () => ( {
 			isResolving: false,
-			getPaymentGateway: jest.fn(),
+			getPaymentGateway: vi.fn(),
 			paymentGatewaySuggestions,
 			installedPaymentGateways: [
 				{
@@ -322,26 +319,21 @@ describe( 'PaymentGatewaySuggestions', () => {
 			],
 			countryCode: 'US',
 		} ) );
-
 		const { container } = render(
 			<PaymentGatewaySuggestions
 				onComplete={ onComplete }
 				query={ query }
 			/>
 		);
-
 		expect(
 			screen.getByText( 'Additional payment options' )
 		).toBeInTheDocument();
-
 		const paymentTitleElements = container.querySelectorAll(
 			'.woocommerce-task-payment__title'
 		);
-
 		const paymentTitles = Array.from( paymentTitleElements ).map(
 			( e ) => e.textContent
 		);
-
 		expect( paymentTitles ).toEqual( [
 			'PayPal PaymentsSetup required',
 			'Eway',
@@ -349,13 +341,12 @@ describe( 'PaymentGatewaySuggestions', () => {
 			'Direct bank transfer',
 		] );
 	} );
-
 	test( 'should record event correctly when finish setup is clicked', () => {
-		const onComplete = jest.fn();
+		const onComplete = vi.fn();
 		const query = {};
 		useSelect.mockImplementation( () => ( {
 			isResolving: false,
-			getPaymentGateway: jest.fn(),
+			getPaymentGateway: vi.fn(),
 			paymentGatewaySuggestions: paymentGatewaySuggestionsWithoutWCPay,
 			countryCode: 'US',
 			installedPaymentGateways: [
@@ -371,51 +362,45 @@ describe( 'PaymentGatewaySuggestions', () => {
 				},
 			],
 		} ) );
-
 		render(
 			<PaymentGatewaySuggestions
 				onComplete={ onComplete }
 				query={ query }
 			/>
 		);
-
 		fireEvent.click( screen.getByText( 'Finish setup' ) );
 		expect( recordEvent ).toHaveBeenCalledWith( 'tasklist_payment_setup', {
 			selected: 'ppcp_gateway',
 		} );
 	} );
-
 	test( 'should record event correctly when Official Marketplace link is clicked', () => {
-		const onComplete = jest.fn();
+		const onComplete = vi.fn();
 		const query = {};
 		useSelect.mockImplementation( () => ( {
 			isResolving: false,
-			getPaymentGateway: jest.fn(),
+			getPaymentGateway: vi.fn(),
 			paymentGatewaySuggestions,
 			installedPaymentGateways: [],
 			countryCode: 'US',
 		} ) );
-
 		render(
 			<PaymentGatewaySuggestions
 				onComplete={ onComplete }
 				query={ query }
 			/>
 		);
-
 		fireEvent.click( screen.getByText( 'Other payment providers' ) );
 		fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
 		expect(
 			recordEvent.mock.calls[ recordEvent.mock.calls.length - 1 ]
 		).toEqual( [ 'tasklist_payment_see_more', {} ] );
 	} );
-
 	test( 'should record event correctly when WCPay BNPL Get started is clicked', () => {
-		const onComplete = jest.fn();
+		const onComplete = vi.fn();
 		const query = {};
 		useSelect.mockImplementation( () => ( {
 			isResolving: false,
-			getPaymentGateway: jest.fn(),
+			getPaymentGateway: vi.fn(),
 			paymentGatewaySuggestions,
 			installedPaymentGateways: [
 				{
@@ -429,14 +414,12 @@ describe( 'PaymentGatewaySuggestions', () => {
 			],
 			countryCode: 'US', // Country with WCPay BNPL.
 		} ) );
-
 		const { container } = render(
 			<PaymentGatewaySuggestions
 				onComplete={ onComplete }
 				query={ query }
 			/>
 		);
-
 		fireEvent.click(
 			container.querySelector(
 				'.woocommerce-wcpay-bnpl-suggestion__button'
@@ -446,24 +429,19 @@ describe( 'PaymentGatewaySuggestions', () => {
 			recordEvent.mock.calls[ recordEvent.mock.calls.length - 1 ]
 		).toEqual( [ 'tasklist_payments_wcpay_bnpl_click' ] );
 	} );
-
 	test( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', async () => {
-		const { isFeatureEnabled } = jest.requireMock( '~/utils/features' );
+		const { isFeatureEnabled } = await import( '~/utils/features' );
 		isFeatureEnabled.mockReturnValue( true );
-
 		const mockLocation = {
 			href: 'test',
 		};
-
 		mockLocation.href = 'test';
 		Object.defineProperty( global.window, 'location', {
 			value: mockLocation,
 		} );
-
 		render(
 			<PaymentGatewaySuggestions onComplete={ () => {} } query={ {} } />
 		);
-
 		fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
 		expect( mockLocation.href ).toContain(
 			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'

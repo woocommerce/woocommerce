@@ -1,7 +1,9 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
-import { renderHook } from '@testing-library/react-hooks/dom';
+import { renderHook } from '@testing-library/react';
 import { useSelect } from '@wordpress/data';
 import { TaskType } from '@woocommerce/data';
 
@@ -12,16 +14,16 @@ import { useTaskListsState } from '../use-tasklists-state';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 // Mock dependencies
-jest.mock( '@wordpress/data', () => {
-	const originalModule = jest.requireActual( '@wordpress/data' );
+vi.mock( '@wordpress/data', async () => {
+	const originalModule = await vi.importActual( '@wordpress/data' );
 
-	return {
+	return ( ( mock ) => ( { default: mock, ...mock } ) )( {
 		__esModule: true,
 		...originalModule,
-		useSelect: jest.fn(),
-	};
+		useSelect: vi.fn(),
+	} );
 } );
-jest.mock( '~/utils/admin-settings' );
+vi.mock( '~/utils/admin-settings' );
 
 describe( 'useTaskListsState', () => {
 	// Setup mock data
@@ -69,14 +71,14 @@ describe( 'useTaskListsState', () => {
 
 	beforeEach( () => {
 		// Reset all mocks before each test
-		jest.clearAllMocks();
-		( useSelect as jest.Mock ).mockImplementation( ( callback ) =>
+		vi.clearAllMocks();
+		( useSelect as Mock ).mockImplementation( ( callback ) =>
 			callback( () => ( {
-				getTaskList: jest.fn(),
+				getTaskList: vi.fn(),
 				hasFinishedResolution: () => true,
 			} ) )
 		);
-		( getAdminSetting as jest.Mock ).mockImplementation( ( setting ) => {
+		( getAdminSetting as Mock ).mockImplementation( ( setting ) => {
 			if ( setting === 'visibleTaskListIds' ) return [];
 			if ( setting === 'completedTaskListIds' ) return [];
 			return [];
@@ -84,7 +86,7 @@ describe( 'useTaskListsState', () => {
 	} );
 
 	it( 'should return default state when no task lists are visible', () => {
-		( getAdminSetting as jest.Mock ).mockImplementation( ( setting ) => {
+		( getAdminSetting as Mock ).mockImplementation( ( setting ) => {
 			if ( setting === 'visibleTaskListIds' ) return [];
 			if ( setting === 'completedTaskListIds' ) return [];
 			return [];
@@ -104,12 +106,12 @@ describe( 'useTaskListsState', () => {
 	} );
 
 	it( 'should return setup task list state when only setup is visible and not completed', () => {
-		( getAdminSetting as jest.Mock ).mockImplementation( ( setting ) => {
+		( getAdminSetting as Mock ).mockImplementation( ( setting ) => {
 			if ( setting === 'visibleTaskListIds' ) return [ 'setup' ];
 			if ( setting === 'completedTaskListIds' ) return [];
 			return [];
 		} );
-		( useSelect as jest.Mock ).mockImplementation( ( callback ) =>
+		( useSelect as Mock ).mockImplementation( ( callback ) =>
 			callback( () => ( {
 				getTaskList: () => mockSetupTaskList,
 				hasFinishedResolution: () => true,
@@ -130,12 +132,12 @@ describe( 'useTaskListsState', () => {
 	} );
 
 	it( 'should return extended task list state when only extended is visible and not completed', () => {
-		( getAdminSetting as jest.Mock ).mockImplementation( ( setting ) => {
+		( getAdminSetting as Mock ).mockImplementation( ( setting ) => {
 			if ( setting === 'visibleTaskListIds' ) return [ 'extended' ];
 			if ( setting === 'completedTaskListIds' ) return [];
 			return [];
 		} );
-		( useSelect as jest.Mock ).mockImplementation( ( callback ) =>
+		( useSelect as Mock ).mockImplementation( ( callback ) =>
 			callback( () => ( {
 				getTaskList: () => mockExtendedTaskList,
 				hasFinishedResolution: () => true,
@@ -161,13 +163,13 @@ describe( 'useTaskListsState', () => {
 	} );
 
 	it( 'should return full state when both task lists are visible and not completed', () => {
-		( getAdminSetting as jest.Mock ).mockImplementation( ( setting ) => {
+		( getAdminSetting as Mock ).mockImplementation( ( setting ) => {
 			if ( setting === 'visibleTaskListIds' )
 				return [ 'setup', 'extended' ];
 			if ( setting === 'completedTaskListIds' ) return [];
 			return [];
 		} );
-		( useSelect as jest.Mock ).mockImplementation( ( callback ) =>
+		( useSelect as Mock ).mockImplementation( ( callback ) =>
 			callback( () => ( {
 				getTaskList: ( id: string ) =>
 					id === 'setup' ? mockSetupTaskList : mockExtendedTaskList,
@@ -189,13 +191,13 @@ describe( 'useTaskListsState', () => {
 	} );
 
 	it( 'should handle loading state correctly', () => {
-		( getAdminSetting as jest.Mock ).mockImplementation( ( setting ) => {
+		( getAdminSetting as Mock ).mockImplementation( ( setting ) => {
 			if ( setting === 'visibleTaskListIds' )
 				return [ 'setup', 'extended' ];
 			if ( setting === 'completedTaskListIds' ) return [];
 			return [];
 		} );
-		( useSelect as jest.Mock ).mockImplementation( ( callback ) =>
+		( useSelect as Mock ).mockImplementation( ( callback ) =>
 			callback( () => ( {
 				getTaskList: () => null,
 				hasFinishedResolution: () => false,
@@ -208,13 +210,13 @@ describe( 'useTaskListsState', () => {
 	} );
 
 	it( 'should handle completed task lists correctly', () => {
-		( getAdminSetting as jest.Mock ).mockImplementation( ( setting ) => {
+		( getAdminSetting as Mock ).mockImplementation( ( setting ) => {
 			if ( setting === 'visibleTaskListIds' )
 				return [ 'setup', 'extended' ];
 			if ( setting === 'completedTaskListIds' ) return [ 'setup' ];
 			return [];
 		} );
-		( useSelect as jest.Mock ).mockImplementation( ( callback ) =>
+		( useSelect as Mock ).mockImplementation( ( callback ) =>
 			callback( () => ( {
 				getTaskList: () => ( {
 					...mockSetupTaskList,
@@ -238,14 +240,14 @@ describe( 'useTaskListsState', () => {
 	} );
 
 	it( 'should respect the options parameter when task lists are completed', () => {
-		( getAdminSetting as jest.Mock ).mockImplementation( ( setting ) => {
+		( getAdminSetting as Mock ).mockImplementation( ( setting ) => {
 			if ( setting === 'visibleTaskListIds' )
 				return [ 'setup', 'extended' ];
 			if ( setting === 'completedTaskListIds' )
 				return [ 'setup', 'extended' ];
 			return [];
 		} );
-		( useSelect as jest.Mock ).mockImplementation( ( callback ) =>
+		( useSelect as Mock ).mockImplementation( ( callback ) =>
 			callback( () => ( {
 				getTaskList: () => ( {
 					...mockSetupTaskList,

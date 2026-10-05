@@ -1,7 +1,9 @@
+import { afterEach, beforeAll, describe, expect, it } from 'vitest';
+
 /**
  * External dependencies
  */
-import { renderHook, act } from '@testing-library/react-hooks/dom';
+import { renderHook, act } from '@testing-library/react';
 
 /**
  * Internal dependencies

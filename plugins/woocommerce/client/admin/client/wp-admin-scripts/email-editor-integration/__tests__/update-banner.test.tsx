@@ -1,3 +1,5 @@
+import { afterEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -33,19 +35,19 @@ interface BannerOverrides {
 	canReview?: boolean;
 	disabledReason?: 'dirty' | 'read_only' | 'has_conflicts' | null;
 	expanded?: boolean;
-	onApply?: jest.Mock;
-	onReview?: jest.Mock;
-	onDismiss?: jest.Mock;
-	onAutoDismiss?: jest.Mock;
-	onToggleExpanded?: jest.Mock;
+	onApply?: Mock;
+	onReview?: Mock;
+	onDismiss?: Mock;
+	onAutoDismiss?: Mock;
+	onToggleExpanded?: Mock;
 }
 
 function renderBanner( overrides: BannerOverrides = {} ) {
-	const onApply = overrides.onApply ?? jest.fn();
-	const onReview = overrides.onReview ?? jest.fn();
-	const onDismiss = overrides.onDismiss ?? jest.fn();
-	const onAutoDismiss = overrides.onAutoDismiss ?? jest.fn();
-	const onToggleExpanded = overrides.onToggleExpanded ?? jest.fn();
+	const onApply = overrides.onApply ?? vi.fn();
+	const onReview = overrides.onReview ?? vi.fn();
+	const onDismiss = overrides.onDismiss ?? vi.fn();
+	const onAutoDismiss = overrides.onAutoDismiss ?? vi.fn();
+	const onToggleExpanded = overrides.onToggleExpanded ?? vi.fn();
 
 	const result = render(
 		<UpdateBanner
@@ -79,7 +81,7 @@ function renderBanner( overrides: BannerOverrides = {} ) {
 
 describe( 'UpdateBanner', () => {
 	afterEach( () => {
-		jest.useRealTimers();
+		vi.useRealTimers();
 	} );
 
 	it( 'renders the default state with title, summary subtitle, and actions', () => {
@@ -209,9 +211,9 @@ describe( 'UpdateBanner', () => {
 	} );
 
 	it( 'renders the success morph and auto-dismisses after 2s via onAutoDismiss', () => {
-		jest.useFakeTimers();
-		const onDismiss = jest.fn();
-		const onAutoDismiss = jest.fn();
+		vi.useFakeTimers();
+		const onDismiss = vi.fn();
+		const onAutoDismiss = vi.fn();
 		renderBanner( { applyState: 'applied', onDismiss, onAutoDismiss } );
 
 		expect( screen.getByText( 'Template updated' ) ).toBeInTheDocument();
@@ -220,7 +222,7 @@ describe( 'UpdateBanner', () => {
 		).toBeInTheDocument();
 
 		act( () => {
-			jest.advanceTimersByTime( 2000 );
+			vi.advanceTimersByTime( 2000 );
 		} );
 		// Spec §9.2: success auto-dismiss does NOT fire `_dismissed`. The
 		// banner routes through the no-event path so the hook can skip
@@ -230,8 +232,8 @@ describe( 'UpdateBanner', () => {
 	} );
 
 	it( 'success-state × button routes to onAutoDismiss, not onDismiss', () => {
-		const onDismiss = jest.fn();
-		const onAutoDismiss = jest.fn();
+		const onDismiss = vi.fn();
+		const onAutoDismiss = vi.fn();
 		renderBanner( { applyState: 'applied', onDismiss, onAutoDismiss } );
 
 		fireEvent.click(
@@ -244,8 +246,8 @@ describe( 'UpdateBanner', () => {
 	} );
 
 	it( 'renders the failure morph with role=alert and does not auto-dismiss', () => {
-		jest.useFakeTimers();
-		const onDismiss = jest.fn();
+		vi.useFakeTimers();
+		const onDismiss = vi.fn();
 		const { container } = renderBanner( {
 			applyState: 'failed',
 			onDismiss,
@@ -263,7 +265,7 @@ describe( 'UpdateBanner', () => {
 		expect( container.querySelector( '[role="alert"]' ) ).not.toBeNull();
 
 		act( () => {
-			jest.advanceTimersByTime( 5000 );
+			vi.advanceTimersByTime( 5000 );
 		} );
 		expect( onDismiss ).not.toHaveBeenCalled();
 	} );
@@ -277,10 +279,10 @@ describe( 'UpdateBanner', () => {
 	} );
 
 	it( 'fires the click callbacks for Apply, Review, and Dismiss', () => {
-		const onApply = jest.fn();
-		const onReview = jest.fn();
-		const onDismiss = jest.fn();
-		const onAutoDismiss = jest.fn();
+		const onApply = vi.fn();
+		const onReview = vi.fn();
+		const onDismiss = vi.fn();
+		const onAutoDismiss = vi.fn();
 		renderBanner( { onApply, onReview, onDismiss, onAutoDismiss } );
 
 		fireEvent.click( screen.getByRole( 'button', { name: /^apply$/i } ) );
@@ -300,8 +302,8 @@ describe( 'UpdateBanner', () => {
 	} );
 
 	it( 'failure-state × routes to onDismiss (Tracks event fires)', () => {
-		const onDismiss = jest.fn();
-		const onAutoDismiss = jest.fn();
+		const onDismiss = vi.fn();
+		const onAutoDismiss = vi.fn();
 		renderBanner( { applyState: 'failed', onDismiss, onAutoDismiss } );
 
 		fireEvent.click(
