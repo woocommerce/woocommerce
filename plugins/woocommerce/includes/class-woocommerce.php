@@ -276,10 +276,21 @@ final class WooCommerce {
 	 * WooCommerce Constructor.
 	 */
 	public function __construct() {
+		do_action( 'qm/start', 'WooCommerce::__construct/define_constants' );
 		$this->define_constants();
+		do_action( 'qm/stop', 'WooCommerce::__construct/define_constants' );
+
+		do_action( 'qm/start', 'WooCommerce::__construct/define_tables' );
 		$this->define_tables();
+		do_action( 'qm/stop', 'WooCommerce::__construct/define_tables' );
+
+		do_action( 'qm/start', 'WooCommerce::__construct/includes' );
 		$this->includes();
+		do_action( 'qm/stop', 'WooCommerce::__construct/includes' );
+
+		do_action( 'qm/start', 'WooCommerce::__construct/init_hooks' );
 		$this->init_hooks();
+		do_action( 'qm/stop', 'WooCommerce::__construct/init_hooks' );
 	}
 
 	/**
@@ -375,6 +386,8 @@ final class WooCommerce {
 		add_filter( 'wp_plugin_dependencies_slug', array( $this, 'convert_woocommerce_slug' ) );
 		add_filter( 'woocommerce_register_log_handlers', array( $this, 'register_remote_log_handler' ) );
 
+		do_action( 'qm/start', 'WooCommerce::__construct/init_hooks/DI-get-register' );
+
 		// These classes set up hooks on instantiation.
 		$container = wc_get_container();
 		$container->get( ProductDownloadDirectories::class );
@@ -453,6 +466,8 @@ final class WooCommerce {
 
 		// Integration point between legacy reports and orders APIs (the reports caches invalidation focused).
 		\WC_Admin_Reports::register_orders_hook_handlers();
+
+		do_action( 'qm/stop', 'WooCommerce::__construct/init_hooks/DI-get-register' );
 	}
 
 	/**
