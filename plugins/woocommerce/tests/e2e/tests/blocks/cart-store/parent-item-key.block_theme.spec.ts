@@ -73,6 +73,9 @@ test.describe( 'ProductButton in-cart count', () => {
 
 		expect( await readServerRenderedButtonText() ).toBe( 'Add to cart' );
 		await page.goto( postUrl );
+		// The server renders the button hidden and the client store reveals it, so
+		// waiting for it to be visible makes the next text check read the hydrated count.
+		await expect( addToCartButton ).toBeVisible();
 		await expect( addToCartButton ).toHaveText( 'Add to cart' );
 
 		await addToCartButton.click();
@@ -80,6 +83,7 @@ test.describe( 'ProductButton in-cart count', () => {
 
 		expect( await readServerRenderedButtonText() ).toBe( '1 in cart' );
 		await page.reload();
+		await expect( addToCartButton ).toBeVisible();
 		await expect( addToCartButton ).toHaveText( '1 in cart' );
 	} );
 } );
