@@ -53,7 +53,7 @@ test( 'Shortcode checkout shows or hides the State field for the selected countr
 	// Lithuania has no state list and a required State.
 	await country.selectOption( 'LT' );
 	await expect( stateRow ).toBeVisible();
-	await expect( stateRow ).toHaveClass( /validate-required/ );
+	await expect( stateRow ).toContainClass( 'validate-required' );
 
 	// A locale that hides State still hides it.
 	await country.selectOption( 'CY' );
