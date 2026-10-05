@@ -1,3 +1,5 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -196,9 +198,9 @@ describe( 'getReportChartData()', () => {
 			totalResults: 1,
 		};
 		const selector = {
-			getReportStats: jest.fn( () => stats ),
-			getReportStatsError: jest.fn( () => undefined ),
-			isResolving: jest.fn( () => false ),
+			getReportStats: vi.fn( () => stats ),
+			getReportStatsError: vi.fn( () => undefined ),
+			isResolving: vi.fn( () => false ),
 		};
 		const options = {
 			endpoint: 'customers' as const,
@@ -238,11 +240,11 @@ describe( 'getReportChartData()', () => {
 			{ data: { intervals: [ { interval: 'page-3' } ] } },
 		];
 		const selector = {
-			getReportStats: jest.fn(
+			getReportStats: vi.fn(
 				( _endpoint, query ) => responses[ ( query.page || 1 ) - 1 ]
 			),
-			getReportStatsError: jest.fn( () => undefined ),
-			isResolving: jest.fn( () => false ),
+			getReportStatsError: vi.fn( () => undefined ),
+			isResolving: vi.fn( () => false ),
 		};
 		const options = {
 			endpoint: 'orders' as const,

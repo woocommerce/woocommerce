@@ -1,5 +1,7 @@
+import { describe, expect, it } from 'vitest';
+
 /**
- * @jest-environment node
+ * @vitest-environment node
  */
 
 /**

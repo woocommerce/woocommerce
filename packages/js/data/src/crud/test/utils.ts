@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * Internal dependencies
  */
@@ -72,7 +74,7 @@ describe( 'utils', () => {
 
 	it( 'should apply the namespace as an argument to a given function', () => {
 		const namespace = 'test/namespace';
-		const mockedCallback = jest.fn();
+		const mockedCallback = vi.fn();
 		const wrappedFunction = applyNamespace( mockedCallback, namespace );
 		wrappedFunction( 'a' );
 
