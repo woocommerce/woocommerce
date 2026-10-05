@@ -27,36 +27,42 @@ describe( 'pluginInstallerMachine', () => {
 		jest.resetAllMocks();
 	} );
 
-	it( 'records slug-indexed installation time while preserving the alternate plugin key', async () => {
-		const machineUnderTest = pluginInstallerMachine.provide( {
-			...mockConfig,
-			actors: {
-				installPlugin: fromPromise( async () => ( {
-					data: {
-						install_time: { mailpoet: 4000 },
-					},
-				} ) ),
-			},
-		} );
-		const service = createActor( machineUnderTest, {
-			input: {
-				selectedPlugins: [ 'mailpoet:alt' ],
-				pluginsAvailable: [],
-			},
-		} ).start();
+	it.each( [
+		[ 'mailpoet:alt', 'mailpoet', 4000 ],
+		[ 'woocommerce-services:tax', 'woocommerce-services', 0 ],
+	] )(
+		'preserves trunk installation timing for %s',
+		async ( plugin, slug, installTime ) => {
+			const machineUnderTest = pluginInstallerMachine.provide( {
+				...mockConfig,
+				actors: {
+					installPlugin: fromPromise( async () => ( {
+						data: {
+							install_time: { [ slug ]: 4000 },
+						},
+					} ) ),
+				},
+			} );
+			const service = createActor( machineUnderTest, {
+				input: {
+					selectedPlugins: [ plugin ],
+					pluginsAvailable: [],
+				},
+			} ).start();
 
-		try {
-			const snapshot = await waitFor( service, ( snap ) =>
-				snap.matches( 'reportSuccess' )
-			);
+			try {
+				const snapshot = await waitFor( service, ( snap ) =>
+					snap.matches( 'reportSuccess' )
+				);
 
-			expect( snapshot.context.installedPlugins ).toEqual( [
-				{ plugin: 'mailpoet:alt', installTime: 4000 },
-			] );
-		} finally {
-			service.stop();
+				expect( snapshot.context.installedPlugins ).toEqual( [
+					{ plugin, installTime },
+				] );
+			} finally {
+				service.stop();
+			}
 		}
-	} );
+	);
 
 	it( 'when given one plugin it should call the installPlugin service once', async () => {
 		const mockInstallPlugin = jest.fn();
