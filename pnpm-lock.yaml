@@ -31,8 +31,8 @@ catalogs:
       specifier: 5.56.0
       version: 5.56.0
     '@wordpress/prettier-config':
-      specifier: 4.49.0
-      version: 4.49.0
+      specifier: 4.56.0
+      version: 4.56.0
     postcss:
       specifier: ^8.5.26
       version: 8.5.26
@@ -262,7 +262,7 @@ importers:
         version: link:tools/monorepo-utils
       '@wordpress/prettier-config':
         specifier: catalog:tooling
-        version: 4.49.0(wp-prettier@3.0.3)
+        version: 4.56.0(wp-prettier@3.9.6)
       babel-loader:
         specifier: 9.2.x
         version: 9.2.1(@babel/core@7.25.7)(webpack@5.97.1(@swc/core@1.15.24))
@@ -303,8 +303,8 @@ importers:
         specifier: 4.3.x
         version: 4.3.0(postcss@8.5.26)(webpack@5.97.1(@swc/core@1.15.24))
       prettier:
-        specifier: npm:wp-prettier@3.0.3
-        version: wp-prettier@3.0.3
+        specifier: npm:wp-prettier@3.9.6
+        version: wp-prettier@3.9.6
       regenerator-runtime:
         specifier: ^0.13.11
         version: 0.13.11
@@ -1407,8 +1407,8 @@ importers:
         specifier: 29.5.x
         version: 29.5.0
       prettier:
-        specifier: npm:wp-prettier@3.0.3
-        version: wp-prettier@3.0.3
+        specifier: npm:wp-prettier@3.9.6
+        version: wp-prettier@3.9.6
       react:
         specifier: 18.3.x
         version: 18.3.1
@@ -1441,13 +1441,13 @@ importers:
     dependencies:
       '@wordpress/eslint-plugin':
         specifier: 25.6.0
-        version: 25.6.0(@babel/core@7.25.7)(@types/eslint@9.6.1)(@types/react@18.3.28)(@typescript-eslint/eslint-plugin@8.64.0(@typescript-eslint/parser@8.64.0(eslint@10.7.0(jiti@2.6.1))(typescript@5.7.3))(eslint@10.7.0(jiti@2.6.1))(typescript@5.7.3))(@typescript-eslint/parser@8.64.0(eslint@10.7.0(jiti@2.6.1))(typescript@5.7.3))(eslint@10.7.0(jiti@2.6.1))(jest@29.7.0(@types/node@24.12.2)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))(typescript@5.7.3)(wp-prettier@3.0.3)
+        version: 25.6.0(@babel/core@7.25.7)(@types/eslint@9.6.1)(@types/react@18.3.28)(@typescript-eslint/eslint-plugin@8.64.0(@typescript-eslint/parser@8.64.0(eslint@10.7.0(jiti@2.6.1))(typescript@5.7.3))(eslint@10.7.0(jiti@2.6.1))(typescript@5.7.3))(@typescript-eslint/parser@8.64.0(eslint@10.7.0(jiti@2.6.1))(typescript@5.7.3))(eslint@10.7.0(jiti@2.6.1))(jest@29.7.0(@types/node@24.12.2)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))(typescript@5.7.3)(wp-prettier@3.9.6)
       eslint-plugin-testing-library:
         specifier: ^7.16.2
         version: 7.16.2(eslint@10.7.0(jiti@2.6.1))(typescript@5.7.3)
       prettier:
-        specifier: npm:wp-prettier@3.0.3
-        version: wp-prettier@3.0.3
+        specifier: npm:wp-prettier@3.9.6
+        version: wp-prettier@3.9.6
       typescript-eslint:
         specifier: ^8.63.0
         version: 8.64.0(eslint@10.7.0(jiti@2.6.1))(typescript@5.7.3)
@@ -2586,8 +2586,8 @@ importers:
         specifier: 0.0.27
         version: 0.0.27
       prettier:
-        specifier: npm:wp-prettier@3.0.3
-        version: wp-prettier@3.0.3
+        specifier: npm:wp-prettier@3.9.6
+        version: wp-prettier@3.9.6
       rimraf:
         specifier: 5.0.5
         version: 5.0.5
@@ -2692,8 +2692,8 @@ importers:
         specifier: ^16.5.0
         version: 16.5.0
       prettier:
-        specifier: npm:wp-prettier@3.0.3
-        version: wp-prettier@3.0.3
+        specifier: npm:wp-prettier@3.9.6
+        version: wp-prettier@3.9.6
       react:
         specifier: 18.3.x
         version: 18.3.1
@@ -3170,8 +3170,8 @@ importers:
         specifier: 4.3.x
         version: 4.3.0(postcss@8.5.26)(webpack@5.97.1(@swc/core@1.15.24))
       prettier:
-        specifier: npm:wp-prettier@3.0.3
-        version: wp-prettier@3.0.3
+        specifier: npm:wp-prettier@3.9.6
+        version: wp-prettier@3.9.6
       promptly:
         specifier: ^3.2.0
         version: 3.2.0
@@ -3403,16 +3403,16 @@ importers:
         version: 1.63.0
       '@storybook/addon-a11y':
         specifier: 10.5.10
-        version: 10.5.10(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3))
+        version: 10.5.10(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6))
       '@storybook/addon-docs':
         specifier: 10.5.10
-        version: 10.5.10(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(esbuild@0.24.2)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3))(webpack@5.97.1)
+        version: 10.5.10(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(esbuild@0.24.2)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6))(webpack@5.97.1)
       '@storybook/addon-links':
         specifier: 10.5.10
-        version: 10.5.10(@types/react@18.3.28)(react@18.3.1)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3))
+        version: 10.5.10(@types/react@18.3.28)(react@18.3.1)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6))
       '@storybook/react-webpack5':
         specifier: 10.5.10
-        version: 10.5.10(@swc/core@1.15.24)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(esbuild@0.24.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3))(typescript@5.7.3)(webpack-cli@5.1.4)
+        version: 10.5.10(@swc/core@1.15.24)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(esbuild@0.24.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6))(typescript@5.7.3)(webpack-cli@5.1.4)
       '@testing-library/dom':
         specifier: 9.3.3
         version: 9.3.3
@@ -3693,8 +3693,8 @@ importers:
         specifier: 4.3.x
         version: 4.3.0(postcss@8.5.26)(webpack@5.97.1(@swc/core@1.15.24))
       prettier:
-        specifier: npm:wp-prettier@3.0.3
-        version: wp-prettier@3.0.3
+        specifier: npm:wp-prettier@3.9.6
+        version: wp-prettier@3.9.6
       progress-bar-webpack-plugin:
         specifier: 2.1.x
         version: 2.1.0(webpack@5.97.1)
@@ -3721,7 +3721,7 @@ importers:
         version: 10.5.2(sass@1.69.5)(webpack@5.97.1(@swc/core@1.15.24))
       storybook:
         specifier: 10.5.10
-        version: 10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3)
+        version: 10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6)
       stylelint:
         specifier: ^16.9.0
         version: 16.26.1(typescript@5.7.3)
@@ -9701,12 +9701,6 @@ packages:
     peerDependencies:
       react: ^18.0.0
       react-dom: ^18.0.0
-
-  '@wordpress/prettier-config@4.49.0':
-    resolution: {integrity: sha512-yP4hm2m2Hxv3I7HI5lxbrCmh95Db4QWcGJGLq/fysepbLjTnqnMIHRs5p0/QoRMV/MhwFi8vMkNmmQYJt386ug==}
-    engines: {node: '>=18.12.0', npm: '>=8.19.2'}
-    peerDependencies:
-      prettier: '>=3'
 
   '@wordpress/prettier-config@4.56.0':
     resolution: {integrity: sha512-FTiY8VRrKVcB2FNxFsALoe8TC0ilpIzYdiRT+VaS87HlEF99L5UfZoGT7gL2VhdEhkNCS9FPtk9k2xGPok/WJg==}
@@ -19112,8 +19106,8 @@ packages:
   wordwrap@1.0.0:
     resolution: {integrity: sha512-gvVzJFlPycKc5dZN4yPkP8w7Dc37BtP1yczEneOb4uq34pXZcvrtRTmWV8W+Ume+XCxKgbjM+nevkyFPMybd4Q==}
 
-  wp-prettier@3.0.3:
-    resolution: {integrity: sha512-X4UlrxDTH8oom9qXlcjnydsjAOD2BmB6yFmvS4Z2zdTzqqpRWb+fbqrH412+l+OUXmbzJlSXjlMFYPgYG12IAA==}
+  wp-prettier@3.9.6:
+    resolution: {integrity: sha512-rKjrWazF+8QexwTG4Y1Xmnnnp9SDNvaakDtXTRDHxhyudrelGQ5tqoviFtGUuE4fvMs4ck3pmgrZ2Ap202GTIQ==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -24147,11 +24141,11 @@ snapshots:
       axe-core: 4.11.3
       storybook: 10.5.10(@types/react@18.3.28)(prettier@2.8.8)(react@18.3.1)
 
-  '@storybook/addon-a11y@10.5.10(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3))':
+  '@storybook/addon-a11y@10.5.10(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6))':
     dependencies:
       '@storybook/global': 5.0.0
       axe-core: 4.11.3
-      storybook: 10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3)
+      storybook: 10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6)
 
   '@storybook/addon-docs@10.5.10(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(esbuild@0.24.2)(storybook@10.5.10(@types/react@18.3.28)(prettier@2.8.8)(react@18.3.1))(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.24.2))':
     dependencies:
@@ -24191,15 +24185,15 @@ snapshots:
       - vite
       - webpack
 
-  '@storybook/addon-docs@10.5.10(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(esbuild@0.24.2)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3))(webpack@5.97.1)':
+  '@storybook/addon-docs@10.5.10(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(esbuild@0.24.2)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6))(webpack@5.97.1)':
     dependencies:
       '@mdx-js/react': 3.1.1(@types/react@18.3.28)(react@18.3.1)
-      '@storybook/csf-plugin': 10.5.10(esbuild@0.24.2)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3))(webpack@5.97.1)
+      '@storybook/csf-plugin': 10.5.10(esbuild@0.24.2)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6))(webpack@5.97.1)
       '@storybook/icons': 2.1.0(react@18.3.1)
-      '@storybook/react-dom-shim': 10.5.10(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3))
+      '@storybook/react-dom-shim': 10.5.10(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6))
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      storybook: 10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3)
+      storybook: 10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6)
       ts-dedent: 2.2.0
     optionalDependencies:
       '@types/react': 18.3.28
@@ -24218,10 +24212,10 @@ snapshots:
       '@types/react': 18.3.28
       react: 18.3.1
 
-  '@storybook/addon-links@10.5.10(@types/react@18.3.28)(react@18.3.1)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3))':
+  '@storybook/addon-links@10.5.10(@types/react@18.3.28)(react@18.3.1)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6))':
     dependencies:
       '@storybook/global': 5.0.0
-      storybook: 10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3)
+      storybook: 10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6)
     optionalDependencies:
       '@types/react': 18.3.28
       react: 18.3.1
@@ -24282,9 +24276,9 @@ snapshots:
       - uglify-js
       - webpack-cli
 
-  '@storybook/builder-webpack5@10.5.10(@swc/core@1.15.24)(esbuild@0.24.2)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3))(typescript@5.7.3)(webpack-cli@5.1.4)':
+  '@storybook/builder-webpack5@10.5.10(@swc/core@1.15.24)(esbuild@0.24.2)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6))(typescript@5.7.3)(webpack-cli@5.1.4)':
     dependencies:
-      '@storybook/core-webpack': 10.5.10(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3))
+      '@storybook/core-webpack': 10.5.10(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6))
       case-sensitive-paths-webpack-plugin: 2.4.0
       cjs-module-lexer: 1.4.3
       css-loader: 7.1.4(webpack@5.97.1)
@@ -24293,7 +24287,7 @@ snapshots:
       html-webpack-plugin: 5.6.6(webpack@5.97.1)
       magic-string: 0.30.21
       semver: 7.8.5
-      storybook: 10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3)
+      storybook: 10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6)
       style-loader: 4.0.0(webpack@5.97.1)
       terser-webpack-plugin: 5.4.0(@swc/core@1.15.24)(esbuild@0.24.2)(webpack@5.97.1)
       ts-dedent: 2.2.0
@@ -24343,9 +24337,9 @@ snapshots:
       storybook: 10.5.10(@types/react@18.3.28)(prettier@2.8.8)(react@18.3.1)
       ts-dedent: 2.2.0
 
-  '@storybook/core-webpack@10.5.10(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3))':
+  '@storybook/core-webpack@10.5.10(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6))':
     dependencies:
-      storybook: 10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3)
+      storybook: 10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6)
       ts-dedent: 2.2.0
 
   '@storybook/csf-plugin@10.5.10(esbuild@0.24.2)(storybook@10.5.10(@types/react@18.3.28)(prettier@2.8.8)(react@18.3.1))(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.24.2))':
@@ -24364,9 +24358,9 @@ snapshots:
       esbuild: 0.24.2
       webpack: 5.97.1(@swc/core@1.15.24)(esbuild@0.24.2)(webpack-cli@5.1.4)
 
-  '@storybook/csf-plugin@10.5.10(esbuild@0.24.2)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3))(webpack@5.97.1)':
+  '@storybook/csf-plugin@10.5.10(esbuild@0.24.2)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6))(webpack@5.97.1)':
     dependencies:
-      storybook: 10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3)
+      storybook: 10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6)
       unplugin: 2.3.11
     optionalDependencies:
       esbuild: 0.24.2
@@ -24424,9 +24418,9 @@ snapshots:
       - uglify-js
       - webpack-cli
 
-  '@storybook/preset-react-webpack@10.5.10(@swc/core@1.15.24)(esbuild@0.24.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3))(typescript@5.7.3)(webpack-cli@5.1.4)':
+  '@storybook/preset-react-webpack@10.5.10(@swc/core@1.15.24)(esbuild@0.24.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6))(typescript@5.7.3)(webpack-cli@5.1.4)':
     dependencies:
-      '@storybook/core-webpack': 10.5.10(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3))
+      '@storybook/core-webpack': 10.5.10(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6))
       '@storybook/react-docgen-typescript-plugin': 1.0.6--canary.9.0c3f3b7.0(typescript@5.7.3)(webpack@5.97.1)
       '@types/semver': 7.7.1
       magic-string: 0.30.21
@@ -24435,7 +24429,7 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
       resolve: 1.22.12
       semver: 7.8.5
-      storybook: 10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3)
+      storybook: 10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6)
       tsconfig-paths: 4.2.0
       webpack: 5.97.1(@swc/core@1.15.24)(esbuild@0.24.2)(webpack-cli@5.1.4)
     optionalDependencies:
@@ -24507,11 +24501,11 @@ snapshots:
       '@types/react': 18.3.28
       '@types/react-dom': 18.3.7(@types/react@18.3.28)
 
-  '@storybook/react-dom-shim@10.5.10(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3))':
+  '@storybook/react-dom-shim@10.5.10(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6))':
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      storybook: 10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3)
+      storybook: 10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6)
     optionalDependencies:
       '@types/react': 18.3.28
       '@types/react-dom': 18.3.7(@types/react@18.3.28)
@@ -24556,14 +24550,14 @@ snapshots:
       - uglify-js
       - webpack-cli
 
-  '@storybook/react-webpack5@10.5.10(@swc/core@1.15.24)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(esbuild@0.24.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3))(typescript@5.7.3)(webpack-cli@5.1.4)':
+  '@storybook/react-webpack5@10.5.10(@swc/core@1.15.24)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(esbuild@0.24.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6))(typescript@5.7.3)(webpack-cli@5.1.4)':
     dependencies:
-      '@storybook/builder-webpack5': 10.5.10(@swc/core@1.15.24)(esbuild@0.24.2)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3))(typescript@5.7.3)(webpack-cli@5.1.4)
-      '@storybook/preset-react-webpack': 10.5.10(@swc/core@1.15.24)(esbuild@0.24.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3))(typescript@5.7.3)(webpack-cli@5.1.4)
-      '@storybook/react': 10.5.10(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3))(typescript@5.7.3)
+      '@storybook/builder-webpack5': 10.5.10(@swc/core@1.15.24)(esbuild@0.24.2)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6))(typescript@5.7.3)(webpack-cli@5.1.4)
+      '@storybook/preset-react-webpack': 10.5.10(@swc/core@1.15.24)(esbuild@0.24.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6))(typescript@5.7.3)(webpack-cli@5.1.4)
+      '@storybook/react': 10.5.10(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6))(typescript@5.7.3)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      storybook: 10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3)
+      storybook: 10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6)
     optionalDependencies:
       typescript: 5.7.3
     transitivePeerDependencies:
@@ -24612,15 +24606,15 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@storybook/react@10.5.10(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3))(typescript@5.7.3)':
+  '@storybook/react@10.5.10(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6))(typescript@5.7.3)':
     dependencies:
       '@storybook/global': 5.0.0
-      '@storybook/react-dom-shim': 10.5.10(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3))
+      '@storybook/react-dom-shim': 10.5.10(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6))
       react: 18.3.1
       react-docgen: 8.0.3
       react-docgen-typescript: 2.4.0(typescript@5.7.3)
       react-dom: 18.3.1(react@18.3.1)
-      storybook: 10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3)
+      storybook: 10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6)
     optionalDependencies:
       '@types/react': 18.3.28
       '@types/react-dom': 18.3.7(@types/react@18.3.28)
@@ -28306,14 +28300,14 @@ snapshots:
 
   '@wordpress/escape-html@3.50.0': {}
 
-  '@wordpress/eslint-plugin@25.6.0(@babel/core@7.25.7)(@types/eslint@9.6.1)(@types/react@18.3.28)(@typescript-eslint/eslint-plugin@8.64.0(@typescript-eslint/parser@8.64.0(eslint@10.7.0(jiti@2.6.1))(typescript@5.7.3))(eslint@10.7.0(jiti@2.6.1))(typescript@5.7.3))(@typescript-eslint/parser@8.64.0(eslint@10.7.0(jiti@2.6.1))(typescript@5.7.3))(eslint@10.7.0(jiti@2.6.1))(jest@29.7.0(@types/node@24.12.2)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))(typescript@5.7.3)(wp-prettier@3.0.3)':
+  '@wordpress/eslint-plugin@25.6.0(@babel/core@7.25.7)(@types/eslint@9.6.1)(@types/react@18.3.28)(@typescript-eslint/eslint-plugin@8.64.0(@typescript-eslint/parser@8.64.0(eslint@10.7.0(jiti@2.6.1))(typescript@5.7.3))(eslint@10.7.0(jiti@2.6.1))(typescript@5.7.3))(@typescript-eslint/parser@8.64.0(eslint@10.7.0(jiti@2.6.1))(typescript@5.7.3))(eslint@10.7.0(jiti@2.6.1))(jest@29.7.0(@types/node@24.12.2)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))(typescript@5.7.3)(wp-prettier@3.9.6)':
     dependencies:
       '@babel/core': 7.25.7
       '@babel/eslint-parser': 7.28.6(@babel/core@7.25.7)(eslint@10.7.0(jiti@2.6.1))
       '@eslint-community/eslint-plugin-eslint-comments': 4.7.2(eslint@10.7.0(jiti@2.6.1))
       '@eslint/compat': 2.1.0(eslint@10.7.0(jiti@2.6.1))
       '@wordpress/babel-preset-default': 8.51.0
-      '@wordpress/prettier-config': 4.56.0(wp-prettier@3.0.3)
+      '@wordpress/prettier-config': 4.56.0(wp-prettier@3.9.6)
       '@wordpress/theme': 0.17.0(@types/react@18.3.28)(esbuild@0.24.2)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
       cosmiconfig: 7.1.0
       eslint: 10.7.0(jiti@2.6.1)
@@ -28324,14 +28318,14 @@ snapshots:
       eslint-plugin-jsdoc: 50.8.0(eslint@10.7.0(jiti@2.6.1))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@10.7.0(jiti@2.6.1))
       eslint-plugin-playwright: 2.10.5(eslint@10.7.0(jiti@2.6.1))
-      eslint-plugin-prettier: 5.5.5(@types/eslint@9.6.1)(eslint-config-prettier@10.1.8(eslint@10.7.0(jiti@2.6.1)))(eslint@10.7.0(jiti@2.6.1))(wp-prettier@3.0.3)
+      eslint-plugin-prettier: 5.5.5(@types/eslint@9.6.1)(eslint-config-prettier@10.1.8(eslint@10.7.0(jiti@2.6.1)))(eslint@10.7.0(jiti@2.6.1))(wp-prettier@3.9.6)
       eslint-plugin-react: 7.37.5(eslint@10.7.0(jiti@2.6.1))
       eslint-plugin-react-hooks: 7.1.1(eslint@10.7.0(jiti@2.6.1))
       globals: 16.5.0
       requireindex: 1.2.0
       typescript-eslint: 8.64.0(eslint@10.7.0(jiti@2.6.1))(typescript@5.7.3)
     optionalDependencies:
-      prettier: wp-prettier@3.0.3
+      prettier: wp-prettier@3.9.6
       typescript: 5.7.3
     transitivePeerDependencies:
       - '@types/eslint'
@@ -28349,14 +28343,14 @@ snapshots:
       - supports-color
       - vite
 
-  '@wordpress/eslint-plugin@25.6.0(@babel/core@7.29.7)(@types/react@18.3.28)(esbuild@0.24.2)(eslint-import-resolver-webpack@0.13.11)(eslint@10.7.0(jiti@2.6.1))(jest@29.7.0(@types/node@24.12.2)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))(typescript@5.7.3)(wp-prettier@3.0.3)':
+  '@wordpress/eslint-plugin@25.6.0(@babel/core@7.29.7)(@types/react@18.3.28)(esbuild@0.24.2)(eslint-import-resolver-webpack@0.13.11)(eslint@10.7.0(jiti@2.6.1))(jest@29.7.0(@types/node@24.12.2)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))(typescript@5.7.3)(wp-prettier@3.9.6)':
     dependencies:
       '@babel/core': 7.29.7
       '@babel/eslint-parser': 7.28.6(@babel/core@7.29.7)(eslint@10.7.0(jiti@2.6.1))
       '@eslint-community/eslint-plugin-eslint-comments': 4.7.2(eslint@10.7.0(jiti@2.6.1))
       '@eslint/compat': 2.1.0(eslint@10.7.0(jiti@2.6.1))
       '@wordpress/babel-preset-default': 8.51.0
-      '@wordpress/prettier-config': 4.56.0(wp-prettier@3.0.3)
+      '@wordpress/prettier-config': 4.56.0(wp-prettier@3.9.6)
       '@wordpress/theme': 0.17.0(@types/react@18.3.28)(esbuild@0.24.2)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
       cosmiconfig: 7.1.0
       eslint: 10.7.0(jiti@2.6.1)
@@ -28367,14 +28361,14 @@ snapshots:
       eslint-plugin-jsdoc: 50.8.0(eslint@10.7.0(jiti@2.6.1))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@10.7.0(jiti@2.6.1))
       eslint-plugin-playwright: 2.10.5(eslint@10.7.0(jiti@2.6.1))
-      eslint-plugin-prettier: 5.5.5(@types/eslint@9.6.1)(eslint-config-prettier@10.1.8(eslint@10.7.0(jiti@2.6.1)))(eslint@10.7.0(jiti@2.6.1))(wp-prettier@3.0.3)
+      eslint-plugin-prettier: 5.5.5(@types/eslint@9.6.1)(eslint-config-prettier@10.1.8(eslint@10.7.0(jiti@2.6.1)))(eslint@10.7.0(jiti@2.6.1))(wp-prettier@3.9.6)
       eslint-plugin-react: 7.37.5(eslint@10.7.0(jiti@2.6.1))
       eslint-plugin-react-hooks: 7.1.1(eslint@10.7.0(jiti@2.6.1))
       globals: 16.5.0
       requireindex: 1.2.0
       typescript-eslint: 8.64.0(eslint@10.7.0(jiti@2.6.1))(typescript@5.7.3)
     optionalDependencies:
-      prettier: wp-prettier@3.0.3
+      prettier: wp-prettier@3.9.6
       typescript: 5.7.3
     transitivePeerDependencies:
       - '@types/eslint'
@@ -29336,13 +29330,9 @@ snapshots:
       - stylelint
       - supports-color
 
-  '@wordpress/prettier-config@4.49.0(wp-prettier@3.0.3)':
+  '@wordpress/prettier-config@4.56.0(wp-prettier@3.9.6)':
     dependencies:
-      prettier: wp-prettier@3.0.3
-
-  '@wordpress/prettier-config@4.56.0(wp-prettier@3.0.3)':
-    dependencies:
-      prettier: wp-prettier@3.0.3
+      prettier: wp-prettier@3.9.6
 
   '@wordpress/primitives@2.2.0':
     dependencies:
@@ -29654,11 +29644,11 @@ snapshots:
       '@wordpress/browserslist-config': 6.51.0
       '@wordpress/dependency-extraction-webpack-plugin': 6.51.0(webpack@5.97.1)
       '@wordpress/e2e-test-utils-playwright': 1.51.0(@playwright/test@1.63.0)(@types/node@24.12.2)
-      '@wordpress/eslint-plugin': 25.6.0(@babel/core@7.29.7)(@types/react@18.3.28)(esbuild@0.24.2)(eslint-import-resolver-webpack@0.13.11)(eslint@10.7.0(jiti@2.6.1))(jest@29.7.0(@types/node@24.12.2)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))(typescript@5.7.3)(wp-prettier@3.0.3)
+      '@wordpress/eslint-plugin': 25.6.0(@babel/core@7.29.7)(@types/react@18.3.28)(esbuild@0.24.2)(eslint-import-resolver-webpack@0.13.11)(eslint@10.7.0(jiti@2.6.1))(jest@29.7.0(@types/node@24.12.2)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))(typescript@5.7.3)(wp-prettier@3.9.6)
       '@wordpress/jest-preset-default': 12.51.0(@babel/core@7.29.7)(jest@29.7.0(@types/node@24.12.2)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))
       '@wordpress/npm-package-json-lint-config': 5.51.0(npm-package-json-lint@6.4.0(typescript@5.7.3))
       '@wordpress/postcss-plugins-preset': 5.56.0(postcss@8.5.26)
-      '@wordpress/prettier-config': 4.56.0(wp-prettier@3.0.3)
+      '@wordpress/prettier-config': 4.56.0(wp-prettier@3.9.6)
       '@wordpress/stylelint-config': 23.42.0(@types/react@18.3.28)(esbuild@0.24.2)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint-scss@6.14.0(stylelint@16.26.1(typescript@5.7.3)))(stylelint@16.26.1(typescript@5.7.3))
       adm-zip: 0.5.17
       babel-jest: 29.7.0(@babel/core@7.29.7)
@@ -29689,7 +29679,7 @@ snapshots:
       npm-packlist: 3.0.0
       postcss: 8.5.26
       postcss-loader: 6.2.1(postcss@8.5.26)(webpack@5.97.1)
-      prettier: wp-prettier@3.0.3
+      prettier: wp-prettier@3.9.6
       puppeteer-core: 23.11.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -29757,11 +29747,11 @@ snapshots:
       '@wordpress/browserslist-config': 6.51.0
       '@wordpress/dependency-extraction-webpack-plugin': 6.51.0(webpack@5.97.1)
       '@wordpress/e2e-test-utils-playwright': 1.51.0(@playwright/test@1.63.0)(@types/node@24.12.2)
-      '@wordpress/eslint-plugin': 25.6.0(@babel/core@7.29.7)(@types/react@18.3.28)(esbuild@0.24.2)(eslint-import-resolver-webpack@0.13.11)(eslint@10.7.0(jiti@2.6.1))(jest@29.7.0(@types/node@24.12.2)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))(typescript@5.7.3)(wp-prettier@3.0.3)
+      '@wordpress/eslint-plugin': 25.6.0(@babel/core@7.29.7)(@types/react@18.3.28)(esbuild@0.24.2)(eslint-import-resolver-webpack@0.13.11)(eslint@10.7.0(jiti@2.6.1))(jest@29.7.0(@types/node@24.12.2)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))(typescript@5.7.3)(wp-prettier@3.9.6)
       '@wordpress/jest-preset-default': 12.51.0(@babel/core@7.29.7)(jest@29.7.0(@types/node@24.12.2)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))
       '@wordpress/npm-package-json-lint-config': 5.51.0(npm-package-json-lint@6.4.0(typescript@5.7.3))
       '@wordpress/postcss-plugins-preset': 5.56.0(postcss@8.5.26)
-      '@wordpress/prettier-config': 4.56.0(wp-prettier@3.0.3)
+      '@wordpress/prettier-config': 4.56.0(wp-prettier@3.9.6)
       '@wordpress/stylelint-config': 23.42.0(@types/react@18.3.28)(esbuild@0.24.2)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint-scss@6.14.0(stylelint@16.26.1(typescript@5.7.3)))(stylelint@16.26.1(typescript@5.7.3))
       adm-zip: 0.5.17
       babel-jest: 29.7.0(@babel/core@7.29.7)
@@ -29792,7 +29782,7 @@ snapshots:
       npm-packlist: 3.0.0
       postcss: 8.5.26
       postcss-loader: 6.2.1(postcss@8.5.26)(webpack@5.97.1)
-      prettier: wp-prettier@3.0.3
+      prettier: wp-prettier@3.9.6
       puppeteer-core: 23.11.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -29860,11 +29850,11 @@ snapshots:
       '@wordpress/browserslist-config': 6.51.0
       '@wordpress/dependency-extraction-webpack-plugin': 6.51.0(webpack@5.97.1)
       '@wordpress/e2e-test-utils-playwright': 1.51.0(@playwright/test@1.63.0)(@types/node@24.12.2)
-      '@wordpress/eslint-plugin': 25.6.0(@babel/core@7.29.7)(@types/react@18.3.28)(esbuild@0.24.2)(eslint-import-resolver-webpack@0.13.11)(eslint@10.7.0(jiti@2.6.1))(jest@29.7.0(@types/node@24.12.2)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))(typescript@5.7.3)(wp-prettier@3.0.3)
+      '@wordpress/eslint-plugin': 25.6.0(@babel/core@7.29.7)(@types/react@18.3.28)(esbuild@0.24.2)(eslint-import-resolver-webpack@0.13.11)(eslint@10.7.0(jiti@2.6.1))(jest@29.7.0(@types/node@24.12.2)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))(typescript@5.7.3)(wp-prettier@3.9.6)
       '@wordpress/jest-preset-default': 12.51.0(@babel/core@7.29.7)(jest@29.7.0(@types/node@24.12.2)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))
       '@wordpress/npm-package-json-lint-config': 5.51.0(npm-package-json-lint@6.4.0(typescript@5.7.3))
       '@wordpress/postcss-plugins-preset': 5.56.0(postcss@8.5.26)
-      '@wordpress/prettier-config': 4.56.0(wp-prettier@3.0.3)
+      '@wordpress/prettier-config': 4.56.0(wp-prettier@3.9.6)
       '@wordpress/stylelint-config': 23.42.0(@types/react@18.3.28)(esbuild@0.24.2)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint-scss@6.14.0(stylelint@16.26.1(typescript@5.7.3)))(stylelint@16.26.1(typescript@5.7.3))
       adm-zip: 0.5.17
       babel-jest: 29.7.0(@babel/core@7.29.7)
@@ -29895,7 +29885,7 @@ snapshots:
       npm-packlist: 3.0.0
       postcss: 8.5.26
       postcss-loader: 6.2.1(postcss@8.5.26)(webpack@5.97.1)
-      prettier: wp-prettier@3.0.3
+      prettier: wp-prettier@3.9.6
       puppeteer-core: 23.11.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -33310,10 +33300,10 @@ snapshots:
       eslint: 10.7.0(jiti@2.6.1)
       globals: 17.7.0
 
-  eslint-plugin-prettier@5.5.5(@types/eslint@9.6.1)(eslint-config-prettier@10.1.8(eslint@10.7.0(jiti@2.6.1)))(eslint@10.7.0(jiti@2.6.1))(wp-prettier@3.0.3):
+  eslint-plugin-prettier@5.5.5(@types/eslint@9.6.1)(eslint-config-prettier@10.1.8(eslint@10.7.0(jiti@2.6.1)))(eslint@10.7.0(jiti@2.6.1))(wp-prettier@3.9.6):
     dependencies:
       eslint: 10.7.0(jiti@2.6.1)
-      prettier: wp-prettier@3.0.3
+      prettier: wp-prettier@3.9.6
       prettier-linter-helpers: 1.0.1
       synckit: 0.11.12
     optionalDependencies:
@@ -39690,7 +39680,7 @@ snapshots:
       - react
       - utf-8-validate
 
-  storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3):
+  storybook@10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6):
     dependencies:
       '@storybook/global': 5.0.0
       '@storybook/icons': 2.1.0(react@18.3.1)
@@ -39711,7 +39701,7 @@ snapshots:
       ws: 8.21.3
     optionalDependencies:
       '@types/react': 18.3.28
-      prettier: wp-prettier@3.0.3
+      prettier: wp-prettier@3.9.6
     transitivePeerDependencies:
       - bufferutil
       - react
@@ -41315,7 +41305,7 @@ snapshots:
 
   wordwrap@1.0.0: {}
 
-  wp-prettier@3.0.3: {}
+  wp-prettier@3.9.6: {}
 
   wp-textdomain@1.0.1:
     dependencies:
