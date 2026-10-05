@@ -211,5 +211,64 @@ test.describe(
 				bccEmail
 			);
 		} );
+
+		test( 'Does not show the core Content block list in the Email tab', async ( {
+			page,
+		} ) => {
+			await accessTheEmailEditor( page, 'Customer note' );
+
+			const emailTab = page.getByLabel( 'Email' );
+			await expect(
+				emailTab.getByRole( 'button', { name: 'Settings' } )
+			).toBeVisible();
+			await expect(
+				emailTab.getByRole( 'button', { name: 'Content', exact: true } )
+			).toHaveCount( 0 );
+
+			// Asserting the item exists keeps this test from passing when core never
+			// rendered the panel. If core stops rendering it, remove the CSS rule.
+			const quickNavItem = emailTab
+				.locator( '.components-button .block-editor-block-icon' )
+				.first();
+			await expect( quickNavItem ).toBeAttached();
+			await expect( quickNavItem ).toBeHidden();
+		} );
+
+		test( 'Shows the Content list in the Block tab of a content-only block', async ( {
+			page,
+		} ) => {
+			await accessTheEmailEditor( page, 'Customer note' );
+			await expect( page.getByLabel( 'Email' ) ).toBeVisible();
+
+			await page.evaluate( () => {
+				const { createBlock } = window.wp.blocks;
+				const { select, dispatch } = window.wp.data;
+				const group = createBlock(
+					'core/group',
+					{ templateLock: 'contentOnly' },
+					[
+						createBlock( 'core/paragraph', {
+							content: 'Nested text',
+						} ),
+					]
+				);
+				const [ postContent ] =
+					select( 'core/block-editor' ).getBlocksByName(
+						'core/post-content'
+					);
+				dispatch( 'core/block-editor' ).insertBlocks(
+					group,
+					0,
+					postContent
+				);
+				dispatch( 'core/block-editor' ).selectBlock( group.clientId );
+			} );
+
+			await page.getByRole( 'tab', { name: 'Block' } ).click();
+			const sidebar = page.locator( '.editor-sidebar__panel' );
+			await expect(
+				sidebar.getByRole( 'button', { name: 'Paragraph' } )
+			).toBeVisible();
+		} );
 	}
 );
