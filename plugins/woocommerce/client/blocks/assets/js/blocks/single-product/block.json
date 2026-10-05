@@ -7,7 +7,26 @@
 	"keywords": [ "WooCommerce", "single product" ],
 	"supports": {
 		"interactivity": true,
-		"align": [ "wide", "full" ]
+		"align": [ "wide", "full" ],
+		"color": {
+			"background": true,
+			"gradients": true,
+			"text": false,
+			"__experimentalDefaultControls": {
+				"background": true
+			}
+		},
+		"spacing": {
+			"padding": true,
+			"margin": [ "top", "bottom" ]
+		},
+		"__experimentalBorder": {
+			"color": true,
+			"style": true,
+			"width": true,
+			"radius": true
+		},
+		"listView": true
 	},
 	"attributes": {
 		"productId": {
@@ -16,6 +35,7 @@
 	},
 	"example": {},
 	"usesContext": [ "postId", "postType", "queryId" ],
+	"style": "file:../woocommerce/single-product-style.css",
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

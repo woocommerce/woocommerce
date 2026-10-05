@@ -10,7 +10,10 @@ import metadata from './block.json';
 
 const v1 = {
 	attributes: metadata.attributes,
-	supports: metadata.supports,
+	supports: {
+		interactivity: true,
+		align: [ 'wide', 'full' ],
+	},
 	save: () => {
 		const blockProps = useBlockProps.save();
 
