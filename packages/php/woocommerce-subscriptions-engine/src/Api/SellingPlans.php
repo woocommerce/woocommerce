@@ -34,6 +34,13 @@ defined( 'ABSPATH' ) || exit;
 final class SellingPlans {
 
 	/**
+	 * Filter fired on plan writes so the owning extension validates its payload:
+	 * `( array $payload, string $extension_slug, ?int $plan_id )`, returning the
+	 * payload or a WP_Error.
+	 */
+	public const VALIDATE_PLAN_FILTER = 'woocommerce_subscriptions_engine_validate_plan';
+
+	/**
 	 * Query limit for plan lookups; high enough that a plan catalog is never
 	 * truncated by the repository's default of 50.
 	 *

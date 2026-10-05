@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Api\Rest;
 
+use Automattic\WooCommerce\SubscriptionsEngine\Api\SellingPlans;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
@@ -28,11 +29,6 @@ defined( 'ABSPATH' ) || exit;
  * Plans REST controller.
  */
 final class PlansController extends WP_REST_Controller {
-
-	/**
-	 * Filter asking a plan's owning extension to validate its payload before a write.
-	 */
-	public const VALIDATE_PLAN_FILTER = 'woocommerce_subscriptions_engine_validate_plan';
 
 	private const REST_NAMESPACE = 'wc/v3';
 
@@ -633,16 +629,20 @@ final class PlansController extends WP_REST_Controller {
 		/**
 		 * Filters a plan's extension payload before the engine stores it.
 		 *
-		 * Runs on every plan create and update with the full merged payload, so the
-		 * owning extension can validate and normalize it. Return the (possibly
-		 * normalized) payload array, or a WP_Error to reject the write.
+		 * Runs on every plan create and update (including status-only updates; not on
+		 * reorder) with the full merged payload, so the owning extension can validate
+		 * and normalize it. Act only on your own `$extension_slug`; pass other owners'
+		 * payloads and an earlier WP_Error through unchanged. Return the array you
+		 * received with your changes - unknown keys must pass through - or a WP_Error
+		 * to reject the write. Only `pricing_policy` is required in the return; keys
+		 * added later that are missing from it keep their stored value.
 		 *
 		 * @param array<string, mixed>|WP_Error $payload        Plan payload: currently `pricing_policy` only; more keys may be added.
 		 * @param string                        $extension_slug Owning extension slug.
 		 * @param int|null                      $plan_id        Plan id, or null on create.
 		 */
 		$payload = apply_filters(
-			self::VALIDATE_PLAN_FILTER,
+			SellingPlans::VALIDATE_PLAN_FILTER,
 			array( 'pricing_policy' => $plan->get_pricing_policy() ),
 			$extension_slug,
 			$plan->get_id()
@@ -658,7 +658,7 @@ final class PlansController extends WP_REST_Controller {
 		}
 
 		if ( ! is_array( $payload ) || ! array_key_exists( 'pricing_policy', $payload ) ) {
-			return $this->invalid_error( __( 'The plan owner returned an invalid payload.', 'woocommerce-subscriptions-engine' ) );
+			return $this->invalid_error( __( 'A woocommerce_subscriptions_engine_validate_plan callback returned an invalid value.', 'woocommerce-subscriptions-engine' ) );
 		}
 
 		$plan->set_pricing_policy( $this->pricing_policy_from_param( $payload['pricing_policy'], null ) );

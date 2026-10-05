@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Api\Rest;
 
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Rest\PlansController;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\SellingPlans;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use EngineIntegrationTestCase;
 use WP_Error;
@@ -43,7 +44,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 	}
 
 	public function tearDown(): void {
-		remove_all_filters( PlansController::VALIDATE_PLAN_FILTER );
+		remove_all_filters( SellingPlans::VALIDATE_PLAN_FILTER );
 		wp_set_current_user( 0 );
 		parent::tearDown();
 	}
@@ -376,7 +377,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 
 		$calls = array();
 		add_filter(
-			PlansController::VALIDATE_PLAN_FILTER,
+			SellingPlans::VALIDATE_PLAN_FILTER,
 			static function ( $payload, $extension_slug, $plan_id ) use ( &$calls ) {
 				$calls[] = array( $payload, $extension_slug, $plan_id );
 
@@ -450,7 +451,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 
 		$seen = array();
 		add_filter(
-			PlansController::VALIDATE_PLAN_FILTER,
+			SellingPlans::VALIDATE_PLAN_FILTER,
 			static function ( $payload, $extension_slug, $plan_id ) use ( &$seen ) {
 				$seen[] = $plan_id;
 
@@ -484,7 +485,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$id = $this->create_plan( 'Untouched' );
 
 		add_filter(
-			PlansController::VALIDATE_PLAN_FILTER,
+			SellingPlans::VALIDATE_PLAN_FILTER,
 			static function () use ( $error ) {
 				return $error;
 			}
@@ -518,7 +519,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$this->assertSame( $expected_status, $patched->get_status() );
 		$this->assertSame( 'owner_rejected', $this->response_data( $patched )['code'] );
 
-		remove_all_filters( PlansController::VALIDATE_PLAN_FILTER );
+		remove_all_filters( SellingPlans::VALIDATE_PLAN_FILTER );
 
 		$fetched = $this->response_data( $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) ) );
 		$this->assertSame( 'Untouched', $fetched['name'] );
@@ -542,7 +543,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		wp_set_current_user( $this->admin_id );
 
 		add_filter(
-			PlansController::VALIDATE_PLAN_FILTER,
+			SellingPlans::VALIDATE_PLAN_FILTER,
 			static function ( $payload ) {
 				$payload['pricing_policy'] = array( 'policies' => array( array( 'type' => 'normalized' ) ) );
 
@@ -582,7 +583,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		wp_set_current_user( $this->admin_id );
 
 		add_filter(
-			PlansController::VALIDATE_PLAN_FILTER,
+			SellingPlans::VALIDATE_PLAN_FILTER,
 			static function () use ( $returned ) {
 				return $returned;
 			}
@@ -604,7 +605,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$this->assertSame( 400, $created->get_status() );
 		$this->assertSame( 'woocommerce_subscriptions_engine_invalid_plan', $this->response_data( $created )['code'] );
 
-		remove_all_filters( PlansController::VALIDATE_PLAN_FILTER );
+		remove_all_filters( SellingPlans::VALIDATE_PLAN_FILTER );
 		$list = $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
 		$this->assertSame( '0', $list->get_headers()['X-WP-Total'] );
 	}
