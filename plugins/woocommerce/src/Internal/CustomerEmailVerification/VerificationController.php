@@ -357,11 +357,16 @@ class VerificationController {
 		if ( ! $user_id || '' === $key ) {
 			return false;
 		}
+		$user = get_user_by( 'id', $user_id );
+		if ( ! $user instanceof \WP_User ) {
+			return false;
+		}
+		$expected_email = $user->user_email;
 		if ( ! $this->service->check_verification_key( $user_id, $key ) ) {
 			return false;
 		}
-		$this->service->mark_verified( $user_id );
-		return true;
+		$this->service->mark_verified( $user_id, $expected_email );
+		return $this->service->is_verified( $user_id );
 	}
 
 	/**
