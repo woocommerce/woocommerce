@@ -8517,7 +8517,7 @@ parameters:
 		-
 			message: '#^Cannot call method managing_stock\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 1
 			path: includes/class-wc-ajax.php
 
 		-
@@ -8529,7 +8529,7 @@ parameters:
 		-
 			message: '#^Cannot call method save\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
-			count: 8
+			count: 7
 			path: includes/class-wc-ajax.php
 
 		-

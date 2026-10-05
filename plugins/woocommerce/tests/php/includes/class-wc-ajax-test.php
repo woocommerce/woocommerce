@@ -1830,6 +1830,76 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should enable stock management on bulk stock update only when requested and allowed by the store setting.
+	 * @testWith [false, "yes", "yes", true, 5]
+	 *           [false, "", "yes", false, null]
+	 *           [false, "yes", "no", false, null]
+	 *           [true, "", "yes", true, 5]
+	 *
+	 * @param bool     $manage_stock Initial manage stock value of the variation.
+	 * @param string   $manage_stock_flag Value of the manage_stock flag sent with the bulk action.
+	 * @param string   $store_manage_stock Value of the woocommerce_manage_stock option.
+	 * @param bool     $expected_manage_stock Expected manage stock value after the bulk action.
+	 * @param int|null $expected_quantity Expected stock quantity after the bulk action.
+	 */
+	public function test_bulk_stock_enables_manage_stock_when_requested( bool $manage_stock, string $manage_stock_flag, string $store_manage_stock, bool $expected_manage_stock, ?int $expected_quantity ): void {
+		$original_store_manage_stock = get_option( 'woocommerce_manage_stock' );
+		update_option( 'woocommerce_manage_stock', $store_manage_stock );
+
+		$variation = new WC_Product_Variation();
+		$variation->set_manage_stock( $manage_stock );
+		$variation->save();
+
+		$data = array( 'value' => '5' );
+		if ( '' !== $manage_stock_flag ) {
+			$data['manage_stock'] = $manage_stock_flag;
+		}
+
+		$method = new ReflectionMethod( WC_AJAX::class, 'variation_bulk_action_variable_stock' );
+		$method->setAccessible( true );
+		$method->invokeArgs( null, array( array( $variation->get_id() ), $data ) );
+
+		update_option( 'woocommerce_manage_stock', $original_store_manage_stock );
+
+		$variation = wc_get_product( $variation->get_id() );
+
+		$this->assertSame( $expected_manage_stock, $variation->get_manage_stock( 'edit' ), 'Stock management should only be enabled when requested and allowed by the store setting.' );
+		$this->assertSame( $expected_quantity, $variation->get_stock_quantity( 'edit' ), 'The stock quantity should only be set for variations that manage stock.' );
+	}
+
+	/**
+	 * @testdox Should enable variation level stock management on bulk stock update when stock is inherited from the parent.
+	 */
+	public function test_bulk_stock_enables_manage_stock_for_parent_managed_variation(): void {
+		$parent = new WC_Product_Variable();
+		$parent->set_manage_stock( true );
+		$parent->set_stock_quantity( 20 );
+		$parent->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $parent->get_id() );
+		$variation->save();
+
+		$method = new ReflectionMethod( WC_AJAX::class, 'variation_bulk_action_variable_stock' );
+		$method->setAccessible( true );
+		$method->invokeArgs(
+			null,
+			array(
+				array( $variation->get_id() ),
+				array(
+					'value'        => '5',
+					'manage_stock' => 'yes',
+				),
+			)
+		);
+
+		$variation = wc_get_product( $variation->get_id() );
+
+		$this->assertTrue( $variation->get_manage_stock( 'edit' ), 'Stock management should be enabled on the variation itself.' );
+		$this->assertSame( 5, $variation->get_stock_quantity( 'edit' ), 'The stock quantity should be set on the variation.' );
+	}
+
+	/**
 	 * @testdox Adding a custom field renders a Delete button with a valid delete nonce.
 	 */
 	public function test_order_add_meta_delete_button_uses_name_value_nonce(): void {

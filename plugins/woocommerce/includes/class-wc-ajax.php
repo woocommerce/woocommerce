@@ -3367,10 +3367,17 @@ class WC_AJAX {
 			return;
 		}
 
-		$quantity = wc_stock_amount( wc_clean( $data['value'] ) );
+		$quantity            = wc_stock_amount( wc_clean( $data['value'] ) );
+		$enable_manage_stock = isset( $data['manage_stock'] ) && 'yes' === $data['manage_stock'] && 'yes' === get_option( 'woocommerce_manage_stock' );
 
 		foreach ( $variations as $variation_id ) {
 			$variation = wc_get_product( $variation_id );
+			if ( ! $variation ) {
+				continue;
+			}
+			if ( $enable_manage_stock && ! $variation->get_manage_stock( 'edit' ) ) {
+				$variation->set_manage_stock( true );
+			}
 			if ( $variation->managing_stock() ) {
 				$variation->set_stock_quantity( $quantity );
 			} else {
