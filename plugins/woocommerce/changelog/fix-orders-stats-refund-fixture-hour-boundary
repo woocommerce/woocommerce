@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Pin the refund fixtures' dates in the Orders Stats report tests, closing the half of the hour-boundary flake that pinning the orders alone left open.

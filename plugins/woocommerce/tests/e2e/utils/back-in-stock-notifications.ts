@@ -422,10 +422,9 @@ export async function restockProduct(
  * Locator for the PDP sign-up form wrapper.
  *
  * The wrapper is rendered whenever the product allows signups, and core's
- * `back-in-stock-form.js` toggles its `hidden` class from the `show_variation`
- * event — the class the variation specs assert on. A product whose parent opts
- * out of signups renders no wrapper at all, so that case is asserted on
- * presence instead.
+ * `back-in-stock-form.js` toggles its `hidden` attribute from the
+ * `show_variation` event. A product whose parent opts out of signups renders no
+ * wrapper at all, so that case is asserted on presence instead.
  *
  * @param {Page} page Playwright page on the product detail.
  */

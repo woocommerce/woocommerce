@@ -30,13 +30,9 @@ const registerWooCommerceAnalyticsCommand = ( { label, path } ) => {
 };
 
 domReady( () => {
-	if (
-		window.hasOwnProperty( 'wcCommandPaletteAnalytics' ) &&
-		window.wcCommandPaletteAnalytics.hasOwnProperty( 'reports' ) &&
-		Array.isArray( window.wcCommandPaletteAnalytics.reports )
-	) {
-		const analyticsReports = window.wcCommandPaletteAnalytics.reports;
+	const analyticsReports = window.wcCommandPaletteAnalytics?.reports;
 
+	if ( Array.isArray( analyticsReports ) ) {
 		analyticsReports.forEach( ( analyticsReport ) => {
 			registerWooCommerceAnalyticsCommand( {
 				label: analyticsReport.title,
