@@ -289,7 +289,7 @@ final class Contract {
 
 		$contract = new self( $args );
 
-		if ( ! ContractStatus::is_valid( $contract->status ) ) {
+		if ( ! ContractStatus::is_registered( $contract->status ) ) {
 			throw new DomainException( sprintf( 'Contract: invalid status "%s".', $contract->status ) );
 		}
 
@@ -370,7 +370,7 @@ final class Contract {
 			return;
 		}
 
-		if ( ! ContractStatus::is_valid( $status ) ) {
+		if ( ! ContractStatus::is_registered( $status ) ) {
 			throw new DomainException( sprintf( 'Contract: status "%s" is not registered.', $status ) );
 		}
 

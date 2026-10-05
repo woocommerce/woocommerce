@@ -122,7 +122,7 @@ class ContractFactoryTest extends EngineIntegrationTestCase {
 		// Cycle 1 is the origin period: count 1, linked to the origin order, billed.
 		$this->assertSame( 1, $cycle->get_count() );
 		$this->assertSame( $order->get_id(), $cycle->get_order_id() );
-		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( $cycle->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 		$this->assertSame( 'lite', $cycle->get_extension_slug() );
 
 		// Its period runs from the paid time to the first renewal date.

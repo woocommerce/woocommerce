@@ -236,9 +236,9 @@ final class Cycle {
 	/**
 	 * Hydrate from a stored row.
 	 *
-	 * The stored status is kept verbatim, registered or not (it bypasses the
-	 * validating {@see CycleStatus::from()}), so a value written by a
-	 * since-deactivated extension round-trips unchanged.
+	 * The stored status is kept verbatim, registered or not (registration is checked
+	 * only where a status is written), so a value written by a since-deactivated
+	 * extension round-trips unchanged.
 	 *
 	 * @param array<string, mixed> $row Cycle row.
 	 * @throws DomainException If the stored kind or sequence_no is invalid.
@@ -254,10 +254,6 @@ final class Cycle {
 		unset( $row['plan_snapshot'], $row['items_snapshot'] );
 
 		$row['count'] = array_key_exists( 'count', $row ) ? self::normalize_count( $row['count'] ) : null;
-
-		if ( isset( $row['status'] ) && ! $row['status'] instanceof CycleStatus ) {
-			$row['status'] = CycleStatus::stored( ScalarCoercion::coerce_string( $row['status'] ) );
-		}
 
 		return new self( $row );
 	}
@@ -340,7 +336,7 @@ final class Cycle {
 	 *
 	 * Any status may follow any other: the engine enforces no transition table. A
 	 * changed status must be registered (an unregistered value, such as one built
-	 * through {@see CycleStatus::stored()}, is rejected); setting the current status
+	 * through {@see new CycleStatus()}, is rejected); setting the current status
 	 * is a no-op, so a hydrated unregistered status can be saved unchanged.
 	 *
 	 * @param CycleStatus $status Target status.
@@ -616,7 +612,7 @@ final class Cycle {
 	 * @throws DomainException If the status is not registered.
 	 */
 	private static function assert_registered_status( CycleStatus $status ): void {
-		if ( ! CycleStatus::is_valid( $status->get_value() ) ) {
+		if ( ! CycleStatus::is_registered( $status->get_value() ) ) {
 			throw new DomainException(
 				sprintf( 'Cycle: status "%s" is not registered.', $status->get_value() )
 			);
@@ -625,14 +621,13 @@ final class Cycle {
 
 	/**
 	 * Resolve a status input into a typed {@see CycleStatus}. A `CycleStatus` passes
-	 * through; null defaults to `pending`; a string is validated via
-	 * {@see CycleStatus::from()}. A passed-through instance is checked by
-	 * {@see self::create()} (storage hydration converts its string first and is not
-	 * checked, so an unregistered stored value round-trips).
+	 * through; null defaults to `pending`; a string is wrapped (slug format checked).
+	 * Registration is checked by {@see self::create()} and {@see self::set_status()},
+	 * not here, so storage hydration keeps an unregistered stored value.
 	 *
 	 * @param mixed $status Raw status value (a CycleStatus, null, or a status string).
 	 * @return CycleStatus
-	 * @throws DomainException If a status string is not a registered status.
+	 * @throws DomainException If a status string is not a well-formed status slug.
 	 */
 	private static function coerce_status( $status ): CycleStatus {
 		if ( $status instanceof CycleStatus ) {
@@ -640,10 +635,10 @@ final class Cycle {
 		}
 
 		if ( null === $status ) {
-			return CycleStatus::pending();
+			return new CycleStatus( CycleStatus::PENDING );
 		}
 
-		return CycleStatus::from( ScalarCoercion::coerce_string( $status ) );
+		return new CycleStatus( ScalarCoercion::coerce_string( $status ) );
 	}
 
 	/**

@@ -517,7 +517,7 @@ final class RenewalEngine {
 			return null;
 		}
 
-		if ( $head->get_status()->equals( CycleStatus::pending() ) && $this->lease_has_expired( $head, $now ) ) {
+		if ( $head->get_status()->equals( new CycleStatus( CycleStatus::PENDING ) ) && $this->lease_has_expired( $head, $now ) ) {
 			// Crash recovery, race-safe: only the caller whose CAS UPDATE matches the
 			// still-expired row reclaims it; a concurrent worker that already extended the
 			// lease leaves this caller matching zero rows, so it skips.
@@ -549,7 +549,7 @@ final class RenewalEngine {
 
 		// Admin retry: flip a failed head back to pending and re-attempt its charge. Scheduled
 		// selection never routes a failed head here; only a manual trigger does.
-		if ( $head->get_status()->equals( CycleStatus::failed() ) ) {
+		if ( $head->get_status()->equals( new CycleStatus( CycleStatus::FAILED ) ) ) {
 			// Race-safe: only the caller whose CAS UPDATE matches the still-failed row wins.
 			if ( $this->contracts->reclaim_failed_cycle( (int) $head->get_id(), self::LEASE_TTL_SECONDS ) ) {
 				wc_get_logger()->info(
@@ -729,7 +729,7 @@ final class RenewalEngine {
 			}
 			// Sync the entity with the row the CAS just wrote, for the action payload.
 			$cycle->set_order_id( $order->get_id() );
-			$cycle->set_status( CycleStatus::billed() );
+			$cycle->set_status( new CycleStatus( CycleStatus::BILLED ) );
 			$cycle->set_claimed_until_gmt( null );
 
 			// Advance to the period actually billed (this cycle's end), not a recomputed one;
@@ -773,7 +773,7 @@ final class RenewalEngine {
 				return;
 			}
 			$cycle->set_order_id( $order->get_id() );
-			$cycle->set_status( CycleStatus::failed() );
+			$cycle->set_status( new CycleStatus( CycleStatus::FAILED ) );
 			$cycle->set_reason( 'gateway-charge-failed' );
 			$cycle->set_claimed_until_gmt( null );
 

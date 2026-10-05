@@ -57,7 +57,7 @@ class CycleTest extends TestCase {
 		$this->assertSame( 1, $cycle->get_sequence_no() );
 		$this->assertSame( 1, $cycle->get_count() );
 		$this->assertSame( Cycle::KIND_BILLING, $cycle->get_kind() );
-		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::pending() ) );
+		$this->assertTrue( $cycle->get_status()->equals( new CycleStatus( CycleStatus::PENDING ) ) );
 		$this->assertNull( $cycle->get_reason() );
 		$this->assertSame( '2026-02-01 00:00:00', $cycle->get_starts_at_gmt() );
 		$this->assertSame( '2026-03-01 00:00:00', $cycle->get_ends_at_gmt() );
@@ -80,9 +80,9 @@ class CycleTest extends TestCase {
 
 	public function test_create_can_build_a_billed_cycle_directly(): void {
 		// The checkout signup cycle is created directly billed (the origin order is paid).
-		$cycle = $this->make_pending( array( 'status' => CycleStatus::billed() ) );
+		$cycle = $this->make_pending( array( 'status' => new CycleStatus( CycleStatus::BILLED ) ) );
 
-		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( $cycle->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 	}
 
 	public function test_create_requires_a_contract_id(): void {
@@ -175,16 +175,16 @@ class CycleTest extends TestCase {
 	public function test_status_changes_go_through_cycle_status(): void {
 		$cycle = $this->make_pending();
 
-		$cycle->set_status( CycleStatus::billed() );
-		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::billed() ) );
+		$cycle->set_status( new CycleStatus( CycleStatus::BILLED ) );
+		$this->assertTrue( $cycle->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 	}
 
 	public function test_status_change_is_not_constrained_by_a_transition_table(): void {
-		$cycle = $this->make_pending( array( 'status' => CycleStatus::billed() ) );
+		$cycle = $this->make_pending( array( 'status' => new CycleStatus( CycleStatus::BILLED ) ) );
 
-		$cycle->set_status( CycleStatus::failed() );
+		$cycle->set_status( new CycleStatus( CycleStatus::FAILED ) );
 
-		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::failed() ) );
+		$this->assertTrue( $cycle->get_status()->equals( new CycleStatus( CycleStatus::FAILED ) ) );
 	}
 
 	public function test_create_accepts_an_extension_registered_status_string(): void {
@@ -219,7 +219,7 @@ class CycleTest extends TestCase {
 		$cycle = $this->make_pending();
 
 		try {
-			$cycle->set_status( CycleStatus::stored( 'nope' ) );
+			$cycle->set_status( new CycleStatus( 'nope' ) );
 			$this->fail( 'Expected a DomainException for an unregistered status.' );
 		} catch ( DomainException $e ) {
 			$this->assertStringContainsString( 'nope', $e->getMessage() );
@@ -231,7 +231,7 @@ class CycleTest extends TestCase {
 	public function test_create_rejects_an_unregistered_status_instance(): void {
 		$this->expectException( DomainException::class );
 
-		$this->make_pending( array( 'status' => CycleStatus::stored( 'nope' ) ) );
+		$this->make_pending( array( 'status' => new CycleStatus( 'nope' ) ) );
 	}
 
 	public function test_a_hydrated_unregistered_status_can_be_kept_unchanged(): void {
@@ -250,7 +250,7 @@ class CycleTest extends TestCase {
 			)
 		);
 
-		$cycle->set_status( CycleStatus::stored( 'legacy-x' ) );
+		$cycle->set_status( new CycleStatus( 'legacy-x' ) );
 		$cycle->set_reason( 'annotated' );
 
 		$this->assertSame( 'legacy-x', $cycle->to_storage()['status'] );
@@ -259,9 +259,9 @@ class CycleTest extends TestCase {
 	public function test_setting_the_same_status_is_a_no_op(): void {
 		$cycle = $this->make_pending();
 
-		$cycle->set_status( CycleStatus::pending() );
+		$cycle->set_status( new CycleStatus( CycleStatus::PENDING ) );
 
-		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::pending() ) );
+		$this->assertTrue( $cycle->get_status()->equals( new CycleStatus( CycleStatus::PENDING ) ) );
 	}
 
 	public function test_period_boundaries_are_frozen_at_construction(): void {
@@ -334,7 +334,7 @@ class CycleTest extends TestCase {
 	public function test_reason_can_be_annotated_when_cancelling_a_pending_cycle(): void {
 		$cycle = $this->make_pending();
 
-		$cycle->set_status( CycleStatus::cancelled() );
+		$cycle->set_status( new CycleStatus( CycleStatus::CANCELLED ) );
 		$cycle->set_reason( 'customer requested cancellation' );
 
 		$this->assertSame( 'customer requested cancellation', $cycle->get_reason() );
@@ -342,7 +342,7 @@ class CycleTest extends TestCase {
 
 	public function test_reason_can_be_annotated_on_a_billed_cycle(): void {
 		// `reason` is one of the few mutable fields: any cycle may carry one.
-		$cycle = $this->make_pending( array( 'status' => CycleStatus::billed() ) );
+		$cycle = $this->make_pending( array( 'status' => new CycleStatus( CycleStatus::BILLED ) ) );
 
 		$cycle->set_reason( 'settled after retry' );
 
@@ -351,7 +351,7 @@ class CycleTest extends TestCase {
 
 	public function test_reason_can_be_annotated_on_a_failed_cycle(): void {
 		$cycle = $this->make_pending();
-		$cycle->set_status( CycleStatus::failed() );
+		$cycle->set_status( new CycleStatus( CycleStatus::FAILED ) );
 
 		$cycle->set_reason( 'gateway declined the charge' );
 
@@ -383,7 +383,7 @@ class CycleTest extends TestCase {
 		$this->assertSame( 7, $cycle->get_contract_id() );
 		$this->assertSame( 2, $cycle->get_sequence_no() );
 		$this->assertSame( 2, $cycle->get_count() );
-		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( $cycle->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 		$this->assertSame( 11, $cycle->get_plan_snapshot_id() );
 		$this->assertSame( 22, $cycle->get_items_snapshot_id() );
 		$this->assertSame( 123, $cycle->get_order_id() );

@@ -3,7 +3,7 @@
  * StatusRegistry - the set of registered contract and cycle statuses.
  *
  * Statuses are opaque engine data: the engine ships a default set per kind
- * ({@see ContractStatus::defaults()}, {@see CycleStatus::defaults()}) and
+ * ({@see ContractStatus::get_defaults()}, {@see CycleStatus::get_defaults()}) and
  * extensions may register more. The registry holds slugs only - no labels, no
  * transitions, no meaning - and is global (not per owner). Registration is the
  * write-path allowlist: entity setters and the cycle status write refuse a slug
@@ -84,7 +84,7 @@ final class StatusRegistry {
 			);
 		}
 
-		if ( in_array( $slug, self::all( $kind ), true ) ) {
+		if ( in_array( $slug, self::get_all( $kind ), true ) ) {
 			return;
 		}
 
@@ -100,7 +100,7 @@ final class StatusRegistry {
 	 * @throws InvalidArgumentException When the kind is unknown.
 	 */
 	public static function is_registered( string $kind, string $slug ): bool {
-		return in_array( $slug, self::all( $kind ), true );
+		return in_array( $slug, self::get_all( $kind ), true );
 	}
 
 	/**
@@ -111,10 +111,10 @@ final class StatusRegistry {
 	 * @return array<int, string>
 	 * @throws InvalidArgumentException When the kind is unknown.
 	 */
-	public static function all( string $kind ): array {
+	public static function get_all( string $kind ): array {
 		self::assert_known_kind( $kind );
 
-		$defaults = self::KIND_CONTRACT === $kind ? ContractStatus::defaults() : CycleStatus::defaults();
+		$defaults = self::KIND_CONTRACT === $kind ? ContractStatus::get_defaults() : CycleStatus::get_defaults();
 
 		return array_merge( $defaults, self::$registered[ $kind ] ?? array() );
 	}

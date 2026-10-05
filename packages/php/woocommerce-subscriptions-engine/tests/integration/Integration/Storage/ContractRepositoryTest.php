@@ -513,8 +513,8 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 
 		$counts = $this->sut->count_by_status();
 
-		// Every known status is a key, in ContractStatus::all() order, with absent ones 0.
-		$this->assertSame( ContractStatus::all(), array_keys( $counts ) );
+		// Every known status is a key, in ContractStatus::get_all() order, with absent ones 0.
+		$this->assertSame( ContractStatus::get_all(), array_keys( $counts ) );
 		$this->assertSame( 2, $counts[ ContractStatus::ACTIVE ] );
 		$this->assertSame( 1, $counts[ ContractStatus::ON_HOLD ] );
 		$this->assertSame( 0, $counts[ ContractStatus::PENDING_CANCELLATION ] );
@@ -528,7 +528,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	public function test_count_by_status_is_all_zero_when_empty(): void {
 		$counts = $this->sut->count_by_status();
 
-		$this->assertSame( ContractStatus::all(), array_keys( $counts ) );
+		$this->assertSame( ContractStatus::get_all(), array_keys( $counts ) );
 		$this->assertSame( array( 0, 0, 0, 0, 0 ), array_values( $counts ) );
 	}
 
@@ -637,7 +637,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	public function test_insert_with_origin_cycle_records_refs_on_the_contract(): void {
 		$contract = $this->make_contract();
 		$cycle    = $this->make_cycle( 0, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', $this->sample_plan_snapshot(), $this->sample_items_snapshot(), 1001 );
-		$cycle->set_status( CycleStatus::billed() );
+		$cycle->set_status( new CycleStatus( CycleStatus::BILLED ) );
 
 		$id = $this->sut->insert_with_origin_cycle( $contract, $cycle );
 		$this->assertGreaterThan( 0, $id );
@@ -657,7 +657,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$current = $this->sut->find_chain_head( $id );
 		$this->assertInstanceOf( Cycle::class, $current );
 		$this->assertSame( 1, $current->get_count() );
-		$this->assertTrue( $current->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( $current->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 	}
 
 	/**
@@ -812,7 +812,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( $cycle->get_id(), $current->get_id() );
 		$this->assertSame( 1, $current->get_sequence_no() );
 		$this->assertSame( 1, $current->get_count() );
-		$this->assertTrue( $current->get_status()->equals( CycleStatus::pending() ) );
+		$this->assertTrue( $current->get_status()->equals( new CycleStatus( CycleStatus::PENDING ) ) );
 		$this->assertSame( '2026-07-15 00:00:00', $current->get_starts_at_gmt() );
 		$this->assertSame( '19.99000000', $current->get_expected_total() );
 		$this->assertSame( 'lite', $current->get_extension_slug() );
@@ -961,12 +961,12 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$cycle = $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' );
 		$this->sut->append_cycle( $cycle );
 
-		$cycle->set_status( CycleStatus::billed() );
+		$cycle->set_status( new CycleStatus( CycleStatus::BILLED ) );
 		$this->sut->update_cycle( $cycle );
 
 		$reloaded = $this->sut->find_chain_head( $id );
 		$this->assertInstanceOf( Cycle::class, $reloaded );
-		$this->assertTrue( $reloaded->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( $reloaded->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 	}
 
 	/**
@@ -981,7 +981,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 				'contract_id'    => $id,
 				'sequence_no'    => 1,
 				'count'          => 1,
-				'status'         => CycleStatus::pending(),
+				'status'         => new CycleStatus( CycleStatus::PENDING ),
 				'starts_at_gmt'  => '2026-07-15 00:00:00',
 				'ends_at_gmt'    => '2026-08-15 00:00:00',
 				'expected_total' => '19.99',
@@ -996,7 +996,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( '2026-07-15 00:15:00', $reloaded->get_claimed_until_gmt() );
 
 		// Cleared on update (a settled cycle holds no lease).
-		$reloaded->set_status( CycleStatus::billed() );
+		$reloaded->set_status( new CycleStatus( CycleStatus::BILLED ) );
 		$reloaded->set_claimed_until_gmt( null );
 		$this->sut->update_cycle( $reloaded );
 
@@ -1062,7 +1062,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$cycle = $this->append_pending_cycle_with_lease( $id, gmdate( 'Y-m-d H:i:s', time() - 60 ) );
 
 		// Settle it billed (clearing the lease, as the money-path does).
-		$cycle->set_status( CycleStatus::billed() );
+		$cycle->set_status( new CycleStatus( CycleStatus::BILLED ) );
 		$cycle->set_claimed_until_gmt( null );
 		$this->sut->update_cycle( $cycle );
 
@@ -1082,7 +1082,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 				'contract_id'    => $contract_id,
 				'sequence_no'    => 1,
 				'count'          => 1,
-				'status'         => CycleStatus::pending(),
+				'status'         => new CycleStatus( CycleStatus::PENDING ),
 				'starts_at_gmt'  => '2026-07-15 00:00:00',
 				'ends_at_gmt'    => '2026-08-15 00:00:00',
 				'expected_total' => '19.99',
@@ -1420,7 +1420,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 
 		$counts = $this->sut->count_by_status();
 
-		$this->assertSame( ContractStatus::all(), array_keys( $counts ) );
+		$this->assertSame( ContractStatus::get_all(), array_keys( $counts ) );
 		$this->assertSame( 1, $counts['paused-by-merchant'] );
 	}
 
@@ -1484,7 +1484,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 						'contract_id'    => $id,
 						'sequence_no'    => 1,
 						'count'          => 1,
-						'status'         => CycleStatus::from( $head_status ),
+						'status'         => new CycleStatus( $head_status ),
 						'starts_at_gmt'  => '2026-01-15 00:00:00',
 						'ends_at_gmt'    => $head_ends_at ?? $next_payment_gmt,
 						'expected_total' => '19.99',

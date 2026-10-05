@@ -34,7 +34,7 @@ final class ContractStatus {
 	 *
 	 * @return array<int, string>
 	 */
-	public static function defaults(): array {
+	public static function get_defaults(): array {
 		return array(
 			self::ACTIVE,
 			self::ON_HOLD,
@@ -50,16 +50,27 @@ final class ContractStatus {
 	 *
 	 * @return array<int, string>
 	 */
-	public static function all(): array {
-		return StatusRegistry::all( StatusRegistry::KIND_CONTRACT );
+	public static function get_all(): array {
+		return StatusRegistry::get_all( StatusRegistry::KIND_CONTRACT );
 	}
 
 	/**
-	 * Whether `$status` is a registered contract status.
+	 * Whether `$status` is a registered contract status (an engine default or an extension
+	 * registration). Write paths accept only registered statuses.
+	 *
+	 * @param string $status Status to check.
+	 */
+	public static function is_registered( string $status ): bool {
+		return StatusRegistry::is_registered( StatusRegistry::KIND_CONTRACT, $status );
+	}
+
+	/**
+	 * Whether `$status` is a well-formed status slug (lowercase letters and digits in
+	 * words joined by single hyphens, at most 20 characters), registered or not.
 	 *
 	 * @param string $status Status to check.
 	 */
 	public static function is_valid( string $status ): bool {
-		return StatusRegistry::is_registered( StatusRegistry::KIND_CONTRACT, $status );
+		return StatusRegistry::is_valid_slug( $status );
 	}
 }

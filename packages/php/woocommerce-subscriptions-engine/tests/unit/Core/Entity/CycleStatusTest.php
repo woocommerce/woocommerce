@@ -24,7 +24,7 @@ class CycleStatusTest extends TestCase {
 		parent::tearDown();
 	}
 
-	public function test_all_returns_exactly_the_known_statuses(): void {
+	public function test_get_all_returns_exactly_the_known_statuses(): void {
 		$this->assertSame(
 			array(
 				CycleStatus::PENDING,
@@ -33,17 +33,17 @@ class CycleStatusTest extends TestCase {
 				CycleStatus::FAILED,
 				CycleStatus::CANCELLED,
 			),
-			CycleStatus::all()
+			CycleStatus::get_all()
 		);
 	}
 
 	public function test_known_statuses_are_valid(): void {
-		$this->assertTrue( CycleStatus::is_valid( CycleStatus::PENDING ) );
-		$this->assertTrue( CycleStatus::is_valid( CycleStatus::PROCESSING ) );
-		$this->assertTrue( CycleStatus::is_valid( CycleStatus::BILLED ) );
-		$this->assertTrue( CycleStatus::is_valid( CycleStatus::FAILED ) );
-		$this->assertTrue( CycleStatus::is_valid( CycleStatus::CANCELLED ) );
-		$this->assertFalse( CycleStatus::is_valid( 'nonsense' ) );
+		$this->assertTrue( CycleStatus::is_registered( CycleStatus::PENDING ) );
+		$this->assertTrue( CycleStatus::is_registered( CycleStatus::PROCESSING ) );
+		$this->assertTrue( CycleStatus::is_registered( CycleStatus::BILLED ) );
+		$this->assertTrue( CycleStatus::is_registered( CycleStatus::FAILED ) );
+		$this->assertTrue( CycleStatus::is_registered( CycleStatus::CANCELLED ) );
+		$this->assertFalse( CycleStatus::is_registered( 'nonsense' ) );
 	}
 
 	public function test_billed_and_cancelled_are_terminal(): void {
@@ -64,49 +64,75 @@ class CycleStatusTest extends TestCase {
 		$this->assertFalse( CycleStatus::is_terminal( 'legacy-x' ) );
 	}
 
-	public function test_named_factories_carry_their_status_value(): void {
-		$this->assertSame( CycleStatus::PENDING, CycleStatus::pending()->get_value() );
-		$this->assertSame( CycleStatus::PROCESSING, CycleStatus::processing()->get_value() );
-		$this->assertSame( CycleStatus::BILLED, CycleStatus::billed()->get_value() );
-		$this->assertSame( CycleStatus::FAILED, CycleStatus::failed()->get_value() );
-		$this->assertSame( CycleStatus::CANCELLED, CycleStatus::cancelled()->get_value() );
+	public function test_constructor_wraps_a_default_status(): void {
+		$this->assertSame( CycleStatus::PENDING, ( new CycleStatus( CycleStatus::PENDING ) )->get_value() );
 	}
 
-	public function test_from_builds_a_known_status(): void {
-		$this->assertSame( CycleStatus::PENDING, CycleStatus::from( CycleStatus::PENDING )->get_value() );
+	/**
+	 * Registration is checked where a cycle status is written, not when the value is built,
+	 * so a stored status an unregistered extension wrote can still be loaded.
+	 */
+	public function test_constructor_wraps_a_well_formed_unregistered_status(): void {
+		$this->assertSame( 'legacy-x', ( new CycleStatus( 'legacy-x' ) )->get_value() );
 	}
 
-	public function test_from_rejects_an_unknown_status(): void {
+	/**
+	 * @dataProvider malformed_slugs
+	 *
+	 * @param string $slug Malformed slug.
+	 */
+	public function test_constructor_rejects_a_malformed_slug( string $slug ): void {
 		$this->expectException( DomainException::class );
 
-		CycleStatus::from( 'nonsense' );
+		new CycleStatus( $slug );
 	}
 
-	public function test_from_accepts_an_extension_registered_status(): void {
-		StatusRegistry::register( StatusRegistry::KIND_CYCLE, 'disputed' );
-
-		$this->assertSame( 'disputed', CycleStatus::from( 'disputed' )->get_value() );
+	/**
+	 * Strings that are not well-formed status slugs.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public function malformed_slugs(): array {
+		return array(
+			'empty'            => array( '' ),
+			'uppercase'        => array( 'Pending' ),
+			'double hyphen'    => array( 'on--hold' ),
+			'trailing newline' => array( "pending\n" ),
+			'markup'           => array( '<b>x</b>' ),
+			'over 20 chars'    => array( str_repeat( 'a', 21 ) ),
+		);
 	}
 
-	public function test_from_rejects_a_status_registered_for_contracts_only(): void {
+	public function test_is_valid_checks_the_slug_format_only(): void {
+		$this->assertTrue( CycleStatus::is_valid( CycleStatus::PENDING ) );
+		$this->assertTrue( CycleStatus::is_valid( 'legacy-x' ), 'Well-formed but unregistered.' );
+		$this->assertFalse( CycleStatus::is_registered( 'legacy-x' ) );
+	}
+
+	/**
+	 * @dataProvider malformed_slugs
+	 *
+	 * @param string $slug Malformed slug.
+	 */
+	public function test_is_valid_rejects_a_malformed_slug( string $slug ): void {
+		$this->assertFalse( CycleStatus::is_valid( $slug ) );
+	}
+
+	public function test_is_registered_is_scoped_to_cycle_registrations(): void {
 		StatusRegistry::register( StatusRegistry::KIND_CONTRACT, 'disputed' );
+		$this->assertFalse( CycleStatus::is_registered( 'disputed' ) );
 
-		$this->expectException( DomainException::class );
-
-		CycleStatus::from( 'disputed' );
-	}
-
-	public function test_stored_builds_an_unregistered_value_without_validation(): void {
-		$this->assertSame( 'legacy-x', CycleStatus::stored( 'legacy-x' )->get_value() );
+		StatusRegistry::register( StatusRegistry::KIND_CYCLE, 'disputed' );
+		$this->assertTrue( CycleStatus::is_registered( 'disputed' ) );
 	}
 
 	public function test_equals_compares_by_value(): void {
-		$this->assertTrue( CycleStatus::pending()->equals( CycleStatus::pending() ) );
-		$this->assertFalse( CycleStatus::pending()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( new CycleStatus( CycleStatus::PENDING )->equals( new CycleStatus( CycleStatus::PENDING ) ) );
+		$this->assertFalse( new CycleStatus( CycleStatus::PENDING )->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 	}
 
-	public function test_the_retired_transition_api_is_gone(): void {
-		foreach ( array( 'is_transition_allowed', 'can_transition', 'assert_transition_allowed', 'can_transition_to', 'transition_to' ) as $method ) {
+	public function test_the_retired_transition_api_and_factories_are_gone(): void {
+		foreach ( array( 'is_transition_allowed', 'can_transition', 'assert_transition_allowed', 'can_transition_to', 'transition_to', 'from', 'stored', 'pending', 'processing', 'billed', 'failed', 'cancelled', 'all', 'defaults' ) as $method ) {
 			$this->assertFalse( method_exists( CycleStatus::class, $method ), "CycleStatus::{$method}() should not exist." );
 		}
 	}

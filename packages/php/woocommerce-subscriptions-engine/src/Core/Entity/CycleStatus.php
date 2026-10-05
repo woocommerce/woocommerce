@@ -23,8 +23,11 @@ defined( 'ABSPATH' ) || exit;
 /**
  * CycleStatus value object.
  *
- * Immutable. Construct via a named factory ({@see self::pending()} etc.) or
- * {@see self::from()}; storage hydration uses {@see self::stored()}.
+ * Immutable: `new CycleStatus( CycleStatus::PENDING )`. The constructor checks the slug
+ * format only, so a stored status a since-deactivated extension wrote still loads;
+ * whether a status is registered is checked where a cycle status is written
+ * ({@see Cycle::create()}, {@see Cycle::set_status()}, the repository's status
+ * compare-and-set).
  */
 final class CycleStatus {
 
@@ -42,78 +45,19 @@ final class CycleStatus {
 	private $value;
 
 	/**
-	 * Use a named factory ({@see self::pending()} etc.), {@see self::from()} or
-	 * {@see self::stored()}.
+	 * Wrap a status slug.
 	 *
-	 * @param string $value Status string.
+	 * @param string $value Status slug.
+	 * @throws DomainException If `$value` is not a well-formed status slug.
 	 */
-	private function __construct( string $value ) {
-		$this->value = $value;
-	}
-
-	/**
-	 * Build a status value from a registered status string.
-	 *
-	 * @param string $value Status string.
-	 * @throws DomainException If `$value` is not a registered cycle status.
-	 */
-	public static function from( string $value ): self {
+	public function __construct( string $value ) {
 		if ( ! self::is_valid( $value ) ) {
 			throw new DomainException(
-				sprintf( 'CycleStatus: "%s" is not a registered status.', $value )
+				sprintf( 'CycleStatus: "%s" is not a valid status slug.', $value )
 			);
 		}
 
-		return new self( $value );
-	}
-
-	/**
-	 * Build a status value from a persisted string without validation.
-	 *
-	 * Storage hydration only: a value written by a since-deactivated extension
-	 * must round-trip unchanged rather than fail the read.
-	 *
-	 * @internal Not part of the consumer API; writes go through {@see self::from()}.
-	 *
-	 * @param string $value Stored status string.
-	 */
-	public static function stored( string $value ): self {
-		return new self( $value );
-	}
-
-	/**
-	 * The `pending` status (charge in flight; values locked at creation).
-	 */
-	public static function pending(): self {
-		return new self( self::PENDING );
-	}
-
-	/**
-	 * The `processing` status (charge submitted, awaiting a terminal outcome; non-terminal).
-	 */
-	public static function processing(): self {
-		return new self( self::PROCESSING );
-	}
-
-	/**
-	 * The `billed` status (settled after a successful charge; terminal).
-	 */
-	public static function billed(): self {
-		return new self( self::BILLED );
-	}
-
-	/**
-	 * The `failed` status (charge declined; non-terminal).
-	 */
-	public static function failed(): self {
-		return new self( self::FAILED );
-	}
-
-	/**
-	 * The `cancelled` status (closed; terminal).
-	 */
-	public static function cancelled(): self {
-		return new self( self::CANCELLED );
+		$this->value = $value;
 	}
 
 	/**
@@ -137,7 +81,7 @@ final class CycleStatus {
 	 *
 	 * @return array<int, string>
 	 */
-	public static function defaults(): array {
+	public static function get_defaults(): array {
 		return array(
 			self::PENDING,
 			self::PROCESSING,
@@ -153,17 +97,28 @@ final class CycleStatus {
 	 *
 	 * @return array<int, string>
 	 */
-	public static function all(): array {
-		return StatusRegistry::all( StatusRegistry::KIND_CYCLE );
+	public static function get_all(): array {
+		return StatusRegistry::get_all( StatusRegistry::KIND_CYCLE );
 	}
 
 	/**
-	 * Whether `$status` is a registered cycle status.
+	 * Whether `$status` is a registered cycle status (an engine default or an extension
+	 * registration). Write paths accept only registered statuses.
+	 *
+	 * @param string $status Status to check.
+	 */
+	public static function is_registered( string $status ): bool {
+		return StatusRegistry::is_registered( StatusRegistry::KIND_CYCLE, $status );
+	}
+
+	/**
+	 * Whether `$status` is a well-formed status slug (lowercase letters and digits in
+	 * words joined by single hyphens, at most 20 characters), registered or not.
 	 *
 	 * @param string $status Status to check.
 	 */
 	public static function is_valid( string $status ): bool {
-		return StatusRegistry::is_registered( StatusRegistry::KIND_CYCLE, $status );
+		return StatusRegistry::is_valid_slug( $status );
 	}
 
 	/**

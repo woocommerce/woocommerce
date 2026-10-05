@@ -285,7 +285,7 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 		$this->seed_list_contract( ContractStatus::ON_HOLD );
 
 		$by_status = Subscriptions::count_by_status();
-		$this->assertSame( ContractStatus::all(), array_keys( $by_status ) );
+		$this->assertSame( ContractStatus::get_all(), array_keys( $by_status ) );
 		$this->assertSame( 2, $by_status[ ContractStatus::ACTIVE ] );
 		$this->assertSame( 1, $by_status[ ContractStatus::ON_HOLD ] );
 		$this->assertSame( 0, $by_status[ ContractStatus::CANCELLED ] );
@@ -345,7 +345,7 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 		// Newest first: cycle 2 is billed, linked to the renewal order.
 		$cycle_two = $history[0];
 		$this->assertSame( 2, $cycle_two->get_count() );
-		$this->assertTrue( $cycle_two->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( $cycle_two->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 		$this->assertSame( $renewal_order->get_id(), $cycle_two->get_order_id() );
 
 		// The schedule advanced one cadence (cycle 1 ended 2026-02-15 + 1 month).

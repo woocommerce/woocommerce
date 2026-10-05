@@ -28,11 +28,11 @@ class StatusRegistryTest extends TestCase {
 	public function test_all_returns_exactly_the_engine_defaults_with_nothing_registered(): void {
 		$this->assertSame(
 			array( 'active', 'on-hold', 'pending-cancellation', 'cancelled', 'expired' ),
-			StatusRegistry::all( StatusRegistry::KIND_CONTRACT )
+			StatusRegistry::get_all( StatusRegistry::KIND_CONTRACT )
 		);
 		$this->assertSame(
 			array( 'pending', 'processing', 'billed', 'failed', 'cancelled' ),
-			StatusRegistry::all( StatusRegistry::KIND_CYCLE )
+			StatusRegistry::get_all( StatusRegistry::KIND_CYCLE )
 		);
 	}
 
@@ -41,8 +41,8 @@ class StatusRegistryTest extends TestCase {
 		StatusRegistry::register( StatusRegistry::KIND_CONTRACT, 'awaiting-shipment' );
 
 		$this->assertSame(
-			array_merge( ContractStatus::defaults(), array( 'paused-by-merchant', 'awaiting-shipment' ) ),
-			StatusRegistry::all( StatusRegistry::KIND_CONTRACT )
+			array_merge( ContractStatus::get_defaults(), array( 'paused-by-merchant', 'awaiting-shipment' ) ),
+			StatusRegistry::get_all( StatusRegistry::KIND_CONTRACT )
 		);
 	}
 
@@ -60,8 +60,8 @@ class StatusRegistryTest extends TestCase {
 		StatusRegistry::register( StatusRegistry::KIND_CONTRACT, 'paused-by-merchant' );
 
 		$this->assertSame(
-			array_merge( ContractStatus::defaults(), array( 'paused-by-merchant' ) ),
-			StatusRegistry::all( StatusRegistry::KIND_CONTRACT )
+			array_merge( ContractStatus::get_defaults(), array( 'paused-by-merchant' ) ),
+			StatusRegistry::get_all( StatusRegistry::KIND_CONTRACT )
 		);
 	}
 
@@ -70,7 +70,7 @@ class StatusRegistryTest extends TestCase {
 
 		$this->assertTrue( StatusRegistry::is_registered( StatusRegistry::KIND_CONTRACT, 'paused-by-merchant' ) );
 		$this->assertFalse( StatusRegistry::is_registered( StatusRegistry::KIND_CYCLE, 'paused-by-merchant' ) );
-		$this->assertSame( CycleStatus::defaults(), StatusRegistry::all( StatusRegistry::KIND_CYCLE ) );
+		$this->assertSame( CycleStatus::get_defaults(), StatusRegistry::get_all( StatusRegistry::KIND_CYCLE ) );
 	}
 
 	/**
@@ -144,7 +144,7 @@ class StatusRegistryTest extends TestCase {
 	public function test_all_rejects_an_unknown_kind(): void {
 		$this->expectException( InvalidArgumentException::class );
 
-		StatusRegistry::all( 'plan' );
+		StatusRegistry::get_all( 'plan' );
 	}
 
 	public function test_is_registered_rejects_an_unknown_kind(): void {
@@ -159,8 +159,8 @@ class StatusRegistryTest extends TestCase {
 
 		StatusRegistry::reset();
 
-		$this->assertSame( ContractStatus::defaults(), StatusRegistry::all( StatusRegistry::KIND_CONTRACT ) );
-		$this->assertSame( CycleStatus::defaults(), StatusRegistry::all( StatusRegistry::KIND_CYCLE ) );
+		$this->assertSame( ContractStatus::get_defaults(), StatusRegistry::get_all( StatusRegistry::KIND_CONTRACT ) );
+		$this->assertSame( CycleStatus::get_defaults(), StatusRegistry::get_all( StatusRegistry::KIND_CYCLE ) );
 		$this->assertFalse( StatusRegistry::is_registered( StatusRegistry::KIND_CONTRACT, 'paused-by-merchant' ) );
 	}
 }

@@ -423,7 +423,7 @@ final class ContractRepository {
 		$params  = array();
 
 		$status = isset( $args['status'] ) && is_string( $args['status'] ) ? $args['status'] : '';
-		if ( '' !== $status && ContractStatus::is_valid( $status ) ) {
+		if ( '' !== $status && ContractStatus::is_registered( $status ) ) {
 			$clauses[] = 'status = %s';
 			$params[]  = $status;
 		}
@@ -499,7 +499,7 @@ final class ContractRepository {
 
 	/**
 	 * The contract count per status - the views bar's read. One `GROUP BY status` scan,
-	 * returned as a map keyed by EVERY registered contract status ({@see ContractStatus::all()}:
+	 * returned as a map keyed by EVERY registered contract status ({@see ContractStatus::get_all()}:
 	 * the engine defaults plus extension registrations; absent statuses filled with 0) and in
 	 * that order, so a consumer can render a fixed set of views without knowing which statuses
 	 * currently have rows. A stored status that is not registered is not counted as a key. The
@@ -518,7 +518,7 @@ final class ContractRepository {
 
 		// Seed every registered status at 0 so the map is complete and stably ordered.
 		$counts = array();
-		foreach ( ContractStatus::all() as $status ) {
+		foreach ( ContractStatus::get_all() as $status ) {
 			$counts[ $status ] = 0;
 		}
 
@@ -528,7 +528,7 @@ final class ContractRepository {
 			}
 			$status = ScalarCoercion::coerce_string( $row['status'] ?? '' );
 			// A row whose stored status is not registered is ignored, not added as a
-			// stray key - the map stays exactly ContractStatus::all().
+			// stray key - the map stays exactly ContractStatus::get_all().
 			if ( array_key_exists( $status, $counts ) ) {
 				$counts[ $status ] = ScalarCoercion::coerce_int( $row['total'] ?? 0 );
 			}
@@ -1005,7 +1005,7 @@ final class ContractRepository {
 	public function transition_cycle_status( int $cycle_id, string $from_status, string $to_status, int $order_id, ?string $reason = null ): bool {
 		global $wpdb;
 
-		if ( ! CycleStatus::is_valid( $to_status ) ) {
+		if ( ! CycleStatus::is_registered( $to_status ) ) {
 			throw new \DomainException( esc_html( sprintf( 'ContractRepository::transition_cycle_status(): cycle status "%s" is not registered.', $to_status ) ) );
 		}
 
