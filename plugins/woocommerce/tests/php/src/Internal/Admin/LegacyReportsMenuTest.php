@@ -396,67 +396,6 @@ class LegacyReportsMenuTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should remember a found extension report across requests until a plugin is deactivated.
-	 */
-	public function test_extension_reports_stored_until_plugin_deactivated(): void {
-		$calls = $this->add_counting_extension_report();
-
-		$this->assertTrue( $this->is_menu_shown(), 'Precondition: the extension report is found' );
-		$this->assertSame( 'yes', get_option( 'woocommerce_store_has_legacy_reports_related_plugins' ) );
-
-		$this->assertTrue( $this->is_menu_shown(), 'A later request must reuse the stored result' );
-		$this->assertSame( 1, $calls->count, 'A later request must not build the legacy reports again' );
-
-		do_action( 'deactivated_plugin', 'reporting-extension/reporting-extension.php', false ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-
-		$this->assertSame( 'no', get_option( 'woocommerce_store_has_legacy_reports_related_plugins' ) );
-		$this->assertTrue( $this->is_menu_shown() );
-		$this->assertSame( 2, $calls->count, 'Deactivating a plugin must make the next request check again' );
-	}
-
-	/**
-	 * @testdox Should not create the stored result when a plugin is deactivated before any check.
-	 */
-	public function test_plugin_deactivation_does_not_create_stored_result(): void {
-		do_action( 'deactivated_plugin', 'some-plugin/some-plugin.php', false ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-
-		$this->assertFalse( get_option( 'woocommerce_store_has_legacy_reports_related_plugins' ) );
-	}
-
-	/**
-	 * @testdox Should check again on every request while the stored result is no.
-	 */
-	public function test_extension_reports_checked_again_when_stored_no(): void {
-		update_option( 'woocommerce_store_has_legacy_reports_related_plugins', 'no' );
-		$this->add_counting_extension_report();
-
-		$this->assertTrue( $this->is_menu_shown() );
-		$this->assertSame( 'yes', get_option( 'woocommerce_store_has_legacy_reports_related_plugins' ) );
-	}
-
-	/**
-	 * @testdox Should ignore the stored result once no plugin hooks the legacy report filters.
-	 */
-	public function test_stored_extension_reports_ignored_without_report_filters(): void {
-		$this->add_counting_extension_report();
-		$this->assertTrue( $this->is_menu_shown(), 'Precondition: the extension report is found' );
-
-		remove_all_filters( 'woocommerce_admin_reports' );
-
-		$this->assertFalse( $this->is_menu_shown() );
-	}
-
-	/**
-	 * @testdox Should store no when no extension report is found, so the option is autoloaded.
-	 */
-	public function test_extension_reports_stored_no_when_none_found(): void {
-		add_filter( 'woocommerce_admin_reports', fn( $reports ) => $reports );
-
-		$this->assertFalse( $this->is_menu_shown() );
-		$this->assertSame( 'no', get_option( 'woocommerce_store_has_legacy_reports_related_plugins' ) );
-	}
-
-	/**
 	 * @testdox Should hide the WooCommerce > Reports item on a new store but keep the page accessible.
 	 */
 	public function test_admin_menu_hides_submenu_item_and_keeps_page_accessible(): void {
@@ -554,28 +493,6 @@ class LegacyReportsMenuTest extends WC_Unit_Test_Case {
 		$menus->admin_menu();
 		$menus->reports_menu();
 		$menus->settings_menu();
-	}
-
-	/**
-	 * Add a legacy report through woocommerce_admin_reports and count how often the filter runs.
-	 *
-	 * @return \stdClass Object whose count property holds the number of calls.
-	 */
-	private function add_counting_extension_report(): \stdClass {
-		$calls = (object) array( 'count' => 0 );
-		add_filter(
-			'woocommerce_admin_reports',
-			function ( $reports ) use ( $calls ) {
-				++$calls->count;
-				$reports['stock']['reports']['insufficient_stock'] = array(
-					'title'    => 'Insufficient stock',
-					'callback' => '__return_empty_string',
-				);
-				return $reports;
-			}
-		);
-
-		return $calls;
 	}
 
 	/**
