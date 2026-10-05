@@ -43,6 +43,7 @@ class WC_Effective_Price_Tax_Setting_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_checkout_keeps_cart_price_tax_setting( string $path, string $option, bool $effective_setting, string $expected_subtotal, string $expected_tax, string $expected_total ): void {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_default_country', 'DE' );
 		update_option( 'woocommerce_prices_include_tax', $option );
 		update_option( 'woocommerce_price_num_decimals', 2 );
 		add_filter( 'woocommerce_prices_include_tax', $effective_setting ? '__return_true' : '__return_false' );

@@ -38,6 +38,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
 
 		try {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
 			update_option( 'woocommerce_prices_include_tax', $tax_mode );
 			$sut = new $order_class();
 
@@ -78,6 +79,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$sut               = null;
 
 		try {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
 			update_option( 'woocommerce_prices_include_tax', $tax_mode );
 			$sut = new WC_Order();
 			if ( null !== $override ) {
@@ -128,6 +130,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_email_log_enabled', '__return_false' );
 
 		try {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
 			update_option( 'woocommerce_prices_include_tax', $tax_mode );
 			$order = new WC_Order();
 			if ( null !== $override ) {

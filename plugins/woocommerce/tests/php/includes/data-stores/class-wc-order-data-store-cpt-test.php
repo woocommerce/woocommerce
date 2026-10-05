@@ -876,6 +876,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$order_id          = 0;
 
 		try {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
 			update_option( 'woocommerce_prices_include_tax', $tax_mode );
 			update_option( 'woocommerce_currency', 'EUR' );
 			$post     = get_default_post_to_edit( 'shop_order', true );
