@@ -1,3 +1,13 @@
+import {
+	afterEach,
+	beforeEach,
+	describe,
+	expect,
+	test,
+	vi,
+	type Mock,
+} from 'vitest';
+
 /**
  * External dependencies
  */
@@ -13,14 +23,14 @@ import {
 } from '../sanitize';
 
 // Mock DOMPurify for testing
-jest.mock( 'dompurify' );
+vi.mock( 'dompurify' );
 
 describe( 'sanitizeHTML', () => {
-	const mockSanitize = jest.fn();
+	const mockSanitize = vi.fn();
 
 	beforeEach( () => {
-		jest.clearAllMocks();
-		( DOMPurify.sanitize as jest.Mock ) = mockSanitize;
+		vi.clearAllMocks();
+		( DOMPurify.sanitize as Mock ) = mockSanitize;
 	} );
 
 	afterEach( () => {
@@ -28,7 +38,7 @@ describe( 'sanitizeHTML', () => {
 	} );
 
 	test( 'should handle no-op trusted type policy creation errors', () => {
-		const mockCreatePolicy = jest.fn();
+		const mockCreatePolicy = vi.fn();
 
 		mockCreatePolicy.mockImplementation( () => {
 			throw new Error( 'Creation failed' );
@@ -58,6 +68,10 @@ describe( 'sanitizeHTML', () => {
 			ALLOWED_TAGS: [ ...DEFAULT_ALLOWED_TAGS ],
 			ALLOWED_ATTR: [ ...DEFAULT_ALLOWED_ATTR ],
 		} );
+		expect( console.warn ).toHaveBeenCalledWith(
+			expect.stringContaining( 'trusted type policy:' ),
+			expect.objectContaining( { message: 'Creation failed' } )
+		);
 	} );
 
 	describe( 'basic sanitization', () => {

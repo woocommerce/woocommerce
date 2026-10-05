@@ -1,3 +1,5 @@
+import { describe, expect, test, vi } from 'vitest';
+
 /**
  * Internal dependencies
  */
@@ -48,7 +50,7 @@ describe( 'sanitizeHTML integration tests', () => {
 
 		// Provide a minimal Trusted Types factory so getTrustedTypesPolicy can create
 		// a policy in this test environment (JSDOM doesn't ship TT by default).
-		const mockCreatePolicy = jest.fn(
+		const mockCreatePolicy = vi.fn(
 			(
 				name: string,
 				config: {
