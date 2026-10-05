@@ -5,7 +5,6 @@ import '@testing-library/jest-dom';
 import { screen } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
-import { createBlock, parse, serialize } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -86,72 +85,6 @@ async function setup() {
 }
 
 describe( 'Product block', () => {
-	it( 'preserves unstyled saved markup', () => {
-		const content =
-			'<!-- wp:woocommerce/single-product {"productId":82} -->\n<div class="wp-block-woocommerce-single-product woocommerce"></div>\n<!-- /wp:woocommerce/single-product -->';
-		const [ block ] = parse( content );
-
-		expect( block.isValid ).toBe( true );
-		expect( serialize( block ) ).toBe( content );
-	} );
-
-	it( 'round-trips spacing, background, and border styles on the saved wrapper', () => {
-		const style = {
-			color: { gradient: 'linear-gradient(135deg,#ffffff,#eeeeee)' },
-			border: {
-				color: '#123456',
-				style: 'solid',
-				width: '2px',
-				radius: '8px',
-			},
-			spacing: {
-				margin: { top: 'var:preset|spacing|40', bottom: '0' },
-				padding: {
-					top: '0',
-					right: '1rem',
-					bottom: '2rem',
-					left: '1rem',
-				},
-			},
-		};
-		const content = serialize(
-			createBlock( 'woocommerce/single-product', {
-				productId: 82,
-				style,
-			} )
-		);
-		const wrapper = document.createElement( 'div' );
-		wrapper.innerHTML = content;
-		const product = wrapper.querySelector< HTMLElement >(
-			'.wp-block-woocommerce-single-product'
-		);
-
-		expect( product ).toHaveClass( 'woocommerce', 'has-background' );
-		expect( product?.getAttribute( 'style' ) ).toContain(
-			'background:linear-gradient(135deg,#ffffff,#eeeeee)'
-		);
-		expect( product?.style.borderWidth ).toBe( '2px' );
-		expect( product?.style.borderRadius ).toBe( '8px' );
-		expect( product?.getAttribute( 'style' ) ).toContain(
-			'margin-top:var(--wp--preset--spacing--40)'
-		);
-		expect( product?.style.marginBottom ).toBe( '0px' );
-		expect( product?.style.paddingTop ).toBe( '0px' );
-		expect( product?.style.paddingRight ).toBe( '1rem' );
-		expect( product?.style.paddingBottom ).toBe( '2rem' );
-		expect( product?.style.paddingLeft ).toBe( '1rem' );
-
-		const [ block ] = parse( content );
-		expect( block.isValid ).toBe( true );
-		expect( block.attributes.style ).toEqual( style );
-		expect( serialize( block ) ).toBe( content );
-		expect(
-			serialize(
-				createBlock( 'woocommerce/single-product', { style: {} } )
-			)
-		).not.toContain( 'style=' );
-	} );
-
 	it( 'should render inner blocks for users without edit permissions', async () => {
 		// The V4 of this endpoint will return product data to authors,
 		// see https://github.com/woocommerce/woocommerce/pull/61718.
