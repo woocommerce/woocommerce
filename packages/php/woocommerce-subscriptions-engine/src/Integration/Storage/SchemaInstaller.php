@@ -40,8 +40,9 @@ final class SchemaInstaller {
 	 * 2.3.0 - catalog flatten: drop the plan_groups table; plans lose group_id and
 	 *         options, gain merchant_code (UNIQUE).
 	 * 2.4.0 - owner-scoped due scan: `due_owner (extension_slug, next_payment_gmt)` replaces
-	 *         `due_contract (status, next_payment_gmt)`; pre-freeze, existing tables must be
-	 *         recreated to drop the old index.
+	 *         `due_contract (status, next_payment_gmt)` and makes the contracts
+	 *         `extension_slug` index redundant (dropped); pre-freeze, existing tables must be
+	 *         recreated to drop the old indexes.
 	 *
 	 * Pre-freeze, tables are recreated rather than migrated. dbDelta adds columns but
 	 * does not change an existing column's nullability or drop unused ones, so a dev box
@@ -263,8 +264,7 @@ final class SchemaInstaller {
   KEY customer_status (customer_id, status),
   KEY due (next_payment_gmt, status),
   KEY due_owner (extension_slug, next_payment_gmt),
-  KEY origin_order (origin_order_id),
-  KEY extension_slug (extension_slug)
+  KEY origin_order (origin_order_id)
 ) {$collate};";
 
 		$contract_items_sql = "CREATE TABLE {$contract_items} (
