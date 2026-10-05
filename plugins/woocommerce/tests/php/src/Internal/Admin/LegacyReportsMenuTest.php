@@ -449,6 +449,31 @@ class LegacyReportsMenuTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should build the legacy reports once per request after finding an extension report.
+	 */
+	public function test_extension_reports_found_once_per_request(): void {
+		$calls = 0;
+		add_filter(
+			'woocommerce_admin_reports',
+			function ( $reports ) use ( &$calls ) {
+				++$calls;
+				$reports['stock']['reports']['insufficient_stock'] = array(
+					'title'    => 'Insufficient stock',
+					'callback' => '__return_empty_string',
+				);
+				return $reports;
+			}
+		);
+		$this->register_woocommerce_menu();
+
+		$this->sut->handle_admin_menu();
+		$this->sut->handle_admin_head();
+
+		$this->assertSame( 1, $calls, 'The legacy reports must not be built again on admin_head' );
+		$this->assertFalse( $this->has_hide_class( 'submenu', 'wc-reports' ) );
+	}
+
+	/**
 	 * @testdox Should add the hide class once when both admin_menu and admin_head hide the item.
 	 */
 	public function test_hide_class_added_once_across_both_passes(): void {

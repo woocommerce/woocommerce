@@ -46,6 +46,13 @@ final class LegacyReportsMenu {
 	private array $hidden_in = array();
 
 	/**
+	 * Whether has_extension_reports() already found an extension report during this request.
+	 *
+	 * @var bool
+	 */
+	private bool $found_extension_reports = false;
+
+	/**
 	 * Hide the Reports menu item at the end of admin_menu.
 	 *
 	 * Requests that only build the menu, such as the Calypso sidebar's /wpcom/v2/admin-menu endpoint, never
@@ -191,12 +198,27 @@ final class LegacyReportsMenu {
 	/**
 	 * Whether an extension adds to or changes the legacy reports.
 	 *
+	 * Only a positive result is remembered, so the admin_head pass still catches filters registered after admin_menu.
+	 *
+	 * @return bool
+	 */
+	private function has_extension_reports(): bool {
+		if ( ! $this->found_extension_reports ) {
+			$this->found_extension_reports = $this->find_extension_reports();
+		}
+
+		return $this->found_extension_reports;
+	}
+
+	/**
+	 * Look for legacy reports that an extension adds or changes.
+	 *
 	 * Analytics also applies woocommerce_admin_reports, so hooking it isn't enough on its own: the filtered
 	 * legacy reports must contain a report core doesn't define, or a core report with a different callback.
 	 *
 	 * @return bool
 	 */
-	private function has_extension_reports(): bool {
+	private function find_extension_reports(): bool {
 		if ( has_action( 'wc_reports_tabs' ) || has_filter( 'wc_admin_reports_path' ) ) {
 			return true;
 		}
