@@ -1,8 +1,16 @@
+import {
+	afterEach,
+	beforeEach,
+	describe,
+	expect,
+	test,
+	vi,
+	type Mock,
+} from 'vitest';
 describe( 'getTrustedTypesPolicy', () => {
-	let mockCreatePolicy: jest.Mock;
-
+	let mockCreatePolicy: Mock;
 	beforeEach( () => {
-		mockCreatePolicy = jest.fn();
+		mockCreatePolicy = vi.fn();
 		Object.defineProperty( window, 'trustedTypes', {
 			value: {
 				createPolicy: mockCreatePolicy,
@@ -11,24 +19,24 @@ describe( 'getTrustedTypesPolicy', () => {
 			configurable: true,
 		} );
 	} );
-
 	afterEach( () => {
-		jest.resetModules();
-		delete ( window as unknown as { trustedTypes?: unknown } ).trustedTypes;
+		vi.resetModules();
+		delete (
+			window as unknown as {
+				trustedTypes?: unknown;
+			}
+		 ).trustedTypes;
 	} );
-
 	test( 'should create trusted types policy when window.trustedTypes is available', async () => {
 		const mockPolicy = {
 			name: 'woocommerce-sanitize',
-			createHTML: jest.fn( ( str: string ) => str ),
+			createHTML: vi.fn( ( str: string ) => str ),
 		};
 		mockCreatePolicy.mockReturnValue( mockPolicy );
-
 		const { getTrustedTypesPolicy } = await import(
 			'../trusted-types-policy'
 		);
 		const policy = getTrustedTypesPolicy();
-
 		expect( policy ).toBe( mockPolicy );
 		expect( mockCreatePolicy ).toHaveBeenCalledWith(
 			'woocommerce-sanitize',
@@ -37,60 +45,57 @@ describe( 'getTrustedTypesPolicy', () => {
 			}
 		);
 	} );
-
 	test( 'should cache the policy instance and not create it multiple times', async () => {
 		const mockPolicy = {
 			name: 'woocommerce-sanitize',
-			createHTML: jest.fn( ( str: string ) => str ),
+			createHTML: vi.fn( ( str: string ) => str ),
 		};
 		mockCreatePolicy.mockReturnValue( mockPolicy );
-
 		const { getTrustedTypesPolicy } = await import(
 			'../trusted-types-policy'
 		);
 		const policy1 = getTrustedTypesPolicy();
 		const policy2 = getTrustedTypesPolicy();
-
 		expect( policy1 ).toBe( policy2 );
 		expect( mockCreatePolicy ).toHaveBeenCalledTimes( 1 );
 	} );
-
 	test( 'should handle case when window.trustedTypes is not available', async () => {
-		delete ( window as unknown as { trustedTypes?: unknown } ).trustedTypes;
-
+		delete (
+			window as unknown as {
+				trustedTypes?: unknown;
+			}
+		 ).trustedTypes;
 		const { getTrustedTypesPolicy } = await import(
 			'../trusted-types-policy'
 		);
 		const policy = getTrustedTypesPolicy();
-
 		expect( policy ).toBeNull();
 	} );
-
 	test( 'should handle policy creation errors', async () => {
 		mockCreatePolicy.mockImplementation( () => {
 			throw new Error( 'Creation failed' );
 		} );
-
 		const { getTrustedTypesPolicy } = await import(
 			'../trusted-types-policy'
 		);
 		const policy = getTrustedTypesPolicy();
-
 		expect( policy ).toBeNull();
+		expect( console.warn ).toHaveBeenCalledWith(
+			expect.stringContaining( 'trusted type policy:' ),
+			expect.objectContaining( { message: 'Creation failed' } )
+		);
 	} );
-
 	test( 'should call sanitizeHTML when createHTML is invoked', async () => {
 		// Mock sanitizeHTML
-		const mockSanitizeHTML = jest.fn(
+		const mockSanitizeHTML = vi.fn(
 			( input: string ) => `sanitized: ${ input }`
 		);
 
 		// Setup trusted types mock
 		const mockPolicy = {
 			name: 'woocommerce-sanitize',
-			createHTML: jest.fn(),
+			createHTML: vi.fn(),
 		};
-
 		mockCreatePolicy.mockImplementation( ( name, config ) => {
 			// Capture the createHTML function that was passed
 			mockPolicy.createHTML = config.createHTML;
@@ -98,10 +103,17 @@ describe( 'getTrustedTypesPolicy', () => {
 		} );
 
 		// Mock the sanitize module
-		jest.doMock( '../sanitize', () => ( {
-			sanitizeHTML: mockSanitizeHTML,
-		} ) );
-
+		vi.doMock( '../sanitize', () => {
+			const mock = {
+				sanitizeHTML: mockSanitizeHTML,
+			};
+			return Object.defineProperties(
+				{
+					default: mock,
+				},
+				Object.getOwnPropertyDescriptors( mock )
+			);
+		} );
 		const { getTrustedTypesPolicy } = await import(
 			'../trusted-types-policy'
 		);
@@ -114,7 +126,6 @@ describe( 'getTrustedTypesPolicy', () => {
 		// Verify sanitizeHTML was called with the input
 		expect( mockSanitizeHTML ).toHaveBeenCalledWith( testInput );
 		expect( result ).toBe( 'sanitized: ' + testInput );
-
-		jest.dontMock( '../sanitize' );
+		vi.doUnmock( '../sanitize' );
 	} );
 } );
