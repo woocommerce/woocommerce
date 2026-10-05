@@ -136,7 +136,9 @@ test.describe(
 				// The editor strips preview_nonce from the preview link but keeps
 				// preview=true, which is what makes WordPress serve the unsaved
 				// post rather than the published one.
-				expect( newPage.url() ).toContain( 'preview=true' );
+				expect(
+					new URL( newPage.url() ).searchParams.get( 'preview' )
+				).toBe( 'true' );
 				await expect( newPage.locator( 'body' ) ).toContainText(
 					'New order: #12345'
 				);
