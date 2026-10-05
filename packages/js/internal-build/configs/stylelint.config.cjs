@@ -27,7 +27,6 @@ module.exports = {
 		'scss/no-global-function-names': null,
 		'scss/selector-no-redundant-nesting-selector': null,
 		'selector-id-pattern': null,
-		'no-invalid-position-at-import-rule': null,
 		'length-zero-no-unit': [ true, { ignoreFunctions: [ 'calc', 'var' ] } ],
 	},
 	overrides: [
