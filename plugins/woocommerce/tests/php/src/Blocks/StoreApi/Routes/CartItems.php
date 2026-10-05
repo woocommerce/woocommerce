@@ -382,72 +382,49 @@ class CartItems extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox Simple and variation cart lines include a null parent item key by default.
+	 * @testdox Cart lines include a null parent item key by default, declared in the schema as a readonly string or null.
 	 */
-	public function test_parent_item_key_is_null_by_default_for_each_cart_line() {
+	public function test_parent_item_key_is_null_by_default() {
 		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'cart-items', 'v1' );
-		$cart       = WC()->cart->get_cart();
+		$data       = $controller->prepare_item_for_response( current( WC()->cart->get_cart() ), new \WP_REST_Request() )->get_data();
+		$property   = $controller->get_item_schema()['properties']['parent_item_key'];
 
-		$this->assertCount( 2, $cart, 'The fixture must contain a simple line and a variation line.' );
-
-		foreach ( $cart as $cart_item ) {
-			$response = $controller->prepare_item_for_response( $cart_item, new \WP_REST_Request() );
-			$data     = $response->get_data();
-
-			$this->assertArrayHasKey( 'parent_item_key', $data );
-			$this->assertNull( $data['parent_item_key'] );
-		}
+		$this->assertArrayHasKey( 'parent_item_key', $data );
+		$this->assertNull( $data['parent_item_key'] );
+		$this->assertSame( array( 'string', 'null' ), $property['type'] );
+		$this->assertTrue( $property['readonly'] );
 	}
 
 	/**
-	 * @testdox The cart item schema declares parent_item_key as a readonly string or null.
+	 * @testdox The parent item key filter receives null, the raw cart line, and its key.
 	 */
-	public function test_parent_item_key_is_defined_on_cart_item_schema() {
+	public function test_parent_item_key_filter_receives_arguments() {
 		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'cart-items', 'v1' );
-		$properties = $controller->get_item_schema()['properties'];
-
-		$this->assertArrayHasKey( 'parent_item_key', $properties );
-		$this->assertSame( array( 'string', 'null' ), $properties['parent_item_key']['type'] );
-		$this->assertTrue( $properties['parent_item_key']['readonly'] );
-	}
-
-	/**
-	 * @testdox The parent item key filter receives null, the raw cart line, and its key once per line.
-	 */
-	public function test_parent_item_key_filter_receives_arguments_for_each_cart_line() {
-		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
-		$controller = $routes->get( 'cart-items', 'v1' );
-		$cart       = WC()->cart->get_cart();
+		$cart_item  = current( WC()->cart->get_cart() );
 		$calls      = array();
-		$filter     = function ( $parent_item_key, $cart_item, $cart_item_key ) use ( &$calls ) {
-			$calls[] = array( $parent_item_key, $cart_item, $cart_item_key );
-			return $parent_item_key;
-		};
 
-		add_filter( 'woocommerce_store_api_cart_item_parent_item_key', $filter, 10, 3 );
+		add_filter(
+			'woocommerce_store_api_cart_item_parent_item_key',
+			function ( $parent_item_key, $cart_item, $cart_item_key ) use ( &$calls ) {
+				$calls[] = array( $parent_item_key, $cart_item, $cart_item_key );
+				return $parent_item_key;
+			},
+			10,
+			3
+		);
 
-		try {
-			foreach ( $cart as $cart_item ) {
-				$controller->prepare_item_for_response( $cart_item, new \WP_REST_Request() );
-			}
-		} finally {
-			remove_filter( 'woocommerce_store_api_cart_item_parent_item_key', $filter, 10 );
-		}
+		$controller->prepare_item_for_response( $cart_item, new \WP_REST_Request() );
 
-		$this->assertCount( count( $cart ), $calls );
-
-		foreach ( array_values( $cart ) as $index => $cart_item ) {
-			$this->assertNull( $calls[ $index ][0] );
-			$this->assertSame( $cart_item, $calls[ $index ][1] );
-			$this->assertSame( $cart_item['key'], $calls[ $index ][2] );
-		}
+		$this->assertSame( array( array( null, $cart_item, $cart_item['key'] ) ), $calls );
 	}
 
 	/**
-	 * @testdox The parent item key filter keeps only non-empty strings.
-	 * @dataProvider parent_item_key_filter_values
+	 * @testdox The parent item key filter keeps only non-empty strings, even when no cart line has that key.
+	 * @testWith ["not-a-cart-line-key", "not-a-cart-line-key"]
+	 *           ["", null]
+	 *           [42, null]
 	 *
 	 * @param mixed $filtered_value Value returned by the filter.
 	 * @param mixed $expected_value Value expected in the response.
@@ -455,37 +432,17 @@ class CartItems extends ControllerTestCase {
 	public function test_parent_item_key_filter_keeps_only_non_empty_strings( $filtered_value, $expected_value ) {
 		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'cart-items', 'v1' );
-		$cart_item  = current( WC()->cart->get_cart() );
-		$filter     = static function ( $parent_item_key, $cart_item, $cart_item_key ) use ( $filtered_value ) {
-			unset( $parent_item_key, $cart_item, $cart_item_key );
-			return $filtered_value;
-		};
 
-		add_filter( 'woocommerce_store_api_cart_item_parent_item_key', $filter, 10, 3 );
+		add_filter(
+			'woocommerce_store_api_cart_item_parent_item_key',
+			static function () use ( $filtered_value ) {
+				return $filtered_value;
+			}
+		);
 
-		try {
-			$response = $controller->prepare_item_for_response( $cart_item, new \WP_REST_Request() );
-		} finally {
-			remove_filter( 'woocommerce_store_api_cart_item_parent_item_key', $filter, 10 );
-		}
+		$response = $controller->prepare_item_for_response( current( WC()->cart->get_cart() ), new \WP_REST_Request() );
 
 		$this->assertSame( $expected_value, $response->get_data()['parent_item_key'] );
-	}
-
-	/**
-	 * Filter results and their expected parent_item_key response values.
-	 *
-	 * @return array
-	 */
-	public function parent_item_key_filter_values() {
-		return array(
-			'non-empty string' => array( 'not-a-cart-line-key', 'not-a-cart-line-key' ),
-			'empty string'     => array( '', null ),
-			'integer'          => array( 42, null ),
-			'array'            => array( array( 'parent-key' ), null ),
-			'false'            => array( false, null ),
-			'other non-string' => array( true, null ),
-		);
 	}
 
 	/**

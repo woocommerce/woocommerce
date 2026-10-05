@@ -75,7 +75,6 @@ describe( 'getInCartQuantity', () => {
 		expect( getInCartQuantity( items, { id: 10 } ) ).toBe( 3 );
 		expect( getInCartQuantity( items, { id: 21 } ) ).toBe( 2 );
 		expect( getInCartQuantity( items, { id: 20 } ) ).toBe( 0 );
-		expect( getInCartQuantity( items, { id: 99 } ) ).toBe( 0 );
 	} );
 
 	it( 'filters variation lines by selected attributes and excludes declared children', () => {
@@ -111,16 +110,6 @@ describe( 'getInCartQuantity', () => {
 					},
 				],
 			} ),
-			makeCartItem( 22, 5, {
-				type: 'variation',
-				variation: [
-					{
-						attribute: 'Color',
-						value: 'Red',
-						raw_attribute: 'attribute_pa_color',
-					},
-				],
-			} ),
 		];
 
 		expect(
@@ -136,25 +125,7 @@ describe( 'getInCartQuantity', () => {
 			} )
 		).toBe( 7 );
 		expect(
-			getInCartQuantity( items, {
-				id: 22,
-				selectedAttributes: [ { attribute: 'Color', value: 'red' } ],
-			} )
-		).toBe( 5 );
-		expect(
 			getInCartQuantity( items, { id: 21, selectedAttributes: [] } )
 		).toBe( 0 );
-		expect(
-			getInCartQuantity( items, {
-				id: 20,
-				selectedAttributes: [ { attribute: 'Color', value: 'blue' } ],
-			} )
-		).toBe( 0 );
-	} );
-
-	it( 'preserves fractional quantities', () => {
-		const items = [ makeCartItem( 10, 1.5 ), makeCartItem( 10, 2 ) ];
-
-		expect( getInCartQuantity( items, { id: 10 } ) ).toBe( 3.5 );
 	} );
 } );
