@@ -95,7 +95,7 @@ type InstallAndActivateSuccessResponse = {
 	data: {
 		installed: PluginNames[];
 		results: Record< PluginNames, boolean >;
-		install_time: Record< PluginNames, number >;
+		install_time: Partial< Record< string, number > >;
 	};
 };
 
