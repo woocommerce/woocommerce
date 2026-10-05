@@ -93,7 +93,9 @@ const COMPATIBILITY_OVERRIDES = {
 	LI: { pattern: '94[8-9][0-9]' },
 	LV: { pattern: '(?:LV[- ]?)?[1-9][0-9]{3}', flags: 'i' },
 	MN: { pattern: '[0-9]{5}(?:-[0-9]{4})?' },
-	// The 2026 digital postcode (NDAPS), alongside the six-digit code it replaces.
+	// NDAPS, the 2026 digital postcode: 2-letter state or FCT, 2-digit LGA
+	// (01 to 99), 3-character alphanumeric district, 2-letter area, and 2-digit
+	// building (01 to 99). The six-digit code it replaces is still accepted.
 	NG: {
 		pattern:
 			'[0-9]{6}|[A-Z]{2}(?:0[1-9]|[1-9][0-9])[A-Z0-9]{3}[A-Z]{2}(?:0[1-9]|[1-9][0-9])',
