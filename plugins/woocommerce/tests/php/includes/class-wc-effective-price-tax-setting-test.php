@@ -8,6 +8,27 @@ use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
  */
 class WC_Effective_Price_Tax_Setting_Test extends WC_Unit_Test_Case {
 	/**
+	 * @testdox New orders use the same effective price tax setting as the cart.
+	 * @testWith ["no", true, "yes", true]
+	 *           ["yes", false, "yes", false]
+	 *           ["yes", true, "no", false]
+	 * @param string $option Stored price tax setting.
+	 * @param bool   $filtered_setting Price tax filter result.
+	 * @param string $tax_enabled Whether tax calculation is enabled.
+	 * @param bool   $expected Expected price tax setting.
+	 */
+	public function test_new_orders_use_effective_price_tax_setting( string $option, bool $filtered_setting, string $tax_enabled, bool $expected ): void {
+		update_option( 'woocommerce_calc_taxes', $tax_enabled );
+		update_option( 'woocommerce_prices_include_tax', $option );
+		add_filter( 'woocommerce_prices_include_tax', $filtered_setting ? '__return_true' : '__return_false' );
+
+		$this->assertSame( $expected, ( new WC_Order() )->get_prices_include_tax(), 'New orders must use the effective setting.' );
+		$order = wc_create_order();
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( $expected, $order->get_prices_include_tax(), 'Orders created through wc_create_order() must use the effective setting.' );
+	}
+
+	/**
 	 * @testdox Both checkout paths keep the price tax setting used by the cart.
 	 * @testWith ["classic", "no", true, "109.09", "10.91", "120.00"]
 	 *           ["store-api", "no", true, "109.09", "10.91", "120.00"]

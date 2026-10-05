@@ -552,7 +552,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		try {
 			$order = $this->prepare_item_for_database( $request );
 			$order->set_created_via( 'rest-api' );
-			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+			$order->set_prices_include_tax( wc_prices_include_tax() );
 			$order->calculate_totals();
 			$order->save();
 
