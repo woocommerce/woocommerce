@@ -1,23 +1,23 @@
+import { describe, expect, test } from 'vitest';
+
 /**
  * Tests for isValidFormattedNumber and getDecimalCount from utils/number-validation.js
  */
 
 // Import the utility function
-const { isValidFormattedNumber, getDecimalCount } = require('../number-validation');
-
+const { isValidFormattedNumber, getDecimalCount } = await import(
+	'../number-validation'
+);
 describe( 'Number Validation Utils - isValidFormattedNumber', () => {
-
 	test( 'should import function from utility file', () => {
 		expect( typeof isValidFormattedNumber ).toBe( 'function' );
 		expect( isValidFormattedNumber.length ).toBe( 2 ); // expects 2 parameters: value and config
 	} );
-
 	describe( 'Basic number validation', () => {
 		const config = {
 			decimalSeparator: '.',
-			thousandSeparator: ','
+			thousandSeparator: ',',
 		};
-
 		test( 'should treat empty string as valid and reject non-string/invalid inputs', () => {
 			expect( isValidFormattedNumber( '', config ) ).toBe( true );
 			expect( isValidFormattedNumber( null, config ) ).toBe( false );
@@ -25,53 +25,54 @@ describe( 'Number Validation Utils - isValidFormattedNumber', () => {
 			expect( isValidFormattedNumber( 123, config ) ).toBe( false ); // not a string
 			expect( isValidFormattedNumber( '123', null ) ).toBe( false ); // no config
 		} );
-
 		test( 'should validate simple integers', () => {
 			expect( isValidFormattedNumber( '123', config ) ).toBe( true );
 			expect( isValidFormattedNumber( '0', config ) ).toBe( true );
 			expect( isValidFormattedNumber( '999', config ) ).toBe( true );
 		} );
-
 		test( 'should validate decimal numbers', () => {
 			expect( isValidFormattedNumber( '123.45', config ) ).toBe( true );
 			expect( isValidFormattedNumber( '0.99', config ) ).toBe( true );
 			expect( isValidFormattedNumber( '999.00', config ) ).toBe( true );
 		} );
-
 		test( 'should validate numbers with thousand separators', () => {
 			expect( isValidFormattedNumber( '1,234', config ) ).toBe( true );
-			expect( isValidFormattedNumber( '1,234,567', config ) ).toBe( true );
+			expect( isValidFormattedNumber( '1,234,567', config ) ).toBe(
+				true
+			);
 			expect( isValidFormattedNumber( '1,234.56', config ) ).toBe( true );
 		} );
-
 		test( 'should reject invalid formats', () => {
-			expect( isValidFormattedNumber( '123.45.67', config ) ).toBe( false ); // multiple decimal points
+			expect( isValidFormattedNumber( '123.45.67', config ) ).toBe(
+				false
+			); // multiple decimal points
 			expect( isValidFormattedNumber( '1,23', config ) ).toBe( false ); // incorrect thousand grouping
 			expect( isValidFormattedNumber( ',123', config ) ).toBe( false ); // starts with separator
 			expect( isValidFormattedNumber( '123,', config ) ).toBe( false ); // ends with separator
 			expect( isValidFormattedNumber( 'abc', config ) ).toBe( false ); // letters
 		} );
 	} );
-
 	describe( 'Weight placeholder limits', () => {
 		const config = {
 			decimalSeparator: ',',
 			thousandSeparator: '.',
 		};
-
 		test.each( [
 			'[weight min="0.5"]',
 			'10 * [weight max="1000.5"]',
 			'[weight min="0.5" max="1.5"] + 2,5',
 			'[weight min="0.5"] + [weight max="1.5"]',
-		] )( 'allows dot-decimal weight limits in %s for server validation', ( value ) => {
-			expect( isValidFormattedNumber( value, config ) ).toBe( true );
-		} );
-
+		] )(
+			'allows dot-decimal weight limits in %s for server validation',
+			( value ) => {
+				expect( isValidFormattedNumber( value, config ) ).toBe( true );
+			}
+		);
 		test( 'still validates the decimal separator outside weight limits', () => {
-			expect( isValidFormattedNumber( '[weight min="0.5"] * 2.5', config ) ).toBe( false );
+			expect(
+				isValidFormattedNumber( '[weight min="0.5"] * 2.5', config )
+			).toBe( false );
 		} );
-
 		test.each( [
 			'[weightless min="0.5"]',
 			'[weight-foo]',
@@ -85,265 +86,418 @@ describe( 'Number Validation Utils - isValidFormattedNumber', () => {
 			expect( isValidFormattedNumber( value, config ) ).toBe( false );
 		} );
 	} );
-
 	describe( 'Formula validation - US format', () => {
 		const config = {
 			decimalSeparator: '.',
-			thousandSeparator: ','
+			thousandSeparator: ',',
 		};
-
 		test( 'should accept formulas without decimals', () => {
-			expect( isValidFormattedNumber( '[qty] * 2', config ) ).toBe( true );
-			expect( isValidFormattedNumber( '10 + [cost]', config ) ).toBe( true );
-			expect( isValidFormattedNumber( '[weight] / 2', config ) ).toBe( true );
-			expect( isValidFormattedNumber( '([qty] * 5)', config ) ).toBe( true );
+			expect( isValidFormattedNumber( '[qty] * 2', config ) ).toBe(
+				true
+			);
+			expect( isValidFormattedNumber( '10 + [cost]', config ) ).toBe(
+				true
+			);
+			expect( isValidFormattedNumber( '[weight] / 2', config ) ).toBe(
+				true
+			);
+			expect( isValidFormattedNumber( '([qty] * 5)', config ) ).toBe(
+				true
+			);
 		} );
-
 		test( 'should validate formulas with correct decimal separators', () => {
-			expect( isValidFormattedNumber( '[qty] * 2.5', config ) ).toBe( true );
-			expect( isValidFormattedNumber( '10.99 + [cost]', config ) ).toBe( true );
-			expect( isValidFormattedNumber( '[weight] / 2.5', config ) ).toBe( true );
+			expect( isValidFormattedNumber( '[qty] * 2.5', config ) ).toBe(
+				true
+			);
+			expect( isValidFormattedNumber( '10.99 + [cost]', config ) ).toBe(
+				true
+			);
+			expect( isValidFormattedNumber( '[weight] / 2.5', config ) ).toBe(
+				true
+			);
 		} );
-
 		test( 'should reject formulas with incorrect decimal separators', () => {
-			expect( isValidFormattedNumber( '[qty] * 2,5', config ) ).toBe( false );
-			expect( isValidFormattedNumber( '10,99 + [cost]', config ) ).toBe( false );
+			expect( isValidFormattedNumber( '[qty] * 2,5', config ) ).toBe(
+				false
+			);
+			expect( isValidFormattedNumber( '10,99 + [cost]', config ) ).toBe(
+				false
+			);
 		} );
-
 		test( 'should validate formulas with different variable names', () => {
-			expect( isValidFormattedNumber( '[quantity] * 2.5', config ) ).toBe( true );
-			expect( isValidFormattedNumber( '[price] + [shipping_cost]', config ) ).toBe( true );
-			expect( isValidFormattedNumber( '[base_rate] * [distance]', config ) ).toBe( true );
-			expect( isValidFormattedNumber( '([item_weight] / 1000) * 5.50', config ) ).toBe( true );
+			expect( isValidFormattedNumber( '[quantity] * 2.5', config ) ).toBe(
+				true
+			);
+			expect(
+				isValidFormattedNumber( '[price] + [shipping_cost]', config )
+			).toBe( true );
+			expect(
+				isValidFormattedNumber( '[base_rate] * [distance]', config )
+			).toBe( true );
+			expect(
+				isValidFormattedNumber(
+					'([item_weight] / 1000) * 5.50',
+					config
+				)
+			).toBe( true );
 		} );
-
-
 		test( 'should validate nested parentheses in formulas', () => {
-			expect( isValidFormattedNumber( '(([qty] * 2.5) + ([weight] * 0.1)) * 1.08', config ) ).toBe( true );
-			expect( isValidFormattedNumber( '((10.00 + [base]) * [multiplier]) - [discount]', config ) ).toBe( true );
+			expect(
+				isValidFormattedNumber(
+					'(([qty] * 2.5) + ([weight] * 0.1)) * 1.08',
+					config
+				)
+			).toBe( true );
+			expect(
+				isValidFormattedNumber(
+					'((10.00 + [base]) * [multiplier]) - [discount]',
+					config
+				)
+			).toBe( true );
 		} );
-
 		test( 'should validate formulas with multiple decimal numbers', () => {
-			expect( isValidFormattedNumber( '[qty] * 2.5 + [weight] * 0.15 + 5.50', config ) ).toBe( true );
-			expect( isValidFormattedNumber( '([price] * 1.08) + ([shipping] * 1.15)', config ) ).toBe( true );
+			expect(
+				isValidFormattedNumber(
+					'[qty] * 2.5 + [weight] * 0.15 + 5.50',
+					config
+				)
+			).toBe( true );
+			expect(
+				isValidFormattedNumber(
+					'([price] * 1.08) + ([shipping] * 1.15)',
+					config
+				)
+			).toBe( true );
 		} );
 	} );
-
 	describe( 'Formula validation with different locale configurations', () => {
 		describe( 'European format (comma as decimal, space as thousand)', () => {
 			const euroConfig = {
 				decimalSeparator: ',',
-				thousandSeparator: ' '
+				thousandSeparator: ' ',
 			};
-
 			test( 'should validate basic formulas with European decimal format', () => {
-				expect( isValidFormattedNumber( '[qty] * 2,5', euroConfig ) ).toBe( true );
-				expect( isValidFormattedNumber( '10,99 + [cost]', euroConfig ) ).toBe( true );
-				expect( isValidFormattedNumber( '[weight] / 2,75', euroConfig ) ).toBe( true );
-				expect( isValidFormattedNumber( '([qty] * 15,5)', euroConfig ) ).toBe( true );
+				expect(
+					isValidFormattedNumber( '[qty] * 2,5', euroConfig )
+				).toBe( true );
+				expect(
+					isValidFormattedNumber( '10,99 + [cost]', euroConfig )
+				).toBe( true );
+				expect(
+					isValidFormattedNumber( '[weight] / 2,75', euroConfig )
+				).toBe( true );
+				expect(
+					isValidFormattedNumber( '([qty] * 15,5)', euroConfig )
+				).toBe( true );
 			} );
-
 			test( 'should reject formulas with incorrect decimal separator', () => {
-				expect( isValidFormattedNumber( '[qty] * 2.5', euroConfig ) ).toBe( false );
-				expect( isValidFormattedNumber( '10.99 + [cost]', euroConfig ) ).toBe( false );
-				expect( isValidFormattedNumber( '[weight] / 2.75', euroConfig ) ).toBe( false );
+				expect(
+					isValidFormattedNumber( '[qty] * 2.5', euroConfig )
+				).toBe( false );
+				expect(
+					isValidFormattedNumber( '10.99 + [cost]', euroConfig )
+				).toBe( false );
+				expect(
+					isValidFormattedNumber( '[weight] / 2.75', euroConfig )
+				).toBe( false );
 			} );
-
-
 			test( 'should validate mixed formula operations', () => {
-				expect( isValidFormattedNumber( '[qty] * 2,5 + 10,75', euroConfig ) ).toBe( true );
-				expect( isValidFormattedNumber( '([weight] / 2,5) + ([qty] * 1,99)', euroConfig ) ).toBe( true );
-				expect( isValidFormattedNumber( '100,00 - [discount] + ([qty] * 5,50)', euroConfig ) ).toBe( true );
+				expect(
+					isValidFormattedNumber( '[qty] * 2,5 + 10,75', euroConfig )
+				).toBe( true );
+				expect(
+					isValidFormattedNumber(
+						'([weight] / 2,5) + ([qty] * 1,99)',
+						euroConfig
+					)
+				).toBe( true );
+				expect(
+					isValidFormattedNumber(
+						'100,00 - [discount] + ([qty] * 5,50)',
+						euroConfig
+					)
+				).toBe( true );
 			} );
-
 			test( 'should reject mixed decimal separators in formulas', () => {
-				expect( isValidFormattedNumber( '[qty] * 2,5 + 10.75', euroConfig ) ).toBe( false );
-				expect( isValidFormattedNumber( '([weight] / 2.5) + ([qty] * 1,99)', euroConfig ) ).toBe( false );
+				expect(
+					isValidFormattedNumber( '[qty] * 2,5 + 10.75', euroConfig )
+				).toBe( false );
+				expect(
+					isValidFormattedNumber(
+						'([weight] / 2.5) + ([qty] * 1,99)',
+						euroConfig
+					)
+				).toBe( false );
 			} );
 		} );
-
 		describe( 'German format (comma as decimal, dot as thousand)', () => {
 			const germanConfig = {
 				decimalSeparator: ',',
-				thousandSeparator: '.'
+				thousandSeparator: '.',
 			};
-
 			test( 'should validate basic formulas with German decimal format', () => {
-				expect( isValidFormattedNumber( '[qty] * 2,5', germanConfig ) ).toBe( true );
-				expect( isValidFormattedNumber( '10,99 + [cost]', germanConfig ) ).toBe( true );
-				expect( isValidFormattedNumber( '[weight] / 2,75', germanConfig ) ).toBe( true );
-				expect( isValidFormattedNumber( '([qty] * 15,5)', germanConfig ) ).toBe( true );
+				expect(
+					isValidFormattedNumber( '[qty] * 2,5', germanConfig )
+				).toBe( true );
+				expect(
+					isValidFormattedNumber( '10,99 + [cost]', germanConfig )
+				).toBe( true );
+				expect(
+					isValidFormattedNumber( '[weight] / 2,75', germanConfig )
+				).toBe( true );
+				expect(
+					isValidFormattedNumber( '([qty] * 15,5)', germanConfig )
+				).toBe( true );
 			} );
-
 			test( 'should validate complex German format formulas', () => {
-				expect( isValidFormattedNumber( '[qty] * 2,5 + 10,75', germanConfig ) ).toBe( true );
-				expect( isValidFormattedNumber( '([weight] / 2,5) + ([qty] * 1,99)', germanConfig ) ).toBe( true );
-				expect( isValidFormattedNumber( '([qty] * 5,50)', germanConfig ) ).toBe( true );
+				expect(
+					isValidFormattedNumber(
+						'[qty] * 2,5 + 10,75',
+						germanConfig
+					)
+				).toBe( true );
+				expect(
+					isValidFormattedNumber(
+						'([weight] / 2,5) + ([qty] * 1,99)',
+						germanConfig
+					)
+				).toBe( true );
+				expect(
+					isValidFormattedNumber( '([qty] * 5,50)', germanConfig )
+				).toBe( true );
 			} );
-
 			test( 'should reject US decimal format in German locale formulas', () => {
-				expect( isValidFormattedNumber( '[qty] * 2.5', germanConfig ) ).toBe( false );
-				expect( isValidFormattedNumber( '1,000.50 + [cost]', germanConfig, true ) ).toBe( false );
+				expect(
+					isValidFormattedNumber( '[qty] * 2.5', germanConfig )
+				).toBe( false );
+				expect(
+					isValidFormattedNumber(
+						'1,000.50 + [cost]',
+						germanConfig,
+						true
+					)
+				).toBe( false );
 			} );
 		} );
-
 		describe( 'Swiss format (comma as decimal, apostrophe as thousand)', () => {
 			const swissConfig = {
 				decimalSeparator: ',',
-				thousandSeparator: '\''
+				thousandSeparator: "'",
 			};
-
 			test( 'should validate Swiss format formulas', () => {
-				expect( isValidFormattedNumber( '[qty] * 2,5', swissConfig ) ).toBe( true );
-				expect( isValidFormattedNumber( '10,99 + [cost]', swissConfig ) ).toBe( true );
-				expect( isValidFormattedNumber( '[weight] / 2,75', swissConfig ) ).toBe( true );
-				expect( isValidFormattedNumber( '([qty] * 1,5)', swissConfig ) ).toBe( true );
+				expect(
+					isValidFormattedNumber( '[qty] * 2,5', swissConfig )
+				).toBe( true );
+				expect(
+					isValidFormattedNumber( '10,99 + [cost]', swissConfig )
+				).toBe( true );
+				expect(
+					isValidFormattedNumber( '[weight] / 2,75', swissConfig )
+				).toBe( true );
+				expect(
+					isValidFormattedNumber( '([qty] * 1,5)', swissConfig )
+				).toBe( true );
 			} );
-
 			test( 'should validate complex Swiss format formulas', () => {
-				expect( isValidFormattedNumber( '[qty] * 2,5 + 1,75', swissConfig ) ).toBe( true );
-				expect( isValidFormattedNumber( '([weight] / 2,5) + ([qty] * 1,99)', swissConfig ) ).toBe( true );
-				expect( isValidFormattedNumber( '100,00 - [discount]', swissConfig ) ).toBe( true );
+				expect(
+					isValidFormattedNumber( '[qty] * 2,5 + 1,75', swissConfig )
+				).toBe( true );
+				expect(
+					isValidFormattedNumber(
+						'([weight] / 2,5) + ([qty] * 1,99)',
+						swissConfig
+					)
+				).toBe( true );
+				expect(
+					isValidFormattedNumber( '100,00 - [discount]', swissConfig )
+				).toBe( true );
 			} );
 		} );
-
 		describe( 'US/UK format (dot as decimal, comma as thousand)', () => {
 			const usConfig = {
 				decimalSeparator: '.',
-				thousandSeparator: ','
+				thousandSeparator: ',',
 			};
-
 			test( 'should validate US format operations with decimals', () => {
-				expect( isValidFormattedNumber( '[qty] * 2.5 + 10.75', usConfig ) ).toBe( true );
-				expect( isValidFormattedNumber( '([weight] / 2.5) + ([qty] * 1.99)', usConfig ) ).toBe( true );
-				expect( isValidFormattedNumber( '([cost] * 1.08) + 15.50', usConfig ) ).toBe( true );
+				expect(
+					isValidFormattedNumber( '[qty] * 2.5 + 10.75', usConfig )
+				).toBe( true );
+				expect(
+					isValidFormattedNumber(
+						'([weight] / 2.5) + ([qty] * 1.99)',
+						usConfig
+					)
+				).toBe( true );
+				expect(
+					isValidFormattedNumber(
+						'([cost] * 1.08) + 15.50',
+						usConfig
+					)
+				).toBe( true );
 			} );
-
 			test( 'should reject European decimal format in US locale formulas', () => {
-				expect( isValidFormattedNumber( '[qty] * 2,5', usConfig ) ).toBe( false );
+				expect(
+					isValidFormattedNumber( '[qty] * 2,5', usConfig )
+				).toBe( false );
 			} );
 		} );
-
 	} );
-
 	describe( 'Different locale configurations - Basic number validation', () => {
 		test( 'should work with European format (comma as decimal, space as thousand)', () => {
 			const euroConfig = {
 				decimalSeparator: ',',
-				thousandSeparator: ' '
+				thousandSeparator: ' ',
 			};
-
-			expect( isValidFormattedNumber( '123,45', euroConfig ) ).toBe( true );
-			expect( isValidFormattedNumber( '1 234', euroConfig ) ).toBe( true );
-			expect( isValidFormattedNumber( '1 234,56', euroConfig ) ).toBe( true );
-
-			expect( isValidFormattedNumber( '123.45', euroConfig ) ).toBe( false );
+			expect( isValidFormattedNumber( '123,45', euroConfig ) ).toBe(
+				true
+			);
+			expect( isValidFormattedNumber( '1 234', euroConfig ) ).toBe(
+				true
+			);
+			expect( isValidFormattedNumber( '1 234,56', euroConfig ) ).toBe(
+				true
+			);
+			expect( isValidFormattedNumber( '123.45', euroConfig ) ).toBe(
+				false
+			);
 		} );
-
 		test( 'should work with German format (comma as decimal, dot as thousand)', () => {
 			const germanConfig = {
 				decimalSeparator: ',',
-				thousandSeparator: '.'
+				thousandSeparator: '.',
 			};
-
-			expect( isValidFormattedNumber( '123,45', germanConfig ) ).toBe( true );
-			expect( isValidFormattedNumber( '1.234', germanConfig ) ).toBe( true );
-			expect( isValidFormattedNumber( '1.234,56', germanConfig ) ).toBe( true );
+			expect( isValidFormattedNumber( '123,45', germanConfig ) ).toBe(
+				true
+			);
+			expect( isValidFormattedNumber( '1.234', germanConfig ) ).toBe(
+				true
+			);
+			expect( isValidFormattedNumber( '1.234,56', germanConfig ) ).toBe(
+				true
+			);
 		} );
 	} );
-
 	describe( 'Edge cases and whitespace', () => {
 		const config = {
 			decimalSeparator: '.',
-			thousandSeparator: ','
+			thousandSeparator: ',',
 		};
-
 		test( 'should handle whitespace', () => {
 			expect( isValidFormattedNumber( ' 123 ', config ) ).toBe( true );
 			expect( isValidFormattedNumber( ' 123.45 ', config ) ).toBe( true );
-			expect( isValidFormattedNumber( ' 1,234.56 ', config ) ).toBe( true );
+			expect( isValidFormattedNumber( ' 1,234.56 ', config ) ).toBe(
+				true
+			);
 		} );
-
 		test( 'should handle special characters in separators', () => {
 			const specialConfig = {
 				decimalSeparator: '.',
-				thousandSeparator: '\''  // Swiss format uses apostrophe
+				thousandSeparator: "'", // Swiss format uses apostrophe
 			};
-
-			expect( isValidFormattedNumber( '1\'234.56', specialConfig ) ).toBe( true );
-			expect( isValidFormattedNumber( '1\'234\'567.89', specialConfig ) ).toBe( true );
+			expect( isValidFormattedNumber( "1'234.56", specialConfig ) ).toBe(
+				true
+			);
+			expect(
+				isValidFormattedNumber( "1'234'567.89", specialConfig )
+			).toBe( true );
 		} );
-
 		test( 'should handle shortcodes with spaces', () => {
 			expect( isValidFormattedNumber( '[ qty ]', config ) ).toBe( true );
-			expect( isValidFormattedNumber( '[ cost ] + 10', config ) ).toBe( true );
-			expect( isValidFormattedNumber( '([ weight ] / 2)', config ) ).toBe( true );
+			expect( isValidFormattedNumber( '[ cost ] + 10', config ) ).toBe(
+				true
+			);
+			expect( isValidFormattedNumber( '([ weight ] / 2)', config ) ).toBe(
+				true
+			);
 		} );
-
 		test( 'should handle characters used as separators', () => {
 			const customConfig = {
 				decimalSeparator: 'd',
-				thousandSeparator: 't'
+				thousandSeparator: 't',
 			};
-
-			expect( isValidFormattedNumber( '1t234d56', customConfig ) ).toBe( true );
-			expect( isValidFormattedNumber( '1t234t56', customConfig ) ).toBe( false ); // incorrect format
-			expect( isValidFormattedNumber( '1t234d567d89', customConfig ) ).toBe( false ); // incorrect format
+			expect( isValidFormattedNumber( '1t234d56', customConfig ) ).toBe(
+				true
+			);
+			expect( isValidFormattedNumber( '1t234t56', customConfig ) ).toBe(
+				false
+			); // incorrect format
+			expect(
+				isValidFormattedNumber( '1t234d567d89', customConfig )
+			).toBe( false ); // incorrect format
 		} );
-
 		test( 'should handle numbers with leading zeros', () => {
 			expect( isValidFormattedNumber( '00123', config ) ).toBe( true );
 			expect( isValidFormattedNumber( '0001.23', config ) ).toBe( true );
 			expect( isValidFormattedNumber( '1,234.00', config ) ).toBe( true );
-			expect( isValidFormattedNumber( '01,234.56', config ) ).toBe( true );
+			expect( isValidFormattedNumber( '01,234.56', config ) ).toBe(
+				true
+			);
 		} );
-
 		test( 'should handle invalid decimal separators in formulas', () => {
-			expect( isValidFormattedNumber( '[qty] * 2,5', config ) ).toBe( false );
-			expect( isValidFormattedNumber( '10,99 + [cost]', config ) ).toBe( false );
-			expect( isValidFormattedNumber( '[weight] / 2\'75', config ) ).toBe( false );
-			expect( isValidFormattedNumber( '([qty] * 15 5)', config ) ).toBe( false );
+			expect( isValidFormattedNumber( '[qty] * 2,5', config ) ).toBe(
+				false
+			);
+			expect( isValidFormattedNumber( '10,99 + [cost]', config ) ).toBe(
+				false
+			);
+			expect( isValidFormattedNumber( "[weight] / 2'75", config ) ).toBe(
+				false
+			);
+			expect( isValidFormattedNumber( '([qty] * 15 5)', config ) ).toBe(
+				false
+			);
 		} );
 	} );
 } );
-
 describe( 'Number Validation Utils - getDecimalCount', () => {
-	const dotConfig = { decimalSeparator: '.', thousandSeparator: ',' };
-	const commaConfig = { decimalSeparator: ',', thousandSeparator: '.' };
-
+	const dotConfig = {
+		decimalSeparator: '.',
+		thousandSeparator: ',',
+	};
+	const commaConfig = {
+		decimalSeparator: ',',
+		thousandSeparator: '.',
+	};
 	test( 'should import function from utility file', () => {
 		expect( typeof getDecimalCount ).toBe( 'function' );
 		expect( getDecimalCount.length ).toBe( 2 ); // expects 2 parameters: value and config
 	} );
-
 	test( 'should count the digits after the decimal separator', () => {
 		expect( getDecimalCount( '4.596', dotConfig ) ).toBe( 3 );
 		expect( getDecimalCount( '8.69565', dotConfig ) ).toBe( 5 );
 		expect( getDecimalCount( '4.5', dotConfig ) ).toBe( 1 );
 		expect( getDecimalCount( '4', dotConfig ) ).toBe( 0 );
 	} );
-
 	test( 'should use the configured decimal separator', () => {
 		expect( getDecimalCount( '4,596', commaConfig ) ).toBe( 3 );
 		expect( getDecimalCount( '1.234,567', commaConfig ) ).toBe( 3 );
 	} );
-
 	test( 'should ignore thousand separators and surrounding whitespace', () => {
 		expect( getDecimalCount( '1,234.567', dotConfig ) ).toBe( 3 );
 		expect( getDecimalCount( ' 4.596 ', dotConfig ) ).toBe( 3 );
-		expect( getDecimalCount( '1 234,567', { decimalSeparator: ',', thousandSeparator: ' ' } ) ).toBe( 3 );
-		expect( getDecimalCount( '1_234.567', { decimalSeparator: '.', thousandSeparator: '_' } ) ).toBe( 3 );
+		expect(
+			getDecimalCount( '1 234,567', {
+				decimalSeparator: ',',
+				thousandSeparator: ' ',
+			} )
+		).toBe( 3 );
+		expect(
+			getDecimalCount( '1_234.567', {
+				decimalSeparator: '.',
+				thousandSeparator: '_',
+			} )
+		).toBe( 3 );
 	} );
-
 	test( 'should return 0 for values that are not plain numbers', () => {
 		expect( getDecimalCount( '', dotConfig ) ).toBe( 0 );
 		expect( getDecimalCount( '4.', dotConfig ) ).toBe( 0 );
 		expect( getDecimalCount( '1.2.3', dotConfig ) ).toBe( 0 );
 		expect( getDecimalCount( '10 * [qty]', dotConfig ) ).toBe( 0 );
 		expect( getDecimalCount( '10.123 * [qty]', dotConfig ) ).toBe( 0 );
-		expect( getDecimalCount( '[fee min_fee="8.69565"]', dotConfig ) ).toBe( 0 );
+		expect( getDecimalCount( '[fee min_fee="8.69565"]', dotConfig ) ).toBe(
+			0
+		);
 	} );
-
 	test( 'should return 0 for invalid inputs without throwing', () => {
 		expect( getDecimalCount( 4.596, dotConfig ) ).toBe( 0 );
 		expect( getDecimalCount( null, dotConfig ) ).toBe( 0 );
@@ -351,8 +505,20 @@ describe( 'Number Validation Utils - getDecimalCount', () => {
 		expect( getDecimalCount( '4.596', null ) ).toBe( 0 );
 		expect( getDecimalCount( '4.596', undefined ) ).toBe( 0 );
 		expect( getDecimalCount( '4.596', 'invalid' ) ).toBe( 0 );
-		expect( getDecimalCount( '4.596', { thousandSeparator: ',' } ) ).toBe( 0 );
-		expect( getDecimalCount( '4.596', { decimalSeparator: 1 } ) ).toBe( 0 );
-		expect( getDecimalCount( '4.596', { decimalSeparator: '' } ) ).toBe( 0 );
+		expect(
+			getDecimalCount( '4.596', {
+				thousandSeparator: ',',
+			} )
+		).toBe( 0 );
+		expect(
+			getDecimalCount( '4.596', {
+				decimalSeparator: 1,
+			} )
+		).toBe( 0 );
+		expect(
+			getDecimalCount( '4.596', {
+				decimalSeparator: '',
+			} )
+		).toBe( 0 );
 	} );
 } );

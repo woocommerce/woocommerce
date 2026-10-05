@@ -19,7 +19,7 @@
 		"watch:build": "pnpm watch:build:project",
 		"watch:build:project": "pnpm --stream '/^watch:build:project:.*$/'",
 		"watch:build:project:assets": "grunt watch",
-		"test:js": "wp-scripts test-unit-js --config jest.config.json"
+		"test:js": "wp-scripts test-unit-js"
 	},
 	"devDependencies": {
 		"@types/node": "^24.1.0",
