@@ -17,7 +17,6 @@
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"@woocommerce/internal-build": "workspace:*",
 		"@wordpress/env": "11.9.0",
 		"@wordpress/prettier-config": "4.49.0",
 		"@wordpress/scripts": "^32.6.0",
@@ -26,7 +25,6 @@
 		"prettier": "npm:wp-prettier@3.0.3",
 		"react": "18.3.x",
 		"react-dom": "18.3.x",
-		"stylelint": "^16.9.0",
 		"ts-loader": "9.5.x",
 		"typescript": "5.7.x",
 		"uglify-js": "^3.17.4"
@@ -74,10 +72,8 @@
 					".eslintrc",
 					".eslintignore",
 					"eslint.config.mjs",
-					".stylelintrc.json",
 					"tsconfig.json",
-					"src/**/*.{js,jsx,ts,tsx,scss}",
-					"assets/css/**/*.css"
+					"src/**/*.{js,jsx,ts,tsx}"
 				]
 			},
 			"tests": [
@@ -109,9 +105,9 @@
 		"check-licenses": "wp-scripts check-licenses",
 		"format:js": "wp-scripts format",
 		"postinstall": "XDEBUG_MODE=off composer install --quiet",
-		"lint": "wp-scripts lint-js src && pnpm lint:css",
-		"lint:css": "stylelint 'src/**/*.scss' 'assets/css/**/*.css'",
-		"lint:css:fix": "stylelint 'src/**/*.scss' 'assets/css/**/*.css' --fix",
+		"lint": "wp-scripts lint-js src",
+		"lint:css": "wp-scripts lint-style",
+		"lint:css:fix": "wp-scripts lint-style --fix",
 		"lint:js": "wp-scripts lint-js",
 		"lint:js:fix": "wp-scripts lint-js --fix",
 		"lint:md:docs": "wp-scripts lint-md-docs",

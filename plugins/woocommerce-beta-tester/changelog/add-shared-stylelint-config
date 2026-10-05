@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Lint styles with the shared stylelint config; no visual change.
