@@ -1,7 +1,10 @@
 {
-	"extends": "@woocommerce/internal-build/configs/stylelint-base.cjs",
+	"extends": "@wordpress/stylelint-config/scss-stylistic",
 	"reportNeedlessDisables": true,
 	"rules": {
+		"no-descending-specificity": null,
+		"no-duplicate-selectors": null,
+		"selector-class-pattern": null,
 		"at-rule-empty-line-before": null,
 		"at-rule-no-unknown": null,
 		"comment-empty-line-before": null,

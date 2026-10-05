@@ -2,7 +2,7 @@
 # configs in client/blocks and packages/js/email-editor. Read the notes before
 # "aligning" any of these with the preset.
 {
-	"extends": "@woocommerce/internal-build/configs/stylelint-base.cjs",
+	"extends": "@wordpress/stylelint-config/scss-stylistic",
 
 	# Vendored upstream file; 159 violations we do not own. This is the single
 	# authoritative exclusion, so a direct `stylelint` run skips it too.

@@ -23,8 +23,8 @@
 	},
 	"devDependencies": {
 		"@types/node": "^24.1.0",
-		"@woocommerce/internal-build": "workspace:*",
 		"@wordpress/scripts": "32.6.0",
+		"@wordpress/stylelint-config": "^23.14.0",
 		"chokidar": "^3.6.0",
 		"eslint": "^10.0.0",
 		"globals": "^16.5.0",

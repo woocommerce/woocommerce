@@ -1,13 +1,16 @@
 /**
- * Shared stylelint config for the monorepo's SCSS: the base config plus the
- * relaxations that the existing code relies on.
+ * Shared stylelint config for the monorepo's SCSS: the WordPress SCSS preset
+ * (with stylistic rules) plus the relaxations that the existing code relies on.
  *
  * Usage, from a package's `.stylelintrc.json`:
  *   { "extends": "@woocommerce/internal-build/configs/stylelint.config.cjs" }
  */
 module.exports = {
-	extends: require.resolve( './stylelint-base.cjs' ),
+	extends: '@wordpress/stylelint-config/scss-stylistic',
 	rules: {
+		'no-descending-specificity': null,
+		'no-duplicate-selectors': null,
+		'selector-class-pattern': null,
 		'at-rule-empty-line-before': null,
 		'at-rule-no-unknown': null,
 		'comment-empty-line-before': null,
@@ -31,4 +34,20 @@ module.exports = {
 		'no-invalid-position-at-import-rule': null,
 		'length-zero-no-unit': [ true, { ignoreFunctions: [ 'calc', 'var' ] } ],
 	},
+	overrides: [
+		{
+			// CSS modules use `:global`/`:local` and the `composes` property.
+			files: [ '**/*.module.css' ],
+			rules: {
+				'selector-pseudo-class-no-unknown': [
+					true,
+					{ ignorePseudoClasses: [ 'global', 'local' ] },
+				],
+				'property-no-unknown': [
+					true,
+					{ ignoreProperties: [ 'composes' ] },
+				],
+			},
+		},
+	],
 };
