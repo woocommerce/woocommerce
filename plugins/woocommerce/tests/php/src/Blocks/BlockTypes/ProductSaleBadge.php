@@ -176,6 +176,48 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Numeric badges omit custom affixes only when using Up to.
+	 * @dataProvider provider_discount_label_affixes
+	 * @param string $type Product type.
+	 * @param string $prefix Discount prefix.
+	 * @param string $suffix Discount suffix.
+	 * @param string $expected Expected label with a placeholder for the discount.
+	 */
+	public function test_discount_label_affixes( string $type, string $prefix, string $suffix, string $expected ): void {
+		$product = 'variable' === $type ? \WC_Helper_Product::create_variation_product() : \WC_Helper_Product::create_simple_product();
+		$priced  = 'variable' === $type ? wc_get_product( $product->get_children()[0] ) : $product;
+		$priced->set_regular_price( '10' );
+		$priced->set_sale_price( '9' );
+		$priced->save();
+
+		foreach ( array( 'percentage' => '10%', 'amount' => '$1.00' ) as $mode => $discount ) {
+			$attributes = array( 'badgeContent' => $mode, 'prefix' => $prefix, 'suffix' => $suffix );
+			$markup     = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/product-sale-badge ' . wp_json_encode( $attributes ) . ' /--><!-- /wp:woocommerce/single-product -->' );
+			$label      = sprintf( $expected, $discount );
+			$this->assertStringContainsString( 'aria-hidden="true">' . $label . '</span>', $markup );
+			$this->assertStringContainsString( 'screen-reader-text">Product on sale: ' . $label . '</span>', $markup );
+		}
+	}
+
+	/**
+	 * Discount label affixes for simple and variable products.
+	 *
+	 * @return array
+	 */
+	public function provider_discount_label_affixes(): array {
+		return array(
+			array( 'simple', '', '', '%s' ),
+			array( 'simple', '−', '', '−%s' ),
+			array( 'simple', '', ' off', '%s off' ),
+			array( 'simple', 'Save ', ' off', 'Save %s off' ),
+			array( 'variable', '', '', 'Up to %s' ),
+			array( 'variable', '−', '', 'Up to %s' ),
+			array( 'variable', '', ' off', 'Up to %s' ),
+			array( 'variable', 'Save ', ' off', 'Up to %s' ),
+		);
+	}
+
+	/**
 	 * @testdox Variable product badge uses each variation's own regular price for the largest discount.
 	 */
 	public function test_variable_product_sale_badge_displays_maximum_discount(): void {

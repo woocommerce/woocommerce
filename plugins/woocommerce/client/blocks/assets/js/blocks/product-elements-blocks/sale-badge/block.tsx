@@ -67,17 +67,14 @@ export const Block = ( props: Props ): ReactElement | null => {
 							getCurrencyFromPriceResponse( prices )
 					  );
 			// Parent prices are independent minima, so the editor preview may differ from the largest variation discount.
-			const preview =
+			label =
 				product.type === 'variable'
 					? sprintf(
 							/* translators: %s: approximate discount for a variable product in the editor. */
 							__( 'Up to %s', 'woocommerce' ),
 							value
 					  )
-					: value;
-			label = `${ props.prefix ?? '' }${ preview }${
-				props.suffix ?? ''
-			}`;
+					: `${ props.prefix ?? '' }${ value }${ props.suffix ?? '' }`;
 		}
 	}
 

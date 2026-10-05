@@ -108,9 +108,10 @@ class ProductSaleBadge extends AbstractBlock {
 
 				if ( $product->is_type( 'variable' ) ) {
 					/* translators: %s: largest discount across variations. */
-					$value = sprintf( __( 'Up to %s', 'woocommerce' ), $value );
+					$sale_text = sprintf( __( 'Up to %s', 'woocommerce' ), $value );
+				} else {
+					$sale_text = ( $attributes['prefix'] ?? '' ) . $value . ( $attributes['suffix'] ?? '' );
 				}
-				$sale_text = ( $attributes['prefix'] ?? '' ) . $value . ( $attributes['suffix'] ?? '' );
 			}
 		}
 

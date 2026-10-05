@@ -120,7 +120,7 @@ it( 'previews a variable discount using parent prices without rendering on the s
 	expect( screen.getByText( 'Sale' ) ).toBeInTheDocument();
 } );
 
-it( 'formats the variable amount preview with currency and custom text', () => {
+it( 'preserves currency units without custom affixes when using Up to', () => {
 	product.prices.price = '900';
 	render(
 		<Block
@@ -132,5 +132,35 @@ it( 'formats the variable amount preview with currency and custom text', () => {
 			suffix=" off"
 		/>
 	);
-	expect( screen.getByText( 'Save Up to $1.00 off' ) ).toBeInTheDocument();
+	expect( screen.getByText( 'Up to $1.00' ) ).toBeInTheDocument();
 } );
+
+it.each( [
+	[ 'simple', '', '', '10%' ],
+	[ 'simple', '−', '', '−10%' ],
+	[ 'simple', '', ' off', '10% off' ],
+	[ 'simple', 'Save ', ' off', 'Save 10% off' ],
+	[ 'variable', '', '', 'Up to 10%' ],
+	[ 'variable', '−', '', 'Up to 10%' ],
+	[ 'variable', '', ' off', 'Up to 10%' ],
+	[ 'variable', 'Save ', ' off', 'Up to 10%' ],
+] )(
+	'formats the %s discount label with prefix "%s" and suffix "%s"',
+	( type, prefix, suffix, expected ) => {
+		product.type = type;
+		render(
+			<Block
+				productId={ 1 }
+				align={ false }
+				isDescendentOfSingleProductTemplate={ false }
+				badgeContent="percentage"
+				prefix={ prefix }
+				suffix={ suffix }
+			/>
+		);
+		expect( screen.getByText( expected ) ).toBeInTheDocument();
+		expect(
+			screen.getByText( `Product on sale: ${ expected }` )
+		).toBeInTheDocument();
+	}
+);
