@@ -18,6 +18,6 @@
 <p class="has-text-align-center" style="margin-top:var(--wp--preset--spacing--30)"><?php echo esc_html_x( 'The page you\'re looking for could not be found. Maybe try a search?', '404 error message', 'purple' ); ?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:pattern {"slug":"purple/hidden-search"} /-->
+<!-- wp:pattern {"slug":"purple/hidden-search-products"} /-->
 </div>
 <!-- /wp:group -->
