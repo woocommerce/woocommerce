@@ -339,6 +339,8 @@ final class WooCommerce {
 	 * @return void
 	 */
 	private function init_hooks() {
+		do_action( 'qm/start', 'WooCommerce::__construct/init_hooks/hooks' );
+
 		register_activation_hook( WC_PLUGIN_FILE, array( 'WC_Install', 'install' ) );
 		register_shutdown_function( array( $this, 'log_errors' ) );
 
@@ -386,7 +388,9 @@ final class WooCommerce {
 		add_filter( 'wp_plugin_dependencies_slug', array( $this, 'convert_woocommerce_slug' ) );
 		add_filter( 'woocommerce_register_log_handlers', array( $this, 'register_remote_log_handler' ) );
 
-		do_action( 'qm/start', 'WooCommerce::__construct/init_hooks/DI-get-register' );
+		do_action( 'qm/stop', 'WooCommerce::__construct/init_hooks/hooks' );
+
+		do_action( 'qm/start', 'WooCommerce::__construct/init_hooks/DI-batch-1' );
 
 		// These classes set up hooks on instantiation.
 		$container = wc_get_container();
@@ -425,6 +429,9 @@ final class WooCommerce {
 		$container->get( CustomerEmailVerification::class );
 		$container->get( OrderLogsCleanupHelper::class );
 
+		do_action( 'qm/stop', 'WooCommerce::__construct/init_hooks/DI-batch-1' );
+		do_action( 'qm/start', 'WooCommerce::__construct/init_hooks/DI-batch-2' );
+
 		/**
 		 * These classes have a register method for attaching hooks.
 		 */
@@ -452,6 +459,9 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator::class )->register();
 
+		do_action( 'qm/stop', 'WooCommerce::__construct/init_hooks/DI-batch-2' );
+		do_action( 'qm/start', 'WooCommerce::__construct/init_hooks/DI-batch-3' );
+
 		// Classes inheriting from RestApiControllerBase.
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderActionsRestController::class )->register();
@@ -461,13 +471,16 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreviewRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Emails\EmailListingRestController::class )->register();
 
+		do_action( 'qm/stop', 'WooCommerce::__construct/init_hooks/DI-batch-3' );
+		do_action( 'qm/start', 'WooCommerce::__construct/init_hooks/DI-batch-4' );
+
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\MainQueryController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\CacheController::class )->register();
 
+		do_action( 'qm/stop', 'WooCommerce::__construct/init_hooks/DI-batch-4' );
+
 		// Integration point between legacy reports and orders APIs (the reports caches invalidation focused).
 		\WC_Admin_Reports::register_orders_hook_handlers();
-
-		do_action( 'qm/stop', 'WooCommerce::__construct/init_hooks/DI-get-register' );
 	}
 
 	/**
