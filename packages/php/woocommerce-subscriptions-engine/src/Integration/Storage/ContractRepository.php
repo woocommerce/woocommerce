@@ -1530,7 +1530,9 @@ final class ContractRepository {
 		global $wpdb;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META ), array( 'contract_id' => $contract_id ) );
+		if ( false === $wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META ), array( 'contract_id' => $contract_id ) ) ) {
+			$this->log_meta_write_failure( $contract_id, 'delete' );
+		}
 		$this->insert_meta( $contract_id, $meta );
 	}
 
@@ -1599,7 +1601,7 @@ final class ContractRepository {
 			// The engine's own contract-meta columns, not post/order meta; the
 			// slow-meta-query heuristic does not apply.
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-			$wpdb->insert(
+			$inserted = $wpdb->insert(
 				SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META ),
 				array(
 					'contract_id' => $contract_id,
@@ -1607,7 +1609,31 @@ final class ContractRepository {
 					'meta_value'  => (string) $value,
 				)
 			);
+			if ( false === $inserted ) {
+				$this->log_meta_write_failure( $contract_id, 'insert', (string) $key );
+			}
 		}
+	}
+
+	/**
+	 * Log a failed contract-meta write. Meta writes follow the row write without a
+	 * transaction, so a failure here leaves the row and its meta out of step; logging it
+	 * makes that visible.
+	 *
+	 * @param int    $contract_id Contract id.
+	 * @param string $operation   The failed operation (`delete` or `insert`).
+	 * @param string $meta_key    The meta key being inserted, if any.
+	 */
+	private function log_meta_write_failure( int $contract_id, string $operation, string $meta_key = '' ): void {
+		global $wpdb;
+
+		wc_get_logger()->error(
+			sprintf( 'ContractRepository: contract meta %s failed for contract %d%s - %s', $operation, $contract_id, '' === $meta_key ? '' : sprintf( ' (key %s)', $meta_key ), $wpdb->last_error ),
+			array(
+				'source'      => self::LOG_SOURCE,
+				'contract_id' => $contract_id,
+			)
+		);
 	}
 
 	/**

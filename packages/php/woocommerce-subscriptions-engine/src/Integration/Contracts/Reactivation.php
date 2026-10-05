@@ -88,10 +88,11 @@ final class Reactivation {
 	 * Reactivate `$contract`: move it to active, re-arm the next-payment date forward,
 	 * and persist.
 	 *
-	 * The anchor the date is recomputed from is the next-due moment stashed by
-	 * {@see Hold} ({@see Hold::ANCHOR_META_KEY}), falling back to the stored
-	 * `next_payment_gmt` for a contract held before hold disarmed it. The anchor meta is
-	 * removed. The date is recomputed through the single seam
+	 * The anchor the date is recomputed from is the stored `next_payment_gmt` when one is
+	 * set (hold clears it, so a value means it was re-armed deliberately, or the contract
+	 * was held before hold disarmed it), else the next-due moment stashed by {@see Hold}
+	 * ({@see Hold::ANCHOR_META_KEY}); a malformed stashed value counts as absent. The
+	 * anchor meta is removed. The date is recomputed through the single seam
 	 * ({@see self::recompute_next_payment()}) so a contract that sat on hold past its due
 	 * date does not fire an immediate, back-dated renewal the moment it resumes; with no
 	 * anchor the contract simply stays unscheduled.
@@ -118,10 +119,9 @@ final class Reactivation {
 		// Read the clock at the integration boundary so the Core cadence math stays clock-free.
 		$now = ( $now ?? new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) ) )->setTimezone( new DateTimeZone( 'UTC' ) );
 
-		$anchor = $contract->get_meta()[ Hold::ANCHOR_META_KEY ] ?? '';
-		if ( '' === $anchor ) {
-			$anchor = $contract->get_next_payment_gmt();
-		}
+		// A next-due moment set while held was re-armed deliberately (hold clears it), so
+		// it wins; otherwise resume from the hold anchor, ignoring a malformed one.
+		$anchor = $contract->get_next_payment_gmt() ?? self::well_formed_anchor( $contract->get_meta()[ Hold::ANCHOR_META_KEY ] ?? '' );
 
 		$contract->set_next_payment_gmt( $this->recompute_next_payment( $contract, $anchor, $now, $this->billing_policy( $contract ) ) );
 		$contract->set_meta( Hold::ANCHOR_META_KEY, null );
@@ -237,5 +237,16 @@ final class Reactivation {
 		$plan = $this->plans->find( $contract->get_selling_plan_id() );
 
 		return $plan instanceof Plan ? $plan->get_billing_policy() : null;
+	}
+
+	/**
+	 * The hold anchor when it is a well-formed GMT datetime (`Y-m-d H:i:s`), else null.
+	 *
+	 * @param string $anchor Stored anchor meta value.
+	 */
+	private static function well_formed_anchor( string $anchor ): ?string {
+		$parsed = DateTimeImmutable::createFromFormat( '!Y-m-d H:i:s', $anchor, new DateTimeZone( 'UTC' ) );
+
+		return false !== $parsed && $parsed->format( 'Y-m-d H:i:s' ) === $anchor ? $anchor : null;
 	}
 }

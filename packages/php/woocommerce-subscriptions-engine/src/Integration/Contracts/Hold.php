@@ -89,22 +89,16 @@ final class Hold {
 		}
 
 		if ( ContractStatus::ACTIVE === $previous ) {
-			// A contract with no next-due moment stores no anchor (null removes the key).
+			$this->persist_anchor( $contract );
+
 			$contract->set_status( ContractStatus::ON_HOLD );
-			$contract->set_meta( self::ANCHOR_META_KEY, $contract->get_next_payment_gmt() );
 			$contract->set_next_payment_gmt( null );
 		}
 
 		// Compare-and-set on the status read above: a concurrent transition (another
 		// request, the renewal engine) makes this write miss loudly rather than be
-		// clobbered.
-		//
-		// Not atomic: the status/date row write and the anchor meta write are separate
-		// statements, not one transaction. If the meta write fails after the row write,
-		// the contract is held without an anchor and reactivation leaves it unscheduled
-		// (it falls back to the cleared, null next payment). Accepted for this interim
-		// flow - the repository has no transaction wrapper today - and the consumer that
-		// takes over hold owns the durable shape.
+		// clobbered. The anchor is already stored, so a reader that sees the contract
+		// on hold always finds it.
 		if ( ! $this->contracts->update_if_status( $contract, $previous ) ) {
 			throw new \DomainException( 'Hold::hold(): the contract state changed concurrently; nothing was written.' );
 		}
@@ -117,5 +111,35 @@ final class Hold {
 		do_action( self::CONTRACT_HELD_ACTION, $contract );
 
 		return true;
+	}
+
+	/**
+	 * Store the next-due moment as the hold anchor while the contract is still active,
+	 * before the hold disarms it.
+	 *
+	 * The repository writes the row and its meta as separate statements (no
+	 * transaction), so the anchor is written and read back first: if it did not
+	 * persist, nothing has been disarmed yet and the hold aborts. A contract with no
+	 * next-due moment stores no anchor (null removes the key). An anchor left behind by
+	 * a hold that then loses its compare-and-set is harmless: the next hold overwrites
+	 * it and cancellation clears it.
+	 *
+	 * @param Contract $contract Active contract about to be held. Must have an id.
+	 * @throws \DomainException If the contract stopped being active concurrently.
+	 * @throws RuntimeException If the anchor could not be stored.
+	 */
+	private function persist_anchor( Contract $contract ): void {
+		$next_payment_gmt = $contract->get_next_payment_gmt();
+		$contract->set_meta( self::ANCHOR_META_KEY, $next_payment_gmt );
+
+		if ( ! $this->contracts->update_if_status( $contract, ContractStatus::ACTIVE ) ) {
+			throw new \DomainException( 'Hold::hold(): the contract state changed concurrently; nothing was written.' );
+		}
+
+		$stored = $this->contracts->find( (int) $contract->get_id() );
+		$anchor = null === $stored ? null : ( $stored->get_meta()[ self::ANCHOR_META_KEY ] ?? null );
+		if ( $anchor !== $next_payment_gmt ) {
+			throw new RuntimeException( 'Hold::hold(): the hold anchor could not be stored; the contract was not held.' );
+		}
 	}
 }
