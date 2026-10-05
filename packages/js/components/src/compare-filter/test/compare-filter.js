@@ -3,6 +3,7 @@
  */
 import { render } from '@testing-library/react';
 import { createElement } from '@wordpress/element';
+import { logged } from '@wordpress/deprecated';
 
 /**
  * Internal dependencies
@@ -18,19 +19,25 @@ Search.mockName( 'Search' );
 
 describe( 'CompareFilter', () => {
 	let props;
+	let warn;
 	beforeEach( () => {
+		// Reset the deprecation messages, so each test can assert its own warning.
+		Object.keys( logged ).forEach( ( key ) => delete logged[ key ] );
+		warn = jest.spyOn( console, 'warn' ).mockImplementation( () => {} );
 		props = {
 			path: '/foo/bar',
-			type: 'products',
 			param: 'product',
 			getLabels() {
 				return Promise.resolve( [] );
 			},
 			labels: {
 				helpText: 'Select at least two to compare',
-				placeholder: 'Search for things to compare',
 				title: 'Compare Things',
 				update: 'Compare',
+			},
+			searchProps: {
+				type: 'products',
+				placeholder: 'Search for things to compare',
 			},
 		};
 	} );
@@ -42,30 +49,84 @@ describe( 'CompareFilter', () => {
 		} ).not.toThrow();
 	} );
 
-	it( 'should forward the `type` prop the Search component', () => {
-		props.type = 'custom';
+	it( 'should forward `searchProps` to the Search component', () => {
+		props.searchProps = {
+			type: 'custom',
+			autocompleter: productAutocompleter,
+			placeholder: 'Search for things to compare',
+			showClearButton: true,
+		};
 
 		render( <CompareFilter { ...props } /> );
 
-		// Check that Search component received the prop, without checking its behavior/internals/implementation details.
+		// Check that Search component received the props, without checking its behavior/internals/implementation details.
 		expect( Search ).toHaveBeenLastCalledWith(
 			expect.objectContaining( {
 				type: 'custom',
+				autocompleter: productAutocompleter,
+				placeholder: 'Search for things to compare',
+				showClearButton: true,
 			} ),
 			expect.anything()
 		);
+		expect( warn ).not.toHaveBeenCalled();
 	} );
-	it( 'should forward the `autocompleter` prop the Search component', () => {
-		props.autocompleter = productAutocompleter;
+
+	it( 'should keep control of the `selected` and `onChange` Search props', () => {
+		const onChange = jest.fn();
+		props.searchProps = {
+			type: 'products',
+			selected: [ { key: 1, label: 'Foo' } ],
+			onChange,
+		};
 
 		render( <CompareFilter { ...props } /> );
 
-		// Check that Search component received the prop, without checking its behavior/internals/implementation details.
+		const [ searchProps ] = Search.mock.calls.slice( -1 )[ 0 ];
+		expect( searchProps.selected ).toEqual( [] );
+		expect( searchProps.onChange ).not.toBe( onChange );
+	} );
+
+	it( 'should still forward the deprecated `type`, `autocompleter`, and `labels.placeholder` props', () => {
+		delete props.searchProps;
+		props.type = 'custom';
+		props.autocompleter = productAutocompleter;
+		props.labels.placeholder = 'Search for things to compare';
+
+		render( <CompareFilter { ...props } /> );
+
 		expect( Search ).toHaveBeenLastCalledWith(
 			expect.objectContaining( {
+				type: 'custom',
 				autocompleter: productAutocompleter,
+				placeholder: 'Search for things to compare',
 			} ),
 			expect.anything()
 		);
+		expect( warn ).toHaveBeenCalledWith(
+			expect.stringContaining( 'to CompareFilter' )
+		);
+	} );
+
+	it( 'should prefer the deprecated props over `searchProps`', () => {
+		props.type = 'custom';
+		props.autocompleter = productAutocompleter;
+		props.labels.placeholder = 'Changed placeholder';
+		props.searchProps = {
+			type: 'products',
+			placeholder: 'Search for things to compare',
+		};
+
+		render( <CompareFilter { ...props } /> );
+
+		expect( Search ).toHaveBeenLastCalledWith(
+			expect.objectContaining( {
+				type: 'custom',
+				autocompleter: productAutocompleter,
+				placeholder: 'Changed placeholder',
+			} ),
+			expect.anything()
+		);
+		expect( warn ).toHaveBeenCalled();
 	} );
 } );
