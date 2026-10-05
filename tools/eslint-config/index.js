@@ -2,6 +2,7 @@
  * External dependencies
  */
 const woocommerce = require( '@woocommerce/eslint-plugin' );
+const vitest = require( '@vitest/eslint-plugin' );
 
 /*
  * Rules the ESLint v8 -> v10 upgrade newly surfaced, downgraded to warnings so
@@ -87,15 +88,38 @@ const RELAXED_TEST_RULES = {
 	'testing-library/no-manual-cleanup': 'warn',
 	'testing-library/no-wait-for-multiple-assertions': 'warn',
 	// Now reach the TypeScript tests that were previously unlinted.
-	'jest/expect-expect': 'warn',
-	'jest/no-conditional-expect': 'warn',
-	'jest/no-mocks-import': 'warn',
-	'jest/no-done-callback': 'warn',
-	'jest/no-alias-methods': 'warn',
-	'jest/no-export': 'warn',
-	'jest/no-jasmine-globals': 'warn',
-	'jest/no-identical-title': 'warn',
-	'jest/valid-expect': 'warn',
+	'vitest/expect-expect': 'warn',
+	'vitest/no-conditional-expect': 'warn',
+	'vitest/no-identical-title': 'warn',
+	'vitest/valid-expect': 'warn',
+	'vitest/no-alias-methods': 'warn',
+	// Existing __mocks__ folders also contain explicitly imported scenario fixtures.
+	'vitest/no-mocks-import': 'off',
+	'vitest/no-standalone-expect': [
+		'error',
+		{
+			additionalTestBlockFunctions: [
+				'beforeEach',
+				'afterEach',
+				'beforeAll',
+				'afterAll',
+			],
+		},
+	],
+	'jsdoc/check-tag-names': [
+		'error',
+		{
+			definedTags: [
+				'jest-environment',
+				'vitest-environment',
+				'vitest-environment-options',
+				'filter',
+				'action',
+				'slotFill',
+				'scope',
+			],
+		},
+	],
 };
 
 /*
@@ -112,6 +136,7 @@ const TYPE_AWARE_IGNORES = [
 	'**/*.stories.[jt]s?(x)',
 	'**/typings/**',
 	'**/*.d.ts',
+	'**/vitest.setup.ts',
 ];
 
 /*
@@ -133,8 +158,20 @@ module.exports = [
 		rules: RELAXED_RULES,
 	},
 	{
+		...vitest.configs.recommended,
 		files: TEST_FILES,
-		rules: RELAXED_TEST_RULES,
+		languageOptions: { globals: vitest.environments.env.globals },
+		rules: {
+			...Object.fromEntries(
+				woocommerce.configs.recommended.flatMap( ( config ) =>
+					Object.keys( config.rules || {} )
+						.filter( ( rule ) => rule.startsWith( 'jest/' ) )
+						.map( ( rule ) => [ rule, 'off' ] )
+				)
+			),
+			...vitest.configs.recommended.rules,
+			...RELAXED_TEST_RULES,
+		},
 	},
 	{
 		files: [ '**/*.ts', '**/*.tsx' ],
