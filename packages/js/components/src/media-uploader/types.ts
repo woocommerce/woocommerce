@@ -27,11 +27,12 @@ export interface MediaUploadProps< T extends boolean = false > {
 	onSelect: (
 		value: T extends true
 			? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-				Array< { id: number } & { [ k: string ]: any } >
+			  Array< { id: number } & { [ k: string ]: any } >
 			: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-				{ id: number } & { [ k: string ]: any }
+			  { id: number } & { [ k: string ]: any }
 	) => void;
-	render: ( props: { open: () => void } ) => JSX.Element;
+	// eslint-disable-next-line @typescript-eslint/method-signature-style
+	render( props: { open(): void } ): JSX.Element;
 	title?: string;
 }
 
