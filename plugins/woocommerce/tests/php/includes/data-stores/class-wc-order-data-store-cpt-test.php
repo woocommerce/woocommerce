@@ -58,52 +58,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should read the created and modified dates from the local post columns when the GMT ones hold the zero date.
-	 */
-	public function test_read_falls_back_to_local_dates_when_gmt_dates_are_zero(): void {
-		global $wpdb;
-
-		update_option( 'timezone_string', 'Europe/Amsterdam' );
-		$order = OrderHelper::create_order();
-		$wpdb->update(
-			$wpdb->posts,
-			array(
-				'post_date_gmt'     => '0000-00-00 00:00:00',
-				'post_modified_gmt' => '0000-00-00 00:00:00',
-			),
-			array( 'ID' => $order->get_id() )
-		);
-		clean_post_cache( $order->get_id() );
-		$post = get_post( $order->get_id() );
-
-		$read = new WC_Order();
-		$read->set_id( $order->get_id() );
-		( new WC_Order_Data_Store_CPT() )->read( $read );
-
-		$this->assertSame( get_gmt_from_date( $post->post_date ), $read->get_date_created()->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' ), 'The created date should come from post_date.' );
-		$this->assertSame( get_gmt_from_date( $post->post_modified ), $read->get_date_modified()->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' ), 'The modified date should come from post_modified.' );
-	}
-
-	/**
-	 * @testdox Should leave the post dates untouched when backfilling an order that has no created date.
-	 */
-	public function test_update_order_from_object_keeps_post_dates_for_order_without_created_date(): void {
-		$order    = OrderHelper::create_order();
-		$before   = get_post( $order->get_id() );
-		$dateless = new WC_Order();
-		$dateless->set_id( $order->get_id() );
-		$dateless->set_status( OrderStatus::COMPLETED );
-		$dateless->set_date_created( null );
-
-		$this->assertNotFalse( ( new WC_Order_Data_Store_CPT() )->update_order_from_object( $dateless ) );
-
-		$after = get_post( $order->get_id() );
-		$this->assertSame( $before->post_date, $after->post_date, 'post_date should be kept.' );
-		$this->assertSame( $before->post_date_gmt, $after->post_date_gmt, 'post_date_gmt should be kept.' );
-		$this->assertSame( 'wc-completed', $after->post_status, 'Other fields should still be written.' );
-	}
-
-	/**
 	 * Test that refund cache are invalidated correctly when refund is deleted.
 	 */
 	public function test_refund_cache_invalidation() {

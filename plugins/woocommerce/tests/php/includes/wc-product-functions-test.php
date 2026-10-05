@@ -48,6 +48,39 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_get_formatted_variation() lists an attribute whose value only appears in the parent product name.
+	 */
+	public function test_wc_get_formatted_variation_keeps_attribute_that_matches_the_parent_name(): void {
+		// Three attributes keep the attribute list out of the variation title, so it is just "Vienna Black"
+		// and the "black" colour must not be treated as already shown.
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Vienna Black',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '1',
+				'pa_colour' => 'black',
+			),
+			array(
+				'size'   => array( 'small', 'huge' ),
+				'number' => array( '0', '1' ),
+				'colour' => array( 'black', 'white' ),
+			)
+		);
+
+		try {
+			$this->assertSame( 'Vienna Black', $variation->get_name() );
+			$this->assertSame(
+				'size: huge, number: 1, colour: black',
+				wc_get_formatted_variation( $variation, true, true, true ),
+				'Every attribute is listed when the variation name shows none of them.'
+			);
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
 	 * @testdox If 'wc_get_price_excluding_tax' gets an order as argument, it passes the order customer to 'WC_Tax::get_rates'.
 	 *
 	 * @testWith [true, 1, true]
@@ -2852,5 +2885,26 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			$cache_state_during_first_save['next_batch'],
 			'The next batch must not be primed while the first batch is processing.'
 		);
+	}
+
+	/**
+	 * @testdox wc_get_formatted_variation resolves taxonomy term slugs to human-readable names via the prefetch cache.
+	 */
+	public function test_wc_get_formatted_variation_resolves_taxonomy_term_names(): void {
+		$attribute = WC_Helper_Product::create_product_attribute_object( 'color', array( 'Dark Blue', 'Light Green' ) );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Test Product' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'pa_color' => 'dark-blue' ) );
+		$variation->save();
+
+		$this->assertSame( 'color: Dark Blue', wc_get_formatted_variation( wc_get_product( $variation->get_id() ), true ) );
+
+		$product->delete( true );
 	}
 }

@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/order-confirmation-summary",
-	"version": "1.0.0",
 	"title": "Order Summary",
 	"description": "Display the order summary on the order confirmation page.",
 	"category": "woocommerce",
