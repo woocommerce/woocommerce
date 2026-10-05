@@ -1581,14 +1581,55 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * Sign up a contract from an order carrying a real product line (quantity 2, USD
-	 * 39.98) on a monthly plan with the given pricing payload.
+	 * @testdox renewal order lines keep the stored quantity: $label.
+	 * @dataProvider provide_unclamped_quantities
+	 *
+	 * @param string    $label      Case label.
+	 * @param int|float $quantity   Origin line quantity.
+	 * @param bool      $fractional Whether a fractional stock-amount filter is active.
+	 */
+	public function test_renewal_order_lines_keep_the_stored_quantity( string $label, $quantity, bool $fractional ): void {
+		if ( $fractional ) {
+			remove_filter( 'woocommerce_stock_amount', 'intval' );
+			add_filter( 'woocommerce_stock_amount', 'floatval' );
+		}
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+
+		$contract    = $this->sign_up_contract_with_line_item( self::GATEWAY_APPROVING, null, $quantity );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$renewal_order = $this->run_scheduled_renewal( $contract_id );
+		$this->assertInstanceOf( WC_Order::class, $renewal_order, $label );
+
+		$items = array_values( $renewal_order->get_items() );
+		$this->assertCount( 1, $items );
+		$this->assertInstanceOf( \WC_Order_Item_Product::class, $items[0] );
+		$this->assertEquals( $quantity, $items[0]->get_quantity(), $label );
+	}
+
+	/**
+	 * Quantities the engine must not floor or round.
+	 *
+	 * @return array<string, array{0: string, 1: int|float, 2: bool}>
+	 */
+	public function provide_unclamped_quantities(): array {
+		return array(
+			'zero'       => array( 'zero', 0, false ),
+			'fractional' => array( 'fractional', 1.5, true ),
+		);
+	}
+
+	/**
+	 * Sign up a contract from an order carrying a real product line (quantity 2 by default,
+	 * USD 39.98) on a monthly plan with the given pricing payload.
 	 *
 	 * @param string                    $gateway        Gateway id stamped on the order/contract.
 	 * @param array<string, mixed>|null $pricing_policy The plan's pricing payload, or null for none.
+	 * @param int|float                 $quantity       Origin line quantity.
 	 * @return Contract The persisted contract with cycle 1 billed.
 	 */
-	private function sign_up_contract_with_line_item( string $gateway, ?array $pricing_policy ): Contract {
+	private function sign_up_contract_with_line_item( string $gateway, ?array $pricing_policy, $quantity = 2 ): Contract {
 		$plan = Plan::create(
 			array(
 				'name'           => 'Monthly',
@@ -1613,7 +1654,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$line = new \WC_Order_Item_Product();
 		$line->set_name( 'Monthly Filters' );
 		$line->set_product_id( $product_id );
-		$line->set_quantity( 2 );
+		$line->set_props( array( 'quantity' => $quantity ) );
 		$line->set_subtotal( '39.98' );
 		$line->set_total( '39.98' );
 		$order->add_item( $line );
