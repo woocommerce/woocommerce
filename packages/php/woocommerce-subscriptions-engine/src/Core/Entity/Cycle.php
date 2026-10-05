@@ -236,12 +236,13 @@ final class Cycle {
 	/**
 	 * Hydrate from a stored row.
 	 *
-	 * The stored status is kept verbatim, registered or not (registration is checked
-	 * only where a status is written), so a value written by a since-deactivated
+	 * A well-formed stored status is kept verbatim, registered or not (registration is
+	 * checked only where a status is written), so a value written by a since-deactivated
 	 * extension round-trips unchanged.
 	 *
 	 * @param array<string, mixed> $row Cycle row.
-	 * @throws DomainException If the stored kind or sequence_no is invalid.
+	 * @throws DomainException If the stored kind or sequence_no is invalid, or the stored
+	 *                         status is not a well-formed status slug.
 	 */
 	public static function from_storage( array $row ): self {
 		$kind = ScalarCoercion::coerce_string( $row['kind'] ?? null, self::KIND_BILLING );
