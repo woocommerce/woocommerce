@@ -1,12 +1,13 @@
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+
 /**
- * @jest-environment jest-fixed-jsdom
+ * @vitest-environment jsdom
  */
 
 // Fixtures match jQuery 3 serialize(): encodeURIComponent per field, spaces as
 // %20, apostrophes literal. Typing %27 serializes as %2527.
 const CART_URL = 'https://example.test/cart/';
 const COUPON_CODE = "SAVE'10";
-
 const SHIPPING_FORM_SERIALIZED =
 	'calc_shipping_country=US' +
 	"&calc_shipping_state=O'State" +
@@ -15,7 +16,6 @@ const SHIPPING_FORM_SERIALIZED =
 	'&woocommerce-shipping-calculator-nonce=abc123' +
 	'&_wp_http_referer=%2Fcart%2F' +
 	'&calc_shipping=x';
-
 const SHIPPING_FORM_ENCODED =
 	'calc_shipping_country=US' +
 	'&calc_shipping_state=O%27State' +
@@ -24,7 +24,6 @@ const SHIPPING_FORM_ENCODED =
 	'&woocommerce-shipping-calculator-nonce=abc123' +
 	'&_wp_http_referer=%2Fcart%2F' +
 	'&calc_shipping=x';
-
 const CART_FORM_SERIALIZED =
 	'cart%5Babc123%5D%5Bqty%5D=2' +
 	"&coupon_code=SAVE'10" +
@@ -32,7 +31,6 @@ const CART_FORM_SERIALIZED =
 	'&reference=already%2527encoded' +
 	'&woocommerce-cart-nonce=abc123' +
 	'&_wp_http_referer=%2Fcart%2F';
-
 const CART_FORM_ENCODED =
 	'cart%5Babc123%5D%5Bqty%5D=2' +
 	'&coupon_code=SAVE%2710' +
@@ -45,7 +43,6 @@ const CART_FORM_ENCODED =
 const QUANTITY_FORM_SERIALIZED =
 	CART_FORM_SERIALIZED + '&update_cart=Update%20Cart';
 const QUANTITY_FORM_ENCODED = CART_FORM_ENCODED + '&update_cart=Update%20Cart';
-
 describe( 'cart.js request encoding', () => {
 	let capturedAjaxRequests;
 	let documentHandlers;
@@ -58,11 +55,16 @@ describe( 'cart.js request encoding', () => {
 
 	// Sentinels standing in for the DOM elements jQuery would hand to a
 	// delegated handler as `evt.currentTarget`.
-	const cartFormElement = { id: 'cart-form' };
-	const shippingFormElement = { id: 'shipping-form' };
-	const removeCouponElement = { id: 'remove-coupon' };
-
-	beforeEach( () => {
+	const cartFormElement = {
+		id: 'cart-form',
+	};
+	const shippingFormElement = {
+		id: 'shipping-form',
+	};
+	const removeCouponElement = {
+		id: 'remove-coupon',
+	};
+	beforeEach( async () => {
 		capturedAjaxRequests = [];
 		documentHandlers = [];
 		clickedSubmitName = null;
@@ -72,22 +74,22 @@ describe( 'cart.js request encoding', () => {
 		const createDefaultMock = () => {
 			const mock = {
 				length: 0,
-				addClass: jest.fn( () => mock ),
-				appendTo: jest.fn( () => mock ),
-				attr: jest.fn( () => mock ),
-				block: jest.fn( () => mock ),
-				closest: jest.fn( () => createDefaultMock() ),
-				each: jest.fn( () => mock ),
-				find: jest.fn( () => createDefaultMock() ),
-				hide: jest.fn( () => mock ),
-				is: jest.fn( () => false ),
-				on: jest.fn( () => mock ),
-				parents: jest.fn( () => createDefaultMock() ),
-				prop: jest.fn( () => mock ),
-				removeClass: jest.fn( () => mock ),
-				trigger: jest.fn( () => mock ),
-				unblock: jest.fn( () => mock ),
-				val: jest.fn(),
+				addClass: vi.fn( () => mock ),
+				appendTo: vi.fn( () => mock ),
+				attr: vi.fn( () => mock ),
+				block: vi.fn( () => mock ),
+				closest: vi.fn( () => createDefaultMock() ),
+				each: vi.fn( () => mock ),
+				find: vi.fn( () => createDefaultMock() ),
+				hide: vi.fn( () => mock ),
+				is: vi.fn( () => false ),
+				on: vi.fn( () => mock ),
+				parents: vi.fn( () => createDefaultMock() ),
+				prop: vi.fn( () => mock ),
+				removeClass: vi.fn( () => mock ),
+				trigger: vi.fn( () => mock ),
+				unblock: vi.fn( () => mock ),
+				val: vi.fn(),
 			};
 			return mock;
 		};
@@ -97,19 +99,20 @@ describe( 'cart.js request encoding', () => {
 		// on( 'submit', selector, handler ). Store one entry per event name so a
 		// test can pick a handler by ( event, selector ).
 		const $document = {
-			on: jest.fn( ( events, selectorOrHandler, delegatedHandler ) => {
+			on: vi.fn( ( events, selectorOrHandler, delegatedHandler ) => {
 				const isDelegated = typeof delegatedHandler === 'function';
 				events.split( ' ' ).forEach( ( event ) => {
 					documentHandlers.push( {
 						event,
 						selector: isDelegated ? selectorOrHandler : null,
-						handler: isDelegated ? delegatedHandler : selectorOrHandler,
+						handler: isDelegated
+							? delegatedHandler
+							: selectorOrHandler,
 					} );
 				} );
 				return $document;
 			} ),
 		};
-
 		findDocumentHandler = ( event, selector = null ) => {
 			const entry = documentHandlers.find(
 				( candidate ) =>
@@ -117,54 +120,57 @@ describe( 'cart.js request encoding', () => {
 			);
 			if ( ! entry ) {
 				throw new Error(
-					'No ' + event + ' handler' + ( selector ? ' for ' + selector : '' )
+					'No ' +
+						event +
+						' handler' +
+						( selector ? ' for ' + selector : '' )
 				);
 			}
 			return entry.handler;
 		};
-
-		const formAttributes = { method: 'post', action: CART_URL };
-
+		const formAttributes = {
+			method: 'post',
+			action: CART_URL,
+		};
 		$cartForm = createDefaultMock();
 		$cartForm.length = 1;
-		$cartForm.attr = jest.fn( ( name ) => formAttributes[ name ] );
-		$cartForm.serialize = jest.fn( () => CART_FORM_SERIALIZED );
+		$cartForm.attr = vi.fn( ( name ) => formAttributes[ name ] );
+		$cartForm.serialize = vi.fn( () => CART_FORM_SERIALIZED );
 		// cart_submit() bails unless the target is a form with cart contents.
-		$cartForm.is = jest.fn( ( selector ) => selector === 'form' );
-		$cartForm.find = jest.fn( ( selector ) =>
+		$cartForm.is = vi.fn( ( selector ) => selector === 'form' );
+		$cartForm.find = vi.fn( ( selector ) =>
 			selector === '.woocommerce-cart-form__contents'
-				? { length: 1 }
+				? {
+						length: 1,
+				  }
 				: createDefaultMock()
 		);
-
 		$shippingForm = createDefaultMock();
 		$shippingForm.length = 1;
-		$shippingForm.attr = jest.fn( ( name ) => formAttributes[ name ] );
-		$shippingForm.serialize = jest.fn( () => SHIPPING_FORM_SERIALIZED );
-
+		$shippingForm.attr = vi.fn( ( name ) => formAttributes[ name ] );
+		$shippingForm.serialize = vi.fn( () => SHIPPING_FORM_SERIALIZED );
 		$couponInput = createDefaultMock();
 		$couponInput.length = 1;
-		$couponInput.val = jest.fn( () => COUPON_CODE );
+		$couponInput.val = vi.fn( () => COUPON_CODE );
 
 		// remove_coupon_clicked() reads the code off data-coupon and blocks
 		// the closest .cart_totals wrapper.
 		$removeCouponLink = createDefaultMock();
 		$removeCouponLink.length = 1;
-		$removeCouponLink.attr = jest.fn( ( name ) =>
+		$removeCouponLink.attr = vi.fn( ( name ) =>
 			name === 'data-coupon' ? COUPON_CODE : undefined
 		);
-		$removeCouponLink.closest = jest.fn( () => createDefaultMock() );
+		$removeCouponLink.closest = vi.fn( () => createDefaultMock() );
 
 		// cart_submit() routes on which submit button was clicked.
 		const $clickedSubmit = {
-			is: jest.fn(
+			is: vi.fn(
 				( selector ) =>
 					clickedSubmitName !== null &&
 					selector === ':input[name="' + clickedSubmitName + '"]'
 			),
 		};
-
-		const jQueryMock = jest.fn( ( arg ) => {
+		const jQueryMock = vi.fn( ( arg ) => {
 			// Document ready: jQuery( function ( $ ) { ... } ).
 			if ( typeof arg === 'function' ) {
 				arg( jQueryMock );
@@ -194,13 +200,15 @@ describe( 'cart.js request encoding', () => {
 			}
 			return createDefaultMock();
 		} );
-		jQueryMock.ajax = jest.fn( ( options ) => {
+		jQueryMock.ajax = vi.fn( ( options ) => {
 			capturedAjaxRequests.push( options );
-			return { abort: jest.fn() };
+			return {
+				abort: vi.fn(),
+			};
 		} );
 		// Mirrors jQuery 3 param(): encodeURIComponent per field, spaces as %20,
 		// apostrophes literal. encodeApostrophes() then turns `'` into %27.
-		jQueryMock.param = jest.fn( ( object ) => {
+		jQueryMock.param = vi.fn( ( object ) => {
 			const parts = [];
 			const add = ( key, value ) => {
 				parts.push(
@@ -214,7 +222,10 @@ describe( 'cart.js request encoding', () => {
 			const buildParams = ( prefix, value ) => {
 				if ( value !== null && typeof value === 'object' ) {
 					Object.keys( value ).forEach( ( nestedKey ) =>
-						buildParams( prefix + '[' + nestedKey + ']', value[ nestedKey ] )
+						buildParams(
+							prefix + '[' + nestedKey + ']',
+							value[ nestedKey ]
+						)
 					);
 					return;
 				}
@@ -225,12 +236,10 @@ describe( 'cart.js request encoding', () => {
 			);
 			return parts.join( '&' );
 		} );
-
 		global.window.jQuery = jQueryMock;
 		global.window.$ = jQueryMock;
 		global.jQuery = jQueryMock;
 		global.$ = jQueryMock;
-
 		global.window.wc_cart_params = {
 			ajax_url: '/wp-admin/admin-ajax.php',
 			wc_ajax_url: '/?wc-ajax=%%endpoint%%',
@@ -240,26 +249,24 @@ describe( 'cart.js request encoding', () => {
 		};
 
 		// Requiring cart.js runs the jQuery wrapper and binds the handlers.
-		jest.resetModules();
-		require( '../cart' );
+		vi.resetModules();
+		await import( '../cart' );
 	} );
-
 	afterEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	} );
-
 	test( 'should encode apostrophes in shipping calculator data', () => {
 		const submit = findDocumentHandler(
 			'submit',
 			'form.woocommerce-shipping-calculator'
 		);
-		const evt = { preventDefault: jest.fn(), currentTarget: shippingFormElement };
-
+		const evt = {
+			preventDefault: vi.fn(),
+			currentTarget: shippingFormElement,
+		};
 		submit( evt );
-
 		expect( evt.preventDefault ).toHaveBeenCalled();
 		expect( capturedAjaxRequests ).toHaveLength( 1 );
-
 		const request = capturedAjaxRequests[ 0 ];
 		expect( request.url ).toBe( CART_URL );
 		expect( request.data ).not.toContain( "'" );
@@ -271,41 +278,39 @@ describe( 'cart.js request encoding', () => {
 		expect( body.get( 'calc_shipping_state' ) ).toBe( "O'State" );
 		expect( body.get( 'calc_shipping' ) ).toBe( 'x' );
 	} );
-
 	test( 'should encode apostrophes in update cart data', () => {
 		// update_cart() is reached through the wc_update_cart document event.
 		const updateCart = findDocumentHandler( 'wc_update_cart' );
-
 		updateCart( {} );
-
 		expect( capturedAjaxRequests ).toHaveLength( 1 );
-
 		const request = capturedAjaxRequests[ 0 ];
 		expect( request.url ).toBe( CART_URL );
 		expect( request.data ).not.toContain( "'" );
 		expect( request.data ).toBe( CART_FORM_ENCODED );
-
 		const body = new URLSearchParams( request.data );
 		expect( body.get( 'coupon_code' ) ).toBe( "SAVE'10" );
 		expect( body.get( 'cart[abc123][qty]' ) ).toBe( '2' );
 		expect( body.get( "order'note" ) ).toBe( "Leave at O'Brien's door" );
 		expect( body.get( 'reference' ) ).toBe( 'already%27encoded' );
 	} );
-
 	test( 'should encode apostrophes in quantity update data', () => {
 		// quantity_update() is reached through cart_submit() when the clicked
 		// submit button is the Update cart button.
 		clickedSubmitName = 'update_cart';
 		$cartForm.serialize.mockReturnValue( QUANTITY_FORM_SERIALIZED );
-		const submit = findDocumentHandler( 'submit', '.woocommerce-cart-form' );
-		const evt = { preventDefault: jest.fn(), currentTarget: cartFormElement };
-
+		const submit = findDocumentHandler(
+			'submit',
+			'.woocommerce-cart-form'
+		);
+		const evt = {
+			preventDefault: vi.fn(),
+			currentTarget: cartFormElement,
+		};
 		submit( evt );
 
 		// preventDefault() proves cart_submit() took the quantity_update() branch.
 		expect( evt.preventDefault ).toHaveBeenCalled();
 		expect( capturedAjaxRequests ).toHaveLength( 1 );
-
 		const request = capturedAjaxRequests[ 0 ];
 		expect( request.url ).toBe( CART_URL );
 		expect( request.data ).not.toContain( "'" );
@@ -314,38 +319,38 @@ describe( 'cart.js request encoding', () => {
 		expect( body.get( 'coupon_code' ) ).toBe( "SAVE'10" );
 		expect( body.get( 'update_cart' ) ).toBe( 'Update Cart' );
 	} );
-
 	test( 'should encode apostrophes in apply coupon data', () => {
 		clickedSubmitName = 'apply_coupon';
-		const submit = findDocumentHandler( 'submit', '.woocommerce-cart-form' );
-		const evt = { preventDefault: jest.fn(), currentTarget: cartFormElement };
-
+		const submit = findDocumentHandler(
+			'submit',
+			'.woocommerce-cart-form'
+		);
+		const evt = {
+			preventDefault: vi.fn(),
+			currentTarget: cartFormElement,
+		};
 		submit( evt );
-
 		expect( evt.preventDefault ).toHaveBeenCalled();
-
 		const request = capturedAjaxRequests.find( ( options ) =>
 			options.url.includes( 'apply_coupon' )
 		);
 		expect( request ).toBeDefined();
 		expect( request.data ).not.toContain( "'" );
-
 		const body = new URLSearchParams( request.data );
 		expect( body.get( 'coupon_code' ) ).toBe( COUPON_CODE );
 		expect( body.get( 'security' ) ).toBe( 'nonce' );
 	} );
-
 	test( 'should encode apostrophes in remove coupon data', () => {
-		const click = findDocumentHandler( 'click', 'a.woocommerce-remove-coupon' );
+		const click = findDocumentHandler(
+			'click',
+			'a.woocommerce-remove-coupon'
+		);
 		const evt = {
-			preventDefault: jest.fn(),
+			preventDefault: vi.fn(),
 			currentTarget: removeCouponElement,
 		};
-
 		click( evt );
-
 		expect( evt.preventDefault ).toHaveBeenCalled();
-
 		const request = capturedAjaxRequests.find( ( options ) =>
 			options.url.includes( 'remove_coupon' )
 		);

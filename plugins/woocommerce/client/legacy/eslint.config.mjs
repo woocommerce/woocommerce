@@ -57,4 +57,8 @@ export default [
 			'no-console': 'warn',
 		},
 	},
+	{
+		files: [ 'js/**/test/**/*.js' ],
+		languageOptions: { sourceType: 'module', ecmaVersion: 'latest' },
+	},
 ];

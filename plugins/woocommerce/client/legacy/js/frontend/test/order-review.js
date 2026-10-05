@@ -1,19 +1,19 @@
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+
 /**
- * @jest-environment jest-fixed-jsdom
+ * @vitest-environment jsdom
  */
 
 function TestFormData( form ) {
 	this.form = form;
 }
-
 describe( 'Review Order frontend behavior', () => {
 	let originalFetch;
 	let originalGlobalFetch;
 	let originalFormData;
 	let originalWcOrderReview;
 	let originalReadyState;
-
-	function initializeReviewOrder() {
+	async function initializeReviewOrder() {
 		originalReadyState = Object.getOwnPropertyDescriptor(
 			document,
 			'readyState'
@@ -22,72 +22,69 @@ describe( 'Review Order frontend behavior', () => {
 			configurable: true,
 			value: 'complete',
 		} );
-
-		jest.resetModules();
-		require( '../order-review' );
-
+		vi.resetModules();
+		await import( '../order-review' );
 		if ( originalReadyState ) {
 			Object.defineProperty( document, 'readyState', originalReadyState );
 		} else {
 			delete document.readyState;
 		}
 	}
-
 	beforeEach( () => {
 		originalFetch = window.fetch;
 		originalGlobalFetch = global.fetch;
 		originalFormData = window.FormData;
 		originalWcOrderReview = window.wcOrderReview;
 	} );
-
 	afterEach( () => {
 		document.body.replaceChildren();
-		jest.resetModules();
-		jest.restoreAllMocks();
+		vi.resetModules();
+		vi.restoreAllMocks();
 		window.fetch = originalFetch;
 		global.fetch = originalGlobalFetch;
 		window.FormData = originalFormData;
-
 		if ( undefined === originalWcOrderReview ) {
 			delete window.wcOrderReview;
 		} else {
 			window.wcOrderReview = originalWcOrderReview;
 		}
 	} );
-
-	test( 'dismisses disabled-products notice with the production hidden class', () => {
+	test( 'dismisses disabled-products notice with the production hidden class', async () => {
 		document.body.innerHTML = `
 			<div class="woocommerce-review-order__notice">
 				<button class="woocommerce-review-order__notice-dismiss" type="button">Dismiss</button>
 			</div>
 		`;
-
-		initializeReviewOrder();
-
+		await initializeReviewOrder();
 		const notice = document.querySelector(
 			'.woocommerce-review-order__notice'
 		);
 		notice
 			.querySelector( '.woocommerce-review-order__notice-dismiss' )
 			.click();
-
 		expect(
 			notice.classList.contains(
 				'woocommerce-review-order__notice--hidden'
 			)
 		).toBe( true );
 	} );
-
 	test( 'blocks a text-only review until a rating is selected', async () => {
 		const ajaxUrl = 'https://example.test/wp-admin/admin-ajax.php';
 		const ratingRequired = 'A rating is required before submitting.';
 		window.wcOrderReview = {
-			i18n: { rating_required: ratingRequired },
+			i18n: {
+				rating_required: ratingRequired,
+			},
 		};
-		window.fetch = jest.fn( () =>
+		window.fetch = vi.fn( () =>
 			Promise.resolve( {
 				json: () =>
-					Promise.resolve( { success: true, data: { results: {} } } ),
+					Promise.resolve( {
+						success: true,
+						data: {
+							results: {},
+						},
+					} ),
 			} )
 		);
 		global.fetch = window.fetch;
@@ -104,9 +101,7 @@ describe( 'Review Order frontend behavior', () => {
 				<button class="woocommerce-review-order__submit" type="submit">Submit</button>
 			</form>
 		`;
-
-		initializeReviewOrder();
-
+		await initializeReviewOrder();
 		const form = document.querySelector(
 			'.woocommerce-review-order__form'
 		);
@@ -119,35 +114,36 @@ describe( 'Review Order frontend behavior', () => {
 		const submit = form.querySelector(
 			'.woocommerce-review-order__submit'
 		);
-
 		expect( submit.disabled ).toBe( true );
-
 		textarea.value = 'Text-only review';
-		textarea.dispatchEvent( new Event( 'input', { bubbles: true } ) );
-
+		textarea.dispatchEvent(
+			new Event( 'input', {
+				bubbles: true,
+			} )
+		);
 		expect( submit.disabled ).toBe( false );
 		submit.click();
-
 		expect( form.querySelectorAll( '[role="alert"]' ) ).toHaveLength( 1 );
 		expect( form.querySelector( '[role="alert"]' ).textContent ).toBe(
 			ratingRequired
 		);
 		expect( window.fetch ).not.toHaveBeenCalled();
-
 		rating.checked = true;
-		rating.dispatchEvent( new Event( 'change', { bubbles: true } ) );
-
+		rating.dispatchEvent(
+			new Event( 'change', {
+				bubbles: true,
+			} )
+		);
 		expect( form.querySelectorAll( '[role="alert"]' ) ).toHaveLength( 0 );
 		expect( submit.disabled ).toBe( false );
-
 		submit.click();
-
 		expect( window.fetch ).toHaveBeenCalledTimes( 1 );
 		expect( window.fetch ).toHaveBeenCalledWith(
 			ajaxUrl,
-			expect.objectContaining( { method: 'POST' } )
+			expect.objectContaining( {
+				method: 'POST',
+			} )
 		);
-
 		await Promise.resolve();
 	} );
 } );
