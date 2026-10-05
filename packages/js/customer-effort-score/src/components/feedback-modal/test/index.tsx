@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -9,7 +11,7 @@ import { createElement } from '@wordpress/element';
  */
 import { FeedbackModal } from '../index';
 
-const mockRecordScoreCallback = jest.fn();
+const mockRecordScoreCallback = vi.fn();
 
 describe( 'FeedbackModal', () => {
 	it( 'should render a modal', async () => {

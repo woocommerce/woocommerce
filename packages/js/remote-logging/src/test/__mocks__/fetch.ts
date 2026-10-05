@@ -1,4 +1,6 @@
-export const fetchMock = jest.fn().mockResolvedValue( {
+import { vi } from 'vitest';
+
+export const fetchMock = vi.fn().mockResolvedValue( {
 	ok: true,
 	json: () => Promise.resolve( {} ),
 } );

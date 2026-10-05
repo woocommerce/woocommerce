@@ -1,3 +1,13 @@
+import {
+	afterEach,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+} from 'vitest';
+
 /**
  * Internal dependencies
  */
@@ -156,7 +166,7 @@ describe( 'getNewPath', () => {
 
 describe( 'addHistoryListener', () => {
 	it( 'should add a custom event to the browser pushState', () => {
-		const mockCallback = jest.fn();
+		const mockCallback = vi.fn();
 		const removeListener = addHistoryListener( mockCallback );
 		window.history.pushState( {}, 'Test pushState' );
 		window.history.pushState( {}, 'Test pushState 2' );
@@ -170,7 +180,7 @@ describe( 'addHistoryListener', () => {
 	} );
 
 	it( 'should add a custom event to the browser replaceState', () => {
-		const mockCallback = jest.fn();
+		const mockCallback = vi.fn();
 		const removeListener = addHistoryListener( mockCallback );
 		window.history.replaceState( {}, 'Test replaceState' );
 		window.history.replaceState( {}, 'Test replaceState 2' );
@@ -294,7 +304,7 @@ describe( 'navigateTo', () => {
 
 	beforeEach( () => {
 		window.location = oldLocation;
-		jest.spyOn( getHistory(), 'push' );
+		vi.spyOn( getHistory(), 'push' );
 	} );
 
 	afterEach( () => {

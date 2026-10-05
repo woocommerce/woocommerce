@@ -1,7 +1,18 @@
+import {
+	afterAll,
+	afterEach,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+} from 'vitest';
+
 /**
  * External dependencies
  */
-import '@wordpress/jest-console';
+
 import { addFilter, removeFilter } from '@wordpress/hooks';
 /**
  * Internal dependencies
@@ -17,56 +28,61 @@ import {
 	REMOTE_LOGGING_REQUEST_URI_PARAMS_WHITELIST_FILTER,
 } from '../remote-logger';
 import { fetchMock } from './__mocks__/fetch';
-
-jest.mock( 'tracekit', () => ( {
-	computeStackTrace: jest.fn().mockReturnValue( {
-		name: 'Error',
-		message: 'Test error',
-		stack: [
-			{
-				url: 'http://example.com/woocommerce/assets/js/admin/app.min.js',
-				func: 'testFunction',
-				args: [],
-				line: 1,
-				column: 1,
-			},
-		],
-	} ),
-} ) );
-
-jest.mock( '@woocommerce/settings', () => {
-	return {
-		getSetting: jest.fn().mockImplementation( ( key ) => {
+vi.mock( 'tracekit', () => {
+	const mock = {
+		computeStackTrace: vi.fn().mockReturnValue( {
+			name: 'Error',
+			message: 'Test error',
+			stack: [
+				{
+					url: 'http://example.com/woocommerce/assets/js/admin/app.min.js',
+					func: 'testFunction',
+					args: [],
+					line: 1,
+					column: 1,
+				},
+			],
+		} ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@woocommerce/settings', () => {
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
+		getSetting: vi.fn().mockImplementation( ( key ) => {
 			if ( key === 'wcAssetUrl' ) {
 				return 'http://example.com/woocommerce/assets';
 			}
 			return null;
 		} ),
-	};
+	} );
 } );
-
 describe( 'RemoteLogger', () => {
 	const originalConsoleWarn = console.warn;
 	let logger: RemoteLogger;
-
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 		localStorage.clear();
-		logger = new RemoteLogger( { errorRateLimitMs: 60000 } ); // 1 minute
+		logger = new RemoteLogger( {
+			errorRateLimitMs: 60000,
+		} ); // 1 minute
 	} );
-
 	afterEach( () => {
 		removeFilter( REMOTE_LOGGING_SHOULD_SEND_ERROR_FILTER, 'test' );
 	} );
-
 	beforeAll( () => {
-		console.warn = jest.fn();
+		console.warn = vi.fn();
 	} );
-
 	afterAll( () => {
 		console.warn = originalConsoleWarn;
 	} );
-
 	describe( 'log', () => {
 		it( 'should send a log message to the API', async () => {
 			await logger.log( 'info', 'Test message' );
@@ -78,12 +94,10 @@ describe( 'RemoteLogger', () => {
 				} )
 			);
 		} );
-
 		it( 'should not send an empty message', async () => {
 			await logger.log( 'info', '' );
 			expect( fetchMock ).not.toHaveBeenCalled();
 		} );
-
 		it( 'should use the filtered Log endpoint', async () => {
 			const customEndpoint = 'https://custom-logstash.example.com';
 			addFilter(
@@ -91,9 +105,7 @@ describe( 'RemoteLogger', () => {
 				'test',
 				() => customEndpoint
 			);
-
 			await logger.log( 'info', 'Test message' );
-
 			expect( fetchMock ).toHaveBeenCalledWith(
 				customEndpoint,
 				expect.objectContaining( {
@@ -101,16 +113,13 @@ describe( 'RemoteLogger', () => {
 					body: expect.any( FormData ),
 				} )
 			);
-
 			removeFilter( REMOTE_LOGGING_LOG_ENDPOINT_FILTER, 'test' );
 		} );
 	} );
-
 	describe( 'error', () => {
 		it( 'should send an error to the API with default data', async () => {
 			const error = new Error( 'Test error' );
 			await logger.error( error );
-
 			expect( fetchMock ).toHaveBeenCalledWith(
 				'https://public-api.wordpress.com/rest/v1.1/js-error',
 				expect.objectContaining( {
@@ -118,7 +127,6 @@ describe( 'RemoteLogger', () => {
 					body: expect.any( FormData ),
 				} )
 			);
-
 			const formData = fetchMock.mock.calls[ 0 ][ 1 ].body;
 			const payload = JSON.parse( formData.get( 'error' ) );
 			expect( payload[ 'message' ] ).toBe( 'Test error' );
@@ -127,7 +135,6 @@ describe( 'RemoteLogger', () => {
 				'#1 at testFunction (http://example.com/woocommerce/assets/js/admin/app.min.js:1:1)'
 			);
 		} );
-
 		it( 'should send an error to the API with extra data', async () => {
 			const error = new Error( 'Test error' );
 			const extraData = {
@@ -135,7 +142,6 @@ describe( 'RemoteLogger', () => {
 				tags: [ 'custom-tag' ],
 			};
 			await logger.error( error, extraData );
-
 			expect( fetchMock ).toHaveBeenCalledWith(
 				'https://public-api.wordpress.com/rest/v1.1/js-error',
 				expect.objectContaining( {
@@ -143,7 +149,6 @@ describe( 'RemoteLogger', () => {
 					body: expect.any( FormData ),
 				} )
 			);
-
 			const formData = fetchMock.mock.calls[ 0 ][ 1 ].body;
 			const payload = JSON.parse( formData.get( 'error' ) );
 			expect( payload[ 'message' ] ).toBe( 'Test error' );
@@ -158,7 +163,6 @@ describe( 'RemoteLogger', () => {
 			);
 		} );
 	} );
-
 	describe( 'handleError', () => {
 		it( 'should send an error to the API', async () => {
 			const error = new Error( 'Test error' );
@@ -171,20 +175,17 @@ describe( 'RemoteLogger', () => {
 				} )
 			);
 		} );
-
 		it( 'should respect rate limiting', async () => {
 			addFilter(
 				REMOTE_LOGGING_SHOULD_SEND_ERROR_FILTER,
 				'test',
 				() => true
 			);
-
 			const error = new Error( 'Test error - rate limit' );
 			await ( logger as any ).handleError( error );
 			await ( logger as any ).handleError( error );
 			expect( fetchMock ).toHaveBeenCalledTimes( 1 );
 		} );
-
 		it( 'should filter error data', async () => {
 			const filteredErrorData = {
 				message: 'Filtered test error',
@@ -192,21 +193,17 @@ describe( 'RemoteLogger', () => {
 				tags: [ 'filtered-tag' ],
 				trace: 'Filtered stack trace',
 			};
-
 			addFilter( REMOTE_LOGGING_ERROR_DATA_FILTER, 'test', ( data ) => {
 				return filteredErrorData;
 			} );
 			// mock sendError to return true
-			const sendErrorSpy = jest
+			const sendErrorSpy = vi
 				.spyOn( logger as any, 'sendError' )
 				.mockImplementation( () => {} );
-
 			const error = new Error( 'Test error' );
 			await ( logger as any ).handleError( error );
-
 			expect( sendErrorSpy ).toHaveBeenCalledWith( filteredErrorData );
 		} );
-
 		it( 'should use the filtered JS error endpoint', async () => {
 			const customEndpoint = 'https://custom-js-error.example.com';
 			addFilter(
@@ -214,10 +211,8 @@ describe( 'RemoteLogger', () => {
 				'test',
 				() => customEndpoint
 			);
-
 			const error = new Error( 'Test error' );
 			await ( logger as any ).handleError( error );
-
 			expect( fetchMock ).toHaveBeenCalledWith(
 				customEndpoint,
 				expect.objectContaining( {
@@ -225,11 +220,9 @@ describe( 'RemoteLogger', () => {
 					body: expect.any( FormData ),
 				} )
 			);
-
 			removeFilter( REMOTE_LOGGING_JS_ERROR_ENDPOINT_FILTER, 'test' );
 		} );
 	} );
-
 	describe( 'shouldHandleError', () => {
 		it( 'should return true for WooCommerce errors', () => {
 			const error = new Error( 'Test error' );
@@ -248,7 +241,6 @@ describe( 'RemoteLogger', () => {
 			);
 			expect( result ).toBe( true );
 		} );
-
 		it( 'should return false for non-WooCommerce errors', () => {
 			const error = new Error( 'Test error' );
 			const stackFrames = [
@@ -273,13 +265,11 @@ describe( 'RemoteLogger', () => {
 			);
 			expect( result ).toBe( false );
 		} );
-
 		it( 'should return false for WooCommerce errors with no stack frames', () => {
 			const error = new Error( 'Test error' );
 			const result = ( logger as any ).shouldHandleError( error, [] );
 			expect( result ).toBe( false );
 		} );
-
 		it( 'should return true if filter returns true', () => {
 			addFilter(
 				REMOTE_LOGGING_SHOULD_SEND_ERROR_FILTER,
@@ -291,7 +281,6 @@ describe( 'RemoteLogger', () => {
 			expect( result ).toBe( true );
 		} );
 	} );
-
 	describe( 'getFormattedStackFrame', () => {
 		it( 'should format stack frames correctly', () => {
 			const stackTrace = {
@@ -324,45 +313,45 @@ describe( 'RemoteLogger', () => {
 		} );
 	} );
 } );
-
 global.window.wcSettings = {
 	isRemoteLoggingEnabled: true,
 };
-
 describe( 'init', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
-
+		vi.clearAllMocks();
 		global.window.wcSettings = {
 			isRemoteLoggingEnabled: true,
 		};
 	} );
-
 	it( 'should not initialize or log when remote logging is disabled', () => {
 		global.window.wcSettings = {
 			isRemoteLoggingEnabled: false,
 		};
-		init( { errorRateLimitMs: 1000 } );
+		init( {
+			errorRateLimitMs: 1000,
+		} );
 		log( 'info', 'Test message' );
 		expect( fetchMock ).not.toHaveBeenCalled();
 	} );
-
 	it( 'should initialize and log without throwing when remote logging is enabled', () => {
-		init( { errorRateLimitMs: 1000 } );
+		init( {
+			errorRateLimitMs: 1000,
+		} );
 		expect( () => log( 'info', 'Test message' ) ).not.toThrow();
 		expect( fetchMock ).toHaveBeenCalled();
 	} );
-
 	it( 'should not initialize the logger twice', () => {
-		init( { errorRateLimitMs: 1000 } );
-		init( { errorRateLimitMs: 2000 } );
-
+		init( {
+			errorRateLimitMs: 1000,
+		} );
+		init( {
+			errorRateLimitMs: 2000,
+		} );
 		expect( console ).toHaveWarnedWith(
 			'RemoteLogger: RemoteLogger is already initialized.'
 		);
 	} );
 } );
-
 describe( 'log', () => {
 	it( 'should not log if remote logging is disabled', () => {
 		global.window.wcSettings = {
@@ -372,7 +361,6 @@ describe( 'log', () => {
 		expect( fetchMock ).not.toHaveBeenCalled();
 	} );
 } );
-
 describe( 'captureException', () => {
 	it( 'should not log error if remote logging is disabled', () => {
 		global.window.wcSettings = {
@@ -382,7 +370,6 @@ describe( 'captureException', () => {
 		expect( fetchMock ).not.toHaveBeenCalled();
 	} );
 } );
-
 describe( 'sanitiseRequestUriParams', () => {
 	afterEach( () => {
 		removeFilter(

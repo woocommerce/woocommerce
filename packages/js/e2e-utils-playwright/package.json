@@ -40,12 +40,13 @@
 		"build:publish:project:types": "tsc --build --emitDeclarationOnly",
 		"build:publish:project:runtime": "pnpm build:project",
 		"prepack": "pnpm build:publish:project",
-		"test": "jest --passWithNoTests",
+		"test": "wp-scripts test-unit-js --passWithNoTests",
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"watch:build": "pnpm watch:build:project",
 		"watch:build:project": "pnpm --stream '/^watch:build:project:.*$/'",
 		"watch:build:project:cjs": "node build.mjs --commonjs --watch",
-		"watch:build:project:esm": "node build.mjs --watch"
+		"watch:build:project:esm": "node build.mjs --watch",
+		"test:js": "wp-scripts test-unit-js --passWithNoTests"
 	},
 	"config": {
 		"ci": {
@@ -58,7 +59,7 @@
 					"name": "JavaScript",
 					"command": "test",
 					"changes": [
-						"jest.config.json",
+						"vitest.config.mjs",
 						"tsconfig.json",
 						"src/**/*.{js,jsx,ts,tsx}"
 					],

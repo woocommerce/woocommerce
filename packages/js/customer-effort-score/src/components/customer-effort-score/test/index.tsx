@@ -1,3 +1,5 @@
+import { describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -12,22 +14,22 @@ import { CustomerEffortScore } from '..';
 
 const noop = () => {};
 
-jest.mock( '@wordpress/data', () => {
-	const originalModule = jest.requireActual( '@wordpress/data' );
+vi.mock( '@wordpress/data', async () => {
+	const originalModule = await vi.importActual( '@wordpress/data' );
 
-	return {
+	return ( ( mock ) => ( { default: mock, ...mock } ) )( {
 		__esModule: true,
 		...originalModule,
-		useDispatch: jest.fn().mockReturnValue( {
-			createNotice: jest.fn(),
+		useDispatch: vi.fn().mockReturnValue( {
+			createNotice: vi.fn(),
 		} ),
-	};
+	} );
 } );
 
 describe( 'CustomerEffortScore', () => {
 	it( 'should call createNotice with appropriate parameters', async () => {
-		const mockCreateNotice = jest.fn();
-		( useDispatch as jest.Mock ).mockReturnValue( {
+		const mockCreateNotice = vi.fn();
+		( useDispatch as Mock ).mockReturnValue( {
 			createNotice: mockCreateNotice,
 		} );
 		const icon = <span>icon</span>;
@@ -57,8 +59,8 @@ describe( 'CustomerEffortScore', () => {
 	} );
 
 	it( 'should not call createNotice on rerender', async () => {
-		const mockCreateNotice = jest.fn();
-		( useDispatch as jest.Mock ).mockReturnValue( {
+		const mockCreateNotice = vi.fn();
+		( useDispatch as Mock ).mockReturnValue( {
 			createNotice: mockCreateNotice,
 		} );
 
@@ -99,7 +101,7 @@ describe( 'CustomerEffortScore', () => {
 	} );
 
 	it( 'should show dialog if "Give feedback" callback is run', async () => {
-		const mockOnModalShownCallback = jest.fn();
+		const mockOnModalShownCallback = vi.fn();
 		const createNotice = (
 			...args: [
 				unknown,
@@ -122,7 +124,7 @@ describe( 'CustomerEffortScore', () => {
 			// Modal shown callback should also be called.
 			expect( mockOnModalShownCallback ).toHaveBeenCalled();
 		};
-		( useDispatch as jest.Mock ).mockReturnValue( {
+		( useDispatch as Mock ).mockReturnValue( {
 			createNotice,
 		} );
 

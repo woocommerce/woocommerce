@@ -12,7 +12,7 @@
 		"analyzer": "node -r ts-node/register ./src/commands/analyzer/index.ts",
 		"lint": "eslint .",
 		"test": "pnpm test:js",
-		"test:js": "jest"
+		"test:js": "wp-scripts test-unit-js"
 	},
 	"dependencies": {
 		"@actions/core": "^2.0.3",
@@ -52,7 +52,7 @@
 					"name": "JavaScript",
 					"command": "test:js",
 					"changes": [
-						"jest.config.js",
+						"vitest.config.mjs",
 						"tsconfig.json",
 						"src/**/*.ts"
 					],
