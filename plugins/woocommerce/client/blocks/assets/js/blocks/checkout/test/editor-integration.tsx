@@ -1,4 +1,3 @@
-/* eslint-disable testing-library/no-unnecessary-act -- Gutenberg schedules asynchronous updates after these interactions. */
 /**
  * External dependencies
  */

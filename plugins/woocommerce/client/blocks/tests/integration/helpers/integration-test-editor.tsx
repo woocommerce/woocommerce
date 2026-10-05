@@ -39,7 +39,6 @@ const { ExperimentalBlockCanvas: BlockCanvas } = unlock(
  * @param name The block name.
  */
 export async function selectBlock( name: string | RegExp ) {
-	// eslint-disable-next-line testing-library/no-unnecessary-act -- Gutenberg schedules asynchronous updates after selecting a block.
 	await act( () => userEvent.click( screen.getByLabelText( name ) ) );
 }
 
