@@ -340,7 +340,10 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		wp_get_current_user()->add_cap( 'read_private_products' );
 
-		$this->assertContains( $product->get_id(), $data_store->search_products( 'Searchable private product', '', false, false ), 'Private product should be returned to users who can read private products' );
+		$this->assertTrue( current_user_can( 'read_private_products' ), 'The user under test should be able to read private products' );
+		$this->assertFalse( current_user_can( 'edit_private_products' ), 'Granting read access should leave the user unable to edit private products' );
+
+		$this->assertContains( $product->get_id(), $data_store->search_products( 'Searchable private product', '', false, false ), 'Private product should be returned to users who can read private products but not edit them' );
 	}
 
 	/**
