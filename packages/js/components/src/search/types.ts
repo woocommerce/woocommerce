@@ -38,7 +38,8 @@ export type SearchProps = {
 	/**
 	 * Function called when selected results change, passed result list.
 	 */
-	onChange?: ( value: Option | OptionCompletionValue[] ) => unknown;
+	// eslint-disable-next-line @typescript-eslint/method-signature-style -- Preserve callback parameter bivariance.
+	onChange?( value: Option | OptionCompletionValue[] ): unknown;
 	/**
 	 * The object type to be used in searching.
 	 */

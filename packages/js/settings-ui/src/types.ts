@@ -121,7 +121,8 @@ export type SettingsEditControlField = {
 	getValue: ( args: { item: SettingsValues } ) => SettingsValue;
 	// Method syntax keeps this assignable from DataForm's signature, which
 	// also receives the normalized field.
-	isDisabled: ( args: { item: SettingsValues } ) => boolean;
+	// eslint-disable-next-line @typescript-eslint/method-signature-style -- Preserve callback parameter bivariance.
+	isDisabled( args: { item: SettingsValues } ): boolean;
 };
 
 export type SettingsEditControlProps = {

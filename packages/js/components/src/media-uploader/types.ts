@@ -24,14 +24,15 @@ export interface MediaUploadProps< T extends boolean = false > {
 	modalClass?: string;
 	multiple?: T | string;
 	value?: T extends true ? number[] : number;
-	onSelect: (
+	// eslint-disable-next-line @typescript-eslint/method-signature-style -- Preserve callback parameter bivariance.
+	onSelect(
 		value: T extends true
 			? // eslint-disable-next-line @typescript-eslint/no-explicit-any
 			  Array< { id: number } & { [ k: string ]: any } >
 			: // eslint-disable-next-line @typescript-eslint/no-explicit-any
 			  { id: number } & { [ k: string ]: any }
-	) => void;
-	// eslint-disable-next-line @typescript-eslint/method-signature-style
+	): void;
+	// eslint-disable-next-line @typescript-eslint/method-signature-style -- Preserve callback parameter bivariance.
 	render( props: { open(): void } ): JSX.Element;
 	title?: string;
 }
