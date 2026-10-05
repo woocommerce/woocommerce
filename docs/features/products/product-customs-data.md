@@ -22,7 +22,7 @@ All three fields can be left empty. For a variable product, expand a variation a
 
 ## Import and export CSV files
 
-Product CSV files use the columns **Commodity code (HS code)**, **Country of origin**, and **Customs description**. The machine-name headers `commodity_code`, `country_of_origin`, and `customs_description` are also accepted on import. These columns work for product and variation rows.
+Product CSV files use the columns **Commodity code (HS code)**, **Country of origin**, and **Customs description**. The machine-name headers `customs_commodity_code`, `customs_country_of_origin`, and `customs_description` are also accepted on import. These columns work for product and variation rows.
 
 -   A blank cell in a mapped customs column clears the value. On a variation row, this means the variation inherits the parent's value.
 -   Omit a column to leave that value unchanged for every row.
