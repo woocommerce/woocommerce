@@ -1339,7 +1339,10 @@ final class WooCommerce {
 
 		WC_Helper::deactivated_plugin( $filename );
 
-		wc_get_container()->get( LegacyReportsMenu::class )->handle_deactivated_plugin();
+		// Guard against a request that replaced the plugin files with a version that no longer has this class.
+		if ( class_exists( LegacyReportsMenu::class ) ) {
+			wc_get_container()->get( LegacyReportsMenu::class )->handle_deactivated_plugin();
+		}
 	}
 
 	/**

@@ -354,21 +354,6 @@ class LegacyReportsMenuTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should register the container instance on admin_head from reports_menu() so production hides the item.
-	 */
-	public function test_reports_menu_registers_admin_head_handler(): void {
-		$this->reset_container_resolutions();
-		$this->register_woocommerce_menu();
-
-		$handler = array( wc_get_container()->get( LegacyReportsMenu::class ), 'handle_admin_head' );
-		$this->assertSame( PHP_INT_MAX, has_action( 'admin_head', $handler ), 'reports_menu() must hook the handler late on admin_head' );
-
-		call_user_func( $handler );
-
-		$this->assertStringContainsString( WC_Admin_Menus::HIDE_CSS_CLASS, $this->get_menu_item_classes( 'submenu', 'wc-reports' ) );
-	}
-
-	/**
 	 * @testdox Should treat a fresh install as new before admin_init records the initial installed version.
 	 *
 	 * @testWith ["yes", false]
@@ -408,69 +393,6 @@ class LegacyReportsMenuTest extends WC_Unit_Test_Case {
 		$handler = array( wc_get_container()->get( LegacyReportsMenu::class ), 'handle_admin_menu' );
 		$this->assertSame( PHP_INT_MAX, has_action( 'admin_menu', $handler ), 'reports_menu() must hook the handler late on admin_menu' );
 		$this->assertTrue( $this->has_hide_class( 'submenu', 'wc-reports' ), 'The handler added during admin_menu must run in the same admin_menu' );
-	}
-
-	/**
-	 * @testdox Should show the item again on admin_head when an extension adds legacy reports after admin_menu.
-	 */
-	public function test_admin_head_restores_item_hidden_on_admin_menu(): void {
-		$this->register_woocommerce_menu();
-
-		$this->sut->handle_admin_menu();
-		$this->assertTrue( $this->has_hide_class( 'submenu', 'wc-reports' ), 'Precondition: hidden on admin_menu' );
-
-		add_filter( 'wc_admin_reports_path', '__return_null' );
-		$this->sut->handle_admin_head();
-
-		$this->assertFalse( $this->has_hide_class( 'submenu', 'wc-reports' ) );
-	}
-
-	/**
-	 * @testdox Should show a top-level item again after WordPress reorders the menu and adds classes between admin_menu and admin_head.
-	 */
-	public function test_admin_head_restores_top_level_item_after_menu_processing(): void {
-		wp_set_current_user( $this->create_reports_only_user() );
-		( new WC_Admin_Menus() )->reports_menu();
-		$classes_before = $this->get_menu_item_classes( 'menu', 'wc-reports' );
-
-		$this->sut->handle_admin_menu();
-		$this->assertTrue( $this->has_hide_class( 'menu', 'wc-reports' ), 'Precondition: hidden on admin_menu' );
-
-		// Like wp-admin/includes/menu.php: usort() renumbers $menu when custom_menu_order is on, then add_menu_classes() runs.
-		usort( $GLOBALS['menu'], fn( $a, $b ) => strcmp( $a[2], $b[2] ) );
-		foreach ( $GLOBALS['menu'] as $index => $item ) {
-			$GLOBALS['menu'][ $index ][4] .= ' menu-top-last'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		}
-
-		add_filter( 'woocommerce_show_legacy_reports_menu', '__return_true' );
-		$this->sut->handle_admin_head();
-
-		$this->assertSame( $classes_before . ' menu-top-last', $this->get_menu_item_classes( 'menu', 'wc-reports' ) );
-	}
-
-	/**
-	 * @testdox Should build the legacy reports once per request after finding an extension report.
-	 */
-	public function test_extension_reports_found_once_per_request(): void {
-		$calls = 0;
-		add_filter(
-			'woocommerce_admin_reports',
-			function ( $reports ) use ( &$calls ) {
-				++$calls;
-				$reports['stock']['reports']['insufficient_stock'] = array(
-					'title'    => 'Insufficient stock',
-					'callback' => '__return_empty_string',
-				);
-				return $reports;
-			}
-		);
-		$this->register_woocommerce_menu();
-
-		$this->sut->handle_admin_menu();
-		$this->sut->handle_admin_head();
-
-		$this->assertSame( 1, $calls, 'The legacy reports must not be built again on admin_head' );
-		$this->assertFalse( $this->has_hide_class( 'submenu', 'wc-reports' ) );
 	}
 
 	/**
@@ -535,42 +457,12 @@ class LegacyReportsMenuTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should add the hide class once when both admin_menu and admin_head hide the item.
-	 */
-	public function test_hide_class_added_once_across_both_passes(): void {
-		$this->register_woocommerce_menu();
-
-		$this->sut->handle_admin_menu();
-		$this->sut->handle_admin_head();
-
-		$this->assertSame( WC_Admin_Menus::HIDE_CSS_CLASS, $this->get_menu_item_classes( 'submenu', 'wc-reports' ) );
-	}
-
-	/**
-	 * @testdox Should leave a hide class added by another plugin in place when showing the item.
-	 */
-	public function test_restore_keeps_hide_class_added_by_others(): void {
-		$this->register_woocommerce_menu();
-		foreach ( $GLOBALS['submenu']['woocommerce'] as $index => $item ) {
-			if ( 'wc-reports' === $item[2] ) {
-				$GLOBALS['submenu']['woocommerce'][ $index ][4] = 'custom ' . WC_Admin_Menus::HIDE_CSS_CLASS; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-			}
-		}
-
-		$this->sut->handle_admin_menu();
-		add_filter( 'woocommerce_show_legacy_reports_menu', '__return_true' );
-		$this->sut->handle_admin_head();
-
-		$this->assertSame( 'custom ' . WC_Admin_Menus::HIDE_CSS_CLASS, $this->get_menu_item_classes( 'submenu', 'wc-reports' ) );
-	}
-
-	/**
 	 * @testdox Should hide the WooCommerce > Reports item on a new store but keep the page accessible.
 	 */
-	public function test_admin_head_hides_submenu_item_and_keeps_page_accessible(): void {
+	public function test_admin_menu_hides_submenu_item_and_keeps_page_accessible(): void {
 		$this->register_woocommerce_menu();
 
-		$this->sut->handle_admin_head();
+		$this->sut->handle_admin_menu();
 
 		$this->assertStringContainsString( WC_Admin_Menus::HIDE_CSS_CLASS, $this->get_menu_item_classes( 'submenu', 'wc-reports' ) );
 		$this->assertStringNotContainsString( WC_Admin_Menus::HIDE_CSS_CLASS, $this->get_menu_item_classes( 'submenu', 'wc-settings' ), 'Other items must stay visible' );
@@ -580,11 +472,11 @@ class LegacyReportsMenuTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should not hide the WooCommerce > Reports item on an existing store.
 	 */
-	public function test_admin_head_keeps_submenu_item_on_existing_store(): void {
+	public function test_admin_menu_keeps_submenu_item_on_existing_store(): void {
 		update_option( WC_Install::INITIAL_INSTALLED_VERSION, '11.2.0' );
 		$this->register_woocommerce_menu();
 
-		$this->sut->handle_admin_head();
+		$this->sut->handle_admin_menu();
 
 		$this->assertStringNotContainsString( WC_Admin_Menus::HIDE_CSS_CLASS, $this->get_menu_item_classes( 'submenu', 'wc-reports' ) );
 	}
@@ -592,10 +484,10 @@ class LegacyReportsMenuTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should not hide Reports when it is the first WooCommerce submenu item, since WordPress links the parent to it.
 	 */
-	public function test_admin_head_keeps_reports_when_first_submenu_item(): void {
+	public function test_admin_menu_keeps_reports_when_first_submenu_item(): void {
 		$GLOBALS['submenu']['woocommerce'] = array( array( 'Reports', 'view_woocommerce_reports', 'wc-reports', 'Reports' ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		$this->sut->handle_admin_head();
+		$this->sut->handle_admin_menu();
 
 		$this->assertStringNotContainsString( WC_Admin_Menus::HIDE_CSS_CLASS, $this->get_menu_item_classes( 'submenu', 'wc-reports' ) );
 	}
@@ -603,12 +495,12 @@ class LegacyReportsMenuTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should not recreate a Reports item that another plugin removed.
 	 */
-	public function test_admin_head_does_not_recreate_removed_item(): void {
+	public function test_admin_menu_does_not_recreate_removed_item(): void {
 		$this->register_woocommerce_menu();
 		remove_submenu_page( 'woocommerce', 'wc-reports' );
 		$submenu_before = $GLOBALS['submenu'];
 
-		$this->sut->handle_admin_head();
+		$this->sut->handle_admin_menu();
 
 		$this->assertSame( $submenu_before, $GLOBALS['submenu'] );
 	}
@@ -616,12 +508,12 @@ class LegacyReportsMenuTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should hide the top-level Sales reports item for users who can view reports but not the WooCommerce menu.
 	 */
-	public function test_admin_head_hides_top_level_item_for_reports_only_user(): void {
+	public function test_admin_menu_hides_top_level_item_for_reports_only_user(): void {
 		wp_set_current_user( $this->create_reports_only_user() );
 		$this->assertFalse( WC_Admin_Menus::can_view_woocommerce_menu_item(), 'Precondition: user cannot see the WooCommerce menu' );
 
 		( new WC_Admin_Menus() )->reports_menu();
-		$this->sut->handle_admin_head();
+		$this->sut->handle_admin_menu();
 
 		$this->assertStringContainsString( WC_Admin_Menus::HIDE_CSS_CLASS, $this->get_menu_item_classes( 'menu', 'wc-reports' ) );
 		$this->assertTrue( $this->can_access_reports_page(), 'The reports page must stay accessible by URL' );
@@ -634,13 +526,13 @@ class LegacyReportsMenuTest extends WC_Unit_Test_Case {
 		wp_set_current_user( $this->factory->user->create( array( 'role' => 'subscriber' ) ) );
 
 		( new WC_Admin_Menus() )->reports_menu();
-		$this->sut->handle_admin_head();
+		$this->sut->handle_admin_menu();
 
 		$this->assertFalse( $this->can_access_reports_page() );
 	}
 
 	/**
-	 * Build the WooCommerce menu, run the admin_head handler on a fresh instance, and report whether Reports is visible.
+	 * Build the WooCommerce menu, run the admin_menu handler on a fresh instance, and report whether Reports is visible.
 	 *
 	 * @return bool
 	 */
@@ -649,7 +541,7 @@ class LegacyReportsMenuTest extends WC_Unit_Test_Case {
 		$GLOBALS['submenu'] = array(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$this->register_woocommerce_menu();
 
-		( new LegacyReportsMenu() )->handle_admin_head();
+		( new LegacyReportsMenu() )->handle_admin_menu();
 
 		return false === strpos( $this->get_menu_item_classes( 'submenu', 'wc-reports' ), WC_Admin_Menus::HIDE_CSS_CLASS );
 	}

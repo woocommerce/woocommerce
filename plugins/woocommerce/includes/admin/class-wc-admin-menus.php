@@ -114,9 +114,7 @@ class WC_Admin_Menus {
 			add_menu_page( __( 'Sales reports', 'woocommerce' ), __( 'Sales reports', 'woocommerce' ), 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ), 'dashicons-chart-bar', '55.6' );
 		}
 
-		$legacy_reports_menu = wc_get_container()->get( LegacyReportsMenu::class );
-		add_action( 'admin_menu', array( $legacy_reports_menu, 'handle_admin_menu' ), PHP_INT_MAX );
-		add_action( 'admin_head', array( $legacy_reports_menu, 'handle_admin_head' ), PHP_INT_MAX );
+		add_action( 'admin_menu', array( wc_get_container()->get( LegacyReportsMenu::class ), 'handle_admin_menu' ), PHP_INT_MAX );
 	}
 
 	/**
