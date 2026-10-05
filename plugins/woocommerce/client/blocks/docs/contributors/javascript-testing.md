@@ -57,6 +57,10 @@ Do not run both projects in one `playwright test` call. `blocks-serial` resets
 the database after each test, which breaks the tests that `blocks-parallel` runs
 at the same time.
 
+New specs run in `blocks-parallel` by default. Write them parallel-safe, or use
+a test lock. Add a spec to `blocksSerialSpecs` only when neither can work. See
+[Parallel, locked, and serial specs](../../../../tests/e2e/README.md#parallel-locked-and-serial-specs).
+
 For the full setup and available environments, see the
 [core e2e documentation](../../../../tests/e2e/README.md).
 

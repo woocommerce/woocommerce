@@ -179,10 +179,23 @@ read: [Playwright Best Practices](https://playwright.dev/docs/best-practices).
 
 ### Parallel, locked, and serial specs
 
-Core specs run on one shared site, in two Playwright projects: `core-parallel` runs specs in several workers at the same time, and `core-serial` runs them one at a time. Put each spec in one of three groups:
+Core and Blocks specs each run in two Playwright projects on one shared site. The parallel project runs specs in several workers at the same time. The serial project runs them one at a time, in one worker.
 
-1. **Parallel.** The spec does not change site-wide state. It makes its own products, orders, customers, and pages, and does not change shared settings. This is the default: every spec runs in `core-parallel` unless something else is set.
-2. **Parallel with a lock.** The spec changes a site-wide option, but only specs that change the same option read it. Give all those specs the same [test lock](https://playwright.dev/docs/test-parallel#test-locks) from `locks` in `fixtures/fixtures.ts`. Specs that share a lock never run at the same time, in any worker or project. Add a new entry to `locks` if none fits.
+| Project | Specs | Workers | After each test | Command |
+| --- | --- | --- | --- | --- |
+| `core-parallel` | Core specs not in `serialRunSpecs` | Several | Nothing | `pnpm test:e2e:core-parallel` |
+| `core-serial` | Core specs in `serialRunSpecs` | 1 | Nothing | `pnpm test:e2e:core-serial` |
+| `blocks-parallel` | Blocks specs not in `blocksSerialSpecs` | Several | Nothing | `pnpm test:e2e:blocks:parallel` |
+| `blocks-serial` | Blocks specs in `blocksSerialSpecs` | 1 | Database reset | `pnpm test:e2e:blocks:serial` |
+
+Both lists are in `playwright.config.ts`. A spec that is not on a list runs in the parallel project.
+
+Run one project at a time, as CI does: each project runs in its own CI jobs. A serial spec changes state that parallel specs read, and the `blocks-serial` database reset deletes the data of the tests that run in parallel. `pnpm test:e2e:blocks` runs `blocks-parallel` first, then `blocks-serial`.
+
+Put each new spec in the first of these three types that works for it:
+
+1. **Parallel.** The spec does not change site-wide state. It makes its own products, orders, customers, pages, and templates, with unique names, and does not change shared settings. It cleans up what it makes, because `core-parallel` and `blocks-parallel` do not reset the database.
+2. **Parallel with a lock.** The spec changes a site-wide option, but only specs that change the same option read it. Give all those specs the same [test lock](https://playwright.dev/docs/test-parallel#test-locks) from `locks` in `fixtures/fixtures.ts`. Specs that share a lock never run at the same time, in any worker or project. Add a new entry to `locks` if none fits. Set the option back in `afterEach` or `afterAll`.
 
     ```ts
     import { test, locks } from '../../fixtures/fixtures';
@@ -192,11 +205,11 @@ Core specs run on one shared site, in two Playwright projects: `core-parallel` r
     } );
     ```
 
-    The core projects do not use `fullyParallel`, so one worker runs a whole spec file. A lock on one test holds for the whole file, including `beforeAll` and `afterAll`.
+    The projects do not use `fullyParallel`, so one worker runs a whole spec file. A lock on one test holds for the whole file, including `beforeAll` and `afterAll`. Blocks specs import `locks` from the same file.
 
-3. **Serial.** The spec changes a setting that many other specs read, such as tax, store address, or permalinks. A lock cannot help here, because the specs that read the setting do not take the lock. Add the spec to `serialRunSpecs` in `playwright.config.ts`, so it runs in `core-serial`.
+3. **Serial.** Use this type only when the first two cannot work: the spec changes a setting that many other specs read, such as tax, store address, permalinks, the active theme, or a site-wide template. A lock cannot help here, because the specs that read the setting do not take the lock. Add the spec to `serialRunSpecs` or `blocksSerialSpecs`, under the comment that gives the reason.
 
-Prefer the first group. A spec that changes a setting only for itself can often use its own data instead, for example its own tax class or customer.
+A spec that changes a setting only for itself can often use its own data instead, for example its own tax class, customer, product, or template. Each serial spec makes the serial project slower and adds to the CI time of every pull request.
 
 ### Gotchas
 
