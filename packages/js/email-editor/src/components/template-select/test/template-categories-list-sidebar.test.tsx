@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -34,7 +36,7 @@ describe( 'TemplateCategoriesListSidebar', () => {
 	} );
 
 	it( 'reports the clicked category', async () => {
-		const onValueChange = jest.fn();
+		const onValueChange = vi.fn();
 		render(
 			<Tabs.Root
 				orientation="vertical"

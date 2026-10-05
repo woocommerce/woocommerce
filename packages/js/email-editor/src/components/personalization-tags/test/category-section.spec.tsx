@@ -1,10 +1,11 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import '../../test/__mocks__/setup-shared-mocks';
 
 /**
  * External dependencies
  */
 import { render, screen, fireEvent } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import * as dataModule from '@wordpress/data';
 
 /**
@@ -12,21 +13,33 @@ import * as dataModule from '@wordpress/data';
  */
 import { CategorySection } from '../category-section';
 import { PersonalizationTag } from '../../../store';
-
-const updateBlockAttributes = jest.fn();
-const useDispatchMock = dataModule.useDispatch as jest.Mock;
-const useSelectMock = dataModule.useSelect as jest.Mock;
-
-jest.mock( '@wordpress/components', () => ( {
-	Button: ( props: React.ComponentProps< 'button' > ) => (
-		<button onClick={ props.onClick }>{ props.children }</button>
-	),
-} ) );
-
-jest.mock( '@wordpress/block-editor', () => ( {
-	store: {},
-} ) );
-
+const updateBlockAttributes = vi.fn();
+const useDispatchMock = dataModule.useDispatch as Mock;
+const useSelectMock = dataModule.useSelect as Mock;
+vi.mock( '@wordpress/components', () => {
+	const mock = {
+		Button: ( props: React.ComponentProps< 'button' > ) => (
+			<button onClick={ props.onClick }>{ props.children }</button>
+		),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/block-editor', () => {
+	const mock = {
+		store: {},
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const setupUseSelectMock = (
 	selectedBlockId = '123',
 	selectedBlockName = 'core/paragraph'
@@ -39,11 +52,12 @@ const setupUseSelectMock = (
 		)
 		.mockImplementationOnce( ( selector ) =>
 			selector( () => ( {
-				getBlock: () => ( { name: selectedBlockName } ),
+				getBlock: () => ( {
+					name: selectedBlockName,
+				} ),
 			} ) )
 		);
 };
-
 describe( 'CategorySection', () => {
 	const mockTags: Record< string, PersonalizationTag[] > = {
 		General: [
@@ -75,19 +89,17 @@ describe( 'CategorySection', () => {
 			},
 		],
 	};
-
-	const onInsert = jest.fn();
-	const closeCallback = jest.fn();
-	const openLinkModal = jest.fn();
-
+	const onInsert = vi.fn();
+	const closeCallback = vi.fn();
+	const openLinkModal = vi.fn();
 	beforeEach( () => {
-		jest.clearAllMocks();
-		useDispatchMock.mockReturnValue( { updateBlockAttributes } );
+		vi.clearAllMocks();
+		useDispatchMock.mockReturnValue( {
+			updateBlockAttributes,
+		} );
 	} );
-
 	it( 'should render tags for all categories', () => {
 		setupUseSelectMock();
-
 		render(
 			<CategorySection
 				groupedTags={ mockTags }
@@ -98,15 +110,12 @@ describe( 'CategorySection', () => {
 				openLinkModal={ openLinkModal }
 			/>
 		);
-
 		expect( screen.getByText( 'Customer Name' ) ).toBeInTheDocument();
 		expect( screen.getByText( 'Customer Email' ) ).toBeInTheDocument();
 		expect( screen.getByText( 'Profile URL' ) ).toBeInTheDocument();
 	} );
-
 	it( 'should call onInsert when Insert is clicked', () => {
 		setupUseSelectMock();
-
 		render(
 			<CategorySection
 				groupedTags={ mockTags }
@@ -117,17 +126,14 @@ describe( 'CategorySection', () => {
 				openLinkModal={ openLinkModal }
 			/>
 		);
-
 		fireEvent.click( screen.getAllByText( 'Insert' )[ 0 ] );
 		expect( onInsert ).toHaveBeenCalledWith(
 			'[woocommerce/customer-name]',
 			false
 		);
 	} );
-
 	it( 'should call updateBlockAttributes and close modal when Set as URL is clicked', () => {
 		setupUseSelectMock( '123', 'core/button' );
-
 		render(
 			<CategorySection
 				groupedTags={ mockTags }
@@ -138,17 +144,14 @@ describe( 'CategorySection', () => {
 				openLinkModal={ openLinkModal }
 			/>
 		);
-
 		fireEvent.click( screen.getByText( 'Set as URL' ) );
 		expect( updateBlockAttributes ).toHaveBeenCalledWith( '123', {
 			url: '[woocommerce/profile-url]',
 		} );
 		expect( closeCallback ).toHaveBeenCalled();
 	} );
-
 	it( 'should call openLinkModal when Insert as link is clicked for Link category', () => {
 		setupUseSelectMock();
-
 		render(
 			<CategorySection
 				groupedTags={ mockTags }
@@ -159,7 +162,6 @@ describe( 'CategorySection', () => {
 				openLinkModal={ openLinkModal }
 			/>
 		);
-
 		fireEvent.click( screen.getByText( 'Insert as link' ) );
 		expect( closeCallback ).toHaveBeenCalled();
 		expect( openLinkModal ).toHaveBeenCalledWith( mockTags.Link[ 0 ] );

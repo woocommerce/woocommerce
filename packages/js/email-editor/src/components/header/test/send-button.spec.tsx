@@ -1,10 +1,11 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import '../../test/__mocks__/setup-shared-mocks';
 
 /**
  * External dependencies
  */
 import { render, fireEvent } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import { useSelect } from '@wordpress/data';
 import { applyFilters } from '@wordpress/hooks';
 import { useEntitiesSavedStatesIsDirty } from '@wordpress/editor';
@@ -15,61 +16,78 @@ import { useEntitiesSavedStatesIsDirty } from '@wordpress/editor';
 import { SendButton } from '../send-button';
 import { storeName } from '../../../store';
 import { recordEvent } from '../../../events';
-
-jest.mock( '@wordpress/components', () => ( {
-	Button: ( props ) => <button { ...props }>{ props.children }</button>,
-} ) );
-
-jest.mock( '../../../events', () => ( {
-	recordEvent: jest.fn(),
-} ) );
-
-const useSelectMock = useSelect as jest.Mock;
-const useEntitiesSavedStatesIsDirtyMock =
-	useEntitiesSavedStatesIsDirty as jest.Mock;
-const recordEventMock = recordEvent as jest.Mock;
-const applyFiltersMock = applyFilters as jest.Mock;
-
+vi.mock( '@wordpress/components', () => {
+	const mock = {
+		Button: ( props ) => <button { ...props }>{ props.children }</button>,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../../events', () => {
+	const mock = {
+		recordEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+const useSelectMock = useSelect as Mock;
+const useEntitiesSavedStatesIsDirtyMock = useEntitiesSavedStatesIsDirty as Mock;
+const recordEventMock = recordEvent as Mock;
+const applyFiltersMock = applyFilters as Mock;
 const mockStoreValues = {
 	hasEmptyContent: false,
 	isEmailSent: false,
 };
-
 describe( 'SendButton', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 		mockStoreValues.hasEmptyContent = false;
 		mockStoreValues.isEmailSent = false;
-
-		useEntitiesSavedStatesIsDirtyMock.mockReturnValue( { isDirty: false } );
-
+		useEntitiesSavedStatesIsDirtyMock.mockReturnValue( {
+			isDirty: false,
+		} );
 		useSelectMock.mockImplementation( ( selector ) =>
 			selector( ( store ) => {
 				if ( store === storeName ) {
 					return {
 						hasEmptyContent: () => mockStoreValues.hasEmptyContent,
 						isEmailSent: () => mockStoreValues.isEmailSent,
-						getUrls: () => ( { send: 'https://example.com/send' } ),
+						getUrls: () => ( {
+							send: 'https://example.com/send',
+						} ),
 					};
 				}
 				return {};
 			} )
 		);
 	} );
-
 	it( 'should render with the correct label', () => {
 		const { getByRole } = render( <SendButton /> );
-		expect( getByRole( 'button', { name: 'Send' } ) ).toBeInTheDocument();
+		expect(
+			getByRole( 'button', {
+				name: 'Send',
+			} )
+		).toBeInTheDocument();
 	} );
-
 	it( 'should be disabled if isDirty is true', () => {
-		useEntitiesSavedStatesIsDirtyMock.mockReturnValue( { isDirty: true } );
+		useEntitiesSavedStatesIsDirtyMock.mockReturnValue( {
+			isDirty: true,
+		} );
 		const { getByRole } = render( <SendButton /> );
 		expect( getByRole( 'button' ) ).toBeDisabled();
 	} );
-
 	it( 'should allow the disabled state to be overridden via filter', () => {
-		useEntitiesSavedStatesIsDirtyMock.mockReturnValue( { isDirty: true } );
+		useEntitiesSavedStatesIsDirtyMock.mockReturnValue( {
+			isDirty: true,
+		} );
 
 		// Override applyFilters to simulate a filter that removes isDirty from disabled
 		applyFiltersMock.mockImplementationOnce(
@@ -86,7 +104,6 @@ describe( 'SendButton', () => {
 				return value;
 			}
 		);
-
 		const { getByRole } = render( <SendButton /> );
 		expect( getByRole( 'button' ) ).not.toBeDisabled();
 		expect( applyFiltersMock ).toHaveBeenCalledWith(
@@ -99,10 +116,10 @@ describe( 'SendButton', () => {
 			}
 		);
 	} );
-
 	it( 'should fall back to default when filter returns non-boolean', () => {
-		useEntitiesSavedStatesIsDirtyMock.mockReturnValue( { isDirty: true } );
-
+		useEntitiesSavedStatesIsDirtyMock.mockReturnValue( {
+			isDirty: true,
+		} );
 		applyFiltersMock.mockImplementationOnce(
 			( hook: string, value: unknown ) => {
 				if (
@@ -113,43 +130,35 @@ describe( 'SendButton', () => {
 				return value;
 			}
 		);
-
 		const { getByRole } = render( <SendButton /> );
 		expect( getByRole( 'button' ) ).toBeDisabled();
 	} );
-
 	it( 'should be disabled if hasEmptyContent is true', () => {
 		mockStoreValues.hasEmptyContent = true;
-
 		const { getByRole } = render( <SendButton /> );
 		expect( getByRole( 'button' ) ).toBeDisabled();
 	} );
-
 	it( 'should be disabled if isEmailSent is true', () => {
 		mockStoreValues.isEmailSent = true;
-
 		const { getByRole } = render( <SendButton /> );
 		expect( getByRole( 'button' ) ).toBeDisabled();
 	} );
-
 	it( 'should trigger sendAction and recordEvent on click', () => {
 		mockStoreValues.hasEmptyContent = false;
 		mockStoreValues.isEmailSent = false;
-
 		const originalLocation = window.location;
 		Object.defineProperty( window, 'location', {
-			value: { href: '' },
+			value: {
+				href: '',
+			},
 			writable: true,
 		} );
-
 		const { getByRole } = render( <SendButton /> );
 		fireEvent.click( getByRole( 'button' ) );
-
 		expect( recordEventMock ).toHaveBeenCalledWith(
 			'header_send_button_clicked'
 		);
 		expect( window.location.href ).toBe( 'https://example.com/send' );
-
 		window.location = originalLocation;
 	} );
 } );

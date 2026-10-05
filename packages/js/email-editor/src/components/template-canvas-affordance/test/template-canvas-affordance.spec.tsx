@@ -1,10 +1,11 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import '../../test/__mocks__/setup-shared-mocks';
 
 /**
  * External dependencies
  */
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import { useSelect } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
 
@@ -14,12 +15,13 @@ import { store as editorStore } from '@wordpress/editor';
 import { TemplateCanvasAffordance } from '../template-canvas-affordance';
 import { storeName } from '../../../store';
 import { recordEvent } from '../../../events';
-
-jest.mock( '@wordpress/components', () => {
+vi.mock( '@wordpress/components', async () => {
 	const { forwardRef: forwardRefImpl } =
-		jest.requireActual( '@wordpress/element' );
-
-	return {
+		await vi.importActual( '@wordpress/element' );
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		Button: forwardRefImpl(
 			( { children, className, onClick, variant }, ref ) => (
 				<button
@@ -32,30 +34,41 @@ jest.mock( '@wordpress/components', () => {
 				</button>
 			)
 		),
-	};
+	} );
 } );
-
-jest.mock( '@wordpress/icons', () => ( {
-	Icon: () => <span data-testid="template-area-icon" />,
-	layout: 'layout',
-} ) );
-
-jest.mock( '../../../events', () => ( {
-	recordEvent: jest.fn(),
-} ) );
-
-const useSelectMock = useSelect as jest.Mock;
-const recordEventMock = recordEvent as jest.Mock;
-
+vi.mock( '@wordpress/icons', () => {
+	const mock = {
+		Icon: () => <span data-testid="template-area-icon" />,
+		layout: 'layout',
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../../events', () => {
+	const mock = {
+		recordEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+const useSelectMock = useSelect as Mock;
+const recordEventMock = recordEvent as Mock;
 const template = {
 	id: 'twentytwentyfive//wooemailtemplate',
 	title: 'Woo email template',
 };
-
 const setupUseSelectMock = ( {
 	canEditTemplates = true,
 	currentPostType = 'woo_email',
-	onNavigateToEntityRecord = jest.fn(),
+	onNavigateToEntityRecord = vi.fn(),
 } = {} ) => {
 	useSelectMock.mockImplementation( ( selector ) =>
 		selector( ( store ) => {
@@ -65,7 +78,6 @@ const setupUseSelectMock = ( {
 					getCurrentTemplate: () => template,
 				};
 			}
-
 			if ( store === editorStore ) {
 				return {
 					getCurrentPostType: () => currentPostType,
@@ -74,14 +86,13 @@ const setupUseSelectMock = ( {
 					} ),
 				};
 			}
-
 			return {};
 		} )
 	);
-
-	return { onNavigateToEntityRecord };
+	return {
+		onNavigateToEntityRecord,
+	};
 };
-
 const addEditorCanvas = ( {
 	headerAttributes = '',
 	headerContent = '<h1 class="wp-block-site-title">testingbun</h1>',
@@ -110,20 +121,17 @@ const addEditorCanvas = ( {
 			'</div>',
 		].join( '' )
 	);
-
 	const templateHeader = iframe.contentDocument?.querySelector(
 		'[data-block="template-header"]'
 	);
 	const outerTemplate = iframe.contentDocument?.querySelector(
 		'[data-block="outer-template"]'
 	);
-
 	if ( ! outerTemplate || ! templateHeader ) {
 		throw new Error(
 			'Editor canvas fixture is missing expected template elements.'
 		);
 	}
-
 	Object.defineProperty( outerTemplate, 'getBoundingClientRect', {
 		value: () => ( {
 			bottom: 900,
@@ -136,7 +144,6 @@ const addEditorCanvas = ( {
 			y: 0,
 		} ),
 	} );
-
 	Object.defineProperty( templateHeader, 'getBoundingClientRect', {
 		value: () => ( {
 			bottom: 148,
@@ -149,22 +156,17 @@ const addEditorCanvas = ( {
 			y: 84,
 		} ),
 	} );
-
 	return iframe;
 };
-
 describe( 'TemplateCanvasAffordance', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 		document.body.innerHTML = '';
 	} );
-
 	it( 'renders a selectable frame over the template area without showing the toolbar by default', async () => {
 		const iframe = addEditorCanvas();
 		setupUseSelectMock();
-
 		render( <TemplateCanvasAffordance /> );
-
 		await waitFor( () => {
 			expect(
 				iframe.contentDocument?.getElementById(
@@ -172,7 +174,6 @@ describe( 'TemplateCanvasAffordance', () => {
 				)
 			).toBeInTheDocument();
 		} );
-
 		expect(
 			iframe.contentDocument?.querySelector(
 				'.woocommerce-email-editor-template-area-affordance__frame'
@@ -182,13 +183,10 @@ describe( 'TemplateCanvasAffordance', () => {
 			'Edit template'
 		);
 	} );
-
 	it( 'shows the toolbar after the template area is selected', async () => {
 		const iframe = addEditorCanvas();
 		setupUseSelectMock();
-
 		render( <TemplateCanvasAffordance /> );
-
 		await waitFor( () => {
 			expect(
 				iframe.contentDocument?.querySelector(
@@ -196,28 +194,23 @@ describe( 'TemplateCanvasAffordance', () => {
 				)
 			).toBeInTheDocument();
 		} );
-
 		fireEvent.click(
 			iframe.contentDocument?.querySelector(
 				'.woocommerce-email-editor-template-area-affordance__frame'
 			) as HTMLButtonElement
 		);
-
 		expect( iframe.contentDocument?.body ).toHaveTextContent( 'Template' );
 		expect( iframe.contentDocument?.body ).toHaveTextContent(
 			'Edit template'
 		);
 	} );
-
 	it( 'anchors the affordance to editor block metadata when site title classes are not rendered', async () => {
 		const iframe = addEditorCanvas( {
 			headerAttributes: 'data-type="core/site-title"',
 			headerContent: '<h1>testingbun</h1>',
 		} );
 		setupUseSelectMock();
-
 		render( <TemplateCanvasAffordance /> );
-
 		await waitFor( () => {
 			expect(
 				iframe.contentDocument?.querySelector(
@@ -225,64 +218,58 @@ describe( 'TemplateCanvasAffordance', () => {
 				)
 			).toBeInTheDocument();
 		} );
-
 		fireEvent.click(
 			iframe.contentDocument?.querySelector(
 				'.woocommerce-email-editor-template-area-affordance__frame'
 			) as HTMLButtonElement
 		);
-
 		expect(
 			iframe.contentDocument?.querySelector(
 				'.woocommerce-email-editor-template-area-affordance__frame'
 			)
-		).toHaveStyle( { top: '83px' } );
+		).toHaveStyle( {
+			top: '83px',
+		} );
 		expect(
 			iframe.contentDocument?.querySelector(
 				'.woocommerce-email-editor-template-area-affordance'
 			)
-		).toHaveStyle( { top: '30px' } );
+		).toHaveStyle( {
+			top: '30px',
+		} );
 	} );
-
 	it( 'does not render when no site-identity block is available to anchor to', async () => {
 		const iframe = addEditorCanvas( {
 			headerContent: '<h1>testingbun</h1>',
 		} );
 		setupUseSelectMock();
-
 		render( <TemplateCanvasAffordance /> );
 
 		// Give the rAF-driven mount loop a chance to run and bail out.
 		await new Promise( ( resolve ) => setTimeout( resolve, 50 ) );
-
 		expect(
 			iframe.contentDocument?.getElementById(
 				'woocommerce-email-editor-template-area-affordance-slot'
 			)
 		).not.toBeInTheDocument();
 	} );
-
 	it( 'does not render when the user cannot edit templates', async () => {
 		const iframe = addEditorCanvas();
-		setupUseSelectMock( { canEditTemplates: false } );
-
+		setupUseSelectMock( {
+			canEditTemplates: false,
+		} );
 		render( <TemplateCanvasAffordance /> );
-
 		await new Promise( ( resolve ) => setTimeout( resolve, 50 ) );
-
 		expect(
 			iframe.contentDocument?.getElementById(
 				'woocommerce-email-editor-template-area-affordance-slot'
 			)
 		).not.toBeInTheDocument();
 	} );
-
 	it( 'navigates to the current template when edit template is clicked', async () => {
 		const iframe = addEditorCanvas();
 		const { onNavigateToEntityRecord } = setupUseSelectMock();
-
 		render( <TemplateCanvasAffordance /> );
-
 		await waitFor( () => {
 			expect(
 				iframe.contentDocument?.querySelector(
@@ -290,35 +277,33 @@ describe( 'TemplateCanvasAffordance', () => {
 				)
 			).toBeInTheDocument();
 		} );
-
 		fireEvent.click(
 			iframe.contentDocument?.querySelector(
 				'.woocommerce-email-editor-template-area-affordance__frame'
 			) as HTMLButtonElement
 		);
-
 		fireEvent.click(
 			iframe.contentDocument?.querySelector(
 				'.woocommerce-email-editor-template-area-affordance__button'
 			) as HTMLButtonElement
 		);
-
 		expect( recordEventMock ).toHaveBeenCalledWith(
 			'template_canvas_affordance_edit_template_clicked',
-			{ templateId: template.id }
+			{
+				templateId: template.id,
+			}
 		);
 		expect( onNavigateToEntityRecord ).toHaveBeenCalledWith( {
 			postId: template.id,
 			postType: 'wp_template',
 		} );
 	} );
-
 	it( 'does not render while editing a template', async () => {
 		const iframe = addEditorCanvas();
-		setupUseSelectMock( { currentPostType: 'wp_template' } );
-
+		setupUseSelectMock( {
+			currentPostType: 'wp_template',
+		} );
 		render( <TemplateCanvasAffordance /> );
-
 		await waitFor( () => {
 			expect(
 				iframe.contentDocument?.getElementById(

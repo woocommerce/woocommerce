@@ -1,11 +1,20 @@
-jest.mock( '@wordpress/block-editor', () => ( {
-	store: {},
-	privateApis: {
-		// Mock the private APIs that are used by the email editor
-		ColorPanel: jest.fn( () => null ),
-		BackgroundPanel: jest.fn( () => null ),
-		useHasColorPanel: jest.fn( () => true ),
-		useHasBackgroundPanel: jest.fn( () => false ),
-		useGlobalStylesOutputWithConfig: jest.fn( () => [ [], {} ] ),
-	},
-} ) );
+import { vi } from 'vitest';
+vi.mock( '@wordpress/block-editor', () => {
+	const mock = {
+		store: {},
+		privateApis: {
+			// Mock the private APIs that are used by the email editor
+			ColorPanel: vi.fn( () => null ),
+			BackgroundPanel: vi.fn( () => null ),
+			useHasColorPanel: vi.fn( () => true ),
+			useHasBackgroundPanel: vi.fn( () => false ),
+			useGlobalStylesOutputWithConfig: vi.fn( () => [ [], {} ] ),
+		},
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );

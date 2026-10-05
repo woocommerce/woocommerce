@@ -1,8 +1,10 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
 import { act, render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import {
 	createRegistry,
 	createReduxStore,
@@ -22,38 +24,93 @@ import { getInitialState } from '../../../store/initial-state';
 import { reducer } from '../../../store/reducer';
 import * as selectors from '../../../store/selectors';
 import { State } from '../../../store/types';
-
-jest.mock( '@wordpress/compose', () => ( {
-	useViewportMatch: jest.fn(),
-} ) );
-
-jest.mock( '@wordpress/core-data', () => ( {
-	store: { name: 'core' },
-} ) );
-
-jest.mock( '@wordpress/editor', () => ( {
-	store: { name: 'core/editor' },
-} ) );
-
-jest.mock( '@wordpress/preferences', () => ( {
-	store: { name: 'core/preferences' },
-} ) );
-
-jest.mock( '@wordpress/blocks', () => ( {
-	parse: jest.fn(),
-	serialize: jest.fn(),
-} ) );
-
-jest.mock( '@wordpress/hooks', () => ( {
-	applyFilters: jest.fn( ( _hook: string, value: unknown ) => value ),
-} ) );
-
-jest.mock( '@wordpress/i18n', () => ( {
-	__: ( value: string ) => value,
-	sprintf: ( format: string, value: string ) => format.replace( '%s', value ),
-} ) );
-
-jest.mock( '@wordpress/components', () => {
+vi.mock( '@wordpress/compose', () => {
+	const mock = {
+		useViewportMatch: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/core-data', () => {
+	const mock = {
+		store: {
+			name: 'core',
+		},
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/editor', () => {
+	const mock = {
+		store: {
+			name: 'core/editor',
+		},
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/preferences', () => {
+	const mock = {
+		store: {
+			name: 'core/preferences',
+		},
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/blocks', () => {
+	const mock = {
+		parse: vi.fn(),
+		serialize: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/hooks', () => {
+	const mock = {
+		applyFilters: vi.fn( ( _hook: string, value: unknown ) => value ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/i18n', () => {
+	const mock = {
+		__: ( value: string ) => value,
+		sprintf: ( format: string, value: string ) =>
+			format.replace( '%s', value ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/components', () => {
 	const TextControl = forwardRef<
 		HTMLInputElement,
 		React.InputHTMLAttributes< HTMLInputElement > & {
@@ -68,7 +125,6 @@ jest.mock( '@wordpress/components', () => {
 			onChange,
 			...rest
 		} = props;
-
 		return (
 			<input
 				data-testid="text-control"
@@ -78,8 +134,10 @@ jest.mock( '@wordpress/components', () => {
 			/>
 		);
 	} );
-
-	return {
+	return ( ( mock ) => ( {
+		default: mock,
+		...mock,
+	} ) )( {
 		Modal: ( props: { children?: React.ReactNode } ) => (
 			<div data-testid="modal">{ props.children }</div>
 		),
@@ -89,29 +147,49 @@ jest.mock( '@wordpress/components', () => {
 				{ props.children }
 			</button>
 		),
-	};
+	} );
 } );
-
-jest.mock( '@wordpress/icons', () => ( {
-	Icon: ( props: React.HTMLAttributes< HTMLSpanElement > ) => (
-		<span data-testid="icon" { ...props } />
-	),
-	check: 'check',
-} ) );
-
-jest.mock( '@wordpress/keycodes', () => ( {
-	ENTER: 13,
-} ) );
-
-jest.mock( '../../../events', () => ( {
-	recordEvent: jest.fn(),
-	recordEventOnce: jest.fn(),
-} ) );
-
+vi.mock( '@wordpress/icons', () => {
+	const mock = {
+		Icon: ( props: React.HTMLAttributes< HTMLSpanElement > ) => (
+			<span data-testid="icon" { ...props } />
+		),
+		check: 'check',
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/keycodes', () => {
+	const mock = {
+		ENTER: 13,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../../events', () => {
+	const mock = {
+		recordEvent: vi.fn(),
+		recordEventOnce: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 const renderWithPreviewState = (
 	overrides: Partial< State[ 'preview' ] > = {}
 ) => {
-	const requestSendingNewsletterPreview = jest.fn( () => ( {
+	const requestSendingNewsletterPreview = vi.fn( () => ( {
 		type: 'REQUEST_SENDING_NEWSLETTER_PREVIEW',
 	} ) );
 	const initialState = getInitialState();
@@ -134,7 +212,6 @@ const renderWithPreviewState = (
 	} );
 	const registry = createRegistry();
 	registry.register( store );
-
 	return {
 		registry,
 		requestSendingNewsletterPreview,
@@ -145,16 +222,16 @@ const renderWithPreviewState = (
 		),
 	};
 };
-
 describe( 'SendPreviewEmail', () => {
 	it( 'should render the modal with input and buttons', () => {
 		renderWithPreviewState();
 		expect( screen.getByTestId( 'modal' ) ).toBeInTheDocument();
 		expect( screen.getByTestId( 'text-control' ) ).toBeInTheDocument();
 	} );
-
 	it( "carries the editor config's user email into the preview recipient", () => {
-		const { registry } = renderWithPreviewState( { toEmail: '' } );
+		const { registry } = renderWithPreviewState( {
+			toEmail: '',
+		} );
 
 		// Inside act(): the rendered modal is subscribed to this store, so the
 		// dispatch re-renders it.
@@ -175,22 +252,22 @@ describe( 'SendPreviewEmail', () => {
 			}
 		);
 	} );
-
 	it( 'opens with that recipient already filled in and a usable send button', () => {
-		renderWithPreviewState( { toEmail: 'shopkeeper@example.com' } );
-
+		renderWithPreviewState( {
+			toEmail: 'shopkeeper@example.com',
+		} );
 		expect( screen.getByTestId( 'text-control' ) ).toHaveValue(
 			'shopkeeper@example.com'
 		);
 		expect(
-			screen.getByRole( 'button', { name: 'Send test email' } )
+			screen.getByRole( 'button', {
+				name: 'Send test email',
+			} )
 		).toBeEnabled();
 	} );
-
 	it( 'requests a preview email sent to the address entered by the user', async () => {
 		const { registry, requestSendingNewsletterPreview } =
 			renderWithPreviewState();
-
 		await userEvent.type(
 			screen.getByTestId( 'text-control' ),
 			'test@example.com'
@@ -201,15 +278,15 @@ describe( 'SendPreviewEmail', () => {
 			}
 		);
 		await userEvent.click(
-			screen.getByRole( 'button', { name: 'Send test email' } )
+			screen.getByRole( 'button', {
+				name: 'Send test email',
+			} )
 		);
-
 		expect( requestSendingNewsletterPreview ).toHaveBeenCalledTimes( 1 );
 		expect( requestSendingNewsletterPreview ).toHaveBeenCalledWith(
 			'test@example.com'
 		);
 	} );
-
 	it( 'should show error message when status is ERROR', () => {
 		renderWithPreviewState( {
 			sendingPreviewStatus: SendingPreviewStatus.ERROR,
@@ -222,7 +299,6 @@ describe( 'SendPreviewEmail', () => {
 			screen.getByText( /Error: Server failure/ )
 		).toBeInTheDocument();
 	} );
-
 	it( 'should show success message when status is SUCCESS', () => {
 		renderWithPreviewState( {
 			sendingPreviewStatus: SendingPreviewStatus.SUCCESS,
@@ -232,14 +308,12 @@ describe( 'SendPreviewEmail', () => {
 		).toBeInTheDocument();
 		expect( screen.getByTestId( 'icon' ) ).toBeInTheDocument();
 	} );
-
 	it( 'should render nothing when modal is closed', () => {
 		const { container } = renderWithPreviewState( {
 			isModalOpened: false,
 		} );
 		expect( container.firstChild ).toBeNull();
 	} );
-
 	it( 'should disable send button and show "Sending…" text when sending', () => {
 		renderWithPreviewState( {
 			isSendingPreviewEmail: true,

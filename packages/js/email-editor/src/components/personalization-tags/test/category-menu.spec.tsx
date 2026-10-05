@@ -1,37 +1,42 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import '../../test/__mocks__/setup-shared-mocks';
 
 /**
  * External dependencies
  */
 import { render, screen, fireEvent } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 
 /**
  * Internal dependencies
  */
 import { CategoryMenu } from '../category-menu';
-
-jest.mock( '@wordpress/components', () => ( {
-	MenuGroup: ( props: React.HTMLAttributes< HTMLDivElement > ) => (
-		<div data-testid="menu-group" { ...props } />
-	),
-	MenuItem: ( props: React.ButtonHTMLAttributes< HTMLButtonElement > ) => (
-		<button role="menuitem" { ...props } />
-	),
-} ) );
-
+vi.mock( '@wordpress/components', () => {
+	const mock = {
+		MenuGroup: ( props: React.HTMLAttributes< HTMLDivElement > ) => (
+			<div data-testid="menu-group" { ...props } />
+		),
+		MenuItem: (
+			props: React.ButtonHTMLAttributes< HTMLButtonElement >
+		) => <button role="menuitem" { ...props } />,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 describe( 'CategoryMenu', () => {
 	const groupedTags = {
 		Marketing: [],
 		Promotions: [],
 		'Customer Data': [],
 	};
-	const onCategorySelect = jest.fn();
-
+	const onCategorySelect = vi.fn();
 	beforeEach( () => {
 		onCategorySelect.mockClear();
 	} );
-
 	it( 'should render the "All" menu item and all categories', () => {
 		render(
 			<CategoryMenu
@@ -40,13 +45,11 @@ describe( 'CategoryMenu', () => {
 				onCategorySelect={ onCategorySelect }
 			/>
 		);
-
 		expect( screen.getByText( 'All' ) ).toBeInTheDocument();
 		expect( screen.getByText( 'Marketing' ) ).toBeInTheDocument();
 		expect( screen.getByText( 'Promotions' ) ).toBeInTheDocument();
 		expect( screen.getByText( 'Customer Data' ) ).toBeInTheDocument();
 	} );
-
 	it( 'should call onCategorySelect when "All" is clicked', () => {
 		render(
 			<CategoryMenu
@@ -55,11 +58,9 @@ describe( 'CategoryMenu', () => {
 				onCategorySelect={ onCategorySelect }
 			/>
 		);
-
 		fireEvent.click( screen.getByText( 'All' ) );
 		expect( onCategorySelect ).toHaveBeenCalledWith( null );
 	} );
-
 	it( 'should call onCategorySelect with correct category', () => {
 		render(
 			<CategoryMenu
@@ -68,11 +69,9 @@ describe( 'CategoryMenu', () => {
 				onCategorySelect={ onCategorySelect }
 			/>
 		);
-
 		fireEvent.click( screen.getByText( 'Promotions' ) );
 		expect( onCategorySelect ).toHaveBeenCalledWith( 'Promotions' );
 	} );
-
 	it( 'should apply active class to active category', () => {
 		render(
 			<CategoryMenu
@@ -81,13 +80,11 @@ describe( 'CategoryMenu', () => {
 				onCategorySelect={ onCategorySelect }
 			/>
 		);
-
 		const activeItem = screen.getByText( 'Customer Data' );
 		expect( activeItem ).toHaveClass(
 			'woocommerce-personalization-tags-modal-menu-item-active'
 		);
 	} );
-
 	it( 'should render separators between categories', () => {
 		render(
 			<CategoryMenu
@@ -96,7 +93,6 @@ describe( 'CategoryMenu', () => {
 				onCategorySelect={ onCategorySelect }
 			/>
 		);
-
 		const separators = screen.getAllByTestId(
 			'woocommerce-personalization-tags-modal-menu-separator'
 		);

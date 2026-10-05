@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import '../../../components/test/__mocks__/setup-shared-mocks';
 
 /**
@@ -9,54 +10,100 @@ import { registerFormatType } from '@wordpress/rich-text';
  * Internal dependencies
  */
 import { extendRichTextFormats } from '../rich-text';
-
-jest.mock( '@wordpress/rich-text', () => ( {
-	registerFormatType: jest.fn(),
-	unregisterFormatType: jest.fn(),
-} ) );
-
-jest.mock( '@wordpress/components', () => ( {
-	ToolbarButton: () => null,
-	ToolbarGroup: () => null,
-} ) );
-
-jest.mock( '../../../store', () => ( {
-	storeName: 'email-editor',
-} ) );
-
-jest.mock( '../../../events', () => ( {
-	recordEvent: jest.fn(),
-} ) );
-
-jest.mock(
+vi.mock( '@wordpress/rich-text', () => {
+	const mock = {
+		registerFormatType: vi.fn(),
+		unregisterFormatType: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/components', () => {
+	const mock = {
+		ToolbarButton: () => null,
+		ToolbarGroup: () => null,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../../store', () => {
+	const mock = {
+		storeName: 'email-editor',
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '../../../events', () => {
+	const mock = {
+		recordEvent: vi.fn(),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock(
 	'../../../components/personalization-tags/personalization-tags-modal',
-	() => ( {
-		PersonalizationTagsModal: () => null,
-	} )
+	() => {
+		const mock = {
+			PersonalizationTagsModal: () => null,
+		};
+		return Object.defineProperties(
+			{
+				default: mock,
+			},
+			Object.getOwnPropertyDescriptors( mock )
+		);
+	}
 );
-
-jest.mock(
+vi.mock(
 	'../../../components/personalization-tags/personalization-tags-popover',
-	() => ( {
-		PersonalizationTagsPopover: () => null,
-	} )
+	() => {
+		const mock = {
+			PersonalizationTagsPopover: () => null,
+		};
+		return Object.defineProperties(
+			{
+				default: mock,
+			},
+			Object.getOwnPropertyDescriptors( mock )
+		);
+	}
 );
-
-jest.mock(
+vi.mock(
 	'../../../components/personalization-tags/personalization-tags-link-popover',
-	() => ( {
-		PersonalizationTagsLinkPopover: () => null,
-	} )
+	() => {
+		const mock = {
+			PersonalizationTagsLinkPopover: () => null,
+		};
+		return Object.defineProperties(
+			{
+				default: mock,
+			},
+			Object.getOwnPropertyDescriptors( mock )
+		);
+	}
 );
-
-const registerFormatTypeMock = registerFormatType as jest.Mock;
-
+const registerFormatTypeMock = registerFormatType as Mock;
 describe( 'extendRichTextFormats', () => {
 	beforeEach( () => {
 		registerFormatTypeMock.mockClear();
 		extendRichTextFormats();
 	} );
-
 	it( 'registers the personalization tags format as non-interactive', () => {
 		// Blocks using `withoutInteractiveFormatting` (e.g. the Button block)
 		// drop interactive formats entirely, which would hide the
@@ -69,14 +116,16 @@ describe( 'extendRichTextFormats', () => {
 			} )
 		);
 	} );
-
 	it( 'registers the link format as interactive', () => {
 		// The link format renders a real `a` element and is applied
 		// programmatically via `applyFormat`, so unlike the shortcode format it
 		// has no toolbar `edit` component that the interactive flag could hide.
 		expect( registerFormatTypeMock ).toHaveBeenCalledWith(
 			'woocommerce-email-editor/link-shortcode',
-			expect.objectContaining( { interactive: true, edit: null } )
+			expect.objectContaining( {
+				interactive: true,
+				edit: null,
+			} )
 		);
 	} );
 } );

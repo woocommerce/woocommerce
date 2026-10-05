@@ -69,7 +69,7 @@
 		"lint:lang:style": "stylelint 'src/**/*.{css,scss}'",
 		"lint:lang:types": "tsc --build --emitDeclarationOnly",
 		"prepack": "pnpm build:publish:project",
-		"test:js": "jest --config ./jest.config.json --passWithNoTests",
+		"test:js": "wp-scripts test-unit-js --passWithNoTests",
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"watch:build": "pnpm watch:build:project",
 		"watch:build:project": "pnpm --stream '/^watch:build:project:.*$/'",
@@ -170,8 +170,8 @@
 					"command": "test:js",
 					"changes": [
 						"webpack.config.js",
-						"jest.config.json",
-						"jest.setup.ts",
+						"vitest.config.mjs",
+						"vitest.setup.ts",
 						"tsconfig.json",
 						"src/**/*.{js,jsx,ts,tsx}",
 						"typings/**/*.ts"

@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -8,27 +10,28 @@ import { renderHook } from '@testing-library/react';
  */
 import { useNoticeOverrides } from '../use-notice-overrides';
 import { storeName as EMAIL_EDITOR_STORE_NAME } from '../../store/constants';
-
 const CORE_EDITOR_STORE = 'core/editor';
 
 // Keep a reference to the plugin callback registered via `use()`.
 let capturedPlugin: ( registry: {
 	select: ( namespace: string ) => unknown;
-} ) => { select: ( namespace: string ) => unknown };
-
-jest.mock( '@wordpress/data', () => {
+} ) => {
+	select: ( namespace: string ) => unknown;
+};
+vi.mock( '@wordpress/data', async () => {
 	const actual =
-		jest.requireActual< typeof import('@wordpress/data') >(
+		await vi.importActual< typeof import('@wordpress/data') >(
 			'@wordpress/data'
 		);
-
 	return Object.create( actual, {
 		use: {
-			value: jest.fn(
+			value: vi.fn(
 				(
 					plugin: ( registry: {
 						select: ( namespace: string ) => unknown;
-					} ) => { select: ( namespace: string ) => unknown }
+					} ) => {
+						select: ( namespace: string ) => unknown;
+					}
 				) => {
 					capturedPlugin = plugin;
 				}
@@ -36,35 +39,62 @@ jest.mock( '@wordpress/data', () => {
 		},
 	} );
 } );
-
-jest.mock( '@wordpress/notices', () => ( {
-	store: { name: 'core/notices' },
-} ) );
-
-jest.mock( '@wordpress/core-data', () => ( {
-	store: { name: 'core' },
-} ) );
-
-jest.mock( '@wordpress/i18n', () => ( {
-	__: ( text: string ) => text,
-} ) );
-
+vi.mock( '@wordpress/notices', () => {
+	const mock = {
+		store: {
+			name: 'core/notices',
+		},
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/core-data', () => {
+	const mock = {
+		store: {
+			name: 'core',
+		},
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+vi.mock( '@wordpress/i18n', () => {
+	const mock = {
+		__: ( text: string ) => text,
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 interface Notice {
 	id: string;
 	content: string;
 	spokenMessage: string;
 	actions: unknown[];
 }
-
 type Labels = Record< string, string > | undefined;
 
 // `originalSelect` is called with either a store name string (from the
 // plugin's own `select( namespace )`) or a store descriptor object (from
 // the hook's own `originalSelect( coreStore )` / `originalSelect( storeName )`
 // calls) — normalise both to a name for routing in the test doubles below.
-const resolveStoreName = ( ns: string | { name: string } ): string =>
-	typeof ns === 'object' ? ns.name : ns;
-
+const resolveStoreName = (
+	ns:
+		| string
+		| {
+				name: string;
+		  }
+): string => ( typeof ns === 'object' ? ns.name : ns );
 const makeNotice = ( partial: Partial< Notice > = {} ): Notice => ( {
 	id: 'test-notice',
 	content: 'Test notice',
@@ -72,10 +102,9 @@ const makeNotice = ( partial: Partial< Notice > = {} ): Notice => ( {
 	actions: [],
 	...partial,
 } );
-
 describe( 'useNoticeOverrides — memoized selector stability', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 	} );
 
 	/**
@@ -96,20 +125,32 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		labels?: Labels,
 		currentPostType = 'email'
 	) {
-		const originalGetNotices = jest.fn().mockReturnValue( notices );
-		const noticesSelectors = { getNotices: originalGetNotices };
-
-		const getPostType = jest
-			.fn()
-			.mockReturnValue( labels === undefined ? undefined : { labels } );
-		const coreSelectors = { getPostType };
-
-		const getCurrentPostType = jest.fn().mockReturnValue( currentPostType );
-		const editorSelectors = { getCurrentPostType };
-
-		const originalSelect = jest
-			.fn()
-			.mockImplementation( ( ns: string | { name: string } ) => {
+		const originalGetNotices = vi.fn().mockReturnValue( notices );
+		const noticesSelectors = {
+			getNotices: originalGetNotices,
+		};
+		const getPostType = vi.fn().mockReturnValue(
+			labels === undefined
+				? undefined
+				: {
+						labels,
+				  }
+		);
+		const coreSelectors = {
+			getPostType,
+		};
+		const getCurrentPostType = vi.fn().mockReturnValue( currentPostType );
+		const editorSelectors = {
+			getCurrentPostType,
+		};
+		const originalSelect = vi.fn().mockImplementation(
+			(
+				ns:
+					| string
+					| {
+							name: string;
+					  }
+			) => {
 				const name = resolveStoreName( ns );
 				if ( name === 'core/notices' ) {
 					return noticesSelectors;
@@ -121,11 +162,12 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 					return editorSelectors;
 				}
 				return undefined;
-			} );
-
+			}
+		);
 		renderHook( () => useNoticeOverrides() );
-
-		const pluginResult = capturedPlugin( { select: originalSelect } );
+		const pluginResult = capturedPlugin( {
+			select: originalSelect,
+		} );
 		return {
 			pluginResult,
 			originalSelect,
@@ -134,37 +176,41 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 			getCurrentPostType,
 		};
 	}
-
 	it( 'getNotices returns the same array reference when notices and labels are unchanged', () => {
 		const notices = [ makeNotice() ];
 		const { pluginResult } = buildSelectOverride( notices, {
 			item_updated: 'Post updated.',
 		} );
-
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
 		};
-
 		const firstResult = selectors.getNotices();
 		const secondResult = selectors.getNotices();
-
 		expect( firstResult ).toBe( secondResult );
 	} );
-
 	it( 'getNotices returns a new array reference when notices input changes', () => {
-		const originalGetNotices = jest.fn();
-		const noticesSelectors = { getNotices: originalGetNotices };
+		const originalGetNotices = vi.fn();
+		const noticesSelectors = {
+			getNotices: originalGetNotices,
+		};
 		const coreSelectors = {
-			getPostType: jest.fn().mockReturnValue( {
-				labels: { item_updated: 'Post updated.' },
+			getPostType: vi.fn().mockReturnValue( {
+				labels: {
+					item_updated: 'Post updated.',
+				},
 			} ),
 		};
 		const editorSelectors = {
-			getCurrentPostType: jest.fn().mockReturnValue( 'email' ),
+			getCurrentPostType: vi.fn().mockReturnValue( 'email' ),
 		};
-		const originalSelect = jest
-			.fn()
-			.mockImplementation( ( ns: string | { name: string } ) => {
+		const originalSelect = vi.fn().mockImplementation(
+			(
+				ns:
+					| string
+					| {
+							name: string;
+					  }
+			) => {
 				const name = resolveStoreName( ns );
 				if ( name === 'core/notices' ) {
 					return noticesSelectors;
@@ -176,42 +222,63 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 					return editorSelectors;
 				}
 				return undefined;
-			} );
-
+			}
+		);
 		renderHook( () => useNoticeOverrides() );
-		const pluginResult = capturedPlugin( { select: originalSelect } );
-
-		const firstNotices = [ makeNotice( { id: 'a' } ) ];
+		const pluginResult = capturedPlugin( {
+			select: originalSelect,
+		} );
+		const firstNotices = [
+			makeNotice( {
+				id: 'a',
+			} ),
+		];
 		originalGetNotices.mockReturnValue( firstNotices );
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
 		};
 		const firstResult = selectors.getNotices();
-
-		const secondNotices = [ makeNotice( { id: 'b' } ) ];
+		const secondNotices = [
+			makeNotice( {
+				id: 'b',
+			} ),
+		];
 		originalGetNotices.mockReturnValue( secondNotices );
 		const secondResult = selectors.getNotices();
-
 		expect( firstResult ).not.toBe( secondResult );
 	} );
-
 	it( 'getNotices returns a new array reference when the labels reference changes', () => {
 		// Uses an overridable notice id: the postType/labels lookup (finding 3)
 		// is skipped entirely for non-overridable notices, which would make
 		// this label change invisible to the memoized selector.
-		const notices = [ makeNotice( { id: 'editor-save' } ) ];
-		const originalGetNotices = jest.fn().mockReturnValue( notices );
-		const noticesSelectors = { getNotices: originalGetNotices };
-		const getPostType = jest
-			.fn()
-			.mockReturnValue( { labels: { item_updated: 'Post updated.' } } );
-		const coreSelectors = { getPostType };
-		const editorSelectors = {
-			getCurrentPostType: jest.fn().mockReturnValue( 'email' ),
+		const notices = [
+			makeNotice( {
+				id: 'editor-save',
+			} ),
+		];
+		const originalGetNotices = vi.fn().mockReturnValue( notices );
+		const noticesSelectors = {
+			getNotices: originalGetNotices,
 		};
-		const originalSelect = jest
-			.fn()
-			.mockImplementation( ( ns: string | { name: string } ) => {
+		const getPostType = vi.fn().mockReturnValue( {
+			labels: {
+				item_updated: 'Post updated.',
+			},
+		} );
+		const coreSelectors = {
+			getPostType,
+		};
+		const editorSelectors = {
+			getCurrentPostType: vi.fn().mockReturnValue( 'email' ),
+		};
+		const originalSelect = vi.fn().mockImplementation(
+			(
+				ns:
+					| string
+					| {
+							name: string;
+					  }
+			) => {
 				const name = resolveStoreName( ns );
 				if ( name === 'core/notices' ) {
 					return noticesSelectors;
@@ -223,124 +290,134 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 					return editorSelectors;
 				}
 				return undefined;
-			} );
-
+			}
+		);
 		renderHook( () => useNoticeOverrides() );
-		const pluginResult = capturedPlugin( { select: originalSelect } );
+		const pluginResult = capturedPlugin( {
+			select: originalSelect,
+		} );
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
 		};
-
 		const firstResult = selectors.getNotices();
-
 		getPostType.mockReturnValue( {
-			labels: { item_updated: 'Příspěvek byl aktualizován.' },
+			labels: {
+				item_updated: 'Příspěvek byl aktualizován.',
+			},
 		} );
 		const secondResult = selectors.getNotices();
-
 		expect( firstResult ).not.toBe( secondResult );
 	} );
-
 	it( 'passes through select for non-notices stores unchanged', () => {
 		const notices = [ makeNotice() ];
-		const otherSelectors = { getSomething: jest.fn() };
-		const originalGetNotices = jest.fn().mockReturnValue( notices );
-		const originalSelectors = { getNotices: originalGetNotices };
-
-		const originalSelect = jest
+		const otherSelectors = {
+			getSomething: vi.fn(),
+		};
+		const originalGetNotices = vi.fn().mockReturnValue( notices );
+		const originalSelectors = {
+			getNotices: originalGetNotices,
+		};
+		const originalSelect = vi
 			.fn()
 			.mockImplementation( ( ns: string ) =>
 				ns === 'core/notices' ? originalSelectors : otherSelectors
 			);
-
 		renderHook( () => useNoticeOverrides() );
-		const pluginResult = capturedPlugin( { select: originalSelect } );
-
+		const pluginResult = capturedPlugin( {
+			select: originalSelect,
+		} );
 		const result = pluginResult.select( 'some/other-store' );
 		expect( result ).toBe( otherSelectors );
 	} );
-
 	it( 'transforms an editor-save notice whose content matches the localized item_updated label', () => {
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
 			content: 'Příspěvek byl aktualizován.',
-			actions: [ { label: 'Zobrazit e-mail', url: '#' } ],
+			actions: [
+				{
+					label: 'Zobrazit e-mail',
+					url: '#',
+				},
+			],
 		} );
 		const { pluginResult } = buildSelectOverride( [ originalNotice ], {
 			item_updated: 'Příspěvek byl aktualizován.',
 			view_item: 'Zobrazit e-mail',
 		} );
-
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
 		};
 		const result = selectors.getNotices();
-
 		expect( result[ 0 ].content ).toBe( 'Email saved.' );
 		expect( result[ 0 ].spokenMessage ).toBe( 'Email saved.' );
 		expect( result[ 0 ].actions ).toEqual( [] );
 	} );
-
 	it( 'transforms an editor-save notice matching a custom integration item_updated label', () => {
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
 			content: 'Email updated.',
-			actions: [ { label: 'View', url: '#' } ],
+			actions: [
+				{
+					label: 'View',
+					url: '#',
+				},
+			],
 		} );
 		const { pluginResult } = buildSelectOverride( [ originalNotice ], {
 			item_updated: 'Email updated.',
 		} );
-
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
 		};
 		const result = selectors.getNotices();
-
 		expect( result[ 0 ].content ).toBe( 'Email saved.' );
 	} );
-
 	it.each( [ [ 'item_published', 'Příspěvek byl publikován.' ] ] )(
 		'transforms an editor-save notice matching the localized %s label',
 		( labelKey, localizedText ) => {
 			const originalNotice = makeNotice( {
 				id: 'editor-save',
 				content: localizedText,
-				actions: [ { label: 'View', url: '#' } ],
+				actions: [
+					{
+						label: 'View',
+						url: '#',
+					},
+				],
 			} );
 			const { pluginResult } = buildSelectOverride( [ originalNotice ], {
 				[ labelKey ]: localizedText,
 			} );
-
 			const selectors = pluginResult.select( 'core/notices' ) as {
 				getNotices: () => Notice[];
 			};
 			const result = selectors.getNotices();
-
 			expect( result[ 0 ].content ).toBe( 'Email saved.' );
 			expect( result[ 0 ].actions ).toEqual( [] );
 		}
 	);
-
 	it( 'leaves an editor-save notice unchanged when labels are not loaded yet, but still removes the action', () => {
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
 			content: 'Post updated.',
-			actions: [ { label: 'View Email', url: '#' } ],
+			actions: [
+				{
+					label: 'View Email',
+					url: '#',
+				},
+			],
 		} );
 		const { pluginResult } = buildSelectOverride(
 			[ originalNotice ],
 			undefined
 		);
-
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
 		};
 		const result = selectors.getNotices();
-
 		expect( result[ 0 ].content ).toBe( 'Post updated.' );
 		expect( result[ 0 ].actions ).toEqual( [] );
 	} );
-
 	it( 'leaves an editor-save notice with content matching no label unchanged', () => {
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
@@ -350,16 +427,13 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		const { pluginResult } = buildSelectOverride( [ originalNotice ], {
 			item_updated: 'Post updated.',
 		} );
-
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
 		};
 		const result = selectors.getNotices();
-
 		expect( result[ 0 ].content ).toBe( 'Updating failed.' );
 		expect( result[ 0 ].actions ).toEqual( [] );
 	} );
-
 	it.each( [
 		[ 'item_published_privately', 'Příspěvek byl publikován soukromě.' ],
 		[ 'item_scheduled', 'Příspěvek byl naplánován.' ],
@@ -369,22 +443,24 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 			const originalNotice = makeNotice( {
 				id: 'editor-save',
 				content: localizedText,
-				actions: [ { label: 'View', url: '#' } ],
+				actions: [
+					{
+						label: 'View',
+						url: '#',
+					},
+				],
 			} );
 			const { pluginResult } = buildSelectOverride( [ originalNotice ], {
 				[ labelKey ]: localizedText,
 			} );
-
 			const selectors = pluginResult.select( 'core/notices' ) as {
 				getNotices: () => Notice[];
 			};
 			const result = selectors.getNotices();
-
 			expect( result[ 0 ].content ).toBe( localizedText );
 			expect( result[ 0 ].actions ).toEqual( [] );
 		}
 	);
-
 	it( 'leaves an editor-save notice with "Draft saved." content unchanged but removes the action', () => {
 		// A saved draft is not used for sending; rewriting the notice to
 		// "Email saved." would suggest the opposite. The view-post action is
@@ -392,91 +468,115 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
 			content: 'Draft saved.',
-			actions: [ { label: 'View Preview', url: '#' } ],
+			actions: [
+				{
+					label: 'View Preview',
+					url: '#',
+				},
+			],
 		} );
 		const { pluginResult } = buildSelectOverride( [ originalNotice ], {
 			item_updated: 'Post updated.',
 		} );
-
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
 		};
 		const result = selectors.getNotices();
-
 		expect( result[ 0 ].content ).toBe( 'Draft saved.' );
 		expect( result[ 0 ].actions ).toEqual( [] );
 	} );
-
 	it( 'transforms site-editor-save-success notice and removes actions regardless of labels', () => {
 		const originalNotice = makeNotice( {
 			id: 'site-editor-save-success',
 			content: 'Site updated.',
-			actions: [ { label: 'View', url: '#' } ],
+			actions: [
+				{
+					label: 'View',
+					url: '#',
+				},
+			],
 		} );
 		const { pluginResult } = buildSelectOverride(
 			[ originalNotice ],
 			undefined
 		);
-
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
 		};
 		const result = selectors.getNotices();
-
 		expect( result[ 0 ].content ).toBe( 'Email design updated.' );
 		expect( result[ 0 ].actions ).toEqual( [] );
 	} );
-
 	it( 'returns selectors unchanged when getNotices is not present', () => {
-		const originalSelectors = { someOtherSelector: jest.fn() };
-		const originalSelect = jest.fn().mockReturnValue( originalSelectors );
-
+		const originalSelectors = {
+			someOtherSelector: vi.fn(),
+		};
+		const originalSelect = vi.fn().mockReturnValue( originalSelectors );
 		renderHook( () => useNoticeOverrides() );
-		const pluginResult = capturedPlugin( { select: originalSelect } );
-
+		const pluginResult = capturedPlugin( {
+			select: originalSelect,
+		} );
 		const result = pluginResult.select( 'core/notices' );
 		expect( result ).toBe( originalSelectors );
 	} );
-
 	it( 'does not rewrite content that merely contains the label as a substring', () => {
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
 			content: 'Post updated. Extra',
-			actions: [ { label: 'View', url: '#' } ],
+			actions: [
+				{
+					label: 'View',
+					url: '#',
+				},
+			],
 		} );
 		const { pluginResult } = buildSelectOverride( [ originalNotice ], {
 			item_updated: 'Post updated.',
 		} );
-
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
 		};
 		const result = selectors.getNotices();
-
 		expect( result[ 0 ].content ).toBe( 'Post updated. Extra' );
 		expect( result[ 0 ].actions ).toEqual( [] );
 	} );
-
 	it( 'skips the postType/labels lookup when the current post type is not set yet, but still removes the action', () => {
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
 			content: 'Post updated.',
-			actions: [ { label: 'View', url: '#' } ],
+			actions: [
+				{
+					label: 'View',
+					url: '#',
+				},
+			],
 		} );
-		const originalGetNotices = jest
+		const originalGetNotices = vi
 			.fn()
 			.mockReturnValue( [ originalNotice ] );
-		const noticesSelectors = { getNotices: originalGetNotices };
-		const getPostType = jest
-			.fn()
-			.mockReturnValue( { labels: { item_updated: 'Post updated.' } } );
-		const coreSelectors = { getPostType };
-		const getCurrentPostType = jest.fn().mockReturnValue( undefined );
-		const editorSelectors = { getCurrentPostType };
-
-		const originalSelect = jest
-			.fn()
-			.mockImplementation( ( ns: string | { name: string } ) => {
+		const noticesSelectors = {
+			getNotices: originalGetNotices,
+		};
+		const getPostType = vi.fn().mockReturnValue( {
+			labels: {
+				item_updated: 'Post updated.',
+			},
+		} );
+		const coreSelectors = {
+			getPostType,
+		};
+		const getCurrentPostType = vi.fn().mockReturnValue( undefined );
+		const editorSelectors = {
+			getCurrentPostType,
+		};
+		const originalSelect = vi.fn().mockImplementation(
+			(
+				ns:
+					| string
+					| {
+							name: string;
+					  }
+			) => {
 				const name = resolveStoreName( ns );
 				if ( name === 'core/notices' ) {
 					return noticesSelectors;
@@ -488,39 +588,52 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 					return editorSelectors;
 				}
 				return undefined;
-			} );
-
+			}
+		);
 		renderHook( () => useNoticeOverrides() );
-		const pluginResult = capturedPlugin( { select: originalSelect } );
+		const pluginResult = capturedPlugin( {
+			select: originalSelect,
+		} );
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
 		};
 		const result = selectors.getNotices();
-
 		expect( result[ 0 ].content ).toBe( 'Post updated.' );
 		expect( result[ 0 ].actions ).toEqual( [] );
 		expect( getPostType ).not.toHaveBeenCalled();
 	} );
-
 	it( 'leaves notices unchanged without throwing when the core/editor store is not registered', () => {
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
 			content: 'Post updated.',
-			actions: [ { label: 'View', url: '#' } ],
+			actions: [
+				{
+					label: 'View',
+					url: '#',
+				},
+			],
 		} );
-		const originalGetNotices = jest
+		const originalGetNotices = vi
 			.fn()
 			.mockReturnValue( [ originalNotice ] );
-		const noticesSelectors = { getNotices: originalGetNotices };
+		const noticesSelectors = {
+			getNotices: originalGetNotices,
+		};
 		const coreSelectors = {
-			getPostType: jest.fn().mockReturnValue( {
-				labels: { item_updated: 'Post updated.' },
+			getPostType: vi.fn().mockReturnValue( {
+				labels: {
+					item_updated: 'Post updated.',
+				},
 			} ),
 		};
-
-		const originalSelect = jest
-			.fn()
-			.mockImplementation( ( ns: string | { name: string } ) => {
+		const originalSelect = vi.fn().mockImplementation(
+			(
+				ns:
+					| string
+					| {
+							name: string;
+					  }
+			) => {
 				const name = resolveStoreName( ns );
 				if ( name === 'core/notices' ) {
 					return noticesSelectors;
@@ -530,37 +643,48 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 				}
 				// core/editor store not registered.
 				return undefined;
-			} );
-
+			}
+		);
 		renderHook( () => useNoticeOverrides() );
-		const pluginResult = capturedPlugin( { select: originalSelect } );
+		const pluginResult = capturedPlugin( {
+			select: originalSelect,
+		} );
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
 		};
-
 		expect( () => selectors.getNotices() ).not.toThrow();
 		const result = selectors.getNotices();
 		expect( result[ 0 ].content ).toBe( 'Post updated.' );
 		expect( result[ 0 ].actions ).toEqual( [] );
 	} );
-
 	it( 'leaves notices unchanged without throwing when the core store selectors are unavailable', () => {
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
 			content: 'Post updated.',
-			actions: [ { label: 'View', url: '#' } ],
+			actions: [
+				{
+					label: 'View',
+					url: '#',
+				},
+			],
 		} );
-		const originalGetNotices = jest
+		const originalGetNotices = vi
 			.fn()
 			.mockReturnValue( [ originalNotice ] );
-		const noticesSelectors = { getNotices: originalGetNotices };
-		const editorSelectors = {
-			getCurrentPostType: jest.fn().mockReturnValue( 'email' ),
+		const noticesSelectors = {
+			getNotices: originalGetNotices,
 		};
-
-		const originalSelect = jest
-			.fn()
-			.mockImplementation( ( ns: string | { name: string } ) => {
+		const editorSelectors = {
+			getCurrentPostType: vi.fn().mockReturnValue( 'email' ),
+		};
+		const originalSelect = vi.fn().mockImplementation(
+			(
+				ns:
+					| string
+					| {
+							name: string;
+					  }
+			) => {
 				const name = resolveStoreName( ns );
 				if ( name === 'core/notices' ) {
 					return noticesSelectors;
@@ -570,39 +694,51 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 				}
 				// Core store not resolvable in this registry.
 				return undefined;
-			} );
-
+			}
+		);
 		renderHook( () => useNoticeOverrides() );
-		const pluginResult = capturedPlugin( { select: originalSelect } );
+		const pluginResult = capturedPlugin( {
+			select: originalSelect,
+		} );
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
 		};
-
 		expect( () => selectors.getNotices() ).not.toThrow();
 		const result = selectors.getNotices();
 		expect( result[ 0 ].content ).toBe( 'Post updated.' );
 		expect( result[ 0 ].actions ).toEqual( [] );
 	} );
-
 	it( 'skips the postType/labels lookup entirely when no notice is overridable', () => {
 		const originalNotice = makeNotice( {
 			id: 'unrelated-notice',
 			content: 'Something else',
 		} );
-		const originalGetNotices = jest
+		const originalGetNotices = vi
 			.fn()
 			.mockReturnValue( [ originalNotice ] );
-		const noticesSelectors = { getNotices: originalGetNotices };
-		const getCurrentPostType = jest.fn().mockReturnValue( 'email' );
-		const editorSelectors = { getCurrentPostType };
-		const getPostType = jest
-			.fn()
-			.mockReturnValue( { labels: { item_updated: 'Post updated.' } } );
-		const coreSelectors = { getPostType };
-
-		const originalSelect = jest
-			.fn()
-			.mockImplementation( ( ns: string | { name: string } ) => {
+		const noticesSelectors = {
+			getNotices: originalGetNotices,
+		};
+		const getCurrentPostType = vi.fn().mockReturnValue( 'email' );
+		const editorSelectors = {
+			getCurrentPostType,
+		};
+		const getPostType = vi.fn().mockReturnValue( {
+			labels: {
+				item_updated: 'Post updated.',
+			},
+		} );
+		const coreSelectors = {
+			getPostType,
+		};
+		const originalSelect = vi.fn().mockImplementation(
+			(
+				ns:
+					| string
+					| {
+							name: string;
+					  }
+			) => {
 				const name = resolveStoreName( ns );
 				if ( name === 'core/notices' ) {
 					return noticesSelectors;
@@ -614,87 +750,97 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 					return editorSelectors;
 				}
 				return undefined;
-			} );
-
+			}
+		);
 		renderHook( () => useNoticeOverrides() );
-		const pluginResult = capturedPlugin( { select: originalSelect } );
+		const pluginResult = capturedPlugin( {
+			select: originalSelect,
+		} );
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
 		};
 		const result = selectors.getNotices();
-
 		expect( result[ 0 ] ).toBe( originalNotice );
 		expect( getCurrentPostType ).not.toHaveBeenCalled();
 		expect( getPostType ).not.toHaveBeenCalled();
 	} );
-
 	it( 'leaves a notice whose id collides with an Object.prototype member completely untouched', () => {
 		const originalNotice = makeNotice( {
 			id: 'constructor',
 			content: 'Something else',
 			spokenMessage: 'Something else',
-			actions: [ { label: 'View', url: '#' } ],
+			actions: [
+				{
+					label: 'View',
+					url: '#',
+				},
+			],
 		} );
 		const { pluginResult } = buildSelectOverride( [ originalNotice ], {
 			item_updated: 'Post updated.',
 		} );
-
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
 		};
 		const result = selectors.getNotices();
-
 		expect( result[ 0 ].content ).toBe( 'Something else' );
 		expect( result[ 0 ].spokenMessage ).toBe( 'Something else' );
 		expect( result[ 0 ].actions ).toEqual( originalNotice.actions );
 	} );
-
 	it.each( [ 'wp_template', 'wp_template_part' ] )(
 		'transforms an editor-save notice matching item_updated for the %s post type to "Email design updated."',
 		( postType ) => {
 			const originalNotice = makeNotice( {
 				id: 'editor-save',
 				content: 'Template updated.',
-				actions: [ { label: 'View', url: '#' } ],
+				actions: [
+					{
+						label: 'View',
+						url: '#',
+					},
+				],
 			} );
 			const { pluginResult } = buildSelectOverride(
 				[ originalNotice ],
-				{ item_updated: 'Template updated.' },
+				{
+					item_updated: 'Template updated.',
+				},
 				postType
 			);
-
 			const selectors = pluginResult.select( 'core/notices' ) as {
 				getNotices: () => Notice[];
 			};
 			const result = selectors.getNotices();
-
 			expect( result[ 0 ].content ).toBe( 'Email design updated.' );
 			expect( result[ 0 ].spokenMessage ).toBe( 'Email design updated.' );
 			expect( result[ 0 ].actions ).toEqual( [] );
 		}
 	);
-
 	it( 'transforms an editor-save notice matching item_published for the wp_template post type to "Email design updated."', () => {
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
 			content: 'Post published.',
-			actions: [ { label: 'View', url: '#' } ],
+			actions: [
+				{
+					label: 'View',
+					url: '#',
+				},
+			],
 		} );
 		const { pluginResult } = buildSelectOverride(
 			[ originalNotice ],
-			{ item_published: 'Post published.' },
+			{
+				item_published: 'Post published.',
+			},
 			'wp_template'
 		);
-
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
 		};
 		const result = selectors.getNotices();
-
 		expect( result[ 0 ].content ).toBe( 'Email design updated.' );
 		expect( result[ 0 ].actions ).toEqual( [] );
 	} );
-
 	it( 'leaves an editor-save notice with content matching no label unchanged for a template post type', () => {
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
@@ -703,19 +849,18 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		} );
 		const { pluginResult } = buildSelectOverride(
 			[ originalNotice ],
-			{ item_updated: 'Template updated.' },
+			{
+				item_updated: 'Template updated.',
+			},
 			'wp_template'
 		);
-
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
 		};
 		const result = selectors.getNotices();
-
 		expect( result[ 0 ].content ).toBe( 'Updating failed.' );
 		expect( result[ 0 ].actions ).toEqual( [] );
 	} );
-
 	it( "matches against the currently edited post type when it diverges from the email editor store's post type", () => {
 		// In-app navigation case: the editor was opened on an email (the
 		// email editor store still reports the email post type), but the
@@ -728,24 +873,43 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
 			content: 'Template updated.',
-			actions: [ { label: 'View', url: '#' } ],
+			actions: [
+				{
+					label: 'View',
+					url: '#',
+				},
+			],
 		} );
-		const originalGetNotices = jest
+		const originalGetNotices = vi
 			.fn()
 			.mockReturnValue( [ originalNotice ] );
-		const noticesSelectors = { getNotices: originalGetNotices };
-		const getPostType = jest.fn().mockReturnValue( {
-			labels: { item_updated: 'Template updated.' },
+		const noticesSelectors = {
+			getNotices: originalGetNotices,
+		};
+		const getPostType = vi.fn().mockReturnValue( {
+			labels: {
+				item_updated: 'Template updated.',
+			},
 		} );
-		const coreSelectors = { getPostType };
-		const getCurrentPostType = jest.fn().mockReturnValue( 'wp_template' );
-		const editorSelectors = { getCurrentPostType };
-		const getEmailPostType = jest.fn().mockReturnValue( 'email' );
-		const emailEditorSelectors = { getEmailPostType };
-
-		const originalSelect = jest
-			.fn()
-			.mockImplementation( ( ns: string | { name: string } ) => {
+		const coreSelectors = {
+			getPostType,
+		};
+		const getCurrentPostType = vi.fn().mockReturnValue( 'wp_template' );
+		const editorSelectors = {
+			getCurrentPostType,
+		};
+		const getEmailPostType = vi.fn().mockReturnValue( 'email' );
+		const emailEditorSelectors = {
+			getEmailPostType,
+		};
+		const originalSelect = vi.fn().mockImplementation(
+			(
+				ns:
+					| string
+					| {
+							name: string;
+					  }
+			) => {
 				const name = resolveStoreName( ns );
 				if ( name === 'core/notices' ) {
 					return noticesSelectors;
@@ -760,15 +924,16 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 					return emailEditorSelectors;
 				}
 				return undefined;
-			} );
-
+			}
+		);
 		renderHook( () => useNoticeOverrides() );
-		const pluginResult = capturedPlugin( { select: originalSelect } );
+		const pluginResult = capturedPlugin( {
+			select: originalSelect,
+		} );
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
 		};
 		const result = selectors.getNotices();
-
 		expect( result[ 0 ].content ).toBe( 'Email design updated.' );
 		expect( result[ 0 ].spokenMessage ).toBe( 'Email design updated.' );
 		expect( result[ 0 ].actions ).toEqual( [] );
@@ -797,26 +962,32 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		labelsByType: Record< string, Labels >
 	) {
 		const noticesSelectors = {
-			getNotices: jest.fn().mockReturnValue( notices ),
+			getNotices: vi.fn().mockReturnValue( notices ),
 		};
-		const getPostType = jest
-			.fn()
-			.mockImplementation( ( postType: string ) =>
-				labelsByType[ postType ] === undefined
-					? undefined
-					: { labels: labelsByType[ postType ] }
-			);
-		const coreSelectors = { getPostType };
+		const getPostType = vi.fn().mockImplementation( ( postType: string ) =>
+			labelsByType[ postType ] === undefined
+				? undefined
+				: {
+						labels: labelsByType[ postType ],
+				  }
+		);
+		const coreSelectors = {
+			getPostType,
+		};
 		const editorSelectors = {
-			getCurrentPostType: jest.fn().mockReturnValue( currentPostType ),
+			getCurrentPostType: vi.fn().mockReturnValue( currentPostType ),
 		};
 		const emailEditorSelectors = {
-			getEmailPostType: jest.fn().mockReturnValue( emailPostType ),
+			getEmailPostType: vi.fn().mockReturnValue( emailPostType ),
 		};
-
-		const originalSelect = jest
-			.fn()
-			.mockImplementation( ( ns: string | { name: string } ) => {
+		const originalSelect = vi.fn().mockImplementation(
+			(
+				ns:
+					| string
+					| {
+							name: string;
+					  }
+			) => {
 				const name = resolveStoreName( ns );
 				if ( name === 'core/notices' ) {
 					return noticesSelectors;
@@ -831,13 +1002,17 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 					return emailEditorSelectors;
 				}
 				return undefined;
-			} );
-
+			}
+		);
 		renderHook( () => useNoticeOverrides() );
-		const pluginResult = capturedPlugin( { select: originalSelect } );
-		return { pluginResult, getPostType };
+		const pluginResult = capturedPlugin( {
+			select: originalSelect,
+		} );
+		return {
+			pluginResult,
+			getPostType,
+		};
 	}
-
 	it( 'rewrites a stale notice to "Email saved." when its content matches the email post type\'s labels while a template is current', () => {
 		// The user saved the email, then navigated into its template before
 		// the notice dismissed: `getCurrentPostType` now reports the
@@ -845,97 +1020,122 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
 			content: 'Post updated.',
-			actions: [ { label: 'View', url: '#' } ],
+			actions: [
+				{
+					label: 'View',
+					url: '#',
+				},
+			],
 		} );
 		const { pluginResult } = buildTwoCandidateSelectOverride(
 			[ originalNotice ],
 			'wp_template',
 			'email',
 			{
-				wp_template: { item_updated: 'Template updated.' },
-				email: { item_updated: 'Post updated.' },
+				wp_template: {
+					item_updated: 'Template updated.',
+				},
+				email: {
+					item_updated: 'Post updated.',
+				},
 			}
 		);
-
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
 		};
 		const result = selectors.getNotices();
-
 		expect( result[ 0 ].content ).toBe( 'Email saved.' );
 		expect( result[ 0 ].actions ).toEqual( [] );
 	} );
-
 	it( 'rewrites a stale notice to "Email design updated." when its content matches the template\'s labels while the email post type is current', () => {
 		// The reverse: the user saved the template, then navigated back to
 		// the email before the notice dismissed.
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
 			content: 'Template updated.',
-			actions: [ { label: 'View', url: '#' } ],
+			actions: [
+				{
+					label: 'View',
+					url: '#',
+				},
+			],
 		} );
 		const { pluginResult } = buildTwoCandidateSelectOverride(
 			[ originalNotice ],
 			'email',
 			'wp_template',
 			{
-				email: { item_updated: 'Post updated.' },
-				wp_template: { item_updated: 'Template updated.' },
+				email: {
+					item_updated: 'Post updated.',
+				},
+				wp_template: {
+					item_updated: 'Template updated.',
+				},
 			}
 		);
-
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
 		};
 		const result = selectors.getNotices();
-
 		expect( result[ 0 ].content ).toBe( 'Email design updated.' );
 		expect( result[ 0 ].actions ).toEqual( [] );
 	} );
-
 	it( "leaves a notice unchanged when its content matches neither candidate post type's labels", () => {
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
 			content: 'Something else.',
-			actions: [ { label: 'View', url: '#' } ],
+			actions: [
+				{
+					label: 'View',
+					url: '#',
+				},
+			],
 		} );
 		const { pluginResult } = buildTwoCandidateSelectOverride(
 			[ originalNotice ],
 			'email',
 			'wp_template',
 			{
-				email: { item_updated: 'Post updated.' },
-				wp_template: { item_updated: 'Template updated.' },
+				email: {
+					item_updated: 'Post updated.',
+				},
+				wp_template: {
+					item_updated: 'Template updated.',
+				},
 			}
 		);
-
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
 		};
 		const result = selectors.getNotices();
-
 		expect( result[ 0 ].content ).toBe( 'Something else.' );
 		expect( result[ 0 ].actions ).toEqual( [] );
 	} );
-
 	it( 'rewrites correctly and looks up labels only once when both candidate post types are the same', () => {
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
 			content: 'Post updated.',
-			actions: [ { label: 'View', url: '#' } ],
+			actions: [
+				{
+					label: 'View',
+					url: '#',
+				},
+			],
 		} );
 		const { pluginResult, getPostType } = buildTwoCandidateSelectOverride(
 			[ originalNotice ],
 			'email',
 			'email',
-			{ email: { item_updated: 'Post updated.' } }
+			{
+				email: {
+					item_updated: 'Post updated.',
+				},
+			}
 		);
-
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
 		};
 		const result = selectors.getNotices();
-
 		expect( result[ 0 ].content ).toBe( 'Email saved.' );
 		expect( result[ 0 ].actions ).toEqual( [] );
 		// Pins the single "are these the same post type" decision: labels
@@ -944,48 +1144,66 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		expect( getPostType ).toHaveBeenCalledTimes( 1 );
 		expect( getPostType ).toHaveBeenCalledWith( 'email' );
 	} );
-
 	it( 'looks up labels for the current post type, not any other cached post type', () => {
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
 			content: 'Template updated.',
-			actions: [ { label: 'View', url: '#' } ],
+			actions: [
+				{
+					label: 'View',
+					url: '#',
+				},
+			],
 		} );
 		const { pluginResult, getPostType } = buildSelectOverride(
 			[ originalNotice ],
-			{ item_updated: 'Template updated.' },
+			{
+				item_updated: 'Template updated.',
+			},
 			'wp_template'
 		);
-
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
 		};
 		selectors.getNotices();
-
 		expect( getPostType ).toHaveBeenCalledWith( 'wp_template' );
 	} );
-
 	it( 'does not throw and still removes actions when getCurrentPostType is unavailable', () => {
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
 			content: 'Post updated.',
-			actions: [ { label: 'View', url: '#' } ],
+			actions: [
+				{
+					label: 'View',
+					url: '#',
+				},
+			],
 		} );
-		const originalGetNotices = jest
+		const originalGetNotices = vi
 			.fn()
 			.mockReturnValue( [ originalNotice ] );
-		const noticesSelectors = { getNotices: originalGetNotices };
-		const getPostType = jest
-			.fn()
-			.mockReturnValue( { labels: { item_updated: 'Post updated.' } } );
-		const coreSelectors = { getPostType };
+		const noticesSelectors = {
+			getNotices: originalGetNotices,
+		};
+		const getPostType = vi.fn().mockReturnValue( {
+			labels: {
+				item_updated: 'Post updated.',
+			},
+		} );
+		const coreSelectors = {
+			getPostType,
+		};
 		// `core/editor` is registered, but returns no selector for
 		// `getCurrentPostType` (e.g. an older Gutenberg version).
 		const editorSelectors = {};
-
-		const originalSelect = jest
-			.fn()
-			.mockImplementation( ( ns: string | { name: string } ) => {
+		const originalSelect = vi.fn().mockImplementation(
+			(
+				ns:
+					| string
+					| {
+							name: string;
+					  }
+			) => {
 				const name = resolveStoreName( ns );
 				if ( name === 'core/notices' ) {
 					return noticesSelectors;
@@ -997,14 +1215,15 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 					return editorSelectors;
 				}
 				return undefined;
-			} );
-
+			}
+		);
 		renderHook( () => useNoticeOverrides() );
-		const pluginResult = capturedPlugin( { select: originalSelect } );
+		const pluginResult = capturedPlugin( {
+			select: originalSelect,
+		} );
 		const selectors = pluginResult.select( 'core/notices' ) as {
 			getNotices: () => Notice[];
 		};
-
 		expect( () => selectors.getNotices() ).not.toThrow();
 		const result = selectors.getNotices();
 		expect( result[ 0 ].content ).toBe( 'Post updated.' );
