@@ -21,6 +21,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts;
 
+use DateTimeImmutable;
+use DateTimeZone;
 use RuntimeException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
@@ -141,5 +143,36 @@ final class Hold {
 		if ( $anchor !== $next_payment_gmt ) {
 			throw new RuntimeException( 'Hold::hold(): the hold anchor could not be stored; the contract was not held.' );
 		}
+	}
+
+	/**
+	 * The hold anchor stored on `$contract`, or null when there is none.
+	 *
+	 * The one reader of {@see self::ANCHOR_META_KEY}: a value that is not a well-formed
+	 * GMT datetime (`Y-m-d H:i:s`) counts as absent and is logged, since a flow resuming
+	 * or ending from it would otherwise act on garbage.
+	 *
+	 * @param Contract $contract Contract to read.
+	 */
+	public static function read_anchor( Contract $contract ): ?string {
+		$anchor = $contract->get_meta()[ self::ANCHOR_META_KEY ] ?? '';
+		if ( '' === $anchor ) {
+			return null;
+		}
+
+		$parsed = DateTimeImmutable::createFromFormat( '!Y-m-d H:i:s', $anchor, new DateTimeZone( 'UTC' ) );
+		if ( false !== $parsed && $parsed->format( 'Y-m-d H:i:s' ) === $anchor ) {
+			return $anchor;
+		}
+
+		wc_get_logger()->warning(
+			sprintf( 'Hold: contract %d has a malformed hold anchor; it is ignored.', (int) $contract->get_id() ),
+			array(
+				'source'      => 'woocommerce-subscriptions-engine',
+				'contract_id' => $contract->get_id(),
+			)
+		);
+
+		return null;
 	}
 }

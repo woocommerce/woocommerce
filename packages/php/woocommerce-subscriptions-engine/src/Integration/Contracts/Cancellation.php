@@ -161,8 +161,11 @@ final class Cancellation {
 
 			// The end of the current period is the next-due moment: the contract is honoured
 			// up to (not through) it. A held contract's moment lives in the hold anchor.
-			$period_end = $contract->get_next_payment_gmt() ?? ( $contract->get_meta()[ Hold::ANCHOR_META_KEY ] ?? null );
-			if ( null === $contract->get_end_gmt() && null !== $period_end && '' !== $period_end ) {
+			$period_end = $contract->get_next_payment_gmt();
+			if ( null === $period_end && ContractStatus::ON_HOLD === $previous ) {
+				$period_end = Hold::read_anchor( $contract );
+			}
+			if ( null === $contract->get_end_gmt() && null !== $period_end ) {
 				$contract->set_end_gmt( $period_end );
 			}
 
