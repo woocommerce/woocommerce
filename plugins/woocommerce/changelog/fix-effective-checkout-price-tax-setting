@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Keep tax-inclusive pricing consistent between the cart and checkout orders.
+Keep tax-inclusive pricing consistent between the cart and checkout.
