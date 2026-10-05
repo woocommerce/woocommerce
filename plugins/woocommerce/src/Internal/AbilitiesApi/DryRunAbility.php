@@ -10,9 +10,9 @@ namespace Automattic\WooCommerce\Internal\AbilitiesApi;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * The base class for WooCommerce's ability contracts. It adds the extension
- * field values an ability declares in `meta.woocommerce.extension_fields` to
- * its output, on every WordPress version. Experimental: a subclass can
+ * The base class for WooCommerce's ability contracts. Before WordPress 7.1, it
+ * adds the extension field values an ability declares in
+ * `meta.woocommerce.extension_fields` to its output. Experimental: a subclass can
  * implement do_dry_run() to say what execute would do without doing it.
  * dry_run() checks the input and permissions first.
  *
@@ -76,14 +76,19 @@ class DryRunAbility extends \WP_Ability {
 	}
 
 	/**
-	 * Run the execute callback, then add the extension field values the
-	 * ability declares in meta. WordPress's own hooks run as usual; this class
-	 * fires none of them.
+	 * Run the execute callback. From WordPress 7.1, extension values come from
+	 * wp_ability_execute_result, as for any ability that opts in. Before 7.1,
+	 * this method adds them. This class fires no WordPress hook itself.
 	 *
 	 * @param mixed $input Input.
 	 * @return mixed
 	 */
 	protected function do_execute( $input = null ) {
-		return RegistrationArgs::fill_result( parent::do_execute( $input ), $this );
+		$result = parent::do_execute( $input );
+		if ( RegistrationArgs::execute_result_hook_available() ) {
+			return $result;
+		}
+		// Removed once WooCommerce requires WordPress 7.1.
+		return RegistrationArgs::fill_result( $result, $this );
 	}
 }

@@ -29,10 +29,11 @@ final class RegistrationArgs {
 	public const META = 'woocommerce';
 
 	/**
-	 * Derive the write meta and add `extensions` to the schemas. A plain
-	 * WP_Ability gets extension values only through wp_ability_execute_result,
-	 * which WordPress fires from 7.1, so before 7.1 its output schema gets no
-	 * `extensions` either. A DryRunAbility fills them itself on every version.
+	 * Derive the write meta and add `extensions` to the schemas. Extension
+	 * values come from wp_ability_execute_result, which WordPress fires from
+	 * 7.1. Before 7.1, only a DryRunAbility gets values, from its own
+	 * do_execute(), so a plain WP_Ability's output schema gets no `extensions`
+	 * either.
 	 *
 	 * @param array $args Registration arguments.
 	 * @return array

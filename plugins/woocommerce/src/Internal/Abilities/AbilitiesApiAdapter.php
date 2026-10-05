@@ -10,7 +10,6 @@ namespace Automattic\WooCommerce\Internal\Abilities;
 use Automattic\WooCommerce\Abilities\AbilityContracts;
 use Automattic\WooCommerce\Abilities\AbilityFieldRegistry;
 use Automattic\WooCommerce\Abilities\ObjectValidatorRegistry;
-use Automattic\WooCommerce\Internal\AbilitiesApi\DryRunAbility;
 use Automattic\WooCommerce\Internal\AbilitiesApi\RegistrationArgs;
 
 defined( 'ABSPATH' ) || exit;
@@ -56,8 +55,9 @@ class AbilitiesApiAdapter {
 	}
 
 	/**
-	 * Add extension field values to the output of a plain ability when ability
-	 * contracts are on. A DryRunAbility fills its own.
+	 * Add extension field values to the output of any ability that declares
+	 * them, when ability contracts are on. Hooked at the default priority 10,
+	 * so a later filter sees the values.
 	 *
 	 * @internal
 	 *
@@ -68,7 +68,7 @@ class AbilitiesApiAdapter {
 	 * @return mixed
 	 */
 	public static function execute_result( $result, $ability_name, $input, $ability ) {
-		if ( ! $ability instanceof \WP_Ability || $ability instanceof DryRunAbility || ! AbilityContracts::is_enabled() ) {
+		if ( ! $ability instanceof \WP_Ability || ! AbilityContracts::is_enabled() ) {
 			return $result;
 		}
 		return RegistrationArgs::fill_result( $result, $ability );

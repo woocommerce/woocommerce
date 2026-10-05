@@ -11,6 +11,8 @@ use Automattic\WooCommerce\Abilities\AbilityContracts;
 use Automattic\WooCommerce\Abilities\AbilityFieldRegistry;
 use Automattic\WooCommerce\Abilities\ObjectValidatorRegistry;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
+use Automattic\WooCommerce\Tests\Internal\Abilities\TestExtensionProductsDefinition;
+use Automattic\WooCommerce\Tests\Internal\Abilities\TestExtensionRootProductDefinition;
 
 /**
  * Extension fields and object validators on the product create and update abilities.
@@ -652,6 +654,60 @@ class ProductAbilityContractsTest extends \WC_Unit_Test_Case {
 			$this->assertSame( array(), $fired );
 		} else {
 			$this->assertCount( 7, $fired );
+		}
+	}
+
+	/**
+	 * @testdox Should fill extension values once, on every WordPress version, for an extension's read ability registered through the ability loader.
+	 */
+	public function test_loader_registered_extension_read_gets_extension_values(): void {
+		$reads = 0;
+		add_filter(
+			'woocommerce_ability_fields',
+			static function ( array $fields, string $object_type ) use ( &$reads ): array {
+				if ( 'product' === $object_type ) {
+					$fields['test_badge'] = array(
+						'schema'       => array(
+							'type'  => 'string',
+							'title' => 'Badge',
+						),
+						'get_callback' => static function () use ( &$reads ) {
+							++$reads;
+							return 'new';
+						},
+					);
+				}
+				return $fields;
+			},
+			10,
+			2
+		);
+		add_filter(
+			'woocommerce_ability_definition_classes',
+			static function ( array $classes ): array {
+				$classes[] = TestExtensionProductsDefinition::class;
+				$classes[] = TestExtensionRootProductDefinition::class;
+				return $classes;
+			}
+		);
+		$this->set_feature( true );
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Mug' ) );
+
+		$reads  = 0;
+		$result = wp_get_ability( TestExtensionProductsDefinition::get_name() )->execute( array( 'id' => $product->get_id() ) );
+		$this->assertSame( 'new', $result['items'][0]['extensions']['test_badge'] );
+		$this->assertSame( 1, $reads );
+
+		$reads  = 0;
+		$result = wp_get_ability( TestExtensionRootProductDefinition::get_name() )->execute( array( 'id' => $product->get_id() ) );
+		$this->assertSame( 'Mug', $result['name'] );
+		$this->assertSame( 'new', $result['extensions']['test_badge'] );
+		$this->assertSame( 1, $reads );
+
+		$this->assertSame( 'Badge', wp_get_ability( TestExtensionRootProductDefinition::get_name() )->get_output_schema()['properties']['extensions']['properties']['test_badge']['title'] );
+
+		foreach ( array( TestExtensionProductsDefinition::get_name(), TestExtensionRootProductDefinition::get_name() ) as $name ) {
+			wp_unregister_ability( $name );
 		}
 	}
 

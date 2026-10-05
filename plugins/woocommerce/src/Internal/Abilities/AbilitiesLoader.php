@@ -156,9 +156,11 @@ class AbilitiesLoader {
 	}
 
 	/**
-	 * Declare the extension fields of the read abilities and run them as
-	 * DryRunAbility, which fills the values on every WordPress version. Run
-	 * Core's product writes and order status update as object changes.
+	 * Declare the extension fields of Core's read abilities, and run Core's
+	 * product writes and order status update as object changes. Any ability
+	 * the loader registers, an extension's included, that declares extension
+	 * fields and has no class of its own runs as DryRunAbility, so it gets
+	 * extension values before WordPress 7.1 too.
 	 *
 	 * @param array        $args         Registration arguments.
 	 * @param string       $ability_name Ability name.
@@ -172,8 +174,6 @@ class AbilitiesLoader {
 			OrderAddNote::class  => array( 'order', 'order' ),
 		);
 		if ( isset( $outputs[ $class_name ] ) ) {
-			$args['ability_class'] = DryRunAbility::class;
-
 			$args['meta'][ RegistrationArgs::META ]['extension_fields'] = array(
 				'object_type' => $outputs[ $class_name ][0],
 				'output'      => $outputs[ $class_name ][1],
@@ -185,6 +185,9 @@ class AbilitiesLoader {
 		}
 		if ( OrderUpdateStatus::class === $class_name ) {
 			$args['ability_class'] = OrderUpdateStatusAbility::class;
+		}
+		if ( ! isset( $args['ability_class'] ) && isset( $args['meta'][ RegistrationArgs::META ]['extension_fields'] ) ) {
+			$args['ability_class'] = DryRunAbility::class;
 		}
 
 		return $args;
