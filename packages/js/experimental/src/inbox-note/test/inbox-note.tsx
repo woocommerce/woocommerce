@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -10,11 +12,11 @@ import { createElement } from '@wordpress/element';
  */
 import { InboxNoteCard } from '../inbox-note';
 
-window.open = jest.fn();
+window.open = vi.fn();
 
 // Mock react-intersection-observer
-jest.mock( 'react-intersection-observer', () => {
-	return {
+vi.mock( 'react-intersection-observer', () => {
+	return ( ( mock ) => ( { default: mock, ...mock } ) )( {
 		useInView: (
 			options: { onChange?: ( inView: boolean ) => void } = {}
 		) => {
@@ -23,11 +25,11 @@ jest.mock( 'react-intersection-observer', () => {
 				options.onChange( true );
 			}
 			return {
-				ref: jest.fn(),
+				ref: vi.fn(),
 				inView: true,
 			};
 		},
-	};
+	} );
 } );
 
 describe( 'InboxNoteCard', () => {
@@ -191,7 +193,7 @@ describe( 'InboxNoteCard', () => {
 
 	describe( 'callbacks', () => {
 		it( 'should call onDismiss with note when "Dismiss this message" is clicked', () => {
-			const onDismiss = jest.fn();
+			const onDismiss = vi.fn();
 			const { getByText } = render(
 				<InboxNoteCard
 					key={ note.id }
@@ -204,7 +206,7 @@ describe( 'InboxNoteCard', () => {
 		} );
 
 		it( 'should call onNoteActionClick with specific action when action is clicked', () => {
-			const onNoteActionClick = jest.fn();
+			const onNoteActionClick = vi.fn();
 			const { getByText } = render(
 				<InboxNoteCard
 					key={ note.id }
@@ -220,7 +222,7 @@ describe( 'InboxNoteCard', () => {
 		} );
 
 		it( 'should call onBodyLinkClick with innerLink if link within content is clicked', () => {
-			const onBodyLinkClick = jest.fn();
+			const onBodyLinkClick = vi.fn();
 			const noteWithInnerLink = {
 				...note,
 				content:
@@ -242,7 +244,7 @@ describe( 'InboxNoteCard', () => {
 		} );
 
 		it( 'should call onVisible when element is in view', () => {
-			const onVisible = jest.fn();
+			const onVisible = vi.fn();
 			render(
 				<InboxNoteCard
 					key={ note.id }

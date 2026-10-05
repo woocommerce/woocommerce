@@ -1,3 +1,5 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -12,7 +14,7 @@ import { ExperimentalList } from '../experimental-list';
 import { ExperimentalListItem } from '../experimental-list-item';
 import { ExperimentalCollapsibleList } from '../collapsible-list';
 
-jest.mock( 'react-transition-group', () => {
+vi.mock( 'react-transition-group', async () => {
 	const EmptyTransition = ( {
 		children,
 		component,
@@ -28,11 +30,11 @@ jest.mock( 'react-transition-group', () => {
 		}
 		return <div>{ children }</div>;
 	};
-	return {
-		...jest.requireActual( 'react-transition-group' ),
+	return ( ( mock ) => ( { default: mock, ...mock } ) )( {
+		...( await vi.importActual( 'react-transition-group' ) ),
 		TransitionGroup: EmptyTransition,
 		CSSTransition: EmptyTransition,
-	};
+	} );
 } );
 
 describe( 'Experimental List', () => {
@@ -126,7 +128,7 @@ describe( 'Experimental List', () => {
 		} );
 
 		it( 'supports onClick on the list item, and handles keyboard events', () => {
-			const dummyOnClick = jest.fn();
+			const dummyOnClick = vi.fn();
 
 			const { container, queryByRole } = render(
 				<ExperimentalListItem onClick={ dummyOnClick }>
@@ -151,7 +153,7 @@ describe( 'Experimental List', () => {
 		} );
 
 		it( 'includes correct ARIA roles and a11y attributes when the item has an action', () => {
-			const clickHandler = jest.fn();
+			const clickHandler = vi.fn();
 			render(
 				<ExperimentalListItem onClick={ clickHandler }>
 					<div>Test</div>
@@ -181,8 +183,8 @@ describe( 'Experimental List', () => {
 		} );
 
 		it( 'should render list items when footer is clicked and trigger onExpand', () => {
-			const onExpand = jest.fn();
-			const onCollapse = jest.fn();
+			const onExpand = vi.fn();
+			const onCollapse = vi.fn();
 			const { container } = render(
 				<ExperimentalCollapsibleList
 					collapseLabel="Show less"
@@ -209,8 +211,8 @@ describe( 'Experimental List', () => {
 		} );
 
 		it( 'should render minimum children if minChildrenToShow is set and show the rest on expand', () => {
-			const onExpand = jest.fn();
-			const onCollapse = jest.fn();
+			const onExpand = vi.fn();
+			const onCollapse = vi.fn();
 			const { container } = render(
 				<ExperimentalCollapsibleList
 					collapseLabel="Show less"
@@ -246,8 +248,8 @@ describe( 'Experimental List', () => {
 		} );
 
 		it( 'should correctly toggle the list', async () => {
-			const onExpand = jest.fn();
-			const onCollapse = jest.fn();
+			const onExpand = vi.fn();
+			const onCollapse = vi.fn();
 			const { container } = render(
 				<ExperimentalCollapsibleList
 					collapseLabel="Show less"
@@ -297,12 +299,12 @@ describe( 'Experimental List', () => {
 			};
 
 			beforeEach( () => {
-				jest.useFakeTimers();
+				vi.useFakeTimers();
 			} );
 
 			afterEach( () => {
-				jest.runOnlyPendingTimers();
-				jest.useRealTimers();
+				vi.runOnlyPendingTimers();
+				vi.useRealTimers();
 			} );
 
 			it( 'should only update the shown items at first', () => {
@@ -324,7 +326,7 @@ describe( 'Experimental List', () => {
 				expect( queryByText( 'item-2' ) ).not.toBeInTheDocument();
 
 				act( () => {
-					jest.runAllTimers();
+					vi.runAllTimers();
 				} );
 			} );
 
@@ -346,7 +348,7 @@ describe( 'Experimental List', () => {
 				expect( queryByText( 'item-3' ) ).not.toBeInTheDocument();
 
 				act( () => {
-					jest.advanceTimersByTime( 500 );
+					vi.advanceTimersByTime( 500 );
 				} );
 				expect(
 					queryByText( 'Show more items' )

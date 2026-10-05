@@ -1,37 +1,41 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
+import { render, act } from '@testing-library/react';
 import { createElement, createRef, Fragment } from '@wordpress/element';
 /**
  * Internal dependencies
  */
 import { VerticalCSSTransition } from '../vertical-css-transition';
-
 describe( 'VerticalCSSTransition', () => {
 	const originalClientHeight = Object.getOwnPropertyDescriptor(
 		HTMLElement.prototype,
 		'clientHeight'
 	);
-
 	beforeEach( () => {
+		vi.useFakeTimers();
 		Object.defineProperty( HTMLElement.prototype, 'clientHeight', {
 			configurable: true,
 			value: 100,
 		} );
 	} );
-
 	afterEach( () => {
+		vi.useRealTimers();
 		if ( originalClientHeight ) {
 			Object.defineProperty(
 				HTMLElement.prototype,
-				'offsetHeight',
+				'clientHeight',
 				originalClientHeight
 			);
 		}
 	} );
-
-	it( 'should set maxHeight of children to container on entering and remove it when entered', ( done ) => {
+	it( 'should set maxHeight of children to container on entering and remove it when entered', async () => {
+		let done;
+		const completion = new Promise< void >( ( resolve ) => {
+			done = resolve;
+		} );
 		const nodeRef = createRef< undefined | HTMLDivElement >();
 		let onEnteringCalledCount = 0;
 		const props = {
@@ -62,7 +66,6 @@ describe( 'VerticalCSSTransition', () => {
 				</div>
 			</VerticalCSSTransition>
 		);
-		jest.runOnlyPendingTimers();
 
 		rerender(
 			<VerticalCSSTransition { ...props } in={ true }>
@@ -71,10 +74,17 @@ describe( 'VerticalCSSTransition', () => {
 				</div>
 			</VerticalCSSTransition>
 		);
-		jest.runOnlyPendingTimers();
-	} );
 
-	it( 'should update maxHeight when children are updated', ( done ) => {
+		await act( async () => {
+			await vi.runAllTimersAsync();
+		} );
+		await completion;
+	} );
+	it( 'should update maxHeight when children are updated', async () => {
+		let done;
+		const completion = new Promise< void >( ( resolve ) => {
+			done = resolve;
+		} );
 		const nodeRef = createRef< undefined | HTMLDivElement >();
 		let onEnteringCalledCount = 0;
 		const props = {
@@ -105,7 +115,6 @@ describe( 'VerticalCSSTransition', () => {
 				</div>
 			</VerticalCSSTransition>
 		);
-		jest.runOnlyPendingTimers();
 
 		rerender(
 			<VerticalCSSTransition { ...props } in={ true }>
@@ -120,9 +129,12 @@ describe( 'VerticalCSSTransition', () => {
 		expect(
 			nodeRef.current && nodeRef.current.parentElement?.style.maxHeight
 		).toBe( '200px' );
-		jest.runOnlyPendingTimers();
-	} );
 
+		await act( async () => {
+			await vi.runAllTimersAsync();
+		} );
+		await completion;
+	} );
 	it( 'should set maxHeight to zero if in is set to false', () => {
 		const nodeRef = createRef< undefined | HTMLDivElement >();
 		render(
@@ -137,12 +149,10 @@ describe( 'VerticalCSSTransition', () => {
 				</div>
 			</VerticalCSSTransition>
 		);
-
 		expect(
 			nodeRef.current && nodeRef.current.parentElement?.style.maxHeight
 		).toBe( '0' );
 	} );
-
 	it( 'should not set transition variables when not in transition', () => {
 		const nodeRef = createRef< undefined | HTMLDivElement >();
 		render(
@@ -157,7 +167,6 @@ describe( 'VerticalCSSTransition', () => {
 				</div>
 			</VerticalCSSTransition>
 		);
-
 		expect(
 			nodeRef.current &&
 				nodeRef.current.parentElement?.style.transitionDuration
@@ -167,8 +176,11 @@ describe( 'VerticalCSSTransition', () => {
 				nodeRef.current.parentElement?.style.transitionProperty
 		).toBe( '' );
 	} );
-
-	it( 'should add transition style properties when in transition', ( done ) => {
+	it( 'should add transition style properties when in transition', async () => {
+		let done;
+		const completion = new Promise< void >( ( resolve ) => {
+			done = resolve;
+		} );
 		const nodeRef = createRef< undefined | HTMLDivElement >();
 		render(
 			<VerticalCSSTransition
@@ -196,9 +208,16 @@ describe( 'VerticalCSSTransition', () => {
 				</div>
 			</VerticalCSSTransition>
 		);
+		await act( async () => {
+			await vi.runAllTimersAsync();
+		} );
+		await completion;
 	} );
-
-	it( 'should still set css classes on enter transition', ( done ) => {
+	it( 'should still set css classes on enter transition', async () => {
+		let done;
+		const completion = new Promise< void >( ( resolve ) => {
+			done = resolve;
+		} );
 		const nodeRef = createRef< undefined | HTMLDivElement >();
 		const props = {
 			in: false,
@@ -233,9 +252,16 @@ describe( 'VerticalCSSTransition', () => {
 				</div>
 			</VerticalCSSTransition>
 		);
+		await act( async () => {
+			await vi.runAllTimersAsync();
+		} );
+		await completion;
 	} );
-
-	it( 'should still set css classes on exit transition', ( done ) => {
+	it( 'should still set css classes on exit transition', async () => {
+		let done;
+		const completion = new Promise< void >( ( resolve ) => {
+			done = resolve;
+		} );
 		const nodeRef = createRef< undefined | HTMLDivElement >();
 		const props = {
 			in: true,
@@ -268,10 +294,17 @@ describe( 'VerticalCSSTransition', () => {
 				</div>
 			</VerticalCSSTransition>
 		);
+		await act( async () => {
+			await vi.runAllTimersAsync();
+		} );
+		await completion;
 	} );
-
 	describe( 'defaultStyle', () => {
-		it( 'should overwrite default style when passed in', ( done ) => {
+		it( 'should overwrite default style when passed in', async () => {
+			let done;
+			const completion = new Promise< void >( ( resolve ) => {
+				done = resolve;
+			} );
 			const nodeRef = createRef< undefined | HTMLDivElement >();
 			render(
 				<VerticalCSSTransition
@@ -297,6 +330,9 @@ describe( 'VerticalCSSTransition', () => {
 					</div>
 				</VerticalCSSTransition>
 			);
+			await act( async () => {
+				await completion;
+			} );
 		} );
 	} );
 } );

@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -14,8 +16,8 @@ describe( 'InboxDismissConfirmationModal', () => {
 	it( "should render with default button label - Yes, I'am sure", () => {
 		const { queryByText } = render(
 			<InboxDismissConfirmationModal
-				onClose={ jest.fn() }
-				onDismiss={ jest.fn() }
+				onClose={ vi.fn() }
+				onDismiss={ vi.fn() }
 			/>
 		);
 		expect( queryByText( "Yes, I'm sure" ) ).toBeInTheDocument();
@@ -24,8 +26,8 @@ describe( 'InboxDismissConfirmationModal', () => {
 	it( 'should render passed in button label if provided', () => {
 		const { queryByText } = render(
 			<InboxDismissConfirmationModal
-				onClose={ jest.fn() }
-				onDismiss={ jest.fn() }
+				onClose={ vi.fn() }
+				onDismiss={ vi.fn() }
 				buttonLabel="Custom button"
 			/>
 		);
@@ -33,11 +35,11 @@ describe( 'InboxDismissConfirmationModal', () => {
 	} );
 
 	it( 'should call onClose if Cancel is clicked', () => {
-		const onClose = jest.fn();
+		const onClose = vi.fn();
 		const { getByText } = render(
 			<InboxDismissConfirmationModal
 				onClose={ onClose }
-				onDismiss={ jest.fn() }
+				onDismiss={ vi.fn() }
 			/>
 		);
 		userEvent.click( getByText( 'Cancel' ) );
@@ -45,10 +47,10 @@ describe( 'InboxDismissConfirmationModal', () => {
 	} );
 
 	it( 'should call onDismiss if dismiss button is clicked', () => {
-		const onDismiss = jest.fn();
+		const onDismiss = vi.fn();
 		const { getByText } = render(
 			<InboxDismissConfirmationModal
-				onClose={ jest.fn() }
+				onClose={ vi.fn() }
 				onDismiss={ onDismiss }
 			/>
 		);
