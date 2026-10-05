@@ -1,10 +1,20 @@
+import ResizeObserver from 'resize-observer-polyfill';
+import * as element from '@wordpress/element';
+import * as data from '@wordpress/data';
+import { vi } from 'vitest';
+
 /**
  * External dependencies
  */
-const { TextDecoder, TextEncoder } = require( 'node:util' );
-const { setLocaleData } = require( '@wordpress/i18n' );
-const { registerStore } = require( '@wordpress/data' );
-require( 'regenerator-runtime/runtime' );
+import { TextDecoder, TextEncoder } from 'node:util';
+import { setLocaleData } from '@wordpress/i18n';
+import { registerStore } from '@wordpress/data';
+import 'regenerator-runtime/runtime';
+
+/**
+ * Internal dependencies
+ */
+import config from '../../../../plugins/woocommerce/client/admin/config/development.json';
 
 if ( typeof global.TextEncoder === 'undefined' ) {
 	global.TextEncoder = TextEncoder;
@@ -16,30 +26,18 @@ if ( typeof global.TextDecoder === 'undefined' ) {
 
 // Due to the dependency @wordpress/compose which introduces the use of
 // ResizeObserver this global mock is required for some tests to work.
-global.ResizeObserver = require( 'resize-observer-polyfill' );
+global.ResizeObserver = ResizeObserver;
 
 // Set up `wp.*` aliases.  Doing this because any tests importing wp stuff will
 // likely run into this.
 global.wp = {
 	shortcode: {
 		next() {},
-		regexp: jest.fn().mockReturnValue( new RegExp() ),
+		regexp: vi.fn().mockReturnValue( new RegExp() ),
 	},
 };
 
 global.wc = {};
-
-const wordPressPackages = [ 'element', 'date', 'data' ];
-
-const wooCommercePackages = [
-	'components',
-	'csv',
-	'currency',
-	'date',
-	'navigation',
-	'number',
-	'data',
-];
 
 global.wcTracks = {
 	isEnabled: false,
@@ -108,19 +106,7 @@ global.wcSettings = {
 	},
 };
 
-wordPressPackages.forEach( ( lib ) => {
-	Object.defineProperty( global.wp, lib, {
-		get: () => require( `@wordpress/${ lib }` ),
-	} );
-} );
-
-wooCommercePackages.forEach( ( lib ) => {
-	Object.defineProperty( global.wc, lib, {
-		get: () => require( `@woocommerce/${ lib }` ),
-	} );
-} );
-
-const config = require( '../../../../plugins/woocommerce/client/admin/config/development.json' );
+Object.assign( global.wp, { element, data } );
 
 // Check if test is jsdom or node
 if ( global.window ) {

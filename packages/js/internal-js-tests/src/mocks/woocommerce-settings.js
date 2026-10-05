@@ -1,4 +1,4 @@
-module.exports = {
+const settings = {
 	getSetting: ( key, backup ) => {
 		return global.wcSettings[ key ] || backup;
 	},
@@ -30,3 +30,6 @@ module.exports = {
 		return false;
 	},
 };
+
+export const { getSetting, getAdminLink, isWpVersion } = settings;
+export default settings;
