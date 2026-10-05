@@ -1,5 +1,31 @@
 *** WooCommerce Beta Tester Changelog ***
 
+2026-10-05 - version 4.0.0
+* Patch - Remove async product editor category field from live branch feature flags.
+* Patch - Implement hide shipping rates when free is available option
+* Patch - Monorepo: Webpack deps review and consolidation and a bit of deps grooming
+* Patch - Bump wireit dependency version to latest.
+* Patch - Beta Tester: Remove not necessary endpoints to reset CYS.
+* Patch - Monorepo: consolidate packages licenses to `GPL-2.0-or-later`.
+* Major [ **BREAKING CHANGE** ] - Updated all PHP dependencies.
+* Minor - Remove Legacy REST API settings section, admin notices, auto-install logic, and UI nudges from WooCommerce core. The Legacy REST API extension continues to work if manually installed.
+* Patch - Reset Customize Your Store: simplify the action to adjust to journey updates
+* Minor - Add template loading tool in beta tester
+* Patch - Remove the unused PHPUnit dev dependency and move symfony/process to a patched version.
+* Patch - Add void to intentionally-unawaited promises for the new no-floating-promises lint rule
+* Patch - Fix TypeError when deleting the simulate WooCommerce JS error option
+* Patch - Fix live-branches api request body structure to use 'data' instead of 'body'
+* Patch - Restrict the WCA Test Helper REST API, its admin script, and the Live Branches page to users who can install plugins.
+* Patch - Fix live-branches userscript broken by GitHub DOM changes: extract PR data from embedded JSON instead of removed CSS selectors, and fix checkbox change listeners that were never attached due to arrow function misuse.
+* Patch - Restore the main Beta Tester JavaScript bundle and correct asset version fallback paths.
+* Patch - Remove product editor devtools for the deprecated product block editor.
+* Minor - Remove reactify-classic-payments-settings flag as it was migrated to Core features
+* Patch - Update PHP development dependencies to versions that resolve reported security advisories.
+* Patch - Update @wordpress/* peerDependencies from dist-tags to semver ranges for pnpm 10 compatibility.
+* Minor - Added additional switch version button to the top of versions list
+* Major [ **BREAKING CHANGE** ] - Update @wordpress/* dependencies to wp-6.8 minimum.
+* Patch - Update woocommerce-sniffs to 1.0.1 / wp-coding-standards/wpcs to 3.4.1 (security release).
+
 2025-02-20 - version 3.0.0
 * Patch - Fix warnings on the Plugins page when a plugin requires another plugin
 * Patch - Add tab navigation with URL state management in WooCommerce Admin Test Helper
