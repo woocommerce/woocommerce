@@ -27,7 +27,6 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ConsumerRegistry;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -655,9 +654,9 @@ final class ContractRepository {
 	 * Contracts actionable for renewal at `$now`, oldest-due first - the batch dispatcher's scan.
 	 *
 	 * A contract is due when its next-due moment (`next_payment_gmt`) has passed AND its owner
-	 * (`extension_slug`) is a registered consumer ({@see ConsumerRegistry}). A contract with a
-	 * null or unregistered owner waits untouched (its next-due moment is never rewritten) until
-	 * its owner registers; with no consumer registered the scan returns nothing. A null
+	 * (`extension_slug`) is one of `$owners` - the dispatcher passes the registered consumers.
+	 * A contract with a null or unlisted owner waits untouched (its next-due moment is never
+	 * rewritten) until its owner is listed; with no owners the scan returns nothing. A null
 	 * `next_payment_gmt` never matches the `<=` comparison.
 	 *
 	 * Interim: moves out of the engine with the renewal flow (the predicates below; the scan
@@ -681,16 +680,17 @@ final class ContractRepository {
 	 * via the `chain_seq` UNIQUE index. Returns the head fields selection needs, so the dispatcher
 	 * does not re-load the head to decide what to bill.
 	 *
-	 * @param DateTimeImmutable $now   The cutoff moment; contracts due at or before it.
-	 * @param int               $limit Maximum rows to return (the batch size).
+	 * @param DateTimeImmutable  $now   The cutoff moment; contracts due at or before it.
+	 * @param int                $limit  Maximum rows to return (the batch size).
+	 * @param array<int, string> $owners Owner slugs whose contracts may be selected.
 	 * @return array<int, RenewalCandidate> Actionable renewal candidates, oldest-due first.
 	 */
-	public function find_due( DateTimeImmutable $now, int $limit ): array {
+	public function find_due( DateTimeImmutable $now, int $limit, array $owners ): array {
 		if ( $limit < 1 ) {
 			return array();
 		}
 
-		$owners = ConsumerRegistry::all();
+		$owners = array_values( array_unique( array_map( 'strval', $owners ) ) );
 		if ( array() === $owners ) {
 			return array();
 		}

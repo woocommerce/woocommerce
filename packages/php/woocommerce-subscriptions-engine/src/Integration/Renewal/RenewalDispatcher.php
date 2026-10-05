@@ -207,9 +207,9 @@ final class RenewalDispatcher {
 	/**
 	 * Run one scan tick over up to `$limit` due contracts.
 	 *
-	 * The scan is owner-scoped ({@see ContractRepository::find_due()}): only contracts owned by
-	 * a registered consumer are selected, so with no consumer registered nothing is charged (the
-	 * empty-registry check up front just skips the query). The scan returns the actionable
+	 * The scan is owner-scoped: the registered consumers are read once and passed to
+	 * {@see ContractRepository::find_due()}, so only their contracts are selected; with no
+	 * consumer registered the tick logs that and charges nothing. The scan returns the actionable
 	 * contracts due at `$now`; each is run through read-only selection and, when a cycle is due,
 	 * billed via {@see RenewalEngine::process()}. A pre-flight impossibility
 	 * ({@see RenewalNotProcessable}) parks the contract; any other throw is logged - so one bad
@@ -226,7 +226,10 @@ final class RenewalDispatcher {
 			return 0;
 		}
 
-		if ( ConsumerRegistry::is_empty() ) {
+		// Read the owner set once per tick; with nobody registered there is nothing to scan,
+		// and saying so in the log beats a silent empty batch.
+		$owners = ConsumerRegistry::all();
+		if ( array() === $owners ) {
 			wc_get_logger()->info(
 				'RenewalDispatcher::run(): no consumer extension is registered - skipping the renewal scan (charging nothing).',
 				array( 'source' => self::LOG_SOURCE )
@@ -235,7 +238,7 @@ final class RenewalDispatcher {
 		}
 
 		$now        = $now ?? new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
-		$candidates = $this->contracts->find_due( $now, $limit );
+		$candidates = $this->contracts->find_due( $now, $limit, $owners );
 
 		$billed  = 0;
 		$skipped = 0;

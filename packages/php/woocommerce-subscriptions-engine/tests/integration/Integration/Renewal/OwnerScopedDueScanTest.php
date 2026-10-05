@@ -195,7 +195,7 @@ class OwnerScopedDueScanTest extends EngineIntegrationTestCase {
 	 */
 	private function due_ids( DateTimeImmutable $at ): array {
 		$ids = array();
-		foreach ( $this->contracts->find_due( $at, 50 ) as $candidate ) {
+		foreach ( $this->contracts->find_due( $at, 50, ConsumerRegistry::all() ) as $candidate ) {
 			$ids[] = $candidate->get_contract_id();
 		}
 

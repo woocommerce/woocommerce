@@ -17,7 +17,6 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ConsumerRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\DuplicateCycleException;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\RenewalCandidate;
@@ -43,12 +42,9 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut = new ContractRepository();
-		ConsumerRegistry::reset();
-		ConsumerRegistry::register( self::OWNER );
 	}
 
 	public function tearDown(): void {
-		ConsumerRegistry::reset();
 		StatusRegistry::reset();
 		parent::tearDown();
 	}
@@ -1152,9 +1148,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 
 		$this->assertNotContains( $id, $this->due_ids( $now, 50 ) );
 
-		ConsumerRegistry::register( 'other-ext' );
-
-		$this->assertContains( $id, $this->due_ids( $now, 50 ) );
+		$this->assertContains( $id, $this->due_ids( $now, 50, array( self::OWNER, 'other-ext' ) ) );
 		$contract = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $contract );
 		$this->assertSame( '2026-06-15 00:00:00', $contract->get_next_payment_gmt(), 'The waiting contract keeps its due moment.' );
@@ -1167,9 +1161,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
 		$this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
 
-		ConsumerRegistry::reset();
-
-		$this->assertSame( array(), $this->sut->find_due( $now, 50 ) );
+		$this->assertSame( array(), $this->sut->find_due( $now, 50, array() ) );
 	}
 
 	/**
@@ -1223,7 +1215,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
 
 		$id         = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
-		$candidates = $this->sut->find_due( $now, 50 );
+		$candidates = $this->sut->find_due( $now, 50, array( self::OWNER ) );
 
 		$this->assertCount( 1, $candidates );
 		$row = $candidates[0];
@@ -1286,8 +1278,8 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
 		$this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
 
-		$this->assertSame( array(), $this->sut->find_due( $now, 0 ) );
-		$this->assertSame( array(), $this->sut->find_due( $now, -1 ) );
+		$this->assertSame( array(), $this->sut->find_due( $now, 0, array( self::OWNER ) ) );
+		$this->assertSame( array(), $this->sut->find_due( $now, -1, array( self::OWNER ) ) );
 	}
 
 	/**
@@ -1427,16 +1419,17 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	/**
 	 * The contract ids of the due scan at `$now`, in scan order.
 	 *
-	 * @param \DateTimeImmutable $now   The cutoff moment.
-	 * @param int                $limit The batch size.
+	 * @param \DateTimeImmutable      $now    The cutoff moment.
+	 * @param int                     $limit  The batch size.
+	 * @param array<int, string>|null $owners Owners to scan; defaults to the test owner.
 	 * @return array<int, int>
 	 */
-	private function due_ids( \DateTimeImmutable $now, int $limit ): array {
+	private function due_ids( \DateTimeImmutable $now, int $limit, ?array $owners = null ): array {
 		return array_map(
 			static function ( RenewalCandidate $candidate ): int {
 				return $candidate->get_contract_id();
 			},
-			$this->sut->find_due( $now, $limit )
+			$this->sut->find_due( $now, $limit, $owners ?? array( self::OWNER ) )
 		);
 	}
 
