@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Let themes size the Order Confirmation section headings, so they no longer render smaller than body text on narrow screens.
+Order Confirmation section headings now use the theme's heading size instead of a fixed 24px
