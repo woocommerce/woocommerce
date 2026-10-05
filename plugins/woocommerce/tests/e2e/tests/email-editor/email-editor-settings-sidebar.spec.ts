@@ -265,14 +265,16 @@ test.describe(
 			page,
 		} ) => {
 			await openEmail( page, 'Customer note' );
-			await expect( page.getByLabel( 'Email' ) ).toBeVisible();
-			// Blocks inserted before the canvas renders are lost when the editor sets up its blocks.
+			// The email content replaces the post-content inner blocks when it
+			// loads, so wait for it before inserting a block.
 			await expect(
 				page
 					.locator( 'iframe[name="editor-canvas"]' )
 					.contentFrame()
 					.getByLabel( 'Block: Heading' )
-					.first()
+					.filter( {
+						hasText: 'A note has been added to your order',
+					} )
 			).toBeVisible();
 
 			await page.evaluate( () => {
