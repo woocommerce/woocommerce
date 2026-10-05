@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce Beta Tester
  * Plugin URI: https://github.com/woocommerce/woocommerce-beta-tester
  * Description: Run bleeding edge versions of WooCommerce. This will replace your installed version of WooCommerce with the latest tagged release - use with caution, and not on production sites.
- * Version: 4.0.1
+ * Version: 4.0.0
  * Author: WooCommerce
  * Author URI: https://woocommerce.com/
  * License: GPL-2.0-or-later
@@ -32,7 +32,7 @@ if ( ! defined( 'WC_BETA_TESTER_FILE' ) ) {
 }
 
 if ( ! defined( 'WC_BETA_TESTER_VERSION' ) ) {
-	define( 'WC_BETA_TESTER_VERSION', '4.0.1' ); // WRCS: DEFINED_VERSION.
+	define( 'WC_BETA_TESTER_VERSION', '4.0.0' ); // WRCS: DEFINED_VERSION.
 }
 
 /**

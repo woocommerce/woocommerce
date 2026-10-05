@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update plugin headers: declare the GPL-2.0-or-later license, require WordPress 6.8, and mark as tested up to WordPress 7.1 and WooCommerce 11.2.

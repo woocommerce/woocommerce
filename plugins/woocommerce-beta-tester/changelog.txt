@@ -1,8 +1,5 @@
 *** WooCommerce Beta Tester Changelog ***
 
-2026-10-05 - version 4.0.1
-* Patch - Update plugin headers: declare the GPL-2.0-or-later license, require WordPress 6.8, and mark as tested up to WordPress 7.1 and WooCommerce 11.2.
-
 2026-10-05 - version 4.0.0
 * Patch - Remove async product editor category field from live branch feature flags.
 * Patch - Implement hide shipping rates when free is available option
