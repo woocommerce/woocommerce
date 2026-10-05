@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withSelect } from '@wordpress/data';
@@ -15,7 +15,7 @@ import {
 } from '@woocommerce/components';
 import { calculateDelta, formatValue } from '@woocommerce/number';
 import { getSummaryNumbers, settingsStore } from '@woocommerce/data';
-import { getDateParamsFromQuery } from '@woocommerce/date';
+import { getCurrentDates } from '@woocommerce/date';
 import { recordEvent } from '@woocommerce/tracks';
 import { CurrencyContext } from '@woocommerce/currency';
 
@@ -72,7 +72,11 @@ export class ReportSummary extends Component {
 			return <SummaryListPlaceholder numberOfItems={ charts.length } />;
 		}
 
-		const { compare } = getDateParamsFromQuery( query, defaultDateRange );
+		const prevLabel = sprintf(
+			/* translators: %s: name of the compared date range, e.g. "Same day last year" */
+			__( '%s:', 'woocommerce' ),
+			getCurrentDates( query, defaultDateRange ).secondary.label
+		);
 
 		const renderSummaryNumbers = ( { onToggle } ) =>
 			charts.map( ( chart ) => {
@@ -103,11 +107,7 @@ export class ReportSummary extends Component {
 						href={ href }
 						label={ label }
 						reverseTrend={ isReverseTrend }
-						prevLabel={
-							compare === 'previous_period'
-								? __( 'Previous period:', 'woocommerce' )
-								: __( 'Previous year:', 'woocommerce' )
-						}
+						prevLabel={ prevLabel }
 						prevValue={ prevValue }
 						selected={ isSelected }
 						value={ value }
