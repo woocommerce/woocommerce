@@ -25,7 +25,9 @@ const wpCLI = async ( command: string | string[] ) => {
 				...command,
 		  ] )
 		: await execAsync(
-				`pnpm exec wp-env --config ${ process.env.E2E_WP_ENV_CONFIG ?? '.wp-env.e2e.json' } run cli -- ${ command }`
+				`pnpm exec wp-env --config ${
+					process.env.E2E_WP_ENV_CONFIG ?? '.wp-env.e2e.json'
+				} run cli -- ${ command }`
 		  );
 
 	return { stdout, stderr };
