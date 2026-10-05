@@ -316,13 +316,19 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		$total_cost = is_array( $args['cost'] ) ? array_sum( $args['cost'] ) : $args['cost'];
 		$taxes      = $args['taxes'];
 
+		// An empty cost means free, for example local pickup with no cost set.
+		if ( '' === $total_cost ) {
+			$total_cost = 0;
+		}
+
 		// Taxes - if not an array and not set to false, calc tax based on cost and passed calc_tax variable. This saves shipping methods having to do complex tax calculations.
-		if ( ! is_array( $taxes ) && false !== $taxes && $total_cost > 0 && $this->is_taxable() ) {
+		// Free rates are included so the order gets a 0 tax entry per rate, same as when taxes are recalculated in admin.
+		if ( ! is_array( $taxes ) && false !== $taxes && is_numeric( $total_cost ) && $total_cost >= 0 && $this->is_taxable() ) {
 			if ( 'per_item' === $args['calc_tax'] ) {
 				$taxes = $this->get_taxes_per_item( $args['cost'] );
 			} else {
 				$shipping_tax_rates = WC_Tax::get_shipping_tax_rates();
-				$taxes              = WC_Tax::calc_shipping_tax( $total_cost, $shipping_tax_rates );
+				$taxes              = WC_Tax::calc_shipping_tax( (float) $total_cost, $shipping_tax_rates );
 			}
 
 			/**
