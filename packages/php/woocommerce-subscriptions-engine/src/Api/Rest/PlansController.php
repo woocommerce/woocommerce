@@ -9,7 +9,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Api\Rest;
 
-use Automattic\WooCommerce\SubscriptionsEngine\Api\SellingPlans;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
@@ -638,7 +637,7 @@ final class PlansController extends WP_REST_Controller {
 		 * @param Plan|WP_Error $plan           Plan about to be written; its id is null on create.
 		 * @param string        $extension_slug Owning extension slug.
 		 */
-		$result = apply_filters( SellingPlans::VALIDATE_PLAN_FILTER, $plan, $extension_slug );
+		$result = apply_filters( 'woocommerce_subscriptions_engine_validate_plan', $plan, $extension_slug );
 
 		if ( $result instanceof WP_Error ) {
 			$data = $result->get_error_data();

@@ -34,13 +34,6 @@ defined( 'ABSPATH' ) || exit;
 final class SellingPlans {
 
 	/**
-	 * Filter fired on plan writes so the owning extension validates and normalizes
-	 * the plan: `( Plan $plan, string $extension_slug )`, returning the Plan or a
-	 * WP_Error. The plan's id and owner must not change.
-	 */
-	public const VALIDATE_PLAN_FILTER = 'woocommerce_subscriptions_engine_validate_plan';
-
-	/**
 	 * Query limit for plan lookups; high enough that a plan catalog is never
 	 * truncated by the repository's default of 50.
 	 *

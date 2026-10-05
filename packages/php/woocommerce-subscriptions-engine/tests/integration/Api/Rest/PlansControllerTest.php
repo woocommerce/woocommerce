@@ -10,7 +10,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Api\Rest;
 
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Rest\PlansController;
-use Automattic\WooCommerce\SubscriptionsEngine\Api\SellingPlans;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use EngineIntegrationTestCase;
 use WP_Error;
@@ -44,7 +43,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 	}
 
 	public function tearDown(): void {
-		remove_all_filters( SellingPlans::VALIDATE_PLAN_FILTER );
+		remove_all_filters( 'woocommerce_subscriptions_engine_validate_plan' );
 		wp_set_current_user( 0 );
 		parent::tearDown();
 	}
@@ -377,7 +376,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 
 		$calls = array();
 		add_filter(
-			SellingPlans::VALIDATE_PLAN_FILTER,
+			'woocommerce_subscriptions_engine_validate_plan',
 			static function ( $plan, $extension_slug ) use ( &$calls ) {
 				self::assertInstanceOf( Plan::class, $plan );
 				$calls[] = array( $plan->get_id(), $plan->get_name(), $plan->get_pricing_policy(), $extension_slug );
@@ -451,7 +450,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 
 		$seen = array();
 		add_filter(
-			SellingPlans::VALIDATE_PLAN_FILTER,
+			'woocommerce_subscriptions_engine_validate_plan',
 			static function ( $plan ) use ( &$seen ) {
 				self::assertInstanceOf( Plan::class, $plan );
 				$seen[] = array( $plan->get_id(), $plan->get_name() );
@@ -484,7 +483,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$id = $this->create_plan( 'Untouched' );
 
 		add_filter(
-			SellingPlans::VALIDATE_PLAN_FILTER,
+			'woocommerce_subscriptions_engine_validate_plan',
 			static function () use ( $error ) {
 				return $error;
 			}
@@ -518,7 +517,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$this->assertSame( $expected_status, $patched->get_status() );
 		$this->assertSame( 'owner_rejected', $this->response_data( $patched )['code'] );
 
-		remove_all_filters( SellingPlans::VALIDATE_PLAN_FILTER );
+		remove_all_filters( 'woocommerce_subscriptions_engine_validate_plan' );
 
 		$fetched = $this->response_data( $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) ) );
 		$this->assertSame( 'Untouched', $fetched['name'] );
@@ -542,7 +541,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		wp_set_current_user( $this->admin_id );
 
 		add_filter(
-			SellingPlans::VALIDATE_PLAN_FILTER,
+			'woocommerce_subscriptions_engine_validate_plan',
 			static function ( $plan ) {
 				self::assertInstanceOf( Plan::class, $plan );
 				$plan->set_pricing_policy( array( 'policies' => array( array( 'type' => 'normalized' ) ) ) );
@@ -579,7 +578,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		);
 		$this->assertSame( 200, $patched->get_status() );
 
-		remove_all_filters( SellingPlans::VALIDATE_PLAN_FILTER );
+		remove_all_filters( 'woocommerce_subscriptions_engine_validate_plan' );
 
 		$fetched = $this->response_data( $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) ) );
 		$this->assertSame( 'Normalized again', $fetched['name'] );
@@ -595,7 +594,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		wp_set_current_user( $this->admin_id );
 		$id = $this->create_plan( 'Untouched' );
 
-		add_filter( SellingPlans::VALIDATE_PLAN_FILTER, $make_return );
+		add_filter( 'woocommerce_subscriptions_engine_validate_plan', $make_return );
 
 		$created = $this->request(
 			'POST',
@@ -623,7 +622,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$this->assertSame( 400, $patched->get_status() );
 		$this->assertSame( 'woocommerce_subscriptions_engine_invalid_plan', $this->response_data( $patched )['code'] );
 
-		remove_all_filters( SellingPlans::VALIDATE_PLAN_FILTER );
+		remove_all_filters( 'woocommerce_subscriptions_engine_validate_plan' );
 
 		$fetched = $this->response_data( $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) ) );
 		$this->assertSame( 'Untouched', $fetched['name'] );
