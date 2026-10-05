@@ -147,6 +147,33 @@ class HoldTest extends EngineIntegrationTestCase {
 		}
 	}
 
+	/**
+	 * The anchor is stored and read back before the hold disarms the contract, so a failed
+	 * meta write aborts the hold with nothing disarmed instead of leaving a held contract
+	 * that reactivation could not re-arm.
+	 */
+	public function test_hold_aborts_without_disarming_when_the_anchor_cannot_be_stored(): void {
+		$id         = $this->seed( ContractStatus::ACTIVE );
+		$meta_table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
+		$break      = static function ( string $query ) use ( $meta_table ): string {
+			return 0 === strpos( $query, "INSERT INTO `{$meta_table}`" ) ? 'SELECT broken syntax (' : $query;
+		};
+		add_filter( 'query', $break );
+
+		try {
+			$this->sut->hold( $this->reload( $id ) );
+			$this->fail( 'Expected the hold to abort when the anchor cannot be stored.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'anchor could not be stored', $e->getMessage() );
+		} finally {
+			remove_filter( 'query', $break );
+		}
+
+		$stored = $this->reload( $id );
+		$this->assertSame( ContractStatus::ACTIVE, $stored->get_status() );
+		$this->assertSame( '2099-01-01 00:00:00', $stored->get_next_payment_gmt(), 'The next-due moment was not disarmed.' );
+	}
+
 	public function test_hold_rejects_a_cancelled_contract(): void {
 		$id = $this->seed( ContractStatus::CANCELLED );
 

@@ -24,6 +24,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Hold;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Reactivation;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Reactivation
@@ -170,12 +171,28 @@ class ReactivationTest extends EngineIntegrationTestCase {
 		$this->assertArrayNotHasKey( Hold::ANCHOR_META_KEY, $stored->get_meta() );
 	}
 
-	public function test_reactivate_prefers_the_anchor_over_a_stored_next_payment(): void {
+	/**
+	 * Hold clears the next payment, so one set while held was re-armed deliberately and wins.
+	 */
+	public function test_reactivate_prefers_a_stored_next_payment_over_the_anchor(): void {
 		$id = $this->seed_on_hold( '2099-06-01 00:00:00', $this->make_monthly_plan(), ContractStatus::ON_HOLD, array( Hold::ANCHOR_META_KEY => '2099-01-01 00:00:00' ) );
 
 		$this->sut->reactivate( $this->reload( $id ), $this->utc( '2026-06-01 00:00:00' ) );
 
-		$this->assertSame( '2099-01-01 00:00:00', $this->reload( $id )->get_next_payment_gmt() );
+		$stored = $this->reload( $id );
+		$this->assertSame( '2099-06-01 00:00:00', $stored->get_next_payment_gmt() );
+		$this->assertArrayNotHasKey( Hold::ANCHOR_META_KEY, $stored->get_meta() );
+	}
+
+	public function test_reactivate_ignores_a_malformed_anchor(): void {
+		$id = $this->seed_on_hold( null, $this->make_monthly_plan(), ContractStatus::ON_HOLD, array( Hold::ANCHOR_META_KEY => 'not-a-date' ) );
+
+		$this->sut->reactivate( $this->reload( $id ), $this->utc( '2026-06-01 00:00:00' ) );
+
+		$stored = $this->reload( $id );
+		$this->assertSame( ContractStatus::ACTIVE, $stored->get_status() );
+		$this->assertNull( $stored->get_next_payment_gmt(), 'A malformed anchor counts as absent.' );
+		$this->assertArrayNotHasKey( Hold::ANCHOR_META_KEY, $stored->get_meta() );
 	}
 
 	public function test_reactivate_rolls_by_the_frozen_snapshot_cadence_over_the_live_plan(): void {
@@ -296,6 +313,36 @@ class ReactivationTest extends EngineIntegrationTestCase {
 
 		$this->expectException( DomainException::class );
 		$this->sut->reactivate( $this->reload( $id ), $this->utc( '2026-06-01 00:00:00' ) );
+	}
+
+	public function test_reactivate_rejects_a_pending_cancellation_contract(): void {
+		$id = $this->seed_on_hold( '2099-01-01 00:00:00', $this->make_monthly_plan(), ContractStatus::PENDING_CANCELLATION );
+
+		try {
+			$this->sut->reactivate( $this->reload( $id ), $this->utc( '2026-06-01 00:00:00' ) );
+			$this->fail( 'Expected a DomainException for a pending-cancellation contract.' );
+		} catch ( DomainException $e ) {
+			$stored = $this->reload( $id );
+			$this->assertSame( ContractStatus::PENDING_CANCELLATION, $stored->get_status() );
+			$this->assertSame( '2099-01-01 00:00:00', $stored->get_next_payment_gmt(), 'Nothing was written.' );
+		}
+	}
+
+	public function test_reactivate_rejects_an_unregistered_stored_status(): void {
+		global $wpdb;
+
+		$id = $this->seed_on_hold( '2099-01-01 00:00:00', $this->make_monthly_plan() );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ), array( 'status' => 'legacy-paused' ), array( 'id' => $id ) );
+
+		try {
+			$this->sut->reactivate( $this->reload( $id ), $this->utc( '2026-06-01 00:00:00' ) );
+			$this->fail( 'Expected a DomainException for an unregistered stored status.' );
+		} catch ( DomainException $e ) {
+			$stored = $this->reload( $id );
+			$this->assertSame( 'legacy-paused', $stored->get_status() );
+			$this->assertSame( '2099-01-01 00:00:00', $stored->get_next_payment_gmt(), 'Nothing was written.' );
+		}
 	}
 
 	/**

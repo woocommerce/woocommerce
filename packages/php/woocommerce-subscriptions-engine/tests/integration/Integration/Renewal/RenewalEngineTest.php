@@ -786,13 +786,13 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox the scheduled path skips a non-active contract without parking it and creates no renewal order.
+	 * @testdox the due scan excludes a past-due non-active contract: no renewal order, its next-due moment untouched.
 	 *
-	 * The due scan selects only active contracts, but a scheduled run can still reach one that
-	 * stopped being active (a shape no flow produces, seeded here). The engine skips it and
-	 * leaves its next-due moment alone: it never clears a due moment for a status it did not set.
+	 * A shape no flow produces (on hold while still carrying a due moment), seeded here. The
+	 * scan's interim `active` predicate keeps it out of the batch, so neither `process()` nor
+	 * `park()` is reached; those paths are pinned by the `renew_now` and `park` tests below.
 	 */
-	public function test_scheduled_renewal_skips_a_non_active_contract_without_parking(): void {
+	public function test_due_scan_excludes_a_non_active_contract_and_leaves_it_untouched(): void {
 		$this->approve_charges_for( self::GATEWAY_APPROVING );
 
 		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );

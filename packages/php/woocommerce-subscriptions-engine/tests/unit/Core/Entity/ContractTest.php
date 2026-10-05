@@ -490,6 +490,8 @@ class ContractTest extends TestCase {
 		$this->assertSame( 'legacy-paused', $contract->to_storage()['status'] );
 
 		$contract->set_next_payment_gmt( '2026-03-01 00:00:00' );
+		// Setting the same unregistered value is a no-op, not a registration failure.
+		$contract->set_status( 'legacy-paused' );
 
 		$this->assertSame( 'legacy-paused', $contract->to_storage()['status'] );
 	}

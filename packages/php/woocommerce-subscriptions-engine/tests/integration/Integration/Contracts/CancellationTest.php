@@ -251,6 +251,38 @@ class CancellationTest extends EngineIntegrationTestCase {
 		}
 	}
 
+	public function test_cancel_at_period_end_rejects_an_expired_contract(): void {
+		$id     = $this->seed( ContractStatus::EXPIRED );
+		$before = did_action( Cancellation::CONTRACT_PENDING_CANCELLATION_ACTION );
+
+		try {
+			$this->sut->cancel_at_period_end( $this->reload( $id ) );
+			$this->fail( 'Expected a DomainException for an expired contract.' );
+		} catch ( DomainException $e ) {
+			$reloaded = $this->reload( $id );
+			$this->assertSame( ContractStatus::EXPIRED, $reloaded->get_status() );
+			$this->assertSame( '2099-01-01 00:00:00', $reloaded->get_next_payment_gmt(), 'Nothing was written.' );
+			$this->assertSame( $before, did_action( Cancellation::CONTRACT_PENDING_CANCELLATION_ACTION ), 'The action does not fire.' );
+		}
+	}
+
+	public function test_cancel_at_period_end_rejects_an_unregistered_stored_status(): void {
+		global $wpdb;
+
+		$id = $this->seed_active();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ), array( 'status' => 'legacy-paused' ), array( 'id' => $id ) );
+
+		try {
+			$this->sut->cancel_at_period_end( $this->reload( $id ) );
+			$this->fail( 'Expected a DomainException for an unregistered stored status.' );
+		} catch ( DomainException $e ) {
+			$reloaded = $this->reload( $id );
+			$this->assertSame( 'legacy-paused', $reloaded->get_status() );
+			$this->assertSame( '2099-01-01 00:00:00', $reloaded->get_next_payment_gmt(), 'Nothing was written.' );
+		}
+	}
+
 	/**
 	 * Reload a contract, asserting it still exists (narrows the nullable read).
 	 *
