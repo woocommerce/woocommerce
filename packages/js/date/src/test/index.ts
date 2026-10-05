@@ -1,3 +1,16 @@
+import {
+	afterAll,
+	afterEach,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	test,
+	vi,
+	type Mock,
+} from 'vitest';
+
 /**
  * External dependencies
  */
@@ -9,11 +22,18 @@ import {
 	setSettings as setDateSettings,
 } from '@wordpress/date';
 import { timeFormat as d3TimeFormat } from 'd3-time-format';
-
-jest.mock( '@wordpress/i18n', () => ( {
-	...jest.requireActual( '@wordpress/i18n' ),
-	__: jest.fn( ( text: string ) => text ),
-} ) );
+vi.mock( '@wordpress/i18n', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/i18n' ) ),
+		__: vi.fn( ( text: string ) => text ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
 
 /**
  * Internal dependencies
@@ -50,27 +70,23 @@ declare global {
 		};
 	}
 }
-
 describe( 'appendTimestamp', () => {
 	it( 'should append `start` timestamp', () => {
 		expect( appendTimestamp( moment( '2018-01-01' ), 'start' ) ).toEqual(
 			'2018-01-01T00:00:00'
 		);
 	} );
-
 	it( 'should append `now` timestamp', () => {
 		const nowTimestamp = moment().format( 'HH:mm:00' );
 		expect(
 			appendTimestamp( moment( '2018-01-01 ' + nowTimestamp ), 'now' )
 		).toEqual( '2018-01-01T' + nowTimestamp );
 	} );
-
 	it( 'should append `end` timestamp', () => {
 		expect( appendTimestamp( moment( '2018-01-01' ), 'end' ) ).toEqual(
 			'2018-01-01T23:59:59'
 		);
 	} );
-
 	it( 'should throw and error if `timeOfDay` is not valid', () => {
 		// @ts-expect-error appendTimestamp should be called with timeOfDay param but this test is testing the error handling.
 		expect( () => appendTimestamp( moment( '2018-01-01' ) ) ).toThrow(
@@ -78,53 +94,43 @@ describe( 'appendTimestamp', () => {
 		);
 	} );
 } );
-
 describe( 'toMoment', () => {
 	it( 'should pass through a valid Moment object as an argument', () => {
 		const now = moment();
 		const myMoment = toMoment( 'YYYY', now );
 		expect( myMoment ).toEqual( now );
 	} );
-
 	it( 'should handle isoFormat dates', () => {
 		const myMoment = toMoment( 'YYYY', '2018-04-15' );
 		if ( myMoment === null ) fail( 'myMoment should not be null' );
-
 		expect( moment.isMoment( myMoment ) ).toBe( true );
 		expect( myMoment.isValid() ).toBe( true );
 	} );
-
 	it( 'should handle local formats', () => {
 		const longDate = toMoment( 'MMMM D, YYYY', 'April 15, 2018' );
 		if ( longDate === null ) fail( 'longDate should not be null' );
-
 		expect( moment.isMoment( longDate ) ).toBe( true );
 		expect( longDate.isValid() ).toBe( true );
 		expect( longDate.date() ).toBe( 15 );
 		expect( longDate.month() ).toBe( 3 );
 		expect( longDate.year() ).toBe( 2018 );
-
 		const shortDate = toMoment( 'DD/MM/YYYY', '15/04/2018' );
 		if ( shortDate === null ) fail( 'shortDate should not be null' );
-
 		expect( moment.isMoment( shortDate ) ).toBe( true );
 		expect( shortDate.isValid() ).toBe( true );
 		expect( shortDate.date() ).toBe( 15 );
 		expect( shortDate.month() ).toBe( 3 );
 		expect( shortDate.year() ).toBe( 2018 );
 	} );
-
 	it( 'should throw on an invalid argument', () => {
 		const fn = () => toMoment( '', 77 );
 		expect( fn ).toThrow();
 	} );
-
 	it( 'should return null on invalid date', () => {
 		const invalidDate = toMoment( 'YYYY', '2018-00-00' );
 		expect( invalidDate ).toBe( null );
 	} );
 } );
-
 describe( 'getAllowedIntervalsForQuery', () => {
 	it( 'should return days when query period is defined but empty', () => {
 		const allowedIntervals = getAllowedIntervalsForQuery( {
@@ -133,7 +139,6 @@ describe( 'getAllowedIntervalsForQuery', () => {
 		} );
 		expect( allowedIntervals ).toEqual( [ 'day' ] );
 	} );
-
 	it( 'should return days, hours when query period is empty but defaultDateRange is today and yesterday', () => {
 		const allowedIntervals = getAllowedIntervalsForQuery(
 			{
@@ -143,7 +148,6 @@ describe( 'getAllowedIntervalsForQuery', () => {
 			'period=today&compare=previous_year'
 		);
 		expect( allowedIntervals ).toEqual( [ 'hour', 'day' ] );
-
 		const allowedIntervalsYesterday = getAllowedIntervalsForQuery(
 			{
 				period: '',
@@ -153,56 +157,48 @@ describe( 'getAllowedIntervalsForQuery', () => {
 		);
 		expect( allowedIntervalsYesterday ).toEqual( [ 'hour', 'day' ] );
 	} );
-
 	it( 'should return days and hours for today and yesterday periods', () => {
 		const allowedIntervalsToday = getAllowedIntervalsForQuery( {
 			period: 'today',
 			compare: 'previous_year',
 		} );
 		expect( allowedIntervalsToday ).toEqual( [ 'hour', 'day' ] );
-
 		const allowedIntervalsYesterday = getAllowedIntervalsForQuery( {
 			period: 'yesterday',
 			compare: 'previous_year',
 		} );
 		expect( allowedIntervalsYesterday ).toEqual( [ 'hour', 'day' ] );
 	} );
-
 	it( 'should return day for week and last_week periods', () => {
 		const allowedIntervalsWeek = getAllowedIntervalsForQuery( {
 			period: 'week',
 			compare: 'previous_year',
 		} );
 		expect( allowedIntervalsWeek ).toEqual( [ 'day' ] );
-
 		const allowedIntervalsLastWeek = getAllowedIntervalsForQuery( {
 			period: 'last_week',
 			compare: 'previous_year',
 		} );
 		expect( allowedIntervalsLastWeek ).toEqual( [ 'day' ] );
 	} );
-
 	it( 'should return day, week for month and last_month periods', () => {
 		const allowedIntervalsMonth = getAllowedIntervalsForQuery( {
 			period: 'month',
 			compare: 'previous_year',
 		} );
 		expect( allowedIntervalsMonth ).toEqual( [ 'day', 'week' ] );
-
 		const allowedIntervalsLastMonth = getAllowedIntervalsForQuery( {
 			period: 'last_month',
 			compare: 'previous_year',
 		} );
 		expect( allowedIntervalsLastMonth ).toEqual( [ 'day', 'week' ] );
 	} );
-
 	it( 'should return day, week, month for quarter and last_quarter periods', () => {
 		const allowedIntervalsQuarter = getAllowedIntervalsForQuery( {
 			period: 'quarter',
 			compare: 'previous_year',
 		} );
 		expect( allowedIntervalsQuarter ).toEqual( [ 'day', 'week', 'month' ] );
-
 		const allowedIntervalsLastQuarter = getAllowedIntervalsForQuery( {
 			period: 'last_quarter',
 			compare: 'previous_year',
@@ -213,7 +209,6 @@ describe( 'getAllowedIntervalsForQuery', () => {
 			'month',
 		] );
 	} );
-
 	it( 'should return day, week, month, quarter for year and last_year periods', () => {
 		const allowedIntervalsYear = getAllowedIntervalsForQuery( {
 			period: 'year',
@@ -225,7 +220,6 @@ describe( 'getAllowedIntervalsForQuery', () => {
 			'month',
 			'quarter',
 		] );
-
 		const allowedIntervalsLastYear = getAllowedIntervalsForQuery( {
 			period: 'last_year',
 			compare: 'previous_year',
@@ -238,11 +232,9 @@ describe( 'getAllowedIntervalsForQuery', () => {
 		] );
 	} );
 } );
-
 describe( 'getCurrentPeriod', () => {
 	it( 'should return a DateValue object with correct properties', () => {
 		const dateValue = getCurrentPeriod( 'day', 'previous_period' );
-
 		expect( dateValue.primaryStart ).toBeDefined();
 		expect( dateValue.primaryEnd ).toBeDefined();
 		expect( dateValue.secondaryStart ).toBeDefined();
@@ -272,20 +264,16 @@ describe( 'getCurrentPeriod', () => {
 	// year
 	const thisYearStart = moment().startOf( 'year' );
 	const lastYearStart = thisYearStart.clone().subtract( 1, 'year' );
-
 	describe( 'day', () => {
 		it( 'should return correct values for primary period', () => {
 			const dateValue = getCurrentPeriod( 'day', 'previous_period' );
-
 			expect( today.isSame( dateValue.primaryStart, 'day' ) ).toBe(
 				true
 			);
 			expect( today.isSame( dateValue.primaryEnd, 'day' ) ).toBe( true );
 		} );
-
 		it( 'should return correct values for previous_period', () => {
 			const dateValue = getCurrentPeriod( 'day', 'previous_period' );
-
 			expect( yesterday.isSame( dateValue.secondaryStart, 'day' ) ).toBe(
 				true
 			);
@@ -293,10 +281,8 @@ describe( 'getCurrentPeriod', () => {
 				true
 			);
 		} );
-
 		it( 'should return correct values for previous_year', () => {
 			const dateValue = getCurrentPeriod( 'day', 'previous_year' );
-
 			expect(
 				todayLastYear.isSame( dateValue.secondaryStart, 'day' )
 			).toBe( true );
@@ -305,20 +291,16 @@ describe( 'getCurrentPeriod', () => {
 			).toBe( true );
 		} );
 	} );
-
 	describe( 'week', () => {
 		it( 'should return correct values for primary period', () => {
 			const dateValue = getCurrentPeriod( 'week', 'previous_period' );
-
 			expect(
 				thisWeekStart.isSame( dateValue.primaryStart, 'day' )
 			).toBe( true );
 			expect( today.isSame( dateValue.primaryEnd, 'day' ) ).toBe( true );
 		} );
-
 		it( 'should return correct values for previous_period', () => {
 			const dateValue = getCurrentPeriod( 'week', 'previous_period' );
-
 			expect(
 				lastWeekStart.isSame( dateValue.secondaryStart, 'day' )
 			).toBe( true );
@@ -326,7 +308,6 @@ describe( 'getCurrentPeriod', () => {
 				todayLastWeek.isSame( dateValue.secondaryEnd, 'day' )
 			).toBe( true );
 		} );
-
 		it( 'should return correct values for previous_year', () => {
 			const dateValue = getCurrentPeriod( 'week', 'previous_year' );
 			const daysSoFar = today.diff( thisWeekStart, 'days' );
@@ -337,7 +318,6 @@ describe( 'getCurrentPeriod', () => {
 			const todayThisWeekLastYear = thisWeekLastYearStart
 				.clone()
 				.add( daysSoFar, 'days' );
-
 			expect(
 				thisWeekLastYearStart.isSame( dateValue.secondaryStart, 'day' )
 			).toBe( true );
@@ -346,20 +326,16 @@ describe( 'getCurrentPeriod', () => {
 			).toBe( true );
 		} );
 	} );
-
 	describe( 'month', () => {
 		it( 'should return correct values for primary period', () => {
 			const dateValue = getCurrentPeriod( 'month', 'previous_period' );
-
 			expect(
 				thisMonthStart.isSame( dateValue.primaryStart, 'day' )
 			).toBe( true );
 			expect( today.isSame( dateValue.primaryEnd, 'day' ) ).toBe( true );
 		} );
-
 		it( 'should return correct values for previous_period', () => {
 			const dateValue = getCurrentPeriod( 'month', 'previous_period' );
-
 			expect(
 				lastMonthStart.isSame( dateValue.secondaryStart, 'day' )
 			).toBe( true );
@@ -367,18 +343,15 @@ describe( 'getCurrentPeriod', () => {
 				todayLastMonth.isSame( dateValue.secondaryEnd, 'day' )
 			).toBe( true );
 		} );
-
 		it( 'should return correct values for previous_year', () => {
 			const dateValue = getCurrentPeriod( 'month', 'previous_year' );
 			const daysSoFar = today.diff( thisMonthStart, 'days' );
-
 			const thisMonthLastYearStart = thisMonthStart
 				.clone()
 				.subtract( 1, 'years' );
 			const thisMonthLastYearEnd = thisMonthLastYearStart
 				.clone()
 				.add( daysSoFar, 'days' );
-
 			expect(
 				thisMonthLastYearStart.isSame( dateValue.secondaryStart, 'day' )
 			).toBe( true );
@@ -387,20 +360,16 @@ describe( 'getCurrentPeriod', () => {
 			).toBe( true );
 		} );
 	} );
-
 	describe( 'quarter', () => {
 		it( 'should return correct values for primary period', () => {
 			const dateValue = getCurrentPeriod( 'quarter', 'previous_period' );
-
 			expect(
 				thisQuarterStart.isSame( dateValue.primaryStart, 'day' )
 			).toBe( true );
 			expect( today.isSame( dateValue.primaryEnd, 'day' ) ).toBe( true );
 		} );
-
 		it( 'should return correct values for previous_period', () => {
 			const dateValue = getCurrentPeriod( 'quarter', 'previous_period' );
-
 			expect(
 				lastQuarterStart.isSame( dateValue.secondaryStart, 'day' )
 			).toBe( true );
@@ -408,18 +377,15 @@ describe( 'getCurrentPeriod', () => {
 				todayLastQuarter.isSame( dateValue.secondaryEnd, 'day' )
 			).toBe( true );
 		} );
-
 		it( 'should return correct values for previous_year', () => {
 			const dateValue = getCurrentPeriod( 'quarter', 'previous_year' );
 			const daysSoFar = today.diff( thisQuarterStart, 'days' );
-
 			const thisQuarterLastYearStart = thisQuarterStart
 				.clone()
 				.subtract( 1, 'years' );
 			const thisQuarterLastYearEnd = thisQuarterLastYearStart
 				.clone()
 				.add( daysSoFar, 'days' );
-
 			expect(
 				thisQuarterLastYearStart.isSame(
 					dateValue.secondaryStart,
@@ -431,20 +397,16 @@ describe( 'getCurrentPeriod', () => {
 			).toBe( true );
 		} );
 	} );
-
 	describe( 'year', () => {
 		it( 'should return correct values for primary period', () => {
 			const dateValue = getCurrentPeriod( 'year', 'previous_period' );
-
 			expect(
 				thisYearStart.isSame( dateValue.primaryStart, 'day' )
 			).toBe( true );
 			expect( today.isSame( dateValue.primaryEnd, 'day' ) ).toBe( true );
 		} );
-
 		it( 'should return correct values for previous_period', () => {
 			const dateValue = getCurrentPeriod( 'year', 'previous_period' );
-
 			expect(
 				lastYearStart.isSame( dateValue.secondaryStart, 'day' )
 			).toBe( true );
@@ -452,13 +414,10 @@ describe( 'getCurrentPeriod', () => {
 				todayLastYear.isSame( dateValue.secondaryEnd, 'day' )
 			).toBe( true );
 		} );
-
 		it( 'should return correct values for previous_year', () => {
 			const dateValue = getCurrentPeriod( 'year', 'previous_year' );
 			const daysSoFar = today.diff( thisYearStart, 'days' );
-
 			const lastYearEnd = lastYearStart.clone().add( daysSoFar, 'days' );
-
 			expect(
 				lastYearStart.isSame( dateValue.secondaryStart, 'day' )
 			).toBe( true );
@@ -468,11 +427,9 @@ describe( 'getCurrentPeriod', () => {
 		} );
 	} );
 } );
-
 describe( 'getLastPeriod', () => {
 	it( 'should return a DateValue object with correct properties', () => {
 		const dateValue = getLastPeriod( 'day', 'previous_period' );
-
 		expect( dateValue.primaryStart ).toBeDefined();
 		expect( dateValue.primaryEnd ).toBeDefined();
 		expect( dateValue.secondaryStart ).toBeDefined();
@@ -504,11 +461,9 @@ describe( 'getLastPeriod', () => {
 	const lastYearStart = moment().startOf( 'year' ).subtract( 1, 'year' );
 	const lastYearEnd = lastYearStart.clone().endOf( 'year' );
 	const twoYearsAgoStart = moment().startOf( 'year' ).subtract( 2, 'year' );
-
 	describe( 'day', () => {
 		it( 'should return correct values for primary period', () => {
 			const dateValue = getLastPeriod( 'day', 'previous_period' );
-
 			expect( yesterday.isSame( dateValue.primaryStart, 'day' ) ).toBe(
 				true
 			);
@@ -516,10 +471,8 @@ describe( 'getLastPeriod', () => {
 				true
 			);
 		} );
-
 		it( 'should return correct values for previous_period', () => {
 			const dateValue = getLastPeriod( 'day', 'previous_period' );
-
 			expect( twoDaysAgo.isSame( dateValue.secondaryStart, 'day' ) ).toBe(
 				true
 			);
@@ -527,10 +480,8 @@ describe( 'getLastPeriod', () => {
 				true
 			);
 		} );
-
 		it( 'should return correct values for previous_year', () => {
 			const dateValue = getLastPeriod( 'day', 'previous_year' );
-
 			expect(
 				yesterdayLastYear.isSame( dateValue.secondaryStart, 'day' )
 			).toBe( true );
@@ -539,11 +490,9 @@ describe( 'getLastPeriod', () => {
 			).toBe( true );
 		} );
 	} );
-
 	describe( 'week', () => {
 		it( 'should return correct values for primary period', () => {
 			const dateValue = getLastPeriod( 'week', 'previous_period' );
-
 			expect(
 				lastWeekStart.isSame( dateValue.primaryStart, 'day' )
 			).toBe( true );
@@ -551,15 +500,12 @@ describe( 'getLastPeriod', () => {
 				true
 			);
 		} );
-
 		it( 'should return correct values for previous_period', () => {
 			const dateValue = getLastPeriod( 'week', 'previous_period' );
-
 			const twoWeeksAgoStart = lastWeekStart
 				.clone()
 				.subtract( 1, 'week' );
 			const twoWeeksAgoEnd = twoWeeksAgoStart.clone().endOf( 'week' );
-
 			expect(
 				twoWeeksAgoStart.isSame( dateValue.secondaryStart, 'day' )
 			).toBe( true );
@@ -567,7 +513,6 @@ describe( 'getLastPeriod', () => {
 				twoWeeksAgoEnd.isSame( dateValue.secondaryEnd, 'day' )
 			).toBe( true );
 		} );
-
 		it( 'should return correct values for previous_year', () => {
 			const dateValue = getLastPeriod( 'week', 'previous_year' );
 
@@ -578,7 +523,6 @@ describe( 'getLastPeriod', () => {
 			const lastWeekLastYearEnd = lastWeekEnd
 				.clone()
 				.subtract( 1, 'year' );
-
 			expect(
 				lastWeekLastYearStart.isSame( dateValue.secondaryStart, 'day' )
 			).toBe( true );
@@ -587,11 +531,9 @@ describe( 'getLastPeriod', () => {
 			).toBe( true );
 		} );
 	} );
-
 	describe( 'month', () => {
 		it( 'should return correct values for primary period', () => {
 			const dateValue = getLastPeriod( 'month', 'previous_period' );
-
 			expect(
 				lastMonthStart.isSame( dateValue.primaryStart, 'day' )
 			).toBe( true );
@@ -599,18 +541,15 @@ describe( 'getLastPeriod', () => {
 				true
 			);
 		} );
-
 		it( 'should return correct values for previous_period', () => {
 			const dateValue = getLastPeriod( 'month', 'previous_period' );
 			const daysDiff = lastMonthEnd.diff( lastMonthStart, 'days' );
-
 			const twoMonthsAgoEnd = lastMonthStart
 				.clone()
 				.subtract( 1, 'days' );
 			const twoMonthsAgoStart = twoMonthsAgoEnd
 				.clone()
 				.subtract( daysDiff, 'days' );
-
 			expect(
 				twoMonthsAgoStart.isSame( dateValue.secondaryStart, 'day' )
 			).toBe( true );
@@ -618,10 +557,8 @@ describe( 'getLastPeriod', () => {
 				twoMonthsAgoEnd.isSame( dateValue.secondaryEnd, 'day' )
 			).toBe( true );
 		} );
-
 		it( 'should return correct values for previous_year', () => {
 			const dateValue = getLastPeriod( 'month', 'previous_year' );
-
 			const lastMonthkLastYearStart = lastMonthStart
 				.clone()
 				.subtract( 1, 'year' );
@@ -638,25 +575,19 @@ describe( 'getLastPeriod', () => {
 				lastMonthkLastYearEnd.isSame( dateValue.secondaryEnd, 'day' )
 			).toBe( true );
 		} );
-
 		it( 'should return correct values on a leap year', () => {
 			// Mock the current time as a year and month after a leap year month, March 2021.
-			const dateNowSpy = jest
+			const dateNowSpy = vi
 				.spyOn( Date, 'now' )
 				.mockImplementation( () => 1615587095000 );
-
 			const dateValue = getLastPeriod( 'month', 'previous_year' );
-
 			expect( dateValue.secondaryEnd.date() ).toBe( 29 );
-
 			dateNowSpy.mockRestore();
 		} );
 	} );
-
 	describe( 'quarter', () => {
 		it( 'should return correct values for primary period', () => {
 			const dateValue = getLastPeriod( 'quarter', 'previous_period' );
-
 			expect(
 				lastQuarterStart.isSame( dateValue.primaryStart, 'day' )
 			).toBe( true );
@@ -664,18 +595,15 @@ describe( 'getLastPeriod', () => {
 				true
 			);
 		} );
-
 		it( 'should return correct values for previous_period', () => {
 			const dateValue = getLastPeriod( 'quarter', 'previous_period' );
 			const daysDiff = lastQuarterEnd.diff( lastQuarterStart, 'days' );
-
 			const twoQuartersAgoEnd = lastQuarterStart
 				.clone()
 				.subtract( 1, 'days' );
 			const twoQuartersAgoStart = twoQuartersAgoEnd
 				.clone()
 				.subtract( daysDiff, 'days' );
-
 			expect(
 				twoQuartersAgoStart.isSame( dateValue.secondaryStart, 'day' )
 			).toBe( true );
@@ -683,7 +611,6 @@ describe( 'getLastPeriod', () => {
 				twoQuartersAgoEnd.isSame( dateValue.secondaryEnd, 'day' )
 			).toBe( true );
 		} );
-
 		it( 'should return correct values for previous_year', () => {
 			const dateValue = getLastPeriod( 'quarter', 'previous_year' );
 			const lastQuarterLastYearStart = lastQuarterStart
@@ -692,7 +619,6 @@ describe( 'getLastPeriod', () => {
 			const lastQuarterLastYearEnd = lastQuarterLastYearStart
 				.clone()
 				.endOf( 'quarter' );
-
 			expect(
 				lastQuarterLastYearStart.isSame(
 					dateValue.secondaryStart,
@@ -704,11 +630,9 @@ describe( 'getLastPeriod', () => {
 			).toBe( true );
 		} );
 	} );
-
 	describe( 'year', () => {
 		it( 'should return correct values for primary period', () => {
 			const dateValue = getLastPeriod( 'year', 'previous_period' );
-
 			expect(
 				lastYearStart.isSame( dateValue.primaryStart, 'day' )
 			).toBe( true );
@@ -716,11 +640,9 @@ describe( 'getLastPeriod', () => {
 				true
 			);
 		} );
-
 		it( 'should return correct values for previous_period', () => {
 			const dateValue = getLastPeriod( 'year', 'previous_period' );
 			const twoYearsAgoEnd = twoYearsAgoStart.clone().endOf( 'year' );
-
 			expect(
 				twoYearsAgoStart.isSame( dateValue.secondaryStart, 'day' )
 			).toBe( true );
@@ -728,11 +650,9 @@ describe( 'getLastPeriod', () => {
 				twoYearsAgoEnd.isSame( dateValue.secondaryEnd, 'day' )
 			).toBe( true );
 		} );
-
 		it( 'should return correct values for previous_year', () => {
 			const dateValue = getLastPeriod( 'year', 'previous_year' );
 			const twoYearsAgoEnd = twoYearsAgoStart.clone().endOf( 'year' );
-
 			expect(
 				twoYearsAgoStart.isSame( dateValue.secondaryStart, 'day' )
 			).toBe( true );
@@ -742,44 +662,43 @@ describe( 'getLastPeriod', () => {
 		} );
 	} );
 } );
-
 describe( 'start of week setting', () => {
 	const originalSettings = getDateSettings();
 	const originalDow = moment.localeData().firstDayOfWeek();
-
 	afterEach( () => {
 		setDateSettings( originalSettings );
 		moment.updateLocale( moment.locale(), {
-			week: { dow: originalDow },
+			week: {
+				dow: originalDow,
+			},
 		} );
 	} );
-
 	it( 'getCurrentPeriod should start the week on the day from the WordPress setting', () => {
 		setDateSettings( {
 			...originalSettings,
-			l10n: { ...originalSettings.l10n, startOfWeek: 1 },
+			l10n: {
+				...originalSettings.l10n,
+				startOfWeek: 1,
+			},
 		} );
-
 		const dateValue = getCurrentPeriod( 'week', 'previous_period' );
-
 		expect( dateValue.primaryStart.day() ).toBe( 1 );
 		expect( dateValue.primaryStart.isSameOrBefore( moment(), 'day' ) ).toBe(
 			true
 		);
 	} );
-
 	it( 'getLastPeriod should start and end the week on days from the WordPress setting', () => {
 		setDateSettings( {
 			...originalSettings,
-			l10n: { ...originalSettings.l10n, startOfWeek: 3 },
+			l10n: {
+				...originalSettings.l10n,
+				startOfWeek: 3,
+			},
 		} );
-
 		const dateValue = getLastPeriod( 'week', 'previous_period' );
-
 		expect( dateValue.primaryStart.day() ).toBe( 3 );
 		expect( dateValue.primaryEnd.day() ).toBe( 2 );
 	} );
-
 	it( 'should leave the moment default when the setting is invalid', () => {
 		setDateSettings( {
 			...originalSettings,
@@ -788,13 +707,10 @@ describe( 'start of week setting', () => {
 				startOfWeek: 7 as unknown as 0,
 			},
 		} );
-
 		const dateValue = getCurrentPeriod( 'week', 'previous_period' );
-
 		expect( dateValue.primaryStart.day() ).toBe( originalDow );
 	} );
 } );
-
 describe( 'weekday names', () => {
 	const HEBREW_WEEKDAYS_SHORT = [ 'א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש' ];
 	const ENGLISH_WEEKDAYS_SHORT = [
@@ -828,33 +744,24 @@ describe( 'weekday names', () => {
 	 * @param {Object} config - Locale configuration.
 	 * @return {Object} - The locale data moment holds once the package loaded.
 	 */
-	function loadWithLocale( config: moment.LocaleSpecification ) {
-		let localeData = moment.localeData();
-
-		jest.isolateModules( () => {
-			/* eslint-disable @typescript-eslint/no-require-imports -- isolateModules only tracks synchronous requires. */
-			const momentLib = require( 'moment' );
-
-			momentLib.defineLocale( 'test_locale', config );
-			require( '../index' );
-			/* eslint-enable @typescript-eslint/no-require-imports */
-
-			localeData = momentLib.localeData();
-		} );
-
+	async function loadWithLocale( config: moment.LocaleSpecification ) {
+		const originalLocale = moment.locale();
+		moment.defineLocale( 'test_locale', null );
+		moment.defineLocale( 'test_locale', config );
+		vi.resetModules();
+		await import( '../index' );
+		const localeData = moment.localeData();
+		moment.locale( originalLocale );
 		return localeData;
 	}
-
-	it( 'should fill in the missing weekdaysMin from the translated short names', () => {
-		const localeData = loadWithLocale( {
+	it( 'should fill in the missing weekdaysMin from the translated short names', async () => {
+		const localeData = await loadWithLocale( {
 			weekdaysShort: HEBREW_WEEKDAYS_SHORT,
 		} );
-
 		expect( localeData.weekdaysMin() ).toEqual( HEBREW_WEEKDAYS_SHORT );
 	} );
-
-	it( 'should keep the rest of the locale data untouched', () => {
-		const localeData = loadWithLocale( {
+	it( 'should keep the rest of the locale data untouched', async () => {
+		const localeData = await loadWithLocale( {
 			weekdaysShort: HEBREW_WEEKDAYS_SHORT,
 			longDateFormat: {
 				L: 'DD/MM/YYYY',
@@ -865,42 +772,34 @@ describe( 'weekday names', () => {
 				LTS: 'HH:mm:ss',
 			},
 		} );
-
 		expect( localeData.weekdaysMin() ).toEqual( HEBREW_WEEKDAYS_SHORT );
 		expect( localeData.longDateFormat( 'L' ) ).toBe( 'DD/MM/YYYY' );
 		expect( localeData.longDateFormat( 'LL' ) ).toBe( 'D [ב]MMMM YYYY' );
 		expect( localeData.weekdaysShort() ).toEqual( HEBREW_WEEKDAYS_SHORT );
 	} );
-
-	it( 'should leave an English locale on the moment fallback', () => {
-		const localeData = loadWithLocale( {
+	it( 'should leave an English locale on the moment fallback', async () => {
+		const localeData = await loadWithLocale( {
 			weekdaysShort: ENGLISH_WEEKDAYS_SHORT,
 		} );
-
 		expect( localeData.weekdaysMin() ).toEqual( ENGLISH_WEEKDAYS_MIN );
 	} );
-
-	it( 'should keep the weekdaysMin something else already supplied', () => {
-		const localeData = loadWithLocale( {
+	it( 'should keep the weekdaysMin something else already supplied', async () => {
+		const localeData = await loadWithLocale( {
 			weekdaysShort: GERMAN_WEEKDAYS_SHORT,
 			weekdaysMin: GERMAN_WEEKDAYS_MIN,
 		} );
-
 		expect( localeData.weekdaysMin() ).toEqual( GERMAN_WEEKDAYS_MIN );
 	} );
-
-	it( 'should leave a locale that holds its short names in another shape alone', () => {
-		const localeData = loadWithLocale( {
+	it( 'should leave a locale that holds its short names in another shape alone', async () => {
+		const localeData = await loadWithLocale( {
 			weekdaysShort: {
 				format: RUSSIAN_WEEKDAYS_SHORT,
 				standalone: RUSSIAN_WEEKDAYS_SHORT,
 			} as unknown as string[],
 		} );
-
 		expect( localeData.weekdaysMin() ).toEqual( ENGLISH_WEEKDAYS_MIN );
 	} );
 } );
-
 describe( 'getRangeLabel', () => {
 	it( 'should return correct string for dates on the same day', () => {
 		const label = getRangeLabel(
@@ -909,7 +808,6 @@ describe( 'getRangeLabel', () => {
 		);
 		expect( label ).toBe( 'Apr 15, 2018' );
 	} );
-
 	it( 'should return correct string for dates in the same month', () => {
 		const label = getRangeLabel(
 			moment( '2018-04-01' ),
@@ -917,7 +815,6 @@ describe( 'getRangeLabel', () => {
 		);
 		expect( label ).toBe( 'Apr 1 - 15, 2018' );
 	} );
-
 	it( 'should return correct string for dates in the same year, but different months', () => {
 		const label = getRangeLabel(
 			moment( '2018-04-01' ),
@@ -925,7 +822,6 @@ describe( 'getRangeLabel', () => {
 		);
 		expect( label ).toBe( 'Apr 1 - May 15, 2018' );
 	} );
-
 	it( 'should return correct string for dates in different years', () => {
 		const label = getRangeLabel(
 			moment( '2017-04-01' ),
@@ -933,143 +829,108 @@ describe( 'getRangeLabel', () => {
 		);
 		expect( label ).toBe( 'Apr 1, 2017 - May 15, 2018' );
 	} );
-
 	it( 'should fall back to the shared month when the format holds no day token', () => {
-		( __ as jest.Mock ).mockReturnValueOnce( 'YYYY年M月' );
-
+		( __ as Mock ).mockReturnValueOnce( 'YYYY年M月' );
 		const label = getRangeLabel(
 			moment( '2024-10-01' ),
 			moment( '2024-10-31' )
 		);
-
 		expect( label ).toBe( '2024年10月' );
 	} );
-
 	it( 'should keep the range when the format uses a localized format token', () => {
-		( __ as jest.Mock ).mockReturnValueOnce( 'LL' );
-
+		( __ as Mock ).mockReturnValueOnce( 'LL' );
 		const label = getRangeLabel(
 			moment( '2024-10-01' ),
 			moment( '2024-10-31' )
 		);
-
 		expect( label ).toBe( 'October 1 - 31, 2024' );
 	} );
-
 	it( 'should keep the range when the format uses an abbreviated localized format token', () => {
-		( __ as jest.Mock ).mockReturnValueOnce( 'll' );
-
+		( __ as Mock ).mockReturnValueOnce( 'll' );
 		const label = getRangeLabel(
 			moment( '2024-10-01' ),
 			moment( '2024-10-31' )
 		);
-
 		expect( label ).toBe( 'Oct 1 - 31, 2024' );
 	} );
-
 	it( 'should leave a bracketed localized format token alone', () => {
-		( __ as jest.Mock ).mockReturnValueOnce( '[LL] MMM D, YYYY' );
-
+		( __ as Mock ).mockReturnValueOnce( '[LL] MMM D, YYYY' );
 		const label = getRangeLabel(
 			moment( '2024-10-01' ),
 			moment( '2024-10-31' )
 		);
-
 		expect( label ).toBe( 'LL Oct 1 - 31, 2024' );
 	} );
-
 	it( 'should leave a backslash escaped localized format token alone', () => {
-		( __ as jest.Mock ).mockReturnValueOnce( '\\LL MMM D, YYYY' );
-
+		( __ as Mock ).mockReturnValueOnce( '\\LL MMM D, YYYY' );
 		expect(
 			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
 		).toBe( 'LL Oct 1 - 31, 2024' );
-
-		( __ as jest.Mock ).mockReturnValueOnce( '\\L\\L MMM D, YYYY' );
-
+		( __ as Mock ).mockReturnValueOnce( '\\L\\L MMM D, YYYY' );
 		expect(
 			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
 		).toBe( 'LL Oct 1 - 31, 2024' );
 	} );
-
 	it( 'should keep the zero padding a "DD" format asks for', () => {
 		// Mirrors the Serbian translation of the format.
-		( __ as jest.Mock ).mockReturnValueOnce( 'DD. MMM YYYY.' );
-
+		( __ as Mock ).mockReturnValueOnce( 'DD. MMM YYYY.' );
 		const label = getRangeLabel(
 			moment( '2018-04-01' ),
 			moment( '2018-04-15' )
 		);
-
 		expect( label ).toBe( '01 - 15. Apr 2018.' );
 	} );
-
 	it( 'should keep the ordinal a "Do" format asks for', () => {
-		( __ as jest.Mock ).mockReturnValueOnce( 'MMM Do, YYYY' );
-
+		( __ as Mock ).mockReturnValueOnce( 'MMM Do, YYYY' );
 		const label = getRangeLabel(
 			moment( '2018-04-01' ),
 			moment( '2018-04-15' )
 		);
-
 		expect( label ).toBe( 'Apr 1st - 15th, 2018' );
 	} );
-
 	it( 'should leave a bracketed day literal alone', () => {
-		( __ as jest.Mock ).mockReturnValueOnce( '[Day] MMM D, YYYY' );
-
+		( __ as Mock ).mockReturnValueOnce( '[Day] MMM D, YYYY' );
 		const label = getRangeLabel(
 			moment( '2018-04-01' ),
 			moment( '2018-04-15' )
 		);
-
 		expect( label ).toBe( 'Day Apr 1 - 15, 2018' );
 	} );
-
 	it( 'should leave a bracketed month literal alone', () => {
-		( __ as jest.Mock ).mockReturnValueOnce( '[MMMM] MMM D, YYYY' );
-
+		( __ as Mock ).mockReturnValueOnce( '[MMMM] MMM D, YYYY' );
 		const label = getRangeLabel(
 			moment( '2018-04-01' ),
 			moment( '2018-04-15' )
 		);
-
 		expect( label ).toBe( 'MMMM Apr 1 - 15, 2018' );
 	} );
-
 	it( 'should leave a backslash escaped day literal alone', () => {
-		( __ as jest.Mock ).mockReturnValueOnce( '\\D MMM D, YYYY' );
-
+		( __ as Mock ).mockReturnValueOnce( '\\D MMM D, YYYY' );
 		const label = getRangeLabel(
 			moment( '2018-04-01' ),
 			moment( '2018-04-15' )
 		);
-
 		expect( label ).toBe( 'D Apr 1 - 15, 2018' );
 	} );
-
 	it( 'should not mistake day of year tokens for the day of month', () => {
-		( __ as jest.Mock ).mockReturnValueOnce( 'DDDD, YYYY' );
-
+		( __ as Mock ).mockReturnValueOnce( 'DDDD, YYYY' );
 		expect(
 			getRangeLabel( moment( '2018-04-01' ), moment( '2018-04-15' ) )
 		).toBe( '091, 2018' );
-
-		( __ as jest.Mock ).mockReturnValueOnce( 'DDDo, YYYY' );
-
+		( __ as Mock ).mockReturnValueOnce( 'DDDo, YYYY' );
 		expect(
 			getRangeLabel( moment( '2018-04-01' ), moment( '2018-04-15' ) )
 		).toBe( '91st, 2018' );
 	} );
-
 	describe( 'with a locale whose month names contain digits', () => {
 		// Mirrors moment's Japanese locale, which renders October as "10月".
 		const monthNames = Array.from(
-			{ length: 12 },
+			{
+				length: 12,
+			},
 			( _, index ) => `${ index + 1 }月`
 		);
 		let originalLocale: string;
-
 		beforeAll( () => {
 			originalLocale = moment.locale();
 			moment.defineLocale( 'digit-months', {
@@ -1078,11 +939,9 @@ describe( 'getRangeLabel', () => {
 			} );
 			moment.locale( 'digit-months' );
 		} );
-
 		afterAll( () => {
 			moment.locale( originalLocale );
 		} );
-
 		it( 'should not expand the day range inside the month name', () => {
 			const label = getRangeLabel(
 				moment( '2024-10-01' ),
@@ -1090,7 +949,6 @@ describe( 'getRangeLabel', () => {
 			);
 			expect( label ).toBe( '10月 1 - 31, 2024' );
 		} );
-
 		it( 'should not expand the day range inside a month name sharing the day digits', () => {
 			const label = getRangeLabel(
 				moment( '2024-12-12' ),
@@ -1098,7 +956,6 @@ describe( 'getRangeLabel', () => {
 			);
 			expect( label ).toBe( '12月 12 - 31, 2024' );
 		} );
-
 		it( 'should leave single day, cross month and cross year labels alone', () => {
 			expect(
 				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-01' ) )
@@ -1111,7 +968,6 @@ describe( 'getRangeLabel', () => {
 			).toBe( '10月 1, 2023 - 12月 31, 2024' );
 		} );
 	} );
-
 	describe( 'with a locale that renders non-Latin digits', () => {
 		// Mirrors moment's Arabic locale, which maps digits when formatting.
 		const arabicDigits = [
@@ -1141,7 +997,6 @@ describe( 'getRangeLabel', () => {
 			'ديسمبر',
 		];
 		let originalLocale: string;
-
 		beforeAll( () => {
 			originalLocale = moment.locale();
 			moment.defineLocale( 'non-latin-digits', {
@@ -1155,11 +1010,9 @@ describe( 'getRangeLabel', () => {
 			} );
 			moment.locale( 'non-latin-digits' );
 		} );
-
 		afterAll( () => {
 			moment.locale( originalLocale );
 		} );
-
 		it( 'should keep both ends of the range', () => {
 			const label = getRangeLabel(
 				moment( '2024-10-01' ),
@@ -1167,7 +1020,6 @@ describe( 'getRangeLabel', () => {
 			);
 			expect( label ).toBe( 'أكتوبر ١ - ٣١, ٢٠٢٤' );
 		} );
-
 		it( 'should leave a single day label alone', () => {
 			const label = getRangeLabel(
 				moment( '2024-10-01' ),
@@ -1177,52 +1029,41 @@ describe( 'getRangeLabel', () => {
 		} );
 	} );
 	it( 'should leave a whole backslash escaped token alone', () => {
-		( __ as jest.Mock ).mockReturnValueOnce( '\\MMMM MMM D, YYYY' );
-
+		( __ as Mock ).mockReturnValueOnce( '\\MMMM MMM D, YYYY' );
 		expect(
 			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
 		).toBe( 'MMMM Oct 1 - 31, 2024' );
-
-		( __ as jest.Mock ).mockReturnValueOnce( '\\DD MMM D, YYYY' );
-
+		( __ as Mock ).mockReturnValueOnce( '\\DD MMM D, YYYY' );
 		expect(
 			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
 		).toBe( 'DD Oct 1 - 31, 2024' );
-
-		( __ as jest.Mock ).mockReturnValueOnce( '\\DDDo MMM D, YYYY' );
-
+		( __ as Mock ).mockReturnValueOnce( '\\DDDo MMM D, YYYY' );
 		expect(
 			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
 		).toBe( 'DDDo Oct 1 - 31, 2024' );
 	} );
-
 	it( 'should escape no more of a backslashed day run than moment does', () => {
 		// Moment reads "\DDDDD" as an escaped "DDDD" and a live day of month
 		// token, so the fifth "D" still carries the range.
-		( __ as jest.Mock ).mockReturnValueOnce( '\\DDDDD MMM YYYY' );
-
+		( __ as Mock ).mockReturnValueOnce( '\\DDDDD MMM YYYY' );
 		expect(
 			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
 		).toBe( 'DDDD1 - 31 Oct 2024' );
 	} );
-
 	it( 'should render a weekday from the start of the range', () => {
-		( __ as jest.Mock ).mockReturnValueOnce( 'ddd, MMM D, YYYY' );
+		( __ as Mock ).mockReturnValueOnce( 'ddd, MMM D, YYYY' );
 
 		// Oct 1 2024 is a Tuesday, Oct 31 a Thursday.
 		expect(
 			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
 		).toBe( 'Tue, Oct 1 - 31, 2024' );
 	} );
-
 	it( 'should render a week number from the start of the range', () => {
-		( __ as jest.Mock ).mockReturnValueOnce( 'MMM D, YYYY [w]w' );
-
+		( __ as Mock ).mockReturnValueOnce( 'MMM D, YYYY [w]w' );
 		expect(
 			getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
 		).toBe( 'Oct 1 - 31, 2024 w40' );
 	} );
-
 	describe( 'with a locale that inflects the month name', () => {
 		// Moment picks the genitive month name over the nominative one by
 		// testing the format string for a day token next to the month one, and
@@ -1231,35 +1072,40 @@ describe( 'getRangeLabel', () => {
 		// tests the format itself. Each is covered here because a format string
 		// that stops matching renders the wrong grammatical form.
 		const genitive = Array.from(
-			{ length: 12 },
+			{
+				length: 12,
+			},
 			( _, index ) => `month${ index + 1 }-genitive`
 		);
 		const nominative = Array.from(
-			{ length: 12 },
+			{
+				length: 12,
+			},
 			( _, index ) => `month${ index + 1 }-nominative`
 		);
 		let originalLocale: string;
-
 		beforeAll( () => {
 			originalLocale = moment.locale();
 		} );
-
 		afterEach( () => {
 			moment.locale( originalLocale );
 		} );
-
 		it( "should keep the genitive month name of moment's own format test", () => {
 			moment.defineLocale( 'inflected-months', {
-				months: { format: genitive, standalone: nominative },
-				monthsShort: { format: genitive, standalone: nominative },
+				months: {
+					format: genitive,
+					standalone: nominative,
+				},
+				monthsShort: {
+					format: genitive,
+					standalone: nominative,
+				},
 			} );
-			( __ as jest.Mock ).mockReturnValueOnce( 'D MMMM YYYY' );
-
+			( __ as Mock ).mockReturnValueOnce( 'D MMMM YYYY' );
 			expect(
 				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
 			).toBe( '1 - 31 month10-genitive 2024' );
 		} );
-
 		it( 'should keep the genitive month name of a locale that allows only whitespace before the month', () => {
 			// Mirrors the Catalan locale's stricter `isFormat`.
 			moment.defineLocale( 'inflected-months-strict', {
@@ -1268,15 +1114,16 @@ describe( 'getRangeLabel', () => {
 					standalone: nominative,
 					isFormat: /D[oD]?(\s)+MMMM/,
 				},
-				monthsShort: { format: genitive, standalone: nominative },
+				monthsShort: {
+					format: genitive,
+					standalone: nominative,
+				},
 			} );
-			( __ as jest.Mock ).mockReturnValueOnce( 'D MMMM YYYY' );
-
+			( __ as Mock ).mockReturnValueOnce( 'D MMMM YYYY' );
 			expect(
 				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
 			).toBe( '1 - 31 month10-genitive 2024' );
 		} );
-
 		it( 'should keep the genitive month name of a locale that tests the format itself', () => {
 			// Mirrors the Polish locale, which resolves month names in code.
 			moment.defineLocale( 'inflected-months-fn', {
@@ -1284,45 +1131,57 @@ describe( 'getRangeLabel', () => {
 					( /D MMMM/.test( format || '' ) ? genitive : nominative )[
 						monthMoment.month()
 					],
-				monthsShort: { format: genitive, standalone: nominative },
+				monthsShort: {
+					format: genitive,
+					standalone: nominative,
+				},
 			} );
-			( __ as jest.Mock ).mockReturnValueOnce( 'D MMMM YYYY' );
-
+			( __ as Mock ).mockReturnValueOnce( 'D MMMM YYYY' );
 			expect(
 				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
 			).toBe( '1 - 31 month10-genitive 2024' );
 		} );
-
 		it( 'should keep the genitive short month name of a "MMM" format', () => {
 			const shortGenitive = Array.from(
-				{ length: 12 },
+				{
+					length: 12,
+				},
 				( _, index ) => `short${ index + 1 }-genitive`
 			);
 			const shortNominative = Array.from(
-				{ length: 12 },
+				{
+					length: 12,
+				},
 				( _, index ) => `short${ index + 1 }-nominative`
 			);
 			moment.defineLocale( 'inflected-months-abbreviated', {
-				months: { format: genitive, standalone: nominative },
+				months: {
+					format: genitive,
+					standalone: nominative,
+				},
 				monthsShort: {
 					format: shortGenitive,
 					standalone: shortNominative,
 				},
 			} );
-			( __ as jest.Mock ).mockReturnValueOnce( 'D MMM YYYY' );
-
+			( __ as Mock ).mockReturnValueOnce( 'D MMM YYYY' );
 			expect(
 				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
 			).toBe( '1 - 31 short10-genitive 2024' );
 		} );
-
 		it( 'should keep the genitive month name behind a localized format token', () => {
 			// The WOOAIRR-105 shape itself: the translation resolves to a
 			// localized token, and only its expansion reveals the day sitting
 			// next to the month.
 			moment.defineLocale( 'inflected-months-localized', {
-				months: { format: genitive, standalone: nominative },
-				monthsShort: { format: genitive, standalone: nominative },
+				months: {
+					format: genitive,
+					standalone: nominative,
+				},
+				monthsShort: {
+					format: genitive,
+					standalone: nominative,
+				},
 				longDateFormat: {
 					LT: 'HH:mm',
 					LTS: 'HH:mm:ss',
@@ -1332,36 +1191,42 @@ describe( 'getRangeLabel', () => {
 					LLLL: 'dddd, D MMMM YYYY HH:mm',
 				},
 			} );
-			( __ as jest.Mock ).mockReturnValueOnce( 'LL' );
-
+			( __ as Mock ).mockReturnValueOnce( 'LL' );
 			expect(
 				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
 			).toBe( '1 - 31 month10-genitive 2024' );
 		} );
-
 		it( 'should keep the nominative month name when the format holds no day token', () => {
 			moment.defineLocale( 'inflected-months-standalone', {
-				months: { format: genitive, standalone: nominative },
-				monthsShort: { format: genitive, standalone: nominative },
+				months: {
+					format: genitive,
+					standalone: nominative,
+				},
+				monthsShort: {
+					format: genitive,
+					standalone: nominative,
+				},
 			} );
-			( __ as jest.Mock ).mockReturnValueOnce( 'MMMM YYYY' );
-
+			( __ as Mock ).mockReturnValueOnce( 'MMMM YYYY' );
 			expect(
 				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
 			).toBe( 'month10-nominative 2024' );
 		} );
 	} );
-
 	describe( 'with a locale that inflects the weekday name', () => {
 		// Mirrors the Ukrainian locale, which renders the genitive weekday
 		// whenever a bracketed literal precedes "dddd" - exactly the shape the
 		// month and day substitutions leave behind.
 		const weekdayGenitive = Array.from(
-			{ length: 7 },
+			{
+				length: 7,
+			},
 			( _, index ) => `weekday${ index }-genitive`
 		);
 		const weekdayNominative = Array.from(
-			{ length: 7 },
+			{
+				length: 7,
+			},
 			( _, index ) => `weekday${ index }-nominative`
 		);
 		const weekdays = ( dayMoment: moment.Moment, format?: string ) =>
@@ -1369,57 +1234,51 @@ describe( 'getRangeLabel', () => {
 				? weekdayGenitive
 				: weekdayNominative )[ dayMoment.day() ];
 		let originalLocale: string;
-
 		beforeAll( () => {
 			originalLocale = moment.locale();
 		} );
-
 		afterEach( () => {
 			moment.locale( originalLocale );
 		} );
-
 		it( 'should keep the nominative weekday after the month name', () => {
-			moment.defineLocale( 'inflected-weekdays', { weekdays } );
-			( __ as jest.Mock ).mockReturnValueOnce( 'MMM dddd D YYYY' );
-
+			moment.defineLocale( 'inflected-weekdays', {
+				weekdays,
+			} );
+			( __ as Mock ).mockReturnValueOnce( 'MMM dddd D YYYY' );
 			expect(
 				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
 			).toBe( 'Oct weekday2-nominative 1 - 31 2024' );
 		} );
-
 		it( 'should keep the nominative weekday after the day of month', () => {
-			moment.defineLocale( 'inflected-weekdays-after-day', { weekdays } );
-			( __ as jest.Mock ).mockReturnValueOnce( 'D dddd MMM YYYY' );
-
+			moment.defineLocale( 'inflected-weekdays-after-day', {
+				weekdays,
+			} );
+			( __ as Mock ).mockReturnValueOnce( 'D dddd MMM YYYY' );
 			expect(
 				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
 			).toBe( '1 - 31 weekday2-nominative Oct 2024' );
 		} );
-
 		it( 'should keep the genitive weekday of a format that asks for it', () => {
-			moment.defineLocale( 'inflected-weekdays-literal', { weekdays } );
-			( __ as jest.Mock ).mockReturnValueOnce( '[у] dddd, MMM D, YYYY' );
-
+			moment.defineLocale( 'inflected-weekdays-literal', {
+				weekdays,
+			} );
+			( __ as Mock ).mockReturnValueOnce( '[у] dddd, MMM D, YYYY' );
 			expect(
 				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
 			).toBe( 'у weekday2-genitive, Oct 1 - 31, 2024' );
 		} );
 	} );
-
 	describe( 'with a locale that nests localized format tokens', () => {
 		// `loadLocaleData` below builds "LLL" from a translation that still
 		// holds "LT", so on a real site an expansion can itself hold a
 		// localized token and a single pass is not enough.
 		let originalLocale: string;
-
 		beforeAll( () => {
 			originalLocale = moment.locale();
 		} );
-
 		afterEach( () => {
 			moment.locale( originalLocale );
 		} );
-
 		it( 'should expand a localized format token that expands to another', () => {
 			moment.defineLocale( 'nested-long-formats', {
 				longDateFormat: {
@@ -1431,15 +1290,13 @@ describe( 'getRangeLabel', () => {
 					LLLL: 'dddd, MMMM D, YYYY',
 				},
 			} );
-			( __ as jest.Mock ).mockReturnValueOnce( 'LL' );
-
+			( __ as Mock ).mockReturnValueOnce( 'LL' );
 			expect(
 				getRangeLabel( moment( '2024-10-01' ), moment( '2024-10-31' ) )
 			).toBe( 'October 1 - 31, 2024' );
 		} );
 	} );
 } );
-
 describe( 'loadLocaleData', () => {
 	const originalLocale = {
 		siteLocale: 'en_US',
@@ -1449,11 +1306,9 @@ describe( 'loadLocaleData', () => {
 		// Reset to default settings
 		loadLocaleData( originalLocale );
 	} );
-
 	it( 'should load locale data on user locale', () => {
 		// initialize locale. Gutenberg normally does this, but not in test environment.
 		moment.locale( 'fr_FR', {} );
-
 		const weekdaysShort = [
 			'dim',
 			'lun',
@@ -1463,7 +1318,6 @@ describe( 'loadLocaleData', () => {
 			'ven',
 			'sam',
 		];
-
 		loadLocaleData( {
 			userLocale: 'fr_FR',
 			weekdaysShort,
@@ -1471,25 +1325,21 @@ describe( 'loadLocaleData', () => {
 		expect( moment.localeData().weekdaysMin() ).toEqual( weekdaysShort );
 	} );
 } );
-
 describe( 'getCurrentDates', () => {
 	it( 'should return a correctly shaped object', () => {
 		const query = {};
 		const currentDates = getCurrentDates( query );
-
 		expect( currentDates.primary ).toBeDefined();
 		expect( typeof currentDates.primary.label ).toBe( 'string' );
 		expect( typeof currentDates.primary.range ).toBe( 'string' );
 		expect( moment.isMoment( currentDates.primary.after ) ).toBe( true );
 		expect( moment.isMoment( currentDates.primary.before ) ).toBe( true );
-
 		expect( currentDates.secondary ).toBeDefined();
 		expect( typeof currentDates.secondary.label ).toBe( 'string' );
 		expect( typeof currentDates.secondary.range ).toBe( 'string' );
 		expect( moment.isMoment( currentDates.secondary.after ) ).toBe( true );
 		expect( moment.isMoment( currentDates.secondary.before ) ).toBe( true );
 	} );
-
 	it( 'should correctly apply default values', () => {
 		const query = {};
 		const today = moment().format( isoDateFormat );
@@ -1522,10 +1372,8 @@ describe( 'getCurrentDates', () => {
 		);
 	} );
 } );
-
 describe( 'validateDateInputForRange', () => {
 	const dateFormat = 'YYYY-MM-DD';
-
 	it( 'should return a valid date in Moment object', () => {
 		const validated = validateDateInputForRange(
 			'after',
@@ -1537,7 +1385,6 @@ describe( 'validateDateInputForRange', () => {
 		expect( moment.isMoment( validated.date ) ).toBe( true );
 		expect( validated.error ).toBe( undefined );
 	} );
-
 	it( 'should return a null date on invalid date string', () => {
 		const validated = validateDateInputForRange(
 			'after',
@@ -1549,7 +1396,6 @@ describe( 'validateDateInputForRange', () => {
 		expect( validated.date ).toBe( null );
 		expect( validated.error ).toBe( dateValidationMessages.invalid );
 	} );
-
 	it( 'should return a correct error for a date in the future', () => {
 		const futureDateString = moment()
 			.add( 1, 'months' )
@@ -1564,7 +1410,6 @@ describe( 'validateDateInputForRange', () => {
 		expect( validated.date ).toBe( null );
 		expect( validated.error ).toBe( dateValidationMessages.future );
 	} );
-
 	it( 'should return a correct error for start', () => {
 		const futureDateString = moment()
 			.add( 1, 'months' )
@@ -1579,7 +1424,6 @@ describe( 'validateDateInputForRange', () => {
 		expect( validated.date ).toBe( null );
 		expect( validated.error ).toBe( dateValidationMessages.future );
 	} );
-
 	it( 'should return a correct error for start after end', () => {
 		const end = moment().subtract( 5, 'months' );
 		const value = end.clone().add( 1, 'months' ).format( dateFormat );
@@ -1593,7 +1437,6 @@ describe( 'validateDateInputForRange', () => {
 		expect( validated.date ).toBe( null );
 		expect( validated.error ).toBe( dateValidationMessages.startAfterEnd );
 	} );
-
 	it( 'should return a correct error for end after start', () => {
 		const start = moment().subtract( 5, 'months' );
 		const value = start
@@ -1611,7 +1454,6 @@ describe( 'validateDateInputForRange', () => {
 		expect( validated.error ).toBe( dateValidationMessages.endBeforeStart );
 	} );
 } );
-
 describe( 'getDateDifferenceInDays', () => {
 	it( 'should calculate the day difference between two dates', () => {
 		const difference = getDateDifferenceInDays(
@@ -1621,15 +1463,12 @@ describe( 'getDateDifferenceInDays', () => {
 		expect( difference ).toBe( 92 );
 	} );
 } );
-
 describe( 'secondary range shift', () => {
 	afterEach( () => {
-		jest.useRealTimers();
+		vi.useRealTimers();
 	} );
-
 	it( 'is a year shift for previous year and for the year presets, an offset otherwise', () => {
-		jest.useFakeTimers().setSystemTime( new Date( '2025-03-15T12:00:00' ) );
-
+		vi.useFakeTimers().setSystemTime( new Date( '2025-03-15T12:00:00' ) );
 		expect( getLastPeriod( 'month', 'previous_year' ).secondaryShift ).toBe(
 			'year'
 		);
@@ -1649,9 +1488,8 @@ describe( 'secondary range shift', () => {
 			getCurrentPeriod( 'quarter', 'previous_period' ).secondaryShift
 		).toBe( 'offset' );
 	} );
-
 	it( 'ends a year shifted current period on the same calendar day a year earlier', () => {
-		jest.useFakeTimers().setSystemTime( new Date( '2025-06-15T12:00:00' ) );
+		vi.useFakeTimers().setSystemTime( new Date( '2025-06-15T12:00:00' ) );
 		const { secondaryStart, secondaryEnd } = getCurrentPeriod(
 			'year',
 			'previous_year'
@@ -1661,19 +1499,15 @@ describe( 'secondary range shift', () => {
 			'2024-06-15 23:59:59'
 		);
 	} );
-
 	it( 'keeps the previous period of the last year on the store clock around New Year', () => {
 		// 09:30 UTC on 1st January: every browser zone east of -09:30 is
 		// already in 2027 while a Honolulu store is still on 31st December.
-		jest.useFakeTimers().setSystemTime(
-			new Date( '2027-01-01T09:30:00Z' )
-		);
+		vi.useFakeTimers().setSystemTime( new Date( '2027-01-01T09:30:00Z' ) );
 		const previousWcSettings = global.window.wcSettings;
 		global.window.wcSettings = {
 			...previousWcSettings,
 			timeZone: 'Pacific/Honolulu',
 		};
-
 		try {
 			const { primaryStart, secondaryStart, secondaryEnd } =
 				getLastPeriod( 'year', 'previous_period' );
@@ -1688,33 +1522,33 @@ describe( 'secondary range shift', () => {
 			global.window.wcSettings = previousWcSettings;
 		}
 	} );
-
 	it( 'is exposed on the secondary date picker options', () => {
-		jest.useFakeTimers().setSystemTime( new Date( '2026-09-09T12:00:00' ) );
+		vi.useFakeTimers().setSystemTime( new Date( '2026-09-09T12:00:00' ) );
 		expect(
 			getCurrentDates( {
 				period: 'last_year',
 				compare: 'previous_period',
 			} ).secondary.shift
 		).toBe( 'year' );
-
 		const custom = {
 			period: 'custom',
 			after: '2024-12-01',
 			before: '2025-12-01',
 		};
-
 		expect(
-			getCurrentDates( { ...custom, compare: 'previous_year' } ).secondary
-				.shift
+			getCurrentDates( {
+				...custom,
+				compare: 'previous_year',
+			} ).secondary.shift
 		).toBe( 'year' );
 		expect(
-			getCurrentDates( { ...custom, compare: 'previous_period' } )
-				.secondary.shift
+			getCurrentDates( {
+				...custom,
+				compare: 'previous_period',
+			} ).secondary.shift
 		).toBe( 'offset' );
 	} );
 } );
-
 describe( 'getPreviousDate', () => {
 	it( 'should use the shift over the compare value when given', () => {
 		const yearShifted = getPreviousDate(
@@ -1726,7 +1560,6 @@ describe( 'getPreviousDate', () => {
 			'year'
 		);
 		expect( yearShifted.format( isoDateFormat ) ).toBe( '2023-03-01' );
-
 		const offset = getPreviousDate(
 			'2025-03-01',
 			'2024-12-01',
@@ -1742,7 +1575,6 @@ describe( 'getPreviousDate', () => {
 		// April starts in EDT, the last day of December in EST.
 		const primaryStart = moment.parseZone( '2026-04-01T00:00:00-04:00' );
 		const secondaryStart = moment.parseZone( '2025-12-31T00:00:00-05:00' );
-
 		expect(
 			getPreviousDate(
 				'2026-04-01 00:00:00',
@@ -1827,7 +1659,6 @@ describe( 'getPreviousDate', () => {
 		expect( previousDate.format( isoDateFormat ) ).toBe( '2019-03-01' );
 	} );
 } );
-
 describe( 'getChartTypeForQuery', () => {
 	it( 'should return allowed type', () => {
 		const query = {
@@ -1835,11 +1666,9 @@ describe( 'getChartTypeForQuery', () => {
 		};
 		expect( getChartTypeForQuery( query ) ).toBe( 'bar' );
 	} );
-
 	it( 'should default to line', () => {
 		expect( getChartTypeForQuery( {} ) ).toBe( 'line' );
 	} );
-
 	it( 'should return line for not allowed type', () => {
 		const query = {
 			chartType: 'burrito',
@@ -1847,25 +1676,19 @@ describe( 'getChartTypeForQuery', () => {
 		expect( getChartTypeForQuery( query ) ).toBe( 'line' );
 	} );
 } );
-
 describe( 'getStoreTimeZoneMoment', () => {
 	const previousWcSettings = global.window.wcSettings;
-
 	afterEach( () => {
-		jest.restoreAllMocks();
+		vi.restoreAllMocks();
 		// These tests mutate the global store settings; restore them so a
 		// leaked time zone cannot make later tests order-dependent.
 		global.window.wcSettings = previousWcSettings;
 	} );
-
 	it( 'should return the default moment when no timezone exists', () => {
-		const utcOffset = jest.spyOn( moment.prototype, 'utcOffset' );
-
+		const utcOffset = vi.spyOn( moment.prototype, 'utcOffset' );
 		expect( getStoreTimeZoneMoment() ).toHaveProperty( '_isAMomentObject' );
-
 		expect( utcOffset ).not.toHaveBeenCalled();
 	} );
-
 	it( 'should resolve the offset for a named timezone', () => {
 		global.window.wcSettings = {
 			timeZone: 'Asia/Taipei',
@@ -1874,27 +1697,19 @@ describe( 'getStoreTimeZoneMoment', () => {
 		// Taipei is a fixed UTC+8 (no DST) => +480 minutes.
 		expect( getStoreTimeZoneMoment().utcOffset() ).toBe( 480 );
 	} );
-
 	it( 'should use the utc offset when it is set', () => {
-		const utcOffset = jest.spyOn( moment.prototype, 'utcOffset' );
-
+		const utcOffset = vi.spyOn( moment.prototype, 'utcOffset' );
 		global.window.wcSettings = {
 			timeZone: '+06:00',
 		};
-
 		getStoreTimeZoneMoment();
-
 		expect( utcOffset ).toHaveBeenCalledWith( '+06:00' );
-
 		global.window.wcSettings = {
 			timeZone: '-04:00',
 		};
-
 		getStoreTimeZoneMoment();
-
 		expect( utcOffset ).toHaveBeenCalledWith( '-04:00' );
 	} );
-
 	it( 'should fall back to wcSettings.admin.timeZone when wcSettings.timeZone is not set', () => {
 		global.window.wcSettings = {
 			admin: {
@@ -1907,21 +1722,16 @@ describe( 'getStoreTimeZoneMoment', () => {
 			getStoreTimeZoneMoment().utcOffset()
 		);
 	} );
-
 	it( 'should use wcSettings.admin.timeZone utc offset when wcSettings.timeZone is not set', () => {
-		const utcOffset = jest.spyOn( moment.prototype, 'utcOffset' );
-
+		const utcOffset = vi.spyOn( moment.prototype, 'utcOffset' );
 		global.window.wcSettings = {
 			admin: {
 				timeZone: '+05:00',
 			},
 		};
-
 		getStoreTimeZoneMoment();
-
 		expect( utcOffset ).toHaveBeenCalledWith( '+05:00' );
 	} );
-
 	it( 'should prefer wcSettings.timeZone over wcSettings.admin.timeZone', () => {
 		global.window.wcSettings = {
 			timeZone: 'Asia/Taipei',
@@ -1933,7 +1743,6 @@ describe( 'getStoreTimeZoneMoment', () => {
 		// Resolves Taipei (+480), not New York.
 		expect( getStoreTimeZoneMoment().utcOffset() ).toBe( 480 );
 	} );
-
 	it( 'should not rely on the clobberable window.moment.tz (regression for #64020)', () => {
 		// A third-party plugin can replace window.moment with a build that
 		// has no timezone data, removing the `.tz` method. Because the admin
@@ -1944,8 +1753,9 @@ describe( 'getStoreTimeZoneMoment', () => {
 		global.window.wcSettings = {
 			timeZone: 'America/New_York',
 		};
-
-		const momentWithTz = moment as unknown as { tz?: unknown };
+		const momentWithTz = moment as unknown as {
+			tz?: unknown;
+		};
 		const momentProtoWithTz = moment.prototype as unknown as {
 			tz?: unknown;
 		};
@@ -1953,30 +1763,25 @@ describe( 'getStoreTimeZoneMoment', () => {
 		const originalProtoTz = momentProtoWithTz.tz;
 		delete momentWithTz.tz;
 		delete momentProtoWithTz.tz;
-
 		try {
 			let result: moment.Moment | undefined;
-
 			expect( () => {
 				result = getStoreTimeZoneMoment();
 			} ).not.toThrow();
-
 			expect( [ -300, -240 ] ).toContain( result?.utcOffset() );
 		} finally {
 			momentWithTz.tz = originalStaticTz;
 			momentProtoWithTz.tz = originalProtoTz;
 		}
 	} );
-
 	it( 'keeps named-zone range boundaries DST-correct across a transition (#64020)', () => {
 		// "Now" is summer (EDT, UTC-4); the previous-year range lands in
 		// winter (EST, UTC-5). A single "now" offset would leave the boundary
 		// an hour off, so each boundary is re-anchored against its own date.
-		jest.useFakeTimers().setSystemTime(
-			new Date( '2026-07-15T12:00:00Z' )
-		);
-		global.window.wcSettings = { timeZone: 'America/New_York' };
-
+		vi.useFakeTimers().setSystemTime( new Date( '2026-07-15T12:00:00Z' ) );
+		global.window.wcSettings = {
+			timeZone: 'America/New_York',
+		};
 		try {
 			const { primaryStart, primaryEnd, secondaryStart, secondaryEnd } =
 				getLastPeriod( 'year', 'previous_period' );
@@ -2001,20 +1806,18 @@ describe( 'getStoreTimeZoneMoment', () => {
 				'2024-12-31T23:59:59'
 			);
 		} finally {
-			jest.useRealTimers();
+			vi.useRealTimers();
 		}
 	} );
-
 	it( 'anchors getCurrentPeriod boundaries to their own dates across a DST transition (#64020)', () => {
 		// "Now" is summer (EDT, -240); the year-to-date range opens in winter
 		// (EST, -300). Each boundary must resolve its own date's offset, so a
 		// single "now" offset is not reused across the range. This also covers
 		// getCurrentPeriod, whose boundary math differs from getLastPeriod.
-		jest.useFakeTimers().setSystemTime(
-			new Date( '2026-07-15T12:00:00Z' )
-		);
-		global.window.wcSettings = { timeZone: 'America/New_York' };
-
+		vi.useFakeTimers().setSystemTime( new Date( '2026-07-15T12:00:00Z' ) );
+		global.window.wcSettings = {
+			timeZone: 'America/New_York',
+		};
 		try {
 			const { primaryStart, primaryEnd, secondaryStart, secondaryEnd } =
 				getCurrentPeriod( 'year', 'previous_year' );
@@ -2034,27 +1837,52 @@ describe( 'getStoreTimeZoneMoment', () => {
 			);
 			expect( secondaryEnd.utcOffset() ).toBe( -240 );
 		} finally {
-			jest.useRealTimers();
+			vi.useRealTimers();
 		}
 	} );
 } );
-
 describe( 'getDateFormatsForIntervalPhp', () => {
 	test.each( [
-		{ interval: 'hour', ticks: 0 },
-		{ interval: 'day', ticks: dayTicksThreshold - 1 },
-		{ interval: 'day', ticks: dayTicksThreshold + 1 },
-		{ interval: 'week', ticks: dayTicksThreshold - 1 },
-		{ interval: 'week', ticks: dayTicksThreshold + 1 },
-		{ interval: 'quarter', ticks: 0 },
-		{ interval: 'month', ticks: 0 },
-		{ interval: 'year', ticks: 0 },
-		{ interval: 'default', ticks: 0 },
+		{
+			interval: 'hour',
+			ticks: 0,
+		},
+		{
+			interval: 'day',
+			ticks: dayTicksThreshold - 1,
+		},
+		{
+			interval: 'day',
+			ticks: dayTicksThreshold + 1,
+		},
+		{
+			interval: 'week',
+			ticks: dayTicksThreshold - 1,
+		},
+		{
+			interval: 'week',
+			ticks: dayTicksThreshold + 1,
+		},
+		{
+			interval: 'quarter',
+			ticks: 0,
+		},
+		{
+			interval: 'month',
+			ticks: 0,
+		},
+		{
+			interval: 'year',
+			ticks: 0,
+		},
+		{
+			interval: 'default',
+			ticks: 0,
+		},
 	] )(
 		'should return formatted date same as getDateFormatsForIntervalD3 when interval is $interval and ticks is $ticks',
 		( { interval, ticks } ) => {
 			const date = new Date();
-
 			const dateFormatsPhp = getDateFormatsForIntervalPhp(
 				interval,
 				ticks
@@ -2063,7 +1891,6 @@ describe( 'getDateFormatsForIntervalPhp', () => {
 				interval,
 				ticks
 			);
-
 			expect(
 				formatDate( dateFormatsPhp.screenReaderFormat, date )
 			).toBe(
@@ -2071,7 +1898,6 @@ describe( 'getDateFormatsForIntervalPhp', () => {
 					date
 				).trimStart() // trim the leading space since d3.timeFormat adds it but it does not affect the UI
 			);
-
 			expect(
 				formatDate( dateFormatsPhp.tooltipLabelFormat, date )
 			).toBe(
@@ -2079,60 +1905,49 @@ describe( 'getDateFormatsForIntervalPhp', () => {
 					date
 				).trimStart()
 			);
-
 			expect( formatDate( dateFormatsPhp.xFormat, date ) ).toBe(
 				d3TimeFormat( dateFormatsD3.xFormat )( date ).trimStart()
 			);
-
 			expect( formatDate( dateFormatsPhp.x2Format, date ) ).toBe(
 				d3TimeFormat( dateFormatsD3.x2Format )( date ).trimStart()
 			);
 		}
 	);
-
 	describe( 'isLeapYear', () => {
 		test( 'returns true for a leap year divisible by 4 but not by 100', () => {
 			expect( isLeapYear( 2024 ) ).toBe( true );
 		} );
-
 		test( 'returns true for a leap year divisible by 400', () => {
 			expect( isLeapYear( 2000 ) ).toBe( true );
 		} );
-
 		test( 'returns false for a non-leap year divisible by 100 but not by 400', () => {
 			expect( isLeapYear( 1900 ) ).toBe( false );
 		} );
-
 		test( 'returns false for a non-leap year not divisible by 4', () => {
 			expect( isLeapYear( 2019 ) ).toBe( false );
 		} );
 	} );
-
 	describe( 'containsLeapYear', () => {
 		test( 'returns true when date range contains at least one leap year', () => {
 			expect( containsLeapYear( '2020-01-01', '2022-12-31' ) ).toBe(
 				true
 			);
 		} );
-
 		test( 'returns false when date range does not contain any leap years', () => {
 			expect( containsLeapYear( '2018-01-01', '2019-12-31' ) ).toBe(
 				false
 			);
 		} );
-
 		test( 'returns true when the date range starts and ends in the same leap year', () => {
 			expect( containsLeapYear( '2024-01-01', '2024-12-31' ) ).toBe(
 				true
 			);
 		} );
-
 		test( 'returns true when the start and end dates are the same and it’s a leap year', () => {
 			expect( containsLeapYear( '2024-02-29', '2024-02-29' ) ).toBe(
 				true
 			);
 		} );
-
 		test( 'handles incorrect date formats gracefully', () => {
 			expect( containsLeapYear( 'invalid-date', '2022-12-31' ) ).toBe(
 				false
