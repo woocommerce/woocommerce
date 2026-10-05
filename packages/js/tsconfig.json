@@ -19,8 +19,7 @@
 		"**/build-module",
 		"**/build-types",
 		"**/build-style",
-		"**/jest.config.js",
-		"**/jest-preset.js",
+		"**/vitest.config.mjs",
 		"**/webpack.*.js",
 		"**/babel.config.js"
 	],

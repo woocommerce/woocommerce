@@ -39,7 +39,8 @@
 		"wc:watch": "pnpm --filter='@woocommerce/plugin-woocommerce' watch:build",
 		"wc:watch:admin": "pnpm --filter='@woocommerce/plugin-woocommerce' watch:build:admin",
 		"wc:watch:blocks": "pnpm --filter='@woocommerce/plugin-woocommerce' watch:build:blocks",
-		"wc:watch:classic-assets": "pnpm --filter='@woocommerce/plugin-woocommerce' watch:build:classic-assets"
+		"wc:watch:classic-assets": "pnpm --filter='@woocommerce/plugin-woocommerce' watch:build:classic-assets",
+		"test:js": "wp-scripts test-unit-js && pnpm -r --no-bail --workspace-concurrency=1 --if-present test:js"
 	},
 	"devDependencies": {
 		"@babel/preset-env": "catalog:tooling",
