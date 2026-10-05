@@ -66,13 +66,40 @@ class WC_Beta_Tester_Version_Picker {
 			$upgrader = new WC_Beta_Tester_Plugin_Upgrader( $skin );
 			$result   = $upgrader->switch_version( $plugin );
 
-			// Try to reactivate.
-			activate_plugin( $plugin, '', is_network_admin(), true );
+			require_once __DIR__ . '/class-wc-beta-tester-live-branches-installer.php';
+			$live_branch_plugins = array_filter(
+				(array) get_option( 'active_plugins', array() ),
+				function ( $active_plugin ) {
+					return str_contains( $active_plugin, LIVE_BRANCH_PLUGIN_PREFIX );
+				}
+			);
+
+			if ( empty( $live_branch_plugins ) ) {
+				// Try to reactivate.
+				activate_plugin( $plugin, '', is_network_admin(), true );
+			} else {
+				// An active Live Branch build is already loaded in this request, so activating WooCommerce
+				// here would declare it twice. Deactivate the build and activate WooCommerce in a new request.
+				deactivate_plugins( $live_branch_plugins );
+			}
 
 			if ( is_wp_error( $skin->result ) ) {
 				throw new Exception( $skin->result->get_error_message() );
 			} elseif ( false === $result ) {
 				throw new Exception( __( 'Update failed', 'woocommerce-beta-tester' ) );
+			}
+
+			if ( ! empty( $live_branch_plugins ) ) {
+				$activate_url = add_query_arg(
+					array(
+						'action'   => 'activate',
+						'plugin'   => rawurlencode( $plugin ),
+						'_wpnonce' => wp_create_nonce( 'activate-plugin_' . $plugin ),
+					),
+					self_admin_url( 'plugins.php' )
+				);
+				wp_safe_redirect( $activate_url );
+				exit;
 			}
 
 			wp_safe_redirect( admin_url( 'plugins.php?page=wc-beta-tester-version-picker&switched=' . rawurlencode( $version ) ) );

@@ -16,6 +16,7 @@
 * Patch - Fix TypeError when deleting the simulate WooCommerce JS error option
 * Patch - Fix live-branches api request body structure to use 'data' instead of 'body'
 * Patch - Restrict the WCA Test Helper REST API, its admin script, and the Live Branches page to users who can install plugins.
+* Patch - Deactivate an active Live Branch build before switching WooCommerce versions, preventing a fatal error.
 * Patch - Fix live-branches userscript broken by GitHub DOM changes: extract PR data from embedded JSON instead of removed CSS selectors, and fix checkbox change listeners that were never attached due to arrow function misuse.
 * Patch - Restore the main Beta Tester JavaScript bundle and correct asset version fallback paths.
 * Patch - Remove product editor devtools for the deprecated product block editor.
