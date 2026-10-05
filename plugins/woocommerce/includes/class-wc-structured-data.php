@@ -195,8 +195,9 @@ class WC_Structured_Data {
 			return;
 		}
 
+		$permalink = get_permalink( get_queried_object_id() );
 		foreach ( $this->get_data() as $data ) {
-			if ( in_array( 'product', array_map( 'strtolower', (array) $data['@type'] ), true ) ) {
+			if ( in_array( 'product', array_map( 'strtolower', (array) $data['@type'] ), true ) && ( ( $data['@id'] ?? null ) === $permalink . '#product' || ( $data['url'] ?? null ) === $permalink ) ) {
 				return;
 			}
 		}

@@ -379,6 +379,22 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product structured data for another product does not prevent generating data for the queried product.
+	 */
+	public function test_maybe_generate_product_data_ignores_other_product_data(): void {
+		$product       = WC_Helper_Product::create_simple_product();
+		$other_product = WC_Helper_Product::create_simple_product();
+		$this->go_to( get_permalink( $product->get_id() ) );
+		$this->structured_data->generate_product_data( $other_product );
+
+		$this->structured_data->maybe_generate_product_data();
+
+		$data = $this->structured_data->get_data();
+		$this->assertCount( 2, $data, 'The fallback should generate data for the queried product.' );
+		$this->assertSame( get_permalink( $product->get_id() ) . '#product', $data[1]['@id'], 'The second Product node should describe the queried product.' );
+	}
+
+	/**
 	 * Test simple product offer structured data includes offer-level price currency.
 	 *
 	 * @return void
