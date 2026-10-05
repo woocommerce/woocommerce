@@ -197,10 +197,13 @@ class ProductCollectionData extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox Store API counts retain the parent taxonomy eligibility used by its products endpoint.
+	 * @testdox Store API counts and attribute filtering follow the lookup option.
+	 * @testWith [true]
+	 *           [false]
+	 * @param bool $lookup_enabled Whether lookup filtering is enabled.
 	 */
-	public function test_attribute_counts_match_parent_taxonomy_filtering(): void {
-		update_option( 'woocommerce_attribute_lookup_enabled', 'yes' );
+	public function test_attribute_counts_follow_lookup_option( bool $lookup_enabled ): void {
+		update_option( 'woocommerce_attribute_lookup_enabled', $lookup_enabled ? 'yes' : 'no' );
 		$fixtures  = new FixtureData();
 		$attribute = $this->create_product_attribute( 'size', array( 'xs', 's' ) );
 		$product   = $fixtures->get_variable_product( array(), array( $attribute ) );
@@ -224,21 +227,45 @@ class ProductCollectionData extends ControllerTestCase {
 		);
 		$this->assertSame( 200, $response->get_status() );
 		$counts = wp_list_pluck( $response->get_data()['attribute_counts'], 'count', 'term' );
-		$this->assertSame( 1, $counts[ term_exists( 'xs', 'pa_size' )['term_id'] ] );
+		$this->assertSame( $lookup_enabled ? 0 : 1, $counts[ term_exists( 'xs', 'pa_size' )['term_id'] ] ?? 0 );
 
-		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
-		$request->set_param(
-			'attributes',
+		$cases = array(
 			array(
-				array(
-					'attribute' => 'pa_size',
-					'slug'      => 'xs-slug',
-				),
-			)
+				'slug'     => array( 'xs-slug' ),
+				'operator' => 'in',
+				'matches'  => ! $lookup_enabled,
+			),
+			array(
+				'slug'     => array( 'xs-slug' ),
+				'operator' => 'not_in',
+				'matches'  => $lookup_enabled,
+			),
+			array(
+				'term_id'  => array( $attribute['term_ids'][1] ),
+				'operator' => 'in',
+				'matches'  => true,
+			),
+			array(
+				'slug'     => array( 'xs-slug', 's-slug' ),
+				'operator' => 'and',
+				'matches'  => ! $lookup_enabled,
+			),
+			array(
+				'slug'     => array( 's-slug', 'unknown' ),
+				'operator' => 'and',
+				'matches'  => false,
+			),
 		);
-		$response = rest_get_server()->dispatch( $request );
-		$this->assertSame( 200, $response->get_status() );
-		$this->assertSame( array( $product->get_id() ), wp_list_pluck( $response->get_data(), 'id' ) );
+		foreach ( $cases as $case ) {
+			$matches = $case['matches'];
+			unset( $case['matches'] );
+			$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+			$request->set_param( 'include', array( $product->get_id() ) );
+			$request->set_param( 'attributes', array( array_merge( array( 'attribute' => 'pa_size' ), $case ) ) );
+			$response = rest_get_server()->dispatch( $request );
+			$this->assertSame( 200, $response->get_status() );
+			$this->assertSame( $matches ? array( $product->get_id() ) : array(), wp_list_pluck( $response->get_data(), 'id' ), wp_json_encode( $case ) );
+		}
 	}
 
 	/**

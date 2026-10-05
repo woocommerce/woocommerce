@@ -7,7 +7,8 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
-use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\AttributeCountQueryGenerator;
+use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
+use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use WC_Tax;
@@ -17,20 +18,7 @@ use WC_Tax;
  *
  * Helper class to handle product queries for the API.
  */
-class ProductQuery implements AttributeCountQueryGenerator {
-	/**
-	 * Keep attribute counts based on the parent taxonomies used by Store API filtering.
-	 *
-	 * @since 11.3.0
-	 * @param array  $query_vars  The WP_Query arguments.
-	 * @param string $taxonomy    Attribute taxonomy name.
-	 * @param string $product_ids_placeholder Trusted SQL placeholder for eligible product IDs; embed it unchanged.
-	 * @return string|null Null to use taxonomy counting.
-	 */
-	public function get_attribute_count_query( array $query_vars, string $taxonomy, string $product_ids_placeholder ): ?string {
-		return null;
-	}
-
+class ProductQuery implements QueryClausesGenerator {
 	/**
 	 * Prepare query args to pass to WP_Query for a REST API request.
 	 *
@@ -171,7 +159,9 @@ class ProductQuery implements AttributeCountQueryGenerator {
 				}
 			}
 
-			if ( 1 < count( $att_queries ) ) {
+			if ( 'yes' === get_option( 'woocommerce_attribute_lookup_enabled' ) && 'product_variation' !== $args['post_type'] ) {
+				$args['attribute_query'] = $att_queries;
+			} elseif ( 1 < count( $att_queries ) ) {
 				// Add relation arg when using multiple attributes.
 				$relation    = $request->get_param( 'attribute_relation' ) && isset( $operator_mapping[ $request->get_param( 'attribute_relation' ) ] ) ? $operator_mapping[ $request->get_param( 'attribute_relation' ) ] : 'IN';
 				$tax_query[] = array(
@@ -185,18 +175,10 @@ class ProductQuery implements AttributeCountQueryGenerator {
 
 		// Build tax_query if taxonomies are set.
 		if ( ! empty( $tax_query ) && 'product_variation' !== $args['post_type'] ) {
-			if ( ! empty( $args['tax_query'] ) ) {
-				$args['tax_query'] = array_merge( $tax_query, $args['tax_query'] ); // phpcs:ignore
-			} else {
-				$args['tax_query'] = $tax_query; // phpcs:ignore
-			}
+			$args['tax_query'] = $tax_query; // phpcs:ignore
 		} else {
 			// For product_variations we need to convert the tax_query to a meta_query.
-			if ( ! empty( $args['tax_query'] ) ) {
-				$args['meta_query'] = $this->convert_tax_query_to_meta_query( array_merge( $tax_query, $args['tax_query'] ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-			} else {
-				$args['meta_query'] = $this->convert_tax_query_to_meta_query( $tax_query ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-			}
+			$args['meta_query'] = $this->convert_tax_query_to_meta_query( $tax_query ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		}
 
 		// Filter featured.
@@ -423,6 +405,43 @@ class ProductQuery implements AttributeCountQueryGenerator {
 	}
 
 	/**
+	 * Apply Store API attribute operators using the shared lookup filtering.
+	 *
+	 * @param array $args       Product query clauses.
+	 * @param array $attributes Attribute taxonomy queries.
+	 * @return array Updated clauses.
+	 */
+	private function add_attribute_lookup_clauses( array $args, array $attributes ): array {
+		$query_clauses = wc_get_container()->get( QueryClauses::class );
+		foreach ( $attributes as $attribute ) {
+			$term_field = 'term_id' === $attribute['field'] ? 'include' : 'slug';
+			$terms      = get_terms(
+				array(
+					'taxonomy'   => $attribute['taxonomy'],
+					'hide_empty' => false,
+					'fields'     => 'slugs',
+					$term_field  => $attribute['terms'],
+				)
+			);
+			if ( ! is_array( $terms ) || ( 'AND' === $attribute['operator'] && count( $terms ) !== count( array_unique( (array) $attribute['terms'] ) ) ) ) {
+				$args['where'] .= ' AND 1=0';
+				continue;
+			}
+			$clauses        = $query_clauses->add_attribute_clauses(
+				array( 'where' => '' ),
+				array(
+					$attribute['taxonomy'] => array(
+						'terms'      => $terms,
+						'query_type' => 'AND' === $attribute['operator'] ? 'and' : 'or',
+					),
+				)
+			);
+			$args['where'] .= 'NOT IN' === $attribute['operator'] ? ' AND NOT ( 1=1 ' . $clauses['where'] . ' )' : $clauses['where'];
+		}
+		return $args;
+	}
+
+	/**
 	 * Add in conditional search filters for products.
 	 *
 	 * @param array     $args Query args.
@@ -431,6 +450,10 @@ class ProductQuery implements AttributeCountQueryGenerator {
 	 */
 	public function add_query_clauses( array $args, \WP_Query $wp_query ): array {
 		global $wpdb;
+
+		if ( $wp_query->get( 'attribute_query' ) ) {
+			$args = $this->add_attribute_lookup_clauses( $args, $wp_query->get( 'attribute_query' ) );
+		}
 
 		// SKU and slug lookups can return variations, so exclude any whose parent product is not published.
 		if ( in_array( 'product_variation', (array) $wp_query->get( 'post_type' ), true ) ) {
