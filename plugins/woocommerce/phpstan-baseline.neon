@@ -41006,18 +41006,6 @@ parameters:
 			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
 
 		-
-			message: '#^Parameter \#1 \$customer_id of static method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\DataStore\:\:get_oldest_orders\(\) expects int, int\<min, \-1\>\|int\<1, max\>\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
-
-		-
-			message: '#^Parameter \#1 \$customer_id of static method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\DataStore\:\:set_customer_first_order\(\) expects int, int\<min, \-1\>\|int\<1, max\>\|true given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
-
-		-
 			message: '#^Parameter \#1 \$order of static method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\DataStore\:\:get_existing_customer_id_from_order\(\) expects object, WC_Order\|WC_Order_Refund\|false given\.$#'
 			identifier: argument.type
 			count: 1
