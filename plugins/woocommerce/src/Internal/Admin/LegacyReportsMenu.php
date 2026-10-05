@@ -39,11 +39,11 @@ final class LegacyReportsMenu {
 	private const CORE_CALLBACK = array( 'WC_Admin_Reports', 'get_report' );
 
 	/**
-	 * Original classes of the items this class hid, keyed by 'menu' or 'submenu' and then by item index.
+	 * Which menus this class hid the Reports item in, keyed by 'menu' or 'submenu'.
 	 *
-	 * @var array<string, array<int|string, mixed>>
+	 * @var array<string, true>
 	 */
-	private array $hidden_items = array();
+	private array $hidden_in = array();
 
 	/**
 	 * Hide the Reports menu item at the end of admin_menu.
@@ -95,8 +95,8 @@ final class LegacyReportsMenu {
 			foreach ( $submenu['woocommerce'] as $index => $item ) {
 				// WordPress links the WooCommerce parent item to its first submenu entry, hidden or not.
 				if ( 'wc-reports' === ( $item[2] ?? null ) && $index !== $first_index && ! self::has_hide_class( $item[4] ?? '' ) ) {
-					$this->hidden_items['submenu'][ $index ] = $item[4] ?? null;
-					$submenu['woocommerce'][ $index ][4]     = self::add_hide_class( $item[4] ?? '' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+					$this->hidden_in['submenu']          = true;
+					$submenu['woocommerce'][ $index ][4] = self::add_hide_class( $item[4] ?? '' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 				}
 			}
 		}
@@ -104,32 +104,38 @@ final class LegacyReportsMenu {
 		if ( ! empty( $menu ) && is_array( $menu ) ) {
 			foreach ( $menu as $index => $item ) {
 				if ( 'wc-reports' === ( $item[2] ?? null ) && ! self::has_hide_class( $item[4] ?? '' ) ) {
-					$this->hidden_items['menu'][ $index ] = $item[4] ?? null;
-					$menu[ $index ][4]                    = self::add_hide_class( $item[4] ?? '' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+					$this->hidden_in['menu'] = true;
+					$menu[ $index ][4]       = self::add_hide_class( $item[4] ?? '' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 				}
 			}
 		}
 	}
 
 	/**
-	 * Give the Reports entries this class hid their original classes back.
+	 * Remove the hide class this class added to the Reports entries.
+	 *
+	 * Entries are found by slug again, since WordPress can reorder $menu and add classes after admin_menu.
 	 */
 	private function restore_menu_items(): void {
 		global $menu, $submenu;
 
-		foreach ( $this->hidden_items['submenu'] ?? array() as $index => $classes ) {
-			if ( 'wc-reports' === ( $submenu['woocommerce'][ $index ][2] ?? null ) ) {
-				self::set_classes( $submenu['woocommerce'][ $index ], $classes );
+		if ( isset( $this->hidden_in['submenu'] ) && ! empty( $submenu['woocommerce'] ) && is_array( $submenu['woocommerce'] ) ) {
+			foreach ( $submenu['woocommerce'] as $index => $item ) {
+				if ( 'wc-reports' === ( $item[2] ?? null ) ) {
+					$submenu['woocommerce'][ $index ][4] = self::remove_hide_class( $item[4] ?? '' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				}
 			}
 		}
 
-		foreach ( $this->hidden_items['menu'] ?? array() as $index => $classes ) {
-			if ( 'wc-reports' === ( $menu[ $index ][2] ?? null ) ) {
-				self::set_classes( $menu[ $index ], $classes );
+		if ( isset( $this->hidden_in['menu'] ) && ! empty( $menu ) && is_array( $menu ) ) {
+			foreach ( $menu as $index => $item ) {
+				if ( 'wc-reports' === ( $item[2] ?? null ) ) {
+					$menu[ $index ][4] = self::remove_hide_class( $item[4] ?? '' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				}
 			}
 		}
 
-		$this->hidden_items = array();
+		$this->hidden_in = array();
 	}
 
 	/**
@@ -223,20 +229,6 @@ final class LegacyReportsMenu {
 	}
 
 	/**
-	 * Set a menu item's classes, removing the entry when there were none.
-	 *
-	 * @param array $item    Menu item, passed by reference.
-	 * @param mixed $classes Classes to set, or null to remove them.
-	 */
-	private static function set_classes( array &$item, $classes ): void {
-		if ( null === $classes ) {
-			unset( $item[4] );
-		} else {
-			$item[4] = $classes;
-		}
-	}
-
-	/**
 	 * Whether the classes already include the class WordPress uses to hide admin elements.
 	 *
 	 * @param mixed $classes Menu item classes.
@@ -244,6 +236,23 @@ final class LegacyReportsMenu {
 	 */
 	private static function has_hide_class( $classes ): bool {
 		return is_string( $classes ) && in_array( WC_Admin_Menus::HIDE_CSS_CLASS, explode( ' ', $classes ), true );
+	}
+
+	/**
+	 * Remove the last hide class, which is the one add_hide_class() appended.
+	 *
+	 * @param mixed $classes Menu item classes.
+	 * @return string
+	 */
+	private static function remove_hide_class( $classes ): string {
+		$classes = is_string( $classes ) ? explode( ' ', $classes ) : array();
+		$index   = array_search( WC_Admin_Menus::HIDE_CSS_CLASS, array_reverse( $classes, true ), true );
+
+		if ( false !== $index ) {
+			unset( $classes[ $index ] );
+		}
+
+		return implode( ' ', $classes );
 	}
 
 	/**

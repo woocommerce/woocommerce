@@ -415,7 +415,6 @@ class LegacyReportsMenuTest extends WC_Unit_Test_Case {
 	 */
 	public function test_admin_head_restores_item_hidden_on_admin_menu(): void {
 		$this->register_woocommerce_menu();
-		$submenu_before = $GLOBALS['submenu'];
 
 		$this->sut->handle_admin_menu();
 		$this->assertTrue( $this->has_hide_class( 'submenu', 'wc-reports' ), 'Precondition: hidden on admin_menu' );
@@ -423,24 +422,30 @@ class LegacyReportsMenuTest extends WC_Unit_Test_Case {
 		add_filter( 'wc_admin_reports_path', '__return_null' );
 		$this->sut->handle_admin_head();
 
-		$this->assertSame( $submenu_before, $GLOBALS['submenu'], 'The item must get its original classes back' );
+		$this->assertFalse( $this->has_hide_class( 'submenu', 'wc-reports' ) );
 	}
 
 	/**
-	 * @testdox Should restore the original classes of a top-level item hidden on admin_menu.
+	 * @testdox Should show a top-level item again after WordPress reorders the menu and adds classes between admin_menu and admin_head.
 	 */
-	public function test_admin_head_restores_top_level_item_classes(): void {
+	public function test_admin_head_restores_top_level_item_after_menu_processing(): void {
 		wp_set_current_user( $this->create_reports_only_user() );
 		( new WC_Admin_Menus() )->reports_menu();
-		$menu_before = $GLOBALS['menu'];
+		$classes_before = $this->get_menu_item_classes( 'menu', 'wc-reports' );
 
 		$this->sut->handle_admin_menu();
 		$this->assertTrue( $this->has_hide_class( 'menu', 'wc-reports' ), 'Precondition: hidden on admin_menu' );
 
+		// Like wp-admin/includes/menu.php: usort() renumbers $menu when custom_menu_order is on, then add_menu_classes() runs.
+		usort( $GLOBALS['menu'], fn( $a, $b ) => strcmp( $a[2], $b[2] ) );
+		foreach ( $GLOBALS['menu'] as $index => $item ) {
+			$GLOBALS['menu'][ $index ][4] .= ' menu-top-last'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+
 		add_filter( 'woocommerce_show_legacy_reports_menu', '__return_true' );
 		$this->sut->handle_admin_head();
 
-		$this->assertSame( $menu_before, $GLOBALS['menu'] );
+		$this->assertSame( $classes_before . ' menu-top-last', $this->get_menu_item_classes( 'menu', 'wc-reports' ) );
 	}
 
 	/**
