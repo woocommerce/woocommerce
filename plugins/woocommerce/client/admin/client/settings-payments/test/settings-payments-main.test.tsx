@@ -19,6 +19,10 @@ jest.mock( '~/utils/features', () => ( {
 } ) );
 
 describe( 'SettingsPaymentsMain', () => {
+	afterEach( () => {
+		delete window.wcSettings.admin.woocommerce_payments_nox_profile;
+	} );
+
 	it( 'should record settings_payments_pageview event on load', () => {
 		render(
 			<Router>
@@ -107,7 +111,5 @@ describe( 'SettingsPaymentsMain', () => {
 			'href',
 			'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations&country=BR'
 		);
-
-		delete window.wcSettings.admin.woocommerce_payments_nox_profile;
 	} );
 } );
