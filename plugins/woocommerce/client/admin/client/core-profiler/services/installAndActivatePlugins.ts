@@ -245,7 +245,9 @@ export const pluginInstallerMachine = createMachine(
 							installTime:
 								(
 									event as DoneActorEvent< InstallAndActivateSuccessResponse >
-								 ).output.data.install_time[ plugin ] || 0,
+								 ).output.data.install_time[
+									getPluginSlug( plugin )
+								] || 0,
 						},
 					];
 				},
