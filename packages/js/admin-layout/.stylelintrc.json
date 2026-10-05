@@ -1,6 +1,3 @@
 {
-	"extends": "@woocommerce/internal-build/configs/stylelint.config.cjs",
-	"rules": {
-		"no-empty-source": null
-	}
+	"extends": "@woocommerce/internal-build/configs/stylelint.config.cjs"
 }
