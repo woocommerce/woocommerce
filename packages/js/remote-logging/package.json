@@ -72,20 +72,18 @@
 	"devDependencies": {
 		"@babel/core": "catalog:tooling",
 		"@types/debug": "^4.1.12",
-		"@types/jest": "29.5.x",
 		"@types/node": "^24.1.0",
+		"@vitest/coverage-v8": "catalog:tooling",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
-		"@wordpress/jest-console": "^5.4.0",
+		"@wordpress/scripts": "catalog:tooling",
 		"eslint": "^10.0.0",
-		"jest": "29.5.x",
-		"jest-cli": "29.5.x",
-		"jest-environment-jsdom": "29.5.x",
 		"rimraf": "5.0.5",
-		"ts-jest": "29.1.x",
-		"typescript": "5.7.x"
+		"typescript": "5.7.x",
+		"vite": "catalog:tooling",
+		"vitest": "catalog:tooling"
 	},
 	"publishConfig": {
 		"access": "public",

@@ -25,16 +25,18 @@
 		"simple-git": "^3.21.0"
 	},
 	"devDependencies": {
-		"@types/jest": "29.5.x",
 		"@types/node": "^24.1.0",
+		"@vitest/coverage-v8": "catalog:tooling",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"@wordpress/scripts": "catalog:tooling",
 		"eslint": "^10.0.0",
-		"jest": "29.5.x",
-		"ts-jest": "29.1.x",
 		"ts-node": "^10.9.2",
 		"tslib": "^2.6.2",
-		"typescript": "5.7.x"
+		"typescript": "5.7.x",
+		"vite": "catalog:tooling",
+		"vitest": "catalog:tooling",
+		"@woocommerce/internal-js-tests": "workspace:*"
 	},
 	"engines": {
 		"node": "^24.15.0"
