@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ProductRating should render rating based on product object 1`] = `
+exports[`ProductRating > should render rating based on product object 1`] = `
 <div>
   <div
     aria-label="2.5 out of 5 stars."
@@ -155,7 +155,7 @@ exports[`ProductRating should render rating based on product object 1`] = `
 </div>
 `;
 
-exports[`Rating should render different icons if specified 1`] = `
+exports[`Rating > should render different icons if specified 1`] = `
 <div>
   <div
     aria-label="2 out of 5 stars."
@@ -310,7 +310,7 @@ exports[`Rating should render different icons if specified 1`] = `
 </div>
 `;
 
-exports[`Rating should render stars at a different size 1`] = `
+exports[`Rating > should render stars at a different size 1`] = `
 <div>
   <div
     aria-label="1 out of 5 stars."
@@ -465,7 +465,7 @@ exports[`Rating should render stars at a different size 1`] = `
 </div>
 `;
 
-exports[`Rating should render the correct amount of total stars 1`] = `
+exports[`Rating > should render the correct amount of total stars 1`] = `
 <div>
   <div
     aria-label="4 out of 6 stars."
@@ -648,7 +648,7 @@ exports[`Rating should render the correct amount of total stars 1`] = `
 </div>
 `;
 
-exports[`Rating should render the passed rating prop 1`] = `
+exports[`Rating > should render the passed rating prop 1`] = `
 <div>
   <div
     aria-label="4 out of 5 stars."
@@ -803,7 +803,7 @@ exports[`Rating should render the passed rating prop 1`] = `
 </div>
 `;
 
-exports[`ReviewRating should render rating based on review object 1`] = `
+exports[`ReviewRating > should render rating based on review object 1`] = `
 <div>
   <div
     aria-label="1.5 out of 5 stars."

@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -38,7 +40,7 @@ describe( 'TreeSelectControl Component', () => {
 	} );
 
 	it( 'Calls onChange property with the selected values', () => {
-		const onChange = jest.fn().mockName( 'onChange' );
+		const onChange = vi.fn().mockName( 'onChange' );
 
 		const { queryByLabelText, queryByRole, rerender } = render(
 			<TreeSelectControl
@@ -72,7 +74,7 @@ describe( 'TreeSelectControl Component', () => {
 	} );
 
 	it( 'Should include parent in onChange value when includeParent is truthy', () => {
-		const onChange = jest.fn().mockName( 'onChange' );
+		const onChange = vi.fn().mockName( 'onChange' );
 
 		const { queryByLabelText, queryByRole } = render(
 			<TreeSelectControl
@@ -99,7 +101,7 @@ describe( 'TreeSelectControl Component', () => {
 	} );
 
 	it( 'Renders the All Options', () => {
-		const onChange = jest.fn().mockName( 'onChange' );
+		const onChange = vi.fn().mockName( 'onChange' );
 		const { queryByLabelText, queryByRole, rerender } = render(
 			<TreeSelectControl options={ options } onChange={ onChange } />
 		);
@@ -185,7 +187,7 @@ describe( 'TreeSelectControl Component', () => {
 	} );
 
 	it( 'should call onInputChange when input field changed', () => {
-		const onInputChangeMock = jest.fn();
+		const onInputChangeMock = vi.fn();
 		const { queryByRole } = render(
 			<TreeSelectControl
 				options={ options }

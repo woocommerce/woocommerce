@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Timeline Empty snapshot 1`] = `
+exports[`Timeline > Empty snapshot 1`] = `
 <div>
   <div
     class="woocommerce-timeline"
@@ -14,7 +14,7 @@ exports[`Timeline Empty snapshot 1`] = `
 </div>
 `;
 
-exports[`Timeline With data snapshot 1`] = `
+exports[`Timeline > With data snapshot 1`] = `
 <div>
   <div
     class="woocommerce-timeline"

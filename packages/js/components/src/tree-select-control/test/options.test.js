@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -15,8 +17,8 @@ import TreeSelectControl from '../index';
  * by `isVisible` in focusable.
  * Ref: https://github.com/WordPress/gutenberg/blob/%40wordpress/dom%403.1.1/packages/dom/src/focusable.js#L42-L48
  */
-jest.mock( '@wordpress/dom', () => {
-	const { focus } = jest.requireActual( '@wordpress/dom' );
+vi.mock( '@wordpress/dom', async () => {
+	const { focus } = await vi.importActual( '@wordpress/dom' );
 	const descriptor = { configurable: true, get: () => 1 };
 	function find( context ) {
 		context.querySelectorAll( '*' ).forEach( ( element ) => {
@@ -24,12 +26,12 @@ jest.mock( '@wordpress/dom', () => {
 		} );
 		return focus.focusable.find( ...arguments );
 	}
-	return {
+	return ( ( mock ) => ( { default: mock, ...mock } ) )( {
 		focus: {
 			...focus,
 			focusable: { ...focus.focusable, find },
 		},
-	};
+	} );
 } );
 
 const options = [

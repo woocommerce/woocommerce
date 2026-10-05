@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ProductImage should fallback to empty alt attribute if not passed via prop or product object 1`] = `
+exports[`ProductImage > should fallback to empty alt attribute if not passed via prop or product object 1`] = `
 <div>
   <img
     alt=""
@@ -13,7 +13,7 @@ exports[`ProductImage should fallback to empty alt attribute if not passed via p
 </div>
 `;
 
-exports[`ProductImage should fallback to product alt text 1`] = `
+exports[`ProductImage > should fallback to product alt text 1`] = `
 <div>
   <img
     alt="hello world"
@@ -26,7 +26,7 @@ exports[`ProductImage should fallback to product alt text 1`] = `
 </div>
 `;
 
-exports[`ProductImage should render a placeholder image if no product images are found 1`] = `
+exports[`ProductImage > should render a placeholder image if no product images are found 1`] = `
 <div>
   <img
     alt=""
@@ -39,7 +39,7 @@ exports[`ProductImage should render a placeholder image if no product images are
 </div>
 `;
 
-exports[`ProductImage should render a product image 1`] = `
+exports[`ProductImage > should render a product image 1`] = `
 <div>
   <img
     alt=""
@@ -52,7 +52,7 @@ exports[`ProductImage should render a product image 1`] = `
 </div>
 `;
 
-exports[`ProductImage should render a variations image 1`] = `
+exports[`ProductImage > should render a variations image 1`] = `
 <div>
   <img
     alt=""
@@ -65,7 +65,7 @@ exports[`ProductImage should render a variations image 1`] = `
 </div>
 `;
 
-exports[`ProductImage should render the passed alt prop 1`] = `
+exports[`ProductImage > should render the passed alt prop 1`] = `
 <div>
   <img
     alt="testing"

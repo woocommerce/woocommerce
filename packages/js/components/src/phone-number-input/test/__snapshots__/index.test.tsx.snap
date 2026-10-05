@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`PhoneNumberInput should match snapshot 1`] = `
+exports[`PhoneNumberInput > should match snapshot 1`] = `
 <div>
   <div
     class="wcpay-component-phone-number-input"
@@ -54,7 +54,7 @@ exports[`PhoneNumberInput should match snapshot 1`] = `
 </div>
 `;
 
-exports[`PhoneNumberInput should match snapshot with custom renders 1`] = `
+exports[`PhoneNumberInput > should match snapshot with custom renders 1`] = `
 <div>
   <div
     class="wcpay-component-phone-number-input"

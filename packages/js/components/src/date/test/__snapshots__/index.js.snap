@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Date should respect formats from props 1`] = `
+exports[`Date > should respect formats from props 1`] = `
 <div>
   <time
     datetime="2019-01-01"
@@ -19,7 +19,7 @@ exports[`Date should respect formats from props 1`] = `
 </div>
 `;
 
-exports[`Date should use fallback formats 1`] = `
+exports[`Date > should use fallback formats 1`] = `
 <div>
   <time
     datetime="2019-01-01 00:00:00"

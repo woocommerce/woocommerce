@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -11,9 +13,12 @@ import { createElement } from '@wordpress/element';
  */
 import registeredCustomers from '../registered-customers';
 
-jest.mock( '@wordpress/api-fetch', () => jest.fn() );
+vi.mock( '@wordpress/api-fetch', () => {
+	const mock = vi.fn();
+	return { default: mock, ...mock };
+} );
 
-const mockedApiFetch = apiFetch as unknown as jest.Mock;
+const mockedApiFetch = apiFetch as unknown as Mock;
 
 describe( 'registered customers autocompleter', () => {
 	const named = {
@@ -95,7 +100,9 @@ describe( 'registered customers autocompleter', () => {
 	} );
 
 	it( 'highlights the match inside the appended field', () => {
-		render( <>{ registeredCustomers.getOptionLabel( named, 'example' ) }</> );
+		render(
+			<>{ registeredCustomers.getOptionLabel( named, 'example' ) }</>
+		);
 
 		expect( screen.getByText( 'example' ).tagName ).toBe( 'STRONG' );
 	} );

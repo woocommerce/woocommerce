@@ -1,3 +1,5 @@
+import { describe, expect, it, vi, type Mock } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -32,9 +34,9 @@ function renderForm< Values extends Record< string, unknown > >(
 	children: ( context: FormContextType< Values > ) => ReactNode,
 	{ strict = false } = {}
 ) {
-	const validate = jest.fn( () => ( {} ) );
-	const onChange = jest.fn();
-	const onChanges = jest.fn();
+	const validate = vi.fn( () => ( {} ) );
+	const onChange = vi.fn();
+	const onChanges = vi.fn();
 	const form = (
 		<Form< Values >
 			initialValues={ initialValues }
@@ -62,7 +64,7 @@ function renderForm< Values extends Record< string, unknown > >(
 const renderedValues = () =>
 	screen.getByRole( 'status', { name: 'Form values' } ).textContent;
 
-const validatedValues = ( validate: jest.Mock ) =>
+const validatedValues = ( validate: Mock ) =>
 	validate.mock.calls.map( ( [ values ] ) => values );
 
 describe( 'Form state updates', () => {
@@ -569,7 +571,9 @@ describe( 'Form state updates', () => {
 			)
 		);
 
-		userEvent.click( screen.getByRole( 'button', { name: 'Apply patch' } ) );
+		userEvent.click(
+			screen.getByRole( 'button', { name: 'Apply patch' } )
+		);
 
 		const nextValues = { ...initialNameValues(), firstName: 'Updated' };
 		expect( renderedValues() ).toBe( JSON.stringify( nextValues ) );
@@ -590,7 +594,9 @@ describe( 'Form state updates', () => {
 			initialValues,
 			( { setValues } ) => (
 				<button
-					onClick={ () => setValues( patch as unknown as NameValues ) }
+					onClick={ () =>
+						setValues( patch as unknown as NameValues )
+					}
 				>
 					Apply nullish patch
 				</button>
@@ -603,7 +609,9 @@ describe( 'Form state updates', () => {
 
 		expect( renderedValues() ).toBe( JSON.stringify( initialValues ) );
 		expect( onChange ).not.toHaveBeenCalled();
-		expect( onChanges.mock.calls ).toEqual( [ [ [], initialValues, true ] ] );
+		expect( onChanges.mock.calls ).toEqual( [
+			[ [], initialValues, true ],
+		] );
 	} );
 
 	// setWith() writes each of these names as one literal key, since none is a

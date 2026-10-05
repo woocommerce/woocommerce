@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -10,7 +12,7 @@ import { createElement } from '@wordpress/element';
  */
 import TourKit from '..';
 
-jest.mock( '@automattic/calypso-config' );
+vi.mock( '@automattic/calypso-config' );
 
 const config = {
 	steps: [
@@ -39,7 +41,7 @@ const config = {
 			},
 		},
 	],
-	closeHandler: () => jest.fn(),
+	closeHandler: () => vi.fn(),
 	options: {},
 };
 

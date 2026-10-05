@@ -1,7 +1,0 @@
-{
-	"rootDir": "./",
-	"roots": [
-		"<rootDir>/src"
-	],
-	"preset": "./node_modules/@woocommerce/internal-js-tests/jest-preset.js"
-}

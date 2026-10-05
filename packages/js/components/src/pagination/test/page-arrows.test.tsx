@@ -1,3 +1,12 @@
+import {
+	afterEach,
+	describe,
+	expect,
+	it,
+	vi,
+	type MockedFunction,
+} from 'vitest';
+
 /**
  * External dependencies
  */
@@ -10,13 +19,19 @@ import { isRTL } from '@wordpress/i18n';
  */
 import { PageArrows } from '../page-arrows';
 import { PageArrowsWithPicker } from '../page-arrows-with-picker';
-
-jest.mock( '@wordpress/i18n', () => ( {
-	...jest.requireActual( '@wordpress/i18n' ),
-	isRTL: jest.fn( () => false ),
-} ) );
-
-const mockedIsRTL = isRTL as jest.MockedFunction< typeof isRTL >;
+vi.mock( '@wordpress/i18n', async () => {
+	const mock = {
+		...( await vi.importActual( '@wordpress/i18n' ) ),
+		isRTL: vi.fn( () => false ),
+	};
+	return Object.defineProperties(
+		{
+			default: mock,
+		},
+		Object.getOwnPropertyDescriptors( mock )
+	);
+} );
+const mockedIsRTL = isRTL as MockedFunction< typeof isRTL >;
 
 // chevronLeft points left (path starts moving toward smaller x), chevronRight
 // the opposite; compare the rendered SVG path data to tell them apart.
@@ -28,15 +43,12 @@ function getArrowPaths( container: HTMLElement ) {
 		( button ) => button.querySelector( 'path' )?.getAttribute( 'd' )
 	);
 }
-
 const CHEVRON_LEFT_D = 'M14.6 7l-1.2-1L8 12l5.4 6 1.2-1-4.6-5z';
 const CHEVRON_RIGHT_D = 'M10.6 6L9.4 7l4.6 5-4.6 5 1.2 1 5.4-6z';
-
 describe( 'PageArrows', () => {
 	afterEach( () => {
 		mockedIsRTL.mockReturnValue( false );
 	} );
-
 	it( 'points previous left and next right in LTR', () => {
 		const { container } = render(
 			<PageArrows
@@ -50,7 +62,6 @@ describe( 'PageArrows', () => {
 			CHEVRON_RIGHT_D,
 		] );
 	} );
-
 	it( 'points previous right and next left in RTL', () => {
 		mockedIsRTL.mockReturnValue( true );
 		const { container } = render(
@@ -66,12 +77,10 @@ describe( 'PageArrows', () => {
 		] );
 	} );
 } );
-
 describe( 'PageArrowsWithPicker', () => {
 	afterEach( () => {
 		mockedIsRTL.mockReturnValue( false );
 	} );
-
 	it( 'points previous left and next right in LTR', () => {
 		const { container } = render(
 			<PageArrowsWithPicker
@@ -85,7 +94,6 @@ describe( 'PageArrowsWithPicker', () => {
 			CHEVRON_RIGHT_D,
 		] );
 	} );
-
 	it( 'points previous right and next left in RTL', () => {
 		mockedIsRTL.mockReturnValue( true );
 		const { container } = render(

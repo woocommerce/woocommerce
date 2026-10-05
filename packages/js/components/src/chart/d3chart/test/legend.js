@@ -1,3 +1,5 @@
+import { describe, expect, test, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -9,7 +11,7 @@ import { createElement } from '@wordpress/element';
  */
 import D3Legend from '../legend';
 
-const colorScheme = jest.fn();
+const colorScheme = vi.fn();
 const data = [
 	{
 		key: 'lorem',

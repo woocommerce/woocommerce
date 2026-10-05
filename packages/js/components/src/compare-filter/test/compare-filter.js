@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -14,7 +16,7 @@ import Search from '../../search';
 import productAutocompleter from '../../search/autocompleters/product';
 // Due to Jest implementation we cannot mock it only for specific tests.
 // If your test requires non-mocked Search, move them to another test file.
-jest.mock( '../../search' );
+vi.mock( '../../search' );
 Search.mockName( 'Search' );
 
 describe( 'CompareFilter', () => {
@@ -23,7 +25,7 @@ describe( 'CompareFilter', () => {
 	beforeEach( () => {
 		// Reset the deprecation messages, so each test can assert its own warning.
 		Object.keys( logged ).forEach( ( key ) => delete logged[ key ] );
-		warn = jest.spyOn( console, 'warn' ).mockImplementation( () => {} );
+		warn = vi.spyOn( console, 'warn' ).mockImplementation( () => {} );
 		props = {
 			path: '/foo/bar',
 			param: 'product',
@@ -73,7 +75,7 @@ describe( 'CompareFilter', () => {
 	} );
 
 	it( 'should keep control of the `selected` and `onChange` Search props', () => {
-		const onChange = jest.fn();
+		const onChange = vi.fn();
 		props.searchProps = {
 			type: 'products',
 			selected: [ { key: 1, label: 'Foo' } ],

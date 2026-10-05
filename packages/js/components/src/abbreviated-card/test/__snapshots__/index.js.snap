@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`AbbreviatedCard it renders correctly 1`] = `
+exports[`AbbreviatedCard > it renders correctly 1`] = `
 <div>
   <div
     class="components-surface components-card woocommerce-abbreviated-card css-1vojmlq-PolymorphicDiv-Surface-getBorders-primary-Card-rounded e19lxcc00"

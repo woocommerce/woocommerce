@@ -1,3 +1,5 @@
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -33,7 +35,7 @@ describe( 'ErrorBoundary', () => {
 		delete window.location;
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore - Ignore TS error for assigning window.location
-		window.location = { reload: jest.fn() };
+		window.location = { reload: vi.fn() };
 	} );
 
 	afterAll( () => {
@@ -64,7 +66,7 @@ describe( 'ErrorBoundary', () => {
 	} );
 
 	it( 'refreshes the page when Reload Page button is clicked', () => {
-		const reloadMock = jest.fn();
+		const reloadMock = vi.fn();
 		Object.defineProperty( window.location, 'reload', {
 			configurable: true,
 			value: reloadMock,
@@ -82,7 +84,7 @@ describe( 'ErrorBoundary', () => {
 	} );
 
 	it( 'triggers on error callback when provided', () => {
-		const onError = jest.fn();
+		const onError = vi.fn();
 
 		render(
 			<ErrorBoundary onError={ onError }>
@@ -94,7 +96,7 @@ describe( 'ErrorBoundary', () => {
 	} );
 
 	it( 'triggers custom action callback when provided', () => {
-		const customActionCallback = jest.fn();
+		const customActionCallback = vi.fn();
 
 		render(
 			<ErrorBoundary actionCallback={ customActionCallback }>
@@ -105,7 +107,7 @@ describe( 'ErrorBoundary', () => {
 		fireEvent.click( screen.getByText( 'Reload' ) );
 
 		expect( customActionCallback ).toHaveBeenCalledWith(
-			new Error( 'Test error' )
+			expect.objectContaining( { message: 'Test error' } )
 		);
 	} );
 

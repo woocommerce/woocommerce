@@ -1,3 +1,5 @@
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+
 /**
  * External dependencies
  */
@@ -16,7 +18,7 @@ describe( 'AnalyticsError', () => {
 
 	beforeAll( () => {
 		delete window.location;
-		window.location = { reload: jest.fn() };
+		window.location = { reload: vi.fn() };
 	} );
 
 	afterAll( () => {
@@ -42,7 +44,7 @@ describe( 'AnalyticsError', () => {
 	} );
 
 	it( 'refreshes the page when Reload Page button is clicked', () => {
-		const reloadMock = jest.fn();
+		const reloadMock = vi.fn();
 		Object.defineProperty( window.location, 'reload', {
 			configurable: true,
 			value: reloadMock,
