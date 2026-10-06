@@ -269,6 +269,9 @@ importers:
       '@wordpress/stylelint-config':
         specifier: catalog:tooling
         version: 23.42.0(@types/react@18.3.28)(esbuild@0.24.2)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint-scss@6.14.0(stylelint@16.26.1(typescript@5.7.3)))(stylelint@16.26.1(typescript@5.7.3))
+      '@wordpress/theme':
+        specifier: catalog:wp-bundled
+        version: 0.17.0(@types/react@18.3.28)(esbuild@0.24.2)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
       babel-loader:
         specifier: 9.2.x
         version: 9.2.1(@babel/core@7.25.7)(webpack@5.97.1(@swc/core@1.15.24))
@@ -1748,6 +1751,9 @@ importers:
       '@wordpress/postcss-plugins-preset':
         specifier: catalog:wp-min
         version: 5.33.1(postcss@8.5.26)
+      '@wordpress/theme':
+        specifier: catalog:wp-bundled
+        version: 0.17.0(@types/react@18.3.28)(esbuild@0.24.2)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
       chokidar:
         specifier: ^3.6.0
         version: 3.6.0
@@ -3608,6 +3614,9 @@ importers:
       '@wordpress/stylelint-config':
         specifier: catalog:tooling
         version: 23.36.0(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint-scss@6.14.0(stylelint@16.26.1(typescript@5.7.3)))(stylelint@16.26.1(typescript@5.7.3))
+      '@wordpress/theme':
+        specifier: catalog:wp-bundled
+        version: 0.17.0(@types/react@18.3.28)(esbuild@0.24.2)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
       ajv-cli:
         specifier: 3.3.x
         version: 3.3.0
