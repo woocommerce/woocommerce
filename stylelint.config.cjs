@@ -1,13 +1,16 @@
 /**
- * Shared stylelint config for the monorepo's SCSS: the WordPress SCSS preset
- * (with stylistic rules) plus the relaxations that the existing code relies on.
- *
- * Usage, from a package's `.stylelintrc.json`:
- *   { "extends": "@woocommerce/internal-build/configs/stylelint.config.cjs" }
+ * Stylelint config for the monorepo's SCSS: the WordPress SCSS preset (with
+ * stylistic rules) plus the relaxations that the existing code relies on.
  */
 module.exports = {
 	extends: '@wordpress/stylelint-config/scss-stylistic',
 	reportNeedlessDisables: true,
+	ignoreFiles: [
+		'docs/**',
+		'packages/php/**',
+		'plugins/woocommerce-beta-tester/**',
+		'plugins/woocommerce/tests/**',
+	],
 	rules: {
 		'no-descending-specificity': null,
 		'no-duplicate-selectors': null,

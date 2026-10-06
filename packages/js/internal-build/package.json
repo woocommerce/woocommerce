@@ -29,7 +29,6 @@
 			"require": "./src/style-build/index.cjs"
 		},
 		"./configs/tsconfig.json": "./configs/tsconfig.json",
-		"./configs/stylelint.config.cjs": "./configs/stylelint.config.cjs",
 		"./type-overrides/*": "./type-overrides/*",
 		"./styles/*": "./styles/*"
 	},
@@ -60,7 +59,6 @@
 		"@automattic/color-studio": "^4.0.0",
 		"@wordpress/base-styles": "catalog:wp-bundled",
 		"@wordpress/postcss-plugins-preset": "catalog:wp-min",
-		"@wordpress/stylelint-config": "catalog:tooling",
 		"chokidar": "^3.6.0",
 		"css-loader": "6.11.x",
 		"esbuild": "^0.24.0",
@@ -88,12 +86,7 @@
 		"ci": {
 			"lint": {
 				"command": "lint",
-				"changes": [
-					"src/**/*.{js,jsx,ts,tsx,cjs}",
-					"styles/**/*.scss",
-					".stylelintrc.json",
-					"configs/stylelint.config.cjs"
-				]
+				"changes": "{src/**/*.{js,jsx,ts,tsx,cjs},styles/**/*.scss}"
 			}
 		}
 	}

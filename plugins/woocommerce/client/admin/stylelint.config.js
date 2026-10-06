@@ -1,5 +1,5 @@
 module.exports = {
-	extends: '@woocommerce/internal-build/configs/stylelint.config.cjs',
+	extends: '../../../../stylelint.config.cjs',
 	ignoreFiles: [ './vendor/**/*.scss' ],
 	rules: {
 		'scss/load-partial-extension': 'always',
