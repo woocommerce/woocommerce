@@ -307,6 +307,30 @@ class PlansTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'Renamed elsewhere', $plan->get_name(), 'The status-only update must not write the name it read.' );
 	}
 
+	public function test_update_with_no_fields_validates_and_writes_nothing(): void {
+		global $wpdb;
+
+		$id    = $this->create();
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( $wpdb->prepare( "UPDATE {$table} SET date_updated_gmt = %s WHERE id = %d", '2020-01-01 00:00:00', $id ) );
+
+		$validated = 0;
+		add_action(
+			self::HOOK,
+			static function () use ( &$validated ): void {
+				++$validated;
+			}
+		);
+
+		$this->assertTrue( Plans::update( $id, array() ) );
+		$this->assertSame( 1, $validated, 'An empty update still runs the owner validation.' );
+		$this->assertSame( '2020-01-01 00:00:00', $this->stored( $id )->get_date_updated_gmt(), 'An empty update writes nothing.' );
+
+		$this->assertTrue( Plans::update( $id, array( 'name' => 'Renamed' ) ) );
+		$this->assertNotSame( '2020-01-01 00:00:00', $this->stored( $id )->get_date_updated_gmt(), 'A field update bumps the update time.' );
+	}
+
 	public function test_validate_action_receives_the_would_be_state_on_create(): void {
 		$seen = array();
 		add_action(

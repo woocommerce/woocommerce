@@ -110,7 +110,8 @@ final class Plans {
 	 *
 	 * @param int                  $id   Plan id.
 	 * @param array<string, mixed> $args Fields to write.
-	 * @return bool True when written; false when the plan does not exist.
+	 * @return bool True when the plan exists and the write passed validation (an empty `$args`
+	 *              validates the stored plan and writes nothing); false when the plan does not exist.
 	 * @throws InvalidArgumentException If the id is not positive, a key is unknown or a value is invalid,
 	 *                                  or a {@see PlanValidationException} when the owner refuses the plan.
 	 * @throws RuntimeException If a validation callback throws or the update fails.
