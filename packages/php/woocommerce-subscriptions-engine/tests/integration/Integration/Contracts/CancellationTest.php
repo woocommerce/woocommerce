@@ -196,6 +196,92 @@ class CancellationTest extends EngineIntegrationTestCase {
 		$this->assertSame( '', $this->contracts->get_meta( $id, Hold::ANCHOR_META_KEY, true ) );
 	}
 
+	/**
+	 * The anchor is cleared after the status write has committed, so a failed delete must
+	 * not abort the transition: the lifecycle action still fires.
+	 *
+	 * @dataProvider provide_cancel_modes
+	 *
+	 * @param string $method Cancellation method under test.
+	 * @param string $action Action the method fires.
+	 * @param string $status Status the method writes.
+	 */
+	public function test_a_failed_anchor_clear_does_not_abort_the_transition( string $method, string $action, string $status ): void {
+		$id = $this->seed_active();
+		( new Hold( $this->contracts ) )->hold( $this->reload( $id ) );
+
+		$fired = 0;
+		add_action(
+			$action,
+			static function () use ( &$fired ): void {
+				++$fired;
+			}
+		);
+		$break = $this->break_meta_deletes();
+
+		try {
+			$this->assertTrue( $this->sut->$method( $this->reload( $id ) ) );
+		} finally {
+			remove_filter( 'query', $break );
+		}
+
+		$this->assertSame( 1, $fired, 'The lifecycle action fires.' );
+		$this->assertSame( $status, $this->reload( $id )->get_status() );
+		$this->assertSame( '2099-01-01 00:00:00', $this->contracts->get_meta( $id, Hold::ANCHOR_META_KEY, true ), 'The anchor is left behind.' );
+	}
+
+	/**
+	 * A transition that loses its compare-and-set leaves the hold anchor in place, so the
+	 * contract that won can still resume from it.
+	 *
+	 * @dataProvider provide_cancel_modes
+	 *
+	 * @param string $method Cancellation method under test.
+	 */
+	public function test_a_lost_race_keeps_the_hold_anchor( string $method ): void {
+		$id = $this->seed_active();
+		( new Hold( $this->contracts ) )->hold( $this->reload( $id ) );
+		$stale = $this->reload( $id );
+
+		$concurrent = $this->reload( $id );
+		$concurrent->set_status( ContractStatus::EXPIRED );
+		$this->contracts->update( $concurrent );
+
+		try {
+			$this->sut->$method( $stale );
+			$this->fail( 'Expected a DomainException when the conditional write misses.' );
+		} catch ( DomainException $e ) {
+			$this->assertSame( '2099-01-01 00:00:00', $this->contracts->get_meta( $id, Hold::ANCHOR_META_KEY, true ) );
+		}
+	}
+
+	/**
+	 * Both cancellation modes: method, action, resulting status.
+	 *
+	 * @return array<string, array{0: string, 1: string, 2: string}>
+	 */
+	public function provide_cancel_modes(): array {
+		return array(
+			'cancel'               => array( 'cancel', Cancellation::CONTRACT_CANCELLED_ACTION, ContractStatus::CANCELLED ),
+			'cancel at period end' => array( 'cancel_at_period_end', Cancellation::CONTRACT_PENDING_CANCELLATION_ACTION, ContractStatus::PENDING_CANCELLATION ),
+		);
+	}
+
+	/**
+	 * Make every contract meta DELETE fail until the returned filter is removed.
+	 *
+	 * @return callable The `query` filter to remove.
+	 */
+	private function break_meta_deletes(): callable {
+		$meta_table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
+		$break      = static function ( string $query ) use ( $meta_table ): string {
+			return 0 === strpos( $query, "DELETE FROM `{$meta_table}`" ) ? 'SELECT broken syntax (' : $query;
+		};
+		add_filter( 'query', $break );
+
+		return $break;
+	}
+
 	public function test_cancel_accepts_a_pending_cancellation_contract(): void {
 		$id = $this->seed( ContractStatus::PENDING_CANCELLATION );
 

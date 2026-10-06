@@ -149,6 +149,30 @@ final class Hold {
 	}
 
 	/**
+	 * Clear a contract's hold anchor after a status write has committed.
+	 *
+	 * Best effort: a failed delete is logged and swallowed, so the caller still finishes
+	 * the transition it already wrote (cycle close, lifecycle action). A leftover anchor
+	 * is harmless: the next hold overwrites it and only an on-hold contract reads it.
+	 *
+	 * @param ContractRepository $contracts   Contract repository.
+	 * @param int                $contract_id Contract id.
+	 */
+	public static function clear_anchor( ContractRepository $contracts, int $contract_id ): void {
+		try {
+			$contracts->delete_meta( $contract_id, self::ANCHOR_META_KEY );
+		} catch ( RuntimeException $e ) {
+			wc_get_logger()->warning(
+				sprintf( 'Hold: the hold anchor of contract %d could not be cleared: %s', $contract_id, $e->getMessage() ),
+				array(
+					'source'      => 'woocommerce-subscriptions-engine',
+					'contract_id' => $contract_id,
+				)
+			);
+		}
+	}
+
+	/**
 	 * The hold anchor stored for a contract, or null when there is none.
 	 *
 	 * The one reader of {@see self::ANCHOR_META_KEY}: a value that is not a well-formed

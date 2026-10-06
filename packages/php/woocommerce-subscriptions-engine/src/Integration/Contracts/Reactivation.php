@@ -134,7 +134,7 @@ final class Reactivation {
 			throw new DomainException( 'Reactivation::reactivate(): the contract state changed concurrently; nothing was written.' );
 		}
 
-		$this->contracts->delete_meta( $id, Hold::ANCHOR_META_KEY );
+		Hold::clear_anchor( $this->contracts, $id );
 
 		/**
 		 * Fires after a held contract is reactivated: its renewal is re-armed, or left

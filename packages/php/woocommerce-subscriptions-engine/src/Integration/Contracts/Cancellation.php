@@ -104,7 +104,7 @@ final class Cancellation {
 		}
 
 		if ( ContractStatus::CANCELLED !== $previous ) {
-			$this->contracts->delete_meta( $id, Hold::ANCHOR_META_KEY );
+			Hold::clear_anchor( $this->contracts, $id );
 		}
 
 		// Close a charge caught mid-flight: a still-pending head cycle is cancelled so no stale
@@ -182,7 +182,7 @@ final class Cancellation {
 		}
 
 		if ( ContractStatus::PENDING_CANCELLATION !== $previous ) {
-			$this->contracts->delete_meta( $id, Hold::ANCHOR_META_KEY );
+			Hold::clear_anchor( $this->contracts, $id );
 		}
 
 		/**
