@@ -19,8 +19,7 @@ export const BASE_URL =
 	'http://localhost:' + ( process.env.WP_ENV_PORT || '8086' );
 
 export const WP_ARTIFACTS_PATH =
-	process.env.WP_ARTIFACTS_PATH ||
-	path.join( process.cwd(), 'tests/e2e/.state' );
+	process.env.WP_ARTIFACTS_PATH || path.join( __dirname, '../../.state' );
 
 export const STORAGE_STATE_PATH =
 	process.env.STORAGE_STATE_PATH ||

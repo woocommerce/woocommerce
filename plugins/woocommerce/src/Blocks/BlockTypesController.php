@@ -26,6 +26,13 @@ final class BlockTypesController {
 	private const DATA_ATTRIBUTES_PRIORITY = 10;
 
 	/**
+	 * Priority of the callback that ends the data attributes suspension. The lowest possible priority puts it ahead
+	 * of other callbacks on the render end action, so one of those throwing cannot leave the filter suspended for
+	 * the rest of the request.
+	 */
+	private const RESTORE_DATA_ATTRIBUTES_PRIORITY = PHP_INT_MIN;
+
+	/**
 	 * Instance of the asset API.
 	 *
 	 * @var AssetApi
@@ -80,6 +87,7 @@ final class BlockTypesController {
 		add_filter( 'render_block', array( $this, 'add_data_attributes' ), self::DATA_ATTRIBUTES_PRIORITY, 2 );
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
+		add_filter( 'block_type_metadata', array( $this, 'handle_block_type_metadata' ) );
 		add_filter( 'block_type_metadata_settings', array( $this, 'use_single_block_editor_style' ), 10, 2 );
 		add_filter( 'register_block_type_args', array( $this, 'enqueue_block_style_for_classic_themes' ), 10, 2 );
 		add_filter( 'block_core_breadcrumbs_post_type_settings', array( $this, 'set_product_breadcrumbs_preferred_taxonomy' ), 10, 3 );
@@ -179,19 +187,19 @@ final class BlockTypesController {
 		}
 
 		remove_filter( 'render_block', $data_attributes_callback, self::DATA_ATTRIBUTES_PRIORITY );
-		add_action( 'woocommerce_email_editor_render_end', array( $this, 'restore_data_attributes_after_email_render' ) );
+		add_action( 'woocommerce_email_editor_render_end', array( $this, 'restore_data_attributes_after_email_render' ), self::RESTORE_DATA_ATTRIBUTES_PRIORITY );
 	}
 
 	/**
 	 * Add the data- attributes filter back once the email render has ended.
 	 *
-	 * Only a suspension hooks this, so a render whose end action never reached it is repaired by the next one.
+	 * Only a suspension hooks this, and a render that never fired the end action is repaired by the next one.
 	 *
 	 * @internal
 	 */
 	public function restore_data_attributes_after_email_render(): void {
 		add_filter( 'render_block', array( $this, 'add_data_attributes' ), self::DATA_ATTRIBUTES_PRIORITY, 2 );
-		remove_action( 'woocommerce_email_editor_render_end', array( $this, 'restore_data_attributes_after_email_render' ) );
+		remove_action( 'woocommerce_email_editor_render_end', array( $this, 'restore_data_attributes_after_email_render' ), self::RESTORE_DATA_ATTRIBUTES_PRIORITY );
 	}
 
 	/**
@@ -709,6 +717,30 @@ final class BlockTypesController {
 		$args['style']         = array();
 
 		return $args;
+	}
+
+	/**
+	 * Use the WooCommerce asset version when a bundled block.json omits one.
+	 *
+	 * WordPress otherwise adds the WordPress version to stylesheets registered from that file.
+	 *
+	 * @internal
+	 *
+	 * @param array $metadata Block metadata.
+	 * @return array Block metadata.
+	 */
+	public function handle_block_type_metadata( $metadata ) {
+		if ( ! is_array( $metadata ) || ! $this->is_woocommerce_block_metadata( $metadata ) ) {
+			return $metadata;
+		}
+
+		if ( isset( $metadata['version'] ) && '' !== $metadata['version'] ) {
+			return $metadata;
+		}
+
+		$metadata['version'] = $this->asset_api->wc_version;
+
+		return $metadata;
 	}
 
 	/**
