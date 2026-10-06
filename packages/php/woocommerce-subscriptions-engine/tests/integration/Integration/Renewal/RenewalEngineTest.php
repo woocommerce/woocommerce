@@ -736,6 +736,89 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox the scheduled scan falls back to the live plan when the snapshot billing has no usable cadence, and parks when neither is usable.
+	 *
+	 * @dataProvider provide_unusable_snapshot_billing_payloads
+	 *
+	 * @param array<string, mixed>      $snapshot_billing The snapshot's billing payload.
+	 * @param array<string, mixed>|null $live_billing     The live plan's billing payload.
+	 * @param string|null               $expected_next    The next payment after the run; null when parked.
+	 */
+	public function test_scheduled_renewal_reads_an_unusable_snapshot_billing_through_the_live_plan( array $snapshot_billing, ?array $live_billing, ?string $expected_next ): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+
+		$plan  = $this->make_plan_view();
+		$order = new WC_Order();
+		$order->set_currency( 'USD' );
+		$order->set_payment_method( self::GATEWAY_APPROVING );
+		$order->set_total( '19.99' );
+		$order->set_date_paid( '2026-01-15 00:00:00' );
+		$order->save();
+
+		$contract_id = $this->sign_up_from_order(
+			$order,
+			$plan,
+			array(
+				'plan_snapshot' => array(
+					'selling_plan_id' => $plan->get_id(),
+					'name'            => $plan->get_name(),
+					'billing_policy'  => $snapshot_billing,
+				),
+			)
+		);
+		$this->assertTrue( Plans::update( $plan->get_id(), array( 'billing_policy' => $live_billing ) ) );
+
+		$warnings = array();
+		$capture  = static function ( $message, $level ) use ( &$warnings ) {
+			if ( 'warning' === $level && is_string( $message ) && false !== strpos( $message, 'unreadable plan-snapshot billing policy' ) ) {
+				$warnings[] = $message;
+			}
+			return $message;
+		};
+		add_filter( 'woocommerce_logger_log_message', $capture, 10, 2 );
+
+		try {
+			$result = $this->run_scheduled_renewal( $contract_id );
+		} finally {
+			remove_filter( 'woocommerce_logger_log_message', $capture, 10 );
+		}
+
+		$this->assertNotEmpty( $warnings, 'An unusable snapshot billing payload is logged.' );
+		$this->assertSame( $expected_next, $this->reload_contract( $contract_id )->get_next_payment_gmt() );
+		if ( null === $expected_next ) {
+			$this->assertNull( $result );
+			$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 2 ), 'A parked contract bills nothing.' );
+		} else {
+			$this->assertInstanceOf( WC_Order::class, $result, 'The renewal bills on the live cadence.' );
+		}
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>, 1: array<string, mixed>|null, 2: string|null}>
+	 */
+	public function provide_unusable_snapshot_billing_payloads(): array {
+		$monthly = array(
+			'period'   => 'month',
+			'interval' => 1,
+		);
+		$decade  = array(
+			'period'   => 'decade',
+			'interval' => 1,
+		);
+		$zero    = array(
+			'period'   => 'month',
+			'interval' => 0,
+		);
+
+		return array(
+			'unknown period, live monthly'  => array( $decade, $monthly, '2026-03-15 00:00:00' ),
+			'zero interval, live monthly'   => array( $zero, $monthly, '2026-03-15 00:00:00' ),
+			'unknown period, live unusable' => array( $decade, $zero, null ),
+			'zero interval, live null'      => array( $zero, null, null ),
+		);
+	}
+
+	/**
 	 * @testdox the scheduled scan resumes a stalled renewal whose order was saved but never charged.
 	 *
 	 * A run that claimed cycle 2 pending and saved its renewal order, then crashed before the

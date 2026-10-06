@@ -6,8 +6,9 @@
  * engine stores plan policies opaquely and does not construct this on plan writes. It
  * does read one payload with it: renewal and reactivation parse a contract's plan
  * snapshot `billing_policy`, and the live plan's `billing_policy` when the contract has
- * no readable snapshot, so a plan whose contracts the engine renews must store this
- * shape there. The array shape it parses:
+ * no usable snapshot policy, both through {@see self::from_array_with_usable_cadence()},
+ * so a plan whose contracts the engine renews must store this shape there. The array
+ * shape it parses:
  *   {
  *     period:         'day' | 'week' | 'month' | 'year',
  *     interval:       int,
@@ -136,6 +137,39 @@ final class BillingPolicy {
 	}
 
 	/**
+	 * Hydrate like {@see self::from_array()} and also require a usable cadence.
+	 *
+	 * The one rule the engine applies before it renews on a payload: an unknown period
+	 * or a non-positive interval parses, but no next renewal can be computed from it.
+	 *
+	 * @param array<string, mixed> $data Decoded billing_policy row.
+	 * @throws DomainException If the data does not parse or has no usable cadence.
+	 */
+	public static function from_array_with_usable_cadence( array $data ): self {
+		$policy = self::from_array( $data );
+		$policy->assert_usable_cadence();
+
+		return $policy;
+	}
+
+	/**
+	 * Check that a next renewal can be computed from this policy's cadence: the period
+	 * is one of day/week/month/year and the interval is positive. Trial fields are not
+	 * checked here.
+	 *
+	 * @throws DomainException If the period is unknown or the interval is not positive.
+	 */
+	public function assert_usable_cadence(): void {
+		if ( $this->interval <= 0 ) {
+			throw new DomainException(
+				sprintf( 'BillingPolicy: interval must be positive, got %d.', $this->interval )
+			);
+		}
+
+		$this->normalize_unit( $this->period, 'period' );
+	}
+
+	/**
 	 * Period unit: 'day' | 'week' | 'month' | 'year'.
 	 */
 	public function get_period(): string {
@@ -184,16 +218,11 @@ final class BillingPolicy {
 	 * @throws DomainException If `period` is unknown or `interval` is not positive.
 	 */
 	public function compute_next_renewal_from( DateTimeImmutable $anchor ): DateTimeImmutable {
-		if ( $this->interval <= 0 ) {
-			throw new DomainException(
-				sprintf( 'BillingPolicy::compute_next_renewal_from(): interval must be positive, got %d.', $this->interval )
-			);
-		}
+		$this->assert_usable_cadence();
 
-		$unit = $this->normalize_unit( $this->period, 'period' );
-		$utc  = $anchor->setTimezone( new DateTimeZone( 'UTC' ) );
+		$utc = $anchor->setTimezone( new DateTimeZone( 'UTC' ) );
 
-		return $utc->modify( sprintf( '+%d %s', $this->interval, $unit ) );
+		return $utc->modify( sprintf( '+%d %s', $this->interval, $this->period ) );
 	}
 
 	/**

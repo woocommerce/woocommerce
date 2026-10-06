@@ -20,6 +20,40 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
  */
 class BillingPolicyTest extends TestCase {
 
+	/**
+	 * @testWith ["decade", 1, "BillingPolicy: invalid period \"decade\"."]
+	 *           ["month", 0, "BillingPolicy: interval must be positive, got 0."]
+	 *           ["day", -1, "BillingPolicy: interval must be positive, got -1."]
+	 *
+	 * @param string $period   Period.
+	 * @param int    $interval Interval.
+	 * @param string $message  Expected exception message.
+	 */
+	public function test_from_array_with_usable_cadence_refuses_an_unusable_cadence( string $period, int $interval, string $message ): void {
+		$data = array(
+			'period'   => $period,
+			'interval' => $interval,
+		);
+		BillingPolicy::from_array( $data );
+
+		$this->expectException( DomainException::class );
+		$this->expectExceptionMessage( $message );
+
+		BillingPolicy::from_array_with_usable_cadence( $data );
+	}
+
+	public function test_from_array_with_usable_cadence_accepts_a_usable_cadence(): void {
+		$policy = BillingPolicy::from_array_with_usable_cadence(
+			array(
+				'period'   => 'week',
+				'interval' => 2,
+			)
+		);
+
+		$this->assertSame( 'week', $policy->get_period() );
+		$this->assertSame( 2, $policy->get_interval() );
+	}
+
 	public function test_round_trips_through_array(): void {
 		$data = array(
 			'period'         => 'month',

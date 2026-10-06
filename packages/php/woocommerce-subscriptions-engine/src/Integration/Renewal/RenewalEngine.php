@@ -398,21 +398,21 @@ final class RenewalEngine {
 	private function resolve_billing_policy( Contract $contract ): ?BillingPolicy {
 		$snapshot = $this->resolve_plan_snapshot( $contract );
 		if ( $snapshot instanceof PlanSnapshot ) {
-			$payload = $snapshot->to_array();
-			if ( isset( $payload['billing_policy'] ) && is_array( $payload['billing_policy'] ) ) {
-				try {
-					return self::read_billing_policy( self::string_keyed( $payload['billing_policy'] ) );
-				} catch ( \DomainException $e ) {
-					// A corrupt stored policy must not crash the scheduled run; fall through to the
-					// live plan below so the renewal can still resolve on current terms.
-					wc_get_logger()->warning(
-						sprintf( 'RenewalEngine: contract %d has an unreadable plan-snapshot billing policy; falling back to the live plan. %s', (int) $contract->get_id(), $e->getMessage() ),
-						array(
-							'source'      => self::LOG_SOURCE,
-							'contract_id' => (int) $contract->get_id(),
-						)
-					);
+			try {
+				$policy = $snapshot->read_billing_policy();
+				if ( null !== $policy ) {
+					return $policy;
 				}
+			} catch ( \DomainException $e ) {
+				// A corrupt stored policy must not crash the scheduled run; fall through to the
+				// live plan below so the renewal can still resolve on current terms.
+				wc_get_logger()->warning(
+					sprintf( 'RenewalEngine: contract %d has an unreadable plan-snapshot billing policy; falling back to the live plan. %s', (int) $contract->get_id(), $e->getMessage() ),
+					array(
+						'source'      => self::LOG_SOURCE,
+						'contract_id' => (int) $contract->get_id(),
+					)
+				);
 			}
 		}
 
@@ -428,7 +428,7 @@ final class RenewalEngine {
 		}
 
 		try {
-			return self::read_billing_policy( $billing );
+			return BillingPolicy::from_array_with_usable_cadence( $billing );
 		} catch ( \DomainException $e ) {
 			wc_get_logger()->warning(
 				sprintf( 'RenewalEngine: contract %d has an unreadable live plan billing policy; the renewal cannot be processed. %s', (int) $contract->get_id(), $e->getMessage() ),
@@ -440,21 +440,6 @@ final class RenewalEngine {
 
 			return null;
 		}
-	}
-
-	/**
-	 * Parse a billing payload and check its cadence up front: an unknown period or a
-	 * non-positive interval parses but would only throw later, when the next cycle is
-	 * computed, so it is refused here like a payload that does not parse.
-	 *
-	 * @param array<string, mixed> $data Billing payload.
-	 * @throws \DomainException If the payload does not parse or has no usable cadence.
-	 */
-	private static function read_billing_policy( array $data ): BillingPolicy {
-		$policy = BillingPolicy::from_array( $data );
-		$policy->compute_next_renewal_from( new DateTimeImmutable( '@0' ) );
-
-		return $policy;
 	}
 
 	/**
@@ -1013,20 +998,6 @@ final class RenewalEngine {
 	private static function item_int( array $item, string $key ): int {
 		$value = $item[ $key ] ?? null;
 		return is_numeric( $value ) ? (int) $value : 0;
-	}
-
-	/**
-	 * Coerce a decoded array to a string-keyed array for the typed value-object factories.
-	 *
-	 * @param array<mixed, mixed> $value The decoded array.
-	 * @return array<string, mixed>
-	 */
-	private static function string_keyed( array $value ): array {
-		$out = array();
-		foreach ( $value as $key => $item ) {
-			$out[ (string) $key ] = $item;
-		}
-		return $out;
 	}
 
 	/**

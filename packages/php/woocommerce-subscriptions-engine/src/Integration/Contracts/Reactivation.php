@@ -223,17 +223,30 @@ final class Reactivation {
 	 * The billing policy the forward roll steps by: the contract's own frozen plan
 	 * terms first (the snapshot is what the contract actually bills under - the same
 	 * source the renewal money-path resolves), falling back to the live selling plan
-	 * (parsing its billing payload) for a contract with no snapshot, and null when neither
-	 * resolves or the live payload does not parse or has no usable cadence (logged).
+	 * (parsing its billing payload) when the contract has no snapshot or its snapshot
+	 * policy does not parse or has no usable cadence (logged), and null when neither
+	 * resolves. Both sources are read with the renewal rule
+	 * ({@see BillingPolicy::from_array_with_usable_cadence()}), so the forward roll never
+	 * throws on a stored payload.
 	 *
 	 * @param Contract $contract The contract.
 	 */
 	private function billing_policy( Contract $contract ): ?BillingPolicy {
 		$snapshot = $contract->get_plan_snapshot();
 		if ( null !== $snapshot ) {
-			$policy = $snapshot->get_billing_policy();
-			if ( $policy instanceof BillingPolicy ) {
-				return $policy;
+			try {
+				$policy = $snapshot->read_billing_policy();
+				if ( null !== $policy ) {
+					return $policy;
+				}
+			} catch ( DomainException $e ) {
+				wc_get_logger()->warning(
+					sprintf( 'Reactivation: contract %d has an unreadable plan-snapshot billing policy; falling back to the live plan. %s', (int) $contract->get_id(), $e->getMessage() ),
+					array(
+						'source'      => self::LOG_SOURCE,
+						'contract_id' => (int) $contract->get_id(),
+					)
+				);
 			}
 		}
 
@@ -249,11 +262,7 @@ final class Reactivation {
 		}
 
 		try {
-			$policy = BillingPolicy::from_array( $billing );
-			// An unknown period or a non-positive interval parses but throws on the forward roll.
-			$policy->compute_next_renewal_from( new DateTimeImmutable( '@0' ) );
-
-			return $policy;
+			return BillingPolicy::from_array_with_usable_cadence( $billing );
 		} catch ( DomainException $e ) {
 			wc_get_logger()->warning(
 				sprintf( 'Reactivation: contract %d has an unreadable live plan billing policy; a past-due next payment is floored at now. %s', (int) $contract->get_id(), $e->getMessage() ),

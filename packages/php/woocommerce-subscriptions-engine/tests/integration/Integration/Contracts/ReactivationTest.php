@@ -288,6 +288,77 @@ class ReactivationTest extends EngineIntegrationTestCase {
 		);
 	}
 
+	/**
+	 * A snapshot policy with no usable cadence falls through to the live plan (logged),
+	 * the same as renewal, instead of throwing out of the forward roll.
+	 *
+	 * @dataProvider provide_unusable_snapshot_billing_payloads
+	 *
+	 * @param array<string, mixed>      $snapshot_billing The snapshot's billing payload.
+	 * @param array<string, mixed>|null $live_billing     The live plan's billing payload.
+	 * @param string                    $expected_next    The expected next payment.
+	 */
+	public function test_reactivate_falls_back_to_the_live_plan_when_the_snapshot_billing_is_unusable( array $snapshot_billing, ?array $live_billing, string $expected_next ): void {
+		$id = $this->seed_on_hold( '2026-02-01 00:00:00', $this->make_plan( array( 'billing_policy' => $live_billing ) ) );
+
+		$contract = $this->reload( $id );
+		$contract->set_plan_snapshot(
+			PlanSnapshot::from_array(
+				array(
+					'selling_plan_id' => $contract->get_selling_plan_id(),
+					'billing_policy'  => $snapshot_billing,
+				)
+			)
+		);
+
+		$warnings = array();
+		$capture  = static function ( $message, $level ) use ( &$warnings ) {
+			if ( 'warning' === $level && is_string( $message ) && false !== strpos( $message, 'unreadable plan-snapshot billing policy' ) ) {
+				$warnings[] = $message;
+			}
+			return $message;
+		};
+		add_filter( 'woocommerce_logger_log_message', $capture, 10, 2 );
+
+		try {
+			$this->assertTrue( $this->sut->reactivate( $contract, $this->utc( '2026-04-15 09:30:00' ) ) );
+		} finally {
+			remove_filter( 'woocommerce_logger_log_message', $capture, 10 );
+		}
+
+		$stored = $this->reload( $id );
+		$this->assertSame( ContractStatus::ACTIVE, $stored->get_status() );
+		$this->assertSame( $expected_next, $stored->get_next_payment_gmt() );
+		$this->assertNotEmpty( $warnings, 'An unusable snapshot billing payload is logged.' );
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>, 1: array<string, mixed>|null, 2: string}>
+	 */
+	public function provide_unusable_snapshot_billing_payloads(): array {
+		$monthly = array(
+			'period'   => 'month',
+			'interval' => 1,
+		);
+		$decade  = array(
+			'period'   => 'decade',
+			'interval' => 1,
+		);
+		$zero    = array(
+			'period'   => 'month',
+			'interval' => 0,
+		);
+		$rolled  = '2026-05-01 00:00:00';
+		$floored = '2026-04-15 09:30:00';
+
+		return array(
+			'unknown period, live monthly'     => array( $decade, $monthly, $rolled ),
+			'zero interval, live monthly'      => array( $zero, $monthly, $rolled ),
+			'unknown period, live unusable'    => array( $decade, $zero, $floored ),
+			'zero interval, live null payload' => array( $zero, null, $floored ),
+		);
+	}
+
 	public function test_reactivate_leaves_a_null_next_payment_null(): void {
 		$id = $this->seed_on_hold( null, $this->make_monthly_plan() );
 
