@@ -169,9 +169,9 @@ final class Contracts {
 	 *
 	 * The first public form of the cycle append tool: append-if-absent on the chain's
 	 * unique positions. `status` (a registered cycle status), `starts_at_gmt` and
-	 * `ends_at_gmt` are required. `kind` defaults to `billing`; `sequence_no` and `count`
-	 * default to the next position in the chain (`count` may be null for a non-counting
-	 * cycle); `expected_total` defaults to 0; `currency` defaults to the contract's;
+	 * `ends_at_gmt` are required. `kind` defaults to `billing`; `sequence_no` defaults to
+	 * the head's plus one; `count` defaults to MAX(count) + 1 in the chain (pass `null` for
+	 * a non-counting cycle); `expected_total` defaults to 0; `currency` defaults to the contract's;
 	 * `order_id` is optional. Without `plan_snapshot` / `items_snapshot` payloads the
 	 * cycle references the contract's current snapshots; payloads attach to the new cycle
 	 * only. The owner is copied from the contract.
