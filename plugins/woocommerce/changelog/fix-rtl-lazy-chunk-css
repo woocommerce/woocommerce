@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Load right-to-left styles on admin pages that load their styles on demand, such as the setup task list.
