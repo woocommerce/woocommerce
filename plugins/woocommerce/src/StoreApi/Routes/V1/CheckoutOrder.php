@@ -6,7 +6,6 @@ use Automattic\WooCommerce\StoreApi\Exceptions\InvalidStockLevelsInCartException
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderAuthorizationTrait;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
-use Automattic\WooCommerce\StoreApi\Utilities\ValidationUtils;
 
 /**
  * CheckoutOrder class.
@@ -14,17 +13,6 @@ use Automattic\WooCommerce\StoreApi\Utilities\ValidationUtils;
 class CheckoutOrder extends AbstractCartRoute {
 	use OrderAuthorizationTrait;
 	use CheckoutTrait;
-
-	/**
-	 * Address fields an order's pricing is matched on. Shipping zones use country, state and
-	 * postcode, tax rates also use city; city is compared for both so the checks stay consistent.
-	 *
-	 * @see \WC_Shipping_Zones::get_zone_matching_package()
-	 * @see \WC_Tax::find_rates()
-	 *
-	 * @var string[]
-	 */
-	private const PRICING_ADDRESS_FIELDS = [ 'country', 'state', 'postcode', 'city' ];
 
 	/**
 	 * The route identifier.
@@ -224,19 +212,7 @@ class CheckoutOrder extends AbstractCartRoute {
 		$keep_shipping = ! wc_ship_to_billing_address_only() && '' !== $order->get_shipping_country();
 		$shipping      = $request['shipping_address'] ?? ( $keep_shipping ? $order->get_address( 'shipping' ) : $billing );
 
-		// Captured before the request is applied so the guard below compares against the order as priced.
-		$priced_destination  = $this->get_shipping_destination( $order );
-		$priced_tax_location = $order->get_taxable_location();
-		$stored_states       = [
-			'billing'  => $order->get_billing_state(),
-			'shipping' => $order->get_shipping_state(),
-		];
-
-		$order->set_billing_address( $billing );
-		$order->set_shipping_address( $shipping );
-		$this->keep_stored_state_names( $order, $stored_states );
-		$this->order_controller->validate_existing_order_before_update( $order );
-		$this->validate_order_is_still_priced( $order, $priced_destination, $priced_tax_location );
+		$this->order_controller->update_existing_order_addresses( $order, $billing, $shipping );
 
 		// Update customer object with validated order addresses.
 		foreach ( $billing as $key => $value ) {
@@ -264,117 +240,6 @@ class CheckoutOrder extends AbstractCartRoute {
 		$customer->save();
 		$order->save();
 		$order->calculate_totals();
-	}
-
-	/**
-	 * Puts back a state the order stores as a name when the request sends the code for the same state.
-	 *
-	 * Orders created outside the Store API (REST API, imports) can hold the name, which matches no shipping zone
-	 * or tax rate. The Store API always sends the code, so writing it would re-price an unchanged address.
-	 *
-	 * @param \WC_Order $order         Order with the request's addresses applied.
-	 * @param string[]  $stored_states State per address group before the request was applied.
-	 */
-	private function keep_stored_state_names( \WC_Order $order, array $stored_states ): void {
-		$validation_utils = new ValidationUtils();
-
-		foreach ( $stored_states as $group => $stored_state ) {
-			$address = $order->get_address( $group );
-			$state   = (string) ( $address['state'] ?? '' );
-
-			if ( $stored_state !== $state && $validation_utils->format_state( $stored_state, (string) ( $address['country'] ?? '' ) ) === $state ) {
-				$order->set_props( [ "{$group}_state" => $stored_state ] );
-			}
-		}
-	}
-
-	/**
-	 * Reads the destination the order is priced to ship to.
-	 *
-	 * An order with no shipping address ships to its billing address, e.g. one created in the admin, so fall
-	 * back to billing the same way WC_Abstract_Order::get_tax_location() does.
-	 *
-	 * @param \WC_Order $order Order to read.
-	 * @return array
-	 */
-	private function get_shipping_destination( \WC_Order $order ): array {
-		return $order->get_address( '' !== $order->get_shipping_country() ? 'shipping' : 'billing' );
-	}
-
-	/**
-	 * Rejects an address change that would alter what the order costs.
-	 *
-	 * @throws RouteException When the order would have to be re-priced.
-	 *
-	 * @param \WC_Order $order               Order with the request's addresses applied.
-	 * @param array     $priced_destination  Shipping destination the order is priced against.
-	 * @param array     $priced_tax_location Tax location the order is priced against.
-	 */
-	private function validate_order_is_still_priced( \WC_Order $order, array $priced_destination, array $priced_tax_location ): void {
-		// An order with no address was never priced against one, e.g. a merchant-created order the shopper
-		// is addressing for the first time, so there is nothing to protect.
-		if ( empty( $priced_destination['country'] ) ) {
-			return;
-		}
-
-		// needs_shipping() hydrates a product per line item, so let the free comparison short-circuit it.
-		if ( $this->pricing_fields_differ( $priced_destination, $this->get_shipping_destination( $order ) ) && $order->needs_shipping() ) {
-			throw new RouteException(
-				'woocommerce_rest_checkout_order_address_change_not_allowed',
-				esc_html__( 'Sorry, the shipping address on this order cannot be changed because the shipping cost was calculated for the original address. Please use the original address, or contact us to have the order updated.', 'woocommerce' ),
-				400
-			);
-		}
-
-		// Resolved through the order so this follows whichever address actually prices it, including the
-		// shop base for local pickup and anything woocommerce_order_get_tax_location redirects it to.
-		// A store that collects no tax has no tax location to protect.
-		if ( wc_tax_enabled() && $this->pricing_fields_differ( $priced_tax_location, $order->get_taxable_location() ) ) {
-			throw new RouteException(
-				'woocommerce_rest_checkout_order_address_change_not_allowed',
-				esc_html__( 'Sorry, the address on this order cannot be changed because the tax was calculated for the original address. Please use the original address, or contact us to have the order updated.', 'woocommerce' ),
-				400
-			);
-		}
-	}
-
-	/**
-	 * Compares two sets of pricing fields.
-	 *
-	 * Values are normalized the way WooCommerce keys pricing on them, so a value that differs only in case
-	 * or postcode spacing resolves to the same zone and tax rate and is not a difference.
-	 *
-	 * @param array $priced  Values the order is priced against.
-	 * @param array $updated Values the request would leave on the order.
-	 * @return bool
-	 */
-	private function pricing_fields_differ( array $priced, array $updated ): bool {
-		foreach ( self::PRICING_ADDRESS_FIELDS as $field ) {
-			if ( $this->normalize_pricing_address_field( $field, $priced ) !== $this->normalize_pricing_address_field( $field, $updated ) ) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * Normalizes an address field to the form shipping zones and tax rates are matched on.
-	 *
-	 * @param string $field   Field name.
-	 * @param array  $address Address the field belongs to.
-	 * @return string
-	 */
-	private function normalize_pricing_address_field( string $field, array $address ): string {
-		$value = (string) ( $address[ $field ] ?? '' );
-
-		if ( 'postcode' === $field ) {
-			return wc_normalize_postcode( $value );
-		}
-
-		// Both lookups uppercase with strtoupper(), which leaves multibyte characters alone. Matching that
-		// keeps the guard from treating two values as equal when the zone or tax lookup would not.
-		return strtoupper( trim( $value ) );
 	}
 
 	/**
