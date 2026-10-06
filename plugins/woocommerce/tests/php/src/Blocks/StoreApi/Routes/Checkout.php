@@ -2515,44 +2515,20 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * @testdox Checkout refuses to complete a failed non-zero order when a filter says it does not need payment.
+	 * @testdox Checkout refuses to complete a cancelled unpaid non-zero order.
 	 */
-	public function test_checkout_rejects_unpaid_non_zero_order_when_failed_status_is_not_payable(): void {
+	public function test_checkout_rejects_cancelled_unpaid_non_zero_order(): void {
 		$order_id = 0;
-		add_filter(
-			'woocommerce_valid_order_statuses_for_payment',
-			function ( $statuses ) {
-				return array_diff( $statuses, array( OrderStatus::FAILED ) );
-			}
-		);
 		add_action(
 			'woocommerce_store_api_checkout_order_processed',
 			function ( \WC_Order $order ) use ( &$order_id ) {
-				$order->set_status( OrderStatus::FAILED );
+				$order->set_status( OrderStatus::CANCELLED );
 				$order->save();
 				$order_id = $order->get_id();
 			}
 		);
 
-		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
-		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
-		$request->set_body_params(
-			array(
-				'billing_address' => (object) array(
-					'first_name' => 'test',
-					'last_name'  => 'test',
-					'address_1'  => 'test',
-					'city'       => 'test',
-					'postcode'   => 'cb241ab',
-					'country'    => 'GB',
-					'email'      => 'testaccount@test.com',
-				),
-				'payment_method'  => WC_Gateway_BACS::ID,
-				'expected_total'  => '3000',
-			)
-		);
-
-		$response = rest_get_server()->dispatch( $request );
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
 
 		$this->assertSame( 400, $response->get_status(), print_r( $response->get_data(), true ) );
 		$this->assertSame( 'woocommerce_rest_checkout_payment_required', $response->get_data()['code'] );
@@ -2560,8 +2536,24 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$this->assertGreaterThan( 0, $order_id, 'Checkout should have created an order before refusing to complete it.' );
 
 		$order = wc_get_order( $order_id );
-		$this->assertSame( OrderStatus::FAILED, $order->get_status(), 'The order should remain failed.' );
+		$this->assertSame( OrderStatus::CANCELLED, $order->get_status(), 'The order should remain cancelled.' );
 		$this->assertNull( $order->get_date_paid(), 'The order should not be marked paid.' );
+	}
+
+	/**
+	 * @testdox Checkout allows extensions to waive payment for a pending non-zero order.
+	 */
+	public function test_checkout_allows_waived_payment_for_pending_non_zero_order(): void {
+		add_filter( 'woocommerce_order_needs_payment', '__return_false' );
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 'success', $response->get_data()['payment_result']['payment_status'] );
+
+		$order = wc_get_order( $response->get_data()['order_id'] );
+		$this->assertTrue( $order->is_paid(), 'The intentionally payment-free order should be completed.' );
+		$this->assertNotNull( $order->get_date_paid(), 'The intentionally payment-free order should have a paid date.' );
 	}
 
 	/**

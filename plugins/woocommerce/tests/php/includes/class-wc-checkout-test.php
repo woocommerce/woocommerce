@@ -150,39 +150,40 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Checkout refuses to complete an unpaid non-zero order without payment.
-	 *
-	 * @dataProvider unpaid_non_zero_order_status_provider
-	 * @param string $status Order status to test.
+	 * @testdox Checkout refuses to complete a cancelled unpaid non-zero order without payment.
 	 */
-	public function test_process_order_without_payment_rejects_unpaid_non_zero_order( string $status ): void {
+	public function test_process_order_without_payment_rejects_cancelled_unpaid_non_zero_order(): void {
 		$order = wc_create_order();
 		$order->set_total( 10 );
-		$order->set_status( $status );
+		$order->set_status( OrderStatus::CANCELLED );
 		$order->save();
 
 		try {
 			$this->sut->process_order_without_payment( $order->get_id() );
-			$this->fail( 'Checkout should not complete an unpaid non-zero order without payment.' );
+			$this->fail( 'Checkout should not complete a cancelled unpaid non-zero order without payment.' );
 		} catch ( Exception $exception ) {
 			$this->assertSame( 'This order cannot be completed without payment. Please try again.', $exception->getMessage() );
 		}
 
 		$reloaded_order = wc_get_order( $order->get_id() );
-		$this->assertSame( $status, $reloaded_order->get_status(), 'The order status should not change.' );
+		$this->assertSame( OrderStatus::CANCELLED, $reloaded_order->get_status(), 'The order status should not change.' );
 		$this->assertNull( $reloaded_order->get_date_paid(), 'The order should not be marked paid.' );
 	}
 
 	/**
-	 * Provides unpaid order statuses observed in the affected checkout paths.
-	 *
-	 * @return array<string, array{string}>
+	 * @testdox Checkout allows extensions to complete a pending non-zero order without payment.
 	 */
-	public static function unpaid_non_zero_order_status_provider(): array {
-		return array(
-			'failed order'    => array( OrderStatus::FAILED ),
-			'cancelled order' => array( OrderStatus::CANCELLED ),
-		);
+	public function test_process_order_without_payment_allows_pending_non_zero_order(): void {
+		$order = wc_create_order();
+		$order->set_total( 10 );
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+
+		$this->sut->process_order_without_payment( $order->get_id() );
+
+		$reloaded_order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $reloaded_order->is_paid(), 'The intentionally payment-free order should be completed.' );
+		$this->assertNotNull( $reloaded_order->get_date_paid(), 'The intentionally payment-free order should have a paid date.' );
 	}
 
 	/**

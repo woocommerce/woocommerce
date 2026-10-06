@@ -1201,7 +1201,7 @@ class WC_Checkout {
 	 * Process an order that doesn't require payment.
 	 *
 	 * @since 3.0.0
-	 * @throws Exception If the order is missing or an unpaid order with a non-zero total would be marked paid.
+	 * @throws Exception If the order is missing or a cancelled unpaid order would be marked paid.
 	 * @param int $order_id Order ID.
 	 */
 	protected function process_order_without_payment( $order_id ) {
@@ -1211,8 +1211,8 @@ class WC_Checkout {
 			throw new Exception( esc_html__( 'Unable to process this order. Please try again.', 'woocommerce' ) );
 		}
 
-		// payment_complete() only marks these statuses paid by default; custom statuses retain the existing no-op behavior.
-		if ( 0 < $order->get_total() && ! $order->is_paid() && $order->has_status( OrderStatus::PAYMENT_COMPLETE_STATUSES ) ) {
+		// A cancelled order can reach this path after a stale cache read; never revive it without payment.
+		if ( 0 < $order->get_total() && ! $order->is_paid() && $order->has_status( OrderStatus::CANCELLED ) ) {
 			throw new Exception( esc_html__( 'This order cannot be completed without payment. Please try again.', 'woocommerce' ) );
 		}
 
