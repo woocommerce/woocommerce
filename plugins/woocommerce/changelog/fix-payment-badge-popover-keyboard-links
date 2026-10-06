@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Open links in payment badge popovers with the keyboard.
+Fix an accessibility issue where the Enter key didn't open links in Payments settings badge popovers.
