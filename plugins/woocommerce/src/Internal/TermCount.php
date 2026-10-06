@@ -68,6 +68,13 @@ class TermCount {
 			return $term;
 		}
 
+		$term_counts = get_transient( 'wc_term_counts' );
+		$key         = $term->term_id . '_' . $term->taxonomy;
+		if ( is_array( $term_counts ) && isset( $term_counts[ $key ] ) && is_numeric( $term_counts[ $key ] ) ) {
+			$term->count = absint( $term_counts[ $key ] );
+			return $term;
+		}
+
 		$count       = get_term_meta( $term->term_id, 'product_count_' . $term->taxonomy, true );
 		$term->count = '' !== $count ? absint( $count ) : 0;
 

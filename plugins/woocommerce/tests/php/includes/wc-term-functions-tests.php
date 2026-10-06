@@ -194,12 +194,12 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 		global $wpdb;
 
 		$term_id     = $this->terms['parent']['term_id'];
-		$term_counts = array( $term_id . '_product_cat' => 99 );
+		$term_counts = array( $this->terms['tag1']['term_id'] . '_product_tag' => 99 );
 		set_transient( 'wc_term_counts', $term_counts, MONTH_IN_SECONDS );
 		update_term_meta( $term_id, 'product_count_product_cat', 2 );
 
 		$term = get_term( $term_id, 'product_cat' );
-		$this->assertSame( 2, $term->count, 'Single-term counts should use metadata instead of the bulk transient.' );
+		$this->assertSame( 2, $term->count, 'A count missing from the bulk transient should fall back to metadata.' );
 
 		$query_count = $wpdb->num_queries;
 		$term        = get_term( $term_id, 'product_cat' );
@@ -210,6 +210,38 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 		$term = get_term( $term_id, 'product_cat' );
 		$this->assertSame( 4, $term->count, 'Metadata updates should be reflected in subsequent lookups.' );
 		$this->assertSame( $term_counts, get_transient( 'wc_term_counts' ), 'Single-term lookups should leave the bulk transient unchanged.' );
+	}
+
+	/**
+	 * @testdox Single terms reuse cached counts without reading metadata or writing the bulk transient.
+	 * @testWith [0]
+	 *           [3]
+	 *
+	 * @param int $count Cached product count.
+	 */
+	public function test_single_term_count_reuses_bulk_transient( int $count ): void {
+		$term_id     = $this->terms['parent']['term_id'];
+		$term_counts = array( $term_id . '_product_cat' => $count );
+		set_transient( 'wc_term_counts', $term_counts, MONTH_IN_SECONDS );
+		$metadata_reads = 0;
+		add_filter(
+			'get_term_metadata',
+			static function ( $value ) use ( &$metadata_reads ) {
+				++$metadata_reads;
+				return $value;
+			}
+		);
+
+		$term = get_term( $term_id, 'product_cat' );
+
+		$this->assertSame( $count, $term->count, 'The single-term count should match the cached bulk count, including zero.' );
+		$this->assertSame( 0, $metadata_reads, 'A cached count should avoid a metadata lookup.' );
+		$this->assertSame( $term_counts, get_transient( 'wc_term_counts' ), 'Single-term lookups should leave the bulk transient unchanged.' );
+
+		delete_transient( 'wc_term_counts' );
+		update_term_meta( $term_id, 'product_count_product_cat', 4 );
+		$term = get_term( $term_id, 'product_cat' );
+		$this->assertSame( 4, $term->count, 'Invalidating the bulk transient should make subsequent lookups read current metadata.' );
 	}
 
 	/**
