@@ -1124,6 +1124,28 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'woocommerce_ship_to_different_address_checked' lets a priority 0 callback added before the checkout is created override the core default.
+	 */
+	public function test_ship_to_different_address_checked_lets_priority_zero_callbacks_override_it(): void {
+		add_filter( 'woocommerce_ship_to_different_address_checked', '__return_zero', 0 );
+		$this->reinstantiate_checkout();
+
+		$original_customer = WC()->customer;
+		WC()->customer     = new WC_Customer();
+		WC()->customer->set_billing_city( 'San Francisco' );
+		WC()->customer->set_shipping_city( 'San Diego' );
+
+		try {
+			$checked = apply_filters( 'woocommerce_ship_to_different_address_checked', 0 );
+		} finally {
+			WC()->customer = $original_customer;
+			remove_filter( 'woocommerce_ship_to_different_address_checked', '__return_zero', 0 );
+		}
+
+		$this->assertSame( 0, $checked );
+	}
+
+	/**
 	 * Creates a fresh checkout singleton, so the hooks it registers on first instantiation are in place for this test.
 	 * The original singleton is restored on tear down.
 	 */

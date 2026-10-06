@@ -77,8 +77,8 @@ class WC_Checkout {
 			add_action( 'woocommerce_checkout_billing', array( self::$instance, 'checkout_form_billing' ) );
 			add_action( 'woocommerce_checkout_shipping', array( self::$instance, 'checkout_form_shipping' ) );
 
-			// Priority 0 so callbacks added by themes and extensions still run after this one.
-			add_filter( 'woocommerce_ship_to_different_address_checked', array( self::$instance, 'handle_woocommerce_ship_to_different_address_checked' ), 0 );
+			// Lowest priority, so every callback from themes and extensions runs after this one, even those at priority 0.
+			add_filter( 'woocommerce_ship_to_different_address_checked', array( self::$instance, 'handle_woocommerce_ship_to_different_address_checked' ), PHP_INT_MIN );
 
 			/**
 			 * Runs once when the WC_Checkout class is first instantiated.
