@@ -358,6 +358,54 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep the saved shipping address when the billing address lacks a postcode its country requires.
+	 */
+	public function test_saved_shipping_address_is_kept_when_billing_address_lacks_a_required_postcode(): void {
+		update_option( 'woocommerce_ship_to_destination', 'billing' );
+
+		$customer = new WC_Customer();
+		$customer->set_email( 'session-billing-without-postcode@example.com' );
+		$customer->set_billing_address_1( 'Stationsplein 23' );
+		$customer->set_billing_city( 'Amsterdam' );
+		$customer->set_billing_country( 'NL' );
+		$customer->set_shipping_address_1( 'Brandarisstraat 2' );
+		$customer->set_shipping_city( 'West-Terschelling' );
+		$customer->set_shipping_postcode( '8881 AW' );
+		$customer->set_shipping_country( 'NL' );
+		$customer->save();
+
+		$session_customer = new WC_Customer( $customer->get_id(), true );
+
+		$this->assertSame( 'Brandarisstraat 2', $session_customer->get_shipping_address_1(), 'A billing address missing a required postcode should not replace the shipping address' );
+		$this->assertSame( '8881 AW', $session_customer->get_shipping_postcode(), 'The saved shipping postcode should be kept' );
+	}
+
+	/**
+	 * @testdox Should use a billing address without a postcode when its country doesn't require one.
+	 */
+	public function test_shipping_address_defaults_to_billing_address_without_postcode_when_not_required(): void {
+		update_option( 'woocommerce_ship_to_destination', 'billing' );
+
+		$customer = new WC_Customer();
+		$customer->set_email( 'session-billing-optional-postcode@example.com' );
+		$customer->set_billing_address_1( '1 Queen\'s Road Central' );
+		$customer->set_billing_city( 'Central' );
+		$customer->set_billing_state( 'HONG KONG' );
+		$customer->set_billing_country( 'HK' );
+		$customer->set_shipping_address_1( 'Brandarisstraat 2' );
+		$customer->set_shipping_city( 'West-Terschelling' );
+		$customer->set_shipping_postcode( '8881 AW' );
+		$customer->set_shipping_country( 'NL' );
+		$customer->save();
+
+		$session_customer = new WC_Customer( $customer->get_id(), true );
+
+		$this->assertSame( '1 Queen\'s Road Central', $session_customer->get_shipping_address_1(), 'The billing street should be used when the billing country has no required postcode' );
+		$this->assertSame( 'HK', $session_customer->get_shipping_country(), 'The billing country should be used when the billing country has no required postcode' );
+		$this->assertSame( '', $session_customer->get_shipping_postcode(), 'The shipping postcode should follow the billing address' );
+	}
+
+	/**
 	 * @testdox Should let the shipping to billing default be disabled with a filter.
 	 */
 	public function test_shipping_to_billing_default_can_be_disabled_with_a_filter(): void {

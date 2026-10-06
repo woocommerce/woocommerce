@@ -180,22 +180,44 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Checks whether the billing address can replace the shipping address.
 	 *
-	 * A billing address with only a country can't, if there is a saved shipping address: copying it would clear the
-	 * street, city and postcode that shipping zones match against.
+	 * When there is a saved shipping address, the billing address needs a street, city or postcode, plus a postcode if
+	 * its country requires one. Otherwise copying it would clear the fields that shipping zones match against.
 	 *
 	 * @param WC_Customer $customer Customer object.
 	 * @return bool
 	 */
 	private function billing_address_can_replace_shipping( $customer ): bool {
-		if ( ! $customer->get_billing_country() ) {
+		$country = $customer->get_billing_country( 'edit' );
+
+		if ( ! $country ) {
 			return false;
 		}
 
-		if ( ! $customer->has_shipping_address() ) {
+		if ( ! $customer->has_shipping_address() || $customer->get_billing_postcode( 'edit' ) ) {
 			return true;
 		}
 
-		return (bool) $customer->get_billing_address_1() || (bool) $customer->get_billing_postcode() || (bool) $customer->get_billing_city();
+		if ( ! $customer->get_billing_address_1( 'edit' ) && ! $customer->get_billing_city( 'edit' ) ) {
+			return false;
+		}
+
+		return ! $this->is_postcode_required( $country );
+	}
+
+	/**
+	 * Checks whether addresses in a country require a postcode, based on the store's country locale settings.
+	 *
+	 * @param string $country Country code.
+	 * @return bool
+	 */
+	private function is_postcode_required( string $country ): bool {
+		if ( ! WC()->countries instanceof WC_Countries ) {
+			return true;
+		}
+
+		$locale = WC()->countries->get_country_locale();
+
+		return (bool) ( $locale[ $country ]['postcode']['required'] ?? $locale['default']['postcode']['required'] ?? true );
 	}
 
 	/**
