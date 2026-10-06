@@ -650,7 +650,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox the scheduled scan parks a contract without a snapshot whose live plan billing payload is null or does not parse.
+	 * @testdox the scheduled scan parks a contract without a snapshot whose live plan billing payload is null, does not parse, or has no usable cadence.
 	 *
 	 * @dataProvider provide_unusable_live_billing_payloads
 	 *
@@ -718,6 +718,20 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		return array(
 			'null payload'     => array( null, false ),
 			'missing interval' => array( array( 'period' => 'month' ), true ),
+			'unknown period'   => array(
+				array(
+					'period'   => 'decade',
+					'interval' => 1,
+				),
+				true,
+			),
+			'zero interval'    => array(
+				array(
+					'period'   => 'month',
+					'interval' => 0,
+				),
+				true,
+			),
 		);
 	}
 

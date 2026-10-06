@@ -389,8 +389,8 @@ final class RenewalEngine {
 	 * snapshot - the live source of truth, so a contract updated since an earlier cycle bills
 	 * on its current terms. Falls back to parsing the live selling plan's billing payload when
 	 * the contract carries no snapshot, and returns null when neither resolves (a deleted plan,
-	 * a null billing payload, or one that does not parse) so the caller skips gracefully
-	 * rather than mis-billing.
+	 * a null billing payload, or one that does not parse or has no usable cadence) so the
+	 * caller parks the contract rather than mis-billing or retrying every tick.
 	 *
 	 * @param Contract $contract The contract being renewed.
 	 * @return BillingPolicy|null The billing policy, or null when unresolvable.
@@ -401,7 +401,7 @@ final class RenewalEngine {
 			$payload = $snapshot->to_array();
 			if ( isset( $payload['billing_policy'] ) && is_array( $payload['billing_policy'] ) ) {
 				try {
-					return BillingPolicy::from_array( self::string_keyed( $payload['billing_policy'] ) );
+					return self::read_billing_policy( self::string_keyed( $payload['billing_policy'] ) );
 				} catch ( \DomainException $e ) {
 					// A corrupt stored policy must not crash the scheduled run; fall through to the
 					// live plan below so the renewal can still resolve on current terms.
@@ -428,7 +428,7 @@ final class RenewalEngine {
 		}
 
 		try {
-			return BillingPolicy::from_array( $billing );
+			return self::read_billing_policy( $billing );
 		} catch ( \DomainException $e ) {
 			wc_get_logger()->warning(
 				sprintf( 'RenewalEngine: contract %d has an unreadable live plan billing policy; the renewal cannot be processed. %s', (int) $contract->get_id(), $e->getMessage() ),
@@ -440,6 +440,21 @@ final class RenewalEngine {
 
 			return null;
 		}
+	}
+
+	/**
+	 * Parse a billing payload and check its cadence up front: an unknown period or a
+	 * non-positive interval parses but would only throw later, when the next cycle is
+	 * computed, so it is refused here like a payload that does not parse.
+	 *
+	 * @param array<string, mixed> $data Billing payload.
+	 * @throws \DomainException If the payload does not parse or has no usable cadence.
+	 */
+	private static function read_billing_policy( array $data ): BillingPolicy {
+		$policy = BillingPolicy::from_array( $data );
+		$policy->compute_next_renewal_from( new DateTimeImmutable( '@0' ) );
+
+		return $policy;
 	}
 
 	/**

@@ -224,7 +224,7 @@ final class Reactivation {
 	 * terms first (the snapshot is what the contract actually bills under - the same
 	 * source the renewal money-path resolves), falling back to the live selling plan
 	 * (parsing its billing payload) for a contract with no snapshot, and null when neither
-	 * resolves or the live payload does not parse.
+	 * resolves or the live payload does not parse or has no usable cadence (logged).
 	 *
 	 * @param Contract $contract The contract.
 	 */
@@ -249,8 +249,20 @@ final class Reactivation {
 		}
 
 		try {
-			return BillingPolicy::from_array( $billing );
+			$policy = BillingPolicy::from_array( $billing );
+			// An unknown period or a non-positive interval parses but throws on the forward roll.
+			$policy->compute_next_renewal_from( new DateTimeImmutable( '@0' ) );
+
+			return $policy;
 		} catch ( DomainException $e ) {
+			wc_get_logger()->warning(
+				sprintf( 'Reactivation: contract %d has an unreadable live plan billing policy; a past-due next payment is floored at now. %s', (int) $contract->get_id(), $e->getMessage() ),
+				array(
+					'source'      => self::LOG_SOURCE,
+					'contract_id' => (int) $contract->get_id(),
+				)
+			);
+
 			return null;
 		}
 	}

@@ -234,24 +234,57 @@ class ReactivationTest extends EngineIntegrationTestCase {
 	/**
 	 * @dataProvider provide_unusable_live_billing_payloads
 	 *
-	 * @param array<string, mixed>|null $billing The live plan's billing payload.
+	 * @param array<string, mixed>|null $billing   The live plan's billing payload.
+	 * @param bool                      $logs_warn Whether an unreadable-payload warning is expected.
 	 */
-	public function test_reactivate_floors_past_due_at_now_when_the_live_billing_is_unusable( ?array $billing ): void {
+	public function test_reactivate_floors_past_due_at_now_when_the_live_billing_is_unusable( ?array $billing, bool $logs_warn ): void {
 		$plan_id = $this->make_plan( array( 'billing_policy' => $billing ) );
 		$id      = $this->seed_on_hold( '2026-02-01 00:00:00', $plan_id );
 
-		$this->sut->reactivate( $this->reload( $id ), $this->utc( '2026-04-15 09:30:00' ) );
+		$warnings = array();
+		$capture  = static function ( $message, $level ) use ( &$warnings ) {
+			if ( 'warning' === $level && is_string( $message ) && false !== strpos( $message, 'unreadable live plan billing policy' ) ) {
+				$warnings[] = $message;
+			}
+			return $message;
+		};
+		add_filter( 'woocommerce_logger_log_message', $capture, 10, 2 );
+
+		try {
+			$this->sut->reactivate( $this->reload( $id ), $this->utc( '2026-04-15 09:30:00' ) );
+		} finally {
+			remove_filter( 'woocommerce_logger_log_message', $capture, 10 );
+		}
 
 		$this->assertSame( '2026-04-15 09:30:00', $this->reload( $id )->get_next_payment_gmt() );
+		if ( $logs_warn ) {
+			$this->assertNotEmpty( $warnings, 'An unreadable live billing payload is logged.' );
+		} else {
+			$this->assertSame( array(), $warnings );
+		}
 	}
 
 	/**
-	 * @return array<string, array{0: array<string, mixed>|null}>
+	 * @return array<string, array{0: array<string, mixed>|null, 1: bool}>
 	 */
 	public function provide_unusable_live_billing_payloads(): array {
 		return array(
-			'null payload'     => array( null ),
-			'missing interval' => array( array( 'period' => 'month' ) ),
+			'null payload'     => array( null, false ),
+			'missing interval' => array( array( 'period' => 'month' ), true ),
+			'unknown period'   => array(
+				array(
+					'period'   => 'decade',
+					'interval' => 1,
+				),
+				true,
+			),
+			'zero interval'    => array(
+				array(
+					'period'   => 'month',
+					'interval' => 0,
+				),
+				true,
+			),
 		);
 	}
 
