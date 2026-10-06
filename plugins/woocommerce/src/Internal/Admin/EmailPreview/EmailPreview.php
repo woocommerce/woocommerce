@@ -464,8 +464,16 @@ class EmailPreview {
 						'method_id'    => 'pickup_location',
 					)
 				);
+				$pickup_address = array_merge(
+					$this->get_dummy_address(),
+					array(
+						'first_name' => '',
+						'last_name'  => '',
+						'company'    => '',
+					)
+				);
 				$shipping_item->add_meta_data( 'pickup_location', get_bloginfo( 'name', 'display' ) );
-				$shipping_item->add_meta_data( 'pickup_address', WC()->countries->get_formatted_address( $this->get_dummy_address(), ', ' ) );
+				$shipping_item->add_meta_data( 'pickup_address', WC()->countries->get_formatted_address( $pickup_address, ', ' ) );
 				$shipping_item->add_meta_data( 'pickup_details', __( 'Bring your order number and a photo ID.', 'woocommerce' ) );
 			}
 			$order->add_item( $shipping_item );

@@ -70,6 +70,30 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should preview the ready for pickup email with a sample pickup location.
+	 */
+	public function test_ready_for_pickup_email_preview_shows_pickup_location(): void {
+		update_option( 'woocommerce_pickup_location_settings', array( 'enabled' => 'yes' ) );
+
+		// The mailer is shared between tests and only registers this email on stores that offer local pickup.
+		$mailer          = WC()->mailer();
+		$original_emails = $mailer->emails;
+		$mailer->emails['WC_Email_Customer_Ready_For_Pickup_Order'] = require WC_ABSPATH . 'includes/emails/class-wc-email-customer-ready-for-pickup-order.php';
+
+		try {
+			$this->sut->set_email_type( 'WC_Email_Customer_Ready_For_Pickup_Order' );
+			$message = $this->sut->render();
+		} finally {
+			$mailer->emails = $original_emails;
+		}
+
+		$this->assertStringContainsString( 'Your order is ready for pickup', $message );
+		$this->assertStringContainsString( 'Pickup location', $message );
+		$this->assertStringContainsString( '123 Fake Street, Faketown, CA 12345', $message );
+		$this->assertStringContainsString( 'Bring your order number and a photo ID.', $message );
+	}
+
+	/**
 	 * Tests that it renders HTML email.
 	 */
 	public function test_it_renders_html_email() {
