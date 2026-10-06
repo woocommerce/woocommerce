@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Limit the email Styles sidebar font sizes to px, so the sizes you pick show correctly in email clients.
