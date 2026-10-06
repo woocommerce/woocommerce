@@ -93,6 +93,10 @@ class ContractsTest extends EngineIntegrationTestCase {
 				'payment_token_id'     => 5,
 				'start_gmt'            => '2026-01-01 00:00:00',
 				'next_payment_gmt'     => '2026-02-01 00:00:00',
+				'last_payment_gmt'     => '2026-01-02 00:00:00',
+				'last_attempt_gmt'     => '2026-01-03 00:00:00',
+				'trial_end_gmt'        => '2026-01-04 00:00:00',
+				'end_gmt'              => '2027-01-01 00:00:00',
 				'schedule_source'      => Contract::SCHEDULE_SOURCE_GATEWAY,
 				'billing_total'        => 20,
 				'discount_total'       => '1.5',
@@ -126,6 +130,10 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertSame( 5, $view->get_payment_token_id() );
 		$this->assertSame( '2026-01-01 00:00:00', $view->get_start_gmt() );
 		$this->assertSame( '2026-02-01 00:00:00', $view->get_next_payment_gmt() );
+		$this->assertSame( '2026-01-02 00:00:00', $view->get_last_payment_gmt() );
+		$this->assertSame( '2026-01-03 00:00:00', $view->get_last_attempt_gmt() );
+		$this->assertSame( '2026-01-04 00:00:00', $view->get_trial_end_gmt() );
+		$this->assertSame( '2027-01-01 00:00:00', $view->get_end_gmt() );
 		$this->assertSame( Contract::SCHEDULE_SOURCE_GATEWAY, $view->get_schedule_source() );
 		$this->assertSame( '20.00000000', $view->get_billing_total() );
 		$this->assertSame( '1.50000000', $view->get_discount_total() );
@@ -280,6 +288,54 @@ class ContractsTest extends EngineIntegrationTestCase {
 			'unknown address key'    => array( array( 'addresses' => array( 'billing' => array( 'zip' => '1' ) ) ) ),
 			'plan snapshot scalar'   => array( array( 'plan_snapshot' => 'x' ) ),
 			'items snapshot scalar'  => array( array( 'items_snapshot' => array( 'x' ) ) ),
+		);
+	}
+
+	/**
+	 * A rejected update writes none of its keys, including the valid ones beside the bad one.
+	 *
+	 * @dataProvider provide_invalid_update_fields
+	 *
+	 * @param array<string, mixed> $fields Invalid fields.
+	 */
+	public function test_a_rejected_update_writes_none_of_its_keys( array $fields ): void {
+		$id = Contracts::create(
+			array(
+				'owner'          => self::OWNER,
+				'currency'       => 'USD',
+				'payment_method' => 'dummy',
+				'billing_total'  => '10',
+			)
+		);
+
+		try {
+			Contracts::update(
+				$id,
+				array_merge(
+					array(
+						'payment_method' => 'other',
+						'billing_total'  => '25',
+					),
+					$fields
+				)
+			);
+			$this->fail( 'Expected an InvalidArgumentException.' );
+		} catch ( InvalidArgumentException $e ) {
+			$view = $this->view( $id );
+			$this->assertSame( 'dummy', $view->get_payment_method(), 'The valid key beside the bad one is not written.' );
+			$this->assertSame( '10.00000000', $view->get_billing_total() );
+		}
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>}>
+	 */
+	public function provide_invalid_update_fields(): array {
+		return array(
+			'unknown key'         => array( array( 'nonsense' => 1 ) ),
+			'unregistered status' => array( array( 'status' => 'nonsense' ) ),
+			'malformed date'      => array( array( 'end_gmt' => '2026-01-01' ) ),
+			'unknown item key'    => array( array( 'items' => array( array( 'price' => '1' ) ) ) ),
 		);
 	}
 
@@ -650,9 +706,12 @@ class ContractsTest extends EngineIntegrationTestCase {
 	public function test_invalid_cycle_args_are_rejected( array $args ): void {
 		$id = $this->contract_with_snapshots();
 
-		$this->expectException( InvalidArgumentException::class );
-
-		Contracts::add_cycle( $id, $args );
+		try {
+			Contracts::add_cycle( $id, $args );
+			$this->fail( 'Expected an InvalidArgumentException.' );
+		} catch ( InvalidArgumentException $e ) {
+			$this->assertSame( array(), Subscriptions::get_history( $id ), 'No cycle is written.' );
+		}
 	}
 
 	/**
