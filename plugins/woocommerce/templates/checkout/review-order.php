@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 11.2.0
+ * @version 11.3.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -57,6 +57,16 @@ defined( 'ABSPATH' ) || exit;
 						<?php echo wp_kses_post( $product_name ) . '&nbsp;'; ?>
 						<?php echo apply_filters( 'woocommerce_checkout_cart_item_quantity', ' <strong class="product-quantity">' . sprintf( '&times;&nbsp;%s', $cart_item['quantity'] ) . '</strong>', $cart_item, $cart_item_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						<?php echo wc_get_formatted_cart_item_data( $cart_item, false, $cart_item_name ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<?php
+						/**
+						 * Fires after the cart item data is rendered in the checkout review order table.
+						 *
+						 * @since 11.3.0
+						 * @param array  $cart_item     The cart item data.
+						 * @param string $cart_item_key The cart item key.
+						 */
+						do_action( 'woocommerce_checkout_after_cart_item_meta', $cart_item, $cart_item_key );
+						?>
 					</td>
 					<td class="product-total">
 						<?php echo apply_filters( 'woocommerce_cart_item_subtotal', WC()->cart->get_product_subtotal( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
