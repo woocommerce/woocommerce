@@ -236,7 +236,12 @@ final class Reactivation {
 			}
 		}
 
-		$plan = $this->plans->find( $contract->get_selling_plan_id() );
+		$plan_id = $contract->get_selling_plan_id();
+		if ( null === $plan_id ) {
+			return null;
+		}
+
+		$plan = $this->plans->find( $plan_id );
 
 		return $plan instanceof Plan ? $plan->get_billing_policy() : null;
 	}

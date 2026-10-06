@@ -166,6 +166,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		// so the renewal amount resolves off the current cycle.
 		$contract = Contract::create(
 			array(
+				'status'           => ContractStatus::ACTIVE,
 				'customer_id'      => 1,
 				'currency'         => 'USD',
 				'selling_plan_id'  => $plan_id,
@@ -766,7 +767,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$this->assertNotNull( $contract_id );
 
 		// Delete the live selling plan; the contract keeps its frozen snapshot.
-		( new PlanRepository() )->delete( $contract->get_selling_plan_id() );
+		( new PlanRepository() )->delete( (int) $contract->get_selling_plan_id() );
 
 		$renewal_order = $this->run_scheduled_renewal( $contract_id );
 		$this->assertInstanceOf( WC_Order::class, $renewal_order );
@@ -900,6 +901,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$order       = $this->make_origin_order();
 		$contract    = Contract::create(
 			array(
+				'status'           => ContractStatus::ACTIVE,
 				'customer_id'      => 1,
 				'currency'         => 'USD',
 				'selling_plan_id'  => $plan_id,

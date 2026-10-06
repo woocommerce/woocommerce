@@ -402,7 +402,12 @@ final class RenewalEngine {
 			}
 		}
 
-		$plan = $this->plans->find( $contract->get_selling_plan_id() );
+		$plan_id = $contract->get_selling_plan_id();
+		if ( null === $plan_id ) {
+			return null;
+		}
+
+		$plan = $this->plans->find( $plan_id );
 		return $plan instanceof Plan ? $plan->get_billing_policy() : null;
 	}
 
@@ -842,7 +847,7 @@ final class RenewalEngine {
 
 		$instrument = $contract->get_payment_instrument();
 
-		$renewal_order->set_currency( $contract->get_currency() );
+		$renewal_order->set_currency( (string) $contract->get_currency() );
 		if ( null !== $instrument->get_gateway() ) {
 			$renewal_order->set_payment_method( (string) $instrument->get_gateway() );
 		}

@@ -87,7 +87,7 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 	 */
 	private function repoint_live_plan( Contract $contract, BillingPolicy $policy ): void {
 		$plans = new PlanRepository();
-		$plan  = $plans->find( $contract->get_selling_plan_id() );
+		$plan  = $plans->find( (int) $contract->get_selling_plan_id() );
 		$this->assertInstanceOf( Plan::class, $plan );
 
 		$plan->set_billing_policy( $policy );

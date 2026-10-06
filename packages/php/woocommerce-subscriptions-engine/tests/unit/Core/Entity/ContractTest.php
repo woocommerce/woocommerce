@@ -66,6 +66,7 @@ class ContractTest extends TestCase {
 	private function make_contract(): Contract {
 		return Contract::create(
 			array(
+				'status'           => ContractStatus::ACTIVE,
 				'customer_id'      => 1,
 				'currency'         => 'USD',
 				'selling_plan_id'  => 2,
@@ -78,9 +79,77 @@ class ContractTest extends TestCase {
 	}
 
 	/**
-	 * @testdox create() builds an active contract from its identity and live config.
+	 * @testdox create() with no attributes yields a draft with no customer, currency, plan or start.
 	 */
-	public function test_create_builds_an_active_contract(): void {
+	public function test_create_with_no_args_is_an_empty_draft(): void {
+		$contract = Contract::create( array() );
+
+		$this->assertSame( ContractStatus::DRAFT, $contract->get_status() );
+		$this->assertNull( $contract->get_customer_id() );
+		$this->assertNull( $contract->get_currency() );
+		$this->assertNull( $contract->get_selling_plan_id() );
+		$this->assertNull( $contract->get_start_gmt() );
+
+		$row = $contract->to_storage();
+		$this->assertNull( $row['customer_id'] );
+		$this->assertNull( $row['currency'] );
+		$this->assertNull( $row['selling_plan_id'] );
+		$this->assertNull( $row['start_gmt'] );
+	}
+
+	/**
+	 * @testdox The facade setters round-trip their values.
+	 */
+	public function test_setters_round_trip(): void {
+		$contract = Contract::create( array() );
+
+		$contract->set_customer_id( 7 );
+		$contract->set_currency( 'EUR' );
+		$contract->set_selling_plan_id( 8 );
+		$contract->set_origin_order_id( 9 );
+		$contract->set_start_gmt( '2026-03-01 00:00:00' );
+		$contract->set_schedule_source( Contract::SCHEDULE_SOURCE_GATEWAY );
+		$contract->set_items( array( array( 'item_name' => 'Coffee' ), 'skipped' ) );
+		$contract->set_addresses( array( Contract::ADDRESS_BILLING => array( 'city' => 'Lisbon' ) ) );
+
+		$this->assertSame( 7, $contract->get_customer_id() );
+		$this->assertSame( 'EUR', $contract->get_currency() );
+		$this->assertSame( 8, $contract->get_selling_plan_id() );
+		$this->assertSame( 9, $contract->get_origin_order_id() );
+		$this->assertSame( '2026-03-01 00:00:00', $contract->get_start_gmt() );
+		$this->assertSame( Contract::SCHEDULE_SOURCE_GATEWAY, $contract->get_schedule_source() );
+		$this->assertSame( array( array( 'item_name' => 'Coffee' ) ), $contract->get_items() );
+		$this->assertSame( array( 'billing' => array( 'city' => 'Lisbon' ) ), $contract->get_addresses() );
+
+		$contract->set_customer_id( null );
+		$contract->set_currency( null );
+		$contract->set_selling_plan_id( null );
+		$contract->set_origin_order_id( null );
+		$contract->set_start_gmt( null );
+
+		$this->assertNull( $contract->get_customer_id() );
+		$this->assertNull( $contract->get_currency() );
+		$this->assertNull( $contract->get_selling_plan_id() );
+		$this->assertNull( $contract->get_origin_order_id() );
+		$this->assertNull( $contract->get_start_gmt() );
+	}
+
+	/**
+	 * @testdox set_schedule_source() refuses an unknown source.
+	 */
+	public function test_set_schedule_source_rejects_an_unknown_source(): void {
+		$contract = Contract::create( array() );
+
+		$this->expectException( DomainException::class );
+		$this->expectExceptionMessage( 'Contract: invalid schedule source "bogus".' );
+
+		$contract->set_schedule_source( 'bogus' );
+	}
+
+	/**
+	 * @testdox create() builds a contract from its identity and live config.
+	 */
+	public function test_create_builds_a_contract_from_its_identity(): void {
 		$contract = $this->make_contract();
 
 		$this->assertNull( $contract->get_id() );

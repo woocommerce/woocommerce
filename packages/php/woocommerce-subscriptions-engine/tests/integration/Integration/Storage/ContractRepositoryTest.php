@@ -52,6 +52,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	private function make_contract(): Contract {
 		return Contract::create(
 			array(
+				'status'               => ContractStatus::ACTIVE,
 				'customer_id'          => 42,
 				'currency'             => 'USD',
 				'selling_plan_id'      => 7,
@@ -614,6 +615,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$id = $this->sut->insert(
 			Contract::create(
 				array(
+					'status'          => ContractStatus::ACTIVE,
 					'customer_id'     => 1,
 					'currency'        => 'EUR',
 					'selling_plan_id' => 2,
@@ -663,6 +665,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$id = $this->sut->insert(
 			Contract::create(
 				array(
+					'status'          => ContractStatus::ACTIVE,
 					'customer_id'     => 1,
 					'currency'        => 'EUR',
 					'selling_plan_id' => 2,
@@ -728,6 +731,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 
 		$mutated = Contract::create(
 			array(
+				'status'          => ContractStatus::ACTIVE,
 				'customer_id'     => 42,
 				'currency'        => 'USD',
 				'selling_plan_id' => 7,

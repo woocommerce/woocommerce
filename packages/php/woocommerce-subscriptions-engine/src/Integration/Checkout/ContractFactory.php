@@ -21,6 +21,7 @@ use Throwable;
 use WC_Order;
 use WC_Order_Item_Product;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
@@ -101,6 +102,7 @@ final class ContractFactory {
 		$currency       = $order->get_currency();
 
 		$contract_defaults = array(
+			'status'               => ContractStatus::ACTIVE,
 			'customer_id'          => $order->get_customer_id(),
 			'currency'             => $currency,
 			'selling_plan_id'      => $plan_id,
