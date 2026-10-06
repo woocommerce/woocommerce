@@ -566,10 +566,10 @@ class DataSynchronizer implements BatchProcessorInterface {
 				$sql = $wpdb->prepare(
 					"
 SELECT
- COALESCE(SUM(CASE WHEN (posts.post_type IS NULL OR posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "')
-  AND orders.status NOT IN ('auto-draft') AND orders.type IN ($order_post_type_placeholder) THEN 1 ELSE 0 END), 0)
- + COALESCE(SUM(CASE WHEN posts.post_type IN ($order_post_type_placeholder)
-  AND orders.date_updated_gmt > posts.post_modified_gmt THEN 1 ELSE 0 END), 0) AS count
+ COUNT(CASE WHEN (posts.post_type IS NULL OR posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "')
+  AND orders.status <> 'auto-draft' AND orders.type IN ($order_post_type_placeholder) THEN 1 END)
+ + COUNT(CASE WHEN posts.post_type IN ($order_post_type_placeholder)
+  AND orders.date_updated_gmt > posts.post_modified_gmt THEN 1 END) AS count
 FROM $orders_table orders
 LEFT JOIN $wpdb->posts posts ON posts.ID = orders.id",
 					array_merge( $order_post_types, $order_post_types )
@@ -578,8 +578,8 @@ LEFT JOIN $wpdb->posts posts ON posts.ID = orders.id",
 				$sql = $wpdb->prepare(
 					"
 SELECT
- COALESCE(SUM(CASE WHEN posts.post_status != 'auto-draft' AND orders.id IS NULL THEN 1 ELSE 0 END), 0)
- + COALESCE(SUM(CASE WHEN orders.date_updated_gmt < posts.post_modified_gmt THEN 1 ELSE 0 END), 0) AS count
+ COUNT(CASE WHEN posts.post_status != 'auto-draft' AND orders.id IS NULL THEN 1 END)
+ + COUNT(CASE WHEN orders.date_updated_gmt < posts.post_modified_gmt THEN 1 END) AS count
 FROM $wpdb->posts posts
 LEFT JOIN $orders_table orders ON posts.ID = orders.id
 WHERE posts.post_type IN ($order_post_type_placeholder)",
