@@ -69,13 +69,13 @@ export const seedMetaLine = async (
 };
 
 /**
- * Seeds a product variation as a child line with a declared parent key.
+ * Seeds a product or variation as a child line with a declared parent key.
  *
- * The parent key may intentionally refer to no cart line; it is the presence
- * of the declaration that marks the line as a child.
+ * The declared key is published as the line's `parent_item_key` only when it
+ * names a line in the cart; otherwise, `null` is emitted.
  *
  * @param page          The Playwright page.
- * @param variationId   The variation id to add.
+ * @param variationId   The product or variation id to add.
  * @param parentItemKey The parent key to declare for the line.
  */
 export const seedDeclaredChildLine = async (
