@@ -169,6 +169,25 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox get_related_orders lists an origin order that also carries the contract meta once.
+	 */
+	public function test_get_related_orders_lists_a_meta_tagged_origin_once(): void {
+		$contract    = $this->sign_up_contract();
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$origin = wc_get_order( (int) $contract->get_origin_order_id() );
+		$this->assertInstanceOf( WC_Order::class, $origin );
+		$origin->update_meta_data( OrderLinkage::META_CONTRACT_ID, (string) $contract_id );
+		$origin->save();
+
+		$orders = Subscriptions::get_related_orders( $contract_id );
+
+		$this->assertCount( 1, $orders );
+		$this->assertSame( $origin->get_id(), $orders[0]->get_id() );
+	}
+
+	/**
 	 * @testdox get_related_orders is empty for a contract with no linked orders.
 	 */
 	public function test_get_related_orders_is_empty_when_none_are_linked(): void {
