@@ -128,18 +128,27 @@ final class Subscriptions {
 	 * another customer's contracts. Each view carries its plan snapshot payload (children
 	 * not loaded), so a list row's cadence is read off the snapshot.
 	 *
-	 * @param int $customer_id Owning customer id.
-	 * @param int $limit       Maximum contracts to return.
-	 * @param int $offset      Contracts to skip (for paging).
+	 * The status filter applies before paging, so a page holds `$limit` matching contracts.
+	 *
+	 * @param int                  $customer_id Owning customer id.
+	 * @param int                  $limit       Maximum contracts to return.
+	 * @param int                  $offset      Contracts to skip (for paging).
+	 * @param array<string, mixed> $args {
+	 *     Optional. Query args.
+	 *
+	 *     @type string|string[] $status One status or a list of them ({@see \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus});
+	 *                                   unregistered values are dropped, and the filter is ignored when none remain.
+	 * }
 	 * @return array<int, ContractView> The customer's contracts, newest first.
 	 */
-	public static function list_for_customer( int $customer_id, int $limit = 20, int $offset = 0 ): array {
+	public static function list_for_customer( int $customer_id, int $limit = 20, int $offset = 0, array $args = array() ): array {
 		return self::views(
 			( new ContractRepository() )->find_by_customer_id(
 				$customer_id,
 				array(
 					'limit'  => $limit,
 					'offset' => $offset,
+					'status' => $args['status'] ?? array(),
 				)
 			)
 		);

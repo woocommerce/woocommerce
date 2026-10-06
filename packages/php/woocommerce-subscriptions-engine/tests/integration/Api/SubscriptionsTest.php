@@ -471,6 +471,24 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox list_for_customer filters by status before paging.
+	 */
+	public function test_list_for_customer_filters_by_status_before_paging(): void {
+		$active_old = $this->seed_for_customer( 44 );
+		$this->seed_for_customer( 44, ContractStatus::DRAFT );
+		$on_hold = $this->seed_for_customer( 44, ContractStatus::ON_HOLD );
+		$this->seed_for_customer( 44, ContractStatus::DRAFT );
+
+		$ids  = static fn ( array $views ): array => array_map( static fn ( ContractView $c ): int => (int) $c->get_id(), $views );
+		$args = array( 'status' => array( ContractStatus::ACTIVE, ContractStatus::ON_HOLD ) );
+
+		$this->assertSame( array( $on_hold ), $ids( Subscriptions::list_for_customer( 44, 1, 0, $args ) ) );
+		$this->assertSame( array( $active_old ), $ids( Subscriptions::list_for_customer( 44, 1, 1, $args ) ) );
+		$this->assertSame( array( $on_hold ), $ids( Subscriptions::list_for_customer( 44, 20, 0, array( 'status' => ContractStatus::ON_HOLD ) ) ), 'A single status is accepted.' );
+		$this->assertCount( 4, Subscriptions::list_for_customer( 44, 20, 0, array( 'status' => array( 'nonsense' ) ) ), 'An unregistered status is dropped, leaving no filter.' );
+	}
+
+	/**
 	 * @testdox get_for_customer returns the contract when the customer owns it.
 	 */
 	public function test_get_for_customer_returns_the_owned_contract(): void {

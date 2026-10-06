@@ -831,17 +831,28 @@ final class ContractRepository {
 	 *
 	 *     @type int    $limit  Maximum contracts to return. Default 20.
 	 *     @type int    $offset Rows to skip (for paging). Default 0.
-	 *     @type string $status Optional status filter (one of {@see \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus}).
+	 *     @type string|string[] $status Optional status filter: one status or a list of them
+	 *                                   ({@see ContractStatus}). Unregistered values are dropped;
+	 *                                   ignored when none remain.
 	 * }
 	 * @return array<int, Contract> Contracts the customer owns, newest first.
 	 */
 	public function find_by_customer_id( int $customer_id, ?array $args = null ): array {
 		global $wpdb;
 
-		$args   = $args ?? array();
-		$limit  = isset( $args['limit'] ) && is_numeric( $args['limit'] ) ? (int) $args['limit'] : 20;
-		$offset = isset( $args['offset'] ) && is_numeric( $args['offset'] ) ? (int) $args['offset'] : 0;
-		$status = isset( $args['status'] ) && is_string( $args['status'] ) && '' !== $args['status'] ? $args['status'] : null;
+		$args     = $args ?? array();
+		$limit    = isset( $args['limit'] ) && is_numeric( $args['limit'] ) ? (int) $args['limit'] : 20;
+		$offset   = isset( $args['offset'] ) && is_numeric( $args['offset'] ) ? (int) $args['offset'] : 0;
+		$statuses = array_values(
+			array_unique(
+				array_filter(
+					(array) ( $args['status'] ?? array() ),
+					static function ( $status ): bool {
+						return is_string( $status ) && ContractStatus::is_registered( $status );
+					}
+				)
+			)
+		);
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 
@@ -850,9 +861,9 @@ final class ContractRepository {
 		// interpolated).
 		$where  = 'customer_id = %d';
 		$params = array( $customer_id );
-		if ( null !== $status ) {
-			$where   .= ' AND status = %s';
-			$params[] = $status;
+		if ( array() !== $statuses ) {
+			$where .= ' AND status IN (' . implode( ', ', array_fill( 0, count( $statuses ), '%s' ) ) . ')';
+			$params = array_merge( $params, $statuses );
 		}
 		$params[] = $limit;
 		$params[] = $offset;
